@@ -51,10 +51,13 @@ const instantane = (page) => page.evaluate(() => {
 });
 
 test.describe('#963 · faire relire sa carte par une IA', () => {
-    test('le principe est affiché sous le titre de la carte', async ({ page }) => {
+    // Lot 3 (869d7f1bc, 7 nov.) : la ligne D2 quitte l'écran, décision de Grégoire
+    // (plans de travail/A-DECIDER-2026-11-07-lot-3-les-textes.md). Le principe vit dans le modèle
+    // téléchargé : le test « le fichier porte les choix » le lit en tête du fichier.
+    test('le principe ne s\'affiche plus sous le titre de la carte (D2, retirée par Grégoire)', async ({ page }) => {
         await ouvrirCarte(page);
-        await expect(page.locator('#conception-carte > p.text-muted').nth(1))
-            .toHaveText('Évaluer ce qu\'on enseigne, et enseigner ce qu\'on évalue, au même niveau d\'exigence.');
+        await expect(page.locator('#conception-carte .planif-wrapper')).toBeVisible();
+        await expect(page.locator('#conception-carte')).not.toContainText('au même niveau d\'exigence');
     });
 
     // #973 — la semaine présélectionnée est la dernière qui contient une leçon,
@@ -123,6 +126,7 @@ test.describe('#963 · faire relire sa carte par une IA', () => {
 
         expect(await page.evaluate(() => window.__nomTelecharge)).toMatch(/^modele-ia-.+\.md$/);
         expect(contenu.split('\n')[0]).toBe('# Carte d\'alignement : ' + nomCarte);
+        expect(contenu).toContain('> Évaluer ce qu\'on enseigne, et enseigner ce qu\'on évalue, au même niveau d\'exigence.');
         expect(contenu).toMatch(/> Étape : Relier\. Carte bâtie jusqu'à la semaine 3( sur \d+)?\.\n/);
         expect(contenu).toContain('ce qui suit la semaine 3 ;');
         expect(contenu).toContain('## Semaine par semaine');
