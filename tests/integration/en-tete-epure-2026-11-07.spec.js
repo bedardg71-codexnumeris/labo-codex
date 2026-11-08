@@ -87,7 +87,7 @@ test('Accueil : pas de bande de navigation secondaire ; le slogan et l\'ancien b
     const haut = await boite(page, '.entete');
     const bande = await boite(page, '.bande-groupe');
     expect(bande.top).toBe(haut.bottom);
-    expect(await page.locator('.entete-logo img').evaluate((i) => i.currentSrc)).toMatch(/labo-codex-logo-blanc\.svg$/);
+    expect(await page.locator('.entete-logo img').evaluate((i) => i.currentSrc)).toMatch(/labo-codex-logo-couleur-sur-sombre\.svg$/);
     expect(await page.locator('.entete-bloc').count()).toBe(0);
 });
 

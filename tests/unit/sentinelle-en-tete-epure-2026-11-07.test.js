@@ -45,9 +45,31 @@ describe('en-tête épuré · ce qui disparaît', () => {
 });
 
 describe('en-tête épuré · la bande du haut', () => {
-    it('le logo seul, logo-blanc', () => {
-        expect(tranche(entete, '<h1 class="entete-logo">', '</h1>')).toMatch(/^<h1 class="entete-logo">\s*<img src="img\/labo-codex-logo-blanc\.svg" alt="Labo Codex" class="logo-entete"/);
-        expect(lire('img/labo-codex-logo-blanc.svg')).toBe(lire('Logo/labo-codex-logo-blanc.svg'));
+    it('le logo seul, en couleur sur sombre (lettres blanches, signes orange, 7 nov.)', () => {
+        expect(tranche(entete, '<h1 class="entete-logo">', '</h1>')).toMatch(/^<h1 class="entete-logo">\s*<img src="img\/labo-codex-logo-couleur-sur-sombre\.svg" alt="Labo Codex" class="logo-entete"/);
+        expect(lire('img/labo-codex-logo-couleur-sur-sombre.svg')).toBe(lire('Logo/labo-codex-logo-couleur-sur-sombre.svg'));
+    });
+    it('favicon et icône d\'accueil en couleur : sur-clair par défaut, sur-sombre pour les onglets sombres ; les copies de img/ = les originaux de Logo/', () => {
+        const tete = tranche(html, '<head>', '</head>');
+        const icones = [...tete.matchAll(/<link rel="(icon|apple-touch-icon)"[^>]*>/g)].map((m) => m[0]);
+        expect(icones).toEqual([
+            '<link rel="icon" type="image/png" sizes="32x32" href="img/labo-codex-icone-couleur-sur-clair-32.png">',
+            '<link rel="icon" type="image/png" sizes="16x16" href="img/labo-codex-icone-couleur-sur-clair-16.png">',
+            '<link rel="icon" type="image/png" sizes="32x32" href="img/labo-codex-icone-couleur-sur-sombre-32.png" media="(prefers-color-scheme: dark)">',
+            '<link rel="icon" type="image/png" sizes="16x16" href="img/labo-codex-icone-couleur-sur-sombre-16.png" media="(prefers-color-scheme: dark)">',
+            '<link rel="apple-touch-icon" sizes="180x180" href="img/labo-codex-icone-application-couleur-ios-180.png">',
+        ]);
+        for (const lien of icones) {
+            const f = lien.match(/href="img\/([^"]+)"/)[1];
+            expect(readFileSync(path.join(racine, 'img', f)).equals(readFileSync(path.join(racine, 'Logo', f))), f).toBe(true);
+        }
+    });
+    it('l\'orange du logo sur sombre, inscrit en dur dans les SVG, est celui de --icone-aide-config : s\'il change, le signaler à Grégoire', () => {
+        const variable = css.match(/--icone-aide-config:\s*(#[0-9a-fA-F]{6})/)[1].toUpperCase();
+        for (const f of readdirSync(path.join(racine, 'Logo')).filter((n) => /couleur-sur-sombre\.svg$/.test(n))) {
+            expect(lire('Logo/' + f), `${f} : --icone-aide-config vaut ${variable}`).toContain('#E8923A');
+            expect(variable, `${f} : --icone-aide-config a changé, la couleur du logo est en dur`).toBe('#E8923A');
+        }
     });
     it('la navigation principale : sept mots, sans icône, dans l\'en-tête', () => {
         const nav = tranche(entete, '<nav class="navigation-principale">', '</nav>');
