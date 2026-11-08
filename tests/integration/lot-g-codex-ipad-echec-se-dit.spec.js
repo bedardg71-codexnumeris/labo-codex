@@ -274,6 +274,9 @@ test.describe('Lot G (#988) — l\'échec de la mise à jour du codex se dit', (
         expect(modaleTelechargement.message).toMatch(/^L'application ne peut pas savoir si le téléchargement s'est terminé\. Attends qu'il le soit, puis vérifie que le fichier « codex-.+\.zip » \(environ \d+ (Ko|Mo)\) se trouve dans tes Téléchargements\.$/);
         // Tant que l'usager n'a rien dit, rien n'est posé.
         expect((await lireEtat(page)).menu).toBe(PAS_A_JOUR);
+        // #1185 (capture de Grégoire, iPad, 29 oct. 2026) : le bandeau rouge du partage refusé ne reste pas sous
+        // « Téléchargement lancé », qui le contredirait ; « Il n'y est pas » le redit (ci-dessous).
+        expect((await lireEtat(page)).temoin, 'pas de bandeau « Codex non mis à jour » pendant le téléchargement').toBeNull();
         section = sectionDuRapport(await rapport(page));
         expect(section).toContain('Stratégie: téléchargement direct');
         expect(section).toContain('Étape atteinte: téléchargement lancé, en attente de l\'usager');
@@ -299,7 +302,8 @@ test.describe('Lot G (#988) — l\'échec de la mise à jour du codex se dit', (
         await page.evaluate(() => { window.__reponsesPartage = ['AbortError']; });
         await page.evaluate(() => { Codex.actionEnregistrer(); });
         await attendreModale(page, 'Codex non mis à jour');
-        await page.evaluate(() => { if (window.temoinEnregistrement) window.temoinEnregistrement.fermer(); });
+        // #1185 : plus de `fermer()` à la main ici — c'est le cas vécu (partage annulé, `AbortError`) ; le bandeau doit
+        // partir de lui-même quand le téléchargement prend la suite.
         await cliquerBouton(page, 'Télécharger à la place');
         await attendreModale(page, 'Téléchargement lancé');
         expect((await lireEtat(page)).temoin).toBeNull();

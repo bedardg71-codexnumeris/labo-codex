@@ -3622,6 +3622,9 @@ async function _ecrireLeCodexPrepare(resultat, reglage) {
 
         var ecrit = sauvegarde.methode === 'fsapi' || sauvegarde.methode === 'share';
         if (sauvegarde.methode === 'download') {
+            // #1185 (capture de Grégoire, iPad, 29 oct. 2026) : le bandeau de l'échec que ce téléchargement rattrape ne
+            // reste pas sous « Téléchargement lancé », qui le contredirait. « Il n'y est pas » le redit (`reglage.echec`).
+            if (window.temoinEnregistrement) window.temoinEnregistrement.fermerSi(CLE_TEMOIN_CODEX);
             _noterTentative({ etape: 'téléchargement lancé, en attente de l\'usager' });
             ecrit = await window.FichierSortant.confirmerTelechargement(resultat.nomFichier, taille);
             if (!ecrit) console.warn('[Codex] Téléchargement direct : fichier non trouvé par l\'usager.');
