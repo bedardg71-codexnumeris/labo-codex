@@ -270,6 +270,7 @@
  "js/travaux-ui.js:pipeline-etapes-groupe",
  "js/travaux-ui.js:pipeline-input-etudiant",
  "js/travaux-ui.js:pipeline-jeton-sous-select",
+ "js/travaux-ui.js:pipeline-page",
  "js/travaux-ui.js:pipeline-radio-label",
  "js/travaux-ui.js:pipeline-reglages-ligne",
  "js/travaux-ui.js:preview-quicklook-prec",

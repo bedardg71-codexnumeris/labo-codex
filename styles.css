@@ -532,7 +532,7 @@ body[data-mode="anonymisation"]:not(.mode-clair) {
 
     /* Gris — inversés (foncés pour texte, clairs pour fond) */
     --gris-fonce: #333344;
-    --gris-moyen: #666677;
+    --gris-moyen: #636374;         /* le texte discret (.texte-muted) : 4.61:1 sur --surface-page, où le lot 4 (7 nov. 2026) pose le contenu sans panneau (#666677 y faisait 4.40) */
     --gris-clair: #777788;          /* WCAG — 4.39:1 sur --surface-carte (Q11 / A2, gradation préservée vs #6e6e7c qui aurait inversé l'échelle) */
     --gris-tres-clair: #d0d1dd;
     --gris-tres-pale: #f0f1f5;
@@ -540,7 +540,7 @@ body[data-mode="anonymisation"]:not(.mode-clair) {
     /* Texte */
     --texte-principal: #1a1a2e;
     --texte-secondaire: #555566;
-    --texte-muted: #666677;         /* WCAG AA — 5.63:1 sur --surface-carte (Q11 / sous-étape A2) */
+    --texte-muted: #636374;         /* WCAG AA — 5.89:1 sur --surface-carte ; 4.61:1 sur --surface-page, où le lot 4 (7 nov. 2026) pose le contenu sans panneau (#666677 y faisait 4.40) */
 
     /* Accents — rester vifs, légèrement assombris pour contraste sur clair */
     --accent-primaire: #065dbb;
@@ -2039,6 +2039,17 @@ body.mode-clair {
     background: var(--surface-section, #142428);
     padding: var(--espacement-moyen);
     border-radius: var(--radius-grand);
+}
+
+/* Lot 4 « Les pages sans emboîtement » (7 nov. 2026, esquisse 68) : le contenu pose sur le fond de la page.
+   Le panneau commun (.conteneur, .contenu, .section.active) perd son fond, sa bordure et son ombre ; ses
+   marges restent, le contenu ne bouge pas. Première page : Évaluation › Préparer. */
+.conteneur:has(#evaluations-importer.active),
+.contenu:has(#evaluations-importer.active),
+.section.active:has(#evaluations-importer.active) {
+    background: transparent;
+    border-color: transparent;
+    box-shadow: none;
 }
 
 @keyframes apparition {
@@ -18831,17 +18842,9 @@ tr.ligne-import-ecartee td {
    =================================================================== */
 
 /* --- Layout pipeline --- */
-.pipeline-page {
-    max-width: 900px;
-    margin: 0 auto;
-    padding: 16px;
-}
-
+/* Lot 4 (esquisse 68) : plus de carte autour de la page ni de chaque étape. Une étape, c'est sa pastille
+   numérotée et son titre ; la zone de dépôt prend toute la largeur du contenu. */
 .pipeline-etape {
-    border: 1px solid var(--bordure-claire);
-    border-radius: var(--radius-grand);
-    padding: 16px;
-    background: var(--gris-tres-pale);
     margin-bottom: 0;
 }
 
@@ -26618,13 +26621,11 @@ body.mode-clair {
    ZERO-STATE — Panneau d'accueil pour les novices (module Travaux)
    ============================================================================= */
 
+/* Lot 4 : sans cadre — ses pointillés imitaient la zone de dépôt qui suit. */
 .travaux-zero-state {
     text-align: center;
-    padding: 24px 20px;
-    margin-bottom: 16px;
-    background: rgba(106, 172, 184, 0.06);
-    border: 1px dashed rgba(106, 172, 184, 0.25);
-    border-radius: var(--radius-moyen, 8px);
+    padding: 8px 20px 0;
+    margin-bottom: 24px;
 }
 
 .travaux-zero-state .zero-state-icone {
