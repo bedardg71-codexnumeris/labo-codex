@@ -21,6 +21,22 @@
 
     var CHANGELOG = [
         {
+            // 1.236 (nouvelle identité ; chaîne des quatre lots du 7 nov. : en-tête, accueil, pages sans doublons, pages sans emboîtement ; #1240) — titre et items validés par Grégoire, mot pour mot, le 7 nov. 2026 vers 22 h. Item 1 : ligne validée le 7 nov. à 7 h 21.
+            version: '1.236',
+            couleur: 'vert',
+            titre: 'Une nouvelle identité, des pages épurées',
+            items: [
+                'Labo Codex a une nouvelle identité&nbsp;: un logo dans l’en-tête, une icône dans l’onglet du navigateur, et une icône parmi les apps de l’iPad quand on l’y ajoute depuis Safari.',
+                'L’en-tête est épuré&nbsp;: les sections y sont nommées en toutes lettres. Visite guidée, Assistance, Aide, Réglages, Signaler et Soutenir passent dans le menu à trois traits, en haut à droite.',
+                'Les onglets portent des noms courts (Préparer, Annoter, Présences, Profils…). Une page n’affiche plus de titre quand il répète son onglet.',
+                'Le groupe actif s’affiche au centre, sous les onglets. La session n’y paraît plus deux fois quand le nom de l’horaire la contient déjà.',
+                'Accueil&nbsp;: neuf tâches, et chacune indique où elle mène. «&nbsp;Organiser tes rencontres&nbsp;» s’ajoute et ouvre Suivi › Rencontres. «&nbsp;Adopter ta pratique&nbsp;» ouvre l’assistant dans Conception › Pratiques.',
+                'Accueil › À propos&nbsp;: la présentation, la visite guidée, les guides et «&nbsp;Par où commencer&nbsp;?&nbsp;» au même endroit. Les Nouveautés s’ouvrent depuis le pied de page&nbsp;; une pastille à côté d’«&nbsp;Accueil&nbsp;» signale qu’il y en a de nouvelles.',
+                'Les pages n’ont plus de panneau autour de leur contenu, et aucune carte n’est posée dans une autre. Les frises d’étapes sont plus compactes.',
+                'Sur un téléphone, «&nbsp;Non enregistré&nbsp;» se place en haut de la page au lieu de cacher «&nbsp;← Précédent&nbsp;» et les boutons des présences.'
+            ]
+        },
+        {
             // 1.235 (#1232 à #1235) — titre et items validés par Grégoire, mot pour mot, le 5 nov. 2026 vers 16 h.
             version: '1.235',
             couleur: 'vert',
