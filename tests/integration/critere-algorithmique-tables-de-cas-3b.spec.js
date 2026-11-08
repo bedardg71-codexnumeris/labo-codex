@@ -268,7 +268,9 @@ test('une vraie copie évaluée · codes posés dans Annoter : la phrase sous le
 });
 
 // Deux colonnes tant que la table a la place (au-dessus de 560 px de large), empilées sinon ; aucun défilement de côté.
-for (const [largeur, hauteur, empilee] of [[1440, 900, false], [1180, 820, false], [820, 1180, true], [700, 900, true]]) {
+// ↻ Lot 4 (33ff3840f puis 6ad15e114, 7 nov.) : plus de panneau autour du contenu — à 700 px, la table dépasse
+// 560 px et garde ses deux colonnes ; l'empilement se mesure à 820 px.
+for (const [largeur, hauteur, empilee] of [[1440, 900, false], [1180, 820, false], [820, 1180, true], [700, 900, false]]) {
     test(`${largeur} px · les tables de l’enseignant·e, sans défilement de côté ; les rangées ${empilee ? 's’empilent' : 'en deux colonnes'}`, async ({ page }) => {
         const erreurs = await ouvrir(page, 'GM', largeur, hauteur, true);
         await ouvrirCas(page, 'CM');
