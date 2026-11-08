@@ -2032,9 +2032,9 @@
         const c = document.createElement('canvas');
         c.width = taille; c.height = taille;
         const ctx = c.getContext('2d');
-        // Mode sombre : inverser
+        // Mode sombre : inverser — sauf un tampon fait d'un emoji, qui garde ses couleurs (#1244, contre-vérification du 8 nov.)
         const estModeSombre = !document.body.classList.contains('mode-clair');
-        if (estModeSombre) ctx.filter = 'invert(1)';
+        if (estModeSombre && !tamponGardeSesCouleurs(autocollantId)) ctx.filter = 'invert(1)';
         ctx.drawImage(img, 0, 0, taille, taille);
         const url = 'url(' + c.toDataURL() + ') 16 16, copy';
         _curseurCache['tampon_' + autocollantId] = url;

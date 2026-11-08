@@ -70,6 +70,12 @@ describe('#1244 — chaque lieu de dessin laisse ses couleurs à un tampon-emoji
         expect(outils).toContain('emoji: (persObs[a.id] && persObs[a.id].emoji) || undefined,');
         expect(outils).toContain("if (typeof t.emoji === 'string' && t.emoji) persObj[t.id].emoji = t.emoji;");
     });
+
+    it('5. le curseur du Mac : l\'inversion du mode sombre est écartée pour un emoji (contre-vérification du 8 nov.)', () => {
+        const corps = tranche(lire('js/travaux-outils.js'), 'function genererCurseurTampon(autocollantId) {', 'ctx.drawImage(img, 0, 0, taille, taille);', { longueurMin: 300 });
+        expect(corps).toContain("if (estModeSombre && !tamponGardeSesCouleurs(autocollantId)) ctx.filter = 'invert(1)';");
+        expect(corps, 'aucune autre inversion').not.toMatch(/if \(estModeSombre\) ctx\.filter/);
+    });
 });
 
 /*
