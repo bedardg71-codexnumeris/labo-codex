@@ -1195,6 +1195,20 @@ function annoncerEcritureUsager(cles, options) {
 }
 
 /**
+ * #1242 (8 nov. 2026) — « le graphique suit les évaluations » : une écriture réussie des évaluations est
+ * signalée au module des captures (snapshots.js), qui refait celles qu'elle change. Ici, le point par
+ * lequel passent les gestes qui écrivent les évaluations ; les écritures directes en `db` (une échelle
+ * modifiée, par exemple) n'y passent pas : « Recalculer les captures » reste leur recours.
+ */
+function _signalerAuxCaptures(cleEffective, donnees) {
+    if (typeof window.signalerEvaluationsEcrites !== 'function') return;
+    if (cleEffective !== window.cle('evaluationsSauvegardees')) return;
+    try { window.signalerEvaluationsEcrites(donnees); } catch (e) {
+        console.warn('[#1242] Captures non signalées :', e && e.message);
+    }
+}
+
+/**
  * Sauvegarde des données selon le mode actif
  * FONCTION CENTRALE - À utiliser partout où on fait db.setSync()
  *
@@ -1250,6 +1264,7 @@ function sauvegarderDonneesSelonMode(cle, donnees, options) {
         invaliderCacheLecture(cleEffective);
         if (modeActuel === MODES.ANONYMISATION) _poserEmpreintes(cle, donnees);   // R1
         if (temoin && !discret) _annoncerEnregistre(temoin, cleEffective, geste);
+        _signalerAuxCaptures(cleEffective, donnees);   // #1242
         return true;
     } catch (error) {
         // #618 : l'ancien toast disait « Les données sont sauvegardées » sur un quota

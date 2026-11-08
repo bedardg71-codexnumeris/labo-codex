@@ -57,12 +57,15 @@ Les quatre points tiennent, lus dans `cafc89ff2` :
     Elle le fait aussi une fois par semaine, à l'ouverture : … » ; et « Si tu corriges des présences ou des évaluations
     passées, « Recalculer les captures » les refait toutes… » devient « Si tu corriges les présences d'une séance passée,
     sa capture et celles des séances suivantes sont refaites. Si tu corriges des évaluations passées, « Recalculer les
-    captures » les refait toutes… ».
+    captures » les refait toutes… ». ↻ Avec #1242 (§ 8), cette seconde phrase devient : « Si tu corriges les présences
+    d'une séance passée ou une évaluation, les captures concernées sont refaites d'elles-mêmes, avec celles des séances
+    qui suivent ; pour une évaluation, à partir de l'échéance de son travail. « Recalculer les captures » les refait toutes
+    depuis le début du trimestre : utile après une échéance déplacée ou une pratique de notation changée. »
 
 ## 5. Inscrit au backlog
 
-- **#1242** : enregistrer une évaluation change C et P sans recapturer (sur consigne). La question ouverte : quelle date D
-  pour une évaluation (sa date, ou l'échéance effective de la production, qui décide déjà du C et du P historiques).
+- **#1242** : enregistrer une évaluation change C et P sans recapturer (sur consigne). **Fait le même jour, à la demande
+  de Grégoire** (« c'est toujours l'échéance du travail »), § 8.
 - **#1243**, trouvaille : le graphique se lisait mal à une seule séance (un point par élève, collé à l'axe) et à deux
   séances par semaine (deux points « Sem. 2 », sans date). Déjà vrai après « Recalculer les captures » ; le lot le rend
   courant. **Corrigé sur la même branche** (accord de Grégoire, 8 nov., 8 h 57), § 7.
@@ -115,3 +118,56 @@ Les quatre points tiennent, lus dans `cafc89ff2` :
 - **La densité, mesurée sur la démo** (30 séances, deux par semaine, « Recalculer les captures », Chromium) : à 1366 px,
   les 30 étiquettes s'affichent, lisibles en biais ; à 820 px (l'iPad debout), Chart.js en garde 15, la première séance
   de chaque semaine. Captures : `demo-bureau-1366.png`, `demo-ipad-debout-820.png`. Pas vu dans Safari.
+
+## 8. #1242 : le graphique suit aussi les évaluations
+
+Décision de Grégoire (8 nov., 9 h 13) : pour une évaluation, la date qui compte est **l'échéance du travail**.
+
+- **Le déclencheur** : `sauvegarderDonneesSelonMode` (modes.js), le point par lequel passent les gestes qui écrivent les
+  évaluations (évaluer, verrouiller, déverrouiller, supprimer, changer un statut, appliquer un jeton, associer une copie…),
+  signale chaque écriture réussie à `signalerEvaluationsEcrites` (snapshots.js).
+- **Ce qui a changé** : beaucoup de ces gestes modifient en place le tableau lu (l'objet du cache mémoire de `db`) avant de
+  l'écrire ; relu au moment de l'écriture, « avant » vaudrait déjà « après ». Le module garde donc une **empreinte** de chaque
+  évaluation (son JSON), prise au démarrage, au changement de trimestre, à l'entrée et à la sortie de la démo, puis à chaque
+  écriture. Changées, ajoutées ou retirées : celles dont l'empreinte diffère.
+- **La date** : l'échéance effective la plus ancienne parmi elles, pour les élèves et les travaux du groupe-cours actif (une
+  copie d'un autre groupe ou d'un autre cours ne refait rien ici) ; sans échéance, la date de l'évaluation, comme le C et le
+  P historiques. Les captures déjà prises à partir de cette date sont refaites ; une évaluation ne crée pas de capture.
+- **La file** : une demande arrivée pendant qu'une autre attend s'y fond (la date la plus ancienne l'emporte). Une série de
+  corrections ne relance pas autant de chaînes.
+
+**Décidé seul** :
+- les écritures directes en `db` des évaluations (une échelle modifiée qui réécrit ses copies, par exemple) ne déclenchent
+  rien : ce sont des changements de paramètres, « Recalculer les captures » reste leur recours (Aide mise à jour) ;
+- sans empreinte de départ pour la clé écrite (une écriture avant la fin du démarrage), l'écriture devient le point de départ
+  et rien n'est refait.
+
+- **le départ des captures attend le tour suivant de la boucle** (une minuterie à 0) : l'écriture en attente des
+  présences part au déchargement de la page (`pagehide`) ; les captures ne disputent plus à cette écriture le temps qui
+  lui reste pour atteindre IndexedDB. Au rechargement, la capture manque, pas la saisie. Motif : la spec
+  `presences-lot-d-enregistrement` (a), « une note tapée puis rechargement », a rougi sur la branche ; **mesuré ensuite,
+  elle rougit autant sur `cafc89ff2`** sous Chromium (5 sur 10 de chaque côté dans la même série ; 6 sur 20 au total sur
+  la base) : intermittence de Chromium, sans lien établi avec le lot. La précaution reste, elle ne coûte rien.
+
+**Une limite** : seules les captures du groupe-cours actif se refont. Évaluer les copies d'un groupe pendant qu'un autre est
+actif ne refait pas les captures du premier ; elles se rattrapent à sa prochaine saisie de présences (à partir de cette
+séance seulement) ou par « Recalculer les captures ».
+
+**Vérifié comment** :
+- `tests/unit/sentinelle-1242-graphique-suit-les-evaluations.test.js` (11 essais, modules réels) : une évaluation enregistrée
+  refait S1, S3, S4 (C d'Alice, fictive : 100 puis 50 quand le travail P3 est dû aussi), S0 intacte, aucune capture créée ;
+  modifiée, retirée : idem ; travail pas encore dû, élève d'un autre groupe, réécriture sans changement : rien ; deux
+  écritures rapprochées : trois captures écrites, une fois chacune ; travail dû un jour de cours jamais saisi : les suivantes
+  refaites, rien de créé ; sans empreinte de départ ; les trois reprises de l'empreinte. Avec `modes.js` et `snapshots.js`
+  d'avant : 10 rouges sur 10. Break-tests G à L consignés dans le fichier.
+- Specs voisines qui écrivent des évaluations dans la démo (14 fichiers, 91 essais, Chromium) : 89 verts ; 2 rouges,
+  `1007-propose-codex-avant-suppression` P8 (vert ensuite 9 fois sur 9 sur la branche, vert sur la base) et la note tapée
+  ci-dessus (même taux sur la base).
+- Au navigateur (Chromium), `graphique-suit-les-presences.spec.js`, second essai : démo activée en cours de session, une
+  évaluation modifiée en place puis écrite ; les captures à partir de son échéance sont refaites, celles d'avant non. Rouge
+  quand la reprise de l'empreinte à l'entrée de la démo est retirée.
+- **Coût mesuré** (démo : 101 évaluations, 392 Ko ; Chromium) : l'écriture, empreintes comprises, 10 ms ; une écriture sans
+  changement, 5 ms et rien de refait ; la chaîne pour la plus ancienne échéance, 22 captures en 257 ms. **Extrapolation, non
+  mesurée** : pour 700 évaluations (deux groupes, un trimestre), compter environ sept fois le coût de l'empreinte, soit de
+  l'ordre de 30 à 70 ms par enregistrement d'une évaluation. À surveiller sur l'iPad.
+- **Vitest entier** : 888 fichiers, 10 789 essais, tous verts. **Pas vérifié** : WebKit et Safari, l'iPad.

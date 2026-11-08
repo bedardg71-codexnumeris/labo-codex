@@ -316,6 +316,7 @@ async function activerModeDemo() {
         if (typeof initialiserSystemeModes === 'function') {
             initialiserSystemeModes();
         }
+        if (typeof window.initialiserEmpreintesEvaluations === 'function') window.initialiserEmpreintesEvaluations();   // #1242 : l'empreinte des évaluations du trimestre devenu actif
 
         // 9. Calcul dérivée : calendrier complet pour demo
         if (typeof genererCalendrierComplet === 'function') {
@@ -568,6 +569,7 @@ async function desactiverModeDemo() {
         if (typeof initialiserSystemeModes === 'function') {
             initialiserSystemeModes();
         }
+        if (typeof window.initialiserEmpreintesEvaluations === 'function') window.initialiserEmpreintesEvaluations();   // #1242 : l'empreinte des évaluations du trimestre devenu actif
         if (typeof peuplerDropdownGroupeCoursActif === 'function') {
             peuplerDropdownGroupeCoursActif();
         }

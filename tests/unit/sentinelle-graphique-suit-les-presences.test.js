@@ -163,7 +163,9 @@ describe('le graphique suit les présences — chaque enregistrement capture sa 
     it('5. jamais de capture pour une date future', async () => {
         const b = monterSaisie(storeTrimestre());
         await saisir(b, S0);
-        const recapturees = await b.win.recapturerDepuisSeance('2026-09-10');
+        const enCours = b.win.recapturerDepuisSeance('2026-09-10');
+        b.avancer(1);   // le départ attend le tour suivant (minuterie virtuelle du banc)
+        const recapturees = await enCours;
         expect(recapturees).toEqual([]);
         expect(captures(b).map((s) => s.dateSeance)).toEqual([S0]);
     });
@@ -174,6 +176,7 @@ describe('le graphique suit les présences — chaque enregistrement capture sa 
         const cleGC1 = b.win.cleSnapshots();
         const enCours = b.win.recapturerDepuisSeance(S1);   // la chaîne attend son tour dans la file
         b.store.infoCours = { id: 'GC2', nom: 'Cours banc 2', groupe: '02', _groupeCoursId: 'GC2' };
+        b.avancer(1);   // le départ attend le tour suivant (minuterie virtuelle du banc)
         expect(await enCours).toEqual([]);
         expect(b.win.cleSnapshots()).not.toBe(cleGC1);
         expect(b.store[cleGC1].hebdomadaires.map((s) => s.dateSeance)).toEqual([S0]);

@@ -203,3 +203,45 @@ test('groupe neuf · la première séance saisie paraît au graphique du Suivi d
 
     expect(erreurs, 'erreurs console pendant le parcours').toEqual([]);
 });
+
+// #1242 (8 nov. 2026, « c'est toujours l'échéance du travail ») — dans la démo, entrée en cours de session (la clé
+// des évaluations change sans rechargement) : une évaluation modifiée, écrite par le point commun des gestes,
+// refait les captures prises à partir de l'échéance de son travail ; celles d'avant ne bougent pas.
+test('démo · une évaluation modifiée refait les captures à partir de l\'échéance de son travail', async ({ page }) => {
+    test.setTimeout(120000);
+    const erreurs = brancherEcouteurs(page);
+    await suivreLesReactions(page);
+    await page.goto(indexHtml);
+    await page.waitForLoadState('domcontentloaded');
+    await attendreApplication(page);
+    await viderStockage(page);
+    await page.reload();
+    await page.waitForLoadState('domcontentloaded');
+    await attendreApplication(page);
+    await page.evaluate(() => activerModeDemo());
+    await attendreRepos(page);
+    const preparation = await page.evaluate(async () => {
+        await reconstruireSnapshotsHistoriques();
+        const k = cleSnapshots();
+        const s = await db.get(k);
+        s.hebdomadaires.forEach((c) => { c.timestamp = 'MARQUE'; });
+        await db.set(k, s);
+        const evaluations = db.getSync(cle('evaluationsSauvegardees'), []);
+        const productions = obtenirDonneesSelonMode('productions') || [];
+        const gc = obtenirIdContexteActif();
+        const das = new Set(obtenirEtudiantsCoursActif().map((e) => String(e.da)));
+        const echeanceDe = (e) => { const p = productions.find((x) => x.id === e.productionId); return p ? obtenirEcheanceEffective(p, gc).date : null; };
+        const cible = evaluations.filter((e) => das.has(String(e.etudiantDA)) && echeanceDe(e))
+            .sort((a, b) => echeanceDe(b).localeCompare(echeanceDe(a)))[0];   // l'échéance la plus récente : des captures avant et après
+        cible.noteFinale = cible.noteFinale === 50 ? 60 : 50;   // modifiée EN PLACE, comme le font les gestes
+        sauvegarderDonneesSelonMode('evaluationsSauvegardees', evaluations, { geste: 'Évaluation (banc)' });
+        return { echeance: echeanceDe(cible), dates: s.hebdomadaires.map((c) => c.dateSeance) };
+    });
+    const avant = preparation.dates.filter((d) => d < preparation.echeance);
+    const apres = preparation.dates.filter((d) => d >= preparation.echeance);
+    expect(avant.length, 'des captures avant l\'échéance').toBeGreaterThan(0);
+    expect(apres.length, 'des captures à partir de l\'échéance').toBeGreaterThan(0);
+    await expect.poll(async () => page.evaluate(async () => (await db.get(cleSnapshots())).hebdomadaires
+        .filter((c) => c.timestamp !== 'MARQUE').map((c) => c.dateSeance)), { message: 'les captures refaites' }).toEqual(apres);
+    expect(erreurs, 'erreurs console').toEqual([]);
+});

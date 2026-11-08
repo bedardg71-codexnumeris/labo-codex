@@ -565,6 +565,7 @@
         // (tableau .actif, window.trimestreActif, clé storage 'trimestreActif')
         window.trimestreActif = id;
         db.setSync('trimestreActif', id);
+        if (typeof window.initialiserEmpreintesEvaluations === 'function') window.initialiserEmpreintesEvaluations();   // #1242 : l'empreinte des évaluations du trimestre devenu actif
 
         // Réinitialiser le contexte : le pointeur `groupeCoursActif` est GLOBAL
         // (non namespacé), donc invalide dès qu'on change de trimestre.

@@ -95,6 +95,9 @@ function cleSnapshots() {
 
 function initialiserModuleSnapshots() {
 
+    // #1242 : l'empreinte de départ des évaluations, avec ou sans groupe-cours actif.
+    initialiserEmpreintesEvaluations();
+
     const cleSnap = cleSnapshots();
     if (!cleSnap) {
         return;
@@ -388,63 +391,92 @@ async function verifierEtCapturerSnapshotHebdomadaire() {
 }
 
 /**
- * « LE GRAPHIQUE SUIT LES PRÉSENCES » (8 nov. 2026, règle validée par Grégoire).
+ * « LE GRAPHIQUE SUIT LES PRÉSENCES » (8 nov. 2026, règle validée par Grégoire), puis « … ET LES
+ * ÉVALUATIONS » (#1242, même jour : « c'est toujours l'échéance du travail »).
  *
- * Appelée par l'écrivain des présences (`ecrirePresencesSeance`, saisie-presences.js) après chaque
- * enregistrement d'une séance D : recapture D, puis chacune des séances DÉJÀ capturées après D — les
- * indices sont cumulatifs, une correction en semaine 3 change les captures suivantes. Les captures
- * d'avant D ne bougent pas ; une séance jamais saisie ne reçoit pas de capture ici. Une date future n'est
- * jamais capturée : `capturerSnapshotSeance` la refuse, et aucune capture ne la suit.
+ * Deux déclencheurs, une seule file :
+ *   · les présences d'une séance D enregistrées (`ecrirePresencesSeance`, saisie-presences.js) :
+ *     `recapturerDepuisSeance(D)` capture D, et refait les captures déjà prises à partir de D ;
+ *   · des évaluations écrites (`sauvegarderDonneesSelonMode`, modes.js) : `signalerEvaluationsEcrites`
+ *     retient l'échéance effective la plus ancienne parmi les évaluations qui ont changé, et refait les
+ *     captures déjà prises à partir d'elle. Une évaluation ne crée pas de capture : une capture est celle
+ *     d'une séance.
+ * Les indices sont cumulatifs : une correction en semaine 3 change les captures suivantes ; celles d'avant
+ * ne bougent pas. Une date future n'est jamais capturée (`capturerSnapshotSeance` la refuse).
  *
- * Les appels passent dans une file : deux enregistrements rapprochés ne se recalculent pas en même temps.
- * Une capture se calcule sur le groupe-cours ACTIF (élèves, travaux, clé) : si on change de groupe-cours
- * avant ou pendant la chaîne, elle s'arrête plutôt que d'écrire les séances de l'un chez l'autre. La séance
- * manquante se rattrape à la saisie suivante ou par « Recalculer les captures ».
+ * LA FILE : une chaîne à la fois ; une demande arrivée pendant qu'une autre ATTEND se fond dans elle (la
+ * date la plus ancienne l'emporte) — une série de corrections ne relance pas autant de chaînes.
+ * LA GARDE : une capture se calcule sur le groupe-cours ACTIF (élèves, travaux, clé). Si on change de
+ * groupe-cours avant ou pendant la chaîne, elle s'arrête plutôt que d'écrire les séances de l'un chez
+ * l'autre ; ce qui manque se rattrape à l'enregistrement suivant ou par « Recalculer les captures ».
  *
  * ⚠ TARIR N'EST PAS RÉPARER : les séances enregistrées avant cette règle et jamais capturées restent
  * absentes du graphique jusqu'à « Recalculer les captures » (Réglages › Données). Rien n'est recalculé
  * d'office chez les gens.
  *
  * La vérification à l'ouverture (`verifierEtCapturerSnapshotHebdomadaire`) reste : c'est la seule capture
- * automatique d'un groupe dont on saisit les évaluations sans prendre les présences dans l'application.
- *
- * @param {string} dateSeance - D, au format 'YYYY-MM-DD'
- * @returns {Promise<string[]>} les dates effectivement (re)capturées, dans l'ordre
+ * automatique d'un groupe dont on ne prend pas les présences dans l'application.
  */
 let _fileRecapture = Promise.resolve();
+let _demandeEnAttente = null;   // { cle, depuis, seances: Set, promesse } — pas encore commencée
 
-function recapturerDepuisSeance(dateSeance) {
+function _demanderRecapture(seance, depuis) {
     const cleDuGroupe = cleSnapshots();   // le groupe-cours de l'enregistrement, lu à l'appel
-    const tache = _fileRecapture.then(() => {}, () => {}).then(() => _recapturerDepuisSeance(dateSeance, cleDuGroupe));
-    _fileRecapture = tache;
-    return tache;
+    const attente = _demandeEnAttente;
+    if (attente && attente.cle === cleDuGroupe) {
+        if (seance) attente.seances.add(seance);
+        if (depuis && (!attente.depuis || depuis < attente.depuis)) attente.depuis = depuis;
+        return attente.promesse;
+    }
+    const demande = { cle: cleDuGroupe, depuis: depuis || null, seances: new Set(seance ? [seance] : []) };
+    // Le départ attend le tour suivant de la boucle : quand l'écriture part au déchargement de la page (l'écriture
+    // en attente des présences se vide sur `pagehide`), les captures ne lui disputent pas le temps qui reste pour
+    // atteindre IndexedDB. Au rechargement, la minuterie ne part jamais : la capture manquera, pas la saisie.
+    const tourSuivant = new Promise(resolve => setTimeout(resolve, 0));
+    demande.promesse = Promise.all([_fileRecapture.then(() => {}, () => {}), tourSuivant]).then(() => {
+        if (_demandeEnAttente === demande) _demandeEnAttente = null;
+        return _recapturer(demande);
+    });
+    _demandeEnAttente = demande;
+    _fileRecapture = demande.promesse;
+    return demande.promesse;
 }
 
-async function _recapturerDepuisSeance(dateSeance, cleDuGroupe) {
+/**
+ * Les présences de la séance D sont enregistrées : D est capturée, et les captures prises à partir de D refaites.
+ * @param {string} dateSeance - D, 'YYYY-MM-DD'
+ * @returns {Promise<string[]>} les dates (re)capturées par la chaîne qui la porte, dans l'ordre
+ */
+function recapturerDepuisSeance(dateSeance) {
+    if (!dateSeance) return Promise.resolve([]);
+    return _demanderRecapture(dateSeance, dateSeance);
+}
+
+/** Les dates à (re)capturer, chacune avec son numéro de semaine (séances du groupe-cours actif d'abord). */
+function _datesARefaire(demande, stock) {
+    const seancesCompletes = typeof obtenirSeancesCompletes === 'function' ? obtenirSeancesCompletes() : null;
+    const numeroDe = (date, repli) => {
+        const seances = seancesCompletes && seancesCompletes[date];
+        return (seances && seances[0] && seances[0].numeroSemaine) || repli || null;
+    };
+    const parDate = new Map();
+    demande.seances.forEach(d => parDate.set(d, numeroDe(d, null)));
+    (stock && Array.isArray(stock.hebdomadaires) ? stock.hebdomadaires : []).forEach(s => {
+        if (!s || !s.dateSeance || !demande.depuis || s.dateSeance < demande.depuis) return;
+        if (!parDate.get(s.dateSeance)) parDate.set(s.dateSeance, numeroDe(s.dateSeance, s.numeroSemaine || s.numSemaine));
+    });
+    return [...parDate.keys()].sort().map(date => ({ date, numero: parDate.get(date) }));
+}
+
+async function _recapturer(demande) {
     const recapturees = [];
-    const memeGroupe = () => !!cleDuGroupe && cleSnapshots() === cleDuGroupe;
+    const memeGroupe = () => !!demande.cle && cleSnapshots() === demande.cle;
     try {
-        if (!dateSeance || !memeGroupe()) return recapturees;
-
-        const stock = await db.get(cleDuGroupe, null);
-        const suivantes = (stock && Array.isArray(stock.hebdomadaires) ? stock.hebdomadaires : [])
-            .filter(s => s && s.dateSeance && s.dateSeance > dateSeance)
-            .sort((a, b) => a.dateSeance.localeCompare(b.dateSeance));
-
-        // Le numéro de semaine vient des séances du groupe-cours actif (même patron que la vérification
-        // à l'ouverture et la reconstruction) ; une séance déjà capturée garde le sien à défaut.
-        const seancesCompletes = typeof obtenirSeancesCompletes === 'function' ? obtenirSeancesCompletes() : null;
-        const numeroDe = (date, repli) => {
-            const seances = seancesCompletes && seancesCompletes[date];
-            return (seances && seances[0] && seances[0].numeroSemaine) || repli || null;
-        };
-
+        if (!memeGroupe()) return recapturees;
+        const aRefaire = _datesARefaire(demande, await db.get(demande.cle, null));
         // Les évaluations, lues une fois pour toute la chaîne (comme la reconstruction). Jamais `null` : la
         // capture ne relit alors rien avant d'écrire, et sa clé est celle que la garde vient de vérifier.
         const evaluationsCache = (await db.get(cle('evaluationsSauvegardees'))) || [];
-
-        const aRefaire = [{ date: dateSeance, numero: numeroDe(dateSeance, null) }]
-            .concat(suivantes.map(s => ({ date: s.dateSeance, numero: numeroDe(s.dateSeance, s.numeroSemaine || s.numSemaine) })));
         for (const { date, numero } of aRefaire) {
             if (!memeGroupe()) break;   // juste avant : la capture calcule et lit sa clé dans le même tour
             if (await capturerSnapshotSeance(date, evaluationsCache, numero ? { numeroSemaine: numero } : {})) {
@@ -452,9 +484,89 @@ async function _recapturerDepuisSeance(dateSeance, cleDuGroupe) {
             }
         }
     } catch (error) {
-        console.warn('[Snapshots] Recapture après les présences interrompue :', error.message || error);
+        console.warn('[Snapshots] Recapture interrompue :', error.message || error);
     }
     return recapturees;
+}
+
+/* --- #1242 : les évaluations ---------------------------------------------------------------------------
+ * Une quinzaine de gestes écrivent les évaluations, et beaucoup modifient en place le tableau lu (l'objet
+ * du cache mémoire de `db`) avant de l'écrire : relu au moment de l'écriture, « avant » vaudrait déjà
+ * « après ». D'où une EMPREINTE de chaque évaluation (son JSON), prise au démarrage puis à chaque
+ * écriture : ce qui a changé, c'est ce dont l'empreinte diffère. Sans empreinte de départ pour la clé
+ * écrite (trimestre changé en cours de session, écriture avant la fin du démarrage), l'écriture devient le
+ * point de départ et rien n'est refait : « Recalculer les captures » reste le recours. */
+let _empreintesEvaluations = null;   // { cle, parId: Map(id → { empreinte, productionId, etudiantDA, dateEvaluation }) }
+
+function _indexerEvaluations(evaluations) {
+    const parId = new Map();
+    (Array.isArray(evaluations) ? evaluations : []).forEach(e => {
+        if (!e || e.id === undefined || e.id === null) return;
+        parId.set(String(e.id), { empreinte: JSON.stringify(e), productionId: e.productionId, etudiantDA: e.etudiantDA, dateEvaluation: e.dateEvaluation });
+    });
+    return parId;
+}
+
+/** Au démarrage : l'empreinte de départ des évaluations du trimestre. */
+async function initialiserEmpreintesEvaluations() {
+    const cleEval = cle('evaluationsSauvegardees');
+    try {
+        const lues = await db.get(cleEval, []);
+        if (!_empreintesEvaluations || _empreintesEvaluations.cle !== cleEval) {
+            _empreintesEvaluations = { cle: cleEval, parId: _indexerEvaluations(lues) };
+        }
+    } catch (e) { console.warn('[Snapshots] Empreintes des évaluations non prises :', e.message || e); }
+}
+
+/** L'échéance effective la plus ancienne parmi `touchees`, pour les élèves et les travaux du groupe-cours actif. */
+function _premiereEcheance(touchees) {
+    const productions = obtenirDonneesSelonMode('productions') || [];
+    const groupeCoursId = obtenirCoursIdPourSnapshots();
+    const dasDuGroupe = new Set((typeof obtenirEtudiantsCoursActif === 'function' ? obtenirEtudiantsCoursActif() : []).map(e => String(e.da)));
+    let premiere = null;
+    touchees.forEach(e => {
+        if (!dasDuGroupe.has(String(e.etudiantDA))) return;   // un élève d'un autre groupe : ses captures ne sont pas celles-ci
+        const production = productions.find(p => p.id === e.productionId);
+        if (!production) return;   // un travail d'un autre cours n'entre ni dans C ni dans P du groupe
+        const { date, assignee } = obtenirEcheanceEffective(production, groupeCoursId);
+        if (!assignee) return;
+        // Même règle que le C et le P historiques (`calculerIndicesHistoriques`) : l'échéance, sinon la date de l'évaluation.
+        const jour = String(date || e.dateEvaluation || '').slice(0, 10);
+        if (/^\d{4}-\d{2}-\d{2}$/.test(jour) && (!premiere || jour < premiere)) premiere = jour;
+    });
+    return premiere;
+}
+
+/**
+ * Des évaluations viennent d'être écrites (appelée par `sauvegarderDonneesSelonMode`, modes.js, avec la
+ * collection écrite) : les captures prises à partir de l'échéance la plus ancienne des évaluations
+ * changées, ajoutées ou retirées sont refaites.
+ * @param {Array} evaluations - la collection écrite
+ * @returns {Promise<string[]>} les dates recapturées
+ */
+function signalerEvaluationsEcrites(evaluations) {
+    const cleEval = cle('evaluationsSauvegardees');
+    const avant = _empreintesEvaluations && _empreintesEvaluations.cle === cleEval ? _empreintesEvaluations.parId : null;
+    const apres = _indexerEvaluations(evaluations);
+    _empreintesEvaluations = { cle: cleEval, parId: apres };
+    if (!avant) return Promise.resolve([]);
+    const touchees = [];
+    apres.forEach((n, id) => {
+        const a = avant.get(id);
+        if (!a) touchees.push(n);
+        else if (a.empreinte !== n.empreinte) touchees.push(n, a);   // l'ancienne aussi : son travail a pu changer
+    });
+    avant.forEach((a, id) => { if (!apres.has(id)) touchees.push(a); });
+    const depuis = touchees.length ? _premiereEcheance(touchees) : null;
+    if (!depuis) return Promise.resolve([]);
+    return _demanderRecapture(null, depuis).then((dates) => {
+        // Le Suivi du groupe, s'il est affiché, montre les captures refaites.
+        const suivi = typeof document !== 'undefined' ? document.getElementById('suivi-groupe') : null;
+        if (dates.length && suivi && suivi.classList.contains('active') && typeof chargerTableauBordApercu === 'function') {
+            try { chargerTableauBordApercu(); } catch (e) { console.warn('[Snapshots] Suivi du groupe non redessiné :', e.message || e); }
+        }
+        return dates;
+    });
 }
 
 /**
@@ -1278,6 +1390,8 @@ window.initialiserModuleSnapshots = initialiserModuleSnapshots;
 window.verifierEtCapturerSnapshotHebdomadaire = verifierEtCapturerSnapshotHebdomadaire;
 window.capturerSnapshotSeance = capturerSnapshotSeance;
 window.recapturerDepuisSeance = recapturerDepuisSeance;
+window.signalerEvaluationsEcrites = signalerEvaluationsEcrites;   // #1242
+window.initialiserEmpreintesEvaluations = initialiserEmpreintesEvaluations;   // #1242
 window.capturerSnapshotIntervention = capturerSnapshotIntervention;
 window.mettreAJourSnapshotIntervention = mettreAJourSnapshotIntervention;
 window.reconstruireSnapshotsHistoriques = reconstruireSnapshotsHistoriques;
