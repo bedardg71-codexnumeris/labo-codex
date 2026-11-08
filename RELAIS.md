@@ -7,6 +7,20 @@
 
 ---
 
+## 8 NOV. 2026, 18 H 25 (Claude Code) : **1.237.2 POUSSÉE, VERDICT VERT ; SIX ENTRÉES DE LA FILE EN LIGNE ; AUCUNE PORTE TERRAIN**
+
+`main` = `origin/main` = `54a87bcae` (+ le commit de docs qui porte ce relais). Version en ligne : 1.237.2, build `1108-1646`. La 1.237.1 (`47e2e8681`), jamais poussée seule, part avec elle.
+
+- **Passage de la boucle** (entrées 16, 17, 19, 21, 22, 24 ; #1196, #1205, #1188, #1086, #588, #859) : détail dans `plans de travail/FILE-DES-CORRECTIFS.md`. Mots d'écran et Nouvelles validés par Grégoire tels quels.
+- **Verdict complet** sur `54a87bcae` (Cowork, Chrome et Safari fermés, secteur, aucune veille) : 1 420 essais en 10 morceaux, 1 420 verts, 0 au second essai, 0 rouge, 39 sautés. Push `f96b0bb20..54a87bcae` (39 commits) vers 18 h 20.
+- **Aucune porte terrain** (règles 1 et 2 du skill, décidé par Claude Code) : `plans de travail/PORTES-TERRAIN-2026-11-08-boucle.md` dit pourquoi et ce qui reste invérifié. Rien à publier pour Cowork.
+
+**Complexité** (1.237.0 `144a4dd66` → 1.237.2) : fichiers de plus de 1 000 lignes 40 → 40, leurs lignes Δ +73 (`js/travaux-preparation.js` 2 020 → 2 051, `js/saisie-presences.js` 1 399 → 1 414, `js/productions.js` 1 822 → 1 834, `js/profil-etudiant-calculs.js` 1 177 → 1 187, `js/changelog-data.js` 2 589 → 2 595, `js/codex.js` +1, `js/profil-etudiant-sections-affichage.js` −2) ; au-dessus de 15 : 438 → 437 (Δ −1) ; au-dessus de 30 : 80 → 79 (Δ −1, maximum 130) ; somme au-dessus de 15 : 11 031 → 11 021 (Δ −10). Lignes de `js/` : 160 139 → 160 214 ; fonctions : 15 237 → 15 247.
+
+**Suite** : la file reprend à l'entrée 23 (#696). Hors boucle : le lot #1176 (copie non recevable), sur sa branche, lancé par Grégoire depuis la page du tri (consigne non commitée, laissée telle quelle) ; les tâches préalables aux parcours ; l'aide « C et P » attend la décision du chantier des parcours, absente du dépôt.
+
+---
+
 ## 8 NOV. 2026, 14 H 40 (Claude Code) : **1.237.0 POUSSÉE, VERDICT VERT ; LES DEUX BRANCHES DU 8 NOV. FUSIONNÉES ; PAS DE PORTE TERRAIN (DÉCISION DE GRÉGOIRE)**
 
 `main` = `origin/main` = `7323316a0` (+ le commit de docs qui porte ce relais). Version en ligne : 1.237.0, build `1108-1213` (`144a4dd66`).
