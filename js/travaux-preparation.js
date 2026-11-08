@@ -443,8 +443,10 @@
 
     /**
      * #1248 (rapport de Grégoire, iPad, 5 nov. 2026) — ce que les curseurs de la palette doivent montrer pour une pile
-     * d'opérations : la valeur de la DERNIÈRE opération de chaque sorte, ou 0 s'il n'y en a plus. C'est la valeur que
-     * chaque curseur remplace quand on le bouge (`changerLuminosite` & cie retirent la dernière de leur sorte).
+     * d'opérations : la valeur de la DERNIÈRE opération de chaque sorte, ou 0 s'il n'y en a plus.
+     * ⚠ Antérieur à #1248, sans cas vécu (relecture du 8 nov. 2026) : `changerLuminosite` & cie ne retirent l'opération
+     * de leur sorte que si elle est EN HAUT de la pile, et les filtres CSS se cumulent. Pile [luminosité 30, rotation 90°],
+     * curseur monté à 40 : l'aperçu prend 130 % × 140 %, le curseur dit 40.
      * @param {Array} ops - Pile d'operations
      * @returns {{luminosite: number, contraste: number, exposition: number, rotationFine: number}}
      */

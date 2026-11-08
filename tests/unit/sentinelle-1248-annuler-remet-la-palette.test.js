@@ -49,24 +49,27 @@ describe('#1248 — les gestes qui remettent la palette d\'accord', () => {
         const annuler = tranche(SOURCE, 'function annulerDerniere() {', '\n    }', { longueurMin: 100 });
         const reinit = tranche(SOURCE, 'function reinitialiser() {', '\n    }', { longueurMin: 100 });
         const charger = tranche(SOURCE, 'async function chargerFichier(index) {', '// Charger l\'image', { longueurMin: 200 });
-        expect(annuler).toContain('synchroniserPalette();');
-        expect(reinit).toContain('synchroniserPalette();');
+        expect(annuler, 'après le retrait de l\'opération').toMatch(/operations\.pop\(\);[\s\S]*synchroniserPalette\(\);/);
+        expect(reinit, 'après la pile vidée').toMatch(/operations = \[\];[\s\S]*synchroniserPalette\(\);/);
         expect(charger, 'après que la pile du nouveau fichier est en place').toMatch(/operations = f\.operations;[\s\S]*synchroniserPalette\(\);/);
     });
 
     it('2. la palette pose les quatre curseurs et le libellé de l\'exposition, à partir de la pile', () => {
         const corps = tranche(SOURCE, 'function synchroniserPalette() {', '\n    }', { longueurMin: 200 });
         expect(corps).toContain('reglagesDeLaPile(operations)');
-        for (const id of ['prep-luminosite', 'prep-contraste', 'prep-exposition', 'prep-rotation-fine', 'prep-exposition-valeur']) {
-            expect(corps).toContain(`'${id}'`);
+        for (const [id, champ] of [['prep-luminosite', 'luminosite'], ['prep-contraste', 'contraste'], ['prep-exposition', 'exposition'], ['prep-rotation-fine', 'rotationFine']]) {
+            expect(corps, `${id} reçoit ${champ}`).toContain(`poser('${id}', r.${champ});`);
         }
+        expect(corps).toContain("getElementById('prep-exposition-valeur')");
+        expect(corps).toContain('libelleExposition(r.exposition)');
     });
 });
 
 /*
  * BREAK-TESTS (8 nov. 2026) — chaque altération rend son essai rouge, puis retirée :
  *   « Annuler » sans `synchroniserPalette()` → 1 ; `reglagesDeLaPile` qui lit la PREMIÈRE opération de chaque sorte → 0 ;
- *   le changement de fichier sans `synchroniserPalette()` → 1.
+ *   le changement de fichier sans `synchroniserPalette()` → 1. Après la relecture neuve : synchroniser AVANT `operations.pop()`
+ *   → 1 ; le contraste posé dans le curseur de luminosité → 2.
  * Au navigateur (WebKit, essai jetable non gardé) : avant le correctif, après deux « Annuler » puis « Réinit. », les
  * curseurs restaient à 30, 20, +0.5 EV, 3° ; après, ils suivent la pile (3° → 0 ; +0.5 EV → 0 ; tout à 0 ; le fichier
  * suivant, sans opération, part de 0).
