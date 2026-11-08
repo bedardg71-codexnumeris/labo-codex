@@ -66,7 +66,7 @@ describe('en-tête épuré · la bande du haut', () => {
     });
     it('l\'orange du logo sur sombre, inscrit en dur dans les SVG, est celui de --icone-aide-config : s\'il change, le signaler à Grégoire', () => {
         const variable = css.match(/--icone-aide-config:\s*(#[0-9a-fA-F]{6})/)[1].toUpperCase();
-        for (const f of readdirSync(path.join(racine, 'Logo')).filter((n) => /couleur-sur-sombre(-16)?\.svg$/.test(n))) {
+        for (const f of readdirSync(path.join(racine, 'Logo')).filter((n) => /couleur-sur-sombre(-16|-32)?\.svg$/.test(n))) {
             expect(lire('Logo/' + f), `${f} : --icone-aide-config vaut ${variable}`).toContain('#E8923A');
             expect(variable, `${f} : --icone-aide-config a changé, la couleur du logo est en dur`).toBe('#E8923A');
         }
