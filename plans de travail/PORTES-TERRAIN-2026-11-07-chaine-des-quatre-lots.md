@@ -1,8 +1,6 @@
 # Portes terrain — chaîne du 7 novembre 2026 (en-tête épuré, accueil épuré, pages sans doublons, pages sans emboîtement, logo)
 
-**État : EN ATTENTE DE LA FUSION.** Les commits de la branche `lot/en-tete-epure` ne sont pas sur `main` : ils ne
-sont donc pas en ligne. Tant que ce n'est pas fait, chaque porte jugerait la version d'avant. À la fusion, inscrire
-ici le numéro de version attendu (§ 0), puis Cowork publie l'artefact jumeau, avec le bouton « Copier mes résultats ».
+**État : FUSIONNÉ dans `main` le 7 nov. 2026 vers 22 h, version 1.236.0 (build `1107-2156`).** Les portes s'ouvrent quand ce numéro est en ligne, après le push qui suit le verdict complet de la nuit. Cowork publie l'artefact jumeau, avec le bouton « Copier mes résultats ».
 
 **Ce qui n'est PAS ici, et pourquoi.** L'apparence des pages, en clair et en sombre, à 1180 et 820 px, se juge sur
 les captures WebKit que Cowork relit (`Claude outputs/captures-2026-11-07-*`). Les cadres, les contrastes et les
@@ -17,7 +15,7 @@ Ce qui échoue devient un item de backlog, avec le numéro de la porte.
 
 | # | Geste | Attendu |
 |---|---|---|
-| 0.1 | Sur le Mac (Safari), ouvre `https://app.codexnumeris.org`, recharge avec vidage du cache (Option-Cmd-E, puis Cmd-R). Lis le numéro en bas de page. | Le numéro inscrit ici à la fusion : _____ |
+| 0.1 | Sur le Mac (Safari), ouvre `https://app.codexnumeris.org`, recharge avec vidage du cache (Option-Cmd-E, puis Cmd-R). Lis le numéro en bas de page. | Le numéro inscrit ici à la fusion : **Bêta publique 1.236.0** |
 | 0.2 | Même geste sur l'iPad. | Le même numéro. |
 
 ## § 2 · Interface
