@@ -6,9 +6,6 @@ Tenue par Claude Code pendant l'essai de la boucle sans relais, du 3 au 10 nov. 
 
 ## À faire
 
-### 19. Le message du profil ne nomme plus le portfolio en standards sans artefact (#1188)
-`js/profil-etudiant-actions.js` ~166. Mots d'écran : à soumettre en fin de file.
-
 ### 21. L'aide sur C et P est attachée à la case, pas à la date (#1086, la partie « aide » seulement)
 `index.html` ~4920 ; `js/productions.js` ~932. La partie export de #1086 reste hors boucle.
 
@@ -137,6 +134,10 @@ Passage du 8 nov. 2026, après-midi (Claude Code, à partir de 16 h) — la 1.23
 
 - **16. « Tous présents » saute les élèves inactifs** : dans la saisie des présences, « Mettre tout le monde présent » laisse la ligne d'un élève inactif ou en décrochage telle quelle ; le premier geste sur une séance non saisie ne lui écrit plus « présent » d'office ; sa ligne sans fiche affiche 0 ; toucher sa ligne l'écrit comme toute autre. Deux sources trouvées, pas une : le bouton, et la première écriture d'une séance, qui inscrivait toutes les lignes sans fiche. Reproduit d'abord (deux essais rouges) ; break-tests M13 à M16 ; Vitest 10 818/10 818 ; 7 specs des présences vertes sous WebKit (38 essais). Relecture neuve : VERT AVEC RÉSERVE (l'affichage 0 sans essai : gardé dans `a24ccc799` ; l'effet sur l'assiduité d'un inactif : porté à la mise de côté). Le stock : mis de côté avec sa question. (`b72e4c503`, `8111affbb`, `a24ccc799`, #1196)
 - **17. La colonne RàI de la liste dit le niveau du profil** : Suivi › Liste, un élève au seul diagnostic (ou en non-participation) lit « Niveau 3 » dans la colonne RàI, comme sur son profil, au lieu de « — » ; un élève « En attente de données » au profil garde son tiret. Reproduit d'abord (essai rouge) ; break-tests g, h, i ; Vitest 10 820/10 820 ; specs de la liste et du profil vertes sous WebKit (19 specs du profil, 48 essais ; 5 de la liste). Relecture neuve : VERT AVEC RÉSERVE (avec un diagnostic, sans présence ni copie, la liste disait un niveau là où le profil dit « En attente de données ») : corrigé dans `caacea00f`, une seule règle (`aucuneDonneeDeSuivi`) lue aux deux endroits. La colonne Pattern garde sa condition (« — » en non-participation, le profil dit « Non-participation ») : commenté dans le code, aucun cas vécu. (`09b0011dc`, `caacea00f`, #1205)
+- **19. Le message du profil ne parle plus de portfolio à des standards sans artefact** : profil d'un élève, pratique PAN-Standards d'un cours sans « Artefact » (la chimie du lot 5) dont la structure manque : le message nomme la carte « Structure des évaluations » et ses champs, plus le portfolio ni les artefacts ; avec un « Artefact », l'ancienne phrase reste. Reproduit d'abord (essai rouge) ; break-tests (branche coupée, condition inversée) ; Vitest 10 819/10 819 ; 5 specs des standards sans portfolio vertes. Relecture neuve : VERT AVEC RÉSERVE (« minimum requis » contredisait le § 6 du lot 5, « incomplète » décrivait mal le déclencheur) : le texte neuf repris dans `72d6ee385`, l'ancienne phrase commentée (inexactitudes héritées). **Mot d'écran à soumettre** (ci-dessous). (`0427ac5ed`, `72d6ee385`, #1188)
+
+**Mots d'écran du passage du 8 nov., après-midi — à soumettre à Grégoire** :
+1. Entrée 19, profil d'un élève, standards sans « Artefact » : « Pratique PAN-Standards, mais la carte « Structure des évaluations » de sa fiche n'est pas réglée (productions pour la note finale, minimum de productions évaluées). Ouvre « Réglages de la pratique » pour la régler. »
 
 **Mots d'écran du passage du 5 nov., après-midi — à soumettre à Grégoire** :
 1. 32 bis, sur la page : « Une page de cette copie s'affiche blanche : sa photo est encore dans le fichier, mais mal enregistrée. » ; le bouton « Réparer la copie ».
