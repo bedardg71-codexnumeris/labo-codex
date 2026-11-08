@@ -1411,7 +1411,9 @@
         const estModeSombre = !document.body.classList.contains('mode-clair');
 
         // Teinte de categorie : dessiner l'image coloree
-        var tint = sticker.tint || (_outils().obtenirCouleurCategorieAutocollant ? _outils().obtenirCouleurCategorieAutocollant(sticker.autocollantId) : null);
+        // #1244 : un tampon fait d'un emoji garde ses couleurs (ni teinte, même posée avant, ni inversion en mode sombre).
+        var gardeCouleurs = _outils().tamponGardeSesCouleurs(sticker.autocollantId);
+        var tint = _outils().teinteDuTampon(sticker.autocollantId, sticker.tint);
         if (tint) {
             // Canvas temporaire pour coloriser l'image noire
             var tmpCanvas = document.createElement('canvas');
@@ -1430,7 +1432,7 @@
             tmpCtx.fillRect(0, 0, tmpCanvas.width, tmpCanvas.height);
 
             ctxAnnotation.drawImage(tmpCanvas, sx, sy, sw, sh);
-        } else if (estModeSombre) {
+        } else if (estModeSombre && !gardeCouleurs) {
             ctxAnnotation.save();
             ctxAnnotation.filter = 'invert(1)';
             ctxAnnotation.drawImage(img, sx, sy, sw, sh);

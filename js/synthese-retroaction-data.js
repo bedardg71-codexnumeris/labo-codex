@@ -706,7 +706,8 @@
                     nom:     t.nom,
                     count:   t.nombre,
                     comment: t.texte,
-                    icone:   tamponEnDataURL(t.id, couleurFam),
+                    // #1244 : un tampon fait d'un emoji garde ses couleurs dans la légende.
+                    icone:   tamponEnDataURL(t.id, (travauxOutils.tamponGardeSesCouleurs && travauxOutils.tamponGardeSesCouleurs(t.id)) ? null : couleurFam),
                     couleur: couleurFam
                 }))
             };

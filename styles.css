@@ -21070,6 +21070,11 @@ body.planif-plein-ecran-actif #planif-guide-panel {
 .mode-clair .travaux-autocollant-item.actif img {
     filter: invert(1);
 }
+/* #1244 — un tampon fait d'un emoji garde ses couleurs : ni inversion en mode sombre, ni à la sélection. */
+.travaux-autocollant-item img.tampon-emoji,
+.mode-clair .travaux-autocollant-item.actif img.tampon-emoji {
+    filter: none;
+}
 
 /* Palettes ancrées au bord (height explicite) : contenu prend tout l'espace */
 .palette-flottante[style*="height"] .palette-flottante-contenu {
@@ -28754,6 +28759,23 @@ body.mode-clair {
 }
 
 /* Input icone Unicode (symboles) */
+/* #1244 — « ou un emoji », à côté de l'image d'un tampon : la même famille que le nom du tampon, à sa droite,
+   assez large pour sa consigne. */
+.travaux-retro-emoji-input {
+    flex-shrink: 0;
+    width: 7.5rem;
+    font-size: 0.85rem;
+    padding: 4px 8px;
+    border: 1px solid var(--bordure-claire);
+    border-radius: var(--radius-moyen);
+    background: var(--surface-input, var(--surface-carte));
+    color: var(--texte-principal);
+}
+.travaux-retro-emoji-input:focus-visible {
+    outline: none;
+    box-shadow: var(--focus-ring);
+}
+
 .travaux-retro-icone-input {
     flex-shrink: 0;
     width: 36px;

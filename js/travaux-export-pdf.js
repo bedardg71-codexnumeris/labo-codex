@@ -343,8 +343,8 @@
             for (const stk of donneesPage.stickers) {
                 const img = travauxOutils.getImageAutocollant(stk.autocollantId);
                 if (img && img.complete) {
-                    const tint = stk.tint || (travauxOutils.obtenirCouleurCategorieAutocollant
-                        ? travauxOutils.obtenirCouleurCategorieAutocollant(stk.autocollantId) : null);
+                    // #1244 : un tampon fait d'un emoji garde ses couleurs, même posé avant (teinte enregistrée).
+                    const tint = travauxOutils.teinteDuTampon(stk.autocollantId, stk.tint);
                     const sx = stk.x * w;
                     const sy = stk.y * h;
                     const sw = Math.round(stk.width * w) || 1;
@@ -911,6 +911,25 @@
      * dans le rendu). Un document jsPDF naît avec une page blanche : on la retire une fois la
      * synthèse ajoutée. Rien n'est écrit : ni `marquerExporte` (aucun fichier), ni évaluation.
      */
+    /**
+     * #1245 (8 nov. 2026) — LE DOCUMENT de la synthèse seule, sans le télécharger : lu par « Dossier PDF » (#912,
+     * ci-dessous) et par « Exporter pour Léa » pour une copie évaluée sur papier (`exporterPourLea`,
+     * travaux-archivage.js). Un document jsPDF naît avec une page blanche : on la retire une fois la synthèse ajoutée ;
+     * sans la page, il ne resterait qu'une feuille blanche, et `doc` est nul.
+     * @returns {Promise<{doc: Object|null, synthese: {ajoutee: boolean, raison: string|null, avertissement?: string}}>}
+     */
+    async function genererDocSyntheseSeule(da, productionId) {
+        const sansCopie = { id: null, etudiantDA: da, productionId: productionId };
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF({ orientation: 'portrait', unit: 'px', format: [SYNTH_PAGE_W * SYNTH_RASTER_SCALE, SYNTH_PAGE_H_MIN * SYNTH_RASTER_SCALE], compress: true });
+        const synthese = await ajouterPageSynthese(doc, sansCopie, productionId);
+        if (!synthese || !synthese.ajoutee) {
+            return { doc: null, synthese: synthese || { ajoutee: false, raison: 'raison inconnue' } };
+        }
+        doc.deletePage(1);
+        return { doc, synthese };
+    }
+
     async function exporterSyntheseSeule(da, productionId) {
         const sansCopie = { id: null, etudiantDA: da, productionId: productionId };
         if (!trouverEvaluationPourSynthese(sansCopie, productionId)) {
@@ -925,16 +944,11 @@
         }
 
         try {
-            const { jsPDF } = window.jspdf;
-            const doc = new jsPDF({ orientation: 'portrait', unit: 'px', format: [SYNTH_PAGE_W * SYNTH_RASTER_SCALE, SYNTH_PAGE_H_MIN * SYNTH_RASTER_SCALE], compress: true });
-
-            const synthese = await ajouterPageSynthese(doc, sansCopie, productionId);
-            if (!synthese || !synthese.ajoutee) {
-                // Sans la page, il ne reste qu'une feuille blanche : on ne la remet pas.
+            const { doc, synthese } = await genererDocSyntheseSeule(da, productionId);
+            if (!doc) {
                 alert('La rétroaction n\'a pas pu être exportée (' + ((synthese && synthese.raison) || 'raison inconnue') + ').');
                 return;
             }
-            doc.deletePage(1);
 
             if (_hasProg) window.majProgression(90, 'Téléchargement…');
 
@@ -1379,6 +1393,7 @@
 
     window.travauxExportPDF = {
         genererDocPDF: genererDocPDF,
+        genererDocSyntheseSeule: genererDocSyntheseSeule,   // #1245 — lu par « Exporter pour Léa »
         exporterPDF: exporterPDF,
         exporterDossierComplet: exporterDossierComplet,
         afficherRevisionExport: afficherRevisionExport,

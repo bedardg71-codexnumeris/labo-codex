@@ -3948,20 +3948,23 @@
             compteur.textContent = '';
             return;
         }
+        // #1245 (8 nov. 2026) — une copie évaluée sur papier donne aussi un PDF, la synthèse seule : le compteur
+        // compte les deux et dit la part du papier (phrases validées par Grégoire le 8 nov.).
         const selection = travauxArchivage.selectionnerEvaluationsLea(productionId, da, reprisesSeulement);
-        const nbPdf = selection.fichiers.length;
-        const nbSans = selection.sansFichier.length;
+        const nbCopies = selection.fichiers.length;
+        const nbPapier = selection.sansFichier.length;
+        const nbPdf = nbCopies + nbPapier;
         const label = reprisesSeulement ? 'reprise' : 'évaluation';
 
         if (da) {
-            compteur.textContent = nbPdf > 0
+            compteur.textContent = nbCopies > 0
                 ? `1 ${label} prête`
-                : (nbSans > 0 ? `1 ${label}, mais aucun fichier : pas de PDF` : `Aucune ${label}`);
-        } else if (nbPdf === 0 && nbSans === 0) {
+                : (nbPapier > 0 ? `1 ${label} prête (synthèse seule)` : `Aucune ${label}`);
+        } else if (nbPdf === 0) {
             compteur.textContent = reprisesSeulement ? 'Aucune reprise trouvée' : 'Aucune évaluation trouvée';
         } else {
-            compteur.textContent = `${nbPdf} PDF pour ${nbPdf} étudiant(s)`
-                + (nbSans > 0 ? ` — ${nbSans} ${label}(s) sans fichier, sans PDF` : '');
+            compteur.textContent = `${nbPdf} PDF pour ${nbPdf} ${nbPdf > 1 ? 'étudiant·es' : 'étudiant·e'}`
+                + (nbPapier > 0 ? `, dont ${nbPapier} sur papier (synthèse seule)` : '');
         }
     }
 

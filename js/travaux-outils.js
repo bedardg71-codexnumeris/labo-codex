@@ -862,10 +862,98 @@
      * @returns {string|null} Couleur hex ou null
      */
     function obtenirCouleurCategorieAutocollant(autocollantId) {
+        if (tamponGardeSesCouleurs(autocollantId)) return null;   // #1244 : un emoji n'est pas repeint
         var autocollant = AUTOCOLLANTS.find(function(a) { return a.id === autocollantId; });
         if (!autocollant) return null;
         var couleurs = obtenirCouleursCategories();
         return couleurs[autocollant.categorie] || null;
+    }
+
+    /**
+     * #1244 (8 nov. 2026, décision de Grégoire) — UN TAMPON FAIT D'UN EMOJI GARDE SES COULEURS. Les tampons livrés sont
+     * des dessins noirs, repeints dans la couleur de leur catégorie (et inversés en mode sombre) ; un emoji est déjà en
+     * couleurs : ni teinte, ni inversion. Lu par la palette, la pose, le dessin de la copie, son export et la synthèse.
+     * @param {string} autocollantId
+     * @returns {boolean}
+     */
+    function tamponGardeSesCouleurs(autocollantId) {
+        var pers = obtenirPersonnalisationObservations()[autocollantId];
+        return !!(pers && pers.emoji);
+    }
+
+    /**
+     * #1244 — LA TEINTE D'UN TAMPON POSÉ, en un seul endroit (la copie à l'écran, la copie exportée) : aucune pour un
+     * emoji, même enregistrée sur un tampon posé avant ; sinon celle enregistrée à la pose, ou la couleur de sa catégorie.
+     * @param {string} autocollantId
+     * @param {string} [teinteEnregistree] - `sticker.tint`
+     * @returns {string|null}
+     */
+    function teinteDuTampon(autocollantId, teinteEnregistree) {
+        if (tamponGardeSesCouleurs(autocollantId)) return null;
+        return teinteEnregistree || obtenirCouleurCategorieAutocollant(autocollantId);
+    }
+
+    /**
+     * #1244 — L'IMAGE D'UN EMOJI : l'emoji écrit dans une image PNG carrée, comme si une image avait été importée pour le
+     * tampon. Un emoji est un caractère de la police du système, pas un dessin que l'application pourrait reprendre :
+     * l'image fige l'apparence qu'il a sur l'appareil où il est saisi, la même ensuite partout, PDF compris.
+     * @param {string} emoji
+     * @returns {string|null} dataURL PNG, ou null (rien à écrire, ou canevas indisponible)
+     */
+    function emojiEnImage(emoji) {
+        var texte = String(emoji == null ? '' : emoji).trim();
+        if (!texte) return null;
+        try {
+            var cote = 128;
+            var canvas = document.createElement('canvas');
+            canvas.width = cote;
+            canvas.height = cote;
+            var ctx = canvas.getContext('2d');
+            if (!ctx) return null;
+            ctx.font = '100px "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(texte, cote / 2, cote / 2 + 6, cote);
+            return canvas.toDataURL('image/png');
+        } catch (e) {
+            console.warn('[Travaux-Outils] Emoji non converti en image :', e && e.message);
+            return null;
+        }
+    }
+
+    /**
+     * #1244 — le champ « ou un emoji » d'une ligne de tampon : il remplace l'image de la ligne par celle de l'emoji. Vidé,
+     * il rend à la ligne l'image qu'elle avait avant l'emoji tapé (sans quoi l'image de l'emoji resterait, privée de son
+     * drapeau, et serait repeinte).
+     */
+    function _brancherEmojiTampon(ligne) {
+        var champ = ligne.querySelector('input[data-emoji-id]');
+        var imgEl = ligne.querySelector('img[data-img-id]');
+        if (!champ || !imgEl) return;
+        var avant = null;   // l'image de la ligne avant l'emoji tapé
+        champ.addEventListener('input', function() {
+            var url = emojiEnImage(champ.value);
+            if (!url) {
+                if (avant) _rendreImageLigne(imgEl, avant);
+                avant = null;
+                return;
+            }
+            if (!avant || !imgEl.dataset.emoji) {   // une image choisie entre-temps devient l'image d'avant
+                avant = { src: imgEl.getAttribute('src') || '', base64: imgEl.dataset.base64, emoji: imgEl.dataset.emoji, opacite: imgEl.style.opacity };
+            }
+            imgEl.src = url;
+            imgEl.dataset.base64 = url;
+            imgEl.dataset.emoji = champ.value.trim();
+            imgEl.style.opacity = '1';
+        });
+    }
+
+    /** #1244 — l'image d'une ligne de tampon, remise comme elle était (attributs absents compris). */
+    function _rendreImageLigne(imgEl, etat) {
+        imgEl.setAttribute('src', etat.src);
+        if (etat.base64 === undefined) delete imgEl.dataset.base64; else imgEl.dataset.base64 = etat.base64;
+        if (etat.emoji === undefined) delete imgEl.dataset.emoji; else imgEl.dataset.emoji = etat.emoji;
+        imgEl.style.opacity = etat.opacite;
     }
 
     var CATEGORIES_BUILTIN = ['action', 'comprehension', 'observations'];
@@ -1645,7 +1733,7 @@
                 var r = '<div class="travaux-autocollant-item' + actif + '" data-action="travauxOutils.setAutocollantActif" data-param="' + echapperHtml(a.id) + '" title="' + echapperHtml(a.nom) + (racc ? ' [' + racc + ']' : '') + '" aria-label="' + echapperHtml(a.nom) + '">';
                 if (racc) r += '<span class="raccourci-badge raccourci-badge--coin">' + racc + '</span>';
                 if (imgSrc) {
-                    r += '<img src="' + echapperHtml(imgSrc) + '" alt="' + echapperHtml(a.nom) + '">';
+                    r += '<img src="' + echapperHtml(imgSrc) + '" alt="' + echapperHtml(a.nom) + '"' + (tamponGardeSesCouleurs(a.id) ? ' class="tampon-emoji"' : '') + '>';   // #1244
                 } else {
                     r += '<span class="travaux-autocollant-sans-image">?</span>';
                 }
@@ -2873,6 +2961,9 @@
             r += '<img src="' + echapperHtml(imgSrc) + '" alt="' + echapperHtml(a.nom) + '" data-img-id="' + echapperHtml(a.id) + '"' + (imgSrc ? '' : ' style="opacity:0.3"') + '>';
             r += '<input type="file" accept="image/*" data-file-id="' + echapperHtml(a.id) + '" hidden>';
             r += '</div>';
+            // #1244 : « ou un emoji » (mots validés par Grégoire, 8 nov. 2026)
+            var emojiActuel = (persObs[a.id] && persObs[a.id].emoji) || '';
+            r += '<input type="text" class="travaux-retro-emoji-input" data-emoji-id="' + echapperHtml(a.id) + '" value="' + echapperHtml(emojiActuel) + '" placeholder="ou un emoji" aria-label="Emoji du tampon" maxlength="16">';
             r += '<input type="text" class="travaux-retro-nom-input" data-nom-id="' + echapperHtml(a.id) + '" value="' + echapperHtml(a.nom) + '"' + (a.custom ? ' placeholder="Nom du tampon"' : '') + '>';
             r += '<input type="text" class="travaux-retro-raccourci-input" data-raccourci-id="' + echapperHtml(a.id) + '" value="' + echapperHtml(raccourci) + '" maxlength="1" placeholder="\u2328" title="Raccourci clavier (1 touche)">';
             r += menuHTML;
@@ -2990,10 +3081,14 @@
                 reader.onload = function(ev) {
                     imgEl.src = ev.target.result;
                     imgEl.dataset.base64 = ev.target.result;
+                    imgEl.dataset.emoji = '';   // #1244 : une image choisie remplace l'emoji
+                    var champEmoji = wrap.parentNode && wrap.parentNode.querySelector('input[data-emoji-id]');
+                    if (champEmoji) champEmoji.value = '';
                 };
                 reader.readAsDataURL(file);
             });
         });
+        overlay.querySelectorAll('.travaux-retro-row').forEach(_brancherEmojiTampon);   // #1244
 
         // Wiring picker couleur custom (#287) : sync visuel pastille +
         // icône-à-côté quand l'input couleur frère reçoit un changement
@@ -3175,6 +3270,11 @@
             if (!persObj[id]) persObj[id] = {};
             if (img.dataset.base64) {
                 persObj[id].imageBase64 = img.dataset.base64;
+            }
+            // #1244 : l'image vient d'un emoji (il garde ses couleurs) ; une image choisie ensuite efface ce drapeau.
+            if (img.dataset.emoji !== undefined) {
+                if (img.dataset.emoji) persObj[id].emoji = img.dataset.emoji;
+                else delete persObj[id].emoji;
             }
         });
         // Couleurs des symboles
@@ -3381,6 +3481,7 @@
                     '<img src="" alt="Nouveau" data-img-id="' + id + '" style="opacity:0.3">' +
                     '<input type="file" accept="image/*" data-file-id="' + id + '" hidden>' +
                 '</div>' +
+                '<input type="text" class="travaux-retro-emoji-input" data-emoji-id="' + echapperHtml(id) + '" value="" placeholder="ou un emoji" aria-label="Emoji du tampon" maxlength="16">' +
                 '<input type="text" class="travaux-retro-nom-input" data-nom-id="' + id + '" value="" placeholder="Nom du tampon">' +
                 menuTamponHTML +
             '</div>' +
@@ -3402,10 +3503,14 @@
             reader.onload = function(ev) {
                 imgEl.src = ev.target.result;
                 imgEl.dataset.base64 = ev.target.result;
+                imgEl.dataset.emoji = '';   // #1244 : une image choisie remplace l'emoji
+                var champEmoji = div.querySelector('input[data-emoji-id]');
+                if (champEmoji) champEmoji.value = '';
                 imgEl.style.opacity = '1';
             };
             reader.readAsDataURL(file);
         });
+        _brancherEmojiTampon(div);   // #1244
 
         // Re-configurer le drag pour la liste
         configurerDragRetroObs(liste);
@@ -3640,6 +3745,7 @@
                 nom: (persObs[a.id] && persObs[a.id].nom) || a.nom,
                 categorie: a.categorie,
                 imageBase64: base64,
+                emoji: (persObs[a.id] && persObs[a.id].emoji) || undefined,   // #1244 : il garde ses couleurs chez qui l'importe
                 retroaction: retroObs[a.id] || '',
                 custom: a.custom || false
             });
@@ -3824,6 +3930,7 @@
                     if (!persObj[t.id]) persObj[t.id] = {};
                     persObj[t.id].imageBase64 = t.imageBase64;
                     persObj[t.id].nom = t.nom;
+                    if (typeof t.emoji === 'string' && t.emoji) persObj[t.id].emoji = t.emoji;   // #1244
                 }
                 if (t.retroaction) retroObj[t.id] = t.retroaction;
 
@@ -4323,6 +4430,9 @@
         // Personnalisations (noms, icônes, couleurs)
         appliquerPersonnalisations: appliquerPersonnalisations,
         obtenirCouleurCategorieAutocollant: obtenirCouleurCategorieAutocollant,
+        tamponGardeSesCouleurs: tamponGardeSesCouleurs,   // #1244
+        teinteDuTampon: teinteDuTampon,   // #1244
+        emojiEnImage: emojiEnImage,   // #1244
         // Epaisseur increments
         incrementerEpaisseur: incrementerEpaisseur,
         decrementerEpaisseur: decrementerEpaisseur,

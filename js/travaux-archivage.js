@@ -375,10 +375,26 @@
      * actif, filtrées reprises/élève ; (2) une par élève, la reprise l'emportant
      * sur l'originale ; (3) résolution vers le fichier (stricte, #145).
      *
+     * #1245 (8 nov. 2026, décision de Grégoire : « que ce soit par Léa ou sur papier, nous avons besoin de produire
+     * une rétroaction en format PDF ») — une remise HYBRIDE : dans un même groupe, des copies numérisées et des copies
+     * remises sur papier. Les élèves retenus sont ceux du groupe-cours actif (avant : seulement ceux qui avaient au
+     * moins une copie importée — un élève évalué uniquement sur papier n'était ni exporté ni compté) ; les élèves
+     * supprimés restent écartés (#1013). Une évaluation sans copie donne la synthèse seule.
+     *
      * @returns {{ evaluations: Array, fichiers: Array, sansFichier: Array }}
-     *   `evaluations` = une par élève ; `fichiers` = ceux qui donneront un PDF ;
-     *   `sansFichier` = les évaluations qui n'en donneront PAS (pas de fichier résolu).
+     *   `evaluations` = une par élève ; `fichiers` = les copies importées, qui donneront le PDF annoté avec sa
+     *   synthèse ; `sansFichier` = les évaluations sans copie résolue, qui donneront la synthèse seule.
      */
+    /** #1245 — les élèves du groupe-cours actif et ceux de ses copies, élèves supprimés écartés (#1013). */
+    function _dasDuGroupeActif(fichiers) {
+        const supprimes = typeof window.dasElevesSupprimes === 'function' ? window.dasElevesSupprimes() : null;
+        const elevesDuGroupe = (typeof obtenirEtudiantsCoursActif === 'function' ? obtenirEtudiantsCoursActif() : []) || [];
+        return new Set(fichiers.map(f => f.etudiantDA)
+            .concat(elevesDuGroupe.map(e => e.da))
+            .filter(Boolean).map(String)
+            .filter(da => !supprimes || !supprimes.has(da)));
+    }
+
     function selectionnerEvaluationsLea(productionId, da, reprisesSeulement) {
         // #1013 (règle de Grégoire, 4 oct. 2026) : l'export pour Léa ENVOIE, il écarte l'élève
         // supprimé — ni son PDF, ni sa place au compteur de l'écran.
@@ -387,11 +403,11 @@
 
         // Partir des ÉVALUATIONS actives (non remplacées) plutôt que des fichiers,
         // pour que la reprise (et son fichier) parte au lieu de l'originale ;
-        // restreindre aux DAs du groupe-cours actif (29 mars 2026).
-        const dasGroupeActif = new Set(fichiers.map(f => f.etudiantDA).filter(Boolean));
+        // restreindre aux DAs du groupe-cours actif (29 mars 2026) : ses élèves (#1245), et ceux de ses copies.
+        const dasGroupeActif = _dasDuGroupeActif(fichiers);
 
         let evalsActives = evaluations.filter(e =>
-            e.productionId === productionId && !e.remplaceeParId && dasGroupeActif.has(e.etudiantDA)
+            e.productionId === productionId && !e.remplaceeParId && dasGroupeActif.has(String(e.etudiantDA))
         );
         if (reprisesSeulement) {
             evalsActives = evalsActives.filter(e => e.repriseDeId || e.jetonRepriseCibleeApplique);
@@ -444,39 +460,46 @@
             .replace(/[^a-zA-ZÀ-ÿ0-9]/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, '');
 
         // #566 — la même sélection que le compteur de l'écran.
-        const fichiersAvecEval = selectionnerEvaluationsLea(productionId, da, reprisesSeulement).fichiers;
+        const selection = selectionnerEvaluationsLea(productionId, da, reprisesSeulement);
+        const fichiersAvecEval = selection.fichiers;
+        const surPapier = selection.sansFichier;   // #1245 : la synthèse seule
 
-        if (fichiersAvecEval.length === 0) {
+        if (fichiersAvecEval.length === 0 && surPapier.length === 0) {
             throw new Error('Aucune évaluation trouvée pour ces critères.');
         }
 
         let traites = 0;
-        const total = fichiersAvecEval.length;
+        const total = fichiersAvecEval.length + surPapier.length;
         const blobs = [];
         // #565 — un étudiant en échec ne doit plus emporter le lot entier.
         const echecs = [];
         const sansSynthese = [];
 
-        for (const fichier of fichiersAvecEval) {
-            // Identité résolue AVANT le try : en cas d'échec, le bilan doit
-            // pouvoir nommer l'étudiant concerné, pas seulement compter.
-            const etudiant = etudiants.find(e => e.da === fichier.etudiantDA);
+        // Identité et nom de fichier d'un élève : les mêmes pour une copie importée et pour une copie sur papier.
+        const identite = (daEleve) => {
+            const etudiant = etudiants.find(e => e.da === daEleve);
             const nom = (etudiant?.nom || 'Inconnu').replace(/[^a-zA-ZÀ-ÿ-]/g, '');
-            const daEtud = etudiant?.da || fichier.etudiantDA || '0000000';
+            const daEtud = etudiant?.da || daEleve || '0000000';
             // #950 — en anonymisation, ni nom ni DA : le nom anonyme seul (« Élève 32 »), comme
             // l'export des travaux (#948). Avant : `Inconnu_<DA réel>_…` (le nom anonyme est vide).
             const anonyme = _estAnonymise();
             const libelle = anonyme
                 ? _libelleEleve(etudiant, daEtud, false)
                 : `${etudiant?.prenom ? etudiant.prenom + ' ' : ''}${etudiant?.nom || 'étudiant inconnu'} (${daEtud})`;
+            const nomFichier = anonyme
+                ? `${libelle}_${nomProd}_Evalue.pdf`
+                : `${nom}_${daEtud}_${nomProd}_Evalue.pdf`;
+            return { daEtud, libelle, nomFichier };
+        };
+
+        for (const fichier of fichiersAvecEval) {
+            // Identité résolue AVANT le try : en cas d'échec, le bilan doit
+            // pouvoir nommer l'étudiant concerné, pas seulement compter.
+            const { daEtud, libelle, nomFichier } = identite(fichier.etudiantDA);
 
             try {
                 const { doc, synthese } = await travauxExportPDF.genererDocPDF(fichier.id, productionId);
                 const pdfBlob = doc.output('blob');
-
-                const nomFichier = anonyme
-                    ? `${libelle}_${nomProd}_Evalue.pdf`
-                    : `${nom}_${daEtud}_${nomProd}_Evalue.pdf`;
                 blobs.push({ blob: pdfBlob, nom: nomFichier });
 
                 // La copie part quand même : elle est valide, il lui manque la
@@ -487,6 +510,26 @@
                 }
             } catch (e) {
                 console.error('[Travaux-Archivage] Export Léa — échec pour ' + daEtud + ' :', e);
+                echecs.push(`${libelle} — ${e && e.message ? e.message : e}`);
+            }
+
+            traites++;
+            if (onProgression) onProgression(traites, total);
+        }
+
+        // #1245 — les copies évaluées sur papier : la synthèse seule, même nom, même ZIP. Sans sa page, il n'y a rien
+        // à envoyer : c'est un échec, nommé au bilan.
+        for (const evaluation of surPapier) {
+            const { daEtud, libelle, nomFichier } = identite(evaluation.etudiantDA);
+            try {
+                const { doc, synthese } = await travauxExportPDF.genererDocSyntheseSeule(evaluation.etudiantDA, productionId);
+                if (!doc) {
+                    echecs.push(`${libelle} — sur papier : ${(synthese && synthese.raison) || 'la synthèse n\'a pas pu être produite'}`);
+                } else {
+                    blobs.push({ blob: doc.output('blob'), nom: nomFichier });
+                }
+            } catch (e) {
+                console.error('[Travaux-Archivage] Export Léa — échec (sur papier) pour ' + daEtud + ' :', e);
                 echecs.push(`${libelle} — ${e && e.message ? e.message : e}`);
             }
 

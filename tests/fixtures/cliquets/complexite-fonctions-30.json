@@ -134,7 +134,6 @@
   "retablir": 32
  },
  "js/travaux-export-pdf.js": {
-  "dessinerAnnotationsSurCtx": 32,
   "dessinerForme": 45
  },
  "js/travaux-import.js": {
