@@ -55,7 +55,7 @@ function monterSeance(store, opts = {}) {
         obtenirRangSeanceDansSemaine: () => 1, pluriel: (n, s) => s, genererCalendrierComplet() {}, cleSeancesCompletes: () => 'test_seancesCompletes', DUREE_PERIODE_DEFAUT: 50,
         uiDialogues: { confirmerAction: async (o) => { dialogues.push(o); return reponses.length ? reponses.shift() : false; } }
     }, opts.globaux || {});
-    const b = monter(store, { modules: ['js/indices.js', 'js/saisie-presences.js'], globaux, elements,
+    const b = monter(store, { modules: ['js/indices.js', opts.internes ? { chemin: 'js/saisie-presences.js', internes: opts.internes } : 'js/saisie-presences.js'], globaux, elements,
         selecteurs: { '.input-periodes': periodes, '.input-notes': notes } });
     b.dialogues = dialogues;
     return b;
@@ -393,6 +393,13 @@ describe('lot D · 10. un élève inactif (#1196)', () => {
         b.avancer(1500);
         expect(fichesDu(store, DATE).find((p) => p.da === '2000003')).toMatchObject({ periodesPresentes: 1 });
     });
+
+    it('sa ligne sans fiche n’affiche pas « présent » : elle ne s’écrira pas d’office', () => {
+        const b = monterInactif(storeInactif(), { internes: ['_periodesParDefaut'] });
+        const defaut = b.interne['saisie-presences.js']._periodesParDefaut;
+        expect(defaut({ da: '2000003', statut: 'inactif' }, 2)).toBe(0);
+        expect(defaut({ da: '2000001', statut: 'actif' }, 2)).toBe(2);
+    });
 });
 
 /*
@@ -415,4 +422,5 @@ describe('lot D · 10. un élève inactif (#1196)', () => {
  *   M13. « Tous présents » ne saute plus les exclus                       → 1 rouge (10)
  *   M14. `_ligneAEcrire` écrit d'office la ligne d'un exclu               → 2 rouges (10)
  *   M15. la garde « exclu » passe avant « touchée »                       → 1 rouge (10)
+ *   M16. `_periodesParDefaut` rend « présent » à tous                       → 1 rouge (10)
  */

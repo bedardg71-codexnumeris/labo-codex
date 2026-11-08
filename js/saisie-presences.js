@@ -936,6 +936,8 @@ window.basculerVerrouillageDateActive = basculerVerrouillageDateActive;
  *     que touchée À LA MAIN, et « Tous présents » la saute (#1196, 8 nov. 2026). Grégoire ne
  *     prend plus la présence d'un élève signalé inactif : un « présent » écrit pour lui n'est pas
  *     une observation, et il fausse sa dernière présence, lue comme sa date de départ.
+ *     « Réinitialiser », qui touche toutes les lignes, lui écrit encore une fiche à 0 : une absence
+ *     ne déplace pas sa dernière présence (laissé tel quel, relecture neuve du 8 nov.).
  * Les lignes absentes du tableau (autre sous-groupe filtré) ne sont jamais retirées (#785).
  *
  * UN CHARGEMENT N'ÉCRIT RIEN : ouvrir une séance jamais saisie ne crée aucune présence
@@ -953,6 +955,14 @@ let _presencesEnAttente = null;
 /** #1196 — l'élève est-il exclu du groupe (inactif, décrochage) ? La règle vit dans main.js. */
 function _estExclu(etudiant) {
     return typeof estEtudiantExclu === 'function' && estEtudiantExclu(etudiant);
+}
+
+/**
+ * #1196 — ce qu'affiche la ligne d'un élève sans fiche pour la séance : « présent » (la séance s'écrira
+ * ainsi au premier geste), sauf un élève exclu, dont la ligne ne s'écrit pas d'office.
+ */
+function _periodesParDefaut(etudiant, nombrePeriodesSeance) {
+    return _estExclu(etudiant) ? 0 : nombrePeriodesSeance;
 }
 
 /** Les DA des élèves exclus du cours actif (#1196). */
@@ -1555,7 +1565,7 @@ function chargerTableauPresences(dateStr, estVerrouille) {
                 periodesPresence = nombrePeriodesSeance; // Présent par défaut
             }
         } else {
-            periodesPresence = nombrePeriodesSeance; // Présent par défaut si nouvelle saisie
+            periodesPresence = _periodesParDefaut(etudiant, nombrePeriodesSeance);   // présent, sauf un exclu (#1196)
         }
 
         // D2 bis (b), 27 sept. 2026 — une séance DÉJÀ saisie pour son sous-groupe, sans fiche pour
@@ -1564,9 +1574,6 @@ function chargerTableauPresences(dateStr, estVerrouille) {
         const nonSaisi = !presenceExistante && typeof construireDatesSaisiesGroupe === 'function'
             && construireDatesSaisiesGroupe(etudiant.da, presences).has(dateStr);
         if (nonSaisi) periodesPresence = 0;
-        // #1196 : la ligne d'un élève exclu, sans fiche, ne s'écrit pas d'office ; elle n'affiche
-        // donc pas « présent ».
-        if (!presenceExistante && _estExclu(etudiant)) periodesPresence = 0;
 
         const notes = presenceExistante ? (presenceExistante.notes || '') : '';
         // Lot A de l'enregistrement (26 sept. 2026, #751) — en anonymisation, rien d'identifiant à
