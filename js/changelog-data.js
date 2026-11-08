@@ -21,6 +21,19 @@
 
     var CHANGELOG = [
         {
+            // 1.237 (« Le graphique suit les présences » ; #1242, #1243 ; #1244, #1245) — titre et items validés par Grégoire, mot pour mot, le 8 nov. 2026 (ligne 4 réécrite par lui).
+            version: '1.237',
+            couleur: 'vert',
+            titre: 'Un graphique à jour, des tampons emoji',
+            items: [
+                'Suivi › Groupe&nbsp;: chaque séance dont tu enregistres les présences paraît aussitôt au graphique. Corriger une séance passée refait aussi les séances qui suivent.',
+                'Une évaluation enregistrée ou corrigée met aussi le graphique à jour, à partir de l’échéance de son travail.',
+                'Deux séances dans la même semaine ont chacune leur point, avec leur date («&nbsp;Sem.&nbsp;2 · mar. 25&nbsp;août&nbsp;»). Le premier point ne colle plus à l’axe.',
+                'Annoter › Tampons › «&nbsp;Personnaliser&nbsp;»&nbsp;: un tampon peut être un emoji, tapé dans «&nbsp;ou un emoji&nbsp;». Il garde ses couleurs, et sa phrase arrive dans la synthèse de l’élève.',
+                '«&nbsp;Exporter pour Léa&nbsp;»&nbsp;: une copie évaluée sur papier donne aussi sa synthèse PDF, nommée avec le DA, dans le même ZIP.'
+            ]
+        },
+        {
             // 1.236 (nouvelle identité ; chaîne des quatre lots du 7 nov. : en-tête, accueil, pages sans doublons, pages sans emboîtement ; #1240) — titre et items validés par Grégoire, mot pour mot, le 7 nov. 2026 vers 22 h. Item 1 : ligne validée le 7 nov. à 7 h 21.
             version: '1.236',
             couleur: 'vert',
