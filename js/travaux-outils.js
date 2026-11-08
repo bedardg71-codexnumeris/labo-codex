@@ -911,9 +911,13 @@
             var ctx = canvas.getContext('2d');
             if (!ctx) return null;
             ctx.font = '100px "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif';
-            ctx.textAlign = 'center';
+            // Centré à la main : sous WebKit (Safari, l'iPad), `textAlign = 'center'` place mal un emoji fait de plusieurs
+            // caractères (❤️, 👍🏽, un drapeau, une famille) : décalé d'une demi-largeur, coupé de moitié. Sa largeur, elle,
+            // est juste (mesuré le 8 nov. 2026, contre-vérification de #1244). Au-delà de la case, `maxWidth` le resserre.
+            ctx.textAlign = 'left';
             ctx.textBaseline = 'middle';
-            ctx.fillText(texte, cote / 2, cote / 2 + 6, cote);
+            var largeur = Math.min(ctx.measureText(texte).width || 0, cote);
+            ctx.fillText(texte, (cote - largeur) / 2, cote / 2 + 6, cote);
             return canvas.toDataURL('image/png');
         } catch (e) {
             console.warn('[Travaux-Outils] Emoji non converti en image :', e && e.message);

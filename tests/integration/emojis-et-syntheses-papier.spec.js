@@ -180,3 +180,44 @@ test('#1245 · la démo n\'a que des copies sur papier : le compteur les compte,
     expect(r.octets[0], 'un PDF qui porte une page').toBeGreaterThan(5000);
     expect(erreurs).toEqual([]);
 });
+
+// Contre-vérification du 8 nov. 2026 : sous WebKit, avec la police des emojis d'Apple, un emoji fait de plusieurs
+// caractères (❤️, 👍🏽, un drapeau) sortait décalé d'une demi-largeur et coupé de moitié ; 🙂 était juste. Le banc du nuage
+// dessinait avec Noto, sous Chromium : il ne pouvait pas le voir. Une machine sans police d'emojis en couleurs ne
+// dessine rien d'utile : l'essai le dit et se retire.
+test('#1244 · un emoji fait de plusieurs caractères tient centré dans l\'image du tampon', async ({ page }) => {
+    const erreurs = brancherEcouteurs(page);
+    await page.goto(indexHtml);
+    await page.waitForLoadState('domcontentloaded');
+    await attendreApplication(page);
+    const boites = await page.evaluate(async (emojis) => {
+        const r = {};
+        for (const e of emojis) {
+            const img = new Image();
+            img.src = window.travauxOutils.emojiEnImage(e);
+            await img.decode();
+            const c = document.createElement('canvas');
+            c.width = c.height = 128;
+            const x = c.getContext('2d');
+            x.drawImage(img, 0, 0);
+            const d = x.getImageData(0, 0, 128, 128).data;
+            let gauche = 128, droite = -1, enCouleur = 0;
+            for (let i = 0; i < d.length; i += 4) {
+                if (d[i + 3] <= 20) continue;
+                const col = (i / 4) % 128;
+                if (col < gauche) gauche = col;
+                if (col > droite) droite = col;
+                if (Math.abs(d[i] - d[i + 1]) > 30 || Math.abs(d[i + 1] - d[i + 2]) > 30) enCouleur++;
+            }
+            r[e] = { gauche, droite, enCouleur };
+        }
+        return r;
+    }, ['🙂', '❤️', '👍🏽', '🇨🇦']);
+    test.skip(boites['🙂'].enCouleur < 500, 'aucune police d\'emojis en couleurs sur cette machine');
+    for (const [e, b] of Object.entries(boites)) {
+        expect(b.droite, `${e} ne touche pas le bord droit : ${JSON.stringify(b)}`).toBeLessThan(124);
+        expect(b.gauche, `${e} ne touche pas le bord gauche : ${JSON.stringify(b)}`).toBeGreaterThan(3);
+        expect(Math.abs(b.gauche - (127 - b.droite)), `${e} centré à quelques pixels près : ${JSON.stringify(b)}`).toBeLessThanOrEqual(12);
+    }
+    expect(erreurs).toEqual([]);
+});
