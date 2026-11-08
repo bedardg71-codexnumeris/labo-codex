@@ -38,7 +38,9 @@ test('bureau (1440) : bande du haut de 84 px, logo de 60, mots centrés sur la p
     expect(Math.abs((nav.left + nav.right) / 2 - 720)).toBeLessThan(1);
     // Les mots : sans icône, 15 px demi-gras, zone de toucher d'au moins 44 px
     const mots = await page.evaluate(() => [...document.querySelectorAll('.navigation-boutons > *')].map((b) => {
-        const s = getComputedStyle(b); return { mot: b.textContent.trim(), h: b.getBoundingClientRect().height, taille: s.fontSize, graisse: s.fontWeight, icones: b.querySelectorAll('.nav-icon, img').length };
+        // Le mot À L'ÉCRAN : la pastille des nouveautés (lot 3) ajoute « (nouveautés disponibles) » pour les lecteurs d'écran.
+        const vu = b.cloneNode(true); vu.querySelectorAll('.u-lecteur-ecran').forEach((e) => e.remove());
+        const s = getComputedStyle(b); return { mot: vu.textContent.trim(), h: b.getBoundingClientRect().height, taille: s.fontSize, graisse: s.fontWeight, icones: b.querySelectorAll('.nav-icon, img').length };
     }));
     expect(mots.map((m) => m.mot)).toEqual(['Accueil', 'Cadre', 'Conception', 'Évaluation', 'Suivi', 'Labo', 'CoP']);
     for (const m of mots) {
@@ -153,7 +155,9 @@ test('iPhone (390) : la liste des sept sections, l\'active marquée ; un choix c
     await page.locator('#entete-section-bouton').click();
     await expect(page.locator('#entete-sections-liste')).toBeVisible();
     await expect(page.locator('#entete-section-bouton')).toHaveAttribute('aria-expanded', 'true');
-    expect(await page.locator('#entete-sections-liste .entete-sections-item').allTextContents())
+    expect(await page.locator('#entete-sections-liste .entete-sections-item').evaluateAll((items) => items.map((i) => {
+        const vu = i.cloneNode(true); vu.querySelectorAll('.u-lecteur-ecran').forEach((e) => e.remove()); return vu.textContent.trim();
+    })))
         .toEqual(['Accueil', 'Cadre', 'Conception', 'Évaluation', 'Suivi', 'Labo', 'CoP']);
     expect(await page.locator('#entete-sections-liste [aria-current="true"]').textContent()).toBe('Suivi');
     await page.locator('#entete-sections-liste [data-param="labo"]').click();
