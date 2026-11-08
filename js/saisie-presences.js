@@ -931,7 +931,11 @@ window.basculerVerrouillageDateActive = basculerVerrouillageDateActive;
  *     une ligne cachée par la recherche s'écrit aussi (D2 bis a) ;
  *   - une ligne sans fiche dans un sous-groupe DÉJÀ saisi ne s'écrit pas tant qu'on ne la touche
  *     pas : elle compte absente et le dit (D2 bis b) ;
- *   - une ligne qui a déjà sa fiche, non touchée, n'est pas réécrite.
+ *   - une ligne qui a déjà sa fiche, non touchée, n'est pas réécrite ;
+ *   - la ligne d'un élève exclu (inactif, décrochage : `estEtudiantExclu`, main.js) ne s'écrit
+ *     que touchée À LA MAIN, et « Tous présents » la saute (#1196, 8 nov. 2026). Grégoire ne
+ *     prend plus la présence d'un élève signalé inactif : un « présent » écrit pour lui n'est pas
+ *     une observation, et il fausse sa dernière présence, lue comme sa date de départ.
  * Les lignes absentes du tableau (autre sous-groupe filtré) ne sont jamais retirées (#785).
  *
  * UN CHARGEMENT N'ÉCRIT RIEN : ouvrir une séance jamais saisie ne crée aucune présence
@@ -945,6 +949,19 @@ const MENTION_NON_SAISI = 'Non saisi·e : compté·e absent·e';
 
 /** L'écriture en attente : { dateStr, touches: Set<da>, minuterie }. */
 let _presencesEnAttente = null;
+
+/** #1196 — l'élève est-il exclu du groupe (inactif, décrochage) ? La règle vit dans main.js. */
+function _estExclu(etudiant) {
+    return typeof estEtudiantExclu === 'function' && estEtudiantExclu(etudiant);
+}
+
+/** Les DA des élèves exclus du cours actif (#1196). */
+function _dasExclus() {
+    const etudiants = (typeof obtenirEtudiantsCoursActif === 'function'
+        ? obtenirEtudiantsCoursActif()
+        : obtenirDonneesSelonMode('groupeEtudiants')) || [];
+    return new Set(etudiants.filter(_estExclu).map(e => e.da));
+}
 
 /** Les présences du cours actif (filtrées par `coursId`, comme l'assiduité les lit). */
 function _presencesDuCours() {
@@ -977,7 +994,7 @@ function _etatLignesSeance(dateStr, presencesCours) {
         const groupeSaisi = typeof construireDatesSaisiesGroupe === 'function'
             ? construireDatesSaisiesGroupe(e.da, presencesCours).has(dateStr)
             : presencesCours.some(p => p.date === dateStr && p.facultatif !== true);
-        lignes.push({ da: e.da, aFiche, groupeSaisi });
+        lignes.push({ da: e.da, aFiche, groupeSaisi, exclu: _estExclu(e) });
     });
     return lignes;
 }
@@ -985,6 +1002,7 @@ function _etatLignesSeance(dateStr, presencesCours) {
 /** Une ligne à écrire au prochain enregistrement (voir l'en-tête du bloc). */
 function _ligneAEcrire(ligne, touches) {
     if (touches && touches.has(ligne.da)) return true;
+    if (ligne.exclu) return false;   // #1196 : jamais écrite d'office
     return !ligne.aFiche && !ligne.groupeSaisi;
 }
 
@@ -1546,6 +1564,9 @@ function chargerTableauPresences(dateStr, estVerrouille) {
         const nonSaisi = !presenceExistante && typeof construireDatesSaisiesGroupe === 'function'
             && construireDatesSaisiesGroupe(etudiant.da, presences).has(dateStr);
         if (nonSaisi) periodesPresence = 0;
+        // #1196 : la ligne d'un élève exclu, sans fiche, ne s'écrit pas d'office ; elle n'affiche
+        // donc pas « présent ».
+        if (!presenceExistante && _estExclu(etudiant)) periodesPresence = 0;
 
         const notes = presenceExistante ? (presenceExistante.notes || '') : '';
         // Lot A de l'enregistrement (26 sept. 2026, #751) — en anonymisation, rien d'identifiant à
@@ -1815,6 +1836,7 @@ function mettreAJourLigne(da, dateStr) {
 /**
  * Met tous les étudiants présents (périodes complètes)
  * IMPORTANT : Préserve les absences motivées RàI (0 période avec facultatif=true)
+ * #1196 : saute les élèves exclus (inactif, décrochage) — Grégoire ne prend plus leur présence
  * 🆕 BETA 95.1 : Utilise les périodes au lieu des heures
  */
 function tousPresents() {
@@ -1832,10 +1854,12 @@ function tousPresents() {
     if (!Array.isArray(presences)) presences = [];
 
     const touches = [];
+    const exclus = _dasExclus();   // #1196 : leur ligne n'est pas touchée
 
     inputs.forEach(input => {
         if (!input.disabled) {
             const da = input.id.replace('periodes_', '');
+            if (exclus.has(da)) return;
 
             // Vérifier si cet étudiant a une absence motivée RàI
             const presenceExistante = presences.find(p => p.date === dateStr && p.da === da);

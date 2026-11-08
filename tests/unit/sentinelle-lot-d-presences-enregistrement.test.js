@@ -354,6 +354,48 @@ describe('lot D · 8. un échec d’écriture ne dit aucun succès', () => {
 });
 
 /*
+ * #1196 (8 nov. 2026) — un élève inactif ne reçoit plus de présence qu'on n'a pas saisie pour lui.
+ * Grégoire, 30 oct. : signalé inactif par la direction des études, il ne prend plus sa présence ;
+ * ses « présent » ultérieurs n'étaient pas des observations. Deux sources : « Tous présents », et
+ * le premier geste d'une séance, qui écrivait toutes les lignes sans fiche. Toucher SA ligne l'écrit.
+ * La règle « exclu » est celle de `js/main.js` (`estEtudiantExclu`), recopiée ici : main.js n'est
+ * pas monté dans ce bac.
+ */
+describe('lot D · 10. un élève inactif (#1196)', () => {
+    const exclu = (e) => !!e && ['inactif', 'décrochage', 'abandon'].includes(e.statut);
+    function storeInactif(presences = [], statut = 'inactif') {
+        const store = storeSeance(presences);
+        store.test_groupeEtudiants.find((e) => e.da === '2000003').statut = statut;
+        return store;
+    }
+    const monterInactif = (store, opts = {}) => monterSeance(store, Object.assign({ globaux: { estEtudiantExclu: exclu } }, opts));
+
+    it('« Tous présents » saute sa ligne : aucune fiche pour lui', () => {
+        const store = storeInactif();
+        const b = monterInactif(store, { valeurs: { '2000001': 0, '2000002': 0, '2000003': 0 } });
+        b.win.tousPresents();
+        b.avancer(1500);
+        expect(fichesDu(store, DATE).map((p) => [p.da, p.periodesPresentes]).sort()).toEqual([['2000001', 2], ['2000002', 2]]);
+    });
+
+    it('le premier geste d’une séance non saisie n’écrit pas sa ligne', () => {
+        const store = storeInactif([], 'décrochage');
+        const b = monterInactif(store, { valeurs: { '2000002': 0 } });
+        geste(b, '2000002');
+        b.avancer(1500);
+        expect(fichesDu(store, DATE).map((p) => p.da).sort()).toEqual(['2000001', '2000002']);
+    });
+
+    it('toucher sa ligne l’écrit comme toute autre', () => {
+        const store = storeInactif();
+        const b = monterInactif(store, { valeurs: { '2000003': 1 } });
+        geste(b, '2000003');
+        b.avancer(1500);
+        expect(fichesDu(store, DATE).find((p) => p.da === '2000003')).toMatchObject({ periodesPresentes: 1 });
+    });
+});
+
+/*
  * JOURNAL DES BREAK-TESTS — 27 sept. 2026, sur l'arbre du lot (module restauré par copie, empreinte
  * vérifiée). Bancs rejoués : ce fichier, #785, audit du 6 sept. (§ 3), #749 lot 3.
  *   M1.  un chargement qui écrit (« Confirmer » au rendu)                → 1 rouge (1)
@@ -368,4 +410,9 @@ describe('lot D · 8. un échec d’écriture ne dit aucun succès', () => {
  *   M10. délai de 1,5 s ramené à 0                                       → 1 rouge (2)
  *   M11. le verrou dit toujours « Séance verrouillée. »                  → 1 rouge (6)
  *   M12. `facultatif !== true` retiré de construireDatesSaisiesGroupe (indices.js) → 2 rouges (9)
+
+ * #1196, 8 nov. 2026 (module restauré par copie, `cmp` vérifié) :
+ *   M13. « Tous présents » ne saute plus les exclus                       → 1 rouge (10)
+ *   M14. `_ligneAEcrire` écrit d'office la ligne d'un exclu               → 2 rouges (10)
+ *   M15. la garde « exclu » passe avant « touchée »                       → 1 rouge (10)
  */
