@@ -499,7 +499,10 @@ test.describe('La palette Rétroaction compacte', () => {
         await page.evaluate(() => window.travauxUI.togglePleinEcran());
         await expect.poll(hauteur).toBeGreaterThan(443);
         const plein = await hauteur();
-        expect(plein).toBeGreaterThan(hors);
+        // ↻ Lot 4 (33ff3840f, 7 nov.) : hors plein écran, le champ remplit déjà toute la palette — 571 px avant
+        // le lot, 572 après, autant qu'en plein écran (mesuré le 8 nov. à 1 180 px). Le « plus grand » strict ne
+        // tenait qu'à ce pixel ; ce qui compte : en plein écran, le champ ne perd rien.
+        expect(plein).toBeGreaterThanOrEqual(hors);
         if (process.env.MESURE_RAPPORT) await page.screenshot({ path: process.env.MESURE_RAPPORT + '/plein.png' });
         if (process.env.MESURE_RAPPORT) console.warn('MESURE', JSON.stringify({ hors, plein }));
     });
