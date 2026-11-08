@@ -63,9 +63,9 @@ Les quatre points tiennent, lus dans `cafc89ff2` :
 
 - **#1242** : enregistrer une évaluation change C et P sans recapturer (sur consigne). La question ouverte : quelle date D
   pour une évaluation (sa date, ou l'échéance effective de la production, qui décide déjà du C et du P historiques).
-- **#1243**, trouvaille : le graphique se lit mal à une seule séance (un point par élève, collé à l'axe) et à deux
+- **#1243**, trouvaille : le graphique se lisait mal à une seule séance (un point par élève, collé à l'axe) et à deux
   séances par semaine (deux points « Sem. 2 », sans date). Déjà vrai après « Recalculer les captures » ; le lot le rend
-  courant. Visible sur la capture « après ».
+  courant. **Corrigé sur la même branche** (accord de Grégoire, 8 nov., 8 h 57), § 7.
 
 ## 6. Vérifié comment
 
@@ -95,3 +95,23 @@ Les quatre points tiennent, lus dans `cafc89ff2` :
   sort en fonction de 4 : complexité déplacée, pas réduite) ; `sentinelle-audit-aide-15-oct` : l'essai « les captures sont
   hebdomadaires » interdisait à l'Aide de dire qu'une saisie capture, ce qui devient vrai ; il exige maintenant les deux phrases.
 - **Pas vérifié** : WebKit et Safari, l'iPad. **Le verdict Playwright complet est à prendre sur le Mac** avant toute fusion.
+
+## 7. #1243 : le graphique se lit à une séance et à deux séances par semaine
+
+- **Les étiquettes** (`etiquettesCaptures`, `graphiques-progression.js`) : une semaine à une capture garde « Sem. N » ;
+  une semaine à plusieurs captures écrit le jour et la date, « Sem. 2 · mar. 25 août ». Jours et mois sont écrits par le
+  module, pas par la langue du navigateur : la même étiquette dans Safari et dans Chrome. L'infobulle du Suivi du groupe,
+  qui reprend l'étiquette, dit donc aussi le jour.
+- **L'axe** se décale d'une demi-colonne (`offset`) : le premier point s'écarte de l'axe vertical ; seul, il se tient au
+  milieu du graphique.
+- **Décidé seul** : le profil de l'élève (« Progression temporelle ACP ») suit la même règle. Il lit les mêmes captures,
+  et aurait gardé ses « Sem. 2 » répétés.
+- **Vérifié** : `tests/unit/sentinelle-1243-graphique-lisible-a-deux-seances.test.js` (3 essais, les deux graphiques
+  construits par le vrai module) : 3 rouges sur la version d'avant, 3 verts ; break-tests (l'étiquette ou le décalage
+  retiré de l'un ou l'autre graphique → l'essai concerné rougit). Au navigateur, la spec du lot vérifie maintenant
+  « Sem. 2 » seul et écarté de l'axe (plus de 20 px), puis « Sem. 2 · mar. 25 août » et « Sem. 2 · jeu. 27 août ».
+  Captures : `suivi-groupe-neuf-apres.png` (refaite) et `suivi-groupe-deux-seances.png`. Vitest entier : 887 fichiers,
+  10 778 essais, tous verts.
+- **La densité, mesurée sur la démo** (30 séances, deux par semaine, « Recalculer les captures », Chromium) : à 1366 px,
+  les 30 étiquettes s'affichent, lisibles en biais ; à 820 px (l'iPad debout), Chart.js en garde 15, la première séance
+  de chaque semaine. Captures : `demo-bureau-1366.png`, `demo-ipad-debout-820.png`. Pas vu dans Safari.

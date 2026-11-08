@@ -722,6 +722,29 @@ const pluginEtiquettesCourbes = {
 const graphiquesIndividuels = {};
 
 /**
+ * #1243 (8 nov. 2026) — l'étiquette de chaque capture sur l'axe des deux graphiques qui lisent les captures (le
+ * profil, le Suivi du groupe). « Sem. N » quand la semaine n'a qu'une capture ; « Sem. N · mar. 25 août » quand elle
+ * en a plusieurs : depuis « Le graphique suit les présences », un groupe vu deux fois par semaine a deux captures par
+ * semaine, et deux points « Sem. N » ne se distinguaient pas. Jours et mois écrits ici plutôt que par
+ * `toLocaleDateString` : la même étiquette dans Safari et dans Chrome.
+ * @param {Array} snapshots - les captures, dans l'ordre de l'axe
+ * @returns {string[]}
+ */
+const JOURS_ETIQUETTE = ['dim.', 'lun.', 'mar.', 'mer.', 'jeu.', 'ven.', 'sam.'];
+const MOIS_ETIQUETTE = ['janv.', 'févr.', 'mars', 'avr.', 'mai', 'juin', 'juill.', 'août', 'sept.', 'oct.', 'nov.', 'déc.'];
+function etiquettesCaptures(snapshots) {
+    const parSemaine = {};
+    snapshots.forEach(s => { parSemaine[s.numSemaine] = (parSemaine[s.numSemaine] || 0) + 1; });
+    return snapshots.map(s => {
+        const semaine = `Sem. ${s.numSemaine}`;
+        const date = String(s.dateSeance || '');
+        if (parSemaine[s.numSemaine] < 2 || !/^\d{4}-\d{2}-\d{2}$/.test(date)) return semaine;
+        const d = new Date(date + 'T12:00:00');
+        return `${semaine} · ${JOURS_ETIQUETTE[d.getDay()]} ${d.getDate()} ${MOIS_ETIQUETTE[d.getMonth()]}`;
+    });
+}
+
+/**
  * Rafraîchit le graphique individuel en fonction des checkboxes
  * @param {string} da - Numéro DA de l'étudiant
  */
@@ -755,7 +778,7 @@ function creerGraphiqueIndividuel(canvasId, da) {
             P: 0.010
         };
 
-        const labels = snapshots.map(s => `Sem. ${s.numSemaine}`);
+        const labels = etiquettesCaptures(snapshots);   // #1243
 
         // 🆕 Beta 98.3 : Construire la liste des productions assignées pour vérifier
         // à chaque date de snapshot si des productions sont dues.
@@ -1074,6 +1097,7 @@ function creerGraphiqueIndividuel(canvasId, da) {
                 },
                 scales: {
                     x: {
+                        offset: true,   // #1243 : le premier point (le seul, sur un groupe neuf) se tient à l'écart de l'axe
                         title: {
                             display: true,
                             text: 'Semaines',
@@ -1279,7 +1303,7 @@ function creerGraphiqueGroupeSpaghettiACP(canvasId, indice = 'A') {
         snapshots.sort((a, b) => a.numSemaine - b.numSemaine);
 
         // Labels (semaines)
-        const labels = snapshots.map(s => `Sem. ${s.numSemaine}`);
+        const labels = etiquettesCaptures(snapshots);   // #1243
 
         // Récupérer les étudiants du groupe actif (source de vérité pour les noms)
         const etudiantsGroupeActif = typeof obtenirEtudiantsCoursActif === 'function'
@@ -1515,6 +1539,7 @@ function creerGraphiqueGroupeSpaghettiACP(canvasId, indice = 'A') {
                 },
                 scales: {
                     x: {
+                        offset: true,   // #1243 : le premier point (le seul, sur un groupe neuf) se tient à l'écart de l'axe
                         grid: { display: true, color: couleurGrille() },
                         ticks: {
                             color: couleurTexte(),

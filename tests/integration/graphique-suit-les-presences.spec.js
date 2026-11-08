@@ -19,7 +19,8 @@ const indexHtml = 'file://' + path.join(racineProjet, 'index.html');
 // Avant : aucune capture sans réouverture de l'application, le graphique restait vide.
 //
 // Le banc unitaire (tests/unit/sentinelle-graphique-suit-les-presences.test.js) tient la règle en
-// détail (correction antérieure, séances suivantes, ordre, date future).
+// détail (correction antérieure, séances suivantes, ordre, date future). #1243 (même jour) : le seul
+// point s'écarte de l'axe, et deux séances d'une semaine portent leur jour.
 //
 // DOSSIER_CAPTURES=<dossier> : enregistre l'écran du Suivi du groupe avant et après la première saisie.
 // ⚠ Il part d'un stockage vidé (origine file:// partagée, workers: 1). Noms fictifs.
@@ -125,7 +126,9 @@ const etatGraphique = (page) => page.evaluate(() => {
     return {
         captures: obtenirSnapshotsHebdomadaires().map((s) => s.dateSeance),
         etiquettes: chart ? chart.data.labels.slice() : null,
-        courbes: chart ? chart.data.datasets.filter((d) => d.data.some((v) => v !== null && v !== undefined)).length : 0
+        courbes: chart ? chart.data.datasets.filter((d) => d.data.some((v) => v !== null && v !== undefined)).length : 0,
+        // #1243 : l'écart, en pixels, entre l'axe vertical et le premier point.
+        ecartPremierPoint: chart ? Math.round(chart.scales.x.getPixelForValue(0) - chart.chartArea.left) : null
     };
 });
 
@@ -175,7 +178,7 @@ test('groupe neuf · la première séance saisie paraît au graphique du Suivi d
 
     // AVANT : aucune capture, aucun graphique.
     await ouvrirSuiviGroupe(page);
-    expect(await etatGraphique(page)).toEqual({ captures: [], etiquettes: null, courbes: 0 });
+    expect(await etatGraphique(page)).toEqual({ captures: [], etiquettes: null, courbes: 0, ecartPremierPoint: null });
     await capturer(page, 'suivi-groupe-neuf-avant.png');
 
     // La première saisie : le mardi, un élève absent.
@@ -185,15 +188,18 @@ test('groupe neuf · la première séance saisie paraît au graphique du Suivi d
     // APRÈS : retour au Suivi du groupe, sans rechargement ni Réglages — la séance y est, une courbe par élève.
     await ouvrirSuiviGroupe(page);
     const apres = await etatGraphique(page);
-    expect(apres.etiquettes, 'un point : la séance du mardi').toHaveLength(1);
+    expect(apres.etiquettes, 'un point : la séance du mardi').toEqual(['Sem. 2']);
     expect(apres.courbes, 'une courbe par élève').toBe(8);
+    expect(apres.ecartPremierPoint, '#1243 : le seul point ne se colle pas à l\'axe').toBeGreaterThan(20);
     await capturer(page, 'suivi-groupe-neuf-apres.png');
 
     // La deuxième séance de la même semaine a sa propre capture : deux points.
     await saisirUneAbsence(page, JEUDI);
     await expect.poll(async () => (await etatGraphique(page)).captures).toEqual([MARDI, JEUDI]);
     await ouvrirSuiviGroupe(page);
-    expect((await etatGraphique(page)).etiquettes, 'deux points, un par séance').toHaveLength(2);
+    expect((await etatGraphique(page)).etiquettes, '#1243 : deux points, un par séance, distingués par leur jour')
+        .toEqual(['Sem. 2 · mar. 25 août', 'Sem. 2 · jeu. 27 août']);
+    await capturer(page, 'suivi-groupe-deux-seances.png');
 
     expect(erreurs, 'erreurs console pendant le parcours').toEqual([]);
 });
