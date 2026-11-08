@@ -11,7 +11,7 @@ const indexHtml = 'file://' + path.join(path.resolve(__dirname, '..', '..'), 'in
 // maintenant sous `suivi-groupe`, et s'affiche par l'appel de navigation.js (`afficherGuidageDemo`), qui n'a pas changé.
 // L'unitaire (sentinelle-guidage-demo-2026-10-29) juge les textes ; ici, que la bulle paraît. Données de la démo.
 
-test('la démo activée, Suivi du groupe montre la bulle « Suivi du groupe »', async ({ page }) => {
+test('la démo activée, Suivi du groupe montre la bulle « Groupe »', async ({ page }) => {
     const erreurs = [];
     page.on('pageerror', (e) => erreurs.push(e.message));
     page.on('dialog', async (d) => { await d.accept(); });
@@ -20,7 +20,8 @@ test('la démo activée, Suivi du groupe montre la bulle « Suivi du groupe »',
     await page.evaluate(async () => { await window.activerModeDemo(); });
     const bulle = page.locator('#suivi-groupe > #guidage-demo-encart');
     await expect(bulle).toBeVisible();
-    await expect(bulle.locator('strong')).toHaveText('Suivi du groupe');
+    // Lot 3 (9296b35c9, 7 nov.) : les titres des bulles de la démo passent au libellé court de l'onglet.
+    await expect(bulle.locator('strong')).toHaveText('Groupe');
     await expect(bulle).toContainText('des 10 étudiant·es de la démo');
     expect(erreurs).toEqual([]);
 });
