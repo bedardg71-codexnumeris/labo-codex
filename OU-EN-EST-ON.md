@@ -15,6 +15,14 @@
 > **Mis à jour à la fin de chaque journée de travail.** Une ligne ne change
 > d'état que si quelqu'un écrit **comment** il l'a vérifié.
 
+✅ **LE 8 NOVEMBRE 2026, 14 H 33 : LA 1.237.0 EST EN LIGNE — UN GRAPHIQUE À JOUR, DES TAMPONS EMOJI.** *Écrit par Claude Code.*
+
+**Ce qui change pour toi** : ce que disent les cinq lignes de la 1.237 dans les Nouvelles, validées par toi le 8 nov. (la ligne 4 réécrite par toi). Le graphique du Suivi › Groupe montre chaque séance dès que ses présences sont enregistrées, et une correction de présences ou d'évaluation refait les séances qui suivent. Deux séances d'une même semaine ont chacune leur point daté. Un tampon peut être un emoji, qui garde ses couleurs. « Exporter pour Léa » donne aussi la synthèse PDF d'une copie évaluée sur papier.
+
+**Ce qui reste à toi** : rien pour cette version. Une question attend ta réponse quand tu voudras : une copie numérisée dont le fichier ne se retrouve plus part aujourd'hui « sur papier » à l'export Léa ; faut-il la compter à part ? (#1247)
+
+**Vérifié comment** : une contre-vérification des deux lots par une session qui ne les avait pas écrits (`Claude outputs/CONTRE-VERIFICATION-2026-11-08.md`, 23 altérations du code, chacune essayée contre les bancs). Elle a trouvé sous WebKit un emoji composé (❤️, 👍🏽, un drapeau) coupé de moitié, corrigé avant la mise en ligne avec ton accord. Puis la vérification complète au navigateur WebKit sur le commit de la version (`144a4dd66`) : 1 419 essais, 1 419 verts du premier coup, 0 rouge, 39 sautés ; poussé à 14 h 33. Pas de porte terrain, par ta décision du 8 nov. : rien n'écrit dans tes données. **Pas vérifié** : vu sous WebKit, pas dans le vrai Safari ni sur l'iPad (les emojis de l'iPad dans le tampon — sous WebKit, c'est la police d'emojis du Mac qui a dessiné —, la pose au doigt, le curseur en mode sombre, le graphique du Suivi).
+
 ✅ **LE 8 NOVEMBRE 2026, 7 H 32 : LA 1.236.0 EST EN LIGNE ET SES PORTES SONT PASSÉES — UNE NOUVELLE IDENTITÉ, DES PAGES ÉPURÉES. Chantier clos.** *Écrit par Claude Code.*
 
 **Ce qui change pour toi** : ce que disent les huit lignes de la 1.236 dans les Nouvelles, validées mot pour mot le 7 nov. vers 22 h. Un logo dans l'en-tête, une icône dans l'onglet du navigateur et parmi les apps de l'iPad. L'en-tête nomme les sections en toutes lettres ; Visite guidée, Assistance, Aide, Réglages, Signaler et Soutenir passent dans le menu à trois traits. Les onglets ont des noms courts, et une page ne répète plus son onglet en titre. Le groupe actif s'affiche au centre, sous les onglets. L'Accueil propose neuf tâches qui disent où elles mènent, et un « À propos » qui réunit la présentation, la visite, les guides et « Par où commencer ? ». Plus de panneau autour des pages, plus de carte dans une carte, des frises d'étapes plus compactes.

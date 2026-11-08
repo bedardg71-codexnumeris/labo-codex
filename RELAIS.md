@@ -7,6 +7,22 @@
 
 ---
 
+## 8 NOV. 2026, 14 H 40 (Claude Code) : **1.237.0 POUSSÉE, VERDICT VERT ; LES DEUX BRANCHES DU 8 NOV. FUSIONNÉES ; PAS DE PORTE TERRAIN (DÉCISION DE GRÉGOIRE)**
+
+`main` = `origin/main` = `7323316a0` (+ le commit de docs qui porte ce relais). Version en ligne : 1.237.0, build `1108-1213` (`144a4dd66`).
+
+- **Contre-vérification** des deux branches écrites dans le nuage (`lot/graphique-suit-les-presences`, `lot/emojis-et-syntheses-papier` ; #1242 à #1245) : `Claude outputs/CONTRE-VERIFICATION-2026-11-08.md` (6 constats, 23 break-tests). Un bloquant mesuré sous WebKit : un emoji fait de plusieurs caractères (❤️, 👍🏽, un drapeau) était coupé de moitié dans l'image du tampon (`textAlign = 'center'` de WebKit). Corrigé avec l'accord de Grégoire (`ccbeaba30`), ainsi que le curseur du tampon emoji en mode sombre (`4894c8392`). Inscrits : #1246 (le rouge de GitHub sur 1.236.0, sans correction), #1247 (une copie numérisée introuvable part « sur papier » à l'export Léa : question pour Grégoire) (`cce0d7871`). Mots de l'Aide et Nouvelles 1.237 validés par Grégoire, ligne 4 réécrite par lui.
+- **Baseline** : les 4 cas iPad du témoin (#1181) en sont sortis ; elle est vide (`279b2e641`).
+- **Verdict complet** sur `144a4dd66` : 1 419 essais en 10 morceaux, 1 419 verts, 0 au second essai, 0 rouge, 39 sautés. Les 3 essais du lot emoji rejoués à part sous WebKit : verts, aucun sauté. Fusion en avance rapide, puis `plans de travail/BOUCLE-SANS-RELAIS.md` remplacé par la révision de Cowork du 8 nov. (`7323316a0`, jeton reporté par `--reporter`), poussé à 14 h 33.
+- **Pas de porte terrain** (Grégoire, par Cowork, 8 nov. ; règle 2 du skill `portes-terrain`) : rien n'écrit dans les données. Ce qui reste invérifiable est écrit dans `OU-EN-EST-ON.md`.
+- `Claude outputs/` : le patch, le message du lot et la copie de la boucle supprimés ; les captures restent.
+
+**Complexité** (1.236.0 `4bf9cc3f` → 1.237.0) : fichiers de plus de 1 000 lignes 40 → 40, leurs lignes 94 138 → 94 257 (Δ +119 : `js/travaux-outils.js` 3 033 → 3 110, `js/graphiques-progression.js` 3 282 → 3 297, `js/changelog-data.js` 2 577 → 2 589, `js/modes.js` 1 020 → 1 028, `js/saisie-presences.js` 1 395 → 1 399, et +1 pour `travaux-ui`, `travaux-annotation`, `trimestres`) ; au-dessus de 15 : 439 → 438 (Δ −1) ; au-dessus de 30 : 81 → 80 (Δ −1, maximum 130) ; somme au-dessus de 15 : 11 045 → 11 031 (Δ −14). Lignes de `js/` : 159 856 → 160 139 ; fonctions : 15 199 → 15 237.
+
+**Suite** : la file des correctifs (`plans de travail/BOUCLE-SANS-RELAIS.md`), d'abord le rapport du 5 nov. à 16 h 22 (« Annuler » dans « Réglages spécifiques », #1248). Le lot « Les deux parcours » de la page du tri est lancé à part par Grégoire.
+
+---
+
 ## 8 NOV. 2026, 7 H 32 (Claude Code) : **1.236.0 POUSSÉE, VERDICT VERT, PORTES 9/9, CHANTIER CLOS**
 
 `main` = `origin/main` = `4bf9cc3f` (+ le commit de docs qui porte ce relais). Version en ligne : 1.236.0, build `1107-2156`.
