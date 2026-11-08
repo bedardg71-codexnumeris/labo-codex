@@ -34,7 +34,11 @@
                 // 1.237.1 (#1248, #1228, #1185) — les trois lignes validées par Grégoire telles quelles, le 8 nov. 2026.
                 '«&nbsp;Réglages spécifiques&nbsp;»&nbsp;: «&nbsp;Annuler&nbsp;» remet aussi les curseurs à leur valeur d’avant&nbsp;; «&nbsp;Réinit.&nbsp;» les remet à zéro, et le fichier suivant ne garde plus ceux du précédent.',
                 'Une copie marquée plagiat ou «&nbsp;IA&nbsp;» ne pèse plus sur les moyennes par critère, l’IPB, le défi et les directions du profil. Le registre longitudinal et le rapport du profil affichent «&nbsp;Non recevable&nbsp;» à la place de sa note et de ses niveaux.',
-                '«&nbsp;Mettre à jour le codex&nbsp;»&nbsp;: après un partage annulé, le bandeau rouge disparaît quand «&nbsp;Télécharger à la place&nbsp;» prend la suite.'
+                '«&nbsp;Mettre à jour le codex&nbsp;»&nbsp;: après un partage annulé, le bandeau rouge disparaît quand «&nbsp;Télécharger à la place&nbsp;» prend la suite.',
+                // 1.237.2 (#1196, #1205, #588) — les trois lignes validées par Grégoire telles quelles, le 8 nov. 2026 vers 17 h.
+                'Saisie des présences&nbsp;: ✓ «&nbsp;Mettre tout le monde présent&nbsp;» saute les élèves en inactivité ou en décrochage, et une séance saisie ne leur écrit plus de présence d’office.',
+                'Suivi › Liste&nbsp;: la colonne RàI montre le niveau du profil, aussi pour un élève qui n’a encore que son diagnostic.',
+                'Exploration des pratiques&nbsp;: en standards, la ligne «&nbsp;Reprises&nbsp;» dit la règle appliquée — la reprise prend la place de la copie d’origine dans la note.'
             ]
         },
         {

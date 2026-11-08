@@ -38,3 +38,4 @@ Point de comparaison (`MESURE-2026-11-02-routine-de-travail.md`) : du 19 au 29 o
 | 2026-11-08 | 16 h 45 | Claude Code | Export recherche et copie non recevable : la décision du 4 nov. vaut-elle aussi ? (oui, #1249) | didactique |
 | 2026-11-08 | 16 h 44 | Claude Code | Aide « C et P » : une production sans copie évaluée compte-t-elle manquante dans C ? (non) | didactique |
 | 2026-11-08 | 16 h 50 | Claude Code | La règle de C en Standards diffère de sa réponse (case + date suffisent) : décision déjà prise avec Cowork (chantier des parcours) | didactique |
+| 2026-11-08 | 17 h 00 | Claude Code | Deux mots d écran et trois lignes des Nouvelles à valider (validés tels quels) | mots |
