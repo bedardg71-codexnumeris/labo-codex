@@ -295,7 +295,7 @@ test('#1013 — seuils « en attente » sans ses présences ni ses évaluations 
         travauxUI.afficherFichiers();
         return document.getElementById('travaux-fichiers-message-vide').textContent;
     });
-    expect(vide, 'sans copie, la phrase d\'avant').toBe('Aucun fichier importé. Importe des travaux depuis l\'onglet « Préparer et importer ».');
+    expect(vide, 'sans copie, la phrase d\'avant').toBe('Aucun fichier importé. Importe des travaux depuis l\'onglet « Préparer ».');
 
     expect(erreurs, 'aucune erreur de page').toEqual([]);
 });
