@@ -76,6 +76,9 @@ test('lot C · l\'éditeur d\'échelles : plus de colonne « Ordre », un niveau
 // d'interprétation » ouverte (`[data-palier-rangee]`) ; elle se règle sur la largeur de la TABLE
 // (`@container table-cas (max-width: 560px)`), plus sur celle de la fenêtre : trois colonnes à 1200 px,
 // une à 700 px — les valeurs que mesure `critere-algorithmique-table-de-cas` aux largeurs voisines.
+// ↻ LOT 4 (33ff3840f puis 6ad15e114, 7 nov.) : plus de panneau autour du contenu — à 700 px, la table mesure
+// 578 px (501 avant) et la rangée d'un palier garde ses trois colonnes. Son empilement se mesure à 820 px,
+// dans `critere-algorithmique-table-de-cas` ; ici, les deux grilles réglées sur la FENÊTRE s'empilent.
 test('lot C · sous 768 px, la grille à deux colonnes du formulaire de groupe-cours et la rangée d\'un sous-critère s\'empilent', async ({ page }) => {
     const colonnes = () => page.evaluate(() => {
         const nb = (el) => (el ? getComputedStyle(el).gridTemplateColumns.trim().split(/\s+/).length : -1);
@@ -106,5 +109,5 @@ test('lot C · sous 768 px, la grille à deux colonnes du formulaire de groupe-c
     await page.setViewportSize({ width: 700, height: 1000 });
     const etroit = await colonnes();
     console.log('COLONNES À 700 px →', JSON.stringify(etroit));
-    expect(etroit).toEqual({ groupeCours: 1, palier: 1, sousCritere: 1 });
+    expect(etroit).toEqual({ groupeCours: 1, palier: 3, sousCritere: 1 });
 });
