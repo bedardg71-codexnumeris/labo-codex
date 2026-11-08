@@ -329,6 +329,7 @@
         cropRect = null;
         perspectiveCorners = null;
         canvasGeometrique = null;
+        synchroniserPalette();
 
         // Charger l'image
         const blob = f.fichier;
@@ -423,6 +424,7 @@
         fichiers[indexActuel].operations = operations;
         canvasGeometrique = null;
         mettreAJourApercu();
+        synchroniserPalette();
     }
 
     /**
@@ -436,6 +438,48 @@
         perspectiveCorners = null;
         canvasGeometrique = null;
         mettreAJourApercu();
+        synchroniserPalette();
+    }
+
+    /**
+     * #1248 (rapport de Grégoire, iPad, 5 nov. 2026) — ce que les curseurs de la palette doivent montrer pour une pile
+     * d'opérations : la valeur de la DERNIÈRE opération de chaque sorte, ou 0 s'il n'y en a plus. C'est la valeur que
+     * chaque curseur remplace quand on le bouge (`changerLuminosite` & cie retirent la dernière de leur sorte).
+     * @param {Array} ops - Pile d'operations
+     * @returns {{luminosite: number, contraste: number, exposition: number, rotationFine: number}}
+     */
+    function reglagesDeLaPile(ops) {
+        const derniere = function (type, champ) {
+            for (let i = (ops || []).length - 1; i >= 0; i--) {
+                if (ops[i] && ops[i].type === type) return Number(ops[i][champ]) || 0;
+            }
+            return 0;
+        };
+        return {
+            luminosite: derniere('brightness', 'value'),
+            contraste: derniere('contrast', 'value'),
+            exposition: derniere('exposure', 'value'),
+            rotationFine: derniere('fineRotation', 'degrees')
+        };
+    }
+
+    function libelleExposition(v) {
+        return v === 0 ? '0' : (v > 0 ? '+' : '') + (v / 10).toFixed(1) + ' EV';
+    }
+
+    /**
+     * #1248 — remet la palette d'accord avec la pile du fichier courant : après « Annuler », après « Réinit. », et au
+     * changement de fichier (avant, les curseurs gardaient les valeurs défaites, ou celles du fichier précédent).
+     */
+    function synchroniserPalette() {
+        const r = reglagesDeLaPile(operations);
+        const poser = function (id, v) { const el = document.getElementById(id); if (el) el.value = String(v); };
+        poser('prep-luminosite', r.luminosite);
+        poser('prep-contraste', r.contraste);
+        poser('prep-exposition', r.exposition);
+        poser('prep-rotation-fine', r.rotationFine);
+        const lbl = document.getElementById('prep-exposition-valeur');
+        if (lbl) lbl.textContent = libelleExposition(r.exposition);
     }
 
     /* ===============================
@@ -2209,7 +2253,7 @@
         }
         // Afficher la valeur en EV
         const lbl = document.getElementById('prep-exposition-valeur');
-        if (lbl) lbl.textContent = v === 0 ? '0' : (v > 0 ? '+' : '') + (v / 10).toFixed(1) + ' EV';
+        if (lbl) lbl.textContent = libelleExposition(v);
         mettreAJourFiltresTempsReel();
     }
 
@@ -2880,6 +2924,7 @@
         changerOptBalance: changerOptBalance,
         changerOptResolution: changerOptResolution,
         annulerDerniere: annulerDerniere,
+        reglagesDeLaPile: reglagesDeLaPile,
         reinitialiser: reinitialiser,
         // Palettes
         togglePalette: togglePalette,
