@@ -6,9 +6,6 @@ Tenue par Claude Code pendant l'essai de la boucle sans relais, du 3 au 10 nov. 
 
 ## À faire
 
-### 16. « Mettre tout le monde présent » saute les élèves inactifs (#1196)
-`js/saisie-presences.js` ~1831. **La source seulement.** Les présences déjà écrites pour des inactifs touchent ses données : mesure combien il y en a, puis mets cette partie de côté avec la question.
-
 ### 17. La liste écrit le niveau RàI d'un élève qui n'a que son diagnostic (#1205)
 `js/etudiants.js` ~1240 exige A et C ou P ; le profil, lui, montre le niveau. Aligner sur le profil.
 
@@ -46,6 +43,8 @@ Neuf restent (voir la vérification). Code mort : le retirer, après la preuve q
 `.claude/skills/alignement/SKILL.md` ~98, ~133-141, ~293. Documentation seulement.
 
 ## Mises de côté (attendent Grégoire)
+
+- **Les « présent » déjà écrits pour des élèves inactifs (le stock de l'entrée 16, #1196)**. La source est tarie (`b72e4c503`) ; les fiches déjà en base ne sont pas touchées. **Mesure à prendre avec lui** : le codex n'est pas sur le disque de la session, je ne l'ai pas cherché plus loin. Le script est prêt (`scripts/mesures-depistage/presences-des-exclus.mjs`, `8111affbb`) : A2026 seulement, sans identifiant, il compte les fiches « présent » qui suivent la dernière absence de chaque élève exclu (borne haute ; la date du signalement n'est pas dans le codex). Résultat en page privée seulement. **À lui dire en même temps** (relecture neuve) : désormais, après son inactivité, un élève exclu compte absent à chaque séance saisie pour son sous-groupe (règle de l'assiduité, inchangée) ; son A, et par lui son niveau de dépistage, baisseront là où des « présent » fabriqués les tenaient. Question : « Tu me donnes le chemin de ton codex pour compter ces présences ? Ensuite : on les laisse, ou on prépare un retrait que tu valides élève par élève ? »
 
 - **L'export recherche compte encore les niveaux d'une copie non recevable** (trouvé le 8 nov. par la relecture neuve de 10 septies, vérifié dans le code). `performance_par_critere` (`js/trimestres.js` ~2319) et la liste des évaluations exportée (~2255) gardent les niveaux d'une copie plagiée ou « IA », sans son statut. Hors de la boucle (§ 3, point 2 : un format d'échange). Question : « Ta décision du 4 nov. (« ses niveaux ne se lisent nulle part ») vaut-elle aussi pour l'export recherche, qui part chez quelqu'un d'autre ? Si oui, ses niveaux sortent de la distribution par critère, et la copie part avec son statut. »
 
@@ -136,6 +135,10 @@ Passage du 5 nov. 2026, après-midi (Claude Code, à partir de 13 h 08) — les 
 - **Vérification du passage, 8 nov. vers 15 h 35** : relecture croisée de Cowork sur 10 septies (#1228) : le lot tient, aucune correction. Fiche #1176 corrigée par consigne de Cowork (la règle en ligne n'est pas la pratique de Grégoire ; docs seulement, `27f619dc1`). Nouvelles : trois lignes ajoutées à l'entrée 1.237, validées par Grégoire telles quelles. Release **1.237.1** (patch, build 1108-1534, `47e2e8681`) ; Vitest 10 812/10 812. **Verdict du Mac reporté par Grégoire (« plus tard »)** : rien n'est poussé, `origin/main` reste à `f96b0bb20` (1.237.0). Prochain geste : le verdict (`node scripts/verdict-en-morceaux.mjs`, Cowork, Chrome et Safari fermés, secteur), push si vert. La question de l'export recherche (mises de côté) attend toujours.
 - **Ménage du 8 nov.** : #1233 fermé au BACKLOG ; les trois rapports du 5 nov. au matin aux corrigés de `SUIVI-BUGS.md` (#1232 à #1235) (`6776740a0`).
 - **35. « Annuler » remet aussi les curseurs** (rapport de Grégoire, iPad, 1.234.0, 5 nov. à 16 h 22 : « Dans les réglages spécifiques, il faudrait que lorsque l'utilisateur clique le bouton « annuler », l'application ne fait pas que rétablir l'affichage précédent, mais rétablit également l'affichage des réglages par la palette des paramètres. » ; la capture annoncée n'est pas au dossier) : dans « Réglages spécifiques », « Annuler » remet Luminosité, Contraste, Exposition et Rotation fine à la valeur d'avant la dernière opération ; « Réinit. » les remet à 0 ; le fichier suivant montre ses propres réglages, pas ceux du précédent. Reproduit d'abord sous WebKit (essai jetable : les curseurs restaient à 30, 20, +0.5 EV, 3°). Vitest 10 803/10 803 ; les 3 specs du poste de préparation vertes sous WebKit. Relecture neuve : TIENT AVEC RÉSERVE (l'essai ne gardait ni l'ordre des appels ni les paires curseur et valeur ; le JSDoc décrivait mal les curseurs), corrigé ; le cumul de deux luminosités séparées par une autre opération, antérieur et sans cas vécu, est commenté dans le code. (`9ef5a15ec`, + le commit de la relecture, #1248)
+
+Passage du 8 nov. 2026, après-midi (Claude Code, à partir de 16 h) — la 1.237.1 attend toujours son verdict ; ce passage s'y ajoute :
+
+- **16. « Tous présents » saute les élèves inactifs** : dans la saisie des présences, « Mettre tout le monde présent » laisse la ligne d'un élève inactif ou en décrochage telle quelle ; le premier geste sur une séance non saisie ne lui écrit plus « présent » d'office ; sa ligne sans fiche affiche 0 ; toucher sa ligne l'écrit comme toute autre. Deux sources trouvées, pas une : le bouton, et la première écriture d'une séance, qui inscrivait toutes les lignes sans fiche. Reproduit d'abord (deux essais rouges) ; break-tests M13 à M16 ; Vitest 10 818/10 818 ; 7 specs des présences vertes sous WebKit (38 essais). Relecture neuve : VERT AVEC RÉSERVE (l'affichage 0 sans essai : gardé dans `a24ccc799` ; l'effet sur l'assiduité d'un inactif : porté à la mise de côté). Le stock : mis de côté avec sa question. (`b72e4c503`, `8111affbb`, `a24ccc799`, #1196)
 
 **Mots d'écran du passage du 5 nov., après-midi — à soumettre à Grégoire** :
 1. 32 bis, sur la page : « Une page de cette copie s'affiche blanche : sa photo est encore dans le fichier, mais mal enregistrée. » ; le bouton « Réparer la copie ».
