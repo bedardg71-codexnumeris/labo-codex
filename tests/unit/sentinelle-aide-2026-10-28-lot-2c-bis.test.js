@@ -328,11 +328,13 @@ describe('#1152 lot 2c bis · ce que les entrées affirment, lu dans le code', (
         expect(t).not.toMatch(/2 heures|transfère automatiquement|se propagent/);
     });
 
-    it('snapshots : une capture prise garde ses valeurs jusqu\'à « Recalculer les captures » (#1175)', () => {
+    it('snapshots : une correction refait les captures concernées ; « Recalculer les captures » les refait toutes (#1175, puis 8 nov. 2026)', () => {
         expect(lire('js', 'snapshots.js')).toContain('une capture déjà écrite garde son C jusqu\'à « Recalculer les captures »');
         expect(pageHorsAide).toContain('Recalculer les captures');
         const t = texteDe('snapshots');
-        expect(t).toContain('Une capture déjà prise garde ses valeurs.');
+        // 8 nov. 2026 (mots validés par Grégoire) : « garde ses valeurs » ne tenait plus depuis que les corrections refont les captures.
+        expect(t).not.toContain('Une capture déjà prise garde ses valeurs.');
+        expect(t).toContain('les captures concernées sont refaites d\'elles-mêmes');
         expect(t).not.toMatch(/ponctuel|24h|heures/);
     });
 });
