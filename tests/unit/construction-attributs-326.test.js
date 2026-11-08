@@ -106,15 +106,18 @@ describe('#326 R3 · STANDARDS', () => {
     });
 });
 
-describe('relecture du lot 28 (17 sept. 2026) · reprises STD : l\'alias « derniers » vaut « recents »', () => {
-    // « derniers » est la valeur que l'assistant et le formulaire ÉCRIVENT pour « N derniers » ; ce lecteur était le
-    // seul des cinq à l'ignorer : une pratique « N derniers » lisait « Selon la sélection d'artefacts ».
-    const std = (methodeSelection) => ({ type: 'standards', configuration: { portfolio: { nombreARetenir: 4, methodeSelection } } });
-    it.each([['derniers'], ['recents'], ['recents-meilleurs']])('%s → « Récence (dernier essai retenu) »', (m) => {
-        expect(val(extraire(std(m)), 'reprises')).toBe('Récence (dernier essai retenu)');
+describe('#588 (8 nov. 2026) · reprises STD : la règle appliquée, dite, quelle que soit la sélection', () => {
+    // Grégoire, 28 août (option A) : garder la récence et LA DIRE. En standards comme en sommative, une reprise prend la
+    // place de la copie d'origine (`evaluationEntreDansLaNote`, pratique-registre.js), quelle que soit la sélection du
+    // portfolio. Avant : « Récence (dernier essai retenu) » sous « N derniers » (la sélection, pas la reprise), « Selon la
+    // sélection d'artefacts » sinon, et « Limitées »/« Illimitées » d'un déclaratif (`systeme_reprises`) que rien n'applique.
+    const REGLE = 'La reprise prend la place de la copie d\'origine dans la note';
+    const std = (methodeSelection, sr) => ({ type: 'standards', configuration: Object.assign({ portfolio: { nombreARetenir: 4, methodeSelection } }, sr ? { systeme_reprises: sr } : {}) });
+    it.each([['derniers'], ['recents'], ['recents-meilleurs'], ['meilleurs'], ['tous'], [undefined]])('%s → la règle', (m) => {
+        expect(val(extraire(std(m)), 'reprises')).toBe(REGLE);
     });
-    it.each([['meilleurs'], ['tous'], [undefined]])('%s → « Selon la sélection d\'artefacts » (le témoin : l\'alias ne déborde pas)', (m) => {
-        expect(val(extraire(std(m)), 'reprises')).toBe('Selon la sélection d\'artefacts');
+    it.each([['limitees'], ['illimitees']])('un déclaratif « %s » ne promet plus de règle', (t) => {
+        expect(val(extraire(std('meilleurs', { type: t })), 'reprises')).toBe(REGLE);
     });
 });
 

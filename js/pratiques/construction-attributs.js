@@ -115,7 +115,6 @@
         // Ce qui vaut, quel que soit le réglage enregistré : une reprise prend la place de la copie d'origine
         // (`remplaceeParId`, écartée de la note par `evaluationEntreDansLaNote`). « Non permises »,
         // « Limitées » et « Illimitées » promettaient une règle. MOT D'ÉCRAN NEUF, soumis à Grégoire.
-        if (famille === 'sommative') return 'La reprise prend la place de la copie d\'origine dans la note';
         if (famille === 'specifications') {
             var jetons = _lire(config, 'jetons') || {};
             if (jetons.activer === true || (jetons.reprise && jetons.reprise.nombre)) {
@@ -124,22 +123,12 @@
             }
             return 'Aucune (jetons désactivés)';
         }
-        // STD : régime de reprises (récence par défaut) — PAS de jetons (constat R1).
-        var sr = _lire(config, 'systeme_reprises') || {};
-        if (sr.type) {
-            var t = String(sr.type).toLowerCase();
-            if (t.indexOf('illimit') !== -1) return 'Illimitées';
-            if (t.indexOf('limit') !== -1) return 'Limitées';
-        }
-        // Sélection « récents » ⇒ la dernière tentative non remplacée est retenue.
-        var portfolio = _lire(config, 'portfolio') || {};
-        // Relecture croisée du lot 28 (17 sept. 2026) : `derniers` est l'ALIAS de `recents` — c'est la valeur que
-        // l'assistant et le formulaire écrivent pour « N derniers ». Ce lecteur-ci était le seul des cinq à
-        // l'ignorer (portfolio.js, profil-etudiant-actions.js, pratique-pan-standards.js, la carte du profil).
-        var methode = String(portfolio.methodeSelection || '');
-        if (methode === 'derniers') methode = 'recents';
-        if (methode.indexOf('recents') !== -1) return 'Récence (dernier essai retenu)';
-        return 'Selon la sélection d\'artefacts';
+        // #588 (8 nov. 2026) — Standards comme Sommative : une reprise prend la place de la copie d'origine
+        // (`evaluationEntreDansLaNote`, pratique-registre.js), quelle que soit la sélection du portfolio — la récence,
+        // décidée par Grégoire le 28 août (option A : la garder, et la dire). Avant : « Récence » sous « N derniers »
+        // (la sélection, pas la reprise), « Selon la sélection d'artefacts » sinon, « Limitées »/« Illimitées » lus
+        // dans `systeme_reprises`, un déclaratif que rien n'applique. Pas de jetons en Standards (constat R1).
+        return 'La reprise prend la place de la copie d\'origine dans la note';
     }
 
     function _nbProductions(config, famille) {
