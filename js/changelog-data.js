@@ -30,7 +30,11 @@
                 'Une évaluation enregistrée ou corrigée met aussi le graphique à jour, à partir de l’échéance de son travail.',
                 'Deux séances dans la même semaine ont chacune leur point, avec leur date («&nbsp;Sem.&nbsp;2 · mar. 25&nbsp;août&nbsp;»). Le premier point ne colle plus à l’axe.',
                 'Annoter › Tampons › «&nbsp;Personnaliser&nbsp;»&nbsp;: un tampon peut être un emoji, tapé dans «&nbsp;ou un emoji&nbsp;». Il garde ses couleurs, et sa phrase arrive dans la synthèse de l’élève.',
-                '«&nbsp;Exporter pour Léa&nbsp;»&nbsp;: une copie évaluée sur papier donne aussi sa synthèse PDF, nommée avec le DA, dans le même ZIP.'
+                '«&nbsp;Exporter pour Léa&nbsp;»&nbsp;: une copie évaluée sur papier donne aussi sa synthèse PDF, nommée avec le DA, dans le même ZIP.',
+                // 1.237.1 (#1248, #1228, #1185) — les trois lignes validées par Grégoire telles quelles, le 8 nov. 2026.
+                '«&nbsp;Réglages spécifiques&nbsp;»&nbsp;: «&nbsp;Annuler&nbsp;» remet aussi les curseurs à leur valeur d’avant&nbsp;; «&nbsp;Réinit.&nbsp;» les remet à zéro, et le fichier suivant ne garde plus ceux du précédent.',
+                'Une copie marquée plagiat ou «&nbsp;IA&nbsp;» ne pèse plus sur les moyennes par critère, l’IPB, le défi et les directions du profil. Le registre longitudinal et le rapport du profil affichent «&nbsp;Non recevable&nbsp;» à la place de sa note et de ses niveaux.',
+                '«&nbsp;Mettre à jour le codex&nbsp;»&nbsp;: après un partage annulé, le bandeau rouge disparaît quand «&nbsp;Télécharger à la place&nbsp;» prend la suite.'
             ]
         },
         {
