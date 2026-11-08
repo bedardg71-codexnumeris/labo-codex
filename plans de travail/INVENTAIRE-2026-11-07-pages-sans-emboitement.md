@@ -99,3 +99,12 @@ Dans une carte, ils font un deuxième niveau (Aide, Trimestre, Données, Product
 - **(a) Ce sont des cadres à fonction : ils restent partout** (recommandé). Leur couleur dit quelque chose
   (attention, information) ; sans fond, on ne les distingue plus du texte.
 - (b) Dans une carte, ils perdent leur fond et gardent seulement leur filet de couleur à gauche.
+
+## 6. Décisions reçues à l'étape 2
+
+- **Question 1 : (a).** Les alertes (attention, information, succès, erreur) et les encadrés de guidage de la
+  démo sont des cadres à fonction : ils restent partout, tels quels. Les autres encadrés teintés (le violet de
+  « Ressources partageables », les astuces du Bilan, « Outil en développement ») partent comme classés au § 2.
+- **La pastille pleine est réservée aux étapes à faire** (Grégoire, sur la première capture de Préparer). Dans
+  un bloc d'explication, le chiffre reste, sans disque, à au moins 4,5:1 sur le fond de la page. À reprendre
+  sur toute autre page où une explication numérotée voisine de vraies étapes. Fait sur Préparer (`056275301`).
