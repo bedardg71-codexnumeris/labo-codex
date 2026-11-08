@@ -236,8 +236,10 @@ test('mots puis calculs · une collection enregistrée sur une grille, reprise d
 });
 
 // La table s'empile sous 560 px (le seuil de l'ébauche) : à 1 440 et 1 180 px (palette à côté), elle en mesure
-// environ 600 et 585 ; à 820 px (palette compacte, simulation à droite), 300 ; à 700 px (simulation en tiroir), 500.
-for (const [largeur, hauteur, empilee] of [[1440, 900, false], [1180, 820, false], [820, 1180, true], [700, 900, true]]) {
+// environ 640 et 627 ; à 820 px (palette compacte, simulation à droite), 382 : elle s'empile.
+// ↻ Lot 4 (33ff3840f puis 6ad15e114, 7 nov.) : plus de panneau autour du contenu — à 700 px (simulation en tiroir),
+// la table passe de 501 à 578 px et garde ses trois colonnes (écran regardé le 8 nov. : lisible, rien ne déborde).
+for (const [largeur, hauteur, empilee] of [[1440, 900, false], [1180, 820, false], [820, 1180, true], [700, 900, false]]) {
     test(`${largeur} px · la table des paliers, sans défilement de côté ; les rangées ${empilee ? 's’empilent' : 'en trois colonnes'}`, async ({ page }) => {
         const erreurs = await ouvrir(page, 'GM', largeur, hauteur);
         await ouvrirCas(page, 'CM');
