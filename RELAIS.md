@@ -7,6 +7,32 @@
 
 ---
 
+## 8 NOV. 2026 (Claude Code) : **LES 13 ROUGES DE 1.236.0 TRAITÉS — BANCS SEULS, AUCUN CHANGEMENT DE L'APP ; RIEN N'EST POUSSÉ ; VERDICT COMPLET À LANCER AU SIGNAL DE GRÉGOIRE**
+
+`main` local = 11 commits de tests au-dessus de `b66b2777` (+ ce relais). `js/`, `index.html`, `styles.css` intacts : version 1.236.0, build `1107-2156` inchangés. Vitest 10 768/10 768. Les 13 specs et leurs voisines (38 fichiers, 163 essais) : 153 verts, 9 sautés, 1 rouge par délai de `page.goto` (`critere-algorithmique-etape-0`, pendant qu'un agent lançait une spec en parallèle), vert relancé seul.
+
+**Sécurité d'abord — l'échappement tient.** `bareme-3-evaluer` › sécurité : le texte attendu n'a pas changé. Le clic sur « 4 » tombait sur la croix du bandeau de jalon (`transitions.js`, fixe en bas), mesuré par les événements pointer ; depuis le lot 4, la tranche piégée, plus longue, place la valeur sous elle à 1 440 px. Prouvé à l'écran : nom et texte en caractères (`&lt;img…&gt;` dans l'`innerHTML`), 0 `img[src="x"]`, `window.__piege` indéfini, PDF `&lt;img src=x onerror=&quot;…&quot;&gt;Texte`. Break-tests : sans `echapperHtml` sur le nom → rouge ; sans `esc()` au PDF → rouge.
+
+**Une ligne par spec** (a = mot changé par décision ; b = mise en page, écran regardé avant) :
+- `bareme-3-evaluer` › sécurité — décor : les trois jalons marqués vus (`8a767af4`). Pas une régression de l'échappement.
+- `materiel-aide-accompagnement` — (a) lot 3 `a7870e53`, « Mène à Grilles… » (`41432d66`).
+- `guidage-demo-29-oct` — (a) lot 3 `9296b35c`, bulle « Groupe » (`5335a634`).
+- `planif-modele-ia-963` — (a) lot 3 `869d7f1b`, D2 retirée par Grégoire : le test vérifie l'absence à l'écran ; le principe est désormais exigé en tête du modèle téléchargé (`fdfa2f28`).
+- `lot-f-placement-mots` ×4 — (b) lot 4 `6ad15e11`, les cases perdent `.carte-bleu-pale-p15` ; écran à 768 et 1 470 px : deux colonnes, rien ne déborde ; sélecteur par le `h4` (`73dd0fc0`).
+- `critere-algorithmique-presentation` 1 440 px — (b) lot 3 `1cd72053` (frise compacte) : le mot de « 0 code » est un `.u-lecteur-ecran` dans l'info ; le banc lit `:scope >` comme l'app (`ace560f2`).
+- `critere-algorithmique-table-de-cas` 700 px — (b) lot 4 : la table passe de 501 px (`be443f6d`, `869d7f1b`) à 538 (`33ff3840`) puis 578 (`6ad15e11`), au-dessus du seuil de 560 ; trois colonnes lisibles à l'écran ; l'empilement reste mesuré à 820 px (`db6c9607`).
+- `critere-algorithmique-tables-de-cas-3b` 700 px — (b) même cause, deux colonnes (`d9e0c0e5`).
+- `lot-C-echelles-chevrons-corbeille` 700 px — (b) même cause : palier 3 colonnes ; groupe-cours et sous-critère toujours 1 (`fc98ed0e`).
+- `palette-retroaction-compacte` — (b) lot 4 `33ff3840` : le champ remplit déjà la palette hors plein écran (571 → 572, plein 572) ; `plein >= hors`, et — relecture adverse — le plein écran doit avoir eu lieu : classe + palette remontée (`4e4c3264`, `a8ffa8f6`).
+
+Aucune régression de l'app trouvée. Chaque test modifié a son break-test (dans le message de son commit). Relecture du seul diff des tests par un agent neuf : 8 conservés, palette jugée affaiblie → renforcée (`a8ffa8f6`), bareme-3 jugé « douteux » pour la trouvaille ci-dessous.
+
+**Trouvaille, issue 3 (commentée dans le banc, non inscrite — symptôme non vécu)** : la croix de 28 px du bandeau de jalon garde `pointer-events: auto` (#508) et peut recouvrir une cible au bas de l'écran ; le premier toucher ferme le bandeau au lieu d'agir. Une fois, à la première visite d'Évaluation. À inscrire si Grégoire ou un testeur le vit.
+
+**Reste** : retirer de `playwright-baseline.json` les 4 specs redevenues vertes (déjà signalé) ; **verdict complet en dix morceaux au signal de Grégoire**, puis push si vert.
+
+---
+
 ## 7 NOV. 2026, 23 H 30 (Claude Code) : **VERDICT ROUGE SUR LA RELEASE 1.236.0 — RIEN N'EST POUSSÉ ; `main` LOCAL = `ef114c34` (+ ce relais), 31 COMMITS DEVANT `origin/main` (`be443f6d`) ; EN LIGNE : TOUJOURS 1.235.0**
 
 **Ce qui a été fait** (consigne de Cowork, 7 nov. vers 21 h 50) : Nouvelles de 1.236 validées par Grégoire mot pour mot (« je valide », vers 22 h ; la ligne de l'identité du 7 nov. à 7 h 21 en tête) ; `lot/en-tete-epure` fusionnée dans `main` local en avance rapide (29 commits) ; release mineure par `scripts/release.mjs` : **1.236.0, build `1107-2156`** (`c8142f95`) ; numéro inscrit au § 0 des portes de la chaîne (`ef114c34`). Vitest 10 768/10 768 sur la release.
