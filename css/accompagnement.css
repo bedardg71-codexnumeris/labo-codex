@@ -559,6 +559,12 @@ body.aide-contextuelle-active .btn-aide-contextuelle,
 .aide-contextuelle-active .titre-emoji-container .btn-aide-contextuelle {
     display: inline-flex !important;
 }
+/* #1086 (8 nov. 2026) : un bouton d'aide caché par `u-hide` le reste quand les aides sont actives — la règle
+   ci-dessus (0,2,1) l'emportait sur `.u-hide` (0,1,0). Cas : l'aide « C et P » de la date, passée à la case. */
+.tour-guide-actif .btn-aide-contextuelle.u-hide,
+.aide-contextuelle-active .btn-aide-contextuelle.u-hide {
+    display: none !important;
+}
 
 /* Bannières d'assistants guidés (🗺️) — visibles uniquement si Tour guidé actif */
 .banniere-assistant-guide {

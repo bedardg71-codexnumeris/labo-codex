@@ -152,6 +152,24 @@ describe('#494 · U1 — la case existe en mode simple', () => {
         expect(note.textContent).toContain('La date peut être posée d\'avance');
         expect(note.textContent).toContain('une fois la case cochée');
     });
+
+    // #1086 (8 nov. 2026) — l'aide sur C et P est attachée à la case, qui décide de ce qui y entre ; sans case
+    // (sans groupe-cours), elle reste à la date. Une seule aide visible à la fois.
+    // Rouge à HEAD avant le correctif ; break-tests (module restauré par copie, `cmp` vérifié) : le bouton non posé
+    // sur la ligne → ROUGE ; l'aide de la date jamais cachée → ROUGE.
+    it('U1.e L\'aide « C et P » suit la case : sur sa ligne avec un groupe, à la date sans groupe', () => {
+        const classes = new Set();
+        const aideDate = { classList: { toggle: (c, f) => (f ? classes.add(c) : classes.delete(c)) } };
+        const win = charger({ aideEcheanceIndicesDate: aideDate });
+        const ecran = ecranModeSimple();
+        const zone = poser(win, ecran, null, 'GC_A');
+        const ligne = zone.enfants.find(n => n.className === 'echeance-simple-ligne');
+        const aide = ligne.enfants.find(n => n.className === 'btn-aide-contextuelle');
+        expect(aide && aide.getAttribute('data-aide')).toBe('echeance-indices');
+        expect(classes.has('u-hide')).toBe(true);
+        poser(win, ecran, null, null);
+        expect(classes.has('u-hide')).toBe(false);
+    });
 });
 
 /* ------------------------------------ U2 — LE POINT DÉCISIF : écran = données */

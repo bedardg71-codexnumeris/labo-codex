@@ -4716,7 +4716,8 @@
                                     <div id="champDateEcheance" style="display: grid; grid-template-columns: 250px 1fr; gap: 20px; align-items: start;">
                                         <div class="groupe-form" style="margin: 0;">
                                             <label for="productionDateEcheance">Date d'échéance
-                                                <button class="btn-aide-contextuelle" data-aide="echeance-indices" aria-label="Aide contextuelle"><span class="icone-info-aide taille-bouton" aria-hidden="true"></span></button>
+                                                <!-- #1086 : sans groupe-cours seulement ; avec un groupe, l'aide passe à la case « Consignes transmises » (productions.js) -->
+                                                <button id="aideEcheanceIndicesDate" class="btn-aide-contextuelle" data-aide="echeance-indices" aria-label="Aide contextuelle"><span class="icone-info-aide taille-bouton" aria-hidden="true"></span></button>
                                             </label>
                                             <input type="date" id="productionDateEcheance" class="controle-form"
                                                 data-tooltip="cn-prod-echeance">
@@ -11543,7 +11544,7 @@
          Chargé AVANT eux — ils l'appellent au rendu, pas au chargement, mais
          l'ordre reste la garantie la plus simple à relire. -->
     <script src="js/ui-blocs.js?v=20260905b"></script>
-    <script src="js/productions.js?v=20261030b"></script> <!-- #1178, lot 5 (30 oct.) : le texte 8 à l'encadré · #1178, lot 3, retouche (29 oct.) : en Standards, la terminale et le conteneur exigent encore une pondération · #1159, retouche (25 oct.) : genererBadgeSourceProduction et genererIdCourtProduction retirés · #1075, points 3 et 5 (22 oct.) : une production employée reste ; un exemple ne s’écrit pas · Beta 99.41 b0511-1215 : #216 data-tooltip sur dates échéance multi-groupe -->
+    <script src="js/productions.js?v=20261108a"></script> <!-- #1178, lot 5 (30 oct.) : le texte 8 à l'encadré · #1178, lot 3, retouche (29 oct.) : en Standards, la terminale et le conteneur exigent encore une pondération · #1159, retouche (25 oct.) : genererBadgeSourceProduction et genererIdCourtProduction retirés · #1075, points 3 et 5 (22 oct.) : une production employée reste ; un exemple ne s’écrit pas · Beta 99.41 b0511-1215 : #216 data-tooltip sur dates échéance multi-groupe -->
     <script src="js/productions-import-export.js?v=20261029b"></script> <!-- #1152, lot 5 (29 oct.) : CC-BY-NC-SA dans le nom du fichier · #1156 (25 oct.) : la phrase après l’import dit les mots des deux colonnes · Refactor étape 3 (16 mai 2026) : extrait de productions.js (lignes 2630-3276) -->
     <script src="js/productions-liste.js?v=20261104b"></script> <!-- #1171 (4 nov.) : le menu dit « (rangée sous …) » · #1075, point 3 (22 oct.) : une production employée ne se supprime pas · Refactor étape 3 (16 mai 2026) : sidebar + CRUD utilisateur extraits de productions.js · #522 lot 4 : le descripteur de production écrit par db.modifier -->
     <script src="js/productions-bibliotheque-ui.js?v=20261025b"></script> <!-- #1158, retouche (25 oct.) : « ← Utiliser » sur l’exemplaire ramène une production retirée (par idOriginal) · #1156 (25 oct.) : retouche, la phrase de colonne vide · la bibliothèque des productions en deux colonnes ; « Supprimer définitivement » garde l’exemplaire de la bibliothèque · Fix preview « Voir les productions » : display:none inline → classe u-hide · #522 lot 4 : le descripteur de production écrit par db.modifier -->
@@ -11761,7 +11762,7 @@
     <!-- SYSTÈME D'ACCOMPAGNEMENT UNIFIÉ (Beta 99.20) —
          Un seul moteur pour hover, flèches didactiques, popups aide contextuelle,
          visite guidée et glossaire. API publique : window.accompagnement. -->
-    <link rel="stylesheet" href="css/accompagnement.css?v=20261102a"> <!-- La palette Évaluation compacte (1er nov.) · #1152, lot 3 (28 oct.) : le micro-popup d’un terme souligné passe au-dessus de l’aide contextuelle -->
+    <link rel="stylesheet" href="css/accompagnement.css?v=20261108a"> <!-- La palette Évaluation compacte (1er nov.) · #1152, lot 3 (28 oct.) : le micro-popup d’un terme souligné passe au-dessus de l’aide contextuelle -->
     <script src="js/accompagnement.js?v=20261107d"></script> <!-- La palette Évaluation compacte (1er nov.) · #1152, lot 5 (29 oct.) : le trait d’union n’est plus échappé (regex sous u) · #1152, lot 5 (29 oct.) : le soulignement du glossaire aux mots entiers · #1152, lot 3 (28 oct.) : « En savoir plus » ouvre Aide › Référence sur la fiche du terme · L’aide d’« Apporter mon matériel » (19 oct.) : l’étape « Conception » de la visite correspond aussi à l’onglet (#1092) · Relecture de Cowork du 17 oct. (C3) : une icône « i » qui désigne une clé du catalogue ouvre son aide · #305 (2 juil.) : popup Conseil — nom accessible + focus -->
     <!-- Catalogues de contenu (hover, popup, terme). DOIVENT charger après accompagnement.js :
          chaque fichier appelle window.accompagnement.ajouterEntrees() directement. -->

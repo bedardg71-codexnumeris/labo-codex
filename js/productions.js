@@ -886,6 +886,10 @@ function poserCaseAssignationSimple(inputSimple, production, groupeCoursId) {
 
     const existante = parent.querySelector('.echeance-simple-assignee');
     if (existante) existante.remove();
+    // #1086 (8 nov. 2026) : l'aide sur C et P est celle de la case, qui décide de ce qui y entre ; elle quitte
+    // la date dès que la case est là, et y reste sans groupe-cours (pas de case).
+    const aideDate = document.getElementById('aideEcheanceIndicesDate');
+    if (aideDate && aideDate.classList) aideDate.classList.toggle('u-hide', !!groupeCoursId);
     if (!groupeCoursId) return;
 
     const entree = production && production.echeancesParGroupe
@@ -922,8 +926,19 @@ function poserCaseAssignationSimple(inputSimple, production, groupeCoursId) {
     etiquette.style.cssText = 'cursor: pointer; font-weight: normal; margin: 0;';
     etiquette.textContent = 'Consignes transmises';
 
+    const aide = document.createElement('button');
+    aide.type = 'button';
+    aide.className = 'btn-aide-contextuelle';
+    aide.setAttribute('data-aide', 'echeance-indices');
+    aide.setAttribute('aria-label', 'Aide contextuelle');
+    const icone = document.createElement('span');
+    icone.className = 'icone-info-aide taille-bouton';
+    icone.setAttribute('aria-hidden', 'true');
+    aide.appendChild(icone);
+
     ligne.appendChild(case_);
     ligne.appendChild(etiquette);
+    ligne.appendChild(aide);   // #1086
     zone.appendChild(ligne);
 
     const note = document.createElement('p');
