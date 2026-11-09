@@ -59,3 +59,12 @@ Specs voisines (export Léa, Dossier PDF, synthèse) : 54 vertes, 2 sautées au 
 ## Vérification
 
 Spec WebKit `tests/integration/export-lea-verrouillees.spec.js` : trois évaluations (verrouillée avec copie, non verrouillée avec copie, verrouillée sur papier) → deux PDF dans le ZIP téléchargé, le compteur au singulier ; une quatrième non verrouillée → le pluriel ; tout verrouillé → rien d'ajouté, trois PDF. Banc Vitest #1245, cas 6 (les phrases). Break-tests : sans le filtre, la spec rougit ; sans la mention, le cas 6 rougit. Les bancs de l'export qui exportaient des évaluations sans verrou (#565, #566, #950, #1245, « Un mot pour ton étudiant·e ») les verrouillent désormais.
+
+
+## Le cas « aucune évaluation verrouillée », posé (9 nov. 2026)
+
+Grégoire a validé le texte proposé (réponse du 9 nov., avec le feu vert du groupe 1) : quand des évaluations existent
+pour la production mais qu'aucune n'est verrouillée, l'export dit, seul, « Aucune évaluation verrouillée : rien à
+envoyer. Verrouille les évaluations à remettre, puis relance l'export. » — sans le préfixe « L'export Léa a échoué : »,
+puisque rien n'a échoué (supposition de Claude Code, nommée ici). Sans aucune évaluation, le message d'avant reste.
+Banc : `sentinelle-1245`, cas 9 ; deux break-tests rouges (la condition, le préfixe).

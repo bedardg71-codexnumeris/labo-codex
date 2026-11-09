@@ -476,6 +476,8 @@
      *   rétroaction — livrable, mais incomplet, et c'est ce qui partait en
      *   silence sur Léa auparavant.
      */
+    const TEXTE_LEA_RIEN_DE_VERROUILLE = 'Aucune évaluation verrouillée\u00a0: rien à envoyer. Verrouille les évaluations à remettre, puis relance l\u2019export.';
+
     async function exporterPourLea(productionId, da, reprisesSeulement, onProgression) {
         const etudiants = obtenirDonneesSelonMode('groupeEtudiants');
         const productions = obtenirDonneesSelonMode('productions');
@@ -489,6 +491,13 @@
         const surPapier = selection.sansFichier;   // #1245 : la synthèse seule
 
         if (fichiersAvecEval.length === 0 && surPapier.length === 0) {
+            // Lot du 9 nov. 2026 : des évaluations existent, aucune n'est verrouillée — texte validé par Grégoire,
+            // affiché seul (sans « L'export Léa a échoué : »), car rien n'a échoué.
+            if (selection.nonVerrouillees.length > 0) {
+                const rien = new Error(TEXTE_LEA_RIEN_DE_VERROUILLE);
+                rien.texteEntier = true;
+                throw rien;
+            }
             throw new Error('Aucune évaluation trouvée pour ces critères.');
         }
 
@@ -922,7 +931,7 @@
             _afficherBilanExport(blobs.length, blobs.length + echecs.length, echecs, sansSynthese);
         } catch (e) {
             console.error('[Travaux-Archivage] Erreur export Lea:', e);
-            alert('L\'export Léa a échoué : ' + e.message);
+            alert(e && e.texteEntier ? e.message : 'L\'export Léa a échoué : ' + e.message);
         }
     }
 

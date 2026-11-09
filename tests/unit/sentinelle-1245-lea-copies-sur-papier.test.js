@@ -127,6 +127,20 @@ describe('Lot du 9 nov. 2026 — « Exporter pour Léa » n\'envoie que les éva
         await a.exporterPourLea('P1', null, false);
         expect(appels.evaluationsPassees.sort(), 'le PDF porte l\'évaluation choisie, pas la plus récente du couple').toEqual(['E1', 'E2', 'E3']);
     });
+
+    it('9. aucune verrouillée : rien ne part, et le texte validé par Grégoire est dit seul (rien n\'a échoué)', async () => {
+        const { a, appels } = monter({ evaluations: EVALUATIONS.map((e) => Object.assign({}, e, { verrouillee: false })) });
+        const err = await a.exporterPourLea('P1', null, false).then(() => null, (e) => e);
+        expect(err && err.message).toBe('Aucune évaluation verrouillée\u00a0: rien à envoyer. Verrouille les évaluations à remettre, puis relance l\u2019export.');
+        expect(err.texteEntier).toBe(true);
+        expect(appels.copies.concat(appels.papier)).toEqual([]);
+        // Sans aucune évaluation, le message d'avant reste, préfixé par « L'export Léa a échoué : ».
+        const vide = await monter({ evaluations: [] }).a.exporterPourLea('P1', null, false).then(() => null, (e) => e);
+        expect(vide.message).toBe('Aucune évaluation trouvée pour ces critères.');
+        expect(vide.texteEntier).toBeUndefined();
+        const src = readFileSync(path.join(RACINE, 'js', 'travaux-archivage.js'), 'utf8');
+        expect(src).toContain("alert(e && e.texteEntier ? e.message : 'L\\'export Léa a échoué : ' + e.message);");
+    });
 });
 
 describe('#1245 — le compteur de « Export Léa » compte le papier et le dit', () => {
