@@ -40,6 +40,10 @@ test('« Évaluer une première production », grille à niveaux, l’échelle l
     await leParcoursEntier(page, { niveaux: true, echelleVide: true, cap: '1180-sombre-echelle-vide' });
 });
 
+test('« Évaluer une première production », étape 8 à 820 px (l’iPad en portrait) : le menu « Cartouche de rétroaction » amené dans la vue, la bulle à côté', async ({ page }) => {
+    await leParcoursEntier(page, { niveaux: true, cap: '820-sombre-niveaux', fenetreEtape8: { width: 820, height: 1180 } });
+});
+
 test('« Évaluer une première production », grille en points : la bulle du choix, et la cartouche ajoute le commentaire de son palier (1180 px)', async ({ page }) => {
     await leParcoursEntier(page, { niveaux: false, cap: '1180-sombre-points' });
 });

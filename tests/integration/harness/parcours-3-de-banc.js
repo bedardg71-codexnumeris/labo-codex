@@ -6,6 +6,7 @@
 import { test, expect } from '@playwright/test';
 import {
     ouvrirEspaceVide, ouvrirPanneau, attendreEtape, contourSur, bulleNeCouvrePas, capture, bulle, mettreLaClasseEnPlace, deuxSondes,
+    entierDansLaFenetre,
     etiqueterExemple, choisirDesNiveaux
 } from './classe-de-banc.js';
 import { attendreApplication } from './attendre-application.js';
@@ -280,7 +281,10 @@ async function etape8(page, { niveaux, cap }) {
         await contourSur(page, modifier);
         await page.click(modifier);
     }
+    // Le menu « Cartouche de rétroaction » amené dans la vue, entier, le contour dessus, la bulle à côté (9 nov., 17 h 52).
+    await entierDansLaFenetre(page, '#productionCartouche', 'étape 8, la fiche ouverte');
     await contourSur(page, '#productionCartouche');
+    await entierDansLaFenetre(page, '#parcours-contour', 'étape 8, le contour du menu');
     await menusLibres(page, 'étape 8, la cartouche');
     await bulleNeCouvrePas(page, '#productionCartouche', 'étape 8, la cartouche');
     await capture(page, DOSSIER, `p3-8-production-${cap}`);
@@ -321,7 +325,7 @@ async function etape9(page, { cap }) {
     expect(await page.evaluate(() => Assistance.etatDe('evaluer').etat)).toBe('fait');
 }
 
-export async function leParcoursEntier(page, { niveaux, cap, echelleVide = false }) {
+export async function leParcoursEntier(page, { niveaux, cap, echelleVide = false, fenetreEtape8 = null }) {
     test.setTimeout(240000);
     await ouvrirEspaceVide(page, 1180);
     await lePanneauSansClasse(page, cap);
@@ -343,7 +347,10 @@ export async function leParcoursEntier(page, { niveaux, cap, echelleVide = false
     await etape4(page, { niveaux, cap, echelleVide });
     await etapes5et6(page, { cap });
     await etape7(page, { cap });
+    // `fenetreEtape8` : l'étape 8 jouée dans une autre fenêtre (l'iPad en portrait, 820 × 1180), puis l'essai s'arrête.
+    if (fenetreEtape8) await page.setViewportSize(fenetreEtape8);
     await etape8(page, { niveaux, cap });
+    if (fenetreEtape8) return;
     await etape9(page, { cap });
 
     await expect(rang(page)).toHaveText('1 sur ' + await nParcours(page));   // « Découvrir » reste à faire

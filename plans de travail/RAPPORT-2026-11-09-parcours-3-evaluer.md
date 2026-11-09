@@ -11,6 +11,19 @@ familles) puis `origin/main` (1.238.0, « Un mot pour ton étudiant·e »). Non 
 
 ### Ce qui est fait (en gestes d'utilisateur)
 
+- **Étape 8, la fiche de la production (Cowork et Grégoire, 9 nov., 17 h 52, sur la capture `p3-8-production`)** : dès
+  que la fiche est ouverte, le menu « Cartouche de rétroaction » est amené dans la vue, entier, le contour est posé
+  dessus, et la bulle ne le couvre pas. Mesuré d'abord : la capture n'avait pas été prise avant un défilement ; à 1180
+  × 900, sur la grille à niveaux, le menu restait à 938-977 px pour une fenêtre de 900, trois secondes plus tard encore,
+  et le contour aussi : rien ne disait où aller. Le parcours l'amène maintenant comme il amène « Appliquer » à l'étape
+  6 (pendant les vingt premiers passages de la sonde, puis la personne garde la main). Essais à **1180 × 900** et à
+  **820 × 1180** : ils rougissent si le menu n'est pas entier dans la fenêtre, si le contour n'y est pas, ou si la
+  bulle le couvre. Break-test : l'amenée retirée → **rouge à 1180**. À 820 × 1180, le menu est déjà entier à l'arrivée
+  (l'essai passe sans l'amenée) : l'essai le vérifie quand même. Captures `p3-8-production-1180-sombre-niveaux` et
+  `p3-8-production-820-sombre-niveaux` refaites.
+- **À revérifier après la fusion des bulles en pages : étape 8, la matrice de la cartouche reste libre pendant la
+  saisie.** (Capture `p3-8-fiche` : la bulle, de seize lignes, couvre deux colonnes de la matrice ; le lot
+  `lot/bulles-en-pages` le règle, rien n'est touché ici.)
 - Dans le menu, « Assistance » compte maintenant trois parcours. Le panneau montre « Évaluer une première production »,
   troisième et dernier, avec sa ligne (« De ta grille à ta première rétroaction, réécrite avec tes mots. », validée le
   9 nov. à 13 h 37), son état (À faire, Étape n sur 9, Fait) et son bouton (Commencer, Reprendre, Refaire).

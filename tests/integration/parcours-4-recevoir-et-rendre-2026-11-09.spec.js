@@ -66,6 +66,19 @@ async function bulleSousLesColonnes(page, contexte) {
     expect(haut, contexte + ' : la bulle sous les colonnes et « Importer »').toBeGreaterThanOrEqual(basColonnes);
 }
 
+ /**
+ * Étape 2 (Grégoire, 9 nov., 17 h 58) : la bulle nomme les zones par leur titre ; mesuré, les trois titres s'écrivent
+ * « Originaux », « Inspecteur » et « Aperçu » (en capitales par le style). Et un guillemet ne passe jamais seul à la ligne :
+ * le moteur pose une espace insécable à l'intérieur des guillemets (Cowork, 17 h 58).
+ */
+async function zonesNommeesParLeurTitre(page) {
+    expect(await page.locator('.pipeline-3col-grid .pipeline-col-titre').allTextContents()).toEqual(['Originaux', 'Inspecteur', 'Aperçu']);
+    const t = await bulle(page).locator('.parcours-bulle-texte').textContent();
+    expect(t, 'aucune espace ordinaire à l’intérieur des guillemets').not.toMatch(/« | »/);
+    expect(t).toContain('Sous «\u00a0Inspecteur\u00a0», la production');
+    expect(t).toContain('«\u00a0Importer\u00a0»');
+}
+
 const PDF_LEA = 'Baobab_Basile_2390002_Journal de lecture 1__Remis_le_2026-11-03_10h00m00s.png';
 const n = (page, k, total, titre, opts) => attendreEtape(page, k, total, titre, opts);
 const ligneDe = (page, valeur) => page.locator('#evaluations-liste select.eval-actions-select', { has: page.locator(`option[value="${valeur}"]`) });
@@ -116,6 +129,7 @@ test('« Recevoir les productions, rendre tes rétroactions », la voie des fich
     await contourSur(page, '.pipeline-col-confirmes', 'parcours-contour-extra-0');
     await contourSur(page, '.pipeline-col-originaux', 'parcours-contour-extra-1');
     await bulleSousLesColonnes(page, 'étape 2, 1180 px');
+    await zonesNommeesParLeurTitre(page);
     await capture(page, DOSSIER, `p4-2-${cap}`);
     await page.selectOption('.pipeline-production-selecteur select', pid);
     // Deux photos SANS DA dans leur nom (question 9) : cochées, « Réunir en une copie », puis l'étudiante choisie.
@@ -301,6 +315,7 @@ test('« Recevoir les productions, rendre tes rétroactions », étape 2 à 820 
     await n(page, 2, 9, "Vérifie avant d'importer", { focus: false });
     await contourSur(page, '.pipeline-production-selecteur');
     await bulleSousLesColonnes(page, 'étape 2, 820 px');
+    await zonesNommeesParLeurTitre(page);
     await capture(page, DOSSIER, 'p4-2-820-sombre');
 });
 

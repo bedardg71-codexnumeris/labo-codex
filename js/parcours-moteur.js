@@ -151,6 +151,15 @@
         return etat ? etat.def.etapes[etat.i] : null;
     }
 
+    /**
+     * À l'intérieur des guillemets, une espace insécable : un guillemet ne passe jamais seul à la ligne (décision de
+     * Cowork, 9 nov. 2026, 17 h 58 ; mesuré à 820 px : « Importer » se coupait avant son guillemet fermant). Pour toutes
+     * les bulles, au rendu : les textes validés, et les sentinelles qui les lisent, gardent leurs espaces ordinaires.
+     */
+    function typographier(t) {
+        return String(t == null ? '' : t).replace(/« /g, '«\u00a0').replace(/ »/g, '\u00a0»');
+    }
+
     function rendreBulle() {
         var etape = etapeCourante();
         var b = etat.elements.bulle;
@@ -162,7 +171,7 @@
         var h = document.createElement('h2');
         h.className = 'parcours-bulle-titre';
         h.id = 'parcours-bulle-titre';
-        h.textContent = etape.titre;
+        h.textContent = typographier(etape.titre);
         var rang = document.createElement('span');
         rang.className = 'parcours-bulle-rang';
         rang.textContent = (etat.i + 1) + ' sur ' + total;
@@ -172,13 +181,13 @@
 
         var p = document.createElement('p');
         p.className = 'parcours-bulle-texte';
-        p.textContent = etape.texte;
+        p.textContent = typographier(etape.texte);
         b.appendChild(p);
 
         if (etape.geste) {
             var g = document.createElement('p');
             g.className = 'parcours-bulle-geste';
-            g.textContent = etape.geste;
+            g.textContent = typographier(etape.geste);
             b.appendChild(g);
         }
 
