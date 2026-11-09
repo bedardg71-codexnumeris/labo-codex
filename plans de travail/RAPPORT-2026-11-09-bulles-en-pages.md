@@ -5,6 +5,68 @@ Branche `lot/bulles-en-pages`, partie de `origin/lot/bulle-sur-telephone` (19b3f
 
 ⚠ Chromium seulement : WebKit est absent des sessions cloud. Le verdict Safari et iPad se prend sur le Mac.
 
+## Retouche du 9 nov., 17 h 55 (après lecture des captures par Cowork et Grégoire)
+
+Validé tel quel : la découpe à une fin de phrase, les pages de même hauteur, les flèches de 44 × 44 qui ne bougent
+pas, la ligne du geste et « Plus tard » sur chaque page, le rendu à 820 px.
+
+**1. Le compteur entre les flèches (décision de Grégoire) : fait.**
+
+- Sous le texte, « ← 1/3 → ». La tête de la bulle ne garde que le titre et « n sur N ».
+- Au changement de page (« → », « ← » ou les flèches du clavier), le lecteur d'écran entend « page 2 de 3 », et
+  rien d'autre : la zone d'annonce du moteur ne reçoit que ces mots, le texte de l'étape n'est pas relu. Le compteur
+  visible reste caché au lecteur d'écran : lu seul, « 1/3 » ne dirait pas ce qu'il compte.
+- Repliée sur téléphone, rien ne change : le compteur est dans la rangée des flèches, cachée avec elle, et le clavier
+  ne change pas la page.
+- Le compteur s'écrit en chiffres de largeur fixe : « ← » et « → » ne bougent pas entre « 1/3 » et « 2/3 ».
+- Essais : le compteur absent de la tête, et la tête réduite au titre et au rang ; le compteur entre les deux
+  flèches, dans le DOM et à l'écran ; « page 2 de 2 » puis « page 1 de 2 » annoncés. Break-tests : l'ancien
+  comportement remis (le compteur dans la tête, caché sur une seule page) → ROUGE « le compteur des pages hors de la
+  tête », à 1180 et à 820 px ; l'annonce retirée → ROUGE. Rétablis, les 7 essais du lot sont verts.
+
+**2. Les captures du parcours 3 : faites, et l'étape 8 couvre encore la matrice (mesure ci-dessous).**
+
+Fusion jetable avec `origin/lot/parcours-3-evaluer` à jour (0925e22, « la cartouche nommée dans la fiche de la
+production »), mêmes conflits qu'avant, résolus par union, rien poussé. Le banc du parcours 3 joué entier (grille à
+niveaux), à 1180 et à 820 px : son banc ne tourne qu'à 1180, la copie jetable lui a donné une largeur.
+
+- **Étape 2, « Ta production », sur la fiche** (le contour sur « Créer la production ») : 17 lignes à la largeur du
+  texte (338 px), deux pages de 7 et 10 lignes ; la bulle fait 396 px de haut (496 sans les pages). « Créer la
+  production » et les menus « Grille » et « Échelle » restent libres aux deux largeurs. À 820 px, la bulle se pose en
+  bas à gauche, sur la colonne gauche de la fiche, déjà remplie à ce moment.
+- **Étape 8, « Ta cartouche », la matrice remplie** : 16 lignes, deux pages de 9 et 7 lignes ; la bulle fait 374 px
+  de haut (474 sans les pages), en haut à droite (x 652 à 1032 px à 1180 ; x 321 à 701 px à 820).
+
+⚠ **En pages, la bulle de l'étape 8 couvre encore la première rangée de la matrice, dans les quatre colonnes de
+niveaux, et leurs en-têtes.** Part de chaque case sous la bulle (la case amenée dans la vue comme la saisie le fait,
+puis deux passages de la sonde) :
+
+| Largeur | Rangée | I | P | S | R |
+|---|---|---|---|---|---|
+| 1180, en pages | 1 | 54 % | 72 % | 72 % | 24 % |
+| 1180, en pages | 2 à 4 | 0 | 0 | 0 | 0 |
+| 1180, sans les pages | 1 | 75 % | 100 % | 100 % | 34 % |
+| 1180, sans les pages | 2 | 46 % | 61 % | 61 % | 21 % |
+| 820, en pages | 1 | 72 % | 72 % | 72 % | 4 % |
+| 820, en pages | 2 à 4 | 0 | 0 | 0 | 0 |
+| 820, sans les pages | 1 | 100 % | 100 % | 100 % | 6 % |
+| 820, sans les pages | 2 | 61 % | 61 % | 61 % | 3 % |
+
+Les pages libèrent la deuxième rangée ; la première reste couverte aux deux tiers. Placement inchangé, comme demandé :
+**Cowork tranche.** Captures `parcours-3-etape-8-…-matrice-page-1/2` et, pour comparer,
+`parcours-3-etape-8-…-matrice-sans-les-pages`.
+
+À 820 px, un clic du banc du parcours 3 est couvert à l'étape 1 (« des niveaux », dans « Ta grille ») ; c'est vrai
+aussi sans les pages, donc hors de ce lot. La copie jetable l'a fait par le DOM pour aller jusqu'aux captures. À
+signaler à la session des parcours 3, 4 et 5.
+
+**3. Le parcours 9 : captures refaites** avec le compteur déplacé (trois pages, la tête « Ta pratique · 1 sur 8 »,
+« ← 1/3 → »).
+
+**Les sondes, relancées sur la retouche** (fusions jetables avec les branches à jour) : parcours 3, 3 verts sur 3 ;
+parcours 6, 14 sur 14 ; parcours 8, 9 verts (5 captures sautées) ; parcours 9, 16 verts (4 captures sautées).
+Aucune sonde touchée. Vitest, depuis `tests/` : 894 fichiers, 10 884 essais, tous verts.
+
 ## Ce qui est fait
 
 **Le moteur (`js/parcours-moteur.js`).**
@@ -24,7 +86,8 @@ Branche `lot/bulles-en-pages`, partie de `origin/lot/bulle-sur-telephone` (19b3f
   fois, au rendu : une nouvelle découpe ne le relit pas.
 - Les pages ont toutes la hauteur de la plus haute : « ← » et « → » ne bougent pas sous le doigt d'une page à
   l'autre. Sous la contrainte du filet, le texte se resserre encore.
-- La navigation : « 1/2 » à côté de « n sur N » ; « ← » et « → » sous le texte, au-dessus de la ligne du geste
+- La navigation : « ← 1/2 → » sous le texte, au-dessus de la ligne du geste (le compteur était d'abord à côté de
+  « n sur N » ; déplacé à la retouche de 17 h 55)
   (« ← » désactivé à la première page, « → » à la dernière ; si le bouton qui a le focus se désactive, le focus passe
   à l'autre). Au clavier, les flèches gauche et droite quand le focus est dans la bulle, sans modificateur (Alt ou
   Cmd + ← restent au navigateur), et pas quand la bulle est repliée.
@@ -139,9 +202,12 @@ temps ; seul, vert.
 
 ## Les captures
 
-`plans de travail/captures-2026-11-09-bulles-en-pages/` : la bulle de l'étape 1 du parcours 9, à 1180 et à 820 px,
-sombre, ses trois pages (435, 341 et 354 caractères ; 9, 7 et 8 lignes), puis après le geste (l'assistant ouvert, la
-bulle à sa forme réduite, le second temps de l'étape). La bulle garde 431 px de haut d'une page à l'autre.
+`plans de travail/captures-2026-11-09-bulles-en-pages/`, sombre, à 1180 et à 820 px, refaites à la retouche :
+
+- parcours 9, étape 1 : ses trois pages (435, 341 et 354 caractères ; 9, 7 et 8 lignes), puis après le geste
+  (l'assistant ouvert, la bulle à sa forme réduite, le second temps de l'étape). 431 px de haut d'une page à l'autre ;
+- parcours 3, étape 2, sur la fiche de la production : ses deux pages ;
+- parcours 3, étape 8, la matrice de la cartouche remplie : ses deux pages, et la même bulle sans les pages.
 
 ## La relecture d'un agent neuf
 
