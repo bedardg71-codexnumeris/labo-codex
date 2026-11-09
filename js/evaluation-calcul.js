@@ -1462,13 +1462,19 @@ function _ecrireLigneNoteRemise(texte) {
  * null. Trouvée comme l'auto-save la trouve (élève, production, non remplacée) : c'est elle qu'il
  * refuserait d'écrire. Sans note (« Incomplet ; travail en cours », note nulle ou absente),
  * l'écran se comporte comme avant.
+ * Lot du 9 nov. 2026 : l'évaluation OUVERTE (`indexEvaluationOuverte`), en lecture seule — une originale
+ * remplacée l'est, verrouillée en base ou non : son écran montre sa note enregistrée, comme une verrouillée.
  */
 function evaluationRemiseAffichee() {
     const c = etatVivantEvaluationEnCours();
     if (!c.etudiantDA || !c.productionId) return null;
-    const e = (db.getSync(cle('evaluationsSauvegardees'), []) || []).find(x =>
-        x && !x.remplaceeParId && x.etudiantDA === c.etudiantDA && x.productionId === c.productionId);
-    if (!e || e.verrouillee !== true || e.travailEnCours === true) return null;
+    const evaluations = db.getSync(cle('evaluationsSauvegardees'), []) || [];
+    // Sans les modules du formulaire (bancs qui chargent ce fichier seul) : la recherche d'avant.
+    const i = (typeof window.indexEvaluationOuverte === 'function') ? window.indexEvaluationOuverte(evaluations, c)
+        : evaluations.findIndex(x => x && !x.remplaceeParId && x.etudiantDA === c.etudiantDA && x.productionId === c.productionId);
+    const e = (typeof i === 'number' && i >= 0) ? evaluations[i] : null;
+    const lectureSeule = e && ((typeof window.evaluationEnLectureSeule === 'function') ? window.evaluationEnLectureSeule(e) : e.verrouillee === true);
+    if (!e || !lectureSeule || e.travailEnCours === true) return null;
     return (typeof e.noteFinale === 'number' && isFinite(e.noteFinale)) ? e : null;
 }
 

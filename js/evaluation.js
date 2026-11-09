@@ -1086,7 +1086,12 @@ function modifierEvaluation(evaluationId) {
         return;
     }
 
-    const estVerrouillee = evaluation.verrouillee || false;
+    // Lot du 9 nov. 2026 — une originale remplacée s'ouvre en lecture seule, même non verrouillée en base.
+    // L'écriture en attente part D'ABORD (relecture du 9 nov.) : faite après l'oubli, elle trouvait l'originale
+    // déverrouillée exprès redevenue en lecture seule, et le niveau tapé dans la seconde se perdait sans un mot.
+    if (typeof window._flusherAutoSave === 'function') window._flusherAutoSave();
+    _oublierDeverrouillageExpres(evaluationId);
+    const estVerrouillee = evaluationEnLectureSeule(evaluation);
 
     // Flag pour empêcher afficherFichiers() de masquer le formulaire d'évaluation
     // (afficherSousSection déclenche initialiserModuleTravaux → rafraichirUI → afficherFichiers
@@ -1945,7 +1950,8 @@ function sauvegarderEvaluationModifiee() {
 
     // Vérifier que l'évaluation n'est pas verrouillée
     // Exception : modification post-reprise autorisée via _snapshotAvantModifRemplacee
-    if (evaluations[indexEval].verrouillee && !window._snapshotAvantModifRemplacee) {
+    // (Lot du 9 nov. 2026 : l'instantané de CETTE évaluation, pas celui d'une autre.)
+    if (evaluations[indexEval].verrouillee && !originaleDeverrouilleeExpres(evaluations[indexEval])) {
         notifications.erreur('Évaluation verrouillée', 'Impossible de modifier une évaluation verrouillée');
         return;
     }
@@ -2147,6 +2153,13 @@ function basculerVerrouillageEvaluationCourante() {
     let evaluations = db.getSync(cle('evaluationsSauvegardees'), []);
     const index = evaluationId ? evaluations.findIndex(e => e.id === evaluationId) : -1;
 
+    // Lot du 9 nov. 2026 — une originale remplacée, ouverte en lecture seule : « Déverrouiller » la rend
+    // modifiable exprès, qu'elle soit verrouillée en base ou non.
+    if (index !== -1 && estOriginaleRemplacee(evaluations[index]) && !originaleDeverrouilleeExpres(evaluations[index])) {
+        _deverrouillerOriginaleExpres(evaluations, index);
+        return;
+    }
+
     // Verrouiller : la porte de l'enregistrement, avec ses vérifications. Pas d'évaluation connue
     // (copie neuve, id perdu) : elle retrouve l'existante par l'élève et la production.
     if (index === -1 || evaluations[index].verrouillee !== true) {
@@ -2155,6 +2168,80 @@ function basculerVerrouillageEvaluationCourante() {
     }
 
     _deverrouillerEvaluation(evaluations, index);
+}
+
+/* ===============================
+   LOT DU 9 NOV. 2026 — L'ORIGINALE REMPLACÉE S'OUVRE EN LECTURE SEULE
+   ===============================
+   Décision de Grégoire (9 nov., 9 h 04, en Cowork) : une originale remplacée par une reprise s'ouvre en
+   lecture seule, comme une copie verrouillée, même si elle n'est pas verrouillée en base. Rien n'est écrit
+   dans ses données pour ça : la lecture seule se décide à l'ouverture. Pour la corriger, on la déverrouille
+   exprès (« Déverrouiller », ou « Modifier l'évaluation » sur sa ligne de la Liste) ; ce qu'on y change
+   s'écrit alors sur ELLE, et « Verrouiller » le trace au journal (modification après reprise).
+   AVANT : l'enregistrement automatique écrivait l'évaluation EN VIGUEUR du couple élève-production — la
+   reprise — et non celle qui était ouverte.
+   « Déverrouillée exprès » = l'instantané d'avant modification (`_snapshotAvantModifRemplacee`) porte son
+   id : un seul état, celui que « Verrouiller » consomme pour le journal. Toute autre ouverture l'efface
+   (`_oublierDeverrouillageExpres`, dans `modifierEvaluation`). Doublon réconcilié (#360) compris : il porte
+   `remplaceeParId`, et ne compte nulle part. */
+
+/** L'évaluation est-elle une originale remplacée (par une reprise, ou un doublon réconcilié) ? */
+function estOriginaleRemplacee(evaluation) {
+    return !!(evaluation && evaluation.remplaceeParId);
+}
+
+/** L'enseignant l'a-t-il déverrouillée exprès dans ce formulaire ? */
+function originaleDeverrouilleeExpres(evaluation) {
+    const instantane = window._snapshotAvantModifRemplacee;
+    return !!(evaluation && instantane && instantane.evalId === evaluation.id);
+}
+
+/** La règle de l'ouverture et des écrivains : verrouillée en base, ou originale remplacée non déverrouillée exprès. */
+function evaluationEnLectureSeule(evaluation) {
+    if (!evaluation) return false;
+    if (evaluation.verrouillee === true) return true;
+    return estOriginaleRemplacee(evaluation) && !originaleDeverrouilleeExpres(evaluation);
+}
+
+/** L'instantané d'avant modification, que « Verrouiller » journalise (`_traiterPostRepriseMod`). */
+function armerDeverrouillageExpres(evaluation) {
+    window._snapshotAvantModifRemplacee = {
+        evalId: evaluation.id,
+        avant: {
+            statutIntegrite: evaluation.statutIntegrite,
+            noteFinale: evaluation.noteFinale,
+            niveauFinal: evaluation.niveauFinal,
+            criteres: (evaluation.criteres || []).map(c => ({ critereId: c.critereId, niveau: c.niveauSelectionne }))
+        }
+    };
+}
+
+/** À l'ouverture d'une évaluation : l'originale reprend sa lecture seule, sauf si l'ouverture est le geste exprès. */
+function _oublierDeverrouillageExpres(evaluationId) {
+    const instantane = window._snapshotAvantModifRemplacee;
+    if (!instantane) return;
+    if (instantane.ouverture === true && instantane.evalId === evaluationId) {
+        delete instantane.ouverture;   // « Modifier l'évaluation » (Liste) : elle s'ouvre déverrouillée
+        return;
+    }
+    window._snapshotAvantModifRemplacee = null;
+}
+
+/** « Déverrouiller » sur une originale remplacée : verrouillée en base, le déverrouillage s'écrit sur elle ; sinon rien à écrire. */
+function _deverrouillerOriginaleExpres(evaluations, index) {
+    const evaluation = evaluations[index];
+    if (evaluation.verrouillee === true) {
+        _deverrouillerEvaluation(evaluations, index);
+        if (evaluations[index].verrouillee === true) return;   // échec d'écriture : rien ne bascule
+        armerDeverrouillageExpres(evaluation);
+        return;
+    }
+    armerDeverrouillageExpres(evaluation);
+    if (window.evaluationEnCours) window.evaluationEnCours.verrouillee = false;
+    mettreAJourBoutonVerrouillage(false);
+    desactiverFormulaireEvaluation(false);
+    if (typeof window.afficherCalculActuel === 'function') window.afficherCalculActuel();
+    notifications.succes(messageVerrouEvaluation(evaluation, false));
 }
 
 /**
@@ -2794,6 +2881,10 @@ window.copierCriteresSRPNF = copierCriteresSRPNF;
 // Exports requis pour le mode evaluation depuis la visionneuse (travaux-ui.js)
 window.changerEchelleEvaluation = changerEchelleEvaluation;
 window.basculerVerrouillageEvaluationCourante = basculerVerrouillageEvaluationCourante;
+// Lot du 9 nov. 2026 — la lecture seule de l'originale remplacée : l'enregistrement automatique, les lecteurs
+// du verrou (evaluation-retroaction.js, evaluation-calcul.js) et « Modifier l'évaluation » (liste-evaluations.js).
+window.evaluationEnLectureSeule = evaluationEnLectureSeule;
+window.armerDeverrouillageExpres = armerDeverrouillageExpres;
 window.basculerVerrouDepuisAnnotation = basculerVerrouDepuisAnnotation;   // 24 oct. 2026 — le bouton de la palette Annotation
 window.mettreAJourVerrouAnnotation = mettreAJourVerrouAnnotation;         // appelé par travaux-ui.js et travaux-outils.js
 window.messageVerrouEvaluation = messageVerrouEvaluation;   // lot C — evaluation-sauvegarde.js
