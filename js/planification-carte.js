@@ -523,8 +523,8 @@ var LIBELLES_DEUX_LIENS = {
 /**
  * La mention de la fiche de production, validée mot pour mot :
  * « Repris dans la carte : leçon « … », semaine N ». Une leçon sans semaine
- * n'a pas de N à dire : la phrase s'arrête après le titre (cette variante est
- * PROPOSÉE, non validée : rapport de l'étape 2, § 8).
+ * n'a pas de N à dire : la phrase s'arrête après le titre (variante acceptée
+ * le 9 nov. 2026).
  */
 function texteRepriseObjectif(titreLecon, semaine) {
     return 'Repris dans la carte : leçon « ' + titreLecon + ' »' + (semaine ? ', semaine ' + semaine : '');
@@ -2565,7 +2565,8 @@ var GUIDE_PAGES = [
             '<p class="planif-guide-pourquoi">Chaque cours vise des compétences — c\u2019est ce que l\u2019étudiant sera capable de faire à la fin. Tout le reste de ta carte en découle.</p>' +
             '<ol>' +
                 '<li>Glisse un élément <span class="planif-guide-type" style="background:var(--planif-couleur-competence)"></span> <strong>Compétence</strong> de la palette sur le canevas.</li>' +
-                '<li>Double-clique dessus pour écrire l\u2019énoncé de compétence.</li>' +
+                // Deux liens (9 nov. 2026) — phrase validée par Grégoire mot pour mot.
+                '<li>Si la fiche de ton cours (Cadre › Trimestre) porte la compétence, le bloc la reprend\u00a0; sinon, double-clique dessus pour écrire l\u2019énoncé, ou écris-le dans la fiche.</li>' +
             '</ol>' +
             '<div class="planif-guide-astuce">Sélectionne la compétence et utilise le <strong>sélecteur de niveau cognitif</strong> dans l\u2019<strong>Inspecteur</strong> (panneau de droite) pour choisir le niveau visé (ex.\u00a0: Analyser, Créer). Les verbes suggérés t\u2019aideront à formuler ton énoncé.</div>' +
             // #966 — ligne ajoutée, texte validé par Grégoire (27 sept. 2026).
@@ -6782,7 +6783,7 @@ function ligneObjectifLieHTML(n, o, production, rang, nbLignes) {
     var ouvert = !!(_menuObjectifLie && _menuObjectifLie.noeudId === n.id
         && _menuObjectifLie.objectifId === o.id);
     var titreProd = (production.titre && String(production.titre).trim()) || 'Sans titre';
-    // PROPOSÉ (non validé, rapport § « Les mots à valider ») : l'infobulle.
+    // L'infobulle : acceptée le 9 nov. 2026.
     var bulle = 'Objectif de la production « ' + titreProd + ' »';
     var html =
         '<div class="planif-noeud-objectif-ligne planif-noeud-objectif-ligne--liee">' +

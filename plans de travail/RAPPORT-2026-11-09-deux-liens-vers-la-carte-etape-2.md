@@ -17,15 +17,16 @@
 - **Si la fiche ne répond plus** (compétence effacée, cours passé en service, carte détachée), le bloc lié garde son dernier énoncé et reste verrouillé ; « Délier » est toujours offert pour en sortir.
 - **Le relevé du stock** est prêt pour le Mac : `scripts/releve-stock-deux-liens.js`, à coller dans la console de Chrome (§ 6).
 - **Le point 5** (la production reprise à la rentrée) est vérifié en exécutant le chemin, pas seulement en le lisant (§ 5).
+- **Le guide de la carte**, page « Commence par le pourquoi », porte la phrase validée le 9 nov. (§ 7).
 
-### Ce qui attend Grégoire (une question par ligne, ma recommandation après la flèche)
+### Les questions, tranchées le 9 nov. 2026, 13 h 45 à 13 h 47, en Cowork
 
-1. **Délier un bloc Compétence que tu avais relié depuis ton stock.** Le rapport de mesure disait : « Délier recopie l'énoncé courant dans le titre ». Ta règle disait : le titre que tu as écrit n'est jamais effacé. J'ai appliqué les deux ainsi : si tu avais un titre à toi, il revient ; sinon (bloc né lié), l'énoncé reste. ⮕ Garder ainsi.
-2. **Recoudre les liens à la rentrée** (point 5). C'est possible : la production reprise garde l'identifiant de l'ancienne. Mais aujourd'hui, ni l'évaluation ni l'objectif ne se recousent. ⮕ Ne pas le faire dans ce lot. Le faire pour les deux liens ensemble, en lot à part, seulement si tu le vis à la rentrée d'hiver (§ 5).
-3. **Les mots que j'ai dû poser sans validation** (liste au § 8). Le plus visible : l'infobulle de la ligne liée, « Objectif de la production « … » ». ⮕ Les relire d'un coup d'œil sur les captures.
-4. **La phrase du guide de la carte** (« Double-clique dessus pour écrire l'énoncé de compétence »). Proposition au § 7, non posée. ⮕ La valider avec la fusion du cinquième parcours.
-5. **Le modèle de relecture par IA.** Le rapport de mesure proposait qu'un bloc lié « renvoie à Le cours » au lieu de répéter l'énoncé. Je ne l'ai pas fait : c'est un texte neuf, et avec le titre rafraîchi les deux sections disent désormais le même énoncé, sans se contredire. ⮕ Laisser ainsi.
-6. **La carte d'un trimestre passé suit la fiche d'aujourd'hui.** La fiche du cours est la même d'un trimestre à l'autre : ouvrir la carte de l'automne passé y met l'énoncé actuel de la compétence liée (relecture, constat 6). Le titre mis de côté, lui, ne bouge pas. ⮕ Garder : la fiche fait foi, et l'énoncé d'un devis change rarement.
+1. **Délier un bloc Compétence relié depuis le stock** (ton titre revient s'il y en avait un ; sinon l'énoncé reste) : **gardé** (Cowork).
+2. **Recoudre les liens à la rentrée** : **pas dans ce lot** ; plus tard, pour les deux liens ensemble, seulement si Grégoire le vit à la rentrée d'hiver. Écrit au § 12, sans entrée au backlog (aucun symptôme vécu).
+3. **Les mots posés sans validation** (§ 8) : **acceptés** (Cowork). Leurs marques « PROPOSÉ » sont retirées du code.
+4. **La phrase du guide de la carte** : **validée par Grégoire, mot pour mot, posée** dans ce lot (§ 7) ; la sentinelle l'exige.
+5. **Le modèle de relecture par IA** : **laissé ainsi** (Cowork).
+6. **La carte d'un trimestre passé suit la fiche d'aujourd'hui** pour un bloc lié ; le titre mis de côté ne bouge pas : **gardé** (Grégoire). L'Aide de la carte n'en dit rien : la phrase est **proposée** au § 7 bis, non posée.
 
 ### Ce que je n'ai pas pu vérifier
 
@@ -155,15 +156,27 @@ Il ne relève pas l'espace de démonstration. Il ne voit pas les objectifs d'une
 
 **Vérifié comment** : `tests/unit/releve-stock-deux-liens.test.js` confronte le relevé aux fonctions de la carte elles-mêmes (`objectifsARelierPourEvaluation`, `peutRelierCompetence`, `sectionCompetenceInspecteurHTML`), carte par carte, sur un jeu fictif qui passe par chaque branche (leçon avant, leçon après déjà cochée, évaluation hors leçon, production introuvable, objectif vide, clone, carte qui a déjà une compétence liée, fiche vide, service, carte sans cours, clé nue). Non lancé dans un navigateur : `db.keysSync` et `db.get` sont pris tels que le reste du code les emploie.
 
-## 7. La phrase du guide de la carte (proposée, non posée)
+## 7. La phrase du guide de la carte (posée)
 
-`js/planification-carte.js:2568`, page « Commence par le pourquoi », deuxième étape : « Double-clique dessus pour écrire l'énoncé de compétence. »
+`js/planification-carte.js:2568`, page « Commence par le pourquoi », deuxième étape. L'ancienne phrase, « Double-clique dessus pour écrire l'énoncé de compétence. », devient, validée par Grégoire le 9 nov. 2026 (13 h 45 à 13 h 47) mot pour mot :
 
-Proposition : « Si la fiche de ton cours (Cadre › Trimestre) porte la compétence, le bloc la reprend ; sinon, double-clique dessus pour écrire l'énoncé, ou écris-le dans la fiche. »
+« Si la fiche de ton cours (Cadre › Trimestre) porte la compétence, le bloc la reprend ; sinon, double-clique dessus pour écrire l'énoncé, ou écris-le dans la fiche. »
 
-## 8. Les mots posés sans validation (à relire)
+Typographie du guide : apostrophe courbe, espace insécable avant le point-virgule. **Vérifié comment** : `sentinelle-libelles-deux-liens` compare le texte rendu de la page (même normalisation que `sentinelle-guide-carte-966`) et exige que l'ancienne phrase soit partie ; un seul mot changé dans la phrase la fait rougir (break-test). `sentinelle-guide-carte-966` reste verte : cette ligne de la page 2 n'était pas figée.
 
-Posés pour que l'écran fonctionne, marqués « PROPOSÉ » dans le code quand ils sont neufs :
+## 7 bis. Une phrase pour l'Aide de la carte (proposée, non posée)
+
+Décision 6 : « le jour où un devis change, délier les cartes passées garde l'ancien énoncé ». L'Aide de la carte (`js/accompagnement-contenu-popup.js`, entrée `planification-alignement`) ne parle ni de la fiche du cours, ni du lien, ni du devis : rien à compléter. Proposition, à placer dans cette entrée :
+
+« Un bloc Compétence relié reprend l'énoncé de la fiche de ton cours (Cadre › Trimestre), dans toutes tes cartes, celles des trimestres passés comprises. Si le devis change, délie d'abord ce bloc dans les cartes passées, puis modifie la fiche : délié, il garde l'ancien énoncé, ou le titre que tu lui avais donné avant de le relier. »
+
+Deux précisions que la phrase porte, lues dans le code :
+- **l'ordre compte** : une carte passée ouverte APRÈS la modification de la fiche prend aussitôt le nouvel énoncé (le rafraîchissement à l'ouverture) ; il faut délier avant ;
+- **« l'ancien énoncé » n'est pas toujours ce que « Délier » laisse** : un bloc relié depuis le stock rend le titre mis de côté, pas l'énoncé (décision 1).
+
+## 8. Les mots posés sans validation au départ (acceptés le 9 nov. 2026)
+
+Posés pour que l'écran fonctionne, acceptés par Cowork le 9 nov. (13 h 45 à 13 h 47) ; leurs marques « PROPOSÉ » sont retirées du code :
 - l'infobulle de la ligne liée : « Objectif de la production « … » » ;
 - la mention d'une leçon **sans semaine** : la phrase validée s'arrête après le titre, « Repris dans la carte : leçon « … » » ;
 - dans l'Inspecteur d'un bloc Compétence, trois étiquettes reprises **telles quelles** de la fiche du cours : « N° de la compétence », « Éléments de compétence », « Compétence » (au-dessus du texte de la fiche, quand il diffère du titre) ;
@@ -175,6 +188,7 @@ Les six libellés validés sont posés mot pour mot, avec l'apostrophe typograph
 
 Pour la seconde des deux branches à fusionner (`lot/parcours-5-monter-ton-cours` ou celle-ci), mot pour mot, validées par Grégoire :
 
+- **La phrase du guide de la carte** (« Double-clique dessus pour écrire l'énoncé de compétence ») que la consigne du cinquième parcours voulait soumettre à Grégoire : **posée dans ce lot** (§ 7). La branche du parcours n'a pas à en poser une autre.
 - **Étape 1**, « …touche « Compétence » dans la palette « Nœuds », puis écris son énoncé, tel que le devis ministériel décrit la compétence et ses éléments » devient : « …touche « Compétence » dans la palette « Nœuds » : le bloc reprend la compétence de la fiche de ton cours (Cadre › Trimestre). Si ta fiche ne la porte pas encore, écris-y son énoncé et ses éléments, tels que le devis ministériel les décrit. »
   - La condition d'avance (« un bloc Compétence a un énoncé ») compte alors l'énoncé repris de la fiche. Avec ce lot, un bloc lié porte l'énoncé dans son **titre** (rafraîchi) : une condition qui lit `titre` tient. Une condition qui attendrait une frappe dans le titre ne tiendrait pas : le titre d'un bloc lié ne se tape pas.
 - **Étape 4**, « Ta production porte déjà un objectif d'apprentissage : si c'est celui que vise cette leçon, reprends-le ici. » devient : « Ta production porte déjà un objectif d'apprentissage : si c'est celui que vise cette leçon, touche « Reprendre l'objectif d'une production » et choisis-la. La ligne suivra toujours le texte de ta production. »
@@ -183,7 +197,7 @@ Pour la seconde des deux branches à fusionner (`lot/parcours-5-monter-ton-cours
 
 ## 10. Vérifications finales, et la relecture par un agent neuf
 
-- **Vitest, suite entière** (depuis `tests/`, après les corrections de la relecture) : 898 fichiers, 10 897 essais, tous verts.
+- **Vitest, suite entière** (depuis `tests/`, après les décisions du 9 nov., 13 h 45) : 898 fichiers, 10 898 essais, tous verts.
 - **Chromium** : la spec du lot et les specs voisines de la carte (`planif-date-inspecteur-695`, `planif-badges-objectifs-964`, `planif-pastille-evaluation-965`, `planif-objectifs-espacement-157`) vertes après les corrections ; la passe complète des specs de la carte est au § 4.
 - **Relecture par un agent neuf**, sur `eb98c159` (sondes et mutations sur une copie, rien écrit dans le dépôt). **Verdict, en une ligne : deux défauts à corriger avant la fusion (un titre mis de côté perdu par une frappe sur un lien qui dort ; « Décloner » qui laissait deux compétences liées), le reste mineur ; sécurité conforme, aucun glissement de lien trouvé dans `appliquerObjectifs`.**
 
@@ -196,7 +210,7 @@ Ce que chaque constat est devenu :
 | 3. « Relier » crée un doublon que « Reprendre » refuse | **Corrigé** : refusé et non proposé. Essai et mutant ; le relevé suit la même règle. |
 | 4. Un titre identique à la casse près n'est pas mis de côté | **Corrigé** : mis de côté dès qu'il n'est pas exactement l'énoncé. Essai et mutant. |
 | 5. L'import par la bibliothèque garde les liens d'objectif morts | **Commenté, gardé** : même règle que le pont de l'évaluation sur ce chemin (§ 11). |
-| 6. Le rafraîchissement réécrit aussi les cartes des trimestres passés | **À Grégoire** : question 6 de l'en-tête. |
+| 6. Le rafraîchissement réécrit aussi les cartes des trimestres passés | **Gardé** (Grégoire, 9 nov.) ; une phrase pour l'Aide est proposée au § 7 bis. |
 | 7. Le relevé : (a) évaluation sans production, (b) espace de démo, (c) objectifs pas encore migrés | **(a) et (b) corrigés**, essais et mutants ; **(c) dit** au § 6. |
 | 8. Quitter une ligne d'accueil vide pour le sélecteur « Reprendre… » le détruisait | **Corrigé** (lu, non éprouvé au banc : un menu natif ne s'ouvre pas sous Playwright). À toucher sur l'iPad. |
 | Tests : l'essai du stock pouvait sauter en silence | **Corrigé** : il échoue au lieu de sauter. |
@@ -209,6 +223,8 @@ Ce que chaque constat est devenu :
 - **Le badge du niveau cognitif chevauche le titre d'un bloc d'une ligne** (« Analyser » sur « Analyser un texte littéraire », vu sur les captures en mode clair). Antérieur au lot, aucun symptôme vécu connu. ⮕ Commenter ici et oublier, sauf si tu le vis.
 - **Une carte reçue d'un·e collègue garde des liens d'objectif vers des productions qui n'existent pas chez toi** (`importerDepuisBibliotheque` ne fait pas le contrôle de la reprise, comme pour l'évaluation, déjà relevé au rapport de mesure). Effet : la ligne s'affiche comme un objectif ordinaire ; l'écrire fait tomber le lien. ⮕ Commenter ici et oublier.
 
-## 12. À inscrire au BACKLOG
+## 12. À inscrire
 
-Rien de neuf. Les deux entrées du rapport de mesure (§ 6 là-bas) sont livrées par ce lot : la session du Mac les inscrit comme faites à la fusion, ou ne les inscrit pas.
+**Au BACKLOG : rien de neuf.** Les deux entrées du rapport de mesure (§ 6 là-bas) sont livrées par ce lot : la session du Mac les inscrit comme faites à la fusion, ou ne les inscrit pas.
+
+**Noté, sans entrée au backlog** (décision 2 du 9 nov. ; aucun symptôme vécu) : **recoudre les liens à la rentrée**, pour les deux liens ensemble (l'objectif repris d'une production et le pont de l'évaluation), plus tard, seulement si Grégoire le vit à la rentrée d'hiver. Ce qu'il faudrait savoir ce jour-là est au § 5 : la production reprise garde `idOriginal` ; l'ordre des reprises compte ; l'import sélectif en conflit ne laisse aucune trace.

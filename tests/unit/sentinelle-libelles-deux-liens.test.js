@@ -58,6 +58,19 @@ describe('Sentinelle · libellés des deux liens (validés le 9 nov. 2026)', () 
         });
     });
 
+    // Guide de la carte, page « Commence par le pourquoi » : phrase validée par Grégoire le 9 nov. 2026
+    // (13 h 45 à 13 h 47), mot pour mot. Même normalisation que sentinelle-guide-carte-966 : balises
+    // retirées, apostrophe courbe → droite, espace insécable → espace (la typographie du guide).
+    it('le guide de la carte porte la phrase validée, et plus l’ancienne', () => {
+        const normaliser = (t) => t.replace(/<\/(p|li|div|span)>/g, ' ').replace(/<[^>]+>/g, '')
+            .replace(/[’]/g, "'").replace(/\u00a0/g, ' ').replace(/\s+/g, ' ').trim();
+        const page = api.GUIDE_PAGES.find((p) => p.id === 'competence');
+        const texte = normaliser(page.contenu);
+        expect(texte).toContain("Si la fiche de ton cours (Cadre › Trimestre) porte la compétence, le bloc la reprend ; "
+            + "sinon, double-clique dessus pour écrire l'énoncé, ou écris-le dans la fiche.");
+        expect(texte).not.toContain("Double-clique dessus pour écrire l'énoncé de compétence.");
+    });
+
     it('la fiche de production affiche la mention par la carte, sans recopier la phrase', () => {
         expect(sourceProductions).toMatch(/lignesReprisesObjectif\(/);
         expect(sourceProductions).not.toMatch(/Repris dans la carte/);
