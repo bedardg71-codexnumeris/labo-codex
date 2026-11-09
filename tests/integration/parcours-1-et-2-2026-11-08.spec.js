@@ -128,7 +128,8 @@ test('panneau : titre, phrase, « Tes parcours », deux parcours à faire, l’a
     await expect(p.locator('.assistance-parcours-titre')).toHaveText(['Découvrir', 'Mettre ta classe en place', 'Lire ta classe et intervenir']);
     await expect(p.locator('.assistance-parcours-ligne')).toHaveText([
         "Ce que Labo Codex te montre avant d'entrer en classe, sur une classe de démonstration.",
-        "De ton trimestre à ta première saisie de présences : ta classe d'un coup d'œil."
+        "De ton trimestre à ta première saisie de présences : ta classe d'un coup d'œil.",
+        "Avant chaque cours, voir qui a besoin de toi et de quoi ; puis, si tu le décides, noter une intervention."
     ]);
     await expect(p.locator('.assistance-parcours-etat')).toHaveText(['À faire', 'À faire', 'À faire']);
     await expect(p.locator('.assistance-parcours-bouton')).toHaveText(['Commencer', 'Commencer', 'Commencer']);
