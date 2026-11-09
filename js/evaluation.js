@@ -2155,16 +2155,27 @@ function appliquerJetonDelaiDepuisSidebar() {
 
 /**
  * Tableau de notation (9 nov. 2026) — CE QUE DIT LE FORMULAIRE D'UN RÉSULTAT SAISI SANS GRILLE. Il n'a ni grille
- * ni critères : le formulaire ne peut ni l'afficher ni le modifier. Mots PROPOSÉS, à faire valider par Grégoire.
+ * ni critères : le formulaire ne peut ni l'afficher ni le modifier. Mots validés par Grégoire, mot pour mot (9 nov. 2026).
  */
 function _direResultatSansGrille() {
     notifications.info('Résultat saisi sans grille',
-        'Cette production a été notée au tableau de notation (Évaluation › Liste). Change son résultat là.');
+        'Cette production a été évaluée au tableau de notation (Évaluation › Liste). C\'est là que tu changes son résultat.');
 }
 
-/** Le formulaire rencontre un résultat sans grille (élève et production choisis) : verrouillé, sans cadenas, et il le dit. */
+/**
+ * « Verrouiller » n'a rien à verrouiller sur le formulaire vidé d'un résultat sans grille (Cowork, 9 nov. 2026) : masqué.
+ * Avant, il restait visible et répondait « Impossible de modifier une évaluation verrouillée ». Tout autre chargement
+ * du formulaire le remontre (`afficherOuMasquerBoutonVerrouillage`).
+ */
+function _masquerVerrouDuFormulaire(masquer) {
+    const bouton = document.getElementById('btnVerrouillerEvaluation');
+    if (bouton) bouton.classList.toggle('u-hide', !!masquer);
+}
+
+/** Le formulaire rencontre un résultat sans grille (élève et production choisis) : verrouillé, sans cadenas ni bouton de verrou, et il le dit. */
 function _formulaireSurResultatSansGrille() {
     afficherOuMasquerBoutonVerrouillage(false);
+    _masquerVerrouDuFormulaire(true);
     desactiverFormulaireEvaluation(true);
     _direResultatSansGrille();
 }
@@ -2390,6 +2401,7 @@ function _poserCadenasDesBadges(estVerrouillee) {
  * Affiche ou masque l'indicateur de verrouillage selon le contexte
  */
 function afficherOuMasquerBoutonVerrouillage(afficher, estVerrouillee = false) {
+    _masquerVerrouDuFormulaire(false);   // tableau de notation : masqué seulement devant un résultat sans grille
     if (afficher) {
         mettreAJourBoutonVerrouillage(estVerrouillee);
     } else {

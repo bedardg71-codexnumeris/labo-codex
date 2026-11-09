@@ -1215,7 +1215,7 @@ function resultatAcceptableSansGrille(evaluation) {
 
 /**
  * Les mots d'un jugement sans grille, là où une copie montre son niveau (la liste des évaluations, le tableau).
- * PROPOSÉS (9 nov. 2026, les mots de la légende de l'ébauche du tableau) : à faire valider par Grégoire.
+ * Validés par Grégoire, mot pour mot (9 nov. 2026, 15 h 38 à 15 h 40) : les mots de la légende du tableau.
  */
 const LIBELLES_JUGEMENT_SANS_GRILLE = Object.freeze({ acceptable: 'Acceptable', nonAcceptable: 'Non acceptable' });
 

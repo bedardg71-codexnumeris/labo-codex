@@ -337,3 +337,21 @@
 .tn-annonce {
     margin: 0;
 }
+
+/* « Annuler » et « Exporter », côte à côte dans le bandeau. */
+.tn-gestes {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+/* L'échelle a changé depuis la saisie : un signe au coin de la case (≠), en plus de l'infobulle et du libellé lu. */
+.tn-case--valeur-changee::before {
+    content: '≠';
+    position: absolute;
+    left: 4px;
+    bottom: 1px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    line-height: 1;
+}

@@ -105,6 +105,40 @@ describe('A · l\'écriture d\'un résultat sans grille (pure)', () => {
         // Une copie de standards sous une pratique devenue « spécifications » : pas de jugement binaire, la case est vide.
         expect(donnees.etatDeLaCase(Object.assign({}, deverrouillee, { verrouillee: true }), 'SPE', true).forme).toBe('vide');
     });
+    // Décision de Grégoire (9 nov. 2026, 15 h 38) : « Annuler » défait le dernier geste, quel qu'il soit.
+    it('A9 annuler : un niveau changé revient, une case vidée retrouve son résultat, une case remplie redevient vide', () => {
+        const saisir = (stock, valeur) => donnees.appliquerSaisie(stock, { famille: 'STD', valeur, echelle: ECHELLE, contexte: contexte() });
+        const geste = (avant, r) => ({ da: ETUDIANT.da, productionId: 'A1', avant: avant ? clone(avant) : null, apresId: r.action === 'retire' ? null : r.evaluation.id });
+        // Créer puis annuler : la case redevient vide.
+        const cree = saisir([], 'M');
+        expect(donnees.defaireSaisie(cree.evaluations, geste(null, cree))).toEqual({ evaluations: [], action: 'defait' });
+        // Changer M → E puis annuler : M, sa valeur et son verrou reviennent.
+        const change = saisir(cree.evaluations, 'E');
+        const revenu = donnees.defaireSaisie(change.evaluations, geste(cree.evaluation, change));
+        expect(revenu.action).toBe('defait');
+        expect(revenu.evaluations).toHaveLength(1);
+        expect(revenu.evaluations[0]).toMatchObject({ id: 'EVAL_NEUF', niveauFinal: 'M', noteFinale: 75, verrouillee: true, sansGrille: true });
+        // Vider (le toucher de trop) puis annuler : le résultat est rendu, le même.
+        const vide = saisir(cree.evaluations, '');
+        expect(vide.evaluations).toHaveLength(0);
+        const rendu = donnees.defaireSaisie(vide.evaluations, geste(cree.evaluation, vide));
+        expect(rendu.evaluations).toEqual([cree.evaluation]);
+    });
+    it('A10 annuler ne touche jamais une évaluation à grille, et renonce si la case a changé depuis le geste', () => {
+        const saisir = (stock, valeur) => donnees.appliquerSaisie(stock, { famille: 'STD', valeur, echelle: ECHELLE, contexte: contexte() });
+        const cree = saisir([], 'M');
+        const g = { da: ETUDIANT.da, productionId: 'A1', avant: null, apresId: cree.evaluation.id };
+        // Entre-temps, une évaluation à grille est venue pour le même couple : rien ne se défait.
+        const avecGrille = cree.evaluations.concat([COPIE_GRILLE]);
+        expect(donnees.defaireSaisie(avecGrille, g)).toEqual({ evaluations: avecGrille, action: 'refuse' });
+        // La copie du geste n'est plus là, ou c'est une évaluation à grille qui porte cet id : refus.
+        expect(donnees.defaireSaisie([], g).action).toBe('refuse');
+        expect(donnees.defaireSaisie([Object.assign({}, COPIE_GRILLE, { id: cree.evaluation.id })], g).action).toBe('refuse');
+        // Un geste qui avait vidé la case ne remet rien si la case n'est plus vide ; et jamais une évaluation à grille.
+        expect(donnees.defaireSaisie([COPIE_GRILLE], { da: ETUDIANT.da, productionId: 'A1', avant: cree.evaluation, apresId: null }).action).toBe('refuse');
+        expect(donnees.defaireSaisie([], { da: ETUDIANT.da, productionId: 'A1', avant: COPIE_GRILLE, apresId: null }).action).toBe('refuse');
+        expect(donnees.defaireSaisie([], null).action).toBe('refuse');
+    });
 });
 
 /* ================================================================ B */
@@ -342,9 +376,58 @@ describe('E · l\'écran (sécurité et règle dite)', () => {
         expect(html).not.toMatch(/<img src=x|<script>x|<b>Pratique/);
         expect(html).toContain('&lt;img src=x onerror=alert(1)&gt;');
     });
-    it('E3 la règle des standards se dit avec les réglages de la pratique (mots PROPOSÉS)', () => {
+    it('E3 la règle des standards se dit avec les réglages de la pratique (mots validés par Grégoire, 9 nov. 2026)', () => {
         expect(ecran.phraseRegleStd({ portfolio: { nombreARetenir: 3, methodeSelection: 'recents' } }, false)).toBe('La note retient les 3 productions les plus récentes.');
-        expect(ecran.phraseRegleStd({ portfolio: { nombreARetenir: 4, methodeSelection: 'meilleurs' } }, true)).toBe('La note retient les 4 meilleures productions, puis la terminale.');
+        expect(ecran.phraseRegleStd({ portfolio: { nombreARetenir: 4, methodeSelection: 'meilleurs' } }, true)).toBe('La note retient les 4 meilleures productions, et la terminale.');
         expect(ecran.phraseRegleStd({ categories: { actif: true }, portfolio: {} }, false)).toBe('La note retient les catégories de ta pratique.');
+    });
+});
+
+/* ================================================================ F */
+// LES MOTS DE L'ÉCRAN, VALIDÉS PAR GRÉGOIRE MOT POUR MOT (9 nov. 2026, 15 h 38 à 15 h 40, relayés par Cowork). Ce bloc les
+// exige : une phrase retouchée ici sans son accord rougit. Seule l'infobulle de l'échelle modifiée reste proposée.
+describe('F · les mots validés', () => {
+    const fs = require('node:fs');
+    const path = require('node:path');
+    const lire = (f) => fs.readFileSync(path.resolve(__dirname, '..', '..', f), 'utf8');
+    const ecran = chargerScript('js/tableau-notation.js', { db: { getSync: (k, d) => (d !== undefined ? d : null) }, echapperHtml: (t) => String(t).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;') },
+        { TableauNotationDonnees: donnees }).TableauNotation;
+    const ctxStd = (extra) => Object.assign({ etat: 'ok', famille: 'STD', pratiqueId: 'p', pratiqueNom: 'Pratique fictive', config: { portfolio: { nombreARetenir: 4, methodeSelection: 'meilleurs' } },
+        echelle: ECHELLE, etudiants: [{ da: '2000001', prenom: 'Alice', nom: 'Fictive' }], productions: [{ id: 'P1', titre: 'Production fictive' }], evaluations: [], terminalId: 'T1' }, extra || {});
+    it('F1 le tableau en standards : intro, avertissement, règle, colonne de la note, légende et ⌘Z', () => {
+        const html = ecran.construireHTML(ctxStd());
+        for (const mot of [
+            'Tableau de notation',
+            'Saisis le résultat de chaque production, qu’elle ait été évaluée ici ou ailleurs. La note de chaque étudiant·e se construit dans la dernière colonne, selon les réglages de ta pratique.',
+            'Un résultat saisi ici compte dans la note, mais il n’a pas de critères : il ne donne ni forces, ni défis, ni rétroaction par critère.',
+            'La note retient les 4 meilleures productions, et la terminale.',
+            'Note provisoire', 'Étudiant·e', 'en attente de résultats', '>Annuler<',
+            'Plein : compte dans la note', 'Contour : évaluée, non retenue', 'Pointillé : à saisir', 'Point : évaluée avec une grille',
+            'Touche une case pour changer le niveau. Au clavier : la lettre du niveau, Retour arrière pour vider, les flèches pour se déplacer. ⌘Z annule le dernier geste.'
+        ]) expect(html, mot).toContain(mot);
+        expect(html).not.toContain('puis la terminale');
+        const finalisee = ecran.construireHTML(ctxStd({ config: { notesFinales: true, portfolio: { nombreARetenir: 4, methodeSelection: 'meilleurs' } } }));
+        expect(finalisee).toContain('>Note finale<');
+        expect(finalisee).not.toContain('Note provisoire');
+    });
+    it('F2 les états sans tableau, la légende des spécifications, la bascule et l\'avis du formulaire', () => {
+        expect(ecran.construireHTML({ etat: 'autre-famille' })).toContain('Le tableau de notation sert aux pratiques par standards et par spécifications. Pour la pratique de ce groupe-cours, la Liste reste la vue de tes évaluations.');
+        expect(ecran.construireHTML({ etat: 'aucune-pratique' })).toContain('Ce groupe-cours n’a pas de pratique de notation. Choisis-en une dans Conception › Pratiques : le tableau suivra ses réglages.');
+        const source = lire('js/tableau-notation.js');
+        expect(source).toContain('Touche une case pour changer le résultat. Au clavier : A ou N, Retour arrière pour vider, les flèches pour se déplacer. ⌘Z annule le dernier geste.');
+        expect(source).toContain("legendeSpe: ['✓ Acceptable', '✗ Non acceptable', 'Pointillé : à saisir', 'Point : évaluée avec une grille']");
+        const index = lire('index.html');
+        expect(index).toMatch(/id="tn-vue-liste"[^>]*>Liste<\/button>/);
+        expect(index).toMatch(/id="tn-vue-tableau"[^>]*>Tableau de notation<\/button>/);
+        const formulaire = lire('js/evaluation.js');
+        expect(formulaire).toContain("notifications.info('Résultat saisi sans grille',");
+        expect(formulaire).toContain("'Cette production a été évaluée au tableau de notation (Évaluation › Liste). C\\'est là que tu changes son résultat.'");
+        expect(registre.LIBELLES_JUGEMENT_SANS_GRILLE).toEqual({ acceptable: 'Acceptable', nonAcceptable: 'Non acceptable' });
+    });
+    it('F3 plus aucun mot du tableau n\'est marqué « PROPOSÉ », sauf l\'infobulle de l\'échelle modifiée', () => {
+        const marques = (f) => (lire(f).match(/PROPOS[ÉE]+S?/g) || []).length;
+        expect(marques('js/tableau-notation.js')).toBe(2);   // l'en-tête qui nomme l'exception, et l'infobulle `valeurChangee`
+        expect(marques('js/tableau-notation-donnees.js')).toBe(0);
+        expect(marques('css/tableau-notation.css')).toBe(0);
     });
 });

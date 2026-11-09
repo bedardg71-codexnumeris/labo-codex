@@ -2,6 +2,54 @@
 
 *Deux sessions Claude Code dans le cloud ont fait ce lot. La première (rapport d'origine, conservé plus bas) l'a codé sans la consigne, depuis la 1.238.0, et l'a poussé à 19 h 52 UTC. La seconde (ce rapport de tête) a reçu la consigne et les six précisions de Cowork du 9 nov., 15 h. **Cette seconde version est poussée sur `lot/tableau-de-notation-1-bis`, à la demande de Cowork (9 nov.) : rien n'a été poussé sur `lot/tableau-de-notation-1`, qui reste à `12f5c640`. Cowork comparera les deux, Grégoire choisira.** Rien n'est fusionné dans `main`, rien n'est publié, la version ne bouge pas. Chromium seulement.*
 
+## Après les décisions du 9 nov., 15 h 37 à 15 h 40 (la bis est la version retenue)
+
+*Cette section fait foi sur tout ce qui suit. Branche `lot/tableau-de-notation-1-bis` ; `lot/tableau-de-notation-1` n'est jamais touchée. Le verdict WebKit et la fusion se feront sur le Mac, au groupe 3, après `lot/completion-suit-la-remise`.*
+
+### Ce qui est fait, en gestes
+
+- **« Annuler »** : un bouton dans l'en-tête du tableau, et ⌘Z (Ctrl+Z hors Mac). Il défait le dernier geste fait au tableau, quel qu'il soit : un niveau changé revient, une case vidée retrouve son résultat (le même, à l'identique), une case remplie par erreur redevient vide. Un seul niveau : le geste défait ne se refait pas, et le bouton se grise. Il ne touche jamais une évaluation faite avec une grille, et il renonce sans rien écrire si la case a changé depuis le geste.
+- **« Verrouiller » est masqué** sur le formulaire vidé d'un résultat sans grille ; il revient dès qu'on ouvre une évaluation à grille.
+- **Une échelle modifiée après la saisie** : la case porte un signe « ≠ » au coin, une infobulle et le même texte pour le lecteur d'écran. Rien n'est réécrit : la note compte toujours la valeur saisie. Ressaisir le niveau écrit la valeur d'aujourd'hui et le signe part.
+- **Les mots validés sont posés mot pour mot**, et « PROPOSÉ » est retiré du code. Un banc les exige (bloc F de `tests/unit/tableau-notation-1.test.js`) : une phrase retouchée rougit.
+
+### Les questions, tranchées
+
+| Question | Décision |
+|---|---|
+| Spécifications sans seuil dans cette voie | **Confirmé par Grégoire** : ✓ compte, ✗ ne compte pas. Rien à changer au code. |
+| Vider une case | **Grégoire** : « Annuler » et ⌘Z. Fait. |
+| Inactifs, décrochage, abandon hors du tableau | **Cowork** : on garde. |
+| Les pastilles qui changent la règle ; « Évaluer avec une grille » qui remplace un résultat | **Cowork** : lot 2. |
+| Le PDF d'un jugement « Acceptable / Non acceptable » | **Cowork** : lot 2, ses mots à Grégoire. |
+| « Verrouiller » sur le formulaire vidé | **Cowork** : masqué maintenant. Fait. |
+| Une échelle modifiée après la saisie | **Cowork** : un signe, sans rien réécrire. Fait. |
+| L'échelle de départ en dernier recours | **Cowork** : on garde. |
+| Les colonnes limitées aux productions qui entrent dans la note | **Cowork** : on garde. |
+| Copie importée et résultat au tableau pour la même production | **Cowork** : on garde pour ce lot. |
+| Les mots de l'écran | **Validés par Grégoire**, avec six changements, tous posés. |
+
+### Ce qui attend encore Grégoire (une question par ligne)
+
+1. **L'infobulle de l'échelle modifiée**, seul texte encore proposé : « L'échelle a changé depuis la saisie : ce résultat compte encore pour 75. » (75 est la valeur écrite.) *Recommandation : la garder telle quelle.*
+2. **Le refus d'une reprise sur un résultat sans grille** dit : « Cette production a été notée au tableau de notation : change son résultat là, sans reprise. » Cette phrase n'était pas dans le tableau des mots validés ; elle dit encore « notée » quand l'avis du formulaire dit maintenant « évaluée ». *Recommandation : « Cette production a été évaluée au tableau de notation : c'est là que tu changes son résultat, sans reprise. »* Je ne l'ai pas changée.
+3. **⌘Z dans la légende** : le texte validé dit « ⌘Z » sur tous les postes ; sous Windows, le raccourci qui marche est Ctrl+Z. *Recommandation : garder, tes utilisateurs sont sur Mac et iPad ; à revoir si un testeur est sous Windows.*
+
+### Ce que je n'ai pas pu vérifier
+
+- WebKit, Safari, l'iPad, tes données réelles (inchangé).
+- ⌘Z avec un clavier externe sur l'iPad : sous Chromium, le banc joue Ctrl+Z (Linux). Le code accepte les deux touches ; la touche ⌘ elle-même n'a pas été jouée.
+- La suite Playwright complète : seule la spec du lot a tourné.
+
+### Preuve (sur le dernier commit de code)
+
+- **Spec Chromium du lot, en entier** : 15 essais verts sur 15, plus 8 captures à la demande.
+- **Vitest du lot** : 32 essais verts (A9, A10 et le bloc F ajoutés).
+- **Vitest complet** : VERDICT_VITEST_3
+- **Break-tests de cette étape**, chacun rougit son essai puis le code est restauré : l'écoute de ⌘Z retirée ; le geste non mémorisé (le bouton reste grisé) ; le signe de l'échelle retiré ; le masquage de « Verrouiller » retiré ; la garde qui empêche « Annuler » de toucher une évaluation à grille retirée (banc A10).
+- **Captures** : huit, refaites sur cet état, dans `plans de travail/captures-2026-11-09-tableau-de-notation-1/` : standards et spécifications, 1180 et 820 px, clair et sombre, Chromium, noms fictifs. Le témoin « Enregistré » y paraît en bas à gauche : c'est son comportement ordinaire.
+- **Pas de nouvelle relecture par un agent neuf** pour cette étape : la précédente portait sur `0c862c9f`.
+
 ## Reprise avec la consigne (seconde session)
 
 ### À mesurer sur le Mac, au retour

@@ -167,11 +167,16 @@ test.describe('Tableau de notation · standards', () => {
             s.value = '9990010';
             s.dispatchEvent(new Event('change', { bubbles: true }));
         });
-        await expect(page.getByText('Cette production a été notée au tableau de notation')).toBeVisible({ timeout: 15000 });
+        await expect(page.getByText('Cette production a été évaluée au tableau de notation (Évaluation › Liste). C\'est là que tu changes son résultat.')).toBeVisible({ timeout: 15000 });
+        // « Verrouiller » n'a rien à verrouiller ici : masqué (Cowork, 9 nov.) ; il revient pour une évaluation à grille.
+        await expect(page.locator('#btnVerrouillerEvaluation')).toBeHidden();
         await expect(page.locator('#selectGrille1')).toBeDisabled();
         // L'enregistrement automatique n'a rien d'armé : ni minuteur ni instantané en attente.
         await page.waitForFunction(() => !window._timerAutoSave && !window._pendingAutoSaveSnapshot, null, { timeout: 10000 });
         expect(await sansGrilleDe(page, '9990010', 'P1')).toEqual(avant);
+        await page.evaluate(() => window.modifierEvaluationParId('EG1'));
+        await page.waitForFunction(() => window.evaluationEnCours && window.evaluationEnCours.idModification === 'EG1', null, { timeout: 15000 });
+        await expect(page.locator('#btnVerrouillerEvaluation')).toBeVisible();
         expect(erreurs).toEqual([]);
     });
 });
@@ -356,6 +361,77 @@ test.describe('Tableau de notation · la consigne', () => {
         expect(erreurs).toEqual([]);
     });
 
+    // Décision de Grégoire (9 nov., 15 h 38) : « Annuler » et ⌘Z défont le dernier geste fait au tableau, quel qu'il soit.
+    test('« Annuler » et ⌘Z : le toucher de trop ne fait pas perdre un résultat ; une évaluation à grille n\'est jamais touchée', async ({ page }) => {
+        const erreurs = await monter(page, 'STD', [COPIE_GRILLE]);
+        const empreinte = await empreinteAGrille(page);
+        const annuler = page.locator('#tableau-notation-hote #tn-annuler');
+        await expect(annuler).toHaveText('Annuler');
+        await expect(annuler).toBeDisabled();
+        const raccourci = process.platform === 'darwin' ? 'Meta+z' : 'Control+z';
+
+        // E (le dernier niveau), puis le toucher de trop : la case se vide, la note part.
+        await kase(page, 1, 1).focus();
+        await page.keyboard.press('e');
+        const saisi = await sansGrilleDe(page, '9990010', 'P1');
+        await expect(note(page, 1)).toHaveText('100');
+        await kase(page, 1, 1).click();
+        await expect(kase(page, 1, 1)).toHaveText('+');
+        expect(await sansGrilleDe(page, '9990010', 'P1')).toBeUndefined();
+        // Le bouton : le résultat revient, le même, et la note avec lui.
+        await expect(annuler).toBeEnabled();
+        await annuler.click();
+        await expect(kase(page, 1, 1)).toHaveText('E');
+        await expect(note(page, 1)).toHaveText('100');
+        expect(await sansGrilleDe(page, '9990010', 'P1')).toEqual(saisi);
+        await expect(page.locator('#tableau-notation-hote #tn-annuler')).toBeDisabled();   // un seul niveau
+
+        // Un niveau changé (E → M au clavier), défait au clavier.
+        await kase(page, 1, 1).focus();
+        await page.keyboard.press('m');
+        await expect(kase(page, 1, 1)).toHaveText('M');
+        await page.keyboard.press(raccourci);
+        await expect(kase(page, 1, 1)).toHaveText('E');
+        expect(await sansGrilleDe(page, '9990010', 'P1')).toEqual(saisi);
+        // Une case remplie par erreur, défaite : elle redevient vide et la copie part.
+        await kase(page, 1, 3).click();
+        await expect(kase(page, 1, 3)).toHaveText('PS');
+        await page.keyboard.press(raccourci);
+        await expect(kase(page, 1, 3)).toHaveText('+');
+        expect(await sansGrilleDe(page, '9990010', 'P3')).toBeUndefined();
+        // Sans geste à défaire, le raccourci ne fait rien ; les évaluations à grille n'ont jamais bougé.
+        await page.keyboard.press(raccourci);
+        expect(await sansGrilleDe(page, '9990010', 'P1')).toEqual(saisi);
+        expect(await empreinteAGrille(page)).toEqual(empreinte);
+        expect(erreurs).toEqual([]);
+    });
+
+    test('une échelle modifiée après la saisie : un signe sur la case, la note écrite ne bouge pas', async ({ page }) => {
+        const erreurs = await monter(page, 'STD');
+        await kase(page, 1, 1).focus();
+        await page.keyboard.press('m');
+        await expect(kase(page, 1, 1)).not.toHaveClass(/tn-case--valeur-changee/);
+        await page.evaluate((T) => {
+            const echelles = window.db.getSync(T + '_echellesTemplates', []);
+            echelles[0].niveaux.find((n) => n.code === 'M').valeurCalcul = 80;
+            window.db.setSync(T + '_echellesTemplates', echelles);   // security-ok: fixture fictive du banc
+            window.TableauNotation.afficher();
+        }, T);
+        const c = kase(page, 1, 1);
+        await expect(c).toHaveClass(/tn-case--valeur-changee/);
+        await expect(c).toHaveAttribute('title', 'L’échelle a changé depuis la saisie : ce résultat compte encore pour 75.');
+        await expect(c).toHaveAttribute('aria-label', /compte encore pour 75/);
+        await expect(note(page, 1)).toHaveText('75');
+        expect(await sansGrilleDe(page, '9990010', 'P1')).toMatchObject({ niveauFinal: 'M', noteFinale: 75 });
+        // Ressaisir le niveau (E, puis M) écrit la valeur d'aujourd'hui : le signe part.
+        await c.focus();
+        await page.keyboard.press('e');
+        await page.keyboard.press('m');
+        await expect(kase(page, 1, 1)).not.toHaveClass(/tn-case--valeur-changee/);
+        expect(await sansGrilleDe(page, '9990010', 'P1')).toMatchObject({ noteFinale: 80 });
+        expect(erreurs).toEqual([]);
+    });
+
     test('sans note, la case dit la cause en clair (pas seulement en bulle) : aucun forfait atteint, aucun palier d\'échec', async ({ page }) => {
         const erreurs = await monter(page, 'SPE');
         await page.evaluate((T) => {
@@ -372,7 +448,7 @@ test.describe('Tableau de notation · la consigne', () => {
     });
 });
 
-// CAPTURES — Chromium, 1180 px, standards et spécifications, noms fictifs. Le dossier de sortie vient de la variable
+// CAPTURES — Chromium, 1180 et 820 px, standards et spécifications, noms fictifs. Le dossier de sortie vient de la variable
 // CAPTURES (un chemin absolu) : une spec ne nomme pas un chemin que la CI n'observe pas.
 test.describe('Tableau de notation · captures', () => {
     test.skip(!process.env.CAPTURES, 'captures à la demande (CAPTURES=<dossier>)');
@@ -382,9 +458,9 @@ test.describe('Tableau de notation · captures', () => {
         SPE: [['a', 'a', 'a', 'a', 'a', 'a'], ['a', 'n', 'a', null, 'a', null], ['a', 'a', 'a', null, 'n', null], [null, null, null, null, null, null]]
     };
     for (const famille of ['STD', 'SPE']) {
-        for (const mode of ['sombre', 'clair']) {
-            test(`${famille === 'STD' ? 'standards' : 'specifications'}, 1180, ${mode}`, async ({ page }) => {
-                await page.setViewportSize({ width: 1180, height: 820 });
+        for (const [mode, largeur, hauteur] of [['sombre', 1180, 820], ['clair', 1180, 820], ['sombre', 820, 1180], ['clair', 820, 1180]]) {
+            test(`${famille === 'STD' ? 'standards' : 'specifications'}, ${largeur}, ${mode}`, async ({ page }) => {
+                await page.setViewportSize({ width: largeur, height: hauteur });
                 const grille = famille === 'STD'
                     ? [COPIE_GRILLE, Object.assign({}, COPIE_GRILLE, { id: 'EG-O', etudiantDA: '9990012', noteFinale: 40, niveauFinal: 'I', remplaceeParId: 'EG-R' }),
                         Object.assign({}, COPIE_GRILLE, { id: 'EG-R', etudiantDA: '9990012', noteFinale: 100, niveauFinal: 'E', repriseDeId: 'EG-O', jetonRepriseApplique: true, dateEvaluation: '2026-10-20T12:00:00.000Z' })]
@@ -411,7 +487,7 @@ test.describe('Tableau de notation · captures', () => {
                     return noms;
                 });
                 expect(flottants.length).toBeGreaterThan(0);
-                await page.screenshot({ path: path.join(dossier, `${famille === 'STD' ? 'standards' : 'specifications'}-1180-${mode}.png`), fullPage: true });
+                await page.screenshot({ path: path.join(dossier, `${famille === 'STD' ? 'standards' : 'specifications'}-${largeur}-${mode}.png`), fullPage: true });
             });
         }
     }

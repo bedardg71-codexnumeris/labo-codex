@@ -196,6 +196,32 @@
         return { evaluations: liste.filter(e => e !== existante), action: 'retire', evaluation: existante };
     }
 
+    /**
+     * DÉFAIT LE DERNIER GESTE DU TABLEAU (décision de Grégoire, 9 nov. 2026, 15 h 38 : « Annuler » et ⌘Z ; aucun toucher
+     * de trop ne fait perdre un résultat). `geste` : { da, productionId, avant, apresId } — `avant` est la copie telle
+     * qu'elle était (null : la case était vide), `apresId` l'id de la copie que le geste a laissée (null : il l'a retirée).
+     * Ne touche qu'un résultat sans grille, et seulement si la case est encore dans l'état que le geste a laissé : tout
+     * autre état (une évaluation faite depuis, une reprise) fait refuser, sans rien écrire.
+     * @returns {{evaluations:Array, action:'defait'|'refuse'}}
+     */
+    function defaireSaisie(evaluations, geste) {
+        const liste = Array.isArray(evaluations) ? evaluations : [];
+        const refus = { evaluations: liste, action: 'refuse' };
+        if (!geste || (geste.avant && !_modifiable(geste.avant))) return refus;
+        const duCouple = liste.filter(e => e && e.etudiantDA === geste.da && e.productionId === geste.productionId);
+        if (geste.apresId === null) {
+            // Le geste avait vidé la case : elle doit être encore vide.
+            if (duCouple.length > 0 || !geste.avant) return refus;
+            return { evaluations: liste.concat([geste.avant]), action: 'defait' };
+        }
+        const courante = duCouple.find(e => e.id === geste.apresId);
+        if (!courante || duCouple.length !== 1 || !_modifiable(courante)) return refus;
+        return {
+            evaluations: geste.avant ? liste.map(e => (e === courante ? geste.avant : e)) : liste.filter(e => e !== courante),
+            action: 'defait'
+        };
+    }
+
     window.TableauNotationDonnees = {
         FAMILLES_DU_TABLEAU,
         ACCEPTABLE,
@@ -206,6 +232,7 @@
         valeurParTouche,
         copieDeLaCase,
         etatDeLaCase,
-        appliquerSaisie
+        appliquerSaisie,
+        defaireSaisie
     };
 })();

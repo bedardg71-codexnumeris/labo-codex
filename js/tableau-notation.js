@@ -12,7 +12,8 @@
  * grille, de l'instance des spécifications configurée comme la pratique (deux de ses méthodes internes,
  * `_compterTravauxAcceptables` et `_estTravailAcceptable`, lues sans écrire). Aucune règle de note n'est recopiée ici.
  *
- * ⚠ MOTS DE L'ÉCRAN : tous PROPOSÉS (point ouvert du plan), à faire valider par Grégoire. Ils sont réunis dans `MOTS`.
+ * MOTS DE L'ÉCRAN : VALIDÉS par Grégoire, mot pour mot (9 nov. 2026, 15 h 38 à 15 h 40), réunis dans `MOTS` ; le banc les
+ * exige (tests/unit/tableau-notation-1.test.js, bloc F). Seule l'infobulle `valeurChangee` reste PROPOSÉE (rapport du lot).
  * Données et écriture pure : `tableau-notation-donnees.js`.
  */
 (function () {
@@ -21,29 +22,33 @@
     const MOTS = Object.freeze({
         titre: 'Tableau de notation',
         intro: 'Saisis le résultat de chaque production, qu’elle ait été évaluée ici ou ailleurs. La note de chaque étudiant·e se construit dans la dernière colonne, selon les réglages de ta pratique.',
-        avis: 'Un résultat saisi ici n’a pas de critères : ni forces, ni défis, ni rétroaction par critère. Le suivi qui lit la note continue de fonctionner.',
+        avis: 'Un résultat saisi ici compte dans la note, mais il n’a pas de critères : il ne donne ni forces, ni défis, ni rétroaction par critère.',
+        annuler: 'Annuler',
+        // PROPOSÉE (Cowork, 9 nov. : « son infobulle proposée au rapport ») — l'échelle a changé depuis la saisie.
+        valeurChangee: (valeur) => `L’échelle a changé depuis la saisie : ce résultat compte encore pour ${valeur}.`,
         exporter: 'Exporter la synthèse (CSV)',   // le bouton de Suivi › Groupe, repris tel quel (consigne)
         reglages: 'Réglages de la pratique',      // le lien du profil (pratiques-gestion.js, `ouvrirReglagesPratique`), repris tel quel
         eleve: 'Étudiant·e',
         noteProvisoire: 'Note provisoire',
-        noteFinale: 'Note',
+        noteFinale: 'Note finale',
         enAttente: 'en attente de résultats',
         nonCalculable: 'non calculable',
         aSaisir: 'à saisir',
         avecGrille: 'évaluée avec une grille ; toucher pour l’ouvrir',
         aucunePratique: 'Ce groupe-cours n’a pas de pratique de notation. Choisis-en une dans Conception › Pratiques : le tableau suivra ses réglages.',
-        autreFamille: 'Le tableau de notation sert les pratiques par standards et par spécifications. La pratique de ce groupe-cours se note autrement : la liste reste la vue de ses évaluations.',
+        autreFamille: 'Le tableau de notation sert aux pratiques par standards et par spécifications. Pour la pratique de ce groupe-cours, la Liste reste la vue de tes évaluations.',
         aucunEleve: 'Aucun·e étudiant·e dans ce groupe-cours. Ajoute ta liste dans Cadre › Trimestre pour remplir le tableau.',
         aucuneProduction: 'Aucune production n’entre dans la note de ta pratique. Crée tes productions dans Conception › Productions.',
         sansEchelle: 'Ni tes productions ni ta pratique n’ont d’échelle dont les niveaux portent une valeur : aucun niveau ne peut être saisi.',
         legendeStd: ['Plein : compte dans la note', 'Contour : évaluée, non retenue', 'Pointillé : à saisir', 'Point : évaluée avec une grille'],
         legendeSpe: ['✓ Acceptable', '✗ Non acceptable', 'Pointillé : à saisir', 'Point : évaluée avec une grille'],
-        aideStd: 'Touche une case pour changer le niveau. Au clavier : la lettre du niveau, Retour arrière pour vider, les flèches pour se déplacer.',
-        aideSpe: 'Touche une case pour changer le résultat. Au clavier : A ou N, Retour arrière pour vider, les flèches pour se déplacer.',
+        aideStd: 'Touche une case pour changer le niveau. Au clavier : la lettre du niveau, Retour arrière pour vider, les flèches pour se déplacer. ⌘Z annule le dernier geste.',
+        aideSpe: 'Touche une case pour changer le résultat. Au clavier : A ou N, Retour arrière pour vider, les flèches pour se déplacer. ⌘Z annule le dernier geste.',
         palierEchec: 'palier d’échec'
     });
 
     let _affiche = false;
+    let _dernierGeste = null;   // « Annuler » : le dernier geste écrit par le tableau, dans ce trimestre
     let _minuteurIndices = null;
     const DELAI_INDICES_MS = 1200;
 
@@ -244,6 +249,7 @@
         // 28 oct. 2026). La case dit « -- », comme la Liste, et son libellé (registre) ; elle s'ouvre, elle ne se modifie pas.
         const nonRecevable = ev && typeof window.libelleCopieNonRecevable === 'function' ? window.libelleCopieNonRecevable(ev) : null;
         if (nonRecevable) return Object.assign(etat, { valeur: '', forme: 'contour', nonRecevable });
+        etat.valeurChangee = _valeurChangee(ev, ctx);
         if (ctx.famille !== 'SPE' || !ev || window.resultatAcceptableSansGrille(ev) !== null || !compte) return etat;
         const type = ctx.types.find(t => window.productionEstDuType(production, t));
         const ok = !!(type && ctx.speInstance && ctx.speInstance._estTravailAcceptable(ev, type));
@@ -252,17 +258,42 @@
         return etat;
     }
 
+    /**
+     * L'échelle a changé depuis la saisie (Cowork, 9 nov. 2026 : un signe sur la case, sans rien réécrire) : le niveau
+     * d'un résultat sans grille ne vaut plus, dans SON échelle, la note écrite à la saisie. La note du cours lit toujours
+     * la valeur écrite ; la réécrire reste le geste de l'enseignant·e (il ressaisit le niveau).
+     * @returns {number|null} la valeur écrite, quand elle n'est plus celle du niveau ; null sinon
+     */
+    function _valeurChangee(ev, ctx) {
+        if (ctx.famille !== 'STD' || !ev || ev.sansGrille !== true || typeof ev.noteFinale !== 'number') return null;
+        const niveau = D().niveauxSaisissables(_echelleParId(ev.echelleId)).find(n => n.code === ev.niveauFinal);
+        return (niveau && niveau.valeur !== ev.noteFinale) ? ev.noteFinale : null;
+    }
+
+    /** La phrase du signe « échelle modifiée » (infobulle et libellé lu), ou '' quand la valeur écrite est celle du niveau. */
+    function _phraseValeurChangee(etat) {
+        return (etat.valeurChangee === null || etat.valeurChangee === undefined) ? '' : MOTS.valeurChangee(etat.valeurChangee);
+    }
+
+    function _classesDeLaCase(etat, changee) {
+        return ['tn-case', 'tn-case--' + etat.forme]
+            .concat(etat.modifiable ? [] : ['tn-case--grille'])
+            .concat(changee ? ['tn-case--valeur-changee'] : []);
+    }
+
     function _caseHTML(etudiant, production, ctx, resultat) {
         const etat = _etatCase(etudiant, production, ctx, resultat);
         const nom = `${etudiant.prenom || ''} ${etudiant.nom || ''}`.trim();
         const mot = etat.nonRecevable || _motDeLaValeur(etat.valeur, ctx, production.id, etat.echelleId);
-        const aria = `${nom}, ${production.titre || ''} : ${mot}` + (etat.modifiable ? '' : `, ${MOTS.avecGrille}`);
-        const classes = ['tn-case', 'tn-case--' + etat.forme].concat(etat.modifiable ? [] : ['tn-case--grille']);
+        const changee = _phraseValeurChangee(etat);
+        const aria = `${nom}, ${production.titre || ''} : ${mot}` + (etat.modifiable ? '' : `, ${MOTS.avecGrille}`) + (changee ? `. ${changee}` : '');
+        const classes = _classesDeLaCase(etat, changee);
+        const bulle = changee ? ` title="${esc(changee)}"` : '';
         const style = etat.valeur ? ` style="--tn-couleur: ${esc(_couleurDeLaValeur(etat.valeur, ctx, production.id, etat.echelleId))}"` : '';
         const ouvrir = etat.modifiable ? '' : ` data-evaluation="${esc(etat.evaluationId)}"`;
         // Un seul arrêt de Tab pour tout le tableau (la première case) ; les flèches font le reste.
         const tab = (etudiant === ctx.etudiants[0] && production === ctx.productions[0]) ? '0' : '-1';
-        return `<td class="tn-cellule"><button type="button" class="${classes.join(' ')}"${style} tabindex="${tab}" data-da="${esc(etudiant.da)}" data-production="${esc(production.id)}"${ouvrir} aria-label="${esc(aria)}">${esc(etat.nonRecevable ? '--' : _libelleDeLaValeur(etat.valeur, ctx))}</button></td>`;
+        return `<td class="tn-cellule"><button type="button" class="${classes.join(' ')}"${style} tabindex="${tab}" data-da="${esc(etudiant.da)}" data-production="${esc(production.id)}"${ouvrir}${bulle} aria-label="${esc(aria)}">${esc(etat.nonRecevable ? '--' : _libelleDeLaValeur(etat.valeur, ctx))}</button></td>`;
     }
 
     function _noteHTML(resultat) {
@@ -312,7 +343,7 @@
         return `<thead><tr><th scope="col" class="tn-col-eleve">${esc(MOTS.eleve)}</th>${prods}${types}<th scope="col" class="tn-col-note">${esc(note)}</th></tr></thead>`;
     }
 
-    /** La règle des standards, dite avec les libellés du calcul. PROPOSÉE. */
+    /** La règle des standards, dite avec les libellés du calcul (mots validés par Grégoire, 9 nov. 2026). */
     function phraseRegleStd(config, avecTerminale) {
         const pf = (config && config.portfolio) || {};
         const n = Number(pf.nombreARetenir) || 0;
@@ -326,7 +357,7 @@
             hybride: 'les catégories de ta pratique'
         };
         const base = phrases[methode] || phrases.meilleurs;
-        return `La note retient ${base}${avecTerminale ? ', puis la terminale' : ''}.`;
+        return `La note retient ${base}${avecTerminale ? ', et la terminale' : ''}.`;
     }
 
     function _echelleHTML(ctx) {
@@ -355,7 +386,8 @@
         return `<div class="tn-bandeau">
             <div class="tn-pratique">${badge}<span class="tn-pratique-nom">${esc(ctx.pratiqueNom)}</span><span class="tn-regle">${esc(regle)}</span>
                 <a href="#" class="tn-reglages" data-prevent data-action="ouvrirReglagesPratique" data-param="${esc(ctx.pratiqueId)}">${esc(MOTS.reglages)}</a></div>
-            <button type="button" class="btn btn-secondaire" data-action="exporterSyntheseResultatsCSV">${esc(MOTS.exporter)}</button>
+            <div class="tn-gestes"><button type="button" class="btn btn-secondaire" id="tn-annuler" data-action="TableauNotation.annuler"${_gesteAnnulable() ? '' : ' disabled'}>${esc(MOTS.annuler)}</button>
+            <button type="button" class="btn btn-secondaire" data-action="exporterSyntheseResultatsCSV">${esc(MOTS.exporter)}</button></div>
         </div>
         ${ctx.famille === 'STD' ? _echelleHTML(ctx) : _forfaitsHTML(ctx)}`;
     }
@@ -436,13 +468,59 @@
         const contexte = _contexteEcriture(da, productionId, ctx);
         if (!contexte) return 'refuse';
         const stock = db.getSync(cle('evaluationsSauvegardees'), []) || [];
+        const avant = D().copieDeLaCase(stock, da, productionId);
         const r = D().appliquerSaisie(stock, { famille: ctx.famille, valeur, echelle: _echelleDe(ctx, productionId), contexte });
         if (r.action === 'inchange' || r.action === 'refuse') return r.action;
         if (sauvegarderDonneesSelonMode('evaluationsSauvegardees', r.evaluations, { geste: 'Tableau de notation' }) !== true) return 'echec';
+        // Le dernier geste, pour « Annuler » : la copie d'avant (une copie, pas l'objet du stock) et ce que le geste a laissé.
+        _dernierGeste = { cleStock: cle('evaluationsSauvegardees'), da, productionId,
+            avant: avant ? JSON.parse(JSON.stringify(avant)) : null, apresId: r.action === 'retire' ? null : r.evaluation.id };
         window._moyennesQualifies = null;
         window._moyennesToutes = null;
         _planifierIndices();
         return r.action;
+    }
+
+    /* ============================== ANNULER ============================== */
+
+    function _gesteAnnulable() {
+        return !!_dernierGeste && _dernierGeste.cleStock === cle('evaluationsSauvegardees');
+    }
+
+    /**
+     * « Annuler » et ⌘Z (Ctrl+Z hors Mac) : défait le dernier geste fait au tableau, quel qu'il soit (niveau changé, case
+     * vidée). Un seul niveau : le geste défait ne se refait pas. Rien ne s'écrit si la case a changé depuis.
+     * @returns {string} 'defait', 'refuse', 'echec' ou 'rien'
+     */
+    function annuler() {
+        if (!_gesteAnnulable()) { _dernierGeste = null; return 'rien'; }
+        const geste = _dernierGeste;
+        const stock = db.getSync(cle('evaluationsSauvegardees'), []) || [];
+        const r = D().defaireSaisie(stock, geste);
+        _dernierGeste = null;
+        if (r.action === 'defait') {
+            if (sauvegarderDonneesSelonMode('evaluationsSauvegardees', r.evaluations, { geste: 'Tableau de notation' }) !== true) return 'echec';
+            window._moyennesQualifies = null;
+            window._moyennesToutes = null;
+            _planifierIndices();
+        }
+        if (_affiche) {
+            rendre({ da: geste.da, production: geste.productionId });
+            _annoncerNote(geste.da);
+        }
+        return r.action;
+    }
+
+    /** ⌘Z ou Ctrl+Z, quand le tableau est à l'écran et qu'on n'écrit pas dans un champ (son propre « annuler » passe d'abord). */
+    function _surRaccourciAnnuler(e) {
+        if (!_affiche || !(e.metaKey || e.ctrlKey) || e.shiftKey || e.altKey || String(e.key).toLowerCase() !== 'z') return;
+        const hote = _hote();
+        if (!hote || hote.offsetParent === null) return;
+        const cible = e.target;
+        if (cible && (cible.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(cible.tagName || ''))) return;
+        if (!_gesteAnnulable()) return;
+        e.preventDefault();
+        annuler();
     }
 
     function _planifierIndices() {
@@ -519,6 +597,7 @@
         hote._tnEcoutes = true;
         hote.addEventListener('click', _surClic);
         hote.addEventListener('keydown', _surTouche);
+        document.addEventListener('keydown', _surRaccourciAnnuler);
     }
 
     /* ============================== LA BASCULE ============================== */
@@ -561,6 +640,7 @@
     window.TableauNotation = {
         afficher,              // la bascule, « Consulter » et « Modifier » de la Liste
         afficherListe,         // la bascule
+        annuler,               // le bouton « Annuler » ; ⌘Z passe par la même fonction
         rafraichirSiAffiche,   // initialiserListeEvaluations
         construireHTML,        // exposés pour le banc (tests/unit/tableau-notation-1.test.js)
         phraseRegleStd,
