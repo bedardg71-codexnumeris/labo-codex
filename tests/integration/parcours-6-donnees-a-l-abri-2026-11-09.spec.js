@@ -15,7 +15,11 @@ import { attendreApplication } from './harness/attendre-application.js';
 //   · l'étape 3 : la bulle est AU-DESSUS de l'aperçu, près de « Mettre à jour » sans le couvrir,
 //     et dit la phrase du chemin que prendra l'écriture (fenêtre de choix, partage,
 //     téléchargement et « Il y est », fichier tenu, copies manquantes) ; elle cède la place aux
-//     fenêtres qui suivent ;
+//     fenêtres qui suivent. À partir de 1180 px (corrections du 9 nov., question 8), elle se pose
+//     à DROITE de l'aperçu et n'en couvre rien ; le « i » de l'aperçu ouvre son aide au-dessus
+//     de lui (question 1) ;
+//   · le menu Codex dit « Partage un nouveau fichier » ou « Télécharge un nouveau fichier » selon
+//     le chemin (question 5) ;
 //   · l'étape 4 : le menu rouvert, « Ouvrir un codex… » éclairé mais sans effet ; « Terminer » ;
 //   · le rappel « Mets ton codex à jour », dû, ne s'ouvre pas pendant le parcours, et la mise à
 //     jour du parcours le repousse.
@@ -49,7 +53,7 @@ async function capture(page, nom) {
     await page.evaluate(() => window.accompagnement && window.accompagnement.masquerHover && window.accompagnement.masquerHover());
     await page.waitForFunction(() => document.getAnimations()
         .filter((a) => a.effect && a.effect.target && a.effect.target.closest
-            && a.effect.target.closest('#panneau-assistance, #parcours-voile, #parcours-bulle'))
+            && a.effect.target.closest('#panneau-assistance, #parcours-voile, #parcours-bulle, .aide-contextuelle-modal, .aide-contextuelle-overlay'))
         .every((a) => a.playState !== 'running'));
     await page.screenshot({ path: path.join(CAPTURES, nom + '.jpg'), type: 'jpeg', quality: 85 });
 }
@@ -159,8 +163,18 @@ async function jusquALApercu(page, { capturer = '', avantApercu = null } = {}) {
     await contourSur(page, '.export-preview-modal .btn-confirmer');
 }
 
-/** La bulle 3 est au-dessus de l'aperçu, et ne couvre ni « Mettre à jour » ni « Annuler ». */
+/**
+ * La bulle 3 est au-dessus de l'aperçu, et ne couvre ni « Mettre à jour » ni « Annuler ».
+ * À partir de 1180 px (question 8, 9 nov.), elle est à DROITE de l'aperçu et n'en couvre rien :
+ * ni la mise en garde, ni la liste des fichiers, ni le « i », ni les boutons ; elle tient dans
+ * la fenêtre, sans chevaucher la barre de défilement. Sous 1180 px, la place d'avant.
+ */
 async function bulleSurLApercuSansCouvrirSesBoutons(page) {
+    const largeur = page.viewportSize().width;
+    // La sonde du moteur (120 ms) pose la place : on attend qu'elle soit prise.
+    await expect.poll(() => page.evaluate(() => document.getElementById('parcours-bulle')
+        .classList.contains('parcours--a-droite-de-l-apercu')), { message: 'la bulle à droite de l’aperçu', timeout: 3000 })
+        .toBe(largeur >= 1180);
     const g = await page.evaluate(() => {
         const r = (s) => document.querySelector(s).getBoundingClientRect();
         const b = r('#parcours-bulle');
@@ -169,10 +183,79 @@ async function bulleSurLApercuSansCouvrirSesBoutons(page) {
         return {
             dessus: !!(centre && centre.closest('#parcours-bulle')),
             couvreMettreAJour: touche(r('.export-preview-modal .btn-confirmer')),
-            couvreAnnuler: touche(r('.export-preview-modal .btn-annuler'))
+            couvreAnnuler: touche(r('.export-preview-modal .btn-annuler')),
+            couvreMiseEnGarde: touche(r('.export-preview-modal .export-preview-note')),
+            couvreListe: touche(r('.export-preview-modal .export-preview-liste')),
+            couvreI: touche(r('.export-preview-modal .btn-aide-contextuelle')),
+            aDroite: b.left >= r('.export-preview-modal').right,
+            dansLaFenetre: b.left >= 0 && b.top >= 0 && b.right <= document.documentElement.clientWidth && b.bottom <= window.innerHeight
         };
     });
-    expect(g).toEqual({ dessus: true, couvreMettreAJour: false, couvreAnnuler: false });
+    expect(g.dessus, 'la bulle au-dessus de l’aperçu').toBe(true);
+    expect(g.dansLaFenetre, 'la bulle dans la fenêtre').toBe(true);
+    expect({ couvreMettreAJour: g.couvreMettreAJour, couvreAnnuler: g.couvreAnnuler })
+        .toEqual({ couvreMettreAJour: false, couvreAnnuler: false });
+    if (largeur >= 1180) {
+        expect({ aDroite: g.aDroite, couvreMiseEnGarde: g.couvreMiseEnGarde, couvreListe: g.couvreListe, couvreI: g.couvreI })
+            .toEqual({ aDroite: true, couvreMiseEnGarde: false, couvreListe: false, couvreI: false });
+        // Ce qui est couvert se voit aussi au toucher : le milieu de chacun répond, pas la bulle.
+        const libres = await page.evaluate(() => ['.export-preview-note', '.export-preview-liste', '.btn-confirmer', '.btn-annuler']
+            .map((s) => {
+                const el = document.querySelector('.export-preview-modal ' + s);
+                const r = el.getBoundingClientRect();
+                const dessus = document.elementFromPoint((r.left + r.right) / 2, (r.top + r.bottom) / 2);
+                return !!(dessus && el.contains(dessus));
+            }));
+        expect(libres).toEqual([true, true, true, true]);
+    } else {
+        // Sous 1180 px, la place d'avant : au-dessus de « Mettre à jour », à la largeur ordinaire.
+        expect(g.aDroite).toBe(false);
+    }
+}
+
+/**
+ * Question 1 (9 nov.) : toucher le « i » de l'aperçu ouvre son aide au-dessus de lui ; la refermer
+ * rend l'aperçu tel quel, et l'aide ouverte ailleurs reste à sa place habituelle.
+ * Break-test (9 nov., Chromium) : `placerLEtageDeLAide` sans effet (accompagnement.js) → ROUGE
+ * (l'aide sous l'aperçu : le milieu de l'aide répond par l'aperçu). Rétabli → vert.
+ */
+async function aideDuIAuDessusDeLApercu(page, capturer) {
+    await page.click('.export-preview-modal .btn-aide-contextuelle');
+    const aide = page.locator('.aide-contextuelle-modal.active');
+    await expect(aide).toBeVisible();
+    await expect(aide.locator('#aide-ctx-titre')).toContainText('Ce que contient le fichier');
+    const g = await page.evaluate(() => {
+        const m = document.querySelector('.aide-contextuelle-modal.active');
+        const r = m.getBoundingClientRect();
+        const points = [[0.5, 0.5], [0.15, 0.15], [0.85, 0.15], [0.15, 0.85], [0.85, 0.85]];
+        const dessus = points.every(([fx, fy]) => {
+            const el = document.elementFromPoint(r.left + r.width * fx, r.top + r.height * fy);
+            return !!(el && m.contains(el));
+        });
+        // Le micro-popup d'un terme souligné vit au-dessus de l'aide (#1152) : il monte avec elle.
+        const micro = document.createElement('div');
+        micro.className = 'glossaire-micropopup';
+        document.body.appendChild(micro);
+        const z = (el) => parseInt(getComputedStyle(el).zIndex, 10);
+        const n = { apercu: z(document.querySelector('.export-preview-modal').parentElement), bulle: z(document.getElementById('parcours-bulle')),
+            voile: z(document.querySelector('.aide-contextuelle-overlay')), aide: z(m), micro: z(micro) };
+        micro.remove();
+        return { dessus, ordre: n.voile > n.apercu && n.voile > n.bulle && n.aide > n.voile && n.micro > n.aide };
+    });
+    expect(g).toEqual({ dessus: true, ordre: true });
+    if (capturer) await capture(page, capturer);
+    await aide.locator('.primo-popup-fermer').click();
+    await expect(page.locator('.aide-contextuelle-modal.active')).toHaveCount(0);
+    await expect(page.locator('.export-preview-modal')).toBeVisible();
+    expect(await page.evaluate(() => document.body.classList.contains('aide-par-dessus-les-fenetres'))).toBe(false);
+    // Ouverte sans « i » d'une fenêtre (par sa clé), l'aide reste à sa place habituelle.
+    const zParCle = await page.evaluate(() => {
+        window.afficherAideContextuelle('modal-export-preview');
+        const z = getComputedStyle(document.querySelector('.aide-contextuelle-modal.active')).zIndex;
+        window.fermerAideContextuelle();
+        return z;
+    });
+    expect(zParCle).toBe('10002');
 }
 
 async function ecrireEtAttendreEtape4(page, { ilYEst = false, capturer = '' } = {}) {
@@ -256,6 +339,10 @@ for (const clair of [false, true]) {
         }), 'le « i » n’est pas couvert par la bulle').toBe(true);
         await capture(page, `1180-${theme}-etape-3-fenetre-de-choix`);
 
+        // Question 1 (9 nov.) : le « i » ouvre « Ce que contient le fichier » AU-DESSUS de l'aperçu
+        // (99999) et de la bulle (100002) ; l'étage entier monte, le micro-popup des termes compris.
+        await aideDuIAuDessusDeLApercu(page, clair ? '' : '1180-sombre-etape-3-aide-du-i');
+
         await ecrireEtAttendreEtape4(page);
         expect(await page.evaluate(() => window.__ecritures)).toBe(1);
         await expect(texteBulle(page)).toHaveText(textes[3]);
@@ -335,6 +422,7 @@ test('des copies manquent (1180, sombre) : l’avertissement passe pendant l’�
     });
     await expect(texteBulle(page)).toContainText(phrases.fenetre1);
     await expect(texteBulle(page)).not.toContainText(phrases.fenetre2);
+    await bulleSurLApercuSansCouvrirSesBoutons(page);
     await capture(page, '1180-sombre-etape-3-copies-manquantes');
     await ecrireEtAttendreEtape4(page);
     expect(await page.evaluate(() => window.__ecritures)).toBe(1);
@@ -351,6 +439,64 @@ for (const chemin of ['partage', 'telechargement']) {
         await bulleSurLApercuSansCouvrirSesBoutons(page);
         await capture(page, `390-sombre-etape-3-${chemin}`);
         await ecrireEtAttendreEtape4(page, { ilYEst: chemin === 'telechargement', capturer: chemin === 'telechargement' ? '390-sombre-etape-3-il-y-est' : '' });
+        expect(erreurs).toEqual([]);
+    });
+}
+
+// Question 8 (décidée par Cowork le 9 nov.) : à 1440 px aussi, la bulle 3 se pose à droite de
+// l'aperçu et n'en couvre rien, pour chacun des trois chemins dont Grégoire juge les captures.
+// Break-tests (9 nov., Chromium) : `largeurADroiteDeLApercu` rendant toujours 0 → ces trois
+// essais ROUGES (la bulle n'est pas à droite) ; le seuil de 1180 retiré → l'essai « 1179 px »
+// ROUGE (la bulle étroite à droite). Rétablis → verts.
+for (const chemin of ['fenetre', 'partage', 'copies-manquantes']) {
+    test(`1440 px, ${chemin} : la bulle 3 à droite de l'aperçu ne couvre ni la mise en garde, ni la liste, ni « Mettre à jour », ni « Annuler »`, async ({ page }) => {
+        const erreurs = await ouvrirEspace(page, 1440, { chemin: chemin === 'partage' ? 'partage' : 'fenetre' });
+        const { phrases } = await P(page);
+        if (chemin === 'copies-manquantes') {
+            await page.evaluate(() => db.setSync(cle('fichiersTravaux'), [{ id: 'ft-fictif-1', nomFichier: 'production-fictive.pdf' }]));   // security-ok: banc, donnée fictive créée ici
+        }
+        await lancerLeParcours(page);
+        await jusquALApercu(page, chemin !== 'copies-manquantes' ? {} : {
+            avantApercu: async () => {
+                const avertissement = page.locator('#overlay-ui-dialogue');
+                await expect(avertissement).toBeVisible();
+                await avertissement.locator('.btn-supprimer').click();
+            }
+        });
+        await expect(texteBulle(page)).toContainText(chemin === 'partage' ? phrases.partage : phrases.fenetre1);
+        await bulleSurLApercuSansCouvrirSesBoutons(page);
+        const nom = chemin === 'fenetre' ? 'fenetre-de-choix' : chemin;
+        await capture(page, `1440-sombre-etape-3-${nom}`);
+        await ecrireEtAttendreEtape4(page);
+        expect(erreurs).toEqual([]);
+    });
+}
+
+test('1179 px : sous 1180, la bulle 3 garde la place d’avant (au-dessus de « Mettre à jour », largeur ordinaire)', async ({ page }) => {
+    const erreurs = await ouvrirEspace(page, 1179);
+    await lancerLeParcours(page);
+    await jusquALApercu(page);
+    await bulleSurLApercuSansCouvrirSesBoutons(page);
+    const g = await page.evaluate(() => {
+        const b = document.getElementById('parcours-bulle');
+        const r = b.getBoundingClientRect(), m = document.querySelector('.export-preview-modal .btn-confirmer').getBoundingClientRect();
+        return { largeur: Math.round(r.width), auDessus: r.bottom <= m.top, enLigne: b.style.width };
+    });
+    expect(g).toEqual({ largeur: 380, auDessus: true, enLigne: '' });
+    expect(erreurs).toEqual([]);
+});
+
+// Question 5 (validée par Grégoire le 9 nov., 9 h 33) : la ligne sous « Mettre à jour le codex »
+// dit le chemin. Un essai par cas. Break-tests (9 nov., Chromium) : la ligne remise à
+// « Télécharge un nouveau fichier » en dur (codex.js, _actualiserMenu) → « partage » ROUGE ;
+// « Partage un nouveau fichier » en dur → « telechargement » ROUGE. Rétablie → verts.
+for (const [chemin, ligne] of [['partage', 'Partage un nouveau fichier'], ['telechargement', 'Télécharge un nouveau fichier']]) {
+    test(`menu Codex, ${chemin} : sous « Mettre à jour le codex », « ${ligne} »`, async ({ page }) => {
+        const erreurs = await ouvrirEspace(page, 1180, { chemin });
+        await page.click('#btn-codex');
+        await expect(page.locator('#codex-menu-enreg-label')).toHaveText('Mettre à jour le codex');
+        await expect(page.locator('#codex-menu-enreg-info')).toBeVisible();
+        await expect(page.locator('#codex-menu-enreg-info')).toHaveText(ligne);
         expect(erreurs).toEqual([]);
     });
 }

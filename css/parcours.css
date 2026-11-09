@@ -478,3 +478,8 @@ body.parcours-actif .transition-bandeau { display: none; }
     max-height: min(560px, 55vh);
     overflow-y: auto;
 }
+
+/* Parcours 6, étape 3, à partir de 1180 px (question 8, décidée par Cowork le 9 nov. 2026) : la
+   bulle se pose à DROITE de l'aperçu, à la largeur qui y tient (js/parcours-donnees.js, sa largeur
+   en ligne). Elle n'y couvre rien : elle reprend la hauteur de la bulle ordinaire, défile moins. */
+.parcours-bulle.parcours--a-droite-de-l-apercu { max-height: calc(100vh - 32px); }

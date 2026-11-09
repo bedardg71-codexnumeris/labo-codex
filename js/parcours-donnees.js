@@ -140,6 +140,33 @@
         elementsDuMoteur().forEach(function (el) { el.classList.toggle('parcours--par-dessus-les-fenetres', !!oui); });
     }
 
+    // Étape 3, à partir de 1180 px (question 8, décidée par Cowork le 9 nov. 2026) : la bulle se
+    // pose, étroite, À DROITE de l'aperçu, et n'en couvre rien : ni la mise en garde « Vérifie
+    // qu'aucun nom de fichier n'est inattendu… », ni la liste des fichiers, ni ses deux boutons.
+    // Au-dessus de « Mettre à jour », elle couvrait la mise en garde. Sous 1180 px, la place
+    // d'avant. Ni le moteur ni sa bulle ne changent : l'étape donne l'aperçu pour zone, et la
+    // largeur qui tient à sa droite ; le moteur y pose la bulle (son côté « droite »).
+    var A_DROITE_DES = 1180;
+    var LARGEUR_MIN_A_DROITE = 220;
+    var LARGEUR_BULLE = 380;      // css/parcours.css, .parcours-bulle
+    var ESPACE_DU_MOTEUR = 20;    // parcours-moteur.js : ECART (12) entre la zone et la bulle, MARGE (8) au bord
+
+    /** La largeur de la bulle à droite de l'aperçu ; 0 quand la place n'y est pas. */
+    function largeurADroiteDeLApercu(a) {
+        if (window.innerWidth < A_DROITE_DES) return 0;
+        // clientWidth : sans la barre de défilement, que la bulle ne doit pas chevaucher.
+        var libre = Math.floor(document.documentElement.clientWidth - a.getBoundingClientRect().right - ESPACE_DU_MOTEUR);
+        return libre >= LARGEUR_MIN_A_DROITE ? Math.min(LARGEUR_BULLE, libre) : 0;
+    }
+
+    /** Pose (largeur > 0) ou retire la bulle étroite à droite de l'aperçu. */
+    function bulleADroite(largeur) {
+        var b = document.getElementById('parcours-bulle');
+        if (!b) return;
+        b.classList.toggle('parcours--a-droite-de-l-apercu', largeur > 0);
+        b.style.width = largeur > 0 ? largeur + 'px' : '';
+    }
+
     /** « Ouvrir un codex… » ne répond pas pendant ce parcours : il remplacerait l'espace de travail. */
     function garderOuvrir(ev) {
         if (!cestNotreParcours()) return;
@@ -161,6 +188,7 @@
             texte: TEXTE_1,
             avant: async function () {
                 auDessusDesFenetres(false);
+                bulleADroite(0);
                 // Le geste à faire est d'ouvrir le menu : il part fermé.
                 fermerMenu();
             },
@@ -172,6 +200,7 @@
             texte: TEXTE_2,
             avant: async function () {
                 auDessusDesFenetres(false);
+                bulleADroite(0);
                 ouvrirMenu();
             },
             zones: function () { return [hautDuMenu()]; },
@@ -198,10 +227,16 @@
                 // La bulle passe au-dessus de l'aperçu et de la progression ; elle cède la place
                 // aux fenêtres qui suivent (« Ton codex est prêt », « Il y est », l'échec), dont
                 // les boutons doivent rester touchables : à 390 px, elle couvrait « Il y est ».
-                auDessusDesFenetres(!fenetreDeDialogue());
-                // L'aperçu n'est pas une zone : la bulle ne tient à côté de lui à aucune largeur
-                // et s'y poserait au hasard. Elle évite son bouton (le contour), et la progression.
-                var p = apercu() ? null : progression();
+                var dialogue = fenetreDeDialogue();
+                auDessusDesFenetres(!dialogue);
+                // À partir de 1180 px, l'aperçu est la zone : la bulle, étroite, se pose à sa droite.
+                var a = apercu();
+                var largeur = a && !dialogue ? largeurADroiteDeLApercu(a) : 0;
+                bulleADroite(largeur);
+                if (largeur) return [a];
+                // Plus étroit, l'aperçu n'est pas une zone : la bulle ne tient pas à côté de lui et
+                // s'y poserait au hasard. Elle évite son bouton (le contour), et la progression.
+                var p = a ? null : progression();
                 return p ? [p] : [];
             },
             contour: function () {
@@ -224,6 +259,7 @@
             sansSortie: true,
             avant: async function () {
                 auDessusDesFenetres(false);
+                bulleADroite(0);
                 // La mise à jour a refermé le menu (_mettreAJourLeCodex) : on le rouvre.
                 ouvrirMenu();
             },

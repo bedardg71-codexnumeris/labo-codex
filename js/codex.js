@@ -1778,8 +1778,13 @@ async function sauvegarderVersDestination(blob, nomFichier, options) {
 function cheminDeLaProchaineEcriture(copiesManquent) {
     if (_fileHandle && !copiesManquent) return 'tenu';
     if (window.showSaveFilePicker) return 'fenetre';
-    if (_peutPartagerFichier(new Blob([], { type: 'application/zip' }), 'codex' + EXTENSION_CODEX)) return 'partage';
+    if (_partageraUnCodex()) return 'partage';
     return 'telechargement';
+}
+
+/** Sans fenêtre de choix : le navigateur offre-t-il le partage d'un codex (stratégie 2 ci-dessus) ? */
+function _partageraUnCodex() {
+    return _peutPartagerFichier(new Blob([], { type: 'application/zip' }), 'codex' + EXTENSION_CODEX);
 }
 
 /**
@@ -3283,7 +3288,8 @@ function _actualiserMenu() {
 
     // Libellé canonique « Mettre à jour le codex » partout (D4, Grégoire, 26 sept. 2026 :
     // « Enregistré » ne veut plus dire qu'écrit dans l'application ; le codex a son verbe).
-    // La mécanique Safari (téléchargement d'un nouveau fichier) reste dite par le sous-texte.
+    // Sans fenêtre de choix, la mécanique (partage ou téléchargement d'un nouveau fichier)
+    // reste dite par le sous-texte.
     var fsapiOk = (typeof window.showSaveFilePicker === 'function');
     var enregLabel = document.getElementById('codex-menu-enreg-label');
     if (enregLabel) {
@@ -3294,7 +3300,9 @@ function _actualiserMenu() {
     var enregInfo = document.getElementById('codex-menu-enreg-info');
     if (enregInfo) {
         if (!fsapiOk) {
-            enregInfo.textContent = 'Télécharge un nouveau fichier';
+            // Parcours 6 (mots validés par Grégoire le 9 nov. 2026, 9 h 33) : sur l'iPad, l'écriture
+            // passe par la feuille de partage ; la bulle 3 du parcours le dit, le menu aussi.
+            enregInfo.textContent = _partageraUnCodex() ? 'Partage un nouveau fichier' : 'Télécharge un nouveau fichier';
             enregInfo.classList.remove('u-hide');
         } else if (_fileHandle) {
             enregInfo.textContent = 'Dans le même fichier';

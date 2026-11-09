@@ -871,7 +871,36 @@ function rendreContenuAide(aide) {
     return sectionsHTML + voirAussiHTML;
 }
 
-function afficherAideContextuelle(cleAide) {
+/**
+ * Parcours 6 (9 nov. 2026) : le niveau d'empilement de ce qui porte un « i » — le plus haut
+ * z-index de ses ancêtres positionnés. L'aperçu « Mettre à jour le codex » est à 99999
+ * (securite-export-preview.js) : son « i » ouvrait l'aide DESSOUS, cachée tant qu'il restait ouvert.
+ */
+function niveauDEmpilement(el) {
+    let niveau = 0;
+    for (let n = el; n && n.nodeType === 1 && n !== document.body; n = n.parentElement) {
+        const s = getComputedStyle(n);
+        const z = parseInt(s.zIndex, 10);
+        if (!isNaN(z) && s.position !== 'static') niveau = Math.max(niveau, z);
+    }
+    return niveau;
+}
+
+/**
+ * L'aide passe au-dessus de ce qui porte son « i ». L'étage entier monte (voile, aide, et le
+ * micro-popup de ses termes, #1152) par une classe du body : css/accompagnement.css, fin du
+ * fichier. Un lien « Voir aussi » vit dans l'aide elle-même : l'étage reste où il est. Sans
+ * déclencheur connu (ouverture par clé, data-action), l'aide reste à sa place habituelle.
+ */
+function placerLEtageDeLAide(modal, declencheur) {
+    if (declencheur && declencheur.closest && declencheur.closest('.aide-contextuelle-modal')) return;
+    document.body.classList.remove('aide-par-dessus-les-fenetres');
+    if (!declencheur) return;
+    const base = parseInt(getComputedStyle(modal).zIndex, 10) || 0;
+    if (niveauDEmpilement(declencheur) >= base) document.body.classList.add('aide-par-dessus-les-fenetres');
+}
+
+function afficherAideContextuelle(cleAide, declencheur) {
     const aide = obtenirPopup(cleAide);
     if (!aide) {
         console.warn(`[Accompagnement/popup] Aide non trouvée : ${cleAide}`);
@@ -892,6 +921,8 @@ function afficherAideContextuelle(cleAide) {
         modal.className = 'aide-contextuelle-modal primo-popup';
         document.body.appendChild(modal);
     }
+
+    placerLEtageDeLAide(modal, declencheur);
 
     modal.setAttribute('role', 'dialog');
     modal.setAttribute('aria-modal', 'true');
@@ -923,6 +954,7 @@ function fermerAideContextuelle() {
 
     if (overlay) overlay.classList.remove('active');
     if (modal) modal.classList.remove('active');
+    document.body.classList.remove('aide-par-dessus-les-fenetres');
     document.body.style.overflow = '';
 
     if (declencheur && typeof declencheur.focus === 'function') declencheur.focus();
@@ -1035,14 +1067,14 @@ function initialiserPopup() {
             event.preventDefault();
             event.stopPropagation();
             const cle = bouton.getAttribute('data-aide');
-            if (cle) afficherAideContextuelle(cle);
+            if (cle) afficherAideContextuelle(cle, bouton);
             return;
         }
         const lienVoirAussi = event.target.closest('.aide-lien-voir-aussi');
         if (lienVoirAussi) {
             event.preventDefault();
             const nouvelleCle = lienVoirAussi.getAttribute('data-aide');
-            if (nouvelleCle) afficherAideContextuelle(nouvelleCle);
+            if (nouvelleCle) afficherAideContextuelle(nouvelleCle, lienVoirAussi);
             return;
         }
     });
