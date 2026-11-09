@@ -45,7 +45,7 @@
 
 - **Spec Chromium du lot, en entier** : 15 essais verts sur 15, plus 8 captures à la demande.
 - **Vitest du lot** : 32 essais verts (A9, A10 et le bloc F ajoutés).
-- **Vitest complet** : VERDICT_VITEST_3
+- **Vitest complet** : 10 961 verts sur 10 961, 898 fichiers (lu sur `3f38107a`). Une passe précédente rendait 1 rouge, un cliquet de complexité sur mon code (`_caseHTML`), corrigé avant ce décompte.
 - **Break-tests de cette étape**, chacun rougit son essai puis le code est restauré : l'écoute de ⌘Z retirée ; le geste non mémorisé (le bouton reste grisé) ; le signe de l'échelle retiré ; le masquage de « Verrouiller » retiré ; la garde qui empêche « Annuler » de toucher une évaluation à grille retirée (banc A10).
 - **Captures** : huit, refaites sur cet état, dans `plans de travail/captures-2026-11-09-tableau-de-notation-1/` : standards et spécifications, 1180 et 820 px, clair et sombre, Chromium, noms fictifs. Le témoin « Enregistré » y paraît en bas à gauche : c'est son comportement ordinaire.
 - **Pas de nouvelle relecture par un agent neuf** pour cette étape : la précédente portait sur `0c862c9f`.
