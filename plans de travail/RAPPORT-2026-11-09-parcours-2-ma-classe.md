@@ -79,27 +79,148 @@ prennent sur le Mac. Captures Chromium : `plans de travail/captures-2026-11-09-p
 
 ## 1. Ce qui change, par fichier
 
-(à compléter)
+- **`js/parcours-classe.js`** (il ne portait que l'inscription au panneau et un lancement provisoire) : les huit
+  étapes. Les six du Cadre ouvrent leur accordéon (`toggleAccordeonV2`, sans le défilement doux de la barre) et, quand
+  le bouton « Créer… » n'est pas déjà à l'écran et qu'aucun élément n'existe, le formulaire « + Nouveau… »
+  (`nouveauCoursV2`, `nouveauProfilEnseignantV2`, `nouveauHoraireV2`, `nouveauGroupeCoursV2` ; le trimestre s'ouvre en
+  création de lui-même, l'import des étudiant·es est toujours là). Une saisie déjà commencée n'est pas effacée à la
+  reprise. Zone éclairée : le formulaire du bloc (`.panneau-formulaire`), sans la rangée de sélection au-dessus ; à
+  l'étape 4, la seule zone « Importer des étudiant·es ». L'étape avance sur l'état de la barre du Cadre, donc sur ce
+  qui est **écrit**. L'étape 7 a deux bulles sous un même rang (getters lus par le moteur), décidées à sa préparation.
+  Le lancement provisoire de la partie 1 est retiré.
+- **`js/trimestre-v2.js`** : `etapesDuCadre()`, extraite de `mettreAJourBarreContexte` : la barre la dessine, le
+  parcours s'y repère (une seule source). L'export `window.ouvrirAccordeonDeLEtape` est retiré : son seul consommateur
+  était l'ancienne porte de l'accueil ; la fonction reste, pour le clic sur la barre.
+- **`js/accueil.js`** : `commencerParLeTrimestre` (le nom de l'action reste, `data-action` inchangé) lance le parcours.
+- **`js/saisie-presences.js`** : le défaut de la date (§ 3) ; `window.obtenirDatesVerrouillees` exportée (l'étape 7
+  avance quand une séance du groupe-cours actif est verrouillée).
+- **`index.html`** : quatre jetons anti-cache, au jour du build (`20261108`) avec une lettre neuve, puisque
+  `scripts/release.mjs` est interdit cette nuit. La release du Mac les réécrira.
+- **Bancs** : `tests/unit/sentinelle-parcours-classe-2026-11-09.test.js` (les mots, le retrait du provisoire, la
+  source unique) ; `tests/integration/parcours-2-ma-classe-2026-11-09.spec.js` (deux essais qui tournent toujours, un
+  troisième pour les captures de l'iPhone seulement) ; `sentinelle-accueil-porte-ortho-et-champ2-846` suit la nouvelle
+  porte (elle exigeait l'ancien geste et l'export retiré).
+
+**Ce que le moteur n'offre pas, et comment je l'ai contourné sans le refondre** (règle de la nuit) :
+- **Un seul contour par étape.** L'étape 7 en veut deux. Le second (sur la date) est posé par le parcours, dans le
+  même dessin (`parcours-contour`), et suit la page tant que l'étape 7 est à l'écran. *Il faudrait* : `contour()` qui
+  rende une liste.
+- **Il amène la zone dans la vue une seule fois, sans attendre que la page soit immobile.** L'application lance
+  elle-même des défilements doux (le formulaire « + Nouveau… » se fait défiler ; l'import des étudiant·es fait défiler
+  jusqu'à l'Horaire) : ils l'emportaient sur celui du moteur, 2 passes sur 4 rouges. Le parcours attend désormais que
+  la page soit immobile avant de rendre la main (6 passes sur 6 vertes ensuite). *Il faudrait* : que le moteur
+  attende lui-même.
+- **Quand la zone ne tient pas à l'écran, il y amène le contour** (le bas d'un formulaire), et le haut sort de l'écran.
+  Contourné en éclairant le formulaire seul, plus court que l'accordéon : à 1180 px, tout tient. À 390 px, rien ne tient
+  (question 2 de l'en-tête).
+- **`attendre` et `aller`** sont recopiés de « Découvrir » (quatre lignes chacun). *Il faudrait* : que le moteur les offre.
 
 ## 2. Les deux affirmations à vérifier avant de poser les textes
 
-(à compléter)
+Les deux tiennent ; les textes sont posés tels quels. Mesuré sous Chromium par un sous-agent, sur un groupe créé par
+l'interface, horloge au 10 nov. 2026.
+
+- **Étape 2, « si tu donnes le même cours à deux groupes, tu les prépares une seule fois » : tient, dans le trimestre.**
+  Une production reçoit le `coursId` du cours actif (`productions.js:2024`, `:2087`) ; la clé `productions` est rangée
+  par trimestre (`trimestres.js:63`) ; l'import et l'évaluation filtrent par cours, jamais par groupe-cours
+  (`modes.js:771`, `:807`). Mesuré : deux groupes-cours du même cours (00001 et 00002, deux horaires) ; une production
+  créée depuis le premier paraît dans le menu du second après `changerGroupeCoursActifV2`. Nuances : les échéances
+  restent une par groupe (`productions.js:1010`, voulu) ; rien ne passe au trimestre suivant (déduit du code, non mesuré).
+- **Étape 7, « une séance laissée sans verrou et sans aucune absence ne compte pas » : tient.** Ouvrir une séance
+  n'écrit rien (`saisie-presences.js:945`) ; l'assiduité ne compte que les dates qui ont au moins une fiche
+  (`indices.js:156`, `:225`). Mesuré : trois dates affichées sans aucun geste, puis un rechargement → `presences` vide,
+  0 séance au profil, « 1 séance en attente » à la bande. « Verrouiller la saisie » sans absence → trois fiches, 100 %,
+  1 séance. **Mais** une absence saisie, « Confirmer la séance » seul, ou une note tapée seule font aussi compter la
+  séance (question 5 de l'en-tête).
 
 ## 3. Le défaut de la consigne : la date vide de Présences
 
-(à compléter)
+**Reproduit** sous Chromium, par l'interface : trimestre, cours, profil, trois étudiant·es, horaire, groupe-cours,
+puis Suivi › Présences sans recharger → date vide, ni « Confirmer la séance » ni « Verrouiller la saisie » ; après un
+rechargement, le 10 nov. est proposé.
+
+**Cause** : la date se propose au démarrage (`initialiserModuleSaisiePresences`, appelée une fois par `main.js`) ; sur
+un poste neuf, il n'y avait alors rien à proposer. Le premier groupe-cours devient actif par une simple écriture
+(`sauvegarderGroupeCoursV2`), et l'observateur qui rafraîchit la saisie à l'arrivée ne le faisait que si une date était
+déjà là.
+
+**Correction, à la source** : à l'arrivée dans Présences, si la date est vide, l'observateur passe par le même chemin
+que le démarrage (séances régénérées, la plus récente ≤ aujourd'hui proposée). Une date déjà là ne change pas de
+chemin. **Source ou stock** : un état d'écran, rien n'est écrit chez les gens ; pas de stock.
+**Break-test** : la correction retirée → l'essai de bout en bout rougit sur la date (`""` au lieu de `2026-11-10`),
+rétablie → vert.
 
 ## 4. Les éléments de la démo dans un Cadre neuf (mesuré, rien d'écrit)
 
-(à compléter)
+**D'où ils viennent.** `initialiserDemoNamespace` (`demo-namespace.js`, appelée à chaque chargement par `main.js:1255`)
+écrit 15 clés `demo_*` dès le premier chargement d'un navigateur neuf, sans que la démo ait été ouverte ; l'enseignant,
+l'horaire et le groupe-cours de la démo sont fabriqués à `demo-namespace.js:207-250`. Puis huit menus du Cadre leur
+ajoutent un groupe d'options « Démo (par Labo Codex – à dupliquer pour utiliser) »
+(`BibliothequeUI.ajouterOptgroupDemo`, `bibliotheque-ui.js:260`) : `trimestre-v2.js:326` (cours), `:349` (horaire),
+`:369` (enseignant), `:393` (pratique) dans le formulaire du groupe-cours ; `trimestre-v2-cours.js:260`,
+`trimestre-v2-enseignants.js:184`, `trimestre-v2-horaires.js:556`, `trimestre-v2-groupes-cours.js:150` dans les menus
+de chaque bloc. Deux corrections au constat de la consigne : aucun trimestre de la démo n'est proposé ; le menu des
+cours n'affiche le cours de la démo qu'à partir d'un vrai cours (sans aucun cours, il dit « Aucun cours — crée ou
+importe un cours »).
+
+**Peut-on en choisir un à l'étape 6 ? Non.** Toutes ces options sont grisées (`disabled`) : ni au toucher, ni au clavier
+(Fin, flèches, première lettre), ni par `selectOption` ; seule une affectation par programme prend. Une valeur forcée
+est refusée par « Créer le groupe-cours » (`verifierReferencesPasDemo`, `trimestre-v2-groupes-cours.js:801`) :
+« Non enregistré – Créer le groupe-cours : le cours sélectionné est un exemple fourni par Labo Codex. Clique sur
+« Dupliquer » dans sa bibliothèque pour en créer ta propre version avant de l'utiliser. » **Ce message, et l'Aide
+(`accompagnement-contenu-popup.js:1289`), demandent un geste qui n'existe pas dans le Cadre** : le plan qui prévoyait
+une fiche en lecture seule avec « Dupliquer » (PLAN-AUTONOMISATION-UTILISATEUR, § 3.1 et 3.4) n'a pas été livré ici ;
+sa tentative est partie avec le retour en arrière du 22 avril (`docs/POST-MORTEM-PHASE5-22-AVRIL.md:74-76`).
+
+**Trois façons de les tenir hors des listes** (aucune n'est faite) :
+- **(a) Retirer le groupe démo des menus du Cadre** hors de la démo, comme Conception le fait déjà
+  (`filtrerParModeDemo`, `bibliotheque-ui.js:92`) : les huit appels, la fonction, trois faux objets de bancs et la
+  phrase de l'Aide partent ; la garde contre les valeurs forcées reste. Environ 40 lignes retirées. On perd le seul signe
+  de la démo dans le Cadre, et une prémisse du plan 2 (§ 2.5), à rouvrir avec lui. **Ma recommandation.**
+- **(b) Retirer seulement les quatre du formulaire du groupe-cours** : minime, mais « Primo Primavera », « Lun-AM /
+  Mer-PM » et « DEMO-601-101-MQ-0demo » restent dans les menus des blocs, là où ils ont été vus.
+- **(c) Livrer ce que le plan dessinait** (option cliquable, fiche en lecture seule, « Dupliquer » pour cinq fiches) :
+  coûteux, rien ne se retire ; le message de la garde deviendrait vrai.
 
 ## 5. Trouvailles, et leur issue
 
-(à compléter)
+1. **Le témoin « Enregistré » recouvre « Plus tard » à 390 px** — *inscrire* (question 3 de l'en-tête ; code de la
+   partie 1).
+2. **Sur l'iPhone, la bulle couvre une partie des formulaires du Cadre** — *inscrire* (question 2 ; règle du moteur).
+3. **« Trimestre : 15 semaines • 30 jours de cours »** s'affiche dans Cadre › Trimestre alors qu'aucun trimestre n'existe,
+   juste après être sorti de la démo par « Commencer avec ma classe » (capture `classe-1-1180-sombre`). Le résumé lit
+   `cle('calendrierComplet')` ; je n'ai pas établi s'il montre un calendrier resté de la démo ou un affichage non
+   rafraîchi — *inscrire*.
+4. **« Supprimer » paraît dans « Nouveau profil »**, en création (capture `classe-3-1180-sombre`) ; le toucher dit
+   « Aucun profil sélectionné ». Vu sur capture, non creusé — *inscrire*.
+5. **Banc de la partie 1, `parcours-1-et-2` › « panneau : titre, phrase… »** : rouge sous Chromium, sur la base comme sur
+   ce lot : il mesure la position du panneau pendant qu'il glisse encore (−172 px au lieu de 0). Vert sur le Mac
+   (WebKit, 25/25 selon le commit de la partie 1) — *inscrire* : attendre la fin de la transition, comme le fait déjà
+   `capture()`.
+6. **`en-tete-epure`** : trois rouges sous Chromium, identiques sur la base — *commenter et oublier* (Chromium n'est pas
+   la cible ; la config Chromium le dit elle-même).
+7. **Rouge GitHub sur `main`** (audit de début de session) : le run de la 1.237.2 (`54a87bca`) a quatre essais hors de la
+   baseline Linux ; deux sont déjà rattachés à #1246, deux sont neufs : `aide-cp-suit-la-case-1086` et
+   `tampons-masques-bibliotheque-1216` — *inscrire*.
+8. **`calculerNombreSeances`** (`saisie-presences.js:580`) n'a aucun appelant — *commenter et oublier* (non commenté :
+   hors du lot ; noté ici).
 
 ## 6. Tests
 
-(à compléter)
+- **Vitest** (depuis `tests/`), sur le lot : **10 893/10 893**, 893 fichiers (la base en avait 10 869 ; + 24 essais de la sentinelle neuve).
+- **Playwright, sous Chromium** (`playwright.chromium.config.js`) :
+  - `parcours-2-ma-classe` : 2/2, et 6 passes sur 6 de l'essai de bout en bout ; l'essai des captures de l'iPhone, vert
+    avec `CAPTURES_PARCOURS`.
+  - Les specs liées, en entier : `barre-convergence-suit-les-enregistrements-918`, `chaines-etapes-1149` (les deux),
+    `demo-saisie-presences-749-lot3`, `graphique-suit-les-presences`, `parcours-neuf-saisie-presences`,
+    `presences-lot-d-enregistrement`, `temoin-dans-le-flux-1240`, `temoin-enregistrement-lot-b`,
+    `trimestre-v2-chargement`, `accueil-epure`, `en-tete-epure`, `guidage-demo`, `parcours-1-et-2`,
+    `lot-e2-cadre-creer-ou-modifier`, `parcours-rentree-478`, `groupe-cours-sans-ses-eleves-1038` : **99 verts, 4 rouges,
+    10 sautés**. Les 4 rouges le sont aussi sur la base `a328bb9` (§ 5, points 5 et 6) : aucun n'est dû à ce lot.
+- **Break-tests** : la sentinelle (« tes présences, tes évaluations » → « tes présences et tes évaluations » : rouge,
+  rétabli : vert) ; la correction de la date (§ 3).
+- **Sur le Mac, à faire** : le verdict WebKit complet, et les captures WebKit (chaque étape à 1180 px en sombre ; 1, 7
+  et 8 à 390 px ; menu et panneau).
 
 ## 7. Relecture par un agent neuf
 
@@ -107,4 +228,18 @@ prennent sur le Mac. Captures Chromium : `plans de travail/captures-2026-11-09-p
 
 ## À inscrire au BACKLOG
 
-(à compléter)
+Les trois que la consigne demande d'inscrire sans les faire :
+- Sur un groupe neuf sans aucune production, la complétion affiche « 1 évaluation en attente » et la performance
+  « 3 évaluations en attente » (vu aussi sur la capture `classe-8-1180-sombre`).
+- « Aucun production défini », dans « Trajectoires par production » : l'accord.
+- Sous le sélecteur du profil enseignant, « nom, établissement, discipline » : le formulaire exige le courriel (et
+  l'institution), pas la discipline.
+
+Ceux de cette nuit (§ 5) :
+- Le témoin « Enregistré » recouvre le lien « Plus tard » (et « Quitter le parcours » ?) de la bulle à 390 px.
+- Sur l'iPhone, la bulle couvre une partie des formulaires du Cadre : une bulle repliable sous ~500 px.
+- « 15 semaines • 30 jours de cours » sans trimestre, après la sortie de la démo.
+- « Supprimer » dans « Nouveau profil », en création.
+- `parcours-1-et-2` › « panneau » mesure le panneau pendant qu'il glisse (rouge sous Chromium).
+- Deux essais neufs rouges sur le run GitHub de la 1.237.2 : `aide-cp-suit-la-case-1086`, `tampons-masques-bibliotheque-1216`.
+- Si Grégoire retient l'option (a) du § 4 : retirer le groupe « Démo » des menus du Cadre.
