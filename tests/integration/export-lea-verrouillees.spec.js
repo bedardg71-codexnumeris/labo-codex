@@ -19,7 +19,7 @@ const indexHtml = 'file://' + path.join(racineProjet, 'index.html');
 const PNG = 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==';
 const T = 'tlea';
 
-async function monter(page, { quatrieme = false, tousVerrouilles = false, doublons = false } = {}) {
+async function monter(page, { quatrieme = false, tousVerrouilles = false, doublons = false, aucunVerrouille = false } = {}) {
     const erreurs = [];
     page.on('console', (m) => { if (m.type() === 'error') erreurs.push(m.text()); });
     page.on('pageerror', (e) => erreurs.push(`pageerror: ${e.message}`));
@@ -28,7 +28,7 @@ async function monter(page, { quatrieme = false, tousVerrouilles = false, doublo
     await page.goto(indexHtml);
     await page.waitForFunction(() => typeof window.db !== 'undefined' && window.travauxUI && window.travauxStockage
         && window.travauxArchivage && typeof window.JSZip !== 'undefined');
-    await page.evaluate(({ png, T, quatrieme, tousVerrouilles, doublons }) => {
+    await page.evaluate(({ png, T, quatrieme, tousVerrouilles, doublons, aucunVerrouille }) => {
         // security-ok: fixtures littérales du banc, aucune source externe.
         const coursId = 'cours-lea';
         const crit = [{ id: 'c1', nom: 'Contenu', ponderation: 60, type: 'holistique' }, { id: 'c2', nom: 'Structure', ponderation: 40, type: 'holistique' }];
@@ -53,7 +53,9 @@ async function monter(page, { quatrieme = false, tousVerrouilles = false, doublo
         window.db.setSync(T + '_cartouches_GLEA', [
             { id: 'CTLEA', nom: 'Cartouche témoin', grilleId: 'GLEA', contexte: '', criteres: [{ id: 'c1', nom: 'Contenu' }, { id: 'c2', nom: 'Structure' }], commentaires }
         ]);
-        const verrou = { TESTL1: true, TESTL2: tousVerrouilles, TESTL3: true, TESTL4: false };
+        const verrou = aucunVerrouille
+            ? { TESTL1: false, TESTL2: false, TESTL3: false, TESTL4: false }
+            : { TESTL1: true, TESTL2: tousVerrouilles, TESTL3: true, TESTL4: false };
         const evaluations = eleves.map((da, i) => ({
             id: 'EV' + da, etudiantDA: da, etudiantNom: 'Élève ' + (i + 1) + ' Fictif', productionId: 'plea', productionNom: 'Analyse',
             groupeCoursId: 'GCLEA', coursId, grilleId: 'GLEA', echelleId: 'ELEA', cartoucheId: 'CTLEA',
@@ -96,7 +98,7 @@ async function monter(page, { quatrieme = false, tousVerrouilles = false, doublo
         window._telecharges = [];
         const creer = URL.createObjectURL.bind(URL);
         URL.createObjectURL = function (blob) { window._telecharges.push(blob); return creer(blob); };
-    }, { png: PNG, T, quatrieme, tousVerrouilles, doublons });
+    }, { png: PNG, T, quatrieme, tousVerrouilles, doublons, aucunVerrouille });
     return erreurs;
 }
 
@@ -156,6 +158,15 @@ test('Léa · tout est verrouillé : rien n\'est ajouté au compteur, les trois 
     await expect(await compteur(page)).toHaveText('3 PDF pour 3 étudiant·es, dont 1 sur papier (synthèse seule)');
     const noms = await exporterEtLireLeZip(page);
     expect(noms).toHaveLength(3);
+});
+
+// 9 nov., 15 h 25 — texte validé par Grégoire mot pour mot : rien de verrouillé, le compteur dit la même chose que
+// l'alerte de l'export, plus « Aucune évaluation trouvée ».
+test('Léa · aucune verrouillée : « Aucune évaluation verrouillée », et les trois laissées de côté', async ({ page }) => {
+    test.setTimeout(120000);
+    await monter(page, { aucunVerrouille: true });
+    await expect(await compteur(page))
+        .toHaveText('Aucune évaluation verrouillée · 3 évaluations non verrouillées laissées de côté');
 });
 
 // Relecture du 9 nov. — le générateur retenait la plus récente du couple élève-production : un doublon non verrouillé

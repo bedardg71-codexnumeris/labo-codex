@@ -177,6 +177,13 @@ describe('#1245 — le compteur de « Export Léa » compte le papier et le dit'
         expect(compter(sel(3, 0, 2))).toBe('3 PDF pour 3 étudiant·es · 2 évaluations non verrouillées laissées de côté');
         expect(compter(sel(3, 0, 0))).toBe('3 PDF pour 3 étudiant·es');
     });
+
+    it('10. 9 nov., 15 h 25 — aucune verrouillée : « Aucune évaluation verrouillée », comme l\'alerte (texte validé par Grégoire, accordé au nombre) ; aucune du tout : le message d\'avant', () => {
+        expect(compter(sel(0, 0, 1))).toBe('Aucune évaluation verrouillée · 1 évaluation non verrouillée laissée de côté');
+        expect(compter(sel(0, 0, 4))).toBe('Aucune évaluation verrouillée · 4 évaluations non verrouillées laissées de côté');
+        expect(compter(sel(0, 0, 0))).toBe('Aucune évaluation trouvée');
+        expect(compter(sel(0, 0, 2))).not.toContain('Aucune évaluation trouvée');
+    });
 });
 
 /*

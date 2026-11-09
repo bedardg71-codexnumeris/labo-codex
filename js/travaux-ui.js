@@ -3964,7 +3964,13 @@
             if (nbCopies > 0) return `1 ${label} prête`;
             return nbPapier > 0 ? `1 ${label} prête (synthèse seule)` : `Aucune ${label}`;
         }
-        if (nbPdf === 0) return reprisesSeulement ? 'Aucune reprise trouvée' : 'Aucune évaluation trouvée';
+        if (nbPdf === 0) {
+            if (reprisesSeulement) return 'Aucune reprise trouvée';
+            // 9 nov. 2026, 15 h 25 — validé par Grégoire mot pour mot : quand des évaluations existent mais qu'aucune
+            // n'est verrouillée, le compteur dit la même chose que l'alerte de l'export. Aucune évaluation du tout :
+            // le message d'avant.
+            return (selection.nonVerrouillees || []).length > 0 ? 'Aucune évaluation verrouillée' : 'Aucune évaluation trouvée';
+        }
         return `${nbPdf} PDF pour ${nbPdf} ${nbPdf > 1 ? 'étudiant·es' : 'étudiant·e'}`
             + (nbPapier > 0 ? `, dont ${nbPapier} sur papier (synthèse seule)` : '');
     }
