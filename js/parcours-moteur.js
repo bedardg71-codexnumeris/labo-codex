@@ -214,6 +214,9 @@
                 && /[A-ZÀ-ÖØ-ÞŒ«0-9]/.test(texte.charAt(i + 2))) res.push(i + 1);
         }
         return res;
+        // Limite connue (relecture du 9 nov.) : une abréviation suivie d'une majuscule ou d'un chiffre
+        // (« M. Untel », « p. 12 », « chap. 3 ») passe pour une fin de phrase, et une phrase entre
+        // parenthèses n'est pas protégée. Aucun texte de parcours n'en a ; à reprendre si l'un en a.
     }
 
     /**
@@ -249,19 +252,40 @@
         return Math.round(p.scrollHeight / ligne);
     }
 
-    /** Les pages du texte, à la largeur de `p` : une seule s'il tient en LIGNES_PAR_PAGE lignes. */
+    /**
+     * Les pages du texte, à la largeur de `p` : une seule s'il tient en LIGNES_PAR_PAGE lignes. Sinon la
+     * première découpe (deux pages, puis trois) dont chaque page tient ; à défaut, celle dont la plus haute
+     * page est la plus basse, si elle épargne au moins un tiers des lignes (une découpe qui laisse une page
+     * presque aussi longue que le tout coûterait une navigation sans épargner le défilement : le filet suffit).
+     */
     function decouperEnPages(p, texte) {
         p.style.minHeight = '';
-        if (lignesDe(p, texte) <= LIGNES_PAR_PAGE) return [texte];
+        p.style.flexBasis = '';
+        var total = lignesDe(p, texte);
+        if (total <= LIGNES_PAR_PAGE) return [texte];
         var coupes = coupuresPossibles(texte);
-        var retenues = [texte];
+        var meilleure = null;
         for (var n = 2; n <= PAGES_MAX; n++) {
             var pages = partager(texte, coupes, n);
             if (!pages) break;
-            retenues = pages;
-            if (pages.every(function (pg) { return lignesDe(p, pg) <= LIGNES_PAR_PAGE; })) break;
+            var plusHaute = Math.max.apply(null, pages.map(function (pg) { return lignesDe(p, pg); }));
+            if (!meilleure || plusHaute < meilleure.plusHaute) meilleure = { pages: pages, plusHaute: plusHaute };
+            if (plusHaute <= LIGNES_PAR_PAGE) break;
         }
-        return retenues;
+        if (!meilleure || (meilleure.plusHaute > LIGNES_PAR_PAGE && meilleure.plusHaute > total * 2 / 3)) return [texte];
+        return meilleure.pages;
+    }
+
+    /**
+     * Toutes les pages prennent la hauteur de la plus haute (sa base flex) : « ← » et « → » ne bougent pas
+     * sous le doigt d'une page à l'autre. Sous la contrainte du filet, le texte se resserre encore.
+     */
+    function egaliserPages(p, pages) {
+        p.style.flexBasis = '';
+        if (pages.length < 2) return;
+        var haute = 0;
+        pages.forEach(function (pg) { p.textContent = pg; haute = Math.max(haute, p.scrollHeight); });
+        p.style.flexBasis = haute + 'px';
     }
 
     /** Pose les pages dans le texte de la bulle : toutes, dans l'ordre ; celle qu'on lit est visible. */
@@ -321,23 +345,31 @@
         return true;
     }
 
-    /** Les flèches gauche et droite, quand la bulle (ou l'un de ses boutons) a le focus. */
+    /**
+     * Les flèches gauche et droite, quand la bulle (ou l'un de ses boutons) a le focus. Pas avec un
+     * modificateur (Alt ou Cmd + ← : la page précédente du navigateur), ni la bulle repliée (rien ne
+     * se verrait changer).
+     */
     function surToucheBulle(ev) {
         if (!etat || (ev.key !== 'ArrowRight' && ev.key !== 'ArrowLeft')) return;
+        if (ev.altKey || ev.metaKey || ev.ctrlKey || ev.shiftKey) return;
+        if (etat.elements.bulle.classList.contains('est-repliee')) return;
         if (!etat.elements.bulle.contains(document.activeElement)) return;
         if (changerPage(ev.key === 'ArrowRight' ? 1 : -1)) ev.preventDefault();
     }
 
     /**
-     * Découpe le texte de l'étape à la largeur actuelle de la bulle et pose ses pages ; la page `garder`
-     * reste affichée si elle existe encore ; la largeur mesurée est gardée (`largeurPages`).
+     * Découpe le texte de la bulle (lu une fois, au rendu de l'étape : `etat.texte`) à la largeur actuelle
+     * et pose ses pages ; la page `garder` reste affichée si elle existe encore ; la largeur mesurée est
+     * gardée (`largeurPages`).
      */
-    function paginer(etape, garder) {
+    function paginer(garder) {
         var b = etat.elements.bulle;
         var p = b.querySelector('.parcours-bulle-texte');
         if (!p) return;
         etat.largeurPages = p.offsetWidth;
-        etat.pages = decouperEnPages(p, etape.texte);
+        etat.pages = decouperEnPages(p, etat.texte);
+        egaliserPages(p, etat.pages);
         ecrirePages(p, etat.pages);
         var plusieurs = etat.pages.length > 1;
         var indice = b.querySelector('.parcours-bulle-pages');
@@ -353,10 +385,10 @@
      * réduite d'un parcours, bulle repliée) n'est pas mesuré.
      */
     function suivreLargeurDesPages() {
-        var etape = etapeCourante();
         var p = etat.elements.bulle.querySelector('.parcours-bulle-texte');
-        if (!p || !p.offsetWidth || p.offsetWidth === etat.largeurPages) return;
-        paginer(etape, etat.page);
+        if (!p || !p.offsetWidth || p.offsetWidth === etat.largeurPages) return false;
+        paginer(etat.page);
+        return true;
     }
 
     // ---------- Le rendu d'une étape ----------
@@ -448,7 +480,8 @@
 
         // Les pages, à la largeur de la bulle (le filet : jamais sous trois lignes, posé par montrerPage).
         // Seule la forme change (le seuil du téléphone franchi) : la page affichée reste.
-        paginer(etape, opts && opts.sansAnnonce ? etat.page : 0);
+        etat.texte = etape.texte;
+        paginer(opts && opts.sansAnnonce ? etat.page : 0);
 
         if (etape.geste) {
             var g = document.createElement('p');
@@ -712,14 +745,25 @@
 
         // La découpe suit la largeur de la bulle (une sonde d'étape a pu la changer), avant sa place.
         suivreLargeurDesPages();
-        // La bulle évite la zone éclairée ET le contour.
-        placerBulle(etape, union(rectsDe(zones.concat(contourEl ? [contourEl] : []))), visible(contourEl) ? contourEl : null);
+        placerSelonEtape(etape, zones, contourEl);
+        if (etape.atteint) suivreAtteint(etape, zones, contourEl);
+    }
 
-        if (etape.atteint) {
-            var ok = false;
-            try { ok = !!etape.atteint(); } catch (e) { ok = false; }
-            if (ok) allerA(etat.i + 1);
-        }
+    /** La bulle évite la zone éclairée ET le contour. */
+    function placerSelonEtape(etape, zones, contourEl) {
+        placerBulle(etape, union(rectsDe(zones.concat(contourEl ? [contourEl] : []))), visible(contourEl) ? contourEl : null);
+    }
+
+    /**
+     * L'état atteint : l'étape suivante. Sinon, la sonde d'étape a pu changer la forme de la bulle (le
+     * neuvième parcours la pose dans `atteint`) : la découpe et la place suivent dans le même passage,
+     * sans image périmée.
+     */
+    function suivreAtteint(etape, zones, contourEl) {
+        var ok = false;
+        try { ok = !!etape.atteint(); } catch (e) { ok = false; }
+        if (ok) { allerA(etat.i + 1); return; }
+        if (suivreLargeurDesPages()) placerSelonEtape(etape, zones, contourEl);
     }
 
     /** Prépare la page pour l'étape i (`avant`), puis attend deux images qu'elle soit dessinée. */
@@ -780,7 +824,7 @@
         if (etat) fermer();
         retirerElements();
         etat = { def: def, i: 0, opts: opts || {}, elements: creerElements(), enTransition: false,
-                 telephone: surTelephone(), replie: false, reglerJusqua: 0, pages: [], page: 0, largeurPages: 0 };
+                 telephone: surTelephone(), replie: false, reglerJusqua: 0, texte: '', pages: [], page: 0, largeurPages: 0 };
         document.body.classList.add('parcours-actif');
         if (window.transitions && typeof window.transitions.fermerBandeau === 'function') window.transitions.fermerBandeau();
         document.addEventListener('keydown', surTouche, true);
@@ -822,7 +866,7 @@
         actif: function () { return !!etat; },
         etapeCourante: function () { return etat ? etat.i : null; },
         // Les bulles en pages : la page affichée et leur nombre (0 et 1 quand le texte tient).
-        pageCourante: function () { return etat ? { page: etat.page, pages: etat.pages.length } : null; },
+        pageCourante: function () { return etat ? { page: etat.page, pages: etat.pages.length, largeur: etat.largeurPages } : null; },
         allerA: function (i) { return allerA(i); },
         // Utilitaires pour les définitions de parcours.
         visible: visible,
