@@ -303,7 +303,9 @@
         var w = Math.min(window.innerWidth, r.right + pad) - x;
         var hh = Math.min(window.innerHeight, r.bottom + pad) - y;
         if (w <= 0 || hh <= 0) return '';
-        var rr = 6;
+        // Le rayon ne dépasse pas la moitié d'un côté : une cible presque sortie de l'écran (moins de
+        // 12 px visibles) rendait « v-2.4 » puis « v--2.4 », que WebKit refuse (verdict du 9 nov.).
+        var rr = Math.min(6, w / 2, hh / 2);
         return 'M' + (x + rr) + ',' + y + ' h' + (w - 2 * rr) + ' a' + rr + ',' + rr + ' 0 0 1 ' + rr + ',' + rr +
             ' v' + (hh - 2 * rr) + ' a' + rr + ',' + rr + ' 0 0 1 -' + rr + ',' + rr +
             ' h-' + (w - 2 * rr) + ' a' + rr + ',' + rr + ' 0 0 1 -' + rr + ',-' + rr +
