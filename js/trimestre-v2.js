@@ -298,7 +298,9 @@ function populerDropdownsAssemblageV2() {
     }
 
     // En mode démo legacy, les items démo sont dans les clés globales ;
-    // on les affiche dans la section principale (pas d'optgroup séparé).
+    // on les affiche dans la section principale. Hors de la démo, ils n'y paraissent pas.
+    // Lot « Les deux parcours », partie 2 (9 nov. 2026, option a de Grégoire) : le groupe « Démo » ne paraît
+    // plus dans ce menu hors de la démo, comme en Conception (`filtrerParModeDemo`).
     const enDemoLegacy = typeof estEnModeDemo === 'function' && estEnModeDemo();
 
     // Dropdown Cours
@@ -320,11 +322,6 @@ function populerDropdownsAssemblageV2() {
             html += `<option value="${echapperHtml(c.id)}">${echapperHtml(labelCours(c))}</option>`;
         });
         selectCours.innerHTML = html;
-
-        if (!enDemoLegacy && typeof cleDemo === 'function' && typeof BibliothequeUI !== 'undefined') {
-            const coursDemo = db.getSync(cleDemo('listeCours'), []) || [];
-            BibliothequeUI.ajouterOptgroupDemo(selectCours, coursDemo, labelCours);
-        }
     }
 
     // Dropdown Groupes d'étudiants
@@ -343,11 +340,6 @@ function populerDropdownsAssemblageV2() {
             html += `<option value="${echapperHtml(h.id)}">${echapperHtml(nom)}</option>`;
         });
         selectHoraire.innerHTML = html;
-
-        if (!enDemoLegacy && typeof cleDemo === 'function' && typeof BibliothequeUI !== 'undefined') {
-            const horairesDemo = db.getSync(cleDemo('horaires'), []) || [];
-            BibliothequeUI.ajouterOptgroupDemo(selectHoraire, horairesDemo, h => h.nom || h.id || 'Sans nom');
-        }
     }
 
     // Beta 95.2: Dropdown Enseignants (maintenant depuis liste unifiée)
@@ -363,11 +355,6 @@ function populerDropdownsAssemblageV2() {
             html += `<option value="${echapperHtml(e.id)}">${echapperHtml(labelEns(e))}</option>`;
         });
         selectEnseignant.innerHTML = html;
-
-        if (!enDemoLegacy && typeof cleDemo === 'function' && typeof BibliothequeUI !== 'undefined') {
-            const ensDemo = db.getSync(cleDemo('enseignants'), []) || [];
-            BibliothequeUI.ajouterOptgroupDemo(selectEnseignant, ensDemo, labelEns);
-        }
     }
 
     // Beta 95.3: Dropdown Pratiques de notation (alignement Primo)
@@ -387,11 +374,6 @@ function populerDropdownsAssemblageV2() {
             html += `<option value="${echapperHtml(p.id)}">${echapperHtml(nom)}</option>`;
         });
         selectPratique.innerHTML = html;
-
-        if (!enDemoLegacy && typeof cleDemo === 'function' && typeof BibliothequeUI !== 'undefined') {
-            const pratiquesDemo = db.getSync(cleDemo('pratiquesConfigurables'), []) || [];
-            BibliothequeUI.ajouterOptgroupDemo(selectPratique, pratiquesDemo, p => p.nom || p.id || 'Sans nom');
-        }
     }
 
     // Retour testeur du 18 sept. 2026 : ce hub est rejoué après chaque

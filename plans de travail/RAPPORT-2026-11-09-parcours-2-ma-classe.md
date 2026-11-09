@@ -188,6 +188,33 @@ sa tentative est partie avec le retour en arrière du 22 avril (`docs/POST-MORTE
 - **(c) Livrer ce que le plan dessinait** (option cliquable, fiche en lecture seule, « Dupliquer » pour cinq fiches) :
   coûteux, rien ne se retire ; le message de la garde deviendrait vrai.
 
+### 4 bis. L'option (a), faite (9 nov. 2026, décision de Grégoire à 9 h 24)
+
+Fait dans la session principale, après la fusion de la partie 1 sous ce lot :
+- les huit appels à `ajouterOptgroupDemo` sont retirés (`trimestre-v2.js` quatre, `trimestre-v2-cours.js`,
+  `trimestre-v2-enseignants.js`, `trimestre-v2-horaires.js`, `trimestre-v2-groupes-cours.js`), puis la fonction
+  (`bibliotheque-ui.js`), plus rien ne l'appelant ; ses trois faux objets de bancs (`sentinelle-449`, `-458`, `-762`) ;
+  sa ligne dans `docs/modules/demo-et-autonomisation.md` ;
+- dans la fenêtre « Données démo » de l'Aide, la phrase « Dans les menus de Cadre › Trimestre (…) sous « Démo (par Labo
+  Codex – à dupliquer pour utiliser) ». » est retirée. **Supposé par moi** : la seconde phrase du même conseil (« Ton
+  matériel ne peut pas pointer vers un modèle de la démo : duplique-le d'abord, puis choisis ta copie. ») reste, mot pour
+  mot : elle est toujours vraie (la garde reste) et la décision nomme une phrase. `sentinelle-guidage-demo-2026-10-29`
+  garde le reste du bloc 6 mot pour mot ;
+- le cliquet de complexité descend de 437 à 435 : `populerDropdownsAssemblageV2` 29 → 13, `chargerDropdownCoursV2` 17 → 12 ;
+- banc neuf `tests/unit/sentinelle-cadre-sans-groupe-demo.test.js` (3 cas : plus d'appel ni de définition, plus du
+  libellé dans `js/`, la garde toujours définie) ; rouge sans le retrait (2 cas sur 3), vérifié.
+
+**La garde `verifierReferencesPasDemo` reste.** Son message devient inatteignable par l'interface (plus aucune option
+`demo-` à forcer dans le Cadre), mais il reste faux : il demande « Dupliquer » dans une bibliothèque, geste qui n'existe
+pas pour un cours, un horaire, un enseignant ou un groupe-cours. Non changé. **Texte proposé** (à décider par Grégoire) :
+« Non enregistré – le cours sélectionné vient de la démo. Choisis un de tes cours, ou crée-le dans Cadre › Trimestre. »
+(le type et le chemin suivent `labelType` : cours, horaire, enseignant·e, pratique).
+
+**La prémisse du plan 2 que ce retrait touche** : `plans de travail/HOOKS-PLAN2.md`, § 2.5 « Sélecteurs à 2 sections
+(`ajouterOptgroupDemo`) », prévoyait d'étendre ces sélecteurs à trois sections (« Mes documents | Démo | Partagés »)
+en généralisant la fonction. La fonction n'existe plus et le Cadre n'a plus de section « Démo » : le jour où le plan 2
+reprend, ce paragraphe est à réécrire (une section « Partagés » seulement, ou rien). Le plan n'est pas modifié.
+
 ## 5. Trouvailles, et leur issue
 
 1. **Le témoin « Enregistré » recouvre « Plus tard » à 390 px** — *inscrire* (question 3 de l'en-tête ; code de la
@@ -273,4 +300,4 @@ Ceux de cette nuit (§ 5) :
 - « Supprimer » dans « Nouveau profil », en création.
 - `parcours-1-et-2` › « panneau » mesure le panneau pendant qu'il glisse (rouge sous Chromium).
 - Deux essais neufs rouges sur le run GitHub de la 1.237.2 : `aide-cp-suit-la-case-1086`, `tampons-masques-bibliotheque-1216`.
-- Si Grégoire retient l'option (a) du § 4 : retirer le groupe « Démo » des menus du Cadre.
+- Si Grégoire retient l'option (a) du § 4 : retirer le groupe « Démo » des menus du Cadre. ⮕ **Fait** (§ 4 bis), n'est plus à inscrire.

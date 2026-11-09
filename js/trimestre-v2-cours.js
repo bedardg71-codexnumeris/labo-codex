@@ -251,14 +251,8 @@ function chargerDropdownCoursV2() {
             select.appendChild(option);
         });
 
-        // Section Démo (Plan 1 Phase 2.4) : cours Labo Codex en lecture seule.
-        // Skip en mode démo legacy : les cours démo sont déjà dans la clé globale,
-        // pas de section séparée à afficher (sera retiré en Plan 1 Phase 5).
-        const enDemoLegacy = typeof estEnModeDemo === 'function' && estEnModeDemo();
-        if (!enDemoLegacy && typeof cleDemo === 'function' && typeof BibliothequeUI !== 'undefined') {
-            const coursDemo = db.getSync(cleDemo('listeCours'), []) || [];
-            BibliothequeUI.ajouterOptgroupDemo(select, coursDemo, obtenirTexteCours);
-        }
+        // Lot « Les deux parcours », partie 2 (9 nov. 2026, option a de Grégoire) : le groupe « Démo » ne paraît
+        // plus dans ce menu hors de la démo, comme en Conception (`filtrerParModeDemo`).
 
         // Si aucun cours sélectionné mais qu'il y en a, sélectionner le premier
         if (!coursSelectionne && coursAfficher.length > 0) {

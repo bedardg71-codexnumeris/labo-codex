@@ -178,13 +178,8 @@ function populerDropdownEnseignantsV2() {
 
     select.innerHTML = html;
 
-    // Section Démo (Plan 1 Phase 2.4) : seulement en mode normal
-    if (!enDemoLegacy && typeof cleDemo === 'function' && typeof BibliothequeUI !== 'undefined') {
-        const enseignantsDemo = db.getSync(cleDemo('enseignants'), []) || [];
-        BibliothequeUI.ajouterOptgroupDemo(select, enseignantsDemo, e =>
-            `${e.prenom || ''} ${e.nom || ''}`.trim() || 'Sans nom'
-        );
-    }
+    // Lot « Les deux parcours », partie 2 (9 nov. 2026, option a de Grégoire) : le groupe « Démo » ne paraît
+    // plus dans ce menu hors de la démo, comme en Conception (`filtrerParModeDemo`).
 }
 
 /**
