@@ -151,6 +151,12 @@
         // retirée) : celles déjà écrites restent dans le stockage, rien ne les lit plus.
         parcoursAssistance: {},
 
+        // Le repère du troisième parcours, « Évaluer une première production » (js/parcours-evaluer.js,
+        // 9 nov. 2026), pour « Reprendre » : ce qui existait à « Commencer » (grillesAvant, productionsAvant,
+        // pratiquesAvant, pratiqueAppliqueeAvant), puis ce qu'il a vu naître (grilleId, productionId,
+        // evaluationId, pratiqueId, cartoucheId). Des identifiants, rien des données de la personne.
+        parcoursEvaluer: {},
+
         // Export du plan — niveau « Personnalisé » (#431, 8 août 2026).
         // ⚠ REMPLACÉE par exportGabarits (#416 lot H, 12 août 2026). Elle
         // subsiste ici le temps que la migration la lise ; elle est effacée

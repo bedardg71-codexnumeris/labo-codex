@@ -269,9 +269,41 @@
     }
 
     /**
+     * Parcours 6 (9 nov. 2026, consigne « Mettre tes données à l'abri ») : pendant un parcours
+     * de l'assistance, quel qu'il soit, le rappel ne s'ouvre pas. Vu le 8 nov. : sa fenêtre
+     * passe au-dessus du voile et bloque les clics en plein parcours. S'il était dû, il attend
+     * la fin du parcours, puis le même délai qu'à l'ouverture de l'application : un parcours
+     * qui en lance un autre (« Commencer avec ma classe ») ne lui laisse pas de fenêtre.
+     * Une mise à jour réussie pendant le parcours l'a repoussé comme d'habitude
+     * (reporterApresMiseAJourDuCodex) : à la fin, il n'est plus dû.
+     */
+    const SONDE_FIN_DE_PARCOURS_MS = 500;
+    const DELAI_APRES_PARCOURS_MS = 1500;
+    let attenteDeLaFinDuParcours = null;
+
+    function parcoursEnCours() {
+        const moteur = window.ParcoursMoteur;
+        return !!(moteur && typeof moteur.actif === 'function' && moteur.actif());
+    }
+
+    function attendreLaFinDuParcours() {
+        if (attenteDeLaFinDuParcours) return;
+        attenteDeLaFinDuParcours = setInterval(() => {
+            if (parcoursEnCours()) return;
+            clearInterval(attenteDeLaFinDuParcours);
+            attenteDeLaFinDuParcours = null;
+            setTimeout(verifierEtAfficher, DELAI_APRES_PARCOURS_MS);
+        }, SONDE_FIN_DE_PARCOURS_MS);
+    }
+
+    /**
      * Vérifie si le modal doit être affiché et l'affiche si nécessaire
      */
     function verifierEtAfficher() {
+        if (parcoursEnCours()) {
+            attendreLaFinDuParcours();
+            return;
+        }
         if (doitAfficherModal()) {
             afficherModal();
         }

@@ -69,6 +69,16 @@ function changerEchelleEvaluation(num) {
 
     if (evaluationEnCours) {
         evaluationEnCours.echelleId = echelleId;
+        // Troisième parcours (9 nov. 2026, mesuré sous Chromium) : une grille à niveaux, une production qui ne nomme pas
+        // d'échelle, deux échelles au trimestre → l'écran dit « Choisis maintenant une échelle de performance : sans
+        // elle, les critères ne peuvent pas apparaître ». Choisie, elle ne les faisait pas paraître : seul le choix de la
+        // grille les dessine (`chargerGrilleSelectionnee`). Les critères qui l'attendaient sont dessinés ici.
+        const grilleChoisie = document.getElementById('selectGrille1')?.value;
+        const criteresEnAttente = !document.querySelector('#listeCriteresGrille1 [id^="eval_"]');
+        if (echelleId && grilleChoisie && criteresEnAttente && typeof window.chargerGrilleSelectionnee === 'function') {
+            window.chargerGrilleSelectionnee();
+            return;
+        }
         // Recalculer la note et regénérer la rétroaction avec la nouvelle échelle
         // Patch §5.6 — promotion calculerNote vers evaluation-calcul.js (session B étape 3 refactor 2026-05-18)
         window.calculerNote();

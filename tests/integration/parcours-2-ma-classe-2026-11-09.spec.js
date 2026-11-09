@@ -110,6 +110,8 @@ async function bulleNeCouvrePas(page, selecteur, contexte = '') {
 }
 
 const rang = (page) => page.locator('#assistance-menu-rang');
+// Parcours 3 (9 nov.) : les lots suivants inscrivent leurs parcours après ces deux-là ; le compte se lit sur le registre.
+const nParcours = (page) => page.evaluate(() => window.Assistance.parcours().length);
 
 /** Note chaque titre de bulle rendu, pour dire quelles étapes ont paru, même un instant. */
 async function noterLesBulles(page) {
@@ -247,7 +249,7 @@ test('de « Découvrir » à sa propre classe : « Commencer avec ma classe », 
     expect(await page.evaluate(() => Assistance.etatDe('decouvrir').etat)).toBe('fait');
     expect(await page.evaluate(() => Assistance.etatDe('classe'))).toEqual({ etat: 'en-cours', etape: 0 });
     await expect(page.locator('#calendrier-trimestre')).toBeVisible();
-    await expect(rang(page)).toHaveText('2 sur 2');
+    await expect(rang(page)).toHaveText('2 sur ' + await nParcours(page));
     // Le haut du formulaire (nom, session, année) et « Créer le trimestre » sont à l'écran, la bulle à côté.
     for (const sel of ['#v2-nomTrimestre', '#v2-sessionTrimestre', '#v2-anneeTrimestre', '#v2-finTrimestre', '#v2-btnCreerTrimestre']) {
         await expect(page.locator(sel)).toBeInViewport();
@@ -275,7 +277,7 @@ test('de « Découvrir » à sa propre classe : « Commencer avec ma classe », 
             await page.reload();
             await attendreApplication(page);
             await expect(bulle(page)).toHaveCount(0);
-            await expect(rang(page)).toHaveText('2 sur 2');
+            await expect(rang(page)).toHaveText('2 sur ' + await nParcours(page));
             // Le panneau dit où il attend ; « Reprendre » repart au profil.
             await ouvrirPanneau(page);
             const item = page.locator('#panneau-assistance [data-parcours="classe"]');
@@ -319,7 +321,8 @@ test('de « Découvrir » à sa propre classe : « Commencer avec ma classe », 
 
     await expect(bulle(page)).toHaveCount(0);
     expect(await page.evaluate(() => Assistance.etatDe('classe').etat)).toBe('fait');
-    await expect(rang(page)).toHaveText('');
+    // Les deux premiers sont faits : le rang passe au suivant, s'il y en a un (parcours 3, 9 nov.).
+    await expect(rang(page)).toHaveText((await nParcours(page)) > 2 ? '3 sur ' + await nParcours(page) : '');
     await ouvrirPanneau(page);
     const item = page.locator('#panneau-assistance [data-parcours="classe"]');
     await expect(item.locator('.assistance-parcours-etat')).toHaveText('Fait');

@@ -1082,6 +1082,27 @@ function basculerDescriptionCritere(bouton) {
     if (description) window.basculerBulleAncree(bouton, bouton.closest('.eval-critere-header'), description.textContent);
 }
 
+/**
+ * LE COMMENTAIRE D'UNE CARTOUCHE SUR UNE GRILLE EN POINTS (troisième parcours, 9 nov. 2026 ; mesuré par Cowork le
+ * 8 nov., 6 h 30). Une grille en points se note sans échelle depuis la 1.158 : sans échelle, les points ne donnent
+ * aucun niveau (`calculerNote` le déduit des bornes de l'échelle), et la cartouche n'avait aucun palier à commenter —
+ * la rétroaction ne portait que « Critère 1 (Rédaction) — 70 / 100 », même après « Régénérer ». La cartouche, elle,
+ * est écrite sur une échelle (`cartouche.echelleId`, cartouches.js) : choisie, elle la pose sur l'évaluation quand
+ * AUCUNE n'y est choisie. Jamais à la place d'une échelle choisie ; une échelle absente du menu n'est pas posée.
+ * @param {Object} cartouche
+ * @returns {boolean} vrai si l'échelle de la cartouche est désormais celle de l'évaluation
+ */
+function _adopterEchelleDeLaCartouche(cartouche) {
+    if (!cartouche || !cartouche.echelleId || !evaluationEnCours) return false;
+    const select = document.getElementById('selectEchelle1');
+    if (evaluationEnCours.echelleId || !select || select.value) return false;
+    const offerte = Array.from(select.options || []).some(o => o.value === cartouche.echelleId);
+    if (!offerte) return false;
+    select.value = cartouche.echelleId;
+    evaluationEnCours.echelleId = cartouche.echelleId;
+    return true;
+}
+
 function cartoucheSelectionnee() {
     const cartoucheId = document.getElementById('selectCartoucheEval').value;
 
@@ -1108,6 +1129,9 @@ function cartoucheSelectionnee() {
     const grille = grilles.find(g => g.id === grilleId);
 
     if (!grille) return;
+
+    // Parcours 3 (9 nov. 2026) : une cartouche choisie sans échelle à l'écran y pose la sienne.
+    _adopterEchelleDeLaCartouche(cartouche);
 
     // CRITIQUE: Lire les niveaux depuis l'échelle sélectionnée (pas depuis la cartouche)
     // Cela permet d'utiliser des échelles avec plus ou moins de niveaux que la cartouche

@@ -15,7 +15,7 @@ const indexHtml = 'file://' + path.join(path.resolve(__dirname, '..', '..'), 'in
 //   · C1 (relecture du 18 oct.) : la palette reste à GAUCHE du canevas, debout (820) comme couché (1180) ;
 //     la précision de l'étiquette en main passe dans le bandeau ;
 //   · C2 : « Coller une autre grille » demande confirmation dès qu'une étiquette est posée ;
-//   · un collage piégé n'entre pas dans la page ; l'exemple et « Taper ma grille à la main ».
+//   · un collage piégé n'entre pas dans la page ; l'exemple et « Partir de zéro » (« Taper ma grille à la main » jusqu'au 9 nov.).
 
 async function ouvrirConception(page) {
     await page.goto(indexHtml);
@@ -215,7 +215,7 @@ test('dissection · un collage piégé n’entre pas dans la page : rien ne s’
     expect(r.textes).toEqual(['Critère', 'A', '<b>gras</b>', '1']);
 });
 
-test('dissection · « Essayer avec un exemple » ouvre une grille fictive ; « Taper ma grille à la main » mène à Grilles de critères', async ({ page }) => {
+test('dissection · « Essayer avec un exemple » ouvre une grille fictive ; « Partir de zéro » mène à Grilles de critères', async ({ page }) => {
     const erreurs = [];
     page.on('pageerror', (e) => erreurs.push(e.message));
     await ouvrirConception(page);
@@ -227,6 +227,7 @@ test('dissection · « Essayer avec un exemple » ouvre une grille fictive ; « 
     await page.locator('#materiel-dissection [data-action="materielDissection.collerAutre"]').click();
     await expect(page.locator('#materiel-accueil')).toBeVisible();
 
+    await expect(page.locator('#materiel-accueil [data-action="materiel.taperMain"]')).toHaveText('Partir de zéro');   // 8 nov. 2026, Grégoire
     await page.locator('#materiel-accueil [data-action="materiel.taperMain"]').click();
     await expect(page.locator('#conception-grille-criteres')).toBeVisible();
     await expect(page.locator('#conception-materiel')).toBeHidden();
