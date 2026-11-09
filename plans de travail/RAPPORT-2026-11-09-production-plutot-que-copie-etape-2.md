@@ -4,16 +4,29 @@
 
 ## En tête
 
-### À porter à Grégoire avant tout : les tampons ne partent pas dans les archives
+### Les tampons dans les archives : corrigé (ajout au lot, décidé avec Grégoire le 9 nov., 13 h 33)
 
-C'est vérifié dans le code [lu]. La liste blanche des Archives (`CLES_GLOBALES_INCLUSES`, `js/reserve.js:58`) ne contient ni `tamponsPersonnalises` ni `bibliothequeTampons`. Les autres passes de la collecte ne prennent que les clés d'un trimestre et les cartouches. L'archive d'un trimestre, elle, n'emporte aucune clé globale, et c'est voulu (`js/reserve-trimestre.js:22`). Je n'ai rien corrigé.
+**Le constat du matin.** La liste blanche des Archives ne contenait aucune clé des tampons, et l'archive d'un trimestre n'emportait aucune clé globale. C'est maintenant **éprouvé**, et plus seulement inféré. La spec `tampons-dans-les-archives-2026-11-09`, lancée sous Chromium sur le code d'avant le correctif, donne ceci : un tampon personnalisé est posé sur une production, le trimestre est archivé puis rapporté dans un espace qui n'a plus ce tampon. Le tampon s'affiche alors sous son identifiant brut (« TP_archive »), sans image, sans icône dans le PDF et sans sa phrase dans la rétroaction. L'espace, lui, restait intact.
 
-Ce qu'une archive rouverte perdrait :
-- **Tes tampons personnalisés et ta bibliothèque de tampons** [lu]. Dans « Ouvrir une archive », la section « Tampons personnalisés » lit `donnees.tamponsPersonnalises` (`js/reserve-ouvrir.js:299`). Elle est donc toujours vide pour une archive faite aujourd'hui.
-- **L'image des tampons sur les productions annotées** [inféré, non éprouvé]. Une annotation ne garde que l'identifiant du tampon (`autocollantId`, `js/travaux-annotation.js`), pas son image ni son texte. Sur un appareil où seule l'archive est rouverte, sans le codex, ces tampons n'auraient plus rien à afficher. Les textes qu'ils portent dans la rétroaction manqueraient aussi. À mesurer sur le Mac.
-- **Le codex, lui, les emporte** : toute clé y part.
+**Ce qui est fait :**
+- **Chaque archive emporte une photo des tampons, telle qu'ils sont au moment d'archiver.** La photo, ce sont les clés globales qui font un tampon. J'en ai pris huit et pas seulement les deux nommées, parce qu'une annotation ne garde que l'identifiant de son tampon : son image, son nom, sa phrase et sa catégorie vivent ailleurs. Les huit clés : les tampons personnels, la bibliothèque de tampons, leur personnalisation (nom, image, emoji), leurs phrases, et ce qui nomme, ordonne et colore leurs catégories.
+  - **L'archive d'un groupe** les emporte dans `CLES_GLOBALES_INCLUSES`, telles quelles.
+  - **L'archive d'un trimestre** ne peut pas les emporter ainsi : « Faire revenir » refuse toute clé qui n'est pas du trimestre. Elle les emporte donc sous une clé du trimestre, `<trimestre>_photoTampons`, que « Faire revenir » rapporte comme les autres. Une photo déjà gardée par le trimestre, venue d'une archive rapportée avant, est complétée à l'archivage, jamais perdue.
+- **Un trimestre rapporté dessine et dit ses tampons par sa photo quand l'espace ne les a pas** : l'image sur la production, l'icône et la phrase dans le PDF de l'étudiant·e, le nom de la catégorie. Pour un tampon que l'espace a, c'est toujours celui de l'espace qui compte.
+- **« Ouvrir une archive » montre ces tampons** : la section « Tampons personnalisés » n'est plus vide. Cocher un tampon puis « Réimporter » l'ajoute à ta palette avec son image et sa phrase.
+- **Rouvrir une archive n'écrit jamais dans tes tampons.** Trois garanties :
+  - **« Faire revenir » un trimestre** n'écrit que des clés du trimestre : c'est sa règle, et la photo en est une. Les clés globales des tampons ne sont jamais touchées. Les essais le vérifient clé par clé.
+  - **« Ouvrir une archive »** n'écrit rien en ouvrant. Seule la réimportation que tu coches écrit, et elle **ajoute** : un tampon que ton espace a déjà est laissé, ou recopié en double si tu le demandes, sous un autre nom. Une image ou une phrase que ton espace a déjà n'est jamais remplacée. Sans phrases enregistrées dans ton espace, celles des tampons livrés sont gardées.
+  - **« Faire revenir » les productions d'une archive de groupe** garde son contrat (n'écrire que les fichiers des productions). Les annotations d'un groupe n'ont jamais quitté l'application. Un tampon que tu aurais supprimé depuis se réimporte par « Ouvrir une archive ».
+- **Ce qui vient d'une archive est borné**, puisque c'est un fichier venu de dehors. Une image n'est acceptée que si c'est une image (data URI `data:image/…`, 10 Mo au plus), et une phrase que si c'est du texte (5 000 caractères au plus).
 
-La banque de types, elle, entre bien dans la liste blanche des Archives, comme le demandait la consigne.
+**Le stock : tes archives déjà faites restent sans tampons.** Rien ne les répare d'office. Ce qu'il te faut faire, après la mise en ligne de ce lot, **tant que tes tampons sont dans ton espace** :
+1. **Un groupe-cours déjà archivé** : menu Codex (en haut de l'écran) › « Archiver… », choisis le trimestre et le groupe, archive. Puis, dans Réglages › Données › Archives, « Vérifier » sur sa ligne.
+2. **Un trimestre clos déjà archivé en entier** : Cadre › Trimestre, « Consulter la bibliothèque », repli « Clos », ⋮ › « Archiver le trimestre… ». Puis « Vérifier » dans Réglages › Données › Archives.
+3. **Garde les nouvelles archives** : ce sont elles qui portent la photo de tes tampons.
+4. **Un trimestre déjà renvoyé aux archives** (il n'est plus dans l'application) : fais-le revenir, puis archive-le de nouveau. Son ancienne archive n'a pas la photo, et tes tampons d'aujourd'hui sont ceux qu'elle prendra.
+
+Ce n'est pas rouvrir des notes : archiver ne change aucune note, aucune évaluation. Une archive refaite remplace l'ancienne dans la liste. Tant que tu ne l'as pas refaite, une archive ancienne rouverte ailleurs montre ses tampons sous leur identifiant, sans image ni phrase.
 
 ### Ce qui est fait
 
@@ -194,6 +207,7 @@ Ils sont posés pour que l'écran fonctionne. Aucun n'est validé.
 | Fenêtre « Gérer mes types… », erreur de renommage | Ce nom est déjà dans ton menu. |
 | Fusion de deux codex, nom de la clé | ta banque de types de production (où elle se règle : Conception › Productions › Type) |
 | Fusion de deux codex, ses deux entrées | Tes types / Les exemples retirés de ta vue |
+| Fusion de deux codex, la photo des tampons d'un trimestre rapporté (ajout du 9 nov., 13 h 33) | les tampons gardés par l'archive de ce trimestre |
 
 ## 4. Vérifications
 
@@ -260,6 +274,23 @@ Ils sont posés pour que l'écran fonctionne. Aucun n'est validé.
   | S1 de la sentinelle 492 compare la table au menu bâti depuis elle | refusé : B3 (`banque-types-production`) tient la liste écrite à la main, mot pour mot ; S1.0 garde que le `<select>` statique est vide |
   | La spec neuve et la config Chromium n'étaient pas commitées | la spec est commitée après son passage ; la config Chromium est un fichier de travail, retirée en fin de session |
 
+## 4 bis. Vérifications de l'ajout « les tampons dans les archives »
+
+- **Le constat éprouvé avant le correctif** (spec `tampons-dans-les-archives-2026-11-09`, sous Chromium, sur le code d'avant). L'espace reste intact, mais le tampon de l'archive n'a pas d'image, et la rétroaction le nomme « TP_archive », sans icône ni phrase. Il a fallu recharger la page après avoir retiré le tampon de l'espace : sans cela, le cache des images de la page le gardait, et le banc ne prouvait rien.
+- **Après le correctif, la spec passe** : l'espace est intact (huit clés comparées) ; l'image se charge (32 px) ; la rétroaction porte le nom, l'icône et la phrase ; « Ouvrir une archive » montre le tampon et n'écrit rien en ouvrant ; la réimportation cochée l'ajoute avec son image et sa phrase, sans toucher la phrase du tampon de l'espace ; une seconde réimportation ne remplace rien.
+- **Break-tests de la spec**, par mutation puis restauration :
+  - M1, l'image de la photo retirée : rouge ;
+  - M2, la phrase de la photo retirée : rouge ;
+  - M3, « Ouvrir une archive » qui ne lit plus la photo d'un trimestre : rouge.
+- **Le banc E3** (`sentinelle-e3-renvoyer-trimestre`, +6 essais) vérifie trois choses. L'archive emporte la photo sous le nom du trimestre, et jamais les clés globales. Renvoyée puis rapportée dans un espace qui a d'autres tampons, elle revient, et l'espace garde les siens. L'archivage réunit les tampons de l'espace et la photo gardée. Trois break-tests par mutation, dans le banc :
+  - la photo comparée comme une autre clé : le renvoi est refusé, en boucle ;
+  - E2 sans sa règle : la photo restée là est un débris, et le retour est refusé ;
+  - l'archivage sans la photo : l'archive n'a rien.
+- **Le banc #1021** (+1 essai) : l'archive d'un groupe emporte les clés des tampons et la photo gardée, et rien n'est dit « non classé ». Break-test : la liste blanche sans les tampons, rouge.
+- **La défense, règle de sécurité 5** (`tampons-photo-archive-2026-11-09`, 7 essais). Pour un tampon absent de l'espace, la phrase, le nom et la catégorie viennent de la photo ; l'espace l'emporte pour ceux qu'il a ; une image qui n'en est pas une ne charge rien. Break-tests B1 à B3, notés en tête du fichier.
+- **Vitest complet** : 10 884 sur 10 884, au crochet du dernier push.
+- **Les specs voisines, sous Chromium** (`e2-emprunter-trimestre`, `reserve-1025`, `reserve-reouverture-cartouches-637`, `lot-a3-faire-revenir`, `lot-a2-verifier-archive`, `import-cartouche-renommee-654`, `copie-de-reference-1229`) : 30 passent et 3 rougissent. Ces 3 rougissent de la même façon sur `origin/main` sous Chromium (une taille dite « 3,0 Go » au lieu de « 3,2 Go », et #654). WebKit reste à prendre sur le Mac.
+
 ## 5. À reporter, à la fusion
 
 - **`lot/copie-non-recevable-choix` (session A) dit « copie »** dans ses textes neufs, et ils suivront les mêmes règles. C'est la branche qui fusionne en second qui les applique. Ses chaînes, relevées sur `origin/lot/copie-non-recevable-choix` :
@@ -291,8 +322,9 @@ Ils sont posés pour que l'écran fonctionne. Aucun n'est validé.
 
 ## 6. À inscrire au BACKLOG
 
-1. **Les tampons dans les archives**, si Grégoire le veut (voir l'en-tête) : ajouter `tamponsPersonnalises` et `bibliothequeTampons` à `CLES_GLOBALES_INCLUSES`, puis mesurer sur le Mac ce que montre une archive rouverte.
-2. **« évaluation terminale » dans la prose** (question 2), si Grégoire dit oui : un relevé à part.
+1. **« évaluation terminale » dans la prose** (question 2), si Grégoire dit oui : un relevé à part.
+2. **La réimportation d'un tampon personnel n'assainit pas sa définition** (`appliquerReimport`, `js/reserve-ouvrir.js`). Elle recopie l'entrée lue dans l'archive (`_nettoyerMarqueurs`), sans `assainirObjet(…, SCHEMAS_IMPORT.tampon)`, contrairement à la bibliothèque de tampons. C'est antérieur à ce lot. Ce que ce lot y ajoute (l'image, la phrase) est borné. *Inscrire et continuer.*
+3. **Les tampons d'une archive de groupe rapportée par « Faire revenir »** : si Grégoire veut qu'ils se dessinent par la photo, comme ceux d'un trimestre rapporté. Aujourd'hui « Faire revenir » n'écrit que les fichiers, et un tampon supprimé depuis se réimporte par « Ouvrir une archive ». Seulement si un symptôme est vécu.
 
 ## 7. Trouvailles faites en chemin, et ce qu'elles deviennent
 
