@@ -157,6 +157,11 @@
         // evaluationId, pratiqueId, cartoucheId). Des identifiants, rien des données de la personne.
         parcoursEvaluer: {},
 
+        // La voie et le repère du quatrième parcours, « Recevoir les productions, rendre tes rétroactions »
+        // (js/parcours-recevoir.js, 9 nov. 2026) : { voie: 'fichiers'|'sans-fichier', fichiersAvant, verrousAvant,
+        // productionId }. Des identifiants, rien des données de la personne.
+        parcoursRecevoir: {},
+
         // Export du plan — niveau « Personnalisé » (#431, 8 août 2026).
         // ⚠ REMPLACÉE par exportGabarits (#416 lot H, 12 août 2026). Elle
         // subsiste ici le temps que la migration la lise ; elle est effacée
