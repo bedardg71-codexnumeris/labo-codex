@@ -47,12 +47,12 @@
         },
         "ouvrir": {
             "titre": "L'ouvrir",
-            "texte": "Pour régler ta pratique, ouvre-la : choisis-la dans le menu « Pratique ouverte », en haut de la page. Sa fiche rassemble tout ce qui construit la note : la structure de tes évaluations, ton échelle, ce que lit l'étudiant·e et le cours auquel la pratique s'applique. Une pratique créée d'un modèle en porte le nom. Donne-lui le tien, dans « Informations de base » : tu la reconnaîtras parmi celles que tu prépareras ou que des collègues partageront avec toi.",
+            "texte": "Pour régler ta pratique, ouvre-la : choisis-la dans le menu en haut de la page, à côté de « + Nouvelle pratique ». Sa fiche rassemble tout ce qui construit la note : la structure de tes évaluations, ton échelle, ce que lit l'étudiant·e et le cours auquel la pratique s'applique. Une pratique créée d'un modèle en porte le nom. Donne-lui le tien, dans « Informations de base » : tu la reconnaîtras parmi celles que tu prépareras ou que des collègues partageront avec toi.",
             "geste": "Choisis ta pratique dans le menu ; renomme-la si tu veux."
         },
         "std": {
             "titre": "Ta sélection",
-            "texte": "En standards, la note repose sur les productions que tu tiens pour représentatives de la compétence de l'étudiant·e, chacune à un moment de son parcours. Dans « Mode de sélection », choisis la règle qui les retient pour chaque étudiant·e : les meilleures valorisent le progrès, les dernières, l'état actuel de la maîtrise. Tu peux aussi les retenir toutes, ou ajouter aux meilleures des productions obligatoires (« Hybride »). Dessous, écris combien en retenir, puis à partir de combien de productions évaluées le Suivi montre la performance de ta classe. Dans « Productions qui comptent dans la note », décoche celles qui ne doivent pas compter, comme un exercice formatif. Une évaluation terminale, s'il y en a une, atteste l'acquisition de la compétence en fin de parcours ; elle compte selon sa pondération. Le jugement est dans tes évaluations et dans ce choix ; l'application construit ensuite la note. Chaque réglage s'enregistre dès que tu le changes.",
+            "texte": "En standards, la note repose sur les productions que tu tiens pour représentatives de la compétence de l'étudiant·e, chacune à un moment de son parcours. Dans « Mode de sélection », choisis la règle qui les retient pour chaque étudiant·e : les meilleures valorisent le progrès, les dernières, l'état actuel de la maîtrise. Tu peux aussi les retenir toutes, ou ajouter aux meilleures des productions obligatoires (« Hybride »). À côté, écris combien en retenir. Dessous, le minimum de productions évaluées pour que la performance d'un·e étudiant·e soit jugée fiable : sous ce nombre, son profil ne la donne pas encore. Dans « Productions qui comptent dans la note », décoche celles qui ne doivent pas compter, comme un exercice formatif. Une évaluation terminale, s'il y en a une, atteste l'acquisition de la compétence en fin de parcours ; elle compte selon sa pondération. Le jugement est dans tes évaluations et dans ce choix ; l'application construit ensuite la note. Chaque réglage s'enregistre dès que tu le changes.",
             "geste": "Règle ta sélection, puis touche « Continuer »."
         },
         "spe-types": {
@@ -72,26 +72,26 @@
         },
         "affichage": {
             "titre": "Ce que lit l'étudiant·e",
-            "texte": "Dans sa synthèse, ton étudiant·e lit le niveau atteint à chaque critère et pour sa production. Ces niveaux viennent de l'échelle de performance associée à la production : chacun couvre une plage de notes. Choisis ici ce qu'il ou elle y lit, dans « Affichage de la note dans la rétroaction » : « Note chiffrée » montre les niveaux et les chiffres ; « Niveau de performance » ne montre que les niveaux, les chiffres restant dans l'application. En cours de trimestre, que la note soit chiffrée ou non importe peu : ce qui compte, c'est la compétence que tu observes. Ton choix vaut pour chaque nouvelle évaluation ; tu pourras le changer pour une évaluation, dans sa palette « Rétroaction ». Une production évaluée en points garde ses chiffres.",
+            "texte": "Dans sa synthèse, ton étudiant·e lit le niveau atteint à chaque critère et pour sa production. Ces niveaux viennent de l'échelle de performance associée à la production : chacun couvre une plage de notes. Choisis ici ce qu'il ou elle y lit, dans « Affichage de la note dans la rétroaction » : « Note chiffrée » ajoute les chiffres à ta rétroaction écrite et, en standards, à la note provisoire ; « Niveau de performance » n'y laisse que les niveaux, les chiffres restant dans l'application. En cours de trimestre, que la note soit chiffrée ou non importe peu : ce qui compte, c'est la compétence que tu observes. Ton choix vaut pour chaque nouvelle évaluation ; tu pourras le changer pour une évaluation, dans sa palette « Rétroaction ». Une production évaluée en points garde ses chiffres.",
             "geste": "Choisis l'affichage, puis touche « Continuer »."
         },
         "appliquer": {
             "titre": "L'appliquer à ton cours",
-            "texte": "Ta pratique est prête : applique-la au groupe-cours actif, celui qui est nommé au centre de la bande, sous la navigation. Touche « Appliquer au cours actif » : dans la frise du haut, « Groupe-cours » passe à « active », et le menu marque ta pratique « (active) ». Si une autre pratique s'appliquait à ce groupe, les notes que tu as déjà attribuées ne bougent pas : seule la note du cours se construit désormais selon celle-ci. Tes évaluations déjà enregistrées gardent leur affichage ; change-le au besoin dans leur palette « Rétroaction ». Pour un autre groupe-cours, choisis-le dans la bande, puis applique ta pratique de nouveau.",
+            "texte": "Ta pratique est prête : applique-la au groupe-cours actif, celui qui est nommé au centre de la bande, sous la navigation. Touche « Appliquer au cours actif » : dans la frise du haut, « Groupe-cours » passe à « active », et le menu marque ta pratique « (active) ». Si une autre pratique s'appliquait à ce groupe, les notes que tu as déjà attribuées ne bougent pas : seule la note du cours se construit désormais selon celle-ci. Tes évaluations déjà enregistrées gardent leur affichage. Pour en changer une, ouvre-la (« Actions › Consulter »), touche « Déverrouiller », choisis l'affichage dans sa palette « Rétroaction », puis « Verrouiller ». Pour un autre groupe-cours, choisis-le dans la bande, puis applique ta pratique de nouveau.",
             "geste": "Touche « Appliquer au cours actif »."
         },
         "evaluer": {
             "titre": "Évaluer une production",
-            "texte": "C'est dans tes évaluations que ton jugement s'exerce. Évalue une production que tu n'as pas encore évaluée : touche « Actions › Évaluer » sur la ligne d'un·e étudiant·e. En spécifications, choisis une production dont le « Type » est l'un de ceux de ta pratique : les autres ne comptent pour aucun forfait. Choisis le niveau ou les points de chaque critère, comme d'habitude. Ouvre ensuite la palette « Rétroaction » : sa première ligne rappelle ton choix (« Options : … · niveau de performance »). Touche-la pour changer ce choix pour cette évaluation seulement. Quand tu es satisfait·e, touche le cadenas « Verrouiller », en haut de « Paramètres ».",
+            "texte": "C'est dans tes évaluations que ton jugement s'exerce. Évalue une production que tu n'as pas encore évaluée : touche « Actions › Évaluer » sur la ligne d'un·e étudiant·e. En spécifications, choisis une production dont le « Type » est l'un de ceux de ta pratique : les autres ne comptent pour aucun forfait. Choisis le niveau ou les points de chaque critère, comme d'habitude. Regarde ensuite la rétroaction : sous « Générale · Spécifique · Bilan », la ligne « Options : … » rappelle ton choix (« … · niveau de performance »). Touche-la pour changer ce choix pour cette évaluation seulement. Quand tu es satisfait·e, touche le cadenas « Verrouiller », en haut de « Paramètres ».",
             "geste": "Évalue la production, puis verrouille."
         },
         "synthese": {
             "titre": "Ta synthèse",
-            "texte": "Voici ce que ton étudiant·e recevra. Sur la ligne de la production que tu viens d'évaluer, touche « Actions › Dossier PDF » : le PDF se télécharge. Il contient sa production annotée suivie de sa synthèse de rétroaction, ou la synthèse seule si rien n'a été importé. Ouvre-le et lis-le comme il ou elle le lira. Avec « Niveau de performance », la synthèse dit le niveau de la production et de chaque critère, sans chiffre. En standards, elle montre aussi une « Note provisoire » : les productions que ta pratique retient pour l'instant et celles qui sont à venir. Elle peut rassurer des étudiant·es habitué·es aux notes chiffrées ; avec « Niveau de performance », elle ne porte aucun chiffre. En spécifications et en dénotation, la note du cours n'y paraît pas. Tes étudiant·es y lisent où en est leur compétence ; la note chiffrée qu'exige le règlement viendra à la fin du trimestre."
+            "texte": "Voici ce que ton étudiant·e recevra. Sur la ligne de la production que tu viens d'évaluer, touche « Actions › Dossier PDF » : le PDF se télécharge. Il contient sa production annotée suivie de sa synthèse de rétroaction, ou la synthèse seule si rien n'a été importé. Ouvre-le et lis-le comme il ou elle le lira. Avec « Niveau de performance », la synthèse dit le niveau de la production et de chaque critère, sans note chiffrée. En standards, elle montre aussi une « Note provisoire » : les productions que ta pratique retient pour l'instant et celles qui sont à venir. Elle peut rassurer des étudiant·es habitué·es aux notes chiffrées ; avec « Niveau de performance », elle ne porte aucune note chiffrée. En spécifications et en dénotation, la note du cours n'y paraît pas. Tes étudiant·es y lisent où en est leur compétence ; la note chiffrée qu'exige le règlement viendra à la fin du trimestre."
         },
         "plus-loin": {
             "titre": "Pour aller plus loin",
-            "texte": "Te voilà avec une pratique alternative appliquée à ton cours, et une première synthèse telle que tes étudiant·es la liront. Le reste viendra à ton rythme. En dénotation, pose ta note à la fin du trimestre dans le profil de chaque étudiant·e, section « Jugement » : confirme les cibles atteintes, puis écris la note et sa justification. Quand tes notes sont arrêtées, coche « Notes finalisées » dans la fiche de ta pratique : la synthèse s'intitule alors « Note finale » et ne montre plus ce qui était à venir. Dans Suivi › Groupe, « Exporter la synthèse (CSV) », dans la carte « Résultats finaux », produit une ligne par étudiant·e : c'est la note chiffrée qu'exige le règlement, à reporter dans le système de ton établissement. Au bas de la fiche, « Système de jetons » offre des reprises et des délais. Labo › Exploration compare, sur des profils fictifs, la façon dont deux pratiques construisent la note."
+            "texte": "Te voilà avec une pratique alternative appliquée à ton cours, et une première synthèse telle que tes étudiant·es la liront. Le reste viendra à ton rythme. En dénotation, pose ta note à la fin du trimestre dans le profil de chaque étudiant·e, section « Jugement » : confirme les cibles atteintes, puis écris la note et sa justification, et touche « Enregistrer le jugement ». Quand tes notes sont arrêtées, coche « Notes finalisées » dans la fiche de ta pratique : l'export les marque « final » ; en standards, la synthèse s'intitule alors « Note finale » et ne montre plus ce qui était à venir. Dans Suivi › Groupe, « Exporter la synthèse (CSV) », dans la carte « Résultats finaux », produit une ligne par étudiant·e : c'est la note chiffrée qu'exige le règlement, à reporter dans le système de ton établissement. Au bas de la fiche, « Système de jetons » offre des reprises et des délais. Labo › Exploration compare, sur des profils fictifs, la façon dont deux ou trois pratiques construisent la note."
         }
     };
 
@@ -99,7 +99,7 @@
     var PHRASES = {
         listeQuiComptent: "Dans « Productions qui comptent dans la note », décoche celles qui ne doivent pas compter, comme un exercice formatif.",
         specificationsEvaluer: "En spécifications, choisis une production dont le « Type » est l'un de ceux de ta pratique : les autres ne comptent pour aucun forfait.",
-        denotationJugement: "En dénotation, pose ta note à la fin du trimestre dans le profil de chaque étudiant·e, section « Jugement » : confirme les cibles atteintes, puis écris la note et sa justification."
+        denotationJugement: "En dénotation, pose ta note à la fin du trimestre dans le profil de chaque étudiant·e, section « Jugement » : confirme les cibles atteintes, puis écris la note et sa justification, et touche « Enregistrer le jugement »."
     };
 
     // ---------- Ce que le parcours retient ----------
@@ -286,6 +286,75 @@
 
     function surModale(oui) {
         document.body.classList.toggle('parcours-sur-modale', !!oui && window.innerWidth >= LARGEUR_MIN_SUR_MODALE);
+    }
+
+    // ---------- La forme et la place de la bulle, à deux étapes (corrections du 9 nov. 2026) ----------
+
+    /**
+     * Une forme de bulle propre à une étape : `reduite` (étape 1, l'assistant ouvert), `large` (étape 3, standards),
+     * ou aucune. Chaque étape repart de la forme ordinaire (`construireEtape`, à l'entrée de l'étape).
+     */
+    function formeDeBulle(nom) {
+        var b = el('parcours-bulle');
+        if (!b) return;
+        b.classList.toggle('parcours-bulle--reduite', nom === 'reduite');
+        b.classList.toggle('parcours-bulle--large', nom === 'large');
+    }
+
+    /**
+     * Étape 1 en deux temps (question 12, validée par Grégoire le 9 nov. 2026). Avant que l'assistant s'ouvre, la
+     * bulle entière, près de « + Nouvelle pratique ». L'assistant ouvert, à partir de 700 px, elle se réduit à sa ligne
+     * orange, posée au bord : ni ses deux cartes, ni « Suivant » ne sont couverts. Aucun mot ne change ; le titre et le
+     * texte restent dans la bulle, cachés (css/parcours.css) ; le lecteur d'écran les a reçus par l'annonce de l'étape. Sous 700 px,
+     * la place d'avant : le lot « La bulle sur téléphone » s'en charge.
+     */
+    function bulleDeLEtape1() {
+        formeDeBulle(wizardOuvert() && window.innerWidth >= LARGEUR_MIN_SUR_MODALE ? 'reduite' : null);
+    }
+
+    /**
+     * Place la bulle, après le moteur (la sonde de l'étape passe après lui : sa place l'emporte), à celle qui couvre
+     * le moins `gardes`, parmi neuf places (trois colonnes, trois rangées, sous l'en-tête). La place du moteur reste si
+     * elle ne couvre rien. Même règle que le huitième parcours (`bulleHors`), propre à ce fichier : le moteur n'est
+     * pas touché ; à unifier à la fusion.
+     */
+    function bulleHorsDe(gardes) {
+        var b = el('parcours-bulle');
+        if (!b) return;
+        var rects = gardes.filter(vis).map(function (g) { return g.getBoundingClientRect(); });
+        var bw = b.offsetWidth, bh = b.offsetHeight, vw = document.documentElement.clientWidth, vh = window.innerHeight;
+        var e = document.querySelector('header.entete');
+        var haut = e ? Math.max(0, e.getBoundingClientRect().bottom) : 0;
+        function cout(x, y) {
+            return rects.reduce(function (t, r) {
+                var w = Math.min(x + bw, r.right) - Math.max(x, r.left);
+                var h = Math.min(y + bh, r.bottom) - Math.max(y, r.top);
+                return t + (w > 0 && h > 0 ? w * h : 0);
+            }, 0);
+        }
+        var meilleur = { x: parseFloat(b.style.left) || 0, y: parseFloat(b.style.top) || 0 };
+        meilleur.cout = cout(meilleur.x, meilleur.y);
+        if (meilleur.cout === 0) return;
+        var marge = 8;
+        [marge, (vw - bw) / 2, vw - bw - marge].forEach(function (x) {
+            [Math.max(marge, haut + marge), Math.max(marge, (vh - bh) / 2), Math.max(marge, vh - bh - marge)].forEach(function (y) {
+                var c = cout(x, y);
+                if (c < meilleur.cout) meilleur = { x: x, y: y, cout: c };
+            });
+        });
+        b.style.left = Math.round(Math.max(marge, meilleur.x)) + 'px';
+        b.style.top = Math.round(meilleur.y) + 'px';
+    }
+
+    /**
+     * Étape 3, standards (décision de Cowork du 9 nov. 2026) : la bulle couvrait le champ du nombre à retenir, à
+     * droite de « Mode de sélection », dont elle parle. La carte « Structure des évaluations » occupe l'écran : le
+     * moteur posait la bulle en son milieu. Plus large (donc moins haute), elle se pose là où elle ne couvre ni ce
+     * champ, ni « Mode de sélection », ni le minimum.
+     */
+    function bulleHorsDesReglagesStd() {
+        formeDeBulle('large');
+        bulleHorsDe([el('mat-portfolio-nombre'), el('mat-portfolio-selection'), el('mat-portfolio-minimum')]);
     }
 
     /** « Continuer » paraît selon l'état : le moteur rend la bulle une fois, la sonde la retouche ici. */
@@ -477,6 +546,8 @@
                 window.scrollTo(0, 0);
             },
             zones: function () {
+                // Appelée par le moteur avant qu'il place la bulle : sa forme est prise avant sa place.
+                bulleDeLEtape1();
                 return wizardOuvert() ? zonesWizard()
                     : [document.querySelector('#conception-pratiques-notation .rangee-selection')].filter(Boolean);
             },
@@ -521,7 +592,9 @@
             },
             zones: function () { return [el('mat-carte-structure')]; },
             contour: function () { return el('mat-carte-structure'); },
-            boutons: [CONTINUER]
+            boutons: [CONTINUER],
+            // Rien ne fait avancer seul (« Continuer ») : la sonde ne sert qu'à la place de la bulle.
+            atteint: function () { bulleHorsDesReglagesStd(); return false; }
         },
         'spe-types': {
             avant: async function () {
@@ -653,6 +726,12 @@
         ['voile', 'centre', 'sansSortie', 'avant', 'zones', 'contour', 'atteint', 'boutons'].forEach(function (k) {
             if (d[k] !== undefined) etape[k] = d[k];
         });
+        // Chaque étape repart de la forme ordinaire de la bulle (corrections du 9 nov. : étapes 1 et 3).
+        var avantPropre = etape.avant;
+        etape.avant = async function () {
+            formeDeBulle(null);
+            if (avantPropre) await avantPropre.apply(this, arguments);
+        };
         etape.id = id;
         return etape;
     }

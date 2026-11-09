@@ -51,8 +51,52 @@ async function capture(page, nom) {
  * Un trimestre réel : un cours, son groupe-cours actif, trois étudiant·es fictif·ves, une échelle, une grille,
  * deux productions avec leur grille (un projet, un examen), et les pratiques données. Puis la page rechargée.
  */
+/**
+ * Corrections du 9 nov. (Cowork, comme au huitième parcours) : aucun avis de la pile ne couvre la bulle. Un relevé tourne
+ * dans la page pendant tout l'essai (posé avant chaque chargement) : toutes les 100 ms, il regarde si un avis couvre la
+ * bulle ; un recouvrement de plus de cinq relevés (la pile se replace en 200 ms au plus, utils-notifications.js) est
+ * consigné avec le titre de l'étape. Chaque essai finit en exigeant un relevé vide (afterEach).
+ */
+function releveDesAvisSurLaBulle() {
+    window.__avisSurLaBulle = [];
+    let suite = 0;
+    setInterval(() => {
+        const b = document.getElementById('parcours-bulle');
+        let couvrent = [];
+        if (b) {
+            const r = b.getBoundingClientRect();
+            couvrent = [...document.querySelectorAll('#notifications-pile > *')]
+                .filter((n) => !n.classList.contains('notification-sortie'))
+                .filter((n) => { const x = n.getBoundingClientRect(); return !(x.right <= r.left || r.right <= x.left || x.bottom <= r.top || r.bottom <= x.top); });
+        }
+        suite = couvrent.length ? suite + 1 : 0;
+        if (suite === 6) {
+            const t = b.querySelector('.parcours-bulle-titre');
+            window.__avisSurLaBulle.push((t ? t.textContent : '?') + ' : ' + couvrent.map((n) => n.textContent.trim().slice(0, 40)).join(' | '));
+        }
+    }, 100);
+}
+
+test.afterEach(async ({ page }) => {
+    const releve = await page.evaluate(() => window.__avisSurLaBulle || []).catch(() => []);
+    expect(releve, 'aucun avis n’a couvert la bulle').toEqual([]);
+});
+
+/** La bulle ne couvre aucun des éléments (sélecteurs CSS) ; la sonde du moteur la replace toutes les 120 ms. */
+async function bulleNeCouvrePas(page, selecteurs, message) {
+    await expect.poll(() => page.evaluate((sels) => {
+        const b = document.getElementById('parcours-bulle').getBoundingClientRect();
+        return sels.flatMap((s) => [...document.querySelectorAll(s)]).filter((el) => {
+            const r = el.getBoundingClientRect();
+            if (!r.width || !r.height) return false;
+            return !(r.right <= b.left || b.right <= r.left || r.bottom <= b.top || b.bottom <= r.top);
+        }).map((el) => el.id || el.className);
+    }, selecteurs), { message, timeout: 3000 }).toEqual([]);
+}
+
 async function monter(page, { largeur = 1180, hauteur = 900, clair = false, pratiques = [], active = null, grille = true } = {}) {
     page.on('dialog', (d) => d.accept().catch(() => {}));
+    await page.addInitScript(releveDesAvisSurLaBulle);
     await page.clock.setFixedTime(HORLOGE);
     await page.setViewportSize({ width: largeur, height: hauteur });
     await page.goto(indexHtml);
@@ -275,6 +319,42 @@ test('étape 5 : la pratique déjà appliquée ne fait pas passer l’étape seu
     await attendreEtape(page, 'Évaluer une production', '5 sur 7');
 });
 
+// Question 11 (décidée par Cowork le 9 nov.) : la lecture, pas les données. Hors de la démo, une pratique n'est jamais une
+// pratique de démo, même si son auteur dit « Demo Labo Codex » (le stock : une copie de modèle adoptée sans auteur).
+// Break-test (9 nov., Chromium) : `estPratiqueDeDemo` remise à `estItemDemo` seul (bibliotheque-ui.js) → ROUGE (la
+// pratique manque au menu). Rétablie → vert.
+test('question 11 : hors de la démo, une pratique dont l’auteur dit « Demo Labo Codex » est au menu, modifiable, et s’applique ; rien n’est réécrit', async ({ page }) => {
+    await page.goto(indexHtml);
+    await attendreApplication(page);
+    const pratiques = await pratiquesDesModeles(page);
+    pratiques[0].auteur = 'Demo Labo Codex';
+    await monter(page, { pratiques });
+    await page.evaluate(() => naviguerVers('conception', 'pratiques-notation'));
+    await expect(page.locator('#menuPratiques option[value="pratique_banc_0"]')).toHaveCount(1);
+    await page.selectOption('#menuPratiques', 'pratique_banc_0');
+    await expect(page.locator('#mat-portfolio-nombre')).toBeVisible();
+    await expect(page.locator('#conteneurEditionPratique')).not.toHaveClass(/demo-readonly/);
+    await expect(page.locator('#mat-portfolio-nombre')).toBeEnabled();
+    await page.click('#conteneurEditionPratique [data-action="appliquerPratiqueAuCoursActive"]');
+    await expect.poll(() => page.evaluate(() => obtenirIdPratiqueActive())).toBe('pratique_banc_0');
+    expect(await page.evaluate(() => db.getSync(cle('pratiquesConfigurables'), []).find((p) => p.id === 'pratique_banc_0').auteur)).toBe('Demo Labo Codex');
+});
+
+// Comme au huitième parcours (Cowork, 9 nov.) : pendant tout parcours, l'aide dans les pages se tait. Même mécanisme,
+// le même code (accompagnement.js), à unifier à la fusion.
+test('pendant le parcours, l’aide dans les pages se tait ; après « Plus tard », elle parle', async ({ page }) => {
+    await monter(page);
+    await page.evaluate(() => { definirPreference('accompagnementActif', true); document.body.classList.add('aide-contextuelle-active'); });
+    await commencer(page);
+    await attendreEtape(page, 'Ta pratique', '1 sur 8');
+    await page.evaluate(() => window.accompagnement.afficherBulleDecouverte({ cible: '#btn-codex', message: 'Bulle du banc' }));
+    await expect(page.locator('.bulle-decouverte')).toHaveCount(0);
+    await bulle(page).locator('.parcours-bulle-sortie').click();
+    await expect(bulle(page)).toHaveCount(0);
+    await page.evaluate(() => window.accompagnement.afficherBulleDecouverte({ cible: '#btn-codex', message: 'Bulle du banc' }));
+    await expect(page.locator('.bulle-decouverte')).toBeVisible();
+});
+
 /**
  * Le parcours entier, en faisant les gestes. `modele` : la carte de « Partir d'un modèle ».
  * Spécifications : 9 étapes ; standards : 8 (l'assistant demande l'échelle, la fenêtre le dit).
@@ -288,12 +368,22 @@ async function parcoursEntier(page, { famille, modele, largeur = 1180, clair = f
 
     // 1. « Ta pratique » : contour sur « + Nouvelle pratique », puis sur « Partir d'un modèle ».
     await attendreEtape(page, 'Ta pratique', '1 sur 8');
+    // Question 12 (validée par Grégoire le 9 nov.) : avant l'assistant, la bulle entière, près de « + Nouvelle pratique ».
+    await expect(bulle(page).locator('.parcours-bulle-texte')).toBeVisible();
+    await bulleNeCouvrePas(page, ['#conception-pratiques-notation [data-action="creerNouvellePratique"]'], 'la bulle 1 laisse « + Nouvelle pratique » libre');
     await cap('etape-1');
     await toucher(page, '#conception-pratiques-notation [data-action="creerNouvellePratique"]');
     await expect(page.locator('#modalWizardPratiqueV2')).toHaveClass(/actif/);
     if (largeur >= 700) {
         await expect(page.locator('body')).toHaveClass(/parcours-sur-modale/);
         await expect(page.locator('#parcours-contour')).toBeVisible();
+        // L'assistant ouvert : la bulle réduite à sa ligne orange, au bord, sans couvrir ses deux cartes ni « Suivant ».
+        // Break-test (9 nov., Chromium) : `bulleDeLEtape1` sans effet → ROUGE (la bulle entière couvre les cartes).
+        await expect(bulle(page)).toHaveClass(/parcours-bulle--reduite/);
+        await expect(bulle(page).locator('.parcours-bulle-texte')).toBeHidden();
+        await expect(bulle(page).locator('.parcours-bulle-geste')).toBeVisible();
+        await expect(bulle(page).locator('.parcours-bulle-geste')).toHaveText('Touche « + Nouvelle pratique », choisis ton modèle, puis « Créer la pratique ».');
+        await bulleNeCouvrePas(page, ['#modalWizardPratiqueV2 .wizard-v2-radio-card', '#wizard-v2-btn-suivant'], 'la bulle réduite laisse les deux cartes et « Suivant » libres');
     } else {
         // Sur un téléphone, l'assistant prend l'écran : la bulle attend derrière lui.
         await expect(page.locator('body')).not.toHaveClass(/parcours-sur-modale/);
@@ -325,6 +415,9 @@ async function parcoursEntier(page, { famille, modele, largeur = 1180, clair = f
         await boutonBulle(page, 'Continuer').click();
     } else {
         await attendreEtape(page, 'Ta sélection', n(3));
+        // Cowork (9 nov.) : le champ du nombre à retenir, à droite de « Mode de sélection », reste libre ; le mode et le
+        // minimum aussi. Break-test (9 nov., Chromium) : la sonde de l'étape 3 sans `bulleHorsDesReglagesStd` → ROUGE.
+        await bulleNeCouvrePas(page, ['#mat-portfolio-nombre', '#mat-portfolio-selection', '#mat-portfolio-minimum'], 'la bulle 3 laisse les réglages de la sélection libres');
         await cap('etape-3-standards');
         await boutonBulle(page, 'Continuer').click();
     }
@@ -359,6 +452,10 @@ async function parcoursEntier(page, { famille, modele, largeur = 1180, clair = f
     await expect(page.locator('#parcours-contour')).toBeVisible();
     await cap('etape-6-evaluation');
     await toucher(page, '#btnVerrouillerEvaluation');
+    // Cowork (9 nov., étape 5) : sous le verrou, les deux boutons d'affichage suivent le reste de la fiche.
+    // Break-test (9 nov., Chromium) : les deux lignes retirées de `desactiverFormulaireEvaluation` → ROUGE.
+    await expect(page.locator('#affichageNoteComplet1')).toBeDisabled();
+    await expect(page.locator('#affichageNoteLettre1')).toBeDisabled();
     // L'évaluation neuve a pris l'affichage de la pratique (« Niveau de performance », étape 4) : sans copie, elle
     // gardait « Note chiffrée » (mesuré la nuit du 8 nov., corrigé dans `_evaluerSansCopie`).
     await expect.poll(() => page.evaluate(() => (db.getSync(cle('evaluationsSauvegardees'), []) || [])

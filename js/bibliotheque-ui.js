@@ -75,6 +75,19 @@
     };
 
     /**
+     * Corrections du neuvième parcours (9 nov. 2026, question 11, décision de Cowork) : HORS DE LA DÉMO, UNE
+     * PRATIQUE N'EST JAMAIS UNE PRATIQUE DE DÉMO — ni masquée du menu, ni en lecture seule, ni refusée quand on
+     * l'applique — même si son auteur dit « Demo Labo Codex ». Trois modèles de l'assistant portent cet auteur
+     * (pratiques-bibliotheque.js) ; une copie adoptée sans auteur au récapitulatif le gardait, et disparaissait du
+     * menu (la source est tarie par `auteurDeLaCopie`, wizard-pratique-v2.js). Ici, la lecture : rien n'est réécrit,
+     * le stock garde sa marque. Dans la démo, la règle commune (`estItemDemo`).
+     * Lue par le menu et la fiche des pratiques (pratiques-gestion.js) et par `verifierReferencesPasDemo`.
+     */
+    BibliothequeUI.estPratiqueDeDemo = function (pratique) {
+        return BibliothequeUI.modeDemoActif() && BibliothequeUI.estItemDemo(pratique);
+    };
+
+    /**
      * Phase A.0 — Mode démo actif (Beta 99.39, audit biblios 2026-05-09).
      * Source de vérité : flag `demo-actif` géré par js/demo-activation.js.
      */
@@ -445,7 +458,10 @@
                 var cleCollection = (typeof cle === 'function') ? cle(ref.collection) : ref.collection;
                 var items = db.getSync(cleCollection, []) || [];
                 var item = items.find(function (x) { return x && x.id === ref.id; });
-                if (item && BibliothequeUI.estItemDemo(item)) {
+                // Une pratique ne se lit « de démo » que dans la démo (9 nov., question 11 : `estPratiqueDeDemo`).
+                var deDemo = ref.collection === 'pratiquesConfigurables'
+                    ? BibliothequeUI.estPratiqueDeDemo(item) : BibliothequeUI.estItemDemo(item);
+                if (item && deDemo) {
                     var nom = item.nom || item.titre || '';
                     return {
                         type: ref.labelType || 'élément',

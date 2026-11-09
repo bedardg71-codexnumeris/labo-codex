@@ -471,3 +471,11 @@ body.parcours-sur-modale .parcours-bulle { z-index: 10011; }
     .assistance-interrupteur::before,
     .assistance-interrupteur::after { transition: none; }
 }
+
+/* ---------- Parcours 9, corrections du 9 nov. 2026 : deux formes de bulle (js/parcours-notation-alternative.js) ----------
+   Étape 1, l'assistant ouvert (à partir de 700 px ; question 12, validée par Grégoire) : la bulle se réduit à sa ligne
+   orange, au bord. Le titre, le texte et le lien de sortie restent dans la bulle, cachés (le lecteur d'écran a reçu
+   l'annonce de l'étape ; Échap ferme alors l'assistant). Étape 3, standards (Cowork) : plus large, donc moins haute, pour laisser libres les réglages. */
+.parcours-bulle.parcours-bulle--reduite { padding: 10px 14px; gap: 0; }
+.parcours-bulle--reduite > :not(.parcours-bulle-geste) { display: none; }
+.parcours-bulle.parcours-bulle--large { width: min(560px, calc(100vw - 32px)); }

@@ -12,6 +12,11 @@
 //   5. Deux défauts trouvés en chemin, corrigés parce qu'ils cassaient le parcours : la copie d'un
 //      modèle « Demo Labo Codex » masquée du menu (`auteurDeLaCopie`), et « N plus récentes » qui
 //      s'ouvrait sur un menu vide puis s'enregistrait en « meilleurs » (`modeSelectionDuMenu`).
+//   6. Les corrections du 9 nov. (9 h 50 à 9 h 58, relais de Cowork) : les phrases que Grégoire a validées ce
+//      jour-là remplacent celles de la consigne. Chaque correction porte l'ancien bout (qui doit se lire tel quel
+//      dans la consigne du 8) et le nouveau (exigé tel quel dans le code) ; la consigne corrigée est la référence
+//      des blocs 1 et 2. Break-test (9 nov., corrections) : « deux ou trois pratiques » remis à « deux pratiques »
+//      → ROUGE (blocs 1 et 6) ; rétabli → vert.
 // Break-tests (9 nov.) : « 59 au plus » changé en « 59 » dans js/parcours-notation-alternative.js → ROUGE
 // (bloc 1) ; `if (id === 'evaluer' && …)` retiré de `texteDe` → ROUGE (bloc 2) ; `ids.push('spe-types',
 // 'spe-forfaits')` réduit à `'spe-types'` → ROUGE (bloc 3) ; la ligne `return mode === 'recents' ? …` remise
@@ -26,7 +31,29 @@ import { tranche } from './_helpers/tranche.js';
 
 const racine = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..');
 const lire = (f) => readFileSync(path.join(racine, f), 'utf8');
-const CONSIGNE = lire('plans de travail/CONSIGNE-LOT-2026-11-08-parcours-9-notation-alternative.md');
+const CONSIGNE_DU_8 = lire('plans de travail/CONSIGNE-LOT-2026-11-08-parcours-9-notation-alternative.md');
+
+// Validées par Grégoire le 9 nov. 2026, 9 h 50 à 9 h 58, mot pour mot (relais de Cowork).
+const CORRECTIONS_9_NOV = [
+    { etape: '2', avant: 'Pour régler ta pratique, ouvre-la : choisis-la dans le menu « Pratique ouverte », en haut de la page.',
+        apres: 'Pour régler ta pratique, ouvre-la : choisis-la dans le menu en haut de la page, à côté de « + Nouvelle pratique ».' },
+    { etape: '3, standards', avant: 'Dessous, écris combien en retenir, puis à partir de combien de productions évaluées le Suivi montre la performance de ta classe.',
+        apres: "À côté, écris combien en retenir. Dessous, le minimum de productions évaluées pour que la performance d'un·e étudiant·e soit jugée fiable : sous ce nombre, son profil ne la donne pas encore." },
+    { etape: '4', avant: "« Note chiffrée » montre les niveaux et les chiffres ; « Niveau de performance » ne montre que les niveaux, les chiffres restant dans l'application.",
+        apres: "« Note chiffrée » ajoute les chiffres à ta rétroaction écrite et, en standards, à la note provisoire ; « Niveau de performance » n'y laisse que les niveaux, les chiffres restant dans l'application." },
+    { etape: '5', avant: 'Tes évaluations déjà enregistrées gardent leur affichage ; change-le au besoin dans leur palette « Rétroaction ».',
+        apres: "Tes évaluations déjà enregistrées gardent leur affichage. Pour en changer une, ouvre-la (« Actions › Consulter »), touche « Déverrouiller », choisis l'affichage dans sa palette « Rétroaction », puis « Verrouiller »." },
+    { etape: '6', avant: 'Ouvre ensuite la palette « Rétroaction » : sa première ligne rappelle ton choix (« Options : … · niveau de performance »).',
+        apres: 'Regarde ensuite la rétroaction : sous « Générale · Spécifique · Bilan », la ligne « Options : … » rappelle ton choix (« … · niveau de performance »).' },
+    { etape: '7', avant: 'chaque critère, sans chiffre.', apres: 'chaque critère, sans note chiffrée.' },
+    { etape: '7', avant: 'elle ne porte aucun chiffre.', apres: 'elle ne porte aucune note chiffrée.' },
+    { etape: '8', avant: "coche « Notes finalisées » dans la fiche de ta pratique : la synthèse s'intitule alors « Note finale » et ne montre plus ce qui était à venir.",
+        apres: "coche « Notes finalisées » dans la fiche de ta pratique : l'export les marque « final » ; en standards, la synthèse s'intitule alors « Note finale » et ne montre plus ce qui était à venir." },
+    { etape: '8, dénotation', avant: 'puis écris la note et sa justification.', apres: 'puis écris la note et sa justification, et touche « Enregistrer le jugement ».' },
+    { etape: '8', avant: 'la façon dont deux pratiques construisent la note.', apres: 'la façon dont deux ou trois pratiques construisent la note.' }
+];
+const CONSIGNE = CORRECTIONS_9_NOV.reduce((c, k) => c.split(k.avant).join(k.apres), CONSIGNE_DU_8);
+const SOURCE_DU_PARCOURS = lire('js/parcours-notation-alternative.js');
 
 function monter() {
     const inscrits = [];
@@ -94,7 +121,7 @@ describe('les phrases propres à une famille : dans leur texte, retirées hors d
         expect(P.texteDe('std', { famille: 'standards', listeQuiComptent: true })).toBe(P.TEXTES.std.texte);
         const sans = P.texteDe('std', { famille: 'standards', listeQuiComptent: false });
         expect(sans).not.toContain('Productions qui comptent dans la note');
-        expect(sans).toContain('Dessous, écris combien en retenir');
+        expect(sans).toContain('À côté, écris combien en retenir');   // la phrase validée le 9 nov. (avant : « Dessous, écris combien en retenir »)
         expect(sans).not.toMatch(/ {2}/);
     });
 
@@ -205,5 +232,13 @@ describe('ce que le parcours touche hors de son fichier : le strict nécessaire,
 
     it('la préférence du parcours est déclarée (sans elle, chaque lecture avertit en console)', () => {
         expect(lire('js/preferences.js')).toContain('parcoursNotationAlternative: {},');
+    });
+});
+
+describe('les corrections du 9 nov. : chaque ancien bout était dans la consigne, chaque phrase validée est dans le code', () => {
+    it.each(CORRECTIONS_9_NOV.map((k) => [k.etape, k]))('étape %s', (etape, k) => {
+        expect(CONSIGNE_DU_8, 'l’ancien bout se lit dans la consigne du 8').toContain(k.avant);
+        expect(SOURCE_DU_PARCOURS, 'la phrase validée le 9 est posée').toContain(k.apres);
+        expect(SOURCE_DU_PARCOURS.split(k.apres).join(''), 'l’ancien bout n’est plus posé').not.toContain(k.avant);
     });
 });

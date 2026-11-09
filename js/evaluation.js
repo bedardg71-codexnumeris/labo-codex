@@ -2324,6 +2324,15 @@ function desactiverFormulaireEvaluation(desactiver) {
         if (checkbox) checkbox.disabled = desactiver;
     });
 
+    // Corrections du neuvième parcours (9 nov. 2026, décision de Cowork, étape 5) : les deux boutons d'affichage de la
+    // palette « Rétroaction » (« Note chiffrée », « Niveau de performance ») suivent le reste de la fiche. Sous le
+    // verrou, ils restaient cliquables sans rien enregistrer (la garde d'`autoSave`, evaluation-chargement.js) : le
+    // choix semblait pris, et ne l'était pas. Pour changer l'affichage d'une évaluation verrouillée : « Déverrouiller ».
+    ['affichageNoteComplet1', 'affichageNoteLettre1'].forEach(id => {
+        const radio = document.getElementById(id);
+        if (radio) radio.disabled = desactiver;
+    });
+
     // Lot C de l'enregistrement — « Verrouiller » n'est plus éteint sous le verrou :
     // il y devient « Déverrouiller » (`_libellerBoutonVerrouiller`). Toujours actif.
     const btnVerrouiller = document.getElementById('btnVerrouillerEvaluation');

@@ -4,7 +4,68 @@
 
 ⚠ **Tout ce qui suit a été éprouvé sous Chromium** (WebKit n'existe pas ici). Le verdict WebKit et les captures WebKit se prennent sur le Mac.
 
-## En tête
+> **Mis à jour le 9 nov. 2026, après les décisions de 9 h 50 à 9 h 58 (Cowork)** : les phrases validées sont posées, les
+> placements et les décisions techniques sont faits (section suivante). Reste au Mac : le verdict WebKit et la fusion,
+> **après le troisième parcours**, auquel celui-ci renvoie.
+
+## Les corrections du 9 nov. (ce que tu verras)
+
+- **Les phrases validées sont posées, mot pour mot** : étape 2 (le menu « à côté de « + Nouvelle pratique » »), étape 3
+  des standards (« À côté, écris combien en retenir… », le minimum de fiabilité), étape 4 (« Note chiffrée » et la
+  note provisoire), étape 5 (« Actions › Consulter », « Déverrouiller », « Verrouiller »), étape 6 (« Regarde ensuite
+  la rétroaction : sous « Générale · Spécifique · Bilan »… »), étape 7 (« sans note chiffrée », deux fois), étape 8
+  (l'export marqué « final », « Enregistrer le jugement », « deux ou trois pratiques »). La sentinelle Vitest part de
+  la consigne du 8, y applique ces corrections, et exige chaque phrase neuve dans le code.
+- **Étape 1 en deux temps** (question 12, validée par Grégoire) : avant que l'assistant s'ouvre, la bulle entière, près
+  de « + Nouvelle pratique ». L'assistant ouvert, elle se réduit à sa ligne orange (« Touche « + Nouvelle pratique »,
+  choisis ton modèle, puis « Créer la pratique ». »), posée sous l'assistant : ni ses deux cartes ni « Suivant » ne
+  sont couverts. Aucun mot ne change. Sous 700 px, ce que j'avais fait reste (la bulle attend derrière l'assistant) :
+  le lot « La bulle sur téléphone » s'en charge. Captures `p9-etape-1-1180-sombre.png` et
+  `p9-etape-1-assistant-1180-sombre.png`.
+- **Étape 3, standards** (Cowork) : la bulle, plus large et donc moins haute, se pose en bas à droite de la carte. Le
+  champ du nombre à retenir (« Productions pour la note finale »), « Mode de sélection » et le minimum restent libres.
+  Comme au huitième parcours, c'est la sonde de l'étape qui la place, après le moteur, sans le toucher (à unifier à la
+  fusion). Capture `p9-etape-3-standards-1180-sombre.png`.
+- **Les avis ne couvrent plus une bulle, et l'aide dans les pages se tait pendant tout parcours** (Cowork, comme au
+  huitième parcours) : le même code que sur la branche du huitième, recopié tel quel (`js/utils-notifications.js` : la
+  pile des avis prend le coin qui ne couvre pas la bulle ; `js/accompagnement.js` et `css/accompagnement.css` :
+  survol, flèches et bulles de découverte se taisent). **À n'en garder qu'un à la fusion.** Sur la capture de
+  l'étape 7, « Pratique appliquée au cours actif » et « Évaluation verrouillée » sont passés en bas à droite.
+- **Question 11, la lecture** (Cowork) : hors de la démo, une pratique n'est jamais traitée comme une pratique de démo,
+  même si son auteur dit « Demo Labo Codex ». Elle paraît au menu, sa fiche se modifie, et elle s'applique au
+  groupe-cours. Une seule règle, `BibliothequeUI.estPratiqueDeDemo` (la démo ouverte ET la marque), lue par le menu, la
+  fiche et la garde d'« Appliquer » (`verifierReferencesPasDemo`). **Rien n'est réécrit** : le stock garde sa marque,
+  et elle ne compte plus hors de la démo. Mon hypothèse, à corriger au besoin : la décision vise **tes** pratiques (celles
+  du trimestre) ; la fenêtre « Bibliothèque » garde son filtre pour les modèles livrés (`toutesBibliotheque`), que je
+  n'ai pas touché.
+- **Étape 5, le verrou** (Cowork) : sur une évaluation verrouillée, « Note chiffrée » et « Niveau de performance »
+  sont désactivés, comme le reste de la fiche (`desactiverFormulaireEvaluation`, `js/evaluation.js`). Avant, ils
+  restaient cliquables sans rien enregistrer. Déverrouillée, l'évaluation les rend.
+- Captures Chromium à 1180 px, en sombre, remplacées : l'étape 1 dans ses deux temps, les étapes 3 et 5 à 8, et aussi
+  les étapes 2 et 4, dont les phrases ont changé. Les autres n'ont pas bougé.
+
+### Les questions du rapport, tranchées (9 nov. 2026, 9 h 50 à 9 h 58)
+
+- **1 à 8** (les phrases qui ne tenaient pas) : remplacées par celles que Grégoire a validées (ci-dessus).
+- **9** (les trois correctifs hors du parcours) : gardés (Grégoire).
+- **10** (le stock « N plus récentes ») : Grégoire n'a jamais adopté « N plus récentes » : rien à mesurer chez lui. Chez
+  d'autres, **une pratique déjà réécrite en « meilleures » ne se distingue pas de façon sûre d'un choix délibéré** :
+  aucun champ ne garde le mode d'origine ni la date du changement. Pas d'entrée au backlog (aucun symptôme vécu).
+- **11** (le stock « Demo Labo Codex ») : la lecture corrigée, pas les données (ci-dessus).
+- **12** (la bulle 1) : en deux temps (ci-dessus).
+- **13 et 14** (« n sur N » qui change ; l'étape 5 d'une pratique déjà appliquée) : on garde (Cowork).
+
+### À reporter
+
+Le lot « Écarter une copie plagiée, ou lui mettre 0 » (branche `lot/copie-non-recevable-choix`, pas encore tranché par
+Grégoire) donne à « Notes finalisées » un effet de plus en standards : une terminale non remise ou écartée vaut alors
+0. **La phrase de l'étape 8 sera à revoir à sa fusion.**
+
+### Ce qui attend encore Grégoire
+
+Rien de nouveau. Aucun texte n'a été écrit en dehors des phrases validées.
+
+## En tête (premier dépôt, nuit du 8 au 9 nov.)
 
 ### Ce qui est fait
 
@@ -146,10 +207,11 @@ Aucune rangée (règles 1 et 2 du skill `portes-terrain`) : le verdict WebKit es
 21. **Le mode anonymisation** rend l'étape 7 fausse (le PDF porte « Élève N ») : à décider si le parcours doit le dire, ou refuser de se lancer en anonymisation.
 22. **Le moteur des parcours** : les besoins nommés plus haut (rang obligatoire pour les lots 3 à 8, bouton selon l'état, voile qui change, bulle sur une fenêtre, Échap dans une fenêtre, toucher sans changement d'état), à reprendre dans le moteur à la fusion plutôt que dans chaque parcours.
 23. **Sur un téléphone, une bulle longue couvre l'écran** (la bulle 1 du neuvième parcours, et sans doute d'autres) : la bulle du moteur n'a pas de forme réduite.
-24. **Le stock des pratiques « N plus récentes » passées en « meilleures »** et **des copies masquées « Demo Labo Codex »** : à mesurer sur le Mac (questions 10 et 11).
+24. ~~**Le stock des pratiques « N plus récentes » passées en « meilleures »** et **des copies masquées « Demo Labo Codex »** : à mesurer sur le Mac (questions 10 et 11).~~ **Tranché le 9 nov. : ne pas inscrire.** La question 10 n'a rien à mesurer chez Grégoire, et le stock d'autres n'est pas détectable de façon sûre ; la question 11 est réglée par la lecture.
 
 ## Les commits
 
+- Corrections du 9 nov. : le commit qui suit ce rapport (phrases, étapes 1 et 3, avis, aide, question 11, verrou).
 - `00628a0e` : le parcours, le panneau, le banc (point d'étape).
 - `50075de7` : le parcours entier vert ; les trois défauts corrigés ; la sentinelle.
 - `61ba6ddc` : la relecture neuve (reprise, étape 5, Échap, filtre de l'étape 6, téléphone, DA retiré) ; les captures.
