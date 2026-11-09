@@ -17916,6 +17916,26 @@ tr.ligne-import-ecartee td {
 .eval-retro-pied .btn-copier-tout {
     color: var(--bleu-clair);
 }
+/* Lot « Un mot pour ton étudiant·e » (9 nov. 2026) — sous le pied, dans les trois vues : le mot suit la copie, pas la vue. */
+.eval-mot-etudiant {
+    display: flex;
+    flex-direction: column;
+    flex-shrink: 0;
+    gap: 3px;
+    margin-top: 10px;
+}
+.eval-mot-etudiant-titre {
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--texte-principal);
+}
+.eval-mot-etudiant .eval-textarea {
+    min-height: 60px;
+}
+.eval-mot-etudiant-aide {
+    font-size: 0.7rem;
+    color: var(--texte-secondaire);
+}
 /* Spécifique et Bilan gardent ce qu'ils avaient : « Copier tout », seul. */
 .zone-retroaction:has(#vueRetroGenerale.u-hide) .eval-retro-pied > :not(.btn-copier-tout) {
     display: none;
