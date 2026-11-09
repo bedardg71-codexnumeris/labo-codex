@@ -415,8 +415,10 @@
                 }
                 await attendre(fiche, 2500);
             }),
-            // Le choix du statut reste sous le voile : aucun geste attendu ici.
-            zones: zonesMasquees(function () { return [fiche()]; }, function () {
+            // « La fiche, contour sur le statut » (pas « éclairée », comme à l'étape 7) : rien n'est ouvert
+            // dans le voile, sinon le contour ; la bulle se pose à côté de lui. Le choix du statut reste sous
+            // le voile : aucun geste attendu ici.
+            zones: zonesMasquees(function () { return []; }, function () {
                 var r = radioStatut('completee');
                 var bloc = r ? r.closest('.champ-formulaire') : null;
                 return bloc ? [bloc] : [];
@@ -445,13 +447,26 @@
         var s = document.getElementById('v2-pref-grille-reference');
         return s && M().visible(s) ? s : null;
     }
+    /**
+     * ouvrirOutilsObservation défile, en douceur, vers le haut de la sous-section : le menu est amené
+     * dans la vue une fois ce défilement fini (la page immobile deux tours de suite), sans quoi les
+     * deux défilements se disputent la page. Une fois par arrivée : si la personne défile ensuite,
+     * le parcours ne la ramène pas.
+     */
     function amenerLeMenu(menu) {
         if (menuAmene) return;
         menuAmene = true;
-        // ouvrirOutilsObservation défile vers le haut de la sous-section après 80 ms : le menu, ensuite.
-        setTimeout(function () {
-            if (menu.isConnected) menu.scrollIntoView({ behavior: M().mouvementReduit() ? 'auto' : 'smooth', block: 'center' });
-        }, 300);
+        var dernier = null, immobile = 0, tours = 0;
+        (function tour() {
+            if (!menu.isConnected || tours++ > 30) return;
+            immobile = window.scrollY === dernier ? immobile + 1 : 0;
+            dernier = window.scrollY;
+            if (immobile < 2) { setTimeout(tour, 100); return; }
+            var r = menu.getBoundingClientRect();
+            var entete = document.querySelector('header.entete');
+            var haut = entete ? Math.max(0, entete.getBoundingClientRect().bottom) : 0;
+            if (r.top < haut + 16 || r.bottom > window.innerHeight - 16) menu.scrollIntoView({ behavior: 'auto', block: 'center' });
+        })();
     }
 
     var DEF = { id: ID, etapes: ETAPES, lienSortie: 'Plus tard' };

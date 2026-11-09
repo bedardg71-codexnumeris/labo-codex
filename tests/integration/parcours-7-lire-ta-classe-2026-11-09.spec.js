@@ -77,8 +77,8 @@ async function capture(page, nom) {
         .filter((a) => a.effect && a.effect.target && a.effect.target.closest
             && a.effect.target.closest('#panneau-assistance, #parcours-voile, #parcours-bulle, #entete-menu-panneau'))
         .every((a) => a.playState !== 'running'));
-    // La sonde du moteur passe toutes les 120 ms : la bulle et le contour sont à leur place.
-    await page.waitForTimeout(300);   // pause-gardee : la sonde du moteur tourne par setInterval, que attendreRepos ne voit pas
+    // Pas de pause : chaque capture suit la bulle focalisée (le moteur la focalise APRÈS un passage de sa sonde,
+    // qui pose trous, masques et contour) ou un contour constaté posé (contourSur).
     await page.screenshot({ path: path.join(CAPTURES, nom + '.png') });
 }
 
@@ -227,8 +227,8 @@ async function quiRecoitLeToucher(page, selecteur) {
         const avant = visibleDe();
         if (!avant) return 'absent';
         avant.scrollIntoView({ block: 'center' });
-        // pause-gardee : la sonde du moteur (setInterval, 120 ms) replace les masques après le défilement.
-        await new Promise((ok) => setTimeout(ok, 400));
+        // Le moteur écoute `scroll` et y replace trous et masques : deux images après le défilement, c'est fait.
+        await new Promise((ok) => requestAnimationFrame(() => requestAnimationFrame(ok)));
         // Relu après l'attente : le profil a pu se redessiner (un nœud neuf au même endroit).
         const el = visibleDe();
         if (!el) return 'absent';
@@ -337,6 +337,20 @@ async function parcourir(page, { largeur, theme, designee }) {
         await contourSur(page, lien);
         await capture(page, `p7-etape-5a-${suffixe}`);
         await page.click(lien);
+        await contourSur(page, '#v2-pref-grille-reference');
+        // Le menu est amené dans la vue une fois le défilement d'ouvrirOutilsObservation fini. Mesuré le 9 nov. :
+        // pendant ce défilement lisse, le menu PASSE à l'écran ; la mesure attend donc une page immobile.
+        const menuALEcran = () => page.evaluate(() => new Promise((ok) => {
+            let dernier = null, immobiles = 0;
+            (function image() {
+                immobiles = scrollY === dernier ? immobiles + 1 : 0;
+                dernier = scrollY;
+                if (immobiles < 20) { requestAnimationFrame(image); return; }
+                const r = document.getElementById('v2-pref-grille-reference').getBoundingClientRect();
+                ok(r.top >= 0 && r.bottom <= innerHeight);
+            })();
+        }));
+        await expect.poll(menuALEcran, { message: 'le menu des grilles est à l’écran, page immobile', timeout: 6000 }).toBe(true);
         await contourSur(page, '#v2-pref-grille-reference');
         await capture(page, `p7-etape-5b-${suffixe}`);
         await page.selectOption('#v2-pref-grille-reference', GRILLE.id);
@@ -467,16 +481,24 @@ test('les refus proposés : la démo, l’option RàI décochée, le mode anonym
     expect(erreurs, 'erreurs console').toEqual([]);
 });
 
-test('captures : les neuf étapes à 1180 px en clair, et les étapes 1, 2 et 7 à 390 px', async ({ page }) => {
+// Un test par largeur et par thème : chacun a son contexte, donc un stockage neuf (un second montage
+// sur la même page retrouvait la séance du premier, déjà saisie).
+test('captures : les neuf étapes à 1180 px en clair', async ({ page }) => {
     test.skip(!CAPTURES, 'captures seulement (CAPTURES_PARCOURS)');
-    test.setTimeout(300000);
+    test.setTimeout(240000);
     await suivreLesReactions(page);
     page.on('dialog', (d) => d.accept().catch(() => {}));
     await groupeAvecUnePersonneAlEcart(page, { clair: true });
     await parcourir(page, { largeur: 1180, theme: 'clair', designee: false });
+});
 
-    for (const clair of [false, true]) {
-        const theme = clair ? 'clair' : 'sombre';
+for (const clair of [false, true]) {
+    const theme = clair ? 'clair' : 'sombre';
+    test(`captures : les étapes 1, 2 et 7 à 390 px (${theme})`, async ({ page }) => {
+        test.skip(!CAPTURES, 'captures seulement (CAPTURES_PARCOURS)');
+        test.setTimeout(240000);
+        await suivreLesReactions(page);
+        page.on('dialog', (d) => d.accept().catch(() => {}));
         await groupeAvecUnePersonneAlEcart(page, { largeur: 390, hauteur: 844, clair });
         await commencer(page);
         await attendreEtape(page, 1);
@@ -497,6 +519,7 @@ test('captures : les neuf étapes à 1180 px en clair, et les étapes 1, 2 et 7 
         await attendreEtape(page, 6);
         await page.locator('#profil-contenu-dynamique [data-action="naviguerVersNouvelleIntervention"]', { hasText: '+ Nouvelle intervention' }).click();
         await attendreEtape(page, 7);
+        await contourSur(page, '[data-fiche-intervention] [data-action="sauvegarderPresencesIntervention"]');
         await capture(page, `p7-etape-7-390-${theme}`);
-    }
-});
+    });
+}
