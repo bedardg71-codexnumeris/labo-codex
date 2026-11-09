@@ -251,7 +251,38 @@
     function ouToucherProduction() {
         var creer = el('btnCreerProduction');
         if (!vis(creer)) return el('actionsFicheProduction');
-        return premierAFaire(['productionTitre', 'productionType', 'productionActivite', 'productionPonderation', 'productionGrille'], creer);
+        var champs = ['productionTitre', 'productionType', 'productionActivite', 'productionPonderation', 'productionGrille'];
+        if (echelleDeLaGrilleChoisie()) champs.push('productionEchelle');
+        return premierAFaire(champs, creer);
+    }
+
+    /**
+     * « … et son échelle si elle en a une » (Grégoire, 9 nov., 13 h 37) : l'échelle d'une grille, c'est celle de ses
+     * descripteurs (`criteres[].descripteurs.echelleId`, posée par Mon matériel quand la grille a des niveaux ; l'éditeur
+     * ne pose pas `grille.echelleId`, cartouches.js:439). Seulement si le menu « Échelle » de la fiche l'offre.
+     */
+    function echelleDeLaGrilleChoisie() {
+        var sg = el('productionGrille'), se = el('productionEchelle');
+        if (!sg || !sg.value || !se) return null;
+        var g = (typeof db !== 'undefined' && typeof cle === 'function' ? (db.getSync(cle('grillesTemplates'), []) || []) : [])
+            .find(function (x) { return x && x.id === sg.value; });
+        var cr = g && Array.isArray(g.criteres)
+            ? g.criteres.find(function (c) { return c && c.descripteurs && c.descripteurs.echelleId; }) : null;
+        var id = cr ? cr.descripteurs.echelleId : null;
+        return id && [].some.call(se.options, function (o) { return o.value === id; }) ? id : null;
+    }
+
+    /**
+     * Sur la fiche de la production, la bulle ne couvre jamais les menus « Grille de critères d'évaluation » ni
+     * « Échelle de performance » (Grégoire, 9 nov., 13 h 37) : ils sont désignés avec le champ visé, et le moteur pose
+     * la bulle hors de leur union. Pas de voile, la bulle accrochée au champ (gardé, même décision).
+     */
+    function surLaFiche(cible) {
+        var menus = ['productionGrille', 'productionEchelle'].map(function (id) {
+            var s = el(id);
+            return s ? (s.closest('.groupe-form') || s) : null;
+        });
+        return surLaCible(cible).concat(menus.filter(vis));
     }
 
     function caseConsignes() {
@@ -431,13 +462,13 @@
         },
         {
             titre: 'Ta production',
-            texte: "Une production, c'est ce que tes étudiant·es font dans une activité d'apprentissage : un texte, mais aussi un stage, un film, un enregistrement, une entrevue, un labo. Ce n'est pas toujours un objet qu'on remet : c'est ce que l'étudiant·e fait quand il ou elle apprend, et c'est cet apprentissage que tu évalues à travers elle. Décris celle que tu demandes : son titre, son type, sa pondération, et surtout l'activité d'apprentissage : c'est ce que tes étudiant·es retrouveront en tête de leur synthèse de rétroaction. Puis associe-lui la grille que tu viens de créer. La production relie ce que tu demandes à la façon dont tu l'évalues : ce que chaque étudiant·e fait s'y rattache, et sa pondération dit ce qu'elle pèsera dans la note du cours.",
+            texte: "Une production, c'est ce que tes étudiant·es font dans une activité d'apprentissage : un texte, mais aussi un stage, un film, un enregistrement, une entrevue, un labo. Ce n'est pas toujours un objet qu'on remet : c'est ce que l'étudiant·e fait quand il ou elle apprend, et c'est cet apprentissage que tu évalues à travers elle. Décris celle que tu demandes : son titre, son type, sa pondération, et surtout l'activité d'apprentissage : c'est ce que tes étudiant·es retrouveront en tête de leur synthèse de rétroaction. Puis associe-lui la grille que tu viens de créer, et son échelle si elle en a une. La production relie ce que tu demandes à la façon dont tu l'évalues : ce que chaque étudiant·e fait s'y rattache, et sa pondération dit ce qu'elle pèsera dans la note du cours.",
             avant: async function () {
                 aller('conception', 'productions');
                 await attendre(function () { return sousSectionVisible('conception-productions'); }, 2000);
             },
             zones: function () {
-                if (ficheProductionOuverte()) return surLaCible(ouToucherProduction());
+                if (ficheProductionOuverte()) return surLaFiche(ouToucherProduction());
                 poserVoile('normal');
                 return [qs('#conception-productions .rangee-selection')];
             },
@@ -629,8 +660,8 @@
     window.Assistance.enregistrer({
         id: ID,
         titre: 'Évaluer une première production',
-        // La ligne du panneau n'est pas validée : aucune n'est posée (proposée dans le rapport du lot).
-        ligne: '',
+        // Validée par Grégoire le 9 nov. (13 h 37 à 13 h 42, en Cowork).
+        ligne: 'De ta grille à ta première rétroaction, réécrite avec tes mots.',
         total: ETAPES.length,
         condition: condition,
         lancer: lancer

@@ -38,8 +38,8 @@ async function lePanneauSansClasse(page, cap) {
     await ouvrirPanneau(page);
     await expect(item(page).locator('.assistance-parcours-titre')).toHaveText('Évaluer une première production');
     await expect(item(page).locator('.assistance-parcours-etat')).toHaveText('À faire');
-    // Sa ligne n'est pas validée : aucune n'est écrite (rapport du lot, proposée).
-    await expect(item(page).locator('.assistance-parcours-ligne')).toHaveCount(0);
+    // Sa ligne, validée par Grégoire le 9 nov. (13 h 37).
+    await expect(item(page).locator('.assistance-parcours-ligne')).toHaveText('De ta grille à ta première rétroaction, réécrite avec tes mots.');
     await item(page).locator('.assistance-parcours-bouton').click();
     await expect(item(page).locator('.assistance-parcours-condition')).toHaveText(REFUS);
     await expect(page.locator('#panneau-assistance')).toBeVisible();
@@ -66,26 +66,59 @@ async function etape1(page, { niveaux, cap }) {
     await page.click('#dissection-creer [data-action="materielDissection.creer"]');
 }
 
-/** Étape 2 : la production, champ par champ (le contour suit), puis « Créer la production ». */
-async function etape2(page, { cap }) {
+/** Sur la fiche, la bulle ne couvre jamais les menus « Grille de critères d'évaluation » ni « Échelle » (9 nov., 13 h 37). */
+async function menusLibres(page, contexte) {
+    for (const id of ['productionGrille', 'productionEchelle']) await bulleNeCouvrePas(page, `#champGrille .groupe-form:has(#${id})`, contexte);
+}
+
+/**
+ * Étape 2 : la production, champ par champ (le contour suit), puis « Créer la production ». Une grille à niveaux a son
+ * échelle (celle que Mon matériel a créée avec elle) : le contour passe par le menu « Échelle », et la fiche la reçoit,
+ * sauf dans l'essai où on la laisse vide (`echelleVide`). Une grille en points n'en a pas : le contour saute le menu.
+ */
+async function etape2(page, { cap, niveaux, echelleVide }) {
     await etape(page, 2, 'Ta production', { focus: false });
     await contourSur(page, '#conception-productions [data-action="creerNouvelleProduction"]');
     await capture(page, DOSSIER, `p3-2-${cap}`);
     await page.click('#conception-productions [data-action="creerNouvelleProduction"]');
     await contourSur(page, '#productionTitre');
+    await menusLibres(page, 'étape 2, le titre');
     await page.fill('#productionTitre', 'Journal de lecture 1');
     await contourSur(page, '#productionType');
+    await menusLibres(page, 'étape 2, le type');
     await page.selectOption('#productionType', 'travail');
     await page.fill('#productionActivite', 'Lire un roman et en rendre compte');
     await page.fill('#productionPonderation', '20');
     await contourSur(page, '#productionGrille');
+    await menusLibres(page, 'étape 2, la grille');
     const grilleId = (await ctx(page)).grilleId;
     expect(grilleId).toBeTruthy();
     await page.selectOption('#productionGrille', grilleId);
-    await contourSur(page, '#btnCreerProduction');
-    await bulleNeCouvrePas(page, '#btnCreerProduction', 'étape 2');
+    if (niveaux) {
+        // « … et son échelle si elle en a une » : le contour passe au menu « Échelle ».
+        await contourSur(page, '#productionEchelle');
+        await menusLibres(page, 'étape 2, l’échelle');
+        await capture(page, DOSSIER, `p3-2-fiche-echelle-${cap}`);
+        if (!echelleVide) {
+            const echelle = await page.evaluate(() => [...document.querySelectorAll('#productionEchelle option')].find((o) => /Journal de lecture/.test(o.textContent)).value);
+            await page.selectOption('#productionEchelle', echelle);
+        }
+    }
+    if (echelleVide) {
+        // Laissée vide, l'échelle reste ce qui manque : le contour y reste ; on crée la production quand même.
+        await contourSur(page, '#productionEchelle');
+    } else {
+        await contourSur(page, '#btnCreerProduction');
+        await bulleNeCouvrePas(page, '#btnCreerProduction', 'étape 2');
+    }
+    await menusLibres(page, 'étape 2, « Créer la production »');
     await capture(page, DOSSIER, `p3-2-fiche-${cap}`);
     await page.click('#btnCreerProduction');
+    await expect.poll(() => page.evaluate(async () => {
+        const id = ParcoursEvaluer.contexte().productionId;
+        const p = id && (db.getSync(cle('productions'), []) || []).find((x) => x.id === id);
+        return p ? !!p.echelleId : null;
+    })).toBe(!!niveaux && !echelleVide);
 }
 
 /** Étape 3 : « Plus tard », un rechargement, « Reprendre » ; puis la date et « Consignes transmises ». */
@@ -117,7 +150,7 @@ async function etape3(page, { cap, plusTard }) {
 }
 
 /** Étape 4 : la Liste, « Actions › Évaluer » sans fichier, chaque critère, la rétroaction, « Verrouiller ». */
-async function etape4(page, { niveaux, cap }) {
+async function etape4(page, { niveaux, cap, echelleVide }) {
     await etape(page, 4, 'Une première production', { focus: false });
     const pid = (await ctx(page)).productionId;
     const evaluer = (await valeursActions(page, pid)).find((v) => v.startsWith('evaluer|2390001|'));
@@ -129,14 +162,18 @@ async function etape4(page, { niveaux, cap }) {
     await actionDeLaListe(page, evaluer);
     await expect(page.locator('#evaluations-contenu-evaluation')).toBeVisible();
     const lireChamps = () => page.evaluate(() => [...document.querySelectorAll('#listeCriteresGrille1 select[id^="eval_"], #listeCriteresGrille1 input[id^="eval_pts_"]')].map((c) => c.id));
-    if (niveaux) {
-        // Une grille à niveaux, une production qui ne nomme pas d'échelle, deux échelles au trimestre (celle de
-        // Mon matériel, celle de départ semée au rechargement) : l'écran demande l'échelle, le contour s'y pose.
-        // La bulle 4 ne le dit pas (rapport du lot, phrase proposée).
+    if (niveaux && echelleVide) {
+        // Une grille à niveaux, une production dont on a laissé l'échelle vide, deux échelles au trimestre (celle de
+        // Mon matériel, celle de départ) : l'écran demande l'échelle, le contour s'y pose, sans mot de plus dans la bulle
+        // (Grégoire, 9 nov., 13 h 37).
         await expect(page.locator('#listeCriteresGrille1')).toContainText('Choisis maintenant une échelle de performance');
         await contourSur(page, '#selectEchelle1');
         const echelle = await page.evaluate(() => [...document.querySelectorAll('#selectEchelle1 option')].find((o) => /Journal de lecture/.test(o.textContent)).value);
         await page.selectOption('#selectEchelle1', echelle);
+    } else if (niveaux) {
+        // La production porte l'échelle : l'écran ne la redemande pas.
+        await expect(page.locator('#selectEchelle1')).not.toHaveValue('');
+        await expect(page.locator('#listeCriteresGrille1')).not.toContainText('Choisis maintenant une échelle de performance');
     }
     await expect.poll(async () => (await lireChamps()).length).toBe(4);
     const champs = await lireChamps();
@@ -261,7 +298,7 @@ async function etape9(page, { cap }) {
     expect(await page.evaluate(() => Assistance.etatDe('evaluer').etat)).toBe('fait');
 }
 
-export async function leParcoursEntier(page, { niveaux, cap }) {
+export async function leParcoursEntier(page, { niveaux, cap, echelleVide = false }) {
     test.setTimeout(240000);
     await ouvrirEspaceVide(page, 1180);
     await lePanneauSansClasse(page, cap);
@@ -276,11 +313,11 @@ export async function leParcoursEntier(page, { niveaux, cap }) {
     await item(page).locator('.assistance-parcours-bouton').click();
 
     await etape1(page, { niveaux, cap });
-    await etape2(page, { cap });
+    await etape2(page, { cap, niveaux, echelleVide });
     // « Plus tard », un rechargement, « Reprendre » : dans l'essai à niveaux. L'essai en points se joue d'une traite :
     // sans rechargement, l'échelle de départ doit exister à l'étape 8 (relecture neuve du 9 nov.).
-    await etape3(page, { cap, plusTard: niveaux });
-    await etape4(page, { niveaux, cap });
+    await etape3(page, { cap, plusTard: niveaux && !echelleVide });
+    await etape4(page, { niveaux, cap, echelleVide });
     await etapes5et6(page, { cap });
     await etape7(page, { cap });
     await etape8(page, { niveaux, cap });
