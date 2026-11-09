@@ -45,10 +45,10 @@ Release mineure par `scripts/release.mjs` après le verdict. Proposer la ligne d
 | Champ | `#motPourEtudiant1`, sous le pied de la rétroaction (après « Régénérer / Copier / Copier tout »), visible dans les trois vues (Générale, Spécifique, Bilan) : le mot suit la copie, pas la vue. |
 | Écrivains | Enregistrement automatique (`_autoSauvegarderCriteres`, le mot voyage dans l'instantané comme l'intégrité), « Enregistrer » d'une évaluation neuve (`evaluation-sauvegarde.js`) et d'une existante (`sauvegarderEvaluationModifiee`). |
 | Identité | Le champ porte la copie à qui son texte appartient (`data-mot-pour`), comme #961 et #671 : un écrivain n'écrit le mot que pour elle. |
-| Un mot seul | Sur une évaluation existante, il s'enregistre seul (comme l'intégrité). Sur une copie jamais évaluée, il ne crée pas d'évaluation : il part avec le premier niveau. |
+| Un mot seul | Sur une évaluation existante, il s'enregistre seul (comme l'intégrité). Sur une copie jamais évaluée, il ne crée pas d'évaluation : il part avec le premier niveau. **Décision de Grégoire (9 nov., réponse a) : on garde ainsi, sans avis.** |
 | Verrou | Champ désactivé sous le verrou ; aucun écrivain n'écrit une évaluation verrouillée. |
 | Ce qui voyage | Codex, export, import : l'évaluation entière, sans liste blanche, rien à changer. Archives ZIP : passé par `anonymiserTexteRetroaction` en anonymisation, comme la rétroaction. Export « expérience » du journal : liste blanche, le mot n'y entre pas. Aucune donnée réécrite. |
-| Anonymisation | Écran : masqué comme les notes d'intégrité (vide, désactivé, mention) — un texte libre peut nommer l'élève, et l'écrivain réécrirait le texte affiché. PDF et archives : le même outil que la rétroaction écrite. **Écart avec la consigne, nommé.** |
+| Anonymisation | **Décision (acceptée par Cowork le 9 nov.)** : à l'écran, masqué comme les notes d'intégrité (vide, désactivé, mention) — un texte libre peut nommer l'élève, et l'écrivain réécrirait le texte affiché. PDF et archives : le même outil que la rétroaction écrite. |
 | Reprise (jeton) | Part sans le mot (supposition de Cowork, appliquée). L'originale garde le sien. |
 | « Copier tout » | Le mot à la fin, sans titre (supposition de Cowork, appliquée). |
 | Copie non recevable, travail en cours | Le mot reste sur le PDF, comme la rétroaction écrite. |
@@ -59,9 +59,14 @@ Release mineure par `scripts/release.mjs` après le verdict. Proposer la ligne d
 | # | Constat | Disposition |
 |---|---|---|
 | 1 | La reprise recevait le mot de l'originale : « Modifier » sur une originale remplacée, puis un niveau touché — l'enregistrement automatique écrit l'ACTIVE du couple élève-production (vérifié par exécution). | **Corrigé dans le lot** (code neuf) : une existante ne reçoit le mot que si c'est elle qui est ouverte (`idModification`). Spec « une originale remplacée, rouverte et touchée », break-test fait. |
-| 1 bis | Même trajet : la reprise reçoit aussi les **niveaux** tapés sur l'originale. Antérieur au lot. | **Inscrit, à arbitrer par Grégoire** (code étranger au lot ; touche des notes). Non corrigé. |
+| 1 bis | Même trajet : la reprise reçoit aussi les **niveaux** tapés sur l'originale. Antérieur au lot. | **Hors du lot, par décision de Cowork (9 nov.)** : non corrigé ici ; Cowork le présente à Grégoire au retour du verdict. |
 | 2 | « Copier tout » emportait le texte du champ sans vérifier à quelle copie il appartient ; la branche « aucune évaluation » du chargeur ne vidait pas le champ. | **Corrigé dans le lot** : « Copier tout » ne prend que le mot de la copie ouverte ; le chargeur vide le champ sans évaluation. |
-| 3 | Un mot tapé sur une copie jamais évaluée, sans aucun niveau, se perd au changement d'élève, sans avis. | **Décision nommée, question à Grégoire** (voir le rapport). |
+| 3 | Un mot tapé sur une copie jamais évaluée, sans aucun niveau, se perd au changement d'élève, sans avis. | **Refusé par Grégoire (9 nov., réponse a)** : comportement gardé, pas d'avis. |
 | 4 | Le test « avant les tampons » restait vert section déplacée après les tampons (le banc n'avait aucun tampon). | **Corrigé** : test sur un rendu qui porte des tampons ; break-test fait. |
 | 5 | Formulaire sans copie, mode changé en anonymisation : le champ n'est pas reposé (même trou que les notes d'intégrité, antérieur). | **Commenté et laissé** : sans conséquence sur les données (l'écrivain n'écrit que le texte de la copie liée, et rien ne s'imprime de l'écran). |
 | — | Relevé : `db.getSync` pouvait rendre vide une liste hors du cache mémoire. | **Corrigé** : `db.get` asynchrone. |
+
+## Ligne des Nouvelles (entrée 1.238)
+
+Validée par Grégoire, mot pour mot, le 9 nov. 2026 (relayée par Cowork) : « Évaluer : un champ « Un mot pour ton étudiant·e », sous la rétroaction. Ce que tu y écris s'imprime sur son PDF, après son niveau ; laissé vide, rien n'apparaît. Les retouches faites dans le cadre de la rétroaction, elles, ne vont pas sur le PDF. »
+Titre de l'entrée, supposé par Claude Code : « Un mot pour ton étudiant·e » (le nom du champ, déjà validé).
