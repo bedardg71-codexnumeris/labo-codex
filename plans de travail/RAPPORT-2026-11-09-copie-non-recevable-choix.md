@@ -1,14 +1,246 @@
-# Rapport, session A de la nuit du 8 au 9 novembre 2026 : écarter une copie plagiée, ou lui mettre 0
+# Rapport : écarter une copie plagiée, ou lui mettre 0 (#1176)
 
-**Écrit par Claude Code (session cloud A), le 9 nov. 2026 entre 3 h et 6 h (heure de Montréal).** Branche
-`lot/copie-non-recevable-choix`, partie de `origin/main` (`98c04bfc`, 1.237.2), poussée aussi sous
-`claude/modest-cannon-krvuf1` (même contenu ; c'est la branche que l'environnement cloud m'assignait). Consigne :
-`plans de travail/CONSIGNE-LOT-2026-11-08-copie-non-recevable-choix.md` (déjà sur `main`, donc dans la branche). Fiche #1176,
-#1226 liée. Aucun fichier de coordination touché (règle 3 du plan de la nuit), aucune release, rien au changelog.
+**Deux sessions de Claude Code dans le cloud, le 9 nov. 2026.** Branche `lot/copie-non-recevable-choix`.
+- **Session A** (nuit du 8 au 9 nov., entre 3 h et 6 h) : le lot en entier, partie de `origin/main` (`98c04bfc`, 1.237.2) ;
+  ses textes posés comme PROPOSÉS. Son rapport est conservé plus bas (§ « Le détail »).
+- **Session du 9 nov. après-midi** (celle-ci) : `origin/main` (1.238.0, « Un mot pour ton étudiant·e ») fusionnée dans la
+  branche ; les textes validés par Grégoire posés mot pour mot ; le relevé du stock écrit ; les captures refaites.
+  Consigne recopiée ci-dessous. Aucun fichier de coordination touché, aucune release, rien au changelog.
 
 ## En tête : ce que Grégoire verra
 
 ### Ce qui est fait
+
+- **Les textes sont ceux que tu as validés** (9 nov., 10 h 08 à 10 h 13, en Cowork), mot pour mot, sans leur marque
+  « proposé ». Une sentinelle les exige (`tests/unit/sentinelle-textes-copie-non-recevable-valides-9-nov.test.js`).
+- **Ta variante « N meilleures » sur la copie** : en standards, quand la copie est au portfolio (ou aux productions
+  retenues, sans Artefact) et que le mode de sélection de la pratique est « N meilleures », « lui mettre 0 » dit
+  « lui mettre 0 : elle entre au portfolio avec 0 ; en « N meilleures », ce 0 ne compte que s'il te manque des
+  productions ». Les modes « Tous », « N plus récentes » et « Hybride » gardent « lui mettre 0 : elle entre au portfolio
+  avec 0 ». La terminale et l'obligatoire gardent leur texte, quel que soit le mode.
+- **L'assistant** : « Lui mettre 0 », standards, dit ta phrase. Rien n'est coché d'avance. **Les réglages** : inchangés.
+- **L'Aide** : ta puce « Lui mettre 0 » dans « Travail NON RECEVABLE » ; l'exemple de la terminale dans « Travail NON
+  REMIS » ; et l'aide de « Notes finalisées » se termine par « En standards, une terminale non remise ou écartée vaut
+  alors 0. »
+- **Le calcul n'a pas bougé** (ta question 2). Tu choisiras toi-même « Lui mettre 0 » dans les réglages de ta pratique
+  par standards, après la mise en ligne : **je n'ai rien écrit dans tes données**, et le lot n'écrit rien tant que tu ne
+  cliques pas.
+- **Le relevé de tes copies non recevables** est prêt (`scripts/releve-copies-non-recevables-a2026.js`), en lecture
+  seule, à coller dans la console de Chrome sur ton Mac **avant la fusion** (ta question 5, plus bas).
+- **Captures Chromium à 1180 px** (pas WebKit), dans `plans de travail/captures-2026-11-09-copie-non-recevable-choix/`,
+  qui remplacent celles de la nuit : la copie marquée dans une pratique par standards en « N meilleures », règle
+  « l'écarter » cochée (`1a-…`), puis « lui mettre 0 » choisi (`1b-…`) ; les réglages de la pratique (`2-…`) ; l'étape de
+  l'assistant, standards (`3-…`).
+
+### Ce qui attend Grégoire (une question par ligne, avec ma recommandation)
+
+1. **Lancer le relevé sur ton Mac, avant la fusion.** Ouvre l'application en ligne dans Chrome, ouvre la console
+   (⌥⌘J), colle le contenu de `scripts/releve-copies-non-recevables-a2026.js`, Entrée. Il n'écrit rien. Le résultat est
+   copié dans ton presse-papier ; colle-le à Cowork. Il dit, sans aucun nom ni DA : combien de copies sont marquées non
+   recevables en A2026, par pratique et par famille ; si une terminale non recevable passerait de 0 à provisoire ; si,
+   « Notes finalisées » cochée, une terminale manquante passerait de provisoire à 0. *Recommandation : fusionner seulement
+   si les deux derniers comptes sont à 0, ou si tu acceptes ce qu'ils nomment.*
+2. **En mode « Hybride », la copie au bloc Sélection garde le texte commun.** C'est ta consigne (« les autres modes
+   gardent ton texte »). Or l'hybride retient aussi les N meilleures de sa Sélection (`_selectionnerArtefactsLegacy`,
+   `js/profil-etudiant-actions.js:296`) : une copie à 0 n'y compte, elle aussi, que s'il manque des productions.
+   *Recommandation : garder tel quel pour la cohorte (ta pratique n'est pas hybride) ; si tu veux la variante en hybride
+   aussi, c'est une ligne de code et un mot de toi.*
+3. **Le glossaire, « Notes finalisées »** (`js/accompagnement-contenu-terme.js:606`), dit seulement qu'en hybride une
+   obligatoire non remise compte alors pour zéro ; il ne dit rien de la terminale. Non touché (texte non validé).
+   *Proposition : ajouter « En standards, une terminale non remise ou écartée compte alors pour zéro. »*
+4. **Une supposition de typographie, carte « Travail NON REMIS ».** Ta phrase commence par une majuscule ; je l'ai posée
+   comme une phrase à elle : « … par exemple, en sommative, il n'y entre pas. En standards, une fois les notes finales
+   cochées, une terminale non remise vaut 0 ; en mode hybride, une obligatoire non remise aussi. » (avant : « … il n'y
+   entre pas ; en standards hybride, … »). *Si tu préfères la suite après « ; », c'est une minuscule à changer.*
+5. **À la fusion des deux lots** : la phrase de l'étape 8 du neuvième parcours sur « Notes finalisées » (branche
+   `lot/parcours-9-notation-alternative`) est à compléter pour la terminale. Non faite ici (autre branche) ; reportée.
+
+Questions de la nuit, réglées par toi le 9 nov. : 1 (les textes) et 6 (l'Aide et « Notes finalisées ») sont posées ;
+2 (le minimum des standards) : le calcul ne change pas ; 3 (un brouillon ou un « Incomplet » de terminale laisse la note
+provisoire aux notes finales) : validé, c'est ce qui est codé ; 4, 7, 8 et 9 : gardées ; 5 : le relevé (question 1).
+
+### Ce que je n'ai pas pu vérifier
+
+- **WebKit, Safari, l'iPad** : rien. Les captures et les specs sont sous Chromium. À rejouer sur le Mac :
+  `copie-non-recevable-choix-1176.spec.js`, les trois specs de l'assistant retouchées par la nuit, et les captures.
+- **Tes données réelles** : le relevé (question 1). Il a été éprouvé ici sur un A2026 fictif seulement.
+- **La relecture croisée de Cowork** (règle 2 de `PROTOCOLE.md`) : le champ `sortCopieNonRecevable` voyage avec la copie
+  et la pratique.
+
+## La consigne de cette session (relayée par Cowork, décisions de Grégoire du 9 nov. 2026, 10 h 08 à 10 h 13)
+
+> LOT : finir « Écarter une copie plagiée, ou lui mettre 0 ». Branche existante `lot/copie-non-recevable-choix`. Fusionne
+> d'abord origin/main dans la branche.
+>
+> 1. LE FOND (question 2) : le calcul ne change pas. Grégoire constate que sa règle des standards du 8 nov. (0 seulement
+>    si la copie est nécessaire pour atteindre le nombre minimal) correspond à « lui mettre 0 » en « N meilleures ». Il
+>    choisira lui-même « lui mettre 0 » dans les réglages de sa pratique après la mise en ligne : n'écris rien dans ses
+>    données ; dis-le dans le rapport.
+> 2. LES TEXTES, validés mot pour mot (retire leur marque « PROPOSÉS » ; une sentinelle Vitest les exige) :
+>    - La ligne sur la copie (`TEXTES_SORT_COPIE_NON_RECEVABLE`) : ton tableau du rapport, tel quel, sauf une variante. En
+>      standards, à la place « portfolio » et « sans Artefact », quand le mode de sélection de la pratique est « N
+>      meilleures », « lui mettre 0 » dit : « lui mettre 0 : elle entre au portfolio avec 0 ; en « N meilleures », ce 0 ne
+>      compte que s'il te manque des productions » (et l'équivalent « aux productions retenues » sans Artefact). Les
+>      autres modes gardent ton texte. Le titre « Dans la note du cours : » et la ligne « Règle de ta pratique : … Ton
+>      choix ne vaut que pour cette copie. » : validés.
+>    - L'assistant et les réglages : tes textes, tels quels, sauf « Lui mettre 0 », standards : « Elle entre au portfolio
+>      avec 0 ; en « N meilleures », ce 0 ne compte que s'il te manque des productions. Une terminale vaut 0. » Sans
+>      réponse cochée d'avance : validé.
+>    - L'avis « Travail non recevable » du formulaire : le retrait de la phrase « Dans la note du cours, elle vaut ce que
+>      dit ta pratique : … » est validé ; le reste mot pour mot.
+>    - L'Aide, « Travail NON RECEVABLE » : ton paragraphe, tel quel, sauf la puce « Lui mettre 0 », qui devient « « Lui
+>      mettre 0 » : 0 en sommative, un travail non satisfaisant en spécifications, 0 en standards, au portfolio comme à la
+>      terminale ; en « N meilleures », ce 0 ne compte que s'il manque des productions. »
+>    - Question 6 : l'Aide, carte « Travail NON REMIS » : l'exemple devient « En standards, une fois les notes finales
+>      cochées, une terminale non remise vaut 0 ; en mode hybride, une obligatoire non remise aussi. » ; l'aide de « Notes
+>      finalisées » reçoit « En standards, une terminale non remise ou écartée vaut alors 0. »
+> 3. LES AUTRES QUESTIONS : 3, validé par Grégoire : un brouillon ou un « Incomplet » de terminale laisse la note
+>    provisoire aux notes finales (ce qui est codé). 4, 7, 8, 9 : on garde (Cowork). 5 : voir point 4.
+> 4. LES DONNÉES DE GRÉGOIRE (question 5), avant toute fusion : prépare un relevé en LECTURE SEULE, à coller dans la
+>    console de Chrome sur son Mac (`scripts/releve-copies-non-recevables-a2026.js`). Il compte, sans aucun nom d'élève,
+>    les copies d'A2026 marquées non recevables, par pratique et par famille ; il dit si une pratique par standards a
+>    « Notes finalisées » cochée avec une terminale non remise (elle passerait à 0), et si une terminale non recevable est
+>    déjà marquée (elle passerait de 0 à provisoire). La fusion attendra que Grégoire l'ait lancé.
+> 5. À REPORTER : la phrase de l'étape 8 du neuvième parcours sur « Notes finalisées » (branche
+>    `lot/parcours-9-notation-alternative`) sera à compléter à la fusion des deux lots.
+>
+> Captures Chromium de la copie marquée (standards en « N meilleures », les deux choix), de l'étape de l'assistant et des
+> réglages, à 1180 px, à remplacer dans `plans de travail/captures-2026-11-09-copie-non-recevable-choix/`. Mets à jour le
+> rapport. Pousse. Le verdict WebKit et la fusion se feront sur le Mac.
+
+## Les textes, validés le 9 nov. (mot pour mot)
+
+**1. La ligne sur la copie** (`TEXTES_SORT_COPIE_NON_RECEVABLE`, `js/evaluation-sauvegarde.js`). Titre : « Dans la note du
+cours : ». Les deux choix, selon la famille et la place de la copie :
+
+| Où | « l'écarter » | « lui mettre 0 » |
+|---|---|---|
+| Sommative | l'écarter, comme une copie non remise : elle n'entre pas dans la moyenne | lui mettre 0 : elle compte pour 0 dans la moyenne |
+| Spécifications | l'écarter, comme un travail non remis | lui mettre 0 : elle compte comme un travail non satisfaisant |
+| Standards, portfolio | l'écarter, comme une copie non remise : elle manque au portfolio | lui mettre 0 : elle entre au portfolio avec 0 |
+| Standards, portfolio, **« N meilleures »** | (idem) | lui mettre 0 : elle entre au portfolio avec 0 ; en « N meilleures », ce 0 ne compte que s'il te manque des productions |
+| Standards sans « Artefact » | … elle manque aux productions retenues | … elle entre aux productions retenues avec 0 |
+| Standards sans « Artefact », **« N meilleures »** | (idem) | lui mettre 0 : elle entre aux productions retenues avec 0 ; en « N meilleures », ce 0 ne compte que s'il te manque des productions |
+| Standards, obligatoire (hybride) | l'écarter, comme une obligatoire non remise : elle vaut 0 une fois les notes finales cochées | lui mettre 0 : elle compte pour 0 tout de suite |
+| Standards, terminale | l'écarter, comme une terminale non remise : la note reste provisoire, puis la terminale vaut 0 une fois les notes finales cochées | lui mettre 0 : la terminale vaut 0 tout de suite |
+| Sans pratique | l'écarter, comme une copie non remise | lui mettre 0 |
+
+Dessous : « Règle de ta pratique : l'écarter. Ton choix ne vaut que pour cette copie. » (ou « lui mettre 0 »).
+
+**Le mode « N meilleures »** se lit comme le calcul le lit (`_obtenirConfigPortfolioCalcul`,
+`js/profil-etudiant-actions.js`) : `portfolio.methodeSelection`, « meilleurs » quand rien n'est écrit. L'hybride stocke
+aussi « meilleurs » (l'assistant), mais l'écran des réglages l'affiche comme un autre mode (« hybride a priorité »,
+`js/pratiques-gestion.js`) : il garde le texte commun (question 2). Sans configuration de portfolio : le texte commun.
+
+**L'avis « Travail non recevable »** du formulaire : la phrase « Dans la note du cours, elle vaut ce que dit ta pratique : … »
+est retirée (validé) ; le reste mot pour mot.
+
+**2. L'assistant** (`js/wizard-pratique-v2.js`, étape `copie-non-recevable`) : titre « Une copie non recevable » ; « Quand
+tu marques une copie non recevable (plagiat, IA non autorisée), que devient-elle dans la note ? » ; « L'écarter » —
+sommative : « Elle n'entre pas dans la moyenne, comme une copie non remise. » ; spécifications : « Elle compte comme un
+travail non remis. » ; standards : « Elle manque au portfolio, comme une copie non remise. Une terminale écartée laisse la
+note provisoire, puis vaut 0 une fois les notes finales cochées. » ; « Lui mettre 0 » — sommative : « Elle compte pour 0
+dans la moyenne. » ; spécifications : « Elle compte comme un travail non satisfaisant. » ; standards : **« Elle entre au
+portfolio avec 0 ; en « N meilleures », ce 0 ne compte que s'il te manque des productions. Une terminale vaut 0. »** ;
+l'encadré : « C'est ta règle. Quand tu marqueras une copie non recevable, elle apparaîtra déjà cochée, et tu pourras la
+changer pour cette copie-là. La règle elle-même se change dans les réglages de ta pratique. »
+
+**Les réglages de la pratique** (`index.html`) : « Une copie non recevable (plagiat, IA non autorisée), dans la note » ;
+« L'écarter, comme une copie non remise » ; « Lui mettre 0 » ; « Ta règle. Quand tu marques une copie non recevable, elle
+apparaît déjà cochée ; tu peux la changer pour cette copie-là. » L'aide de « Notes finalisées » se termine par **« En
+standards, une terminale non remise ou écartée vaut alors 0. »**
+
+**3. L'Aide** (`index.html`, `accordeon-aide-irrecevables`), « Travail NON RECEVABLE » :
+
+> Une copie non recevable compte comme non remise dans la complétion (C) ; elle reste dans le total attendu. Dans la note, c'est
+> toi qui choisis son sort. Ta pratique de notation porte ta règle ; quand tu marques une copie non recevable, ta règle apparaît
+> déjà cochée sous le menu, et tu peux la changer pour cette copie-là.
+> - « L'écarter » : elle est traitée comme une copie non remise. En sommative, elle n'entre pas dans la moyenne ; en
+>   spécifications, elle compte comme un travail non remis ; en standards, elle manque au portfolio, avec ce que ta pratique fait
+>   d'une copie manquante. Une terminale écartée laisse la note provisoire, puis vaut 0 une fois les notes finales cochées, comme
+>   une terminale non remise ; en mode hybride, une obligatoire écartée aussi.
+> - **« Lui mettre 0 » : 0 en sommative, un travail non satisfaisant en spécifications, 0 en standards, au portfolio comme à la
+>   terminale ; en « N meilleures », ce 0 ne compte que s'il manque des productions.**
+> - En dénotation, ta note est ton jugement : la copie n'y entre pas par calcul.
+>
+> Une pratique créée avant ce choix, tant que tu ne choisis pas sa règle, lit : 0 en sommative, un travail non satisfaisant en
+> spécifications, « L'écarter » en standards. Tu changes sa règle dans Conception → Pratiques. Une reprise remplace la copie non
+> recevable, quel que soit son sort.
+
+« Travail NON REMIS » : « … La note dépend de ta pratique ; par exemple, en sommative, il n'y entre pas. **En standards, une
+fois les notes finales cochées, une terminale non remise vaut 0 ; en mode hybride, une obligatoire non remise aussi.** »
+(question 4 : la ponctuation avant ta phrase).
+
+L'infobulle `eval-integrite` (« dans la note, son sort dépend de ta pratique ») tient encore : non touchée.
+
+## Le détail
+
+### La session du 9 nov. après-midi
+
+**Commits** (`git log --oneline 3095eec..lot/copie-non-recevable-choix`) :
+- `e2a3e7f8` merge : `origin/main` (1.238.0) fusionnée. Deux conflits de code, les deux côtés gardés : la reprise part
+  sans le choix de la copie ET sans le mot (`js/evaluation-jetons.js`) ; la modification enregistre le choix de la copie
+  ET le mot (`js/evaluation.js` ; le chemin de création les portait déjà tous deux, `js/evaluation-sauvegarde.js`).
+  `index.html` : les jetons de `main`, puis `20261109s` pour les 18 fichiers dont le contenu fusionné diffère de `main`
+  (aucun autre `20261109s` sur les branches du dépôt).
+- `5ba6c36d` les textes validés, la variante « N meilleures », la sentinelle (jetons `20261109t` des deux fichiers retouchés).
+- `0df3f9c4` le relevé du stock.
+- `f500c0cc` les captures.
+- (le dernier : ce rapport.)
+
+**La sentinelle des textes validés** (`tests/unit/sentinelle-textes-copie-non-recevable-valides-9-nov.test.js`, 13 essais).
+La ligne de la copie se juge AU RENDU : le vrai `evaluation-sauvegarde.js` sur le bloc d'`index.html` (menu « Intégrité
+académique » et `divSortNonRecevable`), avec les vrais prédicats du registre ; chaque famille, chaque place, et pour le
+pool des standards chaque mode (« meilleurs », rien d'écrit, « tous », « derniers », hybride par `categories`, hybride par
+`portfolio.hybride`, sans portfolio). L'assistant par ses options, les réglages, l'avis et l'Aide dans `index.html`. Les
+insécables sont ramenées à l'espace avant comparaison (ce ne sont pas des mots) ; un essai à part exige celles de la
+source. Plus aucune marque « PROPOSÉS, en attente de Grégoire » sur ces textes.
+Break-tests, une mutation à la fois, fichier restauré : **11 mutants, 11 rouges** — la variante jamais prise ; l'hybride
+par `categories` oublié ; « meilleurs » par défaut oublié ; « te manque » → « manque » (productions retenues) ; le titre ;
+le texte standards de l'assistant revenu à celui de la nuit ; la puce de l'Aide revenue ; l'exemple « NON REMIS » revenu ;
+la phrase de « Notes finalisées » retirée ; la marque « PROPOSÉS » remise ; un mot retiré de l'aide des réglages.
+Trois sentinelles existantes suivent : `sentinelle-audit-aide-15-oct-…` (la puce « Lui mettre 0 » citée mot pour mot) et,
+en commentaire seulement, `sentinelle-copie-non-recevable-affichage-28-oct` et `sentinelle-note-provisoire-reservee`.
+
+**Le relevé** (`scripts/releve-copies-non-recevables-a2026.js`). Autonome : la version en ligne n'a pas le code du lot ;
+il reprend la règle du code sans l'appeler (`terminaleManquante`, `originaleEstRemplacee` simplifiée à « la reprise
+existe », `configuration.notesFinales === true`, la pratique d'un groupe-cours par `groupesCours[].pratiqueId`, la famille
+normalisée comme le registre). Une copie se range sous le groupe-cours qu'elle porte, sinon celui de son cours, départagé
+par le groupe de l'élève ; sinon elle est comptée « sans groupe-cours retrouvé ». Il lit par `db.get` (asynchrone) : une
+liste lourde peut vivre dans IndexedDB. Éprouvé sous Chromium, l'application ouverte, sur un A2026 fictif (trois
+pratiques, six élèves fictifs, sept copies), **derrière un `db` et un `localStorage` qui refusent toute écriture** :
+0 écriture tentée ; aucun nom ni DA dans la sortie (cherchés un à un) ; les comptes attendus (5 copies non recevables dont
+1 sans groupe-cours ; 1 terminale de 0 à provisoire ; 3 terminales manquantes de provisoire à 0, dont 1 élève en abandon,
+et un groupe écrit « 2 » rattaché au groupe « 02 »). Ce qu'il ne voit pas : `contexteImposeNoteProvisoire` (un contexte
+qui impose la note provisoire) ; il suppose « Notes finalisées » effective dès qu'elle est cochée.
+
+**Les captures** : script jetable (hors dépôt), Chromium, 1180 × 820, deviceScaleFactor 2 ; une pratique par standards
+« Standards témoin » en « N meilleures », sans règle écrite (elle lit « l'écarter »), l'élève fictif « Élève Fictif »,
+Artefact 1 marqué « Non recevable (Plagiat) ». Le clic sur « lui mettre 0 » s'est enregistré tout seul avec la copie
+(`sortCopieNonRecevable: 'zero'`). L'étape de l'assistant est ouverte directement (son compteur dit « Étape 1/2 » ; dans
+un vrai parcours, elle vient après la configuration de la famille). Les notifications ont été retirées avant chaque prise.
+
+**Vérifié** : Vitest depuis `tests/`, à `f500c0cc` : **896 fichiers, 10 903 essais, tous verts** (au départ de la session,
+3095eec : 893 et 10 875 ; +2 fichiers venus de `main`, +1 la sentinelle). Playwright **sous Chromium** :
+`copie-non-recevable-choix-1176.spec.js` et `un-mot-pour-ton-etudiant.spec.js`, **12/12 verts** (les deux lots que la
+fusion a croisés). **Le verdict WebKit reste à prendre sur le Mac.**
+
+**Relecture par un agent neuf** : en cours au moment de ce commit ; son verdict viendra au commit suivant.
+
+**Trouvailles, et leur issue**
+- **Le glossaire, « Notes finalisées »**, ne dit rien de la terminale (question 3 de l'en-tête). Texte non validé : issue 2,
+  proposé, non posé.
+- **L'audit d'ouverture** signale, sur GitHub, le push de la 1.238.0 : `pages-sans-emboitement-2026-11-07.spec.js ›
+  Préparer (sombre)` rouge sur le runner Linux, ni au BACKLOG ni au RELAIS (vert sur le Mac, selon le relais). Hors lot :
+  issue 2, à inscrire par la session du Mac (§ « À inscrire »).
+- **La branche `lot/completion-suit-la-remise`** (session D) touche sept fichiers de ce lot (`index.html`, quatre moteurs
+  de pratique, `predicats-copie.js`, `sentinelle-audit-aide-15-oct-…`) : la seconde à rejoindre `main` aura des conflits.
+  Attendu ; à la fusion sur le Mac.
+
+
+### L'en-tête de la session A (nuit du 8 au 9 nov.), conservé
+
+**Ce qu'elle avait fait** (tel quel ; seuls les textes ont changé depuis, et les captures) :
 
 - **Marquer une copie « Non recevable (Plagiat) » ou « Non recevable (IA non autorisée) »** fait apparaître, juste sous le menu
   « Intégrité académique », la ligne « Dans la note du cours : » et deux choix, « l'écarter » et « lui mettre 0 », chacun avec ce
@@ -41,7 +273,7 @@
 Captures Chromium (pas WebKit) : `plans de travail/captures-2026-11-09-copie-non-recevable-choix/` — la copie marquée,
 les réglages, l'étape de l'assistant, à 1440 px et à la largeur de l'iPad (820 px).
 
-### Ce qui attend Grégoire (une question par ligne, avec ma recommandation)
+**Ses questions**, réglées par Grégoire le 9 nov. (voir l'en-tête) :
 
 1. **Les textes proposés** (section suivante) : à corriger. La consigne voulait les mots validés avant l'écran ; le plan de la
    nuit m'a demandé de les poser pour que l'écran fonctionne, marqués « PROPOSÉS » dans le code. Chacun vit à un seul endroit.
@@ -80,74 +312,7 @@ les réglages, l'étape de l'assistant, à 1440 px et à la largeur de l'iPad (8
 9. **« Ajouter » depuis la bibliothèque, « Dupliquer » et l'import ne posent pas la question** : la pratique garde la règle de sa
    source, ou, sans règle, la lecture de sa famille. *Recommandation : suffisant ; la question se pose à la création.*
 
-### Ce que je n'ai pas pu vérifier
-
-- **WebKit, Safari, l'iPad** : rien. Les specs et les captures sont sous Chromium (le cloud n'a pas WebKit). Le verdict WebKit et
-  les captures WebKit se prennent sur le Mac. À rejouer en particulier : `copie-non-recevable-choix-1176.spec.js` et les trois
-  specs de l'assistant retouchées (`audit-parcours-sommatif-2026-09-24`, `pratiques-898-…`, `pratiques-909-903-…`).
-- **Les données réelles de Grégoire** : question 5.
-- **La relecture croisée de Cowork** (règle 2 de `PROTOCOLE.md` : un format qui voyage, le champ `sortCopieNonRecevable` sur la
-  copie et dans la pratique) : due au matin, avant le verdict.
-
-## Les textes proposés, en attente de Grégoire
-
-**1. La ligne sur la copie** (`TEXTES_SORT_COPIE_NON_RECEVABLE`, `js/evaluation-sauvegarde.js`). Titre : « Dans la note du cours : ».
-Les deux choix, selon la famille et la place de la copie :
-
-| Où | « l'écarter » | « lui mettre 0 » |
-|---|---|---|
-| Sommative | l'écarter, comme une copie non remise : elle n'entre pas dans la moyenne | lui mettre 0 : elle compte pour 0 dans la moyenne |
-| Spécifications | l'écarter, comme un travail non remis | lui mettre 0 : elle compte comme un travail non satisfaisant |
-| Standards, portfolio | l'écarter, comme une copie non remise : elle manque au portfolio | lui mettre 0 : elle entre au portfolio avec 0 |
-| Standards sans « Artefact » | … elle manque aux productions retenues | … elle entre aux productions retenues avec 0 |
-| Standards, obligatoire (hybride) | l'écarter, comme une obligatoire non remise : elle vaut 0 une fois les notes finales cochées | lui mettre 0 : elle compte pour 0 tout de suite |
-| Standards, terminale | l'écarter, comme une terminale non remise : la note reste provisoire, puis la terminale vaut 0 une fois les notes finales cochées | lui mettre 0 : la terminale vaut 0 tout de suite |
-| Sans pratique | l'écarter, comme une copie non remise | lui mettre 0 |
-
-Dessous : « Règle de ta pratique : l'écarter. Ton choix ne vaut que pour cette copie. » (ou « lui mettre 0 »).
-
-**L'avis « Travail non recevable »** du formulaire (validé le 28 oct.) : je propose d'en **retirer** la phrase « Dans la note du
-cours, elle vaut ce que dit ta pratique : 0 en sommative, un travail non satisfaisant en spécifications, hors du portfolio en
-standards. » Elle ne tient plus devant le choix affiché juste dessous. Le reste est mot pour mot. *Retrait posé, à confirmer.*
-
-**2. La question à la création** (`js/wizard-pratique-v2.js`, étape `copie-non-recevable`) :
-- titre « Une copie non recevable » ; sous-titre « Quand tu marques une copie non recevable (plagiat, IA non autorisée), que
-  devient-elle dans la note ? » ;
-- « L'écarter » — sommative : « Elle n'entre pas dans la moyenne, comme une copie non remise. » ; spécifications : « Elle compte
-  comme un travail non remis. » ; standards : « Elle manque au portfolio, comme une copie non remise. Une terminale écartée laisse
-  la note provisoire, puis vaut 0 une fois les notes finales cochées. » ;
-- « Lui mettre 0 » — sommative : « Elle compte pour 0 dans la moyenne. » ; spécifications : « Elle compte comme un travail non
-  satisfaisant. » ; standards : « Elle entre au portfolio avec 0 ; une terminale vaut 0. » ;
-- l'encadré : « C'est ta règle. Quand tu marqueras une copie non recevable, elle apparaîtra déjà cochée, et tu pourras la changer
-  pour cette copie-là. La règle elle-même se change dans les réglages de ta pratique. »
-
-**Les réglages de la pratique** (`index.html`, carte des informations de la pratique) reprennent les mêmes mots : « Une copie non
-recevable (plagiat, IA non autorisée), dans la note » ; « L'écarter, comme une copie non remise » ; « Lui mettre 0 » ; « Ta règle.
-Quand tu marques une copie non recevable, elle apparaît déjà cochée ; tu peux la changer pour cette copie-là. »
-
-**3. Le paragraphe « Travail NON RECEVABLE » de l'Aide** (`index.html`, `accordeon-aide-irrecevables` ; les quatre lignes par
-famille du 15 oct. sont remplacées) :
-
-> Une copie non recevable compte comme non remise dans la complétion (C) ; elle reste dans le total attendu. Dans la note, c'est
-> toi qui choisis son sort. Ta pratique de notation porte ta règle ; quand tu marques une copie non recevable, ta règle apparaît
-> déjà cochée sous le menu, et tu peux la changer pour cette copie-là.
-> - « L'écarter » : elle est traitée comme une copie non remise. En sommative, elle n'entre pas dans la moyenne ; en
->   spécifications, elle compte comme un travail non remis ; en standards, elle manque au portfolio, avec ce que ta pratique fait
->   d'une copie manquante. Une terminale écartée laisse la note provisoire, puis vaut 0 une fois les notes finales cochées, comme
->   une terminale non remise ; en mode hybride, une obligatoire écartée aussi.
-> - « Lui mettre 0 » : 0 en sommative, un travail non satisfaisant en spécifications, 0 en standards, au portfolio comme à la
->   terminale.
-> - En dénotation, ta note est ton jugement : la copie n'y entre pas par calcul.
->
-> Une pratique créée avant ce choix, tant que tu ne choisis pas sa règle, lit : 0 en sommative, un travail non satisfaisant en
-> spécifications, « L'écarter » en standards. Tu changes sa règle dans Conception → Pratiques. Une reprise remplace la copie non
-> recevable, quel que soit son sort.
-
-L'infobulle `eval-integrite` (« dans la note, son sort dépend de ta pratique ») tient encore : non touchée.
-
-## Le détail
-
-### Commits
+### Session A : commits
 
 ```
 git log --oneline 98c04bfc..lot/copie-non-recevable-choix
@@ -210,7 +375,7 @@ Témoin : les neuf autres sortent identiques, champ par champ. Avant la relectur
 (84,53 → 50,72) bougeaient aussi : leurs terminales sont en brouillon, et le code les mettait à 0 aux notes finales. C'est la
 trouvaille 2 de la relecture ; resserré à la décision 4 (question 3).
 
-### Essais
+### Session A : essais
 
 - **Vitest** (depuis `tests/`) : 893 fichiers, 10 875 essais verts (§ Verdict).
 - **`tests/unit/copie-non-recevable-choix-1176.test.js`** (43 cas) : chaque famille × chaque choix × chaque place, sur les
@@ -238,7 +403,7 @@ trouvaille 2 de la relecture ; resserré à la décision 4 (question 3).
   quatre specs qui parcourent l'assistant répondent à la question neuve (« Flux E », audit sommatif, 898, 909).
 - **Complexité** : aucune fonction figée ne monte, le compte au-dessus de 15 reste 437.
 
-### Relecture par un agent neuf
+### Session A : relecture par un agent neuf
 
 Un sous-agent sans mon raisonnement, avec la consigne et le diff `98c04bfc..ae2a9b0a`, skill `verification-adverse`. **Verdict :
 « à corriger »**. Ses neuf trouvailles, et leur sort :
@@ -257,7 +422,7 @@ Un sous-agent sans mon raisonnement, avec la consigne et le diff `98c04bfc..ae2a
 8. *Assistant rouvert, famille changée : la réponse montrée pouvait céder à la lecture de l'autre famille.* **Corrigé**, essai.
 9. *Le récit écrit « comptée » pour une terminale manquante à 0 ; un commentaire périmé.* **Commenté** (question 8).
 
-### Les specs Playwright des fichiers touchés, sous Chromium
+### Session A : les specs Playwright des fichiers touchés, sous Chromium
 
 Les 71 specs qui touchent la surface du lot (`grep -lE "statutIntegrite|wizard|Wizard|ouvrirReglagesPratique|chargerPratiquePourModif|
 mat-notes-finales|calculerDetailsNoteFinale|determinerNiveauRai|trajectoire|non-recevable|plagiat" tests/integration/*.spec.js`),
@@ -281,13 +446,13 @@ rougi ont été rejoués **à l'identique sur `main` (`98c04bfc`) et sur la bran
 Un premier passage a été faussé par ma faute : j'ai retiré du dépôt la configuration jetable pendant qu'il tournait, et chaque
 essai relancé ensuite est tombé sur « Cannot find module ». Écarté ; c'est le second passage qui compte.
 
-### Verdict
+### Session A : verdict
 
 - **Vitest** (depuis `tests/`, à `791f08b5`, le code de `cedef6fb`) : **893 fichiers, 10 875 essais, tous verts**. Au départ
   (`98c04bfc`) : 892 fichiers, 10 825 essais.
 - **Playwright** : sous Chromium seulement (ci-dessus). **Le verdict WebKit reste à prendre sur le Mac.**
 
-### Trouvailles, et leur issue
+### Session A : trouvailles, et leur issue
 
 1. **Deux « évaluation en cours »** (le nom nu de `config.js` et `window.evaluationEnCours`) : trouvé par la spec, sur mon
    propre code. Corrigé dans le lot (`ae2a9b0a`). Pas une trouvaille au sens des trois issues : c'était le lot qui n'était pas fini.
@@ -304,10 +469,15 @@ essai relancé ensuite est tombé sur « Cannot find module ». Écarté ; c'est
 
 ## À inscrire au BACKLOG
 
+- **Session du 9 nov. après-midi** : `pages-sans-emboitement-2026-11-07.spec.js › Préparer (sombre)`, rouge sur le
+  runner Linux de GitHub au push de la 1.238.0, absente du BACKLOG et du RELAIS (mesure de l'audit d'ouverture) ; à ranger
+  avec #1246 ou à part, à la décision de la session du Mac. Hors de ce lot.
+- Le reste, de la session A :
+
 - **#1176 devient ce lot** (consigne du 8 nov.) ; #1226 y est lié (les trajectoires suivent la règle). **La terminale non remise à
   0 une fois les notes finales cochées s'inscrit dans #1176** (mon choix, la consigne me le laissait) : même décision, même code.
   Y noter que les cinq sites du dépistage des instances n'ont pas d'appelant (trouvaille 2).
-- **Si Grégoire répond « 0 » à la question 3** (brouillon de terminale aux notes finales) : une ligne dans #1176, pas une fiche.
+- ~~**Si Grégoire répond « 0 » à la question 3**~~ : périmé. Il a validé « provisoire » le 9 nov. (ce qui est codé) : rien à inscrire.
 - Du rituel d'ouverture (audit de début de session, à `98c04bfc`) : sur GitHub, le verdict Playwright du push de la 1.237.2 est
   rouge par quatre specs ; deux sont déjà dans #1246 (`annotation-formes-fermees-polygone`, `palette-evaluation-compacte`), **deux
   n'apparaissent ni dans le BACKLOG ni dans le RELAIS** : `aide-cp-suit-la-case-1086.spec.js` et
