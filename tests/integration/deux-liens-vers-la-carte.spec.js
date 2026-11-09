@@ -166,7 +166,8 @@ test.describe('Deux liens · l’objectif d’une production', () => {
     test('le stock : « Relier » n’apparaît que pour un objectif identique, et rien n’est relié avant le geste', async ({ page }) => {
         await ouvrirCarte(page);
         const ids = await preparer(page);
-        test.skip(!ids.evaluation, 'la leçon démo n’a pas d’évaluation');
+        // La démo porte une évaluation dans cette leçon : sans elle, l'essai doit ÉCHOUER, pas sauter.
+        expect(ids.evaluation, 'la leçon démo n’a plus d’évaluation').toBeTruthy();
         await page.evaluate(({ ids, OBJECTIF_A }) => {
             const api = window.planificationCarte;
             // Posé AVANT l'écriture des objectifs, qui sauvegarde la carte entière.

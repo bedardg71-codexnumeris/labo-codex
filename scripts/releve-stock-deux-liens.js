@@ -43,7 +43,8 @@ function releverStockDeuxLiens(lire, cles) {
     const cours = Array.isArray(lire('cours')) ? lire('cours') : [];
     const sortie = { releve: 'deux liens vers la carte, lecture seule', date: new Date().toISOString(), trimestres: {} };
 
-    cles.filter((k) => k === NOM || k.endsWith('_' + NOM)).forEach((k) => {
+    // L'espace de démonstration (`demo_…`) n'est pas un trimestre : il n'est pas relevé.
+    cles.filter((k) => (k === NOM || k.endsWith('_' + NOM)) && k.indexOf('demo_') !== 0).forEach((k) => {
         const prefixe = k === NOM ? '(clé nue)' : k.slice(0, -(NOM.length + 1));
         const donnees = lire(k);
         if (!donnees || !donnees.cartes) return;
@@ -80,6 +81,7 @@ function releverStockDeuxLiens(lire, cles) {
             const aRelier = new Set();
             noeuds.filter((n) => n.type === 'evaluation').forEach((ev) => {
                 const pid = ev.metadata && ev.metadata.productionId;
+                if (!pid) return;   // comme `trouverProduction` : pas d'id, pas de production
                 const cible = norm(objectifProd(pid));
                 if (!cible) return;
                 const hote = ev.parent && parId[ev.parent] && parId[ev.parent].type === 'lecon' ? parId[ev.parent] : null;
@@ -90,6 +92,8 @@ function releverStockDeuxLiens(lire, cles) {
                 });
                 let ici = 0;
                 groupes.forEach((l) => objectifs(l).forEach((o) => {
+                    // Une leçon qui reprend déjà cette production ne se voit rien proposer.
+                    if (objectifs(l).some((x) => x.productionId === pid)) return;
                     if (o.productionId || norm(o.texte) !== cible) return;
                     ici++;
                     aRelier.add(l.id + '::' + o.id);

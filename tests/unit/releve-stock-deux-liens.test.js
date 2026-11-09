@@ -38,7 +38,8 @@ const JEU = {
     a2026_productions: [
         { id: 'P1', objectif: 'Analyser un poème  fictif' },
         { id: 'P2', objectif: 'Écrire un texte fictif' },
-        { id: 'P3', objectif: '' }
+        { id: 'P3', objectif: '' },
+        { objectif: 'Analyser un poème fictif' }          // une production stockée sans id
     ],
     a2026_planification_mindmap: {
         index: { active: 'k1', cartes: [{ id: 'k1', coursId: 'c1' }, { id: 'k2', coursId: 'c2' }, { id: 'k3' }, { id: 'k4', coursId: 's1' }, { id: 'k5', coursId: 'c1' }] },
@@ -55,6 +56,8 @@ const JEU = {
                 evaluation('E4', null, 'P1', ['o6']),            // hors leçon, mais o6 coché : 1
                 evaluation('E5', null, 'PX'),                    // production introuvable : 0
                 evaluation('E6', null, 'P3'),                    // production sans objectif : 0
+                evaluation('E7', 'L2', null),                    // sans production : 0 (même si une production n'a pas d'id)
+                { id: 'E8', type: 'evaluation', titre: 'Sans metadata', parent: 'L2', enfants: [], cloneSourceId: null, x: 0, y: 0 },
                 competence('C1', 'analyser des textes  fictifs'),  // identique (casse, espaces) : un texte
                 competence('C2', 'Mon titre à moi'),               // deux textes
                 competence('C3', 'Mon titre à moi', { cloneSourceId: 'C2' })   // clone : même bloc
@@ -68,6 +71,8 @@ const JEU = {
             ] }
         }
     },
+    // L'espace de démonstration n'est pas un trimestre : il n'est pas relevé.
+    demo_planification_mindmap: { index: { cartes: [{ id: 'kd' }] }, cartes: { kd: { noeuds: [competence('CD', 'X')] } } },
     a2025_planification_mindmap: { index: { cartes: [{ id: 'k9' }] }, cartes: { k9: { noeuds: [
         lecon('L9', 1, 1, [{ id: 'o9', texte: 'Objectif de la clé nue' }], ['E9']),
         evaluation('E9', 'L9', 'PN')
@@ -140,6 +145,10 @@ describe('Relevé du stock · deux liens', () => {
         expect(t.blocsSansFiche).toBe(2);                // C5, C6
         expect(t.dejaLies).toEqual({ objectifs: 1, competences: 1 });
         expect(t.detail.every(d => !('texte' in d) && !('titre' in d))).toBe(true);
+    });
+
+    it('l’espace de démonstration n’est pas relevé', () => {
+        expect(Object.keys(r.trimestres).sort()).toEqual(['a2025', 'a2026']);
     });
 
     it('un trimestre sans productions propres lit la clé nue, comme la carte', () => {

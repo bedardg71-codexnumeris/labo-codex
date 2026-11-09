@@ -185,7 +185,9 @@ describe('Deux liens · B · la ligne suit le texte de la production', () => {
         expect(api.rafraichirLiensCarte()).toBe(0);
     });
 
-    it('le plan de cours lit objectifDeLeconParId : il imprime le texte courant de la production', () => {
+    // Le plan exporté lit ces portes ; l'épreuve de bout en bout (chargement de la carte, puis
+    // `construirePlan`) est au banc Chromium, deux-liens-vers-la-carte.spec.js.
+    it('après le rafraîchissement, les portes que lit le plan rendent le texte courant de la production', () => {
         poserProductions([{ id: 'P1', objectif: 'Texte neuf de la production' }]);
         poserLecon('L1', [{ id: 'o1', texte: 'Ancien texte', productionId: 'P1' }, { id: 'o2', texte: 'Libre' }]);
         api.rafraichirLiensCarte();
@@ -276,6 +278,17 @@ describe('Deux liens · C · délier, et le stock jamais relié d’office', () 
         poserNoeud('E2', 'evaluation', { parent: 'L1', metadata: { productionId: 'P1' } });
         expect(api.objectifsARelierPourEvaluation(api.etat.noeuds.get('E1'))).toEqual([]);
         expect(api.objectifsARelierPourEvaluation(api.etat.noeuds.get('E2'))).toEqual([]);
+    });
+
+    it('une leçon qui reprend déjà la production ne reçoit pas de deuxième ligne liée (relecture, constat 3)', () => {
+        poserProductions([{ id: 'P1', objectif: 'Analyser un poème' }]);
+        poserLecon('L1', [{ id: 'o1', texte: 'Analyser un poème' }], { enfants: ['E1'] });
+        poserNoeud('E1', 'evaluation', { parent: 'L1', metadata: { productionId: 'P1' } });
+        api.reprendreObjectifProduction('L1', 'P1');
+
+        expect(api.objectifsARelierPourEvaluation(api.etat.noeuds.get('E1'))).toEqual([]);
+        expect(api.relierObjectifAProduction('L1', 'o1', 'P1')).toBe(false);
+        expect(api.etat.noeuds.get('L1').metadata.objectifs.filter(o => o.productionId === 'P1')).toHaveLength(1);
     });
 
     it('relierObjectifAProduction : refuse deux textes différents, accepte deux textes identiques', () => {
@@ -481,11 +494,41 @@ describe('Deux liens · G · bloc Compétence lié', () => {
         expect(api.peutRelierCompetence(n)).toBe(true);
     });
 
-    it('un titre identique à la fiche n’est pas mis de côté (rien à rendre)', () => {
+    it('un titre EXACTEMENT identique à la fiche n’est pas mis de côté (rien à rendre)', () => {
         fiches = [ficheLitterature()];
-        poserNoeud('C1', 'competence', { titre: 'analyser des textes  littéraires' });
+        poserNoeud('C1', 'competence', { titre: 'Analyser des textes littéraires' });
         api.relierCompetenceAFiche('C1');
         expect(api.etat.noeuds.get('C1').metadata.titreAvantLien).toBeUndefined();
+    });
+
+    it('un titre différent par la casse seulement est mis de côté : la fiche peut changer avant le délier (relecture, constat 4)', () => {
+        fiches = [ficheLitterature()];
+        poserNoeud('C1', 'competence', { titre: 'ANALYSER des textes littéraires' });
+        api.relierCompetenceAFiche('C1');
+        fiches[0].competence = 'Expliquer des textes';
+        api.rafraichirLiensCarte();
+        api.delierCompetence('C1');
+        expect(api.etat.noeuds.get('C1').titre).toBe('ANALYSER des textes littéraires');
+    });
+
+    it('Décloner un bloc lié : le bloc détaché garde le texte, pas le lien (relecture, constat 2)', () => {
+        fiches = [ficheLitterature()];
+        poserNoeud('C1', 'competence', { titre: 'Analyser des textes littéraires', metadata: { lieFicheCours: true, titreAvantLien: 'Mon titre' } });
+        poserNoeud('C2', 'competence', { titre: 'Analyser des textes littéraires', cloneSourceId: 'C1', metadata: { lieFicheCours: true, titreAvantLien: 'Mon titre' } });
+        poserNoeud('C3', 'competence', { titre: 'Analyser des textes littéraires', cloneSourceId: 'C1', metadata: { lieFicheCours: true, titreAvantLien: 'Mon titre' } });
+        api.reconstruireIndexClones();
+
+        expect(api.detacherDeLaFamille(['C2'])).toBe(1);
+        expect(api.etat.noeuds.get('C2').metadata).toEqual({});
+        expect(api.etat.noeuds.get('C2').titre).toBe('Analyser des textes littéraires');
+        // L'original et le clone qui reste gardent le lien et le titre mis de côté.
+        expect(api.etat.noeuds.get('C1').metadata.lieFicheCours).toBe(true);
+        expect(api.etat.noeuds.get('C3').metadata.titreAvantLien).toBe('Mon titre');
+
+        // Décloner l'original dissout la famille : il reste UNE compétence liée.
+        api.detacherDeLaFamille(['C1']);
+        const lies = [...api.etat.noeuds.values()].filter(n => api.competenceLiee(n)).map(n => n.id);
+        expect(lies).toEqual(['C1']);
     });
 
     it('la permutation Compétence → Idée maîtresse retire le lien et rend le titre', () => {
@@ -535,9 +578,23 @@ describe('Deux liens · H · le bloc Compétence dans la carte', () => {
             .toContain('Modifier dans la fiche du cours');
     });
 
-    it('lien dormant (fiche sans compétence) : le bloc se rend comme un bloc libre', () => {
+    it('lien qui dort (fiche vidée) : le bloc reste verrouillé, avec son dernier énoncé (relecture, constat 1)', () => {
         fiches = [ficheLitterature({ competence: '' })];
+        const n = poserNoeud('C1', 'competence', { titre: 'Dernier énoncé', metadata: { lieFicheCours: true, titreAvantLien: 'Mon titre' } });
+        expect(api.contenuNoeudHTML(n)).toMatch(/<div class="planif-noeud-titre planif-noeud-titre--lie">Dernier énoncé<\/div>/);
+        // L'Inspecteur offre la sortie (« Délier », qui rend le titre) et le chemin vers la fiche.
+        const section = api.sectionCompetenceInspecteurHTML(n, null);
+        expect(section).toContain('>Délier<');
+        expect(section).toContain('Modifier dans la fiche du cours');
+        expect(api.delierCompetence('C1')).toBe(true);
+        expect(n.titre).toBe('Mon titre');
+    });
+
+    it('lien qui dort sans cours (carte détachée, service) : « Délier » seul', () => {
+        fiches = [ficheLitterature({ nature: 'service' })];
         const n = poserNoeud('C1', 'competence', { titre: 'Dernier énoncé', metadata: { lieFicheCours: true } });
-        expect(api.contenuNoeudHTML(n)).toMatch(/<div class="planif-noeud-titre" contenteditable="true">Dernier énoncé<\/div>/);
+        const section = api.sectionCompetenceInspecteurHTML(n, null);
+        expect(section).toContain('>Délier<');
+        expect(section).not.toContain('Modifier dans la fiche du cours');
     });
 });
