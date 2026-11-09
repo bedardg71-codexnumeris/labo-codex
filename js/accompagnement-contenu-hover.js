@@ -556,7 +556,7 @@ const TOOLTIPS = {
     'liste-filtre-rai':
         'Filtre par niveau d\'intervention : Tous, Niveau 1 (universel), Niveau 2 (préventif), Niveau 3 (intensif).',
     'liste-filtre-pattern':
-        'Filtre par trajectoire détectée : progression stable, défi spécifique, difficulté émergente, difficulté persistante, non-participation (présent·e, rien de remis), ou données insuffisantes (rien encore de jugeable).',
+        'Filtre par trajectoire détectée : progression stable, défi spécifique, difficulté émergente, difficulté persistante, non-participation (rien de remis, présent·e ou absent·e), ou données insuffisantes (rien encore de jugeable).',
     'liste-recherche':
         'Recherche un·e étudiant·e par nom, prénom ou numéro d\'admission (DA).',
     'liste-col-sa':

@@ -1971,7 +1971,7 @@ function determinerNiveauRaiPedagogique(da, ligneSimulee) {
 
     // Aucune production → Non-participation (signal prioritaire) : `_seLitEnNonParticipation`.
     if (_seLitEnNonParticipation(da, indices, sansCopie)) {
-        return _niveauNonParticipation(fenetreAnalyse);
+        return _niveauNonParticipation(fenetreAnalyse, indices.A === 0);
     }
 
     const ligne = ligneSimulee ?? window.ligneDeReussite();
@@ -2126,7 +2126,9 @@ function _estHorsDesCalculsDuGroupe(da) {
     return !!fiche && estEtudiantExclu(fiche);
 }
 
-function _niveauNonParticipation(fenetreAnalyse) {
+// 9 nov. 2026 (validé par Grégoire, deux phrases) : la carte dit ce qui est vrai pour cette personne-là — présente au
+// moins une fois, ou absente à toutes les séances passées (A = 0, lue en non-participation depuis la retouche de 13 h 44).
+function _niveauNonParticipation(fenetreAnalyse, absentePartout) {
     return {
         niveau: 3,
         motif: 'non-participation',
@@ -2134,7 +2136,9 @@ function _niveauNonParticipation(fenetreAnalyse) {
         label: 'Non-participation',
         pattern: 'Non-participation',
         defi: 'Aucun',
-        description: 'Étudiant·e présent·e en classe mais aucune production remise. Profil prioritaire nécessitant une intervention immédiate.',
+        description: absentePartout
+            ? 'Absent·e à toutes les séances passées, et aucune production remise. Profil prioritaire nécessitant une intervention immédiate.'
+            : 'Étudiant·e présent·e en classe mais aucune production remise. Profil prioritaire nécessitant une intervention immédiate.',
         badgeClasse: 'badge-rai-3',
         patternBadge: 'badge-pattern-difficulte-persistante',
         donneesSuffisantes: false,

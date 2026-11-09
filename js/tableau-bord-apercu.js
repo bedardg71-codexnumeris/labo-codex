@@ -2961,7 +2961,7 @@ function genererCartePattern(label, valeurSom, valeurPan, total, afficherSom, af
  * @param {Array} etudiants - Étudiants avec indices calculés
  */
 function afficherAlerteNonParticipation(etudiants) {
-    // Détecter les élèves présents mais sans aucune production
+    // Détecter les élèves sans aucune production, dont l’assiduité est connue (présent·es ou absent·es partout)
     const nonParticipants = etudiants.filter(e => {
         // #743 (lot D) : « a des présences » = son assiduité est connue (même lecture que les barres ci-dessus).
         const aDesPresences = (e.sommatif && e.sommatif.assiduite !== null && e.sommatif.assiduite !== undefined)
@@ -3009,7 +3009,7 @@ function afficherAlerteNonParticipation(etudiants) {
     const nbEleves = nonParticipants.length;
     const html = `
         <div class="alerte-non-participation info-box info-box--attention" style="margin: 16px 20px 0;">
-            <strong>&#9888;&#65039; ${nbEleves} étudiant·e${nbEleves > 1 ? '·s' : ''} présent·e${nbEleves > 1 ? '·s' : ''} sans ${accordTermeProduction('aucun', 1)} ${obtenirTermeProduction('singulier')} ${accordTermeProduction('remis', 1)}</strong>
+            <strong>&#9888;&#65039; ${nbEleves} étudiant·e${nbEleves > 1 ? '·s' : ''} sans ${accordTermeProduction('aucun', 1)} ${obtenirTermeProduction('singulier')} ${accordTermeProduction('remis', 1)}</strong>
             <ul style="margin: 6px 0 0 16px; padding: 0; list-style: none;">
                 ${lignes}
             </ul>
