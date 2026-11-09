@@ -144,11 +144,8 @@ function populerDropdownGroupeCoursV2() {
     });
     select.innerHTML = html;
 
-    // Section Démo (Plan 1 Phase 2.4) : seulement en mode normal
-    if (!enDemoLegacy && typeof cleDemo === 'function' && typeof BibliothequeUI !== 'undefined') {
-        const gcDemo = db.getSync(cleDemo('groupesCours'), []) || [];
-        BibliothequeUI.ajouterOptgroupDemo(select, gcDemo, gc => gc.nom || gc.id);
-    }
+    // Lot « Les deux parcours », partie 2 (9 nov. 2026, option a de Grégoire) : le groupe « Démo » ne paraît
+    // plus dans ce menu hors de la démo, comme en Conception (`filtrerParModeDemo`).
 
     // Restaurer la sélection si elle existait
     if (valeurActuelle) {

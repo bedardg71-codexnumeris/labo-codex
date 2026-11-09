@@ -337,16 +337,24 @@ describe('Les gestes décrits sont ceux du code', () => {
         expect(AIDE).not.toMatch(/analysant tes rétroactions écrites|analyse tes rétroactions pour/);
     });
 
-    it('la visite guidée : le nombre d\'étapes lu dans la visite, relancée depuis l\'en-tête', () => {
-        const bloc = tranche(VISITE, 'const ETAPES_TOUR = [', 'const TOUR_NAV');
-        const n = (bloc.match(/^\s{8}id: \d+,/gm) || []).length;
-        expect(n).toBeGreaterThan(0);
-        expect(TERME).toContain(`Un parcours en ${n} étapes`);
-        // ↻ #1152, lot 3 (28 oct. 2026) : « Parcours en N étapes » n'était, dans l'Aide, que dans le glossaire statique, parti ;
-        // le seul glossaire le dit (TERME, ci-dessus ; consigne du lot 3, §2.5).
+    it('la visite guidée est retirée : l\'Aide ne compte plus ses étapes', () => {
+        // ↻ Lot « Les deux parcours » (8 nov. 2026) : la visite en sept étapes est remplacée par les parcours
+        // du panneau « Assistance » ; il n'y a plus de nombre d'étapes à lire dans une visite.
+        expect(VISITE).not.toContain('const ETAPES_TOUR');
         expect(AIDE).not.toContain('Parcours en 7 &eacute;tapes');
-        expect(INDEX).toMatch(/data-action="afficherAideContextuelle" data-param="tour-guide"/);
+        expect(INDEX).toContain('data-action="ouvrirPanneauAssistance"');
         expect(TERME).not.toContain('depuis les Préférences');
+    });
+
+    it('le glossaire ne décrit plus la visite en sept étapes : le « Parcours assisté », texte validé', () => {
+        // ↻ Lot « Les deux parcours », partie 1 : le texte validé par Grégoire le 9 nov. 2026 à 9 h 11 (Cowork),
+        // mot pour mot, remplace celui de la visite (le témoin était un `it.fails` depuis le 8 nov.).
+        expect(TERME).not.toContain('Un parcours en 7 étapes');
+        expect(TERME).not.toContain('la ligne « Visite guidée » du menu');
+        const bloc = tranche(TERME, "'parcours-guide-tour': {", "'bilan-reflexif': {");
+        expect(bloc).toContain("terme: 'Parcours assisté',");
+        expect(bloc).toContain("definition: 'Un parcours où tu fais les gestes toi-même, accompagné·e pas à pas : d’abord sur une classe de démonstration, puis avec ta propre classe. Tu peux le quitter à tout moment et le reprendre à la même étape depuis le panneau « Assistance » du menu.',");
+        expect(bloc).toContain("voir: 'En-tête › Menu › Assistance'");
     });
 
     it('le mode anonymisé : « Élève 1, Élève 2 », décrit d\'une seule façon', () => {

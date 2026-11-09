@@ -20,7 +20,7 @@ function monter({ anonyme, genererDocPDF }) {
     const fichiers = [{ id: 'F1', etudiantDA: DA, productionId: 'P1', nomFichier: 'copie.pdf' }];
     const store = {
         groupeEtudiants: etudiants,
-        evaluationsSauvegardees: [{ id: 'E1', etudiantDA: DA, productionId: 'P1' }],
+        evaluationsSauvegardees: [{ id: 'E1', etudiantDA: DA, productionId: 'P1', verrouillee: true }],   // lot du 9 nov. : verrouillées seules
         productions: [{ id: 'P1', titre: 'Artefact 2 (rév)' }]
     };
     const win = chargerScript('js/travaux-archivage.js', {

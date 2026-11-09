@@ -1237,21 +1237,6 @@ const AIDE_CONTEXTUELLE = {
     // ACCUEIL — MODE DÉMONSTRATION & DUPLICATION CC
     // =========================================================================
 
-    'tour-guide': {
-        titre: 'Visite guidée',
-        sections: [
-            {
-                type: 'texte',
-                contenu: "La visite guidée te présente, en quelques étapes, les grandes sections de l’application — Cadre, Conception, Évaluation, Suivi. Tu peux la quitter à tout moment, et la relancer depuis ce bouton quand tu veux."
-            },
-            {
-                type: 'action',
-                libelle: 'Démarrer la visite',
-                action: 'demarrerTourDepuisAide'
-            }
-        ]
-    },
-
     'accueil-donnees-demo': {
         // Le guidage de la démo (29 oct. 2026) : titre et blocs 1, 3 à 7 validés par Grégoire le 29 oct. à 8 h 02 et 8 h 03,
         // posés mot pour mot (plans de travail/TEXTES-2026-10-28-guidage-demo.md) ; le bloc 2 reste celui du 7 oct. (G4).
@@ -1284,8 +1269,10 @@ const AIDE_CONTEXTUELLE = {
                 contenu: "Tu ouvres la grille «\u00a0Grille-5 FR-HOLIS-20 H26\u00a0» de la démo et tu cliques sur «\u00a0Dupliquer pour créer ma grille\u00a0». Ta copie porte la ligne «\u00a0Inspiré de Grille-5 FR-HOLIS-20 H26 par Labo Codex\u00a0»\u00a0: c'est la reconnaissance d'origine qu'exige la licence."
             },
             {
+                // Lot « Les deux parcours », partie 2 (9 nov. 2026, option a de Grégoire) : la phrase sur le groupe
+                // « Démo » des menus du Cadre est partie avec ce groupe ; la seconde, toujours vraie, reste.
                 type: 'conseil',
-                contenu: "Dans les menus de Cadre › Trimestre (cours, horaire, enseignant·e, pratique, groupe-cours), le matériel de la démo paraît grisé, sous «\u00a0Démo (par Labo Codex – à dupliquer pour utiliser)\u00a0». Ton matériel ne peut pas pointer vers un modèle de la démo\u00a0: duplique-le d'abord, puis choisis ta copie."
+                contenu: "Ton matériel ne peut pas pointer vers un modèle de la démo\u00a0: duplique-le d'abord, puis choisis ta copie."
             },
             {
                 type: 'alerte',

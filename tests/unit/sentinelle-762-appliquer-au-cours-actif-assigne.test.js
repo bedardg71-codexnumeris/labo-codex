@@ -73,7 +73,7 @@ function monter({ avecGroupeCours = true } = {}) {
         // Le nom nu que lit pratiques-gestion.js, renvoyé au VRAI registre chargé plus bas (résolu à l'appel).
         obtenirIdPratiqueActive: () => win.obtenirIdPratiqueActive(),
         normaliserIdPratique: (t) => t,
-        BibliothequeUI: { filtrerParMaquette: (l) => l, filtrerParModeDemo: (l) => l, ajouterOptgroupDemo() {}, forgerInspireDe: () => ({}) },
+        BibliothequeUI: { filtrerParMaquette: (l) => l, filtrerParModeDemo: (l) => l, forgerInspireDe: () => ({}) },
         obtenirCodePratique: () => 'STD', obtenirCouleurPratique: () => '', obtenirLabelFamillePratique: () => 'PAN'
     };
     chargerScript('js/pratiques/pratique-configurable.js', globaux, win);

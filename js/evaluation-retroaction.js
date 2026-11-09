@@ -414,16 +414,20 @@ function _estADemander() {
 }
 
 /** L'évaluation enregistrée de la copie ouverte est-elle verrouillée ? Lue en base, comme
- *  l'auto-save la trouve (`_autoSauvegarderCriteres`) : c'est lui qui refuserait d'écrire. */
+ *  l'auto-save la trouve (`_autoSauvegarderCriteres`) : c'est lui qui refuserait d'écrire.
+ *  Lot du 9 nov. 2026 : l'évaluation OUVERTE (`indexEvaluationOuverte`), et sa lecture seule
+ *  (une originale remplacée l'est, verrouillée en base ou non). */
 function _copieVerrouillee() {
     const c = (typeof window.etatVivantEvaluationEnCours === 'function')
         ? window.etatVivantEvaluationEnCours() : (window.evaluationEnCours || {});
     if (!c || !c.etudiantDA || !c.productionId) return false;
     const evaluations = db.getSync(cle('evaluationsSauvegardees'), []) || [];
-    const e = evaluations.find(function(x) {
-        return x && !x.remplaceeParId && x.etudiantDA === c.etudiantDA && x.productionId === c.productionId;
-    });
-    return !!(e && e.verrouillee === true);
+    // Sans les modules du formulaire (bancs qui chargent ce fichier seul) : la recherche d'avant.
+    const i = (typeof window.indexEvaluationOuverte === 'function') ? window.indexEvaluationOuverte(evaluations, c)
+        : evaluations.findIndex(function(x) { return x && !x.remplaceeParId && x.etudiantDA === c.etudiantDA && x.productionId === c.productionId; });
+    const e = (typeof i === 'number' && i >= 0) ? evaluations[i] : null;
+    if (!e) return false;
+    return (typeof window.evaluationEnLectureSeule === 'function') ? window.evaluationEnLectureSeule(e) : e.verrouillee === true;
 }
 
 function _chargementEnCours() {

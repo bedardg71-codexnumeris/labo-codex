@@ -3952,21 +3952,32 @@
         // #1245 (8 nov. 2026) — une copie évaluée sur papier donne aussi un PDF, la synthèse seule : le compteur
         // compte les deux et dit la part du papier (phrases validées par Grégoire le 8 nov.).
         const selection = travauxArchivage.selectionnerEvaluationsLea(productionId, da, reprisesSeulement);
+        compteur.textContent = _texteCompteurLea(selection, da, reprisesSeulement) + _laisseesDeCoteLea(selection);
+    }
+
+    /** Le nombre de PDF que l'export produira, et la part du papier (phrases validées par Grégoire le 8 nov.). */
+    function _texteCompteurLea(selection, da, reprisesSeulement) {
         const nbCopies = selection.fichiers.length;
         const nbPapier = selection.sansFichier.length;
         const nbPdf = nbCopies + nbPapier;
         const label = reprisesSeulement ? 'reprise' : 'évaluation';
-
         if (da) {
-            compteur.textContent = nbCopies > 0
-                ? `1 ${label} prête`
-                : (nbPapier > 0 ? `1 ${label} prête (synthèse seule)` : `Aucune ${label}`);
-        } else if (nbPdf === 0) {
-            compteur.textContent = reprisesSeulement ? 'Aucune reprise trouvée' : 'Aucune évaluation trouvée';
-        } else {
-            compteur.textContent = `${nbPdf} PDF pour ${nbPdf} ${nbPdf > 1 ? 'étudiant·es' : 'étudiant·e'}`
-                + (nbPapier > 0 ? `, dont ${nbPapier} sur papier (synthèse seule)` : '');
+            if (nbCopies > 0) return `1 ${label} prête`;
+            return nbPapier > 0 ? `1 ${label} prête (synthèse seule)` : `Aucune ${label}`;
         }
+        if (nbPdf === 0) return reprisesSeulement ? 'Aucune reprise trouvée' : 'Aucune évaluation trouvée';
+        return `${nbPdf} PDF pour ${nbPdf} ${nbPdf > 1 ? 'étudiant·es' : 'étudiant·e'}`
+            + (nbPapier > 0 ? `, dont ${nbPapier} sur papier (synthèse seule)` : '');
+    }
+
+    /**
+     * Lot du 9 nov. 2026 — l'export ne prend que les évaluations verrouillées ; le compteur dit celles qu'il laisse
+     * de côté (texte validé par Grégoire mot pour mot, accordé au nombre). Rien quand tout est verrouillé.
+     */
+    function _laisseesDeCoteLea(selection) {
+        const nbNon = (selection.nonVerrouillees || []).length;
+        if (nbNon === 0) return '';
+        return nbNon > 1 ? ` · ${nbNon} évaluations non verrouillées laissées de côté` : ' · 1 évaluation non verrouillée laissée de côté';
     }
 
     /**

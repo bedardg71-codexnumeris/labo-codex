@@ -382,9 +382,16 @@
      * moins une copie importée — un élève évalué uniquement sur papier n'était ni exporté ni compté) ; les élèves
      * supprimés restent écartés (#1013). Une évaluation sans copie donne la synthèse seule.
      *
-     * @returns {{ evaluations: Array, fichiers: Array, sansFichier: Array }}
-     *   `evaluations` = une par élève ; `fichiers` = les copies importées, qui donneront le PDF annoté avec sa
-     *   synthèse ; `sansFichier` = les évaluations sans copie résolue, qui donneront la synthèse seule.
+     * Lot du 9 nov. 2026 (décision de Grégoire, 10 h 00) — L'EXPORT POUR LÉA N'ENVOIE QUE LES ÉVALUATIONS
+     * VERROUILLÉES, avec ou sans copie. AVANT : une évaluation non verrouillée partait dans le ZIP (mesuré : son PDF
+     * dans le ZIP, le compteur muet sur le verrou). Le choix d'une évaluation par élève se fait d'abord, le verrou
+     * ensuite : une reprise non verrouillée (réévaluation en cours) laisse l'élève de côté, son originale ne part pas
+     * à sa place. Les laissées de côté sont rendues pour que le compteur le dise.
+     *
+     * @returns {{ evaluations: Array, fichiers: Array, sansFichier: Array, nonVerrouillees: Array }}
+     *   `evaluations` = une par élève, verrouillée ; `fichiers` = les copies importées, qui donneront le PDF annoté
+     *   avec sa synthèse ; `sansFichier` = les évaluations sans copie résolue, qui donneront la synthèse seule ;
+     *   `nonVerrouillees` = celles laissées de côté.
      */
     /** #1245 — les élèves du groupe-cours actif et ceux de ses copies, élèves supprimés écartés (#1013). */
     function _dasDuGroupeActif(fichiers) {
@@ -394,6 +401,19 @@
             .concat(elevesDuGroupe.map(e => e.da))
             .filter(Boolean).map(String)
             .filter(da => !supprimes || !supprimes.has(da)));
+    }
+
+    function _estReprise(e) {
+        return !!(e.repriseDeId || e.jetonRepriseCibleeApplique);
+    }
+
+    /**
+     * Relecture du 9 nov. 2026 — deux évaluations actives d'un même élève, aucune reprise (un doublon à notes
+     * divergentes, que la réconciliation #360 laisse) : la verrouillée l'emporte sur la non verrouillée, quel que
+     * soit leur ordre en base. Sans cela, l'élève était laissé de côté quand la non verrouillée venait d'abord.
+     */
+    function _verrouilleeDevantUnDoublon(existant, e) {
+        return !_estReprise(existant) && existant.verrouillee !== true && e.verrouillee === true;
     }
 
     function selectionnerEvaluationsLea(productionId, da, reprisesSeulement) {
@@ -420,7 +440,7 @@
         const evalParEtudiant = new Map();
         for (const e of evalsActives) {
             const existant = evalParEtudiant.get(e.etudiantDA);
-            if (!existant || e.repriseDeId || e.jetonRepriseCibleeApplique) {
+            if (!existant || _estReprise(e) || _verrouilleeDevantUnDoublon(existant, e)) {
                 evalParEtudiant.set(e.etudiantDA, e);
             }
         }
@@ -428,16 +448,22 @@
         const retenues = [];
         const fichiersAvecEval = [];
         const sansFichier = [];
+        const nonVerrouillees = [];
+        const evaluationDuFichier = new Map();   // relecture du 9 nov. : le PDF porte CETTE évaluation, pas une autre du couple
         for (const evaluation of evalParEtudiant.values()) {
+            if (evaluation.verrouillee !== true) { nonVerrouillees.push(evaluation); continue; }
             retenues.push(evaluation);
             const fichier = (typeof travauxResolution !== 'undefined' && typeof travauxResolution.trouverFichierPourEvaluation === 'function')
                 ? travauxResolution.trouverFichierPourEvaluation(evaluation)
                 : null;
-            if (fichier) fichiersAvecEval.push(fichier);
+            if (fichier) { fichiersAvecEval.push(fichier); evaluationDuFichier.set(fichier.id, evaluation); }
             else sansFichier.push(evaluation);
         }
-        return { evaluations: retenues, fichiers: fichiersAvecEval, sansFichier: sansFichier };
+        return { evaluations: retenues, fichiers: fichiersAvecEval, sansFichier: sansFichier, nonVerrouillees: nonVerrouillees, evaluationDuFichier: evaluationDuFichier };
     }
+
+    // Lot du 9 nov. 2026 : le texte validé par Grégoire quand rien n'est verrouillé (dit seul, rien n'a échoué).
+    const TEXTE_LEA_RIEN_DE_VERROUILLE = 'Aucune évaluation verrouillée\u00a0: rien à envoyer. Verrouille les évaluations à remettre, puis relance l\u2019export.';
 
     /**
      * Genere des PDFs annotes+synthese pour televersement Lea
@@ -466,6 +492,13 @@
         const surPapier = selection.sansFichier;   // #1245 : la synthèse seule
 
         if (fichiersAvecEval.length === 0 && surPapier.length === 0) {
+            // Lot du 9 nov. 2026 : des évaluations existent, aucune n'est verrouillée — texte validé par Grégoire,
+            // affiché seul (sans « L'export Léa a échoué : »), car rien n'a échoué.
+            if (selection.nonVerrouillees.length > 0) {
+                const rien = new Error(TEXTE_LEA_RIEN_DE_VERROUILLE);
+                rien.texteEntier = true;
+                throw rien;
+            }
             throw new Error('Aucune évaluation trouvée pour ces critères.');
         }
 
@@ -499,7 +532,10 @@
             const { daEtud, libelle, nomFichier } = identite(fichier.etudiantDA);
 
             try {
-                const { doc, synthese } = await travauxExportPDF.genererDocPDF(fichier.id, productionId);
+                // Relecture du 9 nov. — l'évaluation CHOISIE (verrouillée) va au générateur : il retenait sinon la plus
+                // récente du couple élève-production, et un doublon non verrouillé partait à sa place.
+                const choisie = selection.evaluationDuFichier ? selection.evaluationDuFichier.get(fichier.id) : undefined;
+                const { doc, synthese } = await travauxExportPDF.genererDocPDF(fichier.id, productionId, choisie);
                 const pdfBlob = doc.output('blob');
                 blobs.push({ blob: pdfBlob, nom: nomFichier });
 
@@ -523,7 +559,7 @@
         for (const evaluation of surPapier) {
             const { daEtud, libelle, nomFichier } = identite(evaluation.etudiantDA);
             try {
-                const { doc, synthese } = await travauxExportPDF.genererDocSyntheseSeule(evaluation.etudiantDA, productionId);
+                const { doc, synthese } = await travauxExportPDF.genererDocSyntheseSeule(evaluation.etudiantDA, productionId, evaluation);
                 if (!doc) {
                     echecs.push(`${libelle} — sur papier : ${(synthese && synthese.raison) || 'la synthèse n\'a pas pu être produite'}`);
                 } else {
@@ -895,6 +931,7 @@
             // et l'enseignant sait ce qui manque avant de téléverser sur Léa.
             _afficherBilanExport(blobs.length, blobs.length + echecs.length, echecs, sansSynthese);
         } catch (e) {
+            if (e && e.texteEntier) { alert(e.message); return; }   // rien de verrouillé : pas une erreur
             console.error('[Travaux-Archivage] Erreur export Lea:', e);
             alert('L\'export Léa a échoué : ' + e.message);
         }

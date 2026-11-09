@@ -148,7 +148,6 @@ const TOLEREES = {
     'unit/sentinelle-ancrage-temporel-lecon.test.js': 1,
     'unit/sentinelle-audit-aide-lot-A-chemins-et-libelles.test.js': 1,
     'unit/sentinelle-audit-aide-lot-B-surfaces-concordent.test.js': 1,
-    'unit/sentinelle-audit-aide-lot-C-visite-guidee.test.js': 2,
     'unit/sentinelle-carte-bilan.test.js': 1,
     'unit/sentinelle-carte-rendu-unique-437.test.js': 1,
     'unit/sentinelle-codex-etat-db-ready.test.js': 1,

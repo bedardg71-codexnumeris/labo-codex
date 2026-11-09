@@ -81,10 +81,10 @@ function chargerArchivage({ fichiers, evaluations, resoudre }) {
 describe('#566 · B — la sélection Léa distingue ce qui donnera un PDF de ce qui n\'en donnera pas', () => {
     const fichiers = [{ id: 'F1', etudiantDA: '111', productionId: 'P1' }, { id: 'F2', etudiantDA: '222', productionId: 'P9' }];
     const evaluations = [
-        { id: 'E1', etudiantDA: '111', productionId: 'P1' },                       // fichier résolu
-        { id: 'E2', etudiantDA: '222', productionId: 'P1' },                       // pas de fichier pour P1
-        { id: 'E3', etudiantDA: '111', productionId: 'P1', repriseDeId: 'E1' },    // reprise : prime sur E1
-        { id: 'E4', etudiantDA: '333', productionId: 'P1' }                        // hors groupe actif
+        { id: 'E1', etudiantDA: '111', productionId: 'P1', verrouillee: true },   // fichier résolu
+        { id: 'E2', etudiantDA: '222', productionId: 'P1', verrouillee: true },   // pas de fichier pour P1
+        { id: 'E3', etudiantDA: '111', productionId: 'P1', repriseDeId: 'E1', verrouillee: true },   // reprise : prime sur E1
+        { id: 'E4', etudiantDA: '333', productionId: 'P1', verrouillee: true }   // hors groupe actif
     ];
     const resoudre = (e) => (e.etudiantDA === '111' ? fichiers[0] : null);
 
@@ -117,6 +117,9 @@ describe('#566 · C — cliquets : export et compteur lisent la même sélection
         const compteur = ui.slice(j, ui.indexOf('\n    }\n', j));
         expect(compteur).toContain('travauxArchivage.selectionnerEvaluationsLea(productionId, da, reprisesSeulement)');
         expect(compteur).not.toContain("obtenirDonneesSelonMode('evaluationsSauvegardees')");
-        expect(compteur).toContain('sansFichier');
+        // Lot du 9 nov. 2026 : la phrase du compteur vit dans `_texteCompteurLea`, qui lit la même sélection.
+        const k = ui.indexOf('function _texteCompteurLea(');
+        expect(compteur).toContain('_texteCompteurLea(selection');
+        expect(ui.slice(k, ui.indexOf('\n    }\n', k))).toContain('sansFichier');
     });
 });

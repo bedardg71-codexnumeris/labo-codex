@@ -87,7 +87,8 @@ test('« À propos » : la devise, quatre intertitres, trois liens, « Par où c
     expect(lu.premier).toBe('Labo Codex est une application');
     expect(lu.corps).not.toContain('Bienvenue dans Labo Codex');
     expect(lu.corps).not.toContain('Labo Codex est un outil de soutien');
-    expect(lu.liens).toEqual(['Visite guidée', 'Guides pédagogiques', 'Tutoriels ↗ (s’ouvre dans un nouvel onglet)']);
+    // ↻ Lot « Les deux parcours » (8 nov. 2026) : « Visite guidée » devient « Assistance ».
+    expect(lu.liens).toEqual(['Assistance', 'Guides pédagogiques', 'Tutoriels ↗ (s’ouvre dans un nouvel onglet)']);
     expect(lu.label).toEqual(['Par où commencer ?']);
     expect(lu.boutons).toEqual([['BUTTON', 'Commencer', true], ['BUTTON', 'Commencer', true], ['BUTTON', 'Explorer', true]]);
     expect(lu.cp).toBe('Explore un cours de démonstration déjà configuré, aux données fictives mais réalistes.');
@@ -234,12 +235,12 @@ test('pied de page : deux moitiés symétriques autour d\'un filet, logos à la 
     await expect(page.locator('#modal-nouveautes, .modal-overlay.actif').first()).toBeVisible();
 });
 
-test('la visite guidée : « Bienvenue dans la visite guidée », relancée « depuis le menu, en haut à droite »', async ({ page }) => {
+// ↻ Lot « Les deux parcours » (8 nov. 2026) : la visite et sa bulle « Bienvenue » sont retirées ; le lien
+// « Assistance » ouvre le panneau des parcours (le détail : parcours-1-et-2-2026-11-08.spec.js).
+test('le lien « Assistance » d’« À propos » ouvre le panneau des parcours', async ({ page }) => {
     await ouvrirAccueilVide(page, 1180);
-    await page.getByRole('button', { name: 'Visite guidée', exact: true }).first().click();
-    const bulle = page.locator('text=Bienvenue dans la visite guidée').first();
-    await expect(bulle).toBeVisible();
-    await expect(page.locator('text=le relancer depuis le menu, en haut à droite').first()).toBeVisible();
+    await page.locator('#banniere-bienvenue').getByRole('button', { name: 'Assistance', exact: true }).click();
+    await expect(page.locator('#panneau-assistance')).toBeVisible();
 });
 
 // ─── Captures pour Grégoire (CAPTURES_ACCUEIL=<dossier>) ─────────────────────────────────────

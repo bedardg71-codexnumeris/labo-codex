@@ -2575,17 +2575,11 @@ function modifierEvaluationRemplacee(evaluationId) {
         return;
     }
 
-    // Capturer snapshot avant modification
-    var avant = {
-        statutIntegrite: evaluation.statutIntegrite,
-        noteFinale: evaluation.noteFinale,
-        niveauFinal: evaluation.niveauFinal,
-        criteres: (evaluation.criteres || []).map(function(c) {
-            return { critereId: c.critereId, niveau: c.niveauSelectionne };
-        })
-    };
-
-    window._snapshotAvantModifRemplacee = { evalId: evaluationId, avant: avant };
+    // Capturer snapshot avant modification. Lot du 9 nov. 2026 : c'est aussi la marque « déverrouillée
+    // exprès » (evaluation.js) — ce geste est l'un des deux qui rendent l'originale modifiable ; `ouverture`
+    // la garde à travers l'ouverture qui suit, que toute autre ouverture efface.
+    window.armerDeverrouillageExpres(evaluation);
+    window._snapshotAvantModifRemplacee.ouverture = true;
 
     // Déverrouiller temporairement
     evaluation.verrouillee = false;

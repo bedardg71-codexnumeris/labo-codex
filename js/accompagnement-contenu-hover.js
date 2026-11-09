@@ -35,9 +35,7 @@ const TOOLTIPS = {
         'Ton cahier de travail portable sur clé USB : toutes tes données dans un fichier que tu mets à jour et ouvres toi-même. Pastille verte : ton codex est à jour. Orange : il n\'a pas tes derniers changements.',
 
     // --- Assistance ---
-
-    'entete-tour-guide':
-        'Visite guidée : un parcours en quelques étapes pour découvrir les grandes sections de l’application.',
+    // La bulle de l'entrée « Visite guidée » du menu est partie avec elle (lot « Les deux parcours », 8 nov. 2026).
 
     // --- Réglages ---
 
