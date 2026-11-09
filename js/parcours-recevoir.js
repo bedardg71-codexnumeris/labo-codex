@@ -118,9 +118,7 @@
 
     function fichierNeuf() {
         var avant = lireCtx().fichiersAvant || [];
-        var f = fichiersDuGroupe().find(function (x) { return x && x.id && avant.indexOf(x.id) === -1; });
-        if (f && !lireCtx().productionId) majCtx({ productionId: f.productionId });
-        return f || null;
+        return fichiersDuGroupe().find(function (x) { return x && x.id && avant.indexOf(x.id) === -1; }) || null;
     }
 
     function fichierOuvert() {
@@ -135,6 +133,32 @@
 
     function annotationOuverte() { return sousSectionVisible('evaluations-annoter') && !!fichierOuvert(); }
 
+    /** L'étape 3 : la production ouverte est retenue, pour que « Reprendre » la rouvre aux étapes 4 à 7. */
+    function annotationOuverteRetenue() {
+        if (!annotationOuverte()) return false;
+        var f = fichierOuvert();
+        if (lireCtx().fichierId !== f.id) majCtx({ fichierId: f.id, productionId: f.productionId || null });
+        return true;
+    }
+
+    /**
+     * « Reprendre » aux étapes 4 à 7 (relecture neuve du 9 nov. : après un rechargement, l'étape 4 retombait sur l'Accueil
+     * sous un voile plein, sans rien à toucher) : la production retenue se rouvre comme « Actions › Annoter » l'ouvre,
+     * puis, au besoin, en mode Évaluer, comme « Annoter ▾ › Évaluer ». Rien ne s'écrit.
+     */
+    async function revenirALaProduction(modeVoulu) {
+        var c = lireCtx();
+        if (!annotationOuverte() && c.fichierId && typeof window.ouvrirAnnotationDepuisListe === 'function') {
+            window.ouvrirAnnotationDepuisListe(c.fichierId, c.productionId);
+            await attendre(annotationOuverte, 4000);
+        }
+        if (modeVoulu === 'evaluer' && annotationOuverte() && mode() !== 'evaluer' && window.travauxUI
+            && typeof window.travauxUI.basculerMode === 'function') {
+            window.travauxUI.basculerMode('evaluer');
+            await attendre(function () { return mode() === 'evaluer' && vis(el('travaux-palette-eval-gauche')); }, 4000);
+        }
+    }
+
     function paletteTampons() { return el('travaux-palette-tampons'); }
     function engrenageTampons() { var p = paletteTampons(); return p ? p.querySelector('[title="Personnaliser"]') : null; }
     function fenetreTampons() { return el('modal-retro-observations'); }
@@ -144,7 +168,6 @@
     document.addEventListener('click', function (ev) {
         var t = ev.target;
         if (t && t.closest && t.closest('#modal-retro-observations [data-action="travauxOutils.enregistrerRetroObservations"]')) tamponsEnregistres = true;
-        if (t && t.closest && t.closest('[data-action="travauxUI.lancerExportLea"]')) exportTouche = true;
     }, true);
 
     // ---------- L'évaluation ----------
@@ -203,10 +226,14 @@
      */
     function tenu(condition) {
         var suite = 0;
-        return function () {
+        var garde = function () {
             suite = condition() ? suite + 1 : 0;
             return suite >= 3;
         };
+        // Remise à zéro à l'entrée de l'étape : sans elle, le compte d'un passage précédent (« Refaire » sans recharger
+        // la page) laissait avancer l'étape dès la première sonde (relecture neuve du 9 nov.).
+        garde.reprendre = function () { suite = 0; };
+        return garde;
     }
 
     function critereAAttribuer() {
@@ -240,12 +267,13 @@
 
     // ---------- L'export ----------
 
-    var exportTouche = false;
-    function exportFini() {
-        var t = el('travaux-texte-progression-lea');
-        var m = t ? String(t.textContent || '').match(/^(\d+)\/(\d+) fichiers traités/) : null;
-        return !!(exportTouche && m && m[1] === m[2]);
-    }
+    // L'étape 8 avance quand l'export est TÉLÉCHARGÉ (la consigne) : l'export Léa le dit par un événement, émis après le
+    // téléchargement. La barre « n/n fichiers traités » se remplit aussi quand tous les PDF échouent (relecture neuve).
+    var exportTelecharge = false;
+    window.addEventListener('travaux-export-lea-telecharge', function (ev) {
+        if (ev && ev.detail && ev.detail.fichiers > 0) exportTelecharge = true;
+    });
+    function exportFini() { return exportTelecharge; }
     function boutonExportLea() { return qs('[data-action="travauxUI.lancerExportLea"]'); }
     function carteExportLea() { var b = boutonExportLea(); return b ? b.closest('.travaux-archivage-carte') : null; }
 
@@ -343,7 +371,7 @@
         },
         zones: function () { return [rangeeDe(menuActions('annoter'))]; },
         contour: function () { return menuActions('annoter'); },
-        atteint: annotationOuverte
+        atteint: annotationOuverteRetenue
     };
 
     var ETAPE_4 = {
@@ -351,12 +379,20 @@
         texte: "Avant d'annoter, regarde tes tampons. Chaque tampon que tu poses ajoute sa phrase à la synthèse de rétroaction de ton étudiant·e. Ceux de départ ont été écrits pour l'analyse littéraire : lis leurs phrases avant de t'en servir. Touche l'engrenage de la palette « Tampons » : garde les phrases qui disent ce que tu dirais, réécris les autres, change leur image ou crée tes propres tampons, une catégorie par cours si tu en donnes plusieurs. Puis touche « Enregistrer » : tes tampons te suivront d'un trimestre à l'autre, et tu pourras les partager avec tes collègues.",
         avant: async function () {
             tamponsEnregistres = false;
+            await revenirALaProduction();
+            // « Affiche-la si elle est masquée » (la consigne) : masquée, la palette n'existe plus ; son bouton la recrée.
+            if (annotationOuverte() && !paletteTampons() && window.travauxOutils
+                && typeof window.travauxOutils.togglePaletteAutocollants === 'function') {
+                window.travauxOutils.togglePaletteAutocollants();
+            }
             await attendre(function () { return vis(paletteTampons()); }, 2000);
         },
         zones: function () {
             var f = fenetreTampons();
             surModale(vis(f));
-            if (vis(f)) return [f.querySelector('.modal-contenu') || f];
+            if (vis(f)) { poserVoile('normal'); return [f.querySelector('.modal-contenu') || f]; }
+            // Sans palette à éclairer (la production n'a pas pu se rouvrir), pas de voile : rien ne doit devenir intouchable.
+            poserVoile(vis(paletteTampons()) ? 'normal' : 'aucun');
             return [paletteTampons()];
         },
         contour: function () {
@@ -375,24 +411,30 @@
         titre: 'Annoter',
         texte: "Annote la production comme tu le ferais sur papier : souligne, encercle, écris dans la marge. Ces traces restent sur le fichier que ton étudiant·e recevra. Pose aussi tes tampons là où tu observes quelque chose : sur la production, le tampon montre l'endroit ; dans la synthèse, sa phrase dit ce que tu as observé, et combien de fois. Quand tu as fini, touche « Annoter ▾ », au-dessus de la production, et choisis « Évaluer ».",
         voile: 'aucun',   // la production entière s'annote : rien n'est voilé
+        avant: function () { return revenirALaProduction(); },
         zones: function () { return [el('travaux-btn-actions')]; },
         contour: function () { return el('travaux-btn-actions'); },
         atteint: function () { return mode() === 'evaluer' && vis(el('travaux-palette-eval-gauche')); }
     };
 
+    var critereTenu = tenu(chaqueCritereAttribue);
+    var critereTenuSansFichier = tenu(function () { return ecranEvaluationVisible() && chaqueCritereAttribue(); });
+
     var ETAPE_6_FICHIER = {
         titre: 'Évaluer',
         texte: "Te voici en mode Évaluer. Dans « Paramètres », ta grille, ton échelle et ta cartouche sont déjà choisies : ce sont celles de ta production. Dans « Évaluation », choisis pour chaque critère le niveau ou les points que tu attribues ; la note se calcule à mesure.",
         voile: 'aucun',
+        avant: async function () { critereTenu.reprendre(); await revenirALaProduction('evaluer'); },
         zones: function () { return [critereAAttribuer() || el('travaux-palette-eval-droite')]; },
         contour: critereAAttribuer,
-        atteint: tenu(chaqueCritereAttribue)
+        atteint: critereTenu
     };
 
     var ETAPE_6_SANS_FICHIER = {
         titre: 'Évaluer',
         texte: "Rien à importer : touche « Actions › Évaluer » sur la ligne de l'étudiant·e. Ta grille, ton échelle et ta cartouche sont déjà choisies : ce sont celles de ta production. Pour chaque critère, choisis le niveau ou les points que tu attribues.",
         avant: async function () {
+            critereTenuSansFichier.reprendre();
             if (ecranEvaluationVisible()) return;
             aller('evaluations', 'liste');
             await attendre(function () { return !!menuActions('evaluer'); }, 3000);
@@ -404,13 +446,14 @@
             return [rangeeDe(menuActions('evaluer'))];
         },
         contour: function () { return ecranEvaluationVisible() ? critereAAttribuer() : menuActions('evaluer'); },
-        atteint: tenu(function () { return ecranEvaluationVisible() && chaqueCritereAttribue(); })
+        atteint: critereTenuSansFichier
     };
 
     var ETAPE_7_FICHIER = {
         titre: 'Ta rétroaction',
         texte: texte7(TEXTE_7_SPECIFIQUE),
         voile: 'aucun',
+        avant: function () { return revenirALaProduction('evaluer'); },
         zones: function () { return [boutonVerrou()]; },
         contour: boutonVerrou,
         atteint: verrouNeuf
@@ -429,7 +472,7 @@
         titre: 'Rends tes rétroactions',
         texte: "Évalue de la même façon les productions des autres étudiant·es : « Plus tard » garde le parcours ici, et « Reprendre » t'y ramène. Quand tes évaluations sont faites et verrouillées, il reste à rendre tes rétroactions. Choisis la production, laisse « Tous » pour tout le groupe, puis touche « Exporter pour Léa ». Chaque étudiant·e reçoit un PDF : sa synthèse de rétroaction, précédée de sa production annotée si tu l'as importée. Le nom du fichier porte son DA : c'est ce qui permet de le remettre à la bonne personne. Avec plusieurs étudiant·es, les PDF arrivent réunis dans un ZIP.",
         avant: async function () {
-            exportTouche = false;
+            exportTelecharge = false;
             aller('evaluations', 'exporter');
             await attendre(function () { return vis(boutonExportLea()); }, 3000);
         },
@@ -456,7 +499,7 @@
     // ---------- Le lancement, la voie, « Plus tard », la fin ----------
 
     function poserLeRepere(v) {
-        majCtx({ voie: v, fichiersAvant: ids(fichiersDuGroupe()), verrousAvant: ids(evaluationsVerrouillees()), productionId: null });
+        majCtx({ voie: v, fichiersAvant: ids(fichiersDuGroupe()), verrousAvant: ids(evaluationsVerrouillees()), fichierId: null, productionId: null });
     }
 
     function opts(depuis) {

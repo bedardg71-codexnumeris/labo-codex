@@ -159,7 +159,8 @@
 
         // La voie et le repère du quatrième parcours, « Recevoir les productions, rendre tes rétroactions »
         // (js/parcours-recevoir.js, 9 nov. 2026) : { voie: 'fichiers'|'sans-fichier', fichiersAvant, verrousAvant,
-        // productionId }. Des identifiants, rien des données de la personne.
+        // fichierId, productionId } — la production ouverte à l'étape 3, que « Reprendre » rouvre aux étapes 4 à 7.
+        // Des identifiants, rien des données de la personne.
         parcoursRecevoir: {},
 
         // Export du plan — niveau « Personnalisé » (#431, 8 août 2026).

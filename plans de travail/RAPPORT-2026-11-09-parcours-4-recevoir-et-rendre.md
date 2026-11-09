@@ -25,7 +25,9 @@ les synthèses PDF des copies sur papier » est sur `main` (1.237.0).
   « Terminer ».
 - **La voie sans fichier, quatre étapes** (« n sur 4 », bulles et panneau) : « Actions › Évaluer » sur la ligne, le
   verrou, l'export, la fin. La voie choisie est retenue pour « Reprendre » comme pour « Refaire ».
-- « Plus tard » sur chaque bulle sauf la dernière ; « Reprendre » relit la voie et l'étape, même après un rechargement.
+- « Plus tard » sur chaque bulle sauf la dernière ; « Reprendre » relit la voie et l'étape, même après un rechargement :
+  aux étapes 4 à 7, la production ouverte à l'étape 3 se rouvre (en mode Évaluer aux étapes 6 et 7), et la palette
+  « Tampons » revient si tu l'avais masquée (corrigé après la relecture neuve, section 8).
 - Le rappel « Mets ton codex à jour » ne s'ouvre pas en plein parcours (le code du troisième, qui est celui du sixième) ;
   il s'ouvre après, comme prévu.
 - Tes corrections du 9 nov. sont posées mot pour mot (étape 5 : « Annoter ▾ », puis « Évaluer » ; étape 7 : « Un mot
@@ -94,7 +96,8 @@ y répondent. Ce que ce lot y ajoute, mesuré par son banc :
   endroit où on l'apprend (session H). **Tient.**
 - **Étape 3, « Importé »** : **tient** ; les deux copies importées s'affichent « Importé » (en capitales par la CSS).
 - **Étape 4, la palette « Tampons » visible à l'ouverture** : **tient** ; l'engrenage ouvre « Rétroactions —
-  Observations », « Enregistrer » la ferme.
+  Observations », « Enregistrer » la ferme. Masquée par son bouton, elle n'existe plus et ne revenait pas : l'étape la
+  réaffiche maintenant (« affiche-la si elle est masquée », section 8).
 - **Étape 6, grille, échelle et cartouche déjà choisies** : **tient** quand la production nomme les trois (ta question
   7) ; vérifié dans le banc sur les deux voies.
 - **Étape 7** : tes corrections remplacent la retouche dans le cadre (qui n'arrive pas au PDF) et les descripteurs (vus
@@ -111,7 +114,8 @@ y répondent. Ce que ce lot y ajoute, mesuré par son banc :
 
 ## 3. Les essais
 
-- **Vitest** : `tests/unit/sentinelle-parcours-recevoir-2026-11-09.test.js`, 15 essais. Les textes lus à l'exécution,
+- **Vitest** : `tests/unit/sentinelle-parcours-recevoir-2026-11-09.test.js`, 21 essais (15, puis 6 après la relecture :
+  la condition de la question 7 champ par champ, la garde de l'étape 6 qui repart de zéro, section 8). Les textes lus à l'exécution,
   comparés à ceux de la consigne avec tes corrections ; chaque correction doit trouver sa phrase dans la consigne ; les
   deux variantes de l'étape 6, la variante sans fichier de l'étape 7 ; les deux voies (9 et 4) ; « Rien à importer »,
   « Terminer », la bulle au centre ; le titre, la ligne et la phrase du refus. Break-test : « choisis « Évaluer » »
@@ -122,7 +126,7 @@ y répondent. Ce que ce lot y ajoute, mesuré par son banc :
   depuis un espace où le troisième parcours est fait (le banc du troisième, rejoué : `harness/parcours-3-de-banc.js`).
   - La voie des fichiers : le refus mesuré, la production complétée dans sa fiche, les neuf étapes, chaque contour,
     l'étape qui n'avance pas avant la donnée (rien d'importé avant « Importer », trois critères sur quatre), « Plus tard »
-    puis un rechargement et « Reprendre » à l'étape 8, le ZIP `Lea_Journal-de-lecture-1_2026-11-10.zip`, le panneau
+    puis un rechargement et « Reprendre » à l'étape 4 (palette masquée) et à l'étape 8, le ZIP `Lea_Journal-de-lecture-1_2026-11-10.zip`, le panneau
     « Fait ».
   - La voie sans fichier : « Rien à importer », « 1 sur 4 » à « 4 sur 4 », la deuxième phrase de l'étape 7, « Étape 3 sur
     4 » au panneau, « Refaire » qui repart de la voie retenue.
@@ -136,8 +140,9 @@ y répondent. Ce que ce lot y ajoute, mesuré par son banc :
 - La production de la condition se cherche parmi celles du cours du groupe-cours actif (`obtenirDonneesSelonMode`) ; un
   service d'orthopédagogie ne compte pas.
 - « Commencer » ouvre toujours la bulle 1 (avec ses deux voies) ; « Reprendre » et « Refaire », la voie retenue.
-- L'étape 8 avance quand l'export touché arrive au bout de sa progression (« n/n fichiers traités ») ; le téléchargement
-  suit dans la même seconde.
+- L'étape 8 avance quand l'export Léa a **téléchargé** au moins un PDF : l'export le dit maintenant par un événement
+  (`travaux-export-lea-telecharge`, `js/travaux-archivage.js`), émis après le téléchargement. Si tous les PDF échouent,
+  la bulle reste à l'étape 8 (section 8, réserve 4).
 - Sur la voie sans fichier, « Plus tard » de la bulle 3 (l'export) dit « Étape 3 sur 4 ».
 
 ## 5. À inscrire au BACKLOG
@@ -152,9 +157,52 @@ qui dit « Actions ▾ ») sont dans son rapport ; je ne les répète pas.
 - le panneau : `panneau-1180-sombre-sans-production-prete` (le refus, question 1), `-a-faire`, `-en-cours` (« Étape 8
   sur 9 »), `-fait` ; et pour la voie sans fichier, `…-sans-fichier-en-cours` (« Étape 3 sur 4 ») ;
 - chaque étape : `p4-1` (la zone), `p4-2` (les trois contours), `p4-2-reunies`, `p4-2-confirmation`, `p4-3` (la Liste),
-  `p4-4` (l'engrenage) et `p4-4-fenetre`, `p4-5`, `p4-6`, `p4-7`, `p4-8`, `p4-9` (au centre) ; la voie sans fichier :
+  `p4-4` (l'engrenage), `p4-4-reprise` (après « Plus tard », rechargement et « Reprendre ») et `p4-4-fenetre`, `p4-5`, `p4-6`, `p4-7`, `p4-8`, `p4-9` (au centre) ; la voie sans fichier :
   `p4-6-…-sans-fichier`, `p4-7-…-sans-fichier`.
 
 ## 7. Relecture par un agent neuf
 
 Voir la section 8 (ajoutée après la relecture).
+
+## 8. Relecture par un agent neuf (9 nov.), et ce que j'en ai fait
+
+Verdict de l'agent : **« À reprendre »**. Il a rejoué la sentinelle (15/15) et le banc (2/2), et confirmé le break-test
+de la garde des trois passages. Ses propres break-tests ont trouvé deux trous dans les bancs (réserve 5). Chaque
+réserve, et ce qu'elle est devenue :
+
+1. **L'étape 4 bloquait à la reprise** (mesuré par lui) : « Plus tard » à l'étape 4, rechargement, « Reprendre », et
+   l'on arrivait sur l'Accueil sous un voile plein, sans rien à toucher sauf « Plus tard ». Les étapes 5 à 7 n'avaient
+   pas non plus de quoi replacer la page. La palette « Tampons » masquée ne revenait pas (« affiche-la si elle est
+   masquée », la consigne). → **Corrigé** : l'étape 3 retient le fichier ouvert (`fichierId`) ; les étapes 4 à 7 le
+   rouvrent comme « Actions › Annoter » (`ouvrirAnnotationDepuisListe`), puis passent en mode Évaluer aux étapes 6 et 7.
+   L'étape 4 réaffiche la palette masquée par son propre bouton (`togglePaletteAutocollants`). Sans palette à éclairer,
+   elle ne pose plus de voile. Le banc le joue : palette masquée, « Plus tard », rechargement, « Reprendre », puis la
+   bulle 4, la page d'annotation, la palette et le contour sur l'engrenage. Break-test : la réouverture retirée →
+   **rouge**, rétablie.
+2. **La garde des trois passages ne repartait pas de zéro** (son compte vivait le temps de la page : « Refaire » sans
+   recharger laissait avancer l'étape 6 dès la première sonde). → **Corrigé** : la garde se remet à zéro à l'entrée de
+   chacune des deux étapes 6. Un essai Vitest le tient sur les deux voies (trois sondes à la première entrée, trois à
+   la suivante). Break-test : la remise à zéro retirée → **rouge** (les deux voies), rétablie.
+3. **La voie sans fichier n'a pas de retour** : une fois « Rien à importer » touché, « Reprendre » et « Refaire »
+   relancent les quatre étapes. → **Refusé, motif** : c'est la lettre de la consigne (« Le parcours retient la voie
+   choisie, pour « Reprendre » comme pour « Refaire » »). L'observation reste juste : qui a touché « Rien à importer »
+   par erreur ne retrouve plus les neuf étapes depuis le panneau. *À trancher par toi ou Cowork*, si ça compte : que
+   « Refaire » rouvre la bulle 1 (avec ses deux voies), « Reprendre » gardant la voie.
+4. **L'étape 8 pouvait avancer sans téléchargement** : la barre « n/n fichiers traités » se remplit aussi quand tous les
+   PDF échouent. → **Corrigé** : l'export Léa émet `travaux-export-lea-telecharge` après le téléchargement (une ligne,
+   `js/travaux-archivage.js`) ; l'étape 8 n'avance que sur lui, avec au moins un fichier. Break-test : l'événement retiré
+   → **rouge** (la bulle reste à l'étape 8 après le ZIP), rétabli.
+5. **Les bancs ne tenaient pas la question 7, ni le compte « quatre »** : retirer l'exigence de cartouche ou d'échelle
+   laissait tout vert ; le compte du panneau se comparait au registre. → **Corrigé** : la condition est essayée champ
+   par champ en Vitest (sans grille, sans échelle, sans cartouche : le refus ; les trois : le lancement). Le banc lit
+   l'ordre du panneau rendu : « Découvrir », « Mettre ta classe en place », « Évaluer une première production »,
+   « Recevoir… » en quatrième. « Reprendre » est maintenant essayé aux étapes 4 et 8. *Non repris :* la garde « le fichier
+   ouvert est celui de l'évaluation » (`evaluationDuFichierOuvert`) reste sans essai qui la départage : le banc n'ouvre
+   qu'une production avant l'étape 6. Inscrit ici, pas au BACKLOG (aucun symptôme vécu).
+6. **`productionId` écrit, jamais lu** → **corrigé** (mon lot) : il est maintenant lu, avec `fichierId`, par la reprise
+   des étapes 4 à 7, et n'est plus écrit à l'import.
+
+**Les affirmations du rapport que le code ne soutenait pas** ont été réécrites : la reprise « même après un
+rechargement » (vraie maintenant aux étapes 4 à 8, essayée aux étapes 4 et 8), « palette visible à l'ouverture » (elle
+revient aussi si on l'a masquée) et l'export (« téléchargé », plus « dans la même seconde »).
+
