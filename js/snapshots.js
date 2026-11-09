@@ -253,7 +253,7 @@ function calculerIndicesHistoriques(da, dateLimite, evaluationsCache = null, use
         return date && date <= dateLimite;
     });
 
-    // La pratique active : le C ci-dessous (la complétion suit la remise, en sommative, 8 nov. 2026) et le P plus bas la lisent.
+    // La pratique active : le C ci-dessous (la complétion suit la remise, 8 et 9 nov. 2026) et le P plus bas la lisent.
     const resolutionP = (typeof resoudrePratiqueActive === 'function') ? resoudrePratiqueActive() : null;
     const pratiqueP = (resolutionP && resolutionP.etat === 'ok') ? resolutionP.pratique : null;
 
@@ -265,9 +265,9 @@ function calculerIndicesHistoriques(da, dateLimite, evaluationsCache = null, use
         // ✅ IMPORTANT (Beta 94 - 10 déc): Option B - Considérer dateEcheance, pas dateEvaluation
         // Un travail remis en retard est compté rétroactivement dès son échéance
         // Cela rend C monotone croissant (jamais de baisse) et fidèle aux échéances
-        // La complétion suit la remise (décisions de Grégoire, 8 nov. 2026) : EN SOMMATIVE, une copie IMPORTÉE compte comme
-        // remise dès sa réception, comme pour le C du jour (pratique-registre.js, `productionRemiseParEleve`) ; elle aussi est
-        // comptée dès l'échéance. Hors sommative, la règle d'avant. ⚠ Les captures déjà écrites gardent leur C.
+        // La complétion suit la remise (décisions de Grégoire, 8 nov. 2026, étendues aux quatre familles le 9 nov.) : une copie
+        // IMPORTÉE compte comme remise dès sa réception, comme pour le C du jour (pratique-registre.js, `productionRemiseParEleve`) ;
+        // elle aussi est comptée dès l'échéance. Sans pratique résolue, la règle d'avant. ⚠ Les captures déjà écrites gardent leur C.
         const copiesRecues = window.receptionVautRemise(pratiqueP)
             ? window.lireCopiesRecues(obtenirDonneesSelonMode('fichiersTravaux') || [])
             : null;
@@ -876,9 +876,10 @@ async function capturerSnapshotSeance(dateSeance, evaluationsCacheParam = null, 
 }
 
 /**
- * La complétion suit la remise (décisions de Grégoire, 8 nov. 2026), pour le C du groupe d'une capture : EN SOMMATIVE,
- * un·e élève du groupe dont la copie importée du dernier travail n'est corrigée par aucune évaluation l'a remis, comme
- * pour le C de chaque élève (`calculerIndicesHistoriques`). Hors sommative, rien ne s'ajoute. Écrit dans `dasRemis`.
+ * La complétion suit la remise (décisions de Grégoire, 8 nov. 2026, étendues aux quatre familles le 9 nov.), pour le C du
+ * groupe d'une capture : un·e élève du groupe dont la copie importée du dernier travail n'est corrigée par aucune évaluation
+ * l'a remis, comme pour le C de chaque élève (`calculerIndicesHistoriques`). Sans pratique résolue, rien ne s'ajoute.
+ * Écrit dans `dasRemis`.
  * @param {Set<string>} dasDuGroupe
  * @param {Set<string>} dasRemis
  * @param {string} productionId

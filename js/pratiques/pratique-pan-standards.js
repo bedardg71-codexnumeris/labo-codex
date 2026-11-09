@@ -324,13 +324,15 @@ class PratiquePANStandards {
         // dénominateur et si elle est remise ; `remis` en est le compte (jamais un second calcul). La carte Complétion
         // du profil y lit sa liste des non-remises et son message, comme la fraction (DEMO006 : « 9/10 » à côté de
         // « tous les artefacts remis ! » — la terminale manquante n'était nulle part).
+        // La complétion suit la remise (décisions de Grégoire, 8 nov. 2026, étendues aux quatre familles le 9 nov.) : une copie
+        // IMPORTÉE compte comme remise dès sa réception, l'évaluation la confirme ou la corrige ; sans import, l'évaluation seule
+        // confirme. Règle et familles : pratique-registre.js (`productionRemiseParEleve`, `receptionVautRemise`). Le dénominateur
+        // ne change pas : les travaux assignés avec une échéance, évalués ou non. ⚠ D'où une différence avec la sommative : ici,
+        // une copie importée compte avant toute évaluation de son travail (le travail est déjà au dénominateur).
+        const copiesRecues = window.receptionVautRemise(this) ? window.lireCopiesRecues(this._lireFichiersRecus()) : null;
         const detailProductions = travauxAssignes.map(travail => ({
             id: travail.id,
-            remis: evaluations.some(e =>
-                e.etudiantDA === da &&
-                e.productionId === travail.id &&
-                window.evaluationCompteCommeRemise(e, evaluations)   // lot 30 (17 sept.) et le statut incomplet (25 oct. 2026) : la règle de pratique-registre.js
-            )
+            remis: window.productionRemiseParEleve(da, travail.id, evaluations, copiesRecues)   // lot 30, statut incomplet, 8 et 9 nov. 2026
         }));
 
         return { remis: detailProductions.filter(p => p.remis).length, total: detailProductions.length, productions: detailProductions };
@@ -571,6 +573,15 @@ class PratiquePANStandards {
      */
     _lireProductionsBrutes() {
         return obtenirDonneesSelonMode('productions') || [];
+    }
+
+    /**
+     * Les copies importées (`fichiersTravaux`, travaux-stockage.js), pour la complétion : une copie importée compte comme
+     * remise dès sa réception (8 nov. 2026 en sommative, étendu aux standards le 9 nov.). Lues au stockage du mode.
+     * @private
+     */
+    _lireFichiersRecus() {
+        return obtenirDonneesSelonMode('fichiersTravaux') || [];
     }
 
     /**

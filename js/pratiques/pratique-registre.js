@@ -1191,8 +1191,9 @@ function evaluationCompteCommeRemise(evaluation, evaluations) {
 }
 
 /* ===============================
-   LA COMPLÉTION SUIT LA REMISE, EN SOMMATIVE : décisions de Grégoire du 8 nov. 2026 (7 h 58 et 7 h 59) ; lot de la
-   session D de la nuit du 8 au 9 nov. (`plans de travail/RAPPORT-2026-11-09-completion-suit-la-remise.md`).
+   LA COMPLÉTION SUIT LA REMISE, DANS LES QUATRE FAMILLES : décisions de Grégoire du 8 nov. 2026 (7 h 58 et 7 h 59),
+   étendues aux quatre familles le 9 nov. (9 h 27 à 9 h 30, en Cowork) ; lot de la session D de la nuit du 8 au 9 nov.
+   (`plans de travail/RAPPORT-2026-11-09-completion-suit-la-remise.md`).
    Une copie IMPORTÉE compte comme remise dès sa réception ; l'évaluation vient la confirmer, ou la corriger (non remise,
    non recevable). Sans import (une copie papier), l'évaluation seule confirme la remise, comme avant.
    Avant : une copie n'était remise qu'évaluée et verrouillée. Pendant une correction, chaque élève pas encore corrigé·e
@@ -1200,17 +1201,21 @@ function evaluationCompteCommeRemise(evaluation, evaluations) {
    signal dépendait de l'ordre de correction.
    ⚠ UNE COPIE IMPORTÉE N'EST PAS UNE ÉVALUATION : c'est une fiche de `fichiersTravaux` (travaux-stockage.js), par élève
    et par production ; la corbeille l'en retire. Chaque calcul la lit au stockage de son mode et passe la liste ici.
-   ⚠ LA SOMMATIVE SEULEMENT : la consigne interdit d'étendre la décision aux autres familles sans Grégoire. Dans
-   `PratiqueConfigurable`, le même calcul de C sert les quatre familles : la condition sur la famille est ICI.
+   ⚠ LES QUATRE FAMILLES (Grégoire, 9 nov. : il a lui-même constaté le défaut hors sommative). La liste ci-dessous les
+   nomme : sommative, standards, spécifications, dénotation. Elle sert la configurable (un seul calcul de C pour les
+   quatre), les captures du Suivi, la sommative et les standards codés en dur. ⚠ PAS les spécifications codées en dur :
+   leur C n'y compte pas des remises mais les travaux ACCEPTABLES du palier le plus haut (pratique-pan-specifications.js) ;
+   une copie reçue n'y est pas encore jugée, la règle n'y a pas de sens. Sans pratique résolue : la règle d'avant.
    ⚠ Le dénominateur ne change pas : une production y entre à la première copie évaluée du groupe, comme avant.
    ⚠ Une copie qui CORRIGE la réception est enregistrée (verrouillée) : un brouillon ne compte nulle part (16 sept.).
    ⚠ Se lit AU CALCUL : les captures déjà prises gardent leur C jusqu'à « Recalculer les captures ».
    =============================== */
 
-const FAMILLES_OU_LA_RECEPTION_VAUT_REMISE = Object.freeze(['SOM']);
+const FAMILLES_OU_LA_RECEPTION_VAUT_REMISE = Object.freeze(['SOM', 'STD', 'SPE', 'DEN']);
 
 /**
- * La réception d'une copie importée vaut-elle remise dans cette pratique ? En sommative seulement (8 nov. 2026).
+ * La réception d'une copie importée vaut-elle remise dans cette pratique ? Dans les quatre familles (8 nov. 2026 en
+ * sommative, étendu le 9 nov.) ; sans pratique, non.
  * @param {Object} pratique - une instance (codée en dur ou configurable)
  * @returns {boolean}
  */
@@ -1258,7 +1263,7 @@ function evaluationCorrigeLaReception(evaluation, evaluations) {
  * @param {string} da
  * @param {string} productionId
  * @param {Array} evaluations
- * @param {Set<string>|null} copiesRecues - `lireCopiesRecues` ; null : la réception ne vaut pas remise (autre famille)
+ * @param {Set<string>|null} copiesRecues - `lireCopiesRecues` ; null : la réception ne vaut pas remise (pas de pratique)
  * @returns {boolean}
  */
 function receptionNonCorrigee(da, productionId, evaluations, copiesRecues) {
@@ -1270,7 +1275,7 @@ function receptionNonCorrigee(da, productionId, evaluations, copiesRecues) {
 
 /**
  * LA PRODUCTION EST REMISE PAR CET ÉLÈVE : la règle par production des calculs de complétion qui la reçoivent (la
- * sommative, la configurable, les deux C des captures) : une copie qui compte comme remise, ou une copie reçue par
+ * sommative, les standards, la configurable, les deux C des captures) : une copie qui compte comme remise, ou une copie reçue par
  * import que rien ne corrige.
  * @param {string} da
  * @param {string} productionId
@@ -1322,7 +1327,7 @@ window.libelleCopieNonRecevable = libelleCopieNonRecevable;   // ce que la copie
 // Statut « Incomplet ; travail en cours » (25 oct. 2026) — hors de la note, remise pour C
 window.evaluationTravailEnCours = evaluationTravailEnCours;
 window.evaluationCompteCommeRemise = evaluationCompteCommeRemise;
-// La complétion suit la remise, en sommative (8 nov. 2026) : une copie importée compte dès sa réception
+// La complétion suit la remise, dans les quatre familles (8 et 9 nov. 2026) : une copie importée compte dès sa réception
 window.receptionVautRemise = receptionVautRemise;
 window.lireCopiesRecues = lireCopiesRecues;
 window.receptionNonCorrigee = receptionNonCorrigee;

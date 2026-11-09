@@ -298,9 +298,10 @@ describe('Les gestes décrits sont ceux du code', () => {
     it('une copie non recevable reste au dénominateur de la complétion', () => {
         // Le code : la complétion de chaque famille qui compte des productions lit la règle unique de la remise
         // (25 oct. 2026), et cette règle écarte une copie non recevable.
-        // La complétion suit la remise (8 nov. 2026) : la sommative et la configurable passent par la règle PAR PRODUCTION
-        // (`productionRemiseParEleve`), qui lit la même règle de la remise ; une copie importée non recevable y est corrigée.
-        expect(lire('js/pratiques/pratique-pan-standards.js')).toContain('window.evaluationCompteCommeRemise(e, evaluations)');   // E15 (28 oct. 2026) : avec la liste où chercher la reprise
+        // La complétion suit la remise (8 nov. 2026 ; les quatre familles le 9 nov.) : la sommative, les standards et la
+        // configurable passent par la règle PAR PRODUCTION (`productionRemiseParEleve`), qui lit la même règle de la remise ;
+        // une copie importée non recevable y est corrigée.
+        expect(lire('js/pratiques/pratique-pan-standards.js')).toContain('window.productionRemiseParEleve(da, travail.id, evaluations, copiesRecues)');
         for (const f of ['js/pratiques/pratique-sommative.js', 'js/pratiques/pratique-configurable.js']) {
             expect(lire(f), f).toContain('window.productionRemiseParEleve(da, production.id, evaluations, copiesRecues)');
         }

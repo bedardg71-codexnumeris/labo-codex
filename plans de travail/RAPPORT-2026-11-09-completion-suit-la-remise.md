@@ -1,4 +1,4 @@
-Codé
+Codé, puis étendu aux quatre familles le 9 nov. (décision de Grégoire, 9 h 27 à 9 h 30) ; les trois questions sont tranchées
 
 # Rapport : lot « La complétion suit la remise » (session D, nuit du 8 au 9 nov. 2026)
 
@@ -11,19 +11,32 @@ session dans le nuage : ni WebKit ni les données de Grégoire ici.
 
 ### Ce qui est fait (en gestes d'utilisateur)
 
-- En pratique **sommative**, une copie que tu importes compte comme remise dès qu'elle est reçue. Pendant une correction,
+**Mis à jour le 9 nov., après tes décisions (section 11).** La règle vaut maintenant dans les quatre familles.
+
+- Dans **les quatre familles** (sommative, standards, spécifications, dénotation), une copie que tu importes compte
+  comme remise dès qu'elle est reçue (la nuit : en sommative seulement ; le 9 nov. : partout). Pendant une correction,
   les étudiant·es que tu n'as pas encore corrigé·es ne perdent plus de complétion. Mesuré dans l'application (Chromium) :
   douze élèves, douze copies importées, une seule évaluée. Avant : 1/1 pour l'évaluée, 0/1 pour les onze autres.
   Après : 1/1 pour les douze.
 - Ton évaluation corrige la remise : une copie importée que tu enregistres « Non reçu », ou marquée plagiat ou IA non
   autorisée, n'est pas remise (qu'elle soit écartée ou mise à 0).
 - Une copie papier, sans fichier, ne compte qu'une fois évaluée, comme avant.
-- Les captures du Suivi suivent la même règle en sommative, pour les captures à venir.
-- Rien ne change en standards, en spécifications ni en dénotation (ta consigne : ne pas étendre sans toi).
+- Les captures du Suivi suivent la même règle, dans les quatre familles, pour les captures à venir.
+- Une seule exception, qui ne change pas de sens : une ancienne pratique « spécifications » absente de ta bibliothèque
+  compte les travaux **acceptables**, pas les remises ; une copie reçue n'y est pas encore jugée (section 11.2).
 - La démo ne bouge pas : Loyal Suricate reste à 80 % (8/10), et ses deux productions non remises restent
   « Artefact 3 » et « Artefact 4 ».
 
-### Ce qui attend Grégoire (une question par ligne, avec ma recommandation)
+### Les questions, tranchées le 9 nov. (9 h 27 à 9 h 30, en Cowork)
+
+- Question 1 : **étendue aux quatre familles** (Grégoire a lui-même constaté le défaut). Fait : section 11.
+- Question 2 : **la phrase de l'étape 7 (et de l'étape 3) est corrigée par Grégoire** : « La complétion, elle, suit la
+  remise : dès ta première évaluation, chaque production importée pour ce travail compte comme remise ; sans fichier,
+  c'est ton évaluation qui confirme la remise. » Elle se pose dans le lot du troisième parcours.
+- Question 3 : **laisser ainsi** (décision de Cowork) : une reprise sur une copie non recevable compte comme remise une
+  fois évaluée.
+
+Plus rien n'attend Grégoire dans ce lot. Les trois questions de la nuit, telles qu'elles étaient posées :
 
 1. **Étendre la règle aux autres familles ?** Dans une pratique de ta bibliothèque, le calcul de C est le même code
    pour les quatre familles : le défaut que Cowork a mesuré (onze à 0 % après une première copie évaluée) existe donc
@@ -44,7 +57,7 @@ session dans le nuage : ni WebKit ni les données de Grégoire ici.
 
 ### Ce que je n'ai pas pu vérifier
 
-- **WebKit** : absent du nuage. Essais Playwright sous Chromium seulement (section 3).
+- **WebKit** : absent du nuage. Essais Playwright sous Chromium seulement (sections 3 et 11).
 - **Ton groupe d'A2026** : tes données sont sur le Mac. Un relevé en lecture seule est prêt (section 5).
 - La suite Playwright entière : seules les 13 specs qui touchent la complétion ont tourné.
 
@@ -145,8 +158,9 @@ mêmes deux productions.
 
 ### 1.8 Ton groupe d'A2026
 
-À mesurer sur le Mac, en lecture seule. Ce qui décide : la famille de la pratique appliquée au groupe, et le nombre de
-copies importées qui ne sont pas encore évaluées. Si la pratique n'est pas une sommative, rien ne change à l'écran.
+À mesurer sur le Mac, en lecture seule. Ce qui décide : le nombre de copies importées qui ne sont pas encore évaluées.
+Depuis le 9 nov., la famille ne décide plus (les quatre suivent la règle), sauf une ancienne pratique « spécifications »
+absente de ta bibliothèque (section 11.2).
 
 ## 2. La décision de coder
 
@@ -235,8 +249,8 @@ aucun nom) :
 })()
 ```
 
-Il rend la famille, puis seulement les élèves dont la fraction change (avant, après). Si la famille n'est pas « SOM »,
-la liste est vide : rien ne change à l'écran.
+Il rend la famille, puis seulement les élèves dont la fraction change (avant, après). Depuis le 9 nov., il vaut pour les
+quatre familles ; une liste vide veut dire qu'aucune copie importée n'attend d'évaluation.
 
 ## 6. Le stock
 
@@ -295,3 +309,76 @@ Deux remarques de plus, sans suite de code :
 3. **Une reprise accordée sur une copie non recevable, remise par import** : l'élève reste « non remis » jusqu'à ce que
    tu évalues sa reprise, parce que l'originale « plagiat » reste active d'ici là. C'était déjà le cas avant ce lot.
    *Recommandation : laisser ainsi* (cas rare ; la reprise évaluée remplace l'originale et l'élève redevient remis).
+
+## 11. L'extension aux quatre familles (9 nov. 2026)
+
+Décisions de Grégoire du 9 nov. (9 h 27 à 9 h 30, en Cowork), relayées à une session dans le nuage (ni WebKit ni tes
+données) : `FAMILLES_OU_LA_RECEPTION_VAUT_REMISE` couvre la sommative, les standards, les spécifications et la
+dénotation, dans la pratique configurable et dans les captures du Suivi. Pour les instances codées en dur : mesurer ce
+que l'extension y changerait, le dire, et ne pas changer leur sens sans le dire.
+
+### 11.1 Ce qui change (en gestes)
+
+- **Une pratique de ta bibliothèque, quelle que soit sa famille** (tout ce qui naît de « Partir d'un modèle », de
+  l'assistant ou d'un partage) : dès ta première évaluation d'une production, chaque copie importée pour cette
+  production compte comme remise ; « Non reçu », plagiat ou IA la corrigent ; sans fichier, ton évaluation confirme.
+  C'est exactement la règle de la sommative, dans les trois autres familles.
+- **Les captures du Suivi** (le graphique) : la même règle, dans les quatre familles, pour les captures à venir.
+- **Sans pratique appliquée au groupe**, les captures gardent la règle d'avant (hypothèse prise seul : la règle se lit
+  dans la famille de la pratique ; sans pratique, il n'y en a pas). Sans effet sur le troisième parcours : la pratique y
+  est appliquée à l'étape 6, avant que l'étape 7 montre la bande.
+
+Code : `pratique-registre.js` (la liste des familles), `pratique-pan-standards.js` (11.2), les commentaires de
+`pratique-configurable.js` et de `snapshots.js` (rien d'autre n'y change : ils lisaient déjà la liste), quatre jetons
+anti-cache dans `index.html`.
+
+### 11.2 Les instances codées en dur, mesurées
+
+Elles ne servent que lorsqu'une pratique n'est pas dans ta bibliothèque : une ancienne configuration dont l'identifiant
+(`pan-standards`, `pan-specifications`, `sommative`) ne trouve aucune fiche (`obtenirPratiqueParId`,
+`pratique-registre.js`). Tout ce que tu crées aujourd'hui est une configurable. La sommative codée en dur suivait déjà
+la règle depuis la nuit.
+
+- **Les standards codés en dur** (`pratique-pan-standards.js`, `calculerDetailsCompletion`). Leur dénominateur est
+  autre : les travaux **assignés avec une échéance**, évalués ou non, et quelle que soit l'échéance (passée ou à venir).
+  Mesuré par les essais : avant l'extension, Bruno et Chloé (copies importées, pas encore évaluées) étaient à 0/1 ; après,
+  1/1 ; Dario (papier, pas évalué) reste à 0/1 ; marqué plagiat, Bruno retombe à 0/1. **Ce que ça change de plus
+  qu'ailleurs** : le travail étant au dénominateur avant toute évaluation, la copie importée y compte dès sa réception,
+  sans attendre une première évaluation du groupe. **Le sens de C ne change pas** (des remises sur des travaux
+  assignés) ; seul ce qui compte comme remise suit ta règle. **Étendu**, pour qu'une pratique par standards dise la même
+  chose qu'elle soit dans ta bibliothèque ou non.
+- **Les spécifications codées en dur** (`pratique-pan-specifications.js`). Leur C n'est pas une part de remises : c'est
+  la part des travaux **acceptables** du palier le plus haut, comptés sur les évaluations de l'élève. Une copie importée
+  n'y est ni acceptable ni non acceptable tant qu'elle n'est pas jugée : y étendre la règle changerait le sens de C
+  (d'« acceptables » à « remis »). **Non étendu** ; un essai le garde (elles ne lisent pas les copies importées). Les
+  captures du Suivi, elles, comptent des remises dans toutes les familles (déjà avant ce lot) : avec une telle pratique,
+  le graphique suit ta règle, et la carte Complétion du profil continue de compter des travaux acceptables.
+
+### 11.3 Les essais
+
+- La sentinelle du lot (`tests/unit/sentinelle-completion-suit-la-remise-2026-11-08.test.js`) passe de 17 à **35
+  essais** : le cas de la consigne dans la sommative codée en dur et dans la configurable de **chacune des quatre
+  familles** (Bruno et Chloé importés remis, Dario sur papier non remis, le témoin sans fichiers, le dénominateur, la
+  correction par l'évaluation) ; les standards codés en dur (trois essais) ; les spécifications codées en dur, inchangées
+  (un essai) ; les deux C des captures dans les trois autres familles et sans pratique.
+- **Rouges avant le correctif des standards codés en dur** : 2 (Bruno à 0/1 au lieu de 1/1, avec et sans évaluation).
+- **Break-tests**, chacun rouge puis rétabli : chacun des trois codes retiré de la liste, un à la fois (STD : 6 rouges ;
+  SPE : 4 ; DEN : 4) ; les standards codés en dur sans les copies reçues (2) ; la garde « sans pratique » retirée (3).
+- Deux sentinelles de texte suivent le site des standards (il passe par la règle par production) :
+  `sentinelle-audit-aide-15-oct-ce-que-fait-l-application`, `sentinelle-lot-A-737-741-718-738-les-memes-copies-partout`
+  (D3). Leur intention ne change pas : le calcul lit toujours `evaluationCompteCommeRemise` par la règle du registre.
+- **Vitest** (depuis `tests/`) : 893 fichiers, **10 860 essais, tous verts**.
+- **Playwright, Chromium**, les 13 specs qui touchent la complétion (liste en section 3) : **32 verts sur 33**. Le rouge,
+  `registre-longitudinal-915` R5 (une tuile à 768 px), est le même que la nuit, rouge aussi sur `main` : sans rapport.
+- **La démo ne bouge pas** : son pack ne contient aucune copie importée (`fichiersTravaux` absent de
+  `js/pack-demo-10.js`), et sa pratique (`demo-std-litt`, standards, configurable) compte comme avant. Loyal Suricate
+  reste à 80 % (8/10). Inférence tirée du code et de la mesure de la nuit, pas remesurée dans le navigateur.
+
+### 11.4 Le stock
+
+Comme en section 6 : la source seulement. Rien n'est écrit dans tes données. Le C du jour se recalcule au prochain
+calcul, dans les quatre familles ; les captures déjà enregistrées gardent leur C jusqu'à « Recalculer les captures ».
+
+### 11.5 Relecture par un agent neuf
+
+Voir 11.6 (ajoutée après la relecture).

@@ -320,15 +320,15 @@ describe('D · un seul endroit pour chaque règle — aucun site ne recopie « n
         // qui lit les trois prédicats — les sites ne les recopient plus (un site qui en oubliait un rougissait ici).
         const regle = sansCommentaires(tranche(source('js/pratiques/pratique-registre.js'), 'function evaluationCompteCommeRemise(', 'function compterEvaluationsEcarteesDeLaNote('));
         expect(/evaluationEntreDansLaNote\(/.test(regle) && /!evaluationNonRemise\(/.test(regle) && /evaluationNonRecevable\(/.test(regle)).toBe(true);
-        const deux = (s) => /window\.evaluationCompteCommeRemise\(e, evaluations\)/.test(s);   // E15 (28 oct. 2026) : avec la liste où chercher la reprise
-        // La complétion suit la remise (8 nov. 2026) : la sommative, la configurable et le C de chaque élève des captures passent
-        // par la règle PAR PRODUCTION du registre, qui lit la règle de la remise (et la copie importée, en sommative).
-        const parProduction = (s) => /window\.productionRemiseParEleve\(da, production\.id, evaluations, copiesRecues\)/.test(s);
+        // La complétion suit la remise (8 nov. 2026 ; les quatre familles le 9 nov.) : la sommative, les standards, la
+        // configurable et le C de chaque élève des captures passent par la règle PAR PRODUCTION du registre, qui lit la règle de
+        // la remise (`evaluationCompteCommeRemise`, E15 : avec la liste où chercher la reprise) et la copie importée.
+        const parProduction = (s) => /window\.productionRemiseParEleve\(da, (production|travail)\.id, evaluations, copiesRecues\)/.test(s);
         const regleParProduction = sansCommentaires(tranche(source('js/pratiques/pratique-registre.js'), 'function productionRemiseParEleve(', 'function compterEvaluationsEcarteesDeLaNote('));
         expect(/evaluationCompteCommeRemise\(e, liste\)/.test(regleParProduction)).toBe(true);
         expect(parProduction(corps('js/pratiques/pratique-sommative.js', '    calculerDetailsCompletion(da) {', '    calculerCompletion(da) {'))).toBe(true);
         expect(parProduction(corps('js/pratiques/pratique-configurable.js', '    calculerDetailsCompletion(da) {', '    calculerCompletion(da) {'))).toBe(true);
-        expect(deux(corps('js/pratiques/pratique-pan-standards.js', '    calculerDetailsCompletion(da) {', '    calculerCompletion(da) {'))).toBe(true);
+        expect(parProduction(corps('js/pratiques/pratique-pan-standards.js', '    calculerDetailsCompletion(da) {', '    calculerCompletion(da) {'))).toBe(true);
         // Lot 30 : partout où la complétion lit « non remise », elle lit aussi « non recevable » — par la règle unique.
         ['js/pratiques/pratique-sommative.js', 'js/pratiques/pratique-configurable.js', 'js/pratiques/pratique-pan-standards.js'].forEach(fichier =>
             expect([fichier, /evaluationNonRemise\(|evaluationNonRecevable\(/.test(corps(fichier, '    calculerDetailsCompletion(da) {', '    calculerCompletion(da) {'))]).toEqual([fichier, false]));
