@@ -1005,3 +1005,14 @@ body.aide-contextuelle-active .btn-aide-contextuelle,
     text-align: center;
     padding: 24px;
 }
+
+/* --- L'aide au-dessus de ce qui porte son « i » (parcours 6, 9 nov. 2026) ----------
+   L'aperçu « Mettre à jour le codex » est à 99999 (js/securite-export-preview.js) : son « i »
+   ouvrait l'aide (10002) DESSOUS, cachée tant que l'aperçu restait ouvert. Quand le « i » vit
+   dans une couche plus haute que l'aide, js/accompagnement.js (placerLEtageDeLAide) pose cette
+   classe sur le body, le temps que l'aide reste ouverte. L'étage entier monte ensemble : le
+   voile, l'aide, et le micro-popup de ses termes (#1152, au-dessus de l'aide). Au-dessus de la
+   progression (100000) et de la bulle du parcours posée sur l'aperçu (100002, css/parcours.css). */
+body.aide-par-dessus-les-fenetres .aide-contextuelle-overlay { z-index: 100010; }
+body.aide-par-dessus-les-fenetres .aide-contextuelle-modal { z-index: 100011; }
+body.aide-par-dessus-les-fenetres .glossaire-micropopup { z-index: 100012; }

@@ -626,7 +626,10 @@ async function genererCodex(options = {}) {
     // Lot G (#988) : la taille se voit AVANT (aperçu). Les travaux (PDF, images) se
     // compressent peu : la taille non compressée est une estimation honnête du fichier.
     var tailleEstimee = manifeste.contenu.tailleTotaleOctets;
-    if (options.suivreTentative) _noterTentative({ etape: 'aperçu', tailleEstimeeOctets: tailleEstimee });
+    // Parcours 6 : le compte des copies manquantes est gardé avant l'aperçu, pour que le parcours
+    // sache, pendant l'aperçu, que l'application demandera où écrire (#1012). Le rapport de bug
+    // ne le montre pas (rapport-bug.js nomme ses champs).
+    if (options.suivreTentative) _noterTentative({ etape: 'aperçu', tailleEstimeeOctets: tailleEstimee, copiesManquantes: compteDesCopies.manquantes });
 
     // Défense K — valider que le ZIP ne contient que les entrées attendues
     // avant de le sérialiser. Si un payload a tenté d'ajouter un fichier
@@ -1761,6 +1764,27 @@ async function sauvegarderVersDestination(blob, nomFichier, options) {
     // Stratégie 3 : Téléchargement classique (fallback universel). Rend `download` : il est
     // LANCÉ ; l'application ne peut pas savoir s'il s'est terminé (js/fichier-sortant.js).
     return window.FichierSortant.telecharger(blob, nomFichier);
+}
+
+/**
+ * Parcours 6 (9 nov. 2026) : le chemin que prendra la PROCHAINE écriture de « Mettre à jour le
+ * codex », lu avant qu'elle parte, dans l'ordre de `sauvegarderVersDestination` ci-dessus. Le
+ * parcours « Mettre tes données à l'abri » choisit sa phrase avec lui : sa bulle doit être lue
+ * avant qu'une fenêtre du système s'ouvre. Il dit le premier essai ; un échec peut ensuite
+ * mener ailleurs (un fichier tenu devenu invalide, une fenêtre de choix qui échoue).
+ * @param {boolean} copiesManquent - #1012 : l'application demande alors toujours où écrire
+ * @returns {'tenu'|'fenetre'|'partage'|'telechargement'}
+ */
+function cheminDeLaProchaineEcriture(copiesManquent) {
+    if (_fileHandle && !copiesManquent) return 'tenu';
+    if (window.showSaveFilePicker) return 'fenetre';
+    if (_partageraUnCodex()) return 'partage';
+    return 'telechargement';
+}
+
+/** Sans fenêtre de choix : le navigateur offre-t-il le partage d'un codex (stratégie 2 ci-dessus) ? */
+function _partageraUnCodex() {
+    return _peutPartagerFichier(new Blob([], { type: 'application/zip' }), 'codex' + EXTENSION_CODEX);
 }
 
 /**
@@ -3234,7 +3258,9 @@ function _actualiserMenu() {
                 ligneInfo;
             statutHaut.classList.remove('u-hide');
         } else {
-            statutHaut.innerHTML = '<div class="codex-statut-etat">Aucun codex actif — ouvre ou crée un codex pour commencer.</div>';
+            // Parcours 6 (mots validés par Grégoire le 8 nov. 2026, 14 h 47) : « Ouvrir » remplace
+            // l'espace et « Nouveau codex » n'écrit rien ; c'est la mise à jour qui crée le codex.
+            statutHaut.innerHTML = '<div class="codex-statut-etat">Pas encore de codex : « Mettre à jour le codex » en crée un avec tes données.</div>';
             statutHaut.classList.remove('u-hide');
         }
     }
@@ -3262,7 +3288,8 @@ function _actualiserMenu() {
 
     // Libellé canonique « Mettre à jour le codex » partout (D4, Grégoire, 26 sept. 2026 :
     // « Enregistré » ne veut plus dire qu'écrit dans l'application ; le codex a son verbe).
-    // La mécanique Safari (téléchargement d'un nouveau fichier) reste dite par le sous-texte.
+    // Sans fenêtre de choix, la mécanique (partage ou téléchargement d'un nouveau fichier)
+    // reste dite par le sous-texte.
     var fsapiOk = (typeof window.showSaveFilePicker === 'function');
     var enregLabel = document.getElementById('codex-menu-enreg-label');
     if (enregLabel) {
@@ -3273,7 +3300,9 @@ function _actualiserMenu() {
     var enregInfo = document.getElementById('codex-menu-enreg-info');
     if (enregInfo) {
         if (!fsapiOk) {
-            enregInfo.textContent = 'Télécharge un nouveau fichier';
+            // Parcours 6 (mots validés par Grégoire le 9 nov. 2026, 9 h 33) : sur l'iPad, l'écriture
+            // passe par la feuille de partage ; la bulle 3 du parcours le dit, le menu aussi.
+            enregInfo.textContent = _partageraUnCodex() ? 'Partage un nouveau fichier' : 'Télécharge un nouveau fichier';
             enregInfo.classList.remove('u-hide');
         } else if (_fileHandle) {
             enregInfo.textContent = 'Dans le même fichier';
@@ -3463,6 +3492,7 @@ function _debuterTentative(geste) {
         etape: 'début',
         tailleEstimeeOctets: null,
         tailleOctets: null,
+        copiesManquantes: null,
         essais: 0,
         strategie: null,
         toucherFrais: null,
@@ -4809,6 +4839,7 @@ window.Codex = {
     ouvrirFichier: ouvrirFichier,
     actionEnregistrer: actionEnregistrer,
     derniereTentative: derniereTentative,
+    cheminDeLaProchaineEcriture: cheminDeLaProchaineEcriture,   // parcours 6
     actionEnregistrerSous: actionEnregistrerSous,
     ecrireAPartAvantSuppression: ecrireCodexAPartAvantSuppression,   // #1007
     proposerAvantSuppression: proposerCodexAvantSuppression,         // #1007, second lot

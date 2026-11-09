@@ -105,6 +105,11 @@ async function bulleNeCouvrePasLeContour(page) {
 
 const MENU_ATTENDU = ['Assistance', 'Aide', 'Signaler', 'Soutenir', 'Réglages'];
 
+// Parcours 6 (9 nov.) : les lots suivants inscrivent leurs parcours après ces deux-là. Le rang
+// se lit sur le registre, et les deux premiers parcours de la liste sont ceux de la partie 1.
+const nParcours = (page) => page.evaluate(() => window.Assistance.parcours().length);
+const deuxPremiers = async (loc) => (await loc.allTextContents()).slice(0, 2).map((t) => t.trim());
+
 test('menu : une seule entrée « Assistance », avant Aide, Signaler, Soutenir, Réglages ; le rang du parcours à venir', async ({ page }) => {
     await ouvrirEspaceVide(page, 1180);
     await page.click('#entete-menu-bouton');
@@ -112,7 +117,7 @@ test('menu : une seule entrée « Assistance », avant Aide, Signaler, Soutenir,
     expect(mots.map((m) => m.trim())).toEqual(MENU_ATTENDU);
     await expect(page.locator('#entete-menu-panneau')).not.toContainText('Visite guidée');
     await expect(page.locator('#btn-assistance-nav')).toHaveCount(0);
-    await expect(page.locator('#assistance-menu-rang')).toHaveText('1 sur 2');
+    await expect(page.locator('#assistance-menu-rang')).toHaveText('1 sur ' + await nParcours(page));
     await capture(page, 'menu-1180-sombre-rien-de-fait');
 });
 
@@ -124,13 +129,14 @@ test('panneau : titre, phrase, « Tes parcours », deux parcours à faire, l’a
     await expect(p.locator('.assistance-titre')).toHaveText('Assistance');
     await expect(p.locator('.assistance-intro')).toHaveText('Des parcours où tu fais les gestes toi-même, accompagné·e pas à pas : quoi faire, comment le faire, et pourquoi.');
     await expect(p.locator('.assistance-intitule')).toHaveText('Tes parcours');
-    await expect(p.locator('.assistance-parcours-titre')).toHaveText(['Découvrir', 'Mettre ta classe en place']);
-    await expect(p.locator('.assistance-parcours-ligne')).toHaveText([
+    await expect(p.locator('.assistance-parcours-titre')).toHaveCount(await nParcours(page));
+    expect(await deuxPremiers(p.locator('.assistance-parcours-titre'))).toEqual(['Découvrir', 'Mettre ta classe en place']);
+    expect(await deuxPremiers(p.locator('.assistance-parcours-ligne'))).toEqual([
         "Ce que Labo Codex te montre avant d'entrer en classe, sur une classe de démonstration.",
         "De ton trimestre à ta première saisie de présences : ta classe d'un coup d'œil."
     ]);
-    await expect(p.locator('.assistance-parcours-etat')).toHaveText(['À faire', 'À faire']);
-    await expect(p.locator('.assistance-parcours-bouton')).toHaveText(['Commencer', 'Commencer']);
+    expect(await deuxPremiers(p.locator('.assistance-parcours-etat'))).toEqual(['À faire', 'À faire']);
+    expect(await deuxPremiers(p.locator('.assistance-parcours-bouton'))).toEqual(['Commencer', 'Commencer']);
     await expect(p.locator('.assistance-aide-titre')).toHaveText('Aide dans les pages');
     await expect(p.locator('.assistance-aide-ligne')).toHaveText('Infobulles et flèches qui expliquent ce que tu touches.');
 
@@ -193,7 +199,7 @@ test('« Découvrir » de bout en bout sur la démo, en faisant les gestes (1180
     await expect(page.locator('#transition-bandeau')).toBeHidden();
     await capture(page, 'decouvrir-1-1180-sombre');
     // Le menu dit qu'un parcours est en cours : le premier.
-    expect(await page.locator('#assistance-menu-rang').textContent()).toBe('1 sur 2');
+    expect(await page.locator('#assistance-menu-rang').textContent()).toBe('1 sur ' + await nParcours(page));
     await page.click('#btn-toggle-panneau-prioritaire');
 
     // Étape 2 : la pastille de Loyal Suricate, le contour sur son A.
@@ -254,7 +260,7 @@ test('« Découvrir » de bout en bout sur la démo, en faisant les gestes (1180
     expect(await page.evaluate(() => document.body.classList.contains('parcours-actif'))).toBe(false);
     expect(await page.evaluate(() => estEnModeDemo())).toBe(true);
     expect(await page.evaluate(() => Assistance.etatDe('decouvrir').etat)).toBe('fait');
-    await expect(page.locator('#assistance-menu-rang')).toHaveText('2 sur 2');
+    await expect(page.locator('#assistance-menu-rang')).toHaveText('2 sur ' + await nParcours(page));
     await ouvrirPanneau(page);
     const item = page.locator('#panneau-assistance [data-parcours="decouvrir"]');
     await expect(item).toHaveAttribute('data-etat', 'fait');
