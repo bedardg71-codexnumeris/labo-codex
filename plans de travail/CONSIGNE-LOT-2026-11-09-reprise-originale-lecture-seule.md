@@ -61,3 +61,7 @@ LIVRAISON : release patch après verdict WebKit sur le Mac, puis push et fusion 
 ## Le stock
 
 **Stock non mesurable.** L'écriture fautive ne laisse aucune marque de sa source : l'enregistrement automatique pose sur la reprise les critères, la note, la rétroaction et `dateModification`, comme quand on évalue la reprise elle-même. Une reprise qui porte les niveaux de son originale peut aussi être une reprise réévaluée aux mêmes niveaux. Une condition nécessaire, elle, se mesure : le défaut n'a pu jouer que si l'originale était **non verrouillée en base** (verrouillée, son formulaire était déjà en lecture seule) — c'est l'état que laisse « Modifier l'évaluation » quand on ne reverrouille pas. Un relevé en lecture seule des couples « originale remplacée non verrouillée + reprise » est possible ; il n'est pas écrit, faute de demande. Rien n'est réparé ni réécrit.
+
+## Ligne des Nouvelles (sous l'entrée 1.238, version 1.238.1)
+
+Proposée par Claude Code, validée par Grégoire telle quelle le 9 nov. 2026 : « Évaluer : une évaluation remplacée par une reprise s'ouvre en lecture seule, comme une évaluation verrouillée. Pour la corriger, « Déverrouiller » ; ce que tu y changes reste sur elle, la reprise n'en reçoit rien. »

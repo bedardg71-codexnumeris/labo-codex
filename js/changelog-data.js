@@ -27,7 +27,9 @@
             couleur: 'vert',
             titre: 'Un mot pour ton étudiant·e',
             items: [
-                'Évaluer&nbsp;: un champ «&nbsp;Un mot pour ton étudiant·e&nbsp;», sous la rétroaction. Ce que tu y écris s’imprime sur son PDF, après son niveau&nbsp;; laissé vide, rien n’apparaît. Les retouches faites dans le cadre de la rétroaction, elles, ne vont pas sur le PDF.'
+                'Évaluer&nbsp;: un champ «&nbsp;Un mot pour ton étudiant·e&nbsp;», sous la rétroaction. Ce que tu y écris s’imprime sur son PDF, après son niveau&nbsp;; laissé vide, rien n’apparaît. Les retouches faites dans le cadre de la rétroaction, elles, ne vont pas sur le PDF.',
+                // 1.238.1 (lot de la reprise, 9 nov. 2026) — ligne validée par Grégoire telle quelle.
+                'Évaluer&nbsp;: une évaluation remplacée par une reprise s’ouvre en lecture seule, comme une évaluation verrouillée. Pour la corriger, «&nbsp;Déverrouiller&nbsp;»&nbsp;; ce que tu y changes reste sur elle, la reprise n’en reçoit rien.'
             ]
         },
         {
