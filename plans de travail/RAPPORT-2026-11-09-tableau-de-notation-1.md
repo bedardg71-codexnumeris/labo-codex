@@ -1,6 +1,6 @@
 # Rapport : tableau de notation, lot 1 (9 nov. 2026)
 
-*Deux sessions Claude Code dans le cloud ont fait ce lot. La première (rapport d'origine, conservé plus bas) l'a codé sans la consigne, depuis la 1.238.0, et l'a poussé à 19 h 52 UTC. La seconde (ce rapport de tête) a reçu la consigne et les six précisions de Cowork du 9 nov., 15 h. Branche `lot/tableau-de-notation-1`. Rien n'est fusionné dans `main`, rien n'est publié, la version ne bouge pas. Chromium seulement.*
+*Deux sessions Claude Code dans le cloud ont fait ce lot. La première (rapport d'origine, conservé plus bas) l'a codé sans la consigne, depuis la 1.238.0, et l'a poussé à 19 h 52 UTC. La seconde (ce rapport de tête) a reçu la consigne et les six précisions de Cowork du 9 nov., 15 h. **Cette seconde version est poussée sur `lot/tableau-de-notation-1-bis`, à la demande de Cowork (9 nov.) : rien n'a été poussé sur `lot/tableau-de-notation-1`, qui reste à `12f5c640`. Cowork comparera les deux, Grégoire choisira.** Rien n'est fusionné dans `main`, rien n'est publié, la version ne bouge pas. Chromium seulement.*
 
 ## Reprise avec la consigne (seconde session)
 
@@ -14,7 +14,7 @@
 
 - **La branche `lot/tableau-de-notation-1` existait déjà à distance** : 8 commits d'une autre session, partis de la 1.238.0, sans la consigne. Le message de Cowork parlait d'une « nouvelle session » et d'une première version « jamais poussée » : elle l'était.
 - **J'avais commencé à réécrire le lot** (un module, une spec) avant de le voir. J'ai arrêté. La réalisation existante était plus avancée que la mienne (clavier, garde de la reprise, fenêtres du dépistage, break-tests, relecture) et la refaire aurait été refaire le travail d'un autre. Mon brouillon n'est pas dans le dépôt.
-- **J'ai gardé la branche et son histoire** : `origin/main` (1.239.0) y est fusionné (`9c3b0c8c`, deux conflits résolus), puis le lot est confronté à la consigne (`0c862c9f` et suivants). Aucun push forcé.
+- **Je suis reparti de ses 8 commits** (`12f5c640`) : `origin/main` (`5ef6adcb`, 1.239.0 plus la consigne) y est fusionné (`9c3b0c8c`, deux conflits résolus), puis le lot est confronté à la consigne (`0c862c9f`, `46613b15`, `6835aeba` et le commit de ce rapport). La branche bis contient donc la première version ET ces changements ; ce n'est pas une réécriture depuis `main`.
 - *Supposé : c'est ce que Cowork aurait voulu en sachant que la branche existait. Si tu préférais une réécriture depuis `main`, dis-le.*
 
 ### Ce qui a changé depuis la première passe, en gestes
@@ -33,7 +33,7 @@
 3. **Les reprises** (mesuré, bancs C7 et « la consigne ») : la case montre la reprise, jamais l'originale remplacée, même si l'originale porte une date plus récente. La note lit la reprise dès qu'elle est verrouillée ; d'ici là elle lit encore l'originale (règle E4 du 28 oct.), et la case montre déjà la reprise. **Écart possible entre la case et la note pendant cette fenêtre** : la reprise naît avec le niveau de l'originale, donc on voit le même niveau tant qu'elle n'est pas réévaluée ; je n'ai pas mesuré le cas où on la modifie sans la verrouiller.
 4. **Les branches en attente** : voir « À reporter » plus bas. Aucune n'est fusionnée ici.
 5. **Les captures** : dans `plans de travail/captures-2026-11-09-tableau-de-notation-1/`, Chromium, 1180 px, standards et spécifications, en clair et en sombre, noms fictifs, refaites sur la base 1.239.0. Les quatre à 820 px datent de la première passe (avant la fusion et les changements ci-dessus). Sur les captures, le témoin « Enregistré » recouvre le début d'un nom : c'est son comportement ordinaire, il s'efface en deux secondes.
-6. **Le push** : sur `lot/tableau-de-notation-1`. La session était configurée pour une branche `claude/…` ; je ne l'ai pas utilisée.
+6. **Le push** : sur `lot/tableau-de-notation-1-bis` (consigne de Cowork reçue en cours de route ; un push vers `lot/tableau-de-notation-1` a été interrompu avant d'aboutir, vérifié par `git ls-remote`). La session était configurée pour une branche `claude/…` ; je ne l'ai pas utilisée.
 
 ### Les choix techniques de la consigne, et ce que le lot en fait
 
@@ -70,7 +70,7 @@ Les dix questions de la première passe restent ouvertes (plus bas), sauf la 1 (
 
 ### Preuve
 
-- **Vitest complet** : une première passe a rendu 10 952 verts sur 10 956 ; les 4 rouges étaient des cliquets sur mon propre code (une classe CSS sans règle, un chemin de captures nommé dans la spec, une fonction de la Liste montée de 31 à 32), tous corrigés. Le verdict final est celui du hook pre-push, qui relance Vitest au complet : VERDICT_FINAL
+- **Vitest complet** : une première passe a rendu 10 952 verts sur 10 956 ; les 4 rouges étaient des cliquets sur mon propre code (une classe CSS sans règle, un chemin de captures nommé dans la spec, une fonction de la Liste montée de 31 à 32), tous corrigés. Le verdict final est celui du hook pre-push, qui relance Vitest au complet : ce commit n'est poussé que si elle est verte (le hook refuse sinon).
 - **Vitest du lot** : `tests/unit/tableau-notation-1.test.js`, 27 essais verts. Ajoutés : C5 (résultats sans grille mêlés à des évaluations à grille, la terminale saisie au tableau, la note provisoire sans elle), C6 (mêlés, en spécifications), C7 (la reprise), C8 (l'échelle modifiée). Le plancher des forfaits est en C2 (palier F, 50).
 - **Chromium** : `tests/integration/tableau-de-notation-1.spec.js`, 13 essais verts, plus 4 captures à la demande (`CAPTURES=1`). Ajoutés : aucun écrit dans les évaluations à grille (compte et empreinte), rechargement, la reprise ; Léa et Dossier PDF ; l'échelle de la production ; la cause lisible ; la copie non recevable.
 - **Break-tests de cette session**, chacun rougit son essai puis le code est restauré : l'exclusion de Léa ; le filtre du Dossier PDF ; le menu de la Liste ; l'échelle de la production ; la cause écrite ; « non remplacée » dans `copieDeLaCase` (l'essai passait encore à la première tentative : la reprise était aussi la plus récente ; l'originale porte maintenant la date la plus récente) ; la garde de la copie non recevable.
