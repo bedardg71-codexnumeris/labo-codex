@@ -170,7 +170,7 @@ function formulaire() {
     return { document, poser, evaluationEnCours, panneau: document.getElementById('travaux-eval-droite') };
 }
 
-// ↻ #1176 (9 nov. 2026) — PROPOSÉ, EN ATTENTE DE GRÉGOIRE : la phrase sur la note (« Dans la note du cours, elle vaut ce que
+// ↻ #1176 (9 nov. 2026) — retrait VALIDÉ par Grégoire (9 nov., en Cowork) : la phrase sur la note (« Dans la note du cours, elle vaut ce que
 // dit ta pratique : 0 en sommative… ») est retirée ; le choix « l'écarter » / « lui mettre 0 » s'affiche sous le menu.
 const AVIS = 'Travail non recevable Ton évaluation est gardée, mais la copie montre « Non recevable » au lieu de sa note et de ses niveaux, '
     + 'jusque sur le PDF de l’étudiant·e. Dans la complétion, elle compte comme non remise. Retirer le '

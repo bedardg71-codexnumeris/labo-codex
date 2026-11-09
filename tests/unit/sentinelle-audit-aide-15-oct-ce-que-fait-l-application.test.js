@@ -392,9 +392,10 @@ describe('Une copie non recevable dans la note, famille par famille (décisions 
         expect(perf).toContain('!window.copieNonRecevableEcartee(e, regle)');
         // E4 (28 oct. 2026) : la reprise remplace l'originale quand elle entre elle-même dans la note (`originaleEstRemplacee`).
         expect(corps(lire('js/pratiques/pratique-registre.js'), 'evaluationEntreDansLaNote')).toContain('if (evaluation.remplaceeParId && originaleEstRemplacee(evaluation, evaluations)) return false;');
-        // ↻ #1176 (9 nov. 2026) : les lignes par famille cèdent la place au choix (texte PROPOSÉ, en attente de Grégoire).
+        // ↻ #1176 (9 nov. 2026) : les lignes par famille cèdent la place au choix (texte validé par Grégoire, 9 nov., en Cowork ;
+        // mot pour mot dans sentinelle-textes-copie-non-recevable-valides-9-nov).
         expect(CARTE).toContain('En sommative, elle n\'entre pas dans la moyenne');
-        expect(CARTE).toContain('«&nbsp;Lui mettre 0&nbsp;» : 0 en sommative, un travail non satisfaisant en spécifications, 0 en standards, au portfolio comme à la terminale.');
+        expect(CARTE).toContain('«&nbsp;Lui mettre 0&nbsp;» : 0 en sommative, un travail non satisfaisant en spécifications, 0 en standards, au portfolio comme à la terminale ; en «&nbsp;N meilleures&nbsp;», ce 0 ne compte que s\'il manque des productions.');
         expect(CARTE).toContain('Une reprise remplace la copie non recevable, quel que soit son sort.');
         expect(CARTE, 'la clause des meilleures productions ne joue jamais en sommative').not.toMatch(/meilleures productions/);
     });
@@ -417,7 +418,7 @@ describe('Une copie non recevable dans la note, famille par famille (décisions 
         const hybride = corps(ACTIONS, '_selectionnerArtefactsHybride');
         expect(hybride).toContain('const denominateurObl = estFinale ? nombreObligatoiresTotal : evalsObligatoires.length;');
         expect(hybride).toMatch(/const nombreObligatoiresTotal = productionsNonPortfolio\s*\.filter\(p => p\.categorie === 'obligatoire' && p\.id !== terminalId\)\.length;/);
-        // ↻ #1176 (9 nov. 2026) : texte PROPOSÉ, en attente de Grégoire.
+        // ↻ #1176 (9 nov. 2026) : texte validé par Grégoire (9 nov., en Cowork).
         expect(CARTE).toContain("en standards, elle manque au portfolio, avec ce que ta pratique fait d'une copie manquante. Une terminale écartée laisse la note provisoire, puis vaut 0 une fois les notes finales cochées, comme une terminale non remise ; en mode hybride, une obligatoire écartée aussi.</li>");
     });
 

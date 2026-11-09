@@ -5572,7 +5572,7 @@
 
                                     <!-- #1176 (9 nov. 2026) : la règle de la pratique pour une copie non recevable. Écrite seulement quand
                                          l'utilisateur la choisit (`data-choisi`) ; sans règle écrite, elle se lit comme le comportement d'avant
-                                         (registre). Cachée en dénotation. Les mots : PROPOSÉS, en attente de Grégoire. -->
+                                         (registre). Cachée en dénotation. Les mots : validés par Grégoire, mot pour mot (9 nov. 2026, en Cowork). -->
                                     <div class="groupe-form u-mt-15" id="mat-sort-non-recevable" data-choisi="">
                                         <span id="mat-sort-non-recevable-titre" class="u-texte-gras" style="display: block; margin-bottom: 6px">
                                             Une copie non recevable (plagiat, IA non autorisée), dans la note
@@ -5594,7 +5594,7 @@
                                             <span class="u-texte-gras">Notes finalisées</span>
                                         </label>
                                         <p class="text-muted u-mt-5 u-texte-09" style="margin-left: 26px;">
-                                            Active le titre « Note finale » sur les PDF de rétroaction, à la place de « Note actuelle du cours » (pratique sommative) ou de « Note provisoire » (pratique alternative), et retire la liste « Artefacts à venir ». À activer en fin de session, quand les notes sont arrêtées.
+                                            Active le titre « Note finale » sur les PDF de rétroaction, à la place de « Note actuelle du cours » (pratique sommative) ou de « Note provisoire » (pratique alternative), et retire la liste « Artefacts à venir ». À activer en fin de session, quand les notes sont arrêtées. En standards, une terminale non remise ou écartée vaut alors 0.
                                         </p>
                                     </div>
                                 </div>
@@ -8327,7 +8327,7 @@
                                 <!-- #1176 (9 nov. 2026) : ce que la copie non recevable devient dans la note, coché selon la règle de la
                                      pratique et changeable pour cette copie (afficherChoixCopieNonRecevable, evaluation-sauvegarde.js).
                                      `data-choix-copie` : le choix fait sur la copie ; vide, elle suit la règle. Les mots sont posés par le
-                                     JS (TEXTES_SORT_COPIE_NON_RECEVABLE) : PROPOSÉS, en attente de Grégoire. -->
+                                     JS (TEXTES_SORT_COPIE_NON_RECEVABLE) : validés par Grégoire, mot pour mot (9 nov. 2026, en Cowork). -->
                                 <div id="divSortNonRecevable" class="groupe-form choix-sort-non-recevable u-hide" role="radiogroup"
                                      aria-labelledby="titreSortNonRecevable" data-choix-copie="">
                                     <span id="titreSortNonRecevable" class="label-formulaire"></span>
@@ -10647,19 +10647,19 @@
 
                         <div class="alerte alerte-information">
                             <h4 class="u-mb-10 u-texte-bleu">Travail NON REMIS</h4>
-                            <p>La Liste montre «&nbsp;Non reçu&nbsp;» et «&nbsp;--&nbsp;»&nbsp;; le profil, «&nbsp;Non remis&nbsp;». Le travail reste au total attendu de la complétion (C). La note dépend de ta pratique&nbsp;; par exemple, en sommative, il n'y entre pas&nbsp;; en standards hybride, une fois les notes finales cochées, une obligatoire non remise vaut 0.</p>
+                            <p>La Liste montre «&nbsp;Non reçu&nbsp;» et «&nbsp;--&nbsp;»&nbsp;; le profil, «&nbsp;Non remis&nbsp;». Le travail reste au total attendu de la complétion (C). La note dépend de ta pratique&nbsp;; par exemple, en sommative, il n'y entre pas. En standards, une fois les notes finales cochées, une terminale non remise vaut 0&nbsp;; en mode hybride, une obligatoire non remise aussi.</p>
                         </div>
 
                         <div class="alerte alerte-attention">
                             <h4 class="u-mb-10 u-texte-bleu">Travail NON RECEVABLE (Plagiat ou IA)</h4>
                             <p>Une raison d'intégrité&nbsp;: la Liste marque la copie «&nbsp;Non recevable (Plagiat)&nbsp;» ou «&nbsp;Non recevable (IA)&nbsp;», 0 sous «&nbsp;Statut&nbsp;», «&nbsp;--&nbsp;» en note.</p>
-                            <!-- #1176 (9 nov. 2026) : PROPOSÉ, EN ATTENTE DE GRÉGOIRE (rapport RAPPORT-2026-11-09-copie-non-recevable-choix.md).
-                                 Remplace les quatre lignes par famille du 15 oct. : le sort se choisit désormais (règle de la pratique, choix
-                                 sur la copie). Mot pour mot dans sentinelle-audit-aide-15-oct-ce-que-fait-l-application. -->
+                            <!-- #1176 : VALIDÉ par Grégoire, mot pour mot (9 nov. 2026, 10 h 08 à 10 h 13, en Cowork) ; la puce « Lui mettre 0 »
+                                 est la sienne. Remplace les quatre lignes par famille du 15 oct. : le sort se choisit désormais (règle de la
+                                 pratique, choix sur la copie). Exigé par sentinelle-textes-copie-non-recevable-valides-9-nov. -->
                             <p>Une copie non recevable compte comme non remise dans la complétion (C) ; elle reste dans le total attendu. Dans la note, c'est toi qui choisis son sort. Ta pratique de notation porte ta règle ; quand tu marques une copie non recevable, ta règle apparaît déjà cochée sous le menu, et tu peux la changer pour cette copie-là.</p>
                             <ul class="m-10-0-0-0">
                                 <li>«&nbsp;L'écarter&nbsp;» : elle est traitée comme une copie non remise. En sommative, elle n'entre pas dans la moyenne ; en spécifications, elle compte comme un travail non remis ; en standards, elle manque au portfolio, avec ce que ta pratique fait d'une copie manquante. Une terminale écartée laisse la note provisoire, puis vaut 0 une fois les notes finales cochées, comme une terminale non remise ; en mode hybride, une obligatoire écartée aussi.</li>
-                                <li>«&nbsp;Lui mettre 0&nbsp;» : 0 en sommative, un travail non satisfaisant en spécifications, 0 en standards, au portfolio comme à la terminale.</li>
+                                <li>«&nbsp;Lui mettre 0&nbsp;» : 0 en sommative, un travail non satisfaisant en spécifications, 0 en standards, au portfolio comme à la terminale ; en «&nbsp;N meilleures&nbsp;», ce 0 ne compte que s'il manque des productions.</li>
                                 <li>En dénotation, ta note est ton jugement : la copie n'y entre pas par calcul.</li>
                             </ul>
                             <p>Une pratique créée avant ce choix, tant que tu ne choisis pas sa règle, lit : 0 en sommative, un travail non satisfaisant en spécifications, «&nbsp;L'écarter&nbsp;» en standards. Tu changes sa règle dans Conception → Pratiques. Une reprise remplace la copie non recevable, quel que soit son sort.</p>
@@ -11670,7 +11670,7 @@
 
     <!-- Interface de gestion des pratiques configurables -->
     <script src="js/pratiques.js?v=20261030b"></script> <!-- #1178, lot 5 (30 oct.) : nombreTotal retiré du portfolio par défaut · #326 (28 juin) : T3 copie en forme canonique + T4 dérivation = arbre sans wizard ; Beta 99.38 b0508-1425 : nettoyage wizard V1 fantôme (-1772 l.) -->
-    <script src="js/wizard-pratique-v2.js?v=20261109s"></script> <!-- #1178, lot 5 (30 oct.) : les mots suivent la variante, deux champs morts retirés · Jetons par défaut (29 oct.) : une pratique créée sans réglage refuse les jetons · #1152, retouche du lot 5 (29 oct.) : « Ouvrir l’Exploration des pratiques » · #1152, lot 5 (29 oct.) : « étudiant·e » dans les écrans d’enseignant · #345 (22 juin) : lien « Ouvrir le comparateur » du récap gaté · #577 : l'étape « Échelle de performance » pose les deux repères de maîtrise de l'échelle choisie -->
+    <script src="js/wizard-pratique-v2.js?v=20261109t"></script> <!-- #1178, lot 5 (30 oct.) : les mots suivent la variante, deux champs morts retirés · Jetons par défaut (29 oct.) : une pratique créée sans réglage refuse les jetons · #1152, retouche du lot 5 (29 oct.) : « Ouvrir l’Exploration des pratiques » · #1152, lot 5 (29 oct.) : « étudiant·e » dans les écrans d’enseignant · #345 (22 juin) : lien « Ouvrir le comparateur » du récap gaté · #577 : l'étape « Échelle de performance » pose les deux repères de maîtrise de l'échelle choisie -->
     <script src="js/objectifs.js?v=20261029b"></script> <!-- #1152, lot 5 (29 oct.) : CC-BY-NC-SA dans le nom du fichier · Beta 99.39 b0509-0719 : #262 Phase 2 + precisionDate:minute -->
 
     <script src="js/portfolio.js?v=20261017a"></script> <!-- #326 (28 juin) : T1 simulerIndices — note STD non bâtie = « non constructible » (plus de 0 trompeur du repli) -->
@@ -11789,7 +11789,7 @@
     <script src="js/comptes-erreurs-stock.js?v=20261027b"></script> <!-- #1142 (23 oct.) : ComptesErreurs.verifier() à la console — mesurer, et réparer sur accord, les comptes d'erreurs qu'une autre copie a écrits -->
     <script src="js/cartouches-decalees.js?v=20261024a"></script> <!-- #1144 (23 oct.) : CartouchesDecalees.verifier() à la console — mesurer, et rattacher sur accord, les cartouches rangées sous une grille avec les critères d’une autre -->
     <script src="js/evaluation-retroaction.js?v=20261109n"></script> <!-- La palette Rétroaction compacte (1er nov.) · Beta 99.48 : session B 2e sous-module (10 fonctions Rétroaction) -->
-    <script src="js/evaluation-sauvegarde.js?v=20261109s"></script> <!-- La barre d’outils compacte, partie A (1er nov.) · Beta 99.48 : session B 3e sous-module (12 fonctions Sauvegarde + jetons + badges + statuts) ; #563 la case « Reprise ciblée » ne ment plus -->
+    <script src="js/evaluation-sauvegarde.js?v=20261109t"></script> <!-- La barre d’outils compacte, partie A (1er nov.) · Beta 99.48 : session B 3e sous-module (12 fonctions Sauvegarde + jetons + badges + statuts) ; #563 la case « Reprise ciblée » ne ment plus -->
     <script src="js/evaluation.js?v=20261109s"></script> <!-- Les palettes, une même famille § 4 (2 nov.) : un seul verrou, « Verrouiller » / « Déverrouiller », le cadenas de l’en-tête retiré · La palette Rétroaction compacte (1er nov.) · #1152, lot 5 (29 oct.) : « étudiant·e » dans les écrans d’enseignant · #1134 (21 oct.) : le critère algorithmique fait ce que son écran dit · #557 : la seconde supprimerEvaluation retiree -->
     <script src="js/evaluation-handlers.js?v=20261102a"></script> <!-- #1215, 1er nov. : Évaluer relit la grille · Beta 99.48 : session A étape 3 refactor (3 fonctions extraites) -->
 

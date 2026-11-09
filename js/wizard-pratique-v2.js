@@ -140,7 +140,8 @@ function _etapeApresInference(reponses) {
 
 /**
  * #1176 — les deux réponses à « que devient une copie non recevable dans la note ? », dites pour la famille choisie.
- * ⚠ TEXTES PROPOSÉS, EN ATTENTE DE GRÉGOIRE.
+ * TEXTES VALIDÉS PAR GRÉGOIRE, MOT POUR MOT (9 nov. 2026, 10 h 08 à 10 h 13, en Cowork) ; « Lui mettre 0 » en standards est
+ * le sien. Exigés par sentinelle-textes-copie-non-recevable-valides-9-nov.
  * @param {string} famille
  * @returns {Array<{value:string,label:string,description:string}>}
  */
@@ -149,7 +150,7 @@ function optionsSortCopieNonRecevable(famille) {
         sommative: ['Elle n\'entre pas dans la moyenne, comme une copie non remise.', 'Elle compte pour 0 dans la moyenne.'],
         specifications: ['Elle compte comme un travail non remis.', 'Elle compte comme un travail non satisfaisant.'],
         standards: ['Elle manque au portfolio, comme une copie non remise. Une terminale écartée laisse la note provisoire, puis vaut 0 une fois les notes finales cochées.',
-            'Elle entre au portfolio avec 0 ; une terminale vaut 0.']
+            'Elle entre au portfolio avec 0 ; en « N meilleures », ce 0 ne compte que s\'il te manque des productions. Une terminale vaut 0.']
     }[famille] || ['Elle est traitée comme une copie non remise.', 'Elle vaut 0.'];
     return [
         { value: 'ecarter', label: 'L\'écarter', description: effets[0] },
@@ -385,7 +386,7 @@ const ETAPES_WIZARD = {
     // #1176 (9 nov. 2026, décision 5 de Grégoire du 8 nov.) — UNE NOUVELLE PRATIQUE DEMANDE CE QUE VAUT UNE COPIE NON
     // RECEVABLE, SANS RÉPONSE COCHÉE D'AVANCE. La réponse devient sa règle (`configuration.sortCopieNonRecevable`), que
     // chaque copie marquée montre déjà cochée. Dénotation : sautée (la note est un jugement saisi). Un modèle adopté passe
-    // ici aussi. ⚠ TEXTES PROPOSÉS, EN ATTENTE DE GRÉGOIRE (rapport du 9 nov. 2026).
+    // ici aussi. Textes validés par Grégoire, mot pour mot (9 nov. 2026, en Cowork), sans réponse cochée d'avance.
     'copie-non-recevable': {
         id: 'copie-non-recevable',
         titre: 'Une copie non recevable',

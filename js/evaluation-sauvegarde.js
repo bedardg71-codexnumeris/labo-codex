@@ -578,8 +578,9 @@ function changerStatutRemise(num) {
 /**
  * L'avis « Travail non recevable » du formulaire — mots de Grégoire, validés le 28 oct. 2026 à 6 h 49 (« je garde »),
  * mot pour mot. La phrase du jeton, pour le plagiat seulement.
- * ↻ #1176 (9 nov. 2026) — PROPOSÉ, EN ATTENTE DE GRÉGOIRE : la phrase « Dans la note du cours, elle vaut ce que dit ta
- * pratique : 0 en sommative, un travail non satisfaisant en spécifications, hors du portfolio en standards. » est retirée.
+ * ↻ #1176 — retrait VALIDÉ par Grégoire (9 nov. 2026, 10 h 08 à 10 h 13, en Cowork) : la phrase « Dans la note du cours,
+ * elle vaut ce que dit ta pratique : 0 en sommative, un travail non satisfaisant en spécifications, hors du portfolio en
+ * standards. » est retirée.
  * Elle ne tient plus : le choix « l'écarter » ou « lui mettre 0 » s'affiche juste sous le menu, coché selon la règle de
  * la pratique (`afficherChoixCopieNonRecevable`). Le reste est mot pour mot.
  */
@@ -596,7 +597,11 @@ const AVIS_COPIE_NON_RECEVABLE = Object.freeze({
  * Quand l'utilisateur marque une copie « Non recevable », la règle de sa pratique apparaît déjà cochée, avec ce qu'elle
  * fera à la note ; il la change pour cette copie-là. Le choix fait sur la copie s'enregistre (`sortCopieNonRecevable`) ;
  * sans geste, rien ne s'écrit : la copie suit la règle de la pratique, lue au calcul (pratique-registre.js).
- * ⚠ TEXTES PROPOSÉS, EN ATTENTE DE GRÉGOIRE (rapport du 9 nov. 2026) : ils ne vivent qu'ici, pour se corriger d'un coup.
+ * TEXTES VALIDÉS PAR GRÉGOIRE, MOT POUR MOT (9 nov. 2026, 10 h 08 à 10 h 13, en Cowork) : ils ne vivent qu'ici ;
+ * sentinelle-textes-copie-non-recevable-valides-9-nov les exige. Une seule variante, la sienne : en standards, au pool
+ * (portfolio ou productions retenues), quand le mode de sélection de la pratique est « N meilleures », « lui mettre 0 »
+ * dit que ce 0 ne compte que s'il manque des productions (`zeroNMeilleures`) — c'est l'effet mesuré du calcul (rapport,
+ * § « Le minimum »). Les autres modes (tous, derniers, hybride) gardent le texte commun.
  * Le mot du pool suit la règle du récit (décision Q1 du 28 oct.) : « portfolio » avec des « Artefact », sinon
  * « productions retenues ». Dénotation : aucun choix, la note est un jugement saisi.
  */
@@ -615,11 +620,13 @@ const TEXTES_SORT_COPIE_NON_RECEVABLE = Object.freeze({
     },
     standardsPortfolio: {
         ecarter: 'l\'écarter, comme une copie non remise\u00a0: elle manque au portfolio',
-        zero: 'lui mettre 0\u00a0: elle entre au portfolio avec 0'
+        zero: 'lui mettre 0\u00a0: elle entre au portfolio avec 0',
+        zeroNMeilleures: 'lui mettre 0\u00a0: elle entre au portfolio avec 0\u00a0; en «\u00a0N meilleures\u00a0», ce 0 ne compte que s\'il te manque des productions'
     },
     standardsProductions: {
         ecarter: 'l\'écarter, comme une copie non remise\u00a0: elle manque aux productions retenues',
-        zero: 'lui mettre 0\u00a0: elle entre aux productions retenues avec 0'
+        zero: 'lui mettre 0\u00a0: elle entre aux productions retenues avec 0',
+        zeroNMeilleures: 'lui mettre 0\u00a0: elle entre aux productions retenues avec 0\u00a0; en «\u00a0N meilleures\u00a0», ce 0 ne compte que s\'il te manque des productions'
     },
     standardsObligatoire: {
         ecarter: 'l\'écarter, comme une obligatoire non remise\u00a0: elle vaut 0 une fois les notes finales cochées',
@@ -644,11 +651,31 @@ function _estStatutNonRecevable(statut) {
     return statut === 'plagiat' || statut === 'ia';
 }
 
-/** Les mots du choix, selon la famille de la pratique active et la place de la production dans la note. */
+/**
+ * Les mots du choix, selon la famille de la pratique active et la place de la production dans la note. Au pool des
+ * standards, en « N meilleures », « lui mettre 0 » prend la variante de Grégoire (9 nov. 2026).
+ * @returns {{ecarter:string, zero:string}}
+ */
 function _textesDuChoixCopie(famille, productionId) {
     const T = TEXTES_SORT_COPIE_NON_RECEVABLE;
-    if (famille === 'standards') return T[_placeEnStandards(productionId)];
-    return T[famille] || T.generique;   // sommative, specifications ; sinon (aucune pratique) : générique
+    if (famille !== 'standards') return T[famille] || T.generique;   // sommative, specifications ; sinon (aucune pratique) : générique
+    const textes = T[_placeEnStandards(productionId)];
+    if (textes.zeroNMeilleures && _modeSelectionNMeilleures()) return { ecarter: textes.ecarter, zero: textes.zeroNMeilleures };
+    return textes;
+}
+
+/**
+ * Le mode de sélection de la pratique active est-il « N meilleures » ? Lu comme le calcul le lit
+ * (`_obtenirConfigPortfolioCalcul`, profil-etudiant-actions.js) : `portfolio.methodeSelection`, « meilleurs » par défaut ;
+ * l'hybride stocke aussi « meilleurs » (wizard-pratique-v2.js), mais c'est un autre mode à l'écran (pratiques-gestion.js,
+ * « hybride a priorité ») : il garde le texte commun. Sans configuration de portfolio : non.
+ */
+function _modeSelectionNMeilleures() {
+    const configuration = (typeof window.obtenirConfigPratiqueActive === 'function') ? window.obtenirConfigPratiqueActive() : null;
+    const portfolio = configuration && configuration.portfolio;
+    if (!portfolio) return false;
+    if (portfolio.hybride || (configuration.categories && configuration.categories.actif)) return false;
+    return (portfolio.methodeSelection || 'meilleurs') === 'meilleurs';
 }
 
 /** Standards : la place de la production — terminale, obligatoire (hybride), ou pool (portfolio / productions retenues). */
