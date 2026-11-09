@@ -334,6 +334,15 @@ function _rafraichirProfilEtudiantSiVisible() {
 }
 
 /**
+ * Vue simple (9 nov. 2026) : le message nomme un objet de la vue étendue (« Groupe-cours activé ») ; l'écran de la vue
+ * simple dit déjà ce qui vient de se passer (« Classe créée »). En vue étendue, rien ne change.
+ */
+function _annoncerContexteActive(message) {
+    if (window.VueSimple && window.VueSimple.estSimple()) return;
+    notifications.succes(message);
+}
+
+/**
  * (Helper privé) Rafraîchit toutes les vues dépendantes du contexte
  * groupe-cours/cours actif : entête, calendrier, étudiants, tableau de
  * bord, profil étudiant, boîte à outils, saisie présences, évaluations,
@@ -360,7 +369,7 @@ function _rafraichirVuesContextDependantes(valeurHeader, messageNotification, re
     // #887 : le formulaire d'ajout d'élèves du Cadre nomme le cours actif — il vient de changer.
     if (typeof window.rafraichirRattachementEtudiantsV2 === 'function') window.rafraichirRattachementEtudiantsV2();
 
-    notifications.succes(messageNotification);
+    _annoncerContexteActive(messageNotification);
 
     // Mode GROUPE-COURS uniquement : régénérer le calendrier avec les bons jours
     if (regenererCalendrier && typeof genererCalendrierComplet === 'function') {

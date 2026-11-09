@@ -52,6 +52,11 @@
     });
 
     let _affiche = false;
+    /* LA VUE SIMPLE (lot « Vue simple », 9 nov. 2026) : le même tableau, monté dans un autre hôte, avec une présentation
+       qui ne nomme rien qui n'existe pas dans les données de l'utilisateur (règle arrêtée par Grégoire). La présentation
+       est donnée par `vue-simple.js` (`afficherDans`) ; sans elle, rien ne change : les mots validés restent ceux de `MOTS`. */
+    let _presentation = null;
+    let _ecoutesCommunes = false;
     let _dernierGeste = null;   // « Annuler » : le dernier geste écrit par le tableau, dans ce trimestre
     let _minuteurIndices = null;
     const DELAI_INDICES_MS = 1200;
@@ -302,7 +307,7 @@
         const nom = `${etudiant.prenom || ''} ${etudiant.nom || ''}`.trim();
         const mot = etat.nonRecevable || _motDeLaValeur(etat.valeur, ctx, production.id, etat.echelleId);
         const changee = _phraseValeurChangee(etat);
-        const aria = `${nom}, ${production.titre || ''} : ${mot}` + (etat.modifiable ? '' : `, ${MOTS.avecGrille}`) + (changee ? `. ${changee}` : '');
+        const aria = `${nom}, ${production.titre || ''} : ${mot}` + (etat.modifiable ? '' : `, ${_presentation ? MOTS.avecGrille.split(' ;')[0] : MOTS.avecGrille}`) + (changee ? `. ${changee}` : '');
         const classes = _classesDeLaCase(etat, changee);
         const bulle = changee ? ` title="${esc(changee)}"` : '';
         const style = etat.valeur ? ` style="--tn-couleur: ${esc(_couleurDeLaValeur(etat.valeur, ctx, production.id, etat.echelleId))}"` : '';
@@ -399,10 +404,15 @@
         const regle = ctx.famille === 'STD'
             ? phraseRegleStd(ctx.config, !!ctx.terminalId)
             : ctx.types.map(t => `${t.nom || t.id} (${ctx.productions.filter(p => window.productionEstDuType(p, t)).length})`).join(' · ');
+        // Vue simple : « Réglages de la pratique » mène à l'écran Pratique, et « + Production » ajoute une colonne.
+        const p = _presentation;
+        const reglages = (p && p.reglages) || { action: 'ouvrirReglagesPratique', param: ctx.pratiqueId };
+        const g = p && p.gestes && p.gestes['aucune-production'];
+        const ajout = g ? `<button type="button" class="btn btn-principal" data-action="${esc(g.action)}">${esc(g.libelle)}</button>` : '';
         return `<div class="tn-bandeau">
             <div class="tn-pratique">${badge}<span class="tn-pratique-nom">${esc(ctx.pratiqueNom)}</span><span class="tn-regle">${esc(regle)}</span>
-                <a href="#" class="tn-reglages" data-prevent data-action="ouvrirReglagesPratique" data-param="${esc(ctx.pratiqueId)}">${esc(MOTS.reglages)}</a></div>
-            <div class="tn-gestes"><button type="button" class="btn btn-secondaire" id="tn-annuler" data-action="TableauNotation.annuler"${_gesteAnnulable() ? '' : ' disabled'}>${esc(MOTS.annuler)}</button>
+                <a href="#" class="tn-reglages" data-prevent data-action="${esc(reglages.action)}" data-param="${esc(reglages.param)}">${esc(MOTS.reglages)}</a></div>
+            <div class="tn-gestes">${ajout}<button type="button" class="btn btn-secondaire" id="tn-annuler" data-action="TableauNotation.annuler"${_gesteAnnulable() ? '' : ' disabled'}>${esc(MOTS.annuler)}</button>
             <button type="button" class="btn btn-secondaire" data-action="exporterSyntheseResultatsCSV">${esc(MOTS.exporter)}</button></div>
         </div>
         ${ctx.famille === 'STD' ? _echelleHTML(ctx) : _forfaitsHTML(ctx)}`;
@@ -415,8 +425,19 @@
         return /Mac|iPhone|iPad|iPod/i.test(poste) ? '⌘Z' : 'Ctrl+Z';
     }
 
+    /** Une case du tableau montre-t-elle une copie évaluée avec une grille ? (la même règle que la case : `modifiable`) */
+    function _aUneCaseAvecGrille(ctx) {
+        return ctx.etudiants.some(e => ctx.productions.some(p => {
+            const ev = D().copieDeLaCase(ctx.evaluations, e.da, p.id);
+            return !!ev && !D().etatDeLaCase(ev, ctx.famille, false).modifiable;
+        }));
+    }
+
     function _legendeHTML(ctx) {
-        const items = (ctx.famille === 'SPE' ? MOTS.legendeSpe : MOTS.legendeStd).map(t => `<span class="tn-legende-item">${esc(t)}</span>`).join('');
+        // En vue simple, « Point : évaluée avec une grille » ne paraît que s'il existe une telle case (arrêté par Grégoire).
+        const sansPoint = !!_presentation && !_aUneCaseAvecGrille(ctx);
+        const mots = (ctx.famille === 'SPE' ? MOTS.legendeSpe : MOTS.legendeStd).filter((t, i, tous) => !(sansPoint && i === tous.length - 1));
+        const items = mots.map(t => `<span class="tn-legende-item">${esc(t)}</span>`).join('');
         return `<div class="tn-legende">${items}<span class="tn-legende-aide">${esc((ctx.famille === 'SPE' ? MOTS.aideSpe : MOTS.aideStd) + ' ' + MOTS.annulerAuClavier(raccourciAnnuler()))}</span></div>`;
     }
 
@@ -424,17 +445,33 @@
 
     const MESSAGES_ETAT = { 'aucune-pratique': 'aucunePratique', 'autre-famille': 'autreFamille', 'aucun-eleve': 'aucunEleve', 'aucune-production': 'aucuneProduction', 'sans-echelle': 'sansEchelle' };
 
+    /** L'état sans tableau. En vue simple : les mots de la vue simple, et le geste qui débloque (« + Production »…). */
+    function _etatVideHTML(ctx) {
+        const p = _presentation;
+        const cleMot = MESSAGES_ETAT[ctx.etat];
+        const mot = (p && p.mots && p.mots[cleMot]) || MOTS[cleMot] || '';
+        const geste = p && p.gestes && p.gestes[ctx.etat];
+        const bouton = geste ? `<p class="tn-etat-geste"><button type="button" class="btn btn-principal" data-action="${esc(geste.action)}"${geste.param ? ` data-param="${esc(geste.param)}"` : ''}>${esc(geste.libelle)}</button></p>` : '';
+        return `<p class="tn-etat-vide">${esc(mot)}</p>${bouton}`;
+    }
+
+    /** La phrase sur les critères : en vue simple, seulement si l'utilisateur a une grille (arrêté par Grégoire, 9 nov. 2026). */
+    function _avisHTML() {
+        if (_presentation && _presentation.aUneGrille && !_presentation.aUneGrille()) return '';
+        return `<p class="tn-avis">${esc(MOTS.avis)}</p>`;
+    }
+
     function construireHTML(ctx) {
         const tete = `<h3 class="tn-titre" tabindex="-1">${esc(MOTS.titre)}</h3><p class="tn-intro">${esc(MOTS.intro)}</p>`;
-        if (ctx.etat !== 'ok') return `${tete}<p class="tn-etat-vide">${esc(MOTS[MESSAGES_ETAT[ctx.etat]] || '')}</p>`;
+        if (ctx.etat !== 'ok') return `${tete}${_etatVideHTML(ctx)}`;
         const rangees = ctx.etudiants.map(e => _rangeeHTML(e, ctx)).join('');
-        return `${tete}${_bandeauHTML(ctx)}<p class="tn-avis">${esc(MOTS.avis)}</p>
+        return `${tete}${_bandeauHTML(ctx)}${_avisHTML()}
             <div class="tn-cadre"><div class="tn-defilement"><table class="tn-tableau">${_enteteColonnesHTML(ctx)}<tbody>${rangees}</tbody></table></div></div>
             ${_legendeHTML(ctx)}
             <p class="tn-annonce u-lecteur-ecran" aria-live="polite"></p>`;
     }
 
-    function _hote() { return document.getElementById('tableau-notation-hote'); }
+    function _hote() { return (_presentation && _presentation.hote) || document.getElementById('tableau-notation-hote'); }
 
     /** La case qui a le focus, s'il est dans le tableau : un rendu venu d'ailleurs (la Liste rechargée) le lui rend. */
     function _focusActuel(hote) {
@@ -631,6 +668,7 @@
         const bouton = e.target.closest('.tn-case');
         if (!bouton) return;
         if (bouton.dataset.evaluation) {
+            if (_presentation) return;   // vue simple : la copie se lit, elle s'ouvre en vue étendue
             if (typeof window.consulterEvaluationDepuisListe === 'function') window.consulterEvaluationDepuisListe(bouton.dataset.evaluation);
             return;
         }
@@ -668,6 +706,8 @@
         hote._tnEcoutes = true;
         hote.addEventListener('click', _surClic);
         hote.addEventListener('keydown', _surTouche);
+        if (_ecoutesCommunes) return;   // deux hôtes (la Liste, la vue simple), une seule paire d'écoutes communes
+        _ecoutesCommunes = true;
         document.addEventListener('keydown', _surRaccourciAnnuler);
         window.addEventListener('resize', _marquerDebordement);
     }
@@ -685,6 +725,40 @@
             b.classList.toggle('actif', actif);
             b.setAttribute('aria-pressed', actif ? 'true' : 'false');
         });
+    }
+
+    /** Vue simple : le tableau monté dans l'hôte donné, avec sa présentation. La Liste de la vue étendue n'est pas touchée. */
+    function afficherDans(presentation) {
+        _presentation = presentation;
+        _affiche = true;
+        _dernierGeste = null;
+        rendre(null);
+    }
+
+    /** Vue simple quittée (autre écran, ou retour à la vue étendue) : l'hôte est vidé, le tableau de la Liste reprend sa place. */
+    function quitterPresentation() {
+        if (!_presentation) return;
+        if (_presentation.hote) _presentation.hote.innerHTML = '';
+        _presentation = null;
+        _affiche = false;
+        _dernierGeste = null;
+        _poserBascule(false);
+    }
+
+    /**
+     * Les notes du groupe actif, une par élève : la note du tableau (`simulerIndices`, la source de l'export) et ce que
+     * dit sa dernière colonne. Pour l'écran « Note finale » de la vue simple : aucune règle n'est recopiée.
+     * @returns {{etat: string, finales: boolean, lignes: Array<{da, nom, prenom, note: (number|null), detail: string}>}}
+     */
+    function notesDuGroupe() {
+        const ctx = construireContexte();
+        if (ctx.etat !== 'ok' && ctx.etat !== 'aucune-production') return { etat: ctx.etat, finales: false, lignes: [] };
+        const lignes = ctx.etudiants.map(e => {
+            const r = _resultatEleve(e.da, ctx);
+            const detail = r.note === null ? (r.cause || (r.aDesCopies ? MOTS.nonCalculable : MOTS.enAttente)) : r.detail;
+            return { da: e.da, nom: e.nom || '', prenom: e.prenom || '', note: r.note, detail };
+        });
+        return { etat: ctx.etat, finales: !!(ctx.config && ctx.config.notesFinales === true), lignes, famille: ctx.famille, pratiqueNom: ctx.pratiqueNom, types: ctx.types || [] };
     }
 
     function afficher() {
@@ -714,6 +788,10 @@
         afficherListe,         // la bascule
         annuler,               // le bouton « Annuler » ; ⌘Z passe par la même fonction
         rafraichirSiAffiche,   // initialiserListeEvaluations
+        afficherDans,          // vue simple : le tableau dans l'écran « Résultats »
+        quitterPresentation,   // vue simple quittée
+        notesDuGroupe,         // vue simple : l'écran « Note finale »
+        MOTS,                  // vue simple : les mots validés, repris tels quels (gelés)
         construireHTML,        // exposés pour le banc (tests/unit/tableau-notation-1.test.js)
         phraseRegleStd,
         couleurSure

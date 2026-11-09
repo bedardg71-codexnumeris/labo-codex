@@ -3206,7 +3206,14 @@ function _fermerMenuExterne(e) {
 function _actualiserMenu() {
     // Bandeau de statut en haut du menu (#230)
     var statutHaut = document.getElementById('codex-menu-statut-haut');
-    if (statutHaut) {
+    // Vue simple (9 nov. 2026) : le bouton s'appelle « Sauvegarder » et son menu s'ouvre sur la phrase arrêtée par
+    // Grégoire ; les mots viennent de vue-simple.js. En vue étendue, `enteteVueSimple` est null : rien ne change.
+    var enteteVueSimple = (window.VueSimple && typeof window.VueSimple.enteteDuMenuSauvegarder === 'function')
+        ? window.VueSimple.enteteDuMenuSauvegarder({ actif: !!_etat.actif, modifie: !!_etat.modificationsDepuis }) : null;
+    if (statutHaut && enteteVueSimple !== null) {
+        statutHaut.innerHTML = enteteVueSimple;   // security-ok: mots fixes de vue-simple.js, échappés là-bas
+        statutHaut.classList.remove('u-hide');
+    } else if (statutHaut) {
         if (_etat.actif) {
             var modifie = !!_etat.modificationsDepuis;
             var classePastille = modifie ? 'codex-statut-pastille--orange' : 'codex-statut-pastille--vert';

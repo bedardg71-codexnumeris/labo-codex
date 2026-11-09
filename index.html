@@ -3717,6 +3717,19 @@
                     </div>
                 </nav>
 
+                <!-- VUE SIMPLE (lot « Vue simple », 9 nov. 2026) : la seconde barre, cinq entrées (décidé par Cowork). Même classe
+                     que la barre principale : main.js câble le clic (afficherSection), navigation.js pose « actif ». Une seule des
+                     deux barres est visible, selon la classe « vue-simple » du body (css/vue-simple.css). Libellés PROPOSÉS. -->
+                <nav class="navigation-principale navigation-vue-simple" aria-label="Vue simple">
+                    <div class="navigation-boutons">
+                        <button data-onglet="simple-accueil"><span class="nav-label" data-vs-mot="nav.accueil">Accueil</span></button>
+                        <button data-onglet="simple-classe"><span class="nav-label" data-vs-mot="nav.classe">Classe</span></button>
+                        <button data-onglet="simple-pratique"><span class="nav-label" data-vs-mot="nav.pratique">Pratique</span></button>
+                        <button data-onglet="simple-resultats"><span class="nav-label" data-vs-mot="nav.resultats">Résultats</span></button>
+                        <button data-onglet="simple-note"><span class="nav-label" data-vs-mot="nav.note">Note finale</span></button>
+                    </div>
+                </nav>
+
                 <!-- Droite : Codex, le thème (un clic), le menu à trois traits -->
                 <div class="entete-actions">
                 <div id="codex-controle" class="codex-controle">
@@ -3726,6 +3739,14 @@
                     </button>
                     <div id="codex-menu" class="codex-menu u-hide">
                         <div id="codex-menu-statut-haut" class="codex-menu-statut-haut u-hide"></div>
+                        <!-- VUE SIMPLE : « Sauvegarder » n'offre que ces deux gestes (les actions du menu Codex) ; les autres lignes
+                             sont masquées (css/vue-simple.css). Libellés PROPOSÉS. -->
+                        <button class="codex-menu-item codex-menu-item--simple" data-action="Codex.actionEnregistrer">
+                            <span class="codex-menu-icone"><img src="icons/icon-usb-memory.svg" alt=""></span> <span data-vs-mot="sauvegarderEnregistrer">Enregistrer dans un fichier</span>
+                        </button>
+                        <button class="codex-menu-item codex-menu-item--simple" data-action="Codex.actionOuvrir">
+                            <span class="codex-menu-icone"><img src="icons/icon-final-state.svg" alt=""></span> <span data-vs-mot="sauvegarderOuvrir">Ouvrir un fichier…</span>
+                        </button>
                         <button class="codex-menu-item" data-action="Codex.actionOuvrir">
                             <span class="codex-menu-icone"><img src="icons/icon-final-state.svg" alt=""></span> Ouvrir un codex…
                         </button>
@@ -3787,6 +3808,11 @@
                             <button data-action="ouvrirModalRapportBug" class="entete-menu-item" data-tooltip="entete-signaler-bug" title="Signaler un bug ou donner ton avis"><span class="header-icon ico-bug" aria-hidden="true"></span><span class="entete-menu-mot">Signaler</span></button>
                             <button data-action="ouvrirModalSoutien" class="entete-menu-item" data-tooltip="entete-soutien"><span class="header-icon ico-coeur" aria-hidden="true"></span><span class="entete-menu-mot">Soutenir</span></button>
                             <button data-action="afficherSection" data-param="reglages" class="entete-menu-item btn-action-header" data-tooltip="entete-reglages"><span class="header-icon ico-tune" aria-hidden="true"></span><span class="entete-menu-mot">R&eacute;glages</span></button>
+                            <!-- LA BASCULE DES VUES (arrêté par Grégoire, 9 nov. 2026) : en vue étendue, le menu habituel puis, sous un
+                                 filet, « Vue simple » ; en vue simple, une seule ligne, « Vue étendue ». Sous-lignes PROPOSÉES par Cowork. -->
+                            <div class="entete-menu-filet" role="separator"></div>
+                            <button id="menu-vue-simple" class="entete-menu-item entete-menu-vue" data-action="VueSimple.basculer" data-param="simple"><span class="entete-menu-mot"><span data-vs-mot="vueSimple">Vue simple</span><span class="entete-menu-sous" data-vs-mot="sousVueSimple">Ta notation seulement</span></span></button>
+                            <button id="menu-vue-etendue" class="entete-menu-item entete-menu-vue" data-action="VueSimple.basculer" data-param="etendue"><span class="entete-menu-mot"><span data-vs-mot="vueEtendue">Vue étendue</span><span class="entete-menu-sous" data-vs-mot="sousVueEtendue">Toutes les fonctions</span></span></button>
                         </div>
                     </div>
                 </div>
@@ -3988,6 +4014,16 @@
                 <!-- Accueil = section plate, contenu généré par accueil.js (toggles Découvrir/Parcourir/Piloter) -->
             </section>
 
+
+            <!-- ===================================
+     VUE SIMPLE (lot « Vue simple », 9 nov. 2026) : cinq sections, rendues par js/vue-simple.js.
+     Absentes de configurationsOnglets (config.js, non touché) : sans sous-navigation.
+     =================================== -->
+            <section id="section-simple-accueil" class="section section-vue-simple"><div id="simple-accueil-contenu" class="vs-page"></div></section>
+            <section id="section-simple-classe" class="section section-vue-simple"><div id="simple-classe-contenu" class="vs-page"></div></section>
+            <section id="section-simple-pratique" class="section section-vue-simple"><div id="simple-pratique-contenu" class="vs-page"></div></section>
+            <section id="section-simple-resultats" class="section section-vue-simple"><div id="simple-resultats-contenu" class="vs-page"></div></section>
+            <section id="section-simple-note" class="section section-vue-simple"><div id="simple-note-contenu" class="vs-page"></div></section>
 
             <!-- ===================================
      SECTION: CONCEPTION
@@ -11543,7 +11579,7 @@
     <script src="js/correction-da.js?v=20261008f"></script> <!-- #976 (8 oct. 2026) : corriger le DA d'une fiche — passe à blanc, déplacement clé par clé, vérification -->
     <script src="js/registre-longitudinal.js?v=20261108f"></script> <!-- #1152, lot 5 (29 oct.) : « étudiant·e » dans les écrans d’enseignant · Standards sans portfolio, lot 1 (28 oct.) : la tuile ne dit plus « remplacée par une reprise » d’un doublon ni d’une originale qui compte · Lot I bis (30 sept.) : le registre voyage dans le codex · #915 : registre longitudinal (Labo › Suivi longitudinal), seul écrivain de la clé globale registreLongitudinal -->
     <script src="js/trimestre-v2-groupes-cours.js?v=20261109n"></script> <!-- #1152, lot 5 (29 oct.) : « n/5 configurés » compte le trimestre, pas la pratique · #1152, lot 5 (29 oct.) : ouvrirAideGroupeCours retiré (code mort) · #1038 (26 oct.) : la question du groupe-cours qui naît sans ses élèves · #1159, retouche (25 oct.) : « Groupe-cours mis de côté. », « Groupe-cours remis dans le menu. » · #1159 (25 oct.) : la bibliothèque des groupes-cours en une seule liste, « Mis de côté (n) » replié · Refactor étape 3 session B (17 mai 2026) : extrait de trimestre-v2.js (lignes 119-219 + 360-1149, zone 6 — hub populerDropdownsAssemblageV2 reste résidu) -->
-    <script src="js/trimestre-v2-orchestre.js?v=20261107e"></script> <!-- Le nouvel en-tête (7 nov.) : libellé du groupe en deux tons, sans nom d’enseignant·e · #1152, lot 5 (29 oct.) : allerVersAide retiré (code mort) · #306 Lot 1 (3 juil.) : retrait des fonctions enseignant mortes (zéro-dette) -->
+    <script src="js/trimestre-v2-orchestre.js?v=20261109a"></script> <!-- Le nouvel en-tête (7 nov.) : libellé du groupe en deux tons, sans nom d’enseignant·e · #1152, lot 5 (29 oct.) : allerVersAide retiré (code mort) · #306 Lot 1 (3 juil.) : retrait des fonctions enseignant mortes (zéro-dette) -->
 
     <!-- ENTITÉS Beta 95.2 - Architecture modulaire groupe-cours -->
     <script src="js/entites/cours-entite.js?v=20260911l"></script>
@@ -11746,10 +11782,11 @@
     <script src="js/partage-section.js?v=20261025c"></script> <!-- #1156 (25 oct.) : genererSectionHTML retirée, rangeesDeuxColonnes seule · #1154 (25 oct.) : rangeesDeuxColonnes, « Partagés par des collègues » en données · #1075, point 9 (22 oct.) : l’échelle partagée d’une pratique -->
     <script src="js/import-export.js?v=20261031a"></script> <!-- #1152, lot 5 (29 oct.) : « étudiant·e » dans les écrans d’enseignant · #1135 (21 oct.) : étape 0, un critère algorithmique neuf ne reçoit plus les codes du français · #1120, lot 1 (20 oct.) : le barème d’un critère à l’import (numberOrNull) · « Apporter mon matériel » lot 1 (16 oct.) : descripteurs au schéma d'import, rebranchés au partage · #1028 (5 oct., verdict) : copie sans fichier, fusion, notifications · #1028 (5 oct.) : les copies aux archives · #1012 (2 oct.) : les copies d'un ancien fichier ouvert par la case s'ajoutent à celles de l'espace · Lot I bis (1er oct.) : un codex choisi dans la case « Ouvrir un Codex » part au codex, avant la limite de taille et sans lecture complète · Lot I bis (30 sept.) : la fenêtre des clés et son export retirés ; un ancien fichier s'ouvre toujours · Fusion #374 : journeesSansCours + noms hérités en lecture (5 août) · schéma d'échelle complété (audit du 28 août) -->
     <script src="js/codex-fusion-fenetre.js?v=20261030b"></script> <!-- #1186 (29 oct.) : la fenêtre de fusion en deux colonnes ; rien de choisi d'office -->
-    <script src="js/codex.js?v=20261108g"></script> <!-- Consigne du 31 oct., partie D : la palette Tampons, tuiles soudées et catégories qui se replient · Consigne du 31 oct., partie C : la palette d’annotation refaite, à 188 px · #1186 (29 oct.) : la fenêtre de fusion en deux colonnes, la lecture unique de l'appareil · #1184 (29 oct.) : la marque des archives s'installe à l'ouverture, une copie marquée ne part plus · #1182 retouche (29 oct.) : la fusion compare comme le codex écrit (undefined, Date) · #1182 (29 oct.) : la fusion copie par copie, sans ancêtre · 24 oct. : l’aperçu dit « Mettre à jour le codex », et « Écrire le codex à part » pour le codex à part · #1075, point 4 (22 oct.) : le geste « copieRemplacee » · #976 : la fenêtre du codex dit « corriger » pour un déplacement · #1028 (5 oct.) : les copies aux archives · Lot I bis (1er oct.) : ouvrirFichier (un fichier déjà choisi, même chemin que le menu) et estUnFichierDeCodex (par le répertoire du ZIP) · Lot A1 (30 sept.) : l'assemblage, le téléchargement et sa confirmation vivent dans fichier-sortant.js · Lot J0 ter (#988) : le message d'attente avant la feuille de partage (30 sept.) · Lot J0 bis (#988) : toucher expiré avant le partage, la fenêtre « Ton codex est prêt » (30 sept.) · Lot J0 (#988) : le fichier du codex est assemblé sans faire passer les copies par la mémoire (30 sept.) · Lot F (D4) : le témoin du codex dit vrai ; l'enregistrement automatique retiré (Grégoire, 29 sept.) · #614 : la fusion valide les magic bytes -->
+    <script src="js/codex.js?v=20261109a"></script> <!-- Consigne du 31 oct., partie D : la palette Tampons, tuiles soudées et catégories qui se replient · Consigne du 31 oct., partie C : la palette d’annotation refaite, à 188 px · #1186 (29 oct.) : la fenêtre de fusion en deux colonnes, la lecture unique de l'appareil · #1184 (29 oct.) : la marque des archives s'installe à l'ouverture, une copie marquée ne part plus · #1182 retouche (29 oct.) : la fusion compare comme le codex écrit (undefined, Date) · #1182 (29 oct.) : la fusion copie par copie, sans ancêtre · 24 oct. : l’aperçu dit « Mettre à jour le codex », et « Écrire le codex à part » pour le codex à part · #1075, point 4 (22 oct.) : le geste « copieRemplacee » · #976 : la fenêtre du codex dit « corriger » pour un déplacement · #1028 (5 oct.) : les copies aux archives · Lot I bis (1er oct.) : ouvrirFichier (un fichier déjà choisi, même chemin que le menu) et estUnFichierDeCodex (par le répertoire du ZIP) · Lot A1 (30 sept.) : l'assemblage, le téléchargement et sa confirmation vivent dans fichier-sortant.js · Lot J0 ter (#988) : le message d'attente avant la feuille de partage (30 sept.) · Lot J0 bis (#988) : toucher expiré avant le partage, la fenêtre « Ton codex est prêt » (30 sept.) · Lot J0 (#988) : le fichier du codex est assemblé sans faire passer les copies par la mémoire (30 sept.) · Lot F (D4) : le témoin du codex dit vrai ; l'enregistrement automatique retiré (Grégoire, 29 sept.) · #614 : la fusion valide les magic bytes -->
     <script src="js/liste-evaluations.js?v=20261109x"></script> <!-- Consigne du 31 oct., partie F : même en-tête aux trois palettes, ↔ et ↕ en texte sur l’iPad · #1152, lot 5 (29 oct.) : « étudiant·e » dans les écrans d’enseignant · E16 (28 oct.) : « Compte jusqu’à sa reprise » sur l’originale pendant la fenêtre · #1174 (27 oct.) : « Mettre à la corbeille (N) » dans la barre de sélection · #1075, point 1 (22 oct.) : le DA affiché en anonymisation, menu Étudiant·e des Propriétés · #934 (22 sept.) : « Réassigner la sélection » en masse — cases, barre, question groupée qui nomme fichiers et conflits ; #932 : Propriétés montre la copie -->
     <script src="js/tableau-notation-donnees.js?v=20261109y"></script> <!-- Tableau de notation, lot 1 (9 nov. 2026) : le résultat sans grille, pur -->
-    <script src="js/tableau-notation.js?v=20261109z"></script> <!-- Tableau de notation, lot 1 (9 nov. 2026) : la seconde vue de la Liste -->
+    <script src="js/vue-simple-donnees.js?v=20261109a"></script> <!-- Vue simple (9 nov. 2026) : les fonctions pures -->
+    <script src="js/tableau-notation.js?v=20261109aa"></script> <!-- Tableau de notation, lot 1 (9 nov. 2026) : la seconde vue de la Liste -->
     <script src="js/journal.js?v=20261109o"></script>
     <script src="js/snapshots.js?v=20261108b"></script> <!-- E15 (28 oct.) : la remise pour C cherche la reprise dans la liste lue · #116 (2 juil.) : flux auto scopé au GC actif + dédoublonnage -->
     <script src="js/couleurs.js?v=20260512c"></script> <!-- Beta 99.42 b0512-0738 : #246 STYLE_GRAPHIQUE.tooltip + couleurs() -->
@@ -11790,8 +11827,9 @@
          Un seul moteur pour hover, flèches didactiques, popups aide contextuelle,
          visite guidée et glossaire. API publique : window.accompagnement. -->
     <link rel="stylesheet" href="css/accompagnement.css?v=20261109d"> <!-- La palette Évaluation compacte (1er nov.) · #1152, lot 3 (28 oct.) : le micro-popup d’un terme souligné passe au-dessus de l’aide contextuelle -->
+    <link rel="stylesheet" href="css/vue-simple.css?v=20261109a"> <!-- Vue simple (9 nov. 2026) -->
     <link rel="stylesheet" href="css/tableau-notation.css?v=20261109z"> <!-- Tableau de notation, lot 1 (9 nov. 2026) -->
-    <script src="js/accompagnement.js?v=20261109aa"></script> <!-- La palette Évaluation compacte (1er nov.) · #1152, lot 5 (29 oct.) : le trait d’union n’est plus échappé (regex sous u) · #1152, lot 5 (29 oct.) : le soulignement du glossaire aux mots entiers · #1152, lot 3 (28 oct.) : « En savoir plus » ouvre Aide › Référence sur la fiche du terme · L’aide d’« Apporter mon matériel » (19 oct.) : l’étape « Conception » de la visite correspond aussi à l’onglet (#1092) · Relecture de Cowork du 17 oct. (C3) : une icône « i » qui désigne une clé du catalogue ouvre son aide · #305 (2 juil.) : popup Conseil — nom accessible + focus -->
+    <script src="js/accompagnement.js?v=20261109ab"></script> <!-- La palette Évaluation compacte (1er nov.) · #1152, lot 5 (29 oct.) : le trait d’union n’est plus échappé (regex sous u) · #1152, lot 5 (29 oct.) : le soulignement du glossaire aux mots entiers · #1152, lot 3 (28 oct.) : « En savoir plus » ouvre Aide › Référence sur la fiche du terme · L’aide d’« Apporter mon matériel » (19 oct.) : l’étape « Conception » de la visite correspond aussi à l’onglet (#1092) · Relecture de Cowork du 17 oct. (C3) : une icône « i » qui désigne une clé du catalogue ouvre son aide · #305 (2 juil.) : popup Conseil — nom accessible + focus -->
     <!-- Catalogues de contenu (hover, popup, terme). DOIVENT charger après accompagnement.js :
          chaque fichier appelle window.accompagnement.ajouterEntrees() directement. -->
     <script src="js/accompagnement-contenu-hover.js?v=20261109c"></script> <!-- Les palettes, une même famille § 4 (2 nov.) : un seul verrou, « Verrouiller » / « Déverrouiller », le cadenas de l’en-tête retiré · Consigne du 31 oct., partie F : même en-tête aux trois palettes, ↔ et ↕ en texte sur l’iPad · Lot 2 des seuils (30 oct.) : le niveau RàI · #1152, retouche du lot 5 (29 oct.) : la reprise ciblée n’est plus offerte ; HEIC selon le navigateur · #1152, lot 5 (29 oct.) : « étudiant·e » dans les écrans d’enseignant · #1152, lot 5 (29 oct.) : les bulles du Labo et de l’Animation, « Exporter ma config », les niveaux RàI · #1156 (25 oct.) : les bulles « Tout importer » des échelles et des productions disent « dans ta bibliothèque » · #1151 (24 oct.) : la bulle du menu de l'élève dit ‹ et › · #1120, lot 2 (20 oct.) : les bulles du barème, C2 · L’aide d’« Apporter mon matériel » (19 oct.) : bulle du menu réécrite, onze bulles neuves · « Apporter mon matériel », étape 7 (17 oct.) : bulle validée par Grégoire · « Apporter mon matériel » lot 1 (16 oct.) : texte de l'info-bulle nav-conception-materiel · Lot 1 de la carte (8 oct.) : infobulle du zoom, menu « Vue » · Lot I bis (30 sept.) : infobulles de la carte Ouverture et partage · Clé orga-vue-calendrier retirée avec la vue (lot 2, 6 août) -->
@@ -11810,6 +11848,7 @@
     <!-- PRIORITÉ 8: Initialisation finale (TOUJOURS EN DERNIER) -->
     <script src="js/main.js?v=20261109b"></script> <!-- Le nouvel en-tête (7 nov.) : bulles sur les deux bandes · Un commentaire : « les trois portes de l’accueil » (29 oct.) · #374-bis : re-scan de la fusion à db-ready (congés IDB-only, 6 août) -->
     <script src="js/chrome-unifie.js?v=20261107e"></script> <!-- Chrome unifié (23 mai 2026) : selects mobile nav/sous-nav · popover ⋯ retiré (nouvel en-tête, 7 nov.) -->
+    <script src="js/vue-simple.js?v=20261109a"></script> <!-- Vue simple (9 nov. 2026) : l'écran ; après main.js, qui câble la navigation -->
 
     <!-- PRIORITÉ 9: Scripts inline externalisés (Phase 6 CSP) -->
     <script src="js/init-inline.js?v=20261109b"></script> <!-- #1152, lot 1 (24 oct.) : la recherche de l’Aide retombe sur « Commencer » ; la paire aide-apropos-* retirée · Beta 99.48 b0518-0540 : refactor profil-etudiant sessions A+B+C+D LIVRÉES (7 sous-modules autonomes : helpers + calculs + rapport + diagnostics + confidentiel + actions + sections-affichage ; 102 fonctions extraites ; profil-etudiant.js renommé en sections-affichage.js + afficherProfilComplet cyc 58 éclaté en 5 helpers privés — étape 4 partielle, 5 fonctions cyc > 30 héritages documentées) -->
