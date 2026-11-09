@@ -382,9 +382,16 @@
      * moins une copie importée — un élève évalué uniquement sur papier n'était ni exporté ni compté) ; les élèves
      * supprimés restent écartés (#1013). Une évaluation sans copie donne la synthèse seule.
      *
-     * @returns {{ evaluations: Array, fichiers: Array, sansFichier: Array }}
-     *   `evaluations` = une par élève ; `fichiers` = les copies importées, qui donneront le PDF annoté avec sa
-     *   synthèse ; `sansFichier` = les évaluations sans copie résolue, qui donneront la synthèse seule.
+     * Lot du 9 nov. 2026 (décision de Grégoire, 10 h 00) — L'EXPORT POUR LÉA N'ENVOIE QUE LES ÉVALUATIONS
+     * VERROUILLÉES, avec ou sans copie. AVANT : une évaluation non verrouillée partait dans le ZIP (mesuré : son PDF
+     * dans le ZIP, le compteur muet sur le verrou). Le choix d'une évaluation par élève se fait d'abord, le verrou
+     * ensuite : une reprise non verrouillée (réévaluation en cours) laisse l'élève de côté, son originale ne part pas
+     * à sa place. Les laissées de côté sont rendues pour que le compteur le dise.
+     *
+     * @returns {{ evaluations: Array, fichiers: Array, sansFichier: Array, nonVerrouillees: Array }}
+     *   `evaluations` = une par élève, verrouillée ; `fichiers` = les copies importées, qui donneront le PDF annoté
+     *   avec sa synthèse ; `sansFichier` = les évaluations sans copie résolue, qui donneront la synthèse seule ;
+     *   `nonVerrouillees` = celles laissées de côté.
      */
     /** #1245 — les élèves du groupe-cours actif et ceux de ses copies, élèves supprimés écartés (#1013). */
     function _dasDuGroupeActif(fichiers) {
@@ -428,7 +435,9 @@
         const retenues = [];
         const fichiersAvecEval = [];
         const sansFichier = [];
+        const nonVerrouillees = [];
         for (const evaluation of evalParEtudiant.values()) {
+            if (evaluation.verrouillee !== true) { nonVerrouillees.push(evaluation); continue; }
             retenues.push(evaluation);
             const fichier = (typeof travauxResolution !== 'undefined' && typeof travauxResolution.trouverFichierPourEvaluation === 'function')
                 ? travauxResolution.trouverFichierPourEvaluation(evaluation)
@@ -436,7 +445,7 @@
             if (fichier) fichiersAvecEval.push(fichier);
             else sansFichier.push(evaluation);
         }
-        return { evaluations: retenues, fichiers: fichiersAvecEval, sansFichier: sansFichier };
+        return { evaluations: retenues, fichiers: fichiersAvecEval, sansFichier: sansFichier, nonVerrouillees: nonVerrouillees };
     }
 
     /**

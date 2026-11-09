@@ -35,10 +35,10 @@ const FICHIERS = [
     { id: 'F3', etudiantDA: '2100003', productionId: 'P2', nomFichier: 'copie-cleo-p2.pdf' }
 ];
 const EVALUATIONS = [
-    { id: 'E1', etudiantDA: '2100001', productionId: 'P1' },
-    { id: 'E2', etudiantDA: '2100002', productionId: 'P1' },
-    { id: 'E3', etudiantDA: '2100003', productionId: 'P1' },
-    { id: 'E4', etudiantDA: '2100004', productionId: 'P1' }
+    { id: 'E1', etudiantDA: '2100001', productionId: 'P1', verrouillee: true },
+    { id: 'E2', etudiantDA: '2100002', productionId: 'P1', verrouillee: true },
+    { id: 'E3', etudiantDA: '2100003', productionId: 'P1', verrouillee: true },
+    { id: 'E4', etudiantDA: '2100004', productionId: 'P1', verrouillee: true }
 ];
 
 function monter({ syntheseSeule } = {}) {
@@ -104,7 +104,8 @@ describe('#1245 — « Exporter pour Léa » prend aussi les copies évaluées s
 
 describe('#1245 — le compteur de « Export Léa » compte le papier et le dit', () => {
     const source = readFileSync(path.join(RACINE, 'js/travaux-ui.js'), 'utf8');
-    const corps = tranche(source, 'function mettreAJourCompteurLea() {', '\n    }\n', { longueurMin: 400 });
+    // Lot du 9 nov. 2026 : le compteur et ses deux phrases (`_texteCompteurLea`, `_laisseesDeCoteLea`), jusqu'au quota.
+    const corps = tranche(source, 'function mettreAJourCompteurLea() {', '    /**\n     * Charge et affiche les infos de quota', { longueurMin: 400 });
     function compter(selection, { da = '', reprises = false } = {}) {
         const elements = {
             'travaux-lea-compteur': { textContent: '' },
@@ -114,10 +115,10 @@ describe('#1245 — le compteur de « Export Léa » compte le papier et le dit'
         };
         const document = { getElementById: (id) => elements[id] || null };
         const travauxArchivage = { selectionnerEvaluationsLea: () => selection };
-        new Function('document', 'travauxArchivage', corps + '\n    }\nmettreAJourCompteurLea();')(document, travauxArchivage);   // la tranche s'arrête avant l'accolade
+        new Function('document', 'travauxArchivage', corps + '\nmettreAJourCompteurLea();')(document, travauxArchivage);
         return elements['travaux-lea-compteur'].textContent;
     }
-    const sel = (nbCopies, nbPapier) => ({ fichiers: Array(nbCopies).fill({}), sansFichier: Array(nbPapier).fill({}), evaluations: [] });
+    const sel = (nbCopies, nbPapier, nbNon = 0) => ({ fichiers: Array(nbCopies).fill({}), sansFichier: Array(nbPapier).fill({}), evaluations: [], nonVerrouillees: Array(nbNon).fill({}) });
 
     it('5. les phrases validées par Grégoire', () => {
         expect(compter(sel(9, 3))).toBe('12 PDF pour 12 étudiant·es, dont 3 sur papier (synthèse seule)');
@@ -127,6 +128,12 @@ describe('#1245 — le compteur de « Export Léa » compte le papier et le dit'
         expect(compter(sel(1, 0), { da: '2100001' })).toBe('1 évaluation prête');
         expect(compter(sel(0, 1), { da: '2100002', reprises: true })).toBe('1 reprise prête (synthèse seule)');
         expect(compter(sel(0, 0))).toBe('Aucune évaluation trouvée');
+    });
+
+    it('6. lot du 9 nov. — les non verrouillées laissées de côté : le texte validé par Grégoire, au singulier et au pluriel', () => {
+        expect(compter(sel(2, 1, 1))).toBe('3 PDF pour 3 étudiant·es, dont 1 sur papier (synthèse seule) · 1 évaluation non verrouillée laissée de côté');
+        expect(compter(sel(3, 0, 2))).toBe('3 PDF pour 3 étudiant·es · 2 évaluations non verrouillées laissées de côté');
+        expect(compter(sel(3, 0, 0))).toBe('3 PDF pour 3 étudiant·es');
     });
 });
 
