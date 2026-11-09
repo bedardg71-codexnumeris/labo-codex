@@ -26,8 +26,7 @@
     var TEXTE_GRAND_ECRAN = 'Ce parcours se fait sur un écran plus grand : une tablette ou un ordinateur.';
 
     function tropPetitPour(def) {
-        return !!def.grandEcranSeulement && !!window.ParcoursMoteur
-            && typeof window.ParcoursMoteur.surTelephone === 'function' && window.ParcoursMoteur.surTelephone();
+        return !!def.grandEcranSeulement && surTelephone();
     }
     var registre = [];
     var focusAvant = null;
@@ -118,6 +117,8 @@
         l1.appendChild(etatTxt);
         corps.appendChild(l1);
 
+        // Lu à la construction pour l'affichage ; relu au toucher (la fenêtre a pu changer de largeur),
+        // et la liste se redessine quand le seuil est franchi panneau ouvert (rafraichirListe).
         var refuse = tropPetitPour(def);
         if (refuse) {
             li.dataset.ecran = 'trop-petit';
@@ -141,7 +142,7 @@
         // Sur téléphone, un parcours pour grand écran : le bouton reste lisible, il ne lance rien.
         if (refuse) btn.setAttribute('aria-disabled', 'true');
         btn.addEventListener('click', function () {
-            if (refuse) return;
+            if (tropPetitPour(def)) return;
             var depuis = e.etat === 'en-cours' ? e.etape : 0;
             fermerPanneau({ sansRetourFocus: true });
             def.lancer(depuis);
@@ -150,6 +151,33 @@
 
         li.appendChild(corps);
         return li;
+    }
+
+    var listeTelephone = null; // la largeur (téléphone ou non) pour laquelle la liste est dessinée
+
+    function surTelephone() {
+        return !!window.ParcoursMoteur && typeof window.ParcoursMoteur.surTelephone === 'function'
+            && window.ParcoursMoteur.surTelephone();
+    }
+
+    function remplirListe(liste) {
+        liste.textContent = '';
+        listeTelephone = surTelephone();
+        registre.forEach(function (def) { liste.appendChild(creerParcoursItem(def)); });
+    }
+
+    /** Panneau ouvert, la fenêtre franchit le seuil du téléphone : la liste suit (refus, bouton). */
+    function rafraichirListe() {
+        var liste = document.getElementById('assistance-parcours-liste');
+        if (!liste || surTelephone() === listeTelephone) return;
+        var focusDedans = liste.contains(document.activeElement)
+            ? document.activeElement.closest('[data-parcours]') : null;
+        var id = focusDedans ? focusDedans.dataset.parcours : null;
+        remplirListe(liste);
+        if (id) {
+            var b = liste.querySelector('[data-parcours="' + id + '"] .assistance-parcours-bouton');
+            if (b) b.focus();
+        }
     }
 
     function construirePanneau() {
@@ -198,8 +226,9 @@
 
         var liste = document.createElement('ol');
         liste.className = 'assistance-parcours';
+        liste.id = 'assistance-parcours-liste';
         liste.setAttribute('aria-labelledby', 'assistance-intitule');
-        registre.forEach(function (def) { liste.appendChild(creerParcoursItem(def)); });
+        remplirListe(liste);
         panneau.appendChild(liste);
 
         var filet = document.createElement('div');
@@ -277,6 +306,7 @@
         document.body.appendChild(els.panneau);
         if (typeof window.synchroniserControlesAssistance === 'function') window.synchroniserControlesAssistance();
         document.addEventListener('keydown', surEchapDocument, true);
+        window.addEventListener('resize', rafraichirListe);
         requestAnimationFrame(function () { els.panneau.classList.remove('est-entrant'); });
         var titre = els.panneau.querySelector('.assistance-fermer');
         if (titre) titre.focus();
@@ -286,6 +316,7 @@
         var p = document.getElementById('panneau-assistance');
         var v = document.getElementById('assistance-voile');
         document.removeEventListener('keydown', surEchapDocument, true);
+        window.removeEventListener('resize', rafraichirListe);
         if (!p && !v) return;
         if (p) p.remove();
         if (v) v.remove();

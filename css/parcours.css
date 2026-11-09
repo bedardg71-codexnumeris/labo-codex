@@ -210,7 +210,8 @@ body.mode-clair {
 
 /* Le témoin « Enregistré » (en bas à gauche) passe au-dessus d'une bulle rangée en bas : le moteur
    pose --parcours-reserve-bas, 0 hors téléphone (rien ne bouge alors). */
-body.parcours-actif .temoin-enregistrement {
+body.parcours-actif .temoin-enregistrement,
+body.parcours-actif .temoin-dans-le-flux .temoin-enregistrement-succes.visible {
     bottom: calc(16px + max(var(--temoin-hauteur-clavier, 0px), var(--parcours-reserve-bas, 0px)));
 }
 

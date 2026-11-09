@@ -32,8 +32,8 @@
      un toucher déplie, un toucher replie ; repliée, toute la bulle est ce bouton.
    · Repliée ou dépliée, elle ne couvre pas la zone éclairée : en bas par défaut (au début d'une
      étape et à chaque dépliement, le moteur fait défiler la page s'il le faut, pendant REGLAGE_MS
-     seulement) ; en haut si la zone occupe le bas ; si la zone prend tout l'écran, elle en couvre
-     une partie mais jamais le contour (ce qu'il faut toucher), et son texte défile au besoin.
+     et jusqu'au premier geste de la personne) ; en haut si la zone occupe le bas ; si la zone prend
+     tout l'écran, elle en couvre une partie, au mieux sans toucher au contour, et son texte défile.
    · Le témoin « Enregistré » (en bas à gauche) passe au-dessus d'une bulle rangée en bas
      (--parcours-reserve-bas, lue par css/parcours.css).
    LE FILET DE TOUTES LES BULLES (ajout du 9 nov., 9 h 51) : à toutes les largeurs, une bulle plus
@@ -47,8 +47,8 @@
     var SONDE_MS = 120;
     var MARGE = 8;
     var ECART = 12;
-    var SEUIL_TELEPHONE = 500;
-    var REGLAGE_MS = 1200; // sur téléphone, le temps où le moteur peut faire défiler pour ranger la bulle en bas // px de large, la même borne que le @media de css/parcours.css
+    var SEUIL_TELEPHONE = 500; // px de large de la fenêtre : en deçà, la bulle prend sa forme de téléphone
+    var REGLAGE_MS = 1200;     // sur téléphone, le temps où le moteur peut faire défiler pour ranger la bulle en bas
 
     var etat = null; // { def, i, opts, timer, elements, enTransition }
 
@@ -204,7 +204,7 @@
         sonder();
     }
 
-    function rendreBulle() {
+    function rendreBulle(opts) {
         var etape = etapeCourante();
         var b = etat.elements.bulle;
         var total = etat.def.etapes.length;
@@ -212,7 +212,9 @@
         etat.telephone = surTelephone();
         b.className = 'parcours-bulle' + (etat.telephone ? ' parcours-bulle--telephone' : '');
         b.style.maxHeight = '';
-        if (!etat.telephone) b.style.right = '';
+        // Sur téléphone, la largeur est posée AVANT de mesurer le texte (son plancher de trois lignes).
+        b.style.left = etat.telephone ? MARGE + 'px' : b.style.left;
+        b.style.right = etat.telephone ? MARGE + 'px' : '';
 
         var tete = document.createElement('div');
         tete.className = 'parcours-bulle-tete';
@@ -276,7 +278,8 @@
         }
 
         // L'annonce : le titre et le texte, puis le geste. Vidée d'abord, pour qu'un même
-        // texte soit relu s'il revient.
+        // texte soit relu s'il revient. Pas d'annonce quand seule la forme change (le seuil franchi).
+        if (opts && opts.sansAnnonce) { appliquerRepli(); return; }
         var a = etat.elements.annonce;
         a.textContent = '';
         setTimeout(function () {
@@ -341,69 +344,86 @@
         return Math.max(MARGE, hautEntete() + MARGE);
     }
 
-    /** La réserve du témoin « Enregistré » : la hauteur occupée par une bulle rangée en bas. */
+    /**
+     * La réserve du témoin « Enregistré » : la hauteur occupée par une bulle rangée en bas. Bornée
+     * pour que le témoin (~40 px) reste dans l'écran quand la bulle prend presque toute la hauteur :
+     * il passe alors sur le haut de la bulle plutôt que hors de l'écran.
+     */
     function poserReserveBas(px) {
-        document.documentElement.style.setProperty('--parcours-reserve-bas', Math.max(0, Math.round(px)) + 'px');
+        var plafond = Math.max(0, window.innerHeight - 64);
+        document.documentElement.style.setProperty('--parcours-reserve-bas', Math.round(Math.min(plafond, Math.max(0, px))) + 'px');
+    }
+
+    /** Un geste de la personne (molette, doigt, clavier) arrête le réglage : le moteur ne lutte pas. */
+    function arreterReglage() {
+        if (etat) etat.reglerJusqua = 0;
     }
 
     /**
      * Sur téléphone : la bulle pleine largeur, rangée en bas ; en haut si la zone éclairée occupe
-     * le bas ; si aucun côté ne contient sa hauteur, le plus grand, et le texte défile.
+     * le bas ; si aucun côté ne contient sa hauteur, le côté du contour, sinon le plus grand, et le
+     * texte défile. Jamais plus haute que l'écran utile (la cible peut être hors de l'écran).
      */
-    function placerBulleTelephone(cibleRect) {
+    /** Le côté où la bulle tient (en bas d'abord), sinon le plus grand des deux. */
+    function choisirCote(naturelle, sous, dessus) {
+        if (naturelle <= sous) return { cote: 'bas', max: sous };
+        if (naturelle <= dessus) return { cote: 'haut', max: dessus };
+        return sous >= dessus ? { cote: 'bas', max: sous } : { cote: 'haut', max: dessus };
+    }
+
+    /**
+     * En bas d'abord : pendant le réglage (début d'étape, dépliement, jusqu'au premier geste), si
+     * faire défiler la page laisse la place sous la zone, le moteur la fait défiler. Rend la zone
+     * telle qu'elle est après ce défilement.
+     */
+    function reglerDefilement(cibleRect, naturelle, haut, bas) {
+        var manque = Math.ceil(naturelle - (bas - (cibleRect.bottom + ECART)));
+        if (manque <= 0 || Date.now() >= etat.reglerJusqua) return cibleRect;
+        if ((cibleRect.top - ECART) - haut < manque) return cibleRect;
+        var avant = window.scrollY;
+        window.scrollBy(0, manque);
+        var fait = window.scrollY - avant;
+        return { top: cibleRect.top - fait, bottom: cibleRect.bottom - fait };
+    }
+
+    /**
+     * Le côté de la bulle sur téléphone. La zone éclairée d'abord ; si elle prend tout l'écran, la
+     * bulle en couvre une partie, au mieux sans toucher au contour (ce qu'il faut toucher) : le côté
+     * du contour où elle tient, sinon le plus grand ; si les deux ont moins que sa tête (56 px), elle
+     * couvre le bord du contour. Sans contour (le geste est dans la bulle) : en bas, à sa hauteur.
+     */
+    function coteTelephone(cibleRect, contourEl, naturelle, haut, bas) {
+        var ecran = Math.max(0, bas - haut);
+        if (!cibleRect) return { cote: 'bas', max: ecran };
+        var z = reglerDefilement(cibleRect, naturelle, haut, bas);
+        var place = choisirCote(naturelle, bas - (z.bottom + ECART), (z.top - ECART) - haut);
+        if (naturelle <= place.max) return place;
+        if (!contourEl) return { cote: 'bas', max: ecran };
+        var rc = contourEl.getBoundingClientRect(); // lu maintenant : après le défilement éventuel
+        return choisirCote(naturelle, bas - (rc.bottom + ECART), (rc.top - ECART) - haut);
+    }
+
+    /**
+     * Sur téléphone : la bulle pleine largeur, au bord de l'écran (coteTelephone). Jamais plus haute
+     * que l'écran utile (la cible peut être hors de l'écran) ; repliée, elle garde sa tête (56 px).
+     */
+    function placerBulleTelephone(cibleRect, contourEl) {
         var b = etat.elements.bulle;
         var haut = hautUtile();
         var bas = basEcran() - MARGE;
-        var naturelle = hauteurNaturelle();
-        var place = { cote: 'bas', max: bas - haut };
-        if (cibleRect) {
-            var sous = bas - (cibleRect.bottom + ECART);
-            // En bas d'abord : pendant le réglage (début d'étape, dépliement), si faire défiler la page
-            // laisse la place sous la zone, le moteur la fait défiler. Ensuite, il laisse la page à la
-            // personne : il ne lutte pas contre son défilement.
-            if (naturelle > sous && Date.now() < etat.reglerJusqua) {
-                var manque = Math.ceil(naturelle - sous);
-                if ((cibleRect.top - ECART) - haut >= manque) {
-                    var avant = window.scrollY;
-                    window.scrollBy(0, manque);
-                    var fait = window.scrollY - avant;
-                    cibleRect = { top: cibleRect.top - fait, bottom: cibleRect.bottom - fait };
-                    sous = bas - (cibleRect.bottom + ECART);
-                }
-            }
-            var dessus = (cibleRect.top - ECART) - haut;
-            if (naturelle <= sous) place = { cote: 'bas', max: sous };
-            else if (naturelle <= dessus) place = { cote: 'haut', max: dessus };
-            else {
-                // La zone éclairée prend tout l'écran : la bulle en couvre une partie, jamais ce qu'il
-                // faut toucher (le contour). Le côté du contour où elle tient, sinon le plus grand.
-                // Sans contour (le geste est dans la bulle), elle se range en bas, à sa hauteur.
-                var c = etat.elements.contour;
-                if (c.hidden) {
-                    place = { cote: 'bas', max: bas - haut };
-                } else {
-                    var rc = c.getBoundingClientRect();
-                    sous = bas - (rc.bottom + ECART);
-                    dessus = (rc.top - ECART) - haut;
-                    if (naturelle <= sous) place = { cote: 'bas', max: sous };
-                    else if (naturelle <= dessus) place = { cote: 'haut', max: dessus };
-                    else place = sous >= dessus ? { cote: 'bas', max: sous } : { cote: 'haut', max: dessus };
-                }
-            }
-        }
-        // Repliée, la bulle ne fait que sa tête : elle ne se resserre pas sous cette hauteur.
-        b.style.maxHeight = Math.max(Math.round(place.max), 56) + 'px';
+        var place = coteTelephone(cibleRect, contourEl, hauteurNaturelle(), haut, bas);
+        b.style.maxHeight = Math.max(Math.round(Math.min(place.max, Math.max(0, bas - haut))), 56) + 'px';
         var bh = b.offsetHeight;
-        var y = place.cote === 'bas' ? bas - bh : haut;
+        var y = place.cote === 'bas' ? Math.max(MARGE, bas - bh) : haut;
         b.style.left = MARGE + 'px';
         b.style.right = MARGE + 'px';
         b.style.top = Math.round(y) + 'px';
         poserReserveBas(place.cote === 'bas' ? window.innerHeight - y : 0);
     }
 
-    function placerBulle(etape, cibleRect) {
+    function placerBulle(etape, cibleRect, contourEl) {
         var b = etat.elements.bulle;
-        if (etat.telephone) { placerBulleTelephone(cibleRect); return; }
+        if (etat.telephone) { placerBulleTelephone(cibleRect, contourEl); return; }
         poserReserveBas(0);
         var vw = window.innerWidth, vh = basEcran();
         // Le filet : jamais plus haute que l'écran utile ; au-delà, son texte défile.
@@ -447,13 +467,24 @@
         b.style.top = Math.round(y) + 'px';
     }
 
+    /**
+     * La fenêtre a franchi le seuil du téléphone (rotation, écran partagé) : la bulle change de forme,
+     * sans nouvelle annonce, et garde le focus si elle l'avait.
+     */
+    function suivreSeuil() {
+        if (surTelephone() === etat.telephone) return;
+        var avaitFocus = etat.elements.bulle.contains(document.activeElement);
+        rendreBulle({ sansAnnonce: true });
+        if (!avaitFocus) return;
+        try { etat.elements.bulle.focus({ preventScroll: true }); } catch (e) { etat.elements.bulle.focus(); }
+    }
+
     /** Un passage de la sonde : trous, contour, bulle, puis l'état atteint. */
     function sonder() {
         if (!etat || etat.enTransition) return;
         var etape = etapeCourante();
         if (etat.opts.verifier && !etat.opts.verifier()) { fermer(); return; }
-        // La fenêtre a franchi le seuil du téléphone (rotation, écran partagé) : la bulle change de forme.
-        if (surTelephone() !== etat.telephone) rendreBulle();
+        suivreSeuil();
 
         var zones = etape.zones ? (etape.zones() || []) : [];
         var contourEl = etape.contour ? etape.contour() : null;
@@ -477,7 +508,7 @@
         }
 
         // La bulle évite la zone éclairée ET le contour.
-        placerBulle(etape, union(rectsDe(zones.concat(contourEl ? [contourEl] : []))));
+        placerBulle(etape, union(rectsDe(zones.concat(contourEl ? [contourEl] : []))), visible(contourEl) ? contourEl : null);
 
         if (etape.atteint) {
             var ok = false;
@@ -551,6 +582,7 @@
         window.addEventListener('resize', surRedimension);
         window.addEventListener('scroll', surRedimension, { passive: true });
         if (window.visualViewport) window.visualViewport.addEventListener('resize', surRedimension);
+        ['wheel', 'touchstart', 'keydown'].forEach(function (t) { window.addEventListener(t, arreterReglage, { passive: true, capture: true }); });
         etat.timer = setInterval(sonder, SONDE_MS);
         var depuis = Math.max(0, Math.min((opts && opts.depuis) || 0, def.etapes.length - 1));
         return allerA(depuis);
@@ -563,6 +595,7 @@
         window.removeEventListener('resize', surRedimension);
         window.removeEventListener('scroll', surRedimension);
         if (window.visualViewport) window.visualViewport.removeEventListener('resize', surRedimension);
+        ['wheel', 'touchstart', 'keydown'].forEach(function (t) { window.removeEventListener(t, arreterReglage, { passive: true, capture: true }); });
         etat = null;
         retirerElements();
         document.documentElement.style.removeProperty('--parcours-reserve-bas');

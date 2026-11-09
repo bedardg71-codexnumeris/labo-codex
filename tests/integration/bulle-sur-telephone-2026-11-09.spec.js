@@ -332,3 +332,58 @@ test('1180 px : le même parcours est proposé, sans le texte, et se lance', asy
     await item.locator('.assistance-parcours-bouton').click();
     expect(await page.evaluate(() => window.__lance)).toBe(1);
 });
+
+// ---------- Relecture du 9 nov. : trois cas que le banc ne voyait pas ----------
+
+test('390 × 330 : la page défile après le réglage, la bulle reste dans l’écran et sa tête à portée', async ({ page }) => {
+    test.setTimeout(90000);
+    await ouvrirEspaceVide(page, 390, 330);
+    await page.evaluate(() => Assistance.parcours()[0].lancer(0));
+    await attendreEtape(page, 1);
+    await bascule(page).click();
+    await bulleStable(page);
+    // La personne fait défiler loin vers le bas (la molette arrête aussi le réglage du moteur).
+    await page.mouse.move(195, 60);
+    await page.mouse.wheel(0, 2500);
+    await expect.poll(() => page.evaluate(() => window.scrollY)).toBeGreaterThan(500);
+    await bulleStable(page);
+    const m = await page.evaluate(() => {
+        const r = document.getElementById('parcours-bulle').getBoundingClientRect();
+        const bandeau = document.getElementById('bandeau-demo');
+        const bas = bandeau && bandeau.getClientRects().length ? bandeau.getBoundingClientRect().top : window.innerHeight;
+        return { haut: r.top, bas: r.bottom, limite: bas };
+    });
+    expect(m.haut).toBeGreaterThanOrEqual(0);
+    expect(m.bas).toBeLessThanOrEqual(m.limite);
+    await expect(bascule(page)).toBeInViewport({ ratio: 1 });
+});
+
+test('le seuil franchi en cours d’étape (rotation, écran partagé) : la bulle garde le focus', async ({ page }) => {
+    test.setTimeout(90000);
+    await ouvrirEspaceVide(page, 390, 844);
+    await page.evaluate(() => Assistance.parcours()[0].lancer(3));
+    await attendreEtape(page, 4);
+    await bulle(page).getByRole('button', { name: 'Continuer' }).focus();
+    await page.setViewportSize({ width: 800, height: 844 });
+    await expect.poll(() => page.evaluate(() => document.getElementById('parcours-bulle').classList.contains('parcours-bulle--telephone'))).toBe(false);
+    await expect.poll(() => page.evaluate(() => document.getElementById('parcours-bulle').contains(document.activeElement))).toBe(true);
+    await page.setViewportSize({ width: 390, height: 844 });
+    await expect.poll(() => page.evaluate(() => document.getElementById('parcours-bulle').classList.contains('parcours-bulle--telephone'))).toBe(true);
+    await expect.poll(() => page.evaluate(() => document.getElementById('parcours-bulle').contains(document.activeElement))).toBe(true);
+});
+
+test('le refus suit la largeur, panneau ouvert : 390 → 1000 px il se retire, 1000 → 390 px il revient', async ({ page }) => {
+    await ouvrirEspaceVide(page, 390, 844);
+    await enregistrerParcoursGrandEcran(page);
+    await page.click('#entete-menu-bouton');
+    await page.click('#btn-assistance-menu');
+    const item = page.locator('#panneau-assistance [data-parcours="essai-grand-ecran"]');
+    await expect(item.locator('.assistance-parcours-grand-ecran')).toHaveText(TEXTE_GRAND_ECRAN);
+    await page.setViewportSize({ width: 1000, height: 844 });
+    await expect(item.locator('.assistance-parcours-grand-ecran')).toHaveCount(0);
+    await expect(item.locator('.assistance-parcours-bouton')).not.toHaveAttribute('aria-disabled', 'true');
+    await page.setViewportSize({ width: 390, height: 844 });
+    await expect(item.locator('.assistance-parcours-grand-ecran')).toHaveText(TEXTE_GRAND_ECRAN);
+    await item.locator('.assistance-parcours-bouton').click({ force: true });
+    expect(await page.evaluate(() => window.__lance)).toBe(0);
+});
