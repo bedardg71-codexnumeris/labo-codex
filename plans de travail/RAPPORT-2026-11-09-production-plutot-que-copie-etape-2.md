@@ -41,6 +41,7 @@ La banque de types, elle, entre bien dans la liste blanche des Archives, comme l
   - la définition « Production » du glossaire ;
   - les infobulles « Type », titre et grille ;
   - les trois définitions sous le menu (Portfolio, Artefact, Épreuve terminale). Aucune autre définition ne s'affiche.
+- **Le type s'affiche par son libellé partout où il s'affiche** : la liste des productions, la carte d'alignement (un type de ta banque y a son groupe à son nom), Réglages › Données, les exports de Conception.
 - **Vérifié contre le code** : « Structure des évaluations » est bien le titre affiché dans Conception › Pratiques.
 
 ### Ce qui attend Grégoire (une question par ligne, ma recommandation entre parenthèses)
@@ -196,7 +197,7 @@ Ils sont posés pour que l'écran fonctionne. Aucun n'est validé.
 
 ## 4. Vérifications
 
-- **Vitest complet**, depuis `tests/` : 898 fichiers, 10 870 essais sur 10 870, après le code.
+- **Vitest complet**, depuis `tests/` : 898 fichiers, 10 870 essais sur 10 870, après les suites de la relecture (et au crochet de chaque push).
 - **Sentinelles neuves** :
   - `sentinelle-pdf-eleve-evaluation-plutot-que-copie-2026-11-09` : PDF rendu par le vrai code dans le bac à sable. Rouge avant (4/4), vert après. Break-test refait sur l'ancien texte : 4 rouges.
   - `sentinelle-production-plutot-que-copie-2026-11-09` : le relevé de la nuit refait à chaque passage (acorn pour `js/`, parse5 pour `index.html`). Chaque « copie » restante est rangée (b, c, n), et une occurrence neuve fait rougir. Break-tests : « Réunir en une copie » remis → 2 rouges ; « Importer des copies » remis → 1 rouge.
@@ -223,7 +224,15 @@ Ils sont posés pour que l'écran fonctionne. Aucun n'est validé.
 
     Break-test M8, l'échappement du groupe de la carte retiré : 1 rouge.
 - **Bancs existants mis au texte neuf** : 94 fichiers de test. Chaque fois, l'ancien passage doit exister dans le texte validé, et seul le passage changé est remplacé. Aucun essai n'est retiré.
-- **Playwright, sous Chromium seulement** : les 41 specs que le lot touche, plus `lot-e3-creer-ou-modifier`, `bibliotheques-menu-1147` et la spec neuve `banque-types-production-2026-11-09` (B1, B2). Le résultat est au § 4 bis.
+- **Playwright, sous Chromium seulement.** Les 41 specs que le lot touche, plus `lot-e3-creer-ou-modifier` et `bibliotheques-menu-1147` (qui choisissent un type dans le menu bâti), plus la spec neuve `banque-types-production-2026-11-09`.
+  - **206 essais passent**, dont la spec neuve (B1, B2) et les deux specs corrigées après la relecture ; un est sauté par la spec elle-même.
+  - **12 rougissent, et aucun ne tient au lot.** Les mêmes 11 essais, lancés sur `origin/main` (158ff5d) sous Chromium, rougissent de la même façon :
+    - deux tailles de fichier propres à l'encodeur d'images de Chromium (« 188,5 Ko » au lieu de « 193,0 Ko », « 2,0 Mo » au lieu de « 2,1 Mo ») : `1028-archiver-copies:245`, `nettoyage-sans-perte-892:100` ;
+    - l'écriture de fichier et l'espace simulé : `codex-1011-ouvert-sans-espace` (3), `codex-1012-avertissement:323`, `codex-1012-fichier-d-origine:364`, `e1-archiver-trimestre:141`, `e3-renvoyer-trimestre:251` ;
+    - le défilement et une largeur de 690 au lieu de 700 px : `critere-algorithmique-calculs-4a:71`, `critere-algorithmique-presentation:300`.
+
+    Le douzième, `clore-et-alleger-un-trimestre:327`, a rougi une fois pendant que d'autres essais tournaient à côté. Relancé seul, il passe sur cette branche comme sur `origin/main`.
+  - **Le verdict qui compte se prend sous WebKit, sur le Mac.** La configuration Chromium qui a servi ici n'est pas commitée.
 - **Captures sous Chromium, à 1180 px**, dans `plans de travail/captures-2026-11-09-production-plutot-que-copie/` :
   - 01, Évaluation › Liste, deux rangées cochées (« 2 rangées sélectionnées ») ;
   - 02, Annoter › Actions (« Production de référence ») ;
