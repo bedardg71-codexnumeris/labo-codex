@@ -1237,22 +1237,6 @@ const AIDE_CONTEXTUELLE = {
     // ACCUEIL — MODE DÉMONSTRATION & DUPLICATION CC
     // =========================================================================
 
-    'tour-guide': {
-        titre: 'Visite guidée',
-        sections: [
-            {
-                type: 'texte',
-                // Lot « Les deux parcours » (8 nov. 2026) : texte de la consigne, mot pour mot.
-                contenu: "L'assistance te propose des parcours où tu fais les gestes toi-même, accompagné·e pas à pas : d'abord sur une classe de démonstration, puis avec ta propre classe. Tu les retrouves dans le menu, sous « Assistance », avec l'aide dans les pages."
-            },
-            {
-                type: 'action',
-                libelle: 'Démarrer la visite',
-                action: 'demarrerTourDepuisAide'
-            }
-        ]
-    },
-
     'accueil-donnees-demo': {
         // Le guidage de la démo (29 oct. 2026) : titre et blocs 1, 3 à 7 validés par Grégoire le 29 oct. à 8 h 02 et 8 h 03,
         // posés mot pour mot (plans de travail/TEXTES-2026-10-28-guidage-demo.md) ; le bloc 2 reste celui du 7 oct. (G4).

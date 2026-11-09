@@ -130,12 +130,12 @@ describe('#1152 lot 3 · un seul glossaire', () => {
         expect(terme('mode-assistance-icones').definition).not.toContain('case');
     });
 
-    it.fails('le glossaire dit où se coupe l\'aide dans les pages : dans le panneau « Assistance », plus sur la ligne du menu', () => {
-        // ⏳ TEXTE DEVENU FAUX, EN ATTENTE DE GRÉGOIRE — lot « Les deux parcours » (8 nov. 2026).
-        // La consigne interdit de retoucher un texte qu'elle ne nomme pas : celui-ci reste tel quel, et
-        // `it.fails` le dit. Quand le texte revu sera posé, ce témoin passera au vert, `it.fails` rougira :
-        // remplacer alors ce bloc par le texte validé.
+    it('le glossaire dit où se coupe l\'aide dans les pages : dans le panneau « Assistance », plus sur la ligne du menu', () => {
+        // ↻ Lot « Les deux parcours », partie 1 : terme et définition validés par Grégoire le 9 nov. 2026 à 9 h 11
+        // (Cowork), mot pour mot (le témoin était un `it.fails` depuis le 8 nov.).
         expect(terme('mode-assistance-icones').definition).not.toContain('par la ligne Assistance du menu');
+        expect(terme('mode-assistance-icones').terme).toBe('Aide dans les pages');
+        expect(terme('mode-assistance-icones').definition).toBe('Les info-bulles, l’aide à l’écran et les flèches. Elle s’active ou se coupe dans le panneau « Assistance » du menu. Elle est indépendante des parcours.');
     });
 
     it('la retouche du verdict (28 oct., 14 h 15) : le menu Codex sans côté ; SRPNF mot pour mot, sa validation notée', () => {

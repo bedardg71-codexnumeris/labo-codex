@@ -125,7 +125,8 @@ describe('#1152 lot 2a, retouche · les entrées disent le mot de l\'écran', ()
     it('prise-en-main : « Assistance » ne règle pas la visite guidée ; « Étapes de configuration » est une entrée de l\'Aide', () => {
         const t = entree('prise-en-main');
         const assistance = tranche(t, 'Assistance', 'Pour configurer');
-        expect(assistance).toContain('les info-bulles, l\'aide à l\'écran et les flèches');
+        // ↻ Lot « Les deux parcours », partie 1 (9 nov. 2026) : une seule ligne « Assistance », texte validé par Grégoire.
+        expect(assistance).toContain('les parcours où tu fais les gestes toi-même, et l\'aide dans les pages (info-bulles, aide à l\'écran, flèches)');
         expect(assistance).not.toMatch(/visite guidée/i);
         expect(t).toContain('l\'entrée « Étapes de configuration », dans la partie Cadre de cette Aide');
     });

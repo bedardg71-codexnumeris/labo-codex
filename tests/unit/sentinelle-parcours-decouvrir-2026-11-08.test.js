@@ -82,12 +82,15 @@ describe('le panneau « Assistance » et l’aide disent les phrases de la consi
         }
     });
 
-    it('le texte de l’aide sur la visite est remplacé', () => {
+    it('l’aide sur la visite est retirée : plus rien ne l’ouvrait', () => {
+        // ↻ Partie 1 (9 nov. 2026), décision de Cowork : la fiche 'tour-guide' (« Visite guidée », bouton
+        // « Démarrer la visite ») part, mesurée sans ouvreur (aucun data-aide, data-target, voirAussi ni appel
+        // par clé) ; son action demarrerTourDepuisAide part avec elle.
         const popup = lire('js/accompagnement-contenu-popup.js');
-        const neuf = "L'assistance te propose des parcours où tu fais les gestes toi-même, accompagné·e pas à pas : d'abord sur une classe de démonstration, puis avec ta propre classe. Tu les retrouves dans le menu, sous « Assistance », avec l'aide dans les pages.";
-        expect(CONSIGNE).toContain(neuf);
-        expect(popup).toContain(neuf);
+        expect(popup).not.toContain("'tour-guide': {");
+        expect(popup).not.toContain('Démarrer la visite');
         expect(popup).not.toContain('La visite guidée te présente');
+        expect(lire('js/accompagnement.js')).not.toContain('demarrerTourDepuisAide');
     });
 
     it('le menu : « Assistance » ouvre le panneau, plus de « Visite guidée » ni d’interrupteur', () => {
