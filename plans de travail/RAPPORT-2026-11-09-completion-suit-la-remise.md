@@ -1,4 +1,4 @@
-En cours : la mesure est faite et poussée, le code suit. Cette ligne dira « Codé » ou « Pas codé » à la fin de la session.
+Codé
 
 # Rapport : lot « La complétion suit la remise » (session D, nuit du 8 au 9 nov. 2026)
 
@@ -9,11 +9,43 @@ session dans le nuage : ni WebKit ni les données de Grégoire ici.
 
 ## En tête
 
-**Fait** : la mesure que demande la consigne (section 1 ci-dessous).
+### Ce qui est fait (en gestes d'utilisateur)
 
-**Attend Grégoire** : rien pour l'instant ; les questions viendront avec le code.
+- En pratique **sommative**, une copie que tu importes compte comme remise dès qu'elle est reçue. Pendant une correction,
+  les étudiant·es que tu n'as pas encore corrigé·es ne perdent plus de complétion. Mesuré dans l'application (Chromium) :
+  douze élèves, douze copies importées, une seule évaluée. Avant : 1/1 pour l'évaluée, 0/1 pour les onze autres.
+  Après : 1/1 pour les douze.
+- Ton évaluation corrige la remise : une copie importée que tu enregistres « Non reçu », ou marquée plagiat ou IA non
+  autorisée, n'est pas remise (qu'elle soit écartée ou mise à 0).
+- Une copie papier, sans fichier, ne compte qu'une fois évaluée, comme avant.
+- Les captures du Suivi suivent la même règle en sommative, pour les captures à venir.
+- Rien ne change en standards, en spécifications ni en dénotation (ta consigne : ne pas étendre sans toi).
+- La démo ne bouge pas : Loyal Suricate reste à 80 % (8/10), et ses deux productions non remises restent
+  « Artefact 3 » et « Artefact 4 ».
 
-**Pas vérifiable ici** : ce qui change sur ton groupe d'A2026 (tes données sont sur le Mac).
+### Ce qui attend Grégoire (une question par ligne, avec ma recommandation)
+
+1. **Étendre la règle aux autres familles ?** Dans une pratique de ta bibliothèque, le calcul de C est le même code
+   pour les quatre familles : le défaut que Cowork a mesuré (onze à 0 % après une première copie évaluée) existe donc
+   aussi en standards, en spécifications et en dénotation. *Recommandation : étendre.* La règle porte sur la remise,
+   pas sur la note ; le code est prêt (une ligne, `FAMILLES_OU_LA_RECEPTION_VAUT_REMISE`, et ses essais). Si ta propre
+   pratique d'A2026 est une pratique par standards, rien ne change pour toi tant que la règle n'est pas étendue.
+2. **La phrase validée de l'étape 7 du troisième parcours tient-elle ?** Elle dit : « une production importée compte
+   comme remise à son échéance ». Dans le code, la bande C du Suivi › Groupe lit le C du jour (`indicesCP`,
+   `js/tableau-bord-apercu.js:404`) : une production importée y compte dès qu'une première production de ce travail
+   est évaluée dans le groupe, **pas à son échéance**. Seules les captures du Suivi (le graphique) comptent à
+   l'échéance. Au moment de l'étape 7, ta première évaluation est faite : l'écran montre bien la production importée
+   comme remise, mais pour une autre raison que celle que dit la phrase. Je ne la retouche pas (règle 6). *Proposition,
+   à corriger :* « La complétion, elle, suit la remise : dès ta première évaluation d'une production, chaque production
+   importée pour ce travail compte comme remise ; sans fichier, c'est ton évaluation qui confirme la remise. » L'étape 3
+   dit aussi « À son échéance, ce que tes étudiant·es ont remis compte dans leur complétion » : même remarque. La
+   session H porte ces textes ; je le signale ici parce que la règle vient de ce lot.
+
+### Ce que je n'ai pas pu vérifier
+
+- **WebKit** : absent du nuage. Essais Playwright sous Chromium seulement (section 3).
+- **Ton groupe d'A2026** : tes données sont sur le Mac. Un relevé en lecture seule est prêt (section 5).
+- La suite Playwright entière : seules les 13 specs qui touchent la complétion ont tourné.
 
 ## 1. La mesure, avant tout code
 
@@ -105,10 +137,128 @@ au prochain calcul, comme toujours.
 ### 1.7 La démo
 
 Le pack démo (`js/pack-demo-10.js`) ne contient **aucune** copie importée (aucune entrée `fichiersTravaux`), et sa pratique
-est « standards ». Ses chiffres ne peuvent pas bouger : Loyal Suricate reste à 80 %, et les deux productions non remises
-dont parle « Découvrir » restent non remises. Mesure dans Chromium avant et après : section 4.
+est « standards ». Ses chiffres ne peuvent pas bouger. Mesuré dans Chromium, avant (`98c04bf`) et après (`7b2f87ac`) : les dix élèves
+identiques, à la virgule près. Pratique résolue : `demo-std-litt` (STD, une configurable), aucune fiche
+`fichiersTravaux`. Loyal Suricate : C = 80, 8/10, non remises « Artefact 3 » et « Artefact 4 ». « Découvrir » parle des
+mêmes deux productions.
 
 ### 1.8 Ton groupe d'A2026
 
 À mesurer sur le Mac, en lecture seule. Ce qui décide : la famille de la pratique appliquée au groupe, et le nombre de
 copies importées qui ne sont pas encore évaluées. Si la pratique n'est pas une sommative, rien ne change à l'écran.
+
+## 2. La décision de coder
+
+Les trois conditions du plan de la nuit tiennent :
+- **le dénominateur peut rester tel qu'il est** (1.3) ;
+- **la règle n'a pas à s'étendre aux autres familles pour être juste en sommative** (1.4) : aucun calcul de C ne mêle
+  deux familles ; une condition sur la famille suffit ;
+- **la complétion n'entre dans aucune note** (1.5).
+
+D'où « Codé » en première ligne : la session H peut faire le troisième parcours sur cette branche.
+
+## 3. Ce qui est fait
+
+Commit `7b2f87ac`, branche `lot/completion-suit-la-remise`.
+
+**Une règle, à un seul endroit** (`js/pratiques/pratique-registre.js`, après `evaluationCompteCommeRemise`) :
+- `receptionVautRemise(pratique)` : vrai en sommative seulement (`FAMILLES_OU_LA_RECEPTION_VAUT_REMISE = ['SOM']`) ;
+- `lireCopiesRecues(fichiers)` : une clé « élève | production » par fiche de `fichiersTravaux` rattachée à une production ;
+  une fiche orpheline ne compte pas ; une fiche à la corbeille n'est plus dans la liste ;
+- `evaluationCorrigeLaReception(e)` : une évaluation **enregistrée** (verrouillée), pas une originale remplacée, non
+  remise ou non recevable. Le statut suffit : ce que la copie vaut dans la note n'y entre pas (écartée ou mise à 0) ;
+- `productionRemiseParEleve(da, production, évaluations, copiesRecues)` : une copie qui compte comme remise (la règle
+  d'avant, inchangée), **ou** une copie reçue que rien ne corrige.
+
+**Les quatre calculs qui la lisent** :
+- la sommative codée en dur (`pratique-sommative.js`, `calculerDetailsCompletion`, et un lecteur `_lireFichiersRecus`) ;
+- la configurable (`pratique-configurable.js`), qui ne lit les copies reçues que si sa famille est la sommative ;
+- les captures du Suivi (`snapshots.js`) : le C de chaque élève (la pratique active est maintenant résolue avant C, et
+  sert aussi à P comme avant) et le C du groupe (`_ajouterRemisesParReception`, une fonction à part pour que
+  `capturerSnapshotSeance` reste sous le cliquet de complexité).
+
+Les standards codés en dur et les spécifications codées en dur ne sont pas touchés.
+
+**Hypothèses que j'ai prises seul (à corriger en dix secondes si elles sont fausses)** :
+- un **brouillon** marqué plagiat ne corrige pas la réception : « un brouillon ne compte nulle part » (ta décision du
+  16 sept.). La copie redevient non remise quand tu verrouilles ;
+- une copie importée compte **sans date** : elle compte dès que sa production est au dénominateur, comme une évaluation
+  aujourd'hui ; dans les captures, dès l'échéance (le C historique compte déjà ainsi les remises en retard).
+
+**Les jetons anti-cache** des quatre scripts sont posés dans `index.html` (exigés par le crochet du commit). Les autres
+sessions de la nuit en poseront aussi : conflits attendus à la fusion, sans enjeu (prendre le jeton le plus récent).
+
+### Les essais
+
+- **Neuf** : `tests/unit/sentinelle-completion-suit-la-remise-2026-11-08.test.js`, 17 essais. Le cas de la consigne
+  (une production, trois copies importées, une seule évaluée et verrouillée : les deux autres remises ; une copie papier
+  ni importée ni évaluée : pas remise), dans la sommative codée en dur et dans la configurable sommative ; le
+  dénominateur inchangé ; la correction par l'évaluation ; une configurable par standards inchangée ; les deux C des
+  captures. **Rouge avant le correctif** (3 essais : Bruno à 0/1 au lieu de 1/1). Six break-tests, chacun rouge,
+  listés en tête du fichier.
+- **Trois sentinelles de texte** suivent le passage par la règle par production, sans perdre leur intention (le calcul
+  lit la règle unique du registre, qui lit toujours `evaluationCompteCommeRemise`) :
+  `audit-onglet-suivi-2026-09-05` (B4), `sentinelle-audit-aide-15-oct-ce-que-fait-l-application`,
+  `sentinelle-lot-A-737-741-718-738-les-memes-copies-partout` (D3). Les valeurs mesurées de B4 ne bougent pas.
+- **Une spec Playwright** change d'attente : `statut-incomplet-travail-en-cours.spec.js`, « 1/2 » devient « 2/2 » avant de
+  cocher « Incomplet » (la copie importée d'Alpha, sommative, compte dès sa réception). C'est la règle décidée.
+- **Vitest** (depuis `tests/`) : 893 fichiers, 10 842 essais, tous verts.
+- **Playwright, Chromium** : les 13 specs qui touchent la complétion (`assiduite-lot-D-date-arrivee-et-inconnu`,
+  `audit-pratiques-notation-parcours-2026-09-16`, `construction-de-la-note-correctifs-28-oct`, `copie-non-recevable-note-28-oct`,
+  `golden-master-procedural-L2-0`, `lot-n4-spe-note-absente-cause`, `profil-745-eleve-exclu`, `profil-871-completion-fraction`,
+  `profil-922-completion-sommative`, `registre-longitudinal-915`, `standards-sans-portfolio-lot-2`,
+  `statut-incomplet-travail-en-cours`, `suivi-830-barre-a-sans-periodes`) : 32 verts sur 33 après l'attente ajustée. Le rouge restant, `registre-longitudinal-915` R5 (une tuile décalée à 768 px),
+  **est rouge aussi sur `main` sans ce lot**, sous Chromium : un écart de mise en page entre navigateurs, sans rapport.
+  À juger sous WebKit au Mac.
+
+## 4. La démo, avant et après
+
+Voir 1.7 : identique. Aucun chiffre de « Découvrir » ne change.
+
+## 5. Ton groupe d'A2026, en lecture seule (à faire sur le Mac)
+
+Ce qui décide : la famille de la pratique appliquée au groupe, et les copies importées pas encore évaluées. Pour le
+mesurer sans rien écrire, dans la console de l'application, groupe d'A2026 ouvert, sur la branche de ce lot (des DA,
+aucun nom) :
+
+```js
+(() => {
+  const p = resoudrePratiqueActive().pratique, evs = obtenirDonneesSelonMode('evaluationsSauvegardees');
+  return { famille: p.obtenirCode(), lignes: obtenirDonneesSelonMode('groupeEtudiants').map(e => {
+    const d = obtenirDetailsCompletion(e.da);
+    if (!d || !d.productions) return [e.da, null];
+    const avant = d.productions.filter(x => evs.some(v => v.etudiantDA === e.da && v.productionId === x.id
+      && evaluationCompteCommeRemise(v, evs))).length;
+    return [e.da, avant + '/' + d.total, d.remis + '/' + d.total];
+  }).filter(l => l[1] && l[1] !== l[2]) };
+})()
+```
+
+Il rend la famille, puis seulement les élèves dont la fraction change (avant, après). Si la famille n'est pas « SOM »,
+la liste est vide : rien ne change à l'écran.
+
+## 6. Le stock
+
+Source seulement : rien n'est écrit dans tes données. Le C du jour se recalcule au prochain calcul. Les captures déjà
+enregistrées gardent l'ancienne valeur de C ; « Recalculer les captures » les recalculerait avec la nouvelle règle (y
+compris dans un trimestre archivé qu'on rouvrirait : C n'est pas une note, mais je le dis).
+
+## 7. Limites connues
+
+- **Une reprise accordée sur une copie non recevable** : tant que la reprise n'est pas évaluée, l'originale verrouillée
+  « plagiat » reste active et corrige la réception, même si l'élève a déjà remis sa reprise par import. L'élève reste
+  non remis jusqu'à la réévaluation, comme avant ce lot. Cas rare ; je recommande de le laisser ainsi.
+- Les spécifications **codées en dur** ne comptent pas des remises mais des travaux acceptables : la règle n'y aurait
+  pas de sens. Seules les spécifications d'une pratique de ta bibliothèque passent par le calcul commun.
+
+## 8. À inscrire au BACKLOG
+
+Rien de neuf trouvé dans le code du lot. Une trouvaille relayée, **non vérifiée par moi** : l'audit de début de session
+rapporte que la vérification GitHub de la release 1.237.2 (run `42534632439`, commit `54a87bca`) est rouge à l'étape
+Playwright, quatre specs neuves rouges sous WebKit Linux (`aide-cp-suit-la-case-1086`,
+`annotation-formes-fermees-polygone`, `palette-evaluation-compacte`, `tampons-masques-bibliotheque-1216`), alors que le
+Mac disait 1 420/1 420. Issue proposée : inscrire et continuer.
+
+## 9. Relecture par un agent neuf
+
+(verdict ci-dessous)
