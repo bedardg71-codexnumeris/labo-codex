@@ -191,7 +191,7 @@ Les « tient » et « ne tient pas » viennent de la lecture du code par un agen
   le lancement du parcours émet lui-même un avis, qui replace la pile ; l'essai juge le résultat, pas ce chemin-là.
   L'essai « sans fichier » était instable avant ces corrections (1 rouge sur 3, mesuré avec le code d'avant aussi) :
   il tapait les deux nombres sans quitter le champ ; il fait maintenant le geste entier (`change`), 5 verts sur 5.
-  Banc complet : **10 verts**, 5 captures sautées hors demande.
+  Banc complet : **9 verts**, 5 captures sautées hors demande.
   Specs voisines (Chromium) : `notifications-pile-1224`, `grille-critere-ajoute-enregistrer-957`,
   `confirmations-conception-uniformes`, `parcours-1-et-2` : 18 verts, 1 sauté, 1 rouge, le rouge Chromium connu de la
   base (« panneau : … le ferment », la géométrie du panneau pendant son glissement).
