@@ -523,7 +523,8 @@ var LIBELLES_DEUX_LIENS = {
 /**
  * La mention de la fiche de production, validée mot pour mot :
  * « Repris dans la carte : leçon « … », semaine N ». Une leçon sans semaine
- * n'a pas de N à dire : la phrase s'arrête après le titre.
+ * n'a pas de N à dire : la phrase s'arrête après le titre (cette variante est
+ * PROPOSÉE, non validée : rapport de l'étape 2, § 8).
  */
 function texteRepriseObjectif(titreLecon, semaine) {
     return 'Repris dans la carte : leçon « ' + titreLecon + ' »' + (semaine ? ', semaine ' + semaine : '');
