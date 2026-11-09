@@ -1190,6 +1190,99 @@ function evaluationCompteCommeRemise(evaluation, evaluations) {
     return evaluationEntreDansLaNote(evaluation, evaluations) && !evaluationNonRemise(evaluation);
 }
 
+/* ===============================
+   LA COMPLÉTION SUIT LA REMISE, EN SOMMATIVE : décisions de Grégoire du 8 nov. 2026 (7 h 58 et 7 h 59) ; lot de la
+   session D de la nuit du 8 au 9 nov. (`plans de travail/RAPPORT-2026-11-09-completion-suit-la-remise.md`).
+   Une copie IMPORTÉE compte comme remise dès sa réception ; l'évaluation vient la confirmer, ou la corriger (non remise,
+   non recevable). Sans import (une copie papier), l'évaluation seule confirme la remise, comme avant.
+   Avant : une copie n'était remise qu'évaluée et verrouillée. Pendant une correction, chaque élève pas encore corrigé·e
+   perdait de la complétion (onze sur douze à 0 % après une première copie évaluée, mesuré par Cowork le 8 nov.) : le
+   signal dépendait de l'ordre de correction.
+   ⚠ UNE COPIE IMPORTÉE N'EST PAS UNE ÉVALUATION : c'est une fiche de `fichiersTravaux` (travaux-stockage.js), par élève
+   et par production ; la corbeille l'en retire. Chaque calcul la lit au stockage de son mode et passe la liste ici.
+   ⚠ LA SOMMATIVE SEULEMENT : la consigne interdit d'étendre la décision aux autres familles sans Grégoire. Dans
+   `PratiqueConfigurable`, le même calcul de C sert les quatre familles : la condition sur la famille est ICI.
+   ⚠ Le dénominateur ne change pas : une production y entre à la première copie évaluée du groupe, comme avant.
+   ⚠ Une copie qui CORRIGE la réception est enregistrée (verrouillée) : un brouillon ne compte nulle part (16 sept.).
+   ⚠ Se lit AU CALCUL : les captures déjà prises gardent leur C jusqu'à « Recalculer les captures ».
+   =============================== */
+
+const FAMILLES_OU_LA_RECEPTION_VAUT_REMISE = Object.freeze(['SOM']);
+
+/**
+ * La réception d'une copie importée vaut-elle remise dans cette pratique ? En sommative seulement (8 nov. 2026).
+ * @param {Object} pratique - une instance (codée en dur ou configurable)
+ * @returns {boolean}
+ */
+function receptionVautRemise(pratique) {
+    if (!pratique || typeof pratique.obtenirCode !== 'function') return false;
+    return FAMILLES_OU_LA_RECEPTION_VAUT_REMISE.includes(pratique.obtenirCode());
+}
+
+function _cleCopieRecue(da, productionId) {
+    return String(da) + '|' + String(productionId);
+}
+
+/**
+ * Les copies reçues par import : une clé « DA|production » par fiche de `fichiersTravaux` rattachée à un·e élève et à
+ * une production. Une fiche orpheline (sans production) n'est la remise de rien.
+ * @param {Array} fichiers - la liste `fichiersTravaux` du mode actif
+ * @returns {Set<string>}
+ */
+function lireCopiesRecues(fichiers) {
+    const recues = new Set();
+    (Array.isArray(fichiers) ? fichiers : []).forEach(f => {
+        if (!f || !f.etudiantDA || !f.productionId || f.statut === 'corbeille') return;
+        recues.add(_cleCopieRecue(f.etudiantDA, f.productionId));
+    });
+    return recues;
+}
+
+/**
+ * L'évaluation CORRIGE la réception de sa copie : enregistrée (un brouillon ne compte nulle part), pas une originale
+ * remplacée, et non remise ou non recevable (« qu'elle soit écartée ou mise à 0 », Grégoire, 8 nov. 2026 : le statut
+ * suffit, ce que vaut la copie dans la note n'y entre pas).
+ * @param {Object} evaluation
+ * @param {Array} [evaluations]
+ * @returns {boolean}
+ */
+function evaluationCorrigeLaReception(evaluation, evaluations) {
+    if (!evaluation || evaluation.verrouillee === false) return false;
+    if (evaluation.remplaceeParId && originaleEstRemplacee(evaluation, evaluations)) return false;
+    return evaluationNonRecevable(evaluation) || evaluationNonRemise(evaluation);
+}
+
+/**
+ * La copie de cet élève pour cette production a été reçue par import, et aucune évaluation ne la corrige.
+ * @param {string} da
+ * @param {string} productionId
+ * @param {Array} evaluations
+ * @param {Set<string>|null} copiesRecues - `lireCopiesRecues` ; null : la réception ne vaut pas remise (autre famille)
+ * @returns {boolean}
+ */
+function receptionNonCorrigee(da, productionId, evaluations, copiesRecues) {
+    if (!copiesRecues || !copiesRecues.has(_cleCopieRecue(da, productionId))) return false;
+    const liste = Array.isArray(evaluations) ? evaluations : [];
+    return !liste.some(e => e && String(e.etudiantDA) === String(da) && e.productionId === productionId
+        && evaluationCorrigeLaReception(e, liste));
+}
+
+/**
+ * LA PRODUCTION EST REMISE PAR CET ÉLÈVE : la règle par production des calculs de complétion qui la reçoivent (la
+ * sommative, la configurable, les deux C des captures) : une copie qui compte comme remise, ou une copie reçue par
+ * import que rien ne corrige.
+ * @param {string} da
+ * @param {string} productionId
+ * @param {Array} evaluations
+ * @param {Set<string>|null} copiesRecues - null : seule l'évaluation confirme la remise (la règle d'avant)
+ * @returns {boolean}
+ */
+function productionRemiseParEleve(da, productionId, evaluations, copiesRecues) {
+    const liste = Array.isArray(evaluations) ? evaluations : [];
+    if (liste.some(e => e && e.etudiantDA === da && e.productionId === productionId && evaluationCompteCommeRemise(e, liste))) return true;
+    return receptionNonCorrigee(da, productionId, liste, copiesRecues);
+}
+
 /**
  * Combien d'évaluations de cet élève portent une note mais sont écartées par #706.
  * @param {string} da
@@ -1228,6 +1321,11 @@ window.libelleCopieNonRecevable = libelleCopieNonRecevable;   // ce que la copie
 // Statut « Incomplet ; travail en cours » (25 oct. 2026) — hors de la note, remise pour C
 window.evaluationTravailEnCours = evaluationTravailEnCours;
 window.evaluationCompteCommeRemise = evaluationCompteCommeRemise;
+// La complétion suit la remise, en sommative (8 nov. 2026) : une copie importée compte dès sa réception
+window.receptionVautRemise = receptionVautRemise;
+window.lireCopiesRecues = lireCopiesRecues;
+window.receptionNonCorrigee = receptionNonCorrigee;
+window.productionRemiseParEleve = productionRemiseParEleve;
 // #394 — rôles des productions STD (SSOT des deux systèmes de calcul)
 window.identifierProductionTerminale = identifierProductionTerminale;
 window.obtenirArtefactsIdsPoolStd = obtenirArtefactsIdsPoolStd;

@@ -27,6 +27,13 @@ export function chargerPredicatsCopie(win) {
     // Statut « Incomplet ; travail en cours » (25 oct. 2026) — la règle de la remise pour C, et le statut
     win.evaluationCompteCommeRemise = registre.evaluationCompteCommeRemise;
     win.evaluationTravailEnCours = registre.evaluationTravailEnCours;
+    // La complétion suit la remise, en sommative (8 nov. 2026) : la règle par production des complétions et des captures.
+    // Elle demande sa famille à la pratique (`obtenirCode`, qui lit `obtenirCodePratique`) : le vrai, si le banc n'a pas le sien.
+    win.receptionVautRemise = registre.receptionVautRemise;
+    win.lireCopiesRecues = registre.lireCopiesRecues;
+    win.receptionNonCorrigee = registre.receptionNonCorrigee;
+    win.productionRemiseParEleve = registre.productionRemiseParEleve;
+    if (typeof win.obtenirCodePratique !== 'function') win.obtenirCodePratique = registre.obtenirCodePratique;
     // Lot 2 des standards sans portfolio (29 oct. 2026) — le pool de la note, lu par les lecteurs secondaires
     win.obtenirIdsPoolStdDuCorpus = registre.obtenirIdsPoolStdDuCorpus;
     return win;

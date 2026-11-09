@@ -253,6 +253,10 @@ function calculerIndicesHistoriques(da, dateLimite, evaluationsCache = null, use
         return date && date <= dateLimite;
     });
 
+    // La pratique active : le C ci-dessous (la complétion suit la remise, en sommative, 8 nov. 2026) et le P plus bas la lisent.
+    const resolutionP = (typeof resoudrePratiqueActive === 'function') ? resoudrePratiqueActive() : null;
+    const pratiqueP = (resolutionP && resolutionP.etat === 'ok') ? resolutionP.pratique : null;
+
     if (productionsDues.length === 0) {
         // ✅ CORRECTION (Beta 93) : null au lieu de 100% quand aucune production due
         indiceC = null;
@@ -261,13 +265,15 @@ function calculerIndicesHistoriques(da, dateLimite, evaluationsCache = null, use
         // ✅ IMPORTANT (Beta 94 - 10 déc): Option B - Considérer dateEcheance, pas dateEvaluation
         // Un travail remis en retard est compté rétroactivement dès son échéance
         // Cela rend C monotone croissant (jamais de baisse) et fidèle aux échéances
-        const productionsRemises = productionsDues.filter(production => {
-            return evaluations.some(e =>
-                e.etudiantDA === da &&
-                e.productionId === production.id &&
-                window.evaluationCompteCommeRemise(e, evaluations)   // lot A (16 sept.), lot 30 (17 sept.), statut incomplet (25 oct. 2026)
-            );
-        });
+        // La complétion suit la remise (décisions de Grégoire, 8 nov. 2026) : EN SOMMATIVE, une copie IMPORTÉE compte comme
+        // remise dès sa réception, comme pour le C du jour (pratique-registre.js, `productionRemiseParEleve`) ; elle aussi est
+        // comptée dès l'échéance. Hors sommative, la règle d'avant. ⚠ Les captures déjà écrites gardent leur C.
+        const copiesRecues = window.receptionVautRemise(pratiqueP)
+            ? window.lireCopiesRecues(obtenirDonneesSelonMode('fichiersTravaux') || [])
+            : null;
+        const productionsRemises = productionsDues.filter(production =>
+            window.productionRemiseParEleve(da, production.id, evaluations, copiesRecues)   // lot A, lot 30, statut incomplet, 8 nov. 2026
+        );
 
         indiceC = Math.round((productionsRemises.length / productionsDues.length) * 100);
     }
@@ -289,8 +295,6 @@ function calculerIndicesHistoriques(da, dateLimite, evaluationsCache = null, use
     // ⚠ TARIR N'EST PAS RÉPARER : les snapshots déjà écrits gardent leur P jusqu'à ce que l'enseignant
     // clique « Recalculer les captures » (Réglages › Captures et recherche). Rien n'est réécrit d'office.
     let indiceP = null;
-    const resolutionP = (typeof resoudrePratiqueActive === 'function') ? resoudrePratiqueActive() : null;
-    const pratiqueP = (resolutionP && resolutionP.etat === 'ok') ? resolutionP.pratique : null;
     const estDenotation = !!(pratiqueP && typeof pratiqueP.obtenirCode === 'function' && pratiqueP.obtenirCode() === 'DEN');
 
     if (pratiqueP && !estDenotation && typeof calculerNoteDuCours === 'function' && typeof definirContexteSimulation === 'function') {
@@ -775,6 +779,7 @@ async function capturerSnapshotSeance(dateSeance, evaluationsCacheParam = null, 
                     dasRemis.add(String(e.etudiantDA));
                 }
             });
+            _ajouterRemisesParReception(dasDuGroupe, dasRemis, dernierTravail.id, evaluationsCache);   // 8 nov. 2026, en sommative
             cGlobal = Math.round((dasRemis.size / nbEtudiants) * 100);
         }
 
@@ -868,6 +873,25 @@ async function capturerSnapshotSeance(dateSeance, evaluationsCacheParam = null, 
         console.error('❌ Erreur capture snapshot séance:', error);
         return null;
     }
+}
+
+/**
+ * La complétion suit la remise (décisions de Grégoire, 8 nov. 2026), pour le C du groupe d'une capture : EN SOMMATIVE,
+ * un·e élève du groupe dont la copie importée du dernier travail n'est corrigée par aucune évaluation l'a remis, comme
+ * pour le C de chaque élève (`calculerIndicesHistoriques`). Hors sommative, rien ne s'ajoute. Écrit dans `dasRemis`.
+ * @param {Set<string>} dasDuGroupe
+ * @param {Set<string>} dasRemis
+ * @param {string} productionId
+ * @param {Array} evaluations
+ */
+function _ajouterRemisesParReception(dasDuGroupe, dasRemis, productionId, evaluations) {
+    const resolution = (typeof resoudrePratiqueActive === 'function') ? resoudrePratiqueActive() : null;
+    const pratique = (resolution && resolution.etat === 'ok') ? resolution.pratique : null;
+    if (!window.receptionVautRemise(pratique)) return;
+    const copiesRecues = window.lireCopiesRecues(obtenirDonneesSelonMode('fichiersTravaux') || []);
+    dasDuGroupe.forEach(da => {
+        if (!dasRemis.has(da) && window.receptionNonCorrigee(da, productionId, evaluations, copiesRecues)) dasRemis.add(da);
+    });
 }
 
 /**
