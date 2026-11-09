@@ -215,6 +215,21 @@ pas pour un cours, un horaire, un enseignant ou un groupe-cours. Non changé. **
 en généralisant la fonction. La fonction n'existe plus et le Cadre n'a plus de section « Démo » : le jour où le plan 2
 reprend, ce paragraphe est à réécrire (une section « Partagés » seulement, ou rien). Le plan n'est pas modifié.
 
+### 4 ter. Les captures WebKit à 1180 px, et l'étape 7 (9 nov. 2026)
+
+Prises sur le Mac après la fusion de la partie 1 et l'option (a). Sept étapes sur huit, la variante « avant le premier
+cours » : la bulle et le contour aux mêmes places que sur les captures Chromium approuvées (les champs de date vides se
+dessinent « 11/09/2026 » sous WebKit, rendu natif). **L'étape 7 différait** : la flèche didactique des présences
+(« Clique dans une cellule pour saisir des périodes de présence », `suivi-presences-premiere-saisie`) s'ajoutait à la
+bulle et couvrait le haut de la colonne « Présence » ; sous Chromium, la cellule n'existait pas encore au bout des
+150 ms de stabilisation. Montrée à Grégoire, qui a choisi de taire les flèches pendant un parcours : `afficherAutoReveal`
+ne fait rien quand `<body>` porte `parcours-actif`, et `parcours.css` cache une flèche déjà ouverte au lancement. La
+flèche n'est pas marquée vue : elle revient hors parcours. Spec : deux assertions (pas de flèche à l'étape 7 ; le témoin,
+elle revient après « Terminer ») ; rouge sans la garde, vérifié.
+
+À 390 px, la capture de l'iPhone rougit à l'étape 5 (« la bulle ne couvre pas #v2-btnCreerHoraire ») : c'est la bulle
+sur téléphone, au lot de l'autre instance. Cet essai ne tourne qu'en mode captures.
+
 ## 5. Trouvailles, et leur issue
 
 1. **Le témoin « Enregistré » recouvre « Plus tard » à 390 px** — *inscrire* (question 3 de l'en-tête ; code de la
