@@ -63,14 +63,21 @@ function texte7SansFichier() {
     return texteValide(7).replace("« Générale » reprend les phrases de ta cartouche, critère par critère ; « Spécifique », celles de tes tampons, avec le nombre de fois où tu les as posés.", deuxieme);
 }
 
-function charger() {
+function charger(productions) {
     const enregistres = [];
     const win = {
         Assistance: { enregistrer: (d) => enregistres.push(d), definirEtat() {}, etatDe: () => ({ etat: 'a-faire', etape: 0 }) },
-        ParcoursMoteur: { visible: () => false, premierVisible: () => null, actif: () => false, etapeCourante: () => null }
+        ParcoursMoteur: { visible: () => false, premierVisible: () => null, actif: () => false, etapeCourante: () => null },
+        addEventListener() {}
     };
     const document = { getElementById: () => null, querySelector: () => null, querySelectorAll: () => [], addEventListener() {}, body: { classList: { toggle() {} } } };
-    chargerScript('js/parcours-recevoir.js', { document }, win);
+    const globaux = { document };
+    if (productions) {
+        // Un groupe-cours actif et les productions données : la condition ne lit que celles du cours actif.
+        globaux.db = { getSync: (k, d) => (k === 'groupeCoursActif' ? { id: 'GC_fictif' } : d) };
+        globaux.obtenirDonneesSelonMode = (k) => (k === 'productions' ? productions : []);
+    }
+    chargerScript('js/parcours-recevoir.js', globaux, win);
     return { def: enregistres[0], api: win.ParcoursRecevoir };
 }
 
@@ -126,5 +133,62 @@ describe('« Recevoir les productions, rendre tes rétroactions » : les bulles,
         expect(m).not.toBeNull();
         // Sans groupe-cours actif (le banc n'en a pas), le refus est dit.
         expect(api.condition()).toBe(m[1]);
+    });
+});
+
+// La question 7 (Cowork, 9 nov.) : la condition exige une production qui nomme sa grille, son échelle ET sa cartouche.
+// Le banc de bout en bout ne départage que la grille (à la sortie du troisième parcours, la production n'a ni échelle ni
+// cartouche) : relecture neuve du 9 nov. Ici, chacune des trois manque à son tour.
+describe('« Recevoir les productions, rendre tes rétroactions » : la condition de la question 7', () => {
+    const REFUS = charger().api.condition();
+    const P = { id: 'PROD_un', grilleId: 'G_un', echelleId: 'ECH_un', cartoucheId: 'CART_un' };
+    it.each(['grilleId', 'echelleId', 'cartoucheId'])('sans %s, le refus', (champ) => {
+        const p = { ...P };
+        delete p[champ];
+        expect(charger([p]).api.condition()).toBe(REFUS);
+    });
+    it('grille, échelle et cartouche : le parcours se lance', () => {
+        expect(charger([P]).api.condition()).toBeNull();
+    });
+});
+
+// La garde des trois passages de l'étape 6 (relecture neuve du 9 nov.) : son compte repart de zéro à l'entrée de l'étape.
+// Sans cela, « Refaire » sans recharger la page laissait avancer l'étape dès la première sonde, sur l'état transitoire
+// que la garde doit filtrer. Ici, tout est déjà attribué : il faut trois sondes, à chaque entrée.
+// Break-test (9 nov.) : `reprendre()` retiré de l'`avant` des deux étapes 6 → ROUGE ; rétabli.
+describe('« Recevoir les productions, rendre tes rétroactions » : la garde de l’étape 6 repart de zéro à chaque entrée', () => {
+    function sonde(voieChoisie) {
+        const enregistres = [];
+        const visible = { offsetParent: {} };
+        const win = {
+            Assistance: { enregistrer: (d) => enregistres.push(d), definirEtat() {}, etatDe: () => ({ etat: 'en-cours', etape: 5 }) },
+            ParcoursMoteur: { visible: () => true, actif: () => true, etapeCourante: () => 5 },
+            addEventListener() {},
+            evaluationEnCours: { grilleId: 'G_un', etudiantDA: '2390002', productionId: 'PROD_un', criteres: { CR_un: 'S' } },
+            travauxVisionneuse: { getFichierActuel: () => ({ id: 'F_un', etudiantDA: '2390002', productionId: 'PROD_un' }) },
+            travauxUI: { getModeCourant: () => 'evaluer' }
+        };
+        const document = {
+            getElementById: () => visible, querySelector: () => visible,
+            querySelectorAll: (sel) => (sel.includes('listeCriteresGrille1') ? [{ value: 'S' }] : []),
+            addEventListener() {}, body: { classList: { toggle() {} } }
+        };
+        chargerScript('js/parcours-recevoir.js', {
+            document,
+            db: { getSync: (k, d) => (k === 'grillesTemplates' ? [{ id: 'G_un', criteres: [{ id: 'CR_un' }] }] : d) },
+            cle: (k) => k,
+            obtenirPreference: () => ({ voie: voieChoisie }),
+            naviguerVers() {}
+        }, win);
+        const v = win.ParcoursRecevoir.voies();
+        return voieChoisie === 'fichiers' ? v.fichiers[5] : v['sans-fichier'][0];
+    }
+
+    it.each(['fichiers', 'sans-fichier'])('voie %s : trois sondes à la première entrée, trois de nouveau à la suivante', async (voieChoisie) => {
+        const etape6 = sonde(voieChoisie);
+        await etape6.avant();
+        expect([etape6.atteint(), etape6.atteint(), etape6.atteint()]).toEqual([false, false, true]);
+        await etape6.avant();   // la rentrée dans l'étape (« Refaire », sans recharger la page)
+        expect([etape6.atteint(), etape6.atteint(), etape6.atteint()]).toEqual([false, false, true]);
     });
 });

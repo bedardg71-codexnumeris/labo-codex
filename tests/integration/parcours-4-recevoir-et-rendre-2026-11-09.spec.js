@@ -68,6 +68,9 @@ async function espaceDuTroisiemeParcours(page, cap) {
     await fermerLeRappel(page);
     await ouvrirPanneau(page);
     await expect(page.locator('#panneau-assistance .assistance-parcours-item')).toHaveCount(await page.evaluate(() => Assistance.parcours().length));
+    // Quatrième entrée, juste après « Évaluer une première production » (la consigne) : lu dans le panneau rendu.
+    const ordre = await page.locator('#panneau-assistance .assistance-parcours-item').evaluateAll((els) => els.map((e) => e.dataset.parcours));
+    expect(ordre.slice(0, 4)).toEqual(['decouvrir', 'classe', 'evaluer', 'recevoir']);
     await expect(item(page).locator('.assistance-parcours-titre')).toHaveText('Recevoir les productions, rendre tes rétroactions');
     await expect(item(page).locator('.assistance-parcours-ligne')).toHaveText('De la remise de tes étudiant·es à leur rétroaction en PDF, avec ou sans fichier à importer.');
     await item(page).locator('.assistance-parcours-bouton').click();
@@ -144,6 +147,24 @@ test('« Recevoir les productions, rendre tes rétroactions », la voie des fich
     await expect(page.locator('#travaux-palette-tampons')).toBeVisible();
     await contourSur(page, '#travaux-palette-tampons [title="Personnaliser"]');
     await capture(page, DOSSIER, `p4-4-${cap}`);
+    // « Plus tard » à l'étape 4, la palette masquée par son bouton, un rechargement, « Reprendre » (relecture neuve du
+    // 9 nov. : l'Accueil sous un voile plein) : la production se rouvre et la palette revient (« affiche-la si elle est
+    // masquée »), contour sur l'engrenage.
+    await bulle(page).getByRole('button', { name: 'Plus tard' }).click();
+    await page.click('#btn-toggle-tampons');
+    await expect(page.locator('#travaux-palette-tampons')).toHaveCount(0);
+    await page.reload();
+    await attendreApplication(page);
+    await fermerLeRappel(page);
+    await ouvrirPanneau(page);
+    await expect(item(page).locator('.assistance-parcours-etat')).toHaveText('Étape 4 sur 9');
+    await item(page).locator('.assistance-parcours-bouton').click();
+    await n(page, 4, 9, 'Tes tampons');
+    await expect(page.locator('#evaluations-annoter')).toBeVisible();
+    await expect(page.locator('#travaux-palette-tampons')).toBeVisible();
+    await contourSur(page, '#travaux-palette-tampons [title="Personnaliser"]');
+    expect(await page.evaluate(() => document.getElementById('parcours-voile').getAttribute('class'))).toContain('parcours-voile--normal');
+    await capture(page, DOSSIER, `p4-4-reprise-${cap}`);
     await page.locator('#travaux-palette-tampons [title="Personnaliser"]').click();
     await expect(page.locator('#modal-retro-observations')).toBeVisible();
     await contourSur(page, '#modal-retro-observations [data-action="travauxOutils.enregistrerRetroObservations"]');
