@@ -309,7 +309,7 @@
         titre: "Mettre tes données à l'abri",
         ligne: LIGNE,
         total: ETAPES.length,
-        condition: function () { return aUnTrimestreReel() ? null : REFUS_SANS_TRIMESTRE; },
+        refus: function () { return aUnTrimestreReel() ? null : REFUS_SANS_TRIMESTRE; },
         lancer: lancer
     });
 

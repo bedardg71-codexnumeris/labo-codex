@@ -1923,10 +1923,14 @@ const BADGE_DU_PATTERN = {
  * @returns {Object} - Modèle de la Réponse à l'intervention (RàI) avec pattern et descriptif ; `motif` et `noteAffichee` : ce qui le fixe
  */
 /**
- * « En attente de données » au suivi d'un élève : ni assiduité (inconnue ou 0), ni copie, ni P.
+ * « En attente de données » au suivi d'un élève : ni assiduité CONNUE, ni copie, ni P.
  * Une complétion INCONNUE (`null`, sans pratique assignée) se juge sur les copies elles-mêmes (lot N1b).
  * #1205 (8 nov. 2026) : une seule règle, lue par la carte RàI du profil et par la colonne RàI de la liste —
  * sans elle, la liste disait un niveau là où le profil dit « En attente de données ».
+ * Parcours 7 (9 nov. 2026, décision de Cowork dans la ligne de #743, « l'absent total, 0 %, CONNU ») : une
+ * assiduité de 0 % est une donnée. Avant, l'élève absent·e à toutes les séances, sans production, tombait
+ * « En attente de données » : son Accompagnement n'avait ni ses cartes ni « + Nouvelle intervention ».
+ * Seule l'assiduité INCONNUE (`null`) compte maintenant comme absence de donnée.
  * @param {string} da
  * @param {{A:(number|null), C:(number|null), P:number}} indices
  * @returns {boolean}
@@ -1935,7 +1939,7 @@ function aucuneDonneeDeSuivi(da, indices) {
     const completionVide = (indices.C === null)
         ? calculerIndicesNDerniersArtefacts(da, true).nbArtefacts === 0
         : indices.C === 0;
-    return (indices.A === null || indices.A === 0) && completionVide && indices.P === 0;
+    return indices.A === null && completionVide && indices.P === 0;
 }
 
 function determinerNiveauRaiPedagogique(da, ligneSimulee) {
@@ -1965,10 +1969,8 @@ function determinerNiveauRaiPedagogique(da, ligneSimulee) {
     // Lot 2 (30 oct. 2026) : une copie « non remise » n'est pas une production remise.
     const sansCopie = indices3Derniers.nbArtefacts === 0 || copies.remises === 0;
 
-    // Élève présent mais aucune production → Non-participation (signal prioritaire)
-    // #731 — seulement si le groupe permet de le juger : un travail dû ET une copie évaluée
-    // (règle de Grégoire, 5 sept. 2026). Sinon « En attente », ou le niveau d'un signalement.
-    if (sansCopie && indices.A > 0 && depistagePeutJugerLaNonParticipation().possible) {
+    // Aucune production → Non-participation (signal prioritaire) : `_seLitEnNonParticipation`.
+    if (_seLitEnNonParticipation(da, indices, sansCopie)) {
         return _niveauNonParticipation(fenetreAnalyse);
     }
 
@@ -2094,6 +2096,34 @@ function ceQueTesSeuilsDonnent() {
 function _bornesDeLaLecture(ligneSimulee) {
     const bornes = window.bornesDepistage();
     return typeof ligneSimulee === 'number' ? { ...bornes, bas: ligneSimulee / 100 } : bornes;
+}
+
+/**
+ * Aucune production → Non-participation (signal prioritaire, niveau 3).
+ * #731 — seulement si le groupe permet de le juger : un travail dû ET une copie évaluée (règle de Grégoire, 5 sept.
+ * 2026). Sinon « En attente », ou le niveau d'un signalement.
+ * Décision de Grégoire du 9 nov. 2026 (13 h 44) : il suffit d'au moins une séance passée connue (une assiduité CONNUE,
+ * #743) ; l'absent·e à toutes les séances passées en fait partie (avant : « présent·e », A > 0). Avant la première
+ * séance (assiduité inconnue, `null`), rien ne change : « En attente ». Une personne hors des calculs du groupe
+ * (inactivité, décrochage, abandon : `estEtudiantExclu`) absente partout reste hors des signaux, comme avant : sans
+ * cette garde, elle passait au niveau 3 dans Suivi › Liste (mesuré le 9 nov.).
+ */
+function _seLitEnNonParticipation(da, indices, sansCopie) {
+    if (!sansCopie || typeof indices.A !== 'number') return false;
+    if (indices.A === 0 && _estHorsDesCalculsDuGroupe(da)) return false;
+    return depistagePeutJugerLaNonParticipation().possible;
+}
+
+/**
+ * La fiche de la personne, dans le groupe-cours actif, la met-elle hors des calculs du groupe (`estEtudiantExclu`) ?
+ * Sans suite (relecture du 9 nov.) : seules les fiches du groupe-cours actif sont lues. `calculerEtStockerPatternsGroupe`
+ * (profil-etudiant-actions.js) parcourt tout le trimestre : une personne exclue d'un autre groupe, à 0 %, y serait lue en
+ * non-participation, dans un cache qui n'est lu qu'en repli d'erreur.
+ */
+function _estHorsDesCalculsDuGroupe(da) {
+    if (typeof obtenirEtudiantsCoursActif !== 'function' || typeof estEtudiantExclu !== 'function') return false;
+    const fiche = (obtenirEtudiantsCoursActif() || []).find(e => e && e.da === da);
+    return !!fiche && estEtudiantExclu(fiche);
 }
 
 function _niveauNonParticipation(fenetreAnalyse) {
@@ -2309,7 +2339,7 @@ function nommerDefiAvecSOLO(defi) {
  * @param {string} da - Le DA de l'élève
  * @returns {Object} { cible, pattern, niveau, couleur }
  */
-function _cibleSansCopie(carte, assiduite) {
+function _cibleSansCopie(carte) {
     // Lot 3 des seuils : un signalement diagnostique peut fixer le niveau avant toute autre copie.
     if (carte.pattern === 'Données insuffisantes' && carte.niveau > 0) {
         return { cible: 'Signalement diagnostique', pattern: carte.pattern, niveau: carte.niveau, couleur: '#8aa4b0' };
@@ -2319,7 +2349,9 @@ function _cibleSansCopie(carte, assiduite) {
     if (!depistagePeutJugerLaNonParticipation().possible) {
         return { cible: 'En attente', pattern: 'Données insuffisantes', niveau: 0, couleur: '#8aa4b0' };
     }
-    return assiduite > 0 ? { cible: 'Non-participation', pattern: 'Non-participation', niveau: 3, couleur: '#dc3545' } : null;
+    // #744 : la carte RàI décide (décision du 9 nov. 2026 : une assiduité connue, 0 % compris, hors des personnes
+    // hors du groupe) ; la cible ne recopie plus sa règle.
+    return carte.motif === 'non-participation' ? { cible: 'Non-participation', pattern: 'Non-participation', niveau: 3, couleur: '#dc3545' } : null;
 }
 
 function determinerCibleIntervention(da) {
@@ -2341,7 +2373,7 @@ function determinerCibleIntervention(da) {
     // Élève présent, aucune production remise : il n'y a rien à mesurer, et
     // c'est en soi le signal le plus fort. Conséquence logique, pas seuil.
     if (indices3Derniers.nbArtefacts === 0 || !(_lireLesCopiesDuDepistage().copies.get(da) || { remises: 0 }).remises) {
-        const sansCopie = _cibleSansCopie(carte, indices.A);
+        const sansCopie = _cibleSansCopie(carte);
         if (sansCopie) return sansCopie;
     }
 
@@ -2368,9 +2400,9 @@ function determinerCibleIntervention(da) {
     // `diagnostiquerSuiviApprentissage` rend `null` quand aucune grille de
     // référence n'est utilisable ou qu'aucune évaluation n'est comparable.
     // Le palier, lui, ne dépend plus du suivi : la carte le donne (#744).
-    // ⚠ Conséquence nommée : un élève jamais présent (A = 0) et sans copie passe
-    // par ici ; la carte le dit « En attente » (niveau 0), et la barre des patterns
-    // du groupe l'écarte désormais comme la barre RàI l'écartait déjà (#731).
+    // ⚠ Conséquence nommée : un élève sans assiduité connue (aucune séance passée, `null`) et sans copie passe
+    // par ici ; la carte le dit « En attente » (niveau 0), et la barre des patterns du groupe l'écarte comme la
+    // barre RàI (#731). Depuis le 9 nov. 2026, l'absent·e à toutes les séances (A = 0) est en non-participation.
     if (!suivi) {
         return {
             cible: 'Persistance non calculable — aucun suivi des fondations disponible',

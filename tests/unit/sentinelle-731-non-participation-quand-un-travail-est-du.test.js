@@ -109,10 +109,18 @@ describe('#731 · avant le premier travail, tout le monde reste « En attente »
         expect(p.rai.label).toBe('En attente');
         expect(p.cible.cible).toBe('En attente');
     });
-    it('aucune présence, garde ouverte : En attente pour le RàI (inchangé), et la cible ne dit pas « Non-participation »', () => {
-        const p = portrait(monter({ echeance: '2026-02-01', evaluations: [EVAL_AUTRE], A: 0 }));
+    // Décision de Grégoire du 9 nov. 2026 (13 h 44) : « aucune présence » se lit maintenant comme l'assiduité le dit
+    // depuis #743. Aucune séance passée (assiduité inconnue, `null`) : rien ne change. Absente à toutes les séances
+    // passées (0 %, connue) : non-participation, comme la personne présente sans production.
+    it('aucune séance passée (assiduité inconnue), garde ouverte : En attente pour le RàI (inchangé), et la cible ne dit pas « Non-participation »', () => {
+        const p = portrait(monter({ echeance: '2026-02-01', evaluations: [EVAL_AUTRE], A: null }));
         expect(p.rai).toMatchObject({ niveau: 0, label: 'En attente' });
         expect(p.cible.cible).not.toBe('Non-participation');
         expect(p.alertes).toBe(0);   // pas de séance saisie pour lui
+    });
+    it('absente à toutes les séances passées (0 %), garde ouverte : Non-participation, niveau 3, pour le RàI et la cible (9 nov.)', () => {
+        const p = portrait(monter({ echeance: '2026-02-01', evaluations: [EVAL_AUTRE], A: 0 }));
+        expect(p.rai).toMatchObject({ niveau: 3, label: 'Non-participation' });
+        expect(p.cible.cible).toBe('Non-participation');
     });
 });

@@ -374,7 +374,7 @@ test('captures du menu et du panneau : 1180 et 390 px, sombre et clair, trois é
     const ETATS = {
         'rien-de-fait': {},
         'un-en-cours': { decouvrir: { etat: 'fait', etape: 0 }, classe: { etat: 'en-cours', etape: 4 } },
-        'tout-fait': { decouvrir: { etat: 'fait', etape: 0 }, classe: { etat: 'fait', etape: 0 } }
+        'tout-fait': { decouvrir: { etat: 'fait', etape: 0 }, classe: { etat: 'fait', etape: 0 }, 'lire-ta-classe': { etat: 'fait', etape: 0 } }
     };
     for (const largeur of [1180, 390]) {
         await ouvrirEspaceVide(page, largeur, { hauteur: largeur === 390 ? 844 : 900 });

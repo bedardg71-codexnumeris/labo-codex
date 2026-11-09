@@ -848,7 +848,8 @@ function genererSectionAccompagnement(da) {
     const indices = calculerTousLesIndices(da);
 
     // 🆕 BETA 95.6 : Détecter si aucune donnée n'est saisie pour cet étudiant
-    // #743 (lot D) : une assiduité inconnue (`null`) est, elle aussi, « aucune donnée ».
+    // #743 (lot D) : une assiduité inconnue (`null`) compte comme « aucune donnée » ; une assiduité de 0 %, non
+    // (corrections du septième parcours, 9 nov. 2026 : l'absent·e à toutes les séances a son Accompagnement).
     // Lot N1b (21 sept. 2026) : une complétion INCONNUE (`null`, sans pratique assignée) ne dit rien des copies —
     // forces, défis et paliers se lisent sur les copies, pas sur la pratique. « Aucune donnée » s'y juge donc sur
     // les copies elles-mêmes. (Première écriture du lot : `null` compté comme 0 ; un élève SANS présence saisie et

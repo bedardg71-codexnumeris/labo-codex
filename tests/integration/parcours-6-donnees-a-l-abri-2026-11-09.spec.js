@@ -309,8 +309,8 @@ test('panneau : le parcours inscrit ; sans trimestre réel, « Commencer » ne l
     // La démo ouverte ne compte pas : le codex l'exclut.
     await page.evaluate(() => db.setSync('trimestres', [{ id: 'demo', nom: 'Démo' }]));
     await item.locator('.assistance-parcours-bouton').click();
-    await expect(item.locator('.assistance-parcours-condition')).toHaveText('Commence par « Mettre ta classe en place » : ton codex gardera ce que tu y auras mis.');
-    await expect(item.locator('.assistance-parcours-condition')).toHaveAttribute('role', 'status');
+    await expect(item.locator('.assistance-parcours-refus')).toHaveText('Commence par « Mettre ta classe en place » : ton codex gardera ce que tu y auras mis.');
+    await expect(item.locator('.assistance-parcours-refus')).toHaveAttribute('role', 'status');
     await expect(page.locator('#panneau-assistance')).toBeVisible();
     await expect(bulle(page)).toHaveCount(0);
     expect(await page.evaluate(() => window.Assistance.etatDe('donnees').etat)).toBe('a-faire');

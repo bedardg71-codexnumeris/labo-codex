@@ -143,21 +143,11 @@
         if (refuse) btn.setAttribute('aria-disabled', 'true');
         btn.addEventListener('click', function () {
             if (tropPetitPour(def)) return;
-            // Parcours 6 : un parcours peut poser sa condition d'entrée (`condition`, qui rend
-            // la phrase du refus, ou rien). Non remplie, le bouton ne lance rien : le panneau dit
-            // pourquoi, sous le bouton, et le lecteur d'écran l'annonce.
-            var refus = typeof def.condition === 'function' ? def.condition() : null;
-            if (refus) {
-                var dit = corps.querySelector('.assistance-parcours-condition');
-                if (!dit) {
-                    dit = document.createElement('p');
-                    dit.className = 'assistance-parcours-condition';
-                    dit.setAttribute('role', 'status');
-                    corps.appendChild(dit);
-                }
-                dit.textContent = refus;
-                return;
-            }
+            // La condition d'entrée d'un parcours (`refus`, lot du septième parcours, 9 nov. 2026) :
+            // lue dans les données au toucher. Refusé, le parcours ne part pas : le panneau reste
+            // ouvert et dit pourquoi, sous le bouton.
+            var raison = typeof def.refus === 'function' ? def.refus() : null;
+            if (raison) { direRefus(corps, raison); return; }
             var depuis = e.etat === 'en-cours' ? e.etape : 0;
             fermerPanneau({ sansRetourFocus: true });
             def.lancer(depuis);
@@ -193,6 +183,18 @@
             var b = liste.querySelector('[data-parcours="' + id + '"] .assistance-parcours-bouton');
             if (b) b.focus();
         }
+    }
+
+    /** Ce que dit le panneau quand un parcours ne peut pas partir : sous son bouton, annoncé (role status). */
+    function direRefus(corps, texte) {
+        var p = corps.querySelector('.assistance-parcours-refus');
+        if (!p) {
+            p = document.createElement('p');
+            p.className = 'assistance-parcours-refus';
+            p.setAttribute('role', 'status');
+            corps.appendChild(p);
+        }
+        p.textContent = texte;
     }
 
     function construirePanneau() {
