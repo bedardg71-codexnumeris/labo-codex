@@ -15,6 +15,16 @@
 > **Mis à jour à la fin de chaque journée de travail.** Une ligne ne change
 > d'état que si quelqu'un écrit **comment** il l'a vérifié.
 
+✅ **LE 9 NOVEMBRE 2026, 14 H 48 : LA 1.239.0 EST EN LIGNE — DEUX PARCOURS POUR COMMENCER.** *Écrit par Claude Code.*
+
+**Ce qui change pour toi** : ce que disent les quatre lignes de la 1.239 dans les Nouvelles, validées par toi mot pour mot le 9 nov. Le menu de l'en-tête a une ligne « Assistance » : le parcours « Découvrir » (la démo en huit étapes) et le parcours « Mettre ta classe en place » (trimestre, cours, profil, classe, horaire, groupe-cours, première saisie des présences), lancé aussi par « Commencer » à l'accueil. Hors de la démo, les menus du Cadre ne montrent plus le matériel de la démo. « Exporter pour Léa » n'envoie que les évaluations verrouillées. Une évaluation remplacée par une reprise s'ouvre en lecture seule.
+
+**Ce qui reste à toi** : une question que Cowork te pose, sur le compteur sous « Exporter pour Léa ». Quand rien n'est verrouillé, l'alerte dit « Aucune évaluation verrouillée : rien à envoyer… », mais le compteur dit « Aucune évaluation trouvée · N évaluations non verrouillées laissées de côté ». Proposition : « Aucune évaluation verrouillée · N évaluations non verrouillées laissées de côté ». Toujours en attente : le chiffre du relevé dans la console de Chrome, et le texte du message quand un cours de la démo est choisi dans le Cadre.
+
+**Vérifié comment** : la vérification complète au navigateur WebKit sur le commit de la version (`b864809cf`) : 1 450 essais, 1 449 verts du premier coup, 1 au second essai (l'en-tête au format bureau), 0 rouge, 41 sautés ; des specs pour chacun des trois lots ; une relecture des deux derniers correctifs par un agent neuf. Le verdict a tourné avec Cowork, Chrome et Safari ouverts, sur ton « procède » : la mémoire est restée basse tout du long, mais ce n'était pas la condition prévue.
+
+**Pas vérifié** : le vrai Safari, l'iPad ; le parcours 2 sur un écran de téléphone (la bulle de l'étape 5 ne se place pas encore bien à 390 px, c'est le lot de la bulle) ; une infobulle de la saisie des présences qui pourrait passer par-dessus la bulle du parcours (lu au code, pas vu).
+
 ✅ **LE 9 NOVEMBRE 2026, 9 H : LA 1.238.0 EST EN LIGNE — UN MOT POUR TON ÉTUDIANT·E.** *Écrit par Claude Code.*
 
 **Ce qui change pour toi** : ce que dit la ligne de la 1.238 dans les Nouvelles, validée par toi mot pour mot le 9 nov. Dans Évaluer, sous la rétroaction, un champ « Un mot pour ton étudiant·e ». Ce que tu y écris s'imprime sur le PDF de l'élève, après son niveau, sous le titre « Un mot pour toi » ; laissé vide, rien n'apparaît, ni titre ni case. Les retouches faites dans le cadre de la rétroaction ne vont toujours pas sur le PDF : elles servent à « Copier » pour Léa, et l'avis sous le cadre le dit. Sur une évaluation verrouillée, le champ se lit sans se modifier ; en anonymisation, il est masqué comme les notes d'intégrité.

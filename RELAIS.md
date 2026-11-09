@@ -7,6 +7,28 @@
 
 ---
 
+## 9 NOV. 2026, 14 H 50 (Claude Code) : **1.239.0 POUSSÉE, VERDICT VERT ; GROUPE 1 EN LIGNE ; LE GROUPE 2 ATTEND LES BRANCHES DU CLOUD**
+
+`main` = `origin/main` = `5ef6adcb7` (+ le commit de docs qui porte ce relais). Version en ligne : 1.239.0, build `1109-1302` (`b864809cf`). Feu vert de Grégoire pour le groupe 1, relayé par Cowork.
+
+- **Le groupe 1** : trois branches fusionnées dans `main` (merges `83dcec7a3`, `33accac76`, `82afbcfab`), toutes poussées à jour : `lot/reprise-originale-lecture-seule` (l'originale remplacée s'ouvre en lecture seule), `lot/export-lea-verrouillees` jusqu'à `5e0cba90b` (« Exporter pour Léa » n'envoie que les évaluations verrouillées), `lot/parcours-2-ma-classe` jusqu'à `8309ea585` (« Découvrir » et « Mettre ta classe en place » dans « Assistance » ; le Cadre ne montre plus le groupe « Démo » hors de la démo, option a). Nouvelles 1.239 « Deux parcours pour commencer » : titre et quatre lignes validés par Grégoire mot pour mot.
+- **Bancs** : Vitest 10 924/10 924 sur `main`. Relecture des deux derniers correctifs par un agent neuf, dispositions écrites dans la consigne de l'export et le rapport du parcours 2.
+- **Verdict complet** sur `b864809cf` : 1 450 essais en 10 morceaux, 1 449 verts, 1 au second essai (`en-tete-epure-2026-11-07.spec.js` › bureau 1440 ; ne bloque pas, à surveiller s'il revient), 0 rouge, 41 sautés. Push `158ff5dce..b864809cf` à 14 h 48, le hook a lu un verdict à jour.
+- **Docs** : `5ef6adcb7`, la consigne du lot 1 du tableau de notation, son plan et ses deux ébauches, déposés par Cowork, poussés par `scripts/pousser.sh` pour la session du cloud. La consigne cite `main` `6c8dd5bc5` : c'est une première écriture de la release, jamais poussée ; la release poussée est `b864809cf`.
+
+**Quatre points pour la suite** :
+
+1. **Le compteur de l'export Léa** (question pour Grégoire, posée par Cowork). Sans aucune évaluation verrouillée, l'alerte dit « Aucune évaluation verrouillée : rien à envoyer… », mais le compteur sous le bouton dit « Aucune évaluation trouvée · N évaluations non verrouillées laissées de côté » : les deux se contredisent. Proposition de la relecture : « Aucune évaluation verrouillée · N évaluations non verrouillées laissées de côté ». Ce sont des mots qu'il lit avant l'envoi aux élèves. Cowork relaie sa réponse pour le groupe 2 ; rien n'est changé d'ici là.
+2. **L'infobulle des cellules pendant le parcours 2** (lu au code seulement, pas observé). Les cellules de la saisie des présences portent un `data-tooltip` ; au focus, pendant l'étape 7, « Clique dans une cellule… » pourrait s'afficher par-dessus la bulle du parcours. À vérifier au navigateur avant d'en faire une entrée du BACKLOG.
+3. **La capture à 390 px du parcours 2** est rouge à l'étape 5 : « la bulle ne couvre pas `#v2-btnCreerHoraire` ». C'est le placement de la bulle, qui relève du lot de la bulle (l'autre instance), pas du groupe 1. Détail : `plans de travail/RAPPORT-2026-11-09-parcours-2-ma-classe.md`, §4 ter.
+4. **Le verdict a tourné avec Cowork, Chrome et Safari ouverts** (règle 8 de `PROTOCOLE.md` non tenue), sur le « procède » de Grégoire. Les gardes du script l'ont laissé passer : secteur, aucune veille, pression mémoire 1 aux dix relevés, échange stable vers 1,65 Go. Il est jugé, mais pas dans les conditions que la règle demande.
+
+**Hors des quatre** : le jeton anti-cache `20261109b` de `js/accompagnement.js` avait déjà été servi par `d17cb9fa` sur `lot/production-plutot-que-copie` ; le hook l'a remplacé (`20261109aa` dans la release). La CI GitHub de `main` reste rouge sur les 4 specs nommées au relais de 9 h, vertes au verdict local.
+
+**Suite** : le groupe 2 attend le retour des branches du cloud (dont `lot/tableau-de-notation-1`) et la réponse de Grégoire sur le compteur. Toujours en attente : le chiffre du relevé `scripts/releve-retroactions-reecrites-a2026.js`, et le texte proposé pour la garde « Non enregistré – le cours sélectionné vient de la démo… » (même rapport, §4 bis).
+
+---
+
 ## 9 NOV. 2026, 9 H 00 (Claude Code) : **1.238.0 POUSSÉE, VERDICT VERT ; « UN MOT POUR TON ÉTUDIANT·E » EN LIGNE ; AUCUNE PORTE TERRAIN**
 
 `main` = `origin/main` = `d32b660f1` (+ le commit de docs qui porte ce relais). Version en ligne : 1.238.0, build `1109-0727`. Branche `lot/un-mot-pour-ton-etudiant` (partie de `98c04bfce`), fusionnée en avance rapide.
