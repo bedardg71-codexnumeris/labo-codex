@@ -115,7 +115,9 @@ y répondent. Ce que ce lot y ajoute, mesuré par son banc :
   comparés à ceux de la consigne avec tes corrections ; chaque correction doit trouver sa phrase dans la consigne ; les
   deux variantes de l'étape 6, la variante sans fichier de l'étape 7 ; les deux voies (9 et 4) ; « Rien à importer »,
   « Terminer », la bulle au centre ; le titre, la ligne et la phrase du refus. Break-test : « choisis « Évaluer » »
-  changé en « touche « Évaluer » » → rouge, rétabli.
+  changé en « touche « Évaluer » » → rouge, rétabli. ⚠ Comme celles des parcours 1 à 3, elle lit sa consigne, rangée
+  dans `plans de travail/` : la CI ignore ce dossier ; un commit qui ne changerait que la consigne ne la relancerait pas
+  (tout changement du code, si).
 - **Playwright, Chromium** : `tests/integration/parcours-4-recevoir-et-rendre-2026-11-09.spec.js`, deux essais, chacun
   depuis un espace où le troisième parcours est fait (le banc du troisième, rejoué : `harness/parcours-3-de-banc.js`).
   - La voie des fichiers : le refus mesuré, la production complétée dans sa fiche, les neuf étapes, chaque contour,

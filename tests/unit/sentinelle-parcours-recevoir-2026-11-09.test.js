@@ -19,7 +19,11 @@ import { fileURLToPath } from 'node:url';
 import { chargerScript } from './_helpers/charger-script.js';
 
 const racine = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..');
-const CONSIGNE = readFileSync(path.join(racine, 'plans de travail/CONSIGNE-LOT-2026-11-08-parcours-4-recevoir-et-rendre.md'), 'utf8');
+// Comme les sentinelles des parcours 1 à 3 : la consigne est lue par un lecteur. ⚠ `plans de travail/` est ignoré par la
+// CI (paths-ignore) : un commit qui ne changerait QUE la consigne ne relancerait pas ce banc ; tout changement du code,
+// si (rapport du lot, section 3).
+const lire = (f) => readFileSync(path.join(racine, f), 'utf8');
+const CONSIGNE = lire('plans de travail/CONSIGNE-LOT-2026-11-08-parcours-4-recevoir-et-rendre.md');
 const lignes = CONSIGNE.split('\n');
 
 function ligneEtape(n) { return lignes.find((l) => l.startsWith(`Étape ${n}, «`)); }

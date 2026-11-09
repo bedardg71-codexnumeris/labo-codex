@@ -168,17 +168,32 @@
      */
     function chaqueCritereAttribue() {
         var ec = evaluationVivante();
-        if (!ec || !ec.grilleId || !ec.etudiantDA) return false;
+        if (!ec || !ec.grilleId || !ec.etudiantDA || !evaluationDuFichierOuvert(ec)) return false;
+        return champsTousRemplis() && criteresTousAttribues(ec);
+    }
+
+    /** Avec un fichier, l'évaluation ouverte est celle du fichier ouvert (même étudiant·e, même production). */
+    function evaluationDuFichierOuvert(ec) {
+        if (voie() !== 'fichiers') return true;
         var f = fichierOuvert();
-        if (voie() === 'fichiers' && (!f || f.etudiantDA !== ec.etudiantDA || f.productionId !== ec.productionId)) return false;
+        return !!(f && f.etudiantDA === ec.etudiantDA && f.productionId === ec.productionId);
+    }
+
+    /** À l'écran : chaque menu de niveau, chaque champ de points visible a sa valeur. */
+    function champsTousRemplis() {
+        var champs = champsDesCriteres().filter(vis);
+        return champs.length > 0 && champs.every(function (c) { return String(c.value || '').trim() !== ''; });
+    }
+
+    /** Dans l'évaluation : chaque critère de sa grille a son niveau ou ses points. */
+    function criteresTousAttribues(ec) {
         var g = (typeof db !== 'undefined' && typeof cle === 'function' ? (db.getSync(cle('grillesTemplates'), []) || []) : [])
             .find(function (x) { return x && x.id === ec.grilleId; });
         var criteres = g && Array.isArray(g.criteres) ? g.criteres : [];
         var niveaux = ec.criteres || {}, points = ec.pointsAnalytiques || {};
-        var champs = champsDesCriteres().filter(vis);
-        return criteres.length > 0 && champs.length > 0
-            && champs.every(function (c) { return String(c.value || '').trim() !== ''; })
-            && criteres.every(function (c) { return !!niveaux[c.id] || (typeof points[c.id] === 'number' && !isNaN(points[c.id])); });
+        return criteres.length > 0 && criteres.every(function (c) {
+            return !!niveaux[c.id] || (typeof points[c.id] === 'number' && !isNaN(points[c.id]));
+        });
     }
 
     /**
