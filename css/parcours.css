@@ -471,3 +471,9 @@ body.parcours-sur-modale .parcours-bulle { z-index: 10011; }
 /* « Sans voile » (neuvième parcours, repris par le troisième sur les écrans pleine largeur) : rien n'assombrit ni ne
    capte le toucher. */
 .parcours-voile--aucun path  { fill-opacity: 0; pointer-events: none; }
+
+/* Le quatrième parcours, étape 2 (Grégoire, 9 nov. 2026, 15 h 55) : la bulle se pose sous les trois colonnes de
+   l'import et sous « Importer ». La page n'avait plus de quoi défiler sous eux (mesuré à 1180 × 900 : au bout de sa
+   course) : elle reçoit, le temps de l'étape, la place de la bulle. Posé et retiré par js/parcours-recevoir.js. */
+body.parcours-actif.parcours-place-sous-les-colonnes #evaluations-importer { padding-bottom: 60vh; }
+

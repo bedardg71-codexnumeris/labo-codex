@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { ouvrirPanneau, attendreEtape, contourSur, bulleNeCouvrePas, capture, bulle } from './harness/classe-de-banc.js';
+import { ouvrirPanneau, attendreEtape, contourSur, bulleNeCouvrePas, capture, bulle, ouvrirEspaceVide, mettreLaClasseEnPlace } from './harness/classe-de-banc.js';
 import { leParcoursEntier, dossierDesCaptures } from './harness/parcours-3-de-banc.js';
 import { attendreApplication } from './harness/attendre-application.js';
 
@@ -52,6 +52,20 @@ async function deposer(page, noms) {
     await page.dispatchEvent('#travaux-drop-zone', 'drop', { dataTransfer: dt });
 }
 
+ /**
+ * Étape 2 (Grégoire, 9 nov., 15 h 55) : la bulle ne couvre ni les Originaux, ni l'Inspecteur, ni l'Aperçu, ni « Importer » ;
+ * elle se pose sous eux. Côte à côte (1180 px), elle a la largeur des colonnes ; empilées (820 px), sous « Importer ».
+ */
+async function bulleSousLesColonnes(page, contexte) {
+    for (const s of ['.pipeline-col-originaux', '.pipeline-col-centre', '.pipeline-col-confirmes', '[data-action="travauxUI.appliquerEtImporter"]']) {
+        await bulleNeCouvrePas(page, s, contexte);
+    }
+    const [haut, basColonnes] = await page.evaluate(() => [document.getElementById('parcours-bulle').getBoundingClientRect().top,
+        Math.max(document.querySelector('.pipeline-3col-grid').getBoundingClientRect().bottom,
+            document.querySelector('[data-action="travauxUI.appliquerEtImporter"]').getBoundingClientRect().bottom)]);
+    expect(haut, contexte + ' : la bulle sous les colonnes et « Importer »').toBeGreaterThanOrEqual(basColonnes);
+}
+
 const PDF_LEA = 'Baobab_Basile_2390002_Journal de lecture 1__Remis_le_2026-11-03_10h00m00s.png';
 const n = (page, k, total, titre, opts) => attendreEtape(page, k, total, titre, opts);
 const ligneDe = (page, valeur) => page.locator('#evaluations-liste select.eval-actions-select', { has: page.locator(`option[value="${valeur}"]`) });
@@ -59,14 +73,14 @@ async function valeurAction(page, debut) {
     return page.evaluate((d) => [...document.querySelectorAll('#evaluations-liste select.eval-actions-select option')].map((o) => o.value).find((v) => v.startsWith(d)), debut);
 }
 
-/** Un espace où le troisième parcours est fait ; la production reçoit ensuite son échelle et sa cartouche (question 1). */
+/** Un espace où le troisième parcours est fait, et rien d'autre : le quatrième démarre de là (question 1, 9 nov., 15 h 55). */
 async function espaceDuTroisiemeParcours(page, cap) {
     dossierDesCaptures('');
     await leParcoursEntier(page, { niveaux: true, cap: 'p3' });
     await page.keyboard.press('Escape');
     dossierDesCaptures(DOSSIER);
-    // MESURÉ : à la sortie du troisième parcours, la production nomme sa grille et son échelle, pas sa cartouche : le
-    // quatrième refuse.
+    // De bout en bout (décision du 9 nov., 15 h 55) : à la sortie du troisième parcours, la production nomme sa grille, son
+    // échelle et sa cartouche ; le quatrième démarre sans rien préparer à la main.
     await fermerLeRappel(page);
     await ouvrirPanneau(page);
     await expect(page.locator('#panneau-assistance .assistance-parcours-item')).toHaveCount(await page.evaluate(() => Assistance.parcours().length));
@@ -75,22 +89,8 @@ async function espaceDuTroisiemeParcours(page, cap) {
     expect(ordre.slice(0, 4)).toEqual(['decouvrir', 'classe', 'evaluer', 'recevoir']);
     await expect(item(page).locator('.assistance-parcours-titre')).toHaveText('Recevoir les productions, rendre tes rétroactions');
     await expect(item(page).locator('.assistance-parcours-ligne')).toHaveText('De la remise de tes étudiant·es à leur rétroaction en PDF, avec ou sans fichier à importer.');
-    await item(page).locator('.assistance-parcours-bouton').click();
-    await expect(item(page).locator('.assistance-parcours-condition')).toHaveText(REFUS);
-    await expect(bulle(page)).toHaveCount(0);
-    await capture(page, DOSSIER, `panneau-${cap}-sans-production-prete`);
-    await page.keyboard.press('Escape');
-    // Sa fiche : l'échelle y est déjà (le troisième parcours la fait associer avec la grille) ; la cartouche du troisième
-    // parcours (enregistrée d'elle-même).
     const p3 = await page.evaluate(() => ParcoursEvaluer.contexte());
-    expect(await page.evaluate((id) => { const p = (db.getSync(cle('productions'), []) || []).find((x) => x.id === id); return [!!p.grilleId, !!p.echelleId, !!p.cartoucheId]; }, p3.productionId)).toEqual([true, true, false]);
-    await page.evaluate(() => naviguerVers('conception', 'productions'));
-    await page.evaluate((id) => modifierProduction(id), p3.productionId);
-    await expect(page.locator('#formulaireProduction')).toBeVisible();
-    await page.selectOption('#productionCartouche', p3.cartoucheId);
-    await expect.poll(() => page.evaluate((id) => { const p = (db.getSync(cle('productions'), []) || []).find((x) => x.id === id); return !!(p && p.echelleId && p.cartoucheId); }, p3.productionId)).toBe(true);
-    await fermerLeRappel(page);
-    await ouvrirPanneau(page);
+    expect(await page.evaluate((id) => { const p = (db.getSync(cle('productions'), []) || []).find((x) => x.id === id); return [!!p.grilleId, !!p.echelleId, p.cartoucheId]; }, p3.productionId)).toEqual([true, true, p3.cartoucheId]);
     await expect(item(page).locator('.assistance-parcours-etat')).toHaveText('À faire');
     await expect(item(page).locator('.assistance-parcours-bouton')).toHaveText('Commencer');
     await capture(page, DOSSIER, `panneau-${cap}-a-faire`);
@@ -115,6 +115,7 @@ test('« Recevoir les productions, rendre tes rétroactions », la voie des fich
     await contourSur(page, '.pipeline-production-selecteur');
     await contourSur(page, '.pipeline-col-confirmes', 'parcours-contour-extra-0');
     await contourSur(page, '.pipeline-col-originaux', 'parcours-contour-extra-1');
+    await bulleSousLesColonnes(page, 'étape 2, 1180 px');
     await capture(page, DOSSIER, `p4-2-${cap}`);
     await page.selectOption('.pipeline-production-selecteur select', pid);
     // Deux photos SANS DA dans leur nom (question 9) : cochées, « Réunir en une copie », puis l'étudiante choisie.
@@ -288,3 +289,36 @@ test('« Recevoir les productions, rendre tes rétroactions », la voie sans fic
     await n(page, 1, 4, 'Évaluer', { focus: false });
     await page.keyboard.press('Escape');
 });
+
+test('« Recevoir les productions, rendre tes rétroactions », étape 2 à 820 px (l’iPad en portrait) : la bulle sous les trois colonnes empilées et « Importer »', async ({ page }) => {
+    test.setTimeout(300000);
+    await espaceDuTroisiemeParcours(page, '820-sombre');
+    await page.setViewportSize({ width: 820, height: 1180 });
+    // Le parcours est commencé à 1180 px : l'étape 1 se rejoue à 820, comme au retour d'un « Plus tard ».
+    await page.evaluate(() => ParcoursMoteur.allerA(0));
+    await n(page, 1, 9, 'Leurs productions', { focus: false });
+    await deposer(page, [PDF_LEA, 'IMG_0001.png', 'IMG_0002.png']);
+    await n(page, 2, 9, "Vérifie avant d'importer", { focus: false });
+    await contourSur(page, '.pipeline-production-selecteur');
+    await bulleSousLesColonnes(page, 'étape 2, 820 px');
+    await capture(page, DOSSIER, 'p4-2-820-sombre');
+});
+
+test('« Recevoir les productions, rendre tes rétroactions » : sans production prête (la grille seule), le refus', async ({ page }) => {
+    test.setTimeout(180000);
+    await ouvrirEspaceVide(page, 1180);
+    await mettreLaClasseEnPlace(page);
+    // Le seul cas que le bout en bout ne montre plus (le troisième parcours fait nommer échelle et cartouche) : une
+    // production qui ne nomme que sa grille, posée pour l'essai. Le refus, champ par champ, est tenu par la sentinelle.
+    await page.evaluate(() => {
+        const gc = db.getSync('groupeCoursActif', null);
+        db.setSync(cle('productions'), [{ id: 'PROD_fictive', titre: 'Journal fictif', grilleId: 'GRILLE_fictive', coursId: gc && gc.coursId, dansBibliotheque: true }]);
+    });
+    await fermerLeRappel(page);
+    await ouvrirPanneau(page);
+    await item(page).locator('.assistance-parcours-bouton').click();
+    await expect(item(page).locator('.assistance-parcours-condition')).toHaveText(REFUS);
+    await expect(bulle(page)).toHaveCount(0);
+    await capture(page, DOSSIER, 'panneau-1180-sombre-sans-production-prete');
+});
+

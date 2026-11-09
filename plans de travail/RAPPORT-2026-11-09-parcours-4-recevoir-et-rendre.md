@@ -35,6 +35,9 @@ les synthèses PDF des copies sur papier » est sur `main` (1.237.0).
 
 ### Ce qui attend Grégoire (une question par ligne, avec ma recommandation)
 
+**Les quatre sont tranchées** (Grégoire, 9 nov., 13 h 37 pour l'échelle, puis 15 h 55 à 16 h 00 pour le reste, en
+Cowork) ; chaque question garde son texte, suivi de la décision et de ce qui en est fait.
+
 1. **Le troisième parcours ne mène pas au quatrième** (mesuré). À la sortie du troisième, la production ne nomme que sa
    grille : ni échelle ni cartouche. Le quatrième refuse alors, et sa phrase renvoie… au troisième, déjà « Fait »
    (capture `panneau-…-sans-production-prete`). *Recommandation :* que le troisième parcours fasse nommer à la production
@@ -47,17 +50,32 @@ les synthèses PDF des copies sur papier » est sur `main` (1.237.0).
    parcours porte maintenant son **échelle** (étape 2). Mesuré par le banc, remis sur le troisième : à sa sortie, la
    production nomme sa grille et son échelle, pas sa cartouche ; le quatrième refuse encore, pour la cartouche seule.
    **Reste à trancher : la cartouche** (la phrase proposée ci-dessus pour l'étape 8 du troisième, ou la condition
-   allégée).
+   allégée). → **Tranché à 15 h 55** : la phrase proposée est posée à la fin de l'étape 8 du troisième, mot pour mot ;
+   son étape avance quand la cartouche est enregistrée **et** nommée par la production. À la sortie du troisième, la
+   production nomme sa grille, son échelle et sa cartouche : **le quatrième démarre**. Essayé de bout en bout : le banc
+   joue le troisième, puis le quatrième, sans rien préparer à la main. Le refus (une production qui ne nomme que sa
+   grille) a son propre essai, avec une production posée pour l'essai, et la sentinelle le tient champ par champ.
 2. **Étape 2, « À droite… s'il manque un nom, choisis-le »** : tient en partie. La colonne de droite s'intitule
    « Aperçu » ; elle montre l'étudiant·e trouvé·e, mais un nom manquant se choisit **au centre**, dans l'inspecteur,
    après avoir touché le fichier (mesuré : c'est là que le banc choisit l'étudiante des deux photos). *Proposée :*
-   « … s'il manque un nom, touche le fichier et choisis-le au centre. »
+   « … s'il manque un nom, touche le fichier et choisis-le au centre. » → **Validé, posé** ; la sentinelle l'exige.
 3. **Étape 4, les emojis** (la consigne demande la phrase qui les nommerait, sans toucher le texte) : *proposée :*
    « … réécris les autres, change leur image ou tape un emoji à sa place, ou crée tes propres tampons, … » (le champ de la
-   fenêtre s'appelle « ou un emoji », d'après les Nouvelles de la 1.237.0).
+   fenêtre s'appelle « ou un emoji », d'après les Nouvelles de la 1.237.0). → **Validé dans une autre forme, posé** :
+   « … réécris les autres, change leur image (ou mets un emoji à sa place), ou crée tes propres tampons… » ; la
+   sentinelle l'exige.
 4. **Étape 2, la bulle et l'inspecteur, à juger sur la capture `p4-2-…`** : sur cette page pleine largeur, sans voile, la
    bulle s'accroche au menu « Production » et couvre une partie de l'inspecteur, là où l'on choisit l'étudiant·e.
-   *Recommandation :* garder ainsi pour l'instant ; une bulle repliable serait un lot du moteur.
+   *Recommandation :* garder ainsi pour l'instant ; une bulle repliable serait un lot du moteur. → **Tranché autrement**
+   : la bulle ne couvre ni l'Inspecteur, ni les Originaux, ni l'Aperçu ; elle se pose **sous les trois colonnes**, sans
+   refondre le moteur. Le moyen, comme à l'étape 3 du sixième parcours : l'étape donne au moteur pour zones les colonnes
+   et « Importer », élargit la bulle à leur largeur (elle en devient basse : 235 px au lieu de 409), et laisse à la page
+   la place de défiler sous elles (elle était au bout de sa course, mesuré). Le moteur cadre l'ensemble à l'entrée de
+   l'étape. Mesuré et essayé à **1180 × 900** (colonnes côte à côte, la bulle sous « Importer », à leur largeur) et à
+   **820 × 1180** (colonnes empilées : la bulle sous « Importer », après l'Aperçu ; le haut des Originaux défile
+   au-dessus de l'écran, sans être couvert). Captures `p4-2-1180-sombre` et `p4-2-820-sombre`. *À savoir :* la bulle
+   couvre maintenant le message placé sous « Importer » (« 2 fichiers ne sont associés à aucune production… ») ;
+   j'infère de son texte, sans l'avoir mesuré, qu'il s'en va une fois la production choisie en haut de l'Inspecteur.
 
 ### Ce que je n'ai pas pu vérifier
 
@@ -114,13 +132,23 @@ y répondent. Ce que ce lot y ajoute, mesuré par son banc :
 - **Ta question 9** : l'essai des pages à réunir part de deux photos **sans DA** dans leur nom (`IMG_0001.png`,
   `IMG_0002.png`), cochées, « Réunir en une copie », puis l'étudiante choisie dans l'inspecteur. Les pages au format de
   Léa d'un même élève arrivent déjà réunies (session H).
-- **À reporter** (ton relais) : le lot « production plutôt que copie » pourrait renommer « Réunir en une copie » ; la bulle
-  2 le cite tel qu'il s'affiche aujourd'hui.
+- **À reporter** (ton relais, rappelé le 9 nov. à 15 h 55) : « Réunir en une copie » deviendra « Réunir en une
+  production » à la fusion avec `lot/production-plutot-que-copie` ; la bulle 2 le cite tel qu'il s'affiche aujourd'hui,
+  et sa sentinelle le lit dans la consigne : les deux changeront ensemble.
 
 ## 3. Les essais
 
 - **Vitest** : `tests/unit/sentinelle-parcours-recevoir-2026-11-09.test.js`, 21 essais (15, puis 6 après la relecture :
-  la condition de la question 7 champ par champ, la garde de l'étape 6 qui repart de zéro, section 8). Les textes lus à l'exécution,
+  la condition de la question 7 champ par champ, la garde de l'étape 6 qui repart de zéro, section 8). Après 15 h 55,
+  les phrases des étapes 2 et 4 entrent dans ses corrections ; break-test, l'étape 2 remise à l'ancienne → rouge.
+- **Playwright, après 15 h 55** : quatre essais. Le bout en bout part du troisième parcours joué entier, sans rien
+  préparer : la production nomme sa grille, son échelle et sa cartouche, et « Commencer » lance le quatrième. À l'étape
+  2, la bulle ne couvre ni les Originaux, ni l'Inspecteur, ni l'Aperçu, ni « Importer », et son haut est sous eux : à
+  1180 × 900 (l'essai des fichiers) et à 820 × 1180 (un essai à part). Le refus a son essai (une production posée pour
+  lui, qui ne nomme que sa grille). **4 sur 4 verts.** Break-tests : les zones remises au seul menu « Production » →
+  rouge (l'Originaux couvert) ; la place sous les colonnes retirée → rouge (la bulle remonte sur elles) ; la bulle
+  remise à 380 px → rouge (l'Inspecteur couvert) ; rétablis. Un cas pour les colonnes empilées, que j'avais écrit, est
+  retiré : les essais ne le départageaient pas (le moteur cadre déjà l'ensemble à 820 px). Les textes lus à l'exécution,
   comparés à ceux de la consigne avec tes corrections ; chaque correction doit trouver sa phrase dans la consigne ; les
   deux variantes de l'étape 6, la variante sans fichier de l'étape 7 ; les deux voies (9 et 4) ; « Rien à importer »,
   « Terminer », la bulle au centre ; le titre, la ligne et la phrase du refus. Break-test : « choisis « Évaluer » »
