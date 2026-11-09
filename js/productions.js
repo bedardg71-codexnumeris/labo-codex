@@ -3261,9 +3261,28 @@ function initialiserModuleProductions() {
         mettreAJourPonderationTotale();
     }
 
+    // Troisième parcours d'assistance (9 nov. 2026) : une fiche restée ouverte retrouve les cartouches créées entre-temps.
+    rafraichirCartouchesDeLaFiche();
+
     // Pas d'événements globaux à attacher pour l'instant
     // Les événements sont gérés via les attributs onclick dans le HTML
 
+}
+
+/**
+ * Le menu « Cartouche » d'une fiche de production restée ouverte, refait au retour sur « Productions » (troisième
+ * parcours d'assistance, 9 nov. 2026, mesuré sous Chromium) : créée entre-temps dans Conception › Cartouches, une
+ * cartouche n'y paraissait pas, le menu gardant la liste du moment où la fiche s'était ouverte. Le choix en cours est
+ * gardé, et une référence introuvable reste visible (#453). Rien ne s'écrit.
+ */
+async function rafraichirCartouchesDeLaFiche() {
+    const fiche = document.getElementById('formulaireProduction');
+    const selectGrille = document.getElementById('productionGrille');
+    const selectCartouche = document.getElementById('productionCartouche');
+    if (!fiche || !fiche.offsetParent || !selectGrille || !selectGrille.value || !selectCartouche) return;
+    const choisie = selectCartouche.value;
+    await peuplerCartouchesProduction(selectGrille.value);
+    poserReferenceSelect(selectCartouche, choisie, 'cartouche');
 }
 
 

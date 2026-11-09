@@ -2,8 +2,8 @@
 
 Consigne : `plans de travail/CONSIGNE-LOT-2026-11-08-parcours-3-evaluer.md` (recopiée de `main`, présente sur la branche).
 Décisions de Grégoire du 9 nov., 9 h 27 à 9 h 30, en Cowork (six corrections de textes), puis de 13 h 37 à 13 h 42 (les
-quatre questions de ce rapport, tranchées : section « Ce qui attend Grégoire »), relayées à une session dans le nuage :
-ni WebKit ni tes données ici. Branche `lot/parcours-3-evaluer`, partie de `origin/lot/parcours-2-ma-classe`,
+quatre questions de ce rapport, tranchées : section « Ce qui attend Grégoire »), puis de 15 h 55 à 16 h 00 (l'étape 8,
+sur la question 1 du rapport du quatrième parcours), relayées à une session dans le nuage : ni WebKit ni tes données ici. Branche `lot/parcours-3-evaluer`, partie de `origin/lot/parcours-2-ma-classe`,
 dans laquelle sont fusionnées `origin/lot/completion-suit-la-remise` (la complétion suit la remise, étendue aux quatre
 familles) puis `origin/main` (1.238.0, « Un mot pour ton étudiant·e »). Non fusionnée, non publiée, rien au changelog.
 
@@ -24,6 +24,17 @@ familles) puis `origin/main` (1.238.0, « Un mot pour ton étudiant·e »). Non 
 - Sans classe en place, « Commencer » ne lance rien : le panneau dit, sous le bouton, « Commence par « Mettre ta
   classe en place » : il faut une classe pour évaluer une production. » La démo ouverte ne compte pas : le parcours la
   referme d'abord, comme le deuxième, et se joue sur tes vraies données.
+- **À l'étape 8, la cartouche va dans la production** (ta décision de 15 h 55) : la bulle finit par « Puis, dans la
+  fiche de ta production, choisis cette cartouche : elle s'y appliquera à chaque évaluation. » L'étape avance quand la
+  cartouche est enregistrée **et** nommée par la production (avant : enregistrée seulement). Une fois la cartouche
+  créée, le contour passe à l'onglet « Productions », puis au menu « Cartouche » de la fiche (rouverte d'elle-même par
+  l'application ; sinon, « Modifier » sur sa ligne). À la sortie du troisième, la production nomme sa grille, son
+  échelle et sa cartouche : le quatrième parcours démarre sans rien préparer (essayé de bout en bout, rapport du
+  quatrième).
+- **Un défaut trouvé sur ce chemin, corrigé** (il cassait l'étape 8) : revenu sur « Productions », le menu
+  « Cartouche » d'une fiche restée ouverte gardait la liste du moment où elle s'était ouverte, et n'offrait pas la
+  cartouche créée entre-temps (mesuré : « Aucune » seulement). Il se refait maintenant au retour, en gardant le choix
+  en cours (`js/productions.js`, `rafraichirCartouchesDeLaFiche`). Vrai aussi hors du parcours.
 - Les neuf bulles, avec tes six corrections du 9 nov. posées mot pour mot ; la bulle du choix (« des points / des
   niveaux ») paraît d'elle-même quand Mon matériel pose la question, au même rang (1 sur 9).
 - Chaque étape avance quand la donnée est enregistrée : la grille créée, la production enregistrée, « Consignes
@@ -187,7 +198,8 @@ Faites par la session H sous Chromium (`RAPPORT-2026-11-09-verifications-parcour
   du choix, la phrase du refus, « Plus tard », « Continuer », « Terminer », la ligne du panneau, « Partir de zéro ».
   Break-test : « la moyenne de tes travaux » remis en « la somme » dans le parcours → rouge (étape 5), rétabli. Après
   les décisions de 13 h 37 : la phrase de l'étape 2 entre dans ses corrections, et la ligne est exigée mot pour mot ;
-  break-test, l'une et l'autre retouchées → **rouge** (deux essais), rétablies.
+  break-test, l'une et l'autre retouchées → **rouge** (deux essais), rétablies. Après 15 h 55 : la phrase de l'étape 8
+  entre dans ses corrections.
 - **Playwright, Chromium, de bout en bout** : `tests/integration/parcours-3-evaluer-2026-11-09.spec.js`, trois essais
   (grille à niveaux ; grille à niveaux, l'échelle laissée vide sur la fiche ; grille en points), chacun depuis un espace vide où le deuxième parcours est joué par ses propres
   gestes (`tests/integration/harness/classe-de-banc.js`, neuf, réutilisable pour les parcours 4 et 5) : le panneau sans
@@ -199,6 +211,15 @@ Faites par la session H sous Chromium (`RAPPORT-2026-11-09-verifications-parcour
     la production enregistrée porte l'échelle, et l'étape 4 ne la redemande pas ; en points, le contour saute le menu.
     Break-tests : les menus retirés de ce que la bulle doit laisser libre → **rouge** (« la bulle ne couvre pas … la
     grille ») ; le menu « Échelle » retiré du parcours de la fiche → **rouge** ; rétablis.
+  - Après 15 h 55, à l'étape 8 : la cartouche créée ne fait pas avancer l'étape (lu après deux passages réels de la
+    sonde) ; le contour sur l'onglet « Productions », puis sur le menu « Cartouche », que la bulle ne couvre pas, pas
+    plus que les menus « Grille » et « Échelle » ; le menu offre la nouvelle cartouche ; la production la nomme.
+    Break-tests : la condition remise à « enregistrée seulement » → **rouge** ; le rafraîchissement du menu retiré →
+    **rouge** (le menu n'offre qu'« Aucune »), rétablis. ⚠ Une fois, ce dernier break-test a rougi plus loin (étape 9)
+    au lieu du menu : le menu avait été refait par un autre chemin que je n'ai pas identifié ; relancé avec un
+    diagnostic, il rougit bien sur le menu. Et une fois, l'essai « en points » a raté avec les captures, sans que je
+    voie l'erreur ; non reproduit en dix passages ensuite (quatre « en points », six des trois essais). Cause inconnue :
+    à surveiller au Mac.
   - Break-test du semis du premier trimestre : neutralisé → **rouge** (étape 8 en points, aucune échelle), rétabli.
   - Break-test de la cartouche en points : l'appel à `_adopterEchelleDeLaCartouche` retiré → **rouge** (le commentaire
     absent de la rétroaction, essai « en points »), rétabli.
@@ -251,6 +272,8 @@ Vus par ce lot (issue proposée : inscrire et continuer) :
 variantes (`-niveaux`, `-points`), toutes refaites après les décisions de 13 h 37, plus quatre de l'essai « échelle
 laissée vide » (`p3-2-fiche-…`, `p3-2-fiche-echelle-…`, `p3-4-…`, `p3-4-evaluation-…`, suffixe `-echelle-vide`) :
 - le panneau : `panneau-…-sans-classe` (le refus), `-a-faire`, `-en-cours` (« Étape 3 sur 9 », « Reprendre »), `-fait` ;
+- l'étape 8, après 15 h 55 : `p3-8-onglet` (le contour sur « Productions ») et `p3-8-production` (le menu
+  « Cartouche » de la fiche, la bulle au-dessus, les trois menus libres) ;
 - chaque étape : `p3-1` (l'accueil de Mon matériel), `p3-1-choix` (la bulle du choix), `p3-2`, `p3-2-fiche-echelle`
   (à niveaux : le contour sur le menu « Échelle ») et `p3-2-fiche` (la bulle à gauche des menus « Grille » et
   « Échelle »), `p3-3`,

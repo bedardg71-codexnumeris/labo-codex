@@ -53,6 +53,9 @@ const CORRECTIONS = [
         "Sans pratique appliquée, l'application ne sait pas comment tu construis ta note : elle n'en calcule aucune."],
     [7, "La complétion, elle, suit la remise : une production importée compte comme remise à son échéance ; sans fichier, c'est ton évaluation qui confirme la remise.",
         "La complétion, elle, suit la remise : dès ta première évaluation, chaque production importée pour ce travail compte comme remise ; sans fichier, c'est ton évaluation qui confirme la remise."],
+    // Le 9 nov., 15 h 55 (question 1 du rapport du quatrième parcours) : la cartouche nommée dans la fiche de la production.
+    [8, "Tes étudiant·es reçoivent un commentaire cohérent d'une évaluation à l'autre, et tu n'as plus à le réécrire chaque fois.",
+        "Tes étudiant·es reçoivent un commentaire cohérent d'une évaluation à l'autre, et tu n'as plus à le réécrire chaque fois. Puis, dans la fiche de ta production, choisis cette cartouche : elle s'y appliquera à chaque évaluation."],
     [9, null,
         "Reviens à ta première évaluation : touche « Actions › Consulter », puis « Déverrouiller ». Choisis ta cartouche : la rétroaction se réécrit avec tes phrases. Relis-la comme ton étudiant·e la lira, dans sa synthèse de rétroaction. Un mot personnel ? Écris-le dans « Un mot pour ton étudiant·e ». Puis verrouille. Désormais, chaque production que tu évalueras recevra sa rétroaction de la même façon."]
 ];
