@@ -24,7 +24,6 @@ const racine = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', 
 const lire = (f) => readFileSync(path.join(racine, f), 'utf8');
 const CONSIGNE = lire('plans de travail/CONSIGNE-LOT-2026-11-08-parcours-7-lire-ta-classe.md');
 const CONSIGNE_PARCOURS_1_ET_2 = lire('plans de travail/CONSIGNE-LOT-2026-11-08-parcours-1-et-2.md');
-const RAPPORT = lire('plans de travail/RAPPORT-2026-11-09-parcours-7-lire-ta-classe.md');
 const SOURCE = lire('js/parcours-lire-ta-classe.js');
 
 /** Les chaînes d'un champ (titre, texte, geste, libelle) dans un bloc, guillemets simples ou doubles. */

@@ -65,7 +65,14 @@ saisies (0 %), sans production, sans pratique assignée.
 
 ### Ce qui attend encore Grégoire
 
-Rien de nouveau. Aucun texte n'a été écrit en dehors des six phrases validées.
+Aucun texte n'a été écrit en dehors des six phrases validées. Une question, relevée par la relecture, qui relève de
+ta définition du RàI (aucun code ne l'attend) :
+
+- La personne absente à toutes les séances, sans production, a maintenant son Accompagnement, mais son niveau RàI
+  reste 0, « En attente » : la non-participation exige une assiduité au-dessus de 0 (`js/profil-etudiant-calculs.js:1975`,
+  « Élève présent mais aucune production », #731). Elle n'est signalée que par sa pastille A. Est-ce ce que tu veux,
+  ou l'absent·e total·e devrait-il ou elle être lu·e en non-participation ? Je n'ai pas de recommandation ferme :
+  l'absence et la non-participation sont deux signaux que tu as distingués jusqu'ici.
 
 ### Ce que je n'ai pas pu vérifier
 
@@ -144,7 +151,7 @@ Lecture du code (et banc Chromium quand il est dit).
 | 2 : le toucher d'une pastille ouvre le profil, puis Engagement ACP après 100 ms | **tient** | `js/tableau-bord-apercu.js:1224-1234` ; vu au banc |
 | 3 : la leçon manquée dans la pastille (`badge-absence-lecon`) | **tient** (lecture) ; **non vérifiable ici** sur une vraie carte | `js/profil-etudiant-sections-affichage.js:599`, `:1851` |
 | 4 : la recommandation du palier le plus bas | **tient** | « …rencontrer l'étudiant·e pour comprendre les absences ou les travaux manquants… », `js/contexte-qualification.js:408` |
-| 4 : le niveau ne vient ni de A ni de C, sauf en non-participation | **tient** | `classerNiveauAuCritere`, `js/profil-etudiant-calculs.js:1796` ; non-participation `:1971` |
+| 4 : le niveau ne vient ni de A ni de C, sauf en non-participation | **tient** | `classerNiveauAuCritere`, `js/profil-etudiant-calculs.js:1796` ; non-participation `:1975` (ligne d'après les corrections du 9 nov.) |
 | 4 : niveau 1 ou « En attente » sans difficulté dans les productions | **tient** | `:1797-1805` ; vu au banc (« En attente ») |
 | 5 : le choix s'enregistre au changement, gardé par #806 | **tient** | `_sauvegarderGrilleReferenceSiFiable`, `js/preferences-v2.js:267` ; vu au banc (préférence écrite, étape 6 atteinte) |
 | 5 : au retour, l'Accompagnement affiche le défi | **tient** (lecture) ; au banc, sans évaluation, il n'y a pas encore de défi à afficher | |
@@ -208,6 +215,9 @@ Les miennes (trouvées en chemin) :
 7. **« Suggérer » efface l'objectif déjà écrit** quand aucun critère n'est coché (`js/interventions.js:1430`, `:1437`).
 8. **À 390 px, la rangée des filtres du Suivi déborde** à droite du panneau des noms (capture de l'étape 2).
 9. **« Découvrir », étape 1 : deux touchers sur « Détails » quand il était déjà actif** (lecture du code, à mesurer).
+10. **(Relecture du 9 nov.) Le refus « service d'orthopédagogie » n'est joué par aucun essai dans le navigateur**
+    (`js/parcours-lire-ta-classe.js`, `refus()`). La sentinelle juge ses mots, pas son câblage : si la branche
+    rendait une autre phrase, rien ne rougirait. Il faudrait monter un service dans le banc. Aucun symptôme vécu.
 
 ### Les essais
 
@@ -218,13 +228,14 @@ Les miennes (trouvées en chemin) :
   qui ignore A → **rouge** (personne n'est signalé). Rétablis → vert.
 - **Le banc complet du parcours**, sous Chromium : 9/9 (le test de la consigne ; les neuf étapes sans grille
   désignée ; avec grille désignée, l'étape 4 mène à l'étape 6 ; une personne absente à toutes les séances, à 0 % :
-  signalée, puis l'étape 2 dit pourquoi elle ramène aux noms, et une autre personne mène à l'étape 3 ; « Plus
+  signalée, puis l'étape 2 dit pourquoi elle ramène aux noms, et une autre personne mène à l'étape 3 (**réécrit le 9 nov.** : voir
+  « Corrections du 9 nov. » plus bas) ; « Plus
   tard », « Reprendre » et Échap ; les refus proposés ; trois passes de captures). Break-test de la personne à
   0 % : sans le message, **rouge** ; rétabli, vert. Il vérifie aussi que les pastilles d'absence (étape 3) et le statut
   (étape 8) **reçoivent le toucher du masque**, pas d'eux-mêmes, et que l'intervention créée porte la personne,
   son « avant » et le statut « en préparation ».
 - **La sentinelle des mots** (Vitest) : neuf titres, neuf textes, cinq gestes, trois boutons, le titre et la ligne
-  du panneau, les deux refus validés, confrontés à la consigne ; les cinq refus proposés absents de la consigne et
+  du panneau, les deux refus validés, confrontés à la consigne ; les cinq refus proposés (**validés le 9 nov.**, voir plus bas) absents de la consigne et
   présents dans ce rapport. **Break-test** : « avant chaque cours » changé en « avant chaque séance » dans la bulle
   de l'étape 1 → **rouge**, rétabli → vert.
 - **Les bancs de la première partie, sous Chromium** : parcours-1-et-2, accueil-epure, guidage-demo verts, sauf
@@ -261,6 +272,23 @@ qui mène à l'étape 6) ; les étapes 1, 2 et 7 à 390 px en sombre et en clair
 présences, personne à l'écart, et deux des textes proposés cette nuit-là, validés le 9 nov. : RàI, anonymisation).
 
 ### La relecture par un agent neuf
+
+**Seconde relecture, des corrections du 9 nov.** (un agent neuf, avec les deux décisions et le diff de `aa703d6`).
+Verdict, en une ligne : **le commit tient, avec quatre réserves mineures ; aucun défaut bloquant.** Il a comparé les
+six phrases caractère par caractère (apostrophes, espaces, guillemets : identiques), cherché tous les lecteurs de la
+règle (trois, tous au tableau) et tout autre endroit qui traiterait A = 0 comme « aucune donnée » (aucun), relancé
+Vitest (10 910 / 10 910) et le banc (6 / 6), et fait trois break-tests, tous rouges (la règle sans condition sur A ;
+une apostrophe typographique et une espace insécable dans deux phrases ; l'Accompagnement seul qui diverge de la
+règle). Ce que j'ai fait de ses réserves :
+- une variable morte dans la sentinelle des mots (la lecture du rapport) : retirée ;
+- un commentaire devenu faux dans `js/profil-etudiant-sections-affichage.js` (« elle aussi ») : corrigé (jeton
+  20261108h) ;
+- deux refus jamais exercés dans le navigateur : celui de la collecte ACP est maintenant joué par l'essai des refus ;
+  celui du service d'orthopédagogie ne l'est toujours pas (inscrit, n° 10) ;
+- trois passages du rapport d'avant les corrections : marqués comme réécrits, la référence de ligne corrigée.
+Il relève aussi une question de didactique : elle est plus haut, sous « Ce qui attend encore Grégoire ».
+
+**Première relecture (nuit du 8 au 9 nov.)** :
 
 Verdict de l'agent neuf (il n'a eu que la consigne et le diff) : **« tient avec réserves »** — la condition
 d'entrée laissait partir le parcours pour une personne que l'étape 2 renvoyait sans un mot (A = 0 %) ; un banc de

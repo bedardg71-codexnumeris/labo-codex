@@ -526,6 +526,13 @@ test('les refus validés le 9 nov. : la démo, l’option RàI décochée, le mo
     await page.keyboard.press('Escape');
     await page.evaluate(() => definirPreference('activerRai', true));
 
+    // La collecte ACP décochée (relecture du 9 nov. : ce refus n'était exercé par aucun essai).
+    await page.evaluate(() => definirPreference('depistageAcp', false));
+    await commencer(page);
+    await expect(item(page).locator('.assistance-parcours-refus')).toHaveText(valides.acp);
+    await page.keyboard.press('Escape');
+    await page.evaluate(() => definirPreference('depistageAcp', true));
+
     await page.evaluate(() => changerMode(MODES.ANONYMISATION));
     await attendreRepos(page);
     expect(await page.evaluate(() => estModeAnonymisation())).toBe(true);
