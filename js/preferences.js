@@ -150,6 +150,10 @@
         // Il remplace tourGuide_etape / _complete / _etapes_vues (la visite en sept étapes,
         // retirée) : celles déjà écrites restent dans le stockage, rien ne les lit plus.
         parcoursAssistance: {},
+        // Ce que le neuvième parcours, « Mettre en place ta notation alternative », retient d'une étape à
+        // l'autre et pour « Reprendre » (js/parcours-notation-alternative.js, 8 nov. 2026) : son chemin
+        // (étape 1 sautée, famille), la pratique ouverte, l'évaluation verrouillée. Rien des données de cours.
+        parcoursNotationAlternative: {},
 
         // Export du plan — niveau « Personnalisé » (#431, 8 août 2026).
         // ⚠ REMPLACÉE par exportGabarits (#416 lot H, 12 août 2026). Elle

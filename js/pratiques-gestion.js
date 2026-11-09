@@ -1256,6 +1256,10 @@ function remplirFormulairePratique(pratique) {
         // 🆕 #24 : Déterminer le mode de sélection (hybride a priorité)
         const estHybride = config.portfolio?.hybride || config.categories?.actif || false;
         let modeSelection = config.portfolio?.methodeSelection || 'meilleurs';
+        // Neuvième parcours (8 nov. 2026, nuit) — le modèle « N plus récentes » écrit `recents`, que le menu n'offre pas
+        // (il dit `derniers`, que le moteur lit comme `recents`). Le menu restait vide, et le premier réglage changé
+        // écrivait « meilleurs » (le repli de la sauvegarde). Lecture seule : rien n'est écrit tant qu'on ne touche rien.
+        if (modeSelection === 'recents') modeSelection = 'derniers';
         if (estHybride) modeSelection = 'hybride';
 
         // #435 (9 août 2026) — NORMALISATION des pratiques legacy, extension de

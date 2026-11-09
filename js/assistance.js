@@ -9,6 +9,9 @@
 
    Les parcours s'inscrivent eux-mêmes, dans l'ordre (Assistance.enregistrer) : la liste
    est construite pour qu'un troisième s'y ajoute avec son lot, sans toucher à ce fichier.
+   Lot du neuvième parcours (8 nov. 2026, nuit) : deux champs facultatifs d'une définition,
+   `rang` (sa place, même si ceux d'avant ne sont pas livrés) et `refus()` (le motif qui
+   empêche de le lancer, dit dans le panneau).
    Leur état vit dans UNE préférence, `parcoursAssistance` :
      { <id>: { etat: 'a-faire' | 'en-cours' | 'fait', etape: <index de 0> } }
    Rien ne démarre de lui-même : un parcours se lance par « Commencer », « Reprendre »
@@ -39,9 +42,26 @@
         majMenu();
     }
 
+    /**
+     * Le rang d'un parcours dans la liste. Un parcours qui déclare `rang` (le neuvième, lot du 8 nov.) garde sa
+     * place même quand ceux d'avant ne sont pas encore livrés : la liste suit les rangs, le compte du menu aussi.
+     * Sans `rang`, l'ordre d'inscription.
+     */
+    var rangs = {};
+
+    function rangDe(def) {
+        return rangs[def.id];
+    }
+
+    function totalParcours() {
+        return registre.reduce(function (n, def) { return Math.max(n, rangDe(def)); }, registre.length);
+    }
+
     function enregistrer(def) {
         if (registre.some(function (p) { return p.id === def.id; })) return;
+        rangs[def.id] = typeof def.rang === 'number' ? def.rang : registre.length + 1;
         registre.push(def);
+        registre.sort(function (a, b) { return rangDe(a) - rangDe(b); });
         majMenu();
     }
 
@@ -57,7 +77,7 @@
                 if (etatDe(registre[j].id).etat !== 'fait') { idx = j; break; }
             }
         }
-        return idx === -1 ? '' : (idx + 1) + ' sur ' + registre.length;
+        return idx === -1 ? '' : rangDe(registre[idx]) + ' sur ' + totalParcours();
     }
 
     function majMenu() {
@@ -85,7 +105,7 @@
         if (e.etat === 'fait') {
             pastille.textContent = '✓';
         } else {
-            pastille.textContent = String(registre.indexOf(def) + 1);
+            pastille.textContent = String(rangDe(def));
         }
         li.appendChild(pastille);
 
@@ -117,12 +137,26 @@
         btn.className = 'assistance-parcours-bouton' + (e.etat === 'en-cours' ? ' assistance-parcours-bouton--plein' : '');
         btn.textContent = e.etat === 'fait' ? 'Refaire' : e.etat === 'en-cours' ? 'Reprendre' : 'Commencer';
         btn.setAttribute('aria-describedby', h.id);
+        // Un parcours qui suppose des données (`refus`, lot du neuvième parcours) : sans elles, le bouton ne le
+        // lance pas, et le panneau dit par où commencer, sous le bouton.
+        var refus = document.createElement('p');
+        refus.className = 'assistance-parcours-refus';
+        refus.id = 'assistance-parcours-refus-' + def.id;
+        refus.setAttribute('role', 'status');
+        refus.hidden = true;
         btn.addEventListener('click', function () {
+            var motif = typeof def.refus === 'function' ? def.refus() : null;
+            if (motif) {
+                refus.textContent = motif;
+                refus.hidden = false;
+                return;
+            }
             var depuis = e.etat === 'en-cours' ? e.etape : 0;
             fermerPanneau({ sansRetourFocus: true });
             def.lancer(depuis);
         });
         corps.appendChild(btn);
+        corps.appendChild(refus);
 
         li.appendChild(corps);
         return li;

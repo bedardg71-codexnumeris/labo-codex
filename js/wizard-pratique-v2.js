@@ -52,7 +52,8 @@ const TYPE_BADGES = {
     'standards': { code: 'STD', classe: 'std', label: 'PAN – Standards', description: 'Tu évalues par niveaux de maîtrise (ex. : I-D-M-E). La note est construite à partir de la démonstration de compétences, pas d\'une simple moyenne.' },
     'specifications': { code: 'SPE', classe: 'spe', label: 'PAN – Spécifications', description: 'Chaque travail est jugé acceptable ou non. La note finale dépend du nombre de spécifications réussies (forfaits).' },
     // #319 Lot 5 (#318) : DEN reconnue à l'édition (code/couleur du registre canonique,
-    // --den-violet). Parcours de CRÉATION reporté #318 — pas de carte Q1 pour DEN.
+    // --den-violet). Elle se crée aussi : la carte « Note finale posée, pas calculée » de
+    // « Décrire ma pratique », et le « Modèle de base » de « Partir d'un modèle ».
     'denotation': { code: 'DEN', classe: 'den', label: 'PAN – Dénotation', description: 'Rétroaction qualitative sur des cibles et des critères explicites ; la note certificative est posée par jugement à la fin.' }
 };
 
@@ -2421,6 +2422,11 @@ async function creerPratiqueV2() {
         clone.nom = r.nom || src.nom || 'Pratique adoptée';
         const auteurRecap = `${r.prenom || ''} ${r.nomAuteur || ''}`.trim();
         if (auteurRecap) clone.auteur = auteurRecap;
+        // Neuvième parcours (8 nov. 2026, nuit) — trois modèles portent l'auteur « Demo Labo Codex », qui est AUSSI le
+        // marqueur d'un item de la démo (`BibliothequeUI.estItemDemo`, #692). Sans auteur au récapitulatif (aucun profil
+        // d'enseignant·e), la copie le gardait : hors démo, elle n'était pas dans le menu « Pratique ouverte ». La copie
+        // n'est pas un item de la démo : elle perd ce marqueur. Le stock déjà écrit n'est pas touché.
+        else if (window.BibliothequeUI && BibliothequeUI.estItemDemo(clone) && clone.isDemo !== true) clone.auteur = '';
         if (r.etablissement) clone.etablissement = r.etablissement;
         if (r.discipline) clone.discipline = r.discipline;
         if (r.description) clone.description = r.description;
