@@ -11,6 +11,42 @@ les synthèses PDF des copies sur papier » est sur `main` (1.237.0).
 
 ### Ce qui est fait (en gestes d'utilisateur)
 
+- **Étape 2, les zones nommées par leur titre (Grégoire, 9 nov., 17 h 58)** : à 820 px, les trois colonnes s'empilent,
+  et « en haut », « à droite », « à gauche », « au centre » n'étaient plus vrais. Le début de la bulle est posé mot
+  pour mot : « Avant d'importer, vérifie trois choses. Sous « Inspecteur », la production : elle s'applique à tout le
+  lot. Sous « Aperçu », pour chaque fichier, l'étudiant·e que l'application a trouvé·e par son DA ; s'il manque un nom,
+  touche le fichier et choisis-le sous « Inspecteur ». Sous « Originaux », les pages remises par un·e même
+  étudiant·e : » ; la suite ne change pas. La sentinelle l'exige (la correction de 15 h 55 sur « au centre » est
+  remplacée). **Mesuré** : les trois titres s'écrivent à l'écran « Originaux », « Inspecteur » et « Aperçu »
+  (`js/travaux-ui.js`, en capitales par le style), les mots de la bulle ; un essai le vérifie à 1180 et à 820 px.
+- **Un guillemet ne passe plus seul à la ligne** (Cowork, 17 h 58) : **dans le moteur, une fois pour toutes les
+  bulles** (`js/parcours-moteur.js`, `typographier`, appelée par `rendreBulle` sur le titre, le texte et le geste).
+  Au rendu, l'espace à l'intérieur des guillemets devient insécable ; les textes validés et les sentinelles qui les
+  lisent gardent leurs espaces ordinaires. Essai : aucune espace ordinaire à l'intérieur des guillemets dans la bulle,
+  et « « Importer » » d'un seul tenant, à 1180 et à 820 px ; break-test, la fonction neutralisée → rouge. ⚠ Le lot
+  « Les bulles en pages » touche aussi `rendreBulle` : à la fusion, garder les trois appels à `typographier`.
+- Captures `p4-2-1180-sombre` et `p4-2-820-sombre` refaites.
+- **Les autres indications de lieu des parcours 3, 4 et 5**, relevées dans les textes validés et **mesurées à 820 ×
+  1180** quand elles dépendent de la mise en page (non changées : Grégoire tranchera une à une) :
+  | Parcours, étape | La phrase | À 820 px |
+  |---|---|---|
+  | 3, étape 6 | « Choisis-la dans le menu en haut de la page » | **vraie** (mesuré : le menu est dans la rangée du haut de « Pratiques », à côté de « Consulter la bibliothèque ») |
+  | 3, étape 2 | « retrouveront en tête de leur synthèse de rétroaction » | vraie (le PDF de la synthèse, pas l'écran) |
+  | 4, étape 5 | « touche « Annoter ▾ », au-dessus de la production » | **vraie** (mesuré : le bouton de 16 à 50 px, la production à partir de 55 px) |
+  | 4, étape 7 | « le cadenas « Verrouiller », en haut de « Paramètres » » | **vraie** (mesuré : juste sous le titre de la palette « Paramètres ») |
+  | 5, étape 2 | « depuis l'un des petits cercles au bord de la compétence » | vraie (dans le bloc, à toute largeur) |
+  | 5, étapes 2 à 6 | « touche « … » dans la frise, au-dessus de la carte » | **vraie** (mesuré : la frise de 317 à 355 px, la carte à partir de 355 px) |
+  | 5, étape 3 | « Dans son en-tête, choisis sa semaine » | vraie (dans le bloc) |
+  | 5, étape 4 | « Une pastille « ! » apparaît à côté » | vraie (à côté de l'objectif, dans le bloc) |
+  | 5, étape 6 et sa variante | « sous ton activité », « Glisse-la sous l'activité » | vraie (l'ordre des blocs dans la leçon) |
+  | 5, étape 3 | « la date peut tomber à côté » | sans objet (une locution, pas un lieu) |
+
+  Hors des bulles, un texte de l'application dit « Clique sur un fichier à gauche pour le prévisualiser » (l'Inspecteur
+  de l'import) : à 820 px, les fichiers sont au-dessus. Vu sur la capture `p4-2-820-sombre` ; non touché (hors du lot).
+- **Les bancs voisins avec le moteur changé** (`parcours-3-evaluer`, `parcours-1-et-2`, `parcours-2-ma-classe`) :
+  12 sur 13. Le rouge (« panneau : titre, phrase… ») l'est aussi sans ces changements : mesuré, sa mesure tombe pendant
+  l'animation d'ouverture du panneau et rougit au hasard sur la largeur (430,00006 ou 429,99994) ou sur le bord droit
+  (−228 px), avec comme sans mes changements.
 - Le panneau « Assistance » compte quatre parcours. « Recevoir les productions, rendre tes rétroactions » y est
   quatrième, avec sa ligne validée, son état et son bouton.
 - **La condition d'entrée** (ta question 7) : une production du groupe-cours actif qui nomme sa grille, son échelle et
