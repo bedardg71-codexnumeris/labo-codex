@@ -2375,6 +2375,33 @@ function _echelleManquanteAutoSave(ec, grille) {
     return !window.resoudreEchelleEvaluation(echelleId);
 }
 
+/**
+ * Lot du 9 nov. 2026 — L'ÉVALUATION QUE LE FORMULAIRE ÉCRIT, c'est celle qui est OUVERTE, par son id
+ * (`idModification`), jamais une autre du même couple élève-production. AVANT : la recherche par élève +
+ * production, non remplacée, rendait l'évaluation EN VIGUEUR : une originale remplacée ouverte, un niveau
+ * touché, et c'est sa reprise qui le recevait (consigne `CONSIGNE-LOT-2026-11-09-reprise-originale-lecture-seule.md`).
+ * Rend l'index ; -1 quand la copie n'a pas d'évaluation (l'écrivain en crée une) ; null quand l'id ouvert
+ * n'est plus en base (supprimée entre-temps) et qu'une autre du couple y est : rien ne s'écrit sur elle.
+ * Sans id (copie ouverte avant que son évaluation soit connue), ou un id d'un AUTRE couple (resté d'une copie
+ * précédente), la recherche d'avant : l'évaluation en vigueur du couple — c'est celle que ces chargeurs ouvrent.
+ * Lue aussi par les lecteurs du verrou (`_copieVerrouillee`, `evaluationRemiseAffichee`) : la même règle.
+ */
+function indexEvaluationOuverte(evaluations, ec) {
+    const liste = Array.isArray(evaluations) ? evaluations : [];
+    const duCouple = e => e && e.etudiantDA === ec.etudiantDA && e.productionId === ec.productionId;
+    if (ec && ec.idModification) {
+        const parId = liste.findIndex(e => e && e.id === ec.idModification);
+        if (parId === -1) return liste.some(duCouple) ? null : -1;
+        if (duCouple(liste[parId])) return parId;
+    }
+    return liste.findIndex(e => duCouple(e) && !e.remplaceeParId);
+}
+
+function _evaluationEnLectureSeule(evaluation) {
+    return (typeof window.evaluationEnLectureSeule === 'function')
+        ? window.evaluationEnLectureSeule(evaluation) : !!(evaluation && evaluation.verrouillee === true);
+}
+
 function _autoSauvegarderCriteres(snapshot) {
     window._timerAutoSave = null;
     var ec = snapshot || window.evaluationEnCours;
@@ -2423,11 +2450,8 @@ function _autoSauvegarderCriteres(snapshot) {
         }
     }
 
-    const idx = evaluations.findIndex(function(e) {
-        return !e.remplaceeParId &&
-            e.etudiantDA === ec.etudiantDA &&
-            e.productionId === ec.productionId;
-    });
+    const idx = indexEvaluationOuverte(evaluations, ec);
+    if (idx === null) return;   // l'évaluation ouverte n'existe plus : rien n'est écrit sur une autre
 
     if (idx !== -1) {
         // GARDE (Phase 0 A25, juin 2026) : ne JAMAIS réécrire une évaluation
@@ -2435,7 +2459,8 @@ function _autoSauvegarderCriteres(snapshot) {
         // toute modification passe par un déverrouillage explicite. Protège les
         // notes archivées d'un recalcul accidentel déclenché par une interaction
         // sur un formulaire mal désactivé (angle mort terminale #348 ; risque #350).
-        if (evaluations[idx].verrouillee === true) return;
+        // Lot du 9 nov. 2026 : une originale remplacée non déverrouillée exprès est en lecture seule aussi.
+        if (_evaluationEnLectureSeule(evaluations[idx])) return;
         _majIntegriteAutoSave(evaluations[idx], integrite);   // lot C
         ecrireMot(evaluations[idx], true);   // un mot seul s'enregistre, comme l'intégrité
         // Sans niveau dans l'instantané, les critères ne sont pas réécrits : un instantané vide
@@ -2591,6 +2616,7 @@ window.demarrerEvaluationDepuisFichier = demarrerEvaluationDepuisFichier;
 // Exposé pour la sentinelle auto-save ↔ verrouillage (Phase 0 A25, juin 2026) :
 // vérifie que l'auto-save ne réécrit JAMAIS une évaluation verrouillée.
 window._autoSauvegarderCriteres = _autoSauvegarderCriteres;
+window.indexEvaluationOuverte = indexEvaluationOuverte;   // lot du 9 nov. 2026 — les lecteurs du verrou (retroaction, calcul)
 window._annulerAutoSaveEnAttente = _annulerAutoSaveEnAttente;   // #1145 — evaluation.js, evaluation-sauvegarde.js
 // #882 — les options d'affichage (evaluation.js) arment l'auto-save comme un critère : nom privé de cette IIFE.
 window._debouncerAutoSave = _debouncerAutoSave;
