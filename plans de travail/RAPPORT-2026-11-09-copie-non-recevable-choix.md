@@ -26,7 +26,9 @@
   par standards, après la mise en ligne : **je n'ai rien écrit dans tes données**, et le lot n'écrit rien tant que tu ne
   cliques pas.
 - **Le relevé de tes copies non recevables** est prêt (`scripts/releve-copies-non-recevables-a2026.js`), en lecture
-  seule, à coller dans la console de Chrome sur ton Mac **avant la fusion** (ta question 5, plus bas).
+  seule, à coller dans la console de Chrome sur ton Mac **avant la fusion** (ta question 5, plus bas). La relecture neuve
+  y a trouvé deux défauts (des comptes faux sur la terminale, une écriture possible dans IndexedDB) : corrigés, et ses
+  comptes sont maintenant ceux que l'application calcule elle-même, avant et après le lot.
 - **Captures Chromium à 1180 px** (pas WebKit), dans `plans de travail/captures-2026-11-09-copie-non-recevable-choix/`,
   qui remplacent celles de la nuit : la copie marquée dans une pratique par standards en « N meilleures », règle
   « l'écarter » cochée (`1a-…`), puis « lui mettre 0 » choisi (`1b-…`) ; les réglages de la pratique (`2-…`) ; l'étape de
@@ -37,9 +39,10 @@
 1. **Lancer le relevé sur ton Mac, avant la fusion.** Ouvre l'application en ligne dans Chrome, ouvre la console
    (⌥⌘J), colle le contenu de `scripts/releve-copies-non-recevables-a2026.js`, Entrée. Il n'écrit rien. Le résultat est
    copié dans ton presse-papier ; colle-le à Cowork. Il dit, sans aucun nom ni DA : combien de copies sont marquées non
-   recevables en A2026, par pratique et par famille ; si une terminale non recevable passerait de 0 à provisoire ; si,
-   « Notes finalisées » cochée, une terminale manquante passerait de provisoire à 0. *Recommandation : fusionner seulement
-   si les deux derniers comptes sont à 0, ou si tu acceptes ce qu'ils nomment.*
+   recevables en A2026, par pratique et par famille ; et, pour chaque élève d'un groupe en standards, si sa note de
+   terminale passerait de 0 à provisoire (une terminale non recevable, ou une reprise accordée pas encore évaluée) ou de
+   provisoire à 0 (« Notes finalisées » cochée, terminale non remise, absente ou écartée). *Recommandation : fusionner
+   seulement si ces comptes sont à 0, ou si tu acceptes ce qu'ils nomment.*
 2. **En mode « Hybride », la copie au bloc Sélection garde le texte commun.** C'est ta consigne (« les autres modes
    gardent ton texte »). Or l'hybride retient aussi les N meilleures de sa Sélection (`_selectionnerArtefactsLegacy`,
    `js/profil-etudiant-actions.js:296`) : une copie à 0 n'y compte, elle aussi, que s'il manque des productions.
@@ -63,7 +66,8 @@ provisoire aux notes finales) : validé, c'est ce qui est codé ; 4, 7, 8 et 9 :
 
 - **WebKit, Safari, l'iPad** : rien. Les captures et les specs sont sous Chromium. À rejouer sur le Mac :
   `copie-non-recevable-choix-1176.spec.js`, les trois specs de l'assistant retouchées par la nuit, et les captures.
-- **Tes données réelles** : le relevé (question 1). Il a été éprouvé ici sur un A2026 fictif seulement.
+- **Tes données réelles** : le relevé (question 1). Il a été éprouvé ici sur un A2026 fictif seulement, contre les notes
+  que l'application calcule elle-même avant et après le lot.
 - **La relecture croisée de Cowork** (règle 2 de `PROTOCOLE.md`) : le champ `sortCopieNonRecevable` voyage avec la copie
   et la pratique.
 
@@ -186,7 +190,8 @@ L'infobulle `eval-integrite` (« dans la note, son sort dépend de ta pratique �
 - `5ba6c36d` les textes validés, la variante « N meilleures », la sentinelle (jetons `20261109t` des deux fichiers retouchés).
 - `0df3f9c4` le relevé du stock.
 - `f500c0cc` les captures.
-- (le dernier : ce rapport.)
+- `421ec565` le rapport (premier jet de la session).
+- (le dernier : le relevé corrigé après la relecture neuve, et ce rapport complété.)
 
 **La sentinelle des textes validés** (`tests/unit/sentinelle-textes-copie-non-recevable-valides-9-nov.test.js`, 13 essais).
 La ligne de la copie se juge AU RENDU : le vrai `evaluation-sauvegarde.js` sur le bloc d'`index.html` (menu « Intégrité
@@ -202,17 +207,27 @@ la phrase de « Notes finalisées » retirée ; la marque « PROPOSÉS » remise
 Trois sentinelles existantes suivent : `sentinelle-audit-aide-15-oct-…` (la puce « Lui mettre 0 » citée mot pour mot) et,
 en commentaire seulement, `sentinelle-copie-non-recevable-affichage-28-oct` et `sentinelle-note-provisoire-reservee`.
 
-**Le relevé** (`scripts/releve-copies-non-recevables-a2026.js`). Autonome : la version en ligne n'a pas le code du lot ;
-il reprend la règle du code sans l'appeler (`terminaleManquante`, `originaleEstRemplacee` simplifiée à « la reprise
-existe », `configuration.notesFinales === true`, la pratique d'un groupe-cours par `groupesCours[].pratiqueId`, la famille
-normalisée comme le registre). Une copie se range sous le groupe-cours qu'elle porte, sinon celui de son cours, départagé
-par le groupe de l'élève ; sinon elle est comptée « sans groupe-cours retrouvé ». Il lit par `db.get` (asynchrone) : une
-liste lourde peut vivre dans IndexedDB. Éprouvé sous Chromium, l'application ouverte, sur un A2026 fictif (trois
-pratiques, six élèves fictifs, sept copies), **derrière un `db` et un `localStorage` qui refusent toute écriture** :
-0 écriture tentée ; aucun nom ni DA dans la sortie (cherchés un à un) ; les comptes attendus (5 copies non recevables dont
-1 sans groupe-cours ; 1 terminale de 0 à provisoire ; 3 terminales manquantes de provisoire à 0, dont 1 élève en abandon,
-et un groupe écrit « 2 » rattaché au groupe « 02 »). Ce qu'il ne voit pas : `contexteImposeNoteProvisoire` (un contexte
-qui impose la note provisoire) ; il suppose « Notes finalisées » effective dès qu'elle est cochée.
+**Le relevé** (`scripts/releve-copies-non-recevables-a2026.js`). Autonome : la version en ligne n'a pas le code du lot.
+Il recopie la règle du code sans l'appeler : les prédicats d'une copie du registre (`_copieCompteParElleMeme`,
+`originaleEstRemplacee`, `evaluationEntreDansLaNote`, `evaluationNonRemise`, identiques sur `main` et sur le lot), et la
+note de terminale de `_obtenirNoteTerminaleEtudiant` (`js/profil-etudiant-actions.js`) dans ses deux versions : celle de
+`main` pour « avant », celle du lot pour « après » (`copieNonRecevableEcartee`, `terminaleManquante`). Il la calcule pour
+CHAQUE élève de chaque groupe-cours par standards et compte les changements (0 → provisoire, provisoire → 0, autres), avec
+leur cause (non recevable ; non recevable avec une reprise accordée pas encore évaluée ; non remise ; aucune copie).
+La pratique d'un groupe-cours : `groupesCours[].pratiqueId`. Une copie se range sous le groupe-cours qu'elle porte, sinon
+celui de son cours, départagé par le groupe de l'élève ; sinon elle est comptée « sans groupe-cours retrouvé ».
+Lecture par `db.getSync` seul (au démarrage, db.js range tout IndexedDB en mémoire ou dans le localStorage ; `db.get`,
+lui, recopie dans IndexedDB une clé qu'il n'y trouve pas).
+
+**L'oracle du relevé** (script jetable, Chromium) : un A2026 fictif de huit élèves en standards, une terminale chacun dans
+une situation différente (plagiée et verrouillée ; plagiée avec une reprise accordée pas encore évaluée, la reprise née
+comme le fait `appliquerJetonReprise` ; brouillon plagié ; aucune copie ; non remise ; notée ; plagiée puis reprise
+évaluée ; brouillon ordinaire), avec et sans « Notes finalisées ». La vérité : la note de terminale calculée **par
+l'application elle-même** (`calculerDetailsNoteFinale`), sur `origin/main` (un worktree jetable) puis sur le lot. Le
+relevé, lancé sur `main` derrière un `db` et un `localStorage` qui refusent toute écriture, rend **les mêmes comptes** :
+sans notes finales, 2 de 0 à provisoire ; avec, 1 de 0 à provisoire (la reprise en attente) et 3 de provisoire à 0
+(brouillon plagié, aucune copie, non remise). 0 écriture tentée ; aucun nom ni DA dans la sortie. **Le premier relevé,
+devant le même oracle, rendait 0 et 4 avec notes finales** (au lieu de 1 et 3) : l'essai sait le prendre en défaut.
 
 **Les captures** : script jetable (hors dépôt), Chromium, 1180 × 820, deviceScaleFactor 2 ; une pratique par standards
 « Standards témoin » en « N meilleures », sans règle écrite (elle lit « l'écarter »), l'élève fictif « Élève Fictif »,
@@ -225,7 +240,25 @@ un vrai parcours, elle vient après la configuration de la famille). Les notific
 `copie-non-recevable-choix-1176.spec.js` et `un-mot-pour-ton-etudiant.spec.js`, **12/12 verts** (les deux lots que la
 fusion a croisés). **Le verdict WebKit reste à prendre sur le Mac.**
 
-**Relecture par un agent neuf** : en cours au moment de ce commit ; son verdict viendra au commit suivant.
+**Relecture par un agent neuf** (sans mon raisonnement ; skill `verification-adverse` ; commits `e2a3e7f8` à `f500c0cc`) :
+**« à corriger »** — les textes, le mode « N meilleures », la sentinelle et la fusion sont bons ; le relevé comptait faux
+les deux chiffres de la question 5. Ses trouvailles et leur sort :
+
+1. *Le relevé comptait faux les terminales qui bougent* : il prenait toute copie marquée pour un 0 « avant le lot » (un
+   brouillon plagié n'entre pas dans la note) et toute originale dont la reprise existe pour remplacée (elle ne l'est que
+   si sa reprise compte). **Corrigé** (mon code : le lot n'était pas fini) ; prouvé par l'oracle ci-dessus.
+2. *Le relevé pouvait écrire dans IndexedDB* (`db.get` recopie une clé absente). **Corrigé** : `db.getSync` seul.
+3. *Les textes sont conformes mot pour mot.* Typographie, supposition nommée : dans l'assistant et la puce de l'Aide, les
+   espaces avant « ; », « : » et dans « » sont ordinaires, comme le texte voisin ; la ligne sur la copie est en
+   insécables, comme la sienne. La carte « NON REMIS » : le point avant ta phrase est jugé fidèle (question 4).
+4. *La détection « N meilleures » est conforme à la lettre de la consigne.* Trois écarts, sans défaut : l'hybride
+   (question 2) ; un ancien drapeau `portfolio.hybride` sans catégories actives, que l'écran montre « Hybride » et que le
+   calcul trie en « N meilleures » ; « Hybride » choisi puis catégories décochées (`methodeSelection: 'hybride'`), même
+   effet. Le texte suit l'écran dans les deux derniers cas : issue 3, sans conséquence observable pour la cohorte.
+5. *La sentinelle mord* : 13 mutations sur 15 la font rougir ; les deux qui restent vertes (le titre et la phrase du jeton
+   de l'avis) sont gardées par `sentinelle-copie-non-recevable-affichage-28-oct` (rouge prouvé).
+6. *La fusion est bonne* : les deux ajouts sont gardés aux trois chemins d'écriture (Enregistrer, Modifier,
+   auto-sauvegarde) ; les 18 jetons sont neufs, et seuls eux ont changé.
 
 **Trouvailles, et leur issue**
 - **Le glossaire, « Notes finalisées »**, ne dit rien de la terminale (question 3 de l'en-tête). Texte non validé : issue 2,

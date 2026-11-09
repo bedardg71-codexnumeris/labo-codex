@@ -2,54 +2,73 @@
 //
 // Question 5 du rapport `plans de travail/RAPPORT-2026-11-09-copie-non-recevable-choix.md`, à lancer AVANT la fusion du
 // lot. Le lot ne réécrit rien : une pratique sans règle écrite se lit comme avant (sommative : 0 ; spécifications : un
-// travail non satisfaisant ; standards : « l'écarter »). Trois choses peuvent pourtant bouger sans geste, en standards
-// seulement, et ce relevé les compte :
-//   1. les copies d'A2026 marquées non recevables (plagiat, IA non autorisée), par pratique et par famille ;
-//   2. une pratique par standards avec « Notes finalisées » cochée et une terminale NON REMISE : elle passerait à 0
-//      (avant le lot : la note restait provisoire) ;
-//   3. une terminale NON RECEVABLE déjà marquée, dans une pratique par standards sans « Notes finalisées » : elle
-//      passerait de 0 à provisoire (avant le lot : 0 tout de suite).
-// Il dit aussi combien de ces copies le dépistage lit autrement (avant : leur note calculée ; après : 0, ou hors du
-// calcul si elles sont écartées) : un niveau RàI peut bouger, une note non.
+// travail non satisfaisant ; standards : « l'écarter »). Une note peut pourtant bouger sans geste, en standards, par la
+// TERMINALE (décision 4 : non remise ou écartée, elle laisse la note provisoire pendant le trimestre et vaut 0 une fois
+// « Notes finalisées » cochée ; avant le lot, une terminale non recevable valait 0 tout de suite, et une terminale non
+// remise laissait la note provisoire même aux notes finales). Ce relevé dit :
+//   1. les copies d'A2026 marquées non recevables (plagiat, IA non autorisée), par pratique et par famille, et leur place ;
+//   2. en standards, pour CHAQUE élève de chaque groupe, la note de terminale avant le lot et après (0, une note, ou
+//      « provisoire »), et compte ce qui change : une terminale qui passerait de 0 à provisoire (une terminale non
+//      recevable, ou une reprise accordée pas encore évaluée), une terminale qui passerait de provisoire à 0 (« Notes
+//      finalisées » cochée, terminale non remise ou absente).
+// Il dit aussi combien de copies le dépistage lit autrement (avant : leur note calculée ; après : 0, ou hors du calcul
+// si elles sont écartées) : un niveau RàI peut bouger, une note non.
 //
-// ⛔ N'écrit RIEN, ne répare RIEN. Aucun nom d'élève, aucun DA dans la sortie : des noms de pratiques, des numéros de
-// groupe, des titres de productions et des comptes. À coller dans la console de Chrome, l'application ouverte (n'importe
-// quelle section, n'importe quel cours actif : le relevé lit tout A2026). Il tourne sur la version EN LIGNE, qui n'a pas
-// encore le code du lot : il ne s'appuie sur aucune de ses fonctions. Le résultat est copié dans le presse-papier (JSON)
-// et affiché en tableaux ; la console rend une promesse, dont la valeur est la phrase de synthèse.
-(async () => {
-    const lire = async (cle, defaut) => {
-        try { if (typeof db.get === 'function') { const v = await db.get(cle, defaut); return v == null ? defaut : v; } } catch (e) { /* repli */ }
-        const v = db.getSync(cle, defaut);
-        return v == null ? defaut : v;
-    };
+// LA RÈGLE, RECOPIÉE DU CODE (la version en ligne n'a pas le code du lot : le relevé n'appelle aucune de ses fonctions).
+// Les prédicats d'une copie sont ceux du registre (`js/pratiques/pratique-registre.js`), identiques sur `main` et sur le
+// lot : `_copieCompteParElleMeme`, `originaleEstRemplacee`, `evaluationEntreDansLaNote`, `evaluationNonRemise`. La note de
+// terminale suit `_obtenirNoteTerminaleEtudiant` (`js/profil-etudiant-actions.js`) : celle de `main` pour « avant »,
+// celle du lot pour « après » (`copieNonRecevableEcartee`, `terminaleManquante`). « Notes finalisées » : comme le profil,
+// `!!configuration.notesFinales`.
+//
+// ⛔ N'écrit RIEN, ne répare RIEN. Lecture par `db.getSync` seul : au démarrage, db.js range tout IndexedDB en mémoire ou
+// dans le localStorage ; `db.get`, lui, recopie dans IndexedDB une clé qu'il n'y trouve pas (relecture du 9 nov.).
+// Aucun nom d'élève, aucun DA dans la sortie : des noms de pratiques, des numéros de groupe, des titres de productions et
+// des comptes. À coller dans la console de Chrome, l'application ouverte (n'importe quelle section, n'importe quel cours
+// actif : le relevé lit tout A2026). Le résultat est copié dans le presse-papier (JSON) et affiché en tableaux ; la
+// console rend la phrase de synthèse.
+(() => {
+    const lire = (cle, defaut) => { const v = db.getSync(cle, defaut); return v == null ? defaut : v; };
     const NORMALISATION = { 'alternative': 'standards', 'pan-maitrise': 'standards', 'pan-maitrise-json': 'standards', 'pan-standards': 'standards',
         'pan-objectifs': 'standards', 'pan-specifications': 'specifications', 'pan-denotation': 'denotation' };
     const famille = (t) => (t ? (NORMALISATION[t] || t) : null);
     const groupeNorm = (g) => String(g || '').padStart(5, '0');   // normaliserNumeroGroupe (modes.js)
+    const inactif = (et) => !!et && (et.statut === 'inactif' || et.statut === 'décrochage' || et.statut === 'abandon');   // main.js
+    // Le registre, mot pour mot (identique sur main et sur le lot).
     const nonRecevable = (e) => !!e && (e.statutIntegrite === 'plagiat' || e.statutIntegrite === 'ia');
     const nonRemise = (e) => !!e && (e.statutRemise === 'non-remis' || e.statutRemise === 'non-recu');
-    const inactif = (et) => !!et && (et.statut === 'inactif' || et.statut === 'décrochage' || et.statut === 'abandon');   // main.js
+    const compteParElleMeme = (e) => !(e.travailEnCours === true) && e.noteFinale !== null && e.noteFinale !== undefined
+        && e.verrouillee !== false && e.ponderationCouverte !== 0;
+    const SORTS = ['ecarter', 'zero'];
+    const sortValide = (s) => (SORTS.includes(s) ? s : null);
 
-    const trimestres = (db.getSync('trimestres', []) || []).filter((t) => t && (
+    const trimestres = (lire('trimestres', []) || []).filter((t) => t && (
         /^a2026/i.test(String(t.id || '')) || (String(t.session || '').toUpperCase() === 'A' && Number(t.annee) === 2026)));
     if (!trimestres.length) return 'Aucun trimestre A2026 trouvé dans « trimestres ».';
 
     const parPratique = {};
-    const terminalesNonRecevables = [];
-    const terminalesNonRemisesAuxNotesFinales = [];
-    const nonRattachees = { copies: 0 };
-    let evaluationsLues = 0;
+    const terminales = {};   // une ligne par pratique, groupe et changement
     let copiesNonRecevables = 0;
+    let copiesSansGroupeCours = 0;
+    let evaluationsLues = 0;
+    let elevesStandardsLus = 0;
 
     for (const t of trimestres) {
-        const evaluations = (await lire(t.id + '_evaluationsSauvegardees', [])) || [];
-        const productions = (await lire(t.id + '_productions', [])) || [];
-        const etudiants = (await lire(t.id + '_groupeEtudiants', [])) || [];
-        const groupesCours = ((await lire(t.id + '_groupesCours', [])) || []).filter(Boolean);
-        const bibliotheque = ((await lire(t.id + '_pratiquesConfigurables', [])) || []).filter(Boolean);
+        const evaluations = (lire(t.id + '_evaluationsSauvegardees', []) || []).filter(Boolean);
+        const productions = (lire(t.id + '_productions', []) || []).filter(Boolean);
+        const etudiants = (lire(t.id + '_groupeEtudiants', []) || []).filter(Boolean);
+        const groupesCours = (lire(t.id + '_groupesCours', []) || []).filter(Boolean);
+        const bibliotheque = (lire(t.id + '_pratiquesConfigurables', []) || []).filter(Boolean);
         evaluationsLues += evaluations.length;
-        const parId = new Map(evaluations.filter((e) => e && e.id).map((e) => [e.id, e]));
+        const parId = new Map(evaluations.filter((e) => e.id).map((e) => [e.id, e]));
+        // originaleEstRemplacee / evaluationEntreDansLaNote (registre), sur la liste du trimestre.
+        const remplacee = (e) => {
+            if (!e.remplaceeParId) return false;
+            if (e.reconcilieParDoublon) return true;
+            const reprise = parId.get(e.remplaceeParId);
+            return !reprise || compteParElleMeme(reprise);
+        };
+        const entreDansLaNote = (e) => !(e.remplaceeParId && remplacee(e)) && compteParElleMeme(e);
 
         // La pratique d'un groupe-cours : `groupesCours[].pratiqueId`, trouvée en bibliothèque (trouverPratiqueEnBibliotheque).
         const pratiqueDu = (gc) => {
@@ -60,23 +79,25 @@
             const configuration = entree ? (entree.configuration || entree.config || {}) : {};
             const fam = famille((entree && ((entree.configuration && entree.configuration.type) || entree.type || (entree.config && entree.config.type))) || (entree ? null : id));
             const portfolio = configuration.portfolio || null;
-            const hybride = !!((portfolio && portfolio.hybride) || (configuration.categories && configuration.categories.actif));
+            const hybride = !!(configuration.categories && configuration.categories.actif);
+            const regleEcrite = sortValide(configuration.sortCopieNonRecevable);
             return {
                 cle: t.id + ' · ' + ((entree && entree.nom) || id) + ' (' + ((entree && entree.id) || id) + ')',
                 famille: fam || '(illisible)',
-                regleEcrite: configuration.sortCopieNonRecevable || null,
-                notesFinales: configuration.notesFinales === true,
+                regleEcrite,
+                // sortCopieNonRecevableDeLaPratique (lot) : la règle écrite, sinon le comportement d'avant.
+                regle: regleEcrite || (fam === 'denotation' ? null : (fam === 'standards' ? 'ecarter' : 'zero')),
+                notesFinales: !!configuration.notesFinales,
                 hybride,
                 modeSelection: fam === 'standards' ? (hybride ? 'hybride' : ((portfolio && portfolio.methodeSelection) || 'meilleurs')) : null
             };
         };
-        // La règle que le lot lira, sans règle écrite : le comportement d'avant (sortCopieNonRecevableDeLaPratique).
-        const regleLue = (p) => p.regleEcrite || (p.famille === 'denotation' ? null : (p.famille === 'standards' ? 'ecarter' : 'zero'));
         const ligneDe = (p) => parPratique[p.cle] || (parPratique[p.cle] = {
-            pratique: p.cle, famille: p.famille, regle: p.regleEcrite ? p.regleEcrite + ' (écrite)' : (regleLue(p) || '—') + ' (lue, sans règle écrite)',
+            pratique: p.cle, famille: p.famille, regle: p.regleEcrite ? p.regleEcrite + ' (écrite)' : (p.regle || '—') + ' (lue, sans règle écrite)',
             notesFinales: p.notesFinales, modeSelection: p.modeSelection || '', groupes: [],
             nonRecevables: 0, plagiat: 0, ia: 0, terminale: 0, obligatoire: 0, auPool: 0, autre: 0,
-            remplaceesParUneReprise: 0, choixDejaSurLaCopie: 0, verrouillees: 0 });
+            avecRepriseAccordee: 0, choixDejaSurLaCopie: 0, verrouillees: 0 });
+        const nomGroupe = (gc) => (gc.modeCours ? 'cours' : String(gc.groupeNum || '?'));
 
         // Le groupe-cours d'une copie : le sien s'il est écrit ; sinon celui de son cours, départagé par le groupe de l'élève.
         const groupeCoursDe = (e) => {
@@ -84,71 +105,64 @@
             const candidats = groupesCours.filter((g) => g.coursId && g.coursId === e.coursId);
             if (candidats.length === 1) return candidats[0];
             if (candidats.length > 1) {
-                const et = etudiants.find((x) => x && x.da === e.etudiantDA && (!x.coursId || x.coursId === e.coursId));
-                const groupe = e.groupe || (et && (et.groupe || et.groupeReel));
+                const et = etudiants.find((x) => x.da === e.etudiantDA && (!x.coursId || x.coursId === e.coursId));
                 if (et && et.groupeCoursId) { const gc = candidats.find((g) => g.id === et.groupeCoursId); if (gc) return gc; }
+                const groupe = e.groupe || (et && (et.groupe || et.groupeReel));
                 if (groupe) { const gc = candidats.find((g) => g.groupeNum && groupeNorm(g.groupeNum) === groupeNorm(groupe)); if (gc) return gc; }
             }
             return null;
         };
-        const productionDe = (id) => productions.find((p) => p && p.id === id) || null;
-        const terminaleDuCours = (coursId) => productions.find((p) => p && p.type === 'terminale' && (!p.coursId || p.coursId === coursId)) || null;
-        const remplacee = (e) => !!(e.remplaceeParId && (e.reconcilieParDoublon || parId.has(e.remplaceeParId)));
+        const productionDe = (id) => productions.find((p) => p.id === id) || null;
 
-        // 1. et 3. — les copies non recevables, rangées sous la pratique de leur groupe-cours.
+        // 1. — les copies non recevables, rangées sous la pratique de leur groupe-cours.
         evaluations.filter(nonRecevable).forEach((e) => {
             copiesNonRecevables++;
             const gc = groupeCoursDe(e);
             const p = gc ? pratiqueDu(gc) : null;
-            if (!p) { nonRattachees.copies++; return; }
+            if (!p) { copiesSansGroupeCours++; return; }
             const l = ligneDe(p);
-            const groupe = gc.modeCours ? 'cours' : String(gc.groupeNum || '?');
-            if (!l.groupes.includes(groupe)) l.groupes.push(groupe);
+            if (!l.groupes.includes(nomGroupe(gc))) l.groupes.push(nomGroupe(gc));
             l.nonRecevables++;
             l[e.statutIntegrite]++;
-            if (e.remplaceeParId) l.remplaceesParUneReprise++;
+            if (e.remplaceeParId) l.avecRepriseAccordee++;
             if (e.sortCopieNonRecevable) l.choixDejaSurLaCopie++;
             if (e.verrouillee === true) l.verrouillees++;
             const prod = productionDe(e.productionId);
-            const place = !prod ? 'autre' : (prod.type === 'terminale' ? 'terminale'
-                : ((p.hybride && prod.categorie === 'obligatoire') ? 'obligatoire' : (p.famille === 'standards' ? 'auPool' : 'autre')));
-            l[place]++;
-            if (p.famille === 'standards' && place === 'terminale') {
-                const sort = e.sortCopieNonRecevable || regleLue(p);
-                terminalesNonRecevables.push({
-                    pratique: p.cle, groupe, production: (prod && (prod.titre || prod.nom)) || '?', statut: e.statutIntegrite,
-                    regle: sort, notesFinales: p.notesFinales, remplaceeParUneReprise: remplacee(e),
-                    avantLeLot: 0,
-                    apresLeLot: sort === 'zero' ? 0 : (p.notesFinales ? 0 : 'provisoire'),
-                    bouge: !remplacee(e) && sort === 'ecarter' && !p.notesFinales
-                });
-            }
+            l[!prod ? 'autre' : (prod.type === 'terminale' ? 'terminale'
+                : ((p.hybride && prod.categorie === 'obligatoire') ? 'obligatoire' : (p.famille === 'standards' ? 'auPool' : 'autre')))]++;
         });
 
-        // 2. — « Notes finalisées » cochée, terminale non remise (ou écartée), en standards : provisoire avant, 0 après.
+        // 2. — standards : la note de terminale de chaque élève, avant le lot et après.
         groupesCours.forEach((gc) => {
             const p = pratiqueDu(gc);
-            if (!p || p.famille !== 'standards' || !p.notesFinales) return;
-            const terminale = terminaleDuCours(gc.coursId);
-            const groupe = gc.modeCours ? 'cours' : String(gc.groupeNum || '?');
-            const ligne = { pratique: p.cle, groupe, terminale: terminale ? (terminale.titre || terminale.nom || '?') : '(aucune terminale)',
-                etudiants: 0, inactifs: 0, aucuneCopie: 0, nonRemise: 0, nonRecevableEcartee: 0, passeraientA0: 0, dontInactifs: 0 };
-            const duGroupe = etudiants.filter((et) => et && et.da && (et.groupeCoursId ? et.groupeCoursId === gc.id
+            if (!p || p.famille !== 'standards') return;
+            const terminale = productions.find((x) => x.type === 'terminale' && (!x.coursId || x.coursId === gc.coursId)) || null;
+            if (!terminale) return;
+            const duGroupe = etudiants.filter((et) => et.da && (et.groupeCoursId ? et.groupeCoursId === gc.id
                 : ((!et.coursId || et.coursId === gc.coursId) && (gc.modeCours || !gc.groupeNum || groupeNorm(et.groupe || et.groupeReel) === groupeNorm(gc.groupeNum)))));
             duGroupe.forEach((et) => {
-                ligne.etudiants++;
-                if (inactif(et)) ligne.inactifs++;
-                if (!terminale) return;
-                const copies = evaluations.filter((e) => e && e.etudiantDA === et.da && e.productionId === terminale.id && !remplacee(e));
-                const ecartee = (e) => nonRecevable(e) && (e.sortCopieNonRecevable || regleLue(p)) === 'ecarter';
-                if (!copies.every((e) => nonRemise(e) || ecartee(e))) return;   // terminaleManquante (registre)
-                if (!copies.length) ligne.aucuneCopie++;
-                else if (copies.some(ecartee)) ligne.nonRecevableEcartee++;
-                else ligne.nonRemise++;
-                ligne.passeraientA0++;
-                if (inactif(et)) ligne.dontInactifs++;
+                elevesStandardsLus++;
+                const copies = evaluations.filter((e) => e.etudiantDA === et.da && e.productionId === terminale.id);
+                const sortDe = (e) => sortValide(e.sortCopieNonRecevable) || sortValide(p.regle) || 'zero';
+                const ecartee = (e) => nonRecevable(e) && sortDe(e) === 'ecarter';
+                // Avant (main) : la première copie qui entre dans la note ; non recevable, 0 ; sinon provisoire.
+                const avantCopie = copies.find(entreDansLaNote) || null;
+                const avant = avantCopie ? (nonRecevable(avantCopie) ? 0 : avantCopie.noteFinale) : null;
+                // Après (lot) : une copie écartée n'entre pas ; manquante (non remise ou écartée) aux notes finales : 0.
+                const apresCopie = copies.find((e) => entreDansLaNote(e) && !ecartee(e)) || null;
+                const manquante = copies.filter((e) => !(e.remplaceeParId && remplacee(e))).every((e) => nonRemise(e) || ecartee(e));
+                const apres = apresCopie ? (nonRecevable(apresCopie) ? 0 : apresCopie.noteFinale) : ((p.notesFinales && manquante) ? 0 : null);
+                if (avant === apres) return;
+                const dit = (v) => (v === null ? 'provisoire' : (v === 0 ? '0' : 'une note'));
+                const cause = !copies.length ? 'aucune copie'
+                    : (copies.some((e) => nonRecevable(e) && e.remplaceeParId && !remplacee(e)) ? 'non recevable, reprise accordée pas encore évaluée'
+                        : (copies.some(nonRecevable) ? 'non recevable' : (copies.every(nonRemise) ? 'non remise' : 'autre')));
+                const cle = [p.cle, nomGroupe(gc), dit(avant) + ' → ' + dit(apres), cause].join('|');
+                const l = terminales[cle] || (terminales[cle] = { pratique: p.cle, groupe: nomGroupe(gc), terminale: terminale.titre || terminale.nom || '?',
+                    notesFinales: p.notesFinales, changement: dit(avant) + ' → ' + dit(apres), cause, eleves: 0, dontInactifs: 0 });
+                l.eleves++;
+                if (inactif(et)) l.dontInactifs++;
             });
-            terminalesNonRemisesAuxNotesFinales.push(ligne);
         });
     }
 
@@ -159,34 +173,34 @@
         f.pratiques++;
         ['nonRecevables', 'terminale', 'obligatoire', 'auPool', 'autre'].forEach((k) => { f[k] += l[k]; });
     });
-    const bougent = terminalesNonRecevables.filter((x) => x.bouge).length;
-    const passeraientA0 = terminalesNonRemisesAuxNotesFinales.reduce((s, l) => s + l.passeraientA0, 0);
+    const changements = Object.values(terminales);
+    const compte = (changement) => changements.filter((l) => l.changement === changement).reduce((s, l) => s + l.eleves, 0);
     const resume = {
-        releve: '#1176 — copies non recevables, A2026, lecture seule',
+        releve: '#1176 — copies non recevables et terminales des standards, A2026, lecture seule',
         date: new Date().toISOString(),
         version: (window.__VERSION__ && window.__VERSION__.beta) || null,
         trimestres: trimestres.map((t) => t.id),
         evaluationsLues,
         copiesNonRecevables,
-        copiesSansGroupeCoursRetrouve: nonRattachees.copies,
+        copiesSansGroupeCoursRetrouve: copiesSansGroupeCours,
         parFamille: Object.values(parFamille),
         parPratique: lignes,
-        standardsTerminalesNonRecevables: terminalesNonRecevables,
-        standardsTerminalesNonRemisesAvecNotesFinales: terminalesNonRemisesAuxNotesFinales,
+        standardsElevesLus: elevesStandardsLus,
+        standardsTerminalesQuiChangent: changements,
         ceQuiBouge: {
-            terminalesNonRecevablesDe0AProvisoire: bougent,
-            terminalesManquantesDeProvisoireA0: passeraientA0,
-            depistage: 'les ' + copiesNonRecevables + ' copies non recevables : le dépistage lisait leur note calculée ; il lira 0, '
+            terminalesDe0AProvisoire: compte('0 → provisoire'),
+            terminalesDeProvisoireA0: compte('provisoire → 0'),
+            autresChangements: changements.filter((l) => l.changement !== '0 → provisoire' && l.changement !== 'provisoire → 0').reduce((s, l) => s + l.eleves, 0),
+            depistage: copiesNonRecevables + ' copie(s) non recevable(s) : le dépistage lisait leur note calculée ; il lira 0, '
                 + 'ou les laissera de côté si elles sont écartées (un niveau RàI peut bouger, pas une note)'
         }
     };
     try { copy(JSON.stringify(resume, null, 2)); } catch (e) { /* hors console Chrome */ }
     console.table(Object.values(parFamille));
     console.table(lignes);
-    if (terminalesNonRecevables.length) console.table(terminalesNonRecevables);
-    if (terminalesNonRemisesAuxNotesFinales.length) console.table(terminalesNonRemisesAuxNotesFinales);
+    if (changements.length) console.table(changements);
     return 'Copié : ' + copiesNonRecevables + ' copie(s) non recevable(s) sur ' + evaluationsLues + ' évaluation(s) d\'A2026, dans '
-        + lignes.length + ' pratique(s)' + (nonRattachees.copies ? ' (' + nonRattachees.copies + ' sans groupe-cours retrouvé)' : '')
-        + '. Standards : ' + bougent + ' terminale(s) non recevable(s) passeraient de 0 à provisoire ; '
-        + passeraientA0 + ' terminale(s) manquante(s) passeraient de provisoire à 0 (« Notes finalisées » cochée).';
+        + lignes.length + ' pratique(s)' + (copiesSansGroupeCours ? ' (' + copiesSansGroupeCours + ' sans groupe-cours retrouvé)' : '')
+        + '. Standards, terminale (' + elevesStandardsLus + ' élève(s) lus) : ' + resume.ceQuiBouge.terminalesDe0AProvisoire + ' de 0 à provisoire ; '
+        + resume.ceQuiBouge.terminalesDeProvisoireA0 + ' de provisoire à 0 ; ' + resume.ceQuiBouge.autresChangements + ' autre(s) changement(s).';
 })();
