@@ -13,7 +13,7 @@
  * `_compterTravauxAcceptables` et `_estTravailAcceptable`, lues sans écrire). Aucune règle de note n'est recopiée ici.
  *
  * MOTS DE L'ÉCRAN : VALIDÉS par Grégoire, mot pour mot (9 nov. 2026, 15 h 38 à 15 h 40), réunis dans `MOTS` ; le banc les
- * exige (tests/unit/tableau-notation-1.test.js, bloc F). Seule l'infobulle `valeurChangee` reste PROPOSÉE (rapport du lot).
+ * exige (tests/unit/tableau-notation-1.test.js, bloc F). L'infobulle `valeurChangee` l'a été à 16 h 20, avec son ajout.
  * Données et écriture pure : `tableau-notation-donnees.js`.
  */
 (function () {
@@ -24,14 +24,16 @@
         intro: 'Saisis le résultat de chaque production, qu’elle ait été évaluée ici ou ailleurs. La note de chaque étudiant·e se construit dans la dernière colonne, selon les réglages de ta pratique.',
         avis: 'Un résultat saisi ici compte dans la note, mais il n’a pas de critères : il ne donne ni forces, ni défis, ni rétroaction par critère.',
         annuler: 'Annuler',
-        // PROPOSÉE (Cowork, 9 nov. : « son infobulle proposée au rapport ») — l'échelle a changé depuis la saisie.
-        valeurChangee: (valeur) => `L’échelle a changé depuis la saisie : ce résultat compte encore pour ${valeur}.`,
+        // Validée par Grégoire, mot pour mot (9 nov. 2026, 16 h 20) — l'échelle a changé depuis la saisie ; l'infobulle et le lecteur d'écran disent la même phrase.
+        valeurChangee: (valeur) => `L’échelle a changé depuis la saisie : ce résultat compte encore pour ${valeur}. Ressaisis le niveau pour prendre la valeur d’aujourd’hui.`,
         exporter: 'Exporter la synthèse (CSV)',   // le bouton de Suivi › Groupe, repris tel quel (consigne)
         reglages: 'Réglages de la pratique',      // le lien du profil (pratiques-gestion.js, `ouvrirReglagesPratique`), repris tel quel
         eleve: 'Étudiant·e',
         noteProvisoire: 'Note provisoire',
         noteFinale: 'Note finale',
         enAttente: 'en attente de résultats',
+        // Validée par Grégoire, mot pour mot (9 nov. 2026, 16 h 18) : au tableau, à la place des deux phrases du calcul partagé.
+        aucuneEvaluee: 'Aucune production n’est encore évaluée.',
         nonCalculable: 'non calculable',
         aSaisir: 'à saisir',
         avecGrille: 'évaluée avec une grille ; toucher pour l’ouvrir',
@@ -42,8 +44,10 @@
         sansEchelle: 'Ni tes productions ni ta pratique n’ont d’échelle dont les niveaux portent une valeur : aucun niveau ne peut être saisi.',
         legendeStd: ['Plein : compte dans la note', 'Contour : évaluée, non retenue', 'Pointillé : à saisir', 'Point : évaluée avec une grille'],
         legendeSpe: ['✓ Acceptable', '✗ Non acceptable', 'Pointillé : à saisir', 'Point : évaluée avec une grille'],
-        aideStd: 'Touche une case pour changer le niveau. Au clavier : la lettre du niveau, Retour arrière pour vider, les flèches pour se déplacer. ⌘Z annule le dernier geste.',
-        aideSpe: 'Touche une case pour changer le résultat. Au clavier : A ou N, Retour arrière pour vider, les flèches pour se déplacer. ⌘Z annule le dernier geste.',
+        aideStd: 'Touche une case pour changer le niveau. Au clavier : la lettre du niveau, Retour arrière pour vider, les flèches pour se déplacer.',
+        aideSpe: 'Touche une case pour changer le résultat. Au clavier : A ou N, Retour arrière pour vider, les flèches pour se déplacer.',
+        // Le raccourci du poste (Cowork, 9 nov. 2026, 16 h 21) : ⌘Z sur Mac et iPad, Ctrl+Z ailleurs ; le reste de la phrase validée ne bouge pas.
+        annulerAuClavier: (raccourci) => `${raccourci} annule le dernier geste.`,
         palierEchec: 'palier d’échec'
     });
 
@@ -175,12 +179,24 @@
     function _resultatEleve(da, ctx) {
         const r = (typeof simulerIndices === 'function') ? simulerIndices(da, ctx.pratiqueId) : null;
         const constructible = !!(r && r.noteConstructible);
-        const res = { note: constructible ? Math.round(r.P) : null, cause: r ? r.causeNonConstructible : null, comptent: new Set(), detail: '' };
+        const res = { note: constructible ? Math.round(r.P) : null, cause: _causeAuTableau(r ? r.causeNonConstructible : null), comptent: new Set(), detail: '' };
         const ids = new Set(ctx.productions.map(p => p.id));
         res.aDesCopies = ctx.evaluations.some(e => e && e.etudiantDA === da && ids.has(e.productionId));
         if (ctx.famille === 'STD') _completerStd(res, r && r.details, ctx);
         else _completerSpe(res, da, ctx);
         return res;
+    }
+
+    /**
+     * La cause d'une note absente, telle que le tableau la dit. En standards, quand aucune production n'est évaluée, le
+     * calcul partagé dit « Aucun artefact du portfolio n'est encore évalué. » ou « Aucune production retenue pour la note
+     * n'est encore évaluée. » (`causeNoteStdSansProductionNotee`, registre ; le profil, le rapport et l'export la lisent).
+     * AU TABLEAU SEULEMENT, la phrase validée par Grégoire le 9 nov. 2026 la remplace ; les autres écrans ne changent pas.
+     */
+    function _causeAuTableau(cause) {
+        const dire = window.causeNoteStdSansProductionNotee;
+        if (!cause || typeof dire !== 'function') return cause;
+        return (cause === dire(true, false) || cause === dire(false, false)) ? MOTS.aucuneEvaluee : cause;
     }
 
     function _completerStd(res, details, ctx) {
@@ -392,9 +408,16 @@
         ${ctx.famille === 'STD' ? _echelleHTML(ctx) : _forfaitsHTML(ctx)}`;
     }
 
+    /** Le raccourci que la légende affiche : celui du poste. Le code, lui, accepte ⌘Z et Ctrl+Z partout. */
+    function raccourciAnnuler() {
+        const nav = (typeof navigator !== 'undefined' && navigator) || {};
+        const poste = String(nav.platform || '') + ' ' + String(nav.userAgent || '');
+        return /Mac|iPhone|iPad|iPod/i.test(poste) ? '⌘Z' : 'Ctrl+Z';
+    }
+
     function _legendeHTML(ctx) {
         const items = (ctx.famille === 'SPE' ? MOTS.legendeSpe : MOTS.legendeStd).map(t => `<span class="tn-legende-item">${esc(t)}</span>`).join('');
-        return `<div class="tn-legende">${items}<span class="tn-legende-aide">${esc(ctx.famille === 'SPE' ? MOTS.aideSpe : MOTS.aideStd)}</span></div>`;
+        return `<div class="tn-legende">${items}<span class="tn-legende-aide">${esc((ctx.famille === 'SPE' ? MOTS.aideSpe : MOTS.aideStd) + ' ' + MOTS.annulerAuClavier(raccourciAnnuler()))}</span></div>`;
     }
 
     /* ============================== LE RENDU ============================== */
@@ -406,7 +429,7 @@
         if (ctx.etat !== 'ok') return `${tete}<p class="tn-etat-vide">${esc(MOTS[MESSAGES_ETAT[ctx.etat]] || '')}</p>`;
         const rangees = ctx.etudiants.map(e => _rangeeHTML(e, ctx)).join('');
         return `${tete}${_bandeauHTML(ctx)}<p class="tn-avis">${esc(MOTS.avis)}</p>
-            <div class="tn-defilement"><table class="tn-tableau">${_enteteColonnesHTML(ctx)}<tbody>${rangees}</tbody></table></div>
+            <div class="tn-cadre"><div class="tn-defilement"><table class="tn-tableau">${_enteteColonnesHTML(ctx)}<tbody>${rangees}</tbody></table></div></div>
             ${_legendeHTML(ctx)}
             <p class="tn-annonce u-lecteur-ecran" aria-live="polite"></p>`;
     }
@@ -424,8 +447,17 @@
         const hote = _hote();
         if (!hote) return;
         const aRendre = focus || _focusActuel(hote);
+        // Le défilement survit au rendu : une saisie dans une colonne de droite ne ramène pas le tableau à gauche.
+        const avant = hote.querySelector('.tn-defilement');
+        const defilement = avant ? avant.scrollLeft : 0;
         hote.innerHTML = construireHTML(construireContexte());
         _poserEcoutes(hote);
+        const zone = hote.querySelector('.tn-defilement');
+        if (zone) {
+            zone.scrollLeft = defilement;
+            zone.addEventListener('scroll', _marquerDebordement, { passive: true });
+        }
+        _marquerDebordement();
         if (aRendre) _reprendreFocus(hote, aRendre);
     }
 
@@ -439,7 +471,46 @@
         const hote = _hote();
         if (hote) hote.querySelectorAll('.tn-case[tabindex="0"]').forEach(b => { if (b !== bouton) b.setAttribute('tabindex', '-1'); });
         bouton.setAttribute('tabindex', '0');
-        bouton.focus();
+        bouton.focus({ preventScroll: true });
+        _amenerDansLaVue(bouton);
+    }
+
+    /* ============================== LE DÉBORDEMENT (9 nov. 2026, 16 h 18) ==============================
+       Quand les colonnes débordent, on doit le comprendre au premier regard : un BORD ESTOMPÉ contre la colonne fixée
+       (les noms à gauche, la note à droite), du côté où il reste des colonnes ; il disparaît au bout du défilement.
+       Les deux colonnes fixées recouvrent ce qui défile : la bande visible est ce qui reste entre elles. */
+
+    function _bandeVisible(zone) {
+        const largeur = (sel) => { const n = zone.querySelector(sel); return n ? n.getBoundingClientRect().width : 0; };
+        return { gauche: largeur('.tn-col-eleve'), droite: largeur('.tn-col-note') };
+    }
+
+    function _marquerDebordement() {
+        const hote = _hote();
+        const cadre = hote && hote.querySelector('.tn-cadre');
+        const zone = cadre && cadre.querySelector('.tn-defilement');
+        if (!zone) return;
+        const bande = _bandeVisible(zone);
+        const reste = zone.scrollWidth - zone.clientWidth - zone.scrollLeft;
+        cadre.style.setProperty('--tn-fixe-gauche', bande.gauche + 'px');
+        cadre.style.setProperty('--tn-fixe-droite', bande.droite + 'px');
+        cadre.classList.toggle('tn-cadre--reste-a-gauche', zone.scrollLeft > 1);
+        cadre.classList.toggle('tn-cadre--reste-a-droite', reste > 1);
+    }
+
+    /** La case active entière dans la bande visible (les flèches du clavier font défiler le tableau avec elles). */
+    function _amenerDansLaVue(bouton) {
+        const zone = bouton.closest('.tn-defilement');
+        const cellule = bouton.closest('td');
+        if (!zone || !cellule) return;
+        const bande = _bandeVisible(zone);
+        const z = zone.getBoundingClientRect();
+        const c = cellule.getBoundingClientRect();
+        const debut = z.left + bande.gauche;
+        const fin = z.right - bande.droite;
+        if (c.left < debut) zone.scrollLeft -= (debut - c.left);
+        else if (c.right > fin) zone.scrollLeft += (c.right - fin);
+        _marquerDebordement();
     }
 
     /* ============================== LA SAISIE ============================== */
@@ -598,6 +669,7 @@
         hote.addEventListener('click', _surClic);
         hote.addEventListener('keydown', _surTouche);
         document.addEventListener('keydown', _surRaccourciAnnuler);
+        window.addEventListener('resize', _marquerDebordement);
     }
 
     /* ============================== LA BASCULE ============================== */

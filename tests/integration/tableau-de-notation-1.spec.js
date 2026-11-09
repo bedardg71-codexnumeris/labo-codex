@@ -419,8 +419,11 @@ test.describe('Tableau de notation · la consigne', () => {
         }, T);
         const c = kase(page, 1, 1);
         await expect(c).toHaveClass(/tn-case--valeur-changee/);
-        await expect(c).toHaveAttribute('title', 'L’échelle a changé depuis la saisie : ce résultat compte encore pour 75.');
-        await expect(c).toHaveAttribute('aria-label', /compte encore pour 75/);
+        await expect(c).toHaveAttribute('title', 'L’échelle a changé depuis la saisie : ce résultat compte encore pour 75. Ressaisis le niveau pour prendre la valeur d’aujourd’hui.');
+        await expect(c).toHaveAttribute('aria-label', /compte encore pour 75\. Ressaisis le niveau pour prendre la valeur d’aujourd’hui\.$/);
+        // Le banc tourne sous Linux : la légende y dit Ctrl+Z, jamais ⌘Z (Cowork, 9 nov., 16 h 21).
+        await expect(page.locator('#tableau-notation-hote .tn-legende-aide')).toContainText('Ctrl+Z annule le dernier geste.');
+        await expect(page.locator('#tableau-notation-hote .tn-legende-aide')).not.toContainText('⌘');
         await expect(note(page, 1)).toHaveText('75');
         expect(await sansGrilleDe(page, '9990010', 'P1')).toMatchObject({ niveauFinal: 'M', noteFinale: 75 });
         // Ressaisir le niveau (E, puis M) écrit la valeur d'aujourd'hui : le signe part.
@@ -448,6 +451,122 @@ test.describe('Tableau de notation · la consigne', () => {
     });
 });
 
+// LE DÉBORDEMENT À 820 PX (décision de Grégoire, 9 nov. 2026, 16 h 18, après lecture des captures par Cowork) : le tableau
+// coupait des colonnes sans que rien ne le montre. Le signe : un bord estompé contre la colonne fixée, du côté où il reste
+// des colonnes ; il disparaît au bout du défilement. Un titre de colonne ne se tronque jamais au milieu.
+test.describe('Tableau de notation · le débordement à 820 px', () => {
+    /** Ce que l'écran dit du débordement : les classes du cadre, l'opacité des deux bords, la bande visible entre les colonnes fixées. */
+    const etat = (page) => page.evaluate(() => {
+        const cadre = document.querySelector('#tableau-notation-hote .tn-cadre');
+        const zone = cadre.querySelector('.tn-defilement');
+        const z = zone.getBoundingClientRect();
+        const l = (sel) => zone.querySelector(sel).getBoundingClientRect();
+        return {
+            bordGauche: Number(getComputedStyle(cadre, '::before').opacity), bordDroit: Number(getComputedStyle(cadre, '::after').opacity),
+            largeurBord: parseFloat(getComputedStyle(cadre, '::after').width), fondBord: getComputedStyle(cadre, '::after').backgroundImage,
+            defilement: Math.round(zone.scrollLeft), reste: Math.round(zone.scrollWidth - zone.clientWidth - zone.scrollLeft),
+            debut: z.left + l('.tn-col-eleve').width, fin: z.right - l('.tn-col-note').width,
+            nomsFixes: Math.round(l('.tn-col-eleve').left - z.left), noteFixee: Math.round(z.right - l('.tn-col-note').right),
+            debordeX: getComputedStyle(zone).overflowX
+        };
+    });
+    const dansLaBande = async (page, locator) => {
+        const e = await etat(page);
+        const b = await locator.boundingBox();
+        return b.x >= e.debut - 1 && b.x + b.width <= e.fin + 1;
+    };
+    const allerAuBout = (page) => page.evaluate(() => { const z = document.querySelector('#tableau-notation-hote .tn-defilement'); z.scrollLeft = z.scrollWidth; });
+
+    test('standards : un bord estompé du côté où il reste des colonnes, qui disparaît au bout ; les flèches amènent la case dans la vue', async ({ page }) => {
+        await page.setViewportSize({ width: 820, height: 1180 });
+        const erreurs = await monter(page, 'STD');
+        // Au début : il reste des colonnes à droite, aucune à gauche. Les noms et la note sont fixés (mesuré, pas refait).
+        await expect.poll(async () => (await etat(page)).bordDroit).toBe(1);   // le bord paraît en fondu (120 ms)
+        let e = await etat(page);
+        expect(e.reste).toBeGreaterThan(1);
+        // `nomsFixes` et `noteFixee` : l'écart au bord de la zone, soit son filet d'un pixel.
+        expect(e).toMatchObject({ bordDroit: 1, bordGauche: 0, defilement: 0, nomsFixes: 1, noteFixee: 1, debordeX: 'auto' });
+        expect(e.largeurBord).toBeGreaterThanOrEqual(24);
+        expect(e.fondBord).toContain('linear-gradient');
+        expect(await dansLaBande(page, kase(page, 1, 5))).toBe(false);   // Production 5 est hors de la vue
+        // Au clavier : quatre fois la flèche droite ; la case active est entière entre les deux colonnes fixées.
+        await kase(page, 1, 1).focus();
+        for (let i = 0; i < 4; i++) await page.keyboard.press('ArrowRight');
+        await expect(kase(page, 1, 5)).toBeFocused();
+        expect(await dansLaBande(page, kase(page, 1, 5))).toBe(true);
+        // Une saisie dans cette colonne ne ramène pas le tableau à gauche.
+        await page.keyboard.press('m');
+        await expect(kase(page, 1, 5)).toHaveText('M');
+        expect(await dansLaBande(page, kase(page, 1, 5))).toBe(true);
+        // Au bout du défilement : plus rien à droite, le bord droit s'efface ; il en reste à gauche. Les colonnes fixées n'ont pas bougé.
+        await allerAuBout(page);
+        await expect.poll(async () => (await etat(page)).bordDroit).toBe(0);
+        await expect.poll(async () => (await etat(page)).bordGauche).toBe(1);
+        expect(await etat(page)).toMatchObject({ reste: 0, nomsFixes: 1, noteFixee: 1 });
+        // Retour au clavier : la première colonne revient entière, et le bord gauche s'efface.
+        await kase(page, 1, 5).focus();
+        for (let i = 0; i < 4; i++) await page.keyboard.press('ArrowLeft');
+        expect(await dansLaBande(page, kase(page, 1, 1))).toBe(true);
+        await expect.poll(async () => (await etat(page)).bordGauche).toBe(0);
+        // Le doigt : la zone défile d'elle-même, et une case ne retient pas le glissement (`manipulation` laisse passer le défilement).
+        expect(await kase(page, 1, 1).evaluate((n) => getComputedStyle(n).touchAction)).toBe('manipulation');
+        expect(erreurs).toEqual([]);
+    });
+
+    test('à 1180 px, rien ne déborde : aucun bord estompé', async ({ page }) => {
+        await page.setViewportSize({ width: 1180, height: 820 });
+        await monter(page, 'STD');
+        expect(await etat(page)).toMatchObject({ reste: 0, bordDroit: 0, bordGauche: 0 });
+    });
+
+    test('spécifications : les compteurs par type sont dans la zone qui défile, pas masqués', async ({ page }) => {
+        await page.setViewportSize({ width: 820, height: 1180 });
+        const erreurs = await monter(page, 'SPE');
+        const compteur = page.locator('#tableau-notation-hote tbody tr:nth-child(1) .tn-compte');
+        await expect(compteur).toHaveCount(2);
+        await expect.poll(async () => (await etat(page)).bordDroit).toBe(1);
+        expect(await dansLaBande(page, compteur.last())).toBe(false);   // au début, hors de la vue
+        expect(await compteur.last().evaluate((n) => getComputedStyle(n).display)).toBe('table-cell');
+        await allerAuBout(page);
+        await expect.poll(() => dansLaBande(page, compteur.last())).toBe(true);
+        await expect.poll(() => dansLaBande(page, compteur.first())).toBe(true);
+        await expect.poll(async () => (await etat(page)).bordDroit).toBe(0);
+        expect(erreurs).toEqual([]);
+    });
+
+    test('un titre de colonne ne se tronque jamais : entier dans sa colonne, sur deux lignes s\'il est long', async ({ page }) => {
+        await page.setViewportSize({ width: 820, height: 1180 });
+        const erreurs = await monter(page, 'STD');
+        await page.evaluate((T) => {
+            const productions = window.db.getSync(T + '_productions', []);
+            productions.find((p) => p.id === 'P2').titre = 'Analyse comparée de deux extraits';
+            window.db.setSync(T + '_productions', productions);   // security-ok: fixture fictive du banc
+            window.TableauNotation.afficher();
+        }, T);
+        const titres = await page.evaluate(() => Array.from(document.querySelectorAll('#tableau-notation-hote th.tn-col-production')).map((th) => {
+            const t = th.querySelector('.tn-production-titre');
+            const rt = t.getBoundingClientRect(), rh = th.getBoundingClientRect();
+            const st = getComputedStyle(t), sh = getComputedStyle(th);
+            return { texte: t.textContent, deborde: t.scrollWidth > t.clientWidth + 1 || th.scrollWidth > th.clientWidth + 1,
+                dansSaColonne: rt.left >= rh.left - 0.5 && rt.right <= rh.right + 0.5, coupe: [st.overflow, st.whiteSpace, sh.overflow, sh.whiteSpace].join(' '),
+                lignes: Math.round(rt.height / parseFloat(st.lineHeight)), largeur: Math.round(rh.width) };
+        }));
+        expect(titres.map((t) => t.texte)).toEqual(['Production 1', 'Analyse comparée de deux extraits', 'Production 3', 'Production 4', 'Production 5']);
+        for (const t of titres) {
+            expect(t.deborde, t.texte).toBe(false);
+            expect(t.dansSaColonne, t.texte).toBe(true);
+            expect(t.coupe, t.texte).not.toMatch(/hidden|clip|ellipsis|nowrap/);
+        }
+        expect(titres[1].lignes).toBeGreaterThanOrEqual(2);   // le titre long passe à la ligne
+        expect(titres[1].largeur).toBeLessThanOrEqual(130);   // sans élargir sa colonne outre mesure
+        // Une colonne amenée dans la vue au clavier montre son titre en entier, entre les deux colonnes fixées.
+        await kase(page, 1, 1).focus();
+        for (let i = 0; i < 2; i++) await page.keyboard.press('ArrowRight');
+        expect(await dansLaBande(page, page.locator('#tableau-notation-hote th.tn-col-production').nth(2).locator('.tn-production-titre'))).toBe(true);
+        expect(erreurs).toEqual([]);
+    });
+});
+
 // CAPTURES — Chromium, 1180 et 820 px, standards et spécifications, noms fictifs. Le dossier de sortie vient de la variable
 // CAPTURES (un chemin absolu) : une spec ne nomme pas un chemin que la CI n'observe pas.
 test.describe('Tableau de notation · captures', () => {
@@ -457,6 +576,30 @@ test.describe('Tableau de notation · captures', () => {
         STD: [['e', 'm', 'm', 'd', 'e'], ['i', null, 'd', 'm', null], ['m', null, 'e', 'e', 'm'], [null, null, null, null, null]],
         SPE: [['a', 'a', 'a', 'a', 'a', 'a'], ['a', 'n', 'a', null, 'a', null], ['a', 'a', 'a', null, 'n', null], [null, null, null, null, null, null]]
     };
+    // Le signe « ≠ » de l'échelle modifiée, à 1180 px, la souris sur la case. ⚠ L'infobulle est celle du navigateur
+    // (attribut `title`) : une capture sans écran ne la dessine pas. Son texte est exigé par l'essai « une échelle modifiée ».
+    for (const mode of ['sombre', 'clair']) {
+        test(`le signe de l'échelle modifiée, 1180, ${mode}`, async ({ page }) => {
+            await page.setViewportSize({ width: 1180, height: 820 });
+            await monter(page, 'STD');
+            await page.evaluate((clair) => window.definirTheme(clair), mode === 'clair');
+            for (const [col, lettre] of [[1, 'm'], [2, 'e'], [3, 'm'], [4, 'd']]) { await kase(page, 1, col).focus(); await page.keyboard.press(lettre); }
+            await page.evaluate((T) => {
+                const echelles = window.db.getSync(T + '_echellesTemplates', []);
+                echelles[0].niveaux.find((n) => n.code === 'M').valeurCalcul = 80;
+                window.db.setSync(T + '_echellesTemplates', echelles);   // security-ok: fixture fictive du banc
+                window.TableauNotation.afficher();
+            }, T);
+            await expect(kase(page, 1, 3)).toHaveClass(/tn-case--valeur-changee/);
+            // Le message d'accueil de l'espace prêt arrive après coup : on l'attend, puis on le sort du cadre avec le témoin.
+            await page.getByText('Ton espace de travail est prêt').waitFor({ timeout: 8000 }).catch(() => {});
+            await page.evaluate(() => document.querySelectorAll('body *').forEach((n) => {
+                if (getComputedStyle(n).position === 'fixed' && /espace de travail est prêt|^Enregistré$/.test((n.textContent || '').trim().slice(0, 400)) && !n.closest('header')) n.style.display = 'none';
+            }));
+            await kase(page, 1, 3).hover();
+            await page.locator('#tableau-notation-hote .tn-cadre').screenshot({ path: path.join(dossier, `echelle-modifiee-1180-${mode}.png`) });
+        });
+    }
     for (const famille of ['STD', 'SPE']) {
         for (const [mode, largeur, hauteur] of [['sombre', 1180, 820], ['clair', 1180, 820], ['sombre', 820, 1180], ['clair', 820, 1180]]) {
             test(`${famille === 'STD' ? 'standards' : 'specifications'}, ${largeur}, ${mode}`, async ({ page }) => {
@@ -487,7 +630,17 @@ test.describe('Tableau de notation · captures', () => {
                     return noms;
                 });
                 expect(flottants.length).toBeGreaterThan(0);
-                await page.screenshot({ path: path.join(dossier, `${famille === 'STD' ? 'standards' : 'specifications'}-${largeur}-${mode}.png`), fullPage: true });
+                const nom = `${famille === 'STD' ? 'standards' : 'specifications'}-${largeur}-${mode}`;
+                if (largeur !== 820) { await page.screenshot({ path: path.join(dossier, nom + '.png'), fullPage: true }); return; }
+                // À 820 px, les colonnes débordent : une capture au début du défilement, une à la fin.
+                const zone = page.locator('#tableau-notation-hote .tn-defilement');
+                await zone.evaluate((z) => { z.scrollLeft = 0; });
+                await page.waitForFunction(() => getComputedStyle(document.querySelector('#tableau-notation-hote .tn-cadre'), '::after').opacity === '1');
+                await page.screenshot({ path: path.join(dossier, nom + '-debut.png'), fullPage: true });
+                await zone.evaluate((z) => { z.scrollLeft = z.scrollWidth; });
+                await page.waitForFunction(() => getComputedStyle(document.querySelector('#tableau-notation-hote .tn-cadre'), '::after').opacity === '0'
+                    && getComputedStyle(document.querySelector('#tableau-notation-hote .tn-cadre'), '::before').opacity === '1');
+                await page.screenshot({ path: path.join(dossier, nom + '-fin.png'), fullPage: true });
             });
         }
     }

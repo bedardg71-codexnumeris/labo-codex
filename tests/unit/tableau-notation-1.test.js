@@ -390,8 +390,14 @@ describe('F · les mots validés', () => {
     const fs = require('node:fs');
     const path = require('node:path');
     const lire = (f) => fs.readFileSync(path.resolve(__dirname, '..', '..', f), 'utf8');
-    const ecran = chargerScript('js/tableau-notation.js', { db: { getSync: (k, d) => (d !== undefined ? d : null) }, echapperHtml: (t) => String(t).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;') },
+    const echapper = (t) => String(t).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    const MAC = { platform: 'MacIntel', userAgent: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 Version/26.0 Safari/605.1.15' };
+    const IPAD = { platform: 'iPad', userAgent: 'Mozilla/5.0 (iPad; CPU OS 26_0 like Mac OS X) AppleWebKit/605.1.15 Mobile/15E148 Safari/604.1' };
+    const WINDOWS = { platform: 'Win32', userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/140.0.0.0 Safari/537.36' };
+    const LINUX = { platform: 'Linux x86_64', userAgent: 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 Chrome/140.0.0.0 Safari/537.36' };
+    const ecranSur = (navigator) => chargerScript('js/tableau-notation.js', { db: { getSync: (k, d) => (d !== undefined ? d : null) }, echapperHtml: echapper, navigator },
         { TableauNotationDonnees: donnees }).TableauNotation;
+    const ecran = ecranSur(MAC);
     const ctxStd = (extra) => Object.assign({ etat: 'ok', famille: 'STD', pratiqueId: 'p', pratiqueNom: 'Pratique fictive', config: { portfolio: { nombreARetenir: 4, methodeSelection: 'meilleurs' } },
         echelle: ECHELLE, etudiants: [{ da: '2000001', prenom: 'Alice', nom: 'Fictive' }], productions: [{ id: 'P1', titre: 'Production fictive' }], evaluations: [], terminalId: 'T1' }, extra || {});
     it('F1 le tableau en standards : intro, avertissement, règle, colonne de la note, légende et ⌘Z', () => {
@@ -406,6 +412,21 @@ describe('F · les mots validés', () => {
             'Touche une case pour changer le niveau. Au clavier : la lettre du niveau, Retour arrière pour vider, les flèches pour se déplacer. ⌘Z annule le dernier geste.'
         ]) expect(html, mot).toContain(mot);
         expect(html).not.toContain('puis la terminale');
+        // 9 nov., 16 h 18 : sans résultat en standards, la phrase validée, à la place de celles du calcul partagé (au tableau seulement).
+        const sim = (cause) => () => ({ noteConstructible: false, P: 0, causeNonConstructible: cause, details: null });
+        const avecCause = (cause) => chargerScript('js/tableau-notation.js', { db: { getSync: (k, d) => (d !== undefined ? d : null) }, simulerIndices: sim(cause),
+            echapperHtml: (t) => String(t).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;') },
+            { TableauNotationDonnees: donnees, causeNoteStdSansProductionNotee: registre.causeNoteStdSansProductionNotee }).TableauNotation.construireHTML(ctxStd());
+        for (const partagee of [registre.causeNoteStdSansProductionNotee(true, false), registre.causeNoteStdSansProductionNotee(false, false)]) {
+            const rendu = avecCause(partagee);
+            expect(rendu).toContain('Aucune production n’est encore évaluée.');
+            expect(rendu).not.toContain('artefact du portfolio');
+            expect(rendu).not.toContain('retenue pour la note');
+        }
+        // Une autre cause passe telle quelle (seule la terminale a une note).
+        expect(avecCause(registre.causeNoteStdSansProductionNotee(true, true))).toContain('Seule l\'évaluation terminale a une note.');
+        // Le calcul partagé garde ses phrases : le profil, le rapport et l'export ne changent pas.
+        expect(registre.causeNoteStdSansProductionNotee(true, false)).toBe('Aucun artefact du portfolio n\'est encore évalué.');
         const finalisee = ecran.construireHTML(ctxStd({ config: { notesFinales: true, portfolio: { nombreARetenir: 4, methodeSelection: 'meilleurs' } } }));
         expect(finalisee).toContain('>Note finale<');
         expect(finalisee).not.toContain('Note provisoire');
@@ -414,7 +435,10 @@ describe('F · les mots validés', () => {
         expect(ecran.construireHTML({ etat: 'autre-famille' })).toContain('Le tableau de notation sert aux pratiques par standards et par spécifications. Pour la pratique de ce groupe-cours, la Liste reste la vue de tes évaluations.');
         expect(ecran.construireHTML({ etat: 'aucune-pratique' })).toContain('Ce groupe-cours n’a pas de pratique de notation. Choisis-en une dans Conception › Pratiques : le tableau suivra ses réglages.');
         const source = lire('js/tableau-notation.js');
-        expect(source).toContain('Touche une case pour changer le résultat. Au clavier : A ou N, Retour arrière pour vider, les flèches pour se déplacer. ⌘Z annule le dernier geste.');
+        expect(source).toContain("aideSpe: 'Touche une case pour changer le résultat. Au clavier : A ou N, Retour arrière pour vider, les flèches pour se déplacer.',");
+        expect(source).toContain('annulerAuClavier: (raccourci) => `${raccourci} annule le dernier geste.`');
+        // Le refus d'une reprise sur un résultat sans grille (validé le 9 nov., 16 h 20).
+        expect(lire('js/evaluation-jetons.js')).toContain("notifications.info('Résultat saisi sans grille', 'Cette production a été évaluée au tableau de notation : c\\'est là que tu changes son résultat, sans reprise.')");
         expect(source).toContain("legendeSpe: ['✓ Acceptable', '✗ Non acceptable', 'Pointillé : à saisir', 'Point : évaluée avec une grille']");
         const index = lire('index.html');
         expect(index).toMatch(/id="tn-vue-liste"[^>]*>Liste<\/button>/);
@@ -424,9 +448,35 @@ describe('F · les mots validés', () => {
         expect(formulaire).toContain("'Cette production a été évaluée au tableau de notation (Évaluation › Liste). C\\'est là que tu changes son résultat.'");
         expect(registre.LIBELLES_JUGEMENT_SANS_GRILLE).toEqual({ acceptable: 'Acceptable', nonAcceptable: 'Non acceptable' });
     });
-    it('F3 plus aucun mot du tableau n\'est marqué « PROPOSÉ », sauf l\'infobulle de l\'échelle modifiée', () => {
+    // Décision de Cowork (9 nov., 16 h 21) : la légende affiche le raccourci du poste.
+    it('F4 la légende dit ⌘Z sur Mac et iPad, Ctrl+Z ailleurs ; jamais ⌘Z sur un poste qui n\'est pas d\'Apple', () => {
+        const fin = (raccourci) => `les flèches pour se déplacer. ${raccourci} annule le dernier geste.`;
+        for (const poste of [MAC, IPAD]) {
+            const html = ecranSur(poste).construireHTML(ctxStd());
+            expect(html).toContain(fin('⌘Z'));
+            expect(html).not.toContain('Ctrl+Z');
+        }
+        for (const poste of [WINDOWS, LINUX, {}, undefined]) {
+            const html = ecranSur(poste).construireHTML(ctxStd());
+            expect(html).toContain(fin('Ctrl+Z'));
+            expect(html).not.toContain('⌘');
+        }
+    });
+    // Validée par Grégoire avec son ajout (9 nov., 16 h 20) : l'infobulle et le lecteur d'écran disent la même phrase.
+    it('F5 l\'échelle modifiée : l\'infobulle et le libellé lu portent la phrase validée, avec la valeur écrite', () => {
+        const phrase = 'L’échelle a changé depuis la saisie : ce résultat compte encore pour 75. Ressaisis le niveau pour prendre la valeur d’aujourd’hui.';
+        const E80 = { id: 'E0', nom: 'IDME', niveaux: ECHELLE.niveaux.map(n => (n.code === 'M' ? Object.assign({}, n, { valeurCalcul: 80 }) : n)) };
+        const html = chargerScript('js/tableau-notation.js', { db: { getSync: (k, d) => (d !== undefined ? d : null) }, echapperHtml: echapper, navigator: MAC,
+            obtenirEchelleResolue: (id) => (id === 'E0' ? E80 : null) }, { TableauNotationDonnees: donnees }).TableauNotation
+            .construireHTML(ctxStd({ evaluations: [{ id: 'SG', etudiantDA: '2000001', productionId: 'P1', sansGrille: true, criteres: [], niveauFinal: 'M', noteFinale: 75, echelleId: 'E0', verrouillee: true }] }));
+        expect(html).toContain(`title="${phrase}"`);
+        expect(html).toContain(`Maîtrise. ${phrase}"`);
+        expect(html).toContain('tn-case--valeur-changee');
+    });
+    it('F3 plus aucun mot du tableau n\'est marqué « PROPOSÉ »', () => {
         const marques = (f) => (lire(f).match(/PROPOS[ÉE]+S?/g) || []).length;
-        expect(marques('js/tableau-notation.js')).toBe(2);   // l'en-tête qui nomme l'exception, et l'infobulle `valeurChangee`
+        expect(marques('js/tableau-notation.js')).toBe(0);
+        expect(lire('js/evaluation-jetons.js')).not.toMatch(/tableau[^\n]*PROPOS/);
         expect(marques('js/tableau-notation-donnees.js')).toBe(0);
         expect(marques('css/tableau-notation.css')).toBe(0);
     });

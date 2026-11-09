@@ -207,6 +207,8 @@
 
 .tn-col-production {
     min-width: 76px;
+    max-width: 112px;
+    white-space: normal;
 }
 
 .tn-production-titre,
@@ -216,6 +218,8 @@
 
 .tn-production-titre {
     color: var(--texte-principal);
+    /* Un titre ne se coupe jamais au milieu : il passe sur deux lignes aux espaces ; un mot plus long que la colonne se replie. */
+    overflow-wrap: break-word;
 }
 
 .tn-production-date {
@@ -350,8 +354,52 @@
     content: '≠';
     position: absolute;
     left: 4px;
-    bottom: 1px;
-    font-size: 0.7rem;
+    bottom: 2px;
+    font-size: 0.85rem;
     font-weight: 700;
     line-height: 1;
+}
+
+/* Le débordement (9 nov. 2026, 16 h 18) : un bord estompé contre la colonne fixée, du côté où il reste des colonnes.
+   `--tn-fixe-gauche` et `--tn-fixe-droite` (les largeurs des colonnes fixées) et les deux classes sont posées par
+   tableau-notation.js (`_marquerDebordement`), au rendu, au défilement et au redimensionnement. */
+.tn-cadre {
+    position: relative;
+    --tn-fixe-gauche: 0px;   /* la largeur de la colonne des noms, mesurée par le script */
+    --tn-fixe-droite: 0px;   /* celle de la colonne de la note */
+}
+
+.tn-cadre::before,
+.tn-cadre::after {
+    content: '';
+    position: absolute;
+    top: 1px;
+    bottom: 1px;
+    width: 36px;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 120ms ease;
+    z-index: 3;
+}
+
+.tn-cadre::before {
+    left: var(--tn-fixe-gauche, 0px);
+    background: linear-gradient(to right, var(--surface-carte), transparent);
+}
+
+.tn-cadre::after {
+    right: var(--tn-fixe-droite, 0px);
+    background: linear-gradient(to left, var(--surface-carte), transparent);
+}
+
+.tn-cadre--reste-a-gauche::before,
+.tn-cadre--reste-a-droite::after {
+    opacity: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .tn-cadre::before,
+    .tn-cadre::after {
+        transition: none;
+    }
 }

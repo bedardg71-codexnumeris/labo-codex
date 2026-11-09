@@ -568,9 +568,9 @@ async function appliquerJetonReprise(evaluationOriginaleId, archiverOriginale, o
 
     // Tableau de notation (9 nov. 2026, relecture neuve) : un résultat saisi sans grille n'a pas de reprise. La reprise
     // naissait déverrouillée (hors de la note) et le tableau écrivait dedans sans qu'elle compte ; la vider laissait
-    // l'originale pointer vers une copie disparue. Son résultat se change au tableau. Mots PROPOSÉS.
+    // l'originale pointer vers une copie disparue. Son résultat se change au tableau. Mots validés par Grégoire, mot pour mot (9 nov. 2026, 16 h 20).
     if (evaluationOriginale.sansGrille === true) {
-        if (!silencieux) notifications.info('Résultat saisi sans grille', 'Cette production a été notée au tableau de notation : change son résultat là, sans reprise.');
+        if (!silencieux) notifications.info('Résultat saisi sans grille', 'Cette production a été évaluée au tableau de notation : c\'est là que tu changes son résultat, sans reprise.');
         return null;
     }
 

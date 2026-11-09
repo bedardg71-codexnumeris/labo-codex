@@ -2,6 +2,52 @@
 
 *Deux sessions Claude Code dans le cloud ont fait ce lot. La première (rapport d'origine, conservé plus bas) l'a codé sans la consigne, depuis la 1.238.0, et l'a poussé à 19 h 52 UTC. La seconde (ce rapport de tête) a reçu la consigne et les six précisions de Cowork du 9 nov., 15 h. **Cette seconde version est poussée sur `lot/tableau-de-notation-1-bis`, à la demande de Cowork (9 nov.) : rien n'a été poussé sur `lot/tableau-de-notation-1`, qui reste à `12f5c640`. Cowork comparera les deux, Grégoire choisira.** Rien n'est fusionné dans `main`, rien n'est publié, la version ne bouge pas. Chromium seulement.*
 
+## Après les trois relais de 16 h 18 à 16 h 21 (le débordement à 820 px, deux phrases, le raccourci)
+
+*Cette section fait foi sur tout ce qui suit. Même branche, `lot/tableau-de-notation-1-bis`. Rien d'autre n'a changé dans le lot.*
+
+### Ce qui est fait, en gestes
+
+- **Quand les colonnes débordent, on le voit** : un bord estompé contre la colonne fixée, du côté où il reste des colonnes (contre la note s'il en reste à droite, contre les noms s'il en reste à gauche). Il s'efface quand on arrive au bout. À 1180 px, rien ne déborde et il n'y en a pas.
+- **Un titre de colonne ne se coupe plus au milieu** : il s'écrit en entier dans sa colonne, et passe sur deux lignes s'il est long (« Analyse comparée de deux extraits » tient en trois lignes sans élargir la colonne au-delà de 130 px). Ce que les captures montraient (« Production » sans son 3) était une colonne recouverte par la colonne de la note, pas un titre tronqué ; le bord estompé le dit maintenant.
+- **Les flèches du clavier amènent la case active dans la vue**, entière entre les deux colonnes fixées. Au doigt, la zone défile d'elle-même.
+- **Une saisie dans une colonne de droite ne ramène plus le tableau à gauche.** Trouvé en faisant ce travail : chaque geste redessinait le tableau et perdait le défilement. Corrigé (c'est mon lot).
+- **Sans résultat en standards**, la colonne de la note dit : « Aucune production n'est encore évaluée. »
+- **L'infobulle de l'échelle modifiée** dit : « L'échelle a changé depuis la saisie : ce résultat compte encore pour 75. Ressaisis le niveau pour prendre la valeur d'aujourd'hui. » Le lecteur d'écran dit la même phrase.
+- **Le refus d'une reprise** sur un résultat sans grille dit : « Cette production a été évaluée au tableau de notation : c'est là que tu changes son résultat, sans reprise. »
+- **La légende affiche le raccourci du poste** : « ⌘Z annule le dernier geste. » sur Mac et iPad, « Ctrl+Z annule le dernier geste. » ailleurs. Les deux touches marchent partout.
+- Plus aucun mot du tableau n'est marqué « PROPOSÉ ».
+
+### Les mesures demandées
+
+- **Les colonnes fixées** (mesuré, pas refait) : la colonne des noms reste collée à gauche et celle de la note à droite, au début comme au bout du défilement (écart d'un pixel au bord de la zone : son filet).
+- **Les compteurs « Exercices » et « Projets » à 820 px** : ils sont **dans la zone qui défile**, pas masqués. Au début ils sont hors de la vue ; au bout du défilement ils sont entiers, juste avant la note. Voir `specifications-820-…-fin.png`.
+- **D'où vient « Aucun artefact du portfolio n'est encore évalué. »** : du calcul partagé, pas du tableau (`causeNoteStdSansProductionNotee`, `js/pratiques/pratique-registre.js`). Je l'ai remplacée **au tableau seulement**. L'ancienne phrase, et sa jumelle « Aucune production retenue pour la note n'est encore évaluée. », paraissent encore, inchangées :
+  - au **profil** de l'étudiant·e, dans la carte de la note (`calculerDetailsNoteFinale`, champs `erreur` et `causeNoteAbsente`) et en bulle sur le tiret de la note ;
+  - au **rapport** du profil et au **Suivi**, par `causeNoteNonConstructible` ;
+  - dans **l'export CSV** des résultats, colonne « Statut » (« non constructible – Aucun artefact… »).
+  Ces deux phrases ont été validées le 28 oct. (20 h 13). Cowork tranchera. La troisième variante (« Seule l'évaluation terminale a une note… ») passe telle quelle au tableau.
+
+### Ce qui attend Grégoire ou Cowork
+
+1. **Les autres écrans gardent l'ancienne phrase** (ci-dessus) : l'aligner partout, ou la garder ? *Recommandation : l'aligner, mais c'est une phrase validée le 28 oct. et lue aussi dans le CSV.*
+2. **L'infobulle ne se lit pas sur l'iPad au doigt** : c'est une bulle au survol. Le signe « ≠ » se voit, et le lecteur d'écran dit la phrase, mais rien ne l'écrit à l'écran sans souris. *Recommandation : une ligne dans la légende quand au moins une case porte le signe ; à décider avec ses mots.*
+3. **La capture « infobulle ouverte » n'existe pas** : la bulle est celle du navigateur, et une capture prise sans écran ne la dessine pas. `echelle-modifiee-1180-…png` montre le signe sur deux cases ; le texte de la bulle est exigé par deux essais. À voir sur le Mac, la souris sur la case.
+
+### Ce que je n'ai pas pu vérifier
+
+- WebKit, Safari, l'iPad : le fondu du bord, le défilement au doigt, les colonnes fixées pendant ce défilement. Sous Chromium, le défilement au doigt n'est pas joué ; le banc vérifie que la zone défile et qu'une case ne retient pas le glissement.
+- La détection du poste sur un vrai iPad (qui se présente parfois comme un Mac : dans les deux cas la légende dit ⌘Z).
+- La suite Playwright complète : seule la spec du lot a tourné.
+
+### Preuve (sur le dernier commit)
+
+- **Spec Chromium du lot, en entier** : 19 essais verts sur 19 ; 14 captures à la demande.
+- **Vitest du lot** : 34 essais verts. Le bloc F exige maintenant les trois phrases neuves et le raccourci selon le poste.
+- **Vitest complet** : 10 963 verts sur 10 963, 898 fichiers. Une passe précédente rendait 1 rouge, un cliquet sur mon code (deux variables CSS posées par le script sans définition dans la feuille), corrigé avant ce décompte.
+- **Break-tests**, chacun rougit son essai puis le code est restauré : le bord estompé rendu invisible (CSS) ; la marque « il reste des colonnes à droite » non posée (script) ; un titre de colonne tronqué (largeur réduite, sans retour à la ligne) ; la case active non amenée dans la vue ; la légende qui dit ⌘Z partout (rougit sur Windows et Linux) ; la phrase « Aucune production n'est encore évaluée. » non substituée.
+- **Captures** (Chromium, noms fictifs), dans `plans de travail/captures-2026-11-09-tableau-de-notation-1/` : à 820 px, standards et spécifications, clair et sombre, **au début et à la fin du défilement** (huit, suffixes `-debut` et `-fin` ; les quatre anciennes à 820 px sont retirées) ; à 1180 px, les quatre vues d'ensemble refaites ; `echelle-modifiee-1180-clair.png` et `-sombre.png` pour le signe « ≠ ».
+
 ## Après les décisions du 9 nov., 15 h 37 à 15 h 40 (la bis est la version retenue)
 
 *Cette section fait foi sur tout ce qui suit. Branche `lot/tableau-de-notation-1-bis` ; `lot/tableau-de-notation-1` n'est jamais touchée. Le verdict WebKit et la fusion se feront sur le Mac, au groupe 3, après `lot/completion-suit-la-remise`.*
@@ -29,7 +75,7 @@
 | Copie importée et résultat au tableau pour la même production | **Cowork** : on garde pour ce lot. |
 | Les mots de l'écran | **Validés par Grégoire**, avec six changements, tous posés. |
 
-### Ce qui attend encore Grégoire (une question par ligne)
+### Ce qui attendait encore Grégoire (tranché depuis, entre 16 h 20 et 16 h 21 : voir la section du haut)
 
 1. **L'infobulle de l'échelle modifiée**, seul texte encore proposé : « L'échelle a changé depuis la saisie : ce résultat compte encore pour 75. » (75 est la valeur écrite.) *Recommandation : la garder telle quelle.*
 2. **Le refus d'une reprise sur un résultat sans grille** dit : « Cette production a été notée au tableau de notation : change son résultat là, sans reprise. » Cette phrase n'était pas dans le tableau des mots validés ; elle dit encore « notée » quand l'avis du formulaire dit maintenant « évaluée ». *Recommandation : « Cette production a été évaluée au tableau de notation : c'est là que tu changes son résultat, sans reprise. »* Je ne l'ai pas changée.
