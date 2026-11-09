@@ -183,8 +183,14 @@
 
     function grilleCreee() {
         var g = nouveau(grilles(), lireCtx().grillesAvant);
-        if (g && !lireCtx().grilleId) majCtx({ grilleId: g.id, cartouchesAvant: ids(cartouchesDe(g.id)) });
+        // Une grille née avec ses rétroactions (Mon matériel peut créer sa cartouche) : elles ne font pas avancer l'étape 8.
+        if (g && !lireCtx().grilleId) majCtx({ grilleId: g.id, cartouchesAvant: (lireCtx().cartouchesAvant || []).concat(ids(cartouchesDe(g.id))) });
         return !!g;
+    }
+
+    /** Toutes les cartouches existantes, toutes grilles confondues (le repère de « Commencer »). */
+    function toutesLesCartouches() {
+        return grilles().reduce(function (acc, g) { return acc.concat(ids(cartouchesDe(g && g.id))); }, []);
     }
 
     function zonesEtape1() {
@@ -563,7 +569,9 @@
         majCtx({
             grillesAvant: ids(grilles()), productionsAvant: ids(productions()), pratiquesAvant: ids(pratiques()),
             pratiqueAppliqueeAvant: pratiqueAppliquee(),
-            grilleId: null, cartouchesAvant: [], productionId: null, evaluationId: null, evaluationDA: null,
+            // Relecture neuve du 9 nov. : le repère des cartouches couvre TOUTES les grilles. La production peut
+            // nommer une grille déjà là, avec ses cartouches : l'étape 8 n'avançait alors sur aucune cartouche neuve.
+            grilleId: null, cartouchesAvant: toutesLesCartouches(), productionId: null, evaluationId: null, evaluationDA: null,
             pratiqueId: null, cartoucheId: null
         });
     }
@@ -573,11 +581,18 @@
         if (enDemo() && typeof desactiverModeDemo === 'function') await desactiverModeDemo();
         if (enDemo()) return;
         if (!classeEnPlace()) {
-            // La démo refermée ne laisse aucune classe : le panneau le dit.
-            if (window.Assistance && typeof window.Assistance.ouvrirPanneau === 'function') window.Assistance.ouvrirPanneau();
+            // La démo refermée ne laisse aucune classe : le panneau se rouvre et dit pourquoi, sous le bouton (la phrase
+            // ne s'écrit qu'au toucher : le bouton est touché pour elle ; la condition, non remplie, ne lance rien).
+            if (window.Assistance && typeof window.Assistance.ouvrirPanneau === 'function') {
+                window.Assistance.ouvrirPanneau();
+                var b = document.querySelector('#panneau-assistance [data-parcours="' + ID + '"] .assistance-parcours-bouton');
+                if (b) b.click();
+            }
             return;
         }
-        var reprise = (depuis || 0) > 0 && lireCtx().grillesAvant;
+        // « Reprendre » (le parcours en cours) relit le repère, même à l'étape 1 (relecture neuve du 9 nov. : à l'étape 1,
+        // il était refait, et une grille créée pendant « Plus tard » ne comptait plus) ; « Commencer » et « Refaire » le posent.
+        var reprise = window.Assistance.etatDe(ID).etat === 'en-cours' && lireCtx().grillesAvant;
         if (!reprise) { depuis = 0; poserLeRepere(); }
         window.Assistance.definirEtat(ID, 'en-cours', depuis);
         return M().lancer(DEF, {

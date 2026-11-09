@@ -513,6 +513,8 @@ window.fermerModalBibliothequeTrimestres = fermerModalBibliothequeTrimestres;
 window.confirmerSuppressionTrimestre = confirmerSuppressionTrimestre;
 window.changerTrimestreActifV2 = changerTrimestreActifV2;
 
+    // Le premier trimestre sème aussi le matériel de départ (trimestre-v2-init.js, 9 nov. 2026).
+    window.semerMaterielDeDepartApresBascule = semerMaterielDeDepartApresBascule;
 })();
 
 

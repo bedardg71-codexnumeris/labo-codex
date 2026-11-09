@@ -47,6 +47,9 @@ export async function ouvrirEspaceVide(page, largeur, { hauteur = 900, horloge =
 }
 
 export async function ouvrirPanneau(page) {
+    // Une notification qui reste (« Cette cartouche n'est pas encore créée… ») couvre le bouton du menu : les bancs
+    // jugent le panneau, pas elles ; elles sont retirées avant le geste (mesuré sans captures, le 9 nov.).
+    await page.evaluate(() => document.querySelectorAll('.notifications-pile > *').forEach((n) => n.remove()));
     await page.click('#entete-menu-bouton');
     await page.click('#btn-assistance-menu');
     await expect(page.locator('#panneau-assistance')).toBeVisible();
