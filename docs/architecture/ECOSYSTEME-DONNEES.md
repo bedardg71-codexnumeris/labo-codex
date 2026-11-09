@@ -453,6 +453,16 @@ spécifiques ci-dessus.
   soit un mécanisme d'export/import par fichier.
 - **Fonctionnement hors-ligne** : tout reste local. La voûte (serveur)
   est le seul composant qui nécessitera éventuellement une connexion.
+- **⛔ Le nom de la base ne change jamais : `MonitoragePedagogique`** (9 nov. 2026,
+  avant le changement de nom de l'application). Le navigateur range les données par
+  adresse (origine), puis par nom de base : renommer la base dans `js/db.js` ouvrirait
+  une base vide, sans erreur, et laisserait toutes les données dans l'ancienne. Le nom
+  est technique et invisible : renommer l'application ne demande pas d'y toucher.
+  Changer d'ADRESSE, en revanche, change d'origine : l'espace y est vide, et les données
+  passent par le codex (« Mettre à jour le codex » à l'ancienne adresse, « Ouvrir un
+  codex… » à la nouvelle). Ce que le codex n'emporte pas, et la tenue d'une ouverture
+  d'environ 1 Go : BACKLOG #992 et
+  `plans de travail/PORTES-TERRAIN-2026-11-09-ouverture-codex-1go.md`.
 
 ---
 

@@ -454,6 +454,18 @@
          */
         async _initIndexedDB() {
             return new Promise((resolve, reject) => {
+                // ⛔ NE JAMAIS RENOMMER CETTE BASE (9 nov. 2026, avant le changement de nom de
+                // l'application). Le navigateur range les données par ORIGINE (l'adresse), puis,
+                // dans une origine, par NOM DE BASE. Un autre nom ouvre une base VIDE :
+                // l'application démarrerait sans aucun trimestre, sans erreur ni message, et
+                // toutes les données resteraient dans l'ancienne base, que plus rien ne lirait.
+                // « MonitoragePedagogique » est un nom technique que personne ne voit : il garde
+                // l'ancien nom de l'application, et c'est voulu. Renommer l'application, ses
+                // textes ou son adresse ne demande PAS de toucher à cette ligne.
+                // Changer d'ADRESSE, en revanche, change d'origine : l'espace y est vide, et les
+                // données ne passent que par le codex (« Mettre à jour le codex » à l'ancienne
+                // adresse, « Ouvrir un codex… » à la nouvelle). Voir
+                // docs/architecture/ECOSYSTEME-DONNEES.md, « Contraintes techniques », et #992.
                 const request = indexedDB.open('MonitoragePedagogique', 2);
 
                 request.onerror = () => {
