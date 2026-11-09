@@ -40,6 +40,7 @@ session dans le nuage : ni WebKit ni les données de Grégoire ici.
    importée pour ce travail compte comme remise ; sans fichier, c'est ton évaluation qui confirme la remise. » L'étape 3
    dit aussi « À son échéance, ce que tes étudiant·es ont remis compte dans leur complétion » : même remarque. La
    session H porte ces textes ; je le signale ici parce que la règle vient de ce lot.
+3. **Une reprise accordée sur une copie non recevable** (détail en section 10). *Recommandation : laisser ainsi.*
 
 ### Ce que je n'ai pas pu vérifier
 
@@ -261,4 +262,36 @@ Mac disait 1 420/1 420. Issue proposée : inscrire et continuer.
 
 ## 9. Relecture par un agent neuf
 
-(verdict ci-dessous)
+Un sous-agent qui n'avait vu ni mon raisonnement ni ce rapport a reçu la consigne et le diff `7b2f87ac`. Verdict, en une
+ligne : **« Bon avec réserves »** (le diff fait ce que Grégoire a décrit ; quatre réserves). Il a fait quatre break-tests
+lui-même ; trois rougissaient l'essai, le quatrième (la garde du remplacement) non.
+
+Ce que chaque réserve est devenue :
+- **La garde du remplacement sans essai** : c'était mon code, donc fini maintenant. Un essai neuf (un doublon réconcilié
+  « plagiat » ne corrige pas la réception) ; son break-test rougit (commit suivant `603e24ca`).
+- **La condition `corbeille` testait un état qu'aucun code n'écrit** : retirée (la corbeille retire la fiche de la
+  liste) ; l'essai de la fiche orpheline garde un témoin.
+- **Le C mis en cache n'est pas recalculé à l'import** : vérifié, sans conséquence à l'ouverture d'un écran. Le profil
+  recalcule A, C et P avant de s'afficher (`profil-etudiant-sections-affichage.js:2462`), le tableau de bord aussi
+  (`tableau-bord-apercu.js:1388`, par la chaîne de l'assiduité), la liste à chaque rendu (`indices.js:350`). Un écran
+  déjà ouvert ne se redessine pas tout seul après un import, comme pour tout autre changement. Aucune suite.
+- **L'essai Playwright du statut « Incomplet » ne prouve plus que ce statut compte comme remise** (2/2 avant comme après,
+  parce que la copie du banc est importée). Vrai. Les essais Vitest le prouvent encore, sans fichier
+  (`tests/unit/statut-incomplet-travail-en-cours.test.js`, « les trois familles qui comptent des productions »). Je ne
+  refais pas le banc Playwright cette nuit : il passe par l'ouverture d'un fichier importé.
+- **Le cas de la reprise accordée sur une copie non recevable** : l'agent le range parmi les questions de pédagogie.
+  Je l'ajoute aux questions (section 10).
+
+Deux remarques de plus, sans suite de code :
+- **Une copie en retard** : une évaluation enregistrée « Non reçu » à l'échéance continue de corriger une copie importée
+  plus tard, jusqu'à ce que tu évalues cette copie (la date d'import n'est pas comparée à celle de l'évaluation). Ton
+  dernier geste fait foi ; je recommande de laisser ainsi.
+- **Le coût** : en sommative, « Recalculer les captures » relit la liste des copies importées pour chaque élève et chaque
+  séance. Mesuré par l'agent : environ 0,5 ms par lecture (300 fiches) sous Node, soit environ une demi-seconde pour 900
+  appels. Non mesuré sur l'iPad. Le C du jour, lui, lit en mémoire pour tout le groupe. Rien hors de la sommative.
+
+## 10. Une question de plus pour Grégoire
+
+3. **Une reprise accordée sur une copie non recevable, remise par import** : l'élève reste « non remis » jusqu'à ce que
+   tu évalues sa reprise, parce que l'originale « plagiat » reste active d'ici là. C'était déjà le cas avant ce lot.
+   *Recommandation : laisser ainsi* (cas rare ; la reprise évaluée remplace l'originale et l'élève redevient remis).
