@@ -21,8 +21,7 @@
  *   - Les attributs HTML existants (~220 usages : data-tooltip, data-aide,
  *     data-target, data-glossaire) fonctionnent sans modification.
  *   - Globals conservés pour le dispatcher data-action de main.js :
- *     masquerFlecheDidactique, fermerPopupPrimo, fermerAideContextuelle,
- *     demarrerTourDepuisAide.
+ *     masquerFlecheDidactique, fermerPopupPrimo, fermerAideContextuelle.
  *   - API sémantique : window.afficherAideContextuelle (ouverture par clé).
  *   - Toute autre API passe par window.accompagnement.*
  *   - Les flags localStorage fleche-vue__* sont migrés vers accompagnement-vu__*
@@ -1519,12 +1518,6 @@ window.masquerFlecheDidactique = fermerEtMarquerAutoReveal;
 window.basculerBulleAncree = basculerBulleAncree;
 window.fermerPopupPrimo = fermerPopupPrimo;
 window.fermerAideContextuelle = fermerAideContextuelle;
-// Le bouton de l'aide qui lançait la visite ouvre maintenant le panneau « Assistance »
-// (lot « Les deux parcours », 8 nov. 2026) : ferme d'abord la popup d'aide.
-window.demarrerTourDepuisAide = function() {
-    fermerAideContextuelle();
-    if (typeof window.ouvrirPanneauAssistance === 'function') window.ouvrirPanneauAssistance();
-};
 
 // Bascule globale de l'aide dans les pages. Pref unique → pilote les 4 sous-systèmes.
 // Cette fonction reflète l'état courant sur l'interrupteur « Aide dans les pages » du

@@ -504,20 +504,22 @@ const GLOSSAIRE = {
 
     'mode-assistance-icones': {
         cle: 'mode-assistance-icones',
-        terme: 'Mode assistance',
+        // Lot « Les deux parcours », partie 1 : terme et définition validés par Grégoire le 9 nov. 2026 à 9 h 11 (Cowork), mot pour mot.
+        terme: 'Aide dans les pages',
         categorie: 'Préférences',
         etape: 'interface',
-        definition: 'Les info-bulles, l’aide à l’écran et les flèches. Il s’active ou se coupe par la ligne Assistance du menu. Ce mode est indépendant du parcours guidé.',
+        definition: 'Les info-bulles, l’aide à l’écran et les flèches. Elle s’active ou se coupe dans le panneau « Assistance » du menu. Elle est indépendante des parcours.',
         voir: 'En-tête › Menu › Assistance'
     },
 
     'parcours-guide-tour': {
         cle: 'parcours-guide-tour',
-        terme: 'Parcours guidé (tour)',
+        // Lot « Les deux parcours », partie 1 : terme, définition et chemin validés par Grégoire le 9 nov. 2026 à 9 h 11 (Cowork), mot pour mot.
+        terme: 'Parcours assisté',
         categorie: 'Aide',
         etape: 'interface',
-        definition: 'Un parcours en 7 étapes, de l’accueil au Labo, qui te guide à travers les sections essentielles de l\'application. Tu peux le quitter à tout moment et le relancer depuis la ligne « Visite guidée » du menu. Le parcours est complémentaire au mode assistance.',
-        voir: 'En-tête › Menu › Visite guidée'
+        definition: 'Un parcours où tu fais les gestes toi-même, accompagné·e pas à pas : d’abord sur une classe de démonstration, puis avec ta propre classe. Tu peux le quitter à tout moment et le reprendre à la même étape depuis le panneau « Assistance » du menu.',
+        voir: 'En-tête › Menu › Assistance'
     },
 
     'bilan-reflexif': {

@@ -15,6 +15,16 @@
 > **Mis à jour à la fin de chaque journée de travail.** Une ligne ne change
 > d'état que si quelqu'un écrit **comment** il l'a vérifié.
 
+✅ **LE 9 NOVEMBRE 2026, 9 H : LA 1.238.0 EST EN LIGNE — UN MOT POUR TON ÉTUDIANT·E.** *Écrit par Claude Code.*
+
+**Ce qui change pour toi** : ce que dit la ligne de la 1.238 dans les Nouvelles, validée par toi mot pour mot le 9 nov. Dans Évaluer, sous la rétroaction, un champ « Un mot pour ton étudiant·e ». Ce que tu y écris s'imprime sur le PDF de l'élève, après son niveau, sous le titre « Un mot pour toi » ; laissé vide, rien n'apparaît, ni titre ni case. Les retouches faites dans le cadre de la rétroaction ne vont toujours pas sur le PDF : elles servent à « Copier » pour Léa, et l'avis sous le cadre le dit. Sur une évaluation verrouillée, le champ se lit sans se modifier ; en anonymisation, il est masqué comme les notes d'intégrité.
+
+**Ce qui reste à toi** : coller le relevé `scripts/releve-retroactions-reecrites-a2026.js` dans la console de Chrome, l'application ouverte. Il compte, par production d'A2026, les évaluations dont tu as retouché la rétroaction (donc dont la retouche n'est pas allée au PDF), sans aucun nom ; il ne change rien. Ce que tu fais de ces copies t'appartient. Cowork te présentera aussi un défaut antérieur trouvé en chemin, non corrigé : rouvrir une évaluation déjà remplacée par une reprise, puis toucher un niveau, écrit ce niveau sur la reprise.
+
+**Vérifié comment** : la vérification complète au navigateur WebKit sur le commit de la version (`d32b660f1`) : 1 429 essais, 1 429 verts du premier coup, 0 rouge, 39 sautés ; une spec du lot (le mot revient à l'ouverture, par la copie et par la liste ; le PDF de l'export Léa a la section quand le champ est rempli, ne l'a pas quand il est vide ou blanc) ; une relecture par un agent neuf. Captures : `Claude outputs/captures-2026-11-09-un-mot-pour-ton-etudiant/`.
+
+**Pas vérifié** : le vrai Safari, l'iPad.
+
 ✅ **LE 8 NOVEMBRE 2026, 14 H 33 : LA 1.237.0 EST EN LIGNE — UN GRAPHIQUE À JOUR, DES TAMPONS EMOJI.** *Écrit par Claude Code.*
 
 **Ce qui change pour toi** : ce que disent les cinq lignes de la 1.237 dans les Nouvelles, validées par toi le 8 nov. (la ligne 4 réécrite par toi). Le graphique du Suivi › Groupe montre chaque séance dès que ses présences sont enregistrées, et une correction de présences ou d'évaluation refait les séances qui suivent. Deux séances d'une même semaine ont chacune leur point daté. Un tampon peut être un emoji, qui garde ses couleurs. « Exporter pour Léa » donne aussi la synthèse PDF d'une copie évaluée sur papier.

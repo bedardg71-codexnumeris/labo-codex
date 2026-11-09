@@ -154,12 +154,13 @@ describe('Aide — elle ne décrit pas de fonctionnalité retirée', () => {
         expect(INTERFACE).toContain('data-action="ouvrirPanneauAssistance"');
     });
 
-    it.fails('la carte de prise en main ne nomme plus la ligne « Visite guidée » du menu', () => {
-        // ⏳ TEXTE DEVENU FAUX, EN ATTENTE DE GRÉGOIRE — lot « Les deux parcours » (8 nov. 2026).
-        // La consigne interdit de retoucher un texte qu'elle ne nomme pas : celui-ci reste tel quel, et
-        // `it.fails` le dit. Quand le texte revu sera posé, ce témoin passera au vert, `it.fails` rougira :
-        // remplacer alors ce bloc par le texte validé.
-        expect(tranche(AIDE, 'accordeon-aide-prise-en-main', 'accordeon-aide-demo')).not.toContain('Visite guidée</strong>, une ligne du menu');
+    it('la carte de prise en main ne nomme plus la ligne « Visite guidée » du menu : une seule ligne « Assistance »', () => {
+        // ↻ Lot « Les deux parcours », partie 1 : la ligne validée par Grégoire le 9 nov. 2026 à 9 h 11 (Cowork),
+        // mot pour mot (le témoin était un `it.fails` depuis le 8 nov.).
+        const carte = tranche(AIDE, 'accordeon-aide-prise-en-main', 'accordeon-aide-demo');
+        expect(carte).not.toContain('Visite guidée</strong>, une ligne du menu');
+        expect(carte).toContain("<li><strong>Assistance</strong>, une ligne du menu de l'en-tête : les parcours où tu fais les gestes toi-même, et l'aide dans les pages (info-bulles, aide à l'écran, flèches).</li>");
+        expect(carte.match(/<strong>Assistance<\/strong>/g)).toHaveLength(1);
     });
 });
 

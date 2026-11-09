@@ -346,13 +346,15 @@ describe('Les gestes décrits sont ceux du code', () => {
         expect(TERME).not.toContain('depuis les Préférences');
     });
 
-    it.fails('le glossaire ne décrit plus la visite en sept étapes ni la ligne « Visite guidée » du menu', () => {
-        // ⏳ TEXTE DEVENU FAUX, EN ATTENTE DE GRÉGOIRE — lot « Les deux parcours » (8 nov. 2026).
-        // La consigne interdit de retoucher un texte qu'elle ne nomme pas : celui-ci reste tel quel, et
-        // `it.fails` le dit. Quand le texte revu sera posé, ce témoin passera au vert, `it.fails` rougira :
-        // remplacer alors ce bloc par le texte validé.
+    it('le glossaire ne décrit plus la visite en sept étapes : le « Parcours assisté », texte validé', () => {
+        // ↻ Lot « Les deux parcours », partie 1 : le texte validé par Grégoire le 9 nov. 2026 à 9 h 11 (Cowork),
+        // mot pour mot, remplace celui de la visite (le témoin était un `it.fails` depuis le 8 nov.).
         expect(TERME).not.toContain('Un parcours en 7 étapes');
         expect(TERME).not.toContain('la ligne « Visite guidée » du menu');
+        const bloc = tranche(TERME, "'parcours-guide-tour': {", "'bilan-reflexif': {");
+        expect(bloc).toContain("terme: 'Parcours assisté',");
+        expect(bloc).toContain("definition: 'Un parcours où tu fais les gestes toi-même, accompagné·e pas à pas : d’abord sur une classe de démonstration, puis avec ta propre classe. Tu peux le quitter à tout moment et le reprendre à la même étape depuis le panneau « Assistance » du menu.',");
+        expect(bloc).toContain("voir: 'En-tête › Menu › Assistance'");
     });
 
     it('le mode anonymisé : « Élève 1, Élève 2 », décrit d\'une seule façon', () => {

@@ -123,6 +123,7 @@ function nouvelleEvaluation() {
     window.ecrireAttenteCriteres(window.MESSAGE_ATTENTE_CRITERES);
     document.getElementById('retroactionFinale1').value = '';
     if (typeof window.poserRetroactionReecrite === 'function') window.poserRetroactionReecrite(false);   // #961
+    if (typeof window.poserMotPourEtudiant === 'function') window.poserMotPourEtudiant(null);   // un mot pour ton étudiant·e : à personne
     document.getElementById('noteProduction1').textContent = '0.0';
     document.getElementById('niveauProduction1').textContent = '--';
     if (typeof window.ecrireLigneNoteRemise === 'function') window.ecrireLigneNoteRemise('');   // #1173
@@ -175,6 +176,11 @@ function reinitialiserFormulaire() {
     window.ecrireAttenteCriteres(window.MESSAGE_ATTENTE_CRITERES);
     document.getElementById('retroactionFinale1').value = '';
     if (typeof window.poserRetroactionReecrite === 'function') window.poserRetroactionReecrite(false);   // #961
+    // Un mot pour ton étudiant·e — vidé, comme la rétroaction, et toujours à la copie ouverte.
+    if (typeof window.poserMotPourEtudiant === 'function') {
+        window.poserMotPourEtudiant(null, (typeof window.etatVivantEvaluationEnCours === 'function')
+            ? window.etatVivantEvaluationEnCours() : window.evaluationEnCours);
+    }
     document.getElementById('noteProduction1').textContent = '0.0';
     document.getElementById('niveauProduction1').textContent = '--';
     if (typeof window.ecrireLigneNoteRemise === 'function') window.ecrireLigneNoteRemise('');   // #1173
@@ -549,6 +555,8 @@ function verifierEtChargerEvaluationExistante() {
         document.querySelectorAll('input[id^="eval_pts_"]').forEach(champ => { champ.value = ''; });
         // #1120, lot 3 — vidés sans passer par la frappe : les tranches du barème ne restent pas choisies.
         if (typeof window.marquerBaremesEvaluation === 'function') window.marquerBaremesEvaluation();
+        // Lot « Un mot pour ton étudiant·e » (relecture du 9 nov.) — aucune évaluation : aucun mot, à personne.
+        if (typeof window.poserMotPourEtudiant === 'function') window.poserMotPourEtudiant(null);
 
         // Vider les champs algorithmiques dans le DOM
         // IDs: eval_categories_*, eval_erreurs_*, eval_mots_*, resultat_algo_*
@@ -672,6 +680,8 @@ function verifierEtChargerEvaluationExistante() {
         // #961 (D7) — la marque enregistrée revient avec le texte ; sans clé (stock d'avant D7),
         // la question due au premier geste qui régénérerait (R2).
         if (typeof window.preparerRetroactionEnregistree === 'function') window.preparerRetroactionEnregistree(evaluationExistante);
+        // Lot « Un mot pour ton étudiant·e » — le mot revient avec la copie.
+        if (typeof window.poserMotPourEtudiant === 'function') window.poserMotPourEtudiant(evaluationExistante);
         // Patch §5.6 — promotion mettreAJourCompteurMots vers evaluation-retroaction.js (session B étape 3 refactor 2026-05-18)
         window.mettreAJourCompteurMots();
 
@@ -1619,6 +1629,8 @@ function _chargerOptionsEtRetroactionModif(evaluation) {
     }
     // #961 (D7) — la marque (ou la question due, R2) revient avec le texte (jumeau de la copie).
     if (typeof window.preparerRetroactionEnregistree === 'function') window.preparerRetroactionEnregistree(evaluation);
+    // Lot « Un mot pour ton étudiant·e » — le mot revient aussi (jumeau du chargeur de la copie).
+    if (typeof window.poserMotPourEtudiant === 'function') window.poserMotPourEtudiant(evaluation);
 }
 
 function _gererIndicateurEtVerrouillageModif(evaluation, estVerrouillee) {
@@ -1986,6 +1998,10 @@ function sauvegarderEvaluationModifiee() {
         _lireChampsDOMMod(maintenant),
         proprietesJetons // Préserver toutes les propriétés de jetons en dernier
     );
+    // Lot « Un mot pour ton étudiant·e » — le mot de cette copie, s'il lui appartient (masqué : la base garde le sien).
+    if (typeof window.enregistrerMotDeLaCopie === 'function') {
+        window.enregistrerMotDeLaCopie(evaluations[indexEval], { etudiantDA: etudiantDA, productionId: productionId });
+    }
 
     _appliquerProfilACOMod(evaluations[indexEval]);
 
@@ -2303,6 +2319,11 @@ function desactiverFormulaireEvaluation(desactiver) {
     const retroaction = document.getElementById('retroactionFinale1');
     if (retroaction) {
         retroaction.disabled = desactiver;
+    }
+    // Un mot pour ton étudiant·e : en lecture seule sous le verrou ; masqué en anonymisation, il le reste.
+    const mot = document.getElementById('motPourEtudiant1');
+    if (mot) {
+        mot.disabled = desactiver || (typeof champMasqueAnonymisation === 'function' && champMasqueAnonymisation(mot));
     }
 
     // Désactiver les checkboxes d'options d'affichage
