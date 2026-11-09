@@ -141,26 +141,35 @@ async function attendreTitre(page, titre, { focus = true } = {}) {
 
 /**
  * Corrections du 9 nov. (décision 2 de Cowork) : aucun avis de la pile ne couvre la bulle. Un relevé tourne dans la
- * page pendant tout l'essai (posé avant chaque chargement) : toutes les 100 ms, il regarde si un avis couvre la bulle ;
- * un recouvrement qui dure plus de cinq relevés (la pile se replace en 200 ms au plus, utils-notifications.js,
+ * page pendant tout l'essai (posé avant chaque chargement) : toutes les 100 ms, il regarde si un avis est AU-DESSUS de
+ * la bulle (le point du milieu de leur intersection répond par l'avis : sous la bulle, il ne couvre rien). Un
+ * recouvrement de plus de trois relevés (la pile se replace en 200 ms au plus, utils-notifications.js,
  * `_placerLaPile`) est consigné, avec le titre de l'étape. Chaque essai finit en exigeant un relevé vide (afterEach).
  * Break-test (9 nov., Chromium) : `_placerLaPile` sans effet → « 820 px : aucun avis… » ROUGE (l'orange de
  * l'étape 7 sur la bulle de l'étape 9) ; rétabli → vert.
  */
 function releveDesAvisSurLaBulle() {
     window.__avisSurLaBulle = [];
+    window.__relevesFaits = 0;
     let suite = 0;
     setInterval(() => {
+        window.__relevesFaits++;
         const b = document.getElementById('parcours-bulle');
         let couvrent = [];
         if (b) {
             const r = b.getBoundingClientRect();
             couvrent = [...document.querySelectorAll('#notifications-pile > *')]
                 .filter((n) => !n.classList.contains('notification-sortie'))
-                .filter((n) => { const x = n.getBoundingClientRect(); return !(x.right <= r.left || r.right <= x.left || x.bottom <= r.top || r.bottom <= x.top); });
+                .filter((n) => {
+                    const x = n.getBoundingClientRect();
+                    const g = Math.max(x.left, r.left), d = Math.min(x.right, r.right), h = Math.max(x.top, r.top), bas = Math.min(x.bottom, r.bottom);
+                    if (d <= g || bas <= h) return false;
+                    const dessus = document.elementFromPoint((g + d) / 2, (h + bas) / 2);
+                    return !!(dessus && n.contains(dessus));
+                });
         }
         suite = couvrent.length ? suite + 1 : 0;
-        if (suite === 6) {
+        if (suite === 4) {
             const t = b.querySelector('.parcours-bulle-titre');
             window.__avisSurLaBulle.push((t ? t.textContent : '?') + ' : ' + couvrent.map((n) => n.textContent.trim().slice(0, 40)).join(' | '));
         }
@@ -508,6 +517,46 @@ test('820 px : aucun avis ne couvre la bulle, l’orange de la grille restant af
     await expect(page.locator('#notifications-pile .notification-warning', { hasText: 'ses critères totalisent' })).toBeVisible();
 });
 
+// Relecture du 9 nov. : à 1180 × 820 (l'iPad à l'horizontale), aucun coin ne laisse la bulle libre à l'étape 11 (bulle
+// centrée, pile de 444 px) : la pile passe sous la bulle. Break-test (9 nov., Chromium) : le passage sous la bulle
+// retiré (`_placerLaPile`) → ROUGE (« Pour aller plus loin : Évaluation verrouillée… »). Rétabli → vert.
+test('1180 × 820 : aucun avis ne couvre la bulle, même quand aucun coin ne la laisse libre', async ({ page }) => {
+    test.setTimeout(180000);
+    await ouvrirEspace(page, 1180, { hauteur: 820 });
+    const grille = await reglerUneGrilleNeuve(page);
+    await finirLeCheminAvecFichier(page, grille, async (n) => {
+        // À la dernière étape, le relevé a le temps de voir (six passages) : la bulle centrée, l'orange et le vert sont là.
+        if (n !== 11) return;
+        await expect.poll(() => page.evaluate(() => document.getElementById('notifications-pile').children.length)).toBeGreaterThan(0);
+        const depart = await page.evaluate(() => window.__relevesFaits);
+        await expect.poll(() => page.evaluate(() => window.__relevesFaits)).toBeGreaterThanOrEqual(depart + 6);
+    });
+});
+
+// Relecture du 9 nov. : un avis affiché AVANT le lancement cède aussi (la sonde tourne tant que la pile n'est pas vide).
+// À cette taille, l'orange en haut à droite tombe sur la bulle de l'étape 1 (mesuré par la relecture). Break-test (9 nov.,
+// Chromium) : la sonde lancée seulement pendant un parcours → ROUGE (l'orange reste sur la bulle). Rétabli → vert.
+test('820 × 600 : un orange affiché avant le lancement ne couvre pas la bulle', async ({ page }) => {
+    await ouvrirEspace(page, 820, { hauteur: 600 });
+    await page.evaluate(() => window.notifications.warning('Avis du banc, resté jusqu’à « OK » : il est là avant le parcours.'));
+    // L'orange couvre le bouton du menu (noté au rapport) : le panneau s'ouvre par le DOM, ce n'est pas ce qui est jugé.
+    await page.evaluate(() => { document.getElementById('entete-menu-bouton').click(); document.getElementById('btn-assistance-menu').click(); });
+    await expect(page.locator('#panneau-assistance')).toBeVisible();
+    await item(page).locator('.assistance-parcours-bouton').evaluate((b) => b.click());
+    await attendreTitre(page, 'Ta grille');
+    // Le relevé a besoin de quelques passages : l'orange reste, on attend qu'il ait cédé.
+    await expect.poll(() => page.evaluate(() => {
+        const b = document.getElementById('parcours-bulle').getBoundingClientRect();
+        const n = document.querySelector('#notifications-pile .notification-warning');
+        const x = n.getBoundingClientRect();
+        const g = Math.max(x.left, b.left), d = Math.min(x.right, b.right), h = Math.max(x.top, b.top), bas = Math.min(x.bottom, b.bottom);
+        if (d <= g || bas <= h) return 'libre';
+        const dessus = document.elementFromPoint((g + d) / 2, (h + bas) / 2);
+        return n.contains(dessus) ? 'couverte' : 'libre';
+    }), { timeout: 3000 }).toBe('libre');
+    await expect(page.locator('#notifications-pile .notification-warning')).toBeVisible();
+});
+
 // Corrections du 9 nov. (décision 3 de Cowork) : pendant tout parcours, l'aide dans les pages se tait.
 // Break-test (9 nov., Chromium) : le garde de `afficherBulleDecouverte` retiré (accompagnement.js) → ROUGE
 // (une bulle de découverte en plein parcours) ; celui de `afficherHover` retiré → ROUGE. Rétablis → verts.
@@ -527,6 +576,19 @@ test('pendant un parcours, l’aide dans les pages se tait (bulle de découverte
     await expect(page.locator('#fleche-didactique-host')).toBeHidden();
     await page.evaluate(() => window.accompagnement.afficherBulleDecouverte({ cible: '#btn-codex', message: 'Bulle du banc' }));
     await expect(page.locator('.bulle-decouverte')).toHaveCount(0);
+    // Une flèche demandée en plein parcours ne se pose pas (relecture du 9 nov. : le CSS la cachait, le garde n'était
+    // pas éprouvé). Elle se pose 150 ms après l'appel (AUTO_DELAI_STABILISATION) : on regarde après ce délai, mesuré
+    // dans la page, si sa cible a reçu sa marque. Break-test : les deux gardes d'`afficherAutoReveal` retirés → ROUGE.
+    expect(await page.evaluate(() => new Promise((ok) => {
+        window.accompagnement.afficherFleche('banc-p8-fleche-2', { sectionActive: 'banc', cibleSelector: '#btn-codex', message: 'Flèche du banc, 2', direction: 'bas' });
+        setTimeout(() => ok(document.querySelectorAll('.fleche-didactique-cible').length), 400);
+    }))).toBe(0);
+    // La bulle d'une description touchée n'est pas une aide : elle reste pendant un parcours.
+    // Break-test : `:not(.tooltip-bulle--ancree)` retiré de css/accompagnement.css → ROUGE.
+    await page.evaluate(() => { const c = document.getElementById('btn-codex'); window.basculerBulleAncree(c, c, 'Description du banc'); });
+    await expect(page.locator('.tooltip-bulle.tooltip-bulle--ancree')).toBeVisible();
+    await page.evaluate(() => { const c = document.getElementById('btn-codex'); window.basculerBulleAncree(c, c, 'Description du banc'); });
+    await expect(page.locator('.tooltip-bulle.tooltip-visible')).toHaveCount(0);
     await page.evaluate((k) => {
         const s = document.createElement('span');
         s.id = 'banc-p8-survol';
@@ -665,11 +727,15 @@ async function cheminSansFichier(page, cap = async () => {}) {
     }, T);
     await expect(page.locator('#eval_erreurs_' + critereId)).toBeVisible({ timeout: 10000 });
     await contourSur(page, '#eval_erreurs_' + critereId);
+    // Le geste entier : taper, puis quitter le champ (`change`), comme dans l'essai avec fichier. Avec `input` seul,
+    // la phrase arrivait parfois après 5 s (mesuré le 9 nov. : 1 rouge sur 3, avec ou sans les corrections du jour).
     await page.fill('#eval_erreurs_' + critereId, '3');
     await page.locator('#eval_erreurs_' + critereId).dispatchEvent('input');
+    await page.locator('#eval_erreurs_' + critereId).dispatchEvent('change');
     await contourSur(page, '#eval_mots_' + critereId);
     await page.fill('#eval_mots_' + critereId, '12');
     await page.locator('#eval_mots_' + critereId).dispatchEvent('input');
+    await page.locator('#eval_mots_' + critereId).dispatchEvent('change');
     await expect(page.locator('#retroactionFinale1')).toHaveValue(/Ta production contient 3 unités manquantes pour 12 calculs\./, { timeout: 5000 });
     // L'autre critère s'évalue « comme d'habitude » : sans lui, le verrou refuserait.
     await page.evaluate(() => {

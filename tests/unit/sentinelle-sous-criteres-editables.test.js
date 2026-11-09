@@ -126,7 +126,7 @@ describe('R — le rendu des sous-critères d’un critère non algorithmique', 
 describe('G — les gestes, et les bornes de l’assistant', () => {
     const grille = (scs) => [{ id: 'GR_BANC', nom: 'Journal fictif', criteres: [critere({ type: 'analytique', sousCriteres: scs })] }];
 
-    it('G.a ajouter, sur un critère sans sous-critère : la forme de la dissection, écrite', async () => {
+    it('G.a ajouter, sur un critère sans sous-critère : la forme de la dissection (le code compté depuis 1), écrite', async () => {
         const g = grille(undefined);
         delete g[0].criteres[0].sousCriteres;
         const { win, store } = monter(g);

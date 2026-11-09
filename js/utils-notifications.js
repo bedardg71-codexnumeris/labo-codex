@@ -162,12 +162,17 @@
     // Pendant un parcours, un avis ne couvre plus la bulle (corrections du huitième parcours, 9 nov. 2026,
     // décision de Cowork). Constat : à 820 px, l'orange « Grille enregistrée : ses critères totalisent… »,
     // resté de l'étape 7 jusqu'à son « OK » (#1224), couvrait la bulle de l'étape 9 ; un vert aussi.
-    // Choix : c'est la PILE qui se déplace, pas la bulle et pas l'avis. Fermer un orange au changement de
-    // section reviendrait sur #1224 ; faire éviter la pile par la bulle demanderait la règle à chaque parcours
-    // (le moteur n'en a pas). Tant qu'un parcours joue et que la pile n'est pas vide, elle prend, parmi les
-    // quatre coins, le premier qui ne couvre pas la bulle (et, autant que possible, ni le contour de ce qu'il
-    // faut toucher). Hors parcours, elle reste en haut à droite. Même lecture que le rappel du codex au
-    // sixième parcours : `ParcoursMoteur.actif()`.
+    // Choix : c'est la PILE qui cède, pas la bulle et pas l'avis. Fermer un orange au changement de section
+    // reviendrait sur #1224 ; faire éviter la pile par la bulle demanderait la règle à chaque parcours (le moteur
+    // n'en a pas). Tant qu'un parcours joue et qu'un avis est affiché :
+    //   1. la pile prend, parmi les quatre coins, le premier qui ne couvre pas la bulle (et, autant que possible,
+    //      ni le contour de ce qu'il faut toucher) ;
+    //   2. si aucun coin ne laisse la bulle libre (à 1180 × 820, une bulle centrée et une pile de 444 px ne tiennent
+    //      pas côte à côte, relecture du 9 nov.), elle garde le coin qui la couvre le moins et passe SOUS la bulle.
+    // Hors parcours, elle reste en haut à droite, à sa hauteur. La sonde tourne tant que la pile n'est pas vide :
+    // un avis affiché avant le lancement d'un parcours cède aussi. Elle ne recalcule que si la bulle, le contour,
+    // la pile ou la fenêtre ont bougé. Même lecture que le rappel du codex au sixième parcours :
+    // `ParcoursMoteur.actif()`.
     // ------------------------------------------------------------------------
     const COINS_DE_LA_PILE = [
         { top: '', bottom: '', left: '', right: '', alignItems: '' },                             // en haut à droite (CSS)
@@ -177,6 +182,7 @@
     ];
     const SONDE_PILE_MS = 200;
     let _sondePile = null;
+    let _dernierEtatPile = null;
 
     function _parcoursActif() {
         return !!(window.ParcoursMoteur && typeof window.ParcoursMoteur.actif === 'function' && window.ParcoursMoteur.actif());
@@ -199,28 +205,48 @@
         return r.width > 0 && r.height > 0 ? r : null;
     }
 
-    /** La place de la pile : le coin le moins gênant pour la bulle du parcours ; hors parcours, celle du CSS. */
+    function _remettreLaPile(pile) {
+        _poserCoin(pile, COINS_DE_LA_PILE[0]);
+        pile.style.zIndex = '';
+    }
+
+    /** La place de la pile : celle du CSS hors parcours ; pendant un parcours, celle qui laisse la bulle libre. */
     function _placerLaPile() {
         const pile = document.getElementById(ID_PILE);
-        if (!pile) return;
-        const enParcours = _parcoursActif() && pile.children.length > 0;
-        if (!enParcours) {
-            _poserCoin(pile, COINS_DE_LA_PILE[0]);
+        if (!pile || !pile.children.length) {
+            if (pile) _remettreLaPile(pile);
             if (_sondePile) { clearInterval(_sondePile); _sondePile = null; }
+            _dernierEtatPile = null;
             return;
         }
         if (!_sondePile) _sondePile = setInterval(_placerLaPile, SONDE_PILE_MS);
-        const bulle = _rectVisible(document.getElementById('parcours-bulle'));
+        if (!_parcoursActif()) {
+            if (_dernierEtatPile !== 'hors parcours') _remettreLaPile(pile);
+            _dernierEtatPile = 'hors parcours';
+            return;
+        }
+        const elBulle = document.getElementById('parcours-bulle');
+        const bulle = _rectVisible(elBulle);
         const contour = _rectVisible(document.getElementById('parcours-contour'));
+        const cleRect = (r) => (r ? [r.left, r.top, r.width, r.height].map(Math.round).join(',') : '-');
+        const etat = [cleRect(bulle), cleRect(contour), pile.children.length, pile.scrollHeight, window.innerWidth, window.innerHeight].join('|');
+        if (etat === _dernierEtatPile) return;
+        _dernierEtatPile = etat;
+        pile.style.zIndex = '';
         let meilleur = null;
         COINS_DE_LA_PILE.forEach((coin, i) => {
             _poserCoin(pile, coin);
             const r = pile.getBoundingClientRect();
+            const surBulle = _aire(r, bulle);
             // Couvrir la bulle coûte bien plus que couvrir le contour ; à égalité, le coin d'abord essayé.
-            const cout = _aire(r, bulle) * 10000 + _aire(r, contour);
-            if (!meilleur || cout < meilleur.cout) meilleur = { i, cout };
+            const cout = surBulle * 10000 + _aire(r, contour);
+            if (!meilleur || cout < meilleur.cout) meilleur = { i, cout, surBulle };
         });
         _poserCoin(pile, COINS_DE_LA_PILE[meilleur.i]);
+        if (meilleur.surBulle > 0 && elBulle) {
+            const z = parseInt(getComputedStyle(elBulle).zIndex, 10);
+            if (!isNaN(z)) pile.style.zIndex = String(z - 1);
+        }
     }
 
     function succes(message, details = '', options = {})  { _emettre('succes',  message, details, options); }

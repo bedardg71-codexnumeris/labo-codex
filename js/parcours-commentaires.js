@@ -664,7 +664,7 @@
             },
             zones: function () {
                 // La production elle-même reste touchable : on y pose les codes.
-                // « Annoter ▾ » et son menu aussi : le geste suivant y passe (« … puis touche « Actions › Évaluer » »).
+                // « Annoter ▾ » et son menu aussi : le geste suivant y passe (« … puis touche « Annoter ▾ », en haut de la production, et choisis « Évaluer » »).
                 if (annoterOuvert()) {
                     return [palette('travaux-palette-erreurs-fr'), vis(document.getElementById('travaux-canvas-annotation')),
                         vis(document.getElementById('travaux-btn-actions')), vis(document.getElementById('travaux-actions-dropdown'))];

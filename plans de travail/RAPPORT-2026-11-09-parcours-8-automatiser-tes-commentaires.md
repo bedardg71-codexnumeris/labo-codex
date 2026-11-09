@@ -25,9 +25,14 @@
 - **Un avis ne couvre plus la bulle** (décision 2 de Cowork). **Ce que j'ai choisi** : ni fermer l'avis au changement
   de section (ce serait revenir sur #1224, où Grégoire a voulu que l'orange et le rouge restent jusqu'à « OK »), ni
   faire éviter l'avis par la bulle (il faudrait cette règle dans chaque parcours, le moteur ne l'ayant pas). C'est la
-  **pile des avis** qui se déplace : tant qu'un parcours joue et qu'un avis est affiché, elle prend le premier des
-  quatre coins qui ne couvre pas la bulle, et autant que possible ni le contour de ce qu'il faut toucher. Hors
-  parcours, elle reste en haut à droite. Le code est dans le module qui possède la pile (`js/utils-notifications.js`),
+  **pile des avis** qui cède : tant qu'un parcours joue et qu'un avis est affiché, elle prend le premier des quatre
+  coins qui ne couvre pas la bulle, et autant que possible ni le contour de ce qu'il faut toucher. **Si aucun coin ne
+  laisse la bulle libre** (à 1180 × 820, une bulle centrée et une pile de 444 px ne tiennent pas côte à côte), elle
+  garde le coin qui la couvre le moins et **passe sous la bulle** : la bulle se lit entière, l'avis reste visible
+  autour. Un avis affiché avant le lancement cède aussi. Hors parcours, la pile reste en haut à droite, à sa hauteur.
+  **Ce qui reste** : la pile ne connaît que la bulle et le contour. Déplacée, elle peut tomber sur une autre commande
+  (à 820 px, étape 9, sur la palette « Tampons » ; à 1180 × 820, étape 10, sur « Un mot pour ton étudiant·e », mesuré
+  par la relecture). Inscrit plus bas (n° 7). Le code est dans le module qui possède la pile (`js/utils-notifications.js`),
   donc valable pour tout parcours : le neuvième en aura besoin (mêmes avis verts), **à unifier à la fusion**. Capture
   `chromium-avec-fichier-820-sombre-09.png` : l'orange et le vert passent en bas à droite, sur la palette « Tampons ».
 - **L'aide dans les pages se tait pendant tout parcours** (décision 3 de Cowork) : l'infobulle du survol, les flèches
@@ -162,8 +167,8 @@ Les « tient » et « ne tient pas » viennent de la lecture du code par un agen
 - **La spec de la partie 1**, sous Chromium : 6 essais verts, 1 rouge, 1 sauté. Le rouge mesure le panneau pendant son glissement d'entrée (−228 px). C'est le défaut de chronométrage relevé par l'audit de début de session, présent sur la base a328bb9, sans lien avec ce lot.
 - **Les captures** : `plans de travail/captures-2026-11-09-parcours-8/`, préfixées `chromium-`. Elles couvrent les onze étapes à 1180 px en sombre et en clair, les étapes 2, 5 et 9 à 820 et 390 px, le chemin sans fichier à 1180 px (et le panneau en cours), le refus du panneau. Le fichier `chromium-couverts-390.json` relève ce que la bulle ou les palettes couvrent à 390 px (voir la question 2).
 
-- **Corrections du 9 nov.** Vitest complet (depuis `tests/`, après la fusion de main) : voir plus bas pour le compte
-  final. Trois essais attendaient un premier code à 0 (`sentinelle-sous-criteres-editables` G.a et G.e,
+- **Corrections du 9 nov.** Vitest complet (depuis `tests/`, après la fusion de main) : **10 934 / 10 934**, 896 fichiers
+  (mesuré aussi par la relecture). Trois essais attendaient un premier code à 0 (`sentinelle-sous-criteres-editables` G.a et G.e,
   `bareme-grille-neuve-1120` E.b) : mis à jour, la décision de Cowork en commentaire. Deux bancs neufs :
   `sentinelle-premier-code-numero-1-2026-11-09` (la règle, le stock gardé ; break-test : le rang depuis 0 → rouge) et
   la sentinelle des textes, étendue aux corrections (break-test : « (0 pour le code 10) » retiré → rouge). Playwright
@@ -178,11 +183,34 @@ Les « tient » et « ne tient pas » viennent de la lecture du code par un agen
     le garde de la bulle de découverte → **rouge** ; sans celui de l'infobulle → **rouge**.
   - Les codes de l'essai de bout en bout sont maintenant « Code 1 » et « Code 2 » (break-test : le rang depuis 0 →
     rouge).
+  **Après la relecture** : trois essais de plus (« 1180 × 820 », où aucun coin ne laisse la bulle libre ; « 820 × 600 »,
+  un orange affiché avant le lancement ; l'aide muette éprouvée aussi sur les flèches et la bulle ancrée) ; le relevé
+  ne compte plus qu'un avis réellement au-dessus de la bulle, et dès quatre passages. Break-tests : la pile qui ne passe
+  plus sous la bulle → « 1180 × 820 » **rouge** ; les gardes des flèches retirés → **rouge** ; l'exception de la bulle
+  ancrée retirée → **rouge**. Un seul reste vert : la sonde lancée seulement pendant un parcours, pour « 820 × 600 » :
+  le lancement du parcours émet lui-même un avis, qui replace la pile ; l'essai juge le résultat, pas ce chemin-là.
+  L'essai « sans fichier » était instable avant ces corrections (1 rouge sur 3, mesuré avec le code d'avant aussi) :
+  il tapait les deux nombres sans quitter le champ ; il fait maintenant le geste entier (`change`), 5 verts sur 5.
+  Banc complet : **10 verts**, 5 captures sautées hors demande.
   Specs voisines (Chromium) : `notifications-pile-1224`, `grille-critere-ajoute-enregistrer-957`,
   `confirmations-conception-uniformes`, `parcours-1-et-2` : 18 verts, 1 sauté, 1 rouge, le rouge Chromium connu de la
   base (« panneau : … le ferment », la géométrie du panneau pendant son glissement).
 
 ### Relecture par un agent neuf
+
+**Seconde relecture, des corrections du 9 nov.** Verdict, en une ligne : **prêt avec réserves ; phrases, numérotation et
+aide muette conformes ; la pile couvrait encore la bulle à 1180 × 820, et un avis d'avant le lancement ne bougeait pas.**
+Il a rejoué Vitest (10 934 / 10 934) et le banc, comparé les onze phrases par script, et fait quatre break-tests (deux
+rouges, deux trous : les gardes des flèches et l'exception de la bulle ancrée n'étaient pas éprouvés). Ce que j'en ai
+fait : la pile passe sous la bulle quand aucun coin n'est libre, sonde tant qu'un avis est affiché, et ne recalcule que
+si quelque chose a bougé (sa remarque sur le coût) ; les deux trous sont comblés ; un commentaire et un titre d'essai
+devenus faux sont corrigés (le geste de l'étape 9 dans `js/parcours-commentaires.js`, « la forme de la dissection »).
+Inscrits plus bas : la pile sur d'autres commandes (n° 7), la dissection qui compte ses codes depuis 0 (n° 6). Laissé
+sans suite, commenté dans le code : la bulle de découverte marquée vue même quand elle se tait. Sa remarque pour
+Grégoire : la variante sans fichier dit toujours « ni « Spécifique » ni « Bilan » ne les nomment », vrai sans codes ;
+la variante avec fichier renvoie maintenant au PDF. Rien à changer à mon avis, à toi de voir.
+
+**Première relecture (nuit du 8 au 9 nov.)** :
 
 Verdict : **prêt avec réserves**. Ses constats, tous traités dans le lot :
 - l'étape 8 n'était pas sautée quand l'étape 7 s'était affichée ;
@@ -201,13 +229,22 @@ Pour la session du Mac, à la fusion, sous le prochain numéro. Les trois premi�
 2. L'atelier du critère algorithmique et ses calculs disent « copie » pour la production (« Copie fictive », « Copies de référence », « sur la copie », « la longueur de la copie », « Une copie déjà évaluée garde sa note… »). À joindre au lot « « Production » plutôt que « copie », dans l'interface ».
 3. À joindre à #1133 (le mode Catégories sans écran) : le parcours montre ce que perd le chemin sans fichier : ni décompte par code, ni « principalement », ni table selon le code le plus fréquent. Taper ses codes à la main reste la question qui revient à Grégoire.
 4. ~~Le premier sous-critère ajouté par « + Ajouter un sous-critère » porte le numéro 0~~ **Corrigé le 9 nov.
-   (décision 1 de Cowork) : ne pas inscrire.** Le premier sous-critère ajouté par « + Ajouter un sous-critère » portait le numéro 0 (`codeSousCritereNeuf`, `grilles.js:5156-5159`), et aucune touche ne choisit le code 0 dans Annoter. Il bloque une phrase validée de l'étape 9 (le clavier). Vu à l'écran (« Code 0 ») ; la touche est lue dans le code.
+   (décision 1 de Cowork) : ne pas inscrire.** Le premier sous-critère ajouté par « + Ajouter un sous-critère » portait le numéro 0 (`codeSousCritereNeuf`, `grilles.js:5161-5164` depuis les corrections), et aucune touche ne choisit le code 0 dans Annoter. Il bloque une phrase validée de l'étape 9 (le clavier). Vu à l'écran (« Code 0 ») ; la touche est lue dans le code.
 
 5. **(Décision de Cowork du 9 nov.) Le basculement automatique sur le modèle « Français écrit »** quand le nom du
    critère contient « français » (`js/evaluation-enonces.js:436, 545-554, 742`) est une règle codée pour une
    discipline, qui agit sans que l'utilisateur·rice la choisisse ; deux principes de Grégoire l'excluent (ne rien
    coder en dur pour une discipline, 21 oct. ; rien qui agisse à la place de la personne sans qu'elle le choisisse).
    À revoir à part, en mesurant d'abord si ses grilles réelles en dépendent. La phrase de l'étape 6 le dit en attendant.
+
+6. **(Relecture du 9 nov.) La dissection compte encore les codes depuis 0** (`js/materiel-assistant.js`, `code:
+   String(k)`) : inerte tant que le critère n'est pas algorithmique ; s'il le devient (« Type »), son premier code vaut 0
+   et aucune touche ne le choisit. Plusieurs bancs de la dissection attendent ces codes : à décider à part. Voisin et
+   antérieur : `codeAfficheSousCritere` (`js/grilles.js`) affiche « 0 » pour un sous-critère sans code.
+7. **(Relecture du 9 nov.) La pile des avis, déplacée pendant un parcours, peut tomber sur une commande** que la
+   bulle demande de toucher (elle ne connaît que la bulle et le contour) : la palette « Tampons » à 820 px (étape 9),
+   « Un mot pour ton étudiant·e » à 1180 × 820 (étape 10), où l'orange capte alors le toucher. À voir avec le moteur,
+   qui seul sait ce que l'étape éclaire.
 
 ## Pour la fusion sur le Mac
 
