@@ -24,6 +24,8 @@
  *   · (9 nov.) standards codés en dur, `remis:` sans les copies reçues → 2 rouges ;
  *   · (9 nov.) la garde « sans pratique » retirée (`receptionVautRemise` rend vrai sur null) → 3 rouges (la famille, les
  *     deux captures) ;
+ *   · (9 nov., relecture neuve) les spécifications codées en dur qui comptent les copies importées comme acceptables, sous
+ *     un nom de clé déguisé (que le motif de texte ne voit pas) → 1 rouge (Bruno à 2/2 au lieu de 0/2) ;
  *   · `evaluation.verrouillee === false` retiré de `evaluationCorrigeLaReception` → 1 rouge (le brouillon « plagiat » corrige) ;
  *   · la garde du remplacement retirée de `evaluationCorrigeLaReception` → 1 rouge (le doublon réconcilié corrige) ;
  *   · captures, C de chaque élève sans les copies reçues → 1 rouge ;
@@ -195,10 +197,21 @@ describe('Le cas de la consigne, dans chaque classe et chaque famille qui compte
     // LES SPÉCIFICATIONS CODÉES EN DUR : leur C n'est pas une part de remises, c'est la part des travaux ACCEPTABLES du
     // palier le plus haut. Une copie reçue n'y est pas encore jugée : l'extension n'y entre pas, leur sens ne change pas.
     it('PratiquePanSpecifications (codée en dur) : inchangée, une copie importée et non évaluée n\'y compte pas', () => {
+        // Relecture neuve du 9 nov. : sans évaluation de Bruno, le calcul rendait null avant toute lecture ; l'essai ne
+        // gardait donc que par le texte. Ici Bruno a UNE évaluation non acceptable (40 < 60) sur P1 et des copies importées
+        // pour P1 et P2 : il reste à 0/2 ; un travail acceptable le met à 1/2, et les copies importées n'y ajoutent rien.
         const s = store();
-        const inst = instance('js/pratiques/pratique-pan-specifications.js', 'PratiquePanSpecifications', s,
-            { id: 'pan-specifications', tableBundles: [{ noteFixe: 85, requis: { travail: 2 } }], types: [] });
-        expect(inst.calculerDetailsCompletion(BRUNO)).toBeNull();   // aucune évaluation de Bruno : rien à juger
+        s.test_productions.push({ id: 'P2', titre: 'Analyse 2', type: 'travail', ponderation: 20, dateEcheance: '2026-03-08', coursId: 'GC1' });
+        s.test_fichiersTravaux.push(fichier('F_B2', BRUNO, 'P2'));
+        const config = { id: 'pan-specifications', typesTravaux: [{ id: 'travail', nom: 'Travail', seuilAcceptable: 60 }],
+            tableBundles: [{ noteFixe: 85, requis: { travail: 2 } }] };
+        const c = (note) => {
+            s.test_evaluationsSauvegardees = [evaluee('E_BRUNO', BRUNO, 'P1', { noteFinale: note })];
+            const d = instance('js/pratiques/pratique-pan-specifications.js', 'PratiquePanSpecifications', s, config).calculerDetailsCompletion(BRUNO);
+            return [d.remis, d.total];
+        };
+        expect(c(40)).toEqual([0, 2]);   // non acceptable, deux copies importées : rien ne compte
+        expect(c(80)).toEqual([1, 2]);   // TÉMOIN : un travail acceptable compte ; la copie importée de P2, non
         const src = readFileSync(path.join(RACINE, 'js/pratiques/pratique-pan-specifications.js'), 'utf8');
         expect(/lireCopiesRecues|productionRemiseParEleve|fichiersTravaux/.test(src)).toBe(false);
     });

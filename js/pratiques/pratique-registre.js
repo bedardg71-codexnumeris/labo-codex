@@ -1203,10 +1203,13 @@ function evaluationCompteCommeRemise(evaluation, evaluations) {
    et par production ; la corbeille l'en retire. Chaque calcul la lit au stockage de son mode et passe la liste ici.
    ⚠ LES QUATRE FAMILLES (Grégoire, 9 nov. : il a lui-même constaté le défaut hors sommative). La liste ci-dessous les
    nomme : sommative, standards, spécifications, dénotation. Elle sert la configurable (un seul calcul de C pour les
-   quatre), les captures du Suivi, la sommative et les standards codés en dur. ⚠ PAS les spécifications codées en dur :
-   leur C n'y compte pas des remises mais les travaux ACCEPTABLES du palier le plus haut (pratique-pan-specifications.js) ;
-   une copie reçue n'y est pas encore jugée, la règle n'y a pas de sens. Sans pratique résolue : la règle d'avant.
-   ⚠ Le dénominateur ne change pas : une production y entre à la première copie évaluée du groupe, comme avant.
+   quatre), les captures du Suivi, la sommative et les standards codés en dur. ⚠ Le calcul de C des spécifications
+   CODÉES EN DUR ne la lit pas : il compte les travaux ACCEPTABLES du palier le plus haut, pas des remises
+   (pratique-pan-specifications.js) ; une copie reçue n'y est pas encore jugée. `receptionVautRemise` rend pourtant vrai
+   pour cette instance ('SPE' est dans la liste) : les CAPTURES, qui comptent des remises, lui appliquent la règle.
+   Sans pratique résolue : la règle d'avant.
+   ⚠ Le dénominateur ne change pas : une production y entre à la première copie évaluée du groupe (sommative,
+   configurable) ; dans les standards codés en dur, ce sont les travaux assignés avec une échéance, comme avant.
    ⚠ Une copie qui CORRIGE la réception est enregistrée (verrouillée) : un brouillon ne compte nulle part (16 sept.).
    ⚠ Se lit AU CALCUL : les captures déjà prises gardent leur C jusqu'à « Recalculer les captures ».
    =============================== */
