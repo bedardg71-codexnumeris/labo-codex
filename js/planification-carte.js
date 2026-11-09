@@ -382,7 +382,13 @@ function appliquerObjectifs(n, textes) {
         var estObjet = brut && typeof brut === 'object';
         var texte = String((estObjet ? brut.texte : brut) == null ? '' : (estObjet ? brut.texte : brut)).trim();
         if (texte === '') continue;
-        entrees.push({ texte: texte, idDemande: estObjet && brut.id ? String(brut.id) : null });
+        entrees.push({
+            texte: texte,
+            idDemande: estObjet && brut.id ? String(brut.id) : null,
+            // Deux liens vers la carte (9 nov. 2026) : la ligne relue d'une
+            // ligne LIÉE porte son lien (`data-obj-production`).
+            productionDemandee: lienDemande(brut)
+        });
     }
 
     function reserver(id) {
@@ -413,11 +419,39 @@ function appliquerObjectifs(n, textes) {
         curseur++;
     }
 
-    var nouveaux = entrees.map(function(e) { return { id: e.id, texte: e.texte }; });
+    // LE LIEN VERS UNE PRODUCTION (deux liens vers la carte, 9 nov. 2026) — il
+    // ne survit qu'à deux conditions, et c'est ce qui l'empêche de glisser :
+    //   • la ligne le PORTE (la carte relit une ligne liée avec son lien) ;
+    //   • ou elle a gardé l'id ET le texte de l'objectif lié : un appelant qui
+    //     n'envoie que du texte ne coupe pas un lien qu'il n'a pas vu.
+    // Un texte modifié sur place n'est plus celui de la production : le lien
+    // tombe, le texte reste. Et un id réattribué AU RANG (passe 3, ligne liée
+    // retirée) n'hérite jamais du lien — son texte n'est pas le même.
+    var parIdAncien = {};
+    anciens.forEach(function(o) { parIdAncien[o.id] = o; });
+    var nouveaux = entrees.map(function(e) { return objectifReecrit(e, parIdAncien[e.id]); });
     if (nouveaux.length === 0) delete n.metadata.objectifs;
     else n.metadata.objectifs = nouveaux;
     sauvegarder();
     return true;
+}
+
+/** Le lien qu'une entrée d'`appliquerObjectifs` porte elle-même, ou null. */
+function lienDemande(brut) {
+    return brut && typeof brut === 'object' && brut.productionId ? String(brut.productionId) : null;
+}
+
+/**
+ * Une entrée résolue d'`appliquerObjectifs`, et son lien s'il survit (voir la
+ * règle là-bas) : la ligne le porte, ou elle garde l'id ET le texte de
+ * l'objectif lié.
+ */
+function objectifReecrit(entree, ancien) {
+    var obj = { id: entree.id, texte: entree.texte };
+    var garde = ancien && ancien.productionId && ancien.texte.trim() === entree.texte;
+    var lien = entree.productionDemandee || (garde ? ancien.productionId : null);
+    if (lien) obj.productionId = lien;
+    return obj;
 }
 
 /**
@@ -436,6 +470,605 @@ function definirObjectifsLecon(leconId, textes) {
     reconstruireDOM();
     mettreAJourTousLesBadges();
     return true;
+}
+
+// =====================================================================
+// DEUX LIENS VERS LA CARTE (9 nov. 2026) — l'objectif d'une production,
+// la compétence de la fiche du cours.
+//
+// Décisions de Grégoire du 9 nov., 10 h 19 à 10 h 21 (les neuf
+// recommandations du rapport de mesure, `plans de travail/RAPPORT-2026-11-09-
+// deux-liens-vers-la-carte.md`) :
+//
+//   L'OBJECTIF. La production fait foi : elle existe sans carte, et ce que
+//   lisent les étudiant·es (feuille de consignes, rétroaction, synthèse) vient
+//   d'elle. La leçon la REPREND par un geste explicite, en une ligne liée
+//   `{id, texte, productionId}` : `id` porte déjà tous les liens de la carte
+//   (servis, vérifiés, pastilles), `texte` garde le dernier texte connu, repli
+//   quand la production n'est pas là. Aucun champ ajouté à la production.
+//
+//   LA COMPÉTENCE. La fiche du cours (Cadre › Trimestre) fait foi : elle est
+//   globale, la carte est recopiée à chaque trimestre. Une seule compétence liée
+//   par carte. Le bloc lié porte `metadata.lieFicheCours: true`.
+//
+//   LE STOCK. Rien n'est relié d'office ; aucune donnée réécrite. Seul un geste
+//   (« Relier », sur proposition) pose un lien sur ce qui existe déjà.
+//
+// ▣ TITRE RAFRAÎCHI, PAS PORTE DE LECTURE (choix technique, tranché ici). Le
+// titre d'un bloc et le texte d'un objectif sont lus par plus de soixante sites
+// (canevas, Inspecteur, recherche, plan exporté, modèle de relecture par IA,
+// phrases des liens). Une porte de lecture aurait demandé de les reprendre tous,
+// et chaque oubli aurait montré l'ancien texte. On rafraîchit donc la DONNÉE à
+// l'ouverture de la carte (`rafraichirLiensCarte`) : la production et la fiche
+// ne se modifient qu'ailleurs, et revenir à la carte passe par `chargerCarte`.
+// ⚠ Le prix de ce choix : la donnée d'un bloc lié appartient à la fiche. Le
+// titre que l'enseignant·e avait écrit avant de relier n'est JAMAIS effacé : il
+// est mis de côté (`metadata.titreAvantLien`) et rendu au « Délier ».
+// =====================================================================
+
+/**
+ * LES MOTS DES DEUX LIENS — validés par Grégoire MOT POUR MOT (9 nov. 2026).
+ * Une seule table : chaque écran la lit, aucun ne recopie la chaîne
+ * (sentinelle `sentinelle-libelles-deux-liens`).
+ */
+var LIBELLES_DEUX_LIENS = {
+    reprendreObjectif: 'Reprendre l’objectif d’une production',
+    modifierDansProduction: 'Modifier dans la production',
+    delier: 'Délier',
+    relier: 'Relier',
+    modifierDansFiche: 'Modifier dans la fiche du cours',
+    relierAFiche: 'Relier à la fiche du cours'
+};
+
+/**
+ * La mention de la fiche de production, validée mot pour mot :
+ * « Repris dans la carte : leçon « … », semaine N ». Une leçon sans semaine
+ * n'a pas de N à dire : la phrase s'arrête après le titre.
+ */
+function texteRepriseObjectif(titreLecon, semaine) {
+    return 'Repris dans la carte : leçon « ' + titreLecon + ' »' + (semaine ? ', semaine ' + semaine : '');
+}
+
+/** Deux textes « identiques » : mêmes mots, espaces comprimés. */
+function normaliserTexteLien(t) {
+    return String(t == null ? '' : t).replace(/\s+/g, ' ').trim();
+}
+
+/**
+ * Les productions du trimestre actif, TOUTES (pas seulement celles de la liste
+ * de Conception) : un lien vise un identifiant, il se résout quoi qu'en dise le
+ * filtre d'affichage. Même chemin que `idsProductionsVivantes`
+ * (planification-donnees.js) : la clé namespacée, avec repli sur la clé nue —
+ * la règle qui décide, à la reprise d'une carte, si un lien est vivant.
+ */
+function productionsDuTrimestre() {
+    if (typeof db === 'undefined' || typeof window.cle !== 'function') return [];
+    try {
+        var liste = db.getSync(window.cle('productions')) || db.getSync('productions', []);
+        return Array.isArray(liste) ? liste : [];
+    } catch (e) {
+        console.warn('[Planif-Carte] Lecture des productions échouée :', e);
+        return [];
+    }
+}
+
+function trouverProduction(productionId, productions) {
+    if (!productionId) return null;
+    var liste = productions || productionsDuTrimestre();
+    for (var i = 0; i < liste.length; i++) {
+        if (liste[i] && liste[i].id === productionId) return liste[i];
+    }
+    return null;
+}
+
+/** L'objectif d'apprentissage d'une production, nettoyé ; '' s'il n'y en a pas. */
+function objectifDeProduction(p) {
+    return p && typeof p.objectif === 'string' ? p.objectif.trim() : '';
+}
+
+/**
+ * La production qui fait foi pour cette ligne d'objectif — ou null : ligne non
+ * liée, production introuvable dans ce trimestre (carte reçue d'un·e collègue,
+ * production supprimée), ou objectif vidé. Dans ces trois cas la ligne
+ * s'affiche comme un objectif ordinaire, avec son dernier texte connu.
+ */
+function productionDeObjectif(o, productions) {
+    if (!o || !o.productionId) return null;
+    var p = trouverProduction(o.productionId, productions);
+    return objectifDeProduction(p) ? p : null;
+}
+
+/**
+ * Les productions qu'une leçon peut reprendre : celles de la liste de
+ * Conception (la même que le sélecteur « Production » de l'Inspecteur), dont
+ * l'objectif est rempli, moins celles que cette leçon reprend déjà.
+ */
+function productionsPourReprendre(lecon) {
+    var deja = {};
+    objectifsDeLecon(lecon).forEach(function(o) { if (o.productionId) deja[o.productionId] = true; });
+    return productionsVisibles().filter(function(p) {
+        return p && p.id && !deja[p.id] && objectifDeProduction(p) !== '';
+    });
+}
+
+/**
+ * Le geste qui CRÉE le lien d'objectif : la leçon reprend l'objectif d'une
+ * production, en une ligne liée ajoutée à la fin. Rien n'est coché d'office :
+ * aucune évaluation ne reçoit cet objectif sans que l'enseignant·e le coche.
+ * @returns {string|null} l'id de la ligne créée, ou null si refusé
+ */
+function reprendreObjectifProduction(leconId, productionId) {
+    var n = etat.noeuds.get(leconId);
+    if (!n || n.type !== 'lecon') return null;
+    var texte = objectifDeProduction(trouverProduction(productionId));
+    if (!texte) return null;
+    if (objectifsDeLecon(n).some(function(o) { return o.productionId === productionId; })) return null;
+    enregistrerPourUndo();
+    if (!n.metadata) n.metadata = {};
+    if (!Array.isArray(n.metadata.objectifs)) n.metadata.objectifs = [];
+    var id = nouvelIdObjectif();
+    n.metadata.objectifs.push({ id: id, texte: texte, productionId: productionId });
+    sauvegarder();
+    return id;
+}
+
+/** La ligne d'objectif `objectifId` de la leçon, telle qu'elle est stockée. */
+function objectifStocke(leconId, objectifId) {
+    var n = etat.noeuds.get(leconId);
+    if (!n || n.type !== 'lecon' || !n.metadata || !Array.isArray(n.metadata.objectifs)) return null;
+    for (var i = 0; i < n.metadata.objectifs.length; i++) {
+        var o = n.metadata.objectifs[i];
+        if (o && o.id === objectifId && typeof o.texte === 'string') return o;
+    }
+    return null;
+}
+
+/**
+ * Délier : la ligne redevient un objectif ordinaire, avec le texte du moment.
+ * Son id ne bouge pas — ce qui la sert ou la vérifie reste en place.
+ */
+function delierObjectif(leconId, objectifId) {
+    var o = objectifStocke(leconId, objectifId);
+    if (!o || !o.productionId) return false;
+    enregistrerPourUndo();
+    var p = productionDeObjectif(o);
+    if (p) o.texte = objectifDeProduction(p);
+    delete o.productionId;
+    sauvegarder();
+    return true;
+}
+
+/**
+ * Relier un objectif DÉJÀ ÉCRIT (le stock) à la production d'une évaluation —
+ * seulement s'il est identique à l'objectif de la production. Deux textes
+ * différents peuvent viser deux choses : la porte refuse, l'interface ne
+ * propose rien.
+ */
+function relierObjectifAProduction(leconId, objectifId, productionId) {
+    var o = objectifStocke(leconId, objectifId);
+    if (!o || o.productionId) return false;
+    var texte = objectifDeProduction(trouverProduction(productionId));
+    if (!texte || normaliserTexteLien(o.texte) !== normaliserTexteLien(texte)) return false;
+    enregistrerPourUndo();
+    o.texte = texte;
+    o.productionId = productionId;
+    sauvegarder();
+    return true;
+}
+
+/**
+ * Les propositions « Relier » de l'Inspecteur d'une évaluation : parmi les
+ * objectifs qu'il montre (`leconsInspecteurEvaluation`), ceux qui ne sont pas
+ * liés et dont le texte est IDENTIQUE à l'objectif de la production choisie.
+ * Le relevé du stock (rapport, § 5) compte exactement ces propositions.
+ * @returns {Array<{leconId, objectifId, productionId}>}
+ */
+function objectifsARelierPourEvaluation(evaluation) {
+    if (!evaluation || evaluation.type !== 'evaluation' || !evaluation.metadata) return [];
+    var pid = evaluation.metadata.productionId;
+    var cible = normaliserTexteLien(objectifDeProduction(trouverProduction(pid)));
+    if (!cible) return [];
+    var propositions = [];
+    leconsInspecteurEvaluation(evaluation).forEach(function(lec) {
+        objectifsDeLecon(lec).forEach(function(o) {
+            if (o.productionId || normaliserTexteLien(o.texte) !== cible) return;
+            propositions.push({ leconId: lec.id, objectifId: o.id, productionId: pid });
+        });
+    });
+    return propositions;
+}
+
+/**
+ * LA FICHE DU COURS DE LA CARTE ACTIVE, si elle porte une compétence — ou null
+ * (carte sans cours, rattachement orphelin, service, compétence vide). Lue
+ * contre la collection globale vivante (`resoudreCoursDeCarte`) : une carte
+ * reçue d'un·e collègue a pris le cours ACTIF à l'import, c'est donc la fiche
+ * de la personne qui la reçoit qui répond.
+ * Les éléments : un par ligne, comme le modèle de relecture par IA les lit.
+ */
+function ficheCompetenceCarte() {
+    var pd = window.planificationDonnees;
+    if (!pd || typeof pd.getIndex !== 'function' || typeof pd.resoudreCoursDeCarte !== 'function') return null;
+    var fiche;
+    try {
+        var index = pd.getIndex();
+        if (!index || !index.active) return null;
+        fiche = pd.resoudreCoursDeCarte(index.active);
+    } catch (e) {
+        console.warn('[Planif-Carte] Fiche du cours illisible :', e);
+        return null;
+    }
+    if (!fiche || fiche.nature === 'service') return null;
+    var enonce = String(fiche.competence || '').trim();
+    if (!enonce) return null;
+    return {
+        coursId: fiche.id,
+        numero: String(fiche.numeroCompetence || '').trim(),
+        enonce: enonce,
+        elements: String(fiche.elementsCompetence || '').split('\n')
+            .map(function(l) { return l.trim(); }).filter(Boolean)
+    };
+}
+
+/** Le cours de la carte active, résolu — fiche de cours ou service —, ou null. */
+function coursResoluDeLaCarte() {
+    var pd = window.planificationDonnees;
+    if (!pd || typeof pd.getIndex !== 'function' || typeof pd.resoudreCoursDeCarte !== 'function') return null;
+    try {
+        var index = pd.getIndex();
+        return index && index.active ? pd.resoudreCoursDeCarte(index.active) : null;
+    } catch (e) {
+        return null;
+    }
+}
+
+/** Le bloc porte-t-il le lien vers la fiche ? (Qu'elle réponde ou non.) */
+function competenceLiee(n) {
+    return !!(n && n.type === 'competence' && n.metadata && n.metadata.lieFicheCours === true);
+}
+
+/** Vrai si un AUTRE bloc Compétence de la carte est lié (un clone est le même bloc). */
+function autreCompetenceLiee(n) {
+    var identite = n ? (n.cloneSourceId || n.id) : null;
+    for (var entryCL of etat.noeuds) {
+        var m = entryCL[1];
+        if (competenceLiee(m) && (m.cloneSourceId || m.id) !== identite) return true;
+    }
+    return false;
+}
+
+/**
+ * Pose le lien sur le bloc, en mémoire. Le titre écrit par l'enseignant·e
+ * n'est jamais effacé : s'il dit autre chose que la fiche, il est mis de côté
+ * pour le « Délier ». La casse et les espaces ne comptent pas : même relevé
+ * que le rapport (§ 5, `competenceIdentiqueAFiche`).
+ */
+function poserLienCompetence(n, fiche) {
+    if (!n.metadata) n.metadata = {};
+    var titre = String(n.titre || '').trim();
+    if (titre && normaliserTexteLien(titre).toLowerCase() !== normaliserTexteLien(fiche.enonce).toLowerCase()) {
+        n.metadata.titreAvantLien = n.titre;
+    }
+    n.metadata.lieFicheCours = true;
+    n.titre = fiche.enonce;
+}
+
+/**
+ * Retire le lien, en mémoire : le titre mis de côté revient ; sans lui (bloc
+ * né lié), l'énoncé courant de la fiche reste dans le titre.
+ */
+function retirerLienCompetence(n) {
+    if (!n.metadata) n.metadata = {};
+    var avant = n.metadata.titreAvantLien;
+    if (typeof avant === 'string' && avant.trim() !== '') {
+        n.titre = avant;
+    } else {
+        var fiche = ficheCompetenceCarte();
+        if (fiche) n.titre = fiche.enonce;
+    }
+    delete n.metadata.lieFicheCours;
+    delete n.metadata.titreAvantLien;
+}
+
+/**
+ * Un bloc dont le lien DORT (fiche vidée, carte détachée de son cours) se
+ * rend comme un bloc libre, donc modifiable. Y écrire, c'est en faire son
+ * propre texte : le lien tombe, sans rien rendre ni effacer — ce qu'on tape
+ * est déjà dans le titre. Sans ça, la fiche remplie plus tard écraserait ce
+ * texte au rafraîchissement suivant.
+ */
+function abandonnerLienCompetence(n) {
+    if (!retirerDrapeauxLienCompetence(n)) return false;
+    propagerModification(n.id, 'metadata', n.metadata);
+    return true;
+}
+
+/** Une COPIE (pas un clone) d'un bloc lié garde le texte, pas le lien. */
+function retirerLienDeLaCopie(copie) {
+    if (!copie.cloneSourceId) retirerDrapeauxLienCompetence(copie);
+}
+
+/** Les deux drapeaux du lien partent, le titre ne bouge pas. @returns {boolean} il y avait un lien */
+function retirerDrapeauxLienCompetence(n) {
+    if (!competenceLiee(n)) return false;
+    delete n.metadata.lieFicheCours;
+    delete n.metadata.titreAvantLien;
+    return true;
+}
+
+/** Le lien vers la fiche peut-il être posé sur ce bloc, maintenant ? */
+function peutRelierCompetence(n) {
+    if (!n || n.type !== 'competence' || competenceLiee(n)) return false;
+    if (autreCompetenceLiee(n)) return false;
+    return ficheCompetenceCarte() !== null;
+}
+
+/**
+ * Un bloc Compétence CRÉÉ dans une carte dont la fiche porte une compétence
+ * naît lié — sauf si la carte en a déjà une liée : le deuxième reste libre.
+ * En mémoire seulement : `creerNoeud` sauvegarde juste après.
+ */
+function lierCompetenceNeuve(n) {
+    if (!n || n.type !== 'competence' || autreCompetenceLiee(n)) return false;
+    var fiche = ficheCompetenceCarte();
+    if (!fiche) return false;
+    poserLienCompetence(n, fiche);
+    return true;
+}
+
+/**
+ * Le champ « Titre » de l'Inspecteur : le titre d'un bloc Compétence lié
+ * s'écrit dans la fiche du cours, le champ passe en lecture seule. Il est le
+ * même pour tous les blocs : il se remet en écriture pour tout autre bloc.
+ * @returns {Object|null} la fiche, pour un bloc Compétence (null sinon)
+ */
+function preparerTitreInspecteur(n) {
+    var fiche = n.type === 'competence' ? ficheCompetenceCarte() : null;
+    var champ = document.getElementById('planif-panneau-titre');
+    if (champ) champ.readOnly = !!fiche && competenceLiee(n);
+    return fiche;
+}
+
+/**
+ * Les écouteurs des deux liens dans l'Inspecteur, posés une fois que plus rien
+ * ne réécrit `extra` (même contrainte que « Dans la leçon »). Chaque geste
+ * réussi redessine la carte et l'Inspecteur.
+ */
+function brancherDeuxLiensInspecteur(extra, id) {
+    var apres = function(reussi) {
+        if (!reussi) return;
+        reconstruireDOM();
+        mettreAJourTousLesBadges();
+        ouvrirPanneau(id);
+    };
+    extra.querySelectorAll('.planif-btn-relier-objectif').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            apres(relierObjectifAProduction(btn.getAttribute('data-lecon-id'),
+                btn.getAttribute('data-obj-id'), btn.getAttribute('data-production-id')));
+        });
+    });
+    var btnFiche = extra.querySelector('#planif-btn-competence-fiche');
+    if (btnFiche) {
+        btnFiche.addEventListener('click', function() {
+            var cours = coursResoluDeLaCarte();
+            fermerPanneau();
+            ouvrirFicheCoursDepuisCarte(cours && cours.id);
+        });
+    }
+    [['#planif-btn-competence-delier', delierCompetence],
+     ['#planif-btn-competence-relier', relierCompetenceAFiche]].forEach(function(paire) {
+        var bouton = extra.querySelector(paire[0]);
+        if (bouton) bouton.addEventListener('click', function() { apres(paire[1](id)); });
+    });
+}
+
+/**
+ * Pose la section « compétence » dans l'Inspecteur d'un bloc Compétence, et
+ * dans aucun autre.
+ * ⚠ PAS `extra.innerHTML +=` : il re-sérialise le panneau et tue les écouteurs
+ * déjà posés — celui du champ « Semaine » d'une leçon, attrapé par
+ * planif-date-inspecteur-695 quand la section était posée pour tous les blocs
+ * (même piège que la légende du lot 4).
+ */
+function ajouterSectionCompetenceInspecteur(extra, n, fiche) {
+    if (n.type !== 'competence') return;
+    // security-ok: construit par sectionCompetenceInspecteurHTML, chaque texte de la fiche passé par echapperHtml().
+    extra.insertAdjacentHTML('beforeend', sectionCompetenceInspecteurHTML(n, fiche));
+}
+
+/** Un bouton de l'Inspecteur, au patron de « Décloner » (`planif-btn-carte`). */
+function boutonInspecteurHTML(id, libelle) {
+    return '<button type="button" class="planif-btn-carte" id="' + id + '">' + echapperHtml(libelle) + '</button>';
+}
+
+/**
+ * La section « compétence » de l'Inspecteur d'un bloc Compétence. Trois cas :
+ *   1. lié, la fiche répond : le numéro et les éléments du devis, EN LECTURE
+ *      SEULE (un élément du devis n'est pas une idée maîtresse : il ne devient
+ *      pas un bloc), puis les deux commandes du lien ;
+ *   2. libre, et la carte peut en lier un : la proposition de relier, avec le
+ *      texte de la fiche quand il diffère du titre (le titre est juste au-dessus,
+ *      dans son champ : les deux textes se lisent l'un sous l'autre) ;
+ *   3. la carte est rattachée à une fiche qui n'a pas encore de compétence : le
+ *      chemin pour l'y écrire.
+ * Les étiquettes « N° de la compétence », « Éléments de compétence » et
+ * « Compétence » sont celles de la fiche du cours, reprises telles quelles.
+ */
+function sectionCompetenceInspecteurHTML(n, fiche) {
+    // Appelée pour TOUS les blocs (ouvrirPanneau) : sans cette garde, le cas 3
+    // offrait « la fiche du cours » dans l'Inspecteur d'une évaluation (vu sur
+    // capture, 9 nov.).
+    if (!n || n.type !== 'competence') return '';
+    var html = '';
+    if (competenceLiee(n) && fiche) {
+        if (fiche.numero) {
+            html += '<label>N° de la compétence</label>' +
+                '<div class="planif-panneau-derive">' + echapperHtml(fiche.numero) + '</div>';
+        }
+        if (fiche.elements.length > 0) {
+            html += '<label>Éléments de compétence</label><ul class="planif-panneau-elements">';
+            fiche.elements.forEach(function(el) {
+                // La fiche invite à écrire « • élément » : la puce est celle de la liste.
+                html += '<li>' + echapperHtml(el.replace(/^[•\-–*]\s*/, '')) + '</li>';
+            });
+            html += '</ul>';
+        }
+        return html + '<div class="planif-panneau-actions-lien">' +
+            boutonInspecteurHTML('planif-btn-competence-fiche', LIBELLES_DEUX_LIENS.modifierDansFiche) +
+            boutonInspecteurHTML('planif-btn-competence-delier', LIBELLES_DEUX_LIENS.delier) +
+            '</div>';
+    }
+    if (fiche && peutRelierCompetence(n)) {
+        var differe = normaliserTexteLien(n.titre).toLowerCase() !== normaliserTexteLien(fiche.enonce).toLowerCase();
+        if (differe) {
+            html += '<label>Compétence</label>' +
+                '<div class="planif-panneau-derive planif-panneau-texte-fiche">' +
+                    echapperHtml((fiche.numero ? fiche.numero + ' · ' : '') + fiche.enonce) + '</div>';
+        }
+        return html + '<div class="planif-panneau-actions-lien">' +
+            boutonInspecteurHTML('planif-btn-competence-relier', LIBELLES_DEUX_LIENS.relierAFiche) +
+            '</div>';
+    }
+    var cours = coursResoluDeLaCarte();
+    if (!fiche && cours && cours.nature !== 'service') {
+        return '<div class="planif-panneau-actions-lien">' +
+            boutonInspecteurHTML('planif-btn-competence-fiche', LIBELLES_DEUX_LIENS.modifierDansFiche) +
+            '</div>';
+    }
+    return '';
+}
+
+/** Porte d'écriture : relier un bloc existant (le stock) à la fiche. */
+function relierCompetenceAFiche(noeudId) {
+    var n = etat.noeuds.get(noeudId);
+    if (!peutRelierCompetence(n)) return false;
+    enregistrerPourUndo();
+    poserLienCompetence(n, ficheCompetenceCarte());
+    // Un clone est une INSTANCE LIÉE : il suit, titre et drapeau compris.
+    propagerModification(noeudId, 'metadata', n.metadata);
+    propagerModification(noeudId, 'titre', n.titre);
+    sauvegarder();
+    return true;
+}
+
+/** Porte d'écriture : délier. */
+function delierCompetence(noeudId) {
+    var n = etat.noeuds.get(noeudId);
+    if (!competenceLiee(n)) return false;
+    enregistrerPourUndo();
+    retirerLienCompetence(n);
+    propagerModification(noeudId, 'metadata', n.metadata);
+    propagerModification(noeudId, 'titre', n.titre);
+    sauvegarder();
+    return true;
+}
+
+/**
+ * LE RAFRAÎCHISSEMENT — à l'ouverture de la carte et après une annulation.
+ * Recopie le texte courant de chaque production reprise et l'énoncé courant de
+ * la fiche dans les blocs liés. Il ne POSE jamais de lien : un objectif ou un
+ * titre identique, sans lien, reste tel quel (le stock n'est pas relié
+ * d'office). Ce qui ne répond pas (production absente, fiche vidée) garde son
+ * dernier texte connu.
+ * @returns {number} le nombre de textes changés (0 : rien à écrire)
+ */
+function rafraichirLiensCarte() {
+    var changes = 0;
+    var productions = null;
+    var fiche;          // undefined : pas encore lue
+    // Lues une fois, et seulement s'il y a un lien à rafraîchir.
+    var lireProductions = function() { return productions || (productions = productionsDuTrimestre()); };
+    for (var entryRL of etat.noeuds) {
+        var n = entryRL[1];
+        if (n.type === 'lecon') {
+            changes += rafraichirObjectifsLies(n, lireProductions);
+        } else if (competenceLiee(n)) {
+            if (fiche === undefined) fiche = ficheCompetenceCarte();
+            if (fiche && n.titre !== fiche.enonce) { n.titre = fiche.enonce; changes++; }
+        }
+    }
+    return changes;
+}
+
+/** Les lignes liées d'une leçon reprennent le texte courant de leur production. */
+function rafraichirObjectifsLies(lecon, lireProductions) {
+    var liste = lecon.metadata && lecon.metadata.objectifs;
+    if (!Array.isArray(liste)) return 0;
+    var changes = 0;
+    liste.forEach(function(o) {
+        if (!o || !o.productionId || typeof o.texte !== 'string') return;
+        var p = productionDeObjectif(o, lireProductions());
+        var texte = objectifDeProduction(p);
+        if (p && o.texte !== texte) { o.texte = texte; changes++; }
+    });
+    return changes;
+}
+
+/**
+ * Au chargement d'une carte (`chargerCarte`, pendant les écritures de la
+ * MACHINE) : la production et la fiche ne changent qu'ailleurs (Conception ›
+ * Productions, Cadre › Trimestre), et revenir à la carte repasse ici. On
+ * n'écrit que s'il y a eu un changement — comme `migrerObjectifsVersMetadata`,
+ * qui sauvegarde lui aussi avant le rendu.
+ */
+function rafraichirLiensAuChargement() {
+    if (rafraichirLiensCarte() > 0) sauvegarder();
+}
+
+/**
+ * Où l'objectif de cette production est-il repris ? Lu AU STOCKAGE, dans les
+ * cartes du trimestre actif (`sauvegarder()` écrit à chaque geste). Toutes les
+ * cartes : le lien désigne une production par son id, il n'y a pas de cours à
+ * deviner. Une ligne par leçon, dans la forme validée.
+ * @returns {Array<string>}
+ */
+function lignesReprisesObjectif(productionId) {
+    if (!productionId) return [];
+    var pd = window.planificationDonnees;
+    if (!pd || typeof pd.getIndex !== 'function' || typeof pd.chargerCarte !== 'function') return [];
+    var index;
+    try { index = pd.getIndex(); } catch (e) { return []; }
+    if (!index || !Array.isArray(index.cartes)) return [];
+    var lignes = [];
+    index.cartes.forEach(function(entree) {
+        if (!entree || !entree.id) return;
+        var donnees = pd.chargerCarte(entree.id);
+        if (!donnees || !Array.isArray(donnees.noeuds)) return;
+        donnees.noeuds.forEach(function(n) {
+            if (!n || n.type !== 'lecon') return;
+            var reprend = objectifsDeLecon(n).some(function(o) { return o.productionId === productionId; });
+            if (reprend) lignes.push(texteRepriseObjectif((n.titre && String(n.titre).trim()) || 'Sans titre', semaineDeLecon(n)));
+        });
+    });
+    return lignes;
+}
+
+/**
+ * Les deux chemins vers l'écran qui fait foi. Même précaution que
+ * `ouvrirCadreTrimestre` : sortir d'abord de la « Vue plein écran », sans quoi
+ * l'en-tête et la navigation resteraient masqués à l'arrivée.
+ */
+function ouvrirProductionDepuisCarte(productionId) {
+    if (!productionId) return;
+    if (_planifPleinEcran) togglePleinEcranCarte();
+    if (typeof afficherSection === 'function') afficherSection('conception');
+    if (typeof afficherSousSection === 'function') afficherSousSection('conception-productions');
+    if (typeof window.chargerProductionPourModif !== 'function') return;
+    Promise.resolve(window.chargerProductionPourModif(productionId)).then(function() {
+        var champ = document.getElementById('productionObjectif');
+        if (champ && champ.offsetParent !== null) champ.focus();
+    }).catch(function(e) { console.warn('[Planif-Carte] Ouverture de la production échouée :', e); });
+}
+
+function ouvrirFicheCoursDepuisCarte(coursId) {
+    if (!coursId) return;
+    if (_planifPleinEcran) togglePleinEcranCarte();
+    if (typeof window.naviguerVersReglagesTrimestre === 'function') window.naviguerVersReglagesTrimestre();
+    var select = document.getElementById('v2-selectCours');
+    if (select) select.value = coursId;
+    if (typeof window.changerCoursSelectionneV2 === 'function') window.changerCoursSelectionneV2(coursId);
+    var champ = document.getElementById('v2-competence');
+    if (champ && champ.offsetParent !== null) champ.focus();
 }
 
 /**
@@ -1608,6 +2241,14 @@ function definirTypeNoeud(noeudId, nouveauType) {
     if (!famille || famille.indexOf(nouveauType) === -1) return false;
     if (n.type === nouveauType) return false;
     enregistrerPourUndo();
+    // Deux liens (9 nov. 2026) : la permutation garde toute la metadata ; un
+    // drapeau de lien survivrait sur une idée maîtresse. Elle délie d'abord,
+    // comme « Délier » (le titre mis de côté revient).
+    if (competenceLiee(n)) {
+        retirerLienCompetence(n);
+        propagerModification(noeudId, 'metadata', n.metadata);
+        propagerModification(noeudId, 'titre', n.titre);
+    }
     n.type = nouveauType;
     // Un clone est une INSTANCE LIÉE : son type suit celui de sa source, comme
     // son titre et sa durée.
@@ -3134,6 +3775,9 @@ function creerNoeud(type, x, y) {
         cloneSourceId: null
     };
     etat.noeuds.set(id, donnees);
+    // Deux liens (9 nov. 2026) : une compétence posée dans une carte dont la
+    // fiche du cours en porte une naît liée (la deuxième reste libre).
+    if (type === 'competence') lierCompetenceNeuve(donnees);
 
     const estConteneur = config.conteneur === true;
 
@@ -3234,6 +3878,7 @@ function ouvrirPanneau(id) {
     document.getElementById('planif-panneau-pastille').style.background = obtenirCouleurNoeud(donnees);
     document.getElementById('planif-panneau-type').textContent = obtenirLabelNoeud(donnees);
     document.getElementById('planif-panneau-titre').value = donnees.titre;
+    var ficheInspecteur = preparerTitreInspecteur(donnees);   // deux liens (9 nov. 2026)
     document.getElementById('planif-panneau-description').value = donnees.description || '';
 
     // Champs extra selon le type
@@ -3297,6 +3942,9 @@ function ouvrirPanneau(id) {
     if (donnees.type === 'evaluation') {
         extra.innerHTML += blocLegendeEvaluationHTML();
     }
+    // Deux liens (9 nov. 2026) : la compétence de la fiche du cours. Écouteurs
+    // posés EN FIN de ouvrirPanneau, comme les autres.
+    ajouterSectionCompetenceInspecteur(extra, donnees, ficheInspecteur);
 
     // « Dans la leçon » — déplacement SANS geste, depuis l'inspecteur (friction
     // F7, précision du 6 août : sur iPad il n'existe ni ⌘ ni glisser de nœud
@@ -3345,6 +3993,10 @@ function ouvrirPanneau(id) {
         var groupes = leconsInspecteurEvaluation(donnees, idxEval);
         var hoteEval = leconParenteDe(donnees);
         var htmlVerifies = '';
+        // Deux liens (9 nov. 2026) : le stock. Un objectif identique à celui de
+        // la production choisie se voit proposer « Relier » ; rien d'autre.
+        var aRelier = {};
+        objectifsARelierPourEvaluation(donnees).forEach(function(p) { aRelier[p.objectifId] = p; });
         groupes.forEach(function(lec) {
             var objs = objectifsDeLecon(lec);
             if (objs.length === 0) return;
@@ -3356,13 +4008,24 @@ function ouvrirPanneau(id) {
                     + (sem !== null ? ' (semaine ' + sem + (seance ? ', séance ' + seance : '') + ')' : '');
             htmlVerifies += '<div class="planif-objectifs-servis-groupe">' + echapperHtml(titreGroupe) + '</div>';
             objs.forEach(function(o) {
-                htmlVerifies +=
+                var caseObjectif =
                     '<label class="planif-checkbox-label planif-objectif-servi-ligne">' +
                         '<input type="checkbox" class="planif-objectif-servi"' +
                         ' data-obj-id="' + echapperHtml(o.id) + '"' +
                         (dejaVerifies.indexOf(o.id) !== -1 ? ' checked' : '') + '>' +
                         ' <span>' + echapperHtml(o.texte) + '</span>' +
                     '</label>';
+                var prop = aRelier[o.id];
+                // Le bouton est à CÔTÉ de l'étiquette, jamais dedans : un clic
+                // dans une <label> cocherait la case en même temps.
+                htmlVerifies += prop
+                    ? '<div class="planif-objectif-servi-rangee">' + caseObjectif +
+                        '<button type="button" class="planif-btn-carte planif-btn-relier-objectif"' +
+                        ' data-lecon-id="' + echapperHtml(prop.leconId) + '"' +
+                        ' data-obj-id="' + echapperHtml(prop.objectifId) + '"' +
+                        ' data-production-id="' + echapperHtml(prop.productionId) + '">' +
+                        echapperHtml(LIBELLES_DEUX_LIENS.relier) + '</button></div>'
+                    : caseObjectif;
             });
         });
         if (htmlVerifies) {
@@ -3513,6 +4176,11 @@ function ouvrirPanneau(id) {
             var niveauObj = NIVEAUX_COGNITIFS.find(function(n) { return n.id === niveauId; });
             if (niveauObj) descDiv.textContent = niveauObj.description;
             var verbes = BANQUE_VERBES[niveauId] || [];
+            // Deux liens (9 nov. 2026) : les verbes s'AJOUTENT au titre ; celui
+            // d'une compétence liée s'écrit dans la fiche du cours. Affichés, ils
+            // ne feraient rien. Le niveau cognitif, lui, reste à choisir ici.
+            var champTitre = document.getElementById('planif-panneau-titre');
+            if (champTitre && champTitre.readOnly) verbes = [];
             verbesDiv.innerHTML = '';
             for (var vi = 0; vi < verbes.length; vi++) {
                 var tag = document.createElement('button');
@@ -3523,7 +4191,8 @@ function ouvrirPanneau(id) {
                 tag.addEventListener('click', function() {
                     var verbe = this.dataset.verbe;
                     var titreInput = document.getElementById('planif-panneau-titre');
-                    if (titreInput) {
+                    // Deux liens : le titre d'une compétence liée est celui de la fiche.
+                    if (titreInput && !titreInput.readOnly) {
                         var titreCourant = titreInput.value.trim();
                         if (!titreCourant.toLowerCase().startsWith(verbe.toLowerCase())) {
                             enregistrerPourUndo();
@@ -3553,6 +4222,8 @@ function ouvrirPanneau(id) {
     };
     document.getElementById('planif-panneau-titre').oninput = function(e) {
         donnees.titre = e.target.value;
+        // Seul un lien qui dort laisse ce champ en écriture (`abandonnerLienCompetence`).
+        abandonnerLienCompetence(donnees);
         const titreEl = document.getElementById(id);
         if (titreEl) {
             const t = titreEl.querySelector('.planif-noeud-titre');
@@ -3726,8 +4397,17 @@ function ouvrirPanneau(id) {
             if (!donnees.metadata) donnees.metadata = {};
             donnees.metadata.productionId = e.target.value || null;
             sauvegarder();
+            // Deux liens (9 nov. 2026) : les propositions « Relier » dépendent
+            // de la production choisie — l'Inspecteur se redessine, et le
+            // focus revient au sélecteur.
+            ouvrirPanneau(id);
+            var selFrais = document.getElementById('planif-panneau-production');
+            if (selFrais) selFrais.focus();
         });
     }
+
+    // Deux liens (9 nov. 2026) — même contrainte d'ordre que « Dans la leçon ».
+    brancherDeuxLiensInspecteur(extra, id);
 
     // #403 : même contrainte d'ordre que « Dans la leçon » ci-dessus.
     var casesServies = extra.querySelectorAll('.planif-objectif-servi');
@@ -4221,6 +4901,10 @@ function dupliquerNoeud(noeudId, silencieux, lie) {
         metadata: JSON.parse(JSON.stringify(source.metadata || {})),
         cloneSourceId: cloneSourceId
     };
+    // Deux liens (9 nov. 2026) : une COPIE est un autre bloc, et une carte n'a
+    // qu'une compétence liée. La copie garde le texte, pas le lien ; le clone
+    // (instance du même bloc) garde les deux.
+    retirerLienDeLaCopie(donnees);
     etat.noeuds.set(newId, donnees);
     if (cloneSourceId) _indexerClone(donnees);
 
@@ -6068,6 +6752,76 @@ function commandesObjectifHTML(rang, premier, dernier) {
                'Retirer cet objectif', false);
 }
 
+// Deux liens vers la carte (9 nov. 2026) — la ligne liée dont le menu est
+// ouvert : { noeudId, objectifId } ou null. Même patron que `_ajoutObjectif` :
+// un état d'affichage transitoire, jamais persisté.
+var _menuObjectifLie = null;
+
+/** Ouvre ou ferme le menu d'une ligne liée. @returns {boolean} ouvert après l'appel */
+function basculerMenuObjectifLie(leconId, objectifId) {
+    var ouvert = !!(_menuObjectifLie && _menuObjectifLie.noeudId === leconId
+        && _menuObjectifLie.objectifId === objectifId);
+    _menuObjectifLie = ouvert ? null : { noeudId: leconId, objectifId: objectifId };
+    return !ouvert;
+}
+
+/**
+ * La ligne d'un objectif REPRIS d'une production : son texte est celui de la
+ * production, il ne se modifie pas sur place. La toucher ouvre ses deux
+ * commandes. Elle garde la pastille et les quatre commandes des autres lignes :
+ * elle se réordonne, se retire, et on insère après elle comme ailleurs.
+ */
+function ligneObjectifLieHTML(n, o, production, rang, nbLignes) {
+    var ouvert = !!(_menuObjectifLie && _menuObjectifLie.noeudId === n.id
+        && _menuObjectifLie.objectifId === o.id);
+    var titreProd = (production.titre && String(production.titre).trim()) || 'Sans titre';
+    // PROPOSÉ (non validé, rapport § « Les mots à valider ») : l'infobulle.
+    var bulle = 'Objectif de la production « ' + titreProd + ' »';
+    var html =
+        '<div class="planif-noeud-objectif-ligne planif-noeud-objectif-ligne--liee">' +
+            pastilleObjectifHTML(n, o.id) +
+            '<div class="planif-noeud-objectif planif-noeud-objectif--lie" data-obj-rang="' + rang + '"' +
+            ' data-obj-id="' + echapperHtml(o.id) + '" data-obj-production="' + echapperHtml(production.id) + '"' +
+            ' role="button" tabindex="0" aria-expanded="' + (ouvert ? 'true' : 'false') + '"' +
+            // Le glyphe du lien est posé en CSS (`::before`), pas dans le DOM :
+            // `lireLignes` relit le `textContent` de chaque ligne, il y entrerait.
+            ' title="' + echapperHtml(bulle) + '">' +
+                echapperHtml(objectifDeProduction(production)) +
+            '</div>' +
+            commandesObjectifHTML(rang, rang === 0, rang === nbLignes - 1) +
+        '</div>';
+    if (ouvert) {
+        html += '<div class="planif-obj-lie-menu">' +
+            '<button type="button" class="planif-btn-carte" data-geste-lien="modifier"' +
+            ' data-production-id="' + echapperHtml(production.id) + '">' +
+                echapperHtml(LIBELLES_DEUX_LIENS.modifierDansProduction) + '</button>' +
+            '<button type="button" class="planif-btn-carte" data-geste-lien="delier"' +
+            ' data-obj-id="' + echapperHtml(o.id) + '">' + echapperHtml(LIBELLES_DEUX_LIENS.delier) + '</button>' +
+            '</div>';
+    }
+    return html;
+}
+
+/**
+ * La commande qui reprend l'objectif d'une production : un sélecteur dont la
+ * première entrée porte le libellé validé. Un `<select>` et non un menu
+ * maison : sur iPad il ouvre la roue native, au clavier il se parcourt seul.
+ * Absente quand aucune production n'a d'objectif à reprendre.
+ */
+function selecteurReprendreObjectifHTML(n) {
+    var offertes = productionsPourReprendre(n);
+    if (offertes.length === 0) return '';
+    var libelle = LIBELLES_DEUX_LIENS.reprendreObjectif;
+    var html = '<select class="planif-obj-reprendre" data-lecon-id="' + echapperHtml(n.id) + '"' +
+        ' aria-label="' + echapperHtml(libelle) + '">' +
+        '<option value="" selected>' + echapperHtml(libelle) + '</option>';
+    offertes.forEach(function(p) {
+        html += '<option value="' + echapperHtml(p.id) + '">' +
+            echapperHtml((p.titre && String(p.titre).trim()) || 'Sans titre') + '</option>';
+    });
+    return html + '</select>';
+}
+
 /** Le bloc dépliable des objectifs d'une leçon. '' si replié ou pas une leçon. */
 function objectifsLeconHTML(n) {
     if (n.type !== 'lecon' || !objectifEstDeplie(n)) return '';
@@ -6080,8 +6834,9 @@ function objectifsLeconHTML(n) {
                 '<div class="planif-noeud-objectif" contenteditable="true" data-obj-rang="0"' +
                 ' data-placeholder="Sera en mesure de…"></div>' +
                 '</div>';
-        return html + '</div>';
+        return html + selecteurReprendreObjectifHTML(n) + '</div>';
     }
+    var productions = productionsDuTrimestre();
     var rangAccueil = (_ajoutObjectif && _ajoutObjectif.noeudId === n.id)
         ? _ajoutObjectif.rang : -1;
     // Nombre de lignes RENDUES (la ligne d'accueil en est une) : c'est la
@@ -6103,6 +6858,12 @@ function objectifsLeconHTML(n) {
             rangRendu++;
         }
         if (io_ === objs.length) break;
+        var prodLiee = productionDeObjectif(objs[io_], productions);
+        if (prodLiee) {
+            html += ligneObjectifLieHTML(n, objs[io_], prodLiee, rangRendu, nbLignes);
+            rangRendu++;
+            continue;
+        }
         html +=
             '<div class="planif-noeud-objectif-ligne">' +
                 pastilleObjectifHTML(n, objs[io_].id) +
@@ -6118,7 +6879,7 @@ function objectifsLeconHTML(n) {
             '</div>';
         rangRendu++;
     }
-    return html + '</div>';
+    return html + selecteurReprendreObjectifHTML(n) + '</div>';
 }
 
 /**
@@ -6252,6 +7013,24 @@ function enTeteIdentiteHTML(n) {
         obtenirLabelNoeud(n) + '</span>';
 }
 
+/**
+ * Le titre d'une feuille. Un bloc Compétence LIÉ dont la fiche répond affiche
+ * le numéro et l'énoncé de la fiche, et son titre ne se modifie pas sur place :
+ * c'est dans la fiche du cours qu'il s'écrit (deux liens, 9 nov. 2026). Un lien
+ * qui dort (fiche vidée, carte détachée) rend un bloc libre, avec son dernier
+ * titre — modifiable.
+ */
+function titreFeuilleHTML(n) {
+    var fiche = competenceLiee(n) ? ficheCompetenceCarte() : null;
+    if (fiche) {
+        return (fiche.numero
+                ? '<div class="planif-noeud-numero-competence">' + echapperHtml(fiche.numero) + '</div>'
+                : '') +
+            '<div class="planif-noeud-titre planif-noeud-titre--lie">' + echapperHtml(fiche.enonce) + '</div>';
+    }
+    return '<div class="planif-noeud-titre" contenteditable="true">' + echapperHtml(n.titre || '') + '</div>';
+}
+
 function contenuNoeudHTML(n) {
     var estConteneur = !!(TYPES[n.type] && TYPES[n.type].conteneur);
     var enTete =
@@ -6285,7 +7064,7 @@ function contenuNoeudHTML(n) {
             ' role="separator" aria-label="Ajuster la largeur de ce bloc"></div>';
     }
     return enTete +
-        '<div class="planif-noeud-titre" contenteditable="true">' + echapperHtml(n.titre || '') + '</div>' +
+        titreFeuilleHTML(n) +
         ports +
         // Poignée de redimensionnement — FEUILLES SEULEMENT (option A,
         // décision du 6 août). Les conteneurs sont dimensionnés par
@@ -6462,6 +7241,9 @@ function restaurerSnapshot(snapshot) {
         if (nV.enfants) nV.enfants = nV.enfants.filter(function(eid) { return etat.noeuds.has(eid); });
     }
     _reconstruireCloneIndex();
+    // Deux liens (9 nov. 2026) : un instantané garde le texte de son époque ;
+    // une ligne liée doit montrer celui d'aujourd'hui. La sauvegarde suit.
+    rafraichirLiensCarte();
 
     reconstruireDOM();
     etat.selection = null;
@@ -6526,6 +7308,7 @@ function viderCanvas() {
 
 function chargerCarte(carteId) {
     _ajoutObjectif = null;
+    _menuObjectifLie = null;
     viderCanvas();
     var donnees = window.planificationDonnees.chargerCarte(carteId);
     if (!donnees) { centrerVueSurContenu(); rendreChaineCarte(); return; }
@@ -6649,6 +7432,9 @@ function chargerCarte(carteId) {
         // Ablation de l'ancrage porté par la séquence, avant le rendu pour que
         // l'étendue affichée soit déjà la dérivée et non l'ancienne valeur saisie.
         migrerAncrageTemporelVersLecon();
+        // Deux liens (9 nov. 2026) : le texte courant des productions reprises
+        // et l'énoncé courant de la fiche, AVANT le rendu.
+        rafraichirLiensAuChargement();
 
         reconstruireDOM();
         if (liensModifies) sauvegarder();
@@ -7648,6 +8434,9 @@ function attacherEvenements(el, donnees) {
     });
     titreEl.addEventListener('input', throttleRAF(function() {
         donnees.titre = titreEl.textContent;
+        // Un lien qui dort (le titre n'est modifiable que dans ce cas) : écrire
+        // ici en fait son propre texte (deux liens, `abandonnerLienCompetence`).
+        abandonnerLienCompetence(donnees);
         sauvegarder();
         // Un titre qui passe sur deux lignes grandit l'en-tête : les enfants
         // doivent redescendre d'autant (même cause que pour les objectifs).
@@ -7698,10 +8487,16 @@ function attacherEvenements(el, donnees) {
         var lireLignes = function() {
             var lues = [];
             zoneObjectifs.querySelectorAll('.planif-noeud-objectif').forEach(function(ligne) {
-                lues.push({
+                var lue = {
                     id: ligne.getAttribute('data-obj-id') || null,
                     texte: ligne.textContent.trim()
-                });
+                };
+                // Deux liens (9 nov. 2026) : une ligne liée se relit AVEC son
+                // lien, sans quoi `appliquerObjectifs` le perdrait au premier
+                // geste sur une autre ligne de la leçon.
+                var lien = ligne.getAttribute('data-obj-production');
+                if (lien) lue.productionId = lien;
+                lues.push(lue);
             });
             return lues;
         };
@@ -7716,6 +8511,8 @@ function attacherEvenements(el, donnees) {
         };
 
         zoneObjectifs.querySelectorAll('.planif-noeud-objectif').forEach(function(ligne) {
+            // Une ligne LIÉE ne se tape pas : ses gestes sont plus bas.
+            if (ligne.classList.contains('planif-noeud-objectif--lie')) return;
             collerEnTexteBrut(ligne);
             ligne.addEventListener('focus', function() { enregistrerPourUndo(); });
 
@@ -7847,6 +8644,65 @@ function attacherEvenements(el, donnees) {
                 if (e.key === 'Enter' || e.key === ' ') agir(e);
             });
         });
+
+        // === DEUX LIENS (9 nov. 2026) : la ligne liée, son menu, la reprise ===
+        // Le pointerdown du bloc démarre le déplacement (#148) : chaque
+        // contrôle l'intercepte, comme les commandes ci-dessus.
+        var arreterPression = function(cible) {
+            cible.addEventListener('pointerdown', function(e) { e.stopPropagation(); });
+        };
+        var rerendreZone = function(selecteurFocus) {
+            reconstruireDOM();
+            mettreAJourTousLesBadges();
+            var frais = document.getElementById(id);
+            var cible = frais && selecteurFocus ? frais.querySelector(selecteurFocus) : null;
+            if (cible) cible.focus();
+        };
+        zoneObjectifs.querySelectorAll('.planif-noeud-objectif--lie').forEach(function(ligne) {
+            arreterPression(ligne);
+            var objId = ligne.getAttribute('data-obj-id');
+            var basculer = function(e) {
+                e.stopPropagation();
+                e.preventDefault();
+                basculerMenuObjectifLie(id, objId);
+                rerendreZone('.planif-noeud-objectif--lie[data-obj-id="' + objId.replace(/"/g, '') + '"]');
+            };
+            ligne.addEventListener('click', basculer);
+            ligne.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter' || e.key === ' ') basculer(e);
+            });
+        });
+        zoneObjectifs.querySelectorAll('[data-geste-lien="modifier"]').forEach(function(btn) {
+            arreterPression(btn);
+            btn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                _menuObjectifLie = null;
+                ouvrirProductionDepuisCarte(btn.getAttribute('data-production-id'));
+            });
+        });
+        zoneObjectifs.querySelectorAll('[data-geste-lien="delier"]').forEach(function(btn) {
+            arreterPression(btn);
+            btn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                var objId = btn.getAttribute('data-obj-id');
+                _menuObjectifLie = null;
+                delierObjectif(id, objId);
+                rerendreZone('.planif-noeud-objectif[data-obj-id="' + objId.replace(/"/g, '') + '"]');
+            });
+        });
+        var selReprendre = zoneObjectifs.querySelector('.planif-obj-reprendre');
+        if (selReprendre) {
+            ['pointerdown', 'mousedown', 'click'].forEach(function(evt) {
+                selReprendre.addEventListener(evt, function(e) { e.stopPropagation(); });
+            });
+            selReprendre.addEventListener('change', function() {
+                var choisie = selReprendre.value;
+                if (!choisie) return;
+                _ajoutObjectif = null;
+                reprendreObjectifProduction(id, choisie);
+                rerendreZone('.planif-noeud-objectif--lie[data-obj-production="' + choisie.replace(/"/g, '') + '"]');
+            });
+        }
     }
 
     el.querySelectorAll('.planif-noeud-port').forEach(function(port) {
@@ -8319,10 +9175,17 @@ function trouverIdeesMaitressesAncetres(noeudId) {
     return resultats;
 }
 
-function chargerProductions() {
+/**
+ * Les productions de la liste de Conception, objets COMPLETS (deux liens vers la
+ * carte, 9 nov. 2026 : la commande qui reprend un objectif lit `objectif`, que
+ * la projection de `chargerProductions` ne garde pas). Le filtre est celui que
+ * `chargerProductions` appliquait seul jusqu'ici — il est extrait, pas recopié.
+ */
+function productionsVisibles() {
     if (typeof db === 'undefined' || typeof window.cle !== 'function') return [];
     try {
         var productions = db.getSync(window.cle('productions'), []);
+        if (!Array.isArray(productions)) return [];
 
         // ⚠⚠ LE FILTRE QUI VIDAIT TOUT (corrigé le 25 août 2026).
         // Cette ligne disait `p.estActive`. Or AUCUN module du projet n'écrit
@@ -8346,8 +9209,16 @@ function chargerProductions() {
         if (window.BibliothequeUI && typeof window.BibliothequeUI.filtrerParModeDemo === 'function') {
             visibles = window.BibliothequeUI.filtrerParModeDemo(visibles);
         }
+        return visibles;
+    } catch (e) {
+        console.warn('[Planif-Carte] Lecture des productions échouée :', e);
+        return [];
+    }
+}
 
-        return visibles.map(function(p) {
+function chargerProductions() {
+    try {
+        return productionsVisibles().map(function(p) {
             // 🆕 Beta 98.3 : Résoudre via obtenirEcheanceEffective (multi-groupe)
             var infoC = db.getSync('infoCours', null);
             var gcPlanif = obtenirIdContexteActif(infoC);
@@ -12289,6 +13160,25 @@ window.planificationCarte = {
     objectifDeLeconParId: objectifDeLeconParId,
     objectifsDeLeconParId: objectifsDeLeconParId,
     definirObjectifsLecon: definirObjectifsLecon,
+    // Deux liens vers la carte (9 nov. 2026) — l'objectif d'une production,
+    // la compétence de la fiche du cours.
+    LIBELLES_DEUX_LIENS: LIBELLES_DEUX_LIENS,
+    texteRepriseObjectif: texteRepriseObjectif,
+    lignesReprisesObjectif: lignesReprisesObjectif,
+    productionsPourReprendre: productionsPourReprendre,
+    reprendreObjectifProduction: reprendreObjectifProduction,
+    delierObjectif: delierObjectif,
+    relierObjectifAProduction: relierObjectifAProduction,
+    objectifsARelierPourEvaluation: objectifsARelierPourEvaluation,
+    basculerMenuObjectifLie: basculerMenuObjectifLie,
+    rafraichirLiensCarte: rafraichirLiensCarte,
+    ficheCompetenceCarte: ficheCompetenceCarte,
+    competenceLiee: competenceLiee,
+    peutRelierCompetence: peutRelierCompetence,
+    lierCompetenceNeuve: lierCompetenceNeuve,
+    relierCompetenceAFiche: relierCompetenceAFiche,
+    delierCompetence: delierCompetence,
+    sectionCompetenceInspecteurHTML: sectionCompetenceInspecteurHTML,
     // #403 — liens objectif → activité / évaluation
     TYPES_SERVANTS_OBJECTIF: TYPES_SERVANTS_OBJECTIF,
     leconParenteDe: leconParenteDe,

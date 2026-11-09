@@ -703,6 +703,23 @@ function ordreBlocsAEnregistrer() {
         .map(b => b.ref);
 }
 
+/**
+ * Les leçons de la carte qui reprennent l'objectif de la production ouverte —
+ * une ligne chacune, déjà formulée par la carte (`lignesReprisesObjectif`).
+ * [] pour une production en création : elle n'a pas encore d'id à reprendre.
+ */
+function lignesReprisesDeLaProductionOuverte() {
+    const carte = window.planificationCarte;
+    const id = (typeof productionEnEdition !== 'undefined') ? productionEnEdition : null;
+    if (!id || !carte || typeof carte.lignesReprisesObjectif !== 'function') return [];
+    try {
+        return carte.lignesReprisesObjectif(id);
+    } catch (e) {
+        console.warn('[productions] Lecture des reprises dans la carte échouée :', e);
+        return [];
+    }
+}
+
 function rendreBlocsConsignes() {
     const liste = document.getElementById('champsPersonnalisesListe');
     if (!liste) return;
@@ -731,6 +748,10 @@ function rendreBlocsConsignes() {
             const boutonAide = a.aide
                 ? `<button class="btn-aide-contextuelle" data-aide="${echapperHtml(a.aide)}" aria-label="Aide contextuelle"><span class="icone-info-aide taille-bouton" aria-hidden="true"></span></button>`
                 : '';
+            // Deux liens vers la carte (9 nov. 2026) : sous l'objectif, les leçons
+            // de la carte qui le reprennent. La phrase est celle de la carte,
+            // validée mot pour mot : on l'affiche, on ne la recopie pas.
+            const reprises = a.cle === 'objectif' ? lignesReprisesDeLaProductionOuverte() : [];
             return `
         <div class="champ-perso champ-perso-ancre" data-champ-id="${echapperHtml(a.cle)}" data-ancre="${echapperHtml(a.cle)}"
              style="border: 1px solid var(--bordure-moyenne, #ccc); border-radius: var(--rayon-moyen, 6px); padding: 12px;">
@@ -741,7 +762,8 @@ function rendreBlocsConsignes() {
             </div>
             <p class="u-texte-petit" style="color: var(--gris-moyen); margin: 0 0 6px 0">${echapperHtml(a.note)}${a.recommande ? ' <span class="champ-recommande" title="Recommandé : sans ce champ, l\'en-tête des rétroactions perd cette ligne, en silence">*</span>' : ''}</p>
             <textarea id="${echapperHtml(a.champId)}" class="controle-form champ-perso-contenu-ancre" rows="${a.rows}"
-                placeholder="${echapperHtml(a.placeholder)}">${echapperHtml(bloc.contenu)}</textarea>
+                placeholder="${echapperHtml(a.placeholder)}">${echapperHtml(bloc.contenu)}</textarea>${reprises.map(l =>
+                `<p class="u-texte-petit production-objectif-reprise">${echapperHtml(l)}</p>`).join('')}
         </div>`;
         }
 

@@ -366,3 +366,43 @@ describe('Reprise · vivacité de productionId (#425 préalable)', () => {
     });
 });
 
+
+// Deux liens vers la carte (9 nov. 2026) — l'objectif de leçon repris d'une
+// production (`metadata.objectifs[].productionId`) suit la MÊME règle que le
+// pont de l'évaluation : effacé si la production n'existe pas dans le trimestre
+// d'arrivée, gardé sinon. Le TEXTE, lui, reste toujours : c'est le dernier texte
+// connu, et la ligne redevient un objectif ordinaire.
+describe('Reprise · le lien d’un objectif repris d’une production', () => {
+    let api;
+    beforeEach(() => { api = monterModule().planificationDonnees; });
+
+    function reprendre(objectifs, productionsCible) {
+        poserTrimestre('h2026', [{
+            id: 'carte_1', nom: '601-101', coursId: 'c-601',
+            noeuds: [{ id: 'L1', type: 'lecon', titre: 'Le sonnet', metadata: { objectifs } }]
+        }]);
+        poserTrimestre('a2026', [{ id: 'carte_9', nom: 'Vide' }]);
+        store['cours'] = [{ id: 'c-601', code: '601-101' }];
+        if (productionsCible) store['a2026_productions'] = productionsCible;
+        const nouvelId = api.importerCarteDepuisTrimestre('h2026', 'carte_1');
+        return store['a2026_planification_mindmap'].cartes[nouvelId].noeuds[0].metadata.objectifs;
+    }
+
+    it('production morte à l’arrivée : le lien tombe, l’id et le texte restent', () => {
+        const objs = reprendre([{ id: 'o1', texte: 'Analyser un poème', productionId: 'prod-morte' }],
+            [{ id: 'prod-autre', objectif: 'Autre' }]);
+        expect(objs).toEqual([{ id: 'o1', texte: 'Analyser un poème' }]);
+    });
+
+    it('production vivante (import sélectif qui a gardé son id) : le lien tient', () => {
+        const objs = reprendre([{ id: 'o1', texte: 'Analyser un poème', productionId: 'prod-commune' }],
+            [{ id: 'prod-commune', objectif: 'Analyser un poème' }]);
+        expect(objs).toEqual([{ id: 'o1', texte: 'Analyser un poème', productionId: 'prod-commune' }]);
+    });
+
+    it('la source n’est jamais touchée', () => {
+        reprendre([{ id: 'o1', texte: 'Analyser', productionId: 'prod-morte' }], []);
+        const source = store['h2026_planification_mindmap'].cartes.carte_1.noeuds[0].metadata.objectifs;
+        expect(source[0].productionId).toBe('prod-morte');
+    });
+});

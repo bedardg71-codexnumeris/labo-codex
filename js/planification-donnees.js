@@ -526,6 +526,15 @@ function importerCarteDepuisTrimestre(trimestreSourceId, carteId) {
             if (n && n.metadata && n.metadata.productionId && !vivantes.has(n.metadata.productionId)) {
                 delete n.metadata.productionId;
             }
+            // Deux liens vers la carte (9 nov. 2026) : l'objectif de leçon repris
+            // d'une production suit la MÊME règle que le pont de l'évaluation. Le
+            // lien tombe si la production n'est pas dans le trimestre d'arrivée ;
+            // le texte reste (le dernier connu) et la ligne redevient ordinaire.
+            if (n && n.metadata && Array.isArray(n.metadata.objectifs)) {
+                n.metadata.objectifs.forEach(o => {
+                    if (o && o.productionId && !vivantes.has(o.productionId)) delete o.productionId;
+                });
+            }
         });
         setDonnees(donnees);
 

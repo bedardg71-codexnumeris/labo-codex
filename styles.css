@@ -25401,6 +25401,127 @@ body.planif-plein-ecran-actif #planif-guide-panel {
     font-style: italic;
 }
 
+/* === DEUX LIENS VERS LA CARTE (9 nov. 2026) ===
+   L'objectif repris d'une production, la compétence de la fiche du cours.
+   Aucune couleur nouvelle : la teinte de la leçon et celle de la compétence. */
+
+/* La ligne d'un objectif REPRIS : son texte est celui de la production, il ne
+   se tape pas sur place. Droite (les objectifs qu'on écrit sont en italique),
+   précédée du glyphe du lien, elle se touche comme un bouton. Le glyphe est en
+   CSS, pas dans le DOM : la carte relit le texte des lignes. */
+.planif-noeud-objectif--lie {
+    font-style: normal;
+    cursor: pointer;
+}
+.planif-noeud-objectif--lie::before {
+    content: "\1F517";
+    font-size: 10px;
+    margin-right: 3px;
+}
+.planif-noeud-objectif--lie:focus-visible {
+    outline: none;
+    box-shadow: var(--focus-ring);
+    border-radius: 3px;
+}
+.planif-noeud-objectif--lie[aria-expanded="true"] {
+    background: color-mix(in srgb, var(--planif-couleur-lecon) 18%, transparent);
+    border-radius: 3px;
+}
+
+/* Ses deux commandes, ouvertes sous la ligne. */
+.planif-obj-lie-menu {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    padding: 2px 6px 4px 18px;
+}
+
+/* La reprise : un sélecteur discret sous la liste, comme celui de la semaine. */
+.planif-obj-reprendre {
+    display: block;
+    width: calc(100% - 12px);
+    margin: 4px 6px 2px;
+    font-size: 11px;
+    padding: 2px 4px;
+    border: 1px solid color-mix(in srgb, var(--planif-couleur-lecon) 45%, transparent);
+    border-radius: 4px;
+    background: transparent;
+    color: var(--planif-couleur-lecon);
+    cursor: pointer;
+}
+.planif-obj-reprendre:focus {
+    outline: 2px solid var(--planif-couleur-selection, #3b82f6);
+    outline-offset: 1px;
+}
+/* Au doigt (iPad) : cibles de 44 px. */
+@media (hover: none) {
+    .planif-obj-reprendre,
+    .planif-obj-lie-menu .planif-btn-carte {
+        min-height: 44px;
+    }
+}
+
+/* Le bloc Compétence lié : le numéro de la fiche au-dessus de son énoncé. */
+.planif-noeud-numero-competence {
+    padding: 0 10px;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.3px;
+    color: var(--planif-couleur-competence);
+}
+
+/* L'Inspecteur : les éléments du devis (lecture seule), les commandes du lien,
+   et « Relier » à côté de la case d'un objectif (jamais dans son étiquette). */
+.planif-panneau-elements {
+    margin: 0 0 6px;
+    padding-left: 18px;
+    font-size: 12px;
+    color: var(--texte-secondaire, #8aa4b0);
+}
+.planif-panneau-actions-lien {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin: 8px 0;
+}
+.planif-objectif-servi-rangee {
+    display: flex;
+    align-items: flex-start;
+    gap: 6px;
+}
+.planif-objectif-servi-rangee .planif-objectif-servi-ligne {
+    flex: 1;
+    min-width: 0;
+}
+.planif-btn-relier-objectif {
+    flex: 0 0 auto;   /* dans sa rangée, « Relier » ne cède pas sa place à l'objectif */
+}
+/* Le texte de la fiche, montré sous le titre du bloc avant de relier : c'est
+   lui que le bloc affichera, il se lit en couleur de texte, pas en dérivé.
+   `--texte-principal` et non `--planif-couleur-texte` : celui-ci est résolu
+   une fois pour toutes sur la racine, il resterait pâle en mode clair. */
+.planif-panneau-texte-fiche {
+    color: var(--texte-principal);
+}
+/* Le titre d'une compétence liée : en lecture seule, il se lit comme un dérivé.
+   L'id du panneau en tête l'emporte sur `.mode-clair #planif-panneau input`. */
+#planif-panneau #planif-panneau-titre[readonly] {
+    color: var(--texte-secondaire, #8aa4b0);
+    cursor: default;
+}
+@media (hover: none) {
+    .planif-panneau-actions-lien .planif-btn-carte,
+    .planif-objectif-servi-rangee .planif-btn-carte {
+        min-height: 44px;
+    }
+}
+
+/* La fiche de production : sous l'objectif, les leçons qui le reprennent. */
+.production-objectif-reprise {
+    margin: 6px 0 0;
+    color: var(--texte-secondaire, #8aa4b0);
+}
+
 /* === #403 — pastille d'alignement d'un objectif ===
    Elle REMPLACE la puce « • » : même place, même rôle de marqueur d'unité,
    plus un état. Trois états de même gabarit, pour que la colonne se lise d'un
