@@ -2114,7 +2114,12 @@ function _seLitEnNonParticipation(da, indices, sansCopie) {
     return depistagePeutJugerLaNonParticipation().possible;
 }
 
-/** La fiche de la personne, dans le groupe-cours actif, la met-elle hors des calculs du groupe (`estEtudiantExclu`) ? */
+/**
+ * La fiche de la personne, dans le groupe-cours actif, la met-elle hors des calculs du groupe (`estEtudiantExclu`) ?
+ * Sans suite (relecture du 9 nov.) : seules les fiches du groupe-cours actif sont lues. `calculerEtStockerPatternsGroupe`
+ * (profil-etudiant-actions.js) parcourt tout le trimestre : une personne exclue d'un autre groupe, à 0 %, y serait lue en
+ * non-participation, dans un cache qui n'est lu qu'en repli d'erreur.
+ */
 function _estHorsDesCalculsDuGroupe(da) {
     if (typeof obtenirEtudiantsCoursActif !== 'function' || typeof estEtudiantExclu !== 'function') return false;
     const fiche = (obtenirEtudiantsCoursActif() || []).find(e => e && e.da === da);

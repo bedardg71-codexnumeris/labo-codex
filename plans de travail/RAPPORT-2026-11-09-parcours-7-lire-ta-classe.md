@@ -26,6 +26,10 @@ verdict WebKit et les captures WebKit se prennent sur le Mac.
 Mesuré sous Chromium, sur un groupe monté par les formulaires du Cadre : une personne absente aux deux séances
 saisies (0 %), sans production, sans pratique assignée.
 
+Ce tableau date des corrections du matin. Depuis la retouche de 13 h 44, la colonne RàI et la carte disent
+« Non-participation » quand le groupe permet déjà d'en juger (un travail dû, une copie évaluée) ; le tableau ci-dessous
+reste vrai tant qu'il ne le permet pas.
+
 | Lecteur de `aucuneDonneeDeSuivi` | Avant | Maintenant |
 |---|---|---|
 | Profil › Accompagnement (`js/profil-etudiant-sections-affichage.js:857`) | Trois cartes « En attente de données » ; ni l'historique des interventions, ni « + Nouvelle intervention » | Ses trois cartes : Contexte d'apprentissage (« Assiduité (A) : 0 % », complétion « — ») ; Observation SOLO (« Aucune évaluation retenue pour cet·te étudiant·e… ») ; RàI « En attente » (« Données insuffisantes · Aucune production évaluée… », « Mobilisation : Assiduité 0 % ») ; l'historique et « + Nouvelle intervention » |
@@ -52,8 +56,12 @@ production, est lue en non-participation et reçoit le niveau RàI que cette rè
   déjà en non-participation sur son profil et dans la liste : rien ne change pour elle.
 - La cible d'intervention ne recopie plus la règle : elle suit la carte RàI (#744). La règle vit dans une seule
   fonction.
-- Rien n'est écrit dans tes données : le niveau se calcule à l'affichage. Le module des instantanés, qui lirait le
-  niveau, est en commentaire (`js/snapshots.js`).
+- Ce qui s'écrit (relecture du 9 nov.) : le niveau se calcule à l'affichage, mais deux endroits en gardent une
+  trace. Une intervention enregistre l'analyse de son sous-groupe quand on y reporte les présences (`niveauxRai`,
+  `patternsCommuns`, `js/interventions.js`) : celles déjà enregistrées gardent l'ancien compte, datées ; les suivantes
+  prennent le nouveau. Le cache `indicesPatternsRaI` est recalculé à chaque rendu de l'Aperçu. **Aucun stock à
+  réparer** : la règle change la source, pas ce qui est déjà écrit. Le module des instantanés, qui lirait le niveau, est
+  en commentaire (`js/snapshots.js`).
 
 ### Ce que montre chaque lecteur du niveau RàI, pour ce cas
 
@@ -64,19 +72,24 @@ personne, une personne absente aux deux séances (active), une autre absente aux
 |---|---|---|
 | Profil › Accompagnement, carte RàI | « En attente » → **« Non-participation »**, niveau 3, avec la description de ce niveau (voir les textes à corriger) | « En attente », inchangé |
 | Suivi › Groupe, filtre « RàI 2-3 » | absente des retenues → **retenue** (3/5 → 4/5) | hors de la liste du Suivi, inchangé |
-| Suivi › Groupe, les bandes (A, C, P) | inchangées : elles ne lisent pas le niveau RàI ; « A 0 % » comme avant | hors de la liste, inchangé |
+| Suivi › Groupe, les bandes (A, C, P) | sans filtre, inchangées (« A 0 % » comme avant). Avec « RàI 2-3 » actif, ses trois bulles sont colorées en corail comme celles des personnes retenues (`appliquerCouleursPrioritaires`, mesuré par la relecture) ; avant, aucune | hors de la liste, inchangé |
 | Aperçu, « Modèle de la Réponse à l'intervention » | « Niveau 3 Intensif » compte une personne de plus (sur ce groupe : 3 → 4, 60 % → 80 %) ; une de moins « en attente de sa note du cours » | n'y entre pas, inchangé |
 | Aperçu, barre des patterns | elle compte une personne de plus sous « Difficulté persistante » (3 → 4) : la barre range déjà la non-participation des présent·es à cet endroit | n'y entre pas, inchangé |
 | Suivi › Liste, colonne RàI | « — » → **« Niveau 3 »** | « — », inchangé |
 | Suivi › Liste, filtre « niveau 3 » | absente → **présente** | absente, inchangé |
 | La répartition du groupe (le réglage des seuils) | une personne de plus au niveau 3, une de moins hors des pourcentages | n'y entre pas, inchangé |
+| Suivi › Liste, filtre « Profils » | « Données insuffisantes » → **« Non-participation »** (relecture) | inchangé |
+| Suivi › Liste, tri et corrélations Pattern ↔ P et RàI ↔ P | elle entre dans les corrélations (score 0, niveau 3) : les valeurs de r affichées bougent (relecture, lu dans le code) | exclue des corrélations, inchangé |
+| Aperçu, l'alerte « … présent·e sans aucun travail remis » | **déjà là avant la retouche** dès qu'une pratique est assignée : elle retient toute assiduité connue, 0 % compris, depuis #743, et la dit « présent·e », « A : 0 % » (mesuré par la relecture). Sixième texte à corriger, plus bas | — |
+| Formulaire d'intervention : la carte « Niveaux RàI » et le niveau à côté de chaque personne cochée | niveau 3 (relecture, lu dans le code) | sans objet |
 | Septième parcours, condition d'entrée | inchangé : elle était déjà signalée (A sous le seuil) | inchangé (exclue) |
 | Fiche d'intervention, niveau proposé | inférence tirée du code, non mesurée : 3 (`js/interventions.js`, le niveau du profil) | sans objet |
 
 ### Les textes qui disent « présent·e », à corriger (proposés, pas posés)
 
-La règle neuve rend faux, pour l'absent·e total·e, cinq textes lus à l'écran. **Je n'en ai touché aucun.** Ma
-proposition pour chacun, à valider ou à corriger :
+Pour l'absent·e total·e, six textes lus à l'écran sont faux : cinq le deviennent avec la règle neuve, le sixième
+l'était déjà (trouvé par la relecture). **Je n'en ai touché aucun.** Ma proposition pour chacun, à valider ou à
+corriger :
 
 1. **L'Aide, « Repérer les patterns de progression »** (`index.html`, accordéon `accordeon-aide-patterns`). Aujourd'hui :
    « Non-participation : présent·e en classe, mais aucune production évaluée, quand le groupe permet d'en juger (un
@@ -95,9 +108,26 @@ proposition pour chacun, à valider ou à corriger :
    immédiate. » ; ou deux phrases, la présente telle quelle et, pour l'absent·e total·e, « Absent·e à toutes les
    séances passées, et aucune production remise. Profil prioritaire nécessitant une intervention immédiate. » Je
    recommande les deux phrases : la carte dit alors ce qui est vrai pour cette personne-là.
+6. **L'alerte de l'Aperçu** (`js/tableau-bord-apercu.js`, `afficherAlerteNonParticipation`) : « N étudiant·e présent·e
+   sans aucun travail remis », suivie, pour chacun·e, de « A : 0 % » quand c'est le cas. Fausse depuis #743 pour
+   l'absent·e total·e, avant cette retouche. Proposé : « N étudiant·e sans aucun travail remis » (la ligne de chacun·e
+   donne déjà son assiduité).
 
 La sentinelle de l'Aide (`sentinelle-aide-2026-10-28-lot-2c-bis`) relie déjà ce texte au code par sa phrase « Non-participation » le
 niveau 3 ; elle ne lit pas « présent·e ». Quand une proposition sera validée, l'essai de ce texte sera à mettre à jour avec.
+
+### Ce qui reste à trancher (relecture du 9 nov.)
+
+- **Une personne inactive qui est venue au moins une fois, sans production**, reste au niveau 3 sur son profil et dans
+  Suivi › Liste, comme avant la retouche ; l'inactive jamais venue, elle, reste « En attente ». J'ai lu « comme
+  aujourd'hui » comme le maintien de ce qui existait. Lue au mot, « une personne marquée inactive reste hors des
+  signaux » pourrait viser aussi ce cas. À trancher (Cowork) ; aucun banc ne fixe ce cas pour l'instant.
+- **À inscrire** : le harnais de `sentinelle-731-non-participation-quand-un-travail-est-du` fait passer A = 0 pour une
+  assiduité inconnue (`assiduite: null`), contraire à #743 ; son essai à 0 % ne vérifie donc pas l'alerte de l'Aperçu,
+  que la page montre.
+- **Commenté dans le code, sans suite** : la garde des personnes hors du groupe ne lit que le groupe-cours actif ; le
+  cache des patterns, qui parcourt le trimestre, peut lire autrement une personne exclue d'un autre groupe (cache lu
+  seulement en repli d'erreur).
 
 ### Les essais
 
@@ -105,7 +135,7 @@ niveau 3 ; elle ne lit pas « présent·e ». Quand une proposition sera validé
   arrivée après les séances, il vérifie la règle (niveau 3 pour l'absente, « En attente » pour l'inactive et pour
   l'arrivée) et chaque lecteur mesuré (profil, « RàI 2-3 », Aperçu, colonne et filtre de la liste). Break-tests :
   la condition remise à « A > 0 » → **rouge** ; la garde des personnes hors du groupe retirée → **rouge**. Rétablies →
-  vertes. Banc complet : **8 / 8** hors captures. `assiduite-lot-D-date-arrivee-et-inconnu` et
+  vertes. Banc complet : **7 / 7** hors captures (3 sautés). `assiduite-lot-D-date-arrivee-et-inconnu` et
   `profil-etudiant-chargement` : verts.
 - **Vitest** : trois bancs encodaient l'ancienne règle (« jamais présent → En attente », modélisé par A = 0) :
   `sentinelle-731-non-participation-quand-un-travail-est-du`, `sentinelle-niveau-au-critere-2026-10-30` (deux essais),
@@ -113,7 +143,15 @@ niveau 3 ; elle ne lit pas « présent·e ». Quand une proposition sera validé
   attente ») et le cas décidé est ajouté (absente partout : non-participation). Le cliquet de complexité
   (`sentinelle-contenir-complexite`) avait vu une fonction de plus au-dessus de 15 : la règle est sortie dans sa propre
   fonction, et il repasse au vert. Vitest complet : **10 912 / 10 912**, 894 fichiers.
-- Jeton : `profil-etudiant-calculs.js` 20261108i.
+- Jeton : `profil-etudiant-calculs.js` 20261108j.
+- **Relecture par un agent neuf** (la retouche, `fbd071d`). Verdict, en une ligne : **la règle est juste et fait ce que
+  la décision demande, sans toucher aucun texte affiché ; le rapport était incomplet sur les lecteurs et faux à deux
+  endroits, et un sixième texte « présent·e » manquait.** Il a vérifié les cas `null`, 0 et au-dessus, la garde #731
+  fermée, le décrochage (inchangé : la cible dit déjà « Décrochage »), la démo (sans effet : chacun·e y a des copies),
+  et fait cinq break-tests (quatre rouges ; le cinquième est le cas à trancher plus haut). Ce que j'en ai fait : le
+  tableau des lecteurs complété (bandes, filtre « Profils », corrélations, formulaire d'intervention, alerte de
+  l'Aperçu), la phrase sur ce qui s'écrit corrigée, le sixième texte ajouté, le compte du banc corrigé, une précision
+  au tableau du matin, un commentaire dans le code.
 
 ## En tête, en gestes d'utilisateur (premier dépôt, nuit du 8 au 9 nov.)
 
@@ -148,7 +186,8 @@ niveau 3 ; elle ne lit pas « présent·e ». Quand une proposition sera validé
 ### Ce qui attend encore Grégoire
 
 Aucun texte n'a été écrit en dehors des six phrases validées. **Tranchée le 9 nov. à 13 h 44** (voir « La retouche du
-9 nov. », plus haut) : la question ci-dessous. Restent à valider : les cinq textes qui disent « présent·e ».
+9 nov. », plus haut) : la question ci-dessous. Restent à valider : les six textes qui disent « présent·e », et le cas
+de la personne inactive venue au moins une fois.
 
 La question, relevée par la relecture :
 
