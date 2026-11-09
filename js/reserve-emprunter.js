@@ -265,6 +265,10 @@ async function emprunter(source, entree, onProg) {
     // Les séances, et les clés du trimestre restées d'un renvoi interrompu (E3), déjà là :
     // identiques → laissées ; différentes → refus. Une clé du trimestre que l'archive n'a pas → débris.
     var presentes = await _toutesLesCles();
+    // 9 nov. 2026 : la photo des tampons est DÉRIVÉE (reserve-trimestre.js). Une photo restée là n'est
+    // ni un débris ni un refus : on la tient pour absente, et celle de l'archive (qui la contient :
+    // l'archivage réunit la photo gardée et les tampons de l'espace) est écrite à sa place.
+    presentes.delete(prefixe + 'photoTampons');
     for (var kp of presentes) {
         if (typeof kp !== 'string' || kp.indexOf(prefixe) !== 0 || _a(donnees, kp)) continue;
         // Une clé vide ne garde rien (E1 ne l'archive pas) : ni débris, ni réécrite.

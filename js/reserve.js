@@ -54,6 +54,21 @@ var CLE_MANIFESTE_LOCAL = '_manifesteReserve';
 // Préfixes de clés à exclure de l’archive
 var PREFIXES_EXCLUS = ['_codex_', '_'];
 
+// 9 nov. 2026 (décision de Grégoire, 13 h 33) — LES CLÉS QUI FONT UN TAMPON : sa définition
+// (tampon personnel), sa bibliothèque, son nom et son image (personnalisation), sa phrase dans la
+// rétroaction (textes), et ce qui nomme, ordonne et colore sa catégorie. La photo d'une archive, ce
+// sont ces clés telles qu'elles sont au moment d'archiver (`photoDesTampons`).
+var CLES_PHOTO_TAMPONS = [
+    'tamponsPersonnalises',
+    'bibliothequeTampons',
+    'personnalisationObservations',
+    'retroactionsObservations',
+    'nomsCategoriesTampons',
+    'categoriesPerso',
+    'ordreCategories',
+    'couleursCategories'
+];
+
 // Clés globales (non namespacées) à inclure dans l’archive
 var CLES_GLOBALES_INCLUSES = [
     'listeCours',
@@ -75,7 +90,13 @@ var CLES_GLOBALES_INCLUSES = [
     // hors trimestre. Une production d'une archive porte le NOM de son type : elle se lit sans
     // la banque ; la banque part pour que l'archive garde aussi ce que la personne a nommé.
     'banqueTypesProduction'
-];
+].concat(
+    // 9 nov. 2026 (décision de Grégoire, 13 h 33) : LA PHOTO DES TAMPONS. Une annotation ne garde que
+    // l'identifiant de son tampon ; son nom, son image, sa phrase et sa catégorie vivent dans ces clés
+    // globales. Sans elles, l'archive rouverte ailleurs ne pouvait plus les dire. Rouvrir n'en écrit
+    // aucune : « Ouvrir une archive » les montre, et ne les reprend que par la réimportation choisie.
+    CLES_PHOTO_TAMPONS
+);
 
 // Clés à filtrer par DA dans la collecte (passe 2)
 // Forme acceptée : tableau d'entrées avec `da`/`etudiantDA`, OU objet `{[da]: ...}` ;
@@ -128,6 +149,8 @@ var CLES_SANS_FILTRE = [
     // Fallback legacy : la version vivante est `seancesCompletes_gc_{id}` (non
     // namespacée). Inclure le fallback trimestre tel quel.
     'seancesCompletes',
+    // 9 nov. 2026 : la photo des tampons d'archives rapportées (`photoDesTampons`) ; sans élève.
+    'photoTampons',
     // Snapshots pré-namespacing par groupe-cours. La version vivante est
     // `{trimestre}_snapshots_{gcId}` (déjà gérée). Le bare `snapshots` est
     // un legacy ; on l'inclut tel quel pour ne pas perdre de données.
@@ -1986,6 +2009,73 @@ if (typeof window !== 'undefined') {
     }
 }
 
+/* ===============================
+   LA PHOTO DES TAMPONS (9 nov. 2026, décision de Grégoire, 13 h 33)
+   =============================== */
+
+/**
+ * Deux photos réunies : `devant` l'emporte, `derriere` complète ce qui lui manque. Listes réunies
+ * par identifiant (le premier vu reste), objets réunis par clé ; `ordreCategories`, celui de devant.
+ * Une valeur absente (null) d'un côté ne retire rien de l'autre.
+ */
+function _listeDe(v) { return Array.isArray(v) ? v : []; }
+function _objetDe(v) { return (v && typeof v === 'object' && !Array.isArray(v)) ? v : null; }
+
+/** Deux listes réunies par identifiant (ou par valeur) : le premier vu reste. */
+function _reunirListes(va, vb) {
+    var vus = {}, liste = [];
+    _listeDe(va).concat(_listeDe(vb)).forEach(function(e) {
+        var id = e && typeof e === 'object' ? e.id : e;
+        if (id === undefined || id === null || vus[id]) return;
+        vus[id] = true;
+        liste.push(e);
+    });
+    return liste;
+}
+
+/** Une clé de deux photos réunie : `va` l'emporte, `vb` complète. */
+function _reunirUneCle(k, va, vb) {
+    if (k === 'ordreCategories') return Array.isArray(va) ? va : (Array.isArray(vb) ? vb : null);
+    if (Array.isArray(va) || Array.isArray(vb)) return _reunirListes(va, vb);
+    var oa = _objetDe(va), ob = _objetDe(vb);
+    if (oa || ob) return Object.assign({}, ob || {}, oa || {});
+    return (va !== undefined && va !== null) ? va : (vb !== undefined ? vb : null);
+}
+
+function _reunirPhotosTampons(devant, derriere) {
+    var a = devant || {}, b = derriere || {}, sortie = {};
+    CLES_PHOTO_TAMPONS.forEach(function(k) { sortie[k] = _reunirUneCle(k, a[k], b[k]); });
+    return sortie;
+}
+
+/** Vrai si la photo ne porte rien (aucune clé non vide). */
+function _photoVide(photo) {
+    return !photo || CLES_PHOTO_TAMPONS.every(function(k) {
+        var v = photo[k];
+        if (v === null || v === undefined) return true;
+        if (Array.isArray(v)) return v.length === 0;
+        return typeof v === 'object' && Object.keys(v).length === 0;
+    });
+}
+
+/**
+ * La photo des tampons pour l'archive d'un trimestre : les clés de l'espace telles qu'elles sont
+ * MAINTENANT, complétées par la photo que ce trimestre garde déjà (`<trimestre>_photoTampons`,
+ * venue d'une archive rapportée : ses annotations peuvent porter des tampons que l'espace n'a plus).
+ * Ne lit que ; n'écrit rien. `null` si rien à photographier.
+ * @param {string} trimestre
+ * @returns {Promise<Object|null>}
+ */
+async function photoDesTampons(trimestre) {
+    var maintenant = {};
+    for (var i = 0; i < CLES_PHOTO_TAMPONS.length; i++) {
+        maintenant[CLES_PHOTO_TAMPONS[i]] = await db.get(CLES_PHOTO_TAMPONS[i], null);
+    }
+    var gardee = trimestre ? await db.get(trimestre + '_photoTampons', null) : null;
+    var photo = _reunirPhotosTampons(maintenant, gardee && typeof gardee === 'object' ? gardee : null);
+    return _photoVide(photo) ? null : photo;
+}
+
 window.Reserve = {
     verserGroupeCours: verserGroupeCours,
     estimerVersement: estimerVersement,
@@ -2018,7 +2108,11 @@ window.Reserve = {
     extensionDuNom: _extensionDepuisNomFichier,
     nouvelUuid: _genererUUIDv4,
     appareil: _identifierAppareil,
-    versionApp: _versionApp
+    versionApp: _versionApp,
+    // 9 nov. 2026 : la photo des tampons (archive d'un trimestre, « Ouvrir une archive »).
+    CLES_PHOTO_TAMPONS: CLES_PHOTO_TAMPONS,
+    photoDesTampons: photoDesTampons,
+    reunirPhotosTampons: _reunirPhotosTampons
 };
 
 })();

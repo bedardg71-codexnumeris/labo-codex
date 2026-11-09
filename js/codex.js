@@ -2580,7 +2580,10 @@ var LIBELLES_DES_CLES = {
     // 9 nov. 2026 (lot « Production plutôt que copie ») : la banque de types, clé globale de productions.js.
     // Mots proposés, à valider par Grégoire (rapport de l'étape 2, § 3).
     banqueTypesProduction: { nom: 'ta banque de types de production', ou: 'Conception › Productions › Type',
-        entrees: { types: 'Tes types', exemplesMasques: 'Les exemples retirés de ta vue' } }
+        entrees: { types: 'Tes types', exemplesMasques: 'Les exemples retirés de ta vue' } },
+    // 9 nov. 2026 : la photo des tampons d'un trimestre rapporté d'une archive (reserve-trimestre.js).
+    // Mots proposés, à valider par Grégoire.
+    photoTampons: { nom: 'les tampons gardés par l\'archive de ce trimestre' }
 };
 
 function _majuscule(s) { return s.charAt(0).toUpperCase() + s.slice(1); }

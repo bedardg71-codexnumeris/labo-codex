@@ -782,3 +782,92 @@ describe('E3 · (g) témoins : le banc rougit', () => {
         expect(banc.db._map.has('h2032_notesRapport')).toBe(false); // le banc (d) aurait rougi
     });
 });
+
+// =====================================================================
+// 9 nov. 2026 — LA PHOTO DES TAMPONS (décision de Grégoire, 13 h 33, lot « Production plutôt que copie »)
+// =====================================================================
+// L'archive d'un trimestre emporte, sous `<trimestre>_photoTampons`, les clés globales des tampons
+// telles qu'elles sont au moment d'archiver ; jamais ces clés elles-mêmes (E2 n'en réécrit aucune).
+// Renvoyée puis rapportée, la photo revient ; les tampons de l'espace ne bougent pas. Dérivée, elle
+// part avec les autres clés sans comparaison, et une photo restée là n'est ni un débris ni un refus.
+describe('E3 · (9 nov. 2026) la photo des tampons voyage avec le trimestre, sans toucher ceux de l\'espace', () => {
+    const TAMPONS = {
+        tamponsPersonnalises: [{ id: 'TP1', nom: 'Tampon fictif', categorie: 'observations' }],
+        personnalisationObservations: { TP1: { imageBase64: 'data:image/png;base64,AAAA' } },
+        retroactionsObservations: { TP1: 'Phrase fictive du tampon.' }
+    };
+    const VIEILLE = { tamponsPersonnalises: [{ id: 'TP0', nom: 'Ancien tampon fictif', categorie: 'observations' }] };
+    const avecTampons = (extra = {}) => Object.assign({}, CORPUS, TAMPONS, extra);
+    async function donneesDeLArchive(zip) {
+        const z = await JSZip.loadAsync(await zip.arrayBuffer());
+        const nom = Object.keys(z.files).find((n) => /\/donnees\.json$/.test(n));
+        return JSON.parse(await z.file(nom).async('string'));
+    }
+
+    it('l\'archive l\'emporte sous le nom du trimestre, jamais les clés globales ; renvoyée puis rapportée dans un espace qui a d\'autres tampons, elle revient et l\'espace garde les siens', async () => {
+        const banc = await preparer({ corpus: avecTampons() });
+        const donnees = await donneesDeLArchive(banc.zip);
+        expect(donnees.h2032_photoTampons).toMatchObject(TAMPONS);
+        expect(Object.keys(donnees).filter((k) => !k.startsWith('h2032_') && !k.startsWith('seancesCompletes_gc_'))).toEqual([]);
+        expect((await renvoyer(banc)).bilan.etat).toBe('fait');
+        expect(banc.db._map.has('h2032_photoTampons')).toBe(false);
+        const espace = {
+            tamponsPersonnalises: [{ id: 'TP2', nom: 'Tampon fictif de l\'espace', categorie: 'observations' }],
+            retroactionsObservations: { TP2: 'Phrase fictive de l\'espace.' },
+            personnalisationObservations: {}
+        };
+        for (const [k, v] of Object.entries(espace)) banc.db._map.set(k, v);
+        expect((await faireRevenir(banc)).etat).toBe('fait');
+        expect(banc.db._map.get('h2032_photoTampons')).toMatchObject(TAMPONS);
+        for (const [k, v] of Object.entries(espace)) expect([k, banc.db._map.get(k)]).toEqual([k, v]);
+    });
+
+    it('l\'archivage réunit les tampons de l\'espace et la photo gardée ; la photo gardée, différente, ne refuse pas le renvoi', async () => {
+        const banc = await preparer({ corpus: avecTampons({ h2032_photoTampons: VIEILLE }) });
+        const donnees = await donneesDeLArchive(banc.zip);
+        expect(donnees.h2032_photoTampons.tamponsPersonnalises.map((t) => t.id)).toEqual(['TP1', 'TP0']);
+        const r = await renvoyer(banc);
+        expect(r.comparaison.etat).toBe('identique');
+        expect(r.bilan.etat).toBe('fait');
+        expect(banc.db._map.has('h2032_photoTampons')).toBe(false);
+    });
+
+    it('BREAK-TEST : comparée comme une autre clé, la photo gardée refuserait le renvoi, en boucle', async () => {
+        const banc = await preparer({
+            corpus: avecTampons({ h2032_photoTampons: VIEILLE }),
+            muter: { [MODULE]: (s) => s.replace('    _photoSansComparaison(aComparer, prefixe, res);\n', '') }
+        });
+        const r = await renvoyer(banc);
+        expect(r.comparaison.etat).toBe('different');
+        expect(banc.db._map.has('h2032_photoTampons')).toBe(true);
+    });
+
+    it('faire revenir quand une photo est restée là (un renvoi interrompu) : ni débris ni refus ; celle de l\'archive la remplace', async () => {
+        const banc = await preparer({ corpus: avecTampons() });
+        expect((await renvoyer(banc)).bilan.etat).toBe('fait');
+        banc.db._map.set('h2032_photoTampons', VIEILLE);
+        expect((await faireRevenir(banc)).etat).toBe('fait');
+        expect(banc.db._map.get('h2032_photoTampons')).toMatchObject(TAMPONS);
+    });
+
+    it('BREAK-TEST : sans la règle de E2, la photo restée là est un débris et le retour est refusé', async () => {
+        const banc = await preparer({
+            corpus: avecTampons(),
+            muter: { 'js/reserve-emprunter.js': (s) => s.replace("    presentes.delete(prefixe + 'photoTampons');\n", '') }
+        });
+        expect((await renvoyer(banc)).bilan.etat).toBe('fait');
+        banc.db._map.set('h2032_photoTampons', VIEILLE);
+        const bilan = await faireRevenir(banc);
+        expect(bilan.etat).not.toBe('fait');
+        expect(banc.db._map.get('h2032_photoTampons')).toEqual(VIEILLE);
+    });
+
+    it('BREAK-TEST : sans la photo à l\'archivage, le trimestre rapporté n\'a rien pour dire ses tampons', async () => {
+        const banc = await preparer({
+            corpus: avecTampons(),
+            muter: { 'js/reserve-trimestre.js': (s) => s.replace('    if (photo) {\n        donnees[prefixe', '    if (false) {\n        donnees[prefixe') }
+        });
+        const donnees = await donneesDeLArchive(banc.zip);
+        expect(donnees.h2032_photoTampons).toBeUndefined();
+    });
+});

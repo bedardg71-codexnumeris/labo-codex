@@ -201,7 +201,12 @@
         // trimestre, comme les grilles qu'elle crée ; en démo, `cle()` le range sous `demo_` et
         // il ne touche pas celui de l'enseignant. Sans semis ; exclu de l'archive d'un groupe
         // (reserve.js) : un travail en cours ne voyage pas.
-        'brouillonDissection'
+        'brouillonDissection',
+        // 🆕 9 nov. 2026 (décision de Grégoire, 13 h 33) : la PHOTO DES TAMPONS d'un trimestre rapporté
+        // d'une archive (« Faire revenir », reserve-emprunter.js), telle qu'elle était au moment
+        // d'archiver. travaux-outils.js la lit pour dessiner et dire un tampon que l'espace n'a pas ;
+        // jamais recopiée dans les clés globales des tampons. Sans semis.
+        'photoTampons'
     ];
 
     // 🆕 #464/CT-26 : clés inconnues déjà signalées (un seul warn par clé et par

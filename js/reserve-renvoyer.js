@@ -303,6 +303,19 @@ async function relireArchive(source, trimestre, entree, onProg) {
 }
 
 /**
+ * 9 nov. 2026 (décision de Grégoire) — la photo des tampons est DÉRIVÉE : les tampons de l'espace et
+ * celle d'une archive rapportée, réunis à l'archivage ; l'archive garde la plus récente. Elle part
+ * avec les autres clés, SANS comparaison : sinon une photo rapportée hier refuserait le renvoi d'une
+ * archive faite aujourd'hui, en boucle.
+ */
+function _photoSansComparaison(aComparer, prefixe, res) {
+    var i = aComparer.indexOf(prefixe + 'photoTampons');
+    if (i === -1) return;
+    aComparer.splice(i, 1);
+    res.aRetirer.cles.push(prefixe + 'photoTampons');
+}
+
+/**
  * Relit l'archive, puis compare le trimestre à l'archive. N'écrit rien.
  * @param {Object} source - ReserveVerifier.sourceFichier(...) ou sourceDossier(...)
  * @param {string} trimestre
@@ -344,6 +357,7 @@ async function comparer(source, trimestre, onProg) {
     if (Array.isArray(gcs)) gcs.forEach(function(g) { if (g && g.id) seances[PREFIXE_SEANCE + g.id] = true; });
     Object.keys(seances).sort().forEach(function(k) { if (presentes.has(k)) aComparer.push(k); });
 
+    _photoSansComparaison(aComparer, prefixe, res);
     for (var c = 0; c < aComparer.length; c++) {
         var cle = aComparer[c];
         var valeur = await window.db.get(cle, null);
@@ -427,7 +441,7 @@ async function retirer(res, onProg) {
     // milieu laisserait un reste qui ne concorde plus, que ni la reprise ni « Faire revenir »
     // ne sauraient finir).
     var changees = [];
-    var aRelire = a.seances.concat(a.cles);
+    var aRelire = a.seances.concat(a.cles).filter(function(k) { return k !== prefixe + 'photoTampons'; });   // 9 nov. 2026 : dérivée
     for (var r = 0; r < aRelire.length; r++) {
         var val = await window.db.get(aRelire[r], null);
         if (val === null || val === undefined) continue;

@@ -18,6 +18,10 @@
      - une empreinte SHA-256 par fichier (`integrite.travaux_sha256`, comme le lot A1) et
        une par clé (`integrite.cles_sha256` : l'empreinte de JSON.stringify de sa valeur).
 
+   La photo des tampons (9 nov. 2026, décision de Grégoire)
+     `<trimestre>_photoTampons` : les clés globales des tampons telles qu'elles sont au moment
+     d'archiver (Reserve.photoDesTampons), sous le nom du trimestre. E2 la rapporte comme toute clé
+     du trimestre ; E3 ne la compare pas (dérivée : l'archive garde la plus récente).
    Ce qu'elle n'emporte pas
      Aucune clé globale dans donnees.json : rien que E2 pourrait réécrire par-dessus un
      autre trimestre (cours, listeCours, enseignants, profil, trimestres, registre
@@ -148,6 +152,18 @@ async function collecterDonnees(trimestre) {
             _prog(5 + Math.round((i / cles.length) * 25), 'Lecture des données…', (i + 1) + ' / ' + cles.length + ' clés');
             await _yield();
         }
+    }
+
+    // 9 nov. 2026 (décision de Grégoire, 13 h 33) — LA PHOTO DES TAMPONS, telle qu'elle est au moment
+    // d'archiver : les clés globales des tampons ne peuvent pas entrer dans donnees.json (E2 refuse
+    // toute clé hors du trimestre, et n'en réécrit aucune) ; leur photo y entre sous le nom du
+    // trimestre. Rapporté, le trimestre la retrouve là, et ses tampons se dessinent par elle quand
+    // l'espace ne les a pas (travaux-outils.js). Une photo déjà gardée (archive rapportée avant) est
+    // complétée, jamais perdue (`Reserve.photoDesTampons`).
+    var photo = typeof Reserve.photoDesTampons === 'function' ? await Reserve.photoDesTampons(trimestre) : null;
+    if (photo) {
+        donnees[prefixe + 'photoTampons'] = photo;
+        empreintesCles[prefixe + 'photoTampons'] = await Reserve.empreinteDuTexte(JSON.stringify(photo));
     }
 
     var etudiants = donnees[prefixe + 'groupeEtudiants'];

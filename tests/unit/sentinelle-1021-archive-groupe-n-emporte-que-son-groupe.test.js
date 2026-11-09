@@ -417,3 +417,32 @@ describe('#1005 · (g) « Vérifier » lit, « Archiver… » écrit', () => {
         expect(banc.journal.selecteurs).toEqual(['read']); // pas de second sélecteur
     }, 20000);
 });
+
+// 9 nov. 2026 (décision de Grégoire, 13 h 33, lot « Production plutôt que copie ») — LA PHOTO DES TAMPONS.
+// Une annotation ne garde que l'identifiant de son tampon : l'archive d'un groupe emporte les clés
+// globales qui le disent (`Reserve.CLES_PHOTO_TAMPONS`, ajoutées à CLES_GLOBALES_INCLUSES), et la photo
+// qu'un trimestre garde d'une archive rapportée (`<trimestre>_photoTampons`, classée « sans filtre »).
+describe('9 nov. 2026 · la photo des tampons part avec l\'archive d\'un groupe', () => {
+    const TAMPONS = {
+        tamponsPersonnalises: [{ id: 'TP1', nom: 'Tampon fictif', categorie: 'observations' }],
+        bibliothequeTampons: [{ id: 'TP1', nom: 'Tampon fictif', categorie: 'observations', dansBibliotheque: true }],
+        personnalisationObservations: { TP1: { imageBase64: 'data:image/png;base64,AAAA' } },
+        retroactionsObservations: { TP1: 'Phrase fictive du tampon.' },
+        nomsCategoriesTampons: { observations: 'Observations fictives' },
+        couleursCategories: { observations: '#123456' }
+    };
+    const GARDEE = { tamponsPersonnalises: [{ id: 'TP0', nom: 'Ancien tampon fictif', categorie: 'observations' }] };
+
+    it('les clés des tampons partent telles quelles, la photo gardée par le trimestre aussi, et rien n\'est dit « non classé »', async () => {
+        const racineDisque = fauxDossier('Archives_LaboCodex');
+        const banc = monter(creerDb(Object.assign({}, ESPACE, TAMPONS, { [T + '_photoTampons']: GARDEE })), { dossier: racineDisque });
+        const rendu = await banc.reserve.verserGroupeCours(T, 'GC_UN');
+        expect(rendu && rendu.succes).toBe(true);
+        const donnees = JSON.parse(racineDisque._enfants.get('trimestres')._enfants.get(DOSSIER)._fichiers.get('donnees.json'));
+        for (const [k, v] of Object.entries(TAMPONS)) expect([k, donnees[k]]).toEqual([k, v]);
+        expect(donnees[T + '_photoTampons']).toEqual(GARDEE);
+        expect(banc.journal.avertissements.filter((a) => /non reconnue|non classée/i.test(a))).toEqual([]);
+        // Chaque clé de la photo est dans la liste blanche (la liste et la photo ne divergent pas).
+        expect(banc.reserve.CLES_PHOTO_TAMPONS.filter((k) => !(k in donnees) && k in TAMPONS)).toEqual([]);
+    }, 20000);
+});

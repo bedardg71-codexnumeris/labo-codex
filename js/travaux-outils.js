@@ -436,8 +436,9 @@
     async function attendreChargementAutocollants(donneesPage) {
         if (!donneesPage || !donneesPage.stickers || donneesPage.stickers.length === 0) return;
 
+        // 9 nov. 2026 : `getImageAutocollant` lance au besoin le chargement d'un tampon de la photo.
         const promesses = donneesPage.stickers
-            .map(stk => promessesAutocollants[stk.autocollantId])
+            .map(stk => promessesAutocollants[stk.autocollantId] || (getImageAutocollant(stk.autocollantId) && promessesAutocollants[stk.autocollantId]))
             .filter(Boolean);
 
         await Promise.allSettled(promesses);
@@ -449,7 +450,8 @@
      * @returns {HTMLImageElement|null}
      */
     function getImageAutocollant(id) {
-        return imagesAutocollants[id] || null;
+        // 9 nov. 2026 : un tampon que l'espace n'a pas se dessine par la photo de son archive.
+        return imagesAutocollants[id] || _imageDeLaPhoto(id) || null;
     }
 
     /**
@@ -459,7 +461,13 @@
      * @returns {Object|null}
      */
     function getAutocollant(id) {
-        return AUTOCOLLANTS.find(function(a) { return a.id === id; }) || null;
+        var a = AUTOCOLLANTS.find(function(x) { return x.id === id; });
+        if (a) return a;
+        // 9 nov. 2026 : sinon, sa définition dans la photo de son archive (jamais ajoutée au catalogue :
+        // la palette ne montre que les tampons de l'espace).
+        var p = _tamponDeLaPhoto(id);
+        if (!p || !p.tampon) return null;
+        return { id: id, nom: (p.perso && p.perso.nom) || p.tampon.nom || '', fichier: '', categorie: p.tampon.categorie || 'diagnostic', custom: true };
     }
 
     /**
@@ -814,6 +822,60 @@
         db.setSync('personnalisationObservations', obj);
     }
 
+    /* ===============================
+       LA PHOTO DES TAMPONS D'UNE ARCHIVE (9 nov. 2026, décision de Grégoire, 13 h 33)
+       Un trimestre rapporté d'une archive (« Faire revenir », reserve-emprunter.js) garde, sous
+       `<trimestre>_photoTampons`, les clés des tampons telles qu'elles étaient au moment d'archiver
+       (reserve-trimestre.js). Un tampon que l'ESPACE N'A PAS (absent du catalogue courant) se
+       dessine et se dit par elle : son image, son nom, sa catégorie, sa phrase. Un tampon que
+       l'espace a se lit TOUJOURS dans l'espace. Rien n'est jamais écrit ici.
+       =============================== */
+    function _photoTampons() {
+        if (typeof cle !== 'function') return null;
+        var p = null;
+        try { p = db.getSync(cle('photoTampons'), null); } catch (e) { p = null; }
+        return (p && typeof p === 'object' && !Array.isArray(p)) ? p : null;
+    }
+
+    function _dansLEspace(id) {
+        return AUTOCOLLANTS.some(function(a) { return a.id === id; });
+    }
+
+    /** L'entrée de la photo pour un tampon que l'espace n'a pas : { tampon, perso, photo }, ou null. */
+    function _tamponDeLaPhoto(id) {
+        if (!id || _dansLEspace(id)) return null;
+        var photo = _photoTampons();
+        if (!photo) return null;
+        var customs = Array.isArray(photo.tamponsPersonnalises) ? photo.tamponsPersonnalises : [];
+        var tampon = customs.find(function(c) { return c && c.id === id; }) || null;
+        var perso = (photo.personnalisationObservations && typeof photo.personnalisationObservations === 'object')
+            ? photo.personnalisationObservations[id] || null : null;
+        if (!tampon && !perso) return null;
+        return { tampon: tampon, perso: perso, photo: photo };
+    }
+
+    /** La personnalisation d'un tampon : celle de l'espace, ou celle de la photo s'il n'y est pas. */
+    function _persoDuTampon(id) {
+        var pers = obtenirPersonnalisationObservations()[id];
+        if (pers) return pers;
+        var p = _tamponDeLaPhoto(id);
+        return p ? p.perso : null;
+    }
+
+    /** Charge l'image d'un tampon de la photo (une fois), comme une image personnalisée. */
+    function _imageDeLaPhoto(id) {
+        var p = _tamponDeLaPhoto(id);
+        if (!p || !p.perso || !p.perso.imageBase64) return null;
+        var img = new Image();
+        promessesAutocollants[id] = new Promise(function(resolve, reject) {
+            img.onload = function() { resolve(img); };
+            img.onerror = function() { reject(new Error('Echec chargement image de la photo: ' + id)); };
+        });
+        img.src = p.perso.imageBase64;
+        imagesAutocollants[id] = img;
+        return img;
+    }
+
     // Noms des categories de tampons
     const NOMS_CATEGORIES_DEFAUT = {
         action: 'Action',
@@ -877,7 +939,7 @@
      * @returns {boolean}
      */
     function tamponGardeSesCouleurs(autocollantId) {
-        var pers = obtenirPersonnalisationObservations()[autocollantId];
+        var pers = _persoDuTampon(autocollantId);   // 9 nov. 2026 : la photo, pour un tampon que l'espace n'a pas
         return !!(pers && pers.emoji);
     }
 
@@ -1228,11 +1290,27 @@
                 catalogue[c.id] = { id: c.id, nom: c.nom || '', categorie: c.categorie || 'diagnostic' };
             }
         });
+        // 9 nov. 2026 : un tampon posé que l'espace n'a pas se lit dans la photo de son archive
+        // (sa catégorie, son nom, sa phrase) ; l'espace l'emporte toujours pour ceux qu'il a.
+        const dePhoto = {};
+        Object.keys(comptes).forEach(id => {
+            if (catalogue[id]) return;
+            const p = _tamponDeLaPhoto(id);
+            if (!p) return;
+            dePhoto[id] = p;
+            if (p.tampon) catalogue[id] = { id: id, nom: p.tampon.nom || '', categorie: p.tampon.categorie || 'diagnostic' };
+        });
         Object.keys(catalogue).forEach((id, i) => { rangCatalogue[id] = i; });
 
         const persObs = obtenirPersonnalisationObservations();
         const textesEnregistres = db.getSync('retroactionsObservations', null);
         const texteDe = (id) => {
+            const p = dePhoto[id];
+            if (p) {
+                const t = p.photo.retroactionsObservations;
+                if (t && Object.prototype.hasOwnProperty.call(t, id)) return (t[id] == null) ? '' : String(t[id]);
+                return RETROACTIONS_OBSERVATIONS_DEFAUT[id] || '';
+            }
             if (textesEnregistres && Object.prototype.hasOwnProperty.call(textesEnregistres, id)) {
                 const t = textesEnregistres[id];
                 return (t == null) ? '' : String(t);
@@ -1248,7 +1326,7 @@
             const def = catalogue[id];
             if ((def && def.categorie === 'jeton') || idsJetons.indexOf(id) !== -1) return;
             const cat = def ? def.categorie : 'autres';
-            const nomPerso = persObs[id] && persObs[id].nom;
+            const nomPerso = (persObs[id] && persObs[id].nom) || (dePhoto[id] && dePhoto[id].perso && dePhoto[id].perso.nom);
             (parCategorie[cat] = parCategorie[cat] || []).push({
                 id: id,
                 nom: nomPerso || (def && def.nom) || id,
@@ -1280,11 +1358,24 @@
             const perso = catsPerso.find(c => c && c.id === cat);
             resultat.push({
                 id: cat,
-                nom: noms[cat] || (perso && perso.nom) || NOMS_CATEGORIES_DEFAUT[cat] || NOMS_CATEGORIES_HORS_REGLAGES[cat] || cat,
+                nom: noms[cat] || (perso && perso.nom) || _nomDeCategorieDeLaPhoto(dePhoto, cat) || NOMS_CATEGORIES_DEFAUT[cat] || NOMS_CATEGORIES_HORS_REGLAGES[cat] || cat,
                 tampons: tampons
             });
         });
         return resultat;
+    }
+
+    /** 9 nov. 2026 : le nom d'une catégorie que l'espace ne nomme pas, lu dans la photo d'un de ses tampons. */
+    function _nomDeCategorieDeLaPhoto(dePhoto, cat) {
+        const ids = Object.keys(dePhoto);
+        for (let i = 0; i < ids.length; i++) {
+            const photo = dePhoto[ids[i]].photo;
+            const noms = photo.nomsCategoriesTampons;
+            if (noms && typeof noms === 'object' && noms[cat]) return noms[cat];
+            const perso = Array.isArray(photo.categoriesPerso) ? photo.categoriesPerso.find(c => c && c.id === cat) : null;
+            if (perso && perso.nom) return perso.nom;
+        }
+        return '';
     }
 
     function obtenirPersonnalisationErreursFr() {

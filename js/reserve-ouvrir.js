@@ -295,8 +295,10 @@ function _extraireRessources(donnees) {
         .filter(function(e) { return e && e.id && e.nom; })
         .map(function(e) { return Object.assign({}, e, { _doublon: idsEchellesActives.has(e.id) }); });
 
-    // Tampons (clé globale)
-    var tampons = (Array.isArray(donnees.tamponsPersonnalises) ? donnees.tamponsPersonnalises : [])
+    // Tampons : la photo de l'archive (9 nov. 2026, décision de Grégoire) — les clés globales d'une
+    // archive de groupe, ou `<trimestre>_photoTampons` d'une archive de trimestre, réunies.
+    var photoTampons = _photoDeLArchive(donnees);
+    var tampons = (Array.isArray(photoTampons.tamponsPersonnalises) ? photoTampons.tamponsPersonnalises : [])
         .filter(function(t) { return t && t.id; })
         .map(function(t) { return Object.assign({}, t, { _doublon: idsTamponsActifs.has(t.id) }); });
 
@@ -388,8 +390,31 @@ function _extraireRessources(donnees) {
         tampons: tampons,
         productions: productions,
         cartouches: cartouches,
-        pratiques: pratiques
+        pratiques: pratiques,
+        // 9 nov. 2026 : l'image et la phrase de chaque tampon, pour la réimportation choisie.
+        photoTampons: photoTampons
     };
+}
+
+/**
+ * 9 nov. 2026 (décision de Grégoire, 13 h 33) — LA PHOTO DES TAMPONS D'UNE ARCHIVE, telle qu'elle a été
+ * prise : les clés globales des tampons d'une archive de groupe (`CLES_GLOBALES_INCLUSES`), et la
+ * clé `<trimestre>_photoTampons` d'une archive de trimestre (ou celle qu'un groupe tenait d'une
+ * archive rapportée). Ne lit que : rien de l'espace n'est touché. Une archive faite avant ce jour
+ * n'en a pas : la photo est vide, et la section des tampons aussi.
+ */
+function _photoDeLArchive(donnees) {
+    var R = window.Reserve;
+    var cles = (R && Array.isArray(R.CLES_PHOTO_TAMPONS)) ? R.CLES_PHOTO_TAMPONS : ['tamponsPersonnalises'];
+    var photo = {};
+    cles.forEach(function(k) { if (Object.prototype.hasOwnProperty.call(donnees, k)) photo[k] = donnees[k]; });
+    Object.keys(donnees).forEach(function(k) {
+        var v = donnees[k];
+        if (!/_photoTampons$/.test(k) || !v || typeof v !== 'object' || Array.isArray(v)) return;
+        photo = (R && typeof R.reunirPhotosTampons === 'function') ? R.reunirPhotosTampons(photo, v)
+            : Object.assign({}, v, photo);
+    });
+    return photo;
 }
 
 /* ===============================
@@ -1053,6 +1078,59 @@ function _rebrancherReferences(item, type, tables) {
         ? window.rebrancherReferences(item, type, tables) : 0;
 }
 
+/**
+ * 9 nov. 2026 (décision de Grégoire, 13 h 33) — un tampon réimporté arrive avec son image et sa phrase,
+ * lues dans la photo de l'archive. C'est le geste choisi de la réimportation (cases cochées, puis le
+ * bouton) : il AJOUTE, pour les seuls tampons qu'il vient d'écrire ; il ne remplace jamais une image ni
+ * une phrase que l'espace a déjà. Un double prend l'image de son original, pas son nom.
+ * @param {Object} ajoutes - { idDansLArchive: idEcritDansLEspace }
+ */
+async function _reimporterImagesEtPhrases(ajoutes) {
+    var ids = Object.keys(ajoutes || {});
+    if (ids.length === 0) return;
+    // La photo de l'archive ouverte (`_photoDeLArchive`, lue par `_extraireRessources`).
+    var photo = (_payloadCourant && _payloadCourant.ressources && _payloadCourant.ressources.photoTampons) || {};
+    var objet = function(v) { return (v && typeof v === 'object' && !Array.isArray(v)) ? v : {}; };
+    await _reimporterImages(ids, ajoutes, objet(photo.personnalisationObservations));
+    await _reimporterPhrases(ids, ajoutes, objet(photo.retroactionsObservations));
+    if (window.travauxOutils && typeof window.travauxOutils.rechargerTamponsPersonnalises === 'function') {
+        window.travauxOutils.rechargerTamponsPersonnalises();
+    }
+}
+
+/** L'image (la personnalisation) de chaque tampon ajouté que l'espace n'a pas encore. */
+async function _reimporterImages(ids, ajoutes, persos) {
+    if (!ids.some(function(id) { return persos[id]; })) return;
+    await db.modifier('personnalisationObservations', function(lus) {
+        var actuels = (lus && typeof lus === 'object' && !Array.isArray(lus)) ? lus : {};
+        ids.forEach(function(id) {
+            var cible = ajoutes[id];
+            if (!persos[id] || Object.prototype.hasOwnProperty.call(actuels, cible)) return;
+            var perso = JSON.parse(JSON.stringify(persos[id]));
+            if (cible !== id) delete perso.nom;   // un double garde son nom « — copie »
+            actuels[cible] = perso;
+        });
+        return actuels;
+    }, {});
+}
+
+/** La phrase de chaque tampon ajouté que l'espace n'a pas encore. */
+async function _reimporterPhrases(ids, ajoutes, textes) {
+    var a = function(o, k) { return Object.prototype.hasOwnProperty.call(o, k); };
+    if (!ids.some(function(id) { return a(textes, id); })) return;
+    // Sans textes enregistrés, l'espace lit les textes par défaut : on part d'eux, pour qu'ajouter
+    // une phrase n'efface pas celles des tampons livrés.
+    var depart = (window.travauxOutils && typeof window.travauxOutils.obtenirRetroactionsObservations === 'function')
+        ? window.travauxOutils.obtenirRetroactionsObservations() : {};
+    await db.modifier('retroactionsObservations', function(lus) {
+        var actuels = (lus && typeof lus === 'object' && !Array.isArray(lus)) ? lus : Object.assign({}, depart);
+        ids.forEach(function(id) {
+            if (a(textes, id) && !a(actuels, ajoutes[id])) actuels[ajoutes[id]] = textes[id];
+        });
+        return actuels;
+    }, null);
+}
+
 function _faireCopie(item, prefixId) {
     var copie = _nettoyerMarqueurs(item);
     if (typeof window.genererIdUnique === 'function') {
@@ -1196,10 +1274,11 @@ async function appliquerReimport() {
         // compteurs du rapport se font dans le mutateur, sur la liste qu'il écrit.
         if (selection.tampons.length > 0 && window.db) {
             var copiesTampons = 0, tamponsAjoutes = 0;
+            var ajoutesTampons = {};   // id dans l'archive → id écrit dans l'espace
             await db.modifier('tamponsPersonnalises', function(lus) {
                 var actuels = Array.isArray(lus) ? lus : [];
                 var idsActuels = new Set(actuels.map(function(t) { return t.id; }));
-                copiesTampons = 0; tamponsAjoutes = 0;
+                copiesTampons = 0; tamponsAjoutes = 0; ajoutesTampons = {};
                 for (var i = 0; i < selection.tampons.length; i++) {
                     var src = selection.tampons[i];
                     var item;
@@ -1212,12 +1291,14 @@ async function appliquerReimport() {
                     }
                     actuels.push(item);
                     idsActuels.add(item.id);
+                    ajoutesTampons[src.id] = item.id;
                     tamponsAjoutes++;
                 }
                 return actuels;
             }, []);
             rapport.copies += copiesTampons;
             rapport.tampons += tamponsAjoutes;
+            await _reimporterImagesEtPhrases(ajoutesTampons);
         }
 
         var totalAjoutes = rapport.grilles + rapport.echelles + rapport.tampons +
