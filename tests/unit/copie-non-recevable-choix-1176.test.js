@@ -177,7 +177,9 @@ describe('Sommative — écarter : hors de la moyenne, comme une copie non remis
     it('le verrou de l\'assistant : écartée, la Dissertation manque — aucun plafond (90) ; à 0, plafond 40', () => {
         const VERROU = [{ type: 'double_verrou', condition: { evaluation: 'Dissertation', comparateur: '<', seuil: 60 }, consequence: { action: 'plafonner', valeur: 40 } }];
         const p = (regle) => Object.assign(avecRegle(PRATIQUE_SOM, regle), { calcul_note: { methode: 'moyenne_ponderee', conditions_speciales: VERROU } });
-        expect(noteDe({ ...base, pratique: p('ecarter'), evaluations: marquer(COPIES_SOM, DA.ALICE, 'P1') }).P).toBe(90);
+        // La note calculée de la copie plagiée est SOUS le seuil (50) : un verrou qui la lirait plafonnerait à tort.
+        const sousLeSeuil = COPIES_SOM.map(e => (e.etudiantDA === DA.ALICE && e.productionId === 'P1' ? Object.assign({}, e, { noteFinale: 50 }) : e));
+        expect(noteDe({ ...base, pratique: p('ecarter'), evaluations: marquer(sousLeSeuil, DA.ALICE, 'P1') }).P).toBe(90);
         expect(noteDe({ ...base, pratique: p('zero'), evaluations: marquer(COPIES_SOM, DA.ALICE, 'P1') }).P).toBe(40);
     });
     it('TÉMOIN — Bruno, tout recevable, ne bouge pas selon la règle (67)', () => {
