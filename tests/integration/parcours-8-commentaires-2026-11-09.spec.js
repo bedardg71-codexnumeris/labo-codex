@@ -295,7 +295,6 @@ test('de bout en bout, avec fichier : une grille neuve, deux codes posés, la r�
         }, 0.3 + 0.3 * k);
         await page.mouse.click(p.x, p.y);
     }
-    if (process.env.SONDE_P8) await page.screenshot({ path: process.env.SONDE_P8 + '/sonde-09.png' });
     await expect(page.locator('#travaux-errfr-total-pastille')).toHaveText('2');
     await page.evaluate(() => window.travauxUI.basculerMode('evaluer'));
 
@@ -309,13 +308,11 @@ test('de bout en bout, avec fichier : une grille neuve, deux codes posés, la r�
     // La rétroaction : le décompte sous le critère, les deux codes dans « Spécifique ».
     const retro = page.locator('#travaux-palette-eval-retro');
     await expect(retro).toBeVisible();
-    if (process.env.SONDE_P8) { await page.waitForTimeout(800); await page.screenshot({ path: process.env.SONDE_P8 + '/sonde-10.png' }); }
     // La phrase du compte, sous le critère, dans la « Générale » (une zone de texte) ; la bulle ne couvre pas le contour.
     await expect(page.locator('#retroactionFinale1')).toHaveValue(/Ta production contient 2 unités manquantes pour 12 calculs\./);
     await bulleNeCouvrePasLeContour(page);
     await page.locator('#travaux-palette-eval-retro .retro-vues-radios label', { hasText: 'Spécifique' }).click({ timeout: 4000 });
     const specifique = (await page.locator('#contenuRetroSpecifique').innerText()).replace(/\s+/g, ' ');
-    if (process.env.SONDE_P8) console.log('SPECIFIQUE>>', specifique.slice(0, 800));
     expect(specifique).toContain('Code 0');
     expect(specifique).toContain('Code 1');
     await contourSur(page, '#btnVerrouillerEvaluation');
@@ -326,6 +323,116 @@ test('de bout en bout, avec fichier : une grille neuve, deux codes posés, la r�
     await expect(bulle(page).locator('.parcours-bulle-sortie')).toHaveCount(0);
     await boutonBulle(page, 'Terminer').click();
     await expect(bulle(page)).toHaveCount(0);
+    await ouvrirPanneau(page);
+    await expect(item(page)).toHaveAttribute('data-etat', 'fait');
+});
+
+/** Le contour posé sur le DERNIER élément qui répond au sélecteur (un critère qu'on vient d'ajouter). */
+async function contourSurDernier(page, selecteur) {
+    await expect.poll(() => page.evaluate((sel) => {
+        const c = document.getElementById('parcours-contour');
+        const tous = document.querySelectorAll(sel);
+        const el = tous[tous.length - 1];
+        if (!c || c.hidden || !el) return 'absent';
+        const a = c.getBoundingClientRect(), b = el.getBoundingClientRect();
+        const dx = Math.abs((a.left + a.right) / 2 - (b.left + b.right) / 2);
+        const dy = Math.abs((a.top + a.bottom) / 2 - (b.top + b.bottom) / 2);
+        return dx < 3 && dy < 3 ? 'posé' : 'décalé de ' + Math.round(dx) + ', ' + Math.round(dy);
+    }, selecteur), { message: 'contour posé sur le dernier ' + selecteur, timeout: 5000 }).toBe('posé');
+}
+
+test('sans fichier, sur une grille déjà associée : l’étape 7 sautée hors du compte, « Plus tard » puis « Reprendre », « Rien à importer »', async ({ page }) => {
+    test.setTimeout(120000);
+    await ouvrirEspace(page, 1180);
+    await ouvrirPanneau(page);
+    await item(page).locator('.assistance-parcours-bouton').click();
+    await attendreTitre(page, 'Ta grille');
+    await page.selectOption('#menuGrilles', 'G_P8_1');
+    // Une grille existante : d'abord « + Ajouter un critère », puis le « Type » du critère ajouté.
+    await contourSur(page, '#conteneurEditionGrille [data-action="ajouterCritereGrille"]');
+    await page.click('#conteneurEditionGrille [data-action="ajouterCritereGrille"]');
+    const types = '#listeCriteres select[data-on-change="modifierTypeCritereGrilleHandler"]';
+    await expect(page.locator(types)).toHaveCount(2);
+    await contourSurDernier(page, types);
+    await page.locator(types).last().selectOption('algorithmique');
+
+    // La grille porte déjà une production : l'étape 7 ne compte pas (10 étapes au lieu de 11).
+    await attendreTitre(page, 'Ce que tu comptes');
+    await expect(rang(page)).toHaveText('2 sur 10');
+    const nom = (paire, forme) => `#listeCriteres .noms-algo input[data-nom-paire="${paire}"][data-nom-forme="${forme}"]`;
+    for (const [paire, forme, valeur] of [['erreurs', 'singulier', 'unité manquante'], ['erreurs', 'pluriel', 'unités manquantes'],
+        ['mots', 'singulier', 'calcul'], ['mots', 'pluriel', 'calculs']]) {
+        await page.fill(nom(paire, forme), valeur);
+        await page.locator(nom(paire, forme)).dispatchEvent('change');
+    }
+
+    // « Plus tard » ferme la bulle ; le parcours attend dans le panneau ; « Reprendre » revient à la même étape.
+    await attendreTitre(page, 'Tes codes');
+    await expect(rang(page)).toHaveText('3 sur 10');
+    await bulle(page).locator('.parcours-bulle-sortie').click();
+    await expect(bulle(page)).toHaveCount(0);
+    await ouvrirPanneau(page);
+    await expect(item(page)).toHaveAttribute('data-etat', 'en-cours');
+    await expect(item(page).locator('.assistance-parcours-etat')).toHaveText('Étape 3 sur 10');
+    await expect(item(page).locator('.assistance-parcours-bouton')).toHaveText('Reprendre');
+    await item(page).locator('.assistance-parcours-bouton').click();
+    await attendreTitre(page, 'Tes codes');
+    await expect(rang(page)).toHaveText('3 sur 10');
+    for (let k = 0; k < 2; k++) {
+        await page.locator('#listeCriteres .atelier-algo-etape[data-etape="codes"] [data-action="ajouterSousCritere"]').first().click();
+    }
+    await boutonBulle(page, 'Continuer').click();
+
+    await attendreTitre(page, 'Ta note');
+    const pond = '#listeCriteres input[data-on-change="modifierCritereGrilleHandler"][data-champ="ponderation"]';
+    await contourSurDernier(page, pond);
+    await page.locator(pond).last().fill('20');
+    await page.locator(pond).last().dispatchEvent('change');
+    await expect(boutonBulle(page, 'Continuer')).toBeVisible();
+    await boutonBulle(page, 'Continuer').click();
+    await attendreTitre(page, 'Tes cas');
+    await boutonBulle(page, 'Continuer').click();
+
+    // Une grille existante s'enregistre d'elle-même : « Continuer », pas « Créer la grille ».
+    await attendreTitre(page, "Ce que l'étudiant·e lit");
+    await expect(rang(page)).toHaveText('6 sur 10');
+    await expect(boutonBulle(page, 'Continuer')).toBeVisible();
+    await boutonBulle(page, 'Continuer').click();
+
+    await attendreTitre(page, 'Tes productions');
+    await expect(rang(page)).toHaveText('7 sur 10');
+    await boutonBulle(page, 'Rien à importer').click();
+
+    // Sans fichier : l'étape 9 sautée, la variante de l'étape 10 ; 9 étapes en tout.
+    await attendreTitre(page, "Ta rétroaction s'écrit seule");
+    await expect(rang(page)).toHaveText('8 sur 9');
+    await expect(bulle(page).locator('.parcours-bulle-texte')).toContainText("Pas besoin d'importer");
+    const evaluer = '#evaluations-liste tr[data-production-id="P_P8_1"][data-da="1111111"] select.eval-actions-select';
+    await contourSur(page, evaluer);
+    await page.selectOption(evaluer, 'evaluer|1111111|P_P8_1');
+    const critereId = await page.evaluate((T) => {
+        const g = (window.db.getSync(T + '_grillesTemplates', []) || []).find((x) => x.id === 'G_P8_1');
+        return (g.criteres.find((c) => c.type === 'algorithmique') || {}).id;
+    }, T);
+    await expect(page.locator('#eval_erreurs_' + critereId)).toBeVisible({ timeout: 10000 });
+    await contourSur(page, '#eval_erreurs_' + critereId);
+    await page.fill('#eval_erreurs_' + critereId, '3');
+    await page.locator('#eval_erreurs_' + critereId).dispatchEvent('input');
+    await contourSur(page, '#eval_mots_' + critereId);
+    await page.fill('#eval_mots_' + critereId, '12');
+    await page.locator('#eval_mots_' + critereId).dispatchEvent('input');
+    await expect(page.locator('#retroactionFinale1')).toHaveValue(/Ta production contient 3 unités manquantes pour 12 calculs\./, { timeout: 5000 });
+    // L'autre critère s'évalue « comme d'habitude » : sans lui, le verrou refuserait.
+    await page.evaluate(() => {
+        const s = [...document.querySelectorAll('#travaux-eval-droite select')].find((x) => [...x.options].some((o) => o.value === 'M'));
+        if (s) { s.value = 'M'; s.dispatchEvent(new Event('change', { bubbles: true })); }
+    });
+    await contourSur(page, '#btnVerrouillerEvaluation');
+    await page.click('#btnVerrouillerEvaluation');
+
+    await attendreTitre(page, 'Pour aller plus loin');
+    await expect(rang(page)).toHaveText('9 sur 9');
+    await boutonBulle(page, 'Terminer').click();
     await ouvrirPanneau(page);
     await expect(item(page)).toHaveAttribute('data-etat', 'fait');
 });

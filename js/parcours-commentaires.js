@@ -241,7 +241,10 @@
     /** La carte d'un critère, dans la fiche : son en-tête porte le nom, le « Type » et la pondération. */
     function carteDuCritere(a) {
         var el = a || atelier();
-        return el ? el.closest('.item-liste') : null;
+        if (!el) return null;
+        // Dans une grille enregistrée, l'atelier n'est pas dans la carte : on la retrouve par le rang du critère.
+        var menu = $('#listeCriteres select[data-on-change^="modifierTypeCritere"][data-critere-index="' + el.dataset.atelierAlgo + '"]');
+        return (menu && menu.closest('.item-liste')) || el.closest('.item-liste');
     }
 
     function menuType(carte) {
@@ -249,7 +252,7 @@
     }
 
     function champPonderation(carte) {
-        return carte ? carte.querySelector('input[data-on-change="modifierPonderationCritereTempHandler"], input[data-champ="ponderation"]') : null;
+        return carte ? carte.querySelector('input[data-on-change="modifierPonderationCritereTempHandler"], input[data-on-change="modifierCritereGrilleHandler"][data-champ="ponderation"]') : null;
     }
 
     function cartesDesCriteres() {
@@ -269,11 +272,15 @@
     async function assurerAtelier(id) {
         aller('conception', 'grille-criteres');
         await attendre(function () { return sousSectionVisible('conception-grille-criteres'); }, 2000);
+        // La fiche se redessine après chaque changement enregistré (le « Type », un nom) : l'atelier peut
+        // manquer un instant. On l'attend d'abord ; la fiche ne se rouvre que si elle est fermée (après un
+        // rechargement) — la rouvrir pendant qu'on écrit effacerait ce qu'on vient de taper.
+        await attendre(atelier, 1500);
         var c = lireCtx();
-        if (!atelier() && !enCreation() && c.grilleId && grilleExiste(c.grilleId) && typeof chargerGrillePourModif === 'function') {
+        if (!atelier() && !ficheOuverte() && c.grilleId && grilleExiste(c.grilleId) && typeof chargerGrillePourModif === 'function') {
             await chargerGrillePourModif(c.grilleId);
+            await attendre(atelier, 2000);
         }
-        await attendre(atelier, 2000);
         if (!atelier()) { M().allerA(0); return; }
         ouvrirEtape(id);
     }
@@ -412,13 +419,20 @@
         return !!(f && idsDuParcours().indexOf(f.productionId) !== -1 && sousSectionVisible('evaluations-annoter'));
     }
 
+    /** L'évaluation sans fichier (« Actions › Évaluer » sans production importée) : trois panneaux, pas de palettes. */
+    function evaluationSansFichier() {
+        var e = document.getElementById('evaluations-contenu-evaluation');
+        if (!e || e.classList.contains('u-hide') || !sousSectionVisible('evaluations-annoter')) return false;
+        if ($('#travaux-palette-eval-gauche')) return false;
+        var s = document.getElementById('selectProduction1');
+        return !!(s && idsDuParcours().indexOf(s.value) !== -1);
+    }
+
     /** L'évaluation en cours porte sur une production du parcours (avec ou sans fichier). */
     function evaluationOuverte() {
-        var e = window.evaluationEnCours;
-        var pid = e && (e.productionId || (e.production && e.production.id));
+        if (evaluationSansFichier()) return true;
         var f = fichierOuvert();
-        var prod = pid || (f && f.productionId);
-        return !!(mode() === 'evaluer' && $('#travaux-palette-eval-gauche') && prod && idsDuParcours().indexOf(prod) !== -1);
+        return !!(mode() === 'evaluer' && $('#travaux-palette-eval-gauche') && f && idsDuParcours().indexOf(f.productionId) !== -1);
     }
 
     /** Le menu « Actions » d'une ligne de la liste qui offre ce geste sur une production du parcours. */
@@ -442,19 +456,20 @@
 
     function vide(champ) { return !!champ && String(champ.value || '').trim() === ''; }
 
-    /** Où toucher dans le mode Évaluer : les nombres, puis la palette « Rétroaction », puis le verrou. */
+    /** Où toucher dans le mode Évaluer : les nombres, puis la palette « Rétroaction » si elle est repliée, puis le verrou. */
     function contourEvaluation(avecCompte) {
         if (avecCompte && vide(champAlgo('eval_erreurs_'))) return champAlgo('eval_erreurs_');
         if (vide(champAlgo('eval_mots_'))) return champAlgo('eval_mots_');
         var r = palette('travaux-palette-eval-retro');
-        if (!r || r.classList.contains('replie')) {
-            return r ? (r.querySelector('[data-action="travauxUI.togglePaletteEvalReplie"]') || r) : palette('travaux-palette-eval-droite');
-        }
+        if (r && r.classList.contains('replie')) return r.querySelector('[data-action="travauxUI.togglePaletteEvalReplie"]') || r;
         return vis(document.getElementById('btnVerrouillerEvaluation'));
     }
 
+    /** Les palettes du mode Évaluer ; sans fichier, les trois panneaux qui en tiennent lieu. */
     function zonesEvaluation() {
-        return ['travaux-palette-eval-droite', 'travaux-palette-eval-retro', 'travaux-palette-eval-gauche'].map(palette).filter(Boolean);
+        var p = ['travaux-palette-eval-droite', 'travaux-palette-eval-retro', 'travaux-palette-eval-gauche'].map(palette).filter(Boolean);
+        if (p.length) return p;
+        return ['travaux-eval-gauche', 'travaux-eval-droite', 'travaux-eval-retroaction'].map(palette).filter(Boolean);
     }
 
     function verrouNeuf() {
