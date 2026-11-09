@@ -21,6 +21,9 @@
     /* Le trait, les pastilles « À faire » et les boutons en contour du panneau : le texte du menu
        atténué. --bordure-moyenne (0,35 d'opacité) s'effaçait sur le fond du menu. */
     --assistance-trait: rgba(196, 208, 228, 0.4);
+    /* La hauteur d'une bulle rangée en bas sur téléphone, posée par js/parcours-moteur.js (9 nov.) :
+       le témoin « Enregistré » monte d'autant. 0 hors téléphone. */
+    --parcours-reserve-bas: 0px;
 }
 
 body.mode-clair {

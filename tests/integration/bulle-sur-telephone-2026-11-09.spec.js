@@ -34,7 +34,7 @@ async function capture(page, nom) {
         .filter((a) => a.effect && a.effect.target && a.effect.target.closest
             && a.effect.target.closest('#panneau-assistance, #parcours-voile, #parcours-bulle'))
         .every((a) => a.playState !== 'running'));
-    await page.waitForTimeout(250); // deux passages de la sonde : la bulle est à sa place
+    await bulleStable(page);
     await page.screenshot({ path: path.join(CAPTURES, nom + '.png') });
 }
 
@@ -59,12 +59,28 @@ async function ouvrirEspaceVide(page, largeur, hauteur) {
 }
 
 const bulle = (page) => page.locator('#parcours-bulle');
+
+/** La bulle a fini de bouger : sa place et le défilement sont les mêmes à deux sondes d'écart. */
+async function bulleStable(page) {
+    let avant = null;
+    await expect.poll(async () => {
+        const maintenant = await page.evaluate(() => {
+            const b = document.getElementById('parcours-bulle');
+            if (!b) return 'aucune';
+            const r = b.getBoundingClientRect();
+            return [r.top, r.height, window.scrollY].map(Math.round).join(',');
+        });
+        const stable = maintenant === avant;
+        avant = maintenant;
+        return stable;
+    }, { message: 'la bulle a fini de bouger', intervals: [150], timeout: 5000 }).toBe(true);
+}
 const bascule = (page) => page.locator('#parcours-bulle .parcours-bulle-bascule');
 
 async function attendreEtape(page, n) {
     await expect(bulle(page).locator('.parcours-bulle-rang')).toHaveText(n + ' sur 8', { timeout: 10000 });
     await expect(bulle(page)).toBeFocused();
-    await page.waitForTimeout(250);
+    await bulleStable(page);
 }
 
 /**
@@ -187,7 +203,7 @@ test('390 px : le témoin « Enregistré » passe au-dessus de la bulle, le lien
     // Le témoin parle (il reste 2 s) : il se pose au-dessus de la bulle, sans couvrir la sortie.
     await page.evaluate(() => window.temoinEnregistrement.enregistre());
     await expect(page.locator('#temoin-enregistrement .temoin-enregistrement-succes')).toBeVisible();
-    await page.waitForTimeout(250);
+    await bulleStable(page);
     const g = await page.evaluate(() => {
         const t = document.querySelector('#temoin-enregistrement .temoin-enregistrement-succes').getBoundingClientRect();
         const b = document.getElementById('parcours-bulle').getBoundingClientRect();
@@ -219,7 +235,10 @@ test('le filet : dans une fenêtre courte, la bulle s’y limite, seul le texte 
             const q = el.getBoundingClientRect();
             return q.top >= r.top - 1 && q.bottom <= r.bottom + 1 && q.top >= 0 && q.bottom <= window.innerHeight;
         });
-        return { haut: r.top, bas: r.bottom, h: window.innerHeight, texteDefile: t.scrollHeight > t.clientHeight + 1,
+        // Le bas utile : au-dessus du bandeau de la démo, fixé en bas (le parcours a ouvert la démo).
+        const bandeau = document.getElementById('bandeau-demo');
+        const basUtile = bandeau && bandeau.getClientRects().length ? bandeau.getBoundingClientRect().top : window.innerHeight;
+        return { haut: r.top, bas: r.bottom, h: basUtile, texteDefile: t.scrollHeight > t.clientHeight + 1,
                  bulleDefile: b.scrollHeight > b.clientHeight + 1,
                  teteVisible: dedans('.parcours-bulle-tete'), boutonsVisibles: dedans('.parcours-bulle-boutons button'),
                  sortieVisible: dedans('.parcours-bulle-sortie') };
@@ -234,8 +253,15 @@ test('le filet : dans une fenêtre courte, la bulle s’y limite, seul le texte 
     const texte = bulle(page).locator('.parcours-bulle-texte');
     const t = await texte.boundingBox();
     await page.mouse.move(t.x + t.width / 2, t.y + t.height / 2);
-    const avant = await page.evaluate(() => window.scrollY);
-    for (let k = 0; k < 6; k++) { await page.mouse.wheel(0, 400); await page.waitForTimeout(80); }
+    const avant = await page.evaluate(() => {
+        window.__roues = 0;
+        document.addEventListener('wheel', () => { window.__roues += 1; }, { capture: true, passive: true });
+        return window.scrollY;
+    });
+    for (let k = 0; k < 6; k++) await page.mouse.wheel(0, 400);
+    // Les six tours de molette sont arrivés, et deux images ont passé : le défilement a eu lieu.
+    await expect.poll(() => page.evaluate(() => window.__roues)).toBe(6);
+    await page.evaluate(() => new Promise((fin) => requestAnimationFrame(() => requestAnimationFrame(fin))));
     await expect.poll(() => texte.evaluate((el) => el.scrollTop + el.clientHeight >= el.scrollHeight - 1)).toBe(true);
     expect(await page.evaluate(() => window.scrollY)).toBe(avant);
 });
