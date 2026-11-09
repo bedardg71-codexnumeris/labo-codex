@@ -188,8 +188,10 @@ function rendreAccueil(options) {
         setTimeout: (f) => f(),
     }, {
         addEventListener() {},
-        // Lus sur `window` par accueil.js : l'export de trimestre-v2.js et la garde de l'import (T7).
-        ouvrirAccordeonDeLEtape: (e) => appels.push(['etape', e]),
+        // Lus sur `window` par accueil.js : le panneau « Assistance » (la porte « Tu enseignes ? »
+        // lance le parcours « Mettre ta classe en place ») et la garde de l'import (T7).
+        Assistance: { parcours: () => [{ id: 'decouvrir', lancer: () => appels.push(['parcours', 'decouvrir']) },
+            { id: 'classe', lancer: () => appels.push(['parcours', 'classe']) }] },
         importEmpecheLaBascule: opts.importEmpeche ? () => true : undefined,
     });
     win.afficherAccueil();
@@ -346,14 +348,14 @@ describe('B5 · trois portes d\'entrée (28 oct. 2026), de vrais boutons (7 nov.
         p.forEach((c) => expect(c).toMatch(/<div class="accueil-porte-desc">[^<]+<\/div>/));
     });
 
-    it('« Tu enseignes ? » : Cadre › Trimestre, puis l\'étape Trimestre de la barre de convergence', () => {
+    // Lot « Les deux parcours », partie 2 (9 nov. 2026) : la porte lance le deuxième parcours, qui
+    // ouvre lui-même Cadre › Trimestre et ses blocs (avant : l'accordéon Trimestre, par la barre).
+    it('« Tu enseignes ? » : le parcours « Mettre ta classe en place », et lui seul', () => {
         const { html, win, appels } = rendreAccueil();
         expect(portes(html)[0]).toContain('data-action="commencerParLeTrimestre">Commencer</button>');
         win.commencerParLeTrimestre();
-        expect(appels).toEqual([['section', 'calendrier'], ['sous-section', 'calendrier-trimestre'], ['etape', 'trimestre']]);
-        const t = lire('js/trimestre-v2.js');
-        expect(t).toMatch(/'trimestre': 'accordeon-gestion-trimestres'/);
-        expect(t).toContain('window.ouvrirAccordeonDeLEtape = ouvrirAccordeonDeLEtape;');
+        expect(appels).toEqual([['parcours', 'classe']]);
+        expect(lire('js/parcours-classe.js')).toMatch(/'trimestre': 'accordeon-gestion-trimestres'/);
     });
 
     it('« Explorer » appelle activerModeDemo (qui porte la garde de l\'import, T7) ; rien quand la démo est déjà active', () => {

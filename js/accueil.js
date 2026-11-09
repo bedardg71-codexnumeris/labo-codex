@@ -305,15 +305,13 @@ function deplacerFocusVersSection(section) {
 }
 
 /**
- * Porte « Tu enseignes ? » : Cadre › Trimestre, puis la première étape de la barre de
- * convergence (l'accordéon Trimestre) — le geste d'un clic sur cette étape, pas un second.
- * Le délai suit celui de naviguerAccueilCarte : la sous-section doit être affichée.
+ * Porte « Tu enseignes ? » : le parcours « Mettre ta classe en place » (js/parcours-classe.js,
+ * lot « Les deux parcours », partie 2, 9 nov. 2026). Il ouvre Cadre › Trimestre et ses blocs
+ * lui-même, à la première étape non faite ; avant lui, cette porte ouvrait l'accordéon Trimestre.
  */
 function commencerParLeTrimestre() {
-    naviguerAccueilCarte('calendrier|calendrier-trimestre');
-    setTimeout(function() {
-        if (typeof window.ouvrirAccordeonDeLEtape === 'function') window.ouvrirAccordeonDeLEtape('trimestre');
-    }, 200);
+    const classe = window.Assistance.parcours().find(function(p) { return p.id === 'classe'; });
+    if (classe) classe.lancer();
 }
 
 /**

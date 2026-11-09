@@ -911,6 +911,8 @@ function mettreAJourControleVerrouillage(dateStr, estVerrouille) {
 }
 
 window.basculerVerrouillageDateActive = basculerVerrouillageDateActive;
+// Le parcours « Mettre ta classe en place » (js/parcours-classe.js) avance quand une séance est verrouillée.
+window.obtenirDatesVerrouillees = obtenirDatesVerrouillees;
 
 /* ===============================
    ENREGISTREMENT — lot D (D2, D2 bis ; 27 sept. 2026)
@@ -2399,6 +2401,13 @@ document.addEventListener('DOMContentLoaded', function() {
                     const dateInput = document.getElementById('date-cours');
                     if (dateInput && dateInput.value) {
                         initialiserSaisiePresences();
+                    } else if (dateInput) {
+                        // Lot « Les deux parcours », partie 2 (9 nov. 2026) : la date part vide quand
+                        // le démarrage n'avait rien à proposer (poste neuf), et le premier groupe-cours,
+                        // créé ensuite dans le Cadre, n'y revenait qu'au rechargement — date vide, ni
+                        // « Confirmer la séance » ni « Verrouiller la saisie ». À l'arrivée, le chemin
+                        // du démarrage : les séances régénérées, la plus récente ≤ aujourd'hui proposée.
+                        initialiserModuleSaisiePresences();
                     }
                 }
             }
