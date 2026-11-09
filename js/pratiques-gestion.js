@@ -1074,7 +1074,7 @@ async function chargerPratiquePourModif(pratiqueId) {
     // Phase 4.B : mode lecture seule si item démo. Question 11 du neuvième parcours (9 nov. 2026) : une pratique
     // ne l'est que dans la démo (`estPratiqueDeDemo`) ; sinon, l'appel nettoie (item nul).
     if (conteneurEdition && typeof BibliothequeUI !== 'undefined' && BibliothequeUI.appliquerModeLectureSeuleDemo) {
-        const deDemo = BibliothequeUI.estPratiqueDeDemo ? BibliothequeUI.estPratiqueDeDemo(pratique) : BibliothequeUI.estItemDemo(pratique);
+        const deDemo = BibliothequeUI.estPratiqueDeDemo(pratique);
         BibliothequeUI.appliquerModeLectureSeuleDemo(conteneurEdition, deDemo ? pratique : null, 'dupliquerEtEditerPratique', 'Dupliquer pour créer ma pratique');
     }
 

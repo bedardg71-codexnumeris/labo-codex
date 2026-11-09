@@ -54,8 +54,8 @@ async function capture(page, nom) {
 /**
  * Corrections du 9 nov. (Cowork, comme au huitième parcours) : aucun avis de la pile ne couvre la bulle. Un relevé tourne
  * dans la page pendant tout l'essai (posé avant chaque chargement) : toutes les 100 ms, il regarde si un avis couvre la
- * bulle ; un recouvrement de plus de cinq relevés (la pile se replace en 200 ms au plus, utils-notifications.js) est
- * consigné avec le titre de l'étape. Chaque essai finit en exigeant un relevé vide (afterEach).
+ * bulle (au-dessus d'elle : sous elle, il ne couvre rien) ; un recouvrement de plus de trois relevés (la pile se replace
+ * en 200 ms au plus, utils-notifications.js) est consigné avec le titre de l'étape. Chaque essai finit en exigeant un relevé vide (afterEach).
  */
 function releveDesAvisSurLaBulle() {
     window.__avisSurLaBulle = [];
@@ -65,12 +65,19 @@ function releveDesAvisSurLaBulle() {
         let couvrent = [];
         if (b) {
             const r = b.getBoundingClientRect();
+            // Un avis ne compte que s'il est AU-DESSUS de la bulle (le milieu de leur intersection répond par l'avis).
             couvrent = [...document.querySelectorAll('#notifications-pile > *')]
                 .filter((n) => !n.classList.contains('notification-sortie'))
-                .filter((n) => { const x = n.getBoundingClientRect(); return !(x.right <= r.left || r.right <= x.left || x.bottom <= r.top || r.bottom <= x.top); });
+                .filter((n) => {
+                    const x = n.getBoundingClientRect();
+                    const g = Math.max(x.left, r.left), d = Math.min(x.right, r.right), h = Math.max(x.top, r.top), bas = Math.min(x.bottom, r.bottom);
+                    if (d <= g || bas <= h) return false;
+                    const dessus = document.elementFromPoint((g + d) / 2, (h + bas) / 2);
+                    return !!(dessus && n.contains(dessus));
+                });
         }
         suite = couvrent.length ? suite + 1 : 0;
-        if (suite === 6) {
+        if (suite === 4) {
             const t = b.querySelector('.parcours-bulle-titre');
             window.__avisSurLaBulle.push((t ? t.textContent : '?') + ' : ' + couvrent.map((n) => n.textContent.trim().slice(0, 40)).join(' | '));
         }
@@ -321,8 +328,9 @@ test('étape 5 : la pratique déjà appliquée ne fait pas passer l’étape seu
 
 // Question 11 (décidée par Cowork le 9 nov.) : la lecture, pas les données. Hors de la démo, une pratique n'est jamais une
 // pratique de démo, même si son auteur dit « Demo Labo Codex » (le stock : une copie de modèle adoptée sans auteur).
-// Break-test (9 nov., Chromium) : `estPratiqueDeDemo` remise à `estItemDemo` seul (bibliotheque-ui.js) → ROUGE (la
-// pratique manque au menu). Rétablie → vert.
+// Break-tests (9 nov., Chromium) : `estPratiqueDeDemo` remise à `estItemDemo` seul (bibliotheque-ui.js) → ROUGE (la fiche
+// en lecture seule, `demo-readonly`) ; la garde des références seule remise à `estItemDemo` → ROUGE (le formulaire
+// Cadre › Groupes-cours refuserait la pratique). Rétablies → verts.
 test('question 11 : hors de la démo, une pratique dont l’auteur dit « Demo Labo Codex » est au menu, modifiable, et s’applique ; rien n’est réécrit', async ({ page }) => {
     await page.goto(indexHtml);
     await attendreApplication(page);
@@ -338,6 +346,64 @@ test('question 11 : hors de la démo, une pratique dont l’auteur dit « Demo L
     await page.click('#conteneurEditionPratique [data-action="appliquerPratiqueAuCoursActive"]');
     await expect.poll(() => page.evaluate(() => obtenirIdPratiqueActive())).toBe('pratique_banc_0');
     expect(await page.evaluate(() => db.getSync(cle('pratiquesConfigurables'), []).find((p) => p.id === 'pratique_banc_0').auteur)).toBe('Demo Labo Codex');
+    // La garde des références (le formulaire Cadre › Groupes-cours, trimestre-v2-groupes-cours.js) ne la refuse pas.
+    expect(await page.evaluate(() => BibliothequeUI.verifierReferencesPasDemo(
+        [{ id: 'pratique_banc_0', collection: 'pratiquesConfigurables', labelType: 'pratique' }], { cible: cle('groupesCours') }))).toBeNull();
+});
+
+// Étape 3, standards (Cowork, 9 nov.) : le champ du nombre reste libre, à 1180 px de large, à la hauteur du banc (900) et
+// à celle de la fenêtre de Safari sur l'iPad à l'horizontale (770 environ, relecture du 9 nov.) ; le mode et le minimum
+// aussi. Break-test (9 nov., Chromium) : la place sous le nombre retirée et le poids du nombre ramené à 1 → ROUGE à 770.
+for (const hauteur of [900, 820, 770]) {
+    test(`étape 3, standards, 1180 × ${hauteur} : la bulle laisse le nombre à retenir, le mode et le minimum libres`, async ({ page }) => {
+        await page.goto(indexHtml);
+        await attendreApplication(page);
+        const pratiques = await pratiquesDesModeles(page);
+        await monter(page, { pratiques, active: 'pratique_banc_0', hauteur });
+        await commencer(page);
+        await attendreEtape(page, "L'ouvrir", '1 sur 7');
+        await page.selectOption('#menuPratiques', 'pratique_banc_0');
+        await attendreEtape(page, 'Ta sélection', '2 sur 7');
+        await bulleNeCouvrePas(page, ['#mat-portfolio-nombre', '#mat-portfolio-selection', '#mat-portfolio-minimum'], 'la bulle 3 laisse les réglages de la sélection libres');
+        // La bulle tient dans la fenêtre ; ce qui dépasse défile dans la bulle, « Continuer » compris.
+        const g = await page.evaluate(() => { const r = document.getElementById('parcours-bulle').getBoundingClientRect(); return { haut: r.top >= 0, bas: r.bottom <= window.innerHeight }; });
+        expect(g).toEqual({ haut: true, bas: true });
+        await boutonBulle(page, 'Continuer').scrollIntoViewIfNeeded();
+        await boutonBulle(page, 'Continuer').click();
+        await attendreEtape(page, "Ce que lit l'étudiant·e", '3 sur 7');
+    });
+}
+
+// Étape 5 (Cowork, 9 nov.) : sous le verrou, les deux boutons d'affichage sont désactivés ; « Déverrouiller » les rend.
+// Break-test (9 nov., Chromium) : les boutons jamais réactivés (`radio.disabled = true` seulement) → ROUGE.
+test('étape 5 : sur une évaluation verrouillée, « Note chiffrée » et « Niveau de performance » sont désactivés ; « Déverrouiller » les rend', async ({ page }) => {
+    await page.goto(indexHtml);
+    await attendreApplication(page);
+    const pratiques = await pratiquesDesModeles(page);
+    await monter(page, { pratiques, active: 'pratique_banc_0' });
+    // Le rappel « Mets ton codex à jour » (un espace avec des données, sans codex) ne vient pas couvrir le verrou.
+    await page.evaluate(() => { const loin = new Date(); loin.setDate(loin.getDate() + 30); db.setSync('backupProchainRappel', loin.toISOString()); });
+    await page.evaluate(() => naviguerVers('evaluations', 'liste'));
+    const ligne = page.locator('#conteneur-tableau-evaluations tr[data-da="9000001"][data-production-id="P1"]');
+    await ligne.locator('select.eval-actions-select').selectOption('evaluer|9000001|P1');
+    await expect(page.locator('#btnVerrouillerEvaluation')).toBeVisible({ timeout: 10000 });
+    await expect(page.locator('#eval_c1')).toBeAttached({ timeout: 10000 });
+    await page.evaluate(() => { const s = document.getElementById('eval_c1'); s.value = 'M'; s.dispatchEvent(new Event('change', { bubbles: true })); });
+    await expect(page.locator('#affichageNoteLettre1')).toBeEnabled();
+    await page.click('#btnVerrouillerEvaluation');
+    await expect(page.locator('#affichageNoteComplet1')).toBeDisabled();
+    await expect(page.locator('#affichageNoteLettre1')).toBeDisabled();
+    // Le chemin que dit la bulle 5 : « Actions › Consulter », puis « Déverrouiller ». On attend que l'évaluation soit
+    // chargée (son id dans le formulaire) : plus tôt, « Déverrouiller » reverrouille (relecture du 9 nov., inscrit).
+    const evalId = await page.evaluate(() => (db.getSync(cle('evaluationsSauvegardees'), []) || []).find((e) => e.verrouillee === true).id);
+    await page.evaluate(() => naviguerVers('evaluations', 'liste'));
+    await page.locator('#conteneur-tableau-evaluations tr[data-da="9000001"][data-production-id="P1"] select.eval-actions-select')
+        .selectOption('consulter|' + evalId);
+    await expect.poll(() => page.evaluate(() => window.evaluationEnCours && window.evaluationEnCours.idModification), { timeout: 10000 }).toBe(evalId);
+    await expect(page.locator('#affichageNoteLettre1')).toBeDisabled();
+    await page.click('#btnVerrouillerEvaluation');
+    await expect(page.locator('#affichageNoteComplet1')).toBeEnabled();
+    await expect(page.locator('#affichageNoteLettre1')).toBeEnabled();
 });
 
 // Comme au huitième parcours (Cowork, 9 nov.) : pendant tout parcours, l'aide dans les pages se tait. Même mécanisme,
@@ -370,7 +436,8 @@ async function parcoursEntier(page, { famille, modele, largeur = 1180, clair = f
     await attendreEtape(page, 'Ta pratique', '1 sur 8');
     // Question 12 (validée par Grégoire le 9 nov.) : avant l'assistant, la bulle entière, près de « + Nouvelle pratique ».
     await expect(bulle(page).locator('.parcours-bulle-texte')).toBeVisible();
-    await bulleNeCouvrePas(page, ['#conception-pratiques-notation [data-action="creerNouvellePratique"]'], 'la bulle 1 laisse « + Nouvelle pratique » libre');
+    // Sous 700 px, la bulle longue couvre l'écran : le lot « La bulle sur téléphone » s'en charge (décision du 9 nov.).
+    if (largeur >= 700) await bulleNeCouvrePas(page, ['#conception-pratiques-notation [data-action="creerNouvellePratique"]'], 'la bulle 1 laisse « + Nouvelle pratique » libre');
     await cap('etape-1');
     await toucher(page, '#conception-pratiques-notation [data-action="creerNouvellePratique"]');
     await expect(page.locator('#modalWizardPratiqueV2')).toHaveClass(/actif/);
@@ -417,7 +484,7 @@ async function parcoursEntier(page, { famille, modele, largeur = 1180, clair = f
         await attendreEtape(page, 'Ta sélection', n(3));
         // Cowork (9 nov.) : le champ du nombre à retenir, à droite de « Mode de sélection », reste libre ; le mode et le
         // minimum aussi. Break-test (9 nov., Chromium) : la sonde de l'étape 3 sans `bulleHorsDesReglagesStd` → ROUGE.
-        await bulleNeCouvrePas(page, ['#mat-portfolio-nombre', '#mat-portfolio-selection', '#mat-portfolio-minimum'], 'la bulle 3 laisse les réglages de la sélection libres');
+        if (largeur >= 1180) await bulleNeCouvrePas(page, ['#mat-portfolio-nombre', '#mat-portfolio-selection', '#mat-portfolio-minimum'], 'la bulle 3 laisse les réglages de la sélection libres');
         await cap('etape-3-standards');
         await boutonBulle(page, 'Continuer').click();
     }

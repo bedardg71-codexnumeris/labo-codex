@@ -299,6 +299,7 @@
         if (!b) return;
         b.classList.toggle('parcours-bulle--reduite', nom === 'reduite');
         b.classList.toggle('parcours-bulle--large', nom === 'large');
+        b.style.maxHeight = '';   // une hauteur bornée par `bulleHorsDe` ne survit pas à sa place
     }
 
     /**
@@ -313,48 +314,78 @@
     }
 
     /**
-     * Place la bulle, après le moteur (la sonde de l'étape passe après lui : sa place l'emporte), à celle qui couvre
-     * le moins `gardes`, parmi neuf places (trois colonnes, trois rangées, sous l'en-tête). La place du moteur reste si
-     * elle ne couvre rien. Même règle que le huitième parcours (`bulleHors`), propre à ce fichier : le moteur n'est
-     * pas touché ; à unifier à la fusion.
+     * Place la bulle, après le moteur (la sonde de l'étape passe après lui : sa place l'emporte), à celle qui coûte le
+     * moins. Le coût d'une place : l'aire qu'elle couvre de chaque garde, multipliée par son poids. Les places essayées :
+     * celles que l'étape propose d'abord (`places`, chacune avec sa hauteur bornée au besoin : la bulle défile alors),
+     * puis neuf places (trois colonnes, trois rangées, sous l'en-tête). La place du moteur reste si elle ne couvre rien.
+     * Même règle que le huitième parcours (`bulleHors`), propre à ce fichier : le moteur n'est pas touché ; à unifier.
+     * @param {Array<{el: Element, poids: number}>} gardes
+     * @param {Array<{x: number, y: number, hauteur?: number}>} [places]
      */
-    function bulleHorsDe(gardes) {
+    function bulleHorsDe(gardes, places) {
         var b = el('parcours-bulle');
         if (!b) return;
-        var rects = gardes.filter(vis).map(function (g) { return g.getBoundingClientRect(); });
+        b.style.maxHeight = '';
+        var rects = gardes.filter(function (g) { return vis(g.el); })
+            .map(function (g) { return { r: g.el.getBoundingClientRect(), poids: g.poids }; });
         var bw = b.offsetWidth, bh = b.offsetHeight, vw = document.documentElement.clientWidth, vh = window.innerHeight;
         var e = document.querySelector('header.entete');
         var haut = e ? Math.max(0, e.getBoundingClientRect().bottom) : 0;
-        function cout(x, y) {
-            return rects.reduce(function (t, r) {
-                var w = Math.min(x + bw, r.right) - Math.max(x, r.left);
-                var h = Math.min(y + bh, r.bottom) - Math.max(y, r.top);
-                return t + (w > 0 && h > 0 ? w * h : 0);
+        function cout(x, y, h) {
+            return rects.reduce(function (t, o) {
+                var w = Math.min(x + bw, o.r.right) - Math.max(x, o.r.left);
+                var hh = Math.min(y + h, o.r.bottom) - Math.max(y, o.r.top);
+                return t + (w > 0 && hh > 0 ? w * hh * o.poids : 0);
             }, 0);
         }
-        var meilleur = { x: parseFloat(b.style.left) || 0, y: parseFloat(b.style.top) || 0 };
-        meilleur.cout = cout(meilleur.x, meilleur.y);
+        var meilleur = { x: parseFloat(b.style.left) || 0, y: parseFloat(b.style.top) || 0, hauteur: null };
+        meilleur.cout = cout(meilleur.x, meilleur.y, bh);
         if (meilleur.cout === 0) return;
         var marge = 8;
+        var candidats = (places || []).slice();
         [marge, (vw - bw) / 2, vw - bw - marge].forEach(function (x) {
             [Math.max(marge, haut + marge), Math.max(marge, (vh - bh) / 2), Math.max(marge, vh - bh - marge)].forEach(function (y) {
-                var c = cout(x, y);
-                if (c < meilleur.cout) meilleur = { x: x, y: y, cout: c };
+                candidats.push({ x: x, y: y });
             });
+        });
+        candidats.forEach(function (p) {
+            var h = p.hauteur ? Math.min(p.hauteur, bh) : bh;
+            var c = cout(p.x, p.y, h);
+            if (c < meilleur.cout) meilleur = { x: p.x, y: p.y, hauteur: h < bh ? h : null, cout: c };
         });
         b.style.left = Math.round(Math.max(marge, meilleur.x)) + 'px';
         b.style.top = Math.round(meilleur.y) + 'px';
+        if (meilleur.hauteur) b.style.maxHeight = Math.floor(meilleur.hauteur) + 'px';
     }
 
     /**
      * Étape 3, standards (décision de Cowork du 9 nov. 2026) : la bulle couvrait le champ du nombre à retenir, à
      * droite de « Mode de sélection », dont elle parle. La carte « Structure des évaluations » occupe l'écran : le
-     * moteur posait la bulle en son milieu. Plus large (donc moins haute), elle se pose là où elle ne couvre ni ce
-     * champ, ni « Mode de sélection », ni le minimum.
+     * moteur posait la bulle en son milieu. Le champ du nombre est le garde prioritaire, « Mode de sélection » et le
+     * minimum viennent ensuite. La place préférée est juste sous le champ, à droite, la hauteur bornée à ce qui reste
+     * jusqu'au bas de l'écran (la bulle défile au-delà) : elle tient aussi dans la fenêtre de Safari sur l'iPad à
+     * l'horizontale (1180 × 770 environ, relecture du 9 nov.). À partir de 1180 px, la bulle est plus large, donc
+     * moins haute.
      */
+    var HAUTEUR_MIN_SOUS_LE_NOMBRE = 220;
+
     function bulleHorsDesReglagesStd() {
-        formeDeBulle('large');
-        bulleHorsDe([el('mat-portfolio-nombre'), el('mat-portfolio-selection'), el('mat-portfolio-minimum')]);
+        var vw = document.documentElement.clientWidth;
+        formeDeBulle(vw >= 1180 ? 'large' : null);
+        var b = el('parcours-bulle');
+        var nombre = el('mat-portfolio-nombre');
+        var places = [];
+        if (b && vis(nombre)) {
+            var r = nombre.getBoundingClientRect();
+            var y = r.bottom + 12;
+            var hauteur = window.innerHeight - y - 8;
+            if (hauteur >= HAUTEUR_MIN_SOUS_LE_NOMBRE) places.push({ x: vw - b.offsetWidth - 8, y: y, hauteur: hauteur });
+        }
+        bulleHorsDe([
+            { el: nombre, poids: 10000 },
+            { el: el('mat-portfolio-selection'), poids: 100 },
+            { el: el('mat-portfolio-minimum'), poids: 100 }
+        ], places);
     }
 
     /** « Continuer » paraît selon l'état : le moteur rend la bulle une fois, la sonde la retouche ici. */

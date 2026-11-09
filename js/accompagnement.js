@@ -1103,7 +1103,9 @@ function initialiserPopup() {
 // --- Bulle de découverte (petit helper de aide-contextuelle.js) --------------
 
 function afficherBulleDecouverte({ cible, message, position = 'bas', duree = 8000 }) {
-    if (parcoursEnCours()) return;   // 9 nov. : l'aide dans les pages se tait pendant tout parcours
+    // 9 nov. : l'aide dans les pages se tait pendant tout parcours. Sans suite (relecture du 9 nov.) : travaux-ui.js marque
+    // la bulle « Clique ici pour activer les outils d'annotation… » vue même quand elle se tait ; elle ne reparaît pas de la session.
+    if (parcoursEnCours()) return;
     const el = document.querySelector(cible);
     if (!el) return;
     const existante = document.querySelector('.bulle-decouverte');

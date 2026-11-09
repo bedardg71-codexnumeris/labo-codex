@@ -22,27 +22,49 @@
   sont couverts. Aucun mot ne change. Sous 700 px, ce que j'avais fait reste (la bulle attend derrière l'assistant) :
   le lot « La bulle sur téléphone » s'en charge. Captures `p9-etape-1-1180-sombre.png` et
   `p9-etape-1-assistant-1180-sombre.png`.
-- **Étape 3, standards** (Cowork) : la bulle, plus large et donc moins haute, se pose en bas à droite de la carte. Le
-  champ du nombre à retenir (« Productions pour la note finale »), « Mode de sélection » et le minimum restent libres.
-  Comme au huitième parcours, c'est la sonde de l'étape qui la place, après le moteur, sans le toucher (à unifier à la
-  fusion). Capture `p9-etape-3-standards-1180-sombre.png`.
+- **Étape 3, standards** (Cowork) : la bulle se pose juste sous le champ du nombre à retenir (« Productions pour la
+  note finale »), à droite, sa hauteur bornée à ce qui reste jusqu'au bas de l'écran (ce qui dépasse défile dans la
+  bulle, « Continuer » compris). Ce champ, « Mode de sélection » et le minimum restent libres ; le champ du nombre est
+  le plus protégé. À partir de 1180 px, la bulle est plus large, donc moins haute. Éprouvé à 1180 × 900, × 820 et
+  × 770 (la fenêtre de Safari sur l'iPad à l'horizontale). Comme au huitième parcours, c'est la sonde de l'étape qui la
+  place, après le moteur, sans le toucher (à unifier à la fusion). Capture `p9-etape-3-standards-1180-sombre.png`.
 - **Les avis ne couvrent plus une bulle, et l'aide dans les pages se tait pendant tout parcours** (Cowork, comme au
   huitième parcours) : le même code que sur la branche du huitième, recopié tel quel (`js/utils-notifications.js` : la
   pile des avis prend le coin qui ne couvre pas la bulle ; `js/accompagnement.js` et `css/accompagnement.css` :
   survol, flèches et bulles de découverte se taisent). **À n'en garder qu'un à la fusion.** Sur la capture de
   l'étape 7, « Pratique appliquée au cours actif » et « Évaluation verrouillée » sont passés en bas à droite.
 - **Question 11, la lecture** (Cowork) : hors de la démo, une pratique n'est jamais traitée comme une pratique de démo,
-  même si son auteur dit « Demo Labo Codex ». Elle paraît au menu, sa fiche se modifie, et elle s'applique au
-  groupe-cours. Une seule règle, `BibliothequeUI.estPratiqueDeDemo` (la démo ouverte ET la marque), lue par le menu, la
-  fiche et la garde d'« Appliquer » (`verifierReferencesPasDemo`). **Rien n'est réécrit** : le stock garde sa marque,
-  et elle ne compte plus hors de la démo. Mon hypothèse, à corriger au besoin : la décision vise **tes** pratiques (celles
+  même si son auteur dit « Demo Labo Codex ». Elle paraît au menu (le filtre « démo » des pratiques du trimestre est
+  retiré : dans la démo, il ne masquait rien), sa fiche se modifie, et la garde des références du formulaire
+  Cadre › Groupes-cours (`verifierReferencesPasDemo`) ne la refuse plus. Une seule règle, `BibliothequeUI.estPratiqueDeDemo`
+  (la démo ouverte ET la marque), lue par la fiche et par cette garde. **Rien n'est réécrit** : le stock garde sa
+  marque, et elle ne compte plus hors de la démo. Reste hors de la règle : l'export pour partager (inscrit, n° 25). Mon hypothèse, à corriger au besoin : la décision vise **tes** pratiques (celles
   du trimestre) ; la fenêtre « Bibliothèque » garde son filtre pour les modèles livrés (`toutesBibliotheque`), que je
   n'ai pas touché.
 - **Étape 5, le verrou** (Cowork) : sur une évaluation verrouillée, « Note chiffrée » et « Niveau de performance »
   sont désactivés, comme le reste de la fiche (`desactiverFormulaireEvaluation`, `js/evaluation.js`). Avant, ils
-  restaient cliquables sans rien enregistrer. Déverrouillée, l'évaluation les rend.
+  restaient cliquables sans rien enregistrer. Rouverte par « Actions › Consulter » puis déverrouillée, l'évaluation
+  les rend (éprouvé).
 - Captures Chromium à 1180 px, en sombre, remplacées : l'étape 1 dans ses deux temps, les étapes 3 et 5 à 8, et aussi
-  les étapes 2 et 4, dont les phrases ont changé. Les autres n'ont pas bougé.
+  les étapes 2 et 4, dont les phrases ont changé. Les autres (en clair, à 820 et 390 px) datent de la nuit : ni leurs
+  phrases ni la place de l'étape 3 n'y sont à jour ; elles se refont toutes sur le Mac, sous WebKit.
+
+### Les essais des corrections
+
+- **Playwright (Chromium)**, le banc du parcours : **16 essais verts** hors captures, et **20 / 20** avec les captures
+  (`CAPTURES_PARCOURS`, aux quatre largeurs). Neufs : la question 11 (menu, fiche, application, garde des références,
+  rien de réécrit) ; l'étape 3 à 1180 × 900, × 820 et × 770 ; le verrou de l'étape 5 (désactivé, puis rendu par
+  « Consulter » et « Déverrouiller ») ; l'aide muette. Les parcours entiers vérifient aussi l'étape 1 en deux temps et
+  l'étape 3 (à partir de 1180 px). Un relevé tourne pendant chaque essai : un avis au-dessus de la bulle plus de trois
+  passages le fait rougir.
+- **Break-tests**, chacun rouge puis vert une fois rétabli : `bulleDeLEtape1` sans effet ; la place sous le nombre et
+  sa priorité retirées (rouge à 770) ; les boutons d'affichage jamais désactivés, puis jamais réactivés ;
+  `estPratiqueDeDemo` sans la condition « démo ouverte » ; la garde des références remise à `estItemDemo` ; la pile qui
+  ne se déplace plus (les deux parcours entiers rougissent : « Pratique appliquée au cours actif » et « Évaluation
+  verrouillée » sur les bulles des étapes 7 et 8) ; « deux ou trois pratiques » remis à « deux pratiques » (sentinelle).
+- **Vitest** : la sentinelle des textes (79 essais avec les corrections) ; `sentinelle-note-provisoire-reservee` : la
+  bulle 4 validée nomme « la note provisoire » en standards, exception nommée ajoutée (même motif que la bulle 7).
+  Vitest complet (depuis `tests/`) : **10 944 / 10 944**, 893 fichiers.
 
 ### Les questions du rapport, tranchées (9 nov. 2026, 9 h 50 à 9 h 58)
 
@@ -64,6 +86,22 @@ Grégoire) donne à « Notes finalisées » un effet de plus en standards : une 
 ### Ce qui attend encore Grégoire
 
 Rien de nouveau. Aucun texte n'a été écrit en dehors des phrases validées.
+
+### Seconde relecture, des corrections du 9 nov.
+
+Un agent neuf, avec les décisions et le diff. Verdict, en une ligne : **pas encore fusionnable : l'étape 3 ne tenait
+qu'à 900 px de haut, et les captures à 820 et 390 px échouaient ; textes, étape 1, avis et aide, verrou et démo
+justes.** Il a vérifié les phrases au caractère près, la démo inchangée, le verrou par un essai à lui, et fait cinq
+break-tests (quatre rouges ; un trou : la garde des références n'était pas éprouvée). Ce que j'en ai fait :
+- l'étape 3 : la place préférée sous le champ du nombre, sa priorité, et trois hauteurs éprouvées (900, 820, 770) ;
+- les captures à 820 et 390 px : les vérifications de place ne jouent qu'aux largeurs que les décisions visent
+  (l'étape 1 à partir de 700 px, l'étape 3 à partir de 1180) ; les quatre largeurs passent ;
+- la garde des références : nommée juste (le formulaire Cadre › Groupes-cours, pas « Appliquer », qui n'en consulte
+  aucune), et éprouvée ;
+- le verrou : éprouvé dans les deux sens, par le chemin que dit la bulle 5 ;
+- deux commentaires faux corrigés, et le repli « au cas où » de la fiche retiré (règle zéro-dette).
+Inscrits (n° 25 à 27) : l'export pour partager, la course de « Déverrouiller » juste après « Consulter », la fenêtre
+« Bibliothèque ».
 
 ## En tête (premier dépôt, nuit du 8 au 9 nov.)
 
@@ -209,9 +247,22 @@ Aucune rangée (règles 1 et 2 du skill `portes-terrain`) : le verdict WebKit es
 23. **Sur un téléphone, une bulle longue couvre l'écran** (la bulle 1 du neuvième parcours, et sans doute d'autres) : la bulle du moteur n'a pas de forme réduite.
 24. ~~**Le stock des pratiques « N plus récentes » passées en « meilleures »** et **des copies masquées « Demo Labo Codex »** : à mesurer sur le Mac (questions 10 et 11).~~ **Tranché le 9 nov. : ne pas inscrire.** La question 10 n'a rien à mesurer chez Grégoire, et le stock d'autres n'est pas détectable de façon sûre ; la question 11 est réglée par la lecture.
 
+25. **(Relecture du 9 nov.) L'export pour partager traite encore une pratique marquée « Demo Labo Codex » comme de la
+    démo** (`js/partage-export.js`, `estItemDemo`) : « Exporter pour partager » répond « Le matériel de démonstration ne
+    s'exporte pas… ». C'est ce qui voyage, et la validation à l'arrivée refuse cet auteur (`USURPATION_DEMO`) : il
+    faudrait changer l'auteur à l'export, donc écrire. À voir à part.
+26. **(Relecture du 9 nov., antérieur) « Déverrouiller », touché juste après « Actions › Consulter »** (environ 600 ms),
+    reverrouille au lieu de déverrouiller : l'évaluation n'est pas encore connue du formulaire
+    (`basculerVerrouillageEvaluationCourante`, `idModification`). La bulle 5 envoie justement sur ce chemin. Même chose
+    juste après un premier verrou, sans rouvrir.
+27. **(Relecture du 9 nov., antérieur) La fenêtre « Bibliothèque » masque, hors de la démo, trois modèles que
+    l'assistant offre** (« Modèle simple », « N meilleures évaluations », « N plus récentes » : leur auteur est
+    « Demo Labo Codex »). À inscrire si Grégoire l'a vécu.
+
 ## Les commits
 
-- Corrections du 9 nov. : le commit qui suit ce rapport (phrases, étapes 1 et 3, avis, aide, question 11, verrou).
+- Corrections du 9 nov. : `3b952c3` (phrases, étapes 1 et 3, avis, aide, question 11, verrou), `5ba61ee` (l'exception
+  « note provisoire »), puis les reprises de la seconde relecture.
 - `00628a0e` : le parcours, le panneau, le banc (point d'étape).
 - `50075de7` : le parcours entier vert ; les trois défauts corrigés ; la sentinelle.
 - `61ba6ddc` : la relecture neuve (reprise, étape 5, Échap, filtre de l'étape 6, téléphone, DA retiré) ; les captures.

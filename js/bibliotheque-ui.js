@@ -76,12 +76,13 @@
 
     /**
      * Corrections du neuvième parcours (9 nov. 2026, question 11, décision de Cowork) : HORS DE LA DÉMO, UNE
-     * PRATIQUE N'EST JAMAIS UNE PRATIQUE DE DÉMO — ni masquée du menu, ni en lecture seule, ni refusée quand on
-     * l'applique — même si son auteur dit « Demo Labo Codex ». Trois modèles de l'assistant portent cet auteur
+     * PRATIQUE N'EST JAMAIS UNE PRATIQUE DE DÉMO — ni masquée du menu, ni en lecture seule, ni refusée par la garde des
+     * références (le formulaire Cadre › Groupes-cours) — même si son auteur dit « Demo Labo Codex ». Trois modèles de l'assistant portent cet auteur
      * (pratiques-bibliotheque.js) ; une copie adoptée sans auteur au récapitulatif le gardait, et disparaissait du
      * menu (la source est tarie par `auteurDeLaCopie`, wizard-pratique-v2.js). Ici, la lecture : rien n'est réécrit,
      * le stock garde sa marque. Dans la démo, la règle commune (`estItemDemo`).
-     * Lue par le menu et la fiche des pratiques (pratiques-gestion.js) et par `verifierReferencesPasDemo`.
+     * Lue par la fiche des pratiques (pratiques-gestion.js) et par `verifierReferencesPasDemo` ; le menu, lui, ne filtre
+     * plus les pratiques du trimestre. Reste hors de cette règle : l'export pour partager (partage-export.js), inscrit.
      */
     BibliothequeUI.estPratiqueDeDemo = function (pratique) {
         return BibliothequeUI.modeDemoActif() && BibliothequeUI.estItemDemo(pratique);
