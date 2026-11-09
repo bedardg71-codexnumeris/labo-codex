@@ -1225,14 +1225,15 @@ function _cleCopieRecue(da, productionId) {
 
 /**
  * Les copies reçues par import : une clé « DA|production » par fiche de `fichiersTravaux` rattachée à un·e élève et à
- * une production. Une fiche orpheline (sans production) n'est la remise de rien.
+ * une production. Une fiche orpheline (sans production) n'est la remise de rien ; une copie mise à la corbeille n'est
+ * plus dans la liste (`deplacerEnCorbeilleLot`, travaux-stockage.js).
  * @param {Array} fichiers - la liste `fichiersTravaux` du mode actif
  * @returns {Set<string>}
  */
 function lireCopiesRecues(fichiers) {
     const recues = new Set();
     (Array.isArray(fichiers) ? fichiers : []).forEach(f => {
-        if (!f || !f.etudiantDA || !f.productionId || f.statut === 'corbeille') return;
+        if (!f || !f.etudiantDA || !f.productionId) return;   // la corbeille retire la fiche de la liste (deplacerEnCorbeilleLot)
         recues.add(_cleCopieRecue(f.etudiantDA, f.productionId));
     });
     return recues;

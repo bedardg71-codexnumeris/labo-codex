@@ -17,6 +17,7 @@
  *   · `FAMILLES_OU_LA_RECEPTION_VAUT_REMISE` étendu à 'STD' → 4 rouges (la famille, la configurable par standards, les
  *     deux captures hors sommative) ;
  *   · `evaluation.verrouillee === false` retiré de `evaluationCorrigeLaReception` → 1 rouge (le brouillon « plagiat » corrige) ;
+ *   · la garde du remplacement retirée de `evaluationCorrigeLaReception` → 1 rouge (le doublon réconcilié corrige) ;
  *   · captures, C de chaque élève sans les copies reçues → 1 rouge ;
  *   · captures, C du groupe sans `_ajouterRemisesParReception` → 1 rouge.
  * Noms fictifs.
@@ -46,10 +47,11 @@ describe('La règle (pratique-registre.js)', () => {
         expect(r.productionRemiseParEleve(DARIO, 'P1', [evaluee('E', DARIO, 'P1')], recues)).toBe(true);   // l'évaluation confirme
     });
 
-    it('une fiche orpheline (sans production) ou à la corbeille n\'est la remise de rien', () => {
+    it('une fiche orpheline (sans production) ou sans élève n\'est la remise de rien', () => {
         const r = registre();
-        const recues = r.lireCopiesRecues([fichier('F1', BRUNO, ''), fichier('F2', CHLOE, 'P1', { statut: 'corbeille' }), null]);
+        const recues = r.lireCopiesRecues([fichier('F1', BRUNO, ''), fichier('F2', '', 'P1'), null]);
         expect(recues.size).toBe(0);
+        expect(r.lireCopiesRecues([fichier('F3', CHLOE, 'P1')]).size).toBe(1);   // TÉMOIN
     });
 
     it('l\'évaluation enregistrée corrige la réception : non recevable (plagiat, IA) ou « Non reçu » ; pas un brouillon', () => {
@@ -65,6 +67,19 @@ describe('La règle (pratique-registre.js)', () => {
         // TÉMOINS : une évaluation recevable confirme ; « soupçon » n'est pas un statut non recevable.
         expect(corrigee({})).toBe(true);
         expect(corrigee({ statutIntegrite: 'soupcon' })).toBe(true);
+    });
+
+    it('une copie REMPLACÉE ne corrige pas : un doublon réconcilié « plagiat » laisse la réception compter', () => {
+        // Relecture neuve du 9 nov. : la garde du remplacement n'avait aucun essai. Le doublon (#360) est remplacé par E2,
+        // un brouillon qui ne compte pas encore : seule la réception reste, et rien d'actif ne la corrige.
+        const r = registre();
+        const recues = r.lireCopiesRecues([fichier('F1', BRUNO, 'P1')]);
+        const doublon = evaluee('E1', BRUNO, 'P1', { statutIntegrite: 'plagiat', remplaceeParId: 'E2', reconcilieParDoublon: true });
+        const remplacante = evaluee('E2', BRUNO, 'P1', { verrouillee: false });
+        expect(r.productionRemiseParEleve(BRUNO, 'P1', [doublon, remplacante], recues)).toBe(true);
+        // TÉMOIN : le même « plagiat », actif (pas remplacé), corrige.
+        const actif = evaluee('E1', BRUNO, 'P1', { statutIntegrite: 'plagiat' });
+        expect(r.productionRemiseParEleve(BRUNO, 'P1', [actif, remplacante], recues)).toBe(false);
     });
 
     it('la famille décide : la sommative seulement', () => {
