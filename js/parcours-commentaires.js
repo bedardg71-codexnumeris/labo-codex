@@ -209,19 +209,38 @@
 
     function enCreation() { return ficheOuverte() && !grilleOuverte(); }
 
-    /** L'atelier du premier critère algorithmique de la grille ouverte : les codes ne vont qu'à lui (#1132). */
+    /** Les critères de la fiche ouverte : ceux de la création en cours, ou ceux de la grille enregistrée (relus). */
+    function criteresDeLaFiche() {
+        if (enCreation()) return Array.isArray(window.tempCriteres) ? window.tempCriteres : [];
+        var g = grilleOuverte();
+        if (!g) return [];
+        var frais = grilles().find(function (x) { return x && x.id === g.id; });
+        return (frais || g).criteres || [];
+    }
+
+    /**
+     * L'atelier du premier critère algorithmique de la grille ouverte : les codes ne vont qu'à lui (#1132).
+     * Le critère se lit sur l'atelier (`_critere`, posé par atelierAlgo.monter) ; un atelier redessiné sans
+     * lui (mesuré : la bulle restait sur l'étape 2, le parcours croyant l'atelier parti) le reprend des données.
+     */
     function atelier() {
         if (!ficheOuverte()) return null;
         var a = $('#listeCriteres .gabarit-algo[data-atelier-algo]');
-        return a && a._critere ? a : null;
+        return a && critereDe(a) ? a : null;
     }
 
-    function critere() { var a = atelier(); return a ? a._critere : null; }
+    function critereDe(a) {
+        if (a._critere) return a._critere;
+        var c = criteresDeLaFiche()[parseInt(a.dataset.atelierAlgo, 10)];
+        return c && c.type === 'algorithmique' ? c : null;
+    }
+
+    function critere() { var a = atelier(); return a ? critereDe(a) : null; }
 
     function etapesAtelier() {
         var a = atelier();
         if (!a || !window.atelierAlgo) return [];
-        return window.atelierAlgo.etapes(a._critere, a._ctx && a._ctx.criteres);
+        return window.atelierAlgo.etapes(critereDe(a), (a._ctx && a._ctx.criteres) || criteresDeLaFiche());
     }
 
     function reglee(id) {
@@ -261,7 +280,7 @@
 
     function ouvrirEtape(id) {
         var a = atelier(), s = sectionAtelier(id);
-        if (a && s && !s.hasAttribute('data-ouverte') && window.atelierAlgo) window.atelierAlgo.ouvrir(a, id, false);
+        if (a && a._critere && s && !s.hasAttribute('data-ouverte') && window.atelierAlgo) window.atelierAlgo.ouvrir(a, id, false);
     }
 
     /**
@@ -307,33 +326,39 @@
      * palettes du mode Évaluer), le moteur, qui pose la bulle hors de toutes les zones éclairées, se
      * rabat sur un bord : la bulle tombait sur la production, ou sur le champ à remplir, et captait le
      * toucher. La sonde de l'étape (elle passe après celle du moteur : sa place l'emporte) essaie
-     * quelques places et garde celle qui couvre le moins ces éléments ; couvrir le contour coûte cent
-     * fois plus. Le moteur n'a pas cette règle : voir le rapport du lot.
+     * quelques places et garde celle qui couvre le moins ces éléments ; couvrir un élément prioritaire
+     * (le contour, le bouton du geste suivant) coûte dix mille fois plus : il n'est couvert que faute de mieux. La place du moteur est gardée si
+     * aucune ne couvre moins. Le moteur n'a pas cette règle : voir le rapport du lot.
      */
-    function bulleHors(elements, contour) {
+    function bulleHors(elements, prioritaires) {
         var b = document.getElementById('parcours-bulle');
         if (!b) return;
         var marge = 8, haut = 0;
         var e = document.querySelector('header.entete');
         if (e) haut = Math.max(0, e.getBoundingClientRect().bottom);
         var vw = window.innerWidth, vh = window.innerHeight, bw = b.offsetWidth, bh = b.offsetHeight;
+        var rects = [];
+        (elements || []).forEach(function (el) { if (el && M().visible(el)) rects.push({ r: el.getBoundingClientRect(), poids: 1 }); });
+        (prioritaires || []).forEach(function (el) { if (el && M().visible(el)) rects.push({ r: el.getBoundingClientRect(), poids: 10000 }); });
+        function cout(x, y) {
+            return rects.reduce(function (t, o) {
+                var w = Math.min(x + bw, o.r.right) - Math.max(x, o.r.left);
+                var h = Math.min(y + bh, o.r.bottom) - Math.max(y, o.r.top);
+                return t + (w > 0 && h > 0 ? w * h * o.poids : 0);
+            }, 0);
+        }
+        // La place du moteur d'abord : elle ne change que si une autre couvre moins.
+        var meilleur = { x: parseFloat(b.style.left) || 0, y: parseFloat(b.style.top) || 0 };
+        meilleur.cout = cout(meilleur.x, meilleur.y);
+        if (meilleur.cout === 0) return;
         var xs = [marge, (vw - bw) / 2, vw - bw - marge];
         var ys = [Math.max(marge, haut + marge), Math.max(marge, (vh - bh) / 2), Math.max(marge, vh - bh - marge)];
-        var rects = (elements || []).filter(function (el) { return el && M().visible(el); })
-            .map(function (el) { return { r: el.getBoundingClientRect(), poids: el === contour ? 100 : 1 }; });
-        if (contour && M().visible(contour) && (elements || []).indexOf(contour) === -1) rects.push({ r: contour.getBoundingClientRect(), poids: 100 });
-        var meilleur = null;
         xs.forEach(function (x) {
             ys.forEach(function (y) {
-                var cout = rects.reduce(function (t, o) {
-                    var w = Math.min(x + bw, o.r.right) - Math.max(x, o.r.left);
-                    var h = Math.min(y + bh, o.r.bottom) - Math.max(y, o.r.top);
-                    return t + (w > 0 && h > 0 ? w * h * o.poids : 0);
-                }, 0);
-                if (!meilleur || cout < meilleur.cout) meilleur = { x: x, y: y, cout: cout };
+                var c = cout(x, y);
+                if (c < meilleur.cout) meilleur = { x: x, y: y, cout: c };
             });
         });
-        if (!meilleur) return;
         b.style.left = Math.round(Math.max(marge, meilleur.x)) + 'px';
         b.style.top = Math.round(meilleur.y) + 'px';
     }
@@ -518,7 +543,11 @@
                 var corps = corpsAtelier('compte');
                 return corps ? ancetreCommun([].slice.call(corps.querySelectorAll('input[type="text"]'))) : null;
             },
-            atteint: function () { return reglee('compte'); }
+            atteint: function () {
+                var a = atelier();
+                bulleHors([sectionAtelier('compte')], [a && a.querySelector('.atelier-algo-chaine'), ETAPES.compte.contour()]);
+                return reglee('compte');
+            }
         }),
         codes: Object.assign({}, TEXTES.codes, {
             avant: function () { return assurerAtelier('codes'); },
@@ -529,6 +558,7 @@
                 var c = critere(), C = window.codesAnnotation;
                 var n = c && C && typeof C.apercuCodes === 'function' ? C.apercuCodes(c).length : 0;
                 montrerBouton('Continuer', n > 0);
+                bulleHors([sectionAtelier('codes')], [ETAPES.codes.contour()]);
                 return false;
             }
         }),
@@ -543,7 +573,11 @@
                     || ancetreCommun([].slice.call(corps.querySelectorAll('input[type="radio"]')))) : null;
             },
             boutons: [{ libelle: 'Continuer', primaire: true, action: suivante }],
-            atteint: function () { montrerBouton('Continuer', reglee('note')); return false; }
+            atteint: function () {
+                montrerBouton('Continuer', reglee('note'));
+                bulleHors([sectionAtelier('note')], [ETAPES.note.contour()]);
+                return false;
+            }
         }),
         cas: Object.assign({}, TEXTES.cas, {
             avant: function () { return assurerAtelier('paliers'); },
@@ -555,7 +589,12 @@
                 return a ? vis(a.querySelector('.apercu-algo')) : null;
             },
             boutons: [{ libelle: 'Continuer', primaire: true, action: suivante }],
-            atteint: function () { montrerBouton('Continuer', reglee('paliers')); return false; }
+            atteint: function () {
+                var a = atelier();
+                montrerBouton('Continuer', reglee('paliers'));
+                bulleHors([sectionAtelier('paliers')], [ETAPES.cas.contour(), a ? vis(a.querySelector('.apercu-algo')) : null]);
+                return false;
+            }
         }),
         lit: Object.assign({}, TEXTES.lit, {
             avant: function () { return assurerAtelier('eleve'); },
@@ -569,6 +608,7 @@
             boutons: [{ libelle: 'Continuer', primaire: true, action: suivante }],
             atteint: function () {
                 montrerBouton('Continuer', !enCreation());
+                bulleHors([], [ETAPES.lit.contour()]);
                 if (enCreation()) { creationVue = true; return false; }
                 // Une grille nouvelle : l'étape avance quand elle est créée (« Créer la grille » peut refuser).
                 var g = grilleOuverte();
@@ -629,8 +669,8 @@
             },
             atteint: function () {
                 if (annoterOuvert()) {
-                    bulleHors([palette('travaux-palette-erreurs-fr'), vis(document.getElementById('travaux-canvas-annotation'))],
-                        palette('travaux-palette-erreurs-fr'));
+                    bulleHors([vis(document.getElementById('travaux-canvas-annotation'))],
+                        [palette('travaux-palette-erreurs-fr'), vis(document.getElementById('travaux-btn-actions'))]);
                 }
                 return evaluationOuverte();
             }
@@ -649,7 +689,7 @@
             },
             contour: function () { return evaluationOuverte() ? contourEvaluation(false) : menuActions('annoter'); },
             atteint: function () {
-                if (evaluationOuverte()) bulleHors(zonesEvaluation(), contourEvaluation(false));
+                if (evaluationOuverte()) bulleHors(zonesEvaluation(), [contourEvaluation(false)]);
                 return verrouNeuf();
             }
         }),
@@ -667,7 +707,7 @@
             },
             contour: function () { return evaluationOuverte() ? contourEvaluation(true) : menuActions('evaluer'); },
             atteint: function () {
-                if (evaluationOuverte()) bulleHors(zonesEvaluation(), contourEvaluation(true));
+                if (evaluationOuverte()) bulleHors(zonesEvaluation(), [contourEvaluation(true)]);
                 return verrouNeuf();
             }
         }),
