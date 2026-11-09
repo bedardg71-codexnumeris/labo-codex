@@ -316,3 +316,20 @@ Ceux de cette nuit (§ 5) :
 - `parcours-1-et-2` › « panneau » mesure le panneau pendant qu'il glisse (rouge sous Chromium).
 - Deux essais neufs rouges sur le run GitHub de la 1.237.2 : `aide-cp-suit-la-case-1086`, `tampons-masques-bibliotheque-1216`.
 - Si Grégoire retient l'option (a) du § 4 : retirer le groupe « Démo » des menus du Cadre. ⮕ **Fait** (§ 4 bis), n'est plus à inscrire.
+
+## 8. Relecture neuve des flèches tues (9 nov. 2026, avant le verdict du groupe 1)
+
+Un agent neuf a relu `9fe51cf33`. Dispositions :
+1. **Une flèche déjà ouverte au lancement restait active, cachée par le CSS** ; un clic sur sa cible pendant le parcours
+   la marquait vue (elle ne serait jamais revenue), et sa cible gardait le contour orange pulsant — *corrigé* (`129c908b9`) :
+   `ParcoursMoteur.lancer` appelle `accompagnement.masquerFleche` (retire sans marquer), l'écouteur de clic ne marque rien
+   pendant un parcours, la règle de `parcours.css` est retirée. Spec : un essai neuf, déjà sur la page de l'étape 1
+   (le lancement ne navigue pas) ; rouge sans le retrait, vérifié.
+2. **La spec ne départageait pas la garde JS et la règle CSS** — *corrigé* : la règle CSS est partie ; l'étape 7 vérifie
+   aussi qu'aucune cible n'est contournée. Le témoin de fin rougissait une fois sur deux (sa cible, une cellule des
+   présences, est redessinée) : il est posé sur une cible stable ; trois passages verts.
+3. **La bulle de survol (`data-tooltip`) de la même aide reste posée sur les cellules pendant le parcours** : au focus
+   d'une cellule, elle pourrait dire « Clique dans une cellule… » par-dessus la colonne. Lu dans le code, non éprouvé
+   dans un navigateur — *inscrire* (au relais, à éprouver avant d'entrer au BACKLOG).
+4. **Une flèche refusée pendant le parcours revient au prochain changement de page, pas à la fermeture** — conforme,
+   *commenter et oublier*.
