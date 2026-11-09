@@ -441,6 +441,10 @@ function sauvegarderEvaluation() {
         criteres, coursId, groupeCoursActif, maintenant
     });
 
+    // Lot « Un mot pour ton étudiant·e » (9 nov. 2026) — le mot de cette copie, s'il lui appartient.
+    if (typeof window.enregistrerMotDeLaCopie === 'function') {
+        window.enregistrerMotDeLaCopie(evaluation, { etudiantDA: etudiantDA, productionId: productionId });
+    }
     _appliquerProfilACOSauv(evaluation);
     _appliquerJetonDelaiSiCocheSauv(evaluation, etudiantDA, maintenant);
 

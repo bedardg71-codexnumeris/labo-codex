@@ -450,6 +450,70 @@ function marqueRetroactionAEcrire(copie) {
     return estRetroactionReecrite(copie);
 }
 
+/**
+ * LOT « UN MOT POUR TON ÉTUDIANT·E » (consigne du 9 nov. 2026). La retouche tapée dans le cadre
+ * « Générale » ne va pas sur le PDF de synthèse (il rebâtit chaque critère depuis la cartouche) :
+ * le mot qui doit y aller a son champ, `#motPourEtudiant1`, et sa clé, `motPourEtudiant`.
+ *
+ * Le champ porte l'IDENTITÉ de la copie à qui son texte appartient (`data-mot-pour`, élève +
+ * production), comme la marque #961 et les champs #671 : posé par les chargeurs, par une frappe,
+ * retiré par les remises à zéro. Un écrivain n'écrit le mot que pour cette copie-là — une écriture
+ * qui part après un changement d'élève n'emporte jamais le mot du voisin.
+ * En anonymisation, le champ est masqué comme les notes d'intégrité (`poserChampTexteLibre`) :
+ * un texte libre peut nommer l'élève, et l'écrivain réécrirait le texte affiché. La base garde le
+ * sien ; le PDF et les archives le passent par `anonymiserTexteRetroaction`, comme la rétroaction.
+ */
+function _champMotPourEtudiant() {
+    return document.getElementById('motPourEtudiant1');
+}
+
+/** Chargeurs et remises à zéro : le mot de `evaluation` (vide sans elle), lié à la copie
+ *  `copie` (par défaut celle de l'évaluation). Sans copie : le champ n'appartient à personne. */
+function poserMotPourEtudiant(evaluation, copie) {
+    const champ = _champMotPourEtudiant();
+    if (!champ) return;
+    const mot = (evaluation && typeof evaluation.motPourEtudiant === 'string') ? evaluation.motPourEtudiant : '';
+    if (typeof poserChampTexteLibre === 'function') poserChampTexteLibre(champ, mot);
+    else champ.value = mot;
+    const c = copie || evaluation;
+    if (c && c.etudiantDA && c.productionId) champ.dataset.motPour = c.etudiantDA + '|' + c.productionId;
+    else delete champ.dataset.motPour;
+    // Le verrou l'emporte : sortir de l'anonymisation rend le champ, pas une copie verrouillée.
+    if (evaluation && evaluation.verrouillee === true) champ.disabled = true;
+}
+
+/** Une frappe : le texte appartient à la copie ouverte. */
+function lierMotPourEtudiantALaCopie() {
+    const champ = _champMotPourEtudiant();
+    const cleCopie = _cleCopieRetroaction();
+    if (champ && cleCopie) champ.dataset.motPour = cleCopie;
+}
+
+/** Ce que les écrivains enregistrent pour la copie `copie` (par défaut l'ouverte) : le texte tel
+ *  quel, ou `undefined` — rien à écrire — si le champ est absent, masqué, ou appartient à une
+ *  autre copie (ou à aucune). */
+function motPourEtudiantAEcrire(copie) {
+    const champ = _champMotPourEtudiant();
+    if (!champ) return undefined;
+    if (typeof champMasqueAnonymisation === 'function' && champMasqueAnonymisation(champ)) return undefined;
+    const cleCopie = _cleCopieRetroaction(copie);
+    if (!cleCopie || champ.dataset.motPour !== cleCopie) return undefined;
+    return champ.value || '';
+}
+
+/** L'écriture elle-même, partagée par les trois écrivains. Rien à écrire : rien ne bouge. Un mot
+ *  vide sur une évaluation qui n'a jamais eu la clé ne la crée pas (absent vaut vide). */
+function ecrireMotPourEtudiant(evaluation, mot) {
+    if (!evaluation || typeof mot !== 'string') return;
+    if (!mot && !Object.prototype.hasOwnProperty.call(evaluation, 'motPourEtudiant')) return;
+    evaluation.motPourEtudiant = mot;
+}
+
+/** Les deux écrivains de « Enregistrer » : le mot de `copie`, s'il lui appartient, sur `evaluation`. */
+function enregistrerMotDeLaCopie(evaluation, copie) {
+    ecrireMotPourEtudiant(evaluation, motPourEtudiantAEcrire(copie));
+}
+
 let _questionStockEnCours = false;
 async function _demanderPourLeStock() {
     if (_questionStockEnCours || !window.uiDialogues || typeof window.uiDialogues.confirmerAction !== 'function') return;
@@ -1491,6 +1555,12 @@ function copierToutRetroaction() {
     var texteBilan = _texteSepareDuHtml((document.getElementById('contenuRetroBilan') || {}).innerHTML);
     if (texteBilan) parties.push('=== BILAN ===\n' + texteBilan);
 
+    // Lot « Un mot pour ton étudiant·e » (supposition de Cowork, 9 nov.) — le mot, à la fin et sans
+    // titre : il arrive aussi dans Léa par cette voie. Seulement le mot de la copie ouverte (relecture du
+    // 9 nov. : un mot resté d'une autre copie ne part pas dans la sienne) ; masqué en anonymisation : rien.
+    var mot = (motPourEtudiantAEcrire() || '').trim();
+    if (mot) parties.push(mot);
+
     var texteComplet = parties.join('\n\n');
     if (!texteComplet) {
         alert('Aucune rétroaction à copier');
@@ -1537,6 +1607,12 @@ window.estRetroactionReecrite = estRetroactionReecrite;
 window.poserRetroactionReecrite = poserRetroactionReecrite;
 window.preparerRetroactionEnregistree = preparerRetroactionEnregistree;   // R2 — les chargeurs
 window.marqueRetroactionAEcrire = marqueRetroactionAEcrire;               // R2 — les écrivains
+// Lot « Un mot pour ton étudiant·e » (9 nov. 2026)
+window.poserMotPourEtudiant = poserMotPourEtudiant;               // les chargeurs et les remises à zéro
+window.lierMotPourEtudiantALaCopie = lierMotPourEtudiantALaCopie; // la frappe
+window.motPourEtudiantAEcrire = motPourEtudiantAEcrire;           // les écrivains : quoi
+window.ecrireMotPourEtudiant = ecrireMotPourEtudiant;             // les écrivains : comment
+window.enregistrerMotDeLaCopie = enregistrerMotDeLaCopie;         // « Enregistrer » (les deux chemins)
 // Étape 2a (22 oct. 2026) — les deux lignes du bilan qui portent les noms du critère : exposées pour les bancs.
 window.bilanAlgoNoms = { rendreAlgoA0: _rendreAlgoA0Bilan, rendreTousMaitrises: _rendreTousMaitrisesBilan };
 

@@ -639,7 +639,10 @@ async function appliquerJetonReprise(evaluationOriginaleId, archiverOriginale, o
     // reprise accordée après un plagiat valait 0 et se montrait « Non recevable ». L'originale garde les siens.
     ['jetonDelaiApplique', 'dateApplicationJetonDelai', 'delaiAccorde', 'dureeDelaiJours',
         'jetonRepriseCibleeApplique', 'remplaceeParId', 'dateRemplacement', 'archivee',
-        'dateArchivage', 'reconcilieParDoublon', 'statutIntegrite', 'notesIntegrite', 'sortCopieNonRecevable'].forEach(champ => { delete nouvelleEvaluation[champ]; });
+        'dateArchivage', 'reconcilieParDoublon', 'statutIntegrite', 'notesIntegrite', 'sortCopieNonRecevable',
+        // Lot « Un mot pour ton étudiant·e » (supposition de Cowork, 9 nov. 2026) — la reprise part sans le mot :
+        // il s'écrit pour une production précise. L'originale garde le sien.
+        'motPourEtudiant'].forEach(champ => { delete nouvelleEvaluation[champ]; });
     // #1175, quatrième retouche (relecture de Cowork, 28 oct. 2026, 8 h 20) — la reprise d'une copie NON RECEVABLE part vide :
     // ses niveaux ne se lisent nulle part (décision de Grégoire, 6 h 46), pas même sur la reprise qui les recopiait. Vidé :
     // les niveaux des critères, la note, le niveau final, la portée, les points, les comptes, la rétroaction et sa marque —

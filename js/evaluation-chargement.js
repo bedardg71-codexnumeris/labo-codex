@@ -475,10 +475,7 @@ function chargerEvaluationsEtudiant() {
     if (niveauElem) niveauElem.textContent = '--';
     if (typeof window.ecrireLigneNoteRemise === 'function') window.ecrireLigneNoteRemise('');   // #1173
 
-    // Vider la rétroaction finale
-    const retroaction = document.getElementById('retroactionFinale1');
-    if (retroaction) retroaction.value = '';
-    mettreAJourCompteurMots();
+    _viderRetroactionEtMot();
 
     // Initialiser evaluationEnCours avec le nouvel étudiant mais préserver les sélections
     evaluationEnCours = {
@@ -2007,6 +2004,21 @@ function _suspendreAutoSaveTemporairement() {
     }, 500);
 }
 
+/** La copie change : la rétroaction finale et le mot du précédent partent avec lui ; le chargeur pose ceux du suivant. */
+function _viderRetroactionEtMot() {
+    const retroaction = document.getElementById('retroactionFinale1');
+    if (retroaction) retroaction.value = '';
+    mettreAJourCompteurMots();
+    if (typeof window.poserMotPourEtudiant === 'function') window.poserMotPourEtudiant(null);   // lot « Un mot pour ton étudiant·e »
+}
+
+/** Lot « Un mot pour ton étudiant·e » — le mot à écrire pour la copie de `ec` : celui de l'instantané s'il l'a lu
+ *  (comme l'intégrité), sinon l'écran. `undefined` : rien à écrire. */
+function _motAEcrireAutoSave(ec) {
+    if (ec.motLu) return ec.motPourEtudiant;
+    return (typeof window.motPourEtudiantAEcrire === 'function') ? window.motPourEtudiantAEcrire(ec) : undefined;
+}
+
 function _debouncerAutoSave() {
     // Ignorer les debounces pendant le chargement d'une évaluation (cf.
     // `_suspendreAutoSaveTemporairement`).
@@ -2039,6 +2051,10 @@ function _debouncerAutoSave() {
     // de copie, quand l'écran montre déjà l'élève suivant (#959 le remet à « recevable »).
     window._pendingAutoSaveSnapshot.integrite = _lireIntegriteEcran();
     window._pendingAutoSaveSnapshot.travailEnCoursEcran = _lireTravailEnCoursEcran();   // statut incomplet, même raison
+    // Lot « Un mot pour ton étudiant·e » — le mot aussi, lu pour la copie de l'instantané (`undefined` : rien à écrire).
+    window._pendingAutoSaveSnapshot.motLu = true;
+    window._pendingAutoSaveSnapshot.motPourEtudiant = (typeof window.motPourEtudiantAEcrire === 'function')
+        ? window.motPourEtudiantAEcrire(window._pendingAutoSaveSnapshot) : undefined;
     // #1145 — le minuteur CONSOMME l'instantané : laissé en attente, le prochain flush le rejouait.
     window._timerAutoSave = setTimeout(function() {
         const instantane = window._pendingAutoSaveSnapshot;
@@ -2374,6 +2390,14 @@ function _autoSauvegarderCriteres(snapshot) {
     const integriteSignalee = integrite.statutIntegrite !== 'recevable';
     // Statut incomplet (25 oct. 2026) — comme l'intégrité : posé sans niveau, il s'enregistre.
     const travailEnCours = (typeof ec.travailEnCoursEcran === 'boolean') ? ec.travailEnCoursEcran : _lireTravailEnCoursEcran();
+    const mot = _motAEcrireAutoSave(ec);   // lot « Un mot pour ton étudiant·e »
+    // Relecture du 9 nov. — une existante ne reçoit le mot que si c'est ELLE qui est ouverte : l'écriture cherche
+    // l'active du couple élève-production, et une originale remplacée ouverte (« Modifier » sur elle) donnerait
+    // son mot à sa reprise, qui part sans (la clé de copie élève + production ne les distingue pas).
+    const ecrireMot = (evaluation, existante) => {
+        if (existante && ec.idModification && ec.idModification !== evaluation.id) return;
+        if (typeof window.ecrireMotPourEtudiant === 'function') window.ecrireMotPourEtudiant(evaluation, mot);
+    };
 
     // Collecter les criteres
     const grilles = db.getSync(cle('grillesTemplates'), []);
@@ -2413,6 +2437,7 @@ function _autoSauvegarderCriteres(snapshot) {
         // sur un formulaire mal désactivé (angle mort terminale #348 ; risque #350).
         if (evaluations[idx].verrouillee === true) return;
         _majIntegriteAutoSave(evaluations[idx], integrite);   // lot C
+        ecrireMot(evaluations[idx], true);   // un mot seul s'enregistre, comme l'intégrité
         // Sans niveau dans l'instantané, les critères ne sont pas réécrits : un instantané vide
         // effacerait ceux de la base (la garde d'origine de cette fonction). Statut incomplet posé :
         // les critères masqués ne sont pas réécrits non plus, la note est retirée.
@@ -2427,6 +2452,7 @@ function _autoSauvegarderCriteres(snapshot) {
         _majIntegriteAutoSave(nouvelle, integrite);   // lot C — l'instantané, pas l'écran
         _majTravailEnCoursAutoSave(nouvelle, travailEnCours);
         if (typeof integrite.notesIntegrite !== 'string') nouvelle.notesIntegrite = '';   // masquées : rien
+        ecrireMot(nouvelle);   // un mot seul ne crée pas d'évaluation : il part avec le premier niveau
         evaluations.push(nouvelle);
         ec.idModification = nouvelle.id;
     }
@@ -2500,6 +2526,16 @@ function _signalerEvaluationCreeeAutoSave(ec) {
 }
 
 /**
+ * Lot « Un mot pour ton étudiant·e » (9 nov. 2026) — une frappe lie le texte à la copie ouverte et
+ * arme l'enregistrement automatique (`data-on-input` du champ, index.html). Masqué : rien.
+ */
+function motPourEtudiantModifie(champ) {
+    if (typeof champMasqueAnonymisation === 'function' && champMasqueAnonymisation(champ)) return;
+    if (typeof window.lierMotPourEtudiantALaCopie === 'function') window.lierMotPourEtudiantALaCopie();
+    _debouncerAutoSave();
+}
+
+/**
  * Lot C — les notes d'intégrité, tapées au clavier, arment l'enregistrement automatique
  * (`data-on-input` du champ, index.html). Masquées en anonymisation : rien à écrire.
  */
@@ -2566,6 +2602,7 @@ window._debouncerAutoSave = _debouncerAutoSave;
 // toujours faux, et la fermeture de la copie comme le rechargement ne vidaient rien.
 window._flusherAutoSave = _flusherAutoSave;
 window.notesIntegriteModifiees = notesIntegriteModifiees;   // lot C — data-on-input (index.html)
+window.motPourEtudiantModifie = motPourEtudiantModifie;     // lot « Un mot pour ton étudiant·e » — data-on-input (index.html)
 
 // Exposé pour la sentinelle anti-re-pollution (Brique D hygiène, juin 2026) :
 // la pré-sélection d'une nouvelle éval suit le modèle des évals existantes,

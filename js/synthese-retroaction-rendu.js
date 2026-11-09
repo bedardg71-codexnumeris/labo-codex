@@ -57,6 +57,7 @@
             renderRuban(ctx),
             renderCriteres(ctx),
             renderNiveauGlobal(ctx),
+            renderMotPourToi(ctx),
             renderTamponsErreurs(ctx),
             renderBilan(ctx),
             renderPiedCC(ctx)
@@ -512,6 +513,25 @@
                     <div style="font-size: 44px; font-weight: 800; line-height: 0.85; letter-spacing: -2px;">${esc(o.code)}</div>
                     <div style="font-family: ${FONT_MONO}; font-size: 9px; letter-spacing: 0.8px; opacity: 0.9; text-transform: uppercase;">Niveau général${o.label ? ' · ' + esc(o.label) : ''}</div>
                 </div>
+            </section>`;
+    }
+
+    /* =====================================================================
+       4 bis. UN MOT POUR TOI (lot du 9 nov. 2026)
+       ===================================================================== */
+
+    /**
+     * Le mot de l'enseignant·e, après le niveau et avant les tampons, tel qu'il l'a écrit
+     * (retours à la ligne gardés, texte échappé). ⛔ Vide : RIEN, ni titre ni case — règle de
+     * Grégoire ; le module data rend déjà '' pour un champ de blancs, la garde est répétée ici.
+     */
+    function renderMotPourToi(ctx) {
+        const mot = typeof ctx.feedback.motPourEtudiant === 'string' ? ctx.feedback.motPourEtudiant : '';
+        if (!mot.trim()) return '';
+        return `
+            <section style="margin-bottom: 10px;">
+                ${sectionHeader('Un mot pour toi')}
+                <div style="border: 1px solid ${LINE}; border-radius: 3px; padding: 7px 10px; font-size: 10px; line-height: 1.45; white-space: pre-wrap; overflow-wrap: break-word;">${esc(mot)}</div>
             </section>`;
     }
 
