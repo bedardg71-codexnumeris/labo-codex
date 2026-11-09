@@ -411,6 +411,8 @@ test.describe('Tableau de notation · la consigne', () => {
         await kase(page, 1, 1).focus();
         await page.keyboard.press('m');
         await expect(kase(page, 1, 1)).not.toHaveClass(/tn-case--valeur-changee/);
+        const ligneDuSigne = page.locator('#tableau-notation-hote .tn-legende-signe');
+        await expect(ligneDuSigne).toHaveCount(0);   // aucune case marquée : la légende ne parle pas du signe
         await page.evaluate((T) => {
             const echelles = window.db.getSync(T + '_echellesTemplates', []);
             echelles[0].niveaux.find((n) => n.code === 'M').valeurCalcul = 80;
@@ -425,12 +427,16 @@ test.describe('Tableau de notation · la consigne', () => {
         await expect(page.locator('#tableau-notation-hote .tn-legende-aide')).toContainText('Ctrl+Z annule le dernier geste.');
         await expect(page.locator('#tableau-notation-hote .tn-legende-aide')).not.toContainText('⌘');
         await expect(note(page, 1)).toHaveText('75');
+        // Une case porte le signe : la légende le nomme, visible sans survol (l'iPad).
+        await expect(ligneDuSigne).toBeVisible();
+        await expect(ligneDuSigne).toHaveText('≠ : l’échelle a changé depuis la saisie. Ressaisis le niveau pour prendre la valeur d’aujourd’hui.');
         expect(await sansGrilleDe(page, '9990010', 'P1')).toMatchObject({ niveauFinal: 'M', noteFinale: 75 });
         // Ressaisir le niveau (E, puis M) écrit la valeur d'aujourd'hui : le signe part.
         await c.focus();
         await page.keyboard.press('e');
         await page.keyboard.press('m');
         await expect(kase(page, 1, 1)).not.toHaveClass(/tn-case--valeur-changee/);
+        await expect(ligneDuSigne).toHaveCount(0);   // plus aucune case marquée : la ligne part
         expect(await sansGrilleDe(page, '9990010', 'P1')).toMatchObject({ noteFinale: 80 });
         expect(erreurs).toEqual([]);
     });
@@ -597,7 +603,12 @@ test.describe('Tableau de notation · captures', () => {
                 if (getComputedStyle(n).position === 'fixed' && /espace de travail est prêt|^Enregistré$/.test((n.textContent || '').trim().slice(0, 400)) && !n.closest('header')) n.style.display = 'none';
             }));
             await kase(page, 1, 3).hover();
-            await page.locator('#tableau-notation-hote .tn-cadre').screenshot({ path: path.join(dossier, `echelle-modifiee-1180-${mode}.png`) });
+            await expect(page.locator('#tableau-notation-hote .tn-legende-signe')).toBeVisible();
+            // Le tableau ET sa légende (la ligne du signe « ≠ »).
+            const haut = await page.locator('#tableau-notation-hote .tn-cadre').boundingBox();
+            const bas = await page.locator('#tableau-notation-hote .tn-legende').boundingBox();
+            await page.screenshot({ path: path.join(dossier, `echelle-modifiee-1180-${mode}.png`), fullPage: true,
+                clip: { x: haut.x - 8, y: haut.y - 8, width: haut.width + 16, height: (bas.y + bas.height) - haut.y + 16 } });
         });
     }
     for (const famille of ['STD', 'SPE']) {

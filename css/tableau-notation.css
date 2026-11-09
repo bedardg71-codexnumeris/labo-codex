@@ -403,3 +403,9 @@
         transition: none;
     }
 }
+
+/* La ligne de légende du signe « ≠ » : seule sur sa ligne, présente seulement quand une case porte le signe. */
+.tn-legende-signe {
+    flex-basis: 100%;
+    color: var(--texte-principal);
+}

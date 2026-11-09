@@ -935,7 +935,7 @@ function causeNoteStdSansProductionNotee(avecArtefacts, terminaleNotee) {
             + ' : elle ne se calcule pas sur la terminale seule.';
     }
     return avecArtefacts
-        ? 'Aucun artefact du portfolio n\'est encore évalué.'
+        ? 'Aucune production n\'est encore évaluée.'   // 9 nov. 2026, 17 h 38 (Grégoire) : remplace « Aucun artefact du portfolio n'est encore évalué. », partout
         : 'Aucune production retenue pour la note n\'est encore évaluée.';
 }
 

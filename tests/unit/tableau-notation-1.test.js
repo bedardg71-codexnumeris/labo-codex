@@ -412,21 +412,19 @@ describe('F · les mots validés', () => {
             'Touche une case pour changer le niveau. Au clavier : la lettre du niveau, Retour arrière pour vider, les flèches pour se déplacer. ⌘Z annule le dernier geste.'
         ]) expect(html, mot).toContain(mot);
         expect(html).not.toContain('puis la terminale');
-        // 9 nov., 16 h 18 : sans résultat en standards, la phrase validée, à la place de celles du calcul partagé (au tableau seulement).
+        // 9 nov., 17 h 38 (Grégoire) : « Aucune production n'est encore évaluée. » à la SOURCE, pour tous les écrans ; le tableau
+        // n'a plus de remplacement à lui : il écrit la cause que le calcul lui rend, telle quelle.
+        expect(registre.causeNoteStdSansProductionNotee(true, false)).toBe('Aucune production n\'est encore évaluée.');
+        expect(registre.causeNoteStdSansProductionNotee(false, false)).toBe('Aucune production retenue pour la note n\'est encore évaluée.');   // la jumelle ne bouge pas
+        expect(registre.causeNoteStdSansProductionNotee(true, true)).toBe('Seule l\'évaluation terminale a une note. En standards, la note du cours s\'appuie aussi sur les artefacts du portfolio : elle ne se calcule pas sur la terminale seule.');
+        expect(lire('js/pratiques/pratique-registre.js')).not.toContain("'Aucun artefact du portfolio n");
         const sim = (cause) => () => ({ noteConstructible: false, P: 0, causeNonConstructible: cause, details: null });
-        const avecCause = (cause) => chargerScript('js/tableau-notation.js', { db: { getSync: (k, d) => (d !== undefined ? d : null) }, simulerIndices: sim(cause),
-            echapperHtml: (t) => String(t).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;') },
-            { TableauNotationDonnees: donnees, causeNoteStdSansProductionNotee: registre.causeNoteStdSansProductionNotee }).TableauNotation.construireHTML(ctxStd());
-        for (const partagee of [registre.causeNoteStdSansProductionNotee(true, false), registre.causeNoteStdSansProductionNotee(false, false)]) {
-            const rendu = avecCause(partagee);
-            expect(rendu).toContain('Aucune production n’est encore évaluée.');
-            expect(rendu).not.toContain('artefact du portfolio');
-            expect(rendu).not.toContain('retenue pour la note');
+        const avecCause = (cause) => chargerScript('js/tableau-notation.js', { db: { getSync: (k, d) => (d !== undefined ? d : null) }, simulerIndices: sim(cause), echapperHtml: echapper, navigator: MAC },
+            { TableauNotationDonnees: donnees }).TableauNotation.construireHTML(ctxStd());
+        for (const cause of [registre.causeNoteStdSansProductionNotee(true, false), registre.causeNoteStdSansProductionNotee(false, false)]) {
+            expect(avecCause(cause)).toContain('<span class="tn-note-detail">' + echapper(cause) + '</span>');
         }
-        // Une autre cause passe telle quelle (seule la terminale a une note).
-        expect(avecCause(registre.causeNoteStdSansProductionNotee(true, true))).toContain('Seule l\'évaluation terminale a une note.');
-        // Le calcul partagé garde ses phrases : le profil, le rapport et l'export ne changent pas.
-        expect(registre.causeNoteStdSansProductionNotee(true, false)).toBe('Aucun artefact du portfolio n\'est encore évalué.');
+        expect(lire('js/tableau-notation.js')).not.toMatch(/aucuneEvaluee|_causeAuTableau/);   // une seule source
         const finalisee = ecran.construireHTML(ctxStd({ config: { notesFinales: true, portfolio: { nombreARetenir: 4, methodeSelection: 'meilleurs' } } }));
         expect(finalisee).toContain('>Note finale<');
         expect(finalisee).not.toContain('Note provisoire');
@@ -472,6 +470,23 @@ describe('F · les mots validés', () => {
         expect(html).toContain(`title="${phrase}"`);
         expect(html).toContain(`Maîtrise. ${phrase}"`);
         expect(html).toContain('tn-case--valeur-changee');
+    });
+    // Validée par Grégoire, mot pour mot (9 nov., 17 h 48) : au doigt sur l'iPad, l'infobulle ne se lit pas.
+    it('F6 la légende nomme le signe « ≠ » quand une case le porte, et seulement alors', () => {
+        const ligne = '≠ : l’échelle a changé depuis la saisie. Ressaisis le niveau pour prendre la valeur d’aujourd’hui.';
+        const E80 = { id: 'E0', nom: 'IDME', niveaux: ECHELLE.niveaux.map(n => (n.code === 'M' ? Object.assign({}, n, { valeurCalcul: 80 }) : n)) };
+        const rendre = (echelle, evaluations) => chargerScript('js/tableau-notation.js', { db: { getSync: (k, d) => (d !== undefined ? d : null) }, echapperHtml: echapper, navigator: IPAD,
+            obtenirEchelleResolue: (id) => (id === 'E0' ? echelle : null) }, { TableauNotationDonnees: donnees }).TableauNotation.construireHTML(ctxStd({ evaluations }));
+        const saisie = [{ id: 'SG', etudiantDA: '2000001', productionId: 'P1', sansGrille: true, criteres: [], niveauFinal: 'M', noteFinale: 75, echelleId: 'E0', verrouillee: true }];
+        const marquee = rendre(E80, saisie);
+        expect(marquee).toContain('tn-case--valeur-changee');
+        expect(marquee).toContain('<span class="tn-legende-signe">' + ligne + '</span>');
+        // La même saisie sous l'échelle d'origine, puis un tableau vide : aucune case marquée, aucune ligne.
+        for (const sans of [rendre({ id: 'E0', nom: 'IDME', niveaux: ECHELLE.niveaux }, saisie), rendre(E80, [])]) {
+            expect(sans).not.toContain('tn-case--valeur-changee');
+            expect(sans).not.toContain('tn-legende-signe');
+            expect(sans).not.toContain('≠');
+        }
     });
     it('F3 plus aucun mot du tableau n\'est marqué « PROPOSÉ »', () => {
         const marques = (f) => (lire(f).match(/PROPOS[ÉE]+S?/g) || []).length;

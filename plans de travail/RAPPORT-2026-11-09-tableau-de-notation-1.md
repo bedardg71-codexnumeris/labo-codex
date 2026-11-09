@@ -2,6 +2,45 @@
 
 *Deux sessions Claude Code dans le cloud ont fait ce lot. La première (rapport d'origine, conservé plus bas) l'a codé sans la consigne, depuis la 1.238.0, et l'a poussé à 19 h 52 UTC. La seconde (ce rapport de tête) a reçu la consigne et les six précisions de Cowork du 9 nov., 15 h. **Cette seconde version est poussée sur `lot/tableau-de-notation-1-bis`, à la demande de Cowork (9 nov.) : rien n'a été poussé sur `lot/tableau-de-notation-1`, qui reste à `12f5c640`. Cowork comparera les deux, Grégoire choisira.** Rien n'est fusionné dans `main`, rien n'est publié, la version ne bouge pas. Chromium seulement.*
 
+## Après les décisions de 17 h 38 et 17 h 48 (la phrase à la source, la ligne de légende du signe)
+
+*Cette section fait foi sur tout ce qui suit. Même branche, `lot/tableau-de-notation-1-bis` ; son historique n'est pas réécrit (une session « Vue simple » en est partie à 17 h 36).*
+
+### Ce qui est fait, en gestes
+
+- **« Aucune production n'est encore évaluée. » partout.** La phrase est changée à la source (`causeNoteStdSansProductionNotee`, `js/pratiques/pratique-registre.js`). Le profil (la carte de la note et la bulle sur le tiret), le rapport du profil, le Suivi et la colonne « Statut » de l'export CSV (« non constructible – Aucune production n'est encore évaluée. ») la lisent tous là. Le remplacement que j'avais posé au tableau seulement est retiré : il ne reste qu'une source, et un banc le vérifie.
+- **Les deux autres phrases n'ont pas bougé** : « Aucune production retenue pour la note n'est encore évaluée. » (un pool sans « Artefact ») et « Seule l'évaluation terminale a une note… ». **Conséquence au tableau** : pour un pool sans « Artefact », la case dit maintenant la jumelle, plus la phrase courte. Entre 16 h 18 et 17 h 38, mon remplacement local couvrait les deux ; c'est ta consigne (« ne bougent pas », « une seule source ») qui le défait.
+- **La ligne du signe « ≠ » dans la légende** : « ≠ : l'échelle a changé depuis la saisie. Ressaisis le niveau pour prendre la valeur d'aujourd'hui. » Elle paraît dès qu'une case porte le signe, seule sur sa ligne, et part quand plus aucune ne le porte. L'infobulle au survol reste comme elle était.
+
+### Où « artefact » ou « portfolio » paraît encore dans un texte du calcul partagé (relevé, rien touché)
+
+- `js/pratiques/pratique-registre.js`, **la même fonction** : « Seule l'évaluation terminale a une note. En standards, la note du cours s'appuie aussi sur **les artefacts du portfolio** : elle ne se calcule pas sur la terminale seule. » (variante avec « Artefact » ; l'autre dit « les productions retenues »).
+- `js/pratiques/pratique-registre.js`, **les mots de la variante « par artefacts »** d'une pratique par standards (lus par l'assistant et la fiche de la pratique) : « Par artefacts (portfolio) », « Par artefacts », « Les étudiant·es soumettent des artefacts. La note finale est calculée à partir des N meilleurs artefacts. », « PAN-Standards s'appuie sur le portfolio : c'est la progression à travers les artefacts qui construit la note. », « Configuration du portfolio », « Paramètre la gestion des artefacts », « N meilleurs artefacts », « Tous les artefacts », « N derniers artefacts », « Nombre d'artefacts retenus pour la note finale », « Artefacts pour la note finale », « Artefacts retenus », « Minimum d'artefacts évalués pour un indice P fiable ».
+- `js/profil-etudiant-actions.js`, **la formule du récit de la note** : « portfolio × 60 % + terminale × 40 % » (avec « Artefact » ; sinon « productions retenues × … »), validée le 28 et le 29 oct.
+- `js/profil-etudiant-actions.js`, **les diagnostics d'une note non calculable** : « …se calcule par portfolio, propre aux PAN-Standards… » ; « …pas un calcul sur les artefacts… » ; « …sa configuration de portfolio (nombre d'artefacts à retenir, minimum requis) est absente ou incomplète… » ; « Pondération manquante (pondération du portfolio)… » ; « Pondérations nulles (portfolio 0 % + terminale 0 %)… ».
+
+Relevé par recherche dans les fichiers du calcul (`pratique-registre.js`, `profil-etudiant-actions.js`, `portfolio.js`, les quatre familles, l'export). Je n'ai pas relevé les écrans qui affichent autour (le profil, l'Aide, l'assistant) : ce ne sont pas des textes du calcul partagé.
+
+### Ce qui attend Grégoire ou Cowork
+
+- Rien de neuf. Les deux lignes ouvertes sont tranchées.
+- Reste vrai : la capture d'une infobulle ouverte ne peut pas se prendre ici (bulle du navigateur) ; la ligne de légende dit maintenant la même chose à l'écran.
+
+### Ce que je n'ai pas pu vérifier
+
+- WebKit, Safari, l'iPad, tes données réelles.
+- La suite Playwright complète. J'ai lancé la spec du lot et `standards-sans-portfolio-lot-1.spec.js`, qui exige la phrase au profil ; les autres specs qui affichent une note en standards n'ont pas tourné ici.
+
+### Preuve (sur le dernier commit)
+
+- **Spec Chromium du lot, en entier** : 19 essais verts sur 19 ; 14 captures refaites.
+- **`standards-sans-portfolio-lot-1.spec.js`** (le profil) : 3 verts sur 3, avec la phrase neuve.
+- **Vitest du lot** : 35 essais verts. Le bloc F exige les deux phrases neuves (F1, F6).
+- **Vitest complet** : 10 964 verts sur 10 964, 898 fichiers.
+- **Bancs mis à jour** (ils exigeaient la phrase du 28 oct., ils exigent celle du 9 nov.) : `sentinelle-standards-sans-portfolio.test.js`, `sentinelle-construction-de-la-note-2026-10-28.test.js` (l'export), `audit-pratique-de-notation-2026-09-05.test.js` (l'export), `standards-sans-portfolio-lot-1.spec.js`. Aucune autre assertion n'a changé.
+- **Break-tests**, chacun rougit son essai puis le code est restauré : la ligne de légende écrite même sans case marquée (rouge en Chromium et au banc F6) ; la ligne jamais écrite (rouge en Chromium) ; l'ancienne phrase remise à la source (3 rouges).
+- **Captures** : `echelle-modifiee-1180-clair.png` et `-sombre.png` refaites, **légende comprise** ; les douze autres refaites sur cet état. Sur celles du signe, le témoin « Enregistré » recouvre le début du premier nom : il s'efface en deux secondes.
+
 ## Après les trois relais de 16 h 18 à 16 h 21 (le débordement à 820 px, deux phrases, le raccourci)
 
 *Cette section fait foi sur tout ce qui suit. Même branche, `lot/tableau-de-notation-1-bis`. Rien d'autre n'a changé dans le lot.*
@@ -28,7 +67,7 @@
   - dans **l'export CSV** des résultats, colonne « Statut » (« non constructible – Aucun artefact… »).
   Ces deux phrases ont été validées le 28 oct. (20 h 13). Cowork tranchera. La troisième variante (« Seule l'évaluation terminale a une note… ») passe telle quelle au tableau.
 
-### Ce qui attend Grégoire ou Cowork
+### Ce qui attendait Grégoire ou Cowork (les lignes 1 et 2 sont tranchées depuis : voir la section du haut)
 
 1. **Les autres écrans gardent l'ancienne phrase** (ci-dessus) : l'aligner partout, ou la garder ? *Recommandation : l'aligner, mais c'est une phrase validée le 28 oct. et lue aussi dans le CSV.*
 2. **L'infobulle ne se lit pas sur l'iPad au doigt** : c'est une bulle au survol. Le signe « ≠ » se voit, et le lecteur d'écran dit la phrase, mais rien ne l'écrit à l'écran sans souris. *Recommandation : une ligne dans la légende quand au moins une case porte le signe ; à décider avec ses mots.*

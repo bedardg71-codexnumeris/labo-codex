@@ -32,8 +32,9 @@
         noteProvisoire: 'Note provisoire',
         noteFinale: 'Note finale',
         enAttente: 'en attente de résultats',
-        // Validée par Grégoire, mot pour mot (9 nov. 2026, 16 h 18) : au tableau, à la place des deux phrases du calcul partagé.
-        aucuneEvaluee: 'Aucune production n’est encore évaluée.',
+        // Validée par Grégoire, mot pour mot (9 nov. 2026, 17 h 48) : la ligne de légende du signe « ≠ », quand une case le porte
+        // (au doigt sur l'iPad, l'infobulle au survol ne se lit pas).
+        legendeValeurChangee: '≠ : l’échelle a changé depuis la saisie. Ressaisis le niveau pour prendre la valeur d’aujourd’hui.',
         nonCalculable: 'non calculable',
         aSaisir: 'à saisir',
         avecGrille: 'évaluée avec une grille ; toucher pour l’ouvrir',
@@ -179,24 +180,12 @@
     function _resultatEleve(da, ctx) {
         const r = (typeof simulerIndices === 'function') ? simulerIndices(da, ctx.pratiqueId) : null;
         const constructible = !!(r && r.noteConstructible);
-        const res = { note: constructible ? Math.round(r.P) : null, cause: _causeAuTableau(r ? r.causeNonConstructible : null), comptent: new Set(), detail: '' };
+        const res = { note: constructible ? Math.round(r.P) : null, cause: r ? r.causeNonConstructible : null, comptent: new Set(), detail: '' };
         const ids = new Set(ctx.productions.map(p => p.id));
         res.aDesCopies = ctx.evaluations.some(e => e && e.etudiantDA === da && ids.has(e.productionId));
         if (ctx.famille === 'STD') _completerStd(res, r && r.details, ctx);
         else _completerSpe(res, da, ctx);
         return res;
-    }
-
-    /**
-     * La cause d'une note absente, telle que le tableau la dit. En standards, quand aucune production n'est évaluée, le
-     * calcul partagé dit « Aucun artefact du portfolio n'est encore évalué. » ou « Aucune production retenue pour la note
-     * n'est encore évaluée. » (`causeNoteStdSansProductionNotee`, registre ; le profil, le rapport et l'export la lisent).
-     * AU TABLEAU SEULEMENT, la phrase validée par Grégoire le 9 nov. 2026 la remplace ; les autres écrans ne changent pas.
-     */
-    function _causeAuTableau(cause) {
-        const dire = window.causeNoteStdSansProductionNotee;
-        if (!cause || typeof dire !== 'function') return cause;
-        return (cause === dire(true, false) || cause === dire(false, false)) ? MOTS.aucuneEvaluee : cause;
     }
 
     function _completerStd(res, details, ctx) {
@@ -415,9 +404,11 @@
         return /Mac|iPhone|iPad|iPod/i.test(poste) ? '⌘Z' : 'Ctrl+Z';
     }
 
-    function _legendeHTML(ctx) {
+    /** `avecSigne` : au moins une case porte le signe « ≠ » ; la légende le nomme alors, et seulement alors. */
+    function _legendeHTML(ctx, avecSigne) {
         const items = (ctx.famille === 'SPE' ? MOTS.legendeSpe : MOTS.legendeStd).map(t => `<span class="tn-legende-item">${esc(t)}</span>`).join('');
-        return `<div class="tn-legende">${items}<span class="tn-legende-aide">${esc((ctx.famille === 'SPE' ? MOTS.aideSpe : MOTS.aideStd) + ' ' + MOTS.annulerAuClavier(raccourciAnnuler()))}</span></div>`;
+        const signe = avecSigne ? `<span class="tn-legende-signe">${esc(MOTS.legendeValeurChangee)}</span>` : '';
+        return `<div class="tn-legende">${items}${signe}<span class="tn-legende-aide">${esc((ctx.famille === 'SPE' ? MOTS.aideSpe : MOTS.aideStd) + ' ' + MOTS.annulerAuClavier(raccourciAnnuler()))}</span></div>`;
     }
 
     /* ============================== LE RENDU ============================== */
@@ -430,7 +421,7 @@
         const rangees = ctx.etudiants.map(e => _rangeeHTML(e, ctx)).join('');
         return `${tete}${_bandeauHTML(ctx)}<p class="tn-avis">${esc(MOTS.avis)}</p>
             <div class="tn-cadre"><div class="tn-defilement"><table class="tn-tableau">${_enteteColonnesHTML(ctx)}<tbody>${rangees}</tbody></table></div></div>
-            ${_legendeHTML(ctx)}
+            ${_legendeHTML(ctx, rangees.indexOf('tn-case--valeur-changee') !== -1)}
             <p class="tn-annonce u-lecteur-ecran" aria-live="polite"></p>`;
     }
 
