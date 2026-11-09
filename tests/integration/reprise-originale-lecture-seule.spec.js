@@ -45,7 +45,10 @@ async function monter(page, { originaleVerrouillee = false } = {}) {
         window.db.setSync('trimestres', [{ id: T, nom: 'Trimestre témoin', annee: 2026, session: 'A', actif: true }]);
         window.db.setSync('cours', [{ id: coursId, codeCours: 'FRA101', titre: 'Écriture et littérature' }]);
         window.db.setSync(T + '_groupesCours', [{ id: 'GCROL', trimestreId: T, coursId, groupeNum: '01', pratiqueId: 'sommative', actif: true }]);
-        window.db.setSync(T + '_groupeEtudiants', [{ da: 'TESTROL', nom: 'Fictif', prenom: 'Élève', groupe: '01', coursId, groupeCoursId: 'GCROL' }]);
+        window.db.setSync(T + '_groupeEtudiants', [
+            { da: 'TESTROL', nom: 'Fictif', prenom: 'Élève', groupe: '01', coursId, groupeCoursId: 'GCROL' },
+            { da: 'TESTROLB', nom: 'Témoin', prenom: 'Élève', groupe: '01', coursId, groupeCoursId: 'GCROL' }
+        ]);
         window.db.setSync(T + '_productions', [
             { id: 'prol', titre: 'Analyse', type: 'travail', ponderation: 60, grilleId: 'GROL', echelleId: 'EROL', cartoucheId: 'CTROL', groupeCoursId: 'GCROL' }
         ]);
@@ -54,8 +57,8 @@ async function monter(page, { originaleVerrouillee = false } = {}) {
         window.db.setSync(T + '_cartouches_GROL', [
             { id: 'CTROL', nom: 'Cartouche témoin', grilleId: 'GROL', contexte: '', criteres: [{ id: 'c1', nom: 'Contenu' }, { id: 'c2', nom: 'Structure' }], commentaires }
         ]);
-        const evaluation = (id, c1, c2, note, niveau) => ({
-            id, etudiantDA: 'TESTROL', etudiantNom: 'Élève Fictif', productionId: 'prol', productionNom: 'Analyse', groupeCoursId: 'GCROL', coursId,
+        const evaluation = (id, c1, c2, note, niveau, da = 'TESTROL') => ({
+            id, etudiantDA: da, etudiantNom: 'Élève Fictif', productionId: 'prol', productionNom: 'Analyse', groupeCoursId: 'GCROL', coursId,
             grilleId: 'GROL', echelleId: 'EROL', cartoucheId: 'CTROL', statutRemise: 'evalue', statutIntegrite: 'recevable',
             dateEvaluation: '2026-11-05T08:00:00.000Z', noteFinale: note, niveauFinal: niveau,
             criteres: [
@@ -68,7 +71,9 @@ async function monter(page, { originaleVerrouillee = false } = {}) {
         // d'être réévaluée. L'originale, verrouillée ou non selon le cas.
         window.db.setSync(T + '_evaluationsSauvegardees', [
             Object.assign(evaluation('EVO', 'I', 'D', 50, 'I'), { remplaceeParId: 'EVR', verrouillee: originaleVerrouillee }),
-            Object.assign(evaluation('EVR', 'M', 'M', 80, 'M'), { repriseDeId: 'EVO', jetonRepriseApplique: true, verrouillee: false })
+            Object.assign(evaluation('EVR', 'M', 'M', 80, 'M'), { repriseDeId: 'EVO', jetonRepriseApplique: true, verrouillee: false }),
+            // Un autre élève, une évaluation ordinaire : celle qu'on « Consulte » ensuite.
+            Object.assign(evaluation('EVB', 'D', 'D', 65, 'D', 'TESTROLB'), { verrouillee: false })
         ]);
         window.db.setSync(T + '_fichiersTravaux', []);
         window.trimestreActif = T;
@@ -157,3 +162,54 @@ for (const originaleVerrouillee of [false, true]) {
         expect(sansBruit(erreurs)).toEqual([]);
     });
 }
+
+// Relecture du 9 nov. — l'écriture en attente part AVANT que l'ouverture suivante rende l'originale à sa lecture seule.
+test('Reprise · déverrouillée exprès, un niveau touché, puis « Consulter » un autre élève dans la seconde : le niveau est sur l\'originale', async ({ page }) => {
+    test.setTimeout(90000);
+    const erreurs = await monter(page);
+    await ouvrir(page, 'EVO');
+    await page.evaluate(() => window.basculerVerrouillageEvaluationCourante());
+    await page.waitForFunction(() => !document.getElementById('eval_c2').disabled, null, { timeout: 5000 });
+    // Le niveau, puis tout de suite l'autre ouverture : l'écriture est encore en attente.
+    await page.evaluate(() => {
+        const s = document.getElementById('eval_c2');
+        s.value = 'E';
+        s.dispatchEvent(new Event('change', { bubbles: true }));
+        window.modifierEvaluation('EVB');
+    });
+    await page.waitForFunction(() => window.evaluationEnCours && window.evaluationEnCours.idModification === 'EVB', null, { timeout: 15000 });
+    await attendreRepos(page, { horizon: 3000 });
+    await page.waitForFunction(() => !window._timerAutoSave && !window._pendingAutoSaveSnapshot, null, { timeout: 10000 });
+    expect((await enBase(page, 'EVO')).niveaux, 'le niveau tapé avant de partir est sur l\'originale').toBe('I,E');
+    expect((await enBase(page, 'EVR')).niveaux, 'la reprise n\'a rien reçu').toBe('M,M');
+    expect((await enBase(page, 'EVB')).niveaux, 'l\'autre élève n\'a rien reçu').toBe('D,D');
+    expect(sansBruit(erreurs)).toEqual([]);
+});
+
+test('Reprise · « Modifier l\'évaluation » sur la ligne « Remplacée » : l\'originale s\'ouvre modifiable, le niveau va sur elle', async ({ page }) => {
+    test.setTimeout(90000);
+    const erreurs = await monter(page, { originaleVerrouillee: true });
+    await page.evaluate(() => window.modifierEvaluationRemplacee('EVO'));
+    await page.waitForFunction(() => window.evaluationEnCours && window.evaluationEnCours.idModification === 'EVO', null, { timeout: 15000 });
+    await attendreRepos(page, { horizon: 3000 });
+    await page.waitForFunction(() => !window._timerAutoSave && !window._modifierEvaluationEnCours, null, { timeout: 10000 });
+    expect(await etatFormulaire(page)).toEqual({ critereDesactive: false, motDesactive: false, bouton: 'Verrouiller' });
+    await toucherNiveau(page, 'c2', 'E');
+    expect((await enBase(page, 'EVO')).niveaux).toBe('I,E');
+    expect(await enBase(page, 'EVR'), 'la reprise n\'a rien reçu').toEqual({ niveaux: 'M,M', verrouillee: false, note: 80, journal: 0 });
+    expect(sansBruit(erreurs)).toEqual([]);
+});
+
+test('Reprise · déverrouillée exprès, puis rouverte par « Consulter » : de nouveau en lecture seule', async ({ page }) => {
+    test.setTimeout(90000);
+    await monter(page);
+    await ouvrir(page, 'EVO');
+    await page.evaluate(() => window.basculerVerrouillageEvaluationCourante());
+    await page.waitForFunction(() => !document.getElementById('eval_c2').disabled, null, { timeout: 5000 });
+    await ouvrir(page, 'EVB');
+    await ouvrir(page, 'EVO');
+    expect(await etatFormulaire(page)).toEqual({ critereDesactive: true, motDesactive: true, bouton: 'Déverrouiller' });
+    await toucherNiveau(page, 'c2', 'E');
+    expect((await enBase(page, 'EVO')).niveaux, 'rien n\'est écrit sur elle').toBe('I,D');
+    expect((await enBase(page, 'EVR')).niveaux, 'ni sur sa reprise').toBe('M,M');
+});

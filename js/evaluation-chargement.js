@@ -2452,6 +2452,9 @@ function _autoSauvegarderCriteres(snapshot) {
 
     const idx = indexEvaluationOuverte(evaluations, ec);
     if (idx === null) return;   // l'évaluation ouverte n'existe plus : rien n'est écrit sur une autre
+    // Relecture du 9 nov. (commenté, laissé) : si l'évaluation ouverte devient « remplacée » PENDANT qu'elle est ouverte
+    // (doublon marqué par la réconciliation #360 juste au-dessus, jeton de reprise appliqué hors du formulaire), la garde
+    // de lecture seule ci-dessous refuse, sans message ; avant ce lot, l'écriture partait vers l'autre. Rare, et plus sûr.
 
     if (idx !== -1) {
         // GARDE (Phase 0 A25, juin 2026) : ne JAMAIS réécrire une évaluation

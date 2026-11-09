@@ -1087,6 +1087,9 @@ function modifierEvaluation(evaluationId) {
     }
 
     // Lot du 9 nov. 2026 — une originale remplacée s'ouvre en lecture seule, même non verrouillée en base.
+    // L'écriture en attente part D'ABORD (relecture du 9 nov.) : faite après l'oubli, elle trouvait l'originale
+    // déverrouillée exprès redevenue en lecture seule, et le niveau tapé dans la seconde se perdait sans un mot.
+    if (typeof window._flusherAutoSave === 'function') window._flusherAutoSave();
     _oublierDeverrouillageExpres(evaluationId);
     const estVerrouillee = evaluationEnLectureSeule(evaluation);
 

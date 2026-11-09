@@ -27,7 +27,7 @@ LIVRAISON : release patch après verdict WebKit sur le Mac, puis push et fusion 
 | La lecture seule | `evaluationEnLectureSeule` (`evaluation.js`) : verrouillée en base, ou originale remplacée (`remplaceeParId`) non déverrouillée exprès. Décidée à l'ouverture (`modifierEvaluation`), rien n'est écrit. |
 | Doublon réconcilié (#360) | Il porte `remplaceeParId` : en lecture seule lui aussi. **Supposé** : il ne compte nulle part, une écriture y serait invisible. |
 | « Déverrouillée exprès » | Un seul état : l'instantané d'avant modification (`_snapshotAvantModifRemplacee`), celui que « Verrouiller » consomme pour journaliser la modification après reprise. Toute autre ouverture l'efface : rouverte par « Consulter », l'originale est de nouveau en lecture seule. |
-| Les deux gestes exprès | « Déverrouiller » (panneau Paramètres, et le bouton de la palette Annotation quand la copie affichée est celle du formulaire) ; et « Modifier l'évaluation » sur la ligne « Remplacée » de la Liste, déjà là, qui reste un déverrouillage exprès. **Supposé** : ce menu, propre aux originales remplacées, est un geste exprès. |
+| Les deux gestes exprès | « Déverrouiller » du panneau Paramètres (le bouton de la palette Annotation, lui, porte toujours sur l'évaluation en vigueur de la copie affichée — la reprise : comportement d'avant, #1142) ; et « Modifier l'évaluation » sur la ligne « Remplacée » de la Liste, déjà là, qui reste un déverrouillage exprès. **Supposé** : ce menu, propre aux originales remplacées, est un geste exprès. |
 | Déverrouiller une originale non verrouillée en base | Rien à écrire : le formulaire s'ouvre, le message est celui du déverrouillage. Verrouillée en base : le déverrouillage s'écrit sur elle, comme avant. |
 | Textes | Aucun texte neuf : à l'ouverture, « Évaluation chargée en lecture seule (verrouillée) » et le bouton « Déverrouiller », les mots de la copie verrouillée. |
 
@@ -47,6 +47,16 @@ LIVRAISON : release patch après verdict WebKit sur le Mac, puis push et fusion 
 | `_retirerEchelleDOffice` (l. 355) | Sort tôt dès qu'un id est posé ; sinon le couple. | Inchangé. |
 | Lecteurs du verrou : `_copieVerrouillee` (rétroaction), `evaluationRemiseAffichee` (note affichée) | « Comme l'auto-save la trouve » : élève + production, non remplacée, `verrouillee`. | La même règle que l'écrivain : `indexEvaluationOuverte` + `evaluationEnLectureSeule`. L'originale en lecture seule montre sa note enregistrée, comme une verrouillée. |
 | Jetons (`appliquerJetonRepriseSurCopie`, import d'une reprise, travaux-ui.js l. 4698) | L'active du couple, pour lui appliquer un jeton. | Inchangé : un jeton s'applique à l'évaluation en vigueur, hors du formulaire. |
+
+## Relecture par un agent neuf (9 nov. 2026) — dispositions
+
+| # | Constat | Disposition |
+|---|---|---|
+| 1 | Déverrouillée exprès, un niveau touché, puis « Consulter » une autre évaluation dans la seconde et demie : l'ouverture effaçait l'état exprès avant que l'écriture en attente parte, qui trouvait l'originale en lecture seule et ne l'écrivait pas, sans message (vérifié par exécution). | **Corrigé dans le lot** : `modifierEvaluation` vide l'écriture en attente d'abord. Spec « dans la seconde », break-test fait. |
+| 2 | Aucun test ne tenait la réouverture (lecture seule de retour) ni « Modifier l'évaluation » de la Liste (break-tests du relecteur restés verts). | **Corrigé** : deux cas ajoutés à la spec ; chacun rougit quand on retire sa ligne (break-tests faits). |
+| 3 | La garde de « Enregistrer » (l'instantané de CETTE évaluation) n'est tenue par aucun test. | **Commenté et laissé** : aucun trajet actuel n'arme l'instantané d'une évaluation puis en enregistre une autre (toute ouverture l'efface) ; défense en profondeur. |
+| 4 | L'évaluation ouverte devient « remplacée » pendant qu'elle est ouverte (doublon réconcilié #360, jeton appliqué hors du formulaire) : l'écriture est refusée sans message ; avant, elle partait vers l'autre. | **Commenté dans le code et laissé** (rare, plus sûr qu'avant ; pas de symptôme vécu, donc pas d'entrée au BACKLOG). |
+| — | Le tableau citait le bouton de la palette Annotation comme geste exprès : il porte sur la reprise. | **Corrigé** dans ce fichier. |
 
 ## Le stock
 
