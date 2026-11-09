@@ -448,10 +448,28 @@ function desilluminerSemaines() {
  * 5. Ajoute les statistiques et la légende
  * 6. Injecte le tout dans le DOM
  */
-function afficherCalendrierScolaire() {
+// PROPOSÉ (lot « Vue simple », 9 nov. 2026 ; à valider par Grégoire) : un trimestre sans dates — né en vue simple, par
+// exemple — montrait les mois vides d'août à décembre 2025. Il dit maintenant ce qui manque et où le donner.
+const TEXTE_CALENDRIER_SANS_DATES = 'Le calendrier se construit à partir des dates de ton trimestre, et ce trimestre n\'en a pas encore. Tu peux les donner dans Cadre › Trimestre.';
 
+/** Sans date de début : la phrase et le chemin, à la place des mois vides. @returns {boolean} vrai si la phrase a été posée */
+function direCalendrierSansDates(cadreCalendrier) {
+    const conteneur = document.getElementById('conteneur-calendrier');
+    if (cadreCalendrier.dateDebut || !conteneur) return false;
+    conteneur.innerHTML = '<p class="cal-sans-dates">' + echapperHtml(TEXTE_CALENDRIER_SANS_DATES) + '</p>'
+        + '<p><button type="button" class="btn btn-principal" data-action="naviguerVers" data-param="calendrier" data-param2="trimestre">Cadre › Trimestre</button></p>';
+    return true;
+}
+
+function afficherCalendrierScolaire() {
     // Récupérer les paramètres depuis db.getSync (namespacés par trimestre)
-    const cadreCalendrier = db.getSync(cle('cadreCalendrier'), {});
+    const cadreCalendrier = db.getSync(cle('cadreCalendrier'), {}) || {};
+    if (direCalendrierSansDates(cadreCalendrier)) return;
+    dessinerCalendrierScolaire(cadreCalendrier);
+}
+
+/** Le calendrier d'un trimestre qui a ses dates (le corps d'`afficherCalendrierScolaire` d'avant le lot « Vue simple »). */
+function dessinerCalendrierScolaire(cadreCalendrier) {
     // #374 (5 août 2026) : clé unique journeesSansCours — utilisée plus bas
     // pour les congés avec reprise (cf. congesAvecReprise).
     const tousEvenements = db.getSync(cle('journeesSansCours'), []);

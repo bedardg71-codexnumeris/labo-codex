@@ -119,7 +119,6 @@
   "renderRangeeNote": 44
  },
  "js/tableau-bord-apercu.js": {
-  "afficherMetriquesGlobales": 32,
   "genererBarreDistribution": 58,
   "genererBarrePatterns": 32
  },

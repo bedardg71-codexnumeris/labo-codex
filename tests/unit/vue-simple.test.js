@@ -16,6 +16,7 @@ import { createHash } from 'node:crypto';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { chargerScript } from './_helpers/charger-script.js';
+import { tranche } from './_helpers/tranche.js';
 
 const racine = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..');
 const lire = (f) => readFileSync(path.join(racine, f), 'utf8');
@@ -198,7 +199,7 @@ describe('D. Ce qui naît en coulisse', () => {
     });
 
     const bibliotheque = lire('js/pratiques-bibliotheque.js');
-    const MODELES = new Function(bibliotheque.slice(bibliotheque.indexOf('const MODELES_PRATIQUES_PREDEFINIS'), bibliotheque.indexOf('/**\n * Obtenir toutes les configurations')) + '\nreturn MODELES_PRATIQUES_PREDEFINIS;')();
+    const MODELES = new Function(tranche(bibliotheque, 'const MODELES_PRATIQUES_PREDEFINIS', '/**\n * Obtenir toutes les configurations') + '\nreturn MODELES_PRATIQUES_PREDEFINIS;')();
 
     it('la pratique par standards vient du modèle existant : ses valeurs de départ, rien d\'inventé', () => {
         const p = D.pratiqueDepuisModele(MODELES['STD-n-meilleurs'], { id: 'PRAT_1', nom: 'Par standards', echelleId: 'ECHELLE_IDME_DEPART', maintenant: 'm' });
@@ -206,6 +207,7 @@ describe('D. Ce qui naît en coulisse', () => {
         expect(p.configuration).toMatchObject({ type: 'standards', echelleId: 'ECHELLE_IDME_DEPART', notesFinales: false,
             portfolio: { actif: true, utiliser: true, methodeSelection: 'meilleurs', nombreARetenir: 7, minimumCompletion: 7 } });
         expect(p.estGabarit).toBeUndefined();
+        expect(p.auteur).toBeUndefined();   // « Demo Labo Codex » la ferait masquer dans Conception › Pratiques (`BibliothequeUI.estItemDemo`)
         expect(MODELES['STD-n-meilleurs'].id).toBe('STD-n-meilleurs');   // le modèle n'est pas touché
     });
 

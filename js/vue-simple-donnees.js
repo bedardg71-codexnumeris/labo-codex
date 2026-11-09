@@ -164,6 +164,9 @@
         p.inspireDe = { sourceId: modele.id, nom: modele.nom };
         p.id = id;
         delete p.estGabarit;
+        // « Demo Labo Codex » est l'auteur du MODÈLE : gardé sur la copie, il la ferait passer pour un item de démonstration,
+        // que Conception › Pratiques masque hors démo (`BibliothequeUI.estItemDemo`) — la pratique de l'utilisateur y serait invisible.
+        delete p.auteur;
         p.dansBibliotheque = true;
         p.dateAjout = maintenant;
         p.configuration = Object.assign({ type: famille }, p.configuration || {});

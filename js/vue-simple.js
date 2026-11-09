@@ -282,8 +282,9 @@
         }).join('');
         const vide = actif ? '' : `<option value="" selected>${esc(MOTS.groupeChoisir)}</option>`;
         const mot = groupes.some((g) => _famille(g) === 'autre') ? `<p class="vs-note">${esc(MOTS.groupeMotAutres)}</p>` : '';
-        return `<div class="vs-groupe"><label for="vs-select-groupe">${esc(MOTS.groupe)}</label>
-            <select id="vs-select-groupe" class="controle-form vs-select" data-on-change="VueSimple.changerGroupe">${vide}${options}</select></div>${mot}`;
+        const id = 'vs-select-groupe-' + _ecran;   // un sélecteur par écran : les autres sections restent dans le document
+        return `<div class="vs-groupe"><label for="${esc(id)}">${esc(MOTS.groupe)}</label>
+            <select id="${esc(id)}" class="controle-form vs-select" data-on-change="VueSimple.changerGroupe">${vide}${options}</select></div>${mot}`;
     }
 
     async function changerGroupe(el) {
