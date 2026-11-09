@@ -41,7 +41,8 @@ const FAMILLES = {
         productions: [{ id: 'P1', titre: 'Dissertation', type: 'travail', ponderation: 40, dateEcheance: '2026-02-01' }, { id: 'P2', titre: 'Examen', type: 'examen', ponderation: 60, dateEcheance: '2026-03-01' }],
         evaluations: [ev('EV_S1', '1000001', 'P1', 84, 'M'), ev('EV_S2', '1000001', 'P2', 90, 'E')],
         reponses: { nom: 'Pratique (labo)', prenom: 'Test', nomAuteur: 'Labo', etablissement: 'Cégep banc', discipline: '*premier*', porteEntree: 'decrire', calcNoteFinale: 'moyenne', reglesSommatives: ['double_verrou'], nbEvaluationsPrevues: '4', seuilVaBien: '80', seuilDifficulte: '70', seuilGrandeDifficulte: '60',
-            nomEvalVerrouillee: 'Dissertation', seuilVerrou: '90', plafondVerrou: '50', afficherRang: true },
+            nomEvalVerrouillee: 'Dissertation', seuilVerrou: '90', plafondVerrou: '50', afficherRang: true,
+            sortCopieNonRecevable: 'zero' },   // #1176 : l'étape « Une copie non recevable » (la réponse d'avant ce lot)
         attendu: 'moyenne pondérée 84×40 + 90×60 = 87,6 ; verrou « Dissertation < 90 → max 50 » APPLIQUÉ depuis le lot 29 (#897) : 50 au profil et à l\'export' },
     STD: { da: '1000002', nom: 'Standards', prenom: 'Bruno',
         productions: [{ id: 'PORT', titre: 'Portfolio', type: 'portfolio', ponderation: 60, regles: { nombreARetenir: 3, minimumCompletion: 1, nombreTotal: 6 } },
@@ -49,13 +50,15 @@ const FAMILLES = {
             ...[1, 2, 3, 4, 5, 6].map(i => ({ id: 'A' + i, titre: 'Artefact ' + i, type: 'artefact-portfolio', numero: i, ponderation: 0, dateEcheance: '2026-0' + (1 + Math.floor(i / 3)) + '-1' + i }))],
         evaluations: [ev('EV_A1', '1000002', 'A1', 85, 'M', d(1)), ev('EV_A2', '1000002', 'A2', 60, 'D', d(2)), ev('EV_A3', '1000002', 'A3', 78, 'M', d(3)), ev('EV_A4', '1000002', 'A4', 70, 'D', d(4)), ev('EV_A5', '1000002', 'A5', 78, 'M', d(5)), ev('EV_TERM', '1000002', 'TERM', 82, 'M')],
         reponses: { nom: 'Pratique (labo)', prenom: 'Test', nomAuteur: 'Labo', etablissement: 'Cégep banc', discipline: '*premier*', porteEntree: 'decrire', calcNoteFinale: 'niveaux', approcheEvaluation: 'par-artefacts', nbEvaluationsPrevues: '6', seuilVaBien: '80', seuilDifficulte: '70', seuilGrandeDifficulte: '60',
-            utiliserPortfolio: true, nbArtefactsSoumis: '6', modeSelectionPortfolio: 'derniers', nbArtefactsRetenus: '4', minAvantCalculFormatif: '2', echelleId: 'E1', grilleId: 'G1' },
+            utiliserPortfolio: true, nbArtefactsSoumis: '6', modeSelectionPortfolio: 'derniers', nbArtefactsRetenus: '4', minAvantCalculFormatif: '2', echelleId: 'E1', grilleId: 'G1',
+            sortCopieNonRecevable: 'ecarter' },   // #1176
         attendu: 'les 4 derniers (A2 A3 A4 A5) = 71,5 → ×0,6 + 82×0,4 = 75,7 (banc A2)' },
     SPE: { da: '1000003', nom: 'Specifications', prenom: 'Chloé',
         productions: [{ id: 'D1', titre: 'Dissertation 1', type: 'dissertation', dateEcheance: '2026-02-01' }, { id: 'X1', titre: 'Examen 1', type: 'examen', dateEcheance: '2026-02-15' }],
         evaluations: [ev('EV_D1', '1000003', 'D1', 80, 'M'), ev('EV_X1', '1000003', 'X1', 90, 'E')],
         reponses: { nom: 'Pratique (labo)', prenom: 'Test', nomAuteur: 'Labo', etablissement: 'Cégep banc', discipline: '*premier*', porteEntree: 'decrire', calcNoteFinale: 'acceptable', nbEvaluationsPrevues: '5', seuilVaBien: '80', seuilDifficulte: '70', seuilGrandeDifficulte: '60',
-            seuilAcceptabilite: '70', utiliserJetons: true, nbJetonsDelai: '4', dureeDelaiJours: '5', delaiSurReprise: true, nbJetonsReprise: '3', modeleBundle: '*premier*' },
+            seuilAcceptabilite: '70', utiliserJetons: true, nbJetonsDelai: '4', dureeDelaiJours: '5', delaiSurReprise: true, nbJetonsReprise: '3', modeleBundle: '*premier*',
+            sortCopieNonRecevable: 'zero' },   // #1176
         attendu: 'aucun type de travail ni forfait n\'est écrit par l\'assistant → non constructible (banc A3)' },
     DEN: { da: '1000004', nom: 'Denotation', prenom: 'Dani',
         productions: [{ id: 'W1', titre: 'Travail 1', type: 'travail', dateEcheance: '2026-02-01' }, { id: 'W2', titre: 'Travail 2', type: 'travail', dateEcheance: '2026-03-01' }],
