@@ -21,7 +21,25 @@
        boutons?: [{ libelle, primaire?, action }],
        sansSortie?: bool }
    API : window.ParcoursMoteur.lancer(def, { depuis, surEtape, surQuitter, surEchap, verifier }),
-         .fermer(), .actif(), .etapeCourante().
+         .fermer(), .actif(), .etapeCourante(), .surTelephone().
+
+   LA BULLE SUR TÉLÉPHONE (lot du 9 nov. 2026, plans de travail/CONSIGNE-LOT-2026-11-09-bulle-sur-telephone.md) :
+   · jusqu'à 500 px de large (SEUIL_TELEPHONE, la largeur de la fenêtre et non l'appareil : un iPad
+     en écran partagé étroit est traité comme un téléphone), la bulle se range au bord de l'écran,
+     pleine largeur. Une étape qui désigne quoi toucher sur la page (un contour) l'ouvre REPLIÉE
+     (titre et « n sur N ») ; une étape dont le geste est dans la bulle (« Continuer ») ou sans
+     rien d'éclairé l'ouvre dépliée. La tête de la bulle est un bouton :
+     un toucher déplie, un toucher replie ; repliée, toute la bulle est ce bouton.
+   · Repliée ou dépliée, elle ne couvre pas la zone éclairée : en bas par défaut (au début d'une
+     étape et à chaque dépliement, le moteur fait défiler la page s'il le faut, pendant REGLAGE_MS
+     seulement) ; en haut si la zone occupe le bas ; si la zone prend tout l'écran, elle en couvre
+     une partie mais jamais le contour (ce qu'il faut toucher), et son texte défile au besoin.
+   · Le témoin « Enregistré » (en bas à gauche) passe au-dessus d'une bulle rangée en bas
+     (--parcours-reserve-bas, lue par css/parcours.css).
+   LE FILET DE TOUTES LES BULLES (ajout du 9 nov., 9 h 51) : à toutes les largeurs, une bulle plus
+   haute que l'espace disponible (fenêtre courte, clavier ouvert) s'y limite ; seul son texte
+   défile, le titre, « n sur N », le geste et les boutons restent visibles. Une bulle qui tient
+   reste telle quelle.
    ================================================================= */
 (function () {
     'use strict';
@@ -29,6 +47,8 @@
     var SONDE_MS = 120;
     var MARGE = 8;
     var ECART = 12;
+    var SEUIL_TELEPHONE = 500;
+    var REGLAGE_MS = 1200; // sur téléphone, le temps où le moteur peut faire défiler pour ranger la bulle en bas // px de large, la même borne que le @media de css/parcours.css
 
     var etat = null; // { def, i, opts, timer, elements, enTransition }
 
@@ -75,11 +95,27 @@
         return r.bottom > 0 ? r.bottom : 0;
     }
 
+    /** La largeur du téléphone : la fenêtre, pas l'appareil (l'iPad en écran partagé étroit en est). */
+    function surTelephone() {
+        return window.innerWidth <= SEUIL_TELEPHONE;
+    }
+
+    /**
+     * Le bas visible : au-dessus du clavier à l'écran quand il est ouvert (même mesure que le témoin
+     * « Enregistré », js/temoin-enregistrement.js ; ignorée sous un zoom au pincement).
+     */
+    function basVisible() {
+        var vv = window.visualViewport;
+        if (!vv || Math.abs(vv.scale - 1) > 0.01) return window.innerHeight;
+        return Math.min(window.innerHeight, Math.round(vv.offsetTop + vv.height));
+    }
+
     /** Le bas utile de l'écran : au-dessus du bandeau de la démo, fixé en bas, quand il est là. */
     function basEcran() {
+        var bas = basVisible();
         var b = document.getElementById('bandeau-demo');
-        if (b && visible(b)) return Math.min(window.innerHeight, b.getBoundingClientRect().top);
-        return window.innerHeight;
+        if (b && visible(b)) return Math.min(bas, b.getBoundingClientRect().top);
+        return bas;
     }
 
     /**
@@ -151,11 +187,32 @@
         return etat ? etat.def.etapes[etat.i] : null;
     }
 
+    /** Sur téléphone : la classe de la bulle et l'état du bouton de la tête suivent `etat.replie`. */
+    function appliquerRepli() {
+        var b = etat.elements.bulle;
+        b.classList.toggle('est-repliee', etat.telephone && etat.replie);
+        var bascule = b.querySelector('.parcours-bulle-bascule');
+        if (bascule) bascule.setAttribute('aria-expanded', etat.replie ? 'false' : 'true');
+    }
+
+    function basculerRepli() {
+        if (!etat || !etat.telephone) return;
+        etat.replie = !etat.replie;
+        etat.reglerJusqua = Date.now() + REGLAGE_MS;
+        appliquerRepli();
+        if (!etat.replie) amenerDansLaVue(elementsVises(etapeCourante()), hauteurNaturelle());
+        sonder();
+    }
+
     function rendreBulle() {
         var etape = etapeCourante();
         var b = etat.elements.bulle;
         var total = etat.def.etapes.length;
         b.textContent = '';
+        etat.telephone = surTelephone();
+        b.className = 'parcours-bulle' + (etat.telephone ? ' parcours-bulle--telephone' : '');
+        b.style.maxHeight = '';
+        if (!etat.telephone) b.style.right = '';
 
         var tete = document.createElement('div');
         tete.className = 'parcours-bulle-tete';
@@ -168,12 +225,25 @@
         rang.textContent = (etat.i + 1) + ' sur ' + total;
         tete.appendChild(h);
         tete.appendChild(rang);
+        if (etat.telephone) {
+            // Un bouton posé sur la tête (une tête de section ne va pas DANS un bouton) : son nom
+            // est le titre, son état dit si la bulle est dépliée.
+            var bascule = document.createElement('button');
+            bascule.type = 'button';
+            bascule.className = 'parcours-bulle-bascule';
+            bascule.setAttribute('aria-labelledby', 'parcours-bulle-titre');
+            bascule.addEventListener('click', basculerRepli);
+            tete.appendChild(bascule);
+        }
         b.appendChild(tete);
 
         var p = document.createElement('p');
         p.className = 'parcours-bulle-texte';
         p.textContent = etape.texte;
         b.appendChild(p);
+        // Le filet : le texte peut se resserrer et défiler, jamais sous trois lignes (ou sa hauteur).
+        var ligne = parseFloat(getComputedStyle(p).lineHeight) || 22;
+        p.style.minHeight = Math.min(p.scrollHeight, Math.ceil(3 * ligne)) + 'px';
 
         if (etape.geste) {
             var g = document.createElement('p');
@@ -213,6 +283,16 @@
             if (!etat) return;
             a.textContent = etape.titre + '. ' + etape.texte + (etape.geste ? ' ' + etape.geste : '');
         }, 50);
+        appliquerRepli();
+    }
+
+    /** La hauteur de la bulle si son texte ne défilait pas (le texte est la seule zone qui défile). */
+    function hauteurNaturelle() {
+        var b = etat.elements.bulle;
+        var t = b.querySelector('.parcours-bulle-texte');
+        var h = b.offsetHeight;
+        if (t && !b.classList.contains('est-repliee')) h += Math.max(0, t.scrollHeight - t.clientHeight);
+        return h;
     }
 
     function trouRect(r, pad) {
@@ -256,9 +336,78 @@
         return liste;
     }
 
+    /** Le haut d'où une bulle peut commencer : sous l'en-tête. */
+    function hautUtile() {
+        return Math.max(MARGE, hautEntete() + MARGE);
+    }
+
+    /** La réserve du témoin « Enregistré » : la hauteur occupée par une bulle rangée en bas. */
+    function poserReserveBas(px) {
+        document.documentElement.style.setProperty('--parcours-reserve-bas', Math.max(0, Math.round(px)) + 'px');
+    }
+
+    /**
+     * Sur téléphone : la bulle pleine largeur, rangée en bas ; en haut si la zone éclairée occupe
+     * le bas ; si aucun côté ne contient sa hauteur, le plus grand, et le texte défile.
+     */
+    function placerBulleTelephone(cibleRect) {
+        var b = etat.elements.bulle;
+        var haut = hautUtile();
+        var bas = basEcran() - MARGE;
+        var naturelle = hauteurNaturelle();
+        var place = { cote: 'bas', max: bas - haut };
+        if (cibleRect) {
+            var sous = bas - (cibleRect.bottom + ECART);
+            // En bas d'abord : pendant le réglage (début d'étape, dépliement), si faire défiler la page
+            // laisse la place sous la zone, le moteur la fait défiler. Ensuite, il laisse la page à la
+            // personne : il ne lutte pas contre son défilement.
+            if (naturelle > sous && Date.now() < etat.reglerJusqua) {
+                var manque = Math.ceil(naturelle - sous);
+                if ((cibleRect.top - ECART) - haut >= manque) {
+                    var avant = window.scrollY;
+                    window.scrollBy(0, manque);
+                    var fait = window.scrollY - avant;
+                    cibleRect = { top: cibleRect.top - fait, bottom: cibleRect.bottom - fait };
+                    sous = bas - (cibleRect.bottom + ECART);
+                }
+            }
+            var dessus = (cibleRect.top - ECART) - haut;
+            if (naturelle <= sous) place = { cote: 'bas', max: sous };
+            else if (naturelle <= dessus) place = { cote: 'haut', max: dessus };
+            else {
+                // La zone éclairée prend tout l'écran : la bulle en couvre une partie, jamais ce qu'il
+                // faut toucher (le contour). Le côté du contour où elle tient, sinon le plus grand.
+                // Sans contour (le geste est dans la bulle), elle se range en bas, à sa hauteur.
+                var c = etat.elements.contour;
+                if (c.hidden) {
+                    place = { cote: 'bas', max: bas - haut };
+                } else {
+                    var rc = c.getBoundingClientRect();
+                    sous = bas - (rc.bottom + ECART);
+                    dessus = (rc.top - ECART) - haut;
+                    if (naturelle <= sous) place = { cote: 'bas', max: sous };
+                    else if (naturelle <= dessus) place = { cote: 'haut', max: dessus };
+                    else place = sous >= dessus ? { cote: 'bas', max: sous } : { cote: 'haut', max: dessus };
+                }
+            }
+        }
+        // Repliée, la bulle ne fait que sa tête : elle ne se resserre pas sous cette hauteur.
+        b.style.maxHeight = Math.max(Math.round(place.max), 56) + 'px';
+        var bh = b.offsetHeight;
+        var y = place.cote === 'bas' ? bas - bh : haut;
+        b.style.left = MARGE + 'px';
+        b.style.right = MARGE + 'px';
+        b.style.top = Math.round(y) + 'px';
+        poserReserveBas(place.cote === 'bas' ? window.innerHeight - y : 0);
+    }
+
     function placerBulle(etape, cibleRect) {
         var b = etat.elements.bulle;
+        if (etat.telephone) { placerBulleTelephone(cibleRect); return; }
+        poserReserveBas(0);
         var vw = window.innerWidth, vh = basEcran();
+        // Le filet : jamais plus haute que l'écran utile ; au-delà, son texte défile.
+        b.style.maxHeight = Math.max(0, vh - 2 * MARGE) + 'px';
         var bw = b.offsetWidth, bh = b.offsetHeight;
         var x, y;
         if (etape.centre || !cibleRect) {
@@ -303,6 +452,8 @@
         if (!etat || etat.enTransition) return;
         var etape = etapeCourante();
         if (etat.opts.verifier && !etat.opts.verifier()) { fermer(); return; }
+        // La fenêtre a franchi le seuil du téléphone (rotation, écran partagé) : la bulle change de forme.
+        if (surTelephone() !== etat.telephone) rendreBulle();
 
         var zones = etape.zones ? (etape.zones() || []) : [];
         var contourEl = etape.contour ? etape.contour() : null;
@@ -367,9 +518,13 @@
         await preparer(etape, i);
         // Le parcours a pu être fermé, ou avancé ailleurs, pendant la préparation.
         if (!etat || etat.i !== i) return;
+        // Sur téléphone, une étape qui désigne quoi toucher sur la page (un contour) ouvre la bulle
+        // repliée ; quand le geste est dans la bulle (« Continuer »), elle s'ouvre dépliée.
+        etat.replie = !!etape.contour;
         rendreBulle();
-        if (!etape.centre) amenerDansLaVue(elementsVises(etape), etat.elements.bulle.offsetHeight);
+        if (!etape.centre || etat.telephone) amenerDansLaVue(elementsVises(etape), etat.elements.bulle.offsetHeight);
         etat.enTransition = false;
+        etat.reglerJusqua = Date.now() + REGLAGE_MS;
         sonder();
         try { etat.elements.bulle.focus({ preventScroll: true }); } catch (e) { etat.elements.bulle.focus(); }
     }
@@ -388,12 +543,14 @@
     function lancer(def, opts) {
         if (etat) fermer();
         retirerElements();
-        etat = { def: def, i: 0, opts: opts || {}, elements: creerElements(), enTransition: false };
+        etat = { def: def, i: 0, opts: opts || {}, elements: creerElements(), enTransition: false,
+                 telephone: surTelephone(), replie: false, reglerJusqua: 0 };
         document.body.classList.add('parcours-actif');
         if (window.transitions && typeof window.transitions.fermerBandeau === 'function') window.transitions.fermerBandeau();
         document.addEventListener('keydown', surTouche, true);
         window.addEventListener('resize', surRedimension);
         window.addEventListener('scroll', surRedimension, { passive: true });
+        if (window.visualViewport) window.visualViewport.addEventListener('resize', surRedimension);
         etat.timer = setInterval(sonder, SONDE_MS);
         var depuis = Math.max(0, Math.min((opts && opts.depuis) || 0, def.etapes.length - 1));
         return allerA(depuis);
@@ -405,8 +562,10 @@
         document.removeEventListener('keydown', surTouche, true);
         window.removeEventListener('resize', surRedimension);
         window.removeEventListener('scroll', surRedimension);
+        if (window.visualViewport) window.visualViewport.removeEventListener('resize', surRedimension);
         etat = null;
         retirerElements();
+        document.documentElement.style.removeProperty('--parcours-reserve-bas');
         document.body.classList.remove('parcours-actif');
     }
 
@@ -428,6 +587,7 @@
         // Utilitaires pour les définitions de parcours.
         visible: visible,
         premierVisible: premierVisible,
+        surTelephone: surTelephone,
         mouvementReduit: mouvementReduit
     };
 

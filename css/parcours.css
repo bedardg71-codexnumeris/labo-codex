@@ -79,6 +79,9 @@ body.mode-clair {
     display: flex;
     flex-direction: column;
     gap: 12px;
+    /* Le filet (9 nov. 2026) : js/parcours-moteur.js pose max-height à l'espace disponible ; seul le
+       texte défile (.parcours-bulle-texte). Le défilement de la bulle entière ne reste qu'en dernier
+       recours, si même la tête, le geste et les boutons ne tiennent pas. */
     max-height: calc(100vh - 32px);
     overflow-y: auto;
 }
@@ -110,6 +113,14 @@ body.mode-clair {
     margin: 0;
     font-size: 14.5px;
     line-height: 1.5;
+    /* Le filet : quand la bulle n'a pas la place, le texte se resserre (jamais sous trois lignes,
+       ou sous sa hauteur s'il en a moins : min-height posée par le moteur) et défile ; le défilement
+       au doigt ne passe pas à la page derrière. Qui tient ne bouge pas. */
+    flex: 0 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
 }
 
 .parcours-bulle-geste {
@@ -144,6 +155,61 @@ body.mode-clair {
 
 .parcours-bulle-sortie:hover { color: var(--texte-principal); }
 .parcours-bulle-sortie:focus-visible { outline: 2px solid var(--focus-ring-color); outline-offset: 2px; }
+
+/* ---------- La bulle sur téléphone (lot du 9 nov. 2026) ----------
+   Jusqu'à 500 px de large (SEUIL_TELEPHONE de js/parcours-moteur.js) : pleine largeur, rangée au
+   bord de l'écran par le moteur ; repliée, la tête seule (titre et « n sur N ») ; la tête est un
+   bouton qui déplie et replie. */
+
+.parcours-bulle--telephone {
+    width: auto;
+    padding: 14px 16px 12px;
+    gap: 10px;
+}
+
+.parcours-bulle--telephone .parcours-bulle-tete {
+    position: relative;
+    min-height: 24px;
+    padding-right: 28px; /* la place du chevron */
+}
+
+.parcours-bulle-bascule {
+    position: absolute;
+    inset: -14px -16px -6px -16px; /* toute la tête, marges de la bulle comprises */
+    min-height: 44px;
+    margin: 0;
+    padding: 0;
+    background: none;
+    border: 0;
+    border-radius: var(--radius-grand, 12px) var(--radius-grand, 12px) 0 0;
+    cursor: pointer;
+}
+
+/* Le chevron : vers le bas quand la bulle est dépliée (elle se replie), vers le haut repliée. */
+.parcours-bulle-bascule::after {
+    content: '';
+    position: absolute;
+    right: 20px;
+    top: 50%;
+    width: 9px;
+    height: 9px;
+    border-right: 2px solid var(--texte-secondaire);
+    border-bottom: 2px solid var(--texte-secondaire);
+    transform: translateY(-75%) rotate(45deg);
+}
+
+.parcours-bulle-bascule[aria-expanded="false"]::after { transform: translateY(-25%) rotate(-135deg); }
+.parcours-bulle-bascule:focus-visible { outline: none; box-shadow: inset 0 0 0 3px var(--focus-ring-color); }
+
+.parcours-bulle.est-repliee { padding-top: 12px; padding-bottom: 12px; }
+.parcours-bulle.est-repliee > :not(.parcours-bulle-tete) { display: none; }
+.parcours-bulle.est-repliee .parcours-bulle-bascule { inset: -12px -16px; border-radius: var(--radius-grand, 12px); }
+
+/* Le témoin « Enregistré » (en bas à gauche) passe au-dessus d'une bulle rangée en bas : le moteur
+   pose --parcours-reserve-bas, 0 hors téléphone (rien ne bouge alors). */
+body.parcours-actif .temoin-enregistrement {
+    bottom: calc(16px + max(var(--temoin-hauteur-clavier, 0px), var(--parcours-reserve-bas, 0px)));
+}
 
 /* Pendant un parcours, le jalon de js/transitions.js ne vient pas couvrir l'étape. */
 body.parcours-actif .transition-bandeau { display: none; }
@@ -333,6 +399,13 @@ body.parcours-actif .transition-bandeau { display: none; }
     opacity: 0.8;
 }
 
+.assistance-parcours-grand-ecran {
+    margin: 0;
+    font-size: 13px;
+    line-height: 1.45;
+    font-weight: 600;
+}
+
 .assistance-parcours-bouton {
     align-self: flex-start;
     min-height: 44px;
@@ -351,6 +424,15 @@ body.parcours-actif .transition-bandeau { display: none; }
 .assistance-parcours-item[data-etat="a-faire"] .assistance-parcours-bouton {
     border-color: var(--icone-aide-config);
     color: var(--icone-aide-config);
+}
+
+.assistance-parcours-bouton[aria-disabled="true"],
+.assistance-parcours-item[data-etat] .assistance-parcours-bouton[aria-disabled="true"] {
+    border-color: var(--assistance-trait);
+    color: inherit;
+    background: transparent;
+    opacity: 0.55;
+    cursor: not-allowed;
 }
 
 .assistance-parcours-bouton:focus-visible { outline: 2px solid var(--focus-ring-color); outline-offset: 2px; }

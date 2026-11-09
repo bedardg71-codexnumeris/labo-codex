@@ -13,11 +13,22 @@
      { <id>: { etat: 'a-faire' | 'en-cours' | 'fait', etape: <index de 0> } }
    Rien ne démarre de lui-même : un parcours se lance par « Commencer », « Reprendre »
    ou « Refaire ».
+
+   Un parcours qui déclare `grandEcranSeulement: true` (lot « La bulle sur téléphone »,
+   9 nov. 2026) n'est pas proposé sur téléphone (ParcoursMoteur.surTelephone, 500 px) : sous son
+   titre, le texte validé par Grégoire, et son bouton ne lance rien.
    ================================================================= */
 (function () {
     'use strict';
 
     var CLE_PREF = 'parcoursAssistance';
+    // Validé par Grégoire le 9 nov. 2026 (Cowork), mot pour mot.
+    var TEXTE_GRAND_ECRAN = 'Ce parcours se fait sur un écran plus grand : une tablette ou un ordinateur.';
+
+    function tropPetitPour(def) {
+        return !!def.grandEcranSeulement && !!window.ParcoursMoteur
+            && typeof window.ParcoursMoteur.surTelephone === 'function' && window.ParcoursMoteur.surTelephone();
+    }
     var registre = [];
     var focusAvant = null;
 
@@ -107,6 +118,16 @@
         l1.appendChild(etatTxt);
         corps.appendChild(l1);
 
+        var refuse = tropPetitPour(def);
+        if (refuse) {
+            li.dataset.ecran = 'trop-petit';
+            var refus = document.createElement('p');
+            refus.className = 'assistance-parcours-grand-ecran';
+            refus.id = 'assistance-parcours-grand-ecran-' + def.id;
+            refus.textContent = TEXTE_GRAND_ECRAN;
+            corps.appendChild(refus);
+        }
+
         var p = document.createElement('p');
         p.className = 'assistance-parcours-ligne';
         p.textContent = def.ligne;
@@ -116,8 +137,11 @@
         btn.type = 'button';
         btn.className = 'assistance-parcours-bouton' + (e.etat === 'en-cours' ? ' assistance-parcours-bouton--plein' : '');
         btn.textContent = e.etat === 'fait' ? 'Refaire' : e.etat === 'en-cours' ? 'Reprendre' : 'Commencer';
-        btn.setAttribute('aria-describedby', h.id);
+        btn.setAttribute('aria-describedby', h.id + (refuse ? ' assistance-parcours-grand-ecran-' + def.id : ''));
+        // Sur téléphone, un parcours pour grand écran : le bouton reste lisible, il ne lance rien.
+        if (refuse) btn.setAttribute('aria-disabled', 'true');
         btn.addEventListener('click', function () {
+            if (refuse) return;
             var depuis = e.etat === 'en-cours' ? e.etape : 0;
             fermerPanneau({ sansRetourFocus: true });
             def.lancer(depuis);
