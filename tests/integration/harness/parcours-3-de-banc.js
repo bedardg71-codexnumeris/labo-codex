@@ -123,6 +123,8 @@ async function etape4(page, { niveaux, cap }) {
     const evaluer = (await valeursActions(page, pid)).find((v) => v.startsWith('evaluer|2390001|'));
     expect(evaluer).toBeTruthy();
     await contourSur(page, `#evaluations-liste select.eval-actions-select:has(option[value="${evaluer}"])`);
+    // La colonne « Actions » est amenée dans la vue (le tableau dépasse l'écran à 1180 px).
+    await expect(page.locator(`#evaluations-liste select.eval-actions-select:has(option[value="${evaluer}"])`)).toBeInViewport();
     await capture(page, DOSSIER, `p3-4-${cap}`);
     await actionDeLaListe(page, evaluer);
     await expect(page.locator('#evaluations-contenu-evaluation')).toBeVisible();
@@ -236,6 +238,7 @@ async function etape9(page, { cap }) {
     const c = await ctx(page);
     const consulter = (await valeursActions(page, c.evaluationId)).find((v) => v.startsWith('consulter|'));
     await contourSur(page, `#evaluations-liste select.eval-actions-select:has(option[value="${consulter}"])`);
+    await expect(page.locator(`#evaluations-liste select.eval-actions-select:has(option[value="${consulter}"])`)).toBeInViewport();
     await capture(page, DOSSIER, `p3-9-${cap}`);
     await actionDeLaListe(page, consulter);
     await expect(page.locator('#evaluations-contenu-evaluation')).toBeVisible();

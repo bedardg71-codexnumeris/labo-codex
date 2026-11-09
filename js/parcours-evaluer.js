@@ -288,6 +288,17 @@
 
     function rangeeDe(select) { return select ? (select.closest('tr') || select.parentElement) : null; }
 
+    /**
+     * Le menu « Actions… » d'une ligne, amené dans la vue de côté : à 1180 px, la Liste dépasse l'écran (l'application le
+     * dit : « Le tableau dépasse l'écran ») et la colonne « Actions » restait hors de vue, son contour avec elle (captures du
+     * 9 nov.). Le moteur n'amène que de haut en bas.
+     */
+    function amenerDeCote(el) {
+        if (!el) return;
+        var r = el.getBoundingClientRect();
+        if (r.right > window.innerWidth || r.left < 0) el.scrollIntoView({ block: 'nearest', inline: 'center' });
+    }
+
     /** Un critère encore sans niveau ni points : le menu du niveau, ou le champ des points. */
     function critereAAttribuer() {
         var champs = document.querySelectorAll('#listeCriteresGrille1 select[id^="eval_"], #listeCriteresGrille1 input[id^="eval_pts_"]');
@@ -453,6 +464,7 @@
                 if (ecranEvaluationVisible()) return;
                 aller('evaluations', 'liste');
                 await attendre(function () { return !!ligneDeLaListe(lireCtx().productionId); }, 3000);
+                amenerDeCote(ligneDeLaListe(lireCtx().productionId));
             },
             zones: function () {
                 if (ecranEvaluationVisible()) return surLaCible(ouToucherEnEvaluant());
@@ -544,6 +556,7 @@
                 aller('evaluations', 'liste');
                 var ctx = lireCtx();
                 await attendre(function () { return !!ligneDeLaListe(ctx.productionId, ctx.evaluationDA); }, 3000);
+                amenerDeCote(ligneDeLaListe(ctx.productionId, ctx.evaluationDA));
             },
             zones: function () {
                 if (ecranEvaluationVisible()) return surLaCible(ouToucherEnReecrivant());

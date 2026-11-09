@@ -104,6 +104,8 @@ identifiants seulement, rien des données de la personne. « Reprendre » le rel
 - La condition d'entrée (`condition`) : le code exact du parcours 6, pour que la fusion n'en garde qu'un. ⚠ Les parcours
   7 et 8 ont chacun la leur, sous un autre nom (`refus`, `.assistance-parcours-refus`) : à unifier à la fusion.
 - Une ligne absente n'est pas écrite (`if (def.ligne)`) : la mienne n'est pas validée.
+- Aux étapes 4 et 9, la colonne « Actions » de la Liste est amenée dans la vue : à 1180 px, le tableau dépasse l'écran
+  (l'application le dit) et le contour restait hors de vue (vu sur les captures, corrigé le soir du 9 nov.).
 
 ### 1.3 Les deux défauts corrigés
 
