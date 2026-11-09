@@ -15,10 +15,10 @@
     if (!trimestres.length) return 'Aucun trimestre A2026 trouvé dans « trimestres ».';
     const parProduction = {};
     let total = 0;
-    // `db.get` (asynchrone) : une liste lourde peut vivre dans IndexedDB sans être dans le cache mémoire.
+    // Corrigé par Cowork le 9 nov. (15 h 45) : `db.getSync` seul. `db.get` recopie dans IndexedDB une clé qu'il ne trouve que dans le localStorage (js/db.js, _getIndexedDB) : ce n'était pas une lecture seule. Au démarrage, db.js range tout IndexedDB en mémoire ; getSync suffit.
     for (const t of trimestres) {
-        const evaluations = (await db.get(t.id + '_evaluationsSauvegardees', [])) || [];
-        const productions = (await db.get(t.id + '_productions', [])) || [];
+        const evaluations = (db.getSync(t.id + '_evaluationsSauvegardees', [])) || [];
+        const productions = (db.getSync(t.id + '_productions', [])) || [];
         const titre = (id) => { const p = productions.find((x) => x.id === id); return (p && (p.titre || p.nom)) || '(production introuvable)'; };
         evaluations.forEach((e) => {
             if (!e) return;
