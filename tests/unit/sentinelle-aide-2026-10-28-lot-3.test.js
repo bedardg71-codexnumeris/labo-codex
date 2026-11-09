@@ -118,14 +118,24 @@ describe('#1152 lot 3 · un seul glossaire', () => {
 
     it('le mode assistance nomme les deux commandes que l\'écran porte', () => {
         // ↻ « L'en-tête épuré » (7 nov. 2026) : le bouton est une ligne du menu de l'en-tête, nommée par son mot.
-        expect(html).toMatch(/id="btn-assistance-nav"[^>]*>.*?<span class="entete-menu-mot">Assistance<\/span>/);
+        // ↻ Lot « Les deux parcours » (8 nov. 2026) : la ligne « Assistance » ouvre un panneau ; l'interrupteur
+        // y est, sous « Aide dans les pages » (js/assistance.js).
+        expect(html).toMatch(/id="btn-assistance-menu"[^>]*>.*?<span class="entete-menu-mot">Assistance<\/span>/);
+        expect(lire('js', 'assistance.js')).toContain("inter.setAttribute('role', 'switch');");
         // ↻ « L'accueil épuré » (7 nov. 2026) : la case « Assistance » de l'accueil est retirée. Le glossaire la
         // nomme encore : sa phrase passe au lot « Les pages sans doublons » (inventaire soumis à Grégoire), qui
         // remplacera ce témoin par le texte qu'il aura validé.
         expect(lire('js', 'accueil.js')).not.toContain('accueil-aide-titre');
         // ↻ Lot 3 (7 nov. 2026), phrase 12 approuvée par Grégoire : les mots de la consigne, la case retirée.
-        expect(terme('mode-assistance-icones').definition).toContain('Il s’active ou se coupe par la ligne Assistance du menu.');
         expect(terme('mode-assistance-icones').definition).not.toContain('case');
+    });
+
+    it.fails('le glossaire dit où se coupe l\'aide dans les pages : dans le panneau « Assistance », plus sur la ligne du menu', () => {
+        // ⏳ TEXTE DEVENU FAUX, EN ATTENTE DE GRÉGOIRE — lot « Les deux parcours » (8 nov. 2026).
+        // La consigne interdit de retoucher un texte qu'elle ne nomme pas : celui-ci reste tel quel, et
+        // `it.fails` le dit. Quand le texte revu sera posé, ce témoin passera au vert, `it.fails` rougira :
+        // remplacer alors ce bloc par le texte validé.
+        expect(terme('mode-assistance-icones').definition).not.toContain('par la ligne Assistance du menu');
     });
 
     it('la retouche du verdict (28 oct., 14 h 15) : le menu Codex sans côté ; SRPNF mot pour mot, sa validation notée', () => {

@@ -1242,7 +1242,8 @@ const AIDE_CONTEXTUELLE = {
         sections: [
             {
                 type: 'texte',
-                contenu: "La visite guidée te présente, en quelques étapes, les grandes sections de l’application — Cadre, Conception, Évaluation, Suivi. Tu peux la quitter à tout moment, et la relancer depuis ce bouton quand tu veux."
+                // Lot « Les deux parcours » (8 nov. 2026) : texte de la consigne, mot pour mot.
+                contenu: "L'assistance te propose des parcours où tu fais les gestes toi-même, accompagné·e pas à pas : d'abord sur une classe de démonstration, puis avec ta propre classe. Tu les retrouves dans le menu, sous « Assistance », avec l'aide dans les pages."
             },
             {
                 type: 'action',

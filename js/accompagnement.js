@@ -6,7 +6,8 @@
  *   - fleches-didactiques.js     (mode autoReveal)
  *   - primo-tooltips.js          (mode popup — déclencheur)
  *   - aide-contextuelle.js       (mode popup — rendu riche)
- *   - guidage.js                 (mode tour)
+ *   - guidage.js                 (mode tour — retiré le 8 nov. 2026 : les parcours
+ *                                  du panneau « Assistance » le remplacent)
  *   - glossaire.js               (mode terme)
  *
  * Catalogue central CATALOGUE_ACCOMPAGNEMENT peuplé par 3 fichiers de contenu
@@ -14,14 +15,14 @@
  *   - js/accompagnement-contenu-hover.js   (~283 entrées mode hover)
  *   - js/accompagnement-contenu-popup.js   (~40 entrées mode popup)
  *   - js/accompagnement-contenu-terme.js   (48 entrées mode terme)
- * Les entrées mode autoReveal et tour sont déclarées directement ici.
+ * Les entrées mode autoReveal sont déclarées directement ici.
  *
  * Rétrocompatibilité :
  *   - Les attributs HTML existants (~220 usages : data-tooltip, data-aide,
  *     data-target, data-glossaire) fonctionnent sans modification.
  *   - Globals conservés pour le dispatcher data-action de main.js :
  *     masquerFlecheDidactique, fermerPopupPrimo, fermerAideContextuelle,
- *     demarrerTourGuide.
+ *     demarrerTourDepuisAide.
  *   - API sémantique : window.afficherAideContextuelle (ouverture par clé).
  *   - Toute autre API passe par window.accompagnement.*
  *   - Les flags localStorage fleche-vue__* sont migrés vers accompagnement-vu__*
@@ -244,8 +245,6 @@ function masquerTout() {
     masquerAutoReveal();
     fermerPopup();
     fermerMicroPopupGlossaire();
-    // tour : panneau flottant, masqué par fermerPanneauTour
-    fermerPanneauTour();
 }
 
 // ============================================================================
@@ -1121,301 +1120,12 @@ function afficherBulleDecouverte({ cible, message, position = 'bas', duree = 800
 }
 
 // ============================================================================
-// MODE TOUR — parcours guidé 6 étapes (ex-guidage.js)
+// MODE TOUR — retiré (lot « Les deux parcours », 8 nov. 2026)
 // ============================================================================
-
-const ETAPES_TOUR = [
-    {
-        id: 0,
-        // « L'accueil épuré » (7 nov. 2026) : le titre et la relance, mots de la consigne.
-        titre: 'Bienvenue dans la visite guid\u00e9e',
-        texte: "Labo Codex num\u00e9rise le travail que tu fais d\u00e9j\u00e0. Ce parcours te guide \u00e0 travers les \u00e9tapes essentielles. Tu peux le quitter \u00e0 tout moment et le relancer depuis le menu, en haut \u00e0 droite. Commence par configurer ton espace de travail dans l'onglet Cadre.",
-        correspond: function(idSousSection) { return !idSousSection || idSousSection === 'accueil'; }
-    },
-    {
-        id: 1,
-        titre: 'Cadre',
-        texte: "C'est ici que tu poses les fondations\u00a0: ton trimestre (dates, cong\u00e9s), ton cours (comp\u00e9tence, \u00e9l\u00e9ments), ton groupe d'\u00e9tudiant\u00b7es et ton horaire. Ce sont les m\u00eames informations que dans ton plan de cours. Tu les saisis une fois et l'application g\u00e9n\u00e8re automatiquement le calendrier de tes s\u00e9ances.\n\nLes ic\u00f4nes d'info t'en disent plus sur chaque section. Quand ton groupe-cours est assembl\u00e9, tu es pr\u00eat\u00b7e pour la suite.",        correspond: function(idSousSection) {
-            return typeof idSousSection === 'string' && idSousSection.indexOf('calendrier-') === 0;
-        }
-    },
-    {
-        id: 2,
-        titre: 'Conception',
-        // E1, validé par Grégoire le 19 oct. 2026 (19 h 01) ; l'étape correspond aussi à « Apporter mon matériel » (#1092).
-        texte: "Tu construis ici tes outils d’évaluation : les mêmes que sur papier, mais réutilisables. Si tes grilles existent déjà dans Word ou dans Pages, « Mon matériel » les y range : tu les colles, puis tu montres à l’application ce que veut dire chaque morceau. Les productions définissent les occasions d’apprentissage de tes étudiant·es. Les grilles fixent tes critères. Les échelles établissent les niveaux de performance. Les cartouches préparent la rétroaction. La pratique assemble le tout.\n\nL’ordre n’est pas imposé, mais les productions et les grilles sont un bon point de départ.",
-        correspond: function(idSousSection) {
-            if (typeof idSousSection !== 'string') return false;
-            const structureConception = ['conception-materiel', 'conception-productions', 'conception-grille-criteres', 'conception-echelle-performance', 'conception-retroactions', 'conception-pratiques-notation'];
-            return structureConception.indexOf(idSousSection) !== -1;
-        }
-    },
-    {
-        id: 3,
-        titre: '\u00c9valuation',
-        texte: "C'est le geste quotidien\u00a0: tu s\u00e9lectionnes une production, tu attribues un niveau \u00e0 chaque crit\u00e8re et la r\u00e9troaction se construit au fur et \u00e0 mesure. Tu peux importer les copies de tes \u00e9tudiant\u00b7es (PDF ou images), les annoter avec des tampons / estampes ou des codes, puis les \u00e9valuer \u2014 tout sur le m\u00eame document.\n\nLes jetons (D\u00e9lai, Reprise, Reprise cibl\u00e9e) offrent \u00e0 l'\u00e9tudiant\u00b7e une nouvelle occasion de d\u00e9montrer sa comp\u00e9tence.",        correspond: function(idSousSection) {
-            return typeof idSousSection === 'string' && idSousSection.indexOf('evaluations-') === 0;
-        }
-    },
-    {
-        id: 4,
-        titre: 'Suivi',
-        texte: "L'aper\u00e7u (Groupe) te montre ce que tu ne verrais pas facilement sur papier\u00a0: le portrait de ton groupe en un coup d'\u0153il. Les indices Assiduit\u00e9 (A), Compl\u00e9tion (C) et Performance (P) r\u00e9sument le contexte d'apprentissage observ\u00e9 de chaque \u00e9tudiant\u00b7e. Les zones de couleur t'aident \u00e0 rep\u00e9rer qui a besoin d'attention.\n\nExplore les vues du Suivi\u00a0: Groupe, liste, profils et interventions R\u00e0I.",        correspond: function(idSousSection) {
-            // 'suivi-groupe' couvre l'ancien id 'apercu' depuis la migration du 27 mai 2026.
-            return typeof idSousSection === 'string' && idSousSection.indexOf('suivi-') === 0;
-        }
-    },
-    {
-        id: 5,
-        titre: 'Alignement (optionnel)',
-        texte: "La carte d'alignement rend visible l'alignement p\u00e9dagogique de ton cours\u00a0: ce que tu vises, comment tu l'enseignes et comment tu le v\u00e9rifies. Tu y organises aussi tes s\u00e9quences et tes le\u00e7ons sur les semaines du trimestre, et tu en exportes le plan. Ce module est compl\u00e9mentaire\u00a0: explore-le quand tu te sens \u00e0 l'aise avec les autres sections.",
-        correspond: function(idSousSection) {
-            return idSousSection === 'conception-carte';
-        }
-    },
-    {
-        id: 6,
-        titre: 'Labo (optionnel)',
-        texte: "Le Labo regroupe les outils d'observation et d'analyse : c'est là que tu actives la taxonomie SOLO, les micro-données ACP et le dépistage RàI, et que tu règles leurs seuils.\n\nChaque cadre est expliqué par un guide pédagogique de quelques pages — bouton « Guide » sur les cartes des Observation. Tu y trouveras aussi la modélisation, le rythme de travail, les études et le bilan réflexif.",
-        correspond: function(idSousSection) {
-            return typeof idSousSection === 'string' && idSousSection.indexOf('labo-') === 0;
-        }
-    }
-];
-
-// Modèle « panneau qui suit » : pour chaque étape, la section où le panneau
-// emmène l'utilisateur quand il clique « Suivant ». L'étape 0 (Bienvenue) n'a
-// pas de cible — c'est le point de départ. Les étapes Conception/Alignement
-// ciblent une sous-section précise (sinon afficherSection ouvrirait la 1re).
-const TOUR_NAV = {
-    1: { section: 'calendrier' },
-    2: { section: 'conception', sousSection: 'productions' },
-    3: { section: 'evaluations' },
-    4: { section: 'suivi' },
-    5: { section: 'conception', sousSection: 'carte' },
-    6: { section: 'labo' }
-};
-
-// Libellés courts pour le bouton « Suivant : <section> » (indexés par id d'étape).
-const TOUR_TITRE_COURT = ['Bienvenue', 'Cadre', 'Conception', 'Évaluation', 'Suivi', 'Alignement', 'Labo'];
-
-// Phase 4 : publier les 6 étapes dans le catalogue unifié sous mode `tour`.
-// La clé est `tour-etape-<id>`. L'orchestration continue d'utiliser le tableau
-// ETAPES_TOUR ci-dessus (accès indexé), mais le catalogue expose maintenant
-// ces entrées à `window.accompagnement.catalogue` pour cohérence.
-ETAPES_TOUR.forEach(function(etape) {
-    const obj = {};
-    obj['tour-etape-' + etape.id] = { tour: etape };
-    ajouterEntrees(obj);
-});
-
-const ID_PANNEAU_TOUR = 'panneau-tour-guide';
-
-function tourObtenirEtape() {
-    const v = lirePref('tourGuide_etape', null);
-    return typeof v === 'number' ? v : null;
-}
-
-function tourDefinirEtape(valeur) { ecrirePref('tourGuide_etape', valeur); }
-function tourEstComplete() { return lirePref('tourGuide_complete', false) === true; }
-function tourMarquerComplete(valeur) { ecrirePref('tourGuide_complete', !!valeur); }
-
-function tourObtenirEtapesVues() {
-    const v = lirePref('tourGuide_etapes_vues', []);
-    return Array.isArray(v) ? v.slice() : [];
-}
-
-function tourMarquerEtapeVue(idEtape) {
-    const vues = tourObtenirEtapesVues();
-    if (vues.indexOf(idEtape) === -1) {
-        vues.push(idEtape);
-        ecrirePref('tourGuide_etapes_vues', vues);
-    }
-}
-
-function fermerPanneauTour() {
-    const el = document.getElementById(ID_PANNEAU_TOUR);
-    if (el && el.parentNode) el.parentNode.removeChild(el);
-}
-
-function afficherPanneauEtape(etape) {
-    fermerPanneauTour();
-
-    const panneau = document.createElement('div');
-    panneau.id = ID_PANNEAU_TOUR;
-    panneau.className = 'panneau-tour-guide';
-    panneau.setAttribute('role', 'dialog');
-    panneau.setAttribute('aria-label', 'Visite guid\u00e9e');
-
-    const header = document.createElement('div');
-    header.className = 'tour-header';
-
-    const titre = document.createElement('span');
-    titre.className = 'tour-titre';
-    titre.textContent = etape.titre;
-    header.appendChild(titre);
-
-    const progression = document.createElement('span');
-    progression.className = 'tour-progression';
-    progression.setAttribute('aria-label', '\u00c9tape ' + (etape.id + 1) + ' sur ' + ETAPES_TOUR.length);
-    for (let i = 0; i < ETAPES_TOUR.length; i++) {
-        const dot = document.createElement('span');
-        dot.className = 'tour-dot' + (i === etape.id ? ' actif' : (i < etape.id ? ' vu' : ''));
-        progression.appendChild(dot);
-    }
-    header.appendChild(progression);
-
-    const btnFermer = document.createElement('button');
-    btnFermer.className = 'tour-fermer';
-    btnFermer.type = 'button';
-    btnFermer.setAttribute('aria-label', 'Fermer la visite guid\u00e9e');
-    btnFermer.textContent = '\u2715';
-    btnFermer.addEventListener('click', quitterTourGuide);
-    header.appendChild(btnFermer);
-
-    panneau.appendChild(header);
-
-    const corps = document.createElement('div');
-    corps.className = 'tour-corps';
-    etape.texte.split('\n\n').forEach(function(par) {
-        const p = document.createElement('p');
-        p.textContent = par;
-        corps.appendChild(p);
-    });
-    panneau.appendChild(corps);
-
-    const actions = document.createElement('div');
-    actions.className = 'tour-actions';
-    const dernier = ETAPES_TOUR.length - 1;
-
-    function ajouterBouton(label, type, handler) {
-        const btn = document.createElement('button');
-        btn.type = 'button';
-        btn.className = 'tour-btn btn ' + (type === 'primaire' ? 'btn-principal' : 'btn-secondaire');
-        btn.textContent = label;
-        btn.addEventListener('click', handler);
-        actions.appendChild(btn);
-    }
-
-    // Bouton de gauche : « Précédent » (étapes > 0) ou porte de sortie (étape 0).
-    if (etape.id > 0) {
-        ajouterBouton('‹ Précédent', 'secondaire', tourReculerEtape);
-    } else {
-        ajouterBouton('Explorer seul·e', 'secondaire', quitterTourGuide);
-    }
-
-    // Bouton de droite (primaire) : avancer vers la section suivante, ou terminer.
-    if (etape.id >= dernier) {
-        ajouterBouton('Terminer le parcours', 'primaire', terminerTour);
-    } else {
-        const prefixe = etape.id === 0 ? 'Commencer' : 'Suivant';
-        ajouterBouton(prefixe + ' : ' + TOUR_TITRE_COURT[etape.id + 1] + ' ›', 'primaire', tourAvancerEtape);
-    }
-
-    panneau.appendChild(actions);
-
-    document.body.appendChild(panneau);
-
-    requestAnimationFrame(function() { panneau.classList.add('visible'); });
-}
-
-function tourEtapeCourante() {
-    const i = tourObtenirEtape();
-    if (i === null || i < 0 || i >= ETAPES_TOUR.length) return null;
-    return ETAPES_TOUR[i];
-}
-
-// Cœur du modèle « panneau qui suit » : on fixe l'étape, on emmène
-// l'utilisateur dans la section correspondante, puis on réaffiche le panneau
-// pour cette étape (position fixed → il reste visible à l'écran).
-function tourNaviguerVersEtape(idx) {
-    if (idx < 0 || idx >= ETAPES_TOUR.length) return;
-    tourDefinirEtape(idx);
-    tourMarquerEtapeVue(idx);
-
-    const nav = TOUR_NAV[idx];
-    if (nav) {
-        if (nav.sousSection && typeof naviguerVers === 'function') {
-            naviguerVers(nav.section, nav.sousSection);
-        } else if (typeof afficherSection === 'function') {
-            afficherSection(nav.section);
-        }
-    }
-
-    afficherPanneauEtape(ETAPES_TOUR[idx]);
-}
-
-function tourAvancerEtape() {
-    const courante = tourEtapeCourante();
-    if (!courante) return;
-    const prochaine = courante.id + 1;
-    if (prochaine >= ETAPES_TOUR.length) { terminerTour(); return; }
-    tourNaviguerVersEtape(prochaine);
-}
-
-function tourReculerEtape() {
-    const courante = tourEtapeCourante();
-    if (!courante || courante.id <= 0) return;
-    tourNaviguerVersEtape(courante.id - 1);
-}
-
-function terminerTour() {
-    fermerPanneauTour();
-    tourMarquerComplete(true);
-    tourDefinirEtape(null);
-}
-
-function quitterTourGuide() {
-    fermerPanneauTour();
-    tourMarquerComplete(true);
-    tourDefinirEtape(null);
-}
-
-function demarrerTourGuide() {
-    tourDefinirEtape(0);
-    tourMarquerComplete(false);
-    ecrirePref('tourGuide_etapes_vues', []);
-
-    // S'assurer que l'accompagnement est actif (sinon tooltips, popups et
-    // flèches resteront invisibles pendant le tour)
-    definirAccompagnementActif(true);
-
-    afficherPanneauEtape(ETAPES_TOUR[0]);
-}
-
-function relancerTourGuide() { demarrerTourGuide(); }
-
-function verifierDeclenchementAuto(idSousSection) {
-    if (tourEstComplete()) return;
-    const idxEtape = tourObtenirEtape();
-    if (idxEtape === null) return;
-    const etape = ETAPES_TOUR[idxEtape];
-    if (!etape) return;
-
-    const vues = tourObtenirEtapesVues();
-    if (vues.indexOf(etape.id) !== -1) return;
-
-    if (etape.correspond(idSousSection)) afficherPanneauEtape(etape);
-}
-
-let _tourInitialise = false;
-function initialiserTour() {
-    if (_tourInitialise) return;
-    _tourInitialise = true;
-    window.addEventListener('sectionAffichee', function(e) {
-        const id = e && e.detail && e.detail.idSousSection;
-        setTimeout(function() { verifierDeclenchementAuto(id); }, 300);
-    });
-
-    // Tour en cours au chargement (rechargement de page) : réafficher le
-    // panneau de l'étape courante pour qu'il « suive » l'utilisateur.
-    if (!tourEstComplete()) {
-        const i = tourObtenirEtape();
-        if (typeof i === 'number' && i >= 0 && i < ETAPES_TOUR.length) {
-            afficherPanneauEtape(ETAPES_TOUR[i]);
-        }
-    }
-}
+// La visite en sept étapes est remplacée par les parcours du panneau « Assistance »
+// (js/assistance.js, js/parcours-moteur.js, js/parcours-*.js). Les préférences
+// tourGuide_* déjà écrites chez les gens restent dans leur stockage : rien ne les
+// lit plus, rien ne les réécrit.
 
 // ============================================================================
 // MODE TERME — micro-popup inline sur terme souligné (ex-glossaire.js)
@@ -1793,12 +1503,6 @@ window.accompagnement = {
     afficherBulleDecouverte: afficherBulleDecouverte,
     initialiserPopup: initialiserPopup,
 
-    // Tour
-    demarrerTour: demarrerTourGuide,
-    quitterTour: quitterTourGuide,
-    terminerTour: terminerTour,
-    etapesTour: ETAPES_TOUR,
-
     // Terme / glossaire
     afficherTerme: afficherTermeGlossaire,
     afficherDansConteneur: afficherDansConteneurGlossaire,
@@ -1815,24 +1519,20 @@ window.masquerFlecheDidactique = fermerEtMarquerAutoReveal;
 window.basculerBulleAncree = basculerBulleAncree;
 window.fermerPopupPrimo = fermerPopupPrimo;
 window.fermerAideContextuelle = fermerAideContextuelle;
-window.demarrerTourGuide = demarrerTourGuide;
-// Lancé depuis le popup d'introduction (bouton « Démarrer la visite ») : ferme
-// d'abord la popup d'aide, puis démarre le tour.
+// Le bouton de l'aide qui lançait la visite ouvre maintenant le panneau « Assistance »
+// (lot « Les deux parcours », 8 nov. 2026) : ferme d'abord la popup d'aide.
 window.demarrerTourDepuisAide = function() {
     fermerAideContextuelle();
-    demarrerTourGuide();
+    if (typeof window.ouvrirPanneauAssistance === 'function') window.ouvrirPanneauAssistance();
 };
 
-// Bascule globale de l'assistance depuis l'en-tête. Pref unique → pilote les 4
-// sous-systèmes. Cette fonction reflète l'état courant sur le contrôle de l'en-tête
-// (la case « Assistance » de l'accueil est retirée le 7 nov. 2026, « L'accueil épuré »).
+// Bascule globale de l'aide dans les pages. Pref unique → pilote les 4 sous-systèmes.
+// Cette fonction reflète l'état courant sur l'interrupteur « Aide dans les pages » du
+// panneau « Assistance » (lot « Les deux parcours », 8 nov. 2026 ; il était dans le menu).
 function synchroniserControlesAssistance() {
     var actif = estAccompagnementActif();
-    var btn = document.getElementById('btn-assistance-nav');
-    if (btn) {
-        btn.setAttribute('aria-pressed', actif ? 'true' : 'false');
-        btn.setAttribute('title', actif ? 'Assistance activée' : 'Assistance désactivée');
-    }
+    var inter = document.getElementById('assistance-interrupteur');
+    if (inter) inter.setAttribute('aria-checked', actif ? 'true' : 'false');
 }
 window.synchroniserControlesAssistance = synchroniserControlesAssistance;
 window.basculerAssistance = function() {
@@ -1869,7 +1569,6 @@ function initialiserTout() {
     initialiserHover();
     initialiserAutoReveal();
     initialiserPopup();
-    initialiserTour();
     initialiserTerme();
 }
 

@@ -288,7 +288,8 @@ describe('B3 · les mots viennent du rendu, et un seul endroit les écrit', () =
         const { html } = rendreAccueil();
         const liens = [...tranche(html, 'class="apropos-liens').matchAll(/<(button|a) [^>]*class="apropos-lien"[^>]*>[\s\S]*?<\/\1>/g)].map(m => m[0]);
         expect(liens).toHaveLength(3);
-        expect(liens[0]).toMatch(/data-action="demarrerTourGuide">Visite guidée</);
+        // Lot « Les deux parcours » (8 nov. 2026) : « Visite guidée » devient « Assistance » et ouvre le panneau.
+        expect(liens[0]).toMatch(/data-action="ouvrirPanneauAssistance">Assistance</);
         expect(liens[1]).toMatch(/data-action="naviguerAccueilCarte" data-param="labo\|labo-accompagnement">Guides pédagogiques</);
         expect(liens[2]).toContain('href="https://codexnumeris.org/tutoriels"');
         expect(liens[2]).toContain('target="_blank"');

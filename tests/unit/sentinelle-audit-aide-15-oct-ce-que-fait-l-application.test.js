@@ -337,16 +337,22 @@ describe('Les gestes décrits sont ceux du code', () => {
         expect(AIDE).not.toMatch(/analysant tes rétroactions écrites|analyse tes rétroactions pour/);
     });
 
-    it('la visite guidée : le nombre d\'étapes lu dans la visite, relancée depuis l\'en-tête', () => {
-        const bloc = tranche(VISITE, 'const ETAPES_TOUR = [', 'const TOUR_NAV');
-        const n = (bloc.match(/^\s{8}id: \d+,/gm) || []).length;
-        expect(n).toBeGreaterThan(0);
-        expect(TERME).toContain(`Un parcours en ${n} étapes`);
-        // ↻ #1152, lot 3 (28 oct. 2026) : « Parcours en N étapes » n'était, dans l'Aide, que dans le glossaire statique, parti ;
-        // le seul glossaire le dit (TERME, ci-dessus ; consigne du lot 3, §2.5).
+    it('la visite guidée est retirée : l\'Aide ne compte plus ses étapes', () => {
+        // ↻ Lot « Les deux parcours » (8 nov. 2026) : la visite en sept étapes est remplacée par les parcours
+        // du panneau « Assistance » ; il n'y a plus de nombre d'étapes à lire dans une visite.
+        expect(VISITE).not.toContain('const ETAPES_TOUR');
         expect(AIDE).not.toContain('Parcours en 7 &eacute;tapes');
-        expect(INDEX).toMatch(/data-action="afficherAideContextuelle" data-param="tour-guide"/);
+        expect(INDEX).toContain('data-action="ouvrirPanneauAssistance"');
         expect(TERME).not.toContain('depuis les Préférences');
+    });
+
+    it.fails('le glossaire ne décrit plus la visite en sept étapes ni la ligne « Visite guidée » du menu', () => {
+        // ⏳ TEXTE DEVENU FAUX, EN ATTENTE DE GRÉGOIRE — lot « Les deux parcours » (8 nov. 2026).
+        // La consigne interdit de retoucher un texte qu'elle ne nomme pas : celui-ci reste tel quel, et
+        // `it.fails` le dit. Quand le texte revu sera posé, ce témoin passera au vert, `it.fails` rougira :
+        // remplacer alors ce bloc par le texte validé.
+        expect(TERME).not.toContain('Un parcours en 7 étapes');
+        expect(TERME).not.toContain('la ligne « Visite guidée » du menu');
     });
 
     it('le mode anonymisé : « Élève 1, Élève 2 », décrit d\'une seule façon', () => {

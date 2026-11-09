@@ -127,7 +127,7 @@ function genererBanniereBienvenue() {
                 <div class="apropos-concepts">
                     <p><strong>Certains concepts sont nouveaux ?</strong> Trois guides t’expliquent le concept des micro-données, la taxonomie SOLO et le modèle RàI qui servent au dépistage des difficultés et à la planification des interventions. L’aide et les guides sont accessibles en tout temps.</p>
                     <ul class="apropos-liens banniere-bienvenue-actions">
-                        <li><button type="button" class="apropos-lien" data-action="demarrerTourGuide">Visite guidée</button></li>
+                        <li><button type="button" class="apropos-lien" data-action="ouvrirPanneauAssistance">Assistance</button></li>
                         <li><button type="button" class="apropos-lien" data-action="naviguerAccueilCarte" data-param="labo|labo-accompagnement">Guides pédagogiques</button></li>
                         <li><a class="apropos-lien" href="https://codexnumeris.org/tutoriels" target="_blank" rel="noopener noreferrer">Tutoriels <span aria-hidden="true">↗</span><span class="u-lecteur-ecran"> (s’ouvre dans un nouvel onglet)</span></a></li>
                     </ul>

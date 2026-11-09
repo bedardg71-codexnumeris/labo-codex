@@ -1,4 +1,5 @@
 import { describe, it, expect } from 'vitest';
+import { tranche } from './_helpers/tranche.js';
 import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -149,9 +150,16 @@ describe('Aide — elle ne décrit pas de fonctionnalité retirée', () => {
             expect(accueil.includes(libelle) || accueil.includes(echappe)).toBe(true);
             expect(carte).toContain(libelle);
         }
-        // La visite guidée est le bouton data-param="tour-guide" de l'en-tête.
-        expect(INTERFACE).toContain('data-param="tour-guide"');
-        expect(carte).toContain('Visite guidée');
+        // ↻ Lot « Les deux parcours » (8 nov. 2026) : l'entrée du menu est « Assistance », elle ouvre le panneau.
+        expect(INTERFACE).toContain('data-action="ouvrirPanneauAssistance"');
+    });
+
+    it.fails('la carte de prise en main ne nomme plus la ligne « Visite guidée » du menu', () => {
+        // ⏳ TEXTE DEVENU FAUX, EN ATTENTE DE GRÉGOIRE — lot « Les deux parcours » (8 nov. 2026).
+        // La consigne interdit de retoucher un texte qu'elle ne nomme pas : celui-ci reste tel quel, et
+        // `it.fails` le dit. Quand le texte revu sera posé, ce témoin passera au vert, `it.fails` rougira :
+        // remplacer alors ce bloc par le texte validé.
+        expect(tranche(AIDE, 'accordeon-aide-prise-en-main', 'accordeon-aide-demo')).not.toContain('Visite guidée</strong>, une ligne du menu');
     });
 });
 

@@ -1239,7 +1239,8 @@ body.mode-clair {
     top: calc(100% + 6px);
     right: 0;
     /* ~210 px au total (correction de Grégoire du 7 nov. 2026, était 250) : la ligne la plus
-       longue, Assistance et son interrupteur, y tient sans couper le mot. */
+       longue, Assistance et son rang (« 2 sur 2 », lot « Les deux parcours »), y tient sans
+       couper le mot. */
     width: 210px;
     box-sizing: border-box;
     padding: 6px;
@@ -1297,39 +1298,6 @@ body.mode-clair {
 .entete-menu-mot {
     flex: 1 1 auto;
     white-space: nowrap;
-}
-
-/* L'interrupteur d'Assistance : l'état se lit sur aria-pressed (posé par
-   synchroniserControlesAssistance, accompagnement.js). */
-.entete-interrupteur {
-    position: relative;
-    flex: 0 0 auto;
-    width: 34px;
-    height: 20px;
-    border-radius: 10px;
-    background: rgba(106, 172, 184, 0.35);
-    transition: background-color 0.15s ease;
-}
-
-.entete-interrupteur::after {
-    content: '';
-    position: absolute;
-    top: 3px;
-    left: 3px;
-    width: 14px;
-    height: 14px;
-    border-radius: 50%;
-    background: white;
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
-    transition: transform 0.15s ease;
-}
-
-[aria-pressed="true"] > .entete-interrupteur {
-    background: var(--icone-aide-config);
-}
-
-[aria-pressed="true"] > .entete-interrupteur::after {
-    transform: translateX(14px);
 }
 
 /* === Navigation secondaire : 48 px, centrée, sur le fond de l'en-tête === */
@@ -1773,22 +1741,12 @@ body.mode-clair {
     -webkit-mask-image: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciICB2aWV3Qm94PSIwIDAgNTAgNTAiIHdpZHRoPSI1MHB4IiBoZWlnaHQ9IjUwcHgiPjxwYXRoIGQ9Ik0gMjUgMiBDIDEyLjMwOTI5NSAyIDIgMTIuMzA5Mjk1IDIgMjUgQyAyIDM3LjY5MDcwNSAxMi4zMDkyOTUgNDggMjUgNDggQyAzNy42OTA3MDUgNDggNDggMzcuNjkwNzA1IDQ4IDI1IEMgNDggMTIuMzA5Mjk1IDM3LjY5MDcwNSAyIDI1IDIgeiBNIDM5Ljg1MzUxNiAxMC4xNDY0ODQgQyA0My42NTIyODggMTMuOTQ1MjU2IDQ2IDE5LjE5NTA4OCA0NiAyNSBDIDQ2IDM2LjYwOTgyNCAzNi42MDk4MjQgNDYgMjUgNDYgQyAxOS4xOTUwODggNDYgMTMuOTQ1MjU2IDQzLjY1MjI4OCAxMC4xNDY0ODQgMzkuODUzNTE2IEwgMzkuODUzNTE2IDEwLjE0NjQ4NCB6Ii8+PC9zdmc+");
             mask-image: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciICB2aWV3Qm94PSIwIDAgNTAgNTAiIHdpZHRoPSI1MHB4IiBoZWlnaHQ9IjUwcHgiPjxwYXRoIGQ9Ik0gMjUgMiBDIDEyLjMwOTI5NSAyIDIgMTIuMzA5Mjk1IDIgMjUgQyAyIDM3LjY5MDcwNSAxMi4zMDkyOTUgNDggMjUgNDggQyAzNy42OTA3MDUgNDggNDggMzcuNjkwNzA1IDQ4IDI1IEMgNDggMTIuMzA5Mjk1IDM3LjY5MDcwNSAyIDI1IDIgeiBNIDM5Ljg1MzUxNiAxMC4xNDY0ODQgQyA0My42NTIyODggMTMuOTQ1MjU2IDQ2IDE5LjE5NTA4OCA0NiAyNSBDIDQ2IDM2LjYwOTgyNCAzNi42MDk4MjQgNDYgMjUgNDYgQyAxOS4xOTUwODggNDYgMTMuOTQ1MjU2IDQzLjY1MjI4OCAxMC4xNDY0ODQgMzkuODUzNTE2IEwgMzkuODUzNTE2IDEwLjE0NjQ4NCB6Ii8+PC9zdmc+");
 }
-/* Visite guidée — deux repères (départ, arrivée) reliés par un trajet en pointillé,
-   dessinée pour ce lot comme la bulle et le « ? » (trait 1,5 px sur 22 px). */
-.ico-route {
-    -webkit-mask-image: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyMiAyMiI+PHBhdGggZD0iTTE1LjUgMTQuMjVzLTQtMy45LTQtNy4xYTQgNCAwIDAgMSA4IDBjMCAzLjItNCA3LjEtNCA3LjF6IiBmaWxsPSJub25lIiBzdHJva2U9IiMwMDAiIHN0cm9rZS13aWR0aD0iMS41IiBzdHJva2UtbGluZWpvaW49InJvdW5kIi8+PGNpcmNsZSBjeD0iMTUuNSIgY3k9IjcuMTUiIHI9IjEuMiIvPjxjaXJjbGUgY3g9IjUiIGN5PSIxNy4yNSIgcj0iMi41IiBmaWxsPSJub25lIiBzdHJva2U9IiMwMDAiIHN0cm9rZS13aWR0aD0iMS41Ii8+PGNpcmNsZSBjeD0iOS43NSIgY3k9IjE3LjI1IiByPSIuOCIvPjxjaXJjbGUgY3g9IjEyLjUiIGN5PSIxNy4yNSIgcj0iLjgiLz48Y2lyY2xlIGN4PSIxNS4xIiBjeT0iMTYuODUiIHI9Ii44Ii8+PC9zdmc+");
-            mask-image: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyMiAyMiI+PHBhdGggZD0iTTE1LjUgMTQuMjVzLTQtMy45LTQtNy4xYTQgNCAwIDAgMSA4IDBjMCAzLjItNCA3LjEtNCA3LjF6IiBmaWxsPSJub25lIiBzdHJva2U9IiMwMDAiIHN0cm9rZS13aWR0aD0iMS41IiBzdHJva2UtbGluZWpvaW49InJvdW5kIi8+PGNpcmNsZSBjeD0iMTUuNSIgY3k9IjcuMTUiIHI9IjEuMiIvPjxjaXJjbGUgY3g9IjUiIGN5PSIxNy4yNSIgcj0iMi41IiBmaWxsPSJub25lIiBzdHJva2U9IiMwMDAiIHN0cm9rZS13aWR0aD0iMS41Ii8+PGNpcmNsZSBjeD0iOS43NSIgY3k9IjE3LjI1IiByPSIuOCIvPjxjaXJjbGUgY3g9IjEyLjUiIGN5PSIxNy4yNSIgcj0iLjgiLz48Y2lyY2xlIGN4PSIxNS4xIiBjeT0iMTYuODUiIHI9Ii44Ii8+PC9zdmc+");
-}
 /* Assistance — bulle de dialogue avec un « i », dessinée pour ce lot (trait 1,5 px
-   sur 22 px). Pleine quand l'assistance est activée (aria-pressed="true", posé par
-   synchroniserControlesAssistance), en contour seul quand elle est désactivée. */
+   sur 22 px). En contour : la variante pleine suivait l'interrupteur du menu, parti dans
+   le panneau « Assistance » (lot « Les deux parcours », 8 nov. 2026). */
 .ico-assistance {
     -webkit-mask-image: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyMiAyMiI+PHBhdGggZD0iTTQgMy43NWgxNEEyLjI1IDIuMjUgMCAwIDEgMjAuMjUgNnY4LjVBMi4yNSAyLjI1IDAgMCAxIDE4IDE2Ljc1SDkuNmwtNC4zNSAzLjV2LTMuNUg0QTIuMjUgMi4yNSAwIDAgMSAxLjc1IDE0LjVWNkEyLjI1IDIuMjUgMCAwIDEgNCAzLjc1eiIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjMDAwIiBzdHJva2Utd2lkdGg9IjEuNSIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIvPjxjaXJjbGUgY3g9IjExIiBjeT0iNi45NSIgcj0iMS4wNSIvPjxwYXRoIGQ9Ik0xMSA5LjZ2NC4yIiBzdHJva2U9IiMwMDAiIHN0cm9rZS13aWR0aD0iMS41IiBzdHJva2UtbGluZWNhcD0icm91bmQiLz48L3N2Zz4=");
             mask-image: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyMiAyMiI+PHBhdGggZD0iTTQgMy43NWgxNEEyLjI1IDIuMjUgMCAwIDEgMjAuMjUgNnY4LjVBMi4yNSAyLjI1IDAgMCAxIDE4IDE2Ljc1SDkuNmwtNC4zNSAzLjV2LTMuNUg0QTIuMjUgMi4yNSAwIDAgMSAxLjc1IDE0LjVWNkEyLjI1IDIuMjUgMCAwIDEgNCAzLjc1eiIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjMDAwIiBzdHJva2Utd2lkdGg9IjEuNSIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIvPjxjaXJjbGUgY3g9IjExIiBjeT0iNi45NSIgcj0iMS4wNSIvPjxwYXRoIGQ9Ik0xMSA5LjZ2NC4yIiBzdHJva2U9IiMwMDAiIHN0cm9rZS13aWR0aD0iMS41IiBzdHJva2UtbGluZWNhcD0icm91bmQiLz48L3N2Zz4=");
-}
-[aria-pressed="true"] > .ico-assistance {
-    -webkit-mask-image: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyMiAyMiI+PHBhdGggZD0iTTQgMy43NWgxNEEyLjI1IDIuMjUgMCAwIDEgMjAuMjUgNnY4LjVBMi4yNSAyLjI1IDAgMCAxIDE4IDE2Ljc1SDkuNmwtNC4zNSAzLjV2LTMuNUg0QTIuMjUgMi4yNSAwIDAgMSAxLjc1IDE0LjVWNkEyLjI1IDIuMjUgMCAwIDEgNCAzLjc1ek0xMSA1LjlhMS4wNSAxLjA1IDAgMSAxIDAgMi4xYTEuMDUgMS4wNSAwIDEgMSAwLTIuMXpNMTAuMjUgOS40aDEuNXY0LjZoLTEuNXoiIGZpbGwtcnVsZT0iZXZlbm9kZCIvPjxwYXRoIGQ9Ik00IDMuNzVoMTRBMi4yNSAyLjI1IDAgMCAxIDIwLjI1IDZ2OC41QTIuMjUgMi4yNSAwIDAgMSAxOCAxNi43NUg5LjZsLTQuMzUgMy41di0zLjVINEEyLjI1IDIuMjUgMCAwIDEgMS43NSAxNC41VjZBMi4yNSAyLjI1IDAgMCAxIDQgMy43NXoiIGZpbGw9Im5vbmUiIHN0cm9rZT0iIzAwMCIgc3Ryb2tlLXdpZHRoPSIxLjUiIHN0cm9rZS1saW5lam9pbj0icm91bmQiLz48L3N2Zz4=");
-            mask-image: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyMiAyMiI+PHBhdGggZD0iTTQgMy43NWgxNEEyLjI1IDIuMjUgMCAwIDEgMjAuMjUgNnY4LjVBMi4yNSAyLjI1IDAgMCAxIDE4IDE2Ljc1SDkuNmwtNC4zNSAzLjV2LTMuNUg0QTIuMjUgMi4yNSAwIDAgMSAxLjc1IDE0LjVWNkEyLjI1IDIuMjUgMCAwIDEgNCAzLjc1ek0xMSA1LjlhMS4wNSAxLjA1IDAgMSAxIDAgMi4xYTEuMDUgMS4wNSAwIDEgMSAwLTIuMXpNMTAuMjUgOS40aDEuNXY0LjZoLTEuNXoiIGZpbGwtcnVsZT0iZXZlbm9kZCIvPjxwYXRoIGQ9Ik00IDMuNzVoMTRBMi4yNSAyLjI1IDAgMCAxIDIwLjI1IDZ2OC41QTIuMjUgMi4yNSAwIDAgMSAxOCAxNi43NUg5LjZsLTQuMzUgMy41di0zLjVINEEyLjI1IDIuMjUgMCAwIDEgMS43NSAxNC41VjZBMi4yNSAyLjI1IDAgMCAxIDQgMy43NXoiIGZpbGw9Im5vbmUiIHN0cm9rZT0iIzAwMCIgc3Ryb2tlLXdpZHRoPSIxLjUiIHN0cm9rZS1saW5lam9pbj0icm91bmQiLz48L3N2Zz4=");
 }
 /* Aide — point d'interrogation dans un cercle, en trait, dessiné pour ce lot */
 .ico-aide-cercle {

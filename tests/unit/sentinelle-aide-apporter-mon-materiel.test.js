@@ -6,7 +6,8 @@
  *     pose les bulles des outils et du formulaire de création) a son entrée au VRAI catalogue ;
  *   · les six termes des étiquettes existent au lexique, et leur définition est celle de la section de
  *     l'onglet Aide, mot pour mot (deux copies, un banc) ; « Niveau » ne se confond pas avec « Niveau RàI » ;
- *   · l'étape « Conception » de la visite correspond à `conception-materiel` (#1092) ;
+ *   · l'étape « Concevoir » du parcours « Découvrir » ouvre `conception-materiel` (#1092 ; la visite
+ *     guidée, retirée le 8 nov. 2026, avait son étape « Conception ») ;
  *   · aucun texte neuf ne dit « dissection ».
  *
  * Le vrai accompagnement.js et les trois vrais catalogues, dans une fenêtre jsdom.
@@ -21,6 +22,7 @@ const racine = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', 
 const lire = (f) => readFileSync(path.join(racine, f), 'utf8');
 const INDEX = lire('index.html');
 const DISSECTION = lire('js/materiel-dissection.js');
+const DECOUVRIR = lire('js/parcours-decouvrir.js');
 
 /** La tranche de index.html entre deux marques (la première occurrence de chacune). */
 function tranche(texte, debut, fin) {
@@ -115,16 +117,11 @@ describe('« Apporter mon matériel » — le lexique et la section de l’ongle
     });
 });
 
-describe('« Apporter mon matériel » — la visite guidée passe par l’onglet (#1092)', () => {
-    it('l’étape « Conception » correspond à conception-materiel, et toujours aux autres', () => {
-        const etape = win.accompagnement.etapesTour.find((e) => e.titre === 'Conception');
-        expect(etape.correspond('conception-materiel')).toBe(true);
-        expect(etape.correspond('conception-productions')).toBe(true);
-        expect(etape.correspond('conception-carte')).toBe(false);
-        // ↻ Lot 3 « Les pages sans doublons » (7 nov. 2026) : les renvois d'onglet passent au libellé court.
-        expect(etape.texte).toContain('« Mon matériel » les y range');
-        // Une seule étape correspond à l'onglet : le panneau n'hésite pas entre deux.
-        expect(win.accompagnement.etapesTour.filter((e) => e.correspond('conception-materiel')).length).toBe(1);
+describe('« Apporter mon matériel » — le parcours « Découvrir » passe par l’onglet (#1092)', () => {
+    // ↻ Lot « Les deux parcours » (8 nov. 2026) : la visite en sept étapes est retirée ; son étape
+    // « Conception » est remplacée par l'étape 7 de « Découvrir », qui ouvre Conception › Mon matériel.
+    it('l’étape « Concevoir » ouvre Conception › Mon matériel', () => {
+        expect(tranche(DECOUVRIR, "titre: 'Concevoir'", "titre: 'Poser ton cadre'")).toContain("aller('conception', 'materiel')");
     });
 });
 
@@ -135,7 +132,7 @@ describe('« Apporter mon matériel » — aucun texte neuf ne dit « dissection
             JSON.stringify(cat['conception-materiel'].popup),
             ...TERMES.map((k) => JSON.stringify(cat['terme-' + k].terme)),
             CARTE.replace(/<!--[\s\S]*?-->/g, ''),
-            win.accompagnement.etapesTour.find((e) => e.titre === 'Conception').texte,
+            tranche(DECOUVRIR, "titre: 'Concevoir'", "geste:"),
             tranche(DISSECTION, 'if (b.logique === \'deux\')', '\n')
         ];
         expect(textes.join(' ').length).toBeGreaterThan(3000);
