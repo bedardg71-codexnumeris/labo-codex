@@ -1,0 +1,328 @@
+/* =========================================================================
+   TABLEAU DE NOTATION — lot 1 (9 nov. 2026)
+   La seconde vue de Évaluation › Liste (js/tableau-notation.js). Ébauches :
+   plans de travail/EBAUCHE-2026-11-09-tableau-standards.dc.html et -specifications.
+   Couleurs : variables de styles.css seulement ; la couleur d'un niveau vient
+   de l'échelle (--tn-couleur, posée sur la case, filtrée par `couleurSure`).
+   ========================================================================= */
+
+/* ---------- La bascule Liste / Tableau ---------- */
+.tn-bascule {
+    display: inline-flex;
+    gap: 6px;
+    margin: 0 0 16px;
+    flex-wrap: wrap;
+}
+
+.tn-bascule-btn {
+    min-height: 44px;
+    padding: 0 18px;
+    border-radius: 22px;
+    border: 1px solid var(--bordure-moyenne);
+    background: transparent;
+    color: var(--texte-principal);
+    font: inherit;
+    font-weight: 500;
+    cursor: pointer;
+}
+
+.tn-bascule-btn.actif {
+    background: var(--accent-primaire);
+    border-color: var(--accent-primaire);
+    color: var(--surface-page);
+    font-weight: 600;
+}
+
+.tn-bascule-btn:focus-visible,
+.tn-case:focus-visible {
+    outline: var(--focus-ring-width) solid var(--focus-ring-color);
+    outline-offset: var(--focus-ring-offset);
+}
+
+/* En vue Tableau, les morceaux de la Liste se retirent ; ils gardent leur état et reviennent tels quels. */
+.vue-tableau-notation > .carte-grise-mb20,
+.vue-tableau-notation > .eval-colonnes-selecteur,
+.vue-tableau-notation > #eval-barre-selection,
+.vue-tableau-notation > #bandeau-doublons-evaluations,
+.vue-tableau-notation > #zone-chargement-evaluations,
+.vue-tableau-notation > #conteneur-tableau-evaluations,
+.vue-tableau-notation > #message-aucun-resultat,
+.vue-tableau-notation #stats-evaluations {   /* les compteurs de la Liste : ils ne disent pas le tableau */
+    display: none !important;
+}
+
+/* ---------- L'en-tête ---------- */
+.tableau-notation {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.tn-titre {
+    margin: 0;
+    font-size: 1.25rem;
+    color: var(--texte-principal);
+}
+
+.tn-titre:focus {
+    outline: none;
+}
+
+.tn-intro,
+.tn-avis,
+.tn-etat-vide {
+    margin: 0;
+    line-height: 1.5;
+    color: var(--texte-secondaire);
+}
+
+.tn-etat-vide {
+    padding: 24px 0;
+}
+
+.tn-bandeau {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.tn-pratique {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.tn-pratique-nom {
+    font-weight: 600;
+    color: var(--texte-principal);
+}
+
+.tn-regle {
+    color: var(--texte-secondaire);
+}
+
+.tn-repere {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.tn-repere-titre {
+    color: var(--texte-secondaire);
+    font-size: 0.9rem;
+}
+
+.tn-niveau,
+.tn-forfait {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 6px;
+    padding: 4px 10px;
+    border-radius: 14px;
+    border: 1px solid var(--bordure-moyenne);
+    color: var(--texte-principal);
+    font-size: 0.9rem;
+}
+
+.tn-niveau {
+    border-color: var(--tn-couleur);
+}
+
+.tn-niveau-code {
+    font-weight: 700;
+}
+
+.tn-forfait {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0;
+    border-radius: 8px;
+}
+
+.tn-forfait-titre {
+    font-weight: 600;
+}
+
+.tn-forfait-requis {
+    color: var(--texte-secondaire);
+    font-size: 0.8rem;
+}
+
+/* ---------- Le tableau ---------- */
+.tn-defilement {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    border: 1px solid var(--bordure-claire);
+    border-radius: 8px;
+}
+
+.tn-tableau {
+    border-collapse: separate;
+    border-spacing: 0;
+    width: max-content;
+    min-width: 100%;
+}
+
+.tn-tableau th,
+.tn-tableau td {
+    padding: 6px 8px;
+    border-bottom: 1px solid var(--bordure-claire);
+    text-align: center;
+    vertical-align: middle;
+}
+
+.tn-tableau thead th {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    background: var(--surface-carte);
+    color: var(--texte-secondaire);
+    font-weight: 600;
+    font-size: 0.85rem;
+}
+
+.tn-col-eleve,
+.tn-eleve {
+    position: sticky;
+    left: 0;
+    z-index: 2;
+    text-align: left !important;
+    background: var(--surface-carte);
+    min-width: 160px;
+}
+
+.tn-eleve {
+    color: var(--texte-principal);
+    font-weight: 500;
+}
+
+.tn-col-production {
+    min-width: 76px;
+}
+
+.tn-production-titre,
+.tn-production-date {
+    display: block;
+}
+
+.tn-production-titre {
+    color: var(--texte-principal);
+}
+
+.tn-production-date {
+    font-weight: 400;
+    font-size: 0.75rem;
+}
+
+.tn-cellule {
+    padding: 4px 6px;
+}
+
+/* La couleur d'un niveau : celle de l'échelle, posée sur la case ou la pastille (`style`), sinon l'accent. */
+.tn-case,
+.tn-niveau {
+    --tn-couleur: var(--accent-primaire);
+}
+
+/* La case : 64 × 44 (cible tactile de l'iPad). */
+.tn-case {
+    width: 64px;
+    height: 44px;
+    border-radius: 6px;
+    font: inherit;
+    font-weight: 700;
+    cursor: pointer;
+    position: relative;
+    color: var(--texte-principal);
+}
+
+.tn-case--vide {
+    background: transparent;
+    border: 1px dashed var(--bordure-moyenne);
+    color: var(--texte-secondaire);
+    font-weight: 400;
+}
+
+.tn-case--plein {
+    background: color-mix(in srgb, var(--tn-couleur) 45%, var(--surface-carte));
+    border: 2px solid var(--tn-couleur);
+}
+
+.tn-case--contour {
+    background: transparent;
+    border: 2px solid var(--tn-couleur);
+}
+
+/* Évaluée avec une grille : un point au coin ; elle s'ouvre au toucher, ne se modifie pas ici. */
+.tn-case--grille::after {
+    content: '';
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--texte-principal);
+}
+
+.tn-col-compte {
+    min-width: 72px;
+}
+
+.tn-compte {
+    color: var(--texte-principal);
+    font-variant-numeric: tabular-nums;
+}
+
+/* La note reste à l'écran quand le tableau défile (iPad debout) : c'est le point d'arrivée. */
+.tn-col-note,
+.tn-note {
+    position: sticky;
+    right: 0;
+    background: var(--surface-carte);
+    box-shadow: -1px 0 0 var(--bordure-claire);
+}
+
+.tn-col-note {
+    z-index: 2;
+}
+
+.tn-note {
+    text-align: left !important;
+    min-width: 130px;
+}
+
+.tn-note-valeur {
+    display: block;
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: var(--texte-principal);
+    font-variant-numeric: tabular-nums;
+}
+
+.tn-note-detail {
+    display: block;
+    font-size: 0.75rem;
+    color: var(--texte-secondaire);
+}
+
+/* ---------- La légende ---------- */
+.tn-legende {
+    display: flex;
+    gap: 6px 18px;
+    flex-wrap: wrap;
+    font-size: 0.85rem;
+    color: var(--texte-secondaire);
+}
+
+.tn-legende-item {
+    white-space: nowrap;
+}
+
+.tn-legende-aide {
+    flex-basis: 100%;
+}

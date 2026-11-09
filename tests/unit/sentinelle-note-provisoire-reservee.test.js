@@ -34,6 +34,8 @@ const EXCEPTIONS = [
     { fichier: 'index.html', contient: 'ou de « Note provisoire » (pratique alternative), et retire la liste', nb: 1, motif: PRATIQUE_ALTERNATIVE },
     { fichier: 'js/accompagnement-contenu-terme.js', contient: 'ou de « Note provisoire » (pratique alternative), et ne listent plus', nb: 1, motif: PRATIQUE_ALTERNATIVE },
     { fichier: 'js/synthese-retroaction-rendu.js', contient: 'Note provisoire', nb: 4, motif: PRATIQUE_ALTERNATIVE },
+    // Tableau de notation, lot 1 (9 nov. 2026) : le tableau ne sert que les standards et les spécifications.
+    { fichier: 'js/tableau-notation.js', contient: 'Note provisoire', nb: 1, motif: PRATIQUE_ALTERNATIVE },
 ];
 
 function fichiersJs(dossier) {

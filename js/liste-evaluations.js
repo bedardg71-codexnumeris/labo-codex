@@ -329,6 +329,9 @@ function initialiserListeEvaluations() {
         window.removeEventListener('resize', verifierDebordementTableau);
         window.addEventListener('resize', verifierDebordementTableau);
 
+        // Tableau de notation (9 nov. 2026) : la seconde vue des mêmes évaluations suit la Liste quand elle est affichée.
+        if (window.TableauNotation) window.TableauNotation.rafraichirSiAffiche();
+
     } catch (error) {
         console.error('❌ Erreur lors de l\'initialisation de la liste des évaluations:', error);
         console.error('Stack trace:', error.stack);
@@ -1318,7 +1321,7 @@ function obtenirNomCartouche(grilleId, cartoucheId) {
  */
 function _niveauAffiche(evaluation) {
     // Tableau de notation (9 nov. 2026) : un jugement de spécifications saisi sans grille n'a pas de niveau, il se dit.
-    const jugement = typeof libelleJugementSansGrille === 'function' ? libelleJugementSansGrille(evaluation) : null;
+    const jugement = typeof window.libelleJugementSansGrille === 'function' ? window.libelleJugementSansGrille(evaluation) : null;
     if (jugement) return jugement;
     if (typeof niveauFinalAffichable === 'function') return niveauFinalAffichable(evaluation);
     return (evaluation && evaluation.niveauFinal) || '';
