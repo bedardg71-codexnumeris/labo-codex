@@ -22,7 +22,8 @@
         titre: 'Tableau de notation',
         intro: 'Saisis le résultat de chaque production, qu’elle ait été évaluée ici ou ailleurs. La note de chaque étudiant·e se construit dans la dernière colonne, selon les réglages de ta pratique.',
         avis: 'Un résultat saisi ici n’a pas de critères : ni forces, ni défis, ni rétroaction par critère. Le suivi qui lit la note continue de fonctionner.',
-        exporter: 'Exporter en CSV',
+        exporter: 'Exporter la synthèse (CSV)',   // le bouton de Suivi › Groupe, repris tel quel (consigne)
+        reglages: 'Réglages de la pratique',      // le lien du profil (pratiques-gestion.js, `ouvrirReglagesPratique`), repris tel quel
         eleve: 'Étudiant·e',
         noteProvisoire: 'Note provisoire',
         noteFinale: 'Note',
@@ -34,7 +35,7 @@
         autreFamille: 'Le tableau de notation sert les pratiques par standards et par spécifications. La pratique de ce groupe-cours se note autrement : la liste reste la vue de ses évaluations.',
         aucunEleve: 'Aucun·e étudiant·e dans ce groupe-cours. Ajoute ta liste dans Cadre › Trimestre pour remplir le tableau.',
         aucuneProduction: 'Aucune production n’entre dans la note de ta pratique. Crée tes productions dans Conception › Productions.',
-        sansEchelle: 'Ta pratique n’a pas d’échelle dont les niveaux portent une valeur : aucun niveau ne peut être saisi.',
+        sansEchelle: 'Ni tes productions ni ta pratique n’ont d’échelle dont les niveaux portent une valeur : aucun niveau ne peut être saisi.',
         legendeStd: ['Plein : compte dans la note', 'Contour : évaluée, non retenue', 'Pointillé : à saisir', 'Point : évaluée avec une grille'],
         legendeSpe: ['✓ Acceptable', '✗ Non acceptable', 'Pointillé : à saisir', 'Point : évaluée avec une grille'],
         aideStd: 'Touche une case pour changer le niveau. Au clavier : la lettre du niveau, Retour arrière pour vider, les flèches pour se déplacer.',
@@ -101,8 +102,37 @@
         return {
             etat: 'ok', famille, pratiqueId: designation.id, pratiqueNom: donnees.nom || '',
             config: (typeof obtenirConfigPratiqueActive === 'function' ? obtenirConfigPratiqueActive() : null) || {},
-            echelle: famille === 'STD' ? (window.construireConfigComplete(donnees).echelle || null) : null
+            echelle: famille === 'STD' ? (_utilisable(window.construireConfigComplete(donnees).echelle) || _echelleParId(ID_ECHELLE_DE_DEPART)) : null
         };
+    }
+
+    /* L'ÉCHELLE RETENUE (consigne du lot, 9 nov. 2026) : celle de la production si elle en a une, sinon celle de la
+       pratique, sinon l'échelle de départ du trimestre (`ECHELLE_IDME_DEPART`, celle de l'utilisateur : aucun niveau
+       n'est écrit ici). Une échelle sans niveau saisissable ne retient rien : on passe à la suivante. */
+    const ID_ECHELLE_DE_DEPART = 'ECHELLE_IDME_DEPART';
+
+    /** La même forme pour les deux gisements (`echellesTemplates` : id, nom ; la pratique : echelle_id, echelle_nom). */
+    function _utilisable(echelle) {
+        if (!echelle || D().niveauxSaisissables(echelle).length === 0) return null;
+        return { id: echelle.id || echelle.echelle_id || null, echelle_nom: echelle.nom || echelle.echelle_nom || '', niveaux: echelle.niveaux };
+    }
+
+    function _echelleParId(id) {
+        return (id && typeof obtenirEchelleResolue === 'function') ? _utilisable(obtenirEchelleResolue(id)) : null;
+    }
+
+    function _echelleDe(ctx, productionId) {
+        if (ctx.famille !== 'STD') return null;
+        if (!ctx.echelles) ctx.echelles = new Map();
+        if (!ctx.echelles.has(productionId)) {
+            const production = ctx.productions.find(p => p.id === productionId);
+            ctx.echelles.set(productionId, _echelleParId(production && production.echelleId) || ctx.echelle);
+        }
+        return ctx.echelles.get(productionId);
+    }
+
+    function _cycleDe(ctx, productionId) {
+        return D().cycleDeLaFamille(ctx.famille, _echelleDe(ctx, productionId));
     }
 
     function _completerProductions(ctx) {
@@ -127,8 +157,8 @@
         _completerProductions(ctx);
         ctx.etudiants = _etudiants();
         ctx.evaluations = obtenirDonneesSelonMode('evaluationsSauvegardees') || [];
-        ctx.cycle = D().cycleDeLaFamille(ctx.famille, ctx.echelle);
-        if (ctx.cycle.length < 2) ctx.etat = 'sans-echelle';
+        ctx.echelles = new Map();
+        if (ctx.famille === 'STD' && ctx.productions.length && !ctx.productions.some(p => _cycleDe(ctx, p.id).length > 1)) ctx.etat = 'sans-echelle';
         else if (!ctx.etudiants.length) ctx.etat = 'aucun-eleve';
         else if (!ctx.productions.length) ctx.etat = 'aucune-production';
         return ctx;
@@ -174,17 +204,17 @@
         return /^(#[0-9a-f]{3,8}|var\(--[a-z0-9-]+\)|rgba?\(\s*[0-9.,\s%]+\))$/i.test(c) ? c : 'var(--accent-primaire)';
     }
 
-    function _couleurDeLaValeur(valeur, ctx) {
+    function _couleurDeLaValeur(valeur, ctx, productionId) {
         if (ctx.famille === 'SPE') return valeur === D().ACCEPTABLE ? 'var(--niveau-attention-minimal)' : 'var(--niveau-attention-critique)';
-        const niveau = D().niveauxSaisissables(ctx.echelle).find(n => n.code === valeur);
+        const niveau = D().niveauxSaisissables(_echelleDe(ctx, productionId)).find(n => n.code === valeur);
         return couleurSure(niveau ? niveau.couleur : null);
     }
 
-    function _motDeLaValeur(valeur, ctx) {
+    function _motDeLaValeur(valeur, ctx, productionId) {
         if (valeur === '') return MOTS.aSaisir;
         const jugement = window.LIBELLES_JUGEMENT_SANS_GRILLE;   // les mots de la Liste (registre)
         if (ctx.famille === 'SPE') return valeur === D().ACCEPTABLE ? jugement.acceptable : jugement.nonAcceptable;
-        const niveau = D().niveauxSaisissables(ctx.echelle).find(n => n.code === valeur);
+        const niveau = D().niveauxSaisissables(_echelleDe(ctx, productionId)).find(n => n.code === valeur);
         return niveau ? niveau.nom : valeur;
     }
 
@@ -214,9 +244,9 @@
     function _caseHTML(etudiant, production, ctx, resultat) {
         const etat = _etatCase(etudiant, production, ctx, resultat);
         const nom = `${etudiant.prenom || ''} ${etudiant.nom || ''}`.trim();
-        const aria = `${nom}, ${production.titre || ''} : ${_motDeLaValeur(etat.valeur, ctx)}` + (etat.modifiable ? '' : `, ${MOTS.avecGrille}`);
+        const aria = `${nom}, ${production.titre || ''} : ${_motDeLaValeur(etat.valeur, ctx, production.id)}` + (etat.modifiable ? '' : `, ${MOTS.avecGrille}`);
         const classes = ['tn-case', 'tn-case--' + etat.forme].concat(etat.modifiable ? [] : ['tn-case--grille']);
-        const style = etat.valeur ? ` style="--tn-couleur: ${esc(_couleurDeLaValeur(etat.valeur, ctx))}"` : '';
+        const style = etat.valeur ? ` style="--tn-couleur: ${esc(_couleurDeLaValeur(etat.valeur, ctx, production.id))}"` : '';
         const ouvrir = etat.modifiable ? '' : ` data-evaluation="${esc(etat.evaluationId)}"`;
         // Un seul arrêt de Tab pour tout le tableau (la première case) ; les flèches font le reste.
         const tab = (etudiant === ctx.etudiants[0] && production === ctx.productions[0]) ? '0' : '-1';
@@ -224,12 +254,13 @@
     }
 
     function _noteHTML(resultat) {
+        // Sans note : sa cause, comme ailleurs (`simulerIndices.causeNonConstructible`, la phrase du profil et de l'export),
+        // écrite dans la case : une bulle seule ne se lit pas sur l'iPad.
         const detail = resultat.note === null
-            ? (resultat.aDesCopies ? MOTS.nonCalculable : MOTS.enAttente)
+            ? (resultat.cause || (resultat.aDesCopies ? MOTS.nonCalculable : MOTS.enAttente))
             : resultat.detail;
-        const titre = resultat.cause ? ` title="${esc(resultat.cause)}"` : '';
         const note = resultat.note === null ? '–' : String(resultat.note);
-        return `<td class="tn-note"${titre}><span class="tn-note-valeur">${esc(note)}</span><span class="tn-note-detail">${esc(detail)}</span></td>`;
+        return `<td class="tn-note"><span class="tn-note-valeur">${esc(note)}</span><span class="tn-note-detail">${esc(detail)}</span></td>`;
     }
 
     function _comptesSpeHTML(resultat, ctx) {
@@ -258,8 +289,12 @@
     }
 
     function _enteteColonnesHTML(ctx) {
+        const autreEchelle = (p) => {
+            const e = _echelleDe(ctx, p.id);
+            return (e && ctx.echelle && e.id !== ctx.echelle.id) ? `<span class="tn-production-date">${esc(e.echelle_nom)}</span>` : '';
+        };
         const prods = ctx.productions.map(p =>
-            `<th scope="col" class="tn-col-production"><span class="tn-production-titre">${esc(p.titre || p.nom || '')}</span><span class="tn-production-date">${esc(_dateCourte(p))}</span></th>`).join('');
+            `<th scope="col" class="tn-col-production"><span class="tn-production-titre">${esc(p.titre || p.nom || '')}</span><span class="tn-production-date">${esc(_dateCourte(p))}</span>${autreEchelle(p)}</th>`).join('');
         const types = ctx.famille === 'SPE' ? ctx.types.map(t => `<th scope="col" class="tn-col-compte">${esc(t.nom || t.id)}</th>`).join('') : '';
         const note = ctx.config && ctx.config.notesFinales === true ? MOTS.noteFinale : MOTS.noteProvisoire;
         return `<thead><tr><th scope="col" class="tn-col-eleve">${esc(MOTS.eleve)}</th>${prods}${types}<th scope="col" class="tn-col-note">${esc(note)}</th></tr></thead>`;
@@ -306,7 +341,8 @@
             ? phraseRegleStd(ctx.config, !!ctx.terminalId)
             : ctx.types.map(t => `${t.nom || t.id} (${ctx.productions.filter(p => window.productionEstDuType(p, t)).length})`).join(' · ');
         return `<div class="tn-bandeau">
-            <div class="tn-pratique">${badge}<span class="tn-pratique-nom">${esc(ctx.pratiqueNom)}</span><span class="tn-regle">${esc(regle)}</span></div>
+            <div class="tn-pratique">${badge}<span class="tn-pratique-nom">${esc(ctx.pratiqueNom)}</span><span class="tn-regle">${esc(regle)}</span>
+                <a href="#" class="tn-reglages" data-prevent data-action="ouvrirReglagesPratique" data-param="${esc(ctx.pratiqueId)}">${esc(MOTS.reglages)}</a></div>
             <button type="button" class="btn btn-secondaire" data-action="exporterSyntheseResultatsCSV">${esc(MOTS.exporter)}</button>
         </div>
         ${ctx.famille === 'STD' ? _echelleHTML(ctx) : _forfaitsHTML(ctx)}`;
@@ -388,7 +424,7 @@
         const contexte = _contexteEcriture(da, productionId, ctx);
         if (!contexte) return 'refuse';
         const stock = db.getSync(cle('evaluationsSauvegardees'), []) || [];
-        const r = D().appliquerSaisie(stock, { famille: ctx.famille, valeur, echelle: ctx.echelle, contexte });
+        const r = D().appliquerSaisie(stock, { famille: ctx.famille, valeur, echelle: _echelleDe(ctx, productionId), contexte });
         if (r.action === 'inchange' || r.action === 'refuse') return r.action;
         if (sauvegarderDonneesSelonMode('evaluationsSauvegardees', r.evaluations, { geste: 'Tableau de notation' }) !== true) return 'echec';
         window._moyennesQualifies = null;
@@ -412,7 +448,7 @@
     function _appliquer(bouton, valeurOuSuivante) {
         const ctx = construireContexte();
         if (ctx.etat !== 'ok') return;
-        const valeur = (valeurOuSuivante === null) ? D().valeurSuivante(ctx.cycle, _valeurActuelle(bouton, ctx)) : valeurOuSuivante;
+        const valeur = (valeurOuSuivante === null) ? D().valeurSuivante(_cycleDe(ctx, bouton.dataset.production), _valeurActuelle(bouton, ctx)) : valeurOuSuivante;
         const focus = { da: bouton.dataset.da, production: bouton.dataset.production };
         ecrireCase(focus.da, focus.production, valeur);
         rendre(focus);
@@ -460,7 +496,7 @@
         if (bouton.dataset.evaluation) return;
         const ctx = construireContexte();
         if (ctx.etat !== 'ok') return;
-        const valeur = D().valeurParTouche(ctx.cycle, e.key);
+        const valeur = D().valeurParTouche(_cycleDe(ctx, bouton.dataset.production), e.key);
         if (valeur === null) return;
         e.preventDefault();
         _appliquer(bouton, valeur);

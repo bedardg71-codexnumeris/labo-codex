@@ -807,6 +807,8 @@
 
         const candidates = evaluations
             .filter(e => e.etudiantDA === fichier.etudiantDA && !e.remplaceeParId)
+            // Tableau de notation, lot 1 (9 nov. 2026) : un résultat saisi au tableau, sans grille, n'a rien à imprimer pour l'élève.
+            .filter(e => e.sansGrille !== true)
             .filter(e => e.productionId === productionId);
 
         if (!candidates.length) return null;

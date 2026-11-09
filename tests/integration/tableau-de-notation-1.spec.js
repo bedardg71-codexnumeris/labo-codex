@@ -211,3 +211,170 @@ test.describe('Tableau de notation · spécifications', () => {
         expect(erreurs).toEqual([]);
     });
 });
+
+// CONSIGNE DU LOT ET PRÉCISIONS DE COWORK (9 nov. 2026, 15 h), reçues après la première passe : ce que le lot n'éprouvait pas.
+test.describe('Tableau de notation · la consigne', () => {
+    /** Compte et empreinte des évaluations FAITES AVEC UNE GRILLE : le tableau n'y écrit jamais. */
+    const empreinteAGrille = (page) => page.evaluate((T) => {
+        const aGrille = window.db.getSync(T + '_evaluationsSauvegardees', []).filter((e) => e.grilleId);
+        return { compte: aGrille.length, empreinte: JSON.stringify(aGrille) };
+    }, T);
+    // Chloé : une originale (I) remplacée par sa reprise réévaluée (E), en Production 2.
+    const ORIGINALE = Object.assign({}, COPIE_GRILLE, { id: 'EG-O', etudiantDA: '9990012', noteFinale: 40, niveauFinal: 'I', remplaceeParId: 'EG-R', archivee: true,
+        dateEvaluation: '2026-10-25T12:00:00.000Z' });   // plus récente que sa reprise : seul « remplacée » décide, pas la date (break-test)
+    const REPRISE = Object.assign({}, COPIE_GRILLE, { id: 'EG-R', etudiantDA: '9990012', noteFinale: 100, niveauFinal: 'E', repriseDeId: 'EG-O', jetonRepriseApplique: true,
+        dateEvaluation: '2026-10-20T12:00:00.000Z' });
+
+    test('aucun écrit dans les évaluations à grille (compte et empreinte), recharger retrouve tout, la reprise remplace l\'originale', async ({ page }) => {
+        const erreurs = await monter(page, 'STD', [COPIE_GRILLE, ORIGINALE, REPRISE]);
+        const avant = await empreinteAGrille(page);
+        expect(avant.compte).toBe(3);
+
+        // La case de Chloé montre la reprise (E), pas l'originale (I) ; la toucher ouvrirait la reprise.
+        await expect(kase(page, 3, 2)).toHaveText('E');
+        await expect(kase(page, 3, 2)).toHaveAttribute('data-evaluation', 'EG-R');
+        await expect(note(page, 3)).toHaveText('100');
+
+        // Remplir trois cases d'Ada, voir la note changer.
+        await expect(note(page, 1)).toHaveText('–');
+        const saisir = async (col, lettre) => { await kase(page, 1, col).focus(); await page.keyboard.press(lettre); };
+        await saisir(1, 'm');
+        await expect(note(page, 1)).toHaveText('75');
+        await saisir(3, 'e'); await saisir(4, 'd');
+        await expect(note(page, 1)).toHaveText('80');   // (75 + 100 + 65) / 3
+        // Une case à grille, touchée au clavier et par le geste d'écriture : rien ne s'écrit.
+        await kase(page, 2, 2).focus();
+        await page.keyboard.press('e');
+        await page.keyboard.press('Backspace');
+        expect(await empreinteAGrille(page)).toEqual(avant);
+
+        // Recharger : tout est retrouvé.
+        await page.evaluate(() => window.db.flush());
+        await page.reload();
+        await attendreApplication(page);
+        await page.evaluate((T) => { window.trimestreActif = T; }, T);
+        await page.evaluate(() => { window.afficherSection('evaluations'); window.afficherSousSection('evaluations-liste'); window.TableauNotation.afficher(); });
+        await expect(kase(page, 1, 1)).toHaveText('M');
+        await expect(kase(page, 1, 3)).toHaveText('E');
+        await expect(kase(page, 1, 4)).toHaveText('D');
+        await expect(note(page, 1)).toHaveText('80');
+        await expect(kase(page, 3, 2)).toHaveText('E');
+        expect(await empreinteAGrille(page)).toEqual(avant);
+        expect(erreurs).toEqual([]);
+    });
+
+    test('« Exporter pour Léa » et « Dossier PDF » ne prennent pas un résultat saisi au tableau, même verrouillé', async ({ page }) => {
+        const erreurs = await monter(page, 'STD', [COPIE_GRILLE]);
+        await kase(page, 1, 2).focus();
+        await page.keyboard.press('m');
+        expect(await sansGrilleDe(page, '9990010', 'P2')).toMatchObject({ verrouillee: true, noteFinale: 75 });
+        // Léa : la copie à grille de Bruno part ; le résultat d'Ada, verrouillé lui aussi, n'est ni retenu ni « laissé de côté ».
+        const lea = await page.evaluate(() => {
+            const s = window.travauxArchivage.selectionnerEvaluationsLea('P2', null, false);
+            return { retenues: s.evaluations.map((e) => e.id), nonVerrouillees: s.nonVerrouillees.length };
+        });
+        expect(lea).toEqual({ retenues: ['EG1'], nonVerrouillees: 0 });
+        // La Liste : « Dossier PDF » sur la copie à grille, pas sur le résultat sans grille.
+        await page.locator('#tn-vue-liste').click();
+        const options = (nom) => page.locator('#corps-tableau-evaluations tr').filter({ hasText: nom }).filter({ hasText: 'Production 2' }).locator('select option').allTextContents();
+        await expect(page.locator('#corps-tableau-evaluations tr').filter({ hasText: 'Albatros' }).filter({ hasText: 'Production 2' })).toContainText('Évalué');
+        expect(await options('Baobab')).toContain('Dossier PDF');
+        expect(await options('Albatros')).not.toContain('Dossier PDF');
+        // Et « Dossier PDF », appelé quand même pour Ada, ne trouve rien à imprimer : il le dit, sans produire de PDF.
+        expect(erreurs).toEqual([]);
+        await page.evaluate(() => window.travauxExportPDF.exporterDossierComplet('9990010', 'P2'));
+        expect(erreurs).toEqual(['dialogue: Aucune copie ni évaluation enregistrée pour cet·te étudiant·e et cette production.']);
+    });
+
+    test('l\'échelle de la production passe avant celle de la pratique ; l\'en-tête renvoie aux réglages et reprend le bouton d\'export', async ({ page }) => {
+        const erreurs = await monter(page, 'STD');
+        // Production 3 reçoit sa propre échelle (deux niveaux, d'autres valeurs).
+        await page.evaluate((T) => {
+            const echelles = window.db.getSync(T + '_echellesTemplates', []);
+            echelles.push({ id: 'E_P3', nom: 'Échelle de la production', niveaux: [
+                { code: 'R', nom: 'À reprendre', min: 0, max: 59, valeurCalcul: 50, couleur: '#a02030' },
+                { code: 'A', nom: 'Atteint', min: 60, max: 100, valeurCalcul: 90, couleur: '#34c759' }] });
+            window.db.setSync(T + '_echellesTemplates', echelles);   // security-ok: fixture fictive du banc
+            const productions = window.db.getSync(T + '_productions', []);
+            productions.find((p) => p.id === 'P3').echelleId = 'E_P3';
+            window.db.setSync(T + '_productions', productions);   // security-ok: fixture fictive du banc
+            window.TableauNotation.afficher();
+        }, T);
+        await expect(page.locator('#tableau-notation-hote thead th').nth(3)).toContainText('Échelle de la production');
+        await kase(page, 1, 3).click();
+        await expect(kase(page, 1, 3)).toHaveText('R');
+        await kase(page, 1, 3).click();
+        await expect(kase(page, 1, 3)).toHaveText('A');
+        expect(await sansGrilleDe(page, '9990010', 'P3')).toMatchObject({ niveauFinal: 'A', noteFinale: 90, echelleId: 'E_P3' });
+        // Une autre colonne garde l'échelle de la pratique.
+        await kase(page, 1, 1).click();
+        await expect(kase(page, 1, 1)).toHaveText('PS');
+        expect(await sansGrilleDe(page, '9990010', 'P1')).toMatchObject({ echelleId: 'E_TN', noteFinale: 0 });
+
+        await expect(page.locator('#tableau-notation-hote .tn-bandeau button[data-action="exporterSyntheseResultatsCSV"]')).toHaveText('Exporter la synthèse (CSV)');
+        const lien = page.locator('#tableau-notation-hote .tn-reglages');
+        await expect(lien).toHaveText('Réglages de la pratique');
+        await expect(lien).toHaveAttribute('data-action', 'ouvrirReglagesPratique');
+        await expect(lien).toHaveAttribute('data-param', 'std-tn');
+        expect(erreurs).toEqual([]);
+    });
+
+    test('sans note, la case dit la cause en clair (pas seulement en bulle) : aucun forfait atteint, aucun palier d\'échec', async ({ page }) => {
+        const erreurs = await monter(page, 'SPE');
+        await page.evaluate((T) => {
+            const pratiques = window.db.getSync(T + '_pratiquesConfigurables', []);
+            pratiques[0].configuration.forfaits = pratiques[0].configuration.forfaits.filter((f) => Object.keys(f.travaux).length > 0);
+            window.db.setSync(T + '_pratiquesConfigurables', pratiques);   // security-ok: fixture fictive du banc
+            window.TableauNotation.afficher();
+        }, T);
+        await kase(page, 1, 1).focus();
+        await page.keyboard.press('a');
+        await expect(note(page, 1)).toHaveText('–');
+        await expect(page.locator('#tableau-notation-hote tbody tr:nth-child(1) .tn-note-detail')).toHaveText('Ta pratique ne dit pas quelle note donner quand aucun forfait n\'est atteint.');
+        expect(erreurs).toEqual([]);
+    });
+});
+
+// CAPTURES (CAPTURES=1) — Chromium, 1180 px, standards et spécifications, noms fictifs ; dans `plans de travail/`.
+test.describe('Tableau de notation · captures', () => {
+    test.skip(!process.env.CAPTURES, 'captures à la demande (CAPTURES=1)');
+    const dossier = path.join(racineProjet, 'plans de travail', 'captures-2026-11-09-tableau-de-notation-1');
+    const PLAN = {
+        STD: [['e', 'm', 'm', 'd', 'e'], ['i', null, 'd', 'm', null], ['m', null, 'e', 'e', 'm'], [null, null, null, null, null]],
+        SPE: [['a', 'a', 'a', 'a', 'a', 'a'], ['a', 'n', 'a', null, 'a', null], ['a', 'a', 'a', null, 'n', null], [null, null, null, null, null, null]]
+    };
+    for (const famille of ['STD', 'SPE']) {
+        for (const mode of ['sombre', 'clair']) {
+            test(`${famille === 'STD' ? 'standards' : 'specifications'}, 1180, ${mode}`, async ({ page }) => {
+                await page.setViewportSize({ width: 1180, height: 820 });
+                const grille = famille === 'STD'
+                    ? [COPIE_GRILLE, Object.assign({}, COPIE_GRILLE, { id: 'EG-O', etudiantDA: '9990012', noteFinale: 40, niveauFinal: 'I', remplaceeParId: 'EG-R' }),
+                        Object.assign({}, COPIE_GRILLE, { id: 'EG-R', etudiantDA: '9990012', noteFinale: 100, niveauFinal: 'E', repriseDeId: 'EG-O', jetonRepriseApplique: true, dateEvaluation: '2026-10-20T12:00:00.000Z' })]
+                    : [];
+                await monter(page, famille, grille);
+                await page.evaluate((clair) => { window.definirTheme(clair); window.TableauNotation.afficher(); }, mode === 'clair');
+                for (let r = 0; r < PLAN[famille].length; r++) {
+                    for (let c = 0; c < PLAN[famille][r].length; c++) {
+                        const lettre = PLAN[famille][r][c];
+                        if (!lettre || (await kase(page, r + 1, c + 1).getAttribute('data-evaluation'))) continue;
+                        await kase(page, r + 1, c + 1).focus();
+                        await page.keyboard.press(lettre);
+                    }
+                }
+                await page.locator('#tableau-notation-hote .tn-titre').focus();
+                // Ce qui flotte par-dessus le tableau (le message d'accueil de l'espace prêt, le témoin « Enregistré ») sort du cadre.
+                const flottants = await page.evaluate(() => {
+                    const noms = [];
+                    document.querySelectorAll('body *').forEach((n) => {
+                        const st = getComputedStyle(n);
+                        if (st.position === 'fixed' && n.offsetParent === null && n.getBoundingClientRect().width > 0 && !n.closest('header') && n.tagName !== 'HEADER'
+                            && /espace de travail est prêt|^Enregistré$/.test((n.textContent || '').trim().slice(0, 400))) { noms.push(n.className || n.id); n.style.display = 'none'; }
+                    });
+                    return noms;
+                });
+                expect(flottants.length).toBeGreaterThan(0);
+                await page.screenshot({ path: path.join(dossier, `${famille === 'STD' ? 'standards' : 'specifications'}-1180-${mode}.png`), fullPage: true });
+            });
+        }
+    }
+});

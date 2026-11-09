@@ -243,6 +243,55 @@ describe('C · le vrai moteur, sur un magasin sans horaire, sans enseignant, san
             chiffree(DA.ALICE, 'D1', 80), chiffree(DA.ALICE, 'X1', 80), chiffree(DA.BRUNO, 'D1', 80), chiffree(DA.BRUNO, 'X1', 60)] });
         expect([lire(b, DA.ALICE).P, lire(b, DA.BRUNO).P]).toEqual([100, 50]);
     });
+    // Consigne du lot (9 nov. 2026, reçue après la première passe) : « les deux calculs avec des résultats directs seuls,
+    // puis MÊLÉS à des évaluations à grille ».
+    it('C5 standards, mêlés : trois résultats sans grille et quatre copies avec grille font la même note (85), la terminale saisie au tableau comprise', () => {
+        const auTableau = ['A1', 'A6', 'T1'];
+        const b = banc({ pratique: std(), productions: prodSTD(), evaluations: Object.entries(NIVEAUX_ALICE)
+            .map(([p, c]) => (auTableau.includes(p) ? sansGrille(DA.ALICE, p, c) : avecGrille(DA.ALICE, p, c))) });
+        expect(lire(b, DA.ALICE).P).toBe(85);
+        // Sans la terminale, la note est celle des productions retenues seules (91,67 → 92), et elle reste provisoire.
+        const sansTerminale = banc({ pratique: std(), productions: prodSTD(), evaluations: Object.entries(NIVEAUX_ALICE)
+            .filter(([p]) => p !== 'T1').map(([p, c]) => sansGrille(DA.ALICE, p, c)) });
+        expect(lire(sansTerminale, DA.ALICE).P).toBe(92);
+        expect(lire(sansTerminale, DA.ALICE).sim.details.estProvisoire).toBe(true);
+    });
+    it('C6 spécifications, mêlés : un jugement sans grille et une copie chiffrée (son seuil) comptent ensemble', () => {
+        const chiffree = (da, p, n) => Object.assign(avecGrille(da, p, 'M'), { noteFinale: n });
+        const b = banc({ pratique: spe(), productions: PROD_SPE, evaluations: [
+            binaire(DA.ALICE, 'D1', true), chiffree(DA.ALICE, 'X1', 80),
+            binaire(DA.BRUNO, 'D1', true), chiffree(DA.BRUNO, 'X1', 60)] });
+        expect([lire(b, DA.ALICE).P, lire(b, DA.BRUNO).P]).toEqual([100, 50]);
+    });
+    // Précision 3 de Cowork (9 nov., 15 h) : une case dont l'originale est remplacée par une reprise affiche la reprise.
+    it('C7 la reprise : la case montre la reprise ; la note la lit dès qu\'elle est verrouillée, et l\'originale d\'ici là (E4)', () => {
+        const prods = prodSTD();
+        const base = Object.entries(NIVEAUX_ALICE).filter(([p]) => p !== 'A4').map(([p, c]) => avecGrille(DA.ALICE, p, c));
+        const originale = Object.assign(avecGrille(DA.ALICE, 'A4', 'I'), { id: 'O-A4', remplaceeParId: 'R-A4' });
+        const reprise = (verrouillee) => Object.assign(avecGrille(DA.ALICE, 'A4', 'E'), { id: 'R-A4', repriseDeId: 'O-A4', jetonRepriseApplique: true, verrouillee,
+            dateEvaluation: '2026-11-01T12:00:00.000Z' });
+        const reevaluee = banc({ pratique: std(), productions: prods, evaluations: base.concat([originale, reprise(true)]) });
+        const copie = donnees.copieDeLaCase(reevaluee.store.test_evaluationsSauvegardees, DA.ALICE, 'A4');
+        expect(copie.id).toBe('R-A4');
+        expect(donnees.etatDeLaCase(copie, 'STD', true)).toMatchObject({ valeur: 'E', modifiable: false, evaluationId: 'R-A4' });
+        // 3 meilleures : E, E, E (A1, A6, et A4 par sa reprise) → 100 × 60 % + 75 × 40 % = 90.
+        expect(lire(reevaluee, DA.ALICE).P).toBe(90);
+        expect(lire(reevaluee, DA.ALICE).sim.details.portfolio.artefactsRetenus.map(r => r.productionId)).toContain('A4');
+        // La reprise pas encore réévaluée : la case montre toujours la reprise (non modifiable), la note lit l'originale (I) : 85.
+        const enAttente = banc({ pratique: std(), productions: prods, evaluations: base.concat([originale, reprise(false)]) });
+        expect(donnees.copieDeLaCase(enAttente.store.test_evaluationsSauvegardees, DA.ALICE, 'A4').id).toBe('R-A4');
+        expect(lire(enAttente, DA.ALICE).P).toBe(85);
+    });
+    // Piège de la consigne : « une échelle modifiée après coup ». MESURE : la note écrite à la saisie ne suit pas l'échelle,
+    // comme celle de toute évaluation enregistrée ; rien n'est réécrit (tarir n'est pas réparer).
+    it('C8 MESURE : l\'échelle modifiée après la saisie ne change pas un résultat déjà saisi (M reste 75, même si M vaut maintenant 80)', () => {
+        const b = banc({ pratique: std(), productions: prodSTD(), evaluations: ['A1', 'A2', 'A3'].map(p => sansGrille(DA.ALICE, p, 'M')) });
+        expect(lire(b, DA.ALICE).P).toBe(75);
+        b.store.test_echellesTemplates[0].niveaux.find(n => n.code === 'M').valeurCalcul = 80;
+        b.win.calculerEtStockerIndicesCP();
+        expect(lire(b, DA.ALICE).P).toBe(75);
+        expect(b.store.test_evaluationsSauvegardees.every(e => e.noteFinale === 75)).toBe(true);
+    });
 });
 
 /* ================================================================ D */

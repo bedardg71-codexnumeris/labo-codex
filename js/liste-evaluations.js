@@ -1152,6 +1152,7 @@ function construireLignesEvaluations(evaluations, productions, etudiants) {
                         statutIntegrite: statutIntegrite,
                         statutRemise: evaluation.statutRemise || 'non-remis',  // ✅ Ajout statut de remise
                         evaluationId: evaluation.id,
+                        sansGrille: evaluation.sansGrille === true,   // tableau de notation (9 nov. 2026) : rien à imprimer pour l'élève
                         evaluationNotee: evaluationNotee,
                         verrouille: evaluation.verrouillee || false,
                         // #927 (20 sept. 2026) — NON ENREGISTRÉE : le même test que `evaluationEntreDansLaNote`
@@ -1782,7 +1783,8 @@ function genererDropdownActions(ligne, fichierResolu) {
     }
 
     // Dossier PDF — évalué + export dispo
-    if (ligne.statut === 'evalue' && typeof travauxExportPDF !== 'undefined') {
+    // Tableau de notation, lot 1 : pas pour un résultat saisi au tableau, sans grille (aucune rétroaction à remettre).
+    if (ligne.statut === 'evalue' && !ligne.sansGrille && typeof travauxExportPDF !== 'undefined') {
         options.push(`<option value="dossier|${echapperHtml(da)}|${echapperHtml(prodId)}">Dossier PDF</option>`);
     }
 
