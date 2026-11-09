@@ -233,6 +233,10 @@
         const ev = D().copieDeLaCase(ctx.evaluations, etudiant.da, production.id);
         const compte = resultat.comptent.has(production.id) && !!ev;
         const etat = D().etatDeLaCase(ev, ctx.famille, compte);
+        // Une copie non recevable (plagiat, IA non autorisée) : ses niveaux ne se lisent nulle part (décision de Grégoire,
+        // 28 oct. 2026). La case dit « -- », comme la Liste, et son libellé (registre) ; elle s'ouvre, elle ne se modifie pas.
+        const nonRecevable = ev && typeof window.libelleCopieNonRecevable === 'function' ? window.libelleCopieNonRecevable(ev) : null;
+        if (nonRecevable) return Object.assign(etat, { valeur: '', forme: 'contour', nonRecevable });
         if (ctx.famille !== 'SPE' || !ev || window.resultatAcceptableSansGrille(ev) !== null || !compte) return etat;
         const type = ctx.types.find(t => window.productionEstDuType(production, t));
         const ok = !!(type && ctx.speInstance && ctx.speInstance._estTravailAcceptable(ev, type));
@@ -244,13 +248,14 @@
     function _caseHTML(etudiant, production, ctx, resultat) {
         const etat = _etatCase(etudiant, production, ctx, resultat);
         const nom = `${etudiant.prenom || ''} ${etudiant.nom || ''}`.trim();
-        const aria = `${nom}, ${production.titre || ''} : ${_motDeLaValeur(etat.valeur, ctx, production.id)}` + (etat.modifiable ? '' : `, ${MOTS.avecGrille}`);
+        const mot = etat.nonRecevable || _motDeLaValeur(etat.valeur, ctx, production.id);
+        const aria = `${nom}, ${production.titre || ''} : ${mot}` + (etat.modifiable ? '' : `, ${MOTS.avecGrille}`);
         const classes = ['tn-case', 'tn-case--' + etat.forme].concat(etat.modifiable ? [] : ['tn-case--grille']);
         const style = etat.valeur ? ` style="--tn-couleur: ${esc(_couleurDeLaValeur(etat.valeur, ctx, production.id))}"` : '';
         const ouvrir = etat.modifiable ? '' : ` data-evaluation="${esc(etat.evaluationId)}"`;
         // Un seul arrêt de Tab pour tout le tableau (la première case) ; les flèches font le reste.
         const tab = (etudiant === ctx.etudiants[0] && production === ctx.productions[0]) ? '0' : '-1';
-        return `<td class="tn-cellule"><button type="button" class="${classes.join(' ')}"${style} tabindex="${tab}" data-da="${esc(etudiant.da)}" data-production="${esc(production.id)}"${ouvrir} aria-label="${esc(aria)}">${esc(_libelleDeLaValeur(etat.valeur, ctx))}</button></td>`;
+        return `<td class="tn-cellule"><button type="button" class="${classes.join(' ')}"${style} tabindex="${tab}" data-da="${esc(etudiant.da)}" data-production="${esc(production.id)}"${ouvrir} aria-label="${esc(aria)}">${esc(etat.nonRecevable ? '--' : _libelleDeLaValeur(etat.valeur, ctx))}</button></td>`;
     }
 
     function _noteHTML(resultat) {

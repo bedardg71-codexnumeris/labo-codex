@@ -167,7 +167,7 @@ test.describe('Tableau de notation · standards', () => {
             s.value = '9990010';
             s.dispatchEvent(new Event('change', { bubbles: true }));
         });
-        await expect(page.getByText('Cette copie a été notée au tableau de notation')).toBeVisible({ timeout: 15000 });
+        await expect(page.getByText('Cette production a été notée au tableau de notation')).toBeVisible({ timeout: 15000 });
         await expect(page.locator('#selectGrille1')).toBeDisabled();
         // L'enregistrement automatique n'a rien d'armé : ni minuteur ni instantané en attente.
         await page.waitForFunction(() => !window._timerAutoSave && !window._pendingAutoSaveSnapshot, null, { timeout: 10000 });
@@ -316,6 +316,19 @@ test.describe('Tableau de notation · la consigne', () => {
         await expect(lien).toHaveText('Réglages de la pratique');
         await expect(lien).toHaveAttribute('data-action', 'ouvrirReglagesPratique');
         await expect(lien).toHaveAttribute('data-param', 'std-tn');
+        expect(erreurs).toEqual([]);
+    });
+
+    test('une copie non recevable dit « -- » et son libellé, jamais son niveau ; elle s\'ouvre, elle ne se modifie pas', async ({ page }) => {
+        const plagiat = Object.assign({}, COPIE_GRILLE, { id: 'EG-NR', statutIntegrite: 'plagiat' });
+        const erreurs = await monter(page, 'STD', [plagiat]);
+        const c = kase(page, 2, 2);
+        await expect(c).toHaveText('--');
+        await expect(c).toHaveAttribute('aria-label', /Non recevable \(Plagiat\)/);
+        await expect(c).not.toHaveAttribute('aria-label', /Maîtrise/);
+        await expect(c).toHaveAttribute('data-evaluation', 'EG-NR');
+        await expect(c).toHaveClass(/tn-case--contour/);
+        await expect(note(page, 2)).toHaveText('–');   // en standards, elle sort des productions retenues
         expect(erreurs).toEqual([]);
     });
 

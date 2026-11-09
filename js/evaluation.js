@@ -2159,7 +2159,7 @@ function appliquerJetonDelaiDepuisSidebar() {
  */
 function _direResultatSansGrille() {
     notifications.info('Résultat saisi sans grille',
-        'Cette copie a été notée au tableau de notation (Évaluation › Liste). Change son résultat là.');
+        'Cette production a été notée au tableau de notation (Évaluation › Liste). Change son résultat là.');
 }
 
 /** Le formulaire rencontre un résultat sans grille (élève et production choisis) : verrouillé, sans cadenas, et il le dit. */

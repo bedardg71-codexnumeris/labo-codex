@@ -1,6 +1,101 @@
 # Rapport : tableau de notation, lot 1 (9 nov. 2026)
 
-*Session Claude Code dans le cloud, seule. Branche `lot/tableau-de-notation-1`, partie de `origin/main` (`158ff5dc`, 1.238.0) ; ce rapport remplace le rapport d'arrêt de la session précédente (`af12b9d1`). Rien n'est fusionné, rien n'est publié, la version ne bouge pas.*
+*Deux sessions Claude Code dans le cloud ont fait ce lot. La première (rapport d'origine, conservé plus bas) l'a codé sans la consigne, depuis la 1.238.0, et l'a poussé à 19 h 52 UTC. La seconde (ce rapport de tête) a reçu la consigne et les six précisions de Cowork du 9 nov., 15 h. Branche `lot/tableau-de-notation-1`. Rien n'est fusionné dans `main`, rien n'est publié, la version ne bouge pas. Chromium seulement.*
+
+## Reprise avec la consigne (seconde session)
+
+### À mesurer sur le Mac, au retour
+
+1. **Le verdict WebKit** de `tests/integration/tableau-de-notation-1.spec.js` (13 essais, verts sous Chromium) et de la suite complète.
+2. **La vue « Tableau de notation » sur un groupe réel de Grégoire, en lecture** : ses évaluations s'affichent, aucune n'est écrite. Le banc le prouve sur des données fictives (compte et empreinte des évaluations à grille identiques avant et après) ; pas sur les siennes.
+3. Les captures WebKit et l'iPad (toucher des cases, défilement horizontal, colonnes fixées).
+
+### Ce que j'ai trouvé en arrivant, et ce que j'ai décidé
+
+- **La branche `lot/tableau-de-notation-1` existait déjà à distance** : 8 commits d'une autre session, partis de la 1.238.0, sans la consigne. Le message de Cowork parlait d'une « nouvelle session » et d'une première version « jamais poussée » : elle l'était.
+- **J'avais commencé à réécrire le lot** (un module, une spec) avant de le voir. J'ai arrêté. La réalisation existante était plus avancée que la mienne (clavier, garde de la reprise, fenêtres du dépistage, break-tests, relecture) et la refaire aurait été refaire le travail d'un autre. Mon brouillon n'est pas dans le dépôt.
+- **J'ai gardé la branche et son histoire** : `origin/main` (1.239.0) y est fusionné (`9c3b0c8c`, deux conflits résolus), puis le lot est confronté à la consigne (`0c862c9f` et suivants). Aucun push forcé.
+- *Supposé : c'est ce que Cowork aurait voulu en sachant que la branche existait. Si tu préférais une réécriture depuis `main`, dis-le.*
+
+### Ce qui a changé depuis la première passe, en gestes
+
+- **« Exporter pour Léa » ne prend plus un résultat saisi au tableau**, même s'il est verrouillé, et le compteur ne le dit pas « laissé de côté ». Avant : il partait comme une synthèse seule, sans rien à lire dedans.
+- **« Dossier PDF » n'est plus offert** sur la ligne d'un résultat saisi au tableau, et ne produit rien si on l'appelle quand même.
+- **L'échelle d'une colonne** est celle de la production si elle en a une, sinon celle de la pratique, sinon l'échelle de départ du trimestre. Avant : celle de la pratique seulement. Quand une production a une autre échelle que l'en-tête, son nom s'écrit sous la date.
+- **L'en-tête** porte le lien « Réglages de la pratique » (celui du profil) et le bouton s'appelle « Exporter la synthèse (CSV) », comme dans Suivi.
+- **Sans note, la cause s'écrit sous le tiret** (« Ta pratique ne dit pas quelle note donner quand aucun forfait n'est atteint. »). Avant : dans une bulle au survol, illisible sur l'iPad.
+- **Une copie non recevable dit « -- »** dans sa case, avec son libellé pour le lecteur d'écran. Avant : elle montrait son niveau, alors que ses niveaux ne se lisent nulle part (ta décision du 28 oct.).
+
+### Les six précisions de Cowork, une par une
+
+1. **La base** : la 1.239.0 est fusionnée dans la branche. Le tableau suit ses deux règles : une case à grille s'ouvre par « Consulter » (donc par l'id de l'évaluation, et une originale remplacée s'ouvre en lecture seule) ; l'export Léa n'envoie que des évaluations verrouillées, et jamais un résultat du tableau.
+2. **Le verrou** (mesuré) : oui, les deux calculs ne comptent que le verrouillé. Tout passe par `evaluationEntreDansLaNote` (`pratique-registre.js`), qui écarte une évaluation `verrouillee: false` ; c'est ta règle du 16 sept. (« un brouillon ne compte nulle part »). **Un résultat saisi au tableau est donc enregistré verrouillé**, et il compte dès sa saisie. Je n'ai pas fait l'inverse (un calcul qui lirait le non-verrouillé) : il aurait fallu ouvrir une exception dans la règle que les quatre familles, la complétion et le dépistage partagent. Conséquence assumée : le verrou ne peut plus dire « prêt à remettre » pour ces résultats ; Léa et le Dossier PDF les écartent par leur nature (sans grille), pas par le verrou.
+3. **Les reprises** (mesuré, bancs C7 et « la consigne ») : la case montre la reprise, jamais l'originale remplacée, même si l'originale porte une date plus récente. La note lit la reprise dès qu'elle est verrouillée ; d'ici là elle lit encore l'originale (règle E4 du 28 oct.), et la case montre déjà la reprise. **Écart possible entre la case et la note pendant cette fenêtre** : la reprise naît avec le niveau de l'originale, donc on voit le même niveau tant qu'elle n'est pas réévaluée ; je n'ai pas mesuré le cas où on la modifie sans la verrouiller.
+4. **Les branches en attente** : voir « À reporter » plus bas. Aucune n'est fusionnée ici.
+5. **Les captures** : dans `plans de travail/captures-2026-11-09-tableau-de-notation-1/`, Chromium, 1180 px, standards et spécifications, en clair et en sombre, noms fictifs, refaites sur la base 1.239.0. Les quatre à 820 px datent de la première passe (avant la fusion et les changements ci-dessus). Sur les captures, le témoin « Enregistré » recouvre le début d'un nom : c'est son comportement ordinaire, il s'efface en deux secondes.
+6. **Le push** : sur `lot/tableau-de-notation-1`. La session était configurée pour une branche `claude/…` ; je ne l'ai pas utilisée.
+
+### Les choix techniques de la consigne, et ce que le lot en fait
+
+- **La forme** : la consigne proposait `resultatDirect: { niveau }` ou `{ verdict }`. Le lot écrit `sansGrille: true`, plus `niveauFinal` et `noteFinale` (standards) ou `acceptable` (booléen, spécifications). Je l'ai gardé : même information, déjà lue par une douzaine d'endroits et couverte par ses bancs. `grilleId` vaut `null`, pas `''`.
+- **Standards** : `noteFinale` reçoit la valeur ponctuelle du niveau à l'enregistrement. Conforme.
+- **Spécifications** : le calcul lit le jugement avant tout seuil ; `noteFinale` reste `null`. Conforme. Les lecteurs de `noteFinale` hors spécifications (sommative, standards, dépistage par critère) laissent ce résultat hors de la note, comme toute évaluation sans note ; il compte comme remis pour la complétion.
+- **Les colonnes** : la consigne dit « les productions du cours assignées à ce groupe ». Le lot montre celles qui, en plus, entrent dans la note de la pratique (en standards : les productions retenues possibles et la terminale ; en spécifications : celles d'un type de la pratique). Gardé : un résultat saisi ailleurs ne compterait jamais. Les productions diagnostiques n'y sont pas.
+- **La dernière colonne** : l'entier de `simulerIndices`, celui de l'export CSV. Le profil montre une décimale en standards (87,6 contre 88) : ta décision #723 du 21 sept. vaut ici aussi.
+
+### Les pièges de la consigne
+
+- **Une échelle modifiée après coup** (mesuré, banc C8) : la note écrite à la saisie ne suit pas. M saisi à 75 reste 75 si M vaut ensuite 80. C'est le comportement de toute évaluation enregistrée, et rien n'est réécrit dans tes données. Rien ne le signale à l'écran (question 1).
+- **Ouvrir un résultat sans grille dans le formulaire** : il ne se charge pas ; « Consulter » et « Modifier l'évaluation » ramènent au tableau.
+- **Le codex** : aucun schéma ne valide une évaluation à l'ouverture d'un codex, et les champs inconnus sont conservés (lu dans `codex.js` et `import-export.js` ; non éprouvé par un banc). **Une version antérieure qui ouvre un tel codex** (inféré de la mesure des lecteurs, non rejoué) : le niveau compte dans la note en standards, puisque `noteFinale` est un nombre ; la Liste dit « Non reçu » au lieu d'« Évalué » ; en spécifications le jugement ne compte nulle part, sans message ; le formulaire affiche « Grille introuvable ».
+- **Tarir n'est pas réparer** : il n'y a pas de stock. Ces résultats n'existaient pas avant le lot.
+
+### Ce qui attend Grégoire (une question par ligne, avec ma recommandation)
+
+Les dix questions de la première passe restent ouvertes (plus bas), sauf la 1 (la consigne est arrivée). S'y ajoutent :
+
+1. **Une échelle modifiée après la saisie** : veux-tu que le tableau le signale sur les cases dont la valeur n'est plus celle de l'échelle ? *Recommandation : oui, un signe sur la case, sans rien réécrire ; la réécriture resterait ton geste.*
+2. **L'échelle de départ comme dernier recours** : la consigne la demande, mais tu as écrit « Rien codé en dur ! » le 28 août (#590). Ici aucun niveau n'est écrit dans le code : on lit ton échelle de départ, modifiable. *Recommandation : garder, puisque c'est ton échelle ; à retirer si tu préfères qu'une pratique sans échelle ne se saisisse pas.*
+3. **Les colonnes limitées aux productions qui entrent dans la note**, plutôt que toutes celles du groupe. *Recommandation : garder.*
+4. **Le mot du bouton de vue** : la consigne propose « Tableau », le lot écrit « Tableau de notation ». *Recommandation : « Tableau de notation », qui dit ce qu'on y fait.*
+5. **Le PDF de synthèse d'un jugement** (question 9 de la première passe) ne se pose plus par le Dossier PDF ni par Léa, qui écartent ces résultats. *Recommandation : fermer la question.*
+
+### Ce que je n'ai pas pu vérifier
+
+- WebKit, Safari, l'iPad (voir en tête).
+- Tes données réelles.
+- Ce que fait réellement une version antérieure devant un codex qui porte ces résultats : inféré, pas rejoué.
+- La suite Playwright complète : seule la spec du lot a tourné (Chromium).
+
+### Preuve
+
+- **Vitest complet** : en cours au moment de ce commit ; inscrit au commit suivant.
+- **Vitest du lot** : `tests/unit/tableau-notation-1.test.js`, 27 essais verts. Ajoutés : C5 (résultats sans grille mêlés à des évaluations à grille, la terminale saisie au tableau, la note provisoire sans elle), C6 (mêlés, en spécifications), C7 (la reprise), C8 (l'échelle modifiée). Le plancher des forfaits est en C2 (palier F, 50).
+- **Chromium** : `tests/integration/tableau-de-notation-1.spec.js`, 13 essais verts, plus 4 captures à la demande (`CAPTURES=1`). Ajoutés : aucun écrit dans les évaluations à grille (compte et empreinte), rechargement, la reprise ; Léa et Dossier PDF ; l'échelle de la production ; la cause lisible ; la copie non recevable.
+- **Break-tests de cette session**, chacun rougit son essai puis le code est restauré : l'exclusion de Léa ; le filtre du Dossier PDF ; le menu de la Liste ; l'échelle de la production ; la cause écrite ; « non remplacée » dans `copieDeLaCase` (l'essai passait encore à la première tentative : la reprise était aussi la plus récente ; l'originale porte maintenant la date la plus récente) ; la garde de la copie non recevable.
+- **Relecture par un agent neuf** : en cours au moment de ce commit ; inscrit au commit suivant.
+
+### À reporter : ce que chaque branche en attente changera pour ce lot
+
+Mesuré par `git diff --name-only origin/main...origin/<branche>`, croisé avec les fichiers du lot. Aucune n'est fusionnée ici.
+
+- **`lot/completion-suit-la-remise`** (une production reçue compte comme remise, quatre familles). Fichiers communs : `pratique-registre.js`, `pratique-configurable.js`, `predicats-copie.js`, `index.html`. Les deux lots modifient `evaluationCompteCommeRemise` et le dénominateur de C de la configurable : conflit probable, à résoudre en gardant les deux règles (un jugement sans grille est une remise ; une copie reçue aussi). Rien à changer au tableau : il n'affiche pas la complétion. À vérifier après fusion : le banc C3 (C à 100 pour deux jugements).
+- **`lot/copie-non-recevable-choix`** (l'écarter ou lui mettre 0). Fichiers communs : `pratique-registre.js`, `pratique-pan-specifications.js`, `pratique-configurable.js`, `evaluation.js`, `evaluation-jetons.js`, `profil-etudiant-calculs.js`, quatre sentinelles. **Ce que le tableau montre pour elle aujourd'hui** : « -- », en contour, non modifiable, et elle s'ouvre au toucher ; en standards elle sort des productions retenues, en spécifications elle vaut un travail non acceptable. Après ce lot : si la pratique choisit « 0 », la copie entrera au calcul avec 0 ; la case restera « -- » (elle lit le libellé, pas la note) mais pourra devenir pleine si la règle la retient. À revoir alors : faut-il dire « 0 » dans la case ? Un résultat saisi au tableau n'a pas de statut d'intégrité : rien à faire pour lui.
+- **`lot/production-plutot-que-copie`** (vocabulaire). Fichiers communs : `liste-evaluations.js`, `evaluation.js`, `travaux-archivage.js`, `travaux-export-pdf.js`, `travaux-ui.js`, `rythme.js`, `profil-etudiant-calculs.js`, trois sentinelles. Les mots du tableau disent déjà « production » pour ce que l'élève remet et « évaluation » pour ce qui porte la note, y compris l'avis du formulaire, repris dans cette session (« Cette production a été notée au tableau de notation (Évaluation › Liste). Change son résultat là. » ; la première passe écrivait « Cette copie… »). Les commentaires du code disent encore « copie » : sans effet à l'écran.
+- **`lot/parcours-9-notation-alternative`** (le neuvième parcours). Fichiers communs : `evaluation.js`, `travaux-export-pdf.js`, `index.html`, une sentinelle. Le parcours reste intact ; sa seconde porte (entrer par le tableau) est au lot 2. À vérifier après fusion : qu'aucune étape du parcours ne pointe un élément de la Liste que la vue « Tableau de notation » cache.
+
+Dans les quatre cas, `index.html` conflictera sur les jetons anticache : prendre le plus récent, et un jeton neuf pour tout fichier modifié des deux côtés.
+
+### À inscrire au BACKLOG
+
+- **Les trajectoires du Suivi laissent un trou pour un résultat sans grille** (`graphiques-progression.js`, mode « Note finale » : une évaluation sans critères est sautée). Mesuré à la lecture du code, pas à l'écran : pas de symptôme vécu, donc pas une fiche selon ta règle d'entrée. À regarder au lot 2, quand une classe entière sera notée au tableau.
+- Rien d'autre.
+
+---
+
+# Rapport de la première passe (19 h 52 UTC), conservé
+
+*Ce qui suit est le rapport de la première session, tel qu'elle l'a écrit. Ce qui a changé depuis est dit plus haut ; en cas d'écart, le haut fait foi.*
 
 ## En tête
 

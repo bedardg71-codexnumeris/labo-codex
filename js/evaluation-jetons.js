@@ -570,7 +570,7 @@ async function appliquerJetonReprise(evaluationOriginaleId, archiverOriginale, o
     // naissait déverrouillée (hors de la note) et le tableau écrivait dedans sans qu'elle compte ; la vider laissait
     // l'originale pointer vers une copie disparue. Son résultat se change au tableau. Mots PROPOSÉS.
     if (evaluationOriginale.sansGrille === true) {
-        if (!silencieux) notifications.info('Résultat saisi sans grille', 'Cette copie a été notée au tableau de notation : change son résultat là, sans reprise.');
+        if (!silencieux) notifications.info('Résultat saisi sans grille', 'Cette production a été notée au tableau de notation : change son résultat là, sans reprise.');
         return null;
     }
 
