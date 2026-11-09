@@ -139,6 +139,16 @@ async function commencer(page) {
     await item(page).locator('.assistance-parcours-bouton').click();
 }
 
+/**
+ * Toucher un élément de la page. Au-dessus de 700 px, un vrai clic : s'il est couvert (la bulle, le voile), le banc
+ * rougit. Sur un téléphone, la bulle 1, longue, couvre l'écran (dit au rapport) : les captures y passent par le
+ * clic de l'élément lui-même.
+ */
+async function toucher(page, selecteur) {
+    if (page.viewportSize().width >= 700) return page.click(selecteur);
+    return page.locator(selecteur).first().evaluate((el) => el.click());
+}
+
 /** Le bouton de la bulle par son nom, visible ou caché (`montrerBouton`). */
 const boutonBulle = (page, nom) => bulle(page).locator('.parcours-bulle-boutons button', { hasText: nom });
 
@@ -225,6 +235,46 @@ test('dénotation : « Continuer » ne paraît que si une cible est nommée', as
     await expect(boutonBulle(page, 'Continuer')).toBeHidden();
 });
 
+test('étape 1 : une sommative créée ne fait pas avancer ; une alternative, oui ; « Reprendre » retrouve celle créée entre-temps', async ({ page }) => {
+    await monter(page);
+    await commencer(page);
+    await attendreEtape(page, 'Ta pratique', '1 sur 8');
+    const ajouter = (p) => page.evaluate((p) => {
+        // security-ok: fixture de test, une pratique écrite comme l'assistant l'écrirait.
+        db.setSync(cle('pratiquesConfigurables'), (db.getSync(cle('pratiquesConfigurables'), []) || []).concat([p]));
+    }, p);
+    await ajouter({ id: 'pratique_som_banc', nom: 'Sommative de banc', type: 'sommative', dansBibliotheque: true, configuration: {} });
+    // La sonde a vu la sommative : l'étape ne l'accepte pas (lu dans l'état atteint, sans attendre un délai).
+    expect(await page.evaluate(() => ParcoursNotationAlternative.etapes()[0].atteint())).toBe(false);
+    await expect(bulle(page).locator('.parcours-bulle-titre')).toHaveText('Ta pratique');
+    // « Plus tard », puis une pratique alternative créée hors du parcours, puis « Reprendre » : l'étape la retrouve.
+    await bulle(page).locator('.parcours-bulle-sortie').click();
+    await ajouter({ id: 'pratique_spe_banc', nom: 'Spécifications de banc', type: 'specifications', pratiques: ['SPE'], dansBibliotheque: true, configuration: { typesTravaux: [], forfaits: [] } });
+    await ouvrirPanneau(page);
+    await expect(item(page).locator('.assistance-parcours-bouton')).toHaveText('Reprendre');
+    await item(page).locator('.assistance-parcours-bouton').click();
+    await attendreEtape(page, "L'ouvrir", '2 sur 9');
+});
+
+test('étape 5 : la pratique déjà appliquée ne fait pas passer l’étape seule ; « Appliquer au cours actif » la fait avancer', async ({ page }) => {
+    await page.goto(indexHtml);
+    await attendreApplication(page);
+    const pratiques = await pratiquesDesModeles(page);
+    await monter(page, { pratiques, active: 'pratique_banc_0' });
+    await commencer(page);
+    await attendreEtape(page, "L'ouvrir", '1 sur 7');
+    await page.selectOption('#menuPratiques', 'pratique_banc_0');
+    await attendreEtape(page, 'Ta sélection', '2 sur 7');
+    await boutonBulle(page, 'Continuer').click();
+    await attendreEtape(page, "Ce que lit l'étudiant·e", '3 sur 7');
+    await boutonBulle(page, 'Continuer').click();
+    await attendreEtape(page, "L'appliquer à ton cours", '4 sur 7');
+    expect(await page.evaluate(() => ParcoursNotationAlternative.etapes()[ParcoursMoteur.etapeCourante()].atteint())).toBe(false);
+    await expect(bulle(page).locator('.parcours-bulle-titre')).toHaveText("L'appliquer à ton cours");
+    await page.click('#conteneurEditionPratique [data-action="appliquerPratiqueAuCoursActive"]');
+    await attendreEtape(page, 'Évaluer une production', '5 sur 7');
+});
+
 /**
  * Le parcours entier, en faisant les gestes. `modele` : la carte de « Partir d'un modèle ».
  * Spécifications : 9 étapes ; standards : 8 (l'assistant demande l'échelle, la fenêtre le dit).
@@ -239,16 +289,21 @@ async function parcoursEntier(page, { famille, modele, largeur = 1180, clair = f
     // 1. « Ta pratique » : contour sur « + Nouvelle pratique », puis sur « Partir d'un modèle ».
     await attendreEtape(page, 'Ta pratique', '1 sur 8');
     await cap('etape-1');
-    await page.click('#conception-pratiques-notation [data-action="creerNouvellePratique"]');
+    await toucher(page, '#conception-pratiques-notation [data-action="creerNouvellePratique"]');
     await expect(page.locator('#modalWizardPratiqueV2')).toHaveClass(/actif/);
-    await expect(page.locator('body')).toHaveClass(/parcours-sur-modale/);
-    await expect(page.locator('#parcours-contour')).toBeVisible();
+    if (largeur >= 700) {
+        await expect(page.locator('body')).toHaveClass(/parcours-sur-modale/);
+        await expect(page.locator('#parcours-contour')).toBeVisible();
+    } else {
+        // Sur un téléphone, l'assistant prend l'écran : la bulle attend derrière lui.
+        await expect(page.locator('body')).not.toHaveClass(/parcours-sur-modale/);
+    }
     await cap('etape-1-assistant');
     await page.locator('#modalWizardPratiqueV2 input[name="porteEntree"][value="modele"]').check({ force: true });
-    await page.click('#wizard-v2-btn-suivant');
+    await toucher(page, '#wizard-v2-btn-suivant');
     await page.locator(`#modalWizardPratiqueV2 input[name="modeleChoisi"][value="${modele}"]`).check({ force: true });
-    await page.click('#wizard-v2-btn-suivant');
-    await page.click('#wizard-v2-btn-creer');
+    await toucher(page, '#wizard-v2-btn-suivant');
+    await toucher(page, '#wizard-v2-btn-creer');
     if (famille === 'standards') {
         // « Ce modèle a besoin d'une échelle de performance pour calculer la note. Choisis-la : »
         await page.locator('input[name="ui-dialogue-choix"][value="E1"]').check({ force: true });
@@ -285,7 +340,7 @@ async function parcoursEntier(page, { famille, modele, largeur = 1180, clair = f
     // 5. « L'appliquer à ton cours ».
     await attendreEtape(page, "L'appliquer à ton cours", n(k + 1));
     await cap('etape-5');
-    await page.click('#conteneurEditionPratique [data-action="appliquerPratiqueAuCoursActive"]');
+    await toucher(page, '#conteneurEditionPratique [data-action="appliquerPratiqueAuCoursActive"]');
 
     // 6. « Évaluer une production » : Actions › Évaluer, un niveau, le cadenas.
     await attendreEtape(page, 'Évaluer une production', n(k + 2));
@@ -303,7 +358,7 @@ async function parcoursEntier(page, { famille, modele, largeur = 1180, clair = f
     });
     await expect(page.locator('#parcours-contour')).toBeVisible();
     await cap('etape-6-evaluation');
-    await page.click('#btnVerrouillerEvaluation');
+    await toucher(page, '#btnVerrouillerEvaluation');
     // L'évaluation neuve a pris l'affichage de la pratique (« Niveau de performance », étape 4) : sans copie, elle
     // gardait « Note chiffrée » (mesuré la nuit du 8 nov., corrigé dans `_evaluerSansCopie`).
     await expect.poll(() => page.evaluate(() => (db.getSync(cle('evaluationsSauvegardees'), []) || [])

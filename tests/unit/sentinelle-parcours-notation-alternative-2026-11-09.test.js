@@ -150,6 +150,8 @@ describe('le chemin : seule l’étape 3 change ; « n sur N » compte le chemin
 describe('la famille se lit comme le moteur la lit : `type`, puis `configuration.type`, puis le badge', () => {
     it.each([
         [{ type: 'standards', configuration: {} }, 'standards'],
+        // Le `type` de la racine l'emporte sur `configuration.type` (l'ordre du moteur, `_typeFamille`).
+        [{ type: 'standards', configuration: { type: 'denotation' } }, 'standards'],
         [{ type: 'pan-standards' }, 'standards'],
         [{ configuration: { type: 'denotation' } }, 'denotation'],
         [{ pratiques: ['SPE'], configuration: {} }, 'specifications'],

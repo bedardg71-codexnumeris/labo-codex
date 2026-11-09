@@ -817,12 +817,6 @@
        =============================== */
 
     /**
-     * Exporte un dossier complet : pages annotees + page de synthese
-     * Peut etre appele depuis la page d'evaluation (sans fichier ouvert dans la visionneuse)
-     * @param {string} da - DA de l'etudiant
-     * @param {string} productionId - ID de la production
-     */
-    /**
      * « Dossier PDF » a livré son fichier (le dossier, ou la synthèse seule, #912) : un événement, pour qui attend ce
      * geste sans toucher à l'export. Seul lecteur : le neuvième parcours (étape 7, « Continuer » paraît quand le PDF
      * est téléchargé ; js/parcours-notation-alternative.js, 8 nov. 2026).
@@ -831,6 +825,12 @@
         document.dispatchEvent(new CustomEvent('dossierPdfLivre', { detail: { da: da, productionId: productionId } }));
     }
 
+    /**
+     * Exporte un dossier complet : pages annotees + page de synthese
+     * Peut etre appele depuis la page d'evaluation (sans fichier ouvert dans la visionneuse)
+     * @param {string} da - DA de l'etudiant
+     * @param {string} productionId - ID de la production
+     */
     async function exporterDossierComplet(da, productionId) {
         if (!da || !productionId) {
             alert('Étudiant ou production non spécifié.');

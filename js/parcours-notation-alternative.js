@@ -277,9 +277,15 @@
         return !!(m && m.classList.contains('actif'));
     }
 
-    /** La bulle et le contour au-dessus de l'assistant, tant qu'il est ouvert (css/parcours.css). */
+    /**
+     * La bulle et le contour au-dessus de l'assistant, tant qu'il est ouvert (css/parcours.css). Pas sur un téléphone :
+     * l'assistant y prend tout l'écran, et la bulle par-dessus couvrait ses boutons (mesuré à 390 px). Elle attend alors
+     * derrière lui, et revient à sa fermeture.
+     */
+    var LARGEUR_MIN_SUR_MODALE = 700;
+
     function surModale(oui) {
-        document.body.classList.toggle('parcours-sur-modale', !!oui);
+        document.body.classList.toggle('parcours-sur-modale', !!oui && window.innerWidth >= LARGEUR_MIN_SUR_MODALE);
     }
 
     /** « Continuer » paraît selon l'état : le moteur rend la bulle une fois, la sonde la retouche ici. */
@@ -361,12 +367,14 @@
         return typeof obtenirDonneesSelonMode === 'function' ? (obtenirDonneesSelonMode('evaluationsSauvegardees') || []) : [];
     }
 
-    /** Les évaluations verrouillées du groupe-cours actif. */
+    /**
+     * Les évaluations verrouillées du cours actif (le filtre d'`obtenirDonneesSelonMode`). Pas de second filtre par
+     * groupe-cours : `obtenirIdContexteActif` rend tantôt l'id du groupe-cours, tantôt celui du cours, selon le chemin
+     * qui a écrit `infoCours` (mesuré au banc : l'évaluation verrouillée était écartée une fois sur cinq). Seule une
+     * évaluation verrouillée APRÈS l'entrée dans l'étape compte : un autre groupe du même cours n'y entre pas par hasard.
+     */
     function verrouillees() {
-        var gc = typeof obtenirIdContexteActif === 'function' ? obtenirIdContexteActif() : null;
-        return evaluations().filter(function (e) {
-            return e && e.id && e.verrouillee === true && (!gc || !e.groupeCoursId || e.groupeCoursId === gc);
-        });
+        return evaluations().filter(function (e) { return e && e.id && e.verrouillee === true; });
     }
 
     function enEvaluation() {
@@ -414,9 +422,17 @@
         return aEvaluer[0] || null;
     }
 
+    /** L'évaluation verrouillée à l'étape 6, relue par son id : la préférence ne garde ni DA ni nom. */
+    function evaluationRetenue() {
+        var r = lireCtx().evaluation;
+        var id = r && r.id;
+        return id ? (evaluations().find(function (e) { return e && e.id === id; }) || null) : null;
+    }
+
     function ligneEvaluee() {
-        var e = lireCtx().evaluation;
-        if (!e) return null;
+        var ev = evaluationRetenue();
+        if (!ev) return null;
+        var e = { da: ev.etudiantDA, productionId: ev.productionId };
         return lignesListe().find(function (tr) {
             return tr.getAttribute('data-da') === String(e.da) && tr.getAttribute('data-production-id') === String(e.productionId);
         }) || null;
@@ -428,10 +444,23 @@
 
     var pdfLivre = false;
     document.addEventListener('dossierPdfLivre', function (ev) {
-        var e = lireCtx().evaluation;
+        var e = evaluationRetenue();
         var d = ev && ev.detail;
-        if (!e || !d || (String(d.da) === String(e.da) && String(d.productionId) === String(e.productionId))) pdfLivre = true;
+        if (!e || !d || (String(d.da) === String(e.etudiantDA) && String(d.productionId) === String(e.productionId))) pdfLivre = true;
     });
+
+    // Étape 5 : la pratique déjà appliquée au groupe-cours à l'entrée de l'étape. Re-toucher « Appliquer au cours
+    // actif » ne change alors rien de lisible : c'est ce toucher qui fait avancer (sinon l'étape passait seule).
+    var activeALEntree = null;
+    var appliquerTouche = false;
+    document.addEventListener('click', function (ev) {
+        var t = ev.target;
+        if (t && t.closest && t.closest('#conteneurEditionPratique [data-action="appliquerPratiqueAuCoursActive"]')) appliquerTouche = true;
+    }, true);
+
+    function idActive() {
+        return typeof obtenirIdPratiqueActive === 'function' ? obtenirIdPratiqueActive() : null;
+    }
 
     // ---------- Les étapes ----------
 
@@ -541,13 +570,17 @@
             boutons: [CONTINUER]
         },
         appliquer: {
-            avant: ouvrirLaPratique,
+            avant: async function () {
+                await ouvrirLaPratique();
+                activeALEntree = idActive();
+                appliquerTouche = false;
+            },
             zones: function () { return [document.querySelector('#conteneurEditionPratique [data-action="appliquerPratiqueAuCoursActive"]')]; },
             contour: function () { return document.querySelector('#conteneurEditionPratique [data-action="appliquerPratiqueAuCoursActive"]'); },
             atteint: function () {
                 var id = lireCtx().pratiqueId;
-                var active = typeof obtenirIdPratiqueActive === 'function' ? obtenirIdPratiqueActive() : null;
-                if (!id || active !== id) return false;
+                if (!id || idActive() !== id) return false;
+                if (activeALEntree === id && !appliquerTouche) return false;
                 majCtx({ appliqueeLe: new Date().toISOString() });
                 return true;
             }
@@ -580,7 +613,7 @@
                 var avant = lireCtx().verrouilleesAvant || [];
                 var e = verrouillees().find(function (x) { return avant.indexOf(x.id) === -1; });
                 if (!e) return false;
-                majCtx({ evaluation: { id: e.id, da: e.etudiantDA, productionId: e.productionId } });
+                majCtx({ evaluation: { id: e.id } });
                 return true;
             }
         },
@@ -613,6 +646,9 @@
             titre: TEXTES[id].titre,
             get texte() { return texteCourant(id); }
         };
+        // Étape 1 : l'assistant ouvert, Échap est le sien (il le ferme) et non la sortie du parcours. Le moteur lit
+        // `sansSortie` au toucher : vrai, il passe la touche à `surEchap`.
+        if (id === 'pratique') Object.defineProperty(etape, 'sansSortie', { get: wizardOuvert, enumerable: true });
         if (TEXTES[id].geste) etape.geste = TEXTES[id].geste;
         ['voile', 'centre', 'sansSortie', 'avant', 'zones', 'contour', 'atteint', 'boutons'].forEach(function (k) {
             if (d[k] !== undefined) etape[k] = d[k];
@@ -639,7 +675,10 @@
     async function lancer(depuis) {
         if (motifRefus()) return;
         var ctx;
-        if (!depuis) {
+        // « Reprendre » à l'étape 1 passe aussi 0 : le contexte n'est remis à zéro que pour « Commencer » et
+        // « Refaire ». Sinon une pratique créée entre-temps entrait dans `pratiquesAvant`, et l'étape n'avançait plus.
+        var reprise = window.Assistance.etatDe(ID).etat === 'en-cours' && Array.isArray(lireCtx().pratiquesAvant);
+        if (!depuis && !reprise) {
             var fa = familleActive();
             ctx = poserCtx({
                 sauteEtape1: !!fa,
@@ -663,8 +702,11 @@
                 window.Assistance.definirEtat(ID, 'en-cours', n);
             },
             surQuitter: function () { surModale(false); },
-            // À la dernière bulle, sans lien de sortie, Échap vaut « Terminer ».
-            surEchap: function () { terminer(); },
+            // Dans l'assistant (étape 1), Échap le ferme ; à la dernière bulle, sans lien de sortie, il vaut « Terminer ».
+            surEchap: function () {
+                if (wizardOuvert()) { if (typeof fermerWizardV2 === 'function') fermerWizardV2(); return; }
+                terminer();
+            },
             // Entrer dans la démo en cours de route : le parcours se ferme et attend dans le panneau.
             verifier: function () {
                 if (!enDemo()) return true;

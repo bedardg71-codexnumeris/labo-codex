@@ -152,7 +152,7 @@
         parcoursAssistance: {},
         // Ce que le neuvième parcours, « Mettre en place ta notation alternative », retient d'une étape à
         // l'autre et pour « Reprendre » (js/parcours-notation-alternative.js, 8 nov. 2026) : son chemin
-        // (étape 1 sautée, famille), la pratique ouverte, l'évaluation verrouillée. Rien des données de cours.
+        // (étape 1 sautée, famille) et des identifiants (pratiques, évaluation verrouillée). Aucun nom ni DA.
         parcoursNotationAlternative: {},
 
         // Export du plan — niveau « Personnalisé » (#431, 8 août 2026).
