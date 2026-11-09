@@ -118,6 +118,11 @@
         btn.textContent = e.etat === 'fait' ? 'Refaire' : e.etat === 'en-cours' ? 'Reprendre' : 'Commencer';
         btn.setAttribute('aria-describedby', h.id);
         btn.addEventListener('click', function () {
+            // La condition d'entrée d'un parcours (`refus`, lot du septième parcours, 9 nov. 2026) :
+            // lue dans les données au toucher. Refusé, le parcours ne part pas : le panneau reste
+            // ouvert et dit pourquoi, sous le bouton.
+            var raison = typeof def.refus === 'function' ? def.refus() : null;
+            if (raison) { direRefus(corps, raison); return; }
             var depuis = e.etat === 'en-cours' ? e.etape : 0;
             fermerPanneau({ sansRetourFocus: true });
             def.lancer(depuis);
@@ -126,6 +131,18 @@
 
         li.appendChild(corps);
         return li;
+    }
+
+    /** Ce que dit le panneau quand un parcours ne peut pas partir : sous son bouton, annoncé (role status). */
+    function direRefus(corps, texte) {
+        var p = corps.querySelector('.assistance-parcours-refus');
+        if (!p) {
+            p = document.createElement('p');
+            p.className = 'assistance-parcours-refus';
+            p.setAttribute('role', 'status');
+            corps.appendChild(p);
+        }
+        p.textContent = texte;
     }
 
     function construirePanneau() {

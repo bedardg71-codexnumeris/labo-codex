@@ -112,7 +112,8 @@ test('menu : une seule entrée « Assistance », avant Aide, Signaler, Soutenir,
     expect(mots.map((m) => m.trim())).toEqual(MENU_ATTENDU);
     await expect(page.locator('#entete-menu-panneau')).not.toContainText('Visite guidée');
     await expect(page.locator('#btn-assistance-nav')).toHaveCount(0);
-    await expect(page.locator('#assistance-menu-rang')).toHaveText('1 sur 2');
+    // Le septième parcours (9 nov.) s'inscrit à la suite : trois parcours sur cette branche.
+    await expect(page.locator('#assistance-menu-rang')).toHaveText('1 sur 3');
     await capture(page, 'menu-1180-sombre-rien-de-fait');
 });
 
@@ -124,13 +125,13 @@ test('panneau : titre, phrase, « Tes parcours », deux parcours à faire, l’a
     await expect(p.locator('.assistance-titre')).toHaveText('Assistance');
     await expect(p.locator('.assistance-intro')).toHaveText('Des parcours où tu fais les gestes toi-même, accompagné·e pas à pas : quoi faire, comment le faire, et pourquoi.');
     await expect(p.locator('.assistance-intitule')).toHaveText('Tes parcours');
-    await expect(p.locator('.assistance-parcours-titre')).toHaveText(['Découvrir', 'Mettre ta classe en place']);
+    await expect(p.locator('.assistance-parcours-titre')).toHaveText(['Découvrir', 'Mettre ta classe en place', 'Lire ta classe et intervenir']);
     await expect(p.locator('.assistance-parcours-ligne')).toHaveText([
         "Ce que Labo Codex te montre avant d'entrer en classe, sur une classe de démonstration.",
         "De ton trimestre à ta première saisie de présences : ta classe d'un coup d'œil."
     ]);
-    await expect(p.locator('.assistance-parcours-etat')).toHaveText(['À faire', 'À faire']);
-    await expect(p.locator('.assistance-parcours-bouton')).toHaveText(['Commencer', 'Commencer']);
+    await expect(p.locator('.assistance-parcours-etat')).toHaveText(['À faire', 'À faire', 'À faire']);
+    await expect(p.locator('.assistance-parcours-bouton')).toHaveText(['Commencer', 'Commencer', 'Commencer']);
     await expect(p.locator('.assistance-aide-titre')).toHaveText('Aide dans les pages');
     await expect(p.locator('.assistance-aide-ligne')).toHaveText('Infobulles et flèches qui expliquent ce que tu touches.');
 
@@ -193,7 +194,7 @@ test('« Découvrir » de bout en bout sur la démo, en faisant les gestes (1180
     await expect(page.locator('#transition-bandeau')).toBeHidden();
     await capture(page, 'decouvrir-1-1180-sombre');
     // Le menu dit qu'un parcours est en cours : le premier.
-    expect(await page.locator('#assistance-menu-rang').textContent()).toBe('1 sur 2');
+    expect(await page.locator('#assistance-menu-rang').textContent()).toBe('1 sur 3');
     await page.click('#btn-toggle-panneau-prioritaire');
 
     // Étape 2 : la pastille de Loyal Suricate, le contour sur son A.
@@ -254,7 +255,7 @@ test('« Découvrir » de bout en bout sur la démo, en faisant les gestes (1180
     expect(await page.evaluate(() => document.body.classList.contains('parcours-actif'))).toBe(false);
     expect(await page.evaluate(() => estEnModeDemo())).toBe(true);
     expect(await page.evaluate(() => Assistance.etatDe('decouvrir').etat)).toBe('fait');
-    await expect(page.locator('#assistance-menu-rang')).toHaveText('2 sur 2');
+    await expect(page.locator('#assistance-menu-rang')).toHaveText('2 sur 3');
     await ouvrirPanneau(page);
     const item = page.locator('#panneau-assistance [data-parcours="decouvrir"]');
     await expect(item).toHaveAttribute('data-etat', 'fait');
@@ -368,7 +369,7 @@ test('captures du menu et du panneau : 1180 et 390 px, sombre et clair, trois é
     const ETATS = {
         'rien-de-fait': {},
         'un-en-cours': { decouvrir: { etat: 'fait', etape: 0 }, classe: { etat: 'en-cours', etape: 4 } },
-        'tout-fait': { decouvrir: { etat: 'fait', etape: 0 }, classe: { etat: 'fait', etape: 0 } }
+        'tout-fait': { decouvrir: { etat: 'fait', etape: 0 }, classe: { etat: 'fait', etape: 0 }, 'lire-ta-classe': { etat: 'fait', etape: 0 } }
     };
     for (const largeur of [1180, 390]) {
         await ouvrirEspaceVide(page, largeur, { hauteur: largeur === 390 ? 844 : 900 });

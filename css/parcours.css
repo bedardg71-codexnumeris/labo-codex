@@ -48,6 +48,8 @@ body.mode-clair {
 .parcours-voile--normal path { fill-opacity: 0.55; }
 .parcours-voile--leger path  { fill-opacity: 0.3; }
 .parcours-voile--dense path  { fill-opacity: 0.65; }
+/* « Sans voile » (septième parcours, étape 9) : rien n'est assombri, la bulle seule parle. */
+.parcours-voile--aucun path  { fill-opacity: 0; }
 
 /* ---------- Le contour : il marque où toucher, sans capter le toucher ---------- */
 
@@ -360,6 +362,15 @@ body.parcours-actif .transition-bandeau { display: none; }
     background: var(--icone-aide-config);
     border-color: var(--icone-aide-config);
     color: var(--acc-texte);
+}
+
+/* Le parcours ne peut pas partir (sa condition d'entrée, `refus`) : le panneau dit pourquoi, sous le bouton. */
+.assistance-parcours-refus {
+    margin: 2px 0 0;
+    padding-left: 10px;
+    border-left: 3px solid var(--parcours-geste);
+    font-size: 13px;
+    line-height: 1.45;
 }
 
 .assistance-parcours-bouton:hover { background: rgba(106, 172, 184, 0.15); }
