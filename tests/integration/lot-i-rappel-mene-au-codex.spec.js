@@ -129,7 +129,7 @@ async function cliquerBouton(page, texte) {
 
 const TEXTE_D8 = 'Tes données vivent dans ce navigateur : elles peuvent être perdues si tu effaces ' +
     'les données de sites, changes de navigateur ou d\'ordinateur. Ton codex en garde une copie ' +
-    'complète, copies de tes étudiant·es comprises, que tu rouvres sur n\'importe quel appareil.';
+    'complète, productions de tes étudiant·es comprises, que tu rouvres sur n\'importe quel appareil.';
 
 test.describe('Lot I (#985) — le rappel mène au codex', () => {
     test.setTimeout(180000);

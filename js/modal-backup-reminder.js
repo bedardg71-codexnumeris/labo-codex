@@ -223,7 +223,7 @@
                 <div class="alerte alerte-information" style="margin-bottom: 0">
                     Tes données vivent dans ce navigateur : elles peuvent être perdues si tu effaces
                     les données de sites, changes de navigateur ou d'ordinateur. Ton codex en garde
-                    une copie complète, copies de tes étudiant·es comprises, que tu rouvres sur
+                    une copie complète, productions de tes étudiant·es comprises, que tu rouvres sur
                     n'importe quel appareil.
                 </div>
             </div>
