@@ -125,8 +125,29 @@
             // #674 — SUR QUOI PORTE LA NOTE. Relue sur l'évaluation telle qu'elle est
             // en base (rétroactif : les copies muettes d'avant ce lot sont vues) ;
             // le rendu refuse de conclure et NOMME ce qui manque.
-            portee: nonRecevable ? null : construirePortee(evaluation, grille)
+            portee: nonRecevable ? null : construirePortee(evaluation, grille),
+            // Lot « Un mot pour ton étudiant·e » (9 nov. 2026) — LE MOT DE L'ENSEIGNANT·E, imprimé
+            // tel qu'écrit. Vide ou blancs seuls : '' et la section n'existe pas (règle de Grégoire).
+            motPourEtudiant: construireMotPourEtudiant(evaluation)
         };
+    }
+
+    /**
+     * Lot « Un mot pour ton étudiant·e » (consigne du 9 nov. 2026). La retouche tapée dans le cadre
+     * « Générale » n'atteint pas ce PDF (voir `construireOverall`) : le mot qui doit l'atteindre a
+     * son propre champ, `motPourEtudiant`. RÈGLE FERME DE GRÉGOIRE : un champ vide, ou qui ne porte
+     * que des espaces et des retours à la ligne, rend '' — ni titre ni case sur le PDF (un élève qui
+     * verrait une case vide lirait que son enseignant·e n'a rien écrit pour lui). Clé absente (copie
+     * d'avant ce lot, import) : vide. Le texte garde ses retours à la ligne ; seuls les blancs des
+     * deux bouts tombent. En anonymisation, le même outil que la rétroaction écrite.
+     * @returns {string}
+     */
+    function construireMotPourEtudiant(evaluation) {
+        const brut = (evaluation && typeof evaluation.motPourEtudiant === 'string') ? evaluation.motPourEtudiant.trim() : '';
+        if (!brut) return '';
+        return (typeof anonymiserTexteRetroaction === 'function')
+            ? anonymiserTexteRetroaction(brut, evaluation.etudiantDA)
+            : brut;
     }
 
     /**
@@ -669,6 +690,7 @@
         // Pas de `note` : `evaluation.retroactionFinale` est la concaténation
         // générée pour LÉA (objectif + tâche + commentaires par critère + niveau)
         // — afficher ce texte ici dupliquerait toutes les autres sections.
+        // Un mot écrit pour l'élève a son champ et sa section : `construireMotPourEtudiant`.
         return {
             code:  code,
             label: niveau ? niveau.label : '',
