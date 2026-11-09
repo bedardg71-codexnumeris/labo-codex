@@ -110,6 +110,8 @@ async function bulleNeCouvrePas(page, selecteur, contexte = '') {
 }
 
 const rang = (page) => page.locator('#assistance-menu-rang');
+// Groupe 2 (9 nov.) : le nombre de parcours se lit sur le registre, comme au banc des parcours 1 et 2 (d'autres s'y ajoutent).
+const nParcours = (page) => page.evaluate(() => window.Assistance.parcours().length);
 
 // 9 nov. 2026 (capture WebKit de l'étape 7) : la flèche didactique des présences, demandée par l'API publique ;
 // rend vrai si elle est visible 400 ms plus tard (après son délai de stabilisation de 150 ms).
@@ -259,7 +261,7 @@ test('de « Découvrir » à sa propre classe : « Commencer avec ma classe », 
     expect(await page.evaluate(() => Assistance.etatDe('decouvrir').etat)).toBe('fait');
     expect(await page.evaluate(() => Assistance.etatDe('classe'))).toEqual({ etat: 'en-cours', etape: 0 });
     await expect(page.locator('#calendrier-trimestre')).toBeVisible();
-    await expect(rang(page)).toHaveText('2 sur 2');
+    await expect(rang(page)).toHaveText('2 sur ' + await nParcours(page));
     // Le haut du formulaire (nom, session, année) et « Créer le trimestre » sont à l'écran, la bulle à côté.
     for (const sel of ['#v2-nomTrimestre', '#v2-sessionTrimestre', '#v2-anneeTrimestre', '#v2-finTrimestre', '#v2-btnCreerTrimestre']) {
         await expect(page.locator(sel)).toBeInViewport();
@@ -287,7 +289,7 @@ test('de « Découvrir » à sa propre classe : « Commencer avec ma classe », 
             await page.reload();
             await attendreApplication(page);
             await expect(bulle(page)).toHaveCount(0);
-            await expect(rang(page)).toHaveText('2 sur 2');
+            await expect(rang(page)).toHaveText('2 sur ' + await nParcours(page));
             // Le panneau dit où il attend ; « Reprendre » repart au profil.
             await ouvrirPanneau(page);
             const item = page.locator('#panneau-assistance [data-parcours="classe"]');
@@ -342,7 +344,9 @@ test('de « Découvrir » à sa propre classe : « Commencer avec ma classe », 
     }));
     expect(revient, 'hors parcours, une flèche s’ouvre de nouveau').toBe(true);
     expect(await page.evaluate(() => Assistance.etatDe('classe').etat)).toBe('fait');
-    await expect(rang(page)).toHaveText('');
+    // Les deux premiers faits : le rang passe au troisième parcours, s'il y en a un ; sinon, rien.
+    const n = await nParcours(page);
+    await expect(rang(page)).toHaveText(n > 2 ? '3 sur ' + n : '');
     await ouvrirPanneau(page);
     const item = page.locator('#panneau-assistance [data-parcours="classe"]');
     await expect(item.locator('.assistance-parcours-etat')).toHaveText('Fait');
