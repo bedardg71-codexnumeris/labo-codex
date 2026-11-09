@@ -225,7 +225,9 @@ Faites par la session H sous Chromium (`RAPPORT-2026-11-09-verifications-parcour
 - L'échelle d'une grille, c'est celle que portent ses descripteurs (`criteres[].descripteurs.echelleId`, posée par Mon
   matériel quand la grille a des niveaux ; l'éditeur ne pose pas d'`echelleId` sur la grille elle-même). Une grille en
   points n'en a pas : le contour saute le menu « Échelle » (mesuré dans l'essai « en points »). Si le menu n'offre pas
-  cette échelle, le contour ne s'y pose pas.
+  cette échelle, le contour ne s'y pose pas. ⚠ La sentinelle `bareme-1-editeur` (I.b) liste les modules qui lisent
+  `descripteurs` (aucun module de calcul ne doit le faire) : `parcours-evaluer.js` y est inscrit, avec son motif (il
+  ne lit que `echelleId`, pour poser un contour, et ne calcule rien).
 
 ## 5. À inscrire au BACKLOG
 
