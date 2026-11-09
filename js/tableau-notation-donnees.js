@@ -60,9 +60,14 @@
         return [''].concat(niveauxSaisissables(echelle).map(n => n.code));
     }
 
-    /** La valeur qui suit au toucher ; une valeur inconnue repart de la première. */
+    /**
+     * La valeur qui suit au toucher. Une valeur que le cycle ne porte pas (un niveau saisi sous une autre échelle, la
+     * production ayant reçu la sienne depuis) repart du PREMIER NIVEAU, jamais de la case vide : un toucher n'efface pas
+     * un résultat qu'il ne sait pas lire (relecture neuve, 9 nov. 2026).
+     */
     function valeurSuivante(cycle, actuelle) {
         const i = cycle.indexOf(actuelle == null ? '' : String(actuelle));
+        if (i === -1) return cycle.length > 1 ? cycle[1] : '';
         return cycle[(i + 1) % cycle.length];
     }
 

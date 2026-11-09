@@ -242,7 +242,7 @@ test.describe('Tableau de notation · la consigne', () => {
         await expect(note(page, 1)).toHaveText('75');
         await saisir(3, 'e'); await saisir(4, 'd');
         await expect(note(page, 1)).toHaveText('80');   // (75 + 100 + 65) / 3
-        // Une case à grille, touchée au clavier et par le geste d'écriture : rien ne s'écrit.
+        // Une case à grille, touchée au clavier : rien ne s'écrit (le refus de l'écriture pure est au banc A5).
         await kase(page, 2, 2).focus();
         await page.keyboard.press('e');
         await page.keyboard.press('Backspace');
@@ -284,6 +284,16 @@ test.describe('Tableau de notation · la consigne', () => {
         expect(erreurs).toEqual([]);
         await page.evaluate(() => window.travauxExportPDF.exporterDossierComplet('9990010', 'P2'));
         expect(erreurs).toEqual(['dialogue: Aucune copie ni évaluation enregistrée pour cet·te étudiant·e et cette production.']);
+        // Relecture neuve : si une copie importée accompagne le résultat, elle reste à remettre (Léa la prend, la Liste offre le PDF).
+        await page.evaluate((T) => {
+            window.db.setSync(T + '_fichiersTravaux', [{ id: 'FT-ADA', etudiantDA: '9990010', productionId: 'P2', coursId: 'cours-tn', groupeCoursId: 'GC_TN',
+                nomFichier: 'FICTIF_Ada_Production2.png', typeMIME: 'image/png', tailleFichier: 70, nombrePages: 1, stockage: 'indexeddb', thumbnailDataUrl: '',
+                dateImport: '2026-11-01T12:00:00.000Z', dateModification: '2026-11-01T12:00:00.000Z', source: 'import-local', importePar: 'single', statut: 'present' }]);   // security-ok: fixture fictive du banc
+        }, T);
+        const avecCopie = await page.evaluate(() => window.travauxArchivage.selectionnerEvaluationsLea('P2', null, false).evaluations.map((e) => e.etudiantDA).sort());
+        expect(avecCopie).toEqual(['9990010', '9990011']);
+        await page.evaluate(() => window.initialiserListeEvaluations());
+        await expect.poll(() => options('Albatros')).toContain('Dossier PDF');
     });
 
     test('l\'échelle de la production passe avant celle de la pratique ; l\'en-tête renvoie aux réglages et reprend le bouton d\'export', async ({ page }) => {
@@ -306,6 +316,20 @@ test.describe('Tableau de notation · la consigne', () => {
         await kase(page, 1, 3).click();
         await expect(kase(page, 1, 3)).toHaveText('A');
         expect(await sansGrilleDe(page, '9990010', 'P3')).toMatchObject({ niveauFinal: 'A', noteFinale: 90, echelleId: 'E_P3' });
+        // Un niveau saisi AVANT que la production reçoive son échelle (M, sous celle de la pratique) : un toucher repart du
+        // premier niveau de la colonne, il n'efface pas le résultat (relecture neuve) ; la case le nomme d'ici là.
+        await page.evaluate((T) => {
+            const evals = window.db.getSync(T + '_evaluationsSauvegardees', []);
+            evals.push({ id: 'SG-AVANT', etudiantDA: '9990011', productionId: 'P3', sansGrille: true, grilleId: null, criteres: [], niveauFinal: 'M', noteFinale: 75,
+                echelleId: 'E_TN', verrouillee: true, statutRemise: 'evalue', statutIntegrite: 'recevable', dateEvaluation: '2026-10-01T12:00:00.000Z' });
+            window.db.setSync(T + '_evaluationsSauvegardees', evals);   // security-ok: fixture fictive du banc
+            window.TableauNotation.afficher();
+        }, T);
+        await expect(kase(page, 2, 3)).toHaveText('M');
+        await expect(kase(page, 2, 3)).toHaveAttribute('aria-label', /Maîtrise/);
+        await kase(page, 2, 3).click();
+        await expect(kase(page, 2, 3)).toHaveText('R');
+        expect(await sansGrilleDe(page, '9990011', 'P3')).toMatchObject({ id: 'SG-AVANT', niveauFinal: 'R', noteFinale: 50, echelleId: 'E_P3' });
         // Une autre colonne garde l'échelle de la pratique.
         await kase(page, 1, 1).click();
         await expect(kase(page, 1, 1)).toHaveText('PS');
@@ -348,10 +372,11 @@ test.describe('Tableau de notation · la consigne', () => {
     });
 });
 
-// CAPTURES (CAPTURES=1) — Chromium, 1180 px, standards et spécifications, noms fictifs ; dans `plans de travail/`.
+// CAPTURES — Chromium, 1180 px, standards et spécifications, noms fictifs. Le dossier de sortie vient de la variable
+// CAPTURES (un chemin absolu) : une spec ne nomme pas un chemin que la CI n'observe pas.
 test.describe('Tableau de notation · captures', () => {
-    test.skip(!process.env.CAPTURES, 'captures à la demande (CAPTURES=1)');
-    const dossier = path.join(racineProjet, 'plans de travail', 'captures-2026-11-09-tableau-de-notation-1');
+    test.skip(!process.env.CAPTURES, 'captures à la demande (CAPTURES=<dossier>)');
+    const dossier = process.env.CAPTURES || '';   // un chemin absolu
     const PLAN = {
         STD: [['e', 'm', 'm', 'd', 'e'], ['i', null, 'd', 'm', null], ['m', null, 'e', 'e', 'm'], [null, null, null, null, null]],
         SPE: [['a', 'a', 'a', 'a', 'a', 'a'], ['a', 'n', 'a', null, 'a', null], ['a', 'a', 'a', null, 'n', null], [null, null, null, null, null, null]]

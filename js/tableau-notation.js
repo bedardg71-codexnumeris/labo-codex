@@ -204,17 +204,23 @@
         return /^(#[0-9a-f]{3,8}|var\(--[a-z0-9-]+\)|rgba?\(\s*[0-9.,\s%]+\))$/i.test(c) ? c : 'var(--accent-primaire)';
     }
 
-    function _couleurDeLaValeur(valeur, ctx, productionId) {
+    /** Le niveau d'un code : dans l'échelle de la colonne, sinon dans celle que la copie porte (saisie sous une autre échelle). */
+    function _niveauDe(valeur, ctx, productionId, echelleIdCopie) {
+        const dans = (echelle) => D().niveauxSaisissables(echelle).find(n => n.code === valeur);
+        return dans(_echelleDe(ctx, productionId)) || (echelleIdCopie ? dans(_echelleParId(echelleIdCopie)) : undefined);
+    }
+
+    function _couleurDeLaValeur(valeur, ctx, productionId, echelleIdCopie) {
         if (ctx.famille === 'SPE') return valeur === D().ACCEPTABLE ? 'var(--niveau-attention-minimal)' : 'var(--niveau-attention-critique)';
-        const niveau = D().niveauxSaisissables(_echelleDe(ctx, productionId)).find(n => n.code === valeur);
+        const niveau = _niveauDe(valeur, ctx, productionId, echelleIdCopie);
         return couleurSure(niveau ? niveau.couleur : null);
     }
 
-    function _motDeLaValeur(valeur, ctx, productionId) {
+    function _motDeLaValeur(valeur, ctx, productionId, echelleIdCopie) {
         if (valeur === '') return MOTS.aSaisir;
         const jugement = window.LIBELLES_JUGEMENT_SANS_GRILLE;   // les mots de la Liste (registre)
         if (ctx.famille === 'SPE') return valeur === D().ACCEPTABLE ? jugement.acceptable : jugement.nonAcceptable;
-        const niveau = D().niveauxSaisissables(_echelleDe(ctx, productionId)).find(n => n.code === valeur);
+        const niveau = _niveauDe(valeur, ctx, productionId, echelleIdCopie);
         return niveau ? niveau.nom : valeur;
     }
 
@@ -233,6 +239,7 @@
         const ev = D().copieDeLaCase(ctx.evaluations, etudiant.da, production.id);
         const compte = resultat.comptent.has(production.id) && !!ev;
         const etat = D().etatDeLaCase(ev, ctx.famille, compte);
+        etat.echelleId = ev ? (ev.echelleId || null) : null;
         // Une copie non recevable (plagiat, IA non autorisée) : ses niveaux ne se lisent nulle part (décision de Grégoire,
         // 28 oct. 2026). La case dit « -- », comme la Liste, et son libellé (registre) ; elle s'ouvre, elle ne se modifie pas.
         const nonRecevable = ev && typeof window.libelleCopieNonRecevable === 'function' ? window.libelleCopieNonRecevable(ev) : null;
@@ -248,10 +255,10 @@
     function _caseHTML(etudiant, production, ctx, resultat) {
         const etat = _etatCase(etudiant, production, ctx, resultat);
         const nom = `${etudiant.prenom || ''} ${etudiant.nom || ''}`.trim();
-        const mot = etat.nonRecevable || _motDeLaValeur(etat.valeur, ctx, production.id);
+        const mot = etat.nonRecevable || _motDeLaValeur(etat.valeur, ctx, production.id, etat.echelleId);
         const aria = `${nom}, ${production.titre || ''} : ${mot}` + (etat.modifiable ? '' : `, ${MOTS.avecGrille}`);
         const classes = ['tn-case', 'tn-case--' + etat.forme].concat(etat.modifiable ? [] : ['tn-case--grille']);
-        const style = etat.valeur ? ` style="--tn-couleur: ${esc(_couleurDeLaValeur(etat.valeur, ctx, production.id))}"` : '';
+        const style = etat.valeur ? ` style="--tn-couleur: ${esc(_couleurDeLaValeur(etat.valeur, ctx, production.id, etat.echelleId))}"` : '';
         const ouvrir = etat.modifiable ? '' : ` data-evaluation="${esc(etat.evaluationId)}"`;
         // Un seul arrêt de Tab pour tout le tableau (la première case) ; les flèches font le reste.
         const tab = (etudiant === ctx.etudiants[0] && production === ctx.productions[0]) ? '0' : '-1';

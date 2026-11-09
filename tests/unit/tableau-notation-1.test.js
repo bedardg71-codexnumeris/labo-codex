@@ -43,7 +43,9 @@ describe('A · l\'écriture d\'un résultat sans grille (pure)', () => {
         const cycle = donnees.cycleDeLaFamille('STD', ECHELLE);
         expect(donnees.valeurSuivante(cycle, '')).toBe('PS');
         expect(donnees.valeurSuivante(cycle, 'E')).toBe('');
-        expect(donnees.valeurSuivante(cycle, 'inconnu')).toBe('');
+        // Relecture neuve (9 nov.) : un code que le cycle ne porte pas repart du premier niveau ; avant, la case se vidait.
+        expect(donnees.valeurSuivante(cycle, 'inconnu')).toBe('PS');
+        expect(donnees.valeurSuivante([''], 'inconnu')).toBe('');
         expect(donnees.valeurParTouche(cycle, 'm')).toBe('M');
         expect(donnees.valeurParTouche(cycle, 'p')).toBe('PS');
         expect(donnees.valeurParTouche(cycle, 'Backspace')).toBe('');
@@ -267,7 +269,7 @@ describe('C · le vrai moteur, sur un magasin sans horaire, sans enseignant, san
     it('C7 la reprise : la case montre la reprise ; la note la lit dès qu\'elle est verrouillée, et l\'originale d\'ici là (E4)', () => {
         const prods = prodSTD();
         const base = Object.entries(NIVEAUX_ALICE).filter(([p]) => p !== 'A4').map(([p, c]) => avecGrille(DA.ALICE, p, c));
-        const originale = Object.assign(avecGrille(DA.ALICE, 'A4', 'I'), { id: 'O-A4', remplaceeParId: 'R-A4' });
+        const originale = Object.assign(avecGrille(DA.ALICE, 'A4', 'I'), { id: 'O-A4', remplaceeParId: 'R-A4', dateEvaluation: '2026-11-05T12:00:00.000Z' });   // plus récente que la reprise : « remplacée » décide, pas la date
         const reprise = (verrouillee) => Object.assign(avecGrille(DA.ALICE, 'A4', 'E'), { id: 'R-A4', repriseDeId: 'O-A4', jetonRepriseApplique: true, verrouillee,
             dateEvaluation: '2026-11-01T12:00:00.000Z' });
         const reevaluee = banc({ pratique: std(), productions: prods, evaluations: base.concat([originale, reprise(true)]) });

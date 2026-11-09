@@ -58,7 +58,8 @@ Les dix questions de la première passe restent ouvertes (plus bas), sauf la 1 (
 2. **L'échelle de départ comme dernier recours** : la consigne la demande, mais tu as écrit « Rien codé en dur ! » le 28 août (#590). Ici aucun niveau n'est écrit dans le code : on lit ton échelle de départ, modifiable. *Recommandation : garder, puisque c'est ton échelle ; à retirer si tu préfères qu'une pratique sans échelle ne se saisisse pas.*
 3. **Les colonnes limitées aux productions qui entrent dans la note**, plutôt que toutes celles du groupe. *Recommandation : garder.*
 4. **Le mot du bouton de vue** : la consigne propose « Tableau », le lot écrit « Tableau de notation ». *Recommandation : « Tableau de notation », qui dit ce qu'on y fait.*
-5. **Le PDF de synthèse d'un jugement** (question 9 de la première passe) ne se pose plus par le Dossier PDF ni par Léa, qui écartent ces résultats. *Recommandation : fermer la question.*
+5. **Le PDF de synthèse d'un jugement** (question 9 de la première passe) ne se pose plus pour un résultat sans copie : le Dossier PDF et Léa l'écartent. Il reste posé dans le cas de la question 6.
+6. **Une copie importée ET un résultat saisi au tableau pour la même production** : la copie annotée part pour Léa et le Dossier PDF reste offert, avec une page de synthèse qui porte le niveau (ou rien, pour un jugement acceptable / non acceptable). *Recommandation : garder pour ce lot, c'est le comportement d'avant ; décider au lot 2 si cette page doit dire « Acceptable », des mots que tes élèves liront.*
 
 ### Ce que je n'ai pas pu vérifier
 
@@ -69,11 +70,23 @@ Les dix questions de la première passe restent ouvertes (plus bas), sauf la 1 (
 
 ### Preuve
 
-- **Vitest complet** : en cours au moment de ce commit ; inscrit au commit suivant.
+- **Vitest complet** : une première passe a rendu 10 952 verts sur 10 956 ; les 4 rouges étaient des cliquets sur mon propre code (une classe CSS sans règle, un chemin de captures nommé dans la spec, une fonction de la Liste montée de 31 à 32), tous corrigés. Le verdict final est celui du hook pre-push, qui relance Vitest au complet : VERDICT_FINAL
 - **Vitest du lot** : `tests/unit/tableau-notation-1.test.js`, 27 essais verts. Ajoutés : C5 (résultats sans grille mêlés à des évaluations à grille, la terminale saisie au tableau, la note provisoire sans elle), C6 (mêlés, en spécifications), C7 (la reprise), C8 (l'échelle modifiée). Le plancher des forfaits est en C2 (palier F, 50).
 - **Chromium** : `tests/integration/tableau-de-notation-1.spec.js`, 13 essais verts, plus 4 captures à la demande (`CAPTURES=1`). Ajoutés : aucun écrit dans les évaluations à grille (compte et empreinte), rechargement, la reprise ; Léa et Dossier PDF ; l'échelle de la production ; la cause lisible ; la copie non recevable.
 - **Break-tests de cette session**, chacun rougit son essai puis le code est restauré : l'exclusion de Léa ; le filtre du Dossier PDF ; le menu de la Liste ; l'échelle de la production ; la cause écrite ; « non remplacée » dans `copieDeLaCase` (l'essai passait encore à la première tentative : la reprise était aussi la plus récente ; l'originale porte maintenant la date la plus récente) ; la garde de la copie non recevable.
-- **Relecture par un agent neuf** : en cours au moment de ce commit ; inscrit au commit suivant.
+- **Relecture par un agent neuf** (sur `0c862c9f`), son verdict en une ligne : « fusion propre, aucun bloquant ; trois points à corriger avant de fusionner (une classe CSS jamais définie, un toucher qui efface un résultat quand l'échelle de la colonne a changé, une copie annotée qui ne part plus pour Léa sans que rien ne le dise) ». Disposition de chaque constat :
+
+| Constat | Disposition |
+|---|---|
+| `.tn-reglages` définie nulle part | **Corrigé** (`css/tableau-notation.css`). |
+| Un toucher efface le résultat quand son niveau n'est pas dans l'échelle de la colonne (la production a reçu sa propre échelle après la saisie) ; la case perd sa couleur et son nom | **Corrigé** : le toucher repart du premier niveau de la colonne ; la couleur et le nom se lisent dans l'échelle que le résultat porte. Bancs A2 et « l'échelle de la production ». |
+| Un·e étudiant·e avec une copie importée ET un résultat sans grille : la copie annotée ne partait plus pour Léa, « Dossier PDF » disparaissait | **Corrigé** : l'exclusion ne vaut que sans copie importée. Banc « Léa ». **Question 6 à Grégoire** plus bas. |
+| Une colonne sans aucune échelle dans un tableau par ailleurs utilisable : le toucher ne fait rien et ne le dit pas | **Inscrit ici, non corrigé** : il faut une pratique sans échelle, pas d'échelle de départ, et une seule production avec la sienne. À revoir au lot 2. |
+| L'en-tête ne montre que les valeurs de l'échelle de la pratique ; une colonne à échelle propre ne montre que son nom | **Inscrit ici, non corrigé** : cas rare (question 2). |
+| C7 passait sans le filtre « remplacée » (la reprise était aussi la plus récente) | **Corrigé** : l'originale porte la date la plus récente. |
+| C8 n'exerce aucun code du lot | **Gardé, nommé MESURE** : il documente que le moteur ne recalcule pas une note écrite ; l'écart à l'écran (l'en-tête dit « M 80 », la note compte 75) est la question 1. |
+| Le commentaire d'un essai annonçait un geste qu'il ne jouait pas | **Corrigé** (le commentaire). |
+| La fusion, la garde de `modifierEvaluationRemplacee`, les jetons, l'écriture dans une évaluation à grille, le compteur Léa, l'échappement | **Vérifiés par l'agent, sans défaut.** |
 
 ### À reporter : ce que chaque branche en attente changera pour ce lot
 

@@ -1745,6 +1745,15 @@ function trouverFichierDeLigne(ligne) {
  * @param {Object} ligne
  * @param {Object|null} [fichierResolu] - la copie déjà résolue par l'appelant (#934) ; sinon résolue ici
  */
+/**
+ * « Dossier PDF » : pour une ligne évaluée, quand l'export est chargé. Tableau de notation, lot 1 (9 nov. 2026) : pas pour
+ * un résultat saisi au tableau, sans grille (aucune rétroaction à remettre), sauf si une copie importée l'accompagne.
+ */
+function _dossierPdfOffert(ligne, fichierId) {
+    if (ligne.statut !== 'evalue' || typeof travauxExportPDF === 'undefined') return false;
+    return !ligne.sansGrille || !!fichierId;
+}
+
 function genererDropdownActions(ligne, fichierResolu) {
     // #562 — les identifiants interpolés dans `value="action|id|id"` sont échappés :
     // le navigateur décode `&quot;`/`&amp;` en lisant `.value`, `executerActionEval`
@@ -1783,8 +1792,7 @@ function genererDropdownActions(ligne, fichierResolu) {
     }
 
     // Dossier PDF — évalué + export dispo
-    // Tableau de notation, lot 1 : pas pour un résultat saisi au tableau, sans grille (aucune rétroaction à remettre).
-    if (ligne.statut === 'evalue' && !ligne.sansGrille && typeof travauxExportPDF !== 'undefined') {
+    if (_dossierPdfOffert(ligne, fichierId)) {
         options.push(`<option value="dossier|${echapperHtml(da)}|${echapperHtml(prodId)}">Dossier PDF</option>`);
     }
 

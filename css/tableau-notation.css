@@ -104,6 +104,14 @@
     color: var(--texte-secondaire);
 }
 
+/* Le lien vers la fiche de la pratique : une cible de 44 px de haut au toucher. */
+.tn-reglages {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    color: var(--accent-primaire);
+}
+
 .tn-repere {
     display: flex;
     align-items: center;
