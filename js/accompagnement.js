@@ -684,9 +684,12 @@ function autoPositionner(cible, direction) {
 }
 
 // Lot « Les deux parcours », partie 2 (9 nov. 2026 ; décision de Grégoire après la capture WebKit de l'étape 7) :
-// pendant un parcours, la bulle parle seule — aucune flèche didactique ne s'y ajoute. Le moteur pose la classe
-// `parcours-actif` sur <body> (parcours-moteur.js) ; la flèche n'est pas marquée vue, elle reviendra hors parcours.
-function parcoursEnCours() { return !!(document.body && document.body.classList.contains('parcours-actif')); }
+// pendant un parcours, la bulle parle seule — aucune flèche didactique ne s'y ajoute ; la flèche n'est pas marquée
+// vue, elle reviendra hors parcours. Groupe 2 (9 nov.) : la même lecture que le rappel du codex (sixième parcours),
+// `ParcoursMoteur.actif()`, une seule source pour « un parcours joue ».
+function parcoursEnCours() {
+    return !!(window.ParcoursMoteur && typeof window.ParcoursMoteur.actif === 'function' && window.ParcoursMoteur.actif());
+}
 
 function afficherAutoReveal(id, optionsExterne) {
     if (!prefFlechesActives()) return;
