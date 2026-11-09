@@ -7,6 +7,24 @@
 
 ---
 
+## 9 NOV. 2026, 9 H 00 (Claude Code) : **1.238.0 POUSSÉE, VERDICT VERT ; « UN MOT POUR TON ÉTUDIANT·E » EN LIGNE ; AUCUNE PORTE TERRAIN**
+
+`main` = `origin/main` = `d32b660f1` (+ le commit de docs qui porte ce relais). Version en ligne : 1.238.0, build `1109-0727`. Branche `lot/un-mot-pour-ton-etudiant` (partie de `98c04bfce`), fusionnée en avance rapide.
+
+- **Le lot** : un champ libre « Un mot pour ton étudiant·e » sous la rétroaction (clé `motPourEtudiant`), imprimé sur le PDF de synthèse en section « Un mot pour toi », entre le niveau global et les tampons ; vide ou blanc, aucune section. Consigne, décisions et dispositions de la relecture : `plans de travail/CONSIGNE-LOT-2026-11-09-un-mot-pour-ton-etudiant.md`. Ligne des Nouvelles validée par Grégoire mot pour mot.
+- **Bancs** : Vitest 10 840/10 840 ; deux sentinelles neuves (15 tests, break-testés) ; spec WebKit `un-mot-pour-ton-etudiant.spec.js` (9 cas). Relecture par un agent neuf : 2 constats corrigés dans le lot, 1 refusé par Grégoire, 1 commenté, 1 hors lot (ci-dessous).
+- **Verdict complet** sur `d32b660f1` (Chrome, Safari et Cowork fermés, secteur, aucune veille, pression mémoire 1 tout du long) : 1 429 essais en 10 morceaux, 1 429 verts, 0 au second essai, 0 rouge, 39 sautés. Push `98c04bfce..d32b660f1` à 9 h 00.
+- **Aucune porte terrain** (décidé par Claude Code) : rien n'écrit dans les données à la place de Grégoire, WebKit couvre le parcours. Invérifié : vrai Safari, iPad. Captures WebKit (1 180 px, clair et sombre, PDF rempli et vide) dans `Claude outputs/captures-2026-11-09-un-mot-pour-ton-etudiant/`, relues par Cowork.
+- **Le stock** (tarir n'est pas réparer) : les retouches déjà perdues ne sont pas rendues. Relevé en lecture seule `scripts/releve-retroactions-reecrites-a2026.js`, à coller par Grégoire dans la console de Chrome ; chiffre pas encore reçu.
+
+**Hors lot, à Cowork** : « Modifier » sur une originale remplacée, puis un niveau touché : l'enregistrement automatique écrit les **niveaux** sur la reprise active (antérieur au lot ; le mot, lui, est gardé). Cowork le présente à Grégoire.
+
+**Complexité** (1.237.2 `54a87bcae` → 1.238.0) : fichiers de plus de 1 000 lignes 40 → 40, leurs lignes 94 330 → 94 377 (Δ +47) ; au-dessus de 15 : 437 → 437 ; au-dessus de 30 : 79 → 79 (maximum 130) ; somme au-dessus de 15 : 11 021 → 11 024 (Δ +3). Lignes de `js/` : 160 214 → 160 326 ; fonctions : 15 247 → 15 259.
+
+**Suite** : le chiffre du relevé ; le défaut de la reprise (Cowork) ; la file des correctifs et les branches de la nuit du 8 au 9 nov. (`lot/parcours-1-et-2` d'abord), qui attendent le jugement de Grégoire. Constat du début de session, non traité : la CI GitHub de `main` rouge sur 4 specs hors baseline (`aide-cp-suit-la-case-1086`, `annotation-formes-fermees-polygone`, `palette-evaluation-compacte`, `tampons-masques-bibliotheque-1216`), toutes vertes au verdict local.
+
+---
+
 ## 8 NOV. 2026, 18 H 25 (Claude Code) : **1.237.2 POUSSÉE, VERDICT VERT ; SIX ENTRÉES DE LA FILE EN LIGNE ; AUCUNE PORTE TERRAIN**
 
 `main` = `origin/main` = `54a87bcae` (+ le commit de docs qui porte ce relais). Version en ligne : 1.237.2, build `1108-1646`. La 1.237.1 (`47e2e8681`), jamais poussée seule, part avec elle.

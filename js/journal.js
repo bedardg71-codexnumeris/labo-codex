@@ -382,7 +382,7 @@ function exporterExperienceAnonymisee() {
                     details: j.details || {}
                 };
             })
-            // Champs supprimés : etudiantNom, etudiantDA, notesIntegrite, retroactionFinale
+            // Champs supprimés : etudiantNom, etudiantDA, notesIntegrite, retroactionFinale, motPourEtudiant (liste blanche ci-dessus)
         };
     });
 

@@ -141,6 +141,7 @@
                 : t;
             copie.retroactionFinale = texte(e.retroactionFinale);
             copie.notesIntegrite = texte(e.notesIntegrite);
+            if (typeof e.motPourEtudiant === 'string') copie.motPourEtudiant = texte(e.motPourEtudiant);   // un mot pour ton étudiant·e
             if (Array.isArray(e.criteres)) {
                 copie.criteres = e.criteres.map(c => Object.assign({}, c, { retroaction: texte(c && c.retroaction) }));
             }

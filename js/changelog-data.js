@@ -21,6 +21,16 @@
 
     var CHANGELOG = [
         {
+            // 1.238 (« Un mot pour ton étudiant·e ») — la ligne validée par Grégoire, mot pour mot, le 9 nov. 2026 (relayée
+            // par Cowork). Le titre est le nom du champ, déjà validé (supposition de Claude Code, nommée dans la consigne).
+            version: '1.238',
+            couleur: 'vert',
+            titre: 'Un mot pour ton étudiant·e',
+            items: [
+                'Évaluer&nbsp;: un champ «&nbsp;Un mot pour ton étudiant·e&nbsp;», sous la rétroaction. Ce que tu y écris s’imprime sur son PDF, après son niveau&nbsp;; laissé vide, rien n’apparaît. Les retouches faites dans le cadre de la rétroaction, elles, ne vont pas sur le PDF.'
+            ]
+        },
+        {
             // 1.237 (« Le graphique suit les présences » ; #1242, #1243 ; #1244, #1245) — titre et items validés par Grégoire, mot pour mot, le 8 nov. 2026 (ligne 4 réécrite par lui).
             version: '1.237',
             couleur: 'vert',
