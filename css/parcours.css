@@ -471,3 +471,9 @@ body.parcours-sur-modale .parcours-bulle { z-index: 10011; }
 /* « Sans voile » (neuvième parcours, repris par le troisième sur les écrans pleine largeur) : rien n'assombrit ni ne
    capte le toucher. */
 .parcours-voile--aucun path  { fill-opacity: 0; pointer-events: none; }
+/* Le cinquième parcours (« Monter ton cours », 9 nov. 2026) : l'Inspecteur de la carte passe devant les palettes
+   flottantes. Ouverte par défaut, la palette « Planificateur » (z-index 80) recouvre l'Inspecteur (60) à 1180 px : la
+   case de l'objectif servi (étape 5) et celle de l'objectif vérifié (étape 6) étaient dessous (mesuré : `elementFromPoint`
+   rendait la palette ; constat de la session H). Posé par le parcours, le temps du parcours ; hors parcours, rien ne
+   change (inscrit au rapport). */
+body.parcours-inspecteur-devant #planif-panneau { z-index: 85; }

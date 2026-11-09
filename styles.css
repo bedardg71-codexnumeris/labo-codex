@@ -24729,7 +24729,8 @@ body.planif-plein-ecran-actif #planif-guide-panel {
 /* Cinquième parcours (question 10, Cowork, 9 nov. 2026 ; mesuré par la session H : ±6 px utiles au doigt, quand le
    projet exige 44 px). Au toucher, chaque cercle d'attache reçoit une zone sensible de 44 px, TOURNÉE VERS L'EXTÉRIEUR
    du bloc : elle ne couvre ni le titre ni les sélecteurs de l'en-tête. Le dessin ne change pas (pseudo-élément
-   transparent ; le toucher qui y tombe vise le cercle). Même traitement pour la poignée ⠿ (plus bas). */
+   transparent ; le toucher qui y tombe vise le cercle). La poignée ⠿ a déjà la sienne (`.planif-noeud-prise::after`,
+   16 août). Banc : tests/integration/parcours-5-monter-ton-cours-2026-11-09.spec.js. */
 @media (pointer: coarse) {
     .planif-noeud-port::before { content: ""; position: absolute; width: 44px; height: 44px; background: transparent; }
     .planif-noeud-port.planif-port-droite::before { left: 0; top: -16px; }

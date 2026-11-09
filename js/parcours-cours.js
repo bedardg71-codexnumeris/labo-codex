@@ -17,8 +17,8 @@
      (« se concrétise dans »), un objectif, un bloc qui le sert, une évaluation avec sa production et sa
      pastille à ✓. Une évaluation qui vérifie l'objectif mais dont la pastille dit ⚠ (posée avant
      l'activité) reçoit la variante de l'étape 6.
-   · La carte est un canevas qui se déplace et se zoome : contours et bulle suivent les blocs ; un bloc
-     visé hors de l'écran ramène la vue (« Recentrer la carte », `centrerVueSurContenu`).
+   · La carte est un canevas qui se déplace et se zoome : contours et bulle suivent les blocs ; le bloc visé
+     par une étape est amené au milieu du canevas libre s'il n'y est pas entier (`amenerLeBloc`).
    · Pas de voile : tout le canevas se touche (créer, écrire, tirer un lien, glisser un bloc).
    · La condition d'entrée : une production dans le cours actif. Sur les vraies données : la démo ouverte
      se referme d'abord.
@@ -148,13 +148,57 @@
     function inspecteur() { return el('planif-panneau'); }
     function inspecteurOuvertSur(n) { var c = C(); return !!(n && c && c.etat.panneauOuvert && c.etat.panneauNoeudId === n.id && vis(inspecteur())); }
 
-    /** Un bloc visé hors de l'écran : la vue est ramenée sur le contenu (« Recentrer la carte »). */
-    function ramenerSiHorsVue(n) {
-        var b = bloc(n);
-        if (!b) return;
+    /**
+     * Ce que la bulle doit laisser libre : ce que l'étape fait toucher (le moteur place la bulle hors de leur union).
+     * Un bloc neuf se pose au centre du canevas, là où la bulle se mettait : mesuré, elle couvrait la poignée de l'idée
+     * maîtresse à l'étape 2. D'une leçon, seulement les parties à toucher : entière, elle est trop grande pour que la
+     * bulle trouve sa place à côté, et le moteur la couvrait (mesuré à l'étape 3). L'Inspecteur ouvert sur le bloc visé
+     * passe seul : la bulle se range à sa gauche.
+     */
+    function aLaisserLibre(elements, surInspecteur) {
+        if (surInspecteur && inspecteurOuvertSur(surInspecteur)) return [inspecteur()];
+        return elements.filter(Boolean);
+    }
+
+    /** Des parties d'une leçon : `entete` (semaine, séance, 🎯), `titre`, `objectifs`, `zone` (où l'on dépose un bloc). */
+    function partiesDe(l, noms) {
+        var b = bloc(l);
+        return b ? noms.map(function (nom) { return b.querySelector(':scope > .planif-noeud-' + nom); }).filter(Boolean) : [];
+    }
+
+    /** La partie du canevas qu'on voit et qu'on peut toucher : à l'écran, entre la palette « Nœuds » et le « Planificateur ». */
+    function canevasLibre() {
+        var z = el('planif-zone-travail');
+        if (!z) return null;
+        var r = z.getBoundingClientRect();
+        var g = Math.max(r.left, 0), d = Math.min(r.right, window.innerWidth);
+        var h = Math.max(r.top, 0), b = Math.min(r.bottom, window.innerHeight);
+        var noeudsPal = el('planif-palette'), planif = el('planif-palette-nav');
+        if (vis(noeudsPal)) { var p = noeudsPal.getBoundingClientRect(); if (p.right < (g + d) / 2) g = Math.max(g, p.right); }
+        if (vis(planif)) { var q = planif.getBoundingClientRect(); if (q.left > (g + d) / 2) d = Math.min(d, q.left); }
+        return { left: g, right: d, top: h, bottom: b };
+    }
+
+    /**
+     * Le bloc visé, amené au milieu du canevas libre s'il n'y est pas entier : la vue se déplace comme au glisser du fond
+     * (le défilement du canevas), rien ne s'écrit dans la carte. Mesuré au rechargement (« Reprendre ») : la carte se
+     * recentre sur la moyenne de ses blocs, et la leçon de l'étape 4 tombait au bas de l'écran, son 🎯 sous le
+     * « Planificateur ». « Recentrer la carte » (`centrerVueSurContenu`) fait la même moyenne : il ne suffit pas.
+     */
+    async function amenerLeBloc(quel) {
+        // Lu à mesure : à la reprise après un rechargement, la carte n'est pas encore chargée quand l'étape commence.
+        await attendre(function () { var b = bloc(quel()); return !!b && b.getBoundingClientRect().width > 0; }, 4000);
+        var n = quel();
+        // La carte chargée se recentre à l'image suivante (`requestAnimationFrame`) : on passe après elle.
+        await new Promise(function (fin) { requestAnimationFrame(function () { requestAnimationFrame(fin); }); });
+        var b = bloc(n), z = el('planif-zone-travail'), L = canevasLibre();
+        if (!n || !b || !z || !L) return;
         var r = b.getBoundingClientRect();
-        var dehors = r.bottom < 0 || r.right < 0 || r.top > window.innerHeight || r.left > window.innerWidth;
-        if (dehors && C() && typeof C().centrerVueSurContenu === 'function') C().centrerVueSurContenu();
+        if (r.left >= L.left && r.right <= L.right && r.top >= L.top && r.bottom <= L.bottom) return;
+        var haut = L.bottom - L.top;
+        var cibleHaut = r.height > haut - 40 ? L.top + 20 : L.top + (haut - r.height) / 2;
+        z.scrollLeft += (r.left + r.width / 2) - (L.left + L.right) / 2;
+        z.scrollTop += r.top - cibleHaut;
     }
 
     // Les contours en plus (des cercles d'attache, deux sélecteurs, les cases de l'Inspecteur) : le même dessin que le
@@ -164,6 +208,7 @@
     var ciblesExtras = function () { return []; };
 
     function majExtras() {
+        if (!M().actif()) inspecteurDevant(false);   // le parcours fermé par le moteur (la démo rouverte)
         var cibles = M().actif() ? (ciblesExtras() || []).filter(vis) : [];
         while (extras.length < cibles.length) {
             var d = document.createElement('div');
@@ -198,6 +243,9 @@
         extras = [];
     }
 
+    /** L'Inspecteur devant la palette « Planificateur », le temps du parcours (css/parcours.css). */
+    function inspecteurDevant(oui) { document.body.classList.toggle('parcours-inspecteur-devant', !!oui); }
+
     async function allerALaCarte() {
         if (!vis(el('conception-carte')) && typeof naviguerVers === 'function') naviguerVers('conception', 'carte');
         await attendre(function () { return vis(el('conception-carte')) && vis(el('planif-palette')); }, 3000);
@@ -228,13 +276,16 @@
             voile: 'aucun',
             avant: async function () {
                 await allerALaCarte();
-                ramenerSiHorsVue(competence());
+                await amenerLeBloc(competence);
                 poserExtras(function () {
                     var idee = duType('idee-maitresse').find(texte);
                     return idee ? ports(competence()) : [];
                 });
             },
-            zones: function () { var idee = duType('idee-maitresse').find(texte); return [idee ? bloc(competence()) : boutonPalette('idee-maitresse')]; },
+            zones: function () {
+                var idee = duType('idee-maitresse').find(texte);
+                return idee ? aLaisserLibre([bloc(competence()), bloc(idee)]) : [boutonPalette('idee-maitresse')];
+            },
             contour: function () { return duType('idee-maitresse').find(texte) ? null : boutonPalette('idee-maitresse'); },
             atteint: function () { return !!ideeReliee(); }
         },
@@ -244,7 +295,7 @@
             voile: 'aucun',
             avant: async function () {
                 await allerALaCarte();
-                ramenerSiHorsVue(ideeReliee());
+                await amenerLeBloc(ideeReliee);
                 poserExtras(function () {
                     var l = duType('lecon').find(texte);
                     if (!l) return [];
@@ -254,7 +305,11 @@
                         : [b && b.querySelector('.planif-noeud-semaine'), b && b.querySelector('.planif-noeud-seance')].filter(Boolean);
                 });
             },
-            zones: function () { var l = duType('lecon').find(texte); return [l ? bloc(l) : boutonPalette('lecon')]; },
+            zones: function () {
+                var l = duType('lecon').find(texte);
+                if (!l) return [boutonPalette('lecon')];
+                return aLaisserLibre((leconDatee(l) ? [bloc(ideeReliee())] : []).concat(partiesDe(l, ['entete', 'titre'])), l);
+            },
             contour: function () { return duType('lecon').find(texte) ? null : boutonPalette('lecon'); },
             atteint: function () { return !!leconReliee(); }
         },
@@ -262,8 +317,8 @@
             titre: 'Ton objectif',
             texte: "L'objectif de leçon est la boussole : c'est lui qui dit ce que l'étudiant·e saura faire à la fin, et c'est par rapport à lui que se choisissent les connaissances, les activités et l'évaluation. Touche le badge 🎯 dans l'en-tête de ta leçon : la zone des objectifs se déplie. Écris ton objectif en commençant par un verbe ; l'invite « Sera en mesure de… » t'y aide. Ta production porte déjà un objectif d'apprentissage : si c'est celui que vise cette leçon, reprends-le ici. Le verbe que tu choisis, tes activités devront le faire exercer et tes évaluations devront l'exiger. Une pastille « ! » apparaît à côté : aucun bloc ne sert encore cet objectif. Elle changera à mesure que tu le relieras. Pour aller plus loin, touche « Objectifs » dans la frise : le guide s'ouvre à la page qui en parle.",
             voile: 'aucun',
-            avant: async function () { retirerExtras(); await allerALaCarte(); ramenerSiHorsVue(laLecon()); },
-            zones: function () { return [bloc(laLecon())]; },
+            avant: async function () { retirerExtras(); await allerALaCarte(); await amenerLeBloc(laLecon); },
+            zones: function () { return partiesDe(laLecon(), ['entete', 'objectifs', 'titre']); },
             contour: function () { var b = bloc(laLecon()); return b ? b.querySelector('.planif-badge-objectif') : null; },
             atteint: function () { return objectifs(laLecon()).length > 0; }
         },
@@ -273,19 +328,23 @@
             voile: 'aucun',
             avant: async function () {
                 await allerALaCarte();
-                ramenerSiHorsVue(laLecon());
+                await amenerLeBloc(laLecon);
                 poserExtras(function () {
                     var act = enfantsDe(laLecon()).find(function (n) { return n.type === 'activite'; });
                     if (!act) return [];
-                    return inspecteurOuvertSur(act) ? [qs('#planif-panneau input[type="checkbox"][data-objectif-id], #planif-panneau .planif-objectifs-servis input[type="checkbox"]')]
+                    return inspecteurOuvertSur(act) ? [].slice.call(document.querySelectorAll('#planif-panneau .planif-objectifs-servis input[type="checkbox"]'))
                         : [bloc(act) && bloc(act).querySelector('.planif-noeud-prise')];
                 });
             },
-            zones: function () { return [bloc(laLecon())]; },
+            zones: function () {
+                var act = duType('activite').pop();
+                if (!act) return [boutonPalette('activite')];
+                return aLaisserLibre([bloc(act)].concat(act.parent ? [] : partiesDe(laLecon(), ['zone'])), act);
+            },
             contour: function () {
                 var libres = duType('activite').filter(function (n) { return !n.parent; });
                 if (!duType('activite').length) return boutonPalette('activite');
-                return libres.length ? bloc(laLecon()) : null;
+                return libres.length ? partiesDe(laLecon(), ['zone'])[0] || null : null;
             },
             atteint: function () { return !!blocQuiSert(); }
         },
@@ -296,19 +355,26 @@
             avant: async function () {
                 varianteRendue = !!evaluationApres() && !evaluationAlignee();
                 await allerALaCarte();
-                ramenerSiHorsVue(laLecon());
+                await amenerLeBloc(laLecon);
                 poserExtras(function () {
                     var ev = enfantsDe(laLecon()).find(function (n) { return n.type === 'evaluation'; });
                     if (!ev) return [];
                     if (!inspecteurOuvertSur(ev)) return [bloc(ev) && bloc(ev).querySelector('.planif-noeud-prise')];
-                    return [].slice.call(document.querySelectorAll('#planif-panneau input[type="checkbox"]')).concat([el('planif-panneau-production')]);
+                    return [].slice.call(document.querySelectorAll('#planif-panneau .planif-objectifs-servis input[type="checkbox"]')).concat([el('planif-panneau-production')]);
                 });
             },
-            zones: function () { return [bloc(laLecon())]; },
+            zones: function () {
+                var ev = duType('evaluation').pop();
+                if (!ev) return [boutonPalette('evaluation')];
+                if (!ev.parent) return [bloc(ev)].concat(partiesDe(laLecon(), ['zone']));
+                // La variante ⚠ se joue sur le canevas (glisser l'évaluation sous l'activité), même l'Inspecteur ouvert.
+                if (varianteRendue) return [bloc(ev)].concat(enfantsDe(laLecon()).filter(function (n) { return n.type === 'activite'; }).map(bloc)).filter(Boolean);
+                return aLaisserLibre([bloc(ev)], ev);
+            },
             contour: function () {
                 if (!duType('evaluation').length) return boutonPalette('evaluation');
                 var libres = duType('evaluation').filter(function (n) { return !n.parent; });
-                return libres.length ? bloc(laLecon()) : null;
+                return libres.length ? partiesDe(laLecon(), ['zone'])[0] || null : null;
             },
             atteint: function () {
                 if (evaluationAlignee()) return true;
@@ -353,10 +419,11 @@
         var reprise = window.Assistance.etatDe(ID).etat === 'en-cours';
         if (!reprise) { depuis = 0; majCtx({ leconId: null }); }
         window.Assistance.definirEtat(ID, 'en-cours', depuis);
+        inspecteurDevant(true);
         return M().lancer(DEF, {
             depuis: depuis,
             surEtape: function (i) { retirerExtras(); window.Assistance.definirEtat(ID, 'en-cours', i); },
-            surQuitter: function () { retirerExtras(); },
+            surQuitter: function () { retirerExtras(); inspecteurDevant(false); },
             surEchap: function () { terminer(); },
             verifier: function () { return !enDemo(); }
         });
@@ -364,6 +431,7 @@
 
     function terminer() {
         retirerExtras();
+        inspecteurDevant(false);
         window.Assistance.definirEtat(ID, 'fait', 0);
         M().fermer();
     }
