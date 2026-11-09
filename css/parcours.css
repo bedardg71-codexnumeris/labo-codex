@@ -159,6 +159,55 @@ body.mode-clair {
 .parcours-bulle-sortie:hover { color: var(--texte-principal); }
 .parcours-bulle-sortie:focus-visible { outline: 2px solid var(--focus-ring-color); outline-offset: 2px; }
 
+/* ---------- Les bulles en pages (lot du 9 nov. 2026, js/parcours-moteur.js) ----------
+   « n sur N » et, quand le texte a des pages, « 1/2 » à côté ; « ← » et « → » sous le texte. Les pages
+   qu'on ne lit pas restent dans le texte, cachées à l'œil (u-lecteur-ecran) : le lecteur d'écran lit tout. */
+.parcours-bulle-reperes {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 8px;
+    flex: none;
+}
+
+.parcours-bulle-pages {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--texte-secondaire);
+    white-space: nowrap;
+}
+
+.parcours-bulle-pages[hidden],
+.parcours-bulle-nav[hidden] { display: none; }
+
+/* Une page du texte (un span par page) : la courante seule se voit ; les autres passent en u-lecteur-ecran,
+   pour que le lecteur d'écran lise tout, dans l'ordre. Le span reste en ligne, dans le paragraphe. */
+.parcours-bulle-page { display: inline; }
+
+.parcours-bulle-nav {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    margin-top: -4px;
+}
+
+.parcours-bulle-fleche {
+    min-width: 44px;
+    min-height: 36px;
+    padding: 0 10px;
+    background: var(--surface-conteneur, transparent);
+    color: var(--texte-principal);
+    border: 1px solid var(--bordure-moyenne);
+    border-radius: var(--radius-moyen, 8px);
+    font: inherit;
+    font-size: 16px;
+    line-height: 1;
+    cursor: pointer;
+}
+
+.parcours-bulle-fleche:hover:not(:disabled) { border-color: var(--parcours-contour); }
+.parcours-bulle-fleche:disabled { opacity: 0.4; cursor: default; }
+.parcours-bulle-fleche:focus-visible { outline: 2px solid var(--focus-ring-color); outline-offset: 2px; }
+
 /* ---------- La bulle sur téléphone (lot du 9 nov. 2026) ----------
    Jusqu'à 500 px de large (SEUIL_TELEPHONE de js/parcours-moteur.js) : pleine largeur, rangée au
    bord de l'écran par le moteur ; repliée, la tête seule (titre et « n sur N ») ; la tête est un
@@ -206,6 +255,7 @@ body.mode-clair {
 
 .parcours-bulle.est-repliee { padding-top: 12px; padding-bottom: 12px; }
 .parcours-bulle.est-repliee > :not(.parcours-bulle-tete) { display: none; }
+.parcours-bulle.est-repliee .parcours-bulle-pages { display: none; }   /* repliée : la tête seule, comme avant les pages */
 .parcours-bulle.est-repliee .parcours-bulle-bascule { inset: -12px -16px; border-radius: var(--radius-grand, 12px); }
 
 /* Le témoin « Enregistré » (en bas à gauche) passe au-dessus d'une bulle rangée en bas : le moteur

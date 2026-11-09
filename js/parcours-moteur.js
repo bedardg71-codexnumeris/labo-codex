@@ -40,6 +40,18 @@
    haute que l'espace disponible (fenêtre courte, clavier ouvert) s'y limite ; seul son texte
    défile, le titre, « n sur N », le geste et les boutons restent visibles. Une bulle qui tient
    reste telle quelle.
+   LES BULLES EN PAGES (lot du 9 nov. 2026, plans de travail/CONSIGNE-LOT-2026-11-09-bulles-en-pages.md) :
+   · un texte de plus de LIGNES_PAR_PAGE lignes, à la largeur de la bulle, se coupe en deux pages (trois
+     au plus si une page dépasse encore), à la fin d'une phrase hors d'une citation entre guillemets, au
+     plus près du milieu. Aucun mot ne change ; sans fin de phrase où couper, le texte reste entier.
+   · « 1/2 » se pose à côté de « n sur N » ; « ← » et « → », sous le texte, changent de page ; au
+     clavier, les flèches gauche et droite quand la bulle a le focus.
+   · Toutes les pages restent dans le texte de la bulle, dans l'ordre : celles qu'on ne voit pas sont
+     cachées à l'œil (u-lecteur-ecran), pas au lecteur d'écran ; l'annonce dit le texte entier.
+   · La ligne du geste, les boutons et le lien de sortie ne bougent pas ; l'étape avance sur l'état
+     atteint, quelle que soit la page. Le filet (le texte qui défile) reste le dernier recours.
+   · La découpe suit la largeur de la bulle : un parcours qui la change (une sonde d'étape) la refait
+     au passage suivant de la sonde, la page affichée gardée si elle existe encore.
    ================================================================= */
 (function () {
     'use strict';
@@ -49,6 +61,8 @@
     var ECART = 12;
     var SEUIL_TELEPHONE = 500; // px de large de la fenêtre : en deçà, la bulle prend sa forme de téléphone
     var REGLAGE_MS = 1200;     // sur téléphone, le temps où le moteur peut faire défiler pour ranger la bulle en bas
+    var LIGNES_PAR_PAGE = 10;  // au-delà, à la largeur de la bulle, le texte se coupe en pages
+    var PAGES_MAX = 3;
 
     var etat = null; // { def, i, opts, timer, elements, enTransition }
 
@@ -161,6 +175,7 @@
         bulle.setAttribute('aria-modal', 'false');
         bulle.setAttribute('aria-labelledby', 'parcours-bulle-titre');
         bulle.tabIndex = -1;
+        bulle.addEventListener('keydown', surToucheBulle);
 
         var annonce = document.createElement('div');
         annonce.className = 'u-lecteur-ecran';
@@ -179,6 +194,169 @@
             var el = document.getElementById(id);
             if (el && el.parentNode) el.parentNode.removeChild(el);
         });
+    }
+
+    // ---------- Les pages d'une bulle ----------
+
+    /**
+     * Les positions où le texte peut se couper : juste après une fin de phrase (. ! ? …) suivie d'une
+     * espace et d'une majuscule (ou d'un guillemet, d'un chiffre), hors d'une citation « … ». Pure.
+     * @returns {number[]} les index de coupe (la page suivante commence après l'espace)
+     */
+    function coupuresPossibles(texte) {
+        var res = [];
+        var profondeur = 0;
+        for (var i = 0; i < texte.length; i++) {
+            var c = texte.charAt(i);
+            if (c === '«') profondeur++;
+            else if (c === '»') profondeur = Math.max(0, profondeur - 1);
+            else if (profondeur === 0 && '.!?…'.indexOf(c) !== -1 && texte.charAt(i + 1) === ' '
+                && /[A-ZÀ-ÖØ-ÞŒ«0-9]/.test(texte.charAt(i + 2))) res.push(i + 1);
+        }
+        return res;
+    }
+
+    /**
+     * Le texte en `n` pages, chaque coupe à la fin de phrase la plus proche de j × longueur / n (au plus
+     * près du milieu pour deux pages). Rend null si les fins de phrase ne suffisent pas. Pure.
+     */
+    function partager(texte, coupes, n) {
+        var choisies = [];
+        var avant = 0;
+        for (var j = 1; j < n; j++) {
+            var cible = j * texte.length / n;
+            var restantes = n - 1 - j; // les coupes qu'il faudra encore après celle-ci
+            var candidates = coupes.filter(function (c) { return c > avant; });
+            if (candidates.length <= restantes) return null;
+            candidates = candidates.slice(0, candidates.length - restantes);
+            var meilleure = candidates.reduce(function (m, c) { return Math.abs(c - cible) < Math.abs(m - cible) ? c : m; });
+            choisies.push(meilleure);
+            avant = meilleure;
+        }
+        var pages = [];
+        var debut = 0;
+        choisies.concat([texte.length]).forEach(function (fin) {
+            pages.push(texte.slice(debut, fin).trim());
+            debut = fin;
+        });
+        return pages;
+    }
+
+    /** Le nombre de lignes que `texte` prend dans `p`, à sa largeur. */
+    function lignesDe(p, texte) {
+        p.textContent = texte;
+        var ligne = parseFloat(getComputedStyle(p).lineHeight) || 22;
+        return Math.round(p.scrollHeight / ligne);
+    }
+
+    /** Les pages du texte, à la largeur de `p` : une seule s'il tient en LIGNES_PAR_PAGE lignes. */
+    function decouperEnPages(p, texte) {
+        p.style.minHeight = '';
+        if (lignesDe(p, texte) <= LIGNES_PAR_PAGE) return [texte];
+        var coupes = coupuresPossibles(texte);
+        var retenues = [texte];
+        for (var n = 2; n <= PAGES_MAX; n++) {
+            var pages = partager(texte, coupes, n);
+            if (!pages) break;
+            retenues = pages;
+            if (pages.every(function (pg) { return lignesDe(p, pg) <= LIGNES_PAR_PAGE; })) break;
+        }
+        return retenues;
+    }
+
+    /** Pose les pages dans le texte de la bulle : toutes, dans l'ordre ; celle qu'on lit est visible. */
+    function ecrirePages(p, pages) {
+        p.textContent = '';
+        pages.forEach(function (pg, k) {
+            if (k > 0) p.appendChild(document.createTextNode(' '));
+            var span = document.createElement('span');
+            span.className = 'parcours-bulle-page';
+            span.dataset.page = String(k);
+            span.textContent = pg;
+            p.appendChild(span);
+        });
+    }
+
+    /** Le plancher du filet : le texte se resserre, jamais sous trois lignes (ou sa hauteur). */
+    function poserPlancher(p) {
+        p.style.minHeight = '';
+        var ligne = parseFloat(getComputedStyle(p).lineHeight) || 22;
+        p.style.minHeight = Math.min(p.scrollHeight, Math.ceil(3 * ligne)) + 'px';
+    }
+
+    /** Montre la page `k` (bornée) : sa partie du texte, « k/n », les flèches. */
+    function montrerPage(k) {
+        var b = etat.elements.bulle;
+        var n = etat.pages.length;
+        etat.page = Math.max(0, Math.min(k, n - 1));
+        var p = b.querySelector('.parcours-bulle-texte');
+        if (p) {
+            [].forEach.call(p.querySelectorAll('.parcours-bulle-page'), function (span) {
+                span.classList.toggle('u-lecteur-ecran', Number(span.dataset.page) !== etat.page);
+            });
+            p.scrollTop = 0;
+            poserPlancher(p);
+        }
+        var indice = b.querySelector('.parcours-bulle-pages');
+        if (indice) indice.textContent = (etat.page + 1) + '/' + n;
+        var prec = b.querySelector('.parcours-bulle-page-prec');
+        var suiv = b.querySelector('.parcours-bulle-page-suiv');
+        var avaitFocus = document.activeElement;
+        if (prec) prec.disabled = etat.page === 0;
+        if (suiv) suiv.disabled = etat.page === n - 1;
+        // Un bouton devenu inactif perd le focus : il passe à l'autre flèche.
+        if (avaitFocus && avaitFocus.disabled) {
+            var autre = avaitFocus === prec ? suiv : prec;
+            try { (autre && !autre.disabled ? autre : b).focus({ preventScroll: true }); } catch (e) { b.focus(); }
+        }
+    }
+
+    /** Change de page ; la bulle se replace à sa nouvelle hauteur. */
+    function changerPage(delta) {
+        if (!etat || !etat.pages || etat.pages.length < 2) return false;
+        var k = Math.max(0, Math.min(etat.page + delta, etat.pages.length - 1));
+        if (k === etat.page) return false;
+        montrerPage(k);
+        sonder();
+        return true;
+    }
+
+    /** Les flèches gauche et droite, quand la bulle (ou l'un de ses boutons) a le focus. */
+    function surToucheBulle(ev) {
+        if (!etat || (ev.key !== 'ArrowRight' && ev.key !== 'ArrowLeft')) return;
+        if (!etat.elements.bulle.contains(document.activeElement)) return;
+        if (changerPage(ev.key === 'ArrowRight' ? 1 : -1)) ev.preventDefault();
+    }
+
+    /**
+     * Découpe le texte de l'étape à la largeur actuelle de la bulle et pose ses pages ; la page `garder`
+     * reste affichée si elle existe encore ; la largeur mesurée est gardée (`largeurPages`).
+     */
+    function paginer(etape, garder) {
+        var b = etat.elements.bulle;
+        var p = b.querySelector('.parcours-bulle-texte');
+        if (!p) return;
+        etat.largeurPages = p.offsetWidth;
+        etat.pages = decouperEnPages(p, etape.texte);
+        ecrirePages(p, etat.pages);
+        var plusieurs = etat.pages.length > 1;
+        var indice = b.querySelector('.parcours-bulle-pages');
+        var nav = b.querySelector('.parcours-bulle-nav');
+        if (indice) indice.hidden = !plusieurs;
+        if (nav) nav.hidden = !plusieurs;
+        montrerPage(plusieurs ? (garder || 0) : 0);
+    }
+
+    /**
+     * À chaque passage de la sonde : si la largeur du texte a changé (une sonde d'étape qui change la
+     * forme de la bulle, une fenêtre redimensionnée), la découpe est refaite. Un texte caché (forme
+     * réduite d'un parcours, bulle repliée) n'est pas mesuré.
+     */
+    function suivreLargeurDesPages() {
+        var etape = etapeCourante();
+        var p = etat.elements.bulle.querySelector('.parcours-bulle-texte');
+        if (!p || !p.offsetWidth || p.offsetWidth === etat.largeurPages) return;
+        paginer(etape, etat.page);
     }
 
     // ---------- Le rendu d'une étape ----------
@@ -226,7 +404,17 @@
         rang.className = 'parcours-bulle-rang';
         rang.textContent = (etat.i + 1) + ' sur ' + total;
         tete.appendChild(h);
-        tete.appendChild(rang);
+        // « n sur N » et, quand le texte a des pages, « 1/2 » à côté (pour l'œil : le lecteur d'écran a le
+        // texte entier, dans l'ordre).
+        var reperes = document.createElement('span');
+        reperes.className = 'parcours-bulle-reperes';
+        reperes.appendChild(rang);
+        var indicePages = document.createElement('span');
+        indicePages.className = 'parcours-bulle-pages';
+        indicePages.setAttribute('aria-hidden', 'true');
+        indicePages.hidden = true;
+        reperes.appendChild(indicePages);
+        tete.appendChild(reperes);
         if (etat.telephone) {
             // Un bouton posé sur la tête (une tête de section ne va pas DANS un bouton) : son nom
             // est le titre, son état dit si la bulle est dépliée.
@@ -241,11 +429,26 @@
 
         var p = document.createElement('p');
         p.className = 'parcours-bulle-texte';
-        p.textContent = etape.texte;
         b.appendChild(p);
-        // Le filet : le texte peut se resserrer et défiler, jamais sous trois lignes (ou sa hauteur).
-        var ligne = parseFloat(getComputedStyle(p).lineHeight) || 22;
-        p.style.minHeight = Math.min(p.scrollHeight, Math.ceil(3 * ligne)) + 'px';
+
+        // Les flèches des pages, sous le texte ; cachées tant que le texte tient en une page.
+        var nav = document.createElement('div');
+        nav.className = 'parcours-bulle-nav';
+        nav.hidden = true;
+        [['parcours-bulle-page-prec', '←', 'Page précédente', -1], ['parcours-bulle-page-suiv', '→', 'Page suivante', 1]].forEach(function (d) {
+            var f = document.createElement('button');
+            f.type = 'button';
+            f.className = 'parcours-bulle-fleche ' + d[0];
+            f.textContent = d[1];
+            f.setAttribute('aria-label', d[2]);
+            f.addEventListener('click', function () { changerPage(d[3]); });
+            nav.appendChild(f);
+        });
+        b.appendChild(nav);
+
+        // Les pages, à la largeur de la bulle (le filet : jamais sous trois lignes, posé par montrerPage).
+        // Seule la forme change (le seuil du téléphone franchi) : la page affichée reste.
+        paginer(etape, opts && opts.sansAnnonce ? etat.page : 0);
 
         if (etape.geste) {
             var g = document.createElement('p');
@@ -507,6 +710,8 @@
             c.hidden = true;
         }
 
+        // La découpe suit la largeur de la bulle (une sonde d'étape a pu la changer), avant sa place.
+        suivreLargeurDesPages();
         // La bulle évite la zone éclairée ET le contour.
         placerBulle(etape, union(rectsDe(zones.concat(contourEl ? [contourEl] : []))), visible(contourEl) ? contourEl : null);
 
@@ -575,7 +780,7 @@
         if (etat) fermer();
         retirerElements();
         etat = { def: def, i: 0, opts: opts || {}, elements: creerElements(), enTransition: false,
-                 telephone: surTelephone(), replie: false, reglerJusqua: 0 };
+                 telephone: surTelephone(), replie: false, reglerJusqua: 0, pages: [], page: 0, largeurPages: 0 };
         document.body.classList.add('parcours-actif');
         if (window.transitions && typeof window.transitions.fermerBandeau === 'function') window.transitions.fermerBandeau();
         document.addEventListener('keydown', surTouche, true);
@@ -616,6 +821,8 @@
         quitter: quitter,
         actif: function () { return !!etat; },
         etapeCourante: function () { return etat ? etat.i : null; },
+        // Les bulles en pages : la page affichée et leur nombre (0 et 1 quand le texte tient).
+        pageCourante: function () { return etat ? { page: etat.page, pages: etat.pages.length } : null; },
         allerA: function (i) { return allerA(i); },
         // Utilitaires pour les définitions de parcours.
         visible: visible,
