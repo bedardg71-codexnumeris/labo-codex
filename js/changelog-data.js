@@ -21,6 +21,20 @@
 
     var CHANGELOG = [
         {
+            // 1.240 (groupe 2 du 9 nov. 2026 : la bulle sur téléphone, les parcours 6 et 7, la non-participation de
+            // l'absent·e total·e, le compteur de l'export Léa) — titre et cinq lignes validés par Grégoire, mot pour mot.
+            version: '1.240',
+            couleur: 'vert',
+            titre: 'Deux parcours de plus',
+            items: [
+                'Sur un téléphone, la bulle des parcours se range au bas de l’écran, repliée&nbsp;: son titre et l’étape. Touche-la pour la lire&nbsp;; elle ne couvre pas ce qu’il faut toucher. Une bulle trop haute pour l’écran fait défiler son texte.',
+                'Troisième parcours, «&nbsp;Mettre tes données à l’abri&nbsp;»&nbsp;: mettre ton codex à jour, puis savoir comment le rouvrir. Pendant un parcours, le rappel «&nbsp;Mets ton codex à jour&nbsp;» attend la fin.',
+                'Quatrième parcours, «&nbsp;Lire ta classe et intervenir&nbsp;»&nbsp;: avant chaque cours, voir qui a besoin de toi et de quoi&nbsp;; puis, si tu le décides, noter une intervention.',
+                'Suivi&nbsp;: une personne absente à toutes les séances passées, sans aucune production, est lue en non-participation (niveau 3), quand le groupe permet d’en juger. Son profil a son Accompagnement et «&nbsp;+ Nouvelle intervention&nbsp;».',
+                '«&nbsp;Exporter pour Léa&nbsp;»&nbsp;: quand rien n’est verrouillé, le compteur dit «&nbsp;Aucune évaluation verrouillée&nbsp;».'
+            ]
+        },
+        {
             // 1.239 (groupe 1 du 9 nov. 2026 : « Découvrir », « Mettre ta classe en place », l'export Léa, la reprise) —
             // titre et lignes validés par Grégoire, mot pour mot, le 9 nov. 2026 ; la ligne de la reprise (validée plus tôt
             // le même jour) quitte l'entrée 1.238.
