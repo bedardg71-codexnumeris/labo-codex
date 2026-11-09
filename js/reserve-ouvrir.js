@@ -1098,6 +1098,21 @@ async function _reimporterImagesEtPhrases(ajoutes) {
     }
 }
 
+/**
+ * La personnalisation d'un tampon lue dans une archive (un fichier venu de dehors), réduite à ce
+ * qu'elle peut porter : une image (data URI d'image, `imageDeTamponAcceptable`), un emoji, un nom.
+ * Rien d'autre ne passe ; `null` s'il ne reste rien. Un double ne prend pas le nom de son original.
+ */
+function _persoAssainie(src, garderNom) {
+    if (!src || typeof src !== 'object') return null;
+    var to = window.travauxOutils;
+    var perso = {};
+    if (to && typeof to.imageDeTamponAcceptable === 'function' && to.imageDeTamponAcceptable(src.imageBase64)) perso.imageBase64 = src.imageBase64;
+    if (typeof src.emoji === 'string' && src.emoji.length <= 32) perso.emoji = src.emoji;
+    if (garderNom && typeof src.nom === 'string') perso.nom = src.nom.slice(0, 200);
+    return Object.keys(perso).length ? perso : null;
+}
+
 /** L'image (la personnalisation) de chaque tampon ajouté que l'espace n'a pas encore. */
 async function _reimporterImages(ids, ajoutes, persos) {
     if (!ids.some(function(id) { return persos[id]; })) return;
@@ -1105,9 +1120,8 @@ async function _reimporterImages(ids, ajoutes, persos) {
         var actuels = (lus && typeof lus === 'object' && !Array.isArray(lus)) ? lus : {};
         ids.forEach(function(id) {
             var cible = ajoutes[id];
-            if (!persos[id] || Object.prototype.hasOwnProperty.call(actuels, cible)) return;
-            var perso = JSON.parse(JSON.stringify(persos[id]));
-            if (cible !== id) delete perso.nom;   // un double garde son nom « — copie »
+            var perso = _persoAssainie(persos[id], cible === id);   // un double garde son nom « — copie »
+            if (!perso || Object.prototype.hasOwnProperty.call(actuels, cible)) return;
             actuels[cible] = perso;
         });
         return actuels;
@@ -1117,7 +1131,7 @@ async function _reimporterImages(ids, ajoutes, persos) {
 /** La phrase de chaque tampon ajouté que l'espace n'a pas encore. */
 async function _reimporterPhrases(ids, ajoutes, textes) {
     var a = function(o, k) { return Object.prototype.hasOwnProperty.call(o, k); };
-    if (!ids.some(function(id) { return a(textes, id); })) return;
+    if (!ids.some(function(id) { return typeof textes[id] === 'string'; })) return;
     // Sans textes enregistrés, l'espace lit les textes par défaut : on part d'eux, pour qu'ajouter
     // une phrase n'efface pas celles des tampons livrés.
     var depart = (window.travauxOutils && typeof window.travauxOutils.obtenirRetroactionsObservations === 'function')
@@ -1125,7 +1139,8 @@ async function _reimporterPhrases(ids, ajoutes, textes) {
     await db.modifier('retroactionsObservations', function(lus) {
         var actuels = (lus && typeof lus === 'object' && !Array.isArray(lus)) ? lus : Object.assign({}, depart);
         ids.forEach(function(id) {
-            if (a(textes, id) && !a(actuels, ajoutes[id])) actuels[ajoutes[id]] = textes[id];
+            // Une phrase : du texte, borné ; jamais autre chose (l'archive est un fichier venu de dehors).
+            if (typeof textes[id] === 'string' && !a(actuels, ajoutes[id])) actuels[ajoutes[id]] = textes[id].slice(0, 5000);
         });
         return actuels;
     }, null);

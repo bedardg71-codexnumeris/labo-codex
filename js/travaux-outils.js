@@ -862,10 +862,19 @@
         return p ? p.perso : null;
     }
 
+    /**
+     * 9 nov. 2026 — une image de tampon venue d'une archive (sa photo, ou la réimportation choisie) :
+     * une data URI d'image, bornée comme le schéma d'import d'un tampon (10 Mo) ; rien d'autre.
+     */
+    function imageDeTamponAcceptable(src) {
+        return typeof src === 'string' && src.length <= 10000000
+            && /^data:image\/(png|jpeg|gif|webp|svg\+xml);base64,/.test(src);
+    }
+
     /** Charge l'image d'un tampon de la photo (une fois), comme une image personnalisée. */
     function _imageDeLaPhoto(id) {
         var p = _tamponDeLaPhoto(id);
-        if (!p || !p.perso || !p.perso.imageBase64) return null;
+        if (!p || !p.perso || !imageDeTamponAcceptable(p.perso.imageBase64)) return null;
         var img = new Image();
         promessesAutocollants[id] = new Promise(function(resolve, reject) {
             img.onload = function() { resolve(img); };
@@ -4503,6 +4512,7 @@
         totalCodesEnMots: _totalCodesEnMots,          // étape 2a (22 oct.) — exposée pour les bancs
         // Retroactions personnalisées
         obtenirRetroactionsObservations: obtenirRetroactionsObservations,
+        imageDeTamponAcceptable: imageDeTamponAcceptable,   // 9 nov. 2026 : l'image d'un tampon venue d'une archive
         obtenirRetroactionsErreursFr: obtenirRetroactionsErreursFr,
         // Lot 2 — la grille de la copie ouverte (null = repli), lue par le dessin et le PDF.
         grilleCourante: function() { return _grilleCourante; },

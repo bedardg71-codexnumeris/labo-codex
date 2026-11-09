@@ -171,7 +171,7 @@ test.describe('Les tampons dans l\'archive d\'un trimestre (mode fichier, largeu
                 await db.set('tamponsPersonnalises', [{ id: 'TP_espace', nom: 'Tampon fictif de l\'espace', categorie: 'observations' }]);
                 await db.set('retroactionsObservations', { TP_espace: 'Phrase fictive de l\'espace.' });
                 await db.set('personnalisationObservations', {});
-                await db.set('bibliothequeTampons', []);
+                await db.set('bibliothequeTampons', []);   // security-ok: banc, l'espace vidé de sa bibliothèque
                 await db.flush();
             });
             // Un espace qui n'a pas ce tampon, c'est une page qui ne l'a jamais chargé : on recharge
