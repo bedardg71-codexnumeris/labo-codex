@@ -135,6 +135,7 @@ test('« Recevoir les productions, rendre tes rétroactions », la voie des fich
     await expect(page.locator('#evaluations-liste tr', { hasText: 'Cormoran' })).toContainText('Importé');   // affiché en capitales par la CSS
     const annoter = await valeurAction(page, 'annoter|');
     await contourSur(page, `#evaluations-liste select.eval-actions-select:has(option[value^="annoter|"])`);
+    await expect(page.locator('#evaluations-liste select.eval-actions-select:has(option[value^="annoter|"])').first()).toBeInViewport();
     await capture(page, DOSSIER, `p4-3-${cap}`);
     await ligneDe(page, annoter).selectOption(annoter);
 
@@ -224,6 +225,7 @@ test('« Recevoir les productions, rendre tes rétroactions », la voie sans fic
     expect(await page.evaluate(() => ParcoursRecevoir.contexte().voie)).toBe('sans-fichier');
     const evaluer = await valeurAction(page, 'evaluer|2390002|');
     await contourSur(page, `#evaluations-liste select.eval-actions-select:has(option[value^="evaluer|"])`);
+    await expect(page.locator('#evaluations-liste select.eval-actions-select:has(option[value^="evaluer|"])').first()).toBeInViewport();
     await capture(page, DOSSIER, `p4-6-${cap}`);
     await ligneDe(page, evaluer).selectOption(evaluer);
     await expect(page.locator('#evaluations-contenu-evaluation')).toBeVisible();

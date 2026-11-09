@@ -216,6 +216,13 @@
 
     function rangeeDe(s) { return s ? (s.closest('tr') || s.parentElement) : null; }
 
+    /** Le menu « Actions… » amené dans la vue de côté : à 1180 px, la Liste dépasse l'écran (comme au troisième parcours). */
+    function amenerDeCote(e) {
+        if (!e) return;
+        var r = e.getBoundingClientRect();
+        if (r.right > window.innerWidth || r.left < 0) e.scrollIntoView({ block: 'nearest', inline: 'center' });
+    }
+
     // ---------- L'export ----------
 
     var exportTouche = false;
@@ -317,6 +324,7 @@
             retirerExtras();
             aller('evaluations', 'liste');
             await attendre(function () { return !!menuActions('annoter'); }, 3000);
+            amenerDeCote(menuActions('annoter'));
         },
         zones: function () { return [rangeeDe(menuActions('annoter'))]; },
         contour: function () { return menuActions('annoter'); },
@@ -373,6 +381,7 @@
             if (ecranEvaluationVisible()) return;
             aller('evaluations', 'liste');
             await attendre(function () { return !!menuActions('evaluer'); }, 3000);
+            amenerDeCote(menuActions('evaluer'));
         },
         zones: function () {
             if (ecranEvaluationVisible()) { poserVoile('aucun'); return [critereAAttribuer() || boutonVerrou()]; }
