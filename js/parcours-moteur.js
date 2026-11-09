@@ -44,14 +44,15 @@
    · un texte de plus de LIGNES_PAR_PAGE lignes, à la largeur de la bulle, se coupe en deux pages (trois
      au plus si une page dépasse encore), à la fin d'une phrase hors d'une citation entre guillemets, au
      plus près du milieu. Aucun mot ne change ; sans fin de phrase où couper, le texte reste entier.
-   · « 1/2 » se pose à côté de « n sur N » ; « ← » et « → », sous le texte, changent de page ; au
-     clavier, les flèches gauche et droite quand la bulle a le focus.
+   · Sous le texte, « ← 1/3 → » (décision de Grégoire, 9 nov., 17 h 55 : la tête ne garde que « n sur N ») ;
+     au clavier, les flèches gauche et droite quand la bulle a le focus. Au changement de page, le lecteur
+     d'écran entend « page 2 de 3 », sans le texte de l'étape.
    · Toutes les pages restent dans le texte de la bulle, dans l'ordre : celles qu'on ne voit pas sont
      cachées à l'œil (u-lecteur-ecran), pas au lecteur d'écran ; l'annonce dit le texte entier.
    · La ligne du geste, les boutons et le lien de sortie ne bougent pas ; l'étape avance sur l'état
      atteint, quelle que soit la page. Le filet (le texte qui défile) reste le dernier recours.
    · La découpe suit la largeur de la bulle : un parcours qui la change (une sonde d'étape) la refait
-     au passage suivant de la sonde, la page affichée gardée si elle existe encore.
+     dans le même passage de la sonde, la page affichée gardée si elle existe encore.
    ================================================================= */
 (function () {
     'use strict';
@@ -335,12 +336,16 @@
         }
     }
 
-    /** Change de page ; la bulle se replace à sa nouvelle hauteur. */
+    /**
+     * Change de page ; la bulle se replace à sa nouvelle hauteur. Le lecteur d'écran entend « page 2 de 3 »,
+     * sans le texte de l'étape (déjà annoncé au rendu, et lisible en entier dans la bulle).
+     */
     function changerPage(delta) {
         if (!etat || !etat.pages || etat.pages.length < 2) return false;
         var k = Math.max(0, Math.min(etat.page + delta, etat.pages.length - 1));
         if (k === etat.page) return false;
         montrerPage(k);
+        etat.elements.annonce.textContent = 'page ' + (k + 1) + ' de ' + etat.pages.length;
         sonder();
         return true;
     }
@@ -372,9 +377,7 @@
         egaliserPages(p, etat.pages);
         ecrirePages(p, etat.pages);
         var plusieurs = etat.pages.length > 1;
-        var indice = b.querySelector('.parcours-bulle-pages');
         var nav = b.querySelector('.parcours-bulle-nav');
-        if (indice) indice.hidden = !plusieurs;
         if (nav) nav.hidden = !plusieurs;
         montrerPage(plusieurs ? (garder || 0) : 0);
     }
@@ -436,17 +439,7 @@
         rang.className = 'parcours-bulle-rang';
         rang.textContent = (etat.i + 1) + ' sur ' + total;
         tete.appendChild(h);
-        // « n sur N » et, quand le texte a des pages, « 1/2 » à côté (pour l'œil : le lecteur d'écran a le
-        // texte entier, dans l'ordre).
-        var reperes = document.createElement('span');
-        reperes.className = 'parcours-bulle-reperes';
-        reperes.appendChild(rang);
-        var indicePages = document.createElement('span');
-        indicePages.className = 'parcours-bulle-pages';
-        indicePages.setAttribute('aria-hidden', 'true');
-        indicePages.hidden = true;
-        reperes.appendChild(indicePages);
-        tete.appendChild(reperes);
+        tete.appendChild(rang);
         if (etat.telephone) {
             // Un bouton posé sur la tête (une tête de section ne va pas DANS un bouton) : son nom
             // est le titre, son état dit si la bulle est dépliée.
@@ -463,19 +456,26 @@
         p.className = 'parcours-bulle-texte';
         b.appendChild(p);
 
-        // Les flèches des pages, sous le texte ; cachées tant que le texte tient en une page.
+        // Sous le texte, « ← 1/3 → » ; caché tant que le texte tient en une page. Le compteur est pour
+        // l'œil : au changement de page, le lecteur d'écran entend « page 2 de 3 » (changerPage).
         var nav = document.createElement('div');
         nav.className = 'parcours-bulle-nav';
         nav.hidden = true;
-        [['parcours-bulle-page-prec', '←', 'Page précédente', -1], ['parcours-bulle-page-suiv', '→', 'Page suivante', 1]].forEach(function (d) {
+        var fleche = function (classe, signe, nom, delta) {
             var f = document.createElement('button');
             f.type = 'button';
-            f.className = 'parcours-bulle-fleche ' + d[0];
-            f.textContent = d[1];
-            f.setAttribute('aria-label', d[2]);
-            f.addEventListener('click', function () { changerPage(d[3]); });
-            nav.appendChild(f);
-        });
+            f.className = 'parcours-bulle-fleche ' + classe;
+            f.textContent = signe;
+            f.setAttribute('aria-label', nom);
+            f.addEventListener('click', function () { changerPage(delta); });
+            return f;
+        };
+        var compteur = document.createElement('span');
+        compteur.className = 'parcours-bulle-pages';
+        compteur.setAttribute('aria-hidden', 'true');
+        nav.appendChild(fleche('parcours-bulle-page-prec', '←', 'Page précédente', -1));
+        nav.appendChild(compteur);
+        nav.appendChild(fleche('parcours-bulle-page-suiv', '→', 'Page suivante', 1));
         b.appendChild(nav);
 
         // Les pages, à la largeur de la bulle (le filet : jamais sous trois lignes, posé par montrerPage).

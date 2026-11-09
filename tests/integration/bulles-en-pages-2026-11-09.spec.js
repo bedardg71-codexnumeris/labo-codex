@@ -12,7 +12,9 @@ import { attendreApplication } from './harness/attendre-application.js';
 //   · une longue se coupe à une fin de phrase, jamais dans une citation entre guillemets, au plus près du milieu ;
 //     ses pages, mises bout à bout, redonnent le texte mot pour mot, et chacune tient en dix lignes ;
 //   · le texte entier reste dans la bulle, dans l'ordre (le lecteur d'écran le lit), une page à l'œil ;
-//   · « → », « ← », et les flèches du clavier quand la bulle a le focus ; « 1/2 » à côté de « n sur N » ;
+//   · « → », « ← », et les flèches du clavier quand la bulle a le focus ; le compteur entre les flèches,
+//     « ← 1/2 → », jamais dans la tête (décision de Grégoire, 9 nov., 17 h 55) ; au changement de page, le
+//     lecteur d'écran entend « page 2 de 2 », sans le texte de l'étape ;
 //   · la ligne du geste et « Plus tard » sont visibles sur chaque page ; le geste fait avancer depuis la page 2 ;
 //   · sur téléphone (390 px), repliée, la tête seule (sans « 1/2 ») ; dépliée, elle se pagine.
 // Puis, après la relecture d'un agent neuf (9 nov.) : « ← » et « → » ne bougent pas d'une page à l'autre ; le
@@ -129,11 +131,22 @@ for (const largeur of [1180, 820]) {
         await expect(bulle(page).locator('.parcours-bulle-texte')).toHaveText(COURT);
         await bulle(page).getByRole('button', { name: 'Continuer' }).click();
 
-        // La bulle longue : deux pages (le texte de banc est taillé pour cela), « 1/2 » à côté de « 2 sur 3 ».
+        // La bulle longue : deux pages (le texte de banc est taillé pour cela) ; « ← 1/2 → » sous le texte.
         await expect(rang(page)).toHaveText('2 sur 3');
         const l = await lirePages(page);
         expect(l.etat.pages, 'deux pages à cette largeur : sinon la garde des guillemets n’est pas éprouvée').toBe(2);
         await expect(indice(page)).toHaveText('1/2');
+        // La tête ne garde que le titre et le rang : le compteur des pages n'y reparaît pas.
+        await expect(bulle(page).locator('.parcours-bulle-tete .parcours-bulle-pages'), 'le compteur des pages hors de la tête').toHaveCount(0);
+        await expect(bulle(page).locator('.parcours-bulle-tete')).toHaveText('Longue2 sur 3');
+        // Le compteur entre les deux flèches, dans le DOM et à l'écran.
+        const nav = await bulle(page).locator('.parcours-bulle-nav').evaluate((n) => ({
+            ordre: [...n.children].map((c) => c.className),
+            x: [...n.children].map((c) => { const r = c.getBoundingClientRect(); return [Math.round(r.left), Math.round(r.right)]; })
+        }));
+        expect(nav.ordre).toEqual(['parcours-bulle-fleche parcours-bulle-page-prec', 'parcours-bulle-pages', 'parcours-bulle-fleche parcours-bulle-page-suiv']);
+        expect(nav.x[0][1]).toBeLessThanOrEqual(nav.x[1][0]);
+        expect(nav.x[1][1]).toBeLessThanOrEqual(nav.x[2][0]);
         // Mises bout à bout, les pages redonnent le texte mot pour mot.
         expect(l.textes.join(' ')).toBe(LONG);
         expect(l.tout).toBe(LONG);
@@ -161,12 +174,15 @@ for (const largeur of [1180, 820]) {
         await suivante(page).click();
         expect((await lirePages(page)).etat.page).toBe(1);
         expect(await ou(), '« → » au même endroit sur les deux pages').toEqual(avant);
+        // Le lecteur d'écran entend la page, pas le texte de l'étape une seconde fois.
+        await expect(page.locator('#parcours-annonce')).toHaveText('page 2 de 2');
         await expect(indice(page)).toHaveText('2/' + l.etat.pages);
         await gesteEtSortieVisibles(page);
         await expect(precedente(page)).toBeEnabled();
         // « ← » revient ; au clavier, la flèche droite avance de nouveau, la gauche recule.
         await precedente(page).click();
         expect((await lirePages(page)).etat.page).toBe(0);
+        await expect(page.locator('#parcours-annonce')).toHaveText('page 1 de 2');
         await bulle(page).focus();
         await page.keyboard.press('ArrowRight');
         expect((await lirePages(page)).etat.page).toBe(1);
