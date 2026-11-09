@@ -447,9 +447,25 @@
         return qs('#sous-navigation [data-sous-onglet="conception-productions"]');
     }
 
+    /**
+     * La fiche ouverte, son menu « Cartouche de rétroaction » est amené dans la vue, entier (Cowork et Grégoire, 9 nov.,
+     * 17 h 52, sur la capture ; mesuré : à 1180 × 900, il restait à 938 px, sous le bas de l'écran, sans défilement
+     * ensuite, et rien ne disait où aller). La fiche se dessine en plusieurs temps : il y est ramené pendant les vingt
+     * premiers passages de la sonde (environ deux secondes et demie), puis la personne garde la main.
+     */
+    var cartoucheAmenee = 0;
+    function amenerLaCartouche() {
+        var s = el('productionCartouche');
+        if (cartoucheAmenee >= 20 || !vis(s)) return;
+        cartoucheAmenee++;
+        var r = s.getBoundingClientRect();
+        if (r.top < 0 || r.bottom > window.innerHeight) s.scrollIntoView({ block: 'center' });
+    }
+
     function zonesPourNommer() {
         var cible = ouNommerLaCartouche();
-        if (ficheDe(lireCtx().productionId)) return surLaFiche(cible);
+        if (ficheDe(lireCtx().productionId)) { amenerLaCartouche(); return surLaFiche(cible); }
+        cartoucheAmenee = 0;
         // Sur la page des cartouches, la matrice reste touchable (pas de voile) ; dans la liste, la ligne est éclairée.
         poserVoile(sousSectionVisible('conception-productions') ? 'normal' : 'aucun');
         return [cible];

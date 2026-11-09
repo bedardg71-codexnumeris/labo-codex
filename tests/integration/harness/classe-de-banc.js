@@ -85,6 +85,17 @@ export async function deuxSondes(page) {
     }
 }
 
+/** L'élément est entier dans la fenêtre (le parcours l'y amène au passage de la sonde : on attend qu'il y soit). */
+export async function entierDansLaFenetre(page, selecteur, contexte = '') {
+    await expect.poll(() => page.evaluate((sel) => {
+        const e = document.querySelector(sel);
+        if (!e) return 'absent';
+        const r = e.getBoundingClientRect();
+        return r.top >= 0 && r.left >= 0 && r.bottom <= innerHeight && r.right <= innerWidth ? 'entier'
+            : `de ${Math.round(r.top)} à ${Math.round(r.bottom)} pour ${innerHeight}`;
+    }, selecteur), { message: (contexte ? contexte + ' : ' : '') + selecteur + ' entier dans la fenêtre' }).toBe('entier');
+}
+
 export async function bulleNeCouvrePas(page, selecteur, contexte = '') {
     const chevauche = await page.evaluate((sel) => {
         const c = document.querySelector(sel);
