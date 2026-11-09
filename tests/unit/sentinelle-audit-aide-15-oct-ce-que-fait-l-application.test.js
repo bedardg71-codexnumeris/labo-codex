@@ -411,7 +411,9 @@ describe('Une copie non recevable dans la note, famille par famille (décisions 
         expect(corps(ACTIONS, '_obtenirNoteTerminaleEtudiant')).not.toContain('statutIntegrite');
         // ↻ #1176 (9 nov. 2026) : la terminale gardée vaut ce que dit la règle ; manquante, 0 une fois les notes finales cochées.
         expect(corps(ACTIONS, '_obtenirNoteTerminaleEtudiant')).toContain('window.noteRetenueParLeCalcul(evaluationTerminale, regle)');
-        expect(corps(ACTIONS, '_obtenirNoteTerminaleEtudiant')).toContain(': (estFinale ? 0 : null);');
+        // Relecture du 9 nov. : 0 aux notes finales pour une terminale non remise ou écartée seulement (`terminaleManquante`).
+        expect(corps(ACTIONS, '_obtenirNoteTerminaleEtudiant')).toContain('estFinale && window.terminaleManquante(evaluations, da, productionTerminale.id, regle)');
+        expect(corps(ACTIONS, '_obtenirNoteTerminaleEtudiant')).toContain(': (manqueAuxNotesFinales ? 0 : null);');
         const hybride = corps(ACTIONS, '_selectionnerArtefactsHybride');
         expect(hybride).toContain('const denominateurObl = estFinale ? nombreObligatoiresTotal : evalsObligatoires.length;');
         expect(hybride).toMatch(/const nombreObligatoiresTotal = productionsNonPortfolio\s*\.filter\(p => p\.categorie === 'obligatoire' && p\.id !== terminalId\)\.length;/);

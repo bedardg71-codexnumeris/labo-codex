@@ -165,11 +165,13 @@ function optionsSortCopieNonRecevable(famille) {
  */
 function poserSortCopieNonRecevableAssistant(pratique, r) {
     if (!pratique || !(window.SORTS_COPIE_NON_RECEVABLE || []).includes(r.sortCopieNonRecevable)) return;
-    // Rouvrir sans changer la réponse n'écrit rien qu'il n'y avait déjà (décision 5 : la lecture n'est pas une écriture).
-    const lue = r._sortCopieNonRecevableLu;
-    if (lue && !lue.ecrite && lue.regle === r.sortCopieNonRecevable) return;
     const famille = (typeof normaliserIdPratique === 'function') ? normaliserIdPratique(pratique.type || r.typePratique) : (pratique.type || r.typePratique);
     if (famille === 'denotation') return;
+    // Rouvrir sans règle écrite : la réponse ne s'écrit que si elle change ce que la pratique lirait sans elle (décision 5 :
+    // la lecture n'est pas une écriture). Comparée à la famille FINALE (relecture du 9 nov.) : si la famille a changé à
+    // l'assistant, la réponse montrée s'écrit plutôt que de céder à la lecture de l'autre famille.
+    const lue = r._sortCopieNonRecevableLu;
+    if (lue && !lue.ecrite && r.sortCopieNonRecevable === window.sortCopieNonRecevableDeLaPratique(null, famille)) return;
     const cible = pratique.configuration || pratique.config || (pratique.configuration = {});
     cible.sortCopieNonRecevable = r.sortCopieNonRecevable;
 }

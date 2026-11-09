@@ -393,7 +393,9 @@ describe('#1176 · l\'étape « Une copie non recevable » : la réponse devient
         const champs = etape.getChampsDynamiques({ typePratique: 'sommative' });
         expect(champs[0]).toMatchObject({ id: 'sortCopieNonRecevable', type: 'radio-cards', required: true });
         expect(champs[0].options.map(o => o.value)).toEqual(['ecarter', 'zero']);
-        expect(champs[0]).not.toHaveProperty('defaut');
+        // Le rendu ne coche une carte d'avance que par `default` (genererRadioCards, #443) : ni l'un ni l'autre ici.
+        expect(champs[0]).not.toHaveProperty('default');
+        expect(win.genererRadioCards(champs[0])).not.toMatch(/\bchecked\b/);
         expect(etape.condition({ typePratique: 'sommative' })).toBe(true);
         expect(etape.condition({ typePratique: 'denotation' })).toBe(false);
         expect(win.obtenirEtapeSuivante('grille-criteres', { typePratique: 'standards' })).toBe('copie-non-recevable');
@@ -422,6 +424,9 @@ describe('#1176 · l\'étape « Une copie non recevable » : la réponse devient
             expect((await produire('r1', { ...REPONSES.SOM, ...lu('zero', false) })).configuration).not.toHaveProperty('sortCopieNonRecevable');
             expect((await produire('r2', { ...REPONSES.SOM, ...lu('zero', false), sortCopieNonRecevable: 'ecarter' })).configuration.sortCopieNonRecevable).toBe('ecarter');
             expect((await produire('r3', { ...REPONSES.SOM, ...lu('zero', true) })).configuration.sortCopieNonRecevable).toBe('zero');
+            // La famille change à l'assistant (sommative lue « zero » → standards, qui lirait « ecarter ») : la réponse
+            // montrée s'écrit (relecture du 9 nov.).
+            expect((await produire('r4', { ...REPONSES.STD_art, ...lu('zero', false) })).configuration.sortCopieNonRecevable).toBe('zero');
         });
     });
 

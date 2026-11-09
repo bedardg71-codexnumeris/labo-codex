@@ -311,7 +311,11 @@ class PratiqueConfigurable {
      * @returns {'ecarter'|'zero'|null}
      */
     _sortCopieNonRecevable(famille) {
-        return window.sortCopieNonRecevableDeLaPratique(this.config.configuration || null, famille);
+        // Une pratique rangée sous `.config` seul (la forme d'import, #712) n'a pas de `.configuration` ici : sa
+        // configuration se relit comme le chemin des standards la lit (`obtenirConfigPratiqueActive`), relecture du 9 nov.
+        const configuration = this.config.configuration
+            || (typeof window.obtenirConfigPratiqueActive === 'function' ? window.obtenirConfigPratiqueActive(this.config.id) : null);
+        return window.sortCopieNonRecevableDeLaPratique(configuration || null, famille);
     }
 
     /** L'instance sommative jetable de cette pratique (note, verrou, récit), avec sa règle (#1176). */

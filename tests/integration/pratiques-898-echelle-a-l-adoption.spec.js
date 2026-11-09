@@ -90,6 +90,9 @@ test('#898 · les deux gestes d\'adoption demandent l\'échelle, et les trois é
     expect(await cocherEtSuivant('porteEntree', 'modele')).toBe('ok');
     await page.waitForFunction(() => window.wizardState.etapeActuelle === 'choix-modele');
     expect(await cocherEtSuivant('modeleChoisi', 'STD-n-recents')).toBe('ok');
+    // #1176 : un modèle adopté devient une nouvelle pratique ; l'assistant demande ce que vaut une copie non recevable.
+    await page.waitForFunction(() => window.wizardState.etapeActuelle === 'copie-non-recevable');
+    expect(await cocherEtSuivant('sortCopieNonRecevable', 'ecarter')).toBe('ok');
     await page.waitForFunction(() => window.wizardState.etapeActuelle === 'recapitulatif');
     await page.evaluate(() => document.getElementById('wizard-v2-btn-creer').click());
     await page.waitForSelector('#overlay-ui-dialogue');

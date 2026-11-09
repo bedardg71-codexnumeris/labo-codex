@@ -140,6 +140,16 @@
         return (typeof libelleCopieNonRecevable === 'function' && libelleCopieNonRecevable(evaluation)) || null;
     }
 
+    /**
+     * #1176 (9 nov. 2026) — ce qu'une obligatoire non recevable vaut dans le calcul du bloc Note : 0 si elle est gardée
+     * (« lui mettre 0 »), rien si elle est écartée (comme une obligatoire non remise). La règle est celle du registre,
+     * pour la pratique active (le PDF est celui de la pratique du groupe-cours).
+     */
+    function _noteRetenueObligatoireNonRecevable(evaluation) {
+        const valeur = (typeof valeurCopieNonRecevable === 'function') ? valeurCopieNonRecevable(evaluation) : null;
+        return (valeur && valeur.entreDansLeCalcul) ? valeur.note : null;
+    }
+
     function sansNoteNiNiveauxSiNonRecevable(evaluation) {
         if (!libelleNonRecevable(evaluation)) return evaluation;
         const criteres = Array.isArray(evaluation.criteres)
@@ -1482,13 +1492,16 @@
         const obligatoiresTous = estHybride
             ? artefactsPortfolio.filter(p => p.categorie === 'obligatoire').map(prod => {
                 const evalObl = evaluations.find(e => e.productionId === prod.id && e.etudiantDA === da && !e.remplaceeParId && e.noteFinale != null);
-                // 28 oct. 2026 — une obligatoire non recevable montre son libellé, sans note : le calcul du rendu la
-                // traite alors comme une obligatoire non remise (0 en notes finales, hors du calcul avant), la règle.
+                // 28 oct. 2026 — une obligatoire non recevable montre son libellé à la place de son niveau, jamais sa note.
+                // #1176 (9 nov. 2026) : écartée, elle reste sans note, et le calcul du rendu la traite comme une obligatoire
+                // non remise (0 en notes finales, hors du calcul avant) ; gardée (« lui mettre 0 »), elle porte le 0 que le
+                // moteur compte dès maintenant.
                 const libelleObl = evalObl ? libelleNonRecevable(evalObl) : null;
                 return {
                     titre:    prod.titre || 'Production',
                     niveau:   libelleObl || (evalObl ? (evalObl.niveauFinal || null) : null),
-                    note:     !libelleObl && evalObl && typeof evalObl.noteFinale === 'number' ? evalObl.noteFinale : null,
+                    note:     libelleObl ? _noteRetenueObligatoireNonRecevable(evalObl)
+                        : (evalObl && typeof evalObl.noteFinale === 'number' ? evalObl.noteFinale : null),
                     activite: prod.activiteApprentissage || prod.description || '',
                     echeance: obtenirEcheance(prod)
                 };

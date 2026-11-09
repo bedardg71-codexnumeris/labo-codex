@@ -106,11 +106,11 @@ const MODULES = ['js/interpretation-config.js', 'js/contexte-qualification.js', 
     'js/profil-etudiant-helpers.js', 'js/snapshots.js'];
 const OBJETS_EXPORTES = ['PratiqueManager', 'denotationJugements', 'modalitesEvaluation', 'profilActuelDA', 'etudiantsListeCache', 'PRATIQUE_DEFAUT', 'SEUILS_PAR_DEFAUT', '__audit'];
 
-function banc({ pratique, productions, evaluations, jugements = {} }) {
+function banc({ pratique, productions, evaluations, jugements = {}, autres = [], modules = [] }) {
     const store = storeBase();
     store.test_groupeEtudiants = store.test_groupeEtudiants.filter(e => e.da === DA.ALICE || e.da === DA.BRUNO);
     store.test_groupesCours[0].pratiqueId = pratique.id;
-    store.test_pratiquesConfigurables = [clone(pratique)];
+    store.test_pratiquesConfigurables = [clone(pratique)].concat(clone(autres));   // `autres` : simulées, jamais actives
     store.test_echellesTemplates = [clone(E0)];
     store.test_productions = clone(productions);
     store.test_evaluationsSauvegardees = clone(evaluations);
@@ -119,7 +119,7 @@ function banc({ pratique, productions, evaluations, jugements = {} }) {
     let win = null;
     const classe = (nom) => function (config) { return new win[nom](config); };
     const b = monter(store, {
-        modules: MODULES, objetsExportes: OBJETS_EXPORTES, aujourdhui: '2026-10-28', journal,
+        modules: MODULES.concat(modules), objetsExportes: OBJETS_EXPORTES, aujourdhui: '2026-10-28', journal,
         globaux: {
             PratiqueConfigurable: classe('PratiqueConfigurable'), PratiqueSommative: classe('PratiqueSommative'), PratiquePANStandards: classe('PratiquePANStandards'),
             obtenirEcheanceEffective: (production, gcId) => {
@@ -271,6 +271,15 @@ describe('Standards, terminale — écartée : provisoire, puis 0 aux notes fina
     it('LE CHOIX DE LA COPIE remplace la règle : « zero » sur la terminale, sous une règle « écarter » → 52 pendant le trimestre', () => {
         expect(noteDe({ ...base, pratique: pratiqueSTD({ regle: 'ecarter' }), evaluations: marquer(COPIES_STD, DA.ALICE, 'T1', 'zero') }).profil).toBe(52);
     });
+    it('UN BROUILLON de terminale ne manque pas (la décision 4 ne le nomme pas) : provisoire, aux notes finales comme avant', () => {
+        const brouillon = COPIES_STD.map(e => (e.etudiantDA === DA.ALICE && e.productionId === 'T1' ? Object.assign({}, e, { verrouillee: false }) : e));
+        const d = details({ ...base, pratique: pratiqueSTD({ notesFinales: true }), evaluations: brouillon });
+        expect([Math.round(d.noteFinale * 100) / 100, d.estProvisoire, d.terminal.note]).toEqual([86.67, true, null]);
+        const inst = new (banc({ ...base, pratique: pratiqueSTD({ notesFinales: true }), evaluations: brouillon }).win.PratiquePANStandards)().calculerPerformance(DA.ALICE);
+        expect(inst).toBeCloseTo(0.86667, 4);
+        const incomplet = COPIES_STD.map(e => (e.etudiantDA === DA.ALICE && e.productionId === 'T1' ? Object.assign({}, e, { travailEnCours: true }) : e));
+        expect(details({ ...base, pratique: pratiqueSTD({ notesFinales: true }), evaluations: incomplet }).estProvisoire).toBe(true);
+    });
     it('les captures se calculent en provisoire (#716) : une terminale manquante n\'y vaut pas 0, même notes finales cochées', () => {
         const b = banc({ ...base, pratique: pratiqueSTD({ notesFinales: true }), evaluations: retirer(COPIES_STD, DA.ALICE, 'T1') });
         expect(b.win.calculerIndicesHistoriques(DA.ALICE, FIN).P).toBe(87);
@@ -299,6 +308,59 @@ describe('Standards hybride, obligatoire — écartée : comme une obligatoire n
     it('à 0 : (0 + 80) / 2 = 40 → 76,3 pendant le trimestre aussi', () => {
         expect(noteDe({ ...base, pratique: p('zero', false), evaluations: marquer(COPIES_STD, DA.ALICE, 'A5') }).profil).toBe(76.3);
         expect(noteDe({ ...base, pratique: p('zero', true), evaluations: marquer(COPIES_STD, DA.ALICE, 'A5') }).profil).toBe(76.3);
+    });
+});
+
+/* ================================================================== LE COMPARATEUR (relecture du 9 nov.) */
+describe('Le Comparateur simule une pratique NON ACTIVE avec SA règle, pas celle de la pratique active', () => {
+    it('sommative active sans règle (0 : 54) ; simulée « l\'écarter » : 90', () => {
+        const ecarter = Object.assign(avecRegle(PRATIQUE_SOM, 'ecarter'), { id: 'som-ecarter', nom: 'SOM écarter' });
+        const b = banc({ pratique: PRATIQUE_SOM, productions: PRODUCTIONS_SOM, evaluations: marquer(COPIES_SOM, DA.ALICE, 'P1'), autres: [ecarter] });
+        expect(b.store.test_indicesCP[DA.ALICE].actuel.P).toBe(54);
+        expect(b.win.simulerIndices(DA.ALICE, 'som-ecarter').P).toBe(90);
+        expect(b.win.simulerIndices(DA.ALICE, 'som-banc').P).toBe(54);
+    });
+    it('standards active sans règle (écartée, « récents » : 81,4) ; simulée « lui mettre 0 » : 63,8', () => {
+        const active = pratiqueSTD({ methodeSelection: 'recents' });
+        const zero = Object.assign(pratiqueSTD({ methodeSelection: 'recents', regle: 'zero' }), { id: 'std-zero', nom: 'STD zéro' });
+        const b = banc({ pratique: active, productions: productionsSTD(), evaluations: marquer(COPIES_STD, DA.ALICE, 'A4'), autres: [zero] });
+        expect(Math.round(b.win.calculerDetailsNoteFinale(DA.ALICE).noteFinale * 100) / 100).toBe(81.4);
+        expect(Math.round(b.win.simulerIndices(DA.ALICE, 'std-zero').noteFinale * 100) / 100).toBe(63.8);
+    });
+    it('spécifications : la configurable simulée porte sa règle à son délégué (seule copie écartée : aucune note)', () => {
+        const ecarter = Object.assign(avecRegle(PRATIQUE_SPE, 'ecarter'), { id: 'spe-ecarter', nom: 'SPE écarter' });
+        const b = banc({ pratique: PRATIQUE_SPE, productions: PRODUCTIONS_SPE, evaluations: marquer([ev(DA.ALICE, 'D1', 80)], DA.ALICE, 'D1'), autres: [ecarter] });
+        expect(b.win.simulerIndices(DA.ALICE, 'spe-banc').P).toBe(50);
+        expect(b.win.simulerIndices(DA.ALICE, 'spe-ecarter').noteConstructible).toBe(false);
+    });
+});
+
+/* ================================================================== CE QUE LES VUES LISENT (relecture du 9 nov.) */
+describe('Gardée à 0 et retenue, la copie montre son libellé et le 0 compté — jamais sa note ni son niveau d\'origine', () => {
+    it('la liste des retenues (profil, bilan, PDF) : « Non recevable (Plagiat) », 0', () => {
+        const b = banc({ pratique: pratiqueSTD({ methodeSelection: 'recents', regle: 'zero' }), productions: productionsSTD(), evaluations: marquer(COPIES_STD, DA.ALICE, 'A4') });
+        const a4 = b.win.calculerDetailsNoteFinale(DA.ALICE).portfolio.artefactsRetenus.find(a => a.productionId === 'A4');
+        expect(a4).toEqual({ productionId: 'A4', note: 0, niveau: 'Non recevable (Plagiat)', enPoints: false, nonRecevable: true });
+    });
+    it('le bloc Note du PDF : la retenue et l\'obligatoire hybride gardées à 0 portent le libellé et 0, pas 92 ni « E »', () => {
+        const PDF = [{ chemin: 'js/synthese-retroaction-data.js', internes: ['construireNoteProvisoire'] }];
+        const b = banc({ pratique: pratiqueSTD({ methodeSelection: 'recents', regle: 'zero' }), productions: productionsSTD(), evaluations: marquer(COPIES_STD, DA.ALICE, 'A4'), modules: PDF });
+        const bloc = b.win.__audit['synthese-retroaction-data.js'].construireNoteProvisoire(DA.ALICE, false);
+        const a4 = bloc.selection.find(x => x.titre === 'Artefact 4');
+        expect([a4.niveau, a4.note]).toEqual(['Non recevable (Plagiat)', 0]);
+        // Hybride, provisoire : l'obligatoire A5 gardée à 0 compte 0 au calcul du PDF, comme au moteur (avant : sans note).
+        const h = banc({ pratique: pratiqueSTD({ hybride: true, regle: 'zero' }), productions: productionsSTD(CATEGORIES), evaluations: marquer(COPIES_STD, DA.ALICE, 'A5'), modules: PDF });
+        const blocH = h.win.__audit['synthese-retroaction-data.js'].construireNoteProvisoire(DA.ALICE, false);
+        expect(blocH.obligatoires.find(o => o.titre === 'Artefact 5')).toMatchObject({ niveau: 'Non recevable (Plagiat)', note: 0 });
+        // Écartée : sans note, comme une obligatoire non remise.
+        const e = banc({ pratique: pratiqueSTD({ hybride: true, regle: 'ecarter' }), productions: productionsSTD(CATEGORIES), evaluations: marquer(COPIES_STD, DA.ALICE, 'A5'), modules: PDF });
+        expect(e.win.__audit['synthese-retroaction-data.js'].construireNoteProvisoire(DA.ALICE, false).obligatoires.find(o => o.titre === 'Artefact 5'))
+            .toMatchObject({ niveau: 'Non recevable (Plagiat)', note: null });
+    });
+    it('TÉMOIN — une copie recevable retenue garde sa note et son niveau', () => {
+        const b = banc({ pratique: pratiqueSTD({ methodeSelection: 'recents' }), productions: productionsSTD(), evaluations: COPIES_STD });
+        expect(b.win.calculerDetailsNoteFinale(DA.ALICE).portfolio.artefactsRetenus.find(a => a.productionId === 'A4'))
+            .toMatchObject({ note: 92, niveau: 'E', nonRecevable: false });
     });
 });
 

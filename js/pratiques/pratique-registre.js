@@ -1194,6 +1194,25 @@ function noteRetenueParLeCalcul(evaluation, sortDeLaPratique) {
 }
 
 /**
+ * #1176 (décision 4 de Grégoire, 8 nov. 2026) — LA TERMINALE DE L'ÉLÈVE MANQUE : aucune copie (non remise), une copie
+ * « Non reçu », ou une copie non recevable que la règle écarte. Une fois les notes finales cochées, elle vaut alors 0.
+ * ⚠ Un brouillon, un « Incomplet ; travail en cours » ou une copie de portée nulle NE MANQUENT PAS (relecture du 9 nov.) :
+ * la décision ne les nomme pas ; la note reste provisoire pour eux, comme avant ce lot. Question remontée à Grégoire.
+ * Une originale remplacée par sa reprise ne compte pas ; une reprise pas encore évaluée, si (une copie est attendue).
+ * @param {Array} evaluations
+ * @param {string} da
+ * @param {string} productionId - la production terminale
+ * @param {string|null} [sortDeLaPratique] - comme `valeurCopieNonRecevable`
+ * @returns {boolean}
+ */
+function terminaleManquante(evaluations, da, productionId, sortDeLaPratique) {
+    const liste = evaluations || [];
+    const copies = liste.filter(e => e && e.etudiantDA === da && e.productionId === productionId
+        && !(e.remplaceeParId && originaleEstRemplacee(e, liste)));
+    return copies.every(e => evaluationNonRemise(e) || copieNonRecevableEcartee(e, sortDeLaPratique));
+}
+
+/**
  * CE QUE MONTRE UNE COPIE NON RECEVABLE à la place de sa note et de ses niveaux, sur le formulaire et sur le PDF
  * de l'étudiant·e (décision de Grégoire, 28 oct. 2026, 6 h 46). Les libellés du menu « Intégrité académique »
  * (`index.html`), à la casse de l'écran. Un AFFICHAGE : l'évaluation de l'enseignant·e reste en base, intacte, et
@@ -1283,6 +1302,7 @@ window.sortCopieNonRecevableDeLaPratique = sortCopieNonRecevableDeLaPratique;
 window.sortCopieNonRecevableDeLaPratiqueActive = sortCopieNonRecevableDeLaPratiqueActive;
 window.valeurCopieNonRecevable = valeurCopieNonRecevable;
 window.copieNonRecevableEcartee = copieNonRecevableEcartee;
+window.terminaleManquante = terminaleManquante;   // #1176 : décision 4, la terminale non remise ou écartée
 window.noteRetenueParLeCalcul = noteRetenueParLeCalcul;
 window.libelleCopieNonRecevable = libelleCopieNonRecevable;   // ce que la copie montre à la place
 // Statut « Incomplet ; travail en cours » (25 oct. 2026) — hors de la note, remise pour C

@@ -47,9 +47,10 @@ function _porteMarqueDeReprise(e) {
 
 /**
  * Prédicat « active au sens MOTEUR » restreint à un couple (da, pid).
- * Reproduit `_filtrerEvaluationsArtefactsValides` (profil-etudiant-actions.js) :
+ * Reproduisait `_filtrerEvaluationsArtefactsValides` (profil-etudiant-actions.js) :
  * !remplaceeParId + noteFinale non null/undefined + statutIntegrite ∉ {plagiat,ia}.
- * Toute divergence ici fabriquerait des faux positifs/négatifs de réconciliation.
+ * ⚠ #1176 (9 nov. 2026) : sous « lui mettre 0 », une copie non recevable entre au pool, et ce prédicat l'en tient
+ * toujours hors. Sans conséquence sur la note (il ne choisit qu'entre doublons de même note) : commenté, pas changé.
  */
 function _estActiveMoteur(e, da, pid) {
     if (!e) return false;

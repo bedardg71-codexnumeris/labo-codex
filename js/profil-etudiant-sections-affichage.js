@@ -102,8 +102,10 @@ function _construireArtefactMobilisation(art, evaluation) {
         titre: art.titre,
         description: art.description || art.titre,
         remis: estRemis,
-        note: evaluation?.noteFinale ?? null,
-        niveau: _niveauVuProfil(evaluation),   // #941 lot S1 — aucun pour une copie en points
+        // #1176 (relecture du 9 nov.) : une copie non recevable gardée à 0 peut être retenue ; elle montre le 0 que le calcul
+        // retient (écartée : rien), jamais sa note ni son niveau d'origine (#1228). La moyenne de la carte la lit ainsi.
+        note: estNonRecevable ? (window.noteRetenueParLeCalcul(evaluation) ?? null) : (evaluation?.noteFinale ?? null),
+        niveau: estNonRecevable ? null : _niveauVuProfil(evaluation),   // #941 lot S1 — aucun pour une copie en points
         // #575 — l'échelle de CETTE évaluation, pour que la vue n'ait pas à la
         // deviner. Sans elle, le badge choisissait « l'échelle active, sinon la
         // première » et pouvait colorer un code avec la couleur d'un autre.

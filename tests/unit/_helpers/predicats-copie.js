@@ -28,6 +28,7 @@ export function chargerPredicatsCopie(win) {
     win.copieNonRecevableEcartee = registre.copieNonRecevableEcartee;
     win.sortCopieNonRecevableDeLaPratique = registre.sortCopieNonRecevableDeLaPratique;
     win.sortCopieNonRecevableDeLaPratiqueActive = registre.sortCopieNonRecevableDeLaPratiqueActive;
+    win.terminaleManquante = registre.terminaleManquante;
     win.libelleCopieNonRecevable = registre.libelleCopieNonRecevable;
     // Statut « Incomplet ; travail en cours » (25 oct. 2026) — la règle de la remise pour C, et le statut
     win.evaluationCompteCommeRemise = registre.evaluationCompteCommeRemise;

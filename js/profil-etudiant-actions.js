@@ -371,7 +371,8 @@ function _noteAttendSaTerminale(productionTerminale, noteTerminale) {
  * La note de la terminale d'un élève. #1176 (décision 4 de Grégoire, 8 nov. 2026) : pendant le trimestre, une terminale
  * qui manque (non remise, ou non recevable écartée) laisse la note provisoire, comme avant ; une fois les notes finales
  * cochées, elle vaut 0, non remise comme écartée. ⚠ Le sort d'une terminale NON REMISE change aussi (accord explicite
- * de Grégoire, 15 h 38). Une terminale non recevable gardée (« lui mettre 0 ») vaut 0 tout de suite.
+ * de Grégoire, 15 h 38). Une terminale non recevable gardée (« lui mettre 0 ») vaut 0 tout de suite. Un brouillon de
+ * terminale ne manque pas : provisoire, comme avant (`terminaleManquante`, registre).
  */
 function _obtenirNoteTerminaleEtudiant(evaluations, da, productionTerminale, regle, estFinale) {
     if (!productionTerminale) return { noteTerminale: null, evaluationTerminale: null };
@@ -382,9 +383,10 @@ function _obtenirNoteTerminaleEtudiant(evaluations, da, productionTerminale, reg
         window.evaluationEntreDansLaNote(e) &&
         !window.copieNonRecevableEcartee(e, regle)
     ) || null;
+    const manqueAuxNotesFinales = estFinale && window.terminaleManquante(evaluations, da, productionTerminale.id, regle);
     const noteTerminale = evaluationTerminale
         ? window.noteRetenueParLeCalcul(evaluationTerminale, regle)
-        : (estFinale ? 0 : null);
+        : (manqueAuxNotesFinales ? 0 : null);
     return { noteTerminale, evaluationTerminale };
 }
 
@@ -457,6 +459,22 @@ function _niveauVu(evaluation) {
     if (!evaluation) return null;
     if (typeof niveauFinalAffichable === 'function') return niveauFinalAffichable(evaluation) || null;
     return evaluation.niveauFinal || null;
+}
+
+/**
+ * Une copie retenue, telle que les vues la lisent (le profil, le bilan et le PDF de l'élève). #1176 (relecture du 9 nov.) :
+ * une copie non recevable gardée à 0 (« lui mettre 0 ») entre au pool ; elle montre son libellé à la place de son niveau,
+ * et le 0 que le calcul retient à la place de sa note — jamais sa note ni ses niveaux d'origine (décision du 28 oct., #1228).
+ */
+function _artefactRetenuVu(e, noteRetenue) {
+    const libelle = window.libelleCopieNonRecevable(e);
+    return {
+        productionId: e.productionId,
+        note: libelle ? noteRetenue(e) : e.noteFinale,
+        niveau: libelle || _niveauVu(e),   // #941 lot S1 — affichage seulement
+        enPoints: !libelle && typeof evaluationEnPoints === 'function' && evaluationEnPoints(e),
+        nonRecevable: !!libelle
+    };
 }
 
 function calculerDetailsNoteFinale(da, pratiqueIdDemande = null) {
@@ -693,6 +711,8 @@ function calculerDetailsNoteFinale(da, pratiqueIdDemande = null) {
             _resultatsRecit.push(_resArtefact(e, 'ecarte',
                 e.verrouillee === false ? 'évaluation non verrouillée · non comptée' : 'sans critère évalué · non comptée'));
         });
+    // #1176 : une terminale qui manque aux notes finales (non remise ou écartée) s'inscrit ici à 0, « comptée » : elle
+    // compte bien, pour 0. Aucun mot neuf (relecture du 9 nov., à revoir avec Grégoire s'il veut la dire « manquante »).
     if (productionTerminale && noteTerminale !== null) {
         _resultatsRecit.push({
             label: productionTerminale.titre || productionTerminale.activiteApprentissage || 'Évaluation terminale',
@@ -737,12 +757,7 @@ function calculerDetailsNoteFinale(da, pratiqueIdDemande = null) {
             moyenne: moyennePortfolio,
             ponderation: ponderationPortfolio,
             ponderationNormalisee: normaliser(ponderationPortfolio),
-            artefactsRetenus: artefactsRetenus.map(e => ({
-                productionId: e.productionId,
-                note: e.noteFinale,
-                niveau: _niveauVu(e),   // #941 lot S1 — affichage seulement
-                enPoints: typeof evaluationEnPoints === 'function' && evaluationEnPoints(e)
-            })),
+            artefactsRetenus: artefactsRetenus.map(e => _artefactRetenuVu(e, noteRetenue)),
             plafonnement: plafonnement
         },
         terminal: {

@@ -110,7 +110,8 @@ test('audit · parcours sommatif, grille en points sans échelle choisie — ce 
     await page.evaluate(() => document.querySelector('button[data-action="creerNouvellePratique"]').click());
     await attendre(page, () => document.getElementById('modalWizardPratiqueV2')?.classList.contains('actif'));
     const reponses = { nom: 'Pratique sommative (audit)', prenom: 'Prof', nomAuteur: 'Banc', etablissement: 'Cégep banc', discipline: '*premier*', porteEntree: 'decrire',
-        calcNoteFinale: 'moyenne', reglesSommatives: ['aucune'], nbEvaluationsPrevues: '3', seuilVaBien: '80', seuilDifficulte: '70', seuilGrandeDifficulte: '60' };
+        calcNoteFinale: 'moyenne', reglesSommatives: ['aucune'], nbEvaluationsPrevues: '3', seuilVaBien: '80', seuilDifficulte: '70', seuilGrandeDifficulte: '60',
+        sortCopieNonRecevable: 'zero' };   // #1176 : l'étape « Une copie non recevable » (la réponse d'avant ce lot)
     const parcoursAssistant = [];
     for (let tour = 0; tour < 20; tour++) {
         const etape = await page.evaluate(() => window.wizardState.etapeActuelle);

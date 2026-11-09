@@ -255,7 +255,8 @@ class PratiquePANStandards {
         // Si l'évaluation terminale n'est pas encore faite, note provisoire = pool seul — sauf une fois les notes
         // finales cochées : une terminale manquante vaut alors 0 (#1176, décision 4 de Grégoire, 8 nov. 2026 ; parité
         // avec `_obtenirNoteTerminaleEtudiant`, profil-etudiant-actions.js).
-        const noteTerminale = this._noteTerminaleRetenue(evalTerminale, config.notesFinales, noteRetenue);
+        const manqueAuxNotesFinales = config.notesFinales && window.terminaleManquante(evaluations, da, productionTerminale.id, regle);
+        const noteTerminale = this._noteTerminaleRetenue(evalTerminale, manqueAuxNotesFinales, noteRetenue);
         if (noteTerminale === null) {
             return moyennePortfolio / 100;
         }
@@ -291,12 +292,13 @@ class PratiquePANStandards {
 
     /**
      * #1176 — la note de la terminale : celle que le calcul retient ; manquante (non remise, ou non recevable écartée),
-     * null pendant le trimestre (la note reste provisoire), 0 une fois les notes finales cochées (décision 4).
+     * null pendant le trimestre (la note reste provisoire), 0 une fois les notes finales cochées (décision 4). Un
+     * brouillon ne manque pas (`terminaleManquante`) : provisoire.
      * @returns {number|null}
      */
-    _noteTerminaleRetenue(evalTerminale, notesFinales, noteRetenue) {
+    _noteTerminaleRetenue(evalTerminale, manqueAuxNotesFinales, noteRetenue) {
         if (evalTerminale) return noteRetenue(evalTerminale);
-        return notesFinales ? 0 : null;
+        return manqueAuxNotesFinales ? 0 : null;
     }
 
     // Lot 2 des standards sans portfolio (29 oct. 2026) : `calculerPerformanceRecente` est retirée — aucun appelant
