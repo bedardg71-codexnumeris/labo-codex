@@ -295,6 +295,42 @@
         if (zone) zone.hidden = ![].some.call(zone.children, function (x) { return !x.hidden; });
     }
 
+    /**
+     * Quand ce qu'il faut toucher occupe presque tout l'écran (la production qu'on annote, les trois
+     * palettes du mode Évaluer), le moteur, qui pose la bulle hors de toutes les zones éclairées, se
+     * rabat sur un bord : la bulle tombait sur la production, ou sur le champ à remplir, et captait le
+     * toucher. La sonde de l'étape (elle passe après celle du moteur : sa place l'emporte) essaie
+     * quelques places et garde celle qui couvre le moins ces éléments ; couvrir le contour coûte cent
+     * fois plus. Le moteur n'a pas cette règle : voir le rapport du lot.
+     */
+    function bulleHors(elements, contour) {
+        var b = document.getElementById('parcours-bulle');
+        if (!b) return;
+        var marge = 8, haut = 0;
+        var e = document.querySelector('header.entete');
+        if (e) haut = Math.max(0, e.getBoundingClientRect().bottom);
+        var vw = window.innerWidth, vh = window.innerHeight, bw = b.offsetWidth, bh = b.offsetHeight;
+        var xs = [marge, (vw - bw) / 2, vw - bw - marge];
+        var ys = [Math.max(marge, haut + marge), Math.max(marge, (vh - bh) / 2), Math.max(marge, vh - bh - marge)];
+        var rects = (elements || []).filter(function (el) { return el && M().visible(el); })
+            .map(function (el) { return { r: el.getBoundingClientRect(), poids: el === contour ? 100 : 1 }; });
+        if (contour && M().visible(contour) && (elements || []).indexOf(contour) === -1) rects.push({ r: contour.getBoundingClientRect(), poids: 100 });
+        var meilleur = null;
+        xs.forEach(function (x) {
+            ys.forEach(function (y) {
+                var cout = rects.reduce(function (t, o) {
+                    var w = Math.min(x + bw, o.r.right) - Math.max(x, o.r.left);
+                    var h = Math.min(y + bh, o.r.bottom) - Math.max(y, o.r.top);
+                    return t + (w > 0 && h > 0 ? w * h * o.poids : 0);
+                }, 0);
+                if (!meilleur || cout < meilleur.cout) meilleur = { x: x, y: y, cout: cout };
+            });
+        });
+        if (!meilleur) return;
+        b.style.left = Math.round(Math.max(marge, meilleur.x)) + 'px';
+        b.style.top = Math.round(meilleur.y) + 'px';
+    }
+
     function suivante() {
         var i = M().etapeCourante();
         if (i !== null) M().allerA(i + 1);
@@ -567,7 +603,8 @@
                 await attendre(function () { return !!menuActions('annoter'); }, 3000);
             },
             zones: function () {
-                if (annoterOuvert()) return [palette('travaux-palette-erreurs-fr')];
+                // La production elle-même reste touchable : on y pose les codes.
+                if (annoterOuvert()) return [palette('travaux-palette-erreurs-fr'), vis(document.getElementById('travaux-canvas-annotation'))];
                 var s = menuActions('annoter');
                 return s ? [s.closest('tr')] : [];
             },
@@ -575,7 +612,13 @@
                 if (annoterOuvert()) return palette('travaux-palette-erreurs-fr') || vis(document.getElementById('travaux-btn-actions'));
                 return menuActions('annoter');
             },
-            atteint: evaluationOuverte
+            atteint: function () {
+                if (annoterOuvert()) {
+                    bulleHors([palette('travaux-palette-erreurs-fr'), vis(document.getElementById('travaux-canvas-annotation'))],
+                        palette('travaux-palette-erreurs-fr'));
+                }
+                return evaluationOuverte();
+            }
         }),
         retro: Object.assign({}, TEXTES.retro, {
             avant: async function () {
@@ -590,7 +633,10 @@
                 return s ? [s.closest('tr')] : [];
             },
             contour: function () { return evaluationOuverte() ? contourEvaluation(false) : menuActions('annoter'); },
-            atteint: verrouNeuf
+            atteint: function () {
+                if (evaluationOuverte()) bulleHors(zonesEvaluation(), contourEvaluation(false));
+                return verrouNeuf();
+            }
         }),
         retroSans: Object.assign({}, TEXTES.retroSans, {
             avant: async function () {
@@ -605,7 +651,10 @@
                 return s ? [s.closest('tr')] : [];
             },
             contour: function () { return evaluationOuverte() ? contourEvaluation(true) : menuActions('evaluer'); },
-            atteint: verrouNeuf
+            atteint: function () {
+                if (evaluationOuverte()) bulleHors(zonesEvaluation(), contourEvaluation(true));
+                return verrouNeuf();
+            }
         }),
         loin: Object.assign({}, TEXTES.loin, {
             centre: true,
@@ -655,8 +704,8 @@
         if (i <= ORDRE.indexOf('lit') + 1 && grilleOuverte()) c.grilleId = grilleOuverte().id;
         var s = sautsPrevus(c);
         var neuf = cheminDe(c, s);
-        var cle = neuf[i];
-        var rang = ORDRE.indexOf(cle);
+        var cleEtape = neuf[i];
+        var rang = ORDRE.indexOf(cleEtape);
         if (rang >= ORDRE.indexOf('production')) c.saute7 = s.saute7;
         if (rang >= ORDRE.indexOf('productions')) c.saute8 = s.saute8;
         // Les étapes passées ne changent pas : le préfixe reste celui qu'on a parcouru.
@@ -664,7 +713,7 @@
         c.chemin = neuf;
         ecrireCtx(c);
         poserChemin(neuf);
-        if (cle === 'lit') creationVue = enCreation();
+        if (cleEtape === 'lit') creationVue = enCreation();
         window.Assistance.definirEtat(ID, 'en-cours', i);
     }
 
