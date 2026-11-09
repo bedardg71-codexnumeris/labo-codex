@@ -538,6 +538,17 @@ function genererApercuEchelle(echelle) {
 }
 
 /**
+ * 9 nov. 2026 (lot « Production plutôt que copie », banque de types) — le libellé de lecture du type
+ * (« Artefact d'un portfolio », « Épreuve terminale »), pas son identifiant ; un type de la banque
+ * de la personne s'affiche tel qu'elle l'a nommé. `getTypeLabel` vient de productions.js, chargé avant.
+ * Texte brut : chaque appelant l'échappe ou le passe à jsPDF.
+ */
+function libelleTypeExport(type) {
+    if (!type) return '—';
+    return typeof window.getTypeLabel === 'function' ? window.getTypeLabel(type) : type;
+}
+
+/**
  * Genere un apercu HTML d'une liste de productions
  */
 function genererApercuProductions(productions) {
@@ -574,7 +585,7 @@ function genererApercuProductions(productions) {
         html += `
             <tr>
                 <td>${escapeHtml(p.titre || '—')}</td>
-                <td>${escapeHtml(p.type || '—')}</td>
+                <td>${escapeHtml(libelleTypeExport(p.type))}</td>
                 <td style="text-align: center;">${p.ponderation ? formaterPourcentage(p.ponderation) : '—'}</td>
                 <td>${dateFormatee}</td>
             </tr>
@@ -672,7 +683,7 @@ async function exporterProductionsPDF(productions, options = {}) {
             ? obtenirEcheanceEffective(p, gcIdExpPdf).date : p.dateEcheance;
         return [
             p.titre || '—',
-            p.type || '—',
+            libelleTypeExport(p.type),
             p.ponderation ? formaterPourcentage(p.ponderation) : '—',
             formaterDate(dateEch)
         ];
@@ -1131,7 +1142,7 @@ async function exporterReferentielCompletPDF(options = {}) {
                 ? obtenirEcheanceEffective(p, gcIdExpFull).date : p.dateEcheance;
             return [
                 p.titre || '—',
-                p.type || '—',
+                libelleTypeExport(p.type),
                 p.ponderation ? formaterPourcentage(p.ponderation) : '—',
                 formaterDate(dateEch)
             ];

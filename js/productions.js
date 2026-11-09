@@ -131,7 +131,10 @@ const TYPES_PRODUCTION = [
       prefixeAffichage: '📁 ' },
     { id: 'artefact-portfolio', libelle: 'Artefact',              groupe: 'Portfolio',
       libelleLong: 'Artefact d\'un portfolio', ponderationPropre: false },
-    { id: 'terminale',          libelle: 'Épreuve terminale',     groupe: 'Épreuve terminale' }
+    // `libellesAnciens` : l'ancien nom reste réservé, pour qu'un type de la banque ne le reprenne pas
+    // sans compter comme épreuve terminale.
+    { id: 'terminale',          libelle: 'Épreuve terminale',     groupe: 'Épreuve terminale',
+      libellesAnciens: ['Évaluation terminale'] }
 ];
 
 /** L'entrée de table d'un type, ou null si le type est inconnu. */
@@ -220,8 +223,9 @@ function normaliserNomTypeProduction(nom) {
  *   `valeur` : ce qui irait dans `production.type` (l'identifiant d'un exemple, ou le nom).
  * Un nom qui reprend un exemple choisit l'exemple ; un nom déjà dans la banque choisit
  * celui de la banque. Un nom qui reprend un type de l'application qui n'est pas un exemple
- * (portfolio, artefact, épreuve terminale, « Autre »), un identifiant, ou une forme
- * `<type>-formatif` est refusé : il changerait le calcul ou se confondrait avec un type retiré.
+ * (portfolio, artefact, épreuve terminale et son ancien nom, « Autre »), un identifiant, ou
+ * qui finit par « -formatif » est refusé : il changerait le calcul ou se confondrait avec un
+ * type retiré.
  */
 function analyserNomTypeProduction(nom, banque) {
     const propre = String(nom == null ? '' : nom).replace(/\s+/g, ' ').trim()
@@ -229,9 +233,12 @@ function analyserNomTypeProduction(nom, banque) {
     const n = normaliserNomTypeProduction(propre);
     if (!n) return { statut: 'vide', valeur: '' };
     if (n.indexOf('__') === 0) return { statut: 'reserve', valeur: '' };
-    if (/-formatif$/.test(n) && typeProduction(n.slice(0, -'-formatif'.length))) return { statut: 'reserve', valeur: '' };
+    // « -formatif » : la convention des identifiants formatifs, que d'autres modules lisent par
+    // `endsWith('-formatif')` ; un nom de la banque ne la prend jamais.
+    if (/-formatif$/.test(n)) return { statut: 'reserve', valeur: '' };
     for (const t of TYPES_PRODUCTION) {
-        const formes = [t.id, t.libelle, t.libelleLong].filter(Boolean).map(normaliserNomTypeProduction);
+        const formes = [t.id, t.libelle, t.libelleLong].concat(t.libellesAnciens || [])
+            .filter(Boolean).map(normaliserNomTypeProduction);
         if (formes.indexOf(n) === -1) continue;
         const estExemple = t.groupe === GROUPE_EXEMPLES_TYPES && !t.horsMenu;
         return estExemple ? { statut: 'exemple', valeur: t.id } : { statut: 'reserve', valeur: '' };
@@ -346,14 +353,16 @@ function batirMenuTypesProduction(select, courant) {
         if (estCourant) courantPlace = true;
     });
 
-    const mesTypes = banque.types.slice();
-    if (!courantPlace && mesTypes.indexOf(courant) === -1) mesTypes.push(courant);
-    if (mesTypes.length > 0) {
+    if (banque.types.length > 0) {
         const g = document.createElement('optgroup');
         g.label = 'Mes types';
-        mesTypes.forEach(nom => g.appendChild(option(nom, nom)));
+        banque.types.forEach(nom => g.appendChild(option(nom, nom)));
         select.appendChild(g);
     }
+    // Le type de la production ouverte, s'il n'est ni dans la table ni dans la banque (retiré
+    // de la banque, reçu d'un·e collègue, identifiant d'un autre âge) : à part, sous son nom,
+    // sans se dire « Mes types » (décisions 8 et 9).
+    if (!courantPlace && banque.types.indexOf(courant) === -1) select.appendChild(option(courant, getTypeLabel(courant)));
     select.appendChild(option(VALEUR_NOUVEAU_TYPE, '+ Nouveau type…'));
     select.appendChild(option(VALEUR_GERER_TYPES, 'Gérer mes types…'));
 }
@@ -392,6 +401,8 @@ function traiterActionMenuTypesProduction(selectType, type) {
         return false;
     }
     selectType.value = (selectType.dataset && selectType.dataset.typePrecedent) || '';
+    // L'écouteur `input` du formulaire a déjà redessiné la chaîne avec la valeur de l'action.
+    rendreChaineProduction();
     if (type === VALEUR_NOUVEAU_TYPE) ouvrirFenetreNouveauTypeProduction();
     else ouvrirFenetreGererTypesProduction();
     return true;

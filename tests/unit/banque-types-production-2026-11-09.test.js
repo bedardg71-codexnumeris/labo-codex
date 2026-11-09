@@ -98,10 +98,11 @@ describe('Banque · B2 — retirer un type ne touche aucune production (décisio
         expect(m.win.lireBanqueTypesProduction().types).toEqual([]);
         expect(m.win.getTypeLabel('Prise de sang')).toBe('Prise de sang');
 
-        // Le menu de CETTE production garde son type, choisi.
+        // Le menu de CETTE production garde son type, choisi, à part : il n'est plus « Mes types ».
         m.win.remplirMenuTypesProduction(m.select, 'Prise de sang');
         expect(m.select.value).toBe('Prise de sang');
-        expect(m.menu()).toContainEqual({ groupe: 'Mes types', valeur: 'Prise de sang', texte: 'Prise de sang' });
+        expect(m.menu()).toContainEqual({ groupe: null, valeur: 'Prise de sang', texte: 'Prise de sang' });
+        expect(m.select.querySelector('optgroup[label="Mes types"]')).toBeNull();
         // Celui d'une production neuve ne l'offre plus.
         m.win.remplirMenuTypesProduction(m.select, '');
         expect(m.menu().map(o => o.valeur)).not.toContain('Prise de sang');
@@ -115,7 +116,8 @@ describe('Banque · B2 — retirer un type ne touche aucune production (décisio
         expect(JSON.stringify(m.store.a2026_productions)).toBe(avant);
         m.win.remplirMenuTypesProduction(m.select, 'Prise de sang');
         const mes = m.menu().filter(o => o.groupe === 'Mes types').map(o => o.valeur);
-        expect(mes).toEqual(['Prélèvement', 'Prise de sang']);
+        expect(mes).toEqual(['Prélèvement']);
+        expect(m.menu()).toContainEqual({ groupe: null, valeur: 'Prise de sang', texte: 'Prise de sang' });
         expect(m.select.value).toBe('Prise de sang');
     });
 
@@ -133,6 +135,7 @@ describe('Banque · B2 — retirer un type ne touche aucune production (décisio
         const m = monter({ productions: [prod('P9', 'Reçue', 'Entrevue filmée')] });
         m.win.remplirMenuTypesProduction(m.select, 'Entrevue filmée');
         expect(m.select.value).toBe('Entrevue filmée');
+        expect(m.menu()).toContainEqual({ groupe: null, valeur: 'Entrevue filmée', texte: 'Entrevue filmée' });
         expect(m.win.lireBanqueTypesProduction().types).toEqual([]);
         expect(m.ecritures).toEqual([]);
     });
@@ -194,7 +197,7 @@ describe('Banque · B4 — les noms qu\'on ne peut pas prendre', () => {
         const m = monter({ banque: { types: ['Prise de sang'], exemplesMasques: [] } });
         const a = (n) => m.win.analyserNomTypeProduction(n);
         expect(a('   ').statut).toBe('vide');
-        for (const n of ['Portfolio', 'portfolio (conteneur)', 'Artefact', 'Artefact d\'un portfolio', 'Épreuve terminale', 'terminale', 'Autre', 'examen-formatif', '__gerer-types__']) {
+        for (const n of ['Portfolio', 'portfolio (conteneur)', 'Artefact', 'Artefact d\'un portfolio', 'Épreuve terminale', 'Évaluation terminale', 'terminale', 'Autre', 'examen-formatif', 'Atelier-formatif', '__gerer-types__']) {
             expect(a(n).statut, n).toBe('reserve');
         }
         expect(a('Quiz/test')).toEqual({ statut: 'exemple', valeur: 'quiz' });
@@ -269,8 +272,12 @@ describe('Banque · B7 — seule la personne écrit sa banque (décision 8)', ()
         parcourir(path.join(racine, 'js'));
         const qui = fichiers.filter(f => readFileSync(f, 'utf8').includes('banqueTypesProduction'))
             .map(f => path.relative(racine, f)).sort();
-        // productions.js l'écrit ; reserve.js la nomme pour l'archive d'un groupe (lecture).
-        expect(qui).toEqual(['js/productions.js', 'js/reserve.js']);
+        // productions.js l'écrit ; reserve.js la nomme pour l'archive d'un groupe (lecture) ; codex.js
+        // la nomme pour la fenêtre de fusion de DEUX codex de la même personne (son libellé).
+        // Aucun module d'import ni de partage (partage-*, import-export) ne la nomme.
+        expect(qui).toEqual(['js/codex.js', 'js/productions.js', 'js/reserve.js']);
+        const codex = readFileSync(path.join(racine, 'js/codex.js'), 'utf8');
+        expect(codex.match(/banqueTypesProduction/g)).toHaveLength(1);
         const reserve = readFileSync(path.join(racine, 'js/reserve.js'), 'utf8');
         expect(reserve).toMatch(/CLES_GLOBALES_INCLUSES = \[[\s\S]*'banqueTypesProduction'[\s\S]*\];/);
     });

@@ -237,7 +237,7 @@ test('productions : la ligne en clair (type, pondération à la française) ; l�
 
     const r = rangee(page, 'productions', 'trimestre', 'Artefact 1');
     await expect(r.locator('.biblio2-rangee-meta')).toHaveText('Artefact d\'un portfolio · 6,67 %');
-    await expect(rangee(page, 'productions', 'trimestre', 'Évaluation terminale').locator('.biblio2-rangee-meta')).toHaveText('Évaluation terminale · 40 %');
+    await expect(rangee(page, 'productions', 'trimestre', 'Évaluation terminale').locator('.biblio2-rangee-meta')).toHaveText('Épreuve terminale · 40 %');
     const nom = r.locator('.biblio2-rangee-nom');
     const apercu = r.locator('.biblio2-apercu');
     await expect(nom).toHaveAttribute('aria-expanded', 'false');

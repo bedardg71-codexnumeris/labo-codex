@@ -2576,7 +2576,11 @@ var LIBELLES_DES_CLES = {
     personnalisationObservations: { nom: 'tes tampons personnalisés', ou: 'Annotation › Tampons', unite: 'tampon', entrees: _nomDuTampon },
     brouillonDissection: { nom: 'ta grille en cours dans « Apporter mon matériel »', titre: 'Ta grille en cours',
         ou: 'Conception › Apporter mon matériel', cote: _coteDeLaGrilleEnCours },
-    interventions: { nom: 'les interventions' }
+    interventions: { nom: 'les interventions' },
+    // 9 nov. 2026 (lot « Production plutôt que copie ») : la banque de types, clé globale de productions.js.
+    // Mots proposés, à valider par Grégoire (rapport de l'étape 2, § 3).
+    banqueTypesProduction: { nom: 'ta banque de types de production', ou: 'Conception › Productions › Type',
+        entrees: { types: 'Tes types', exemplesMasques: 'Les exemples retirés de ta vue' } }
 };
 
 function _majuscule(s) { return s.charAt(0).toUpperCase() + s.slice(1); }

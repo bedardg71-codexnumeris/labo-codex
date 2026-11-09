@@ -45,13 +45,15 @@ La banque de types, elle, entre bien dans la liste blanche des Archives, comme l
 
 ### Ce qui attend Grégoire (une question par ligne, ma recommandation entre parenthèses)
 
-1. **Les textes neufs de la banque.** Je les ai posés pour que l'écran fonctionne, et ils restent à corriger (liste complète au § 3). Les principaux : « Mes types » (le groupe du menu et le titre de la fenêtre), « Ta banque », « Exemples du menu », « Décoche ceux qui ne te servent pas : ils sortent du menu. », « Nouveau type », « Nom du type », « Ex. : Prise de sang », « Il restera dans ta banque, d'un trimestre à l'autre. » (Les garder : ils reprennent les mots de ton infobulle.)
+1. **Les textes neufs de la banque.** Je les ai posés pour que l'écran fonctionne, et ils restent à corriger (liste complète au § 3). La fenêtre de fusion de deux codex nomme aussi la banque. Les principaux : « Mes types » (le groupe du menu et le titre de la fenêtre), « Ta banque », « Exemples du menu », « Décoche ceux qui ne te servent pas : ils sortent du menu. », « Nouveau type », « Nom du type », « Ex. : Prise de sang », « Il restera dans ta banque, d'un trimestre à l'autre. » (Les garder : ils reprennent les mots de ton infobulle.)
 2. **Le nom commun « évaluation terminale »** reste dans une quarantaine de phrases : l'Aide, la démo, les avertissements de Productions. Seules les citations du type entre guillemets sont devenues « Épreuve terminale » (trois). Est-ce que la prose suit ? (Oui, mais dans un lot à part, avec son propre relevé : c'est le même exercice que celui-ci.)
-3. **L'écran vide de Préparer** (ligne 465 du relevé) dit maintenant « regroupe les pages d'une même production et les associe à une production ». Le mot y prend tes deux sens. (« … et les rattache à ta production ».)
+3. **L'écran vide de Préparer** (ligne 465 du relevé) dit maintenant « regroupe les pages d'une même production et les associe à une production ». L'aide de Préparer (ligne 100) dit de même « rassemble les productions numérisées de tes étudiant·es […] et les associe à une production ». Le mot y prend tes deux sens. (« … et les rattache à ta production ».)
 4. **L'avis « Non recevable »** (lignes 56 et 250) dit « Ton évaluation est gardée, mais l'évaluation montre « Non recevable » », puis « elle compte comme non remise ». La phrase se répète, et le « elle » vise mal. (À reformuler avec toi. La session A touche aussi cette phrase.)
 5. **La fenêtre de fusion de deux codex** titre un conflit « Production d'« Analyse 1 » », avec le nom de l'étudiant·e à côté. Avant, on lisait « Copie d'« Analyse 1 » ». (« Production remise pour « Analyse 1 » ».)
 6. **Les propositions que la nuit marquait « à confirmer »** sont posées telles quelles. « jamais dans sa rétroaction » (159, 161, 247), « la note de chaque production » (303), et la réécriture « Si la production l'atteint, la note est entière » (27, 241). (Confirmer.)
 7. **La définition du portfolio** garde son nom en gras « Portfolio (conteneur) : », comme aujourd'hui. (Garder : c'est le libellé du menu.)
+8. **Deux codex de toi qui n'ont pas la même banque.** La fenêtre de fusion fait choisir, pour « Tes types » comme pour « Les exemples retirés de ta vue », la version de l'un des deux codex. Elle ne les additionne pas. (Laisser ainsi pour la cohorte : c'est la règle de toute clé de réglages dans la fusion. Une banque additionnée serait un lot à part.)
+9. **Un type reçu d'un·e collègue** reste sur sa production (ta décision 8), et son menu le montre à part. La nuit parlait de « l'ajouter d'un geste » à ta banque : ce geste n'existe pas en propre. On l'ajoute en écrivant le même nom dans « + Nouveau type… ». (Suffisant.)
 
 ### Ce que je n'ai pas pu vérifier
 
@@ -161,10 +163,7 @@ La saisie est bornée à 50 caractères, la borne du partage.
 
 Dans la carte d'alignement, un type que la table ne connaît pas a maintenant son groupe à son nom, échappé. Le groupe commun « Type non répertorié » taisait ce nom. Le menu, lui, passe tout par `textContent` et `value`.
 
-**Le type affiché partout.**
-- Réglages › Données montre maintenant le libellé (« Artefact d'un portfolio ») et non l'identifiant.
-- L'export PDF n'affiche aucun type de production : la nuit l'avait cru [mesuré : `js/travaux-export-pdf.js` ne lit pas `production.type`], et il n'y a rien à faire.
-- Le plan de cours n'affiche pas le type non plus.
+**Le type affiché partout.** Réglages › Données et les exports de Conception (`js/export-pdf.js` : l'aperçu et les deux tableaux du PDF des productions) montrent maintenant le libellé (« Artefact d'un portfolio », « Épreuve terminale »), et non l'identifiant. La nuit citait `js/travaux-export-pdf.js`, qui n'affiche aucun type ; c'est la relecture neuve qui a trouvé le bon fichier. Le plan de cours n'affiche pas le type.
 
 **Ce qui voyage.**
 - La banque part avec le codex et avec l'archive d'un groupe : elle entre dans `CLES_GLOBALES_INCLUSES`.
@@ -192,6 +191,8 @@ Ils sont posés pour que l'écran fonctionne. Aucun n'est validé.
 | Fenêtre « Gérer mes types… », banque vide | Ta banque est vide. Crée un type avec « + Nouveau type… », au bas du menu. |
 | Fenêtre « Gérer mes types… », boutons | Retirer / Fermer |
 | Fenêtre « Gérer mes types… », erreur de renommage | Ce nom est déjà dans ton menu. |
+| Fusion de deux codex, nom de la clé | ta banque de types de production (où elle se règle : Conception › Productions › Type) |
+| Fusion de deux codex, ses deux entrées | Tes types / Les exemples retirés de ta vue |
 
 ## 4. Vérifications
 
@@ -234,7 +235,21 @@ Ils sont posés pour que l'écran fonctionne. Aucun n'est validé.
   - 08, « Gérer mes types » ;
   - 09, la définition du portfolio.
 - **Anti-cache** : 55 `?v=` portés au jour du build (20261109). Les deux sentinelles anti-cache sont vertes, et le crochet de commit a laissé passer. La release du Mac refera les jetons.
-- **Relecture par un agent neuf** (`BOUCLE-SANS-RELAIS.md`, § 4, point 4) : voir le § 4 ter.
+- **Relecture par un agent neuf** (`BOUCLE-SANS-RELAIS.md`, § 4, point 4). Verdict, en une ligne : « le code de la banque et des mots est sain ; le lot ne doit pas passer avant les deux specs rouges et l'export PDF promis ; le reste est mineur ». Chaque constat a reçu une disposition :
+
+  | Constat | Disposition |
+  |---|---|
+  | Deux specs citaient encore l'ancien texte (`bibliotheque-deux-colonnes-1156:240`, « Évaluation terminale · 40 % » ; `materiel-dissection-9:93`, « la note d'une copie évaluée ») | corrigé (mon lot) ; un balayage de toutes les specs contre les textes (a) du relevé n'en trouve plus |
+  | `js/export-pdf.js` montrait l'identifiant brut du type (trois endroits) | corrigé : `libelleTypeExport`, par `getTypeLabel` |
+  | La clé `banqueTypesProduction` n'avait pas de nom dans la fenêtre de fusion du codex (`LIBELLES_DES_CLES`) | corrigé ; mots proposés au § 3 ; question 8 |
+  | Un nom de la banque en « -formatif » sortait des listes « sélection / obligatoires » (`pratiques-gestion.js`, `productions-import-export.js` lisent `endsWith('-formatif')`) | corrigé : tout nom qui finit par « -formatif » est refusé |
+  | L'ancien nom « Évaluation terminale » pouvait devenir un type libre | corrigé : réservé (`libellesAnciens`) |
+  | Le type d'une production hors de la banque se rangeait sous « Mes types » | corrigé : il est à part, sous son nom ; question 9 pour le geste d'ajout |
+  | La chaîne des étapes restait dessinée avec la valeur de l'action du menu | corrigé : redessinée après le retour au type d'avant |
+  | Double sens « associe à une production » (465, aide de Préparer) | question 3 |
+  | Deux entrées de la sentinelle rangées « n » au lieu de « b » (« Copies », « Réimporter, c'est faire une copie. ») | corrigé |
+  | S1 de la sentinelle 492 compare la table au menu bâti depuis elle | refusé : B3 (`banque-types-production`) tient la liste écrite à la main, mot pour mot ; S1.0 garde que le `<select>` statique est vide |
+  | La spec neuve et la config Chromium n'étaient pas commitées | la spec est commitée après son passage ; la config Chromium est un fichier de travail, retirée en fin de session |
 
 ## 5. À reporter, à la fusion
 

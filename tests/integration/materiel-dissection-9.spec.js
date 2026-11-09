@@ -90,7 +90,7 @@ test('dissection 9 · (d7) sans rattachement : créée avec deux critères sans 
     await bouton.click();
     await expect(page.locator('#materiel-titre-cree')).toHaveText('Ta grille « Évaluation fictive sur les images » est créée');
     const confirmation = page.locator('.materiel-confirmation');
-    await expect(confirmation).toContainText('Il te restera à donner des points à 2 critères, dans « Grilles de critères ». D’ici là, la note d’une copie évaluée avec cette grille affichera « -- ».');
+    await expect(confirmation).toContainText('Il te restera à donner des points à 2 critères, dans « Grilles de critères ». D’ici là, la note d’une évaluation faite avec cette grille affichera « -- ».');
     await expect(confirmation).toContainText('3 critères, sur 24 points ; 2 critères sans points pour l’instant.');
     await expect(confirmation).not.toContainText('NaN');
     await expect(confirmation).not.toContainText('null');
