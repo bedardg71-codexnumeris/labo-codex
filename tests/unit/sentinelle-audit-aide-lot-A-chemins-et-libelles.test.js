@@ -1,4 +1,5 @@
 import { describe, it, expect } from 'vitest';
+import { tranche } from './_helpers/tranche.js';
 import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -149,9 +150,17 @@ describe('Aide — elle ne décrit pas de fonctionnalité retirée', () => {
             expect(accueil.includes(libelle) || accueil.includes(echappe)).toBe(true);
             expect(carte).toContain(libelle);
         }
-        // La visite guidée est le bouton data-param="tour-guide" de l'en-tête.
-        expect(INTERFACE).toContain('data-param="tour-guide"');
-        expect(carte).toContain('Visite guidée');
+        // ↻ Lot « Les deux parcours » (8 nov. 2026) : l'entrée du menu est « Assistance », elle ouvre le panneau.
+        expect(INTERFACE).toContain('data-action="ouvrirPanneauAssistance"');
+    });
+
+    it('la carte de prise en main ne nomme plus la ligne « Visite guidée » du menu : une seule ligne « Assistance »', () => {
+        // ↻ Lot « Les deux parcours », partie 1 : la ligne validée par Grégoire le 9 nov. 2026 à 9 h 11 (Cowork),
+        // mot pour mot (le témoin était un `it.fails` depuis le 8 nov.).
+        const carte = tranche(AIDE, 'accordeon-aide-prise-en-main', 'accordeon-aide-demo');
+        expect(carte).not.toContain('Visite guidée</strong>, une ligne du menu');
+        expect(carte).toContain("<li><strong>Assistance</strong>, une ligne du menu de l'en-tête : les parcours où tu fais les gestes toi-même, et l'aide dans les pages (info-bulles, aide à l'écran, flèches).</li>");
+        expect(carte.match(/<strong>Assistance<\/strong>/g)).toHaveLength(1);
     });
 });
 

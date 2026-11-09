@@ -54,7 +54,7 @@ function charger(store, { confirmReponse = false } = {}) {
         echapperHtml: (s) => String(s),
         genererIdUnique: (p) => p + 'X1',
         notifications: { succes() {}, erreur() {}, info() {} },
-        BibliothequeUI: { fermerModal() {}, creerFenetreListe() {}, ajouterOptgroupDemo() {} },   // #1159
+        BibliothequeUI: { fermerModal() {}, creerFenetreListe() {} },   // #1159
         // #678 (12 oct. 2026) : le refus parle par la fenêtre d'information de l'application ;
         // `alertes` recueille son titre et son message. Le natif lève : il ne doit plus servir.
         uiDialogues: { informer: (o) => { alertes.push(String(o.titre) + ' ' + String(o.message)); return Promise.resolve(); } },

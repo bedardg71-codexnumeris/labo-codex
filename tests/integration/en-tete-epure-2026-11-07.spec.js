@@ -168,7 +168,7 @@ test('iPhone (390) : la liste des sept sections, l\'active marquée ; un choix c
         .toEqual(['Observation', 'Modélisation', 'Exploration', 'Rythme', 'Études', 'Bilan', 'Suivi longitudinal']);
 });
 
-test('le menu : six lignes dans l\'ordre, Réglages en dernier ; Échap, clic extérieur et choix le ferment ; le focus revient au bouton', async ({ page }) => {
+test('le menu : cinq lignes dans l\'ordre, Réglages en dernier ; Échap, clic extérieur et choix le ferment ; le focus revient au bouton', async ({ page }) => {
     await ouvrirDemo(page, 1180);
     const bouton = page.locator('#entete-menu-bouton');
     const panneau = page.locator('#entete-menu-panneau');
@@ -176,20 +176,20 @@ test('le menu : six lignes dans l\'ordre, Réglages en dernier ; Échap, clic ex
     await expect(panneau).toBeVisible();
     await expect(bouton).toHaveAttribute('aria-expanded', 'true');
     expect(await panneau.locator('.entete-menu-mot').allTextContents())
-        .toEqual(['Visite guidée', 'Assistance', 'Aide', 'Signaler', 'Soutenir', 'Réglages']);
+        .toEqual(['Assistance', 'Aide', 'Signaler', 'Soutenir', 'Réglages']); // ↻ lot « Les deux parcours », 8 nov.
     // ~210 px (correction du 7 nov.), aligné à droite sous le bouton
     const p = await boite(page, '#entete-menu-panneau');
     const b = await boite(page, '#entete-menu-bouton');
     expect(p.width).toBe(210);
     expect(p.right).toBe(b.right);
     expect(p.top).toBeGreaterThan(b.bottom);
-    // L'interrupteur d'Assistance suit son état
-    const etat = await page.locator('#btn-assistance-nav').getAttribute('aria-pressed');
-    expect(await page.locator('#btn-assistance-nav .entete-interrupteur').count()).toBe(1);
-    // La ligne Assistance tient : le mot n'est ni coupé ni passé à la ligne, l'interrupteur reste dans le panneau
+    // ↻ Lot « Les deux parcours » (8 nov. 2026) : l'interrupteur part dans le panneau « Assistance » ; la
+    // ligne porte le rang du parcours à venir (« 1 sur 2 »).
+    await expect(page.locator('#assistance-menu-rang')).toHaveText(/^\d sur \d$/);
+    // La ligne Assistance tient : le mot n'est ni coupé ni passé à la ligne, le rang reste dans le panneau
     const ligne = await page.evaluate(() => {
-        const b = document.getElementById('btn-assistance-nav');
-        const mot = b.querySelector('.entete-menu-mot'), inter = b.querySelector('.entete-interrupteur');
+        const b = document.getElementById('btn-assistance-menu');
+        const mot = b.querySelector('.entete-menu-mot'), inter = b.querySelector('.entete-menu-rang');
         const r = (e) => e.getBoundingClientRect();
         return { deborde: mot.scrollWidth > mot.clientWidth, hMot: r(mot).height, motDroite: r(mot).right, interGauche: r(inter).left,
             interDroite: r(inter).right, panneauDroite: r(document.getElementById('entete-menu-panneau')).right };
@@ -207,11 +207,13 @@ test('le menu : six lignes dans l\'ordre, Réglages en dernier ; Échap, clic ex
     await bouton.click();
     await page.mouse.click(700, 600);
     await expect(panneau).toBeHidden();
-    // Un choix : Assistance bascule, le menu se ferme, le focus revient
+    // Un choix : Assistance ouvre son panneau, le menu se ferme ; fermé par Échap, le focus revient au bouton
     await bouton.click();
-    await page.locator('#btn-assistance-nav').click();
+    await page.locator('#btn-assistance-menu').click();
     await expect(panneau).toBeHidden();
-    expect(await page.locator('#btn-assistance-nav').getAttribute('aria-pressed')).toBe(etat === 'true' ? 'false' : 'true');
+    await expect(page.locator('#panneau-assistance')).toBeVisible();
+    await page.keyboard.press('Escape');
+    await expect(page.locator('#panneau-assistance')).toHaveCount(0);
     expect(await page.evaluate(() => document.activeElement.id)).toBe('entete-menu-bouton');
     // Un choix : Réglages ouvre sa section
     await bouton.click();
@@ -263,9 +265,11 @@ test('captures', async ({ page }) => {
     await page.addStyleTag({ content: '*, *::before, *::after { transition: none !important; animation: none !important; }' });
     // L'infobulle de l'assistance s'ouvre au toucher d'un bouton : l'assistance est coupée pour les captures,
     // sauf celle du menu ouvert, qui montre son interrupteur dans l'état où Grégoire le trouvera.
-    const assistanceAuDepart = (await page.locator('#btn-assistance-nav').getAttribute('aria-pressed')) === 'true';
+    // ↻ Lot « Les deux parcours » (8 nov. 2026) : l'état se lit sur la préférence (l'interrupteur est dans le panneau).
+    const lireAssistance = () => page.evaluate(() => obtenirPreference('accompagnementActif') !== false);
+    const assistanceAuDepart = await lireAssistance();
     const poserAssistance = async (voulu) => {
-        const actuel = (await page.locator('#btn-assistance-nav').getAttribute('aria-pressed')) === 'true';
+        const actuel = await lireAssistance();
         if (actuel !== voulu) await page.evaluate(() => window.basculerAssistance());
         await page.evaluate(() => document.querySelectorAll('.notifications-pile > *').forEach((n) => n.remove()));
     };

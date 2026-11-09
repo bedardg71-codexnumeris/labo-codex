@@ -118,14 +118,24 @@ describe('#1152 lot 3 · un seul glossaire', () => {
 
     it('le mode assistance nomme les deux commandes que l\'écran porte', () => {
         // ↻ « L'en-tête épuré » (7 nov. 2026) : le bouton est une ligne du menu de l'en-tête, nommée par son mot.
-        expect(html).toMatch(/id="btn-assistance-nav"[^>]*>.*?<span class="entete-menu-mot">Assistance<\/span>/);
+        // ↻ Lot « Les deux parcours » (8 nov. 2026) : la ligne « Assistance » ouvre un panneau ; l'interrupteur
+        // y est, sous « Aide dans les pages » (js/assistance.js).
+        expect(html).toMatch(/id="btn-assistance-menu"[^>]*>.*?<span class="entete-menu-mot">Assistance<\/span>/);
+        expect(lire('js', 'assistance.js')).toContain("inter.setAttribute('role', 'switch');");
         // ↻ « L'accueil épuré » (7 nov. 2026) : la case « Assistance » de l'accueil est retirée. Le glossaire la
         // nomme encore : sa phrase passe au lot « Les pages sans doublons » (inventaire soumis à Grégoire), qui
         // remplacera ce témoin par le texte qu'il aura validé.
         expect(lire('js', 'accueil.js')).not.toContain('accueil-aide-titre');
         // ↻ Lot 3 (7 nov. 2026), phrase 12 approuvée par Grégoire : les mots de la consigne, la case retirée.
-        expect(terme('mode-assistance-icones').definition).toContain('Il s’active ou se coupe par la ligne Assistance du menu.');
         expect(terme('mode-assistance-icones').definition).not.toContain('case');
+    });
+
+    it('le glossaire dit où se coupe l\'aide dans les pages : dans le panneau « Assistance », plus sur la ligne du menu', () => {
+        // ↻ Lot « Les deux parcours », partie 1 : terme et définition validés par Grégoire le 9 nov. 2026 à 9 h 11
+        // (Cowork), mot pour mot (le témoin était un `it.fails` depuis le 8 nov.).
+        expect(terme('mode-assistance-icones').definition).not.toContain('par la ligne Assistance du menu');
+        expect(terme('mode-assistance-icones').terme).toBe('Aide dans les pages');
+        expect(terme('mode-assistance-icones').definition).toBe('Les info-bulles, l’aide à l’écran et les flèches. Elle s’active ou se coupe dans le panneau « Assistance » du menu. Elle est indépendante des parcours.');
     });
 
     it('la retouche du verdict (28 oct., 14 h 15) : le menu Codex sans côté ; SRPNF mot pour mot, sa validation notée', () => {

@@ -76,7 +76,9 @@ describe('#426 · l’onglet porte son nouveau nom, partout où il est nommé', 
 
     it('le tour guidé ne promet plus la page « plan de la leçon », supprimée en 1.57.0', () => {
         expect(sourceTour).not.toMatch(/plan de la le\\u00e7on|plan de la leçon/i);
-        expect(sourceTour).toMatch(/titre: 'Alignement \(optionnel\)'/);   // ↻ Lot 3 « Les pages sans doublons » (7 nov. 2026) : l'Aide nomme les onglets par leur libellé court.
+        // ↻ Lot « Les deux parcours » (8 nov. 2026) : la visite en sept étapes est retirée, son étape
+        // « Alignement (optionnel) » avec elle ; les parcours ne promettent pas cette page non plus.
+        expect(sourceTour).not.toContain('const ETAPES_TOUR');
     });
 });
 

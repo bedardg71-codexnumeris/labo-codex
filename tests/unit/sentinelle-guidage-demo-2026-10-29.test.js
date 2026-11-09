@@ -96,7 +96,12 @@ describe('A · chaque texte validé paraît sous sa clé, mot pour mot', () => {
         expect(f.sections[3].items.slice(0, 2)).toEqual(v.parcours.slice(0, 2).map(typo).map(auxLibellesCourts));
         expect(v.parcours).toHaveLength(3);
         expect(f.sections[4].contenu).toBe(typo(v.blocs[5]));
-        expect(f.sections[5].contenu).toBe(typo(v.blocs[6]));
+        // ↻ Lot « Les deux parcours », partie 2 (9 nov. 2026, option a de Grégoire) : le groupe « Démo » a quitté les
+        // menus du Cadre ; la phrase qui le décrivait part avec lui, la seconde reste mot pour mot.
+        const bloc6 = typo(v.blocs[6]);
+        expect(bloc6.startsWith('Dans les menus de Cadre')).toBe(true);
+        expect(f.sections[5].contenu.startsWith('Ton matériel ne peut pas pointer')).toBe(true);
+        expect(bloc6.endsWith(' ' + f.sections[5].contenu)).toBe(true);   // la seconde phrase, mot pour mot
         // ↻ Lot 3 (7 nov. 2026), phrase 10 approuvée par Grégoire : la case retirée, l'alerte dit « entrer dans la démo
         // ou en sortir » et n'offre plus que le bandeau.
         expect(f.sections[6].contenu).toBe(typo(v.blocs[7])

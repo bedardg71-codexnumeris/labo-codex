@@ -90,7 +90,6 @@ Plus : `demo_planification_mindmap` (`CARTE_DEMO_ALIGNEMENT`, 17 nœuds + 14 lie
 | `js/bibliotheque-ui.js` | `forkerItem(source, prefixeId)` | Clone profond avec `inspireDe` (Phase 4.B). |
 | `js/bibliotheque-ui.js` | `appliquerModeLectureSeuleDemo(conteneur, item, action, label, texte)` | Formulaire démo en lecture seule + bouton « Dupliquer ». |
 | `js/bibliotheque-ui.js` | `verifierReferencesPasDemo(references)` | Garde au save : refuse les références mixtes. |
-| `js/bibliotheque-ui.js` | `ajouterOptgroupDemo(select, items, labeler, titreOptgroup)` | Sélecteurs à 2 sections (Phase 2). |
 | `js/cc-license.js` | `obtenirIdentiteCCUtilisateur()` | Nom de l'utilisateur pour attribution (Phase 4.A). Distinct de `obtenirNomEnseignantActif` (usage PDF). |
 
 ---

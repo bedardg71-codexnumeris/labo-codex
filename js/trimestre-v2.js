@@ -298,7 +298,9 @@ function populerDropdownsAssemblageV2() {
     }
 
     // En mode démo legacy, les items démo sont dans les clés globales ;
-    // on les affiche dans la section principale (pas d'optgroup séparé).
+    // on les affiche dans la section principale. Hors de la démo, ils n'y paraissent pas.
+    // Lot « Les deux parcours », partie 2 (9 nov. 2026, option a de Grégoire) : le groupe « Démo » ne paraît
+    // plus dans ce menu hors de la démo, comme en Conception (`filtrerParModeDemo`).
     const enDemoLegacy = typeof estEnModeDemo === 'function' && estEnModeDemo();
 
     // Dropdown Cours
@@ -320,11 +322,6 @@ function populerDropdownsAssemblageV2() {
             html += `<option value="${echapperHtml(c.id)}">${echapperHtml(labelCours(c))}</option>`;
         });
         selectCours.innerHTML = html;
-
-        if (!enDemoLegacy && typeof cleDemo === 'function' && typeof BibliothequeUI !== 'undefined') {
-            const coursDemo = db.getSync(cleDemo('listeCours'), []) || [];
-            BibliothequeUI.ajouterOptgroupDemo(selectCours, coursDemo, labelCours);
-        }
     }
 
     // Dropdown Groupes d'étudiants
@@ -343,11 +340,6 @@ function populerDropdownsAssemblageV2() {
             html += `<option value="${echapperHtml(h.id)}">${echapperHtml(nom)}</option>`;
         });
         selectHoraire.innerHTML = html;
-
-        if (!enDemoLegacy && typeof cleDemo === 'function' && typeof BibliothequeUI !== 'undefined') {
-            const horairesDemo = db.getSync(cleDemo('horaires'), []) || [];
-            BibliothequeUI.ajouterOptgroupDemo(selectHoraire, horairesDemo, h => h.nom || h.id || 'Sans nom');
-        }
     }
 
     // Beta 95.2: Dropdown Enseignants (maintenant depuis liste unifiée)
@@ -363,11 +355,6 @@ function populerDropdownsAssemblageV2() {
             html += `<option value="${echapperHtml(e.id)}">${echapperHtml(labelEns(e))}</option>`;
         });
         selectEnseignant.innerHTML = html;
-
-        if (!enDemoLegacy && typeof cleDemo === 'function' && typeof BibliothequeUI !== 'undefined') {
-            const ensDemo = db.getSync(cleDemo('enseignants'), []) || [];
-            BibliothequeUI.ajouterOptgroupDemo(selectEnseignant, ensDemo, labelEns);
-        }
     }
 
     // Beta 95.3: Dropdown Pratiques de notation (alignement Primo)
@@ -387,11 +374,6 @@ function populerDropdownsAssemblageV2() {
             html += `<option value="${echapperHtml(p.id)}">${echapperHtml(nom)}</option>`;
         });
         selectPratique.innerHTML = html;
-
-        if (!enDemoLegacy && typeof cleDemo === 'function' && typeof BibliothequeUI !== 'undefined') {
-            const pratiquesDemo = db.getSync(cleDemo('pratiquesConfigurables'), []) || [];
-            BibliothequeUI.ajouterOptgroupDemo(selectPratique, pratiquesDemo, p => p.nom || p.id || 'Sans nom');
-        }
     }
 
     // Retour testeur du 18 sept. 2026 : ce hub est rejoué après chaque
@@ -517,7 +499,17 @@ window.afficherAvertissementsCadreV2 = afficherAvertissementsCadreV2;
 function mettreAJourBarreContexte() {
     const barre = document.getElementById('barreConvergence');
     if (!barre || typeof db === 'undefined' || !db.getSync || typeof ChaineEtapes === 'undefined') return;
+    ChaineEtapes.dessiner(barre, etapesDuCadre(), { surClic: ouvrirAccordeonDeLEtape, prefixeIdInfo: 'bc-info-' });
+}
 
+/**
+ * Les six étapes de la barre, réglées ou non, lues dans le stock, avec l'accordéon que chacune ouvre.
+ * Source unique de ce que la barre montre : le parcours « Mettre ta classe en place »
+ * (js/parcours-classe.js) s'y repère aussi, pour commencer à la première étape non faite et ouvrir
+ * le bon bloc (lot « Les deux parcours », partie 2, 9 nov. 2026).
+ * @returns {Array<{id: string, libelle: string, reglee: boolean, info: string, accordeon: string}>}
+ */
+function etapesDuCadre() {
     // #642 (12 oct. 2026) : plus d'alias local `cle` (il masquait le helper) ; `window.cle`
     // est posé par trimestres.js, chargé avant.
     // Les mots du contexte (cours ou service) : ceux que `appliquerMotsNatureCadre` pose aussi.
@@ -536,8 +528,9 @@ function mettreAJourBarreContexte() {
         etape('horaire', 'Horaire', nb(cle('horaires')), ' hor.'),
         Object.assign(etape('groupe-cours', 'Groupe-cours', nb(cle('groupesCours')), ' GC'), { arrivee: true })
     ];
-
-    ChaineEtapes.dessiner(barre, etapes, { surClic: ouvrirAccordeonDeLEtape, prefixeIdInfo: 'bc-info-' });
+    // L'accordéon que chaque étape ouvre : le parcours le lit ici, comme la barre au clic.
+    etapes.forEach(e => { e.accordeon = ACCORDEON_DE_L_ETAPE[e.id]; });
+    return etapes;
 }
 
 /** L'accordéon que chaque étape de la barre ouvre. */
@@ -570,8 +563,10 @@ function ouvrirAccordeonDeLEtape(idEtape) {
 }
 
 window.mettreAJourBarreContexte = mettreAJourBarreContexte;
-// La porte « Tu enseignes ? » de l'accueil (accueil.js) ouvre l'étape Trimestre par ce chemin.
-window.ouvrirAccordeonDeLEtape = ouvrirAccordeonDeLEtape;
+// La porte « Tu enseignes ? » de l'accueil passe par le parcours « Mettre ta classe en place »
+// (js/parcours-classe.js), qui se repère sur ce que montre la barre. Elle ouvrait l'étape Trimestre
+// par `ouvrirAccordeonDeLEtape`, qui ne sert plus qu'au clic sur la barre (9 nov. 2026).
+window.etapesDuCadre = etapesDuCadre;
 
 /* ===============================
    INITIALISATION AUTOMATIQUE

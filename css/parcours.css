@@ -1,0 +1,456 @@
+/* =================================================================
+   PARCOURS ET PANNEAU « ASSISTANCE » — lot « Les deux parcours » (8 nov. 2026)
+   plans de travail/CONSIGNE-LOT-2026-11-08-parcours-1-et-2.md ; esquisses 69, 70 et 73.
+
+   Deux familles :
+   · le moteur (js/parcours-moteur.js) : un voile percé de trous sur les zones éclairées,
+     un contour dans l'orange de l'aide sur ce qu'il faut toucher, une bulle posée près
+     de la zone ;
+   · le panneau « Assistance » (js/assistance.js) : il glisse de la droite, sous l'en-tête,
+     ~430 px, pleine largeur sous 780 px.
+
+   Une seule variable neuve, --parcours-geste : la consigne de geste est écrite dans
+   l'orange de l'aide. #e8923a (--icone-aide-config) passe sur la surface sombre (5,5:1)
+   mais pas sur le blanc du mode clair (2,5:1) : là, l'orange foncé de la famille
+   (--acc-bordure-active, 6,5:1 sur blanc).
+   ================================================================= */
+
+:root {
+    --parcours-geste: var(--icone-aide-config);
+    --parcours-contour: var(--icone-aide-config);
+    /* Le trait, les pastilles « À faire » et les boutons en contour du panneau : le texte du menu
+       atténué. --bordure-moyenne (0,35 d'opacité) s'effaçait sur le fond du menu. */
+    --assistance-trait: rgba(196, 208, 228, 0.4);
+}
+
+body.mode-clair {
+    --parcours-geste: var(--acc-bordure-active);
+}
+
+/* ---------- Le voile : un chemin plein, les trous laissent passer le toucher ---------- */
+
+.parcours-voile {
+    position: fixed;
+    inset: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: 9000;
+    pointer-events: none;
+}
+
+.parcours-voile path {
+    pointer-events: visiblePainted;
+    fill: #000;
+    fill-rule: evenodd;
+    transition: fill-opacity 0.2s ease;
+}
+
+.parcours-voile--normal path { fill-opacity: 0.55; }
+.parcours-voile--leger path  { fill-opacity: 0.3; }
+.parcours-voile--dense path  { fill-opacity: 0.65; }
+
+/* ---------- Le contour : il marque où toucher, sans capter le toucher ---------- */
+
+.parcours-contour {
+    position: fixed;
+    z-index: 9001;
+    pointer-events: none;
+    border: 3px solid var(--parcours-contour);
+    border-radius: 8px;
+    box-sizing: border-box;
+    box-shadow: 0 0 0 3px rgba(232, 146, 58, 0.25);
+}
+
+.parcours-contour[hidden] { display: none; }
+
+/* ---------- La bulle ---------- */
+
+.parcours-bulle {
+    position: fixed;
+    z-index: 9002;
+    width: min(380px, calc(100vw - 32px));
+    box-sizing: border-box;
+    padding: 18px 20px 16px;
+    background: var(--surface-carte);
+    color: var(--texte-principal);
+    border: 1px solid var(--bordure-moyenne);
+    border-radius: var(--radius-grand, 12px);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    max-height: calc(100vh - 32px);
+    overflow-y: auto;
+}
+
+.parcours-bulle:focus { outline: none; }
+.parcours-bulle:focus-visible { box-shadow: 0 0 0 3px var(--focus-ring-color), 0 10px 30px rgba(0, 0, 0, 0.35); }
+
+.parcours-bulle-tete {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 12px;
+}
+
+.parcours-bulle-titre {
+    margin: 0;
+    font-size: 17px;
+    font-weight: 600;
+    color: var(--texte-principal);
+}
+
+.parcours-bulle-rang {
+    font-size: 12px;
+    color: var(--texte-secondaire);
+    white-space: nowrap;
+}
+
+.parcours-bulle-texte {
+    margin: 0;
+    font-size: 14.5px;
+    line-height: 1.5;
+}
+
+.parcours-bulle-geste {
+    margin: 0;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--parcours-geste);
+}
+
+.parcours-bulle-boutons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.parcours-bulle-boutons .btn {
+    min-height: 44px;
+}
+
+.parcours-bulle-sortie {
+    align-self: flex-start;
+    min-height: 44px;
+    padding: 0;
+    background: none;
+    border: 0;
+    color: var(--texte-secondaire);
+    font: inherit;
+    font-size: 13px;
+    text-decoration: underline;
+    cursor: pointer;
+}
+
+.parcours-bulle-sortie:hover { color: var(--texte-principal); }
+.parcours-bulle-sortie:focus-visible { outline: 2px solid var(--focus-ring-color); outline-offset: 2px; }
+
+/* Pendant un parcours, le jalon de js/transitions.js ne vient pas couvrir l'étape. */
+body.parcours-actif .transition-bandeau { display: none; }
+
+/* ---------- Le panneau « Assistance » ---------- */
+
+.assistance-voile {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    top: 0; /* posé sous l'en-tête par js/assistance.js */
+    z-index: 8000;
+    background: rgba(8, 14, 18, 0.55);
+}
+
+.assistance-panneau {
+    position: fixed;
+    right: 0;
+    bottom: 0;
+    top: 0; /* posé sous l'en-tête par js/assistance.js */
+    z-index: 8001;
+    width: 430px;
+    max-width: 100vw;
+    box-sizing: border-box;
+    padding: 24px 26px;
+    overflow-y: auto;
+    background: var(--entete-menu-fond);
+    color: var(--entete-menu-texte);
+    border-left: 1px solid var(--bordure-moyenne);
+    box-shadow: -18px 0 40px rgba(0, 0, 0, 0.4);
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    transform: translateX(0);
+    transition: transform 0.25s ease;
+}
+
+.assistance-panneau.est-entrant { transform: translateX(100%); }
+
+.assistance-voile[hidden],
+.assistance-panneau[hidden] { display: none; }
+
+@media (max-width: 780px) {
+    .assistance-panneau { width: 100vw; border-left: 0; }
+}
+
+.assistance-tete {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.assistance-titre {
+    margin: 0;
+    font-size: 20px;
+    font-weight: 600;
+    color: inherit;
+}
+
+.assistance-fermer {
+    width: 44px;
+    height: 44px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    background: transparent;
+    border: 0;
+    border-radius: var(--radius-moyen, 6px);
+    cursor: pointer;
+}
+
+.assistance-fermer:hover { background: rgba(106, 172, 184, 0.15); }
+.assistance-fermer:focus-visible { box-shadow: inset 0 0 0 2px var(--focus-ring-color); outline: none; }
+.assistance-fermer img { width: 18px; height: 18px; }
+
+.assistance-intro {
+    margin: 0;
+    font-size: 14px;
+    line-height: 1.5;
+    opacity: 0.85;
+}
+
+.assistance-intitule {
+    margin: 4px 0 0;
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    font-weight: 600;
+    opacity: 0.75;
+}
+
+.assistance-parcours {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+.assistance-parcours-item {
+    position: relative;
+    display: flex;
+    gap: 14px;
+    align-items: flex-start;
+    padding-bottom: 20px;
+}
+
+.assistance-parcours-item:last-child { padding-bottom: 0; }
+
+/* Le trait vertical qui relie les pastilles, comme des étapes. */
+.assistance-parcours-item:not(:last-child)::before {
+    content: '';
+    position: absolute;
+    left: 14px;
+    top: 34px;
+    bottom: 2px;
+    width: 2px;
+    background: var(--assistance-trait);
+}
+
+.assistance-pastille {
+    flex: none;
+    width: 30px;
+    height: 30px;
+    box-sizing: border-box;
+    border-radius: 50%;
+    border: 1.5px solid var(--assistance-trait);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.assistance-parcours-item[data-etat="en-cours"] .assistance-pastille {
+    background: var(--icone-aide-config);
+    border-color: var(--icone-aide-config);
+    color: var(--acc-texte);
+}
+
+.assistance-parcours-item[data-etat="fait"] .assistance-pastille {
+    background: var(--vert-leger);
+    border-color: var(--vert-leger);
+    color: #fff;
+}
+
+.assistance-parcours-corps {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.assistance-parcours-ligne1 {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 8px;
+}
+
+.assistance-parcours-titre {
+    margin: 0;
+    font-size: 15px;
+    font-weight: 600;
+    color: inherit;
+}
+
+.assistance-parcours-etat {
+    font-size: 12px;
+    font-weight: 600;
+    white-space: nowrap;
+    opacity: 0.8;
+}
+
+/* Le panneau garde le fond du menu (sombre aussi en mode clair) : l'orange de l'aide y passe. */
+.assistance-parcours-item[data-etat="en-cours"] .assistance-parcours-etat { color: var(--icone-aide-config); opacity: 1; }
+.assistance-parcours-item[data-etat="fait"] .assistance-parcours-etat { color: var(--vert-leger); opacity: 1; }
+
+.assistance-parcours-ligne {
+    margin: 0;
+    font-size: 13px;
+    line-height: 1.45;
+    opacity: 0.8;
+}
+
+.assistance-parcours-bouton {
+    align-self: flex-start;
+    min-height: 44px;
+    padding: 0 16px;
+    border-radius: var(--radius-moyen, 6px);
+    font: inherit;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    background: transparent;
+    color: inherit;
+    border: 1px solid var(--assistance-trait);
+}
+
+/* « Commencer » : en contour, dans l'orange de l'aide (esquisse 73). */
+.assistance-parcours-item[data-etat="a-faire"] .assistance-parcours-bouton {
+    border-color: var(--icone-aide-config);
+    color: var(--icone-aide-config);
+}
+
+.assistance-parcours-bouton:focus-visible { outline: 2px solid var(--focus-ring-color); outline-offset: 2px; }
+
+/* « Reprendre » : le bouton plein, dans l'orange de l'aide. */
+.assistance-parcours-bouton--plein {
+    background: var(--icone-aide-config);
+    border-color: var(--icone-aide-config);
+    color: var(--acc-texte);
+}
+
+.assistance-parcours-bouton:hover { background: rgba(106, 172, 184, 0.15); }
+.assistance-parcours-bouton--plein:hover { background: var(--acc-surface); }
+
+.assistance-filet {
+    height: 1px;
+    background: var(--bordure-moyenne);
+}
+
+.assistance-aide {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+.assistance-aide-texte {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.assistance-aide-titre {
+    margin: 0;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.assistance-aide-ligne {
+    margin: 0;
+    font-size: 12.5px;
+    line-height: 1.45;
+    opacity: 0.8;
+}
+
+/* L'interrupteur : la même pastille que celle du menu d'avant, lue sur aria-checked. */
+.assistance-interrupteur {
+    flex: none;
+    position: relative;
+    width: 44px;
+    height: 44px;
+    padding: 0;
+    background: none;
+    border: 0;
+    cursor: pointer;
+}
+
+.assistance-interrupteur::before {
+    content: '';
+    position: absolute;
+    left: 2px;
+    top: 10px;
+    width: 40px;
+    height: 24px;
+    border-radius: 12px;
+    background: rgba(106, 172, 184, 0.35);
+    transition: background-color 0.15s ease;
+}
+
+.assistance-interrupteur::after {
+    content: '';
+    position: absolute;
+    left: 5px;
+    top: 13px;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: #fff;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+    transition: transform 0.15s ease;
+}
+
+.assistance-interrupteur[aria-checked="true"]::before { background: var(--icone-aide-config); }
+.assistance-interrupteur[aria-checked="true"]::after { transform: translateX(16px); }
+.assistance-interrupteur:focus-visible { outline: 2px solid var(--focus-ring-color); outline-offset: 2px; border-radius: 12px; }
+
+/* Le rang du parcours en cours ou à venir, en petit, dans le menu. */
+.entete-menu-rang {
+    flex: none;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--icone-aide-config);
+    white-space: nowrap;
+}
+
+.entete-menu-rang:empty { display: none; }
+
+@media (prefers-reduced-motion: reduce) {
+    .parcours-voile path,
+    .assistance-panneau,
+    .assistance-interrupteur::before,
+    .assistance-interrupteur::after { transition: none; }
+}

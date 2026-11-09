@@ -145,10 +145,11 @@
         transition_obs_comp_vue: false,
         transition_obs_comp_vue_demo: false,
 
-        // État de la visite guidée 6 étapes (js/accompagnement.js)
-        tourGuide_etape: null,
-        tourGuide_complete: false,
-        tourGuide_etapes_vues: [],
+        // L'état des parcours du panneau « Assistance » (js/assistance.js, lot « Les deux
+        // parcours », 8 nov. 2026) : { <id>: { etat: 'a-faire'|'en-cours'|'fait', etape } }.
+        // Il remplace tourGuide_etape / _complete / _etapes_vues (la visite en sept étapes,
+        // retirée) : celles déjà écrites restent dans le stockage, rien ne les lit plus.
+        parcoursAssistance: {},
 
         // Export du plan — niveau « Personnalisé » (#431, 8 août 2026).
         // ⚠ REMPLACÉE par exportGabarits (#416 lot H, 12 août 2026). Elle

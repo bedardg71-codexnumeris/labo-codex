@@ -59,7 +59,7 @@ describe('#458 · une fiche neuve est visible dans la Bibliothèque', () => {
                     rendues.selection.push(...c.liste.rangees.map(r => r.id));
                     rendues.disponibles.push(...c.repli.rangees.map(r => r.id));
                 },
-                fermerModal() {}, ajouterOptgroupDemo() {}
+                fermerModal() {}
             },
             alert() {}, confirm: () => false
         });
@@ -85,7 +85,7 @@ describe('#458 · une fiche neuve est visible dans la Bibliothèque', () => {
                     rendues.selection.push(...c.liste.rangees.map(r => r.id));
                     rendues.disponibles.push(...c.repli.rangees.map(r => r.id));
                 },
-                fermerModal() {}, ajouterOptgroupDemo() {}
+                fermerModal() {}
             },
             alert() {}, confirm: () => false
         });

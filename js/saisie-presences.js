@@ -912,6 +912,20 @@ function mettreAJourControleVerrouillage(dateStr, estVerrouille) {
 
 window.basculerVerrouillageDateActive = basculerVerrouillageDateActive;
 
+/**
+ * Les dates verrouillées du groupe-cours actif, telles qu'elles sont en base, SANS le semis de
+ * `obtenirDatesVerrouillees` : une lecture qui n'écrit rien. Pour le parcours « Mettre ta classe en
+ * place » (js/parcours-classe.js), qui avance quand une séance est verrouillée. Relecture du 9 nov. :
+ * passer par le semis copiait chez un groupe-cours neuf les dates du stock d'avant le 11 sept., et
+ * l'étape de la première saisie sautait sans que rien ait été saisi.
+ * @returns {string[]}
+ */
+function lireDatesVerrouilleesSansSemis() {
+    const liste = db.getSync(cleDatesVerrouillees(), null);
+    return Array.isArray(liste) ? liste : [];
+}
+window.lireDatesVerrouilleesSansSemis = lireDatesVerrouilleesSansSemis;
+
 /* ===============================
    ENREGISTREMENT — lot D (D2, D2 bis ; 27 sept. 2026)
    =============================== */
@@ -2399,6 +2413,15 @@ document.addEventListener('DOMContentLoaded', function() {
                     const dateInput = document.getElementById('date-cours');
                     if (dateInput && dateInput.value) {
                         initialiserSaisiePresences();
+                    } else if (dateInput && window.dbReady === true) {
+                        // Lot « Les deux parcours », partie 2 (9 nov. 2026) : la date part vide quand
+                        // le démarrage n'avait rien à proposer (poste neuf), et le premier groupe-cours,
+                        // créé ensuite dans le Cadre, n'y revenait qu'au rechargement — date vide, ni
+                        // « Confirmer la séance » ni « Verrouiller la saisie ». À l'arrivée, le chemin
+                        // du démarrage : les séances régénérées, la plus récente ≤ aujourd'hui proposée.
+                        // Seulement la base prête : avant elle, ce chemin écrirait un calendrier vide sous
+                        // une clé nue (#990, la raison pour laquelle main.js l'attend par `auDbPret`).
+                        initialiserModuleSaisiePresences();
                     }
                 }
             }
