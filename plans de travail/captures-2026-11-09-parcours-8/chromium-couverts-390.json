@@ -1,0 +1,37 @@
+[
+  {
+    "largeur": 390,
+    "etape": "Ta grille",
+    "cible": "#conception-grille-criteres [data-action=\"creerNouvelleGrille\"]"
+  },
+  {
+    "largeur": 390,
+    "etape": "Tes codes",
+    "cible": "#listeCriteres .atelier-algo-etape[data-etape=\"codes\"] [data-action=\"ajouterSousCritere\"]"
+  },
+  {
+    "largeur": 390,
+    "etape": "Tes codes",
+    "cible": "#listeCriteres .atelier-algo-etape[data-etape=\"codes\"] [data-action=\"ajouterSousCritere\"]"
+  },
+  {
+    "largeur": 390,
+    "etape": "Ce que l'étudiant·e lit",
+    "cible": "#btnCreerGrille"
+  },
+  {
+    "largeur": 390,
+    "etape": "Poser tes codes",
+    "cible": "le contour"
+  },
+  {
+    "largeur": 390,
+    "etape": "Poser tes codes",
+    "cible": "locator('#travaux-palette-erreurs-fr .travaux-errfr-item').first()"
+  },
+  {
+    "largeur": 390,
+    "etape": "Poser tes codes",
+    "cible": "aucun point libre sur la production (palettes d’Annoter)"
+  }
+]

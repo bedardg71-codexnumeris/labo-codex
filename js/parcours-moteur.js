@@ -13,7 +13,7 @@
    le moteur le sonde, il n'écoute pas le toucher d'un bouton précis.
 
    Une étape :
-     { titre, texte, geste?, voile?: 'normal'|'leger'|'dense', centre?: bool,
+     { titre, texte, geste?, voile?: 'normal'|'leger'|'dense'|'aucun', centre?: bool,
        avant?: async () => void,   // place la page (idempotent : sert aussi à la reprise)
        zones?: () => Element[],    // ce qui est éclairé
        contour?: () => Element,    // où toucher

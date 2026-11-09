@@ -598,17 +598,22 @@
         }),
         lit: Object.assign({}, TEXTES.lit, {
             avant: function () { return assurerAtelier('eleve'); },
-            zones: function () { return [sectionAtelier('eleve')]; },
+            // Une grille nouvelle : le nom et « Créer la grille » restent touchables ; le contour est sur les
+            // trois phrases, puis sur « Créer la grille » dès que la grille a un nom (la consigne : « puis »).
+            zones: function () {
+                var z = [sectionAtelier('eleve')];
+                if (enCreation()) z.push(vis(document.getElementById('nomGrilleTemplate')), vis(document.getElementById('btnCreerGrille')));
+                return z;
+            },
             contour: function () {
-                if (!enCreation()) return corpsAtelier('eleve');
                 var nom = vis(document.getElementById('nomGrilleTemplate'));
-                if (nom && vide(nom)) return nom;
-                return vis(document.getElementById('btnCreerGrille'));
+                if (enCreation() && nom && !vide(nom)) return vis(document.getElementById('btnCreerGrille'));
+                return corpsAtelier('eleve');
             },
             boutons: [{ libelle: 'Continuer', primaire: true, action: suivante }],
             atteint: function () {
                 montrerBouton('Continuer', !enCreation());
-                bulleHors([], [ETAPES.lit.contour()]);
+                bulleHors([sectionAtelier('eleve')], [ETAPES.lit.contour(), enCreation() ? vis(document.getElementById('nomGrilleTemplate')) : null]);
                 if (enCreation()) { creationVue = true; return false; }
                 // Une grille nouvelle : l'étape avance quand elle est créée (« Créer la grille » peut refuser).
                 var g = grilleOuverte();
@@ -659,7 +664,11 @@
             },
             zones: function () {
                 // La production elle-même reste touchable : on y pose les codes.
-                if (annoterOuvert()) return [palette('travaux-palette-erreurs-fr'), vis(document.getElementById('travaux-canvas-annotation'))];
+                // « Annoter ▾ » et son menu aussi : le geste suivant y passe (« … puis touche « Actions › Évaluer » »).
+                if (annoterOuvert()) {
+                    return [palette('travaux-palette-erreurs-fr'), vis(document.getElementById('travaux-canvas-annotation')),
+                        vis(document.getElementById('travaux-btn-actions')), vis(document.getElementById('travaux-actions-dropdown'))];
+                }
                 var s = menuActions('annoter');
                 return s ? [s.closest('tr')] : [];
             },
@@ -728,9 +737,12 @@
 
     /** Ce que les données disent aujourd'hui des étapes 7 et 8 (une étape déjà figée ne bouge plus). */
     function sautsPrevus(c) {
-        var prods = productionsDeLaGrille(c.grilleId || (grilleOuverte() ? grilleOuverte().id : null));
+        // La grille du parcours seulement (surEtape la tient à jour) : pas une fiche restée ouverte au lancement.
+        var prods = productionsDeLaGrille(c.grilleId);
         var saute7 = typeof c.saute7 === 'boolean' ? c.saute7 : prods.length > 0;
-        var saute8 = typeof c.saute8 === 'boolean' ? c.saute8 : (saute7 && fichiersImportes(prods).length > 0);
+        // L'étape 8 se juge sur les productions qui portent la grille à l'entrée de sa place : une
+        // production associée à l'étape 7 et déjà importée la fait sauter aussi (relecture neuve, 9 nov.).
+        var saute8 = typeof c.saute8 === 'boolean' ? c.saute8 : fichiersImportes(prods).length > 0;
         return { saute7: saute7, saute8: saute8 };
     }
 
@@ -755,8 +767,11 @@
     function surEtape(i) {
         var c = lireCtx();
         var avant = Array.isArray(c.chemin) ? c.chemin.slice(0, i) : [];
-        // Jusqu'à l'étape 6, la grille du parcours est celle de la fiche ouverte.
-        if (i <= ORDRE.indexOf('lit') + 1 && grilleOuverte()) c.grilleId = grilleOuverte().id;
+        // Jusqu'à l'étape 6, la grille du parcours est celle de la fiche : aucune à l'étape 1 (elle n'est
+        // pas encore choisie, et `avant` referme une fiche restée ouverte), aucune pendant une création.
+        // Fiche fermée (« Reprendre » après un rechargement) : la grille retenue reste, l'étape la rouvre.
+        if (i === 0) c.grilleId = null;
+        else if (i <= ORDRE.indexOf('lit') + 1 && ficheOuverte()) c.grilleId = grilleOuverte() ? grilleOuverte().id : null;
         var s = sautsPrevus(c);
         var neuf = cheminDe(c, s);
         var cleEtape = neuf[i];

@@ -9,6 +9,7 @@
 - Dans le panneau « Assistance », un parcours de plus : « Automatiser tes commentaires », avec sa ligne. Sur cette branche, il est le troisième de la liste (les parcours 3 à 7 ne sont pas là) ; son fichier se charge après « Mettre ta classe en place », à la place du huitième.
 - Sans production avec sa grille dans le groupe-cours actif, « Commencer » ne lance rien : le panneau affiche, sous le bouton, la phrase validée (« Commence par « Évaluer une première production »… »). La démo et un service d'orthopédagogie ne comptent pas.
 - « Commencer » ouvre Conception › Grilles. Tu choisis une grille ou tu en crées une, tu ajoutes un critère et tu lui donnes le type « Algorithmique » : le parcours passe dans l'atelier du critère et t'y accompagne étape par étape (les quatre noms, les codes, la note, les cas, les phrases). Il te mène ensuite à la production, à l'import, aux codes dans Annoter, à l'évaluation, jusqu'au verrou. « Terminer » le marque « Fait ».
+- La bulle se place pour ne pas couvrir ce qu'il faut toucher : la chaîne des étapes, le champ à remplir, « Annoter ▾ », la palette « Codes », le verrou (jusqu'à 820 px ; voir la question 2 pour l'iPhone).
 - Les « Continuer » des étapes 3 à 6 ne paraissent qu'une fois l'étape réglée (un code qui pèse, une pondération, les deux nombres d'une limite) ; à l'étape 6, une grille nouvelle avance quand tu la crées.
 - Les étapes sautées ne comptent pas : sur une grille déjà associée à une production, la bulle dit « 2 sur 10 » ; après « Rien à importer », « 8 sur 9 ».
 - « Plus tard » ferme la bulle ; le panneau dit « Étape 3 sur 10 » et « Reprendre » revient à la même étape, sur la même grille.
@@ -100,15 +101,37 @@ Les « tient » et « ne tient pas » viennent de la lecture du code par un agen
 - **Commenté, sans suite** (issue 3) : dans une grille enregistrée, les quatre noms tapés en quelques millisecondes se perdent parfois. Deux enregistrements se croisent, chacun redessinant la fiche (`grilles.js:4879-4900`) ; mesuré 1 passage sur 5 au banc. Une personne ne tape pas si vite.
 - **Commenté, sans suite** (issue 3) : le réglage de départ de la pénalité proportionnelle (500) est pensé pour des mots ; avec « calculs » et une étendue de 12, deux unités manquantes donnent 0/20 (vu : « −63,33 ; la note ne descend pas sous 0 »). La bulle de l'étape 4 dit d'ajuster le réglage.
 - **Commenté, sans suite** (issue 3) : l'avertissement « ses critères totalisent 20 %, pas 100 % » reste à l'écran jusqu'à « OK » et couvre le bouton du menu ; le témoin « Enregistré » passe un instant sur le lien « Plus tard » de la bulle, en bas à gauche.
+- **Commenté, sans suite** (issue 3) : le rappel de sauvegarde (« Mets ton codex à jour ») peut paraître pendant le parcours, sur un espace qui a des données sans codex. Il couvre la bulle jusqu'à ce qu'on le ferme, et lui prend le focus sans le lui rendre. La consigne du quatrième parcours le traite ; celle-ci n'en dit rien. Le banc le repousse (« Plus tard ») dès le montage.
 - **Déjà connu** : sous Chromium, un essai de la spec de la partie 1 mesure 430,00006 px au lieu de 430 (le panneau) ; l'audit de début de session l'avait relevé, avec trois écarts de géométrie dans `en-tete-epure` (barre de défilement de Linux). Sans lien avec ce lot.
 
 ### Tests
 
-(à compléter)
+- **Vitest** : complet au crochet de pré-envoi à chaque push (le dernier : 10 902 essais au compte de la relecture neuve, tous verts, plus les essais de ce lot ajoutés depuis). La sentinelle des textes : 32 essais. Elle vérifie aussi que chaque bulle a le texte et le geste de son étape.
+- **Playwright, sous Chromium seulement** (`tests/playwright.chromium.config.js`) : le banc du parcours, 5 essais, verts deux fois de suite. Ils couvrent le refus du panneau (sans production avec grille, en démo, dans un service d'orthopédagogie), le chemin avec fichier de bout en bout et le chemin sans fichier. Ce dernier part d'une grille déjà employée, avec un verrou posé avant le parcours, « Plus tard », un rechargement et « Reprendre ». Un cinquième essai vérifie l'étape 8 sautée et une grille restée ouverte au lancement. Les 5 essais de captures ne tournent que sur demande (`CAPTURES_PARCOURS=<dossier>`).
+- **Ce que le banc démontre, au sens de la consigne** : le bouton du panneau refuse sans production avec sa grille. D'une grille neuve à deux codes posés sur une production importée, la rétroaction contient le décompte sous le critère (« Ta production contient 2 unités manquantes pour 12 calculs. ») et les deux codes dans « Spécifique ». Les gestes sont faits à la souris : « + Nouvelle grille », le « Type », « + Ajouter un sous-critère », « Créer la grille », les codes posés sur la production, « Annoter ▾ » puis « Évaluer », « Verrouiller ».
+- **Break-tests**, chacun rouge pour la bonne raison, puis rétabli :
+  - un mot changé dans une bulle ;
+  - deux gestes intervertis (étapes 3 et 4) ;
+  - le refus du panneau retiré ;
+  - la démo laissée passer ;
+  - la production retirée des zones éclairées de l'étape 9 (aucun point pour poser un code) ;
+  - l'étape 7 jamais sautée (« 2 sur 11 » au lieu de « 2 sur 10 ») ;
+  - l'ancienne règle de l'étape 8 (« 9 sur 11 » au lieu de « 8 sur 10 ») ;
+  - les verrous d'avant ignorés (le parcours sautait à « Pour aller plus loin ») ;
+  - la grille oubliée à la reprise après un rechargement (« Ta grille » au lieu de « Tes codes »).
+- **La spec de la partie 1**, sous Chromium : 6 essais verts, 1 rouge, 1 sauté. Le rouge mesure le panneau pendant son glissement d'entrée (−228 px). C'est le défaut de chronométrage relevé par l'audit de début de session, présent sur la base a328bb9, sans lien avec ce lot.
+- **Les captures** : `plans de travail/captures-2026-11-09-parcours-8/`, préfixées `chromium-`. Elles couvrent les onze étapes à 1180 px en sombre et en clair, les étapes 2, 5 et 9 à 820 et 390 px, le chemin sans fichier à 1180 px (et le panneau en cours), le refus du panneau. Le fichier `chromium-couverts-390.json` relève ce que la bulle ou les palettes couvrent à 390 px (voir la question 2).
 
 ### Relecture par un agent neuf
 
-(à compléter)
+Verdict : **prêt avec réserves**. Ses constats, tous traités dans le lot :
+- l'étape 8 n'était pas sautée quand l'étape 7 s'était affichée ;
+- une grille restée ouverte au lancement devenait celle du parcours ;
+- le banc n'éprouvait ni le verrou d'avant, ni la démo, ni le service d'orthopédagogie, ni l'appariement des gestes ;
+- l'étape 6 posait son contour sur le nom avant les phrases ;
+- la documentation du moteur ne disait pas `'aucun'`.
+
+En corrigeant, j'ai trouvé deux défauts de plus dans mon propre code, corrigés aussi. À l'étape 9, « Annoter ▾ » restait sous le voile, alors que le geste demande de le toucher : le banc passait en Évaluer par programme et ne pouvait pas le voir. Une reprise après rechargement perdait la grille du parcours ; ce défaut, je l'avais introduit en corrigeant le précédent. Ses deux autres points remontent à Grégoire : l'iPhone (question 2) et le compte des parcours sur cette branche (« Pour la fusion »).
 
 ## À inscrire au BACKLOG
 

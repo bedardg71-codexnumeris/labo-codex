@@ -45,8 +45,13 @@ async function capture(page, nom) {
  * première a sa grille, la seconde (« Rédaction 2 ») attend la sienne. `avecGrille: false` : aucune
  * production n'a de grille (le refus du panneau).
  */
-async function ouvrirEspace(page, largeur, { clair = false, hauteur = 900, avecGrille = true } = {}) {
+async function ouvrirEspace(page, largeur, { clair = false, hauteur = 900, avecGrille = true, verrouDejaPose = false } = {}) {
     page.on('dialog', (d) => d.accept().catch(() => {}));
+    // Le rappel de sauvegarde paraît quand l'espace a des données sans codex : une personne le ferme
+    // (« Plus tard », la croix) et le parcours continue ; le banc fait de même, quand il paraît.
+    await page.addLocatorHandler(page.locator('#overlay-backup-reminder.actif'), async () => {
+        await page.locator('#modal-backup-reminder [data-action="backupReminder.fermerPlusTard"]').click();
+    });
     await page.clock.setFixedTime(HORLOGE);
     await page.setViewportSize({ width: largeur, height: hauteur });
     await page.goto(indexHtml);
@@ -64,13 +69,16 @@ async function ouvrirEspace(page, largeur, { clair = false, hauteur = 900, avecG
     await page.reload();
     await page.waitForFunction(() => typeof window.db !== 'undefined' && window.db.ready && window.Assistance
         && window.ParcoursCommentaires && window.travauxStockage, null, { timeout: 30000 });
-    await page.evaluate(({ T, avecGrille }) => {
+    await page.evaluate(({ T, avecGrille, verrouDejaPose }) => {
         // security-ok: fixtures littérales du banc, aucune source externe ; noms fictifs.
         const coursId = 'cours-p8';
         window.db.setSync('trimestres', [{ id: T, nom: 'Automne 2026', annee: 2026, session: 'A', actif: true,
             dateDebut: '2026-08-24', dateFinCours: '2026-12-11', dateFin: '2026-12-22' }]);
         window.db.setSync('trimestreActif', T);
         window.trimestreActif = T;
+        // La personne a repoussé le rappel de sauvegarde (« Plus tard ») : il ne paraît pas pendant le banc.
+        // (S'il paraissait quand même, le gestionnaire posé plus haut le fermerait.)
+        window.db.setSync('backupProchainRappel', '2026-11-24T14:00:00.000Z');
         window.db.setSync('cours', [{ id: coursId, codeCours: 'FRA101', titre: 'Écriture et littérature' }]);
         window.db.setSync(T + '_groupesCours', [{ id: 'GC_P8', trimestreId: T, coursId, groupeNum: '01', pratiqueId: 'sommative', actif: true }]);
         window.db.setSync('infoCours', { id: coursId, codeCours: 'FRA101', groupe: '01', _groupeCoursId: 'GC_P8' });
@@ -91,7 +99,18 @@ async function ouvrirEspace(page, largeur, { clair = false, hauteur = 900, avecG
             { id: 'P_P8_1', titre: 'Rédaction 1', type: 'travail', ponderation: 40, coursId, grilleId: avecGrille ? 'G_P8_1' : '', echelleId: 'E_P8' },
             { id: 'P_P8_2', titre: 'Rédaction 2', type: 'travail', ponderation: 60, coursId, grilleId: '', echelleId: 'E_P8' }
         ]);
-    }, { T, avecGrille });
+        // Une grille déjà employée : une évaluation verrouillée existe AVANT le parcours ; elle ne doit pas
+        // le faire avancer à l'étape 10 (seul un verrou posé pendant le parcours compte).
+        if (verrouDejaPose) {
+            window.db.setSync(T + '_evaluationsSauvegardees', [{
+                id: 'EV_P8_AVANT', etudiantDA: '2222222', productionId: 'P_P8_1', groupeCoursId: 'GC_P8', coursId,
+                grilleId: 'G_P8_1', echelleId: 'E_P8', statutRemise: 'evalue', statutIntegrite: 'recevable',
+                dateEvaluation: '2026-11-02T08:00:00.000Z', noteFinale: 80, niveauFinal: 'M', verrouillee: true,
+                criteres: [{ critereId: 'c_contenu', critereNom: 'Contenu', niveauSelectionne: 'M', ponderation: 100, retroaction: '' }],
+                retroactionFinale: '', pointsAnalytiques: {}
+            }]);
+        }
+    }, { T, avecGrille, verrouDejaPose });
     await page.reload();
     await page.waitForFunction(() => typeof window.db !== 'undefined' && window.db.ready && window.Assistance
         && window.ParcoursCommentaires && window.travauxStockage, null, { timeout: 30000 });
@@ -114,12 +133,13 @@ const item = (page) => page.locator('#panneau-assistance .assistance-parcours-it
 const bulle = (page) => page.locator('#parcours-bulle');
 const rang = (page) => bulle(page).locator('.parcours-bulle-rang');
 
-async function attendreTitre(page, titre) {
+async function attendreTitre(page, titre, { focus = true } = {}) {
     await expect(bulle(page).locator('.parcours-bulle-titre')).toHaveText(titre, { timeout: 10000 });
-    await expect(bulle(page)).toBeFocused();
+    if (focus) await expect(bulle(page)).toBeFocused();
 }
 
 const REFUS = 'Commence par « Évaluer une première production » : il te faut une production et sa grille pour automatiser tes commentaires.';
+const REFUS_PAGE = REFUS;
 
 test('panneau : sans production avec sa grille, « Commencer » ne lance rien et le panneau dit pourquoi', async ({ page }) => {
     await ouvrirEspace(page, 1180, { avecGrille: false });
@@ -134,9 +154,21 @@ test('panneau : sans production avec sa grille, « Commencer » ne lance rien et
     await capture(page, 'panneau-refus-1180-sombre');
 });
 
-test('panneau : la démo ne compte pas ; avec une production et sa grille, le parcours part sur Conception › Grilles', async ({ page }) => {
+test('panneau : la démo et un service d’orthopédagogie font refuser ; avec une production et sa grille, le parcours part sur Conception › Grilles', async ({ page }) => {
     await ouvrirEspace(page, 1180);
     // Un service d'orthopédagogie ou la démo : refus ; ici, le groupe-cours réel a sa production avec grille.
+    expect(await page.evaluate(() => window.ParcoursCommentaires.refus())).toBe('');
+    // La démo ne compte pas : ouverte, elle fait refuser ; refermée, le groupe-cours réel revient.
+    await page.evaluate(() => activerModeDemo());
+    await expect.poll(() => page.evaluate(() => estEnModeDemo())).toBe(true);
+    expect(await page.evaluate(() => window.ParcoursCommentaires.refus())).toBe(REFUS_PAGE);
+    await page.evaluate(() => desactiverModeDemo());
+    await expect.poll(() => page.evaluate(() => estEnModeDemo())).toBe(false);
+    await expect.poll(() => page.evaluate(() => window.ParcoursCommentaires.refus())).toBe('');
+    // Un service d'orthopédagogie non plus.
+    await page.evaluate(() => { const c = db.getSync('cours', []); c[0].nature = 'service'; db.setSync('cours', c); });
+    expect(await page.evaluate(() => window.ParcoursCommentaires.refus())).toBe(REFUS_PAGE);
+    await page.evaluate(() => { const c = db.getSync('cours', []); delete c[0].nature; db.setSync('cours', c); });
     expect(await page.evaluate(() => window.ParcoursCommentaires.refus())).toBe('');
     await ouvrirPanneau(page);
     await item(page).locator('.assistance-parcours-bouton').click();
@@ -297,7 +329,7 @@ async function reglerUneGrilleNeuve(page, cap = async () => {}) {
     await expect(rang(page)).toHaveText('6 sur 11');
     // Une grille nouvelle : pas de « Continuer » ; elle avance quand la grille est créée.
     await expect(boutonBulle(page, 'Continuer')).toBeHidden();
-    await contourSur(page, '#nomGrilleTemplate');
+    await contourSur(page, '#listeCriteres .atelier-algo-etape[data-etape="eleve"] .atelier-algo-etape-corps');
     await cap(6);
     await page.fill('#nomGrilleTemplate', 'Grille de la rédaction 2');
     await page.locator('#nomGrilleTemplate').dispatchEvent('change');
@@ -368,7 +400,9 @@ async function finirLeCheminAvecFichier(page, grille, cap = async () => {}) {
         await page.mouse.click(p.x, p.y);
     }
     await expect(page.locator('#travaux-errfr-total-pastille')).toHaveText('2');
-    await page.evaluate(() => window.travauxUI.basculerMode('evaluer'));
+    // « Annoter ▾ », en haut de la production, puis « Évaluer » : le vrai geste.
+    await toucher(page, '#travaux-btn-actions');
+    await toucher(page, '#travaux-btn-evaluer');
 
     await attendreTitre(page, "Ta rétroaction s'écrit seule");
     await expect(rang(page)).toHaveText('10 sur 11');
@@ -405,6 +439,24 @@ test('de bout en bout, avec fichier : une grille neuve, deux codes posés, la r�
     await finirLeCheminAvecFichier(page, grille);
     await ouvrirPanneau(page);
     await expect(item(page)).toHaveAttribute('data-etat', 'fait');
+});
+
+test('l’étape 8 sautée : la production associée à l’étape 7 a déjà ses fichiers (8 sur 10) ; une grille restée ouverte au lancement n’est pas celle du parcours', async ({ page }) => {
+    test.setTimeout(120000);
+    await ouvrirEspace(page, 1180);
+    await poserFichierImporte(page);   // « Rédaction 2 » a déjà une production importée, sans grille
+    // Une grille déjà employée reste ouverte au lancement : le parcours la referme, et la grille neuve
+    // est celle du parcours (le compte reste « n sur 11 » pendant les étapes 2 à 6, pas « n sur 10 »).
+    await page.evaluate(() => naviguerVers('conception', 'grille-criteres'));
+    await page.evaluate(() => chargerGrillePourModif('G_P8_1'));
+    await expect(page.locator('#conteneurEditionGrille')).toBeVisible();
+    const grille = await reglerUneGrilleNeuve(page);
+    await attendreTitre(page, 'Ta production');
+    await expect(rang(page)).toHaveText('7 sur 11');
+    await page.selectOption('#menuProductions', 'P_P8_2');
+    await page.selectOption('#productionGrille', grille.id);
+    await attendreTitre(page, 'Poser tes codes');
+    await expect(rang(page)).toHaveText('8 sur 10');
 });
 
 // Les captures (CAPTURES_PARCOURS=<dossier>) : les onze étapes à 1180 px, sombre et clair ; les étapes 2, 5
@@ -467,6 +519,10 @@ async function cheminSansFichier(page, cap = async () => {}) {
     await expect(rang(page)).toHaveText('3 sur 10');
     await bulle(page).locator('.parcours-bulle-sortie').click();
     await expect(bulle(page)).toHaveCount(0);
+    // Un rechargement entre les deux : « Reprendre » retrouve la grille du parcours et rouvre sa fiche.
+    await page.reload();
+    await page.waitForFunction(() => typeof window.db !== 'undefined' && window.db.ready && window.Assistance
+        && window.ParcoursCommentaires && window.travauxStockage, null, { timeout: 30000 });
     await ouvrirPanneau(page);
     await expect(item(page)).toHaveAttribute('data-etat', 'en-cours');
     await expect(item(page).locator('.assistance-parcours-etat')).toHaveText('Étape 3 sur 10');
@@ -543,9 +599,9 @@ async function cheminSansFichier(page, cap = async () => {}) {
     await ouvrirPanneau(page);
     await expect(item(page)).toHaveAttribute('data-etat', 'fait');}
 
-test('sans fichier, sur une grille déjà associée : l’étape 7 sautée hors du compte, « Plus tard » puis « Reprendre », « Rien à importer »', async ({ page }) => {
+test('sans fichier, sur une grille déjà employée : l’étape 7 sautée hors du compte, « Plus tard », un rechargement puis « Reprendre », « Rien à importer » ; un verrou d’avant ne fait pas avancer', async ({ page }) => {
     test.setTimeout(120000);
-    await ouvrirEspace(page, 1180);
+    await ouvrirEspace(page, 1180, { verrouDejaPose: true });
     await cheminSansFichier(page);
 });
 

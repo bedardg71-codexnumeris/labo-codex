@@ -56,6 +56,25 @@ describe('« Automatiser tes commentaires » : les bulles, mot pour mot', () => 
         expect(CONSIGNE).toContain(`Geste : « ${geste} »`);
     });
 
+    it('chaque bulle a le texte ET le geste de SON étape (un geste déplacé d’une étape à l’autre rougit)', () => {
+        const bloc = tranche(PARCOURS, 'var TEXTES = {', 'var ETAPES = {');
+        const champ = (corps, nom) => {
+            const m = corps.match(new RegExp(nom + ':\\s*"((?:[^"\\\\]|\\\\.)*)"'));
+            return m ? m[1].replace(/\\"/g, '"') : null;
+        };
+        const entrees = [...bloc.matchAll(/(\w+): \{([\s\S]*?)\n {8}\}/g)].map((m) => ({ cle: m[1], corps: m[2] }));
+        expect(entrees.map((e) => e.cle)).toEqual(['grille', 'compte', 'codes', 'note', 'cas', 'lit', 'production', 'productions', 'poser', 'retro', 'retroSans', 'loin']);
+        const lignes = CONSIGNE.split('\n').filter((l) => /^Étape \d+/.test(l));
+        expect(lignes).toHaveLength(12);
+        entrees.forEach((e, i) => {
+            const ligne = lignes[i];
+            expect(ligne, e.cle + ' : le texte').toContain(`Texte : « ${champ(e.corps, 'texte')} »`);
+            const geste = champ(e.corps, 'geste');
+            if (geste) expect(ligne, e.cle + ' : le geste').toContain(`Geste : « ${geste} »`);
+            else expect(ligne, e.cle + ' : pas de geste').not.toContain('Geste : «');
+        });
+    });
+
     it('chaque texte et chaque geste de la consigne est posé : rien n’est oublié', () => {
         const textesConsigne = [...CONSIGNE.matchAll(/Texte : « (.*?) » Geste :|Texte : « (.*?) » Bouton/g)].map((m) => m[1] ?? m[2]);
         expect(textesConsigne).toHaveLength(12);
