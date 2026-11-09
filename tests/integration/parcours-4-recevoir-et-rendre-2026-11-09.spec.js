@@ -9,8 +9,9 @@ import { attendreApplication } from './harness/attendre-application.js';
 // plans de travail/CONSIGNE-LOT-2026-11-08-parcours-4-recevoir-et-rendre.md. Ce banc juge, en faisant les gestes,
 // depuis un espace où le troisième parcours est fait (harness/parcours-3-de-banc.js) :
 //   · le panneau : sans production prête (grille, échelle et cartouche, question 7), le bouton ne lance rien et la
-//     phrase validée le dit — MESURÉ : à la sortie du troisième parcours, la production ne nomme que sa grille ;
-//     le banc lui donne son échelle et sa cartouche dans sa fiche (rapport, question 1) ; puis à faire, en cours,
+//     phrase validée le dit — MESURÉ : à la sortie du troisième parcours, la production nomme sa grille et son échelle
+//     (décision du 9 nov., 13 h 37), pas sa cartouche ; le banc lui donne sa cartouche dans sa fiche (rapport, question
+//     1) ; puis à faire, en cours,
 //     fait ; le compte du menu passe à quatre ;
 //   · la voie des fichiers : deux remises — une au format de Léa (le DA dans le nom), une de deux photos SANS DA à
 //     réunir en une copie (question 9) —, la vérification, l'import, la Liste, les tampons, l'annotation, le mode
@@ -64,7 +65,8 @@ async function espaceDuTroisiemeParcours(page, cap) {
     await leParcoursEntier(page, { niveaux: true, cap: 'p3' });
     await page.keyboard.press('Escape');
     dossierDesCaptures(DOSSIER);
-    // MESURÉ : à la sortie du troisième parcours, la production ne nomme que sa grille ; le quatrième refuse.
+    // MESURÉ : à la sortie du troisième parcours, la production nomme sa grille et son échelle, pas sa cartouche : le
+    // quatrième refuse.
     await fermerLeRappel(page);
     await ouvrirPanneau(page);
     await expect(page.locator('#panneau-assistance .assistance-parcours-item')).toHaveCount(await page.evaluate(() => Assistance.parcours().length));
@@ -78,13 +80,13 @@ async function espaceDuTroisiemeParcours(page, cap) {
     await expect(bulle(page)).toHaveCount(0);
     await capture(page, DOSSIER, `panneau-${cap}-sans-production-prete`);
     await page.keyboard.press('Escape');
-    // Sa fiche : l'échelle de sa grille et la cartouche du troisième parcours (enregistrées d'elles-mêmes).
+    // Sa fiche : l'échelle y est déjà (le troisième parcours la fait associer avec la grille) ; la cartouche du troisième
+    // parcours (enregistrée d'elle-même).
     const p3 = await page.evaluate(() => ParcoursEvaluer.contexte());
+    expect(await page.evaluate((id) => { const p = (db.getSync(cle('productions'), []) || []).find((x) => x.id === id); return [!!p.grilleId, !!p.echelleId, !!p.cartoucheId]; }, p3.productionId)).toEqual([true, true, false]);
     await page.evaluate(() => naviguerVers('conception', 'productions'));
     await page.evaluate((id) => modifierProduction(id), p3.productionId);
     await expect(page.locator('#formulaireProduction')).toBeVisible();
-    const echelle = await page.evaluate(() => [...document.querySelectorAll('#productionEchelle option')].find((o) => /Journal de lecture/.test(o.textContent)).value);
-    await page.selectOption('#productionEchelle', echelle);
     await page.selectOption('#productionCartouche', p3.cartoucheId);
     await expect.poll(() => page.evaluate((id) => { const p = (db.getSync(cle('productions'), []) || []).find((x) => x.id === id); return !!(p && p.echelleId && p.cartoucheId); }, p3.productionId)).toBe(true);
     await fermerLeRappel(page);

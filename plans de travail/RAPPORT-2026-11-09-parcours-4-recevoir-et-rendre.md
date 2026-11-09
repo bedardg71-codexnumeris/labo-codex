@@ -43,6 +43,11 @@ les synthèses PDF des copies sur papier » est sur `main` (1.237.0).
    cartouche : elle s'y appliquera à chaque évaluation. »). *À défaut,* revenir à la condition de la consigne (la grille
    seule) avec les phrases de la session H à l'étape 6 (« … déjà choisies si ta production les nomme ; sinon,
    choisis-les. »). Le banc, lui, donne à la production son échelle et sa cartouche dans sa fiche avant de commencer.
+   → **À moitié tranché** (Grégoire, 9 nov., 13 h 37, sur la question 2 du troisième) : la production du troisième
+   parcours porte maintenant son **échelle** (étape 2). Mesuré par le banc, remis sur le troisième : à sa sortie, la
+   production nomme sa grille et son échelle, pas sa cartouche ; le quatrième refuse encore, pour la cartouche seule.
+   **Reste à trancher : la cartouche** (la phrase proposée ci-dessus pour l'étape 8 du troisième, ou la condition
+   allégée).
 2. **Étape 2, « À droite… s'il manque un nom, choisis-le »** : tient en partie. La colonne de droite s'intitule
    « Aperçu » ; elle montre l'étudiant·e trouvé·e, mais un nom manquant se choisit **au centre**, dans l'inspecteur,
    après avoir touché le fichier (mesuré : c'est là que le banc choisit l'étudiante des deux photos). *Proposée :*

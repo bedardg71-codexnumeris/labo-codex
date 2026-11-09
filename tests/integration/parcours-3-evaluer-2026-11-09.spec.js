@@ -17,10 +17,14 @@ import { leParcoursEntier } from './harness/parcours-3-de-banc.js';
 //     palier (avant le correctif, la rétroaction ne portait que « Critère 1 (…) — 4 / 5 »).
 //     Break-test (9 nov.) : l'appel à `_adopterEchelleDeLaCartouche` retiré de js/evaluation-chargement.js →
 //     ROUGE ici (le commentaire de la cartouche absent de la rétroaction, essai « en points »).
-//   · UN SECOND DÉFAUT, SUR LE MÊME CHEMIN (mesuré ici le 9 nov.) : une grille à niveaux, une production qui ne
-//     nomme pas d'échelle, deux échelles au trimestre → « Choisis maintenant une échelle de performance » ; choisie,
-//     elle ne faisait pas paraître les critères. Break-test (9 nov.) : le correctif de `changerEchelleEvaluation`
-//     (js/evaluation.js) neutralisé → ROUGE ici (aucun critère, essai « à niveaux »).
+//   · L'ÉCHELLE (Grégoire, 9 nov., 13 h 37) : à l'étape 2, la production reçoit l'échelle de sa grille à niveaux (le
+//     contour passe par le menu « Échelle ») ; la bulle ne couvre jamais les menus « Grille » ni « Échelle » de la
+//     fiche ; à l'étape 4, l'écran ne la redemande plus. Laissée vide quand même (troisième essai), le contour se pose
+//     sur le menu de l'échelle de l'évaluation, sans mot de plus.
+//   · UN SECOND DÉFAUT, SUR CE CHEMIN-LÀ (mesuré ici le 9 nov.) : une grille à niveaux, une production qui ne nomme
+//     pas d'échelle, deux échelles au trimestre → « Choisis maintenant une échelle de performance » ; choisie, elle ne
+//     faisait pas paraître les critères. Break-test (9 nov.) : le correctif de `changerEchelleEvaluation`
+//     (js/evaluation.js) neutralisé → ROUGE ici (aucun critère, essai « échelle laissée vide »).
 //   · L'ESSAI EN POINTS SE JOUE D'UNE TRAITE (relecture neuve du 9 nov.) : sans rechargement, l'échelle de départ doit
 //     exister à l'étape 8. Break-test (9 nov.) : le semis du premier trimestre (js/trimestre-v2-init.js) neutralisé →
 //     ROUGE ici (étape 8, aucune échelle pour la cartouche).
@@ -30,6 +34,10 @@ import { leParcoursEntier } from './harness/parcours-3-de-banc.js';
 
 test('« Évaluer une première production », grille à niveaux : le panneau, les neuf étapes, « Plus tard » et « Reprendre » à l’étape 3 (1180 px)', async ({ page }) => {
     await leParcoursEntier(page, { niveaux: true, cap: '1180-sombre-niveaux' });
+});
+
+test('« Évaluer une première production », grille à niveaux, l’échelle laissée vide sur la fiche : l’étape 4 la demande, le contour s’y pose (1180 px)', async ({ page }) => {
+    await leParcoursEntier(page, { niveaux: true, echelleVide: true, cap: '1180-sombre-echelle-vide' });
 });
 
 test('« Évaluer une première production », grille en points : la bulle du choix, et la cartouche ajoute le commentaire de son palier (1180 px)', async ({ page }) => {
