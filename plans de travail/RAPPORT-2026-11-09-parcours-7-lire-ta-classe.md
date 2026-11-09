@@ -5,7 +5,35 @@
 Rien au changelog, pas de release, pas de fusion. **Chromium seulement** (WebKit n'existe pas dans ce cloud) : le
 verdict WebKit et les captures WebKit se prennent sur le Mac.
 
-## En tête, en gestes d'utilisateur
+> **Mis à jour le 9 nov. 2026, après les décisions de 9 h 37 à 9 h 39 (Cowork)** : les huit questions sont tranchées,
+> les six phrases proposées sont validées et posées, le point 7 est corrigé (section suivante). Reste au Mac : le
+> verdict WebKit et la fusion.
+
+## Les corrections du 9 nov. (ce que tu verras)
+
+- **Les six phrases proposées sont validées**, mot pour mot, et ne portent plus de marque « proposé » : les refus
+  de l'anonymisation, de l'option RàI, de la collecte ACP, de la démo et du service d'orthopédagogie, et la phrase
+  de l'étape 2 sur une personne sans donnée. Dans la démo, « Commencer » ne la quitte pas : le panneau dit
+  seulement pourquoi. La sentinelle Vitest exige chacune.
+- **Une assiduité de 0 % est maintenant une donnée** (point 7, décision de Cowork dans la ligne de #743). La
+  personne absente à toutes les séances, sans production, a son Accompagnement complet et « + Nouvelle
+  intervention ». Le parcours la suit comme les autres. La phrase de l'étape 2 ne vaut plus que pour une personne
+  dont l'assiduité est inconnue (arrivée après les séances saisies, par exemple) et qui n'a aucune production.
+- Rien n'est écrit dans tes données : la règle se calcule à l'affichage. Aucun stock à réparer.
+
+### Ce que chaque lecteur de la règle affichait, et ce qu'il affiche
+
+Mesuré sous Chromium, sur un groupe monté par les formulaires du Cadre : une personne absente aux deux séances
+saisies (0 %), sans production, sans pratique assignée.
+
+| Lecteur de `aucuneDonneeDeSuivi` | Avant | Maintenant |
+|---|---|---|
+| Profil › Accompagnement (`js/profil-etudiant-sections-affichage.js:857`) | Trois cartes « En attente de données » ; ni l'historique des interventions, ni « + Nouvelle intervention » | Ses trois cartes : Contexte d'apprentissage (« Assiduité (A) : 0 % », complétion « — ») ; Observation SOLO (« Aucune évaluation retenue pour cet·te étudiant·e… ») ; RàI « En attente » (« Données insuffisantes · Aucune production évaluée… », « Mobilisation : Assiduité 0 % ») ; l'historique et « + Nouvelle intervention » |
+| Suivi › Liste, colonne RàI (`js/etudiants.js:1250`) | « — » | « — », inchangé ici : son niveau RàI est 0 (« En attente »). Inférence tirée du code, non mesurée : la colonne montrerait un niveau si une production diagnostique en fixait un sans note (`_niveauFixeParLeDiagnostic`), comme le profil le montre déjà |
+| Septième parcours, étape 2 (`sansDonnee`) | Renvoyée aux noms, avec la phrase de l'étape 2 | Suivie jusqu'à « + Nouvelle intervention » |
+| Bancs qui la lisent | `sentinelle-749-lot2` (un faux de la règle) ; `assiduite-lot-D-date-arrivee-et-inconnu` (assiduité inconnue) | Inchangés, verts |
+
+## En tête, en gestes d'utilisateur (premier dépôt, nuit du 8 au 9 nov.)
 
 ### Ce qui est fait
 
@@ -24,38 +52,20 @@ verdict WebKit et les captures WebKit se prennent sur le Mac.
 - Le parcours n'écrit rien de lui-même : seuls tes gestes écrivent (le choix de la grille, l'intervention créée).
   Il ne garde que son état dans le panneau (la préférence `parcoursAssistance`, comme les autres parcours).
 
-### Ce qui attend Grégoire (une question par ligne, avec ma recommandation)
+### Les huit questions, tranchées (9 nov. 2026, 9 h 37 à 9 h 39)
 
-Les cinq refus ci-dessous, et la phrase de la question 6, sont **posés dans le code pour que l'écran fonctionne, marqués comme proposés** (bloc
-`PROPOSES` de `js/parcours-lire-ta-classe.js`) ; aucun n'est validé.
+1. **Mode anonymisation** : validé par Grégoire, « En mode anonymisation, une intervention ne garde ni son titre ni tes observations : reviens au mode normal pour faire ce parcours. »
+2. **Option RàI décochée** : validé par Grégoire, « Ce parcours passe par l'onglet « Accompagnement » du profil : coche « Appliquer une adaptation du modèle de la Réponse à l'intervention » dans Labo › Observation pour le commencer. »
+3. **Collecte ACP décochée** : validé par Grégoire, « Ce parcours passe par l'onglet « Engagement ACP » du profil : coche « Activer la collecte des données sur le contexte d'apprentissage et la performance » dans Labo › Observation pour le commencer. »
+4. **Dans la démo** : validé par Grégoire, « Ce parcours se joue sur ta propre classe : quitte la démonstration pour le commencer. » « Commencer » ne quitte pas la démo lui-même (déjà le cas).
+5. **Service d'orthopédagogie** : validé par Grégoire, « Ce parcours se joue sur un groupe-cours : choisis-en un dans l'en-tête pour le commencer. »
+6. **Personne sans donnée à l'étape 2** : validé par Grégoire, « Son profil n'a encore aucune donnée que l'Accompagnement puisse lire : choisis une autre personne. »
+7. **Une assiduité de 0 % n'est pas « aucune donnée »** (Cowork, dans la ligne de #743) : corrigé maintenant, hors du parcours, parce qu'il cassait le parcours en livraison. Ses lecteurs, avant et après : tableau plus haut. Le parcours ne traite plus ce cas comme le point 6.
+8. **Le placement de la bulle aux étapes 3 et 7** : on garde (Grégoire a approuvé les captures des neuf étapes et du panneau).
 
-1. **Mode anonymisation** (demandé par la consigne). En anonymisation, le titre, la description, les observations et
-   les notes d'une intervention sont masqués et ne s'écrivent pas (#751) : « Donne-lui un titre » y est impossible.
-   Je recommande que le parcours **ne parte pas** dans ce mode, et que le panneau dise : « En mode anonymisation, une intervention ne garde ni son titre ni tes observations : reviens au mode normal pour faire ce parcours. »
-   Si le mode s'active en cours de route, la bulle se ferme et le parcours attend à son étape.
-2. **L'option RàI décochée** (demandé par la consigne). Sans elle, l'onglet « Accompagnement » et son bouton
-   disparaissent : les étapes 3 à 8 sont impossibles. Je recommande de refuser, avec : « Ce parcours passe par l'onglet « Accompagnement » du profil : coche « Appliquer une adaptation du modèle de la Réponse à l'intervention » dans Labo › Observation pour le commencer. »
-3. **La collecte ACP décochée** (trouvée en chemin, même famille que la précédente). « Activer la collecte des
-   données sur le contexte d'apprentissage et la performance » décochée cache l'onglet « Engagement ACP » : l'étape 3
-   tombe sur « Productions ». Je recommande le même traitement : « Ce parcours passe par l'onglet « Engagement ACP » du profil : coche « Activer la collecte des données sur le contexte d'apprentissage et la performance » dans Labo › Observation pour le commencer. »
-4. **Dans la démo.** La consigne exclut la démo sans dire ce que le panneau dit. Je recommande : « Ce parcours se joue sur ta propre classe : quitte la démonstration pour le commencer. »
-   (Autre voie possible : que « Commencer » quitte la démo lui-même, comme « Commencer avec ma classe » à la fin de
-   « Découvrir ». Je ne l'ai pas fait : c'est un geste plus lourd que ce que la consigne décrit.)
-5. **Sur un service d'orthopédagogie.** Même manque. Je recommande : « Ce parcours se joue sur un groupe-cours : choisis-en un dans l'en-tête pour le commencer. »
-6. **Une personne sans aucune donnée choisie à l'étape 2** (demandé par la consigne). Son Accompagnement n'a ni
-   historique ni « + Nouvelle intervention ». Ce que fait le code : son profil s'ouvre, le parcours dit pourquoi
-   dans un message bref, ramène aux noms et redit la bulle de l'étape 2 ; rien n'est retenu. La personne en choisit
-   une autre (l'étape 2 accepte n'importe qui). Phrase proposée, posée : « Son profil n'a encore aucune donnée que l'Accompagnement puisse lire : choisis une autre personne. »
-   La condition d'entrée, elle, la compte comme signalée : le Suivi la signale, le panneau ne le contredit pas.
-7. **Une assiduité de 0 % compte comme « aucune donnée »** (trouvé en chemin, `aucuneDonneeDeSuivi`,
-   `js/profil-etudiant-calculs.js:1938`). La personne absente à toutes les séances, sans production, est signalée
-   (A sous le seuil) mais n'a pas de « + Nouvelle intervention » : c'est la plus éloignée, et la seule qu'on ne peut
-   pas noter. Cela contredit #743 (« l'absent total, 0 %, CONNU »). Je recommande de corriger la règle (inscrit
-   ci-dessous, n° 5) ; d'ici là, le parcours la traite comme au point 6.
-8. **Les captures** : la bulle de l'étape 3 couvre, à 1180 px, la rangée du nom en haut du profil ; celle de
-   l'étape 7 couvre le milieu de la fiche (la fiche ne tient pas à l'écran ; le moteur amène « Créer
-   l'intervention » dans la vue, et le haut de la fiche, avec le titre, est au-dessus). C'est le placement du
-   moteur de la première partie, que je n'ai pas modifié. À juger sur les captures WebKit.
+### Ce qui attend encore Grégoire
+
+Rien de nouveau. Aucun texte n'a été écrit en dehors des six phrases validées.
 
 ### Ce que je n'ai pas pu vérifier
 
@@ -154,7 +164,7 @@ Lecture du code (et banc Chromium quand il est dit).
 
 | Trouvaille | Issue |
 |---|---|
-| Une assiduité de 0 % compte comme « aucune donnée » (`aucuneDonneeDeSuivi`) | **Inscrire** (n° 5) ; question 7 |
+| Une assiduité de 0 % compte comme « aucune donnée » (`aucuneDonneeDeSuivi`) | ~~Inscrire (n° 5)~~ **Corrigé le 9 nov.** (décision de Cowork : il cassait le parcours en livraison) |
 | Une intervention créée sans titre a un titre vide | **Inscrire** (n° 6) |
 | « Suggérer » efface l'objectif écrit quand aucun critère n'est coché | **Inscrire** (n° 7) |
 | À 390 px, la rangée des filtres du Suivi déborde à droite (« A ou C < 8… » coupé) ; vu sur la capture de l'étape 2 | **Inscrire** (n° 8) |
@@ -190,7 +200,7 @@ Grégoire avant tout code) :
 
 Les miennes (trouvées en chemin) :
 
-5. **Une assiduité de 0 % compte comme « aucune donnée »** dans `aucuneDonneeDeSuivi`
+5. ~~**Une assiduité de 0 % compte comme « aucune donnée »**~~ **Corrigé le 9 nov. (question 7) : ne pas inscrire.** Dans `aucuneDonneeDeSuivi`
    (`js/profil-etudiant-calculs.js:1938`) : la personne absente à toutes les séances, sans production, n'a ni
    historique ni « + Nouvelle intervention », alors que le Suivi la signale. Contredit #743. Symptôme visible : le
    bouton manque sur le profil de la personne la plus absente.
@@ -223,6 +233,16 @@ Les miennes (trouvées en chemin) :
   parcours-1-et-2 (429,99 px au lieu de 430, position lue pendant le glissement d'entrée). Rien à voir avec ce lot ;
   le verdict se prend sous WebKit sur le Mac.
 - **Vitest complet** (depuis `tests/`) : 10 900/10 900, 893 fichiers.
+- **Corrections du 9 nov.** Vitest : la sentinelle des mots exige les six phrases validées, mot pour mot, et
+  l'absence de toute marque « proposé » (break-test : « reviens au mode normal » changé en « reviens en mode
+  normal » → **rouge**, rétabli → vert) ; un banc neuf, `sentinelle-assiduite-zero-est-une-donnee-2026-11-09`,
+  juge la règle sur sa source réelle (break-test : la règle remise à `A === null || A === 0` → **rouge**, rétablie →
+  vert). Vitest complet : **10 910 / 10 910**, 894 fichiers. Playwright (Chromium) : le banc du parcours, **6 / 6**
+  (l'essai de la personne à 0 % réécrit : une personne arrivée après les séances, sans donnée, est renvoyée aux noms
+  avec la phrase ; la personne à 0 % mène à « + Nouvelle intervention », sans « En attente de données » ; break-test
+  de la règle → **rouge**, rétablie → vert). `assiduite-lot-D-date-arrivee-et-inconnu` (l'assiduité inconnue reste
+  « En attente de données ») : vert. Jetons : `profil-etudiant-calculs.js` 20261108h, `parcours-lire-ta-classe.js`
+  20261108d.
 - **Relecture par un agent neuf** : voir la dernière section.
 
 ### Conflits attendus à la fusion (la session du Mac s'en charge)
@@ -238,7 +258,7 @@ Les miennes (trouvées en chemin) :
 `plans de travail/captures-2026-11-09-parcours-7-chromium/` : les neuf étapes à 1180 px en sombre et en clair
 (l'étape 5 en deux temps, `5a` et `5b`) ; l'étape 4 avec une grille désignée (`p7-etape-4-1180-sombre-grille-designee`,
 qui mène à l'étape 6) ; les étapes 1, 2 et 7 à 390 px en sombre et en clair ; le panneau dans quatre refus (sans
-présences, personne à l'écart, et deux des textes proposés : RàI, anonymisation).
+présences, personne à l'écart, et deux des textes proposés cette nuit-là, validés le 9 nov. : RàI, anonymisation).
 
 ### La relecture par un agent neuf
 

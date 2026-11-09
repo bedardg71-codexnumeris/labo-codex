@@ -429,11 +429,22 @@ test('avec une grille de dépistage désignée, l’étape 4 mène à l’étape
     expect(erreurs, 'erreurs console').toEqual([]);
 });
 
-test('une personne absente à toutes les séances (0 %, aucune donnée) : signalée, mais l’étape 2 dit pourquoi elle ramène aux noms', async ({ page }) => {
+test('une personne absente à toutes les séances (0 %) : son Accompagnement et « + Nouvelle intervention », le parcours la suit ; une personne arrivée après les séances (aucune donnée) : l’étape 2 dit pourquoi elle ramène aux noms', async ({ page }) => {
+    // Corrections du 9 nov. (point 7, décision de Cowork, dans la ligne de #743) : une assiduité de 0 % est
+    // une donnée. Avant, cette personne tombait « En attente de données » et le parcours la renvoyait aux noms.
+    // Break-test (9 nov., Chromium) : aucuneDonneeDeSuivi remise à `(A === null || A === 0)` → ROUGE
+    // (sansDonnee [true, false, true], et l'étape 2 ramène aux noms). Rétablie → vert.
     test.setTimeout(180000);
     const erreurs = brancherEcouteurs(page);
     await suivreLesReactions(page);
-    await monterGroupe(page);
+    await monterGroupe(page, { designee: true });
+    // Arrivée après les deux séances (#735) : son assiduité est inconnue, et elle n'a aucune production.
+    const ARRIVEE = ELEVES[2];
+    await page.evaluate((da) => {
+        const g = db.getSync(cle('groupeEtudiants'), []);
+        g.find((e) => e.da === da).dateArrivee = '2026-09-01';
+        db.setSync(cle('groupeEtudiants'), g); // security-ok: fixture de test locale
+    }, ARRIVEE.da);
     // Absente aux deux séances : A = 0 %, connue ; aucune production. Une autre, absente une fois : 50 %.
     await prendrePresences(page, MARDI, { absent: ECARTE.da });
     await prendrePresences(page, JEUDI, { absent: ECARTE.da });
@@ -442,26 +453,35 @@ test('une personne absente à toutes les séances (0 %, aucune donnée) : signal
         A: das.map((da) => calculerTousLesIndices(da).A),
         sansDonnee: das.map((da) => aucuneDonneeDeSuivi(da, calculerTousLesIndices(da))),
         groupe: window.ParcoursLireTaClasse.lireLeGroupe()
-    }), [ECARTE.da, ELEVES[1].da]);
-    expect(lecture.A).toEqual([0, 50]);
-    expect(lecture.sansDonnee, 'aucuneDonneeDeSuivi : 0 % sans production = aucune donnée (question 7 du rapport)').toEqual([true, false]);
+    }), [ECARTE.da, ELEVES[1].da, ARRIVEE.da]);
+    expect(lecture.A).toEqual([0, 50, null]);
+    expect(lecture.sansDonnee, 'aucuneDonneeDeSuivi : 0 % est une donnée ; seule l’assiduité inconnue sans production n’en est pas').toEqual([false, false, true]);
     expect(lecture.groupe.signales.sort()).toEqual([ECARTE.da, ELEVES[1].da].sort());
-    const proposes = await page.evaluate(() => window.ParcoursLireTaClasse.proposes);
+    const phrases = await page.evaluate(() => window.ParcoursLireTaClasse.refus9nov);
 
     await commencer(page);
     await attendreEtape(page, 1);
     await page.click('#btn-toggle-panneau-prioritaire');
     await attendreEtape(page, 2);
-    await page.locator(`#liste-etudiants-suivi .etudiant-suivi-item[data-da="${ECARTE.da}"] .etudiant-prioritaire-indices`).click();
-    // Le parcours le dit, et ramène aux noms : la même bulle, rien de retenu.
-    await expect(page.locator('#notifications-pile, body').getByText(proposes.sansDonnee).first()).toBeVisible();
+    // Sans aucune donnée : le parcours le dit, et ramène aux noms ; la même bulle, rien de retenu.
+    await page.locator(`#liste-etudiants-suivi .etudiant-suivi-item[data-da="${ARRIVEE.da}"] .etudiant-prioritaire-indices`).click();
+    await expect(page.locator('#notifications-pile, body').getByText(phrases.sansDonnee).first()).toBeVisible();
     await attendreEtape(page, 2);
     await expect(page.locator('#panneau-suivi-etudiants')).toBeVisible();
     expect(await page.evaluate(() => window.ParcoursLireTaClasse.memoire.da)).toBeNull();
-    // Une autre personne, qui a des données : l'étape 3.
-    await page.locator(`#liste-etudiants-suivi .etudiant-suivi-item[data-da="${ELEVES[1].da}"] .etudiant-prioritaire-indices`).click();
+    // Absente à toutes les séances : le parcours la suit, jusqu'à « + Nouvelle intervention ».
+    await page.locator(`#liste-etudiants-suivi .etudiant-suivi-item[data-da="${ECARTE.da}"] .etudiant-prioritaire-indices`).click();
     await attendreEtape(page, 3);
-    expect(await page.evaluate(() => window.ParcoursLireTaClasse.memoire.da)).toBe(ELEVES[1].da);
+    expect(await page.evaluate(() => window.ParcoursLireTaClasse.memoire.da)).toBe(ECARTE.da);
+    await page.click('#contenuProfilEtudiant [data-action="changerSectionProfil"][data-param="accompagnement"]');
+    await attendreEtape(page, 4);
+    // Son Accompagnement : ses cartes, plus « En attente de données ».
+    await expect(page.locator('#profil-contenu-dynamique')).not.toContainText('En attente de données');
+    await expect(page.locator('#profil-contenu-dynamique')).toContainText('Assiduité (A) : 0 %');
+    await bulle(page).getByRole('button', { name: 'Continuer' }).click();
+    await attendreEtape(page, 6);
+    await expect(page.locator('#profil-contenu-dynamique [data-action="naviguerVersNouvelleIntervention"]', { hasText: '+ Nouvelle intervention' })).toBeVisible();
+    await contourSur(page, '#profil-contenu-dynamique [data-action="naviguerVersNouvelleIntervention"]');
     expect(erreurs, 'erreurs console').toEqual([]);
 });
 
@@ -492,16 +512,16 @@ test('« Plus tard » ferme la bulle, le parcours attend à la même étape ; «
     expect(erreurs, 'erreurs console').toEqual([]);
 });
 
-test('les refus proposés : la démo, l’option RàI décochée, le mode anonymisation', async ({ page }) => {
+test('les refus validés le 9 nov. : la démo, l’option RàI décochée, le mode anonymisation', async ({ page }) => {
     test.setTimeout(180000);
     const erreurs = brancherEcouteurs(page);
     await suivreLesReactions(page);
     await groupeAvecUnePersonneAlEcart(page, {});
-    const proposes = await page.evaluate(() => window.ParcoursLireTaClasse.proposes);
+    const valides = await page.evaluate(() => window.ParcoursLireTaClasse.refus9nov);
 
     await page.evaluate(() => definirPreference('activerRai', false));
     await commencer(page);
-    await expect(item(page).locator('.assistance-parcours-refus')).toHaveText(proposes.rai);
+    await expect(item(page).locator('.assistance-parcours-refus')).toHaveText(valides.rai);
     await capture(page, 'p7-panneau-1180-sombre-refus-propose-rai', { sansNotifications: true });
     await page.keyboard.press('Escape');
     await page.evaluate(() => definirPreference('activerRai', true));
@@ -510,7 +530,7 @@ test('les refus proposés : la démo, l’option RàI décochée, le mode anonym
     await attendreRepos(page);
     expect(await page.evaluate(() => estModeAnonymisation())).toBe(true);
     await commencer(page);
-    await expect(item(page).locator('.assistance-parcours-refus')).toHaveText(proposes.anonymisation);
+    await expect(item(page).locator('.assistance-parcours-refus')).toHaveText(valides.anonymisation);
     await capture(page, 'p7-panneau-1180-sombre-refus-propose-anonymisation', { sansNotifications: true });
     await page.keyboard.press('Escape');
     await page.evaluate(() => changerMode(MODES.NORMAL));
@@ -519,7 +539,7 @@ test('les refus proposés : la démo, l’option RàI décochée, le mode anonym
     await page.evaluate(() => activerModeDemo());
     await attendreRepos(page);
     await commencer(page);
-    await expect(item(page).locator('.assistance-parcours-refus')).toHaveText(proposes.demo);
+    await expect(item(page).locator('.assistance-parcours-refus')).toHaveText(valides.demo);
     await expect(bulle(page)).toHaveCount(0);
     expect(erreurs, 'erreurs console').toEqual([]);
 });

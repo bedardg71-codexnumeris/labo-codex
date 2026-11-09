@@ -1923,10 +1923,14 @@ const BADGE_DU_PATTERN = {
  * @returns {Object} - Modèle de la Réponse à l'intervention (RàI) avec pattern et descriptif ; `motif` et `noteAffichee` : ce qui le fixe
  */
 /**
- * « En attente de données » au suivi d'un élève : ni assiduité (inconnue ou 0), ni copie, ni P.
+ * « En attente de données » au suivi d'un élève : ni assiduité CONNUE, ni copie, ni P.
  * Une complétion INCONNUE (`null`, sans pratique assignée) se juge sur les copies elles-mêmes (lot N1b).
  * #1205 (8 nov. 2026) : une seule règle, lue par la carte RàI du profil et par la colonne RàI de la liste —
  * sans elle, la liste disait un niveau là où le profil dit « En attente de données ».
+ * Parcours 7 (9 nov. 2026, décision de Cowork dans la ligne de #743, « l'absent total, 0 %, CONNU ») : une
+ * assiduité de 0 % est une donnée. Avant, l'élève absent·e à toutes les séances, sans production, tombait
+ * « En attente de données » : son Accompagnement n'avait ni ses cartes ni « + Nouvelle intervention ».
+ * Seule l'assiduité INCONNUE (`null`) compte maintenant comme absence de donnée.
  * @param {string} da
  * @param {{A:(number|null), C:(number|null), P:number}} indices
  * @returns {boolean}
@@ -1935,7 +1939,7 @@ function aucuneDonneeDeSuivi(da, indices) {
     const completionVide = (indices.C === null)
         ? calculerIndicesNDerniersArtefacts(da, true).nbArtefacts === 0
         : indices.C === 0;
-    return (indices.A === null || indices.A === 0) && completionVide && indices.P === 0;
+    return indices.A === null && completionVide && indices.P === 0;
 }
 
 function determinerNiveauRaiPedagogique(da, ligneSimulee) {

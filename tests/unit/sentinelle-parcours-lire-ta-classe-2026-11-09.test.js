@@ -5,12 +5,14 @@
 //   1. Les neuf bulles sont celles que Grégoire a validées une à une le 8 nov. (15 h 51 à 16 h 27) :
 //      chaque titre, texte et geste se trouve TEL QUEL dans la consigne. Un mot changé, et ce banc rougit.
 //   2. Le titre et la ligne du panneau, et les deux refus validés, sont ceux de la consigne.
-//   3. Les textes PROPOSÉS (les refus démo, service, RàI, ACP, anonymisation, et la phrase de l'étape 2 sur
-//      une personne sans donnée) ne sont PAS dans la consigne : ils restent marqués comme proposés dans le
-//      code, et chacun est soumis à Grégoire dans le rapport.
+//   3. Les refus démo, service, RàI, ACP, anonymisation, et la phrase de l'étape 2 sur une personne sans
+//      donnée : proposés dans la nuit, VALIDÉS par Grégoire le 9 nov. (9 h 37 à 9 h 39). Ils ne sont pas dans
+//      la consigne : ce banc les porte tels qu'il les a validés, et les exige mot pour mot dans le code.
 //   4. Le lien de sortie est « Plus tard », celui des parcours chez soi (consigne « Les deux parcours »).
 // Break-test (9 nov.) : « avant chaque cours » changé en « avant chaque séance » dans le texte de
 // l'étape 1 de js/parcours-lire-ta-classe.js → ROUGE (bloc 1), rétabli → vert.
+// Break-test (9 nov., corrections) : « reviens au mode normal » changé en « reviens en mode normal » dans
+// le refus de l'anonymisation → ROUGE (bloc 3), rétabli → vert.
 
 import { describe, it, expect } from 'vitest';
 import { tranche } from './_helpers/tranche.js';
@@ -33,7 +35,7 @@ function chaines(bloc, champ) {
 
 const ETAPES = tranche(SOURCE, 'var ETAPES = [', 'var DEF = ');
 const REFUS = tranche(SOURCE, 'var REFUS = {', '};');
-const PROPOSES = tranche(SOURCE, 'var PROPOSES = {', '};');
+const REFUS_9_NOV = tranche(SOURCE, 'var REFUS_9_NOV = {', '};');
 
 describe('les neuf bulles, mot pour mot', () => {
     const titres = chaines(ETAPES, 'titre');
@@ -88,13 +90,24 @@ describe('le panneau : titre, ligne, refus', () => {
         for (const r of refus) expect(CONSIGNE).toContain(`« ${r} »`);
     });
 
-    it('les textes proposés ne sont pas dans la consigne, et chacun est soumis à Grégoire dans le rapport', () => {
-        const proposes = chaines(PROPOSES, '\\w+');
-        expect(proposes).toHaveLength(6);
-        expect(SOURCE).toMatch(/PROPOSÉS par Claude Code \(9 nov\.\), PAS VALIDÉS/);
-        for (const p of proposes) {
-            expect(CONSIGNE).not.toContain(p);
-            expect(RAPPORT).toContain(p);
-        }
+    // Validés par Grégoire le 9 nov. 2026, 9 h 37 à 9 h 39 (relais de Cowork), mot pour mot.
+    const VALIDES_9_NOV = {
+        anonymisation: 'En mode anonymisation, une intervention ne garde ni son titre ni tes observations : reviens au mode normal pour faire ce parcours.',
+        rai: "Ce parcours passe par l'onglet « Accompagnement » du profil : coche « Appliquer une adaptation du modèle de la Réponse à l'intervention » dans Labo › Observation pour le commencer.",
+        acp: "Ce parcours passe par l'onglet « Engagement ACP » du profil : coche « Activer la collecte des données sur le contexte d'apprentissage et la performance » dans Labo › Observation pour le commencer.",
+        demo: 'Ce parcours se joue sur ta propre classe : quitte la démonstration pour le commencer.',
+        service: "Ce parcours se joue sur un groupe-cours : choisis-en un dans l'en-tête pour le commencer.",
+        sansDonnee: "Son profil n'a encore aucune donnée que l'Accompagnement puisse lire : choisis une autre personne."
+    };
+
+    it.each(Object.entries(VALIDES_9_NOV))('« %s » : la phrase validée le 9 nov., mot pour mot, dans le bloc REFUS_9_NOV', (cle, phrase) => {
+        const posees = chaines(REFUS_9_NOV, cle);
+        expect(posees).toEqual([phrase]);
+    });
+
+    it('le bloc REFUS_9_NOV porte ces six phrases et rien d’autre ; plus aucune marque « proposé »', () => {
+        expect(chaines(REFUS_9_NOV, '\\w+').sort()).toEqual(Object.values(VALIDES_9_NOV).sort());
+        expect(SOURCE).not.toMatch(/PROPOS[ÉE]S/);
+        expect(SOURCE).not.toMatch(/PAS VALIDÉS/);
     });
 });

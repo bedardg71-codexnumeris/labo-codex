@@ -9,8 +9,8 @@
 
    ⚠ Les neuf bulles et les deux refus du panneau sont ceux que Grégoire a validés le 8 nov.
    (15 h 51 à 16 h 27), posés mot pour mot : tests/unit/sentinelle-parcours-lire-ta-classe-2026-11-09.test.js
-   les confronte à la consigne. Les refus de `PROPOSES` ne sont PAS validés : proposés par
-   Claude Code, en attente de Grégoire (rapport du 9 nov.).
+   les confronte à la consigne. Les cinq autres refus et la phrase de l'étape 2 (`REFUS_9_NOV`) sont
+   ceux que Grégoire a validés le 9 nov. (9 h 37 à 9 h 39), posés mot pour mot : la même sentinelle les exige.
 
    Ce que le moteur (parcours-moteur.js) n'a pas, et que ce fichier contourne sans le refondre :
    · garder sous le voile une partie d'une zone éclairée (les pastilles d'absence et de production
@@ -31,15 +31,17 @@
         personneSignalee: "Personne ne s'écarte dans ton groupe pour l'instant. Reviens quand le Suivi signale quelqu'un."
     };
 
-    // ⏳ PROPOSÉS par Claude Code (9 nov.), PAS VALIDÉS : en attente de Grégoire.
-    var PROPOSES = {
+    // Validés par Grégoire le 9 nov. (9 h 37 à 9 h 39), mot pour mot. Dans la démo, « Commencer » ne la
+    // quitte pas lui-même : le panneau dit seulement pourquoi.
+    var REFUS_9_NOV = {
         demo: 'Ce parcours se joue sur ta propre classe : quitte la démonstration pour le commencer.',
         service: 'Ce parcours se joue sur un groupe-cours : choisis-en un dans l\'en-tête pour le commencer.',
         rai: "Ce parcours passe par l'onglet « Accompagnement » du profil : coche « Appliquer une adaptation du modèle de la Réponse à l'intervention » dans Labo › Observation pour le commencer.",
         acp: "Ce parcours passe par l'onglet « Engagement ACP » du profil : coche « Activer la collecte des données sur le contexte d'apprentissage et la performance » dans Labo › Observation pour le commencer.",
         anonymisation: 'En mode anonymisation, une intervention ne garde ni son titre ni tes observations : reviens au mode normal pour faire ce parcours.',
         // L'étape 2, quand la personne choisie n'a aucune donnée (son Accompagnement n'a pas de
-        // « + Nouvelle intervention ») : dit pourquoi le parcours ramène aux noms.
+        // « + Nouvelle intervention ») : dit pourquoi le parcours ramène aux noms. Une assiduité de 0 %
+        // n'en fait plus partie (aucuneDonneeDeSuivi, 9 nov.) : c'est l'assiduité inconnue.
         sansDonnee: "Son profil n'a encore aucune donnée que l'Accompagnement puisse lire : choisis une autre personne."
     };
 
@@ -89,14 +91,14 @@
 
     /** La condition d'entrée : null si le parcours peut se lancer, sinon ce que le panneau dit. */
     function refus() {
-        if (enDemo()) return PROPOSES.demo;
-        if (surService()) return PROPOSES.service;
+        if (enDemo()) return REFUS_9_NOV.demo;
+        if (surService()) return REFUS_9_NOV.service;
         var groupe = lireLeGroupe();
         if (!groupe.avecPresences) return REFUS.sansPresences;
         if (!groupe.signales.length) return REFUS.personneSignalee;
-        if (!preferenceActive('activerRai')) return PROPOSES.rai;
-        if (!preferenceActive('depistageAcp')) return PROPOSES.acp;
-        if (enAnonymisation()) return PROPOSES.anonymisation;
+        if (!preferenceActive('activerRai')) return REFUS_9_NOV.rai;
+        if (!preferenceActive('depistageAcp')) return REFUS_9_NOV.acp;
+        if (enAnonymisation()) return REFUS_9_NOV.anonymisation;
         return null;
     }
 
@@ -311,11 +313,11 @@
             atteint: function () {
                 if (!profilQuelconqueOuvert()) return false;
                 var da = window.profilActuelDA;
-                // Une personne sans aucune donnée n'a pas de « + Nouvelle intervention » (une assiduité de
-                // 0 % sans production en fait partie : aucuneDonneeDeSuivi, question 7 du rapport du 9 nov.) :
-                // le parcours le dit, ramène aux noms, et la bulle redit d'en choisir une.
+                // Une personne sans aucune donnée (assiduité inconnue, aucune production : aucuneDonneeDeSuivi)
+                // n'a pas de « + Nouvelle intervention » : le parcours le dit, ramène aux noms, et la bulle
+                // redit d'en choisir une. Une assiduité de 0 % est une donnée (9 nov.) : la personne passe.
                 if (sansDonnee(da)) {
-                    if (window.notifications && typeof window.notifications.info === 'function') window.notifications.info(PROPOSES.sansDonnee);
+                    if (window.notifications && typeof window.notifications.info === 'function') window.notifications.info(REFUS_9_NOV.sansDonnee);
                     M().allerA(1);
                     return false;
                 }
@@ -525,5 +527,5 @@
     });
 
     // Pour la sentinelle des textes (tests/unit) et le banc : les étapes, les refus, la mémoire.
-    window.ParcoursLireTaClasse = { etapes: ETAPES, refus: REFUS, proposes: PROPOSES, lireLeGroupe: lireLeGroupe, memoire: memoire };
+    window.ParcoursLireTaClasse = { etapes: ETAPES, refus: REFUS, refus9nov: REFUS_9_NOV, lireLeGroupe: lireLeGroupe, memoire: memoire };
 })();
