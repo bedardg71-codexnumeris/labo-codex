@@ -33,6 +33,88 @@ saisies (0 %), sans production, sans pratique assignée.
 | Septième parcours, étape 2 (`sansDonnee`) | Renvoyée aux noms, avec la phrase de l'étape 2 | Suivie jusqu'à « + Nouvelle intervention » |
 | Bancs qui la lisent | `sentinelle-749-lot2` (un faux de la règle) ; `assiduite-lot-D-date-arrivee-et-inconnu` (assiduité inconnue) | Inchangés, verts |
 
+## La retouche du 9 nov. (13 h 44) : l'absent·e total·e en non-participation
+
+Décision de Grégoire (Cowork), sur la question de ce rapport : une personne absente à toutes les séances passées, sans
+production, est lue en non-participation et reçoit le niveau RàI que cette règle donne déjà (niveau 3, #731).
+
+### Ce qui change
+
+- La condition « assiduité au-dessus de 0 » devient « au moins une séance passée connue » : une assiduité connue,
+  0 % compris (`_seLitEnNonParticipation`, `js/profil-etudiant-calculs.js`). Le reste de #731 ne bouge pas : il faut
+  toujours un travail dû et une copie évaluée dans le groupe.
+- **Avant la première séance** (assiduité inconnue), rien ne change : « En attente ».
+- **Une personne marquée inactive reste hors des signaux.** Mesuré : sans garde, la règle neuve la faisait passer au
+  niveau 3 dans Suivi › Liste (colonne RàI et filtre « niveau 3 »). La garde : une personne absente partout qui est
+  hors des calculs du groupe (`estEtudiantExclu`) reste « En attente », comme avant. **Mon hypothèse, à corriger au
+  besoin** : la garde vaut pour les trois statuts que l'application traite ensemble (inactivité, décrochage,
+  abandon), pas pour l'inactivité seule. Une personne inactive qui est venue au moins une fois, sans production, était
+  déjà en non-participation sur son profil et dans la liste : rien ne change pour elle.
+- La cible d'intervention ne recopie plus la règle : elle suit la carte RàI (#744). La règle vit dans une seule
+  fonction.
+- Rien n'est écrit dans tes données : le niveau se calcule à l'affichage. Le module des instantanés, qui lirait le
+  niveau, est en commentaire (`js/snapshots.js`).
+
+### Ce que montre chaque lecteur du niveau RàI, pour ce cas
+
+Mesuré sous Chromium sur un groupe monté par les formulaires du Cadre : un travail dû, une copie évaluée d'une autre
+personne, une personne absente aux deux séances (active), une autre absente aux deux séances puis marquée inactive.
+
+| Lecteur | Personne absente partout, active | Personne absente partout, inactive |
+|---|---|---|
+| Profil › Accompagnement, carte RàI | « En attente » → **« Non-participation »**, niveau 3, avec la description de ce niveau (voir les textes à corriger) | « En attente », inchangé |
+| Suivi › Groupe, filtre « RàI 2-3 » | absente des retenues → **retenue** (3/5 → 4/5) | hors de la liste du Suivi, inchangé |
+| Suivi › Groupe, les bandes (A, C, P) | inchangées : elles ne lisent pas le niveau RàI ; « A 0 % » comme avant | hors de la liste, inchangé |
+| Aperçu, « Modèle de la Réponse à l'intervention » | « Niveau 3 Intensif » compte une personne de plus (sur ce groupe : 3 → 4, 60 % → 80 %) ; une de moins « en attente de sa note du cours » | n'y entre pas, inchangé |
+| Aperçu, barre des patterns | elle compte une personne de plus sous « Difficulté persistante » (3 → 4) : la barre range déjà la non-participation des présent·es à cet endroit | n'y entre pas, inchangé |
+| Suivi › Liste, colonne RàI | « — » → **« Niveau 3 »** | « — », inchangé |
+| Suivi › Liste, filtre « niveau 3 » | absente → **présente** | absente, inchangé |
+| La répartition du groupe (le réglage des seuils) | une personne de plus au niveau 3, une de moins hors des pourcentages | n'y entre pas, inchangé |
+| Septième parcours, condition d'entrée | inchangé : elle était déjà signalée (A sous le seuil) | inchangé (exclue) |
+| Fiche d'intervention, niveau proposé | inférence tirée du code, non mesurée : 3 (`js/interventions.js`, le niveau du profil) | sans objet |
+
+### Les textes qui disent « présent·e », à corriger (proposés, pas posés)
+
+La règle neuve rend faux, pour l'absent·e total·e, cinq textes lus à l'écran. **Je n'en ai touché aucun.** Ma
+proposition pour chacun, à valider ou à corriger :
+
+1. **L'Aide, « Repérer les patterns de progression »** (`index.html`, accordéon `accordeon-aide-patterns`). Aujourd'hui :
+   « Non-participation : présent·e en classe, mais aucune production évaluée, quand le groupe permet d'en juger (un
+   travail dû et au moins une copie du groupe évaluée). » Proposé : « Non-participation : aucune production évaluée
+   après au moins une séance, présent·e ou absent·e, quand le groupe permet d'en juger (un travail dû et au moins une
+   copie du groupe évaluée). »
+2. **Le guide pédagogique** (`js/guides-pedagogiques.js`), même phrase : même proposition.
+3. **La carte d'information « Profils d'apprentissage »** (`index.html`) : « Non-participation : Présent·e en classe,
+   aucune production évaluée ». Proposé : « Non-participation : aucune production évaluée, présent·e ou absent·e ».
+4. **L'infobulle du filtre des patterns** (`js/accompagnement-contenu-hover.js`) : « non-participation (présent·e, rien
+   de remis) ». Proposé : « non-participation (rien de remis, présent·e ou absent·e) ».
+5. **La description de la carte RàI du profil** (`js/profil-etudiant-calculs.js`, `_niveauNonParticipation`) :
+   « Étudiant·e présent·e en classe mais aucune production remise. Profil prioritaire nécessitant une intervention
+   immédiate. » Elle se lit sur le profil d'une personne précise. Deux voies : une phrase commune, « Aucune production
+   remise depuis le début des séances, présent·e ou absent·e. Profil prioritaire nécessitant une intervention
+   immédiate. » ; ou deux phrases, la présente telle quelle et, pour l'absent·e total·e, « Absent·e à toutes les
+   séances passées, et aucune production remise. Profil prioritaire nécessitant une intervention immédiate. » Je
+   recommande les deux phrases : la carte dit alors ce qui est vrai pour cette personne-là.
+
+La sentinelle de l'Aide (`sentinelle-aide-2026-10-28-lot-2c-bis`) relie déjà ce texte au code par sa phrase « Non-participation » le
+niveau 3 ; elle ne lit pas « présent·e ». Quand une proposition sera validée, l'essai de ce texte sera à mettre à jour avec.
+
+### Les essais
+
+- **Playwright (Chromium)**, un essai neuf dans le banc du parcours : sur le groupe décrit plus haut, plus une personne
+  arrivée après les séances, il vérifie la règle (niveau 3 pour l'absente, « En attente » pour l'inactive et pour
+  l'arrivée) et chaque lecteur mesuré (profil, « RàI 2-3 », Aperçu, colonne et filtre de la liste). Break-tests :
+  la condition remise à « A > 0 » → **rouge** ; la garde des personnes hors du groupe retirée → **rouge**. Rétablies →
+  vertes. Banc complet : **8 / 8** hors captures. `assiduite-lot-D-date-arrivee-et-inconnu` et
+  `profil-etudiant-chargement` : verts.
+- **Vitest** : trois bancs encodaient l'ancienne règle (« jamais présent → En attente », modélisé par A = 0) :
+  `sentinelle-731-non-participation-quand-un-travail-est-du`, `sentinelle-niveau-au-critere-2026-10-30` (deux essais),
+  `sentinelle-aide-2026-10-28-lot-2c-bis`. Leur intention est gardée (sans séance passée, assiduité inconnue : « En
+  attente ») et le cas décidé est ajouté (absente partout : non-participation). Le cliquet de complexité
+  (`sentinelle-contenir-complexite`) avait vu une fonction de plus au-dessus de 15 : la règle est sortie dans sa propre
+  fonction, et il repasse au vert. Vitest complet : **10 912 / 10 912**, 894 fichiers.
+- Jeton : `profil-etudiant-calculs.js` 20261108i.
+
 ## En tête, en gestes d'utilisateur (premier dépôt, nuit du 8 au 9 nov.)
 
 ### Ce qui est fait
@@ -65,8 +147,10 @@ saisies (0 %), sans production, sans pratique assignée.
 
 ### Ce qui attend encore Grégoire
 
-Aucun texte n'a été écrit en dehors des six phrases validées. Une question, relevée par la relecture, qui relève de
-ta définition du RàI (aucun code ne l'attend) :
+Aucun texte n'a été écrit en dehors des six phrases validées. **Tranchée le 9 nov. à 13 h 44** (voir « La retouche du
+9 nov. », plus haut) : la question ci-dessous. Restent à valider : les cinq textes qui disent « présent·e ».
+
+La question, relevée par la relecture :
 
 - La personne absente à toutes les séances, sans production, a maintenant son Accompagnement, mais son niveau RàI
   reste 0, « En attente » : la non-participation exige une assiduité au-dessus de 0 (`js/profil-etudiant-calculs.js:1975`,

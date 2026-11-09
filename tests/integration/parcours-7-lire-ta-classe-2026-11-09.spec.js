@@ -485,6 +485,95 @@ test('une personne absente à toutes les séances (0 %) : son Accompagnement et 
     expect(erreurs, 'erreurs console').toEqual([]);
 });
 
+// Décision de Grégoire du 9 nov. 2026, 13 h 44 (#731) : une personne absente à toutes les séances passées, sans
+// production, est lue en non-participation (niveau 3) quand le groupe permet d'en juger (un travail dû, une copie
+// évaluée). Une personne marquée inactive, absente partout, reste hors des signaux ; avant la première séance (assiduité
+// inconnue), rien ne change. Ce banc juge la règle et ses lecteurs : profil, Suivi › Groupe (« RàI 2-3 »), Suivi › Liste
+// (colonne et filtre), l'Aperçu (« Niveau 3 Intensif »).
+// Break-tests (9 nov., Chromium) : la condition remise à `indices.A > 0` → ROUGE (la personne absente reste « En
+// attente ») ; la garde des personnes hors du groupe retirée → ROUGE (la personne inactive passe au niveau 3 dans la
+// liste). Rétablies → vertes.
+test('non-participation : l’absente à toutes les séances passées, sans production, au niveau 3 partout ; l’inactive et l’arrivée après les séances restent hors des signaux', async ({ page }) => {
+    test.setTimeout(180000);
+    const erreurs = brancherEcouteurs(page);
+    await suivreLesReactions(page);
+    await monterGroupe(page, { designee: true });
+    const INACTIVE = ELEVES[2], ARRIVEE = ELEVES[3];
+    await page.evaluate(({ GRILLE, ELEVES, ARRIVEE }) => {
+        // Un travail dû (échéance passée) et une copie évaluée d'une autre personne : la non-participation se juge.
+        db.setSync(cle('productions'), [{ id: 'P_BANC', titre: 'Analyse fictive', type: 'travail', ponderation: 100, grilleId: GRILLE.id, dateEcheance: '2026-09-10' }]); // security-ok: fixture de test locale
+        db.setSync(cle('evaluationsSauvegardees'), [{ id: 'EV_BANC', etudiantDA: ELEVES[1].da, productionId: 'P_BANC', grilleId: GRILLE.id, // security-ok: fixture de test locale
+            statutRemise: 'evalue', statutIntegrite: 'recevable', dateEvaluation: '2026-09-12T08:00:00.000Z', noteFinale: 80, niveauFinal: 'M', verrouillee: true,
+            criteres: GRILLE.criteres.map((c) => ({ critereId: c.id, critereNom: c.nom, niveauSelectionne: 'M', ponderation: c.ponderation, retroaction: '' })),
+            retroactionFinale: '', pointsAnalytiques: {} }]);
+        // Arrivée après les deux séances (#735) : son assiduité est inconnue.
+        const g = db.getSync(cle('groupeEtudiants'), []);
+        g.find((e) => e.da === ARRIVEE.da).dateArrivee = '2026-09-01';
+        db.setSync(cle('groupeEtudiants'), g); // security-ok: fixture de test locale
+    }, { GRILLE, ELEVES, ARRIVEE });
+    await prendrePresences(page, MARDI, { absent: ECARTE.da });
+    await prendrePresences(page, JEUDI, { absent: ECARTE.da });
+    await prendrePresences(page, MARDI, { absent: INACTIVE.da });
+    await prendrePresences(page, JEUDI, { absent: INACTIVE.da });
+    // Marquée inactive après coup (Cadre › Trimestre) : absente aux deux séances.
+    await page.evaluate((da) => { const g = db.getSync(cle('groupeEtudiants'), []); g.find((e) => e.da === da).statut = 'inactif'; db.setSync(cle('groupeEtudiants'), g); }, INACTIVE.da); // security-ok: fixture de test locale
+
+    const lecture = await page.evaluate((das) => ({
+        A: das.map((da) => calculerTousLesIndices(da).A),
+        jugeable: depistagePeutJugerLaNonParticipation().possible,
+        niveaux: das.map((da) => { const r = determinerNiveauRaiPedagogique(da); return r.niveau + ' ' + r.motif; }),
+        cibles: das.map((da) => determinerCibleIntervention(da).cible)
+    }), [ECARTE.da, INACTIVE.da, ARRIVEE.da]);
+    expect(lecture.A).toEqual([0, 0, null]);
+    expect(lecture.jugeable).toBe(true);
+    expect(lecture.niveaux).toEqual(['3 non-participation', '0 en-attente', '0 en-attente']);
+    expect(lecture.cibles[0]).toBe('Non-participation');
+    expect(lecture.cibles[1]).not.toBe('Non-participation');
+
+    // Suivi › Groupe : « RàI 2-3 » la retient ; l'inactive n'est pas dans la liste.
+    await page.evaluate(() => naviguerVers('suivi', 'groupe'));
+    await attendreRepos(page);
+    if (!(await page.locator('#liste-etudiants-suivi .etudiant-prioritaire-indices').count())) await page.click('#btn-toggle-panneau-prioritaire');
+    await page.click('#suivi-tri-boutons .prioritaire-tri-btn[data-tri="rai"]');
+    await attendreRepos(page);
+    const retenus = await page.evaluate(() => [...document.querySelectorAll('#liste-etudiants-suivi .etudiant-suivi-item.suivi-est-prioritaire')].map((x) => x.dataset.da));
+    expect(retenus).toContain(ECARTE.da);
+    expect(retenus).not.toContain(INACTIVE.da);
+    expect(retenus).not.toContain(ARRIVEE.da);
+
+    // Suivi › Liste : sa colonne RàI dit « Niveau 3 » ; le filtre « niveau 3 » la garde, pas l'inactive.
+    await page.evaluate(() => naviguerVers('suivi', 'liste'));
+    await attendreRepos(page);
+    const ligne = (da) => page.locator('#tbody-suivi-liste tr', { hasText: da });
+    await expect(ligne(ECARTE.da)).toContainText('Niveau 3');
+    await expect(ligne(INACTIVE.da)).not.toContainText('Niveau 3');
+    const filtre = await page.evaluate(() => {
+        const f = document.getElementById('filtre-rai-liste');
+        f.value = '3';
+        f.dispatchEvent(new Event('change', { bubbles: true }));
+        return [...document.querySelectorAll('#tbody-suivi-liste tr')].map((t) => (t.querySelectorAll('td')[1] || {}).textContent).filter(Boolean).map((x) => x.trim());
+    });
+    expect(filtre).toContain(ECARTE.da);
+    expect(filtre).not.toContain(INACTIVE.da);
+    expect(filtre).not.toContain(ARRIVEE.da);
+
+    // De retour sur Suivi › Groupe, l'Aperçu compte trois personnes au niveau 3 sur cinq : les deux présentes sans
+    // production, et l'absente (avant la décision : deux, 40 %). L'inactive n'y entre pas ; l'arrivée après les séances
+    // reste « en attente ».
+    await page.evaluate(() => { const f = document.getElementById('filtre-rai-liste'); f.value = ''; f.dispatchEvent(new Event('change', { bubbles: true })); });
+    await page.evaluate(() => naviguerVers('suivi', 'groupe'));
+    await attendreRepos(page);
+    await expect(page.locator('#conteneur-indicateurs-apprentissage')).toContainText(/Niveau 3\s*Intensif\s*3\s*\(60\s*%\)/);
+
+    // Son profil : la carte RàI dit « Non-participation ».
+    await page.evaluate((da) => afficherProfilComplet(da), ECARTE.da);
+    await attendreRepos(page);
+    await page.evaluate(() => changerSectionProfil('accompagnement'));
+    await attendreRepos(page);
+    await expect(page.locator('#profil-contenu-dynamique')).toContainText('Non-participation');
+    expect(erreurs, 'erreurs console').toEqual([]);
+});
+
 test('« Plus tard » ferme la bulle, le parcours attend à la même étape ; « Reprendre » y revient', async ({ page }) => {
     test.setTimeout(180000);
     const erreurs = brancherEcouteurs(page);

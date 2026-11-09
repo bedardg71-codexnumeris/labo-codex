@@ -186,9 +186,15 @@ describe('§ 1 — ce qui reste, ce qui ne compte jamais', () => {
         expect(c.r(1)).toMatchObject({ niveau: 3, pattern: 'Non-participation' });
     });
 
-    it('un élève jamais présent, sans copie, reste « En attente »', () => {
-        const c = classe([{ P: 80, copies: [80] }, { A: 0, copies: [] }]);
+    // Décision de Grégoire du 9 nov. 2026 (13 h 44, #731) : « jamais présent » se lit comme l'assiduité le dit (#743).
+    it('un élève sans aucune séance passée (assiduité inconnue), sans copie, reste « En attente »', () => {
+        const c = classe([{ P: 80, copies: [80] }, { A: null, copies: [] }]);
         expect(c.r(1)).toMatchObject({ niveau: 0, pattern: 'Données insuffisantes' });
+    });
+
+    it('un élève absent à toutes les séances passées (0 %), sans copie, est en non-participation, niveau 3 (9 nov.)', () => {
+        const c = classe([{ P: 80, copies: [80] }, { A: 0, copies: [] }]);
+        expect(c.r(1)).toMatchObject({ niveau: 3, pattern: 'Non-participation' });
     });
 
     it('la « Mesure d\'aide » de la fiche ne fixe ni n\'influence aucun niveau', () => {
@@ -485,8 +491,9 @@ describe('retouche — C1 : la barre des patterns écarte par le pattern, pas pa
         expect(conteneur.innerHTML).not.toContain(`data-da="${DA_DU_RANG(0)}"`);
     });
 
-    it('un élève jamais présent, sans copie, n\'y entre pas non plus : la cible lit le pattern de la carte', () => {
-        const { html, win } = barre([{ A: 0, copies: [] }, { P: 80, copies: [80] }]);
+    // Décision du 9 nov. 2026 : sans séance passée (assiduité inconnue) ; absent·e partout, la cible dit « Non-participation ».
+    it('un élève sans aucune séance passée, sans copie, n\'y entre pas non plus : la cible lit le pattern de la carte', () => {
+        const { html, win } = barre([{ A: null, copies: [] }, { P: 80, copies: [80] }]);
         expect(win.determinerCibleIntervention(DA_DU_RANG(0))).toMatchObject({ niveau: 0, pattern: 'Données insuffisantes' });
         expect(html).not.toContain(`data-da="${DA_DU_RANG(0)}"`);
         expect(html).toContain(`data-da="${DA_DU_RANG(1)}"`);

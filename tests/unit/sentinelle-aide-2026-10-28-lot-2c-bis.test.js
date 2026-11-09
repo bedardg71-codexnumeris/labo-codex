@@ -206,10 +206,13 @@ describe('#1152 lot 2c bis · ce que les entrées affirment, lu dans le code', (
     // ce niveau 3. Le texte est lié à ce que rend le code, pas seulement à sa présence.
     // Lot 3 des seuils (30 oct. 2026) : la phrase « Seule Non-participation… » est périmée par le modèle au critère ; le texte validé
     // la remplace, et il reste lié à ce que rend le code.
-    it('patterns : « Non-participation » donne le niveau 3, et c\'est la présence sans copie qui le donne', () => {
+    // Décision de Grégoire du 9 nov. 2026 (13 h 44, #731) : une assiduité CONNUE sans copie le donne, 0 % compris (l'absent·e
+    // à toutes les séances passées) ; sans séance passée (inconnue), « En attente ».
+    it('patterns : « Non-participation » donne le niveau 3, et c\'est une assiduité connue sans copie qui le donne', () => {
         const present = niveauRaiDuBanc({ evaluations: [COPIE_DE_L_AUTRE], A: 100 });
         expect(present).toMatchObject({ niveau: 3, pattern: 'Non-participation' });
-        expect(niveauRaiDuBanc({ evaluations: [COPIE_DE_L_AUTRE], A: 0 })).toMatchObject({ niveau: 0, label: 'En attente' });
+        expect(niveauRaiDuBanc({ evaluations: [COPIE_DE_L_AUTRE], A: 0 })).toMatchObject({ niveau: 3, pattern: 'Non-participation' });
+        expect(niveauRaiDuBanc({ evaluations: [COPIE_DE_L_AUTRE], A: null })).toMatchObject({ niveau: 0, label: 'En attente' });
         expect(texteDe('patterns')).toContain('« Non-participation » le niveau 3.');
     });
 
