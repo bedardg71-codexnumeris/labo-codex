@@ -601,7 +601,9 @@ const AVIS_COPIE_NON_RECEVABLE = Object.freeze({
  * sentinelle-textes-copie-non-recevable-valides-9-nov les exige. Une seule variante, la sienne : en standards, au pool
  * (portfolio ou productions retenues), quand le mode de sélection de la pratique est « N meilleures », « lui mettre 0 »
  * dit que ce 0 ne compte que s'il manque des productions (`zeroNMeilleures`) — c'est l'effet mesuré du calcul (rapport,
- * § « Le minimum »). Les autres modes (tous, derniers, hybride) gardent le texte commun.
+ * § « Le minimum »). ↻ Décision de Cowork (9 nov. 2026, après le relevé de Grégoire) : la même phrase, mot pour mot,
+ * s'affiche aussi en mode hybride, dont la partie au choix (la Sélection) retient les meilleures. Les modes « Tous » et
+ * « N plus récentes » gardent le texte commun.
  * Le mot du pool suit la règle du récit (décision Q1 du 28 oct.) : « portfolio » avec des « Artefact », sinon
  * « productions retenues ». Dénotation : aucun choix, la note est un jugement saisi.
  */
@@ -653,29 +655,33 @@ function _estStatutNonRecevable(statut) {
 
 /**
  * Les mots du choix, selon la famille de la pratique active et la place de la production dans la note. Au pool des
- * standards, en « N meilleures », « lui mettre 0 » prend la variante de Grégoire (9 nov. 2026).
+ * standards, en « N meilleures » ou en hybride, « lui mettre 0 » prend la variante de Grégoire (9 nov. 2026).
  * @returns {{ecarter:string, zero:string}}
  */
 function _textesDuChoixCopie(famille, productionId) {
     const T = TEXTES_SORT_COPIE_NON_RECEVABLE;
     if (famille !== 'standards') return T[famille] || T.generique;   // sommative, specifications ; sinon (aucune pratique) : générique
     const textes = T[_placeEnStandards(productionId)];
-    if (textes.zeroNMeilleures && _modeSelectionNMeilleures()) return { ecarter: textes.ecarter, zero: textes.zeroNMeilleures };
+    if (textes.zeroNMeilleures && _poolRetientLesMeilleures()) return { ecarter: textes.ecarter, zero: textes.zeroNMeilleures };
     return textes;
 }
 
 /**
- * Le mode de sélection de la pratique active est-il « N meilleures » ? Lu comme le calcul le lit
- * (`_obtenirConfigPortfolioCalcul`, profil-etudiant-actions.js) : `portfolio.methodeSelection`, « meilleurs » par défaut ;
- * l'hybride stocke aussi « meilleurs » (wizard-pratique-v2.js), mais c'est un autre mode à l'écran (pratiques-gestion.js,
- * « hybride a priorité ») : il garde le texte commun. Sans configuration de portfolio : non.
+ * Le pool de la pratique active retient-il les meilleures ? Vrai en « N meilleures » et en hybride (décision de Cowork du
+ * 9 nov. 2026 : la Sélection de l'hybride retient les N meilleures). La phrase dit ce que fait la NOTE : elle se lit comme
+ * le calcul (`_obtenirConfigPortfolioCalcul`, profil-etudiant-actions.js) — hybride si les catégories sont actives
+ * (`_selectionnerArtefactsHybride`) ; sinon `portfolio.methodeSelection`, « meilleurs » par défaut, et « hybride » écrit
+ * sans catégories actives se trie comme « meilleurs » (`_selectionnerArtefactsLegacy`). « Tous » et « N plus récentes » :
+ * non. L'ancien drapeau `portfolio.hybride` n'est pas lu : le calcul ne le lit plus (wizard-pratique-v2.js) ; seul, avec
+ * « Tous », l'écran des réglages dirait « Hybride » pendant que la note fait « Tous » (écart d'avant ce lot).
+ * Sans configuration de portfolio : non.
  */
-function _modeSelectionNMeilleures() {
+function _poolRetientLesMeilleures() {
     const configuration = (typeof window.obtenirConfigPratiqueActive === 'function') ? window.obtenirConfigPratiqueActive() : null;
     const portfolio = configuration && configuration.portfolio;
     if (!portfolio) return false;
-    if (portfolio.hybride || (configuration.categories && configuration.categories.actif)) return false;
-    return (portfolio.methodeSelection || 'meilleurs') === 'meilleurs';
+    if (configuration.categories && configuration.categories.actif) return true;
+    return ['meilleurs', 'hybride'].includes(portfolio.methodeSelection || 'meilleurs');
 }
 
 /** Standards : la place de la production — terminale, obligatoire (hybride), ou pool (portfolio / productions retenues). */

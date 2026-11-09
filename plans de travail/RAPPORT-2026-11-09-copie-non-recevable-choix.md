@@ -16,8 +16,10 @@
 - **Ta variante « N meilleures » sur la copie** : en standards, quand la copie est au portfolio (ou aux productions
   retenues, sans Artefact) et que le mode de sélection de la pratique est « N meilleures », « lui mettre 0 » dit
   « lui mettre 0 : elle entre au portfolio avec 0 ; en « N meilleures », ce 0 ne compte que s'il te manque des
-  productions ». Les modes « Tous », « N plus récentes » et « Hybride » gardent « lui mettre 0 : elle entre au portfolio
-  avec 0 ». La terminale et l'obligatoire gardent leur texte, quel que soit le mode.
+  productions ». **Elle s'affiche aussi en mode « Hybride »** (décision de Cowork, après ton relevé : la Sélection de
+  l'hybride retient les meilleures) ; la phrase est la même, mot pour mot. Les modes « Tous » et « N plus récentes »
+  gardent « lui mettre 0 : elle entre au portfolio avec 0 ». La terminale et l'obligatoire gardent leur texte, quel que
+  soit le mode.
 - **L'assistant** : « Lui mettre 0 », standards, dit ta phrase. Rien n'est coché d'avance. **Les réglages** : inchangés.
 - **L'Aide** : ta puce « Lui mettre 0 » dans « Travail NON RECEVABLE » ; l'exemple de la terminale dans « Travail NON
   REMIS » ; et l'aide de « Notes finalisées » se termine par « En standards, une terminale non remise ou écartée vaut
@@ -25,10 +27,12 @@
 - **Le calcul n'a pas bougé** (ta question 2). Tu choisiras toi-même « Lui mettre 0 » dans les réglages de ta pratique
   par standards, après la mise en ligne : **je n'ai rien écrit dans tes données**, et le lot n'écrit rien tant que tu ne
   cliques pas.
-- **Le relevé de tes copies non recevables** est prêt (`scripts/releve-copies-non-recevables-a2026.js`), en lecture
-  seule, à coller dans la console de Chrome sur ton Mac **avant la fusion** (ta question 5, plus bas). La relecture neuve
-  y a trouvé deux défauts (des comptes faux sur la terminale, une écriture possible dans IndexedDB) : corrigés, et ses
-  comptes sont maintenant ceux que l'application calcule elle-même, avant et après le lot.
+- **Le relevé de tes copies non recevables** (`scripts/releve-copies-non-recevables-a2026.js`, lecture seule). La
+  relecture neuve y a trouvé deux défauts (des comptes faux sur la terminale, une écriture possible dans IndexedDB) :
+  corrigés avant que tu le lances. **Lancé sur ton Mac le 9 nov. à 15 h 46** (relayé par Cowork) : **1 copie non
+  recevable** en A2026 (IA non autorisée), dans ta pratique par standards (mode hybride, groupe 00007), au portfolio,
+  verrouillée, lue « l'écarter » faute de règle écrite ; **aucune terminale touchée, 0 changement de note.** La fusion
+  n'attend plus le relevé.
 - **Captures Chromium à 1180 px** (pas WebKit), dans `plans de travail/captures-2026-11-09-copie-non-recevable-choix/`,
   qui remplacent celles de la nuit : la copie marquée dans une pratique par standards en « N meilleures », règle
   « l'écarter » cochée (`1a-…`), puis « lui mettre 0 » choisi (`1b-…`) ; les réglages de la pratique (`2-…`) ; l'étape de
@@ -36,18 +40,13 @@
 
 ### Ce qui attend Grégoire (une question par ligne, avec ma recommandation)
 
-1. **Lancer le relevé sur ton Mac, avant la fusion.** Ouvre l'application en ligne dans Chrome, ouvre la console
-   (⌥⌘J), colle le contenu de `scripts/releve-copies-non-recevables-a2026.js`, Entrée. Il n'écrit rien. Le résultat est
-   copié dans ton presse-papier ; colle-le à Cowork. Il dit, sans aucun nom ni DA : combien de copies sont marquées non
-   recevables en A2026, par pratique et par famille ; et, pour chaque élève d'un groupe en standards, si sa note de
-   terminale passerait de 0 à provisoire (une terminale non recevable, ou une reprise accordée pas encore évaluée) ou de
-   provisoire à 0 (« Notes finalisées » cochée, terminale non remise, absente ou écartée). *Recommandation : fusionner
-   seulement si ces comptes sont à 0, ou si tu acceptes ce qu'ils nomment.*
-2. **En mode « Hybride », la copie au bloc Sélection garde le texte commun.** C'est ta consigne (« les autres modes
-   gardent ton texte »). Or l'hybride retient aussi les N meilleures de sa Sélection (`_selectionnerArtefactsLegacy`,
-   `js/profil-etudiant-actions.js:296`) : une copie à 0 n'y compte, elle aussi, que s'il manque des productions.
-   *Recommandation : garder tel quel pour la cohorte (ta pratique n'est pas hybride) ; si tu veux la variante en hybride
-   aussi, c'est une ligne de code et un mot de toi.*
+1. **Ta copie au portfolio, dans ta pratique hybride.** Le relevé la lit « l'écarter » (ta pratique n'a pas de règle
+   écrite) : elle manque à ta Sélection, comme une copie non remise. Si tu choisis « Lui mettre 0 » dans les réglages
+   de ta pratique, comme tu l'as prévu, elle y entrera avec 0, qui ne comptera que s'il manque des productions à cet
+   élève ; la ligne de la copie le dira. *Rien à décider ici ; c'est ton geste, après la mise en ligne.*
+2. ~~En mode « Hybride », la copie au bloc Sélection garde le texte commun.~~ **Réglé par Cowork** : la précision
+   s'affiche aussi en hybride. (Ma recommandation disait « ta pratique n'est pas hybride » : c'était faux, le relevé
+   montre qu'elle l'est.)
 3. **Le glossaire, « Notes finalisées »** (`js/accompagnement-contenu-terme.js:606`), dit seulement qu'en hybride une
    obligatoire non remise compte alors pour zéro ; il ne dit rien de la terminale. Non touché (texte non validé).
    *Proposition : ajouter « En standards, une terminale non remise ou écartée compte alors pour zéro. »*
@@ -131,10 +130,14 @@ cours : ». Les deux choix, selon la famille et la place de la copie :
 
 Dessous : « Règle de ta pratique : l'écarter. Ton choix ne vaut que pour cette copie. » (ou « lui mettre 0 »).
 
-**Le mode « N meilleures »** se lit comme le calcul le lit (`_obtenirConfigPortfolioCalcul`,
-`js/profil-etudiant-actions.js`) : `portfolio.methodeSelection`, « meilleurs » quand rien n'est écrit. L'hybride stocke
-aussi « meilleurs » (l'assistant), mais l'écran des réglages l'affiche comme un autre mode (« hybride a priorité »,
-`js/pratiques-gestion.js`) : il garde le texte commun (question 2). Sans configuration de portfolio : le texte commun.
+**Quand la précision s'affiche** (`_poolRetientLesMeilleures`, `js/evaluation-sauvegarde.js`) : quand le pool de la
+pratique retient les meilleures, lu comme le calcul le lit (`_obtenirConfigPortfolioCalcul`,
+`js/profil-etudiant-actions.js`) — en hybride (catégories actives : la Sélection retient les N meilleures, décision de
+Cowork du 9 nov.), et sinon quand `portfolio.methodeSelection` vaut « meilleurs » (aussi quand rien n'est écrit) ou
+« hybride » écrit sans catégories actives (le calcul le trie comme « meilleurs »). « Tous » et « N plus récentes » : le
+texte commun. Sans configuration de portfolio : le texte commun. **Supposition nommée** : l'ancien drapeau
+`portfolio.hybride` n'est pas lu, parce que le calcul ne le lit plus (l'assistant ne l'écrit plus) ; seul, avec « Tous »,
+l'écran des réglages afficherait « Hybride » pendant que la note fait « Tous » : la phrase suit la note.
 
 **L'avis « Travail non recevable »** du formulaire : la phrase « Dans la note du cours, elle vaut ce que dit ta pratique : … »
 est retirée (validé) ; le reste mot pour mot.
@@ -191,13 +194,14 @@ L'infobulle `eval-integrite` (« dans la note, son sort dépend de ta pratique �
 - `0df3f9c4` le relevé du stock.
 - `f500c0cc` les captures.
 - `421ec565` le rapport (premier jet de la session).
-- (le dernier : le relevé corrigé après la relecture neuve, et ce rapport complété.)
+- `241838a1` le relevé corrigé après la relecture neuve, et le rapport complété.
+- (le dernier : la précision « N meilleures » affichée aussi en hybride, et ce rapport.)
 
 **La sentinelle des textes validés** (`tests/unit/sentinelle-textes-copie-non-recevable-valides-9-nov.test.js`, 13 essais).
 La ligne de la copie se juge AU RENDU : le vrai `evaluation-sauvegarde.js` sur le bloc d'`index.html` (menu « Intégrité
 académique » et `divSortNonRecevable`), avec les vrais prédicats du registre ; chaque famille, chaque place, et pour le
-pool des standards chaque mode (« meilleurs », rien d'écrit, « tous », « derniers », hybride par `categories`, hybride par
-`portfolio.hybride`, sans portfolio). L'assistant par ses options, les réglages, l'avis et l'Aide dans `index.html`. Les
+pool des standards chaque mode (« meilleurs », rien d'écrit, « tous », « derniers », « recents », hybride par `categories`,
+« hybride » écrit sans catégories, l'ancien drapeau `portfolio.hybride` seul, sans portfolio). L'assistant par ses options, les réglages, l'avis et l'Aide dans `index.html`. Les
 insécables sont ramenées à l'espace avant comparaison (ce ne sont pas des mots) ; un essai à part exige celles de la
 source. Plus aucune marque « PROPOSÉS, en attente de Grégoire » sur ces textes.
 Break-tests, une mutation à la fois, fichier restauré : **11 mutants, 11 rouges** — la variante jamais prise ; l'hybride
@@ -229,6 +233,18 @@ sans notes finales, 2 de 0 à provisoire ; avec, 1 de 0 à provisoire (la repris
 (brouillon plagié, aucune copie, non remise). 0 écriture tentée ; aucun nom ni DA dans la sortie. **Le premier relevé,
 devant le même oracle, rendait 0 et 4 avec notes finales** (au lieu de 1 et 3) : l'essai sait le prendre en défaut.
 
+**La précision en hybride** (décision de Cowork, 9 nov., après le relevé de Grégoire). Seule la condition d'affichage
+change ; la phrase reste mot pour mot. `_modeSelectionNMeilleures` devient `_poolRetientLesMeilleures` : vrai si les
+catégories sont actives, ou si `methodeSelection` vaut « meilleurs » (ou rien) ou « hybride » ; l'ancien drapeau
+`portfolio.hybride` n'est plus lu (le calcul ne le lit plus). L'obligatoire et la terminale d'une hybride gardent leur
+texte (la précision n'existe qu'au pool). Jeton `20261109v`. La sentinelle (13 essais) exige la précision en hybride
+(catégories actives, « hybride » écrit), au pool comme aux productions retenues, et son absence en « Tous », « N plus
+récentes » (« derniers », « recents »), avec l'ancien drapeau seul et « Tous », et à la terminale d'une hybride.
+Break-tests, une mutation à la fois, fichier restauré : **5 mutants, 5 rouges** — l'hybride exclu ; l'ancien drapeau
+relu ; « hybride » écrit oublié ; « recents » ajouté ; une pratique sans portfolio prise pour « N meilleures ». Les
+captures `1a` et `1b` (une pratique en « N meilleures ») restent justes.
+Vitest depuis `tests/`, après ce changement : **896 fichiers, 10 903 essais, tous verts**.
+
 **Les captures** : script jetable (hors dépôt), Chromium, 1180 × 820, deviceScaleFactor 2 ; une pratique par standards
 « Standards témoin » en « N meilleures », sans règle écrite (elle lit « l'écarter »), l'élève fictif « Élève Fictif »,
 Artefact 1 marqué « Non recevable (Plagiat) ». Le clic sur « lui mettre 0 » s'est enregistré tout seul avec la copie
@@ -254,7 +270,8 @@ les deux chiffres de la question 5. Ses trouvailles et leur sort :
 4. *La détection « N meilleures » est conforme à la lettre de la consigne.* Trois écarts, sans défaut : l'hybride
    (question 2) ; un ancien drapeau `portfolio.hybride` sans catégories actives, que l'écran montre « Hybride » et que le
    calcul trie en « N meilleures » ; « Hybride » choisi puis catégories décochées (`methodeSelection: 'hybride'`), même
-   effet. Le texte suit l'écran dans les deux derniers cas : issue 3, sans conséquence observable pour la cohorte.
+   effet. Le texte suivait l'écran dans les deux derniers cas : issue 3, sans conséquence observable pour la cohorte.
+   ↻ Après la décision de Cowork sur l'hybride (plus bas), la phrase suit le calcul dans les trois cas.
 5. *La sentinelle mord* : 13 mutations sur 15 la font rougir ; les deux qui restent vertes (le titre et la phrase du jeton
    de l'avis) sont gardées par `sentinelle-copie-non-recevable-affichage-28-oct` (rouge prouvé).
 6. *La fusion est bonne* : les deux ajouts sont gardés aux trois chemins d'écriture (Enregistrer, Modifier,

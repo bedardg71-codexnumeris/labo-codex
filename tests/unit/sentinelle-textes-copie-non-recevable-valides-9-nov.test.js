@@ -4,8 +4,9 @@
  *
  * Posés la nuit du 8 au 9 nov. comme PROPOSÉS ; Grégoire les a validés tels quels, sauf trois retouches à lui :
  *   1. la ligne sur la copie, en standards, au pool (portfolio ou productions retenues), quand le mode de sélection de la
- *      pratique est « N meilleures » : « lui mettre 0 » dit que ce 0 ne compte que s'il te manque des productions ; les
- *      autres modes (tous, derniers, hybride) gardent le texte commun ;
+ *      pratique est « N meilleures » : « lui mettre 0 » dit que ce 0 ne compte que s'il te manque des productions ;
+ *      ↻ décision de Cowork (9 nov., après le relevé de Grégoire) : la même phrase en mode hybride, dont la Sélection
+ *      retient les meilleures ; « Tous » et « N plus récentes » gardent le texte commun ;
  *   2. l'assistant, « Lui mettre 0 » en standards ;
  *   3. l'Aide, la puce « Lui mettre 0 » ; et (question 6) la carte « Travail NON REMIS » et l'aide de « Notes finalisées ».
  * Cette sentinelle EXIGE chacun de ces textes, là où l'utilisateur les lit : la ligne de la copie au rendu réel
@@ -84,7 +85,7 @@ const LIGNE = {
     generique: ['l\'écarter, comme une copie non remise', 'lui mettre 0']
 };
 
-describe('La ligne sur la copie — le tableau validé, et la variante « N meilleures » de Grégoire', () => {
+describe('La ligne sur la copie — le tableau validé, et la variante « N meilleures » de Grégoire (hybride compris)', () => {
     it('le titre et la règle de la pratique, mot pour mot', () => {
         const vu = ligneDeLaCopie({ famille: 'sommative', regle: 'zero' });
         expect(vu.visible).toBe(true);
@@ -103,7 +104,7 @@ describe('La ligne sur la copie — le tableau validé, et la variante « N meil
         expect([aucune.ecarter, aucune.zero, aucune.aide]).toEqual([...LIGNE.generique, 'Ton choix ne vaut que pour cette copie.']);
     });
 
-    it('standards, portfolio : « N meilleures » prend la variante ; tous, derniers, hybride gardent le texte commun', () => {
+    it('standards, portfolio : « N meilleures » et l\'hybride prennent la variante ; tous, derniers gardent le texte commun', () => {
         const vu = (configuration) => {
             const v = ligneDeLaCopie({ famille: 'standards', regle: 'ecarter', productions: ARTEFACTS, productionId: 'A1', configuration });
             return [v.ecarter, v.zero];
@@ -112,8 +113,14 @@ describe('La ligne sur la copie — le tableau validé, et la variante « N meil
         expect(vu(portfolio(null)), 'sans mode écrit, le calcul lit « meilleurs »').toEqual([LIGNE.portfolio[0], LIGNE.portfolio[1] + N_MEILLEURES]);
         expect(vu(portfolio('tous'))).toEqual(LIGNE.portfolio);
         expect(vu(portfolio('derniers'))).toEqual(LIGNE.portfolio);
-        expect(vu(HYBRIDE), 'l\'hybride stocke « meilleurs » mais reste un autre mode').toEqual(LIGNE.portfolio);
-        expect(vu(portfolio('meilleurs', { portfolio: { actif: true, methodeSelection: 'meilleurs', hybride: true } }))).toEqual(LIGNE.portfolio);
+        // ↻ Décision de Cowork (9 nov. 2026) : la Sélection de l'hybride retient les meilleures — la même phrase, mot pour mot.
+        const VARIANTE = [LIGNE.portfolio[0], LIGNE.portfolio[1] + N_MEILLEURES];
+        expect(vu(HYBRIDE), 'hybride (catégories actives)').toEqual(VARIANTE);
+        // L'ancien drapeau `portfolio.hybride` n'est plus lu par le calcul : la phrase suit la note, pas le drapeau.
+        expect(vu(portfolio('tous', { portfolio: { actif: true, methodeSelection: 'tous', hybride: true } })), 'ancien drapeau seul, « Tous » : la note fait « Tous »').toEqual(LIGNE.portfolio);
+        expect(vu(portfolio('hybride')), 'hybride (mode écrit, catégories décochées)').toEqual(VARIANTE);
+        expect(vu(portfolio('tous', { categories: { actif: true } })), 'catégories actives : l\'écran dit « Hybride »').toEqual(VARIANTE);
+        expect(vu(portfolio('recents')), '« recents », l\'autre nom de « N plus récentes »').toEqual(LIGNE.portfolio);
         expect(vu(null), 'sans configuration de portfolio : le texte commun').toEqual(LIGNE.portfolio);
     });
 
@@ -123,15 +130,18 @@ describe('La ligne sur la copie — le tableau validé, et la variante « N meil
             return [v.ecarter, v.zero];
         };
         expect(vu(portfolio('meilleurs'))).toEqual([LIGNE.productions[0], LIGNE.productions[1] + N_MEILLEURES]);
+        expect(vu(HYBRIDE)).toEqual([LIGNE.productions[0], LIGNE.productions[1] + N_MEILLEURES]);
         expect(vu(portfolio('tous'))).toEqual(LIGNE.productions);
     });
 
-    it('standards, obligatoire (hybride) et terminale : le texte du tableau, quel que soit le mode', () => {
+    it('standards, obligatoire (hybride) et terminale : le texte du tableau, quel que soit le mode (la variante est celle du pool)', () => {
         const obl = ligneDeLaCopie({ famille: 'standards', regle: 'ecarter', productionId: 'A1', configuration: HYBRIDE,
             productions: [{ id: 'A1', type: 'artefact-portfolio', categorie: 'obligatoire' }, { id: 'T1', type: 'terminale' }] });
         expect([obl.ecarter, obl.zero]).toEqual(LIGNE.obligatoire);
         const term = ligneDeLaCopie({ famille: 'standards', regle: 'ecarter', productions: ARTEFACTS, productionId: 'T1', configuration: portfolio('meilleurs') });
         expect([term.ecarter, term.zero]).toEqual(LIGNE.terminale);
+        const termHybride = ligneDeLaCopie({ famille: 'standards', regle: 'ecarter', productions: ARTEFACTS, productionId: 'T1', configuration: HYBRIDE });
+        expect([termHybride.ecarter, termHybride.zero], 'la terminale d\'une hybride : sans la variante').toEqual(LIGNE.terminale);
     });
 
     it('la source porte les insécables de la typographie (deux-points, point-virgule, guillemets)', () => {
