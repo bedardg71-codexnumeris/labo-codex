@@ -362,6 +362,14 @@ body.parcours-actif .transition-bandeau { display: none; }
     color: var(--acc-texte);
 }
 
+/* Parcours 6 : la phrase du refus, quand la condition d'entrée d'un parcours n'est pas remplie. */
+.assistance-parcours-condition {
+    margin: 0;
+    font-size: 13px;
+    line-height: 1.45;
+    color: var(--icone-aide-config);
+}
+
 .assistance-parcours-bouton:hover { background: rgba(106, 172, 184, 0.15); }
 .assistance-parcours-bouton--plein:hover { background: var(--acc-surface); }
 
@@ -453,4 +461,20 @@ body.parcours-actif .transition-bandeau { display: none; }
     .assistance-panneau,
     .assistance-interrupteur::before,
     .assistance-interrupteur::after { transition: none; }
+}
+
+/* ---------- Parcours 6 : la bulle au-dessus des fenêtres ----------
+   À l'étape « Range ton fichier », la bulle doit être lue AVANT que la fenêtre du système
+   s'ouvre : elle se pose sur l'aperçu « Mettre à jour le codex » (99999), puis au-dessus
+   de la progression (100000). Elle passe sous les fenêtres qui suivent (« Ton codex est
+   prêt », « Il y est », l'échec : 9999), dont les boutons doivent rester touchables. Le voile,
+   lui, reste dessous : chaque fenêtre garde ses clics.
+   La classe n'est posée que par js/parcours-donnees.js, sur les éléments de son lancement. */
+.parcours-contour.parcours--par-dessus-les-fenetres { z-index: 100001; }
+.parcours-bulle.parcours--par-dessus-les-fenetres {
+    z-index: 100002;
+    /* Sur l'aperçu, la bulle se pose au-dessus de son bouton « Mettre à jour » (le contour) sans
+       le couvrir : bornée, elle y tient aussi à 390 px ; ce qui dépasse défile dans la bulle. */
+    max-height: min(560px, 55vh);
+    overflow-y: auto;
 }

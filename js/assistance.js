@@ -118,6 +118,21 @@
         btn.textContent = e.etat === 'fait' ? 'Refaire' : e.etat === 'en-cours' ? 'Reprendre' : 'Commencer';
         btn.setAttribute('aria-describedby', h.id);
         btn.addEventListener('click', function () {
+            // Parcours 6 : un parcours peut poser sa condition d'entrée (`condition`, qui rend
+            // la phrase du refus, ou rien). Non remplie, le bouton ne lance rien : le panneau dit
+            // pourquoi, sous le bouton, et le lecteur d'écran l'annonce.
+            var refus = typeof def.condition === 'function' ? def.condition() : null;
+            if (refus) {
+                var dit = corps.querySelector('.assistance-parcours-condition');
+                if (!dit) {
+                    dit = document.createElement('p');
+                    dit.className = 'assistance-parcours-condition';
+                    dit.setAttribute('role', 'status');
+                    corps.appendChild(dit);
+                }
+                dit.textContent = refus;
+                return;
+            }
             var depuis = e.etat === 'en-cours' ? e.etape : 0;
             fermerPanneau({ sansRetourFocus: true });
             def.lancer(depuis);
