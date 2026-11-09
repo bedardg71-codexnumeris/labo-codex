@@ -40,7 +40,7 @@ function monter({ genererDocPDF }) {
         id: 'F' + (i + 1), etudiantDA: e.da, productionId: 'P1', nomFichier: `copie${i + 1}.pdf`
     }));
     const evaluations = etudiants.map((e, i) => ({
-        id: 'E' + (i + 1), etudiantDA: e.da, productionId: 'P1'
+        id: 'E' + (i + 1), etudiantDA: e.da, productionId: 'P1', verrouillee: true   // lot du 9 nov. : l'export Léa n'envoie que les verrouillées
     }));
 
     const store = {

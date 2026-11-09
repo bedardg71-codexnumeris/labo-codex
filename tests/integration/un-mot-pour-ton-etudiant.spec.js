@@ -209,7 +209,7 @@ async function exporterPourLea(page) {
 
 test('Un mot · « Exporter pour Léa » : le PDF porte « Un mot pour toi » et le mot quand il est écrit', async ({ page }) => {
     test.setTimeout(90000);
-    const erreurs = await monter(page, { mot: MOT });
+    const erreurs = await monter(page, { mot: MOT, verrouillee: true });   // l'export Léa n'envoie que les verrouillées
     const r = await exporterPourLea(page);
     expect(r.echecs).toEqual([]);
     expect(r.sansSynthese).toEqual([]);
@@ -224,7 +224,7 @@ test('Un mot · « Exporter pour Léa » : le PDF porte « Un mot pour toi » et
 for (const [libelle, mot] of [['vide', ''], ['de blancs seuls', '  \n \n  '], ['absent', undefined]]) {
     test(`Un mot · « Exporter pour Léa » : mot ${libelle}, la section n'existe pas (ni titre ni case)`, async ({ page }) => {
         test.setTimeout(90000);
-        await monter(page, { mot });
+        await monter(page, { mot, verrouillee: true });   // l'export Léa n'envoie que les verrouillées
         const r = await exporterPourLea(page);
         expect(r.echecs).toEqual([]);
         expect(r.html.length).toBe(1);
