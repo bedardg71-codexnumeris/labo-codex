@@ -683,9 +683,15 @@ function autoPositionner(cible, direction) {
     positionner(h, cible, direction);
 }
 
+// Lot « Les deux parcours », partie 2 (9 nov. 2026 ; décision de Grégoire après la capture WebKit de l'étape 7) :
+// pendant un parcours, la bulle parle seule — aucune flèche didactique ne s'y ajoute. Le moteur pose la classe
+// `parcours-actif` sur <body> (parcours-moteur.js) ; la flèche n'est pas marquée vue, elle reviendra hors parcours.
+function parcoursEnCours() { return !!(document.body && document.body.classList.contains('parcours-actif')); }
+
 function afficherAutoReveal(id, optionsExterne) {
     if (!prefFlechesActives()) return;
     if (estVue(id)) return;
+    if (parcoursEnCours()) return;
 
     const entree = (optionsExterne && optionsExterne.sectionActive)
         ? optionsExterne
@@ -711,6 +717,7 @@ function afficherAutoReveal(id, optionsExterne) {
 
     autoTimerAffichage = setTimeout(function() {
         autoTimerAffichage = null;
+        if (parcoursEnCours()) return;   // un parcours lancé pendant le délai de stabilisation
         const cible = document.querySelector(entree.cibleSelector);
         if (!cible) {
             console.warn('[Accompagnement/flèches] Cible introuvable pour "' + id + '" : ' + entree.cibleSelector);

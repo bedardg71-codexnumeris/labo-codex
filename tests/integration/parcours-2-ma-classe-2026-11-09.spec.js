@@ -111,6 +111,18 @@ async function bulleNeCouvrePas(page, selecteur, contexte = '') {
 
 const rang = (page) => page.locator('#assistance-menu-rang');
 
+// 9 nov. 2026 (capture WebKit de l'étape 7) : la flèche didactique des présences, demandée par l'API publique ;
+// rend vrai si elle est visible 400 ms plus tard (après son délai de stabilisation de 150 ms).
+async function flecheDesPresencesVisible(page) {
+    return page.evaluate(() => new Promise((ok) => {
+        window.accompagnement.afficherFleche('suivi-presences-premiere-saisie');
+        setTimeout(() => {
+            const h = document.getElementById('fleche-didactique-host');
+            ok(!!h && h.classList.contains('visible') && getComputedStyle(h).display !== 'none');
+        }, 400);
+    }));
+}
+
 /** Note chaque titre de bulle rendu, pour dire quelles étapes ont paru, même un instant. */
 async function noterLesBulles(page) {
     await page.evaluate(() => {
@@ -305,6 +317,8 @@ test('de « Découvrir » à sa propre classe : « Commencer avec ma classe », 
     await bulleNeCouvrePas(page, '#parcours-contour');
     await bulleNeCouvrePas(page, '#parcours-contour-date');
     await expect(page.locator('#tbody-saisie-presences tr')).toHaveCount(3);
+    // Pendant le parcours, la bulle parle seule : aucune flèche didactique ne s'y ajoute (décision de Grégoire, 9 nov.).
+    expect(await flecheDesPresencesVisible(page), 'étape 7 : pas de flèche orange par-dessus la bulle').toBe(false);
     await capture(page, 'classe-7-1180-sombre');
     await page.click('#btnVerrouillerSaisiePresences');
 
@@ -318,6 +332,8 @@ test('de « Découvrir » à sa propre classe : « Commencer avec ma classe », 
     await bulle(page).getByRole('button', { name: 'Terminer' }).click();
 
     await expect(bulle(page)).toHaveCount(0);
+    // Témoin : hors parcours, la même flèche s'affiche (elle n'a pas été marquée vue pendant le parcours).
+    expect(await flecheDesPresencesVisible(page), 'hors parcours, la flèche revient').toBe(true);
     expect(await page.evaluate(() => Assistance.etatDe('classe').etat)).toBe('fait');
     await expect(rang(page)).toHaveText('');
     await ouvrirPanneau(page);
