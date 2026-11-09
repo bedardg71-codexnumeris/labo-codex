@@ -162,6 +162,10 @@
         // productionId }. Des identifiants, rien des données de la personne.
         parcoursRecevoir: {},
 
+        // Le repère du cinquième parcours, « Monter ton cours » (js/parcours-cours.js, 9 nov. 2026) :
+        // { leconId } — la leçon que l'étape 3 a vue naître, pour « Reprendre ». Un identifiant, rien de la carte.
+        parcoursMonter: {},
+
         // Export du plan — niveau « Personnalisé » (#431, 8 août 2026).
         // ⚠ REMPLACÉE par exportGabarits (#416 lot H, 12 août 2026). Elle
         // subsiste ici le temps que la migration la lise ; elle est effacée

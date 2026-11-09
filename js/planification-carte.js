@@ -1929,7 +1929,7 @@ var GUIDE_PAGES = [
         id: 'idees-maitresses',   // #1172 : l'étape de la chaîne qui mène ici (`etapesChaineCarte`)
         titre: 'Ce que l\u2019étudiant doit retenir',
         contenu:
-            '<p class="planif-guide-pourquoi">Une idée maîtresse, c\u2019est l\u2019essentiel — ce qui restera quand l\u2019étudiant aura oublié les détails. Chaque compétence se décline en une ou plusieurs idées maîtresses.</p>' +
+            '<p class="planif-guide-pourquoi">Une idée maîtresse, c\u2019est l\u2019essentiel : ce qui restera quand l\u2019étudiant·e aura oublié les détails. Chaque compétence se décline en une ou plusieurs idées maîtresses.</p>' +
             '<ol>' +
                 '<li>Glisse une <span class="planif-guide-type" style="background:var(--planif-couleur-idee-maitresse)"></span> <strong>Idée maîtresse</strong> sur le canevas.</li>' +
                 '<li>Relie-la à sa compétence en tirant un lien d\u2019un port à l\u2019autre. Le verbe <em>«\u00a0se décline en\u00a0»</em> s\u2019affiche automatiquement.</li>' +
@@ -1958,7 +1958,7 @@ var GUIDE_PAGES = [
         id: 'objectifs',   // #1172 : l'étape de la chaîne qui mène ici (`etapesChaineCarte`)
         titre: 'Ce que la leçon vise',
         contenu:
-            '<p class="planif-guide-pourquoi">L’objectif de leçon est la boussole : c’est lui qui dit ce que l’étudiant saura faire à la fin, et c’est par rapport à lui que se choisissent les connaissances, les activités et l’évaluation.</p>' +
+            '<p class="planif-guide-pourquoi">L’objectif de leçon est la boussole : c’est lui qui dit ce que l’étudiant·e saura faire à la fin, et c’est par rapport à lui que se choisissent les connaissances, les activités et l’évaluation.</p>' +
             '<ol>' +
                 '<li>Sur un bloc <span class="planif-guide-type" style="background:var(--planif-couleur-lecon)"></span> <strong>Leçon</strong>, clique le badge <strong>🎯</strong> de l’en-tête : il déplie la zone des objectifs. Grisé, il t’indique qu’aucun objectif n’est encore posé.</li>' +
                 '<li>Écris l’objectif. Le <strong>+</strong> en ajoute un autre, le <strong>−</strong> retire celui de la ligne — une leçon en porte souvent plusieurs.</li>' +
@@ -6076,8 +6076,10 @@ function objectifsLeconHTML(n) {
     if (objs.length === 0) {
         // Liste vide : une ligne à remplir, sans commandes — il n'y a encore
         // rien à retirer, ni après quoi insérer, ni quoi réordonner.
+        // `data-premiere` : cinquième parcours (question 13, 9 nov. 2026) — la ligne devient un objectif à la frappe ;
+        // au départ du champ, la carte se reconstruit pour poser sa pastille (voir le `blur` d'`attacherEvenements`).
         html += '<div class="planif-noeud-objectif-ligne">' +
-                '<div class="planif-noeud-objectif" contenteditable="true" data-obj-rang="0"' +
+                '<div class="planif-noeud-objectif" contenteditable="true" data-obj-rang="0" data-premiere="1"' +
                 ' data-placeholder="Sera en mesure de…"></div>' +
                 '</div>';
         return html + '</div>';
@@ -7774,7 +7776,11 @@ function attacherEvenements(el, donnees) {
                 var abandonAccueil = !!ligne.dataset.accueil && ligne.textContent.trim() === '';
                 if (abandonAccueil) _ajoutObjectif = null;
                 appliquerObjectifs(donnees, lireLignes());
-                if (abandonAccueil || objectifsDeLecon(donnees).length !== avant) {
+                // Question 13 (Cowork, 9 nov. 2026, mesuré par la session H) : le PREMIER objectif est compté à la frappe ;
+                // au départ du champ, le nombre n'avait pas bougé et rien ne se reconstruisait : la pastille « ! » ne
+                // paraissait qu'avec Entrée, ou à la reconstruction suivante. La ligne devenue objectif la fait paraître.
+                var devenueObjectif = !!ligne.dataset.premiere && ligne.textContent.trim() !== '';
+                if (abandonAccueil || devenueObjectif || objectifsDeLecon(donnees).length !== avant) {
                     reconstruireDOM();
                     mettreAJourTousLesBadges();
                 }

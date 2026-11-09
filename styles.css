@@ -24726,6 +24726,18 @@ body.planif-plein-ecran-actif #planif-guide-panel {
 .planif-noeud-port.planif-port-bas { bottom: -7px; left: 50%; margin-left: -6px; }
 .planif-noeud-port.planif-port-haut { top: -7px; left: 50%; margin-left: -6px; }
 
+/* Cinquième parcours (question 10, Cowork, 9 nov. 2026 ; mesuré par la session H : ±6 px utiles au doigt, quand le
+   projet exige 44 px). Au toucher, chaque cercle d'attache reçoit une zone sensible de 44 px, TOURNÉE VERS L'EXTÉRIEUR
+   du bloc : elle ne couvre ni le titre ni les sélecteurs de l'en-tête. Le dessin ne change pas (pseudo-élément
+   transparent ; le toucher qui y tombe vise le cercle). Même traitement pour la poignée ⠿ (plus bas). */
+@media (pointer: coarse) {
+    .planif-noeud-port::before { content: ""; position: absolute; width: 44px; height: 44px; background: transparent; }
+    .planif-noeud-port.planif-port-droite::before { left: 0; top: -16px; }
+    .planif-noeud-port.planif-port-gauche::before { right: 0; top: -16px; }
+    .planif-noeud-port.planif-port-bas::before { top: 0; left: -16px; }
+    .planif-noeud-port.planif-port-haut::before { bottom: 0; left: -16px; }
+}
+
 /* === PANNEAU LATÉRAL === */
 #planif-panneau {
     position: absolute;
