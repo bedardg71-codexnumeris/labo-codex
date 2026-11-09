@@ -345,12 +345,15 @@ la règle depuis la nuit.
   1/1 ; Dario (papier, pas évalué) reste à 0/1 ; marqué plagiat, Bruno retombe à 0/1. **Ce que ça change de plus
   qu'ailleurs** : le travail étant au dénominateur avant toute évaluation, la copie importée y compte dès sa réception,
   sans attendre une première évaluation du groupe. **Le sens de C ne change pas** (des remises sur des travaux
-  assignés) ; seul ce qui compte comme remise suit ta règle. **Étendu**, pour qu'une pratique par standards dise la même
-  chose qu'elle soit dans ta bibliothèque ou non.
+  assignés) ; seul ce qui compte comme remise suit ta règle. **Étendu**, pour que ce qui compte comme une remise soit le
+  même dans une pratique par standards, qu'elle soit dans ta bibliothèque ou non (ce qui forme le dénominateur, lui,
+  reste différent, comme avant : avant toute évaluation d'un travail, la configurable ne calcule rien, les standards
+  codés en dur comptent déjà).
 - **Les spécifications codées en dur** (`pratique-pan-specifications.js`). Leur C n'est pas une part de remises : c'est
   la part des travaux **acceptables** du palier le plus haut, comptés sur les évaluations de l'élève. Une copie importée
   n'y est ni acceptable ni non acceptable tant qu'elle n'est pas jugée : y étendre la règle changerait le sens de C
-  (d'« acceptables » à « remis »). **Non étendu** ; un essai le garde (elles ne lisent pas les copies importées). Les
+  (d'« acceptables » à « remis »). **Non étendu** ; un essai le garde (Bruno, un travail non acceptable et deux copies
+  importées, reste à 0/2 ; renforcé après la relecture, 11.6). Les
   captures du Suivi, elles, comptent des remises dans toutes les familles (déjà avant ce lot) : avec une telle pratique,
   le graphique suit ta règle, et la carte Complétion du profil continue de compter des travaux acceptables.
 
@@ -367,7 +370,10 @@ la règle depuis la nuit.
 - Deux sentinelles de texte suivent le site des standards (il passe par la règle par production) :
   `sentinelle-audit-aide-15-oct-ce-que-fait-l-application`, `sentinelle-lot-A-737-741-718-738-les-memes-copies-partout`
   (D3). Leur intention ne change pas : le calcul lit toujours `evaluationCompteCommeRemise` par la règle du registre.
-- **Vitest** (depuis `tests/`) : 893 fichiers, **10 860 essais, tous verts**.
+- **Vitest** (depuis `tests/`) : 893 fichiers, 10 860 essais. **Correction après la relecture** : à `54223bb3`, un
+  rouge, la sentinelle anti-cache (j'avais posé des jetons du 9 nov. ; le build de la branche est du 8, et
+  `release.mjs` est exclu cette nuit). Réparé par `dd4fe697` (jetons du 8, lettres jamais servies), vu rouge par le
+  crochet de push avant : **10 860 sur 10 860** à `dd4fe697`, push accepté par le crochet.
 - **Playwright, Chromium**, les 13 specs qui touchent la complétion (liste en section 3) : **32 verts sur 33**. Le rouge,
   `registre-longitudinal-915` R5 (une tuile à 768 px), est le même que la nuit, rouge aussi sur `main` : sans rapport.
 - **La démo ne bouge pas** : son pack ne contient aucune copie importée (`fichiersTravaux` absent de
@@ -379,6 +385,33 @@ la règle depuis la nuit.
 Comme en section 6 : la source seulement. Rien n'est écrit dans tes données. Le C du jour se recalcule au prochain
 calcul, dans les quatre familles ; les captures déjà enregistrées gardent leur C jusqu'à « Recalculer les captures ».
 
-### 11.5 Relecture par un agent neuf
+### 11.5 Le coût
 
-Voir 11.6 (ajoutée après la relecture).
+« Recalculer les captures » relit la liste des copies importées pour chaque élève et chaque séance : depuis le 9 nov.,
+dans les quatre familles (la nuit : en sommative seulement), donc aussi pour une pratique par standards. La mesure de la
+nuit (section 9 : environ 0,5 ms par lecture de 300 fiches sous Node, une demi-seconde pour 900 appels) vaut donc
+maintenant pour toutes les familles. **Non mesuré sur l'iPad** : à mesurer sur le Mac, avec ton groupe, au prochain
+« Recalculer les captures ». Le C du jour, lui, lit la liste une fois par élève.
+
+### 11.6 Relecture par un agent neuf
+
+Un sous-agent qui n'avait vu ni mon raisonnement ni ce rapport a reçu la décision et le diff `358052c..54223bb3`.
+Verdict, en une ligne : **« Bon avec réserves »** (le diff applique la décision ; aucun site de C oublié : six calculs
+relevés, dont les spécifications codées en dur, exclues exprès ; les deux C de `liste-evaluations.js` ne sont lus par
+personne). Il a fait quatre break-tests : trois rouges, comme annoncé ; le quatrième vert (réserve 2).
+
+Ce que chaque réserve est devenue (toutes portaient sur mon propre lot : finies, pas inscrites) :
+1. **« 10 860 tous verts » faux à `54223bb3`** (la sentinelle anti-cache) : vrai ; réparé par `dd4fe697`, la phrase de
+   11.3 est corrigée.
+2. **L'essai des spécifications codées en dur ne gardait que par le texte** (sans évaluation, le calcul rendait null
+   avant toute lecture) : vrai. L'essai prend maintenant un travail non acceptable et deux copies importées (0/2), avec
+   son témoin (1/2) ; le break-test de l'agent (les copies comptées comme acceptables sous un nom de clé déguisé) le
+   rougit.
+3. **Deux commentaires disaient autre chose que le code** : celui du registre (« PAS les spécifications codées en dur »,
+   alors que les captures leur appliquent la règle) et `snapshots.js` (« en sommative ») : réécrits.
+4. **Le coût de « Recalculer les captures » n'était plus revu** : 11.5.
+5. **Le motif de 11.2 en disait trop** (« dise la même chose ») : réécrit ; le dénominateur reste différent.
+
+Hors lot, vu par l'agent, issue 3 (commenter et oublier, sans effet observable) : `fichiersTravaux` n'est pas une clé
+que le Comparateur simule ; sur un corpus fictif, il lirait les vraies copies importées, mais ses DA fictifs ne
+correspondent jamais à un vrai.

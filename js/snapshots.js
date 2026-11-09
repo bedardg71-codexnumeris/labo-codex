@@ -779,7 +779,7 @@ async function capturerSnapshotSeance(dateSeance, evaluationsCacheParam = null, 
                     dasRemis.add(String(e.etudiantDA));
                 }
             });
-            _ajouterRemisesParReception(dasDuGroupe, dasRemis, dernierTravail.id, evaluationsCache);   // 8 nov. 2026, en sommative
+            _ajouterRemisesParReception(dasDuGroupe, dasRemis, dernierTravail.id, evaluationsCache);   // 8 et 9 nov. 2026, les quatre familles
             cGlobal = Math.round((dasRemis.size / nbEtudiants) * 100);
         }
 
