@@ -158,7 +158,7 @@ describe('Le guide de la carte, aligné sur les bulles (consigne, 10 h 29 et 10 
 // Break-tests (9 nov.) : `leconDatee` remplacé par `texte` dans `leconReliee` → ROUGE (3) ; `productionId` retiré
 // d'`evaluationAlignee` → ROUGE (6) ; la garde `enSaisie` retirée → ROUGE (saisie). Rétablis.
 describe('« Monter ton cours » : ce qui fait avancer chaque étape', () => {
-    function carte({ noeuds = [], liens = [], pastille = 'avant', saisie = false, prods = [{ id: 'PROD_un' }] } = {}) {
+    function carte({ noeuds = [], liens = [], pastille = 'avant', saisie = false, prods = [{ id: 'PROD_un' }], avant } = {}) {
         const N = new Map(noeuds.map((n) => [n.id, { enfants: [], metadata: {}, ...n }]));
         const L = new Map(liens.map((l, k) => [String(k), l]));
         const actif = saisie ? { isContentEditable: true, tagName: 'DIV', closest: (s) => (s === '#conception-carte' ? {} : null) } : null;
@@ -176,7 +176,8 @@ describe('« Monter ton cours » : ce qui fait avancer chaque étape', () => {
             }
         };
         const document = { getElementById: () => null, querySelector: () => null, querySelectorAll: () => [], body: { appendChild() {} }, activeElement: actif };
-        chargerScript('js/parcours-cours.js', { document, obtenirDonneesSelonMode: () => prods }, win);
+        const ctx = avant ? { noeudsAvant: avant } : {};
+        chargerScript('js/parcours-cours.js', { document, obtenirDonneesSelonMode: () => prods, obtenirPreference: () => ctx }, win);
         return win.ParcoursCours;
     }
     const COMP = { id: 'C', type: 'competence', titre: 'Analyser' };
@@ -212,6 +213,17 @@ describe('« Monter ton cours » : ce qui fait avancer chaque étape', () => {
         expect(atteint(carte({ noeuds: [COMP] }), 1)).toBe(true);
         expect(atteint(carte({ noeuds: [COMP], saisie: true }), 1)).toBe(false);
         expect(atteint(carte({ noeuds: [COMP, IDEE], liens: [DECLINE], saisie: true }), 2)).toBe(false);
+    });
+
+    it('seul ce qui est créé après « Commencer » ou « Refaire » fait avancer une étape (16 h 03)', () => {
+        // Une compétence et son idée déjà posées : ni l'étape 1 ni l'étape 2 n'avancent.
+        expect(atteint(carte({ noeuds: [COMP], avant: ['C'] }), 1)).toBe(false);
+        expect(atteint(carte({ noeuds: [COMP, IDEE], liens: [DECLINE], avant: ['C', 'I'] }), 2)).toBe(false);
+        // Une compétence neuve, à côté de l'ancienne : l'étape 1 avance.
+        expect(atteint(carte({ noeuds: [COMP, { ...COMP, id: 'C2' }], avant: ['C'] }), 1)).toBe(true);
+        // Une évaluation déjà posée, alignée : l'étape 6 n'avance pas.
+        const ev = { id: 'E', type: 'evaluation', titre: 'Journal', parent: 'L', metadata: { productionId: 'PROD_un' } };
+        expect(atteint(carte({ noeuds: [LECON({ semaine: 2, rangSeance: 1 }), ev], avant: ['E'] }), 6)).toBe(false);
     });
 
     it('la condition : une production retirée de la bibliothèque ne compte pas (le menu de l’Inspecteur ne l’offre pas)', () => {

@@ -4,7 +4,8 @@ Consigne : `plans de travail/CONSIGNE-LOT-2026-11-08-parcours-5-monter-ton-cours
 de Grégoire du 9 nov., 10 h 01 à 10 h 04, en Cowork (corrections des étapes 2, 3, 5 et 6 ; questions 10, 13 et 16),
 relayées à une session dans le nuage : ni WebKit ni tes données ici. Branche `lot/parcours-5-monter-ton-cours`, partie
 de `lot/parcours-4-recevoir-et-rendre` (qui porte les parcours 1 à 4) ; les retouches du troisième parcours décidées à
-13 h 37 y sont fusionnées. Non fusionnée, non publiée, rien au changelog.
+13 h 37 et 15 h 55 y sont fusionnées. Décisions du 9 nov., 16 h 03, en Cowork, sur les cinq questions de ce rapport
+(captures approuvées par Grégoire) : section « Ce qui attend Grégoire ». Non fusionnée, non publiée, rien au changelog.
 
 ## En tête
 
@@ -41,28 +42,46 @@ de `lot/parcours-4-recevoir-et-rendre` (qui porte les parcours 1 à 4) ; les ret
 
 ### Ce qui attend Grégoire (une question par ligne, avec ma recommandation)
 
+**Les cinq sont tranchées** (9 nov., 16 h 03, en Cowork) ; chaque question garde son texte, suivi de la décision et de ce
+qui en est fait.
+
 1. **Les blocs neufs naissent l'un sur l'autre.** Un toucher sur la palette pose le bloc au centre du canevas, à ±50 px
    près, au hasard (`planification-carte.js:8917-8921`). La compétence, l'idée maîtresse et la leçon se recouvrent
    donc ; pour tirer un trait de l'une à l'autre, il faut d'abord les écarter, et aucune bulle ne le dit (le banc les
    écarte par leur poignée). *Recommandation :* que la carte pose un bloc neuf à côté du dernier, plutôt que sur lui (un
    lot de la carte, pas du parcours). *À défaut,* une phrase à l'étape 2, après « puis écris-la. » : « Écarte-la de ta
-   compétence en la glissant par sa poignée ⠿. »
+   compétence en la glissant par sa poignée ⠿. » → **Corrigé à la source** (décidé par Cowork : cela cassait le
+   parcours livré ; aucune phrase ajoutée). Un bloc neuf posé d'un toucher sur la palette se place à côté du dernier
+   bloc posé (à droite, sinon dessous, à gauche, au-dessus), sans recouvrir aucun bloc, dans la partie visible du
+   canevas (entre les palettes « Nœuds » et « Planificateur ») ; sans place à côté, au plus près ; sans dernier bloc,
+   au centre de cette partie (`placePourBlocNeuf`, `js/planification-carte.js`). Le glisser depuis la palette pose
+   toujours le bloc où on le lâche. Essai : la compétence, l'idée maîtresse et la leçon posées à la suite ne se
+   recouvrent pas, tiennent dans la partie visible, et les deux traits se tirent sans rien déplacer. Break-test : le
+   placement d'avant remis → rouge. *À savoir :* à l'étape 3, tant que la leçon n'est pas datée, la bulle couvre la
+   compétence et l'idée maîtresse posées au-dessus (capture `p5-3-entete`) ; datée, elle laisse libre le cercle de
+   l'idée maîtresse pour le trait (essayé).
 2. **Sans voile.** La consigne dit « la palette « Nœuds » éclairée » aux étapes 1 et 2. Le moteur se sert des mêmes
    zones pour percer le voile et pour placer la bulle : un voile percé sur la seule palette rendrait intouchable le
    canevas, là où le bloc naît et où l'on écrit. Toutes les étapes sont donc sans voile ; la palette est désignée par
-   son contour. *Recommandation :* garder ainsi.
+   son contour. *Recommandation :* garder ainsi. → **Gardé.**
 3. **L'Inspecteur sous le « Planificateur », hors du parcours.** Corrigé pour le parcours seulement (section 4) ;
    ailleurs, à 1180 px, la palette « Planificateur », ouverte par défaut, couvre toujours les cases de l'Inspecteur.
-   *Recommandation :* inscrire (l'Inspecteur devant les palettes, toujours), constat de la session H.
+   *Recommandation :* inscrire (l'Inspecteur devant les palettes, toujours), constat de la session H. → **Dit ici,
+   sans entrée au BACKLOG** (décision de 16 h 03).
 4. **Les zones de 44 px suivent le zoom de la carte**, comme le dessin des cercles : à 50 %, la portée vers l'extérieur
    tombe de 39 à 19 px (mesuré par la relecture neuve). *Recommandation :* garder ainsi pour la cohorte (la carte
    s'ouvre à 100 %) ; une zone qui ne suivrait pas le zoom demande une variable de zoom que la carte n'expose pas (un
-   lot de la carte).
+   lot de la carte). → **Gardé.**
 5. **« Refaire » sur une carte déjà remplie** : les étapes 1 à 6, déjà atteintes, passent d'elles-mêmes en moins d'une
    seconde, jusqu'à la 7 (mesuré). C'est le principe (« l'étape avance quand l'état est atteint »), mais on ne peut pas
    rejouer le parcours sur la même carte. *Recommandation :* garder ainsi (le parcours montre ce qui manque à ta carte ;
    pour le rejouer, une carte neuve) ; *à défaut,* ne compter que ce qui naît après « Refaire », comme le troisième
-   parcours.
+   parcours. → **Tranché : comme le troisième parcours.** À « Commencer » et à « Refaire », le parcours retient les
+   blocs déjà posés sur la carte active (lus dans le stockage : la carte n'a pas à être ouverte) ; seuls les blocs créés
+   ensuite font avancer une étape (`neuf`, `js/parcours-cours.js` ; le repère `noeudsAvant`, préférence
+   `parcoursMonter`). « Reprendre » garde le repère. Essais : en Vitest, une compétence, une idée maîtresse ou une
+   évaluation déjà posées n'avancent pas leur étape, une neuve si ; dans le banc, « Refaire » sur la carte remplie
+   reste à l'étape 1. Break-test : le filtre retiré → rouge (les deux).
 
 ### Ce que je n'ai pas pu vérifier
 
@@ -170,9 +189,9 @@ par le banc :
 
 ## 5. Les essais
 
-- **Vitest** : `tests/unit/sentinelle-parcours-cours-2026-11-09.test.js`, 21 essais (16, puis 5 après la relecture :
+- **Vitest** : `tests/unit/sentinelle-parcours-cours-2026-11-09.test.js`, 22 essais (16, puis 5 après la relecture :
   ce qui fait avancer les étapes 2, 3 et 6 sur une carte simulée, la saisie qui retient toute étape, la production
-  retirée de la bibliothèque) : chaque bulle lue à l'exécution
+  retirée de la bibliothèque ; puis 1 après 16 h 03 : seuls les blocs neufs comptent) : chaque bulle lue à l'exécution
   et comparée à la consigne avec tes corrections ; chaque correction trouve sa phrase dans la consigne ; la variante ⚠ ;
   « Plus tard », « Terminer », la bulle au centre ; le titre, la ligne, la phrase du refus, et une production qui la
   lève ; les deux phrases du guide, la nouvelle présente, l'ancienne absente, et les bulles 2 et 4 qui les reprennent.
@@ -194,18 +213,23 @@ par le banc :
     réels de la sonde (une marque sur le voile que chaque passage remplace), pas après un délai.
   - Sans production : le refus ; les deux pages du guide ouvertes par la frise ; le panneau à 390 px.
   - Au doigt : la zone de 44 px des quatre cercles, et le gain de la poignée vers l'extérieur (question 10).
-  - **3 sur 3 verts**, et l'essai des sept étapes **5 fois de suite** sans raté (les blocs neufs naissent au hasard),
-    puis **3 fois de suite** après les correctifs de la relecture.
+  - **3 sur 3 verts**, et l'essai des sept étapes **5 fois de suite** sans raté (les blocs neufs naissaient au hasard),
+    puis **3 fois de suite** après les correctifs de la relecture, et **3 fois de suite** après ceux de 16 h 03 (les
+    blocs à côté du dernier, sans rien déplacer ; « Refaire » qui reste à l'étape 1).
   - Break-tests, chacun **rouge** puis rétabli : la question 13 (la reconstruction au départ du champ retirée) ; la
     variante (son passage retiré) ; le cadrage à la reprise ; l'Inspecteur devant ; la bulle sur la leçon entière ; la
     règle des 44 px ; après la relecture, la garde de saisie, la veille de la classe et le gain de la poignée.
-- **Vitest entier** (depuis `tests/`) : 900 fichiers, **11 010 essais verts** ; le hook pré-push l'a relancé à chaque
+- **Vitest entier** (depuis `tests/`) : 900 fichiers, **11 011 essais verts** ; le hook pré-push l'a relancé à chaque
   poussée. La sentinelle `phase-ee-et-prise` lit la première règle `.planif-noeud-prise::after` du fichier : la règle
   du doigt est posée après celle de base, pour ne pas la masquer.
 - Les bancs voisins, rejoués sur cette branche après la fusion des retouches du troisième (`parcours-3-evaluer`,
   `parcours-4-recevoir-et-rendre`, `parcours-1-et-2`, `parcours-2-ma-classe`) : **13 sur 14**. Le rouge (« panneau :
   titre, phrase… », largeur 429,99994 px au lieu de 430) l'est aussi sans ces lots : l'arrondi de Chromium déjà dit au
   rapport du troisième parcours.
+- **Les bancs de la carte** (`planif-*`, `chaine-carte-1172`, `bibliotheque-deux-colonnes-1157`), Chromium, après le
+  correctif du placement : **93 sur 96**. Les trois rouges le sont aussi **sans** ce correctif (mesuré en le retirant) :
+  deux attendent « ⌘ » comme sur un Mac (`planif-menu-vue`, « ⌘A », « Annuler (⌘Z) » ; ici « Ctrl ») et un, la
+  corbeille qui rougit sous le bloc glissé (`planif-corbeille-fixe-1070`). Sans rapport avec ce lot ; à juger au Mac.
 
 ## 6. Hypothèses que j'ai prises seul (à corriger en dix secondes si elles sont fausses)
 
@@ -240,8 +264,6 @@ Les deux que la consigne demande d'inscrire, sans les faire :
   compétences », alors qu'un cours en vise en général une seule. Texte à soumettre à Grégoire.
 
 Vus en chemin (issue proposée : inscrire et continuer ; aucun n'a de symptôme que tu as vécu, à toi de juger) :
-- Les blocs neufs naissent l'un sur l'autre (question 1).
-- La palette « Planificateur » couvre l'Inspecteur à 1180 px, hors du parcours (question 3 ; session H).
 - La frise rogne son début : « Compétence » n'est pas entier à 1180 px (session H ; visible sur chaque capture).
 - La garde du double toucher vise `.planif-port` et `.planif-poignee`, des classes qui n'existent pas (session H).
 - La pastille « ! » ne paraît au départ du champ que pour le premier objectif d'une leçon (question 13, décision

@@ -19,8 +19,8 @@ import { attendreApplication } from './harness/attendre-application.js';
 // ⚠ Les gestes sur la carte se font à la souris, aux coordonnées : `click`, `dblclick` et `check` de Playwright font
 // défiler le conteneur de la carte (`overflow: hidden`) pour atteindre leur cible (mesuré : 4 886 × 3 000 px après un
 // `dblclick` sur une poignée), et la carte ne lit plus ses coordonnées. Une personne ne fait pas ce défilement.
-// Les blocs neufs se posent au centre du canevas, à ±50 px près, au hasard : le banc les écarte par leur poignée,
-// comme une personne le ferait.
+// Les blocs neufs se posent à côté du dernier bloc posé, sans le recouvrir, dans la partie visible du canevas (décision du
+// 9 nov., 16 h 03, corrigée à la source) : le banc ne les déplace pas, et tire ses traits tels quels.
 // Les captures pour Grégoire : CAPTURES_PARCOURS=<dossier>.
 // ⚠ Cloud du 9 nov. : Chromium seulement (playwright.chromium.config.js) ; le verdict WebKit se prend sur le Mac.
 
@@ -126,22 +126,40 @@ async function creer(page, type, titre, { lent = false } = {}) {
     return id;
 }
 
-/** Le bloc écarté par sa poignée ⠿, son coin en (x, y). */
-async function deplacer(page, id, x, y) {
-    const b = await rect(page, noeud(id));
-    const g = await rect(page, prise(id));
-    await glisser(page, g, { x: g.x + (x - b.l), y: g.y + (y - b.t) });
+/** Le cercle de la source tourné vers la cible (les blocs neufs se posent à côté du dernier : à droite ou dessous). */
+async function coteVers(page, sourceId, cibleId) {
+    const a = await rect(page, noeud(sourceId)), b = await rect(page, noeud(cibleId));
+    const dx = b.x - a.x, dy = b.y - a.y;
+    return Math.abs(dx) > Math.abs(dy) ? (dx > 0 ? 'droite' : 'gauche') : (dy > 0 ? 'bas' : 'haut');
 }
 
-/** Le bloc écarté sous un autre, de `ecart` px : les blocs neufs naissent l'un sur l'autre, au centre. */
-async function poserSous(page, id, autre, ecart) {
-    const a = await rect(page, noeud(autre));
-    await deplacer(page, id, a.l - 10, a.t + a.h + ecart);
-}
-
-/** Un trait tiré d'un petit cercle de la source jusqu'au titre de la cible. */
-async function relier(page, sourceId, dir, cibleId) {
+/** Un trait tiré du cercle de la source tourné vers la cible, jusqu'à son titre ; rien n'est déplacé avant. */
+async function relier(page, sourceId, cibleId) {
+    const dir = await coteVers(page, sourceId, cibleId);
     await glisser(page, await rect(page, port(sourceId, dir)), await rect(page, `${noeud(cibleId)} .planif-noeud-titre`));
+}
+
+/**
+ * Les blocs posés depuis la palette ne se recouvrent pas et tiennent dans la partie visible du canevas, entre les
+ * palettes « Nœuds » et « Planificateur » (décision du 9 nov., 16 h 03 : corriger la source).
+ */
+async function blocsBienPoses(page, ids) {
+    const r = await page.evaluate((liste) => {
+        const z = document.getElementById('planif-zone-travail').getBoundingClientRect();
+        let g = Math.max(z.left, 0), d = Math.min(z.right, innerWidth);
+        for (const id of ['planif-palette', 'planif-palette-nav']) {
+            const p = document.getElementById(id);
+            if (!p || !p.offsetParent) continue;
+            const q = p.getBoundingClientRect();
+            if (q.right <= (g + d) / 2) g = Math.max(g, q.right); else if (q.left >= (g + d) / 2) d = Math.min(d, q.left);
+        }
+        const h = Math.max(z.top, 0), b = Math.min(z.bottom, innerHeight);
+        const rs = liste.map((id) => document.getElementById(id).getBoundingClientRect());
+        const dedans = rs.every((x) => x.left >= g - 1 && x.right <= d + 1 && x.top >= h - 1 && x.bottom <= b + 1);
+        const recouvrements = rs.flatMap((a, i) => rs.slice(i + 1).filter((c) => a.left < c.right && c.left < a.right && a.top < c.bottom && c.top < a.bottom)).length;
+        return { dedans, recouvrements };
+    }, ids);
+    expect(r, 'les blocs neufs : dans la partie visible, sans se recouvrir').toEqual({ dedans: true, recouvrements: 0 });
 }
 
 /** La bulle se replace à chaque passage de la sonde (120 ms) : un bloc neuf est dégagé un instant après sa naissance. */
@@ -214,7 +232,6 @@ test('« Monter ton cours » : les sept étapes, la variante ⚠, « Plus tard �
     await capture(page, DOSSIER, `p5-1-${cap}`);
     const comp = await creer(page, 'competence', 'Analyser des textes littéraires', { lent: true });
     expect(await page.evaluate((s) => getComputedStyle(document.querySelector(s), '::before').content, port(comp, 'droite'))).toBe('none');
-    await deplacer(page, comp, 290, 130);
 
     // 2. L'idée maîtresse, puis le trait depuis un cercle de la compétence (« se décline en »).
     await n(page, 2, 'Ton idée maîtresse', { focus: false });
@@ -226,10 +243,10 @@ test('« Monter ton cours » : les sept étapes, la variante ⚠, « Plus tard �
     await contourSur(page, port(comp, 'droite'), 'parcours-contour-extra-0');
     await contourSur(page, port(comp, 'bas'), 'parcours-contour-extra-2');
     await capture(page, DOSSIER, `p5-2-cercles-${cap}`);
-    await poserSous(page, idee, comp, 70);
+    await blocsBienPoses(page, [comp, idee]);   // à côté de la compétence, sans rien déplacer
     await deuxSondes(page);
     expect(await rangActuel(page)).toBe(1);   // pas de lien encore
-    await relier(page, comp, 'bas', idee);
+    await relier(page, comp, idee);
 
     // 3. La leçon : son titre, sa semaine, sa séance, puis le trait depuis l'idée maîtresse (« se concrétise dans »).
     await n(page, 3, 'Ta leçon', { focus: false });
@@ -238,19 +255,20 @@ test('« Monter ton cours » : les sept étapes, la variante ⚠, « Plus tard �
     await capture(page, DOSSIER, `p5-3-${cap}`);
     const lecon = await creer(page, 'lecon', 'Lire un incipit');
     await degage(page, prise(lecon));
-    await poserSous(page, lecon, idee, 70);
+    await blocsBienPoses(page, [comp, idee, lecon]);
     await contourSur(page, `${noeud(lecon)} .planif-noeud-semaine`, 'parcours-contour-extra-0');
     await contourSur(page, `${noeud(lecon)} .planif-noeud-seance`, 'parcours-contour-extra-1');
     await capture(page, DOSSIER, `p5-3-entete-${cap}`);
     await bulleNeCouvrePas(page, `${noeud(lecon)} .planif-noeud-seance`, 'étape 3, l’en-tête de la leçon');
     await choisirDansEntete(page, `${noeud(lecon)} .planif-noeud-semaine`, '2');
     await choisirDansEntete(page, `${noeud(lecon)} .planif-noeud-seance`, '1');
-    await contourSur(page, port(idee, 'bas'), 'parcours-contour-extra-2');
+    const versLaLecon = await coteVers(page, idee, lecon);
+    await contourSur(page, port(idee, versLaLecon), 'parcours-contour-extra-' + ['droite', 'gauche', 'bas', 'haut'].indexOf(versLaLecon));
     await deuxSondes(page);
     expect(await rangActuel(page)).toBe(2);   // datée, pas encore reliée
-    await bulleNeCouvrePas(page, port(idee, 'bas'), 'étape 3, le cercle de l’idée maîtresse');
+    await bulleNeCouvrePas(page, port(idee, versLaLecon), 'étape 3, le cercle de l’idée maîtresse');
     await bulleNeCouvrePas(page, `${noeud(lecon)} .planif-noeud-titre`, 'étape 3, le titre de la leçon');
-    await relier(page, idee, 'bas', lecon);
+    await relier(page, idee, lecon);
 
     // 4. L'objectif : le badge 🎯 ; « Plus tard », un rechargement, « Reprendre ».
     await n(page, 4, 'Ton objectif', { focus: false });
@@ -352,10 +370,14 @@ test('« Monter ton cours » : les sept étapes, la variante ⚠, « Plus tard �
     await expect(item(page).locator('.assistance-parcours-bouton')).toHaveText('Refaire');
     await capture(page, DOSSIER, `panneau-${cap}-fait`);
 
-    // « Refaire » sur la carte remplie : les étapes déjà faites passent d'elles-mêmes, jusqu'à la 7. Un autre parcours
-    // lancé ferme celui-ci sans « Plus tard » : l'Inspecteur ne reste pas devant (relecture neuve du 9 nov.).
+    // « Refaire » sur la carte remplie : seul ce qui est créé après compte (décision du 9 nov., 16 h 03) ; la compétence
+    // déjà posée ne fait pas avancer l'étape 1. Un autre parcours lancé ferme celui-ci sans « Plus tard » : l'Inspecteur
+    // ne reste pas devant (relecture neuve du 9 nov.).
     await item(page).locator('.assistance-parcours-bouton').click();
-    await n(page, 7, 'Raffiner, si tu veux', { focus: false });
+    await n(page, 1, 'Ta compétence', { focus: false });
+    await deuxSondes(page);
+    expect(await rangActuel(page)).toBe(0);
+    await contourSur(page, '#planif-palette .planif-palette-btn[data-type="competence"]');
     expect(await page.evaluate(() => document.body.classList.contains('parcours-inspecteur-devant'))).toBe(true);
     await page.evaluate(() => Assistance.parcours().find((p) => p.id === 'decouvrir').lancer(0));
     await expect.poll(() => page.evaluate(() => document.body.classList.contains('parcours-inspecteur-devant'))).toBe(false);

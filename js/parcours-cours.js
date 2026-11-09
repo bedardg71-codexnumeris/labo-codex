@@ -90,7 +90,25 @@
 
     function texte(n) { return String((n && n.titre) || '').trim(); }
 
-    function duType(type) { return noeuds().filter(function (n) { return n && n.type === type; }); }
+    /**
+     * Seul ce qui est créé après « Commencer » (ou « Refaire ») fait avancer une étape, comme au troisième parcours
+     * (décision de Cowork, 9 nov., 16 h 03 ; mesuré par la relecture neuve : sur une carte remplie, « Refaire » faisait
+     * défiler les six étapes en moins d'une seconde). Les blocs déjà posés sont retenus par leur identifiant.
+     */
+    function neuf(n) {
+        var avant = lireCtx().noeudsAvant;
+        return !Array.isArray(avant) || avant.indexOf(n.id) === -1;
+    }
+
+    function duType(type) { return noeuds().filter(function (n) { return n && n.type === type && neuf(n); }); }
+
+    /** Les blocs de la carte active, lus dans le stockage : la carte n'a pas à être ouverte au lancement. */
+    function idsDeLaCarteActive() {
+        var D = window.planificationDonnees;
+        var index = D && typeof D.getIndex === 'function' ? D.getIndex() : null;
+        var carte = index && index.active ? D.chargerCarte(index.active) : null;
+        return carte && Array.isArray(carte.noeuds) ? carte.noeuds.map(function (n) { return n && n.id; }).filter(Boolean) : [];
+    }
 
     function relie(sourceId, cibleId, type) {
         return liens().some(function (l) { return l && l.type === type && l.source === sourceId && l.cible === cibleId; });
@@ -124,7 +142,8 @@
     function laLecon() {
         var c = C();
         var id = lireCtx().leconId;
-        return (id && c && c.etat.noeuds.get(id)) || duType('lecon')[0] || null;
+        var l = id && c ? c.etat.noeuds.get(id) : null;
+        return (l && neuf(l) ? l : null) || duType('lecon')[0] || null;
     }
 
     function objectifs(lecon) {
@@ -133,7 +152,7 @@
 
     function enfantsDe(lecon) {
         var c = C();
-        return lecon ? (lecon.enfants || []).map(function (id) { return c.etat.noeuds.get(id); }).filter(Boolean) : [];
+        return lecon ? (lecon.enfants || []).map(function (id) { return c.etat.noeuds.get(id); }).filter(function (n) { return n && neuf(n); }) : [];
     }
 
     function blocQuiSert() {
@@ -463,7 +482,7 @@
         }
         // « Reprendre » relit la leçon retenue ; « Commencer » et « Refaire » repartent de la première étape.
         var reprise = window.Assistance.etatDe(ID).etat === 'en-cours';
-        if (!reprise) { depuis = 0; majCtx({ leconId: null }); }
+        if (!reprise) { depuis = 0; majCtx({ leconId: null, noeudsAvant: idsDeLaCarteActive() }); }
         window.Assistance.definirEtat(ID, 'en-cours', depuis);
         var lance = M().lancer(DEF, {
             depuis: depuis,

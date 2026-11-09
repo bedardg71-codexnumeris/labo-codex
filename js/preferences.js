@@ -164,7 +164,8 @@
         parcoursRecevoir: {},
 
         // Le repère du cinquième parcours, « Monter ton cours » (js/parcours-cours.js, 9 nov. 2026) :
-        // { leconId } — la leçon que l'étape 3 a vue naître, pour « Reprendre ». Un identifiant, rien de la carte.
+        // { leconId, noeudsAvant } — la leçon que l'étape 3 a vue naître, pour « Reprendre », et les blocs déjà posés à
+        // « Commencer » ou « Refaire », qui ne font pas avancer les étapes. Des identifiants, rien de la carte.
         parcoursMonter: {},
 
         // Export du plan — niveau « Personnalisé » (#431, 8 août 2026).
