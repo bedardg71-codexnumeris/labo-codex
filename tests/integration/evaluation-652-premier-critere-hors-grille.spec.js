@@ -109,7 +109,7 @@ for (const avecCartouche of [false, true]) {
         const etat = await ouvrir(page);
         // AVANT : niveaux null, « erreur: Erreur de chargement », pas d'avis.
         expect(etat).toEqual({ cartesRendues: ['eval_c1', 'eval_c2'], niveauC1: 'M', niveauC2: 'D', notifications: ['succes: Évaluation chargée - Tu peux maintenant la modifier'], chargementEnCours: false,
-            avis: 'Un critère évalué n\'est plus dans la grilleAncien critère (E)L\'évaluation garde ce qui a été enregistré. La note se recalcule sur la grille actuelle dès que tu modifies cette copie.',
+            avis: 'Un critère évalué n\'est plus dans la grilleAncien critère (E)L\'évaluation garde ce qui a été enregistré. La note se recalcule sur la grille actuelle dès que tu modifies cette évaluation.',
             criteresEnBase: ['c0:E', 'c1:M', 'c2:D'] });
         expect(erreurs.filter((m) => /Timeout|Impossible de charger/.test(m))).toEqual([]);
     });

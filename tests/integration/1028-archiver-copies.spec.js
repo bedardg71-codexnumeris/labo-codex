@@ -219,7 +219,7 @@ async function archiverCopiesParLeMenu(page, fichier) {
     await ouvrirClos(modale);
     await modale.locator('[data-param="biblio-menu-h2032"]').click();
     await expect(geste).toBeVisible();
-    await expect(geste).toHaveText('Archiver les copies…');
+    await expect(geste).toHaveText('Archiver les productions remises…');
     const boite = await geste.boundingBox();
     expect(boite.x).toBeGreaterThanOrEqual(0);
     expect(boite.x + boite.width).toBeLessThanOrEqual(IPAD_PORTRAIT.width);
@@ -256,14 +256,14 @@ test.describe('#1028 — « Archiver les copies » d\'un trimestre clos (mode fi
 
             // 2. Archiver les copies par le vrai menu ; la fenêtre ; le bilan.
             await archiverCopiesParLeMenu(page, fichier);
-            let f = await attendreFenetre(page, 'Archiver les copies de Hiver 2032 ?');
-            expect(f.message).toContain('3 copies quitteront l\'application, environ 193,0 Ko.\n');   // 15 oct. 2026 : les tailles se disent comme sur l'appareil (#993) — base 1000 hors Windows (Mac et runner Linux).
-            expect(f.message).toContain('Toutes les données de Hiver 2032 restent dans l\'application : résultats des étudiant·es et du groupe, grilles, rétroactions. Les annotations restent aussi, mais ne se voient qu\'avec leur copie.');
+            let f = await attendreFenetre(page, 'Archiver les productions remises de Hiver 2032 ?');
+            expect(f.message).toContain('3 productions quitteront l\'application, environ 193,0 Ko.\n');   // 15 oct. 2026 : les tailles se disent comme sur l'appareil (#993) — base 1000 hors Windows (Mac et runner Linux).
+            expect(f.message).toContain('Toutes les données de Hiver 2032 restent dans l\'application : résultats des étudiant·es et du groupe, grilles, rétroactions. Les annotations restent aussi, mais ne se voient qu\'avec leur production.');
             expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(IPAD_PORTRAIT.width);
             test.info().annotations.push({ type: 'fenêtre', description: f.message });
-            await f.fenetre.locator('.modal-actions button', { hasText: 'Archiver les copies' }).click();
-            f = await attendreFenetre(page, 'Les copies de Hiver 2032 sont aux archives');
-            expect(f.message).toContain('3 copies retirées. Ton prochain codex sera plus léger d\'environ 193,0 Ko.\n');
+            await f.fenetre.locator('.modal-actions button', { hasText: 'Archiver les productions remises' }).click();
+            f = await attendreFenetre(page, 'Les productions remises de Hiver 2032 sont aux archives');
+            expect(f.message).toContain('3 productions retirées. Ton prochain codex sera plus léger d\'environ 193,0 Ko.\n');
             test.info().annotations.push({ type: 'bilan', description: f.message });
             await fermerFenetre(page);
 
@@ -276,7 +276,7 @@ test.describe('#1028 — « Archiver les copies » d\'un trimestre clos (mode fi
             // 3. « Archiver le trimestre… » refuse, et le dit.
             await page.evaluate(() => { window.__archive = null; ReserveTrimestre.actionArchiver('h2032'); });
             f = await attendreFenetre(page, 'Trimestre non archivé');
-            expect(f.message).toContain('Les copies de Hiver 2032 sont aux archives : une nouvelle archive ne les contiendrait pas, et elle remplacerait celle qui les garde.');
+            expect(f.message).toContain('Les productions remises de Hiver 2032 sont aux archives : une nouvelle archive ne les contiendrait pas, et elle remplacerait celle qui les garde.');
             await fermerFenetre(page);
             expect(await page.evaluate(() => window.__archive)).toBeNull();
 
@@ -293,10 +293,10 @@ test.describe('#1028 — « Archiver les copies » d\'un trimestre clos (mode fi
             // Export du PDF annoté : la fenêtre dit « aux archives ».
             await page.evaluate(() => travauxExportPDF.exporterPDF('FT_h1'));
             await expect.poll(() => alertes.length).toBeGreaterThan(0);
-            expect(alertes.at(-1)).toContain('Cette copie est aux archives.');
+            expect(alertes.at(-1)).toContain('Cette production est aux archives.');
             // L'aperçu du PDF.
             await page.evaluate(() => travauxExportPDF.previsualiserPDF('FT_h1'));
-            await expect(page.locator('.preview-pdf-chargement')).toHaveText('Cette copie est aux archives.');
+            await expect(page.locator('.preview-pdf-chargement')).toHaveText('Cette production est aux archives.');
             // « Dossier PDF » : la synthèse seule, et il le dit.
             await page.evaluate(() => travauxExportPDF.exporterDossierComplet('0000001', 'P1').catch((e) => { window.__dossierErreur = String(e); }));
             await expect.poll(() => page.evaluate(() => window.__notifications.map((n) => n[1]).join('|'))).toContain('le dossier ne contient que la synthèse');
@@ -305,7 +305,7 @@ test.describe('#1028 — « Archiver les copies » d\'un trimestre clos (mode fi
             await page.evaluate(() => travauxUI.ouvrirEditeurPages && travauxUI.ouvrirEditeurPages('FT_h1'));
             if (await page.evaluate(() => typeof travauxUI.ouvrirEditeurPages === 'function')) {
                 await expect.poll(() => alertes.length).toBeGreaterThan(nAlertes);
-                expect(alertes.at(-1)).toBe('Cette copie est aux archives : fais-la revenir avant de modifier ses pages.');
+                expect(alertes.at(-1)).toBe('Cette production est aux archives : fais-la revenir avant de modifier ses pages.');
             }
             // Le codex : les copies aux archives ne sont pas « manquantes ».
             const codex = await page.evaluate(async () => {
@@ -327,11 +327,11 @@ test.describe('#1028 — « Archiver les copies » d\'un trimestre clos (mode fi
             const attente = page.waitForEvent('filechooser');
             await bouton.click();
             await (await attente).setFiles(fichier);
-            f = await attendreFenetre(page, 'Faire revenir les copies');
+            f = await attendreFenetre(page, 'Faire revenir les productions remises');
             await f.fenetre.locator('.modal-actions button', { hasText: 'Faire revenir' }).click();
-            f = await attendreFenetre(page, 'Copies revenues');
+            f = await attendreFenetre(page, 'Productions revenues');
             test.info().annotations.push({ type: 'retour', description: f.message });
-            expect(f.message).toContain('3 copies revenues');
+            expect(f.message).toContain('3 productions revenues');
             await fermerFenetre(page);
             const retour = await photo(page);
             for (const id of COPIES_H) expect([id, retour.copies[id]]).toEqual([id, avant.copies[id]]);
@@ -353,19 +353,19 @@ test.describe('#1028 — « Archiver les copies » d\'un trimestre clos (mode fi
             const fichier = await archiverEtVerifier(page, dossierTmp);
             await page.evaluate(() => { let n = 0; window.__refuserRetrait = () => ++n === 2; });
             await archiverCopiesParLeMenu(page, fichier);
-            let f = await attendreFenetre(page, 'Archiver les copies de Hiver 2032 ?');
-            await f.fenetre.locator('.modal-actions button', { hasText: 'Archiver les copies' }).click();
-            f = await attendreFenetre(page, 'Archivage des copies inachevé');
+            let f = await attendreFenetre(page, 'Archiver les productions remises de Hiver 2032 ?');
+            await f.fenetre.locator('.modal-actions button', { hasText: 'Archiver les productions remises' }).click();
+            f = await attendreFenetre(page, 'Archivage des productions remises inachevé');
             test.info().annotations.push({ type: 'interrompu', description: f.message });
-            expect(f.message).toContain('Pour finir : relance « Archiver les copies… » depuis le menu ⋮ de Hiver 2032.');
+            expect(f.message).toContain('Pour finir : relance « Archiver les productions remises… » depuis le menu ⋮ de Hiver 2032.');
             await fermerFenetre(page);
             expect(Object.keys((await photo(page)).copies).sort()).toEqual(['FT_a1', 'FT_h2', 'FT_hc']);
             await page.evaluate(() => { window.__refuserRetrait = null; });
             await archiverCopiesParLeMenu(page, fichier);
-            f = await attendreFenetre(page, 'Archiver les copies de Hiver 2032 ?');
-            expect(f.message).toContain('2 copies quitteront');
-            await f.fenetre.locator('.modal-actions button', { hasText: 'Archiver les copies' }).click();
-            await attendreFenetre(page, 'Les copies de Hiver 2032 sont aux archives');
+            f = await attendreFenetre(page, 'Archiver les productions remises de Hiver 2032 ?');
+            expect(f.message).toContain('2 productions quitteront');
+            await f.fenetre.locator('.modal-actions button', { hasText: 'Archiver les productions remises' }).click();
+            await attendreFenetre(page, 'Les productions remises de Hiver 2032 sont aux archives');
             await fermerFenetre(page);
             expect(Object.keys((await photo(page)).copies)).toEqual(['FT_a1']);
         } finally {
@@ -388,9 +388,9 @@ test.describe('#1028 — « Archiver les copies » d\'un trimestre clos (mode fi
             const fichier = await archiverEtVerifier(page, dossierTmp);
             const avant = await photo(page);
             await archiverCopiesParLeMenu(page, fichier);
-            let f = await attendreFenetre(page, 'Archiver les copies de Hiver 2032 ?');
-            await f.fenetre.locator('.modal-actions button', { hasText: 'Archiver les copies' }).click();
-            await attendreFenetre(page, 'Les copies de Hiver 2032 sont aux archives');
+            let f = await attendreFenetre(page, 'Archiver les productions remises de Hiver 2032 ?');
+            await f.fenetre.locator('.modal-actions button', { hasText: 'Archiver les productions remises' }).click();
+            await attendreFenetre(page, 'Les productions remises de Hiver 2032 sont aux archives');
             await fermerFenetre(page);
             const parties = await photo(page);
 
@@ -450,7 +450,7 @@ test.describe('#1028 — « Archiver les copies » d\'un trimestre clos (mode fi
             expect(clore.success).toBe(true);
             await page.evaluate(() => { window.__archive = null; ReserveTrimestre.actionArchiver('h2032'); });
             f = await attendreFenetre(page, 'Trimestre non archivé');
-            expect(f.message).toContain('Les copies de Hiver 2032 sont aux archives : une nouvelle archive ne les contiendrait pas, et elle remplacerait celle qui les garde.');
+            expect(f.message).toContain('Les productions remises de Hiver 2032 sont aux archives : une nouvelle archive ne les contiendrait pas, et elle remplacerait celle qui les garde.');
             await fermerFenetre(page);
             expect(await page.evaluate(() => window.__archive)).toBeNull();
             expect(await page.evaluate((ids) => ids.map((id) => ReserveCopies.estAuxArchives(id)), COPIES_H)).toEqual([true, true, true]);
@@ -464,10 +464,10 @@ test.describe('#1028 — « Archiver les copies » d\'un trimestre clos (mode fi
             const attente = page.waitForEvent('filechooser');
             await bouton.click();
             await (await attente).setFiles(fichier);
-            f = await attendreFenetre(page, 'Faire revenir les copies');
+            f = await attendreFenetre(page, 'Faire revenir les productions remises');
             await f.fenetre.locator('.modal-actions button', { hasText: 'Faire revenir' }).click();
-            f = await attendreFenetre(page, 'Copies revenues');
-            expect(f.message).toContain('3 copies revenues');
+            f = await attendreFenetre(page, 'Productions revenues');
+            expect(f.message).toContain('3 productions revenues');
             await fermerFenetre(page);
             const retour = await photo(page);
             for (const id of COPIES_H) expect([id, retour.copies[id]]).toEqual([id, avant.copies[id]]);
@@ -508,7 +508,7 @@ test.describe('#1028 — « Archiver les copies » d\'un trimestre clos (mode fi
         const n = alertes.length;
         await page.evaluate(() => travauxUI.fusionnerFichiers());
         await expect.poll(() => alertes.length).toBeGreaterThan(n);
-        expect(alertes.at(-1)).toBe('Le fichier de cette copie est introuvable : elle ne peut pas être fusionnée.');
+        expect(alertes.at(-1)).toBe('Le fichier de cette production est introuvable : elle ne peut pas être fusionnée.');
         const ids = await page.evaluate(async () => (await db.get('a2032_fichiersTravaux')).map((f) => f.id));
         expect(ids).toEqual(['FT_a1', 'FT_ap', 'FT_am', 'FT_ai']);
         expect(await page.evaluate(() => (document.getElementById('evaluations-contenu-import') || { textContent: '' }).textContent.includes('Fusion :'))).toBe(false);
@@ -525,9 +525,9 @@ test.describe('#1028 — « Archiver les copies » d\'un trimestre clos (mode fi
             const fichier = await archiverEtVerifier(page, dossierTmp);
             const avant = await photo(page);
             await archiverCopiesParLeMenu(page, fichier);
-            let f = await attendreFenetre(page, 'Archiver les copies de Hiver 2032 ?');
-            await f.fenetre.locator('.modal-actions button', { hasText: 'Archiver les copies' }).click();
-            await attendreFenetre(page, 'Les copies de Hiver 2032 sont aux archives');
+            let f = await attendreFenetre(page, 'Archiver les productions remises de Hiver 2032 ?');
+            await f.fenetre.locator('.modal-actions button', { hasText: 'Archiver les productions remises' }).click();
+            await attendreFenetre(page, 'Les productions remises de Hiver 2032 sont aux archives');
             await fermerFenetre(page);
 
             // 1. Le codex, écrit maintenant : aucune copie aux archives dite manquante.
@@ -590,10 +590,10 @@ test.describe('#1028 — « Archiver les copies » d\'un trimestre clos (mode fi
             const attente = page.waitForEvent('filechooser');
             await bouton.click();
             await (await attente).setFiles(fichier);
-            f = await attendreFenetre(page, 'Faire revenir les copies');
+            f = await attendreFenetre(page, 'Faire revenir les productions remises');
             await f.fenetre.locator('.modal-actions button', { hasText: 'Faire revenir' }).click();
-            f = await attendreFenetre(page, 'Copies revenues');
-            expect(f.message).toContain('3 copies revenues');
+            f = await attendreFenetre(page, 'Productions revenues');
+            expect(f.message).toContain('3 productions revenues');
             await fermerFenetre(page);
             const retour = await photo(page);
             for (const id of ['FT_h1', 'FT_h2', 'FT_hc']) expect([id, retour.copies[id]]).toEqual([id, avant.copies[id]]);

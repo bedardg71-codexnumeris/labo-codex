@@ -1078,7 +1078,7 @@
                     if (plage.taches.length > 0) {
                         plage.taches.forEach(function (t) {
                             html += '<div class="rythme-tache">' + echapperHtml(t.nom);
-                            html += '<small> · ~' + t.copies + ' copies · ' + formaterDureeTexte(t.heures * 3600000) + '</small></div>';
+                            html += '<small> · ~' + t.copies + ' productions · ' + formaterDureeTexte(t.heures * 3600000) + '</small></div>';
                         });
                     }
                 }
@@ -1225,7 +1225,7 @@
 
         // Alerte weekend
         if (prefs.alerteWeekend && (jour === 'Samedi' || jour === 'Dimanche')) {
-            afficherRappel('Évaluation un ' + jour.toLowerCase() + ' — les copies seront encore là lundi.');
+            afficherRappel('Évaluation un ' + jour.toLowerCase() + ' — les productions seront encore là lundi.');
         }
 
         // Alerte soir tardif

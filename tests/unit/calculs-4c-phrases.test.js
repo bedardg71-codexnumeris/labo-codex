@@ -315,7 +315,7 @@ describe('4c · E — la palette : le bloc d\'un calcul', () => {
         const c = critere4c({ calculs: [phrases(), phrases({ id: 'calc2', nom: 'pour la note', sert: 'note' })] });
         const b = Pal.blocs(c);
         const dernier = b[b.length - 1];
-        expect(dernier).toMatchObject({ jeton: '{calc1}', famille: 'remplie', nom: 'Taux pour 100', aide: 'Ton calcul : sa valeur sur la copie évaluée.' });
+        expect(dernier).toMatchObject({ jeton: '{calc1}', famille: 'remplie', nom: 'Taux pour 100', aide: 'Ton calcul : sa valeur sur la production évaluée.' });
         expect(b.filter((x) => /calc/.test(x.jeton)).map((x) => x.jeton)).toEqual(['{calc1}']);
         expect(Pal.blocs(critere4c({ calculs: undefined })).some((x) => /calc/.test(x.jeton))).toBe(false);
     });

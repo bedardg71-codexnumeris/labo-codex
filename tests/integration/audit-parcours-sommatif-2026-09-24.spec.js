@@ -338,7 +338,7 @@ test('audit · parcours sommatif, grille en points sans échelle choisie — ce 
         // D1 — l'élève ne lit aucun nom de niveau.
         expect(texte, pdf.p + ' : aucun nom de niveau').not.toMatch(NOMS_NIVEAUX);
         // D4 — la note de la copie en tête du bloc « Niveau général ».
-        expect(texte, pdf.p + ' : la note de la copie').toContain('Niveau général Note de la copie : ' + notes[i] + ' %');
+        expect(texte, pdf.p + ' : la note de la copie').toContain('Niveau général Note : ' + notes[i] + ' %');
     });
     // D4 — la note cumulée dans « Note actuelle du cours » (#1207), calculée par la pratique sommative : (62 + 70 + 74) ÷ 3.
     const pageP3 = R.pdfSansReperes[2].blocs.map(b => b.texte).join(' ');
@@ -397,7 +397,7 @@ test('audit · parcours sommatif, grille en points sans échelle choisie — ce 
 
     // Le stock (décision A) : plus de nom de niveau, rien de réécrit.
     expect(R.stock.texte, 'stock : aucun nom de niveau').not.toMatch(NOMS_NIVEAUX);
-    expect(R.stock.texte, 'stock : la note de la copie').toContain('Note de la copie : 62 %');
+    expect(R.stock.texte, 'stock : la note de la copie').toContain('Note : 62 %');
     expect(R.stock.affichable, 'stock : aucun niveau affichable').toBe('');
     expect(R.stock.niveauFinalIntact, 'stock : la donnée reste telle quelle').toBe('I');
 });

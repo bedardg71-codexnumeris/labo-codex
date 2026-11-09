@@ -111,7 +111,7 @@ describe('#934 · R — le récapitulatif trie ce que le geste fera, et son HTML
             mesure('F_lea', '2000003', 'Gagnon_A2.jpg')
         ]);
         const html = win._genererRecapReassignationHTML(r, 'Artefact 2 <rév>');
-        expect(html).toContain('<strong>3 copies</strong>');
+        expect(html).toContain('<strong>3 fichiers</strong>');
         expect(html).toContain('Artefact 2 &lt;rév&gt;');
         expect(html).not.toContain('<A2>');
         expect(html).toContain('Sara Exemple — Exemple_&lt;A2&gt;.pdf');
@@ -120,7 +120,7 @@ describe('#934 · R — le récapitulatif trie ce que le geste fera, et son HTML
         expect(html).toContain('Sara Exemple : Exemple_A2_rev.jpg → remplacé par Exemple_&lt;A2&gt;.pdf');
         expect(html).toContain('corbeille');
         // Mot validé par Grégoire (22 sept., soir).
-        expect(html).toContain('1 évaluation déjà faite sur « Artefact 2 » n’aura plus de copie liée (l’évaluation elle-même est conservée).');
+        expect(html).toContain('1 évaluation déjà faite sur « Artefact 2 » n’aura plus de fichier lié (l’évaluation elle-même est conservée).');
     });
 
     it('R.e deux évaluations orphelines sur la même ancienne production : une ligne au pluriel, qui nomme les deux élèves', () => {
@@ -129,7 +129,7 @@ describe('#934 · R — le récapitulatif trie ce que le geste fera, et son HTML
             mesure('F_lea', '2000003', 'Gagnon_A2.jpg', { evaluationOrpheline: true })
         ]);
         const html = win._genererRecapReassignationHTML(r, 'Artefact 2 (rév)');
-        expect(html).toContain('2 évaluations déjà faites sur « Artefact 2 » n’auront plus de copie liée (l’évaluation elle-même est conservée).');
+        expect(html).toContain('2 évaluations déjà faites sur « Artefact 2 » n’auront plus de fichier lié (l’évaluation elle-même est conservée).');
         expect(html).toContain('Camille Roy — Roy_A2.pdf');
         expect(html).toContain('Léa Gagnon — Gagnon_A2.jpg');
     });
@@ -137,9 +137,9 @@ describe('#934 · R — le récapitulatif trie ce que le geste fera, et son HTML
     it('R.d rien à déplacer : le HTML le dit, et nomme les ambigus', () => {
         const r = win._composerRecapReassignation([mesure('F_1', '2000003', 'a.jpg'), mesure('F_2', '2000003', 'b.jpg')]);
         const html = win._genererRecapReassignationHTML(r, 'Artefact 2 (rév)');
-        expect(html).toContain('Aucune copie à déplacer');
-        expect(html).toContain('<strong>2 copies non déplacées</strong>');
-        expect(html).toContain('Choisis-en une');
+        expect(html).toContain('Aucun fichier à déplacer');
+        expect(html).toContain('<strong>2 fichiers non déplacés</strong>');
+        expect(html).toContain('Choisis-en un.');
     });
 });
 
@@ -171,7 +171,7 @@ describe('#934 · L — une ligne porte une case seulement si elle porte une cop
         const win = chargerListe({ fichiers: FICHIERS });
         const html = win._genererLigneHTML(ligne({ prenom: HOSTILE }));
         expect(html).not.toContain('<img');
-        expect(html).toMatch(/aria-label="Sélectionner la copie de &quot;&gt;&lt;img/);
+        expect(html).toMatch(/aria-label="Sélectionner la production de &quot;&gt;&lt;img/);
     });
 
     it('L.d la case et le menu Actions parlent du même fichier', () => {
@@ -282,7 +282,7 @@ describe('#934 · D — la barre suit les cases, et la modale n\'écrit qu\'à l
         cases[0].checked = true; cases[1].checked = true;
         win.mettreAJourSelectionEval();
         expect(registre['eval-barre-selection'].classList.contains('u-hide')).toBe(false);
-        expect(registre['eval-barre-selection-compte'].textContent).toBe('2 copies sélectionnées');
+        expect(registre['eval-barre-selection-compte'].textContent).toBe('2 rangées sélectionnées');
         expect(registre['eval-btn-reassigner-selection'].textContent).toBe('Réassigner la sélection (2)');
         expect(registre['eval-tout-selectionner'].indeterminate).toBe(true);
         cases[2].checked = true;
@@ -297,7 +297,7 @@ describe('#934 · D — la barre suit les cases, et la modale n\'écrit qu\'à l
         registre['eval-tout-selectionner'].checked = true;
         win.basculerToutSelectionnerEval(registre['eval-tout-selectionner']);
         expect(cases.every(c => c.checked)).toBe(true);
-        expect(registre['eval-barre-selection-compte'].textContent).toBe('2 copies sélectionnées');
+        expect(registre['eval-barre-selection-compte'].textContent).toBe('2 rangées sélectionnées');
         win.viderSelectionEval();
         expect(cases.some(c => c.checked)).toBe(false);
         expect(registre['eval-barre-selection'].classList.contains('u-hide')).toBe(true);
@@ -314,17 +314,17 @@ describe('#934 · D — la barre suit les cases, et la modale n\'écrit qu\'à l
         const { win, journal, overlays, registre } = monterDOM({ cases, mesuresParId: MESURES });
         win.reassignerSelectionEval();
         expect(overlays).toHaveLength(1);
-        expect(overlays[0].innerHTML).toContain('Réassigner 3 copies');
+        expect(overlays[0].innerHTML).toContain('Réassigner 3 fichiers');
         // Le bouton naît désactivé (attribut du gabarit) : sans cible, rien à confirmer.
         expect(overlays[0].innerHTML).toContain('id="reassigner-selection-btn-confirmer" disabled');
         registre['reassigner-selection-cible'].value = A2R;
         registre['reassigner-selection-cible'].ecouteurs.change();
         const recap = registre['reassigner-selection-recap'].innerHTML;
-        expect(recap).toContain('<strong>3 copies</strong>');
+        expect(recap).toContain('<strong>3 fichiers</strong>');
         expect(recap).toContain('Artefact 2 (rév)');
         expect(recap).toContain('Sara Exemple : Exemple_A2_rev.jpg → remplacé par Exemple_A2.pdf');
         expect(registre['reassigner-selection-btn-confirmer'].disabled).toBe(false);
-        expect(registre['reassigner-selection-btn-confirmer'].textContent).toBe('Réassigner 3 copies');
+        expect(registre['reassigner-selection-btn-confirmer'].textContent).toBe('Réassigner 3 fichiers');
         // « Annuler » : la modale part, rien n'a été écrit.
         overlays[0].remove();
         expect(journal.ecrits).toEqual([]);
@@ -338,11 +338,11 @@ describe('#934 · D — la barre suit les cases, et la modale n\'écrit qu\'à l
         win.reassignerSelectionEval();
         registre['reassigner-selection-cible'].value = A2R;
         registre['reassigner-selection-cible'].ecouteurs.change();
-        expect(registre['reassigner-selection-btn-confirmer'].textContent).toBe('Réassigner 2 copies');
+        expect(registre['reassigner-selection-btn-confirmer'].textContent).toBe('Réassigner 2 fichiers');
         registre['reassigner-selection-btn-confirmer'].ecouteurs.click();
         expect(journal.ecrits).toEqual(['F_sara', 'F_camille']);
         expect(overlays[0].retire).toBe(true);
-        expect(journal.notifs).toEqual([['succes', '2 copies réassignées vers « Artefact 2 (rév) »']]);
+        expect(journal.notifs).toEqual([['succes', '2 fichiers réassignés vers « Artefact 2 (rév) »']]);
     });
 
     it('D.e sans cible, confirmer ne fait rien ; sans travauxUI, la modale ne s\'ouvre pas', () => {

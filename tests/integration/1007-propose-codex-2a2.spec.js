@@ -147,7 +147,7 @@ const rendrePasAJour = (page) => page.evaluate(() => Codex.marquerModification()
 
 
 const SUITE_LES = 'Ton codex à jour pourra te les rendre, jusqu\'à ta mise à jour suivante.';
-const PHRASE_FUSION = 'Fusionner ces copies efface pour de bon celles qui sont absorbées.';
+const PHRASE_FUSION = 'Fusionner ces productions efface pour de bon celles qui sont absorbées.';
 const PHRASE_REPRISE = 'Appliquer ce jeton de reprise efface pour de bon l\'évaluation originale.';
 
 /** Trois copies fictives d'un même élève, images fabriquées en mémoire ; le PDF réassemblé est un témoin. */

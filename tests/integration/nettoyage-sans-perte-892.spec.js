@@ -118,12 +118,12 @@ test('#892 · la liste est vue ; annuler ne retire rien ; seules les copies expo
     expect(modale.lignes.map((l) => l.id), 'seules les deux copies exportées depuis le 16 septembre').toEqual(['FT_avant_hier', 'FT_hier']);
     expect(modale.lignes[0].texte).toMatch(/2,1 Mo · exportée le 18 septembre 2026/);   // 15 oct. 2026 : les tailles se disent comme sur l'appareil (#993) — base 1000 hors Windows (Mac et runner Linux).
     expect(modale.lignes[1].texte).toMatch(/1,0 Mo · exportée le 19 septembre 2026/);
-    expect(modale.boutons).toEqual(['Annuler', 'Retirer ces 2 copies (3,1 Mo)']);
-    expect(modale.texte).toContain('Ces copies ont déjà été exportées : leur fichier existe ailleurs, sur ton ordinateur.');
-    expect(modale.texte).toContain('1 copie porte une marque d\'exportation antérieure au 16 septembre 2026, que l\'application ne garantit pas.');
+    expect(modale.boutons).toEqual(['Annuler', 'Retirer ces 2 productions (3,1 Mo)']);
+    expect(modale.texte).toContain('Ces productions ont déjà été exportées : leur fichier existe ailleurs, sur ton ordinateur.');
+    expect(modale.texte).toContain('1 production porte une marque d\'exportation antérieure au 16 septembre 2026, que l\'application ne garantit pas.');
     // Les deux copies proposées sont évaluées : l'écran dit ce que leur évaluation devient.
     expect(await page.evaluate(() => window.obtenirDonneesSelonMode('evaluationsSauvegardees').length), 'témoin : l\'évaluation semée est lue').toBe(1);
-    expect(modale.texte).toContain('2 de ces copies sont évaluées. Leur évaluation reste : la note, la grille et la rétroaction ne bougent pas. Seule la copie annotée ne s\'ouvrira plus ici.');
+    expect(modale.texte).toContain('2 de ces productions sont évaluées. Leur évaluation reste : la note, la grille et la rétroaction ne bougent pas. Seule la production annotée ne s\'ouvrira plus ici.');
 
     // La liste tient dans la modale : elle défile, et le bouton reste à l'écran.
     const tenue = await page.evaluate(() => {
@@ -142,7 +142,7 @@ test('#892 · la liste est vue ; annuler ne retire rien ; seules les copies expo
     // CONFIRMER : seules les copies exportées partent, et le compte correspond.
     await page.locator('[data-action="travauxUI.proposerNettoyage"]').click();
     await page.waitForSelector('#pipeline-modal-overlay .travaux-nettoyage-liste');
-    await page.locator('#pipeline-modal-overlay .modal-actions button', { hasText: 'Retirer ces 2 copies' }).click();
+    await page.locator('#pipeline-modal-overlay .modal-actions button', { hasText: 'Retirer ces 2 productions' }).click();
     await page.waitForFunction(() => window.travauxStockage.obtenirFichiersTravaux().length === 3);
 
     const restant = JSON.parse(await lireStock(page));
@@ -173,8 +173,8 @@ test('#892 · aucune copie exportée : l\'écran n\'offre aucun retrait et mène
     expect(modale.titre).toBe('Rien à retirer sans risque');
     expect(modale.lignes).toEqual([]);
     expect(modale.boutons).toEqual(['Fermer']);
-    expect(modale.texte).toContain('Aucune copie de ce groupe n\'a encore été exportée : les retirer les perdrait. Exporte-les d\'abord dans « Exporter les travaux », puis reviens ici.');
-    expect(modale.texte).toContain('1 copie porte une marque d\'exportation antérieure au 16 septembre 2026');
+    expect(modale.texte).toContain('Aucune production de ce groupe n\'a encore été exportée : les retirer les perdrait. Exporte-les d\'abord dans « Exporter les travaux », puis reviens ici.');
+    expect(modale.texte).toContain('1 production porte une marque d\'exportation antérieure au 16 septembre 2026');
 
     await page.locator('#pipeline-modal-overlay .modal-actions button', { hasText: 'Fermer' }).click();
     await page.waitForFunction(() => !document.getElementById('pipeline-modal-overlay'));

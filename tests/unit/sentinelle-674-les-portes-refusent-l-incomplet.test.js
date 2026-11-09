@@ -412,10 +412,11 @@ describe('#674 · porte 2 — le PDF de l\'élève refuse de conclure et nomme c
 
     // Les mots de l'élève, arrêtés par Grégoire le 2 septembre 2026 (option C) :
     // « Cette copie n’a pas de niveau général : Langue (20 %) reste à évaluer. »
+    // ↻ 9 nov. 2026 (Grégoire) : « Cette évaluation n’a pas de niveau général… » (seul le mot change).
     it('…et le rendu REFUSE DE CONCLURE : pas de bandeau « E », les mots de l\'élève nomment Langue (20 %)', () => {
         const { feedback, html } = monterPdf({ grille: GRILLE_DATEE });
         const page = html(feedback(EVAL_INCOMPLETE_AVANT_LOT));
-        expect(page).toContain('Cette copie n’a pas de niveau général : Langue (20\u00A0%) reste à évaluer.');
+        expect(page).toContain('Cette évaluation n’a pas de niveau général : Langue (20\u00A0%) reste à évaluer.');
         // Le bandeau coloré du niveau global (44 px, code seul) n'est PAS rendu.
         expect(page).not.toMatch(/font-size: 44px[^>]*>E</);
         expect(page).not.toContain('Niveau général · Étendu');
@@ -431,7 +432,7 @@ describe('#674 · porte 2 — le PDF de l\'élève refuse de conclure et nomme c
         expect(fb.portee.incomplete).toBe(true);
         expect(fb.portee.criteresHorsNote.map((c) => c.motif)).toEqual(['niveau-sans-valeur', 'niveau-sans-valeur', 'niveau-sans-valeur']);
         const page = html(fb);
-        expect(page).toContain('Cette copie n’a pas de niveau général : Contenu (M), Organisation (M), Langue (M) restent à évaluer.');
+        expect(page).toContain('Cette évaluation n’a pas de niveau général : Contenu (M), Organisation (M), Langue (M) restent à évaluer.');
     });
 
     it('sans liste (niveau général jamais établi, rien à nommer) : la phrase s\'arrête au premier membre', () => {
@@ -440,7 +441,7 @@ describe('#674 · porte 2 — le PDF de l\'élève refuse de conclure et nomme c
         // Une copie commencée, déclarée complète, mais dont aucun niveau général n'a été établi.
         const sansConclusion = Object.assign({}, fb, { overall: { code: '', label: '', color: '#767169' } });
         const page = html(sansConclusion);
-        expect(page).toContain('Cette copie n’a pas de niveau général.');
+        expect(page).toContain('Cette évaluation n’a pas de niveau général.');
         expect(page).not.toContain('à évaluer');
     });
 

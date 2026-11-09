@@ -11,7 +11,7 @@ import { chargerScript } from './_helpers/charger-script.js';
 const globaux = { db: { getSync: (k, d) => (d !== undefined ? d : null), setSync() {} }, cle: (k) => k };
 const win = chargerScript('js/pratiques/construction-attributs.js', globaux);
 const ligneReprises = (config) => win.ConstructionAttributs.extraire(config).attributs.find(a => a.axe === 'reprises').valeur;
-const PHRASE = 'La reprise prend la place de la copie d\'origine dans la note';
+const PHRASE = 'La reprise prend la place de l\'évaluation d\'origine dans la note';
 
 describe('#324 · Comparateur : la ligne « Reprises » d\'une sommative', () => {
     it.each([

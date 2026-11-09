@@ -292,7 +292,8 @@ describe('La source unique — aucune famille ne relit `statutIntegrite` elle-m�
     it('l\'Aide dit ce que fait l\'écran : les critères gardent l\'évaluation ; les menus ne passent plus à « 0 »', () => {
         const aide = readFileSync(path.join(RACINE, 'index.html'), 'utf8');
         // ↻ 28 oct. 2026 (retouche, décision 3 de Grégoire) : la ligne validée ; mot pour mot dans sentinelle-copie-non-recevable-affichage-28-oct.
-        expect(aide).toContain('Non recevable, ton évaluation est gardée, mais la copie montre «&nbsp;Non recevable&nbsp;» au lieu de sa note et de ses niveaux, jusque sur le PDF&nbsp;; dans la note, elle vaut ce que dit la règle ci-dessus. Verrouille ensuite.');
+        // ↻ 9 nov. 2026 (relevé « production plutôt que copie », entrée 56) : « la copie montre » → « l'évaluation montre ».
+        expect(aide).toContain('Non recevable, ton évaluation est gardée, mais l\'évaluation montre «&nbsp;Non recevable&nbsp;» au lieu de sa note et de ses niveaux, jusque sur le PDF&nbsp;; dans la note, elle vaut ce que dit la règle ci-dessus. Verrouille ensuite.');
         expect(aide).not.toContain('tous les critères passent à');
         expect(readFileSync(path.join(RACINE, 'js/evaluation-sauvegarde.js'), 'utf8')).not.toContain(`querySelectorAll('select[id^="critere"]')`);
     });

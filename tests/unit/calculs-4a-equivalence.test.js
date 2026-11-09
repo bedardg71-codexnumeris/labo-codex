@@ -314,7 +314,7 @@ describe('4a · D — la ligne chiffrée et les pastilles, dans les deux discipl
     it('les noms des trois calculs et leurs textes : ceux que Grégoire a validés', () => {
         const m = Object.fromEntries(F.listerModeles().map((x) => [x.id, x]));
         expect(F.listerModeles().map((x) => x.nom)).toEqual(['Pénalité proportionnelle à la longueur', 'Rapport visé', 'Pénalité fixe']);
-        expect(m.penalite_par_erreur.texte).toBe('Chaque occurrence retire le même nombre de points, quelle que soit la longueur de la copie. La longueur reste comptée pour les phrases de l’étudiant·e, mais n’entre pas dans la note.');
+        expect(m.penalite_par_erreur.texte).toBe('Chaque occurrence retire le même nombre de points, quelle que soit la longueur de la production. La longueur reste comptée pour les phrases de l’étudiant·e, mais n’entre pas dans la note.');
         expect(m.ratio_cible.parametres[0].libelle(CALCULS.noms)).toBe('Rapport qui donne la note entière : 1 unité manquante à chaque … calculs');
         expect(m.penalite_normalisee.parametres[0].libelle(CALCULS.noms)).toBe('Longueur sur laquelle une occurrence coûte un point (calculs)');
     });

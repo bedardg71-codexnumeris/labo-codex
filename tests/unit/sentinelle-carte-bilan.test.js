@@ -239,7 +239,7 @@ describe('carte « Bilan » · B — ↻ #1150 : « Aucune annotation » vit dan
         expect(zone).toMatch(/<textarea class="controle-form" rows="2"\s+data-on-change="modifierTexteEnonceGrilleHandler" data-grille-id="G1" data-critere-index="0" data-enonce-cle="aucune"/);
         expect(zone).toContain('>' + echapper(E.normaliser(ALGO).enonces.aucune) + '</textarea>');
         expect(zone).toContain(nomDeZone(REGISTRE.aucune.libelle));
-        expect(zone).toContain('S’affiche pour toi seul·e, quand la copie ne porte ni tampon ni code.');   // l'aide de l'atelier (lot 3a)
+        expect(zone).toContain('S’affiche pour toi seul·e, quand la production ne porte ni tampon ni code.');   // l'aide de l'atelier (lot 3a)
         expect(zone).toContain('>Toi seul·e</span>');
         // Ce qu'elle offre : {critere} et {nomErreurs} — jamais {erreurs}, qui y vaudrait toujours vide (le cas qui a
         // fait trancher Grégoire le 3 sept.).

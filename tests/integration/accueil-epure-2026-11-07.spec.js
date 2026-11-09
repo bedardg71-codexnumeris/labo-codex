@@ -55,7 +55,7 @@ const TACHES_ATTENDUES = [
     ['Adopter ta pratique', 'Conception › Pratiques'],
     ['Planifier ton cours', 'Conception › Alignement'],
     ['Saisir les présences', 'Suivi › Présences'],
-    ['Importer des copies', 'Évaluation › Préparer'],
+    ['Importer des productions', 'Évaluation › Préparer'],   // ↻ 9 nov. 2026, lot « production plutôt que copie », rangée 148
     ['Annoter et évaluer', 'Évaluation › Annoter'],
     ['Observer le groupe', 'Suivi › Groupe'],
     ['Consulter un profil', 'Suivi › Profils'],
@@ -174,7 +174,7 @@ test('neuf tâches : trois colonnes à 1180, deux à 820, une à 390 ; chacune d
 const DESTINATIONS = [
     ['Planifier ton cours', 'conception-carte'],
     ['Saisir les présences', 'suivi-saisie'],
-    ['Importer des copies', 'evaluations-importer'],
+    ['Importer des productions', 'evaluations-importer'],   // ↻ 9 nov. 2026, lot « production plutôt que copie », rangée 148
     ['Annoter et évaluer', 'evaluations-annoter'],
     ['Observer le groupe', 'suivi-groupe'],
     ['Consulter un profil', 'suivi-profil'],

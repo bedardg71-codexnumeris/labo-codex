@@ -44,19 +44,19 @@ const GUIDAGE_TEXTES = {
     },
     'evaluations-liste': {
         titre: "Liste",
-        texte: "Une rangée par copie attendue, avec son statut, sa note et ses jetons. Les filtres «\u00a0Production\u00a0» et «\u00a0Statut\u00a0» et la recherche resserrent la liste\u00a0; le menu «\u00a0Actions\u00a0» d'une rangée n'offre que ce que la copie permet. La démo porte 101 évaluations."
+        texte: "Une rangée par étudiant·e et par production, avec son statut, sa note et ses jetons. Les filtres «\u00a0Production\u00a0» et «\u00a0Statut\u00a0» et la recherche resserrent la liste\u00a0; le menu «\u00a0Actions\u00a0» d'une rangée n'offre que ce que la rangée permet. La démo porte 101 évaluations."
     },
     'evaluations-importer': {
         titre: "Préparer",
-        texte: "Importe les fichiers de tes étudiant·es (PDF ou images), prépare-les (rotation, assemblage des pages) et associe chacun à une production. La démo ne livre aucune copie\u00a0; ce que tu importes ici, «\u00a0Retirer les copies\u00a0» (bandeau vert) l'efface."
+        texte: "Importe les fichiers de tes étudiant·es (PDF ou images), prépare-les (rotation, assemblage des pages) et associe chacun à une production. La démo ne livre aucune production remise\u00a0; ce que tu importes ici, «\u00a0Retirer les productions importées\u00a0» (bandeau vert) l'efface."
     },
     'evaluations-annoter': {
         titre: "Annoter",
-        texte: "Annote les copies à l'écran, appose des tampons, puis évalue-les selon la grille\u00a0: «\u00a0Actions ▾\u00a0» passe d'«\u00a0Annoter\u00a0» à «\u00a0Évaluer\u00a0». Pour annoter dans la démo, importe d'abord une copie\u00a0: le pack n'en livre aucune."
+        texte: "Annote les productions à l'écran, appose des tampons, puis évalue-les selon la grille\u00a0: «\u00a0Actions ▾\u00a0» passe d'«\u00a0Annoter\u00a0» à «\u00a0Évaluer\u00a0». Pour annoter dans la démo, importe d'abord une production remise\u00a0: le pack n'en livre aucune."
     },
     'evaluations-exporter': {
         titre: "Exporter",
-        texte: "Sors tes copies et tes évaluations de l'application\u00a0: un ZIP pour tout le groupe, une production ou un·e étudiant·e, ou l'«\u00a0Export Léa\u00a0», un PDF à téléverser dans Léa."
+        texte: "Sors les productions de tes étudiant·es et tes évaluations de l'application\u00a0: un ZIP pour tout le groupe, une production ou un·e étudiant·e, ou l'«\u00a0Export Léa\u00a0», un PDF à téléverser dans Léa."
     },
     'conception-grille-criteres': {
         titre: "Grilles",

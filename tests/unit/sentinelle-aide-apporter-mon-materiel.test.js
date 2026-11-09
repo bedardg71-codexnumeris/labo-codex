@@ -145,6 +145,6 @@ describe('« Apporter mon matériel » — aucun texte neuf ne dit « dissection
     it('la phrase de la logique « les deux » ne dit plus que l’application ne convertirait rien', () => {
         const phrase = tranche(DISSECTION, 'if (b.logique === \'deux\')', '\n');
         expect(phrase).not.toContain('Elle ne convertirait rien');
-        expect(phrase).toContain('Ce serait à toi de dire laquelle donne le résultat d’une copie.');
+        expect(phrase).toContain('Ce serait à toi de dire laquelle donne le résultat d’une évaluation.');
     });
 });

@@ -132,7 +132,7 @@ const TOOLTIPS = {
     // --- Préférences ---
 
     'pref-actions-rlo':
-        'Active trois tampons ou estampes (Repérage, Liaison, Ouverture) que tu poses sur les copies pour observer les gestes cognitifs de tes étudiant·es. Les résultats alimentent le profil ACO et l\'export de recherche anonymisé.',
+        'Active trois tampons ou estampes (Repérage, Liaison, Ouverture) que tu poses sur les productions pour observer les gestes cognitifs de tes étudiant·es. Les résultats alimentent le profil ACO et l\'export de recherche anonymisé.',
     'pref-affichage-developpement':
         'Affiche le tableau de progression des critères et les graphiques 0-100\u00a0% dans la section «Développement des habiletés» du profil individuel.',
     'pref-affichage-graphiques':
@@ -229,16 +229,18 @@ const TOOLTIPS = {
 
     // --- Productions ---
 
+    // Lot « Production plutôt que copie » : cn-prod-titre, cn-prod-type et cn-prod-grille, textes
+    // validés par Grégoire (8 nov. 2026, 13 h 51 à 14 h 09), posés mot pour mot.
     'cn-prod-titre':
-        'Définis les productions de tes étudiant·es : travaux et exercices avec pondérations et échéances.',
+        'Décris ici les productions que tu demandes : ce que tes étudiant·es feront dans tes activités d\'apprentissage (un texte, un stage, une œuvre…), avec leur grille, leur pondération et leur échéance.',
     'cn-prod-tableau':
         'Tableau récapitulatif de toutes tes productions : titre, type, pondération et échéance.',
     'cn-prod-type':
-        'Portfolio (conteneur d\'artefacts pondéré — ta pratique décide lesquels comptent), Artefact (production à l\'intérieur d\'un portfolio) ou Travail (évaluation indépendante).',
+        'La forme que prend la production : un texte, un examen, un stage, une œuvre… Choisis un exemple, ou crée ton propre type avec « + Nouveau type… » : il restera dans ta banque, d\'un trimestre à l\'autre. Trois types ont un rôle à part dans la note : le portfolio, qui regroupe des artefacts dont ta pratique choisit ceux qui comptent ; l\'artefact, qui n\'a pas de pondération propre ; l\'épreuve terminale, une seule par trimestre.',
     'cn-prod-activite':
         'Nom de l\'activité pédagogique associée à cette production. Clique sur ✏\ufe0f pour modifier.',
     'cn-prod-grille':
-        'Associe une grille d\'évaluation à cette production. Définit les critères utilisés lors de la correction.',
+        'Associe une grille à cette production : ses critères sont ceux de ton évaluation.',
     'cn-prod-objectif':
         'Transférable et sans terme : la capacité qui servira à l\'artefact suivant, au cours suivant, ailleurs. On ne coche pas un objectif atteint — on en observe la progression. Apparaît dans la rétroaction et le dossier PDF.',
     'cn-prod-tache':
@@ -268,7 +270,7 @@ const TOOLTIPS = {
     'bareme-tranche-points':
         'Un nombre (3 ou 2,5) ou deux bornes (3 à 4), de 0 à la pondération du critère. Deux tranches ne se chevauchent pas.',
     'bareme-tranche-texte':
-        'Ce qu’on attend d’une copie qui obtient ces points.',
+        'Ce qu’on attend d’une production pour obtenir ces points.',
     'bareme-ajouter-tranche':
         'Ajoute une tranche au bas du barème. Elle s’enregistre aussitôt et reste « à compléter » jusqu’à ce que tu lui donnes ses points.',
     'bareme-a-completer':
@@ -278,7 +280,7 @@ const TOOLTIPS = {
     // #1120, lot 3 (27 oct. 2026) : le barème à l'évaluation (evaluation-chargement.js, `_saisiePointsHtml`).
     // H1, H3 et H4, validés G. 27 oct. 10 h 31 (plans de travail/TEXTES-2026-10-27-bareme-evaluation.md), tels quels.
     'bareme-eval':
-        'Touche la tranche qui décrit la copie, puis ses points.',
+        'Touche la tranche qui décrit la production, puis ses points.',
     'bareme-eval-hors-bareme':
         'Aucune tranche ne couvre ces points : l’étudiant·e lira le chiffre seul.',
     'bareme-eval-a-completer':
@@ -363,7 +365,7 @@ const TOOLTIPS = {
     'eval-statut-remise':
         'Indique si la production a été remise. Conditionne le calcul de l\'indice de complétion (C).',
     'eval-integrite':
-        'Recevable ou non. Une copie non recevable (plagiat, IA non autorisée) compte comme non remise dans la complétion ; dans la note, son sort dépend de ta pratique (Aide › « Travail NON RECEVABLE »).',
+        'Recevable ou non. Une production non recevable (plagiat, IA non autorisée) compte comme non remise dans la complétion ; dans la note, son sort dépend de ta pratique (Aide › « Travail NON RECEVABLE »).',
     'eval-francais-ecrit':
         'La note de ce critère se calcule par une formule. Le champ de ce que tu comptes se remplit avec les codes que tu poses dans Annoter, ou se tape ; celui de ce à quoi tu le rapportes se tape. Les deux portent les noms que tu as donnés au critère dans la grille. La rétroaction se compose avec les phrases écrites dans la grille.',
     'eval-codes-erreurs':
@@ -430,13 +432,13 @@ const TOOLTIPS = {
     // --- Actions sur les travaux ---
 
     'travaux-btn-annoter':
-        'Mode annotation : surligne, écris et appose des tampons / estampes ou des codes spécifiques directement sur la copie de l\'étudiant·e.',
+        'Mode annotation : surligne, écris et appose des tampons / estampes ou des codes spécifiques directement sur la production de l\'étudiant·e.',
     'travaux-btn-evaluer':
         'Mode évaluation : ouvre les panneaux de critères et de paramètres pour évaluer cette production selon la grille.',
     'travaux-evaluer':
         'Ouvre l\'interface d\'évaluation avec l\'étudiant·e et la production présélectionnés. Tu pourras appliquer une grille de critères et générer une rétroaction.',
     'travaux-btn-reimporter':
-        'Remplace un fichier allégé par l\'original complet, à re-déposer. Ne concerne que les copies allégées avant le retrait de cette fonctionnalité.',
+        'Remplace un fichier allégé par l\'original complet, à re-déposer. Ne concerne que les fichiers allégés avant le retrait de cette fonctionnalité.',
 
     // --- Archivage et export ---
 
@@ -494,7 +496,7 @@ const TOOLTIPS = {
     'wizard-etape-echelle-performance':
         'L’échelle traduit chaque niveau (par exemple I, D, M, E) en pourcentage. C’est elle qui transforme un niveau en points.',
     'wizard-etape-grille-criteres':
-        'La grille donne les critères avec lesquels tu évalues chaque copie. Tu peux la choisir plus tard, dans Conception › Grilles.',
+        'La grille donne les critères avec lesquels tu évalues chaque production. Tu peux la choisir plus tard, dans Conception › Grilles.',
     'wizard-etape-recapitulatif':
         'Rien n’est créé avant que tu confirmes. Tu pourras tout modifier ensuite.',
 
@@ -749,7 +751,7 @@ const TOOLTIPS = {
     'nav-eval-importer':
         'Importe les travaux de tes étudiant·es (PDF, images) et prépare les fichiers (rotation, assemblage).',
     'nav-eval-annoter':
-        'Annote les copies et évalue selon la grille de critères, sur le même document.',
+        'Annote les productions et évalue selon la grille de critères, sur le même document.',
     'nav-eval-exporter':
         'Exporte les PDF annotés aux étudiant·es et allège le stockage.',
 
@@ -904,7 +906,7 @@ const TOOLTIPS = {
     'materiel-nom-grille':
         'Ce nom s’imprime sur le PDF que tes étudiant·es reçoivent après l’évaluation.',
     'materiel-compte':
-        'Ta grille porte des points et des niveaux : choisis lequel donne le résultat d’une copie. Avec les niveaux, tu diras ensuite la note que vaut chacun.',
+        'Ta grille porte des points et des niveaux : choisis lequel donne le résultat d’une évaluation. Avec les niveaux, tu diras ensuite la note que vaut chacun.',
     'materiel-creer':
         'Range ta grille dans Grilles, et ses niveaux dans Échelles s’il y en a. Tu pourras ensuite la modifier là, comme toute autre grille.'
 

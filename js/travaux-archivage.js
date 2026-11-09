@@ -834,7 +834,7 @@
 
         if (sansSynthese && sansSynthese.length > 0) {
             if (lignes.length > 0) lignes.push('');
-            lignes.push(`${sansSynthese.length} copie(s) livrée(s) SANS leur page de rétroaction :`);
+            lignes.push(`${sansSynthese.length} production(s) livrée(s) SANS leur page de rétroaction :`);
             sansSynthese.forEach(function(t) { lignes.push('  • ' + t); });
             lignes.push('');
             lignes.push('Ces PDF sont exportés et lisibles, mais il leur manque la page de synthèse. À vérifier avant de les téléverser sur Léa.');

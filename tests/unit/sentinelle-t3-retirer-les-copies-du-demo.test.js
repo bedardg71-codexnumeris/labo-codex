@@ -142,10 +142,12 @@ describe('T3 · le retrait, par identité', () => {
 });
 
 describe('T3 · le bouton du bandeau et sa confirmation', () => {
-    it('(c) en démo : visible, « Retirer les copies (2) »', async () => {
+    // ↻ 9 nov. 2026, lot « production plutôt que copie » (RAPPORT-2026-11-09-production-plutot-que-copie.md, § 4, rangées
+    // 226 à 229, validées par Grégoire) : le bouton, la question et le titre de la confirmation disent « production ».
+    it('(c) en démo : visible, « Retirer les productions importées (2) »', async () => {
         const { w, bouton } = monter();
         await w.majBoutonRetirerCopiesDemo();
-        expect(bouton.textContent).toBe('Retirer les copies (2)');
+        expect(bouton.textContent).toBe('Retirer les productions importées (2)');
         expect(bouton.classList.contains('u-hide')).toBe(false);
     });
 
@@ -154,9 +156,9 @@ describe('T3 · le bouton du bandeau et sa confirmation', () => {
         initial.demo_corbeilleFichiers = [];
         const { w, bouton, dialogues } = monter({ initial, reponse: false });
         await w.majBoutonRetirerCopiesDemo();
-        expect(bouton.textContent).toBe('Retirer la copie (1)');
+        expect(bouton.textContent).toBe('Retirer la production importée (1)');
         await w.actionRetirerCopiesDuDemo();
-        expect(dialogues[0].message).toBe('Retirer la copie importée dans la démo ? Tes vraies copies et tes données ne sont pas touchées. Pour la retrouver, il faudra l\'importer de nouveau.');
+        expect(dialogues[0].message).toBe('Retirer la production importée dans la démo ? Les productions de tes étudiant·es et tes données ne sont pas touchées. Pour la retrouver, il faudra l\'importer de nouveau.');
     });
 
     it('(b) hors démo, et pendant un import : caché', async () => {
@@ -172,8 +174,8 @@ describe('T3 · le bouton du bandeau et sa confirmation', () => {
         const { w, db, blobs, dialogues } = monter({ reponse: false });
         await w.actionRetirerCopiesDuDemo();
         expect(dialogues).toEqual([{
-            titre: 'Retirer les copies',
-            message: 'Retirer les 2 copies importées dans la démo ? Tes vraies copies et tes données ne sont pas touchées. Pour les retrouver, il faudra les importer de nouveau.',
+            titre: 'Retirer les productions importées',
+            message: 'Retirer les 2 productions importées dans la démo ? Les productions de tes étudiant·es et tes données ne sont pas touchées. Pour les retrouver, il faudra les importer de nouveau.',
             texteAnnuler: 'Annuler',
             texteConfirmer: 'Retirer',
             variante: 'danger'

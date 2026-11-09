@@ -170,7 +170,7 @@ function formulaire() {
     return { document, poser, evaluationEnCours, panneau: document.getElementById('travaux-eval-droite') };
 }
 
-const AVIS = 'Travail non recevable Ton évaluation est gardée, mais la copie montre « Non recevable » au lieu de sa note et de ses niveaux, '
+const AVIS = 'Travail non recevable Ton évaluation est gardée, mais l’évaluation montre « Non recevable » au lieu de sa note et de ses niveaux, '
     + 'jusque sur le PDF de l’étudiant·e. Dans la note du cours, elle vaut ce que dit ta pratique : 0 en sommative, un travail non '
     + 'satisfaisant en spécifications, hors du portfolio en standards. Dans la complétion, elle compte comme non remise. Retirer le '
     + 'statut fait tout revenir.';
@@ -237,7 +237,8 @@ describe('L’aperçu de révision avant export (enseignant·e) dit ce que dira 
 describe('L’Aide — la ligne de la procédure, mot pour mot ; les quatre lignes par famille et le « 7/9 » ne bougent pas', () => {
     it('la ligne validée par Grégoire le 28 oct. à 6 h 49', () => {
         const aide = readFileSync(path.join(RACINE, 'index.html'), 'utf8');
-        expect(aide).toContain('Non recevable, ton évaluation est gardée, mais la copie montre «&nbsp;Non recevable&nbsp;» au lieu de sa note et de ses niveaux, jusque sur le PDF&nbsp;; dans la note, elle vaut ce que dit la règle ci-dessus. Verrouille ensuite.');
+        // ↻ 9 nov. 2026 (relevé « production plutôt que copie », entrée 56, validée par Grégoire) : « la copie montre » → « l'évaluation montre ».
+        expect(aide).toContain('Non recevable, ton évaluation est gardée, mais l\'évaluation montre «&nbsp;Non recevable&nbsp;» au lieu de sa note et de ses niveaux, jusque sur le PDF&nbsp;; dans la note, elle vaut ce que dit la règle ci-dessus. Verrouille ensuite.');
         expect(aide).not.toContain('tes critères gardent ton évaluation');
     });
 });

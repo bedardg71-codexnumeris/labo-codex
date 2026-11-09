@@ -153,7 +153,7 @@ async function reunirEtOrdonner(page) {
     await expect(page.locator('.pipeline-groupe-encadre')).toHaveCount(1);
     await expect(page.locator('.pipeline-groupe-encadre .pipeline-fichier-ligne')).toHaveCount(3);
     // La copie s'ouvre dans l'inspecteur, comme UNE copie.
-    await expect(page.locator('.pipeline-centre-preview')).toContainText('Copie de 3 fichiers');
+    await expect(page.locator('.pipeline-centre-preview')).toContainText('Production en 3 fichiers');
     // C (3e) monte : il reste dans la copie. Puis la flèche « Monter » de A (1re de sa copie) est fermée.
     await page.locator('[data-action="travauxUI.monterFichierPipeline"][data-param="2"]').click();
     await page.waitForTimeout(400);
@@ -210,7 +210,7 @@ async function confirmerEtImporter(page, titreProduction, reprise) {
     await page.locator('[data-action="travauxUI.appliquerEtImporter"]').click();
     const modale = page.locator('.modal-contenu').filter({ hasText: 'Confirmer' }).last();
     await modale.waitFor({ state: 'visible' });
-    await expect(modale).toContainText('1 copie(s) seront créées');
+    await expect(modale).toContainText('1 production(s) remise(s) seront créées');
     const lignes = modale.locator('.pipeline-confirmation-copies li');
     await expect(lignes).toHaveCount(1);
     await expect(lignes.first()).toContainText(titreProduction + (reprise ? ', reprise' : '') + ' – 3 pages');

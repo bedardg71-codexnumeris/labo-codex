@@ -235,7 +235,7 @@ test.describe('E2 — « Emprunter » l\'archive vérifiée d\'un trimestre (mod
             await (await attente).setFiles(fichier);
             let f = await lireFenetre(page);
             expect(f.titre).toBe('Faire revenir Hiver 2032 ?');
-            expect(f.message).toBe('Hiver 2032 revient dans l\'application tel qu\'il a été archivé, clos : 3 étudiant·es, 3 copies.\n\n' +
+            expect(f.message).toBe('Hiver 2032 revient dans l\'application tel qu\'il a été archivé, clos : 3 étudiant·es, 3 productions remises.\n\n' +
                 'Rien d\'autre n\'est touché : les autres trimestres, les cours et les réglages restent tels quels.');
             expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(IPAD_PORTRAIT.width);
             await f.fenetre.locator('.modal-actions button', { hasText: 'Faire revenir' }).click();
@@ -243,7 +243,7 @@ test.describe('E2 — « Emprunter » l\'archive vérifiée d\'un trimestre (mod
             f = await lireFenetre(page);
             expect({ titre: f.titre, message: f.message }).toEqual({
                 titre: 'Trimestre revenu',
-                message: 'Hiver 2032 est revenu, clos. Tu le trouves dans la bibliothèque des trimestres.\n\n2 copies revenues\n1 copie déjà là'
+                message: 'Hiver 2032 est revenu, clos. Tu le trouves dans la bibliothèque des trimestres.\n\n2 productions revenues\n1 production déjà là'
             });
             await fermerFenetre(page);
 

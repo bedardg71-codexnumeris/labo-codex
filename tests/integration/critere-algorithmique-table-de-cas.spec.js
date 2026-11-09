@@ -168,7 +168,7 @@ test('calculs · la table : un seuil en pourcentage, ajouter et retirer un palie
     await expect(niveau()).toHaveValue('');
     await cliquerDom(rangees(page, 'CC').nth(5).locator('[data-apercu-geste="palier"]'));
     const ap = apercu(page, 'CC');
-    await expect(ap.locator('.apercu-algo-flash')).toHaveText(/^Copie réglée sur le palier « Au-delà » : \d+ unités manquantes pour 12 calculs\.$/);
+    await expect(ap.locator('.apercu-algo-flash')).toHaveText(/^Production réglée sur le palier « Au-delà » : \d+ unités manquantes pour 12 calculs\.$/);
     await expect(rangees(page, 'CC').nth(5)).toHaveAttribute('data-atteint', '');
     await expect(rangees(page, 'CC').nth(5).locator('[data-palier-ici]')).toBeVisible();
     expect(await phrasePdf(page, 'CC')).toMatch(/Tu fais en moyenne 1 unité manquante à chaque \d+ calculs?\. Ce rapport dépasse la limite fixée\. Il serait important de demander de l’aide : Atelier des sciences\.$/);
@@ -199,7 +199,7 @@ test('mots · « Égalité » : le premier de la liste pour un critère neuf, le
     const ap = apercu(page, 'CM');
     await expect(ap.locator('.apercu-algo-reference')).toHaveText(['Aucune', 'Quelques', 'Beaucoup', 'Égalité']);
     await cliquerDom(ap.locator('.apercu-algo-reference[data-copie="egalite"]'));
-    await expect(ap.locator('.apercu-algo-flash')).toHaveText('Copie réglée : les codes 2 et 1, deux fois chacun, le 2 posé le premier.');
+    await expect(ap.locator('.apercu-algo-flash')).toHaveText('Production réglée : les codes 2 et 1, deux fois chacun, le 2 posé le premier.');
     await expect(ap.locator('.apercu-algo-dominant')).toHaveText('Le plus fréquent : code 1, Syntaxe (à égalité avec code 2 : le premier de ta liste)');
     await expect(ap.locator('[data-lecture="recurrent"]')).toContainText('Langue écrite : 4 erreurs (principalement : Syntaxe)');
     await expect(ap.locator('[data-etat-lecture="recurrent"]')).toHaveText('s’afficherait');

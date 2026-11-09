@@ -578,7 +578,7 @@ function changerStatutRemise(num) {
  */
 const AVIS_COPIE_NON_RECEVABLE = Object.freeze({
     titre: 'Travail non recevable',
-    corps: 'Ton évaluation est gardée, mais la copie montre «\u00a0Non recevable\u00a0» au lieu de sa note et de ses niveaux, '
+    corps: 'Ton évaluation est gardée, mais l\'évaluation montre «\u00a0Non recevable\u00a0» au lieu de sa note et de ses niveaux, '
         + 'jusque sur le PDF de l\'étudiant·e. Dans la note du cours, elle vaut ce que dit ta pratique\u00a0: 0 en sommative, '
         + 'un travail non satisfaisant en spécifications, hors du portfolio en standards. Dans la complétion, elle compte '
         + 'comme non remise. Retirer le statut fait tout revenir.',
@@ -763,8 +763,8 @@ function _etatReelCopieActiveSansStatut(ui) {
  */
 function refuserVerrouTravailEnCours() {
     if (!_lireTravailEnCoursCoche()) return false;
-    notifications.warning('Copie incomplète',
-        'Une copie « Incomplet ; travail en cours » ne se verrouille pas : décoche la case pour évaluer la copie terminée.');
+    notifications.warning('Production incomplète',
+        'Une évaluation « Incomplet ; travail en cours » ne se verrouille pas : décoche la case pour évaluer la production terminée.');
     return true;
 }
 

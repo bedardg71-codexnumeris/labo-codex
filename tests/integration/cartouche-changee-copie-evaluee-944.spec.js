@@ -161,8 +161,8 @@ test('#944 · copie évaluée, autre cartouche choisie au menu, « Remplacer » 
 
     await choisirAuMenu(page, 'CT939R');
     const d = await dialogue(page);
-    expect(d.message).toBe('Remplacer les commentaires de cette copie par ceux de la cartouche « Cartouche témoin (rev) » ? '
-        + 'Les retouches faites à la main dans la rétroaction de cette copie seront perdues.');
+    expect(d.message).toBe('Remplacer les commentaires de cette évaluation par ceux de la cartouche « Cartouche témoin (rev) » ? '
+        + 'Les retouches faites à la main dans la rétroaction de cette évaluation seront perdues.');
     expect(d.boutons).toEqual(['Garder les commentaires actuels', 'Remplacer']);
     expect(d.menu, 'le temps de la question, le menu garde l\'ancienne cartouche').toBe('CT939');
 

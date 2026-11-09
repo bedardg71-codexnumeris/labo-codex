@@ -709,7 +709,7 @@ function mettreAJourSelectionEval() {
     const compte = document.getElementById('eval-barre-selection-compte');
     const bouton = document.getElementById('eval-btn-reassigner-selection');
     if (barre) barre.classList.toggle('u-hide', n === 0);
-    if (compte) compte.textContent = n + ' ' + (n > 1 ? 'copies sélectionnées' : 'copie sélectionnée');
+    if (compte) compte.textContent = n + ' ' + (n > 1 ? 'rangées sélectionnées' : 'rangée sélectionnée');
     if (bouton) bouton.textContent = 'Réassigner la sélection (' + n + ')';
     const boutonCorbeille = document.getElementById('eval-btn-corbeille-selection');
     if (boutonCorbeille) boutonCorbeille.textContent = 'Mettre à la corbeille (' + n + ')';
@@ -797,9 +797,9 @@ function genererRecapReassignationHTML(recap, nomCible) {
     const li = (m) => '<li>' + echapperHtml(m.nomEleve) + ' — ' + echapperHtml(m.nomFichier) + '</li>';
     let html = '';
     if (n === 0) {
-        html += '<p class="reassigner-recap-vide">Aucune copie à déplacer vers « ' + echapperHtml(nomCible) + ' ».</p>';
+        html += '<p class="reassigner-recap-vide">Aucun fichier à déplacer vers « ' + echapperHtml(nomCible) + ' ».</p>';
     } else {
-        html += '<p><strong>' + pl(n, 'copie', 'copies') + '</strong> vers « ' + echapperHtml(nomCible) + ' » :</p>' +
+        html += '<p><strong>' + pl(n, 'fichier', 'fichiers') + '</strong> vers « ' + echapperHtml(nomCible) + ' » :</p>' +
             '<ul class="reassigner-recap-liste">' + recap.aDeplacer.map(li).join('') + '</ul>';
     }
     if (recap.conflits.length) {
@@ -820,16 +820,16 @@ function genererRecapReassignationHTML(recap, nomCible) {
             const k = liste.length;
             html += '<div class="reassigner-recap-bloc"><p>' + k + (k > 1 ? ' évaluations déjà faites' : ' évaluation déjà faite') +
                 ' sur « ' + echapperHtml(ancienne) + ' » ' + (k > 1 ? 'n’auront' : 'n’aura') +
-                ' plus de copie liée (l’évaluation elle-même est conservée).</p><ul class="reassigner-recap-liste">' +
+                ' plus de fichier lié (l’évaluation elle-même est conservée).</p><ul class="reassigner-recap-liste">' +
                 liste.map(li).join('') + '</ul></div>';
         });
     }
     if (recap.dejaSurCible.length) {
-        html += '<div class="reassigner-recap-bloc"><p>' + pl(recap.dejaSurCible.length, 'copie déjà sur la cible, laissée telle quelle', 'copies déjà sur la cible, laissées telles quelles') + '.</p></div>';
+        html += '<div class="reassigner-recap-bloc"><p>' + pl(recap.dejaSurCible.length, 'fichier déjà sur la cible, laissé tel quel', 'fichiers déjà sur la cible, laissés tels quels') + '.</p></div>';
     }
     if (recap.ambigus.length) {
-        html += '<div class="reassigner-recap-bloc reassigner-recap-conflit"><p><strong>' + pl(recap.ambigus.length, 'copie non déplacée', 'copies non déplacées') +
-            '</strong> : deux copies d’un·e même étudiant·e sont cochées. Choisis-en une.</p><ul class="reassigner-recap-liste">' +
+        html += '<div class="reassigner-recap-bloc reassigner-recap-conflit"><p><strong>' + pl(recap.ambigus.length, 'fichier non déplacé', 'fichiers non déplacés') +
+            '</strong> : deux fichiers d’un·e même étudiant·e sont cochés. Choisis-en un.</p><ul class="reassigner-recap-liste">' +
             recap.ambigus.map(li).join('') + '</ul></div>';
     }
     return html;
@@ -842,7 +842,7 @@ function reassignerSelectionEval() {
     const ids = obtenirSelectionEval();
     if (ids.length === 0) return;
     if (typeof travauxUI === 'undefined' || typeof travauxUI.mesurerReassignation !== 'function' || typeof travauxUI.ecrireReassignation !== 'function') {
-        notifications.erreur('Réassignation impossible', 'Le module des copies n’est pas chargé.');
+        notifications.erreur('Réassignation impossible', 'Le module des fichiers n’est pas chargé.');
         return;
     }
     const productions = obtenirDonneesSelonMode('productions') || [];
@@ -864,7 +864,7 @@ function reassignerSelectionEval() {
     overlay.innerHTML =
         '<div class="modal-contenu modal-compact" style="max-width: 560px;">' +
             '<button class="modal-fermer" data-action="fermerOverlayParent"><img src="icons/icon-close-window.svg" alt="" class="modal-close-icon"></button>' +
-            '<h3 class="modal-titre">Réassigner ' + ids.length + (ids.length > 1 ? ' copies' : ' copie') + '</h3>' +
+            '<h3 class="modal-titre">Réassigner ' + ids.length + (ids.length > 1 ? ' fichiers' : ' fichier') + '</h3>' +
             '<label for="reassigner-selection-cible" style="font-size: 0.85em; color: var(--texte-secondaire);">Production cible :</label>' +
             '<select id="reassigner-selection-cible" class="controle-form" style="margin: 4px 0 12px 0; width: 100%;">' +
                 '<option value="">— Choisir une production —</option>' + optionsProductions +
@@ -903,7 +903,7 @@ function reassignerSelectionEval() {
         zoneRecap.innerHTML = genererRecapReassignationHTML(recapCourant, nomCibleCourant);
         const n = recapCourant.aDeplacer.length;
         btnConfirmer.disabled = n === 0;
-        btnConfirmer.textContent = n === 0 ? 'Réassigner' : 'Réassigner ' + n + (n > 1 ? ' copies' : ' copie');
+        btnConfirmer.textContent = n === 0 ? 'Réassigner' : 'Réassigner ' + n + (n > 1 ? ' fichiers' : ' fichier');
     });
 
     // La question a été lue et nommait chaque conflit : on écrit chaque mesure, sans autre porte.
@@ -912,7 +912,7 @@ function reassignerSelectionEval() {
         let nb = 0;
         recapCourant.aDeplacer.forEach(m => { if (travauxUI.ecrireReassignation(m)) nb++; });
         overlay.remove();
-        notifications.succes(nb + (nb > 1 ? ' copies réassignées' : ' copie réassignée') + ' vers « ' + nomCibleCourant + ' »');
+        notifications.succes(nb + (nb > 1 ? ' fichiers réassignés' : ' fichier réassigné') + ' vers « ' + nomCibleCourant + ' »');
         appliquerFiltres();
     });
 }
@@ -968,7 +968,7 @@ function composerRecapCorbeille(ids, donnees) {
             evaluations.find(ev => estDuCoupleDuFichier(ev, f) && !ev.remplaceeParId);
         aDeplacer.push({
             fichierId: f.id,
-            nomEleve: e ? ((e.prenom || '') + ' ' + (e.nom || '')).trim() : 'Copie sans étudiant·e',
+            nomEleve: e ? ((e.prenom || '') + ' ' + (e.nom || '')).trim() : 'Fichier sans étudiant·e',
             nomFichier: f.nomFichier || f.id,
             evaluee: !!(evaluation && Array.isArray(evaluation.criteres) && evaluation.criteres.length > 0),
             reprise: _travailLieAUneReprise(evaluations, f.etudiantDA, f.productionId)
@@ -992,11 +992,11 @@ function genererRecapCorbeilleHTML(recap) {
     const noms = (liste) => '<ul class="reassigner-recap-liste">' + liste.map(c => '<li>' + echapperHtml(c.nomEleve) + '</li>').join('') + '</ul>';
     let html = '<p>Tu pourras les restaurer depuis la corbeille pendant 30 jours.</p>';
     if (recap.evaluees.length) {
-        html += '<div class="reassigner-recap-bloc"><p><strong>' + pl(recap.evaluees.length, 'copie déjà évaluée', 'copies déjà évaluées') +
-            '</strong> : leur évaluation et leur note restent dans la liste, sans copie liée.</p>' + noms(recap.evaluees) + '</div>';
+        html += '<div class="reassigner-recap-bloc"><p><strong>' + pl(recap.evaluees.length, 'production déjà évaluée', 'productions déjà évaluées') +
+            '</strong> : leur évaluation et leur note restent dans la liste, sans fichier lié.</p>' + noms(recap.evaluees) + '</div>';
     }
     if (recap.reprises.length) {
-        html += '<div class="reassigner-recap-bloc reassigner-recap-conflit"><p><strong>' + pl(recap.reprises.length, 'copie liée', 'copies liées') +
+        html += '<div class="reassigner-recap-bloc reassigner-recap-conflit"><p><strong>' + pl(recap.reprises.length, 'fichier lié', 'fichiers liés') +
             ' à une reprise.</strong> Mettre le fichier à la corbeille ne retire ni la reprise ni le statut « remplacée » de l’évaluation d’origine.</p>' +
             noms(recap.reprises) + '</div>';
     }
@@ -1034,7 +1034,7 @@ function mettreSelectionALaCorbeille() {
     });
     const n = recap.aDeplacer.length;
     if (n === 0) return;
-    const copies = n > 1 ? n + ' copies' : 'une copie';
+    const copies = n > 1 ? n + ' fichiers' : 'un fichier';
 
     const existante = document.getElementById('corbeille-selection-overlay');
     if (existante) existante.remove();
@@ -1058,7 +1058,7 @@ function mettreSelectionALaCorbeille() {
     document.getElementById('corbeille-selection-btn-confirmer').addEventListener('click', function() {
         const nb = travauxStockage.deplacerEnCorbeilleLot(recap.aDeplacer.map(c => c.fichierId));
         overlay.remove();
-        notifications.succes(nb + (nb > 1 ? ' copies mises à la corbeille.' : ' copie mise à la corbeille.'));
+        notifications.succes(nb + (nb > 1 ? ' fichiers mis à la corbeille.' : ' fichier mis à la corbeille.'));
         _rafraichirApresCorbeille();
     });
 }
@@ -1661,7 +1661,7 @@ function genererLigneHTML(ligne) {
     return `
         <tr data-evaluation-id="${echapperHtml(ligne.evaluationId || '')}" data-da="${echapperHtml(ligne.da)}" data-production-id="${echapperHtml(ligne.productionId || '')}"${classeRemplacee}>
             <td class="td-center eval-td-selection">${fichierLigne
-                ? `<input type="checkbox" class="eval-selection-cb" data-fichier-id="${echapperHtml(fichierLigne.id)}" data-on-change="mettreAJourSelectionEval" aria-label="${echapperHtml('Sélectionner la copie de ' + (ligne.prenom || '') + ' ' + (ligne.nom || ''))}">`
+                ? `<input type="checkbox" class="eval-selection-cb" data-fichier-id="${echapperHtml(fichierLigne.id)}" data-on-change="mettreAJourSelectionEval" aria-label="${echapperHtml('Sélectionner la production de ' + (ligne.prenom || '') + ' ' + (ligne.nom || ''))}">`
                 : ''}</td>
             <td class="td-left">${echapperHtml(daAffiche)}</td>
             <td class="td-left">${echapperHtml(ligne.nom)}</td>
@@ -2032,7 +2032,7 @@ function ouvrirProprieteFichier(fichierId) {
     // Jeton de reprise (#561) : une case, visible seulement quand les jetons sont actifs.
     var configJetons = (typeof obtenirConfigJetons === 'function') ? obtenirConfigJetons() : null;
     var blocJeton = (configJetons && configJetons.actif)
-        ? '<label class="prop-fichier-jeton"><input type="checkbox" id="prop-fichier-jeton-reprise"> Cette copie est une reprise : appliquer un jeton de reprise sur la production choisie</label>'
+        ? '<label class="prop-fichier-jeton"><input type="checkbox" id="prop-fichier-jeton-reprise"> Ce fichier est une reprise : appliquer un jeton de reprise sur la production choisie</label>'
         : '';
 
     // Étudiants du groupe actif
@@ -2136,12 +2136,12 @@ function ouvrirProprieteFichier(fichierId) {
         if (nouvelleProd !== (fichier.productionId || '')) association.productionId = nouvelleProd;
         if (Object.keys(association).length > 0) {
             if (typeof travauxUI === 'undefined' || typeof travauxUI.reassignerCopie !== 'function') {
-                notifications.erreur('Réassignation impossible', 'Le module des copies n’est pas chargé.');
+                notifications.erreur('Réassignation impossible', 'Le module des fichiers n’est pas chargé.');
                 return;
             }
             var reassigne = await travauxUI.reassignerCopie(fichierId, association);
             if (!reassigne) {
-                notifications.info('Réassignation annulée', 'La copie garde son étudiant·e et sa production ; rien n’a été modifié.');
+                notifications.info('Réassignation annulée', 'Le fichier garde son étudiant·e et sa production ; rien n’a été modifié.');
                 return;
             }
             modifie = true;

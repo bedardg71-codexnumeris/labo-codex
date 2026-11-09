@@ -3661,7 +3661,7 @@ function rendreBlocFormuleAlgo(critere, ctx) {
                 <div class="calc-choix" role="radiogroup" aria-label="Le calcul de la note">${cartes.join('')}
                 </div>
                 <p class="calc-legende">La note reste entre 0 et la pondération du critère.</p>
-                <p class="calc-legende">Une copie déjà évaluée garde sa note. Elle ne suit le nouveau calcul que si tu la déverrouilles et la modifies.</p>${f.herite && critere.modeleFormule ? `
+                <p class="calc-legende">Une évaluation déjà enregistrée garde sa note. Elle ne suit le nouveau calcul que si tu la déverrouilles et la modifies.</p>${f.herite && critere.modeleFormule ? `
                 <p class="calc-legende calc-inconnu">Le modèle « ${esc(critere.modeleFormule)} » enregistré dans cette grille est inconnu de cette version. Le modèle historique est appliqué en attendant.</p>` : ''}${K ? K.rendre(critere, ctx) : ''}${_calculsPourLesPhrases(r)}
             </div>`;
 }
@@ -3693,7 +3693,7 @@ function _calculsPourLesPhrases(r) {
                     <li class="calc-perso-item" data-calcul-phrases="${esc(c.id)}">
                         <strong class="calc-nom">${esc(c.nom)}</strong>
                         <div class="calc-formule calc-formule--ligne" aria-label="Le calcul, en blocs">${pastilles}</div>
-                        <p class="calc-legende">Sur la copie fictive, il vaudrait <span data-calcul-phrases-valeur="${esc(c.id)}"></span>. Il est dans la palette et dans le menu « Selon » des tables.</p>${gestes}
+                        <p class="calc-legende">Sur la production fictive, il vaudrait <span data-calcul-phrases-valeur="${esc(c.id)}"></span>. Il est dans la palette et dans le menu « Selon » des tables.</p>${gestes}
                     </li>`;
     }).join('');
     return `
@@ -3733,7 +3733,7 @@ function _carteCalculNote(r, m) {
                     <div class="calc-carte" data-actif>${tete}${reglages}
                         <p class="calc-legende">Le calcul, en blocs :</p>
                         <div class="calc-formule" aria-label="Le calcul, en blocs"><span class="calc-op">Note =</span> ${_pastillesDuCalcul(r)}</div>
-                        <p class="calc-copie" data-calcul-copie><span class="calc-legende">Sur la copie fictive : </span><span data-calcul-copie-texte></span></p>${_casZeroDuCalcul(r)}${gestes}
+                        <p class="calc-copie" data-calcul-copie><span class="calc-legende">Sur la production fictive : </span><span data-calcul-copie-texte></span></p>${_casZeroDuCalcul(r)}${gestes}
                     </div>`;
 }
 
@@ -3756,7 +3756,7 @@ function _casZeroDuCalcul(r) {
                             </div>`).join('');
     return rangees ? `
                         <div class="calc-cas">
-                            <p class="calc-cas-titre">Quand une donnée de la copie vaut 0</p>${rangees}${off.divise ? `
+                            <p class="calc-cas-titre">Quand une donnée de la production vaut 0</p>${rangees}${off.divise ? `
                             <p class="calc-legende">Une division par une donnée qui vaut 0 n’a pas de résultat : tu dis ce que vaut alors la note.</p>` : ''}
                         </div>` : '';
 }
@@ -4033,7 +4033,7 @@ function rendreActivationCodes(critere, ctx) {
     const n = apercu.length;
     const sansPoids = (critere.sousCriteres || []).length - n;
     const note = actif
-        ? `Sur toute copie évaluée avec cette grille, la palette des codes montre ${n === 1 ? 'ce sous-critère' : 'ces ' + n + ' sous-critères'} : le numéro est le code, avec le nom, la couleur et l'observation d'ici.`
+        ? `Sur toute production évaluée avec cette grille, la palette des codes montre ${n === 1 ? 'ce sous-critère' : 'ces ' + n + ' sous-critères'} : le numéro est le code, avec le nom, la couleur et l'observation d'ici.`
         : `Ce critère utilise encore les dix codes de la palette générale ; tu les configures dans Annoter, sous l’engrenage de la palette.`;   // lot 3a (ébauche du 26 oct.)
     const precision = sansPoids > 0
         ? ` Un sous-critère de pondération 0 n'est pas un code posable (${sansPoids === 1 ? 'un ici' : sansPoids + ' ici'}).`
@@ -4055,7 +4055,7 @@ function rendreActivationCodes(critere, ctx) {
                                 Utiliser ces sous-critères comme codes d'annotation
                             </label>
                             <small class="sous-criteres-codes-note">${esc(note)}${esc(precision)}${esc(seulAlesRecevoir)}</small>
-                            <small class="sous-criteres-codes-palette">Sans cette case, la copie utilise la palette générale (Annoter › palette). Cochée, ce sont ces sous-critères qui deviennent les codes de la copie.</small>
+                            <small class="sous-criteres-codes-palette">Sans cette case, la production utilise la palette générale (Annoter › palette). Cochée, ce sont ces sous-critères qui deviennent les codes de la production.</small>
                         </div>`;
 }
 

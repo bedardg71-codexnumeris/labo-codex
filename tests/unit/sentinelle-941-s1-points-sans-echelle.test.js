@@ -94,8 +94,8 @@ describe('#941 S1 · S.d — témoins de source', () => {
         }
         expect(source('js/evaluation-retroaction.js')).toContain('if (niv || aDesPoints) {');
     });
-    it('le PDF écrit « Note de la copie : » et la note cumulée d\'une sommative', () => {
-        expect(source('js/synthese-retroaction-rendu.js')).toContain("'Note de la copie : '");
+    it('le PDF écrit « Note : » (« Note de la copie : » jusqu\'au 9 nov. 2026) et la note cumulée d\'une sommative', () => {
+        expect(source('js/synthese-retroaction-rendu.js')).toContain("'Note : '");
         expect(source('js/synthese-retroaction-data.js')).toContain('|| construireNoteSommative(da)');
     });
 });

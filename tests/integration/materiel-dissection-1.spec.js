@@ -99,7 +99,7 @@ test('dissection · coller, poser deux étiquettes au pointeur, lire la grille c
     await page.locator('#dissection-palette [data-param="critere"]').click();
     await expect(page.locator('#dissection-palette [data-param="critere"]')).toHaveAttribute('aria-pressed', 'true');
     await expect(page.locator('#dissection-terminer')).toBeVisible();
-    await expect(page.locator('#dissection-bandeau-precision')).toHaveText('Critère : Ce qui est attendu : la question que tu te poses devant la copie');
+    await expect(page.locator('#dissection-bandeau-precision')).toHaveText('Critère : Ce qui est attendu : la question que tu te poses devant la production d’un·e étudiant·e');
     expect(await touchAction()).toBe('none');
     await geste(page, ['Question 1 : le sens du passage fictif']);
     // La flèche de l'étiquette en main vers son morceau.

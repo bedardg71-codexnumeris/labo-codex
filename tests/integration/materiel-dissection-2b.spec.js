@@ -91,7 +91,7 @@ test('dissection 2b · l’exemple, « des niveaux » choisi, le tableau rempli,
     // Les deux logiques : le choix, « des points » coché, aucun tableau ; le bouton crée en points.
     const parPoints = page.locator('#dissection-compte-points'), parNiveaux = page.locator('#dissection-compte-niveaux');
     const bouton = page.locator('#dissection-creer [data-action="materielDissection.creer"]');
-    await expect(page.locator('#dissection-creer-choix legend')).toHaveText('Le résultat d’une copie viendrait :');
+    await expect(page.locator('#dissection-creer-choix legend')).toHaveText('Le résultat d’une évaluation viendrait :');
     await expect(parPoints).toBeChecked();
     await expect(parNiveaux).not.toBeChecked();
     await expect(page.locator('#dissection-creer-niveaux')).toHaveCount(0);
@@ -101,7 +101,8 @@ test('dissection 2b · l’exemple, « des niveaux » choisi, le tableau rempli,
     await expect(page.locator('.dissection-creer-nom')).toHaveAttribute('data-tooltip', 'materiel-nom-grille');
     await expect(bouton).toHaveAttribute('data-tooltip', 'materiel-creer');
     await page.locator('#dissection-creer-choix legend').hover();
-    await expect(page.locator('#tooltip-bulle.tooltip-visible .tooltip-contenu')).toHaveText('Ta grille porte des points et des niveaux : choisis lequel donne le résultat d’une copie. Avec les niveaux, tu diras ensuite la note que vaut chacun.');
+    // ↻ 9 nov. 2026, lot « production plutôt que copie » (rapport du 9 nov., § 4, rangée 92, validée par Grégoire) : la bulle dit « évaluation ».
+    await expect(page.locator('#tooltip-bulle.tooltip-visible .tooltip-contenu')).toHaveText('Ta grille porte des points et des niveaux : choisis lequel donne le résultat d’une évaluation. Avec les niveaux, tu diras ensuite la note que vaut chacun.');
     await page.mouse.move(0, 0);
 
     // « des niveaux » : le tableau, une rangée par niveau dans l'ordre lu, ses champs VIDES.

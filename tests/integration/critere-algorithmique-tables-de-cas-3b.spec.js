@@ -92,7 +92,7 @@ test('calculs · ajouter une table, changer « Selon », un texte avec un bloc, 
     expect(await actif(page)).toBe('tcas-GC-0-t1-selon');
     const c = carte(page, 'CC');
     await expect(c.locator('.table-cas-titre')).toHaveText('Table de cas');
-    await expect(c.locator('.table-cas-ou')).toHaveText('L’étudiant·e lit le cas de sa copie sous le critère, après les paliers. Une table neuve naît vide : un cas laissé vide n’ajoute rien à ce que lit l’étudiant·e.');
+    await expect(c.locator('.table-cas-ou')).toHaveText('L’étudiant·e lit le cas de sa production sous le critère, après les paliers. Une table neuve naît vide : un cas laissé vide n’ajoute rien à ce que lit l’étudiant·e.');
     await expect(c.locator('.table-cas-entete span')).toHaveText(['Quand', 'L’étudiant·e lit']);
     const options = await c.locator('select option').evaluateAll((els) => els.map((o) => [o.value, o.textContent, o.disabled]));
     expect(options).toEqual([['erreurs', 'Le compte des unités manquantes', false], ['mots', 'Le compte des calculs', false], ['note', 'La note du critère', false],
@@ -128,7 +128,7 @@ test('calculs · ajouter une table, changer « Selon », un texte avec un bloc, 
     // « Voir ce que l'étudiant·e lirait dans ce cas » : la copie réglée, la rangée marquée, le texte avec sa source.
     await cliquerDom(carte(page, 'CC').locator('.table-cas-rangee').nth(1).locator('[data-apercu-geste="cas"]'));
     // La copie fictive de ce critère n'a pas d'étendue (sa formule n'en demande pas) : le message ne dit pas « pour 0 calcul ».
-    await expect(apercu(page, 'CC').locator('.apercu-algo-flash')).toHaveText('Copie réglée : 1 unité manquante.');
+    await expect(apercu(page, 'CC').locator('.apercu-algo-flash')).toHaveText('Production réglée : 1 unité manquante.');
     await expect(carte(page, 'CC').locator('.table-cas-rangee').nth(1)).toHaveAttribute('data-atteint', '');
     await expect(carte(page, 'CC').locator('.table-cas-rangee').nth(1).locator('[data-cas-ici]')).toBeVisible();
     const segment = apercu(page, 'CC').locator('[data-lecture="pdf"] .apercu-algo-segment').last();

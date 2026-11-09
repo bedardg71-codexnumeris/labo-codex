@@ -109,7 +109,11 @@ describe('#1152 lot 2c · ce que les entrées affirment, lu dans le code', () =>
         const ecran = lire('js', 'evaluation-chargement.js').match(/const TEXTES_BAREME_EVAL = \{ ouTape: '([^']+)', horsBareme: '([^']+)', aCompleter: '([^']+)' \}/);
         expect(ecran).toBeTruthy();
         const t = texteDe('annoter-evaluer');
-        expect(t).toContain(h1.charAt(0).toLowerCase() + h1.slice(1, -1));   // « touche la tranche qui décrit la copie, puis ses points »
+        // ↻ « Production plutôt que copie » (9 nov. 2026, validé par Grégoire, entrée 45 du relevé) : « la copie » devient
+        // « la production » ; le reste de H1, mot pour mot.
+        const h1Lot = h1.replace('décrit la copie', 'décrit la production');
+        expect(h1Lot).not.toBe(h1);
+        expect(t).toContain(h1Lot.charAt(0).toLowerCase() + h1Lot.slice(1, -1));   // « touche la tranche qui décrit la production, puis ses points »
         for (const mot of ecran.slice(1)) expect(t, mot).toContain(`« ${mot} »`);
     });
 
@@ -134,7 +138,8 @@ describe('#1152 lot 2c · ce que les entrées affirment, lu dans le code', () =>
 
     it('liste-evaluations : les copies se restaurent pendant la durée de la corbeille', () => {
         const jours = Number(lire('js', 'travaux-stockage.js').match(/const DUREE_CORBEILLE_MS = (\d+) \* 24 \* 60 \* 60 \* 1000/)[1]);
-        expect(texteDe('liste-evaluations')).toContain(`elles s'y restaurent pendant ${jours} jours`);
+        // ↻ 9 nov. 2026 (entrée 42 du relevé « production plutôt que copie ») : la corbeille reçoit les fichiers ; « ils ».
+        expect(texteDe('liste-evaluations')).toContain(`ils s'y restaurent pendant ${jours} jours`);
     });
 
     it('irrecevables : quatre situations, dans l\'ordre de la carte ; le sous-titre que cite l\'infobulle `eval-integrite` existe', () => {

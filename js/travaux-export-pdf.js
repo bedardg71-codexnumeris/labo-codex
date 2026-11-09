@@ -719,7 +719,7 @@
             // unitaire ; ANORMAL en export Léa, qui part des évaluations actives.
             // C'est l'appelant qui juge, d'où la raison remontée plutôt qu'un
             // silence.
-            return { ajoutee: false, raison: 'aucune évaluation enregistrée pour cette copie' };
+            return { ajoutee: false, raison: 'aucune évaluation enregistrée pour cette production' };
         }
 
         // 3. Récupérer l'annotation (peut être null). #912 — sans copie, `fichier.id` est
@@ -737,7 +737,7 @@
         // et l'enseignant·e l'apprend ICI, avant de remettre la copie, pas en la
         // relisant : une note trop haute passe, un avertissement ne passe pas.
         const avertissement = (feedback.portee && feedback.portee.incomplete)
-            ? 'la note de cette copie ne porte pas sur toute la grille (' + feedback.portee.texte + ') : la page de rétroaction le dit et ne conclut pas'
+            ? 'la note de cette évaluation ne porte pas sur toute la grille (' + feedback.portee.texte + ') : la page de rétroaction le dit et ne conclut pas'
             : null;
 
         // 5. Générer le HTML
@@ -933,7 +933,7 @@
     async function exporterSyntheseSeule(da, productionId) {
         const sansCopie = { id: null, etudiantDA: da, productionId: productionId };
         if (!trouverEvaluationPourSynthese(sansCopie, productionId)) {
-            alert('Aucune copie ni évaluation enregistrée pour cet·te étudiant·e et cette production.');
+            alert('Aucun fichier ni évaluation enregistrés pour cet·te étudiant·e et cette production.');
             return;
         }
 

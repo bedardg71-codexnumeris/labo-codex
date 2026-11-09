@@ -330,7 +330,7 @@ describe('lot 4 · C.D — les sous-critères : UNE seule liste (lot A du 5 sept
         expect(bloc).toContain('Utiliser ces sous-critères comme codes d\'annotation');
         expect(pos(bloc, 'class="sous-criteres-codes')).toBeGreaterThan(pos(bloc, 'sous-criteres-header'));
         expect(pos(bloc, 'class="sous-criteres-codes')).toBeLessThan(pos(bloc, 'class="sous-critere-item avec-outils"'));
-        expect(bloc).toContain('sous-criteres-codes-palette">Sans cette case, la copie utilise la palette générale (Annoter › palette). Cochée, ce sont ces sous-critères qui deviennent les codes de la copie.</small>');
+        expect(bloc).toContain('sous-criteres-codes-palette">Sans cette case, la production utilise la palette générale (Annoter › palette). Cochée, ce sont ces sous-critères qui deviennent les codes de la production.</small>');
         // Décochée : ni couleur ni observation, et le mot « rétroaction » n'apparaît pas dans le bloc.
         expect(bloc).not.toContain('data-champ="retroaction"');
         expect(bloc).not.toContain('sous-critere-couleur-groupe');

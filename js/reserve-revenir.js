@@ -53,34 +53,34 @@
 */
 var MOTS = {
     bouton: 'Faire revenir',
-    infobulle: 'Remettre dans l\'application les copies de cette archive',
-    enCours: 'Retour des copies…',
-    compte: function(n, m) { return n + ' copies sur ' + m; },
+    infobulle: 'Ramener dans l\'application les productions remises de cette archive',
+    enCours: 'Retour des productions remises…',
+    compte: function(n, m) { return n + ' productions sur ' + m; },
     fenetre: {
-        titre: 'Faire revenir les copies',
+        titre: 'Faire revenir les productions remises',
         texte: function(m) {
-            return 'Les copies de cette archive (' + m + ') reviennent sous leurs fiches, quand le fichier n\'est plus dans l\'application.\n\n' +
-                'Rien n\'est remplacé ni effacé : une copie déjà là, ou qui a changé depuis l\'archive, reste telle quelle.';
+            return 'Les productions remises de cette archive (' + m + ') reviennent sous leurs fiches, quand le fichier n\'est plus dans l\'application.\n\n' +
+                'Rien n\'est remplacé ni effacé : une production déjà là, ou qui a changé depuis l\'archive, reste telle quelle.';
         },
         confirmer: 'Faire revenir'
     },
     bilan: {
-        titre: 'Copies revenues',
-        titreAbimee: 'Copies revenues, archive abîmée',
-        enTeteAbimee: function(n) { return n + (n > 1 ? ' copies de l\'archive sont abîmées' : ' copie de l\'archive est abîmée') + ' : elle' + (n > 1 ? 's ne sont pas revenues' : ' n\'est pas revenue') + '. Vérifie de nouveau cette archive.'; },
-        revenues: function(n) { return n + (n > 1 ? ' copies revenues' : ' copie revenue'); },
-        dejaLa: function(n) { return n + (n > 1 ? ' copies déjà là' : ' copie déjà là'); },
-        changees: function(n) { return n + (n > 1 ? ' copies changées depuis l\'archive, laissées telles quelles' : ' copie changée depuis l\'archive, laissée telle quelle'); },
-        sansFiche: function(n) { return n + (n > 1 ? ' copies sans fiche dans l\'application' : ' copie sans fiche dans l\'application'); },
-        supprimes: function(n) { return n + (n > 1 ? ' copies d\'étudiant·es supprimé·es' : ' copie d\'un·e étudiant·e supprimé·e'); },
-        nonEcrites: function(n) { return n + (n > 1 ? ' copies n\'ont pas pu être écrites' : ' copie n\'a pas pu être écrite') + ' (espace du navigateur ?)'; }
+        titre: 'Productions revenues',
+        titreAbimee: 'Productions revenues, archive abîmée',
+        enTeteAbimee: function(n) { return n + (n > 1 ? ' fichiers de l\'archive sont abîmés' : ' fichier de l\'archive est abîmé') + ' : il' + (n > 1 ? 's ne sont pas revenus' : ' n\'est pas revenu') + '. Vérifie de nouveau cette archive.'; },
+        revenues: function(n) { return n + (n > 1 ? ' productions revenues' : ' production revenue'); },
+        dejaLa: function(n) { return n + (n > 1 ? ' productions déjà là' : ' production déjà là'); },
+        changees: function(n) { return n + (n > 1 ? ' productions changées depuis l\'archive, laissées telles quelles' : ' production changée depuis l\'archive, laissée telle quelle'); },
+        sansFiche: function(n) { return n + (n > 1 ? ' productions sans fiche dans l\'application' : ' production sans fiche dans l\'application'); },
+        supprimes: function(n) { return n + (n > 1 ? ' productions d\'étudiant·es supprimé·es' : ' production d\'un·e étudiant·e supprimé·e'); },
+        nonEcrites: function(n) { return n + (n > 1 ? ' fichiers n\'ont pas pu être écrits' : ' fichier n\'a pas pu être écrit') + ' (espace du navigateur ?)'; }
     },
     refus: {
-        titre: 'Impossible de faire revenir les copies',
+        titre: 'Impossible de faire revenir les productions remises',
         nonVerifiee: 'Cette archive n\'est pas vérifiée dans ce navigateur. Vérifie-la d\'abord.',
         changeeDepuis: 'Cette archive a changé depuis sa vérification. Vérifie-la de nouveau.',
-        sansEmpreintes: 'Cette archive date d\'avant les empreintes : ses copies ne peuvent pas revenir. Archive de nouveau ce groupe.',
-        sansMagasin: 'Le stockage des copies n\'est pas disponible dans cette page.'
+        sansEmpreintes: 'Cette archive date d\'avant les empreintes : ses productions remises ne peuvent pas revenir. Archive de nouveau ce groupe.',
+        sansMagasin: 'Le stockage des fichiers n\'est pas disponible dans cette page.'
     }
 };
 

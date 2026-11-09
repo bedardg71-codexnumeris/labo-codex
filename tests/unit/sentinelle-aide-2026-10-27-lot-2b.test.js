@@ -129,7 +129,7 @@ describe('#1152 lot 2b · ce que les entrées affirment, lu dans le code', () =>
     });
 
     it('sous-criteres : la règle d\'une copie déjà évaluée est la phrase de l\'étape « Note calculée », mot pour mot', () => {
-        const ecran = lire('js', 'grilles.js').match(/<p class="calc-legende">(Une copie déjà évaluée garde sa note\.[^<]+)<\/p>/);
+        const ecran = lire('js', 'grilles.js').match(/<p class="calc-legende">(Une évaluation déjà enregistrée garde sa note\.[^<]+)<\/p>/);
         expect(ecran).toBeTruthy();
         expect(net(entree('sous-criteres').querySelector('.alerte-attention').textContent)).toContain(net(ecran[1]));
     });
@@ -137,7 +137,7 @@ describe('#1152 lot 2b · ce que les entrées affirment, lu dans le code', () =>
     it('sous-criteres : les gestes de l\'atelier cités existent dans son code', () => {
         const t = texteDe('sous-criteres');
         const gestes = ['Note calculée', 'Cas d\'interprétation', 'Retoucher ce calcul', 'Composer ton propre calcul',
-            'Ce calcul sert', 'Quand une donnée de la copie vaut 0', 'Le calcul, en blocs', 'Fixer une limite',
+            'Ce calcul sert', 'Quand une donnée de la production vaut 0', 'Le calcul, en blocs', 'Fixer une limite',
             'Retirer la limite', '+ Ajouter une table de cas', 'Simulation de ce que l\'étudiant·e lirait'];
         for (const g of gestes) {
             expect(t, g).toContain(`« ${g} »`);

@@ -81,59 +81,59 @@ function _jour(iso) {
 
 var CHEMIN = 'Réglages › Données › Archives';
 var DONNEES = 'résultats des étudiant·es et du groupe, grilles, rétroactions';
-var ANNOTATIONS = 'Les annotations restent aussi, mais ne se voient qu\'avec leur copie.';
+var ANNOTATIONS = 'Les annotations restent aussi, mais ne se voient qu\'avec leur production.';
 function _revenir(nom) { return CHEMIN + ', ligne de ' + nom + ', « Faire revenir »'; }
 
 var MOTS = {
-    menu: 'Archiver les copies…',
-    menuTitre: 'Retirer de l\'application les copies de ce trimestre : son archive vérifiée les garde, ses données restent',
+    menu: 'Archiver les productions remises…',
+    menuTitre: 'Retirer de l\'application les productions remises de ce trimestre : son archive vérifiée les garde, ses données restent',
     enCours: 'Comparaison avec l\'archive…',
-    retrait: 'Archivage des copies…',
+    retrait: 'Archivage des productions remises…',
     fenetre: {
-        titre: function(nom) { return 'Archiver les copies de ' + nom + ' ?'; },
+        titre: function(nom) { return 'Archiver les productions remises de ' + nom + ' ?'; },
         texte: function(c) {
             var lignes = [
-                _pluriel(c.copies, 'copie quittera', 'copies quitteront') + ' l\'application, environ ' + window.TailleFichier.dire(c.taille) + '.',
+                _pluriel(c.copies, 'production quittera', 'productions quitteront') + ' l\'application, environ ' + window.TailleFichier.dire(c.taille) + '.',
                 'Son archive, vérifiée le ' + _jour(c.dateVerification) + ', les garde telles quelles : « Faire revenir » les ramènera.',
                 'Toutes les données de ' + c.nom + ' restent dans l\'application : ' + DONNEES + '. ' + ANNOTATIONS,
-                'Garde bien cette archive : c\'est elle qui conserve les copies.'
+                'Garde bien cette archive : c\'est elle qui conserve les productions.'
             ];
-            if (c.laissees) lignes.push(_pluriel(c.laissees, 'copie d\'un·e étudiant·e supprimé·e reste', 'copies d\'étudiant·es supprimé·es restent') + ' dans l\'application.');
+            if (c.laissees) lignes.push(_pluriel(c.laissees, 'production d\'un·e étudiant·e supprimé·e reste', 'productions d\'étudiant·es supprimé·es restent') + ' dans l\'application.');
             return lignes.join('\n');
         },
-        confirmer: 'Archiver les copies'
+        confirmer: 'Archiver les productions remises'
     },
     different: {
-        titre: function(nom) { return 'Des copies de ' + nom + ' ont changé depuis son archive'; },
+        titre: function(nom) { return 'Des productions remises de ' + nom + ' ont changé depuis son archive'; },
         texte: function(c) {
             var parts = [];
-            if (c.copiesAbsentes) parts.push(_pluriel(c.copiesAbsentes, 'copie ajoutée', 'copies ajoutées'));
-            if (c.copiesDifferentes) parts.push(_pluriel(c.copiesDifferentes, 'copie modifiée', 'copies modifiées'));
+            if (c.copiesAbsentes) parts.push(_pluriel(c.copiesAbsentes, 'production ajoutée', 'productions ajoutées'));
+            if (c.copiesDifferentes) parts.push(_pluriel(c.copiesDifferentes, 'production modifiée', 'productions modifiées'));
             return ['Rien n\'a été retiré.',
                 'Depuis son archive du ' + _jour(c.dateArchive) + ' : ' + parts.join(', ') + '.',
-                'Pour archiver ses copies : archive le trimestre de nouveau, vérifie la nouvelle archive, puis archive ses copies.'].join('\n');
+                'Pour archiver ses productions remises : archive le trimestre de nouveau, vérifie la nouvelle archive, puis archive ses productions remises.'].join('\n');
         },
         confirmer: 'Archiver de nouveau'
     },
     bilan: {
-        titre: function(nom) { return 'Les copies de ' + nom + ' sont aux archives'; },
+        titre: function(nom) { return 'Les productions remises de ' + nom + ' sont aux archives'; },
         texte: function(b) {
-            return _pluriel(b.copies, 'copie retirée', 'copies retirées') + '.' + (b.taille ? ' Ton prochain codex sera plus léger d\'environ ' + window.TailleFichier.dire(b.taille) + '.' : '') + '\n' +
+            return _pluriel(b.copies, 'production retirée', 'productions retirées') + '.' + (b.taille ? ' Ton prochain codex sera plus léger d\'environ ' + window.TailleFichier.dire(b.taille) + '.' : '') + '\n' +
                 'Toutes les données de ' + b.nom + ' restent dans l\'application : ' + DONNEES + '. ' + ANNOTATIONS + '\n' +
-                'Pour faire revenir les copies : ' + _revenir(b.nom) + '.';
+                'Pour faire revenir les productions : ' + _revenir(b.nom) + '.';
         }
     },
     interrompu: {
-        titre: 'Archivage des copies inachevé',
+        titre: 'Archivage des productions remises inachevé',
         texte: function(b) {
-            return 'L\'archivage des copies de ' + b.nom + ' s\'est arrêté en cours de route. Rien n\'est perdu : son archive les garde toutes.\n' +
+            return 'L\'archivage des productions remises de ' + b.nom + ' s\'est arrêté en cours de route. Rien n\'est perdu : son archive les garde toutes.\n' +
                 'Pour finir : relance « ' + MOTS.menu + ' » depuis le menu ⋮ de ' + b.nom + '.\n' +
                 'Pour annuler : « Faire revenir », dans ' + CHEMIN + '.';
         }
     },
     refus: {
-        titre: 'Copies non archivées',
-        rien: 'Ce trimestre n\'a plus de copie dans l\'application : il n\'y a rien à archiver.',
+        titre: 'Productions non archivées',
+        rien: 'Ce trimestre n\'a plus de production remise dans l\'application : il n\'y a rien à archiver.',
         pasDansLApplication: 'Ce trimestre n\'est pas dans l\'application.'
         // Les autres refus (l'archive) sont ceux d'E3 : ReserveRenvoyer.MOTS.refus.
     },
@@ -141,20 +141,20 @@ var MOTS = {
     copie: {
         etiquette: 'Aux archives',
         badge: 'ARC',
-        infobulle: 'Copie aux archives : sa note, sa grille, sa rétroaction et ses annotations restent dans l\'application',
+        infobulle: 'Production aux archives : son évaluation (note, grille, rétroaction) et ses annotations restent dans l\'application',
         message: function(nom) {
-            return 'Cette copie est aux archives.\n' +
-                'Ses résultats, sa grille et sa rétroaction restent dans l\'application ; ses annotations aussi, mais elles ne se voient qu\'avec la copie.\n' +
-                'Pour la revoir : fais revenir les copies de ' + nom + ' (' + _revenir(nom) + ').';
+            return 'Cette production est aux archives.\n' +
+                'Son évaluation (résultats, grille, rétroaction) reste dans l\'application ; ses annotations aussi, mais elles ne se voient qu\'avec la production.\n' +
+                'Pour la revoir : fais revenir les productions remises de ' + nom + ' (' + _revenir(nom) + ').';
         },
         // Dans le bilan d'un export, à la place de « Blob introuvable ».
         raison: 'aux archives',
         // « Dossier PDF » : la synthèse seule.
-        dossierPdf: 'Cette copie est aux archives : le dossier ne contient que la synthèse (note, grille, rétroaction).',
+        dossierPdf: 'Cette production est aux archives : le dossier ne contient que la synthèse (note, grille, rétroaction).',
         // L'aperçu du PDF annoté.
-        apercu: 'Cette copie est aux archives.',
+        apercu: 'Cette production est aux archives.',
         // Un geste qui transforme le fichier (fusion, édition des pages) : refusé.
-        refusGeste: 'Cette copie est aux archives : fais-la revenir avant de modifier ses pages.'
+        refusGeste: 'Cette production est aux archives : fais-la revenir avant de modifier ses pages.'
     },
     // E1 et l'archive d'un groupe, tant que des copies sont aux archives.
     refusArchiver: {
@@ -162,7 +162,7 @@ var MOTS = {
         // Le texte tranché parle des copies du trimestre sans les compter : n reste dans la
         // signature pour l'appelant, il ne s'imprime plus.
         texte: function(n, nom) {
-            return 'Les copies de ' + nom + ' sont aux archives : une nouvelle archive ne les contiendrait pas, et elle remplacerait celle qui les garde.\n' +
+            return 'Les productions remises de ' + nom + ' sont aux archives : une nouvelle archive ne les contiendrait pas, et elle remplacerait celle qui les garde.\n' +
                 'Fais-les revenir d\'abord (' + _revenir(nom) + '), puis archive de nouveau.';
         }
     }

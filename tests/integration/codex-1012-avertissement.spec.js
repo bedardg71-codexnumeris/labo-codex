@@ -244,19 +244,19 @@ const sorties = (page) => page.evaluate(() => ({
 }));
 const RIEN_N_EST_SORTI = { journal: [], ecritures: [], destinationsDemandees: 0 };
 
-const AVERTISSEMENT = 'Ce codex n\'aura pas toutes tes copies';
+const AVERTISSEMENT = 'Ce codex n\'aura pas toutes les productions de tes étudiant·es';
 const mots = (n, m) => n === 1
     ? {
         titre: AVERTISSEMENT,
-        message: '1 copie sur ' + m + ' n\'est pas dans l\'application. Le codex que tu vas écrire ne la contiendra pas.'
+        message: '1 production sur ' + m + ' n\'est pas dans l\'application. Le codex que tu vas écrire ne la contiendra pas.'
             + '\n\nSi un autre fichier de codex la contient encore, ne le remplace pas : donne un autre nom à celui-ci.',
-        boutons: ['Annuler', 'Écrire sans cette copie']
+        boutons: ['Annuler', 'Écrire sans cette production']
     }
     : {
         titre: AVERTISSEMENT,
-        message: n + ' copies sur ' + m + ' ne sont pas dans l\'application. Le codex que tu vas écrire ne les contiendra pas.'
+        message: n + ' productions sur ' + m + ' ne sont pas dans l\'application. Le codex que tu vas écrire ne les contiendra pas.'
             + '\n\nSi un autre fichier de codex les contient encore, ne le remplace pas : donne un autre nom à celui-ci.',
-        boutons: ['Annuler', 'Écrire sans ces copies']
+        boutons: ['Annuler', 'Écrire sans ces productions']
     };
 
 test.describe('#1012 — l\'avertissement à la mise à jour d\'un codex auquel des copies manquent', () => {
@@ -297,7 +297,7 @@ test.describe('#1012 — l\'avertissement à la mise à jour d\'un codex auquel 
             await neuf.page.evaluate(() => { window.__reponsesDestination = ['autre-nom.zip']; });
             await gesteDuMenu(neuf.page, METTRE_A_JOUR);
             await attendreFenetre(neuf.page, AVERTISSEMENT);
-            await bouton(neuf.page, 'Écrire sans ces copies').click();
+            await bouton(neuf.page, 'Écrire sans ces productions').click();
             expect(await attendreLaFin(neuf.page)).toBe('réussie');
             expect(await sorties(neuf.page)).toEqual({
                 journal: ['aperçu', 'destination demandée', 'écriture dans autre-nom.zip'],
@@ -312,7 +312,7 @@ test.describe('#1012 — l\'avertissement à la mise à jour d\'un codex auquel 
             await viderLeJournal(neuf.page);
             await gesteDuMenu(neuf.page, METTRE_A_JOUR);
             expect(await attendreFenetre(neuf.page, AVERTISSEMENT)).toEqual(mots(2, 3));
-            await bouton(neuf.page, 'Écrire sans ces copies').click();
+            await bouton(neuf.page, 'Écrire sans ces productions').click();
             expect(await attendreLaFin(neuf.page)).toBe('fenêtre de choix refusée par l\'usager');
             expect(await sorties(neuf.page), 'rien n\'est écrit dans autre-nom.zip sans le demander')
                 .toEqual({ journal: ['aperçu', 'destination demandée'], ecritures: [], destinationsDemandees: 1 });
@@ -345,7 +345,7 @@ test.describe('#1012 — l\'avertissement à la mise à jour d\'un codex auquel 
         await test.step('une copie manque : la fenêtre au singulier, puis la destination demandée, jamais le fichier tenu', async () => {
             await gesteDuMenu(neuf.page, METTRE_A_JOUR);
             expect(await attendreFenetre(neuf.page, AVERTISSEMENT)).toEqual(mots(1, 3));
-            await bouton(neuf.page, 'Écrire sans cette copie').click();
+            await bouton(neuf.page, 'Écrire sans cette production').click();
             expect(await attendreLaFin(neuf.page)).toBe('fenêtre de choix refusée par l\'usager');
             expect(await sorties(neuf.page), 'le fichier tenu n\'est pas réécrit')
                 .toEqual({ journal: ['aperçu', 'destination demandée'], ecritures: [], destinationsDemandees: 1 });
@@ -357,7 +357,7 @@ test.describe('#1012 — l\'avertissement à la mise à jour d\'un codex auquel 
             await neuf.page.evaluate(() => { window.__reponsesDestination = ['!panne', 'ailleurs.zip']; });
             await gesteDuMenu(neuf.page, METTRE_A_JOUR);
             await attendreFenetre(neuf.page, AVERTISSEMENT);
-            await bouton(neuf.page, 'Écrire sans cette copie').click();
+            await bouton(neuf.page, 'Écrire sans cette production').click();
             await attendreFenetre(neuf.page, 'Codex non mis à jour');
             await bouton(neuf.page, 'Réessayer').click();
             expect(await attendreLaFin(neuf.page)).toBe('réussie');
@@ -470,7 +470,7 @@ test.describe('#1012 — l\'avertissement à la mise à jour d\'un codex auquel 
         await test.step('le partage : « Écrire sans cette copie » partage le fichier, sans la copie', async () => {
             await gesteDuMenu(neuf.page, METTRE_A_JOUR);
             await attendreFenetre(neuf.page, AVERTISSEMENT);
-            await bouton(neuf.page, 'Écrire sans cette copie').click();
+            await bouton(neuf.page, 'Écrire sans cette production').click();
             // Si le toucher a expiré pendant la préparation, la fenêtre « Ton codex est prêt » en demande un frais.
             await expect.poll(async () => {
                 if ((await lireFenetre(neuf.page))?.titre === 'Ton codex est prêt') await bouton(neuf.page, 'Enregistrer').click();
@@ -490,7 +490,7 @@ test.describe('#1012 — l\'avertissement à la mise à jour d\'un codex auquel 
             await gesteDuMenu(neuf.page, METTRE_A_JOUR);
             expect(await attendreFenetre(neuf.page, AVERTISSEMENT)).toEqual(mots(1, 3));
             expect(await sortiesIPad()).toEqual({ journal: [], partages: [], telechargements: 0 });
-            await bouton(neuf.page, 'Écrire sans cette copie').click();
+            await bouton(neuf.page, 'Écrire sans cette production').click();
             await attendreFenetre(neuf.page, 'Téléchargement lancé');
             expect(await sortiesIPad()).toEqual({ journal: ['aperçu', 'téléchargement'], partages: [], telechargements: 1 });
             await bouton(neuf.page, 'Il y est').click();
@@ -567,7 +567,7 @@ test.describe('#1012 — l\'avertissement à la mise à jour d\'un codex auquel 
             const neuf = await ouvrirEspaceNeuf(browser);
             expect(await ouvrirSansCertainesCopies(neuf.page, fichier, {})).toEqual({
                 titre: 'Codex ouvert, mais incomplet',
-                message: '1 copie sur 3 n\'est pas dans ce fichier de codex.' + SUITE
+                message: '1 production sur 3 n\'est pas dans ce fichier de codex.' + SUITE
                     + '\n\nElle manquait déjà quand ce codex a été écrit : le rouvrir ne la ramènera pas. Cherche-la dans un codex plus ancien ou dans une archive.'
                     + QUESTION,
                 boutons: BOUTONS
@@ -580,7 +580,7 @@ test.describe('#1012 — l\'avertissement à la mise à jour d\'un codex auquel 
             const neuf = await ouvrirEspaceNeuf(browser);
             expect(await ouvrirSansCertainesCopies(neuf.page, fichier, {})).toEqual({
                 titre: 'Codex ouvert, mais incomplet',
-                message: '2 copies sur 3 n\'ont pas été reprises : leur contenu n\'est ni une image ni un PDF.' + SUITE
+                message: '2 productions sur 3 n\'ont pas été reprises : leur contenu n\'est ni une image ni un PDF.' + SUITE
                     + '\n\nRouvrir le même codex ne les ramènera pas.'
                     + QUESTION,
                 boutons: BOUTONS
@@ -593,8 +593,8 @@ test.describe('#1012 — l\'avertissement à la mise à jour d\'un codex auquel 
             const neuf = await ouvrirEspaceNeuf(browser);
             expect(await ouvrirSansCertainesCopies(neuf.page, fichier, { [COPIES[1]]: 'erreur' })).toEqual({
                 titre: 'Codex ouvert, mais incomplet',
-                message: '1 copie sur 3 n\'a pas pu revenir, à cause d\'une erreur.' + SUITE
-                    + '\n\nPour retrouver cette copie : rouvre le même codex. Si l\'erreur revient, utilise « Signaler un bug ou donner ton avis ».'
+                message: '1 production sur 3 n\'a pas pu revenir, à cause d\'une erreur.' + SUITE
+                    + '\n\nPour retrouver cette production : rouvre le même codex. Si l\'erreur revient, utilise « Signaler un bug ou donner ton avis ».'
                     + QUESTION,
                 boutons: BOUTONS
             });
@@ -606,8 +606,8 @@ test.describe('#1012 — l\'avertissement à la mise à jour d\'un codex auquel 
             const neuf = await ouvrirEspaceNeuf(browser);
             expect(await ouvrirSansCertainesCopies(neuf.page, fichier, { [COPIES[2]]: 'quota' })).toEqual({
                 titre: 'Codex ouvert, mais incomplet',
-                message: '3 copies sur 3 n\'ont pas pu revenir : 1 faute d\'espace, 1 absente du fichier, 1 dans un format non reconnu.' + SUITE
-                    + '\n\nFaute d\'espace. Pour retrouver cette copie : si tu es en navigation privée, rouvre l\'application dans une fenêtre normale. Sinon, libère de l\'espace sur le disque de l\'appareil (vide la corbeille, retire de gros fichiers), puis rouvre le même codex.'
+                message: '3 productions sur 3 n\'ont pas pu revenir : 1 faute d\'espace, 1 absente du fichier, 1 dans un format non reconnu.' + SUITE
+                    + '\n\nFaute d\'espace. Pour retrouver cette production : si tu es en navigation privée, rouvre l\'application dans une fenêtre normale. Sinon, libère de l\'espace sur le disque de l\'appareil (vide la corbeille, retire de gros fichiers), puis rouvre le même codex.'
                     + '\n\nAbsente du fichier. Elle manquait déjà quand ce codex a été écrit : le rouvrir ne la ramènera pas. Cherche-la dans un codex plus ancien ou dans une archive.'
                     + '\n\nDans un format non reconnu. Rouvrir le même codex ne la ramènera pas.'
                     + QUESTION,
@@ -648,17 +648,17 @@ test.describe('#1012 — l\'avertissement à la mise à jour d\'un codex auquel 
         await ouvrirSansCertainesCopies(neuf.page, fichier, { [COPIES[1]]: 'quota', [COPIES[2]]: 'quota' });
         expect(await neuf.page.evaluate(() => window.__copies.size), 'témoin : une seule copie est dans l\'application').toBe(1);
 
-        const SELECTION = 'Cette sélection n\'aura pas toutes ses copies';
+        const SELECTION = 'Cette sélection n\'aura pas toutes ses productions';
         const motsSelection = (n, m) => n === 1
             ? {
                 titre: SELECTION,
-                message: '1 copie sur ' + m + ' n\'est pas dans l\'application. Le fichier que tu vas écrire ne la contiendra pas.',
-                boutons: ['Annuler', 'Écrire sans cette copie']
+                message: '1 production sur ' + m + ' n\'est pas dans l\'application. Le fichier que tu vas écrire ne la contiendra pas.',
+                boutons: ['Annuler', 'Écrire sans cette production']
             }
             : {
                 titre: SELECTION,
-                message: n + ' copies sur ' + m + ' ne sont pas dans l\'application. Le fichier que tu vas écrire ne les contiendra pas.',
-                boutons: ['Annuler', 'Écrire sans ces copies']
+                message: n + ' productions sur ' + m + ' ne sont pas dans l\'application. Le fichier que tu vas écrire ne les contiendra pas.',
+                boutons: ['Annuler', 'Écrire sans ces productions']
             };
         /** Le geste jusqu'au « Continuer » du résumé ; ce qui suit dépend de l'essai. */
         const choisirLaSelection = async () => {
@@ -694,7 +694,7 @@ test.describe('#1012 — l\'avertissement à la mise à jour d\'un codex auquel 
             await neuf.page.evaluate(() => { window.__reponsesDestination = ['selection.zip']; });
             await choisirLaSelection();
             await attendreFenetre(neuf.page, SELECTION);
-            await bouton(neuf.page, 'Écrire sans ces copies').click();
+            await bouton(neuf.page, 'Écrire sans ces productions').click();
             await expect.poll(() => neuf.page.evaluate(() => window.__ecritures.length), { timeout: 30000 }).toBe(1);
             await attendreLaFinDeLExport();
             expect(await sorties(neuf.page)).toEqual({

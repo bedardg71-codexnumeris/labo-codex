@@ -250,7 +250,7 @@ describe('palette · N — des blocs nommés en mots, deux groupes ; les chips m
         const m = rendu([REDACTION]);
         const { palette } = domDe(m, 'CR');
         const groupes = [...palette.querySelectorAll('.palette-algo-groupe')];
-        expect(groupes.map((g) => texteVisible(g.querySelector('.palette-algo-groupe-nom')))).toEqual(['Ce que tu écris dans la grille', 'Ce qui se remplit quand tu évalues la copie']   /* ↻ lot 3a : les mots de l'ébauche */);
+        expect(groupes.map((g) => texteVisible(g.querySelector('.palette-algo-groupe-nom')))).toEqual(['Ce que tu écris dans la grille', 'Ce qui se remplit quand tu évalues la production']   /* ↻ lot 3a : les mots de l'ébauche */);
         expect(groupes[0].querySelectorAll('.palette-algo-bloc--remplie').length).toBe(0);
         expect(groupes[1].querySelectorAll('.palette-algo-bloc--posee').length).toBe(0);
         for (const b of palette.querySelectorAll('.palette-algo-bloc')) {

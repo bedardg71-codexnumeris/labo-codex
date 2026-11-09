@@ -59,18 +59,18 @@
 var MOTS = {
     bouton: 'Vérifier',
     enCours: 'Vérification de l\'archive…',
-    compte: function(n, m) { return n + ' copies sur ' + m; },
+    compte: function(n, m) { return n + ' productions sur ' + m; },
     reussite: {
         titre: 'Archive vérifiée',
-        texte: function(m) { return 'Les ' + m + ' copies sont présentes et intactes, et les données concordent.'; }
+        texte: function(m) { return 'Les ' + m + ' productions sont présentes et intactes, et les données concordent.'; }
     },
     echec: {
         titre: 'Archive incomplète',
-        texte: function(n, m) { return n + ' copies sur ' + m + ' manquent ou ne concordent pas. Archive de nouveau ce groupe.'; }
+        texte: function(n, m) { return n + ' productions sur ' + m + ' manquent ou ne concordent pas. Archive de nouveau ce groupe.'; }
     },
     sansEmpreintes: {
         titre: 'Archive à refaire',
-        texte: 'Cette archive date d\'avant les empreintes : elle ne peut pas être vérifiée copie par copie. Archive de nouveau ce groupe.'
+        texte: 'Cette archive date d\'avant les empreintes : elle ne peut pas être vérifiée production par production. Archive de nouveau ce groupe.'
     },
     liste: {
         verifiee: function(jour) { return 'Vérifiée le ' + jour; },
@@ -79,10 +79,10 @@ var MOTS = {
     // Le détail sous le texte d'échec : ce que chaque copie a. Accord en nombre tranché par
     // Cowork (verdict de relecture du lot A2, 16 h 57).
     detail: {
-        copies: function(n, adjectif) { return n + ' copie' + (n > 1 ? 's ' : ' ') + adjectif + (n > 1 ? 's' : ''); },
-        absente: 'absente', tronquee: 'tronquée', alteree: 'altérée', illisible: 'illisible',
+        copies: function(n, adjectif) { return n + ' fichier' + (n > 1 ? 's ' : ' ') + adjectif + (n > 1 ? 's' : ''); },
+        absente: 'absent', tronquee: 'tronqué', alteree: 'altéré', illisible: 'illisible',
         enTrop: function(n) { return n + ' fichier' + (n > 1 ? 's' : '') + ' en trop dans l\'archive'; },
-        nonCouvertes: function(n) { return n + ' fiche' + (n > 1 ? 's' : '') + ' du groupe sans copie dans l\'archive'; },
+        nonCouvertes: function(n) { return n + ' fiche' + (n > 1 ? 's' : '') + ' du groupe sans production dans l\'archive'; },
         donneesKo: 'les données de l\'archive ne concordent pas avec leur empreinte',
         couvertureNonMesuree: 'couverture non mesurée : ce groupe n\'est plus dans l\'application'
     },
@@ -94,17 +94,19 @@ var MOTS = {
     // E1 (#1022, 4 oct. 2026) : l'archive d'un trimestre entier. Acceptés par Grégoire (consigne de 17 h 19) :
     // « les données du trimestre », jamais « clés », un mot technique qu'un enseignant ne lit pas.
     trimestre: {
-        reussite: function(m) { return 'Les ' + m + ' copies et les données du trimestre sont présentes et intactes.'; },
-        echec: function(n, m) { return n + ' copies sur ' + m + ' manquent ou ne concordent pas. Archive de nouveau ce trimestre.'; },
+        reussite: function(m) { return 'Les ' + m + ' productions remises et les données du trimestre sont présentes et intactes.'; },
+        echec: function(n, m) { return n + ' productions remises sur ' + m + ' manquent ou ne concordent pas. Archive de nouveau ce trimestre.'; },
         sansEmpreintes: 'Cette archive ne porte pas les empreintes de ses données : elle ne peut pas être vérifiée. Archive de nouveau ce trimestre.',
         cles: function(n, adjectif) { return n + ' donnée' + (n > 1 ? 's' : '') + ' du trimestre ' + adjectif + (n > 1 ? 's' : ''); },
+        // « donnée » est féminin, « fichier » (MOTS.detail) masculin : les adjectifs des données, à part.
+        adjectifs: { absente: 'absente', alteree: 'altérée', illisible: 'illisible' },
         clesEnTrop: function(n) { return n + ' donnée' + (n > 1 ? 's' : '') + ' en trop dans l\'archive'; },
-        nonCouvertes: function(n) { return n + ' fiche' + (n > 1 ? 's' : '') + ' du trimestre sans copie dans l\'archive'; },
+        nonCouvertes: function(n) { return n + ' fiche' + (n > 1 ? 's' : '') + ' du trimestre sans production dans l\'archive'; },
         couvertureNonMesuree: 'couverture non mesurée : ce trimestre n\'est plus dans l\'application'
     },
     // L'archive n'a pas pu être lue (non soumis à Grégoire ; relu par Cowork, tel quel).
     illisible: { titre: 'Archive illisible' },
-    aRefaireDetail: function(nb, taille) { return nb + ' copies, ' + taille + ' (compte et taille seulement, sans valoir vérification).'; },
+    aRefaireDetail: function(nb, taille) { return nb + ' productions, ' + taille + ' (compte et taille seulement, sans valoir vérification).'; },
     erreurs: {
         pasUnZip: 'Le fichier choisi n\'est pas un ZIP lisible.',
         zip64: 'Ce ZIP emploie un format (ZIP64) que l\'application ne lit pas.',
@@ -645,7 +647,7 @@ function compteRendu(rapport) {
         var clesParType = {};
         rapport.clesProblemes.forEach(function(p) { clesParType[p.type] = (clesParType[p.type] || 0) + 1; });
         ['absente', 'alteree', 'illisible'].forEach(function(type) {
-            if (clesParType[type]) lignes.push(T.cles(clesParType[type], MOTS.detail[type]));
+            if (clesParType[type]) lignes.push(T.cles(clesParType[type], T.adjectifs[type]));
         });
         if (rapport.clesEnTrop.length) lignes.push(T.clesEnTrop(rapport.clesEnTrop.length));
     }

@@ -82,7 +82,7 @@ test('source unique · copie gouvernée : pas de bandeau, l\'engrenage porte la 
         return eval(lire)();
     }, LIRE_PALETTE);
     console.log('GOUVERNÉE →', JSON.stringify(gouvernee));
-    const PHRASE = 'Les codes de cette copie viennent de sa grille « Philo activée ». Pour les modifier, ouvre la grille.';
+    const PHRASE = 'Les codes de cette production viennent de sa grille « Philo activée ». Pour les modifier, ouvre la grille.';
     expect(gouvernee.bandeau, 'pas de bandeau dans l\'espace de travail').toBeNull();
     expect(gouvernee.boutonPersonnaliser, 'l\'engrenage reste').toBe(true);
     expect(gouvernee.titreEngrenage).toBe(PHRASE);

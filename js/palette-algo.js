@@ -62,12 +62,12 @@ function _F() { return _reg('formulesAlgo', './evaluation-formules.js'); }
 var TEXTES = {
     // ↻ Lot 3a de la table de cas (26 oct. 2026) : les mots de l'ébauche validée (« Blocs de textes »), au présent.
     titre: 'Blocs de textes',
-    but: 'Ces blocs servent à composer les phrases que ce critère écrit seul sur chaque copie. Chaque bloc prend la valeur réelle de la copie évaluée.',
+    but: 'Ces blocs servent à composer les phrases que ce critère écrit seul dans chaque évaluation. Chaque bloc prend la valeur réelle de la production évaluée.',
     gestes: ['Clique dans une zone violette.', 'Touche un bloc : il se pose au curseur.'],
-    legende: 'Après la flèche : la valeur que le bloc prendrait sur la copie fictive.',
+    legende: 'Après la flèche : la valeur que le bloc prendrait sur la production fictive.',
     groupes: {
         posee: 'Ce que tu écris dans la grille',
-        remplie: 'Ce qui se remplit quand tu évalues la copie'
+        remplie: 'Ce qui se remplit quand tu évalues la production'
     },
     invitation: 'Aucune zone choisie.',
     astuce: 'Touche une zone violette : ses blocs paraissent ici.',
@@ -75,7 +75,7 @@ var TEXTES = {
     vide: 'vide',
     dans: function(zone) { return 'Zone choisie : ' + zone; },
     zonePalier: function(champ, nom) { return champ + ', palier ' + nom; },
-    aideCalcul: 'Ton calcul : sa valeur sur la copie évaluée.',   // étape 4c, les mots de l'ébauche
+    aideCalcul: 'Ton calcul : sa valeur sur la production évaluée.',   // étape 4c, les mots de l'ébauche
     champsPalier: { texte: 'Verdict', texteAide: 'Recommandation' }
 };
 
@@ -83,11 +83,11 @@ var TEXTES = {
 var NOMMES = {
     '{erreurs}': function(n) {
         return { nom: 'Compte des ' + n.erreurs.pluriel,
-                 aide: 'Le nombre compté sur la copie, à la correction : les codes posés dans Annoter, ou le nombre tapé.' };
+                 aide: 'Le nombre compté dans la production, à la correction : les codes posés dans Annoter, ou le nombre tapé.' };
     },
     '{mots}': function(n) {
         return { nom: 'Compte des ' + n.mots.pluriel,
-                 aide: 'Le nombre saisi à la correction, copie par copie.' };
+                 aide: 'Le nombre saisi à la correction, production par production.' };
     },
     '{nomErreurs}': function(n) {
         return { nom: '« ' + n.erreurs.pluriel + ' »',
@@ -113,11 +113,11 @@ var NOMMES = {
         return { nom: 'Nom du service', aide: 'Le nom du service d’aide. Vide : l’application retire ce qui le présente.' };
     },
     '{palier}': function() {
-        return { nom: 'Palier atteint', aide: 'Le nom court du palier que la copie atteint.' };
+        return { nom: 'Palier atteint', aide: 'Le nom court du palier que la production atteint.' };
     },
     // Absent de l'ébauche (elle ne le montre pas) ; ses mots d'hier nommaient les erreurs : dits sans discipline.
     '{projection}': function() {
-        return { nom: 'Compte projeté', aide: 'Ce que la copie compterait sur la longueur de référence, au même rythme.' };
+        return { nom: 'Compte projeté', aide: 'Ce que la production compterait sur la longueur de référence, au même rythme.' };
     }
 };
 

@@ -2410,7 +2410,7 @@ function composerModeleCartouche(grille, echelle, production, nomCartouche) {
     lignes.push('>');
     lignes.push('> CE QUE TU ÉCRIS');
     lignes.push('> Le commentaire décrit ce qu\'un travail situé à ce niveau présente pour CE critère.');
-    lignes.push('> Aucun travail n\'a été remis au moment où tu écris. N\'invente aucun détail de copie');
+    lignes.push('> Aucun travail n\'a été remis au moment où tu écris. N\'invente aucun détail de production');
     lignes.push('> et ne décris jamais une personne.');
     lignes.push('>');
     lignes.push('> RÉDACTION');

@@ -90,7 +90,7 @@ var TEXTES = {
     raisons: {
         note: 'aucune note calculable',
         part: 'aucune limite, ou rien à rapporter',
-        moyenne: 'la copie ne porte aucune occurrence'
+        moyenne: 'la production ne porte aucune occurrence'
     }
 };
 

@@ -908,7 +908,7 @@ async function corrigerDAEtudiantV2() {
         'Passera sous le nouveau DA, dans ce trimestre seulement :',
         '• ' + c.evaluations + ' ' + pluriel(c.evaluations, 'évaluation', 'évaluations'),
         '• ' + c.presences + ' ' + pluriel(c.presences, 'présence', 'présences'),
-        '• ' + c.copies + ' ' + pluriel(c.copies, 'copie', 'copies'),
+        '• ' + c.copies + ' ' + pluriel(c.copies, 'production', 'productions'),
         '• ' + c.resultats + ' ' + pluriel(c.resultats, 'résultat calculé', 'résultats calculés') + ' (indices, portfolio, interventions)',
         '',
         'Les autres trimestres et les archives gardent l\'ancien DA.'

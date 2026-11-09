@@ -38,7 +38,7 @@
     function aCompleterHtml(r) {
         if (!r.aCompleter) return '';
         return '<p class="materiel-a-completer">' + e('Il te restera à donner ' + (r.enPoints ? 'des points' : 'une pondération') + ' à ' +
-            pluriel(r.aCompleter, 'critère', 'critères') + ', dans « Grilles de critères ». D’ici là, la note d’une copie évaluée avec cette grille affichera « -- ».') + '</p>';
+            pluriel(r.aCompleter, 'critère', 'critères') + ', dans « Grilles de critères ». D’ici là, la note d’une évaluation faite avec cette grille affichera « -- ».') + '</p>';
     }
 
     function confirmationHtml(r) {
@@ -51,7 +51,7 @@
             '<p>' + e(phrase) + '</p>' + aCompleterHtml(r) + '<div class="materiel-cartes-cree">' +
             carteCree('Ta grille', carteGrille, 'grille-criteres', 'La voir dans Grilles de critères') +
             carteCree('Ses niveaux', r.niveaux.join(' · '), 'echelle-performance', 'Les voir dans Échelles de performance') +
-            '</div>' + plusLoinHtml(r) + '<div class="materiel-suite"><span>Pour t’en servir, associe-la à une production, puis évalue une première copie avec elle.</span>' +
+            '</div>' + plusLoinHtml(r) + '<div class="materiel-suite"><span>Pour t’en servir, associe-la à une production, puis fais une première évaluation avec elle.</span>' +
             '<button type="button" class="btn btn-principal" data-action="materiel.voir" data-param="productions">Aller aux productions</button></div>' +
             retoursHtml() + '</section>';
     }
@@ -98,7 +98,7 @@
             // Lot 9 : le total des seuls critères qui ont des points, et combien n'en ont pas encore (validé G. 18 oct. 20 h 08).
             carteCree('Ta grille', pluriel(r.nbC, 'critère', 'critères') + ', sur ' + formaterNombre(r.totalPoints) + (Math.abs(r.totalPoints) >= 2 ? ' points' : ' point') +
                 (r.aCompleter ? ' ; ' + pluriel(r.aCompleter, 'critère', 'critères') + ' sans points pour l’instant.' : '.'), 'grille-criteres', 'La voir dans Grilles de critères') +
-            '</div>' + plusLoinHtml(r) + '<div class="materiel-suite"><span>Pour t’en servir, associe-la à une production, puis évalue une première copie avec elle.</span>' +
+            '</div>' + plusLoinHtml(r) + '<div class="materiel-suite"><span>Pour t’en servir, associe-la à une production, puis fais une première évaluation avec elle.</span>' +
             '<button type="button" class="btn btn-principal" data-action="materiel.voir" data-param="productions">Aller aux productions</button></div>' +
             retoursHtml() + '</section>';
     }

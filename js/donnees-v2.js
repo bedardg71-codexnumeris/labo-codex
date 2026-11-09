@@ -701,7 +701,11 @@
         productions.forEach(p => {
             const dansSidebar = p.dansBibliotheque !== false;
             const usage = usages[p.id] || { evaluationsCount: 0 };
-            const typeProduction = p.type || p.categorie || '—';
+            // 9 nov. 2026 (banque de types) : le libellé de lecture, pas l'identifiant (« Artefact
+            // d'un portfolio », pas « artefact-portfolio ») ; un type de la banque s'affiche tel quel.
+            const typeProduction = p.type
+                ? (typeof window.getTypeLabel === 'function' ? window.getTypeLabel(p.type) : p.type)
+                : (p.categorie || '—');
             const descAffCompact = p.activiteApprentissage || p.description;
             html += `<tr><td><strong>${escapeHtml(p.nom)}</strong>${descAffCompact ? `<br><small class="text-muted">${escapeHtml(descAffCompact.substring(0, 50))}${descAffCompact.length > 50 ? '...' : ''}</small>` : ''}</td><td>${escapeHtml(typeProduction)}</td><td>${dansSidebar ? '<span class="badge-actif">Sidebar</span>' : '<span class="badge-archive">Masquée</span>'}</td><td>${usage.evaluationsCount > 0 ? `<span class="badge-statut evalue">${usage.evaluationsCount} éval.</span>` : '<span class="badge-statut non-evalue">Non utilisée</span>'}</td><td class="actions-cell"><button class="btn btn-compact btn-secondaire" data-action="naviguerVersRessource" data-param="production" data-param2="${p.id}" title="Consulter">Voir</button> <button class="btn btn-compact" data-action="ouvrirModalSuppressionRessource" data-param="production" data-param2="${p.id}" title="Supprimer">Supprimer</button></td></tr>`;
         });
@@ -1178,7 +1182,7 @@
                 dependances.push(`Utilisée par ${evalCount} évaluation(s)`);
             }
             if (copiesCount > 0) {
-                dependances.push(`${copiesCount} copie(s) y sont rattachées`);
+                dependances.push(`${copiesCount} production(s) remise(s) y sont rattachées`);
             }
         } catch (e) {
             console.warn('[donnees-v2] Erreur calcul usages:', e.message);

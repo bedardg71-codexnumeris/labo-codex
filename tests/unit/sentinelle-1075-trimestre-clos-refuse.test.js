@@ -123,7 +123,7 @@ describe('#1075, point 2 — un trimestre clos ne s\'écrit pas', () => {
     it('E2 — le seul point d\'écriture d\'Annoter le consulte avant d\'écrire', () => {
         const src = readFileSync(path.join(racine, 'js/travaux-annotation.js'), 'utf8');
         const fn = tranche(src, 'function sauvegarderAnnotation(options) {', 'travauxStockage.sauvegarderAnnotationFichier(annotationCourante, options);');
-        expect(fn).toContain("window.refuserSiTrimestreClos(cle('annotationsTravaux'), 'Annoter la copie', options && options.discret)) return;");
+        expect(fn).toContain("window.refuserSiTrimestreClos(cle('annotationsTravaux'), 'Annoter la production', options && options.discret)) return;");
     });
 
     it('D — la règle CSS de lecture seule ne vise plus d\'onclick', () => {

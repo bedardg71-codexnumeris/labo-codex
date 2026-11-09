@@ -401,7 +401,7 @@ var REPERES = [
     { jeton: JETON_CRITERE, famille: 'posee',   libelle: 'nom du critère',
       aide: 'Le nom de ce critère, tel qu\'il est écrit dans la grille.' },
     { jeton: JETON_ERREURS, famille: 'remplie', libelle: 'nombre d\'erreurs',
-      aide: 'Le nombre d\'erreurs comptées sur la copie, à la correction.' },
+      aide: 'Le nombre d\'erreurs comptées dans la production, à la correction.' },
     { jeton: JETON_MOTS,    famille: 'remplie', libelle: 'nombre de mots',
       aide: 'Le nombre de mots de la production, saisi à la correction.' },
     { jeton: JETON_POINTS,  famille: 'remplie', libelle: 'somme pondérée', espaceDeTete: true,
@@ -498,7 +498,7 @@ var CLES = [
       reperes: [JETON_CRITERE] },
     { cle: 'concentre', libelle: 'Quand tout est maîtrisé',     aide: 'Ce qui reste à travailler lorsque tous les critères sont acquis.',
       reperes: [JETON_CRITERE] },
-    { cle: 'aucune',    libelle: 'Aucune annotation',           aide: 'Affiché à l\'enseignant·e quand la copie ne porte ni tampon ni erreur.',
+    { cle: 'aucune',    libelle: 'Aucune annotation',           aide: 'Affiché à l\'enseignant·e quand la production ne porte ni tampon ni erreur.',
       reperes: [JETON_CRITERE, JETON_NOM_ERREURS] }
 ];
 

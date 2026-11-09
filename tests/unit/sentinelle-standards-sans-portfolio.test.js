@@ -577,10 +577,10 @@ describe('G · lot 3 : les Productions ne poussent plus vers une terminale', () 
             { message: 'Aucune production « Portfolio (conteneur) » : le pool d\'artefacts vaut le complément de la terminale, soit 60 % (100 − 40). C\'est permis — vérifie que c\'est voulu.' }
         ]);
         expect(avertir(sans(['T1'], [exercice('W1', 1, 10)]))).toEqual([
-            { message: '« Exercice 1 » est pondérée (10 %) mais son type est « Examen » : sans le type « Évaluation terminale », elle n\'entre pas dans le calcul STD.', productionId: 'W1' }
+            { message: '« Exercice 1 » est pondérée (10 %) mais son type est « Examen » : sans le type « Épreuve terminale », elle n\'entre pas dans le calcul STD.', productionId: 'W1' }
         ]);
         expect(avertir(sans(['T1'], [exercice('W1', 1, 10), exercice('W2', 2, 20)]))).toEqual([
-            { message: '2 productions pondérées sans évaluation terminale typée : « Exercice 1 », « Exercice 2 ». Choisis laquelle est l\'évaluation terminale dans son formulaire (type « Évaluation terminale ») — l\'outil ne choisit pas à ta place.' }
+            { message: '2 productions pondérées sans évaluation terminale typée : « Exercice 1 », « Exercice 2 ». Choisis laquelle est l\'évaluation terminale dans son formulaire (type « Épreuve terminale ») — l\'outil ne choisit pas à ta place.' }
         ]);
         const t1SansPoids = prodGreg();
         delete t1SansPoids.find(p => p.id === 'T1').ponderation;
@@ -589,15 +589,19 @@ describe('G · lot 3 : les Productions ne poussent plus vers une terminale', () 
         ]);
     });
 
-    it('la définition du type « Évaluation terminale » dit le texte 2 ; celle de l\'« Artefact » tutoie', async () => {
+    // ↻ 9 nov. 2026 (lot « Production plutôt que copie », étape 2) : le type s'appelle « Épreuve terminale », et les
+    // définitions sont celles que Grégoire a validées le 8 nov. (13 h 51 à 14 h 09 ; consigne du lot, partie 2, point 7),
+    // posées mot pour mot ; elles remplacent le texte 2 du 28 oct. et l'ancienne définition de l'« Artefact ».
+    it('la définition du type « Épreuve terminale » et celle de l\'« Artefact » disent les textes validés du 8 nov.', async () => {
         const b = productionsSous(std());
         const definition = (type) => {
             b.document.getElementById('productionType').value = type;
             b.win.gererChangementTypeProduction();
             return b.document.getElementById('texteDefinitionType').innerHTML;
         };
-        expect(definition('terminale')).toBe('<strong>Évaluation terminale :</strong> ' + await texteValide(2));
-        expect(definition('artefact-portfolio')).toContain('<em>Pour paramétrer la valeur des artefacts, va dans « Structure des évaluations » dans les Pratiques de notation.</em>');
+        expect(definition('terminale')).toBe('<strong>Épreuve terminale :</strong> La production qui clôt le trimestre ; une seule par trimestre, et facultative. En notation par standards, elle entre dans le calcul avec sa pondération (par exemple 40\u00a0%) ; le reste va aux artefacts du portfolio ou, sans artefact, aux productions retenues (par exemple 60\u00a0%).');
+        expect(definition('artefact-portfolio')).toBe('<strong>Artefact :</strong> Une production rattachée au portfolio, centrée sur une tâche. Elle n\'a pas de pondération propre : c\'est le portfolio qui porte le poids dans la note. Pour régler la valeur des artefacts, va dans « Structure des évaluations », dans Conception › Pratiques.');
+        expect(await texteValide(2)).toContain('par exemple 40');
     });
 });
 
@@ -930,7 +934,13 @@ describe('I · lot 5 : l\'assistant et les mots', () => {
         const page = net(lireDuDepot('index.html'));
         const attendus = [citations(7)[0], citations(8)[0], ...citations(9), ...citations(11), ...citations(12)];
         expect(attendus).toHaveLength(7);
-        for (const t of attendus) expect(page, t).toContain(net(t));
+        // ↻ « Production plutôt que copie » (9 nov. 2026, décisions de Grégoire) : seuls ces passages changent.
+        const LOT_9_NOV = [
+            ['le niveau d\'une copie n\'y entre pas', 'le niveau d\'une évaluation n\'y entre pas'],
+            ['« Évaluation terminale »', '« Épreuve terminale »']
+        ];
+        const suivre = (t) => LOT_9_NOV.reduce((x, [avant, apres]) => x.split(avant).join(apres), t);
+        for (const t of attendus) expect(page, t).toContain(net(suivre(t)));
         for (const ancien of ['Le meilleur résultat est retenu pour chaque standard', 'traces retenues au portfolio', 'C\'est une moyenne de notes', 'Minimum d\'artefacts avant calcul formatif']) {
             expect(page, ancien).not.toContain(ancien);
         }

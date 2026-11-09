@@ -68,7 +68,8 @@ const GLOSSAIRE = {
         terme: 'Production',
         categorie: 'Structure',
         etape: 'numerisation',
-        definition: 'Une occasion pour tes étudiant·es de mettre en pratique ce qu\'ils et elles apprennent — un exercice, un travail, un examen. Chaque production a une pondération et une échéance. L\'ensemble des productions totalise 100\u00a0% de la note finale. Dans la Carte d\'alignement, les productions sont d\'abord des mises en pratique liées aux objectifs d\'apprentissage.',
+        // Lot « Production plutôt que copie » : définition validée par Grégoire (8 nov. 2026), mot pour mot.
+        definition: 'Ce que tes étudiant·es font dans une activité d\'apprentissage : un texte, mais aussi un stage, un film, un enregistrement, une entrevue, un labo. Ce n\'est pas toujours un objet qu\'on remet : c\'est ce que l\'étudiant·e fait quand il ou elle apprend, et c\'est cet apprentissage que tu évalues à travers elle. Dans Conception › Productions, tu décris celle que tu demandes, avec sa grille ; ce que chaque étudiant·e fait s\'y rattache, et sa pondération dit ce qu\'elle pèse dans la note du cours. Un artefact de portfolio n\'a pas de pondération propre : c\'est le portfolio qui la porte. Dans la carte d\'alignement, les productions sont d\'abord des mises en pratique liées aux objectifs d\'apprentissage.',
         voir: 'Conception › Productions'
     },
 
@@ -105,7 +106,7 @@ const GLOSSAIRE = {
         categorie: 'Structure',
         etape: 'numerisation',
         // A4, validé G. 20 oct. 2026, 9 h 23 : ce que fait l'application (un niveau, ou des points que décrit un barème).
-        definition: 'La méthode d’évaluation d’un critère dans une grille. Trois types sont disponibles : holistique (tu attribues un niveau de l’échelle de performance), analytique (tu attribues des points, que son barème décrit) et algorithmique (une formule calcule la note à partir de ce que tu comptes sur la copie).',
+        definition: 'La méthode d’évaluation d’un critère dans une grille. Trois types sont disponibles : holistique (tu attribues un niveau de l’échelle de performance), analytique (tu attribues des points, que son barème décrit) et algorithmique (une formule calcule la note à partir de ce que tu comptes dans la production).',
         voir: 'Conception › Grilles'
     },
 
@@ -127,7 +128,7 @@ const GLOSSAIRE = {
         terme: 'Critère',
         categorie: 'Structure',
         etape: 'numerisation',
-        definition: 'Ce qui est attendu ; la question que tu te poses devant la copie.',
+        definition: 'Ce qui est attendu ; la question que tu te poses devant la production d\'un·e étudiant·e.',
         voir: 'Conception › Grilles'
     },
 
@@ -136,7 +137,7 @@ const GLOSSAIRE = {
         terme: 'Élément observable',
         categorie: 'Structure',
         etape: 'numerisation',
-        definition: 'Ce que tu regardes dans toutes les copies pour juger d’un critère. On dit aussi sous-critère.',
+        definition: 'Ce que tu regardes dans les productions de tes étudiant·es pour juger d’un critère. On dit aussi sous-critère.',
         voir: 'Conception › Grilles'
     },
 
@@ -145,7 +146,7 @@ const GLOSSAIRE = {
         terme: 'Descripteur',
         categorie: 'Structure',
         etape: 'numerisation',
-        definition: 'Ce que tu observes dans une copie, à un niveau donné ; une réponse possible à la question du critère. Une seule vaut pour une copie.',
+        definition: 'Ce que tu observes dans la production d\'un·e étudiant·e, à un niveau donné ; une réponse possible à la question du critère. Une seule vaut pour chaque production remise.',
         voir: 'Conception › Grilles'
     },
 
@@ -174,7 +175,7 @@ const GLOSSAIRE = {
         terme: 'Barème',
         categorie: 'Structure',
         etape: 'numerisation',
-        definition: 'Pour un critère noté en points, ce que valent ces points : une suite de tranches, chacune avec ses points et ce qu’on attend d’une copie qui les obtient. Chaque critère analytique a son propre barème.',
+        definition: 'Pour un critère noté en points, ce que valent ces points : une suite de tranches, chacune avec ses points et ce qu’on attend d’une production pour les obtenir. Chaque critère analytique a son propre barème.',
         voir: 'Conception › Grilles'
     },
 
@@ -183,7 +184,7 @@ const GLOSSAIRE = {
         terme: 'Tranche',
         categorie: 'Structure',
         etape: 'numerisation',
-        definition: 'Une partie d’un barème : des points (un nombre, comme 2, ou deux bornes, comme 3 à 4), ce qu’on attend d’une copie qui les obtient et, si tu veux, un nom, comme « Partiel ».',
+        definition: 'Une partie d’un barème : des points (un nombre, comme 2, ou deux bornes, comme 3 à 4), ce qu’on attend d’une production pour les obtenir et, si tu veux, un nom, comme « Partiel ».',
         voir: 'Conception › Grilles'
     },
 
@@ -220,7 +221,7 @@ const GLOSSAIRE = {
         terme: 'Évaluation',
         categorie: 'Évaluations',
         etape: 'croisement',
-        definition: 'Le geste de juger chaque critère d\'une grille pour une production donnée et un·e étudiant·e donné·e, selon son type : un niveau de l\'échelle pour un critère holistique, des points pour un critère analytique ; un critère algorithmique se calcule à partir de ce que tu comptes sur la copie. La rétroaction se construit au fur et à mesure.',
+        definition: 'Le geste de juger chaque critère d\'une grille pour une production donnée et un·e étudiant·e donné·e, selon son type : un niveau de l\'échelle pour un critère holistique, des points pour un critère analytique ; un critère algorithmique se calcule à partir de ce que tu comptes dans la production. La rétroaction se construit au fur et à mesure.',
         voir: 'Évaluation › Annoter'
     },
 
@@ -247,7 +248,7 @@ const GLOSSAIRE = {
         terme: 'Tampon / Estampe',
         categorie: 'Travaux',
         etape: 'croisement',
-        definition: 'Marques visuelles que tu apposes sur les copies importées pour annoter le travail de l\'étudiant·e. Ils permettent d\'identifier des éléments précis (erreurs, réussites, points d\'attention) directement sur le document, comme tu le ferais avec un stylo sur une copie papier.',
+        definition: 'Marques visuelles que tu apposes sur les productions importées pour annoter le travail de l\'étudiant·e. Ils permettent d\'identifier des éléments précis (erreurs, réussites, points d\'attention) directement sur le document, comme tu le ferais avec un stylo sur papier.',
         voir: 'Évaluation › Annoter'
     },
 
@@ -372,7 +373,7 @@ const GLOSSAIRE = {
         terme: 'ACO — Actions Cognitives Observées',
         categorie: 'Tableau de bord / Travaux',
         etape: 'observation',
-        definition: 'Trois actions cognitives observables que tu peux repérer sur les copies de tes étudiant·es à l\'aide de tampons ou estampes : Repérage (identifier un élément), Liaison (relier des éléments entre eux) et Ouverture (transférer, généraliser, critiquer). Les résultats alimentent le profil ACO et l\'export de recherche. Cette mesure est subjective — elle dépend des traces que laisse l\'étudiant·e et de la lecture qu\'en fait l\'enseignant·e. La dynamique ressemble à une mycorrhization : des connexions cognitives invisibles se forment en profondeur, et ce n\'est que plus tard qu\'on voit l\'émergence des fruits à la surface.',
+        definition: 'Trois actions cognitives observables que tu peux repérer sur les productions de tes étudiant·es à l\'aide de tampons ou estampes : Repérage (identifier un élément), Liaison (relier des éléments entre eux) et Ouverture (transférer, généraliser, critiquer). Les résultats alimentent le profil ACO et l\'export de recherche. Cette mesure est subjective — elle dépend des traces que laisse l\'étudiant·e et de la lecture qu\'en fait l\'enseignant·e. La dynamique ressemble à une mycorrhization : des connexions cognitives invisibles se forment en profondeur, et ce n\'est que plus tard qu\'on voit l\'émergence des fruits à la surface.',
         voir: 'Évaluation › Annoter · Suivi › Profils'
     },
 
@@ -390,7 +391,7 @@ const GLOSSAIRE = {
         terme: 'Profil ACO',
         categorie: 'Tableau de bord',
         etape: 'observation',
-        definition: 'Le portrait des actions cognitives observées chez un·e étudiant·e, construit à partir des annotations RLO sur ses copies. Le profil ACO montre la répartition entre repérage, liaison et ouverture — il rend visible le type de pensée que l\'étudiant·e mobilise, pas seulement le résultat obtenu. C\'est un outil d\'observation, pas une note.',
+        definition: 'Le portrait des actions cognitives observées chez un·e étudiant·e, construit à partir des annotations RLO sur ses productions. Le profil ACO montre la répartition entre repérage, liaison et ouverture — il rend visible le type de pensée que l\'étudiant·e mobilise, pas seulement le résultat obtenu. C\'est un outil d\'observation, pas une note.',
         voir: 'Suivi › Profils'
     },
 
@@ -575,7 +576,7 @@ const GLOSSAIRE = {
         terme: 'Sous-critère',
         categorie: 'Structure',
         etape: 'numerisation',
-        definition: 'Un élément observable : ce que tu regardes dans toutes les copies pour juger d’un critère. Dans un critère algorithmique, les sous-critères sont les catégories de ce que tu comptes. Chaque sous-critère porte un code, un nom, une pondération (ce que pèse un code posé : 1 par défaut, 0,5 pour le compter à moitié) et une observation, que l\'étudiant·e lit. Le calcul reçoit la somme pondérée des codes posés. « Partir de la liste du français écrit » en crée dix d\'un coup. Ils se règlent à l’étape « Codes utilisés » du critère.',
+        definition: 'Un élément observable : ce que tu regardes dans les productions de tes étudiant·es pour juger d’un critère. Dans un critère algorithmique, les sous-critères sont les catégories de ce que tu comptes. Chaque sous-critère porte un code, un nom, une pondération (ce que pèse un code posé : 1 par défaut, 0,5 pour le compter à moitié) et une observation, que l\'étudiant·e lit. Le calcul reçoit la somme pondérée des codes posés. « Partir de la liste du français écrit » en crée dix d\'un coup. Ils se règlent à l’étape « Codes utilisés » du critère.',
         voir: 'Conception › Grilles'
     },
 
@@ -612,7 +613,7 @@ const GLOSSAIRE = {
         terme: 'Verrouillage',
         categorie: 'Évaluations',
         etape: 'croisement',
-        definition: 'Une copie évaluée ne compte dans la note qu’une fois verrouillée : « Verrouiller », en haut de Paramètres et de la palette Annotation. Verrouillée, elle montre la note remise ; pour la corriger, déverrouille-la. Une copie « Non verrouillée » ne compte pas encore. Dans la saisie des présences, « Verrouiller la saisie » fige une séance.',
+        definition: 'Une évaluation ne compte dans la note qu’une fois verrouillée : « Verrouiller », en haut de Paramètres et de la palette Annotation. Verrouillée, elle montre la note remise ; pour la corriger, déverrouille-la. Une évaluation « Non verrouillée » ne compte pas encore. Dans la saisie des présences, « Verrouiller la saisie » fige une séance.',
         voir: 'Évaluation › Annoter · Suivi › Présences'
     },
 
@@ -621,7 +622,7 @@ const GLOSSAIRE = {
         terme: 'Réassigner',
         categorie: 'Évaluations',
         etape: 'croisement',
-        definition: 'Changer l’étudiant·e, la production ou l’évaluation d’une copie. « Réassigner », dans le menu « Actions » d’une rangée de la Liste, ouvre les « Propriétés du fichier » ; « Réassigner la sélection » le fait pour plusieurs copies.',
+        definition: 'Changer l’étudiant·e, la production ou l’évaluation d’un fichier. « Réassigner », dans le menu « Actions » d’une rangée de la Liste, ouvre les « Propriétés du fichier » ; « Réassigner la sélection » le fait pour plusieurs fichiers.',
         voir: 'Évaluation › Liste'
     },
 
@@ -649,7 +650,7 @@ const GLOSSAIRE = {
         terme: 'Archive (d’un groupe-cours ou d’un trimestre)',
         categorie: 'Données',
         etape: 'interface',
-        definition: 'Un fichier, hors de l’application, qui garde un groupe-cours ou un trimestre clos : « Archiver… », dans le menu Codex, pour un groupe-cours ; ⋮ › « Archiver le trimestre… », dans la bibliothèque des trimestres, pour un trimestre clos. Une fois l’archive vérifiée, ce qu’elle garde peut quitter l’application (« Archiver les copies… », « Renvoyer aux archives… »), puis revenir par « Faire revenir ».',
+        definition: 'Un fichier, hors de l’application, qui garde un groupe-cours ou un trimestre clos : « Archiver… », dans le menu Codex, pour un groupe-cours ; ⋮ › « Archiver le trimestre… », dans la bibliothèque des trimestres, pour un trimestre clos. Une fois l’archive vérifiée, ce qu’elle garde peut quitter l’application (« Archiver les productions remises… », « Renvoyer aux archives… »), puis revenir par « Faire revenir ».',
         voir: 'Réglages › Données'
     },
 
@@ -658,7 +659,7 @@ const GLOSSAIRE = {
         terme: 'Faire revenir',
         categorie: 'Données',
         etape: 'interface',
-        definition: 'Ramener dans l’application ce qu’une archive vérifiée garde. Pour l’archive d’un groupe-cours, ses copies reviennent sous leurs fiches ; rien n’est remplacé ni effacé. Un trimestre renvoyé aux archives revient tel qu’il a été archivé, clos ; les autres trimestres, les cours et les réglages ne sont pas touchés.',
+        definition: 'Ramener dans l’application ce qu’une archive vérifiée garde. Pour l’archive d’un groupe-cours, ses productions reviennent sous leurs fiches ; rien n’est remplacé ni effacé. Un trimestre renvoyé aux archives revient tel qu’il a été archivé, clos ; les autres trimestres, les cours et les réglages ne sont pas touchés.',
         voir: 'Réglages › Données'
     },
 

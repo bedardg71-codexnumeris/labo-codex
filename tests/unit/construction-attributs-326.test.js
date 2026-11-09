@@ -111,7 +111,7 @@ describe('#588 (8 nov. 2026) · reprises STD : la règle appliquée, dite, quell
     // place de la copie d'origine (`evaluationEntreDansLaNote`, pratique-registre.js), quelle que soit la sélection du
     // portfolio. Avant : « Récence (dernier essai retenu) » sous « N derniers » (la sélection, pas la reprise), « Selon la
     // sélection d'artefacts » sinon, et « Limitées »/« Illimitées » d'un déclaratif (`systeme_reprises`) que rien n'applique.
-    const REGLE = 'La reprise prend la place de la copie d\'origine dans la note';
+    const REGLE = 'La reprise prend la place de l\'évaluation d\'origine dans la note';
     const std = (methodeSelection, sr) => ({ type: 'standards', configuration: Object.assign({ portfolio: { nombreARetenir: 4, methodeSelection } }, sr ? { systeme_reprises: sr } : {}) });
     it.each([['derniers'], ['recents'], ['recents-meilleurs'], ['meilleurs'], ['tous'], [undefined]])('%s → la règle', (m) => {
         expect(val(extraire(std(m)), 'reprises')).toBe(REGLE);
@@ -146,7 +146,7 @@ describe('#326 R3 · SOMMATIVE', () => {
     it('pondération par production ; reprises : ce qui s\'applique, pas le déclaratif (#324, lot 11)', () => {
         const r = extraire(cfg);
         expect(val(r, 'ponderation')).toMatch(/production/i);
-        expect(val(r, 'reprises')).toBe('La reprise prend la place de la copie d\'origine dans la note');
+        expect(val(r, 'reprises')).toBe('La reprise prend la place de l\'évaluation d\'origine dans la note');
     });
     it('toutes les évaluations comptent ; pas d\'échelle (SOM par design)', () => {
         const r = extraire(cfg);

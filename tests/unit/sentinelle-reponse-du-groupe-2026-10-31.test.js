@@ -340,25 +340,25 @@ describe('la ligne d\'en-tête du réglage : d\'où vient le seuil', () => {
         it('des plages différentes : pas d\'échelle unique', () => {
             const b = banc([DEUX[0], { ...DEUX[1], echelleId: AUTRE_PLAGES.id }], { autreEchelle: AUTRE_PLAGES });
             expect(b.win.reperesPerformance().raison).toBe('echelles-divergentes');
-            expect(ligne(b)).toBe('2 étudiant·es dans ce groupe. Seuil minimal de réussite : 60 %, la note de passage (tes copies n\'ont pas d\'échelle unique).');
+            expect(ligne(b)).toBe('2 étudiant·es dans ce groupe. Seuil minimal de réussite : 60 %, la note de passage (tes évaluations n\'ont pas d\'échelle unique).');
         });
 
         it('mêmes plages, repères contradictoires : pas d\'échelle unique', () => {
             const b = banc([DEUX[0], { ...DEUX[1], echelleId: AUTRE_REPERE.id }], { autreEchelle: AUTRE_REPERE });
             expect(b.win.reperesPerformance().raison).toBe('echelles-divergentes');
-            expect(ligne(b)).toContain('60 %, la note de passage (tes copies n\'ont pas d\'échelle unique).');
+            expect(ligne(b)).toContain('60 %, la note de passage (tes évaluations n\'ont pas d\'échelle unique).');
         });
 
         it('aucune copie : aucune échelle ne le fixe encore', () => {
             const b = banc([{ P: 0, copies: [] }, { P: 0, copies: [] }]);
             expect(b.win.reperesPerformance().raison).toBe('aucune-copie');
-            expect(ligne(b)).toBe('2 étudiant·es dans ce groupe. Seuil minimal de réussite : 60 %, la note de passage (aucune échelle de tes copies ne le fixe encore).');
+            expect(ligne(b)).toBe('2 étudiant·es dans ce groupe. Seuil minimal de réussite : 60 %, la note de passage (aucune échelle de tes évaluations ne le fixe encore).');
         });
 
         it('sans pratique : aucune échelle ne le fixe encore', () => {
             const b = banc([{ P: 90, copies: [90] }, { P: 80, copies: [80] }], { designation: { etat: 'aucune' } });
             expect(b.win.reperesPerformance().raison).toBe('sans-pratique');
-            expect(ligne(b)).toBe('2 étudiant·es dans ce groupe. Seuil minimal de réussite : 60 %, la note de passage (aucune échelle de tes copies ne le fixe encore).');
+            expect(ligne(b)).toBe('2 étudiant·es dans ce groupe. Seuil minimal de réussite : 60 %, la note de passage (aucune échelle de tes évaluations ne le fixe encore).');
         });
     });
 

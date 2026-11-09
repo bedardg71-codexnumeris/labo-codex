@@ -286,7 +286,7 @@ test('#1013 — seuils « en attente » sans ses présences ni ses évaluations 
     expect(apres.seanceEnAttente, 'sa présence ne compte plus : « 1 séance en attente »').toBe(true);
     expect(apres.barresEvaluationsEnAttente, 'ses évaluations ne comptent plus : C et P attendent tous deux').toBe(2);
     expect(apres.copies, 'aucune copie au tableau').toBe(0);
-    expect(apres.message, 'la phrase de Grégoire, quand le groupe a des copies toutes masquées').toBe('Aucune copie à afficher : celles de ce groupe appartiennent à des étudiant·es supprimé·es.');
+    expect(apres.message, 'la phrase de Grégoire, quand le groupe a des copies toutes masquées').toBe('Aucune production à afficher : celles de ce groupe appartiennent à des étudiant·es supprimé·es.');
 
     // Un groupe sans aucune copie garde « Aucun fichier importé. ».
     const vide = await page.evaluate(async () => {

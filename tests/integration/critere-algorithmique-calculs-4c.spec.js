@@ -119,13 +119,13 @@ test('composer pour les phrases « Compte pondéré des X ÷ Compte des Y × 100
     await expect(item).toHaveCount(1);
     await expect(item.locator('.calc-nom')).toHaveText('Taux pour 100');
     expect(await texte(item.locator('.calc-formule'))).toBe('Compte pondéré des erreurs ÷ Compte des mots × 100');
-    await expect(item.locator('.calc-legende')).toHaveText(/^Sur la copie fictive, il vaudrait [\d,]+\. Il est dans la palette et dans le menu « Selon » des tables\.$/);
+    await expect(item.locator('.calc-legende')).toHaveText(/^Sur la production fictive, il vaudrait [\d,]+\. Il est dans la palette et dans le menu « Selon » des tables\.$/);
     // La chaîne, la palette.
     await expect(etape(page, 'CM').locator('[data-resume]')).toHaveText('Pénalité proportionnelle à la longueur, sur 20 · 1 calcul pour tes phrases');
     await expect(bloc(page, 'CM').locator('.palette-algo-bloc-nom')).toHaveText('Taux pour 100');
-    await expect(bloc(page, 'CM').locator('.palette-algo-bloc-aide')).toHaveText('Ton calcul : sa valeur sur la copie évaluée.');
+    await expect(bloc(page, 'CM').locator('.palette-algo-bloc-aide')).toHaveText('Ton calcul : sa valeur sur la production évaluée.');
     await expect(bloc(page, 'CM').locator('.palette-algo-bloc-valeur')).toHaveText(/^[\d,]+$/);
-    expect(await bloc(page, 'CM').evaluate((b) => b.closest('.palette-algo-groupe').getAttribute('aria-label'))).toBe('Ce qui se remplit quand tu évalues la copie');
+    expect(await bloc(page, 'CM').evaluate((b) => b.closest('.palette-algo-groupe').getAttribute('aria-label'))).toBe('Ce qui se remplit quand tu évalues la production');
     expect(erreurs).toEqual([]);
 });
 

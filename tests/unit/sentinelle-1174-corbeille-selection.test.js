@@ -88,8 +88,8 @@ describe('#1174 · R — le récapitulatif compte ce qui part et nomme ce qui re
         expect(r.aDeplacer).toHaveLength(3);
         expect(r.evaluees.map(c => c.fichierId)).toEqual(['F2']);
         const html = win._genererRecapCorbeilleHTML(r);
-        expect(html).toContain('1 copie déjà évaluée');
-        expect(html).toContain('leur évaluation et leur note restent dans la liste, sans copie liée');
+        expect(html).toContain('1 production déjà évaluée');
+        expect(html).toContain('leur évaluation et leur note restent dans la liste, sans fichier lié');
         expect(html).toContain('<li>Camille Roy</li>');
     });
 
@@ -103,7 +103,7 @@ describe('#1174 · R — le récapitulatif compte ce qui part et nomme ce qui re
         const r = recap(['F1', 'F3'], { evaluations: reprise });
         expect(r.reprises.map(c => c.fichierId)).toEqual(['F3']);
         const html = win._genererRecapCorbeilleHTML(r);
-        expect(html).toContain('1 copie liée à une reprise.');
+        expect(html).toContain('1 fichier lié à une reprise.');
         expect(html).toContain('ni la reprise ni le statut « remplacée »');
         const doublon = recap(['F3'], { evaluations: [{ id: 'EV3', etudiantDA: '2000003', productionId: A5, remplaceeParId: 'X', reconcilieParDoublon: true }] });
         expect(doublon.reprises).toEqual([]);
@@ -117,7 +117,7 @@ describe('#1174 · R — le récapitulatif compte ce qui part et nomme ce qui re
     it('R.g un élève introuvable ne sort jamais son DA ; un nom est échappé', () => {
         const r = recap(['F1', 'F2'], { etudiants: [{ da: '2000002', prenom: '<b>Cam', nom: 'Roy' }], evaluations: [EVAL_NOTEE, { id: 'EVX', etudiantDA: '2000001', productionId: A5, criteres: [{}] }] });
         // ↻ #1152, lot 5 (29 oct. 2026) : « étudiant·e » dans les écrans d'enseignant (décision de Cowork, plans de travail/TEXTES-2026-10-28-textes-d-ecran.md).
-        expect(r.aDeplacer[0].nomEleve).toBe('Copie sans étudiant·e');
+        expect(r.aDeplacer[0].nomEleve).toBe('Fichier sans étudiant·e');
         const html = win._genererRecapCorbeilleHTML(r);
         expect(html).not.toContain('2000001');
         expect(html).toContain('&lt;b&gt;Cam Roy');

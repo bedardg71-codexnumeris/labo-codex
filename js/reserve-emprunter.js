@@ -77,7 +77,7 @@ var MOTS = {
         texte: function(c) {
             return c.nom + ' revient dans l\'application tel qu\'il a été archivé, clos : ' +
                 _pluriel(c.etudiants, 'étudiant·e', 'étudiant·es') + ', ' +
-                _pluriel(c.copies, 'copie', 'copies') + '.\n\n' +
+                _pluriel(c.copies, 'production remise', 'productions remises') + '.\n\n' +
                 'Rien d\'autre n\'est touché : les autres trimestres, les cours et les réglages restent tels quels.';
         },
         confirmer: 'Faire revenir'
@@ -86,10 +86,10 @@ var MOTS = {
         titre: 'Trimestre revenu',
         texte: function(b) {
             var lignes = [b.nom + ' est revenu, clos. Tu le trouves dans la bibliothèque des trimestres.', ''];
-            lignes.push(_pluriel(b.revenues, 'copie revenue', 'copies revenues'));
-            if (b.dejaLa) lignes.push(_pluriel(b.dejaLa, 'copie déjà là', 'copies déjà là'));
-            if (b.supprimes) lignes.push(_pluriel(b.supprimes, 'copie d\'un·e étudiant·e supprimé·e, laissée dans l\'archive', 'copies d\'étudiant·es supprimé·es, laissées dans l\'archive'));
-            if (b.sansFichier) lignes.push(_pluriel(b.sansFichier, 'fiche sans copie dans l\'archive', 'fiches sans copie dans l\'archive'));
+            lignes.push(_pluriel(b.revenues, 'production revenue', 'productions revenues'));
+            if (b.dejaLa) lignes.push(_pluriel(b.dejaLa, 'production déjà là', 'productions déjà là'));
+            if (b.supprimes) lignes.push(_pluriel(b.supprimes, 'production d\'un·e étudiant·e supprimé·e, laissée dans l\'archive', 'productions d\'étudiant·es supprimé·es, laissées dans l\'archive'));
+            if (b.sansFichier) lignes.push(_pluriel(b.sansFichier, 'fiche sans production dans l\'archive', 'fiches sans production dans l\'archive'));
             return lignes.join('\n');
         }
     },
@@ -98,21 +98,21 @@ var MOTS = {
         // Le cas « déjà là » : refusé, sans option « remplacer » (décision de Grégoire, 4 oct.).
         dejaLa: function(nom) { return nom + ' est déjà dans l\'application : ouvre-le depuis la bibliothèque des trimestres. Rien n\'a été écrit.'; },
         debris: function(nom) { return 'Des données de ' + nom + ' sont déjà dans l\'application, sans qu\'il soit dans la bibliothèque des trimestres, et ne concordent pas avec l\'archive. Rien n\'a été écrit.'; },
-        differe: function(nom) { return 'Une séance ou une copie de ' + nom + ' est déjà dans l\'application et ne concorde pas avec l\'archive. Rien n\'a été écrit.'; },
+        differe: function(nom) { return 'Une séance ou une production remise de ' + nom + ' est déjà dans l\'application et ne concorde pas avec l\'archive. Rien n\'a été écrit.'; },
         nonVerifiee: 'Cette archive n\'est pas vérifiée dans ce navigateur. Vérifie-la d\'abord.',
         changeeDepuis: 'Cette archive ne concorde plus avec sa vérification. Rien n\'a été écrit. Vérifie-la de nouveau.',
         pasUnTrimestre: 'Cette archive n\'est pas celle d\'un trimestre entier.',
         sansEmpreintes: 'Cette archive ne porte pas les empreintes de ses données. Archive de nouveau ce trimestre.',
-        sansMagasin: 'Le stockage des copies n\'est pas disponible dans cette page.'
+        sansMagasin: 'Le stockage des fichiers n\'est pas disponible dans cette page.'
     },
     echec: {
         titre: 'Impossible de faire revenir le trimestre',
         texte: function(raison) { return 'Le retour s\'est arrêté en cours de route (' + raison + '). Ce qu\'il avait écrit a été retiré : l\'application est comme avant.'; },
         resteEcrit: function(raison, cles, copies) {
             return 'Le retour s\'est arrêté en cours de route (' + raison + '), et ce qu\'il avait écrit n\'a pas pu être retiré en entier : ' +
-                _pluriel(cles, 'donnée', 'données') + ' et ' + _pluriel(copies, 'copie', 'copies') + ' restent.';
+                _pluriel(cles, 'donnée', 'données') + ' et ' + _pluriel(copies, 'production', 'productions') + ' restent.';
         },
-        copieAbimee: 'une copie de l\'archive ne concorde pas avec son empreinte',
+        copieAbimee: 'un fichier de l\'archive ne concorde pas avec son empreinte',
         nonEcrite: 'l\'espace du navigateur a refusé une écriture',
         apparu: 'le trimestre est apparu pendant son retour'
     }

@@ -113,7 +113,7 @@ var MODELES = [
         id: 'penalite_normalisee',
         nom: 'Pénalité proportionnelle à la longueur',
         court: 'pénalité proportionnelle',
-        texte: 'Chaque occurrence retire des points en proportion de la longueur de la copie : le même nombre d’occurrences coûte moins sur une copie plus longue. Tu fixes la longueur sur laquelle une occurrence coûte un point.',
+        texte: 'Chaque occurrence retire des points en proportion de la longueur de la production : le même nombre d’occurrences coûte moins dans une production plus longue. Tu fixes la longueur sur laquelle une occurrence coûte un point.',
         parametres: [{
             cle: 'facteurNormalisation',
             libelle: function(N) { return 'Longueur sur laquelle une occurrence coûte un point (' + N.mots.pluriel + ')'; },
@@ -128,7 +128,7 @@ var MODELES = [
         id: 'ratio_cible',
         nom: 'Rapport visé',
         court: 'rapport visé',
-        texte: 'Tu fixes le rapport qui donne la note entière, par exemple une occurrence à chaque 60 mots. Une copie qui l’atteint a la note entière ; en deçà, la note baisse en proportion. Une copie sans occurrence a la note entière.',
+        texte: 'Tu fixes le rapport qui donne la note entière, par exemple une occurrence à chaque 60 mots. Si la production l’atteint, la note est entière ; en deçà, la note baisse en proportion. Sans occurrence, la note est entière.',
         parametres: [{
             cle: 'motsParErreurCible',
             libelle: function(N) { return 'Rapport qui donne la note entière : 1 ' + N.erreurs.singulier + ' à chaque … ' + N.mots.pluriel; },
@@ -143,7 +143,7 @@ var MODELES = [
         id: 'penalite_par_erreur',
         nom: 'Pénalité fixe',
         court: 'pénalité fixe',
-        texte: 'Chaque occurrence retire le même nombre de points, quelle que soit la longueur de la copie. La longueur reste comptée pour les phrases de l’étudiant·e, mais n’entre pas dans la note.',
+        texte: 'Chaque occurrence retire le même nombre de points, quelle que soit la longueur de la production. La longueur reste comptée pour les phrases de l’étudiant·e, mais n’entre pas dans la note.',
         parametres: [{
             cle: 'pointsParErreur',
             libelle: function(N) { return 'Points retirés par ' + N.erreurs.singulier; },

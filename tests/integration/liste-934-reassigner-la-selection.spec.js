@@ -133,9 +133,9 @@ test('Porte #934 · trois copies cochées, une en conflit : la question nomme le
     // 1. La question groupée : 3 copies, chaque fichier nommé, 1 conflit nommé (existant → arrivant).
     const q = await cocherToutEtChoisirLaCible(page, A2R);
     expect(q.casesCochees).toBe(3);
-    expect(q.titre).toBe('Réassigner 3 copies');
-    expect(q.bouton).toBe('Réassigner 3 copies');
-    expect(q.recap).toContain('3 copies vers « Artefact 2 (rév) »');
+    expect(q.titre).toBe('Réassigner 3 fichiers');
+    expect(q.bouton).toBe('Réassigner 3 fichiers');
+    expect(q.recap).toContain('3 fichiers vers « Artefact 2 (rév) »');
     expect(q.recap).toContain('Sara Exemple — Exemple_Artefact_2_revise.png');
     expect(q.recap).toContain('Camille Roy — Roy_Artefact_2_revise.png');
     expect(q.recap).toContain('Léa Gagnon — Gagnon_Artefact_2_revise.png');
@@ -152,7 +152,7 @@ test('Porte #934 · trois copies cochées, une en conflit : la question nomme le
     // 3. Confirmer : les trois copies passent sous la cible, l'existante de Sara part à la corbeille.
     await page.evaluate(() => window.viderSelectionEval());
     const q2 = await cocherToutEtChoisirLaCible(page, A2R);
-    expect(q2.bouton).toBe('Réassigner 3 copies');
+    expect(q2.bouton).toBe('Réassigner 3 fichiers');
     await page.evaluate(() => document.getElementById('reassigner-selection-btn-confirmer').click());
     await page.waitForFunction(() => !document.getElementById('reassigner-selection-overlay'), null, { timeout: 10000 });
     await page.waitForFunction(() => {

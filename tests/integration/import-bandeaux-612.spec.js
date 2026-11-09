@@ -176,7 +176,7 @@ test('#612 · cas 3 bis — sans DA ni élève : le bandeau dit qu\'il part sans
     expect(r.texteSansDA, 'le message ne promet pas une association manuelle')
         .not.toMatch(/association devra être faite manuellement/);
     expect(r.texteSansDA, 'il dit la conséquence réelle').toMatch(/importés sans élève/);
-    expect(r.texteSansDA, 'et le geste dans l\'app, pas hors de l\'app').toMatch(/Réunir en une copie/);
+    expect(r.texteSansDA, 'et le geste dans l\'app, pas hors de l\'app').toMatch(/Réunir en une production/);
     expect(r.texteSansDA).not.toMatch(/Ajoutez le DA/);
     expect(erreurs, `Erreurs console : ${erreurs.join(' | ')}`).toEqual([]);
 });

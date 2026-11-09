@@ -350,17 +350,17 @@ describe('Lot A3 — faire revenir les copies d\'une archive vérifiée', () => 
     it('(e) le bilan dit l\'archive abîmée EN TÊTE, puis les nombres, avec les mots provisoires', async () => {
         const { banc, bilan } = await scenario();
         const cr = banc.revenir.compteRendu(bilan);
-        expect(cr.titre).toBe('Copies revenues, archive abîmée');
+        expect(cr.titre).toBe('Productions revenues, archive abîmée');
         expect(cr.message.split('\n')).toEqual([
-            '1 copie de l\'archive est abîmée : elle n\'est pas revenue. Vérifie de nouveau cette archive.',
+            '1 fichier de l\'archive est abîmé : il n\'est pas revenu. Vérifie de nouveau cette archive.',
             '',
-            '2 copies revenues',
-            '2 copies déjà là',
-            '1 copie changée depuis l\'archive, laissée telle quelle',
-            '1 copie sans fiche dans l\'application',
-            '1 copie d\'un·e étudiant·e supprimé·e'
+            '2 productions revenues',
+            '2 productions déjà là',
+            '1 production changée depuis l\'archive, laissée telle quelle',
+            '1 production sans fiche dans l\'application',
+            '1 production d\'un·e étudiant·e supprimé·e'
         ]);
-        expect(banc.revenir.MOTS.bilan.supprimes(2)).toBe('2 copies d\'étudiant·es supprimé·es');
+        expect(banc.revenir.MOTS.bilan.supprimes(2)).toBe('2 productions d\'étudiant·es supprimé·es');
     });
 });
 

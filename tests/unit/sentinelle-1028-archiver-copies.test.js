@@ -303,21 +303,21 @@ describe('#1028 · (a) l\'aller-retour : archiver les copies, faire évoluer les
         const RC = banc.win.ReserveCopies;
         const res = await RC.comparer(banc.win.ReserveVerifier.sourceFichier(banc.zip), TRIM);
         const f = RC.fenetreIdentique(res);
-        expect(f.titre).toBe('Archiver les copies de Hiver 2032 ?');
+        expect(f.titre).toBe('Archiver les productions remises de Hiver 2032 ?');
         const l = f.message.split('\n');
-        expect(l[0]).toBe('4 copies quitteront l\'application, environ 81,9 Ko.');
+        expect(l[0]).toBe('4 productions quitteront l\'application, environ 81,9 Ko.');
         expect(l[1]).toMatch(/^Son archive, vérifiée le .+, les garde telles quelles : « Faire revenir » les ramènera\.$/);
         expect(l.slice(2)).toEqual([
-            'Toutes les données de Hiver 2032 restent dans l\'application : résultats des étudiant·es et du groupe, grilles, rétroactions. Les annotations restent aussi, mais ne se voient qu\'avec leur copie.',
-            'Garde bien cette archive : c\'est elle qui conserve les copies.'
+            'Toutes les données de Hiver 2032 restent dans l\'application : résultats des étudiant·es et du groupe, grilles, rétroactions. Les annotations restent aussi, mais ne se voient qu\'avec leur production.',
+            'Garde bien cette archive : c\'est elle qui conserve les productions.'
         ]);
-        expect(f.texteConfirmer).toBe('Archiver les copies');
+        expect(f.texteConfirmer).toBe('Archiver les productions remises');
         const bilan = await RC.retirer(res);
         expect(RC.compteRendu(res, bilan)).toEqual({
-            titre: 'Les copies de Hiver 2032 sont aux archives',
-            message: '4 copies retirées. Ton prochain codex sera plus léger d\'environ 81,9 Ko.\n' +
-                'Toutes les données de Hiver 2032 restent dans l\'application : résultats des étudiant·es et du groupe, grilles, rétroactions. Les annotations restent aussi, mais ne se voient qu\'avec leur copie.\n' +
-                'Pour faire revenir les copies : Réglages › Données › Archives, ligne de Hiver 2032, « Faire revenir ».'
+            titre: 'Les productions remises de Hiver 2032 sont aux archives',
+            message: '4 productions retirées. Ton prochain codex sera plus léger d\'environ 81,9 Ko.\n' +
+                'Toutes les données de Hiver 2032 restent dans l\'application : résultats des étudiant·es et du groupe, grilles, rétroactions. Les annotations restent aussi, mais ne se voient qu\'avec leur production.\n' +
+                'Pour faire revenir les productions : Réglages › Données › Archives, ligne de Hiver 2032, « Faire revenir ».'
         });
     });
 
@@ -326,17 +326,17 @@ describe('#1028 · (a) l\'aller-retour : archiver les copies, faire évoluer les
         const M = banc.win.ReserveCopies.MOTS;
         expect(M.different.texte({ copiesAbsentes: 2, copiesDifferentes: 1, dateArchive: '2032-06-01T12:00:00' }).split('\n')).toEqual([
             'Rien n\'a été retiré.',
-            'Depuis son archive du 1 juin 2032 : 2 copies ajoutées, 1 copie modifiée.',
-            'Pour archiver ses copies : archive le trimestre de nouveau, vérifie la nouvelle archive, puis archive ses copies.'
+            'Depuis son archive du 1 juin 2032 : 2 productions ajoutées, 1 production modifiée.',
+            'Pour archiver ses productions remises : archive le trimestre de nouveau, vérifie la nouvelle archive, puis archive ses productions remises.'
         ]);
         expect(M.interrompu.texte({ nom: 'Hiver 2032' })).toBe(
-            'L\'archivage des copies de Hiver 2032 s\'est arrêté en cours de route. Rien n\'est perdu : son archive les garde toutes.\n' +
-            'Pour finir : relance « Archiver les copies… » depuis le menu ⋮ de Hiver 2032.\n' +
+            'L\'archivage des productions remises de Hiver 2032 s\'est arrêté en cours de route. Rien n\'est perdu : son archive les garde toutes.\n' +
+            'Pour finir : relance « Archiver les productions remises… » depuis le menu ⋮ de Hiver 2032.\n' +
             'Pour annuler : « Faire revenir », dans Réglages › Données › Archives.');
         expect(M.copie.message('Hiver 2032')).toBe(
-            'Cette copie est aux archives.\n' +
-            'Ses résultats, sa grille et sa rétroaction restent dans l\'application ; ses annotations aussi, mais elles ne se voient qu\'avec la copie.\n' +
-            'Pour la revoir : fais revenir les copies de Hiver 2032 (Réglages › Données › Archives, ligne de Hiver 2032, « Faire revenir »).');
+            'Cette production est aux archives.\n' +
+            'Son évaluation (résultats, grille, rétroaction) reste dans l\'application ; ses annotations aussi, mais elles ne se voient qu\'avec la production.\n' +
+            'Pour la revoir : fais revenir les productions remises de Hiver 2032 (Réglages › Données › Archives, ligne de Hiver 2032, « Faire revenir »).');
     });
 
     it('relancé quand tout est parti : « rien à archiver », rien écrit', async () => {
@@ -386,7 +386,7 @@ describe('#1028 · (c) aucune nouvelle archive sans les copies parties', () => {
         await banc.win.ReserveTrimestre.archiverTrimestre(TRIM);
         expect(banc.journal.fenetres).toEqual([{
             titre: 'Trimestre non archivé',
-            message: 'Les copies de Hiver 2032 sont aux archives : une nouvelle archive ne les contiendrait pas, et elle remplacerait celle qui les garde.\n' +
+            message: 'Les productions remises de Hiver 2032 sont aux archives : une nouvelle archive ne les contiendrait pas, et elle remplacerait celle qui les garde.\n' +
                 'Fais-les revenir d\'abord (Réglages › Données › Archives, ligne de Hiver 2032, « Faire revenir »), puis archive de nouveau.'
         }]);
     });
@@ -471,7 +471,7 @@ describe('#1028 · (e) un arrêt au milieu, puis la reprise', () => {
         banc.magasin.echouer = () => ++n === 2;
         const r = await archiverCopies(banc);
         expect(r.bilan).toMatchObject({ etat: 'interrompu', copies: 1, reste: 3 });
-        expect(banc.win.ReserveCopies.compteRendu(r.comparaison, r.bilan).titre).toBe('Archivage des copies inachevé');
+        expect(banc.win.ReserveCopies.compteRendu(r.comparaison, r.bilan).titre).toBe('Archivage des productions remises inachevé');
         // Les copies encore là ne sont pas « parties » : seule la retirée l'est.
         expect(await banc.win.ReserveCopies.copiesParties(TRIM)).toEqual(['FT_h1']);
         banc.magasin.echouer = null;
@@ -501,7 +501,7 @@ describe('#1028 · (f) la copie d\'un·e étudiant·e supprimé·e reste', () =>
         const res = await RC.comparer(banc.win.ReserveVerifier.sourceFichier(banc.zip), TRIM);
         expect(res.laissees).toBe(1);
         expect(res.aRetirer.copies).not.toContain('FT_h2');
-        expect(RC.fenetreIdentique(res).message.split('\n').at(-1)).toBe('1 copie d\'un·e étudiant·e supprimé·e reste dans l\'application.');
+        expect(RC.fenetreIdentique(res).message.split('\n').at(-1)).toBe('1 production d\'un·e étudiant·e supprimé·e reste dans l\'application.');
         await RC.retirer(res);
         expect(banc.magasin._blobs.has('FT_h2')).toBe(true);
     });

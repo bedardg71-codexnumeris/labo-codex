@@ -265,16 +265,16 @@ test.describe('Clore et alléger un trimestre — le chemin complet (14 oct. 202
             await ouvrirClos(modale);
             await modale.locator('[data-param="biblio-menu-h2032"]').click();
             const archiverCopies = modale.locator('[data-action="ReserveCopies.actionArchiverCopies"][data-param="h2032"]');
-            await expect(archiverCopies).toHaveText('Archiver les copies…');
+            await expect(archiverCopies).toHaveText('Archiver les productions remises…');
             const choix = page.waitForEvent('filechooser');
             await archiverCopies.click();
             await (await choix).setFiles(fichier);
-            f = await attendreFenetre(page, 'Archiver les copies de Hiver 2032 ?');
+            f = await attendreFenetre(page, 'Archiver les productions remises de Hiver 2032 ?');
             journal('fenêtre « Archiver les copies »', f.message);
-            await cliquerDansFenetre(page, 'Archiver les copies');
-            f = await attendreFenetre(page, 'Les copies de Hiver 2032 sont aux archives');
+            await cliquerDansFenetre(page, 'Archiver les productions remises');
+            f = await attendreFenetre(page, 'Les productions remises de Hiver 2032 sont aux archives');
             journal('bilan', f.message);
-            expect(f.message).toContain('3 copies retirées.');
+            expect(f.message).toContain('3 productions retirées.');
             await fermerFenetre(page);
 
             // 4. Le codex mis à jour : sans les trois copies, sans avertissement.

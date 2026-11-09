@@ -3467,7 +3467,7 @@
         // #1075, point 2 (22 oct. 2026) : un trimestre clos ne s'écrit pas, l'annotation non plus. Elle
         // écrit par `travauxStockage`, hors de `sauvegarderDonneesSelonMode` : le refus est posé ici, au
         // seul point d'écriture des gestes d'Annoter. Mots du geste provisoires (Claude Code).
-        if (window.refuserSiTrimestreClos && window.refuserSiTrimestreClos(cle('annotationsTravaux'), 'Annoter la copie', options && options.discret)) return;
+        if (window.refuserSiTrimestreClos && window.refuserSiTrimestreClos(cle('annotationsTravaux'), 'Annoter la production', options && options.discret)) return;
 
         annotationCourante.dateModification = new Date().toISOString();
         travauxStockage.sauvegarderAnnotationFichier(annotationCourante, options);

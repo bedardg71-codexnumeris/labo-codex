@@ -71,14 +71,14 @@ var TEXTES = {
         eleve: 'Ce que l’étudiant·e lit'
     },
     buts: {
-        compte: 'Ce que tu relèves sur la copie, et ce à quoi tu rapportes ce compte (des mots, des calculs, des mesures…). Ces noms s’écrivent dans les phrases destinées à l’étudiant·e.',
-        codes: 'Tes codes sont les sous-critères de ce critère : tu les configures ici (numéro, nom, pondération, observation). Dans Annoter, la palette les affiche pour que tu les poses sur la copie, sans les modifier. Chaque code posé compte selon sa pondération.',
+        compte: 'Ce que tu relèves dans la production, et ce à quoi tu rapportes ce compte (des mots, des calculs, des mesures…). Ces noms s’écrivent dans les phrases destinées à l’étudiant·e.',
+        codes: 'Tes codes sont les sous-critères de ce critère : tu les configures ici (numéro, nom, pondération, observation). Dans Annoter, la palette les affiche pour que tu les poses sur la production, sans les modifier. Chaque code posé compte selon sa pondération.',
         note: 'Comment ce que tu identifies et comptes construit la note, en fonction de la pondération du critère. Chaque code posé compte pour la pondération de son sous-critère : c’est le compte pondéré.',   // étape 4a (ébauche)
         paliers: [
-            'Les paliers situent la copie par rapport à la limite que tu fixes, d’après le compte que l’application fait pour toi.',
-            'Selon la valeur établie sur sa copie, l’étudiant·e reçoit un commentaire précis qui s’adresse à son cas. Ci-dessous, chaque table choisit un seul cas pour l’étudiant·e. La simulation te montre de quel cas il s’agirait.'
+            'Les paliers situent la production par rapport à la limite que tu fixes, d’après le compte que l’application fait pour toi.',
+            'Selon la valeur établie dans sa production, l’étudiant·e reçoit un commentaire précis qui s’adresse à son cas. Ci-dessous, chaque table choisit un seul cas pour l’étudiant·e. La simulation te montre de quel cas il s’agirait.'
         ],
-        eleve: 'Les phrases que l’application écrit à ta place sur chaque copie. Ce que dit chaque cas s’écrit dans l’étape « Cas d’interprétation ».'
+        eleve: 'Les phrases que l’application écrit à ta place pour chaque production. Ce que dit chaque cas s’écrit dans l’étape « Cas d’interprétation ».'
     },
     resumes: {
         avecLimite: 'Paliers selon la limite fixée',
@@ -88,9 +88,9 @@ var TEXTES = {
     // Les aides des zones de l'étape « Ce que l'étudiant·e lit » et de « Aucune annotation » (ébauche).
     aides: {
         decompte: 'Sous le critère, et repris dans le PDF de l’étudiant·e. Toujours.',
-        priorite: 'En tête de son bilan, quand la note de ce critère tombe à 0 alors que la copie porte au moins un code.',
-        concentre: 'Dans son bilan, quand tous les critères de la grille sont acquis et que la copie porte au moins un code. L’application écrit après lui le compte entre parenthèses, puis le point.',
-        aucune: 'S’affiche pour toi seul·e, quand la copie ne porte ni tampon ni code.'
+        priorite: 'En tête de son bilan, quand la note de ce critère tombe à 0 alors que la production porte au moins un code.',
+        concentre: 'Dans son bilan, quand tous les critères de la grille sont acquis et que la production porte au moins un code. L’application écrit après lui le compte entre parenthèses, puis le point.',
+        aucune: 'S’affiche pour toi seul·e, quand la production ne porte ni tampon ni code.'
     },
     modele: 'Revenir au modèle',
     modelePhrases: 'Modèle des phrases',
@@ -98,26 +98,26 @@ var TEXTES = {
     cas: {
         titre: 'Paliers',
         selon: 'Selon',
-        repere: 'La part de la limite atteinte par la copie',
+        repere: 'La part de la limite atteinte par la production',
         reprendre: 'Reprendre une de tes collections…',
         reprendreLecteur: 'Reprendre une collection',
         retirer: 'Retirer la limite',
         fixer: 'Fixer une limite',
         sansLimite: 'Aucune limite fixée : l’étudiant·e ne lit aucun palier. C’est l’état d’un critère neuf. Une limite fait paraître les paliers, du « rien de compté » à « au-delà du dernier seuil ».',
         intro: function(n) {
-            return 'L’étudiant·e lit le cas de sa copie sous le critère, après le décompte. Un verdict sans bloc est précédé de la moyenne, sauf au premier cas : « Tu fais en moyenne 1 '
+            return 'L’étudiant·e lit le cas de sa production sous le critère, après le décompte. Un verdict sans bloc est précédé de la moyenne, sauf au premier cas : « Tu fais en moyenne 1 '
                 + n.erreurs.singulier + ' à chaque N ' + n.mots.pluriel + '. » Un bloc sans valeur disparaît.';
         },
         longueur: function(n) { return 'Longueur de référence (' + n.mots.pluriel + ')'; },
         tolerance: function(n) { return 'Tolérance sur cette longueur (' + n.erreurs.pluriel + ')'; },
         service: 'Nom du service d’aide',
         signalement: 'Ce que le signalement t’affiche',
-        signalementAide: 'À côté du palier RàI de l’étudiant·e, jamais sur sa copie.',
+        signalementAide: 'À côté du palier RàI de l’étudiant·e, jamais dans sa rétroaction.',
         lien: 'Lien d’inscription au service (facultatif)',
         exemples: { longueur: 'ex. : 12', tolerance: 'ex. : 4', service: 'Aucun', signalement: 'Vide : aucun signalement', lien: 'Aucun' },
         limite: function(seuil) { return 'Limite : ' + seuil + '.'; },
         incomplete: 'Écris la longueur de référence et la tolérance : les paliers s’appliquent dès que les deux dépassent 0.',
-        independance: 'La limite est indépendante de la formule de la note : la note suit la formule, le palier situe la copie par rapport à la limite.',
+        independance: 'La limite est indépendante de la formule de la note : la note suit la formule, le palier situe la production par rapport à la limite.',
         colonnes: ['Quand', 'Nom court', 'L’étudiant·e lit'],
         rienCompte: 'Rien de compté',
         auDela: 'Au-delà du dernier seuil',
@@ -139,13 +139,13 @@ var TEXTES = {
             toujours: 'Toujours jointe à ce palier.'
         },
         signal: 'Ce palier lève un signalement',
-        signalPrecision: '(pour toi, à côté du palier RàI de l’étudiant·e ; rien n’est écrit sur sa copie)',
+        signalPrecision: '(pour toi, à côté du palier RàI de l’étudiant·e ; rien n’est écrit dans sa rétroaction)',
         signalNiveau: 'Niveau RàI que ce palier fixe',
         signalNiveauAucun: 'Aucun : le signalement reste à côté',
         signalNiveau2: 'Niveau 2 – Préventif',
         signalNiveau3: 'Niveau 3 – Intensif',
         signalNiveauAide: 'Jusqu’à ce que la note du cours s’affiche. Ensuite, la note et la trajectoire décident, et le signalement reste affiché.',
-        ici: 'cas de la copie fictive',
+        ici: 'cas de la production fictive',
         voir: 'Voir ce que l’étudiant·e lirait à ce palier',
         retirerPalier: 'Retirer ce palier',
         ajouterPalier: '+ Ajouter un palier',
@@ -162,25 +162,25 @@ var TEXTES = {
         modifier: 'Modifier son texte',
         frequent: 'Le code le plus fréquent',
         frequentTexte: function(neuf) {
-            return 'Quand la copie porte au moins un code, l’étudiant·e lit le nom du plus fréquent dans son bilan, à la ligne « principalement ». À égalité : '
+            return 'Quand la production porte au moins un code, l’étudiant·e lit le nom du plus fréquent dans son bilan, à la ligne « principalement ». À égalité : '
                 + (neuf ? 'le premier de ta liste des codes (ta règle du 25 octobre, pour un critère neuf).' : 'le premier posé, comme aujourd’hui (critère existant).')
                 // Lot 3b : la phrase retirée au lot 3a revient avec le geste qu'elle désigne.
                 + ' Pour lui écrire un texte par code, ajoute une table selon « Le code le plus fréquent ».';
         },
         priorite: 'Défi prioritaire',
-        prioriteTexte: 'Quand la note de ce critère tombe à 0 alors que la copie porte au moins un code : en tête de son bilan.',
+        prioriteTexte: 'Quand la note de ce critère tombe à 0 alors que la production porte au moins un code : en tête de son bilan.',
         concentre: 'Quand tout est maîtrisé',
-        concentreTexte: 'Quand tous les critères de la grille sont acquis et que la copie porte au moins un code : dans son bilan.',
+        concentreTexte: 'Quand tous les critères de la grille sont acquis et que la production porte au moins un code : dans son bilan.',
         aucune: 'Aucune annotation',
-        aucuneTexte: 'Quand la copie ne porte ni tampon ni code : toi seul·e le lis.'
+        aucuneTexte: 'Quand la production ne porte ni tampon ni code : toi seul·e le lis.'
     },
     apercu: {
         titre: 'Simulation de ce que l’étudiant·e lirait',
         but: 'En fonction de ce que tu as établi dans les tables, observe si le cas d’interprétation te convient.',
         reduire: 'Réduire',
         toutVoir: 'Tout voir',
-        copie: 'Copie fictive',
-        references: 'Copies de référence',
+        copie: 'Production fictive',
+        references: 'Productions de référence',
         moins: 'Une de moins',
         plus: 'Une de plus',
         compte: 'Nombre compté',
@@ -192,11 +192,11 @@ var TEXTES = {
         palier: 'Palier',
         pdf: 'Sous le critère, dans son PDF',
         bilan: 'Dans son bilan',
-        siCode: 'Si la copie portait au moins un code, dans « Points récurrents » :',
+        siCode: 'Si la production portait au moins un code, dans « Points récurrents » :',
         siEffondre: 'Si la note de ce critère tombait à 0, en tête :',
         siAcquis: 'Si tous ses critères étaient acquis :',
         toi: 'Pour toi seul·e',
-        siAucunCode: 'Si la copie ne portait aucun code :',
+        siAucunCode: 'Si la production ne portait aucun code :',
         siSignalement: 'Si son palier levait un signalement, à côté du palier RàI :',
         etats: { oui: 's’afficherait', non: 'ne s’afficherait pas', depend: 'dépendrait des autres critères' },
         tousMaitrises: 'Tous les critères sont maîtrisés.',
@@ -210,15 +210,15 @@ var TEXTES = {
         plusFrequent: 'Le plus fréquent : ',
         code: function(numero, nom) { return 'code ' + numero + ', ' + nom; },
         egalite: function(autres, liste) { return ' (à égalité avec ' + autres + ' : ' + (liste ? 'le premier de ta liste' : 'le premier posé') + ')'; },
-        regle: function(nom, occ, eten) { return 'Copie réglée sur le palier « ' + nom + ' » : ' + occ + ' pour ' + eten + '.'; },
-        regleImpossible: 'Aucune copie n’atteindrait ce palier avec cette limite.',
+        regle: function(nom, occ, eten) { return 'Production réglée sur le palier « ' + nom + ' » : ' + occ + ' pour ' + eten + '.'; },
+        regleImpossible: 'Aucune production n’atteindrait ce palier avec cette limite.',
         regleSansLimite: 'Écris d’abord la longueur de référence et la tolérance.',
-        regleEgalite: function(a, b) { return 'Copie réglée : les codes ' + a + ' et ' + b + ', deux fois chacun, le ' + a + ' posé le premier.'; },
+        regleEgalite: function(a, b) { return 'Production réglée : les codes ' + a + ' et ' + b + ', deux fois chacun, le ' + a + ' posé le premier.'; },
         // Lot 3b : « Voir ce que l'étudiant·e lirait dans ce cas » (l'ébauche, `regleSurCas`).
-        regleCas: function(occ, eten) { return 'Copie réglée : ' + occ + (eten ? ' pour ' + eten : '') + '.'; },
-        regleCode: function(code) { return 'Copie réglée : trois fois le code ' + code + '.'; },
-        regleAucunCode: 'Copie réglée : aucun code.',
-        regleCasImpossible: 'Aucune copie fictive n’atteindrait ce cas.'
+        regleCas: function(occ, eten) { return 'Production réglée : ' + occ + (eten ? ' pour ' + eten : '') + '.'; },
+        regleCode: function(code) { return 'Production réglée : trois fois le code ' + code + '.'; },
+        regleAucunCode: 'Production réglée : aucun code.',
+        regleCasImpossible: 'Aucune production fictive n’atteindrait ce cas.'
     },
     // Lot 3b (26 oct. 2026) — les tables de l'enseignant·e (`grilles.js`, `rendreTablesCasAlgo`) : les mots de
     // l'ébauche (`tableEnseignant`), au caractère près. Ceux des valeurs et des cas : `tablesCasAlgo.TEXTES`.
@@ -227,7 +227,7 @@ var TEXTES = {
         selon: 'Selon',
         aucuneLimite: ' (aucune limite)',
         retirer: 'Retirer cette table',
-        intro: 'L’étudiant·e lit le cas de sa copie sous le critère, après les paliers. Une table neuve naît vide : un cas laissé vide n’ajoute rien à ce que lit l’étudiant·e.',
+        intro: 'L’étudiant·e lit le cas de sa production sous le critère, après les paliers. Une table neuve naît vide : un cas laissé vide n’ajoute rien à ce que lit l’étudiant·e.',
         colonnes: ['Quand', 'L’étudiant·e lit'],
         jusqua: 'Jusqu’à',
         borneLecteur: 'Borne du cas',
@@ -240,7 +240,7 @@ var TEXTES = {
         texteCas: 'Texte de ce cas',
         public: 'L’étudiant·e le lit',
         vide: 'Vide : ce cas n’ajoute rien.',
-        ici: 'cas de la copie fictive',
+        ici: 'cas de la production fictive',
         voir: 'Voir ce que l’étudiant·e lirait dans ce cas',
         egaliteNeuf: 'À égalité, le premier de ta liste des codes.',
         egaliteExistant: 'À égalité, le premier posé, comme aujourd’hui pour ce critère.',

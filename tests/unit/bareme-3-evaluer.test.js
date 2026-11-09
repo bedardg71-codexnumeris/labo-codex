@@ -227,7 +227,10 @@ describe('barème 3 · H — les textes H1 à H4, tels que validés', () => {
         const [h1] = section(1);
         const h3 = section(3).find(l => l.startsWith('Bulle : ')).slice(8);
         const h4 = section(4).find(l => l.startsWith('Bulle : ')).slice(8);
-        expect(entrees['bareme-eval'].hover).toBe(h1);
+        // ↻ 9 nov. 2026, lot « production plutôt que copie » (RAPPORT-2026-11-09-production-plutot-que-copie.md, § 4,
+        // rangée 74, validée par Grégoire) : « décrit la copie » devient « décrit la production » ; le reste, mot pour mot.
+        expect(h1).toContain('décrit la copie,');
+        expect(entrees['bareme-eval'].hover).toBe(h1.replace('décrit la copie,', 'décrit la production,'));
         expect(entrees['bareme-eval-hors-bareme'].hover).toBe(h3);
         expect(entrees['bareme-eval-a-completer'].hover).toBe(auxLibellesCourts(h4));
         expect(chargement).toContain("const BULLES_BAREME_EVAL = { bareme: 'bareme-eval', horsBareme: 'bareme-eval-hors-bareme', aCompleter: 'bareme-eval-a-completer' };");

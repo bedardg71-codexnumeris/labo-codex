@@ -415,7 +415,8 @@ describe('Une copie non recevable dans la note, famille par famille (décisions 
         const den = tranche(lire('js/pratiques/pratique-configurable.js'), '_calculerPerformanceDenotation(da) {', '\n    }');
         expect(den).toContain('lireJugementDenotation(pratiqueId, da)');
         expect(den).not.toMatch(/evaluationsSauvegardees|_lireEvaluations/);
-        expect(CARTE).toContain("<li>en dénotation, ta note est ton jugement : la copie n'y entre pas par calcul.</li>");
+        // ↻ 9 nov. 2026 (relevé « production plutôt que copie », entrée 53) : « la copie » → « l'évaluation ».
+        expect(CARTE).toContain("<li>en dénotation, ta note est ton jugement : l'évaluation n'y entre pas par calcul.</li>");
     });
 
     it('les anciennes affirmations ne reviennent ni dans la carte ni dans l\'infobulle', () => {

@@ -131,7 +131,7 @@ test('Porte #912 · sans copie : « Dossier PDF » rend un PDF d\'une page, la s
     expect(aUneSectionAnnotations(html[0])).toBe(false);
     // Ce qui est réservé à l'enseignant ne part pas vers l'élève.
     expect(html[0]).not.toContain(NOTE_PRIVEE);
-    expect(html[0]).not.toContain('Cette copie n’a pas de niveau général');
+    expect(html[0]).not.toContain('Cette évaluation n’a pas de niveau général');
     expect(suivi.erreurs, suivi.erreurs.join(' | ')).toEqual([]);
 });
 
@@ -156,10 +156,10 @@ test('Porte #912 · #674 : une note qui ne porte pas sur toute la grille refuse 
     const { pdf, html } = await dossierPdfDepuisLaListe(page, suivi);
     await expect.poll(() => suivi.dialogues.length, { timeout: 10000 }).toBe(1);
     expect(pdf).toEqual([{ nom: 'synthese_Léa_Gagnon_p912.pdf', pages: 1 }]);
-    expect(html[0]).toContain('Cette copie n’a pas de niveau général');
+    expect(html[0]).toContain('Cette évaluation n’a pas de niveau général');
     // 21 oct. 2026 : le PDF porte U+00A0 ; lu par innerHTML, le navigateur le sérialise en « &nbsp; ».
     expect(html[0]).toContain('Structure (40&nbsp;%)');
-    expect(suivi.dialogues[0]).toMatch(/^Le PDF a été exporté, mais la note de cette copie ne porte pas sur toute la grille/);
+    expect(suivi.dialogues[0]).toMatch(/^Le PDF a été exporté, mais la note de cette évaluation ne porte pas sur toute la grille/);
 });
 
 test('Porte #912 · trimestre archivé : le PDF se rend, et rien n\'est écrit dans ses évaluations', async ({ page }) => {
@@ -183,7 +183,7 @@ test('Porte #912 · une évaluation SANS critère enregistré : ce que la page r
     expect(pdf).toEqual([{ nom: 'synthese_Léa_Gagnon_p912.pdf', pages: 1 }]);
     expect(html[0]).not.toContain('Rétroaction par critère');
     expect(html[0]).toContain('Niveau général');
-    expect(html[0]).not.toContain('Cette copie n’a pas de niveau général');
+    expect(html[0]).not.toContain('Cette évaluation n’a pas de niveau général');
     expect(aUneSectionAnnotations(html[0])).toBe(false);
     expect(suivi.dialogues).toEqual([]);
 });
@@ -193,7 +193,7 @@ test('Porte #912 · ni copie ni évaluation : un dialogue le dit, aucun PDF', as
     const suivi = await monter(page);
     await page.evaluate((da) => window.travauxExportPDF.exporterDossierComplet(da, 'p-sans-evaluation'), DA);
     await expect.poll(() => suivi.dialogues.length, { timeout: 10000 }).toBe(1);
-    expect(suivi.dialogues).toEqual(['Aucune copie ni évaluation enregistrée pour cet·te étudiant·e et cette production.']);
+    expect(suivi.dialogues).toEqual(['Aucun fichier ni évaluation enregistrés pour cet·te étudiant·e et cette production.']);
     expect(await page.evaluate(() => window._pdf912)).toEqual([]);
 });
 

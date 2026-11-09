@@ -187,19 +187,19 @@ test.describe('#1229 — la copie de référence', () => {
     test('les mots d’écran, tels que Grégoire les a validés', async ({ page }) => {
         const suivi = await monterLeBanc(page);
         await ouvrirLaCopie(page, 'FT653');
-        expect((await page.locator('#travaux-btn-reference').textContent()).trim()).toBe('Copie de référence');
+        expect((await page.locator('#travaux-btn-reference').textContent()).trim()).toBe('Production de référence');
         await ouvrirLaReference(page);
         expect(await page.locator('#travaux-reference .travaux-reference-etiquette').textContent()).toBe('Référence');
-        expect(await page.locator('#travaux-reference-message').textContent()).toBe('Choisis la copie à mettre en regard.');
+        expect(await page.locator('#travaux-reference-message').textContent()).toBe('Choisis la production à mettre en regard.');
         const textes = await page.evaluate(() => Array.from(document.querySelectorAll('#travaux-reference-choix option'))
             .map((o) => ({ v: o.value, t: o.textContent })));
-        expect(textes[0]).toEqual({ v: '', t: 'Choisir une copie…' });
+        expect(textes[0]).toEqual({ v: '', t: 'Choisir une production…' });
         const texteDe = (id) => textes.find((o) => o.v === id).t;
         // Vue depuis la copie d'Hardie : la copie de Courageux n'est pas SON original, seule la reprise est précisée.
         expect(texteDe('FT651')).toBe('Courageux, Condor');
         expect(texteDe('FT652')).toBe('Courageux, Condor (reprise)');
         expect(texteDe('FT654')).toBe('Absente, Alouette');
-        expect(await page.locator('#travaux-reference [data-action="travauxReference.fermer"]').getAttribute('title')).toBe('Fermer la copie de référence');
+        expect(await page.locator('#travaux-reference [data-action="travauxReference.fermer"]').getAttribute('title')).toBe('Fermer la production de référence');
         expect(await page.locator('#travaux-reference-axe').textContent()).toBe('Côte à côte');
         await page.click('#travaux-reference-axe');
         await attendre(page, 400);
@@ -213,9 +213,9 @@ test.describe('#1229 — la copie de référence', () => {
             RC.estAuxArchives = (id) => id === 'FT654' || estAuxArchives(id);
             await window.travauxReference.afficherCopie('FT654');
         });
-        expect(await message.textContent()).toBe('Cette copie est aux archives.');
+        expect(await message.textContent()).toBe('Cette production est aux archives.');
         await page.evaluate(() => window.travauxReference.afficherCopie('FT999'));
-        expect(await message.textContent()).toBe('Cette copie ne s’ouvre pas ici.');
+        expect(await message.textContent()).toBe('Cette production ne s’ouvre pas ici.');
 
         // Une production à une seule copie.
         await page.evaluate(() => window.travauxReference.fermer());
@@ -224,7 +224,7 @@ test.describe('#1229 — la copie de référence', () => {
             window.db.setSync(window.cle('fichiersTravaux'), seule); // security-ok: fixture de test
         });
         await ouvrirLaReference(page);
-        expect(await message.textContent()).toBe('Aucune autre copie de cette production.');
+        expect(await message.textContent()).toBe('Aucun autre fichier pour cette production.');
         expect(suivi.erreurs).toEqual([]);
     });
 
@@ -233,7 +233,7 @@ test.describe('#1229 — la copie de référence', () => {
         await ouvrirLaCopie(page, 'FT653');
         await ouvrirLaReference(page);
         expect(await page.evaluate(() => window.travauxReference.getFichier())).toBe(null);
-        expect(await page.locator('#travaux-reference-message').textContent()).toBe('Choisis la copie à mettre en regard.');
+        expect(await page.locator('#travaux-reference-message').textContent()).toBe('Choisis la production à mettre en regard.');
         await page.selectOption('#travaux-reference-choix', 'FT652');
         await attendre(page, 600);
         expect(await page.evaluate(() => window.travauxReference.getFichier().id)).toBe('FT652');

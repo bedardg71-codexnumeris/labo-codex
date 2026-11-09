@@ -210,8 +210,8 @@ async function mettreAJourLeCodex(page, { copiesManquantes = false } = {}) {
     if (copiesManquantes) {
         // Des copies de l'espace n'ont pas de fichier : l'avertissement passe d'abord (banc
         // `codex-1012-avertissement`). Ici, on le traverse pour voir où le codex serait écrit.
-        await expect(page.locator('#overlay-ui-dialogue .modal-titre')).toHaveText('Ce codex n\'aura pas toutes tes copies', { timeout: 30000 });
-        await page.locator('#overlay-ui-dialogue').getByRole('button', { name: 'Écrire sans ces copies', exact: true }).click();
+        await expect(page.locator('#overlay-ui-dialogue .modal-titre')).toHaveText('Ce codex n\'aura pas toutes les productions de tes étudiant·es', { timeout: 30000 });
+        await page.locator('#overlay-ui-dialogue').getByRole('button', { name: 'Écrire sans ces productions', exact: true }).click();
     }
     await expect.poll(() => page.evaluate(() => window.__ecritures.length + window.__destinationsDemandees), { timeout: 30000 })
         .toBe(avant.ecritures + avant.destinations + 1);

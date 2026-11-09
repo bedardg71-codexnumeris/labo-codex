@@ -90,17 +90,18 @@ test('T3 · en démo, « Retirer la copie (1) » : Annuler au focus, puis Retire
         travauxStockage.sauvegarderFichiersTravaux(liste.concat([{ id: 'FT_demo_t3', etudiantDA: '9000001', nomFichier: 'copie-fictive-demo.pdf' }]));
     });
     await expect(bouton).toBeVisible();
-    await expect(bouton).toHaveText('Retirer la copie (1)');
+    // ↻ 9 nov. 2026, lot « production plutôt que copie » (RAPPORT-2026-11-09-production-plutot-que-copie.md, § 4, rangées 226 et 227).
+    await expect(bouton).toHaveText('Retirer la production importée (1)');
 
     // La confirmation : « Annuler » a le focus, Entrée ne retire rien.
     await bouton.click();
-    const fenetre = page.locator('[role="dialog"]').filter({ hasText: 'Retirer la copie importée dans la démo ?' });
+    const fenetre = page.locator('[role="dialog"]').filter({ hasText: 'Retirer la production importée dans la démo ?' });
     await expect(fenetre).toBeVisible();
     expect(await page.evaluate(() => document.activeElement && document.activeElement.textContent.trim())).toBe('Annuler');
     await page.keyboard.press('Enter');
     await expect(fenetre).toBeHidden();
     expect(await page.evaluate(() => db.getSync('demo_fichiersTravaux', []).map((f) => f.id))).toEqual(['FT_demo_t3']);
-    await expect(bouton).toHaveText('Retirer la copie (1)');
+    await expect(bouton).toHaveText('Retirer la production importée (1)');
 
     // « Retirer » : la copie du démo part, le bouton se cache ; la réelle survit.
     await bouton.click();

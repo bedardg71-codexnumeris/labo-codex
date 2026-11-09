@@ -82,7 +82,10 @@ describe('#1152, lot 5 — chaque texte validé paraît mot pour mot à sa place
 
     it('n° 7 : l\'aide « i » des grilles, ses deux sections', () => {
         expect(citations(7)).toHaveLength(2);
-        for (const texte of citations(7)) contient('js/accompagnement-contenu-popup.js', texte);
+        // ↻ 9 nov. 2026, lot « production plutôt que copie » (RAPPORT-2026-11-09-production-plutot-que-copie.md, § 4, rangée 94,
+        // validée par Grégoire) : « sur la copie » devient « dans la production » ; le reste, mot pour mot.
+        expect(citations(7)[0]).toContain('ce que tu comptes sur la copie');
+        for (const texte of citations(7)) contient('js/accompagnement-contenu-popup.js', texte.replace('ce que tu comptes sur la copie', 'ce que tu comptes dans la production'));
     });
 
     it('n° 9 : les huit bulles du Labo et de l\'Animation, et les deux lignes de js/navigation.js', () => {
@@ -106,7 +109,7 @@ describe('#1152, lot 5 — chaque texte validé paraît mot pour mot à sa place
 
     it('n° 11 : l\'introduction des cas, sans la phrase du nom court, le reste intact', () => {
         const atelier = net(lire('js/atelier-algo.js'));
-        expect(atelier).toContain(net('L’étudiant·e lit le cas de sa copie sous le critère, après le décompte. Un verdict sans bloc est précédé de la moyenne, sauf au premier cas'));
+        expect(atelier).toContain(net('L’étudiant·e lit le cas de sa production sous le critère, après le décompte. Un verdict sans bloc est précédé de la moyenne, sauf au premier cas'));
     });
 
     it('n° 12, 13, 14, 16 : le bouton, le menu de l\'import, les niveaux RàI, l\'Objectif visé', () => {

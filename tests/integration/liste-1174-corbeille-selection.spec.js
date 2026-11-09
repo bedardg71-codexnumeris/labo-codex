@@ -120,10 +120,10 @@ test('Porte #1174 · trois copies cochées dont deux évaluées : « Annuler » 
 
     // 1. La question : trois copies, deux évaluées nommées, aucune reprise.
     const q = await cocherToutEtOuvrir(page);
-    expect(q.titre).toBe('Mettre 3 copies à la corbeille ?');
-    expect(q.bouton).toBe('Mettre 3 copies à la corbeille');
+    expect(q.titre).toBe('Mettre 3 fichiers à la corbeille ?');
+    expect(q.bouton).toBe('Mettre 3 fichiers à la corbeille');
     expect(q.texte).toContain('Tu pourras les restaurer depuis la corbeille pendant 30 jours.');
-    expect(q.texte).toContain('2 copies déjà évaluées : leur évaluation et leur note restent dans la liste, sans copie liée.');
+    expect(q.texte).toContain('2 productions déjà évaluées : leur évaluation et leur note restent dans la liste, sans fichier lié.');
     expect(q.texte).toContain('Camille Roy');
     expect(q.texte).toContain('Léa Gagnon');
     expect(q.texte).not.toContain('reprise');
@@ -180,8 +180,8 @@ test('Porte #1174 · en anonymisation, la question ne montre aucun nom réel', a
     await page.waitForFunction(() => window.estModeAnonymisation && window.estModeAnonymisation(), null, { timeout: 10000 });
     await ouvrirLaListe(page);
     const q = await cocherToutEtOuvrir(page);
-    expect(q.titre).toBe('Mettre 3 copies à la corbeille ?');
-    expect(q.texte).toContain('2 copies déjà évaluées');
+    expect(q.titre).toBe('Mettre 3 fichiers à la corbeille ?');
+    expect(q.texte).toContain('2 productions déjà évaluées');
     for (const nom of NOMS_REELS) expect(q.texte, `« ${nom} » affiché en anonymisation`).not.toContain(nom);
     expect(q.texte).not.toContain('TEST1174');
     expect(suivi.erreurs).toEqual([]);

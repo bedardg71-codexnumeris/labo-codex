@@ -140,7 +140,7 @@ describe('codes par grille · S.c — les sources du gabarit et de l\'écran de 
         const s = source('js/travaux-outils.js');
         expect(s).toContain("Rétroactions — Codes d\\'annotation</h2>");
         expect(s).not.toMatch(/Erreurs de fran\\u00e7ais<\/h2>/);
-        expect(s).toContain('Ces dix codes servent à toute copie dont la grille ne porte pas ses propres codes');
+        expect(s).toContain('Ces dix codes servent à toute production dont la grille ne porte pas ses propres codes');
     });
 
     it('S.c.5 les jetons du lot ont bougé', () => {

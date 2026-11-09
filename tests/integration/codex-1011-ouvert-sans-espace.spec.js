@@ -65,8 +65,8 @@ const PNG_1PX = 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPh
 
 const QUESTION = 'Recharger la page pour appliquer les données ?';
 const TITRE_DU_BILAN = 'Codex ouvert, mais incomplet';
-const BILAN = '3 copies sur 3 n\'ont pas pu revenir, faute d\'espace. Tes données, elles, sont complètes, et ton fichier de codex n\'a pas changé.'
-    + '\n\nPour retrouver ces copies : si tu es en navigation privée, rouvre l\'application dans une fenêtre normale. Sinon, libère de l\'espace sur le disque de l\'appareil (vide la corbeille, retire de gros fichiers), puis rouvre le même codex.'
+const BILAN = '3 productions sur 3 n\'ont pas pu revenir, faute d\'espace. Tes données, elles, sont complètes, et ton fichier de codex n\'a pas changé.'
+    + '\n\nPour retrouver ces productions : si tu es en navigation privée, rouvre l\'application dans une fenêtre normale. Sinon, libère de l\'espace sur le disque de l\'appareil (vide la corbeille, retire de gros fichiers), puis rouvre le même codex.'
     + '\n\n' + QUESTION;
 
 async function demarrer(page) {

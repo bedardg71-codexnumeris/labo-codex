@@ -658,7 +658,7 @@
     }
 
     function phraseLogique(b) {
-        if (b.logique === 'deux') return 'L’application y lirait les deux logiques : des niveaux nommés, et des points qui s’additionnent' + (b.jusqua != null ? ' jusqu’à ' + formaterNombre(b.jusqua) : '') + '. Ce serait à toi de dire laquelle donne le résultat d’une copie.';   // L2, validé G. 19 oct. 19 h 01
+        if (b.logique === 'deux') return 'L’application y lirait les deux logiques : des niveaux nommés, et des points qui s’additionnent' + (b.jusqua != null ? ' jusqu’à ' + formaterNombre(b.jusqua) : '') + '. Ce serait à toi de dire laquelle donne le résultat d’une évaluation.';   // L2, validé G. 19 oct. 19 h 01
         if (b.logique === 'points') return 'L’application y lirait une grille en points : les points de chaque critère s’additionnent' + (b.jusqua != null ? ' jusqu’à un total de ' + formaterNombre(b.jusqua) : '') + '. Aucun niveau n’y est nommé (et l’application n’en inventerait pas).';
         if (b.logique === 'niveaux') return 'L’application y lirait une grille en niveaux : chaque critère se juge par niveau, sans points à additionner.';
         return '';
@@ -776,7 +776,7 @@
         rendreConstats(cs, R, b);
         if (R.description.length) cp.appendChild(noeud('p', 'dissection-crit-desc', R.description.join(' ')));
         if (!R.criteres.length) {
-            cp.appendChild(noeud('p', 'dissection-vide', 'Aucun critère pour l’instant : surligne une question que tu te poses devant la copie avec « Critère », ou des réponses avec « Descripteur ».'));
+            cp.appendChild(noeud('p', 'dissection-vide', 'Aucun critère pour l’instant : surligne une question que tu te poses devant la production d’un·e étudiant·e avec « Critère », ou des réponses avec « Descripteur ».'));
         } else {
             cp.appendChild(tableComprise(R));
         }
@@ -809,11 +809,11 @@
         // Lot 9, validé G. 18 oct. 20 h 08 : ce qui manque sans empêcher de créer.
         aCompleter: 'Tu pourras créer ta grille, puis compléter dans « Grilles de critères » :',
         // Lot 2b : le choix (logique « les deux » seulement) et le tableau des niveaux.
-        choix: 'Le résultat d’une copie viendrait :',
+        choix: 'Le résultat d’une évaluation viendrait :',
         choixPoints: 'des points',
         choixNiveaux: 'des niveaux',
         niveaux: 'Ce que vaut chaque niveau',
-        niveauxAide: 'Pour chaque niveau : la plage de notes qu’il couvre, et la note qu’une copie reçoit à ce niveau.',
+        niveauxAide: 'Pour chaque niveau : la plage de notes qu’il couvre, et la note qu’il donne.',
         de: 'de',
         a: 'à',
         note: 'note retenue',

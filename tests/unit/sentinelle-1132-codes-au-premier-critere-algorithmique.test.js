@@ -173,13 +173,13 @@ function monterAnnoter(grille) {
 describe('#1132 · C — Annoter nomme le critère qui reçoit les codes', () => {
     it('C.a deux critères : la phrase de l’engrenage le dit', () => {
         const html = monterAnnoter(DEUX);
-        expect(html).toContain('Les codes de cette copie viennent de sa grille « Philo ». Pour les modifier, ouvre la grille.');
+        expect(html).toContain('Les codes de cette production viennent de sa grille « Philo ». Pour les modifier, ouvre la grille.');
         expect(html).toContain('Ils vont tous au critère « Rigueur », le premier des 2 critères algorithmiques de la grille.');
     });
 
     it('C.b un seul : la phrase de Grégoire, telle quelle', () => {
         const html = monterAnnoter(UN);
-        expect(html).toContain('Les codes de cette copie viennent de sa grille « Philo ». Pour les modifier, ouvre la grille.');
+        expect(html).toContain('Les codes de cette production viennent de sa grille « Philo ». Pour les modifier, ouvre la grille.');
         expect(html).not.toContain('Ils vont tous au critère');
     });
 });

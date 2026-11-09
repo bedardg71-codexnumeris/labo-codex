@@ -8528,9 +8528,14 @@ function leconAncetreSerialisee(noeud, parId) {
  *
  * ▣ RIEN NE PEUT PLUS DISPARAÎTRE EN SILENCE — c'est la leçon du défaut qu'on
  * corrige. Une production dont le type n'est dans AUCUNE entrée de la table
- * (donnée ancienne, type retiré depuis) atterrit dans un dernier groupe
- * « Type non répertorié » plutôt que d'être escamotée. Le sélecteur montre
- * toujours TOUTES les productions actives, quoi qu'il arrive à la table.
+ * (donnée ancienne, type retiré depuis) atterrit dans un groupe à la fin
+ * plutôt que d'être escamotée. Le sélecteur montre toujours TOUTES les
+ * productions actives, quoi qu'il arrive à la table.
+ * ↻ 9 nov. 2026 (banque de types, lot « Production plutôt que copie ») : un
+ * type hors de la table est d'abord un type que la personne a nommé (« Prise de
+ * sang »), qui doit s'afficher partout où le type s'affiche. Chacun a donc son
+ * groupe, à son nom (échappé : c'est du texte libre), au lieu d'un « Type non
+ * répertorié » commun qui le taisait.
  *
  * ⚠ `echapperHtml` sur le titre n'est pas décoratif : le titre est du texte
  * libre de Grégoire, et il entre ici dans un `innerHTML`. Il n'était pas
@@ -8574,15 +8579,13 @@ function optionsProductionsHTML(productions, idChoisi) {
     }
     if (groupeOuvert !== null) html += '</optgroup>';
 
-    // Le filet : ce que la table ne connaît pas reste visible et choisissable.
+    // Le filet : ce que la table ne connaît pas reste visible et choisissable, sous son nom.
     var orphelins = Object.keys(parType);
-    if (orphelins.length > 0) {
-        html += '<optgroup label="Type non répertorié">';
-        for (var oi = 0; oi < orphelins.length; oi++) {
-            var reste = parType[orphelins[oi]];
-            for (var ri = 0; ri < reste.length; ri++) {
-                html += optionProductionHTML(reste[ri], idChoisi);
-            }
+    for (var oi = 0; oi < orphelins.length; oi++) {
+        var reste = parType[orphelins[oi]];
+        html += '<optgroup label="' + echapperHtml(orphelins[oi]) + '">';
+        for (var ri = 0; ri < reste.length; ri++) {
+            html += optionProductionHTML(reste[ri], idChoisi);
         }
         html += '</optgroup>';
     }

@@ -197,7 +197,7 @@ test('texte troué 2 · deux badges posés dans un palier au clic, enregistrés,
     const noms = (await palier(page, 4).locator('.table-cas-zone-nom').allTextContents()).map((t) => t.trim());
     expect(noms).toEqual(['Verdict', 'Recommandation']);
     const signal = (await palier(page, 4).locator('label.palier-leve-signalement').textContent()).replace(/\s+/g, ' ').trim();
-    expect(signal).toBe('Ce palier lève un signalement (pour toi, à côté du palier RàI de l’étudiant·e ; rien n’est écrit sur sa copie)');
+    expect(signal).toBe('Ce palier lève un signalement (pour toi, à côté du palier RàI de l’étudiant·e ; rien n’est écrit dans sa rétroaction)');
     const introEnTete = await carte(page, 'projection').evaluate((el) => {
         const intro = el.querySelector('.table-cas-ou');
         const premier = el.querySelector('.table-cas-rangee');

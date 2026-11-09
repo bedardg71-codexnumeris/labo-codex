@@ -105,9 +105,9 @@ function libelles(critere) {
         sansEtendue: 'champ ' + champMots + ' vide',
         code: function(nombre, nom, poids) { return _formaterNombre(nombre) + ' × « ' + nom + ' » (poids ' + _formaterNombre(poids) + ')'; },
         plancher: 'la note touche le plancher',
-        sansPonderation: 'Donne une pondération à ce critère : l\'essai montrera la note de chaque copie.',
+        sansPonderation: 'Donne une pondération à ce critère : l\'essai montrera la note de chaque production.',
         // Étape 4a (27 oct.) : le « facteur » s'appelle « la longueur fixée » dans l'étape « Note calculée ».
-        etendueDuFacteur: 'Sans limite fixée, ces copies ont la longueur fixée dans le calcul : à cette longueur, chaque ' + N.erreurs.singulier + ' coûte un point.'
+        etendueDuFacteur: 'Sans limite fixée, ces productions ont la longueur fixée dans le calcul : à cette longueur, chaque ' + N.erreurs.singulier + ' coûte un point.'
     };
 }
 

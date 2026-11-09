@@ -125,7 +125,7 @@ function roleDuBloc(b) {
     if (/^OBJECTIF /.test(t)) return 'ruban objectif / tâche / contexte';
     if (t.startsWith('Rétroaction par critère')) return 'rétroaction par critère';
     // Le bandeau commence par la LETTRE du niveau (« D Niveau général · … ») ; la porte #674 par la phrase.
-    if (t.includes('Niveau général') || t.includes('Cette copie n’a pas de niveau général')) return 'niveau général';
+    if (t.includes('Niveau général') || t.includes('Cette évaluation n’a pas de niveau général')) return 'niveau général';
     if (t.startsWith('Commentaires ciblés') || /erreurs? annot|2 catégories les plus fréquentes/.test(t)) return 'tampons + erreurs annotées';
     if (b.balise === 'footer') return 'bilan';
     if (t.includes('CC BY-NC-SA')) return 'pied (enseignant · cours · licence)';

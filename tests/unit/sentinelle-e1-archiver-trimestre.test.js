@@ -298,7 +298,7 @@ describe('E1 · (d) « Vérifier » l\'archive d\'un trimestre', () => {
         const { rapport, cr } = await verifier(banc, banc.blob);
         expect(rapport).toMatchObject({ etat: 'verifiee', trimestreEntier: true, total: 4, verifiees: 4, totalCles: CLES_ATTENDUES.length, clesVerifiees: CLES_ATTENDUES.length, couvertureMesuree: true });
         expect(rapport.nonCouvertes).toEqual([]);
-        expect(cr).toEqual({ titre: 'Archive vérifiée', message: 'Les 4 copies et les données du trimestre sont présentes et intactes.' });
+        expect(cr).toEqual({ titre: 'Archive vérifiée', message: 'Les 4 productions remises et les données du trimestre sont présentes et intactes.' });
     });
 
     it('un octet altéré dans une copie (la corbeille) : incomplète, « 1 copie altérée »', async () => {
@@ -310,8 +310,8 @@ describe('E1 · (d) « Vérifier » l\'archive d\'un trimestre', () => {
         const { rapport, cr } = await verifier(banc, new Blob([u8]));
         expect(rapport.etat).toBe('incomplete');
         expect(rapport.problemes).toEqual([{ nom: 'FT_hc.pdf', type: 'alteree' }]);
-        expect(cr.message).toContain('1 copies sur 4 manquent ou ne concordent pas. Archive de nouveau ce trimestre.');
-        expect(cr.message).toContain('1 copie altérée');
+        expect(cr.message).toContain('1 productions remises sur 4 manquent ou ne concordent pas. Archive de nouveau ce trimestre.');
+        expect(cr.message).toContain('1 fichier altéré');
     });
 
     it('une donnée altérée : incomplète, « 1 clé altérée » et l\'empreinte des données ne concorde plus', async () => {
@@ -344,14 +344,14 @@ describe('E1 · (d) « Vérifier » l\'archive d\'un trimestre', () => {
         banc.db.setSync('h2032_corbeilleFichiers', CORPUS.h2032_corbeilleFichiers.concat([{ id: 'FT_neuve', groupeCoursId: 'GC_H1' }]));
         const { rapport, cr } = await verifier(banc, banc.blob);
         expect(rapport.nonCouvertes).toEqual(['FT_neuve']);
-        expect(cr.message).toContain('1 fiche du trimestre sans copie dans l\'archive');
+        expect(cr.message).toContain('1 fiche du trimestre sans production dans l\'archive');
     });
 
     it('l\'archive d\'un groupe se vérifie comme avant (mots du lot A2)', async () => {
         const banc = monter(creerDb());
         const RV = banc.win.ReserveVerifier;
-        expect(RV.MOTS.reussite.texte(3)).toBe('Les 3 copies sont présentes et intactes, et les données concordent.');
-        expect(RV.compteRendu({ etat: 'verifiee', total: 3, trimestreEntier: false }).message).toBe('Les 3 copies sont présentes et intactes, et les données concordent.');
+        expect(RV.MOTS.reussite.texte(3)).toBe('Les 3 productions sont présentes et intactes, et les données concordent.');
+        expect(RV.compteRendu({ etat: 'verifiee', total: 3, trimestreEntier: false }).message).toBe('Les 3 productions sont présentes et intactes, et les données concordent.');
     });
 });
 
@@ -369,7 +369,7 @@ describe('E1 · (e) rien n\'est écrit dans les données ; refusé hors d\'un tr
     it('le message de fin dit « étudiant·es » (mots acceptés par Grégoire le 4 oct.)', async () => {
         const banc = await archiver();
         expect(banc.journal.notifications.filter((n) => n.type === 'succes')).toEqual([
-            { type: 'succes', titre: 'Trimestre archivé : fichier téléchargé', message: expect.stringMatching(/^3 étudiant·es, 4 copie\(s\) \(.+\)$/) }
+            { type: 'succes', titre: 'Trimestre archivé : fichier téléchargé', message: expect.stringMatching(/^3 étudiant·es, 4 production\(s\) remise\(s\) \(.+\)$/) }
         ]);
     });
 
@@ -387,7 +387,7 @@ describe('E1 · (e) rien n\'est écrit dans les données ; refusé hors d\'un tr
         expect(banc.journal.telechargements).toEqual([]);
         expect(banc.journal.fenetres[0]).toEqual({
             titre: 'Archiver Hiver 2032 ?',
-            message: 'L\'archive emporte tout le trimestre : 3 étudiant·es, 2 groupes, 4 copies (dont 1 à la corbeille), environ 81,9 Ko.\nRien n\'est retiré de l\'application : le trimestre reste là, clos.',
+            message: 'L\'archive emporte tout le trimestre : 3 étudiant·es, 2 groupes, 4 productions remises (dont 1 à la corbeille), environ 81,9 Ko.\nRien n\'est retiré de l\'application : le trimestre reste là, clos.',
             bouton: 'Archiver'
         });
     });

@@ -158,7 +158,8 @@ describe('#1002 — l\'état gelé d\'un trimestre se dit « clos »', () => {
         expect(lire('js', 'reserve-reglages.js')).toContain('\' · liste mise à jour le \'');
         expect(lire('js', 'reserve-reglages.js')).not.toContain('dernière maj');
         const aide = tranche(lire('js', 'accompagnement-contenu-popup.js'), '\'reglages-reserve\': {', 'voirAussi:', { longueurMin: 1000 });
-        expect(aide).toContain('<em>Vérifier</em> relit une archive copie par copie ; une archive vérifiée offre <em>Faire revenir</em>.');
+        // ↻ 9 nov. 2026, lot « production plutôt que copie » (rapport du 9 nov., § 4, rangée 124, validée par Grégoire).
+        expect(aide).toContain('<em>Vérifier</em> relit une archive production par production ; une archive vérifiée offre <em>Faire revenir</em>.');
         expect(aide).toContain('d\'un groupe-cours archivé ?');
         expect(index).toContain('→ <em>Archiver…</em>.');
         expect(index).not.toContain('Archiver dans les archives');

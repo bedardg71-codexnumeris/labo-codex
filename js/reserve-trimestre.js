@@ -58,7 +58,7 @@ var MOTS = {
             return 'L\'archive emporte tout le trimestre : ' +
                 c.etudiants + ' étudiant·e' + (c.etudiants > 1 ? 's' : '') + ', ' +
                 c.groupes + ' groupe' + (c.groupes > 1 ? 's' : '') + ', ' +
-                c.copies + ' copie' + (c.copies > 1 ? 's' : '') +
+                c.copies + (c.copies > 1 ? ' productions remises' : ' production remise') +
                 (c.corbeille ? ' (dont ' + c.corbeille + ' à la corbeille)' : '') +
                 ', environ ' + c.taille + '.\n' +
                 'Rien n\'est retiré de l\'application : le trimestre reste là, clos.';
@@ -66,10 +66,10 @@ var MOTS = {
         bouton: 'Archiver'
     },
     archive: function(stats, chemin) {
-        return { titre: 'Trimestre archivé', texte: _etudiants(stats.etudiants) + ', ' + stats.fichiersTrouves + ' copie(s) : ' + chemin };
+        return { titre: 'Trimestre archivé', texte: _etudiants(stats.etudiants) + ', ' + stats.fichiersTrouves + ' production(s) remise(s) : ' + chemin };
     },
     telecharge: function(stats, taille) {
-        return { titre: 'Trimestre archivé : fichier téléchargé', texte: _etudiants(stats.etudiants) + ', ' + stats.fichiersTrouves + ' copie(s) (' + taille + ')' };
+        return { titre: 'Trimestre archivé : fichier téléchargé', texte: _etudiants(stats.etudiants) + ', ' + stats.fichiersTrouves + ' production(s) remise(s) (' + taille + ')' };
     },
     nonArchive: 'Trimestre non archivé',
     refus: {
@@ -203,7 +203,7 @@ async function collecterCopies(donnees, trimestre) {
             if (fiches[j].liste === 'corbeilleFichiers') corbeille++;
         }
         if (j % 5 === 0) {
-            _prog(30 + Math.round((j / fiches.length) * 40), 'Empreintes des copies…',
+            _prog(30 + Math.round((j / fiches.length) * 40), 'Empreintes des productions…',
                 blobs.length + ' / ' + fiches.length + ' (' + window.TailleFichier.dire(tailleTotale) + ')');
             await _yield();
         }

@@ -261,7 +261,7 @@ describe('#932 · C — reassignerCopie : la porte nomme l\'élève quand il cha
         const ok = await win.travauxUI.reassignerCopie('FT_camille', { productionId: A2R });
         expect(ok).toBe(false);
         expect(journal.questions).toHaveLength(1);
-        expect(journal.questions[0]).toBe('L’évaluation déjà faite sur « Artefact 2 » n’aura plus de copie liée (l’évaluation elle-même est conservée). Continuer ?');
+        expect(journal.questions[0]).toBe('L’évaluation déjà faite sur « Artefact 2 » n’aura plus de fichier lié (l’évaluation elle-même est conservée). Continuer ?');
         expect(journal.ecrits).toEqual([]);
     });
 

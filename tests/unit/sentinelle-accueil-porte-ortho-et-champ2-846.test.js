@@ -121,7 +121,9 @@ describe('A · #846 — le champ 2 du groupe-cours dit le même mot sur un servi
 // ─────────────────────────────────────────────────────────────────────────────
 // 19 oct. 2026 : « Importer des productions » devient « Importer des copies » (les productions sont les consignes).
 // 7 nov. 2026 : la neuvième, « Organiser tes rencontres » (consigne « L'accueil épuré »).
-const TACHES = ['Adopter ta pratique', 'Planifier ton cours', 'Saisir les présences', 'Importer des copies',
+// 9 nov. 2026 : « Importer des copies » devient « Importer des productions » (lot « production plutôt que copie »,
+// RAPPORT-2026-11-09-production-plutot-que-copie.md, § 4, rangée 148, validée par Grégoire).
+const TACHES = ['Adopter ta pratique', 'Planifier ton cours', 'Saisir les présences', 'Importer des productions',
     'Annoter et évaluer', 'Observer le groupe', 'Consulter un profil', 'Différencier les interventions',
     'Organiser tes rencontres'];
 // 19 oct. 2026 : les descriptions des huit tâches, dans l'ordre des titres (relecture de Grégoire avec Cowork).

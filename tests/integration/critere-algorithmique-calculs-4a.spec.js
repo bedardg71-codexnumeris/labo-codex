@@ -77,7 +77,7 @@ test('calculs · les trois cartes, le réglage, un menu « vaut 0 » ; la copie 
     expect(await textes(e.locator('.calc-nom'))).toEqual(['Pénalité proportionnelle à la longueur', 'Rapport visé', 'Pénalité fixe']);
     await expect(e.locator('.calc-note > .calc-legende').first()).toHaveText('La note reste entre 0 et la pondération du critère.');
     // #1173 (27 oct.) : la phrase que la mesure du piège 2 retenait, posée une fois la note remise éprouvée (note-remise-1173.spec.js).
-    await expect(e.locator('.calc-note > .calc-legende').nth(1)).toHaveText('Une copie déjà évaluée garde sa note. Elle ne suit le nouveau calcul que si tu la déverrouilles et la modifies.');
+    await expect(e.locator('.calc-note > .calc-legende').nth(1)).toHaveText('Une évaluation déjà enregistrée garde sa note. Elle ne suit le nouveau calcul que si tu la déverrouilles et la modifies.');
     await expect(atelier(page, 'CC').locator('.bc-etape[data-etape="note"] .bc-info')).toHaveText('pénalité fixe');
     await expect(e.locator('[data-resume]')).toHaveText('Pénalité fixe, sur 20');
 

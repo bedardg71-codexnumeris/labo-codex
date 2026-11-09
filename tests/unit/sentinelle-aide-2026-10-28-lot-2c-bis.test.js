@@ -194,7 +194,8 @@ describe('#1152 lot 2c bis · ce que les entrées affirment, lu dans le code', (
         // Aucun champ de l'écran ni des préférences n'écrit de seuil de performance : les repères se posent sur l'échelle.
         expect(html + lire('js', 'preferences-v2.js')).not.toMatch(/idme\.(insuffisant|developpement)|seuil-idme/);
         // Lot 3 des seuils : les textes validés le 30 oct. ; la garde du modèle lui-même vit dans sentinelle-niveau-au-critere-2026-10-30.test.js.
-        expect(texteDe('rai')).toContain('Ce seuil est le repère « Suffisant à partir de » de l\'échelle de tes copies');
+        // ↻ 9 nov. 2026 (relevé « production plutôt que copie », entrée 61) : « tes copies » → « tes évaluations ».
+        expect(texteDe('rai')).toContain('Ce seuil est le repère « Suffisant à partir de » de l\'échelle de tes évaluations');
         expect(texteDe('rai')).not.toMatch(/\b(64|75) %/);
         // Retouche 2 du lot 2 (constat 1) : la moitié « texte » de cette sentinelle gardait la règle retirée.
         expect(texteDe('patterns')).toContain('Les autres nomment le besoin sans fixer le niveau (voir la carte juste au-dessus).');

@@ -70,7 +70,11 @@ var CLES_GLOBALES_INCLUSES = [
     'modalitesEvaluation',
     'infoCours',
     'profilEnseignant',
-    'trimestres'
+    'trimestres',
+    // 9 nov. 2026 (lot « Production plutôt que copie ») : la banque de types de la personne,
+    // hors trimestre. Une production d'une archive porte le NOM de son type : elle se lit sans
+    // la banque ; la banque part pour que l'archive garde aussi ce que la personne a nommé.
+    'banqueTypesProduction'
 ];
 
 // Clés à filtrer par DA dans la collecte (passe 2)

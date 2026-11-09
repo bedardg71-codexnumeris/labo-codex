@@ -125,6 +125,6 @@ describe('#1075, point 3 — une production employée reste', () => {
         const src = readFileSync(path.join(racine, 'js/donnees-v2.js'), 'utf8');
         const fn = tranche(src, 'function verifierDependancesProduction(', 'return { dependances, avertissements };');
         expect(fn).toContain('_fichiersTravaux');
-        expect(fn).toContain('copie(s) y sont rattachées');
+        expect(fn).toContain('production(s) remise(s) y sont rattachées');
     });
 });

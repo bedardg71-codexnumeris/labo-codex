@@ -88,7 +88,7 @@ test('1 440 px · trois colonnes, la chaîne et ses cinq états, une seule étap
     expect(Math.round(ap.largeur)).toBe(340);
     // La palette dit à quoi elle sert (les mots de la maquette).
     await expect(atelier(page).locator('.palette-algo-titre')).toContainText('Blocs de textes');   // ↻ lot 3a : les mots de l'ébauche
-    await expect(atelier(page).locator('.palette-algo-but')).toHaveText('Ces blocs servent à composer les phrases que ce critère écrit seul sur chaque copie. Chaque bloc prend la valeur réelle de la copie évaluée.');   // ↻ lot 3a
+    await expect(atelier(page).locator('.palette-algo-but')).toHaveText('Ces blocs servent à composer les phrases que ce critère écrit seul dans chaque évaluation. Chaque bloc prend la valeur réelle de la production évaluée.');   // ↻ lot 3a
     await expect(atelier(page).locator('.palette-algo-gestes li')).toHaveText(['1Clique dans une zone violette.', '2Touche un bloc : il se pose au curseur.']);
     await expect(atelier(page).locator('.palette-algo-cible')).toHaveText('Aucune zone choisie.');
 
@@ -331,7 +331,7 @@ test('en création · sans pondération, l\'aperçu le dit ; la pondération tap
     await carte.locator('select[data-on-change="modifierTypeCritereTempHandler"]').selectOption('algorithmique');
     const ap = carte.locator('.apercu-algo');
     await expect(ap.locator('.apercu-algo-resultats')).toHaveText(/Note\s+aucune/);
-    await expect(ap.locator('.apercu-algo-raison')).toHaveText('Donne une pondération à ce critère : l\'essai montrera la note de chaque copie.');
+    await expect(ap.locator('.apercu-algo-raison')).toHaveText('Donne une pondération à ce critère : l\'essai montrera la note de chaque production.');
     await expect(carte.locator('.atelier-algo-chaine .bc-etape[data-etape="note"]')).not.toHaveClass(/bc-complet/);
     const base = await page.evaluate(() => JSON.stringify(db.getSync(cle('grillesTemplates'), [])));
     await ap.evaluate((el) => { el.dataset.temoin = '1'; });   // un témoin sur l'élément : un redessin l'emporterait
@@ -366,7 +366,7 @@ test('à 820 px, une chimie aux codes pondérés : la copie pondérée, aucun «
     await expect(ap.locator('[data-apercu-nom="mots"]')).toHaveText('calculs');
     await ap.locator('.apercu-algo-reference[data-copie="aucune"]').click();
     expect(await phrasePdf(page, 'CC')).toBe('Ta production contient 0 unité manquante pour 12 calculs.');
-    await expect(ap.locator('.apercu-algo-etendue')).toHaveText('Sans limite fixée, ces copies ont la longueur fixée dans le calcul : à cette longueur, chaque unité manquante coûte un point.');
+    await expect(ap.locator('.apercu-algo-etendue')).toHaveText('Sans limite fixée, ces productions ont la longueur fixée dans le calcul : à cette longueur, chaque unité manquante coûte un point.');
     // Ni l'aperçu ni la chaîne ne disent « français » (le menu du modèle des phrases, lui, offre « Français écrit »).
     expect((await texte(ap)).toLowerCase()).not.toContain('français');
     expect((await texte(atelier(page, 'CC').locator('.atelier-algo-chaine'))).toLowerCase()).not.toContain('français');

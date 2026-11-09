@@ -118,10 +118,11 @@ async function afficherListeProductions(filtreType = '') {
     if (filtreType) {
         if (filtreType === 'sommative') {
             productionsFiltrees = productionsDansBibliotheque.filter(p =>
-                !p.type.includes('formatif') && p.type !== 'portfolio' && p.type !== 'artefact-portfolio'
+                !estTypeFormatif(p.type) && p.type !== 'portfolio' && p.type !== 'artefact-portfolio'
             );
         } else if (filtreType === 'formative') {
-            productionsFiltrees = productionsDansBibliotheque.filter(p => p.type.includes('formatif'));
+            // 9 nov. 2026 : un type de la banque (« Quiz formatif ») n'est pas formatif par accident.
+            productionsFiltrees = productionsDansBibliotheque.filter(p => estTypeFormatif(p.type));
         } else if (filtreType === 'portfolio') {
             productionsFiltrees = productionsDansBibliotheque.filter(p =>
                 p.type === 'portfolio' || p.type === 'artefact-portfolio'

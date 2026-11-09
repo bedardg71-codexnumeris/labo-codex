@@ -98,7 +98,8 @@ describe('T7 · entrer dans la démo pendant un import de vraies copies', () => 
         expect(store['demo-actif']).toBeUndefined();
         expect(store.trimestreActif).toBe('h2026');
         expect(store.trimestres.map((t) => t.id)).toEqual(['h2026']);
-        expect(avis).toEqual([['Import en cours', 'Attends la fin de l\'import des copies avant d\'entrer dans la démo.']]);
+        // ↻ 9 nov. 2026, lot « production plutôt que copie » (rapport du 9 nov., § 4, rangée 224, validée par Grégoire).
+        expect(avis).toEqual([['Import en cours', 'Attends la fin de l\'import des productions avant d\'entrer dans la démo.']]);
     });
 
     it('break-test : la garde d\'entrée neutralisée, la démo s\'active pendant l\'import (rouge attendu)', async () => {

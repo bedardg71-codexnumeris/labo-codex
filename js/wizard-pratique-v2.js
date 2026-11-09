@@ -413,7 +413,7 @@ const ETAPES_WIZARD = {
                 id: 'uniteCorrection',
                 type: 'radio-cards',
                 required: true,
-                question: 'Sur une copie corrigée, tu inscris le plus souvent…',
+                question: 'Sur une production évaluée, tu inscris le plus souvent…',
                 options: [
                     { value: 'pourcentage', label: 'Un pourcentage ou une note chiffrée', description: 'Ex. 78 %, 17 sur 20.' },
                     { value: 'niveau', label: 'Un niveau ou une cote', description: 'Ex. A, I-D-M-E, 3 sur 4.' },

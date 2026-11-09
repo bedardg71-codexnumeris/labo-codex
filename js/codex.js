@@ -1161,7 +1161,7 @@ async function chargerCodex(fichierZip) {
 function construireBilanImport(stats) {
     var echecs = stats.blobsEchecs || [];
     var nbQuota = echecs.filter(function(e) { return e.raison === 'quota'; }).length;
-    var compte = function(n) { return n + (n === 1 ? ' copie' : ' copies') + ' sur ' + stats.nbBlobsAttendus; };
+    var compte = function(n) { return n + (n === 1 ? ' production' : ' productions') + ' sur ' + stats.nbBlobsAttendus; };
 
     // Dans l'ordre de la phrase d'un mélange, qui est aussi celui des conseils.
     var causes = [
@@ -1170,7 +1170,7 @@ function construireBilanImport(stats) {
             phrase: function(une) { return (une ? ' n\'a pas pu revenir' : ' n\'ont pas pu revenir') + ', faute d\'espace.'; },
             part: function() { return 'faute d\'espace'; },
             conseil: function(une) {
-                return 'Pour retrouver ' + (une ? 'cette copie' : 'ces copies') + ' : si tu es en navigation privée, ' +
+                return 'Pour retrouver ' + (une ? 'cette production' : 'ces productions') + ' : si tu es en navigation privée, ' +
                     'rouvre l\'application dans une fenêtre normale. Sinon, libère de l\'espace sur le disque de ' +
                     'l\'appareil (vide la corbeille, retire de gros fichiers), puis rouvre le même codex.';
             }
@@ -1202,7 +1202,7 @@ function construireBilanImport(stats) {
             // le détail de l'erreur est dans le signalement tant que la page n'est pas rechargée,
             // et n'y est plus après « Recharger », le bouton principal de cette même fenêtre.
             conseil: function(une) {
-                return 'Pour retrouver ' + (une ? 'cette copie' : 'ces copies') + ' : rouvre le même codex. Si l\'erreur ' +
+                return 'Pour retrouver ' + (une ? 'cette production' : 'ces productions') + ' : rouvre le même codex. Si l\'erreur ' +
                     'revient, utilise « Signaler un bug ou donner ton avis ».';
             }
         }
@@ -1241,11 +1241,11 @@ function construireBilanImport(stats) {
 function construireAvertissementCopiesManquantes(manquantes, attendues) {
     var une = manquantes === 1;
     return {
-        titre: 'Ce codex n\'aura pas toutes tes copies',
+        titre: 'Ce codex n\'aura pas toutes les productions de tes étudiant·es',
         message: _direCopiesAbsentes(manquantes, attendues, 'Le codex') + '\n\n' +
             'Si un autre fichier de codex ' + (une ? 'la' : 'les') + ' contient encore, ne le remplace pas : ' +
             'donne un autre nom à celui-ci.',
-        texteConfirmer: une ? 'Écrire sans cette copie' : 'Écrire sans ces copies'
+        texteConfirmer: une ? 'Écrire sans cette production' : 'Écrire sans ces productions'
     };
 }
 
@@ -1259,16 +1259,16 @@ function construireAvertissementCopiesManquantes(manquantes, attendues) {
  */
 function construireAvertissementSelectionIncomplete(manquantes, attendues) {
     return {
-        titre: 'Cette sélection n\'aura pas toutes ses copies',
+        titre: 'Cette sélection n\'aura pas toutes ses productions',
         message: _direCopiesAbsentes(manquantes, attendues, 'Le fichier'),
-        texteConfirmer: manquantes === 1 ? 'Écrire sans cette copie' : 'Écrire sans ces copies'
+        texteConfirmer: manquantes === 1 ? 'Écrire sans cette production' : 'Écrire sans ces productions'
     };
 }
 
 /** #1012 — les deux phrases communes aux deux avertissements ; `sujet` : « Le codex » ou « Le fichier ». */
 function _direCopiesAbsentes(manquantes, attendues, sujet) {
     var une = manquantes === 1;
-    return manquantes + (une ? ' copie' : ' copies') + ' sur ' + attendues +
+    return manquantes + (une ? ' production' : ' productions') + ' sur ' + attendues +
         (une ? ' n\'est pas' : ' ne sont pas') + ' dans l\'application. ' +
         sujet + ' que tu vas écrire ne ' + (une ? 'la' : 'les') + ' contiendra pas.';
 }
@@ -2177,9 +2177,9 @@ var LISTES_PAR_CONTENU = {
 var MOTS_DES_ELEMENTS = {
     evaluationsSauvegardees: ['évaluation', 'évaluations'],
     annotationsTravaux: ['annotation', 'annotations'],
-    fichiersTravaux: ['copie', 'copies'],
-    corbeilleFichiers: ['copie à la corbeille', 'copies à la corbeille'],
-    fichiersModelisation: ['copie de modélisation', 'copies de modélisation'],
+    fichiersTravaux: ['production', 'productions'],
+    corbeilleFichiers: ['production à la corbeille', 'productions à la corbeille'],
+    fichiersModelisation: ['production de modélisation', 'productions de modélisation'],
     chronoEvaluations: ['durée d\'évaluation', 'durées d\'évaluation']   // #1186 : le mot de l'écran Rythme
 };
 
@@ -2768,7 +2768,7 @@ function _phrasesDeLaFusion(analyse, externe) {
         : 'Rien de neuf ne viendra de l\'autre codex sans question.'];
     if (entre.versLaCorbeille) fort.push('Iront à la corbeille, comme dans l\'autre codex : ' + entre.versLaCorbeille + '.');
     var fin = ['Rien n\'est effacé : ce qui n\'est qu\'ici est gardé.'];
-    if (analyse.auxArchives > 0) fin.push('Les copies aux archives ici ne sont pas reprises.');
+    if (analyse.auxArchives > 0) fin.push('Les productions aux archives ici ne sont pas reprises.');
     if (analyse.calculees.length > 0) fin.push('Les indices seront recalculés après la fusion.');
     return { fort: fort.join(' '), fin: fin.join(' ') };
 }
@@ -3833,7 +3833,7 @@ var PROPOSITIONS_AVANT_SUPPRESSION = {
     // Évaluation et copies
     production:            { premiere: 'Supprimer cette production l\'efface pour de bon.', pronom: 'la' },
     evaluation:            { premiere: 'Supprimer cette évaluation l\'efface pour de bon.', pronom: 'la' },
-    copiesExportees:       { premiere: 'Retirer ces copies les efface pour de bon.', pronom: 'les' },
+    copiesExportees:       { premiere: 'Retirer ces productions de tes étudiant·es les efface pour de bon.', pronom: 'les' },
     intervention:          { premiere: 'Supprimer cette intervention l\'efface pour de bon.', pronom: 'la' },
     rencontre:             { premiere: 'Supprimer cette rencontre l\'efface pour de bon.', pronom: 'la' },
     questionnaire:         { premiere: 'Remplacer ce questionnaire l\'efface pour de bon.', pronom: 'le' },
@@ -3854,14 +3854,14 @@ var PROPOSITIONS_AVANT_SUPPRESSION = {
     carte:                 { premiere: 'Supprimer cette carte l\'efface pour de bon.', pronom: 'la' },
     carteBibliotheque:     { premiere: 'Supprimer cette carte de la Bibliothèque l\'efface pour de bon.', pronom: 'la' },
     // Corbeille et Modélisation
-    copieCorbeille:        { premiere: 'Supprimer cette copie l\'efface pour de bon.', pronom: 'la' },
-    corbeille:             { premiere: 'Vider la corbeille efface pour de bon ces copies.', pronom: 'les' },
+    copieCorbeille:        { premiere: 'Supprimer cette production l\'efface pour de bon.', pronom: 'la' },
+    corbeille:             { premiere: 'Vider la corbeille efface pour de bon ces productions.', pronom: 'les' },
     fichierModelisation:   { premiere: 'Supprimer ce fichier l\'efface pour de bon.', pronom: 'le' },
     // Configuration (`enseignants`, `modalitesEvaluation` seulement)
     parametre:             { premiere: 'Supprimer ce paramètre l\'efface pour de bon.', pronom: 'le' },
     // Lot 2a-2 (3 oct. 2026) : les gestes qui demandaient un travail de structure
-    fusionCopies:          { premiere: 'Fusionner ces copies efface pour de bon celles qui sont absorbées.', pronom: 'les' },
-    copieImportee:         { premiere: 'Supprimer cette copie l\'efface pour de bon.', pronom: 'la' },
+    fusionCopies:          { premiere: 'Fusionner ces productions efface pour de bon celles qui sont absorbées.', pronom: 'les' },
+    copieImportee:         { premiere: 'Supprimer cette production l\'efface pour de bon.', pronom: 'la' },
     repriseOriginale:      { premiere: 'Appliquer ce jeton de reprise efface pour de bon l\'évaluation originale.', pronom: 'la' },
     reprise:               { premiere: 'Retirer ce jeton de reprise efface pour de bon la reprise.', pronom: 'la' },
     pages:                 { premiere: 'Retirer ces pages les efface pour de bon.', pronom: 'les' },
@@ -3888,7 +3888,7 @@ var PROPOSITIONS_AVANT_SUPPRESSION = {
     corrigerDA:            { premiere: 'Corriger ce DA déplace sous le nouveau DA tout ce que porte l\'ancien.', pronom: 'le', infinitif: 'corriger' },
     // #1233 (5 nov. 2026) : une page dont l'image s'est perdue ; le fichier de la copie est remplacé par
     // le fichier réparé. Décision de Grégoire (12 h 34) : codex proposé juste avant. Mots proposés, à Grégoire.
-    reparationImage:       { premiere: 'Réparer cette copie remplace son fichier par le fichier réparé.', pronom: 'le', infinitif: 'réparer' }
+    reparationImage:       { premiere: 'Réparer ce fichier le remplace par le fichier réparé.', pronom: 'le', infinitif: 'réparer' }
 };
 
 /**
@@ -4097,13 +4097,13 @@ function _direLaFinDeLaFusion(nomExterne, analyse, externe, choix, statsTravaux,
         lignes.push(gardes + (gardes > 1 ? ' différences gardées' : ' différence gardée') + ' telles qu\'ici.');
     }
     if (statsTravaux.importes > 0) {
-        lignes.push(statsTravaux.importes + (statsTravaux.importes > 1 ? ' fichiers de copies reçus.' : ' fichier de copie reçu.'));
+        lignes.push(statsTravaux.importes + (statsTravaux.importes > 1 ? ' fichiers de productions reçus.' : ' fichier de production reçu.'));
     }
     if (statsTravaux.erreurs.length > 0) {
-        lignes.push(statsTravaux.erreurs.length + ' fichier(s) de copie non reçu(s) : leur copie est dite « manquante ».');
+        lignes.push(statsTravaux.erreurs.length + ' fichier(s) de production non reçu(s) : leur production est dite « manquante ».');
     }
     if (analyse.auxArchives > 0) {
-        lignes.push('Les copies aux archives ici n\'ont pas été reprises de l\'autre codex.');
+        lignes.push('Les productions aux archives ici n\'ont pas été reprises de l\'autre codex.');
     }
     lignes.push('');
     lignes.push((recalcule ? 'Les indices ont été recalculés. ' : '') + 'Pense à mettre à jour le codex pour y garder la fusion.');
@@ -4193,7 +4193,7 @@ async function actionFusionner() {
     var statsTravaux = await _fusionnerTravaux(
         externe._zip, externe.donnees, chemins,
         function(pct, msg) {
-            _majProgression(Math.round(pct * 0.5), 'Import des fichiers des copies…', msg);
+            _majProgression(Math.round(pct * 0.5), 'Import des fichiers des productions…', msg);
         }
     );
 
@@ -4339,7 +4339,7 @@ function _construireRapportComparaison(externe, analyse, fichiersAImporter) {
     lignes.push('Viendraient de l\'autre codex : ' + (entre.venues || 'rien'));
     if (entre.versLaCorbeille) lignes.push('Iraient à la corbeille      : ' + entre.versLaCorbeille);
     lignes.push('Différents des deux côtés   : ' + analyse.conflits.length);
-    lignes.push('Fichiers de copies à recevoir : ' + fichiersAImporter);
+    lignes.push('Fichiers de productions à recevoir : ' + fichiersAImporter);
     if (analyse.auxArchives > 0) lignes.push('Aux archives ici, non repris : ' + analyse.auxArchives);
     lignes.push('Rien n\'est effacé : ce qui n\'est qu\'ici est gardé.');
     lignes.push('');

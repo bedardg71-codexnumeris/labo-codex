@@ -205,7 +205,7 @@
     /** #1028 — Ce que dit la page d'une copie sans fichier qui n'est pas aux archives. */
     const MOTS_SANS_FICHIER = {
         manquant: 'Fichier manquant — rouvre le codex après avoir libéré de l\'espace',
-        introuvable: 'Le fichier de cette copie est introuvable.'
+        introuvable: 'Le fichier de cette production est introuvable.'
     };
 
     /**
@@ -245,8 +245,8 @@
      * Mots proposés, à Grégoire en fin de file avec les Nouvelles.
      */
     const MOTS_IMAGE_PERDUE = {
-        message: 'Une page de cette copie s\'affiche blanche : sa photo est encore dans le fichier, mais mal enregistrée.',
-        bouton: 'Réparer la copie'
+        message: 'Une page de cette production s\'affiche blanche : sa photo est encore dans le fichier, mais mal enregistrée.',
+        bouton: 'Réparer le fichier'
     };
 
     /**

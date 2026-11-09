@@ -2036,9 +2036,9 @@ function phraseHorsDesPourcentages(n) {
 
 /** Pourquoi aucune échelle n'est lue (`reperesPerformance().raison`) : le seuil est alors la note de passage. */
 const ORIGINE_SANS_ECHELLE_LUE = {
-    'echelles-divergentes': 'la note de passage (tes copies n\'ont pas d\'échelle unique)',
-    'aucune-copie': 'la note de passage (aucune échelle de tes copies ne le fixe encore)',
-    'sans-pratique': 'la note de passage (aucune échelle de tes copies ne le fixe encore)'
+    'echelles-divergentes': 'la note de passage (tes évaluations n\'ont pas d\'échelle unique)',
+    'aucune-copie': 'la note de passage (aucune échelle de tes évaluations ne le fixe encore)',
+    'sans-pratique': 'la note de passage (aucune échelle de tes évaluations ne le fixe encore)'
 };
 
 /**

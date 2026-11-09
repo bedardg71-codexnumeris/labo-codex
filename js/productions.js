@@ -98,26 +98,40 @@ function getCleProductions() {
  * artefact, et que `getAvertissementsStructure` redit à voix haute (« sa
  * pondération n'est pas utilisée par le calcul »).
  *
- * ⮕ L'ORDRE DES ENTRÉES EST SIGNIFIANT : c'est celui du formulaire, et la
- * sentinelle `types-production-source-unique` le vérifie option par option.
- * Ajouter un type au `<select>` sans l'ajouter ici fait ROUGIR le test — c'est
- * exactement la dérive silencieuse qu'on vient de payer.
+ * ⮕ L'ORDRE DES ENTRÉES EST SIGNIFIANT : c'est celui du formulaire.
+ * ↻ 9 nov. 2026 (lot « Production plutôt que copie », étape 2) : le `<select>`
+ * d'`index.html` ne porte plus de liste. Le menu est BÂTI depuis cette table
+ * (`remplirMenuTypesProduction`), suivi de la banque de la personne : la dérive
+ * entre deux listes devient impossible. La sentinelle `types-production-source-unique`
+ * vérifie le menu bâti option par option.
  */
 const TYPES_PRODUCTION = [
-    { id: 'examen',             libelle: 'Examen',                groupe: 'Évaluations' },
-    { id: 'travail',            libelle: 'Travail écrit',         groupe: 'Évaluations' },
-    { id: 'quiz',               libelle: 'Quiz/Test',             groupe: 'Évaluations' },
-    { id: 'laboratoire',        libelle: 'Laboratoire',           groupe: 'Évaluations' },
-    { id: 'presentation',       libelle: 'Présentation',          groupe: 'Évaluations' },
-    { id: 'entrevue',           libelle: 'Entrevue',              groupe: 'Évaluations' },
-    { id: 'projet',             libelle: 'Projet',                groupe: 'Évaluations' },
-    { id: 'stage',              libelle: 'Stage',                 groupe: 'Évaluations' },
-    { id: 'autre',              libelle: 'Autre',                 groupe: 'Évaluations' },
+    // Le groupe « Productions » : les exemples du menu, dans l'ordre arrêté par Grégoire
+    // (8 nov. 2026, 13 h 51 à 14 h 09), de l'écrit à la création. Six sont nouveaux
+    // (Démonstration pratique, Œuvre, Maquette, Photographie, Film, Enregistrement).
+    { id: 'examen',             libelle: 'Examen',                groupe: 'Productions' },
+    { id: 'travail',            libelle: 'Travail écrit',         groupe: 'Productions' },
+    { id: 'quiz',               libelle: 'Quiz/Test',             groupe: 'Productions' },
+    { id: 'presentation',       libelle: 'Présentation',          groupe: 'Productions' },
+    { id: 'entrevue',           libelle: 'Entrevue',              groupe: 'Productions' },
+    { id: 'laboratoire',        libelle: 'Laboratoire',           groupe: 'Productions' },
+    { id: 'demonstration',      libelle: 'Démonstration pratique', groupe: 'Productions' },
+    { id: 'stage',              libelle: 'Stage',                 groupe: 'Productions' },
+    { id: 'projet',             libelle: 'Projet',                groupe: 'Productions' },
+    { id: 'oeuvre',             libelle: 'Œuvre',                 groupe: 'Productions' },
+    { id: 'maquette',           libelle: 'Maquette',              groupe: 'Productions' },
+    { id: 'photographie',       libelle: 'Photographie',          groupe: 'Productions' },
+    { id: 'film',               libelle: 'Film',                  groupe: 'Productions' },
+    { id: 'enregistrement',     libelle: 'Enregistrement',        groupe: 'Productions' },
+    // « Autre » sort du menu (la banque le remplace), mais une production qui le porte reste
+    // lisible sous « Autre » : `horsMenu` le tient hors des choix, pas hors de la table. Il
+    // garde le groupe « Productions » pour que la carte le range avec ses voisins.
+    { id: 'autre',              libelle: 'Autre',                 groupe: 'Productions', horsMenu: true },
     { id: 'portfolio',          libelle: 'Portfolio (conteneur)', groupe: 'Portfolio',
       prefixeAffichage: '📁 ' },
     { id: 'artefact-portfolio', libelle: 'Artefact',              groupe: 'Portfolio',
       libelleLong: 'Artefact d\'un portfolio', ponderationPropre: false },
-    { id: 'terminale',          libelle: 'Évaluation terminale',  groupe: 'Évaluation terminale' }
+    { id: 'terminale',          libelle: 'Épreuve terminale',     groupe: 'Épreuve terminale' }
 ];
 
 /** L'entrée de table d'un type, ou null si le type est inconnu. */
@@ -132,6 +146,418 @@ function typeProduction(id) {
 function typePorteSaPonderation(id) {
     const t = typeProduction(id);
     return t ? t.ponderationPropre !== false : true;
+}
+
+/* ===============================
+   LA BANQUE DE TYPES DE PRODUCTION
+   Lot « Production plutôt que copie », étape 2 (9 nov. 2026)
+   =============================== */
+
+/**
+ * « On ne peut pas tout imaginer, mais on peut offrir de le faire et de le retenir. »
+ * (Grégoire, 8 nov. 2026.) Au bas du menu « Type », « + Nouveau type… » : la personne
+ * écrit son type (« Prise de sang »), qui entre dans SA banque et revient d'un trimestre
+ * à l'autre. « Gérer mes types… » le renomme, le retire, et retire de la vue les
+ * exemples qui ne lui servent pas.
+ *
+ * ▣ OÙ ELLE VIT. Une clé GLOBALE, hors trimestre, comme les tampons :
+ * `banqueTypesProduction` = { types: ['Prise de sang', …], exemplesMasques: ['film', …] }.
+ * Propriétaire unique : ce fichier (docs/DATA-OWNERSHIP.md). Elle part avec le codex
+ * (toute clé y part) et avec l'archive d'un groupe (`CLES_GLOBALES_INCLUSES`, reserve.js).
+ *
+ * ▣ SUR LA PRODUCTION, le type créé s'écrit TEL QU'IL EST NOMMÉ, dans `production.type` :
+ * il voyage sans changer aucun format (partage .lcz, import, codex), et une version plus
+ * ancienne de l'application l'affiche tel quel (`getTypeLabel` rend un type inconnu).
+ *
+ * ▣ DÉCISIONS DE GRÉGOIRE (9 nov. 2026, 10 h 14 à 10 h 17) :
+ *   (8) une production partagée ou importée emporte son nom de type, qui ne va que sur
+ *       la production, JAMAIS dans la banque de la personne qui la reçoit — aucun module
+ *       d'import ou de partage n'écrit cette clé (sentinelle) ;
+ *   (9) renommer ou retirer un type de la banque ne réécrit AUCUNE production, et le menu
+ *       d'une production garde son type actuel, même retiré, même « Autre ».
+ */
+const CLE_BANQUE_TYPES_PRODUCTION = 'banqueTypesProduction';
+const LONGUEUR_MAX_TYPE_PRODUCTION = 50;    // la borne du partage .lcz (partage-schemas.js)
+const VALEUR_NOUVEAU_TYPE = '__nouveau-type__';
+const VALEUR_GERER_TYPES = '__gerer-types__';
+const GROUPE_EXEMPLES_TYPES = 'Productions';
+
+/** La banque telle qu'écrite, assainie : jamais d'entrée vide ni de valeur d'un autre genre. */
+function lireBanqueTypesProduction() {
+    const brut = (typeof db !== 'undefined' && db && typeof db.getSync === 'function')
+        ? db.getSync(CLE_BANQUE_TYPES_PRODUCTION, null) : null;
+    const types = Array.isArray(brut && brut.types)
+        ? brut.types.filter(t => typeof t === 'string' && t.trim() !== '') : [];
+    const exemplesMasques = Array.isArray(brut && brut.exemplesMasques)
+        ? brut.exemplesMasques.filter(id => typeof id === 'string') : [];
+    return { types, exemplesMasques };
+}
+
+function ecrireBanqueTypesProduction(banque) {
+    db.setSync(CLE_BANQUE_TYPES_PRODUCTION, {
+        types: banque.types.slice(),
+        exemplesMasques: banque.exemplesMasques.slice()
+    });
+    if (typeof window !== 'undefined' && typeof window.annoncerEcritureUsager === 'function') {
+        window.annoncerEcritureUsager(CLE_BANQUE_TYPES_PRODUCTION);
+    }
+}
+
+/** Les exemples du menu, ceux que la personne peut retirer de sa vue. */
+function exemplesTypesProduction() {
+    return TYPES_PRODUCTION.filter(t => t.groupe === GROUPE_EXEMPLES_TYPES && !t.horsMenu);
+}
+
+/** Forme de comparaison : sans accents, sans casse, espaces réduits. */
+function normaliserNomTypeProduction(nom) {
+    return String(nom == null ? '' : nom).normalize('NFD').replace(/[̀-ͯ]/g, '')
+        .toLowerCase().replace(/\s+/g, ' ').trim();
+}
+
+/**
+ * Ce que deviendrait un nom écrit par la personne, sans rien écrire.
+ * @returns {{statut: 'vide'|'reserve'|'exemple'|'banque'|'nouveau', valeur: string}}
+ *   `valeur` : ce qui irait dans `production.type` (l'identifiant d'un exemple, ou le nom).
+ * Un nom qui reprend un exemple choisit l'exemple ; un nom déjà dans la banque choisit
+ * celui de la banque. Un nom qui reprend un type de l'application qui n'est pas un exemple
+ * (portfolio, artefact, épreuve terminale, « Autre »), un identifiant, ou une forme
+ * `<type>-formatif` est refusé : il changerait le calcul ou se confondrait avec un type retiré.
+ */
+function analyserNomTypeProduction(nom, banque) {
+    const propre = String(nom == null ? '' : nom).replace(/\s+/g, ' ').trim()
+        .slice(0, LONGUEUR_MAX_TYPE_PRODUCTION).trim();
+    const n = normaliserNomTypeProduction(propre);
+    if (!n) return { statut: 'vide', valeur: '' };
+    if (n.indexOf('__') === 0) return { statut: 'reserve', valeur: '' };
+    if (/-formatif$/.test(n) && typeProduction(n.slice(0, -'-formatif'.length))) return { statut: 'reserve', valeur: '' };
+    for (const t of TYPES_PRODUCTION) {
+        const formes = [t.id, t.libelle, t.libelleLong].filter(Boolean).map(normaliserNomTypeProduction);
+        if (formes.indexOf(n) === -1) continue;
+        const estExemple = t.groupe === GROUPE_EXEMPLES_TYPES && !t.horsMenu;
+        return estExemple ? { statut: 'exemple', valeur: t.id } : { statut: 'reserve', valeur: '' };
+    }
+    const existant = (banque || lireBanqueTypesProduction()).types
+        .find(x => normaliserNomTypeProduction(x) === n);
+    if (existant) return { statut: 'banque', valeur: existant };
+    return { statut: 'nouveau', valeur: propre };
+}
+
+/**
+ * « + Nouveau type… » : entre le nom dans la banque, ou retrouve l'exemple ou le type de la
+ * banque qu'il reprend (un exemple retiré de la vue y revient). N'écrit aucune production.
+ */
+function ajouterTypeBanqueProduction(nom) {
+    const banque = lireBanqueTypesProduction();
+    const r = analyserNomTypeProduction(nom, banque);
+    if (r.statut === 'nouveau') {
+        banque.types.push(r.valeur);
+        ecrireBanqueTypesProduction(banque);
+    } else if (r.statut === 'exemple' && banque.exemplesMasques.indexOf(r.valeur) !== -1) {
+        banque.exemplesMasques = banque.exemplesMasques.filter(id => id !== r.valeur);
+        ecrireBanqueTypesProduction(banque);
+    }
+    return r;
+}
+
+/**
+ * Renomme un type de la banque, pour la suite seulement : les productions qui portent
+ * l'ancien nom le gardent (décision 9). Refuse un nom vide, réservé, ou déjà pris.
+ * @returns {{statut: 'ok'|'vide'|'reserve'|'pris'|'absent', valeur: string}}
+ */
+function renommerTypeBanqueProduction(ancien, nouveau) {
+    const banque = lireBanqueTypesProduction();
+    const i = banque.types.indexOf(ancien);
+    if (i === -1) return { statut: 'absent', valeur: '' };
+    const autres = { types: banque.types.filter((_, j) => j !== i), exemplesMasques: [] };
+    const r = analyserNomTypeProduction(nouveau, autres);
+    if (r.statut === 'vide' || r.statut === 'reserve') return r;
+    if (r.statut !== 'nouveau') return { statut: 'pris', valeur: r.valeur };
+    if (r.valeur !== ancien) {
+        banque.types[i] = r.valeur;
+        ecrireBanqueTypesProduction(banque);
+    }
+    return { statut: 'ok', valeur: r.valeur };
+}
+
+/** Retire un type de la banque. Aucune production n'est touchée (décision 9). */
+function retirerTypeBanqueProduction(nom) {
+    const banque = lireBanqueTypesProduction();
+    if (banque.types.indexOf(nom) === -1) return false;
+    banque.types = banque.types.filter(t => t !== nom);
+    ecrireBanqueTypesProduction(banque);
+    return true;
+}
+
+/** Montre ou retire de la vue un exemple du menu. Aucune production n'est touchée. */
+function basculerExempleTypeProduction(id, visible) {
+    if (!exemplesTypesProduction().some(t => t.id === id)) return false;
+    const banque = lireBanqueTypesProduction();
+    const masque = banque.exemplesMasques.indexOf(id) !== -1;
+    if (visible && masque) banque.exemplesMasques = banque.exemplesMasques.filter(x => x !== id);
+    else if (!visible && !masque) banque.exemplesMasques.push(id);
+    else return true;
+    ecrireBanqueTypesProduction(banque);
+    return true;
+}
+
+/**
+ * Bâtit le menu « Type » : les exemples (moins ceux retirés de la vue), le portfolio,
+ * l'épreuve terminale, puis la banque (« Mes types »), puis « + Nouveau type… » et
+ * « Gérer mes types… ». Le type que porte la production ouverte garde TOUJOURS son
+ * option (décision 9) : un exemple retiré de la vue, « Autre », un type retiré de la
+ * banque ou venu d'un·e collègue. Tout passe par `textContent` et `value` : un nom de
+ * type n'entre jamais dans du HTML.
+ */
+function remplirMenuTypesProduction(select, typeCourant) {
+    if (!select) return;
+    const courant = typeCourant == null ? '' : String(typeCourant);
+    const peutBatir = typeof select.appendChild === 'function' && typeof select.removeChild === 'function'
+        && typeof document !== 'undefined' && typeof document.createElement === 'function';
+    if (peutBatir) batirMenuTypesProduction(select, courant);
+    select.value = courant;
+    if (select.dataset) select.dataset.typePrecedent = courant;
+}
+
+function batirMenuTypesProduction(select, courant) {
+    const banque = lireBanqueTypesProduction();
+    const masques = new Set(banque.exemplesMasques);
+    const option = (valeur, texte) => {
+        const o = document.createElement('option');
+        o.value = valeur;
+        o.textContent = texte;
+        return o;
+    };
+    while (select.firstChild) select.removeChild(select.firstChild);
+    select.appendChild(option('', '— Sélectionner —'));
+
+    let groupe = null;
+    let elGroupe = null;
+    let courantPlace = courant === '';
+    TYPES_PRODUCTION.forEach(t => {
+        const estCourant = t.id === courant;
+        if (!estCourant && (t.horsMenu || (t.groupe === GROUPE_EXEMPLES_TYPES && masques.has(t.id)))) return;
+        if (t.groupe !== groupe) {
+            elGroupe = document.createElement('optgroup');
+            elGroupe.label = t.groupe;
+            select.appendChild(elGroupe);
+            groupe = t.groupe;
+        }
+        elGroupe.appendChild(option(t.id, t.libelle));
+        if (estCourant) courantPlace = true;
+    });
+
+    const mesTypes = banque.types.slice();
+    if (!courantPlace && mesTypes.indexOf(courant) === -1) mesTypes.push(courant);
+    if (mesTypes.length > 0) {
+        const g = document.createElement('optgroup');
+        g.label = 'Mes types';
+        mesTypes.forEach(nom => g.appendChild(option(nom, nom)));
+        select.appendChild(g);
+    }
+    select.appendChild(option(VALEUR_NOUVEAU_TYPE, '+ Nouveau type…'));
+    select.appendChild(option(VALEUR_GERER_TYPES, 'Gérer mes types…'));
+}
+
+/** Rebâtit le menu ouvert sur le type qu'il montre (après un geste dans la banque). */
+function rafraichirMenuTypesProduction() {
+    const select = document.getElementById('productionType');
+    if (!select) return;
+    const actuel = (select.dataset && select.dataset.typePrecedent != null)
+        ? select.dataset.typePrecedent : select.value;
+    remplirMenuTypesProduction(select, actuel);
+}
+
+/** Choisit un type dans le menu comme si la personne l'avait choisi (l'enregistrement suit). */
+function choisirTypeDansMenuProduction(valeur) {
+    const select = document.getElementById('productionType');
+    if (!select) return;
+    remplirMenuTypesProduction(select, valeur);
+    select.dispatchEvent(new Event('change', { bubbles: true }));
+}
+
+/** Vrai pour les deux options d'action du menu : elles ouvrent une fenêtre, ce ne sont pas des types. */
+function estActionMenuTypesProduction(valeur) {
+    return valeur === VALEUR_NOUVEAU_TYPE || valeur === VALEUR_GERER_TYPES;
+}
+
+/**
+ * « + Nouveau type… » et « Gérer mes types… » ouvrent une fenêtre : ce ne sont pas des types.
+ * Le menu revient aussitôt au type d'avant, et rien n'est écrit (`surChangementFormulaireProduction`
+ * les écarte aussi). Pour un vrai type, retient le choix (le type d'avant du prochain geste).
+ * @returns {boolean} vrai si la valeur était une action (le changement s'arrête là)
+ */
+function traiterActionMenuTypesProduction(selectType, type) {
+    if (!estActionMenuTypesProduction(type)) {
+        if (selectType.dataset) selectType.dataset.typePrecedent = type;
+        return false;
+    }
+    selectType.value = (selectType.dataset && selectType.dataset.typePrecedent) || '';
+    if (type === VALEUR_NOUVEAU_TYPE) ouvrirFenetreNouveauTypeProduction();
+    else ouvrirFenetreGererTypesProduction();
+    return true;
+}
+
+/**
+ * Convention héritée : une évaluation formative porte un identifiant « <type>-formatif ».
+ * Depuis la banque, un type est un texte libre : « Quiz formatif » ne doit pas devenir
+ * formatif par accident. Seuls les identifiants connus suivent la convention.
+ */
+function estTypeFormatif(type) {
+    if (typeof type !== 'string' || !/-formatif$/.test(type)) return false;
+    return !!typeProduction(type.slice(0, -'-formatif'.length));
+}
+
+function fermerFenetreTypesProduction(id) {
+    const existante = document.getElementById(id);
+    if (existante) existante.remove();
+}
+
+/** La fenêtre « + Nouveau type… ». */
+function ouvrirFenetreNouveauTypeProduction() {
+    fermerFenetreTypesProduction('fenetre-nouveau-type-production');
+    const overlay = document.createElement('div');
+    overlay.id = 'fenetre-nouveau-type-production';
+    overlay.className = 'modal-overlay actif';
+    overlay.innerHTML =
+        '<div class="modal-contenu modal-compact" style="max-width: 460px;" role="dialog" aria-modal="true" aria-labelledby="titre-nouveau-type-production">' +
+            '<button class="modal-fermer" data-action="fermerOverlayParent" aria-label="Fermer"><img src="icons/icon-close-window.svg" alt="" class="modal-close-icon"></button>' +
+            '<h3 class="modal-titre" id="titre-nouveau-type-production">Nouveau type</h3>' +
+            '<label for="nouveau-type-production-nom">Nom du type</label>' +
+            '<input type="text" id="nouveau-type-production-nom" class="controle-form" placeholder="Ex. : Prise de sang" autocomplete="off" style="width: 100%; margin: 4px 0 8px 0;">' +
+            '<p class="text-muted" style="margin: 0 0 8px 0;">Il restera dans ta banque, d\'un trimestre à l\'autre.</p>' +
+            '<p id="nouveau-type-production-erreur" class="alerte alerte-erreur u-hide" role="alert" style="margin: 0 0 8px 0;"></p>' +
+            '<div class="modal-actions" style="display: flex; gap: 8px;">' +
+                '<button class="btn btn-principal" id="nouveau-type-production-ajouter">Ajouter</button>' +
+                '<button class="btn btn-secondaire" data-action="fermerOverlayParent">Annuler</button>' +
+            '</div>' +
+        '</div>';
+    document.body.appendChild(overlay);
+    overlay.addEventListener('click', (e) => { if (e.target === overlay) overlay.remove(); });
+
+    const champ = document.getElementById('nouveau-type-production-nom');
+    champ.maxLength = LONGUEUR_MAX_TYPE_PRODUCTION;
+    const erreur = document.getElementById('nouveau-type-production-erreur');
+    const ajouter = () => {
+        const r = ajouterTypeBanqueProduction(champ.value);
+        if (r.statut === 'vide' || r.statut === 'reserve') {
+            erreur.textContent = r.statut === 'vide'
+                ? 'Écris le nom du type.'
+                : 'Ce nom est déjà celui d\'un type de l\'application. Choisis-en un autre.';
+            erreur.classList.remove('u-hide');
+            champ.focus();
+            return;
+        }
+        overlay.remove();
+        choisirTypeDansMenuProduction(r.valeur);
+    };
+    document.getElementById('nouveau-type-production-ajouter').addEventListener('click', ajouter);
+    champ.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); ajouter(); } });
+    champ.addEventListener('input', () => erreur.classList.add('u-hide'));
+    champ.focus();
+}
+
+/** La fenêtre « Gérer mes types… » : renommer, retirer, montrer ou retirer de la vue les exemples. */
+function ouvrirFenetreGererTypesProduction() {
+    fermerFenetreTypesProduction('fenetre-gerer-types-production');
+    const overlay = document.createElement('div');
+    overlay.id = 'fenetre-gerer-types-production';
+    overlay.className = 'modal-overlay actif';
+    overlay.innerHTML =
+        '<div class="modal-contenu modal-compact" style="max-width: 560px;" role="dialog" aria-modal="true" aria-labelledby="titre-gerer-types-production">' +
+            '<button class="modal-fermer" data-action="fermerOverlayParent" aria-label="Fermer"><img src="icons/icon-close-window.svg" alt="" class="modal-close-icon"></button>' +
+            '<h3 class="modal-titre" id="titre-gerer-types-production">Mes types</h3>' +
+            '<p class="text-muted" style="margin: 0 0 12px 0;">Renommer ou retirer un type ne change aucune production : chacune garde le type qu\'elle porte.</p>' +
+            '<h4 style="margin: 0 0 6px 0;">Ta banque</h4>' +
+            '<div id="gerer-types-production-banque"></div>' +
+            '<h4 style="margin: 14px 0 6px 0;">Exemples du menu</h4>' +
+            '<p class="text-muted" style="margin: 0 0 6px 0;">Décoche ceux qui ne te servent pas : ils sortent du menu.</p>' +
+            '<div id="gerer-types-production-exemples" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 4px 12px;"></div>' +
+            '<div class="modal-actions" style="display: flex; gap: 8px; margin-top: 14px;">' +
+                '<button class="btn btn-principal" data-action="fermerOverlayParent">Fermer</button>' +
+            '</div>' +
+        '</div>';
+    document.body.appendChild(overlay);
+    overlay.addEventListener('click', (e) => { if (e.target === overlay) overlay.remove(); });
+    rendreBanqueDansFenetreTypes();
+    rendreExemplesDansFenetreTypes();
+}
+
+function rendreBanqueDansFenetreTypes() {
+    const zone = document.getElementById('gerer-types-production-banque');
+    if (!zone) return;
+    while (zone.firstChild) zone.removeChild(zone.firstChild);
+    const banque = lireBanqueTypesProduction();
+    if (banque.types.length === 0) {
+        const vide = document.createElement('p');
+        vide.className = 'text-muted';
+        vide.style.margin = '0';
+        vide.textContent = 'Ta banque est vide. Crée un type avec « + Nouveau type… », au bas du menu.';
+        zone.appendChild(vide);
+        return;
+    }
+    banque.types.forEach(nom => {
+        const ligne = document.createElement('div');
+        ligne.style.cssText = 'display: flex; gap: 8px; align-items: center; margin-bottom: 6px;';
+        const champ = document.createElement('input');
+        champ.type = 'text';
+        champ.className = 'controle-form';
+        champ.maxLength = LONGUEUR_MAX_TYPE_PRODUCTION;
+        champ.value = nom;
+        champ.setAttribute('aria-label', 'Nom du type');
+        champ.style.flex = '1';
+        const retirer = document.createElement('button');
+        retirer.type = 'button';
+        retirer.className = 'btn btn-secondaire btn-compact';
+        retirer.textContent = 'Retirer';
+        const erreur = document.createElement('p');
+        erreur.className = 'alerte alerte-erreur u-hide';
+        erreur.setAttribute('role', 'alert');
+        erreur.style.margin = '0 0 6px 0';
+        champ.addEventListener('change', () => {
+            const r = renommerTypeBanqueProduction(nom, champ.value);
+            if (r.statut === 'ok') {
+                rendreBanqueDansFenetreTypes();
+                rafraichirMenuTypesProduction();
+                return;
+            }
+            erreur.textContent = r.statut === 'vide' ? 'Écris le nom du type.'
+                : r.statut === 'pris' ? 'Ce nom est déjà dans ton menu.'
+                : 'Ce nom est déjà celui d\'un type de l\'application. Choisis-en un autre.';
+            erreur.classList.remove('u-hide');
+            champ.value = nom;
+        });
+        retirer.addEventListener('click', () => {
+            retirerTypeBanqueProduction(nom);
+            rendreBanqueDansFenetreTypes();
+            rafraichirMenuTypesProduction();
+        });
+        ligne.appendChild(champ);
+        ligne.appendChild(retirer);
+        zone.appendChild(ligne);
+        zone.appendChild(erreur);
+    });
+}
+
+function rendreExemplesDansFenetreTypes() {
+    const zone = document.getElementById('gerer-types-production-exemples');
+    if (!zone) return;
+    while (zone.firstChild) zone.removeChild(zone.firstChild);
+    const masques = new Set(lireBanqueTypesProduction().exemplesMasques);
+    exemplesTypesProduction().forEach(t => {
+        const etiquette = document.createElement('label');
+        etiquette.style.cssText = 'display: flex; gap: 6px; align-items: center; min-height: 32px;';
+        const caseCocher = document.createElement('input');
+        caseCocher.type = 'checkbox';
+        caseCocher.checked = !masques.has(t.id);
+        caseCocher.value = t.id;
+        caseCocher.addEventListener('change', () => {
+            basculerExempleTypeProduction(t.id, caseCocher.checked);
+            rafraichirMenuTypesProduction();
+        });
+        etiquette.appendChild(caseCocher);
+        etiquette.appendChild(document.createTextNode(t.libelle));
+        zone.appendChild(etiquette);
+    });
 }
 
 /**
@@ -286,7 +712,7 @@ async function afficherTableauProductions() {
             <div class="production-champs-grille ${prod.type === 'artefact-portfolio' ? 'production-champs-grille-2col' : 'production-champs-grille-3col'}">
                 <div>
                     <label class="production-champ-label">Type</label>
-                    <input type="text" value="${getTypeLabel(prod.type)}" class="controle-form production-champ-input" readonly>
+                    <input type="text" value="${echapperHtml(getTypeLabel(prod.type))}" class="controle-form production-champ-input" readonly>
                 </div>
                 ${prod.type !== 'artefact-portfolio' ? `
                 <div>
@@ -406,14 +832,14 @@ function validerProductionsStd(productions) {
     } else if (candidates.length === 1) {
         // Règle 5 : cas NON ambigu → geste explicite offert, jamais de conversion auto.
         avertissements.push({
-            message: `« ${nomDe(candidates[0])} » est pondérée (${formaterPourcentage(candidates[0].ponderation)}) mais son type est « ${getTypeLabel(candidates[0].type)} » : sans le type « Évaluation terminale », elle n'entre pas dans le calcul STD.`,
+            message: `« ${nomDe(candidates[0])} » est pondérée (${formaterPourcentage(candidates[0].ponderation)}) mais son type est « ${getTypeLabel(candidates[0].type)} » : sans le type « Épreuve terminale », elle n'entre pas dans le calcul STD.`,
             productionId: candidates[0].id
         });
     } else if (candidates.length > 1) {
         // Règle 5 : cas ambigu → nommer, renvoyer au formulaire, ne pas choisir.
         const noms = candidates.map(p => `« ${nomDe(p)} »`).join(', ');
         avertissements.push({
-            message: `${candidates.length} productions pondérées sans évaluation terminale typée : ${noms}. Choisis laquelle est l'évaluation terminale dans son formulaire (type « Évaluation terminale ») — l'outil ne choisit pas à ta place.`
+            message: `${candidates.length} productions pondérées sans évaluation terminale typée : ${noms}. Choisis laquelle est l'évaluation terminale dans son formulaire (type « Épreuve terminale ») — l'outil ne choisit pas à ta place.`
         });
     }
 
@@ -1553,7 +1979,7 @@ async function prerenseignerFormulaireProduction(prod) {
 
     document.getElementById('productionTitre').value = prod.titre;
     document.getElementById('productionActivite').value = prod.activiteApprentissage || prod.description || '';
-    document.getElementById('productionType').value = prod.type;
+    remplirMenuTypesProduction(document.getElementById('productionType'), prod.type);
     document.getElementById('productionPonderation').value = prod.ponderation;
     poserReferenceSelect(selectGrille, prod.grilleId, 'grille');
 
@@ -1617,7 +2043,7 @@ function reinitialiserFormulaireProduction() {
     // Réinitialiser les champs
     document.getElementById('productionTitre').value = '';
     document.getElementById('productionActivite').value = '';
-    document.getElementById('productionType').value = '';
+    remplirMenuTypesProduction(document.getElementById('productionType'), '');
     document.getElementById('productionPonderation').value = '';
     if (selectGrille) selectGrille.value = '';
     if (selectEchelle) selectEchelle.value = '';
@@ -2258,6 +2684,10 @@ async function enregistrerProductionModifiee(champ) {
  * grille (les cartouches) : rien n'est écrit avant « Créer la production ».
  */
 async function surChangementFormulaireProduction(champ) {
+    // « + Nouveau type… » / « Gérer mes types… » : une fenêtre s'ouvre, rien ne s'écrit.
+    // La valeur est lue AVANT d'attendre : `gererChangementTypeProduction` remet aussitôt le
+    // type d'avant dans le menu.
+    if (champ && champ.id === 'productionType' && estActionMenuTypesProduction(champ.value)) return;
     // La grille d'abord : ses cartouches remplacent celles de l'ancienne grille,
     // AVANT que la fiche ne soit relue et écrite.
     if (champ && champ.id === 'productionGrille') await peuplerCartouchesProduction(champ.value);
@@ -2620,24 +3050,21 @@ async function descendreEvaluation(id) {
  * 5. Sinon : affichage standard
  */
 function gererChangementTypeProduction() {
-    const type = document.getElementById('productionType').value;
+    const selectType = document.getElementById('productionType');
+    const type = selectType.value;
+
+    if (traiterActionMenuTypesProduction(selectType, type)) return;
 
     // ═══════════════════════════════════════════════════════════
     // DÉFINITIONS DES TYPES DE PRODUCTION
     // ═══════════════════════════════════════════════════════════
+    // Lot « Production plutôt que copie » (décision de Grégoire, 8 nov. 2026, 13 h 51 à 14 h 09) :
+    // une définition sous le menu pour les seuls trois types qui changent le calcul. Textes
+    // validés, posés mot pour mot ; chacun garde son nom en gras devant, comme avant.
     const definitions = {
-        'examen': '<strong>Examen :</strong> Évaluation écrite en temps limité, en classe, sous supervision.',
-        'travail': '<strong>Travail écrit :</strong> Production écrite sur période étendue, à la maison ou en classe.',
-        'quiz': '<strong>Quiz/Test :</strong> Évaluation courte, sous forme de questionnaire à choix multiples ou de réponses à développement.',
-        'laboratoire': '<strong>Laboratoire :</strong> Travail pratique en laboratoire avec rapport.',
-        'presentation': '<strong>Présentation :</strong> Production orale devant un auditoire, généralement unidirectionnelle.',
-        'entrevue': '<strong>Entrevue :</strong> Production orale devant un individu, généralement bidirectionnelle.',
-        'projet': '<strong>Projet :</strong> Production complexe et multi-tâches selon un processus.',
-        'stage': '<strong>Stage :</strong> Expérience pratique dans une entreprise pour découvrir un métier, un secteur ou valider un projet professionnel. Le stage vise l\'apprentissage (découverte/exploration) plutôt que la production. Sa durée varie de quelques heures à quelques semaines et il est suivi par un tuteur.',
-        'autre': '<strong>Autre :</strong> Tout autre type de production (participation, activités, etc.).',
-        'portfolio': '<strong>Portfolio (conteneur) :</strong> Regroupement d\'artefacts permettant d\'évaluer la progression. Le portfolio inclura automatiquement toutes les productions de type «Artefact». Il n\'est pas comptabilisé dans l\'indice de <strong>Complétion (C)</strong>.',
-        'artefact-portfolio': '<strong>Artefact :</strong> Production ciblée sur une tâche de nature variée et rattachée au portfolio.<br><br>Les artefacts n\'ont pas de pondération propre. C\'est le portfolio conteneur qui définit la pondération globale.<br><br><em>Pour paramétrer la valeur des artefacts, va dans « Structure des évaluations » dans les Pratiques de notation.</em>',
-        'terminale': '<strong>Évaluation terminale :</strong> Production qui clôt le trimestre ; une seule par trimestre, et facultative. En PAN – Standards, elle entre dans le calcul avec sa pondération (par exemple 40\u00a0%), le reste allant aux artefacts du portfolio ou, sans artefact, aux productions retenues (par exemple 60\u00a0%).'
+        'portfolio': '<strong>Portfolio (conteneur) :</strong> Regroupe les artefacts de tes étudiant·es pour montrer leur progression. Toutes les productions de type « Artefact » y entrent d\'elles-mêmes, et ta pratique de notation choisit celles qui comptent. Le portfolio ne compte pas dans l\'indice de complétion (C).',
+        'artefact-portfolio': '<strong>Artefact :</strong> Une production rattachée au portfolio, centrée sur une tâche. Elle n\'a pas de pondération propre : c\'est le portfolio qui porte le poids dans la note. Pour régler la valeur des artefacts, va dans « Structure des évaluations », dans Conception › Pratiques.',
+        'terminale': '<strong>Épreuve terminale :</strong> La production qui clôt le trimestre ; une seule par trimestre, et facultative. En notation par standards, elle entre dans le calcul avec sa pondération (par exemple 40\u00a0%) ; le reste va aux artefacts du portfolio ou, sans artefact, aux productions retenues (par exemple 60\u00a0%).'
     };
 
     // Éléments Définition (carte dynamique)
@@ -3016,11 +3443,11 @@ async function afficherToutesLesProductionsParType() {
     const portfolio = productions.find(p => p.type === 'portfolio');
     const artefacts = productions.filter(p => p.type === 'artefact-portfolio');
     const sommatives = productions.filter(p =>
-        !p.type.includes('formatif') &&
+        !estTypeFormatif(p.type) &&
         p.type !== 'portfolio' &&
         p.type !== 'artefact-portfolio'
     );
-    const formatives = productions.filter(p => p.type.includes('formatif'));
+    const formatives = productions.filter(p => estTypeFormatif(p.type));
 
     /**
      * Fonction helper pour générer le HTML d'une production (format compact optimisé)
@@ -3049,7 +3476,7 @@ async function afficherToutesLesProductionsParType() {
                             ${estPortfolio ? '📁 ' : ''}${echapperHtml(prod.titre)}${(prod.activiteApprentissage || prod.description) ? ' - ' + echapperHtml(prod.activiteApprentissage || prod.description) : ''}
                         </div>
                         <div class="production-compact-meta">
-                            ${getTypeLabel(prod.type)}
+                            ${echapperHtml(getTypeLabel(prod.type))}
                             ${!estArtefact ? `<span class="production-separateur">•</span>
                             <strong class="production-ponderation">${formaterPourcentage(prod.ponderation)}</strong>` : ''}
                             ${!estPortfolio && nomGrille !== 'Aucune grille' ? `<span class="production-separateur">•</span>
@@ -3182,7 +3609,7 @@ async function ajouterProductionAuType(type) {
     // Pré-sélectionner le type
     const selectType = document.getElementById('productionType');
     if (selectType) {
-        selectType.value = type;
+        remplirMenuTypesProduction(selectType, type);
         // Déclencher l'événement change pour adapter l'interface
         gererChangementTypeProduction();
     }
@@ -3309,6 +3736,15 @@ window.etapesChaineProduction = etapesChaineProduction;             // #1149, lo
 window.rendreChaineProduction = rendreChaineProduction;
 window.getTypeLabel = getTypeLabel;
 window.TYPES_PRODUCTION = TYPES_PRODUCTION;                                 // 25 août 2026 — table unique des types (sélecteurs, sentinelle)
+// Lot « Production plutôt que copie », étape 2 (9 nov. 2026) : la banque de types.
+window.lireBanqueTypesProduction = lireBanqueTypesProduction;
+window.analyserNomTypeProduction = analyserNomTypeProduction;
+window.ajouterTypeBanqueProduction = ajouterTypeBanqueProduction;
+window.renommerTypeBanqueProduction = renommerTypeBanqueProduction;
+window.retirerTypeBanqueProduction = retirerTypeBanqueProduction;
+window.basculerExempleTypeProduction = basculerExempleTypeProduction;
+window.remplirMenuTypesProduction = remplirMenuTypesProduction;
+window.estTypeFormatif = estTypeFormatif;
 window.typeProduction = typeProduction;
 window.typePorteSaPonderation = typePorteSaPonderation;
 window.gererPortfolio = gererPortfolio;

@@ -1618,8 +1618,8 @@ async function choisirCartoucheEval(select) {
 
     const remplacer = await window.uiDialogues.confirmerAction({
         titre: 'Changer de cartouche',
-        message: `Remplacer les commentaires de cette copie par ceux de la cartouche « ${nom} » ? `
-            + 'Les retouches faites à la main dans la rétroaction de cette copie seront perdues.',
+        message: `Remplacer les commentaires de cette évaluation par ceux de la cartouche « ${nom} » ? `
+            + 'Les retouches faites à la main dans la rétroaction de cette évaluation seront perdues.',
         texteConfirmer: 'Remplacer',
         texteAnnuler: 'Garder les commentaires actuels',
         variante: 'danger'
@@ -2164,7 +2164,7 @@ function _signalerCriteresHorsGrille(conteneur, grille) {
         return `${c.critereNom || c.critereId} (${valeur})`;
     }).join(' · ');
     const explication = document.createElement('small');
-    explication.textContent = 'L\'évaluation garde ce qui a été enregistré. La note se recalcule sur la grille actuelle dès que tu modifies cette copie.';
+    explication.textContent = 'L\'évaluation garde ce qui a été enregistré. La note se recalcule sur la grille actuelle dès que tu modifies cette évaluation.';
     avis.append(titre, detail, explication);
     conteneur.prepend(avis);
 }
@@ -2199,7 +2199,7 @@ function _signalerCriteresAjoutesDepuis(conteneur, grille) {
     detail.textContent = ajoutes.map(c => `${c.nom} (${formaterPourcentage(c.ponderation)})`).join(' · ');
     const explication = document.createElement('small');
     explication.textContent = (un ? 'La note enregistrée ne le couvre pas' : 'La note enregistrée ne les couvre pas')
-        + ' et reste valable : le PDF de l\'étudiant·e conclut normalement. Si tu modifies cette copie, il faudra '
+        + ' et reste valable : le PDF de l\'étudiant·e conclut normalement. Si tu modifies cette évaluation, il faudra '
         + (un ? 'lui' : 'leur') + ' donner un niveau avant de verrouiller.';
     avis.append(titre, detail, explication);
     conteneur.prepend(avis);

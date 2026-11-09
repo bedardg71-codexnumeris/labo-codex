@@ -320,7 +320,7 @@ describe('E2 · (a) le trimestre revient entier et clos ; rien d\'autre n\'a cha
         const cr = banc.win.ReserveEmprunter.compteRendu(await emprunter(banc));
         expect(cr.titre).toBe('Trimestre revenu');
         expect(cr.message).toContain('Hiver 2032 est revenu, clos');
-        expect(cr.message).toContain('4 copies revenues');
+        expect(cr.message).toContain('4 productions revenues');
     });
 });
 

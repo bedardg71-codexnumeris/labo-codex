@@ -318,7 +318,7 @@ describe('E3 · (a) l\'aller-retour : renvoyer, faire évoluer l\'espace, faire 
         const f = banc.win.ReserveRenvoyer.fenetreIdentique(res);
         expect(f.titre).toBe('Renvoyer Hiver 2032 aux archives ?');
         const jour = new Date(banc.win.Reserve.lireManifesteLocal().archives[DOSSIER].verification.date).toLocaleDateString('fr-CA', { day: 'numeric', month: 'long', year: 'numeric' });
-        expect(f.message).toBe('Hiver 2032 quittera l\'application : 3 étudiant·es, 4 copies, environ 81,9 Ko.\n' +
+        expect(f.message).toBe('Hiver 2032 quittera l\'application : 3 étudiant·es, 4 productions remises, environ 81,9 Ko.\n' +
             'Son archive, vérifiée le ' + jour + ', le garde tel quel : « Faire revenir » le ramènera.\n' +
             'Garde bien cette archive : c\'est elle qui le conserve.\n' +
             'Les autres trimestres, les cours et les réglages ne sont pas touchés.');
@@ -329,7 +329,7 @@ describe('E3 · (a) l\'aller-retour : renvoyer, faire évoluer l\'espace, faire 
             titre: 'Hiver 2032 est renvoyé aux archives',
             message: 'Il n\'est plus dans l\'application ; son archive le garde.\n' +
                 'Pour le faire revenir : Réglages › Données › Archives, « Faire revenir ».\n' +
-                '4 copies retirées. Ton prochain codex sera plus léger d\'environ 81,9 Ko.'
+                '4 productions retirées. Ton prochain codex sera plus léger d\'environ 81,9 Ko.'
         });
     });
 });
@@ -480,7 +480,7 @@ describe('E3 · (d) les refus : rien retiré', () => {
     it('une copie promise par l\'archive en est absente', async () => {
         const banc = await preparer();
         const r = await refuse(banc, 'copiesAbsentes', await sansCopie(banc.zip, 'FT_h2'));
-        expect(banc.win.ReserveRenvoyer.compteRendu(r.comparaison).message).toBe('Son archive a changé depuis sa vérification, ou une copie y est illisible. Rien n\'a été retiré. Vérifie-la de nouveau ; si elle reste en défaut, archive le trimestre de nouveau.');
+        expect(banc.win.ReserveRenvoyer.compteRendu(r.comparaison).message).toBe('Son archive a changé depuis sa vérification, ou un fichier y est illisible. Rien n\'a été retiré. Vérifie-la de nouveau ; si elle reste en défaut, archive le trimestre de nouveau.');
     });
     it('une copie différente de l\'archive : différence, rien retiré', async () => {
         const banc = await preparer();
@@ -499,7 +499,7 @@ describe('E3 · (d) les refus : rien retiré', () => {
         const r = await renvoyer(banc);
         expect(r.comparaison.differences).toEqual([{ type: 'copieAbsente', id: 'FT_h3' }]);
         expect(await photo(banc)).toEqual(avant);
-        expect(banc.win.ReserveRenvoyer.compteRendu(r.comparaison).message).toContain(' : 1 copie ajoutée.');
+        expect(banc.win.ReserveRenvoyer.compteRendu(r.comparaison).message).toContain(' : 1 production ajoutée.');
     });
     it('une clé née entre la comparaison et le retrait : rien retiré', async () => {
         const banc = await preparer();
@@ -536,7 +536,7 @@ describe('E3 · correction 1 (verdict) : le contenu des copies de l\'archive est
         expect(r.comparaison).toMatchObject({ etat: 'refus', motif: 'changeeDepuis' });
         expect(await photo(banc)).toEqual(avant);
         expect(banc.db.journal).toEqual([]);
-        expect(banc.win.ReserveRenvoyer.compteRendu(r.comparaison).message).toBe('Son archive a changé depuis sa vérification, ou une copie y est illisible. Rien n\'a été retiré. Vérifie-la de nouveau ; si elle reste en défaut, archive le trimestre de nouveau.');
+        expect(banc.win.ReserveRenvoyer.compteRendu(r.comparaison).message).toBe('Son archive a changé depuis sa vérification, ou un fichier y est illisible. Rien n\'a été retiré. Vérifie-la de nouveau ; si elle reste en défaut, archive le trimestre de nouveau.');
     });
 
     it('tronquée : refus aussi ; et en reprise, une copie que l\'application n\'a plus est relue elle aussi', async () => {

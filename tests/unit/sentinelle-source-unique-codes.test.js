@@ -27,7 +27,7 @@ describe('source unique des codes · sources', () => {
 
     it('U.a la phrase de Grégoire, telle quelle, avec le NOM de la grille', () => {
         const s = outils();
-        expect(s).toContain("'Les codes de cette copie viennent de sa grille « ' + (nom || 'sans nom') + ' ». Pour les modifier, ouvre la grille.'");
+        expect(s).toContain("'Les codes de cette production viennent de sa grille « ' + (nom || 'sans nom') + ' ». Pour les modifier, ouvre la grille.'");
         const f = tranche(s, 'function _phraseSourceCodes', 'function genererContenuErreursFr');
         expect(f).toMatch(/_grilleCourante\.nom/);
         expect(f).not.toMatch(/_grilleCourante\.id/);

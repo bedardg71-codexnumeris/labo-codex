@@ -84,7 +84,7 @@ var MOTS = {
         texte: function(c) {
             return c.nom + ' quittera l\'application : ' +
                 _pluriel(c.etudiants, 'étudiant·e', 'étudiant·es') + ', ' +
-                _pluriel(c.copies, 'copie', 'copies') + ', environ ' + window.TailleFichier.dire(c.taille) + '.\n' +
+                _pluriel(c.copies, 'production remise', 'productions remises') + ', environ ' + window.TailleFichier.dire(c.taille) + '.\n' +
                 'Son archive, vérifiée le ' + _jour(c.dateVerification) + ', le garde tel quel : « Faire revenir » le ramènera.\n' +
                 'Garde bien cette archive : c\'est elle qui le conserve.\n' +
                 'Les autres trimestres, les cours et les réglages ne sont pas touchés.';
@@ -97,8 +97,8 @@ var MOTS = {
             var parts = [];
             if (c.changees) parts.push(_pluriel(c.changees, 'donnée modifiée', 'données modifiées'));
             if (c.nees) parts.push(_pluriel(c.nees, 'donnée ajoutée', 'données ajoutées'));
-            if (c.copiesAbsentes) parts.push(_pluriel(c.copiesAbsentes, 'copie ajoutée', 'copies ajoutées'));
-            if (c.copiesDifferentes) parts.push(_pluriel(c.copiesDifferentes, 'copie modifiée', 'copies modifiées'));
+            if (c.copiesAbsentes) parts.push(_pluriel(c.copiesAbsentes, 'production ajoutée', 'productions ajoutées'));
+            if (c.copiesDifferentes) parts.push(_pluriel(c.copiesDifferentes, 'production modifiée', 'productions modifiées'));
             var lignes = ['Rien n\'a été retiré.', 'Depuis son archive du ' + _jour(c.dateArchive) + ' : ' + parts.join(', ') + '.'];
             if (c.reprise) {
                 lignes.push('Fais-le revenir pour le consulter, puis archive-le de nouveau avant de le renvoyer.');
@@ -115,7 +115,7 @@ var MOTS = {
         texte: function(b) {
             return 'Il n\'est plus dans l\'application ; son archive le garde.\n' +
                 'Pour le faire revenir : Réglages › Données › Archives, « Faire revenir ».\n' +
-                _pluriel(b.copies, 'copie retirée', 'copies retirées') + '.' +
+                _pluriel(b.copies, 'production retirée', 'productions retirées') + '.' +
                 (b.taille ? ' Ton prochain codex sera plus léger d\'environ ' + window.TailleFichier.dire(b.taille) + '.' : '');
         }
     },
@@ -143,12 +143,12 @@ var MOTS = {
         sansArchive: 'Ce trimestre n\'a pas d\'archive dans la liste. Archive-le d\'abord, puis vérifie l\'archive.',
         nonVerifiee: 'Son archive n\'est pas vérifiée dans ce navigateur. Vérifie-la d\'abord (Réglages › Données › Archives).',
         // Un seul message pour les deux cas (mots de Grégoire, 5 oct.).
-        changeeDepuis: 'Son archive a changé depuis sa vérification, ou une copie y est illisible. Rien n\'a été retiré. Vérifie-la de nouveau ; si elle reste en défaut, archive le trimestre de nouveau.',
-        copiesAbsentes: 'Son archive a changé depuis sa vérification, ou une copie y est illisible. Rien n\'a été retiré. Vérifie-la de nouveau ; si elle reste en défaut, archive le trimestre de nouveau.',
+        changeeDepuis: 'Son archive a changé depuis sa vérification, ou un fichier y est illisible. Rien n\'a été retiré. Vérifie-la de nouveau ; si elle reste en défaut, archive le trimestre de nouveau.',
+        copiesAbsentes: 'Son archive a changé depuis sa vérification, ou un fichier y est illisible. Rien n\'a été retiré. Vérifie-la de nouveau ; si elle reste en défaut, archive le trimestre de nouveau.',
         sansEmpreintes: 'Cette archive est trop ancienne pour un renvoi. Archive le trimestre de nouveau.',
         pasUnTrimestre: 'Cette archive n\'est pas celle de ce trimestre.',
         rien: 'Ce trimestre n\'est plus dans l\'application : il n\'y a rien à renvoyer.',
-        sansMagasin: 'Le stockage des copies n\'est pas disponible dans cette page.'
+        sansMagasin: 'Le stockage des fichiers n\'est pas disponible dans cette page.'
     }
 };
 

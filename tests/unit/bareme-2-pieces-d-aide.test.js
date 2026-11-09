@@ -79,9 +79,12 @@ describe('barème 2 · A — le lexique', () => {
     const terme = (k) => cat['terme-' + k] && cat['terme-' + k].terme;
 
     // ↻ #1152, lot 3 (28 oct. 2026) : les chemins « Voir : » prennent les libellés de js/config.js (consigne du lot 3, §2.1).
+    // ↻ 9 nov. 2026, lot « production plutôt que copie » (RAPPORT-2026-11-09-production-plutot-que-copie.md, § 4, rangées
+    // 134 et 135, validées par Grégoire) : « d’une copie qui les obtient » devient « d’une production pour les obtenir » ; le reste, mot pour mot.
     it('A1 « Barème » et A2 « Tranche », termes neufs, catégorie Structure, voir Conception › Grilles de critères', () => {
-        expect(terme('bareme')).toMatchObject({ terme: 'Barème', categorie: 'Structure', voir: 'Conception › Grilles', definition: un('A1') });
-        expect(terme('tranche')).toMatchObject({ terme: 'Tranche', categorie: 'Structure', voir: 'Conception › Grilles', definition: un('A2') });
+        const lot = (s) => { expect(s).toContain('d’une copie qui les obtient'); return s.replace('d’une copie qui les obtient', 'd’une production pour les obtenir'); };
+        expect(terme('bareme')).toMatchObject({ terme: 'Barème', categorie: 'Structure', voir: 'Conception › Grilles', definition: lot(un('A1')) });
+        expect(terme('tranche')).toMatchObject({ terme: 'Tranche', categorie: 'Structure', voir: 'Conception › Grilles', definition: lot(un('A2')) });
     });
 
     it('A3 et A4 remplacent les définitions d’« Échelle de performance » et de « Type de critère »', () => {
@@ -102,10 +105,13 @@ describe('barème 2 · B — l’aide « i » du barème', () => {
         const aide = cat['grille-bareme'].popup;
         expect(aide.titre).toBe(un('B1'));
         expect(aide.sections.map((s) => s.type)).toEqual(['texte', 'texte', 'exemple', 'conseil']);
-        expect(aide.sections[0].contenu).toBe(un('B2'));
+        // ↻ 9 nov. 2026, lot « production plutôt que copie » (rapport du 9 nov., § 4, rangées 113 et 114, validées par
+        // Grégoire) : B2 et B5 changent leur mot ; le reste, mot pour mot.
+        const lot = (s, avant, apres) => { expect(s).toContain(avant); return s.replace(avant, apres); };
+        expect(aide.sections[0].contenu).toBe(lot(un('B2'), 'd’une copie qui les obtient', 'd’une production pour les obtenir'));
         expect(aide.sections[1].contenu).toBe(un('B3'));
         expect([aide.sections[2].titre, ...aide.sections[2].contenu.split('<br>')]).toEqual(T.B4);
-        expect(aide.sections[3].contenu).toBe(un('B5'));
+        expect(aide.sections[3].contenu).toBe(lot(un('B5'), 'deux copies semblables', 'deux productions semblables'));
         expect(aide.voirAussi).toEqual(['construction-echelles', 'echelle-plage-notes', 'grille-type-critere-detail']);
         expect(aide.voirAussi.map((k) => cat[k].popup.titre).join(' · ')).toBe(un('B6'));
     });
@@ -199,7 +205,9 @@ describe('barème 2 · E — les bulles de l’éditeur', () => {
         const t0 = carte.querySelector('.grille-bareme-tranche');
         expect(bulle(t0.querySelector('[data-champ="nom"]'))).toBe(un('E1'));
         expect(bulle(t0.querySelector('[data-champ="points"]'))).toBe(un('E2'));
-        expect(bulle(t0.querySelector('[data-champ="texte"]'))).toBe(un('E3'));
+        // ↻ 9 nov. 2026, lot « production plutôt que copie » (rapport du 9 nov., § 4, rangée 73, validée par Grégoire).
+        expect(un('E3')).toContain('d’une copie qui obtient');
+        expect(bulle(t0.querySelector('[data-champ="texte"]'))).toBe(un('E3').replace('d’une copie qui obtient', 'd’une production pour obtenir'));
         expect(bulle(carte.querySelector('[data-action="ajouterTrancheBareme"]'))).toBe(un('E4'));
         expect([...carte.querySelectorAll('.grille-bareme-marque')].map(bulle)).toEqual([un('E5'), un('E6')]);
     });
@@ -258,7 +266,12 @@ describe('barème 2 · F — la section de l’onglet Aide', () => {
 
     it('F1 à F5, mot pour mot ; F3 en tableau à deux colonnes, une rangée par intitulé', () => {
         expect(texte('.carte-titre-bleu').replace(/^▼\s*/, '')).toBe(un('F1'));
-        expect(texte('#aide-bareme-f2')).toBe(auxLibellesCourts(un('F2')));
+        // ↻ « Production plutôt que copie » (9 nov. 2026, entrée 24 du relevé, validée par Grégoire) : seul ce passage de F2
+        // change ; le reste, mot pour mot.
+        const f2 = auxLibellesCourts(un('F2'));
+        const f2Lot = f2.replace('ce qu’on attend d’une copie qui les obtient', 'ce qu’on attend d’une production pour les obtenir');
+        expect(f2Lot).not.toBe(f2);
+        expect(texte('#aide-bareme-f2')).toBe(f2Lot);
         expect([...doc.querySelectorAll('#aide-bareme-tableau thead th')].map((x) => x.textContent)).toEqual(['', 'Échelle de performance', 'Barème']);
         const rangees = [...doc.querySelectorAll('#aide-bareme-tableau tbody tr')].map((tr) =>
             tr.querySelector('th').textContent + ' : ' + [...tr.querySelectorAll('td')].map((x) => x.textContent).join(' | '));

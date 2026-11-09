@@ -359,7 +359,8 @@ describe('§ 4 — l\'Aide dit le modèle tel que codé', () => {
 
     it('la ligne : le repère de suffisance, sinon la note de passage, lue à la source', () => {
         const passage = Number(lire('js/interpretation-config.js').match(/const NOTE_DE_PASSAGE = ([\d.]+);/)[1]) * 100;
-        expect(carteRai).toContain(`Ce seuil est le repère « Suffisant à partir de » de l'échelle de tes copies ; si ton échelle n'en a pas, c'est la note de passage, ${passage} %.`);
+        // ↻ 9 nov. 2026 (relevé « production plutôt que copie », entrée 61, validée par Grégoire) : « tes copies » → « tes évaluations ».
+        expect(carteRai).toContain(`Ce seuil est le repère « Suffisant à partir de » de l'échelle de tes évaluations ; si ton échelle n'en a pas, c'est la note de passage, ${passage} %.`);
     });
 
     it('avant le minimum, le signalement, ce qui ne fixe jamais', () => {
@@ -369,7 +370,8 @@ describe('§ 4 — l\'Aide dit le modèle tel que codé', () => {
     });
 
     it('les deux patterns qui fixent un niveau', () => {
-        expect(cartePatterns).toContain('sur les derniers artefacts ; en début de trimestre, une seule copie peut l\'allumer ;');
+        // ↻ 9 nov. 2026 (relevé « production plutôt que copie », entrée 62) : « une seule copie » → « une seule évaluation ».
+        expect(cartePatterns).toContain('sur les derniers artefacts ; en début de trimestre, une seule évaluation peut l\'allumer ;');
         expect(cartePatterns).toContain('Deux patterns fixent un niveau : « Difficulté persistante » donne au moins le niveau 2, « Non-participation » le niveau 3.');
     });
 
@@ -409,7 +411,7 @@ describe('la barre P sans répartition (retouche du lot 1, constat 1)', () => {
         expect(divergentes).not.toContain('ne se construit pas encore');
         // Retouche 2 (constat 5) : une copie en points n'est pas une divergence à réparer.
         const enPoints = interne.phraseSansRepartition(0, 4, 'aucune-copie');
-        expect(enPoints).toContain('notées sans échelle');
+        expect(enPoints).toContain('faites sans échelle');
         expect(enPoints).not.toContain('pas d\'échelle unique');
         expect(interne.phraseSansRepartition(1, 4, 'aucune-copie')).toContain('1 étudiant·e sans note constructible');
     });

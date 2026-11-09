@@ -28,17 +28,17 @@
     // Les mots d'écran, validés par Grégoire le 4 nov. 2026 au soir (précision entre parenthèses : le tiret cadratin
     // est réservé aux dialogues). Une copie aux archives dit la phrase de ReserveCopies (MOTS.copie.apercu).
     const MOTS = {
-        menu: 'Copie de référence',
+        menu: 'Production de référence',
         etiquette: 'Référence',
-        choisir: 'Choisir une copie…',
+        choisir: 'Choisir une production…',
         original: 'original',
         reprise: 'reprise',
         coteACote: 'Côte à côte',
         superposer: 'L’une sous l’autre',
-        fermer: 'Fermer la copie de référence',
-        aucuneAutre: 'Aucune autre copie de cette production.',
-        invite: 'Choisis la copie à mettre en regard.',
-        illisible: 'Cette copie ne s’ouvre pas ici.'
+        fermer: 'Fermer la production de référence',
+        aucuneAutre: 'Aucun autre fichier pour cette production.',
+        invite: 'Choisis la production à mettre en regard.',
+        illisible: 'Cette production ne s’ouvre pas ici.'
     };
 
     const etat = {

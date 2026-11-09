@@ -939,10 +939,10 @@
         const zeroStateHTML = (fichiersTravaux.length === 0 && queue.length === 0 && aideActive) ? `
             <div class="travaux-zero-state">
                 <div class="zero-state-icone">&#x1F4DD;</div>
-                <h3>Prépare et importe les copies de tes étudiant·es</h3>
+                <h3>Prépare et importe les productions de tes étudiant·es</h3>
                 <p class="texte-muted">
-                    Dépose les copies numérisées (PDF ou images) : le processus les optimise,
-                    regroupe les pages d'une même copie et les associe à une production, prêtes à annoter.
+                    Dépose les productions numérisées (PDF ou images) : le processus les optimise,
+                    regroupe les pages d'une même production et les associe à une production, prêtes à annoter.
                 </p>
                 <div class="zero-state-etapes">
                     <div class="zero-state-etape">
@@ -1111,7 +1111,7 @@
                 </div>`;
             if (toutesMasquees) {
                 conteneur.querySelector('#travaux-fichiers-message-vide').textContent =
-                    'Aucune copie à afficher : celles de ce groupe appartiennent à des étudiant·es supprimé·es.';
+                    'Aucune production à afficher : celles de ce groupe appartiennent à des étudiant·es supprimé·es.';
             }
             return;
         }
@@ -1267,7 +1267,7 @@
                                 <button class="actions-item" id="travaux-btn-annoter" data-action="travauxUI.basculerMode" data-param="annoter">Annoter</button>
                                 <button class="actions-item actions-item-vert" id="travaux-btn-evaluer" data-action="travauxUI.basculerMode" data-param="evaluer">Évaluer</button>
                                 <!-- #1229 (4 nov. 2026) : une seconde copie, en lecture seule, à côté de celle qu'on annote. -->
-                                <button class="actions-item" id="travaux-btn-reference" data-action="travauxReference.ouvrir">Copie de référence</button>
+                                <button class="actions-item" id="travaux-btn-reference" data-action="travauxReference.ouvrir">Production de référence</button>
                                 <div class="actions-separateur"></div>
                                 <button class="actions-item" id="travaux-btn-editer" data-action="editerFichierDepuisEvaluation">Modifier</button>
                                 <!-- Re-importer : opération sur fichier, disponible dans Exporter les travaux -->
@@ -1993,7 +1993,7 @@
         let colGauche = '<div class="pipeline-col-originaux">';
         colGauche += '<div class="pipeline-col-titre">Originaux</div>';
         if (queue.length >= 2) {
-            colGauche += `<button type="button" class="btn btn-secondaire btn-sm pipeline-btn-reunir" data-action="travauxUI.reunirCopiePipeline" ${selectionReunir.size < 2 ? 'disabled' : ''}>R\u00e9unir en une copie</button>`;
+            colGauche += `<button type="button" class="btn btn-secondaire btn-sm pipeline-btn-reunir" data-action="travauxUI.reunirCopiePipeline" ${selectionReunir.size < 2 ? 'disabled' : ''}>R\u00e9unir en une production</button>`;
         }
         const groupesOuverts = new Set(); // pour tracker les debuts de groupe
 
@@ -2042,7 +2042,7 @@
             const bloqueBas = index === queue.length - 1 || (indicesGroupe && queue[index + 1].groupeDocumentId !== groupeId);
             const coche = selectionReunir.has(f);
             const caseReunir = queue.length >= 2
-                ? `<button type="button" class="pipeline-case-reunir" role="checkbox" aria-checked="${coche ? 'true' : 'false'}" aria-label="Cocher pour r\u00e9unir en une copie" data-stop data-action="travauxUI.cocherPourReunir" data-param="${index}"><input type="checkbox" tabindex="-1" aria-hidden="true" ${coche ? 'checked' : ''}></button>`
+                ? `<button type="button" class="pipeline-case-reunir" role="checkbox" aria-checked="${coche ? 'true' : 'false'}" aria-label="Cocher pour r\u00e9unir en une production" data-stop data-action="travauxUI.cocherPourReunir" data-param="${index}"><input type="checkbox" tabindex="-1" aria-hidden="true" ${coche ? 'checked' : ''}></button>`
                 : '';
             colGauche += `<div class="pipeline-fichier-ligne${selectionne ? ' pipeline-fichier-selectionne' : ''}${indicesGroupe ? ' pipeline-fichier-groupe' : ''}" data-action="travauxUI.selectionnerFichierPipeline" data-param="${index}">
                 ${caseReunir}
@@ -2180,7 +2180,7 @@
             // les champs ci-dessous s'écrivent sur tous ses fichiers.
             const nbFichiersCopie = travauxImport.indicesDeLaCopie(idx).length;
             colCentre += nbFichiersCopie > 1
-                ? `<p class="u-texte-petit" style="margin:10px 0 4px 0;"><strong>Copie de ${nbFichiersCopie} fichiers</strong></p>`
+                ? `<p class="u-texte-petit" style="margin:10px 0 4px 0;"><strong>Production en ${nbFichiersCopie} fichiers</strong></p>`
                 : '<p class="texte-muted u-texte-petit" style="margin:10px 0 4px 0;">Informations du fichier</p>';
             const modeLea = f.modeImport !== 'autre';
             const dateVal = f.dateFichier ? new Date(f.dateFichier).toISOString().substring(0, 10) : '';
@@ -2214,7 +2214,7 @@
                 <div class="pipeline-autocomplete-liste u-hide" id="pipeline-autocomplete-${idx}"></div>
             </div>`;
             colCentre += `<div class="pipeline-champ">
-                <label>${nbFichiersCopie > 1 ? 'Production de cette copie' : 'Production de ce fichier'}</label>
+                <label>${nbFichiersCopie > 1 ? 'Production de ces fichiers' : 'Production de ce fichier'}</label>
                 <select class="controle-form pipeline-select-petit" data-on-change="travauxUI.changerProductionPipeline" data-param="${idx}">
                     <option value="">—</option>
                     ${productions.map(p => `<option value="${echapperHtml(p.id)}" ${f.productionId === p.id && !f.estReprise ? 'selected' : ''}>${echapperHtml(p.titre || p.nom || p.id)}</option>`).join('')}
@@ -4016,12 +4016,12 @@
         const nbAnciennes = tri.marqueAncienne.length;
 
         const phraseAnciennes = nbAnciennes === 0 ? '' : (nbAnciennes === 1
-            ? '<p class="texte-muted">1 copie porte une marque d\'exportation antérieure au 16 septembre 2026, que l\'application ne garantit pas. Elle n\'est pas proposée : exporte-la de nouveau si tu veux la retirer.</p>'
-            : `<p class="texte-muted">${nbAnciennes} copies portent une marque d'exportation antérieure au 16 septembre 2026, que l'application ne garantit pas. Elles ne sont pas proposées : exporte-les de nouveau si tu veux les retirer.</p>`);
+            ? '<p class="texte-muted">1 production porte une marque d\'exportation antérieure au 16 septembre 2026, que l\'application ne garantit pas. Elle n\'est pas proposée : exporte-la de nouveau si tu veux la retirer.</p>'
+            : `<p class="texte-muted">${nbAnciennes} productions portent une marque d'exportation antérieure au 16 septembre 2026, que l'application ne garantit pas. Elles ne sont pas proposées : exporte-les de nouveau si tu veux les retirer.</p>`);
 
         if (aRetirer.length === 0) {
             afficherModalePipeline('Rien à retirer sans risque',
-                '<p>Aucune copie de ce groupe n\'a encore été exportée : les retirer les perdrait. Exporte-les d\'abord dans « Exporter les travaux », puis reviens ici.</p>' + phraseAnciennes,
+                '<p>Aucune production de ce groupe n\'a encore été exportée : les retirer les perdrait. Exporte-les d\'abord dans « Exporter les travaux », puis reviens ici.</p>' + phraseAnciennes,
                 [{ label: 'Fermer', classe: 'btn-secondaire' }]);
             return;
         }
@@ -4043,14 +4043,14 @@
         }).join('');
 
         const phraseEvaluees = nbEvaluees === 0 ? '' : (nbEvaluees === 1
-            ? '<p>1 de ces copies est évaluée. Son évaluation reste : la note, la grille et la rétroaction ne bougent pas. Seule la copie annotée ne s\'ouvrira plus ici.</p>'
-            : `<p>${nbEvaluees} de ces copies sont évaluées. Leur évaluation reste : la note, la grille et la rétroaction ne bougent pas. Seule la copie annotée ne s'ouvrira plus ici.</p>`);
+            ? '<p>1 de ces productions est évaluée. Son évaluation reste : la note, la grille et la rétroaction ne bougent pas. Seule la production annotée ne s\'ouvrira plus ici.</p>'
+            : `<p>${nbEvaluees} de ces productions sont évaluées. Leur évaluation reste : la note, la grille et la rétroaction ne bougent pas. Seule la production annotée ne s'ouvrira plus ici.</p>`);
 
         const n = aRetirer.length;
         const taille = window.TailleFichier.dire(aRetirer.reduce((acc, f) => acc + (f.tailleFichier || 0), 0), { decimales: 1 });
         const intro = n === 1
-            ? 'Cette copie a déjà été exportée : son fichier existe ailleurs, sur ton ordinateur. La retirer d\'ici libère de l\'espace tout de suite. Les copies qui n\'ont pas encore été exportées ne sont jamais proposées.'
-            : 'Ces copies ont déjà été exportées : leur fichier existe ailleurs, sur ton ordinateur. Les retirer d\'ici libère de l\'espace tout de suite. Les copies qui n\'ont pas encore été exportées ne sont jamais proposées.';
+            ? 'Cette production a déjà été exportée : son fichier existe ailleurs, sur ton ordinateur. La retirer d\'ici libère de l\'espace tout de suite. Les productions qui n\'ont pas encore été exportées ne sont jamais proposées.'
+            : 'Ces productions ont déjà été exportées : leur fichier existe ailleurs, sur ton ordinateur. Les retirer d\'ici libère de l\'espace tout de suite. Les productions qui n\'ont pas encore été exportées ne sont jamais proposées.';
         // La liste CAPTURÉE à l'affichage est celle qui part (#556) : pas de relecture au clic.
         const ids = aRetirer.map(f => f.id);
 
@@ -4061,13 +4061,13 @@
             [
                 { label: 'Annuler', classe: 'btn-secondaire' },
                 {
-                    label: n === 1 ? `Retirer cette copie (${taille})` : `Retirer ces ${n} copies (${taille})`,
+                    label: n === 1 ? `Retirer cette production (${taille})` : `Retirer ces ${n} productions (${taille})`,
                     classe: 'btn-principal',
                     action: async () => {
                         const retirees = await travauxStockage.nettoyerFichiersArchives(ids);
                         const bilan = retirees === n
-                            ? (n === 1 ? '1 copie retirée' : `${n} copies retirées`)
-                            : `${retirees} copies retirées sur ${n}`;
+                            ? (n === 1 ? '1 production retirée' : `${n} productions retirées`)
+                            : `${retirees} productions retirées sur ${n}`;
                         if (typeof notifications !== 'undefined' && typeof notifications.succes === 'function') {
                             notifications.succes(bilan);
                         }
@@ -4271,7 +4271,7 @@
                 // #1231 — la liste ne garde que les fichiers SANS élève (filtre
                 // ci-dessus) : le texte dit leur conséquence et le geste dans l'app.
                 // Mots proposés à Grégoire (rapport du 5 nov.).
-                + '<p class="texte-muted u-texte-petit">Ces fichiers ne portent pas de DA et aucun·e étudiant·e ne leur est associé·e : ils seront importés sans élève. Choisis l\'étudiant·e dans l\'inspecteur ; pour une copie en plusieurs fichiers, coche-les dans « Originaux », puis « Réunir en une copie ».</p>'
+                + '<p class="texte-muted u-texte-petit">Ces fichiers ne portent pas de DA et aucun·e étudiant·e ne leur est associé·e : ils seront importés sans élève. Choisis l\'étudiant·e dans l\'inspecteur ; pour une production en plusieurs fichiers, coche-les dans « Originaux », puis « Réunir en une production ».</p>'
                 + '</div>';
         }
 
@@ -4365,7 +4365,7 @@
         const listeCopies = listerCopiesAImporter(queue);
         const phraseImport = listeCopies.length === nbFichiers
             ? `<p>${nbFichiers} fichier(s) seront importés ${msgGroupe} et ${msgProduction}.</p>`
-            : `<p>${listeCopies.length} copie(s) seront créées ${msgGroupe}, à partir de ${nbFichiers} fichiers :</p>`
+            : `<p>${listeCopies.length} production(s) remise(s) seront créées ${msgGroupe}, à partir de ${nbFichiers} fichiers :</p>`
                 + '<ul class="pipeline-confirmation-copies">' + listeCopies.map(c => '<li>' + c + '</li>').join('') + '</ul>';
         afficherModalePipeline('Confirmer l\u2019import',
             bandeauAutreGC + bandeauSansDA + bandeauDAInconnu + bandeauDoublons + `${phraseImport}
@@ -4540,7 +4540,7 @@
         if (bilanJetons.rattaches.length > 0) details.push(bilanJetons.rattaches.length + ' fichier(s) rattaché(s) à une reprise déjà accordée');
         // 6 bis — dit dans le toast vert, avec le bilan de l'import. (Avant #1224,
         // un toast à part était recouvert aussitôt par celui-ci ; ils s'empilent désormais.)
-        if (bilanJetons.originaux.length > 0) details.push('aucune évaluation à reprendre, la copie devient l\u2019original pour : ' + bilanJetons.originaux.join(', '));
+        if (bilanJetons.originaux.length > 0) details.push('aucune évaluation à reprendre, la production devient l\u2019original pour : ' + bilanJetons.originaux.join(', '));
         notifications.succes(msg, details.join(' — '));
     }
 
@@ -5316,7 +5316,7 @@
             // Porte terrain 1.154.0, décision 3.1 de Grégoire : « aligner » — la même phrase que le
             // récapitulatif du geste en masse, avec le nom de l'ancienne production (porté par la mesure).
             const confirme = confirm(
-                `L’évaluation déjà faite sur « ${mesure.nomProductionActuelle} » n’aura plus de copie liée ` +
+                `L’évaluation déjà faite sur « ${mesure.nomProductionActuelle} » n’aura plus de fichier lié ` +
                 `(l’évaluation elle-même est conservée). Continuer ?`
             );
             if (!confirme) return false;
@@ -5882,7 +5882,7 @@
         // `reassignerCopie` : sur refus, rien n'est écrit et le panneau reste ouvert.
         const ok = await reassignerCopie(fichier.id, association);
         if (!ok) {
-            notifications.info('Réassignation annulée', 'La copie garde son étudiant·e et sa production.');
+            notifications.info('Réassignation annulée', 'Le fichier garde son étudiant·e et sa production.');
             return;
         }
 
@@ -6574,7 +6574,7 @@
      * @param {string} fichierId - ID du fichier
      */
     /** #1028 (verdict de Cowork) : « Fusionner » une copie dont le fichier n'est pas là. */
-    const MOT_FUSION_SANS_FICHIER = 'Le fichier de cette copie est introuvable : elle ne peut pas être fusionnée.';
+    const MOT_FUSION_SANS_FICHIER = 'Le fichier de cette production est introuvable : elle ne peut pas être fusionnée.';
 
     /**
      * #1028 — Un geste qui transforme le fichier (éditer les pages, fusionner) est refusé quand
@@ -7160,8 +7160,8 @@
 
     /** #1233 — Mots proposés, à Grégoire en fin de file avec les Nouvelles. */
     const MOTS_REPARATION_IMAGE = {
-        fait: 'Copie réparée : la page s\'affiche de nouveau.',
-        impossible: 'Cette copie ne peut pas être réparée ici. Rien n\'a été modifié.'
+        fait: 'Fichier réparé : la page s\'affiche de nouveau.',
+        impossible: 'Ce fichier ne peut pas être réparé ici. Rien n\'a été modifié.'
     };
 
     /**

@@ -197,7 +197,7 @@
     <li><span class="badge-pattern-defi-specifique">Défi spécifique</span> — performance générale au repère de maîtrise de l'échelle ou au-dessus, mais un défi récurrent identifié sur un ou plusieurs critères.</li>
     <li><span class="badge-pattern-difficulte-emergente">Difficulté émergente</span> — performance sous le repère de maîtrise avec présence d'un défi. Zone de surveillance.</li>
     <li><span class="badge-pattern-difficulte-persistante">Difficulté persistante</span> — performance sous le repère de suffisance sur les artefacts récents. Zone d'intervention prioritaire.</li>
-    <li><span class="badge-pattern-difficulte-persistante">Non-participation</span> — présent·e en classe, mais aucune production évaluée, quand le groupe permet d'en juger (un travail dû et au moins une copie du groupe évaluée).</li>
+    <li><span class="badge-pattern-difficulte-persistante">Non-participation</span> — présent·e en classe, mais aucune production évaluée, quand le groupe permet d'en juger (un travail dû et au moins une production du groupe évaluée).</li>
 </ul>
 <p>Tant que rien n'est jugeable, l'app affiche «&nbsp;Données insuffisantes&nbsp;» plutôt qu'un pattern.</p>
 <div class="guide-pedagogique-astuce">L'app surveille particulièrement les critères de <strong>niveau SOLO Multistructurel</strong> — ce sont les fondamentaux. Si les fondamentaux ne sont pas acquis, les compétences supérieures (Relationnel, Abstrait étendu) ne peuvent pas se développer.</div>`

@@ -344,7 +344,7 @@ test.describe('#1007, second lot — avant de supprimer, le codex proposé', () 
         const modaleCorbeille = () => page.evaluate(() => !!document.getElementById('supprimer-definitif-btn-confirmer'));
         await rendrePasAJour(page);
         await page.evaluate(() => { supprimerFichierDefinitivement('FT_BANC'); });
-        expect((await attendreFenetre(page, TITRE)).texte).toBe('Supprimer cette copie l\'efface pour de bon. ' + SUITE_LA);
+        expect((await attendreFenetre(page, TITRE)).texte).toBe('Supprimer cette production l\'efface pour de bon. ' + SUITE_LA);
         expect(await modaleCorbeille(page)).toBe(false);
         await cliquerDansFenetre(page, 'Annuler');
         await aucuneFenetre(page);

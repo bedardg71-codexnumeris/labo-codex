@@ -439,7 +439,9 @@
     // au premier membre. Le comportement, lui, était tranché le 1er septembre : le
     // PDF refuse de conclure — pas de bandeau « Niveau général » — et NOMME ce qui
     // manque. ⚠ C'est du texte que ses élèves reçoivent : il ne se réécrit pas sans lui.
-    const TEXTE_PORTEE_INCOMPLETE = 'Cette copie n’a pas de niveau général';
+    // ↻ 9 nov. 2026 (Grégoire, lot « Production plutôt que copie ») : « Cette copie » devient
+    // « Cette évaluation » ; seul le mot change (sentinelle-pdf-eleve-evaluation-plutot-que-copie).
+    const TEXTE_PORTEE_INCOMPLETE = 'Cette évaluation n’a pas de niveau général';
 
     function renderPorteeIncomplete(ctx, portee) {
         const liste = (portee.criteresHorsNote || []).map(c =>
@@ -459,6 +461,7 @@
     /**
      * #941 lot S1 (D4, 24 sept. 2026) — en tête du bloc « Niveau général » d'une copie en points,
      * sa note : « Note de la copie : 74 % » (forme proposée par Cowork, retenue par Grégoire).
+     * ↻ 9 nov. 2026 (Grégoire, lot « Production plutôt que copie ») : « Note : 74 % ».
      * Aucun nom de niveau (D1, décision A). Le pourcentage s'écrit comme dans le bloc de la
      * note provisoire (arrondi au dixième).
      */
@@ -468,7 +471,7 @@
             <section style="margin-bottom: 10px;">
                 <div style="padding: 10px 12px; border: 1.5px solid ${MUTED}; border-radius: 3px; color: ${INK};">
                     <div style="${styleMonoLabel()} margin-bottom: 4px;">Niveau général</div>
-                    <div style="font-size: 16px; font-weight: 800;">${esc('Note de la copie : ' + formaterNotePourcentage(o.note))}</div>
+                    <div style="font-size: 16px; font-weight: 800;">${esc('Note : ' + formaterNotePourcentage(o.note))}</div>
                 </div>
             </section>`;
     }

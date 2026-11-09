@@ -125,7 +125,7 @@
         // dans `systeme_reprises`, un déclaratif que rien n'applique. Pas de jetons en Standards (constat R1).
         // Sommative : #324 (lot 11, 11 oct. 2026), aligné sur #903 — son déclaratif (`reprisesPermises`) n'est
         // appliqué par rien non plus ; la phrase est la sienne depuis (MOT D'ÉCRAN, soumis à Grégoire ce jour-là).
-        return 'La reprise prend la place de la copie d\'origine dans la note';
+        return 'La reprise prend la place de l\'évaluation d\'origine dans la note';
     }
 
     function _nbProductions(config, famille) {

@@ -401,12 +401,12 @@ describe('lot A2 · (b) chaque défaut est dit, et aucun ne passe pour « vérif
     it('le détail sous « Archive incomplète » s\'accorde en nombre', () => {
         const banc = monter(creerDb({}));
         const cr = (r) => banc.verifier.compteRendu(Object.assign({ etat: 'incomplete', total: 9, problemes: [], enTrop: [], nonCouvertes: [], couvertureMesuree: true, donneesConcordent: true }, r));
-        expect(cr({ problemes: [{ type: 'absente' }] }).message).toBe('1 copies sur 9 manquent ou ne concordent pas. Archive de nouveau ce groupe.\n1 copie absente');
+        expect(cr({ problemes: [{ type: 'absente' }] }).message).toBe('1 productions sur 9 manquent ou ne concordent pas. Archive de nouveau ce groupe.\n1 fichier absent');
         expect(cr({ problemes: [{ type: 'absente' }, { type: 'absente' }, { type: 'tronquee' }, { type: 'alteree' }, { type: 'alteree' }, { type: 'illisible' }] }).message.split('\n').slice(1))
-            .toEqual(['2 copies absentes', '1 copie tronquée', '2 copies altérées', '1 copie illisible']);
+            .toEqual(['2 fichiers absents', '1 fichier tronqué', '2 fichiers altérés', '1 fichier illisible']);
         expect(cr({ enTrop: ['x'] }).message).toBe('1 fichier en trop dans l\'archive');
-        expect(cr({ enTrop: ['x', 'y'], nonCouvertes: ['a'] }).message).toBe('2 fichiers en trop dans l\'archive\n1 fiche du groupe sans copie dans l\'archive');
-        expect(cr({ nonCouvertes: ['a', 'b'] }).message).toBe('2 fiches du groupe sans copie dans l\'archive');
+        expect(cr({ enTrop: ['x', 'y'], nonCouvertes: ['a'] }).message).toBe('2 fichiers en trop dans l\'archive\n1 fiche du groupe sans production dans l\'archive');
+        expect(cr({ nonCouvertes: ['a', 'b'] }).message).toBe('2 fiches du groupe sans production dans l\'archive');
     });
 
     it('la couverture se mesure sur les fiches d\'AUJOURD\'HUI, pas sur celles de l\'archive : une fiche retirée de l\'application ne manque à rien', async () => {
@@ -476,7 +476,7 @@ describe('lot A2 · (c) une archive d\'avant les empreintes est « à refaire »
         expect(rapport.nombreFichiers).toBe(4);
         const cr = banc.verifier.compteRendu(rapport);
         expect(cr.titre).toBe('Archive à refaire');
-        expect(cr.message).toContain('4 copies');
+        expect(cr.message).toContain('4 productions');
     }, 30000);
     it('l\'état « à refaire » est retenu, et la liste dit « Non vérifiée »', async () => {
         const banc = await archiverEnDossier();
@@ -558,8 +558,8 @@ describe('lot A2 · (d) l\'état retenu survit, et un nouvel archivage le remet 
         const rapport = await banc.verifier.executer(DOSSIER, banc.registre()[DOSSIER], banc.verifier.sourceFichier(banc.blob));
         expect(rapport.etat).toBe('verifiee');
         expect(banc.journal.progression[0]).toEqual({ titre: 'Vérification de l\'archive…' });
-        expect(banc.journal.progression.some((p) => p.s === '4 copies sur 4')).toBe(true);
-        expect(banc.journal.fenetres).toEqual([{ titre: 'Archive vérifiée', message: 'Les 4 copies sont présentes et intactes, et les données concordent.' }]);
+        expect(banc.journal.progression.some((p) => p.s === '4 productions sur 4')).toBe(true);
+        expect(banc.journal.fenetres).toEqual([{ titre: 'Archive vérifiée', message: 'Les 4 productions sont présentes et intactes, et les données concordent.' }]);
         expect(banc.verifier.etatVerification(banc.registre()[DOSSIER]).verifiee).toBe(true);
     }, 30000);
 
@@ -569,9 +569,9 @@ describe('lot A2 · (d) l\'état retenu survit, et un nouvel archivage le remet 
         await MUTATIONS.absente(banc.dossier);
         await banc.verifier.executer(DOSSIER, banc.registre()[DOSSIER], banc.verifier.sourceDossier(banc.dossier, DOSSIER));
         expect(banc.journal.fenetres[0].titre).toBe('Archive incomplète');
-        expect(banc.journal.fenetres[0].message.split('\n')[0]).toBe('2 copies sur 4 manquent ou ne concordent pas. Archive de nouveau ce groupe.');
-        expect(banc.journal.fenetres[0].message).toContain('1 copie absente');
-        expect(banc.journal.fenetres[0].message).toContain('1 copie altérée');
+        expect(banc.journal.fenetres[0].message.split('\n')[0]).toBe('2 productions sur 4 manquent ou ne concordent pas. Archive de nouveau ce groupe.');
+        expect(banc.journal.fenetres[0].message).toContain('1 fichier absent');
+        expect(banc.journal.fenetres[0].message).toContain('1 fichier altéré');
         expect(banc.registre()[DOSSIER].verification.etat).toBe('incomplete');
         expect(banc.verifier.etatVerification(banc.registre()[DOSSIER]).texte).toBe('Non vérifiée');
     }, 30000);
@@ -622,13 +622,13 @@ describe('lot A2 · (f) les mots acceptés par Grégoire (30 sept., 16 h 26), en
         const M = banc.verifier.MOTS;
         expect(M.bouton).toBe('Vérifier');
         expect(M.enCours).toBe('Vérification de l\'archive…');
-        expect(M.compte(3, 205)).toBe('3 copies sur 205');
+        expect(M.compte(3, 205)).toBe('3 productions sur 205');
         expect(M.reussite.titre).toBe('Archive vérifiée');
-        expect(M.reussite.texte(205)).toBe('Les 205 copies sont présentes et intactes, et les données concordent.');
+        expect(M.reussite.texte(205)).toBe('Les 205 productions sont présentes et intactes, et les données concordent.');
         expect(M.echec.titre).toBe('Archive incomplète');
-        expect(M.echec.texte(2, 205)).toBe('2 copies sur 205 manquent ou ne concordent pas. Archive de nouveau ce groupe.');
+        expect(M.echec.texte(2, 205)).toBe('2 productions sur 205 manquent ou ne concordent pas. Archive de nouveau ce groupe.');
         expect(M.sansEmpreintes.titre).toBe('Archive à refaire');
-        expect(M.sansEmpreintes.texte).toBe('Cette archive date d\'avant les empreintes : elle ne peut pas être vérifiée copie par copie. Archive de nouveau ce groupe.');
+        expect(M.sansEmpreintes.texte).toBe('Cette archive date d\'avant les empreintes : elle ne peut pas être vérifiée production par production. Archive de nouveau ce groupe.');
         expect(M.liste.verifiee('30 septembre 2026')).toBe('Vérifiée le 30 septembre 2026');
         expect(M.liste.nonVerifiee).toBe('Non vérifiée');
         const reglages = readFileSync(path.join(racine, 'js/reserve-reglages.js'), 'utf8');

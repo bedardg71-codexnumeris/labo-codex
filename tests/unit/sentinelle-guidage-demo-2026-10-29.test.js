@@ -75,7 +75,16 @@ describe('A · chaque texte validé paraît sous sa clé, mot pour mot', () => {
         expect(bulles.map(b => b.num)).toEqual([1, 2, 3, 4, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18]);
         const g = guidage();
         // ↻ Lot 3 (7 nov. 2026, Cowork) : le titre d'une bulle, qui nomme la page, prend le libellé court ; le texte, mot pour mot.
-        for (const b of bulles) expect(g[b.cle], b.cle).toEqual({ titre: auxLibellesCourts(typo(b.titre)), texte: typo(b.texte) });
+        // ↻ 9 nov. 2026, lot « production plutôt que copie » (RAPPORT-2026-11-09-production-plutot-que-copie.md, § 4, rangées
+        // 261 à 264, validées par Grégoire) : quatre bulles changent « copie » ; le reste de leur texte, mot pour mot.
+        const lot = {
+            'evaluations-liste': [['Une rangée par copie attendue', 'Une rangée par étudiant·e et par production'], ['ce que la copie permet', 'ce que la rangée permet']],
+            'evaluations-importer': [['aucune copie ;', 'aucune production remise ;'], ['« Retirer les copies »', '« Retirer les productions importées »']],
+            'evaluations-annoter': [['Annote les copies', 'Annote les productions'], ['importe d\'abord une copie :', 'importe d\'abord une production remise :']],
+            'evaluations-exporter': [['Sors tes copies', 'Sors les productions de tes étudiant·es']]
+        };
+        const auLot = (b) => (lot[b.cle] || []).reduce((t, [avant, apres]) => { expect(t, b.cle).toContain(avant); return t.replace(avant, apres); }, b.texte);
+        for (const b of bulles) expect(g[b.cle], b.cle).toEqual({ titre: auxLibellesCourts(typo(b.titre)), texte: typo(auLot(b)) });
         expect(Object.keys(g)).toEqual(bulles.map(b => b.cle));   // aucune bulle de plus
     });
 
@@ -87,7 +96,8 @@ describe('A · chaque texte validé paraît sous sa clé, mot pour mot', () => {
         // ↻ Lot 3 (7 nov. 2026) : « Touche « Explorer » » remplace « Coche « Données démo » » (mots de Grégoire, phrase 9 de
         // plans de travail/A-DECIDER-2026-11-07-lot-3-les-textes.md) ; le reste du bloc 1 inchangé.
         expect(f.sections[0].contenu).toBe(typo(v.blocs[1]).replace('Coche «\u00a0Données démo\u00a0»\u00a0: elle s\'ouvre dans Suivi › Suivi du groupe', 'Touche «\u00a0Explorer\u00a0»\u00a0: elle s\'ouvre dans Suivi › Groupe'));
-        expect(f.sections[1].contenu).toBe('Ce que tu fais dans la démo est provisoire : une nouvelle version du pack démo remplace tes évaluations, et « Retirer les copies » efface les copies importées.');
+        // ↻ 9 nov. 2026, lot « production plutôt que copie » (rapport du 9 nov., § 4, rangée 115, validée par Grégoire).
+        expect(f.sections[1].contenu).toBe('Ce que tu fais dans la démo est provisoire : une nouvelle version du pack démo remplace tes évaluations, et « Retirer les productions importées » les efface.');
         expect(f.sections[2].contenu).toBe(typo(v.blocs[3]));
         expect(f.sections[3].titre).toBe('Le parcours en trois temps');
         // 31 oct. 2026 : « Autonomie » a été réécrit et validé après les textes du 28 oct. (VERDICT-RELECTURE-2026-10-31-

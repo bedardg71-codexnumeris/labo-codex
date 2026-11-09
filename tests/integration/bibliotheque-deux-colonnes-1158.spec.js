@@ -379,7 +379,8 @@ test('l’aide de la fenêtre des tampons : la variante courte validée, par son
     await expect(modale.locator('#aide-ctx-titre')).toHaveText('Comment fonctionne la bibliothèque des tampons');
     await expect(modale.locator('.aide-liste-titre')).toHaveText(['Deux colonnes', 'Passer d\'une colonne à l\'autre', 'Les catégories', 'Supprimer']);
     const texte = await texteVisible(modale.locator('.aide-contextuelle-body'));
-    expect(texte).toContain('« Dans ta palette » : les tampons que tu poses sur les copies, dans tous tes trimestres.');
+    // ↻ 9 nov. 2026, lot « production plutôt que copie » (rapport du 9 nov., § 4, rangée 97, validée par Grégoire).
+    expect(texte).toContain('« Dans ta palette » : les tampons que tu poses sur les productions, dans tous tes trimestres.');
     expect(texte).toContain('« Supprimer de ma bibliothèque » (dans le menu ⋮) efface l\'exemplaire de ta bibliothèque ; ta palette n\'est pas touchée.');
     for (const absent of ['Dans ce trimestre', 'Retirer']) expect(texte, absent).not.toContain(absent);
 });

@@ -174,7 +174,7 @@ const AIDE_CONTEXTUELLE = {
         sections: [
             {
                 type: 'texte',
-                contenu: 'Un critère qui se calcule à partir de ce que tu comptes sur la copie (des erreurs, des éléments manquants, des calculs…) peut être de type algorithmique : son atelier propose trois calculs tout faits, que tu peux retoucher, ou te laisse composer le tien (voir l\'Aide, « Les critères algorithmiques »). Les grilles peuvent être dupliquées et modifiées pour créer des variantes adaptées à différents types de productions.'
+                contenu: 'Un critère qui se calcule à partir de ce que tu comptes dans la production (des erreurs, des éléments manquants, des calculs…) peut être de type algorithmique : son atelier propose trois calculs tout faits, que tu peux retoucher, ou te laisse composer le tien (voir l\'Aide, « Les critères algorithmiques »). Les grilles peuvent être dupliquées et modifiées pour créer des variantes adaptées à différents types de productions.'
             },
             {
                 type: 'conseil',
@@ -451,7 +451,7 @@ const AIDE_CONTEXTUELLE = {
                 type: 'liste',
                 titre: "Deux colonnes",
                 items: [
-                    "« Dans ta palette » : les tampons que tu poses sur les copies, dans tous tes trimestres.",
+                    "« Dans ta palette » : les tampons que tu poses sur les productions, dans tous tes trimestres.",
                     "« Dans ta bibliothèque » : les tampons que tu gardes de côté pour les retrouver plus tard."
                 ]
             },
@@ -481,20 +481,20 @@ const AIDE_CONTEXTUELLE = {
     },
 
     'evaluations-importer': {
-        titre: 'Préparer et importer des copies',
+        titre: 'Préparer et importer des productions',
         sections: [
             {
                 type: 'texte',
-                contenu: 'Cette page rassemble les copies numérisées de tes étudiant·es (PDF ou images), les optimise et les associe à une production, prêtes à être annotées et évaluées ensuite.'
+                contenu: 'Cette page rassemble les productions numérisées de tes étudiant·es (PDF ou images), les optimise et les associe à une production, prêtes à être annotées et évaluées ensuite.'
             },
             {
                 type: 'liste',
                 titre: 'Étapes',
                 items: [
                     'Dépose tes fichiers (' + formatsAcceptesLibelle() + ') par glisser-déposer ou en cliquant pour parcourir',
-                    'Le processus optimise les images, regroupe les pages d\'une même copie et propose une association automatique à partir du nom de fichier',
+                    'Le processus optimise les images, regroupe les pages d\'une même production et propose une association automatique à partir du nom de fichier',
                     'Vérifie ou ajuste l\'étudiant·e et la production de chaque fichier dans l\'inspecteur central',
-                    'Clique sur « Importer » : les copies sont stockées et prêtes pour « Annoter »'
+                    'Clique sur « Importer » : les productions sont stockées et prêtes pour « Annoter »'
                 ]
             },
             {
@@ -504,7 +504,7 @@ const AIDE_CONTEXTUELLE = {
             {
                 // #1231 — mots proposés à Grégoire (rapport du 5 nov. 2026).
                 type: 'conseil',
-                contenu: 'Sans DA dans le nom (des photos prises au téléphone, par exemple), coche dans « Originaux » les fichiers d\'une même copie, puis « Réunir en une copie » : ils deviennent un seul document, dans l\'ordre réglé aux flèches, et tu choisis l\'étudiant·e et la production une seule fois.'
+                contenu: 'Sans DA dans le nom (des photos prises au téléphone, par exemple), coche dans « Originaux » les fichiers d\'une même production, puis « Réunir en une production » : ils deviennent un seul document, dans l\'ordre réglé aux flèches, et tu choisis l\'étudiant·e et la production une seule fois.'
             },
             {
                 type: 'liste',
@@ -526,15 +526,15 @@ const AIDE_CONTEXTUELLE = {
         sections: [
             {
                 type: 'texte',
-                contenu: 'L\'annotation te permet de marquer directement sur les copies de tes étudiants : surlignage, commentaires écrits, symboles (crochet, X) et autocollants de rétroaction pédagogique.'
+                contenu: 'L\'annotation te permet de marquer directement sur les productions de tes étudiants : surlignage, commentaires écrits, symboles (crochet, X) et autocollants de rétroaction pédagogique.'
             },
             {
                 type: 'liste',
                 titre: 'Étapes',
                 items: [
                     'Sélectionne la production concernée (le travail que tu corriges)',
-                    'Importe les copies (PDF, JPEG, PNG) par glisser-déposer ou via le bouton parcourir',
-                    'Clique sur une copie pour l\'ouvrir dans la visionneuse',
+                    'Importe les productions de tes étudiant·es (PDF, JPEG, PNG) par glisser-déposer ou via le bouton parcourir',
+                    'Clique sur une production pour l\'ouvrir dans la visionneuse',
                     'Clique sur « Annoter » pour activer la palette d\'outils',
                     'Utilise les autocollants pour apposer des rétroactions visuelles rapides',
                     'Exporte le PDF annoté ou passe directement à l\'évaluation'
@@ -574,7 +574,7 @@ const AIDE_CONTEXTUELLE = {
         sections: [
             {
                 type: 'texte',
-                contenu: 'Le panneau d\'export rassemble l\'inventaire des fichiers de travaux déjà importés (originaux PDF/image, copies annotées) et propose plusieurs modes d\'export pour les sortir hors de l\'application.'
+                contenu: 'Le panneau d\'export rassemble l\'inventaire des fichiers de travaux déjà importés (originaux PDF/image, productions annotées) et propose plusieurs modes d\'export pour les sortir hors de l\'application.'
             },
             {
                 type: 'liste',
@@ -586,7 +586,7 @@ const AIDE_CONTEXTUELLE = {
             },
             {
                 type: 'conseil',
-                contenu: 'L\'inventaire affiché en haut du panneau (« <em>N fichiers en stock</em> ») reflète tout ce qui a été importé dans <strong>Préparer</strong>. Si tu ne vois aucun fichier ici, c\'est qu\'aucune copie n\'a encore été importée pour ce groupe-cours.'
+                contenu: 'L\'inventaire affiché en haut du panneau (« <em>N fichiers en stock</em> ») reflète tout ce qui a été importé dans <strong>Préparer</strong>. Si tu ne vois aucun fichier ici, c\'est qu\'aucune production n\'a encore été importée pour ce groupe-cours.'
             }
         ],
         voirAussi: ['evaluations-annoter', 'evaluations-liste']
@@ -604,7 +604,7 @@ const AIDE_CONTEXTUELLE = {
                 titre: "Filtres disponibles",
                 items: [
                     "Par groupe : voir un seul groupe à la fois",
-                    "Par production : toutes les copies d'un même travail",
+                    "Par production : ce que tous tes étudiant·es ont remis pour une même production",
                     "Par statut : complétées, en cours, à faire",
                     "Recherche : trouver un étudiant spécifique"
                 ]
@@ -1050,7 +1050,7 @@ const AIDE_CONTEXTUELLE = {
             },
             {
                 type: 'conseil',
-                contenu: 'La date est <strong>facultative</strong> et peut \u00eatre pos\u00e9e d\u2019avance. C\u2019est la case <em>Consignes transmises</em> qui d\u00e9cide\u00a0: tant qu\u2019elle est d\u00e9coch\u00e9e, le gabarit s\u2019enregistre normalement et porte le badge <em>\u00e0 planifier</em> dans la liste. Il n\u2019appara\u00eet alors ni au calendrier ni dans les courbes de progression. Les indices C et P ne comptent une production qu\u2019\u00e0 partir de sa premi\u00e8re copie \u00e9valu\u00e9e.'
+                contenu: 'La date est <strong>facultative</strong> et peut \u00eatre pos\u00e9e d\u2019avance. C\u2019est la case <em>Consignes transmises</em> qui d\u00e9cide\u00a0: tant qu\u2019elle est d\u00e9coch\u00e9e, le gabarit s\u2019enregistre normalement et porte le badge <em>\u00e0 planifier</em> dans la liste. Il n\u2019appara\u00eet alors ni au calendrier ni dans les courbes de progression. Les indices C et P ne comptent une production qu\u2019\u00e0 partir de sa premi\u00e8re \u00e9valuation.'
             },
         ],
         voirAussi: ['tableau-bord-apercu', 'conception-productions']
@@ -1177,7 +1177,7 @@ const AIDE_CONTEXTUELLE = {
                 items: [
                     '<strong>Holistique</strong> : tu attribues un niveau de l’échelle de performance ; l’échelle donne la note du critère.',
                     '<strong>Analytique</strong> : tu attribues des points, de 0 à la pondération du critère ; son barème dit ce qu’ils valent.',
-                    '<strong>Algorithmique</strong> : une formule calcule la note à partir de ce que tu comptes sur la copie.',
+                    '<strong>Algorithmique</strong> : une formule calcule la note à partir de ce que tu comptes dans la production.',
                 ]
             },
         ],
@@ -1190,7 +1190,7 @@ const AIDE_CONTEXTUELLE = {
         sections: [
             {
                 type: 'texte',
-                contenu: 'Un critère analytique se note en points, de 0 à sa pondération. Son barème dit ce que valent ces points : chaque tranche porte ses points et ce qu’on attend d’une copie qui les obtient, avec un nom si tu veux. Deux tranches ne se chevauchent pas : des points donnés tombent dans une seule.'
+                contenu: 'Un critère analytique se note en points, de 0 à sa pondération. Son barème dit ce que valent ces points : chaque tranche porte ses points et ce qu’on attend d’une production pour les obtenir, avec un nom si tu veux. Deux tranches ne se chevauchent pas : des points donnés tombent dans une seule.'
             },
             {
                 type: 'texte',
@@ -1203,7 +1203,7 @@ const AIDE_CONTEXTUELLE = {
             },
             {
                 type: 'conseil',
-                contenu: 'Le barème ne change aucune note : la note vient des points que tu donnes, avec ou sans barème. Il peut t’aider à donner les mêmes points à deux copies semblables.'
+                contenu: 'Le barème ne change aucune note : la note vient des points que tu donnes, avec ou sans barème. Il peut t’aider à donner les mêmes points à deux productions semblables.'
             }
         ],
         voirAussi: ['construction-echelles', 'echelle-plage-notes', 'grille-type-critere-detail']
@@ -1264,7 +1264,7 @@ const AIDE_CONTEXTUELLE = {
             {
                 // T6 du chantier du démo (décision G4 de Grégoire, 7 oct. 2026, par Cowork) : phrase validée.
                 type: 'texte',
-                contenu: "Ce que tu fais dans la démo est provisoire : une nouvelle version du pack démo remplace tes évaluations, et « Retirer les copies » efface les copies importées."
+                contenu: "Ce que tu fais dans la démo est provisoire : une nouvelle version du pack démo remplace tes évaluations, et « Retirer les productions importées » les efface."
             },
             {
                 type: 'texte',
@@ -1521,7 +1521,7 @@ const AIDE_CONTEXTUELLE = {
             },
             {
                 type: 'texte',
-                contenu: "<em>Vérifier</em> relit une archive copie par copie ; une archive vérifiée offre <em>Faire revenir</em>."
+                contenu: "<em>Vérifier</em> relit une archive production par production ; une archive vérifiée offre <em>Faire revenir</em>."
             },
             {
                 type: 'conseil',

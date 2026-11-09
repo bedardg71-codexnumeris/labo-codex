@@ -185,7 +185,7 @@ const TACHES = [
     { action: 'ouvrirWizardPratique', icone: 'ico-acc-data-sheet', titre: 'Adopter ta pratique', desc: 'Construction de la note du cours, sommative ou alternative.', chemin: 'Conception › Pratiques' },
     { param: 'conception|conception-carte', icone: 'ico-acc-puzzle', titre: 'Planifier ton cours', desc: 'Alignement constructif des objectifs, leçons et évaluations.', chemin: 'Conception › Alignement' },
     { param: 'suivi|suivi-saisie', icone: 'ico-acc-people', titre: 'Saisir les présences', desc: 'Absences, retards et notes de séance.', chemin: 'Suivi › Présences' },
-    { param: 'evaluations|evaluations-importer', icone: 'ico-acc-downloading', titre: 'Importer des copies', desc: 'Fichiers PDF ou images des travaux d’étudiant·es.', chemin: 'Évaluation › Préparer' },
+    { param: 'evaluations|evaluations-importer', icone: 'ico-acc-downloading', titre: 'Importer des productions', desc: 'Fichiers PDF ou images des travaux d’étudiant·es.', chemin: 'Évaluation › Préparer' },
     { param: 'evaluations|evaluations-annoter', icone: 'ico-acc-edit', titre: 'Annoter et évaluer', desc: 'Annotation, niveaux ou note par critère, rétroaction automatisée.', chemin: 'Évaluation › Annoter' },
     { param: 'suivi|suivi-groupe', icone: 'ico-acc-line-chart', titre: 'Observer le groupe', desc: 'Assiduité, complétion, performance et dépistage des difficultés d’apprentissage.', chemin: 'Suivi › Groupe' },
     { param: 'suivi|suivi-profil', icone: 'ico-acc-profile', titre: 'Consulter un profil', desc: 'Engagement, travaux, progression et accompagnement.', chemin: 'Suivi › Profils' },

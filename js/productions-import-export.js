@@ -407,7 +407,7 @@ async function afficherAssistantMigrationCategories() {
                 ${echapperHtml(prod.titre || 'Sans titre')}
                 ${(prod.activiteApprentissage || prod.description) ? `<br><small style="color: var(--gris-moyen);">${echapperHtml(prod.activiteApprentissage || prod.description)}</small>` : ''}
             </td>
-            <td style="text-align: center;">${getTypeLabel(prod.type)}</td>
+            <td style="text-align: center;">${echapperHtml(getTypeLabel(prod.type))}</td>
             <td style="text-align: center;">
                 <select id="migration-cat-${prod.id}" class="controle-form" style="min-width: 150px;">
                     <option value="">-- Non définie --</option>

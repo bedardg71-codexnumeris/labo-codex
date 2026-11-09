@@ -70,7 +70,7 @@ function _boutonVerifier(dossier) {
     return '<button class="btn btn-secondaire btn-compact" ' +
         'data-action="ReserveVerifier.actionVerifier" ' +
         'data-param="' + _echapper(dossier) + '" ' +
-        'title="Relire cette archive, copie par copie">' +
+        'title="Relire cette archive, production par production">' +
         _echapper(RV.MOTS.bouton) +
     '</button> ';
 }

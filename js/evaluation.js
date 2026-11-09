@@ -2574,7 +2574,7 @@ function mettreAJourSignalConsignes(etudiantDA, productionId) {
     document.getElementById('travaux-eval-signal-consignes-texte').textContent =
         `Les consignes de «\u00a0${titre}\u00a0» ne semblent pas avoir été transmises à ce groupe\u00a0: ` +
         'la case «\u00a0Consignes transmises\u00a0» est décochée. Tant qu\u2019elle l\u2019est, cette production ' +
-        'n\u2019apparaît pas au calendrier et ses copies ne comptent pas dans les courbes de progression.';
+        'n\u2019apparaît pas au calendrier et ses évaluations ne comptent pas dans les courbes de progression.';
     bandeau.dataset.productionId = productionId;
     bandeau.dataset.gcId = gcId;
     bandeau.dataset.da = etudiantDA;

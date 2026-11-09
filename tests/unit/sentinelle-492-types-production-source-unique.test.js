@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { JSDOM } from 'jsdom';
 import { chargerScript } from './_helpers/charger-script.js';
 
 // Sentinelle #492 (25 août 2026) — LE SÉLECTEUR « PRODUCTION » DE LA CARTE
@@ -52,7 +53,7 @@ const echapperHtml = (t) => (t == null ? '' : String(t)
     .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;'));
 
-function charger(productions) {
+function charger(productions, document) {
     const store = {};
     const globaux = {
         db: {
@@ -66,7 +67,9 @@ function charger(productions) {
         obtenirCoursActifId: () => null,
         GabaritsUtils: { lirePratiquesSelectionnees: () => [] },
         alert: () => {},
-        requestAnimationFrame: (fn) => { fn(); return 0; }
+        requestAnimationFrame: (fn) => { fn(); return 0; },
+        // 9 nov. 2026 : un vrai DOM quand le banc lit le menu « Type » bâti (S1).
+        ...(document ? { document } : {})
     };
 
     // Les deux bouts du pont, dans le même sandbox : la table vient de
@@ -91,34 +94,39 @@ const prod = (id, titre, type, ponderation = 0) => ({
 /* ----------------------------------------------------- S1 — LE VERROU (SSOT) */
 
 describe('#492 · S1 — TYPES_PRODUCTION et le formulaire disent la même chose', () => {
-    // Le <select> d'index.html est la vérité de FAIT : c'est ce que Grégoire
-    // voit en créant une production. La table doit le refléter exactement.
+    // ↻ 9 nov. 2026 (lot « Production plutôt que copie », banque de types) : le <select>
+    // d'index.html ne porte plus de liste ; le menu est BÂTI depuis TYPES_PRODUCTION
+    // (`remplirMenuTypesProduction`). La dérive entre deux listes devient impossible ; le
+    // verrou porte maintenant sur ce que le menu bâti montre, lu sur un vrai DOM.
     function optionsDuFormulaire() {
         const html = readFileSync(path.join(racine, 'index.html'), 'utf8');
         const bloc = html.match(/<select id="productionType"[\s\S]*?<\/select>/);
         expect(bloc, 'le <select id="productionType"> doit exister').toBeTruthy();
-
-        const options = [];
-        let groupe = null;
-        const lignes = bloc[0].split('\n');
-        for (const ligne of lignes) {
-            const og = ligne.match(/<optgroup label="([^"]+)"/);
-            if (og) { groupe = og[1]; continue; }
-            const op = ligne.match(/<option value="([^"]*)"\s*>([^<]*)<\/option>/);
-            if (op && op[1] !== '') options.push({ id: op[1], libelle: op[2], groupe });
-        }
-        return options;
+        const dom = new JSDOM('<!doctype html><body>' + bloc[0] + '</body>');
+        const win = charger([], dom.window.document);
+        const select = dom.window.document.getElementById('productionType');
+        win.remplirMenuTypesProduction(select, '');
+        return Array.from(select.options)
+            .filter(o => o.value !== '' && o.parentElement.tagName === 'OPTGROUP' && o.parentElement.label !== 'Mes types')
+            .map(o => ({ id: o.value, libelle: o.textContent, groupe: o.parentElement.label }));
     }
 
-    it('S1.a Mêmes types, dans le même ordre', () => {
+    it('S1.0 Le <select> statique ne porte plus que « — Sélectionner — »', () => {
+        const html = readFileSync(path.join(racine, 'index.html'), 'utf8');
+        const bloc = html.match(/<select id="productionType"[\s\S]*?<\/select>/)[0];
+        expect(bloc.match(/<option /g)).toHaveLength(1);
+        expect(bloc).toContain('<option value="">— Sélectionner —</option>');
+    });
+
+    it('S1.a Mêmes types, dans le même ordre (« Autre » hors menu)', () => {
         const win = charger([]);
-        expect(win.TYPES_PRODUCTION.map(t => t.id)).toEqual(optionsDuFormulaire().map(o => o.id));
+        expect(win.TYPES_PRODUCTION.filter(t => !t.horsMenu).map(t => t.id)).toEqual(optionsDuFormulaire().map(o => o.id));
     });
 
     it('S1.b Mêmes libellés de choix et mêmes groupes', () => {
         const win = charger([]);
         const attendu = optionsDuFormulaire().map(o => ({ id: o.id, libelle: o.libelle, groupe: o.groupe }));
-        const table = win.TYPES_PRODUCTION.map(t => ({ id: t.id, libelle: t.libelle, groupe: t.groupe }));
+        const table = win.TYPES_PRODUCTION.filter(t => !t.horsMenu).map(t => ({ id: t.id, libelle: t.libelle, groupe: t.groupe }));
         expect(table).toEqual(attendu);
     });
 
@@ -242,7 +250,8 @@ describe('#492 · S5 — rien ne disparaît en silence', () => {
         const html = win.planificationCarte.optionsProductionsHTML(
             [prod('X1', 'Production d\'un autre âge', 'type_retire_en_2024', 15)], '');
         expect(html).toContain('value="X1"');
-        expect(html).toContain('Type non répertorié');
+        // ↻ 9 nov. 2026 (banque de types) : son groupe porte son nom, plus « Type non répertorié ».
+        expect(html).toContain('<optgroup label="type_retire_en_2024">');
     });
 
     it('S5.b Les types connus gardent leur groupe malgré un intrus', () => {
@@ -251,9 +260,19 @@ describe('#492 · S5 — rien ne disparaît en silence', () => {
             [prod('X1', 'Intrus', 'type_retire_en_2024', 15),
              prod('A1', 'Artefact 1', 'artefact-portfolio')], '');
         expect(html).toContain('<optgroup label="Portfolio">');
-        expect(html).toContain('<optgroup label="Type non répertorié">');
+        expect(html).toContain('<optgroup label="type_retire_en_2024">');
         expect(html.match(/<optgroup/g)).toHaveLength(2);
         expect(html.match(/<\/optgroup>/g)).toHaveLength(2);
+    });
+
+    it('S5.c (9 nov. 2026) Un type de la banque se lit à son nom, échappé : c\'est un texte libre', () => {
+        const win = charger([]);
+        const html = win.planificationCarte.optionsProductionsHTML(
+            [prod('B1', 'Bilan sanguin', 'Prise de sang', 10),
+             prod('B2', 'Piège', '"><img src=x onerror=alert(1)>', 10)], '');
+        expect(html).toContain('<optgroup label="Prise de sang">');
+        expect(html).not.toContain('<img');
+        expect(html).toContain('label="&quot;&gt;&lt;img src=x onerror=alert(1)&gt;"');
     });
 });
 

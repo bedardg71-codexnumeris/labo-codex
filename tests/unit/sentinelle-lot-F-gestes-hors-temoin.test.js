@@ -64,7 +64,7 @@ const ANNONCES = {
     'js/productions-bibliotheque.js': 2,
     'js/productions-import-export.js': 1,
     'js/productions-liste.js': 2,
-    'js/productions.js': 4,
+    'js/productions.js': 5,   // 9 nov. 2026 : +1, la banque de types (`ecrireBanqueTypesProduction`, hors témoin : clé globale écrite par `db.setSync`)
     'js/profil-etudiant-rapport.js': 1,
     'js/registre-longitudinal.js': 4,
     'js/rencontres.js': 1,

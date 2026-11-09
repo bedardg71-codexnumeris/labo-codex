@@ -616,7 +616,7 @@
     /** La phrase de Grégoire, telle quelle. « X » est le NOM de la grille, jamais un identifiant. */
     function _phraseSourceCodes() {
         var nom = (_grilleCourante && typeof _grilleCourante.nom === 'string') ? _grilleCourante.nom.trim() : '';
-        var phrase = 'Les codes de cette copie viennent de sa grille « ' + (nom || 'sans nom') + ' ». Pour les modifier, ouvre la grille.';
+        var phrase = 'Les codes de cette production viennent de sa grille « ' + (nom || 'sans nom') + ' ». Pour les modifier, ouvre la grille.';
         // #1132 (22 oct. 2026) : plusieurs critères algorithmiques — les codes ne vont qu'au premier, et on le dit.
         var e = (typeof window !== 'undefined') ? window.enoncesAlgo : null;
         var algos = (e && typeof e.criteresAlgorithmiques === 'function') ? e.criteresAlgorithmiques(_grilleCourante) : [];
@@ -4017,7 +4017,7 @@
         // dit plus la discipline ; la phrase dit à quoi servent ces dix codes (le
         // repli) depuis qu'une grille peut porter les siens.
         html += '<h2 style="margin-top:0">Rétroactions — Codes d\'annotation</h2>';
-        html += '<p style="color:var(--texte-secondaire);font-size:0.85rem;margin-bottom:16px;">Ces dix codes servent à toute copie dont la grille ne porte pas ses propres codes (une grille active les siens dans Conception, sous son critère algorithmique). Ces textes apparaîtront dans la rétroaction générée pour l\'étudiant·e lorsque le code correspondant est posé. Clique sur la pastille pour changer sa couleur. Glissez \u2630 pour réordonner.</p>';
+        html += '<p style="color:var(--texte-secondaire);font-size:0.85rem;margin-bottom:16px;">Ces dix codes servent à toute production dont la grille ne porte pas ses propres codes (une grille active les siens dans Conception, sous son critère algorithmique). Ces textes apparaîtront dans la rétroaction générée pour l\'étudiant·e lorsque le code correspondant est posé. Clique sur la pastille pour changer sa couleur. Glissez \u2630 pour réordonner.</p>';
 
         const modeSynthese = obtenirModeSyntheseErrFr();
         html += '<div class="travaux-errfr-reglage">';

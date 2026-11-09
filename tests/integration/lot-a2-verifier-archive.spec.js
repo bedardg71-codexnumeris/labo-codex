@@ -142,7 +142,7 @@ test.describe('Lot A2 — « Vérifier » une archive depuis l\'écran Archives 
             // 2. Le geste : le sélecteur, le fichier, la fenêtre, la ligne.
             const ok = await verifierParLeBouton(page, archive.dossier, fichier);
             expect(ok.titre).toBe('Archive vérifiée');
-            expect(ok.message).toBe('Les 3 copies sont présentes et intactes, et les données concordent.');
+            expect(ok.message).toBe('Les 3 productions sont présentes et intactes, et les données concordent.');
             await expect(tableau(page)).toContainText(/Vérifiée le \d{1,2} \S+ \d{4}/);
             expect(await tableau(page).innerText()).not.toContain('Non vérifiée');
             const retenu = await page.evaluate((d) => db.getSync('_manifesteReserve').archives[d].verification, archive.dossier);
@@ -164,8 +164,8 @@ test.describe('Lot A2 — « Vérifier » une archive depuis l\'écran Archives 
             await poserCopies(page); // le magasin de la page est reposé après le rechargement (la couverture lit les fiches, pas les copies)
             const ko = await verifierParLeBouton(page, archive.dossier, fichier);
             expect(ko.titre).toBe('Archive incomplète');
-            expect(ko.message).toContain('1 copies sur 3 manquent ou ne concordent pas. Archive de nouveau ce groupe.');
-            expect(ko.message).toContain('1 copie altérée');
+            expect(ko.message).toContain('1 productions sur 3 manquent ou ne concordent pas. Archive de nouveau ce groupe.');
+            expect(ko.message).toContain('1 fichier altéré');
             await expect(tableau(page)).toContainText('Non vérifiée');
             expect(await tableau(page).innerText()).not.toContain('Vérifiée le');
             expect(await page.evaluate((d) => db.getSync('_manifesteReserve').archives[d].verification.etat, archive.dossier)).toBe('incomplete');

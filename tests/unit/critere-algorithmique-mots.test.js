@@ -39,6 +39,25 @@ const REGLES = apostrophes(lire('plans de travail/TEXTES-2026-10-21-critere-algo
 
 /* ======================================================= T — LES TEXTES À LEURS SITES */
 
+// ↻ « Production plutôt que copie » (9 nov. 2026, relevé RAPPORT-2026-11-09-production-plutot-que-copie.md, § 4,
+// entrées 25 à 35, validées par Grégoire) : seuls ces passages changent dans l'Aide ; T.0 les ramène au texte réglé
+// d'avant pour vérifier que tout le reste de chaque chaîne est resté mot pour mot. Le banc « D0 à D8 », lui, exige
+// les nouveaux passages à leur site.
+const PRODUCTION_PLUTOT_QUE_COPIE = [
+    ['ce que tu comptes dans la production', 'ce que tu comptes sur la copie'],
+    ['la longueur de la production : le même nombre d’occurrences coûte moins dans une production plus longue', 'la longueur de la copie : le même nombre d’occurrences coûte moins sur une copie plus longue'],
+    ['Si la production l’atteint, la note est entière ; en deçà, la note baisse en proportion. Sans occurrence, la note est entière.', 'Une copie qui l’atteint a la note entière ; en deçà, la note baisse en proportion. Une copie sans occurrence a la note entière.'],
+    ['quelle que soit la longueur de la production.', 'quelle que soit la longueur de la copie.'],
+    ['sur une évaluation verrouillée', 'sur une copie verrouillée'],
+    ['« Quand une donnée de la production vaut 0 »', '« Quand une donnée de la copie vaut 0 »'],
+    ['sur toute production évaluée', 'sur toute copie évaluée'],
+    ['situe la production par des paliers', 'situe la copie par des paliers'],
+    ['une valeur de la production :', 'une valeur de la copie :'],
+    ['le cas de sa production dans les paliers', 'le cas de sa copie dans les paliers'],
+    ['Une évaluation déjà enregistrée garde sa note.', 'Une copie déjà évaluée garde sa note.'],
+];
+const avant9nov = (s) => PRODUCTION_PLUTOT_QUE_COPIE.reduce((t, [neuf, ancien]) => t.split(neuf).join(ancien), s);
+
 const A1 = 'La méthode d’évaluation d’un critère dans une grille. Trois types sont disponibles : holistique (tu attribues un niveau de l’échelle de performance), analytique (tu attribues des points, que son barème décrit) et algorithmique (une formule calcule la note à partir de ce que tu comptes sur la copie).';
 const A2 = 'Algorithmique : une formule calcule la note à partir de ce que tu comptes sur la copie.';
 const A3 = 'Méthode d’évaluation du critère : holistique (tu attribues un niveau de l’échelle), analytique (tu attribues des points, que son barème décrit) ou algorithmique (une formule calcule la note à partir de ce que tu comptes).';
@@ -48,7 +67,7 @@ const B3 = 'Résultat calculé en temps réel : le pourcentage pondéré, et son
 const C1 = 'somme pondérée';
 const C2 = 'Entre parenthèses, le nombre après pondération : « (5 après pondération) ». Il ne paraît que si un sous-critère ne pèse pas 1 ; place-le juste après le nombre. Une phrase sans lui ne montre que le nombre posé, mais la ligne du calcul, dans le PDF, montre la parenthèse.';
 // ↻ Étape 4a (27 oct. 2026) : F1 devient le texte de « Pénalité proportionnelle à la longueur », validé par Grégoire le 26 oct.
-const F1 = 'Chaque occurrence retire des points en proportion de la longueur de la copie : le même nombre d’occurrences coûte moins sur une copie plus longue. Tu fixes la longueur sur laquelle une occurrence coûte un point.';
+const F1 = 'Chaque occurrence retire des points en proportion de la longueur de la production : le même nombre d’occurrences coûte moins dans une production plus longue. Tu fixes la longueur sur laquelle une occurrence coûte un point.';
 const D = {
     // ↻ #1152, lot 1 (audit de l'Aide du 24 oct. 2026, D11 : l'Aide rangée par onglet) : le titre perd son numéro de tête « 5c. », le reste est inchangé.
     D1: 'Les critères algorithmiques',
@@ -60,21 +79,21 @@ const D = {
     // ↻ Retouche du 27 oct. (VERDICT-RELECTURE-2026-10-27-aide-lot-2b.md, § 1.6 et § 2) : D2e, D7a et D7 corrigés par Cowork,
     // validés par Grégoire (17 h 41 à 17 h 43) ; D0, D2, D2d, D7b et D8 validés tels quels.
     D0: 'Le critère s\'ouvre en atelier, une étape à la fois, à côté de la « Simulation de ce que l\'étudiant·e lirait ». Ses étapes : voir « Les chaînes d\'étapes ».',
-    D2: 'Un critère algorithmique calcule sa note à partir de ce que tu comptes sur la copie. Tu choisis le calcul dans l\'étape « Note calculée » du critère. Un calcul tout fait a un réglage ; un calcul que tu composes n\'en a pas : ses nombres sont dans ses blocs.',
-    D2a: 'Pénalité proportionnelle à la longueur : Chaque occurrence retire des points en proportion de la longueur de la copie : le même nombre d’occurrences coûte moins sur une copie plus longue. Tu fixes la longueur sur laquelle une occurrence coûte un point.',
-    D2b: 'Rapport visé : Tu fixes le rapport qui donne la note entière, par exemple une occurrence à chaque 60 mots. Une copie qui l’atteint a la note entière ; en deçà, la note baisse en proportion. Une copie sans occurrence a la note entière.',
-    D2c: 'Pénalité fixe : Chaque occurrence retire le même nombre de points, quelle que soit la longueur de la copie. La longueur reste comptée pour les phrases de l’étudiant·e, mais n’entre pas dans la note.',
-    D2d: '« Le calcul, en blocs » montre le calcul choisi, tes réglages compris. Au moment d\'évaluer, il s\'affiche en chiffres sous le résultat ; sur une copie verrouillée que le calcul actuel ne redonne plus, cette ligne se cache.',
-    D2e: '« Retoucher ce calcul » ouvre « Composer ton propre calcul » sur une copie du calcul choisi ; l\'original ne change pas. « Ce calcul sert » dit si ton calcul donne la note ou sert seulement à tes phrases et à tes tables. « Quand une donnée de la copie vaut 0 » dit ce que vaut alors le calcul.',
+    D2: 'Un critère algorithmique calcule sa note à partir de ce que tu comptes dans la production. Tu choisis le calcul dans l\'étape « Note calculée » du critère. Un calcul tout fait a un réglage ; un calcul que tu composes n\'en a pas : ses nombres sont dans ses blocs.',
+    D2a: 'Pénalité proportionnelle à la longueur : Chaque occurrence retire des points en proportion de la longueur de la production : le même nombre d’occurrences coûte moins dans une production plus longue. Tu fixes la longueur sur laquelle une occurrence coûte un point.',
+    D2b: 'Rapport visé : Tu fixes le rapport qui donne la note entière, par exemple une occurrence à chaque 60 mots. Si la production l’atteint, la note est entière ; en deçà, la note baisse en proportion. Sans occurrence, la note est entière.',
+    D2c: 'Pénalité fixe : Chaque occurrence retire le même nombre de points, quelle que soit la longueur de la production. La longueur reste comptée pour les phrases de l’étudiant·e, mais n’entre pas dans la note.',
+    D2d: '« Le calcul, en blocs » montre le calcul choisi, tes réglages compris. Au moment d\'évaluer, il s\'affiche en chiffres sous le résultat ; sur une évaluation verrouillée que le calcul actuel ne redonne plus, cette ligne se cache.',
+    D2e: '« Retoucher ce calcul » ouvre « Composer ton propre calcul » sur une copie du calcul choisi ; l\'original ne change pas. « Ce calcul sert » dit si ton calcul donne la note ou sert seulement à tes phrases et à tes tables. « Quand une donnée de la production vaut 0 » dit ce que vaut alors le calcul.',
     D3: 'Tu nommes, au singulier et au pluriel, ce que tu comptes et ce à quoi tu le rapportes : « erreur » sur des « mots » pour une rédaction, « unité manquante » sur des « calculs » en chimie, « faute de rythme » sur des « mesures » en musique. Ces noms s\'écrivent dans les champs de l\'évaluation, dans la phrase du décompte et dans le PDF de l\'étudiant·e. Un critère créé avant ces noms se lit « erreur » et « mot ».',
     D4: 'Les sous-critères sont les catégories de ce que tu comptes. Chacun porte un code, un nom, une pondération et une observation : ce que l\'étudiant·e lit à propos de ce code. La pondération dit ce que pèse une occurrence : 1 par défaut, 0,5 pour la compter à moitié ; un sous-critère de pondération 0 ne se pose pas.',
     D4b: 'Exemple : sept codes posés, trois d\'un sous-critère qui pèse 1 et quatre d\'un sous-critère qui pèse 0,5. La formule reçoit 3 + 2 = 5, et l\'étudiant·e lit « 7 erreurs (5 après pondération) ».',
     D5: 'Sous le critère, « + Ajouter un sous-critère » en crée un. « Partir de la liste du français écrit » crée d\'un coup dix catégories d\'une correction du français (codes 1 à 10), toutes de pondération 1, que tu modifies ensuite comme les tiennes.',
-    D6: 'Dans Annoter, les sous-critères sont les codes que tu poses, sur toute copie évaluée avec cette grille. Chaque code posé compte une occurrence de son sous-critère ; le champ de ce que tu comptes se remplit tout seul, et la formule reçoit le nombre pondéré. Sans code posé, tu tapes le nombre : il compte tel quel, sans pondération. Une grille plus ancienne montre la case « Utiliser ces sous-critères comme codes d\'annotation » ; décochée, sa palette garde les dix codes de départ, des codes de correction du français.',
-    D7a: 'L\'étape « Cas d\'interprétation » situe la copie par des paliers, d\'après une limite : une longueur de référence et une tolérance sur cette longueur. « Fixer une limite » en pose une ; « Retirer la limite » la retire sans effacer ce qui est écrit. Chaque palier a un nom court et ce que l\'étudiant·e lit ; tous, sauf « Rien de compté » et « Au-delà du dernier seuil », ont un seuil en pourcentage de la limite. La limite ne touche pas la note.',
-    D7b: '« + Ajouter une table de cas » choisit un texte selon une valeur de la copie : un compte, la note, la part de la limite, la moyenne, le code le plus fréquent ou l\'un de tes calculs. Une table neuve est vide.',
-    D7: 'L\'étudiant·e lit, sous le critère, la phrase du décompte, puis le cas de sa copie dans les paliers, puis le texte des tables de cas. Son PDF imprime aussi la ligne du calcul : « 7 erreurs (5 après pondération) sur 400 mots → 13,75/20 (68,8 %) ». La parenthèse ne paraît que si le nombre pondéré diffère du nombre posé.',
-    D8: 'Règle les pondérations avant de corriger. Une copie déjà évaluée garde sa note. Elle ne suit le nouveau calcul que si tu la déverrouilles et la modifies. Verrouillée, si le calcul actuel lui donnerait une autre note, une ligne sous sa note le dit.'
+    D6: 'Dans Annoter, les sous-critères sont les codes que tu poses, sur toute production évaluée avec cette grille. Chaque code posé compte une occurrence de son sous-critère ; le champ de ce que tu comptes se remplit tout seul, et la formule reçoit le nombre pondéré. Sans code posé, tu tapes le nombre : il compte tel quel, sans pondération. Une grille plus ancienne montre la case « Utiliser ces sous-critères comme codes d\'annotation » ; décochée, sa palette garde les dix codes de départ, des codes de correction du français.',
+    D7a: 'L\'étape « Cas d\'interprétation » situe la production par des paliers, d\'après une limite : une longueur de référence et une tolérance sur cette longueur. « Fixer une limite » en pose une ; « Retirer la limite » la retire sans effacer ce qui est écrit. Chaque palier a un nom court et ce que l\'étudiant·e lit ; tous, sauf « Rien de compté » et « Au-delà du dernier seuil », ont un seuil en pourcentage de la limite. La limite ne touche pas la note.',
+    D7b: '« + Ajouter une table de cas » choisit un texte selon une valeur de la production : un compte, la note, la part de la limite, la moyenne, le code le plus fréquent ou l\'un de tes calculs. Une table neuve est vide.',
+    D7: 'L\'étudiant·e lit, sous le critère, la phrase du décompte, puis le cas de sa production dans les paliers, puis le texte des tables de cas. Son PDF imprime aussi la ligne du calcul : « 7 erreurs (5 après pondération) sur 400 mots → 13,75/20 (68,8 %) ». La parenthèse ne paraît que si le nombre pondéré diffère du nombre posé.',
+    D8: 'Règle les pondérations avant de corriger. Une évaluation déjà enregistrée garde sa note. Elle ne suit le nouveau calcul que si tu la déverrouilles et la modifies. Verrouillée, si le calcul actuel lui donnerait une autre note, une ligne sous sa note le dit.'
 };
 
 let cat, section;
@@ -96,14 +115,17 @@ describe('lot de mots · T — chaque texte à son site', () => {
         // plus d'exception.
         const aRegler = (k, s) => (/^D2[abc]$/.test(k) ? s.split(' : ').slice(1).join(' : ') : s);
         for (const [k, s] of Object.entries({ A1, A2, A3, B1, B2, B3, C1, C2, ...D })) {
-            expect(REGLES.includes(apostrophes(aRegler(k, s))), k).toBe(true);
+            expect(REGLES.includes(apostrophes(avant9nov(aRegler(k, s)))), k).toBe(true);
         }
     });
 
     it('A1 au lexique, A2 à l’aide « i », A3 à la bulle du champ', () => {
-        expect(cat['terme-type-de-critere'].terme.definition).toBe(A1);
+        // ↻ 9 nov. 2026, lot « production plutôt que copie » (RAPPORT-2026-11-09-production-plutot-que-copie.md, § 4, rangées
+        // 130 et 112, validées par Grégoire) : A1 et A2 restent les textes réglés (T.0), « sur la copie » devient « dans la production » à leur site.
+        const lot = (s) => { expect(s).toContain('ce que tu comptes sur la copie'); return s.replace('ce que tu comptes sur la copie', 'ce que tu comptes dans la production'); };
+        expect(cat['terme-type-de-critere'].terme.definition).toBe(lot(A1));
         const items = cat['grille-type-critere-detail'].popup.sections[0].items;
-        expect(items.map((i) => i.replace(/<[^>]+>/g, ''))).toContain(A2);
+        expect(items.map((i) => i.replace(/<[^>]+>/g, ''))).toContain(lot(A2));
         expect(cat['cn-grille-type-critere'].hover).toBe(A3);
     });
 

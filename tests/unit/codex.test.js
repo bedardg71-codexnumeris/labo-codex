@@ -91,7 +91,7 @@ describe('codex.js — bilan d\'une ouverture incomplète (#334 session B ; port
     const TITRE = 'Codex ouvert, mais incomplet';
     const SUITE = ' Tes données, elles, sont complètes, et ton fichier de codex n\'a pas changé.';
     const QUESTION = '\n\nRecharger la page pour appliquer les données ?';
-    const CONSEIL_ESPACE = (une) => 'Pour retrouver ' + (une ? 'cette copie' : 'ces copies') + ' : si tu es en navigation privée, rouvre l\'application dans une fenêtre normale. Sinon, libère de l\'espace sur le disque de l\'appareil (vide la corbeille, retire de gros fichiers), puis rouvre le même codex.';
+    const CONSEIL_ESPACE = (une) => 'Pour retrouver ' + (une ? 'cette production' : 'ces productions') + ' : si tu es en navigation privée, rouvre l\'application dans une fenêtre normale. Sinon, libère de l\'espace sur le disque de l\'appareil (vide la corbeille, retire de gros fichiers), puis rouvre le même codex.';
     const bilanDe = (attendues, { quota = 0, erreur = 0, format = 0, absentes = 0 }) => win.Codex.construireBilanImport({
         nbCles: 120,
         nbBlobs: attendues - quota - erreur - format - absentes,
@@ -113,13 +113,13 @@ describe('codex.js — bilan d\'une ouverture incomplète (#334 session B ; port
     it('copies absentes du fichier → les rouvrir ne les ramènera pas', () => {
         expect(bilanDe(12, { absentes: 4 })).toEqual({
             titre: TITRE,
-            message: '4 copies sur 12 ne sont pas dans ce fichier de codex.' + SUITE
+            message: '4 productions sur 12 ne sont pas dans ce fichier de codex.' + SUITE
                 + '\n\nElles manquaient déjà quand ce codex a été écrit : le rouvrir ne les ramènera pas. Cherche-les dans un codex plus ancien ou dans une archive.'
                 + QUESTION
         });
         expect(bilanDe(12, { absentes: 1 })).toEqual({
             titre: TITRE,
-            message: '1 copie sur 12 n\'est pas dans ce fichier de codex.' + SUITE
+            message: '1 production sur 12 n\'est pas dans ce fichier de codex.' + SUITE
                 + '\n\nElle manquait déjà quand ce codex a été écrit : le rouvrir ne la ramènera pas. Cherche-la dans un codex plus ancien ou dans une archive.'
                 + QUESTION
         });
@@ -128,13 +128,13 @@ describe('codex.js — bilan d\'une ouverture incomplète (#334 session B ; port
     it('format non reconnu → rouvrir le même codex ne les ramènera pas', () => {
         expect(bilanDe(10, { format: 2 })).toEqual({
             titre: TITRE,
-            message: '2 copies sur 10 n\'ont pas été reprises : leur contenu n\'est ni une image ni un PDF.' + SUITE
+            message: '2 productions sur 10 n\'ont pas été reprises : leur contenu n\'est ni une image ni un PDF.' + SUITE
                 + '\n\nRouvrir le même codex ne les ramènera pas.'
                 + QUESTION
         });
         expect(bilanDe(10, { format: 1 })).toEqual({
             titre: TITRE,
-            message: '1 copie sur 10 n\'a pas été reprise : son contenu n\'est ni une image ni un PDF.' + SUITE
+            message: '1 production sur 10 n\'a pas été reprise : son contenu n\'est ni une image ni un PDF.' + SUITE
                 + '\n\nRouvrir le même codex ne la ramènera pas.'
                 + QUESTION
         });
@@ -145,14 +145,14 @@ describe('codex.js — bilan d\'une ouverture incomplète (#334 session B ; port
     it('erreur technique → rouvrir le même codex, puis le signalement', () => {
         expect(bilanDe(2, { erreur: 2 })).toEqual({
             titre: TITRE,
-            message: '2 copies sur 2 n\'ont pas pu revenir, à cause d\'une erreur.' + SUITE
-                + '\n\nPour retrouver ces copies : rouvre le même codex. Si l\'erreur revient, utilise « Signaler un bug ou donner ton avis ».'
+            message: '2 productions sur 2 n\'ont pas pu revenir, à cause d\'une erreur.' + SUITE
+                + '\n\nPour retrouver ces productions : rouvre le même codex. Si l\'erreur revient, utilise « Signaler un bug ou donner ton avis ».'
                 + QUESTION
         });
         expect(bilanDe(2, { erreur: 1 })).toEqual({
             titre: TITRE,
-            message: '1 copie sur 2 n\'a pas pu revenir, à cause d\'une erreur.' + SUITE
-                + '\n\nPour retrouver cette copie : rouvre le même codex. Si l\'erreur revient, utilise « Signaler un bug ou donner ton avis ».'
+            message: '1 production sur 2 n\'a pas pu revenir, à cause d\'une erreur.' + SUITE
+                + '\n\nPour retrouver cette production : rouvre le même codex. Si l\'erreur revient, utilise « Signaler un bug ou donner ton avis ».'
                 + QUESTION
         });
     });
@@ -160,11 +160,11 @@ describe('codex.js — bilan d\'une ouverture incomplète (#334 session B ; port
     it('mélange des quatre causes → le nombre par cause, puis le conseil de chacune sous son nom, l\'espace en premier', () => {
         expect(bilanDe(12, { quota: 2, erreur: 1, format: 1, absentes: 3 })).toEqual({
             titre: TITRE,
-            message: '7 copies sur 12 n\'ont pas pu revenir : 2 faute d\'espace, 3 absentes du fichier, 1 dans un format non reconnu, 1 à cause d\'une erreur.' + SUITE
+            message: '7 productions sur 12 n\'ont pas pu revenir : 2 faute d\'espace, 3 absentes du fichier, 1 dans un format non reconnu, 1 à cause d\'une erreur.' + SUITE
                 + '\n\nFaute d\'espace. ' + CONSEIL_ESPACE(false)
                 + '\n\nAbsentes du fichier. Elles manquaient déjà quand ce codex a été écrit : le rouvrir ne les ramènera pas. Cherche-les dans un codex plus ancien ou dans une archive.'
                 + '\n\nDans un format non reconnu. Rouvrir le même codex ne la ramènera pas.'
-                + '\n\nÀ cause d\'une erreur. Pour retrouver cette copie : rouvre le même codex. Si l\'erreur revient, utilise « Signaler un bug ou donner ton avis ».'
+                + '\n\nÀ cause d\'une erreur. Pour retrouver cette production : rouvre le même codex. Si l\'erreur revient, utilise « Signaler un bug ou donner ton avis ».'
                 + QUESTION
         });
     });
@@ -172,7 +172,7 @@ describe('codex.js — bilan d\'une ouverture incomplète (#334 session B ; port
     it('mélange de deux causes → seules les causes présentes sont nommées et conseillées', () => {
         expect(bilanDe(3, { quota: 1, absentes: 1 })).toEqual({
             titre: TITRE,
-            message: '2 copies sur 3 n\'ont pas pu revenir : 1 faute d\'espace, 1 absente du fichier.' + SUITE
+            message: '2 productions sur 3 n\'ont pas pu revenir : 1 faute d\'espace, 1 absente du fichier.' + SUITE
                 + '\n\nFaute d\'espace. ' + CONSEIL_ESPACE(true)
                 + '\n\nAbsente du fichier. Elle manquait déjà quand ce codex a été écrit : le rouvrir ne la ramènera pas. Cherche-la dans un codex plus ancien ou dans une archive.'
                 + QUESTION
@@ -206,8 +206,8 @@ describe('codex.js — bilan d\'une ouverture incomplète (#334 session B ; port
         });
         expect(bilan).toEqual({
             titre: 'Codex ouvert, mais incomplet',
-            message: '67 copies sur 397 n\'ont pas pu revenir, faute d\'espace. Tes données, elles, sont complètes, et ton fichier de codex n\'a pas changé.'
-                + '\n\nPour retrouver ces copies : si tu es en navigation privée, rouvre l\'application dans une fenêtre normale. Sinon, libère de l\'espace sur le disque de l\'appareil (vide la corbeille, retire de gros fichiers), puis rouvre le même codex.'
+            message: '67 productions sur 397 n\'ont pas pu revenir, faute d\'espace. Tes données, elles, sont complètes, et ton fichier de codex n\'a pas changé.'
+                + '\n\nPour retrouver ces productions : si tu es en navigation privée, rouvre l\'application dans une fenêtre normale. Sinon, libère de l\'espace sur le disque de l\'appareil (vide la corbeille, retire de gros fichiers), puis rouvre le même codex.'
                 + '\n\nRecharger la page pour appliquer les données ?'
         });
     });
@@ -223,8 +223,8 @@ describe('codex.js — bilan d\'une ouverture incomplète (#334 session B ; port
         });
         expect(bilan).toEqual({
             titre: 'Codex ouvert, mais incomplet',
-            message: '1 copie sur 3 n\'a pas pu revenir, faute d\'espace. Tes données, elles, sont complètes, et ton fichier de codex n\'a pas changé.'
-                + '\n\nPour retrouver cette copie : si tu es en navigation privée, rouvre l\'application dans une fenêtre normale. Sinon, libère de l\'espace sur le disque de l\'appareil (vide la corbeille, retire de gros fichiers), puis rouvre le même codex.'
+            message: '1 production sur 3 n\'a pas pu revenir, faute d\'espace. Tes données, elles, sont complètes, et ton fichier de codex n\'a pas changé.'
+                + '\n\nPour retrouver cette production : si tu es en navigation privée, rouvre l\'application dans une fenêtre normale. Sinon, libère de l\'espace sur le disque de l\'appareil (vide la corbeille, retire de gros fichiers), puis rouvre le même codex.'
                 + '\n\nRecharger la page pour appliquer les données ?'
         });
     });
@@ -237,19 +237,19 @@ describe('codex.js — avertissement des copies manquantes (#1012)', () => {
 
     it('au pluriel', () => {
         expect(win.Codex.construireAvertissementCopiesManquantes(67, 397)).toEqual({
-            titre: 'Ce codex n\'aura pas toutes tes copies',
-            message: '67 copies sur 397 ne sont pas dans l\'application. Le codex que tu vas écrire ne les contiendra pas.'
+            titre: 'Ce codex n\'aura pas toutes les productions de tes étudiant·es',
+            message: '67 productions sur 397 ne sont pas dans l\'application. Le codex que tu vas écrire ne les contiendra pas.'
                 + '\n\nSi un autre fichier de codex les contient encore, ne le remplace pas : donne un autre nom à celui-ci.',
-            texteConfirmer: 'Écrire sans ces copies'
+            texteConfirmer: 'Écrire sans ces productions'
         });
     });
 
     it('une seule copie → accord au singulier, jusqu\'au bouton', () => {
         expect(win.Codex.construireAvertissementCopiesManquantes(1, 3)).toEqual({
-            titre: 'Ce codex n\'aura pas toutes tes copies',
-            message: '1 copie sur 3 n\'est pas dans l\'application. Le codex que tu vas écrire ne la contiendra pas.'
+            titre: 'Ce codex n\'aura pas toutes les productions de tes étudiant·es',
+            message: '1 production sur 3 n\'est pas dans l\'application. Le codex que tu vas écrire ne la contiendra pas.'
                 + '\n\nSi un autre fichier de codex la contient encore, ne le remplace pas : donne un autre nom à celui-ci.',
-            texteConfirmer: 'Écrire sans cette copie'
+            texteConfirmer: 'Écrire sans cette production'
         });
     });
 });
@@ -260,17 +260,17 @@ describe('codex.js — avertissement d\'une sélection incomplète (#1012)', () 
 
     it('au pluriel', () => {
         expect(win.Codex.construireAvertissementSelectionIncomplete(2, 3)).toEqual({
-            titre: 'Cette sélection n\'aura pas toutes ses copies',
-            message: '2 copies sur 3 ne sont pas dans l\'application. Le fichier que tu vas écrire ne les contiendra pas.',
-            texteConfirmer: 'Écrire sans ces copies'
+            titre: 'Cette sélection n\'aura pas toutes ses productions',
+            message: '2 productions sur 3 ne sont pas dans l\'application. Le fichier que tu vas écrire ne les contiendra pas.',
+            texteConfirmer: 'Écrire sans ces productions'
         });
     });
 
     it('une seule copie → accord au singulier, jusqu\'au bouton', () => {
         expect(win.Codex.construireAvertissementSelectionIncomplete(1, 2)).toEqual({
-            titre: 'Cette sélection n\'aura pas toutes ses copies',
-            message: '1 copie sur 2 n\'est pas dans l\'application. Le fichier que tu vas écrire ne la contiendra pas.',
-            texteConfirmer: 'Écrire sans cette copie'
+            titre: 'Cette sélection n\'aura pas toutes ses productions',
+            message: '1 production sur 2 n\'est pas dans l\'application. Le fichier que tu vas écrire ne la contiendra pas.',
+            texteConfirmer: 'Écrire sans cette production'
         });
     });
 });

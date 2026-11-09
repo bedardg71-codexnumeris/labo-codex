@@ -113,7 +113,25 @@ describe('#1152 lot 4 · les textes validés, mot pour mot, lus dans le fichier 
         const attendus = [...INTRO_SOMMATIVE, ...SPECIFICATIONS, ...STANDARDS, ...DENOTATION];
         expect(attendus).toHaveLength(5);
         const rendus = [...entree('construction-note').querySelectorAll('.accordeon-contenu > p')].map((p) => net(p.textContent));
-        expect(rendus).toEqual(attendus);
+        // ↻ « Production plutôt que copie » (9 nov. 2026, entrées 14 à 17 du relevé, validées par Grégoire) : seuls ces
+        // passages changent ; le reste de chaque texte validé, mot pour mot. Chaque passage doit exister dans le texte validé.
+        const LOT_9_NOV = [
+            ['Seules comptent les copies évaluées et verrouillées ; un brouillon, une copie « Incomplet ; travail en cours » et une production diagnostique n\'y entrent pas.',
+                'Seules comptent les évaluations verrouillées ; un brouillon, une production « Incomplet ; travail en cours » et une production diagnostique n\'y entrent pas.'],
+            ['Une copie non recevable est non satisfaisante ; un travail non remis ou une copie « Incomplet ; travail en cours » ne compte pour aucun type.',
+                'Une production non recevable est non satisfaisante ; un travail non remis ou une production « Incomplet ; travail en cours » ne compte pour aucun type.'],
+            ['Parmi les productions dont la copie compte,', 'Parmi les productions dont l\'évaluation compte,'],
+            ['quel que soit son statut : une copie non recevable, une reprise ou un jeton n\'y changent rien.',
+                'quel que soit son statut : une production non recevable, une reprise ou un jeton n\'y changent rien.'],
+            // Les mêmes règles, sur les trois « copie » de ces lignes qui étaient hors de l'extrait du relevé.
+            ['une copie non recevable y vaut 0.', 'une production non recevable y vaut 0.'],
+            ['Sans aucune copie qui compte,', 'Sans aucune évaluation qui compte,'],
+            ['le niveau d\'une copie n\'y entre pas.', 'le niveau d\'une évaluation n\'y entre pas.'],
+            // Le type « Évaluation terminale » s'appelle « Épreuve terminale » (Grégoire, 8 nov. 2026) : la citation suit.
+            ['de l\'« Évaluation terminale », s\'il y en a une.', 'de l\'« Épreuve terminale », s\'il y en a une.'],
+        ];
+        for (const [avant] of LOT_9_NOV) expect(attendus.join('\n'), avant).toContain(avant);
+        expect(rendus).toEqual(attendus.map((t) => LOT_9_NOV.reduce((s, [avant, apres]) => s.split(avant).join(apres), t)));
         expect(STANDARDS_DU_28[0]).toContain('à partir de deux types de production seulement');
         const aide = net(doc.getElementById('section-aide').textContent);
         expect(aide).not.toContain('à partir de deux types de production seulement');

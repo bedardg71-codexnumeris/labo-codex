@@ -226,17 +226,17 @@ test.describe('Lot A3 — « Faire revenir » les copies d\'une archive vérifi�
             }, archive.dossier);
             await (await attente).setFiles(fichier);
             const fenetre = await lireEtFermer(page, 'Faire revenir');
-            expect(fenetre.titre).toBe('Faire revenir les copies');
+            expect(fenetre.titre).toBe('Faire revenir les productions remises');
             expect(fenetre.boutonsTextes).toEqual(['Annuler', 'Faire revenir']);
             const bilan = await lireEtFermer(page);
-            expect(bilan.titre).toBe('Copies revenues, archive abîmée');
+            expect(bilan.titre).toBe('Productions revenues, archive abîmée');
             expect(bilan.message.split('\n').filter(Boolean)).toEqual([
-                '1 copie de l\'archive est abîmée : elle n\'est pas revenue. Vérifie de nouveau cette archive.',
-                '2 copies revenues',
-                '2 copies déjà là',
-                '1 copie changée depuis l\'archive, laissée telle quelle',
-                '1 copie sans fiche dans l\'application',
-                '1 copie d\'un·e étudiant·e supprimé·e'
+                '1 fichier de l\'archive est abîmé : il n\'est pas revenu. Vérifie de nouveau cette archive.',
+                '2 productions revenues',
+                '2 productions déjà là',
+                '1 production changée depuis l\'archive, laissée telle quelle',
+                '1 production sans fiche dans l\'application',
+                '1 production d\'un·e étudiant·e supprimé·e'
             ]);
 
             // Le magasin : seules r1 et r2 ont été écrites, octet pour octet ; c4 n'a pas bougé.
@@ -290,7 +290,7 @@ test.describe('Lot A3 — « Faire revenir » les copies d\'une archive vérifi�
             }, archive.dossier);
             await (await attente).setFiles(fichier);
             await lireEtFermer(page, 'Faire revenir');
-            expect((await lireEtFermer(page)).message.split('\n')).toEqual(['1 copie revenue', '7 copies déjà là']);
+            expect((await lireEtFermer(page)).message.split('\n')).toEqual(['1 production revenue', '7 productions déjà là']);
             expect(await page.evaluate(() => db.getSync(cle('fichiersTravaux')).find((f) => f.id === 'FT_r1').blobStatut)).toBe('exporte');
 
             // Le codex : la fenêtre n'est pas appelée, et la copie revenue est dans le fichier.
@@ -336,8 +336,8 @@ test.describe('Lot A3 — « Faire revenir » les copies d\'une archive vérifi�
             const fenetre = await lireEtFermer(page, 'Faire revenir');
             expect(fenetre.largeur).toBeLessThanOrEqual(768);
             const bilan = await lireEtFermer(page);
-            expect(bilan.titre).toBe('Copies revenues');
-            expect(bilan.message.split('\n')).toEqual(['1 copie revenue', '7 copies déjà là']);
+            expect(bilan.titre).toBe('Productions revenues');
+            expect(bilan.message.split('\n')).toEqual(['1 production revenue', '7 productions déjà là']);
             expect(bilan.largeur).toBeLessThanOrEqual(768);
             expect(await page.evaluate(() => window.__ecritures)).toEqual(['FT_r1']);
             expect(await compteDuCodex(page)).toEqual({ manquantes: 0, attendues: 8 });

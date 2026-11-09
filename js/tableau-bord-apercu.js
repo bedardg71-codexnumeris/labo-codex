@@ -1601,7 +1601,7 @@ function phraseSansRepartition(nbSansNote, nbEtudiants, raison) {
         : '';
     const mots = nbSansNote === nbEtudiants
         ? `La note du cours ne se construit pas encore : il n'y a rien à répartir. Le dépistage, lui, s'appuie sur les ${echapperHtml(obtenirTermeProduction('pluriel'))} déjà ${accordTermeProduction('evalue', 2)}.`
-        : `${raison === 'echelles-divergentes' ? 'Les copies de ce groupe n\'ont pas d\'échelle unique' : 'Les copies de ce groupe sont notées sans échelle'} : pas de répartition par niveaux.${nonComptes}`;
+        : `${raison === 'echelles-divergentes' ? 'Les évaluations de ce groupe n\'ont pas d\'échelle unique' : 'Les évaluations de ce groupe sont faites sans échelle'} : pas de répartition par niveaux.${nonComptes}`;
     return `
                     <div class="tb-texte-description">
                         ${mots}

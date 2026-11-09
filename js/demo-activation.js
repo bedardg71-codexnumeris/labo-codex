@@ -500,8 +500,8 @@ function importEmpecheLaBascule(versLaDemo) {
     if (!window.travauxImport || !window.travauxImport.importEnCours) return false;
     if (window.notifications && typeof window.notifications.warning === 'function') {
         window.notifications.warning('Import en cours', versLaDemo
-            ? 'Attends la fin de l\'import des copies avant d\'entrer dans la démo.'
-            : 'Attends la fin de l\'import des copies avant de quitter la démo.');
+            ? 'Attends la fin de l\'import des productions avant d\'entrer dans la démo.'
+            : 'Attends la fin de l\'import des productions avant de quitter la démo.');
     }
     return true;
 }
@@ -674,9 +674,9 @@ async function retirerCopiesDuDemo() {
 function _motsDuRetrait(n) {
     var un = n === 1;
     return {
-        bouton: (un ? 'Retirer la copie' : 'Retirer les copies') + ' (' + n + ')',
-        question: (un ? 'Retirer la copie importée dans la démo ? ' : 'Retirer les ' + n + ' copies importées dans la démo ? ')
-            + 'Tes vraies copies et tes données ne sont pas touchées. '
+        bouton: (un ? 'Retirer la production importée' : 'Retirer les productions importées') + ' (' + n + ')',
+        question: (un ? 'Retirer la production importée dans la démo ? ' : 'Retirer les ' + n + ' productions importées dans la démo ? ')
+            + 'Les productions de tes étudiant·es et tes données ne sont pas touchées. '
             + (un ? 'Pour la retrouver, il faudra l\'importer de nouveau.' : 'Pour les retrouver, il faudra les importer de nouveau.')
     };
 }
@@ -704,7 +704,7 @@ async function actionRetirerCopiesDuDemo() {
     var n = (await planDuRetraitDesCopiesDuDemo()).copies;
     if (n > 0) {
         var accepte = await window.uiDialogues.confirmerAction({
-            titre: 'Retirer les copies',
+            titre: 'Retirer les productions importées',
             message: _motsDuRetrait(n).question,
             texteAnnuler: 'Annuler',
             texteConfirmer: 'Retirer',
