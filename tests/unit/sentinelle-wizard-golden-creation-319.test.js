@@ -376,3 +376,60 @@ describe('#319 Lot 3 — a11 + purge config-reprises', () => {
         expect(win.ETAPES_WIZARD['config-reprises']).toBeUndefined();
     });
 });
+
+// #1176 (9 nov. 2026, décision 5 de Grégoire du 8 nov.) — UNE NOUVELLE PRATIQUE DEMANDE CE QUE VAUT UNE COPIE NON RECEVABLE,
+// sans réponse cochée d'avance ; la réponse devient sa règle (`configuration.sortCopieNonRecevable`). Rouvrir une pratique
+// et ré-enregistrer sans toucher la réponse n'écrit rien qu'il n'y avait déjà (la lecture n'est pas une écriture).
+describe('#1176 · l\'étape « Une copie non recevable » : la réponse devient la règle de la pratique', () => {
+    const registre = chargerScript('js/pratiques/pratique-registre.js', {}, {});
+    async function avecRegistre(fn) {
+        win.SORTS_COPIE_NON_RECEVABLE = registre.SORTS_COPIE_NON_RECEVABLE;
+        win.sortCopieNonRecevableDeLaPratique = registre.sortCopieNonRecevableDeLaPratique;
+        try { return await fn(); } finally { delete win.SORTS_COPIE_NON_RECEVABLE; delete win.sortCopieNonRecevableDeLaPratique; }
+    }
+
+    it('l\'étape : deux réponses, exigée, rien de coché d\'avance ; sautée en dénotation', () => {
+        const etape = win.ETAPES_WIZARD['copie-non-recevable'];
+        const champs = etape.getChampsDynamiques({ typePratique: 'sommative' });
+        expect(champs[0]).toMatchObject({ id: 'sortCopieNonRecevable', type: 'radio-cards', required: true });
+        expect(champs[0].options.map(o => o.value)).toEqual(['ecarter', 'zero']);
+        expect(champs[0]).not.toHaveProperty('defaut');
+        expect(etape.condition({ typePratique: 'sommative' })).toBe(true);
+        expect(etape.condition({ typePratique: 'denotation' })).toBe(false);
+        expect(win.obtenirEtapeSuivante('grille-criteres', { typePratique: 'standards' })).toBe('copie-non-recevable');
+        expect(win.obtenirEtapeSuivante('config-denotation', { typePratique: 'denotation' })).toBe('infos-base');
+    });
+
+    it('création : la réponse s\'écrit dans la configuration (sommative « l\'écarter », spécifications « lui mettre 0 »)', async () => {
+        await avecRegistre(async () => {
+            expect((await produire('n-som', { ...REPONSES.SOM, sortCopieNonRecevable: 'ecarter' })).configuration.sortCopieNonRecevable).toBe('ecarter');
+            expect((await produire('n-spe', { ...REPONSES.SPE, sortCopieNonRecevable: 'zero' })).configuration.sortCopieNonRecevable).toBe('zero');
+        });
+    });
+
+    it('un modèle adopté reçoit la réponse ; le gabarit source n\'est pas touché', async () => {
+        await avecRegistre(async () => {
+            const source = JSON.parse(JSON.stringify(GABARIT_SPE));
+            const obj = await produire('n-modele', { _modeleAdopte: true, _gabaritSource: source, nom: 'X', prenom: 'A', nomAuteur: 'B', sortCopieNonRecevable: 'ecarter' });
+            expect(obj.configuration.sortCopieNonRecevable).toBe('ecarter');
+            expect(source.configuration).not.toHaveProperty('sortCopieNonRecevable');
+        });
+    });
+
+    it('rouvrir sans changer la réponse n\'écrit pas la lecture ; la changer l\'écrit ; une règle écrite se garde', async () => {
+        await avecRegistre(async () => {
+            const lu = (regle, ecrite) => ({ _sortCopieNonRecevableLu: { regle, ecrite }, sortCopieNonRecevable: regle });
+            expect((await produire('r1', { ...REPONSES.SOM, ...lu('zero', false) })).configuration).not.toHaveProperty('sortCopieNonRecevable');
+            expect((await produire('r2', { ...REPONSES.SOM, ...lu('zero', false), sortCopieNonRecevable: 'ecarter' })).configuration.sortCopieNonRecevable).toBe('ecarter');
+            expect((await produire('r3', { ...REPONSES.SOM, ...lu('zero', true) })).configuration.sortCopieNonRecevable).toBe('zero');
+        });
+    });
+
+    it('sans réponse (registre absent, ou dénotation), rien ne s\'écrit', async () => {
+        expect((await produire('s1', { ...REPONSES.SOM, sortCopieNonRecevable: 'ecarter' })).configuration).not.toHaveProperty('sortCopieNonRecevable');
+        await avecRegistre(async () => {
+            const den = await produire('s2', { calcNoteFinale: 'jugement', ciblesDenotation: [{ id: 'c1', nom: 'Lire' }], nom: 'DEN', sortCopieNonRecevable: 'zero' });
+            expect(den.configuration).not.toHaveProperty('sortCopieNonRecevable');
+        });
+    });
+});

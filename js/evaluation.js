@@ -1317,7 +1317,6 @@ function _initEvaluationEnCoursPourModif(evaluation, evaluationId) {
         statutRemise: evaluation.statutRemise,
         statutIntegrite: evaluation.statutIntegrite || 'recevable',
         notesIntegrite: evaluation.notesIntegrite || '',
-        sortCopieNonRecevable: evaluation.sortCopieNonRecevable,   // #1176 — absent : la copie suit la règle de sa pratique
         delaiAccorde: evaluation.delaiAccorde || false,
         jetonDelaiApplique: evaluation.jetonDelaiApplique || false,
         dateApplicationJetonDelai: evaluation.dateApplicationJetonDelai,
@@ -1448,10 +1447,8 @@ function _chargerStatutsEtBadgesModif(evaluation) {
     const selectIntegrite = document.getElementById('statutIntegrite');
     const notesIntegrite = document.getElementById('notesIntegrite');
     if (selectIntegrite) {
-        // #1176 : le choix fait sur cette copie, avant le `change` qui montre le bloc (`afficherChoixCopieNonRecevable`).
-        if (window.evaluationEnCours && typeof window.poserChoixCopieNonRecevable === 'function') {
-            window.poserChoixCopieNonRecevable(window.evaluationEnCours, evaluation.sortCopieNonRecevable);
-        }
+        // #1176 : le choix fait sur cette copie, à l'écran, avant le `change` qui montre le bloc.
+        if (typeof window.poserChoixCopieEcran === 'function') window.poserChoixCopieEcran(evaluation.sortCopieNonRecevable);
         selectIntegrite.value = evaluation.statutIntegrite || 'recevable';
         // Lot A, R4 : texte libre, masqué en anonymisation (`poserChampTexteLibre`, modes.js).
         if (notesIntegrite) {

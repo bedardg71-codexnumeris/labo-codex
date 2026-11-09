@@ -661,31 +661,42 @@ function _placeEnStandards(productionId) {
 /**
  * Montre (ou cache) le choix sous le menu « Intégrité académique ». Coché : le choix de la copie s'il y en a un, sinon
  * la règle de la pratique active ; sans pratique, rien n'est coché (aucune règle à montrer).
+ * ⚠ LE CHOIX DE LA COPIE VIT SUR L'ÉCRAN (`data-choix-copie` du bloc), comme le statut dans son menu : l'application a
+ * deux « évaluation en cours » (le nom nu de config.js et `window.evaluationEnCours`), qui ne sont pas toujours le même
+ * objet (#699) — mesuré par la spec copie-non-recevable-choix-1176. Le chargeur d'une copie le pose
+ * (`poserChoixCopieEcran`), le geste le change, les trois écritures le lisent (`lireChoixCopieNonRecevableEcran`).
  */
 function afficherChoixCopieNonRecevable() {
     const bloc = document.getElementById('divSortNonRecevable');
     if (!bloc) return;
     const statut = (document.getElementById('statutIntegrite') || {}).value || 'recevable';
     const famille = (typeof window.obtenirTypePratiqueActive === 'function') ? window.obtenirTypePratiqueActive() : null;
-    const ec = _evaluationEnCoursCopie();
-    if (!_estStatutNonRecevable(statut) && ec) delete ec.sortCopieNonRecevable;   // recevable ou soupçonnée : le choix part
+    if (!_estStatutNonRecevable(statut)) bloc.setAttribute('data-choix-copie', '');   // recevable ou soupçonnée : le choix part
     if (!_estStatutNonRecevable(statut) || famille === 'denotation') {
         bloc.classList.add('u-hide');
-        bloc.setAttribute('data-choix-copie', '');
         return;
     }
-    _remplirChoixCopie(bloc, famille, ec);
+    _remplirChoixCopie(bloc, famille);
 }
 
-function _evaluationEnCoursCopie() {
-    return (typeof evaluationEnCours !== 'undefined') ? evaluationEnCours : window.evaluationEnCours;
+/** Le chargeur d'une copie pose son choix (ou aucun) AVANT de poser son statut. */
+function poserChoixCopieEcran(choix) {
+    const bloc = document.getElementById('divSortNonRecevable');
+    if (bloc) bloc.setAttribute('data-choix-copie', _sortsCopie().includes(choix) ? choix : '');
+}
+
+/** La production de la copie à l'écran (le menu), pour dire la place qu'elle a dans la note. */
+function _productionDeLaCopie() {
+    const menu = document.getElementById('selectProduction1');
+    return (menu && menu.value) || (window.evaluationEnCours && window.evaluationEnCours.productionId) || null;
 }
 
 /** Les mots, la coche (le choix de la copie, sinon la règle) et le choix porté par le bloc. */
-function _remplirChoixCopie(bloc, famille, ec) {
-    const choix = (ec && _sortsCopie().includes(ec.sortCopieNonRecevable)) ? ec.sortCopieNonRecevable : '';
+function _remplirChoixCopie(bloc, famille) {
+    const lu = bloc.getAttribute('data-choix-copie');
+    const choix = _sortsCopie().includes(lu) ? lu : '';
     const regle = (typeof window.sortCopieNonRecevableDeLaPratiqueActive === 'function') ? window.sortCopieNonRecevableDeLaPratiqueActive() : null;
-    const textes = _textesDuChoixCopie(famille, ec ? ec.productionId : null);
+    const textes = _textesDuChoixCopie(famille, _productionDeLaCopie());
     const T = TEXTES_SORT_COPIE_NON_RECEVABLE;
     document.getElementById('titreSortNonRecevable').textContent = T.titre;
     document.getElementById('libelleSortNonRecevableEcarter').textContent = textes.ecarter;
@@ -701,8 +712,6 @@ function _remplirChoixCopie(bloc, famille, ec) {
 /** Le geste sur la copie : son choix s'enregistre avec elle (auto-sauvegarde, comme le statut d'intégrité). */
 function changerSortCopieNonRecevable(el) {
     if (!el || !_sortsCopie().includes(el.value)) return;
-    const ec = _evaluationEnCoursCopie();
-    if (ec) ec.sortCopieNonRecevable = el.value;
     const bloc = document.getElementById('divSortNonRecevable');
     if (bloc) bloc.setAttribute('data-choix-copie', el.value);
     if (typeof window._debouncerAutoSave === 'function') window._debouncerAutoSave();
@@ -1340,6 +1349,7 @@ window.afficherTravailEnCours = afficherTravailEnCours;
 window.afficherCopieNonRecevable = afficherCopieNonRecevable;   // 28 oct. 2026
 // #1176 (9 nov. 2026) — le sort de la copie non recevable, choisi sur la copie
 window.afficherChoixCopieNonRecevable = afficherChoixCopieNonRecevable;
+window.poserChoixCopieEcran = poserChoixCopieEcran;
 window.changerSortCopieNonRecevable = changerSortCopieNonRecevable;
 window.lireChoixCopieNonRecevableEcran = lireChoixCopieNonRecevableEcran;
 window.poserChoixCopieNonRecevable = poserChoixCopieNonRecevable;
