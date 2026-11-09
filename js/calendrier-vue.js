@@ -455,7 +455,7 @@ const TEXTE_CALENDRIER_SANS_DATES = 'Le calendrier se construit à partir des da
 /** Sans date de début : la phrase et le chemin, à la place des mois vides. @returns {boolean} vrai si la phrase a été posée */
 function direCalendrierSansDates(cadreCalendrier) {
     const conteneur = document.getElementById('conteneur-calendrier');
-    if (cadreCalendrier.dateDebut || !conteneur) return false;
+    if (cadreCalendrier.dateDebut || cadreCalendrier.debutTrimestre || !conteneur) return false;   // `debutTrimestre` : l'ancien nom, encore lu par trimestre-v2.js
     conteneur.innerHTML = '<p class="cal-sans-dates">' + echapperHtml(TEXTE_CALENDRIER_SANS_DATES) + '</p>'
         + '<p><button type="button" class="btn btn-principal" data-action="naviguerVers" data-param="calendrier" data-param2="trimestre">Cadre › Trimestre</button></p>';
     return true;

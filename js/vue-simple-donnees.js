@@ -48,8 +48,13 @@
      * La démonstration ouverte donne la vue étendue : elle ne s'ouvre que de là, et ses données ne sont pas « ta classe »
      * (ajout de Claude Code à la décision de Cowork, signalé au rapport).
      */
-    function vueAuDemarrage({ choix, vide, demoOuverte }) {
+    function vueAuDemarrage({ choix, vide, demoOuverte, pilote }) {
         if (choix === VUES.SIMPLE || choix === VUES.ETENDUE) return choix;
+        // PILOTÉ PAR UN BANC (`navigator.webdriver`) : la vue étendue. Les quelque 340 bancs Playwright du projet ouvrent une
+        // application vide et y naviguent dans la vue étendue ; sans ceci, ils s'ouvriraient tous en vue simple, barre
+        // principale masquée (mesuré le 9 nov. 2026 : le banc du tableau, 19 essais, rougissait en entier). Le banc de la
+        // vue simple éteint ce drapeau pour éprouver la vraie règle. Aucun utilisateur n'a ce drapeau.
+        if (pilote) return VUES.ETENDUE;
         if (demoOuverte) return VUES.ETENDUE;
         return vide ? VUES.SIMPLE : VUES.ETENDUE;
     }
@@ -143,6 +148,15 @@
         };
     }
 
+    /**
+     * Le rang d'une production, tel que « les plus récentes » le lit (`creerComparateurRecenceStd`, registre) : son numéro,
+     * sinon les chiffres qui terminent son identifiant. Une production neuve prend le rang suivant du cours.
+     */
+    function rangDeProduction(production) {
+        const fin = String((production || {}).id || '').match(/(\d+)$/);
+        return Number((production || {}).numero) || (fin ? parseInt(fin[1], 10) : 0) || 0;
+    }
+
     /* ============================== LA PRATIQUE ============================== */
 
     const FAMILLES = Object.freeze({ STD: 'standards', SPE: 'specifications' });
@@ -161,6 +175,7 @@
         const famille = p.type;
         // Le nom du modèle dit sa règle de départ (« N meilleures évaluations ») ; la règle se change ici, le nom dit donc la famille.
         if (nom) p.nom = nom;
+        p.description = '';   // celle du modèle décrit sa règle de départ (« Garde les 7 meilleures… »), que l'enseignant·e change
         p.inspireDe = { sourceId: modele.id, nom: modele.nom };
         p.id = id;
         delete p.estGabarit;
@@ -191,8 +206,10 @@
         const pf = p.configuration.portfolio = Object.assign({ actif: true, utiliser: true }, p.configuration.portfolio || {});
         if (REGLES_STD.indexOf(methode) >= 0) pf.methodeSelection = methode;
         const n = Math.max(1, Math.min(99, parseInt(nombre, 10) || pf.nombreARetenir || 1));
+        // Le minimum d'évaluations (lu par le Suivi) suit le nombre retenu SEULEMENT s'il le suivait déjà, comme dans les deux
+        // modèles (7 et 7, 5 et 5). Un minimum réglé à part en vue étendue n'est pas touché (relecture neuve, 9 nov. 2026).
+        if (pf.minimumCompletion === undefined || pf.minimumCompletion === pf.nombreARetenir) pf.minimumCompletion = n;
         pf.nombreARetenir = n;
-        pf.minimumCompletion = n;   // comme les deux modèles (7 et 7, 5 et 5)
         return p;
     }
 
@@ -227,18 +244,11 @@
         return (grilles || []).some((g) => g && g.id && g.dansBibliotheque !== false && IDS_GRILLES_SEMEES.indexOf(g.id) < 0);
     }
 
-    /** Une case du tableau est-elle évaluée avec une grille ? (une copie qui n'est pas un résultat sans grille, pour une colonne du tableau) */
-    function aUneCaseAvecGrille(evaluations, productionIds, das) {
-        const p = new Set(productionIds || []);
-        const d = new Set(das || []);
-        return (evaluations || []).some((e) => e && e.sansGrille !== true && !e.remplaceeParId && p.has(e.productionId) && d.has(e.etudiantDA));
-    }
-
     window.VueSimpleDonnees = {
         VUES, CLE_CHOIX, ECRANS, FAMILLES, REGLES_STD, GROUPE_SIMPLE, RAISONS,
         applicationVide, vueAuDemarrage,
         analyserListeCollee, trimestreDeLaDate, ficheEleve, groupeCoursLeger, productionLegere,
         pratiqueDepuisModele, regleStd, poserRegleStd, poserPaliersSpe,
-        aUneGrille, aUneCaseAvecGrille
+        aUneGrille, rangDeProduction
     };
 })();

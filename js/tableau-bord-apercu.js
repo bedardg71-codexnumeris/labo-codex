@@ -1795,7 +1795,8 @@ const TEXTE_A_SANS_HORAIRE = 'Assiduité non calculée : ce groupe n\'a pas d\'h
  * @returns {string}
  */
 function texteDeLaBarreA(texteAttenteA, seances) {
-    if (texteAttenteA && Array.isArray(seances) && seances.length === 0) return TEXTE_A_SANS_HORAIRE;
+    const service = typeof window.contexteActifEstService === 'function' && window.contexteActifEstService();   // un service n'a pas d'horaire à donner
+    if (texteAttenteA && !service && Array.isArray(seances) && seances.length === 0) return TEXTE_A_SANS_HORAIRE;
     return texteAttenteA || (horaireSansAucunePeriode(seances) ? TEXTE_A_SANS_PERIODES : '');
 }
 
@@ -3681,7 +3682,6 @@ window._majSousTitreTrajectoires = _majSousTitreTrajectoires;
 window.determinerModeAffichageTableauBord = determinerModeAffichageTableauBord;
 window.seuilEvaluationsPourP = seuilEvaluationsPourP;   // #634
 window.horaireSansAucunePeriode = horaireSansAucunePeriode;
-window.texteDeLaBarreA = texteDeLaBarreA;   // banc (tests/unit/vue-simple.test.js)
 window.libelleCriteresMultiSurveilles = libelleCriteresMultiSurveilles;   // lot 4, volet B
 // 7 sept. 2026 — exposée pour la sentinelle des bulles au doigt : le toucher
 // ne se joue pas au banc (WebKit absent des conteneurs), son arbitrage si.

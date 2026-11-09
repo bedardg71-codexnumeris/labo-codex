@@ -6,7 +6,7 @@
  *    (figées à l'état de `b6d5926`, la base du lot) ; `js/config.js` et `js/navigation.js` n'ont pas bougé d'un octet.
  * C. La liste collée : DA, nom, prénom ; rien n'est inventé.
  * D. Ce qui naît en coulisse : le groupe sans horaire, la production la plus légère, la pratique tirée d'un modèle.
- * E. La règle « ne nomme rien qui n'existe pas » : la grille de l'utilisateur, la case évaluée avec une grille.
+ * E. La règle « ne nomme rien qui n'existe pas » : la grille de l'utilisateur ; les mots arrêtés.
  *
  * Break-tests (faits le 9 nov. 2026, code restauré ensuite) : rapport, section « La preuve ».
  */
@@ -57,6 +57,11 @@ describe('A. La vue au démarrage', () => {
 
     it('sans choix, la démonstration ouverte donne la vue étendue (elle ne s\'ouvre que de là)', () => {
         expect(D.vueAuDemarrage({ choix: null, vide: true, demoOuverte: true })).toBe('etendue');
+    });
+
+    it('sous un banc (navigateur piloté), sans choix : la vue étendue, pour que les bancs existants gardent leur écran', () => {
+        expect(D.vueAuDemarrage({ choix: null, vide: true, demoOuverte: false, pilote: true })).toBe('etendue');
+        expect(D.vueAuDemarrage({ choix: 'simple', vide: true, demoOuverte: false, pilote: true })).toBe('simple');
     });
 
     it('un choix illisible ne vaut pas un choix', () => {
@@ -187,6 +192,12 @@ describe('D. Ce qui naît en coulisse', () => {
         expect(Object.keys(gc).sort()).toEqual(['actif', 'coursId', 'dateCreation', 'enseignantId', 'groupeNum', 'horaireId', 'id', 'nom', 'pratiqueId', 'trimestreId']);
     });
 
+    it('le rang d\'une production : son numéro, sinon les chiffres qui terminent son identifiant (la lecture du calcul)', () => {
+        expect(D.rangDeProduction({ id: 'PROD_x', numero: 4 })).toBe(4);
+        expect(D.rangDeProduction({ id: 'PROD_1762700000123' })).toBe(1762700000123);
+        expect(D.rangDeProduction({ id: 'sans-chiffre' })).toBe(0);
+    });
+
     it('la fiche d\'un élève ne porte que ce qui a été collé', () => {
         expect(D.ficheEleve({ da: '9990001', nom: 'Albatros', prenom: 'Ada' }, 'C1')).toEqual({ da: '9990001', nom: 'Albatros', prenom: 'Ada', groupe: '1', programme: '', sa: '', coursId: 'C1' });
     });
@@ -221,6 +232,10 @@ describe('D. Ce qui naît en coulisse', () => {
         const q = D.poserRegleStd(p, { methode: 'recents', nombre: '3' });
         expect(D.regleStd(q)).toEqual({ methode: 'recents', nombre: 3 });
         expect(q.configuration.portfolio.minimumCompletion).toBe(3);
+        // Un minimum réglé à part en vue étendue (1 pour 3 retenues) n'est pas écrasé par « Enregistrer la règle ».
+        const regle = { configuration: { portfolio: { methodeSelection: 'tous', nombreARetenir: 3, minimumCompletion: 1 } } };
+        expect(D.poserRegleStd(regle, { methode: 'tous', nombre: '3' }).configuration.portfolio).toMatchObject({ nombreARetenir: 3, minimumCompletion: 1 });
+        expect(D.poserRegleStd(regle, { methode: 'meilleurs', nombre: '5' }).configuration.portfolio).toMatchObject({ nombreARetenir: 5, minimumCompletion: 1 });
         expect(q.configuration.echelleId).toBe('E');
         expect(D.regleStd(p)).toEqual({ methode: 'meilleurs', nombre: 7 });   // l'original n'est pas muté
         expect(D.regleStd({ configuration: { portfolio: { methodeSelection: 'derniers', nombreARetenir: 4 } } }).methode).toBe('recents');
@@ -242,13 +257,6 @@ describe('E. La vue simple ne nomme rien qui n\'existe pas', () => {
         expect(D.aUneGrille([{ id: 'GRILLE_GENERIQUE', nom: 'Grille de départ' }])).toBe(false);
         expect(D.aUneGrille([{ id: 'G_X', nom: 'Grille fictive', dansBibliotheque: false }])).toBe(false);
         expect(D.aUneGrille([{ id: 'GRILLE_GENERIQUE' }, { id: 'G_X', nom: 'Grille fictive' }])).toBe(true);
-    });
-
-    it('une case évaluée avec une grille : une copie qui n\'est pas un résultat sans grille, dans une colonne du tableau', () => {
-        const evals = [{ etudiantDA: '9990001', productionId: 'P1', sansGrille: true }, { etudiantDA: '9990002', productionId: 'P2', grilleId: 'G_X' }];
-        expect(D.aUneCaseAvecGrille(evals, ['P1'], ['9990001', '9990002'])).toBe(false);
-        expect(D.aUneCaseAvecGrille(evals, ['P1', 'P2'], ['9990001', '9990002'])).toBe(true);
-        expect(D.aUneCaseAvecGrille(evals, ['P1', 'P2'], ['9990001'])).toBe(false);
     });
 
     it('les mots arrêtés par Grégoire, mot pour mot', () => {

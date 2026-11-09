@@ -28,6 +28,9 @@ async function ouvrir(page) {
     page.on('console', (m) => { if (m.type() === 'error') garder(`console.error: ${m.text()}`); });
     page.on('pageerror', (e) => garder(`pageerror: ${e.message}`));
     page.on('dialog', (d) => { erreurs.push(`dialogue: ${d.message()}`); d.dismiss().catch(() => {}); });
+    // Sous un banc (`navigator.webdriver`), l'application s'ouvre en vue étendue pour ne pas déplacer les autres bancs
+    // (`vueAuDemarrage`). Ce banc-ci éprouve la règle que vivent les utilisateurs : il éteint le drapeau.
+    await page.addInitScript(() => Object.defineProperty(Navigator.prototype, 'webdriver', { get: () => false }));
     await page.goto(indexHtml);
     await attendreApplication(page);
     return erreurs;
@@ -327,6 +330,48 @@ test.describe('Vue simple · le parcours d\'un nouvel arrivant', () => {
     });
 });
 
+test.describe('Vue simple · les gestes tiennent', () => {
+    test('deux clics de suite ne créent ni deux cours, ni deux pratiques, ni deux colonnes', async ({ page }) => {
+        const erreurs = await ouvrir(page);
+        await ecran(page, 'accueil').locator('[data-param="classe"]').click();
+        await page.fill('#vs-liste', LISTE);
+        await page.evaluate(() => { const b = document.querySelector('#simple-classe-contenu [data-action="VueSimple.creerClasse"]'); b.click(); b.click(); });
+        await expect(ecran(page, 'classe').locator('.vs-succes')).toHaveText('Classe créée : 4 élèves.');
+        await allerA(page, 'pratique');
+        await page.evaluate(() => { const b = document.querySelector('[data-action="VueSimple.choisirModele"][data-param="STD-n-meilleurs"]'); b.click(); b.click(); });
+        await expect(ecran(page, 'pratique').locator('[data-action="VueSimple.enregistrerRegle"]')).toBeVisible();
+        await allerA(page, 'resultats');
+        await page.locator('#vs-tableau-hote .tn-etat-geste button').click();
+        await page.fill('#vs-production-nom', 'Production 1');
+        await page.evaluate(() => { const b = document.querySelector('[data-action="VueSimple.ajouterProduction"]'); b.click(); b.click(); });
+        await expect(page.locator('#vs-tableau-hote .tn-production-titre')).toHaveText(['Production 1']);
+        const comptes = await page.evaluate(() => ({ cours: window.db.getSync('cours', []).filter((c) => !c.isDemo).length, groupes: window.db.getSync(window.cle('groupesCours'), []).length,
+            pratiques: window.db.getSync(window.cle('pratiquesConfigurables'), []).length, productions: window.db.getSync(window.cle('productions'), []).length }));
+        expect(comptes).toEqual({ cours: 1, groupes: 1, pratiques: 1, productions: 1 });
+        expect(erreurs).toEqual([]);
+    });
+
+    test('« Changer de modèle » puis le même modèle : la pratique laissée est reprise, pas doublée', async ({ page }) => {
+        const erreurs = await ouvrir(page);
+        await collerLaClasse(page);
+        await choisirLeModele(page, 'STD-n-meilleurs');
+        await page.locator('[data-action="VueSimple.changerModele"]').click();
+        await expect(page.locator('[data-action="VueSimple.choisirModele"]')).toHaveCount(2);
+        await choisirLeModele(page, 'STD-n-meilleurs');
+        expect(await page.evaluate(() => window.db.getSync(window.cle('pratiquesConfigurables'), []).length)).toBe(1);
+        expect(erreurs).toEqual([]);
+    });
+
+    test('un geste commun qui ouvre un écran de la vue étendue ramène à la vue simple (on ne s\'y retrouve pas sans barre)', async ({ page }) => {
+        const erreurs = await ouvrir(page);
+        await collerLaClasse(page);
+        await page.evaluate(() => window.naviguerVers('calendrier', 'trimestre'));   // ce que fait « Trimestres », dans le bandeau d'un trimestre clos
+        await expect(page.locator('#section-simple-classe')).toBeVisible();
+        await expect(page.locator('#section-calendrier')).toBeHidden();
+        expect(erreurs).toEqual([]);
+    });
+});
+
 test.describe('Vue simple · la bascule n\'écrit rien', () => {
     test('application vide : aller-retour, même compte et même empreinte ; seul le choix de la vue change, hors des données', async ({ page }) => {
         const erreurs = await ouvrir(page);
@@ -508,9 +553,13 @@ test.describe('Vue simple · le passage vers la vue étendue', () => {
         const muettes = [];
         for (const [section, items] of sections) {
             for (const item of (items.length ? items : [null])) {
-                await page.evaluate(([s, i]) => { if (i) window.naviguerVers(s, i); else window.afficherSection(s); }, [section, item]);
                 const id = item ? `${section}-${item}` : `section-${section}`;
-                await expect(page.locator('#' + id)).toBeVisible();
+                // Le profil se recharge 100 ms après son affichage et reprend la main (comportement d'avant le lot) : on
+                // redemande la section jusqu'à ce qu'elle tienne à l'écran.
+                await expect(async () => {
+                    await page.evaluate(([s, i]) => { if (i) window.naviguerVers(s, i); else window.afficherSection(s); }, [section, item]);
+                    await expect(page.locator('#' + id)).toBeVisible({ timeout: 800 });
+                }).toPass({ timeout: 10000 });
                 // Les initialisateurs de navigation.js partent à 100 ou 150 ms : la section a jusqu'à 3 s pour dire quelque chose.
                 const parle = await page.waitForFunction((i) => document.getElementById(i).innerText.replace(/\s+/g, ' ').trim().length >= 60, id, { timeout: 3000 }).then(() => true, () => false);
                 if (!parle) muettes.push(id);

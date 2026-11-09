@@ -43,13 +43,16 @@ function lireCleGlobale(nomCle, parDefaut) {
     }
 }
 
-/** Le groupe-cours actif existe et porte un horaire (lu dans la liste du trimestre : la copie du pointeur peut dater). */
+/** Faux seulement pour un groupe-cours de COURS qui n'a pas d'horaire (lu dans la liste du trimestre : la copie du pointeur peut dater). */
 function groupeActifAUnHoraire() {
     var actif = lireCleGlobale('groupeCoursActif', null);
-    if (!actif || !actif.id) return false;
+    if (!actif) return false;
+    // Comme avant le lot : le mode « cours, tous groupes » (pas d'id) et un service (qui n'a jamais d'horaire) gardent le bandeau.
+    if (!actif.id) return true;
+    if (typeof window.contexteActifEstService === 'function' && window.contexteActifEstService()) return true;
     var groupes = lireCleTrim('groupesCours', []);
     var gc = Array.isArray(groupes) ? groupes.filter(function(g) { return g && g.id === actif.id; })[0] : null;
-    return !!(gc && gc.horaireId);
+    return !gc || !!gc.horaireId;
 }
 
 function nbTrim(nomCle) {

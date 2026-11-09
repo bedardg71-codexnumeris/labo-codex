@@ -55,10 +55,10 @@
         classeAucunLu: 'Aucun élève lu. Une ligne par élève : DA, nom, prénom.',
         classeRefusees: (n) => `${n} ligne${n > 1 ? 's' : ''} non lue${n > 1 ? 's' : ''} :`,
         classeCreee: (n) => `Classe créée : ${n} élève${n > 1 ? 's' : ''}.`,
-        classeAjoutes: (n, deja) => `${n} élève${n > 1 ? 's' : ''} ajouté${n > 1 ? 's' : ''}` + (deja ? `, ${deja} déjà dans ta classe` : '') + '.',
+        classeAjoutes: (n, deja) => `${n} élève${n > 1 ? 's' : ''} ajouté${n > 1 ? 's' : ''}` + (deja ? `, ${deja} déjà inscrit${deja > 1 ? 's' : ''} ce trimestre` : '') + '.',
         classeSuite: 'Choisir ma pratique',
         classeEnDemo: 'La démonstration est ouverte. Quitte-la pour créer ta classe.',
-        classeEchec: 'La classe n’a pas pu être créée. Tes données n’ont pas changé.',
+        classeEchec: 'La classe n’a pas pu être créée.',
         // — le groupe
         groupe: 'Groupe',
         groupeChoisir: 'Choisis un groupe',
@@ -84,7 +84,8 @@
         pratiqueChanger: 'Changer de modèle',
         pratiqueAutre: 'La pratique de ce groupe n’est ni par standards ni par spécifications : elle se règle en vue étendue.',
         pratiqueSuite: 'Ouvrir le tableau',
-        pratiqueEchec: 'La pratique n’a pas pu être installée. Tes données n’ont pas changé.',
+        pratiqueEchec: 'La pratique n’a pas pu être enregistrée.',
+        reglePartagee: (n) => `Cette règle vaut pour les ${n} groupes qui ont cette pratique.`,
         niveaux: 'Niveaux :',
         // — Résultats (le tableau garde ses mots validés ; ceux-ci remplacent les messages qui nomment la vue étendue)
         tableau: {
@@ -125,6 +126,16 @@
     }
 
     let _vue = null;
+    let _enCours = false;   // un geste d'écriture à la fois : un double clic ne crée pas deux cours, deux pratiques, deux colonnes
+
+    /** Enveloppe un geste d'écriture : ignoré tant que le précédent n'a pas fini. */
+    function _unALaFois(geste) {
+        return async function () {
+            if (_enCours) return;
+            _enCours = true;
+            try { await geste.apply(null, arguments); } finally { _enCours = false; }
+        };
+    }
     let _ecran = 'accueil';
     let _formulaireProduction = false;
 
@@ -174,12 +185,17 @@
     }
 
     function _vueCalculee() {
-        return D().vueAuDemarrage({ choix: _lireChoix(), vide: _vide(), demoOuverte: _demoOuverte() });
+        const pilote = typeof navigator !== 'undefined' && navigator.webdriver === true;   // un banc Playwright (voir `vueAuDemarrage`)
+        return D().vueAuDemarrage({ choix: _lireChoix(), vide: _vide(), demoOuverte: _demoOuverte(), pilote });
     }
 
     /** Au chargement de la page, puis quand les données sont lisibles (la liste des élèves peut vivre hors du cache synchrone). */
     function demarrer() {
-        _poser(_vueCalculee(), true);
+        // Avant que les données soient lisibles, la liste des élèves peut manquer (elle vit parfois hors du cache synchrone) :
+        // sans choix, dès qu'un trimestre existe, on pose la vue étendue et on tranche quand les données sont là — jamais
+        // l'inverse, qui ferait clignoter la vue simple chez qui a un gros corpus (relecture neuve, 9 nov. 2026).
+        const aUnTrimestre = (db.getSync('trimestres', []) || []).some((t) => t && t.id && t.id !== 'demo' && t.isDemo !== true);
+        _poser((!_lireChoix() && aUnTrimestre && _vide()) ? D().VUES.ETENDUE : _vueCalculee(), true);
         if (typeof window.auDbPret === 'function') {
             window.auDbPret(() => {
                 const vue = _vueCalculee();
@@ -243,7 +259,8 @@
     }
 
     function _productionsDuCours(coursId) {
-        return (db.getSync(cle('productions'), []) || []).filter((p) => p && p.coursId === coursId);
+        // Une production d'avant le rattachement au cours n'a pas de `coursId` : le tableau la montre, elle compte donc ici aussi.
+        return (db.getSync(cle('productions'), []) || []).filter((p) => p && (!p.coursId || p.coursId === coursId));
     }
 
     function _aUneGrille() {
@@ -396,8 +413,9 @@
     }
 
     async function _inscrire(fiches, groupe) {
-        let ajoutes = 0, deja = 0;
-        const ecrit = await window.modifierEtAnnoncer(cle('groupeEtudiants'), (lus) => {
+        let ajoutes = 0, deja = 0, lu = false;
+        await window.modifierEtAnnoncer(cle('groupeEtudiants'), (lus) => {
+            lu = true;   // une écriture refusée (trimestre clos) n'appelle pas ce mutateur : ce n'est pas « 0 élève ajouté »
             const etudiants = (lus || []).slice();
             const presents = new Set(etudiants.map((e) => e && String(e.da)));
             ajoutes = 0; deja = 0;
@@ -409,7 +427,7 @@
             });
             return ajoutes ? etudiants : undefined;
         }, [], { geste: MOTS.classeCreer });
-        return { ajoutes, deja, ecrit: ecrit !== undefined || ajoutes === 0 };
+        return { ajoutes, deja, ecrit: lu };
     }
 
     /** Ce que la liste collée ne permet pas de faire : le message à montrer, ou null. */
@@ -530,23 +548,47 @@
         const famille = _famille(groupe);
         if (famille === null) { _ecrire(hote, `${tete}${retourHTML || ''}${_choixModeleHTML()}`); return; }
         if (famille === 'autre') { _ecrire(hote, `${tete}<p class="vs-etat">${esc(MOTS.pratiqueAutre)}</p>`); return; }
+        _ecrire(hote, tete + _pratiqueChoisieHTML(groupe, famille, retourHTML));
+    }
+
+    /** La pratique du groupe : son modèle, sa règle (réglable ici, ou seulement lue), et les gestes. */
+    function _pratiqueChoisieHTML(groupe, famille, retourHTML) {
         const pratique = _pratiqueDuGroupe(groupe);
+        const std = famille === D().FAMILLES.STD;
         const nomFamille = (MOTS.modeles.find((m) => m.famille === famille) || {}).titre || '';
-        const regle = famille === D().FAMILLES.STD ? _regleStdHTML(pratique) : _regleSpeHTML(pratique);
-        const modifiable = !(famille === D().FAMILLES.STD && D().regleStd(pratique).methode === 'autre');
-        const changer = _productionsDuCours(groupe.coursId).length ? ''
-            : `<button type="button" class="btn btn-secondaire" data-action="VueSimple.changerModele">${esc(MOTS.pratiqueChanger)}</button>`;
-        _ecrire(hote, `${tete}
-            <p class="vs-intro"><span class="vs-libelle">${esc(MOTS.pratiqueModele)}</span> ${esc([nomFamille, pratique.nom].filter((x, i, t) => x && t.indexOf(x) === i).join(' · '))}</p>
-            <div class="vs-bloc"><h3 class="vs-sous-titre">${esc(MOTS.pratiqueRegle)}</h3>${regle}
+        const noms = [nomFamille, pratique.nom].filter((x, i, t) => x && t.indexOf(x) === i).join(' · ');
+        // Une pratique importée sous l'ancienne forme (`.config`) se lit, elle ne se règle pas ici.
+        const lisible = !!pratique.configuration;
+        const regle = !lisible ? `<p class="vs-note">${esc(MOTS.regleAutre)}</p>` : (std ? _regleStdHTML(pratique) : _regleSpeHTML(pratique));
+        const modifiable = lisible && !(std && D().regleStd(pratique).methode === 'autre');
+        return `<p class="vs-intro"><span class="vs-libelle">${esc(MOTS.pratiqueModele)}</span> ${esc(noms)}</p>
+            <div class="vs-bloc"><h3 class="vs-sous-titre">${esc(MOTS.pratiqueRegle)}</h3>${regle}${modifiable ? _reglePartageeHTML(pratique) : ''}
                 <div id="vs-pratique-retour">${retourHTML || ''}</div>
                 <p class="vs-gestes">${modifiable ? `<button type="button" class="btn btn-principal" data-action="VueSimple.enregistrerRegle">${esc(MOTS.regleEnregistrer)}</button>` : ''}
-                    <button type="button" class="btn btn-secondaire" data-action="VueSimple.aller" data-param="resultats">${esc(MOTS.pratiqueSuite)}</button>${changer}</p></div>`);
+                    <button type="button" class="btn btn-secondaire" data-action="VueSimple.aller" data-param="resultats">${esc(MOTS.pratiqueSuite)}</button>${_changerModeleHTML(groupe)}</p></div>`;
+    }
+
+    /** La règle est celle de la PRATIQUE : si d'autres groupes l'ont aussi, l'écran le dit avant qu'on l'enregistre. */
+    function _reglePartageeHTML(pratique) {
+        const n = _groupes().filter((g) => g.pratiqueId === pratique.id).length;
+        return n > 1 ? `<p class="vs-note">${esc(MOTS.reglePartagee(n))}</p>` : '';
+    }
+
+    /** « Changer de modèle » : offert tant que le groupe n'a aucune production. */
+    function _changerModeleHTML(groupe) {
+        if (_productionsDuCours(groupe.coursId).length) return '';
+        return `<button type="button" class="btn btn-secondaire" data-action="VueSimple.changerModele">${esc(MOTS.pratiqueChanger)}</button>`;
     }
 
     function _apresEcriturePratique() {
         if (window.invaliderCachePratique) window.invaliderCachePratique();
         if (typeof window.calculerEtStockerIndicesCP === 'function') window.calculerEtStockerIndicesCP();
+    }
+
+    /** Une pratique déjà installée de ce modèle, qu'aucun groupe n'emploie (laissée par « Changer de modèle ») : on la reprend. */
+    function _pratiqueLibreDuModele(idModele) {
+        const prises = new Set(_groupes().map((g) => g.pratiqueId).filter(Boolean));
+        return _pratiques().find((p) => p.inspireDe && p.inspireDe.sourceId === idModele && p.dansBibliotheque !== false && !prises.has(p.id)) || null;
     }
 
     /** Installe un modèle existant dans le trimestre et l'assigne au groupe actif (les chemins de la vue étendue). */
@@ -557,6 +599,8 @@
         try {
             if (modele.type === D().FAMILLES.STD && typeof window.assurerEchelleIdmeDeDepart === 'function') await window.assurerEchelleIdmeDeDepart();
             const echelle = _echelleDeDepart();
+            const libre = _pratiqueLibreDuModele(idModele);
+            if (libre) { await window.PratiqueManager.changerPratiqueActive(libre.id); _rendrePratique(); return; }
             const titre = (MOTS.modeles.find((m) => m.modele === idModele) || {}).titre;
             const pratique = D().pratiqueDepuisModele(modele, {
                 nom: titre, id: window.genererIdUnique('PRAT_'), echelleId: echelle ? echelle.id : null, maintenant: new Date().toISOString()
@@ -596,7 +640,7 @@
         const groupe = _groupeActif();
         const pratique = _pratiqueDuGroupe(groupe);
         const famille = _famille(groupe);
-        if (!pratique || (famille !== D().FAMILLES.STD && famille !== D().FAMILLES.SPE)) return;
+        if (!pratique || !pratique.configuration || (famille !== D().FAMILLES.STD && famille !== D().FAMILLES.SPE)) return;
         const nouvelle = _lireRegle(pratique, famille);
         const ecrit = await window.modifierEtAnnoncer(cle('pratiquesConfigurables'),
             (lues) => (lues || []).map((p) => (p && p.id === nouvelle.id) ? nouvelle : p), [], { geste: MOTS.regleEnregistrer });
@@ -706,7 +750,7 @@
         });
         // Le rang : « les plus récentes » se lit sur le numéro de la production (`creerComparateurRecenceStd`) ; la colonne
         // neuve prend le suivant, donc l'ordre des colonnes est celui de leur création.
-        production.numero = existantes.reduce((max, p) => Math.max(max, Number(p.numero) || 0), 0) + 1;
+        production.numero = existantes.reduce((max, p) => Math.max(max, D().rangDeProduction(p)), 0) + 1;
         const ecrit = await window.modifierEtAnnoncer(cle('productions'), (lues) => (lues || []).concat([production]), [], { geste: MOTS.plusProduction });
         if (!ecrit) return;
         _formulaireProduction = false;
@@ -764,8 +808,17 @@
         });
     }
 
+    /**
+     * Un geste commun (« Trimestres » du bandeau d'un trimestre clos, « Quitter la démo ») affiche une section de la vue
+     * étendue : en vue simple, sa barre est masquée et l'on ne pourrait plus en sortir. On revient à l'écran simple courant.
+     */
+    function _surSectionEtendue() {
+        if (estSimple()) aller(_ecran);
+    }
+
     function _initialiser() {
         _poserLesMots();
+        window.addEventListener('sectionAffichee', _surSectionEtendue);
         // La barre de la vue simple : `main.js` y a déjà câblé `afficherSection` (boutons de `.navigation-principale`) ; le rendu suit.
         document.querySelectorAll('.navigation-vue-simple button[data-onglet]').forEach((b) => {
             b.addEventListener('click', () => aller(b.getAttribute('data-onglet').replace('simple-', '')));
@@ -775,8 +828,9 @@
 
     window.VueSimple = {
         MOTS, estSimple, vueCourante, basculer, demarrer, aller,
-        changerGroupe, creerClasse, choisirModele, changerModele, enregistrerRegle,
-        ouvrirProduction, fermerProduction, ajouterProduction,
+        changerGroupe, creerClasse: _unALaFois(creerClasse), choisirModele: _unALaFois(choisirModele),
+        changerModele: _unALaFois(changerModele), enregistrerRegle: _unALaFois(enregistrerRegle),
+        ouvrirProduction, fermerProduction, ajouterProduction: _unALaFois(ajouterProduction),
         enteteDuMenuSauvegarder
     };
 

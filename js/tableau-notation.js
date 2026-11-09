@@ -740,9 +740,11 @@
         if (!_presentation) return;
         if (_presentation.hote) _presentation.hote.innerHTML = '';
         _presentation = null;
-        _affiche = false;
         _dernierGeste = null;
-        _poserBascule(false);
+        // La Liste de la vue étendue retrouve l'état où elle était : son tableau, s'il y était ouvert, est redessiné dans son hôte.
+        const carte = document.getElementById('carte-liste-evaluations');
+        _affiche = !!(carte && carte.classList.contains('vue-tableau-notation'));
+        if (_affiche) rendre(null);
     }
 
     /**
