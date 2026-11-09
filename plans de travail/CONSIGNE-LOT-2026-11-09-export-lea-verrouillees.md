@@ -68,3 +68,16 @@ pour la production mais qu'aucune n'est verrouillée, l'export dit, seul, « Auc
 envoyer. Verrouille les évaluations à remettre, puis relance l'export. » — sans le préfixe « L'export Léa a échoué : »,
 puisque rien n'a échoué (supposition de Claude Code, nommée ici). Sans aucune évaluation, le message d'avant reste.
 Banc : `sentinelle-1245`, cas 9 ; deux break-tests rouges (la condition, le préfixe).
+
+## Relecture neuve du cas « aucune évaluation verrouillée » (9 nov. 2026, avant le verdict du groupe 1)
+
+Condition vérifiée juste (le message ne peut pas paraître si une verrouillée est retenue). Dispositions :
+- **Le compteur dit « Aucune évaluation trouvée · N évaluations non verrouillées laissées de côté »** quand rien n'est
+  verrouillé : « trouvée » contredit « laissées de côté », et l'alerte dit maintenant « Aucune évaluation verrouillée ».
+  Mots validés par Grégoire, antérieurs à ce lot — *question pour Grégoire*, au relais (proposition : « Aucune évaluation
+  verrouillée · N évaluations non verrouillées laissées de côté »).
+- L'apostrophe typographique (’) de « l’export » dans le code, droite dans le texte reçu : la typographie de l'app —
+  *acceptée*.
+- La constante glissée sous le JSDoc d'`exporterPourLea` ; « rien de verrouillé » passait par `console.error` —
+  *corrigés* (`054aca576`).
+- Le banc ne couvre pas « un élève » ni « reprises seulement » pour ce message — *commenter et oublier* (même condition).
