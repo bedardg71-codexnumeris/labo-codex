@@ -125,6 +125,9 @@ async function aucunMotInterdit(page, ou) {
     const motDans = (t) => { const m = t.match(MOTS_INTERDITS); return m ? `${ou} : « ${m[0]} » dans « ${t.slice(Math.max(0, m.index - 60), m.index + 60).replace(/\s+/g, ' ')} »` : null; };
     expect(motDans(lu.texte)).toBeNull();
     expect(motDans(lu.attributs)).toBeNull();
+    // Aucun chemin vers un écran de la vue étendue (« Conception › Pratiques », « Cadre › Trimestre ») : elle n'est pas affichée.
+    const chemin = lu.texte.match(/[^\n]*›[^\n]*/);
+    expect(chemin ? `${ou} : un chemin de la vue étendue, « ${chemin[0].trim().slice(0, 120)} »` : null).toBeNull();
     // « codex » : toléré dans la seule phrase qui l'introduit.
     const sansLaPhrase = lu.texte.split(PHRASE_CODEX).join('');
     const codex = sansLaPhrase.match(/codex/i);
@@ -496,8 +499,10 @@ test.describe('Vue simple · le passage vers la vue étendue', () => {
         await basculer(page, 'etendue');
         // « Ton espace de travail est prêt : […] horaire et pratique sont configurés » ne se dit pas d'un groupe sans horaire.
         await page.evaluate(() => window.naviguerVers('evaluations', 'liste'));
-        await expect(page.locator('#evaluations-liste')).toContainText('Production 1');   // la Liste est rendue : le bandeau, s'il devait venir, est là
-        await expect(page.locator('#transition-bandeau')).toHaveCount(0);
+        await expect(page.locator('#evaluations-liste')).toContainText('Production 1');
+        // Le bandeau vient 500 ms après l'affichage (transitions.js) : on le fait évaluer maintenant, sans attendre un délai.
+        await page.evaluate(() => window.transitions.evaluerTransitions());
+        expect(await page.evaluate(() => { const n = document.getElementById('transition-bandeau'); return n ? n.innerText : ''; })).not.toMatch(/horaire/i);
         const sections = await page.evaluate(() => Object.entries(configurationsOnglets).map(([s, items]) => [s, items.map((i) => i.id)]));
         expect(sections.map((s) => s[0])).toEqual(['accueil', 'conception', 'calendrier', 'suivi', 'evaluations', 'labo', 'aide', 'reglages']);
         const muettes = [];
