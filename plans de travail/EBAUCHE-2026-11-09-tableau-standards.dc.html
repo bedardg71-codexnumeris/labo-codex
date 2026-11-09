@@ -1,0 +1,191 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Tableau de notation – standards</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+body{margin:0;background:#0c1a22}
+a{color:#6aacb8}a:hover{color:#a9d6de}
+.case{width:64px;height:44px;border-radius:6px;font:600 14px system-ui,-apple-system,sans-serif;cursor:pointer;box-sizing:border-box}
+.case:focus-visible,.pastille:focus-visible,.bouton:focus-visible{outline:2px solid #e6eef2;outline-offset:2px}
+.vide{background:transparent;border:1px dashed rgba(106,172,184,0.45);color:#8fa8b4}
+.plein-ps{background:#4a5a62;border:1px solid #4a5a62;color:#f2f6f8}
+.plein-i{background:#a02030;border:1px solid #a02030;color:#ffffff}
+.plein-d{background:#ffc107;border:1px solid #ffc107;color:#1a1400}
+.plein-m{background:#34c759;border:1px solid #34c759;color:#0c1a22}
+.plein-e{background:#6aacb8;border:1px solid #6aacb8;color:#0c1a22}
+.trait-ps{background:transparent;border:2px solid #9fb4c0;color:#c4d2da}
+.trait-i{background:transparent;border:2px solid #ff6b7d;color:#ff8a99}
+.trait-d{background:transparent;border:2px solid #ffc107;color:#ffd24d}
+.trait-m{background:transparent;border:2px solid #34c759;color:#5fd981}
+.trait-e{background:transparent;border:2px solid #6aacb8;color:#8cc4ce}
+.pastille{min-height:36px;padding:0 14px;border-radius:20px;border:1px solid rgba(106,172,184,0.45);background:transparent;color:#c4d2da;font:500 14px system-ui,-apple-system,sans-serif;cursor:pointer}
+.pastille.active{background:#6aacb8;border-color:#6aacb8;color:#0c1a22;font-weight:600}
+.bouton{min-height:40px;padding:0 16px;border-radius:6px;border:1px solid rgba(106,172,184,0.45);background:#1a3a48;color:#e6eef2;font:500 14px system-ui,-apple-system,sans-serif;cursor:pointer}
+</style>
+</helmet>
+<div style="min-height: 960px; background: #0c1a22; color: #e6eef2; font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif; box-sizing: border-box">
+<div style="display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; padding: 14px 32px; background: #0e1e28; border-bottom: 1px solid rgba(106,172,184,0.18)">
+<div style="display: flex; align-items: center; gap: 14px; flex-wrap: wrap">
+<span style="font-size: 20px; font-weight: 700; letter-spacing: 0.02em; color: #e6eef2">labo <span style="color: #6aacb8">codex</span></span>
+<span style="font-size: 13px; color: #9fb4c0; padding: 4px 10px; border: 1px solid rgba(106,172,184,0.3); border-radius: 20px">Groupe 01 · cours fictif · Automne 2026</span>
+</div>
+<a href="#" style="font-size: 14px">Ouvrir l'application complète →</a>
+</div>
+<div style="max-width: 1280px; margin: 0 auto; padding: 28px 32px 40px; box-sizing: border-box; display: flex; flex-direction: column; gap: 20px">
+<div style="display: flex; flex-direction: column; gap: 6px">
+<h1 style="margin: 0; font-size: 26px; font-weight: 700">Tableau de notation</h1>
+<p style="margin: 0; font-size: 15px; line-height: 1.5; color: #b8c8d2; max-width: 760px">Saisis le résultat de chaque production, qu'elle ait été évaluée ici ou ailleurs. La note de chaque étudiant·e se construit dans la dernière colonne, selon les réglages de ta pratique.</p>
+</div>
+<div style="display: flex; flex-direction: column; gap: 14px; padding: 18px 20px; background: #122a34; border-radius: 12px">
+<div style="display: flex; align-items: center; justify-content: space-between; gap: 14px; flex-wrap: wrap">
+<div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap">
+<span style="font-size: 13px; font-weight: 700; color: #ffffff; background: #0277bd; padding: 6px 12px; border-radius: 20px">PAN · Standards</span>
+<span style="font-size: 14px; color: #b8c8d2; margin-left: 6px">La note retient</span>
+<button type="button" class="{{recentsCls}}" onClick="{{choisirRecents}}">les plus récentes</button>
+<button type="button" class="{{meilleuresCls}}" onClick="{{choisirMeilleures}}">les meilleures</button>
+<span style="font-size: 14px; color: #b8c8d2; margin-left: 6px">au nombre de</span>
+<button type="button" class="{{troisCls}}" onClick="{{choisirTrois}}">3</button>
+<button type="button" class="{{cinqCls}}" onClick="{{choisirCinq}}">5</button>
+</div>
+<div style="display: flex; gap: 10px; flex-wrap: wrap">
+<button type="button" class="bouton">Importer un CSV</button>
+<button type="button" class="bouton">Exporter en CSV</button>
+</div>
+</div>
+<div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap; font-size: 13px; color: #b8c8d2">
+<span>Échelle de départ (IDME), modifiable :</span>
+<span style="display: inline-flex; align-items: center; gap: 6px"><span style="display: inline-block; padding: 3px 8px; border-radius: 5px; background: #4a5a62; color: #f2f6f8; font-weight: 600">PS</span>0</span>
+<span style="display: inline-flex; align-items: center; gap: 6px"><span style="display: inline-block; padding: 3px 8px; border-radius: 5px; background: #a02030; color: #ffffff; font-weight: 600">I</span>40</span>
+<span style="display: inline-flex; align-items: center; gap: 6px"><span style="display: inline-block; padding: 3px 8px; border-radius: 5px; background: #ffc107; color: #1a1400; font-weight: 600">D</span>65</span>
+<span style="display: inline-flex; align-items: center; gap: 6px"><span style="display: inline-block; padding: 3px 8px; border-radius: 5px; background: #34c759; color: #0c1a22; font-weight: 600">M</span>75</span>
+<span style="display: inline-flex; align-items: center; gap: 6px"><span style="display: inline-block; padding: 3px 8px; border-radius: 5px; background: #6aacb8; color: #0c1a22; font-weight: 600">E</span>100</span>
+</div>
+</div>
+<div style="overflow-x: auto; background: #122a34; border-radius: 12px; padding: 8px 12px 14px">
+<div style="min-width: 900px; display: flex; flex-direction: column">
+<div style="display: grid; grid-template-columns: minmax(180px, 1.4fr) repeat(6, 76px) 150px; gap: 8px; align-items: end; padding: 10px 8px 12px; border-bottom: 1px solid rgba(106,172,184,0.22)">
+<span style="font-size: 13px; font-weight: 600; color: #9fb4c0">Étudiant·e</span>
+<sc-for list="{{productions}}" as="p" hint-placeholder-count="6">
+<span style="display: flex; flex-direction: column; gap: 2px; font-size: 13px"><span style="font-weight: 600; color: #e6eef2">{{p.nom}}</span><span style="color: #9fb4c0; font-size: 12px">{{p.date}}</span></span>
+</sc-for>
+<span style="font-size: 13px; font-weight: 600; color: #e6eef2">Note provisoire</span>
+</div>
+<sc-for list="{{rangees}}" as="r" hint-placeholder-count="8">
+<div style="display: grid; grid-template-columns: minmax(180px, 1.4fr) repeat(6, 76px) 150px; gap: 8px; align-items: center; padding: 6px 8px; border-bottom: 1px solid rgba(106,172,184,0.10)">
+<span style="font-size: 15px; color: #e6eef2">{{r.nom}}</span>
+<sc-for list="{{r.cases}}" as="c" hint-placeholder-count="6">
+<button type="button" class="{{c.cls}}" onClick="{{c.changer}}" aria-label="{{c.aria}}">{{c.libelle}}</button>
+</sc-for>
+<span style="display: flex; flex-direction: column; gap: 1px"><span style="font-size: 22px; font-weight: 700; color: #e6eef2">{{r.note}}</span><span style="font-size: 12px; color: #9fb4c0">{{r.detail}}</span></span>
+</div>
+</sc-for>
+<div style="padding: 12px 8px 0">
+<button type="button" class="bouton">+ Ajouter un·e étudiant·e</button>
+</div>
+</div>
+</div>
+<div style="display: flex; gap: 22px; flex-wrap: wrap; align-items: center; font-size: 13px; color: #b8c8d2">
+<span style="display: inline-flex; align-items: center; gap: 8px"><span style="display: inline-block; width: 22px; height: 16px; border-radius: 4px; background: #34c759"></span>Plein : compte dans la note</span>
+<span style="display: inline-flex; align-items: center; gap: 8px"><span style="display: inline-block; width: 22px; height: 16px; border-radius: 4px; border: 2px solid #34c759; box-sizing: border-box"></span>Contour : évaluée, non retenue</span>
+<span style="display: inline-flex; align-items: center; gap: 8px"><span style="display: inline-block; width: 22px; height: 16px; border-radius: 4px; border: 1px dashed rgba(106,172,184,0.6); box-sizing: border-box"></span>Pointillé : à saisir</span>
+<span>Touche une case pour changer le niveau.</span>
+</div>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1280,"height":960}}'>
+var VALEURS = { PS: 0, I: 40, D: 65, M: 75, E: 100 };
+var NOMS_NIVEAUX = { PS: 'Préstructurel', I: 'Incomplet', D: 'Développement', M: 'Maîtrise', E: 'Étendu' };
+var ORDRE = ['', 'PS', 'I', 'D', 'M', 'E'];
+var PRODUCTIONS = [
+  { nom: 'Production 1', date: '11 sept.' },
+  { nom: 'Production 2', date: '25 sept.' },
+  { nom: 'Production 3', date: '9 oct.' },
+  { nom: 'Production 4', date: '23 oct.' },
+  { nom: 'Production 5', date: '6 nov.' },
+  { nom: 'Production 6', date: '20 nov.' }
+];
+var ETUDIANTS = ['Ada Albatros', 'Bruno Baobab', 'Chloé Cormoran', 'Dario Dahlia', 'Elsa Escargot', 'Félix Fougère', 'Gaïa Goéland', 'Hugo Hibou'];
+var DEPART = [
+  ['D', 'D', 'M', 'M', 'E', ''],
+  ['I', 'D', 'D', 'M', '', ''],
+  ['M', 'E', 'E', 'M', 'E', ''],
+  ['PS', 'I', '', 'D', 'D', ''],
+  ['D', 'M', 'M', 'D', 'M', ''],
+  ['I', 'I', 'D', '', '', ''],
+  ['M', 'M', 'D', 'E', 'M', ''],
+  ['', '', '', '', '', '']
+];
+
+class Component extends DCLogic {
+  lire() {
+    var s = this.state || {};
+    return {
+      grille: s.grille || DEPART,
+      methode: s.methode || 'recents',
+      nombre: s.nombre || 3
+    };
+  }
+
+  changer(i, j) {
+    var g = this.lire().grille.map(function (r) { return r.slice(); });
+    var k = ORDRE.indexOf(g[i][j]);
+    g[i][j] = ORDRE[(k + 1) % ORDRE.length];
+    this.setState({ grille: g });
+  }
+
+  renderVals() {
+    var self = this;
+    var etat = this.lire();
+    var rangees = etat.grille.map(function (ligne, i) {
+      var evaluees = [];
+      ligne.forEach(function (code, j) { if (code) evaluees.push({ code: code, j: j }); });
+      var tri = evaluees.slice();
+      if (etat.methode === 'recents') {
+        tri.sort(function (a, b) { return b.j - a.j; });
+      } else {
+        tri.sort(function (a, b) { return (VALEURS[b.code] - VALEURS[a.code]) || (b.j - a.j); });
+      }
+      var retenues = tri.slice(0, etat.nombre);
+      var indices = retenues.map(function (c) { return c.j; });
+      var somme = retenues.reduce(function (acc, c) { return acc + VALEURS[c.code]; }, 0);
+      var note = retenues.length ? String(Math.round(somme / retenues.length)) : '–';
+      var detail = retenues.length
+        ? (retenues.length + (retenues.length > 1 ? ' productions retenues' : ' production retenue'))
+        : 'en attente de résultats';
+      var cases = ligne.map(function (code, j) {
+        var cls = 'case ';
+        if (!code) cls += 'vide';
+        else cls += (indices.indexOf(j) >= 0 ? 'plein-' : 'trait-') + code.toLowerCase();
+        return {
+          cls: cls,
+          libelle: code || '+',
+          aria: ETUDIANTS[i] + ', ' + PRODUCTIONS[j].nom + ' : ' + (code ? NOMS_NIVEAUX[code] : 'à saisir'),
+          changer: function () { self.changer(i, j); }
+        };
+      });
+      return { nom: ETUDIANTS[i], cases: cases, note: note, detail: detail };
+    });
+    return {
+      productions: PRODUCTIONS,
+      rangees: rangees,
+      recentsCls: 'pastille' + (etat.methode === 'recents' ? ' active' : ''),
+      meilleuresCls: 'pastille' + (etat.methode === 'meilleures' ? ' active' : ''),
+      troisCls: 'pastille' + (etat.nombre === 3 ? ' active' : ''),
+      cinqCls: 'pastille' + (etat.nombre === 5 ? ' active' : ''),
+      choisirRecents: function () { self.setState({ methode: 'recents' }); },
+      choisirMeilleures: function () { self.setState({ methode: 'meilleures' }); },
+      choisirTrois: function () { self.setState({ nombre: 3 }); },
+      choisirCinq: function () { self.setState({ nombre: 5 }); }
+    };
+  }
+}
+</script>
+</body>
+</html>

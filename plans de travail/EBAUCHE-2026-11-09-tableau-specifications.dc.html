@@ -1,0 +1,167 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Tableau de notation – spécifications</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+body{margin:0;background:#0c1a22}
+a{color:#6aacb8}a:hover{color:#a9d6de}
+.case{width:64px;height:44px;border-radius:6px;font:700 17px system-ui,-apple-system,sans-serif;cursor:pointer;box-sizing:border-box}
+.case:focus-visible,.bouton:focus-visible{outline:2px solid #e6eef2;outline-offset:2px}
+.vide{background:transparent;border:1px dashed rgba(106,172,184,0.45);color:#8fa8b4;font-weight:600;font-size:14px}
+.acc{background:#34c759;border:1px solid #34c759;color:#0c1a22}
+.nac{background:transparent;border:2px solid #f0a050;color:#ffb878}
+.bouton{min-height:40px;padding:0 16px;border-radius:6px;border:1px solid rgba(106,172,184,0.45);background:#1a3a48;color:#e6eef2;font:500 14px system-ui,-apple-system,sans-serif;cursor:pointer}
+</style>
+</helmet>
+<div style="min-height: 960px; background: #0c1a22; color: #e6eef2; font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif; box-sizing: border-box">
+<div style="display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; padding: 14px 32px; background: #0e1e28; border-bottom: 1px solid rgba(106,172,184,0.18)">
+<div style="display: flex; align-items: center; gap: 14px; flex-wrap: wrap">
+<span style="font-size: 20px; font-weight: 700; letter-spacing: 0.02em; color: #e6eef2">labo <span style="color: #6aacb8">codex</span></span>
+<span style="font-size: 13px; color: #9fb4c0; padding: 4px 10px; border: 1px solid rgba(106,172,184,0.3); border-radius: 20px">Groupe 02 · cours fictif · Automne 2026</span>
+</div>
+<a href="#" style="font-size: 14px">Ouvrir l'application complète →</a>
+</div>
+<div style="max-width: 1280px; margin: 0 auto; padding: 28px 32px 40px; box-sizing: border-box; display: flex; flex-direction: column; gap: 20px">
+<div style="display: flex; flex-direction: column; gap: 6px">
+<h1 style="margin: 0; font-size: 26px; font-weight: 700">Tableau de notation</h1>
+<p style="margin: 0; font-size: 15px; line-height: 1.5; color: #b8c8d2; max-width: 760px">Indique, pour chaque production, si elle est acceptable. Le forfait atteint, et la note qui lui correspond, se lisent dans les dernières colonnes.</p>
+</div>
+<div style="display: flex; flex-direction: column; gap: 14px; padding: 18px 20px; background: #122a34; border-radius: 12px">
+<div style="display: flex; align-items: center; justify-content: space-between; gap: 14px; flex-wrap: wrap">
+<div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap">
+<span style="font-size: 13px; font-weight: 700; color: #0c1a22; background: #22c55e; padding: 6px 12px; border-radius: 20px">PAN · Spécifications</span>
+<span style="font-size: 14px; color: #b8c8d2; margin-left: 6px">Deux types de travaux : exercices (4) et projets (2)</span>
+</div>
+<div style="display: flex; gap: 10px; flex-wrap: wrap">
+<button type="button" class="bouton">Importer un CSV</button>
+<button type="button" class="bouton">Exporter en CSV</button>
+</div>
+</div>
+<div style="display: flex; align-items: stretch; gap: 10px; flex-wrap: wrap; font-size: 13px">
+<span style="display: flex; flex-direction: column; gap: 2px; padding: 8px 12px; border-radius: 6px; background: #1a3a48"><span style="font-weight: 700; color: #e6eef2">Excellence · 90</span><span style="color: #b8c8d2">4 exercices + 2 projets</span></span>
+<span style="display: flex; flex-direction: column; gap: 2px; padding: 8px 12px; border-radius: 6px; background: #1a3a48"><span style="font-weight: 700; color: #e6eef2">Bien · 80</span><span style="color: #b8c8d2">3 exercices + 2 projets</span></span>
+<span style="display: flex; flex-direction: column; gap: 2px; padding: 8px 12px; border-radius: 6px; background: #1a3a48"><span style="font-weight: 700; color: #e6eef2">Réussite · 65</span><span style="color: #b8c8d2">2 exercices + 1 projet</span></span>
+<span style="display: flex; flex-direction: column; gap: 2px; padding: 8px 12px; border-radius: 6px; border: 1px solid rgba(240,160,80,0.6)"><span style="font-weight: 700; color: #ffb878">Sous la réussite · 50</span><span style="color: #b8c8d2">palier d'échec</span></span>
+</div>
+</div>
+<div style="overflow-x: auto; background: #122a34; border-radius: 12px; padding: 8px 12px 14px">
+<div style="min-width: 1060px; display: flex; flex-direction: column">
+<div style="display: grid; grid-template-columns: minmax(170px, 1.3fr) repeat(6, 76px) 84px 84px 160px; gap: 8px; align-items: end; padding: 10px 8px 12px; border-bottom: 1px solid rgba(106,172,184,0.22)">
+<span style="font-size: 13px; font-weight: 600; color: #9fb4c0">Étudiant·e</span>
+<sc-for list="{{travaux}}" as="t" hint-placeholder-count="6">
+<span style="display: flex; flex-direction: column; gap: 2px; font-size: 13px"><span style="font-weight: 600; color: #e6eef2">{{t.nom}}</span><span style="color: #9fb4c0; font-size: 12px">{{t.date}}</span></span>
+</sc-for>
+<span style="font-size: 13px; font-weight: 600; color: #9fb4c0">Exercices</span>
+<span style="font-size: 13px; font-weight: 600; color: #9fb4c0">Projets</span>
+<span style="font-size: 13px; font-weight: 600; color: #e6eef2">Forfait · note</span>
+</div>
+<sc-for list="{{rangees}}" as="r" hint-placeholder-count="8">
+<div style="display: grid; grid-template-columns: minmax(170px, 1.3fr) repeat(6, 76px) 84px 84px 160px; gap: 8px; align-items: center; padding: 6px 8px; border-bottom: 1px solid rgba(106,172,184,0.10)">
+<span style="font-size: 15px; color: #e6eef2">{{r.nom}}</span>
+<sc-for list="{{r.cases}}" as="c" hint-placeholder-count="6">
+<button type="button" class="{{c.cls}}" onClick="{{c.changer}}" aria-label="{{c.aria}}">{{c.libelle}}</button>
+</sc-for>
+<span style="font-size: 15px; color: #c4d2da">{{r.exercices}}</span>
+<span style="font-size: 15px; color: #c4d2da">{{r.projets}}</span>
+<span style="display: flex; flex-direction: column; gap: 1px"><span style="font-size: 22px; font-weight: 700; color: #e6eef2">{{r.note}}</span><span style="font-size: 12px; color: #9fb4c0">{{r.forfait}}</span></span>
+</div>
+</sc-for>
+<div style="padding: 12px 8px 0">
+<button type="button" class="bouton">+ Ajouter un·e étudiant·e</button>
+</div>
+</div>
+</div>
+<div style="display: flex; gap: 22px; flex-wrap: wrap; align-items: center; font-size: 13px; color: #b8c8d2">
+<span style="display: inline-flex; align-items: center; gap: 8px"><span style="display: inline-flex; align-items: center; justify-content: center; width: 22px; height: 18px; border-radius: 4px; background: #34c759; color: #0c1a22; font-weight: 700; font-size: 12px">✓</span>Acceptable</span>
+<span style="display: inline-flex; align-items: center; gap: 8px"><span style="display: inline-flex; align-items: center; justify-content: center; width: 22px; height: 18px; border-radius: 4px; border: 2px solid #f0a050; box-sizing: border-box; color: #ffb878; font-weight: 700; font-size: 12px">✗</span>Non acceptable</span>
+<span style="display: inline-flex; align-items: center; gap: 8px"><span style="display: inline-block; width: 22px; height: 18px; border-radius: 4px; border: 1px dashed rgba(106,172,184,0.6); box-sizing: border-box"></span>À saisir</span>
+<span>Touche une case pour changer le résultat. Configuration fictive, pour l'ébauche.</span>
+</div>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1280,"height":960}}'>
+var TRAVAUX = [
+  { nom: 'Exercice 1', date: '11 sept.', type: 'ex' },
+  { nom: 'Exercice 2', date: '25 sept.', type: 'ex' },
+  { nom: 'Exercice 3', date: '9 oct.', type: 'ex' },
+  { nom: 'Exercice 4', date: '6 nov.', type: 'ex' },
+  { nom: 'Projet 1', date: '23 oct.', type: 'pr' },
+  { nom: 'Projet 2', date: '4 déc.', type: 'pr' }
+];
+var FORFAITS = [
+  { nom: 'Excellence', note: 90, ex: 4, pr: 2 },
+  { nom: 'Bien', note: 80, ex: 3, pr: 2 },
+  { nom: 'Réussite', note: 65, ex: 2, pr: 1 }
+];
+var ECHEC = { nom: 'Sous la réussite', note: 50 };
+var ORDRE = ['', 'A', 'N'];
+var ETUDIANTS = ['Ada Albatros', 'Bruno Baobab', 'Chloé Cormoran', 'Dario Dahlia', 'Elsa Escargot', 'Félix Fougère', 'Gaïa Goéland', 'Hugo Hibou'];
+var DEPART = [
+  ['A', 'A', 'A', 'A', 'A', ''],
+  ['A', 'N', 'A', '', 'A', 'A'],
+  ['A', 'A', 'A', 'A', 'A', 'A'],
+  ['N', 'N', 'A', '', 'N', ''],
+  ['A', 'A', 'A', 'N', 'A', 'A'],
+  ['A', '', '', '', '', ''],
+  ['A', 'A', 'A', 'A', 'A', ''],
+  ['', '', '', '', '', '']
+];
+
+class Component extends DCLogic {
+  lire() {
+    var s = this.state || {};
+    return { grille: s.grille || DEPART };
+  }
+
+  changer(i, j) {
+    var g = this.lire().grille.map(function (r) { return r.slice(); });
+    var k = ORDRE.indexOf(g[i][j]);
+    g[i][j] = ORDRE[(k + 1) % ORDRE.length];
+    this.setState({ grille: g });
+  }
+
+  renderVals() {
+    var self = this;
+    var etat = this.lire();
+    var rangees = etat.grille.map(function (ligne, i) {
+      var ex = 0, pr = 0, saisies = 0;
+      ligne.forEach(function (code, j) {
+        if (code) saisies++;
+        if (code === 'A') {
+          if (TRAVAUX[j].type === 'ex') ex++; else pr++;
+        }
+      });
+      var atteint = null;
+      for (var f = 0; f < FORFAITS.length; f++) {
+        if (ex >= FORFAITS[f].ex && pr >= FORFAITS[f].pr) { atteint = FORFAITS[f]; break; }
+      }
+      var note, forfait;
+      if (!saisies) { note = '–'; forfait = 'en attente de résultats'; }
+      else if (atteint) { note = String(atteint.note); forfait = atteint.nom; }
+      else { note = String(ECHEC.note); forfait = ECHEC.nom; }
+      var cases = ligne.map(function (code, j) {
+        var cls = 'case ' + (code === 'A' ? 'acc' : (code === 'N' ? 'nac' : 'vide'));
+        var libelle = code === 'A' ? '✓' : (code === 'N' ? '✗' : '+');
+        var mot = code === 'A' ? 'acceptable' : (code === 'N' ? 'non acceptable' : 'à saisir');
+        return {
+          cls: cls,
+          libelle: libelle,
+          aria: ETUDIANTS[i] + ', ' + TRAVAUX[j].nom + ' : ' + mot,
+          changer: function () { self.changer(i, j); }
+        };
+      });
+      return { nom: ETUDIANTS[i], cases: cases, exercices: ex + ' / 4', projets: pr + ' / 2', note: note, forfait: forfait };
+    });
+    return { travaux: TRAVAUX, rangees: rangees };
+  }
+}
+</script>
+</body>
+</html>
