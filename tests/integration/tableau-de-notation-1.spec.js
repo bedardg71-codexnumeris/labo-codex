@@ -46,15 +46,15 @@ function amorcer({ T, famille, evaluations }) {
     window.db.setSync('trimestres', [{ id: T, nom: 'Trimestre fictif', annee: 2026, session: 'A', actif: true }]);
     window.db.setSync('cours', [{ id: coursId, codeCours: 'FRA101', titre: 'Cours fictif' }]);
     window.db.setSync(T + '_groupesCours', [{ id: 'GC_TN', trimestreId: T, coursId, groupeNum: '01', pratiqueId: pratique.id, actif: true }]);
-    window.db.setSync(T + '_groupeEtudiants', eleves.map(([nom, prenom], i) => ({ da: '99900' + (10 + i), nom, prenom, groupe: '01', coursId, groupeCoursId: 'GC_TN' })));
-    window.db.setSync(T + '_pratiquesConfigurables', [pratique]);
-    window.db.setSync(T + '_echellesTemplates', [{ id: 'E_TN', nom: 'IDME fictive', niveaux }]);
-    window.db.setSync(T + '_grillesTemplates', [{ id: 'G_X', nom: 'Grille fictive', type: 'holistique', criteres: [{ id: 'c', nom: 'Critère', ponderation: 100, type: 'holistique' }] }]);
-    window.db.setSync(T + '_productions', productions.map(([id, titre, type, date], i) => ({ id, titre, type, numero: i + 1, dateEcheance: date, ponderation: 10, coursId, groupeCoursId: 'GC_TN' })));
+    window.db.setSync(T + '_groupeEtudiants', eleves.map(([nom, prenom], i) => ({ da: '99900' + (10 + i), nom, prenom, groupe: '01', coursId, groupeCoursId: 'GC_TN' })));   // security-ok: fixture fictive du banc
+    window.db.setSync(T + '_pratiquesConfigurables', [pratique]);   // security-ok: fixture fictive du banc
+    window.db.setSync(T + '_echellesTemplates', [{ id: 'E_TN', nom: 'IDME fictive', niveaux }]);   // security-ok: fixture fictive du banc
+    window.db.setSync(T + '_grillesTemplates', [{ id: 'G_X', nom: 'Grille fictive', type: 'holistique', criteres: [{ id: 'c', nom: 'Critère', ponderation: 100, type: 'holistique' }] }]);   // security-ok: fixture fictive du banc
+    window.db.setSync(T + '_productions', productions.map(([id, titre, type, date], i) => ({ id, titre, type, numero: i + 1, dateEcheance: date, ponderation: 10, coursId, groupeCoursId: 'GC_TN' })));   // security-ok: fixture fictive du banc
     window.db.setSync(T + '_evaluationsSauvegardees', evaluations);
     window.trimestreActif = T;
     window.db.setSync('trimestreActif', T);
-    window.db.setSync('infoCours', { id: coursId, codeCours: 'FRA101', groupe: '01', _groupeCoursId: 'GC_TN' });
+    window.db.setSync('infoCours', { id: coursId, codeCours: 'FRA101', groupe: '01', _groupeCoursId: 'GC_TN' });   // security-ok: fixture fictive du banc
     window.db.setSync('groupeCoursActif', { id: 'GC_TN', trimestreId: T });
     ['overlay-backup-reminder', 'transition-bandeau'].forEach((id) => { const n = document.getElementById(id); if (n) n.remove(); });
 }
