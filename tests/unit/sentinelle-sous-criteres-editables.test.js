@@ -133,7 +133,8 @@ describe('G — les gestes, et les bornes de l’assistant', () => {
         await win.ajouterSousCritere('GR_BANC', 0);
         const ecrits = store[cle('grillesTemplates')][0].criteres[0].sousCriteres;
         expect(ecrits).toHaveLength(1);
-        expect(ecrits[0]).toMatchObject({ code: '0', nom: '', ponderation: 1.0, retroaction: '' });
+        // Corrections du huitième parcours (9 nov. 2026, Cowork) : le premier code porte 1 (avant : 0).
+        expect(ecrits[0]).toMatchObject({ code: '1', nom: '', ponderation: 1.0, retroaction: '' });
         expect(ecrits[0].id).toMatch(/^SC_/);
     });
 
@@ -165,10 +166,10 @@ describe('G — les gestes, et les bornes de l’assistant', () => {
         const codes = store[cle('grillesTemplates')][0].criteres[0].sousCriteres.map(s => s.code);
         expect(codes).toEqual(['1', '2', '3']);
         expect(new Set(codes).size).toBe(codes.length);
-        // Sans code numérique, le rang (comme avant).
+        // Sans code numérique, le rang, compté depuis 1 depuis les corrections du huitième parcours (9 nov. 2026).
         const m = monter(grille([{ id: 'SC_A', code: 'A', nom: 'Un', ponderation: 1 }]));
         await m.win.ajouterSousCritere('GR_BANC', 0);
-        expect(m.store[cle('grillesTemplates')][0].criteres[0].sousCriteres.map(s => s.code)).toEqual(['A', '1']);
+        expect(m.store[cle('grillesTemplates')][0].criteres[0].sousCriteres.map(s => s.code)).toEqual(['A', '2']);
     });
 
     it('G.d le champ refusé est marqué (le handler lit le refus)', async () => {

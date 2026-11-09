@@ -205,7 +205,8 @@ describe('#1120 grille neuve · E — ce qui s’écrit, et quand', () => {
         const c = m.store[K][0].criteres[0];
         expect(c.type).toBe('analytique');
         expect(c.ponderation).toBe(10);
-        expect(c.sousCriteres.map(s => [s.code, s.nom, s.ponderation, s.retroaction])).toEqual([['0', 'Annoncer le plan', 1, ''], ['1', 'Conclure', 1, '']]);
+        // Le premier code porte 1 (corrections du huitième parcours, 9 nov. 2026, Cowork ; avant : 0).
+        expect(c.sousCriteres.map(s => [s.code, s.nom, s.ponderation, s.retroaction])).toEqual([['1', 'Annoncer le plan', 1, ''], ['2', 'Conclure', 1, '']]);
         expect(c.bareme.map(t => [t.nom, t.pointsMin, t.pointsMax, t.texte])).toEqual([
             ['Insuffisant', 0, 3, 'Peu d’idées.'], ['Suffisant', 4, 7, 'Des idées claires.'], ['Excellent', 8, 10, 'Des idées fines.']]);
     });

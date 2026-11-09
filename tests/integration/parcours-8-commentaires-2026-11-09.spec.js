@@ -47,6 +47,7 @@ async function capture(page, nom) {
  */
 async function ouvrirEspace(page, largeur, { clair = false, hauteur = 900, avecGrille = true, verrouDejaPose = false } = {}) {
     page.on('dialog', (d) => d.accept().catch(() => {}));
+    await page.addInitScript(releveDesAvisSurLaBulle);
     // Le rappel de sauvegarde paraît quand l'espace a des données sans codex : une personne le ferme
     // (« Plus tard », la croix) et le parcours continue ; le banc fait de même, quand il paraît.
     await page.addLocatorHandler(page.locator('#overlay-backup-reminder.actif'), async () => {
@@ -137,6 +138,39 @@ async function attendreTitre(page, titre, { focus = true } = {}) {
     await expect(bulle(page).locator('.parcours-bulle-titre')).toHaveText(titre, { timeout: 10000 });
     if (focus) await expect(bulle(page)).toBeFocused();
 }
+
+/**
+ * Corrections du 9 nov. (décision 2 de Cowork) : aucun avis de la pile ne couvre la bulle. Un relevé tourne dans la
+ * page pendant tout l'essai (posé avant chaque chargement) : toutes les 100 ms, il regarde si un avis couvre la bulle ;
+ * un recouvrement qui dure plus de cinq relevés (la pile se replace en 200 ms au plus, utils-notifications.js,
+ * `_placerLaPile`) est consigné, avec le titre de l'étape. Chaque essai finit en exigeant un relevé vide (afterEach).
+ * Break-test (9 nov., Chromium) : `_placerLaPile` sans effet → « 820 px : aucun avis… » ROUGE (l'orange de
+ * l'étape 7 sur la bulle de l'étape 9) ; rétabli → vert.
+ */
+function releveDesAvisSurLaBulle() {
+    window.__avisSurLaBulle = [];
+    let suite = 0;
+    setInterval(() => {
+        const b = document.getElementById('parcours-bulle');
+        let couvrent = [];
+        if (b) {
+            const r = b.getBoundingClientRect();
+            couvrent = [...document.querySelectorAll('#notifications-pile > *')]
+                .filter((n) => !n.classList.contains('notification-sortie'))
+                .filter((n) => { const x = n.getBoundingClientRect(); return !(x.right <= r.left || r.right <= x.left || x.bottom <= r.top || r.bottom <= x.top); });
+        }
+        suite = couvrent.length ? suite + 1 : 0;
+        if (suite === 6) {
+            const t = b.querySelector('.parcours-bulle-titre');
+            window.__avisSurLaBulle.push((t ? t.textContent : '?') + ' : ' + couvrent.map((n) => n.textContent.trim().slice(0, 40)).join(' | '));
+        }
+    }, 100);
+}
+
+test.afterEach(async ({ page }) => {
+    const releve = await page.evaluate(() => window.__avisSurLaBulle || []).catch(() => []);
+    expect(releve, 'aucun avis n’a couvert la bulle').toEqual([]);
+});
 
 const REFUS = 'Commence par « Évaluer une première production » : il te faut une production et sa grille pour automatiser tes commentaires.';
 const REFUS_PAGE = REFUS;
@@ -416,8 +450,11 @@ async function finirLeCheminAvecFichier(page, grille, cap = async () => {}) {
     await expect(page.locator('#retroactionFinale1')).toHaveValue(/Ta production contient 2 unités manquantes pour 12 calculs\./);
     await toucher(page, page.locator('#travaux-palette-eval-retro .retro-vues-radios label', { hasText: 'Spécifique' }));
     const specifique = (await page.locator('#contenuRetroSpecifique').innerText()).replace(/\s+/g, ' ');
-    expect(specifique).toContain('Code 0');
+    // Corrections du 9 nov. (Cowork) : le premier code d'un critère commence au numéro 1 (avant : « Code 0 »,
+    // qu'aucune touche ne choisit). Break-test : codeSousCritereNeuf remis au rang depuis 0 → ROUGE.
     expect(specifique).toContain('Code 1');
+    expect(specifique).toContain('Code 2');
+    expect(specifique).not.toContain('Code 0');
     await contourSur(page, '#btnVerrouillerEvaluation');
     await bulleNeCouvrePasLeContour(page);
     await cap(10);
@@ -457,6 +494,57 @@ test('l’étape 8 sautée : la production associée à l’étape 7 a déjà se
     await page.selectOption('#productionGrille', grille.id);
     await attendreTitre(page, 'Poser tes codes');
     await expect(rang(page)).toHaveText('8 sur 10');
+});
+
+// Corrections du 9 nov. (décision 2) : à 820 px, l'orange « Grille enregistrée : ses critères totalisent… »
+// reste de l'étape 7 jusqu'à son « OK » (#1224) et couvrait la bulle de l'étape 9. Le relevé vérifie à
+// chaque instant qu'aucun avis ne couvre la bulle (le relevé, `afterEach`) ; la fin vérifie que l'orange était bien
+// là tout du long.
+test('820 px : aucun avis ne couvre la bulle, l’orange de la grille restant affiché de l’étape 7 à la fin', async ({ page }) => {
+    test.setTimeout(180000);
+    await ouvrirEspace(page, 820, { hauteur: 1180 });
+    const grille = await reglerUneGrilleNeuve(page);
+    await finirLeCheminAvecFichier(page, grille);
+    await expect(page.locator('#notifications-pile .notification-warning', { hasText: 'ses critères totalisent' })).toBeVisible();
+});
+
+// Corrections du 9 nov. (décision 3 de Cowork) : pendant tout parcours, l'aide dans les pages se tait.
+// Break-test (9 nov., Chromium) : le garde de `afficherBulleDecouverte` retiré (accompagnement.js) → ROUGE
+// (une bulle de découverte en plein parcours) ; celui de `afficherHover` retiré → ROUGE. Rétablis → verts.
+test('pendant un parcours, l’aide dans les pages se tait (bulle de découverte, flèche, infobulle) ; hors parcours, elle parle', async ({ page }) => {
+    test.setTimeout(60000);
+    await ouvrirEspace(page, 1180);
+    await page.evaluate(() => { definirPreference('accompagnementActif', true); document.body.classList.add('aide-contextuelle-active'); });
+    const cle = await page.evaluate(() => Object.keys(window.accompagnement.catalogue).find((k) => window.accompagnement.catalogue[k].hover));
+    expect(cle, 'une aide de survol au catalogue').toBeTruthy();
+    // Hors parcours, une flèche paraît ; elle restera affichée quand le parcours commencera.
+    await page.evaluate(() => window.accompagnement.afficherFleche('banc-p8-fleche', { sectionActive: 'banc', cibleSelector: '#btn-codex', message: 'Flèche du banc', direction: 'bas' }));
+    await expect(page.locator('#fleche-didactique-host')).toBeVisible();
+    await ouvrirPanneau(page);
+    await item(page).locator('.assistance-parcours-bouton').click();
+    await attendreTitre(page, 'Ta grille');
+    // Celle qui était là se cache ; aucune autre ne s'ouvre.
+    await expect(page.locator('#fleche-didactique-host')).toBeHidden();
+    await page.evaluate(() => window.accompagnement.afficherBulleDecouverte({ cible: '#btn-codex', message: 'Bulle du banc' }));
+    await expect(page.locator('.bulle-decouverte')).toHaveCount(0);
+    await page.evaluate((k) => {
+        const s = document.createElement('span');
+        s.id = 'banc-p8-survol';
+        s.dataset.tooltip = k;
+        s.textContent = 'survol';
+        document.querySelector('header.entete').appendChild(s);
+        window.accompagnement.afficherHover(s);
+        return new Promise((ok) => requestAnimationFrame(() => requestAnimationFrame(ok)));
+    }, cle);
+    await expect(page.locator('.tooltip-bulle.tooltip-visible')).toHaveCount(0);
+    // « Plus tard » : hors parcours, l'aide parle de nouveau.
+    await bulle(page).locator('.parcours-bulle-sortie').click();
+    await expect(bulle(page)).toHaveCount(0);
+    await page.evaluate(() => window.accompagnement.afficherHover(document.getElementById('banc-p8-survol')));
+    await expect(page.locator('.tooltip-bulle.tooltip-visible')).toBeVisible();
+    await page.evaluate(() => window.accompagnement.masquerHover());
+    await page.evaluate(() => window.accompagnement.afficherBulleDecouverte({ cible: '#btn-codex', message: 'Bulle du banc' }));
+    await expect(page.locator('.bulle-decouverte')).toBeVisible();
 });
 
 // Les captures (CAPTURES_PARCOURS=<dossier>) : les onze étapes à 1180 px, sombre et clair ; les étapes 2, 5

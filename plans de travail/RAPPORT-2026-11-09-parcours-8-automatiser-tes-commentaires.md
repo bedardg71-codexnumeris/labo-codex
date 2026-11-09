@@ -2,7 +2,43 @@
 
 **Session G de la nuit du 8 au 9 nov. 2026**, dans le cloud. Branche `lot/parcours-8-automatiser-tes-commentaires`, partie de `origin/lot/parcours-1-et-2` (a328bb9). Consigne : `plans de travail/CONSIGNE-LOT-2026-11-08-parcours-8-automatiser-tes-commentaires.md`, recopiée dans la branche avec le plan de la nuit. Rien sur `main`, pas de release, rien au changelog, aucun fichier de coordination touché (règle 3).
 
-## En bref
+> **Mis à jour le 9 nov. 2026, après les décisions de 9 h 41 à 9 h 46 (Cowork)** : les phrases validées sont posées, les
+> trois décisions techniques sont faites, `origin/main` (1.238.0) est fusionné dans la branche (section suivante). Reste
+> au Mac : le verdict WebKit, la déclaration « pas sur téléphone » (lot « La bulle sur téléphone »), la fusion.
+
+## Les corrections du 9 nov. (ce que tu verras)
+
+- **Les phrases validées sont posées, mot pour mot** : l'étape 6 (le modèle « Français écrit » et « Générique »),
+  l'étape 7 (une production pas encore évaluée), l'étape 8 (l'Inspecteur), l'étape 9 (« 0 pour le code 10 », et le
+  geste « Annoter ▾ » puis « Évaluer »), l'étape 10 dans ses deux variantes (« sauf avec une pénalité fixe », le PDF
+  et ses « Points récurrents », « Un mot pour ton étudiant·e », le panneau « Critères », « Regarde ensuite la
+  rétroaction, à côté »), l'étape 11 (créer le critère dans Grilles avant de coller une liste). La sentinelle Vitest
+  part de la consigne du 8, y applique ces corrections, et exige chaque nouvelle phrase dans le code.
+- **`origin/main` fusionné** dans la branche, pour le champ « Un mot pour ton étudiant·e » (1.238.0). Un seul conflit,
+  dans `index.html` (trois jetons anti-cache) ; les jetons des fichiers de la branche sont passés au jour du build de
+  main (1109), comme l'exigent la sentinelle et le crochet anti-cache.
+- **Le premier code d'un critère porte maintenant 1** (décision 1 de Cowork), comme la liste du français écrit. Le
+  clavier le choisit avec la touche 1 ; la bulle 9 est donc vraie pour lui. **Les codes déjà créés ne sont pas
+  renumérotés** : un critère qui porte un 0 le garde, et son code suivant prend 1 (`codeSousCritereNeuf`,
+  `js/grilles.js`). Vaut pour tout sous-critère, puisque hors algorithmique le code est inerte. Le stock est donc
+  intouché, et assumé : un 0 déjà posé reste sans touche.
+- **Un avis ne couvre plus la bulle** (décision 2 de Cowork). **Ce que j'ai choisi** : ni fermer l'avis au changement
+  de section (ce serait revenir sur #1224, où Grégoire a voulu que l'orange et le rouge restent jusqu'à « OK »), ni
+  faire éviter l'avis par la bulle (il faudrait cette règle dans chaque parcours, le moteur ne l'ayant pas). C'est la
+  **pile des avis** qui se déplace : tant qu'un parcours joue et qu'un avis est affiché, elle prend le premier des
+  quatre coins qui ne couvre pas la bulle, et autant que possible ni le contour de ce qu'il faut toucher. Hors
+  parcours, elle reste en haut à droite. Le code est dans le module qui possède la pile (`js/utils-notifications.js`),
+  donc valable pour tout parcours : le neuvième en aura besoin (mêmes avis verts), **à unifier à la fusion**. Capture
+  `chromium-avec-fichier-820-sombre-09.png` : l'orange et le vert passent en bas à droite, sur la palette « Tampons ».
+- **L'aide dans les pages se tait pendant tout parcours** (décision 3 de Cowork) : l'infobulle du survol, les flèches
+  didactiques, les bulles de découverte (« Clique ici pour activer les outils d'annotation… »). Même lecture que le
+  rappel du codex au sixième parcours (`ParcoursMoteur.actif()`), sans toucher au moteur (`js/accompagnement.js`) ;
+  celles déjà affichées au lancement se cachent (`css/accompagnement.css`). Restent : le « i » et sa fenêtre, que la
+  personne ouvre elle-même, et la bulle d'une description de critère touchée, qui n'est pas une aide.
+- Captures Chromium remplacées : les étapes 6 à 11 à 1180 px en sombre, avec et sans fichier, et l'étape 9 à 820 px.
+  Les autres (approuvées) n'ont pas bougé.
+
+## En bref (premier dépôt, nuit du 8 au 9 nov.)
 
 ### Ce qui est fait
 
@@ -15,17 +51,21 @@
 - « Plus tard » ferme la bulle ; le panneau dit « Étape 3 sur 10 » et « Reprendre » revient à la même étape, sur la même grille.
 - Les douze bulles (onze étapes et la variante sans fichier de l'étape 10) sont posées mot pour mot ; une sentinelle les confronte à la consigne.
 
-### Ce qui attend Grégoire
+### Les sept questions, tranchées (9 nov. 2026, 9 h 41 à 9 h 46)
 
-Une question par ligne, avec ma recommandation.
+1. **Les phrases qui ne tenaient pas** : remplacées par celles que Grégoire a validées (section précédente). La phrase
+   du clavier tient maintenant aussi parce que le premier code porte 1 (décision 1).
+2. **L'iPhone** : traité par le lot « La bulle sur téléphone » (Mac), qui fait de « pas sur téléphone » une propriété
+   du registre ; rien ici, la déclaration s'ajoutera à la fusion.
+3. **La fiche d'une grille déjà ouverte, refermée à l'étape 1** : on garde (Cowork).
+4. **Le titre de la variante sans fichier** : on garde (Cowork).
+5. **Le compte qui change quand le chemin se décide** : on garde (Cowork).
+6. **Une production déjà évaluée sur une autre grille** : la phrase de l'étape 7 le dit maintenant (validée par Grégoire).
+7. **La place de la bulle aux étapes 9 et 10** : on garde (Grégoire a approuvé les captures des onze étapes).
 
-1. **Onze phrases validées ne tiennent pas devant le code** (tableau « Les vérifications », plus bas). Je n'en ai changé aucune ; chacune a sa proposition. Recommandation : prendre d'abord celles des étapes 9 et 10, que j'ai vues à l'écran (le premier code porte le numéro 0 ; le bouton dit « Annoter ▾ »), puis relire les autres, lues dans le code.
-2. **Sur iPhone (390 px), le parcours n'est pas praticable.** Les bulles longues couvrent ce qu'il faut toucher (« + Nouvelle grille », « + Ajouter un sous-critère », « Créer la grille »), et dans Annoter les palettes couvrent toute la production. Recommandation : viser l'iPad et le Mac pour ce parcours ; une bulle repliable sur téléphone relève du moteur (lot « Les deux parcours »), pas de ce lot.
-3. **Étape 1, une grille enregistrée déjà ouverte** sans critère algorithmique : le parcours referme sa fiche pour que tu choisisses ta grille dans le menu. Rien ne s'écrit : une grille enregistrée s'enregistre d'elle-même. D'accord ? Recommandation : oui.
-4. **La variante sans fichier de l'étape 10 n'a pas de titre** dans la consigne : j'ai repris « Ta rétroaction s'écrit seule ». Recommandation : garder.
-5. **Le compte change au moment où le chemin se décide** : « 1 sur 11 » tant que la grille n'est pas choisie, puis « 2 sur 10 » si elle porte déjà une production ; « 7 sur 10 » à l'étape 8, puis « 8 sur 9 » après « Rien à importer ». Recommandation : garder (c'est la règle tranchée par Cowork pour le quatrième parcours).
-6. **Étape 7, une production déjà évaluée sur une autre grille** : l'évaluation et la palette « Codes » suivent la grille de ces évaluations, pas celle qu'on vient d'associer (lu dans le code par l'agent de vérification, non exécuté). Le parcours avance quand même. Recommandation : le dire dans la bulle de l'étape 7, avec un texte à valider, puisque le parcours vise une production pas encore évaluée.
-7. **La place de la bulle aux étapes 9 et 10** : pendant qu'on pose les codes, elle va à gauche, sur la palette des outils ; en mode Évaluer, elle prend la place qui couvre le moins les palettes et jamais le champ à remplir ni le verrou, donc elle se déplace d'un geste à l'autre. À juger sur les captures.
+### Ce qui attend encore Grégoire
+
+Rien de nouveau. Aucun texte n'a été écrit en dehors des phrases validées.
 
 ### Ce que je n'ai pas pu vérifier
 
@@ -100,7 +140,7 @@ Les « tient » et « ne tient pas » viennent de la lecture du code par un agen
 - **Corrigé dans le lot (c'est le mien)** : à l'entrée des étapes de l'atelier, le parcours rouvrait la fiche de la grille quand l'atelier manquait un instant (pendant un redessin). Cette réouverture tardive pouvait effacer ce qu'on venait d'écrire. Il attend maintenant l'atelier et ne rouvre qu'une fiche fermée.
 - **Commenté, sans suite** (issue 3) : dans une grille enregistrée, les quatre noms tapés en quelques millisecondes se perdent parfois. Deux enregistrements se croisent, chacun redessinant la fiche (`grilles.js:4879-4900`) ; mesuré 1 passage sur 5 au banc. Une personne ne tape pas si vite.
 - **Commenté, sans suite** (issue 3) : le réglage de départ de la pénalité proportionnelle (500) est pensé pour des mots ; avec « calculs » et une étendue de 12, deux unités manquantes donnent 0/20 (vu : « −63,33 ; la note ne descend pas sous 0 »). La bulle de l'étape 4 dit d'ajuster le réglage.
-- **Commenté, sans suite** (issue 3) : l'avertissement « ses critères totalisent 20 %, pas 100 % » reste à l'écran jusqu'à « OK » et couvre le bouton du menu ; le témoin « Enregistré » passe un instant sur le lien « Plus tard » de la bulle, en bas à gauche.
+- ~~**Commenté, sans suite**~~ **Traité le 9 nov. (décision 2 de Cowork), pour la bulle** : l'avertissement « ses critères totalisent 20 %, pas 100 % » reste à l'écran jusqu'à « OK » et couvre le bouton du menu ; le témoin « Enregistré » passe un instant sur le lien « Plus tard » de la bulle, en bas à gauche.
 - **Commenté, sans suite** (issue 3) : le rappel de sauvegarde (« Mets ton codex à jour ») peut paraître pendant le parcours, sur un espace qui a des données sans codex. Il couvre la bulle jusqu'à ce qu'on le ferme, et lui prend le focus sans le lui rendre. La consigne du quatrième parcours le traite ; celle-ci n'en dit rien. Le banc le repousse (« Plus tard ») dès le montage.
 - **Déjà connu** : sous Chromium, un essai de la spec de la partie 1 mesure 430,00006 px au lieu de 430 (le panneau) ; l'audit de début de session l'avait relevé, avec trois écarts de géométrie dans `en-tete-epure` (barre de défilement de Linux). Sans lien avec ce lot.
 
@@ -122,6 +162,26 @@ Les « tient » et « ne tient pas » viennent de la lecture du code par un agen
 - **La spec de la partie 1**, sous Chromium : 6 essais verts, 1 rouge, 1 sauté. Le rouge mesure le panneau pendant son glissement d'entrée (−228 px). C'est le défaut de chronométrage relevé par l'audit de début de session, présent sur la base a328bb9, sans lien avec ce lot.
 - **Les captures** : `plans de travail/captures-2026-11-09-parcours-8/`, préfixées `chromium-`. Elles couvrent les onze étapes à 1180 px en sombre et en clair, les étapes 2, 5 et 9 à 820 et 390 px, le chemin sans fichier à 1180 px (et le panneau en cours), le refus du panneau. Le fichier `chromium-couverts-390.json` relève ce que la bulle ou les palettes couvrent à 390 px (voir la question 2).
 
+- **Corrections du 9 nov.** Vitest complet (depuis `tests/`, après la fusion de main) : voir plus bas pour le compte
+  final. Trois essais attendaient un premier code à 0 (`sentinelle-sous-criteres-editables` G.a et G.e,
+  `bareme-grille-neuve-1120` E.b) : mis à jour, la décision de Cowork en commentaire. Deux bancs neufs :
+  `sentinelle-premier-code-numero-1-2026-11-09` (la règle, le stock gardé ; break-test : le rang depuis 0 → rouge) et
+  la sentinelle des textes, étendue aux corrections (break-test : « (0 pour le code 10) » retiré → rouge). Playwright
+  (Chromium), le banc du parcours : **7 verts** (5 d'avant et 2 neufs), 5 captures sautées hors demande. Les deux neufs :
+  - « 820 px : aucun avis ne couvre la bulle… » : un relevé tourne dans la page pendant tout essai du fichier
+    (toutes les 100 ms ; un recouvrement de plus de 500 ms est consigné, et chaque essai finit en exigeant un relevé
+    vide). Break-test : la pile qui ne se déplace plus → **rouge** (« Poser tes codes : Grille enregistrée : ses
+    critères totali… »). Un premier essai, qui sondait seulement à l'arrivée de chaque étape, restait vert sans la
+    correction : remplacé par ce relevé.
+  - « pendant un parcours, l'aide dans les pages se tait… » : une flèche affichée avant le lancement se cache ; une
+    bulle de découverte et une infobulle ne s'ouvrent pas ; après « Plus tard », elles s'ouvrent. Break-tests : sans
+    le garde de la bulle de découverte → **rouge** ; sans celui de l'infobulle → **rouge**.
+  - Les codes de l'essai de bout en bout sont maintenant « Code 1 » et « Code 2 » (break-test : le rang depuis 0 →
+    rouge).
+  Specs voisines (Chromium) : `notifications-pile-1224`, `grille-critere-ajoute-enregistrer-957`,
+  `confirmations-conception-uniformes`, `parcours-1-et-2` : 18 verts, 1 sauté, 1 rouge, le rouge Chromium connu de la
+  base (« panneau : … le ferment », la géométrie du panneau pendant son glissement).
+
 ### Relecture par un agent neuf
 
 Verdict : **prêt avec réserves**. Ses constats, tous traités dans le lot :
@@ -140,7 +200,14 @@ Pour la session du Mac, à la fusion, sous le prochain numéro. Les trois premi�
 1. Les exemples grisés et une infobulle du critère algorithmique nomment le français : « Ex: Syntaxe, Ponctuation... » (nom d'un sous-critère), « Ex: La plupart des erreurs concernent la construction syntaxique... » (observation), « Ex: 1.0 pour erreur complète, 0.5 pour demi-point » (pondération), « Ex. : EUF » (nom d'une collection). Contraire au principe du 21 oct. (« ne rien coder en dur en fonction d'une discipline précise »). Proposer à Grégoire des exemples tirés des deux de l'écran (une rédaction, la chimie) avant tout code.
 2. L'atelier du critère algorithmique et ses calculs disent « copie » pour la production (« Copie fictive », « Copies de référence », « sur la copie », « la longueur de la copie », « Une copie déjà évaluée garde sa note… »). À joindre au lot « « Production » plutôt que « copie », dans l'interface ».
 3. À joindre à #1133 (le mode Catégories sans écran) : le parcours montre ce que perd le chemin sans fichier : ni décompte par code, ni « principalement », ni table selon le code le plus fréquent. Taper ses codes à la main reste la question qui revient à Grégoire.
-4. Le premier sous-critère ajouté par « + Ajouter un sous-critère » porte le numéro 0 (`codeSousCritereNeuf`, `grilles.js:5156-5159`), et aucune touche ne choisit le code 0 dans Annoter. Il bloque une phrase validée de l'étape 9 (le clavier). Vu à l'écran (« Code 0 ») ; la touche est lue dans le code.
+4. ~~Le premier sous-critère ajouté par « + Ajouter un sous-critère » porte le numéro 0~~ **Corrigé le 9 nov.
+   (décision 1 de Cowork) : ne pas inscrire.** Le premier sous-critère ajouté par « + Ajouter un sous-critère » portait le numéro 0 (`codeSousCritereNeuf`, `grilles.js:5156-5159`), et aucune touche ne choisit le code 0 dans Annoter. Il bloque une phrase validée de l'étape 9 (le clavier). Vu à l'écran (« Code 0 ») ; la touche est lue dans le code.
+
+5. **(Décision de Cowork du 9 nov.) Le basculement automatique sur le modèle « Français écrit »** quand le nom du
+   critère contient « français » (`js/evaluation-enonces.js:436, 545-554, 742`) est une règle codée pour une
+   discipline, qui agit sans que l'utilisateur·rice la choisisse ; deux principes de Grégoire l'excluent (ne rien
+   coder en dur pour une discipline, 21 oct. ; rien qui agisse à la place de la personne sans qu'elle le choisisse).
+   À revoir à part, en mesurant d'abord si ses grilles réelles en dépendent. La phrase de l'étape 6 le dit en attendant.
 
 ## Pour la fusion sur le Mac
 
@@ -148,4 +215,7 @@ Pour la session du Mac, à la fusion, sous le prochain numéro. Les trois premi�
 - `js/assistance.js` : le crochet `refus()` ; les autres branches ont peut-être posé le leur. En garder un seul.
 - `tests/integration/parcours-1-et-2-2026-11-08.spec.js` : les comptes (« 1 sur 3 », trois parcours) suivront le nombre de parcours fusionnés.
 - `js/preferences.js` : une clé de plus, `parcoursCommentaires`.
-- Les jetons anti-cache : `20261108b` à `d` sur cette branche ; la release les réécrira.
+- Les jetons anti-cache : passés au jour du build de main (`20261109`) à la fusion de main du 9 nov. ; la release les réécrira.
+- `js/utils-notifications.js` (la pile qui évite la bulle) et `js/accompagnement.js` (l'aide qui se tait) : le
+  neuvième parcours a besoin du même mécanisme pour ses avis verts ; **en garder un seul à la fusion**. Le sixième
+  parcours touche aussi `js/accompagnement.js` (l'aide du « i » au-dessus de l'aperçu), dans d'autres fonctions.

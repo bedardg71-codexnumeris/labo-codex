@@ -200,6 +200,19 @@ function definirAccompagnementActif(actif) {
     window.dispatchEvent(new Event('modeChanged'));
 }
 
+/**
+ * Corrections du huitième parcours (9 nov. 2026, décision de Cowork) : pendant tout parcours, les bulles de l'aide
+ * dans les pages se taisent : l'infobulle du survol, les flèches didactiques, les bulles de découverte. Le parcours
+ * a sa propre bulle ; une seconde la couvrait (« Clique ici pour activer les outils d'annotation… », à l'étape 9).
+ * Même lecture que le rappel du codex au sixième parcours : `ParcoursMoteur.actif()`, sans toucher au moteur.
+ * Restent : le « i » et sa fenêtre, que la personne ouvre elle-même ; la bulle d'une description touchée
+ * (`basculerBulleAncree`), qui n'est pas une aide. Ce qui était déjà affiché au lancement est caché par
+ * css/accompagnement.css (`body.parcours-actif`).
+ */
+function parcoursEnCours() {
+    return !!(window.ParcoursMoteur && typeof window.ParcoursMoteur.actif === 'function' && window.ParcoursMoteur.actif());
+}
+
 // Accès granulaire conservé comme alias (tous retournent l'état unifié).
 // Simplifie la conversion des call sites existants sans diff inutile.
 function prefTooltipsActive() { return estAccompagnementActif(); }
@@ -329,6 +342,7 @@ function hoverPositionnerBulle(cible, bulle) {
 function afficherHover(cible) {
     if (hoverCibleAncree) return;   // jamais deux bulles à la fois : celle qu'on a demandée reste
     if (!prefTooltipsActive()) return;
+    if (parcoursEnCours()) return;   // 9 nov. : l'aide dans les pages se tait pendant tout parcours
     const cle = cible.dataset.tooltip;
     if (!cle) return;
 
@@ -686,6 +700,7 @@ function autoPositionner(cible, direction) {
 
 function afficherAutoReveal(id, optionsExterne) {
     if (!prefFlechesActives()) return;
+    if (parcoursEnCours()) return;   // 9 nov. : l'aide dans les pages se tait pendant tout parcours
     if (estVue(id)) return;
 
     const entree = (optionsExterne && optionsExterne.sectionActive)
@@ -712,6 +727,7 @@ function afficherAutoReveal(id, optionsExterne) {
 
     autoTimerAffichage = setTimeout(function() {
         autoTimerAffichage = null;
+        if (parcoursEnCours()) return;   // un parcours lancé pendant l'attente : elle se tait aussi
         const cible = document.querySelector(entree.cibleSelector);
         if (!cible) {
             console.warn('[Accompagnement/flèches] Cible introuvable pour "' + id + '" : ' + entree.cibleSelector);
@@ -1087,6 +1103,7 @@ function initialiserPopup() {
 // --- Bulle de découverte (petit helper de aide-contextuelle.js) --------------
 
 function afficherBulleDecouverte({ cible, message, position = 'bas', duree = 8000 }) {
+    if (parcoursEnCours()) return;   // 9 nov. : l'aide dans les pages se tait pendant tout parcours
     const el = document.querySelector(cible);
     if (!el) return;
     const existante = document.querySelector('.bulle-decouverte');
