@@ -88,11 +88,38 @@ async function quitterLeChamp(page) {
 }
 
 /** « Touche « <type> » dans la palette », puis écris son titre : le bloc naît au centre, son titre à l'écriture. */
-async function creer(page, type, titre) {
+/**
+ * Deux passages de la sonde du moteur : le voile reçoit une marque, et chaque passage la remplace (`sonder` dessine le
+ * voile, puis lit l'état atteint, d'un seul tenant). Une condition observable, pas un délai : après elle, une étape qui
+ * devait avancer l'a fait.
+ */
+async function deuxSondes(page) {
+    for (let k = 0; k < 2; k++) {
+        await page.evaluate(() => document.querySelector('#parcours-voile path').setAttribute('d', 'M0,0'));
+        await page.waitForFunction(() => document.querySelector('#parcours-voile path').getAttribute('d') !== 'M0,0');
+    }
+}
+const rangActuel = (page) => page.evaluate(() => ParcoursMoteur.etapeCourante());
+
+/**
+ * Une saisie lente (`lent`), comme une personne : l'étape n'avance pas tant qu'on écrit (relecture neuve du 9 nov. : elle
+ * avançait dès la première lettre, et la bulle prenait le focus). Elle avance quand on quitte le champ.
+ */
+async function ecrireLentement(page, texte, champ) {
+    const rang = await rangActuel(page);
+    await page.keyboard.type(texte, { delay: 120 });
+    await deuxSondes(page);
+    expect(await rangActuel(page), 'l’étape attend qu’on quitte le champ').toBe(rang);
+    expect(await page.evaluate((s) => document.activeElement && document.activeElement.matches(s), champ), 'le focus reste au champ').toBe(true);
+    expect((await page.locator(`${champ}:focus`).textContent()).trim()).toBe(texte);
+}
+
+async function creer(page, type, titre, { lent = false } = {}) {
     const avant = await ids(page, type);
     await toucher(page, `#planif-palette .planif-palette-btn[data-type="${type}"]`);
     await expect(page.locator('.planif-noeud-titre:focus')).toHaveCount(1);
-    await page.keyboard.type(titre);
+    if (lent) await ecrireLentement(page, titre, '.planif-noeud-titre');
+    else await page.keyboard.type(titre);
     await quitterLeChamp(page);
     const id = (await ids(page, type)).find((x) => !avant.includes(x));
     expect(id, 'le bloc ' + type).toBeTruthy();
@@ -185,7 +212,7 @@ test('« Monter ton cours » : les sept étapes, la variante ⚠, « Plus tard �
     await bulleNeCouvrePas(page, '#planif-palette .planif-palette-btn[data-type="competence"]', 'étape 1');
     // Les cercles d'attache n'ont pas de zone élargie à la souris (question 10 : `pointer: coarse` seulement).
     await capture(page, DOSSIER, `p5-1-${cap}`);
-    const comp = await creer(page, 'competence', 'Analyser des textes littéraires');
+    const comp = await creer(page, 'competence', 'Analyser des textes littéraires', { lent: true });
     expect(await page.evaluate((s) => getComputedStyle(document.querySelector(s), '::before').content, port(comp, 'droite'))).toBe('none');
     await deplacer(page, comp, 290, 130);
 
@@ -200,7 +227,8 @@ test('« Monter ton cours » : les sept étapes, la variante ⚠, « Plus tard �
     await contourSur(page, port(comp, 'bas'), 'parcours-contour-extra-2');
     await capture(page, DOSSIER, `p5-2-cercles-${cap}`);
     await poserSous(page, idee, comp, 70);
-    expect(await page.evaluate(() => ParcoursMoteur.etapeCourante())).toBe(1);   // pas de lien encore
+    await deuxSondes(page);
+    expect(await rangActuel(page)).toBe(1);   // pas de lien encore
     await relier(page, comp, 'bas', idee);
 
     // 3. La leçon : son titre, sa semaine, sa séance, puis le trait depuis l'idée maîtresse (« se concrétise dans »).
@@ -218,7 +246,8 @@ test('« Monter ton cours » : les sept étapes, la variante ⚠, « Plus tard �
     await choisirDansEntete(page, `${noeud(lecon)} .planif-noeud-semaine`, '2');
     await choisirDansEntete(page, `${noeud(lecon)} .planif-noeud-seance`, '1');
     await contourSur(page, port(idee, 'bas'), 'parcours-contour-extra-2');
-    expect(await page.evaluate(() => ParcoursMoteur.etapeCourante())).toBe(2);   // datée, pas encore reliée
+    await deuxSondes(page);
+    expect(await rangActuel(page)).toBe(2);   // datée, pas encore reliée
     await bulleNeCouvrePas(page, port(idee, 'bas'), 'étape 3, le cercle de l’idée maîtresse');
     await bulleNeCouvrePas(page, `${noeud(lecon)} .planif-noeud-titre`, 'étape 3, le titre de la leçon');
     await relier(page, idee, 'bas', lecon);
@@ -245,7 +274,7 @@ test('« Monter ton cours » : les sept étapes, la variante ⚠, « Plus tard �
     await contourSur(page, `${noeud(lecon)} .planif-badge-objectif`);
     await toucher(page, `${noeud(lecon)} .planif-badge-objectif`);
     await toucher(page, `${noeud(lecon)} .planif-noeud-objectif[data-premiere]`);
-    await page.keyboard.type('Sera en mesure de repérer les procédés d’un incipit');
+    await ecrireLentement(page, 'Sera en mesure de repérer les procédés d’un incipit', '.planif-noeud-objectif');
     // Question 13 : la pastille « ! » paraît en quittant le champ, sans Entrée. Lu AUSSITÔT, sans attendre : une
     // reconstruction venue d'ailleurs la ferait paraître plus tard, et le banc ne départagerait plus le correctif.
     const pastille = page.locator(`${noeud(lecon)} .planif-obj-pastille`);
@@ -292,7 +321,6 @@ test('« Monter ton cours » : les sept étapes, la variante ⚠, « Plus tard �
     await contourSur(page, '#planif-panneau-production', 'parcours-contour-extra-1');
     await capture(page, DOSSIER, `p5-6-inspecteur-${cap}`);
     await toucher(page, caseVerifiee);
-    await page.selectOption('#planif-panneau-production', pid);
     // La variante : l'objectif vérifié, mais enseigné APRÈS (l'évaluation vient avant l'activité).
     await expect(texteBulle(page)).toHaveText(await page.evaluate(() => ParcoursCours.texteVariante));
     await expect(bulle(page).locator('.parcours-bulle-rang')).toHaveText('6 sur 7');
@@ -301,6 +329,12 @@ test('« Monter ton cours » : les sept étapes, la variante ⚠, « Plus tard �
     await capture(page, DOSSIER, `p5-6-variante-${cap}`);
     const bas = await rect(page, noeud(act));
     await glisser(page, await rect(page, prise(ev)), { x: bas.x - 40, y: bas.t + bas.h + 30 });
+    // Sous l'activité, la pastille passe à ✓ ; sans production, l'étape attend, et la bulle revient à son texte.
+    await expect.poll(() => pastilleEvaluation(page, ev)).toBe('avant');
+    await deuxSondes(page);
+    expect(await rangActuel(page)).toBe(5);
+    await expect(texteBulle(page)).not.toHaveText(await page.evaluate(() => ParcoursCours.texteVariante));
+    await page.selectOption('#planif-panneau-production', pid);
 
     // 7. Raffiner : la bulle au centre, sans « Plus tard », « Terminer ».
     await n(page, 7, 'Raffiner, si tu veux', { focus: false });
@@ -317,6 +351,15 @@ test('« Monter ton cours » : les sept étapes, la variante ⚠, « Plus tard �
     await expect(item(page).locator('.assistance-parcours-etat')).toHaveText('Fait');
     await expect(item(page).locator('.assistance-parcours-bouton')).toHaveText('Refaire');
     await capture(page, DOSSIER, `panneau-${cap}-fait`);
+
+    // « Refaire » sur la carte remplie : les étapes déjà faites passent d'elles-mêmes, jusqu'à la 7. Un autre parcours
+    // lancé ferme celui-ci sans « Plus tard » : l'Inspecteur ne reste pas devant (relecture neuve du 9 nov.).
+    await item(page).locator('.assistance-parcours-bouton').click();
+    await n(page, 7, 'Raffiner, si tu veux', { focus: false });
+    expect(await page.evaluate(() => document.body.classList.contains('parcours-inspecteur-devant'))).toBe(true);
+    await page.evaluate(() => Assistance.parcours().find((p) => p.id === 'decouvrir').lancer(0));
+    await expect.poll(() => page.evaluate(() => document.body.classList.contains('parcours-inspecteur-devant'))).toBe(false);
+    await expect(page.locator('[id^="parcours-contour-extra-"]')).toHaveCount(0);
 });
 
 test('« Monter ton cours » : sans production, le refus ; les deux pages du guide ; le panneau à 390 px', async ({ page }) => {
@@ -351,7 +394,7 @@ test('« Monter ton cours » : sans production, le refus ; les deux pages du gui
 
 test.describe('Les cercles d’attache au doigt (question 10)', () => {
     test.use({ hasTouch: true });
-    test('sous `pointer: coarse`, chaque cercle porte une zone de 44 px tournée vers l’extérieur ; son dessin ne change pas', async ({ page }) => {
+    test('sous `pointer: coarse`, chaque cercle et la poignée ⠿ portent une zone de 44 px tournée vers l’extérieur ; leur dessin ne change pas', async ({ page }) => {
         test.setTimeout(120000);
         await ouvrirEspaceVide(page, 1180);
         await mettreLaClasseEnPlace(page);
@@ -372,7 +415,15 @@ test.describe('Les cercles d’attache au doigt (question 10)', () => {
         }), comp);
         expect(mesures).toEqual(['droite', 'gauche', 'bas', 'haut'].map((dir) => ({ dir, dessin: 12, zone: ['44px', '44px'], dehors: true })));
         // La poignée ⠿ avait déjà la sienne (16 août).
-        const zonePrise = await page.evaluate((id) => { const a = getComputedStyle(document.querySelector(`[id="${id}"] .planif-noeud-prise`), '::after'); return [parseFloat(a.width), parseFloat(a.height)]; }, comp);
-        expect(Math.min(...zonePrise)).toBeGreaterThanOrEqual(44);
+        // La poignée ⠿ : sa zone (16 août) gagne, au doigt, 12 px vers l'extérieur du bloc, au-dessus de son bord, sans
+        // rien perdre à droite. Un toucher à 4 px au-dessus du bord du bloc, à l'aplomb de la poignée, la vise.
+        const prise = await page.evaluate((id) => {
+            const g = document.querySelector(`[id="${id}"] .planif-noeud-prise`);
+            const a = getComputedStyle(g, '::after');
+            const r = g.getBoundingClientRect(), b = document.getElementById(id).getBoundingClientRect();
+            return { zone: [parseFloat(a.width), parseFloat(a.height)], dehors: document.elementFromPoint(r.left + r.width / 2, b.top - 4) === g };
+        }, comp);
+        expect(Math.min(...prise.zone)).toBeGreaterThanOrEqual(44);
+        expect(prise.dehors).toBe(true);
     });
 });

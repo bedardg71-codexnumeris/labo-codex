@@ -53,6 +53,18 @@
     function qs(sel) { return document.querySelector(sel); }
     function enDemo() { return typeof estEnModeDemo === 'function' && estEnModeDemo(); }
 
+    /**
+     * Une saisie en cours dans la carte (un titre, un objectif, un champ de l'Inspecteur). La carte écrit à chaque
+     * touche : sans cette garde, l'étape avançait dès la première lettre, la bulle prenait le focus et la suite de la
+     * frappe tombait sur les raccourcis de la carte (relecture neuve du 9 nov. : un titre réduit à « Aéraires » ; à
+     * l'étape 4, un Retour arrière supprimait la leçon sélectionnée). L'étape avance quand on quitte le champ.
+     */
+    function enSaisie() {
+        var a = document.activeElement;
+        if (!a || !a.closest || !a.closest('#conception-carte')) return false;
+        return !!(a.isContentEditable || a.tagName === 'TEXTAREA' || (a.tagName === 'INPUT' && (a.type || 'text') === 'text'));
+    }
+
     function lireCtx() {
         var v = typeof obtenirPreference === 'function' ? obtenirPreference(CLE_CTX) : null;
         return v && typeof v === 'object' ? v : {};
@@ -104,6 +116,9 @@
         if (l && lireCtx().leconId !== l.id) majCtx({ leconId: l.id });
         return l;
     }
+
+    /** À l'étape 3 : la dernière leçon titrée de la carte, celle qu'on vient de créer (pas une leçon plus ancienne). */
+    function leconNeuve() { return duType('lecon').filter(texte).pop() || null; }
 
     /** La leçon du parcours : celle que l'étape 3 a vue naître, sinon la première leçon. */
     function laLecon() {
@@ -208,7 +223,6 @@
     var ciblesExtras = function () { return []; };
 
     function majExtras() {
-        if (!M().actif()) inspecteurDevant(false);   // le parcours fermé par le moteur (la démo rouverte)
         var cibles = M().actif() ? (ciblesExtras() || []).filter(vis) : [];
         while (extras.length < cibles.length) {
             var d = document.createElement('div');
@@ -245,6 +259,29 @@
 
     /** L'Inspecteur devant la palette « Planificateur », le temps du parcours (css/parcours.css). */
     function inspecteurDevant(oui) { document.body.classList.toggle('parcours-inspecteur-devant', !!oui); }
+
+    /**
+     * Le parcours est-il toujours le nôtre ? Le moteur peut le fermer sans `surQuitter` : un autre parcours lancé, la démo
+     * ouverte (relecture neuve du 9 nov. : la classe restait sur `body` jusqu'au rechargement). Lu au titre de la bulle,
+     * que le moteur n'expose pas autrement ; pendant un passage d'étape, un de nos titres suffit.
+     */
+    function estLeNotre() {
+        if (!M().actif()) return false;
+        var t = qs('#parcours-bulle .parcours-bulle-titre');
+        return !t || ETAPES.some(function (e) { return e.titre === t.textContent; });
+    }
+
+    var veilleTimer = null;
+    function nettoyer() {
+        retirerExtras();
+        inspecteurDevant(false);
+        if (veilleTimer) clearInterval(veilleTimer);
+        veilleTimer = null;
+    }
+    function veiller() {
+        if (veilleTimer) clearInterval(veilleTimer);
+        veilleTimer = setInterval(function () { if (!estLeNotre()) nettoyer(); }, 400);
+    }
 
     async function allerALaCarte() {
         if (!vis(el('conception-carte')) && typeof naviguerVers === 'function') naviguerVers('conception', 'carte');
@@ -297,7 +334,7 @@
                 await allerALaCarte();
                 await amenerLeBloc(ideeReliee);
                 poserExtras(function () {
-                    var l = duType('lecon').find(texte);
+                    var l = leconNeuve();
                     if (!l) return [];
                     var b = bloc(l);
                     var datee = leconDatee(l);
@@ -306,11 +343,11 @@
                 });
             },
             zones: function () {
-                var l = duType('lecon').find(texte);
+                var l = leconNeuve();
                 if (!l) return [boutonPalette('lecon')];
                 return aLaisserLibre((leconDatee(l) ? [bloc(ideeReliee())] : []).concat(partiesDe(l, ['entete', 'titre'])), l);
             },
-            contour: function () { return duType('lecon').find(texte) ? null : boutonPalette('lecon'); },
+            contour: function () { return leconNeuve() ? null : boutonPalette('lecon'); },
             atteint: function () { return !!leconReliee(); }
         },
         {
@@ -394,6 +431,13 @@
         }
     ];
 
+    // Aucune étape n'avance pendant une saisie dans la carte (`enSaisie`) : elle avance quand on quitte le champ.
+    ETAPES.forEach(function (e) {
+        if (!e.atteint) return;
+        var atteint = e.atteint;
+        e.atteint = function () { return !enSaisie() && atteint(); };
+    });
+
     var DEF = { id: ID, etapes: ETAPES, lienSortie: 'Plus tard' };
 
     // ---------- La condition, le lancement, la fin ----------
@@ -401,7 +445,9 @@
     function condition() {
         if (enDemo()) return null;   // lue sur les vraies données, au lancement, une fois la démo refermée
         var prods = typeof obtenirDonneesSelonMode === 'function' ? (obtenirDonneesSelonMode('productions') || []) : [];
-        return prods.some(function (p) { return p && p.id; }) ? null : REFUS;
+        // Celles que le menu « Production » de l'Inspecteur propose (`chargerProductions` : `dansBibliotheque !== false`) :
+        // une production retirée de la bibliothèque laisserait entrer dans un parcours bloqué à l'étape 6.
+        return prods.some(function (p) { return p && p.id && p.dansBibliotheque !== false; }) ? null : REFUS;
     }
 
     async function lancer(depuis) {
@@ -419,19 +465,20 @@
         var reprise = window.Assistance.etatDe(ID).etat === 'en-cours';
         if (!reprise) { depuis = 0; majCtx({ leconId: null }); }
         window.Assistance.definirEtat(ID, 'en-cours', depuis);
-        inspecteurDevant(true);
-        return M().lancer(DEF, {
+        var lance = M().lancer(DEF, {
             depuis: depuis,
             surEtape: function (i) { retirerExtras(); window.Assistance.definirEtat(ID, 'en-cours', i); },
-            surQuitter: function () { retirerExtras(); inspecteurDevant(false); },
+            surQuitter: nettoyer,
             surEchap: function () { terminer(); },
             verifier: function () { return !enDemo(); }
         });
+        inspecteurDevant(true);
+        veiller();
+        return lance;
     }
 
     function terminer() {
-        retirerExtras();
-        inspecteurDevant(false);
+        nettoyer();
         window.Assistance.definirEtat(ID, 'fait', 0);
         M().fermer();
     }

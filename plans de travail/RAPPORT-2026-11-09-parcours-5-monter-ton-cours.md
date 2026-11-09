@@ -17,7 +17,8 @@ de `lot/parcours-4-recevoir-et-rendre` (qui porte les parcours 1 à 4) ; les ret
   dit la phrase validée (« Commence par « Évaluer une première production » : il te faut une production pour la placer
   dans ta carte. »). La démo ouverte se referme d'abord.
 - **Les sept étapes sur la carte d'alignement**, chacune qui avance sur l'état de la carte, jamais au toucher d'un
-  bouton : la compétence avec son énoncé ; une idée maîtresse reliée (« se décline en ») ; une leçon avec sa semaine,
+  bouton, et jamais pendant que tu écris : l'étape avance quand tu quittes le champ (Entrée dans un titre, ou un
+  toucher ailleurs). Les étapes : la compétence avec son énoncé ; une idée maîtresse reliée (« se décline en ») ; une leçon avec sa semaine,
   sa séance et son lien « se concrétise dans » ; un objectif écrit ; une activité glissée dans la leçon par sa poignée
   ⠿ et qui sert l'objectif ; une évaluation dans la leçon, sous l'activité, avec la production et sa pastille à ✓ ; la
   bulle finale, au centre, « Terminer ».
@@ -28,13 +29,15 @@ de `lot/parcours-4-recevoir-et-rendre` (qui porte les parcours 1 à 4) ; les ret
   lien « se concrétise dans » apparaît » ; étapes 5 et 6 : la poignée ⠿, « Touche deux fois cette poignée »). Une
   sentinelle Vitest les exige, avec les deux phrases du guide passées à l'écriture inclusive (« l'étudiant·e »).
 - **Ta question 10** : au doigt (`pointer: coarse`), chaque petit cercle d'attache a une zone sensible de 44 px tournée
-  vers l'extérieur du bloc ; son dessin ne change pas ; à la souris, rien ne change. La poignée ⠿ avait déjà la sienne.
+  vers l'extérieur du bloc ; son dessin ne change pas ; à la souris, rien ne change. La poignée ⠿ avait déjà une zone
+  de 44 px, tournée vers l'intérieur du bloc ; au doigt, elle gagne 12 px vers l'extérieur, au-dessus du bord.
 - **Ta question 13** : la pastille « ! » paraît dès que tu quittes le champ de ton premier objectif, sans Entrée.
 - « Plus tard » sur chaque bulle sauf la dernière ; « Reprendre » ramène la leçon de l'étape 3 au milieu du canevas,
   même après un rechargement.
-- **Trois choses corrigées en chemin, parce qu'elles cassaient le parcours** (section 4) : l'Inspecteur passait sous
+- **Quatre choses corrigées en chemin, parce qu'elles cassaient le parcours** (section 4) : l'Inspecteur passait sous
   la palette « Planificateur » (les cases des étapes 5 et 6 étaient dessous) ; la bulle couvrait le bloc qu'on venait de
-  créer, puis la leçon ; à la reprise, la leçon tombait au bas de l'écran, son 🎯 sous le « Planificateur ».
+  créer, puis la leçon ; à la reprise, la leçon tombait au bas de l'écran, son 🎯 sous le « Planificateur » ; et
+  l'étape avançait dès la première lettre tapée (trouvé par la relecture neuve).
 
 ### Ce qui attend Grégoire (une question par ligne, avec ma recommandation)
 
@@ -51,6 +54,15 @@ de `lot/parcours-4-recevoir-et-rendre` (qui porte les parcours 1 à 4) ; les ret
 3. **L'Inspecteur sous le « Planificateur », hors du parcours.** Corrigé pour le parcours seulement (section 4) ;
    ailleurs, à 1180 px, la palette « Planificateur », ouverte par défaut, couvre toujours les cases de l'Inspecteur.
    *Recommandation :* inscrire (l'Inspecteur devant les palettes, toujours), constat de la session H.
+4. **Les zones de 44 px suivent le zoom de la carte**, comme le dessin des cercles : à 50 %, la portée vers l'extérieur
+   tombe de 39 à 19 px (mesuré par la relecture neuve). *Recommandation :* garder ainsi pour la cohorte (la carte
+   s'ouvre à 100 %) ; une zone qui ne suivrait pas le zoom demande une variable de zoom que la carte n'expose pas (un
+   lot de la carte).
+5. **« Refaire » sur une carte déjà remplie** : les étapes 1 à 6, déjà atteintes, passent d'elles-mêmes en moins d'une
+   seconde, jusqu'à la 7 (mesuré). C'est le principe (« l'étape avance quand l'état est atteint »), mais on ne peut pas
+   rejouer le parcours sur la même carte. *Recommandation :* garder ainsi (le parcours montre ce qui manque à ta carte ;
+   pour le rejouer, une carte neuve) ; *à défaut,* ne compter que ce qui naît après « Refaire », comme le troisième
+   parcours.
 
 ### Ce que je n'ai pas pu vérifier
 
@@ -96,11 +108,13 @@ par le banc :
 - **Étapes 2 et 3** (les cercles de 12 px) : **corrigé** comme tu l'as décidé (question 10) : une zone de 44 px au
   doigt, tournée vers l'extérieur, essayée en Chromium tactile (un toucher à 14 px hors du cercle le vise encore). Le
   vrai doigt sur l'iPad reste à juger au Mac.
-- **Étapes 2 à 6** (la frise ouvre la page du guide) : **tient** ; le banc ouvre « Idées maîtresses » et « Objectifs »
-  par la frise, et lit la phrase inclusive dans chacune.
-- **Étape 3** (l'Inspecteur, la date) : **tient** ; « Mardi 1 septembre · séance A » paraît dans l'Inspecteur (capture
-  `p5-6-inspecteur`, celui de l'évaluation, qui donne la date de sa leçon). Le lien avec l'absence (#942) : mesuré par la
-  session H, pas repris ici.
+- **Étapes 2 à 6** (la frise ouvre la page du guide) : **tient** ; le banc ouvre deux pages sur cinq par la frise
+  (« Idées maîtresses » et « Objectifs », celles qui changent) et lit la phrase inclusive dans chacune ; les trois
+  autres, la session H les a ouvertes.
+- **Étape 3** (l'Inspecteur, la date) : **la date tient** ; « Mardi 1 septembre · séance A » paraît dans l'Inspecteur
+  (capture `p5-6-inspecteur`, celui de l'évaluation, qui donne la date de sa leçon). Le double toucher sur la leçon
+  elle-même n'est pas joué par le banc (la session H l'a mesuré en Chromium tactile). Le lien avec l'absence (#942) :
+  mesuré par la session H, pas repris ici.
 - **Étape 5** (glisser au doigt) : **tient par la poignée** (tes corrections le disent) ; le banc glisse à la souris.
 - **Étape 6** (✓ sous l'activité, ⚠ au-dessus, le ⚠ de la compétence qui disparaît) : **tient**, les deux ordres
   essayés. « Le bloc affiche la pondération » : ne tient pas (session H), mais la bulle ne le dit pas ; seul le menu
@@ -117,10 +131,15 @@ par le banc :
   `.planif-noeud-port`, décalé vers l'extérieur selon le côté du cercle. Essai Playwright (Chromium, `hasTouch`) :
   `pointer: coarse` vrai, chaque cercle dessiné à 12 px, sa zone à 44 × 44, un point à 14 px vers l'extérieur vise le
   cercle ; à la souris, aucun `::before` (essai du parcours). La poignée ⠿ : sa zone (`::after`, 16 août) mesure 44,5 ×
-  45 px.
+  45 px, tournée vers la droite, vers l'intérieur du bloc ; au doigt, elle gagne 12 px **au-dessus** du bord du bloc
+  (un toucher à 4 px au-dessus du bord la vise, essai rouge sans la règle). Pas à gauche : à mi-hauteur d'un bloc
+  compact, la zone du cercle « gauche » y est déjà et l'emporte (mesuré : à 14 px à gauche de la poignée, c'est le
+  cercle qui répond).
 - **Question 13** : la ligne du premier objectif porte `data-premiere` ; au départ du champ, si elle est devenue un
   objectif, la carte se reconstruit et pose la pastille. La phrase de l'étape 4 reste. Le banc lit la pastille
-  **aussitôt** après le départ du champ (avant : aucune ; juste après : « ! »).
+  **aussitôt** après le départ du champ (avant : aucune ; juste après : « ! »). Seulement pour le **premier** objectif,
+  comme décidé : un objectif ajouté par Entrée ou « + », puis quitté sans Entrée, n'a toujours pas sa pastille (mesuré
+  par la relecture neuve : trois objectifs, deux pastilles). Inscrit (section 8).
 - **Question 16** (pas offert au téléphone) : à reporter à la fusion (section 7).
 
 ## 4. Corrigé en chemin (cela cassait le parcours), et ce qui reste
@@ -128,8 +147,9 @@ par le banc :
 1. **L'Inspecteur sous la palette « Planificateur »** (constat de la session H, mesuré ici) : à 1180 px, la palette,
    ouverte par défaut (z-index 80), couvre l'Inspecteur (60) ; `elementFromPoint` sur la case de l'objectif rendait la
    palette. **Corrigé le temps du parcours** : la classe `parcours-inspecteur-devant` (`css/parcours.css`) fait passer
-   l'Inspecteur devant, posée au lancement, retirée à « Plus tard », à « Terminer » et à la fermeture par le moteur.
-   Hors parcours, rien ne change (question 3).
+   l'Inspecteur devant, posée au lancement, retirée à « Plus tard » et à « Terminer » ; quand le moteur ferme le
+   parcours sans le dire (un autre parcours lancé, la démo ouverte), une veille la retire (au titre de la bulle, que le
+   moteur n'expose pas autrement), et la règle ne vaut que moteur actif. Hors parcours, rien ne change (question 3).
 2. **La bulle couvrait le bloc neuf, puis la leçon** : un bloc neuf naît au centre, là où la bulle se mettait (mesuré :
    elle couvrait la poignée de l'idée maîtresse) ; et la leçon entière était trop grande pour que la bulle trouve sa
    place à côté (le moteur se rabattait sur un bord et la couvrait). Corrigé dans le parcours : la bulle laisse libres
@@ -143,15 +163,22 @@ par le banc :
    vrais événements de souris, rien ne défile. *Inférence :* la trouvaille de la session H venait de ses gestes scriptés
    (elle ne l'avait pas reproduite en espace neuf). Le banc fait donc tous ses gestes sur la carte à la souris, aux
    coordonnées. À confirmer au doigt sur l'iPad.
+5. **L'étape avançait à la première lettre** (relecture neuve, section 10) : la carte écrit le titre et l'objectif à
+   chaque touche ; l'étape avançait, la bulle prenait le focus, et la suite de la frappe tombait sur les raccourcis de
+   la carte (L, R ; un Retour arrière supprimait la leçon sélectionnée). **Corrigé** : aucune étape n'avance pendant une
+   saisie dans la carte ; elle avance quand on quitte le champ. Rien ne change pour la carte elle-même.
 
 ## 5. Les essais
 
-- **Vitest** : `tests/unit/sentinelle-parcours-cours-2026-11-09.test.js`, 16 essais : chaque bulle lue à l'exécution
+- **Vitest** : `tests/unit/sentinelle-parcours-cours-2026-11-09.test.js`, 21 essais (16, puis 5 après la relecture :
+  ce qui fait avancer les étapes 2, 3 et 6 sur une carte simulée, la saisie qui retient toute étape, la production
+  retirée de la bibliothèque) : chaque bulle lue à l'exécution
   et comparée à la consigne avec tes corrections ; chaque correction trouve sa phrase dans la consigne ; la variante ⚠ ;
   « Plus tard », « Terminer », la bulle au centre ; le titre, la ligne, la phrase du refus, et une production qui la
   lève ; les deux phrases du guide, la nouvelle présente, l'ancienne absente, et les bulles 2 et 4 qui les reprennent.
   Break-tests : « par sa poignée ⠿ » retiré de l'étape 5 → rouge ; « l'étudiant·e saura faire » remis à « l'étudiant »
-  dans le guide → rouge ; rétablis.
+  dans le guide → rouge ; la date de la leçon, la production de l'évaluation et la garde de saisie, chacune retirée →
+  rouge ; rétablis.
 - **La sentinelle #966 du guide** (`sentinelle-guide-carte-966`) gardait les pages 3 et 5 par empreinte : elle remet
   maintenant les deux phrases inclusives à l'ancienne avant de calculer l'empreinte, comme elle le faisait déjà pour
   deux retouches de la page 5 : l'empreinte d'avant tient, rien d'autre n'a bougé.
@@ -160,15 +187,21 @@ par le banc :
     (cinquième entrée, à faire, en cours, fait), chaque contour, la bulle qui laisse libres le bloc neuf, l'en-tête de
     la leçon, le cercle de l'idée maîtresse et la case de l'Inspecteur, l'étape qui n'avance pas avant la donnée (pas
     de lien, pas de date), « Plus tard », un rechargement et « Reprendre » à l'étape 4, la pastille « ! » au départ du
-    champ, l'évaluation posée au-dessus (la variante ⚠) puis dessous (✓), la production de la carte.
+    champ, l'évaluation posée au-dessus (la variante ⚠) puis dessous (✓) : sans production, l'étape attend et la bulle
+    revient à son texte ; la production choisie, elle avance. Après la relecture : la compétence et l'objectif tapés
+    lentement (120 ms par lettre) sans que l'étape avance ni que le focus parte ; « Refaire » sur la carte remplie, puis
+    un autre parcours lancé, et la classe de l'Inspecteur retirée. « L'étape n'avance pas » se lit après deux passages
+    réels de la sonde (une marque sur le voile que chaque passage remplace), pas après un délai.
   - Sans production : le refus ; les deux pages du guide ouvertes par la frise ; le panneau à 390 px.
-  - Au doigt : la zone de 44 px des quatre cercles (question 10).
-  - **3 sur 3 verts**, et l'essai des sept étapes **5 fois de suite** sans raté (les blocs neufs naissent au hasard).
+  - Au doigt : la zone de 44 px des quatre cercles, et le gain de la poignée vers l'extérieur (question 10).
+  - **3 sur 3 verts**, et l'essai des sept étapes **5 fois de suite** sans raté (les blocs neufs naissent au hasard),
+    puis **3 fois de suite** après les correctifs de la relecture.
   - Break-tests, chacun **rouge** puis rétabli : la question 13 (la reconstruction au départ du champ retirée) ; la
     variante (son passage retiré) ; le cadrage à la reprise ; l'Inspecteur devant ; la bulle sur la leçon entière ; la
-    règle des 44 px.
-- **Vitest entier** (depuis `tests/`) : 900 fichiers, **11 005 essais verts** ; le hook pré-push l'a relancé à chaque
-  poussée.
+    règle des 44 px ; après la relecture, la garde de saisie, la veille de la classe et le gain de la poignée.
+- **Vitest entier** (depuis `tests/`) : 900 fichiers, **11 010 essais verts** ; le hook pré-push l'a relancé à chaque
+  poussée. La sentinelle `phase-ee-et-prise` lit la première règle `.planif-noeud-prise::after` du fichier : la règle
+  du doigt est posée après celle de base, pour ne pas la masquer.
 - Les bancs voisins, rejoués sur cette branche après la fusion des retouches du troisième (`parcours-3-evaluer`,
   `parcours-4-recevoir-et-rendre`, `parcours-1-et-2`, `parcours-2-ma-classe`) : **13 sur 14**. Le rouge (« panneau :
   titre, phrase… », largeur 429,99994 px au lieu de 430) l'est aussi sans ces lots : l'arrondi de Chromium déjà dit au
@@ -176,8 +209,10 @@ par le banc :
 
 ## 6. Hypothèses que j'ai prises seul (à corriger en dix secondes si elles sont fausses)
 
-- « Une production dans le cours actif » : n'importe quelle production lue par `obtenirDonneesSelonMode('productions')`,
-  pas forcément celle du troisième parcours.
+- « Une production dans le cours actif » : une production du cours actif (`obtenirDonneesSelonMode('productions')`)
+  que le menu « Production » de l'Inspecteur propose (`dansBibliotheque !== false`), pas forcément celle du troisième
+  parcours.
+- L'étape 3 désigne la dernière leçon titrée de la carte, celle qu'on vient de créer.
 - L'étape 2 compte une idée maîtresse reliée par « se décline en » **depuis** la compétence ; l'étape 3, une leçon reliée
   par « se concrétise dans » **depuis** l'idée maîtresse (le sens des verbes de la carte).
 - L'étape 5 accepte tout bloc de la leçon qui peut servir un objectif (activité, exposé, ouverture…), comme le dit la
@@ -209,6 +244,8 @@ Vus en chemin (issue proposée : inscrire et continuer ; aucun n'a de symptôme 
 - La palette « Planificateur » couvre l'Inspecteur à 1180 px, hors du parcours (question 3 ; session H).
 - La frise rogne son début : « Compétence » n'est pas entier à 1180 px (session H ; visible sur chaque capture).
 - La garde du double toucher vise `.planif-port` et `.planif-poignee`, des classes qui n'existent pas (session H).
+- La pastille « ! » ne paraît au départ du champ que pour le premier objectif d'une leçon (question 13, décision
+  tenue) ; un objectif suivant, quitté sans Entrée, l'attend jusqu'à la reconstruction suivante.
 
 ## 9. Captures (Chromium, 1180 px, sombre)
 
@@ -220,6 +257,36 @@ Vus en chemin (issue proposée : inscrire et continuer ; aucun n'a de symptôme 
   `p5-6`, `p5-6-inspecteur` (les cases et « Production ») et `p5-6-variante` (la pastille ⚠), `p5-7` (au centre) ;
 - les deux pages du guide modifiées : `guide-idees-maitresses-1180-sombre`, `guide-objectifs-1180-sombre`.
 
-## 10. Relecture par un agent neuf
+## 10. Relecture par un agent neuf (9 nov.), et ce que j'en ai fait
 
-À venir (section ajoutée après la relecture).
+Verdict de l'agent : **« À reprendre »**, pour un défaut qui casse le parcours tel qu'on le fait à la main. Il a rejoué
+les sentinelles (28/28), le banc (3/3) et Vitest entier, puis fait ses break-tests : deux trous dans le banc (la date
+de la leçon, la production de l'évaluation). Chaque réserve, et ce qu'elle est devenue :
+
+1. **Haute : la bulle prenait le focus en pleine frappe** (étapes 1 et 4 ; mesuré à 150 ms par lettre : la compétence
+   titrée « Aéraires », l'objectif réduit à « S » ; un Retour arrière supprimait la leçon). Le banc tapait tout en moins
+   d'une sonde. → **Corrigé** (section 4, point 5) ; le banc tape maintenant lentement aux étapes 1 et 4. Break-test :
+   la garde retirée → rouge.
+2. **Moyenne : le rapport affirmait « pas de date » et la production, que le banc ne départageait pas.** → **Corrigé** :
+   une carte simulée en Vitest départage la semaine, la séance, le lien et la production ; le banc glisse l'évaluation
+   sous l'activité avant de choisir la production (l'étape attend), et lit « n'avance pas » après deux passages réels
+   de la sonde.
+3. **Basse : la classe de l'Inspecteur pouvait rester sur `body`** (un autre parcours lancé, la démo ouverte). →
+   **Corrigé** : la veille, la règle liée au moteur actif ; essai : « Refaire », puis « Découvrir » lancé, la classe
+   retirée.
+4. **Basse : la question 13 ne couvre que le premier objectif.** → **Inscrit** (section 8) ; conforme à la décision,
+   maintenant dit (section 3).
+5. **Basse : la poignée ⠿ n'avait pas de zone tournée vers l'extérieur ; les zones suivent le zoom.** → La poignée :
+   **corrigé** (12 px au-dessus du bord, au doigt ; pas à gauche, mesuré). Le zoom : **question 4** pour toi.
+6. **Basse : la condition comptait une production retirée de la bibliothèque** (le menu de l'Inspecteur ne la propose
+   pas : le parcours aurait bloqué à l'étape 6). → **Corrigé** : la condition lit le même filtre ; essai Vitest.
+7. **Basse : l'étape 3 visait la première leçon titrée, pas la nouvelle.** → **Corrigé** : la dernière leçon titrée.
+8. **Basse : deux « tient » plus larges que la preuve** (l'Inspecteur de la leçon, la frise). → **Réécrits** (section
+   2).
+9. **« Refaire » sur une carte remplie** : → **question 5** pour toi.
+10. **Les deux items de la consigne seulement listés « À inscrire »** : → **refusé, motif** : la règle de la nuit dans
+    le nuage interdit de toucher `BACKLOG.md` (fichiers de coordination intouchés) ; ils attendent dans la section 8.
+
+Non retenu par l'agent lui-même : un toucher sur la palette juste après la bulle 1 qui n'aurait pas donné le focus au
+titre (deux fois dans sa sonde, non reproduit avec une pause). Je ne l'ai pas reproduit non plus : le banc touche la
+palette dès la bulle 1 et vérifie le focus au titre, cinq fois de suite.

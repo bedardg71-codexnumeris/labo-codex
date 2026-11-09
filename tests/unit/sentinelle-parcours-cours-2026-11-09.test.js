@@ -151,3 +151,71 @@ describe('Le guide de la carte, aligné sur les bulles (consigne, 10 h 29 et 10 
         expect(E[3].texte).toContain(remplacements[1][2]);
     });
 });
+
+// Les conditions des étapes, sur une carte simulée (relecture neuve du 9 nov. : le banc ne départageait ni la date de la
+// leçon, ni la production de l'évaluation). Et aucune étape n'avance pendant une saisie dans la carte (la bulle prenait
+// le focus dès la première lettre).
+// Break-tests (9 nov.) : `leconDatee` remplacé par `texte` dans `leconReliee` → ROUGE (3) ; `productionId` retiré
+// d'`evaluationAlignee` → ROUGE (6) ; la garde `enSaisie` retirée → ROUGE (saisie). Rétablis.
+describe('« Monter ton cours » : ce qui fait avancer chaque étape', () => {
+    function carte({ noeuds = [], liens = [], pastille = 'avant', saisie = false, prods = [{ id: 'PROD_un' }] } = {}) {
+        const N = new Map(noeuds.map((n) => [n.id, { enfants: [], metadata: {}, ...n }]));
+        const L = new Map(liens.map((l, k) => [String(k), l]));
+        const actif = saisie ? { isContentEditable: true, tagName: 'DIV', closest: (s) => (s === '#conception-carte' ? {} : null) } : null;
+        const win = {
+            Assistance: { enregistrer() {}, definirEtat() {}, etatDe: () => ({ etat: 'en-cours', etape: 0 }) },
+            ParcoursMoteur: { visible: () => true, actif: () => true, etapeCourante: () => 0, allerA() {} },
+            planificationCarte: {
+                etat: { noeuds: N, liens: L },
+                semaineDeLecon: (n) => n.metadata.semaine || null,
+                objectifsDeLecon: (n) => n.metadata.objectifs || [],
+                objectifsServisPar: (n) => n.metadata.objectifsServis || [],
+                objectifsVerifiesPar: (n) => n.metadata.objectifsVerifies || [],
+                evaluerPastilleEvaluation: () => ({ etat: pastille }),
+                TYPES_SERVANTS_OBJECTIF: ['activite', 'evaluation']
+            }
+        };
+        const document = { getElementById: () => null, querySelector: () => null, querySelectorAll: () => [], body: { appendChild() {} }, activeElement: actif };
+        chargerScript('js/parcours-cours.js', { document, obtenirDonneesSelonMode: () => prods }, win);
+        return win.ParcoursCours;
+    }
+    const COMP = { id: 'C', type: 'competence', titre: 'Analyser' };
+    const IDEE = { id: 'I', type: 'idee-maitresse', titre: 'Le texte' };
+    const DECLINE = { type: 'se_decline_en', source: 'C', cible: 'I' };
+    const LECON = (meta) => ({ id: 'L', type: 'lecon', titre: 'Lire', metadata: meta });
+    const CONCRETISE = { type: 'se_concretise_dans', source: 'I', cible: 'L' };
+    const atteint = (api, k) => api.etapes()[k - 1].atteint();
+
+    it('2. l’idée maîtresse : titrée ET reliée par « se décline en » depuis la compétence', () => {
+        expect(atteint(carte({ noeuds: [COMP, IDEE] }), 2)).toBe(false);
+        expect(atteint(carte({ noeuds: [COMP, IDEE], liens: [{ ...DECLINE, source: 'I', cible: 'C' }] }), 2)).toBe(false);
+        expect(atteint(carte({ noeuds: [COMP, IDEE], liens: [DECLINE] }), 2)).toBe(true);
+    });
+
+    it('3. la leçon : sa semaine, sa séance, et son lien « se concrétise dans »', () => {
+        const avec = (meta, liens) => atteint(carte({ noeuds: [COMP, IDEE, LECON(meta)], liens: [DECLINE].concat(liens) }), 3);
+        expect(avec({ semaine: 2 }, [CONCRETISE])).toBe(false);           // pas de séance
+        expect(avec({ rangSeance: 1 }, [CONCRETISE])).toBe(false);        // pas de semaine
+        expect(avec({ semaine: 2, rangSeance: 1 }, [])).toBe(false);      // pas de lien
+        expect(avec({ semaine: 2, rangSeance: 1 }, [CONCRETISE])).toBe(true);
+    });
+
+    it('6. l’évaluation : une production ET sa pastille à ✓', () => {
+        const ev = (meta) => ({ id: 'E', type: 'evaluation', titre: 'Journal', parent: 'L', metadata: meta });
+        const avec = (meta, pastille) => atteint(carte({ noeuds: [LECON({ semaine: 2, rangSeance: 1 }), ev(meta)], pastille }), 6);
+        expect(avec({}, 'avant')).toBe(false);                            // pas de production
+        expect(avec({ productionId: 'PROD_un' }, 'apres')).toBe(false);   // posée avant l'activité
+        expect(avec({ productionId: 'PROD_un' }, 'avant')).toBe(true);
+    });
+
+    it('aucune étape n’avance pendant une saisie dans la carte', () => {
+        expect(atteint(carte({ noeuds: [COMP] }), 1)).toBe(true);
+        expect(atteint(carte({ noeuds: [COMP], saisie: true }), 1)).toBe(false);
+        expect(atteint(carte({ noeuds: [COMP, IDEE], liens: [DECLINE], saisie: true }), 2)).toBe(false);
+    });
+
+    it('la condition : une production retirée de la bibliothèque ne compte pas (le menu de l’Inspecteur ne l’offre pas)', () => {
+        expect(carte({ prods: [{ id: 'P', dansBibliotheque: false }] }).condition()).not.toBeNull();
+        expect(carte({ prods: [{ id: 'P', dansBibliotheque: false }, { id: 'Q' }] }).condition()).toBeNull();
+    });
+});

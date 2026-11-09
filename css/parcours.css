@@ -475,5 +475,6 @@ body.parcours-sur-modale .parcours-bulle { z-index: 10011; }
    flottantes. Ouverte par défaut, la palette « Planificateur » (z-index 80) recouvre l'Inspecteur (60) à 1180 px : la
    case de l'objectif servi (étape 5) et celle de l'objectif vérifié (étape 6) étaient dessous (mesuré : `elementFromPoint`
    rendait la palette ; constat de la session H). Posé par le parcours, le temps du parcours ; hors parcours, rien ne
-   change (inscrit au rapport). */
-body.parcours-inspecteur-devant #planif-panneau { z-index: 85; }
+   change (inscrit au rapport). Lié au moteur actif (`parcours-actif`) : si la classe restait un instant après une
+   fermeture, elle ne vaudrait plus rien. */
+body.parcours-actif.parcours-inspecteur-devant #planif-panneau { z-index: 85; }
