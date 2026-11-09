@@ -245,7 +245,15 @@ for (const clair of [false, true]) {
             textes[2].split(phrases.fenetre1)[0] + phrases.fenetre1 + ' ' + phrases.fenetre2 + ' ' +
             'Quand le menu affiche « Ton codex est à jour », ta copie est faite.');
         await bulleSurLApercuSansCouvrirSesBoutons(page);
+        // Le « i » de l'aperçu (bulle 2) : présent, l'aide dans les pages allumée (son défaut),
+        // et pas couvert par la bulle 3 à cette largeur. À 390 px, la bulle le couvre (rapport).
         await expect(page.locator('.export-preview-modal .btn-aide-contextuelle')).toBeVisible();
+        expect(await page.evaluate(() => {
+            const i = document.querySelector('.export-preview-modal .btn-aide-contextuelle');
+            const r = i.getBoundingClientRect();
+            const dessus = document.elementFromPoint((r.left + r.right) / 2, (r.top + r.bottom) / 2);
+            return !!(dessus && i.contains(dessus));
+        }), 'le « i » n’est pas couvert par la bulle').toBe(true);
         await capture(page, `1180-${theme}-etape-3-fenetre-de-choix`);
 
         await ecrireEtAttendreEtape4(page);

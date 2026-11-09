@@ -23,7 +23,7 @@ Branche `lot/parcours-6-donnees-a-l-abri`, partie de `origin/lot/parcours-1-et-2
 5. Sur l'iPad, sous « Mettre à jour le codex », le menu dit « Télécharge un nouveau fichier ». Or l'iPad passe par la feuille de partage, et la bulle 3 dira « Ton appareil te propose de partager le fichier ». Tu veux un autre sous-texte quand c'est le partage ? (Oui. Je propose « Ouvre la feuille de partage », à corriger. Inscrit plus bas.)
 6. La phrase du refus s'affiche au toucher de « Commencer », pas d'avance. C'est ma lecture de « le bouton ne lance pas le parcours ; le panneau dit… ». Tu la veux visible d'emblée ? (Non : au toucher, comme écrit.)
 7. Dans les bulles, la consigne de geste reste dans le paragraphe (« Touche « Codex », en haut de l'écran. »). Elle n'est pas détachée en ligne orange comme dans « Découvrir », parce que ta consigne donne un seul texte par étape. Tu la veux détachée ? (Non pour les étapes 2 à 4, où les gestes sont mêlés au texte. Pour l'étape 1, à ton goût : capture `1180-sombre-etape-1.jpg`.)
-8. À l'étape 3, la bulle couvre la liste des fichiers de l'aperçu. À 390 px, elle couvre aussi son titre et le « i ». À ces largeurs, aucune place ne permet de l'éviter. Ça te va ? (Oui : les deux boutons restent libres, et la bulle doit être lue avant le toucher.)
+8. À l'étape 3, la bulle couvre une partie de l'aperçu. À 1180 px, elle couvre la moitié droite de la liste des fichiers et la mise en garde « Vérifie qu'aucun nom de fichier n'est inattendu avant de continuer. ». À 390 px, elle couvre presque tout l'aperçu, son titre et le « i » compris. Les deux boutons restent libres partout. Une autre place existe à partir de 1180 px : une bulle plus étroite, à droite de l'aperçu (255 px libres à 1180, mesuré), qui ne couvrirait rien ; elle serait plus haute et défilerait davantage. Ça te va comme c'est, ou j'essaie la bulle étroite pour les grands écrans ? (À juger sur les captures `1180-*-etape-3-*.jpg`. Je pencherais pour l'essai à partir de 1180 px : la mise en garde de l'aperçu est là pour être lue.)
 
 ### Ce que je n'ai pas pu vérifier ici
 
@@ -31,6 +31,7 @@ Branche `lot/parcours-6-donnees-a-l-abri`, partie de `origin/lot/parcours-1-et-2
 - **La vraie feuille de partage de l'iPad**, et la vraie fenêtre de choix de Chrome ou d'Edge. Le banc les remplace par des fausses. À mesurer : sur l'iPad, la bulle 3 est-elle lue avant que la feuille s'ouvre, et la feuille s'ouvre-t-elle bien après le toucher sur « Mettre à jour » ?
 - **Safari sur le Mac** : ouvre-t-il la feuille de partage (`navigator.canShare` avec un fichier) ou télécharge-t-il ? Le code prend le partage dès que le navigateur l'offre (`js/codex.js:1778`). La phrase dit « ton appareil » pour ne pas le supposer. À mesurer sur le Mac.
 - **Sur tes données** : un gros codex dont la préparation dépasse 5 s. La fenêtre « Ton codex est prêt » s'ouvre alors en pleine étape 3. Le code la laisse passer au-dessus de la bulle, et le banc l'a vu pour « Il y est », mais pas avec un vrai délai. À mesurer sur le Mac.
+- VoiceOver sur l'iPad : l'aperçu est une fenêtre modale pour les lecteurs d'écran, et la bulle 3 vit hors de lui ; elle pourrait ne pas être lue. À éprouver.
 - Le parcours n'a pas été joué en démo ouverte. Hors démo, il marche ; avec la démo ouverte et un trimestre réel, le codex n'écrit que les vraies données (`_sansLeDemo`).
 
 ## Le détail
@@ -40,7 +41,8 @@ Branche `lot/parcours-6-donnees-a-l-abri`, partie de `origin/lot/parcours-1-et-2
 - `b587528f` : le parcours, le panneau, le menu Codex, le rappel, la CSS ; la sentinelle Vitest (20 essais).
 - `253eb154` : le banc Playwright (7 essais) et les captures.
 - `d17131da` : le banc sans pause fixe (le cliquet des pauses était rouge, 620 pour 618) ; le banc de la partie 1 lit le nombre de parcours sur le registre (voir « Ce que le lot change hors de ses fichiers »).
-- Ce rapport.
+- `24528a51` : ce rapport.
+- Le commit suivant : le banc vérifie que le « i » n'est pas couvert à 1180 px ; le verdict de la relecture et ses constats dans ce rapport.
 
 ### Le moment de l'étape 3 (ce que la consigne me demandait de proposer)
 
@@ -81,10 +83,20 @@ Retenu : **l'étape 2 avance à l'ouverture de l'aperçu, et la bulle 3 se pose 
 2. Une option d'étape « au-dessus des fenêtres ». Contourné : une classe posée par le parcours. Les parcours 3 et 4, qui passent sans doute par des fenêtres (évaluer, recevoir), en auront besoin aussi.
 3. Un signal de fin de parcours. Contourné : le rappel sonde `ParcoursMoteur.actif()` toutes les 500 ms tant qu'il attend.
 
+### Ce que la relecture a ajouté (constats d'après le premier dépôt du rapport)
+
+- La mise en garde de l'aperçu couverte par la bulle 3 à 1180 px : ajoutée à la question 8.
+- À l'étape 4, la notification « Codex mis à jour » couvre quelques secondes le haut du menu, celui que la bulle dit de regarder (capture `1180-sombre-etape-4.jpg`). Passager ; je n'y touche pas.
+- Le banc tenait le « i » pour vérifié par `toBeVisible`, qui passe même couvert. Corrigé : il vérifie maintenant que rien ne le couvre à 1180 px (break-test : la bulle déplacée sur le « i », ROUGE, rétablie). À 390 px, la bulle le couvre (question 8).
+- Non vérifié : l'aperçu est `aria-modal` (`js/securite-export-preview.js:73`) et la bulle vit hors de lui. VoiceOver pourrait donc ignorer la bulle 3 tant que l'aperçu est ouvert. À éprouver sur l'iPad.
+- La bulle ne cède la place qu'aux fenêtres de `uiDialogues` (`#overlay-ui-dialogue`). Ce sont toutes celles que l'écriture du codex ouvre (« Ton codex est prêt », « Il y est », l'échec), relu dans `js/codex.js` et `js/fichier-sortant.js`. Une fenêtre d'un autre module ouverte en pleine étape 3 passerait sous la bulle.
+- Échap, à l'étape 3, quitte le parcours et laisse l'aperçu ouvert : c'est le moteur (Échap vaut « Quitter le parcours »). Sans gravité.
+- Dans le banc de la partie 1, le compte des parcours affichés est comparé au registre : il ne voit plus une entrée en trop dans le registre, seulement une erreur de rendu. Le choix du chemin d'écriture (`js/codex.js:1778`) n'a pas d'essai Vitest ; le banc Playwright l'éprouve par ses cinq chemins.
+
 ### Les essais
 
 - **Vitest**, `tests/unit/sentinelle-parcours-donnees-2026-11-09.test.js`, 20 essais. Bloc 1 : chaque texte posé se trouve tel quel dans la consigne, chaque chemin compose le texte de l'étape 3, aucun produit n'est nommé. Bloc 2 : le rappel, sur le vrai `modal-backup-reminder.js`, avec un faux moteur et des minuteries simulées. **Le test exigé par la consigne échoue avant le code** : avec `verifierEtAfficher` remis à son état d'avant, les quatre essais qui jouent un parcours sont ROUGES et « hors parcours » reste vert. Rétabli : vert. Break-test des mots : « chaque semaine » → « chaque mois », ROUGE, rétabli.
-- **Playwright (Chromium)**, `tests/integration/parcours-6-donnees-a-l-abri-2026-11-09.spec.js`, 7 essais, 7 verts, aucune pause fixe. Break-tests : sans la garde de « Ouvrir un codex… », ROUGE (une ouverture au lieu de zéro) ; la bulle laissée sous l'aperçu, ROUGE. Rétablis : verts.
+- **Playwright (Chromium)**, `tests/integration/parcours-6-donnees-a-l-abri-2026-11-09.spec.js`, 7 essais, 7 verts, aucune pause fixe. Break-tests : sans la garde de « Ouvrir un codex… », ROUGE (une ouverture au lieu de zéro) ; la bulle laissée sous l'aperçu, ROUGE ; la bulle posée sur le « i », ROUGE. Rétablis : verts.
 - **Vitest complet** : avant `d17131da`, 1 rouge sur 10 891 (le cliquet des pauses, causé par mon banc) ; après, **10 891 / 10 891** (la base en avait 10 869).
 - **Specs voisines sous Chromium** (29 fichiers : codex, rappel, panneau, en-tête) : 27 rouges, 90 verts, 8 sautés. Trois venaient de mon lot (le banc de la partie 1, corrigé dans `d17131da`). Les autres ont été rejoués sur la base a328bb9f, sans mon lot : voir « Les rouges de Chromium » plus bas.
 
@@ -98,7 +110,7 @@ Dans `parcours-1-et-2`, un rouge reste sous Chromium : « panneau : … le ferme
 
 ### Relecture par un agent neuf
 
-⏳ En cours au moment de ce commit (l'agent a été interrompu par une limite d'usage, puis relancé) : son verdict sera ajouté ici.
+Un agent neuf, qui n'avait que la consigne, les règles de la nuit et le diff, a relu le lot. Il a relancé Vitest (10 891 / 10 891) et fait dix break-tests de son côté, tous rouges. Verdict, en une ligne : **conforme à la consigne ; textes mot pour mot ; le rappel qui attend la fin du parcours est prouvé par break-test ; à fusionner après le verdict WebKit et tes réponses aux questions, avec les trois constats ajoutés plus haut** (section « Ce que la relecture a ajouté »).
 
 ## À inscrire au BACKLOG
 
