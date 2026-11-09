@@ -462,6 +462,9 @@
         return { evaluations: retenues, fichiers: fichiersAvecEval, sansFichier: sansFichier, nonVerrouillees: nonVerrouillees, evaluationDuFichier: evaluationDuFichier };
     }
 
+    // Lot du 9 nov. 2026 : le texte validé par Grégoire quand rien n'est verrouillé (dit seul, rien n'a échoué).
+    const TEXTE_LEA_RIEN_DE_VERROUILLE = 'Aucune évaluation verrouillée\u00a0: rien à envoyer. Verrouille les évaluations à remettre, puis relance l\u2019export.';
+
     /**
      * Genere des PDFs annotes+synthese pour televersement Lea
      * Seuls les fichiers ayant une evaluation completee sont inclus
@@ -476,8 +479,6 @@
      *   rétroaction — livrable, mais incomplet, et c'est ce qui partait en
      *   silence sur Léa auparavant.
      */
-    const TEXTE_LEA_RIEN_DE_VERROUILLE = 'Aucune évaluation verrouillée\u00a0: rien à envoyer. Verrouille les évaluations à remettre, puis relance l\u2019export.';
-
     async function exporterPourLea(productionId, da, reprisesSeulement, onProgression) {
         const etudiants = obtenirDonneesSelonMode('groupeEtudiants');
         const productions = obtenirDonneesSelonMode('productions');
@@ -930,8 +931,9 @@
             // et l'enseignant sait ce qui manque avant de téléverser sur Léa.
             _afficherBilanExport(blobs.length, blobs.length + echecs.length, echecs, sansSynthese);
         } catch (e) {
+            if (e && e.texteEntier) { alert(e.message); return; }   // rien de verrouillé : pas une erreur
             console.error('[Travaux-Archivage] Erreur export Lea:', e);
-            alert(e && e.texteEntier ? e.message : 'L\'export Léa a échoué : ' + e.message);
+            alert('L\'export Léa a échoué : ' + e.message);
         }
     }
 

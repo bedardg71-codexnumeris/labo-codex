@@ -139,7 +139,8 @@ describe('Lot du 9 nov. 2026 — « Exporter pour Léa » n\'envoie que les éva
         expect(vide.message).toBe('Aucune évaluation trouvée pour ces critères.');
         expect(vide.texteEntier).toBeUndefined();
         const src = readFileSync(path.join(RACINE, 'js', 'travaux-archivage.js'), 'utf8');
-        expect(src).toContain("alert(e && e.texteEntier ? e.message : 'L\\'export Léa a échoué : ' + e.message);");
+        expect(src).toContain("if (e && e.texteEntier) { alert(e.message); return; }");
+        expect(src).toContain("alert('L\\'export Léa a échoué : ' + e.message);");
     });
 });
 
