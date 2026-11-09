@@ -3,6 +3,7 @@ import { readFileSync, readdirSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { chargerScript } from './_helpers/charger-script.js';
+import { predicatsTableauNotation } from './_helpers/predicats-copie.js';
 
 // SENTINELLE #932 (22 sept. 2026) — UN SEUL GESTE RÉASSIGNE UNE COPIE, IL LA MONTRE,
 // ET IL PASSE PAR LA PORTE.
@@ -470,7 +471,7 @@ function monterProprietes({ fichier, vignette = '', verdict = true, jetonsActifs
             mettreAJourFichier: (id, maj) => journal.miseAJour.push([id, Object.assign({}, maj)]),
             obtenirCorbeille: () => []
         }
-    }, { addEventListener() {}, removeEventListener() {}, pluriel: (n, s, p) => (n > 1 ? p : s) });
+    }, Object.assign({ addEventListener() {}, removeEventListener() {}, pluriel: (n, s, p) => (n > 1 ? p : s) }, predicatsTableauNotation()));
     return { win, journal, overlays, registre };
 }
 

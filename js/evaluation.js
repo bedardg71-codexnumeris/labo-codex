@@ -494,6 +494,68 @@ function sauvegarderSelectionsEvaluation() {
 }
 
 /**
+ * Aucune copie pour l'élève et la production choisis : le formulaire repart à neuf (extrait de
+ * `verifierEtChargerEvaluationExistante` le 9 nov. 2026, pour servir aussi au résultat sans grille).
+ */
+function _reinitialiserFormulaireSansCopie() {
+
+    // Masquer l'indicateur de verrouillage et réactiver le formulaire
+    afficherOuMasquerBoutonVerrouillage(false);
+    desactiverFormulaireEvaluation(false);
+
+    // Réinitialiser l'ID de modification si présent
+    if (window.evaluationEnCours?.idModification) {
+        delete window.evaluationEnCours.idModification;
+    }
+
+    // Réinitialiser les données algorithmiques (codes d'erreurs, nombre de mots)
+    if (window.evaluationEnCours) {
+        window.evaluationEnCours.donneesAlgorithmiques = {};
+        window.evaluationEnCours.pointsAnalytiques = {};   // lot 2
+    }
+    // Lot 2 — vider aussi les champs de points des critères analytiques
+    document.querySelectorAll('input[id^="eval_pts_"]').forEach(champ => { champ.value = ''; });
+    // #1120, lot 3 — vidés sans passer par la frappe : les tranches du barème ne restent pas choisies.
+    if (typeof window.marquerBaremesEvaluation === 'function') window.marquerBaremesEvaluation();
+    // Lot « Un mot pour ton étudiant·e » (relecture du 9 nov.) — aucune évaluation : aucun mot, à personne.
+    if (typeof window.poserMotPourEtudiant === 'function') window.poserMotPourEtudiant(null);
+
+    // Vider les champs algorithmiques dans le DOM
+    // IDs: eval_categories_*, eval_erreurs_*, eval_mots_*, resultat_algo_*
+    const champsCategories = document.querySelectorAll('input[id^="eval_categories_"]');
+    const champsErreurs = document.querySelectorAll('input[id^="eval_erreurs_"]');
+    const champsMots = document.querySelectorAll('input[id^="eval_mots_"]');
+    const zonesResultat = document.querySelectorAll('div[id^="resultat_algo_"]');
+
+    champsCategories.forEach(input => input.value = '');
+    champsErreurs.forEach(input => window.poserErreursDuChamp(input, ''));   // 21 oct. 2026 : et sa somme pondérée
+    champsMots.forEach(input => input.value = '');
+    zonesResultat.forEach(div => {
+        const spans = div.querySelectorAll('span');
+        spans.forEach(span => span.textContent = '--');
+    });
+
+    // #959 — le statut d'intégrité de l'élève précédent (« IA », ses notes) ne passe pas à celui-ci :
+    // rien d'autre ne remet ce menu à « recevable ». `changerStatutIntegrite` vide les notes.
+    const selectIntegrite = document.getElementById('statutIntegrite');
+    if (selectIntegrite && selectIntegrite.value !== 'recevable') {
+        selectIntegrite.value = 'recevable';
+        selectIntegrite.dispatchEvent(new Event('change', { bubbles: true }));
+    }
+    // Statut incomplet (25 oct. 2026) — la case de la copie précédente ne passe pas à celle-ci.
+    if (window.evaluationEnCours) delete window.evaluationEnCours.travailEnCours;
+    if (typeof window.afficherTravailEnCours === 'function') window.afficherTravailEnCours(false);
+
+    // Masquer les badges de jetons
+    const section = document.getElementById('gestionJetonsEvaluation');
+    if (section) section.classList.add('u-hide');
+
+    // Régénérer la rétroaction avec les options d'affichage actuelles
+    // Patch §5.6 — promotion genererRetroaction vers evaluation-retroaction.js (session B étape 3 refactor 2026-05-18)
+    window.genererRetroaction(1);
+}
+
+/**
  * Vérifie s'il existe une évaluation sauvegardée pour l'étudiant et la production actuels
  * et charge les niveaux de maîtrise si elle existe
  */
@@ -536,61 +598,15 @@ function verifierEtChargerEvaluationExistante() {
     );
 
     if (!evaluationExistante) {
+        _reinitialiserFormulaireSansCopie();
+        return;
+    }
 
-        // Masquer l'indicateur de verrouillage et réactiver le formulaire
-        afficherOuMasquerBoutonVerrouillage(false);
-        desactiverFormulaireEvaluation(false);
-
-        // Réinitialiser l'ID de modification si présent
-        if (window.evaluationEnCours?.idModification) {
-            delete window.evaluationEnCours.idModification;
-        }
-
-        // Réinitialiser les données algorithmiques (codes d'erreurs, nombre de mots)
-        if (window.evaluationEnCours) {
-            window.evaluationEnCours.donneesAlgorithmiques = {};
-            window.evaluationEnCours.pointsAnalytiques = {};   // lot 2
-        }
-        // Lot 2 — vider aussi les champs de points des critères analytiques
-        document.querySelectorAll('input[id^="eval_pts_"]').forEach(champ => { champ.value = ''; });
-        // #1120, lot 3 — vidés sans passer par la frappe : les tranches du barème ne restent pas choisies.
-        if (typeof window.marquerBaremesEvaluation === 'function') window.marquerBaremesEvaluation();
-        // Lot « Un mot pour ton étudiant·e » (relecture du 9 nov.) — aucune évaluation : aucun mot, à personne.
-        if (typeof window.poserMotPourEtudiant === 'function') window.poserMotPourEtudiant(null);
-
-        // Vider les champs algorithmiques dans le DOM
-        // IDs: eval_categories_*, eval_erreurs_*, eval_mots_*, resultat_algo_*
-        const champsCategories = document.querySelectorAll('input[id^="eval_categories_"]');
-        const champsErreurs = document.querySelectorAll('input[id^="eval_erreurs_"]');
-        const champsMots = document.querySelectorAll('input[id^="eval_mots_"]');
-        const zonesResultat = document.querySelectorAll('div[id^="resultat_algo_"]');
-
-        champsCategories.forEach(input => input.value = '');
-        champsErreurs.forEach(input => window.poserErreursDuChamp(input, ''));   // 21 oct. 2026 : et sa somme pondérée
-        champsMots.forEach(input => input.value = '');
-        zonesResultat.forEach(div => {
-            const spans = div.querySelectorAll('span');
-            spans.forEach(span => span.textContent = '--');
-        });
-
-        // #959 — le statut d'intégrité de l'élève précédent (« IA », ses notes) ne passe pas à celui-ci :
-        // rien d'autre ne remet ce menu à « recevable ». `changerStatutIntegrite` vide les notes.
-        const selectIntegrite = document.getElementById('statutIntegrite');
-        if (selectIntegrite && selectIntegrite.value !== 'recevable') {
-            selectIntegrite.value = 'recevable';
-            selectIntegrite.dispatchEvent(new Event('change', { bubbles: true }));
-        }
-        // Statut incomplet (25 oct. 2026) — la case de la copie précédente ne passe pas à celle-ci.
-        if (window.evaluationEnCours) delete window.evaluationEnCours.travailEnCours;
-        if (typeof window.afficherTravailEnCours === 'function') window.afficherTravailEnCours(false);
-
-        // Masquer les badges de jetons
-        const section = document.getElementById('gestionJetonsEvaluation');
-        if (section) section.classList.add('u-hide');
-
-        // Régénérer la rétroaction avec les options d'affichage actuelles
-        // Patch §5.6 — promotion genererRetroaction vers evaluation-retroaction.js (session B étape 3 refactor 2026-05-18)
-        window.genererRetroaction(1);
+    // Tableau de notation (9 nov. 2026) : un résultat sans grille ne se charge pas dans les critères d'une grille.
+    // Le formulaire repart vide (rien de l'élève précédent), verrouillé, sans cadenas, et il le dit.
+    if (evaluationExistante.sansGrille === true) {
+        _reinitialiserFormulaireSansCopie();
+        _formulaireSurResultatSansGrille(evaluationExistante);
         return;
     }
 
@@ -1083,6 +1099,11 @@ function modifierEvaluation(evaluationId) {
 
     if (!evaluation) {
         notifications.erreur('Erreur', 'Évaluation introuvable');
+        return;
+    }
+    // Tableau de notation (9 nov. 2026) : sans grille, rien à ouvrir dans le formulaire ; le résultat vit au tableau.
+    if (evaluation.sansGrille === true) {
+        _direResultatSansGrille();
         return;
     }
 
@@ -2140,6 +2161,27 @@ function appliquerJetonDelaiDepuisSidebar() {
  * et ne se cliquent pas. La Liste n'a pas de cadenas. Les autres verrous (Banque d'évaluations,
  * verrouillage en lot, verrouillage individuel), sans appelant vivant, sont retirés (#489, 15 oct. 2026).
  */
+/**
+ * Tableau de notation (9 nov. 2026) — CE QUE DIT LE FORMULAIRE D'UN RÉSULTAT SAISI SANS GRILLE. Il n'a ni grille
+ * ni critères : le formulaire ne peut ni l'afficher ni le modifier. Mots PROPOSÉS, à faire valider par Grégoire.
+ */
+function _direResultatSansGrille() {
+    notifications.info('Résultat saisi sans grille',
+        'Cette copie a été notée au tableau de notation (Évaluation › Liste). Change son résultat là.');
+}
+
+/**
+ * Le formulaire rencontre un résultat sans grille (élève et production choisis) : verrouillé, sans cadenas, et il le dit.
+ * @returns {boolean} vrai si la copie était un tel résultat (l'appelant s'arrête)
+ */
+function _formulaireSurResultatSansGrille(evaluation) {
+    if (!evaluation || evaluation.sansGrille !== true) return false;
+    afficherOuMasquerBoutonVerrouillage(false);
+    desactiverFormulaireEvaluation(true);
+    _direResultatSansGrille();
+    return true;
+}
+
 function basculerVerrouillageEvaluationCourante() {
     const evaluationId = window.evaluationEnCours?.idModification;
 
@@ -2166,6 +2208,12 @@ function basculerVerrouillageEvaluationCourante() {
  * @param {number} index - l'évaluation à déverrouiller dans ce tableau
  */
 function _deverrouillerEvaluation(evaluations, index) {
+    // Tableau de notation (9 nov. 2026) : un résultat saisi sans grille ne se déverrouille pas ici. Déverrouillé, il
+    // sortait de la note, et l'enregistrement automatique pouvait l'écrire sous la grille du formulaire, sans ses champs.
+    if (evaluations[index].sansGrille === true) {
+        _direResultatSansGrille();
+        return;
+    }
     evaluations[index].verrouillee = false;
     const estVerrouillee = false;
     const estCelleDuFormulaire = !!window.evaluationEnCours

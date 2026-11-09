@@ -970,7 +970,7 @@ function composerRecapCorbeille(ids, donnees) {
             fichierId: f.id,
             nomEleve: e ? ((e.prenom || '') + ' ' + (e.nom || '')).trim() : 'Copie sans étudiant·e',
             nomFichier: f.nomFichier || f.id,
-            evaluee: !!(evaluation && Array.isArray(evaluation.criteres) && evaluation.criteres.length > 0),
+            evaluee: window.copiePorteUneEvaluation(evaluation),   // tableau de notation (9 nov. 2026) : sans grille aussi
             reprise: _travailLieAUneReprise(evaluations, f.etudiantDA, f.productionId)
         });
     });
@@ -1121,7 +1121,8 @@ function construireLignesEvaluations(evaluations, productions, etudiants) {
                     // Beta 99.30 : flag pour distinguer une évaluation réellement notée
                     // d'une évaluation enregistrée sans critère (ex. application
                     // d'un jeton de délai seul, sans note).
-                    const evaluationNotee = Array.isArray(evaluation.criteres) && evaluation.criteres.length > 0;
+                    // Tableau de notation (9 nov. 2026) : un résultat saisi sans grille est évalué, sans critère.
+                    const evaluationNotee = window.copiePorteUneEvaluation(evaluation);
 
                     lignes.push({
                         da: etudiant.da,
@@ -1316,6 +1317,9 @@ function obtenirNomCartouche(grilleId, cartoucheId) {
  * points, même enregistrée avec l'échelle de départ (`niveauFinalAffichable`, gabarits-utils.js).
  */
 function _niveauAffiche(evaluation) {
+    // Tableau de notation (9 nov. 2026) : un jugement de spécifications saisi sans grille n'a pas de niveau, il se dit.
+    const jugement = typeof libelleJugementSansGrille === 'function' ? libelleJugementSansGrille(evaluation) : null;
+    if (jugement) return jugement;
     if (typeof niveauFinalAffichable === 'function') return niveauFinalAffichable(evaluation);
     return (evaluation && evaluation.niveauFinal) || '';
 }
@@ -2290,6 +2294,12 @@ function consulterEvaluationDepuisListe(evaluationId) {
     // Charger directement l'évaluation par son ID exact
     const evaluations = obtenirDonneesSelonMode('evaluationsSauvegardees') || [];
     const evaluation = evaluations.find(e => e.id === evaluationId);
+
+    // Tableau de notation (9 nov. 2026) : un résultat saisi sans grille se consulte là où il se saisit.
+    if (evaluation && evaluation.sansGrille === true && window.TableauNotation) {
+        window.TableauNotation.afficher();
+        return;
+    }
 
     if (!evaluation) {
         alert('Évaluation non trouvée');

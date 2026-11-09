@@ -14,6 +14,7 @@ import { JSDOM } from 'jsdom';
 import { chargerScript } from './_helpers/charger-script.js';
 import { RACINE } from './_helpers/bac-suivi.js';
 import { tranche } from './_helpers/tranche.js';
+import { predicatsTableauNotation } from './_helpers/predicats-copie.js';
 
 const registre = chargerScript('js/pratiques/pratique-registre.js', {}, {});
 const NIVEAUX = [{ code: 'I', nom: 'Incomplet', couleur: '#c33' }, { code: 'D', nom: 'en Développement', couleur: '#e93' },
@@ -280,7 +281,7 @@ describe('Seconde retouche — la Liste des évaluations : la colonne du niveau 
         libelleCopieNonRecevable: registre.libelleCopieNonRecevable,
         ProductionDiagnostique: { estDiagnostique: () => false, marqueHTML: () => '' },
         notifications: { succes() {}, erreur() {}, info() {}, warning() {} }
-    });
+    }, predicatsTableauNotation(registre));   // tableau de notation (9 nov. 2026) : « la copie porte une évaluation »
     const ETUDIANTS = [{ da: '1028001', nom: 'Fictif', prenom: 'Élève', groupe: '01' }];
     const PRODS = [{ id: 'P1', titre: 'Dissertation fictive', type: 'travail' }];
     // Les cellules d'une ligne, en texte : la colonne du niveau est l'avant-dernière avant la note et les actions.

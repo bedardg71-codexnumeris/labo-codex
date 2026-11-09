@@ -1187,7 +1187,77 @@ function evaluationCompteCommeRemise(evaluation, evaluations) {
     if (evaluation.remplaceeParId && originaleEstRemplacee(evaluation, evaluations)) return false;
     if (evaluationNonRecevable(evaluation)) return false;
     if (evaluationTravailEnCours(evaluation)) return true;
-    return evaluationEntreDansLaNote(evaluation, evaluations) && !evaluationNonRemise(evaluation);
+    // Tableau de notation (lot 1, 9 nov. 2026) : un « acceptable / non acceptable » saisi sans grille est une remise jugée.
+    return (evaluationEntreDansLaNote(evaluation, evaluations) || resultatBinaireCompte(evaluation, evaluations))
+        && !evaluationNonRemise(evaluation);
+}
+
+/* ===============================
+   TABLEAU DE NOTATION, LOT 1 (9 nov. 2026) — LE RÉSULTAT « ACCEPTABLE / NON ACCEPTABLE » SANS GRILLE
+   Décision de Grégoire (9 nov.) : en spécifications, ce qu'on saisit au tableau est « acceptable ou non
+   acceptable », pas un pourcentage. La copie porte `sansGrille: true`, `acceptable` (booléen) et
+   `noteFinale: null` : aucun chiffre n'est fabriqué. Elle ne passe donc PAS par `evaluationEntreDansLaNote`,
+   qui exige une note — une trentaine de lecteurs (moyennes, dépistage, sommative) supposent qu'une copie qui
+   compte porte un nombre. Seuls les lecteurs qui savent lire un jugement binaire l'admettent : le calcul des
+   spécifications (`evaluationCompteEnSpecifications`) et la complétion (`evaluationCompteCommeRemise`).
+   Mêmes exclusions que la règle commune, la note en moins : remplacée, brouillon, « Incomplet », portée nulle.
+   =============================== */
+
+/**
+ * Le jugement d'une copie saisie sans grille en spécifications : true / false, ou null (pas un tel résultat).
+ * @param {Object} evaluation
+ * @returns {boolean|null}
+ */
+function resultatAcceptableSansGrille(evaluation) {
+    if (!evaluation || evaluation.sansGrille !== true) return null;
+    return typeof evaluation.acceptable === 'boolean' ? evaluation.acceptable : null;
+}
+
+/**
+ * Les mots d'un jugement sans grille, là où une copie montre son niveau (la liste des évaluations, le tableau).
+ * PROPOSÉS (9 nov. 2026, les mots de la légende de l'ébauche du tableau) : à faire valider par Grégoire.
+ */
+const LIBELLES_JUGEMENT_SANS_GRILLE = Object.freeze({ acceptable: 'Acceptable', nonAcceptable: 'Non acceptable' });
+
+/** @returns {string|null} « Acceptable », « Non acceptable », ou null (pas un jugement sans grille) */
+function libelleJugementSansGrille(evaluation) {
+    const jugement = resultatAcceptableSansGrille(evaluation);
+    if (jugement === null) return null;
+    return jugement ? LIBELLES_JUGEMENT_SANS_GRILLE.acceptable : LIBELLES_JUGEMENT_SANS_GRILLE.nonAcceptable;
+}
+
+/** Un jugement binaire sans grille qui compte (enregistré, ni remplacé, ni brouillon, ni « Incomplet »). */
+function resultatBinaireCompte(evaluation, evaluations) {
+    if (resultatAcceptableSansGrille(evaluation) === null) return false;
+    if (evaluation.remplaceeParId && originaleEstRemplacee(evaluation, evaluations)) return false;
+    if (evaluationTravailEnCours(evaluation)) return false;
+    if (evaluation.verrouillee === false) return false;
+    return evaluation.ponderationCouverte !== 0;
+}
+
+/**
+ * LA COPIE PORTE UNE ÉVALUATION — le statut « Évalué » de la liste, de la pastille d'une copie et du rythme. Depuis
+ * Beta 99.30, une copie sans critère noté (un jeton de délai seul) n'est pas évaluée ; un résultat saisi au tableau
+ * de notation n'a pas de critères par nature, et il l'est (9 nov. 2026). Ne décide PAS si la copie compte dans la
+ * note : `evaluationEntreDansLaNote` et `evaluationCompteEnSpecifications` le font.
+ * @param {Object} evaluation
+ * @returns {boolean}
+ */
+function copiePorteUneEvaluation(evaluation) {
+    if (!evaluation) return false;
+    if (Array.isArray(evaluation.criteres) && evaluation.criteres.length > 0) return true;
+    if (evaluation.sansGrille !== true) return false;
+    return resultatAcceptableSansGrille(evaluation) !== null || !!evaluation.niveauFinal;
+}
+
+/**
+ * Une copie compte dans une note par spécifications : la règle commune (#706), ou un jugement binaire sans grille.
+ * @param {Object} evaluation
+ * @param {Array} [evaluations]
+ * @returns {boolean}
+ */
+function evaluationCompteEnSpecifications(evaluation, evaluations) {
+    return evaluationEntreDansLaNote(evaluation, evaluations) || resultatBinaireCompte(evaluation, evaluations);
 }
 
 /**
@@ -1228,6 +1298,10 @@ window.libelleCopieNonRecevable = libelleCopieNonRecevable;   // ce que la copie
 // Statut « Incomplet ; travail en cours » (25 oct. 2026) — hors de la note, remise pour C
 window.evaluationTravailEnCours = evaluationTravailEnCours;
 window.evaluationCompteCommeRemise = evaluationCompteCommeRemise;
+window.resultatAcceptableSansGrille = resultatAcceptableSansGrille;   // tableau de notation, lot 1 (9 nov. 2026)
+window.evaluationCompteEnSpecifications = evaluationCompteEnSpecifications;
+window.copiePorteUneEvaluation = copiePorteUneEvaluation;
+window.libelleJugementSansGrille = libelleJugementSansGrille;
 // #394 — rôles des productions STD (SSOT des deux systèmes de calcul)
 window.identifierProductionTerminale = identifierProductionTerminale;
 window.obtenirArtefactsIdsPoolStd = obtenirArtefactsIdsPoolStd;

@@ -13,6 +13,8 @@ function moteur() {
     const win = {
         addEventListener() {}, removeEventListener() {},
         evaluationEntreDansLaNote: () => true,
+        evaluationCompteEnSpecifications: () => true,   // tableau de notation (9 nov. 2026) : la règle des spécifications
+        resultatAcceptableSansGrille: () => null,       // aucune copie de ce banc n'est un jugement sans grille
         evaluationNonRemise: () => false,
         valeurCopieNonRecevable: () => null   // 28 oct. 2026 : les copies de ce banc sont recevables (harnais seulement)
     };

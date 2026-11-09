@@ -2892,7 +2892,8 @@
         // Beta 99.30 : ne marquer "Évalué" que si au moins un critère a été noté.
         // Une évaluation sauvegardée sans critère (ex. juste un jeton de délai
         // appliqué) ne doit pas écraser l'état Annoté/Importé.
-        if (evaluation && Array.isArray(evaluation.criteres) && evaluation.criteres.length > 0) {
+        // Tableau de notation (9 nov. 2026) : un résultat saisi sans grille est évalué, sans critère.
+        if (window.copiePorteUneEvaluation(evaluation)) {
             return { texte: 'Évalué', classe: 'evalue' };
         }
         const annotation = travauxStockage.obtenirAnnotationFichier(f.id);
