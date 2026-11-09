@@ -327,6 +327,30 @@
             " Relis-les comme ton étudiant·e les lira. Un mot personnel ? Écris-le dans « Un mot pour ton étudiant·e ». Plus ta cartouche est précise, plus ton étudiant·e comprend ce que tu as constaté dans sa production. Quand tu es satisfait·e, touche le cadenas « Verrouiller », en haut de « Paramètres » : l'évaluation entre dans la note, et la rétroaction ne bougera plus par mégarde.";
     }
 
+    // ---------- L'étape 2 : la bulle sous les trois colonnes ----------
+    // Décision de Grégoire (9 nov., 15 h 55) : la bulle ne couvre ni les Originaux, ni l'Inspecteur, ni l'Aperçu ; elle se pose
+    // sous les trois colonnes (mesuré avant : elle couvrait l'Inspecteur, là où l'on choisit l'étudiant·e). Le moteur ne change
+    // pas, comme à l'étape 3 du sixième parcours : l'étape lui donne ses zones, élargit la bulle à la largeur des colonnes (elle
+    // en devient basse) et laisse à la page la place de défiler sous elles (`parcours-place-sous-les-colonnes`).
+
+    function colonnes() { return qs('.pipeline-3col-grid'); }
+    function boutonImporter() { return qs('[data-action="travauxUI.appliquerEtImporter"]'); }
+
+    function bulleSousLesColonnes(oui) {
+        document.body.classList.toggle('parcours-place-sous-les-colonnes', !!oui);
+        var b = el('parcours-bulle'), g = colonnes();
+        if (!b) return;
+        var largeur = oui && vis(g) ? Math.round(Math.min(g.getBoundingClientRect().width, window.innerWidth - 16)) : 0;
+        b.style.width = largeur ? largeur + 'px' : '';
+    }
+
+    /**
+     * Les colonnes et « Importer ». À l'entrée de l'étape, le moteur cadre leur ensemble et la bulle se pose dessous :
+     * mesuré à 1180 × 900 (colonnes côte à côte, la bulle à leur largeur) et à 820 × 1180 (colonnes empilées : le haut des
+     * Originaux défile au-dessus de l'écran, sans être couvert).
+     */
+    function zonesSousLesColonnes() { return [colonnes(), boutonImporter()].filter(vis); }
+
     var ETAPE_1 = {
         titre: 'Leurs productions',
         texte: "Tes étudiant·es t'ont remis leurs productions en ligne, dans Léa par exemple ? Télécharge-les dans un dossier, décompresse-les si elles arrivent en ZIP, puis dépose les fichiers ici. Garde leur nom tel quel : il porte le DA de l'étudiant·e, la production et la date de remise, et l'application s'en sert pour ranger chacune. Ta production n'a pas de fichier à importer : elle est sur papier, ou c'est un exposé, une performance, une entrevue ? Touche « Rien à importer » : on passe directement à l'évaluation.",
@@ -342,20 +366,21 @@
 
     var ETAPE_2 = {
         titre: "Vérifie avant d'importer",
-        texte: "Avant d'importer, vérifie trois choses. En haut, la production : elle s'applique à tout le lot. À droite, pour chaque fichier, l'étudiant·e que l'application a trouvé·e par son DA ; s'il manque un nom, choisis-le. À gauche, les pages remises par un·e même étudiant·e : si elles arrivent séparées, coche-les, touche « Réunir en une copie », puis remets-les dans l'ordre. Une photo est de travers ou trop sombre ? « Réglages spécifiques » la pivote, la recadre et en règle le contraste. Touche ensuite « Importer », puis confirme. Un fichier mal associé se règle ici d'un geste ; une fois importé, il faut passer par la liste.",
+        texte: "Avant d'importer, vérifie trois choses. En haut, la production : elle s'applique à tout le lot. À droite, pour chaque fichier, l'étudiant·e que l'application a trouvé·e par son DA ; s'il manque un nom, touche le fichier et choisis-le au centre. À gauche, les pages remises par un·e même étudiant·e : si elles arrivent séparées, coche-les, touche « Réunir en une copie », puis remets-les dans l'ordre. Une photo est de travers ou trop sombre ? « Réglages spécifiques » la pivote, la recadre et en règle le contraste. Touche ensuite « Importer », puis confirme. Un fichier mal associé se règle ici d'un geste ; une fois importé, il faut passer par la liste.",
         voile: 'aucun',
         avant: async function () {
             aller('evaluations', 'importer');
             await attendre(function () { return !!qs('.pipeline-col-originaux'); }, 3000);
             poserExtras([function () { return qs('.pipeline-col-confirmes'); }, function () { return qs('.pipeline-col-originaux'); }]);
+            bulleSousLesColonnes(true);
         },
-        zones: function () { return [qs('.pipeline-production-selecteur')]; },
+        zones: function () { bulleSousLesColonnes(true); return zonesSousLesColonnes(); },
         contour: function () { return qs('.pipeline-production-selecteur'); },
         // « Importer » ouvre la confirmation (une fenêtre à 9999) : elle reste au-dessus de la bulle et des contours, ses
         // boutons doivent rester touchables (mesuré : par-dessus, la bulle les couvrait).
         atteint: function () {
             var ok = !!fichierNeuf();
-            if (ok) retirerExtras();
+            if (ok) { retirerExtras(); bulleSousLesColonnes(false); }
             return ok;
         }
     };
@@ -376,7 +401,7 @@
 
     var ETAPE_4 = {
         titre: 'Tes tampons',
-        texte: "Avant d'annoter, regarde tes tampons. Chaque tampon que tu poses ajoute sa phrase à la synthèse de rétroaction de ton étudiant·e. Ceux de départ ont été écrits pour l'analyse littéraire : lis leurs phrases avant de t'en servir. Touche l'engrenage de la palette « Tampons » : garde les phrases qui disent ce que tu dirais, réécris les autres, change leur image ou crée tes propres tampons, une catégorie par cours si tu en donnes plusieurs. Puis touche « Enregistrer » : tes tampons te suivront d'un trimestre à l'autre, et tu pourras les partager avec tes collègues.",
+        texte: "Avant d'annoter, regarde tes tampons. Chaque tampon que tu poses ajoute sa phrase à la synthèse de rétroaction de ton étudiant·e. Ceux de départ ont été écrits pour l'analyse littéraire : lis leurs phrases avant de t'en servir. Touche l'engrenage de la palette « Tampons » : garde les phrases qui disent ce que tu dirais, réécris les autres, change leur image (ou mets un emoji à sa place), ou crée tes propres tampons, une catégorie par cours si tu en donnes plusieurs. Puis touche « Enregistrer » : tes tampons te suivront d'un trimestre à l'autre, et tu pourras les partager avec tes collègues.",
         avant: async function () {
             tamponsEnregistres = false;
             await revenirALaProduction();
@@ -505,8 +530,11 @@
     function opts(depuis) {
         return {
             depuis: depuis,
-            surEtape: function (i) { window.Assistance.definirEtat(ID, 'en-cours', i); },
-            surQuitter: function () { retirerExtras(); surModale(false); },
+            surEtape: function (i) {
+                if (VOIES[voie()][i] !== ETAPE_2) bulleSousLesColonnes(false);
+                window.Assistance.definirEtat(ID, 'en-cours', i);
+            },
+            surQuitter: function () { retirerExtras(); surModale(false); bulleSousLesColonnes(false); },
             surEchap: function () { terminer(); },
             verifier: function () { return !enDemo(); }
         };
@@ -544,6 +572,7 @@
     function terminer() {
         retirerExtras();
         surModale(false);
+        bulleSousLesColonnes(false);
         window.Assistance.definirEtat(ID, 'fait', 0);
         M().fermer();
     }

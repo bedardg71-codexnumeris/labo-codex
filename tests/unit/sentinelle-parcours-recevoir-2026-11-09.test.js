@@ -32,6 +32,9 @@ function texteDe(ligne) { const m = ligne && ligne.match(/Texte : « (.*?) » ?(
 
 // [étape, phrase de la consigne, phrase validée le 9 nov.]
 const CORRECTIONS = [
+    // Le 9 nov., 15 h 55 (questions 2 et 3 du rapport) : où choisir un nom manquant ; l'emoji à la place de l'image.
+    [2, "s'il manque un nom, choisis-le.", "s'il manque un nom, touche le fichier et choisis-le au centre."],
+    [4, 'réécris les autres, change leur image ou crée tes propres tampons,', 'réécris les autres, change leur image (ou mets un emoji à sa place), ou crée tes propres tampons,'],
     [5, 'Quand tu as fini, touche « Actions › Évaluer », au-dessus de la production.',
         'Quand tu as fini, touche « Annoter ▾ », au-dessus de la production, et choisis « Évaluer ».'],
     [7, 'Relis-les comme ton étudiant·e les lira et retouche-les au besoin, directement dans le cadre.',

@@ -5,7 +5,7 @@
 // le banc du quatrième part d'« un espace où le troisième parcours est fait » et les rejoue.
 import { test, expect } from '@playwright/test';
 import {
-    ouvrirEspaceVide, ouvrirPanneau, attendreEtape, contourSur, bulleNeCouvrePas, capture, bulle, mettreLaClasseEnPlace,
+    ouvrirEspaceVide, ouvrirPanneau, attendreEtape, contourSur, bulleNeCouvrePas, capture, bulle, mettreLaClasseEnPlace, deuxSondes,
     etiqueterExemple, choisirDesNiveaux
 } from './classe-de-banc.js';
 import { attendreApplication } from './attendre-application.js';
@@ -265,6 +265,29 @@ async function etape8(page, { niveaux, cap }) {
         const cart = (db.getSync(cle('cartouches_' + c.grilleId), []) || [])[0];
         return cart ? Object.values(cart.commentaires || {}).filter((t) => /MOT-DE-CARTOUCHE/.test(t)).length : 0;
     })).toBeGreaterThan(0);
+    // Puis la cartouche nommée dans la fiche de la production (Grégoire, 9 nov., 15 h 55) : l'onglet « Productions »,
+    // « Modifier » sur sa ligne, le menu « Cartouche ». Enregistrée seule, la cartouche ne fait pas avancer l'étape.
+    await deuxSondes(page);
+    expect(await page.evaluate(() => ParcoursMoteur.etapeCourante())).toBe(7);
+    const c = await ctx(page);
+    const onglet = '#sous-navigation [data-sous-onglet="conception-productions"]';
+    await contourSur(page, onglet);
+    await capture(page, DOSSIER, `p3-8-onglet-${cap}`);
+    await page.click(onglet);
+    // L'application rouvre d'elle-même la fiche de la dernière production décrite (mesuré) ; sinon, « Modifier » sur sa ligne.
+    if (!(await page.locator('#formulaireProduction').isVisible())) {
+        const modifier = `#conception-productions [data-action="modifierProduction"][data-param="${c.productionId}"]`;
+        await contourSur(page, modifier);
+        await page.click(modifier);
+    }
+    await contourSur(page, '#productionCartouche');
+    await menusLibres(page, 'étape 8, la cartouche');
+    await bulleNeCouvrePas(page, '#productionCartouche', 'étape 8, la cartouche');
+    await capture(page, DOSSIER, `p3-8-production-${cap}`);
+    // Le menu offre la cartouche créée entre-temps (la fiche, ouverte depuis l'étape 3, refait son menu au retour).
+    await expect(page.locator(`#productionCartouche option[value="${c.cartoucheId}"]`)).toHaveCount(1);
+    await page.selectOption('#productionCartouche', c.cartoucheId);
+    await expect.poll(() => page.evaluate((id) => ((db.getSync(cle('productions'), []) || []).find((p) => p.id === id) || {}).cartoucheId, c.productionId)).toBe(c.cartoucheId);
 }
 
 /** Étape 9 : « Actions › Consulter », « Déverrouiller », la cartouche, le mot, « Verrouiller », « Terminer ». */

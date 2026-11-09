@@ -478,3 +478,9 @@ body.parcours-sur-modale .parcours-bulle { z-index: 10011; }
    change (inscrit au rapport). Lié au moteur actif (`parcours-actif`) : si la classe restait un instant après une
    fermeture, elle ne vaudrait plus rien. */
 body.parcours-actif.parcours-inspecteur-devant #planif-panneau { z-index: 85; }
+
+/* Le quatrième parcours, étape 2 (Grégoire, 9 nov. 2026, 15 h 55) : la bulle se pose sous les trois colonnes de
+   l'import et sous « Importer ». La page n'avait plus de quoi défiler sous eux (mesuré à 1180 × 900 : au bout de sa
+   course) : elle reçoit, le temps de l'étape, la place de la bulle. Posé et retiré par js/parcours-recevoir.js. */
+body.parcours-actif.parcours-place-sous-les-colonnes #evaluations-importer { padding-bottom: 60vh; }
+
