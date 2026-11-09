@@ -228,7 +228,7 @@ for (const clair of [false, true]) {
         const erreurs = await ouvrirEspace(page, 1180, { clair });
         const { phrases, textes } = await P(page);
         // Des évaluations réelles : le rappel aurait de quoi s'ouvrir.
-        await page.evaluate(() => db.setSync(cle('evaluationsSauvegardees'), [{ id: 'eval-fictive-1' }]));
+        await page.evaluate(() => db.setSync(cle('evaluationsSauvegardees'), [{ id: 'eval-fictive-1' }]));   // security-ok: banc, donnée fictive créée ici
         await lancerLeParcours(page);
         await attendreEtape(page, 1);
         await expect(texteBulle(page)).toHaveText(textes[0]);
@@ -255,8 +255,8 @@ for (const clair of [false, true]) {
         await capture(page, `1180-${theme}-etape-4`);
 
         // « Ouvrir un codex… » est éclairé, mais ne fait rien pendant le parcours.
+        // Le répartiteur des data-action (main.js) répond dans le clic même : rien à attendre.
         await page.click('#codex-menu [data-action="Codex.actionOuvrir"]');
-        await page.waitForTimeout(300);
         expect(await page.evaluate(() => window.__ouvertures)).toBe(0);
         // Le toucher a pris le focus : la bulle reste, à la même étape.
         await expect(bulle(page).locator('.parcours-bulle-rang')).toHaveText('4 sur 4');
@@ -265,8 +265,9 @@ for (const clair of [false, true]) {
         await expect(bulle(page)).toHaveCount(0);
         expect(await page.evaluate(() => window.Assistance.etatDe('donnees').etat)).toBe('fait');
 
-        // La mise à jour du parcours a repoussé le rappel : à la fin, il n'est plus dû.
-        await page.waitForTimeout(2500);
+        // La mise à jour du parcours a repoussé le rappel : hors parcours, il n'est plus dû.
+        // (L'attente de la fin du parcours, minutée, est éprouvée dans Vitest.)
+        await page.evaluate(() => window.backupReminder.verifierEtAfficher());
         await expect(page.locator('#overlay-backup-reminder')).toHaveCount(0);
         const jours = await page.evaluate(() => (new Date(db.getSync('backupProchainRappel', null)) - Date.now()) / 864e5);
         expect(jours).toBeGreaterThan(13);
@@ -315,7 +316,7 @@ test('des copies manquent (1180, sombre) : l’avertissement passe pendant l’�
     const erreurs = await ouvrirEspace(page, 1180);
     const { phrases } = await P(page);
     // Une production dont le fichier n'est pas dans l'application (nom fictif).
-    await page.evaluate(() => db.setSync(cle('fichiersTravaux'), [{ id: 'ft-fictif-1', nomFichier: 'production-fictive.pdf' }]));
+    await page.evaluate(() => db.setSync(cle('fichiersTravaux'), [{ id: 'ft-fictif-1', nomFichier: 'production-fictive.pdf' }]));   // security-ok: banc, donnée fictive créée ici
     await lancerLeParcours(page);
     await jusquALApercu(page, {
         avantApercu: async () => {
