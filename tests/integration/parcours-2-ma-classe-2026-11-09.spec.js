@@ -111,6 +111,20 @@ async function bulleNeCouvrePas(page, selecteur, contexte = '') {
 
 const rang = (page) => page.locator('#assistance-menu-rang');
 
+/** Note chaque titre de bulle rendu, pour dire quelles étapes ont paru, même un instant. */
+async function noterLesBulles(page) {
+    await page.evaluate(() => {
+        window.__bullesVues = [];
+        const noter = () => {
+            const t = document.getElementById('parcours-bulle-titre');
+            const titre = t ? t.textContent : null;
+            if (titre && window.__bullesVues[window.__bullesVues.length - 1] !== titre) window.__bullesVues.push(titre);
+        };
+        new MutationObserver(noter).observe(document.body, { childList: true, subtree: true, characterData: true });
+    });
+}
+const bullesVues = (page) => page.evaluate(() => window.__bullesVues);
+
 // ---------- Les gestes de chaque étape, tels qu'une personne les fait ----------
 
 async function remplirTrimestre(page, { debut = '2026-08-24' } = {}) {
@@ -214,6 +228,9 @@ async function faireLeCadre(page, { capturer = '', depuis = 1, premiereDejaTouch
 test('de « Découvrir » à sa propre classe : « Commencer avec ma classe », le Cadre bloc par bloc, « Plus tard » puis « Reprendre », la première saisie, la bande (1180 px)', async ({ page }) => {
     test.setTimeout(180000);
     await ouvrirEspaceVide(page, 1180);
+    // Le stock d'avant le 11 sept. : une date verrouillée sous la clé nue. La saisie la sème chez le
+    // groupe-cours neuf ; l'étape 7 ne doit pas la prendre pour sa première saisie (relecture du 9 nov.).
+    await page.evaluate(() => db.setSync('datesVerrouillees', ['2026-03-10']));
 
     // « Découvrir » sur la démo, jusqu'à sa dernière bulle (son banc à lui juge chaque étape).
     await ouvrirPanneau(page);
@@ -307,6 +324,14 @@ test('de « Découvrir » à sa propre classe : « Commencer avec ma classe », 
     const item = page.locator('#panneau-assistance [data-parcours="classe"]');
     await expect(item.locator('.assistance-parcours-etat')).toHaveText('Fait');
     await expect(item.locator('.assistance-parcours-bouton')).toHaveText('Refaire');
+
+    // « Refaire », tout étant en place : la première étape non faite est la dernière ; aucune autre
+    // bulle ne paraît, même un instant.
+    await noterLesBulles(page);
+    await item.locator('.assistance-parcours-bouton').click();
+    await attendreEtape(page, 8, "Ta classe d'un coup d'œil");
+    expect(await bullesVues(page)).toEqual(["Ta classe d'un coup d'œil"]);
+    await bulle(page).getByRole('button', { name: 'Terminer' }).click();
 });
 
 test('la porte de l’accueil commence à la première étape non faite ; avant le premier cours, l’étape 7 le dit, « D’accord » la ferme, « Reprendre » la rouvre', async ({ page }) => {
@@ -321,8 +346,11 @@ test('la porte de l’accueil commence à la première étape non faite ; avant 
 
     // « Commencer », carte « Tu enseignes ? » de l'accueil : le parcours, au cours.
     await page.evaluate(() => { afficherSection('accueil'); afficherAccueil(); });
+    await noterLesBulles(page);
     await page.click('#accueil-portes .accueil-porte:first-child .accueil-porte-bouton');
     await attendreEtape(page, 2, 'Ton cours');
+    // Il PART du cours : la bulle du trimestre n'a jamais paru, même un instant.
+    expect(await bullesVues(page)).toEqual(['Ton cours']);
     expect(await page.evaluate(() => Assistance.etatDe('classe'))).toEqual({ etat: 'en-cours', etape: 1 });
     await faireLeCadre(page, { depuis: 2 });
 

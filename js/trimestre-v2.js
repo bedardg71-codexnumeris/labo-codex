@@ -521,10 +521,11 @@ function mettreAJourBarreContexte() {
 }
 
 /**
- * Les six étapes de la barre, réglées ou non, lues dans le stock. Source unique de ce que la barre
- * montre : le parcours « Mettre ta classe en place » (js/parcours-classe.js) s'y repère aussi, pour
- * commencer à la première étape non faite (lot « Les deux parcours », partie 2, 9 nov. 2026).
- * @returns {Array<{id: string, libelle: string, reglee: boolean, info: string}>}
+ * Les six étapes de la barre, réglées ou non, lues dans le stock, avec l'accordéon que chacune ouvre.
+ * Source unique de ce que la barre montre : le parcours « Mettre ta classe en place »
+ * (js/parcours-classe.js) s'y repère aussi, pour commencer à la première étape non faite et ouvrir
+ * le bon bloc (lot « Les deux parcours », partie 2, 9 nov. 2026).
+ * @returns {Array<{id: string, libelle: string, reglee: boolean, info: string, accordeon: string}>}
  */
 function etapesDuCadre() {
     // #642 (12 oct. 2026) : plus d'alias local `cle` (il masquait le helper) ; `window.cle`
@@ -545,6 +546,8 @@ function etapesDuCadre() {
         etape('horaire', 'Horaire', nb(cle('horaires')), ' hor.'),
         Object.assign(etape('groupe-cours', 'Groupe-cours', nb(cle('groupesCours')), ' GC'), { arrivee: true })
     ];
+    // L'accordéon que chaque étape ouvre : le parcours le lit ici, comme la barre au clic.
+    etapes.forEach(e => { e.accordeon = ACCORDEON_DE_L_ETAPE[e.id]; });
     return etapes;
 }
 

@@ -355,7 +355,8 @@ describe('B5 · trois portes d\'entrée (28 oct. 2026), de vrais boutons (7 nov.
         expect(portes(html)[0]).toContain('data-action="commencerParLeTrimestre">Commencer</button>');
         win.commencerParLeTrimestre();
         expect(appels).toEqual([['parcours', 'classe']]);
-        expect(lire('js/parcours-classe.js')).toMatch(/'trimestre': 'accordeon-gestion-trimestres'/);
+        expect(lire('js/trimestre-v2.js')).toMatch(/'trimestre': 'accordeon-gestion-trimestres'/);
+        expect(lire('js/parcours-classe.js')).toContain('e.accordeon');
     });
 
     it('« Explorer » appelle activerModeDemo (qui porte la garde de l\'import, T7) ; rien quand la démo est déjà active', () => {

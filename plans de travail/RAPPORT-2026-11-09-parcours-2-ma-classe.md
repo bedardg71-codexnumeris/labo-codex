@@ -89,11 +89,13 @@ prennent sur le Mac. Captures Chromium : `plans de travail/captures-2026-11-09-p
   qui est **écrit**. L'étape 7 a deux bulles sous un même rang (getters lus par le moteur), décidées à sa préparation.
   Le lancement provisoire de la partie 1 est retiré.
 - **`js/trimestre-v2.js`** : `etapesDuCadre()`, extraite de `mettreAJourBarreContexte` : la barre la dessine, le
-  parcours s'y repère (une seule source). L'export `window.ouvrirAccordeonDeLEtape` est retiré : son seul consommateur
+  parcours s'y repère (une seule source), y compris pour l'accordéon que chaque étape ouvre. L'export `window.ouvrirAccordeonDeLEtape` est retiré : son seul consommateur
   était l'ancienne porte de l'accueil ; la fonction reste, pour le clic sur la barre.
 - **`js/accueil.js`** : `commencerParLeTrimestre` (le nom de l'action reste, `data-action` inchangé) lance le parcours.
-- **`js/saisie-presences.js`** : le défaut de la date (§ 3) ; `window.obtenirDatesVerrouillees` exportée (l'étape 7
-  avance quand une séance du groupe-cours actif est verrouillée).
+  Changement de comportement à nommer : si la démo est ouverte, « Commencer » la referme maintenant (le parcours se
+  joue sur les vraies données).
+- **`js/saisie-presences.js`** : le défaut de la date (§ 3) ; `lireDatesVerrouilleesSansSemis`, une lecture des dates
+  verrouillées qui n'écrit rien : l'étape 7 avance quand une **séance du groupe** est verrouillée (§ 7).
 - **`index.html`** : quatre jetons anti-cache, au jour du build (`20261108`) avec une lettre neuve, puisque
   `scripts/release.mjs` est interdit cette nuit. La release du Mac les réécrira.
 - **Bancs** : `tests/unit/sentinelle-parcours-classe-2026-11-09.test.js` (les mots, le retrait du provisoire, la
@@ -114,6 +116,9 @@ prennent sur le Mac. Captures Chromium : `plans de travail/captures-2026-11-09-p
   Contourné en éclairant le formulaire seul, plus court que l'accordéon : à 1180 px, tout tient. À 390 px, rien ne tient
   (question 2 de l'en-tête).
 - **`attendre` et `aller`** sont recopiés de « Découvrir » (quatre lignes chacun). *Il faudrait* : que le moteur les offre.
+- **« Reprendre » ne repart pas de l'étape retenue par le panneau** : le parcours recalcule la première étape non faite.
+  C'est la même tant que les étapes avancent sur les données ; si quelqu'un supprime son horaire entre deux reprises,
+  le parcours repart à l'horaire, ce qui me semble juste.
 
 ## 2. Les deux affirmations à vérifier avant de poser les textes
 
@@ -144,9 +149,10 @@ un poste neuf, il n'y avait alors rien à proposer. Le premier groupe-cours devi
 (`sauvegarderGroupeCoursV2`), et l'observateur qui rafraîchit la saisie à l'arrivée ne le faisait que si une date était
 déjà là.
 
-**Correction, à la source** : à l'arrivée dans Présences, si la date est vide, l'observateur passe par le même chemin
-que le démarrage (séances régénérées, la plus récente ≤ aujourd'hui proposée). Une date déjà là ne change pas de
-chemin. **Source ou stock** : un état d'écran, rien n'est écrit chez les gens ; pas de stock.
+**Correction, à la source** : à l'arrivée dans Présences, si la date est vide **et la base prête**, l'observateur passe
+par le même chemin que le démarrage (séances régénérées, la plus récente ≤ aujourd'hui proposée). Une date déjà là ne
+change pas de chemin. Coût : avant le premier cours (aucune date à proposer), chaque arrivée relance le calendrier et
+les indices, comme au démarrage. **Source ou stock** : un état d'écran, rien n'est écrit chez les gens ; pas de stock.
 **Break-test** : la correction retirée → l'essai de bout en bout rougit sur la date (`""` au lieu de `2026-11-10`),
 rétablie → vert.
 
@@ -218,13 +224,38 @@ sa tentative est partie avec le retour en arrière du 22 avril (`docs/POST-MORTE
     `lot-e2-cadre-creer-ou-modifier`, `parcours-rentree-478`, `groupe-cours-sans-ses-eleves-1038` : **99 verts, 4 rouges,
     10 sautés**. Les 4 rouges le sont aussi sur la base `a328bb9` (§ 5, points 5 et 6) : aucun n'est dû à ce lot.
 - **Break-tests** : la sentinelle (« tes présences, tes évaluations » → « tes présences et tes évaluations » : rouge,
-  rétabli : vert) ; la correction de la date (§ 3).
+  rétabli : vert) ; la correction de la date (§ 3) ; après la relecture, le départ forcé à 0, « tout est fait » ramené
+  à l'étape 7, et le verrou compté sans croisement avec les séances : chacun rougit, rétabli : vert.
+- **Après les corrections de la relecture** : Vitest 10 893/10 893 ; `parcours-2-ma-classe` 2/2 ; `barre-convergence-918`,
+  `chaines-etapes-1149` (les deux), `presences-lot-d-enregistrement`, `parcours-neuf-saisie-presences`,
+  `demo-saisie-presences-749-lot3`, `graphique-suit-les-presences` : 33 verts, 2 sautés.
 - **Sur le Mac, à faire** : le verdict WebKit complet, et les captures WebKit (chaque étape à 1180 px en sombre ; 1, 7
   et 8 à 390 px ; menu et panneau).
 
 ## 7. Relecture par un agent neuf
 
-(à compléter)
+Un sous-agent qui n'avait pas vu le travail, avec la consigne et `git show a17bc783` seulement (skill
+`verification-adverse`). **Verdict : « bon avec réserves »**, cinq réserves ; les quatre premières portaient sur ce que
+j'avais écrit, elles sont finies dans le lot (commit suivant) :
+
+1. **Le semis faisait sauter l'étape 7** (mesuré par lui) : chez qui a encore la clé nue `datesVerrouillees` (stock
+   d'avant le 11 sept.), la première lecture la copie chez le groupe-cours neuf ; le parcours comptait toute date
+   verrouillée et passait de l'étape 6 à « 8 sur 8 » sans saisie. **Corrigé** : lecture sans semis
+   (`lireDatesVerrouilleesSansSemis`), et seule compte une date qui est une séance du groupe. Le banc de bout en bout
+   pose désormais ce vieux stock ; break-test : sans le croisement, il rougit à l'étape 7.
+2. **L'observateur n'attendait pas la base** (#990 : avant elle, ce chemin écrit un calendrier vide sous une clé nue).
+   **Corrigé** : `window.dbReady === true` en condition. Non reproduit (fenêtre étroite), lu dans le code.
+3. **`window.ParcoursClasse` sans consommateur, et la table des accordéons recopiée de `trimestre-v2.js`**.
+   **Corrigé** : l'export retiré ; `etapesDuCadre()` porte l'accordéon de chaque étape.
+4. **L'essai « première étape non faite » ne mordait pas** (départ forcé à 0 : vert, le moteur passait seul à l'étape 2 ;
+   « tout est fait » ramené à l'étape 7 : vert). **Corrigé** : le banc note chaque bulle rendue ; la porte de l'accueil ne
+   doit montrer que « Ton cours », et « Refaire », tout étant en place, que l'étape 8. Break-tests : les deux rougissent.
+5. **Les trois éléments « INSCRIS AU BACKLOG » ne sont pas dans `BACKLOG.md`** : voulu, la règle 3 de la nuit interdit d'y
+   écrire ; ils sont plus bas, pour la session du Mac.
+
+Il a aussi relevé : la spec saute à la fin de « Découvrir » (`ParcoursMoteur.allerA(7)`) au lieu de le jouer — son
+propre banc, `parcours-1-et-2`, le joue étape par étape ; les captures du menu et du panneau viennent de l'essai de
+captures de la partie 1 (`parcours-1-et-2` › « captures du menu et du panneau »), relancé ici.
 
 ## À inscrire au BACKLOG
 

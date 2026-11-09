@@ -62,10 +62,20 @@
 
     // ---------- Ce que montre la frise du Cadre, et la suite ----------
 
-    function reglee(idEtape) {
+    function etapeDuCadre(idEtape) {
         var etapes = typeof window.etapesDuCadre === 'function' ? window.etapesDuCadre() : [];
-        var e = etapes.find(function (x) { return x.id === idEtape; });
+        return etapes.find(function (x) { return x.id === idEtape; }) || null;
+    }
+
+    function reglee(idEtape) {
+        var e = etapeDuCadre(idEtape);
         return !!(e && e.reglee);
+    }
+
+    /** L'accordéon du bloc, tel que la barre du Cadre le nomme. */
+    function accordeon(idEtape) {
+        var e = etapeDuCadre(idEtape);
+        return e && e.accordeon ? el(e.accordeon) : null;
     }
 
     function groupeCoursActif() {
@@ -73,10 +83,24 @@
         return gc && gc.id ? gc : null;
     }
 
-    /** Une séance du groupe-cours actif est verrouillée (« Verrouiller la saisie »). */
+    /** Les séances du groupe-cours actif, lues dans leur cache, sans rien générer ni écrire. */
+    function seancesDuGroupe() {
+        var gc = groupeCoursActif();
+        if (!gc || typeof window.obtenirSeancesCompletesDuGroupe !== 'function') return {};
+        return window.obtenirSeancesCompletesDuGroupe(gc.id);
+    }
+
+    /**
+     * Une SÉANCE du groupe-cours actif est verrouillée (« Verrouiller la saisie »). Lue sans semis, et
+     * croisée avec les séances du groupe : une date d'un autre trimestre, venue du stock d'avant le
+     * 11 sept., ne compte pas (relecture du 9 nov.).
+     */
     function seanceVerrouillee() {
-        if (!groupeCoursActif() || typeof window.obtenirDatesVerrouillees !== 'function') return false;
-        return window.obtenirDatesVerrouillees().length > 0;
+        if (!groupeCoursActif() || typeof window.lireDatesVerrouilleesSansSemis !== 'function') return false;
+        var seances = seancesDuGroupe();
+        return window.lireDatesVerrouilleesSansSemis().some(function (d) {
+            return Array.isArray(seances[d]) && seances[d].length > 0;
+        });
     }
 
     /**
@@ -86,9 +110,7 @@
      * des présences le régénère à l'arrivée (js/saisie-presences.js).
      */
     function premierCoursPasse() {
-        var gc = groupeCoursActif();
-        if (!gc || typeof window.obtenirSeancesCompletesDuGroupe !== 'function') return false;
-        var seances = window.obtenirSeancesCompletesDuGroupe(gc.id);
+        var seances = seancesDuGroupe();
         var aujourdhui = window.dateLocaleYMD();
         return Object.keys(seances).some(function (d) {
             return Array.isArray(seances[d]) && seances[d].length > 0 && d <= aujourdhui;
@@ -107,14 +129,6 @@
 
     // ---------- Les blocs du Cadre ----------
 
-    var ACCORDEON = {
-        'trimestre': 'accordeon-gestion-trimestres',
-        'cours': 'accordeon-cours',
-        'enseignant': 'accordeon-enseignant',
-        'etudiants': 'accordeon-groupe-etudiants',
-        'horaire': 'accordeon-horaire',
-        'groupe-cours': 'accordeon-groupe-cours'
-    };
     var BOUTON_CREER = {
         'trimestre': 'v2-btnCreerTrimestre',
         'cours': 'v2-btnCreerCours',
@@ -160,7 +174,7 @@
     async function ouvrirBloc(idEtape) {
         aller('calendrier', 'trimestre');
         await attendre(function () { return sousSectionVisible('calendrier-trimestre'); }, 2000);
-        var acc = el(ACCORDEON[idEtape]);
+        var acc = accordeon(idEtape);
         if (!acc) return;
         if (acc.classList.contains('ferme')) {
             var tete = acc.querySelector('.accordeon-header');
@@ -178,7 +192,7 @@
     // éclairer tout l'accordéon faisait sortir de l'écran le haut d'un grand formulaire, ou passer
     // la bulle dessus (captures du 9 nov., étapes 1 et 6).
     function blocDuFormulaire(idEtape) {
-        var acc = el(ACCORDEON[idEtape]);
+        var acc = accordeon(idEtape);
         return acc ? acc.querySelector('.panneau-formulaire') : null;
     }
 
@@ -282,12 +296,12 @@
             texte: "Ajoute tes étudiant·es. Le plus simple : copie la liste de ton groupe depuis le système de ton établissement et colle-la ici, ou importe-la en fichier texte. La liste de Léa, dans Omnivox (format Excel, dans ses paramètres d'affichage), arrive déjà dans le bon ordre ; sinon, une ligne par personne : DA, groupe, nom, prénom. Le DA reconnaît chaque personne partout dans l'application, jusque dans le nom des fichiers que tu importeras. Le numéro de groupe servira à ton horaire et à ton groupe-cours. Le reste peut attendre.",
             avant: function () { return ouvrirBloc('etudiants'); },
             zones: function () {
-                var acc = el(ACCORDEON.etudiants);
+                var acc = accordeon('etudiants');
                 return [acc ? acc.querySelector('.section-import-droite') : null];
             },
             // « Prévisualiser », puis, l'aperçu affiché, « Confirmer » : c'est lui qui importe.
             contour: function () {
-                var acc = el(ACCORDEON.etudiants);
+                var acc = accordeon('etudiants');
                 var confirmer = el('v2-btnConfirmerImport');
                 if (M().visible(confirmer)) return confirmer;
                 return acc ? acc.querySelector('[data-action="previsualiserDonneesV2"]') : null;
@@ -400,6 +414,4 @@
         lancer: lancer
     });
 
-    // Pour la sentinelle des textes (tests/unit) : les étapes et la variante telles qu'elles sont posées.
-    window.ParcoursClasse = { etapes: ETAPES, texteAvantPremierCours: TEXTE_7_AVANT, premiereNonFaite: premiereNonFaite };
 })();
