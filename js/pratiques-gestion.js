@@ -1255,11 +1255,7 @@ function remplirFormulairePratique(pratique) {
 
         // 🆕 #24 : Déterminer le mode de sélection (hybride a priorité)
         const estHybride = config.portfolio?.hybride || config.categories?.actif || false;
-        let modeSelection = config.portfolio?.methodeSelection || 'meilleurs';
-        // Neuvième parcours (8 nov. 2026, nuit) — le modèle « N plus récentes » écrit `recents`, que le menu n'offre pas
-        // (il dit `derniers`, que le moteur lit comme `recents`). Le menu restait vide, et le premier réglage changé
-        // écrivait « meilleurs » (le repli de la sauvegarde). Lecture seule : rien n'est écrit tant qu'on ne touche rien.
-        if (modeSelection === 'recents') modeSelection = 'derniers';
+        let modeSelection = modeSelectionDuMenu(config.portfolio);
         if (estHybride) modeSelection = 'hybride';
 
         // #435 (9 août 2026) — NORMALISATION des pratiques legacy, extension de
@@ -1438,6 +1434,17 @@ function afficherDescriptionTaxonomiqueMat(type) {
     // Description taxonomique maintenant affichée dans la sidebar
     // Cette fonction est conservée pour éviter les erreurs d'appel
     return;
+}
+
+/**
+ * La valeur du menu « Mode de sélection » pour un portfolio enregistré. Neuvième parcours (8 nov. 2026, nuit) — le modèle
+ * « N plus récentes » écrit `recents`, que le menu n'offre pas (il dit `derniers`, que le moteur lit comme `recents`, et
+ * l'assistant fait la même relecture). Le menu restait vide, et le premier réglage changé écrivait « meilleurs » (le repli
+ * de la sauvegarde). Lecture seule : rien n'est écrit tant qu'on ne touche rien. Pure.
+ */
+function modeSelectionDuMenu(portfolio) {
+    const mode = (portfolio && portfolio.methodeSelection) || 'meilleurs';
+    return mode === 'recents' ? 'derniers' : mode;
 }
 
 /**
@@ -3175,6 +3182,7 @@ window.supprimerTypeTravailMat = supprimerTypeTravailMat;
 
 // PAN-Spécifications : Forfaits
 window.afficherForfaitsMat = afficherForfaitsMat;
+window.modeSelectionDuMenu = modeSelectionDuMenu;   // neuvième parcours (8 nov., nuit) : pour le banc
 window.ajouterForfaitMat = ajouterForfaitMat;
 window.modifierForfaitMat = modifierForfaitMat;
 window.modifierTravailForfaitMat = modifierTravailForfaitMat;

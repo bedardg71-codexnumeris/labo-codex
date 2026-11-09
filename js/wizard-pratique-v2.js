@@ -2420,13 +2420,7 @@ async function creerPratiqueV2() {
         const clone = poserEchelleAdoption(JSON.parse(JSON.stringify(src)), reponseEchelle.echelleId);
         clone.id = wizardState.pratiqueId || genererIdUnique('pratique_');
         clone.nom = r.nom || src.nom || 'Pratique adoptée';
-        const auteurRecap = `${r.prenom || ''} ${r.nomAuteur || ''}`.trim();
-        if (auteurRecap) clone.auteur = auteurRecap;
-        // Neuvième parcours (8 nov. 2026, nuit) — trois modèles portent l'auteur « Demo Labo Codex », qui est AUSSI le
-        // marqueur d'un item de la démo (`BibliothequeUI.estItemDemo`, #692). Sans auteur au récapitulatif (aucun profil
-        // d'enseignant·e), la copie le gardait : hors démo, elle n'était pas dans le menu « Pratique ouverte ». La copie
-        // n'est pas un item de la démo : elle perd ce marqueur. Le stock déjà écrit n'est pas touché.
-        else if (window.BibliothequeUI && BibliothequeUI.estItemDemo(clone) && clone.isDemo !== true) clone.auteur = '';
+        clone.auteur = auteurDeLaCopie(clone, `${r.prenom || ''} ${r.nomAuteur || ''}`.trim());
         if (r.etablissement) clone.etablissement = r.etablissement;
         if (r.discipline) clone.discipline = r.discipline;
         if (r.description) clone.description = r.description;
@@ -2636,6 +2630,19 @@ async function creerPratiqueV2() {
 
     // Finaliser (sauvegarde + fermeture + notification + rafraîchissements).
     await finaliserCreationPratique(pratique);
+}
+
+/**
+ * L'auteur de la copie d'un modèle adopté : celui du récapitulatif, sinon celui du modèle. Neuvième parcours (8 nov. 2026,
+ * nuit) — trois modèles portent l'auteur « Demo Labo Codex », qui est AUSSI le marqueur d'un item de la démo
+ * (`BibliothequeUI.estItemDemo`, #692). Sans auteur au récapitulatif (aucun profil d'enseignant·e), la copie le gardait :
+ * hors démo, elle manquait au menu de Conception › Pratiques. La copie n'est pas un item de la démo : elle perd ce
+ * marqueur. Le stock déjà écrit n'est pas touché.
+ */
+function auteurDeLaCopie(clone, auteurRecap) {
+    if (auteurRecap) return auteurRecap;
+    const marqueDemo = window.BibliothequeUI && BibliothequeUI.estItemDemo(clone) && clone.isDemo !== true;
+    return marqueDemo ? '' : clone.auteur;
 }
 
 /**

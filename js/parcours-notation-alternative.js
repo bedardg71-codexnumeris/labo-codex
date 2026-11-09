@@ -296,6 +296,12 @@
         zone.style.display = visibles ? '' : 'none';
     }
 
+    /** Le voile d'une étape qui change de lieu en cours de route (le moteur le pose à l'entrée de l'étape). */
+    function poserVoile(nom) {
+        var v = el('parcours-voile');
+        if (v) v.setAttribute('class', 'parcours-voile parcours-voile--' + nom);
+    }
+
     function suivante(m) {
         m.allerA(m.etapeCourante() + 1);
     }
@@ -375,12 +381,6 @@
 
     function paletteRetro() {
         return M().premierVisible(['#travaux-palette-eval-retro', '#travaux-eval-retroaction']);
-    }
-
-    function palettesEval() {
-        var flottantes = ['travaux-palette-eval-gauche', 'travaux-palette-eval-droite', 'travaux-palette-eval-retro'].map(el).filter(vis);
-        if (flottantes.length) return flottantes;
-        return ['travaux-eval-gauche', 'travaux-eval-droite', 'travaux-eval-retroaction'].map(el).filter(vis);
     }
 
     function lignesListe() {
@@ -562,7 +562,10 @@
                 }
             },
             zones: function () {
-                if (enEvaluation()) return palettesEval();
+                // Dans l'évaluation, sans voile (voir `atteint`) : la zone ne sert qu'à poser la bulle près de ce
+                // qu'il faut toucher. Sans copie, les trois panneaux s'empilent sur toute la page : éclairés ensemble,
+                // ils ne laissaient à la bulle aucune place, et elle couvrait le cadenas.
+                if (enEvaluation()) return [this.contour()].filter(Boolean);
                 var tr = ligneAEvaluer();
                 return [tr || el('conteneur-tableau-evaluations')].filter(Boolean);
             },
@@ -571,6 +574,9 @@
                 return menuActions(ligneAEvaluer());
             },
             atteint: function () {
+                // Le voile suit le lieu : léger sur la liste, aucun dans l'évaluation, où la personne touche les
+                // critères, la palette « Rétroaction » et le cadenas, loin les uns des autres.
+                poserVoile(enEvaluation() ? 'aucun' : 'leger');
                 var avant = lireCtx().verrouilleesAvant || [];
                 var e = verrouillees().find(function (x) { return avant.indexOf(x.id) === -1; });
                 if (!e) return false;

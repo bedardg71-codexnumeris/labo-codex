@@ -255,6 +255,11 @@ function _evaluerSansCopie(da, productionId) {
     setTimeout(async () => {
         try {
             _setupAffichagePanneauxModif(false);
+            // Neuvième parcours (8 nov. 2026, nuit) — une évaluation neuve prend l'affichage de la pratique active
+            // (« Note chiffrée » ou « Niveau de performance »), comme avec une copie : sans copie, le formulaire gardait
+            // celui de l'évaluation d'avant, ou « Note chiffrée », et le PDF de l'étudiant·e suivait. Une évaluation déjà
+            // enregistrée pose ensuite le sien (`verifierEtChargerEvaluationExistante`).
+            cocherOptionsParDefaut();
             // Sans copie, le travail est « Reçu » — remis, non importé (Grégoire, 15 sept.) — et les
             // critères s'ouvrent ; « Non reçu », le défaut du formulaire, les verrouillait. Posé AVANT
             // l'élève et la production : leur chargement lit ce statut. Une évaluation déjà

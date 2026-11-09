@@ -36,8 +36,14 @@ async function capture(page, nom) {
         .filter((a) => a.effect && a.effect.target && a.effect.target.closest
             && a.effect.target.closest('#panneau-assistance, #parcours-voile, #parcours-bulle, #entete-menu-panneau'))
         .every((a) => a.playState !== 'running'));
-    // La sonde du moteur replace la bulle toutes les 120 ms : la capture attend qu'elle soit posée.
-    await page.waitForTimeout(300);
+    // La sonde du moteur replace la bulle toutes les 120 ms : la capture attend qu'elle ne bouge plus.
+    await page.waitForFunction(() => {
+        const b = document.getElementById('parcours-bulle');
+        const k = b ? b.style.left + ',' + b.style.top : '';
+        const stable = window.__bulleP9 === k;
+        window.__bulleP9 = k;
+        return stable;
+    }, null, { polling: 150 });
     await page.screenshot({ path: path.join(CAPTURES, nom + '.png') });
 }
 
@@ -298,7 +304,10 @@ async function parcoursEntier(page, { famille, modele, largeur = 1180, clair = f
     await expect(page.locator('#parcours-contour')).toBeVisible();
     await cap('etape-6-evaluation');
     await page.click('#btnVerrouillerEvaluation');
-    if (process.env.MESURE_P9) console.log('MESURE affichage', famille, await page.evaluate(() => JSON.stringify((db.getSync(cle('evaluationsSauvegardees'), []) || []).map((e) => [e.id, e.verrouillee, e.optionsAffichage && e.optionsAffichage.affichageNote]))));
+    // L'évaluation neuve a pris l'affichage de la pratique (« Niveau de performance », étape 4) : sans copie, elle
+    // gardait « Note chiffrée » (mesuré la nuit du 8 nov., corrigé dans `_evaluerSansCopie`).
+    await expect.poll(() => page.evaluate(() => (db.getSync(cle('evaluationsSauvegardees'), []) || [])
+        .filter((e) => e.verrouillee === true).map((e) => e.optionsAffichage && e.optionsAffichage.affichageNote))).toEqual(['lettre']);
 
     // 7. « Ta synthèse » : Actions › Dossier PDF ; « Continuer » paraît quand le PDF est téléchargé.
     await attendreEtape(page, 'Ta synthèse', n(k + 3));
