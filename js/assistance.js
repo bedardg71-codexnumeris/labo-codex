@@ -118,6 +118,10 @@
         btn.textContent = e.etat === 'fait' ? 'Refaire' : e.etat === 'en-cours' ? 'Reprendre' : 'Commencer';
         btn.setAttribute('aria-describedby', h.id);
         btn.addEventListener('click', function () {
+            // Une condition d'entrée lue dans les données (le huitième parcours, 9 nov. 2026) : sans
+            // elle, le bouton ne lance rien, et le panneau dit pourquoi, sous le bouton.
+            var refus = typeof def.refus === 'function' ? def.refus() : '';
+            if (refus) { montrerRefus(corps, refus); return; }
             var depuis = e.etat === 'en-cours' ? e.etape : 0;
             fermerPanneau({ sansRetourFocus: true });
             def.lancer(depuis);
@@ -126,6 +130,18 @@
 
         li.appendChild(corps);
         return li;
+    }
+
+    /** Le refus d'un parcours, sous son bouton ; un lecteur d'écran l'annonce (role status). */
+    function montrerRefus(corps, texte) {
+        var p = corps.querySelector('.assistance-parcours-refus');
+        if (!p) {
+            p = document.createElement('p');
+            p.className = 'assistance-parcours-refus';
+            p.setAttribute('role', 'status');
+            corps.appendChild(p);
+        }
+        p.textContent = texte;
     }
 
     function construirePanneau() {

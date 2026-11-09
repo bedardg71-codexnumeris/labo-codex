@@ -151,6 +151,11 @@
         // retirée) : celles déjà écrites restent dans le stockage, rien ne les lit plus.
         parcoursAssistance: {},
 
+        // Le chemin du huitième parcours, « Automatiser tes commentaires » (js/parcours-commentaires.js,
+        // 9 nov. 2026), pour « Reprendre » : { chemin: [clés d'étapes], grilleId, saute7, saute8,
+        // sansFichier, verrousAvant }. Rien des données de la personne : ce que le parcours a vu d'elles.
+        parcoursCommentaires: {},
+
         // Export du plan — niveau « Personnalisé » (#431, 8 août 2026).
         // ⚠ REMPLACÉE par exportGabarits (#416 lot H, 12 août 2026). Elle
         // subsiste ici le temps que la migration la lise ; elle est effacée

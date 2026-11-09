@@ -48,6 +48,8 @@ body.mode-clair {
 .parcours-voile--normal path { fill-opacity: 0.55; }
 .parcours-voile--leger path  { fill-opacity: 0.3; }
 .parcours-voile--dense path  { fill-opacity: 0.65; }
+/* Une bulle sans voile (la dernière du huitième parcours) : la page reste visible et touchable. */
+.parcours-voile--aucun path  { fill-opacity: 0; pointer-events: none; }
 
 /* ---------- Le contour : il marque où toucher, sans capter le toucher ---------- */
 
@@ -363,6 +365,15 @@ body.parcours-actif .transition-bandeau { display: none; }
 }
 
 .assistance-parcours-bouton:hover { background: rgba(106, 172, 184, 0.15); }
+
+/* Le refus d'un parcours qui attend une condition (le huitième : une production et sa grille). */
+.assistance-parcours-refus {
+    margin: 0;
+    padding-left: 10px;
+    border-left: 2px solid var(--icone-aide-config);
+    font-size: 13px;
+    line-height: 1.45;
+}
 .assistance-parcours-bouton--plein:hover { background: var(--acc-surface); }
 
 .assistance-filet {
