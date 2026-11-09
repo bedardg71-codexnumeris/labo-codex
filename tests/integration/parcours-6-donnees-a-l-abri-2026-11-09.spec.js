@@ -248,14 +248,27 @@ async function aideDuIAuDessusDeLApercu(page, capturer) {
     await expect(page.locator('.aide-contextuelle-modal.active')).toHaveCount(0);
     await expect(page.locator('.export-preview-modal')).toBeVisible();
     expect(await page.evaluate(() => document.body.classList.contains('aide-par-dessus-les-fenetres'))).toBe(false);
-    // Ouverte sans « i » d'une fenêtre (par sa clé), l'aide reste à sa place habituelle.
-    const zParCle = await page.evaluate(() => {
+    // Ouverte par sa clé (sans déclencheur), ou par un « i » posé dans la page (une couche basse), l'aide
+    // reste à sa place habituelle. Le « i » de la page reçoit un vrai clic d'événement : l'aperçu, ouvert,
+    // empêcherait le toucher, mais c'est le répartiteur des « i » (accompagnement.js) qui est jugé ici.
+    // Break-test (relecture du 9 nov.) : la classe posée dès qu'il y a un déclencheur, le niveau ignoré →
+    // ROUGE (« i » de la page : 100011). Rétabli → vert.
+    const zAilleurs = await page.evaluate(() => {
+        const lire = () => getComputedStyle(document.querySelector('.aide-contextuelle-modal.active')).zIndex;
         window.afficherAideContextuelle('modal-export-preview');
-        const z = getComputedStyle(document.querySelector('.aide-contextuelle-modal.active')).zIndex;
+        const parCle = lire();
         window.fermerAideContextuelle();
-        return z;
+        const i = document.createElement('button');
+        i.className = 'btn-aide-contextuelle';
+        i.setAttribute('data-aide', 'modal-export-preview');
+        document.querySelector('main, #contenu, body').appendChild(i);
+        i.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true }));
+        const parUnIDeLaPage = lire();
+        window.fermerAideContextuelle();
+        i.remove();
+        return { parCle, parUnIDeLaPage };
     });
-    expect(zParCle).toBe('10002');
+    expect(zAilleurs).toEqual({ parCle: '10002', parUnIDeLaPage: '10002' });
 }
 
 async function ecrireEtAttendreEtape4(page, { ilYEst = false, capturer = '' } = {}) {
@@ -471,6 +484,16 @@ for (const chemin of ['fenetre', 'partage', 'copies-manquantes']) {
         expect(erreurs).toEqual([]);
     });
 }
+
+// La hauteur de l'iPad à l'horizontale (1180 × 820), que les autres essais ne jouent pas (relecture du 9 nov.).
+test('1180 × 820 (iPad à l’horizontale), fenêtre de choix : la bulle 3 à droite de l’aperçu, sans rien en couvrir', async ({ page }) => {
+    const erreurs = await ouvrirEspace(page, 1180, { hauteur: 820 });
+    await lancerLeParcours(page);
+    await jusquALApercu(page);
+    await bulleSurLApercuSansCouvrirSesBoutons(page);
+    await ecrireEtAttendreEtape4(page);
+    expect(erreurs).toEqual([]);
+});
 
 test('1179 px : sous 1180, la bulle 3 garde la place d’avant (au-dessus de « Mettre à jour », largeur ordinaire)', async ({ page }) => {
     const erreurs = await ouvrirEspace(page, 1179);
