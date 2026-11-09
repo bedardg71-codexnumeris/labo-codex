@@ -212,7 +212,7 @@ trouvaille 2 de la relecture ; resserré à la décision 4 (question 3).
 
 ### Essais
 
-- **Vitest** (depuis `tests/`) : chiffre exact au § Verdict ci-dessous.
+- **Vitest** (depuis `tests/`) : 893 fichiers, 10 875 essais verts (§ Verdict).
 - **`tests/unit/copie-non-recevable-choix-1176.test.js`** (43 cas) : chaque famille × chaque choix × chaque place, sur les
   modules réels (P stocké, Comparateur, captures, profil) ; chaque « l'écarter » comparé à la même copie retirée ; le minimum ; la
   terminale provisoire puis finale, le brouillon qui ne manque pas, et l'instance de repli ; l'obligatoire hybride ; la
@@ -259,7 +259,33 @@ Un sous-agent sans mon raisonnement, avec la consigne et le diff `98c04bfc..ae2a
 
 ### Les specs Playwright des fichiers touchés, sous Chromium
 
-(À compléter.)
+Les 71 specs qui touchent la surface du lot (`grep -lE "statutIntegrite|wizard|Wizard|ouvrirReglagesPratique|chargerPratiquePourModif|
+mat-notes-finales|calculerDetailsNoteFinale|determinerNiveauRai|trajectoire|non-recevable|plagiat" tests/integration/*.spec.js`),
+plus la spec neuve, sous Chromium (configuration jetable hors dépôt ; WebKit absent). Les 40 fichiers où un premier passage avait
+rougi ont été rejoués **à l'identique sur `main` (`98c04bfc`) et sur la branche (`cedef6fb`)** :
+
+| | rouges | instables | verts |
+|---|---|---|---|
+| `main` | 5 | 2 | 232 |
+| branche | 6 | 2 | 234 |
+
+- **Rouges des deux côtés** (Chromium n'est pas la cible ; mise en page) : `barre-outils-compacte` ×2, `palette-retroaction-compacte`
+  ×2.
+- **`comptes-erreurs-stock-1142`** : instable des deux côtés (rejoué seul, deux fois : branche 24/24 avec la suivante ; `main`, un
+  rouge sur 24). **`critere-algorithmique-calculs-4a`** : rouge sur `main`, vert sur la branche (instable).
+- **`lot-a-anonymisation-enregistre`** : rouge au passage complet de la branche (la rétroaction sans « Bonjour Élève N ! »), vert
+  rejoué seul deux fois. Instable ; rien dans le lot ne touche la génération de la rétroaction.
+- **Ce que le lot avait cassé, et qui ne l'est plus** : les « Flux E » (3), l'audit sommatif, les adoptions 898 et 909, tous
+  parcourant l'assistant sans répondre à la question neuve (premier passage). Verts au second.
+
+Un premier passage a été faussé par ma faute : j'ai retiré du dépôt la configuration jetable pendant qu'il tournait, et chaque
+essai relancé ensuite est tombé sur « Cannot find module ». Écarté ; c'est le second passage qui compte.
+
+### Verdict
+
+- **Vitest** (depuis `tests/`, à `791f08b5`, le code de `cedef6fb`) : **893 fichiers, 10 875 essais, tous verts**. Au départ
+  (`98c04bfc`) : 892 fichiers, 10 825 essais.
+- **Playwright** : sous Chromium seulement (ci-dessus). **Le verdict WebKit reste à prendre sur le Mac.**
 
 ### Trouvailles, et leur issue
 
