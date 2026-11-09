@@ -9,8 +9,8 @@
 //      deux confrontés.
 //   2. La bulle du choix, la phrase du panneau sans classe, les titres « n sur 9 », « Plus tard » partout sauf
 //      la dernière, « Continuer » (7) et « Terminer » (9).
-//   3. Aucune ligne de panneau n'est posée (elle n'est pas validée) ; « Partir de zéro » remplace « Taper ma
-//      grille à la main ».
+//   3. La ligne du panneau et la phrase de l'étape 2 validées par Grégoire le 9 nov. (13 h 37 à 13 h 42, en Cowork,
+//      sur les questions du rapport) ; « Partir de zéro » remplace « Taper ma grille à la main ».
 // Break-test (9 nov.) : « la moyenne de tes travaux » changé en « la somme de tes travaux » dans
 // js/parcours-evaluer.js → ROUGE (étape 5), rétabli → vert.
 
@@ -40,6 +40,9 @@ function titreDeLaConsigne(n) {
 // LES SIX CORRECTIONS DU 9 NOV., telles que relayées : [étape, phrase de la consigne, phrase validée].
 // `null` : le texte entier est remplacé (étape 9).
 const CORRECTIONS = [
+    // Le 9 nov., 13 h 37 (question 2 du rapport) : l'échelle associée avec la grille.
+    [2, 'Puis associe-lui la grille que tu viens de créer.',
+        'Puis associe-lui la grille que tu viens de créer, et son échelle si elle en a une.'],
     [3, 'À son échéance, ce que tes étudiant·es ont remis compte dans leur complétion, et tes évaluations, dans leur performance.',
         'Dès ta première évaluation, ce que tes étudiant·es ont remis compte dans leur complétion, et tes évaluations, dans leur performance.'],
     [4, "la note se calcule à mesure, et une rétroaction s'écrit sous tes yeux, tirée de ta grille. Tu y mettras bientôt tes propres mots.",
@@ -79,13 +82,13 @@ describe('« Évaluer une première production » : les neuf bulles, mot pour mo
     const { def, api } = charger();
     const etapes = api.etapes();
 
-    it('le panneau : le titre, neuf étapes, aucune ligne (elle n’est pas validée), troisième et dernier', () => {
+    it('le panneau : le titre, la ligne validée le 9 nov. (13 h 37), neuf étapes, troisième et dernier', () => {
         expect(def.id).toBe('evaluer');
         expect(def.titre).toBe('Évaluer une première production');
         expect(CONSIGNE).toContain('« Évaluer une première production » s\'ajoute au panneau « Assistance », troisième et dernier');
         expect(def.total).toBe(9);
         expect(etapes).toHaveLength(9);
-        expect(def.ligne).toBe('');
+        expect(def.ligne).toBe('De ta grille à ta première rétroaction, réécrite avec tes mots.');
     });
 
     it('chaque correction trouve, dans la consigne, la phrase qu’elle remplace', () => {

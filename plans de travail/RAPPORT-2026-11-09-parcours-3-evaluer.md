@@ -1,8 +1,9 @@
 # Rapport : le troisième parcours, « Évaluer une première production » (9 nov. 2026)
 
 Consigne : `plans de travail/CONSIGNE-LOT-2026-11-08-parcours-3-evaluer.md` (recopiée de `main`, présente sur la branche).
-Décisions de Grégoire du 9 nov., 9 h 27 à 9 h 30, en Cowork (six corrections de textes), relayées à une session dans
-le nuage : ni WebKit ni tes données ici. Branche `lot/parcours-3-evaluer`, partie de `origin/lot/parcours-2-ma-classe`,
+Décisions de Grégoire du 9 nov., 9 h 27 à 9 h 30, en Cowork (six corrections de textes), puis de 13 h 37 à 13 h 42 (les
+quatre questions de ce rapport, tranchées : section « Ce qui attend Grégoire »), relayées à une session dans le nuage :
+ni WebKit ni tes données ici. Branche `lot/parcours-3-evaluer`, partie de `origin/lot/parcours-2-ma-classe`,
 dans laquelle sont fusionnées `origin/lot/completion-suit-la-remise` (la complétion suit la remise, étendue aux quatre
 familles) puis `origin/main` (1.238.0, « Un mot pour ton étudiant·e »). Non fusionnée, non publiée, rien au changelog.
 
@@ -11,7 +12,15 @@ familles) puis `origin/main` (1.238.0, « Un mot pour ton étudiant·e »). Non 
 ### Ce qui est fait (en gestes d'utilisateur)
 
 - Dans le menu, « Assistance » compte maintenant trois parcours. Le panneau montre « Évaluer une première production »,
-  troisième et dernier, avec son état (À faire, Étape n sur 9, Fait) et son bouton (Commencer, Reprendre, Refaire).
+  troisième et dernier, avec sa ligne (« De ta grille à ta première rétroaction, réécrite avec tes mots. », validée le
+  9 nov. à 13 h 37), son état (À faire, Étape n sur 9, Fait) et son bouton (Commencer, Reprendre, Refaire).
+- **À l'étape 2, l'échelle va avec la grille** (ta décision de 13 h 37) : la bulle dit « Puis associe-lui la grille que
+  tu viens de créer, et son échelle si elle en a une. » ; une fois la grille choisie, le contour passe au menu
+  « Échelle » si la grille en a une (celle que Mon matériel a créée avec elle), puis à « Créer la production ». La
+  production porte ensuite l'échelle : à l'étape 4, l'écran ne la redemande plus. Laissée vide quand même, l'écran
+  d'évaluation la demande, et le contour se pose sur son menu, sans mot de plus. Sur la fiche, la bulle ne couvre
+  jamais les menus « Grille de critères d'évaluation » ni « Échelle de performance » (essayé à chaque champ, à 1180 px ;
+  capture `p3-2-fiche` refaite).
 - Sans classe en place, « Commencer » ne lance rien : le panneau dit, sous le bouton, « Commence par « Mettre ta
   classe en place » : il faut une classe pour évaluer une production. » La démo ouverte ne compte pas : le parcours la
   referme d'abord, comme le deuxième, et se joue sur tes vraies données.
@@ -44,15 +53,21 @@ familles) puis `origin/main` (1.238.0, « Un mot pour ton étudiant·e »). Non 
 
 ### Ce qui attend Grégoire (une question par ligne, avec ma recommandation)
 
+**Les quatre sont tranchées** (Grégoire, 9 nov., 13 h 37 à 13 h 42, en Cowork) ; ce qui suit garde la question telle
+que posée, puis la décision et ce qui en est fait.
+
 1. **La ligne du panneau sous « Évaluer une première production »** : la consigne n'en donne pas ; je n'en ai posé
    aucune (le panneau n'affiche que le titre). *Proposée :* « De ta grille à ta première rétroaction, réécrite avec tes
-   mots. »
+   mots. » → **Validée mot pour mot. Posée** ; la sentinelle l'exige.
 2. **Étape 4, l'échelle à choisir.** Dans le cas le plus courant (une grille à niveaux, et l'échelle de départ présente
    au trimestre), l'écran d'évaluation demande d'abord une échelle ; la bulle n'en dit rien. Le contour se pose sur le
    menu de l'échelle, mais aucun mot ne l'explique. *Recommandation :* à l'étape 2, faire choisir l'échelle avec la
    grille, la bulle devenant « Puis associe-lui la grille que tu viens de créer, et son échelle si elle en a une. » (la
    production la porte ensuite partout). *À défaut,* à l'étape 4 : « Si l'écran te demande une échelle, choisis celle de
-   ta grille. »
+   ta grille. » → **Validé : la phrase de l'étape 2. Posée** ; la sentinelle l'exige. Le contour de la fiche passe par
+   le menu « Échelle » quand la grille en a une ; l'étape 4 ne la redemande plus. Laissée vide quand même, le contour
+   reste sur le menu de l'échelle de l'évaluation, sans mot de plus. Et la bulle ne couvre jamais les menus « Grille »
+   ni « Échelle » de la fiche (section 3).
 3. **Étape 8 pour une grille en points, sur un espace neuf** (le cas que la consigne demande de décrire) : **corrigé à
    la source**, plus de question. Mesuré avant le correctif : après le deuxième parcours, il n'existait **aucune**
    échelle ; « + Nouvelle cartouche » ouvrait l'alerte « Tu dois d'abord créer au moins une échelle de performance dans
@@ -61,12 +76,14 @@ familles) puis `origin/main` (1.238.0, « Un mot pour ton étudiant·e »). Non 
    le chemin est alors Conception › Échelles (aucun texte non validé posé). *Une seule chose à savoir :* ce semis vaut
    pour tout le monde, pas seulement pour le parcours (comme à la bascule). Un collègue qui crée son premier trimestre
    trouve tout de suite la grille, l'échelle et la cartouche de départ, au lieu de les trouver au rechargement.
+   → **Accepté** (Cowork) : le semis reste pour tout le monde.
 4. **Les écrans pleine largeur, à juger sur les captures.** Sur la fiche de la production, l'écran d'évaluation et la
    fiche de la cartouche, un voile percé laissait la bulle sans place : le moteur la rangeait au bord, et elle couvrait
    « Verrouiller » ou « Consignes transmises » (mesuré). Sur ces écrans, je retire le voile (« aucun », la règle des
    parcours 8 et 9) et la bulle s'accroche au premier champ à remplir, puis au bouton, et le suit au défilement. Elle
    couvre parfois une partie de la fiche (captures `p3-2-fiche`, `p3-8-fiche`). *Recommandation :* garder ainsi ; si
-   c'est trop, une option du moteur (une bulle repliable) serait un lot à part.
+   c'est trop, une option du moteur (une bulle repliable) serait un lot à part. → **Gardé** (Grégoire, sur les
+   captures), sauf sur la fiche de la production : la bulle n'y couvre plus les menus « Grille » ni « Échelle ».
 
 ### Ce que je n'ai pas pu vérifier
 
@@ -167,19 +184,26 @@ Faites par la session H sous Chromium (`RAPPORT-2026-11-09-verifications-parcour
 - **Vitest, une sentinelle neuve** : `tests/unit/sentinelle-parcours-evaluer-2026-11-09.test.js`, 15 essais. Elle
   charge le parcours et lit ses textes **à l'exécution** ; chaque texte est comparé au texte de la consigne auquel on
   applique les six corrections, et chaque correction doit trouver dans la consigne la phrase qu'elle remplace. La bulle
-  du choix, la phrase du refus, « Plus tard », « Continuer », « Terminer », l'absence de ligne, « Partir de zéro ».
-  Break-test : « la moyenne de tes travaux » remis en « la somme » dans le parcours → rouge (étape 5), rétabli.
-- **Playwright, Chromium, de bout en bout** : `tests/integration/parcours-3-evaluer-2026-11-09.spec.js`, deux essais
-  (grille à niveaux, grille en points), chacun depuis un espace vide où le deuxième parcours est joué par ses propres
+  du choix, la phrase du refus, « Plus tard », « Continuer », « Terminer », la ligne du panneau, « Partir de zéro ».
+  Break-test : « la moyenne de tes travaux » remis en « la somme » dans le parcours → rouge (étape 5), rétabli. Après
+  les décisions de 13 h 37 : la phrase de l'étape 2 entre dans ses corrections, et la ligne est exigée mot pour mot ;
+  break-test, l'une et l'autre retouchées → **rouge** (deux essais), rétablies.
+- **Playwright, Chromium, de bout en bout** : `tests/integration/parcours-3-evaluer-2026-11-09.spec.js`, trois essais
+  (grille à niveaux ; grille à niveaux, l'échelle laissée vide sur la fiche ; grille en points), chacun depuis un espace vide où le deuxième parcours est joué par ses propres
   gestes (`tests/integration/harness/classe-de-banc.js`, neuf, réutilisable pour les parcours 4 et 5) : le panneau sans
   classe (le refus), à faire, en cours, fait ; les neuf étapes ; la bulle du choix ; la production évaluée sur papier ;
   « Plus tard », un rechargement, « Reprendre » à l'étape 3 (essai à niveaux) ; l'essai en points d'une traite, sans
-  rechargement ; à chaque étape, le contour au bon endroit et l'étape qui n'avance pas avant la donnée. **2 sur 2 verts.**
+  rechargement ; à chaque étape, le contour au bon endroit et l'étape qui n'avance pas avant la donnée. **3 sur 3 verts.**
+  - Après les décisions de 13 h 37 : à chaque champ de la fiche (titre, type, grille, échelle, « Créer la production »),
+    la bulle ne couvre ni le menu « Grille » ni le menu « Échelle » ; à niveaux, le contour passe au menu « Échelle »,
+    la production enregistrée porte l'échelle, et l'étape 4 ne la redemande pas ; en points, le contour saute le menu.
+    Break-tests : les menus retirés de ce que la bulle doit laisser libre → **rouge** (« la bulle ne couvre pas … la
+    grille ») ; le menu « Échelle » retiré du parcours de la fiche → **rouge** ; rétablis.
   - Break-test du semis du premier trimestre : neutralisé → **rouge** (étape 8 en points, aucune échelle), rétabli.
   - Break-test de la cartouche en points : l'appel à `_adopterEchelleDeLaCartouche` retiré → **rouge** (le commentaire
     absent de la rétroaction, essai « en points »), rétabli.
-  - Break-test de l'échelle choisie après la grille : le correctif neutralisé → **rouge** (aucun critère, essai « à
-    niveaux »), rétabli.
+  - Break-test de l'échelle choisie après la grille : le correctif neutralisé → **rouge** (aucun critère, essai
+    « échelle laissée vide » : depuis 13 h 37, c'est le seul chemin où l'écran demande l'échelle), rétabli.
 - **Les bancs voisins**, Chromium : `parcours-1-et-2`, `parcours-2-ma-classe`, `materiel-dissection-1` : 11 sur 12. Le
   rouge (« panneau : titre, phrase… », largeur 429,99994 px au lieu de 430) l'est aussi **sans ce lot** (mesuré en
   retirant mes changements) : un arrondi de Chromium, sans rapport. À juger sous WebKit au Mac.
@@ -197,7 +221,13 @@ Faites par la session H sous Chromium (`RAPPORT-2026-11-09-verifications-parcour
 - L'étape 2 avance sur la production enregistrée, comme le dit la consigne, même sans grille associée (le contour
   désigne la grille avant « Créer la production »).
 - « Terminer », à l'étape 9, est offert dès l'arrivée (la consigne : « Bouton « Terminer » »).
-- Pas de voile sur les écrans pleine largeur (question 4).
+- Pas de voile sur les écrans pleine largeur (question 4, gardé le 9 nov.).
+- L'échelle d'une grille, c'est celle que portent ses descripteurs (`criteres[].descripteurs.echelleId`, posée par Mon
+  matériel quand la grille a des niveaux ; l'éditeur ne pose pas d'`echelleId` sur la grille elle-même). Une grille en
+  points n'en a pas : le contour saute le menu « Échelle » (mesuré dans l'essai « en points »). Si le menu n'offre pas
+  cette échelle, le contour ne s'y pose pas. ⚠ La sentinelle `bareme-1-editeur` (I.b) liste les modules qui lisent
+  `descripteurs` (aucun module de calcul ne doit le faire) : `parcours-evaluer.js` y est inscrit, avec son motif (il
+  ne lit que `echelleId`, pour poser un contour, et ne calcule rien).
 
 ## 5. À inscrire au BACKLOG
 
@@ -211,15 +241,19 @@ Les trois que la consigne demande d'inscrire, sans les faire :
 Vus par ce lot (issue proposée : inscrire et continuer) :
 - L'échelle de départ et la grille de départ ne sont pas semées à la création du premier trimestre (déjà relevé par la
   session H ; ici, la conséquence mesurée sur l'étape 8, question 3).
-- La bulle couvre une partie des fiches pleine largeur (question 4) : une option « bulle repliable » du moteur.
+- ~~La bulle couvre une partie des fiches pleine largeur (question 4) : une option « bulle repliable » du moteur.~~
+  Gardé tel quel par Grégoire (9 nov., 13 h 37) : rien à inscrire.
 - Les conditions d'entrée des parcours 6, 7 et 8 portent trois noms (`condition`, `refus`) : à unifier à la fusion.
 
 ## 6. Captures (Chromium, 1180 px, sombre)
 
-`plans de travail/captures-2026-11-09-parcours-3-evaluer/`, 39 fichiers, prises par le banc
-(`CAPTURES_PARCOURS=<dossier>`), deux variantes (`-niveaux`, `-points`) :
+`plans de travail/captures-2026-11-09-parcours-3-evaluer/`, prises par le banc (`CAPTURES_PARCOURS=<dossier>`), deux
+variantes (`-niveaux`, `-points`), toutes refaites après les décisions de 13 h 37, plus quatre de l'essai « échelle
+laissée vide » (`p3-2-fiche-…`, `p3-2-fiche-echelle-…`, `p3-4-…`, `p3-4-evaluation-…`, suffixe `-echelle-vide`) :
 - le panneau : `panneau-…-sans-classe` (le refus), `-a-faire`, `-en-cours` (« Étape 3 sur 9 », « Reprendre »), `-fait` ;
-- chaque étape : `p3-1` (l'accueil de Mon matériel), `p3-1-choix` (la bulle du choix), `p3-2` et `p3-2-fiche`, `p3-3`,
+- chaque étape : `p3-1` (l'accueil de Mon matériel), `p3-1-choix` (la bulle du choix), `p3-2`, `p3-2-fiche-echelle`
+  (à niveaux : le contour sur le menu « Échelle ») et `p3-2-fiche` (la bulle à gauche des menus « Grille » et
+  « Échelle »), `p3-3`,
   `p3-4` (la Liste) et `p3-4-evaluation`, `p3-5` et `p3-5-assistant`, `p3-6` et `p3-6-fiche`, `p3-7`, `p3-8` et
   `p3-8-fiche`, `p3-9` (la Liste) et `p3-9-reecrite` (la rétroaction réécrite, « Un mot » rempli) ;
 
