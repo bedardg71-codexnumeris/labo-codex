@@ -25,7 +25,7 @@ Une question par ligne, avec ma recommandation.
 4. **La variante sans fichier de l'étape 10 n'a pas de titre** dans la consigne : j'ai repris « Ta rétroaction s'écrit seule ». Recommandation : garder.
 5. **Le compte change au moment où le chemin se décide** : « 1 sur 11 » tant que la grille n'est pas choisie, puis « 2 sur 10 » si elle porte déjà une production ; « 7 sur 10 » à l'étape 8, puis « 8 sur 9 » après « Rien à importer ». Recommandation : garder (c'est la règle tranchée par Cowork pour le quatrième parcours).
 6. **Étape 7, une production déjà évaluée sur une autre grille** : l'évaluation et la palette « Codes » suivent la grille de ces évaluations, pas celle qu'on vient d'associer (lu dans le code par l'agent de vérification, non exécuté). Le parcours avance quand même. Recommandation : le dire dans la bulle de l'étape 7, avec un texte à valider, puisque le parcours vise une production pas encore évaluée.
-7. **La place de la bulle aux étapes 9 et 10** (coin bas gauche pendant qu'on pose les codes, bas centre en mode Évaluer) : à juger sur les captures.
+7. **La place de la bulle aux étapes 9 et 10** : pendant qu'on pose les codes, elle va à gauche, sur la palette des outils ; en mode Évaluer, elle prend la place qui couvre le moins les palettes et jamais le champ à remplir ni le verrou, donc elle se déplace d'un geste à l'autre. À juger sur les captures.
 
 ### Ce que je n'ai pas pu vérifier
 
