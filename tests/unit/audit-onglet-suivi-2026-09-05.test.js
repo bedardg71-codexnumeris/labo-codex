@@ -1146,7 +1146,7 @@ describe('I · groupe-cours sans pratique assignée (lot N1b)', () => {
         expect(rapport).toContain('Performance : non constructible');
     });
 
-    it('I6 · l\'alerte NOMMÉE du tableau de bord (« N étudiant·e·s présent·e·s sans aucune production remise ») ne nomme PERSONNE sans pratique — avec la pratique, Silence seul', () => {
+    it('I6 · l\'alerte NOMMÉE du tableau de bord (« N étudiant·e·s sans aucune production remise », sans « présent·e » depuis le 9 nov.) ne nomme PERSONNE sans pratique — avec la pratique, Silence seul', () => {
         // Trouvé sur la VRAIE page (pack démo, pratique retirée, WebKit) : les 10 élèves y étaient nommés — complétion inconnue
         // lue comme « rien remis ». Le témoin AVEC pratique prouve que l'alerte sait encore parler : Silence (A 100, rien remis).
         const monterAvecCarte = (pointeur) => {
@@ -1159,7 +1159,7 @@ describe('I · groupe-cours sans pratique assignée (lot N1b)', () => {
         const avec = monterAvecCarte('som-banc'), sans = monterAvecCarte(undefined);
         noter('I6', { avec: avec.length, sans: sans.length });
         expect(avec).toHaveLength(1);
-        expect(avec[0]).toContain('1 étudiant·e présent·e');
+        expect(avec[0]).toContain('1 étudiant·e sans ');
         expect(avec[0]).toContain(DA.SILENCE);
         expect(sans).toEqual([]);
     });
