@@ -139,6 +139,56 @@ function _etapeApresInference(reponses) {
 }
 
 /**
+ * #1176 — les deux réponses à « que devient une copie non recevable dans la note ? », dites pour la famille choisie.
+ * ⚠ TEXTES PROPOSÉS, EN ATTENTE DE GRÉGOIRE.
+ * @param {string} famille
+ * @returns {Array<{value:string,label:string,description:string}>}
+ */
+function optionsSortCopieNonRecevable(famille) {
+    const effets = {
+        sommative: ['Elle n\'entre pas dans la moyenne, comme une copie non remise.', 'Elle compte pour 0 dans la moyenne.'],
+        specifications: ['Elle compte comme un travail non remis.', 'Elle compte comme un travail non satisfaisant.'],
+        standards: ['Elle manque au portfolio, comme une copie non remise. Une terminale écartée laisse la note provisoire, puis vaut 0 une fois les notes finales cochées.',
+            'Elle entre au portfolio avec 0 ; une terminale vaut 0.']
+    }[famille] || ['Elle est traitée comme une copie non remise.', 'Elle vaut 0.'];
+    return [
+        { value: 'ecarter', label: 'L\'écarter', description: effets[0] },
+        { value: 'zero', label: 'Lui mettre 0', description: effets[1] }
+    ];
+}
+
+/**
+ * #1176 — la règle choisie à l'assistant, posée dans la configuration que le calcul lit (`.configuration`, sinon
+ * `.config`, la forme d'import #712) ; sans réponse ou en dénotation, rien n'est écrit.
+ * @param {Object} pratique - la pratique à écrire (mutée)
+ * @param {Object} r - les réponses de l'assistant
+ */
+function poserSortCopieNonRecevableAssistant(pratique, r) {
+    if (!pratique || !(window.SORTS_COPIE_NON_RECEVABLE || []).includes(r.sortCopieNonRecevable)) return;
+    // Rouvrir sans changer la réponse n'écrit rien qu'il n'y avait déjà (décision 5 : la lecture n'est pas une écriture).
+    const lue = r._sortCopieNonRecevableLu;
+    if (lue && !lue.ecrite && lue.regle === r.sortCopieNonRecevable) return;
+    const famille = (typeof normaliserIdPratique === 'function') ? normaliserIdPratique(pratique.type || r.typePratique) : (pratique.type || r.typePratique);
+    if (famille === 'denotation') return;
+    const cible = pratique.configuration || pratique.config || (pratique.configuration = {});
+    cible.sortCopieNonRecevable = r.sortCopieNonRecevable;
+}
+
+/**
+ * #1176 — rouvrir une pratique montre sa règle telle que le calcul la lit (sans règle écrite : le comportement d'avant,
+ * décision 5), et retient si elle était écrite : ré-enregistrer sans y toucher n'écrit pas la lecture.
+ * @returns {Object} les réponses à poser (vide en dénotation, ou sans registre)
+ */
+function lireSortCopieNonRecevableAssistant(pratique, typeCanon) {
+    if (typeof window.sortCopieNonRecevableDeLaPratique !== 'function') return {};
+    const configuration = pratique.configuration || pratique.config || null;
+    const regle = window.sortCopieNonRecevableDeLaPratique(configuration, typeCanon);
+    if (!regle) return {};
+    const ecrite = !!(configuration && configuration.sortCopieNonRecevable);
+    return { sortCopieNonRecevable: regle, _sortCopieNonRecevableLu: { regle, ecrite } };
+}
+
+/**
  * Configuration de toutes les étapes du wizard
  * Chaque étape définit son contenu, sa validation et sa navigation
  */
@@ -195,7 +245,8 @@ const ETAPES_WIZARD = {
                 options: obtenirOptionsModeles()
             }
         ],
-        suivant: () => 'recapitulatif',
+        // #1176 : un modèle adopté devient une NOUVELLE pratique — la question lui est posée aussi (sautée en dénotation).
+        suivant: () => 'copie-non-recevable',
         precedent: () => 'entree-pratique'
     },
 
@@ -324,14 +375,46 @@ const ETAPES_WIZARD = {
         // on nomme/attribue la pratique une fois qu'on sait ce qu'elle est.
         suivant: () => 'recapitulatif',
         precedent: (reponses) => {
-            // Précédent = la dernière étape de configuration (ex-précédent du récap).
+            if (reponses.typePratique === 'denotation') return 'config-denotation';
+            return 'copie-non-recevable';   // #1176 (sautée en dénotation)
+        }
+    },
+
+    // #1176 (9 nov. 2026, décision 5 de Grégoire du 8 nov.) — UNE NOUVELLE PRATIQUE DEMANDE CE QUE VAUT UNE COPIE NON
+    // RECEVABLE, SANS RÉPONSE COCHÉE D'AVANCE. La réponse devient sa règle (`configuration.sortCopieNonRecevable`), que
+    // chaque copie marquée montre déjà cochée. Dénotation : sautée (la note est un jugement saisi). Un modèle adopté passe
+    // ici aussi. ⚠ TEXTES PROPOSÉS, EN ATTENTE DE GRÉGOIRE (rapport du 9 nov. 2026).
+    'copie-non-recevable': {
+        id: 'copie-non-recevable',
+        titre: 'Une copie non recevable',
+        description: 'Quand tu marques une copie non recevable (plagiat, IA non autorisée), que devient-elle dans la note\u00a0?',
+        branche: 'finale',
+        ordre: 8,
+        condition: (reponses) => reponses.typePratique !== 'denotation',
+        getChampsDynamiques: (reponses) => [
+            {
+                id: 'sortCopieNonRecevable',
+                type: 'radio-cards',
+                required: true,
+                options: optionsSortCopieNonRecevable(reponses.typePratique)
+            },
+            {
+                id: 'infoSortCopieNonRecevable',
+                type: 'info',
+                texte: 'C\'est ta règle. Quand tu marqueras une copie non recevable, elle apparaîtra déjà cochée, et tu pourras la changer pour cette copie-là. La règle elle-même se change dans les réglages de ta pratique.'
+            }
+        ],
+        // La porte « modèle » saute à la fin (le compteur la lit avant que l'adoption soit préparée : `porteEntree`).
+        suivant: (reponses) => (reponses._modeleAdopte || reponses.porteEntree === 'modele') ? 'recapitulatif' : 'infos-base',
+        precedent: (reponses) => {
+            if (reponses._modeleAdopte || reponses.porteEntree === 'modele') return 'choix-modele';
+            // Précédent = la dernière étape de configuration (ex-précédent d'infos-base).
             // #900 (lot N6) : l'étape « Configuration sommative » (rang, moyenne du groupe) est retirée.
             if (reponses.typePratique === 'sommative') {
                 const regles = deduireTypePratique(reponses).regles || [];
                 return (regles.length > 0 && !regles.includes('aucune')) ? 'config-sommative-regles' : 'regles-sommative';
             }
             if (reponses.typePratique === 'specifications') return 'choix-modele-bundles';
-            if (reponses.typePratique === 'denotation') return 'config-denotation';
             return 'grille-criteres'; // PAN-Standards (portfolio — seule approche depuis #443)
         }
     },
@@ -493,7 +576,7 @@ const ETAPES_WIZARD = {
         // Bloc 9 (15 oct. 2026) : l'aiguillage de l'ex-étape « Tes seuils personnels », sa seule sortie sommative.
         suivant: (reponses) => {
             const regles = deduireTypePratique(reponses).regles || [];
-            return (regles.length > 0 && !regles.includes('aucune')) ? 'config-sommative-regles' : 'infos-base';
+            return (regles.length > 0 && !regles.includes('aucune')) ? 'config-sommative-regles' : 'copie-non-recevable';   // #1176
         },
         precedent: () => 'calcul-note-finale'
     },
@@ -555,7 +638,7 @@ const ETAPES_WIZARD = {
 
             return champs;
         },
-        suivant: () => 'infos-base',
+        suivant: () => 'copie-non-recevable',   // #1176
         precedent: () => 'regles-sommative'
     },
 
@@ -772,7 +855,7 @@ const ETAPES_WIZARD = {
                 }
             ];
         },
-        suivant: () => 'infos-base',
+        suivant: () => 'copie-non-recevable',   // #1176
         precedent: (reponses) => {
             if (reponses.utiliserJetons) return 'config-jetons';
             return 'config-specifications';
@@ -849,7 +932,7 @@ const ETAPES_WIZARD = {
                 texte: 'La grille peut également être configurée plus tard dans Conception → Grilles de critères.'
             }
         ],
-        suivant: () => 'infos-base',
+        suivant: () => 'copie-non-recevable',   // #1176
         precedent: () => 'echelle-performance'
     },
 
@@ -862,8 +945,9 @@ const ETAPES_WIZARD = {
         champs: [], // Généré dynamiquement
         suivant: () => null, // Fin du wizard
         // #319 Lot 2 (a6) : infos-base précède désormais le récap. Cas modèle (a7) :
-        // l'adoption d'un gabarit saute à la fin → le retour ramène au choix du modèle.
-        precedent: (reponses) => reponses._modeleAdopte ? 'choix-modele' : 'infos-base'
+        // l'adoption d'un gabarit saute à la fin → le retour ramène au choix du modèle (#1176 : par la question de la
+        // copie non recevable, sautée pour un modèle en dénotation).
+        precedent: (reponses) => reponses._modeleAdopte ? 'copie-non-recevable' : 'infos-base'
     }
 };
 
@@ -2429,6 +2513,7 @@ async function creerPratiqueV2() {
         // Le clone est une pratique à part entière, pas un gabarit/seed prédéfini.
         delete clone.estGabarit;
         delete clone.dateAjoutBiblio;
+        poserSortCopieNonRecevableAssistant(clone, r);   // #1176 : sa règle, choisie à l'étape « Une copie non recevable »
         await finaliserCreationPratique(clone);
         return;
     }
@@ -2627,6 +2712,7 @@ async function creerPratiqueV2() {
         };
     }
 
+    poserSortCopieNonRecevableAssistant(pratique, r);   // #1176 : la règle d'une copie non recevable, choisie à l'assistant
 
     // Finaliser (sauvegarde + fermeture + notification + rafraîchissements).
     await finaliserCreationPratique(pratique);
@@ -3082,6 +3168,7 @@ function chargerPratiqueExistante(pratiqueId) {
         reglesSommatives: (pratique.reglesSpeciales || pratique.configuration?.reglesSommatives || [])
             .filter(regle => !REGLES_SOMMATIVES_RETIREES.includes(regle))
     };
+    Object.assign(wizardState.reponses, lireSortCopieNonRecevableAssistant(pratique, typeCanon));   // #1176
 
     // Ajouter la configuration spécifique
     if (pratique.configuration) {

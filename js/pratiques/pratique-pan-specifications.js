@@ -116,6 +116,10 @@ class PratiquePanSpecifications {
 
     constructor() {
 
+        // #1176 (9 nov. 2026) : la règle d'une copie non recevable de la pratique qui délègue ici
+        // (`pratique-configurable.js`, `_instanceSpecifications`). Absente : celle de la famille (non satisfaisant).
+        this.sortCopieNonRecevable = undefined;
+
         // =====================================================================
         // CONFIGURATION PAR DÉFAUT (surchargée par wizard)
         // =====================================================================
@@ -252,11 +256,10 @@ class PratiquePanSpecifications {
         }
 
         // Lire les évaluations — #706 : la règle unique du registre (un élève qui n'a que
-        // des brouillons n'a pas de note, pas un palier d'échec)
+        // des brouillons n'a pas de note, pas un palier d'échec). #1176 : une copie non recevable
+        // écartée est absente, comme un travail non remis.
         const evaluations = this._lireEvaluations();
-        const evaluationsEleve = evaluations.filter(e =>
-            e.etudiantDA === da && window.evaluationEntreDansLaNote(e)
-        );
+        const evaluationsEleve = this._copiesQuiComptent(evaluations, da);
 
         if (evaluationsEleve.length === 0) {
             return null;
@@ -306,10 +309,8 @@ class PratiquePanSpecifications {
         }
 
         const evaluations = this._lireEvaluations();
-        // MÊMES critères de validité que calculerPerformance (garantit la parité) — #706.
-        const valides = (evaluations || []).filter(e =>
-            e.etudiantDA === da && window.evaluationEntreDansLaNote(e)
-        );
+        // MÊMES critères de validité que calculerPerformance (garantit la parité) — #706, #1176.
+        const valides = this._copiesQuiComptent(evaluations || [], da);
 
         if (valides.length === 0) {
             return null;
@@ -762,6 +763,25 @@ class PratiquePanSpecifications {
         return comptes;
     }
 
+    /** #1176 — la règle que ce calcul applique aux copies non recevables ('ecarter' | 'zero'). */
+    _sortCopieNonRecevable() {
+        return this.sortCopieNonRecevable || window.sortCopieNonRecevableDeLaPratique(null, 'specifications');
+    }
+
+    /**
+     * Les copies d'un élève qui comptent pour la note : la règle unique du registre (#706), moins une copie non
+     * recevable que la règle écarte (#1176) — elle est traitée comme un travail non remis : aucune copie.
+     * @param {Array} evaluations
+     * @param {string} da
+     * @returns {Array}
+     */
+    _copiesQuiComptent(evaluations, da) {
+        const regle = this._sortCopieNonRecevable();
+        return evaluations.filter(e =>
+            e.etudiantDA === da && window.evaluationEntreDansLaNote(e) && !window.copieNonRecevableEcartee(e, regle)
+        );
+    }
+
     /**
      * Vérifie si un travail est acceptable selon les spécifications (ÉVALUATION BINAIRE)
      *
@@ -793,9 +813,10 @@ class PratiquePanSpecifications {
             return false;
         }
 
-        // 28 oct. 2026 : une copie non recevable vaut ce que dit le registre (par défaut, un travail non satisfaisant),
-        // quelle que soit sa note calculée — et même sous un seuil écrit à 0.
-        const nonRecevable = window.valeurCopieNonRecevable(evaluation);
+        // #1176 : une copie non recevable n'est jamais satisfaisante, quelle que soit sa note calculée — et même sous un
+        // seuil écrit à 0. Gardée (« lui mettre 0 »), c'est un travail non satisfaisant ; écartée, elle n'arrive pas ici
+        // (`_copiesQuiComptent`), sauf par un lecteur du dépistage, qui la lit alors comme non satisfaisante.
+        const nonRecevable = window.valeurCopieNonRecevable(evaluation, this._sortCopieNonRecevable());
         if (nonRecevable) {
             return nonRecevable.satisfaisante;
         }
@@ -875,8 +896,7 @@ class PratiquePanSpecifications {
             return paliers.some(p => p && !p.requis) ? null : CAUSE_SANS_TYPES_NI_FORFAITS;
         }
         if (!da || da.length !== 7) return null;
-        const evaluationsEleve = this._lireEvaluations().filter(e =>
-            e.etudiantDA === da && window.evaluationEntreDansLaNote(e));
+        const evaluationsEleve = this._copiesQuiComptent(this._lireEvaluations(), da);
         if (evaluationsEleve.length === 0) return null;
         const note = this._determinerPalierBundle(this._compterTravauxAcceptables(da, evaluationsEleve));
         return note === null ? CAUSE_AUCUN_FORFAIT_ATTEINT : null;

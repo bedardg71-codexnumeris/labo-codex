@@ -204,10 +204,12 @@ describe('E7 — l\'export dit « provisoire » tant que « Notes finalisées »
             expect(note(banc({ pratique: fabrique({ notesFinales: true }), productions, evaluations, jugements })).export).toEqual([attendu, 'final']);
         }
     });
-    it('E7-b standards, case cochée : « final » avec la terminale, « provisoire » tant qu\'elle ne compte pas', () => {
+    // ↻ #1176 (9 nov. 2026, décision 4 de Grégoire, accord explicite du 8 nov. à 15 h 38) : case cochée, une terminale
+    // manquante vaut 0 — la note est finale. Avant : « provisoire », le pool seul (87).
+    it('E7-b standards, case cochée : « final » avec la terminale, et sans elle (elle vaut alors 0, #1176)', () => {
         const fin = () => Object.assign(std(), { configuration: Object.assign(std().configuration, { notesFinales: true }) });
         expect(note(banc({ pratique: fin(), productions: prodSTD(), evaluations: COPIES_STD })).export).toEqual([85, 'final']);
-        expect(note(banc({ pratique: fin(), productions: prodSTD(), evaluations: COPIES_STD.filter(e => e.productionId !== 'T1') })).export).toEqual([87, 'provisoire']);
+        expect(note(banc({ pratique: fin(), productions: prodSTD(), evaluations: COPIES_STD.filter(e => e.productionId !== 'T1') })).export).toEqual([52, 'final']);
     });
     it('E7-d standards SANS production terminale (ajout de Cowork, 14 h 55 : la chimie, par exemple) : case cochée, « final » ; le profil ne la dit pas provisoire (avant : « provisoire » pour toujours)', () => {
         const fin = () => Object.assign(std(), { configuration: Object.assign(std().configuration, { notesFinales: true }) });

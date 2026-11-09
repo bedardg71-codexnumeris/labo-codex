@@ -196,17 +196,24 @@ describe('Spécifications — la copie non recevable est un travail non satisfai
     });
 });
 
-describe('Standards — hors du portfolio ; la terminale non recevable vaut 0', () => {
-    it('TERMINALE non recevable : 86,67 × 60 % + 0 × 40 % = 52 — avant : 82 comptait (84,8)', () => {
-        const b = banc({ pratique: pratiqueSTD(), productions: productionsSTD(), evaluations: marquer(COPIES_STD, DA.ALICE, 'T1') });
-        expect(chemins(b, DA.ALICE)).toEqual({ P: 52, comparateur: 52, capture: 52, profil: 52 });
+// ↻ #1176 (9 nov. 2026) : une standards SANS RÈGLE ÉCRITE écarte la copie non recevable (décision 5) ; une terminale écartée
+// laisse la note provisoire pendant le trimestre, puis vaut 0 une fois les notes finales cochées (décision 4). Avant ce lot,
+// elle valait 0 tout de suite. Les deux choix, famille par famille : copie-non-recevable-choix-1176.test.js.
+describe('Standards — hors du portfolio ; la terminale non recevable, écartée, vaut 0 aux notes finales', () => {
+    it('TERMINALE non recevable, notes finales cochées : 86,67 × 60 % + 0 × 40 % = 52 ; pendant le trimestre : provisoire (86,67)', () => {
+        const b = banc({ pratique: pratiqueSTD({ notesFinales: true }), productions: productionsSTD(), evaluations: marquer(COPIES_STD, DA.ALICE, 'T1') });
+        expect(chemins(b, DA.ALICE).profil).toBe(52);
         const terminale = recitDe(b, DA.ALICE).resultats.find(r => r.label === 'Analyse finale');
         expect(terminale).toMatchObject({ note: 0, sort: 'compte' });
+        const t = banc({ pratique: pratiqueSTD(), productions: productionsSTD(), evaluations: marquer(COPIES_STD, DA.ALICE, 'T1') });
+        expect(chemins(t, DA.ALICE)).toEqual({ P: 87, comparateur: 87, capture: 87, profil: 86.67 });
     });
     // L'instance codée en dur (`PratiquePANStandards.calculerPerformance`) : le repli de la note du cours et du Comparateur.
-    it('INSTANCE standards, terminale non recevable : 0,52 — avant : 0,848', () => {
-        const b = banc({ pratique: pratiqueSTD(), productions: productionsSTD(), evaluations: marquer(COPIES_STD, DA.ALICE, 'T1') });
+    it('INSTANCE standards, terminale non recevable : 0,52 aux notes finales, 0,8667 pendant le trimestre', () => {
+        const b = banc({ pratique: pratiqueSTD({ notesFinales: true }), productions: productionsSTD(), evaluations: marquer(COPIES_STD, DA.ALICE, 'T1') });
         expect(new b.win.PratiquePANStandards().calculerPerformance(DA.ALICE)).toBeCloseTo(0.52, 6);
+        const t = banc({ pratique: pratiqueSTD(), productions: productionsSTD(), evaluations: marquer(COPIES_STD, DA.ALICE, 'T1') });
+        expect(new t.win.PratiquePANStandards().calculerPerformance(DA.ALICE)).toBeCloseTo(0.86667, 4);
     });
     it('INSTANCE standards, artefact non recevable (A4, 92) : hors du pool, 0,814 — avant : 92 y restait (0,848)', () => {
         const b = banc({ pratique: pratiqueSTD(), productions: productionsSTD(), evaluations: marquer(COPIES_STD, DA.ALICE, 'A4') });
@@ -235,22 +242,18 @@ describe('Standards — hors du portfolio ; la terminale non recevable vaut 0', 
     });
 });
 
-describe('Un réglage qui remplacerait la règle n\'a rien à changer aux familles (chantier de Grégoire, 28 oct.)', () => {
-    // Le réglage n'existe pas : on le SIMULE en remplaçant les deux lecteurs du registre sur le window du banc — « la copie
-    // reste au portfolio, à 0 ». Si une famille relisait la note calculée (tri, somme, récit), elle trahirait le réglage.
-    function avecReglage(b) {
-        const VALEUR = { note: 0, satisfaisante: false, dansLePortfolio: true };
-        b.win.valeurCopieNonRecevable = (e) => (b.win.evaluationNonRecevable(e) ? VALEUR : null);
-        b.win.noteRetenueParLeCalcul = (e) => (b.win.evaluationNonRecevable(e) ? VALEUR.note : e.noteFinale);
-        return b;
-    }
+describe('Le réglage « lui mettre 0 » n\'a rien eu à changer au tri des familles (chantier de Grégoire, 28 oct. ; #1176)', () => {
+    // ↻ #1176 (9 nov. 2026) : le réglage EXISTE (`configuration.sortCopieNonRecevable`), plus besoin de le simuler.
+    // « La copie reste au portfolio, à 0 » : si une famille relisait la note calculée (tri, somme, récit), elle le trahirait.
+    const avecZero = (pratique) => { pratique.configuration.sortCopieNonRecevable = 'zero'; return pratique; };
+    const avecReglage = (b) => b;
     it('« meilleurs » : A4 reste au pool à 0, triée à sa note retenue → 88, 80, 75 → 81,4 (trié sur 92 : 0, 88, 80 → 72,4)', () => {
-        const b = avecReglage(banc({ pratique: pratiqueSTD(), productions: productionsSTD(), evaluations: marquer(COPIES_STD, DA.ALICE, 'A4') }));
+        const b = avecReglage(banc({ pratique: avecZero(pratiqueSTD()), productions: productionsSTD(), evaluations: marquer(COPIES_STD, DA.ALICE, 'A4') }));
         expect(Math.round(b.win.calculerDetailsNoteFinale(DA.ALICE).noteFinale * 100) / 100).toBe(81.4);
         expect(new b.win.PratiquePANStandards().calculerPerformance(DA.ALICE)).toBeCloseTo(0.814, 6);
     });
     it('« récents » : A6, A5, A4 à 0 → 51,67 × 60 % + 32,8 = 63,8 ; le récit montre A4 à 0', () => {
-        const b = avecReglage(banc({ pratique: pratiqueSTD({ methodeSelection: 'recents' }), productions: productionsSTD(), evaluations: marquer(COPIES_STD, DA.ALICE, 'A4') }));
+        const b = avecReglage(banc({ pratique: avecZero(pratiqueSTD({ methodeSelection: 'recents' })), productions: productionsSTD(), evaluations: marquer(COPIES_STD, DA.ALICE, 'A4') }));
         const d = b.win.calculerDetailsNoteFinale(DA.ALICE);
         expect(Math.round(d.noteFinale * 100) / 100).toBe(63.8);
         expect(d.recit.resultats.find(r => r.label === 'Artefact 4')).toMatchObject({ sort: 'compte', note: 0 });
@@ -296,10 +299,13 @@ describe('La source unique — aucune famille ne relit `statutIntegrite` elle-m�
         expect(aide).not.toContain('tous les critères passent à');
         expect(readFileSync(path.join(RACINE, 'js/evaluation-sauvegarde.js'), 'utf8')).not.toContain(`querySelectorAll('select[id^="critere"]')`);
     });
-    it('le registre porte la règle : un objet, deux lecteurs', () => {
+    // ↻ #1176 (9 nov. 2026) : deux valeurs (écarter, 0) et la règle de la pratique, toujours au seul registre.
+    it('le registre porte la règle : deux valeurs, la règle de la pratique, ses lecteurs', () => {
         const code = readFileSync(path.join(RACINE, 'js/pratiques/pratique-registre.js'), 'utf8');
-        expect(code).toMatch(/const VALEUR_COPIE_NON_RECEVABLE_PAR_DEFAUT = Object\.freeze\(\{/);
+        expect(code).toMatch(/const VALEUR_COPIE_NON_RECEVABLE = Object\.freeze\(\{/);
+        expect(code).toMatch(/window\.sortCopieNonRecevableDeLaPratique = sortCopieNonRecevableDeLaPratique;/);
         expect(code).toMatch(/window\.valeurCopieNonRecevable = valeurCopieNonRecevable;/);
+        expect(code).toMatch(/window\.copieNonRecevableEcartee = copieNonRecevableEcartee;/);
         expect(code).toMatch(/window\.noteRetenueParLeCalcul = noteRetenueParLeCalcul;/);
     });
 });

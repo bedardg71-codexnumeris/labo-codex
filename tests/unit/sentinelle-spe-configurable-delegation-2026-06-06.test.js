@@ -17,13 +17,14 @@ import { chargerScript } from './_helpers/charger-script.js';
 const INDICES = { '1234567': { actuel: { P: 42 } } };
 
 function charger() {
+    // #1176 (9 nov. 2026) : la règle d'une copie non recevable, que la configurable passe à son délégué (harnais seulement).
     return chargerScript('js/pratiques/pratique-configurable.js', {
         db: {
             getSync: (c, d) => (c === 'indicesCP' ? INDICES : (d !== undefined ? d : null)),
             setSync() {}, get: async () => null, set: async () => {}
         },
         cle: (k) => k
-    });
+    }, { sortCopieNonRecevableDeLaPratique: () => 'zero' });
 }
 
 const CONFIG_SPE = {

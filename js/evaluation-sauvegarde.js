@@ -232,6 +232,7 @@ function _lireChampsDOMSauv() {
         statutRemise: document.getElementById('remiseProduction1').value,
         statutIntegrite: document.getElementById('statutIntegrite').value || 'recevable',
         notesIntegrite: document.getElementById('notesIntegrite').value || '',
+        sortCopieNonRecevable: lireChoixCopieNonRecevableEcran(),   // #1176 — null : la copie suit la règle (retiré plus bas)
         noteFinale: (typeof window.noteCalculeeCourante === 'number') ? window.noteCalculeeCourante : 0,   // #572 — la valeur calculée, pas l'écran
         ponderationCouverte: (window.porteeCalculeeCourante && typeof window.porteeCalculeeCourante.ponderationCouverte === 'number') ? window.porteeCalculeeCourante.ponderationCouverte : null,   // #674 — la portée voyage avec la note
         niveauFinal: document.getElementById('niveauProduction1').textContent,
@@ -253,7 +254,7 @@ function _lireOptionsAffichageSauv() {
 
 function _construireObjetEvaluationSauv(ctx) {
     const { etudiant, production, grille, etudiantDA, productionId, grilleId, criteres, coursId, groupeCoursActif, maintenant } = ctx;
-    return Object.assign({
+    const evaluation = Object.assign({
         id: genererIdUnique('EVAL_'),
         etudiantDA: etudiantDA,
         etudiantNom: etudiant ? `${etudiant.prenom} ${etudiant.nom}` : '',
@@ -273,6 +274,8 @@ function _construireObjetEvaluationSauv(ctx) {
         pointsAnalytiques: JSON.parse(JSON.stringify(evaluationEnCours.pointsAnalytiques || {})),   // lot 2 — les points, sous leur nom
         verrouillee: true
     }, _lireChampsDOMSauv());
+    poserChoixCopieNonRecevable(evaluation, evaluation.sortCopieNonRecevable);   // #1176 : sans choix sur la copie, aucun champ
+    return evaluation;
 }
 
 function _appliquerProfilACOSauv(evaluation) {
@@ -571,15 +574,158 @@ function changerStatutRemise(num) {
 /**
  * L'avis « Travail non recevable » du formulaire — mots de Grégoire, validés le 28 oct. 2026 à 6 h 49 (« je garde »),
  * mot pour mot. La phrase du jeton, pour le plagiat seulement.
+ * ↻ #1176 (9 nov. 2026) — PROPOSÉ, EN ATTENTE DE GRÉGOIRE : la phrase « Dans la note du cours, elle vaut ce que dit ta
+ * pratique : 0 en sommative, un travail non satisfaisant en spécifications, hors du portfolio en standards. » est retirée.
+ * Elle ne tient plus : le choix « l'écarter » ou « lui mettre 0 » s'affiche juste sous le menu, coché selon la règle de
+ * la pratique (`afficherChoixCopieNonRecevable`). Le reste est mot pour mot.
  */
 const AVIS_COPIE_NON_RECEVABLE = Object.freeze({
     titre: 'Travail non recevable',
     corps: 'Ton évaluation est gardée, mais la copie montre «\u00a0Non recevable\u00a0» au lieu de sa note et de ses niveaux, '
-        + 'jusque sur le PDF de l\'étudiant·e. Dans la note du cours, elle vaut ce que dit ta pratique\u00a0: 0 en sommative, '
-        + 'un travail non satisfaisant en spécifications, hors du portfolio en standards. Dans la complétion, elle compte '
+        + 'jusque sur le PDF de l\'étudiant·e. Dans la complétion, elle compte '
         + 'comme non remise. Retirer le statut fait tout revenir.',
     jeton: 'Un jeton de reprise peut être appliqué pour permettre une nouvelle remise.'
 });
+
+/**
+ * #1176 (9 nov. 2026, décision 1 de Grégoire du 8 nov.) — CE QUE LA COPIE NON RECEVABLE DEVIENT DANS LA NOTE, SUR LA COPIE.
+ * Quand l'utilisateur marque une copie « Non recevable », la règle de sa pratique apparaît déjà cochée, avec ce qu'elle
+ * fera à la note ; il la change pour cette copie-là. Le choix fait sur la copie s'enregistre (`sortCopieNonRecevable`) ;
+ * sans geste, rien ne s'écrit : la copie suit la règle de la pratique, lue au calcul (pratique-registre.js).
+ * ⚠ TEXTES PROPOSÉS, EN ATTENTE DE GRÉGOIRE (rapport du 9 nov. 2026) : ils ne vivent qu'ici, pour se corriger d'un coup.
+ * Le mot du pool suit la règle du récit (décision Q1 du 28 oct.) : « portfolio » avec des « Artefact », sinon
+ * « productions retenues ». Dénotation : aucun choix, la note est un jugement saisi.
+ */
+const TEXTES_SORT_COPIE_NON_RECEVABLE = Object.freeze({
+    titre: 'Dans la note du cours\u00a0:',
+    regle: { ecarter: 'l\'écarter', zero: 'lui mettre 0' },
+    aide: (regle) => 'Règle de ta pratique\u00a0: ' + regle + '. Ton choix ne vaut que pour cette copie.',
+    aideSansPratique: 'Ton choix ne vaut que pour cette copie.',
+    sommative: {
+        ecarter: 'l\'écarter, comme une copie non remise\u00a0: elle n\'entre pas dans la moyenne',
+        zero: 'lui mettre 0\u00a0: elle compte pour 0 dans la moyenne'
+    },
+    specifications: {
+        ecarter: 'l\'écarter, comme un travail non remis',
+        zero: 'lui mettre 0\u00a0: elle compte comme un travail non satisfaisant'
+    },
+    standardsPortfolio: {
+        ecarter: 'l\'écarter, comme une copie non remise\u00a0: elle manque au portfolio',
+        zero: 'lui mettre 0\u00a0: elle entre au portfolio avec 0'
+    },
+    standardsProductions: {
+        ecarter: 'l\'écarter, comme une copie non remise\u00a0: elle manque aux productions retenues',
+        zero: 'lui mettre 0\u00a0: elle entre aux productions retenues avec 0'
+    },
+    standardsObligatoire: {
+        ecarter: 'l\'écarter, comme une obligatoire non remise\u00a0: elle vaut 0 une fois les notes finales cochées',
+        zero: 'lui mettre 0\u00a0: elle compte pour 0 tout de suite'
+    },
+    standardsTerminale: {
+        ecarter: 'l\'écarter, comme une terminale non remise\u00a0: la note reste provisoire, puis la terminale vaut 0 une fois les notes finales cochées',
+        zero: 'lui mettre 0\u00a0: la terminale vaut 0 tout de suite'
+    },
+    generique: {
+        ecarter: 'l\'écarter, comme une copie non remise',
+        zero: 'lui mettre 0'
+    }
+});
+
+/** Les deux choix, lus au registre (absent : aucun choix ne s'écrit). */
+function _sortsCopie() {
+    return window.SORTS_COPIE_NON_RECEVABLE || [];
+}
+
+function _estStatutNonRecevable(statut) {
+    return statut === 'plagiat' || statut === 'ia';
+}
+
+/** Les mots du choix, selon la famille de la pratique active et la place de la production dans la note. */
+function _textesDuChoixCopie(famille, productionId) {
+    const T = TEXTES_SORT_COPIE_NON_RECEVABLE;
+    if (famille === 'standards') return T[_placeEnStandards(productionId)];
+    return T[famille] || T.generique;   // sommative, specifications ; sinon (aucune pratique) : générique
+}
+
+/** Standards : la place de la production — terminale, obligatoire (hybride), ou pool (portfolio / productions retenues). */
+function _placeEnStandards(productionId) {
+    const productions = (typeof obtenirDonneesSelonMode === 'function') ? (obtenirDonneesSelonMode('productions') || []) : [];
+    const production = productions.find(p => p && p.id === productionId) || {};
+    const terminale = window.identifierProductionTerminale(productions);
+    if (terminale && production.id === terminale.id) return 'standardsTerminale';
+    const categories = window.obtenirConfigCategories();
+    if (categories && production.categorie === 'obligatoire') return 'standardsObligatoire';
+    return window.poolStdFaitDArtefacts(productions, terminale ? terminale.id : null) ? 'standardsPortfolio' : 'standardsProductions';
+}
+
+/**
+ * Montre (ou cache) le choix sous le menu « Intégrité académique ». Coché : le choix de la copie s'il y en a un, sinon
+ * la règle de la pratique active ; sans pratique, rien n'est coché (aucune règle à montrer).
+ */
+function afficherChoixCopieNonRecevable() {
+    const bloc = document.getElementById('divSortNonRecevable');
+    if (!bloc) return;
+    const statut = (document.getElementById('statutIntegrite') || {}).value || 'recevable';
+    const famille = (typeof window.obtenirTypePratiqueActive === 'function') ? window.obtenirTypePratiqueActive() : null;
+    const ec = _evaluationEnCoursCopie();
+    if (!_estStatutNonRecevable(statut) && ec) delete ec.sortCopieNonRecevable;   // recevable ou soupçonnée : le choix part
+    if (!_estStatutNonRecevable(statut) || famille === 'denotation') {
+        bloc.classList.add('u-hide');
+        bloc.setAttribute('data-choix-copie', '');
+        return;
+    }
+    _remplirChoixCopie(bloc, famille, ec);
+}
+
+function _evaluationEnCoursCopie() {
+    return (typeof evaluationEnCours !== 'undefined') ? evaluationEnCours : window.evaluationEnCours;
+}
+
+/** Les mots, la coche (le choix de la copie, sinon la règle) et le choix porté par le bloc. */
+function _remplirChoixCopie(bloc, famille, ec) {
+    const choix = (ec && _sortsCopie().includes(ec.sortCopieNonRecevable)) ? ec.sortCopieNonRecevable : '';
+    const regle = (typeof window.sortCopieNonRecevableDeLaPratiqueActive === 'function') ? window.sortCopieNonRecevableDeLaPratiqueActive() : null;
+    const textes = _textesDuChoixCopie(famille, ec ? ec.productionId : null);
+    const T = TEXTES_SORT_COPIE_NON_RECEVABLE;
+    document.getElementById('titreSortNonRecevable').textContent = T.titre;
+    document.getElementById('libelleSortNonRecevableEcarter').textContent = textes.ecarter;
+    document.getElementById('libelleSortNonRecevableZero').textContent = textes.zero;
+    document.getElementById('aideSortNonRecevable').textContent = regle ? T.aide(T.regle[regle]) : T.aideSansPratique;
+    const coche = choix || regle || '';
+    document.getElementById('sortNonRecevableEcarter').checked = (coche === 'ecarter');
+    document.getElementById('sortNonRecevableZero').checked = (coche === 'zero');
+    bloc.setAttribute('data-choix-copie', choix);
+    bloc.classList.remove('u-hide');
+}
+
+/** Le geste sur la copie : son choix s'enregistre avec elle (auto-sauvegarde, comme le statut d'intégrité). */
+function changerSortCopieNonRecevable(el) {
+    if (!el || !_sortsCopie().includes(el.value)) return;
+    const ec = _evaluationEnCoursCopie();
+    if (ec) ec.sortCopieNonRecevable = el.value;
+    const bloc = document.getElementById('divSortNonRecevable');
+    if (bloc) bloc.setAttribute('data-choix-copie', el.value);
+    if (typeof window._debouncerAutoSave === 'function') window._debouncerAutoSave();
+}
+
+/**
+ * Le choix fait SUR LA COPIE, tel que l'écran le porte : null quand la copie suit la règle de sa pratique, ou quand
+ * elle n'est pas non recevable. Lu par les trois écritures (« Enregistrer », la modification, l'auto-sauvegarde).
+ * @returns {'ecarter'|'zero'|null}
+ */
+function lireChoixCopieNonRecevableEcran() {
+    const statut = (document.getElementById('statutIntegrite') || {}).value || 'recevable';
+    const bloc = document.getElementById('divSortNonRecevable');
+    const choix = bloc ? bloc.getAttribute('data-choix-copie') : null;
+    return (_estStatutNonRecevable(statut) && _sortsCopie().includes(choix)) ? choix : null;
+}
+
+/** Écrit le choix sur une évaluation (ou l'en retire : elle suit alors la règle de sa pratique). */
+function poserChoixCopieNonRecevable(evaluation, choix) {
+    if (!evaluation) return;
+    if (_sortsCopie().includes(choix)) evaluation.sortCopieNonRecevable = choix;
+    else delete evaluation.sortCopieNonRecevable;
+}
 
 /**
  * Décision de Grégoire (28 oct. 2026, 6 h 46) — SUR LE FORMULAIRE, LA NOTE ET LE NIVEAU D'UNE COPIE NON RECEVABLE CÈDENT
@@ -628,6 +774,7 @@ function changerStatutIntegrite() {
             delete evaluationEnCours.notesIntegrite;
         }
     }
+    afficherChoixCopieNonRecevable();   // #1176 : recevable ou soupçonnée, le choix fait sur la copie part avec le statut
 
     // Non recevable (plagiat ou IA) : un avis, et rien d'autre ne change dans le formulaire.
     // 28 oct. 2026 — LES CRITÈRES GARDENT L'ÉVALUATION DE L'ENSEIGNANT. Ce que vaut la copie dans la note se lit
@@ -1191,6 +1338,11 @@ window.changerStatutIntegrite = changerStatutIntegrite;
 window.changerTravailEnCours = changerTravailEnCours;
 window.afficherTravailEnCours = afficherTravailEnCours;
 window.afficherCopieNonRecevable = afficherCopieNonRecevable;   // 28 oct. 2026
+// #1176 (9 nov. 2026) — le sort de la copie non recevable, choisi sur la copie
+window.afficherChoixCopieNonRecevable = afficherChoixCopieNonRecevable;
+window.changerSortCopieNonRecevable = changerSortCopieNonRecevable;
+window.lireChoixCopieNonRecevableEcran = lireChoixCopieNonRecevableEcran;
+window.poserChoixCopieNonRecevable = poserChoixCopieNonRecevable;
 window.refuserVerrouTravailEnCours = refuserVerrouTravailEnCours;
 window.peuplementOptJetons = peuplementOptJetons;
 window.gererChangementCheckboxJetonDelai = gererChangementCheckboxJetonDelai;

@@ -72,6 +72,17 @@ function suggererNoteHolistique(niveauxParObjectif, methode) {
     }
 }
 
+/**
+ * #1176 — « Notes finalisées » cochée sur la pratique, lue comme le chemin riche (`calculerDetailsNoteFinale`) : une capture
+ * se calcule toujours en provisoire (#716, `contexteImposeNoteProvisoire`).
+ * @param {Object|null} configuration
+ * @returns {boolean}
+ */
+function _notesFinalesCochees(configuration) {
+    if (!configuration || configuration.notesFinales !== true) return false;
+    return !(typeof contexteImposeNoteProvisoire === 'function' && contexteImposeNoteProvisoire());
+}
+
 class PratiquePANStandards {
 
     constructor() {
@@ -146,6 +157,7 @@ class PratiquePANStandards {
         const portfolioActif = config.portfolioActif;
         const nombreARetenir = config.nombreARetenir;
         const methodeSelection = config.methodeSelection;
+        const regle = config.sortCopieNonRecevable;   // #1176 : la règle de la pratique pour une copie non recevable
 
         // Si portfolio désactivé, retourner null (productions indépendantes)
         if (!portfolioActif) {
@@ -168,12 +180,13 @@ class PratiquePANStandards {
 
         // Filtrer les évaluations de cet étudiant sur les artefacts du pool — #706 : la règle
         // unique du registre (remplacées, sans note, brouillons, portée nulle : hors note).
-        // 28 oct. 2026 : une copie non recevable sort du portfolio (règle par défaut du registre), comme au chemin riche.
+        // #1176 : une copie non recevable écartée manque au portfolio, comme une copie non remise ; gardée, elle y
+        // entre à 0 (registre), comme au chemin riche.
         const evaluationsEleve = evaluations.filter(e =>
             e.etudiantDA === da &&
             artefactsIds.includes(e.productionId) &&
             window.evaluationEntreDansLaNote(e) &&
-            (!window.valeurCopieNonRecevable(e) || window.valeurCopieNonRecevable(e).dansLePortfolio)
+            !window.copieNonRecevableEcartee(e, regle)
         );
 
         if (evaluationsEleve.length === 0) {
@@ -181,8 +194,8 @@ class PratiquePANStandards {
         }
 
         // Appliquer la logique de sélection selon la modalité — triée et sommée sur la note que le calcul retient
-        // (registre, 28 oct. 2026) : un réglage qui garderait la copie non recevable au pool n'aurait rien à changer ici.
-        const noteRetenue = (e) => window.noteRetenueParLeCalcul(e);
+        // (registre) : une copie non recevable gardée au pool y vaut 0, pas sa note calculée (#1176).
+        const noteRetenue = (e) => window.noteRetenueParLeCalcul(e, regle);
         let artefactsRetenus = [];
 
         switch (methodeSelection) {
@@ -230,15 +243,20 @@ class PratiquePANStandards {
         }
 
         // Trouver l'évaluation de l'étudiant sur l'évaluation terminale (#706 : un brouillon
-        // de terminale n'est pas une terminale — la note reste provisoire)
+        // de terminale n'est pas une terminale — la note reste provisoire ; #1176 : une terminale non recevable
+        // écartée non plus, comme une terminale non remise)
         const evalTerminale = evaluations.find(e =>
             e.etudiantDA === da &&
             e.productionId === productionTerminale.id &&
-            window.evaluationEntreDansLaNote(e)
+            window.evaluationEntreDansLaNote(e) &&
+            !window.copieNonRecevableEcartee(e, regle)
         );
 
-        // Si l'évaluation terminale n'est pas encore faite, note provisoire = pool seul
-        if (!evalTerminale) {
+        // Si l'évaluation terminale n'est pas encore faite, note provisoire = pool seul — sauf une fois les notes
+        // finales cochées : une terminale manquante vaut alors 0 (#1176, décision 4 de Grégoire, 8 nov. 2026 ; parité
+        // avec `_obtenirNoteTerminaleEtudiant`, profil-etudiant-actions.js).
+        const noteTerminale = this._noteTerminaleRetenue(evalTerminale, config.notesFinales, noteRetenue);
+        if (noteTerminale === null) {
             return moyennePortfolio / 100;
         }
 
@@ -265,10 +283,20 @@ class PratiquePANStandards {
 
         const moyennePonderee = (
             (moyennePortfolio * ponderationPortfolio / totalPonderation) +
-            (window.noteRetenueParLeCalcul(evalTerminale) * ponderationTerminale / totalPonderation)   // 28 oct. : non recevable → 0
+            (noteTerminale * ponderationTerminale / totalPonderation)   // #1176 : gardée non recevable → 0 ; manquante aux notes finales → 0
         );
 
         return moyennePonderee / 100;
+    }
+
+    /**
+     * #1176 — la note de la terminale : celle que le calcul retient ; manquante (non remise, ou non recevable écartée),
+     * null pendant le trimestre (la note reste provisoire), 0 une fois les notes finales cochées (décision 4).
+     * @returns {number|null}
+     */
+    _noteTerminaleRetenue(evalTerminale, notesFinales, noteRetenue) {
+        if (evalTerminale) return noteRetenue(evalTerminale);
+        return notesFinales ? 0 : null;
     }
 
     // Lot 2 des standards sans portfolio (29 oct. 2026) : `calculerPerformanceRecente` est retirée — aucun appelant
@@ -514,6 +542,7 @@ class PratiquePANStandards {
      */
     _lireConfiguration() {
         let portfolio = null;
+        let configuration = null;   // #1176 : la configuration entière, pour la règle et les notes finales
 
         if (this.config && this.config.modalites && this.config.modalites.configPAN) {
             // Instance simulée (#307) : config injectée, pas de lecture du stockage.
@@ -521,6 +550,7 @@ class PratiquePANStandards {
         } else if (typeof obtenirConfigPratiqueActive === 'function') {
             const cfgActive = obtenirConfigPratiqueActive();
             portfolio = (cfgActive && cfgActive.portfolio) || null;
+            configuration = cfgActive;
         }
 
         let methodeSelection = (portfolio && portfolio.methodeSelection) || 'meilleurs';
@@ -534,7 +564,11 @@ class PratiquePANStandards {
             // l'atteint jamais pour une standards ; la note est celle de `calculerDetailsNoteFinale`.
             nombreARetenir: (portfolio && portfolio.nombreARetenir) || 3,
             minimumCompletion: (portfolio && portfolio.minimumCompletion) || 7,
-            methodeSelection: methodeSelection
+            methodeSelection: methodeSelection,
+            // #1176 : la règle de la pratique (sans règle écrite : écartée, le comportement d'avant) ; les notes finales,
+            // lues comme le chemin riche (une capture se calcule en provisoire, #716).
+            sortCopieNonRecevable: window.sortCopieNonRecevableDeLaPratique(configuration, 'standards'),
+            notesFinales: _notesFinalesCochees(configuration)
         };
     }
 

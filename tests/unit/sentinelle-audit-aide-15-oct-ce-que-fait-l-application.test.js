@@ -387,35 +387,43 @@ describe('Une copie non recevable dans la note, famille par famille (décisions 
         expect(statut).not.toContain("select.value = '0'");
         const perf = corps(lire('js/pratiques/pratique-sommative.js').replace(/^    calculerPerformance\(/m, 'function calculerPerformance('), 'calculerPerformance');
         expect(perf).not.toContain('statutIntegrite');
-        expect(perf).toContain('window.noteRetenueParLeCalcul(evaluation) * ponderation');
+        // ↻ #1176 (9 nov. 2026) : la note retenue se lit avec la règle de la pratique ; écartée, la copie sort avant.
+        expect(perf).toContain('window.noteRetenueParLeCalcul(evaluation, regle) * ponderation');
+        expect(perf).toContain('!window.copieNonRecevableEcartee(e, regle)');
         // E4 (28 oct. 2026) : la reprise remplace l'originale quand elle entre elle-même dans la note (`originaleEstRemplacee`).
         expect(corps(lire('js/pratiques/pratique-registre.js'), 'evaluationEntreDansLaNote')).toContain('if (evaluation.remplaceeParId && originaleEstRemplacee(evaluation, evaluations)) return false;');
-        expect(CARTE).toContain('<li>en sommative, elle vaut 0, sauf si une reprise la remplace ;</li>');
+        // ↻ #1176 (9 nov. 2026) : les lignes par famille cèdent la place au choix (texte PROPOSÉ, en attente de Grégoire).
+        expect(CARTE).toContain('En sommative, elle n\'entre pas dans la moyenne');
+        expect(CARTE).toContain('«&nbsp;Lui mettre 0&nbsp;» : 0 en sommative, un travail non satisfaisant en spécifications, 0 en standards, au portfolio comme à la terminale.');
+        expect(CARTE).toContain('Une reprise remplace la copie non recevable, quel que soit son sort.');
         expect(CARTE, 'la clause des meilleures productions ne joue jamais en sommative').not.toMatch(/meilleures productions/);
     });
 
     it('spécifications : un travail non satisfaisant (sa note 0 reste sous le seuil)', () => {
         const spe = lire('js/pratiques/pratique-pan-specifications.js');
         expect(tranche(spe, '_estTravailAcceptable(evaluation, typeTravail) {', '\n    }')).toContain('return evaluation.noteFinale >= seuil;');
-        expect(CARTE).toContain('<li>en spécifications, elle compte comme un travail non satisfaisant ;</li>');
+        expect(CARTE).toContain('en spécifications, elle compte comme un travail non remis');   // ↻ #1176 : « l'écarter »
     });
 
     it('standards : hors du portfolio ; la terminale, et l\'obligatoire en hybride avec les notes finales, valent 0', () => {
         // ↻ 28 oct. 2026 : la règle est lue au registre (`valeurCopieNonRecevable`), plus sur le statut ; la terminale vaut 0 par lui.
         expect(corps(ACTIONS, '_filtrerEvaluationsArtefactsValides')).toMatch(/if \(nonRecevable && !nonRecevable\.dansLePortfolio\) return false;/);
         expect(corps(ACTIONS, '_obtenirNoteTerminaleEtudiant')).not.toContain('statutIntegrite');
-        expect(corps(ACTIONS, '_obtenirNoteTerminaleEtudiant')).toContain('window.noteRetenueParLeCalcul(evaluationTerminale)');
+        // ↻ #1176 (9 nov. 2026) : la terminale gardée vaut ce que dit la règle ; manquante, 0 une fois les notes finales cochées.
+        expect(corps(ACTIONS, '_obtenirNoteTerminaleEtudiant')).toContain('window.noteRetenueParLeCalcul(evaluationTerminale, regle)');
+        expect(corps(ACTIONS, '_obtenirNoteTerminaleEtudiant')).toContain(': (estFinale ? 0 : null);');
         const hybride = corps(ACTIONS, '_selectionnerArtefactsHybride');
         expect(hybride).toContain('const denominateurObl = estFinale ? nombreObligatoiresTotal : evalsObligatoires.length;');
         expect(hybride).toMatch(/const nombreObligatoiresTotal = productionsNonPortfolio\s*\.filter\(p => p\.categorie === 'obligatoire' && p\.id !== terminalId\)\.length;/);
-        expect(CARTE).toContain("<li>en standards, elle sort du portfolio : la compétence n'est jugée qu'à la reprise. Exceptions : une terminale non recevable vaut 0, et, en mode hybride une fois les notes finales cochées, une obligatoire non recevable aussi, comme une obligatoire non remise ;</li>");
+        // ↻ #1176 (9 nov. 2026) : texte PROPOSÉ, en attente de Grégoire.
+        expect(CARTE).toContain("en standards, elle manque au portfolio, avec ce que ta pratique fait d'une copie manquante. Une terminale écartée laisse la note provisoire, puis vaut 0 une fois les notes finales cochées, comme une terminale non remise ; en mode hybride, une obligatoire écartée aussi.</li>");
     });
 
     it('dénotation : la note est le jugement saisi, aucune copie n\'y entre par calcul', () => {
         const den = tranche(lire('js/pratiques/pratique-configurable.js'), '_calculerPerformanceDenotation(da) {', '\n    }');
         expect(den).toContain('lireJugementDenotation(pratiqueId, da)');
         expect(den).not.toMatch(/evaluationsSauvegardees|_lireEvaluations/);
-        expect(CARTE).toContain("<li>en dénotation, ta note est ton jugement : la copie n'y entre pas par calcul.</li>");
+        expect(CARTE).toContain("<li>En dénotation, ta note est ton jugement : la copie n'y entre pas par calcul.</li>");   // ↻ #1176 : la majuscule
     });
 
     it('les anciennes affirmations ne reviennent ni dans la carte ni dans l\'infobulle', () => {

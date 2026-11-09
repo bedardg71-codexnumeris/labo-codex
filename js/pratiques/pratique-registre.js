@@ -1100,40 +1100,96 @@ function evaluationNonRecevable(evaluation) {
 }
 
 /**
- * CE QUE VAUT UNE COPIE NON RECEVABLE DANS LE CALCUL DE LA NOTE — la règle par défaut, posée ICI seulement.
- * Décisions de Grégoire du 15 oct. 2026 (13 h 47, 14 h 36), telles que l'Aide les dit (`accordeon-aide-irrecevables`) :
- * en sommative elle vaut 0 (une reprise la remplace ; une pratique qui ne retient que les meilleures l'écarte si elle
- * n'en est pas, puisqu'elle vaut 0) ; en spécifications, un travail non satisfaisant ; en standards, elle sort du
- * portfolio, et une terminale non recevable vaut 0 (en hybride, notes finales cochées, l'obligatoire absente du pool
- * compte 0 au dénominateur) ; en dénotation, la note est un jugement saisi : aucune copie n'y entre par calcul.
- * ⚠ C'EST LA PRATIQUE DE GRÉGOIRE, PAS UNE VÉRITÉ (28 oct. 2026, 6 h 16) : un réglage de la pratique de notation devra
- * pouvoir la remplacer (chantier au BACKLOG). Il remplacera cet objet, et les familles n'auront rien à changer : aucune
- * ne relit `statutIntegrite`, toutes lisent `valeurCopieNonRecevable` ou `noteRetenueParLeCalcul`.
- * ⚠ Se lit AU CALCUL, sur le statut : les copies déjà verrouillées suivent sans qu'on écrive dans leurs données.
+ * #1176 (lot du 9 nov. 2026, consigne `CONSIGNE-LOT-2026-11-08-copie-non-recevable-choix.md`) — CE QUE VAUT UNE COPIE
+ * NON RECEVABLE DANS LA NOTE : L'UTILISATEUR CHOISIT. Décisions de Grégoire du 8 nov. 2026 (15 h 28 à 15 h 40).
+ * Ce n'est la pratique de personne : « c'est lui qui sait comment il gère dans sa classe ». Deux choix :
+ * - « l'écarter » : la copie est traitée EXACTEMENT comme une copie non remise, dans toutes les familles. Elle n'entre
+ *   dans aucun calcul de la note (sommative : hors de la moyenne ; spécifications : un travail non remis ; standards :
+ *   elle manque au portfolio, avec ce que la pratique fait déjà d'une copie manquante ; terminale : note provisoire,
+ *   puis 0 une fois les notes finales cochées, comme une terminale non remise, décision 4).
+ * - « lui mettre 0 » : 0 en sommative, un travail non satisfaisant en spécifications, 0 en standards (au portfolio
+ *   comme à la terminale). Dénotation : sans objet, la note est un jugement saisi.
+ * OÙ VIT LE CHOIX (décision 1) : la RÈGLE dans la pratique (`configuration.sortCopieNonRecevable`), et sur la COPIE
+ * (`evaluation.sortCopieNonRecevable`), qui la remplace pour cette copie-là. Les deux se lisent AU CALCUL.
+ * PRATIQUES EXISTANTES (décision 5) : sans règle écrite, la pratique se LIT comme son comportement d'avant ce lot
+ * (sommative : 0 ; spécifications : non satisfaisant ; standards : écartée). Rien n'est écrit dans
+ * `pratiquesConfigurables` tant que l'utilisateur ne choisit pas ; une copie sans le champ suit la règle.
+ * ⚠ La complétion (C) ne lit pas ce choix : non remise dans les deux cas (décision 3, `evaluationCompteCommeRemise`).
+ * ⚠ Les niveaux d'une copie non recevable restent hors des lectures dans les deux cas (#1228).
+ * ⚠ Aucune famille ne relit `statutIntegrite` : toutes passent par les quatre fonctions ci-dessous, en nommant la
+ * règle de LA pratique qu'elles calculent (le Comparateur en simule d'autres que l'active).
  * Les captures déjà prises gardent leurs valeurs jusqu'à « Recalculer les captures ».
  */
-const VALEUR_COPIE_NON_RECEVABLE_PAR_DEFAUT = Object.freeze({
-    note: 0,                  // sommative, terminale des standards
-    satisfaisante: false,     // spécifications
-    dansLePortfolio: false    // standards
+const SORTS_COPIE_NON_RECEVABLE = Object.freeze(['ecarter', 'zero']);
+
+const VALEUR_COPIE_NON_RECEVABLE = Object.freeze({
+    ecarter: Object.freeze({ sort: 'ecarter', entreDansLeCalcul: false, note: null, satisfaisante: false, dansLePortfolio: false }),
+    zero: Object.freeze({ sort: 'zero', entreDansLeCalcul: true, note: 0, satisfaisante: false, dansLePortfolio: true })
 });
 
-/**
- * @param {Object} evaluation
- * @returns {{note:number, satisfaisante:boolean, dansLePortfolio:boolean}|null} null : la copie est recevable
- */
-function valeurCopieNonRecevable(evaluation) {
-    return evaluationNonRecevable(evaluation) ? VALEUR_COPIE_NON_RECEVABLE_PAR_DEFAUT : null;
+function _sortCopieValide(sort) {
+    return SORTS_COPIE_NON_RECEVABLE.includes(sort) ? sort : null;
 }
 
 /**
- * La note qu'un calcul retient pour une copie : la sienne, ou ce que vaut une copie non recevable.
+ * La règle d'une pratique : celle qu'elle porte, sinon son comportement d'avant ce lot (décision 5).
+ * @param {Object|null} configuration - `.configuration` (ou `.config`) de l'entrée de bibliothèque ; null : aucune
+ * @param {string|null} famille - 'sommative' | 'standards' | 'specifications' | 'denotation' (normalisée ici)
+ * @returns {'ecarter'|'zero'|null} null : la famille n'a pas de règle (dénotation)
+ */
+function sortCopieNonRecevableDeLaPratique(configuration, famille) {
+    const ecrite = _sortCopieValide(configuration && configuration.sortCopieNonRecevable);
+    if (ecrite) return ecrite;
+    const f = normaliserIdPratique(famille || (configuration && configuration.type) || '');
+    if (f === 'denotation') return null;
+    if (f === 'standards') return 'ecarter';
+    return 'zero';   // sommative, spécifications, et une famille illisible : la valeur d'avant ce lot
+}
+
+/** La règle de la pratique active du groupe-cours ; null sans pratique (ou en dénotation). */
+function sortCopieNonRecevableDeLaPratiqueActive() {
+    const designation = designerPratiqueActive();
+    if (designation.etat !== 'ok') return null;
+    const donnees = designation.donnees;
+    return sortCopieNonRecevableDeLaPratique(donnees ? (donnees.configuration || donnees.config || null) : null, designation.famille);
+}
+
+/**
+ * Ce que vaut une copie : null si elle est recevable ; sinon le choix de la copie, à défaut la règle nommée.
+ * @param {Object} evaluation
+ * @param {string|null} [sortDeLaPratique] - la règle de la pratique qui calcule ; ABSENT (undefined) : celle de la
+ *        pratique active. Une règle illisible ou absente (dénotation, aucune pratique) : 0, la valeur d'avant ce lot.
+ * @returns {{sort:string, entreDansLeCalcul:boolean, note:(number|null), satisfaisante:boolean, dansLePortfolio:boolean}|null}
+ */
+function valeurCopieNonRecevable(evaluation, sortDeLaPratique) {
+    if (!evaluationNonRecevable(evaluation)) return null;
+    const regle = (sortDeLaPratique === undefined) ? sortCopieNonRecevableDeLaPratiqueActive() : sortDeLaPratique;
+    const sort = _sortCopieValide(evaluation.sortCopieNonRecevable) || _sortCopieValide(regle) || 'zero';
+    return VALEUR_COPIE_NON_RECEVABLE[sort];
+}
+
+/**
+ * La copie est non recevable ET écartée : elle sort du calcul comme une copie non remise (aucune place, aucune note).
+ * Ne décide rien d'autre : `evaluationEntreDansLaNote` reste la règle de ce qui compte (brouillons, portée nulle…).
+ * @param {Object} evaluation
+ * @param {string|null} [sortDeLaPratique] - comme `valeurCopieNonRecevable`
+ * @returns {boolean}
+ */
+function copieNonRecevableEcartee(evaluation, sortDeLaPratique) {
+    const valeur = valeurCopieNonRecevable(evaluation, sortDeLaPratique);
+    return !!valeur && !valeur.entreDansLeCalcul;
+}
+
+/**
+ * La note qu'un calcul retient pour une copie : la sienne, ou ce que vaut une copie non recevable (0 ; null si elle
+ * est écartée : l'appelant l'a déjà sortie par `copieNonRecevableEcartee`, ou la lit comme absente).
  * Ne décide pas si la copie entre dans la note (`evaluationEntreDansLaNote`) : seulement ce qu'elle y vaut.
  * @param {Object} evaluation
+ * @param {string|null} [sortDeLaPratique] - comme `valeurCopieNonRecevable`
  * @returns {number|null|undefined}
  */
-function noteRetenueParLeCalcul(evaluation) {
-    const valeur = valeurCopieNonRecevable(evaluation);
+function noteRetenueParLeCalcul(evaluation, sortDeLaPratique) {
+    const valeur = valeurCopieNonRecevable(evaluation, sortDeLaPratique);
     return valeur ? valeur.note : evaluation.noteFinale;
 }
 
@@ -1221,8 +1277,12 @@ window.compterEvaluationsEcarteesDeLaNote = compterEvaluationsEcarteesDeLaNote;
 window.evaluationNonRemise = evaluationNonRemise;
 // Lot 30 (17 sept. 2026) — une copie non recevable (plagiat, IA) n'est pas une remise pour la complétion
 window.evaluationNonRecevable = evaluationNonRecevable;
-// 28 oct. 2026 — ce que vaut une copie non recevable dans la note (règle par défaut, un seul endroit)
+// #1176 (9 nov. 2026) — ce que vaut une copie non recevable dans la note : la règle de la pratique, le choix de la copie
+window.SORTS_COPIE_NON_RECEVABLE = SORTS_COPIE_NON_RECEVABLE;
+window.sortCopieNonRecevableDeLaPratique = sortCopieNonRecevableDeLaPratique;
+window.sortCopieNonRecevableDeLaPratiqueActive = sortCopieNonRecevableDeLaPratiqueActive;
 window.valeurCopieNonRecevable = valeurCopieNonRecevable;
+window.copieNonRecevableEcartee = copieNonRecevableEcartee;
 window.noteRetenueParLeCalcul = noteRetenueParLeCalcul;
 window.libelleCopieNonRecevable = libelleCopieNonRecevable;   // ce que la copie montre à la place
 // Statut « Incomplet ; travail en cours » (25 oct. 2026) — hors de la note, remise pour C

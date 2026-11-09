@@ -35,6 +35,14 @@ class PratiqueSommative {
 
     constructor() {
         // ✅ DÉSACTIVÉ (7 déc 2025): Pour performance Safari
+        // #1176 (9 nov. 2026) : la règle d'une copie non recevable de la pratique qui délègue ici (sommative
+        // configurable, `pratique-configurable.js`). Absente : celle de la famille, la valeur d'avant ce lot (0).
+        this.sortCopieNonRecevable = undefined;
+    }
+
+    /** #1176 — la règle que ce calcul applique aux copies non recevables ('ecarter' | 'zero'). */
+    _sortCopieNonRecevable() {
+        return this.sortCopieNonRecevable || window.sortCopieNonRecevableDeLaPratique(null, 'sommative');
     }
 
     // ========================================================================
@@ -83,8 +91,10 @@ class PratiqueSommative {
 
         // Filtrer évaluations de cet étudiant — #706 : la règle unique du registre
         // (remplacées, sans note, brouillons non verrouillés et portée nulle : hors note).
+        // #1176 : une copie non recevable écartée sort comme une copie non remise.
+        const regle = this._sortCopieNonRecevable();
         const evaluationsEleve = evaluations.filter(e =>
-            e.etudiantDA === da && window.evaluationEntreDansLaNote(e)
+            e.etudiantDA === da && window.evaluationEntreDansLaNote(e) && !window.copieNonRecevableEcartee(e, regle)
         );
 
         if (evaluationsEleve.length === 0) {
@@ -100,8 +110,8 @@ class PratiqueSommative {
             const production = productions.find(p => p.id === evaluation.productionId);
             const ponderation = this._ponderationDe(production);
 
-            // 28 oct. 2026 : une copie non recevable vaut ce que dit le registre (0 par défaut), pas sa note calculée.
-            scoreTotal += window.noteRetenueParLeCalcul(evaluation) * ponderation;
+            // #1176 : une copie non recevable gardée vaut 0 (registre), pas sa note calculée.
+            scoreTotal += window.noteRetenueParLeCalcul(evaluation, regle) * ponderation;
             pondTotal += ponderation;
         });
 
@@ -153,9 +163,11 @@ class PratiqueSommative {
         // MÊME règle que calculerPerformance : la pondération de la production (E1 : 0 vaut 0, absente vaut 1).
         const pondProd = (pid) => this._ponderationDe(productions.find(pr => pr.id === pid));
 
-        // MÊMES critères de validité que calculerPerformance (garantit la parité) — #706.
+        // MÊMES critères de validité que calculerPerformance (garantit la parité) — #706. #1176 : une copie non
+        // recevable écartée n'est pas nommée, comme une copie non remise (elle n'a aucune place dans la note).
+        const regle = this._sortCopieNonRecevable();
         const copiesQuiComptent = evaluations.filter(e =>
-            e.etudiantDA === da && window.evaluationEntreDansLaNote(e)
+            e.etudiantDA === da && window.evaluationEntreDansLaNote(e) && !window.copieNonRecevableEcartee(e, regle)
         );
         // E1 — une production à pondération 0 n'entre pas dans la moyenne : nommée, non comptée (plus bas).
         const valides = copiesQuiComptent.filter(e => pondProd(e.productionId) > 0);
@@ -185,7 +197,7 @@ class PratiqueSommative {
                 date: e.dateEvaluation || null,
                 niveau: niveauDuRecit(e),   // code BRUT — traduit par l'échelle à la vue ; #941 lot S1 : aucun en points
                 enPoints: estEnPoints(e),
-                note: (window.noteRetenueParLeCalcul(e) ?? null),   // la note que calculerPerformance retient (parité)
+                note: (window.noteRetenueParLeCalcul(e, regle) ?? null),   // la note que calculerPerformance retient (parité)
                 sort: 'compte',
                 // #921 — le poids en NOMBRE, pour qui écrit la ligne de calcul (profil) : `ponderation` est celle de la
                 // production (défaut 1, même règle que `calculerPerformance`), `poids` sa part en % des copies comptées.
@@ -202,7 +214,7 @@ class PratiqueSommative {
                 date: e.dateEvaluation || null,
                 niveau: niveauDuRecit(e),
                 enPoints: estEnPoints(e),
-                note: (window.noteRetenueParLeCalcul(e) ?? null),
+                note: (window.noteRetenueParLeCalcul(e, regle) ?? null),
                 sort: 'ecarte',
                 detail: 'pondération 0 · non comptée'
             });

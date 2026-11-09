@@ -3637,7 +3637,8 @@ function _substituerOriginauxTrajectoires(evalIndex, evaluations, actif) {
  *
  * Chaque ligne = trajectoire d'un étudiant à travers les productions.
  * Chaque point = note décimale (0-1) selon le mode de mesure :
- *   - mode 'noteFinale' : noteRetenueParLeCalcul(evaluation) / 100 (une copie non recevable vaut 0, #1226)
+ *   - mode 'noteFinale' : noteRetenueParLeCalcul(evaluation, règle) / 100 (une copie non recevable gardée vaut 0, #1226 ;
+ *     écartée, aucun point, #1176)
  *   - mode 'habiletes'  : moyenne des critères cochés (niveauSelectionne)
  *
  * Trous (null) si pas d'évaluation, travail non remis/retard, note absente,
@@ -3917,6 +3918,7 @@ function creerGraphiqueTrajectoiresProduction(canvasId, options) {
             // Volontairement uniforme : la lecture est une « nuage » de trajectoires,
             // pas une identification individuelle. La sélection met en relief.
             const couleurNoteFinale = COULEURS_INDICES.P;
+            const regleNonRecevable = window.sortCopieNonRecevableDeLaPratiqueActive();   // #1176 : lue une fois
             datasets = etudiants.map((etudiant, index) => {
                 const da = etudiant.da;
                 const data = artefacts.map(art => {
@@ -3925,9 +3927,10 @@ function creerGraphiqueTrajectoiresProduction(canvasId, options) {
                     if (ev.statutRemise === 'non-remis' || ev.statutRemise === 'retard') return null;
                     if (!Array.isArray(ev.criteres) || ev.criteres.length === 0) return null;
                     // #1226 (décision de Grégoire, 3 nov. 2026) : une copie non recevable se trace
-                    // à ce qu'elle vaut dans la note du cours (0), pas à sa note enregistrée. La règle
-                    // vit dans pratique-registre.js ; ce graphique ne relit pas statutIntegrite.
-                    const note = window.noteRetenueParLeCalcul(ev);
+                    // à ce qu'elle vaut dans la note du cours, pas à sa note enregistrée. #1176 : gardée,
+                    // 0 ; écartée, aucun point, comme une copie non remise (null, plus bas). La règle vit
+                    // dans pratique-registre.js ; ce graphique ne relit pas statutIntegrite.
+                    const note = window.noteRetenueParLeCalcul(ev, regleNonRecevable);
                     if (note === null || note === undefined) return null;
                     return note / 100;
                 });

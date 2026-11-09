@@ -2451,12 +2451,16 @@ function _lireIntegriteEcran() {
     if (notes && !(typeof champMasqueAnonymisation === 'function' && champMasqueAnonymisation(notes))) {
         lue.notesIntegrite = notes.value || '';
     }
+    // #1176 : le sort choisi sur la copie non recevable ; null, elle suit la règle de sa pratique.
+    lue.sortCopieNonRecevable = (typeof window.lireChoixCopieNonRecevableEcran === 'function')
+        ? window.lireChoixCopieNonRecevableEcran() : null;
     return lue;
 }
 
 function _majIntegriteAutoSave(evaluation, integrite) {
     evaluation.statutIntegrite = integrite.statutIntegrite;
     if (typeof integrite.notesIntegrite === 'string') evaluation.notesIntegrite = integrite.notesIntegrite;
+    if (typeof window.poserChoixCopieNonRecevable === 'function') window.poserChoixCopieNonRecevable(evaluation, integrite.sortCopieNonRecevable);
 }
 
 /** Statut « Incomplet ; travail en cours » (25 oct. 2026) — la case de la palette Paramètres. */

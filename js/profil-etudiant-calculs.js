@@ -1400,9 +1400,13 @@ function calculerIndicesNDerniersArtefacts(da, pourDepistage = false) {
     // Filtrer les productions évaluables selon la pratique active
     const productionsIds = obtenirIdsProductionsEvaluables(productions);
 
+    // #1176 : la règle de la pratique active pour une copie non recevable — écartée, elle sort comme une copie non
+    // remise ; gardée, elle compte à 0 (avant ce lot : sa note calculée, brute).
+    const regleNonRecevable = window.sortCopieNonRecevableDeLaPratiqueActive();
     const evaluationsEleve = evaluations.filter(e =>
         e.etudiantDA === da &&
         window.evaluationEntreDansLaNote(e) &&   // #737 (lot A) : un brouillon ne compte nulle part ; #730 — la performance du RàI lisait 50, 75, 55 là où la note du cours lit 50, 75, 70
+        !window.copieNonRecevableEcartee(e, regleNonRecevable) &&
         productionsIds.includes(e.productionId)
     );
 
@@ -1422,7 +1426,7 @@ function calculerIndicesNDerniersArtefacts(da, pourDepistage = false) {
     const troisDerniers = evaluationsEleve.slice(0, nombreArtefacts);
 
     // Calculer la performance moyenne (notes)
-    const performance = troisDerniers.reduce((sum, e) => sum + e.noteFinale, 0) / troisDerniers.length / 100;
+    const performance = troisDerniers.reduce((sum, e) => sum + window.noteRetenueParLeCalcul(e, regleNonRecevable), 0) / troisDerniers.length / 100;
 
     // #536 (11 oct. 2026) — `idmeMoyen` RETIRÉ. Il rendait 0 quand aucun niveau final
     // n'était convertible (le zéro conservé par #529 en attendant cette fiche), mais
@@ -1841,12 +1845,15 @@ function _copiesDuDepistage() {
     const evaluations = diag ? diag.filtrerEvaluations(brutes, productions) : brutes;
     const evaluables = new Set(obtenirIdsProductionsEvaluables(productions));
 
+    // #1176 : une copie non recevable écartée par la règle sort comme une non remise ; gardée, elle compte à 0.
+    const regle = window.sortCopieNonRecevableDeLaPratiqueActive();
     const copies = new Map();
     evaluations.forEach((c) => {
         if (!evaluables.has(c.productionId) || !window.evaluationEntreDansLaNote(c, brutes) || window.evaluationNonRemise(c)) return;
+        if (window.copieNonRecevableEcartee(c, regle)) return;
         const lignes = copies.get(c.etudiantDA) || { remises: 0, notes: [] };
         lignes.remises++;
-        const note = window.noteRetenueParLeCalcul(c);
+        const note = window.noteRetenueParLeCalcul(c, regle);
         if (typeof note === 'number') lignes.notes.push(note);
         copies.set(c.etudiantDA, lignes);
     });

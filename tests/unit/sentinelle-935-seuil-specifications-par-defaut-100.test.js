@@ -14,7 +14,9 @@ function moteur() {
         addEventListener() {}, removeEventListener() {},
         evaluationEntreDansLaNote: () => true,
         evaluationNonRemise: () => false,
-        valeurCopieNonRecevable: () => null   // 28 oct. 2026 : les copies de ce banc sont recevables (harnais seulement)
+        valeurCopieNonRecevable: () => null,   // 28 oct. 2026 : les copies de ce banc sont recevables (harnais seulement)
+        copieNonRecevableEcartee: () => false,  // #1176 : idem
+        sortCopieNonRecevableDeLaPratique: () => 'zero'
     };
     chargerScript('js/pratiques/pratique-pan-specifications.js', {
         db: { getSync: (k, d) => (d !== undefined ? d : null) }, cle: (k) => k, obtenirDonneesSelonMode: () => []

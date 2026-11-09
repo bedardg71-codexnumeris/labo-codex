@@ -217,19 +217,23 @@ describe('#319 Lot 2 (a7) — adoption d\'un modèle = clone fidèle', () => {
 });
 
 describe('#319 Lot 2 (a7) — navigation des deux portes', () => {
-    it('porte « modèle » → choix-modele → récapitulatif', () => {
+    // ↻ #1176 (9 nov. 2026) : un modèle adopté devient une NOUVELLE pratique ; la question « Une copie non recevable » lui
+    // est posée avant le récapitulatif (décision 5 de Grégoire), sautée pour un modèle en dénotation.
+    it('porte « modèle » → choix-modele → copie-non-recevable → récapitulatif (dénotation : choix-modele → récapitulatif)', () => {
         expect(win.obtenirEtapeSuivante('entree-pratique', { porteEntree: 'modele' })).toBe('choix-modele');
-        expect(win.obtenirEtapeSuivante('choix-modele', {})).toBe('recapitulatif');
+        expect(win.obtenirEtapeSuivante('choix-modele', { porteEntree: 'modele' })).toBe('copie-non-recevable');
+        expect(win.obtenirEtapeSuivante('copie-non-recevable', { porteEntree: 'modele', _modeleAdopte: true })).toBe('recapitulatif');
+        expect(win.obtenirEtapeSuivante('choix-modele', { porteEntree: 'modele', _modeleAdopte: true, typePratique: 'denotation' })).toBe('recapitulatif');
     });
 
     it('porte « décrire » → calcul-note-finale', () => {
         expect(win.obtenirEtapeSuivante('entree-pratique', { porteEntree: 'decrire' })).toBe('calcul-note-finale');
     });
 
-    it('compteur d\'étapes de la porte « modèle » = 3 (entrée → choix → récap)', () => {
+    it('compteur d\'étapes de la porte « modèle » = 4 (entrée → choix → copie non recevable → récap, #1176)', () => {
         win.wizardState.reponses = { porteEntree: 'modele' };
         win.wizardState.etapeInitiale = 'entree-pratique';
-        expect(win.calculerNbEtapes()).toBe(3);
+        expect(win.calculerNbEtapes()).toBe(4);
     });
 });
 

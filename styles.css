@@ -27071,6 +27071,18 @@ body.mode-clair {
     width: 20px;
     height: 20px;
 }
+
+/* #1176 (9 nov. 2026) — le sort d'une copie non recevable dans la note : deux boutons radio, cibles de 44 px (iPad). */
+.choix-sort-non-recevable .bloc-option-label {
+    align-items: center;
+    min-height: 44px;
+}
+.choix-sort-non-recevable input[type="radio"] {
+    margin: 0;
+    width: 20px;
+    height: 20px;
+    flex-shrink: 0;
+}
 .travaux-panneau-droite.travail-en-cours #listeCriteresGrille1,
 .travaux-panneau-droite.travail-en-cours #noteFinale1 {
     display: none;

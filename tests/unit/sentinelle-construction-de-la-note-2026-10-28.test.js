@@ -312,9 +312,11 @@ describe('STD — sélection, portfolio, terminale', () => {
     it('STD-5 sans conteneur « Portfolio » : la terminale à 40 donne au pool le complément (60) → 84,8', () => {
         expect(avec(std(), COPIES_STD, prodSTD({ conteneur: false })).profil).toBe(84.8);
     });
-    it('STD-6 « Notes finalisées » hors hybride : aucun effet sur la note (84,8), l\'export dit toujours « final » quand la terminale est là', () => {
+    // ↻ #1176 (9 nov. 2026, décision 4 de Grégoire du 8 nov., accord explicite à 15 h 38) : une fois les notes finales
+    // cochées, une terminale manquante vaut 0. Avant : la note restait provisoire, le pool seul (87, « provisoire »).
+    it('STD-6 « Notes finalisées » hors hybride : aucun effet sur la note (84,8) ; sans terminale, elle vaut 0 → 52, « final » (#1176)', () => {
         expect(avec(std({ notesFinales: true }))).toMatchObject({ profil: 84.8, export: [85, 'final'] });
-        expect(avec(std({ notesFinales: true }), retirer(COPIES_STD, DA.ALICE, 'T1')).export).toEqual([87, 'provisoire']);
+        expect(avec(std({ notesFinales: true }), retirer(COPIES_STD, DA.ALICE, 'T1')).export).toEqual([52, 'final']);
     });
     it('STD-7 le niveau n\'est pas lu, seule la note : A4 niveau « I », note 92 → 84,8', () => {
         expect(avec(std(), remplacer(COPIES_STD, DA.ALICE, 'A4', { niveauFinal: 'I' })).profil).toBe(84.8);
@@ -355,9 +357,11 @@ describe('STD — les cas qui changent la note', () => {
     it('STD-C2 artefact « non-recu » qui porte une note (A4, 92, portée 100) : il RESTE au pool → 84,8', () => {
         expect(avec(remplacer(COPIES_STD, DA.ALICE, 'A4', { statutRemise: 'non-recu' })).profil).toBe(84.8);
     });
-    it('STD-C3 artefact non recevable (A4) : hors pool → 81,4 ; terminale non recevable : 0 → 52', () => {
+    // ↻ #1176 (9 nov. 2026) : sans règle écrite, une standards ÉCARTE la copie non recevable (décision 5) ; la terminale
+    // écartée laisse la note provisoire pendant le trimestre (décision 4). Avant : 0 tout de suite (52).
+    it('STD-C3 artefact non recevable (A4) : hors pool → 81,4 ; terminale non recevable, écartée : provisoire, le pool seul (86,67) (#1176)', () => {
         expect(avec(remplacer(COPIES_STD, DA.ALICE, 'A4', { statutIntegrite: 'plagiat' })).profil).toBe(81.4);
-        expect(avec(remplacer(COPIES_STD, DA.ALICE, 'T1', { statutIntegrite: 'ia' })).profil).toBe(52);
+        expect(avec(remplacer(COPIES_STD, DA.ALICE, 'T1', { statutIntegrite: 'ia' })).profil).toBe(86.67);
     });
     it('STD-C4 terminale « Incomplet » : hors note → provisoire, portfolio seul (86,67)', () => {
         expect(avec(remplacer(COPIES_STD, DA.ALICE, 'T1', { travailEnCours: true }))).toMatchObject({ profil: 86.67, export: [87, 'provisoire'] });

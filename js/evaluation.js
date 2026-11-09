@@ -1317,6 +1317,7 @@ function _initEvaluationEnCoursPourModif(evaluation, evaluationId) {
         statutRemise: evaluation.statutRemise,
         statutIntegrite: evaluation.statutIntegrite || 'recevable',
         notesIntegrite: evaluation.notesIntegrite || '',
+        sortCopieNonRecevable: evaluation.sortCopieNonRecevable,   // #1176 — absent : la copie suit la règle de sa pratique
         delaiAccorde: evaluation.delaiAccorde || false,
         jetonDelaiApplique: evaluation.jetonDelaiApplique || false,
         dateApplicationJetonDelai: evaluation.dateApplicationJetonDelai,
@@ -1447,6 +1448,10 @@ function _chargerStatutsEtBadgesModif(evaluation) {
     const selectIntegrite = document.getElementById('statutIntegrite');
     const notesIntegrite = document.getElementById('notesIntegrite');
     if (selectIntegrite) {
+        // #1176 : le choix fait sur cette copie, avant le `change` qui montre le bloc (`afficherChoixCopieNonRecevable`).
+        if (window.evaluationEnCours && typeof window.poserChoixCopieNonRecevable === 'function') {
+            window.poserChoixCopieNonRecevable(window.evaluationEnCours, evaluation.sortCopieNonRecevable);
+        }
         selectIntegrite.value = evaluation.statutIntegrite || 'recevable';
         // Lot A, R4 : texte libre, masqué en anonymisation (`poserChampTexteLibre`, modes.js).
         if (notesIntegrite) {
@@ -1778,6 +1783,12 @@ function _extraireProprietesJetons(evalExistante) {
     };
 }
 
+/** #1176 : le choix fait sur la copie non recevable, tel que l'écran le porte (evaluation-sauvegarde.js), ou rien. */
+function _poserChoixCopieDeLEcran(evaluation) {
+    if (typeof window.poserChoixCopieNonRecevable !== 'function') return;
+    window.poserChoixCopieNonRecevable(evaluation, window.lireChoixCopieNonRecevableEcran());
+}
+
 function _lireChampsDOMMod(maintenant) {
     const champs = {
         echelleId: document.getElementById('selectEchelle1').value,
@@ -1986,6 +1997,8 @@ function sauvegarderEvaluationModifiee() {
         _lireChampsDOMMod(maintenant),
         proprietesJetons // Préserver toutes les propriétés de jetons en dernier
     );
+    // #1176 : le choix fait sur la copie, ou rien (elle suit la règle de sa pratique) — un choix ancien ne survit pas.
+    _poserChoixCopieDeLEcran(evaluations[indexEval]);
 
     _appliquerProfilACOMod(evaluations[indexEval]);
 
@@ -2272,6 +2285,7 @@ function desactiverFormulaireEvaluation(desactiver) {
         'selectEchelle1',
         'remiseProduction1',
         'statutIntegrite',  // Intégrité académique (recevabilité)
+        'sortNonRecevableEcarter', 'sortNonRecevableZero',   // #1176 — le sort de la copie non recevable
         'travailEnCours'    // Statut « Incomplet ; travail en cours » (25 oct. 2026)
     ];
 

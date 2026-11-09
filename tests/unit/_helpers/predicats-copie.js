@@ -23,6 +23,11 @@ export function chargerPredicatsCopie(win) {
     // 28 oct. 2026 — ce que vaut une copie non recevable dans la note (la règle par défaut du registre)
     win.valeurCopieNonRecevable = registre.valeurCopieNonRecevable;
     win.noteRetenueParLeCalcul = registre.noteRetenueParLeCalcul;
+    // #1176 (9 nov. 2026) — la règle de la pratique et le choix de la copie. ⚠ Le registre jetable n'a pas de pratique
+    // active : sans règle nommée, une copie non recevable s'y lit « 0 » (la valeur d'avant ce lot).
+    win.copieNonRecevableEcartee = registre.copieNonRecevableEcartee;
+    win.sortCopieNonRecevableDeLaPratique = registre.sortCopieNonRecevableDeLaPratique;
+    win.sortCopieNonRecevableDeLaPratiqueActive = registre.sortCopieNonRecevableDeLaPratiqueActive;
     win.libelleCopieNonRecevable = registre.libelleCopieNonRecevable;
     // Statut « Incomplet ; travail en cours » (25 oct. 2026) — la règle de la remise pour C, et le statut
     win.evaluationCompteCommeRemise = registre.evaluationCompteCommeRemise;

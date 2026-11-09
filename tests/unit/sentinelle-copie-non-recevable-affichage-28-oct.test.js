@@ -170,9 +170,10 @@ function formulaire() {
     return { document, poser, evaluationEnCours, panneau: document.getElementById('travaux-eval-droite') };
 }
 
+// ↻ #1176 (9 nov. 2026) — PROPOSÉ, EN ATTENTE DE GRÉGOIRE : la phrase sur la note (« Dans la note du cours, elle vaut ce que
+// dit ta pratique : 0 en sommative… ») est retirée ; le choix « l'écarter » / « lui mettre 0 » s'affiche sous le menu.
 const AVIS = 'Travail non recevable Ton évaluation est gardée, mais la copie montre « Non recevable » au lieu de sa note et de ses niveaux, '
-    + 'jusque sur le PDF de l’étudiant·e. Dans la note du cours, elle vaut ce que dit ta pratique : 0 en sommative, un travail non '
-    + 'satisfaisant en spécifications, hors du portfolio en standards. Dans la complétion, elle compte comme non remise. Retirer le '
+    + 'jusque sur le PDF de l’étudiant·e. Dans la complétion, elle compte comme non remise. Retirer le '
     + 'statut fait tout revenir.';
 const JETON = ' Un jeton de reprise peut être appliqué pour permettre une nouvelle remise.';
 const net = (s) => s.replace(/\s+/g, ' ').trim().replace(/'/g, '’');
@@ -196,7 +197,7 @@ describe('Le formulaire — la note et le niveau cèdent leur place au libellé 
         expect(avis.querySelector('strong').textContent).toBe('Travail non recevable');
         expect(net(lu(avis))).toBe(net(AVIS + JETON));
         expect(avis.textContent).toContain('« Non recevable »');
-        expect(avis.textContent).toContain('ta pratique : 0');
+        expect(avis.textContent).not.toContain('ta pratique : 0');   // ↻ #1176 : le choix le dit, sous le menu
         f.poser('ia');
         expect(f.document.querySelectorAll('#message-non-recevable')).toHaveLength(1);
         expect(net(lu(f.document.getElementById('message-non-recevable')))).toBe(net(AVIS));

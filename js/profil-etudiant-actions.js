@@ -211,7 +211,7 @@ function _obtenirConfigPortfolioCalcul(modalites, pratiqueIdDemande = null) {
 // window.obtenirArtefactsIdsPoolStd, pratique-registre.js) — plus de définition
 // locale qui pourrait dériver de celle des snapshots/replis.
 
-function _filtrerEvaluationsArtefactsValides(evaluations, da, artefactsIds, terminalId) {
+function _filtrerEvaluationsArtefactsValides(evaluations, da, artefactsIds, terminalId, regle) {
     return evaluations.filter(e => {
         if (e.etudiantDA !== da) return false;
         if (!artefactsIds.includes(e.productionId)) return false;
@@ -219,18 +219,20 @@ function _filtrerEvaluationsArtefactsValides(evaluations, da, artefactsIds, term
         // #706 — la règle unique du registre : remplacées, sans note, brouillons (non
         // verrouillées) et portée nulle n'entrent pas dans la note du cours.
         if (!window.evaluationEntreDansLaNote(e)) return false;
-        // Une copie non recevable sort du portfolio : la règle par défaut du registre (28 oct. 2026), pas une relecture du statut.
-        const nonRecevable = window.valeurCopieNonRecevable(e);
+        // #1176 : une copie non recevable écartée manque au portfolio, comme une copie non remise (le minimum et, en
+        // hybride, une obligatoire aux notes finales la comptent alors comme telle) ; gardée, elle y entre à 0.
+        // La règle est celle de la pratique calculée (le Comparateur en simule d'autres), pas une relecture du statut.
+        const nonRecevable = window.valeurCopieNonRecevable(e, regle);
         if (nonRecevable && !nonRecevable.dansLePortfolio) return false;
         return true;
     });
 }
 
-// La note qu'un calcul retient pour une copie (registre, 28 oct. 2026) : sa note, ou ce que vaut une copie non recevable.
-// Les deux sélections trient et somment sur elle : un réglage qui garderait la copie au pool n'aurait rien à changer ici.
-const noteRetenue = (e) => window.noteRetenueParLeCalcul(e);
+// La note qu'un calcul retient pour une copie (registre) : sa note, ou ce que vaut une copie non recevable gardée (0).
+// Les deux sélections trient et somment sur elle, avec la règle de la pratique calculée (#1176).
+const noteRetenueSelon = (regle) => (e) => window.noteRetenueParLeCalcul(e, regle);
 
-function _selectionnerArtefactsHybride(evalsArtefacts, productions, configCategories, estFinale, terminalId) {
+function _selectionnerArtefactsHybride(evalsArtefacts, productions, configCategories, estFinale, terminalId, noteRetenue) {
     const { nombreARetenir: nSelection, ponderation: pondSel } = configCategories.selection || { nombreARetenir: 4, ponderation: 65 };
     const { ponderation: pondObl } = configCategories.obligatoires || { ponderation: 35 };
     const productionsNonPortfolio = productions.filter(p => p.type !== 'portfolio');
@@ -283,7 +285,7 @@ function _selectionnerArtefactsHybride(evalsArtefacts, productions, configCatego
     return { artefactsRetenus, moyennePortfolio };
 }
 
-function _selectionnerArtefactsLegacy(evalsArtefacts, productions, methodeSelection, nombreARetenir) {
+function _selectionnerArtefactsLegacy(evalsArtefacts, productions, methodeSelection, nombreARetenir, noteRetenue) {
     // #394 (L9) : LE comparateur de récence du moteur STD (SSOT, pratique-registre.js).
     const parRecence = window.creerComparateurRecenceStd(productions);
 
@@ -365,16 +367,24 @@ function _noteAttendSaTerminale(productionTerminale, noteTerminale) {
     return productionTerminale !== null && noteTerminale === null;
 }
 
-function _obtenirNoteTerminaleEtudiant(evaluations, da, productionTerminale) {
+/**
+ * La note de la terminale d'un élève. #1176 (décision 4 de Grégoire, 8 nov. 2026) : pendant le trimestre, une terminale
+ * qui manque (non remise, ou non recevable écartée) laisse la note provisoire, comme avant ; une fois les notes finales
+ * cochées, elle vaut 0, non remise comme écartée. ⚠ Le sort d'une terminale NON REMISE change aussi (accord explicite
+ * de Grégoire, 15 h 38). Une terminale non recevable gardée (« lui mettre 0 ») vaut 0 tout de suite.
+ */
+function _obtenirNoteTerminaleEtudiant(evaluations, da, productionTerminale, regle, estFinale) {
     if (!productionTerminale) return { noteTerminale: null, evaluationTerminale: null };
     // #706 : un brouillon de terminale n'est pas une terminale — la note reste provisoire.
     const evaluationTerminale = evaluations.find(e =>
         e.etudiantDA === da &&
         e.productionId === productionTerminale.id &&
-        window.evaluationEntreDansLaNote(e)
+        window.evaluationEntreDansLaNote(e) &&
+        !window.copieNonRecevableEcartee(e, regle)
     ) || null;
-    // 28 oct. 2026 : une terminale non recevable vaut ce que dit le registre (0 par défaut), pas sa note calculée.
-    const noteTerminale = evaluationTerminale ? window.noteRetenueParLeCalcul(evaluationTerminale) : null;
+    const noteTerminale = evaluationTerminale
+        ? window.noteRetenueParLeCalcul(evaluationTerminale, regle)
+        : (estFinale ? 0 : null);
     return { noteTerminale, evaluationTerminale };
 }
 
@@ -538,7 +548,10 @@ function calculerDetailsNoteFinale(da, pratiqueIdDemande = null) {
     const terminalId = productionTerminale?.id || null;
 
     const artefactsIds = window.obtenirArtefactsIdsPoolStd(productions, terminalId, cfg.configPratique);
-    const evaluationsArtefacts = _filtrerEvaluationsArtefactsValides(evaluations, da, artefactsIds, terminalId);
+    // #1176 : la règle de LA pratique calculée pour une copie non recevable (sans règle écrite : écartée).
+    const regleNonRecevable = window.sortCopieNonRecevableDeLaPratique(cfg.configPratique, 'standards');
+    const noteRetenue = noteRetenueSelon(regleNonRecevable);
+    const evaluationsArtefacts = _filtrerEvaluationsArtefactsValides(evaluations, da, artefactsIds, terminalId, regleNonRecevable);
 
     // Statut Provisoire/Finale lu tôt — pilote la règle « obligatoires non
     // remises = 0 » : appliquée uniquement en mode finale. En provisoire,
@@ -553,8 +566,8 @@ function calculerDetailsNoteFinale(da, pratiqueIdDemande = null) {
 
     // Sélection des artefacts retenus + moyenne (Hybride ou Legacy)
     const { artefactsRetenus, moyennePortfolio: moyenneBrute } = modeHybrideNote
-        ? _selectionnerArtefactsHybride(evaluationsArtefacts, productions, configCategoriesNote, estFinale, terminalId)
-        : _selectionnerArtefactsLegacy(evaluationsArtefacts, productions, methodeSelection, nombreARetenir);
+        ? _selectionnerArtefactsHybride(evaluationsArtefacts, productions, configCategoriesNote, estFinale, terminalId, noteRetenue)
+        : _selectionnerArtefactsLegacy(evaluationsArtefacts, productions, methodeSelection, nombreARetenir, noteRetenue);
 
     // Plafonnement conformité (déficit d'artefacts)
     const nombreEvalues = evaluationsArtefacts.length;
@@ -603,7 +616,7 @@ function calculerDetailsNoteFinale(da, pratiqueIdDemande = null) {
     }
 
     // Note terminale + agrégation finale
-    const { noteTerminale, evaluationTerminale } = _obtenirNoteTerminaleEtudiant(evaluations, da, productionTerminale);
+    const { noteTerminale, evaluationTerminale } = _obtenirNoteTerminaleEtudiant(evaluations, da, productionTerminale, regleNonRecevable, estFinale);
     const noteFinale = erreurConfiguration
         ? null
         : _calculerNoteFinaleAggregee(moyennePortfolio, noteTerminale, ponderationPortfolio, ponderationTerminale, totalPonderation);

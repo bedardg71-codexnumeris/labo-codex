@@ -297,10 +297,28 @@ class PratiqueConfigurable {
             // Classe absente → repli sur la valeur PLATE connue du store (#709 : null si vide).
             return this._lireIndiceStocke(da);
         }
-        const inst = new window.PratiqueSommative();
+        const inst = this._instanceSommative();
         const p = inst.calculerPerformance(da); // décimal 0-1, ou null
         if (p === null || p === undefined) return null;
         return this._appliquerVerrousSommatifs(p * 100, da, inst);
+    }
+
+    /**
+     * #1176 (9 nov. 2026) — LA RÈGLE DE CETTE PRATIQUE pour une copie non recevable (« l'écarter » ou « lui mettre 0 »),
+     * lue sur sa configuration ; sans règle écrite, celle de sa famille (registre). Les instances jetables auxquelles
+     * cette pratique délègue la reçoivent : elles calculent pour CETTE pratique, pas pour l'active.
+     * @param {string} famille - 'sommative' | 'specifications'
+     * @returns {'ecarter'|'zero'|null}
+     */
+    _sortCopieNonRecevable(famille) {
+        return window.sortCopieNonRecevableDeLaPratique(this.config.configuration || null, famille);
+    }
+
+    /** L'instance sommative jetable de cette pratique (note, verrou, récit), avec sa règle (#1176). */
+    _instanceSommative() {
+        const inst = new window.PratiqueSommative();
+        inst.sortCopieNonRecevable = this._sortCopieNonRecevable('sommative');
+        return inst;
     }
 
     /**
@@ -334,8 +352,10 @@ class PratiqueConfigurable {
 
         const normaliser = (s) => String(s === null || s === undefined ? '' : s).trim().toLowerCase();
         const productions = inst._lireProductions();
+        // #1176 : une copie non recevable écartée est absente, comme une copie non remise : le verrou ne s'applique pas.
+        const regle = inst._sortCopieNonRecevable();
         const copies = inst._lireEvaluations().filter(e =>
-            e.etudiantDA === da && window.evaluationEntreDansLaNote(e)
+            e.etudiantDA === da && window.evaluationEntreDansLaNote(e) && !window.copieNonRecevableEcartee(e, regle)
         );
 
         let resultat = note;
@@ -346,8 +366,8 @@ class PratiqueConfigurable {
                 const production = productions.find(p => p.id === copie.productionId);
                 if (!production || normaliser(production.titre) !== cible) continue;
                 resultat = this.appliquerDoubleVerrou(
-                    // 28 oct. 2026 : une copie non recevable vaut ce que dit le registre (0 par défaut) — le verrou se déclenche.
-                    resultat, [{ nom: verrou.condition.evaluation, note: window.noteRetenueParLeCalcul(copie) }], verrou
+                    // #1176 : une copie non recevable gardée vaut 0 (registre) — le verrou se déclenche.
+                    resultat, [{ nom: verrou.condition.evaluation, note: window.noteRetenueParLeCalcul(copie, regle) }], verrou
                 );
             }
         }
@@ -443,7 +463,7 @@ class PratiqueConfigurable {
             // sous le nom de CETTE pratique. La note finale est celle de `_calculerPerformanceSommative` : le verrou
             // de #897 y est appliqué, et le récit dit quand il a plafonné la moyenne (`moyenneOriginale`).
             if (typeof window.PratiqueSommative !== 'function') return null;
-            const recit = new window.PratiqueSommative().decrireCalcul(da);
+            const recit = this._instanceSommative().decrireCalcul(da);
             if (!recit) return null;
             const moyenne = recit.synthese.noteFinale;
             const note = this._calculerPerformanceSommative(da);
@@ -531,6 +551,7 @@ class PratiqueConfigurable {
             seuilReussite: cfg.seuilReussite,
             seuilExcellence: cfg.seuilExcellence
         });
+        inst.sortCopieNonRecevable = this._sortCopieNonRecevable('specifications');   // #1176
         return inst;
     }
 

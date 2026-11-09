@@ -1243,6 +1243,9 @@ function remplirFormulairePratique(pratique) {
     // Toggle Provisoire/Finale (lit configuration.notesFinales)
     setCheckbox('mat-notes-finales', pratique.configuration?.notesFinales === true);
 
+    // #1176 : la règle d'une copie non recevable, telle que le calcul la lit (sans règle écrite : le comportement d'avant)
+    poserSortNonRecevableMat(pratique, typeCanon);
+
     // Afficher la description taxonomique selon le type
     afficherDescriptionTaxonomiqueMat(pratique.type);
 
@@ -1484,6 +1487,7 @@ function changerTypePratiqueMat() {
     const type = getValeurChamp('mat-pratique-type');
     afficherDescriptionTaxonomiqueMat(type);
     afficherConfigurationTypeMat(type);
+    relireSortNonRecevableMat(type);   // #1176 : la lecture de la règle suit la famille (une règle choisie reste cochée)
 
     // Mettre à jour le badge (comparaison sur la forme canonique ; le select
     // peut encore livrer une valeur legacy tant que le Temps 2 n'est pas fait).
@@ -1580,6 +1584,52 @@ async function mettreAJourDisciplinePratiqueMat() {
         configurations[index].discipline = discipline;
         return configurations;
     }, [], { geste: 'Modifier la pratique' });
+}
+
+/**
+ * #1176 (9 nov. 2026) — LA RÈGLE DE LA PRATIQUE POUR UNE COPIE NON RECEVABLE, à l'écran : cochée comme le calcul la lit
+ * (`sortCopieNonRecevableDeLaPratique`, registre) ; cachée en dénotation (la note est un jugement saisi).
+ * @param {Object|null} configuration - la configuration enregistrée
+ * @param {string} typeCanon - la famille
+ */
+function poserSortNonRecevableMat(pratique, typeCanon) {
+    const groupe = document.getElementById('mat-sort-non-recevable');
+    if (!groupe) return;
+    groupe.setAttribute('data-choisi', '');
+    groupe.style.display = (typeCanon === 'denotation') ? 'none' : '';
+    const configuration = pratique ? (pratique.configuration || pratique.config || null) : null;
+    const regle = (typeof window.sortCopieNonRecevableDeLaPratique === 'function')
+        ? window.sortCopieNonRecevableDeLaPratique(configuration, typeCanon) : null;
+    const ecarter = document.getElementById('mat-sort-non-recevable-ecarter');
+    const zero = document.getElementById('mat-sort-non-recevable-zero');
+    if (ecarter) ecarter.checked = (regle === 'ecarter');
+    if (zero) zero.checked = (regle === 'zero');
+}
+
+/** Le type change au formulaire : la règle se relit pour la nouvelle famille, sauf une règle déjà choisie à l'écran. */
+function relireSortNonRecevableMat(type) {
+    const groupe = document.getElementById('mat-sort-non-recevable');
+    if (!groupe || groupe.getAttribute('data-choisi') === '1') return;
+    const enregistree = (db.getSync(cle('pratiquesConfigurables'), null) || []).find(p => p.id === pratiqueEnEditionMateriel);
+    poserSortNonRecevableMat(enregistree || null, (typeof normaliserIdPratique === 'function') ? normaliserIdPratique(type) : type);
+}
+
+/**
+ * #1176 — à l'écriture du formulaire : la règle s'écrit au geste seulement (« rien n'est écrit tant que l'utilisateur ne
+ * choisit pas », décision 5) ; une règle déjà écrite reste telle quelle quand un autre champ change. Dénotation : rien.
+ */
+function appliquerSortNonRecevableMat(configuration, typeCanon) {
+    const groupe = document.getElementById('mat-sort-non-recevable');
+    const regle = document.querySelector('input[name="mat-sort-non-recevable"]:checked')?.value || null;
+    if (!groupe || groupe.getAttribute('data-choisi') !== '1' || typeCanon === 'denotation') return;
+    if ((window.SORTS_COPIE_NON_RECEVABLE || []).includes(regle)) configuration.sortCopieNonRecevable = regle;
+}
+
+/** Le geste sur la règle : marqué, pour que la sauvegarde l'écrive (et rien d'autre ne l'écrit). */
+function choisirSortNonRecevableMat() {
+    const groupe = document.getElementById('mat-sort-non-recevable');
+    if (groupe) groupe.setAttribute('data-choisi', '1');
+    return sauvegarderConfigPratiqueMat();
 }
 
 /**
@@ -1684,6 +1734,8 @@ function appliquerFormulaireDansCollection(lues) {
     // Toggle Provisoire/Finale (pilote le titre du bloc Note dans le PDF rétroaction
     // via construireNoteProvisoire → renderRangeeNote).
     configurations[index].configuration.notesFinales = getCheckbox('mat-notes-finales');
+
+    appliquerSortNonRecevableMat(configurations[index].configuration, typeCanon);   // #1176 : au geste seulement
 
     // Sauvegarder selon le type (comparaison canonique)
     if (typeCanon === 'standards') {
@@ -3147,6 +3199,7 @@ window.mettreAJourNomPratiqueMat = mettreAJourNomPratiqueMat;
 window.mettreAJourDescriptionPratiqueMat = mettreAJourDescriptionPratiqueMat;
 window.mettreAJourDisciplinePratiqueMat = mettreAJourDisciplinePratiqueMat;
 window.sauvegarderConfigPratiqueMat = sauvegarderConfigPratiqueMat;
+window.choisirSortNonRecevableMat = choisirSortNonRecevableMat;   // #1176 — la règle d'une copie non recevable
 window.toggleSystemeJetonsMat = toggleSystemeJetonsMat;
 window.onJetonsActifChangeMat = onJetonsActifChangeMat;
 window.toggleCategoriesMat = toggleCategoriesMat;  // 🆕 Beta 95.4
