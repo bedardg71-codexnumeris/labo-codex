@@ -21,15 +21,27 @@
 
     var CHANGELOG = [
         {
+            // 1.239 (groupe 1 du 9 nov. 2026 : « Découvrir », « Mettre ta classe en place », l'export Léa, la reprise) —
+            // titre et lignes validés par Grégoire, mot pour mot, le 9 nov. 2026 ; la ligne de la reprise (validée plus tôt
+            // le même jour) quitte l'entrée 1.238.
+            version: '1.239',
+            couleur: 'vert',
+            titre: 'Deux parcours pour commencer',
+            items: [
+                'Le menu de l’en-tête a une ligne «&nbsp;Assistance&nbsp;», à la place de la visite guidée&nbsp;: les parcours, où tu fais les gestes toi-même, et l’aide dans les pages. Le premier, «&nbsp;Découvrir&nbsp;», te fait parcourir la démo en huit étapes.',
+                'Deuxième parcours, «&nbsp;Mettre ta classe en place&nbsp;»&nbsp;: ton trimestre, ton cours, ton profil, ta classe, ton horaire, ton groupe-cours, puis ta première saisie des présences. «&nbsp;Commencer&nbsp;», dans «&nbsp;Tu enseignes&nbsp;?&nbsp;» à l’accueil, le lance. Hors de la démo, les menus du Cadre ne montrent plus le matériel de la démo.',
+                '«&nbsp;Exporter pour Léa&nbsp;» n’envoie que les évaluations verrouillées. Le compteur dit combien il en laisse de côté.',
+                'Évaluer&nbsp;: une évaluation remplacée par une reprise s’ouvre en lecture seule, comme une évaluation verrouillée. Pour la corriger, «&nbsp;Déverrouiller&nbsp;»&nbsp;; ce que tu y changes reste sur elle, la reprise n’en reçoit rien.'
+            ]
+        },
+        {
             // 1.238 (« Un mot pour ton étudiant·e ») — la ligne validée par Grégoire, mot pour mot, le 9 nov. 2026 (relayée
             // par Cowork). Le titre est le nom du champ, déjà validé (supposition de Claude Code, nommée dans la consigne).
             version: '1.238',
             couleur: 'vert',
             titre: 'Un mot pour ton étudiant·e',
             items: [
-                'Évaluer&nbsp;: un champ «&nbsp;Un mot pour ton étudiant·e&nbsp;», sous la rétroaction. Ce que tu y écris s’imprime sur son PDF, après son niveau&nbsp;; laissé vide, rien n’apparaît. Les retouches faites dans le cadre de la rétroaction, elles, ne vont pas sur le PDF.',
-                // 1.238.1 (lot de la reprise, 9 nov. 2026) — ligne validée par Grégoire telle quelle.
-                'Évaluer&nbsp;: une évaluation remplacée par une reprise s’ouvre en lecture seule, comme une évaluation verrouillée. Pour la corriger, «&nbsp;Déverrouiller&nbsp;»&nbsp;; ce que tu y changes reste sur elle, la reprise n’en reçoit rien.'
+                'Évaluer&nbsp;: un champ «&nbsp;Un mot pour ton étudiant·e&nbsp;», sous la rétroaction. Ce que tu y écris s’imprime sur son PDF, après son niveau&nbsp;; laissé vide, rien n’apparaît. Les retouches faites dans le cadre de la rétroaction, elles, ne vont pas sur le PDF.'
             ]
         },
         {
