@@ -176,9 +176,6 @@
 }
 
 .tn-tableau thead th {
-    position: sticky;
-    top: 0;
-    z-index: 1;
     background: var(--surface-carte);
     color: var(--texte-secondaire);
     font-weight: 600;
@@ -238,6 +235,7 @@
     cursor: pointer;
     position: relative;
     color: var(--texte-principal);
+    touch-action: manipulation;   /* des touchers rapides font tourner les niveaux, sans zoomer (iPad) */
 }
 
 .tn-case--vide {
@@ -325,4 +323,9 @@
 
 .tn-legende-aide {
     flex-basis: 100%;
+}
+
+/* La zone qui dit la note changée au lecteur d'écran (masquée à l'œil par .u-lecteur-ecran). */
+.tn-annonce {
+    margin: 0;
 }

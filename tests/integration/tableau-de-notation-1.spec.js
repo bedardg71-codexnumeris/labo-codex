@@ -176,6 +176,22 @@ test.describe('Tableau de notation · standards', () => {
     });
 });
 
+test.describe('Tableau de notation · la reprise (relecture neuve)', () => {
+    test('un résultat sans grille n\'a pas de reprise, et « Modifier l\'évaluation » ne le déverrouille pas', async ({ page }) => {
+        const erreurs = await monter(page, 'STD');
+        await kase(page, 1, 1).focus();
+        await page.keyboard.press('m');
+        const copie = await sansGrilleDe(page, '9990010', 'P1');
+        const reprise = await page.evaluate((id) => window.appliquerJetonReprise(id), copie.id);
+        expect(reprise).toBeNull();
+        expect((await copies(page)).filter((e) => e.etudiantDA === '9990010' && e.productionId === 'P1')).toHaveLength(1);
+        await page.evaluate((id) => window.modifierEvaluationRemplacee(id), copie.id);
+        expect(await sansGrilleDe(page, '9990010', 'P1')).toMatchObject({ verrouillee: true });
+        expect(await page.evaluate(() => window._snapshotAvantModifRemplacee)).toBeUndefined();
+        expect(erreurs).toEqual([]);
+    });
+});
+
 test.describe('Tableau de notation · spécifications', () => {
     test('acceptable, non acceptable : les comptes par type et le forfait suivent', async ({ page }) => {
         const erreurs = await monter(page, 'SPE');

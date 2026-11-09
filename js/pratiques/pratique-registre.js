@@ -1302,6 +1302,7 @@ window.resultatAcceptableSansGrille = resultatAcceptableSansGrille;   // tableau
 window.evaluationCompteEnSpecifications = evaluationCompteEnSpecifications;
 window.copiePorteUneEvaluation = copiePorteUneEvaluation;
 window.libelleJugementSansGrille = libelleJugementSansGrille;
+window.LIBELLES_JUGEMENT_SANS_GRILLE = LIBELLES_JUGEMENT_SANS_GRILLE;   // le tableau de notation dit les mêmes mots
 // #394 — rôles des productions STD (SSOT des deux systèmes de calcul)
 window.identifierProductionTerminale = identifierProductionTerminale;
 window.obtenirArtefactsIdsPoolStd = obtenirArtefactsIdsPoolStd;

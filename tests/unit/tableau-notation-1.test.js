@@ -93,6 +93,16 @@ describe('A · l\'écriture d\'un résultat sans grille (pure)', () => {
         expect(donnees.etatDeLaCase(rep, 'STD', false)).toMatchObject({ valeur: 'E', forme: 'contour', modifiable: false, evaluationId: 'R' });
         expect(donnees.etatDeLaCase(null, 'STD', false)).toMatchObject({ valeur: '', forme: 'vide', modifiable: true });
     });
+    it('A8 relecture neuve : une copie sans grille REMPLACÉE ne se touche pas ; une saisie repose le verrou ; sans valeur, la case est vide', () => {
+        const remplacee = { id: 'SG', etudiantDA: ETUDIANT.da, productionId: 'A1', sansGrille: true, criteres: [], niveauFinal: 'M', noteFinale: 75, verrouillee: true, remplaceeParId: 'DISPARUE' };
+        expect(donnees.etatDeLaCase(remplacee, 'STD', false).modifiable).toBe(false);
+        expect(donnees.appliquerSaisie([remplacee], { famille: 'STD', valeur: 'E', echelle: ECHELLE, contexte: contexte() }).action).toBe('refuse');
+        expect(donnees.appliquerSaisie([remplacee], { famille: 'STD', valeur: '', echelle: ECHELLE, contexte: contexte() }).action).toBe('refuse');
+        const deverrouillee = Object.assign({}, remplacee, { remplaceeParId: undefined, verrouillee: false });
+        expect(donnees.appliquerSaisie([deverrouillee], { famille: 'STD', valeur: 'E', echelle: ECHELLE, contexte: contexte() }).evaluation.verrouillee).toBe(true);
+        // Une copie de standards sous une pratique devenue « spécifications » : pas de jugement binaire, la case est vide.
+        expect(donnees.etatDeLaCase(Object.assign({}, deverrouillee, { verrouillee: true }), 'SPE', true).forme).toBe('vide');
+    });
 });
 
 /* ================================================================ B */

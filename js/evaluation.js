@@ -606,7 +606,7 @@ function verifierEtChargerEvaluationExistante() {
     // Le formulaire repart vide (rien de l'élève précédent), verrouillé, sans cadenas, et il le dit.
     if (evaluationExistante.sansGrille === true) {
         _reinitialiserFormulaireSansCopie();
-        _formulaireSurResultatSansGrille(evaluationExistante);
+        _formulaireSurResultatSansGrille();
         return;
     }
 
@@ -2148,6 +2148,22 @@ function appliquerJetonDelaiDepuisSidebar() {
    =============================== */
 
 /**
+ * Tableau de notation (9 nov. 2026) — CE QUE DIT LE FORMULAIRE D'UN RÉSULTAT SAISI SANS GRILLE. Il n'a ni grille
+ * ni critères : le formulaire ne peut ni l'afficher ni le modifier. Mots PROPOSÉS, à faire valider par Grégoire.
+ */
+function _direResultatSansGrille() {
+    notifications.info('Résultat saisi sans grille',
+        'Cette copie a été notée au tableau de notation (Évaluation › Liste). Change son résultat là.');
+}
+
+/** Le formulaire rencontre un résultat sans grille (élève et production choisis) : verrouillé, sans cadenas, et il le dit. */
+function _formulaireSurResultatSansGrille() {
+    afficherOuMasquerBoutonVerrouillage(false);
+    desactiverFormulaireEvaluation(true);
+    _direResultatSansGrille();
+}
+
+/**
  * Lot C de l'enregistrement (D1, Grégoire, 26 sept. 2026) — UNE SEULE PORTE POUR LE VERROU.
  * « Verrouiller » (le bouton du panneau Paramètres) appelle cette fonction, et elle seule ; le
  * bouton de la palette Annotation (24 oct. 2026) y passe aussi (`basculerVerrouDepuisAnnotation`).
@@ -2161,27 +2177,6 @@ function appliquerJetonDelaiDepuisSidebar() {
  * et ne se cliquent pas. La Liste n'a pas de cadenas. Les autres verrous (Banque d'évaluations,
  * verrouillage en lot, verrouillage individuel), sans appelant vivant, sont retirés (#489, 15 oct. 2026).
  */
-/**
- * Tableau de notation (9 nov. 2026) — CE QUE DIT LE FORMULAIRE D'UN RÉSULTAT SAISI SANS GRILLE. Il n'a ni grille
- * ni critères : le formulaire ne peut ni l'afficher ni le modifier. Mots PROPOSÉS, à faire valider par Grégoire.
- */
-function _direResultatSansGrille() {
-    notifications.info('Résultat saisi sans grille',
-        'Cette copie a été notée au tableau de notation (Évaluation › Liste). Change son résultat là.');
-}
-
-/**
- * Le formulaire rencontre un résultat sans grille (élève et production choisis) : verrouillé, sans cadenas, et il le dit.
- * @returns {boolean} vrai si la copie était un tel résultat (l'appelant s'arrête)
- */
-function _formulaireSurResultatSansGrille(evaluation) {
-    if (!evaluation || evaluation.sansGrille !== true) return false;
-    afficherOuMasquerBoutonVerrouillage(false);
-    desactiverFormulaireEvaluation(true);
-    _direResultatSansGrille();
-    return true;
-}
-
 function basculerVerrouillageEvaluationCourante() {
     const evaluationId = window.evaluationEnCours?.idModification;
 

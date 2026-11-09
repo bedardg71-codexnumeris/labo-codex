@@ -8,8 +8,9 @@
  * avec une grille s'y lit et s'ouvre au toucher ; elle ne s'y modifie pas.
  *
  * LA NOTE vient de `simulerIndices` (la source de l'export des résultats) ; « retenue » vient du détail de la note des
- * standards (`details.portfolio.artefactsRetenus`, la terminale) ; les forfaits, de l'instance des spécifications
- * configurée comme la pratique. Le tableau ne calcule rien lui-même.
+ * standards (`details.portfolio.artefactsRetenus`, la terminale) ; les comptes par type et le jugement d'une copie avec
+ * grille, de l'instance des spécifications configurée comme la pratique (deux de ses méthodes internes,
+ * `_compterTravauxAcceptables` et `_estTravailAcceptable`, lues sans écrire). Aucune règle de note n'est recopiée ici.
  *
  * ⚠ MOTS DE L'ÉCRAN : tous PROPOSÉS (point ouvert du plan), à faire valider par Grégoire. Ils sont réunis dans `MOTS`.
  * Données et écriture pure : `tableau-notation-donnees.js`.
@@ -27,8 +28,6 @@
         noteFinale: 'Note',
         enAttente: 'en attente de résultats',
         nonCalculable: 'non calculable',
-        acceptable: 'Acceptable',
-        nonAcceptable: 'Non acceptable',
         aSaisir: 'à saisir',
         avecGrille: 'évaluée avec une grille ; toucher pour l’ouvrir',
         aucunePratique: 'Ce groupe-cours n’a pas de pratique de notation. Choisis-en une dans Conception › Pratiques : le tableau suivra ses réglages.',
@@ -183,7 +182,8 @@
 
     function _motDeLaValeur(valeur, ctx) {
         if (valeur === '') return MOTS.aSaisir;
-        if (ctx.famille === 'SPE') return valeur === D().ACCEPTABLE ? MOTS.acceptable : MOTS.nonAcceptable;
+        const jugement = window.LIBELLES_JUGEMENT_SANS_GRILLE;   // les mots de la Liste (registre)
+        if (ctx.famille === 'SPE') return valeur === D().ACCEPTABLE ? jugement.acceptable : jugement.nonAcceptable;
         const niveau = D().niveauxSaisissables(ctx.echelle).find(n => n.code === valeur);
         return niveau ? niveau.nom : valeur;
     }
@@ -194,15 +194,20 @@
         return valeur;
     }
 
-    /** L'état d'une case ; en spécifications, une copie AVEC grille se lit par le jugement du moteur. */
+    /**
+     * L'état d'une case. En spécifications, une copie sans jugement binaire (évaluée avec une grille, ou saisie en niveau
+     * sous une pratique devenue « spécifications ») se lit par le jugement du moteur quand elle compte ; sinon (brouillon),
+     * elle montre son niveau, en contour (relecture neuve, 9 nov. 2026).
+     */
     function _etatCase(etudiant, production, ctx, resultat) {
         const ev = D().copieDeLaCase(ctx.evaluations, etudiant.da, production.id);
-        const etat = D().etatDeLaCase(ev, ctx.famille, resultat.comptent.has(production.id) && !!ev);
-        if (ctx.famille === 'SPE' && ev && !etat.modifiable) {
-            const type = ctx.types.find(t => window.productionEstDuType(production, t));
-            const ok = !!(type && ctx.speInstance && ctx.speInstance._estTravailAcceptable(ev, type));
-            etat.valeur = ok ? D().ACCEPTABLE : D().NON_ACCEPTABLE;
-        }
+        const compte = resultat.comptent.has(production.id) && !!ev;
+        const etat = D().etatDeLaCase(ev, ctx.famille, compte);
+        if (ctx.famille !== 'SPE' || !ev || window.resultatAcceptableSansGrille(ev) !== null || !compte) return etat;
+        const type = ctx.types.find(t => window.productionEstDuType(production, t));
+        const ok = !!(type && ctx.speInstance && ctx.speInstance._estTravailAcceptable(ev, type));
+        etat.valeur = ok ? D().ACCEPTABLE : D().NON_ACCEPTABLE;
+        etat.forme = 'plein';
         return etat;
     }
 
@@ -213,10 +218,12 @@
         const classes = ['tn-case', 'tn-case--' + etat.forme].concat(etat.modifiable ? [] : ['tn-case--grille']);
         const style = etat.valeur ? ` style="--tn-couleur: ${esc(_couleurDeLaValeur(etat.valeur, ctx))}"` : '';
         const ouvrir = etat.modifiable ? '' : ` data-evaluation="${esc(etat.evaluationId)}"`;
-        return `<td class="tn-cellule"><button type="button" class="${classes.join(' ')}"${style} data-da="${esc(etudiant.da)}" data-production="${esc(production.id)}"${ouvrir} aria-label="${esc(aria)}">${esc(_libelleDeLaValeur(etat.valeur, ctx))}</button></td>`;
+        // Un seul arrêt de Tab pour tout le tableau (la première case) ; les flèches font le reste.
+        const tab = (etudiant === ctx.etudiants[0] && production === ctx.productions[0]) ? '0' : '-1';
+        return `<td class="tn-cellule"><button type="button" class="${classes.join(' ')}"${style} tabindex="${tab}" data-da="${esc(etudiant.da)}" data-production="${esc(production.id)}"${ouvrir} aria-label="${esc(aria)}">${esc(_libelleDeLaValeur(etat.valeur, ctx))}</button></td>`;
     }
 
-    function _noteHTML(resultat, ctx) {
+    function _noteHTML(resultat) {
         const detail = resultat.note === null
             ? (resultat.aDesCopies ? MOTS.nonCalculable : MOTS.enAttente)
             : resultat.detail;
@@ -237,7 +244,7 @@
         const nom = `${etudiant.prenom || ''} ${etudiant.nom || ''}`.trim();
         const cases = ctx.productions.map(p => _caseHTML(etudiant, p, ctx, resultat)).join('');
         const comptes = ctx.famille === 'SPE' ? _comptesSpeHTML(resultat, ctx) : '';
-        return `<tr><th scope="row" class="tn-eleve">${esc(nom)}</th>${cases}${comptes}${_noteHTML(resultat, ctx)}</tr>`;
+        return `<tr><th scope="row" class="tn-eleve">${esc(nom)}</th>${cases}${comptes}${_noteHTML(resultat)}</tr>`;
     }
 
     /* ============================== L'EN-TÊTE ============================== */
@@ -320,7 +327,8 @@
         const rangees = ctx.etudiants.map(e => _rangeeHTML(e, ctx)).join('');
         return `${tete}${_bandeauHTML(ctx)}<p class="tn-avis">${esc(MOTS.avis)}</p>
             <div class="tn-defilement"><table class="tn-tableau">${_enteteColonnesHTML(ctx)}<tbody>${rangees}</tbody></table></div>
-            ${_legendeHTML(ctx)}`;
+            ${_legendeHTML(ctx)}
+            <p class="tn-annonce u-lecteur-ecran" aria-live="polite"></p>`;
     }
 
     function _hote() { return document.getElementById('tableau-notation-hote'); }
@@ -343,7 +351,15 @@
 
     function _reprendreFocus(hote, focus) {
         const cible = hote.querySelector(`.tn-case[data-da="${CSS.escape(focus.da)}"][data-production="${CSS.escape(focus.production)}"]`);
-        if (cible) cible.focus();
+        if (cible) _donnerLeFocus(cible);
+    }
+
+    /** La case qui reçoit le focus devient le seul arrêt de Tab (tabindex itinérant). */
+    function _donnerLeFocus(bouton) {
+        const hote = _hote();
+        if (hote) hote.querySelectorAll('.tn-case[tabindex="0"]').forEach(b => { if (b !== bouton) b.setAttribute('tabindex', '-1'); });
+        bouton.setAttribute('tabindex', '0');
+        bouton.focus();
     }
 
     /* ============================== LA SAISIE ============================== */
@@ -400,6 +416,18 @@
         const focus = { da: bouton.dataset.da, production: bouton.dataset.production };
         ecrireCase(focus.da, focus.production, valeur);
         rendre(focus);
+        _annoncerNote(focus.da);
+    }
+
+    /** Le lecteur d'écran entend la note qui change (zone `aria-live`). */
+    function _annoncerNote(da) {
+        const hote = _hote();
+        const zone = hote && hote.querySelector('.tn-annonce');
+        const case_ = hote && hote.querySelector(`.tn-case[data-da="${CSS.escape(da)}"]`);
+        const rangee = case_ && case_.closest('tr');
+        if (!zone || !rangee) return;
+        const nom = rangee.querySelector('.tn-eleve').textContent;
+        zone.textContent = `${nom} : ${rangee.querySelector('.tn-note-valeur').textContent} ${rangee.querySelector('.tn-note-detail').textContent}`.trim();
     }
 
     function _surClic(e) {
@@ -422,7 +450,7 @@
         const cible = rangees[rangees.indexOf(rangee) + delta[0]];
         const td = cible ? cible.children[col + delta[1]] : rangee.children[col + delta[1]];
         const suivant = (cible || !delta[0]) && td ? td.querySelector('.tn-case') : null;
-        if (suivant) suivant.focus();
+        if (suivant) _donnerLeFocus(suivant);
     }
 
     function _surTouche(e) {
@@ -483,14 +511,10 @@
     }
 
     window.TableauNotation = {
-        MOTS,
-        afficher,
-        afficherListe,
-        rafraichirSiAffiche,
-        estAffiche: () => _affiche,
-        construireContexte,
-        construireHTML,
-        ecrireCase,
+        afficher,              // la bascule, « Consulter » et « Modifier » de la Liste
+        afficherListe,         // la bascule
+        rafraichirSiAffiche,   // initialiserListeEvaluations
+        construireHTML,        // exposés pour le banc (tests/unit/tableau-notation-1.test.js)
         phraseRegleStd,
         couleurSure
     };

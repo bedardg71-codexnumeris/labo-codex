@@ -18,7 +18,8 @@
  *
  * Une case tient UNE copie : celle qui n'est pas remplacée (une reprise remplace l'originale). Une copie
  * évaluée avec une grille se lit au tableau mais ne s'y modifie pas (décidé par Cowork) : la toucher ouvre
- * l'évaluation. Vider une case retire le résultat sans grille qu'elle portait ; rien d'autre.
+ * l'évaluation. Une copie remplacée non plus. Vider une case retire le résultat sans grille qu'elle portait ;
+ * rien d'autre. Un résultat sans grille n'a pas de reprise (`appliquerJetonReprise` le refuse).
  *
  * Ce module est PUR : il reçoit des tableaux et rend des tableaux neufs ou des objets. L'écriture, la
  * lecture du stockage et l'écran vivent dans `tableau-notation.js`.
@@ -110,14 +111,18 @@
      */
     function etatDeLaCase(evaluation, famille, compte) {
         if (!evaluation) return { valeur: '', forme: 'vide', modifiable: true, evaluationId: null };
-        const sansGrille = estResultatSansGrille(evaluation);
-        const valeur = (famille === 'SPE' && sansGrille) ? _valeurSpe(evaluation) : String(evaluation.niveauFinal || '');
+        const valeur = (famille === 'SPE' && evaluation.sansGrille === true) ? _valeurSpe(evaluation) : String(evaluation.niveauFinal || '');
         return {
             valeur: valeur,
-            forme: compte ? 'plein' : 'contour',
-            modifiable: sansGrille,
+            forme: valeur === '' ? 'vide' : (compte ? 'plein' : 'contour'),
+            modifiable: _modifiable(evaluation),
             evaluationId: evaluation.id || null
         };
+    }
+
+    /** Le tableau ne touche qu'un résultat sans grille qui n'est pas remplacé (relecture neuve, 9 nov. 2026). */
+    function _modifiable(evaluation) {
+        return estResultatSansGrille(evaluation) && !evaluation.remplaceeParId;
     }
 
     /** Les champs du résultat selon la famille ; null quand la valeur n'appartient pas au cycle. */
@@ -168,7 +173,7 @@
         const { famille, valeur, echelle, contexte } = saisie;
         const liste = Array.isArray(evaluations) ? evaluations : [];
         const existante = copieDeLaCase(liste, contexte.etudiant.da, contexte.production.id);
-        if (existante && !estResultatSansGrille(existante)) return { evaluations: liste, action: 'refuse', evaluation: existante };
+        if (existante && !_modifiable(existante)) return { evaluations: liste, action: 'refuse', evaluation: existante };
         if (valeur === '') return _retirer(liste, existante);
         const champs = _champsDuResultat(famille, valeur, echelle);
         if (!champs) return { evaluations: liste, action: 'refuse', evaluation: existante };
@@ -176,7 +181,8 @@
             const neuve = construireResultatSansGrille(contexte, champs);
             return { evaluations: liste.concat([neuve]), action: 'cree', evaluation: neuve };
         }
-        const modifiee = Object.assign({}, existante, champs, { dateModification: contexte.maintenant.toISOString() });
+        // Le verrou reposé à chaque saisie : un résultat du tableau compte toujours (relecture neuve, 9 nov. 2026).
+        const modifiee = Object.assign({}, existante, champs, { verrouillee: true, dateModification: contexte.maintenant.toISOString() });
         return { evaluations: liste.map(e => (e === existante ? modifiee : e)), action: 'modifie', evaluation: modifiee };
     }
 
@@ -193,10 +199,8 @@
         cycleDeLaFamille,
         valeurSuivante,
         valeurParTouche,
-        estResultatSansGrille,
         copieDeLaCase,
         etatDeLaCase,
-        construireResultatSansGrille,
         appliquerSaisie
     };
 })();

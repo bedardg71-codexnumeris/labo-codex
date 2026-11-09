@@ -2568,6 +2568,13 @@ function modifierEvaluationRemplacee(evaluationId) {
         return;
     }
 
+    // Tableau de notation (9 nov. 2026, relecture neuve) : AVANT le déverrouillage. Un résultat sans grille ne s'ouvre pas
+    // dans le formulaire ; déverrouillé ici, il sortait de la note et laissait le verrou du formulaire levé pour toutes.
+    if (evaluation.sansGrille === true) {
+        if (window.TableauNotation) window.TableauNotation.afficher();
+        return;
+    }
+
     // Capturer snapshot avant modification
     var avant = {
         statutIntegrite: evaluation.statutIntegrite,
