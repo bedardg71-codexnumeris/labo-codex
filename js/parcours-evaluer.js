@@ -429,6 +429,32 @@
 
     function ficheCartoucheOuverte() { return vis(el('btnCreerCartouche')) || vis(el('actionsFicheCartouche')); }
 
+    /** La production du parcours nomme la cartouche née à l'étape 8 (décision de Grégoire, 9 nov., 15 h 55). */
+    function productionNommeLaCartouche() {
+        var ctx = lireCtx(), p = laProduction();
+        return !!(p && ctx.cartoucheId && p.cartoucheId === ctx.cartoucheId);
+    }
+
+    /**
+     * La cartouche créée, où la nommer : son menu dans la fiche de la production ; sinon « Modifier » sur la ligne de la
+     * production ; sinon l'onglet « Productions ». Le parcours ne change pas de page à ta place : la cartouche vient
+     * d'être créée, et ses commentaires s'écrivent dans sa matrice, sur la page des cartouches.
+     */
+    function ouNommerLaCartouche() {
+        var id = lireCtx().productionId;
+        if (ficheDe(id)) return el('productionCartouche');
+        if (sousSectionVisible('conception-productions')) return qs('#conception-productions [data-action="modifierProduction"][data-param="' + id + '"]');
+        return qs('#sous-navigation [data-sous-onglet="conception-productions"]');
+    }
+
+    function zonesPourNommer() {
+        var cible = ouNommerLaCartouche();
+        if (ficheDe(lireCtx().productionId)) return surLaFiche(cible);
+        // Sur la page des cartouches, la matrice reste touchable (pas de voile) ; dans la liste, la ligne est éclairée.
+        poserVoile(sousSectionVisible('conception-productions') ? 'normal' : 'aucun');
+        return [cible];
+    }
+
     /** Étape 8 : le nom, ta grille, ton échelle, puis « Créer la cartouche » (les commentaires sont dans la matrice). */
     function ouToucherCartouche() {
         var creer = el('btnCreerCartouche');
@@ -562,21 +588,24 @@
         },
         {
             titre: 'Ta cartouche',
-            texte: "La rétroaction de ton évaluation vient de ta grille. Pour qu'elle parle avec tes mots, écris ta cartouche : choisis ta grille, puis ton échelle de performance : celle que Mon matériel a créée avec ta grille si elle a des niveaux ; si elle est en points, les paliers de l'échelle de départ, dont tu peux ajuster les bornes. Puis, pour chaque critère et chaque niveau de l'échelle, note le commentaire que tu écrirais dans la marge. Tu l'écris une fois ; ensuite, chaque évaluation compose la rétroaction à partir de tes phrases. Tes étudiant·es reçoivent un commentaire cohérent d'une évaluation à l'autre, et tu n'as plus à le réécrire chaque fois.",
+            texte: "La rétroaction de ton évaluation vient de ta grille. Pour qu'elle parle avec tes mots, écris ta cartouche : choisis ta grille, puis ton échelle de performance : celle que Mon matériel a créée avec ta grille si elle a des niveaux ; si elle est en points, les paliers de l'échelle de départ, dont tu peux ajuster les bornes. Puis, pour chaque critère et chaque niveau de l'échelle, note le commentaire que tu écrirais dans la marge. Tu l'écris une fois ; ensuite, chaque évaluation compose la rétroaction à partir de tes phrases. Tes étudiant·es reçoivent un commentaire cohérent d'une évaluation à l'autre, et tu n'as plus à le réécrire chaque fois. Puis, dans la fiche de ta production, choisis cette cartouche : elle s'y appliquera à chaque évaluation.",
             avant: async function () {
                 aller('conception', 'retroactions');
                 await attendre(function () { return sousSectionVisible('conception-retroactions'); }, 2000);
             },
             zones: function () {
+                if (cartoucheCreee()) return zonesPourNommer();
                 if (ficheCartoucheOuverte()) return surLaCible(ouToucherCartouche());
                 poserVoile('normal');
                 return [qs('#conception-retroactions .rangee-selection')];
             },
             contour: function () {
+                if (cartoucheCreee()) return ouNommerLaCartouche();
                 if (ficheCartoucheOuverte()) return ouToucherCartouche();
                 return qs('#conception-retroactions [data-action="creerNouvelleCartouche"]');
             },
-            atteint: cartoucheCreee
+            // Décision du 9 nov. (15 h 55) : la cartouche enregistrée ET nommée par la production.
+            atteint: function () { return cartoucheCreee() && productionNommeLaCartouche(); }
         },
         {
             titre: 'Ta rétroaction, avec tes mots',

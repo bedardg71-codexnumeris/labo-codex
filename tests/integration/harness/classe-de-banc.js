@@ -73,6 +73,18 @@ export async function contourSur(page, selecteur, idContour = 'parcours-contour'
     }, [selecteur, idContour]), { message: 'contour posé sur ' + selecteur, timeout: 5000 }).toBe('posé');
 }
 
+/**
+ * Deux passages de la sonde du moteur : le voile reçoit une marque, et chaque passage la remplace (`sonder` dessine le
+ * voile, puis lit l'état atteint, d'un seul tenant). Une condition observable, pas un délai : après elle, une étape qui
+ * devait avancer l'a fait.
+ */
+export async function deuxSondes(page) {
+    for (let k = 0; k < 2; k++) {
+        await page.evaluate(() => document.querySelector('#parcours-voile path').setAttribute('d', 'M0,0'));
+        await page.waitForFunction(() => document.querySelector('#parcours-voile path').getAttribute('d') !== 'M0,0');
+    }
+}
+
 export async function bulleNeCouvrePas(page, selecteur, contexte = '') {
     const chevauche = await page.evaluate((sel) => {
         const c = document.querySelector(sel);
