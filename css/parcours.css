@@ -147,8 +147,6 @@ body.mode-clair {
 
 /* Pendant un parcours, le jalon de js/transitions.js ne vient pas couvrir l'étape. */
 body.parcours-actif .transition-bandeau { display: none; }
-/* 9 nov. 2026 (étape 7 sous WebKit) : une flèche didactique déjà ouverte au lancement ne double pas la bulle. */
-body.parcours-actif .fleche-didactique { display: none; }
 
 /* ---------- Le panneau « Assistance » ---------- */
 

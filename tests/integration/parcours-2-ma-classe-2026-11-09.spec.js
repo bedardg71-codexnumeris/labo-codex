@@ -319,6 +319,7 @@ test('de « Découvrir » à sa propre classe : « Commencer avec ma classe », 
     await expect(page.locator('#tbody-saisie-presences tr')).toHaveCount(3);
     // Pendant le parcours, la bulle parle seule : aucune flèche didactique ne s'y ajoute (décision de Grégoire, 9 nov.).
     expect(await flecheDesPresencesVisible(page), 'étape 7 : pas de flèche orange par-dessus la bulle').toBe(false);
+    await expect(page.locator('.fleche-didactique-cible'), 'étape 7 : aucune cible de flèche contournée').toHaveCount(0);
     await capture(page, 'classe-7-1180-sombre');
     await page.click('#btnVerrouillerSaisiePresences');
 
@@ -332,8 +333,14 @@ test('de « Découvrir » à sa propre classe : « Commencer avec ma classe », 
     await bulle(page).getByRole('button', { name: 'Terminer' }).click();
 
     await expect(bulle(page)).toHaveCount(0);
-    // Témoin : hors parcours, la même flèche s'affiche (elle n'a pas été marquée vue pendant le parcours).
-    expect(await flecheDesPresencesVisible(page), 'hors parcours, la flèche revient').toBe(true);
+    // Témoins, hors parcours : la flèche des présences n'a pas été marquée vue pendant le parcours, et une flèche
+    // s'ouvre de nouveau (sur une cible stable : la cellule des présences peut être redessinée pendant l'attente).
+    expect(await page.evaluate(() => localStorage.getItem('accompagnement-vu__suivi-presences-premiere-saisie'))).toBeNull();
+    const revient = await page.evaluate(() => new Promise((ok) => {
+        window.accompagnement.afficherFleche('essai-fleche-hors-parcours', { sectionActive: 'essai', cibleSelector: '#btn-assistance-menu', message: 'Essai', direction: 'bas' });
+        setTimeout(() => ok(document.getElementById('fleche-didactique-host').classList.contains('visible')), 400);
+    }));
+    expect(revient, 'hors parcours, une flèche s’ouvre de nouveau').toBe(true);
     expect(await page.evaluate(() => Assistance.etatDe('classe').etat)).toBe('fait');
     await expect(rang(page)).toHaveText('');
     await ouvrirPanneau(page);
@@ -392,6 +399,29 @@ test('la porte de l’accueil commence à la première étape non faite ; avant 
     await page.keyboard.press('Escape');
     await expect(bulle(page)).toHaveCount(0);
     expect(await page.evaluate(() => Assistance.etatDe('classe'))).toEqual({ etat: 'en-cours', etape: 6 });
+});
+
+test('une flèche didactique ouverte avant le parcours se retire au lancement, sans être marquée vue, même si l’on clique sa cible', async ({ page }) => {
+    await ouvrirEspaceVide(page, 1180);
+    // Déjà sur la page de l'étape 1 : le lancement ne navigue pas, aucun `sectionAffichee` ne retire la flèche
+    // (le cas trouvé par la relecture neuve du 9 nov.).
+    await page.evaluate(() => naviguerVers('calendrier', 'trimestre'));
+    await expect(page.locator('#calendrier-trimestre')).toBeVisible();
+    // Une flèche ouverte hors parcours, sur une cible qui existe toujours (l'entrée « Assistance » du menu).
+    const ouverte = await page.evaluate(() => new Promise((ok) => {
+        window.accompagnement.afficherFleche('essai-fleche-9-nov', { sectionActive: 'essai', cibleSelector: '#btn-assistance-menu', message: 'Essai', direction: 'bas' });
+        setTimeout(() => ok(document.getElementById('fleche-didactique-host').classList.contains('visible')), 400);
+    }));
+    expect(ouverte, 'témoin : hors parcours, la flèche s’ouvre').toBe(true);
+    await expect(page.locator('#btn-assistance-menu.fleche-didactique-cible')).toHaveCount(1);
+
+    await page.evaluate(() => Assistance.parcours().find((p) => p.id === 'classe').lancer());
+    await attendreEtape(page, 1, 'Ton trimestre');
+    await expect(page.locator('#fleche-didactique-host')).not.toHaveClass(/visible/);
+    await expect(page.locator('.fleche-didactique-cible')).toHaveCount(0);
+    // Un clic sur l'ancienne cible, pendant le parcours, ne marque rien.
+    await page.evaluate(() => document.getElementById('btn-assistance-menu').dispatchEvent(new MouseEvent('click', { bubbles: true })));
+    expect(await page.evaluate(() => localStorage.getItem('accompagnement-vu__essai-fleche-9-nov'))).toBeNull();
 });
 
 test('captures de l’iPhone (390 px) : les étapes 1, 7 et 8', async ({ page }) => {

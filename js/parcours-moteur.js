@@ -391,6 +391,8 @@
         etat = { def: def, i: 0, opts: opts || {}, elements: creerElements(), enTransition: false };
         document.body.classList.add('parcours-actif');
         if (window.transitions && typeof window.transitions.fermerBandeau === 'function') window.transitions.fermerBandeau();
+        // 9 nov. 2026 : une flèche didactique déjà ouverte se retire, sans être marquée vue (la bulle parle seule).
+        if (window.accompagnement && typeof window.accompagnement.masquerFleche === 'function') window.accompagnement.masquerFleche();
         document.addEventListener('keydown', surTouche, true);
         window.addEventListener('resize', surRedimension);
         window.addEventListener('scroll', surRedimension, { passive: true });

@@ -789,6 +789,7 @@ function initialiserAutoReveal() {
 
     document.addEventListener('click', function(ev) {
         if (!autoFlecheActive || !autoCibleActive) return;
+        if (parcoursEnCours()) return;   // 9 nov. 2026 : pendant un parcours, un clic ne marque aucune flèche vue
         const entree = obtenirAutoReveal(autoFlecheActive);
         if (entree && ev.target.closest(entree.cibleSelector) === autoCibleActive) {
             fermerEtMarquerAutoReveal();
