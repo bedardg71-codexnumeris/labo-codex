@@ -24,6 +24,8 @@
 6. **Remplacer un résultat sans grille par une évaluation avec grille** : aujourd'hui, il faut vider la case, puis évaluer. *Recommandation : lot 2, un geste explicite dans Évaluer (« Évaluer avec une grille »), qui remplace le résultat.*
 7. **En spécifications, pas de seuil dans cette voie**, comme le plan le proposait : ✓ compte, ✗ ne compte pas. *Recommandation : confirmer.*
 8. **Sommative et dénotation** : le tableau affiche un message, sans tableau (§ 3, « autreFamille »). *Recommandation : confirmer le message ; la place de la dénotation reste un point ouvert du plan.*
+9. **Le PDF de synthèse d'un jugement « acceptable / non acceptable »** n'affiche aucun résultat. Il ne plante pas, mais rien n'y dit « Acceptable ». Ce sont des mots que tes élèves liront. *Recommandation : dans le bandeau du niveau, écrire « Acceptable » ou « Non acceptable » à la place du niveau, au lot 2 ; à toi de valider les mots.*
+10. **Le bouton « Verrouiller »** reste visible sur le formulaire Évaluer vidé pour un résultat sans grille. Le toucher ne change rien en base, mais répond « Impossible de modifier une évaluation verrouillée ». *Recommandation : le masquer dans ce cas, au lot 2 (mineur).*
 
 ### Ce que je n'ai pas pu vérifier
 
@@ -31,6 +33,7 @@
 - **Tes données réelles** : rien ne s'y écrit sans ton geste, et il n'y a pas de stock à réparer, puisque les résultats sans grille n'existaient pas avant ce lot. À mesurer sur le Mac : le temps d'un rendu sur ton plus gros groupe (sous Chromium, ici : 35 élèves × 10 productions, 263 copies, rendu en 51 à 105 ms).
 - **Le PDF de synthèse d'un résultat sans grille** : il se construit sans planter (lu par l'agent de mesure), mais je ne l'ai pas rendu. En spécifications, il n'a pas de niveau à montrer. Le plan dit la synthèse facultative dans cette voie.
 - **Le dépistage par critère** : trois fenêtres « N dernières » écartent maintenant les résultats sans grille (sinon, la plus récente sans critères faisait lire « Maîtrise acquise »). C'est corrigé dans le code, mais aucun banc ne l'éprouve (voir § 4).
+- **Le lecteur d'écran** : la note changée s'annonce par une zone `aria-live` recréée à chaque rendu, à entendre avec VoiceOver. Sur Safari Mac, Tab n'atteint les boutons que si l'option du système est active : le tableau garde un seul arrêt de Tab, et les flèches font le reste.
 
 ## Détail
 
@@ -97,14 +100,14 @@ Les chemins des états vides reprennent ceux que l'application écrit déjà ail
 
 ### 5. Les bancs
 
-- **Vitest** : `tests/unit/tableau-notation-1.test.js`, 22 essais. Ils couvrent l'écriture pure, les prédicats du registre, le vrai moteur (standards, spécifications, indice C, parité avec la grille), la Liste, l'échappement et la couleur filtrée de l'écran, la règle dite.
+- **Vitest** : `tests/unit/tableau-notation-1.test.js`, 23 essais (A8 ajouté après la relecture). Ils couvrent l'écriture pure, les prédicats du registre, le vrai moteur (standards, spécifications, indice C, parité avec la grille), la Liste, l'échappement et la couleur filtrée de l'écran, la règle dite.
 - **Break-tests faits**, chacun rougit son essai puis le code est restauré :
   - la branche binaire de `_estTravailAcceptable` (C2) ;
   - `copiePorteUneEvaluation` (B4, D1) ;
   - `couleurSure` (E1) ;
   - le refus d'une copie avec grille (A5) ;
   - le dénominateur de la complétion (C3).
-- **Spec Chromium** : `tests/integration/tableau-de-notation-1.spec.js`, 7 essais, 7 verts. Ils suivent le tour au toucher, le clavier, plein et contour, la copie avec grille (lue, non modifiée, ouverte), le retour à la Liste, le formulaire Évaluer, et les spécifications de bout en bout. **Break-tests** : la garde du formulaire et l'ouverture de la copie avec grille, chacune rougit son essai.
+- **Spec Chromium** : `tests/integration/tableau-de-notation-1.spec.js`, 8 essais, 8 verts (« la reprise » ajouté après la relecture ; ses deux gardes cassées exprès rougissent l'essai). Ils suivent le tour au toucher, le clavier, plein et contour, la copie avec grille (lue, non modifiée, ouverte), le retour à la Liste, le formulaire Évaluer, et les spécifications de bout en bout. **Break-tests** : la garde du formulaire et l'ouverture de la copie avec grille, chacune rougit son essai.
 - **Harnais des bancs existants** : complétés des prédicats neufs (`tests/unit/_helpers/predicats-copie.js`, et cinq fichiers qui chargent la Liste, les travaux ou le rythme dans leur propre `window`). **Aucune assertion n'a changé.** Une exception nommée ajoutée à `sentinelle-note-provisoire-reservee` : le tableau ne sert que des pratiques alternatives.
 - **Vitest complet** avant l'étape 2 : 10 861 verts sur 10 866. Les 5 rouges étaient des cliquets sur mon propre code (variable CSS sans définition, un masquage de `cle()`, « Note provisoire », une pause fixe dans la spec), tous corrigés ; les huit sentinelles concernées repassent (563 essais). Le hook pre-push relance Vitest au complet à chaque push (verdict au § 7).
 - **Playwright** : seulement la spec du lot, sous Chromium. Le verdict WebKit complet se prend sur le Mac.
@@ -115,7 +118,24 @@ Les chemins des états vides reprennent ceux que l'application écrit déjà ail
 
 ### 7. Relecture par un agent neuf
 
-*(à compléter dès son retour)*
+**Verdict de l'agent, en une ligne** : « les écritures, l'échappement et la note tiennent sur le chemin livré, mais la reprise sur un résultat sans grille est à corriger avant la fusion vers `main` ». Il a lancé le Vitest complet (10 867 verts) et la spec Chromium (7 sur 7), et posé ses propres sondes hors du dépôt.
+
+Disposition de chaque constat (c'est mon lot : « corrigé » sauf mention) :
+
+| Constat | Disposition |
+|---|---|
+| Un jeton de reprise sur un résultat sans grille : reprise déverrouillée où le tableau écrivait sans effet ; la vider laissait une originale pointer vers une copie disparue | **Corrigé** (`077c8b69`) : `appliquerJetonReprise` refuse ; le tableau ne touche pas une copie remplacée ; chaque saisie reverrouille. Banc A8 et spec « la reprise ». Pas de stock : la fonction est neuve. |
+| « Modifier l'évaluation » (Liste) déverrouillait la copie sans grille avant que le formulaire refuse, et laissait le verrou du formulaire levé | **Corrigé** : la garde passe avant l'écriture et ramène au tableau. Spec « la reprise ». |
+| En spécifications, un niveau saisi sous une pratique devenue « spécifications » s'affichait « + » plein ; un brouillon avec grille s'affichait ✗ | **Corrigé** : lu par le moteur quand il compte, montré en contour sinon ; une case sans valeur est vide. |
+| Le PDF d'un jugement binaire n'affiche aucun résultat | **À Grégoire** (question 9) : ce sont des mots que les élèves liront. |
+| `depistagePeutJugerLaNonParticipation` répond « aucune copie évaluée » pour une classe notée seulement au tableau en spécifications | **Pour le lot 2** : l'entrée allégée en fera le cas courant ; aujourd'hui, une classe a d'ordinaire des copies avec grille. |
+| `compterEvaluationsEcarteesDeLaNote` ignore un jugement binaire en brouillon | **Sans conséquence** : aucun chemin n'en crée plus (le tableau reverrouille, la reprise est refusée). |
+| Le dénominateur de C appelle `evaluationCompteEnSpecifications` pour toutes les familles | **Gardé** : le commentaire dit pourquoi (une production jugée a été évaluée) ; un nom plus général serait un renommage de plus. |
+| « Verrouiller » visible sur le formulaire vidé | **À Grégoire** (question 10), mineur : le résultat reste intact. |
+| Pas de garde « référence démo » au tableau | **Refusé** : le tableau ne lit et n'écrit que dans le mode actif (`cle()`) ; il ne peut pas lier une copie réelle à une production de démo. |
+| Aucune entrée au Journal pour une saisie au tableau | **Limite connue** : le Journal mesure le temps passé à évaluer une copie, et une saisie au tableau n'a pas de durée. |
+| 350 arrêts de Tab ; aucune annonce de la note changée ; pas de `touch-action` | **Corrigés** : tabindex itinérant, zone `aria-live`, `touch-action: manipulation`. |
+| Exports sans lecteur, JSDoc du verrou séparée de sa fonction, booléen ignoré, paramètre inutile, mots en double, commentaire d'en-tête inexact, `sticky top` sans effet | **Corrigés** (le lot n'était pas fini). |
 
 ### 8. À inscrire au BACKLOG
 
