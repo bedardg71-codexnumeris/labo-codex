@@ -5,8 +5,9 @@
 //   1. Les neuf bulles sont celles que Grégoire a validées une à une le 8 nov. (15 h 51 à 16 h 27) :
 //      chaque titre, texte et geste se trouve TEL QUEL dans la consigne. Un mot changé, et ce banc rougit.
 //   2. Le titre et la ligne du panneau, et les deux refus validés, sont ceux de la consigne.
-//   3. Les refus PROPOSÉS (démo, service, RàI, ACP, anonymisation) ne sont PAS dans la consigne : ils
-//      restent marqués comme proposés dans le code, et chacun est soumis à Grégoire dans le rapport.
+//   3. Les textes PROPOSÉS (les refus démo, service, RàI, ACP, anonymisation, et la phrase de l'étape 2 sur
+//      une personne sans donnée) ne sont PAS dans la consigne : ils restent marqués comme proposés dans le
+//      code, et chacun est soumis à Grégoire dans le rapport.
 //   4. Le lien de sortie est « Plus tard », celui des parcours chez soi (consigne « Les deux parcours »).
 // Break-test (9 nov.) : « avant chaque cours » changé en « avant chaque séance » dans le texte de
 // l'étape 1 de js/parcours-lire-ta-classe.js → ROUGE (bloc 1), rétabli → vert.
@@ -87,9 +88,9 @@ describe('le panneau : titre, ligne, refus', () => {
         for (const r of refus) expect(CONSIGNE).toContain(`« ${r} »`);
     });
 
-    it('les refus proposés ne sont pas dans la consigne, et chacun est soumis à Grégoire dans le rapport', () => {
+    it('les textes proposés ne sont pas dans la consigne, et chacun est soumis à Grégoire dans le rapport', () => {
         const proposes = chaines(PROPOSES, '\\w+');
-        expect(proposes).toHaveLength(5);
+        expect(proposes).toHaveLength(6);
         expect(SOURCE).toMatch(/PROPOSÉS par Claude Code \(9 nov\.\), PAS VALIDÉS/);
         for (const p of proposes) {
             expect(CONSIGNE).not.toContain(p);

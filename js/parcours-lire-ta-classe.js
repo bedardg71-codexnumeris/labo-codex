@@ -37,7 +37,10 @@
         service: 'Ce parcours se joue sur un groupe-cours : choisis-en un dans l\'en-tête pour le commencer.',
         rai: "Ce parcours passe par l'onglet « Accompagnement » du profil : coche « Appliquer une adaptation du modèle de la Réponse à l'intervention » dans Labo › Observation pour le commencer.",
         acp: "Ce parcours passe par l'onglet « Engagement ACP » du profil : coche « Activer la collecte des données sur le contexte d'apprentissage et la performance » dans Labo › Observation pour le commencer.",
-        anonymisation: 'En mode anonymisation, une intervention ne garde ni son titre ni tes observations : reviens au mode normal pour faire ce parcours.'
+        anonymisation: 'En mode anonymisation, une intervention ne garde ni son titre ni tes observations : reviens au mode normal pour faire ce parcours.',
+        // L'étape 2, quand la personne choisie n'a aucune donnée (son Accompagnement n'a pas de
+        // « + Nouvelle intervention ») : dit pourquoi le parcours ramène aux noms.
+        sansDonnee: "Son profil n'a encore aucune donnée que l'Accompagnement puisse lire : choisis une autre personne."
     };
 
     // Ce que le parcours retient en chemin : la personne choisie à l'étape 2, la fiche ouverte à
@@ -308,9 +311,14 @@
             atteint: function () {
                 if (!profilQuelconqueOuvert()) return false;
                 var da = window.profilActuelDA;
-                // Une personne sans aucune donnée n'a pas de « + Nouvelle intervention » : le parcours
-                // ramène aux noms, et la bulle redit d'en choisir une (rapport du 9 nov.).
-                if (sansDonnee(da)) { M().allerA(1); return false; }
+                // Une personne sans aucune donnée n'a pas de « + Nouvelle intervention » (une assiduité de
+                // 0 % sans production en fait partie : aucuneDonneeDeSuivi, question 7 du rapport du 9 nov.) :
+                // le parcours le dit, ramène aux noms, et la bulle redit d'en choisir une.
+                if (sansDonnee(da)) {
+                    if (window.notifications && typeof window.notifications.info === 'function') window.notifications.info(PROPOSES.sansDonnee);
+                    M().allerA(1);
+                    return false;
+                }
                 memoire.da = da;
                 memoire.ficheId = null;
                 return true;
@@ -418,10 +426,12 @@
             // « La fiche, contour sur le statut » (pas « éclairée », comme à l'étape 7) : rien n'est ouvert
             // dans le voile, sinon le contour ; la bulle se pose à côté de lui. Le choix du statut reste sous
             // le voile : aucun geste attendu ici.
+            // Le masque couvre ce que le trou ouvre, le contour seul : au-delà, le voile couvre déjà (un
+            // masque plus large l'assombrirait deux fois).
             zones: zonesMasquees(function () { return []; }, function () {
                 var r = radioStatut('completee');
-                var bloc = r ? r.closest('.champ-formulaire') : null;
-                return bloc ? [bloc] : [];
+                var label = r ? r.closest('label') : null;
+                return label ? [label] : [];
             }),
             contour: function () {
                 var r = radioStatut('completee');

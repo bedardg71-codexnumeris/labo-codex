@@ -26,7 +26,7 @@ verdict WebKit et les captures WebKit se prennent sur le Mac.
 
 ### Ce qui attend Grégoire (une question par ligne, avec ma recommandation)
 
-Les cinq refus ci-dessous sont **posés dans le code pour que l'écran fonctionne, marqués comme proposés** (bloc
+Les cinq refus ci-dessous, et la phrase de la question 6, sont **posés dans le code pour que l'écran fonctionne, marqués comme proposés** (bloc
 `PROPOSES` de `js/parcours-lire-ta-classe.js`) ; aucun n'est validé.
 
 1. **Mode anonymisation** (demandé par la consigne). En anonymisation, le titre, la description, les observations et
@@ -43,10 +43,10 @@ Les cinq refus ci-dessous sont **posés dans le code pour que l'écran fonctionn
    « Découvrir ». Je ne l'ai pas fait : c'est un geste plus lourd que ce que la consigne décrit.)
 5. **Sur un service d'orthopédagogie.** Même manque. Je recommande : « Ce parcours se joue sur un groupe-cours : choisis-en un dans l'en-tête pour le commencer. »
 6. **Une personne sans aucune donnée choisie à l'étape 2** (demandé par la consigne). Son Accompagnement n'a ni
-   historique ni « + Nouvelle intervention ». Ce que fait le code : son profil s'ouvre, puis le parcours ramène
-   aussitôt aux noms, la bulle de l'étape 2 redite, **sans un mot de plus** (aucun texte non validé posé). Je
-   recommande d'y ajouter une phrase, par exemple : « Son profil n'a encore aucune donnée : choisis une personne
-   dont une pastille est colorée. » (proposée ici seulement, pas posée).
+   historique ni « + Nouvelle intervention ». Ce que fait le code : son profil s'ouvre, le parcours dit pourquoi
+   dans un message bref, ramène aux noms et redit la bulle de l'étape 2 ; rien n'est retenu. La personne en choisit
+   une autre (l'étape 2 accepte n'importe qui). Phrase proposée, posée : « Son profil n'a encore aucune donnée que l'Accompagnement puisse lire : choisis une autre personne. »
+   La condition d'entrée, elle, la compte comme signalée : le Suivi la signale, le panneau ne le contredit pas.
 7. **Une assiduité de 0 % compte comme « aucune donnée »** (trouvé en chemin, `aucuneDonneeDeSuivi`,
    `js/profil-etudiant-calculs.js:1938`). La personne absente à toutes les séances, sans production, est signalée
    (A sous le seuil) mais n'a pas de « + Nouvelle intervention » : c'est la plus éloignée, et la seule qu'on ne peut
@@ -101,6 +101,8 @@ Les cinq refus ci-dessous sont **posés dans le code pour que l'écran fonctionn
   l'étape 2 ; à l'étape 8, la bulle se lit sans la fiche si elle n'est plus connue.
 - **Étape 8** : la consigne dit « La fiche, contour sur le statut » (et non « la fiche éclairée », comme à
   l'étape 7) : seul le contour est ouvert dans le voile, et masqué. La bulle se pose à côté sans couvrir le statut.
+- **Étape 9** : « sans voile » veut dire rien d'assombri **ni de retenu** : la page reste à portée de main
+  derrière la bulle (relecture neuve, constat 3).
 - **Étape 5** : la bulle a deux temps (le lien « Régler les outils d'observation » de la carte RàI, puis, dans
   Labo › Observation, le menu), sans changer de numéro. Le menu est amené dans la vue une fois la page immobile :
   `ouvrirOutilsObservation` défile en douceur vers le haut de la sous-section, et le menu passait à l'écran puis
@@ -204,9 +206,11 @@ Les miennes (trouvées en chemin) :
   formulaires du Cadre, présences prises par l'écran de saisie. Il échoue avant ce lot (le parcours n'existe pas).
   **Break-tests** (9 nov.) : `refus()` qui rend toujours `null` → **rouge** (aucun refus affiché) ; la condition
   qui ignore A → **rouge** (personne n'est signalé). Rétablis → vert.
-- **Le banc complet du parcours**, sous Chromium : 8/8 (le test de la consigne ; les neuf étapes sans grille
-  désignée ; avec grille désignée, l'étape 4 mène à l'étape 6 ; « Plus tard », « Reprendre » et Échap ; les refus
-  proposés ; trois passes de captures). Il vérifie aussi que les pastilles d'absence (étape 3) et le statut
+- **Le banc complet du parcours**, sous Chromium : 9/9 (le test de la consigne ; les neuf étapes sans grille
+  désignée ; avec grille désignée, l'étape 4 mène à l'étape 6 ; une personne absente à toutes les séances, à 0 % :
+  signalée, puis l'étape 2 dit pourquoi elle ramène aux noms, et une autre personne mène à l'étape 3 ; « Plus
+  tard », « Reprendre » et Échap ; les refus proposés ; trois passes de captures). Break-test de la personne à
+  0 % : sans le message, **rouge** ; rétabli, vert. Il vérifie aussi que les pastilles d'absence (étape 3) et le statut
   (étape 8) **reçoivent le toucher du masque**, pas d'eux-mêmes, et que l'intervention créée porte la personne,
   son « avant » et le statut « en préparation ».
 - **La sentinelle des mots** (Vitest) : neuf titres, neuf textes, cinq gestes, trois boutons, le titre et la ligne
@@ -219,7 +223,7 @@ Les miennes (trouvées en chemin) :
   parcours-1-et-2 (429,99 px au lieu de 430, position lue pendant le glissement d'entrée). Rien à voir avec ce lot ;
   le verdict se prend sous WebKit sur le Mac.
 - **Vitest complet** (depuis `tests/`) : 10 900/10 900, 893 fichiers.
-- **Relecture par un agent neuf** : verdict en une ligne plus bas.
+- **Relecture par un agent neuf** : voir la dernière section.
 
 ### Conflits attendus à la fusion (la session du Mac s'en charge)
 
@@ -238,4 +242,14 @@ présences, personne à l'écart, et deux des textes proposés : RàI, anonymisa
 
 ### La relecture par un agent neuf
 
-(à compléter)
+Verdict de l'agent neuf (il n'a eu que la consigne et le diff) : **« tient avec réserves »** — la condition
+d'entrée laissait partir le parcours pour une personne que l'étape 2 renvoyait sans un mot (A = 0 %) ; un banc de
+la première partie était rouge au deuxième commit. Ses deux break-tests (la condition sans A ; les masques de
+l'étape 3 neutralisés) rougissent ; aucun écart de texte (comparaison indépendante des neuf bulles, du titre, de la
+ligne et des deux refus) ; règles de CLAUDE.md respectées.
+
+Ce que j'en ai fait : l'étape 2 dit maintenant pourquoi elle ramène aux noms (question 6), avec un essai et son
+break-test ; le banc de la première partie était déjà corrigé au commit suivant ; l'étape 9 ne retient plus le
+toucher ; le masque de l'étape 8 ne couvre plus que le contour (il assombrissait deux fois le reste du statut).
+Le compteur « sur 3 » de cette branche est une supposition nommée plus haut ; le couplage des masques au SVG du
+moteur est le contournement décrit dans « Ce qu'il faudrait au moteur ».

@@ -68,9 +68,11 @@ function brancherEcouteurs(page) {
     return erreurs;
 }
 
-async function capture(page, nom) {
+async function capture(page, nom, { sansNotifications = false } = {}) {
     if (!CAPTURES) return;
     fs.mkdirSync(CAPTURES, { recursive: true });
+    // Les avis du montage (« Horaire créé », « Groupe-cours activé ») couvrent le haut du panneau : ce n'est pas lui qu'on juge.
+    if (sansNotifications) await page.addStyleTag({ content: '#notifications-pile { display: none !important; }' });
     await page.mouse.move(2, (page.viewportSize().height / 2) | 0);
     await page.evaluate(() => window.accompagnement && window.accompagnement.masquerHover && window.accompagnement.masquerHover());
     await page.waitForFunction(() => document.getAnimations()
@@ -263,7 +265,7 @@ test('le bouton refuse sans présences, refuse quand personne ne s’écarte, la
     await expect(item(page).locator('.assistance-parcours-refus')).toHaveAttribute('role', 'status');
     await expect(page.locator('#panneau-assistance')).toBeVisible();
     await expect(bulle(page)).toHaveCount(0);
-    await capture(page, 'p7-panneau-1180-sombre-refus-sans-presences');
+    await capture(page, 'p7-panneau-1180-sombre-refus-sans-presences', { sansNotifications: true });
     await page.keyboard.press('Escape');
 
     // Une séance, tout le monde présent : personne ne s'écarte.
@@ -271,7 +273,7 @@ test('le bouton refuse sans présences, refuse quand personne ne s’écarte, la
     await commencer(page);
     await expect(item(page).locator('.assistance-parcours-refus')).toHaveText(REFUS_PERSONNE);
     await expect(bulle(page)).toHaveCount(0);
-    await capture(page, 'p7-panneau-1180-sombre-refus-personne');
+    await capture(page, 'p7-panneau-1180-sombre-refus-personne', { sansNotifications: true });
     await page.keyboard.press('Escape');
 
     // Une deuxième séance, une seule personne absente : 2 périodes sur 4, sous le seuil le plus bas (85 %).
@@ -391,6 +393,11 @@ async function parcourir(page, { largeur, theme, designee }) {
     await expect(bulle(page).locator('.parcours-bulle-sortie')).toHaveCount(0);
     // Sans voile : l'opacité du chemin passe à 0 (sa transition dure 0,2 s).
     await expect.poll(() => page.evaluate(() => getComputedStyle(document.querySelector('#parcours-voile path')).fillOpacity)).toBe('0');
+    // … et ne retient rien : un toucher dans un coin de la page atteint la page, pas le voile.
+    expect(await page.evaluate(() => {
+        const el = document.elementFromPoint(12, innerHeight - 12);
+        return !!el && !el.closest('#parcours-voile');
+    }), 'la page reste à portée de main à l’étape 9').toBe(true);
     await capture(page, `p7-etape-9-${suffixe}`);
     await bulle(page).getByRole('button', { name: 'Terminer' }).click();
     await expect(bulle(page)).toHaveCount(0);
@@ -419,6 +426,42 @@ test('avec une grille de dépistage désignée, l’étape 4 mène à l’étape
     await suivreLesReactions(page);
     await groupeAvecUnePersonneAlEcart(page, { designee: true });
     await parcourir(page, { largeur: 1180, theme: 'sombre', designee: true });
+    expect(erreurs, 'erreurs console').toEqual([]);
+});
+
+test('une personne absente à toutes les séances (0 %, aucune donnée) : signalée, mais l’étape 2 dit pourquoi elle ramène aux noms', async ({ page }) => {
+    test.setTimeout(180000);
+    const erreurs = brancherEcouteurs(page);
+    await suivreLesReactions(page);
+    await monterGroupe(page);
+    // Absente aux deux séances : A = 0 %, connue ; aucune production. Une autre, absente une fois : 50 %.
+    await prendrePresences(page, MARDI, { absent: ECARTE.da });
+    await prendrePresences(page, JEUDI, { absent: ECARTE.da });
+    await prendrePresences(page, JEUDI, { absent: ELEVES[1].da });
+    const lecture = await page.evaluate((das) => ({
+        A: das.map((da) => calculerTousLesIndices(da).A),
+        sansDonnee: das.map((da) => aucuneDonneeDeSuivi(da, calculerTousLesIndices(da))),
+        groupe: window.ParcoursLireTaClasse.lireLeGroupe()
+    }), [ECARTE.da, ELEVES[1].da]);
+    expect(lecture.A).toEqual([0, 50]);
+    expect(lecture.sansDonnee, 'aucuneDonneeDeSuivi : 0 % sans production = aucune donnée (question 7 du rapport)').toEqual([true, false]);
+    expect(lecture.groupe.signales.sort()).toEqual([ECARTE.da, ELEVES[1].da].sort());
+    const proposes = await page.evaluate(() => window.ParcoursLireTaClasse.proposes);
+
+    await commencer(page);
+    await attendreEtape(page, 1);
+    await page.click('#btn-toggle-panneau-prioritaire');
+    await attendreEtape(page, 2);
+    await page.locator(`#liste-etudiants-suivi .etudiant-suivi-item[data-da="${ECARTE.da}"] .etudiant-prioritaire-indices`).click();
+    // Le parcours le dit, et ramène aux noms : la même bulle, rien de retenu.
+    await expect(page.locator('#notifications-pile, body').getByText(proposes.sansDonnee).first()).toBeVisible();
+    await attendreEtape(page, 2);
+    await expect(page.locator('#panneau-suivi-etudiants')).toBeVisible();
+    expect(await page.evaluate(() => window.ParcoursLireTaClasse.memoire.da)).toBeNull();
+    // Une autre personne, qui a des données : l'étape 3.
+    await page.locator(`#liste-etudiants-suivi .etudiant-suivi-item[data-da="${ELEVES[1].da}"] .etudiant-prioritaire-indices`).click();
+    await attendreEtape(page, 3);
+    expect(await page.evaluate(() => window.ParcoursLireTaClasse.memoire.da)).toBe(ELEVES[1].da);
     expect(erreurs, 'erreurs console').toEqual([]);
 });
 
@@ -459,7 +502,7 @@ test('les refus proposés : la démo, l’option RàI décochée, le mode anonym
     await page.evaluate(() => definirPreference('activerRai', false));
     await commencer(page);
     await expect(item(page).locator('.assistance-parcours-refus')).toHaveText(proposes.rai);
-    await capture(page, 'p7-panneau-1180-sombre-refus-propose-rai');
+    await capture(page, 'p7-panneau-1180-sombre-refus-propose-rai', { sansNotifications: true });
     await page.keyboard.press('Escape');
     await page.evaluate(() => definirPreference('activerRai', true));
 
@@ -468,7 +511,7 @@ test('les refus proposés : la démo, l’option RàI décochée, le mode anonym
     expect(await page.evaluate(() => estModeAnonymisation())).toBe(true);
     await commencer(page);
     await expect(item(page).locator('.assistance-parcours-refus')).toHaveText(proposes.anonymisation);
-    await capture(page, 'p7-panneau-1180-sombre-refus-propose-anonymisation');
+    await capture(page, 'p7-panneau-1180-sombre-refus-propose-anonymisation', { sansNotifications: true });
     await page.keyboard.press('Escape');
     await page.evaluate(() => changerMode(MODES.NORMAL));
     await attendreRepos(page);

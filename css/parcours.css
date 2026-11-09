@@ -48,8 +48,9 @@ body.mode-clair {
 .parcours-voile--normal path { fill-opacity: 0.55; }
 .parcours-voile--leger path  { fill-opacity: 0.3; }
 .parcours-voile--dense path  { fill-opacity: 0.65; }
-/* « Sans voile » (septième parcours, étape 9) : rien n'est assombri, la bulle seule parle. */
-.parcours-voile--aucun path  { fill-opacity: 0; }
+/* « Sans voile » (septième parcours, étape 9) : rien n'est assombri ni retenu, la bulle seule parle ;
+   la page reste à portée de main derrière elle. */
+.parcours-voile--aucun path  { fill-opacity: 0; pointer-events: none; }
 
 /* ---------- Le contour : il marque où toucher, sans capter le toucher ---------- */
 
