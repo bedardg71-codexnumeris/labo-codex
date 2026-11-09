@@ -41,22 +41,22 @@ const EVALUATIONS = [
     { id: 'E4', etudiantDA: '2100004', productionId: 'P1', verrouillee: true }
 ];
 
-function monter({ syntheseSeule } = {}) {
-    const appels = { copies: [], papier: [] };
+function monter({ syntheseSeule, evaluations = EVALUATIONS } = {}) {
+    const appels = { copies: [], papier: [], evaluationsPassees: [] };
     const blob = (quoi) => ({ output: () => ({ quoi }) });
     const win = chargerScript('js/travaux-archivage.js', {
         db: { get: async () => null, getSync: (_k, d) => d, set: async () => {}, setSync: () => {} },
         cle: (k) => k,
         echapperHtml: (s) => String(s == null ? '' : s),
-        obtenirDonneesSelonMode: (k) => ({ groupeEtudiants: ELEVES, evaluationsSauvegardees: EVALUATIONS, productions: [{ id: 'P1', titre: 'Analyse fictive' }] })[k] || [],
+        obtenirDonneesSelonMode: (k) => ({ groupeEtudiants: ELEVES, evaluationsSauvegardees: evaluations, productions: [{ id: 'P1', titre: 'Analyse fictive' }] })[k] || [],
         obtenirEtudiantsCoursActif: () => ELEVES,
         sauvegarderDonneesSelonMode: () => true,
         obtenirTrimestreActif: () => null,
         travauxStockage: { obtenirFichiersGroupeActif: () => FICHIERS, obtenirFichiersAffiches: () => FICHIERS, obtenirAnnotationFichier: () => null },
         travauxResolution: { trouverFichierPourEvaluation: (e) => FICHIERS.find((f) => f.etudiantDA === e.etudiantDA && f.productionId === e.productionId) || null },
         travauxExportPDF: {
-            genererDocPDF: async (fichierId) => { appels.copies.push(fichierId); return { doc: blob('copie ' + fichierId), synthese: { ajoutee: true } }; },
-            genererDocSyntheseSeule: syntheseSeule || (async (da) => { appels.papier.push(da); return { doc: blob('synthèse ' + da), synthese: { ajoutee: true } }; })
+            genererDocPDF: async (fichierId, _p, evaluation) => { appels.copies.push(fichierId); appels.evaluationsPassees.push(evaluation && evaluation.id); return { doc: blob('copie ' + fichierId), synthese: { ajoutee: true } }; },
+            genererDocSyntheseSeule: syntheseSeule || (async (da, _p, evaluation) => { appels.papier.push(da); appels.evaluationsPassees.push(evaluation && evaluation.id); return { doc: blob('synthèse ' + da), synthese: { ajoutee: true } }; })
         },
         alert: () => {}, JSZip: function () {}
     }, { addEventListener: () => {}, removeEventListener: () => {}, dasElevesSupprimes: () => new Set(['2100004']) });
@@ -99,6 +99,33 @@ describe('#1245 — « Exporter pour Léa » prend aussi les copies évaluées s
         const r = await a.exporterPourLea('P1', '2100002', false);
         expect(r.blobs.map((b) => b.nom)).toEqual(['Fictifdeux_2100002_Analyse-fictive_Evalue.pdf']);
         expect(appels.copies).toEqual([]);
+    });
+});
+
+describe('Lot du 9 nov. 2026 — « Exporter pour Léa » n\'envoie que les évaluations verrouillées', () => {
+    const avec = (modifs) => EVALUATIONS.map((e) => Object.assign({}, e, modifs[e.id] || {}));
+
+    it('7. une évaluation non verrouillée : pas de PDF, et rendue dans `nonVerrouillees` pour le compteur', async () => {
+        const evaluations = avec({ E2: { verrouillee: false } });
+        const { a } = monter({ evaluations });
+        const sel = a.selectionnerEvaluationsLea('P1', null, false);
+        expect(sel.nonVerrouillees.map((e) => e.id)).toEqual(['E2']);
+        const r = await monter({ evaluations }).a.exporterPourLea('P1', null, false);
+        expect(r.blobs.map((b) => b.nom).sort()).toEqual([
+            'Fictiftrois_2100003_Analyse-fictive_Evalue.pdf',
+            'Fictifun_2100001_Analyse-fictive_Evalue.pdf'
+        ]);
+    });
+
+    it('8. un doublon non verrouillé (plus récent, d\'abord en base) : la verrouillée part, et c\'est ELLE que le générateur reçoit', async () => {
+        const doublon = { id: 'E1B', etudiantDA: '2100001', productionId: 'P1', verrouillee: false };
+        const doublonPapier = { id: 'E2B', etudiantDA: '2100002', productionId: 'P1', verrouillee: false };
+        const { a, appels } = monter({ evaluations: [doublon, doublonPapier].concat(EVALUATIONS) });
+        const sel = a.selectionnerEvaluationsLea('P1', null, false);
+        expect(sel.evaluations.map((e) => e.id).sort()).toEqual(['E1', 'E2', 'E3']);
+        expect(sel.nonVerrouillees).toEqual([]);
+        await a.exporterPourLea('P1', null, false);
+        expect(appels.evaluationsPassees.sort(), 'le PDF porte l\'évaluation choisie, pas la plus récente du couple').toEqual(['E1', 'E2', 'E3']);
     });
 });
 

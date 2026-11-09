@@ -403,6 +403,19 @@
             .filter(da => !supprimes || !supprimes.has(da)));
     }
 
+    function _estReprise(e) {
+        return !!(e.repriseDeId || e.jetonRepriseCibleeApplique);
+    }
+
+    /**
+     * Relecture du 9 nov. 2026 — deux évaluations actives d'un même élève, aucune reprise (un doublon à notes
+     * divergentes, que la réconciliation #360 laisse) : la verrouillée l'emporte sur la non verrouillée, quel que
+     * soit leur ordre en base. Sans cela, l'élève était laissé de côté quand la non verrouillée venait d'abord.
+     */
+    function _verrouilleeDevantUnDoublon(existant, e) {
+        return !_estReprise(existant) && existant.verrouillee !== true && e.verrouillee === true;
+    }
+
     function selectionnerEvaluationsLea(productionId, da, reprisesSeulement) {
         // #1013 (règle de Grégoire, 4 oct. 2026) : l'export pour Léa ENVOIE, il écarte l'élève
         // supprimé — ni son PDF, ni sa place au compteur de l'écran.
@@ -427,7 +440,7 @@
         const evalParEtudiant = new Map();
         for (const e of evalsActives) {
             const existant = evalParEtudiant.get(e.etudiantDA);
-            if (!existant || e.repriseDeId || e.jetonRepriseCibleeApplique) {
+            if (!existant || _estReprise(e) || _verrouilleeDevantUnDoublon(existant, e)) {
                 evalParEtudiant.set(e.etudiantDA, e);
             }
         }
@@ -436,16 +449,17 @@
         const fichiersAvecEval = [];
         const sansFichier = [];
         const nonVerrouillees = [];
+        const evaluationDuFichier = new Map();   // relecture du 9 nov. : le PDF porte CETTE évaluation, pas une autre du couple
         for (const evaluation of evalParEtudiant.values()) {
             if (evaluation.verrouillee !== true) { nonVerrouillees.push(evaluation); continue; }
             retenues.push(evaluation);
             const fichier = (typeof travauxResolution !== 'undefined' && typeof travauxResolution.trouverFichierPourEvaluation === 'function')
                 ? travauxResolution.trouverFichierPourEvaluation(evaluation)
                 : null;
-            if (fichier) fichiersAvecEval.push(fichier);
+            if (fichier) { fichiersAvecEval.push(fichier); evaluationDuFichier.set(fichier.id, evaluation); }
             else sansFichier.push(evaluation);
         }
-        return { evaluations: retenues, fichiers: fichiersAvecEval, sansFichier: sansFichier, nonVerrouillees: nonVerrouillees };
+        return { evaluations: retenues, fichiers: fichiersAvecEval, sansFichier: sansFichier, nonVerrouillees: nonVerrouillees, evaluationDuFichier: evaluationDuFichier };
     }
 
     /**
@@ -508,7 +522,10 @@
             const { daEtud, libelle, nomFichier } = identite(fichier.etudiantDA);
 
             try {
-                const { doc, synthese } = await travauxExportPDF.genererDocPDF(fichier.id, productionId);
+                // Relecture du 9 nov. — l'évaluation CHOISIE (verrouillée) va au générateur : il retenait sinon la plus
+                // récente du couple élève-production, et un doublon non verrouillé partait à sa place.
+                const choisie = selection.evaluationDuFichier ? selection.evaluationDuFichier.get(fichier.id) : undefined;
+                const { doc, synthese } = await travauxExportPDF.genererDocPDF(fichier.id, productionId, choisie);
                 const pdfBlob = doc.output('blob');
                 blobs.push({ blob: pdfBlob, nom: nomFichier });
 
@@ -532,7 +549,7 @@
         for (const evaluation of surPapier) {
             const { daEtud, libelle, nomFichier } = identite(evaluation.etudiantDA);
             try {
-                const { doc, synthese } = await travauxExportPDF.genererDocSyntheseSeule(evaluation.etudiantDA, productionId);
+                const { doc, synthese } = await travauxExportPDF.genererDocSyntheseSeule(evaluation.etudiantDA, productionId, evaluation);
                 if (!doc) {
                     echecs.push(`${libelle} — sur papier : ${(synthese && synthese.raison) || 'la synthèse n\'a pas pu être produite'}`);
                 } else {

@@ -19,7 +19,7 @@ const indexHtml = 'file://' + path.join(racineProjet, 'index.html');
 const PNG = 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==';
 const T = 'tlea';
 
-async function monter(page, { quatrieme = false, tousVerrouilles = false } = {}) {
+async function monter(page, { quatrieme = false, tousVerrouilles = false, doublons = false } = {}) {
     const erreurs = [];
     page.on('console', (m) => { if (m.type() === 'error') erreurs.push(m.text()); });
     page.on('pageerror', (e) => erreurs.push(`pageerror: ${e.message}`));
@@ -28,7 +28,7 @@ async function monter(page, { quatrieme = false, tousVerrouilles = false } = {})
     await page.goto(indexHtml);
     await page.waitForFunction(() => typeof window.db !== 'undefined' && window.travauxUI && window.travauxStockage
         && window.travauxArchivage && typeof window.JSZip !== 'undefined');
-    await page.evaluate(({ png, T, quatrieme, tousVerrouilles }) => {
+    await page.evaluate(({ png, T, quatrieme, tousVerrouilles, doublons }) => {
         // security-ok: fixtures littérales du banc, aucune source externe.
         const coursId = 'cours-lea';
         const crit = [{ id: 'c1', nom: 'Contenu', ponderation: 60, type: 'holistique' }, { id: 'c2', nom: 'Structure', ponderation: 40, type: 'holistique' }];
@@ -54,7 +54,7 @@ async function monter(page, { quatrieme = false, tousVerrouilles = false } = {})
             { id: 'CTLEA', nom: 'Cartouche témoin', grilleId: 'GLEA', contexte: '', criteres: [{ id: 'c1', nom: 'Contenu' }, { id: 'c2', nom: 'Structure' }], commentaires }
         ]);
         const verrou = { TESTL1: true, TESTL2: tousVerrouilles, TESTL3: true, TESTL4: false };
-        window.db.setSync(T + '_evaluationsSauvegardees', eleves.map((da, i) => ({
+        const evaluations = eleves.map((da, i) => ({
             id: 'EV' + da, etudiantDA: da, etudiantNom: 'Élève ' + (i + 1) + ' Fictif', productionId: 'plea', productionNom: 'Analyse',
             groupeCoursId: 'GCLEA', coursId, grilleId: 'GLEA', echelleId: 'ELEA', cartoucheId: 'CTLEA',
             statutRemise: 'evalue', statutIntegrite: 'recevable', dateEvaluation: '2026-11-05T08:00:00.000Z',
@@ -64,7 +64,16 @@ async function monter(page, { quatrieme = false, tousVerrouilles = false } = {})
                 { critereId: 'c2', critereNom: 'Structure', niveauSelectionne: 'D', ponderation: 40, retroaction: 'CARTOUCHE c2_D' }
             ],
             retroactionFinale: 'Rétroaction générée témoin.', retroactionReecrite: false
-        })));
+        }));
+        // `doublons` : TESTL1 et TESTL3 ont aussi une évaluation active NON verrouillée, plus récente, placée d'abord
+        // (un doublon à notes divergentes, que la réconciliation #360 laisse).
+        const brouillons = doublons ? ['TESTL1', 'TESTL3'].map((da) => Object.assign({}, evaluations.find((e) => e.etudiantDA === da),
+            { id: 'EV' + da + '_B', verrouillee: false, noteFinale: 55, dateEvaluation: '2026-11-08T08:00:00.000Z', retroactionFinale: 'BROUILLON' })) : [];
+        window.db.setSync(T + '_evaluationsSauvegardees', brouillons.concat(evaluations));
+        // L'évaluation que reçoit la page de synthèse de chaque PDF.
+        window._feedbackDe = [];
+        const construire = window.syntheseRetroactionData.construireFeedback;
+        window.syntheseRetroactionData.construireFeedback = function (ev) { window._feedbackDe.push(ev && ev.id); return construire.apply(this, arguments); };
         // Une copie importée pour TESTL1 et TESTL2 ; TESTL3 (et TESTL4) sur papier.
         const fichier = (da) => ({
             id: 'FT' + da, etudiantDA: da, productionId: 'plea', coursId, groupeCoursId: 'GCLEA',
@@ -87,7 +96,7 @@ async function monter(page, { quatrieme = false, tousVerrouilles = false } = {})
         window._telecharges = [];
         const creer = URL.createObjectURL.bind(URL);
         URL.createObjectURL = function (blob) { window._telecharges.push(blob); return creer(blob); };
-    }, { png: PNG, T, quatrieme, tousVerrouilles });
+    }, { png: PNG, T, quatrieme, tousVerrouilles, doublons });
     return erreurs;
 }
 
@@ -147,4 +156,16 @@ test('Léa · tout est verrouillé : rien n\'est ajouté au compteur, les trois 
     await expect(await compteur(page)).toHaveText('3 PDF pour 3 étudiant·es, dont 1 sur papier (synthèse seule)');
     const noms = await exporterEtLireLeZip(page);
     expect(noms).toHaveLength(3);
+});
+
+// Relecture du 9 nov. — le générateur retenait la plus récente du couple élève-production : un doublon non verrouillé
+// partait sur la page de l'élève à la place de la verrouillée choisie.
+test('Léa · un doublon non verrouillé plus récent : le PDF porte l\'évaluation verrouillée, avec copie comme sur papier', async ({ page }) => {
+    test.setTimeout(120000);
+    const erreurs = await monter(page, { doublons: true });
+    const noms = await exporterEtLireLeZip(page);
+    expect(noms).toHaveLength(2);
+    const recues = await page.evaluate(() => window._feedbackDe.slice().sort());
+    expect(recues, 'chaque page de synthèse porte la verrouillée').toEqual(['EVTESTL1', 'EVTESTL3']);
+    expect(sansBruit(erreurs)).toEqual([]);
 });

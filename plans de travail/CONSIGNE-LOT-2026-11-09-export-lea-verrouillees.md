@@ -36,10 +36,21 @@ LIVRAISON : release patch après verdict WebKit, push, fusion vers main. Propose
 |---|---|
 | « Exporter pour Léa » (`exporterPourLea`) | **Oui, depuis ce lot.** |
 | « Dossier PDF » de la Liste (`exporterDossierComplet`, `exporterSyntheseSeule`, `trouverEvaluationPourSynthese`) | **Non.** Offert sur toute ligne « évaluée », verrouillée ou non. **À inscrire.** |
-| Aperçu et « Exporter » d'une copie dans la visionneuse (`previsualiserPDF`, `exporterPDF`, `exporterPDFDepuisApercu`) | **Non.** **À inscrire.** |
+| Aperçu et téléchargement d'une copie dans la visionneuse (`previsualiserPDF`, `telechargerDepuisPreview`, `exporterPDF`) | **Non.** **À inscrire.** (`exporterPDFDepuisApercu`, d'abord cité ici, est celui de `js/export-pdf.js` : grilles et consignes, pas des copies d'élèves.) |
 | Archives « Exporter les travaux » / par élève (`exporterTravaux`, `exporterParEtudiant`) | Non, mais ce n'est pas un PDF d'élève : l'archive de l'enseignant (copies, versions annotées, données). |
 
 Les deux « à inscrire » sont dans le rapport du lot ; ils n'entrent pas au BACKLOG sans symptôme vécu (règle du 24 août) : c'est à Grégoire de dire s'il les veut.
+
+## Relecture par un agent neuf (9 nov. 2026) — dispositions
+
+| # | Constat | Disposition |
+|---|---|---|
+| 1 | Les générateurs (`genererDocPDF`, `genererDocSyntheseSeule`) ne recevaient pas l'évaluation choisie : `trouverEvaluationPourSynthese` reprenait la plus récente du couple élève-production. Un doublon actif NON verrouillé, plus récent (que la réconciliation #360 laisse quand les notes divergent), partait sur la page de l'élève à la place de la verrouillée ; dans l'ordre inverse, l'élève était laissé de côté (vérifié par exécution). | **Corrigé dans le lot** : l'évaluation choisie va jusqu'à `ajouterPageSynthese` (`evaluationImposee`) ; entre deux actives sans reprise, la verrouillée l'emporte (`_verrouilleeDevantUnDoublon`). Banc #1245 cas 8 et spec WebKit « doublon » ; break-tests faits (sans la préférence, sans l'évaluation passée, sans l'évaluation reçue par la page : rouge chaque fois). **Supposé** : la verrouillée est celle à envoyer. |
+| 2 | Aucun banc Vitest ne gardait le filtre (le hook pré-push ne lance que Vitest). | **Corrigé** : banc #1245 cas 7 ; break-test fait. |
+| 3 | Une évaluation sans champ `verrouillee` est laissée de côté, alors que le calcul de la note ne tient pour brouillon que `verrouillee === false`. | **Commenté et laissé** : conforme à la consigne (« verrouillées ») ; les écrivains actuels posent tous le champ, seules d'anciennes données sont exposées, et le compteur le dit. |
+| 4 | L'audit citait `exporterPDFDepuisApercu` sous la visionneuse. | **Corrigé** dans le tableau ci-dessus. |
+
+Specs voisines (export Léa, Dossier PDF, synthèse) : 54 vertes, 2 sautées au second passage ; au premier, un rouge dont la sortie n'a pas été gardée, non reproduit — à surveiller au verdict du groupe.
 
 ## Le stock
 

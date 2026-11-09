@@ -46,7 +46,7 @@
         return new Error('Blob introuvable');
     }
 
-    async function genererDocPDF(fichierId, productionIdOverride) {
+    async function genererDocPDF(fichierId, productionIdOverride, evaluationImposee) {
         const fichier = travauxStockage.obtenirFichierParId(fichierId);
         if (!fichier) throw new Error('Fichier introuvable');
         _poserGrilleExport(fichier);
@@ -66,7 +66,7 @@
         // #565 — le statut est REMONTÉ à l'appelant : une copie livrée sans sa
         // page de rétroaction doit pouvoir être nommée dans le bilan d'export,
         // au lieu de partir sur Léa sans que personne ne le sache.
-        const synthese = await ajouterPageSynthese(doc, fichier, productionIdOverride);
+        const synthese = await ajouterPageSynthese(doc, fichier, productionIdOverride, evaluationImposee);
 
         // ✅ ANONYMISATION (Tier 0.2) : anonymiser le nom du fichier de sortie
         const nomFichierAff = typeof anonymiserNomFichier === 'function' ? anonymiserNomFichier(fichier.nomFichier, fichier.etudiantDA) : fichier.nomFichier;
@@ -703,7 +703,7 @@
      *   n'est pas toujours une anomalie : « aucune évaluation enregistrée » est
      *   légitime en export unitaire et anormal en export Léa.
      */
-    async function ajouterPageSynthese(doc, fichier, productionIdOverride) {
+    async function ajouterPageSynthese(doc, fichier, productionIdOverride, evaluationImposee) {
         // 1. Pré-requis : modules + lib disponibles
         if (typeof html2canvas !== 'function' ||
             typeof syntheseRetroactionData === 'undefined' ||
@@ -713,7 +713,9 @@
         }
 
         // 2. Résoudre l'évaluation pour ce fichier
-        const evaluation = trouverEvaluationPourSynthese(fichier, productionIdOverride);
+        // Lot export Léa (relecture du 9 nov. 2026) : l'appelant qui a CHOISI l'évaluation la passe (`evaluationImposee`) ;
+        // sinon, la recherche d'avant (la plus récente du couple élève-production).
+        const evaluation = evaluationImposee || trouverEvaluationPourSynthese(fichier, productionIdOverride);
         if (!evaluation) {
             // Cas de l'élève sans évaluation enregistrée. Légitime en export
             // unitaire ; ANORMAL en export Léa, qui part des évaluations actives.
@@ -918,11 +920,11 @@
      * sans la page, il ne resterait qu'une feuille blanche, et `doc` est nul.
      * @returns {Promise<{doc: Object|null, synthese: {ajoutee: boolean, raison: string|null, avertissement?: string}}>}
      */
-    async function genererDocSyntheseSeule(da, productionId) {
+    async function genererDocSyntheseSeule(da, productionId, evaluationImposee) {
         const sansCopie = { id: null, etudiantDA: da, productionId: productionId };
         const { jsPDF } = window.jspdf;
         const doc = new jsPDF({ orientation: 'portrait', unit: 'px', format: [SYNTH_PAGE_W * SYNTH_RASTER_SCALE, SYNTH_PAGE_H_MIN * SYNTH_RASTER_SCALE], compress: true });
-        const synthese = await ajouterPageSynthese(doc, sansCopie, productionId);
+        const synthese = await ajouterPageSynthese(doc, sansCopie, productionId, evaluationImposee);
         if (!synthese || !synthese.ajoutee) {
             return { doc: null, synthese: synthese || { ajoutee: false, raison: 'raison inconnue' } };
         }
