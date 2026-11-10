@@ -5,6 +5,34 @@
 `.claude/skills/debut-de-session-labo-codex/SKILL.md`. Aucun fichier de `js/`, pas de verdict, pas de release, pas de
 fusion : la session principale fusionnera après le groupe 3.
 
+> **Relais du 10 nov. 2026, sixième passage (décision de Grégoire de 8 h 58 : la cible change)** : fait et poussé,
+> rien fusionné, rien dans `js/`.
+>
+> **Passages changés** :
+> - `OBJECTIF-COHORTE-1.md` (nom gardé) : titre « La cible » ; la section « À quoi sert ce fichier » (seule cible,
+>   question unique, liste fermée) est remplacée par les quatre énoncés de Grégoire, mot pour mot ; la phrase « ne
+>   s'amende que par lui » est gardée ; les huit énoncés sont intacts sous « Les acquis du 1er septembre : à ne pas
+>   faire régresser » ;
+> - même fichier, « Ce qui n'est PAS sur la ligne d'arrivée » devient « Ce qui n'est PAS dans la cible du
+>   27 novembre » : « avant que les huit soient verts » devient « tant que ça n'empêche pas la cible », et le confort
+>   d'interface se mesure à la cible ;
+> - même fichier, « Comment on lit l'avancement » : les trois états valent « pour les huit acquis » ; le reste intact ;
+> - `CLAUDE.md`, l. 14 : « la cible du 27 novembre, et les acquis » ;
+> - `debut-de-session-labo-codex/mesures-sous-condition.md`, §2.1 : devant un rouge de CI, la question devient « est-ce
+>   que ça empêche la cible du 27 novembre ? ». C'était le seul renvoi qui faisait des huit énoncés le filtre ;
+>   `PROTOCOLE.md` et les autres skills n'en portent aucun (mesuré par `grep`).
+>
+> **⚠ Une ligne retirée, à confirmer par Grégoire** : « le premier lancement à froid — décision de Grégoire :
+> couvert par les chroniques Labo, le système d'aide, l'accompagnement et les données de démonstration » figurait
+> parmi ce qui n'est PAS sur la ligne d'arrivée. Avec une cible qui dit « sans l'aide de Grégoire », je ne peux pas
+> affirmer qu'elle reste vraie ; je l'ai retirée plutôt que de la laisser contredire la cible. S'il la maintient,
+> elle se remet en une ligne.
+>
+> **Vu, non touché** : les trois issues de `CLAUDE.md` ne citent pas les huit énoncés, mais leur issue 1 (« casse le
+> parcours qu'on est en train de livrer, ou touche ce que des élèves ont entre les mains ») n'est pas mot pour mot
+> le nouveau filtre (« empêche la cible »). Les deux critères coexistent. Et l'avancement de la cible elle-même n'a
+> pas de règle de lecture : je n'en ai pas inventé.
+>
 > **Relais du 10 nov. 2026, cinquième passage (décisions techniques de Cowork sur les consignes, l'écriture dans
 > `js/` et le push)** : fait et poussé, rien fusionné, rien dans `js/`. Seul `PROTOCOLE.md` est touché, avec ce
 > rapport. **`PROTOCOLE.md` : 571 lignes avant, 555 après** (plafond : 575).

@@ -149,8 +149,8 @@ mieux qu'un silence : c'est le silence qui a produit « je ne sais pas ».
 son rapport d'ouverture, avant tout le reste** — quel job, quelle étape, quel(s) fichier(s)
 de test, en une ligne chacun (`gh run view <id> --log-failed`). **Elle ne corrige rien
 d'elle-même** : un rouge de CI sur un commit déjà publié n'est pas le mandat du jour, c'est
-une trouvaille, et elle reçoit la question habituelle — *est-ce que ça empêche un des huit
-énoncés ?* — puis l'une des trois issues de `CLAUDE.md`.
+une trouvaille, et elle reçoit la question habituelle — *est-ce que ça empêche la cible du
+27 novembre (`OBJECTIF-COHORTE-1.md`) ?* — puis l'une des trois issues de `CLAUDE.md`.
 
 Ce qui compte comme écart ici (§4) : un test en échec (nom, fichier, message
 condensé), un nombre différent de celui que le mandat annonce, un jeton

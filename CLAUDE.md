@@ -11,7 +11,7 @@
 
 **Le premier message reçu est le mandat**, et le skill `debut-de-session-labo-codex`
 dit quoi mesurer. `RELAIS.md` reste le journal des sessions entre elles, toujours lu
-par greps ciblés. `OBJECTIF-COHORTE-1.md` : la ligne d'arrivée, arrêtée.
+par greps ciblés. `OBJECTIF-COHORTE-1.md` : la cible du 27 novembre, et les acquis.
 
 **Puis `PROTOCOLE.md` (racine)** — comment nous trois travaillons ensemble : les rôles,
 la preuve exigée d'une mesure, la relecture croisée, ce qui monte hors de la consigne.

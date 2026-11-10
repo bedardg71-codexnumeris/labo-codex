@@ -1,30 +1,23 @@
-# La ligne d'arrivée — cohorte 1, mi-septembre 2026
+# La cible
 
-> Écrit le **1er septembre 2026** avec Grégoire, depuis Cowork.
-> **ARRÊTÉ par Grégoire le 1er septembre 2026.** Les huit énoncés sont la cible.
-> Ils ne s'amendent que par lui — pas par une session, pas par un audit, pas
+> Écrit le **1er septembre 2026** avec Grégoire, depuis Cowork. Tête réécrite le
+> **10 novembre 2026** (décision de Grégoire, 8 h 58).
+> **La cible ne s'amende que par lui** — pas par une session, pas par un audit, pas
 > parce qu'un chantier serait plus commode autrement.
 
 ---
 
-## À quoi sert ce fichier
+**Cible, arrêtée par Grégoire le 10 novembre 2026 : le 27 novembre, de vrais enseignant·es entrent un vrai groupe dans la vue simple et sortent leurs notes, sans l'aide de Grégoire.**
 
-C'est la **seule cible**. Toute trouvaille reçoit une question, une seule :
+**Le filtre : une trouvaille qui empêche cet énoncé entre dans le lot en cours ; sinon, elle est inscrite et reportée.**
 
-> **Est-ce que ça empêche un des huit énoncés ci-dessous ?**
+**L'horizon : toutes les fiches de la page de tri traitées d'ici Noël.**
 
-**Non** → issue 2 de `CLAUDE.md` : inscrire et continuer. Ce n'est pas un refus,
-c'est un report assumé.
-**Oui** → ça entre dans le lot en cours.
-
-⚠ **Cette liste est FERMÉE.** C'est ce qui la distingue du backlog. Le nombre
-d'items ouverts monte quand on cherche mieux — c'est normal, et c'est pour ça
-qu'il ne peut pas servir de tableau de bord. Le nombre d'énoncés rouges
-ci-dessous, lui, ne peut que descendre.
+**Les acquis : les huit énoncés du 1er septembre ne doivent pas régresser.**
 
 ---
 
-## Les huit énoncés
+## Les acquis du 1er septembre : à ne pas faire régresser
 
 Chacun se vérifie. Aucun ne demande d'interprétation.
 
@@ -63,24 +56,21 @@ qu'on annonce. *(#560 résiduel, #647, #648, #649)*
 
 ---
 
-## Ce qui n'est PAS sur la ligne d'arrivée
+## Ce qui n'est PAS dans la cible du 27 novembre
 
-À inscrire, jamais à traiter avant que les huit soient verts :
+À inscrire et à reporter, tant que ça n'empêche pas la cible :
 
 - la dette invisible à l'usage (courses de lecture-écriture, legacy, variables CSS
   fantômes, doubles définitions) ;
-- le premier lancement à froid — **décision de Grégoire** : couvert par les
-  chroniques Labo, le système d'aide, l'accompagnement et les données de
-  démonstration ;
 - les notes d'A2025 et d'H2026 — **décision pédagogique définitive** : on n'y
   revient pas ;
-- le confort d'interface qui ne bloque aucun des huit parcours.
+- le confort d'interface qui n'empêche pas la cible.
 
 ---
 
 ## Comment on lit l'avancement
 
-Huit lignes, trois états : **vert** (vérifié, avec la trace), **rouge** (un item
+Pour les huit acquis, huit lignes, trois états : **vert** (vérifié, avec la trace), **rouge** (un item
 ouvert l'empêche, nommé), **non mesuré**.
 
 ⚠ **« Non mesuré » n'est pas « vert ».** C'est la confusion qui a coûté le plus
