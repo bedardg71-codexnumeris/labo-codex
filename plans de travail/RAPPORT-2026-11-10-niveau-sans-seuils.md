@@ -2,7 +2,30 @@
 
 Décision de Cowork du 9 nov. 2026, 21 h 43. Branche `lot/niveau-sans-seuils`, partie de `lot/vue-simple` (`58c396bb`, après le relais de 21 h 42). Session cloud, Chromium seulement. Rien n'est fusionné.
 
-> **État de ce fichier : LES CORRECTIONS en tête (10 nov. 2026), LA MESURE dessous**, poussée avant elles comme demandé.
+> **État de ce fichier : LE RELAIS DE 23 h en tête, puis LES CORRECTIONS, puis LA MESURE**, poussée avant elles comme demandé. Arrêt sur cette branche après ce relais : la suite est le passage sous WebKit, sur le Mac.
+
+## RELAIS DE 23 h (9 nov. 2026) — ce qui a été fait
+
+**Point 1, gardé tel quel.** Une note au-dessus du plus haut seuil se range dans le plus haut niveau, y compris sous 100. Aucune note n'est recalculée.
+
+**Point 2, fait : une seule règle, écrite une seule fois.**
+- La règle vit dans `niveauAuDessusDuPlusHautSeuil` (`js/echelles.js`). Deux lecteurs l'appellent : la répartition du Suivi (`niveauQuiRecoit`) et le niveau atteint du profil et des interventions (`situerPourcentageDansEchelle`, `js/profil-etudiant-helpers.js`). Un essai rougit si l'un des deux la recopie.
+- Mesuré dans l'application, avant puis après, sur l'étudiant·e à 110 : la lecture du niveau de sa note globale rendait « hors-echelle », sans niveau ; elle rend « E » (Étendu).
+- Ce qui ne change pas : dans une plage, le niveau de la plage ; dans un trou entre deux plages ou sous la plus basse, aucun niveau.
+- ⚠ **Une limite, dite** : les deux lecteurs gardent chacun LEUR lecture des bornes, je ne les ai pas fondues. Le profil exige les deux seuils et prend le premier niveau dans l'ordre enregistré ; la répartition tolère un seul seuil et prend le plus haut de deux plages qui se touchent. Les fondre changerait la lecture d'échelles ordinaires, hors de ce qui est décidé.
+- **Une sentinelle existante mise à jour** : `sentinelle-575` tenait « aucun niveau » pour une note de 88 sur une échelle qui finit à 40. C'est exactement le cas que la décision renverse. Elle tient maintenant le trou entre deux plages (aucun niveau) et le cas au-dessus du dernier seuil (le plus haut niveau).
+
+**« Dis s'il reste d'autres lectures de ce genre » : il en reste une.** `niveauDuPourcentage` (`js/evaluation-calcul.js`), la conversion d'un pourcentage en code de niveau pendant la NOTATION. Au-dessus du plus haut seuil, elle rend le niveau dont le milieu de plage est le plus proche, avec un avertissement en console : sur une échelle ordinaire c'est le plus haut niveau, donc le même résultat par un autre chemin. Non touchée : c'est un chemin de notation, et « aucune note n'est recalculée ». Elle arrondit aussi à l'entier avant de comparer, ce que les deux autres ne font pas (écart déjà noté dans le code, #1152). Cherché par motif dans `js/` : aucune autre.
+
+**Point 5, le compte.** Bancs Playwright sous Chromium, relancés APRÈS toutes les retouches : **112 sur 112**. Ce sont les 65 d'avant (vue simple, tableau, Suivi, partage, PDF, échelles), les 5 du lot, et 42 ajoutés pour le point 2 (17 fichiers du profil et des interventions).
+
+**Preuve du point 2.** 4 essais Vitest et 1 essai Playwright neufs ; 8 break-tests, tous rouges ; Vitest entier vert au push. Pas de seconde relecture par un agent neuf pour ce point.
+
+**Non vérifié.** WebKit, iPad. L'ÉCRAN du profil qui affiche ce niveau n'a pas été regardé : c'est la lecture qu'il appelle qui est exécutée dans l'application. Les critères par niveau du profil et le bilan des interventions demandent des évaluations faites avec une grille : non rejoués par l'interface, tenus par les essais de la fonction.
+
+**Points 3 et 4.** Pris tels quels ; rien des quatre constats hors lot n'est touché.
+
+---
 
 ## LES CORRECTIONS (10 nov. 2026)
 
