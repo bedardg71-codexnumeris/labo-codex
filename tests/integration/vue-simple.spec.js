@@ -541,12 +541,15 @@ test.describe('Vue simple · A. par standards, les niveaux se règlent', () => {
         await expect(caseTn(page, 1, 2)).toHaveText('M');
         await expect(caseTn(page, 1, 2)).toHaveClass(/tn-case--valeur-changee/);   // le signe « ≠ »
         await expect(caseTn(page, 1, 1)).not.toHaveClass(/tn-case--valeur-changee/);
+        // La légende nomme le signe en vue simple aussi (fusion du 10 nov. : la branche était partie avant cette ligne).
+        await expect(page.locator('#vs-tableau-hote .tn-legende-signe')).toBeVisible();
         await expect(noteTn(page, 1)).toHaveText('80');   // la valeur écrite à la saisie reste : (100 + 75 + 65) / 3
         await caseTn(page, 1, 2).focus();
         await page.keyboard.press('Backspace');
         await page.keyboard.press('m');   // ressaisi : M vaut 90
         await expect(caseTn(page, 1, 2)).not.toHaveClass(/tn-case--valeur-changee/);
-        await expect(noteTn(page, 1)).toHaveText('85');   // (100 + 90 + 65) / 3
+        await expect(noteTn(page, 1)).toHaveText('85');
+        await expect(page.locator('#vs-tableau-hote .tn-legende-signe')).toHaveCount(0);   // plus aucune case ne le porte   // (100 + 90 + 65) / 3
         expect(erreurs).toEqual([]);
     });
 
