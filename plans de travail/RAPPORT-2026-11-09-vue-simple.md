@@ -2,7 +2,147 @@
 
 Consigne de Cowork du 9 nov. 2026, 17 h 40. Branche `lot/vue-simple`, partie de `origin/lot/tableau-de-notation-1-bis` (`b6d5926`). Session cloud, Chromium seulement.
 
-> **État de ce fichier : ÉTAPE 1 (la mesure) seulement.** Le rapport final (ce qui est fait, ce qui est supposé, ce qui attend Grégoire, la preuve) viendra EN TÊTE de ce fichier quand le code sera livré. Rien n'est codé au moment où ce texte est poussé.
+> **État : lot livré sur la branche `lot/vue-simple`, à juger le 11 novembre.** Rien n'est fusionné, `main` n'est pas touché, aucune release, rien au changelog. Le rapport final est ci-dessous ; la mesure faite avant le code suit, inchangée.
+
+---
+
+## RAPPORT FINAL (10 nov. 2026)
+
+### Ce qui est fait, en gestes
+
+1. **Un nouvel arrivant ouvre l'application** : il arrive en vue simple, sur un accueil titré « Ta notation alternative », avec quatre cartes numérotées. La barre porte cinq entrées : Accueil, Classe, Pratique, Résultats, Note finale.
+2. **Il colle sa liste d'élèves** (DA, nom, prénom ; virgule, point-virgule, tabulation ou espaces). Une ligne sans DA de 7 chiffres est refusée et nommée ; rien n'est inventé. Le trimestre, le cours et le groupe naissent en coulisse : sans dates, sans horaire, sans congé.
+3. **Il choisit un modèle**, par standards ou par spécifications, puis règle ce qui construit la note : en standards, « N meilleures », « N dernières » ou « Toutes », et le nombre ; en spécifications, la note de chaque palier et le nombre de productions acceptables qu'il demande.
+4. **Il nomme ses productions depuis le tableau**, par « + Production » : un nom et une date. Chacune devient une colonne. Un tableau sans colonne dit quoi faire et montre « + Production ».
+5. **Il inscrit ses résultats au tableau**, au toucher ou au clavier (le tableau de notation existant, monté dans la vue simple).
+6. **Il voit la note de chaque élève** et exporte le CSV (l'export existant).
+7. **Il sauvegarde** : le bouton de l'en-tête s'appelle « Sauvegarder », à la même place, avec le même point d'état. Son menu s'ouvre sur la phrase arrêtée, puis deux gestes : enregistrer dans un fichier, ouvrir un fichier.
+8. **Il passe à la vue étendue** par le menu en haut à droite : il y retrouve sa classe, sa pratique, ses productions et ses résultats, aux mêmes endroits que tout utilisateur.
+9. **Il revient à la vue simple** : idem.
+
+Autour du parcours :
+
+- **La bascule** vit dans le menu. En vue simple, une seule ligne, « Vue étendue ». En vue étendue, le menu habituel, puis sous un filet, « Vue simple ».
+- **Basculer n'écrit rien dans les données.** Le choix reste sur l'appareil et ne voyage pas avec le codex.
+- **Aucun parcours d'assistance** ne se lance ni ne se propose en vue simple ; les infobulles et flèches automatiques y sont coupées.
+- **Quelqu'un qui a déjà des données** arrive en vue étendue. En vue simple, il voit ses groupes ; un groupe d'une autre pratique est marqué, et un mot dit pourquoi. Un sélecteur de groupe paraît dès qu'il y a plus d'un groupe.
+- **Le passage vers la vue étendue tient** : les 38 écrans s'ouvrent sans erreur. Trois écrans disaient faux ou ne disaient rien devant un trimestre né en coulisse ; ils disent maintenant ce qui manque et où le donner (le calendrier sans dates, l'assiduité sans horaire, le bandeau « ton espace est prêt » qui affirmait un horaire).
+- **`js/config.js` et `js/navigation.js` ne sont pas touchés.** Je n'ai pas eu besoin de l'autorisation : cinq sections neuves et une seconde barre suffisent.
+
+### Ce que j'ai supposé (une ligne chacune)
+
+- « Vide » se lit « aucun élève inscrit, dans aucun trimestre hors démonstration » (les élèves sont une liste plate par trimestre).
+- La démonstration ouverte, sans choix fait, donne la vue étendue : elle ne s'ouvre que de là. **Ajout à la décision de Cowork.**
+- Avoir bâti sa classe en vue simple vaut un choix : au rechargement, on y reste (sans quoi le novice basculerait en vue étendue dès qu'il a des élèves).
+- La grille de départ que l'application sème d'elle-même ne compte pas comme « une grille de l'utilisateur ».
+- En vue simple, une case évaluée avec une grille se lit et ne s'ouvre pas (l'éditeur est un écran de la vue étendue).
+- Le sélecteur de groupe liste les groupes du trimestre actif ; changer de trimestre reste un geste de la vue étendue.
+- La pratique installée s'appelle « Par standards » ou « Par spécifications », pas du nom du modèle (« N meilleures évaluations »), puisque la règle se change.
+- Une production neuve prend le rang suivant du cours : les colonnes suivent l'ordre où on les crée.
+- La règle sur les textes fixes du tableau (légende du point, phrase sur les critères) s'applique en vue simple seulement ; en vue étendue, les mots validés le 9 nov. ne bougent pas.
+- Sous un banc d'essai piloté, la vue par défaut reste l'étendue (voir « La preuve », dernier point).
+
+### Ce qui attend Grégoire
+
+Une question par ligne, avec ma recommandation.
+
+| # | Question | Recommandation |
+|---|---|---|
+| 1 | La carte 4 dit « Arrête les notes du trimestre », mais aucun geste n'arrête les notes. Le seul réglage proche, « Notes finalisées », compte zéro pour une production obligatoire non remise en standards : il change le sens de la note. | Pour le 11 : remplacer le texte par « Vois la note de chaque élève et exporte-les en CSV, prêtes pour ton relevé. » Décider ensuite si « Notes finalisées » s'offre en vue simple. |
+| 2 | Les valeurs de départ sont celles des modèles existants : 7 meilleures productions ; paliers à 90 (2 projets, 1 examen) et à 70 (1 projet, 1 examen). Un novice qui a trois productions lit donc « 7 ». | Garder pour le 11, puisque rien n'est inventé. Dire si un autre départ (« Toutes ») sert mieux la présentation du 27. |
+| 3 | « N dernières productions » suit l'ordre de création des colonnes, pas leur date. Une production ajoutée après coup avec une date ancienne compte comme la plus récente. | Accepter pour cette version ; c'est la lecture du calcul existant. |
+| 4 | En spécifications, « + Production » demande un troisième champ, le type, parce que le modèle a deux types (Projet, Examen) et qu'une production sans type n'entre pas dans la note. | Garder le champ. L'autre voie est un modèle à un seul type pour la vue simple, donc un modèle neuf. |
+| 5 | Le cours né en coulisse s'appelle « Mon cours » si le champ facultatif reste vide. Ce nom sort dans la colonne « Cours » du CSV. | Garder. |
+| 6 | Le geste d'enregistrement dit « codex » dans ses propres fenêtres (« Mettre à jour le codex », « Codex mis à jour »), et le rappel de sauvegarde dit « Mets ton codex à jour ». Le mot est donc lu hors de la phrase qui l'introduit. | Laisser pour cette version : la phrase l'introduit juste avant, et couper le rappel retirerait une protection contre la perte. |
+| 7 | Un novice qui rouvre son fichier sur un AUTRE appareil arrive en vue étendue (le choix ne voyage pas, décision de Cowork). | À trancher : c'est le cas du collègue qui passe du bureau à la maison. |
+| 8 | Quelqu'un qui a créé trimestre, cours et groupes en vue étendue, mais pas encore d'élèves, arrive en vue simple (c'est la définition de « vide » de Cowork). | Recommandation : compter aussi un trimestre hors démonstration comme « des données ». Je n'ai pas changé la règle sans accord. |
+| 9 | Les textes neufs ci-dessous. | À valider un à un. |
+
+### Les textes neufs (tous marqués PROPOSÉ dans `js/vue-simple.js`)
+
+Proposés par Cowork, repris tels quels :
+
+- Accueil, sous le titre : « Quatre étapes, de ta liste d'élèves à ta note finale. »
+- Carte 1 : « Ta classe » · « Colle ta liste d'élèves : DA, nom, prénom. » · « Coller ma liste »
+- Carte 2 : « Ta pratique » · « Choisis un modèle, par standards ou par spécifications, et la règle qui construit la note. » · « Choisir un modèle »
+- Carte 3 : « Tes résultats » · « Inscris un niveau, ou acceptable / non acceptable, dans un tableau : tes élèves en lignes, tes productions en colonnes. » · « Ouvrir le tableau »
+- Carte 4 : « Ta note finale » · « Arrête les notes du trimestre et exporte-les en CSV, prêtes pour ton relevé. » · « Voir les notes »
+- Menu : « Toutes les fonctions » sous « Vue étendue » ; « Ta notation seulement » sous « Vue simple ».
+
+Proposés par moi :
+
+- Barre : « Accueil », « Classe », « Pratique », « Résultats », « Note finale ».
+- Classe : « Colle ta liste d'élèves, une ligne par élève : DA, nom, prénom. » · « Nom du cours (facultatif) » · « Ta liste » · « Créer ma classe » · « Ajouter des élèves » · « Ajouter à ma classe » · « Choisir ma pratique » · en-têtes « DA », « Nom », « Prénom ».
+- Classe, retours : « Classe créée : N élèves. » · « N élèves ajoutés, N déjà inscrits ce trimestre. » · « Aucun élève lu. Une ligne par élève : DA, nom, prénom. » · « N lignes non lues : » · « le DA doit compter 7 chiffres » · « il manque le nom ou le prénom » · « ce DA est déjà dans la liste collée » · « La démonstration est ouverte. Quitte-la pour créer ta classe. » · « La classe n'a pas pu être créée. »
+- Nom du cours par défaut : « Mon cours ».
+- Groupe : « Groupe » · « Choisis un groupe » · « (autre pratique) » · « Un groupe dont la pratique n'est ni par standards ni par spécifications se suit en vue étendue. » · « Commence par ta classe : colle ta liste d'élèves. »
+- Pratique : « Choisis un modèle. Tu régleras ensuite la règle qui construit la note. » · « Par standards » · « Chaque production reçoit un niveau. La note se construit à partir des niveaux que la règle retient. » · « Choisir les standards » · « Par spécifications » · « Chaque production est acceptable ou non acceptable. La note dépend du nombre de productions acceptables. » · « Choisir les spécifications ».
+- Pratique, la règle : « Modèle » · « La règle qui construit la note » · « Nombre de productions retenues » · « Niveaux : » · « Note » · « Pour chaque note, le nombre de productions acceptables qu'il faut, par type. » · « Enregistrer la règle » · « Règle enregistrée. » · « Changer de modèle » · « Cette règle vaut pour les N groupes qui ont cette pratique. » · « La règle de cette pratique se change en vue étendue. » · « La pratique de ce groupe n'est ni par standards ni par spécifications : elle se règle en vue étendue. » · « La pratique n'a pas pu être enregistrée. »
+- Résultats, à la place des messages du tableau qui nomment la vue étendue : « Ce groupe n'a pas encore de pratique. Choisis un modèle : le tableau suivra sa règle. » · « Le tableau sert aux pratiques par standards et par spécifications. La pratique de ce groupe se suit en vue étendue. » · « Ce groupe n'a pas encore d'élèves. Colle ta liste pour remplir le tableau. » · « Ton tableau n'a pas encore de colonne. Ajoute ta première production : un nom et une date. »
+- « + Production » : « Nom de la production » · « Date » · « Type » · « Ajouter » · « Annuler » · « Donne un nom à la production. »
+- Note finale : « La note de chaque élève, construite par la règle de ta pratique à partir des résultats du tableau. » · en-tête « Élève » · « Aucune note à montrer : ce groupe n'a pas encore d'élèves. »
+- Sauvegarder : « Enregistrer dans un fichier » · « Ouvrir un fichier… » · « Ton fichier est à jour. » · « Ton fichier n'a pas tes derniers changements. »
+- Vue étendue, Cadre › Calendrier sans dates (`js/calendrier-vue.js`) : « Le calendrier se construit à partir des dates de ton trimestre, et ce trimestre n'en a pas encore. Tu peux les donner dans Cadre › Trimestre. »
+- Vue étendue, Suivi › Groupe sans horaire (`js/tableau-bord-apercu.js`) : « Assiduité non calculée : ce groupe n'a pas d'horaire. Tu peux le donner dans Cadre › Trimestre › Horaire. »
+
+Repris sans changement de textes déjà validés : les mots du tableau (dont « Exporter la synthèse (CSV) », « Réglages de la pratique », « Note provisoire »), et les libellés de la règle des standards (« N meilleures productions », « N dernières productions », « Toutes les productions »).
+
+### Ce que je n'ai pas pu vérifier
+
+- **WebKit, Safari, l'iPad** : rien. Tout a tourné sous Chromium seulement.
+- **La suite Playwright entière** (environ 360 bancs) : non lancée. Seuls le banc de la vue simple et celui du tableau ont tourné.
+- **Les données réelles de Grégoire** : aucune n'a été ouverte. Le cas « utilisateur existant » est éprouvé sur des données fictives semées.
+- **Sous 780 px de large** (téléphone) : la barre de la vue simple passe sur une seconde rangée ; écrit, non capturé ni éprouvé.
+- **Le toucher** : les essais cliquent à la souris et tapent au clavier.
+- **Un très gros corpus** : au démarrage, la vue étendue est posée d'abord dès qu'un trimestre existe, pour éviter un clignotement ; non mesuré sur un vrai corpus.
+
+### La preuve
+
+- **Vitest** : suite entière, 11 000 essais verts sur 11 000 (10 963 à la base du lot). Banc du lot : `tests/unit/vue-simple.test.js`, 33 essais — la règle de la vue par défaut (vide, démonstration, codex importé, choix), la navigation de la vue étendue identique (sections, ordre, sous-sections, barre, liste des écrans étroits, menu ; empreinte des deux fichiers protégés égale à celle de `b6d5926`), la liste collée, ce qui naît en coulisse, la règle.
+- **Playwright Chromium** : `tests/integration/vue-simple.spec.js`, 13 essais verts sur 13 ; `tableau-de-notation-1.spec.js`, 19 sur 19 (non-régression).
+  - le parcours 1 à 9 en entier, par l'interface, sur des données fictives ;
+  - la bascule aller-retour : même compte de clés et même empreinte, sur une application vide et sur une classe avec résultats ;
+  - sur des données de novice, 25 états d'écran lus (texte, infobulles, libellés lus par un lecteur d'écran) : aucun mot de la liste, « codex » dans la seule phrase, aucun chemin « › » vers la vue étendue ;
+  - la légende du point et la phrase sur les critères : absentes sans grille, présentes avec une grille ;
+  - aucun parcours proposé ; le menu ne porte que « Vue étendue » ;
+  - après le parcours, les 38 écrans de la vue étendue s'ouvrent sans erreur en console et aucun ne reste muet ;
+  - double clic, modèle repris, retour à la vue simple, rechargement, spécifications, utilisateur existant.
+- **Break-tests** : 28 défenses retirées une à une dans une copie de travail à part ; les 28 essais ont rougi ; code restauré. Deux essais étaient verts à tort au premier passage (les messages du tableau, le bandeau d'étape) : ils ont été durcis, puis ont rougi.
+- **Relecture par un agent neuf** : faite sur le diff, sans mes conclusions. Aucun défaut de sécurité ; la bascule n'écrit rien (confirmé). Ses constats et leur disposition : tableau ci-dessous.
+- **Captures** : 80 images dans `plans de travail/captures-2026-11-10-vue-simple/` — 20 écrans à 1180 et 820 px, en clair et en sombre. Noms fictifs.
+- **Sécurité** : toute valeur passe par `echapperHtml` ; aucun handler inline ; aucun `console.log`.
+- **Une conséquence mesurée en chemin, à connaître** : une application vide s'ouvre maintenant en vue simple, et presque tous les bancs Playwright existants partent d'une application vide. Le banc du tableau a rougi en entier. Remède retenu : sous un navigateur piloté par un banc, la vue par défaut reste l'étendue ; le banc de la vue simple éteint ce drapeau pour éprouver la vraie règle. **À confirmer sur le Mac par la suite WebKit entière avant toute fusion.**
+
+### Ce qui n'est pas dans cette version
+
+- Renommer ou retirer une production, retirer un élève : ces gestes restent ceux de la vue étendue.
+- Arrêter les notes (question 1).
+- Changer de trimestre depuis la vue simple.
+
+### Les constats, et ce qu'ils deviennent
+
+De la mesure (§ 11 et 12) et de la relecture neuve. Aucun n'est inscrit au BACKLOG : la règle du 24 août demande un symptôme vécu ; ceux qui le méritent sont proposés à Cowork.
+
+| Constat | Disposition |
+|---|---|
+| Calendrier vide sans explication ; assiduité muette sans horaire ; bandeau qui affirme un horaire | **Corrigé** dans le lot |
+| La pratique née en vue simple était invisible dans Conception › Pratiques (elle gardait l'auteur « Demo Labo Codex » du modèle) | **Corrigé** |
+| Double clic : deux cours, deux pratiques, deux colonnes | **Corrigé** (un geste à la fois) |
+| « Enregistrer la règle » écrasait un minimum d'évaluations réglé à part | **Corrigé** |
+| « Changer de modèle » laissait une pratique orpheline à chaque aller-retour | **Corrigé** (elle est reprise) |
+| Rang d'une production neuve faux dans un cours qui a déjà des productions | **Corrigé** |
+| Un geste commun (« Trimestres », « Quitter la démo ») ouvrait la vue étendue sans barre pour en sortir | **Corrigé** (retour à l'écran simple) |
+| Clignotement possible au démarrage sur un gros corpus | **Corrigé**, non mesuré sur un vrai corpus |
+| Messages faux à l'écriture (« 0 élève ajouté » sur un trimestre clos, « tes données n'ont pas changé ») | **Corrigé** |
+| Régressions possibles en vue étendue : service et mode « cours, tous groupes » pour le bandeau et l'assiduité ; ancien champ de date du calendrier | **Corrigé** |
+| Le mot « codex » dans le geste d'enregistrement et dans le rappel | **Remonte à Grégoire** (question 6) |
+| Un utilisateur sans élèves arrive en vue simple | **Remonte à Grégoire** (question 8) |
+| Un groupe sans horaire hérite des séances du dernier groupe activé (`js/horaire.js:179`) : un groupe né en vue simple, dans un trimestre où un autre groupe a un horaire, en reçoit un qui n'est pas le sien | **Préexistant, non corrigé.** Proposé à Cowork : il touche l'assiduité d'élèves réels |
+| Assigner une pratique écrit même dans un trimestre clos (`PratiqueManager.changerPratiqueActive`) | **Préexistant, non corrigé.** Proposé à Cowork |
+| Les trois modèles prêts portent l'auteur « Demo Labo Codex » ; installés par la vue étendue, ils seraient peut-être masqués de la même façon | **Non vérifié.** À mesurer par Cowork |
+| Un cours orphelin reste si la création du groupe échoue après celle du cours | **Refusé** pour cette version : cas d'un stockage plein, message corrigé |
+| « 1234567 De La Fontaine Jean » (séparé par des espaces) : le nom lu est « De » | **Refusé** : la virgule ou la tabulation lèvent l'ambiguïté ; à dire dans l'aide si le cas se vit |
+| La classe compte les élèves exclus, le tableau non | **Laissé** : sans effet sur la note |
 
 ---
 
