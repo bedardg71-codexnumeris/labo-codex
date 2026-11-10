@@ -46,7 +46,7 @@ async function capture(page, nom) {
     await page.evaluate(() => document.querySelectorAll('.notifications-pile > *').forEach((n) => n.remove()));
     await page.waitForFunction(() => document.getAnimations()
         .filter((a) => a.effect && a.effect.target && a.effect.target.closest
-            && a.effect.target.closest('#panneau-assistance, #parcours-voile, #parcours-bulle, #entete-menu-panneau, .accordeon'))
+            && a.effect.target.closest('#panneau-assistance, #parcours-bulle, #entete-menu-panneau, .accordeon'))
         .every((a) => a.playState !== 'running'));
     await page.screenshot({ path: path.join(CAPTURES, nom + '.png') });
 }

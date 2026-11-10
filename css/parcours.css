@@ -3,9 +3,10 @@
    plans de travail/CONSIGNE-LOT-2026-11-08-parcours-1-et-2.md ; esquisses 69, 70 et 73.
 
    Deux familles :
-   · le moteur (js/parcours-moteur.js) : un voile percé de trous sur les zones éclairées,
-     un contour dans l'orange de l'aide sur ce qu'il faut toucher, une bulle posée près
-     de la zone ;
+   · le moteur (js/parcours-moteur.js) : une flèche manuscrite de la bulle vers ce dont elle
+     parle, une pulsation dans l'orange de l'aide sur ce qu'il faut toucher, la section actuelle
+     mise en évidence, une bulle qu'on peut déplacer (lot « Les flèches des parcours », 10 nov.
+     2026 : le voile percé de trous est retiré) ;
    · le panneau « Assistance » (js/assistance.js) : il glisse de la droite, sous l'en-tête,
      ~430 px, pleine largeur sous 780 px.
 
@@ -30,44 +31,69 @@ body.mode-clair {
     --parcours-geste: var(--acc-bordure-active);
 }
 
-/* ---------- Le voile : un chemin plein, les trous laissent passer le toucher ---------- */
+/* ---------- Les flèches : de la bulle vers ce dont elle parle ----------
+   La couche est fixée en (0, 0) ; sa largeur et sa hauteur sont posées EN PX par le moteur (innerWidth ×
+   innerHeight), sans viewBox : le même repère que le contour. Jamais d'unité de fenêtre ici : sous Safari iPad,
+   barre d'adresse visible, la hauteur de fenêtre des feuilles de style dépasse innerHeight, et un dessin mis à
+   l'échelle glisse (sentinelle tests/unit). L'encre est celle du texte, pas l'orange : l'orange est le geste. */
 
-.parcours-voile {
+.parcours-fleches {
     position: fixed;
-    inset: 0;
-    width: 100vw;
-    height: 100vh;
-    z-index: 9000;
+    left: 0;
+    top: 0;
+    z-index: 9001;
     pointer-events: none;
+    overflow: visible;
 }
 
-.parcours-voile path {
-    pointer-events: visiblePainted;
-    fill: #000;
-    fill-rule: evenodd;
-    transition: fill-opacity 0.2s ease;
+.parcours-fleche path {
+    fill: none;
+    stroke-linecap: round;
+    stroke-linejoin: round;
 }
 
-.parcours-voile--normal path { fill-opacity: 0.55; }
-.parcours-voile--leger path  { fill-opacity: 0.3; }
-.parcours-voile--dense path  { fill-opacity: 0.65; }
-/* « Sans voile » (septième parcours, étape 9 ; la dernière bulle du huitième ; le neuvième, et le troisième sur les
-   écrans pleine largeur) : rien n'est assombri ni retenu, la bulle seule parle ; la page reste visible et touchable derrière elle. */
-.parcours-voile--aucun path  { fill-opacity: 0; pointer-events: none; }
+/* Sous le trait, un liseré de la couleur de la bulle : la flèche se lit sur n'importe quel fond de page. */
+.parcours-fleche-fond {
+    stroke: var(--surface-carte);
+    stroke-width: 6.5px;
+    stroke-opacity: 0.85;
+}
 
-/* ---------- Le contour : il marque où toucher, sans capter le toucher ---------- */
+.parcours-fleche-trait {
+    stroke: var(--texte-principal);
+    stroke-width: 2.5px;
+}
+
+/* ---------- Le contour : une pulsation là où toucher, sans capter le toucher ---------- */
 
 .parcours-contour {
     position: fixed;
     z-index: 9001;
     pointer-events: none;
-    border: 3px solid var(--parcours-contour);
     border-radius: 8px;
     box-sizing: border-box;
-    box-shadow: 0 0 0 3px rgba(232, 146, 58, 0.25);
+    box-shadow: 0 0 0 2px rgba(232, 146, 58, 0.55), 0 0 10px 2px rgba(232, 146, 58, 0.35);
+    animation: parcours-pulsation 2.6s ease-in-out infinite;
+}
+
+@keyframes parcours-pulsation {
+    0%, 100% { box-shadow: 0 0 0 2px rgba(232, 146, 58, 0.5), 0 0 8px 1px rgba(232, 146, 58, 0.25); }
+    50%      { box-shadow: 0 0 0 4px rgba(232, 146, 58, 0.7), 0 0 18px 5px rgba(232, 146, 58, 0.5); }
 }
 
 .parcours-contour[hidden] { display: none; }
+
+/* ---------- La section actuelle : celle dont parle la bulle, dans le menu ou la barre d'onglets du contour ----------
+   Posée et retirée par le moteur seul. Franche, sans pulsation : un fond éclairci et un cadre, dans la couleur du
+   texte de l'élément. Le fond est un calque blanc posé SUR le fond de l'élément, qui garde sa couleur et son texte :
+   un onglet actif au fond sombre et au texte blanc (le profil, en mode clair) reste lisible. Ni la graisse ni la
+   taille ne changent : rien ne bouge autour, le contour voisin reste à sa place. */
+.parcours-section-actuelle {
+    background-image: linear-gradient(rgba(255, 255, 255, 0.18), rgba(255, 255, 255, 0.18)) !important;
+    box-shadow: inset 0 0 0 2px currentColor !important;
+    border-radius: var(--radius-moyen, 8px);
+    opacity: 1 !important;
+}
 
 /* ---------- La bulle ---------- */
 
@@ -101,6 +127,36 @@ body.mode-clair {
     align-items: baseline;
     gap: 12px;
 }
+
+.parcours-bulle-tete .parcours-bulle-titre { flex: 1 1 auto; }
+
+/* La poignée (hors téléphone) : 46 × 46 px sous le doigt, ses marges négatives la gardent dans la tête sans la
+   grandir. touch-action : le doigt qui glisse sur elle déplace la bulle, pas la page. */
+.parcours-bulle-poignee {
+    flex: none;
+    align-self: center;
+    width: 46px;
+    height: 46px;
+    margin: -14px -14px -14px -8px;
+    padding: 0;
+    background: none;
+    border: 0;
+    border-radius: var(--radius-moyen, 8px);
+    color: var(--texte-secondaire);
+    font: inherit;
+    font-size: 20px;
+    line-height: 1;
+    cursor: grab;
+    touch-action: none;
+    -webkit-user-select: none;
+    user-select: none;
+}
+
+.parcours-bulle-poignee:hover { color: var(--texte-principal); }
+.parcours-bulle-poignee:focus-visible { outline: 2px solid var(--focus-ring-color); outline-offset: -4px; }
+.parcours-bulle.est-glissee,
+.parcours-bulle.est-glissee .parcours-bulle-poignee { cursor: grabbing; }
+.parcours-bulle.est-glissee { -webkit-user-select: none; user-select: none; }
 
 .parcours-bulle-titre {
     margin: 0;
@@ -593,7 +649,12 @@ body.parcours-actif .transition-bandeau { display: none; }
 .entete-menu-rang:empty { display: none; }
 
 @media (prefers-reduced-motion: reduce) {
-    .parcours-voile path,
+    /* Sans mouvement : un contour pointillé fixe là où toucher. */
+    .parcours-contour {
+        animation: none;
+        box-shadow: none;
+        border: 3px dashed var(--parcours-contour);
+    }
     .assistance-panneau,
     .assistance-interrupteur::before,
     .assistance-interrupteur::after { transition: none; }
@@ -603,10 +664,10 @@ body.parcours-actif .transition-bandeau { display: none; }
    À l'étape « Range ton fichier », la bulle doit être lue AVANT que la fenêtre du système
    s'ouvre : elle se pose sur l'aperçu « Mettre à jour le codex » (99999), puis au-dessus
    de la progression (100000). Elle passe sous les fenêtres qui suivent (« Ton codex est
-   prêt », « Il y est », l'échec : 9999), dont les boutons doivent rester touchables. Le voile,
-   lui, reste dessous : chaque fenêtre garde ses clics.
+   prêt », « Il y est », l'échec : 9999), dont les boutons doivent rester touchables.
    La classe n'est posée que par js/parcours-donnees.js, sur les éléments de son lancement. */
-.parcours-contour.parcours--par-dessus-les-fenetres { z-index: 100001; }
+.parcours-contour.parcours--par-dessus-les-fenetres,
+.parcours-fleches.parcours--par-dessus-les-fenetres { z-index: 100001; }
 .parcours-bulle.parcours--par-dessus-les-fenetres {
     z-index: 100002;
     /* Sur l'aperçu, la bulle se pose au-dessus de son bouton « Mettre à jour » (le contour) sans
@@ -621,9 +682,9 @@ body.parcours-actif .transition-bandeau { display: none; }
 .parcours-bulle.parcours--a-droite-de-l-apercu { max-height: calc(100vh - 32px); }
 
 /* Une étape qui se joue dans une fenêtre (l'assistant de la pratique, neuvième parcours ; repris par le troisième) :
-   la fenêtre est à 9999, au-dessus du voile. Le contour et la bulle passent au-dessus d'elle ; le voile reste dessous,
-   pour que la fenêtre et les questions qu'elle ouvre restent touchables. Posé par le parcours. */
-body.parcours-sur-modale .parcours-contour { z-index: 10010; }
+   la fenêtre est à 9999. Le contour, les flèches et la bulle passent au-dessus d'elle. Posé par le parcours. */
+body.parcours-sur-modale .parcours-contour,
+body.parcours-sur-modale .parcours-fleches { z-index: 10010; }
 body.parcours-sur-modale .parcours-bulle { z-index: 10011; }
 /* Le cinquième parcours (« Monter ton cours », 9 nov. 2026) : l'Inspecteur de la carte passe devant les palettes
    flottantes. Ouverte par défaut, la palette « Planificateur » (z-index 80) recouvre l'Inspecteur (60) à 1180 px : la

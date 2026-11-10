@@ -195,7 +195,6 @@
             titre: "D'où viennent ces signaux",
             texte: "Voilà le geste : savoir, avant d'entrer en classe, qui a besoin de toi et de quoi. Ces signaux ne viennent pas de nulle part, et ils ne valent que ce qui les nourrit. Remontons d'où ils viennent : tu sauras ce qu'il faudra faire pour les obtenir avec ta classe.",
             geste: "Touche « Évaluation », en haut.",
-            voile: 'dense',
             centre: true,
             avant: async function () { window.scrollTo(0, 0); },
             zones: function () { return zonesNav('evaluations'); },
@@ -206,9 +205,10 @@
             titre: 'Évaluer',
             texte: "Ici, tu reçois les productions de tes étudiant·es et tu les évalues, comme tu en as l'habitude. La différence : chaque geste laisse une trace. Chaque évaluation nourrit leur performance, chaque remise leur complétion. L'assiduité, elle, vient des présences que tu prends dans Suivi. Mais pour évaluer, il te faut tes outils.",
             geste: "Touche « Conception » pour voir d'où viennent tes outils.",
-            voile: 'leger',
             avant: async function () { aller('evaluations', 'importer'); window.scrollTo(0, 0); },
-            zones: function () { return zonesNav('conception'); },
+            // 10 nov. 2026 (« Les flèches des parcours ») : la zone est la section dont parle la bulle, « Évaluation »,
+            // et non plus le prochain bouton (il a sa pulsation). La flèche et la bulle vont à elle.
+            zones: function () { return zonesNav('evaluations'); },
             contour: function () { return boutonNav('conception'); },
             atteint: function () { return sectionCourante() === 'conception'; }
         },
@@ -216,9 +216,9 @@
             titre: 'Concevoir',
             texte: "Tes outils : les productions que tu demandes, tes grilles, tes échelles. Ce sont tes critères qui permettent à l'application de nommer un défi, comme la nuance tout à l'heure. Tu n'as pas à partir de zéro : commence par apporter ce que tu utilises déjà, puisque tes grilles disent déjà ce que tu juges important. Et tout cela s'inscrit dans un cadre.",
             geste: 'Touche « Cadre ».',
-            voile: 'leger',
             avant: async function () { aller('conception', 'materiel'); window.scrollTo(0, 0); },
-            zones: function () { return zonesNav('calendrier'); },
+            // Même règle qu'à l'étape 6 : la zone est « Conception », la section dont parle la bulle.
+            zones: function () { return zonesNav('conception'); },
             contour: function () { return boutonNav('calendrier'); },
             atteint: function () { return sectionCourante() === 'calendrier'; }
         },

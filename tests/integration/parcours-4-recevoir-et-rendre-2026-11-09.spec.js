@@ -1,5 +1,6 @@
 import { test, expect } from '@playwright/test';
 import { ouvrirPanneau, attendreEtape, contourSur, bulleNeCouvrePas, capture, bulle, ouvrirEspaceVide, mettreLaClasseEnPlace } from './harness/classe-de-banc.js';
+import { flecheVers, rienNeRetientLeToucher } from './harness/fleches-de-banc.js';
 import { leParcoursEntier, dossierDesCaptures } from './harness/parcours-3-de-banc.js';
 import { attendreApplication } from './harness/attendre-application.js';
 
@@ -198,7 +199,7 @@ test('« Recevoir les productions, rendre tes rétroactions », la voie des fich
     await contourSur(page, '#travaux-palette-tampons [title="Personnaliser"]');
     await capture(page, DOSSIER, `p4-4-${cap}`);
     // « Plus tard » à l'étape 4, la palette masquée par son bouton, un rechargement, « Reprendre » (relecture neuve du
-    // 9 nov. : l'Accueil sous un voile plein) : la production se rouvre et la palette revient (« affiche-la si elle est
+    // 9 nov. : l'Accueil, sans rien à toucher) : la production se rouvre et la palette revient (« affiche-la si elle est
     // masquée »), contour sur l'engrenage.
     await bulle(page).getByRole('button', { name: 'Plus tard' }).click();
     await page.click('#btn-toggle-tampons');
@@ -213,7 +214,10 @@ test('« Recevoir les productions, rendre tes rétroactions », la voie des fich
     await expect(page.locator('#evaluations-annoter')).toBeVisible();
     await expect(page.locator('#travaux-palette-tampons')).toBeVisible();
     await contourSur(page, '#travaux-palette-tampons [title="Personnaliser"]');
-    expect(await page.evaluate(() => document.getElementById('parcours-voile').getAttribute('class'))).toContain('parcours-voile--normal');
+    // ↻ 10 nov. 2026 (« Les flèches des parcours ») : l'essai lisait ici le voile « normal ». Le voile est retiré : la
+    // palette revenue est ce dont parle la bulle (une flèche y va), et rien ne retient plus le toucher.
+    await flecheVers(page, '#travaux-palette-tampons', 'étape 4, à la reprise');
+    await rienNeRetientLeToucher(page, [[12, 12], [600, 400]], 'étape 4, à la reprise');
     await capture(page, DOSSIER, `p4-4-reprise-${cap}`);
     await page.locator('#travaux-palette-tampons [title="Personnaliser"]').click();
     await expect(page.locator('#modal-retro-observations')).toBeVisible();

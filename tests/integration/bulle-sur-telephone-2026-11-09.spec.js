@@ -32,7 +32,7 @@ async function capture(page, nom) {
     await page.mouse.move(2, (page.viewportSize().height / 2) | 0);
     await page.waitForFunction(() => document.getAnimations()
         .filter((a) => a.effect && a.effect.target && a.effect.target.closest
-            && a.effect.target.closest('#panneau-assistance, #parcours-voile, #parcours-bulle'))
+            && a.effect.target.closest('#panneau-assistance, #parcours-bulle'))
         .every((a) => a.playState !== 'running'));
     await bulleStable(page);
     await page.screenshot({ path: path.join(CAPTURES, nom + '.png') });

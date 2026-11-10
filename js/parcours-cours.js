@@ -19,7 +19,7 @@
      l'activité) reçoit la variante de l'étape 6.
    · La carte est un canevas qui se déplace et se zoome : contours et bulle suivent les blocs ; le bloc visé
      par une étape est amené au milieu du canevas libre s'il n'y est pas entier (`amenerLeBloc`).
-   · Pas de voile : tout le canevas se touche (créer, écrire, tirer un lien, glisser un bloc).
+   · Tout le canevas se touche (créer, écrire, tirer un lien, glisser un bloc).
    · La condition d'entrée : une production dans le cours actif. Sur les vraies données : la démo ouverte
      se referme d'abord.
    ================================================================= */
@@ -320,7 +320,6 @@
         {
             titre: 'Ta compétence',
             texte: "La carte d'alignement n'est pas une tâche de plus : c'est un outil pour monter ton cours, et tu peux utiliser l'application sans elle. Elle montre comment tes leçons et tes productions mènent à la compétence de ton cours, et donc sur quoi repose la note que tu construis. Elle garde ces liens pour toi et signale ceux qui manquent : tu n'as plus à tout tenir en tête. Son principe : tu évalues ce que tu enseignes, et tu enseignes ce que tu évalues, au même niveau d'exigence. Commence par la compétence que ton cours doit développer : touche « Compétence » dans la palette « Nœuds », puis écris son énoncé, tel que le devis ministériel décrit la compétence et ses éléments. Tout le reste de ta carte s'y rattachera.",
-            voile: 'aucun',
             avant: allerALaCarte,
             zones: function () { return [boutonPalette('competence')]; },
             contour: function () { var c = duType('competence')[0]; return c ? bloc(c) : boutonPalette('competence'); },
@@ -329,7 +328,6 @@
         {
             titre: 'Ton idée maîtresse',
             texte: "Une idée maîtresse, c'est l'essentiel : ce qui restera quand l'étudiant·e aura oublié les détails, et autour de quoi tu organises ton contenu. Chaque compétence se décline en une ou plusieurs idées maîtresses. Touche « Idée maîtresse » dans la palette, puis écris-la. Relie-la ensuite à ta compétence : depuis l'un des petits cercles au bord de la compétence, tire un trait jusqu'à l'idée maîtresse. Le lien « se décline en » s'affiche. C'est par tes idées maîtresses que tes leçons se rattacheront à ta compétence. Une seule suffit pour l'instant. Pour aller plus loin, touche « Idées maîtresses » dans la frise, au-dessus de la carte : le guide s'ouvre à la page qui en parle.",
-            voile: 'aucun',
             avant: async function () {
                 await allerALaCarte();
                 await amenerLeBloc(competence);
@@ -348,7 +346,6 @@
         {
             titre: 'Ta leçon',
             texte: "Tes leçons structurent ton cours dans le temps : chacune porte sa semaine et sa séance. Touche « Leçon » dans la palette et donne-lui un titre. Dans son en-tête, choisis sa semaine (S1, S2…), puis sa séance dans la semaine (A pour la première rencontre, B pour la deuxième). Relie-la ensuite à ton idée maîtresse : tire un trait de l'idée maîtresse jusqu'à la leçon. Le lien « se concrétise dans » apparaît : c'est ce lien qui fait remonter tes objectifs et tes évaluations jusqu'à la compétence. Touche deux fois la leçon : l'Inspecteur affiche sa date. Si tu n'as pas encore ajouté tes journées sans cours et tes semaines spéciales dans Cadre › Trimestre, fais-le : sans elles, la date peut tomber à côté. Avec sa date, ta leçon apparaîtra aussi dans le profil d'un·e étudiant·e absent·e ce jour-là : tu sauras quelle matière il ou elle a manquée. Pour aller plus loin, touche « Leçons » dans la frise : le guide s'ouvre à la page qui en parle.",
-            voile: 'aucun',
             avant: async function () {
                 await allerALaCarte();
                 await amenerLeBloc(ideeReliee);
@@ -372,7 +369,6 @@
         {
             titre: 'Ton objectif',
             texte: "L'objectif de leçon est la boussole : c'est lui qui dit ce que l'étudiant·e saura faire à la fin, et c'est par rapport à lui que se choisissent les connaissances, les activités et l'évaluation. Touche le badge 🎯 dans l'en-tête de ta leçon : la zone des objectifs se déplie. Écris ton objectif en commençant par un verbe ; l'invite « Sera en mesure de… » t'y aide. Ta production porte déjà un objectif d'apprentissage : si c'est celui que vise cette leçon, reprends-le ici. Le verbe que tu choisis, tes activités devront le faire exercer et tes évaluations devront l'exiger. Une pastille « ! » apparaît à côté : aucun bloc ne sert encore cet objectif. Elle changera à mesure que tu le relieras. Pour aller plus loin, touche « Objectifs » dans la frise : le guide s'ouvre à la page qui en parle.",
-            voile: 'aucun',
             avant: async function () { retirerExtras(); await allerALaCarte(); await amenerLeBloc(laLecon); },
             zones: function () { return partiesDe(laLecon(), ['entete', 'objectifs', 'titre']); },
             contour: function () { var b = bloc(laLecon()); return b ? b.querySelector('.planif-badge-objectif') : null; },
@@ -381,7 +377,6 @@
         {
             titre: 'Ton activité',
             texte: "Le type d'activité dépend de ce que tu vises : un exercice de mémorisation ne développe pas la même chose qu'une analyse de cas. Touche « Activité » dans la palette, donne-lui un titre, puis glisse le bloc dans ta leçon par sa poignée ⠿. Touche deux fois cette poignée : dans l'Inspecteur, coche l'objectif qu'il sert. C'est ainsi que tu vérifies qu'aucun objectif ne reste sans moyen. La pastille de ton objectif passe à « ⚠ » : il est servi, mais aucune évaluation ne le vérifie encore. Pour aller plus loin, touche « Activités » dans la frise : le guide s'ouvre à la page qui en parle.",
-            voile: 'aucun',
             avant: async function () {
                 await allerALaCarte();
                 await amenerLeBloc(laLecon);
@@ -407,7 +402,6 @@
         {
             titre: 'Ton évaluation',
             get texte() { return varianteRendue ? TEXTE_6_APRES : TEXTE_6; },
-            voile: 'aucun',
             avant: async function () {
                 varianteRendue = !!evaluationApres() && !evaluationAlignee();
                 await allerALaCarte();
@@ -442,7 +436,6 @@
         {
             titre: 'Raffiner, si tu veux',
             texte: "Te voilà avec une première chaîne alignée, de la compétence à ta production. Tu peux t'arrêter là : ta carte dit déjà ce que ta production vérifie, et quand tu l'enseignes. Tu peux aussi la raffiner autant que tu le veux. Quelques pistes, à ton rythme : tes autres leçons, chacune avec ses objectifs ; les connaissances que tes activités font acquérir ; le niveau cognitif de chaque bloc, dans l'Inspecteur, pour que tes activités et tes évaluations visent le même niveau d'exigence ; ta démarche, comme l'enseignement explicite, si c'est la tienne ; le « Planificateur », qui place tes leçons sur les semaines du trimestre. Dans « Actions », « Exporter le plan… » en tire ton plan de cours, et « Télécharger un modèle… » te permet de faire relire ta carte par l'IA de ton choix, sans qu'elle soit modifiée. Dans « Consulter la bibliothèque », « Garder dans ma bibliothèque » la reprend d'un trimestre à l'autre, et « Exporter » en fait un fichier que tes collègues peuvent importer. Le guide t'accompagne à chaque pas.",
-            voile: 'aucun',
             centre: true,
             sansSortie: true,
             avant: async function () { retirerExtras(); },

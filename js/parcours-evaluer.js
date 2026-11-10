@@ -53,19 +53,6 @@
 
     function sousSectionVisible(id) { return vis(el(id)); }
 
-    /**
-     * LE VOILE D'UNE ÉTAPE QUI CHANGE D'ÉCRAN EN ROUTE (le moteur le pose à l'entrée de l'étape). Sur une fiche ou un
-     * écran pleine largeur (la production, l'évaluation, la cartouche), un voile percé laisse la bulle sans place : le
-     * moteur la range au bord de l'écran, et elle couvrait ce qu'il faut toucher (« Verrouiller », « Consignes
-     * transmises », mesuré sous Chromium le 9 nov.). Là, pas de voile (`aucun`, la règle des parcours 8 et 9) : tout
-     * reste touchable, et la bulle s'accroche à ce qu'il faut toucher, qu'elle suit au défilement.
-     */
-    function poserVoile(nom) {
-        var v = el('parcours-voile');
-        var cls = 'parcours-voile parcours-voile--' + nom;
-        if (v && v.getAttribute('class') !== cls) v.setAttribute('class', cls);
-    }
-
     /** Le premier champ visible encore vide de la liste (par id), sinon `fin` : le contour suit ce qui reste à remplir. */
     function premierAFaire(idsChamps, fin) {
         for (var k = 0; k < idsChamps.length; k++) {
@@ -75,9 +62,8 @@
         return fin;
     }
 
-    /** Une zone pleine largeur : pas de voile, et seule la cible est désignée (la bulle s'y accroche). */
+    /** Une zone pleine largeur : seule la cible est désignée (la bulle s'y accroche, qu'elle suit au défilement). */
     function surLaCible(cible) {
-        poserVoile('aucun');
         return [cible];
     }
 
@@ -275,7 +261,7 @@
     /**
      * Sur la fiche de la production, la bulle ne couvre jamais les menus « Grille de critères d'évaluation » ni
      * « Échelle de performance » (Grégoire, 9 nov., 13 h 37) : ils sont désignés avec le champ visé, et le moteur pose
-     * la bulle hors de leur union. Pas de voile, la bulle accrochée au champ (gardé, même décision).
+     * la bulle hors de leur union. La bulle accrochée au champ (gardé, même décision).
      */
     function surLaFiche(cible) {
         var menus = ['productionGrille', 'productionEchelle'].map(function (id) {
@@ -394,7 +380,7 @@
     function boutonAppliquer() { return qs('#conteneurEditionPratique [data-action="appliquerPratiqueAuCoursActive"]'); }
 
     // « Appliquer au cours actif » est au pied de la fiche (à y ≈ 1 867 px pour 900 px d'écran, mesuré par la session H) :
-    // la fiche ouverte, il est amené dans la vue ; le voile ne laisserait pas défiler jusqu'à lui. La fiche se dessine
+    // la fiche ouverte, il est amené dans la vue. La fiche se dessine
     // en plusieurs temps et peut remonter la page : il y est ramené pendant les vingt premiers passages de la sonde
     // (environ deux secondes et demie), puis la personne garde la main.
     var appliquerAmene = 0;
@@ -466,8 +452,6 @@
         var cible = ouNommerLaCartouche();
         if (ficheDe(lireCtx().productionId)) { amenerLaCartouche(); return surLaFiche(cible); }
         cartoucheAmenee = 0;
-        // Sur la page des cartouches, la matrice reste touchable (pas de voile) ; dans la liste, la ligne est éclairée.
-        poserVoile(sousSectionVisible('conception-productions') ? 'normal' : 'aucun');
         return [cible];
     }
 
@@ -511,7 +495,6 @@
             },
             zones: function () {
                 if (ficheProductionOuverte()) return surLaFiche(ouToucherProduction());
-                poserVoile('normal');
                 return [qs('#conception-productions .rangee-selection')];
             },
             contour: function () {
@@ -523,7 +506,6 @@
         {
             titre: 'Tes consignes',
             texte: "Écris ce que tes étudiant·es doivent savoir pour réussir : l'objectif d'apprentissage, la tâche, les consignes précises. Touche « Préparer le PDF » : la feuille de consignes et ta grille en sortent prêtes à remettre. Remettre la grille avec la tâche, c'est leur dire d'avance sur quoi leur production sera évaluée. Quand la feuille est remise, pose la date de remise et coche « Consignes transmises » : la production entre alors au calendrier. Dès ta première évaluation, ce que tes étudiant·es ont remis compte dans leur complétion, et tes évaluations, dans leur performance.",
-            voile: 'aucun',
             avant: ouvrirLaProduction,
             // La date et la case, ensemble : la bulle se pose au-dessus ou au-dessous du bloc, sans couvrir la date.
             zones: function () { return [el('sectionPlanification') || caseConsignes()]; },
@@ -541,7 +523,6 @@
             },
             zones: function () {
                 if (ecranEvaluationVisible()) return surLaCible(ouToucherEnEvaluant());
-                poserVoile('normal');
                 return [rangeeDe(ligneDeLaListe(lireCtx().productionId))];
             },
             contour: function () {
@@ -612,7 +593,6 @@
             zones: function () {
                 if (cartoucheCreee()) return zonesPourNommer();
                 if (ficheCartoucheOuverte()) return surLaCible(ouToucherCartouche());
-                poserVoile('normal');
                 return [qs('#conception-retroactions .rangee-selection')];
             },
             contour: function () {
@@ -636,7 +616,6 @@
             },
             zones: function () {
                 if (ecranEvaluationVisible()) return surLaCible(ouToucherEnReecrivant());
-                poserVoile('normal');
                 var ctx = lireCtx();
                 return [rangeeDe(ligneDeLaListe(ctx.productionId, ctx.evaluationDA))];
             },

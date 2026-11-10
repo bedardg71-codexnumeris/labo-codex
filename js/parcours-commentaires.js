@@ -23,7 +23,6 @@
    CE QUE LE MOTEUR N'A PAS, CONTOURNÉ SANS LE REFONDRE (lot « Les deux parcours »)
      · un bouton de bulle qui ne paraît qu'à une condition (« Continuer » des étapes 3 à 6) :
        la sonde de l'étape (`atteint`, appelée toutes les 120 ms) montre ou cache le bouton ;
-     · une bulle sans voile (l'étape 11) : la classe `parcours-voile--aucun` (css/parcours.css).
    ================================================================= */
 (function () {
     'use strict';
@@ -722,7 +721,6 @@
         }),
         loin: Object.assign({}, TEXTES.loin, {
             centre: true,
-            voile: 'aucun',
             sansSortie: true,
             boutons: [{ libelle: 'Terminer', primaire: true, action: function () { terminer(); } }]
         })
@@ -759,6 +757,27 @@
     var DEF = { id: ID, etapes: [], lienSortie: 'Plus tard' };
 
     function poserChemin(cles) { DEF.etapes = cles.map(function (k) { return ETAPES[k]; }); }
+
+    /**
+     * LA GARDE DE L'ÉTAPE 1 (lot « Les flèches des parcours », 10 nov. 2026 : le voile du moteur est retiré). L'étape
+     * demande d'ajouter un critère et de choisir son type. Le « Type » d'un critère DÉJÀ LÀ était sous le voile : changé,
+     * il s'écrirait aussitôt dans la grille enregistrée et ferait avancer l'étape. Il ne répond pas le temps de l'étape :
+     * le menu reprend sa valeur, le changement ne va pas plus loin. Le modèle de `garderOuvrir` (js/parcours-donnees.js).
+     */
+    function garderLeType(ev) {
+        var m = M();
+        if (!m || !m.joue(DEF) || DEF.etapes[m.etapeCourante()] !== ETAPES.grille) return;
+        var menu = ev.target && ev.target.closest ? ev.target.closest('select[data-on-change^="modifierTypeCritere"]') : null;
+        if (!menu) return;
+        var ajoutee = carteAjoutee();
+        if (ajoutee && ajoutee.contains(menu)) return;
+        var avant = [].slice.call(menu.options).find(function (o) { return o.defaultSelected; });
+        if (avant) menu.value = avant.value; else menu.selectedIndex = 0;
+        ev.preventDefault();
+        ev.stopPropagation();
+    }
+    // En capture sur window : avant le répartiteur des data-on-change (main.js, sur document).
+    window.addEventListener('change', garderLeType, true);
 
     /**
      * À l'entrée de l'étape i (le moteur l'appelle avant de la lire) : le chemin se reconstruit,

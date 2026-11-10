@@ -74,14 +74,14 @@ export async function contourSur(page, selecteur, idContour = 'parcours-contour'
 }
 
 /**
- * Deux passages de la sonde du moteur : le voile reçoit une marque, et chaque passage la remplace (`sonder` dessine le
- * voile, puis lit l'état atteint, d'un seul tenant). Une condition observable, pas un délai : après elle, une étape qui
+ * Deux passages de la sonde du moteur : la couche des flèches reçoit une marque (sa largeur), et chaque passage la
+ * remplace (`sonder` la dimensionne, puis lit l'état atteint, d'un seul tenant ; 10 nov. 2026 : le voile est retiré). Une condition observable, pas un délai : après elle, une étape qui
  * devait avancer l'a fait.
  */
 export async function deuxSondes(page) {
     for (let k = 0; k < 2; k++) {
-        await page.evaluate(() => document.querySelector('#parcours-voile path').setAttribute('d', 'M0,0'));
-        await page.waitForFunction(() => document.querySelector('#parcours-voile path').getAttribute('d') !== 'M0,0');
+        await page.evaluate(() => document.getElementById('parcours-fleches').setAttribute('width', '1'));
+        await page.waitForFunction(() => document.getElementById('parcours-fleches').getAttribute('width') !== '1');
     }
 }
 
@@ -116,7 +116,7 @@ export async function capture(page, dossier, nom) {
     await page.evaluate(() => document.querySelectorAll('.notifications-pile > *').forEach((n) => n.remove()));
     await page.waitForFunction(() => document.getAnimations()
         .filter((a) => a.effect && a.effect.target && a.effect.target.closest
-            && a.effect.target.closest('#panneau-assistance, #parcours-voile, #parcours-bulle, #entete-menu-panneau, .accordeon'))
+            && a.effect.target.closest('#panneau-assistance, #parcours-bulle, #entete-menu-panneau, .accordeon'))
         .every((a) => a.playState !== 'running'));
     await page.screenshot({ path: path.join(dossier, nom + '.png') });
 }

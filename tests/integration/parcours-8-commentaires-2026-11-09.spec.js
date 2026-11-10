@@ -34,7 +34,7 @@ async function capture(page, nom) {
     await page.evaluate(() => window.accompagnement && window.accompagnement.masquerHover && window.accompagnement.masquerHover());
     await page.waitForFunction(() => document.getAnimations()
         .filter((a) => a.effect && a.effect.target && a.effect.target.closest
-            && a.effect.target.closest('#panneau-assistance, #parcours-voile, #parcours-bulle, #entete-menu-panneau'))
+            && a.effect.target.closest('#panneau-assistance, #parcours-bulle, #entete-menu-panneau'))
         .every((a) => a.playState !== 'running'));
     await page.screenshot({ path: path.join(CAPTURES, nom + '.png') });
 }
@@ -320,6 +320,38 @@ async function ecrireLesQuatreFormes(page) {
 }
 
 /** Les étapes 1 à 6 sur une grille NEUVE : le critère algorithmique réglé dans son atelier, deux codes. */
+// ↻ 10 nov. 2026 (« Les flèches des parcours ») : le voile du moteur est retiré, toute la page se touche. À l'étape 1,
+// le « Type » d'un critère DÉJÀ LÀ était sous le voile ; changé, il s'écrirait dans la grille enregistrée et ferait
+// avancer l'étape. La garde `garderLeType` (js/parcours-commentaires.js) le neutralise le temps de l'étape.
+test('étape 1, sans voile : le « Type » d’un critère déjà là ne répond pas (rien ne s’écrit, l’étape n’avance pas) ; celui du critère ajouté, oui', async ({ page }) => {
+    await ouvrirEspace(page, 1180);
+    await ouvrirPanneau(page);
+    await item(page).locator('.assistance-parcours-bouton').click();
+    await attendreTitre(page, 'Ta grille');
+    await page.selectOption('#menuGrilles', 'G_P8_1');
+    const types = '#listeCriteres select[data-on-change="modifierTypeCritereGrilleHandler"]';
+    await expect(page.locator(types)).toHaveCount(1);
+    const typeEnBase = () => page.evaluate(async () => (await obtenirGrilleParId('G_P8_1')).criteres.map((c) => c.type || 'holistique'));
+    const avant = await typeEnBase();
+    const affiche = await page.locator(types).first().inputValue();
+    expect(affiche).not.toBe('algorithmique');
+
+    // Le critère déjà là : le menu reprend sa valeur, rien ne s'écrit, l'étape reste la première.
+    await page.locator(types).first().selectOption('algorithmique');
+    await expect(page.locator(types).first()).toHaveValue(affiche);
+    await page.waitForFunction(() => { window.__g = (window.__g || 0) + 1; return window.__g > 3; }, null, { polling: 150 });
+    expect(await typeEnBase()).toEqual(avant);
+    await expect(rang(page)).toHaveText(/^1 sur /);
+    await expect(bulle(page).locator('.parcours-bulle-titre')).toHaveText('Ta grille');
+
+    // Le critère ajouté : son « Type » répond, et l'étape avance (ce que l'étape demande).
+    await page.click('#conteneurEditionGrille [data-action="ajouterCritereGrille"]');
+    await expect(page.locator(types)).toHaveCount(2);
+    await page.locator(types).last().selectOption('algorithmique');
+    await attendreTitre(page, 'Ce que tu comptes');
+    expect(await typeEnBase()).toEqual(avant.concat(['algorithmique']));
+});
+
 async function reglerUneGrilleNeuve(page, cap = async () => {}) {
     await ouvrirPanneau(page);
     await item(page).locator('.assistance-parcours-bouton').click();

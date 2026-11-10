@@ -34,7 +34,7 @@ async function capture(page, nom) {
     await page.evaluate(() => window.accompagnement && window.accompagnement.masquerHover && window.accompagnement.masquerHover());
     await page.waitForFunction(() => document.getAnimations()
         .filter((a) => a.effect && a.effect.target && a.effect.target.closest
-            && a.effect.target.closest('#panneau-assistance, #parcours-voile, #parcours-bulle, #entete-menu-panneau'))
+            && a.effect.target.closest('#panneau-assistance, #parcours-bulle, #entete-menu-panneau'))
         .every((a) => a.playState !== 'running'));
     // La sonde du moteur replace la bulle toutes les 120 ms : la capture attend qu'elle ne bouge plus.
     await page.waitForFunction(() => {

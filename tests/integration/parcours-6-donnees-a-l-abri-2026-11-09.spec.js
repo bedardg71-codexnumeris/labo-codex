@@ -53,7 +53,7 @@ async function capture(page, nom) {
     await page.evaluate(() => window.accompagnement && window.accompagnement.masquerHover && window.accompagnement.masquerHover());
     await page.waitForFunction(() => document.getAnimations()
         .filter((a) => a.effect && a.effect.target && a.effect.target.closest
-            && a.effect.target.closest('#panneau-assistance, #parcours-voile, #parcours-bulle, .aide-contextuelle-modal, .aide-contextuelle-overlay'))
+            && a.effect.target.closest('#panneau-assistance, #parcours-bulle, .aide-contextuelle-modal, .aide-contextuelle-overlay'))
         .every((a) => a.playState !== 'running'));
     await page.screenshot({ path: path.join(CAPTURES, nom + '.jpg'), type: 'jpeg', quality: 85 });
 }

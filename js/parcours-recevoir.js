@@ -56,13 +56,7 @@
 
     function enDemo() { return typeof estEnModeDemo === 'function' && estEnModeDemo(); }
 
-    function poserVoile(nom) {
-        var v = el('parcours-voile');
-        var cls = 'parcours-voile parcours-voile--' + nom;
-        if (v && v.getAttribute('class') !== cls) v.setAttribute('class', cls);
-    }
-
-    /** Une fenêtre (9999) au-dessus du voile : la bulle et le contour passent au-dessus d'elle (règle du parcours 9). */
+    /** Une fenêtre (9999) : la bulle, les flèches et le contour passent au-dessus d'elle (règle du parcours 9). */
     function surModale(oui) {
         document.body.classList.toggle('parcours-sur-modale', !!oui && window.innerWidth >= 700);
     }
@@ -143,7 +137,7 @@
 
     /**
      * « Reprendre » aux étapes 4 à 7 (relecture neuve du 9 nov. : après un rechargement, l'étape 4 retombait sur l'Accueil
-     * sous un voile plein, sans rien à toucher) : la production retenue se rouvre comme « Actions › Annoter » l'ouvre,
+     * sans rien à toucher) : la production retenue se rouvre comme « Actions › Annoter » l'ouvre,
      * puis, au besoin, en mode Évaluer, comme « Annoter ▾ › Évaluer ». Rien ne s'écrit.
      */
     async function revenirALaProduction(modeVoulu) {
@@ -367,7 +361,6 @@
     var ETAPE_2 = {
         titre: "Vérifie avant d'importer",
         texte: "Avant d'importer, vérifie trois choses. Sous « Inspecteur », la production : elle s'applique à tout le lot. Sous « Aperçu », pour chaque fichier, l'étudiant·e que l'application a trouvé·e par son DA ; s'il manque un nom, touche le fichier et choisis-le sous « Inspecteur ». Sous « Originaux », les pages remises par un·e même étudiant·e : si elles arrivent séparées, coche-les, touche « Réunir en une copie », puis remets-les dans l'ordre. Une photo est de travers ou trop sombre ? « Réglages spécifiques » la pivote, la recadre et en règle le contraste. Touche ensuite « Importer », puis confirme. Un fichier mal associé se règle ici d'un geste ; une fois importé, il faut passer par la liste.",
-        voile: 'aucun',
         avant: async function () {
             aller('evaluations', 'importer');
             await attendre(function () { return !!qs('.pipeline-col-originaux'); }, 3000);
@@ -415,9 +408,7 @@
         zones: function () {
             var f = fenetreTampons();
             surModale(vis(f));
-            if (vis(f)) { poserVoile('normal'); return [f.querySelector('.modal-contenu') || f]; }
-            // Sans palette à éclairer (la production n'a pas pu se rouvrir), pas de voile : rien ne doit devenir intouchable.
-            poserVoile(vis(paletteTampons()) ? 'normal' : 'aucun');
+            if (vis(f)) return [f.querySelector('.modal-contenu') || f];
             return [paletteTampons()];
         },
         contour: function () {
@@ -435,7 +426,6 @@
     var ETAPE_5 = {
         titre: 'Annoter',
         texte: "Annote la production comme tu le ferais sur papier : souligne, encercle, écris dans la marge. Ces traces restent sur le fichier que ton étudiant·e recevra. Pose aussi tes tampons là où tu observes quelque chose : sur la production, le tampon montre l'endroit ; dans la synthèse, sa phrase dit ce que tu as observé, et combien de fois. Quand tu as fini, touche « Annoter ▾ », au-dessus de la production, et choisis « Évaluer ».",
-        voile: 'aucun',   // la production entière s'annote : rien n'est voilé
         avant: function () { return revenirALaProduction(); },
         // Groupe 3 (9 nov., WebKit) : « Annoter ▾ » ouvert, son menu entre dans l'étape. La bulle l'évite (elle couvrait
         // « Évaluer », le geste même qu'elle demande, mesuré à 1180 px) et le contour passe sur « Évaluer ».
@@ -456,7 +446,6 @@
     var ETAPE_6_FICHIER = {
         titre: 'Évaluer',
         texte: "Te voici en mode Évaluer. Dans « Paramètres », ta grille, ton échelle et ta cartouche sont déjà choisies : ce sont celles de ta production. Dans « Évaluation », choisis pour chaque critère le niveau ou les points que tu attribues ; la note se calcule à mesure.",
-        voile: 'aucun',
         avant: async function () { critereTenu.reprendre(); await revenirALaProduction('evaluer'); },
         zones: function () { return [critereAAttribuer() || el('travaux-palette-eval-droite')]; },
         contour: critereAAttribuer,
@@ -474,8 +463,7 @@
             amenerDeCote(menuActions('evaluer'));
         },
         zones: function () {
-            if (ecranEvaluationVisible()) { poserVoile('aucun'); return [critereAAttribuer() || boutonVerrou()]; }
-            poserVoile('normal');
+            if (ecranEvaluationVisible()) return [critereAAttribuer() || boutonVerrou()];
             return [rangeeDe(menuActions('evaluer'))];
         },
         contour: function () { return ecranEvaluationVisible() ? critereAAttribuer() : menuActions('evaluer'); },
@@ -485,7 +473,6 @@
     var ETAPE_7_FICHIER = {
         titre: 'Ta rétroaction',
         texte: texte7(TEXTE_7_SPECIFIQUE),
-        voile: 'aucun',
         avant: function () { return revenirALaProduction('evaluer'); },
         zones: function () { return [boutonVerrou()]; },
         contour: boutonVerrou,
@@ -495,7 +482,6 @@
     var ETAPE_7_SANS_FICHIER = {
         titre: 'Ta rétroaction',
         texte: texte7(TEXTE_7_SANS_FICHIER),
-        voile: 'aucun',
         zones: function () { return [boutonVerrou()]; },
         contour: boutonVerrou,
         atteint: verrouNeuf

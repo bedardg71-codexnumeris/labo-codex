@@ -22,7 +22,7 @@
    Ce qu'il a fallu au moteur, sans le refondre (dit dans le rapport) : les étapes se reconstruisent
    quand la famille est connue (le moteur relit `def.etapes`) ; « Continuer » paraît selon l'état
    (`montrerBouton`, appelé à chaque passage de la sonde) ; la bulle passe au-dessus de l'assistant
-   (classe `parcours-sur-modale`) ; « sans voile » (`voile: 'aucun'`) ; « Dossier PDF » annonce son
+   (classe `parcours-sur-modale`) ; « Dossier PDF » annonce son
    fichier (`dossierPdfLivre`, travaux-export-pdf.js).
    ================================================================= */
 (function () {
@@ -402,12 +402,6 @@
         zone.style.display = visibles ? '' : 'none';
     }
 
-    /** Le voile d'une étape qui change de lieu en cours de route (le moteur le pose à l'entrée de l'étape). */
-    function poserVoile(nom) {
-        var v = el('parcours-voile');
-        if (v) v.setAttribute('class', 'parcours-voile parcours-voile--' + nom);
-    }
-
     function suivante(m) {
         m.allerA(m.etapeCourante() + 1);
     }
@@ -690,7 +684,6 @@
             }
         },
         evaluer: {
-            voile: 'leger',
             avant: async function () {
                 if (!enEvaluation()) { aller('evaluations', 'liste'); window.scrollTo(0, 0); }
                 // Ce qui était déjà verrouillé : seule une évaluation verrouillée ensuite fait avancer.
@@ -699,7 +692,7 @@
                 }
             },
             zones: function () {
-                // Dans l'évaluation, sans voile (voir `atteint`) : la zone ne sert qu'à poser la bulle près de ce
+                // Dans l'évaluation : la zone ne sert qu'à poser la bulle près de ce
                 // qu'il faut toucher. Sans copie, les trois panneaux s'empilent sur toute la page : éclairés ensemble,
                 // ils ne laissaient à la bulle aucune place, et elle couvrait le cadenas.
                 if (enEvaluation()) return [this.contour()].filter(Boolean);
@@ -711,9 +704,6 @@
                 return menuActions(ligneAEvaluer());
             },
             atteint: function () {
-                // Le voile suit le lieu : léger sur la liste, aucun dans l'évaluation, où la personne touche les
-                // critères, la palette « Rétroaction » et le cadenas, loin les uns des autres.
-                poserVoile(enEvaluation() ? 'aucun' : 'leger');
                 var avant = lireCtx().verrouilleesAvant || [];
                 var e = verrouillees().find(function (x) { return avant.indexOf(x.id) === -1; });
                 if (!e) return false;
@@ -738,7 +728,6 @@
         },
         'plus-loin': {
             centre: true,
-            voile: 'aucun',
             sansSortie: true,
             boutons: [{ libelle: 'Terminer', primaire: true, action: function () { terminer(); } }]
         }
@@ -754,7 +743,7 @@
         // `sansSortie` au toucher : vrai, il passe la touche à `surEchap`.
         if (id === 'pratique') Object.defineProperty(etape, 'sansSortie', { get: wizardOuvert, enumerable: true });
         if (TEXTES[id].geste) etape.geste = TEXTES[id].geste;
-        ['voile', 'centre', 'sansSortie', 'avant', 'zones', 'contour', 'atteint', 'boutons'].forEach(function (k) {
+        ['centre', 'sansSortie', 'avant', 'zones', 'contour', 'atteint', 'boutons'].forEach(function (k) {
             if (d[k] !== undefined) etape[k] = d[k];
         });
         // Chaque étape repart de la forme ordinaire de la bulle (corrections du 9 nov. : étapes 1 et 3).

@@ -12,12 +12,13 @@
    les confronte à la consigne. Les cinq autres refus et la phrase de l'étape 2 (`REFUS_9_NOV`) sont
    ceux que Grégoire a validés le 9 nov. (9 h 37 à 9 h 39), posés mot pour mot : la même sentinelle les exige.
 
-   Ce que le moteur (parcours-moteur.js) n'a pas, et que ce fichier contourne sans le refondre :
-   · garder sous le voile une partie d'une zone éclairée (les pastilles d'absence et de production
-     de l'étape 3, le statut de l'étape 8). Un trou du voile ne peut pas contenir de plein : un
-     second chemin, posé dans le SVG du voile (#parcours-masques), recouvre ces éléments. Il part
-     avec le voile quand le moteur se ferme ;
-   · un voile qui ne voile rien (l'étape 9, « sans voile ») : la variante `aucun` de parcours.css.
+   LES GARDES (lot « Les flèches des parcours », 10 nov. 2026 : le voile du moteur est retiré, toute la
+   page se touche). Ce qui restait sous le voile, parce que son toucher casse l'étape, ne répond pas le
+   temps de l'étape : les pastilles d'absence et de production de l'étape 3 et les liens des cartes de
+   l'étape 4 (ils quittent le profil), le statut de l'étape 8 (il écrirait sur une vraie intervention).
+   Une étape les nomme dans sa propriété `gardes` ; un écouteur en capture les neutralise (`garder`,
+   le modèle de `garderOuvrir`, js/parcours-donnees.js). À l'étape 6, une intervention déjà enregistrée,
+   rouverte depuis l'historique, n'est pas prise pour la fiche neuve attendue.
    ================================================================= */
 (function () {
     'use strict';
@@ -229,27 +230,27 @@
         await attendre(function () { return ongletActif(section); }, 2000);
     }
 
-    // ---------- Les masques : ce qui reste sous le voile dans une zone éclairée ----------
+    // ---------- Les gardes : ce qui ne répond pas le temps d'une étape ----------
 
-    function masquer(els) {
-        var svg = document.getElementById('parcours-voile');
-        if (!svg) return;
-        var p = document.getElementById('parcours-masques');
-        if (!p) {
-            p = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-            p.setAttribute('id', 'parcours-masques');
-            // Des masques qui se chevauchent ne doivent pas se rouvrir l'un l'autre (pair-impair).
-            p.style.fillRule = 'nonzero';
-            svg.appendChild(p);
-        }
-        var d = '';
-        (els || []).forEach(function (el) {
-            if (!M().visible(el)) return;
-            var r = el.getBoundingClientRect();
-            d += 'M' + (r.left - 2) + ',' + (r.top - 2) + ' h' + (r.width + 4) + ' v' + (r.height + 4) + ' h' + (-(r.width + 4)) + ' z ';
-        });
-        p.setAttribute('d', d);
+    /** L'étape que ce parcours joue en ce moment, sinon null (le moteur fermé, ou un autre parcours). */
+    function etapeJouee() {
+        var m = M();
+        return m && m.joue(DEF) ? ETAPES[m.etapeCourante()] || null : null;
     }
+
+    /** Un toucher sur ce que l'étape garde ne va pas plus loin : ni son action, ni le répartiteur des data-action. */
+    function garder(ev) {
+        var etape = etapeJouee();
+        if (!etape || !etape.gardes) return;
+        var liste = [];
+        try { liste = etape.gardes() || []; } catch (e) { liste = []; }
+        var garde = liste.some(function (el) { return el && (el === ev.target || el.contains(ev.target)); });
+        if (!garde) return;
+        ev.preventDefault();
+        ev.stopPropagation();
+    }
+    // En capture sur window : avant le répartiteur des data-action (main.js, sur document).
+    window.addEventListener('click', garder, true);
 
     /** Tout ce qui, touché, ferait quitter la page de l'étape. */
     function actionsDans(cartes) {
@@ -260,22 +261,6 @@
         return liste;
     }
 
-    /** Une étape éclairée, avec ses masques recalculés à chaque passage de la sonde. */
-    function zonesMasquees(zones, masques) {
-        return function () {
-            var z = zones().filter(Boolean);
-            masquer(masques ? masques(z) : []);
-            return z;
-        };
-    }
-
-    function sansMasque(avant) {
-        return async function () {
-            masquer([]);
-            if (avant) await avant();
-        };
-    }
-
     // ---------- Les neuf étapes ----------
 
     var ETAPES = [
@@ -283,14 +268,14 @@
             titre: "Ta classe d'un coup d'œil",
             texte: "Voici ta classe : c'est ici que tu peux voir, avant chaque cours, qui a besoin de toi. Chaque point est un·e de tes étudiant·es ; sa place sur chaque bande dit où il ou elle en est. L'assiduité vient de tes présences, la complétion des productions remises, la performance de tes évaluations. Les zones de couleur viennent de tes propres seuils. En début de trimestre, l'assiduité parle d'abord : les deux autres bandes se remplissent à mesure que tu reçois et évalues les productions.",
             geste: "Touche « Détails » pour mettre un nom sur chaque point.",
-            avant: sansMasque(async function () {
+            avant: async function () {
                 aller('suivi', 'groupe');
                 await attendre(bandes, 2000);
                 // Le geste à faire est d'ouvrir les pastilles : elles partent fermées.
                 var b = boutonDetails();
                 if (b && b.classList.contains('actif')) b.click();
                 await attendre(function () { return !pastillesOuvertes(); }, 1000);
-            }),
+            },
             zones: function () { return [bandes()]; },
             contour: boutonDetails,
             atteint: pastillesOuvertes
@@ -299,7 +284,7 @@
             titre: "Qui s'écarte ?",
             texte: "Chaque nom porte maintenant trois pastilles : A, C et P. Une pastille colorée signale une valeur sous tes seuils. Pour ne garder que les personnes qui s'écartent, touche un filtre : « A ou C » pour l'assiduité ou la complétion, « P » pour la performance, « RàI 2-3 » pour celles que le modèle de la Réponse à l'intervention situe au niveau 2 ou 3. Les personnes retenues remontent en tête, les plus éloignées de tes seuils d'abord. Deux filtres touchés ensemble ne gardent que celles qui répondent aux deux. Une pastille signale sans expliquer : le profil rassemble ce que l'application sait de la personne.",
             geste: "Touche le A, le C ou le P de la personne que tu veux regarder : son profil s'ouvre.",
-            avant: sansMasque(async function () {
+            avant: async function () {
                 aller('suivi', 'groupe');
                 await attendre(bandes, 2000);
                 if (!pastillesOuvertes()) {
@@ -307,7 +292,7 @@
                     if (b) b.click();
                 }
                 await attendre(function () { return pastillesOuvertes() && !!document.querySelector('#liste-etudiants-suivi .etudiant-prioritaire-indices'); }, 2000);
-            }),
+            },
             zones: function () { return [panneauNoms()]; },
             contour: function () { return document.getElementById('suivi-tri-boutons'); },
             atteint: function () {
@@ -330,24 +315,26 @@
             titre: "Ce qui l'écarte",
             texte: "Son profil s'ouvre sur son engagement. Sous Assiduité, chaque absence ou retard porte sa date. Si ta carte d'alignement place une leçon ce jour-là, son titre s'affiche aussi : tu sais quelle matière il ou elle a manquée, et ce qu'il y aurait à reprendre. Sous Complétion, tu vois les productions remises et celles qui manquent. Ces deux signaux arrivent avant la performance : ils te permettent d'agir sans attendre une première note.",
             geste: "Touche « Accompagnement » pour voir ce que l'application en tire.",
-            avant: sansMasque(async function () {
+            avant: async function () {
                 await ouvrirProfil(memoire.da, 'mobilisation');
                 await attendre(function () { return carteQuiCommencePar('Complétion'); }, 2000);
-            }),
-            // Les pastilles d'absence et de production restent sous le voile : touchées, elles quittent le profil.
-            zones: zonesMasquees(function () { return [carteQuiCommencePar('Assiduité'), carteQuiCommencePar('Complétion')]; }, actionsDans),
+            },
+            zones: function () { return [carteQuiCommencePar('Assiduité'), carteQuiCommencePar('Complétion')].filter(Boolean); },
+            // Les pastilles d'absence et de production ne répondent pas : touchées, elles quittent le profil.
+            gardes: function () { return actionsDans([carteQuiCommencePar('Assiduité'), carteQuiCommencePar('Complétion')]); },
             contour: function () { return ongletProfil('accompagnement'); },
             atteint: function () { return ongletActif('accompagnement'); }
         },
         {
             titre: 'De quoi il ou elle a besoin',
             texte: "Ici, l'application passe de ce qu'elle observe à ce qu'elle en tire. La carte « Contexte d'apprentissage » résume son assiduité et sa complétion en une phrase, avec une piste : quand l'une ou l'autre est basse, une rencontre peut aider à comprendre ce qui se passe. La carte de la Réponse à l'intervention le ou la situe à un niveau, d'après ses évaluations et ton seuil minimal de réussite ; la phrase qui suit dit pourquoi. Elle nomme aussi son défi principal : le critère de ta grille où il ou elle bute. Si ses productions ne montrent pas encore de difficulté, le niveau reste au 1 ou « En attente » : c'est alors le contexte qui parle. Ces pistes sont des propositions : c'est toi qui décides.",
-            avant: sansMasque(async function () {
+            avant: async function () {
                 await ouvrirProfil(memoire.da, 'accompagnement');
                 await attendre(carteRai, 2000);
-            }),
-            // Rien à toucher dans la page : les liens des deux cartes restent sous le voile.
-            zones: zonesMasquees(function () { return [carteContexte(), carteRai()]; }, actionsDans),
+            },
+            zones: function () { return [carteContexte(), carteRai()].filter(Boolean); },
+            // Rien à toucher dans la page : les liens des deux cartes ne répondent pas.
+            gardes: function () { return actionsDans([carteContexte(), carteRai()]); },
             boutons: [{
                 libelle: 'Continuer',
                 primaire: true,
@@ -357,12 +344,12 @@
         {
             titre: 'Ta grille de dépistage',
             texte: "Son profil ne nomme aucun défi : l'application ne sait pas encore à quels critères comparer ses résultats. Il lui faut ta grille de dépistage. Choisis celle dont les critères reviennent le plus souvent dans tes évaluations. L'application reconnaît un critère à son nom : dans tes autres grilles, elle ne retient que les critères qui portent le même nom qu'un critère de celle-ci. Touche « Régler les outils d'observation », puis choisis ta grille dans « Grille de critères pour le dépistage ». Tu reviendras ensuite à son profil.",
-            avant: sansMasque(async function () {
+            avant: async function () {
                 if (!sousSectionVisible('labo-accompagnement')) {
                     await ouvrirProfil(memoire.da, 'accompagnement');
                     await attendre(carteRai, 2000);
                 }
-            }),
+            },
             // Deux temps dans la même bulle : le lien de la carte RàI, puis, dans Labo › Observation, le menu.
             zones: function () {
                 var menu = menuGrille();
@@ -382,17 +369,20 @@
             titre: "Ouvrir l'intervention",
             texte: "Tu as lu ce qui l'écarte et ce dont il ou elle a peut-être besoin. Reste à décider quoi faire, et si tu veux le noter : noter tes interventions n'est pas une tâche de plus, c'est facultatif, et tu peux utiliser l'application sans le faire. Une intervention notée ici t'aide de deux façons : elle garde la trace de ce que tu as fait, et elle fige un « avant » de ses résultats par critère, pour que tu puisses voir ensuite s'ils ont bougé. L'historique, sous les cartes, rassemblera ses interventions.",
             geste: "Touche « + Nouvelle intervention » : une fiche s'ouvre, son nom coché d'avance.",
-            avant: sansMasque(async function () {
+            avant: async function () {
                 memoire.ficheId = null;
                 await ouvrirProfil(memoire.da, 'accompagnement');
                 await attendre(boutonNouvelleIntervention, 2000);
-            }),
+            },
             contour: boutonNouvelleIntervention,
             // Repéré sur la fiche elle-même, pas sur le délai de naviguerVersNouvelleIntervention.
             atteint: function () {
                 var f = document.querySelector('[data-fiche-intervention]');
                 if (!f || !M().visible(f)) return false;
-                memoire.ficheId = f.getAttribute('data-fiche-intervention');
+                var id = f.getAttribute('data-fiche-intervention');
+                // Une intervention déjà enregistrée, rouverte depuis l'historique : pas la fiche neuve attendue.
+                if (interventionEnregistree(id)) return false;
+                memoire.ficheId = id;
                 return true;
             }
         },
@@ -400,9 +390,9 @@
             titre: 'Ton intervention',
             texte: "Ta fiche est ouverte, son nom coché. Donne-lui un titre et une date. Choisis le niveau : le 2, en petit groupe ciblé, ou le 3, en individuel ; l'application propose le 3 quand son profil l'y situe, sinon le 2. Au niveau 2, tu peux cocher d'autres étudiant·es qui partagent ce besoin. Les critères ciblés sont cochés d'après leurs défis : garde ceux sur lesquels tu veux agir, ce sont eux que le bilan comparera, avant et après. « Suggérer » propose un objectif à partir du plus faible ; réécris-le à ta façon. Si l'intervention porte plutôt sur ses absences ou ses remises, les critères ne sont pas nécessaires : écris ton objectif toi-même.",
             geste: "Touche « Créer l'intervention ». Ensuite, la fiche s'enregistre d'elle-même à chaque changement.",
-            avant: sansMasque(async function () {
+            avant: async function () {
                 await attendre(fiche, 2000);
-            }),
+            },
             zones: function () { return [fiche()]; },
             contour: function () {
                 var f = fiche();
@@ -419,22 +409,18 @@
         {
             titre: "Après l'intervention",
             texte: "Ton intervention est créée, en préparation. Une fois que tu l'auras donnée, rouvre-la, depuis Suivi › Interventions ou depuis son profil : coche les personnes présentes, note tes observations, puis choisis « Complétée ». Une case te propose alors de reporter ces présences dans ta saisie : la présence à l'intervention compensera une absence au cours ; ce report ne se fait qu'une fois. Le bilan apparaît ensuite : pour chaque critère ciblé, la moyenne avant et après des personnes cochées, puis « Objectif atteint ? » et « Suite envisagée ». Il ne compare ni l'assiduité, ni la complétion, ni l'écart avec le reste du groupe. Et une remontée n'est qu'un indice : qui part du plus bas remonte souvent un peu, même sans intervention.",
-            avant: sansMasque(async function () {
+            avant: async function () {
                 if (!fiche() && interventionEnregistree(memoire.ficheId) && typeof window.naviguerVersIntervention === 'function') {
                     window.naviguerVersIntervention(memoire.ficheId);
                 }
                 await attendre(fiche, 2500);
-            }),
-            // « La fiche, contour sur le statut » (pas « éclairée », comme à l'étape 7) : rien n'est ouvert
-            // dans le voile, sinon le contour ; la bulle se pose à côté de lui. Le choix du statut reste sous
-            // le voile : aucun geste attendu ici.
-            // Le masque couvre ce que le trou ouvre, le contour seul : au-delà, le voile couvre déjà (un
-            // masque plus large l'assombrirait deux fois).
-            zones: zonesMasquees(function () { return []; }, function () {
-                var r = radioStatut('completee');
-                var label = r ? r.closest('label') : null;
-                return label ? [label] : [];
-            }),
+            },
+            // « La fiche, contour sur le statut » : la bulle se pose à côté de lui. Aucun geste n'est attendu
+            // ici : le choix du statut ne répond pas (il écrirait sur l'intervention qui vient d'être créée).
+            gardes: function () {
+                var f = fiche();
+                return f ? [].slice.call(f.querySelectorAll('input[name="interventionStatut"]')).map(function (r) { return r.closest('label') || r; }) : [];
+            },
             contour: function () {
                 var r = radioStatut('completee');
                 return r ? r.closest('label') : null;
@@ -444,10 +430,8 @@
         {
             titre: 'Pour aller plus loin',
             texte: "Te voilà avec une première intervention notée. Tu n'as rien de plus à retenir : l'application garde pour toi les signaux, l'historique et l'« avant » de chaque intervention. Si tu veux aller plus loin, à ton rythme : dans son profil, « Confidentiel » range ce qui ne doit pas circuler, comme un diagnostic ou son parcours antérieur ; l'onglet « Rapport » prépare à la demande une synthèse à copier, par exemple pour l'aide pédagogique individuelle, avec les sections que tu choisis ; dans Labo › Observation, tu règles tes seuils d'assiduité et de complétion, ta grille de dépistage et le seuil de défi d'un critère. Avant chaque cours, un coup d'œil à Suivi › Groupe te dira qui a besoin de toi.",
-            voile: 'aucun',
             centre: true,
             sansSortie: true,
-            avant: sansMasque(null),
             boutons: [{ libelle: 'Terminer', primaire: true, action: function () { terminer(); } }]
         }
     ];

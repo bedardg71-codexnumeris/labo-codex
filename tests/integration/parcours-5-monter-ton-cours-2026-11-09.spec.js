@@ -89,14 +89,14 @@ async function quitterLeChamp(page) {
 
 /** « Touche « <type> » dans la palette », puis écris son titre : le bloc naît au centre, son titre à l'écriture. */
 /**
- * Deux passages de la sonde du moteur : le voile reçoit une marque, et chaque passage la remplace (`sonder` dessine le
- * voile, puis lit l'état atteint, d'un seul tenant). Une condition observable, pas un délai : après elle, une étape qui
+ * Deux passages de la sonde du moteur : la couche des flèches reçoit une marque (sa largeur), et chaque passage la
+ * remplace (`sonder` la dimensionne, puis lit l'état atteint, d'un seul tenant ; 10 nov. 2026 : le voile est retiré). Une condition observable, pas un délai : après elle, une étape qui
  * devait avancer l'a fait.
  */
 async function deuxSondes(page) {
     for (let k = 0; k < 2; k++) {
-        await page.evaluate(() => document.querySelector('#parcours-voile path').setAttribute('d', 'M0,0'));
-        await page.waitForFunction(() => document.querySelector('#parcours-voile path').getAttribute('d') !== 'M0,0');
+        await page.evaluate(() => document.getElementById('parcours-fleches').setAttribute('width', '1'));
+        await page.waitForFunction(() => document.getElementById('parcours-fleches').getAttribute('width') !== '1');
     }
 }
 const rangActuel = (page) => page.evaluate(() => ParcoursMoteur.etapeCourante());

@@ -4,6 +4,8 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { attendreApplication } from './harness/attendre-application.js';
 import { attendreRepos, suivreLesReactions } from './harness/attendre-repos.js';
+import { deuxSondes } from './harness/classe-de-banc.js';
+import { flecheVers, nombreDeFleches, rienNeRetientLeToucher } from './harness/fleches-de-banc.js';
 
 // =======================================================================
 // LE SEPTIÈME PARCOURS, « LIRE TA CLASSE ET INTERVENIR » — 9 NOVEMBRE 2026
@@ -15,7 +17,7 @@ import { attendreRepos, suivreLesReactions } from './harness/attendre-repos.js';
 //     d'assiduité, sans aucune évaluation (le test de la consigne, qui échoue avant ce lot) ;
 //   · les neuf étapes, en faisant les gestes : chaque étape avance sur l'état atteint ; l'étape 5
 //     seulement quand aucune grille de dépistage n'est désignée ;
-//   · les pastilles d'absence (étape 3) et le statut (étape 8) restent sous le voile ;
+//   · les pastilles d'absence (étape 3) et le statut (étape 8) sont gardés : touchés, ils ne répondent pas ;
 //   · « Plus tard » ferme la bulle, « Reprendre » repart à la même étape ;
 //   · la fin : une intervention créée, son nom coché, son « avant » figé ; le parcours « Fait ».
 // L'apparence se juge sur capture : CAPTURES_PARCOURS=<dossier> npx playwright test parcours-7
@@ -77,7 +79,7 @@ async function capture(page, nom, { sansNotifications = false } = {}) {
     await page.evaluate(() => window.accompagnement && window.accompagnement.masquerHover && window.accompagnement.masquerHover());
     await page.waitForFunction(() => document.getAnimations()
         .filter((a) => a.effect && a.effect.target && a.effect.target.closest
-            && a.effect.target.closest('#panneau-assistance, #parcours-voile, #parcours-bulle, #entete-menu-panneau'))
+            && a.effect.target.closest('#panneau-assistance, #parcours-bulle, #entete-menu-panneau'))
         .every((a) => a.playState !== 'running'));
     // Pas de pause : chaque capture suit la bulle focalisée (le moteur la focalise APRÈS un passage de sa sonde,
     // qui pose trous, masques et contour) ou un contour constaté posé (contourSur).
@@ -221,26 +223,19 @@ async function contourSur(page, selecteur) {
     }, selecteur), { message: 'contour posé sur ' + selecteur, timeout: 4000 }).toBe('posé');
 }
 
-/** Ce qui reçoit un toucher au centre de l'élément : lui-même, ou le voile (#parcours-masques, le chemin du voile). */
-async function quiRecoitLeToucher(page, selecteur) {
-    return page.evaluate(async (sel) => {
-        // Le premier qui se voit : une copie cachée (taille nulle) ne dit rien du toucher.
-        const visibleDe = () => [...document.querySelectorAll(sel)].find((x) => { const q = x.getBoundingClientRect(); return q.width > 0 && q.height > 0; });
-        const avant = visibleDe();
-        if (!avant) return 'absent';
-        avant.scrollIntoView({ block: 'center' });
-        // Le moteur écoute `scroll` et y replace trous et masques : deux images après le défilement, c'est fait.
-        await new Promise((ok) => requestAnimationFrame(() => requestAnimationFrame(ok)));
-        // Relu après l'attente : le profil a pu se redessiner (un nœud neuf au même endroit).
-        const el = visibleDe();
-        if (!el) return 'absent';
-        const r = el.getBoundingClientRect();
-        const cible = document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2);
-        if (!cible) return 'rien';
-        if (cible.id === 'parcours-masques') return 'masque';
-        if (cible.closest('#parcours-voile')) return 'voile';
-        return el.contains(cible) || cible === el ? 'élément' : 'autre : ' + cible.tagName + '.' + cible.className;
-    }, selecteur);
+/**
+ * ↻ 10 nov. 2026 (« Les flèches des parcours ») : ces éléments étaient « sous le voile » (#parcours-masques), et l'essai
+ * lisait qui recevait le toucher. Le voile est retiré ; ils sont GARDÉS par l'étape (sa propriété `gardes`, l'écouteur
+ * `garder` de js/parcours-lire-ta-classe.js). L'essai les touche pour de vrai, laisse passer deux sondes, et le banc
+ * juge ensuite ce que ce toucher n'a PAS fait. Rien n'est desserré : avant, le toucher n'arrivait pas ; maintenant il
+ * arrive et ne produit rien.
+ */
+async function toucherCeQuiEstGarde(page, selecteur) {
+    const cible = page.locator(selecteur).first();
+    // Un vrai toucher : s'il était couvert (la bulle, une couche du moteur), Playwright le dirait. Le profil peut se
+    // redessiner entre-temps (un nœud neuf au même endroit) : `click` reprend sur le nœud du moment.
+    await cible.click();
+    await deuxSondes(page);
 }
 
 async function commencer(page) {
@@ -319,11 +314,16 @@ async function parcourir(page, { largeur, theme, designee }) {
     await expect(premiere, 'la personne retenue remonte en tête').toHaveAttribute('data-da', ECARTE.da);
     await premiere.locator('.etudiant-prioritaire-indices').click();
 
-    // Étape 3 : son engagement ; les pastilles d'absence restent sous le voile.
+    // Étape 3 : son engagement ; les pastilles d'absence ne répondent pas (touchées, elles quitteraient le profil).
     await attendreEtape(page, 3);
     expect(await page.evaluate(() => window.ParcoursLireTaClasse.memoire.da)).toBe(ECARTE.da);
     await contourSur(page, '#contenuProfilEtudiant [data-action="changerSectionProfil"][data-param="accompagnement"]');
-    expect(await quiRecoitLeToucher(page, '#profil-contenu-dynamique .badge-absence'), 'la pastille d’absence est sous le voile').toBe('masque');
+    await flecheVers(page, '#profil-contenu-dynamique .profil-carte:has(.badge-absence)', 'étape 3');
+    await toucherCeQuiEstGarde(page, '#profil-contenu-dynamique .badge-absence');
+    await expect(page.locator('#suivi-profil'), 'la pastille d’absence gardée : le profil reste ouvert').toBeVisible();
+    // Le toucher a pris le focus à la bulle : seul le rang est relu.
+    await expect(bulle(page).locator('.parcours-bulle-rang')).toHaveText('3 sur 9');
+    await contourSur(page, '#contenuProfilEtudiant [data-action="changerSectionProfil"][data-param="accompagnement"]');
     await capture(page, `p7-etape-3-${suffixe}`);
     await page.click('#contenuProfilEtudiant [data-action="changerSectionProfil"][data-param="accompagnement"]');
 
@@ -375,7 +375,7 @@ async function parcourir(page, { largeur, theme, designee }) {
     await page.fill('#interventionTitre', 'Rattrapage de la séance du 27 août');
     await page.click('[data-fiche-intervention] [data-action="sauvegarderPresencesIntervention"]');
 
-    // Étape 8 : l'intervention est créée ; le statut éclairé, mais sous le voile.
+    // Étape 8 : l'intervention est créée ; la pulsation sur le statut, qui ne répond pas (il écrirait sur l'intervention).
     await attendreEtape(page, 8);
     const creee = await page.evaluate(() => {
         const id = window.ParcoursLireTaClasse.memoire.ficheId;
@@ -384,25 +384,27 @@ async function parcourir(page, { largeur, theme, designee }) {
     });
     expect(creee).toEqual({ etudiants: [ECARTE.da], statut: 'en-cours', titre: 'Rattrapage de la séance du 27 août', avant: [ECARTE.da] });
     await contourSur(page, '[data-fiche-intervention] label:has(input[name="interventionStatut"][value="completee"])');
-    expect(await quiRecoitLeToucher(page, '[data-fiche-intervention] input[name="interventionStatut"][value="completee"]'), 'le statut reste sous le voile').toBe('masque');
+    await toucherCeQuiEstGarde(page, '[data-fiche-intervention] label:has(input[name="interventionStatut"][value="completee"])');
+    expect(await page.evaluate(() => {
+        const id = window.ParcoursLireTaClasse.memoire.ficheId;
+        const i = (obtenirInterventions() || []).find((x) => x.id === id);
+        const r = document.querySelector('[data-fiche-intervention] input[name="interventionStatut"][value="completee"]');
+        return { statut: i && i.statut, coche: r.checked };
+    }), 'le statut gardé : ni coché, ni écrit').toEqual({ statut: 'en-cours', coche: false });
+    await expect(bulle(page).locator('.parcours-bulle-rang')).toHaveText('8 sur 9');
     await capture(page, `p7-etape-8-${suffixe}`);
     await bulle(page).getByRole('button', { name: 'Continuer' }).click();
 
-    // Étape 9 : au centre, sans voile ; « Terminer » : le parcours passe à « Fait ».
+    // Étape 9 : au centre ; « Terminer » : le parcours passe à « Fait ».
     await attendreEtape(page, 9);
     await expect(bulle(page).locator('.parcours-bulle-sortie')).toHaveCount(0);
-    // Sans voile : l'opacité du chemin passe à 0 (sa transition dure 0,2 s).
-    await expect.poll(() => page.evaluate(() => getComputedStyle(document.querySelector('#parcours-voile path')).fillOpacity)).toBe('0');
-    // … et ne retient rien : un toucher dans un coin de la page atteint la page, pas le voile.
-    expect(await page.evaluate(() => {
-        const el = document.elementFromPoint(12, innerHeight - 12);
-        return !!el && !el.closest('#parcours-voile');
-    }), 'la page reste à portée de main à l’étape 9').toBe(true);
+    // Rien de désigné : aucune flèche ; et rien ne retient le toucher, un coin de la page atteint la page.
+    await nombreDeFleches(page, 0, 'étape 9');
+    await rienNeRetientLeToucher(page, [[12, (page.viewportSize().height - 12)]], 'étape 9');
     await capture(page, `p7-etape-9-${suffixe}`);
     await bulle(page).getByRole('button', { name: 'Terminer' }).click();
     await expect(bulle(page)).toHaveCount(0);
     expect(await page.evaluate(() => Assistance.etatDe('lire-ta-classe'))).toEqual({ etat: 'fait', etape: 0 });
-    expect(await page.evaluate(() => document.getElementById('parcours-masques'))).toBeNull();
 }
 
 async function groupeAvecUnePersonneAlEcart(page, opts) {
@@ -588,7 +590,8 @@ test('« Plus tard » ferme la bulle, le parcours attend à la même étape ; «
     await attendreEtape(page, 3);
     await bulle(page).locator('.parcours-bulle-sortie').click();
     await expect(bulle(page)).toHaveCount(0);
-    await expect(page.locator('#parcours-voile')).toHaveCount(0);
+    await expect(page.locator('#parcours-fleches, #parcours-contour')).toHaveCount(0);
+    await expect(page.locator('.parcours-section-actuelle'), 'la mise en évidence part avec le parcours').toHaveCount(0);
     expect(await page.evaluate(() => Assistance.etatDe('lire-ta-classe'))).toEqual({ etat: 'en-cours', etape: 2 });
     await ouvrirPanneau(page);
     await expect(item(page).locator('.assistance-parcours-etat')).toHaveText('Étape 3 sur 9');

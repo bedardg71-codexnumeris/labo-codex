@@ -3,25 +3,32 @@
    plans de travail/CONSIGNE-LOT-2026-11-08-parcours-1-et-2.md, « Le principe, pour les deux ».
 
    Un parcours n'est pas une visite : la personne fait le geste elle-même sur ce qui est
-   éclairé. Le moteur pose :
-   · un voile percé de trous sur les zones éclairées (un chemin SVG evenodd : le plein capte
-     le toucher, les trous le laissent passer, la zone reste atteignable au clavier) ;
-   · un contour dans l'orange de l'aide sur ce qu'il faut toucher ;
-   · une bulle près de la zone, sans la couvrir : titre, « n sur N », texte, geste, boutons,
-     lien de sortie. Elle prend le focus et s'annonce (aria-live poli).
+   désigné. Le moteur pose (lot « Les flèches des parcours », 10 nov. 2026,
+   plans de travail/CONSIGNE-LOT-2026-11-09-parcours-fleches.md ; le voile percé de trous est retiré,
+   la page reste lisible et touchable partout) :
+   · une flèche manuscrite, à l'encre du texte, de la bulle vers ce dont elle parle (les zones) ;
+   · une pulsation dans l'orange de l'aide autour de ce qu'il faut toucher (le contour) : dans un
+     parcours, l'orange veut dire « ce que tu toucheras » ;
+   · une mise en évidence de la section actuelle, dans le menu ou la barre d'onglets du contour ;
+   · une bulle près de ce dont elle parle, sans couvrir le contour : titre, « n sur N », poignée
+     pour la déplacer, texte, geste, boutons, lien de sortie. Elle prend le focus et s'annonce
+     (aria-live poli).
+   LES COORDONNÉES : la couche des flèches est fixée en (0, 0) et dimensionnée en px sur
+   innerWidth × innerHeight à chaque passage, SANS viewBox : le même repère que le contour (des px
+   lus par getBoundingClientRect). Une sentinelle Vitest l'exige (le voile, lui, était en 100vh).
    Une étape avance quand l'état attendu est ATTEINT (`atteint()`), quel que soit le chemin :
    le moteur le sonde, il n'écoute pas le toucher d'un bouton précis.
 
    Une étape :
-     { titre, texte, geste?, voile?: 'normal'|'leger'|'dense'|'aucun', centre?: bool,
+     { titre, texte, geste?, centre?: bool,
        avant?: async () => void,   // place la page (idempotent : sert aussi à la reprise)
-       zones?: () => Element[],    // ce qui est éclairé
-       contour?: () => Element,    // où toucher
+       zones?: () => Element[],    // ce dont parle la bulle (la flèche y va)
+       contour?: () => Element,    // où toucher (la pulsation)
        atteint?: () => bool,       // l'état qui fait avancer
        boutons?: [{ libelle, primaire?, action }],
        sansSortie?: bool }
    API : window.ParcoursMoteur.lancer(def, { depuis, surEtape, surQuitter, surEchap, verifier }),
-         .fermer(), .actif(), .etapeCourante(), .surTelephone().
+         .fermer(), .actif(), .etapeCourante(), .joue(def), .surTelephone().
 
    LA BULLE SUR TÉLÉPHONE (lot du 9 nov. 2026, plans de travail/CONSIGNE-LOT-2026-11-09-bulle-sur-telephone.md) :
    · jusqu'à 500 px de large (SEUIL_TELEPHONE, la largeur de la fenêtre et non l'appareil : un iPad
@@ -60,10 +67,18 @@
     var SONDE_MS = 120;
     var MARGE = 8;
     var ECART = 12;
+    var ECART_FLECHE = 32;     // entre la bulle et ce dont elle parle, quand la place y est : la longueur d'une flèche
+    var FLECHE_MIN = 24;       // en deçà, une flèche ne se lit pas : elle n'est pas tracée
+    var FLECHE_RETRAIT = 6;    // la pointe s'arrête à quelques px du bord de la cible
+    var FLECHES_MAX = 3;       // au-delà de trois cibles, une seule flèche vers leur union
+    var PAS_CLAVIER = 16;      // un pas de la poignée, au clavier
     var SEUIL_TELEPHONE = 500; // px de large de la fenêtre : en deçà, la bulle prend sa forme de téléphone
     var REGLAGE_MS = 1200;     // sur téléphone, le temps où le moteur peut faire défiler pour ranger la bulle en bas
     var LIGNES_PAR_PAGE = 10;  // au-delà, à la largeur de la bulle, le texte se coupe en pages
     var PAGES_MAX = 3;
+
+    // PROPOSÉ (10 nov. 2026, à valider par Grégoire) : le nom de la poignée pour le lecteur d'écran.
+    var LIBELLE_POIGNEE = 'Déplacer la bulle';
 
     var etat = null; // { def, i, opts, timer, elements, enTransition }
 
@@ -157,12 +172,12 @@
 
     function creerElements() {
         var ns = 'http://www.w3.org/2000/svg';
+        // La couche des flèches : jamais de viewBox (voir « LES COORDONNÉES », en tête).
         var svg = document.createElementNS(ns, 'svg');
-        svg.setAttribute('class', 'parcours-voile parcours-voile--normal');
+        svg.setAttribute('class', 'parcours-fleches');
         svg.setAttribute('aria-hidden', 'true');
-        svg.setAttribute('id', 'parcours-voile');
-        var path = document.createElementNS(ns, 'path');
-        svg.appendChild(path);
+        svg.setAttribute('focusable', 'false');
+        svg.setAttribute('id', 'parcours-fleches');
 
         var contour = document.createElement('div');
         contour.className = 'parcours-contour';
@@ -187,11 +202,11 @@
         document.body.appendChild(contour);
         document.body.appendChild(bulle);
         document.body.appendChild(annonce);
-        return { svg: svg, path: path, contour: contour, bulle: bulle, annonce: annonce };
+        return { svg: svg, contour: contour, bulle: bulle, annonce: annonce };
     }
 
     function retirerElements() {
-        ['parcours-voile', 'parcours-contour', 'parcours-bulle', 'parcours-annonce'].forEach(function (id) {
+        ['parcours-fleches', 'parcours-contour', 'parcours-bulle', 'parcours-annonce'].forEach(function (id) {
             var el = document.getElementById(id);
             if (el && el.parentNode) el.parentNode.removeChild(el);
         });
@@ -458,7 +473,22 @@
             bascule.setAttribute('aria-labelledby', 'parcours-bulle-titre');
             bascule.addEventListener('click', basculerRepli);
             tete.appendChild(bascule);
+        } else {
+            // La poignée (hors téléphone) : glisser la bulle à la souris, au doigt, au stylet ; au clavier, les flèches.
+            var poignee = document.createElement('button');
+            poignee.type = 'button';
+            poignee.className = 'parcours-bulle-poignee';
+            poignee.textContent = '\u283f';
+            poignee.setAttribute('aria-label', LIBELLE_POIGNEE);
+            poignee.addEventListener('pointerdown', debutGlisser);
+            poignee.addEventListener('pointermove', surGlisser);
+            poignee.addEventListener('pointerup', finGlisser);
+            poignee.addEventListener('pointercancel', finGlisser);
+            poignee.addEventListener('keydown', surTouchePoignee);
+            tete.appendChild(poignee);
         }
+        etat.glisse = null;
+        if (etat.telephone) etat.deplacee = null;
         b.appendChild(tete);
 
         var p = document.createElement('p');
@@ -544,28 +574,10 @@
         return h;
     }
 
-    function trouRect(r, pad) {
-        var x = Math.max(0, r.left - pad), y = Math.max(0, r.top - pad);
-        var w = Math.min(window.innerWidth, r.right + pad) - x;
-        var hh = Math.min(window.innerHeight, r.bottom + pad) - y;
-        if (w <= 0 || hh <= 0) return '';
-        // Le rayon ne dépasse pas la moitié d'un côté : une cible presque sortie de l'écran (moins de
-        // 12 px visibles) rendait « v-2.4 » puis « v--2.4 », que WebKit refuse (verdict du 9 nov.).
-        var rr = Math.min(6, w / 2, hh / 2);
-        return 'M' + (x + rr) + ',' + y + ' h' + (w - 2 * rr) + ' a' + rr + ',' + rr + ' 0 0 1 ' + rr + ',' + rr +
-            ' v' + (hh - 2 * rr) + ' a' + rr + ',' + rr + ' 0 0 1 -' + rr + ',' + rr +
-            ' h-' + (w - 2 * rr) + ' a' + rr + ',' + rr + ' 0 0 1 -' + rr + ',-' + rr +
-            ' v-' + (hh - 2 * rr) + ' a' + rr + ',' + rr + ' 0 0 1 ' + rr + ',-' + rr + ' z';
-    }
+    // ---------- La géométrie des flèches et du déplacement : des fonctions pures (tests/unit) ----------
 
-    /**
-     * En règle pair-impair, deux trous qui se chevauchent se rebouchent là où ils se
-     * recouvrent : le « A » d'une pastille éclairée redevenait voilé, et son toucher était
-     * capté par le voile. Les trous qui se touchent (à la marge près) sont donc fondus
-     * dans leur rectangle englobant.
-     */
-    function fusionnerTrous(rects) {
-        var pad = 6;
+    /** Des cibles qui se touchent (à `pad` px près) n'en font qu'une : une seule flèche. Pure. */
+    function fondreCibles(rects, pad) {
         var liste = rects.map(function (r) { return { left: r.left, top: r.top, right: r.right, bottom: r.bottom }; });
         var change = true;
         while (change) {
@@ -573,8 +585,8 @@
             for (var a = 0; a < liste.length && !change; a++) {
                 for (var b = a + 1; b < liste.length && !change; b++) {
                     var A = liste[a], B = liste[b];
-                    var touche = !(A.right + pad < B.left - pad || B.right + pad < A.left - pad ||
-                                   A.bottom + pad < B.top - pad || B.bottom + pad < A.top - pad);
+                    var touche = !(A.right + pad < B.left || B.right + pad < A.left ||
+                                   A.bottom + pad < B.top || B.bottom + pad < A.top);
                     if (touche) {
                         liste[a] = { left: Math.min(A.left, B.left), top: Math.min(A.top, B.top),
                                      right: Math.max(A.right, B.right), bottom: Math.max(A.bottom, B.bottom) };
@@ -585,6 +597,128 @@
             }
         }
         return liste;
+    }
+
+    /** Les cibles des flèches : fondues quand elles se touchent ; au-delà de `max`, leur union seule. Pure. */
+    function grouperCibles(rects, max) {
+        var liste = fondreCibles(rects, FLECHE_RETRAIT);
+        if (liste.length <= max) return liste;
+        return [liste.reduce(function (u, r) {
+            return { left: Math.min(u.left, r.left), top: Math.min(u.top, r.top),
+                     right: Math.max(u.right, r.right), bottom: Math.max(u.bottom, r.bottom) };
+        })];
+    }
+
+    function borne(v, min, max) { return Math.min(Math.max(min, v), Math.max(min, max)); }
+    function arrondi(v) { return Math.round(v * 10) / 10; }
+
+    function dansRect(p, r) { return p.x > r.left && p.x < r.right && p.y > r.top && p.y < r.bottom; }
+
+    /**
+     * Une courbe de Bézier légèrement bombée de (sx, sy) à (ex, ey), raccourcie de `retrait` à l'arrivée, bombée du
+     * côté `sens` (1 : à gauche du sens de la marche ; -1 : à droite), et sa pointe en deux traits ouverts. Null si
+     * elle est trop courte pour se lire. `points` : neuf points de la courbe, pour savoir ce qu'elle croise. Pure.
+     */
+    function courbe(sx, sy, ex, ey, retrait, sens, ecran) {
+        var vx = ex - sx, vy = ey - sy;
+        var len = Math.sqrt(vx * vx + vy * vy);
+        if (len - retrait < FLECHE_MIN) return null;
+        var ux = vx / len, uy = vy / len;
+        ex -= ux * retrait; ey -= uy * retrait; len -= retrait;
+        var bombe = sens * Math.min(28, len * 0.18);
+        // Le point de contrôle reste dans l'écran.
+        var kx = borne((sx + ex) / 2 + uy * bombe, 4, ecran.largeur - 4);
+        var ky = borne((sy + ey) / 2 - ux * bombe, 4, ecran.hauteur - 4);
+        // La pointe : deux traits ouverts, de part et d'autre de la tangente à l'arrivée.
+        var tx = ex - kx, ty = ey - ky;
+        var tl = Math.sqrt(tx * tx + ty * ty) || 1;
+        tx /= tl; ty /= tl;
+        var aile = Math.min(12, len * 0.35), cos = Math.cos(0.5), sin = Math.sin(0.5);
+        var ax = ex - aile * (tx * cos - ty * sin), ay = ey - aile * (ty * cos + tx * sin);
+        var bx = ex - aile * (tx * cos + ty * sin), by = ey - aile * (ty * cos - tx * sin);
+        var points = [];
+        for (var n = 1; n <= 9; n++) {
+            var t = n / 10, q = 1 - t;
+            points.push({ x: q * q * sx + 2 * q * t * kx + t * t * ex, y: q * q * sy + 2 * q * t * ky + t * t * ey });
+        }
+        var d = 'M' + arrondi(sx) + ',' + arrondi(sy) + ' Q' + arrondi(kx) + ',' + arrondi(ky) + ' ' + arrondi(ex) + ',' + arrondi(ey) +
+            ' M' + arrondi(ax) + ',' + arrondi(ay) + ' L' + arrondi(ex) + ',' + arrondi(ey) + ' L' + arrondi(bx) + ',' + arrondi(by);
+        return { d: d, depart: { x: arrondi(sx), y: arrondi(sy) }, pointe: { x: arrondi(ex), y: arrondi(ey) },
+                 controle: { x: arrondi(kx), y: arrondi(ky) }, points: points, longueur: len };
+    }
+
+    /**
+     * La flèche, du bord de la bulle vers la cible. Pure et déterministe : les mêmes rectangles rendent le même tracé
+     * (la sonde tourne toutes les 120 ms, la flèche ne frémit pas).
+     *  · d'abord le plus court : du point de la bulle le plus proche de la cible au point de la cible le plus proche ;
+     *  · la cible sortie de l'écran : la flèche va au bord de l'écran, du côté de la cible ;
+     *  · la cible sous la bulle, ou trop près pour qu'une flèche se lise (FLECHE_MIN) : null ;
+     *  · la pointe s'arrête à FLECHE_RETRAIT px du bord de la cible ; deux traits ouverts, pas de triangle ;
+     *  · si ce tracé passe sur un obstacle (une autre cible, ce qu'il faut toucher), le bombement change de côté ;
+     *    sinon la flèche arrive par un autre bord de la cible, par le chemin le plus court qui ne croise rien ; si
+     *    tout croise, le plus court est gardé.
+     * @param {{left,top,right,bottom}} bulle
+     * @param {{left,top,right,bottom}} cible
+     * @param {{largeur:number, hauteur:number}} ecran  innerWidth × innerHeight
+     * @param {Array<{left,top,right,bottom}>} [obstacles]  ce que la flèche évite de croiser
+     * @returns {null|{d:string, depart:{x,y}, pointe:{x,y}, controle:{x,y}, horsEcran:boolean}}
+     */
+    function tracerFleche(bulle, cible, ecran, obstacles) {
+        var W = ecran.largeur, H = ecran.hauteur;
+        obstacles = obstacles || [];
+        var hors = cible.right <= 0 || cible.bottom <= 0 || cible.left >= W || cible.top >= H;
+        var c = hors ? cible : { left: Math.max(0, cible.left), top: Math.max(0, cible.top),
+                                 right: Math.min(W, cible.right), bottom: Math.min(H, cible.bottom) };
+        var cx = (c.left + c.right) / 2, cy = (c.top + c.bottom) / 2;
+        // Le départ : le point du bord de la bulle le plus proche du centre de la cible. Le centre de la cible sous la
+        // bulle (elle est cachée) : le départ est ce centre, la flèche n'a pas de longueur, `courbe` rend null.
+        var sx = borne(cx, bulle.left, bulle.right), sy = borne(cy, bulle.top, bulle.bottom);
+        var finir = function (f) { f.horsEcran = hors; delete f.points; delete f.longueur; return f; };
+        if (hors) {
+            // Le bord de l'écran, du côté de la cible.
+            var bx = borne(cx, 10, W - 10), by = borne(cy, 10, H - 10);
+            if (dansRect({ x: bx, y: by }, bulle)) return null;
+            var fh = courbe(sx, sy, bx, by, 0, 1, ecran);
+            return fh ? finir(fh) : null;
+        }
+        var croise = function (f, rects) {
+            return f.points.some(function (p) { return rects.some(function (r) { return dansRect(p, r); }); });
+        };
+        // Le plus court : le point de la cible le plus proche du départ.
+        var direct = courbe(sx, sy, borne(sx, c.left, c.right), borne(sy, c.top, c.bottom), FLECHE_RETRAIT, 1, ecran);
+        if (!direct) return null;
+        if (!obstacles.length || !croise(direct, obstacles)) return finir(direct);
+        var envers = courbe(sx, sy, borne(sx, c.left, c.right), borne(sy, c.top, c.bottom), FLECHE_RETRAIT, -1, ecran);
+        if (envers && !croise(envers, obstacles)) return finir(envers);
+        // Par un autre bord de la cible : le point de ce bord le plus proche de la bulle, à 16 px des coins,
+        // la pointe à FLECHE_RETRAIT du bord.
+        var bcx = (bulle.left + bulle.right) / 2, bcy = (bulle.top + bulle.bottom) / 2;
+        var px = borne(bcx, c.left + 16, c.right - 16), py = borne(bcy, c.top + 16, c.bottom - 16);
+        var R = FLECHE_RETRAIT;
+        var arrivees = [{ x: px, y: c.top - R }, { x: px, y: c.bottom + R }, { x: c.left - R, y: py }, { x: c.right + R, y: py }];
+        var interdits = obstacles.concat([c, bulle]);
+        var meilleure = null;
+        arrivees.forEach(function (a) {
+            var dx = borne(a.x, bulle.left, bulle.right), dy = borne(a.y, bulle.top, bulle.bottom);
+            [1, -1].forEach(function (sens) {
+                var f = courbe(dx, dy, a.x, a.y, 0, sens, ecran);
+                if (f && !croise(f, interdits) && (!meilleure || f.longueur < meilleure.longueur - 0.5)) meilleure = f;
+            });
+        });
+        return finir(meilleure || direct);
+    }
+
+    /**
+     * La place d'une bulle déplacée, gardée dans l'écran utile (`cadre` : sous l'en-tête, au-dessus du bandeau de la
+     * démo et du clavier). Une bulle plus grande que le cadre se cale en haut à gauche. Pure.
+     */
+    function bornerDeplacement(x, y, largeur, hauteur, cadre) {
+        return { x: Math.round(borne(x, cadre.gauche, cadre.droite - largeur)),
+                 y: Math.round(borne(y, cadre.haut, cadre.bas - hauteur)) };
+    }
+
+    function seCroisent(a, b, marge) {
+        return !(a.right + marge <= b.left || b.right + marge <= a.left || a.bottom + marge <= b.top || b.bottom + marge <= a.top);
     }
 
     /** Le haut d'où une bulle peut commencer : sous l'en-tête. */
@@ -669,13 +803,31 @@
         poserReserveBas(place.cote === 'bas' ? window.innerHeight - y : 0);
     }
 
-    function placerBulle(etape, cibleRect, contourEl) {
+    /** L'écran utile d'une bulle : sous l'en-tête, au-dessus du bandeau de la démo et du clavier. */
+    function cadreUtile() {
+        return { gauche: MARGE, haut: hautUtile(), droite: window.innerWidth - MARGE, bas: basEcran() - MARGE };
+    }
+
+    /** La bulle déplacée par la personne : sa place gardée pour l'étape, ramenée dans l'écran utile s'il a changé. */
+    function poserDeplacee() {
         var b = etat.elements.bulle;
-        if (etat.telephone) { placerBulleTelephone(cibleRect, contourEl); return; }
+        var p = bornerDeplacement(etat.deplacee.x, etat.deplacee.y, b.offsetWidth, b.offsetHeight, cadreUtile());
+        b.style.left = p.x + 'px';
+        b.style.top = p.y + 'px';
+    }
+
+    /**
+     * La bulle, hors téléphone : près de ce dont elle parle (`cibleRect` : l'union des zones ; sans zone, le
+     * contour), sans couvrir ce qu'il faut toucher (`obstacle` : le contour, quand il n'est pas la cible). À
+     * ECART_FLECHE de la cible quand la place y est (la longueur d'une flèche), sinon à ECART, comme avant.
+     */
+    function placerBulle(etape, cibleRect, obstacle) {
+        var b = etat.elements.bulle;
         poserReserveBas(0);
         var vw = window.innerWidth, vh = basEcran();
         // Le filet : jamais plus haute que l'écran utile ; au-delà, son texte défile.
         b.style.maxHeight = Math.max(0, vh - 2 * MARGE) + 'px';
+        if (etat.deplacee) { poserDeplacee(); return; }
         var bw = b.offsetWidth, bh = b.offsetHeight;
         var x, y;
         if (etape.centre || !cibleRect) {
@@ -684,35 +836,187 @@
             if (y + bh > vh - MARGE) y = Math.max(MARGE, vh - bh - MARGE);
         } else {
             var haut = hautEntete();
-            var places = [
-                { cote: 'bas',    libre: vh - cibleRect.bottom - ECART - MARGE },
-                { cote: 'haut',   libre: cibleRect.top - ECART - Math.max(MARGE, hautEntete() + MARGE) },
-                { cote: 'droite', libre: vw - cibleRect.right - ECART - MARGE },
-                { cote: 'gauche', libre: cibleRect.left - ECART - MARGE }
-            ];
+            var hautMin = Math.max(MARGE, haut + MARGE);
+            var ox = obstacle ? (obstacle.left + obstacle.right) / 2 : null;
+            var oy = obstacle ? (obstacle.top + obstacle.bottom) / 2 : null;
+            // La bulle posée d'un côté de la cible ; le long de ce côté, elle s'écarte du contour quand il est à côté.
+            var poser = function (cote, ecart) {
+                var px, py;
+                if (cote === 'bas' || cote === 'haut') {
+                    px = cibleRect.left + cibleRect.width / 2 - bw / 2;
+                    if (obstacle && ox < cibleRect.left) px = cibleRect.left;
+                    else if (obstacle && ox > cibleRect.right) px = cibleRect.right - bw;
+                    py = cote === 'bas' ? cibleRect.bottom + ecart : cibleRect.top - ecart - bh;
+                } else {
+                    py = cibleRect.top + cibleRect.height / 2 - bh / 2;
+                    if (obstacle && oy < cibleRect.top) py = cibleRect.top;
+                    else if (obstacle && oy > cibleRect.bottom) py = cibleRect.bottom - bh;
+                    px = cote === 'droite' ? cibleRect.right + ecart : cibleRect.left - ecart - bw;
+                }
+                px = Math.min(Math.max(MARGE, px), vw - bw - MARGE);
+                py = Math.min(Math.max(Math.min(haut, vh - bh - MARGE), py), vh - bh - MARGE);
+                py = Math.max(MARGE, py);
+                return { x: px, y: py };
+            };
+            var tient = function (cote, ecart) {
+                if (cote === 'bas') return vh - cibleRect.bottom - ecart - MARGE >= bh;
+                if (cote === 'haut') return cibleRect.top - ecart - hautMin >= bh;
+                if (cote === 'droite') return vw - cibleRect.right - ecart - MARGE >= bw;
+                return cibleRect.left - ecart - MARGE >= bw;
+            };
+            var cotes = ['bas', 'haut', 'droite', 'gauche'];
+            var ecarts = [ECART_FLECHE, ECART];
             var choix = null;
-            for (var k = 0; k < places.length; k++) {
-                var pl = places[k];
-                var tient = (pl.cote === 'bas' || pl.cote === 'haut') ? pl.libre >= bh : pl.libre >= bw;
-                if (tient) { choix = pl.cote; break; }
+            // D'abord une place qui tient sans couvrir le contour ; à défaut, une place qui tient.
+            for (var passe = 0; passe < 2 && !choix; passe++) {
+                for (var k = 0; k < cotes.length && !choix; k++) {
+                    for (var e = 0; e < ecarts.length && !choix; e++) {
+                        if (!tient(cotes[k], ecarts[e])) continue;
+                        var p = poser(cotes[k], ecarts[e]);
+                        var couvre = passe === 0 && obstacle &&
+                            seCroisent({ left: p.x, top: p.y, right: p.x + bw, bottom: p.y + bh }, obstacle, MARGE);
+                        if (!couvre) choix = p;
+                    }
+                }
             }
-            if (!choix) {
-                // Rien ne tient sans couvrir : le côté le plus libre, bord de l'écran.
-                choix = (vh - cibleRect.bottom) >= cibleRect.top ? 'bas' : 'haut';
-            }
-            if (choix === 'bas' || choix === 'haut') {
-                x = cibleRect.left + cibleRect.width / 2 - bw / 2;
-                y = choix === 'bas' ? cibleRect.bottom + ECART : cibleRect.top - ECART - bh;
-            } else {
-                y = cibleRect.top + cibleRect.height / 2 - bh / 2;
-                x = choix === 'droite' ? cibleRect.right + ECART : cibleRect.left - ECART - bw;
-            }
-            x = Math.min(Math.max(MARGE, x), vw - bw - MARGE);
-            y = Math.min(Math.max(Math.min(haut, vh - bh - MARGE), y), vh - bh - MARGE);
-            y = Math.max(MARGE, y);
+            // Rien ne tient sans couvrir : le côté le plus libre, bord de l'écran.
+            if (!choix) choix = poser((vh - cibleRect.bottom) >= cibleRect.top ? 'bas' : 'haut', ECART);
+            x = choix.x; y = choix.y;
         }
         b.style.left = Math.round(x) + 'px';
         b.style.top = Math.round(y) + 'px';
+    }
+
+    // ---------- La poignée : déplacer la bulle ----------
+
+    /** Pose la bulle où la personne la veut (bornée à l'écran utile) ; les flèches suivent dans le même geste. */
+    function deplacerBulle(x, y) {
+        etat.deplacee = { x: x, y: y };
+        poserDeplacee();
+        if (etat.vus) dessinerFleches(etat.vus.zones, etat.vus.contourEl);
+    }
+
+    function debutGlisser(ev) {
+        if (!etat || etat.telephone || (ev.pointerType === 'mouse' && ev.button !== 0)) return;
+        var r = etat.elements.bulle.getBoundingClientRect();
+        etat.glisse = { id: ev.pointerId, dx: ev.clientX - r.left, dy: ev.clientY - r.top };
+        try { ev.currentTarget.setPointerCapture(ev.pointerId); } catch (e) { /* le pointeur a déjà été relâché */ }
+        etat.elements.bulle.classList.add('est-glissee');
+        ev.preventDefault();
+    }
+
+    function surGlisser(ev) {
+        if (!etat || !etat.glisse || ev.pointerId !== etat.glisse.id) return;
+        deplacerBulle(ev.clientX - etat.glisse.dx, ev.clientY - etat.glisse.dy);
+        ev.preventDefault();
+    }
+
+    function finGlisser(ev) {
+        if (!etat || !etat.glisse || ev.pointerId !== etat.glisse.id) return;
+        etat.glisse = null;
+        etat.elements.bulle.classList.remove('est-glissee');
+        try { ev.currentTarget.releasePointerCapture(ev.pointerId); } catch (e) { /* déjà relâché */ }
+    }
+
+    /**
+     * Au clavier, la poignée déplace la bulle par pas de PAS_CLAVIER. L'événement ne remonte pas à la bulle :
+     * les flèches gauche et droite n'y changent pas de page.
+     */
+    function surTouchePoignee(ev) {
+        var pas = { ArrowLeft: [-1, 0], ArrowRight: [1, 0], ArrowUp: [0, -1], ArrowDown: [0, 1] }[ev.key];
+        if (!etat || !pas || ev.altKey || ev.metaKey || ev.ctrlKey || ev.shiftKey) return;
+        var r = etat.elements.bulle.getBoundingClientRect();
+        deplacerBulle(r.left + pas[0] * PAS_CLAVIER, r.top + pas[1] * PAS_CLAVIER);
+        ev.preventDefault();
+        ev.stopPropagation();
+    }
+
+    // ---------- Les flèches, la section actuelle ----------
+
+    /** Ce dont parle la bulle : les zones qui ne sont pas ce qu'il faut toucher (le contour a sa pulsation). */
+    function sujets(zones, contourEl) {
+        return (zones || []).filter(function (z) {
+            return visible(z) && z !== contourEl && !(contourEl && contourEl.contains(z));
+        });
+    }
+
+    /** Les cibles des flèches : les sujets, groupés ; sans sujet, le contour ; sans rien de désigné, aucune. */
+    function ciblesDesFleches(zones, contourEl) {
+        var rects = grouperCibles(rectsDe(sujets(zones, contourEl)), FLECHES_MAX);
+        if (!rects.length && visible(contourEl)) rects = [contourEl.getBoundingClientRect()];
+        return rects;
+    }
+
+    /** Trace les flèches de la bulle vers ses cibles ; un tracé inchangé n'est pas réécrit. */
+    function dessinerFleches(zones, contourEl) {
+        var svg = etat.elements.svg;
+        var b = etat.elements.bulle;
+        var traces = [];
+        if (visible(b)) {
+            var rb = b.getBoundingClientRect();
+            var ecran = { largeur: window.innerWidth, hauteur: window.innerHeight };
+            var cibles = ciblesDesFleches(zones, contourEl);
+            // Une flèche évite de passer sur une autre cible, et sur ce qu'il faut toucher.
+            var rc = visible(contourEl) ? contourEl.getBoundingClientRect() : null;
+            cibles.forEach(function (r) {
+                var obstacles = cibles.filter(function (o) { return o !== r; });
+                if (rc && !seCroisent(rc, r, 0)) obstacles.push(rc);
+                var t = tracerFleche(rb, r, ecran, obstacles);
+                if (t) traces.push(t.d);
+            });
+        }
+        var ns = 'http://www.w3.org/2000/svg';
+        while (svg.childNodes.length > traces.length) svg.removeChild(svg.lastChild);
+        while (svg.childNodes.length < traces.length) {
+            var g = document.createElementNS(ns, 'g');
+            g.setAttribute('class', 'parcours-fleche');
+            ['parcours-fleche-fond', 'parcours-fleche-trait'].forEach(function (classe) {
+                var chemin = document.createElementNS(ns, 'path');
+                chemin.setAttribute('class', classe);
+                g.appendChild(chemin);
+            });
+            svg.appendChild(g);
+        }
+        traces.forEach(function (d, k) {
+            var g = svg.childNodes[k];
+            if (g.getAttribute('data-trace') === d) return;
+            g.setAttribute('data-trace', d);
+            g.firstChild.setAttribute('d', d);
+            g.lastChild.setAttribute('d', d);
+        });
+    }
+
+    function effacerFleches() {
+        var svg = etat.elements.svg;
+        while (svg.firstChild) svg.removeChild(svg.firstChild);
+    }
+
+    /**
+     * La section actuelle : dans le menu ou la barre d'onglets qui contient le contour (son parent, ou le parent de
+     * celui-ci), l'élément actif. Ni le contour lui-même, ni rien qui ne soit un bouton, un lien ou un onglet
+     * (`.active` marque aussi les sections de la page).
+     */
+    function sectionActuelleDe(contourEl) {
+        if (!visible(contourEl)) return null;
+        var SEL = '.actif, .active, [aria-current]:not([aria-current="false"]), [aria-selected="true"]';
+        var p = contourEl.parentElement;
+        for (var n = 0; n < 2 && p && p !== document.body; n++, p = p.parentElement) {
+            var liste = p.querySelectorAll(SEL);
+            for (var k = 0; k < liste.length; k++) {
+                var a = liste[k];
+                if (a === contourEl || a.contains(contourEl) || contourEl.contains(a)) continue;
+                if (a.matches('button, a, [role="tab"], [role="menuitem"], [role="option"]') && visible(a)) return a;
+            }
+        }
+        return null;
+    }
+
+    /** Pose la mise en évidence sur la section actuelle, la retire de la précédente. Le moteur seul y touche. */
+    function marquerSectionActuelle(el) {
+        if (etat.sectionActuelle === el) return;
+        if (etat.sectionActuelle) etat.sectionActuelle.classList.remove('parcours-section-actuelle');
+        etat.sectionActuelle = el;
+        if (el) el.classList.add('parcours-section-actuelle');
     }
 
     /**
@@ -727,7 +1031,7 @@
         try { etat.elements.bulle.focus({ preventScroll: true }); } catch (e) { etat.elements.bulle.focus(); }
     }
 
-    /** Un passage de la sonde : trous, contour, bulle, puis l'état atteint. */
+    /** Un passage de la sonde : contour, section actuelle, bulle, flèches, puis l'état atteint. */
     function sonder() {
         if (!etat || etat.enTransition) return;
         var etape = etapeCourante();
@@ -736,12 +1040,14 @@
 
         var zones = etape.zones ? (etape.zones() || []) : [];
         var contourEl = etape.contour ? etape.contour() : null;
-        var vw = window.innerWidth, vh = window.innerHeight;
+        etat.vus = { zones: zones, contourEl: contourEl };
 
-        var d = 'M0,0 H' + vw + ' V' + vh + ' H0 Z';
-        fusionnerTrous(rectsDe(zones.concat(contourEl ? [contourEl] : []))).forEach(function (r) { d += ' ' + trouRect(r, 6); });
-        etat.elements.path.setAttribute('d', d);
-        etat.elements.svg.setAttribute('viewBox', '0 0 ' + vw + ' ' + vh);
+        // La couche des flèches : en px, sur innerWidth × innerHeight, à chaque passage (le repère du contour).
+        var svg = etat.elements.svg;
+        svg.setAttribute('width', String(window.innerWidth));
+        svg.setAttribute('height', String(window.innerHeight));
+        svg.style.width = window.innerWidth + 'px';
+        svg.style.height = window.innerHeight + 'px';
 
         var c = etat.elements.contour;
         if (visible(contourEl)) {
@@ -754,6 +1060,7 @@
         } else {
             c.hidden = true;
         }
+        marquerSectionActuelle(sectionActuelleDe(contourEl));
 
         // La découpe suit la largeur de la bulle (une sonde d'étape a pu la changer), avant sa place.
         suivreLargeurDesPages();
@@ -761,9 +1068,20 @@
         if (etape.atteint) suivreAtteint(etape, zones, contourEl);
     }
 
-    /** La bulle évite la zone éclairée ET le contour. */
+    /**
+     * La bulle près de ce dont elle parle (l'union des zones ; sans zone, le contour), le contour traité comme un
+     * obstacle ; puis ses flèches. Sur téléphone, rien ne change : la bulle rangée évite les zones ET le contour.
+     */
     function placerSelonEtape(etape, zones, contourEl) {
-        placerBulle(etape, union(rectsDe(zones.concat(contourEl ? [contourEl] : []))), visible(contourEl) ? contourEl : null);
+        var c = visible(contourEl) ? contourEl : null;
+        if (etat.telephone) {
+            placerBulleTelephone(union(rectsDe(zones.concat(c ? [c] : []))), c);
+        } else {
+            var sujet = union(rectsDe(sujets(zones, c)));
+            var rc = c ? c.getBoundingClientRect() : null;
+            placerBulle(etape, sujet || rc, sujet ? rc : null);
+        }
+        dessinerFleches(zones, contourEl);
     }
 
     /**
@@ -805,8 +1123,13 @@
         etat.i = i;
         if (etat.opts.surEtape) etat.opts.surEtape(i);
         var etape = etapeCourante();
-        etat.elements.svg.setAttribute('class', 'parcours-voile parcours-voile--' + (etape.voile || 'normal'));
         etat.elements.contour.hidden = true;
+        // L'étape suivante reprend le placement automatique ; ses flèches et sa section actuelle seront les siennes.
+        etat.deplacee = null;
+        etat.glisse = null;
+        etat.vus = null;
+        effacerFleches();
+        marquerSectionActuelle(null);
         await preparer(etape, i);
         // Le parcours a pu être fermé, ou avancé ailleurs, pendant la préparation.
         if (!etat || etat.i !== i) return;
@@ -836,7 +1159,8 @@
         if (etat) fermer();
         retirerElements();
         etat = { def: def, i: 0, opts: opts || {}, elements: creerElements(), enTransition: false,
-                 telephone: surTelephone(), replie: false, reglerJusqua: 0, texte: '', pages: [], page: 0, largeurPages: 0 };
+                 telephone: surTelephone(), replie: false, reglerJusqua: 0, texte: '', pages: [], page: 0, largeurPages: 0,
+                 deplacee: null, glisse: null, vus: null, sectionActuelle: null };
         document.body.classList.add('parcours-actif');
         if (window.transitions && typeof window.transitions.fermerBandeau === 'function') window.transitions.fermerBandeau();
         // 9 nov. 2026 : une flèche didactique déjà ouverte se retire, sans être marquée vue (la bulle parle seule).
@@ -844,7 +1168,10 @@
         document.addEventListener('keydown', surTouche, true);
         window.addEventListener('resize', surRedimension);
         window.addEventListener('scroll', surRedimension, { passive: true });
-        if (window.visualViewport) window.visualViewport.addEventListener('resize', surRedimension);
+        if (window.visualViewport) {
+            window.visualViewport.addEventListener('resize', surRedimension);
+            window.visualViewport.addEventListener('scroll', surRedimension);
+        }
         ['wheel', 'touchstart', 'keydown'].forEach(function (t) { window.addEventListener(t, arreterReglage, { passive: true, capture: true }); });
         etat.timer = setInterval(sonder, SONDE_MS);
         var depuis = Math.max(0, Math.min((opts && opts.depuis) || 0, def.etapes.length - 1));
@@ -857,8 +1184,12 @@
         document.removeEventListener('keydown', surTouche, true);
         window.removeEventListener('resize', surRedimension);
         window.removeEventListener('scroll', surRedimension);
-        if (window.visualViewport) window.visualViewport.removeEventListener('resize', surRedimension);
+        if (window.visualViewport) {
+            window.visualViewport.removeEventListener('resize', surRedimension);
+            window.visualViewport.removeEventListener('scroll', surRedimension);
+        }
         ['wheel', 'touchstart', 'keydown'].forEach(function (t) { window.removeEventListener(t, arreterReglage, { passive: true, capture: true }); });
+        marquerSectionActuelle(null);
         etat = null;
         retirerElements();
         document.documentElement.style.removeProperty('--parcours-reserve-bas');
@@ -879,6 +1210,8 @@
         quitter: quitter,
         actif: function () { return !!etat; },
         etapeCourante: function () { return etat ? etat.i : null; },
+        // Le parcours joué est-il celui-là ? Pour les gardes d'une définition (un écouteur à elle, hors de l'étape).
+        joue: function (def) { return !!etat && etat.def === def; },
         // Les bulles en pages : la page affichée et leur nombre (0 et 1 quand le texte tient).
         pageCourante: function () { return etat ? { page: etat.page, pages: etat.pages.length, largeur: etat.largeurPages } : null; },
         allerA: function (i) { return allerA(i); },
@@ -886,7 +1219,9 @@
         visible: visible,
         premierVisible: premierVisible,
         surTelephone: surTelephone,
-        mouvementReduit: mouvementReduit
+        mouvementReduit: mouvementReduit,
+        // La géométrie des flèches et du déplacement, en fonctions pures (tests/unit).
+        geometrie: { tracerFleche: tracerFleche, grouperCibles: grouperCibles, bornerDeplacement: bornerDeplacement }
     };
 
     window.ParcoursMoteur = api;

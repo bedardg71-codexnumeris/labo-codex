@@ -3,6 +3,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { attendreApplication } from './harness/attendre-application.js';
+import { etatFleches, flecheVers, sectionActuelleSur, styleDuContour, rienNeRetientLeToucher } from './harness/fleches-de-banc.js';
 
 // =======================================================================
 // LOT « LES DEUX PARCOURS » — 8 NOVEMBRE 2026, PARTIE 1
@@ -30,10 +31,10 @@ async function capture(page, nom) {
     // Le pointeur du banc reste sur le dernier bouton touché : son infobulle n'est pas ce qu'on juge.
     await page.mouse.move(2, (page.viewportSize().height / 2) | 0);
     await page.evaluate(() => window.accompagnement && window.accompagnement.masquerHover && window.accompagnement.masquerHover());
-    // Le panneau glisse, le voile s'assombrit : la capture attend que leurs transitions soient finies.
+    // Le panneau glisse : la capture attend que les transitions soient finies.
     await page.waitForFunction(() => document.getAnimations()
         .filter((a) => a.effect && a.effect.target && a.effect.target.closest
-            && a.effect.target.closest('#panneau-assistance, #parcours-voile, #parcours-bulle, #entete-menu-panneau'))
+            && a.effect.target.closest('#panneau-assistance, #parcours-bulle, #entete-menu-panneau'))
         .every((a) => a.playState !== 'running'));
     await page.screenshot({ path: path.join(CAPTURES, nom + '.png') });
 }
@@ -92,7 +93,7 @@ async function contourSur(page, selecteur) {
     }, selecteur), { message: 'contour posé sur ' + selecteur, timeout: 3000 }).toBe('posé');
 }
 
-/** La bulle ne couvre pas la zone éclairée (les trous du voile). */
+/** La bulle ne couvre pas ce qu'il faut toucher (le contour, sa pulsation). */
 async function bulleNeCouvrePasLeContour(page) {
     const chevauche = await page.evaluate(() => {
         const c = document.getElementById('parcours-contour');
@@ -101,6 +102,15 @@ async function bulleNeCouvrePasLeContour(page) {
         return !(a.right <= b.left || b.right <= a.left || a.bottom <= b.top || b.bottom <= a.top);
     });
     expect(chevauche).toBe(false);
+}
+
+/** La bulle n'est pas posée sous (ni sur) le prochain bouton : aucune colonne commune avec lui. */
+async function bullePasSousLeBouton(page, selecteur, contexte) {
+    await expect.poll(() => page.evaluate((sel) => {
+        const a = document.querySelector(sel).getBoundingClientRect(), b = document.getElementById('parcours-bulle').getBoundingClientRect();
+        return a.right <= b.left + 1 || b.right <= a.left + 1 ? 'à côté'
+            : `sous le bouton (bulle de ${Math.round(b.left)} à ${Math.round(b.right)}, bouton de ${Math.round(a.left)} à ${Math.round(a.right)})`;
+    }, selecteur), { message: contexte + ' : la bulle n’est pas sous le prochain bouton' }).toBe('à côté');
 }
 
 // ↻ 9 nov. 2026 (lot du huitième parcours) : « Automatiser tes commentaires » s'inscrit au panneau ; le compte
@@ -227,18 +237,28 @@ test('« Découvrir » de bout en bout sur la démo, en faisant les gestes (1180
     await capture(page, 'decouvrir-4-1180-sombre');
     await bulle(page).getByRole('button', { name: 'Continuer' }).click();
 
-    // Étape 5 : la bulle au centre, seul « Évaluation » éclairé.
+    // Étape 5 : la bulle au centre ; ce qu'il faut toucher, « Évaluation ».
     await attendreEtape(page, 5);
     await contourSur(page, '.navigation-boutons button[data-onglet="evaluations"]');
-    await expect(page.locator('#parcours-voile')).toHaveClass(/parcours-voile--dense/);
+    // ↻ 10 nov. 2026 (« Les flèches des parcours ») : l'essai lisait ici le voile « dense », et à l'étape 6 le voile
+    // « léger ». Le voile est retiré. À sa place : la pulsation sur ce qu'il faut toucher, la flèche vers ce dont parle
+    // la bulle, la section actuelle mise en évidence, et plus rien qui retienne le toucher.
+    expect((await styleDuContour(page)).animation).toBe('parcours-pulsation');
+    await flecheVers(page, '.navigation-boutons button[data-onglet="evaluations"]', 'étape 5');
+    await sectionActuelleSur(page, '.navigation-boutons button[data-onglet="suivi"]', 'étape 5');
+    await rienNeRetientLeToucher(page, [[12, 300], [600, 700], [1100, 400]], 'étape 5');
     await capture(page, 'decouvrir-5-1180-sombre');
     await page.click('.navigation-boutons button[data-onglet="evaluations"]');
 
-    // Étape 6 : Évaluation › Préparer sous un voile léger, « Conception » éclairé.
+    // Étape 6 : Évaluation › Préparer ; la bulle parle d'« Évaluation » (la flèche, la mise en évidence), la pulsation
+    // est sur « Conception », et la bulle n'est plus posée sous ce prochain bouton (les captures de Grégoire, 9 nov.).
     await attendreEtape(page, 6);
     await expect(page.locator('#evaluations-importer')).toBeVisible();
-    await expect(page.locator('#parcours-voile')).toHaveClass(/parcours-voile--leger/);
     await contourSur(page, '.navigation-boutons button[data-onglet="conception"]');
+    await flecheVers(page, '.navigation-boutons button[data-onglet="evaluations"]', 'étape 6');
+    await sectionActuelleSur(page, '.navigation-boutons button[data-onglet="evaluations"]', 'étape 6');
+    await bulleNeCouvrePasLeContour(page);
+    await bullePasSousLeBouton(page, '.navigation-boutons button[data-onglet="conception"]', 'étape 6');
     await capture(page, 'decouvrir-6-1180-sombre');
     await page.click('.navigation-boutons button[data-onglet="conception"]');
 
@@ -246,6 +266,9 @@ test('« Découvrir » de bout en bout sur la démo, en faisant les gestes (1180
     await attendreEtape(page, 7);
     await expect(page.locator('#conception-materiel')).toBeVisible();
     await contourSur(page, '.navigation-boutons button[data-onglet="calendrier"]');
+    await flecheVers(page, '.navigation-boutons button[data-onglet="conception"]', 'étape 7');
+    await sectionActuelleSur(page, '.navigation-boutons button[data-onglet="conception"]', 'étape 7');
+    await bullePasSousLeBouton(page, '.navigation-boutons button[data-onglet="calendrier"]', 'étape 7');
     await capture(page, 'decouvrir-7-1180-sombre');
     await page.click('.navigation-boutons button[data-onglet="calendrier"]');
 
@@ -254,11 +277,16 @@ test('« Découvrir » de bout en bout sur la démo, en faisant les gestes (1180
     await expect(page.locator('#calendrier-trimestre')).toBeVisible();
     await expect(bulle(page).locator('.parcours-bulle-sortie')).toHaveCount(0);
     await expect(bulle(page).locator('.parcours-bulle-boutons button')).toHaveText(['Commencer avec ma classe', "Continuer d'explorer la démo"]);
+    // Rien de désigné : ni flèche, ni pulsation, ni section mise en évidence.
+    expect((await etatFleches(page)).fleches).toEqual([]);
+    await expect(page.locator('#parcours-contour')).toBeHidden();
+    await expect(page.locator('.parcours-section-actuelle')).toHaveCount(0);
     await capture(page, 'decouvrir-8-1180-sombre');
     await bulle(page).getByRole('button', { name: "Continuer d'explorer la démo" }).click();
 
     // Fin : le parcours fermé, la démo reste ouverte, « Découvrir » est fait, le menu passe au 2.
     await expect(bulle(page)).toHaveCount(0);
+    await expect(page.locator('#parcours-fleches, #parcours-contour, .parcours-section-actuelle')).toHaveCount(0);
     expect(await page.evaluate(() => document.body.classList.contains('parcours-actif'))).toBe(false);
     expect(await page.evaluate(() => estEnModeDemo())).toBe(true);
     expect(await page.evaluate(() => Assistance.etatDe('decouvrir').etat)).toBe('fait');

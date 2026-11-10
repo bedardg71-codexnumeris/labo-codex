@@ -127,7 +127,7 @@
     // Le moteur ne dit pas quel parcours il joue : ses éléments, recréés à chaque lancement,
     // portent notre marque. La garde et la bulle au-dessus des fenêtres ne valent que pour eux.
     function elementsDuMoteur() {
-        return [document.getElementById('parcours-bulle'), document.getElementById('parcours-contour')].filter(Boolean);
+        return ['parcours-bulle', 'parcours-contour', 'parcours-fleches'].map(function (id) { return document.getElementById(id); }).filter(Boolean);
     }
 
     function cestNotreParcours() {
@@ -211,7 +211,6 @@
         {
             titre: 'Range ton fichier',
             texte: texteEtape3('fenetre', false),
-            voile: 'leger',
             avant: async function () {
                 auDessusDesFenetres(true);
                 // La phrase se choisit maintenant, l'aperçu ouvert : avant le toucher qui ouvrira
