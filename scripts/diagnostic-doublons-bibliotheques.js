@@ -279,13 +279,13 @@
                 ? trimestres.map((t) => t.id)
                 : (trimestreActif ? [trimestreActif] : []);
 
-            const partages = (await db.get(famille.clePartagee)) || [];
+            const partages = (await db.getSync(famille.clePartagee)) || [];
 
             for (const idTrimestre of idsTrimestres) {
                 const cleLocale = idTrimestre + '_' + famille.cleLocale;
-                let locaux = (await db.get(cleLocale)) || [];
+                let locaux = (await db.getSync(cleLocale)) || [];
                 // Repli : certaines familles vivent encore sous une clé nue.
-                if (!locaux.length) locaux = (await db.get(famille.cleLocale)) || [];
+                if (!locaux.length) locaux = (await db.getSync(famille.cleLocale)) || [];
 
                 const bilan = rapporterUnMagasin(
                     famille.nom + ' · ' + idTrimestre, locaux, partages, famille.champ);
@@ -316,7 +316,7 @@
         // `bibliothequeCartouches` reste GLOBALE par conception
         // (js/cartouches-bibliotheque.js:11-20) : elle n'est PAS namespacée et
         // ne doit pas l'être. Vérifié aux registres de js/trimestres.js.
-        const cartouchesPartagees = (await db.get('bibliothequeCartouches')) || [];
+        const cartouchesPartagees = (await db.getSync('bibliothequeCartouches')) || [];
 
         if (!clesCartouches.length) {
             // Le zéro porte son témoin : sans le nombre de clés examinées, « aucun
@@ -330,7 +330,7 @@
             console.log(LIGNE);
         }
         for (const cleCart of clesCartouches) {
-            const locaux = (await db.get(cleCart)) || [];
+            const locaux = (await db.getSync(cleCart)) || [];
             if (!locaux.length) continue;
             const m = cleCart.match(RE_CARTOUCHES);
             const trimestre = m[1] || null;   // null ⇒ clé NUE, résidu pré-S5

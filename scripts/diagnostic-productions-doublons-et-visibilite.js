@@ -101,8 +101,8 @@
         console.log('Mode démo : ' + (modeDemoActif() ? 'ACTIF' : 'inactif'));
         console.log(LIGNE);
 
-        const productions = (await db.get(cleProd)) || [];
-        const biblio = (await db.get('bibliothequeProductions')) || [];
+        const productions = (await db.getSync(cleProd)) || [];
+        const biblio = (await db.getSync('bibliothequeProductions')) || [];
 
         /* ------------------------------------------------------------------
            A. VISIBILITÉ — pourquoi un ajout n'apparaît pas
@@ -227,7 +227,7 @@
         }
         const clesProd = toutesCles.filter(k => /(^|_)productions$/.test(k) || k === 'bibliothequeProductions');
         for (const k of clesProd) {
-            const v = (await db.get(k)) || [];
+            const v = (await db.getSync(k)) || [];
             const n = Array.isArray(v) ? v.length : '(pas un tableau)';
             console.log('   ' + k + ' : ' + n);
             if (Array.isArray(v) && v.length && v.length <= 20) {
@@ -296,7 +296,7 @@
 
         const collections = {};
         for (const k of clesProd) {
-            const v = (await db.get(k)) || [];
+            const v = (await db.getSync(k)) || [];
             if (Array.isArray(v)) collections[k] = v;
         }
 
@@ -371,7 +371,7 @@
 
         for (const t of trimestresListe) {
             if (!t || !t.id) continue;
-            const evals = (await db.get(t.id + '_evaluationsSauvegardees')) || [];
+            const evals = (await db.getSync(t.id + '_evaluationsSauvegardees')) || [];
             if (!Array.isArray(evals) || evals.length === 0) continue;
             auMoinsUn = true;
 

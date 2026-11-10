@@ -107,7 +107,7 @@
     L('db.ready              : ' + (window.db ? db.ready : '?') + ' · useIndexedDB : ' + (window.db ? db.useIndexedDB : '?'));
 
     // ── 2. Les grilles du trimestre actif, et leurs cartouches
-    const grilles = (typeof cle === 'function' ? await db.get(cle('grillesTemplates')) : null) || [];
+    const grilles = (typeof cle === 'function' ? await db.getSync(cle('grillesTemplates')) : null) || [];
     L('');
     L('-- GRILLES DU TRIMESTRE ACTIF : ' + grilles.length + ' --');
 
@@ -130,7 +130,7 @@
         L('  ' + (g.nom || 'sans nom') + '  [' + g.id + ']');
         if (!routageDispo) { L('     (clé non résolue — voir ci-dessus)'); continue; }
         const cleLot = cle('cartouches_' + g.id);
-        const lot = await db.get(cleLot) || [];
+        const lot = await db.getSync(cleLot) || [];
         const visibles = lot.filter(c => c && c.dansBibliotheque !== false).length;
         totalCartouches += lot.length;
         L('     ' + cleLot + ' : ' + lot.length + ' cartouche(s), '
@@ -164,7 +164,7 @@
         const tousTrimestres = (typeof obtenirTrimestres === 'function') ? (obtenirTrimestres() || []) : [];
         for (const t of tousTrimestres) {
             if (!t || !t.id) continue;
-            const lot = await db.get(t.id + '_grillesTemplates') || [];
+            const lot = await db.getSync(t.id + '_grillesTemplates') || [];
             grillesParTrimestre.set(t.id, new Set(lot.map(g => g && g.id).filter(Boolean)));
         }
     } catch (e) { L('  (catalogue des grilles par trimestre indisponible : ' + (e && e.message) + ')'); }
@@ -176,7 +176,7 @@
         const d = decomposerCleCartouches(k);
         if (!d || vues.has(k)) return;
         vues.add(k);
-        const lot = await db.get(k) || [];
+        const lot = await db.getSync(k) || [];
         const taille = Array.isArray(lot) ? lot.length + ' cartouche(s)' : 'forme inattendue';
 
         if (d.trimestre === null) {
@@ -237,11 +237,11 @@
         const trimestres = (typeof obtenirTrimestres === 'function') ? (obtenirTrimestres() || []) : [];
         for (const t of trimestres) {
             if (!t || !t.id) continue;
-            const lot = await db.get(t.id + '_grillesTemplates') || [];
+            const lot = await db.getSync(t.id + '_grillesTemplates') || [];
             L('  ' + (t.nom || t.id) + ' [' + t.id + ']' + (t.id === actif ? '  ← ACTIF' : '')
               + ' : ' + lot.length + ' grille(s)');
         }
-        const nu = await db.get('grillesTemplates');
+        const nu = await db.getSync('grillesTemplates');
         L('  (clé globale nue « grillesTemplates ») : ' + (nu === null ? 'ABSENTE' : (nu || []).length + ' grille(s)'));
     } catch (e) { L('  (indisponible : ' + (e && e.message) + ')'); }
 

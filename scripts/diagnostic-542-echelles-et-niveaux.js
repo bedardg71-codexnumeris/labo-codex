@@ -46,7 +46,7 @@
     const VERSION_OUTIL = 'r1 · 27 août 2026 · lot 0 du plan SOLO';
 
     async function lire(cle) {
-        try { return await db.get(cle); } catch (e) { return null; }
+        try { return await db.getSync(cle); } catch (e) { return null; }
     }
 
     async function toutesLesCles() {

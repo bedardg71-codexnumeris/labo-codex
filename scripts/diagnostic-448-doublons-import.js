@@ -84,7 +84,7 @@
         var corpus = {};
         for (var c = 0; c < cles.length; c++) {
             try {
-                var v = await db.get(cles[c]);
+                var v = await db.getSync(cles[c]);
                 corpus[cles[c]] = (v === null || v === undefined) ? '' : JSON.stringify(v);
             } catch (e) { corpus[cles[c]] = ''; }
         }
@@ -92,7 +92,7 @@
         // Quels trimestres existent ici ?
         var trimestres = [];
         try {
-            var reg = await db.get('trimestres');
+            var reg = await db.getSync('trimestres');
             if (Array.isArray(reg)) trimestres = reg.map(function (t) { return t && (t.id || t.cle); }).filter(Boolean);
         } catch (e) { /* laissé vide */ }
         console.log('Trimestres déclarés : ' + (trimestres.length ? trimestres.join(', ') : '(aucun)'));
@@ -133,7 +133,7 @@
         for (var a = 0; a < aExaminer.length; a++) {
             var cible = aExaminer[a];
             var liste = null;
-            try { liste = await db.get(cible.cle); } catch (e) { continue; }
+            try { liste = await db.getSync(cible.cle); } catch (e) { continue; }
             if (!Array.isArray(liste) || liste.length === 0) continue;
 
             totalElements += liste.length;

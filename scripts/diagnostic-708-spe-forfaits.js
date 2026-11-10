@@ -36,7 +36,7 @@
     const VERSION_OUTIL = 'r1 · 5 septembre 2026 · D-3 de l\'audit de la pratique de notation';
 
     async function lire(cleBrute) {
-        try { return await db.get(cleBrute); } catch (e) { return null; }
+        try { return await db.getSync(cleBrute); } catch (e) { return null; }
     }
 
     async function toutesLesCles() {

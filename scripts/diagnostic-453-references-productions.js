@@ -65,7 +65,7 @@
     }
 
     async function lire(cle) {
-        try { return await db.get(cle); } catch (e) { return null; }
+        try { return await db.getSync(cle); } catch (e) { return null; }
     }
 
     async function toutesLesCles() {

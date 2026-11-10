@@ -41,7 +41,7 @@
     const VERSION_OUTIL = 'r1 · 5 septembre 2026 · A-1 de l\'audit du moteur';
 
     async function lire(cleBrute) {
-        try { return await db.get(cleBrute); } catch (e) { return null; }
+        try { return await db.getSync(cleBrute); } catch (e) { return null; }
     }
 
     async function toutesLesCles() {
