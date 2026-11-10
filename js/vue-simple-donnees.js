@@ -313,7 +313,7 @@
         const n = b.niveaux;
         if (n.length < MIN_NIVEAUX) return { refus: 'minimumNiveaux' };
         if (n.some((x) => !String(x.code).trim() || !String(x.nom).trim())) return { refus: 'niveauIncomplet' };
-        if (n.some((x) => _nombreEntre(x.valeur, 0, 100) === null)) return { refus: 'valeurNiveau' };
+        if (n.some((x) => valeurDeNiveau(x.valeur) === null)) return { refus: 'valeurNiveau' };
         if (_doublon(n.map((x) => x.code))) return { refus: 'lettreEnDouble' };
         const change = n.find((x) => x.origine && String(x.code).trim() !== x.origine && compterResultats(x.origine) > 0);
         if (change) return { refus: 'lettreUtilisee', n: compterResultats(change.origine), nom: change.origine };
@@ -339,34 +339,69 @@
         return null;
     }
 
+    /** La valeur d'un niveau : un nombre, zéro ou plus, SANS PLAFOND (décision de Grégoire, 9 nov. 2026, 20 h 55 : un niveau peut valoir plus de 100). */
+    function valeurDeNiveau(v) { return _nombreEntre(v, 0, Infinity); }
+
     /**
-     * Les niveaux d'une échelle, tels que le brouillon les règle. Un niveau gardé conserve tout ce que l'écran ne montre
-     * pas (sa couleur, sa description) ; un niveau ajouté n'a pas de couleur à lui (le tableau lui donne la couleur neutre).
-     * LES BORNES (`min`, `max`) servent à convertir un pourcentage en niveau quand on évalue avec une grille, en vue
-     * étendue ; elles sont recalées sur les valeurs : chaque niveau commence à sa valeur, le plus bas à 0, et finit juste
-     * avant le suivant, le plus haut à 100. Un niveau dont la valeur n'a pas bougé garde sa borne d'avant quand elle
-     * tient entre ses voisins (« Étendu », qui vaut 100, commence à 85).
+     * Les niveaux d'une échelle, tels que le brouillon les règle : la lettre, le nom, la valeur, l'ordre.
+     * LES SEUILS NE BOUGENT PAS (décision de Grégoire, 9 nov. 2026, 20 h 49). La valeur dit ce que le niveau pèse dans la
+     * note ; le seuil (`min`, `max`) dit à partir de quel pourcentage une copie évaluée avec une grille le reçoit : ce sont
+     * deux idées. Un niveau gardé conserve donc ses seuils, sa couleur et sa description, quelle que soit sa valeur.
+     * Un niveau AJOUTÉ ici n'a pas de seuils : la conversion d'un pourcentage en niveau (`niveauDuPourcentage`,
+     * evaluation-calcul.js) écarte un niveau sans seuils — il se saisit au tableau, et ne sert à une évaluation avec grille
+     * que le jour où ses seuils sont donnés en vue étendue. Il n'a pas non plus de couleur à lui (couleur neutre au tableau).
      */
     function niveauxRegles(anciens, brouillon) {
         const parLettre = new Map((anciens || []).map((n) => [String(n.code), n]));
-        const niveaux = brouillon.map((x) => {
-            const avant = x.origine ? parLettre.get(x.origine) : null;
-            const valeur = _nombreEntre(x.valeur, 0, 100);
-            const n = Object.assign({}, avant || {}, { code: String(x.code).trim(), nom: String(x.nom).trim(), valeurCalcul: valeur });
-            // La borne d'avant peut être une chaîne dans un stock importé : elle se lit en nombre.
-            const borne = avant && avant.min !== '' && avant.min != null ? Number(avant.min) : NaN;
-            n._bornePrecedente = (avant && Number(avant.valeurCalcul) === valeur && !isNaN(borne)) ? borne : null;
-            return n;
+        return brouillon.map((x) => Object.assign({}, (x.origine && parLettre.get(x.origine)) || {},
+            { code: String(x.code).trim(), nom: String(x.nom).trim(), valeurCalcul: valeurDeNiveau(x.valeur) }));
+    }
+
+    /* ---------- le geste de mise à jour (voulu par Grégoire, 9 nov. 2026, 20 h 49) ----------
+       Comme dans un tableur, changer une valeur doit pouvoir faire suivre les notes. Le geste ne touche QUE les résultats
+       saisis au tableau (sans grille) des groupes qui ont cette pratique ; il n'écrit que la valeur (`noteFinale`) : le niveau
+       inscrit reste, aucun résultat n'est créé ni effacé, aucune copie évaluée avec une grille n'est touchée. */
+
+    /**
+     * Les résultats saisis avec une ancienne valeur.
+     * @param {Array} evaluations - le stock du trimestre
+     * @param {{idsEchelle: string[], niveaux: Array, groupes: string[], cours: string[]}} c - l'échelle de la pratique (et celle
+     *        dont elle est la copie), ses niveaux d'aujourd'hui, les groupes qui ont cette pratique et leurs cours
+     * @returns {Array<{id: string, avant: number, apres: number}>}
+     */
+    function resultatsAMettreAJour(evaluations, c) {
+        const valeurs = new Map((c.niveaux || []).map((n) => [String(n.code), Number(n.valeurCalcul)]));
+        const duGroupe = (e) => (e.groupeCoursId ? c.groupes.indexOf(e.groupeCoursId) >= 0 : c.cours.indexOf(e.coursId) >= 0);
+        return (evaluations || []).filter((e) => e && e.sansGrille === true && !e.remplaceeParId && typeof e.noteFinale === 'number'
+            && c.idsEchelle.indexOf(e.echelleId) >= 0 && duGroupe(e) && valeurs.has(String(e.niveauFinal)) && valeurs.get(String(e.niveauFinal)) !== e.noteFinale)
+            .map((e) => ({ id: e.id, avant: e.noteFinale, apres: valeurs.get(String(e.niveauFinal)) }));
+    }
+
+    /** Écrit la valeur d'aujourd'hui dans ces résultats, et rien d'autre. Un résultat qui a changé depuis le compte n'est pas touché. */
+    function appliquerMiseAJour(evaluations, lot) {
+        const parId = new Map((lot || []).map((x) => [x.id, x]));
+        return (evaluations || []).map((e) => {
+            const x = e && parId.get(e.id);
+            return (x && e.sansGrille === true && e.noteFinale === x.avant) ? Object.assign({}, e, { noteFinale: x.apres }) : e;
         });
-        const parValeur = niveaux.slice().sort((a, b) => a.valeurCalcul - b.valeurCalcul);
-        parValeur.forEach((n, i) => {
-            const plancher = i === 0 ? 0 : parValeur[i - 1].min;
-            const gardee = n._bornePrecedente !== null && (i === 0 || n._bornePrecedente > plancher) && n._bornePrecedente <= n.valeurCalcul;
-            n.min = i === 0 ? 0 : (gardee ? n._bornePrecedente : n.valeurCalcul);
-        });
-        parValeur.forEach((n, i) => { n.max = i === parValeur.length - 1 ? 100 : Math.max(n.min, Math.round((parValeur[i + 1].min - 0.01) * 100) / 100); });
-        niveaux.forEach((n) => { delete n._bornePrecedente; });
-        return niveaux;
+    }
+
+    /* ---------- les colonnes du tableau ---------- */
+
+    /** Une colonne renommée, redatée, retypée : ces trois champs et la date de modification ; le reste de la production ne bouge pas. */
+    function colonneModifiee(production, { titre, date, type, maintenant }) {
+        const p = Object.assign({}, production, { titre: String(titre || '').trim(), dateEcheance: date || '', dateModification: maintenant });
+        if (type !== undefined && type !== null && type !== '') p.type = type;
+        return p;
+    }
+
+    /** La marque « compte dans la note » : le champ de la vue étendue (`configuration.productionsExclues`, une liste d'exclusions). */
+    function poserCompte(pratique, productionId, compte) {
+        const p = _copie(pratique);
+        const exclues = new Set(Array.isArray(p.configuration.productionsExclues) ? p.configuration.productionsExclues : []);
+        if (compte) exclues.delete(productionId); else exclues.add(productionId);
+        if (exclues.size) p.configuration.productionsExclues = Array.from(exclues); else delete p.configuration.productionsExclues;
+        return p;
     }
 
     /** Le nom de l'échelle née avec une pratique de la vue simple. PROPOSÉ (ni « IDME », ni « de départ »). */
@@ -393,7 +428,7 @@
     /** L'échelle a-t-elle changé ? (une règle changée sans toucher aux niveaux ne copie ni n'écrit aucune échelle) */
     function niveauxChanges(echelle, niveauxDuBrouillon) {
         const avant = ((echelle && echelle.niveaux) || []).map((n) => [String(n.code), n.nom || '', _valeurDuNiveau(n)]);
-        const apres = niveauxDuBrouillon.map((x) => [String(x.code).trim(), String(x.nom).trim(), _nombreEntre(x.valeur, 0, 100)]);
+        const apres = niveauxDuBrouillon.map((x) => [String(x.code).trim(), String(x.nom).trim(), valeurDeNiveau(x.valeur)]);
         return JSON.stringify(avant) !== JSON.stringify(apres);
     }
 
@@ -432,6 +467,7 @@
         analyserListeCollee, trimestreDeLaDate, ficheEleve, groupeCoursLeger, productionLegere,
         pratiqueDepuisModele, regleStd, poserRegleStd,
         brouillonDeLaPratique, gestes, refusDesNiveaux, refusDesSpecifications, niveauxRegles, echelleReglee, niveauxChanges, poserSpecifications, NOM_ECHELLE,
+        resultatsAMettreAJour, appliquerMiseAJour, colonneModifiee, poserCompte,
         aUneGrille, rangDeProduction
     };
 })();

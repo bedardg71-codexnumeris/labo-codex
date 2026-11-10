@@ -533,3 +533,65 @@ body.vue-simple .codex-menu {
     color: var(--texte-secondaire);
     font-size: 0.88rem;
 }
+
+/* ---------- Une colonne du tableau : son titre la règle ; « ne compte pas » se lit ---------- */
+
+.tn-production-regler {
+    width: 100%;
+    min-height: 32px;
+    padding: 2px 4px;
+    background: none;
+    border: 0;
+    border-radius: var(--radius-petit, 6px);
+    font: inherit;
+    font-weight: 600;
+    text-align: center;
+    text-decoration: underline dotted;
+    text-underline-offset: 3px;
+    cursor: pointer;
+}
+
+.tn-production-regler:hover {
+    text-decoration-style: solid;
+}
+
+.tn-production-regler:focus-visible {
+    outline: var(--focus-ring-width) solid var(--focus-ring-color);
+    outline-offset: var(--focus-ring-offset);
+}
+
+.tn-production-hors {
+    display: block;
+    margin-top: 2px;
+    font-size: 0.72rem;
+    font-weight: 600;
+    font-style: italic;
+    color: var(--texte-secondaire);
+}
+
+.tn-col-production--hors .tn-production-regler {
+    text-decoration: line-through;
+}
+
+.vs-colonne-compte {
+    margin-top: 10px;
+}
+
+/* ---------- La question de mise à jour ---------- */
+
+.vs-question {
+    padding: 12px 14px;
+    border-radius: var(--radius-moyen);
+    background: var(--alerte-fond-attention);
+    border: 1px solid var(--alerte-bordure-attention);
+    color: var(--texte-principal);
+    line-height: 1.5;
+}
+
+.vs-question p {
+    margin: 0;
+}
+
+.vs-question .vs-gestes {
+    margin-top: 10px;
+}

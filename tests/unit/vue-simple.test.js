@@ -294,12 +294,6 @@ describe('F. La pratique se règle : les niveaux, les types, les paliers', () =>
         expect(r).toMatchObject({ copiee: true, echelle: { id: 'ECH_2', pratiqueId: 'PRAT_1', copieDe: 'ECH_1' } });   // `copieDe` : les résultats d'avant portent encore ECH_1
     });
 
-    it('des bornes en chaînes (stock importé) se lisent en nombres : sans rien changer, « Étendu » garde sa borne à 85', () => {
-        const chaines = DEPART.niveaux.map((n) => Object.assign({}, n, { min: String(n.min), max: String(n.max) }));
-        const n = D.niveauxRegles(chaines, D.brouillonDeLaPratique(std(), { niveaux: chaines }).niveaux);
-        expect(n.map((x) => [x.code, x.min, x.max])).toEqual([['PS', 0, 39.99], ['I', 40, 64.99], ['D', 65, 74.99], ['M', 75, 84.99], ['E', 85, 100]]);
-    });
-
     it('une pratique qui lit une échelle du trimestre : au premier réglage, l\'échelle est copiée, jamais modifiée', () => {
         const partagee = { id: 'E_PARTAGEE', nom: 'Échelle fictive', niveaux: DEPART.niveaux };
         const avant = JSON.stringify(partagee);
@@ -310,23 +304,72 @@ describe('F. La pratique se règle : les niveaux, les types, les paliers', () =>
         expect(JSON.stringify(partagee)).toBe(avant);
     });
 
-    it('quatre niveaux aux valeurs inventées : lettres, noms, valeurs et ordre sont ceux du brouillon ; les bornes suivent les valeurs', () => {
+    it('quatre niveaux aux valeurs inventées : lettres, noms, valeurs et ordre sont ceux du brouillon ; un niveau ajouté n\'a ni seuils ni couleur', () => {
         const brouillon = [{ origine: null, code: 'A', nom: 'Abouti', valeur: '95' }, { origine: null, code: 'B', nom: 'Bien', valeur: '82' },
             { origine: null, code: 'C', nom: 'En chemin', valeur: '61,5' }, { origine: null, code: 'Z', nom: 'À reprendre', valeur: '30' }];
-        const n = D.niveauxRegles([], brouillon);
-        expect(n.map((x) => [x.code, x.nom, x.valeurCalcul, x.min, x.max])).toEqual([
-            ['A', 'Abouti', 95, 95, 100], ['B', 'Bien', 82, 82, 94.99], ['C', 'En chemin', 61.5, 61.5, 81.99], ['Z', 'À reprendre', 30, 0, 61.49]]);
+        expect(D.niveauxRegles([], brouillon)).toEqual([
+            { code: 'A', nom: 'Abouti', valeurCalcul: 95 }, { code: 'B', nom: 'Bien', valeurCalcul: 82 },
+            { code: 'C', nom: 'En chemin', valeurCalcul: 61.5 }, { code: 'Z', nom: 'À reprendre', valeurCalcul: 30 }]);
     });
 
-    it('un niveau gardé conserve sa couleur ; un niveau ajouté n\'en a pas (le tableau lui donne la couleur neutre)', () => {
+    it('LES SEUILS NE BOUGENT PAS (Grégoire, 9 nov. 2026, 20 h 49) : « Étendu » passé de 100 à 95 garde ses seuils, 85 à 100 ; aucun autre niveau ne bouge', () => {
+        const b = D.brouillonDeLaPratique(std(), DEPART).niveaux.map((n) => (n.code === 'E' ? Object.assign({}, n, { valeur: '95' }) : n));
+        const n = D.niveauxRegles(DEPART.niveaux, b);
+        expect(n.map((x) => [x.code, x.min, x.max])).toEqual(DEPART.niveaux.map((x) => [x.code, x.min, x.max]));
+        expect(n.find((x) => x.code === 'E')).toMatchObject({ valeurCalcul: 95, min: 85, max: 100, couleur: 'var(--niveau-attention-nul)' });
+        // Des seuils en chaînes (stock importé), ou dans un autre ordre : rendus tels quels.
+        const chaines = DEPART.niveaux.map((x) => Object.assign({}, x, { min: String(x.min), max: String(x.max) }));
+        const renverse = D.brouillonDeLaPratique(std(), { niveaux: chaines }).niveaux.slice().reverse();
+        expect(D.niveauxRegles(chaines, renverse).map((x) => [x.code, x.min, x.max])).toEqual(chaines.slice().reverse().map((x) => [x.code, x.min, x.max]));
+    });
+
+    it('un niveau peut valoir plus de 100 (Grégoire, 20 h 55) ; seuls un texte qui n\'est pas un nombre et une valeur négative sont refusés', () => {
         const p = std();
         const b = D.gestes.niveauAjouter(D.brouillonDeLaPratique(p, DEPART));
-        b.niveaux[5] = { origine: null, code: 'X', nom: 'Exemplaire', valeur: 110 };
-        expect(D.refusDesNiveaux(b, aucun)).toEqual({ refus: 'valeurNiveau' });
-        b.niveaux[5].valeur = 90;
+        b.niveaux[5] = { origine: null, code: 'X', nom: 'Exemplaire', valeur: '110' };
+        expect(D.refusDesNiveaux(b, aucun)).toBeNull();
         const n = D.niveauxRegles(DEPART.niveaux, b.niveaux);
+        expect(n.find((x) => x.code === 'X')).toEqual({ code: 'X', nom: 'Exemplaire', valeurCalcul: 110 });   // ni seuils, ni couleur
         expect(n.find((x) => x.code === 'E').couleur).toBe('var(--niveau-attention-nul)');
-        expect(n.find((x) => x.code === 'X').couleur).toBeUndefined();
+        for (const v of ['-1', 'beaucoup', '']) {
+            b.niveaux[5] = Object.assign({}, b.niveaux[5], { valeur: v });
+            expect(D.refusDesNiveaux(b, aucun)).toEqual({ refus: 'valeurNiveau' });
+        }
+    });
+
+    it('la mise à jour : seuls les résultats sans grille des groupes de la pratique, dont la valeur n\'est plus celle du niveau ; seule la valeur est écrite', () => {
+        const niveaux = [{ code: 'M', valeurCalcul: 90 }, { code: 'D', valeurCalcul: 65 }];
+        const e = (id, plus) => Object.assign({ id, sansGrille: true, echelleId: 'ECH_1', groupeCoursId: 'GC_A', niveauFinal: 'M', noteFinale: 75, verrouillee: true }, plus);
+        const stock = [e('E1'), e('E2', { niveauFinal: 'D', noteFinale: 65 }),            // E2 : déjà à la valeur d'aujourd'hui
+            e('E3', { sansGrille: false, grilleId: 'G_X' }),                               // évaluée avec une grille : jamais
+            e('E4', { groupeCoursId: 'GC_AUTRE' }),                                        // un groupe d'une autre pratique
+            e('E5', { echelleId: 'ECH_AUTRE' }),                                           // une autre échelle (celle d'une production)
+            e('E6', { remplaceeParId: 'E1' }), e('E7', { echelleId: 'E_ORIGINE', groupeCoursId: 'GC_B' }),   // E7 : saisi avant la copie
+            e('E8', { groupeCoursId: undefined, coursId: 'c-a' })];
+        const c = { idsEchelle: ['ECH_1', 'E_ORIGINE'], niveaux, groupes: ['GC_A', 'GC_B'], cours: ['c-a', 'c-b'] };
+        const lot = D.resultatsAMettreAJour(stock, c);
+        expect(lot).toEqual([{ id: 'E1', avant: 75, apres: 90 }, { id: 'E7', avant: 75, apres: 90 }, { id: 'E8', avant: 75, apres: 90 }]);
+        const apres = D.appliquerMiseAJour(stock, lot);
+        expect(apres).toHaveLength(stock.length);   // aucun résultat créé ni effacé
+        apres.forEach((x, i) => {
+            const attendu = ['E1', 'E7', 'E8'].indexOf(x.id) >= 0 ? Object.assign({}, stock[i], { noteFinale: 90 }) : stock[i];
+            expect(x).toEqual(attendu);   // le niveau inscrit, l'échelle, tout le reste : intacts
+        });
+        // Un résultat changé depuis le compte n'est pas touché.
+        const change = stock.map((x) => (x.id === 'E1' ? Object.assign({}, x, { noteFinale: 40, niveauFinal: 'I' }) : x));
+        expect(D.appliquerMiseAJour(change, lot).find((x) => x.id === 'E1').noteFinale).toBe(40);
+    });
+
+    it('une colonne : renommer, redater, retyper ne touche que ces champs ; « compte dans la note » est le champ de la vue étendue', () => {
+        const prod = { id: 'PROD_1', titre: 'Production 1', type: 'autre', dateEcheance: '2026-11-02', coursId: 'C1', numero: 3, description: 'x' };
+        expect(D.colonneModifiee(prod, { titre: '  Analyse 1 ', date: '2026-11-09', maintenant: 'm' })).toEqual(Object.assign({}, prod, { titre: 'Analyse 1', dateEcheance: '2026-11-09', dateModification: 'm' }));
+        expect(D.colonneModifiee(prod, { titre: 'X', date: '', type: 2, maintenant: 'm' }).type).toBe(2);
+        const p = std();
+        const hors = D.poserCompte(p, 'PROD_1', false);
+        expect(hors.configuration.productionsExclues).toEqual(['PROD_1']);
+        expect(D.poserCompte(hors, 'PROD_1', false).configuration.productionsExclues).toEqual(['PROD_1']);
+        expect('productionsExclues' in D.poserCompte(hors, 'PROD_1', true).configuration).toBe(false);
+        expect(p.configuration.productionsExclues).toBeUndefined();   // l'original n'est pas muté
     });
 
     it('retirer un niveau : deux au minimum ; un niveau inscrit dans des résultats ne se retire pas, et le brouillon ne bouge pas', () => {
@@ -435,5 +478,13 @@ describe('E. La vue simple ne nomme rien qui n\'existe pas', () => {
         const mots = tranche(ecran, 'const MOTS = Object.freeze({', '    /**\n     * Le seul point d\'écriture de HTML');
         const sansCommentaires = mots.split('\n').map((l) => l.replace(/\/\/.*$/, '')).join('\n');   // les commentaires disent le mot qu'on écarte
         expect(sansCommentaires.match(/élèves?|élève/gi)).toBeNull();
+        // Validés à 20 h 49 et 20 h 55 : deux tournures sans accord empilé, et l'aide des niveaux sans « sur 100 ».
+        expect(ecran).toContain("classeAucunLu: 'Aucune ligne lue. Une ligne par étudiant·e : DA, nom, prénom.'");
+        expect(ecran).toContain("niveauxAide: 'Chaque niveau a une lettre, un nom et une valeur. La note se construit avec ces valeurs.'");
+        expect(ecran).toContain("classeAjoutes: (n, deja) => `${n} étudiant·e${n > 1 ? 's' : ''} de plus dans ta classe.` + (deja ? ` ${deja} y ${deja > 1 ? 'étaient' : 'était'} déjà.` : ''),");
+        // Aucun accord forcé par « étudiant·e » (participe ou adjectif au point médian) dans les mots de la vue simple :
+        // le seul mot à point médian est « étudiant·e(s) », et « Étudiant·e » en tête de colonne.
+        const pointsMedians = (sansCommentaires.match(/[A-Za-zÀ-ÿ]+·[a-zé]+/g) || []).filter((m) => !/^[ÉEée]tudiant·es?$/.test(m));
+        expect(pointsMedians).toEqual([]);
     });
 });

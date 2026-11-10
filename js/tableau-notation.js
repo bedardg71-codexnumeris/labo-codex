@@ -84,7 +84,12 @@
         const terminale = window.identifierProductionTerminale(productions);
         const terminalId = terminale ? terminale.id : null;
         const pool = window.obtenirArtefactsIdsPoolStd(productions, terminalId, config);
-        return { liste: productions.filter(p => pool.includes(p.id) || p.id === terminalId), terminalId };
+        // Vue simple : une production marquée « ne compte pas » (le champ `productionsExclues` de la pratique) RESTE une
+        // colonne ; elle est seulement marquée. En vue étendue, rien ne change : elle n'est pas au tableau.
+        const avecExclues = (_presentation && _presentation.colonnesQuiNeComptentPas)
+            ? window.obtenirArtefactsIdsPoolStd(productions, terminalId, Object.assign({}, config, { productionsExclues: [] })) : pool;
+        const hors = new Set(avecExclues.filter(id => !pool.includes(id)));
+        return { liste: productions.filter(p => avecExclues.includes(p.id) || p.id === terminalId), terminalId, hors };
     }
 
     function _productionsSpe(productions, types) {
@@ -157,6 +162,7 @@
             const r = _productionsStd(productions, ctx.config);
             ctx.productions = _productionsTriees(r.liste);
             ctx.terminalId = r.terminalId;
+            ctx.hors = r.hors;
             return;
         }
         ctx.speInstance = _instanceSpe(ctx.config);
@@ -367,8 +373,17 @@
             const e = _echelleDe(ctx, p.id);
             return (e && ctx.echelle && e.id !== ctx.echelle.id) ? `<span class="tn-production-date">${esc(e.echelle_nom)}</span>` : '';
         };
+        // Vue simple : le titre d'une colonne est le geste qui la règle (nom, date, type, « compte dans la note », retrait) ;
+        // une colonne qui ne compte pas le DIT en toutes lettres (pas seulement par un style).
+        const g = _presentation && _presentation.colonne;
+        const titre = (p) => {
+            const t = esc(p.titre || p.nom || '');
+            return g ? `<button type="button" class="tn-production-titre tn-production-regler" data-action="${esc(g.action)}" data-param="${esc(p.id)}" aria-label="${esc(g.libelle(p.titre || p.nom || ''))}">${t}</button>`
+                : `<span class="tn-production-titre">${t}</span>`;
+        };
+        const hors = (p) => (g && ctx.hors && ctx.hors.has(p.id)) ? `<span class="tn-production-hors">${esc(g.motHors)}</span>` : '';
         const prods = ctx.productions.map(p =>
-            `<th scope="col" class="tn-col-production"><span class="tn-production-titre">${esc(p.titre || p.nom || '')}</span><span class="tn-production-date">${esc(_dateCourte(p))}</span>${autreEchelle(p)}</th>`).join('');
+            `<th scope="col" class="tn-col-production${hors(p) ? ' tn-col-production--hors' : ''}">${titre(p)}<span class="tn-production-date">${esc(_dateCourte(p))}</span>${autreEchelle(p)}${hors(p)}</th>`).join('');
         const types = ctx.famille === 'SPE' ? ctx.types.map(t => `<th scope="col" class="tn-col-compte">${esc(t.nom || t.id)}</th>`).join('') : '';
         const note = ctx.config && ctx.config.notesFinales === true ? MOTS.noteFinale : MOTS.noteProvisoire;
         return `<thead><tr><th scope="col" class="tn-col-eleve">${esc(MOTS.eleve)}</th>${prods}${types}<th scope="col" class="tn-col-note">${esc(note)}</th></tr></thead>`;
@@ -426,7 +441,7 @@
         const g = p && p.gestes && p.gestes['aucune-production'];
         const ajout = g ? `<button type="button" class="btn btn-principal" data-action="${esc(g.action)}">${esc(g.libelle)}</button>` : '';
         return `<div class="tn-bandeau">
-            <div class="tn-pratique">${badge}<span class="tn-pratique-nom">${esc(ctx.pratiqueNom)}</span><span class="tn-regle">${esc(regle)}</span>
+            <div class="tn-pratique">${badge}<span class="tn-pratique-nom">${esc(ctx.pratiqueNom)}</span><span class="tn-regle">${esc(regle + (p && p.complementDeLaRegle ? p.complementDeLaRegle(ctx) : ''))}</span>
                 <a href="#" class="tn-reglages" data-prevent data-action="${esc(reglages.action)}" data-param="${esc(reglages.param)}">${esc(reglages.libelle || MOTS.reglages)}</a></div>
             <div class="tn-gestes">${ajout}<button type="button" class="btn btn-secondaire" id="tn-annuler" data-action="TableauNotation.annuler"${_gesteAnnulable() ? '' : ' disabled'}>${esc(MOTS.annuler)}</button>
             <button type="button" class="btn btn-secondaire" data-action="exporterSyntheseResultatsCSV">${esc(MOTS.exporter)}</button></div>
@@ -620,7 +635,7 @@
         if (!_gesteAnnulable()) { _dernierGeste = null; return 'rien'; }
         const geste = _dernierGeste;
         const stock = db.getSync(cle('evaluationsSauvegardees'), []) || [];
-        const r = D().defaireSaisie(stock, geste);
+        const r = geste.lot ? _defaireLot(stock, geste.lot) : D().defaireSaisie(stock, geste);
         _dernierGeste = null;
         if (r.action === 'defait') {
             if (sauvegarderDonneesSelonMode('evaluationsSauvegardees', r.evaluations, { geste: 'Tableau de notation' }) !== true) return 'echec';
@@ -629,10 +644,31 @@
             _planifierIndices();
         }
         if (_affiche) {
-            rendre({ da: geste.da, production: geste.productionId });
-            _annoncerNote(geste.da);
+            rendre(geste.lot ? null : { da: geste.da, production: geste.productionId });
+            if (!geste.lot) _annoncerNote(geste.da);
         }
         return r.action;
+    }
+
+    /**
+     * Défait un LOT : la mise à jour des valeurs après le réglage des niveaux (vue simple, `noterGesteLot`). Chaque résultat
+     * reprend la valeur qu'il portait, s'il porte encore celle que le lot lui a donnée ; un résultat changé depuis n'est pas touché.
+     */
+    function _defaireLot(stock, lot) {
+        const parId = new Map(lot.map(x => [x.id, x]));
+        let defaits = 0;
+        const evaluations = stock.map(e => {
+            const x = e && parId.get(e.id);
+            if (!x || e.noteFinale !== x.apres) return e;
+            defaits++;
+            return Object.assign({}, e, { noteFinale: x.avant });
+        });
+        return defaits ? { action: 'defait', evaluations } : { action: 'rien', evaluations: stock };
+    }
+
+    /** Vue simple : un geste qui a écrit plusieurs résultats d'un coup devient le dernier geste, que « Annuler » défait en entier. */
+    function noterGesteLot(lot) {
+        _dernierGeste = (lot && lot.length) ? { cleStock: cle('evaluationsSauvegardees'), lot: lot.map(x => ({ id: x.id, avant: x.avant, apres: x.apres })) } : null;
     }
 
     /** ⌘Z ou Ctrl+Z, quand le tableau est à l'écran et qu'on n'écrit pas dans un champ (son propre « annuler » passe d'abord). */
@@ -747,7 +783,6 @@
     function afficherDans(presentation) {
         _presentation = presentation;
         _affiche = true;
-        _dernierGeste = null;
         rendre(null);
     }
 
@@ -756,7 +791,6 @@
         if (!_presentation) return;
         if (_presentation.hote) _presentation.hote.innerHTML = '';
         _presentation = null;
-        _dernierGeste = null;
         // La Liste de la vue étendue retrouve l'état où elle était : son tableau, s'il y était ouvert, est redessiné dans son hôte.
         const carte = document.getElementById('carte-liste-evaluations');
         _affiche = !!(carte && carte.classList.contains('vue-tableau-notation'));
@@ -809,6 +843,7 @@
         afficherDans,          // vue simple : le tableau dans l'écran « Résultats »
         quitterPresentation,   // vue simple quittée
         notesDuGroupe,         // vue simple : l'écran « Note finale »
+        noterGesteLot,         // vue simple : la mise à jour des valeurs, que « Annuler » défait en un geste
         MOTS,                  // vue simple : les mots validés, repris tels quels (gelés)
         construireHTML,        // exposés pour le banc (tests/unit/tableau-notation-1.test.js)
         phraseRegleStd,

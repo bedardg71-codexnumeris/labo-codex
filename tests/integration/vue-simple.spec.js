@@ -632,6 +632,240 @@ test.describe('Vue simple · A. par standards, les niveaux se règlent', () => {
     });
 });
 
+test.describe('Vue simple · les seuils, la mise à jour des valeurs, les colonnes (décisions du 9 nov., 20 h 49 à 20 h 55)', () => {
+    const copies = (page) => page.evaluate(() => window.db.getSync(window.cle('evaluationsSauvegardees'), []));
+    const rangee = (page, i) => page.locator('#vs-bloc-niveaux .vs-niveau-rangee').nth(i);
+    const echelle = (page) => page.evaluate(() => {
+        const gc = window.db.getSync('groupeCoursActif', null);
+        const p = window.db.getSync(window.cle('pratiquesConfigurables'), []).find((x) => x.id === gc.pratiqueId);
+        return window.db.getSync(window.cle('echellesTemplates'), []).find((e) => e.id === p.configuration.echelleId);
+    });
+
+    test('les seuils ne bougent pas : « Étendu » passé de 100 à 95, une copie à 90 % évaluée avec une grille garde son niveau ; un niveau ajouté ne sert pas à la conversion ; une valeur au-dessus de 100 se saisit et donne sa note', async ({ page }) => {
+        test.setTimeout(90000);
+        const erreurs = await ouvrir(page);
+        await collerLaClasse(page);
+        await choisirLeModele(page, 'STD-n-meilleurs');
+        const convertir = () => page.evaluate(() => {
+            const gc = window.db.getSync('groupeCoursActif', null);
+            const p = window.db.getSync(window.cle('pratiquesConfigurables'), []).find((x) => x.id === gc.pratiqueId);
+            const e = window.db.getSync(window.cle('echellesTemplates'), []).find((x) => x.id === p.configuration.echelleId);
+            return [84, 85, 90, 100].map((pct) => window.niveauDuPourcentage(pct, e.niveaux));   // la conversion d'une évaluation avec grille
+        });
+        expect(await convertir()).toEqual(['M', 'E', 'E', 'E']);
+        await regler(page, 'niveaux');
+        await expect(page.locator('#vs-bloc-niveaux .vs-note')).toHaveText('Chaque niveau a une lettre, un nom et une valeur. La note se construit avec ces valeurs.');
+        await rangee(page, 4).locator('.vs-n-valeur').fill('95');   // « Étendu » : 100 → 95
+        await page.locator('[data-action="VueSimple.niveauGeste"][data-param="ajouter"]').click();
+        await rangee(page, 5).locator('.vs-n-code').fill('X');
+        await rangee(page, 5).locator('.vs-n-nom').fill('Exemplaire');
+        await rangee(page, 5).locator('.vs-n-valeur').fill('-5');
+        await page.locator('[data-action="VueSimple.enregistrerReglage"]').click();
+        await expect(page.locator('#vs-reglage-retour .vs-erreur')).toHaveText('Chaque niveau a une valeur : un nombre, zéro ou plus.');
+        await rangee(page, 5).locator('.vs-n-valeur').fill('110');   // au-dessus de 100 : permis, sans plafond
+        await enregistrerLeReglage(page, 'Niveaux enregistrés.');
+        const e = await echelle(page);
+        expect(e.niveaux.map((n) => [n.code, n.valeurCalcul, n.min, n.max])).toEqual([['PS', 0, 0, 39.99], ['I', 40, 40, 64.99], ['D', 65, 65, 74.99], ['M', 75, 75, 84.99], ['E', 95, 85, 100], ['X', 110, undefined, undefined]]);
+        expect(await convertir()).toEqual(['M', 'E', 'E', 'E']);   // la copie à 90 % garde « Étendu » ; « X », sans seuils, ne reçoit aucun pourcentage
+        await allerA(page, 'resultats');
+        await ajouterProduction(page, 'Production 1', '2026-11-02');
+        await ajouterProduction(page, 'Production 2', '2026-11-09');
+        await caseTn(page, 1, 1).focus(); await page.keyboard.press('x');
+        await caseTn(page, 1, 2).focus(); await page.keyboard.press('x');
+        await caseTn(page, 2, 1).focus(); await page.keyboard.press('x');
+        await caseTn(page, 2, 2).focus(); await page.keyboard.press('e');
+        await expect(noteTn(page, 1)).toHaveText('110');   // (110 + 110) / 2 : aucun plafond
+        await expect(noteTn(page, 2)).toHaveText('103');   // (110 + 95) / 2 = 102,5 → 103
+        await allerA(page, 'note');
+        await expect(ecran(page, 'note').locator('.vs-note-valeur')).toHaveText(['110', '103', '–', '–']);
+        const [csv] = await Promise.all([page.waitForEvent('download'), ecran(page, 'note').locator('[data-action="exporterSyntheseResultatsCSV"]').click()]);
+        expect(readFileSync(await csv.path(), 'utf8').split(/\r?\n/).find((l) => l.includes('9990001'))).toContain(',110,');
+        expect(erreurs).toEqual([]);
+    });
+
+    test('« Mettre à jour » : le compte exact, seule la valeur est écrite, aucune copie avec grille n\'est touchée ; « Annuler », au tableau, rend l\'empreinte d\'avant ; la note se recalcule à la main avant et après', async ({ page }) => {
+        test.setTimeout(120000);
+        const erreurs = await ouvrir(page);
+        await novice(page);   // Ada : E 100, M 75, D 65 → 80 ; Bruno : I 40
+        // Chloé a une copie évaluée AVEC une grille, niveau « M », dans la même échelle : le geste ne doit jamais la toucher.
+        await page.evaluate(async () => {   // security-ok: fixture fictive du banc
+            const gc = window.db.getSync('groupeCoursActif', null);
+            const pratique = window.db.getSync(window.cle('pratiquesConfigurables'), []).find((x) => x.id === gc.pratiqueId);
+            const p2 = window.db.getSync(window.cle('productions'), []).find((p) => p.titre === 'Production 2');
+            await window.db.modifier(window.cle('evaluationsSauvegardees'), (lues) => (lues || []).concat([{ id: 'EG1', etudiantDA: '9990003', productionId: p2.id, grilleId: 'G_X', grilleNom: 'Grille fictive',
+                echelleId: pratique.configuration.echelleId, noteFinale: 75, niveauFinal: 'M', verrouillee: true, statutRemise: 'evalue', statutIntegrite: 'recevable',
+                criteres: [{ critereId: 'c', critereNom: 'Critère fictif', niveauSelectionne: 'M', ponderation: 100 }], dateEvaluation: '2026-11-09T12:00:00.000Z', coursId: p2.coursId, groupeCoursId: gc.id }]), []);
+        });
+        const avant = await copies(page);
+        expect(avant).toHaveLength(5);
+        await regler(page, 'niveaux');
+        await rangee(page, 3).locator('.vs-n-valeur').fill('90');   // « M » : 75 → 90
+        await rangee(page, 2).locator('.vs-n-valeur').fill('60');   // « D » : 65 → 60
+        await enregistrerLeReglage(page, 'Niveaux enregistrés.');
+        // La question : deux résultats saisis au tableau portent une ancienne valeur (le M et le D d'Ada) ; la copie de Chloé ne compte pas.
+        await expect(page.locator('.vs-question #vs-question-texte')).toHaveText('2 résultats ont été saisis avec les anciennes valeurs. Les mettre à jour ?');
+        await expect(page.locator('.vs-question button')).toHaveText(['Mettre à jour', 'Garder les anciennes valeurs']);
+        expect(await copies(page)).toEqual(avant);   // tant qu'on n'a pas répondu, rien n'est écrit
+        await page.locator('[data-action="VueSimple.mettreAJour"]').click();
+        await expect(ecran(page, 'pratique').locator('.vs-succes')).toHaveText('2 résultats mis à jour. « Annuler », au tableau, les remet comme avant.');
+        const apres = await copies(page);
+        expect(apres).toHaveLength(5);   // aucun résultat créé ni effacé
+        const attendu = avant.map((c) => (c.sansGrille && c.niveauFinal === 'M' ? Object.assign({}, c, { noteFinale: 90 }) : (c.sansGrille && c.niveauFinal === 'D' ? Object.assign({}, c, { noteFinale: 60 }) : c)));
+        expect(apres).toEqual(attendu);   // seule la valeur a changé ; le niveau inscrit reste ; la copie avec grille est identique
+        expect(apres.find((c) => c.id === 'EG1')).toEqual(avant.find((c) => c.id === 'EG1'));
+        await allerA(page, 'resultats');
+        await expect(noteTn(page, 1)).toHaveText('83');   // à la main : (100 + 90 + 60) / 3 = 83,3 ; avant : (100 + 75 + 65) / 3 = 80
+        await expect(page.locator('#vs-tableau-hote .tn-case--valeur-changee')).toHaveCount(0);   // le signe « ≠ » a disparu de ces cases
+        // « Annuler », au tableau : un geste pour tout le lot.
+        await expect(page.locator('#tn-annuler')).toBeEnabled();
+        await page.locator('#tn-annuler').click();
+        expect(await copies(page)).toEqual(avant);   // l'empreinte d'avant
+        await expect(noteTn(page, 1)).toHaveText('80');
+        await expect(page.locator('#vs-tableau-hote .tn-case--valeur-changee')).toHaveCount(2);   // l'état « garder » : le signe, ressaisir
+        expect(erreurs).toEqual([]);
+    });
+
+    test('« Garder les anciennes valeurs » laisse l\'état d\'aujourd\'hui ; avec deux groupes sur la même pratique, la question compte les deux et le dit', async ({ page }) => {
+        const erreurs = await ouvrir(page);
+        await page.evaluate(() => {
+            // security-ok: fixtures littérales du banc. Deux groupes, UNE pratique par standards, son échelle à elle, un résultat sans grille dans chacun.
+            const T = 'avs3';
+            const niveaux = [{ code: 'I', nom: 'Incomplet', min: 0, max: 64.99, valeurCalcul: 40 }, { code: 'M', nom: 'Maîtrise', min: 65, max: 100, valeurCalcul: 80 }];
+            const res = (id, da, prod, cours, gc) => ({ id, etudiantDA: da, productionId: prod, sansGrille: true, grilleId: null, criteres: [], niveauFinal: 'M', noteFinale: 80, echelleId: 'ECH_C', verrouillee: true, statutRemise: 'evalue', statutIntegrite: 'recevable', coursId: cours, groupeCoursId: gc });
+            window.db.setSync('backupNePlusRappeler', 'true');
+            window.db.setSync('trimestres', [{ id: T, nom: 'Trimestre fictif', annee: 2026, session: 'A', actif: true }]);
+            window.db.setSync('cours', [{ id: 'c-a', codeCours: 'FIC301', nomCours: 'Cours fictif A' }, { id: 'c-b', codeCours: 'FIC302', nomCours: 'Cours fictif B' }]);   // security-ok: fixture
+            window.db.setSync(T + '_groupesCours', [{ id: 'GC_A', trimestreId: T, coursId: 'c-a', groupeNum: '01', pratiqueId: 'std-c' }, { id: 'GC_B', trimestreId: T, coursId: 'c-b', groupeNum: '02', pratiqueId: 'std-c' }]);
+            window.db.setSync(T + '_groupeEtudiants', [{ da: '9990041', nom: 'Iris', prenom: 'Inès', groupe: '01', coursId: 'c-a' }, { da: '9990042', nom: 'Jonc', prenom: 'Jules', groupe: '02', coursId: 'c-b' }]);   // security-ok: fixture
+            window.db.setSync(T + '_pratiquesConfigurables', [{ id: 'std-c', nom: 'Standards fictifs', type: 'standards', configuration: { type: 'standards', echelleId: 'ECH_C', notesFinales: false, portfolio: { actif: true, utiliser: true, methodeSelection: 'tous', nombreARetenir: 3, minimumCompletion: 1 } } }]);   // security-ok: fixture
+            window.db.setSync(T + '_echellesTemplates', [{ id: 'ECH_C', nom: 'Mes niveaux', pratiqueId: 'std-c', niveaux }]);   // security-ok: fixture
+            window.db.setSync(T + '_productions', [{ id: 'PA1', titre: 'Production A', type: 'autre', numero: 1, coursId: 'c-a' }, { id: 'PB1', titre: 'Production B', type: 'autre', numero: 1, coursId: 'c-b' }]);   // security-ok: fixture
+            window.db.setSync(T + '_evaluationsSauvegardees', [res('EA1', '9990041', 'PA1', 'c-a', 'GC_A'), res('EB1', '9990042', 'PB1', 'c-b', 'GC_B')]);
+            window.db.setSync('trimestreActif', T);
+            window.db.setSync('groupeCoursActif', { id: 'GC_A', trimestreId: T });
+            window.db.setSync('infoCours', { id: 'c-a', codeCours: 'FIC301', groupe: '01', _groupeCoursId: 'GC_A' });   // security-ok: fixture
+            window.localStorage.setItem('laboCodex.vue', 'simple');
+        });
+        await page.evaluate(() => window.db.flush());
+        await page.reload();
+        await attendreApplication(page);
+        const lire = () => page.evaluate(() => JSON.stringify(window.db.getSync('avs3_evaluationsSauvegardees', [])));
+        const avant = await lire();
+        await regler(page, 'niveaux');
+        await page.locator('#vs-bloc-niveaux .vs-niveau-rangee').nth(1).locator('.vs-n-valeur').fill('90');
+        await enregistrerLeReglage(page, 'Niveaux enregistrés.');
+        await expect(page.locator('.vs-question #vs-question-texte')).toHaveText('2 résultats ont été saisis avec les anciennes valeurs. Les mettre à jour ? Ils sont dans les 2 groupes qui ont cette pratique.');
+        await page.locator('[data-action="VueSimple.garderValeurs"]').click();
+        await expect(page.locator('.vs-question')).toHaveCount(0);
+        expect(await lire()).toBe(avant);   // « Garder » n'écrit rien
+        await allerA(page, 'resultats');
+        await expect(caseTn(page, 1, 1)).toHaveClass(/tn-case--valeur-changee/);   // le signe, comme aujourd'hui
+        await expect(noteTn(page, 1)).toHaveText('80');
+        // Redemander, puis mettre à jour : les deux groupes suivent.
+        await regler(page, 'niveaux');
+        await page.locator('#vs-bloc-niveaux .vs-niveau-rangee').nth(1).locator('.vs-n-valeur').fill('95');
+        await enregistrerLeReglage(page, 'Niveaux enregistrés.');
+        await page.locator('[data-action="VueSimple.mettreAJour"]').click();
+        await expect(ecran(page, 'pratique').locator('.vs-succes')).toContainText('2 résultats mis à jour.');
+        expect(await page.evaluate(() => window.db.getSync('avs3_evaluationsSauvegardees', []).map((e) => [e.id, e.niveauFinal, e.noteFinale]))).toEqual([['EA1', 'M', 95], ['EB1', 'M', 95]]);
+        expect(erreurs).toEqual([]);
+    });
+
+    test('une colonne : la renommer, la dater, la marquer « ne compte pas » (elle reste visible, le dit, la règle dit combien comptent) ; la note suit, à la main', async ({ page }) => {
+        test.setTimeout(90000);
+        const erreurs = await ouvrir(page);
+        await novice(page);   // Ada : E, M, D → 80
+        const avant = await copies(page);
+        await expect(page.locator('#vs-tableau-hote .tn-regle')).toHaveText('La note retient toutes les productions évaluées.');   // toutes comptent au départ : rien à dire
+        await page.locator('#vs-tableau-hote .tn-production-regler', { hasText: 'Production 3' }).click();
+        await expect(page.locator('#vs-production-nom')).toHaveValue('Production 3');
+        await expect(page.locator('#vs-colonne-compte')).toBeChecked();
+        await page.fill('#vs-production-nom', 'Analyse finale');
+        await page.fill('#vs-production-date', '2026-12-01');
+        await page.locator('#vs-colonne-compte').uncheck();
+        await page.locator('[data-action="VueSimple.enregistrerColonne"]').click();
+        const colonne = page.locator('#vs-tableau-hote .tn-col-production').nth(2);
+        await expect(colonne.locator('.tn-production-regler')).toHaveText('Analyse finale');
+        await expect(colonne.locator('.tn-production-hors')).toHaveText('ne compte pas');   // en toutes lettres, pas par la couleur seule
+        await expect(page.locator('#vs-tableau-hote .tn-regle')).toHaveText('La note retient toutes les productions évaluées. 2 productions sur 3 comptent.');
+        await expect(page.locator('#vs-tableau-hote .tn-case')).toHaveCount(12);   // la colonne reste, ses cases aussi
+        await expect(noteTn(page, 1)).toHaveText('88');   // (100 + 75) / 2 = 87,5 ; le D de la colonne écartée ne compte plus
+        expect(await copies(page)).toEqual(avant);   // aucun résultat touché
+        const donnees = await page.evaluate(() => {
+            const gc = window.db.getSync('groupeCoursActif', null);
+            const pratique = window.db.getSync(window.cle('pratiquesConfigurables'), []).find((x) => x.id === gc.pratiqueId);
+            const prods = window.db.getSync(window.cle('productions'), []);
+            return { exclues: pratique.configuration.productionsExclues, titres: prods.map((p) => [p.titre, p.dateEcheance]), idExclu: prods[2].id, simule: Math.round(window.simulerIndices('9990001', pratique.id).P) };
+        });
+        expect(donnees.exclues).toEqual([donnees.idExclu]);   // le champ de la vue étendue
+        expect(donnees.titres[2]).toEqual(['Analyse finale', '2026-12-01']);
+        expect(donnees.simule).toBe(88);   // le calcul partagé donne la même note
+        await allerA(page, 'pratique');
+        await expect(page.locator('#vs-bloc-regle .vs-valeur')).toHaveText('La note retient toutes les productions évaluées. 2 productions sur 3 comptent.');
+        // La remettre dans la note.
+        await allerA(page, 'resultats');
+        await page.locator('#vs-tableau-hote .tn-production-regler', { hasText: 'Analyse finale' }).click();
+        await page.locator('#vs-colonne-compte').check();
+        await page.locator('[data-action="VueSimple.enregistrerColonne"]').click();
+        await expect(page.locator('#vs-tableau-hote .tn-production-hors')).toHaveCount(0);
+        await expect(noteTn(page, 1)).toHaveText('80');
+        expect(erreurs).toEqual([]);
+    });
+
+    test('retirer une colonne : refusé si elle porte un résultat (rien n\'est effacé, l\'écran propose « ne compte pas ») ; une colonne vide se retire', async ({ page }) => {
+        test.setTimeout(90000);
+        const erreurs = await ouvrir(page);
+        await novice(page);
+        const lire = () => page.evaluate(() => JSON.stringify([window.db.getSync(window.cle('productions'), []), window.db.getSync(window.cle('evaluationsSauvegardees'), [])]));
+        const avant = await lire();
+        await page.locator('#vs-tableau-hote .tn-production-regler', { hasText: 'Production 1' }).click();
+        await page.locator('[data-action="VueSimple.retirerColonne"]').click();
+        await expect(page.locator('#vs-production-retour .vs-erreur')).toHaveText('Cette colonne porte 2 résultats : elle ne se retire pas. Rien n’a été effacé.');
+        await expect(page.locator('#vs-production-retour button')).toHaveText('La marquer « ne compte pas »');
+        expect(await lire()).toBe(avant);
+        await page.locator('[data-action="VueSimple.colonneNeComptePas"]').click();
+        await expect(page.locator('#vs-tableau-hote .tn-col-production').nth(0).locator('.tn-production-hors')).toHaveText('ne compte pas');
+        expect(await lire()).toBe(avant);   // la marque est sur la pratique : ni la production ni ses résultats ne bougent
+        await expect(page.locator('#vs-tableau-hote .tn-production-regler')).toHaveCount(3);
+        // Une colonne vide se retire, et elle seule.
+        await ajouterProduction(page, 'Colonne de trop', '');
+        await page.locator('#vs-tableau-hote .tn-production-regler', { hasText: 'Colonne de trop' }).click();
+        await page.locator('[data-action="VueSimple.retirerColonne"]').click();
+        await expect(page.locator('#vs-tableau-hote .tn-production-regler')).toHaveText(['Production 1', 'Production 2', 'Production 3']);
+        expect(await lire()).toBe(avant);
+        // Un fichier suffit à la garder (aucun résultat, mais une copie déposée en vue étendue).
+        await ajouterProduction(page, 'Colonne avec un fichier', '');
+        await page.evaluate(async () => {   // security-ok: fixture fictive du banc
+            const p = window.db.getSync(window.cle('productions'), []).find((x) => x.titre === 'Colonne avec un fichier');
+            await window.db.modifier(window.cle('fichiersTravaux'), (lus) => (lus || []).concat([{ id: 'F_FICTIF', productionId: p.id, etudiantDA: '9990001', nom: 'copie-fictive.pdf' }]), []);
+        });
+        await page.locator('#vs-tableau-hote .tn-production-regler', { hasText: 'Colonne avec un fichier' }).click();
+        await page.locator('[data-action="VueSimple.retirerColonne"]').click();
+        await expect(page.locator('#vs-production-retour .vs-erreur')).toHaveText('Cette colonne porte 1 fichier : elle ne se retire pas. Rien n’a été effacé.');
+        await expect(page.locator('#vs-tableau-hote .tn-production-regler')).toHaveCount(4);
+        expect(erreurs).toEqual([]);
+    });
+
+    test('par spécifications : changer le type d\'une production depuis sa colonne ; les comptes et la note suivent ; la marque « compte dans la note » n\'y est pas offerte', async ({ page }) => {
+        const erreurs = await ouvrir(page);
+        await collerLaClasse(page);
+        await choisirLeModele(page, 'SPE-simple');
+        await allerA(page, 'resultats');
+        await ajouterProduction(page, 'Travail A', '2026-11-02', 'Projet');
+        await ajouterProduction(page, 'Travail B', '2026-11-09', 'Projet');
+        await caseTn(page, 1, 1).focus(); await page.keyboard.press('a');
+        await caseTn(page, 1, 2).focus(); await page.keyboard.press('a');
+        await expect(noteTn(page, 1)).toHaveText('–');   // deux projets, aucun examen : aucun palier atteint
+        await page.locator('#vs-tableau-hote .tn-production-regler', { hasText: 'Travail B' }).click();
+        await expect(page.locator('#vs-colonne-compte')).toHaveCount(0);
+        await expect(page.locator('#vs-production-type')).toHaveValue('1');
+        await page.selectOption('#vs-production-type', { label: 'Examen' });
+        await page.locator('[data-action="VueSimple.enregistrerColonne"]').click();
+        await expect(noteTn(page, 1)).toHaveText('70');   // un projet et un examen acceptables : « Réussite »
+        expect(erreurs).toEqual([]);
+    });
+});
+
 test.describe('Vue simple · B. par spécifications, les types et les paliers se règlent', () => {
     test('renommer un type, en ajouter un, ajouter un palier plancher : « + Production » liste les types de l\'utilisateur, la note suit', async ({ page }) => {
         test.setTimeout(90000);
@@ -872,6 +1106,16 @@ test.describe('Vue simple · elle ne nomme rien qui n\'existe pas', () => {
         await regler(page, 'niveaux');
         await page.locator('[data-action="VueSimple.niveauGeste"][data-param="retirer"]').nth(3).click();   // « M », inscrit dans un résultat
         await aucunMotInterdit(page, 'novice › retrait refusé');
+        await page.locator('#vs-bloc-niveaux .vs-niveau-rangee').nth(3).locator('.vs-n-valeur').fill('90');
+        await page.locator('[data-action="VueSimple.enregistrerReglage"]').click();
+        await expect(page.locator('.vs-question')).toBeVisible();
+        await aucunMotInterdit(page, 'novice › question de mise à jour');
+        await page.locator('[data-action="VueSimple.garderValeurs"]').click();
+        await allerA(page, 'resultats');
+        await page.locator('#vs-tableau-hote .tn-production-regler').first().click();
+        await aucunMotInterdit(page, 'novice › réglage d\'une colonne');
+        await page.locator('[data-action="VueSimple.retirerColonne"]').click();
+        await aucunMotInterdit(page, 'novice › retrait d\'une colonne refusé');
         expect(erreurs).toEqual([]);
     });
 

@@ -53,10 +53,11 @@
         classeAjouter: 'Ajouter à ma classe',
         classeColonnes: ['DA', 'Nom', 'Prénom'],
         classeCompte: (n) => `${n} étudiant·e${n > 1 ? 's' : ''}`,
-        classeAucunLu: 'Aucun·e étudiant·e lu·e. Une ligne par étudiant·e : DA, nom, prénom.',
+        // VALIDÉES par Grégoire, mot pour mot (9 nov. 2026, 20 h 49) : deux tournures, à la place des accords empilés.
+        classeAucunLu: 'Aucune ligne lue. Une ligne par étudiant·e : DA, nom, prénom.',
         classeRefusees: (n) => `${n} ligne${n > 1 ? 's' : ''} non lue${n > 1 ? 's' : ''} :`,
         classeCreee: (n) => `Classe créée : ${n} étudiant·e${n > 1 ? 's' : ''}.`,
-        classeAjoutes: (n, deja) => `${n} étudiant·e${n > 1 ? 's' : ''} ajouté·e${n > 1 ? 's' : ''}` + (deja ? `, ${deja} déjà inscrit·e${deja > 1 ? 's' : ''} ce trimestre` : '') + '.',
+        classeAjoutes: (n, deja) => `${n} étudiant·e${n > 1 ? 's' : ''} de plus dans ta classe.` + (deja ? ` ${deja} y ${deja > 1 ? 'étaient' : 'était'} déjà.` : ''),
         classeSuite: 'Choisir ma pratique',
         classeEnDemo: 'La démonstration est ouverte. Quitte-la pour créer ta classe.',
         classeEchec: 'La classe n’a pas pu être créée.',
@@ -86,7 +87,8 @@
         regleAutre: 'La règle de cette pratique se change en vue étendue.',
         // — les niveaux (standards)
         niveauxTitre: 'Tes niveaux',
-        niveauxAide: 'Chaque niveau a une lettre, un nom et une valeur sur 100. La note se construit avec ces valeurs.',
+        // VALIDÉE par Grégoire, mot pour mot (9 nov. 2026, 20 h 55) : plus de « sur 100 », un niveau peut valoir davantage.
+        niveauxAide: 'Chaque niveau a une lettre, un nom et une valeur. La note se construit avec ces valeurs.',
         niveauColonnes: ['Lettre', 'Nom', 'Valeur'],
         niveauAjouter: '+ Niveau',
         niveauRetirer: 'Retirer',
@@ -114,7 +116,7 @@
             niveauUtilise: (r) => `Le niveau « ${r.nom} » est inscrit dans ${r.n} résultat${r.n > 1 ? 's' : ''} du tableau : il ne se retire pas. Aucun résultat n’a été effacé.`,
             lettreUtilisee: (r) => `La lettre « ${r.nom} » est inscrite dans ${r.n} résultat${r.n > 1 ? 's' : ''} du tableau : elle ne se change pas. Aucun résultat n’a été effacé.`,
             niveauIncomplet: () => 'Chaque niveau a une lettre et un nom.',
-            valeurNiveau: () => 'Chaque niveau a une valeur, de 0 à 100.',
+            valeurNiveau: () => 'Chaque niveau a une valeur : un nombre, zéro ou plus.',
             lettreEnDouble: () => 'Deux niveaux portent la même lettre.',
             minimumTypes: () => 'Il faut au moins un type.',
             typeUtilise: (r) => `${r.n} production${r.n > 1 ? 's' : ''} de ton tableau ${r.n > 1 ? 'sont' : 'est'} du type « ${r.nom} » : il ne se retire pas. Aucune production n’a été touchée.`,
@@ -146,6 +148,21 @@
         productionAjouter: 'Ajouter',
         productionAnnuler: 'Annuler',
         productionSansNom: 'Donne un nom à la production.',
+        // — une colonne du tableau (PROPOSÉ, 10 nov. 2026)
+        colonneRegler: (titre) => `Régler la colonne « ${titre} »`,
+        colonneCompte: 'Compte dans la note',
+        colonneHors: 'ne compte pas',
+        colonneEnregistrer: 'Enregistrer',
+        colonneRetirer: 'Retirer la colonne',
+        colonneCombien: (n, m) => ` ${n} production${n > 1 ? 's' : ''} sur ${m} compte${n > 1 ? 'nt' : ''}.`,
+        colonnePleine: (r) => `Cette colonne porte ${[r.evaluations ? `${r.evaluations} résultat${r.evaluations > 1 ? 's' : ''}` : '', r.copies ? `${r.copies} fichier${r.copies > 1 ? 's' : ''}` : ''].filter(Boolean).join(' et ')} : elle ne se retire pas. Rien n’a été effacé.`,
+        colonneMarquerHors: 'La marquer « ne compte pas »',
+        // — la mise à jour des valeurs (question PROPOSÉE par Cowork, 9 nov. 2026, 20 h 49)
+        majQuestion: (n) => `${n} résultat${n > 1 ? 's ont été saisis' : ' a été saisi'} avec les anciennes valeurs. ${n > 1 ? 'Les' : 'Le'} mettre à jour ?`,
+        majGroupes: (g) => `Ils sont dans les ${g} groupes qui ont cette pratique.`,
+        majOui: 'Mettre à jour',
+        majNon: 'Garder les anciennes valeurs',
+        majFaite: (n) => `${n} résultat${n > 1 ? 's' : ''} mis à jour. « Annuler », au tableau, ${n > 1 ? 'les' : 'le'} remet comme avant.`,
         // — Note finale
         noteTitre: 'Ta note finale',
         noteIntro: 'La note de chaque étudiant·e, construite par la règle de ta pratique à partir des résultats du tableau.',
@@ -183,6 +200,8 @@
     }
     let _ecran = 'accueil';
     let _formulaireProduction = false;
+    let _colonne = null;       // la colonne (production) que le formulaire règle ; null : « + Production »
+    let _miseAJour = null;     // la question posée après un réglage de niveaux : { lot, groupes }
 
     /* ============================== LA VUE ============================== */
 
@@ -322,6 +341,8 @@
         if (_ecran === 'resultats' && ecran !== 'resultats' && window.TableauNotation) window.TableauNotation.quitterPresentation();
         _ecran = ecran;
         _formulaireProduction = false;
+        _colonne = null;
+        _miseAJour = null;
         _fermerReglage();
         if (typeof afficherSection === 'function') afficherSection('simple-' + ecran);
         RENDUS[ecran]();
@@ -637,7 +658,9 @@
     function _regleLueHTML(pratique) {
         const phrase = window.TableauNotation ? window.TableauNotation.phraseRegleStd(pratique.configuration, false) : '';
         const autre = D().regleStd(pratique).methode === 'autre' ? `<p class="vs-note">${esc(MOTS.regleAutre)}</p>` : '';
-        return `<p class="vs-valeur">${esc(phrase)}</p>${autre}`;
+        const groupe = _groupeActif();
+        const colonnes = groupe ? _productionsDuCours(groupe.coursId).filter((x) => x.type !== 'portfolio' && x.type !== 'terminale') : [];
+        return `<p class="vs-valeur">${esc(phrase + (groupe ? _combienComptent(groupe, colonnes) : ''))}</p>${autre}`;
     }
 
     function _regleReglageHTML() {
@@ -662,7 +685,7 @@
         const rangees = _brouillon.niveaux.map((n, i) => `<tr class="vs-niveau-rangee">
                 <td><input type="text" class="controle-form vs-n-code" maxlength="3" value="${esc(n.code)}" aria-label="${esc(MOTS.niveauColonnes[0] + ' ' + (i + 1))}"></td>
                 <td><input type="text" class="controle-form vs-n-nom" maxlength="40" value="${esc(n.nom)}" aria-label="${esc(MOTS.niveauColonnes[1] + ' ' + (i + 1))}"></td>
-                <td><input type="number" class="controle-form vs-n-valeur" min="0" max="100" step="any" value="${esc(String(n.valeur))}" aria-label="${esc(MOTS.niveauColonnes[2] + ' ' + (i + 1))}"></td>
+                <td><input type="number" class="controle-form vs-n-valeur" min="0" step="any" value="${esc(String(n.valeur))}" aria-label="${esc(MOTS.niveauColonnes[2] + ' ' + (i + 1))}"></td>
                 <td class="vs-rangee-gestes">
                     <button type="button" class="btn btn-secondaire vs-petit" data-action="VueSimple.niveauGeste" data-param="monter" data-param2="${i}"${i === 0 ? ' disabled' : ''} aria-label="${esc(MOTS.niveauMonter + ' ' + (n.nom || n.code))}">↑</button>
                     <button type="button" class="btn btn-secondaire vs-petit" data-action="VueSimple.niveauGeste" data-param="descendre" data-param2="${i}"${i === dernier ? ' disabled' : ''} aria-label="${esc(MOTS.niveauDescendre + ' ' + (n.nom || n.code))}">↓</button>
@@ -769,7 +792,7 @@
         const reglable = !!pratique.configuration;
         const blocs = !reglable ? `<p class="vs-note">${esc(MOTS.regleAutre)}</p>` : (std ? _blocsStdHTML(pratique) : _blocsSpeHTML(pratique));
         return `<p class="vs-intro"><span class="vs-libelle">${esc(MOTS.pratiqueModele)}</span> ${esc(noms)}</p>
-            <div id="vs-pratique-retour">${retourHTML || ''}</div>${reglable ? _reglePartageeHTML(pratique) : ''}${blocs}
+            <div id="vs-pratique-retour">${retourHTML || ''}${_questionMiseAJourHTML()}</div>${reglable ? _reglePartageeHTML(pratique) : ''}${blocs}
             <p class="vs-gestes"><button type="button" class="btn btn-principal" data-action="VueSimple.aller" data-param="resultats">${esc(MOTS.pratiqueSuite)}</button>${_changerModeleHTML(groupe)}</p>`;
     }
 
@@ -896,11 +919,54 @@
             return liste.concat([r.echelle]);
         }, [], { geste: MOTS.niveauxTitre });
         if (!ecrit) return { ecrit: false };
-        if (!r.copiee) return { ecrit: true };
-        const nouvelle = JSON.parse(JSON.stringify(pratique));
-        nouvelle.configuration.echelleId = r.echelle.id;
-        return { ecrit: !!(await _ecrirePratique(nouvelle, MOTS.niveauxTitre)) };
+        if (r.copiee) {
+            const nouvelle = JSON.parse(JSON.stringify(pratique));
+            nouvelle.configuration.echelleId = r.echelle.id;
+            if (!(await _ecrirePratique(nouvelle, MOTS.niveauxTitre))) return { ecrit: false };
+        }
+        return { ecrit: true, lot: _lotAMettreAJour(pratique, r.echelle) };
     }
+
+    /** Les résultats saisis au tableau avec une ancienne valeur, dans TOUS les groupes qui ont cette pratique. */
+    function _lotAMettreAJour(pratique, echelle) {
+        const groupes = _groupes().filter((g) => g.pratiqueId === pratique.id);
+        return D().resultatsAMettreAJour(db.getSync(cle('evaluationsSauvegardees'), []) || [], {
+            idsEchelle: [echelle.id, echelle.copieDe].filter(Boolean), niveaux: echelle.niveaux,
+            groupes: groupes.map((g) => g.id), cours: groupes.map((g) => g.coursId)
+        });
+    }
+
+    function _questionMiseAJourHTML() {
+        if (!_miseAJour) return '';
+        const plusieurs = _miseAJour.groupes > 1 ? ` ${MOTS.majGroupes(_miseAJour.groupes)}` : '';
+        return `<div class="vs-question" role="alertdialog" aria-labelledby="vs-question-texte">
+            <p id="vs-question-texte">${esc(MOTS.majQuestion(_miseAJour.lot.length) + plusieurs)}</p>
+            <p class="vs-gestes"><button type="button" class="btn btn-principal" data-action="VueSimple.mettreAJour">${esc(MOTS.majOui)}</button>
+                <button type="button" class="btn btn-secondaire" data-action="VueSimple.garderValeurs">${esc(MOTS.majNon)}</button></p></div>`;
+    }
+
+    /**
+     * « Mettre à jour » : chaque résultat du lot prend la valeur d'aujourd'hui de son niveau. Rien d'autre n'est écrit : le
+     * niveau inscrit reste, aucun résultat n'est créé ni effacé, aucune copie évaluée avec une grille n'est touchée. Le lot
+     * devient le dernier geste du tableau : « Annuler » le défait en entier.
+     */
+    async function mettreAJour() {
+        if (!_miseAJour) return;
+        const lot = _miseAJour.lot;
+        const stock = db.getSync(cle('evaluationsSauvegardees'), []) || [];
+        const ecrit = sauvegarderDonneesSelonMode('evaluationsSauvegardees', D().appliquerMiseAJour(stock, lot), { geste: MOTS.majOui }) === true;
+        _miseAJour = null;
+        if (ecrit) {
+            if (window.TableauNotation) window.TableauNotation.noterGesteLot(lot);
+            window._moyennesQualifies = null;
+            window._moyennesToutes = null;
+            _apresEcriturePratique();
+        }
+        _rendrePratique(ecrit ? `<p class="vs-succes" role="status">${esc(MOTS.majFaite(lot.length))}</p>` : `<p class="vs-erreur" role="alert">${esc(MOTS.pratiqueEchec)}</p>`);
+    }
+
+    /** « Garder les anciennes valeurs » : l'état d'aujourd'hui (le signe « ≠ » sur ces cases, ressaisir pour prendre la valeur). */
+    function garderValeurs() { _miseAJour = null; _rendrePratique(); }
 
     async function _enregistrerLeReglage(pratique, b) {
         if (_reglage === 'niveaux') return Object.assign({ mot: MOTS.niveauxEnregistres }, await _enregistrerNiveaux(pratique, b));
@@ -923,6 +989,7 @@
         const r = await _enregistrerLeReglage(pratique, _brouillon);
         if (r.refus) { _direRefus(r.refus); return; }
         if (r.ecrit) { _apresEcriturePratique(); _fermerReglage(); }
+        _miseAJour = (r.ecrit && r.lot && r.lot.length) ? { lot: r.lot, groupes: _groupes().filter((g) => g.pratiqueId === pratique.id).length } : null;
         _rendrePratique(r.ecrit ? `<p class="vs-succes" role="status">${esc(r.mot)}</p>` : `<p class="vs-erreur" role="alert">${esc(MOTS.pratiqueEchec)}</p>`);
     }
 
@@ -991,22 +1058,58 @@
         return (_famille(groupe) === D().FAMILLES.SPE && p && p.configuration && p.configuration.typesTravaux) || [];
     }
 
+    /** La marque « compte dans la note » : offerte quand le calcul la lit (standards, sans catégories, sans productions de type artefact). */
+    function _marqueOfferte(groupe) {
+        const p = _pratiqueDuGroupe(groupe);
+        if (_famille(groupe) !== D().FAMILLES.STD || !p || !p.configuration) return false;
+        if (p.configuration.categories && p.configuration.categories.actif) return false;
+        return !_productionsDuCours(groupe.coursId).some((x) => x.type === 'artefact-portfolio');
+    }
+
+    function _exclues(groupe) {
+        const p = _pratiqueDuGroupe(groupe);
+        return new Set((p && p.configuration && Array.isArray(p.configuration.productionsExclues)) ? p.configuration.productionsExclues : []);
+    }
+
+    /** « N productions sur M comptent. » : dit seulement quand une colonne ne compte pas. `colonnes` : les productions du tableau. */
+    function _combienComptent(groupe, colonnes) {
+        if (!_marqueOfferte(groupe)) return '';
+        const exclues = _exclues(groupe);
+        const hors = colonnes.filter((c) => exclues.has(c.id)).length;
+        return hors ? MOTS.colonneCombien(colonnes.length - hors, colonnes.length) : '';
+    }
+
+    function _champTypeHTML(types, choisi) {
+        // En spécifications, une production n'est une colonne que si elle a un type de la pratique : avec plus d'un type, il se choisit.
+        if (types.length < 2) return '';
+        const options = types.map((t) => `<option value="${esc(t.id)}"${String(t.id) === String(choisi) ? ' selected' : ''}>${esc(t.nom || t.id)}</option>`).join('');
+        return `<div class="groupe-form"><label for="vs-production-type">${esc(MOTS.productionType)}</label>
+                <select id="vs-production-type" class="controle-form">${options}</select></div>`;
+    }
+
+    /** Le formulaire du tableau : « + Production » (une colonne neuve), ou le réglage d'UNE colonne (`_colonne`). */
     function _formulaireProductionHTML(groupe) {
         if (!_formulaireProduction) return '';
+        const p = _colonne ? _productionsDuCours(groupe.coursId).find((x) => x.id === _colonne) : null;
+        if (_colonne && !p) return '';
         const types = _typesSpe(groupe);
-        // En spécifications, une production n'est une colonne que si elle a un type de la pratique : avec plus d'un type, il se choisit.
-        const type = types.length > 1 ? `<div class="groupe-form"><label for="vs-production-type">${esc(MOTS.productionType)}</label>
-                <select id="vs-production-type" class="controle-form">${types.map((t) => `<option value="${esc(t.id)}">${esc(t.nom || t.id)}</option>`).join('')}</select></div>` : '';
+        const type = _champTypeHTML(types, p ? (types.find((t) => window.productionEstDuType(p, t)) || {}).id : null);
+        const compte = (p && _marqueOfferte(groupe)) ? `<label class="vs-choix vs-colonne-compte"><input type="checkbox" id="vs-colonne-compte"${_exclues(groupe).has(p.id) ? '' : ' checked'}> ${esc(MOTS.colonneCompte)}</label>` : '';
+        const gestes = p
+            ? `<button type="button" class="btn btn-principal" data-action="VueSimple.enregistrerColonne">${esc(MOTS.colonneEnregistrer)}</button>
+                <button type="button" class="btn btn-secondaire" data-action="VueSimple.fermerProduction">${esc(MOTS.productionAnnuler)}</button>
+                <button type="button" class="btn btn-secondaire" data-action="VueSimple.retirerColonne">${esc(MOTS.colonneRetirer)}</button>`
+            : `<button type="button" class="btn btn-principal" data-action="VueSimple.ajouterProduction">${esc(MOTS.productionAjouter)}</button>
+                <button type="button" class="btn btn-secondaire" data-action="VueSimple.fermerProduction">${esc(MOTS.productionAnnuler)}</button>`;
         return `<div class="vs-bloc vs-production" id="vs-production-formulaire">
             <div class="vs-production-champs">
                 <div class="groupe-form vs-production-nom"><label for="vs-production-nom">${esc(MOTS.productionNom)}</label>
-                    <input type="text" id="vs-production-nom" class="controle-form" maxlength="120" autocomplete="off"></div>
+                    <input type="text" id="vs-production-nom" class="controle-form" maxlength="120" autocomplete="off" value="${esc(p ? (p.titre || '') : '')}"></div>
                 <div class="groupe-form"><label for="vs-production-date">${esc(MOTS.productionDate)}</label>
-                    <input type="date" id="vs-production-date" class="controle-form"></div>${type}
-            </div>
+                    <input type="date" id="vs-production-date" class="controle-form" value="${esc(p ? String(p.dateEcheance || '').slice(0, 10) : '')}"></div>${type}
+            </div>${compte}
             <div id="vs-production-retour"></div>
-            <p class="vs-gestes"><button type="button" class="btn btn-principal" data-action="VueSimple.ajouterProduction">${esc(MOTS.productionAjouter)}</button>
-                <button type="button" class="btn btn-secondaire" data-action="VueSimple.fermerProduction">${esc(MOTS.productionAnnuler)}</button></p></div>`;
+            <p class="vs-gestes">${gestes}</p></div>`;
     }
 
     function _presentationDuTableau(hote) {
@@ -1018,6 +1121,11 @@
             // (standards), les types et les paliers (spécifications).
             reglages: { action: 'VueSimple.regler', param: _famille(_groupeActif()) === D().FAMILLES.SPE ? 'types' : 'regle', libelle: MOTS.regler },
             reglerRepere: { action: 'VueSimple.regler', param: _famille(_groupeActif()) === D().FAMILLES.SPE ? 'paliers' : 'niveaux', libelle: MOTS.regler },
+            // Chaque colonne se règle depuis son titre ; une colonne qui ne compte pas reste au tableau et le dit ; la phrase
+            // de la règle dit combien comptent.
+            colonne: { action: 'VueSimple.ouvrirColonne', libelle: MOTS.colonneRegler, motHors: MOTS.colonneHors },
+            colonnesQuiNeComptentPas: _marqueOfferte(_groupeActif()),
+            complementDeLaRegle: (ctx) => _combienComptent(_groupeActif(), (ctx.productions || []).filter((x) => x.id !== ctx.terminalId)),
             gestes: {
                 'aucune-pratique': { libelle: MOTS.cartes[1].lien, action: 'VueSimple.aller', param: 'pratique' },
                 'aucun-eleve': { libelle: MOTS.cartes[0].lien, action: 'VueSimple.aller', param: 'classe' },
@@ -1041,6 +1149,17 @@
     }
 
     function ouvrirProduction() {
+        _colonne = null;
+        _ouvrirFormulaire();
+    }
+
+    /** Le titre d'une colonne, au tableau : ouvre le réglage de CETTE colonne (nom, date, type, « compte dans la note », retrait). */
+    function ouvrirColonne(productionId) {
+        _colonne = String(productionId);
+        _ouvrirFormulaire();
+    }
+
+    function _ouvrirFormulaire() {
         _formulaireProduction = true;
         const hote = document.getElementById('vs-production-hote');
         if (!hote) { _rendreResultats(); return; }
@@ -1051,6 +1170,7 @@
 
     function fermerProduction() {
         _formulaireProduction = false;
+        _colonne = null;
         const hote = document.getElementById('vs-production-hote');
         if (hote) _ecrire(hote, '');
     }
@@ -1094,6 +1214,77 @@
         if (!ecrit) return;
         _formulaireProduction = false;
         _rendreResultats();   // la colonne neuve paraît ; le témoin commun dit « Enregistré »
+    }
+
+    function _direAuFormulaire(html) { _ecrire(document.getElementById('vs-production-retour'), html); }
+
+    /** La colonne qu'on règle, son groupe et sa pratique ; null si elle n'est plus là. */
+    function _colonneOuverte() {
+        const groupe = _groupeActif();
+        const production = groupe && _colonne ? _productionsDuCours(groupe.coursId).find((x) => x.id === _colonne) : null;
+        return production ? { groupe, production, pratique: _pratiqueDuGroupe(groupe) } : null;
+    }
+
+    async function _ecrireCompte(c, compte) {
+        const nouvelle = D().poserCompte(c.pratique, c.production.id, compte);
+        if (JSON.stringify(nouvelle) === JSON.stringify(c.pratique)) return true;
+        const ecrit = await _ecrirePratique(nouvelle, MOTS.colonneCompte);
+        if (ecrit) _apresEcriturePratique();
+        return !!ecrit;
+    }
+
+    /** « Enregistrer » d'une colonne : son nom, sa date, son type, et si elle compte dans la note. Ses résultats ne sont pas touchés. */
+    async function enregistrerColonne() {
+        const c = _colonneOuverte();
+        if (!c) { fermerProduction(); return; }
+        const titre = ((document.getElementById('vs-production-nom') || {}).value || '').trim();
+        if (!titre) { _direAuFormulaire(`<p class="vs-erreur" role="alert">${esc(MOTS.productionSansNom)}</p>`); return; }
+        const champType = document.getElementById('vs-production-type');
+        const types = _typesSpe(c.groupe);
+        const type = champType ? (types.find((t) => String(t.id) === String(champType.value)) || {}).id : undefined;
+        const modifiee = D().colonneModifiee(c.production, { titre, date: (document.getElementById('vs-production-date') || {}).value || '', type, maintenant: new Date().toISOString() });
+        const ecrit = await window.modifierEtAnnoncer(cle('productions'), (lues) => (lues || []).map((p) => (p && p.id === modifiee.id) ? modifiee : p), [], { geste: MOTS.colonneEnregistrer });
+        if (!ecrit) return;
+        const marque = document.getElementById('vs-colonne-compte');
+        if (marque && _marqueOfferte(c.groupe) && !(await _ecrireCompte(c, marque.checked))) return;
+        fermerProduction();
+        _rendreResultats();
+    }
+
+    /**
+     * « Retirer la colonne » : SEULEMENT si elle est vide — aucun résultat, aucune évaluation, aucun fichier, dans aucun
+     * groupe (`compterEmploisProduction`, la garde de la vue étendue). Rien n'est jamais effacé qui porte une donnée (limite
+     * de Grégoire du 20 sept. 2026) : pleine, la colonne reste, et l'écran propose de la marquer « ne compte pas ».
+     */
+    async function retirerColonne() {
+        const c = _colonneOuverte();
+        if (!c) { fermerProduction(); return; }
+        const emplois = window.compterEmploisProduction(c.production.id);
+        if (emplois.total > 0) {
+            const proposer = (_marqueOfferte(c.groupe) && !_exclues(c.groupe).has(c.production.id))
+                ? `<p class="vs-gestes"><button type="button" class="btn btn-secondaire" data-action="VueSimple.colonneNeComptePas">${esc(MOTS.colonneMarquerHors)}</button></p>` : '';
+            _direAuFormulaire(`<p class="vs-erreur" role="alert">${esc(MOTS.colonnePleine(emplois))}</p>${proposer}`);
+            return;
+        }
+        const id = c.production.id;
+        const ecrit = await window.modifierEtAnnoncer(cle('productions'), (lues) => {
+            // La garde se relit À L'INSTANT DE L'ÉCRITURE : un résultat saisi entre le clic et ici garde sa colonne.
+            if (window.compterEmploisProduction(id).total > 0) return undefined;
+            return (lues || []).filter((p) => !p || p.id !== id);
+        }, [], { geste: MOTS.colonneRetirer });
+        if (!ecrit) return;
+        if (c.pratique && c.pratique.configuration && _exclues(c.groupe).has(id)) await _ecrireCompte(c, true);   // l'exclusion d'une colonne partie ne reste pas
+        fermerProduction();
+        _rendreResultats();
+    }
+
+    /** Proposé au refus d'un retrait : la colonne pleine reste, et ne compte plus dans la note. */
+    async function colonneNeComptePas() {
+        const c = _colonneOuverte();
+        if (!c || !_marqueOfferte(c.groupe)) return;
+        if (!(await _ecrireCompte(c, false))) return;
+        fermerProduction();
+        _rendreResultats();
     }
 
     /* ============================== NOTE FINALE ============================== */
@@ -1171,6 +1362,8 @@
         changerModele: _unALaFois(changerModele), enregistrerReglage: _unALaFois(enregistrerReglage),
         regler, annulerReglage, niveauGeste, typeGeste, palierGeste,
         ouvrirProduction, fermerProduction, ajouterProduction: _unALaFois(ajouterProduction),
+        ouvrirColonne, enregistrerColonne: _unALaFois(enregistrerColonne), retirerColonne: _unALaFois(retirerColonne), colonneNeComptePas: _unALaFois(colonneNeComptePas),
+        mettreAJour: _unALaFois(mettreAJour), garderValeurs,
         enteteDuMenuSauvegarder
     };
 
