@@ -2,7 +2,56 @@
 
 Décision de Cowork du 9 nov. 2026, 21 h 43. Branche `lot/niveau-sans-seuils`, partie de `lot/vue-simple` (`58c396bb`, après le relais de 21 h 42). Session cloud, Chromium seulement. Rien n'est fusionné.
 
-> **État de ce fichier : LA MESURE seulement, poussée AVANT toute correction**, comme demandé. Le rapport des corrections viendra en tête.
+> **État de ce fichier : LES CORRECTIONS en tête (10 nov. 2026), LA MESURE dessous**, poussée avant elles comme demandé.
+
+## LES CORRECTIONS (10 nov. 2026)
+
+### Ce qui remonte à Grégoire
+
+1. **Un mot neuf sur un document que des étudiant·es peuvent lire — PROPOSÉ.** Dans le PDF d'une échelle, la colonne « Plage » d'un niveau sans seuils dit :
+   - « — »
+
+   C'est le signe que ce PDF emploie déjà pour une description absente. Avant : « 0 % - 100 % ».
+2. **Une supposition, à confirmer ou à renverser.** Une note au-dessus du plus haut seuil d'une échelle se range dans le plus haut niveau, plutôt que nulle part. ⚠ Elle vaut aussi pour une échelle dont le plus haut seuil est SOUS 100 : avec un plus haut seuil à 89, une note de 95 n'était rangée nulle part dans la répartition du Suivi ; elle va maintenant au plus haut niveau. C'est un changement pour des échelles ordinaires, pas seulement pour la vue simple (relevé par la relecture).
+3. **Un choix d'affichage.** Le niveau sans seuils ne paraît PAS dans la répartition du Suivi (j'avais annoncé « à sa place dans la liste »). Motif : il ne peut recevoir personne, la ligne dirait toujours « Exemplaire : 0 ». À renverser si tu veux le voir.
+
+### Ce qui est corrigé
+
+| Constat de la consigne | Avant (mesuré) | Après (mesuré, même parcours) |
+|---|---|---|
+| (a) Répartition du Suivi | « Préstructurel : 0 • Exemplaire : 1 • … » : l'étudiant·e à 0 dans le niveau ajouté | « Préstructurel : 1 • Incomplet : 0 • Développement : 0 • Maîtrise : 1 • Étendu : 2 » |
+| (a) PDF d'une échelle (aperçu et trois exports) | « X · Exemplaire · — · 0 % - 100 % » | « X · Exemplaire · — · — » ; les cinq autres plages inchangées |
+| (a) Zones du graphique de progression | une zone aux bornes NaN | aucune zone pour ce niveau ; **exécuté hors navigateur seulement** |
+| (b) Note de 110 dans la répartition | rangée nulle part (trois étudiant·es sur quatre) | rangée dans « Étendu » ; « 3 étudiant·es (75 %) ont atteint ou dépassé le niveau de maîtrise » |
+| (c) Partage | « valeur 110 hors limites [0, 100] » | la valeur voyage (`valeurCalcul` et son jumeau `valeur`) ; une valeur négative reste refusée ; les seuils restent bornés à 100 |
+
+**Source, stock, ou les deux ?** Source seulement. Aucune donnée déjà écrite n'est lue autrement, sauf le point 2 ci-dessus, qui change un AFFICHAGE pour les échelles au plus haut seuil sous 100. Rien n'est écrit dans les données de personne.
+
+**Un choix de portée.** « Sans seuils » veut dire sans AUCUN des deux. Un niveau qui n'en a qu'un se lit comme avant ce lot (0 pour un `min` absent, 100 pour un `max` absent) : comparé à l'ancien code sur 20 échelles par la relecture, identique.
+
+**Corrigé en passant, et dit.** Le nom d'un niveau entrait sans échappement dans la répartition du Suivi (règle de sécurité n° 1 ; relevé par la relecture). La ligne n'était pas de ce lot, mais elle est dans la fonction que je réécris et le nom d'un niveau se saisit maintenant en vue simple : échappé, avec son essai.
+
+### Ce qui n'est PAS corrigé, avec sa disposition
+
+| Constat | Disposition |
+|---|---|
+| **La légende des barres du profil** (annoncée au point 4 de la mesure) | *Périmé* : exécuté par la relecture, la source écarte déjà un niveau sans seuils. Aucun défaut. |
+| **La courbe du graphique de progression, plafonnée à 100** | *Refusé dans ce lot* : ni exécutable ni visible ici (aucune capture hebdomadaire). Lu seulement. À décider. |
+| **Aucune échelle de départ ne se partage** : deux couleurs des niveaux par défaut font 31 et 32 caractères, le schéma en accepte 30 | *Hors lot, à inscrire* — remonte. Exécuté sur le contrôle du partage, avec et sans ce lot ; **non vérifié par le geste de l'interface**. Le banc du lot le constate et rougira le jour où c'est levé. |
+| **L'aperçu des niveaux dans les deux éditeurs d'échelle et l'assistant de pratique** : un niveau sans seuils s'affiche « X » suivi d'un tiret orphelin | *Hors lot, à inscrire* — écran d'enseignant·e. Exécuté par la relecture. |
+| **Une troisième lecture « quel niveau reçoit ce pourcentage »** (`situerPourcentageDansEchelle`, profil et interventions) rend « aucun » au-dessus de 100 | *Hors lot, à inscrire.* Lu seulement. |
+| **Une échelle dont AUCUN niveau n'a de seuils** : le Suivi dit « Les copies de ce groupe sont notées sans échelle » | *Hors lot, à inscrire.* Lu ; atteignable en retirant les cinq niveaux d'origine en vue simple, non rejoué. |
+| Un niveau à UN seul seuil trace encore une zone aux bornes NaN ; des seuils illisibles (« 64,99 » avec une virgule) se lisent autrement qu'avant | *Sans suite* : données qu'aucun éditeur n'écrit. |
+
+### La preuve
+
+- **Vitest** : 19 essais neufs (`tests/unit/niveau-sans-seuils.test.js`) ; suite entière verte au push (voir le dernier commit).
+- **Playwright, Chromium** : 4 essais neufs par l'interface (`tests/integration/niveau-sans-seuils.spec.js`) ; 65 sur 65 sur les bancs voisins (vue simple, tableau, Suivi, partage, PDF, échelles), lancés avant les suites de la relecture.
+- **Break-tests** : 23, tous rouges. Un était resté vert (un seuil à zéro, seul) : essai durci, rejoué rouge.
+- **Relecture par un agent neuf** : rien de bloquant ; sept constats. Suivis dans le lot : la note au-dessus d'un plus haut seuil sous 100 (déclarée et tenue par un essai), trois comportements sans essai (essais ajoutés), le champ jumeau `valeur` encore borné (aligné), le nom non échappé (corrigé). Les autres sont au tableau ci-dessus.
+- Des bancs existants chargeaient le Suivi sans `echelles.js` : leurs harnais reçoivent les vraies fonctions, extraites du fichier (aucune copie de la règle).
+
+**Non vérifié** : WebKit, iPad, la suite Playwright entière, le PDF réellement généré (seuls l'aperçu et la fonction commune aux quatre sorties sont exécutés), le graphique rendu à l'écran, des données réelles.
 
 ---
 

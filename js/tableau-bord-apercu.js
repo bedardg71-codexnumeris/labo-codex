@@ -1060,7 +1060,8 @@ function calculerDistributionPerformance(etudiants) {
     const parts = niveaux.map(niveau => {
         const count = compteurs[niveau.code] || 0;
         // Utiliser le nom complet du niveau au lieu du code
-        return `${niveau.nom} : ${count}`;
+        // Le nom d'un niveau est saisi par l'enseignant·e (éditeur d'échelle, vue simple) et cette chaîne entre dans un innerHTML.
+        return `${echapperHtml(niveau.nom)} : ${count}`;
     });
 
     const result = parts.join(' <span class="tb-m-horizontal-6">•</span> ');

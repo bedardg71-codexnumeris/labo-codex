@@ -505,7 +505,8 @@
                         // rendait `null` chez le destinataire : sa première évaluation
                         // affichait 0,0 % sans un mot. La liste blanche ne signale pas
                         // ce qu'elle oublie, elle le fait disparaître (#511).
-                        valeur: { type: 'nombre', minValeur: 0, maxValeur: 100 },
+                        // Lot « niveau sans seuils » (10 nov. 2026) : même règle que `valeurCalcul`, pas de plafond.
+                        valeur: { type: 'nombre', minValeur: 0 },
                         couleur: { type: 'chaine', max: 30 },
                         // #680 (25 sept. 2026) — la description du niveau et son
                         // étiquette SOLO se saisissent dans l'éditeur d'échelle ;

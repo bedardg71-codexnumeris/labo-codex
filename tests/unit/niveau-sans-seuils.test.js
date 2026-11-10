@@ -74,6 +74,20 @@ describe('niveau sans seuils · R — le niveau qui reçoit un pourcentage', () 
         expect(lecture.niveauQuiRecoit([{ code: 'B', min: 0, max: 50 }, { code: 'H', min: 60, max: 100 }], 55)).toBeNull();
     });
 
+    it('R.g deux plages qui se touchent, données dans le désordre : le plus haut des deux reçoit la note commune', () => {
+        const touchent = [{ code: 'H', min: 75, max: 100 }, { code: 'B', min: 0, max: 65 }, { code: 'M', min: 65, max: 75 }];
+        expect([0, 64, 65, 70, 75, 100].map(p => code(lecture.niveauQuiRecoit(touchent, p)))).toEqual(['B', 'B', 'M', 'M', 'H', 'H']);
+    });
+
+    it('R.h au-dessus du plus haut seuil, même quand ce seuil est sous 100 : le niveau qui porte ce seuil', () => {
+        // ⚠ Change avec ce lot, et c'est déclaré au rapport : avec un plus haut seuil à 89, une note de 95 n'était rangée nulle part.
+        const court = [{ code: 'H', min: 60, max: 89 }, { code: 'B', min: 0, max: 59 }];
+        expect([89, 89.5, 95, 100, 110].map(p => code(lecture.niveauQuiRecoit(court, p)))).toEqual(['H', 'H', 'H', 'H', 'H']);
+        // Deux niveaux partagent le plus haut seuil : celui qui commence le plus haut.
+        const partage = [{ code: 'L', min: 80, max: 100 }, { code: 'K', min: 50, max: 100 }, { code: 'J', min: 0, max: 49 }];
+        expect(code(lecture.niveauQuiRecoit(partage, 120))).toBe('L');
+    });
+
     it('R.f aucun niveau à seuils, ou pas un nombre : null, jamais une exception', () => {
         expect(lecture.niveauQuiRecoit([NIVEAUX[5]], 50)).toBeNull();
         expect(lecture.niveauQuiRecoit(undefined, 50)).toBeNull();
@@ -141,6 +155,11 @@ describe('niveau sans seuils · V — le partage d\'une échelle', () => {
         expect(v.erreurs).toEqual([]);
         expect(v.valide).toBe(true);
         expect(v.packageNettoye.entites.echelles[0].niveaux[5]).toEqual({ code: 'X', nom: 'Exemplaire', valeurCalcul: 110 });
+    });
+
+    it('V.d le champ jumeau `valeur` suit la même règle : 110 voyage, une valeur négative non', () => {
+        expect(verdict([{ code: 'X', nom: 'Exemplaire', valeur: 110 }]).valide).toBe(true);
+        expect(champs(verdict([{ code: 'X', nom: 'Exemplaire', valeur: -1 }]).erreurs)).toContain('niveaux[0].valeur');
     });
 
     it('V.b une valeur négative reste refusée', () => {

@@ -15,7 +15,7 @@ const indexHtml = 'file://' + path.join(path.resolve(__dirname, '..', '..'), 'in
 const patternsAttendus = [/version\.json/i, /Cross origin requests/i, /Not allowed to load local resource/i, /favicon/i, /ERR_FILE_NOT_FOUND/i];
 const LISTE = '9990001, Albatros, Ada\n9990002, Baobab, Bruno\n9990003, Cormoran, Chloé\n9990004, Dahlia, Dario';
 
-async function classeNoteeAvecUnNiveauAjoute(page) {
+async function classeNoteeAvecUnNiveauAjoute(page, { nomDuPlusHaut = null } = {}) {
     const erreurs = [];
     const garder = (m) => { if (!patternsAttendus.some((re) => re.test(m))) erreurs.push(m); };
     page.on('console', (m) => { if (m.type() === 'error') garder(`console.error: ${m.text()}`); });
@@ -38,6 +38,7 @@ async function classeNoteeAvecUnNiveauAjoute(page) {
     await rangee.locator('.vs-n-code').fill('X');
     await rangee.locator('.vs-n-nom').fill('Exemplaire');
     await rangee.locator('.vs-n-valeur').fill('110');
+    if (nomDuPlusHaut) await page.locator('.vs-niveau-rangee').nth(4).locator('.vs-n-nom').fill(nomDuPlusHaut);
     await page.locator('[data-action="VueSimple.enregistrerReglage"]').click();
     await expect(page.locator('#simple-pratique-contenu .vs-succes')).toBeVisible();
 
@@ -81,6 +82,14 @@ test.describe('niveau sans seuils — la vue étendue', () => {
         await expect(suivi).toContainText('Préstructurel : 1 • Incomplet : 0 • Développement : 0 • Maîtrise : 1 • Étendu : 2');
         await expect(suivi).not.toContainText('Exemplaire :');
         await expect(suivi).toContainText('3 étudiant·es (75 %) ont atteint ou dépassé le niveau de maîtrise.');
+        expect(erreurs).toEqual([]);
+    });
+
+    test('un nom de niveau qui porte du balisage s\'affiche tel quel dans la répartition, sans devenir du HTML', async ({ page }) => {
+        const erreurs = await classeNoteeAvecUnNiveauAjoute(page, { nomDuPlusHaut: 'Étendu <i id="piege">x</i>' });
+        await page.evaluate(() => window.naviguerVers('suivi', 'groupe'));
+        await expect(page.locator('#suivi-groupe')).toContainText('Étendu <i id="piege">x</i> : 2');
+        await expect(page.locator('#piege')).toHaveCount(0);
         expect(erreurs).toEqual([]);
     });
 
