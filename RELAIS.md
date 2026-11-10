@@ -7,6 +7,41 @@
 
 ---
 
+## 10 NOV. 2026, 12 H 50 (Claude Code) : **PASSATION — `main` LOCAL A 33 COMMITS D'AVANCE, NON POUSSÉS ; LA VUE SIMPLE FUSIONNÉE EN LOCAL ; AUCUN VERDICT PRIS DESSUS**
+
+La session principale passe la main (Cowork, 12 h 45). En ligne : 1.241.0 (`579f6ace6`, verdict vert sur l'ancêtre testé `d570e8864`) ; `origin/main` = `77679dd3d` (relais du groupe 3). **`main` local = ce commit de passation, 33 commits devant `origin/main`, rien de poussé** (consigne : Grégoire essaie d'abord la vue simple sur son iPad).
+
+**Les commits d'avance, dans l'ordre** (premier parent) :
+1. `d2d52fddd` — moteur des parcours : la bulle replacée dans le même passage quand sa hauteur change à la vérification (« Continuer » du parcours 8 ne saute plus) ; banc neuf `bouton-de-bulle-ne-saute-pas-2026-11-10` (rouge 3 sur 3 sans, vert 6 sur 6 avec) ; bancs du parcours 5 étape 4 (attendre que la bulle laisse le champ libre) et du parcours 8 étape 10 (attendre le texte de « Spécifique »).
+2. `423fdcde8` — carte : `#planif-zone-travail { overflow-anchor: none; }` (accord de Cowork, 11 h 25) ; banc du parcours 5 qui compte les défilements de la carte que le code n'a pas écrits pendant les étapes 5 et 6, zéro exigé (rouge 4 sur 4 sans la règle, vert 6 sur 6 avec).
+3. `5bd368523` — le plan de la vue simple de Cowork (9 nov., 19 h 45), tel quel.
+4. `2de7d92e7` — fusion de `lot/vue-simple` (`58c396bb6`) : conflits dans `index.html` (jetons ; côté main, les deux fichiers neufs ajoutés, onze jetons neufs) et `js/tableau-notation.js` (la légende : la ligne du « ≠ » de main ET la règle du point de la vue simple, réunies).
+5. `f8755106c` — fusion de `lot/niveau-sans-seuils` (`65d412208`, qui contient la vue simple) : conflit de jetons seulement, six jetons neufs.
+6. `6a28f47c7` — banc de la vue simple : la légende nomme le « ≠ » en vue simple (rouge sans la ligne).
+7. `0cdca9595` — **défaut né de la fusion, corrigé** : la vue simple ajoute dans le menu du codex un second bouton pour la même action (`codex-menu-item--simple`, caché en vue étendue) ; le parcours 6 visait le premier trouvé, le caché : plus de contour à l'étape 2 (11 rouges). `dansLeMenu` prend le visible (rouge sans). Six bancs visant ces boutons par leur seule action visent le bouton de la vue étendue ; le banc du menu (parcours 1 et 2) attend « Vue simple » et « Vue étendue ».
+8. `7539121c6` — 64 captures de la vue simple sous WebKit (`plans de travail/captures-2026-11-10-vue-simple-webkit/`, avec LISEZMOI).
+
+**Prêt pour le prochain verdict, sans plus** : tout ce qui précède. Mesuré sous WebKit, un navigateur : les 15 fichiers des parcours, bulles et assistance (95 verts avant les fusions ; après, 83 verts et les 12 rouges du point 7, corrigés : les sept fichiers touchés, 41 verts) ; vue simple, niveau sans seuils, tableau, seuils : 64 verts, 10 sautés (captures à la demande). Vitest 11 343/11 343. **Pas mesuré : le reste de la suite** ; la vue simple touche des modules partagés (`codex.js`, l'aperçu, le calendrier, les transitions, `trimestre-v2-orchestre.js`), d'autres bancs peuvent rougir. Le verdict en dix morceaux le dira ; il attend Grégoire (son essai sur l'iPad d'abord). Une release (version et Nouvelles) reste à faire avant le verdict ; les mots des Nouvelles sont à Grégoire.
+
+**Reste ouvert** :
+- **La cause des 72 px** : non établie. Aucune hauteur mesurée ne change de 72 px (espace, SVG, blocs, objectifs) ; le saut suit les lignes de repère d'alignement redessinées pendant un glisser, et ne s'est produit que parcours actif (aucun sur 7 glisser hors parcours). Incohérence non expliquée : avec l'ancrage, `scrollTop` lu passe à 2670 alors que les blocs restent à la même place à l'écran. La règle `overflow-anchor: none` est posée et éprouvée ; la cause reste à comprendre, sans urgence.
+- **La colonne « Note provisoire » à 820 px** prend près de la moitié du tableau en vue simple (deux productions visibles, la troisième coupée par le bord estompé ; capture 12). Le bord estompé est discret (constat de Cowork, déjà noté). À Cowork.
+- **Parcours 5, étape 5** : l'Inspecteur qui ne s'ouvre pas après la double touche, 1 sur 6, non reproduit sur 24 ; probablement le même saut de la carte pendant la double touche, non démontré.
+- Hérité : la personne inactive venue une fois, niveau 3 (Cowork) ; Chromium non rejoué.
+
+**Hors du dépôt** (session `b4a78900`, dossier temporaire, effacé au redémarrage du Mac) : `/private/tmp/claude-501/-Users-kuekatsheu-Documents-GitHub-labo-codex/b4a78900-48bf-410c-bec6-23cbc179cb93/scratchpad/essais-groupe3/` — `banc-p5-etape4.patch` (appliqué dans `d2d52fddd`), les copies de diagnostic `zz-diag-p5`, `zz-diag-p8`, `zz-diag6*`, `zz-diag-ancre.spec.js` (traces du focus, des clics, des défilements et des lignes de repère) ; `../captures-ancrage/` (captures avec et sans ancrage) ; `../gen-captures-vs.cjs` (régénère les 64 captures : `node <chemin>` à la racine, puis `npx playwright test integration/zz-captures-vs.spec.js -g "CAPTURES vue simple"` depuis `tests/`, puis retirer la copie).
+
+**Pièges appris** :
+- **Un seul navigateur à la fois.** Deux courses Playwright en parallèle (ou `--workers=2`) font rougir des essais qui passent seuls (parcours 2 et 8 le 9 nov.) ; une sonde qui relève à chaque image change aussi le minutage (les échecs de course disparaissent sous elle) : tracer par événements.
+- **Chromium n'est pas installé** sur ce Mac (seulement `webkit-2287`) : rien n'y est rejoué ici.
+- **Sous WebKit, Playwright refuse les Blobs dans IndexedDB en `file://`** (mesuré) : le banc du parcours 4 garde ses copies dans un magasin de banc (`magasinDeCopiesDuBanc`, sessionStorage), sous WebKit seulement.
+- **`libre.sh`** (jeton jamais servi) prend une à deux minutes par fichier : le lancer en arrière-plan quand plusieurs fichiers changent.
+- Un vert au second essai d'un essai du lot n'est pas un vert : le relancer seul, six fois (Cowork, 10 nov.).
+
+**Serveur local** : `python3 -m http.server 8000` à la racine du dépôt, lancé par cette session à 12 h 40 pour l'essai de Grégoire (`http://10.0.1.63:8000/index.html`) ; elle l'arrête quand il a fini. Tant qu'il tourne, tout le dossier est lisible depuis le réseau de la maison.
+
+---
+
 ## 10 NOV. 2026, 10 H 30 (Claude Code) : **1.241.0 POUSSÉE, VERDICT VERT SUR L'ANCÊTRE TESTÉ ; GROUPE 3 EN LIGNE**
 
 `main` = `origin/main` = `579f6ace6` (+ le commit de docs qui porte ce relais). Version en ligne : 1.241.0, build `1109-2301`. Feu vert de Grégoire pour assembler (Cowork, 9 nov., 19 h 35), pour le verdict (9 nov.), puis pour pousser 579f6ace6 tel quel (Cowork et Grégoire, 10 nov., 10 h 25), après une heure de recherche des causes. Push : `358eb82a5..579f6ace6`.
