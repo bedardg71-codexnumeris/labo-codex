@@ -124,8 +124,9 @@
 
     // ---------- Les éléments du moteur, pour CE parcours ----------
 
-    // Le moteur ne dit pas quel parcours il joue : ses éléments, recréés à chaque lancement,
-    // portent notre marque. La garde et la bulle au-dessus des fenêtres ne valent que pour eux.
+    // Les éléments du moteur, recréés à chaque lancement, portent notre marque : la garde et la bulle
+    // au-dessus des fenêtres ne valent que pour eux. (Depuis le 10 nov. 2026, le moteur sait aussi dire
+    // quel parcours il joue, `joue(def)` ; la marque reste, elle sert en plus aux feuilles de style.)
     function elementsDuMoteur() {
         return ['parcours-bulle', 'parcours-contour', 'parcours-fleches'].map(function (id) { return document.getElementById(id); }).filter(Boolean);
     }

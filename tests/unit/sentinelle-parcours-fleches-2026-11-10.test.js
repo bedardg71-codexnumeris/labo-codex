@@ -108,8 +108,17 @@ describe('La flèche : du bord de la bulle à la cible', () => {
     });
 
     it('le tracé reste dans l’écran, même quand le bombement en sortirait', () => {
-        const f = tracerFleche(rect(8, 300, 388, 500), rect(8, 40, 60, 80), ECRAN);
-        expect(f.controle.x).toBeGreaterThanOrEqual(4);
+        // La bulle et la cible collées au haut de l'écran : le bombement (20 px vers le haut) sortirait par le haut.
+        const f = tracerFleche(rect(400, 0, 780, 200), rect(900, 0, 1000, 20), ECRAN);
+        expect(f.depart.y).toBe(10);
+        expect(f.controle.y).toBe(4);
+        // Une cible de 10 px, atteinte par un autre bord : la pointe reste à son bord, pas à côté.
+        // (La bulle au-dessus, un obstacle étroit entre les deux : le plus court le traverse.)
+        const petite = rect(300, 500, 310, 510);
+        const p = tracerFleche(rect(200, 100, 580, 300), petite, ECRAN, [rect(240, 320, 320, 380)]);
+        expect(p.d).not.toBe(tracerFleche(rect(200, 100, 580, 300), petite, ECRAN).d);
+        const ecart = Math.hypot(Math.max(petite.left - p.pointe.x, 0, p.pointe.x - petite.right), Math.max(petite.top - p.pointe.y, 0, p.pointe.y - petite.bottom));
+        expect(ecart).toBeLessThanOrEqual(6.5);
     });
 });
 
@@ -214,6 +223,8 @@ describe('Le voile est retiré', () => {
 //   B6 bornerDeplacement : rendre { x, y } sans borner ........................ « ne sort ni par la gauche… »
 //   B7 sonder : poser un viewBox sur la couche ................................ « aucun viewBox »
 //   B9 tracerFleche : ignorer les obstacles .................................. « arrive par un autre bord »
+//   B13 courbe : ne plus borner le point de contrôle à l'écran ................ « le tracé reste dans l'écran »
+//   B14 tracerFleche : 16 px des coins même sur une cible de 10 px ............. « le tracé reste dans l'écran » (la petite cible)
 //   B8 css : `.parcours-fleches { height: 100vh }` ............................ « sans largeur, hauteur ni unité »
 //   B10 sonder : ne plus poser la hauteur en px ............................... « dimensionnée en px »
 //   B11 une définition reprend `voile: 'dense'` ............................... « aucune des neuf définitions »

@@ -15,7 +15,8 @@
    LES GARDES (lot « Les flèches des parcours », 10 nov. 2026 : le voile du moteur est retiré, toute la
    page se touche). Ce qui restait sous le voile, parce que son toucher casse l'étape, ne répond pas le
    temps de l'étape : les pastilles d'absence et de production de l'étape 3 et les liens des cartes de
-   l'étape 4 (ils quittent le profil), le statut de l'étape 8 (il écrirait sur une vraie intervention).
+   l'étape 4 (ils quittent le profil), le statut de l'étape 8 (il écrirait sur une vraie intervention ; il n'a
+   plus de pulsation : c'est une zone, la flèche y va).
    Une étape les nomme dans sa propriété `gardes` ; un écouteur en capture les neutralise (`garder`,
    le modèle de `garderOuvrir`, js/parcours-donnees.js). À l'étape 6, une intervention déjà enregistrée,
    rouverte depuis l'historique, n'est pas prise pour la fiche neuve attendue.
@@ -415,15 +416,16 @@
                 }
                 await attendre(fiche, 2500);
             },
-            // « La fiche, contour sur le statut » : la bulle se pose à côté de lui. Aucun geste n'est attendu
-            // ici : le choix du statut ne répond pas (il écrirait sur l'intervention qui vient d'être créée).
+            // Le statut est ce dont parle la bulle : une zone (la flèche y va, la bulle se pose à côté), PAS un contour.
+            // Aucun geste n'est attendu ici, et la pulsation orange veut dire « ce que tu toucheras » (relecture neuve
+            // du 10 nov.). Le choix du statut ne répond pas : il écrirait sur l'intervention qui vient d'être créée.
             gardes: function () {
                 var f = fiche();
                 return f ? [].slice.call(f.querySelectorAll('input[name="interventionStatut"]')).map(function (r) { return r.closest('label') || r; }) : [];
             },
-            contour: function () {
+            zones: function () {
                 var r = radioStatut('completee');
-                return r ? r.closest('label') : null;
+                return r ? [r.closest('label')].filter(Boolean) : [];
             },
             boutons: [{ libelle: 'Continuer', primaire: true, action: function (m) { m.allerA(8); } }]
         },

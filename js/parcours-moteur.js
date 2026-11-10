@@ -690,10 +690,11 @@
         if (!obstacles.length || !croise(direct, obstacles)) return finir(direct);
         var envers = courbe(sx, sy, borne(sx, c.left, c.right), borne(sy, c.top, c.bottom), FLECHE_RETRAIT, -1, ecran);
         if (envers && !croise(envers, obstacles)) return finir(envers);
-        // Par un autre bord de la cible : le point de ce bord le plus proche de la bulle, à 16 px des coins,
+        // Par un autre bord de la cible : le point de ce bord le plus proche de la bulle, à 16 px des coins (au milieu d'un bord plus court),
         // la pointe à FLECHE_RETRAIT du bord.
         var bcx = (bulle.left + bulle.right) / 2, bcy = (bulle.top + bulle.bottom) / 2;
-        var px = borne(bcx, c.left + 16, c.right - 16), py = borne(bcy, c.top + 16, c.bottom - 16);
+        var mx = Math.min(16, (c.right - c.left) / 2), my = Math.min(16, (c.bottom - c.top) / 2);
+        var px = borne(bcx, c.left + mx, c.right - mx), py = borne(bcy, c.top + my, c.bottom - my);
         var R = FLECHE_RETRAIT;
         var arrivees = [{ x: px, y: c.top - R }, { x: px, y: c.bottom + R }, { x: c.left - R, y: py }, { x: c.right + R, y: py }];
         var interdits = obstacles.concat([c, bulle]);
@@ -814,6 +815,7 @@
         var p = bornerDeplacement(etat.deplacee.x, etat.deplacee.y, b.offsetWidth, b.offsetHeight, cadreUtile());
         b.style.left = p.x + 'px';
         b.style.top = p.y + 'px';
+        return p;
     }
 
     /**
@@ -892,12 +894,14 @@
     /** Pose la bulle où la personne la veut (bornée à l'écran utile) ; les flèches suivent dans le même geste. */
     function deplacerBulle(x, y) {
         etat.deplacee = { x: x, y: y };
-        poserDeplacee();
+        // La place gardée est celle où la bulle s'est arrêtée (bornée), pas celle que le pointeur visait hors de l'écran.
+        etat.deplacee = poserDeplacee();
         if (etat.vus) dessinerFleches(etat.vus.zones, etat.vus.contourEl);
     }
 
     function debutGlisser(ev) {
-        if (!etat || etat.telephone || (ev.pointerType === 'mouse' && ev.button !== 0)) return;
+        // Un seul pointeur déplace la bulle : un second doigt posé pendant le glissement ne prend pas la main.
+        if (!etat || etat.telephone || etat.glisse || (ev.pointerType === 'mouse' && ev.button !== 0)) return;
         var r = etat.elements.bulle.getBoundingClientRect();
         etat.glisse = { id: ev.pointerId, dx: ev.clientX - r.left, dy: ev.clientY - r.top };
         try { ev.currentTarget.setPointerCapture(ev.pointerId); } catch (e) { /* le pointeur a déjà été relâché */ }
@@ -1013,7 +1017,8 @@
 
     /** Pose la mise en évidence sur la section actuelle, la retire de la précédente. Le moteur seul y touche. */
     function marquerSectionActuelle(el) {
-        if (etat.sectionActuelle === el) return;
+        // Le même élément, qui porte encore sa marque (un rendu a pu réécrire ses classes) : rien à faire.
+        if (etat.sectionActuelle === el && (!el || el.classList.contains('parcours-section-actuelle'))) return;
         if (etat.sectionActuelle) etat.sectionActuelle.classList.remove('parcours-section-actuelle');
         etat.sectionActuelle = el;
         if (el) el.classList.add('parcours-section-actuelle');
@@ -1167,7 +1172,8 @@
         if (window.accompagnement && typeof window.accompagnement.masquerFleche === 'function') window.accompagnement.masquerFleche();
         document.addEventListener('keydown', surTouche, true);
         window.addEventListener('resize', surRedimension);
-        window.addEventListener('scroll', surRedimension, { passive: true });
+        // En capture : le défilement d'un conteneur (une fiche, une fenêtre, le canevas) redessine aussi, sans attendre la sonde.
+        window.addEventListener('scroll', surRedimension, { passive: true, capture: true });
         if (window.visualViewport) {
             window.visualViewport.addEventListener('resize', surRedimension);
             window.visualViewport.addEventListener('scroll', surRedimension);
@@ -1183,7 +1189,7 @@
         clearInterval(etat.timer);
         document.removeEventListener('keydown', surTouche, true);
         window.removeEventListener('resize', surRedimension);
-        window.removeEventListener('scroll', surRedimension);
+        window.removeEventListener('scroll', surRedimension, { passive: true, capture: true });
         if (window.visualViewport) {
             window.visualViewport.removeEventListener('resize', surRedimension);
             window.visualViewport.removeEventListener('scroll', surRedimension);

@@ -82,7 +82,7 @@ async function capture(page, nom, { sansNotifications = false } = {}) {
             && a.effect.target.closest('#panneau-assistance, #parcours-bulle, #entete-menu-panneau'))
         .every((a) => a.playState !== 'running'));
     // Pas de pause : chaque capture suit la bulle focalisée (le moteur la focalise APRÈS un passage de sa sonde,
-    // qui pose trous, masques et contour) ou un contour constaté posé (contourSur).
+    // qui pose contour et flèches) ou un contour constaté posé (contourSur).
     await page.screenshot({ path: path.join(CAPTURES, nom + '.png') });
 }
 
@@ -319,6 +319,15 @@ async function parcourir(page, { largeur, theme, designee }) {
     expect(await page.evaluate(() => window.ParcoursLireTaClasse.memoire.da)).toBe(ECARTE.da);
     await contourSur(page, '#contenuProfilEtudiant [data-action="changerSectionProfil"][data-param="accompagnement"]');
     await flecheVers(page, '#profil-contenu-dynamique .profil-carte:has(.badge-absence)', 'étape 3');
+    // Tout ce que l'étape garde (pastilles d'absence ET de production) est nommé par elle : rien n'en est oublié.
+    const gardes3 = await page.evaluate(() => {
+        const e = window.ParcoursLireTaClasse.etapes[2].gardes();
+        const cartes = [...document.querySelectorAll('#profil-contenu-dynamique .profil-carte')].slice(0, 2);
+        const actions = cartes.flatMap((c) => [...c.querySelectorAll('[data-action], button, a[href]')]);
+        return { gardes: e.length, actions: actions.length, tous: actions.every((a) => e.includes(a)) };
+    });
+    expect(gardes3.gardes, 'l’étape 3 garde au moins la pastille d’absence').toBeGreaterThan(0);
+    expect(gardes3).toMatchObject({ gardes: gardes3.actions, tous: true });
     await toucherCeQuiEstGarde(page, '#profil-contenu-dynamique .badge-absence');
     await expect(page.locator('#suivi-profil'), 'la pastille d’absence gardée : le profil reste ouvert').toBeVisible();
     // Le toucher a pris le focus à la bulle : seul le rang est relu.
@@ -329,6 +338,15 @@ async function parcourir(page, { largeur, theme, designee }) {
 
     // Étape 4 : les deux cartes, rien à toucher ; « Continuer » mène à l'étape 5 sans grille désignée, sinon à la 6.
     await attendreEtape(page, 4);
+    // Les liens des deux cartes sont gardés : touché, le premier ne quitte pas le profil, l'étape reste la quatrième.
+    const liens4 = await page.evaluate(() => window.ParcoursLireTaClasse.etapes[3].gardes().length);
+    if (!designee) {
+        expect(liens4, 'sans grille désignée, la carte RàI porte le lien vers Labo › Observation').toBeGreaterThan(0);
+        await toucherCeQuiEstGarde(page, '#profil-contenu-dynamique [data-action="ouvrirOutilsObservation"]');
+        await expect(page.locator('#suivi-profil'), 'le lien gardé : le profil reste ouvert').toBeVisible();
+        await expect(page.locator('#labo-accompagnement')).toBeHidden();
+        await expect(bulle(page).locator('.parcours-bulle-rang')).toHaveText('4 sur 9');
+    }
     await capture(page, `p7-etape-4-${suffixe}${designee ? '-grille-designee' : ''}`);
     await bulle(page).getByRole('button', { name: 'Continuer' }).click();
 
@@ -383,7 +401,10 @@ async function parcourir(page, { largeur, theme, designee }) {
         return i ? { etudiants: i.etudiants, statut: i.statut, titre: i.titre, avant: Object.keys(i.snapshotAvant || {}) } : null;
     });
     expect(creee).toEqual({ etudiants: [ECARTE.da], statut: 'en-cours', titre: 'Rattrapage de la séance du 27 août', avant: [ECARTE.da] });
-    await contourSur(page, '[data-fiche-intervention] label:has(input[name="interventionStatut"][value="completee"])');
+    // ↻ 10 nov. 2026 : le statut n'a plus de pulsation (l'orange veut dire « ce que tu toucheras », et rien n'est à
+    // toucher ici) ; c'est ce dont parle la bulle : la flèche y va.
+    await flecheVers(page, '[data-fiche-intervention] label:has(input[name="interventionStatut"][value="completee"])', 'étape 8');
+    await expect(page.locator('#parcours-contour')).toBeHidden();
     await toucherCeQuiEstGarde(page, '[data-fiche-intervention] label:has(input[name="interventionStatut"][value="completee"])');
     expect(await page.evaluate(() => {
         const id = window.ParcoursLireTaClasse.memoire.ficheId;
@@ -391,6 +412,16 @@ async function parcourir(page, { largeur, theme, designee }) {
         const r = document.querySelector('[data-fiche-intervention] input[name="interventionStatut"][value="completee"]');
         return { statut: i && i.statut, coche: r.checked };
     }), 'le statut gardé : ni coché, ni écrit').toEqual({ statut: 'en-cours', coche: false });
+    // Au clavier aussi : la flèche sur le statut coché ne passe pas au suivant.
+    await page.locator('[data-fiche-intervention] input[name="interventionStatut"]:checked').focus();
+    await page.keyboard.press('ArrowDown');
+    await page.keyboard.press('ArrowRight');
+    await deuxSondes(page);
+    expect(await page.evaluate(() => {
+        const id = window.ParcoursLireTaClasse.memoire.ficheId;
+        const i = (obtenirInterventions() || []).find((x) => x.id === id);
+        return i && i.statut;
+    }), 'le statut gardé au clavier').toBe('en-cours');
     await expect(bulle(page).locator('.parcours-bulle-rang')).toHaveText('8 sur 9');
     await capture(page, `p7-etape-8-${suffixe}`);
     await bulle(page).getByRole('button', { name: 'Continuer' }).click();

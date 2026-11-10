@@ -193,9 +193,9 @@ test('la flèche suit le défilement et le redimensionnement ; une cible sortie 
     const avant = await flecheVers(page, assiduite, 'avant le défilement');
 
     // Un défilement : la mesure est prise la page immobile (`flecheVers` attend que la flèche ait rejoint la carte).
-    const yAvant = (await rectDe(page, assiduite)).top;
+    const defileAvant = await page.evaluate(() => window.scrollY);
     await page.evaluate(() => window.scrollBy(0, 60));
-    await expect.poll(async () => Math.round(yAvant - (await rectDe(page, assiduite)).top)).toBe(60);
+    await expect.poll(() => page.evaluate(() => window.scrollY)).toBe(defileAvant + 60);
     const apres = await flecheVers(page, assiduite, 'après le défilement');
     expect(apres.trace, 'la flèche a suivi').not.toBe(avant.trace);
     await coucheDansLeRepereDeLaFenetre(page, 'après le défilement');
@@ -276,27 +276,26 @@ test('la poignée : 46 px, à la souris et au doigt ; la bulle reste dans l’é
         const x = r.left + r.width / 2, y = r.top + r.height / 2;
         const ev = (type, dx, dy) => el.dispatchEvent(new PointerEvent(type, { pointerId: 41, pointerType: 'touch', isPrimary: true,
             clientX: x + dx, clientY: y + dy, bubbles: true, cancelable: true }));
+        const autre = (type, dx, dy) => el.dispatchEvent(new PointerEvent(type, { pointerId: 99, pointerType: 'touch', isPrimary: false,
+            clientX: x + dx, clientY: y + dy, bubbles: true, cancelable: true }));
         ev('pointerdown', 0, 0);
         ev('pointermove', -90, -60);
+        // Un second doigt, pendant le glissement : il ne prend pas la main, ne déplace rien, et son lever ne l'arrête pas.
+        autre('pointerdown', 300, 300);
+        autre('pointermove', 400, 400);
+        autre('pointerup', 400, 400);
         ev('pointermove', -180, -120);
         ev('pointerup', -180, -120);
     });
     const b3 = await rectDe(page, '#parcours-bulle');
     expect([Math.round(b3.left - b2.left), Math.round(b3.top - b2.top)]).toEqual([-180, -120]);
-    // Un autre doigt, pendant ce temps, ne la déplace pas ; le doigt levé, un mouvement non plus.
+    // Le doigt levé, un mouvement ne la déplace plus.
     await poignee(page).evaluate((el) => el.dispatchEvent(new PointerEvent('pointermove', { pointerId: 41, pointerType: 'touch', clientX: 5, clientY: 5, bubbles: true })));
     expect(await rectDe(page, '#parcours-bulle')).toEqual(b3);
 
-    // Posée sur ce dont elle parle : la cible est cachée, plus de flèche.
-    const cible = await rectDe(page, NAV('evaluations'));
-    const q = await poignee(page).boundingBox();
-    await page.mouse.move(q.x + q.width / 2, q.y + q.height / 2);
-    await page.mouse.down();
-    await page.mouse.move(cible.left + 150, cadre.haut - 200, { steps: 5 });
-    await page.mouse.up();
-    // (Sous l'en-tête, elle ne peut pas couvrir le menu : la flèche reste ; on la pose donc sur une cible de la page.)
+    // L'étape suivante reprend le placement automatique : la bulle n'est plus où on l'avait laissée, elle est
+    // revenue près de ce dont elle parle (deux flèches, vers les deux cartes).
     await allerAEtape(page, 3);
-    // L'étape suivante a repris le placement automatique : la bulle n'est plus où on l'avait laissée.
     await flecheVers(page, '#profil-contenu-dynamique .profil-carte:has(.badge-absence)', 'étape 3, placement automatique');
     await nombreDeFleches(page, 2, 'étape 3, avant de déplacer la bulle');
     const carte = await rectDe(page, '#profil-contenu-dynamique .profil-carte:has(.badge-absence)');
