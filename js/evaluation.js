@@ -69,6 +69,27 @@ function changerEchelleEvaluation(num) {
 
     if (evaluationEnCours) {
         evaluationEnCours.echelleId = echelleId;
+        // Troisième parcours (9 nov. 2026, mesuré sous Chromium) : une grille à niveaux, une production qui ne nomme pas
+        // d'échelle, deux échelles au trimestre → l'écran dit « Choisis maintenant une échelle de performance : sans
+        // elle, les critères ne peuvent pas apparaître ». Choisie, elle ne les faisait pas paraître : seul le choix de la
+        // grille les dessine (`chargerGrilleSelectionnee`). Les critères qui l'attendaient sont dessinés ici.
+        // Relecture neuve du 9 nov. : seulement quand les critères attendent l'ÉCHELLE (le texte d'attente posé, une copie
+        // reçue) ; une copie « Non reçu » n'a pas de critères pour une autre raison. La cartouche choisie est gardée :
+        // `chargerGrilleSelectionnee` refait son menu.
+        const grilleChoisie = document.getElementById('selectGrille1')?.value;
+        const criteresEnAttente = !document.querySelector('#listeCriteresGrille1 [id^="eval_"]')
+            && !!document.querySelector('#listeCriteresGrille1 .eval-texte-placeholder')
+            && document.getElementById('remiseProduction1')?.value !== 'non-recu';
+        if (echelleId && grilleChoisie && criteresEnAttente && typeof window.chargerGrilleSelectionnee === 'function') {
+            const selectCartouche = document.getElementById('selectCartoucheEval');
+            const cartouche = selectCartouche ? selectCartouche.value : '';
+            window.chargerGrilleSelectionnee();
+            if (cartouche && selectCartouche && Array.from(selectCartouche.options).some(o => o.value === cartouche)) {
+                selectCartouche.value = cartouche;
+                if (typeof window.cartoucheSelectionnee === 'function') window.cartoucheSelectionnee();
+            }
+            return;
+        }
         // Recalculer la note et regénérer la rétroaction avec la nouvelle échelle
         // Patch §5.6 — promotion calculerNote vers evaluation-calcul.js (session B étape 3 refactor 2026-05-18)
         window.calculerNote();

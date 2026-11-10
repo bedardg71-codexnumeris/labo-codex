@@ -1082,6 +1082,34 @@ function basculerDescriptionCritere(bouton) {
     if (description) window.basculerBulleAncree(bouton, bouton.closest('.eval-critere-header'), description.textContent);
 }
 
+/**
+ * LE COMMENTAIRE D'UNE CARTOUCHE SUR UNE GRILLE EN POINTS (troisième parcours, 9 nov. 2026 ; mesuré par Cowork le
+ * 8 nov., 6 h 30). Une grille en points se note sans échelle depuis la 1.158 : sans échelle, les points ne donnent
+ * aucun niveau (`calculerNote` le déduit des bornes de l'échelle), et la cartouche n'avait aucun palier à commenter —
+ * la rétroaction ne portait que « Critère 1 (Rédaction) — 70 / 100 », même après « Régénérer ». La cartouche, elle,
+ * est écrite sur une échelle (`cartouche.echelleId`, cartouches.js) : choisie, elle la pose sur l'évaluation quand
+ * AUCUNE n'y est choisie. Jamais à la place d'une échelle choisie ; une échelle absente du menu n'est pas posée.
+ * ⚠ AU GESTE SEULEMENT (relecture neuve du 9 nov.) : les chargeurs passent aussi par `cartoucheSelectionnee`
+ * (`poserCartoucheParChargeur`, la cartouche modèle d'une production) ; y poser l'échelle écrivait, sans geste, des
+ * niveaux dans une copie en points déjà évaluée (#941 D1 : « aucune échelle glissée d'office sous une grille en
+ * points »). Seul le choix de la cartouche au menu, par l'enseignant·e, la pose.
+ * @param {Object} cartouche
+ * @returns {boolean} vrai si l'échelle de la cartouche est désormais celle de l'évaluation
+ */
+// Vrai le temps d'un geste de l'enseignant·e sur le menu de la cartouche (`choisirCartoucheEval`, hors chargeur).
+let _echelleAuGeste = false;
+
+function _adopterEchelleDeLaCartouche(cartouche) {
+    if (!_echelleAuGeste || !cartouche || !cartouche.echelleId || !evaluationEnCours) return false;
+    const select = document.getElementById('selectEchelle1');
+    if (evaluationEnCours.echelleId || !select || select.value) return false;
+    const offerte = Array.from(select.options || []).some(o => o.value === cartouche.echelleId);
+    if (!offerte) return false;
+    select.value = cartouche.echelleId;
+    evaluationEnCours.echelleId = cartouche.echelleId;
+    return true;
+}
+
 function cartoucheSelectionnee() {
     const cartoucheId = document.getElementById('selectCartoucheEval').value;
 
@@ -1108,6 +1136,9 @@ function cartoucheSelectionnee() {
     const grille = grilles.find(g => g.id === grilleId);
 
     if (!grille) return;
+
+    // Parcours 3 (9 nov. 2026) : une cartouche choisie sans échelle à l'écran y pose la sienne.
+    _adopterEchelleDeLaCartouche(cartouche);
 
     // CRITIQUE: Lire les niveaux depuis l'échelle sélectionnée (pas depuis la cartouche)
     // Cela permet d'utiliser des échelles avec plus ou moins de niveaux que la cartouche
@@ -1585,12 +1616,17 @@ function poserCartoucheParChargeur(select, cartoucheId) {
  */
 async function choisirCartoucheEval(select) {
     if (_cartouchePoseeParChargeur || !select || !evaluationEnCours) return cartoucheSelectionnee();
+    // Le geste de l'enseignant·e : la cartouche choisie peut poser son échelle (`_adopterEchelleDeLaCartouche`).
+    const auGeste = () => {
+        _echelleAuGeste = true;
+        try { return cartoucheSelectionnee(); } finally { _echelleAuGeste = false; }
+    };
     // #961 — le remplacement CONFIRMÉ remplace la rétroaction, retouches comprises (la question
     // le dit) : elle suit de nouveau les niveaux. Les chemins sans question (R1 de Cowork) gardent
     // la marque : les commentaires des critères s'appliquent, la garde garde le texte.
     const changerAuGeste = () => {
         if (typeof window.poserRetroactionReecrite === 'function') window.poserRetroactionReecrite(false);
-        return cartoucheSelectionnee();
+        return auGeste();
     };
 
     const nouvelle = select.value;
@@ -1600,14 +1636,14 @@ async function choisirCartoucheEval(select) {
     const dejaConfirme = r && vivant && r.etudiantDA === vivant.etudiantDA
         && r.productionId === vivant.productionId && r.cartoucheId === nouvelle;
     if (!nouvelle || !evaluation || nouvelle === evaluation.cartoucheId || dejaConfirme) {
-        return cartoucheSelectionnee();
+        return auGeste();
     }
     // Rien d'écrit à perdre : pas de question, mais c'est bien le geste de l'enseignant. Il vaut
     // remplacement, sans quoi un commentaire enregistré vide resterait vide (#960, D6) sous la
     // cartouche qu'il vient de choisir.
     if (!_aDesCommentairesEnregistres(evaluation)) {
         _remplacementConfirme = { etudiantDA: vivant.etudiantDA, productionId: vivant.productionId, cartoucheId: nouvelle };
-        return cartoucheSelectionnee();
+        return auGeste();
     }
 
     const precedente = evaluationEnCours.cartoucheId || evaluation.cartoucheId || '';

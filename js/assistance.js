@@ -122,17 +122,20 @@
         var refuse = tropPetitPour(def);
         if (refuse) {
             li.dataset.ecran = 'trop-petit';
-            var refus = document.createElement('p');
-            refus.className = 'assistance-parcours-grand-ecran';
-            refus.id = 'assistance-parcours-grand-ecran-' + def.id;
-            refus.textContent = TEXTE_GRAND_ECRAN;
-            corps.appendChild(refus);
+            var avisEcran = document.createElement('p');
+            avisEcran.className = 'assistance-parcours-grand-ecran';
+            avisEcran.id = 'assistance-parcours-grand-ecran-' + def.id;
+            avisEcran.textContent = TEXTE_GRAND_ECRAN;
+            corps.appendChild(avisEcran);
         }
 
-        var p = document.createElement('p');
-        p.className = 'assistance-parcours-ligne';
-        p.textContent = def.ligne;
-        corps.appendChild(p);
+        // Parcours 3 : sa ligne n'est pas encore validée par Grégoire ; sans ligne, rien ne s'écrit.
+        if (def.ligne) {
+            var p = document.createElement('p');
+            p.className = 'assistance-parcours-ligne';
+            p.textContent = def.ligne;
+            corps.appendChild(p);
+        }
 
         var btn = document.createElement('button');
         btn.type = 'button';

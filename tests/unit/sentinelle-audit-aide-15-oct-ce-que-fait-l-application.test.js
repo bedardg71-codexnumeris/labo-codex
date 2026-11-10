@@ -298,10 +298,17 @@ describe('Les gestes décrits sont ceux du code', () => {
     it('une copie non recevable reste au dénominateur de la complétion', () => {
         // Le code : la complétion de chaque famille qui compte des productions lit la règle unique de la remise
         // (25 oct. 2026), et cette règle écarte une copie non recevable.
-        for (const f of ['js/pratiques/pratique-sommative.js', 'js/pratiques/pratique-pan-standards.js', 'js/pratiques/pratique-configurable.js']) {
-            expect(lire(f), f).toContain('window.evaluationCompteCommeRemise(e, evaluations)');   // E15 (28 oct. 2026) : avec la liste où chercher la reprise
+        // La complétion suit la remise (8 nov. 2026 ; les quatre familles le 9 nov.) : la sommative, les standards et la
+        // configurable passent par la règle PAR PRODUCTION (`productionRemiseParEleve`), qui lit la même règle de la remise ;
+        // une copie importée non recevable y est corrigée.
+        expect(lire('js/pratiques/pratique-pan-standards.js')).toContain('window.productionRemiseParEleve(da, travail.id, evaluations, copiesRecues)');
+        for (const f of ['js/pratiques/pratique-sommative.js', 'js/pratiques/pratique-configurable.js']) {
+            expect(lire(f), f).toContain('window.productionRemiseParEleve(da, production.id, evaluations, copiesRecues)');
         }
-        expect(tranche(lire('js/pratiques/pratique-registre.js'), 'function evaluationCompteCommeRemise(', 'function compterEvaluationsEcarteesDeLaNote(')).toContain('if (evaluationNonRecevable(evaluation)) return false;');
+        const registre = lire('js/pratiques/pratique-registre.js');
+        expect(tranche(registre, 'function evaluationCompteCommeRemise(', 'function compterEvaluationsEcarteesDeLaNote(')).toContain('if (evaluationNonRecevable(evaluation)) return false;');
+        expect(tranche(registre, 'function productionRemiseParEleve(', 'function compterEvaluationsEcarteesDeLaNote(')).toContain('evaluationCompteCommeRemise(e, liste)');
+        expect(tranche(registre, 'function evaluationCorrigeLaReception(', 'function receptionNonCorrigee(')).toContain('return evaluationNonRecevable(evaluation) || evaluationNonRemise(evaluation);');
         const carte = tranche(AIDE, 'Travail NON RECEVABLE', 'Travail SOUPÇONNÉ');
         expect(carte).toContain('7/9');
         expect(carte).not.toMatch(/7\/8|Exclu du total attendu/);

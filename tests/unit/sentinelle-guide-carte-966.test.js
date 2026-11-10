@@ -157,10 +157,20 @@ const P5_POINT3 = '<li>Dans l’<strong>Inspecteur</strong> d’une activité ou
 const P5_POINT4_AVANT = 'Le bloc doit être dans la même leçon que l’objectif.</li>';
 const P5_POINT4 = 'Une activité ou un exposé doit être dans la même leçon que l’objectif ; une évaluation, dans cette leçon ou une leçon placée après.</li>';
 
+// Pages 3 et 5 : une phrase chacune passée à l'écriture inclusive, pour que le cinquième parcours (« Monter ton cours »,
+// 9 nov. 2026) dise la même définition que le guide (consigne du lot, validée par Grégoire à 10 h 29 et 10 h 37).
+// Remises à l'ancienne, elles rendent l'empreinte d'avant : rien d'autre de ces pages n'a bougé.
+const P3_INCLUSIF_AVANT = 'c’est l’essentiel — ce qui restera quand l’étudiant aura oublié les détails.';
+const P3_INCLUSIF = 'c’est l’essentiel : ce qui restera quand l’étudiant·e aura oublié les détails.';
+const P5_INCLUSIF_AVANT = 'c’est lui qui dit ce que l’étudiant saura faire à la fin';
+const P5_INCLUSIF = 'c’est lui qui dit ce que l’étudiant·e saura faire à la fin';
+
 describe('#966 — les pages 3 et 7 ne changent pas, la 9 hors de sa section « Importer » (lot 3) ; la page 5, de ses deux retouches seulement', () => {
     const empreinte = (titre, contenu) => crypto.createHash('sha256').update(titre + '|' + contenu).digest('hex').slice(0, 16);
-    it('pages 3 et 7 : même empreinte qu\'avant le lot (mesurée sur main, df359bf)', () => {
-        expect([2, 6].map((i) => empreinte(pages[i].titre, pages[i].contenu))).toEqual(['4f95ffea44a91cab', '1e4fe6a19353548d']);
+    it('pages 3 et 7 : même empreinte qu\'avant le lot (mesurée sur main, df359bf) ; la page 3, sa phrase du 9 nov. remise à l\'ancienne', () => {
+        expect(pages[2].contenu.split(P3_INCLUSIF).length - 1).toBe(1);
+        const page3 = pages[2].contenu.replace(P3_INCLUSIF, P3_INCLUSIF_AVANT);
+        expect([empreinte(pages[2].titre, page3), empreinte(pages[6].titre, pages[6].contenu)]).toEqual(['4f95ffea44a91cab', '1e4fe6a19353548d']);
     });
     it('page 9 : seule la section « Importer » a changé, au lot 3 de la carte (9 oct. 2026) — les imports vivent dans la Bibliothèque', () => {
         const contenu = pages[8].contenu;
@@ -187,7 +197,9 @@ describe('#966 — les pages 3 et 7 ne changent pas, la 9 hors de sa section « 
         expect(pages[4].contenu).not.toContain('Le bloc doit être dans la même leçon');
     });
     it('page 5 : les deux phrases remises à l\'ancienne, on retrouve l\'empreinte d\'avant (rien d\'autre n\'a bougé)', () => {
-        const ancienne = pages[4].contenu.replace(P5_POINT3, P5_POINT3_AVANT).replace(P5_POINT4, P5_POINT4_AVANT);
+        expect(pages[4].contenu.split(P5_INCLUSIF).length - 1).toBe(1);
+        const ancienne = pages[4].contenu.replace(P5_POINT3, P5_POINT3_AVANT).replace(P5_POINT4, P5_POINT4_AVANT)
+            .replace(P5_INCLUSIF, P5_INCLUSIF_AVANT);
         expect(empreinte(pages[4].titre, ancienne)).toBe('8fe3a8e048b00535');
     });
 });

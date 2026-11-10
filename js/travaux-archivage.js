@@ -926,6 +926,9 @@
                 const zipBlob = await zip.generateAsync({ type: 'blob', compression: 'DEFLATE', compressionOptions: { level: 6 } });
                 telechargerBlob(zipBlob, `Lea_${nomProd}_${date}.zip`);
             }
+            // Le quatrième parcours d'assistance (« Recevoir les productions, rendre tes rétroactions », 9 nov. 2026)
+            // avance quand l'export est TÉLÉCHARGÉ, pas quand la barre est pleine : elle l'est aussi quand tout échoue.
+            window.dispatchEvent(new CustomEvent('travaux-export-lea-telecharge', { detail: { fichiers: blobs.length } }));
 
             // Bilan APRÈS le téléchargement : les copies valides sont parties,
             // et l'enseignant sait ce qui manque avant de téléverser sur Léa.

@@ -522,7 +522,9 @@ describe('barème 1 · I — aucun calcul ne lit le barème', () => {
     it('I.b ni les réponses ni le barème : aucun module d’évaluation, de note ou de bilan ne lit `descripteurs`', () => {
         const lecteurs = readdirSync(path.join(racine, 'js')).filter(f => f.endsWith('.js'))
             .filter(f => /\.descripteurs\b|\bdescripteurs\s*(?:\.[a-zA-Z]|\[)/.test(readFileSync(path.join(racine, 'js', f), 'utf8')));
-        expect(lecteurs.sort()).toEqual(['bareme.js', 'grilles.js', 'import-export.js', 'materiel-assistant.js', 'materiel-creation.js']);
+        // `parcours-evaluer.js` (troisième parcours d'assistance, 9 nov. 2026) lit `descripteurs.echelleId` pour savoir si
+        // la grille choisie a une échelle, et poser le contour sur le menu « Échelle » de la fiche : il ne calcule rien.
+        expect(lecteurs.sort()).toEqual(['bareme.js', 'grilles.js', 'import-export.js', 'materiel-assistant.js', 'materiel-creation.js', 'parcours-evaluer.js']);
     });
 
     it('I.c mêmes points, même note : la portée d’une évaluation enregistrée, avec et sans barème', () => {

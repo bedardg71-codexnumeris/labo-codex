@@ -618,3 +618,25 @@ body.parcours-actif .transition-bandeau { display: none; }
    bulle se pose à DROITE de l'aperçu, à la largeur qui y tient (js/parcours-donnees.js, sa largeur
    en ligne). Elle n'y couvre rien : elle reprend la hauteur de la bulle ordinaire, défile moins. */
 .parcours-bulle.parcours--a-droite-de-l-apercu { max-height: calc(100vh - 32px); }
+
+/* Une étape qui se joue dans une fenêtre (l'assistant de la pratique, neuvième parcours ; repris par le troisième) :
+   la fenêtre est à 9999, au-dessus du voile. Le contour et la bulle passent au-dessus d'elle ; le voile reste dessous,
+   pour que la fenêtre et les questions qu'elle ouvre restent touchables. Posé par le parcours. */
+body.parcours-sur-modale .parcours-contour { z-index: 10010; }
+body.parcours-sur-modale .parcours-bulle { z-index: 10011; }
+/* « Sans voile » (neuvième parcours, repris par le troisième sur les écrans pleine largeur) : rien n'assombrit ni ne
+   capte le toucher. */
+.parcours-voile--aucun path  { fill-opacity: 0; pointer-events: none; }
+/* Le cinquième parcours (« Monter ton cours », 9 nov. 2026) : l'Inspecteur de la carte passe devant les palettes
+   flottantes. Ouverte par défaut, la palette « Planificateur » (z-index 80) recouvre l'Inspecteur (60) à 1180 px : la
+   case de l'objectif servi (étape 5) et celle de l'objectif vérifié (étape 6) étaient dessous (mesuré : `elementFromPoint`
+   rendait la palette ; constat de la session H). Posé par le parcours, le temps du parcours ; hors parcours, rien ne
+   change (inscrit au rapport). Lié au moteur actif (`parcours-actif`) : si la classe restait un instant après une
+   fermeture, elle ne vaudrait plus rien. */
+body.parcours-actif.parcours-inspecteur-devant #planif-panneau { z-index: 85; }
+
+/* Le quatrième parcours, étape 2 (Grégoire, 9 nov. 2026, 15 h 55) : la bulle se pose sous les trois colonnes de
+   l'import et sous « Importer ». La page n'avait plus de quoi défiler sous eux (mesuré à 1180 × 900 : au bout de sa
+   course) : elle reçoit, le temps de l'étape, la place de la bulle. Posé et retiré par js/parcours-recevoir.js. */
+body.parcours-actif.parcours-place-sous-les-colonnes #evaluations-importer { padding-bottom: 60vh; }
+

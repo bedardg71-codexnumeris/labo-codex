@@ -1929,7 +1929,7 @@ var GUIDE_PAGES = [
         id: 'idees-maitresses',   // #1172 : l'étape de la chaîne qui mène ici (`etapesChaineCarte`)
         titre: 'Ce que l\u2019étudiant doit retenir',
         contenu:
-            '<p class="planif-guide-pourquoi">Une idée maîtresse, c\u2019est l\u2019essentiel — ce qui restera quand l\u2019étudiant aura oublié les détails. Chaque compétence se décline en une ou plusieurs idées maîtresses.</p>' +
+            '<p class="planif-guide-pourquoi">Une idée maîtresse, c\u2019est l\u2019essentiel : ce qui restera quand l\u2019étudiant·e aura oublié les détails. Chaque compétence se décline en une ou plusieurs idées maîtresses.</p>' +
             '<ol>' +
                 '<li>Glisse une <span class="planif-guide-type" style="background:var(--planif-couleur-idee-maitresse)"></span> <strong>Idée maîtresse</strong> sur le canevas.</li>' +
                 '<li>Relie-la à sa compétence en tirant un lien d\u2019un port à l\u2019autre. Le verbe <em>«\u00a0se décline en\u00a0»</em> s\u2019affiche automatiquement.</li>' +
@@ -1958,7 +1958,7 @@ var GUIDE_PAGES = [
         id: 'objectifs',   // #1172 : l'étape de la chaîne qui mène ici (`etapesChaineCarte`)
         titre: 'Ce que la leçon vise',
         contenu:
-            '<p class="planif-guide-pourquoi">L’objectif de leçon est la boussole : c’est lui qui dit ce que l’étudiant saura faire à la fin, et c’est par rapport à lui que se choisissent les connaissances, les activités et l’évaluation.</p>' +
+            '<p class="planif-guide-pourquoi">L’objectif de leçon est la boussole : c’est lui qui dit ce que l’étudiant·e saura faire à la fin, et c’est par rapport à lui que se choisissent les connaissances, les activités et l’évaluation.</p>' +
             '<ol>' +
                 '<li>Sur un bloc <span class="planif-guide-type" style="background:var(--planif-couleur-lecon)"></span> <strong>Leçon</strong>, clique le badge <strong>🎯</strong> de l’en-tête : il déplie la zone des objectifs. Grisé, il t’indique qu’aucun objectif n’est encore posé.</li>' +
                 '<li>Écris l’objectif. Le <strong>+</strong> en ajoute un autre, le <strong>−</strong> retire celui de la ligne — une leçon en porte souvent plusieurs.</li>' +
@@ -3121,6 +3121,7 @@ function pointClientDuGeste(e) {
 function creerNoeud(type, x, y) {
     enregistrerPourUndo();
     const id = 'planif-noeud_' + (++etat.compteur);
+    etat.dernierPose = id;   // le prochain bloc de la palette se pose à côté (`placePourBlocNeuf`)
     const config = TYPES[type];
 
     const donnees = {
@@ -3162,6 +3163,84 @@ function creerNoeud(type, x, y) {
 
     sauvegarder();
     return id;
+}
+
+// === UN BLOC NEUF, À CÔTÉ DU DERNIER POSÉ (9 nov. 2026) ===
+//
+// Au toucher d'un bouton de la palette, le bloc se posait au centre du canevas, à ±50 px près, au hasard : la
+// compétence, l'idée maîtresse et la leçon du cinquième parcours d'assistance se recouvraient, et il fallait les
+// écarter avant de tirer un trait (mesuré ; décision de Cowork, 9 nov., 16 h 03 : corriger la source). Il se pose
+// maintenant à côté du dernier bloc posé (à droite, sinon dessous, à gauche, au-dessus), sans recouvrir aucun bloc, dans
+// la partie visible du canevas (entre les palettes « Nœuds » et « Planificateur ») ; sinon, au plus près du centre de
+// cette partie. Le glisser depuis la palette, lui, pose le bloc où on le lâche : il n'est pas touché.
+var ECART_BLOC_NEUF = 40;
+
+/** La taille d'un bloc neuf, avant de le dessiner : un conteneur (leçon, séquence) est plus grand qu'une feuille. */
+function tailleBlocNeuf(type) {
+    return TYPES[type] && TYPES[type].conteneur ? { l: 300, h: 150 } : { l: 230, h: 90 };
+}
+
+/** Le rectangle d'un bloc posé, en coordonnées de la carte. */
+function rectDeBloc(n) {
+    var el = document.getElementById(n.id);
+    return { x: n.x, y: n.y, l: el ? el.offsetWidth : 200, h: el ? el.offsetHeight : 74 };
+}
+
+/** Deux rectangles plus proches que l'écart voulu. */
+function tropProches(a, b) {
+    var m = ECART_BLOC_NEUF / 2;
+    return a.x < b.x + b.l + m && b.x < a.x + a.l + m && a.y < b.y + b.h + m && b.y < a.y + a.h + m;
+}
+
+/** La partie du canevas qu'on voit et qu'on peut toucher, en coordonnées de la carte. */
+function partieVisibleDuCanevas() {
+    var r = zoneTravail.getBoundingClientRect();
+    var g = Math.max(r.left, 0), d = Math.min(r.right, window.innerWidth), h = Math.max(r.top, 0), b = Math.min(r.bottom, window.innerHeight);
+    ['planif-palette', 'planif-palette-nav'].forEach(function(id) {
+        var p = document.getElementById(id);
+        if (!p || !p.offsetParent) return;
+        var q = p.getBoundingClientRect();
+        if (q.right <= (g + d) / 2) g = Math.max(g, q.right);
+        else if (q.left >= (g + d) / 2) d = Math.min(d, q.left);
+    });
+    var a = clientVersData(g, h), z = clientVersData(d, b);
+    return { x: a.x, y: a.y, l: z.x - a.x, h: z.y - a.y };
+}
+
+/** Une place convient si le bloc tient dans la partie visible sans s'approcher d'aucun autre. */
+function placeConvient(c, t, vue, autres) {
+    var r = { x: c.x, y: c.y, l: t.l, h: t.h };
+    var dedans = r.x >= vue.x && r.y >= vue.y && r.x + r.l <= vue.x + vue.l && r.y + r.h <= vue.y + vue.h;
+    return dedans && !autres.some(function(o) { return tropProches(r, o); });
+}
+
+/** Les places à côté du dernier bloc posé, dans l'ordre : à droite, dessous, à gauche, au-dessus. */
+function placesAutourDe(d, t) {
+    var e = ECART_BLOC_NEUF;
+    return [{ x: d.x + d.l + e, y: d.y }, { x: d.x, y: d.y + d.h + e }, { x: d.x - e - t.l, y: d.y }, { x: d.x, y: d.y - e - t.h }];
+}
+
+/** Sinon, la place libre la plus proche du point visé, cherchée dans la partie visible, de 30 en 30 px. */
+function placeLaPlusProche(vise, t, vue, autres) {
+    var meilleure = null, distance = Infinity;
+    for (var y = vue.y; y + t.h <= vue.y + vue.h; y += 30) {
+        for (var x = vue.x; x + t.l <= vue.x + vue.l; x += 30) {
+            var dist = Math.abs(x - vise.x) + Math.abs(y - vise.y);
+            if (dist < distance && placeConvient({ x: x, y: y }, t, vue, autres)) { meilleure = { x: x, y: y }; distance = dist; }
+        }
+    }
+    return meilleure;
+}
+
+/** Où poser le bloc neuf d'un toucher sur la palette. */
+function placePourBlocNeuf(type) {
+    var t = tailleBlocNeuf(type), vue = partieVisibleDuCanevas();
+    var autres = Array.from(etat.noeuds.values()).map(rectDeBloc);
+    var dernier = etat.dernierPose && etat.noeuds.get(etat.dernierPose);
+    var d = dernier ? rectDeBloc(dernier) : null;
+    var proche = d ? placesAutourDe(d, t).find(function(c) { return placeConvient(c, t, vue, autres); }) : null;
+    var centre = { x: vue.x + (vue.l - t.l) / 2, y: vue.y + (vue.h - t.h) / 2 };
+    return proche || placeLaPlusProche(d || centre, t, vue, autres) || centre;
 }
 
 // === SÉLECTION ===
@@ -6076,8 +6155,10 @@ function objectifsLeconHTML(n) {
     if (objs.length === 0) {
         // Liste vide : une ligne à remplir, sans commandes — il n'y a encore
         // rien à retirer, ni après quoi insérer, ni quoi réordonner.
+        // `data-premiere` : cinquième parcours (question 13, 9 nov. 2026) — la ligne devient un objectif à la frappe ;
+        // au départ du champ, la carte se reconstruit pour poser sa pastille (voir le `blur` d'`attacherEvenements`).
         html += '<div class="planif-noeud-objectif-ligne">' +
-                '<div class="planif-noeud-objectif" contenteditable="true" data-obj-rang="0"' +
+                '<div class="planif-noeud-objectif" contenteditable="true" data-obj-rang="0" data-premiere="1"' +
                 ' data-placeholder="Sera en mesure de…"></div>' +
                 '</div>';
         return html + '</div>';
@@ -7774,7 +7855,11 @@ function attacherEvenements(el, donnees) {
                 var abandonAccueil = !!ligne.dataset.accueil && ligne.textContent.trim() === '';
                 if (abandonAccueil) _ajoutObjectif = null;
                 appliquerObjectifs(donnees, lireLignes());
-                if (abandonAccueil || objectifsDeLecon(donnees).length !== avant) {
+                // Question 13 (Cowork, 9 nov. 2026, mesuré par la session H) : le PREMIER objectif est compté à la frappe ;
+                // au départ du champ, le nombre n'avait pas bougé et rien ne se reconstruisait : la pastille « ! » ne
+                // paraissait qu'avec Entrée, ou à la reconstruction suivante. La ligne devenue objectif la fait paraître.
+                var devenueObjectif = !!ligne.dataset.premiere && ligne.textContent.trim() !== '';
+                if (abandonAccueil || devenueObjectif || objectifsDeLecon(donnees).length !== avant) {
                     reconstruireDOM();
                     mettreAJourTousLesBadges();
                 }
@@ -8910,11 +8995,8 @@ function initialiser() {
 
         btn.addEventListener('click', function(e) {
             if (e.detail === 1) {
-                var rect = zoneTravail.getBoundingClientRect();
-                var centre = clientVersData(rect.left + rect.width / 2, rect.top + rect.height / 2);
-                var x = centre.x - 70 + (Math.random() - 0.5) * 100;
-                var y = centre.y - 30 + (Math.random() - 0.5) * 100;
-                creerNoeud(btn.dataset.type, x, y);
+                var place = placePourBlocNeuf(btn.dataset.type);   // à côté du dernier bloc posé (9 nov. 2026)
+                creerNoeud(btn.dataset.type, place.x, place.y);
             }
         });
     });

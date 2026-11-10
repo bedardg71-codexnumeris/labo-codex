@@ -388,6 +388,14 @@ function creerTrimestreV2() {
     // rien du trimestre quitté ne survive (groupe-cours, éditeurs, miroirs, vues).
     if (ancienActif && typeof window.changerTrimestreActifV2 === 'function') {
         window.changerTrimestreActifV2(saisie.id);
+    } else if (!ancienActif && typeof window.semerMaterielDeDepartApresBascule === 'function') {
+        // Troisième parcours (9 nov. 2026, mesuré par la session H puis par le parcours) : le PREMIER trimestre ne
+        // passait pas par la bascule, qui sème le matériel de départ (#683) ; l'« Échelle de départ (IDME) » n'existait
+        // qu'au rechargement suivant. Sans elle, une grille en points n'avait aucune échelle pour sa cartouche
+        // (« Tu dois d'abord créer au moins une échelle… »). Le même semis que la bascule, sous les mêmes gardes.
+        window.semerMaterielDeDepartApresBascule().catch(function (e) {
+            console.error('[Trimestre V2] semis du matériel de départ à la création du premier trimestre', e);
+        });
     }
     notifications.succes(`Trimestre «\u00a0${saisie.nom}\u00a0» créé.`);
     return true;

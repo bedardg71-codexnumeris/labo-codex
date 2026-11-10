@@ -5,7 +5,7 @@
  * (`CONSIGNE-LOT-2026-10-17-…-2.md`, la création), étape 6 (« Aller plus loin avec ta grille »).
  *
  * Un collage, le texte de la zone et l'exemple ouvrent la DISSECTION (`materiel-dissection.js`, depuis le
- * 18 oct.) ; « Taper ma grille à la main » mène vers Grilles de critères. La dissection crée la grille
+ * 18 oct.) ; « Partir de zéro » (« Taper ma grille à la main » jusqu’au 9 nov. 2026, décision de Grégoire du 8 nov.) mène vers Grilles de critères. La dissection crée la grille
  * (`materielCreation`), puis la confirmation s'affiche ici (`montrerCreee`). La dissection, lot 11 : à
  * l'ouverture de l'onglet, son brouillon la rouvre telle qu'elle était (`reprendreDissection`) ; « Coller une
  * autre grille » (`recommencer`) l'efface. #1119 : la confirmation la rouvre aussi (`revenirDissection`).

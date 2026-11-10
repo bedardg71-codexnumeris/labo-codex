@@ -138,7 +138,9 @@ test('statut incomplet · cocher : critères et note masqués, enregistrée sans
     const avant = await etat(page);
     expect(avant.copie).toBeNull();
     expect(avant.note).toBeCloseTo(65, 1);         // la note d'Alpha : le Plan seul
-    expect(avant.completion).toBe('1/2');          // l'Analyse, évaluée pour Bravo, lui manque
+    // La complétion suit la remise (décision de Grégoire, 8 nov. 2026) : en sommative, la copie importée d'Alpha compte comme
+    // remise dès sa réception, avant toute évaluation. Avant : « 1/2 », l'Analyse, évaluée pour Bravo, lui manquait.
+    expect(avant.completion).toBe('2/2');
 
     await ouvrirEnEvaluer(page, 'FT_A_P1');
     await expect(page.locator('#listeCriteresGrille1')).toBeVisible();

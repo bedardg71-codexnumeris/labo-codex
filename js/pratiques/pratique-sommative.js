@@ -324,13 +324,13 @@ class PratiqueSommative {
         // dénominateur et si elle est remise ; `remis` en est le compte (jamais un second calcul). La carte Complétion
         // du profil y lit sa liste des non-remises et son message, comme la fraction (DEMO006 : « 9/10 » à côté de
         // « tous les artefacts remis ! » — la terminale manquante n'était nulle part).
+        // La complétion suit la remise (décisions de Grégoire, 8 nov. 2026) : une copie IMPORTÉE compte comme remise dès sa
+        // réception, l'évaluation la confirme ou la corrige ; sans import, l'évaluation seule confirme. Règle et famille :
+        // pratique-registre.js (`productionRemiseParEleve`, `receptionVautRemise`). Le dénominateur ci-dessus ne change pas.
+        const copiesRecues = window.receptionVautRemise(this) ? window.lireCopiesRecues(this._lireFichiersRecus()) : null;
         const detailProductions = productionsEvaluees.map(production => ({
             id: production.id,
-            remis: evaluations.some(e =>
-                e.etudiantDA === da &&
-                e.productionId === production.id &&
-                window.evaluationCompteCommeRemise(e, evaluations)   // lot 30 (17 sept.) et le statut incomplet (25 oct. 2026) : la règle de pratique-registre.js
-            )
+            remis: window.productionRemiseParEleve(da, production.id, evaluations, copiesRecues)   // lot 30, statut incomplet, 8 nov. 2026
         }));
 
         return { remis: detailProductions.filter(p => p.remis).length, total: detailProductions.length, productions: detailProductions };
@@ -740,6 +740,18 @@ class PratiqueSommative {
             return obtenirDonneesSelonMode('productions') || [];
         }
         return db.getSync(cle('productions'), []);
+    }
+
+    /**
+     * Les copies importées (`fichiersTravaux`, travaux-stockage.js), pour la complétion : en sommative, une copie
+     * importée compte comme remise dès sa réception (8 nov. 2026). Lues au stockage du mode, comme les évaluations.
+     * @private
+     */
+    _lireFichiersRecus() {
+        if (typeof obtenirDonneesSelonMode === 'function') {
+            return obtenirDonneesSelonMode('fichiersTravaux') || [];
+        }
+        return db.getSync(cle('fichiersTravaux'), []);
     }
 
     /**

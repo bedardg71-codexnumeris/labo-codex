@@ -151,6 +151,23 @@
         // retirée) : celles déjà écrites restent dans le stockage, rien ne les lit plus.
         parcoursAssistance: {},
 
+        // Le repère du troisième parcours, « Évaluer une première production » (js/parcours-evaluer.js,
+        // 9 nov. 2026), pour « Reprendre » : ce qui existait à « Commencer » (grillesAvant, productionsAvant,
+        // pratiquesAvant, pratiqueAppliqueeAvant), puis ce qu'il a vu naître (grilleId, productionId,
+        // evaluationId, pratiqueId, cartoucheId). Des identifiants, rien des données de la personne.
+        parcoursEvaluer: {},
+
+        // La voie et le repère du quatrième parcours, « Recevoir les productions, rendre tes rétroactions »
+        // (js/parcours-recevoir.js, 9 nov. 2026) : { voie: 'fichiers'|'sans-fichier', fichiersAvant, verrousAvant,
+        // fichierId, productionId } — la production ouverte à l'étape 3, que « Reprendre » rouvre aux étapes 4 à 7.
+        // Des identifiants, rien des données de la personne.
+        parcoursRecevoir: {},
+
+        // Le repère du cinquième parcours, « Monter ton cours » (js/parcours-cours.js, 9 nov. 2026) :
+        // { leconId, noeudsAvant } — la leçon que l'étape 3 a vue naître, pour « Reprendre », et les blocs déjà posés à
+        // « Commencer » ou « Refaire », qui ne font pas avancer les étapes. Des identifiants, rien de la carte.
+        parcoursMonter: {},
+
         // Export du plan — niveau « Personnalisé » (#431, 8 août 2026).
         // ⚠ REMPLACÉE par exportGabarits (#416 lot H, 12 août 2026). Elle
         // subsiste ici le temps que la migration la lise ; elle est effacée

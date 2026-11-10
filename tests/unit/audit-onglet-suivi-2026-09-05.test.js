@@ -541,10 +541,14 @@ describe('B · ce que C compte comme remis, et quel P le Suivi lit', () => {
         const hist = b.win.calculerIndicesHistoriques(DA.SILENCE, '2026-02-15');
         const srcSom = readFileSync(path.join(RACINE, 'js/pratiques/pratique-sommative.js'), 'utf8');
         const corpsC = tranche(srcSom, '    calculerDetailsCompletion(da) {', '    calculerCompletion(da) {')   /* #871 : le compte vit dans le détail */;
-        noter('B4', { cSom, cSnapshot: hist.C, completionSomLitLePredicat: /evaluationCompteCommeRemise\(/.test(corpsC) });
+        // La complétion suit la remise (8 nov. 2026) : le site passe par la règle PAR PRODUCTION du registre, qui lit la même
+        // règle de la remise (`evaluationCompteCommeRemise`) et y ajoute la copie importée, en sommative.
+        const regleParProduction = tranche(readFileSync(path.join(RACINE, 'js/pratiques/pratique-registre.js'), 'utf8'), 'function productionRemiseParEleve(', 'function compterEvaluationsEcarteesDeLaNote(');
+        const litLaRegle = /productionRemiseParEleve\(/.test(corpsC) && /evaluationCompteCommeRemise\(e, liste\)/.test(regleParProduction);
+        noter('B4', { cSom, cSnapshot: hist.C, completionSomLitLePredicat: litLaRegle });
         expect(cSom).toBe(0);                                  // avant : 25
         expect(hist.C).toBe(0);
-        expect(/evaluationCompteCommeRemise\(/.test(corpsC)).toBe(true);   // le C courant lit la règle du registre (25 oct. 2026 : qui lit `evaluationNonRemise`) — avant : ne lisait aucun statut
+        expect(litLaRegle).toBe(true);   // le C courant lit la règle du registre (25 oct. 2026 : qui lit `evaluationNonRemise` ; 8 nov. : par production) — avant : ne lisait aucun statut
     });
 
     it('B5 · le même P partout : tableau de bord, liste, profil ET rapport lisent le même stock (#732 ; avant, le rapport levait, puis recalculait le sien)', () => {

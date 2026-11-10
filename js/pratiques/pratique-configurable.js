@@ -644,13 +644,17 @@ class PratiqueConfigurable {
         // dénominateur et si elle est remise ; `remis` en est le compte (jamais un second calcul). La carte Complétion
         // du profil y lit sa liste des non-remises et son message, comme la fraction (DEMO006 : « 9/10 » à côté de
         // « tous les artefacts remis ! » — la terminale manquante n'était nulle part).
+        // La complétion suit la remise (décisions de Grégoire, 8 nov. 2026, étendues aux quatre familles le 9 nov.) : une copie
+        // IMPORTÉE compte comme remise dès sa réception, l'évaluation la confirme ou la corrige ; sans import, l'évaluation seule
+        // confirme. Ce calcul sert les quatre familles ; la liste des familles est dans pratique-registre.js (`receptionVautRemise`).
+        const copiesRecues = window.receptionVautRemise(this)
+            ? window.lireCopiesRecues(typeof obtenirDonneesSelonMode === 'function'
+                ? (obtenirDonneesSelonMode('fichiersTravaux') || [])
+                : db.getSync(cle('fichiersTravaux'), []))
+            : null;
         const detailProductions = productionsEvaluees.map(production => ({
             id: production.id,
-            remis: evaluations.some(e =>
-                e.etudiantDA === da &&
-                e.productionId === production.id &&
-                window.evaluationCompteCommeRemise(e, evaluations)   // lot 30 (17 sept.) et le statut incomplet (25 oct. 2026) : la règle de pratique-registre.js
-            )
+            remis: window.productionRemiseParEleve(da, production.id, evaluations, copiesRecues)   // lot 30, statut incomplet, 8 nov. 2026
         }));
 
         return { remis: detailProductions.filter(p => p.remis).length, total: detailProductions.length, productions: detailProductions };
