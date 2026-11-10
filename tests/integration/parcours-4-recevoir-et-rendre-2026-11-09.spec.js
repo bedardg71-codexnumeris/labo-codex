@@ -86,8 +86,41 @@ async function valeurAction(page, debut) {
     return page.evaluate((d) => [...document.querySelectorAll('#evaluations-liste select.eval-actions-select option')].map((o) => o.value).find((v) => v.startsWith(d)), debut);
 }
 
+/**
+ * Le magasin des copies du banc, sous WebKit seulement (groupe 3, 9 nov.) : le WebKit éphémère de Playwright refuse un Blob
+ * dans IndexedDB sous file:// (mesuré : même un Blob nu, hors de l'application ; voir aussi 1028-archiver-copies,
+ * ajouter-pages-photo-droite, codex-1012-*). Sans lui, l'import de l'étape 2 n'enregistrait aucune copie et le parcours
+ * restait à « 2 sur 9 ». Les copies (minuscules) vivent dans le sessionStorage, pour passer les deux rechargements du banc.
+ * Posé avant le premier chargement ; le reste de l'application est le vrai. Sous Chromium, le vrai IndexedDB.
+ */
+async function magasinDeCopiesDuBanc(page) {
+    if (page.context().browser().browserType().name() !== 'webkit') return;
+    await page.addInitScript(() => {
+        const CLE = '__banc_copies';
+        const lire = () => { try { return JSON.parse(sessionStorage.getItem(CLE) || '{}'); } catch (e) { return {}; } };
+        const ecrire = (o) => sessionStorage.setItem(CLE, JSON.stringify(o));
+        const brancher = (db) => {
+            db.storeBlob = async (enr) => {
+                const u = new Uint8Array(await enr.blob.arrayBuffer());
+                let bin = ''; for (let i = 0; i < u.length; i++) bin += String.fromCharCode(u[i]);
+                const o = lire(); o[enr.id] = Object.assign({}, enr, { blob: null, b64: btoa(bin), type: enr.blob.type }); ecrire(o);
+            };
+            db.getBlob = async (id) => {
+                const r = lire()[id]; if (!r) return null;
+                const bin = atob(r.b64); const u = new Uint8Array(bin.length); for (let i = 0; i < bin.length; i++) u[i] = bin.charCodeAt(i);
+                const enr = Object.assign({}, r, { blob: new Blob([u], { type: r.type }) }); delete enr.b64; delete enr.type; return enr;
+            };
+            db.deleteBlob = async (id) => { const o = lire(); delete o[id]; ecrire(o); };
+            db.listBlobIds = async () => Object.keys(lire());
+        };
+        let interne;
+        Object.defineProperty(window, 'db', { configurable: true, get: () => interne, set: (v) => { interne = v; if (v) brancher(v); } });
+    });
+}
+
 /** Un espace où le troisième parcours est fait, et rien d'autre : le quatrième démarre de là (question 1, 9 nov., 15 h 55). */
 async function espaceDuTroisiemeParcours(page, cap) {
+    await magasinDeCopiesDuBanc(page);
     dossierDesCaptures('');
     await leParcoursEntier(page, { niveaux: true, cap: 'p3' });
     await page.keyboard.press('Escape');
@@ -193,6 +226,9 @@ test('« Recevoir les productions, rendre tes rétroactions », la voie des fich
     await contourSur(page, '#travaux-btn-actions');
     await capture(page, DOSSIER, `p4-5-${cap}`);
     await page.click('#travaux-btn-actions');
+    // Groupe 3 (9 nov., WebKit) : le menu ouvert, la bulle ne couvre pas « Évaluer » et le contour s'y pose (elle le couvrait).
+    await contourSur(page, '#travaux-btn-evaluer');
+    await bulleNeCouvrePas(page, '#travaux-btn-evaluer', 'étape 5, le menu « Annoter ▾ » ouvert');
     await page.locator('[data-action="travauxUI.basculerMode"]', { hasText: 'Évaluer' }).first().click();
 
     // 6. Évaluer : la grille, l'échelle et la cartouche déjà choisies ; un niveau par critère.
@@ -321,6 +357,7 @@ test('« Recevoir les productions, rendre tes rétroactions », étape 2 à 820 
 
 test('« Recevoir les productions, rendre tes rétroactions » : sans production prête (la grille seule), le refus', async ({ page }) => {
     test.setTimeout(180000);
+    await magasinDeCopiesDuBanc(page);
     await ouvrirEspaceVide(page, 1180);
     await mettreLaClasseEnPlace(page);
     // Le seul cas que le bout en bout ne montre plus (le troisième parcours fait nommer échelle et cartouche) : une

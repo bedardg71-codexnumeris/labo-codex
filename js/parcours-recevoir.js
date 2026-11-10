@@ -437,10 +437,18 @@
         texte: "Annote la production comme tu le ferais sur papier : souligne, encercle, écris dans la marge. Ces traces restent sur le fichier que ton étudiant·e recevra. Pose aussi tes tampons là où tu observes quelque chose : sur la production, le tampon montre l'endroit ; dans la synthèse, sa phrase dit ce que tu as observé, et combien de fois. Quand tu as fini, touche « Annoter ▾ », au-dessus de la production, et choisis « Évaluer ».",
         voile: 'aucun',   // la production entière s'annote : rien n'est voilé
         avant: function () { return revenirALaProduction(); },
-        zones: function () { return [el('travaux-btn-actions')]; },
-        contour: function () { return el('travaux-btn-actions'); },
+        // Groupe 3 (9 nov., WebKit) : « Annoter ▾ » ouvert, son menu entre dans l'étape. La bulle l'évite (elle couvrait
+        // « Évaluer », le geste même qu'elle demande, mesuré à 1180 px) et le contour passe sur « Évaluer ».
+        zones: function () { var m = menuAnnoterOuvert(); return m ? [el('travaux-btn-actions'), m] : [el('travaux-btn-actions')]; },
+        contour: function () { return menuAnnoterOuvert() && vis(el('travaux-btn-evaluer')) ? el('travaux-btn-evaluer') : el('travaux-btn-actions'); },
         atteint: function () { return mode() === 'evaluer' && vis(el('travaux-palette-eval-gauche')); }
     };
+
+    /** Le menu de « Annoter ▾ », s'il est ouvert. */
+    function menuAnnoterOuvert() {
+        var m = el('travaux-actions-dropdown');
+        return m && m.classList.contains('ouvert') && vis(m) ? m : null;
+    }
 
     var critereTenu = tenu(chaqueCritereAttribue);
     var critereTenuSansFichier = tenu(function () { return ecranEvaluationVisible() && chaqueCritereAttribue(); });
