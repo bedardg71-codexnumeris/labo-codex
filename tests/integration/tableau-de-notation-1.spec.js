@@ -423,9 +423,12 @@ test.describe('Tableau de notation · la consigne', () => {
         await expect(c).toHaveClass(/tn-case--valeur-changee/);
         await expect(c).toHaveAttribute('title', 'L’échelle a changé depuis la saisie : ce résultat compte encore pour 75. Ressaisis le niveau pour prendre la valeur d’aujourd’hui.');
         await expect(c).toHaveAttribute('aria-label', /compte encore pour 75\. Ressaisis le niveau pour prendre la valeur d’aujourd’hui\.$/);
-        // Le banc tourne sous Linux : la légende y dit Ctrl+Z, jamais ⌘Z (Cowork, 9 nov., 16 h 21).
-        await expect(page.locator('#tableau-notation-hote .tn-legende-aide')).toContainText('Ctrl+Z annule le dernier geste.');
-        await expect(page.locator('#tableau-notation-hote .tn-legende-aide')).not.toContainText('⌘');
+        // Le raccourci du poste (Cowork, 9 nov., 16 h 21) : ⌘Z sur Mac et iPad, Ctrl+Z ailleurs. Le banc tourne sous Linux
+        // (la CI) et sur le Mac (le verdict local, groupe 3) : il lit le poste du navigateur et exige le raccourci qui va.
+        const surMac = await page.evaluate(() => /Mac|iPhone|iPad|iPod/i.test(navigator.platform + ' ' + navigator.userAgent));
+        const [attendu, autre] = surMac ? ['⌘Z', 'Ctrl+Z'] : ['Ctrl+Z', '⌘'];
+        await expect(page.locator('#tableau-notation-hote .tn-legende-aide')).toContainText(attendu + ' annule le dernier geste.');
+        await expect(page.locator('#tableau-notation-hote .tn-legende-aide')).not.toContainText(autre);
         await expect(note(page, 1)).toHaveText('75');
         // Une case porte le signe : la légende le nomme, visible sans survol (l'iPad).
         await expect(ligneDuSigne).toBeVisible();

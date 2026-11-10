@@ -193,11 +193,30 @@ for (const largeur of [1180, 820]) {
         expect((await lirePages(page)).etat.page).toBe(0);
         await page.keyboard.press('ArrowRight');
         expect((await lirePages(page)).etat.page).toBe(1);
-        // Avec un modificateur (Alt ou Cmd + ← : la page précédente du navigateur), rien ne change.
-        for (const touche of ['Alt+ArrowLeft', 'Meta+ArrowLeft', 'Control+ArrowLeft', 'Shift+ArrowLeft']) {
-            await page.keyboard.press(touche);
+        // Avec un modificateur (Alt ou Cmd + ← : la page précédente du navigateur), rien ne change, et la bulle laisse la
+        // touche au navigateur (elle ne l'empêche pas). Groupe 3 (9 nov.) : la touche est envoyée à la bulle comme le
+        // clavier l'enverrait, mais sans que le navigateur fasse son geste ; pressée pour de vrai, Cmd+← et Ctrl+← ramenaient
+        // le WebKit du banc à la page précédente, et l'essai mesurait le navigateur, pas la bulle.
+        for (const [touche, mods] of [['Alt+ArrowLeft', { altKey: true }], ['Meta+ArrowLeft', { metaKey: true }],
+            ['Control+ArrowLeft', { ctrlKey: true }], ['Shift+ArrowLeft', { shiftKey: true }]]) {
+            const empechee = await page.evaluate((m) => {
+                const ev = new KeyboardEvent('keydown', Object.assign({ key: 'ArrowLeft', bubbles: true, cancelable: true }, m));
+                (document.activeElement || document.body).dispatchEvent(ev);
+                return ev.defaultPrevented;
+            }, mods);
+            expect(empechee, touche + ' : laissée au navigateur').toBe(false);
             expect((await lirePages(page)).etat.page, touche).toBe(1);
         }
+        // Sans modificateur, la même touche envoyée de la même façon fait bien reculer : l'envoi atteint la bulle.
+        const reculee = await page.evaluate(() => {
+            const ev = new KeyboardEvent('keydown', { key: 'ArrowLeft', bubbles: true, cancelable: true });
+            (document.activeElement || document.body).dispatchEvent(ev);
+            return ev.defaultPrevented;
+        });
+        expect(reculee, '← sans modificateur : prise par la bulle').toBe(true);
+        expect((await lirePages(page)).etat.page).toBe(0);
+        await page.keyboard.press('ArrowRight');
+        expect((await lirePages(page)).etat.page).toBe(1);
         // Le focus sur « → » quand il devient inactif (dernière page) passe à « ← ».
         await page.keyboard.press('ArrowLeft');
         await suivante(page).focus();

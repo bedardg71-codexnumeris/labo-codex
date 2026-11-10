@@ -645,6 +645,10 @@
         const bouton = e.target.closest('.tn-case');
         if (!bouton || e.metaKey || e.ctrlKey || e.altKey) return;
         if (FLECHES[e.key]) { e.preventDefault(); _deplacer(bouton, FLECHES[e.key]); return; }
+        // « Retour arrière » est la touche du tableau (sa légende) sur TOUTES ses cases, même celles qu'il ne vide pas
+        // (une case faite avec une grille) : laissée au navigateur, elle ramenait à la page précédente sous WebKit
+        // (mesuré le 9 nov. au banc, groupe 3). Safari la désactive par défaut depuis sa version 10 ; d'autres réglages non.
+        if (e.key === 'Backspace' || e.key === 'Delete') e.preventDefault();
         if (bouton.dataset.evaluation) return;
         const ctx = construireContexte();
         if (ctx.etat !== 'ok') return;
