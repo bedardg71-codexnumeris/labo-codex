@@ -266,12 +266,6 @@ body.parcours-actif .temoin-dans-le-flux .temoin-enregistrement-succes.visible {
 /* Pendant un parcours, le jalon de js/transitions.js ne vient pas couvrir l'étape. */
 body.parcours-actif .transition-bandeau { display: none; }
 
-/* Une étape qui se joue dans une fenêtre (l'assistant de la pratique, neuvième parcours) : la fenêtre est
-   à 9999, au-dessus du voile. Le contour et la bulle passent au-dessus d'elle ; le voile reste dessous,
-   pour que la fenêtre et les questions qu'elle ouvre restent touchables. Posé par le parcours. */
-body.parcours-sur-modale .parcours-contour { z-index: 10010; }
-body.parcours-sur-modale .parcours-bulle { z-index: 10011; }
-
 /* ---------- Le panneau « Assistance » ---------- */
 
 .assistance-voile {
@@ -513,14 +507,6 @@ body.parcours-sur-modale .parcours-bulle { z-index: 10011; }
 
 .assistance-parcours-bouton:hover { background: rgba(106, 172, 184, 0.15); }
 
-/* Le refus d'un parcours qui attend une condition (le huitième : une production et sa grille). */
-.assistance-parcours-refus {
-    margin: 0;
-    padding-left: 10px;
-    border-left: 2px solid var(--icone-aide-config);
-    font-size: 13px;
-    line-height: 1.45;
-}
 .assistance-parcours-bouton--plein:hover { background: var(--acc-surface); }
 
 .assistance-filet {

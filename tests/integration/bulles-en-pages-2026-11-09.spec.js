@@ -102,11 +102,14 @@ async function lirePages(page) {
         p.parentElement.appendChild(sonde);
         const lignes = spans.map((s) => { sonde.textContent = s.textContent; return Math.round(sonde.scrollHeight / ligne); });
         sonde.remove();
+        // Groupe 3 (9 nov.) : le moteur pose une espace insécable à l'intérieur des guillemets (typographier, 17 h 58) ;
+        // le texte de l'étape garde ses espaces ordinaires : on compare sans elles.
+        const sansInsecable = (t) => t.replace(/\u00a0/g, ' ');
         return {
-            textes: spans.map((s) => s.textContent),
+            textes: spans.map((s) => sansInsecable(s.textContent)),
             visibles: spans.map((s) => !s.classList.contains('u-lecteur-ecran')),
             lignes,
-            tout: p.textContent,
+            tout: sansInsecable(p.textContent),
             etat: (({ page: k, pages: n }) => ({ page: k, pages: n }))(ParcoursMoteur.pageCourante())
         };
     });

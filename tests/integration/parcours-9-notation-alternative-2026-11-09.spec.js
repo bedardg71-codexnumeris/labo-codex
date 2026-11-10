@@ -243,7 +243,8 @@ for (const cas of [
         await expect(page.locator('#parcours-contour')).toBeVisible();
         await page.selectOption('#menuPratiques', cas.id);
         await attendreEtape(page, cas.titre, '2 sur ' + cas.total);
-        const texte = await bulle(page).locator('.parcours-bulle-texte').textContent();
+        // Groupe 3 (9 nov.) : les guillemets portent une espace insécable à l'écran (typographier) ; on lit sans elle.
+        const texte = (await bulle(page).locator('.parcours-bulle-texte').textContent()).replace(/\u00a0/g, ' ');
         if (cas.famille === 'standards') {
             // Sans « Artefact » et hors hybride, la liste est à l'écran : sa phrase paraît.
             await expect(page.locator('#mat-productions-comptees')).toBeVisible();
