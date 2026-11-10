@@ -141,7 +141,10 @@ for (const largeur of [1180, 820]) {
         await expect(indice(page)).toHaveText('1/2');
         // La tête ne garde que le titre et le rang : le compteur des pages n'y reparaît pas.
         await expect(bulle(page).locator('.parcours-bulle-tete .parcours-bulle-pages'), 'le compteur des pages hors de la tête').toHaveCount(0);
-        await expect(bulle(page).locator('.parcours-bulle-tete')).toHaveText('Longue2 sur 3');
+        // ↻ 10 nov. 2026 (« Les flèches des parcours ») : la tête porte aussi la poignée ⠿ (hors téléphone). L'essai
+        // lisait le texte entier de la tête ; il lit maintenant ses enfants, un par un : titre, rang, poignée, rien d'autre.
+        expect(await bulle(page).locator('.parcours-bulle-tete').evaluate((t) => [...t.children].map((c) => [c.className, c.textContent])))
+            .toEqual([['parcours-bulle-titre', 'Longue'], ['parcours-bulle-rang', '2 sur 3'], ['parcours-bulle-poignee', '\u283f']]);
         // Le compteur entre les deux flèches, dans le DOM et à l'écran.
         const nav = await bulle(page).locator('.parcours-bulle-nav').evaluate((n) => ({
             ordre: [...n.children].map((c) => c.className),

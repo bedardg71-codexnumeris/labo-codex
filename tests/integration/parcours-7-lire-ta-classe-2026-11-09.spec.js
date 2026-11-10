@@ -428,6 +428,19 @@ test('avec une grille de dépistage désignée, l’étape 4 mène à l’étape
     await suivreLesReactions(page);
     await groupeAvecUnePersonneAlEcart(page, { designee: true });
     await parcourir(page, { largeur: 1180, theme: 'sombre', designee: true });
+
+    // ↻ 10 nov. 2026 (« Les flèches des parcours ») : sans voile, à l'étape 6, l'historique du profil se touche. Une
+    // intervention DÉJÀ enregistrée, rouverte de là, n'est pas la fiche neuve que l'étape attend : elle ne fait pas
+    // avancer (avant la garde, l'étape 7 la voyait enregistrée et sautait à la 8).
+    const dejaLa = await page.evaluate(() => (obtenirInterventions() || [])[0].id);
+    await page.evaluate(() => window.Assistance.parcours().find((x) => x.id === 'lire-ta-classe').lancer(5));
+    await attendreEtape(page, 6);
+    await page.evaluate((id) => window.naviguerVersIntervention(id), dejaLa);
+    await expect(page.locator(`[data-fiche-intervention="${dejaLa}"]`)).toBeVisible();
+    await deuxSondes(page);
+    await expect(bulle(page).locator('.parcours-bulle-rang'), 'une intervention déjà enregistrée ne fait pas avancer l’étape 6').toHaveText('6 sur 9');
+    expect(await page.evaluate(() => window.ParcoursLireTaClasse.memoire.ficheId)).toBeNull();
+    await page.evaluate(() => window.ParcoursMoteur.fermer());
     expect(erreurs, 'erreurs console').toEqual([]);
 });
 

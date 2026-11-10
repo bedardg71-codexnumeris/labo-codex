@@ -331,7 +331,7 @@ test('étape 1, sans voile : le « Type » d’un critère déjà là ne répond
     await page.selectOption('#menuGrilles', 'G_P8_1');
     const types = '#listeCriteres select[data-on-change="modifierTypeCritereGrilleHandler"]';
     await expect(page.locator(types)).toHaveCount(1);
-    const typeEnBase = () => page.evaluate(async () => (await obtenirGrilleParId('G_P8_1')).criteres.map((c) => c.type || 'holistique'));
+    const typeEnBase = () => page.evaluate((t) => (window.db.getSync(t + '_grillesTemplates', []).find((g) => g.id === 'G_P8_1').criteres || []).map((c) => c.type || 'holistique'), T);
     const avant = await typeEnBase();
     const affiche = await page.locator(types).first().inputValue();
     expect(affiche).not.toBe('algorithmique');

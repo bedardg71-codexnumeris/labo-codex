@@ -201,20 +201,23 @@ test('la flèche suit le défilement et le redimensionnement ; une cible sortie 
     await coucheDansLeRepereDeLaFenetre(page, 'après le défilement');
 
     // La fenêtre redimensionnée : la couche reprend sa taille, en px.
-    await page.setViewportSize({ width: 1024, height: 760 });
-    await coucheDansLeRepereDeLaFenetre(page, 'à 1024 × 760');
+    await page.setViewportSize({ width: 1180, height: 640 });
+    await coucheDansLeRepereDeLaFenetre(page, 'à 1180 × 640');
     await flecheVers(page, assiduite, 'après le redimensionnement');
 
-    // Les cartes sorties par le haut (la bulle déplacée d'abord, pour que le placement automatique ne les ramène pas).
+    // Les cartes sorties par le bas. La bulle est d'abord déplacée (sa place est alors gardée : le placement
+    // automatique ne la recolle pas aux cartes), la fenêtre raccourcie, puis la page ramenée à son début.
     await poignee(page).focus();
     await page.keyboard.press('ArrowDown');
-    await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight));
-    const sorties = await page.evaluate((sel) => [...document.querySelectorAll(sel)].every((e) => e.getBoundingClientRect().bottom <= 0), '#profil-contenu-dynamique .profil-carte:has(.badge-absence)');
-    test.skip(!sorties, 'la page ne défile pas assez pour sortir la carte de l’écran à cette taille');
+    await page.setViewportSize({ width: 1180, height: 420 });
+    await page.evaluate(() => window.scrollTo(0, 0));
+    await expect.poll(() => page.evaluate((sel) => [...document.querySelectorAll(sel)].every((e) => e.getBoundingClientRect().top >= window.innerHeight),
+        '#profil-contenu-dynamique .profil-carte:has(.badge-absence), #profil-contenu-dynamique .profil-carte:has(.badge-absence) + .profil-carte'),
+        { message: 'les deux cartes sont sorties par le bas' }).toBe(true);
     await expect.poll(async () => {
         const e = await etatFleches(page);
-        return e.fleches.length ? e.fleches.map((x) => x.pointe.y).join() : 'aucune';
-    }, { message: 'la pointe va au bord haut de l’écran' }).toBe('10');
+        return e.fleches.length ? [...new Set(e.fleches.map((x) => x.pointe.y))].join() : 'aucune';
+    }, { message: 'la pointe va au bord bas de l’écran (420 − 10)' }).toBe('410');
 });
 
 // ---------- La poignée ----------
@@ -295,6 +298,7 @@ test('la poignée : 46 px, à la souris et au doigt ; la bulle reste dans l’é
     await allerAEtape(page, 3);
     // L'étape suivante a repris le placement automatique : la bulle n'est plus où on l'avait laissée.
     await flecheVers(page, '#profil-contenu-dynamique .profil-carte:has(.badge-absence)', 'étape 3, placement automatique');
+    await nombreDeFleches(page, 2, 'étape 3, avant de déplacer la bulle');
     const carte = await rectDe(page, '#profil-contenu-dynamique .profil-carte:has(.badge-absence)');
     const r = await poignee(page).boundingBox();
     const bb = await rectDe(page, '#parcours-bulle');
@@ -308,7 +312,11 @@ test('la poignée : 46 px, à la souris et au doigt ; la bulle reste dans l’é
         const cx = (c.left + c.right) / 2, cy = (Math.max(0, c.top) + Math.min(await page.evaluate(() => innerHeight), c.bottom)) / 2;
         return cx > b.left && cx < b.right && cy > b.top && cy < b.bottom;
     }, { message: 'la bulle couvre le centre de la carte' }).toBe(true);
-    await nombreDeFleches(page, 1, 'la carte cachée sous la bulle n’a plus de flèche ; l’autre garde la sienne');
+    // La carte cachée sous la bulle n'a plus de flèche : aucune pointe ne s'arrête à son bord.
+    await expect.poll(async () => {
+        const e = await etatFleches(page), c = await rectDe(page, '#profil-contenu-dynamique .profil-carte:has(.badge-absence)');
+        return e.fleches.filter((f) => Math.hypot(Math.max(c.left - f.pointe.x, 0, f.pointe.x - c.right), Math.max(c.top - f.pointe.y, 0, f.pointe.y - c.bottom)) <= 9).length;
+    }, { message: 'aucune flèche vers la carte cachée sous la bulle' }).toBe(0);
 });
 
 test('la poignée au clavier : les flèches déplacent la bulle de 16 px sans changer de page de bulle ; sur la bulle, elles changent de page', async ({ page }) => {
@@ -324,6 +332,8 @@ test('la poignée au clavier : les flèches déplacent la bulle de 16 px sans ch
     await expect(poignee(page)).toBeFocused();
     const b0 = await rectDe(page, '#parcours-bulle');
     await page.keyboard.press('ArrowRight');
+    // Dès la première flèche : la bulle a bougé, sa page n'a pas changé (l'événement ne remonte pas à la bulle).
+    expect((await pages()).page, 'la flèche droite sur la poignée ne change pas de page').toBe(0);
     await page.keyboard.press('ArrowRight');
     await page.keyboard.press('ArrowDown');
     const b1 = await rectDe(page, '#parcours-bulle');
