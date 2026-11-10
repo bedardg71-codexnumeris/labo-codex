@@ -2,7 +2,114 @@
 
 Consigne de Cowork du 9 nov. 2026, 17 h 40. Branche `lot/vue-simple`, partie de `origin/lot/tableau-de-notation-1-bis` (`b6d5926`). Session cloud, Chromium seulement.
 
-> **État : lot livré sur la branche `lot/vue-simple`, à juger le 11 novembre.** Rien n'est fusionné, `main` n'est pas touché, aucune release, rien au changelog. **En tête : la seconde livraison (la pratique se règle), puis la liste de travail, puis le rapport de la première livraison, puis la mesure d'avant le code.**
+> **État : lot livré sur la branche `lot/vue-simple`, à juger le 11 novembre.** Rien n'est fusionné, `main` n'est pas touché, aucune release, rien au changelog. **En tête : la troisième livraison (seuils, mise à jour, colonnes), puis la seconde (la pratique se règle), puis la liste de travail, puis la première livraison, puis la mesure d'avant le code.**
+
+---
+
+## TROISIÈME LIVRAISON — LES SEUILS, LA MISE À JOUR, LES COLONNES (10 nov. 2026)
+
+Sur les décisions de Grégoire du 9 nov., 20 h 49 à 20 h 55, et celles de Cowork.
+
+### Ce qui est fait, en gestes
+
+1. **Régler la valeur d'un niveau ne touche plus à ses seuils.** « Étendu » passé de 100 à 95 commence toujours à 85 : une copie à 90 % évaluée avec une grille garde son niveau.
+2. **Un niveau peut valoir plus de 100**, sans plafond. Seuls un texte qui n'est pas un nombre et une valeur négative sont refusés. L'aide du réglage dit, mot pour mot : « Chaque niveau a une lettre, un nom et une valeur. La note se construit avec ces valeurs. »
+3. **Après un réglage qui change une valeur, l'écran demande** : « N résultats ont été saisis avec les anciennes valeurs. Les mettre à jour ? », avec « Mettre à jour » et « Garder les anciennes valeurs ». S'il y a plus d'un groupe sur la pratique, il le dit.
+4. **« Mettre à jour »** donne à ces résultats la valeur d'aujourd'hui ; le signe « ≠ » disparaît de leurs cases. **« Annuler », au tableau, défait tout le lot en un geste.** « Garder » laisse l'état d'avant (le signe, ressaisir).
+5. **Le titre d'une colonne la règle** : son nom, sa date, son type (spécifications), et si elle compte dans la note (standards).
+6. **Une colonne qui ne compte pas reste au tableau** : son titre est barré, « ne compte pas » est écrit dessous, et la phrase de la règle dit combien comptent (« 4 productions sur 5 comptent. »).
+7. **Une colonne ne se retire que vide.** Si elle porte un résultat ou un fichier, l'écran dit combien, n'efface rien, et propose de la marquer « ne compte pas ». Vide, elle part au second geste.
+8. **Deux tournures validées** remplacent les accords empilés.
+
+### Ce que j'ai tranché, comme demandé (une ligne chacun)
+
+- **Un niveau ajouté en vue simple n'a pas de seuils, et la conversion d'un pourcentage l'ignore.** Mesuré dans le code de la conversion (`niveauDuPourcentage`) et vérifié par un essai, y compris pour un pourcentage hors de toute plage : il se saisit au tableau, il ne reçoit aucune copie évaluée avec une grille tant que ses seuils ne sont pas donnés en vue étendue. Voir la question 1 : quatre écrans de la vue étendue le lisent mal.
+- **Une note au-dessus de 100, mesurée par exécution (un niveau à 110, deux résultats) :** 110 au tableau, 110 à l'écran Note finale, 110 dans le CSV, 110 % au profil, au Suivi et dans la Liste. Rien ne la plafonne, ne la tronque ni ne casse. Une anomalie en vue étendue, non corrigée : voir la question 2.
+- **Le négatif reste refusé.** Je ne vois pas de raison de le permettre : aucun calcul de l'application ne retranche, et une valeur négative donnerait une note négative que les barres du Suivi ne savent pas dessiner.
+- **La mise à jour ne touche que les résultats saisis au tableau, dans les groupes de la pratique**, et jamais une colonne qui a sa propre échelle (réglée en vue étendue). Elle n'écrit que la valeur.
+- **Un geste ne s'annule que là où il a été fait** : une case, dans son groupe ; la mise à jour, depuis un des groupes de la pratique ; jamais depuis la vue étendue. (En vue étendue, la règle d'avant le lot ne change pas.)
+- **« Compte dans la note » est le champ de la vue étendue** (« Productions qui comptent dans la note »), donc offert là où le calcul le lit : en standards, sans catégories, sans productions de type artefact, et pas sur la production terminale, qui compte à part. **En spécifications, la marque n'existe pas dans le calcul : elle n'est pas offerte.**
+- **Le retrait d'une colonne vide demande un second geste** (mon ajout) : une production venue de la vue étendue peut porter des réglages qu'on ne voit pas ici.
+- **Un fichier à la corbeille garde aussi la colonne** : il peut encore être restauré avec sa production. C'est plus strict que la vue étendue.
+- **Le type et la date d'une colonne ne sont écrits que s'ils ont été changés** ; une date qui dépend du groupe (réglée en vue étendue) ne se règle pas ici.
+
+### Ce qui attend Grégoire
+
+| # | Question | Recommandation |
+|---|---|---|
+| 1 | **Un niveau sans seuils est mal lu par quatre écrans de la vue étendue** (lecture du code, non exécutée) : la répartition par niveaux du Suivi y range tous les étudiant·es, l'export PDF imprime « 0 % - 100 % » pour lui, deux graphiques de progression le placent mal. L'éditeur d'échelles de la vue étendue tient les seuils pour obligatoires. La note, elle, n'est pas touchée. | Corriger ces quatre lectures (petit, hors de la vue simple, donc hors de ce lot) avant le 27 ; ou, d'ici là, ne pas offrir « + Niveau » en vue simple. À trancher |
+| 2 | **Une note au-dessus de 100 n'est rangée dans aucun niveau par la répartition du Suivi** (vu à l'exécution : « Étendu : 0 » pour une étudiant·e à 110 %). Lu dans le code, non exécuté : le partage d'une échelle borne la valeur d'un niveau à 100 et signale un problème ; un graphique de progression plafonne. | Même lot de corrections que la question 1, en vue étendue |
+| 3 | **Renommer une production ne renomme pas ses résultats** : ils gardent l'ancien nom, qui se lit dans la Liste et dans des rapports. La vue étendue fait pareil aujourd'hui. | Défaut d'avant le lot, exposé par le geste neuf ; à inscrire par Cowork |
+| 4 | **Les textes neufs** ci-dessous, dont la question de mise à jour. | À valider un à un |
+
+### Les textes neufs de cette livraison (PROPOSÉS, sauf mention)
+
+Écran « Pratique », après un réglage de niveaux :
+- la question (proposée par Cowork) : « N résultats ont été saisis avec les anciennes valeurs. Les mettre à jour ? » ; au singulier : « 1 résultat a été saisi avec les anciennes valeurs. Le mettre à jour ? »
+- sa suite, s'il y a plus d'un groupe : « Ils sont dans les N groupes qui ont cette pratique. »
+- les deux boutons (proposés par Cowork) : « Mettre à jour », « Garder les anciennes valeurs »
+- la confirmation : « N résultats mis à jour. « Annuler », au tableau, les remet comme avant. »
+- le refus d'une valeur : « Chaque niveau a une valeur : un nombre, zéro ou plus. » (remplace « de 0 à 100 »)
+
+Au tableau, sur une colonne :
+- le titre de la colonne est un bouton ; ce que lit le lecteur d'écran : « Régler la colonne « X » »
+- sous le titre d'une colonne écartée : « ne compte pas »
+- à la suite de la phrase de la règle (au tableau et sur l'écran Pratique) : « N productions sur M comptent. »
+
+Dans le formulaire d'une colonne :
+- la case : « Compte dans la note »
+- les boutons : « Enregistrer », « Annuler », « Retirer la colonne »
+- le refus : « Cette colonne porte N résultats : elle ne se retire pas. Rien n'a été effacé. » ; avec des fichiers : « … porte N résultats et N fichiers … », « … porte 1 fichier … »
+- la proposition, sous le refus : « La marquer « ne compte pas » »
+- la question du retrait d'une colonne vide : « Retirer la colonne « X » ? Elle ne porte aucun résultat. », et son bouton « Retirer »
+
+Validés par Grégoire, posés mot pour mot :
+- « Aucune ligne lue. Une ligne par étudiant·e : DA, nom, prénom. »
+- « N étudiant·es de plus dans ta classe. N y étaient déjà. » (au singulier, que j'ai dû choisir : « 1 étudiant·e de plus dans ta classe. 1 y était déjà. » ; sans doublon, la seconde phrase ne paraît pas)
+- « Chaque niveau a une lettre, un nom et une valeur. La note se construit avec ces valeurs. »
+
+**Les autres textes où « étudiant·e » forçait un accord : il n'y en avait pas d'autre.** Un essai lit tous les mots de la vue simple et n'y admet aucun mot à point médian autre que « étudiant·e » et « étudiant·es » ; il passe. (Les mots du tableau lui-même, validés le 9 nov., ne sont pas de ce lot.)
+
+### Ce que je n'ai pas pu vérifier
+
+- WebKit, Safari, l'iPad, le toucher ; la suite Playwright entière ; les données réelles de Grégoire.
+- Les quatre lectures de la question 1 et deux des trois de la question 2 sont lues dans le code, pas exécutées.
+- La mise à jour dans un trimestre clos ou en anonymisation : elle passe par l'écriture commune de l'application, sans essai à elle.
+
+### La preuve
+
+- **Vitest** : suite entière, 11 013 essais verts sur 11 013. Banc du lot : 46 essais.
+- **Playwright Chromium** : banc de la vue simple, 31 essais verts sur 31 ; banc du tableau, 19 sur 19.
+- **Les essais demandés :**
+  - « Étendu » passé de 100 à 95 : ses seuils restent 85 à 100, et la conversion rend « Étendu » à 90 % ;
+  - la mise à jour : le compte exact (2, la copie évaluée avec une grille ne compte pas) ; seule la valeur change ; aucun résultat créé ni effacé ; la copie avec grille est identique ; « Annuler » rend l'empreinte d'avant ;
+  - la note à la main : (100 + 75 + 65) / 3 = 80 avant ; (100 + 90 + 60) / 3 donne 83 après ; 80 de nouveau après « Annuler » ;
+  - « Garder » n'écrit rien ; avec deux groupes, la question compte les deux et le dit ;
+  - une colonne écartée reste visible, le dit, et la note suit : (100 + 75) / 2 donne 88 ; le calcul partagé rend la même note ;
+  - une colonne pleine ne se retire pas (résultats, fichier, fichier à la corbeille) ; une colonne vide part au second geste, et elle seule.
+- **Break-tests** : 35 défenses de cette livraison retirées une à une, 35 essais rougis, code restauré (97 sur les trois livraisons).
+- **Relecture par un agent neuf**, sur le commit de cette tranche. Sécurité : rien. Le tableau de la vue étendue : inchangé. Neuf défauts réels, disposition ci-dessous.
+- **Captures** : 120 images (30 écrans, 1180 et 820 px, clair et sombre), dont la question de mise à jour (27), le réglage d'une colonne (28), une colonne « ne compte pas » (29), le refus de retirer une colonne pleine (30).
+
+### Les constats de la relecture, et ce qu'ils deviennent
+
+| Constat | Disposition |
+|---|---|
+| La mise à jour pouvait toucher les résultats d'une colonne qui a sa propre échelle | **Corrigé** |
+| Enregistrer une colonne réécrivait son type même sans changement (une production rattachée par son nom perdait le sien) | **Corrigé** |
+| « Compte dans la note » offerte sur la production terminale, sans effet | **Corrigé** (non offerte) |
+| « Annuler » défaisait un geste d'un autre groupe, ou d'une autre vue | **Corrigé** |
+| La question de mise à jour suivait un changement de groupe | **Corrigé** |
+| Un retrait refusé à l'instant de l'écriture laissait l'écran muet | **Corrigé** |
+| La date d'une production à échéances par groupe était écrasée | **Corrigé** (elle ne se règle pas ici) |
+| La mise à jour et son annulation ne vérifiaient pas le niveau du résultat | **Corrigé** |
+| Une colonne vide partait au premier clic, avec ses réglages de la vue étendue | **Corrigé** (second geste) |
+| Un fichier à la corbeille n'empêchait pas le retrait | **Corrigé** en vue simple ; la vue étendue a la même lacune, à inscrire par Cowork |
+| Après une seconde copie d'échelle, les résultats de la première origine étaient perdus de vue | **Corrigé** |
+| Un niveau sans seuils et une valeur au-dessus de 100 sont mal lus par des écrans de la vue étendue | **Remonte à Grégoire** (questions 1 et 2) |
+| Une production référencée par la carte d'alignement se retire quand même | **Laissé** : même garde que la vue étendue, aucune donnée d'étudiant·e en jeu |
+| « N sur M comptent » : l'écran Pratique compte aussi une production diagnostique ou non assignée, que le tableau ne montre pas | **Laissé** : ne touche pas un novice, qui n'en a pas |
+| La seconde garde du retrait (relue à l'instant de l'écriture) n'a pas d'essai à elle | **Dit** : la première garde a le sien |
 
 ---
 
@@ -29,7 +136,7 @@ Sur les relais de Grégoire et de Cowork du 9 nov., 19 h 35 à 19 h 44. Principe
 - **(A3) Un niveau inscrit dans un résultat ne se retire pas et ne change pas de lettre.** L'écran dit pourquoi et combien de résultats le portent ; rien n'est effacé, rien n'est écrit.
 - **(A4) Le nom de l'échelle : « Mes niveaux »** (proposé). Ni « IDME », ni « de départ ».
 - **Les couleurs** : un niveau gardé garde sa couleur ; un niveau ajouté prend la couleur neutre du tableau. Les couleurs ne se règlent pas en vue simple (ligne 19 de la liste).
-- **Les seuils d'un niveau suivent sa valeur** (voir la question 1 ci-dessous) : c'est une supposition, elle touche la pédagogie.
+- ~~Les seuils d'un niveau suivent sa valeur~~ : **supposition renversée par Grégoire le 9 nov. à 20 h 49** ; les seuils ne bougent plus (troisième livraison).
 - **Un type porté par une production ne se retire pas** ; un nom de type qui détacherait ou attacherait une production est refusé (certaines productions de la vue étendue tiennent à leur type par son nom).
 - **Un seul palier sans exigence, et c'est le plus bas** : sinon, qui n'a rien d'acceptable recevrait la note haute.
 - **Une pratique que la vue simple ne sait pas régler sans risque** (échelle embarquée dans la pratique, paliers sous l'ancienne forme, règle à catégories) se LIT en vue simple, avec « se change en vue étendue ». Régler ici écrirait à côté de ce que le calcul lit.
