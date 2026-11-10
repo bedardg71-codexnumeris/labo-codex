@@ -293,17 +293,20 @@
      */
     function _valeurChangee(ev, ctx) {
         if (ctx.famille !== 'STD' || !ev || ev.sansGrille !== true || typeof ev.noteFinale !== 'number') return null;
-        const niveau = D().niveauxSaisissables(_echelleDuResultat(ev, ctx)).find(n => n.code === ev.niveauFinal);
+        const niveau = D().niveauxSaisissables(_echelleDuResultat(ev, ctx)).find(n => n.code === ev.niveauFinal);   // voir `_echelleDuResultat`
         return (niveau && niveau.valeur !== ev.noteFinale) ? ev.noteFinale : null;
     }
 
     /**
      * L'échelle à laquelle comparer la valeur écrite d'un résultat : la sienne ; ou, si l'échelle de la pratique en est une
-     * COPIE réglée depuis (`copieDe`, vue simple : une échelle du trimestre n'est jamais modifiée, elle est copiée), cette copie.
+     * COPIE réglée depuis (`origines`, vue simple : une échelle du trimestre n'est jamais modifiée, elle est copiée), cette copie.
      */
     function _echelleDuResultat(ev, ctx) {
+        // Une colonne qui a SON échelle garde la sienne : la copie ne concerne que les colonnes qui lisent celle de la pratique.
+        const production = (ctx.productions || []).find(p => p.id === ev.productionId);
+        if (production && production.echelleId) return _echelleParId(ev.echelleId);
         const actuelle = ctx.echelle && ctx.echelle.id && typeof obtenirEchelleResolue === 'function' ? obtenirEchelleResolue(ctx.echelle.id) : null;
-        if (actuelle && actuelle.copieDe && actuelle.copieDe === ev.echelleId) return _utilisable(actuelle);
+        if (actuelle && Array.isArray(actuelle.origines) && actuelle.origines.indexOf(ev.echelleId) >= 0) return _utilisable(actuelle);
         return _echelleParId(ev.echelleId);
     }
 
@@ -612,7 +615,7 @@
         if (r.action === 'inchange' || r.action === 'refuse') return r.action;
         if (sauvegarderDonneesSelonMode('evaluationsSauvegardees', r.evaluations, { geste: 'Tableau de notation' }) !== true) return 'echec';
         // Le dernier geste, pour « Annuler » : la copie d'avant (une copie, pas l'objet du stock) et ce que le geste a laissé.
-        _dernierGeste = { cleStock: cle('evaluationsSauvegardees'), da, productionId,
+        _dernierGeste = { cleStock: cle('evaluationsSauvegardees'), lieu: _lieu(), da, productionId,
             avant: avant ? JSON.parse(JSON.stringify(avant)) : null, apresId: r.action === 'retire' ? null : r.evaluation.id };
         window._moyennesQualifies = null;
         window._moyennesToutes = null;
@@ -622,8 +625,27 @@
 
     /* ============================== ANNULER ============================== */
 
+    /**
+     * Où un geste a été fait : la vue, et le groupe-cours actif. Un geste de la VUE SIMPLE ne s'annule que là (relecture
+     * neuve, 10 nov. 2026 : sans cela, une case saisie dans un groupe s'annulait depuis le tableau d'un autre, sans que
+     * rien ne bouge à l'écran, et ⌘Z en vue étendue défaisait une mise à jour faite en vue simple). Un geste de la vue
+     * étendue garde sa règle d'avant le lot : le trimestre seul.
+     */
+    function _lieu() {
+        return { simple: !!_presentation, groupe: (db.getSync('groupeCoursActif', null) || {}).id || null };
+    }
+
+    function _auMemeLieu(geste) {
+        const ici = _lieu();
+        const la = geste.lieu || { simple: false, groupe: null };
+        if (la.simple !== ici.simple) return false;
+        if (!la.simple) return true;
+        // Un lot (la mise à jour des valeurs) vaut pour tous les groupes de la pratique : il s'annule depuis l'un d'eux.
+        return geste.lot ? (geste.groupes || []).indexOf(ici.groupe) >= 0 : la.groupe === ici.groupe;
+    }
+
     function _gesteAnnulable() {
-        return !!_dernierGeste && _dernierGeste.cleStock === cle('evaluationsSauvegardees');
+        return !!_dernierGeste && _dernierGeste.cleStock === cle('evaluationsSauvegardees') && _auMemeLieu(_dernierGeste);
     }
 
     /**
@@ -632,7 +654,11 @@
      * @returns {string} 'defait', 'refuse', 'echec' ou 'rien'
      */
     function annuler() {
-        if (!_gesteAnnulable()) { _dernierGeste = null; return 'rien'; }
+        if (!_gesteAnnulable()) {
+            // Un geste d'un autre trimestre est oublié (règle d'avant le lot) ; un geste d'un autre lieu reste, il s'annule là-bas.
+            if (_dernierGeste && _dernierGeste.cleStock !== cle('evaluationsSauvegardees')) _dernierGeste = null;
+            return 'rien';
+        }
         const geste = _dernierGeste;
         const stock = db.getSync(cle('evaluationsSauvegardees'), []) || [];
         const r = geste.lot ? _defaireLot(stock, geste.lot) : D().defaireSaisie(stock, geste);
@@ -659,7 +685,7 @@
         let defaits = 0;
         const evaluations = stock.map(e => {
             const x = e && parId.get(e.id);
-            if (!x || e.noteFinale !== x.apres) return e;
+            if (!x || e.noteFinale !== x.apres || (x.niveau && String(e.niveauFinal) !== x.niveau)) return e;
             defaits++;
             return Object.assign({}, e, { noteFinale: x.avant });
         });
@@ -667,8 +693,9 @@
     }
 
     /** Vue simple : un geste qui a écrit plusieurs résultats d'un coup devient le dernier geste, que « Annuler » défait en entier. */
-    function noterGesteLot(lot) {
-        _dernierGeste = (lot && lot.length) ? { cleStock: cle('evaluationsSauvegardees'), lot: lot.map(x => ({ id: x.id, avant: x.avant, apres: x.apres })) } : null;
+    function noterGesteLot(lot, groupes) {
+        _dernierGeste = (lot && lot.length) ? { cleStock: cle('evaluationsSauvegardees'), lieu: { simple: true, groupe: null }, groupes: groupes || [],
+            lot: lot.map(x => ({ id: x.id, niveau: x.niveau, avant: x.avant, apres: x.apres })) } : null;
     }
 
     /** ⌘Z ou Ctrl+Z, quand le tableau est à l'écran et qu'on n'écrit pas dans un champ (son propre « annuler » passe d'abord). */

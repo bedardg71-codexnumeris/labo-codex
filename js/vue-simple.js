@@ -157,6 +157,8 @@
         colonneCombien: (n, m) => ` ${n} production${n > 1 ? 's' : ''} sur ${m} compte${n > 1 ? 'nt' : ''}.`,
         colonnePleine: (r) => `Cette colonne porte ${[r.evaluations ? `${r.evaluations} résultat${r.evaluations > 1 ? 's' : ''}` : '', r.copies ? `${r.copies} fichier${r.copies > 1 ? 's' : ''}` : ''].filter(Boolean).join(' et ')} : elle ne se retire pas. Rien n’a été effacé.`,
         colonneMarquerHors: 'La marquer « ne compte pas »',
+        colonneRetirerQuestion: (titre) => `Retirer la colonne « ${titre} » ? Elle ne porte aucun résultat.`,
+        colonneRetirerOui: 'Retirer',
         // — la mise à jour des valeurs (question PROPOSÉE par Cowork, 9 nov. 2026, 20 h 49)
         majQuestion: (n) => `${n} résultat${n > 1 ? 's ont été saisis' : ' a été saisi'} avec les anciennes valeurs. ${n > 1 ? 'Les' : 'Le'} mettre à jour ?`,
         majGroupes: (g) => `Ils sont dans les ${g} groupes qui ont cette pratique.`,
@@ -201,6 +203,7 @@
     let _ecran = 'accueil';
     let _formulaireProduction = false;
     let _colonne = null;       // la colonne (production) que le formulaire règle ; null : « + Production »
+    let _retraitDemande = null;   // la colonne dont on a demandé le retrait : il se fait au second geste
     let _miseAJour = null;     // la question posée après un réglage de niveaux : { lot, groupes }
 
     /* ============================== LA VUE ============================== */
@@ -373,6 +376,9 @@
         const id = el && el.value;
         if (!id || typeof changerGroupeCoursActifV2 !== 'function') return;
         _fermerReglage();   // le réglage ouvert est celui de la pratique de l'AUTRE groupe : il ne suit pas
+        _miseAJour = null;  // ni la question de mise à jour, ni le formulaire d'une colonne
+        _colonne = null;
+        _formulaireProduction = false;
         await changerGroupeCoursActifV2(id);
         _rafraichir();
     }
@@ -596,12 +602,24 @@
 
     function _fermerReglage() { _reglage = null; _brouillon = null; }
 
+    /** L'échelle et celles d'où elle a été copiée au réglage (`origines`). */
+    function _idsDeLEchelle(echelle) {
+        return echelle ? [echelle.id].concat(Array.isArray(echelle.origines) ? echelle.origines : []) : [];
+    }
+
+    /** Les productions qui ont LEUR échelle : leurs résultats suivent la leur, pas celle de la pratique. */
+    function _colonnesAEchellePropre() {
+        return (db.getSync(cle('productions'), []) || []).filter((p) => p && p.echelleId).map((p) => p.id);
+    }
+
     /** Le nombre de résultats du trimestre qui portent cette lettre dans cette échelle (les copies remplacées ne comptent pas). */
     function _compterResultats(echelle) {
         const evaluations = db.getSync(cle('evaluationsSauvegardees'), []) || [];
-        // Les résultats saisis AVANT la copie d'une échelle portent encore l'identifiant de l'échelle d'origine (`copieDe`).
-        const ids = echelle ? [echelle.id, echelle.copieDe].filter(Boolean) : [];
-        return (lettre) => evaluations.filter((e) => e && !e.remplaceeParId && ids.indexOf(e.echelleId) >= 0 && String(e.niveauFinal) === String(lettre)).length;
+        // Les résultats saisis AVANT la copie d'une échelle portent encore l'identifiant d'une de ses origines ; ceux d'une
+        // colonne qui a SON échelle ne sont pas ceux de la pratique.
+        const ids = _idsDeLEchelle(echelle);
+        const propres = _colonnesAEchellePropre();
+        return (lettre) => evaluations.filter((e) => e && !e.remplaceeParId && ids.indexOf(e.echelleId) >= 0 && propres.indexOf(e.productionId) < 0 && String(e.niveauFinal) === String(lettre)).length;
     }
 
     /** Le nombre de productions de ce type, dans les cours des groupes qui ont cette pratique. */
@@ -931,7 +949,7 @@
     function _lotAMettreAJour(pratique, echelle) {
         const groupes = _groupes().filter((g) => g.pratiqueId === pratique.id);
         return D().resultatsAMettreAJour(db.getSync(cle('evaluationsSauvegardees'), []) || [], {
-            idsEchelle: [echelle.id, echelle.copieDe].filter(Boolean), niveaux: echelle.niveaux,
+            idsEchelle: _idsDeLEchelle(echelle), niveaux: echelle.niveaux, colonnesAEchellePropre: _colonnesAEchellePropre(),
             groupes: groupes.map((g) => g.id), cours: groupes.map((g) => g.coursId)
         });
     }
@@ -953,16 +971,19 @@
     async function mettreAJour() {
         if (!_miseAJour) return;
         const lot = _miseAJour.lot;
+        const groupesDuLot = _miseAJour.idsGroupes || [];
         const stock = db.getSync(cle('evaluationsSauvegardees'), []) || [];
-        const ecrit = sauvegarderDonneesSelonMode('evaluationsSauvegardees', D().appliquerMiseAJour(stock, lot), { geste: MOTS.majOui }) === true;
+        const apres = D().appliquerMiseAJour(stock, lot);
+        const n = apres.filter((e, i) => e !== stock[i]).length;   // ce qui est réellement écrit (un résultat changé depuis le compte est épargné)
+        const ecrit = sauvegarderDonneesSelonMode('evaluationsSauvegardees', apres, { geste: MOTS.majOui }) === true;
         _miseAJour = null;
         if (ecrit) {
-            if (window.TableauNotation) window.TableauNotation.noterGesteLot(lot);
+            if (window.TableauNotation) window.TableauNotation.noterGesteLot(lot, groupesDuLot);
             window._moyennesQualifies = null;
             window._moyennesToutes = null;
             _apresEcriturePratique();
         }
-        _rendrePratique(ecrit ? `<p class="vs-succes" role="status">${esc(MOTS.majFaite(lot.length))}</p>` : `<p class="vs-erreur" role="alert">${esc(MOTS.pratiqueEchec)}</p>`);
+        _rendrePratique(ecrit ? `<p class="vs-succes" role="status">${esc(MOTS.majFaite(n))}</p>` : `<p class="vs-erreur" role="alert">${esc(MOTS.pratiqueEchec)}</p>`);
     }
 
     /** « Garder les anciennes valeurs » : l'état d'aujourd'hui (le signe « ≠ » sur ces cases, ressaisir pour prendre la valeur). */
@@ -989,7 +1010,8 @@
         const r = await _enregistrerLeReglage(pratique, _brouillon);
         if (r.refus) { _direRefus(r.refus); return; }
         if (r.ecrit) { _apresEcriturePratique(); _fermerReglage(); }
-        _miseAJour = (r.ecrit && r.lot && r.lot.length) ? { lot: r.lot, groupes: _groupes().filter((g) => g.pratiqueId === pratique.id).length } : null;
+        const groupesDeLaPratique = _groupes().filter((g) => g.pratiqueId === pratique.id).map((g) => g.id);
+        _miseAJour = (r.ecrit && r.lot && r.lot.length) ? { lot: r.lot, groupes: groupesDeLaPratique.length, idsGroupes: groupesDeLaPratique } : null;
         _rendrePratique(r.ecrit ? `<p class="vs-succes" role="status">${esc(r.mot)}</p>` : `<p class="vs-erreur" role="alert">${esc(MOTS.pratiqueEchec)}</p>`);
     }
 
@@ -1010,7 +1032,7 @@
         const depart = _echelleDeDepart();
         if (!depart) return null;
         const niveaux = D().brouillonDeLaPratique(pratique, depart).niveaux;
-        const r = D().echelleReglee(depart, pratique, niveaux, { idNeuf: window.genererIdUnique('ECH_'), maintenant: new Date().toISOString() });
+        const r = D().echelleReglee(depart, pratique, niveaux, { idNeuf: window.genererIdUnique('ECH_'), maintenant: new Date().toISOString(), naissance: true });
         const ecrit = await window.modifierEtAnnoncer(cle('echellesTemplates'), (lues) => (lues || []).concat([r.echelle]), [], { geste: MOTS.pratiqueTitre });
         return ecrit ? r.echelle : null;
     }
@@ -1059,9 +1081,11 @@
     }
 
     /** La marque « compte dans la note » : offerte quand le calcul la lit (standards, sans catégories, sans productions de type artefact). */
-    function _marqueOfferte(groupe) {
+    function _marqueOfferte(groupe, production) {
         const p = _pratiqueDuGroupe(groupe);
         if (_famille(groupe) !== D().FAMILLES.STD || !p || !p.configuration) return false;
+        // Une production terminale (ou le dossier « portfolio ») compte à part, hors de la liste des exclusions : la marque n'y ferait rien.
+        if (production && (production.type === 'terminale' || production.type === 'portfolio')) return false;
         if (p.configuration.categories && p.configuration.categories.actif) return false;
         return !_productionsDuCours(groupe.coursId).some((x) => x.type === 'artefact-portfolio');
     }
@@ -1079,6 +1103,16 @@
         return hors ? MOTS.colonneCombien(colonnes.length - hors, colonnes.length) : '';
     }
 
+    /** Le type de la pratique auquel la production se rattache aujourd'hui (par son identifiant, ou par son nom). */
+    function _typeActuel(production, types) {
+        return (types.find((t) => window.productionEstDuType(production, t)) || {}).id;
+    }
+
+    /** Une production dont la date dépend du groupe (réglée en vue étendue) : sa date ne se règle pas ici, elle n'est pas touchée. */
+    function _dateParGroupe(production) {
+        return !!production && !!production.echeancesParGroupe && Object.keys(production.echeancesParGroupe).length > 0;
+    }
+
     function _champTypeHTML(types, choisi) {
         // En spécifications, une production n'est une colonne que si elle a un type de la pratique : avec plus d'un type, il se choisit.
         if (types.length < 2) return '';
@@ -1090,11 +1124,11 @@
     /** Le formulaire du tableau : « + Production » (une colonne neuve), ou le réglage d'UNE colonne (`_colonne`). */
     function _formulaireProductionHTML(groupe) {
         if (!_formulaireProduction) return '';
-        const p = _colonne ? _productionsDuCours(groupe.coursId).find((x) => x.id === _colonne) : null;
+        const p = _colonne ? _productionsDuCours(groupe.coursId).find((x) => String(x.id) === _colonne) : null;
         if (_colonne && !p) return '';
         const types = _typesSpe(groupe);
-        const type = _champTypeHTML(types, p ? (types.find((t) => window.productionEstDuType(p, t)) || {}).id : null);
-        const compte = (p && _marqueOfferte(groupe)) ? `<label class="vs-choix vs-colonne-compte"><input type="checkbox" id="vs-colonne-compte"${_exclues(groupe).has(p.id) ? '' : ' checked'}> ${esc(MOTS.colonneCompte)}</label>` : '';
+        const type = _champTypeHTML(types, p ? _typeActuel(p, types) : null);
+        const compte = (p && _marqueOfferte(groupe, p)) ? `<label class="vs-choix vs-colonne-compte"><input type="checkbox" id="vs-colonne-compte"${_exclues(groupe).has(p.id) ? '' : ' checked'}> ${esc(MOTS.colonneCompte)}</label>` : '';
         const gestes = p
             ? `<button type="button" class="btn btn-principal" data-action="VueSimple.enregistrerColonne">${esc(MOTS.colonneEnregistrer)}</button>
                 <button type="button" class="btn btn-secondaire" data-action="VueSimple.fermerProduction">${esc(MOTS.productionAnnuler)}</button>
@@ -1105,8 +1139,8 @@
             <div class="vs-production-champs">
                 <div class="groupe-form vs-production-nom"><label for="vs-production-nom">${esc(MOTS.productionNom)}</label>
                     <input type="text" id="vs-production-nom" class="controle-form" maxlength="120" autocomplete="off" value="${esc(p ? (p.titre || '') : '')}"></div>
-                <div class="groupe-form"><label for="vs-production-date">${esc(MOTS.productionDate)}</label>
-                    <input type="date" id="vs-production-date" class="controle-form" value="${esc(p ? String(p.dateEcheance || '').slice(0, 10) : '')}"></div>${type}
+                ${_dateParGroupe(p) ? '' : `<div class="groupe-form"><label for="vs-production-date">${esc(MOTS.productionDate)}</label>
+                    <input type="date" id="vs-production-date" class="controle-form" value="${esc(p ? String(p.dateEcheance || '').slice(0, 10) : '')}"></div>`}${type}
             </div>${compte}
             <div id="vs-production-retour"></div>
             <p class="vs-gestes">${gestes}</p></div>`;
@@ -1160,6 +1194,7 @@
     }
 
     function _ouvrirFormulaire() {
+        _retraitDemande = null;
         _formulaireProduction = true;
         const hote = document.getElementById('vs-production-hote');
         if (!hote) { _rendreResultats(); return; }
@@ -1171,6 +1206,7 @@
     function fermerProduction() {
         _formulaireProduction = false;
         _colonne = null;
+        _retraitDemande = null;
         const hote = document.getElementById('vs-production-hote');
         if (hote) _ecrire(hote, '');
     }
@@ -1221,7 +1257,7 @@
     /** La colonne qu'on règle, son groupe et sa pratique ; null si elle n'est plus là. */
     function _colonneOuverte() {
         const groupe = _groupeActif();
-        const production = groupe && _colonne ? _productionsDuCours(groupe.coursId).find((x) => x.id === _colonne) : null;
+        const production = groupe && _colonne ? _productionsDuCours(groupe.coursId).find((x) => String(x.id) === _colonne) : null;
         return production ? { groupe, production, pratique: _pratiqueDuGroupe(groupe) } : null;
     }
 
@@ -1241,14 +1277,37 @@
         if (!titre) { _direAuFormulaire(`<p class="vs-erreur" role="alert">${esc(MOTS.productionSansNom)}</p>`); return; }
         const champType = document.getElementById('vs-production-type');
         const types = _typesSpe(c.groupe);
-        const type = champType ? (types.find((t) => String(t.id) === String(champType.value)) || {}).id : undefined;
-        const modifiee = D().colonneModifiee(c.production, { titre, date: (document.getElementById('vs-production-date') || {}).value || '', type, maintenant: new Date().toISOString() });
+        // Le type n'est écrit que s'il a été CHANGÉ : une production rattachée à son type par son nom (vue étendue) garde le sien.
+        const choisi = champType ? (types.find((t) => String(t.id) === String(champType.value)) || {}).id : undefined;
+        const type = (choisi !== undefined && String(choisi) !== String(_typeActuel(c.production, types))) ? choisi : undefined;
+        const champDate = document.getElementById('vs-production-date');
+        const modifiee = D().colonneModifiee(c.production, { titre, date: champDate ? (champDate.value || '') : undefined, type, maintenant: new Date().toISOString() });
         const ecrit = await window.modifierEtAnnoncer(cle('productions'), (lues) => (lues || []).map((p) => (p && p.id === modifiee.id) ? modifiee : p), [], { geste: MOTS.colonneEnregistrer });
         if (!ecrit) return;
         const marque = document.getElementById('vs-colonne-compte');
-        if (marque && _marqueOfferte(c.groupe) && !(await _ecrireCompte(c, marque.checked))) return;
+        if (marque && _marqueOfferte(c.groupe, c.production) && !(await _ecrireCompte(c, marque.checked))) return;
         fermerProduction();
         _rendreResultats();
+    }
+
+    /**
+     * Ce que porte une colonne : ses résultats et ses évaluations, ses fichiers (`compterEmploisProduction`, la garde de la vue
+     * étendue), et les fichiers de la CORBEILLE, qu'on peut encore restaurer avec leur production (relecture neuve, 10 nov. 2026).
+     */
+    function _emploisDeLaColonne(id) {
+        const nb = window.compterEmploisProduction(id);
+        const corbeille = (db.getSync(cle('corbeilleFichiers'), []) || []).filter((f) => f && f.productionId === id).length;
+        return { evaluations: nb.evaluations, copies: nb.copies + corbeille, total: nb.total + corbeille };
+    }
+
+    /** Dit qu'une colonne pleine ne se retire pas, et propose « ne compte pas ». @returns {boolean} vrai si elle est pleine */
+    function _direColonnePleine(c) {
+        const emplois = _emploisDeLaColonne(c.production.id);
+        if (emplois.total === 0) return false;
+        const proposer = (_marqueOfferte(c.groupe, c.production) && !_exclues(c.groupe).has(c.production.id))
+            ? `<p class="vs-gestes"><button type="button" class="btn btn-secondaire" data-action="VueSimple.colonneNeComptePas">${esc(MOTS.colonneMarquerHors)}</button></p>` : '';
+        _direAuFormulaire(`<p class="vs-erreur" role="alert">${esc(MOTS.colonnePleine(emplois))}</p>${proposer}`);
+        return true;
     }
 
     /**
@@ -1259,20 +1318,23 @@
     async function retirerColonne() {
         const c = _colonneOuverte();
         if (!c) { fermerProduction(); return; }
-        const emplois = window.compterEmploisProduction(c.production.id);
-        if (emplois.total > 0) {
-            const proposer = (_marqueOfferte(c.groupe) && !_exclues(c.groupe).has(c.production.id))
-                ? `<p class="vs-gestes"><button type="button" class="btn btn-secondaire" data-action="VueSimple.colonneNeComptePas">${esc(MOTS.colonneMarquerHors)}</button></p>` : '';
-            _direAuFormulaire(`<p class="vs-erreur" role="alert">${esc(MOTS.colonnePleine(emplois))}</p>${proposer}`);
+        if (_direColonnePleine(c)) return;
+        // Vide, la colonne se retire après un second geste : elle peut porter des réglages de la vue étendue qu'on ne voit pas ici.
+        if (_retraitDemande !== c.production.id) {
+            _retraitDemande = c.production.id;
+            _direAuFormulaire(`<div class="vs-question" role="alertdialog"><p>${esc(MOTS.colonneRetirerQuestion(c.production.titre || ''))}</p>
+                <p class="vs-gestes"><button type="button" class="btn btn-principal" data-action="VueSimple.retirerColonne">${esc(MOTS.colonneRetirerOui)}</button>
+                    <button type="button" class="btn btn-secondaire" data-action="VueSimple.fermerProduction">${esc(MOTS.productionAnnuler)}</button></p></div>`);
             return;
         }
+        _retraitDemande = null;
         const id = c.production.id;
         const ecrit = await window.modifierEtAnnoncer(cle('productions'), (lues) => {
             // La garde se relit À L'INSTANT DE L'ÉCRITURE : un résultat saisi entre le clic et ici garde sa colonne.
-            if (window.compterEmploisProduction(id).total > 0) return undefined;
+            if (_emploisDeLaColonne(id).total > 0) return undefined;
             return (lues || []).filter((p) => !p || p.id !== id);
         }, [], { geste: MOTS.colonneRetirer });
-        if (!ecrit) return;
+        if (!ecrit) { _direColonnePleine(c); return; }   // refusé à l'instant de l'écriture : l'écran dit pourquoi
         if (c.pratique && c.pratique.configuration && _exclues(c.groupe).has(id)) await _ecrireCompte(c, true);   // l'exclusion d'une colonne partie ne reste pas
         fermerProduction();
         _rendreResultats();
@@ -1281,7 +1343,7 @@
     /** Proposé au refus d'un retrait : la colonne pleine reste, et ne compte plus dans la note. */
     async function colonneNeComptePas() {
         const c = _colonneOuverte();
-        if (!c || !_marqueOfferte(c.groupe)) return;
+        if (!c || !_marqueOfferte(c.groupe, c.production)) return;
         if (!(await _ecrireCompte(c, false))) return;
         fermerProduction();
         _rendreResultats();

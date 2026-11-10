@@ -271,9 +271,9 @@ describe('F. La pratique se règle : les niveaux, les types, les paliers', () =>
     it('l\'échelle née avec la pratique est UNE COPIE à elle, nommée « Mes niveaux » ; l\'échelle de départ n\'est pas touchée', () => {
         const avant = JSON.stringify(DEPART);
         const p = std();
-        const r = D.echelleReglee(DEPART, p, D.brouillonDeLaPratique(p, DEPART).niveaux, { idNeuf: 'ECH_1', maintenant: 'm' });
+        const r = D.echelleReglee(DEPART, p, D.brouillonDeLaPratique(p, DEPART).niveaux, { idNeuf: 'ECH_1', maintenant: 'm', naissance: true });
         expect(r.copiee).toBe(true);
-        expect(r.echelle).toMatchObject({ id: 'ECH_1', nom: 'Mes niveaux', pratiqueId: 'PRAT_1' });
+        expect(r.echelle).toMatchObject({ id: 'ECH_1', nom: 'Mes niveaux', pratiqueId: 'PRAT_1', origines: [] });   // à la naissance, aucune origine : l'échelle de départ est celle d'autres colonnes
         expect(r.echelle.nom).not.toMatch(/IDME|départ/i);
         expect(r.echelle.niveaux).toEqual(DEPART.niveaux);   // même départ : lettres, noms, valeurs, bornes, couleurs
         expect(JSON.stringify(DEPART)).toBe(avant);
@@ -291,7 +291,10 @@ describe('F. La pratique se règle : les niveaux, les types, les paliers', () =>
         const b = D.brouillonDeLaPratique(p, aElle).niveaux;
         expect(D.echelleReglee(aElle, p, b, { idNeuf: 'ECH_2', maintenant: 'm', lueAilleurs: false })).toMatchObject({ copiee: false, echelle: { id: 'ECH_1' } });
         const r = D.echelleReglee(aElle, p, b, { idNeuf: 'ECH_2', maintenant: 'm', lueAilleurs: true });
-        expect(r).toMatchObject({ copiee: true, echelle: { id: 'ECH_2', pratiqueId: 'PRAT_1', copieDe: 'ECH_1' } });   // `copieDe` : les résultats d'avant portent encore ECH_1
+        expect(r).toMatchObject({ copiee: true, echelle: { id: 'ECH_2', pratiqueId: 'PRAT_1', origines: ['ECH_1'] } });   // les résultats d'avant portent encore ECH_1
+        // Copiée une seconde fois, elle garde TOUTES ses origines : les résultats de la première ne sont pas perdus de vue.
+        const r3 = D.echelleReglee(r.echelle, p, b, { idNeuf: 'ECH_3', maintenant: 'm', lueAilleurs: true });
+        expect(r3.echelle.origines).toEqual(['ECH_1', 'ECH_2']);
     });
 
     it('une pratique qui lit une échelle du trimestre : au premier réglage, l\'échelle est copiée, jamais modifiée', () => {
@@ -345,10 +348,11 @@ describe('F. La pratique se règle : les niveaux, les types, les paliers', () =>
             e('E4', { groupeCoursId: 'GC_AUTRE' }),                                        // un groupe d'une autre pratique
             e('E5', { echelleId: 'ECH_AUTRE' }),                                           // une autre échelle (celle d'une production)
             e('E6', { remplaceeParId: 'E1' }), e('E7', { echelleId: 'E_ORIGINE', groupeCoursId: 'GC_B' }),   // E7 : saisi avant la copie
-            e('E8', { groupeCoursId: undefined, coursId: 'c-a' })];
-        const c = { idsEchelle: ['ECH_1', 'E_ORIGINE'], niveaux, groupes: ['GC_A', 'GC_B'], cours: ['c-a', 'c-b'] };
+            e('E8', { groupeCoursId: undefined, coursId: 'c-a' }),
+            e('E9', { echelleId: 'E_ORIGINE', productionId: 'P_PROPRE' })];                // une colonne qui a SON échelle : elle lit toujours l'origine, où M vaut 75
+        const c = { idsEchelle: ['ECH_1', 'E_ORIGINE'], niveaux, groupes: ['GC_A', 'GC_B'], cours: ['c-a', 'c-b'], colonnesAEchellePropre: ['P_PROPRE'] };
         const lot = D.resultatsAMettreAJour(stock, c);
-        expect(lot).toEqual([{ id: 'E1', avant: 75, apres: 90 }, { id: 'E7', avant: 75, apres: 90 }, { id: 'E8', avant: 75, apres: 90 }]);
+        expect(lot).toEqual([{ id: 'E1', niveau: 'M', avant: 75, apres: 90 }, { id: 'E7', niveau: 'M', avant: 75, apres: 90 }, { id: 'E8', niveau: 'M', avant: 75, apres: 90 }]);
         const apres = D.appliquerMiseAJour(stock, lot);
         expect(apres).toHaveLength(stock.length);   // aucun résultat créé ni effacé
         apres.forEach((x, i) => {
@@ -358,12 +362,17 @@ describe('F. La pratique se règle : les niveaux, les types, les paliers', () =>
         // Un résultat changé depuis le compte n'est pas touché.
         const change = stock.map((x) => (x.id === 'E1' ? Object.assign({}, x, { noteFinale: 40, niveauFinal: 'I' }) : x));
         expect(D.appliquerMiseAJour(change, lot).find((x) => x.id === 'E1').noteFinale).toBe(40);
+        // Ni un résultat ressaisi sous un autre niveau qui porterait, par hasard, la même valeur qu'avant.
+        const autreNiveau = stock.map((x) => (x.id === 'E1' ? Object.assign({}, x, { niveauFinal: 'D' }) : x));
+        expect(D.appliquerMiseAJour(autreNiveau, lot).find((x) => x.id === 'E1').noteFinale).toBe(75);
     });
 
     it('une colonne : renommer, redater, retyper ne touche que ces champs ; « compte dans la note » est le champ de la vue étendue', () => {
         const prod = { id: 'PROD_1', titre: 'Production 1', type: 'autre', dateEcheance: '2026-11-02', coursId: 'C1', numero: 3, description: 'x' };
         expect(D.colonneModifiee(prod, { titre: '  Analyse 1 ', date: '2026-11-09', maintenant: 'm' })).toEqual(Object.assign({}, prod, { titre: 'Analyse 1', dateEcheance: '2026-11-09', dateModification: 'm' }));
         expect(D.colonneModifiee(prod, { titre: 'X', date: '', type: 2, maintenant: 'm' }).type).toBe(2);
+        // Un type qu'on n'a pas changé, une date qui ne se règle pas ici (échéances par groupe) : non écrits.
+        expect(D.colonneModifiee(prod, { titre: 'X', maintenant: 'm' })).toMatchObject({ type: 'autre', dateEcheance: '2026-11-02' });
         const p = std();
         const hors = D.poserCompte(p, 'PROD_1', false);
         expect(hors.configuration.productionsExclues).toEqual(['PROD_1']);

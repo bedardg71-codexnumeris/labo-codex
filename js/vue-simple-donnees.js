@@ -365,24 +365,28 @@
     /**
      * Les résultats saisis avec une ancienne valeur.
      * @param {Array} evaluations - le stock du trimestre
-     * @param {{idsEchelle: string[], niveaux: Array, groupes: string[], cours: string[]}} c - l'échelle de la pratique (et celle
-     *        dont elle est la copie), ses niveaux d'aujourd'hui, les groupes qui ont cette pratique et leurs cours
-     * @returns {Array<{id: string, avant: number, apres: number}>}
+     * @param {{idsEchelle: string[], niveaux: Array, groupes: string[], cours: string[], colonnesAEchellePropre: string[]}} c -
+     *        l'échelle de la pratique (et celles dont elle est la copie), ses niveaux d'aujourd'hui, les groupes qui ont
+     *        cette pratique et leurs cours, et les productions qui ont LEUR échelle (leurs résultats ne suivent pas celle de
+     *        la pratique, même si elles portent le même identifiant d'origine)
+     * @returns {Array<{id: string, niveau: string, avant: number, apres: number}>}
      */
     function resultatsAMettreAJour(evaluations, c) {
         const valeurs = new Map((c.niveaux || []).map((n) => [String(n.code), Number(n.valeurCalcul)]));
         const duGroupe = (e) => (e.groupeCoursId ? c.groupes.indexOf(e.groupeCoursId) >= 0 : c.cours.indexOf(e.coursId) >= 0);
+        const propres = c.colonnesAEchellePropre || [];
         return (evaluations || []).filter((e) => e && e.sansGrille === true && !e.remplaceeParId && typeof e.noteFinale === 'number'
-            && c.idsEchelle.indexOf(e.echelleId) >= 0 && duGroupe(e) && valeurs.has(String(e.niveauFinal)) && valeurs.get(String(e.niveauFinal)) !== e.noteFinale)
-            .map((e) => ({ id: e.id, avant: e.noteFinale, apres: valeurs.get(String(e.niveauFinal)) }));
+            && c.idsEchelle.indexOf(e.echelleId) >= 0 && propres.indexOf(e.productionId) < 0 && duGroupe(e)
+            && valeurs.has(String(e.niveauFinal)) && valeurs.get(String(e.niveauFinal)) !== e.noteFinale)
+            .map((e) => ({ id: e.id, niveau: String(e.niveauFinal), avant: e.noteFinale, apres: valeurs.get(String(e.niveauFinal)) }));
     }
 
-    /** Écrit la valeur d'aujourd'hui dans ces résultats, et rien d'autre. Un résultat qui a changé depuis le compte n'est pas touché. */
+    /** Écrit la valeur d'aujourd'hui dans ces résultats, et rien d'autre. Un résultat qui a changé depuis le compte (sa valeur, ou son niveau) n'est pas touché. */
     function appliquerMiseAJour(evaluations, lot) {
         const parId = new Map((lot || []).map((x) => [x.id, x]));
         return (evaluations || []).map((e) => {
             const x = e && parId.get(e.id);
-            return (x && e.sansGrille === true && e.noteFinale === x.avant) ? Object.assign({}, e, { noteFinale: x.apres }) : e;
+            return (x && e.sansGrille === true && e.noteFinale === x.avant && String(e.niveauFinal) === x.niveau) ? Object.assign({}, e, { noteFinale: x.apres }) : e;
         });
     }
 
@@ -390,8 +394,9 @@
 
     /** Une colonne renommée, redatée, retypée : ces trois champs et la date de modification ; le reste de la production ne bouge pas. */
     function colonneModifiee(production, { titre, date, type, maintenant }) {
-        const p = Object.assign({}, production, { titre: String(titre || '').trim(), dateEcheance: date || '', dateModification: maintenant });
-        if (type !== undefined && type !== null && type !== '') p.type = type;
+        const p = Object.assign({}, production, { titre: String(titre || '').trim(), dateModification: maintenant });
+        if (date !== undefined) p.dateEcheance = date || '';   // `undefined` : la date ne se règle pas ici (échéances par groupe)
+        if (type !== undefined && type !== null && type !== '') p.type = type;   // `undefined` : le type n'a pas été changé
         return p;
     }
 
@@ -413,13 +418,16 @@
      * des productions ou des grilles peuvent lire aussi : elle n'est jamais modifiée).
      * @returns {{echelle: Object, copiee: boolean}}
      */
-    function echelleReglee(echelle, pratique, niveauxDuBrouillon, { idNeuf, maintenant, lueAilleurs }) {
+    function echelleReglee(echelle, pratique, niveauxDuBrouillon, { idNeuf, maintenant, lueAilleurs, naissance }) {
         // À ELLE SEULE : née avec cette pratique ET lue par personne d'autre (`lueAilleurs` : une autre pratique — une
         // copie faite en vue étendue garde le même identifiant d'échelle —, ou une production). Sinon, on copie.
         const propre = !!echelle && echelle.pratiqueId === pratique.id && !lueAilleurs;
-        // `copieDe` : l'échelle d'où vient la copie. Les résultats déjà saisis la portent encore ; c'est par elle que le
-        // tableau pose le signe « ≠ » et que le retrait d'un niveau utilisé reste refusé (relecture neuve, 10 nov. 2026).
-        const base = propre ? _copie(echelle) : { id: idNeuf, nom: NOM_ECHELLE, pratiqueId: pratique.id, copieDe: echelle ? echelle.id : null, dansBibliotheque: true, verrouille: false, dateCreation: maintenant };
+        // `origines` : les échelles d'où celle-ci a été COPIÉE AU RÉGLAGE, de la plus ancienne à la plus récente. Les résultats
+        // de la pratique saisis avant la copie portent encore leur identifiant : c'est par elles que le tableau pose le signe
+        // « ≠ », que le retrait d'un niveau utilisé reste refusé et que « Mettre à jour » les retrouve. À la NAISSANCE d'une
+        // pratique, aucune origine : aucun résultat ne peut la précéder, et l'échelle de départ est celle d'autres colonnes.
+        const origines = (naissance || !echelle) ? [] : (Array.isArray(echelle.origines) ? echelle.origines : []).concat([echelle.id]);
+        const base = propre ? _copie(echelle) : { id: idNeuf, nom: NOM_ECHELLE, pratiqueId: pratique.id, origines, dansBibliotheque: true, verrouille: false, dateCreation: maintenant };
         base.niveaux = niveauxRegles(echelle ? echelle.niveaux : [], niveauxDuBrouillon);
         base.dateModification = maintenant;
         return { echelle: base, copiee: !propre };

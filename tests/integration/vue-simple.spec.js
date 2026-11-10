@@ -650,9 +650,9 @@ test.describe('Vue simple · les seuils, la mise à jour des valeurs, les colonn
             const gc = window.db.getSync('groupeCoursActif', null);
             const p = window.db.getSync(window.cle('pratiquesConfigurables'), []).find((x) => x.id === gc.pratiqueId);
             const e = window.db.getSync(window.cle('echellesTemplates'), []).find((x) => x.id === p.configuration.echelleId);
-            return [84, 85, 90, 100].map((pct) => window.niveauDuPourcentage(pct, e.niveaux));   // la conversion d'une évaluation avec grille
+            return [84, 85, 90, 100, 101, 150].map((pct) => window.niveauDuPourcentage(pct, e.niveaux));   // la conversion d'une évaluation avec grille
         });
-        expect(await convertir()).toEqual(['M', 'E', 'E', 'E']);
+        expect(await convertir()).toEqual(['M', 'E', 'E', 'E', 'E', 'E']);
         await regler(page, 'niveaux');
         await expect(page.locator('#vs-bloc-niveaux .vs-note')).toHaveText('Chaque niveau a une lettre, un nom et une valeur. La note se construit avec ces valeurs.');
         await rangee(page, 4).locator('.vs-n-valeur').fill('95');   // « Étendu » : 100 → 95
@@ -666,7 +666,7 @@ test.describe('Vue simple · les seuils, la mise à jour des valeurs, les colonn
         await enregistrerLeReglage(page, 'Niveaux enregistrés.');
         const e = await echelle(page);
         expect(e.niveaux.map((n) => [n.code, n.valeurCalcul, n.min, n.max])).toEqual([['PS', 0, 0, 39.99], ['I', 40, 40, 64.99], ['D', 65, 65, 74.99], ['M', 75, 75, 84.99], ['E', 95, 85, 100], ['X', 110, undefined, undefined]]);
-        expect(await convertir()).toEqual(['M', 'E', 'E', 'E']);   // la copie à 90 % garde « Étendu » ; « X », sans seuils, ne reçoit aucun pourcentage
+        expect(await convertir()).toEqual(['M', 'E', 'E', 'E', 'E', 'E']);   // la copie à 90 % garde « Étendu » ; « X », sans seuils, ne reçoit aucun pourcentage, même hors de toute plage
         await allerA(page, 'resultats');
         await ajouterProduction(page, 'Production 1', '2026-11-02');
         await ajouterProduction(page, 'Production 2', '2026-11-09');
@@ -755,6 +755,14 @@ test.describe('Vue simple · les seuils, la mise à jour des valeurs, les colonn
         await page.locator('#vs-bloc-niveaux .vs-niveau-rangee').nth(1).locator('.vs-n-valeur').fill('90');
         await enregistrerLeReglage(page, 'Niveaux enregistrés.');
         await expect(page.locator('.vs-question #vs-question-texte')).toHaveText('2 résultats ont été saisis avec les anciennes valeurs. Les mettre à jour ? Ils sont dans les 2 groupes qui ont cette pratique.');
+        // La question est celle de CETTE pratique : elle ne suit pas un changement de groupe vers... le même écran d'un autre groupe.
+        await ecran(page, 'pratique').locator('.vs-select').selectOption('GC_B');
+        await expect(page.locator('.vs-question')).toHaveCount(0);
+        expect(await lire()).toBe(avant);
+        await ecran(page, 'pratique').locator('.vs-select').selectOption('GC_A');
+        await regler(page, 'niveaux');
+        await page.locator('#vs-bloc-niveaux .vs-niveau-rangee').nth(1).locator('.vs-n-valeur').fill('91');
+        await enregistrerLeReglage(page, 'Niveaux enregistrés.');
         await page.locator('[data-action="VueSimple.garderValeurs"]').click();
         await expect(page.locator('.vs-question')).toHaveCount(0);
         expect(await lire()).toBe(avant);   // « Garder » n'écrit rien
@@ -768,6 +776,25 @@ test.describe('Vue simple · les seuils, la mise à jour des valeurs, les colonn
         await page.locator('[data-action="VueSimple.mettreAJour"]').click();
         await expect(ecran(page, 'pratique').locator('.vs-succes')).toContainText('2 résultats mis à jour.');
         expect(await page.evaluate(() => window.db.getSync('avs3_evaluationsSauvegardees', []).map((e) => [e.id, e.niveauFinal, e.noteFinale]))).toEqual([['EA1', 'M', 95], ['EB1', 'M', 95]]);
+        // UN GESTE NE S'ANNULE QUE LÀ OÙ IL A ÉTÉ FAIT. Le lot vaut pour les deux groupes de la pratique : il s'annule depuis l'un d'eux.
+        await allerA(page, 'resultats');
+        await expect(page.locator('#tn-annuler')).toBeEnabled();
+        // Une case saisie dans le groupe A ne s'annule pas depuis le tableau du groupe B.
+        await caseTn(page, 1, 1).focus();
+        await page.keyboard.press('i');
+        await expect(page.locator('#tn-annuler')).toBeEnabled();
+        await ecran(page, 'resultats').locator('.vs-select').selectOption('GC_B');
+        await expect(page.locator('#vs-tableau-hote .tn-tableau')).toBeVisible();
+        await expect(page.locator('#tn-annuler')).toBeDisabled();
+        const dansB = await lire();
+        await page.keyboard.press('Control+z');
+        expect(await lire()).toBe(dansB);
+        // Ni depuis la vue étendue.
+        await basculer(page, 'etendue');
+        await page.evaluate(() => { window.naviguerVers('evaluations', 'liste'); window.TableauNotation.afficher(); });
+        await expect(page.locator('#tableau-notation-hote #tn-annuler')).toBeDisabled();
+        expect(await page.evaluate(() => window.TableauNotation.annuler())).toBe('rien');
+        expect(await lire()).toBe(dansB);
         expect(erreurs).toEqual([]);
     });
 
@@ -830,7 +857,11 @@ test.describe('Vue simple · les seuils, la mise à jour des valeurs, les colonn
         // Une colonne vide se retire, et elle seule.
         await ajouterProduction(page, 'Colonne de trop', '');
         await page.locator('#vs-tableau-hote .tn-production-regler', { hasText: 'Colonne de trop' }).click();
-        await page.locator('[data-action="VueSimple.retirerColonne"]').click();
+        await page.locator('#vs-production-formulaire > .vs-gestes [data-action="VueSimple.retirerColonne"]').click();
+        // Vide, elle part au second geste : la question d'abord, rien n'est encore écrit.
+        await expect(page.locator('#vs-production-retour .vs-question p').first()).toHaveText('Retirer la colonne « Colonne de trop » ? Elle ne porte aucun résultat.');
+        await expect(page.locator('#vs-tableau-hote .tn-production-regler')).toHaveCount(4);
+        await page.locator('#vs-production-retour [data-action="VueSimple.retirerColonne"]').click();
         await expect(page.locator('#vs-tableau-hote .tn-production-regler')).toHaveText(['Production 1', 'Production 2', 'Production 3']);
         expect(await lire()).toBe(avant);
         // Un fichier suffit à la garder (aucun résultat, mais une copie déposée en vue étendue).
@@ -843,6 +874,58 @@ test.describe('Vue simple · les seuils, la mise à jour des valeurs, les colonn
         await page.locator('[data-action="VueSimple.retirerColonne"]').click();
         await expect(page.locator('#vs-production-retour .vs-erreur')).toHaveText('Cette colonne porte 1 fichier : elle ne se retire pas. Rien n’a été effacé.');
         await expect(page.locator('#vs-tableau-hote .tn-production-regler')).toHaveCount(4);
+        // Un fichier à la CORBEILLE (encore restaurable) la garde aussi.
+        await page.locator('[data-action="VueSimple.fermerProduction"]').click();
+        await ajouterProduction(page, 'Colonne à la corbeille', '');
+        await page.evaluate(async () => {   // security-ok: fixture fictive du banc
+            const p = window.db.getSync(window.cle('productions'), []).find((x) => x.titre === 'Colonne à la corbeille');
+            await window.db.modifier(window.cle('corbeilleFichiers'), (lus) => (lus || []).concat([{ id: 'F_CORBEILLE', productionId: p.id, etudiantDA: '9990002', nom: 'copie-fictive.pdf' }]), []);
+        });
+        await page.locator('#vs-tableau-hote .tn-production-regler', { hasText: 'Colonne à la corbeille' }).click();
+        await page.locator('[data-action="VueSimple.retirerColonne"]').click();
+        await expect(page.locator('#vs-production-retour .vs-erreur')).toHaveText('Cette colonne porte 1 fichier : elle ne se retire pas. Rien n’a été effacé.');
+        await expect(page.locator('#vs-tableau-hote .tn-production-regler')).toHaveCount(5);
+        expect(erreurs).toEqual([]);
+    });
+
+    test('une colonne venue de la vue étendue : son type rattaché par le nom n\'est pas réécrit quand on la renomme ; une date par groupe ne se règle pas ici ; la terminale n\'offre pas « compte dans la note »', async ({ page }) => {
+        test.setTimeout(90000);
+        const erreurs = await ouvrir(page);
+        await collerLaClasse(page);
+        await choisirLeModele(page, 'SPE-simple');
+        await page.evaluate(async () => {   // security-ok: fixture fictive du banc
+            const gc = window.db.getSync(window.cle('groupesCours'), [])[0];
+            await window.db.modifier(window.cle('productions'), (lues) => (lues || []).concat([
+                { id: 'PX1', titre: 'Examen de la vue étendue', type: 'examen', numero: 1, coursId: gc.coursId, dateEcheance: '2026-10-01', echeancesParGroupe: { [gc.id]: { date: '2026-10-15', assignee: true } } }]), []);
+        });
+        await allerA(page, 'resultats');
+        await page.locator('#vs-tableau-hote .tn-production-regler', { hasText: 'Examen de la vue étendue' }).click();
+        await expect(page.locator('#vs-production-type')).toHaveValue('2');   // rattachée à « Examen » par son nom
+        await expect(page.locator('#vs-production-date')).toHaveCount(0);     // sa date dépend du groupe : elle ne se règle pas ici
+        await page.fill('#vs-production-nom', 'Examen renommé');
+        await page.locator('[data-action="VueSimple.enregistrerColonne"]').click();
+        await expect(page.locator('#vs-tableau-hote .tn-production-regler')).toHaveText(['Examen renommé']);
+        const p = await page.evaluate(() => window.db.getSync(window.cle('productions'), []).find((x) => x.id === 'PX1'));
+        expect(p).toMatchObject({ titre: 'Examen renommé', type: 'examen', dateEcheance: '2026-10-01' });   // ni le type ni la date n'ont été réécrits
+        expect(Object.values(p.echeancesParGroupe)[0]).toEqual({ date: '2026-10-15', assignee: true });
+        expect(erreurs).toEqual([]);
+    });
+
+    test('en standards, la production terminale n\'offre pas « compte dans la note » : elle compte à part', async ({ page }) => {
+        const erreurs = await ouvrir(page);
+        await novice(page);
+        await page.evaluate(async () => {   // security-ok: fixture fictive du banc
+            const gc = window.db.getSync(window.cle('groupesCours'), [])[0];
+            await window.db.modifier(window.cle('productions'), (lues) => (lues || []).concat([{ id: 'PT1', titre: 'Terminale fictive', type: 'terminale', ponderation: 40, numero: 9, coursId: gc.coursId }]), []);
+        });
+        await allerA(page, 'accueil');
+        await allerA(page, 'resultats');
+        await page.locator('#vs-tableau-hote .tn-production-regler', { hasText: 'Terminale fictive' }).click();
+        await expect(page.locator('#vs-production-nom')).toHaveValue('Terminale fictive');
+        await expect(page.locator('#vs-colonne-compte')).toHaveCount(0);
+        await page.locator('[data-action="VueSimple.fermerProduction"]').click();
+        await page.locator('#vs-tableau-hote .tn-production-regler', { hasText: 'Production 1' }).click();
+        await expect(page.locator('#vs-colonne-compte')).toBeChecked();   // les autres l'offrent
         expect(erreurs).toEqual([]);
     });
 
