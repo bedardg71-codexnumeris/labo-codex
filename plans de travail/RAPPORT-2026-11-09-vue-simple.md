@@ -6,6 +6,54 @@ Consigne de Cowork du 9 nov. 2026, 17 h 40. Branche `lot/vue-simple`, partie de 
 
 ---
 
+## 10 NOV., 13 H 20 — LA LISTE DE LÉA, COLLÉE TELLE QUELLE (sur `main` local, rien de poussé)
+
+Défaut vécu par Grégoire à son essai (12 h 42) : la liste exportée de Léa, collée dans « Ta classe », rendait « Aucune ligne lue » et 28 lignes refusées (« le DA doit compter 7 chiffres »). Cause : la vue simple découpait la ligne elle-même et ne retirait pas l'écriture `="…"` ; le DA lu était `="2600001"`, refusé. Aucun nom réel ici ni dans les bancs.
+
+### Ce qui change à l'écran
+
+1. **Coller la liste de Léa telle quelle crée la classe.** Valeurs `="…"` ou entre guillemets, point-virgule, tabulation ou virgule, point-virgule final, lignes vides : rien à nettoyer.
+2. **La ligne de titres est reconnue et sautée ; les colonnes se prennent par leur titre** (DA, nom, prénom, dans n'importe quel ordre), les autres sont ignorées (groupe, programme, services adaptés). Sans titres, lecture par position comme avant ; « DA, nom, prénom » marche toujours.
+3. **« Inactif » : la personne est mise de côté et nommée** sous le message de succès (nom, prénom, DA). La vue étendue n'a pas de règle à l'import (mesuré, voir plus bas) : c'est la supposition de Cowork, **à confirmer par Grégoire**.
+4. **Quand aucune ligne n'est lue**, chaque cause est dite une fois, avec son nombre et une ligne en exemple, puis ce qui marche — au lieu de 28 fois la même cause.
+
+### Textes PROPOSÉS (à valider par Grégoire)
+
+- « 1 personne de ta liste a le statut « Inactif » : mise de côté. » / « 3 personnes de ta liste ont le statut « Inactif » : mises de côté. »
+- « 28 lignes : le DA doit compter 7 chiffres. Par exemple : *la ligne* »
+- « Ce qui marche : une ligne par étudiant·e, « 1234567, Tremblay, Alice », ou ta liste de Léa collée telle quelle. »
+- Inchangé, déjà validé : « Aucune ligne lue. Une ligne par étudiant·e : DA, nom, prénom. »
+
+### Mesuré
+
+- **Le lecteur de la vue étendue existait** : `decouperLigneCollee` (`js/trimestre-v2-etudiants.js`), déjà partagé avec Rencontres, retire `="…"` et les guillemets et détecte le séparateur. **La vue simple l'appelle désormais** au lieu de découper elle-même : il n'y a pas de second découpeur. Le repérage des colonnes par leur titre et le statut, eux, n'existaient nulle part : ils sont dans `analyserListeCollee` (`js/vue-simple-donnees.js`).
+- **La vue étendue n'a pas de règle « Inactif » à l'import**, et elle lit mal ce format. Vérifié en exécutant `analyserListeEtudiantsCollee` sur une liste de Léa inventée : elle lit par position (DA, groupe, nom, prénom, programme, SA), donc **le statut est rangé dans « programme »** (« Inactif » ou vide), et la personne inactive est importée comme active. **Un « Oui » dans « Services adaptés » est perdu** : la colonne 5 (le programme) est lue à la place. Supposition : la colonne SA de Léa dit « Oui » ; je n'ai pas vu de vraie liste.
+- **Le DA de Léa** : `="…"` garde les zéros en tête, et les espaces, y compris insécables, sont retirés (comme avant). Non mesuré : une liste passée par Excel puis réenregistrée. Inférence : un DA commençant par 0, s'il passe par une cellule numérique, arrive sur 6 chiffres ; il est alors refusé avec sa cause, rien n'est inventé.
+
+### La preuve
+
+- Vitest `tests/unit/vue-simple.test.js` : liste de Léa inventée (vingt lignes, une inactive, accents, trait d'union, apostrophe), un essai par séparateur (point-virgule, tabulation, virgule), Léa sans titres, colonnes dans le désordre, causes regroupées. **Vitest complet : 11 350/11 350.**
+- WebKit `tests/integration/vue-simple.spec.js`, « la liste de Léa, collée telle quelle » : un essai par séparateur, qui exige la classe créée (19), la personne inactive nommée et absente de la base, les 19 autres inscrites par DA, nom et prénom ; un essai pour le message quand aucune ligne n'est lue. **Fichier entier : 38/38 sous WebKit**, le format simple compris. Un seul navigateur.
+- Break-tests :
+  - Vitest : le découpage naïf d'avant remis (6 rouges), « Inactif » ignoré (5), les titres ignorés (5), les causes non regroupées (1).
+  - WebKit : le découpage d'avant et l'ancien message remis, **4 rouges sur 4**. Code restauré, contrôlé par `cmp`.
+
+### Trouvailles et leur issue
+
+- **La vue étendue lit mal la liste de Léa** (statut dans « programme », SA perdu, inactif importé comme actif). Issue : **inscrire et continuer**. Aucun symptôme vécu ; c'est à Cowork de décider s'il entre au BACKLOG.
+- **Dans mon lot, fini** :
+  - une classe CSS neuve sans règle (`vs-inactifs`) remplacée par `data-vs-liste` ;
+  - la boucle de lecture (complexité 16) coupée en `_parTitre` et `_raisonDuRefus` ;
+  - les jetons posés au jour du build (`20261109q`), convention de la sentinelle anti-cache tant que la release n'est pas faite.
+
+### Supposé
+
+- La première ligne non vide est la seule ligne de titres possible.
+- Une cellule qui vaut exactement « Inactif » signale l'inactivité. Avec titres, seule la colonne « Statut… » est lue ; sans titres, n'importe quelle colonne autre que le DA, le nom ou le prénom.
+- Un DA déjà dans la classe, au second collage, compte comme avant (« y était déjà »).
+
+---
+
 ## RELAIS DE 21 H 42 — LES PALIERS, UN TEXTE, LES ESSAIS DURCIS (10 nov. 2026)
 
 Sur les décisions de Grégoire et de Cowork du 9 nov., 21 h 42 à 21 h 43. Le lot à part (un niveau sans seuils, une note au-dessus de 100, en vue étendue) est sur sa branche, `lot/niveau-sans-seuils`, avec son rapport à lui.

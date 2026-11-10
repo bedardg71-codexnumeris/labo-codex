@@ -386,6 +386,63 @@ test.describe('Vue simple · le parcours d\'un nouvel arrivant', () => {
     });
 });
 
+/* ============================== LA LISTE DE LÉA ==============================
+   Retour vécu de Grégoire (10 nov. 2026, 12 h 42) : la liste exportée de Léa, collée telle quelle, rendait « Aucune ligne
+   lue » et 28 lignes refusées. Noms INVENTÉS ; la forme est celle de l'export : valeurs ="…", point-virgule final, ligne
+   de titres, colonne « Statut du cours » vide ou « Inactif ». Vingt lignes, une inactive, accents, trait d'union, apostrophe. */
+const TITRES_LEA = ['No de DA', 'Groupe', 'Nom de l\'étudiant', 'Prénom de l\'étudiant', 'Statut du cours', 'Prog.', 'Services adaptés', ''];
+const NOMS_LEA = [
+    ['Albatros', 'Ada'], ['Baobab', 'Bruno'], ['Cormoran', 'Chloé'], ['Dahlia', 'Désiré'], ['Épervier', 'Élodie'],
+    ['Fougère-Lanoix', 'Félix'], ['Goéland', 'Gaëlle'], ['D\'Hirondelle', 'Hugo'], ['Ibis', 'Inès'], ['Jacinthe', 'Jérôme'],
+    ['Kiwi', 'Karine'], ['Lupin', 'Léo'], ['Mélèze', 'Maëlle'], ['Narval', 'Noé'], ['Orme', 'Océane'],
+    ['Pélican', 'Pierre-Luc'], ['Quetzal', 'Quentin'], ['Roitelet', 'Rosalie'], ['Saule', 'Sébastien'], ['Tétras', 'Thérèse']
+];
+const daLea = (i) => '26' + String(i + 1).padStart(5, '0');
+function listeLea(sep) {
+    const v = (x) => '="' + x + '"';
+    const lignes = NOMS_LEA.map(([nom, prenom], i) => [v(daLea(i)), v('00007'), v(nom), v(prenom), i === 1 ? ' Inactif' : ' ', v(i % 2 ? '501.A0' : '241.A0'), ''].join(sep));
+    return [TITRES_LEA.join(sep)].concat(lignes).join('\r\n') + '\r\n';
+}
+
+async function collerLea(page, texte) {
+    await ecran(page, 'accueil').locator('[data-param="classe"]').click();
+    await page.fill('#vs-liste', texte);
+    await ecran(page, 'classe').locator('[data-action="VueSimple.creerClasse"]').click();
+}
+
+const elevesInscrits = (page) => page.evaluate(() => (window.db.getSync(window.cle('groupeEtudiants'), []) || []).map((e) => `${e.da} ${e.nom} ${e.prenom}`));
+
+test.describe('Vue simple · la liste de Léa, collée telle quelle', () => {
+    for (const [nomSep, sep] of [['point-virgule', ';'], ['tabulation', '\t'], ['virgule', ',']]) {
+        test(`séparée par ${nomSep} : la classe est créée, la personne inactive mise de côté et nommée`, async ({ page }) => {
+            const erreurs = await ouvrir(page);
+            await collerLea(page, listeLea(sep));
+            await expect(ecran(page, 'classe').locator('.vs-succes')).toHaveText('Classe créée : 19 étudiant·es.');
+            const inactifs = ecran(page, 'classe').locator('[data-vs-liste="inactifs"]');
+            await expect(inactifs.locator('p')).toHaveText('1 personne de ta liste a le statut « Inactif » : mise de côté.');
+            await expect(inactifs.locator('li')).toHaveText([`Baobab Bruno ${daLea(1)}`]);
+            const inscrits = await elevesInscrits(page);
+            expect(inscrits).toHaveLength(19);
+            expect(inscrits).not.toContain(`${daLea(1)} Baobab Bruno`);
+            NOMS_LEA.forEach(([nom, prenom], i) => { if (i !== 1) expect(inscrits).toContain(`${daLea(i)} ${nom} ${prenom}`); });
+            expect(erreurs).toEqual([]);
+        });
+    }
+
+    test('aucune ligne lue : la cause est dite une fois, avec un exemple, et ce qui marche', async ({ page }) => {
+        const erreurs = await ouvrir(page);
+        const vingtHuit = Array.from({ length: 28 }, (_, i) => `="26${String(i).padStart(4, '0')}";="Albatros";="Ada"`).join('\n');
+        await collerLea(page, vingtHuit);
+        const retour = ecran(page, 'classe');
+        await expect(retour.locator('.vs-erreur')).toHaveText('Aucune ligne lue. Une ligne par étudiant·e : DA, nom, prénom.');
+        await expect(retour.locator('.vs-refusees li')).toHaveCount(1);
+        await expect(retour.locator('.vs-refusees li')).toContainText('28 lignes : le DA doit compter 7 chiffres. Par exemple : ="260000";="Albatros";="Ada"');
+        await expect(retour.locator('.vs-refusees > p')).toHaveText('Ce qui marche : une ligne par étudiant·e, « 1234567, Tremblay, Alice », ou ta liste de Léa collée telle quelle.');
+        expect(await elevesInscrits(page)).toEqual([]);
+        expect(erreurs).toEqual([]);
+    });
+});
+
 test.describe('Vue simple · les gestes tiennent', () => {
     test('deux clics de suite ne créent ni deux cours, ni deux pratiques, ni deux colonnes', async ({ page }) => {
         const erreurs = await ouvrir(page);

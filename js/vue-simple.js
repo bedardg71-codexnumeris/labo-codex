@@ -56,6 +56,12 @@
         // VALIDÉES par Grégoire, mot pour mot (9 nov. 2026, 20 h 49) : deux tournures, à la place des accords empilés.
         classeAucunLu: 'Aucune ligne lue. Une ligne par étudiant·e : DA, nom, prénom.',
         classeRefusees: (n) => `${n} ligne${n > 1 ? 's' : ''} non lue${n > 1 ? 's' : ''} :`,
+        // PROPOSÉ par Claude Code (10 nov. 2026, liste de Léa) : la cause dite une fois, un exemple, ce qui marche ; les
+        // lignes mises de côté parce que leur statut dit « Inactif ». Tournures sans accord empilé (« ligne », « personne »).
+        classeCause: (n, raison) => `${n} ligne${n > 1 ? 's' : ''} : ${raison}.`,
+        classeCauseExemple: 'Par exemple :',
+        classeCeQuiMarche: 'Ce qui marche : une ligne par étudiant·e, « 1234567, Tremblay, Alice », ou ta liste de Léa collée telle quelle.',
+        classeInactifs: (n) => `${n} personne${n > 1 ? 's' : ''} de ta liste ${n > 1 ? 'ont' : 'a'} le statut « Inactif » : mise${n > 1 ? 's' : ''} de côté.`,
         classeCreee: (n) => `Classe créée : ${n} étudiant·e${n > 1 ? 's' : ''}.`,
         classeAjoutes: (n, deja) => `${n} étudiant·e${n > 1 ? 's' : ''} de plus dans ta classe.` + (deja ? ` ${deja} y ${deja > 1 ? 'étaient' : 'était'} déjà.` : ''),
         classeSuite: 'Choisir ma pratique',
@@ -430,6 +436,20 @@
         return `<div class="vs-refusees" role="status"><p>${esc(MOTS.classeRefusees(refusees.length))}</p><ul>${lignes}</ul></div>`;
     }
 
+    /** Aucune ligne lue : chaque cause UNE fois, avec son nombre et une ligne en exemple, puis ce qui marche. */
+    function _causesHTML(refusees) {
+        const causes = D().refusParCause(refusees).map((c) => `<li>${esc(MOTS.classeCause(c.nombre, c.raison))}
+            ${esc(MOTS.classeCauseExemple)} <span class="vs-ligne-refusee">${esc(c.exemple)}</span></li>`).join('');
+        return `<div class="vs-refusees" role="status">${causes ? `<ul>${causes}</ul>` : ''}<p>${esc(MOTS.classeCeQuiMarche)}</p></div>`;
+    }
+
+    /** Les lignes mises de côté parce que leur statut dit « Inactif » : nommées, pour qu'aucune ne disparaisse sans le dire. */
+    function _inactifsHTML(inactifs) {
+        if (!inactifs || !inactifs.length) return '';
+        const noms = inactifs.map((f) => `<li>${esc(f.nom)} ${esc(f.prenom)} <span class="vs-ligne-refusee">${esc(f.da)}</span></li>`).join('');
+        return `<div class="vs-refusees" data-vs-liste="inactifs" role="status"><p>${esc(MOTS.classeInactifs(inactifs.length))}</p><ul>${noms}</ul></div>`;
+    }
+
     function _champListeHTML(creation) {
         const nomCours = creation ? `<div class="groupe-form"><label for="vs-nom-cours">${esc(MOTS.classeNomCours)}</label>
                 <input type="text" id="vs-nom-cours" class="controle-form" maxlength="80" autocomplete="off"></div>` : '';
@@ -507,7 +527,7 @@
 
     /** Ce que la liste collée ne permet pas de faire : le message à montrer, ou null. */
     function _refusDeLaListe(lecture) {
-        if (!lecture.fiches.length) return `<p class="vs-erreur" role="alert">${esc(MOTS.classeAucunLu)}</p>${_refuseesHTML(lecture.refusees)}`;
+        if (!lecture.fiches.length) return `<p class="vs-erreur" role="alert">${esc(MOTS.classeAucunLu)}</p>${_causesHTML(lecture.refusees)}${_inactifsHTML(lecture.inactifs)}`;
         if (_demoOuverte()) return `<p class="vs-erreur" role="alert">${esc(MOTS.classeEnDemo)}</p>`;
         return null;
     }
@@ -547,7 +567,7 @@
             if (!r.ecrit) throw new Error('élèves non inscrits');
             if (!actif) await _activerGroupeNe(groupe);
             const mot = actif ? MOTS.classeAjoutes(r.ajoutes, r.deja) : MOTS.classeCreee(r.ajoutes);
-            _rendreClasse(`<p class="vs-succes" role="status">${esc(mot)}</p>${_refuseesHTML(lecture.refusees)}`);
+            _rendreClasse(`<p class="vs-succes" role="status">${esc(mot)}</p>${_refuseesHTML(lecture.refusees)}${_inactifsHTML(lecture.inactifs)}`);
         } catch (e) {
             console.error('[Vue simple] classe non créée :', e);
             dire(`<p class="vs-erreur" role="alert">${esc(MOTS.classeEchec)}</p>`);

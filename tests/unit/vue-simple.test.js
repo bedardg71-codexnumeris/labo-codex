@@ -20,7 +20,16 @@ import { tranche } from './_helpers/tranche.js';
 
 const racine = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..');
 const lire = (f) => readFileSync(path.join(racine, f), 'utf8');
-const D = chargerScript('js/vue-simple-donnees.js', {}, {}).VueSimpleDonnees;
+// La liste collée lit ses cellules par la lecture de la vue étendue (`decouperLigneCollee`, trimestre-v2-etudiants.js) :
+// le VRAI module, chargé dans le même faux window, comme index.html le charge avant la vue simple.
+const W = { addEventListener() {} };
+chargerScript('js/trimestre-v2-etudiants.js', {
+    document: { getElementById: () => null, querySelector: () => null, querySelectorAll: () => [], addEventListener() {} },
+    db: { getSync: () => [], setSync() {}, get: async () => [] }, cle: (k) => k,
+    notifications: { succes() {}, erreur() {}, warning() {} }, normaliserNumeroGroupe: (g) => String(g || '').padStart(5, '0'),
+    echapperHtml: (s) => String(s == null ? '' : s), alert() {}, confirm: () => true, setTimeout: () => 0
+}, W);
+const D = chargerScript('js/vue-simple-donnees.js', {}, W).VueSimpleDonnees;
 
 describe('A. La vue au démarrage', () => {
     it('aucun trimestre : l\'application est vide, la vue est simple', () => {
@@ -186,6 +195,62 @@ describe('C. La liste collée', () => {
     it('une liste à quatre colonnes dont la deuxième est un groupe : le groupe est écarté', () => {
         const r = D.analyserListeCollee('9990001\t00001\tAlbatros\tAda');
         expect(r.fiches).toEqual([{ da: '9990001', nom: 'Albatros', prenom: 'Ada' }]);
+    });
+
+    /* La liste de Léa (retour vécu de Grégoire, 10 nov. 2026, 12 h 42 : « Aucune ligne lue », 28 lignes refusées).
+       Noms INVENTÉS ; la forme est celle de l'export : valeurs ="…", point-virgule, point-virgule final, titres, statut. */
+    const TITRES_LEA = 'No de DA;Groupe;Nom de l\'étudiant;Prénom de l\'étudiant;Statut du cours;Prog.;Services adaptés;';
+    const NOMS_LEA = [
+        ['Albatros', 'Ada'], ['Baobab', 'Bruno'], ['Cormoran', 'Chloé'], ['Dahlia', 'Désiré'], ['Épervier', 'Élodie'],
+        ['Fougère-Lanoix', 'Félix'], ['Goéland', 'Gaëlle'], ['D\'Hirondelle', 'Hugo'], ['Ibis', 'Inès'], ['Jacinthe', 'Jérôme'],
+        ['Kiwi', 'Karine'], ['Lupin', 'Léo'], ['Mélèze', 'Maëlle'], ['Narval', 'Noé'], ['Orme', 'Océane'],
+        ['Pélican', 'Pierre-Luc'], ['Quetzal', 'Quentin'], ['Roitelet', 'Rosalie'], ['Saule', 'Sébastien'], ['Tétras', 'Thérèse']
+    ];
+    const listeLea = (sep, { inactif = 1, titres = true, final = true } = {}) => {
+        const v = (x) => '="' + x + '"';
+        const lignes = NOMS_LEA.map(([nom, prenom], i) => [v('26' + String(i + 1).padStart(5, '0')), v('00007'), v(nom), v(prenom),
+            i === inactif ? ' Inactif' : ' ', v(i % 2 ? '501.A0' : '241.A0')].join(sep) + (final ? sep : ''));
+        return (titres ? TITRES_LEA.split(';').join(sep) + '\n' : '') + lignes.join('\r\n') + '\n\n';
+    };
+
+    it('la liste de Léa, telle quelle : vingt lignes, une inactive mise de côté, les colonnes prises par leur titre', () => {
+        const r = D.analyserListeCollee(listeLea(';'));
+        expect(r.refusees).toEqual([]);
+        expect(r.fiches).toHaveLength(19);
+        expect(r.inactifs).toEqual([{ da: '2600002', nom: 'Baobab', prenom: 'Bruno' }]);
+        expect(r.fiches[0]).toEqual({ da: '2600001', nom: 'Albatros', prenom: 'Ada' });
+        expect(r.fiches.map((f) => f.nom)).toContain('Fougère-Lanoix');
+        expect(r.fiches.map((f) => f.nom)).toContain('D\'Hirondelle');
+        expect(r.fiches.find((f) => f.nom === 'Pélican').prenom).toBe('Pierre-Luc');
+    });
+
+    it.each([['point-virgule', ';'], ['tabulation', '\t'], ['virgule', ',']])('la liste de Léa, séparée par %s', (_, sep) => {
+        const r = D.analyserListeCollee(listeLea(sep));
+        expect(r.refusees).toEqual([]);
+        expect(r.fiches).toHaveLength(19);
+        expect(r.inactifs.map((f) => f.da)).toEqual(['2600002']);
+    });
+
+    it('la liste de Léa sans sa ligne de titres : lue par position, le groupe écarté, « Inactif » reconnu quand même', () => {
+        const r = D.analyserListeCollee(listeLea(';', { titres: false }));
+        expect(r.refusees).toEqual([]);
+        expect(r.fiches).toHaveLength(19);
+        expect(r.fiches[0]).toEqual({ da: '2600001', nom: 'Albatros', prenom: 'Ada' });
+        expect(r.inactifs.map((f) => f.da)).toEqual(['2600002']);
+    });
+
+    it('les colonnes se prennent par leur titre, dans n\'importe quel ordre ; les autres sont ignorées', () => {
+        const r = D.analyserListeCollee('Prénom;Programme;Nom;DA\n"Ada";"241.A0";"Albatros";"9990001"');
+        expect(r.fiches).toEqual([{ da: '9990001', nom: 'Albatros', prenom: 'Ada' }]);
+    });
+
+    it('aucune ligne lue : chaque cause est dite une fois, avec son nombre et un exemple', () => {
+        const r = D.analyserListeCollee('Albatros;Ada\nBaobab;Bruno\n123;Trop;Court\n9990001;Cormoran');
+        expect(r.fiches).toEqual([]);
+        expect(D.refusParCause(r.refusees)).toEqual([
+            { raison: D.RAISONS.da, nombre: 3, exemple: 'Albatros;Ada' },
+            { raison: D.RAISONS.incomplet, nombre: 1, exemple: '9990001;Cormoran' }
+        ]);
     });
 });
 

@@ -70,43 +70,116 @@
         double: 'ce DA est déjà dans la liste collée'
     });
 
-    function _decouper(ligne) {
-        const parSeparateur = ligne.split(/[\t;,]/).map((s) => s.trim()).filter((s) => s !== '');
-        if (parSeparateur.length >= 3) return parSeparateur;
-        // « 1234567 Tremblay Alice » : le DA, le nom (un mot), le reste est le prénom.
-        const mots = ligne.trim().split(/\s+/);
-        if (parSeparateur.length <= 1 && mots.length >= 3) return [mots[0], mots[1], mots.slice(2).join(' ')];
-        return parSeparateur.length ? parSeparateur : mots;
+    /** La valeur « Inactif » d'une colonne de statut (liste exportée de Léa, colonne « Statut du cours »). */
+    const INACTIF_RE = /^inactif$/i;
+
+    /**
+     * Les cellules d'une ligne : la lecture de la vue étendue (`decouperLigneCollee`, trimestre-v2-etudiants.js : séparateur
+     * détecté, `="…"` et guillemets retirés), pas une seconde. Les cellules vides sont GARDÉES : elles tiennent la place
+     * des colonnes repérées par leur titre.
+     */
+    function _cellules(ligne) {
+        return window.decouperLigneCollee(ligne);
     }
 
+    /** Un titre sans accents ni casse : « Prénom de l'étudiant » → « prenom de l'etudiant ». */
+    function _titre(c) {
+        return String(c || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().trim();
+    }
+
+    /** Les colonnes d'une ligne de titres (DA, nom, prénom, et le statut s'il y en a un), ou null si ce n'en est pas une. */
+    function _colonnesParTitre(cellules) {
+        if (cellules.some((c) => DA_RE.test(c.replace(/\s/g, '')))) return null;
+        const t = cellules.map(_titre);
+        const trouver = (re) => t.findIndex((x) => re.test(x));
+        const col = { da: trouver(/\bda\b|matricule/), nom: trouver(/^nom\b/), prenom: trouver(/^prenom/), statut: trouver(/^statut/) };
+        return (col.da >= 0 && col.nom >= 0 && col.prenom >= 0) ? col : null;
+    }
+
+    /** Une première ligne de titres qu'on ne sait pas répartir (« DA ; Nom » seul) : sautée quand même, comme avant. */
     function _estEntete(cellules) {
         return !/\d/.test(cellules[0] || '') && cellules.some((c) => /^(da|matricule|nom|pr[ée]nom)$/i.test(c));
     }
 
     /**
-     * Lit une liste collée : une ligne par élève, « DA, nom, prénom » (tabulation, point-virgule, virgule ou espaces). Une
-     * liste à quatre colonnes dont la deuxième est un numéro de groupe (copie d'Omnivox) est lue aussi : le groupe est écarté.
+     * Sans titres : « DA, nom, prénom » par position. Les cellules vides ne comptent pas ; une deuxième colonne qui est un
+     * numéro de groupe (Omnivox, Léa) est écartée ; une ligne sans séparateur se lit par les espaces (« 1234567 Tremblay
+     * Alice » : le DA, le nom en un mot, le reste est le prénom).
+     * @returns {{da: string, nom: string, prenom: string, autres: string[]}}
+     */
+    function _parPosition(cellules) {
+        let c = cellules.filter((s) => s !== '');
+        if (c.length === 1) {
+            const mots = c[0].split(/\s+/);
+            c = mots.length >= 3 ? [mots[0], mots[1], mots.slice(2).join(' ')] : mots;
+        }
+        const groupe = c.length >= 4 && /^\d{1,6}$/.test(c[1]) && !DA_RE.test(c[1]);
+        const [da, nom, prenom, ...autres] = groupe ? [c[0]].concat(c.slice(2)) : c;
+        return { da: da || '', nom: nom || '', prenom: prenom || '', autres };
+    }
+
+    /**
+     * Lit une liste collée, telle que l'utilisateur l'a, sans rien à nettoyer : « DA, nom, prénom » une ligne par
+     * étudiant·e (tabulation, point-virgule, virgule ou espaces), ou la liste exportée de Léa (valeurs `="…"`, point-virgule,
+     * point-virgule final, ligne de titres). Quand une ligne de titres nomme le DA, le nom et le prénom, les colonnes sont
+     * prises par leur titre et les autres ignorées. Une ligne dont le statut dit « Inactif » est mise de côté et nommée
+     * (la vue étendue n'a pas de règle à l'import : PROPOSÉ par Cowork, à confirmer par Grégoire, 10 nov. 2026).
      * Rien n'est inventé : une ligne sans DA de 7 chiffres est refusée et nommée.
-     * @returns {{fiches: Array<{da,nom,prenom}>, refusees: Array<{ligne: string, raison: string}>}}
+     * @returns {{fiches: Array<{da,nom,prenom}>, refusees: Array<{ligne: string, raison: string}>, inactifs: Array<{da,nom,prenom}>}}
      */
     function analyserListeCollee(texte) {
         const fiches = [];
         const refusees = [];
+        const inactifs = [];
         const vus = new Set();
-        String(texte || '').split(/\r?\n/).forEach((brute, i) => {
+        let colonnes = null;
+        let premiere = true;
+        String(texte || '').split(/\r?\n/).forEach((brute) => {
             const ligne = brute.trim();
             if (!ligne) return;
-            let c = _decouper(ligne);
-            if (i === 0 && _estEntete(c)) return;
-            if (c.length >= 4 && /^\d{1,6}$/.test(c[1]) && !DA_RE.test(c[1])) c = [c[0], c[2], c[3]];
-            const da = (c[0] || '').replace(/\s/g, '');
-            if (!DA_RE.test(da)) { refusees.push({ ligne, raison: RAISONS.da }); return; }
-            if (!c[1] || !c[2]) { refusees.push({ ligne, raison: RAISONS.incomplet }); return; }
-            if (vus.has(da)) { refusees.push({ ligne, raison: RAISONS.double }); return; }
+            const cellules = _cellules(ligne);
+            if (premiere) {
+                premiere = false;
+                colonnes = _colonnesParTitre(cellules);
+                if (colonnes || _estEntete(cellules.filter((s) => s !== ''))) return;
+            }
+            const lue = colonnes ? _parTitre(cellules, colonnes) : _parPosition(cellules);
+            const da = lue.da.replace(/\s/g, '');
+            const raison = _raisonDuRefus(da, lue, vus);
+            if (raison) { refusees.push({ ligne, raison }); return; }
             vus.add(da);
-            fiches.push({ da, nom: c[1], prenom: c[2] });
+            const fiche = { da, nom: lue.nom, prenom: lue.prenom };
+            (lue.autres.some((a) => INACTIF_RE.test(a.trim())) ? inactifs : fiches).push(fiche);
         });
-        return { fiches, refusees };
+        return { fiches, refusees, inactifs };
+    }
+
+    /** Avec titres : les colonnes repérées ; le statut, s'il y en a un, est la seule autre cellule lue. */
+    function _parTitre(cellules, col) {
+        const val = (i) => (i >= 0 && cellules[i]) || '';
+        return { da: val(col.da), nom: val(col.nom), prenom: val(col.prenom), autres: col.statut >= 0 ? [val(col.statut)] : [] };
+    }
+
+    /** Pourquoi une ligne n'est pas lue (DA, nom ou prénom manquant, DA déjà collé), ou null. */
+    function _raisonDuRefus(da, lue, vus) {
+        if (!DA_RE.test(da)) return RAISONS.da;
+        if (!lue.nom || !lue.prenom) return RAISONS.incomplet;
+        return vus.has(da) ? RAISONS.double : null;
+    }
+
+    /**
+     * Les refus regroupés par cause, dans l'ordre où chaque cause paraît : le nombre de lignes et la première, en exemple.
+     * Quand aucune ligne n'est lue, l'écran dit chaque cause UNE fois au lieu de la répéter à chaque ligne.
+     * @returns {Array<{raison: string, nombre: number, exemple: string}>}
+     */
+    function refusParCause(refusees) {
+        const parCause = new Map();
+        (refusees || []).forEach((r) => {
+            const c = parCause.get(r.raison);
+            if (c) c.nombre++;
+            else parCause.set(r.raison, { raison: r.raison, nombre: 1, exemple: r.ligne });
+        });
+        return Array.from(parCause.values());
     }
 
     /* ============================== CE QUI NAÎT EN COULISSE ============================== */
@@ -475,7 +548,7 @@
     window.VueSimpleDonnees = {
         VUES, CLE_CHOIX, CLE_MARQUE, ECRANS, FAMILLES, REGLES_STD, GROUPE_SIMPLE, RAISONS,
         applicationVide, vueAuDemarrage,
-        analyserListeCollee, trimestreDeLaDate, ficheEleve, groupeCoursLeger, productionLegere,
+        analyserListeCollee, refusParCause, trimestreDeLaDate, ficheEleve, groupeCoursLeger, productionLegere,
         pratiqueDepuisModele, regleStd, poserRegleStd,
         brouillonDeLaPratique, gestes, refusDesNiveaux, refusDesSpecifications, niveauxRegles, echelleReglee, niveauxChanges, poserSpecifications, NOM_ECHELLE,
         resultatsAMettreAJour, appliquerMiseAJour, colonneModifiee, poserCompte,
