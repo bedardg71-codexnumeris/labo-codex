@@ -306,6 +306,14 @@ async function etape9(page, { cap }) {
     await capture(page, DOSSIER, `p3-9-${cap}`);
     await actionDeLaListe(page, consulter);
     await expect(page.locator('#evaluations-contenu-evaluation')).toBeVisible();
+    // Groupe 3 (9 nov., WebKit) : « Consulter » montre la fiche, puis charge l'évaluation 300 ms plus tard ; un clic sur
+    // « Déverrouiller » dans l'intervalle était écrasé par le chargement (la fiche revenait verrouillée, le contour restait
+    // sur le bouton : « décalé de 15, 298 »). On attend la fin du chargement, comme evaluation-926 (verrou posé en dernier).
+    await page.waitForFunction((id) => {
+        const ec = window.evaluationEnCours;
+        const b = document.getElementById('btnVerrouillerEvaluation');
+        return !!ec && ec.idModification === id && !window._chargementsEvaluationEnCours && !!b && b.title === 'Déverrouiller l’évaluation';
+    }, c.evaluationId, { timeout: 10000 });
     await contourSur(page, '#btnVerrouillerEvaluation');   // « Déverrouiller »
     await page.click('#btnVerrouillerEvaluation');
     await contourSur(page, '#selectCartoucheEval');
