@@ -933,7 +933,9 @@ function genererInterpretationPerformance(etudiants, echelle) {
     const patterns = db.getSync(cle('indicesPatternsRaI'), null) || db.getSync('indicesPatternsRaI', {});
 
     // Classifier les étudiants par niveau IDME
-    const niveaux = echelle.niveaux.filter(n => n.code !== '0' && n.code !== 0);
+    // Lot « niveau sans seuils » (10 nov. 2026) : un niveau sans seuils ne reçoit personne (avant : la plage 0 à 100 lui
+    // était prêtée), et une note au-dessus du plus haut seuil se range dans le plus haut niveau (`niveauQuiRecoit`).
+    const niveaux = echelle.niveaux.filter(n => n.code !== '0' && n.code !== 0 && window.niveauADesSeuils(n));
     const parNiveau = {};
 
     niveaux.forEach(niveau => {
@@ -941,16 +943,8 @@ function genererInterpretationPerformance(etudiants, echelle) {
     });
 
     etudiants.forEach(etudiant => {
-        const valeurPct = etudiant.valeur * 100;
-        for (let i = niveaux.length - 1; i >= 0; i--) {
-            const niveau = niveaux[i];
-            const min = niveau.min || 0;
-            const max = niveau.max || 100;
-            if (valeurPct >= min && valeurPct <= max) {
-                parNiveau[niveau.code].push(etudiant);
-                break;
-            }
-        }
+        const niveau = window.niveauQuiRecoit(niveaux, etudiant.valeur * 100);
+        if (niveau) parNiveau[niveau.code].push(etudiant);
     });
 
     // Analyser selon les objectifs pédagogiques
@@ -1036,9 +1030,12 @@ function calculerDistributionPerformance(etudiants) {
     }
 
     // Trier les niveaux par valeur min croissante et exclure le niveau "0"
+    // Lot « niveau sans seuils » (10 nov. 2026) : seuls les niveaux qui ont leurs seuils découpent les pourcentages. Un
+    // niveau ajouté en vue simple (une valeur, pas encore de seuils) ne paraît pas dans la répartition : mesuré, il s'y
+    // rangeait en deuxième et comptait l'étudiant·e à 0.
     const niveaux = echelle.niveaux
-        .filter(n => n.code !== '0' && n.code !== 0) // Exclure niveau 0 (plagiat)
-        .sort((a, b) => (a.min || 0) - (b.min || 0));
+        .filter(n => n.code !== '0' && n.code !== 0 && window.niveauADesSeuils(n)) // Exclure niveau 0 (plagiat)
+        .sort((a, b) => (Number(a.min) || 0) - (Number(b.min) || 0));
 
 
     if (niveaux.length === 0) {
@@ -1053,19 +1050,9 @@ function calculerDistributionPerformance(etudiants) {
     });
 
     etudiants.forEach(etudiant => {
-        const valeurPct = etudiant.valeur * 100; // Convertir 0-1 en 0-100%
-
-        // Trouver le niveau correspondant
-        for (let i = niveaux.length - 1; i >= 0; i--) {
-            const niveau = niveaux[i];
-            const min = niveau.min || 0;
-            const max = niveau.max || 100;
-
-            if (valeurPct >= min && valeurPct <= max) {
-                compteurs[niveau.code]++;
-                break;
-            }
-        }
+        // Une note au-dessus du plus haut seuil (110 %) se range dans le plus haut niveau : avant, nulle part.
+        const niveau = window.niveauQuiRecoit(niveaux, etudiant.valeur * 100); // 0-1 → 0-100 %
+        if (niveau) compteurs[niveau.code]++;
     });
 
 
@@ -1073,7 +1060,8 @@ function calculerDistributionPerformance(etudiants) {
     const parts = niveaux.map(niveau => {
         const count = compteurs[niveau.code] || 0;
         // Utiliser le nom complet du niveau au lieu du code
-        return `${niveau.nom} : ${count}`;
+        // Le nom d'un niveau est saisi par l'enseignant·e (éditeur d'échelle, vue simple) et cette chaîne entre dans un innerHTML.
+        return `${echapperHtml(niveau.nom)} : ${count}`;
     });
 
     const result = parts.join(' <span class="tb-m-horizontal-6">•</span> ');

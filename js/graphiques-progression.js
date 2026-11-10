@@ -324,8 +324,10 @@ function genererZonesDepuisEchelle(echelle) {
         return [];
     }
 
-    // Trier les niveaux par min croissant
-    const niveauxTries = [...echelle.niveaux].sort((a, b) => a.min - b.min);
+    // Trier les niveaux par min croissant. Lot « niveau sans seuils » (10 nov. 2026) : un niveau sans seuils n'a pas de
+    // zone — avant, une zone aux bornes qui ne sont pas des nombres, et un tri que ces bornes faussaient.
+    const aSeuils = (n) => typeof window.niveauADesSeuils !== 'function' || window.niveauADesSeuils(n);
+    const niveauxTries = echelle.niveaux.filter(aSeuils).sort((a, b) => a.min - b.min);
 
     return niveauxTries.map(niveau => ({
         yMin: niveau.min / 100,

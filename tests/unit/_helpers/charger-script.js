@@ -148,6 +148,28 @@ export function completerJetonsResolusParDefaut(fauxWindow, cheminRelatifProjet)
     fauxWindow.poserJetonsRefusesSiAucunReglage = jetonsResolusDuMoteur.poserJetonsRefusesSiAucunReglage;
 }
 
+/**
+ * Lot « niveau sans seuils » (10 nov. 2026) — `niveauADesSeuils` et `niveauQuiRecoit` (js/echelles.js) sont lus par
+ * window.… dans la répartition du Suivi (tableau-bord-apercu.js) et, pour `niveauAuDessusDuPlusHautSeuil`, dans le niveau atteint du
+ * profil (profil-etudiant-helpers.js). Comme les jetons : les VRAIES fonctions, extraites une
+ * fois du fichier (aucune copie de la règle ici), fournies quand le harnais charge le Suivi sans echelles.js.
+ */
+let lectureDesSeuils = null;
+export function completerSeuilsParDefaut(fauxWindow, cheminRelatifProjet) {
+    const lecteur = cheminRelatifProjet.endsWith('tableau-bord-apercu.js') || cheminRelatifProjet.endsWith('profil-etudiant-helpers.js');
+    if (!lecteur || fauxWindow.niveauAuDessusDuPlusHautSeuil) return;
+    if (!lectureDesSeuils) {
+        const source = readFileSync(path.join(racineProjet, 'js/echelles.js'), 'utf8');
+        const debut = source.indexOf('function _seuilLu(v) {');
+        const fin = source.indexOf('function valeurNumeriqueDuNiveau(niveau) {', debut);
+        if (debut === -1 || fin === -1) throw new Error('completerSeuilsParDefaut : la lecture des seuils a bougé dans js/echelles.js');
+        lectureDesSeuils = new Function(source.substring(debut, fin) + '\nreturn { niveauADesSeuils, niveauQuiRecoit, niveauAuDessusDuPlusHautSeuil };')();
+    }
+    fauxWindow.niveauADesSeuils = lectureDesSeuils.niveauADesSeuils;
+    fauxWindow.niveauQuiRecoit = lectureDesSeuils.niveauQuiRecoit;
+    fauxWindow.niveauAuDessusDuPlusHautSeuil = lectureDesSeuils.niveauAuDessusDuPlusHautSeuil;
+}
+
 export function chargerScript(cheminRelatifProjet, globaux = {}, fauxWindowExistant = null) {
     const chemin = path.join(racineProjet, cheminRelatifProjet);
     const code = readFileSync(chemin, 'utf8');
@@ -310,6 +332,7 @@ export function chargerScript(cheminRelatifProjet, globaux = {}, fauxWindowExist
         fauxWindow.coursActifFaitDArtefacts = () => true;
     }
     completerJetonsResolusParDefaut(fauxWindow, cheminRelatifProjet);   // jetons par défaut (29 oct. 2026)
+    completerSeuilsParDefaut(fauxWindow, cheminRelatifProjet);          // lot « niveau sans seuils » (10 nov. 2026)
 
     // #876 (15 sept. 2026) — `sessionStorage` aussi : une file d'import persistée
     // se restaure au CHARGEMENT de travaux-import.js, donc elle doit être là avant.

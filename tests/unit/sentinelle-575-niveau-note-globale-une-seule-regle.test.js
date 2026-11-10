@@ -109,11 +109,15 @@ describe('#575 · la lettre du niveau global vient de l\'échelle, jamais d\'un 
     });
 
     it('une note hors de toutes les plages ne se rabat sur aucun niveau', () => {
-        const echelleTrouee = { id: 'E', niveaux: [{ code: 'A', nom: 'A', min: 0, max: 40 }] };
+        // ↻ Lot « niveau sans seuils » (décision de Grégoire, 9 nov. 2026, 23 h) : « hors de toutes les plages » veut dire
+        // dans un TROU entre deux plages (ou sous la plus basse). AU-DESSUS du plus haut seuil, la note se range dans le
+        // plus haut niveau — avant ce lot, cet essai tenait `null` pour 88 sur une échelle qui finit à 40.
+        const echelleTrouee = { id: 'E', niveaux: [{ code: 'A', nom: 'A', min: 0, max: 40 }, { code: 'B', nom: 'B', min: 60, max: 80 }] };
         const win = chargerHelpers({ echelle: echelleTrouee, raison: null, message: '' });
-        const lu = win.lireNiveauNoteGlobale('111', 88);
+        const lu = win.lireNiveauNoteGlobale('111', 50);
         expect(lu.niveau).toBeNull();
         expect(lu.raison).toBe('hors-echelle');
+        expect(win.lireNiveauNoteGlobale('111', 88).niveau.code).toBe('B');
     });
 
     it('SOLO explique le niveau au SURVOL, il ne le remplace pas', () => {
