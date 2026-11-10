@@ -1071,6 +1071,13 @@
 
         // Synchroniser le scroll entre colonnes gauche et droite
         requestAnimationFrame(() => initialiserSyncScrollColonnes());
+
+        // 10 nov. 2026 (rapport iPad de Grégoire) : la page se redessine sans changer de
+        // sous-section après un import ; le bandeau « Aucun travail importé » posé avant
+        // restait affiché. Il part dès que le groupe a des copies (etats-vides.js, exception 3).
+        if (window.etatsVides && typeof window.etatsVides.retirerSiPeuplee === 'function') {
+            window.etatsVides.retirerSiPeuplee('evaluations-importer');
+        }
     }
 
     /**

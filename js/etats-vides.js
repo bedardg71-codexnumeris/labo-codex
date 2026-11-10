@@ -22,6 +22,15 @@
  *  conventions de stockage (clés globales / trimestre-préfixées / par-grille)
  *  et reflète ce que l'utilisateur voit réellement.
  *
+ * 3) EXCEPTION DÉCLARÉE (10 nov. 2026) : une entrée de `ETATS_VIDES` peut porter
+ *    `estVide()`, lu À LA PLACE du DOM. Seulement quand la page ne montre pas ce
+ *    que le bandeau affirme. Cas unique : Évaluation › Préparer, qui ne montre
+ *    jamais les copies déjà importées (elles sont dans Annoter). Jugée par le DOM,
+ *    la page paraissait vide après chaque import, et le bandeau disait « Aucun
+ *    travail importé » à qui venait d'importer (rapport iPad de Grégoire,
+ *    BUG_grégoire_2026-11-10_15-20-18). `retirerSiPeuplee` retire le bandeau resté
+ *    affiché quand la page se redessine après un import.
+ *
  * Architecture :
  * - Écoute `sectionAffichee` émis par navigation.js
  * - Injection au sommet du conteneur #idSousSection, 300 ms après l'événement
@@ -120,7 +129,19 @@ var ETATS_VIDES = {
         message: 'Aucune \u00e9valuation enregistr\u00e9e. Pour commencer, s\u00e9lectionne une production et un\u00b7e \u00e9tudiant\u00b7e, puis applique ta grille de crit\u00e8res. La r\u00e9troaction se construit au fur et \u00e0 mesure que tu attribues les niveaux.'
     },
     'evaluations-importer': {
-        message: 'Aucun travail import\u00e9. Importe les travaux de tes \u00e9tudiant\u00b7es (PDF ou images) pour les annoter et les \u00e9valuer directement dans l\u2019application. Les images sont optimis\u00e9es automatiquement (contraste, luminosit\u00e9, etc.), mais tu peux aussi faire des ajustements manuels.'
+        message: 'Aucun travail import\u00e9. Importe les travaux de tes \u00e9tudiant\u00b7es (PDF ou images) pour les annoter et les \u00e9valuer directement dans l\u2019application. Les images sont optimis\u00e9es automatiquement (contraste, luminosit\u00e9, etc.), mais tu peux aussi faire des ajustements manuels.',
+        // Exception 3) de l'en-t\u00eate : les copies enregistr\u00e9es du groupe actif, et la file
+        // d'import, plut\u00f4t que l'\u00e9cran. M\u00eame lecture que l'\u00e9tat vide propre \u00e0 la page
+        // (`afficherImport`, travaux-ui.js). Lecture pure, aucune \u00e9criture.
+        estVide: function() {
+            var stockage = window.travauxStockage;
+            // Sans le module des copies, on ne sait pas : on ne pr\u00e9tend pas que c'est vide.
+            if (!stockage || typeof stockage.obtenirFichiersGroupeActif !== 'function') return false;
+            var importer = window.travauxImport;
+            var file = (importer && typeof importer.obtenirFileDAttente === 'function')
+                ? (importer.obtenirFileDAttente() || []) : [];
+            return (stockage.obtenirFichiersGroupeActif() || []).length === 0 && file.length === 0;
+        }
     },
     'suivi-saisie': {
         message: 'Aucune pr\u00e9sence saisie. Les s\u00e9ances sont g\u00e9n\u00e9r\u00e9es automatiquement \u00e0 partir de ton calendrier et de ton horaire. S\u00e9lectionne une s\u00e9ance pour saisir les pr\u00e9sences et absences.'
@@ -163,6 +184,23 @@ function creerBanniere(message) {
     return div;
 }
 
+/**
+ * La sous-section est-elle vide ? Par ses données quand l'entrée porte `estVide`
+ * (exception 3 de l'en-tête), sinon par le DOM. Une lecture qui échoue ne conclut
+ * jamais « vide » : un bandeau faux est pire qu'un bandeau absent.
+ */
+function estVidePour(config, conteneur) {
+    if (typeof config.estVide === 'function') {
+        try {
+            return config.estVide() === true;
+        } catch (e) {
+            console.warn('[États vides] Lecture des données impossible :', e);
+            return false;
+        }
+    }
+    return paraitVide(conteneur);
+}
+
 function afficherPourSousSection(idSousSection) {
     supprimerBannieresActives();
 
@@ -174,7 +212,7 @@ function afficherPourSousSection(idSousSection) {
     var conteneur = document.getElementById(idSousSection);
     if (!conteneur) return;
 
-    if (!paraitVide(conteneur)) return;
+    if (!estVidePour(config, conteneur)) return;
 
     var banniere = creerBanniere(config.message);
     if (conteneur.firstChild) {
@@ -182,6 +220,23 @@ function afficherPourSousSection(idSousSection) {
     } else {
         conteneur.appendChild(banniere);
     }
+}
+
+/**
+ * Retire le bandeau d'une sous-section qui ne l'est plus (vide), sans jamais en poser.
+ * Appelé par le module qui redessine sa page sans changer de sous-section : Préparer,
+ * après un import (le bandeau posé avant restait affiché). Ne touche que le bandeau de
+ * CETTE sous-section : rien ailleurs ne bouge.
+ * @param {string} idSousSection
+ */
+function retirerSiPeuplee(idSousSection) {
+    var conteneur = document.getElementById(idSousSection);
+    if (!conteneur) return;
+    var banniere = conteneur.querySelector('.' + CLASSE_BANNIERE);
+    if (!banniere) return;
+    var config = ETATS_VIDES[idSousSection];
+    if (config && estVidePour(config, conteneur)) return;
+    banniere.parentNode.removeChild(banniere);
 }
 
 // =========================================================================
@@ -210,6 +265,7 @@ if (document.readyState === 'loading') {
 
 window.etatsVides = {
     afficherPourSousSection: afficherPourSousSection,
+    retirerSiPeuplee: retirerSiPeuplee,
     supprimerBannieresActives: supprimerBannieresActives,
     paraitVide: paraitVide,
     ETATS_VIDES: ETATS_VIDES
