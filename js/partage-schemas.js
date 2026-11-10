@@ -485,7 +485,9 @@
                         nom: { type: 'chaine', requis: true, max: 200 },
                         min: { type: 'nombre', minValeur: 0, maxValeur: 100 },
                         max: { type: 'nombre', minValeur: 0, maxValeur: 100 },
-                        valeurCalcul: { type: 'nombre', minValeur: 0, maxValeur: 100 },
+                        // Lot « niveau sans seuils » (10 nov. 2026) : la valeur d'un niveau n'a pas de plafond (décision de Grégoire
+                        // du 9 nov. 2026, 20 h 55 : « un niveau peut valoir plus de 100 »). Les seuils, eux, restent des pourcentages.
+                        valeurCalcul: { type: 'nombre', minValeur: 0 },
                         // ⚠ `valeur` VOYAGE AUSSI — mesuré le 1er septembre 2026.
                         // Le canal d'import-export transporte les DEUX depuis
                         // l'audit du 28 août (`SCHEMAS_IMPORT.echelle`), pour une

@@ -487,6 +487,16 @@ function genererApercuGrille(grille) {
 }
 
 /**
+ * La plage d'un niveau, telle que le PDF d'une échelle l'imprime. Lot « niveau sans seuils » (10 nov. 2026) : un niveau
+ * sans seuils (ajouté en vue simple : une valeur, pas encore de plage) imprimait « 0 % - 100 % », à côté de vraies plages.
+ * Il imprime le tiret que ce PDF emploie déjà pour un champ absent. PROPOSÉ : ce PDF peut être remis à des étudiant·es.
+ */
+function plageDuNiveau(n) {
+    if (typeof window.niveauADesSeuils === 'function' && !window.niveauADesSeuils(n)) return '—';
+    return `${formaterPourcentage(n.min ?? 0)} - ${formaterPourcentage(n.max ?? 100)}`;
+}
+
+/**
  * Genere un apercu HTML d'une echelle de performance
  */
 function genererApercuEchelle(echelle) {
@@ -524,7 +534,7 @@ function genererApercuEchelle(echelle) {
                     <td style="text-align: center;" class="${couleurClass}"><strong>${escapeHtml(n.code || '—')}</strong></td>
                     <td>${escapeHtml(n.nom || '—')}</td>
                     <td>${escapeHtml(n.description || '—')}</td>
-                    <td style="text-align: center;">${formaterPourcentage(n.min ?? 0)} - ${formaterPourcentage(n.max ?? 100)}</td>
+                    <td style="text-align: center;">${plageDuNiveau(n)}</td>
                 </tr>
             `;
         });
@@ -863,7 +873,7 @@ async function exporterEchellePDF(echelle, options = {}) {
             n.code || '—',
             n.nom || '—',
             n.description || '—',
-            `${formaterPourcentage(n.min ?? 0)} - ${formaterPourcentage(n.max ?? 100)}`
+            plageDuNiveau(n)
         ]);
 
         doc.autoTable({
@@ -941,7 +951,7 @@ async function exporterToutesEchellesPDF(options = {}) {
                 n.code || '—',
                 n.nom || '—',
                 n.description || '—',
-                `${formaterPourcentage(n.min ?? 0)} - ${formaterPourcentage(n.max ?? 100)}`
+                plageDuNiveau(n)
             ]);
 
             doc.autoTable({
@@ -1214,7 +1224,7 @@ async function exporterReferentielCompletPDF(options = {}) {
                 n.code || '—',
                 n.nom || '—',
                 n.description || '—',
-                `${formaterPourcentage(n.min ?? 0)} - ${formaterPourcentage(n.max ?? 100)}`
+                plageDuNiveau(n)
             ]);
 
             doc.autoTable({
