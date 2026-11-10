@@ -448,8 +448,14 @@ describe('F. La pratique se règle : les niveaux, les types, les paliers', () =>
         const q = D.poserSpecifications(p, b);
         expect(q.configuration.forfaits.map((f) => [f.lettre, f.note, f.travaux])).toEqual([
             ['Excellence', 95, { 1: 3, 2: 1 }], ['Réussite', 70, { 1: 1, 2: 1 }], ['Sous la réussite', 45, {}]]);
-        b.paliers[1] = Object.assign({}, b.paliers[1], { note: '170' });
-        expect(D.refusDesSpecifications(b)).toEqual({ refus: 'notePalier' });
+        // La note d'un palier n'a pas de plafond (décision de Cowork, 9 nov. 2026, 21 h 43) : la règle des niveaux.
+        b.paliers[0] = Object.assign({}, b.paliers[0], { note: '170' });
+        expect(D.refusDesSpecifications(b)).toBeNull();
+        expect(D.poserSpecifications(p, b).configuration.forfaits[0]).toMatchObject({ lettre: 'Excellence', note: 170 });
+        for (const v of ['-5', 'beaucoup', '']) {
+            b.paliers[1] = Object.assign({}, b.paliers[1], { note: v });
+            expect(D.refusDesSpecifications(b)).toEqual({ refus: 'notePalier' });
+        }
         expect(D.gestes.palierRetirer({ paliers: [{ id: 1 }] }, 0)).toEqual({ refus: 'minimumPaliers' });
         // Un seul plancher, et c'est la note la plus basse : sinon qui n'a rien d'acceptable recevrait la note haute.
         const c = D.gestes.palierAjouter(D.brouillonDeLaPratique(p, null));
@@ -490,6 +496,8 @@ describe('E. La vue simple ne nomme rien qui n\'existe pas', () => {
         // Validés à 20 h 49 et 20 h 55 : deux tournures sans accord empilé, et l'aide des niveaux sans « sur 100 ».
         expect(ecran).toContain("classeAucunLu: 'Aucune ligne lue. Une ligne par étudiant·e : DA, nom, prénom.'");
         expect(ecran).toContain("niveauxAide: 'Chaque niveau a une lettre, un nom et une valeur. La note se construit avec ces valeurs.'");
+        // Validé à 21 h 42 : le nom d'un type que des productions portent déjà.
+        expect(ecran).toContain("typeDejaPorte: (r) => `Des productions de ton tableau portent déjà le type « ${r.nom} ». Choisis un autre nom.`,");
         expect(ecran).toContain("classeAjoutes: (n, deja) => `${n} étudiant·e${n > 1 ? 's' : ''} de plus dans ta classe.` + (deja ? ` ${deja} y ${deja > 1 ? 'étaient' : 'était'} déjà.` : ''),");
         // Aucun accord forcé par « étudiant·e » (participe ou adjectif au point médian) dans les mots de la vue simple :
         // le seul mot à point médian est « étudiant·e(s) », et « Étudiant·e » en tête de colonne.

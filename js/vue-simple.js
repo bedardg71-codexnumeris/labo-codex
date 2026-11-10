@@ -124,10 +124,13 @@
             typeEnDouble: () => 'Deux types portent le même nom.',
             minimumPaliers: () => 'Il faut au moins un palier.',
             palierSansNom: () => 'Chaque palier a un nom.',
-            notePalier: () => 'Chaque palier a une note, de 0 à 100.',
+            notePalier: () => 'Chaque palier a une note : un nombre, zéro ou plus.',
             deuxPlanchers: () => 'Un seul palier peut n’avoir aucune exigence : c’est le plancher.',
             plancherTropHaut: (r) => `« ${r.nom} » n’a aucune exigence : c’est le plancher, sa note doit être la plus basse.`,
-            typeRattache: (r) => `Le nom « ${r.nom} » rattacherait ou détacherait des productions de ton tableau : choisis-en un autre.`
+            // VALIDÉ par Grégoire, mot pour mot (9 nov. 2026, 21 h 42) : un nom qui RATTACHERAIT au type des productions qui portent déjà ce nom.
+            typeDejaPorte: (r) => `Des productions de ton tableau portent déjà le type « ${r.nom} ». Choisis un autre nom.`,
+            // PROPOSÉ (le second cas, que la phrase validée ne couvre pas) : renommer DÉTACHERAIT du type les productions qui tiennent à lui par son nom.
+            typeNomGarde: (r) => `Des productions de ton tableau portent le type « ${r.nom} ». Ce nom ne se change pas ici.`
         },
         pratiqueChanger: 'Changer de modèle',
         pratiqueAutre: 'La pratique de ce groupe n’est ni par standards ni par spécifications : elle se règle en vue étendue.',
@@ -650,8 +653,13 @@
     function _refusDesNomsDeTypes(pratique, b) {
         const avant = _rattachements(pratique, pratique.configuration.typesTravaux || []);
         const apres = _rattachements(pratique, b.types.map((t) => ({ id: t.id, nom: String(t.nom).trim() })));
-        const touche = b.types.find((t) => (avant[String(t.id)] || '') !== (apres[String(t.id)] || ''));
-        return touche ? { refus: 'typeRattache', nom: String(touche.nom).trim() } : null;
+        const ids = (carte, t) => (carte[String(t.id)] || '').split(',').filter(Boolean);
+        const enregistre = (t) => (pratique.configuration.typesTravaux || []).find((x) => String(x.id) === String(t.id)) || {};
+        // Détacher : des productions tenaient à ce type par son ANCIEN nom. Rattacher : d'autres portent déjà le NOUVEAU.
+        const detache = b.types.find((t) => ids(avant, t).some((id) => ids(apres, t).indexOf(id) < 0));
+        if (detache) return { refus: 'typeNomGarde', nom: enregistre(detache).nom || '' };
+        const rattache = b.types.find((t) => ids(apres, t).some((id) => ids(avant, t).indexOf(id) < 0));
+        return rattache ? { refus: 'typeDejaPorte', nom: String(rattache.nom).trim() } : null;
     }
 
     function _boutonRegler(quoi) {
@@ -745,7 +753,7 @@
         const rangees = _brouillon.paliers.map((f, i) => {
             const cases = types.map((t) => `<td><input type="number" class="controle-form vs-palier-nombre" min="0" max="99" data-type="${esc(t.id)}" value="${esc(String((f.travaux || {})[t.id] || 0))}" aria-label="${esc((f.lettre || '') + ', ' + (t.nom || t.id))}"></td>`).join('');
             return `<tr class="vs-palier-rangee"><td><input type="text" class="controle-form vs-palier-nom" maxlength="40" value="${esc(f.lettre)}" aria-label="${esc(MOTS.paliersNom + ' ' + (i + 1))}"></td>
-                <td><input type="number" class="controle-form vs-palier-note" min="0" max="100" step="any" value="${esc(String(f.note))}" aria-label="${esc((f.lettre || '') + ', ' + MOTS.paliersNote)}"></td>${cases}
+                <td><input type="number" class="controle-form vs-palier-note" min="0" step="any" value="${esc(String(f.note))}" aria-label="${esc((f.lettre || '') + ', ' + MOTS.paliersNote)}"></td>${cases}
                 <td class="vs-rangee-gestes"><button type="button" class="btn btn-secondaire vs-petit" data-action="VueSimple.palierGeste" data-param="retirer" data-param2="${i}">${esc(MOTS.palierRetirer)}</button></td></tr>`;
         }).join('');
         return `<p class="vs-note">${esc(MOTS.paliersAide)}</p>

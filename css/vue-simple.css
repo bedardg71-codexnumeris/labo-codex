@@ -595,3 +595,42 @@ body.vue-simple .codex-menu {
 .vs-question .vs-gestes {
     margin-top: 10px;
 }
+
+/* ---------- Cibles tactiles : 46 px au moins ----------
+   Le plancher de l'application est 44 px. Sous WebKit, une cible à 44 px juste se mesure parfois à 43,9 (arrondi : six
+   bancs rouges sur le Mac le 9 nov. 2026, vus sous Chromium nulle part). Tout ce qui se touche en vue simple a 2 px de
+   marge. Ces règles viennent APRÈS celles du fichier et les relèvent. */
+
+.vs-page .btn,
+.vs-page .vs-petit,
+.vs-page .controle-form,
+.vs-page .vs-select,
+.vs-page .vs-choix,
+.vs-page .vs-ajout > summary,
+.vs-page .tn-reglages,
+.vs-page .tn-production-regler,
+.navigation-vue-simple button,
+body.vue-simple .codex-menu-item--simple,
+body.vue-simple .btn-codex-header,
+body.vue-simple .entete-bouton-icone {
+    min-height: 46px;
+}
+
+.vs-page .vs-petit,
+.vs-page .tn-reglages,
+body.vue-simple .entete-bouton-icone {
+    min-width: 46px;
+}
+
+.vs-page .vs-ajout > summary {
+    display: flex;
+    align-items: center;
+}
+
+.vs-page .tn-case {
+    height: 46px;
+}
+
+.vs-page .tn-reglages {
+    justify-content: center;
+}

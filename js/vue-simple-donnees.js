@@ -320,6 +320,9 @@
         return null;
     }
 
+    /** La note d'un palier : un nombre, zéro ou plus, SANS PLAFOND — la règle des niveaux (décision de Cowork, 9 nov. 2026, 21 h 43). */
+    function notePalier(v) { return _nombreEntre(v, 0, Infinity); }
+
     /** Ce qui empêche d'enregistrer les types et les paliers, ou null. */
     function refusDesSpecifications(b) {
         if (b.types.length < MIN_TYPES) return { refus: 'minimumTypes' };
@@ -327,15 +330,15 @@
         if (_doublon(b.types.map((t) => t.nom))) return { refus: 'typeEnDouble' };
         if (b.paliers.length < MIN_PALIERS) return { refus: 'minimumPaliers' };
         if (b.paliers.some((p) => !String(p.lettre).trim())) return { refus: 'palierSansNom' };
-        if (b.paliers.some((p) => _nombreEntre(p.note, 0, 100) === null)) return { refus: 'notePalier' };
+        if (b.paliers.some((p) => notePalier(p.note) === null)) return { refus: 'notePalier' };
         // Un palier sans exigence est le PLANCHER : le calcul le donne à qui n'atteint rien d'autre. Deux planchers, ou un
         // plancher qui n'est pas la note la plus basse, donneraient la note haute à qui n'a rien d'acceptable.
         const ids = b.types.map((t) => String(t.id));
         const sansExigence = (p) => !ids.some((id) => _nombreEntre((p.travaux || {})[id], 0, 99) > 0);
         const planchers = b.paliers.filter(sansExigence);
         if (planchers.length > 1) return { refus: 'deuxPlanchers' };
-        const notes = b.paliers.map((p) => _nombreEntre(p.note, 0, 100));
-        if (planchers.length === 1 && _nombreEntre(planchers[0].note, 0, 100) > Math.min.apply(null, notes)) return { refus: 'plancherTropHaut', nom: String(planchers[0].lettre).trim() };
+        const notes = b.paliers.map((p) => notePalier(p.note));
+        if (planchers.length === 1 && notePalier(planchers[0].note) > Math.min.apply(null, notes)) return { refus: 'plancherTropHaut', nom: String(planchers[0].lettre).trim() };
         return null;
     }
 
@@ -450,7 +453,7 @@
         p.configuration.forfaits = brouillon.paliers.map((x) => {
             const travaux = {};
             Object.keys(x.travaux || {}).forEach((id) => { const n = _nombreEntre(x.travaux[id], 0, 99); if (ids.has(String(id)) && n) travaux[id] = Math.round(n); });
-            return Object.assign({}, forfaits.get(String(x.id)) || {}, { id: x.id, lettre: String(x.lettre).trim(), note: _nombreEntre(x.note, 0, 100), travaux });
+            return Object.assign({}, forfaits.get(String(x.id)) || {}, { id: x.id, lettre: String(x.lettre).trim(), note: notePalier(x.note), travaux });
         }).sort((a, b) => b.note - a.note);
         return p;
     }

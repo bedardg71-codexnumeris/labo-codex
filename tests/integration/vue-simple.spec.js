@@ -44,6 +44,26 @@ async function ouvrir(page) {
     return erreurs;
 }
 
+/**
+ * Refait le choix de la vue au démarrage (`VueSimple.demarrer`), SANS RECHARGER LA PAGE. Les essais qui sèment des données
+ * ou ouvrent un fichier s'en servent : sous WebKit, une page qui recharge pendant une mesure a fait rougir des bancs sur
+ * le Mac (9 nov. 2026). Un seul essai recharge vraiment, parce que le rechargement est son sujet (« au rechargement… »).
+ */
+async function redemarrerLaVue(page) {
+    await page.evaluate(async () => {
+        await window.db.flush();
+        const actif = (window.db.getSync('trimestres', []) || []).find((t) => t && t.actif);
+        if (actif) window.trimestreActif = actif.id;
+        if (window.invaliderCachePratique) window.invaliderCachePratique();
+        window.VueSimple.demarrer();
+    });
+}
+
+/** Attend que plus rien ne bouge : aucune animation finie en cours (une section apparaît en 0,3 s). Avant toute MESURE de taille ou de position. */
+async function auRepos(page) {
+    await page.waitForFunction(() => document.getAnimations().every((a) => a.playState !== 'running' || !a.effect || a.effect.getComputedTiming().iterations === Infinity));
+}
+
 const ecran = (page, nom) => page.locator(`#simple-${nom}-contenu`);
 const allerA = async (page, nom) => { await page.locator(`.navigation-vue-simple [data-onglet="simple-${nom}"]`).click(); await expect(page.locator(`#section-simple-${nom}`)).toBeVisible(); };
 const caseTn = (page, rangee, colonne) => page.locator(`#vs-tableau-hote tbody tr:nth-child(${rangee}) td.tn-cellule:nth-of-type(${colonne}) .tn-case`);
@@ -324,12 +344,15 @@ test.describe('Vue simple · le parcours d\'un nouvel arrivant', () => {
     test('au rechargement, celui qui a bâti sa classe en vue simple y reste ; la vue étendue choisie reste aussi', async ({ page }) => {
         const erreurs = await ouvrir(page);
         await collerLaClasse(page);
+        // LE SEUL ESSAI QUI RECHARGE : le rechargement est son sujet. Rien n'est mesuré autour : les écritures sont vidées
+        // avant, l'application est attendue après, puis des états seulement (une classe, un texte).
         await page.evaluate(() => window.db.flush());
         await page.reload();
         await attendreApplication(page);
         await expect(page.locator('body')).toHaveClass(/vue-simple/);
         await expect(ecran(page, 'accueil').locator('.vs-etape-etat').first()).toHaveText('4 étudiant·es');
         await basculer(page, 'etendue');
+        await page.evaluate(() => window.db.flush());
         await page.reload();
         await attendreApplication(page);
         await expect(page.locator('body')).not.toHaveClass(/vue-simple/);
@@ -574,9 +597,7 @@ test.describe('Vue simple · A. par standards, les niveaux se règlent', () => {
             window.db.setSync('infoCours', { id: 'c-a', codeCours: 'FIC201', groupe: '01', _groupeCoursId: 'GC_A' });   // security-ok: fixture
             window.localStorage.setItem('laboCodex.vue', 'simple');
         });
-        await page.evaluate(() => window.db.flush());
-        await page.reload();
-        await attendreApplication(page);
+        await redemarrerLaVue(page);
         await expect(page.locator('body')).toHaveClass(/vue-simple/);
         const lire = () => page.evaluate(() => ({
             commune: JSON.stringify(window.db.getSync('avs2_echellesTemplates', []).find((e) => e.id === 'E_COMMUNE')),
@@ -746,9 +767,8 @@ test.describe('Vue simple · les seuils, la mise à jour des valeurs, les colonn
             window.db.setSync('infoCours', { id: 'c-a', codeCours: 'FIC301', groupe: '01', _groupeCoursId: 'GC_A' });   // security-ok: fixture
             window.localStorage.setItem('laboCodex.vue', 'simple');
         });
-        await page.evaluate(() => window.db.flush());
-        await page.reload();
-        await attendreApplication(page);
+        await redemarrerLaVue(page);
+        await expect(page.locator('body')).toHaveClass(/vue-simple/);
         const lire = () => page.evaluate(() => JSON.stringify(window.db.getSync('avs3_evaluationsSauvegardees', [])));
         const avant = await lire();
         await regler(page, 'niveaux');
@@ -1019,7 +1039,20 @@ test.describe('Vue simple · B. par spécifications, les types et les paliers se
         await regler(page, 'types');
         await page.locator('.vs-type-nom').nth(1).fill('Contrôle');
         await page.locator('[data-action="VueSimple.enregistrerReglage"]').click();
-        await expect(page.locator('#vs-reglage-retour .vs-erreur')).toHaveText('Le nom « Contrôle » rattacherait ou détacherait des productions de ton tableau : choisis-en un autre.');
+        // Renommer DÉTACHERAIT la production qui tient au type par son nom : le second cas, PROPOSÉ.
+        await expect(page.locator('#vs-reglage-retour .vs-erreur')).toHaveText('Des productions de ton tableau portent le type « Examen ». Ce nom ne se change pas ici.');
+        // Un type neuf dont le nom est déjà porté par une production la RATTACHERAIT : la phrase validée par Grégoire.
+        await page.evaluate(async () => {   // security-ok: fixture fictive du banc
+            const gc = window.db.getSync(window.cle('groupesCours'), [])[0];
+            await window.db.modifier(window.cle('productions'), (lues) => (lues || []).concat([{ id: 'PX2', titre: 'Atelier de la vue étendue', type: 'atelier', numero: 2, coursId: gc.coursId }]), []);
+        });
+        await page.locator('.vs-type-nom').nth(1).fill('Examen');
+        await page.locator('[data-action="VueSimple.typeGeste"][data-param="ajouter"]').click();
+        await page.locator('.vs-type-nom').nth(2).fill('Atelier');
+        await page.locator('[data-action="VueSimple.enregistrerReglage"]').click();
+        await expect(page.locator('#vs-reglage-retour .vs-erreur')).toHaveText('Des productions de ton tableau portent déjà le type « Atelier ». Choisis un autre nom.');
+        await page.locator('[data-action="VueSimple.typeGeste"][data-param="retirer"]').nth(2).click();
+        await page.locator('.vs-type-nom').nth(1).fill('Contrôle');
         await page.locator('[data-action="VueSimple.typeGeste"][data-param="retirer"]').nth(1).click();   // et il ne se retire pas, même renommé dans le champ
         await expect(page.locator('#vs-reglage-retour .vs-erreur')).toContainText('1 production de ton tableau est du type');
         await page.locator('[data-action="VueSimple.annulerReglage"]').click();
@@ -1038,6 +1071,79 @@ test.describe('Vue simple · B. par spécifications, les types et les paliers se
         expect(await lire()).toBe(avant);
         expect(erreurs).toEqual([]);
     });
+});
+
+test.describe('Vue simple · la note d\'un palier n\'a pas de plafond ; les cibles tactiles ont de la marge', () => {
+    test('un palier peut valoir plus de 100 : la note est celle du palier ; une note négative ou qui n\'est pas un nombre est refusée', async ({ page }) => {
+        const erreurs = await ouvrir(page);
+        await collerLaClasse(page);
+        await choisirLeModele(page, 'SPE-simple');
+        await regler(page, 'paliers');
+        const excellence = page.locator('.vs-palier-rangee').nth(0);
+        await excellence.locator('.vs-palier-note').fill('-10');
+        await page.locator('[data-action="VueSimple.enregistrerReglage"]').click();
+        await expect(page.locator('#vs-reglage-retour .vs-erreur')).toHaveText('Chaque palier a une note : un nombre, zéro ou plus.');
+        await excellence.locator('.vs-palier-note').fill('120');
+        await excellence.locator('.vs-palier-nombre[data-type="1"]').fill('1');   // Excellence : 1 projet, 1 examen
+        await enregistrerLeReglage(page, 'Paliers enregistrés.');
+        await expect(page.locator('#vs-bloc-paliers .vs-paliers-lus li').first()).toHaveText(/Excellence 120 · Projet : 1, Examen : 1/);
+        await allerA(page, 'resultats');
+        await ajouterProduction(page, 'Projet fictif', '2026-11-02', 'Projet');
+        await ajouterProduction(page, 'Examen fictif', '2026-11-09', 'Examen');
+        await caseTn(page, 1, 1).focus(); await page.keyboard.press('a');
+        await caseTn(page, 1, 2).focus(); await page.keyboard.press('a');
+        await expect(noteTn(page, 1)).toHaveText('120');
+        await allerA(page, 'note');
+        await expect(ecran(page, 'note').locator('.vs-note-valeur').first()).toHaveText('120');
+        expect(erreurs).toEqual([]);
+    });
+
+    for (const [largeur, hauteur] of [[1180, 820], [820, 1180]]) {
+        test(`à ${largeur} px, tout ce qui se touche en vue simple mesure 46 px au moins (deux de plus que le plancher : l'arrondi de WebKit)`, async ({ page }) => {
+            test.setTimeout(120000);
+            await page.setViewportSize({ width: largeur, height: hauteur });
+            const erreurs = await ouvrir(page);
+            const tropPetites = [];
+            // Mesure APRÈS la fin de toute animation (une section apparaît en 0,3 s) : jamais pendant une transition.
+            const mesurer = async (ou) => {
+                await auRepos(page);
+                const liste = await page.evaluate(() => {
+                    const visibles = (sel) => [...document.querySelectorAll(sel)].filter((n) => n.checkVisibility && n.checkVisibility());
+                    const cibles = visibles('.vs-page button, .vs-page a[href], .vs-page select, .vs-page textarea, .vs-page summary, .vs-page label.vs-choix, .vs-page input:not([type="checkbox"]):not([type="radio"]):not([type="hidden"]), '
+                        + '.navigation-vue-simple button, .entete-actions > button, .entete-actions .entete-bouton-icone, #btn-codex, #entete-menu-panneau button, #codex-menu button');
+                    return cibles.map((n) => { const r = n.getBoundingClientRect(); return { quoi: (n.getAttribute('aria-label') || n.textContent || n.id || n.tagName).trim().slice(0, 40), l: Math.round(r.width * 10) / 10, h: Math.round(r.height * 10) / 10 }; });
+                });
+                expect(liste.length).toBeGreaterThan(0);
+                liste.filter((c) => c.h < 46 || c.l < 46).forEach((c) => tropPetites.push(`${ou} : « ${c.quoi} » ${c.l} × ${c.h}`));
+            };
+            await mesurer('accueil vide');
+            await page.locator('#entete-menu-bouton').click(); await mesurer('menu'); await page.keyboard.press('Escape');
+            await page.locator('#btn-codex').click(); await mesurer('Sauvegarder'); await page.locator('#btn-codex').click();
+            await allerA(page, 'classe'); await mesurer('classe avant');
+            await allerA(page, 'accueil');
+            await collerLaClasse(page); await mesurer('classe créée');
+            await ecran(page, 'classe').locator('summary').click(); await mesurer('ajouter des étudiant·es');
+            await allerA(page, 'pratique'); await mesurer('choix du modèle');
+            await choisirLeModele(page, 'STD-n-meilleurs'); await mesurer('pratique');
+            await regler(page, 'regle'); await mesurer('réglage de la règle');
+            await page.locator('[data-action="VueSimple.annulerReglage"]').click();
+            await regler(page, 'niveaux'); await mesurer('réglage des niveaux');
+            await page.locator('[data-action="VueSimple.annulerReglage"]').click();
+            await allerA(page, 'resultats'); await mesurer('tableau sans colonne');
+            await page.locator('#vs-tableau-hote .tn-etat-geste button').click(); await mesurer('+ Production');
+            await page.locator('[data-action="VueSimple.fermerProduction"]').click();
+            for (const n of ['Production 1', 'Production 2', 'Production 3', 'Production 4', 'Production 5']) await ajouterProduction(page, n, '2026-11-02');
+            await caseTn(page, 1, 1).focus(); await page.keyboard.press('m');
+            await page.locator('#vs-tableau-hote .tn-titre').focus();
+            await mesurer('tableau');
+            await page.locator('#vs-tableau-hote .tn-production-regler').first().click(); await mesurer('réglage d\'une colonne');
+            await page.locator('[data-action="VueSimple.retirerColonne"]').click(); await mesurer('refus de retrait');
+            await page.locator('[data-action="VueSimple.fermerProduction"]').click();
+            await allerA(page, 'note'); await mesurer('note finale');
+            expect(tropPetites).toEqual([]);
+            expect(erreurs).toEqual([]);
+        });
+    }
 });
 
 test.describe('Vue simple · la vue voyage avec le fichier', () => {
@@ -1064,14 +1170,12 @@ test.describe('Vue simple · la vue voyage avec le fichier', () => {
         });
         expect(await page.evaluate(() => window.localStorage.getItem('laboCodex.vue'))).toBeNull();
         expect(await page.evaluate(() => window.db.getSync('vueDuFichier', 'absente'))).toBe('simple');   // ouvrir un fichier apporte ses données, dont sa marque
-        await page.reload();
-        await attendreApplication(page);
+        await redemarrerLaVue(page);   // le choix de la vue, refait comme au démarrage
         await expect(page.locator('body')).toHaveClass(/vue-simple/);
         await expect(ecran(page, 'accueil').locator('.vs-etape-etat').first()).toHaveText('4 étudiant·es');
         // Le choix fait sur l'appareil prime : la vue étendue choisie reste, malgré la marque.
         await basculer(page, 'etendue');
-        await page.reload();
-        await attendreApplication(page);
+        await redemarrerLaVue(page);
         await expect(page.locator('body')).not.toHaveClass(/vue-simple/);
         // Enregistré depuis la vue étendue, le fichier porte l'autre marque.
         expect(await page.evaluate(async () => { window.SecuriteExportPreview.previewZipEtConfirmer = async () => true; const r = await window.Codex.generer({}); const zip = await window.JSZip.loadAsync(r.blob); return JSON.parse(await zip.file('donnees.json').async('string')).vueDuFichier; })).toBe('etendue');
@@ -1338,9 +1442,7 @@ test.describe('Vue simple · quelqu\'un qui a déjà des données', () => {
     test('au démarrage, la vue étendue ; en vue simple, ses groupes par standards, et un mot pour les autres', async ({ page }) => {
         const erreurs = await ouvrir(page);
         await page.evaluate(semer);
-        await page.evaluate(() => window.db.flush());
-        await page.reload();
-        await attendreApplication(page);
+        await redemarrerLaVue(page);
         await expect(page.locator('body')).not.toHaveClass(/vue-simple/);   // l'application porte des données : étendue
         await expect(page.locator('#section-accueil')).toBeVisible();
         await basculer(page, 'simple');
