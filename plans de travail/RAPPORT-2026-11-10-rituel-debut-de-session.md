@@ -5,6 +5,57 @@
 `.claude/skills/debut-de-session-labo-codex/SKILL.md`. Aucun fichier de `js/`, pas de verdict, pas de release, pas de
 fusion : la session principale fusionnera après le groupe 3.
 
+> **Relais du 10 nov. 2026, troisième passage (décision de Grégoire de 8 h 20 : il ne lit pas `OU-EN-EST-ON.md` ;
+> décisions techniques de Cowork)** : fait et poussé, rien fusionné, rien dans `js/`.
+>
+> **Ce que `CLAUDE.md` fait lire à l'ouverture** (lignes, par `wc -l`) : **avant, 4 713** — `OU-EN-EST-ON.md` 3 387,
+> la consigne de démarrage 638, `OBJECTIF-COHORTE-1.md` 91, `PROTOCOLE.md` 597 ; **après, 698** —
+> `OBJECTIF-COHORTE-1.md` 91 et `PROTOCOLE.md` 607. S'y ajoutaient « selon le chantier » `BACKLOG.md`,
+> `SESSION.md` (15 710) et `ETAT-PROJET.md` (884) : retirés. `CLAUDE.md` lui-même passe de 249 à 243 lignes.
+> J'ai gardé `OBJECTIF-COHORTE-1.md` : il n'était pas dans la liste à remplacer.
+>
+> **Fichiers touchés à ce passage** : les cinq figés, trois lignes datées et une ligne blanche en tête, rien d'autre
+> (`OU-EN-EST-ON.md`, `CONSIGNE-DEMARRAGE-PROCHAINE-SESSION.md`, `CONSIGNE-DEMARRAGE-COWORK.md`, `ETAT-PROJET.md`,
+> `SESSION.md`) ; `CLAUDE.md` ; `PROTOCOLE.md` (règle 12, neuve) ;
+> `.claude/skills/fin-de-session-labo-codex/SKILL.md` ; `.claude/skills/labo-codex/SKILL.md` ; ce rapport.
+>
+> **Règles montées dans `PROTOCOLE.md`, mot pour mot (règle 12)** :
+> 1. 9 oct. 2026 : « Règle de Grégoire (9 oct., 14 h 42) : d'abord ce qui se fait sans lui, puis la qualité
+>    (robustesse, logique). »
+> 2. 22 oct. 2026 : le port 22 vers github.com bloqué, et la poussée par le port 443 sans toucher à la configuration.
+>    Elle n'existait nulle part ailleurs, ni dans un skill ni dans `scripts/`.
+>
+> **Les règles de parallélisme n'étaient plus dans la consigne** : elles sont dans `PROTOCOLE.md`, règle 5, depuis le
+> tri du 2 septembre (le tableau du bas de la consigne le dit). Rien à monter de ce côté.
+>
+> **Jugées périmées, non montées** (bloc « Ce que la journée du 11 a appris », 11 sept.) :
+> - « Le lot est fini quand Grégoire l'a VU » : contredit par les releases d'octobre et de novembre sans porte terrain
+>   et par les deux règles de tête du skill `portes-terrain`.
+> - « Un mot proposé sans réponse vaut "tel quel" » : contredit par `CLAUDE.md` (les mots que les élèves liront
+>   attendent sa réponse) et par les états d'octobre, où les mots sont « validés par Grégoire ». **C'est une
+>   inférence, et la règle touche ses mots : à lui de dire si elle vaut encore.**
+> - « Une clé nue passe par trimestre ET groupe-cours avec un SEMIS » : non périmée, mais déjà portée par
+>   `docs/DATA-OWNERSHIP.md` ; règle de code, pas de protocole.
+> - « Chaque constat d'audit se remesure » et « la relecture adverse trouve » : déjà couvertes par les règles 1 et 2.
+> - Tout le reste de la consigne est de l'état mesuré daté, des mandats consommés et une liste « dû par Grégoire »
+>   du 5 septembre, que la consigne elle-même dit non remesurée.
+>
+> **Consignes retirées des skills (e)** : `fin-de-session-labo-codex`, §4 et §4.2 (le bilan « à écrire dans
+> `SESSION.md` » devient le rapport du lot et `RELAIS.md`) et §5bis.2 (« le §3 de `SESSION.md` ») ; `labo-codex`,
+> l. 289 (« plans envoyés à Claude Code via `SESSION.md` »). **Rien dans `.claude/hooks/` ni dans `scripts/`** : aucun
+> code n'y lit ni n'écrit l'un des cinq fichiers. Dans `CLAUDE.md`, l'ordre d'écrire `OU-EN-EST-ON.md` « en fin de
+> session » est parti avec les lectures.
+>
+> **Ce qui ordonne encore d'écrire ces fichiers, hors du périmètre de (e) et laissé tel quel : `PROTOCOLE.md`.**
+> L. 8 (l'état courant vit dans `OU-EN-EST-ON.md` et la consigne), § « Qui écrit quoi dans la consigne de démarrage »
+> (l. 41-49), règle 3 (« La consigne ne porte que ce qui périme »), règle 4 (« L'état mesuré s'écrit à la clôture de
+> chaque lot »), et la console « Les huit gestes », vue d'`OU-EN-EST-ON.md` (l. 412, 427). Tant qu'elles restent, une
+> session qui lit `PROTOCOLE.md` reçoit deux ordres contraires. Par ailleurs `PROTOCOLE.md` fait 607 lignes pour un
+> plafond déclaré de 575 (il en faisait déjà 597) : retirer ces passages paierait la règle 12 et le dépassement.
+>
+> **Non vérifié** : aucun banc lancé (aucun fichier de `js/` ni de `tests/` touché) ; j'ai seulement vérifié par `grep`
+> qu'aucun banc ne lit le contenu des cinq fichiers.
+>
 > **Relais du 10 nov. 2026, second passage (décisions techniques de Cowork sur ce rapport)** : fait et poussé, rien
 > fusionné. **Le skill chargé à chaque ouverture pèse 16 109 octets (272 lignes)**, contre 22 745 (465 lignes) au
 > départ et 24 281 après le premier passage. Les mesures sous condition vivent à côté, dans

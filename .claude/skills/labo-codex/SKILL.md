@@ -286,7 +286,8 @@ sélectionnable — acceptable car usage cible = consultation sur cellulaire.
 ### Comment Grégoire travaille
 - **Claude Code (terminal)** : modifications directes dans le code, commits Git
 - **Cowork (ce contexte)** : conception, validation, planification, rédaction
-- **Échanges** : plans produits en Cowork sont envoyés à Claude Code via SESSION.md ;
+- **Échanges** : plans produits en Cowork sont envoyés à Claude Code par le relais (le mandat,
+  premier message de la session ; `SESSION.md` est figé depuis le 10 nov. 2026) ;
   analyses de code de Claude Code peuvent être apportées en Cowork pour révision
 - **VS Code** : consultation du code ; édition manuelle rare
 

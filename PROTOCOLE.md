@@ -595,3 +595,13 @@ délibéré, pas une compression.
 **Elle n'empêche pas de changer de cap** : un retour de testeur passe toujours avant tout, et Grégoire décide de l'ordre. Elle oblige à voir ce qu'on laisse. **Un plan qui nomme des lots restants est un chantier ouvert** tant que la page ne dit pas le contraire : à l'ouverture d'une session, Cowork compte les plans ouverts, pas seulement le lot en cours.
 
 **Ce qu'elle coûte** : une entrée sur la page. **Ce qu'elle rend** : que « où en est-on » ait une seule réponse.
+
+---
+
+## Règle 12 — deux règles montées de la consigne de démarrage, figée le 10 novembre 2026
+
+*`CONSIGNE-DEMARRAGE-PROCHAINE-SESSION.md` est figée depuis le 10 novembre 2026 (elle ne se lit plus, ne s'écrit plus ; le mandat arrive par le relais). Ses règles de parallélisme étaient déjà ici, à la règle 5, depuis le 2 septembre. Deux règles encore appliquées n'avaient pas d'autre domicile ; les voici mot pour mot, avec leur date.*
+
+**9 octobre 2026** — **Règle de Grégoire (9 oct., 14 h 42)** : d'abord ce qui se fait sans lui, puis la qualité (robustesse, logique).
+
+**22 octobre 2026** — ⚠ **Le port 22 vers github.com est bloqué sur ce réseau** : `pousser.sh` a poussé par le port 443 (`GIT_CONFIG_COUNT=1 GIT_CONFIG_KEY_0=url.ssh://git@ssh.github.com:443/.insteadOf GIT_CONFIG_VALUE_0=git@github.com:`), sans toucher à la configuration.

@@ -173,7 +173,7 @@ complet d'abord.
 ## 4. VÉRIFICATION ADVERSE
 
 **Objectif** : prouver que les tests neufs/modifiés protègent vraiment, et que ce
-que la session s'apprête à écrire dans SESSION.md correspond au diff réel. Applique
+que la session s'apprête à écrire dans son rapport et dans `RELAIS.md` correspond au diff réel. Applique
 le skill `verification-adverse` (mode A — auto-vérification) : ce parent porte le
 « pourquoi » et la procédure complète du break-test (§4 du parent). Ici, la version
 courte projet.
@@ -213,7 +213,7 @@ justifie en une ligne (le clic qu'on éprouve).
 
 ### 4.2 Confrontation des affirmations au diff
 
-Avant de rédiger le bilan de session (SESSION.md, message de commit) : pour chaque
+Avant de rédiger le bilan de session (rapport du lot, `RELAIS.md`, message de commit) : pour chaque
 affirmation chiffrée ou de complétude (« N lecteurs migrés », « X retiré partout »,
 « tests verts », « bug réparé »), vérifier qu'elle correspond au diff/grep réel. Une
 affirmation non re-dérivable se reformule en « non vérifié », jamais en fait acquis.
@@ -459,7 +459,7 @@ Grégoire non prise. Alors, et **seulement** alors :
    branche, sa version, et ce qu'elle porte ;
 2. le committer et le **pousser sur `main` SEUL**, sans le reste du travail.
 
-⮕ **Pourquoi sur `main`** : le §3 de `SESSION.md` est un fichier versionné. S'il
+⮕ **Pourquoi sur `main`** : un relais est un fichier versionné. S'il
 vit sur une branche non mergée, la session suivante lira celui de `main`, qui
 sera périmé — et son rituel de début ne verra **aucun écart**, parce qu'il aura
 vérifié une prémisse fausse. `RELAIS.md` est le seul point que toute session

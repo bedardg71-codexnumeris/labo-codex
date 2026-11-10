@@ -1,3 +1,7 @@
+> ⛔ **FIGÉ DEPUIS LE 10 NOVEMBRE 2026** (décision de Grégoire, 8 h 20 ; décisions techniques de Cowork).
+> Ce fichier ne se lit plus à l'ouverture d'une session et ne s'écrit plus : ce qui suit est conservé tel quel, sans mise à jour.
+> Le mandat d'une session arrive désormais par le relais.
+
 # Où en est-on ?
 
 > **Ce fichier répond à une seule question : qu'est-ce qui marche, et qu'est-ce

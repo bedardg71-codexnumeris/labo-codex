@@ -1,3 +1,7 @@
+> ⛔ **FIGÉ DEPUIS LE 10 NOVEMBRE 2026** (décision de Grégoire, 8 h 20 ; décisions techniques de Cowork).
+> Ce fichier ne se lit plus à l'ouverture d'une session et ne s'écrit plus : ce qui suit est conservé tel quel, sans mise à jour.
+> Le mandat d'une session arrive désormais par le relais.
+
 # Consigne de démarrage à froid — les sessions qui prennent le relais
 
 > ↻ **ÉTAT MESURÉ par Claude Code le 31 octobre 2026, 19 h 20 (Toronto) : `1.229.0` EN LIGNE** (build `1031-1415`) — Netlify `6ae6779b`, `commit_ref` `6ab4f080`, `state: ready`, publié à 23:20:13 Z. Verdict du Mac **vert** sur `6ab4f080` (1 220 essais, 4 rouges connus, 0 instable). #1212 fait, le banc seul (`plans de travail/RAPPORT-2026-10-31-cause-essai-g.md`). **Ouverts** : les gestes de Grégoire du § 4 de `CONSIGNE-LOT-2026-10-31-mise-en-ligne-1229.md` ; l'artefact jumeau de la porte des palettes, à publier par Cowork.
