@@ -175,7 +175,7 @@ test('en plein écran, le lien de l’invitation quitte le plein écran avant d�
 
         await lien.click();
         await expect(page.locator('body')).not.toHaveClass(/planif-plein-ecran-actif/);
-        await expect(page.locator('.navigation-principale')).toBeVisible();
+        await expect(page.locator('.navigation-principale:not(.navigation-vue-simple)')).toBeVisible();
         await expect(page.locator('#v2-debutTrimestre')).toBeFocused();
         // La coche du menu « Vue » suit : au retour sur la carte, plus de plein écran.
         await expect(page.locator('#planif-vue-plein-ecran')).toHaveAttribute('aria-pressed', 'false');
