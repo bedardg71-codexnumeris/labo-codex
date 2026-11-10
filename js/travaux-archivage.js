@@ -427,8 +427,16 @@
         // restreindre aux DAs du groupe-cours actif (29 mars 2026) : ses élèves (#1245), et ceux de ses copies.
         const dasGroupeActif = _dasDuGroupeActif(fichiers);
 
+        // Tableau de notation, lot 1 (9 nov. 2026) : un résultat saisi au tableau, sans grille, n'est pas une rétroaction à
+        // remettre (ni critères, ni commentaire). Verrouillé pour compter dans la note, il ne part pas pour Léa, et le
+        // compteur ne le dit pas « laissé de côté » : il n'a jamais été à envoyer. Sauf si une copie importée l'accompagne
+        // (relecture neuve) : la copie annotée reste à remettre, comme avant ce lot.
+        const rienARemettre = (e) => e.sansGrille === true
+            && !(typeof travauxResolution !== 'undefined' && typeof travauxResolution.trouverFichierPourEvaluation === 'function'
+                && travauxResolution.trouverFichierPourEvaluation(e));
         let evalsActives = evaluations.filter(e =>
             e.productionId === productionId && !e.remplaceeParId && dasGroupeActif.has(String(e.etudiantDA))
+            && !rienARemettre(e)
         );
         if (reprisesSeulement) {
             evalsActives = evalsActives.filter(e => e.repriseDeId || e.jetonRepriseCibleeApplique);

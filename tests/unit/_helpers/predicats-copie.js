@@ -36,5 +36,24 @@ export function chargerPredicatsCopie(win) {
     if (typeof win.obtenirCodePratique !== 'function') win.obtenirCodePratique = registre.obtenirCodePratique;
     // Lot 2 des standards sans portfolio (29 oct. 2026) — le pool de la note, lu par les lecteurs secondaires
     win.obtenirIdsPoolStdDuCorpus = registre.obtenirIdsPoolStdDuCorpus;
+    // Tableau de notation, lot 1 (9 nov. 2026) — le jugement binaire sans grille, lu par les spécifications
+    win.resultatAcceptableSansGrille = registre.resultatAcceptableSansGrille;
+    win.evaluationCompteEnSpecifications = registre.evaluationCompteEnSpecifications;
+    Object.assign(win, predicatsTableauNotation(registre));
     return win;
+}
+
+/**
+ * Tableau de notation, lot 1 (9 nov. 2026) — les prédicats d'AFFICHAGE du registre que lisent la Liste, la pastille d'une
+ * copie et le rythme (« la copie porte une évaluation », « Acceptable / Non acceptable »). Les VRAIS, pour les bancs qui
+ * chargent ces modules dans leur propre `window`.
+ * @param {object} [registre] - un registre déjà chargé (sinon chargé ici)
+ */
+export function predicatsTableauNotation(registre) {
+    const r = registre || chargerScript('js/pratiques/pratique-registre.js', {}, {});
+    return {
+        copiePorteUneEvaluation: r.copiePorteUneEvaluation,
+        libelleJugementSansGrille: r.libelleJugementSansGrille,
+        resultatAcceptableSansGrille: r.resultatAcceptableSansGrille
+    };
 }

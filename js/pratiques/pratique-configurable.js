@@ -629,9 +629,11 @@ class PratiqueConfigurable {
         // REMISE (« non-remis » ou « non-recu ») n'est jamais une remise, même notée 0.
         const productionsEvaluees = productions.filter(production => {
             if (production.facultatif) return false;
+            // Tableau de notation (9 nov. 2026) : une production JUGÉE sans grille (acceptable ou non) a été évaluée.
+            // Avant, ce dénominateur l'ignorait (pas de note) : une classe notée au tableau en spécifications avait C nul.
             return evaluations.some(e =>
                 e.productionId === production.id &&
-                window.evaluationEntreDansLaNote(e)
+                window.evaluationCompteEnSpecifications(e)
             );
         });
 

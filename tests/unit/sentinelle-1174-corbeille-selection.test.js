@@ -4,6 +4,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { chargerScript } from './_helpers/charger-script.js';
 import { tranche } from './_helpers/tranche.js';
+import { predicatsTableauNotation } from './_helpers/predicats-copie.js';
 
 // SENTINELLE #1174 (27 oct. 2026) — « METTRE À LA CORBEILLE (N) » : UNE QUESTION,
 // PUIS UNE SEULE ÉCRITURE PAR LISTE.
@@ -56,7 +57,7 @@ function chargerListe() {
         setTimeout: () => 0,
         notifications: { succes() {}, erreur() {}, info() {}, warning() {} }
     };
-    return chargerScript('js/liste-evaluations.js', globaux, { addEventListener() {}, removeEventListener() {}, pluriel: (n, s, p) => (n > 1 ? p : s) });
+    return chargerScript('js/liste-evaluations.js', globaux, Object.assign({ addEventListener() {}, removeEventListener() {}, pluriel: (n, s, p) => (n > 1 ? p : s) }, predicatsTableauNotation()));
 }
 
 /* --------------------------------------------------------- R — récapitulatif pur */

@@ -22,6 +22,7 @@
 import { describe, it, expect } from 'vitest';
 import { monter, storeBase, clone } from './_helpers/bac-suivi.js';
 import { chargerScript } from './_helpers/charger-script.js';
+import { predicatsTableauNotation } from './_helpers/predicats-copie.js';
 
 const DA = { ALICE: '2000001', BRUNO: '2000002' };
 const E0 = { id: 'E0', nom: 'IDME banc', seuilMaitrise: 'M', niveaux: [
@@ -387,7 +388,7 @@ describe('E16 — la Liste : « Compte jusqu\'à sa reprise » pendant la fenêt
             notifications: { succes() {}, erreur() {}, info() {}, warning() {} },
             travauxStockage: { obtenirFichiersTravaux: () => [], obtenirFichiersGroupeActif: () => [], obtenirFichiersAffiches: () => [], obtenirAnnotationFichier: () => null },
             travauxResolution: { trouverFichierPourEvaluation: () => null }, annotationContientDuContenu: () => false
-        }, { originaleEstRemplacee: regle.originaleEstRemplacee, evaluationTravailEnCours: regle.evaluationTravailEnCours });
+        }, Object.assign({ originaleEstRemplacee: regle.originaleEstRemplacee, evaluationTravailEnCours: regle.evaluationTravailEnCours }, predicatsTableauNotation(regle)));
         const ligne = win._construireLignesEvaluations(evaluations, PRODUCTIONS, [ELEVE]).find(l => l.evaluationId === 'EV-' + DA.ALICE + '-P1');
         return { ligne, html: win._genererLigneHTML(ligne) };
     }

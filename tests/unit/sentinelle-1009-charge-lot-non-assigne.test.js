@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { chargerScript } from './_helpers/charger-script.js';
+import { predicatsTableauNotation } from './_helpers/predicats-copie.js';
 
 // Retour testeur (Grégoire, 1er oct. 2026, 1.172.0) — #1009.
 //
@@ -57,7 +58,7 @@ function monterRythme(store) {
         echapperHtml: (t) => String(t ?? ''),
         MutationObserver: class { observe() {} disconnect() {} },
         document: { getElementById: () => null, querySelectorAll: () => [], addEventListener: () => {}, body: {} }
-    });
+    }, predicatsTableauNotation());   // tableau de notation (9 nov. 2026) : « la copie porte une évaluation »
     return win.Rythme;
 }
 

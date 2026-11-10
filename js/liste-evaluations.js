@@ -329,6 +329,9 @@ function initialiserListeEvaluations() {
         window.removeEventListener('resize', verifierDebordementTableau);
         window.addEventListener('resize', verifierDebordementTableau);
 
+        // Tableau de notation (9 nov. 2026) : la seconde vue des mêmes évaluations suit la Liste quand elle est affichée.
+        if (window.TableauNotation) window.TableauNotation.rafraichirSiAffiche();
+
     } catch (error) {
         console.error('❌ Erreur lors de l\'initialisation de la liste des évaluations:', error);
         console.error('Stack trace:', error.stack);
@@ -970,7 +973,7 @@ function composerRecapCorbeille(ids, donnees) {
             fichierId: f.id,
             nomEleve: e ? ((e.prenom || '') + ' ' + (e.nom || '')).trim() : 'Copie sans étudiant·e',
             nomFichier: f.nomFichier || f.id,
-            evaluee: !!(evaluation && Array.isArray(evaluation.criteres) && evaluation.criteres.length > 0),
+            evaluee: window.copiePorteUneEvaluation(evaluation),   // tableau de notation (9 nov. 2026) : sans grille aussi
             reprise: _travailLieAUneReprise(evaluations, f.etudiantDA, f.productionId)
         });
     });
@@ -1121,7 +1124,8 @@ function construireLignesEvaluations(evaluations, productions, etudiants) {
                     // Beta 99.30 : flag pour distinguer une évaluation réellement notée
                     // d'une évaluation enregistrée sans critère (ex. application
                     // d'un jeton de délai seul, sans note).
-                    const evaluationNotee = Array.isArray(evaluation.criteres) && evaluation.criteres.length > 0;
+                    // Tableau de notation (9 nov. 2026) : un résultat saisi sans grille est évalué, sans critère.
+                    const evaluationNotee = window.copiePorteUneEvaluation(evaluation);
 
                     lignes.push({
                         da: etudiant.da,
@@ -1148,6 +1152,7 @@ function construireLignesEvaluations(evaluations, productions, etudiants) {
                         statutIntegrite: statutIntegrite,
                         statutRemise: evaluation.statutRemise || 'non-remis',  // ✅ Ajout statut de remise
                         evaluationId: evaluation.id,
+                        sansGrille: evaluation.sansGrille === true,   // tableau de notation (9 nov. 2026) : rien à imprimer pour l'élève
                         evaluationNotee: evaluationNotee,
                         verrouille: evaluation.verrouillee || false,
                         // #927 (20 sept. 2026) — NON ENREGISTRÉE : le même test que `evaluationEntreDansLaNote`
@@ -1316,6 +1321,9 @@ function obtenirNomCartouche(grilleId, cartoucheId) {
  * points, même enregistrée avec l'échelle de départ (`niveauFinalAffichable`, gabarits-utils.js).
  */
 function _niveauAffiche(evaluation) {
+    // Tableau de notation (9 nov. 2026) : un jugement de spécifications saisi sans grille n'a pas de niveau, il se dit.
+    const jugement = typeof window.libelleJugementSansGrille === 'function' ? window.libelleJugementSansGrille(evaluation) : null;
+    if (jugement) return jugement;
     if (typeof niveauFinalAffichable === 'function') return niveauFinalAffichable(evaluation);
     return (evaluation && evaluation.niveauFinal) || '';
 }
@@ -1737,6 +1745,15 @@ function trouverFichierDeLigne(ligne) {
  * @param {Object} ligne
  * @param {Object|null} [fichierResolu] - la copie déjà résolue par l'appelant (#934) ; sinon résolue ici
  */
+/**
+ * « Dossier PDF » : pour une ligne évaluée, quand l'export est chargé. Tableau de notation, lot 1 (9 nov. 2026) : pas pour
+ * un résultat saisi au tableau, sans grille (aucune rétroaction à remettre), sauf si une copie importée l'accompagne.
+ */
+function _dossierPdfOffert(ligne, fichierId) {
+    if (ligne.statut !== 'evalue' || typeof travauxExportPDF === 'undefined') return false;
+    return !ligne.sansGrille || !!fichierId;
+}
+
 function genererDropdownActions(ligne, fichierResolu) {
     // #562 — les identifiants interpolés dans `value="action|id|id"` sont échappés :
     // le navigateur décode `&quot;`/`&amp;` en lisant `.value`, `executerActionEval`
@@ -1775,7 +1792,7 @@ function genererDropdownActions(ligne, fichierResolu) {
     }
 
     // Dossier PDF — évalué + export dispo
-    if (ligne.statut === 'evalue' && typeof travauxExportPDF !== 'undefined') {
+    if (_dossierPdfOffert(ligne, fichierId)) {
         options.push(`<option value="dossier|${echapperHtml(da)}|${echapperHtml(prodId)}">Dossier PDF</option>`);
     }
 
@@ -2291,6 +2308,12 @@ function consulterEvaluationDepuisListe(evaluationId) {
     const evaluations = obtenirDonneesSelonMode('evaluationsSauvegardees') || [];
     const evaluation = evaluations.find(e => e.id === evaluationId);
 
+    // Tableau de notation (9 nov. 2026) : un résultat saisi sans grille se consulte là où il se saisit.
+    if (evaluation && evaluation.sansGrille === true && window.TableauNotation) {
+        window.TableauNotation.afficher();
+        return;
+    }
+
     if (!evaluation) {
         alert('Évaluation non trouvée');
         console.error('❌ Évaluation introuvable, ID:', evaluationId);
@@ -2552,6 +2575,13 @@ function modifierEvaluationRemplacee(evaluationId) {
 
     if (!evaluation) {
         notifications.erreur('Erreur', 'Évaluation introuvable');
+        return;
+    }
+
+    // Tableau de notation (9 nov. 2026, relecture neuve) : AVANT le déverrouillage. Un résultat sans grille ne s'ouvre pas
+    // dans le formulaire ; déverrouillé ici, il sortait de la note et laissait le verrou du formulaire levé pour toutes.
+    if (evaluation.sansGrille === true) {
+        if (window.TableauNotation) window.TableauNotation.afficher();
         return;
     }
 

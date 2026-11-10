@@ -141,7 +141,8 @@ const avec = (pratique, productions, evaluations) => note(banc({ pratique, produ
 
 // Les phrases du mot neuf 2, validées par Grégoire le 28 oct. 2026 à 20 h 13 — recopiées, au caractère près.
 const AUCUNE_PRODUCTION = 'Aucune production retenue pour la note n\'est encore évaluée.';
-const AUCUN_ARTEFACT = 'Aucun artefact du portfolio n\'est encore évalué.';
+// La phrase d'un pool d'artefacts sans évaluation (9 nov. 2026, 17 h 38 : Grégoire remplace « Aucun artefact du portfolio n'est encore évalué. », validée le 28 oct., par cette phrase, partout).
+const AUCUN_ARTEFACT = 'Aucune production n\'est encore évaluée.';
 const TERMINALE_SEULE_PRODUCTIONS = 'Seule l\'évaluation terminale a une note. En standards, la note du cours s\'appuie aussi sur les productions retenues : elle ne se calcule pas sur la terminale seule.';
 const TERMINALE_SEULE_ARTEFACTS = 'Seule l\'évaluation terminale a une note. En standards, la note du cours s\'appuie aussi sur les artefacts du portfolio : elle ne se calcule pas sur la terminale seule.';
 

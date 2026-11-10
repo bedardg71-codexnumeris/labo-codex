@@ -292,7 +292,7 @@
         evaluations.forEach(function (ev) {
             if (ev.productionId !== prod.id || !ev.etudiantDA || ev.remplaceeParId) return;
             if (gcId && ev.groupeCoursId !== gcId) return;
-            if (!Array.isArray(ev.criteres) || ev.criteres.length === 0) return;
+            if (!window.copiePorteUneEvaluation(ev)) return;   // tableau de notation (9 nov. 2026) : sans grille aussi
             dasEvalues[ev.etudiantDA] = true;
         });
 

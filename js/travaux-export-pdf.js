@@ -807,6 +807,9 @@
 
         const candidates = evaluations
             .filter(e => e.etudiantDA === fichier.etudiantDA && !e.remplaceeParId)
+            // Tableau de notation, lot 1 (9 nov. 2026) : SANS copie importée (`fichier.id` nul : la synthèse seule), un résultat
+            // saisi au tableau, sans grille, n'a rien à imprimer pour l'élève. Avec une copie, rien ne change.
+            .filter(e => !(e.sansGrille === true && !fichier.id))
             .filter(e => e.productionId === productionId);
 
         if (!candidates.length) return null;

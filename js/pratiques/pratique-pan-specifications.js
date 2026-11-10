@@ -112,6 +112,14 @@ function _productionEstDuType(production, typeTravail) {
     return !!(entree && (_cleNom(entree.libelle) === nom || _cleNom(entree.libelleLong) === nom));
 }
 
+/**
+ * Tableau de notation (9 nov. 2026) — le filtre ancien des lecteurs du profil (complétion, défis, pattern, données)
+ * : une note, OU un jugement binaire sans grille (`noteFinale: null`, `acceptable`). Le reste de leur règle ne bouge pas.
+ */
+function _porteUnResultat(evaluation) {
+    return evaluation.noteFinale !== null || window.resultatAcceptableSansGrille(evaluation) !== null;
+}
+
 class PratiquePanSpecifications {
 
     constructor() {
@@ -255,7 +263,7 @@ class PratiquePanSpecifications {
         // des brouillons n'a pas de note, pas un palier d'échec)
         const evaluations = this._lireEvaluations();
         const evaluationsEleve = evaluations.filter(e =>
-            e.etudiantDA === da && window.evaluationEntreDansLaNote(e)
+            e.etudiantDA === da && window.evaluationCompteEnSpecifications(e)
         );
 
         if (evaluationsEleve.length === 0) {
@@ -308,7 +316,7 @@ class PratiquePanSpecifications {
         const evaluations = this._lireEvaluations();
         // MÊMES critères de validité que calculerPerformance (garantit la parité) — #706.
         const valides = (evaluations || []).filter(e =>
-            e.etudiantDA === da && window.evaluationEntreDansLaNote(e)
+            e.etudiantDA === da && window.evaluationCompteEnSpecifications(e)
         );
 
         if (valides.length === 0) {
@@ -404,7 +412,7 @@ class PratiquePanSpecifications {
         const evaluationsEleve = evaluations.filter(e =>
             e.etudiantDA === da &&
             !e.remplaceeParId &&
-            e.noteFinale !== null
+            _porteUnResultat(e)
         );
 
         if (evaluationsEleve.length === 0) {
@@ -479,7 +487,7 @@ class PratiquePanSpecifications {
         const evaluationsEleve = evaluations.filter(e =>
             e.etudiantDA === da &&
             !e.remplaceeParId &&
-            e.noteFinale !== null
+            _porteUnResultat(e)
         );
 
         if (evaluationsEleve.length === 0) {
@@ -570,7 +578,7 @@ class PratiquePanSpecifications {
         const evaluationsEleve = evaluations.filter(e =>
             e.etudiantDA === da &&
             !e.remplaceeParId &&
-            e.noteFinale !== null
+            _porteUnResultat(e)
         );
 
         if (evaluationsEleve.length === 0) {
@@ -691,7 +699,7 @@ class PratiquePanSpecifications {
         const evaluationsEleve = evaluations.filter(e =>
             e.etudiantDA === da &&
             !e.remplaceeParId &&
-            e.noteFinale !== null
+            _porteUnResultat(e)
         );
 
         const comptesAcceptables = this._compterTravauxAcceptables(da, evaluationsEleve);
@@ -780,12 +788,8 @@ class PratiquePanSpecifications {
         }
 
         // #706 — un brouillon ou une portée nulle n'est pas un travail acceptable
-        if (!window.evaluationEntreDansLaNote(evaluation)) {
-            return false;
-        }
-
-        // Si le travail a un statut "non remis" ou null, il n'est pas acceptable
-        if (!evaluation.noteFinale && evaluation.noteFinale !== 0) {
+        // (tableau de notation, 9 nov. 2026 : la règle commune, ou un jugement binaire sans grille)
+        if (!window.evaluationCompteEnSpecifications(evaluation)) {
             return false;
         }
 
@@ -798,6 +802,18 @@ class PratiquePanSpecifications {
         const nonRecevable = window.valeurCopieNonRecevable(evaluation);
         if (nonRecevable) {
             return nonRecevable.satisfaisante;
+        }
+
+        // Tableau de notation (9 nov. 2026) : un « acceptable / non acceptable » saisi sans grille se lit tel quel,
+        // sans seuil (point ouvert du plan, proposé : pas de seuil dans cette voie).
+        const jugement = window.resultatAcceptableSansGrille(evaluation);
+        if (jugement !== null) {
+            return jugement;
+        }
+
+        // Si le travail a un statut "non remis" ou null, il n'est pas acceptable
+        if (!evaluation.noteFinale && evaluation.noteFinale !== 0) {
+            return false;
         }
 
         // LOGIQUE BINAIRE : Vérifier toutes les spécifications
@@ -876,7 +892,7 @@ class PratiquePanSpecifications {
         }
         if (!da || da.length !== 7) return null;
         const evaluationsEleve = this._lireEvaluations().filter(e =>
-            e.etudiantDA === da && window.evaluationEntreDansLaNote(e));
+            e.etudiantDA === da && window.evaluationCompteEnSpecifications(e));
         if (evaluationsEleve.length === 0) return null;
         const note = this._determinerPalierBundle(this._compterTravauxAcceptables(da, evaluationsEleve));
         return note === null ? CAUSE_AUCUN_FORFAIT_ATTEINT : null;

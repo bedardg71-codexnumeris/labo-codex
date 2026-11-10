@@ -1007,6 +1007,7 @@ function calculerMoyennesCriteresRecents(da, nombreArtefacts = null) {
         e.etudiantDA === da &&
         window.evaluationEntreDansLaNote(e) &&   // #741 (lot A) : la règle unique #706 ; #730 pour la remplacée
         !window.evaluationNonRecevable(e) &&     // #1228 : ses niveaux ne disent rien des habiletés
+        e.sansGrille !== true &&                 // tableau de notation (9 nov. 2026) : sans critères, elle diluait la fenêtre
         productionsIds.includes(e.productionId)
     );
 
@@ -1048,6 +1049,7 @@ function _filtrerEtTrierEvaluationsIPB(evaluations, da, productionsIds) {
         return e.etudiantDA === da &&
             window.evaluationEntreDansLaNote(e) &&   // #741 (lot A) : la règle unique #706 ; #730 — l'IPB comptait l'originale ET la reprise
             !window.evaluationNonRecevable(e) &&     // #1228 : ses niveaux ne disent rien des habiletés
+            e.sansGrille !== true &&                 // tableau de notation (9 nov. 2026) : sans critères, l'IPB lisait « Maîtrise acquise »
             productionsIds.indexOf(e.productionId) >= 0 &&
             e.criteres && Array.isArray(e.criteres);
     });
@@ -1580,6 +1582,7 @@ function identifierDefiSpecifique(da) {
         e.etudiantDA === da &&
         window.evaluationEntreDansLaNote(e) &&   // #741 (lot A) : la règle unique #706 ; #730
         !window.evaluationNonRecevable(e) &&     // #1228 : ses niveaux ne disent rien des habiletés
+        e.sansGrille !== true &&                 // tableau de notation (9 nov. 2026) : sans critères, aucun défi à y lire
         productionsIds.includes(e.productionId)
     );
 

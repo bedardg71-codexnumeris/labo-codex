@@ -39,6 +39,8 @@ const EXCEPTIONS = [
     // Corrections du neuvième parcours (9 nov. 2026) : la bulle 4, validée par Grégoire ce jour-là, dit ce que
     // « Note chiffrée » ajoute « en standards, à la note provisoire » : une pratique alternative.
     { fichier: 'js/parcours-notation-alternative.js', contient: 'et, en standards, à la note provisoire', nb: 1, motif: PRATIQUE_ALTERNATIVE },
+    // Tableau de notation, lot 1 (9 nov. 2026) : le tableau ne sert que les standards et les spécifications.
+    { fichier: 'js/tableau-notation.js', contient: 'Note provisoire', nb: 1, motif: PRATIQUE_ALTERNATIVE },
 ];
 
 function fichiersJs(dossier) {
