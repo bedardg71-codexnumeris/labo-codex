@@ -73,7 +73,7 @@ test.describe('iPad', () => {
         await second.fill('Justifier son appréciation');
         await second.press('Tab');
         await expect.poll(async () => (await criteres(page))[1].sousCriteres.map((s) => s.nom)).toEqual(['Situer l’œuvre fictive', 'Justifier son appréciation']);
-        expect((await criteres(page))[1].sousCriteres[0]).toMatchObject({ code: '0', ponderation: 1, retroaction: '' });
+        expect((await criteres(page))[1].sousCriteres[0]).toMatchObject({ code: '1', ponderation: 1, retroaction: '' });   // parcours 8, décision 1 de Cowork (9 nov.) : le premier code commence à 1
 
         // Recharger : ils sont là.
         await page.reload();
