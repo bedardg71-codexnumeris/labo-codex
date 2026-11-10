@@ -1,62 +1,74 @@
 ---
 name: debut-de-session-labo-codex
 description: >
-  Workflow exécutable de début de session pour Labo Codex. Déclencher
-  SYSTÉMATIQUEMENT au premier tour de toute nouvelle session de travail
-  sur ce projet, ou dès que Grégoire dit « où en est-on », « état des
-  lieux », « on commence », « relai », « audit », ou envoie une prémisse
-  de relance avec des commandes git. Objectif : produire un état des
-  lieux factuel du dépôt AVANT de prendre la prémisse de relance pour
-  argent comptant, et signaler tout écart entre la prémisse reçue et
-  l'état mesuré.
+  Rituel d'ouverture de Labo Codex. Déclencher au PREMIER TOUR d'une session
+  de travail sur ce projet, et seulement là : jamais en cours de session, quel
+  que soit le mot prononcé. Le premier message reçu est le mandat : le lire
+  d'abord, mesurer l'état de la branche qu'il nomme (ou de `main` pour la
+  session principale), lire le dernier relais du rapport de cette branche,
+  puis ne rapporter que les écarts entre le mandat et l'état mesuré, en cinq
+  lignes au plus. Sans écart, une ligne, et la session se met au travail.
   Lecture seule — aucune modification de fichier, aucun commit, aucun push.
   Pendant inverse du skill `fin-de-session-labo-codex`.
 ---
 
 # SKILL : Rituel de début de session — Labo Codex
 
-> Cette skill est une procédure exécutable, pas une référence. Elle
-> automatise l'audit factuel qu'un développeur consciencieux ferait
-> avant d'ouvrir un chantier dans un dépôt qu'il n'a pas touché depuis
-> plusieurs heures. Elle est en lecture seule.
+> Cette skill est une procédure exécutable, pas une référence. Elle est en
+> lecture seule et elle est COURTE : elle vérifie que le mandat reçu tient
+> encore debout sur la branche où il envoie travailler, rien de plus.
 >
-> **Justification** : la commande de relance que Grégoire envoie au
-> début d'une session est souvent préparée la veille au soir et pointe
-> vers un état du dépôt qui a évolué entre-temps (autre cycle de
-> travail, commits poussés depuis, sessions intermédiaires). Sans
-> audit, le risque est de coder sur la base d'une prémisse périmée —
-> refaire un travail déjà livré, collider avec l'existant, ou rater
-> une urgence ajoutée depuis. Acté 28 mai 2026 PM après écart de 24 h
-> détecté sur le Lot A ✴ (livré au commit `11f87a1` mais demandé à
-> nouveau dans la prémisse du lendemain).
+> **Justification** : le mandat d'une session est souvent préparé avant que
+> le dépôt ait fini de bouger (autre cycle de travail, commits poussés
+> depuis, sessions parallèles). Sans mesure, le risque est de coder sur une
+> prémisse périmée — refaire un travail déjà livré, collider avec l'existant.
+> Acté le 28 mai 2026 après un écart de 24 h sur le Lot A ✴ (livré au commit
+> `11f87a1` mais redemandé dans la prémisse du lendemain).
 >
-> **Lien** : quand la demande est d'**auditer** le travail d'une session
-> antérieure (et pas seulement d'ouvrir la journée), ce baseline factuel est
-> l'étape 0 du mode B (audit tiers) du skill `verification-adverse` —
-> enchaîner ensuite sur le break-test et la relecture des coutures.
+> **Recentré le 10 novembre 2026** (décision de Grégoire, sur recommandation
+> de Cowork). Le rituel se déclenchait à chaque session et dès que « relai »
+> ou « audit » passaient ; il lisait `SESSION.md`, figé depuis le 15
+> septembre, et l'en-tête de `BACKLOG.md`, puis rapportait des priorités
+> périmées. Sept ou huit sessions par jour le payaient, et Grégoire devait
+> lire ou ignorer ces rapports. **L'état d'ensemble et les priorités vivent
+> dans la relève de Cowork, hors du dépôt : ce rituel ne les lit pas et ne
+> les rapporte pas.**
 
 ---
 
 ## 0. QUAND DÉCLENCHER
 
-- Tout premier tour d'une nouvelle session de travail sur ce projet
-- Quand Grégoire dit « où en est-on », « état des lieux », « on commence »,
-  « relai », « audit », « fais le point »
-- Quand Grégoire envoie une prémisse de relance contenant des assertions
-  vérifiables (« HEAD attendu », « N tests verts », « ~N occurrences »,
-  « version X.Y.Z attendue »)
-- Quand plus de quelques heures se sont écoulées depuis le dernier
-  échange et que le contexte de session précédent est perdu
+- Au premier tour d'une session de travail sur ce projet. **C'est le seul
+  déclencheur.**
 
-**Ne PAS déclencher** pendant une session déjà en cours (le contexte
-récent suffit), pendant un debug actif, ou si Grégoire enchaîne
-explicitement une demande sur un travail déjà en cours.
+**Ne PAS déclencher** en cours de session : ni sur un mot (« relai »,
+« audit », « on commence », « où en est-on », « état des lieux » ne sont plus
+des déclencheurs), ni parce que du temps a passé, ni pendant un debug, ni
+quand Grégoire enchaîne une demande sur un travail en cours. Une question
+posée en cours de session reçoit une réponse, pas un rituel.
+
+### 0.1 LE MANDAT D'ABORD
+
+**Le premier message reçu est le mandat. Le lire en entier AVANT toute
+commande**, et en tirer quatre choses :
+
+- **la branche** qu'il nomme. S'il n'en nomme aucune, c'est la session
+  principale : la branche est `main` ;
+- **sa base**, s'il la donne (« partie de `origin/main`, `<sha>` ou plus
+  récent ») ;
+- **ses assertions vérifiables** : un HEAD, un état d'arbre, un fichier qui
+  doit exister, un travail présenté comme fait ou comme à faire ;
+- **s'il demande une release, un verdict ou un push sur `main`** — c'est ce
+  qui ouvre, ou non, les mesures des §2 et §3.
+
+Tout ce que le mandat ne dit pas n'est pas à mesurer ici.
 
 ---
 
-## 1. INVENTAIRE GIT
+## 1. INVENTAIRE DE LA BRANCHE DU MANDAT
 
-**Objectif** : connaître le HEAD réel et l'état du dépôt.
+**Objectif** : connaître le HEAD réel et l'état de la branche où le mandat
+envoie travailler — elle seule.
 
 ### 0.5 ⛔ LE PIÈGE DU RÉPERTOIRE DE DÉMARRAGE (promu le 2 septembre 2026)
 
@@ -104,27 +116,63 @@ branche aussi. *Une session qui ne démarre pas sur la bonne branche ne peut pas
 lire l'instruction qui lui dit quelle branche prendre.* Le rituel ne protège
 que contre ce que `main` sait — d'où ce balayage, qui coûte cinq secondes.
 
-### 1.1 Ensuite, l'inventaire proprement dit
+### 1.1 Ensuite, l'inventaire — UNE branche
+
+La branche que nomme le mandat ; `main` pour la session principale. Pas les
+autres : ce qu'elles portent est l'affaire de leur session.
 
 ```bash
-# depuis la racine du dépôt
-git status
-git log --oneline main -10
+# depuis la racine du dépôt ; B = la branche du mandat
+git rev-parse --abbrev-ref HEAD                      # suis-je dessus ?
+git log -1 --format='%h · %cd · %s' --date=short     # HEAD
+git status --short | head -20                        # état de l'arbre
+git rev-list --left-right --count origin/B...HEAD    # retard <tab> avance sur origin
 ```
 
-Produire :
-- Branche courante
-- HEAD réel (hash + message du commit)
-- Date du dernier commit
-- Nombre de commits depuis le HEAD attendu par la prémisse (s'il y en a une)
-- Divergence éventuelle avec `origin/main` (ahead/behind)
-- État des fichiers tracked (clean ? modifications non commitées ?)
-- Volume des fichiers untracked (signal qu'un chantier est en cours
-  mais pas commité, ou que des artefacts s'accumulent)
+Trois mesures, pas plus : **HEAD**, **état de l'arbre** (propre ? fichiers
+modifiés ou non suivis, et combien), **avance et retard sur origin**.
+
+⚠ **Branche neuve** (le mandat dit « branche neuve, partie de… ») : elle
+n'existe pas encore sur origin, et ce n'est pas un écart. Mesurer alors la
+base : `git rev-parse --short origin/main`, à comparer au SHA que donne le
+mandat (« ou plus récent » : `git merge-base --is-ancestor <sha> origin/main`).
+En revanche, une branche dite neuve qui EXISTE déjà sur origin est un écart.
+
+### 1.2 Le dernier relais de cette branche
+
+Chaque lot tient son rapport dans `plans de travail/RAPPORT-<date>-<lot>.md`,
+et son en-tête (du titre au premier `## `) porte le dernier relais : la
+branche, sa base, ce qui est fait, ce qui reste. **Lire cet en-tête, et lui
+seul.** Le rapport vit sur la branche : le lire là, pas sur `main`.
+
+```bash
+git ls-tree --name-only origin/B "plans de travail/" | grep RAPPORT | grep "<lot>"
+git show origin/B:"plans de travail/RAPPORT-<date>-<lot>.md" | awk 'NR>1 && /^## /{exit} {print}' | head -c 4000
+```
+
+- **Pas de rapport** (branche neuve, ou session principale sur `main`) : rien
+  à lire, et ce n'est pas un écart. Ne pas chercher un substitut dans
+  `SESSION.md` ni dans `BACKLOG.md`.
+- **Plusieurs rapports** pour le lot : le plus récent par la date du nom.
+- Le reste du rapport se lit plus tard, de façon ciblée, si le travail le
+  demande — pas à l'ouverture.
 
 ---
 
-## 2. ÉTAT DES TESTS
+## ⛔ LES §2 ET §3 NE SE MESURENT QUE SUR DEMANDE DU MANDAT
+
+**L'état des tests, le verdict de GitHub et la version ne se mesurent que si
+le mandat demande une release, un verdict ou un push sur `main`.** Sinon,
+sauter droit au §4 : une session de lot qui ne publie rien n'a pas à payer
+Vitest ni `gh` à l'ouverture, et le verdict se prend de toute façon à la
+clôture (skill `fin-de-session-labo-codex`, §4.5).
+
+Quand ils se mesurent, leurs résultats entrent dans la comparaison du §4
+comme le reste : seuls les écarts sortent.
+
+---
+
+## 2. ÉTAT DES TESTS — seulement si le mandat demande une release, un verdict ou un push sur `main`
 
 **Objectif** : confirmer que la suite de tests passe avant d'attaquer
 un nouveau chantier.
@@ -262,20 +310,17 @@ d'elle-même** : un rouge de CI sur un commit déjà publié n'est pas le mandat
 une trouvaille, et elle reçoit la question habituelle — *est-ce que ça empêche un des huit
 énoncés ?* — puis l'une des trois issues de `CLAUDE.md`.
 
-Reporter :
-- Nombre de tests passés / échoués (Vitest + Playwright)
-- **Le verdict de GitHub sur `main`** : réussi/échoué, date, commit jugé, = `HEAD` ?
-  (§2.1) — ou pourquoi il n'est pas lisible
-- Si écart avec un nombre attendu par la prémisse, le signaler
-- Temps total
-- Si échec : nom du test, fichier, ligne, message condensé
+Ce qui compte comme écart ici (§4) : un test en échec (nom, fichier, message
+condensé), un nombre différent de celui que le mandat annonce, un jeton
+périmé ou absent, un verdict de GitHub rouge ou illisible (§2.1), un commit
+local absent d'origin.
 
 Si la suite n'est pas exécutable, le signaler clairement — ne PAS
 prétendre que les tests passent.
 
 ---
 
-## 3. ÉTAT DE LA VERSION
+## 3. ÉTAT DE LA VERSION — même condition que le §2
 
 **Objectif** : lire `version.json` pour connaître la version/build courante.
 
@@ -294,161 +339,70 @@ et `main.js` — c'est le rôle du rituel de fin de session.
 
 ---
 
-## 4. LECTURE DE SESSION.md
+## 4. COMPARER LE MANDAT À L'ÉTAT MESURÉ — ET NE RAPPORTER QUE LES ÉCARTS
 
-**Objectif** : prendre connaissance du dernier relai écrit.
+**Objectif** : dire à Grégoire ce qui, dans le mandat, ne tient pas devant la
+mesure. Rien d'autre.
 
-Lire :
-- Le bloc d'identification (lignes 1-20 environ) — « Chemin canonique »,
-  « Dernier cycle livré », « Cycle suivant — démarrage »
-- Le §0 (récap de la dernière session) — méthode, livrables, BACKLOG
-  inscrit, prochain cap
-- Toute « Note de relance » insérée plus haut qu'un §0 antérieur
+Un **écart** est une chose que le mandat affirme ou suppose et que la mesure
+contredit :
+- la branche n'est pas où le mandat la dit (HEAD, base, existence sur origin) ;
+- l'arbre n'est pas propre, ou la branche est en retard sur origin ;
+- le dernier relais du rapport dit fait ce que le mandat demande, ou réserve
+  à quelqu'un d'autre ce qu'il confie ;
+- un contrôle du §0.5 ou du §1.0 a levé un drapeau ;
+- une mesure des §2 et §3, quand elles ont été prises, contredit le mandat.
 
-Identifier :
-- La priorité annoncée pour la prochaine session
-- Les chantiers en suspens
-- Les items BACKLOG cités ⚠️ urgents
+Ce qui concorde ne se rapporte pas. Ce que le mandat ne dit pas non plus.
 
-Si le bloc d'identification mentionne un HEAD différent du HEAD réel
-mesuré au §1, le signaler comme **écart documentaire** (SESSION.md
-elle-même est périmée).
+**Le rapport :**
 
----
+- **Aucun écart → UNE ligne**, puis la session se met au travail, sans
+  attendre de confirmation :
 
-## 5. LECTURE DU HAUT DE BACKLOG.md
+  ```
+  Ouverture : aucun écart (lot/<nom> à <sha>, arbre propre, à jour avec origin).
+  ```
 
-**Objectif** : connaître les items prioritaires actuels.
-
-⚠ **NE PAS lire « les 25 premières lignes ».** Cette consigne datait d'un
-fichier aux lignes courtes ; l'en-tête actuel a des lignes de plus de
-10 000 caractères, et `head -25` coûte ~22 000 octets (~7 400 tokens).
-
-**Lire UNIQUEMENT le premier bloc « État courant »** — le plus récent, en
-tête de fichier, ~900 octets. Il contient l'essentiel : version, ce qui vient
-d'être clos, ce qui reste dû.
-
-```bash
-grep -m1 -n "État courant" BACKLOG.md      # localiser
-sed -n "<n>p" BACKLOG.md                   # lire cette ligne seule
-```
-
-En tirer :
-- État courant annoncé (HEAD + items ouverts + dernier ID)
-- Si la ligne « État courant » mentionne un HEAD différent du HEAD réel,
-  le signaler comme **écart documentaire**
-
-⚠ **Le « Dernier ID » fait foi à UNE ligne** : « Dernier ID utilisé » en tête de
-`BACKLOG.md` (posée le 12 sept. 2026 ; compteur unique avec SUIVI-BUGS). Les
-« Dernier ID » des blocs « État courant » sont historiques. Si un grep sur le
-BACKLOG, son archive ou SUIVI-BUGS trouve un numéro plus haut que cette ligne,
-le signaler comme écart documentaire.
-
-Puis parcourir les sections (≤ 1 ligne par section) pour repérer :
-- Items ⚠️ priorité haute actée
-- Items ⚠️ AVANT AQPC (ou autres deadlines datées)
-- Items 📐 en attente de décision UX
+- **Des écarts → CINQ lignes au plus**, une par écart, chacune sous la forme
+  *attendu par le mandat → mesuré* (avec le commit ou le fichier qui
+  l'explique). Pas de tableau, pas de sections, pas d'état des lieux, pas de
+  liste de priorités, pas de « cap recommandé ».
+  - Un écart qui change ce que le mandat demande (travail déjà livré,
+    mauvaise branche, arbre portant le travail de quelqu'un d'autre) :
+    **s'arrêter et attendre Grégoire.**
+  - Un écart qui ne le change pas : le dire, et se mettre au travail.
 
 ---
 
-## 6. COMPARAISON PRÉMISSE vs RÉEL
+## 5. CE QUE CETTE SKILL NE FAIT PAS
 
-**Objectif** : pour chaque assertion vérifiable de la prémisse de
-relance, indiquer attendu vs mesuré.
+Lecture seule : aucune modification de fichier, aucun commit, aucun push.
+En particulier :
 
-Si la prémisse contient des éléments comme :
-- « HEAD attendu : ... »
-- « N tests verts attendus »
-- « ~N occurrences attendues »
-- « version X.Y.Z attendue »
-- « branche X attendue propre »
-
-Construire un tableau de comparaison ≤ 5 lignes :
-
-| Vérification | Attendu par la prémisse | Réel mesuré |
-|---|---|---|
-
-Si écart, nommer le ou les commits qui expliquent la différence et
-proposer une note de relance courte à insérer dans SESSION.md (juste
-après le bloc d'identification, avant le §0 le plus récent).
-
-Si pas d'écart, le dire en une ligne et passer au §7.
-
----
-
-## 7. RAPPORT FINAL ET CAP
-
-**Objectif** : produire une synthèse courte qui permet à Grégoire de
-choisir le prochain chantier en toute connaissance de cause.
-
-Format :
-
-```
-=== ÉTAT DES LIEUX — DÉBUT DE SESSION ===
-
-Repo :
-  - Branche : main (à jour avec origin)
-  - HEAD : <hash> <message court>
-  - Dernier commit : <date>
-  - Untracked : <volume résumé>
-
-Tests :
-  ✅ N/N verts en T s
-  ou
-  ❌ K/N échecs
-
-Version :
-  X.Y.Z / build MMJJ-HHMM
-  (cohérent avec le dernier commit)
-
-Écart prémisse vs réel :
-  ✅ Aucun écart
-  ou
-  ⚠ Écart détecté :
-    [tableau attendu vs mesuré]
-    Explication : <N commits passés depuis, dont ...>
-
-Priorités annoncées (SESSION.md + BACKLOG) :
-  ⚠️ AVANT AQPC : <items>
-  ⚠️ Priorité haute actée : <items>
-  📐 Décision UX en attente : <items>
-
-Cap recommandé pour la session :
-  <propose 1-2 options en question fermée si pertinent>
-```
-
-⏸ S'arrêter ici. Attendre confirmation Grégoire sur le cap avant
-d'ouvrir un chantier.
-
----
-
-## 8. CE QUE CETTE SKILL NE FAIT PAS
-
-Lecture seule (cf. Justification en tête) : aucune modification de fichier,
-aucun commit, aucun push. En particulier :
-
-- Ne corrige pas la documentation périmée (SESSION.md, BACKLOG.md…) —
-  seulement la signaler, et proposer une note de relance que Grégoire validera
-- Ne décide pas du chantier à attaquer — prérogative de Grégoire
-- Ne se substitue pas au skill `fin-de-session-labo-codex` (qui audite le code
-  modifié contre les règles de sécurité)
-- Ne lit pas tout SESSION.md (fichier de >1000 lignes en moyenne) —
-  seulement le bloc d'identification et le §0 le plus récent
+- **Ne lit pas `SESSION.md`** (figé depuis le 15 septembre 2026) ni l'en-tête
+  de `BACKLOG.md`, et **ne rapporte pas de priorités** : l'état d'ensemble et
+  les priorités vivent dans la relève de Cowork, hors du dépôt
+- Ne choisit pas le chantier : le mandat l'a déjà fait
+- Ne mesure ni les tests, ni le verdict de GitHub, ni la version, hors de la
+  condition des §2 et §3
+- N'inventorie pas les autres branches (le balayage du §1.0 mis à part)
+- Ne corrige pas la documentation périmée — elle la signale si elle fait écart
+- Ne se substitue pas au skill `fin-de-session-labo-codex`
 
 ---
 
 ## ANTI-PATTERNS À ÉVITER
 
-- ❌ Prendre la prémisse de relance pour argent comptant sans audit —
-  c'est la raison d'être du rituel
+- ❌ Lancer une commande avant d'avoir lu le mandat
+- ❌ Prendre le mandat pour argent comptant sans mesurer sa branche — c'est
+  la raison d'être du rituel
 - ❌ Sauter le `git fetch origin` (peut masquer une divergence avec le remote)
-- ❌ Confondre « SESSION.md à jour » et « prémisse de relance à jour » —
-  l'une peut être correcte et l'autre périmée
-- ❌ Ignorer les fichiers untracked sans les énumérer rapidement (un
-  chantier en cours non commité peut représenter du travail à préserver)
-- ❌ Enchaîner directement sur un chantier sans avoir produit le §7
-  rapport final — l'objectif du skill est de poser le décor, pas de
-  faire le travail
+- ❌ Rapporter ce qui concorde : un rapport d'ouverture long est un rapport
+  que Grégoire doit lire ou ignorer, sept ou huit fois par jour
+- ❌ Rejouer le rituel en cours de session parce qu'un mot est passé
+- ❌ Mesurer les tests « tant qu'à y être » quand le mandat ne publie rien
+- ❌ Attendre une confirmation quand il n'y a aucun écart
 
 ---
 
@@ -463,3 +417,4 @@ aucun commit, aucun push. En particulier :
 | 2026-09-02 (soir) | §2.1 : la commande lit les JOBS, pas le run — le workflow est devenu deux jobs et Playwright peut être `skipped` sans que le run cesse d'être `success`. Trois états à distinguer, dont NON JUGÉ. |
 | 2026-09-02 | §2.1 : le verdict de GitHub entre dans le rituel (une commande `gh`, une ligne rendue, SHA comparé à `HEAD`, deux cas d'écart distingués, conduite à tenir devant un rouge, conduite sans `gh`). Motif : « je ne vois pas de rouge » alors que huit runs consécutifs étaient rouges sur `main`. |
 | 2026-10-10 | §2.1 : le passage Playwright de nuit est retiré (#1048, décision de Grégoire) ; le job `Garde` aussi. Le verdict au navigateur est le jeton du Mac ; un run GitHub n'existe qu'à la demande, et son absence ne se rapporte pas. Trois états pour un run demandé (le « non jugé » de la garde est parti avec elle). |
+| 2026-11-10 | **Recentrage** (décision de Grégoire, sur recommandation de Cowork). Déclencheur unique : le premier tour d'une session ; « relai », « audit », « on commence », « où en est-on », « état des lieux » sont retirés. Le premier message est le mandat, lu d'abord (§0.1). L'inventaire git se limite à la branche du mandat, ou à `main` pour la session principale (§1.1) ; lecture de l'en-tête du rapport de cette branche (§1.2, neuf). Tests, verdict de GitHub et version (§2, §2.1, §3, texte inchangé) ne se mesurent que si le mandat demande une release, un verdict ou un push sur `main`. Le rapport ne porte que les écarts, cinq lignes au plus, une seule s'il n'y en a pas, et la session se met au travail (§4). **Retirés** : la lecture de `SESSION.md` (ancien §4), celle de l'en-tête de `BACKLOG.md` (ancien §5), le tableau prémisse/réel (ancien §6), le rapport « état des lieux » avec priorités et cap recommandé, et l'arrêt systématique en attente de confirmation (ancien §7). §0.5 et §1.0 gardés tels quels. Motif : le rituel lisait un `SESSION.md` figé depuis le 15 septembre et rapportait des priorités périmées, sept ou huit fois par jour ; l'état d'ensemble vit dans la relève de Cowork. |
