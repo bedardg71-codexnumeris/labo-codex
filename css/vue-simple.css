@@ -1,0 +1,636 @@
+/* ===============================
+   VUE SIMPLE (lot « Vue simple », 9 nov. 2026)
+   La classe « vue-simple » du <body> masque ce que la vue simple ne montre pas. Rien n'est retiré du DOM.
+   Design : celui de l'application (design-system.html) — jetons de couleur, d'espacement et de rayon,
+   .btn, .controle-form, .groupe-form ; les étapes reprennent les portes de l'accueil (colonnes séparées par un filet).
+   =============================== */
+
+/* ---------- Ce que chaque vue masque ---------- */
+
+body:not(.vue-simple) .navigation-vue-simple,
+body:not(.vue-simple) #menu-vue-etendue,
+body:not(.vue-simple) .codex-menu-item--simple,
+body.vue-simple .navigation-principale:not(.navigation-vue-simple),
+body.vue-simple .entete-bas,
+body.vue-simple #entete-menu-panneau > :not(#menu-vue-etendue),
+body.vue-simple .codex-menu > .codex-menu-item:not(.codex-menu-item--simple),
+body.vue-simple .codex-menu > .codex-menu-sep,
+body.vue-simple #bandeau-mise-a-jour [data-action="afficherModalNouveautes"] {
+    display: none !important;
+}
+
+/* Sous le seuil où la barre principale se retire (779 px), la barre de la vue simple passe sur une seconde rangée. */
+@media (max-width: 779px) {
+    body.vue-simple .entete-ligne1 {
+        height: auto;
+        row-gap: 0;
+        padding-top: 6px;
+    }
+
+    body.vue-simple .entete-ligne1 .navigation-vue-simple {
+        display: block;
+        grid-column: 1 / -1;
+        grid-row: 2;
+        justify-self: stretch;
+        overflow-x: auto;
+    }
+}
+
+/* ---------- Le menu : la bascule ---------- */
+
+.entete-menu-filet {
+    height: 1px;
+    margin: 6px 12px;
+    background: rgba(106, 172, 184, 0.2);
+}
+
+.entete-menu-vue {
+    min-height: 52px;
+}
+
+.entete-menu-vue .entete-menu-mot {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.entete-menu-sous {
+    font-size: 12px;
+    opacity: 0.75;
+}
+
+/* ---------- Le menu « Sauvegarder » ---------- */
+
+body.vue-simple .codex-menu {
+    width: 300px;
+}
+
+.vs-phrase-sauvegarder {
+    margin: 0 0 6px;
+    font-size: 0.85rem;
+    line-height: 1.45;
+    color: var(--texte-principal);
+}
+
+/* ---------- Les pages ---------- */
+
+.vs-page {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding-bottom: 56px;   /* le témoin « Enregistré », en bas à gauche, ne recouvre pas le dernier bouton */
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.vs-page > * {
+    margin-top: 0;
+    margin-bottom: 0;
+}
+
+.vs-titre {
+    font-size: 1.5rem;
+    color: var(--texte-principal);
+}
+
+.vs-sous-titre {
+    margin: 0 0 10px;
+    font-size: 1.05rem;
+    color: var(--texte-principal);
+}
+
+.vs-intro,
+.vs-etat,
+.vs-note {
+    line-height: 1.5;
+    color: var(--texte-secondaire);
+}
+
+.vs-note {
+    font-size: 0.88rem;
+}
+
+.vs-etat {
+    padding: 12px 0 0;
+}
+
+.vs-libelle {
+    font-weight: 600;
+    color: var(--texte-principal);
+}
+
+.vs-bloc {
+    padding: var(--espacement-moyen);
+    background: var(--surface-carte);
+    border: 1px solid var(--bordure-claire);
+    border-radius: var(--radius-grand);
+}
+
+.vs-bloc > :last-child {
+    margin-bottom: 0;
+}
+
+.vs-gestes {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin: 12px 0 0;
+}
+
+.vs-gestes .btn,
+.vs-page .btn {
+    min-height: 46px;
+}
+
+.vs-succes,
+.vs-erreur {
+    margin: 0 0 10px;
+    padding: 10px 12px;
+    border-radius: var(--radius-moyen);
+    line-height: 1.4;
+}
+
+.vs-succes {
+    background: var(--alerte-fond-succes);
+    color: var(--alerte-texte-succes);
+    border: 1px solid var(--alerte-bordure-succes);
+}
+
+.vs-erreur {
+    background: var(--alerte-fond-erreur);
+    color: var(--alerte-texte-erreur);
+    border: 1px solid var(--alerte-bordure-erreur);
+}
+
+.vs-refusees {
+    margin: 0 0 10px;
+    padding: 10px 12px;
+    border-radius: var(--radius-moyen);
+    background: var(--alerte-fond-attention);
+    color: var(--alerte-texte-attention);
+    border: 1px solid var(--alerte-bordure-attention);
+    font-size: 0.9rem;
+}
+
+.vs-refusees p {
+    margin: 0 0 4px;
+}
+
+.vs-refusees ul {
+    margin: 0;
+    padding-left: 18px;
+}
+
+.vs-ligne-refusee {
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+
+/* ---------- Les étapes de l'accueil, les deux modèles ---------- */
+
+.vs-etapes {
+    list-style: none;
+    margin: 8px 0 0;
+    padding: var(--espacement-moyen);
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    background: var(--surface-carte);
+    border: 1px solid var(--bordure-claire);
+    border-radius: var(--radius-grand);
+}
+
+.vs-etapes--deux {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.vs-etape {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 4px 20px;
+}
+
+.vs-etape:first-child {
+    padding-left: 0;
+}
+
+.vs-etape + .vs-etape {
+    border-left: 1px solid var(--bordure-claire);
+}
+
+.vs-etape-rang {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    margin-bottom: 10px;
+    border-radius: 50%;
+    border: 1px solid var(--accent-primaire);
+    color: var(--accent-primaire);
+    font-weight: 600;
+    font-size: 0.9rem;
+}
+
+.vs-etape-titre {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--texte-principal);
+}
+
+.vs-etape-texte {
+    margin: 4px 0 12px;
+    font-size: 0.88rem;
+    line-height: 1.45;
+    color: var(--texte-secondaire);
+}
+
+.vs-etape-etat {
+    margin: 0 0 12px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--accent-primaire);
+}
+
+.vs-etape-lien {
+    margin-top: auto;
+}
+
+@media (max-width: 999px) {
+    .vs-etapes:not(.vs-etapes--deux) {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        row-gap: 20px;
+    }
+
+    .vs-etapes:not(.vs-etapes--deux) .vs-etape:nth-child(odd) {
+        padding-left: 0;
+        border-left: none;
+    }
+}
+
+@media (max-width: 599px) {
+    .vs-etapes,
+    .vs-etapes--deux,
+    .vs-etapes:not(.vs-etapes--deux) {
+        grid-template-columns: 1fr;
+        row-gap: 0;
+    }
+
+    .vs-etapes .vs-etape,
+    .vs-etapes:not(.vs-etapes--deux) .vs-etape:nth-child(odd) {
+        padding: 14px 0;
+        border-left: none;
+    }
+
+    .vs-etapes .vs-etape + .vs-etape {
+        border-top: 1px solid var(--bordure-claire);
+    }
+}
+
+/* ---------- Classe ---------- */
+
+.vs-liste {
+    min-height: 120px;
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    resize: vertical;
+}
+
+.vs-ajout > summary {
+    cursor: pointer;
+    font-weight: 600;
+    color: var(--texte-principal);
+    min-height: 46px;
+}
+
+.vs-ajout[open] > summary {
+    margin-bottom: 12px;
+}
+
+.vs-cadre-table {
+    overflow-x: auto;
+    border: 1px solid var(--bordure-claire);
+    border-radius: var(--radius-grand);
+    background: var(--surface-carte);
+}
+
+.vs-table {
+    width: 100%;
+    border-collapse: collapse;
+    color: var(--texte-principal);
+}
+
+.vs-table th,
+.vs-table td {
+    padding: 10px 14px;
+    text-align: left;
+    border-bottom: 1px solid var(--bordure-claire);
+    font-weight: 400;
+}
+
+.vs-table thead th {
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: var(--texte-secondaire);
+}
+
+.vs-table tbody tr:last-child th,
+.vs-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+/* ---------- Le groupe ---------- */
+
+.vs-groupe {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.vs-groupe label {
+    font-weight: 600;
+    color: var(--texte-principal);
+}
+
+.vs-select {
+    width: auto;
+    min-width: 240px;
+    min-height: 46px;
+}
+
+/* ---------- Pratique ---------- */
+
+.vs-regle {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    margin: 0 0 12px;
+    padding: 0;
+    border: 0;
+}
+
+.vs-choix {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-height: 46px;
+    color: var(--texte-principal);
+    cursor: pointer;
+}
+
+.vs-nombre {
+    max-width: 260px;
+}
+
+.vs-niveaux {
+    margin: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 14px;
+    font-size: 0.88rem;
+    color: var(--texte-secondaire);
+}
+
+/* ---------- Le réglage : la valeur se lit, « Régler » est à côté ---------- */
+
+.vs-bloc-tete {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 10px;
+}
+
+.vs-bloc-tete .vs-sous-titre {
+    margin: 0;
+}
+
+.vs-regler {
+    flex: 0 0 auto;
+}
+
+.vs-valeur {
+    margin: 0;
+    color: var(--texte-principal);
+    line-height: 1.5;
+}
+
+.vs-niveau-valeur {
+    font-variant-numeric: tabular-nums;
+    font-weight: 600;
+    color: var(--texte-principal);
+}
+
+.vs-paliers-lus {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    color: var(--texte-secondaire);
+    line-height: 1.5;
+}
+
+.vs-paliers-lus strong {
+    color: var(--texte-principal);
+}
+
+.vs-reglage td {
+    padding: 6px 8px;
+    vertical-align: middle;
+}
+
+.vs-niveau-rangee .vs-n-code {
+    width: 72px;
+    text-transform: none;
+}
+
+.vs-n-nom,
+.vs-type-nom,
+.vs-palier-nom {
+    min-width: 140px;
+}
+
+.vs-n-valeur {
+    width: 96px;
+}
+
+.vs-n-code,
+.vs-n-nom,
+.vs-n-valeur,
+.vs-type-nom,
+.vs-palier-nom,
+.vs-palier-rangee .controle-form {
+    min-height: 46px;
+}
+
+.vs-rangee-gestes {
+    white-space: nowrap;
+    text-align: right;
+}
+
+.vs-page .vs-petit {
+    min-height: 46px;
+    min-width: 46px;
+    padding: 0 10px;
+    margin-left: 4px;
+}
+
+.vs-palier-note,
+.vs-palier-nombre {
+    width: 84px;
+    min-height: 46px;
+}
+
+.vs-niveau {
+    white-space: nowrap;
+}
+
+.vs-paliers tbody th {
+    font-weight: 600;
+}
+
+/* ---------- Résultats ---------- */
+
+.vs-production-champs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    align-items: flex-end;
+}
+
+.vs-production-champs .groupe-form {
+    margin-bottom: 0;
+}
+
+.vs-production-nom {
+    flex: 1 1 280px;
+}
+
+.vs-production .vs-erreur {
+    margin: 12px 0 0;
+}
+
+.tn-etat-geste {
+    margin: 0;
+}
+
+/* ---------- Note finale ---------- */
+
+.vs-notes tbody th {
+    font-weight: 500;
+}
+
+.vs-note-valeur {
+    width: 90px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+}
+
+.vs-note-detail {
+    color: var(--texte-secondaire);
+    font-size: 0.88rem;
+}
+
+/* ---------- Une colonne du tableau : son titre la règle ; « ne compte pas » se lit ---------- */
+
+.tn-production-regler {
+    width: 100%;
+    min-height: 46px;
+    padding: 2px 4px;
+    background: none;
+    border: 0;
+    border-radius: var(--radius-petit, 6px);
+    font: inherit;
+    font-weight: 600;
+    text-align: center;
+    text-decoration: underline dotted;
+    text-underline-offset: 3px;
+    cursor: pointer;
+}
+
+.tn-production-regler:hover {
+    text-decoration-style: solid;
+}
+
+.tn-production-regler:focus-visible {
+    outline: var(--focus-ring-width) solid var(--focus-ring-color);
+    outline-offset: var(--focus-ring-offset);
+}
+
+.tn-production-hors {
+    display: block;
+    margin-top: 2px;
+    font-size: 0.72rem;
+    font-weight: 600;
+    font-style: italic;
+    color: var(--texte-secondaire);
+}
+
+.tn-col-production--hors .tn-production-regler {
+    text-decoration: line-through;
+}
+
+.vs-colonne-compte {
+    margin-top: 10px;
+}
+
+/* ---------- La question de mise à jour ---------- */
+
+.vs-question {
+    padding: 12px 14px;
+    border-radius: var(--radius-moyen);
+    background: var(--alerte-fond-attention);
+    border: 1px solid var(--alerte-bordure-attention);
+    color: var(--texte-principal);
+    line-height: 1.5;
+}
+
+.vs-question p {
+    margin: 0;
+}
+
+.vs-question .vs-gestes {
+    margin-top: 10px;
+}
+
+/* ---------- Cibles tactiles : 46 px au moins ----------
+   Le plancher de l'application est 44 px. Sous WebKit, une cible à 44 px juste se mesure parfois à 43,9 (arrondi : six
+   bancs rouges sur le Mac le 9 nov. 2026, vus sous Chromium nulle part). Tout ce qui se touche en vue simple a 2 px de
+   marge. Ces règles viennent APRÈS celles du fichier et les relèvent. */
+
+.vs-page .btn,
+.vs-page .vs-petit,
+.vs-page .controle-form,
+.vs-page .vs-select,
+.vs-page .vs-choix,
+.vs-page .vs-ajout > summary,
+.vs-page .tn-reglages,
+.vs-page .tn-production-regler,
+.navigation-vue-simple button,
+body.vue-simple .codex-menu-item--simple,
+body.vue-simple .btn-codex-header,
+body.vue-simple .entete-bouton-icone {
+    min-height: 46px;
+}
+
+.vs-page .vs-petit,
+.vs-page .tn-reglages,
+body.vue-simple .entete-bouton-icone {
+    min-width: 46px;
+}
+
+.vs-page .vs-ajout > summary {
+    display: flex;
+    align-items: center;
+}
+
+.vs-page .tn-case {
+    height: 46px;
+}
+
+.vs-page .tn-reglages {
+    justify-content: center;
+}

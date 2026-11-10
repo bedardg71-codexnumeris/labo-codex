@@ -1783,6 +1783,23 @@ function determinerModeAffichageTableauBord(config) {
 // #830 — phrase validée par Grégoire le 23 sept. 2026, mot pour mot.
 const TEXTE_A_SANS_PERIODES = 'Assiduité non calculée : aucune séance de l\'horaire ne porte son nombre de périodes. Tu peux le saisir dans Cadre › Trimestre › Horaire.';
 
+// PROPOSÉ (lot « Vue simple », 9 nov. 2026 ; à valider par Grégoire), sur le patron de la phrase de #830 : un groupe sans
+// horaire — né en vue simple, par exemple — lisait « 1 séance en attente », alors qu'aucune séance ne peut venir.
+const TEXTE_A_SANS_HORAIRE = 'Assiduité non calculée : ce groupe n\'a pas d\'horaire. Tu peux le donner dans Cadre › Trimestre › Horaire.';
+
+/**
+ * Ce que dit la barre A quand elle est vide. Sans horaire : il manque l'horaire (lot « Vue simple »). Sinon, « N séance
+ * en attente » garde la priorité, puis l'horaire dont aucune séance ne porte son nombre de périodes (#830).
+ * @param {string} texteAttenteA - « N séance(s) en attente », ou ''
+ * @param {Array} seances - séances de `obtenirSeancesHoraire()`
+ * @returns {string}
+ */
+function texteDeLaBarreA(texteAttenteA, seances) {
+    const service = typeof window.contexteActifEstService === 'function' && window.contexteActifEstService();   // un service n'a pas d'horaire à donner
+    if (texteAttenteA && !service && Array.isArray(seances) && seances.length === 0) return TEXTE_A_SANS_HORAIRE;
+    return texteAttenteA || (horaireSansAucunePeriode(seances) ? TEXTE_A_SANS_PERIODES : '');
+}
+
 /**
  * #830 — vrai quand l'horaire a des séances et qu'AUCUNE ne porte un nombre de périodes.
  * Même lecture que le dénominateur de l'assiduité (`obtenirPeriodesPrevuesParHoraire`,
@@ -1904,9 +1921,7 @@ function afficherMetriquesGlobales(etudiants) {
     // connue. Sans présence saisie, « N séance en attente » garde la priorité (cas inchangé). Mesuré :
     // le cache des séances suit l'horaire et le rendu recalcule A — aucun A connu ne survit à cet
     // horaire, d'où l'absence de garde côté élèves.
-    const texteBarreA = texteAttenteA || (
-        horaireSansAucunePeriode(typeof obtenirSeancesHoraire === 'function' ? obtenirSeancesHoraire() : [])
-            ? TEXTE_A_SANS_PERIODES : '');
+    const texteBarreA = texteDeLaBarreA(texteAttenteA, typeof obtenirSeancesHoraire === 'function' ? obtenirSeancesHoraire() : []);
 
     // 🆕 BETA 96.1: Pour P, exiger des évaluations réelles (pas seulement des présences)
     const etudiantsAvecEvalsSOM = etudiants.filter(e =>

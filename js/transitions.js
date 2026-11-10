@@ -43,6 +43,18 @@ function lireCleGlobale(nomCle, parDefaut) {
     }
 }
 
+/** Faux seulement pour un groupe-cours de COURS qui n'a pas d'horaire (lu dans la liste du trimestre : la copie du pointeur peut dater). */
+function groupeActifAUnHoraire() {
+    var actif = lireCleGlobale('groupeCoursActif', null);
+    if (!actif) return false;
+    // Comme avant le lot : le mode « cours, tous groupes » (pas d'id) et un service (qui n'a jamais d'horaire) gardent le bandeau.
+    if (!actif.id) return true;
+    if (typeof window.contexteActifEstService === 'function' && window.contexteActifEstService()) return true;
+    var groupes = lireCleTrim('groupesCours', []);
+    var gc = Array.isArray(groupes) ? groupes.filter(function(g) { return g && g.id === actif.id; })[0] : null;
+    return !gc || !!gc.horaireId;
+}
+
 function nbTrim(nomCle) {
     var arr = lireCleTrim(nomCle, []);
     return Array.isArray(arr) ? arr.length : 0;
@@ -60,7 +72,9 @@ var TRANSITIONS = [
         sections: ['evaluations'],
         condition: function() {
             // groupeCoursActif est une clé GLOBALE (stocke l'ID du GC actif)
-            return !!lireCleGlobale('groupeCoursActif', null);
+            // Vue simple (9 nov. 2026) : un groupe né en vue simple n'a pas d'horaire — le message, qui dit « horaire […]
+            // configurés », ne paraît que si le groupe actif en a un.
+            return groupeActifAUnHoraire();
         },
         message: 'Ton espace de travail est pr\u00eat\u00a0: trimestre, cours, groupe, horaire et pratique sont configur\u00e9s. Tu peux maintenant saisir les pr\u00e9sences et \u00e9valuer les productions de tes \u00e9tudiant\u00b7es.',
         messageDemo: 'Cet espace de travail est une d\u00e9mo. Tu peux explorer les pr\u00e9sences et \u00e9valuations avec des donn\u00e9es fictives. Pour construire ton vrai espace, quitte la d\u00e9mo et configure tes propres trimestre, cours, groupe, horaire et pratique.'
