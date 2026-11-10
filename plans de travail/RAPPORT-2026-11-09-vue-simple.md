@@ -2,13 +2,151 @@
 
 Consigne de Cowork du 9 nov. 2026, 17 h 40. Branche `lot/vue-simple`, partie de `origin/lot/tableau-de-notation-1-bis` (`b6d5926`). Session cloud, Chromium seulement.
 
-> **État : lot livré sur la branche `lot/vue-simple`, à juger le 11 novembre.** Rien n'est fusionné, `main` n'est pas touché, aucune release, rien au changelog. Le rapport final est ci-dessous ; la mesure faite avant le code suit, inchangée.
+> **État : lot livré sur la branche `lot/vue-simple`, à juger le 11 novembre.** Rien n'est fusionné, `main` n'est pas touché, aucune release, rien au changelog. **En tête : la seconde livraison (la pratique se règle), puis la liste de travail, puis le rapport de la première livraison, puis la mesure d'avant le code.**
+
+---
+
+## SECONDE LIVRAISON — LA PRATIQUE SE RÈGLE (10 nov. 2026)
+
+Sur les relais de Grégoire et de Cowork du 9 nov., 19 h 35 à 19 h 44. Principe de Grégoire : « Ma pratique ne doit pas être codée en dur. » Règle validée : tout ce qui entre dans la note a une valeur de départ et se règle ; rien ne se règle avant d'avoir une note ; chaque réglage est à un geste, près de la valeur.
+
+### Ce qui est fait, en gestes
+
+1. **Sans ouvrir aucun réglage**, un nouvel arrivant colle sa liste, choisit son modèle, ajoute ses productions, inscrit ses résultats et lit une note. Les valeurs de départ suffisent.
+2. **L'écran « Pratique » montre d'abord les valeurs** : la phrase de la règle, les niveaux avec leur valeur ; ou les paliers et les types. À côté de chacune, un bouton « Régler » ouvre son réglage, sur place. « Enregistrer » écrit ce réglage-là ; « Annuler » ne laisse rien.
+3. **Au tableau, « Régler » est aussi à un geste** : à côté de la phrase de la règle, et à côté des niveaux (ou des paliers). Il mène au réglage déjà ouvert.
+4. **Par standards, les niveaux se règlent** : la lettre, le nom et la valeur de chacun ; on en ajoute, on en retire (deux au minimum), on change leur ordre. La règle arrive sur « Toutes les productions ».
+5. **Par spécifications, les types et les paliers se règlent** : un type se renomme, s'ajoute, se retire (un au minimum) ; un palier s'ajoute, se retire, son nom, sa note et ses exigences par type se règlent. Un palier sans exigence est le plancher. « + Production » liste les types de l'utilisateur.
+6. **« étudiant·e », « étudiant·es » partout** en vue simple ; la carte 4 porte le texte arrêté, mot pour mot.
+7. **La vue voyage avec le fichier** : enregistré depuis la vue simple, il s'ouvre en vue simple sur un appareil qui n'a fait aucun choix. Le choix fait sur l'appareil prime toujours.
+8. **Qui a bâti un trimestre en vue étendue**, même sans étudiant·es, arrive en vue étendue.
+
+### Ce que j'ai tranché, comme demandé (une ligne chacun)
+
+- **(A1) L'échelle appartient à la pratique.** Elle naît avec elle, en copie de l'échelle de départ. Une pratique venue de la vue étendue, qui lit une échelle du trimestre, voit cette échelle **copiée au premier réglage, jamais modifiée** ; même chose si l'échelle est lue ailleurs (une pratique dupliquée, une production). Aucune autre pratique ne change.
+- **Limite de A1 :** deux groupes qui partagent LA MÊME pratique changent ensemble ; l'écran le dit avant l'enregistrement (« Ce réglage vaut pour les N groupes qui ont cette pratique. »).
+- **(A2) Une valeur changée ne réécrit aucun résultat.** Le résultat garde la valeur écrite à la saisie, la case porte le signe « ≠ », la note ne bouge pas ; ressaisir le niveau prend la valeur d'aujourd'hui. Vérifié par un essai, y compris après la copie d'une échelle.
+- **(A3) Un niveau inscrit dans un résultat ne se retire pas et ne change pas de lettre.** L'écran dit pourquoi et combien de résultats le portent ; rien n'est effacé, rien n'est écrit.
+- **(A4) Le nom de l'échelle : « Mes niveaux »** (proposé). Ni « IDME », ni « de départ ».
+- **Les couleurs** : un niveau gardé garde sa couleur ; un niveau ajouté prend la couleur neutre du tableau. Les couleurs ne se règlent pas en vue simple (ligne 19 de la liste).
+- **Les seuils d'un niveau suivent sa valeur** (voir la question 1 ci-dessous) : c'est une supposition, elle touche la pédagogie.
+- **Un type porté par une production ne se retire pas** ; un nom de type qui détacherait ou attacherait une production est refusé (certaines productions de la vue étendue tiennent à leur type par son nom).
+- **Un seul palier sans exigence, et c'est le plus bas** : sinon, qui n'a rien d'acceptable recevrait la note haute.
+- **Une pratique que la vue simple ne sait pas régler sans risque** (échelle embarquée dans la pratique, paliers sous l'ancienne forme, règle à catégories) se LIT en vue simple, avec « se change en vue étendue ». Régler ici écrirait à côté de ce que le calcul lit.
+
+### Ce qui attend Grégoire
+
+| # | Question | Recommandation |
+|---|---|---|
+| 1 | **Quand la valeur d'un niveau change, ses seuils changent avec elle.** Les seuils servent, en vue étendue, à convertir un pourcentage en niveau quand on évalue avec une grille. Exemple mesuré : « Étendu » passé de 100 à 95 commence alors à 95, et une copie à 90 % avec grille devient « Maîtrise ». | À trancher : c'est le sens d'un niveau. L'autre voie est de ne jamais toucher aux seuils depuis la vue simple |
+| 2 | **Changer une valeur ne recalcule pas les notes déjà construites** (le signe « ≠ » le dit, case par case). Qui vient d'un tableur s'attend au recalcul. | Proposer plus tard un geste explicite, « appliquer la valeur d'aujourd'hui aux résultats saisis ». Il écrit dans des résultats : je ne l'ai pas construit |
+| 3 | **La liste de travail** (plus bas) : lignes 6 et 7 sont petites et changent la note ; lignes 8 et 9 (la case vide, la moyenne simple) sont codées en dur dans les deux vues. | Choisir sur la liste ce qui entre pour le 11 et pour le 27 |
+| 4 | **Le mot du geste : « Régler »** (proposition de Cowork). | Garder |
+| 5 | **Les textes neufs** ci-dessous. | À valider un à un |
+
+### Les textes neufs de cette livraison (PROPOSÉS, sauf mention)
+
+Écran « Pratique », lecture :
+- le bouton, à côté de chaque valeur : « Régler »
+- titres des blocs : « La règle qui construit la note » (déjà proposé), « Tes niveaux », « Tes paliers », « Tes types de productions »
+- un palier sans exigence : « aucune exigence »
+- sous les blocs, quand la pratique est partagée : « Ce réglage vaut pour les N groupes qui ont cette pratique. »
+- quand une pratique ne se règle pas ici : « La règle de cette pratique se change en vue étendue. » (déjà proposé)
+
+Écran « Pratique », réglage ouvert :
+- les deux boutons : « Enregistrer », « Annuler »
+- niveaux, l'aide : « Chaque niveau a une lettre, un nom et une valeur sur 100. La note se construit avec ces valeurs. »
+- niveaux, en-têtes : « Lettre », « Nom », « Valeur » ; gestes : « + Niveau », « Retirer », « Monter », « Descendre » (ces deux derniers sont lus par le lecteur d'écran ; à l'écran, deux flèches)
+- types, l'aide : « Chaque production de ton tableau est d'un type. Les paliers comptent les productions acceptables de chaque type. »
+- types : « Nom du type », « + Type », « Retirer »
+- paliers, l'aide : « Pour chaque palier, sa note et le nombre de productions acceptables qu'il faut, par type. Un palier sans exigence est le plancher. »
+- paliers : « Palier », « Note », « + Palier », « Retirer »
+
+Confirmations, sous le titre de l'écran : « Règle enregistrée. » · « Niveaux enregistrés. » · « Types enregistrés. » · « Paliers enregistrés. »
+
+Refus, dans le réglage ouvert :
+- « Il faut au moins deux niveaux. »
+- « Le niveau « X » est inscrit dans N résultats du tableau : il ne se retire pas. Aucun résultat n'a été effacé. »
+- « La lettre « X » est inscrite dans N résultats du tableau : elle ne se change pas. Aucun résultat n'a été effacé. »
+- « Chaque niveau a une lettre et un nom. » · « Chaque niveau a une valeur, de 0 à 100. » · « Deux niveaux portent la même lettre. »
+- « Il faut au moins un type. »
+- « N productions de ton tableau sont du type « X » : il ne se retire pas. Aucune production n'a été touchée. »
+- « Chaque type a un nom. » · « Deux types portent le même nom. »
+- « Le nom « X » rattacherait ou détacherait des productions de ton tableau : choisis-en un autre. »
+- « Il faut au moins un palier. » · « Chaque palier a un nom. » · « Chaque palier a une note, de 0 à 100. »
+- « Un seul palier peut n'avoir aucune exigence : c'est le plancher. »
+- « « X » n'a aucune exigence : c'est le plancher, sa note doit être la plus basse. »
+
+Au tableau : « Régler », à côté de la phrase de la règle (à la place de « Réglages de la pratique », en vue simple seulement) et à côté des niveaux ou des paliers.
+
+Le nom de l'échelle née avec la pratique : « Mes niveaux » (se lit au tableau : « Échelle « Mes niveaux » : », et en vue étendue dans Conception › Échelles).
+
+Arrêtés par Grégoire, posés mot pour mot : la carte 4, « Vois la note de chaque étudiant·e et exporte-les en CSV, prêtes pour ton relevé. » ; « étudiant·e » dans tous les textes de la première livraison (« Colle ta liste d'étudiant·es : DA, nom, prénom. », « Quatre étapes, de ta liste d'étudiant·es à ta note finale. », « Classe créée : N étudiant·es. », « Ajouter des étudiant·es », en-tête « Étudiant·e », etc.). Trois accords que j'ai dû choisir, à valider : « Aucun·e étudiant·e lu·e. », « N étudiant·es ajouté·es », « déjà inscrit·es ce trimestre ».
+
+### Les mesures demandées par Cowork (section E)
+
+- **Les modèles prêts installés par la vue étendue sont-ils masqués ? Oui, confirmé par exécution.** Sur une application neuve, hors démonstration, j'ai installé le « Modèle simple » par la fonction qu'appelle « Utiliser dans ce trimestre » : il est écrit dans le trimestre, mais absent du menu de Conception › Pratiques, qui écarte tout ce dont l'auteur est « Demo Labo Codex ». Je n'ai pas cliqué la fenêtre de la bibliothèque elle-même ; je n'ai rien corrigé.
+- **La vue simple peut-elle mener à « artefact » ou « portfolio » ? Pas un novice.** Ces mots ne viennent que du calcul d'une pratique dont le cours a des productions de ce type, ou une production terminale. « + Production » ne crée ni l'une ni l'autre ; elle ne reprend le type « artefact » que si le cours en a déjà. Celui qui les lit en vue simple les a donc dans ses données.
+- **Les deux défauts préexistants** (un groupe sans horaire hérite des séances du dernier groupe activé ; assigner une pratique écrit dans un trimestre clos) : non corrigés, comme décidé.
+
+### Les captures (section F)
+
+- **Mesuré : c'était la capture, pas l'écran.** Chaque section de l'application apparaît en 0,3 s (opacité) ; mon script photographiait deux images après le clic. Aucun état désactivé, aucune transition propre à la vue simple.
+- **Corrigé** : chaque capture attend la fin des animations. Les 104 captures sont refaites (26 écrans, 1180 et 820 px, clair et sombre), dont le réglage de la règle, des niveaux, des types, des paliers, et deux refus de retrait (un niveau, un type).
+
+### Limites connues de cette version
+
+- **« N dernières productions » suit l'ordre de création des colonnes, pas leur date** (acceptée par Grégoire le 9 nov. ; à reprendre après le 27 novembre ; le calcul partagé n'est pas touché).
+- Renommer ou retirer une production, changer son type ou sa date : pas en vue simple (ligne 7 de la liste).
+- Les couleurs des niveaux ne se règlent pas en vue simple.
+- Après le réglage d'une échelle, la marque « ≠ » demande une ressaisie case par case (question 2).
+
+### Ce que je n'ai pas pu vérifier
+
+- WebKit, Safari, l'iPad, le toucher : rien. Chromium seulement.
+- La suite Playwright entière : non lancée (seuls le banc de la vue simple et celui du tableau).
+- Les données réelles de Grégoire : aucune n'a été ouverte.
+- La fusion de deux fichiers par l'interface : la marque du fichier en est écartée par une liste que tient un essai de lecture du code ; la fusion elle-même n'a pas été jouée.
+
+### La preuve
+
+- **Vitest** : suite entière, 11 011 essais verts sur 11 011. Banc du lot : 44 essais.
+- **Playwright Chromium** : banc de la vue simple, 23 essais verts sur 23 ; banc du tableau, 19 sur 19.
+- **Les essais demandés :**
+  - une échelle modifiée ne change aucun autre groupe ni aucune autre pratique (échelle commune intacte, l'autre pratique et le résultat de l'autre groupe intacts) ;
+  - une valeur changée laisse les résultats saisis et pose le signe ; ressaisir prend la valeur d'aujourd'hui ;
+  - un retrait refusé n'efface rien (niveau, lettre, type), rien n'est écrit ;
+  - quatre niveaux aux valeurs inventées (95, 82, 61,5 et 30) : (95 + 61,5 + 30) / 3 donne 62, deux résultats à 82 donnent 82, et les deux meilleures de la première donnent 78 ;
+  - sur une application vide, de la liste à la note sans ouvrir un seul réglage ; puis chaque valeur réglable atteinte en un geste, sur l'écran Pratique et au tableau ;
+  - « élève » ne se lit sur aucun écran de la vue simple (25 états d'écran, plus les réglages et un refus) ; « codex » toléré aux trois endroits nommés ;
+  - la marque du fichier : écrite à l'enregistrement, lue sans choix, le choix de l'appareil prime.
+- **Break-tests** : 34 défenses de cette livraison retirées une à une, 34 essais rougis, code restauré (62 sur les deux livraisons). Un essai manquait (le texte de la carte 4) : ajouté, puis rougi.
+- **Relecture par un agent neuf**, sur le commit des réglages, sans mes conclusions. Aucun défaut de sécurité. Dix défauts réels, dont le plus grave : changer de groupe avec un réglage ouvert pouvait écrire le brouillon dans la pratique de l'autre groupe. Disposition ci-dessous.
+
+### Les constats de la relecture, et ce qu'ils deviennent
+
+| Constat | Disposition |
+|---|---|
+| Un réglage ouvert suivait un changement de groupe : le brouillon de l'un pouvait s'écrire dans la pratique de l'autre | **Corrigé** (le réglage se referme ; le brouillon ne s'écrit que dans sa pratique) |
+| Après la copie d'une échelle : ni signe « ≠ », ni refus de retrait | **Corrigé** (la copie garde le nom de son origine) |
+| L'échelle n'était pas résolue comme le calcul la résout (échelle embarquée, échelle importée) | **Corrigé** ; une échelle embarquée se lit, « se change en vue étendue » |
+| « Mes niveaux » pouvait être lue par une pratique dupliquée ou une production, et changer avec elles | **Corrigé** (lue ailleurs, elle est copiée) |
+| La marque du fichier entrait dans la fusion (import sans question, conflit à arbitrer) | **Corrigé** (écartée de la fusion) |
+| Deux paliers sans exigence : le plus haut devenait le plancher | **Corrigé** (refusé) |
+| Paliers sous l'ancienne forme : affichés vides, écrits à côté du calcul | **Corrigé** (lus, non réglables ici) |
+| Renommer un type détachait ou attachait des productions | **Corrigé** (refusé) |
+| Un identifiant de type ou de palier retiré était repris, avec ses champs cachés | **Corrigé** |
+| Les seuils d'un niveau bougent avec sa valeur | **Remonte à Grégoire** (question 1) |
+| Une marque de fichier périmée, si le navigateur efface le choix de l'appareil, peut redonner la vue simple à qui avait choisi l'étendue | **Laissé** : la bascule est à un geste |
+| Si l'écriture de la pratique échoue après la copie de l'échelle, une échelle « Mes niveaux » sans lecteur reste | **Laissé** : cas d'un stockage plein, sans effet sur une note |
+| Une lettre portée seulement par les critères d'une évaluation avec grille n'est pas comptée | **Préexistant, laissé** : ne concerne pas un résultat saisi au tableau |
+| La seconde garde du brouillon (son identifiant de pratique) n'a pas d'essai à elle | **Dit** : la première garde (le réglage se referme) la couvre et a son essai |
 
 ---
 
 ## LISTE DE TRAVAIL — ce qui entre dans la note, et où ça se règle (10 nov. 2026)
 
-Demandée par le relais de 19 h 44, poussée AVANT la fin des réglages A et B. Règle validée par Grégoire : tout ce qui entre dans la note a une valeur de départ et se règle ; rien ne se règle avant d'avoir une note ; chaque réglage est à un geste de la valeur qu'il règle.
+Demandée par le relais de 19 h 44, poussée AVANT la fin des réglages A et B (commit `bda4560`) ; les quatre premières lignes sont livrées depuis. Règle validée par Grégoire : tout ce qui entre dans la note a une valeur de départ et se règle ; rien ne se règle avant d'avoir une note ; chaque réglage est à un geste de la valeur qu'il règle.
 
 **Méthode.** Chaque ligne est lue dans le code du calcul (`js/profil-etudiant-actions.js`, `js/pratiques/pratique-pan-specifications.js`, `js/pratiques/pratique-registre.js`, `js/portfolio.js`), pas dans ses commentaires. Rien n'a été exécuté pour cette liste, sauf la dernière ligne du tableau « Constats ».
 
@@ -18,10 +156,10 @@ Demandée par le relais de 19 h 44, poussée AVANT la fin des réglages A et B. 
 
 | # | Valeur | Départ proposé | Réglable en vue étendue ? | En vue simple | Coût | État / recommandation |
 |---|---|---|---|---|---|---|
-| 1 | **Les niveaux** (standards) : lettre, nom, valeur, nombre, ordre | Cinq niveaux, valeurs 0, 40, 65, 75, 100 | Oui : Conception › Échelles | « Régler », à côté des niveaux (écran Pratique et tableau) | Fait | **En cours de livraison (A)** |
-| 2 | **La règle de sélection** (standards) : toutes, N meilleures, N dernières ; le nombre N | Toutes les productions | Oui : fiche de la pratique | « Régler », à côté de la phrase de la règle | Fait | **En cours de livraison** |
-| 3 | **Les types** (spécifications) : nom, ajout, retrait | Projet, Examen | Oui : fiche de la pratique | « Régler », à côté des types | Fait | **En cours de livraison (B)** |
-| 4 | **Les paliers** (spécifications) : nom, note, exigences par type, ajout, retrait | Excellence 90, Réussite 70 | Oui : fiche de la pratique | « Régler », à côté des paliers | Fait | **En cours de livraison (B)** |
+| 1 | **Les niveaux** (standards) : lettre, nom, valeur, nombre, ordre | Cinq niveaux, valeurs 0, 40, 65, 75, 100 | Oui : Conception › Échelles | « Régler », à côté des niveaux (écran Pratique et tableau) | Fait | **Livré (A)** |
+| 2 | **La règle de sélection** (standards) : toutes, N meilleures, N dernières ; le nombre N | Toutes les productions | Oui : fiche de la pratique | « Régler », à côté de la phrase de la règle | Fait | **Livré** |
+| 3 | **Les types** (spécifications) : nom, ajout, retrait | Projet, Examen | Oui : fiche de la pratique | « Régler », à côté des types | Fait | **Livré (B)** |
+| 4 | **Les paliers** (spécifications) : nom, note, exigences par type, ajout, retrait | Excellence 90, Réussite 70 | Oui : fiche de la pratique | « Régler », à côté des paliers | Fait | **Livré (B)** |
 | 5 | **La note quand aucun palier n'est atteint** (spécifications) | Aucune : « pas de note », avec la cause | Oui : un palier sans exigence | C'est le réglage des paliers : un palier sans exigence est le plancher | Fait avec la ligne 4 | À dire dans l'écran (une phrase y est) |
 | 6 | **Les productions qui comptent dans la note** (standards) | Toutes comptent | Oui : fiche de la pratique, « Productions qui comptent dans la note » | Rien aujourd'hui | Petit : une marque par colonne du tableau, même champ | **Candidat pour le 11.** Je ne le construis pas sans accord |
 | 7 | **Retirer ou renommer une production ; changer son type ou sa date** | — | Oui : Conception › Productions | Rien aujourd'hui : une colonne créée par erreur reste | Petit à moyen : retirer demande de dire ce que deviennent ses résultats (sens d'une suppression, donc à Grégoire) | **Candidat pour le 11** pour renommer, la date et le type ; retirer attend sa décision |
@@ -55,7 +193,9 @@ Demandée par le relais de 19 h 44, poussée AVANT la fin des réglages A et B. 
 
 ---
 
-## RAPPORT FINAL (10 nov. 2026)
+## RAPPORT DE LA PREMIÈRE LIVRAISON (10 nov. 2026)
+
+> Écrit avant les relais de 19 h 35 à 19 h 44. Ses questions 1 à 8 sont tranchées (voir la seconde livraison, en tête) ; ses textes disent encore « élève » là où l'écran dit maintenant « étudiant·e ».
 
 ### Ce qui est fait, en gestes
 
