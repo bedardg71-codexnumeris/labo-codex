@@ -15,6 +15,16 @@
 > **Mis à jour à la fin de chaque journée de travail.** Une ligne ne change
 > d'état que si quelqu'un écrit **comment** il l'a vérifié.
 
+✅ **LE 10 NOVEMBRE 2026, 10 H 30 : LA 1.241.0 EST EN LIGNE — CINQ PARCOURS DE PLUS, ET LE TABLEAU DE NOTATION.** *Écrit par Claude Code.*
+
+**Ce qui change pour toi** : ce que disent les cinq lignes de la 1.241 dans les Nouvelles, validées par toi. Le panneau « Assistance » compte neuf parcours : « Évaluer une première production », « Recevoir les productions, rendre tes rétroactions », « Monter ton cours », « Automatiser tes commentaires » et « Mettre en place ta notation alternative » s'ajoutent. Une bulle trop longue se coupe en pages. Évaluation › Liste a une seconde vue, « Tableau de notation ». Une copie importée compte comme remise dès sa réception. L'entrée 1.240 nomme ses deux parcours par leur titre, sans rang.
+
+**Ce qui reste à toi** : rien pour cette version. Un défaut connu, publié en connaissance de cause (ta décision avec Cowork, 10 h 25) : dans « Automatiser tes commentaires », le bouton « Continuer » saute une fois quand il apparaît ; un toucher dans le dixième de seconde qui suit se perd. Corrigé sur `main` local pour la prochaine version.
+
+**Vérifié comment** : deux vérifications complètes au navigateur WebKit. La première a trouvé un essai en retard sur une décision du parcours 8 (le premier code d'un sous-critère porte 1) ; seul l'essai a changé. La seconde, sur `d570e8864` : 1 544 essais, 1 541 verts, 3 rattrapés au second essai, 0 rouge. Ces trois-là relancés seuls : le parcours 5, 2 sur 6, défaut du banc établi par trace ; le parcours 8, 5 sur 6, le saut de « Continuer » établi par trace. Le retrait du vieux dossier du plugin, fusionné après, ne touche aucun fichier que l'application ou les essais chargent. Relectures neuves : rien de bloquant.
+
+**Pas vérifié** : le vrai Safari, l'iPad ; Chromium. Non élucidé : deux rougeurs rares du banc du parcours 5 (l'Inspecteur, 1 sur 6, non reproduit sur 24 ; le second glisser de l'étape 6, 3 sur 24), en cours.
+
 ✅ **LE 9 NOVEMBRE 2026, 19 H 27 : LA 1.240.0 EST EN LIGNE — DEUX PARCOURS DE PLUS.** *Écrit par Claude Code.*
 
 **Ce qui change pour toi** : ce que disent les cinq lignes de la 1.240 dans les Nouvelles, validées par toi mot pour mot le 9 nov. Deux parcours dans « Assistance » : « Mettre tes données à l'abri » et « Lire ta classe et intervenir ». La bulle des parcours se range au bord de l'écran sur un téléphone. Une personne absente à toutes les séances passées, sans production, est lue en non-participation, et les six textes de l'Aide qui le disent ont été réécrits avec toi. Sous « Exporter pour Léa », quand rien n'est verrouillé, le compteur dit « Aucune évaluation verrouillée · N évaluations non verrouillées laissées de côté ». Et un défaut du voile des parcours, présent aussi dans la 1.239.0 : quand la cible était presque sortie de l'écran, le voile perdait son trou le temps d'une image ; c'est corrigé.
