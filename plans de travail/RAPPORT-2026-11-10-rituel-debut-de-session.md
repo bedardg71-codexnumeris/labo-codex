@@ -5,6 +5,34 @@
 `.claude/skills/debut-de-session-labo-codex/SKILL.md`. Aucun fichier de `js/`, pas de verdict, pas de release, pas de
 fusion : la session principale fusionnera après le groupe 3.
 
+> **Relais du 10 nov. 2026, cinquième passage (décisions techniques de Cowork sur les consignes, l'écriture dans
+> `js/` et le push)** : fait et poussé, rien fusionné, rien dans `js/`. Seul `PROTOCOLE.md` est touché, avec ce
+> rapport. **`PROTOCOLE.md` : 571 lignes avant, 555 après** (plafond : 575).
+>
+> **Passages changés** :
+> - (a) les six temps, temps 2 (« CADRER ») : la consigne va dans un bloc de code complet, collé par Grégoire ; un
+>   fichier `CONSIGNE-LOT-…` seulement si elle est trop longue ;
+> - (a) le schéma de la boucle : la ligne « fichier : `CONSIGNE-DU-JOUR.md` » et son bloc d'accompagnement deviennent
+>   « bloc : la consigne complète, collée par Grégoire » ;
+> - (a) « Deux véhicules » : le bloc porte le mandat, c'est la forme ordinaire ; le fichier est l'exception, et le
+>   bloc dit alors de le lire ;
+> - (a) la section « Les consignes passent par un FICHIER », réécrite et renommée : bloc complet, sans retours à la
+>   ligne manuels ; fichier seulement pour une consigne trop longue et quand Cowork peut écrire sur le Mac ; ses deux
+>   conditions gardées mot pour mot (date, heure et version en tête ; commité avec le lot). L'ancienne condition 3
+>   (dire à Grégoire ce que la consigne produira) faisait double emploi avec la règle de forme 2 : ramenée à un renvoi ;
+> - (b) règle 5, point 1 : plusieurs sessions écrivent dans `js/`, chacune sur sa branche partie de `main` ; seule la
+>   session principale fusionne, par groupe de lots, règle les jetons d'`index.html` et lance un verdict par groupe ;
+> - (c) règle 5, point 5 : seule la session principale pousse sur `main` ; une session du cloud ne pousse que sa
+>   branche ; Cowork ne pousse pas ;
+> - (d) règle 5, point 2 : intacte.
+>
+> **Deux alignements que (b) entraînait, faits sans qu'ils soient demandés** : dans les rôles, « une seule session
+> écrit à la fois » devient « plusieurs sessions écrivent, chacune sur sa branche » ; à la fin de la règle 5,
+> « l'écriture dans `js/`, non » devient « se sépare par branche ; sur une même branche, non ».
+>
+> **Vu, non touché** : le temps 6 (« LIVRER (Grégoire). Le `git push`. ») et le schéma (« Grégoire POUSSE ») disent
+> encore que c'est lui qui pousse ; le paragraphe qui les suit les corrige déjà depuis le 13 sept.
+>
 > **Relais du 10 nov. 2026, quatrième passage (décision de Grégoire de 8 h 43 sur les mots ; décisions techniques de
 > Cowork sur `PROTOCOLE.md`)** : fait et poussé, rien fusionné, rien dans `js/`.
 >

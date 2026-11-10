@@ -25,8 +25,8 @@
 - **Cowork** mesure le dépôt en lecture seule, tient le fil d'une session à
   l'autre, rédige les plans, les consignes et les blocs à relayer. Il écrit dans
   le dépôt les documents de cadrage, rien d'autre.
-- **Claude Code** exécute, mesure, teste, commite et pousse. Une seule session
-  écrit à la fois.
+- **Claude Code** exécute, mesure, teste, commite et pousse. Plusieurs sessions
+  écrivent, chacune sur sa branche (règle 5).
 
 ### Qui écrit quoi (aligné le 10 novembre 2026)
 
@@ -58,7 +58,7 @@ Mesure du 13 septembre : **sur trois lots ouverts, trois fiches se sont révél�
 ### Les six temps
 
 1. **MESURER** (Cowork, lecture seule). Reprendre au code ce que la fiche affirme. Chaque compte s'écrit **avec la commande qui le produit**, pour qu'un tiers puisse le refaire.
-2. **CADRER** (Cowork). La consigne va dans un FICHIER (`plans de travail/CONSIGNE-DU-JOUR.md`), jamais dans un bloc à recopier. Elle porte : ce que le lot livre, ce que la mesure corrige de la fiche, la portée, les pièges connus, la preuve exigée, ce qui n'entre PAS, et les écritures de backlog dues.
+2. **CADRER** (Cowork). La consigne va dans un bloc de code, complet, que Grégoire colle ; un fichier `CONSIGNE-LOT-…` seulement si elle est trop longue pour un bloc (règle 6, « Les consignes »). Elle porte : ce que le lot livre, ce que la mesure corrige de la fiche, la portée, les pièges connus, la preuve exigée, ce qui n'entre PAS, et les écritures de backlog dues.
 3. **CODER** (Claude Code). Un lot, un commit. Les trouvailles en chemin reçoivent l'une des trois issues de `CLAUDE.md`, nommées dans le rapport.
 4. **CONTRE-VÉRIFIER** (Cowork). Reprendre au code ce que le rapport affirme. Voir « Deux méthodes » ci-dessous.
 5. **ÉPROUVER** (Claude Code). Suite complète, verdict Playwright pris **Cowork fermé** (règle 8).
@@ -76,8 +76,7 @@ Le tour complet, tel qu'il a tourné le 13 septembre :
    fiche du backlog
         ↓
    [1] Cowork MESURE le dépôt, et dément la fiche
-        ↓  fichier : plans de travail/CONSIGNE-DU-JOUR.md
-        ↓  bloc    : « lis la consigne, voici ce qui t'enverrait de travers »
+        ↓  bloc    : la consigne complète, collée par Grégoire
    [2] Claude Code CODE, commite, et RAPPORTE
         ↓  bloc    : ce qu'il a mesuré, ce qu'il a supposé, ses écarts avec la consigne
    [3] Cowork CONTRE-VÉRIFIE au code, et rend un verdict
@@ -89,8 +88,8 @@ Le tour complet, tel qu'il a tourné le 13 septembre :
 
 **Deux véhicules, deux emplois qui ne se confondent pas.**
 
-- **Le FICHIER** porte le mandat. Il est durable, versionné, relisible à froid, et c'est lui qui fait foi.
-- **Le BLOC** porte le passage. Il est jetable, il tient dans un message, et son seul travail est de **dire où est le fichier et de nommer ce qui enverrait le receveur de travers s'il l'ignorait.** Un bloc qui résume le fichier le rend redondant, et les deux divergent au tour suivant.
+- **Le BLOC** porte le mandat : un bloc de code, complet, sans retours à la ligne manuels, que Grégoire colle. C'est la forme ordinaire.
+- **Le FICHIER** (`plans de travail/CONSIGNE-LOT-…`) ne sert que pour une consigne trop longue pour un bloc, et seulement quand Cowork peut écrire sur le Mac. Le bloc dit alors de le lire et **nomme ce qui enverrait le receveur de travers s'il l'ignorait** ; il ne le résume pas, sinon les deux divergent au tour suivant.
 
 **Trois obligations, à chaque passage :**
 
@@ -281,9 +280,10 @@ seule session. Le travail du 1er septembre (`travaux-ui.js`, `styles.css`,
 `index.html`, `tests/`) n'était pas séparable ; trois sessions s'y seraient
 piétinées toute la journée.
 
-**1. Une seule session écrit dans `js/`.** Tout changement dans `js/` oblige à
-bumper le bloc de jetons d'`index.html` (le hook l'exige) : deux sessions s'y
-heurtent mécaniquement, quel que soit leur soin.
+**1. Plusieurs sessions écrivent dans `js/`, chacune sur sa propre branche partie
+de `main`** (10 novembre 2026 ; la règle disait « une seule session écrit dans
+`js/` »). Seule la session principale fusionne dans `main`, par groupe de lots ;
+elle règle les jetons d'`index.html` à la fusion et lance un seul verdict par groupe.
 
 **2. Une seule session lance une suite.** Toutes les specs ouvrent le même
 `index.html` en `file://` et partagent le `localStorage` de cette origine. Deux
@@ -298,8 +298,9 @@ tient la carte.
 `styles.css`, rien d'autre ». Un mandat qui ne nomme pas ses fichiers ne peut pas
 être vérifié disjoint.
 
-**5. Une seule session pousse : Claude Code, à la demande de Grégoire** (`scripts/pousser.sh`) ;
-Cowork ne pousse pas (corrigé le 13 sept. 2026). Motif d'origine, le 8 août : deux sessions
+**5. Seule la session principale pousse sur `main`** (`scripts/pousser.sh`, à la demande de
+Grégoire) ; une session du cloud ne pousse que sa propre branche ; Cowork ne pousse pas
+(10 novembre 2026). Motif d'origine, le 8 août : deux sessions
 parties du même commit, deux « 1.55.0 », les mêmes identifiants.
 
 **6. Une trouvaille hors de ses fichiers ne se corrige JAMAIS.** Elle remonte à la
@@ -316,7 +317,7 @@ lui, elle passe par elle.
 l'ÉCRITURE.* Deux balayages en lecture seule menés en parallèle le 1er septembre
 n'ont demandé aucune coordination et n'ont couru aucun risque. Le triage de
 rapports, la documentation, les mesures se séparent proprement. L'écriture dans
-`js/`, non.
+`js/` se sépare par branche (règle 1) ; sur une même branche, non.
 
 ⚠ **La sérialisation porte aussi sur git, pas seulement sur les fichiers.** Une
 session qui commite par `git add -A` emporte le travail des autres dans son
@@ -432,28 +433,15 @@ performance.
 « le verdict » : chacun se dit en clair la première fois qu'il apparaît dans une
 séance.
 
-### Les consignes passent par un FICHIER, pas par un bloc à copier
+### Les consignes : un bloc complet ; un fichier seulement quand le bloc ne suffit pas
 
-*Arrêté le 2 septembre 2026, après qu'un bloc relayé eut été **tronqué à la
-copie** : Claude Code a reçu une demi-consigne, coupée en plein milieu d'une
-mesure, et ni Grégoire ni lui n'avaient de quoi s'en apercevoir. Il l'a rattrapé
-en remesurant lui-même — c'était la bonne réaction, mais on ne bâtit pas une
-méthode sur la vigilance d'une session.*
+*Réécrit le 10 novembre 2026 : c'est la pratique actuelle, et la préférence de Grégoire. Le 2 septembre, après un bloc **tronqué à la copie** (Claude Code avait reçu une demi-consigne sans que personne puisse s'en apercevoir), la règle était l'inverse : tout par fichier.*
 
-**Cowork écrit la consigne dans `plans de travail/CONSIGNE-DU-JOUR.md`.**
-Grégoire ne colle plus qu'une ligne :
+**Le relais va dans un bloc de code, complet, sans retours à la ligne manuels, collé par Grégoire.**
 
-```
-Lis « plans de travail/CONSIGNE-DU-JOUR.md » et exécute-la.
-```
+**Un fichier `plans de travail/CONSIGNE-LOT-…` ne sert que pour une consigne trop longue pour un bloc, et seulement quand Cowork peut écrire sur le Mac.** Le bloc dit alors de le lire. Deux conditions pour ce fichier :
 
-Rien de long à copier, donc rien à tronquer. Et la consigne reste dans le dépôt :
-relisible si quelque chose cloche, au lieu de vivre dans une conversation qui
-défile.
-
-**Trois conditions, et elles ne sont pas décoratives :**
-
-**1. Le fichier porte SA DATE ET SON HEURE d'écriture en tête, et la version de
+**1. Il porte SA DATE ET SON HEURE d'écriture en tête, et la version de
 l'application à ce moment-là.** Le nom ne peut pas rôtir ; le contenu, oui. Une
 consigne qui date de plus de quelques heures **se signale au lieu de s'exécuter** :
 l'état du dépôt a pu changer entre-temps.
@@ -462,11 +450,7 @@ l'état du dépôt a pu changer entre-temps.
 du lot : les séparer, c'est perdre la trace de ce qui avait été demandé. C'est
 l'exception à la règle du commit séparé pour les fichiers de Cowork.
 
-**3. ⚠ Grégoire ne voit plus ce qu'il transmet — et c'est le prix de ce
-mécanisme.** Il devient donc OBLIGATOIRE, et non plus seulement souhaitable, que
-Cowork dise **dans la conversation, en une ou deux phrases de français
-d'utilisateur, ce que la consigne va produire à l'écran.** Sans quoi on a résolu
-la troncature en fabriquant un chèque en blanc.
+Dans les deux cas, Cowork dit à Grégoire en une phrase ce que la consigne va produire à l'écran (règle de forme 2).
 
 ### La mesure d'efficacité
 
