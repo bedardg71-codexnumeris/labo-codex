@@ -2,7 +2,52 @@
 
 Consigne de Cowork du 9 nov. 2026, 17 h 40. Branche `lot/vue-simple`, partie de `origin/lot/tableau-de-notation-1-bis` (`b6d5926`). Session cloud, Chromium seulement.
 
-> **État : lot livré sur la branche `lot/vue-simple`, à juger le 11 novembre.** Rien n'est fusionné, `main` n'est pas touché, aucune release, rien au changelog. **En tête : la troisième livraison (seuils, mise à jour, colonnes), puis la seconde (la pratique se règle), puis la liste de travail, puis la première livraison, puis la mesure d'avant le code.**
+> **État : lot livré sur la branche `lot/vue-simple`, à juger le 11 novembre.** Rien n'est fusionné, `main` n'est pas touché, aucune release, rien au changelog. **En tête : le relais de 21 h 42 (paliers, un texte, les essais durcis), puis la troisième livraison (seuils, mise à jour, colonnes), puis la seconde (la pratique se règle), puis la liste de travail, puis la première livraison, puis la mesure d'avant le code.**
+
+---
+
+## RELAIS DE 21 H 42 — LES PALIERS, UN TEXTE, LES ESSAIS DURCIS (10 nov. 2026)
+
+Sur les décisions de Grégoire et de Cowork du 9 nov., 21 h 42 à 21 h 43. Le lot à part (un niveau sans seuils, une note au-dessus de 100, en vue étendue) est sur sa branche, `lot/niveau-sans-seuils`, avec son rapport à lui.
+
+### Ce qui est fait
+
+1. **La note d'un palier n'a pas de plafond**, comme la valeur d'un niveau. Le refus dit : « Chaque palier a une note : un nombre, zéro ou plus. » Un palier à 120 donne 120 au tableau et à l'écran Note finale.
+2. **Le texte validé par Grégoire est posé, mot pour mot** : « Des productions de ton tableau portent déjà le type « X ». Choisis un autre nom. »
+3. **Renommer une production ne renomme pas ses résultats** : rien n'est touché, comme décidé.
+4. **Les essais sont durcis** contre les trois causes vues sous WebKit sur le Mac (voir plus bas).
+
+### La phrase validée ne couvre qu'un des deux cas
+
+- **Elle couvre « rattacher »** : on donne à un type un nom que des productions portent déjà (une production de la vue étendue de type « atelier », et un type neuf nommé « Atelier »). « Choisis un autre nom » dit quoi faire.
+- **Elle ne couvre pas « détacher »** : on renomme un type auquel des productions tiennent par son nom (le type « Examen », une production de type « examen »). Là, c'est l'ANCIEN nom que les productions portent, et il n'y a pas d'autre nom à choisir : il faut le garder.
+- **Pour ce second cas, je propose** (PROPOSÉ, posé dans le code) : « Des productions de ton tableau portent le type « Examen ». Ce nom ne se change pas ici. »
+
+### Ce que j'ai durci, cause par cause
+
+J'ai relu les essais du banc de la vue simple (34 aujourd'hui) avec les trois causes en tête.
+
+| Cause vue sous WebKit | Ce que j'ai trouvé chez moi | Ce que j'ai fait |
+|---|---|---|
+| Une zone tactile à 43,9 px pour 44 | Mes cibles étaient à 44 px juste ; les petits boutons du réglage à 40 ; le titre d'une colonne à 32 ; « Ajouter des étudiant·es » à 24 | **Tout ce qui se touche en vue simple est à 46 px au moins**, y compris les cases du tableau, les boutons de l'en-tête et les deux menus. Un essai neuf le mesure à 1180 et à 820 px, sur 17 états d'écran |
+| Une mesure prise pendant un défilement ou une transition | Aucun de mes essais ne mesurait de position ni de taille. Mes sections apparaissent en 0,3 s : c'est ce qui avait grisé quatre captures | L'essai neuf des tailles **attend la fin de toute animation avant chaque mesure**. Les autres essais ne lisent que des états (un texte, une classe, une donnée) |
+| Une page qui recharge pendant une mesure | **Sept rechargements dans cinq essais** : quatre servaient seulement à démarrer sur des données semées ou sur un fichier ouvert | **Six retirés** : ces essais refont le choix de la vue comme au démarrage, sans recharger. **Un essai recharge encore, parce que le rechargement est son sujet** (« au rechargement, celui qui a bâti sa classe en vue simple y reste ») ; il vide les écritures avant, attend l'application après, et ne mesure rien autour |
+
+Ce que ce durcissement ne prouve pas : je n'ai pas WebKit. Les 46 px sont mesurés sous Chromium ; l'arrondi de WebKit reste à constater sur le Mac.
+
+### Les textes neufs de ce relais
+
+- le refus d'une note de palier : « Chaque palier a une note : un nombre, zéro ou plus. » (remplace « de 0 à 100 » ; PROPOSÉ, sur le modèle du refus des niveaux)
+- le second cas du nom d'un type : « Des productions de ton tableau portent le type « X ». Ce nom ne se change pas ici. » (PROPOSÉ)
+- validé par Grégoire, posé mot pour mot : « Des productions de ton tableau portent déjà le type « X ». Choisis un autre nom. »
+
+### La preuve
+
+- **Vitest** : suite entière, 11 013 essais verts sur 11 013.
+- **Playwright Chromium** : banc de la vue simple, 34 essais verts sur 34 ; banc du tableau, 19 sur 19.
+- **Break-tests** : 7 défenses retirées. Six essais ont rougi (le plafond des paliers, une note négative, les deux refus de nom, une cible sous 46 px, le texte validé). Le septième est resté vert, et c'était mon code, pas l'essai : deux règles donnaient 46 px aux mêmes boutons, en retirer une ne changeait rien. J'ai retiré la redondance (une seule valeur par règle) ; le break-test voisin, sur le titre d'une colonne, prouve que l'essai mord (il a signalé « 89 × 32 »).
+- **Captures** : les 120 refaites, les cibles étant plus hautes de 2 px.
+- **Pas de relecture par un agent neuf pour ce relais** : le changement est étroit (une borne, deux textes, des hauteurs, des essais). Je le dis plutôt que de le laisser croire.
 
 ---
 
