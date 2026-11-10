@@ -123,7 +123,7 @@ test('menu : une seule entrée « Assistance », avant Aide, Signaler, Soutenir,
     await capture(page, 'menu-1180-sombre-rien-de-fait');
 });
 
-test('panneau : titre, phrase, « Tes parcours », deux parcours à faire, l’aide dans les pages ; Échap, voile et bouton le ferment', async ({ page }) => {
+test('panneau : titre, phrase, « Tes parcours », les parcours à faire, l’aide dans les pages ; Échap, voile et bouton le ferment', async ({ page }) => {
     await ouvrirEspaceVide(page, 1180);
     await ouvrirPanneau(page);
     const p = page.locator('#panneau-assistance');
@@ -135,8 +135,7 @@ test('panneau : titre, phrase, « Tes parcours », deux parcours à faire, l’a
     expect(await deuxPremiers(p.locator('.assistance-parcours-titre'))).toEqual(['Découvrir', 'Mettre ta classe en place']);
     expect(await deuxPremiers(p.locator('.assistance-parcours-ligne'))).toEqual([
         "Ce que Labo Codex te montre avant d'entrer en classe, sur une classe de démonstration.",
-        "De ton trimestre à ta première saisie de présences : ta classe d'un coup d'œil.",
-        "De ta grille à une rétroaction qui s'écrit seule, à partir de ce que tu relèves et comptes dans chaque production."
+        "De ton trimestre à ta première saisie de présences : ta classe d'un coup d'œil."
     ]);
     expect(await deuxPremiers(p.locator('.assistance-parcours-etat'))).toEqual(['À faire', 'À faire']);
     expect(await deuxPremiers(p.locator('.assistance-parcours-bouton'))).toEqual(['Commencer', 'Commencer']);

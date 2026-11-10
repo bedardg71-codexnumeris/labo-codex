@@ -282,6 +282,11 @@ function _evaluerSansCopie(da, productionId) {
     setTimeout(async () => {
         try {
             _setupAffichagePanneauxModif(false);
+            // Neuvième parcours (8 nov. 2026, nuit) — une évaluation neuve prend l'affichage de la pratique active
+            // (« Note chiffrée » ou « Niveau de performance »), comme avec une copie : sans copie, le formulaire gardait
+            // celui de l'évaluation d'avant, ou « Note chiffrée », et le PDF de l'étudiant·e suivait. Une évaluation déjà
+            // enregistrée pose ensuite le sien (`verifierEtChargerEvaluationExistante`).
+            cocherOptionsParDefaut();
             // Sans copie, le travail est « Reçu » — remis, non importé (Grégoire, 15 sept.) — et les
             // critères s'ouvrent ; « Non reçu », le défaut du formulaire, les verrouillait. Posé AVANT
             // l'élève et la production : leur chargement lit ce statut. Une évaluation déjà
@@ -2446,6 +2451,15 @@ function desactiverFormulaireEvaluation(desactiver) {
     checkboxes.forEach(id => {
         const checkbox = document.getElementById(id);
         if (checkbox) checkbox.disabled = desactiver;
+    });
+
+    // Corrections du neuvième parcours (9 nov. 2026, décision de Cowork, étape 5) : les deux boutons d'affichage de la
+    // palette « Rétroaction » (« Note chiffrée », « Niveau de performance ») suivent le reste de la fiche. Sous le
+    // verrou, ils restaient cliquables sans rien enregistrer (la garde d'`autoSave`, evaluation-chargement.js) : le
+    // choix semblait pris, et ne l'était pas. Pour changer l'affichage d'une évaluation verrouillée : « Déverrouiller ».
+    ['affichageNoteComplet1', 'affichageNoteLettre1'].forEach(id => {
+        const radio = document.getElementById(id);
+        if (radio) radio.disabled = desactiver;
     });
 
     // Lot C de l'enregistrement — « Verrouiller » n'est plus éteint sous le verrou :

@@ -819,6 +819,15 @@
        =============================== */
 
     /**
+     * « Dossier PDF » a livré son fichier (le dossier, ou la synthèse seule, #912) : un événement, pour qui attend ce
+     * geste sans toucher à l'export. Seul lecteur : le neuvième parcours (étape 7, « Continuer » paraît quand le PDF
+     * est téléchargé ; js/parcours-notation-alternative.js, 8 nov. 2026).
+     */
+    function annoncerDossierLivre(da, productionId) {
+        document.dispatchEvent(new CustomEvent('dossierPdfLivre', { detail: { da: da, productionId: productionId } }));
+    }
+
+    /**
      * Exporte un dossier complet : pages annotees + page de synthese
      * Peut etre appele depuis la page d'evaluation (sans fichier ouvert dans la visionneuse)
      * @param {string} da - DA de l'etudiant
@@ -879,6 +888,7 @@
             const nomEtudiant = etudiant ? `${etudiant.prenom}_${etudiant.nom}` : da;
             const nomSortie = `dossier_${nomEtudiant}_${productionId}.pdf`;
             doc.save(nomSortie);
+            annoncerDossierLivre(da, productionId);
 
             // Marquer le fichier comme exporte (cycle de vie)
             travauxStockage.marquerExporte(fichier.id);
@@ -958,6 +968,7 @@
             const etudiant = obtenirDonneesSelonMode('groupeEtudiants').find(e => e.da === da);
             const nomEtudiant = etudiant ? `${etudiant.prenom}_${etudiant.nom}` : da;
             doc.save(`synthese_${nomEtudiant}_${productionId}.pdf`);
+            annoncerDossierLivre(da, productionId);
 
             // #674 — la page est là, mais elle ne conclut pas : dit avant la remise.
             if (synthese.avertissement) {

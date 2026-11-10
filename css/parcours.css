@@ -266,6 +266,12 @@ body.parcours-actif .temoin-dans-le-flux .temoin-enregistrement-succes.visible {
 /* Pendant un parcours, le jalon de js/transitions.js ne vient pas couvrir l'étape. */
 body.parcours-actif .transition-bandeau { display: none; }
 
+/* Une étape qui se joue dans une fenêtre (l'assistant de la pratique, neuvième parcours) : la fenêtre est
+   à 9999, au-dessus du voile. Le contour et la bulle passent au-dessus d'elle ; le voile reste dessous,
+   pour que la fenêtre et les questions qu'elle ouvre restent touchables. Posé par le parcours. */
+body.parcours-sur-modale .parcours-contour { z-index: 10010; }
+body.parcours-sur-modale .parcours-bulle { z-index: 10011; }
+
 /* ---------- Le panneau « Assistance » ---------- */
 
 .assistance-voile {
@@ -646,3 +652,11 @@ body.parcours-actif.parcours-inspecteur-devant #planif-panneau { z-index: 85; }
    course) : elle reçoit, le temps de l'étape, la place de la bulle. Posé et retiré par js/parcours-recevoir.js. */
 body.parcours-actif.parcours-place-sous-les-colonnes #evaluations-importer { padding-bottom: 60vh; }
 
+
+/* ---------- Parcours 9, corrections du 9 nov. 2026 : deux formes de bulle (js/parcours-notation-alternative.js) ----------
+   Étape 1, l'assistant ouvert (à partir de 700 px ; question 12, validée par Grégoire) : la bulle se réduit à sa ligne
+   orange, au bord. Le titre, le texte et le lien de sortie restent dans la bulle, cachés (le lecteur d'écran a reçu
+   l'annonce de l'étape ; Échap ferme alors l'assistant). Étape 3, standards (Cowork) : plus large, donc moins haute, pour laisser libres les réglages. */
+.parcours-bulle.parcours-bulle--reduite { padding: 10px 14px; gap: 0; }
+.parcours-bulle--reduite > :not(.parcours-bulle-geste) { display: none; }
+.parcours-bulle.parcours-bulle--large { width: min(560px, calc(100vw - 32px)); }

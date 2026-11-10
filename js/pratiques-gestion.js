@@ -84,11 +84,13 @@ async function afficherListePratiquesMateriel() {
     const configurations = db.getSync(cle('pratiquesConfigurables'), null) || [];
 
     // Filtrer les pratiques dans la bibliothèque (affichées dans la sélection)
-    // Beta 99.39 (A.0) : masque les items démo en mode normal
-    // #326 axe D : masque aussi les variantes d'essai (réservées au Labo › Exploration).
-    const pratiquesDansBibliotheque = BibliothequeUI.filtrerParMaquette(BibliothequeUI.filtrerParModeDemo(
+    // #326 axe D : masque les variantes d'essai (réservées au Labo › Exploration).
+    // Question 11 du neuvième parcours (9 nov. 2026, Cowork) : plus de filtre « démo » ici. Dans la démo, il ne
+    // masquait rien ; hors de la démo, il masquait une pratique dont l'auteur dit « Demo Labo Codex » — la copie
+    // d'un modèle, la tienne (`BibliothequeUI.estPratiqueDeDemo`).
+    const pratiquesDansBibliotheque = BibliothequeUI.filtrerParMaquette(
         configurations.filter(p => p.dansBibliotheque !== false)
-    ));
+    );
 
     // #762 (6 sept. 2026) — LA PRATIQUE ASSIGNÉE AU GROUPE-COURS ACTIF SE VOIT ICI : un enseignant
     // pouvait croire sa pratique « activée » sans qu'aucune le soit (le repli « sommative » ne
@@ -270,11 +272,12 @@ async function preparerDonneesBibliothequePratiques() {
     // Beta 99.39 Phase B : migration vers BibliothequeUI (sortir de l'outlier).
     const configurations = db.getSync(cle('pratiquesConfigurables'), null) || [];
 
-    // Beta 99.39 (A.0) : masque les items démo en mode normal
-    // #326 axe D : masque aussi les variantes d'essai (réservées au Labo › Exploration).
-    const pratiquesDansBibliotheque = BibliothequeUI.filtrerParMaquette(BibliothequeUI.filtrerParModeDemo(
+    // #326 axe D : masque les variantes d'essai (réservées au Labo › Exploration).
+    // Question 11 du neuvième parcours (9 nov. 2026) : tes pratiques ne passent plus par le filtre « démo » (voir
+    // `afficherListePratiquesMateriel`). Les modèles de la bibliothèque, eux, le gardent (ligne suivante).
+    const pratiquesDansBibliotheque = BibliothequeUI.filtrerParMaquette(
         configurations.filter(p => p.dansBibliotheque !== false)
-    ));
+    );
 
     let toutesBibliotheque = [];
     if (typeof obtenirToutesLesPratiquesBibliotheque === 'function') {
@@ -294,9 +297,8 @@ async function preparerDonneesBibliothequePratiques() {
     // vivent dans le Labo → Comparateur). Résultat terrain : l'utilisateur les cherche
     // ici pour les supprimer et ne les trouve pas. On signale donc leur existence et
     // on pointe vers le seul endroit où on peut les comparer, les adopter ou les jeter.
-    const nbMaquettes = BibliothequeUI.filtrerParModeDemo(
-        configurations.filter(p => p.dansBibliotheque !== false)
-    ).filter(p => BibliothequeUI.estMaquette(p)).length;
+    const nbMaquettes = configurations.filter(p => p.dansBibliotheque !== false)
+        .filter(p => BibliothequeUI.estMaquette(p)).length;
 
     // #320 — répertoires de classement (couche par-dessus, range par identité).
     const repsPratiques = (window.repertoiresBibliotheque && typeof window.repertoiresBibliotheque.obtenir === 'function')
@@ -1069,9 +1071,11 @@ async function chargerPratiquePourModif(pratiqueId) {
     // Le menu montre la pratique ouverte
     MenuSelection.marquer('menuPratiques', pratiqueId);
 
-    // Phase 4.B : mode lecture seule si item démo
+    // Phase 4.B : mode lecture seule si item démo. Question 11 du neuvième parcours (9 nov. 2026) : une pratique
+    // ne l'est que dans la démo (`estPratiqueDeDemo`) ; sinon, l'appel nettoie (item nul).
     if (conteneurEdition && typeof BibliothequeUI !== 'undefined' && BibliothequeUI.appliquerModeLectureSeuleDemo) {
-        BibliothequeUI.appliquerModeLectureSeuleDemo(conteneurEdition, pratique, 'dupliquerEtEditerPratique', 'Dupliquer pour créer ma pratique');
+        const deDemo = BibliothequeUI.estPratiqueDeDemo(pratique);
+        BibliothequeUI.appliquerModeLectureSeuleDemo(conteneurEdition, deDemo ? pratique : null, 'dupliquerEtEditerPratique', 'Dupliquer pour créer ma pratique');
     }
 
     pratiqueOuverte = pratique;
@@ -1255,7 +1259,7 @@ function remplirFormulairePratique(pratique) {
 
         // 🆕 #24 : Déterminer le mode de sélection (hybride a priorité)
         const estHybride = config.portfolio?.hybride || config.categories?.actif || false;
-        let modeSelection = config.portfolio?.methodeSelection || 'meilleurs';
+        let modeSelection = modeSelectionDuMenu(config.portfolio);
         if (estHybride) modeSelection = 'hybride';
 
         // #435 (9 août 2026) — NORMALISATION des pratiques legacy, extension de
@@ -1434,6 +1438,17 @@ function afficherDescriptionTaxonomiqueMat(type) {
     // Description taxonomique maintenant affichée dans la sidebar
     // Cette fonction est conservée pour éviter les erreurs d'appel
     return;
+}
+
+/**
+ * La valeur du menu « Mode de sélection » pour un portfolio enregistré. Neuvième parcours (8 nov. 2026, nuit) — le modèle
+ * « N plus récentes » écrit `recents`, que le menu n'offre pas (il dit `derniers`, que le moteur lit comme `recents`, et
+ * l'assistant fait la même relecture). Le menu restait vide, et le premier réglage changé écrivait « meilleurs » (le repli
+ * de la sauvegarde). Lecture seule : rien n'est écrit tant qu'on ne touche rien. Pure.
+ */
+function modeSelectionDuMenu(portfolio) {
+    const mode = (portfolio && portfolio.methodeSelection) || 'meilleurs';
+    return mode === 'recents' ? 'derniers' : mode;
 }
 
 /**
@@ -3171,6 +3186,7 @@ window.supprimerTypeTravailMat = supprimerTypeTravailMat;
 
 // PAN-Spécifications : Forfaits
 window.afficherForfaitsMat = afficherForfaitsMat;
+window.modeSelectionDuMenu = modeSelectionDuMenu;   // neuvième parcours (8 nov., nuit) : pour le banc
 window.ajouterForfaitMat = ajouterForfaitMat;
 window.modifierForfaitMat = modifierForfaitMat;
 window.modifierTravailForfaitMat = modifierTravailForfaitMat;
