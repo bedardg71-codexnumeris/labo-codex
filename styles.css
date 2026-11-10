@@ -25021,7 +25021,9 @@ body.planif-plein-ecran-actif #planif-guide-panel {
    à mi-hauteur d'un bloc compact, la zone du cercle « gauche » y est déjà et l'emporte (mesuré). Rien n'est rogné ; à la
    souris, rien ne change. Banc : tests/integration/parcours-5-monter-ton-cours-2026-11-09.spec.js. */
 @media (pointer: coarse) {
-    .planif-noeud .planif-noeud-prise::after { top: -28px; }
+    /* Groupe 3 (9 nov., WebKit) : le glyphe ⠿ y est plus étroit, la zone tombait à 43,9 px de large. À droite, elle
+       touche déjà le sélecteur de type (mesuré : 415,69 contre 415,7 px) ; elle gagne donc 4 px à gauche : 47,9 px. */
+    .planif-noeud .planif-noeud-prise::after { top: -28px; left: -12px; }
 }
 
 /* Le sélecteur reprend l'allure du libellé qu'il remplace (10 px, majuscules,

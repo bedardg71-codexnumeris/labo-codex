@@ -443,9 +443,13 @@ test.describe('Les cercles d’attache au doigt (question 10)', () => {
             const g = document.querySelector(`[id="${id}"] .planif-noeud-prise`);
             const a = getComputedStyle(g, '::after');
             const r = g.getBoundingClientRect(), b = document.getElementById(id).getBoundingClientRect();
-            return { zone: [parseFloat(a.width), parseFloat(a.height)], dehors: document.elementFromPoint(r.left + r.width / 2, b.top - 4) === g };
+            // Groupe 3 (9 nov.) : la zone s'arrête avant le sélecteur de type, qui la suit à droite.
+            const sel = document.getElementById(id).querySelector('.planif-noeud-type-select');
+            return { zone: [parseFloat(a.width), parseFloat(a.height)], dehors: document.elementFromPoint(r.left + r.width / 2, b.top - 4) === g,
+                deborde: sel ? r.right - parseFloat(a.right) - sel.getBoundingClientRect().left : 0 };
         }, comp);
         expect(Math.min(...prise.zone)).toBeGreaterThanOrEqual(44);
+        expect(prise.deborde, 'la zone de la poignée n\'empiète pas sur le sélecteur de type').toBeLessThanOrEqual(0.5);
         expect(prise.dehors).toBe(true);
     });
 });
