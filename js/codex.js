@@ -453,6 +453,12 @@ function _estVignetteAuxArchives(nomCle, auxArchives) {
 /** Les mots de l'aperçu pour « Mettre à jour le codex » et « Enregistrer sous » (Grégoire, 24 oct. 2026). */
 const MOTS_APERCU_CODEX = { titre: 'Mettre à jour le codex', texteConfirmer: 'Mettre à jour' };
 
+/** Vue simple : pose dans les données DU FICHIER la vue d'où il est enregistré (`VueSimpleDonnees.CLE_MARQUE`). */
+function _marquerLaVue(donnees) {
+    if (!window.VueSimple || !window.VueSimpleDonnees) return;
+    donnees[window.VueSimpleDonnees.CLE_MARQUE] = window.VueSimple.vueCourante();
+}
+
 async function genererCodex(options = {}) {
     if (typeof JSZip === 'undefined') {
         throw new Error('JSZip non disponible. Impossible de générer le codex.');
@@ -494,6 +500,10 @@ async function genererCodex(options = {}) {
     //        vignettes). Les listes de fichiers et le manifeste se lisent après ce retrait.
     const partDuDemo = _partDuDemo(donnees);
     donnees = _sansLeDemo(donnees, partDuDemo);
+    // 1 bis'. Vue simple (9 nov. 2026, décision de Cowork) : la vue voyage avec le FICHIER. Il porte la vue d'où il est
+    //         enregistré ; ouvert sur un appareil qui n'a fait aucun choix, il s'ouvre dans cette vue. La marque s'écrit
+    //         ICI, dans le fichier, jamais dans les données de l'appareil ni à la bascule.
+    _marquerLaVue(donnees);
     // 1 ter. #1184 : une copie marquée aux archives (la marque des données qu'on écrit, comme à
     //        l'ouverture) ne part pas, même si son fichier est encore ici : ni son fichier, ni sa
     //        vignette. Sans risque : la marque n'est posée que si l'archive rend le même fichier.

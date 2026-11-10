@@ -77,6 +77,7 @@ body.vue-simple .codex-menu {
 .vs-page {
     max-width: 1100px;
     margin: 0 auto;
+    padding-bottom: 56px;   /* le témoin « Enregistré », en bas à gauche, ne recouvre pas le dernier bouton */
     display: flex;
     flex-direction: column;
     gap: 14px;
@@ -390,8 +391,90 @@ body.vue-simple .codex-menu {
     color: var(--texte-secondaire);
 }
 
-.vs-niveaux-titre {
+/* ---------- Le réglage : la valeur se lit, « Régler » est à côté ---------- */
+
+.vs-bloc-tete {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 10px;
+}
+
+.vs-bloc-tete .vs-sous-titre {
+    margin: 0;
+}
+
+.vs-regler {
+    flex: 0 0 auto;
+}
+
+.vs-valeur {
+    margin: 0;
+    color: var(--texte-principal);
+    line-height: 1.5;
+}
+
+.vs-niveau-valeur {
+    font-variant-numeric: tabular-nums;
     font-weight: 600;
+    color: var(--texte-principal);
+}
+
+.vs-paliers-lus {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    color: var(--texte-secondaire);
+    line-height: 1.5;
+}
+
+.vs-paliers-lus strong {
+    color: var(--texte-principal);
+}
+
+.vs-reglage td {
+    padding: 6px 8px;
+    vertical-align: middle;
+}
+
+.vs-niveau-rangee .vs-n-code {
+    width: 72px;
+    text-transform: none;
+}
+
+.vs-n-nom,
+.vs-type-nom,
+.vs-palier-nom {
+    min-width: 140px;
+}
+
+.vs-n-valeur {
+    width: 96px;
+}
+
+.vs-n-code,
+.vs-n-nom,
+.vs-n-valeur,
+.vs-type-nom,
+.vs-palier-nom,
+.vs-palier-rangee .controle-form {
+    min-height: 40px;
+}
+
+.vs-rangee-gestes {
+    white-space: nowrap;
+    text-align: right;
+}
+
+.vs-page .vs-petit {
+    min-height: 40px;
+    min-width: 40px;
+    padding: 0 10px;
+    margin-left: 4px;
 }
 
 .vs-palier-note,

@@ -30,32 +30,33 @@
         phraseSauvegarder: 'Tes données restent dans ce navigateur. Enregistre-les dans un fichier, ton codex, pour ne pas les perdre et pour les rouvrir ailleurs.',
         vueSimple: 'Vue simple',
         vueEtendue: 'Vue étendue',
-        // PROPOSÉ par Cowork (9 nov. 2026)
-        sousTitreAccueil: 'Quatre étapes, de ta liste d’élèves à ta note finale.',
+        // ARRÊTÉ par Grégoire (9 nov. 2026, 19 h 35) : « étudiant·e », « étudiant·es » partout en vue simple, jamais « élève » ;
+        // le texte de la carte 4, mot pour mot.
+        sousTitreAccueil: 'Quatre étapes, de ta liste d’étudiant·es à ta note finale.',
         cartes: [
-            { ecran: 'classe', titre: 'Ta classe', texte: 'Colle ta liste d’élèves : DA, nom, prénom.', lien: 'Coller ma liste' },
+            { ecran: 'classe', titre: 'Ta classe', texte: 'Colle ta liste d’étudiant·es : DA, nom, prénom.', lien: 'Coller ma liste' },
             { ecran: 'pratique', titre: 'Ta pratique', texte: 'Choisis un modèle, par standards ou par spécifications, et la règle qui construit la note.', lien: 'Choisir un modèle' },
-            { ecran: 'resultats', titre: 'Tes résultats', texte: 'Inscris un niveau, ou acceptable / non acceptable, dans un tableau : tes élèves en lignes, tes productions en colonnes.', lien: 'Ouvrir le tableau' },
-            { ecran: 'note', titre: 'Ta note finale', texte: 'Arrête les notes du trimestre et exporte-les en CSV, prêtes pour ton relevé.', lien: 'Voir les notes' }
+            { ecran: 'resultats', titre: 'Tes résultats', texte: 'Inscris un niveau, ou acceptable / non acceptable, dans un tableau : tes étudiant·es en lignes, tes productions en colonnes.', lien: 'Ouvrir le tableau' },
+            { ecran: 'note', titre: 'Ta note finale', texte: 'Vois la note de chaque étudiant·e et exporte-les en CSV, prêtes pour ton relevé.', lien: 'Voir les notes' }
         ],
-        // PROPOSÉ par Claude Code (9 nov. 2026)
+        // PROPOSÉ par Claude Code (9 nov. 2026) ; « élève » remplacé par « étudiant·e » sur décision de Grégoire
         nav: { accueil: 'Accueil', classe: 'Classe', pratique: 'Pratique', resultats: 'Résultats', note: 'Note finale' },
         // — Classe
         classeTitre: 'Ta classe',
-        classeIntro: 'Colle ta liste d’élèves, une ligne par élève : DA, nom, prénom.',
+        classeIntro: 'Colle ta liste d’étudiant·es, une ligne par étudiant·e : DA, nom, prénom.',
         classeExemple: '1234567, Tremblay, Alice',
         classeNomCours: 'Nom du cours (facultatif)',
         classeNomCoursDefaut: 'Mon cours',
         classeListe: 'Ta liste',
         classeCreer: 'Créer ma classe',
-        classeAjouterTitre: 'Ajouter des élèves',
+        classeAjouterTitre: 'Ajouter des étudiant·es',
         classeAjouter: 'Ajouter à ma classe',
         classeColonnes: ['DA', 'Nom', 'Prénom'],
-        classeCompte: (n) => `${n} élève${n > 1 ? 's' : ''}`,
-        classeAucunLu: 'Aucun élève lu. Une ligne par élève : DA, nom, prénom.',
+        classeCompte: (n) => `${n} étudiant·e${n > 1 ? 's' : ''}`,
+        classeAucunLu: 'Aucun·e étudiant·e lu·e. Une ligne par étudiant·e : DA, nom, prénom.',
         classeRefusees: (n) => `${n} ligne${n > 1 ? 's' : ''} non lue${n > 1 ? 's' : ''} :`,
-        classeCreee: (n) => `Classe créée : ${n} élève${n > 1 ? 's' : ''}.`,
-        classeAjoutes: (n, deja) => `${n} élève${n > 1 ? 's' : ''} ajouté${n > 1 ? 's' : ''}` + (deja ? `, ${deja} déjà inscrit${deja > 1 ? 's' : ''} ce trimestre` : '') + '.',
+        classeCreee: (n) => `Classe créée : ${n} étudiant·e${n > 1 ? 's' : ''}.`,
+        classeAjoutes: (n, deja) => `${n} étudiant·e${n > 1 ? 's' : ''} ajouté·e${n > 1 ? 's' : ''}` + (deja ? `, ${deja} déjà inscrit·e${deja > 1 ? 's' : ''} ce trimestre` : '') + '.',
         classeSuite: 'Choisir ma pratique',
         classeEnDemo: 'La démonstration est ouverte. Quitte-la pour créer ta classe.',
         classeEchec: 'La classe n’a pas pu être créée.',
@@ -64,7 +65,7 @@
         groupeChoisir: 'Choisis un groupe',
         groupeAutrePratique: 'autre pratique',
         groupeMotAutres: 'Un groupe dont la pratique n’est ni par standards ni par spécifications se suit en vue étendue.',
-        sansClasse: 'Commence par ta classe : colle ta liste d’élèves.',
+        sansClasse: 'Commence par ta classe : colle ta liste d’étudiant·es.',
         sansClasseLien: 'Coller ma liste',
         // — Pratique
         pratiqueTitre: 'Ta pratique',
@@ -75,23 +76,64 @@
         ],
         pratiqueModele: 'Modèle',
         pratiqueRegle: 'La règle qui construit la note',
+        // LE GESTE (règle validée par Grégoire, 9 nov. 2026, 19 h 44) : tout ce qui entre dans la note a une valeur de départ
+        // et se règle, à un geste, près de la valeur ; rien ne se règle avant d'avoir une note. Mot proposé par Cowork.
+        regler: 'Régler',
+        reglerEnregistrer: 'Enregistrer',
+        reglerAnnuler: 'Annuler',
         regleNombre: 'Nombre de productions retenues',
-        regleEnregistrer: 'Enregistrer la règle',
         regleEnregistree: 'Règle enregistrée.',
         regleAutre: 'La règle de cette pratique se change en vue étendue.',
+        // — les niveaux (standards)
+        niveauxTitre: 'Tes niveaux',
+        niveauxAide: 'Chaque niveau a une lettre, un nom et une valeur sur 100. La note se construit avec ces valeurs.',
+        niveauColonnes: ['Lettre', 'Nom', 'Valeur'],
+        niveauAjouter: '+ Niveau',
+        niveauRetirer: 'Retirer',
+        niveauMonter: 'Monter',
+        niveauDescendre: 'Descendre',
+        niveauxEnregistres: 'Niveaux enregistrés.',
+        niveauxAucun: 'Cette pratique n’a pas encore de niveaux.',
+        // — les types et les paliers (spécifications)
+        typesTitre: 'Tes types de productions',
+        typesAide: 'Chaque production de ton tableau est d’un type. Les paliers comptent les productions acceptables de chaque type.',
+        typeNom: 'Nom du type',
+        typeAjouter: '+ Type',
+        typeRetirer: 'Retirer',
+        typesEnregistres: 'Types enregistrés.',
+        paliersTitre: 'Tes paliers',
+        paliersNom: 'Palier',
         paliersNote: 'Note',
-        paliersAide: 'Pour chaque note, le nombre de productions acceptables qu’il faut, par type.',
+        paliersAide: 'Pour chaque palier, sa note et le nombre de productions acceptables qu’il faut, par type. Un palier sans exigence est le plancher.',
+        palierAjouter: '+ Palier',
+        palierRetirer: 'Retirer',
+        paliersEnregistres: 'Paliers enregistrés.',
+        palierSansExigence: 'aucune exigence',
+        refus: {
+            minimumNiveaux: () => 'Il faut au moins deux niveaux.',
+            niveauUtilise: (r) => `Le niveau « ${r.nom} » est inscrit dans ${r.n} résultat${r.n > 1 ? 's' : ''} du tableau : il ne se retire pas. Aucun résultat n’a été effacé.`,
+            lettreUtilisee: (r) => `La lettre « ${r.nom} » est inscrite dans ${r.n} résultat${r.n > 1 ? 's' : ''} du tableau : elle ne se change pas. Aucun résultat n’a été effacé.`,
+            niveauIncomplet: () => 'Chaque niveau a une lettre et un nom.',
+            valeurNiveau: () => 'Chaque niveau a une valeur, de 0 à 100.',
+            lettreEnDouble: () => 'Deux niveaux portent la même lettre.',
+            minimumTypes: () => 'Il faut au moins un type.',
+            typeUtilise: (r) => `${r.n} production${r.n > 1 ? 's' : ''} de ton tableau ${r.n > 1 ? 'sont' : 'est'} du type « ${r.nom} » : il ne se retire pas. Aucune production n’a été touchée.`,
+            typeSansNom: () => 'Chaque type a un nom.',
+            typeEnDouble: () => 'Deux types portent le même nom.',
+            minimumPaliers: () => 'Il faut au moins un palier.',
+            palierSansNom: () => 'Chaque palier a un nom.',
+            notePalier: () => 'Chaque palier a une note, de 0 à 100.'
+        },
         pratiqueChanger: 'Changer de modèle',
         pratiqueAutre: 'La pratique de ce groupe n’est ni par standards ni par spécifications : elle se règle en vue étendue.',
         pratiqueSuite: 'Ouvrir le tableau',
         pratiqueEchec: 'La pratique n’a pas pu être enregistrée.',
-        reglePartagee: (n) => `Cette règle vaut pour les ${n} groupes qui ont cette pratique.`,
-        niveaux: 'Niveaux :',
+        reglePartagee: (n) => `Ce réglage vaut pour les ${n} groupes qui ont cette pratique.`,
         // — Résultats (le tableau garde ses mots validés ; ceux-ci remplacent les messages qui nomment la vue étendue)
         tableau: {
             aucunePratique: 'Ce groupe n’a pas encore de pratique. Choisis un modèle : le tableau suivra sa règle.',
             autreFamille: 'Le tableau sert aux pratiques par standards et par spécifications. La pratique de ce groupe se suit en vue étendue.',
-            aucunEleve: 'Ce groupe n’a pas encore d’élèves. Colle ta liste pour remplir le tableau.',
+            aucunEleve: 'Ce groupe n’a pas encore d’étudiant·es. Colle ta liste pour remplir le tableau.',
             aucuneProduction: 'Ton tableau n’a pas encore de colonne. Ajoute ta première production : un nom et une date.'
         },
         plusProduction: '+ Production',
@@ -103,9 +145,9 @@
         productionSansNom: 'Donne un nom à la production.',
         // — Note finale
         noteTitre: 'Ta note finale',
-        noteIntro: 'La note de chaque élève, construite par la règle de ta pratique à partir des résultats du tableau.',
-        noteColonnes: ['Élève', 'Note'],
-        noteSansEleve: 'Aucune note à montrer : ce groupe n’a pas encore d’élèves.',
+        noteIntro: 'La note de chaque étudiant·e, construite par la règle de ta pratique à partir des résultats du tableau.',
+        noteColonnes: ['Étudiant·e', 'Note'],
+        noteSansEleve: 'Aucune note à montrer : ce groupe n’a pas encore d’étudiant·es.',
         // — Sauvegarder
         sauvegarderEnregistrer: 'Enregistrer dans un fichier',
         sauvegarderOuvrir: 'Ouvrir un fichier…',
@@ -152,7 +194,7 @@
 
     function _vide() {
         const trimestres = db.getSync('trimestres', []) || [];
-        return D().applicationVide(trimestres, (id) => db.getSync(id + '_groupeEtudiants', []) || []);
+        return D().applicationVide(trimestres);
     }
 
     function _demoOuverte() {
@@ -186,16 +228,14 @@
 
     function _vueCalculee() {
         const pilote = typeof navigator !== 'undefined' && navigator.webdriver === true;   // un banc Playwright (voir `vueAuDemarrage`)
-        return D().vueAuDemarrage({ choix: _lireChoix(), vide: _vide(), demoOuverte: _demoOuverte(), pilote });
+        // La marque du fichier ouvert (la vue d'où il a été enregistré) : une donnée du fichier, lue seulement, jamais écrite ici.
+        const marque = db.getSync(D().CLE_MARQUE, null);
+        return D().vueAuDemarrage({ choix: _lireChoix(), vide: _vide(), demoOuverte: _demoOuverte(), pilote, marque });
     }
 
-    /** Au chargement de la page, puis quand les données sont lisibles (la liste des élèves peut vivre hors du cache synchrone). */
+    /** Au chargement de la page, puis quand les données sont lisibles (la marque d'un fichier peut vivre hors du cache synchrone). */
     function demarrer() {
-        // Avant que les données soient lisibles, la liste des élèves peut manquer (elle vit parfois hors du cache synchrone) :
-        // sans choix, dès qu'un trimestre existe, on pose la vue étendue et on tranche quand les données sont là — jamais
-        // l'inverse, qui ferait clignoter la vue simple chez qui a un gros corpus (relecture neuve, 9 nov. 2026).
-        const aUnTrimestre = (db.getSync('trimestres', []) || []).some((t) => t && t.id && t.id !== 'demo' && t.isDemo !== true);
-        _poser((!_lireChoix() && aUnTrimestre && _vide()) ? D().VUES.ETENDUE : _vueCalculee(), true);
+        _poser(_vueCalculee(), true);
         if (typeof window.auDbPret === 'function') {
             window.auDbPret(() => {
                 const vue = _vueCalculee();
@@ -279,6 +319,7 @@
         if (_ecran === 'resultats' && ecran !== 'resultats' && window.TableauNotation) window.TableauNotation.quitterPresentation();
         _ecran = ecran;
         _formulaireProduction = false;
+        _fermerReglage();
         if (typeof afficherSection === 'function') afficherSection('simple-' + ecran);
         RENDUS[ecran]();
         window.scrollTo(0, 0);
@@ -463,12 +504,14 @@
         if (refus) { dire(refus); if (zone) zone.focus(); return; }
         const nomCours = ((document.getElementById('vs-nom-cours') || {}).value || '').trim();
         const actif = _groupeActif();
+        // Bâtir sa classe ici vaut un choix, posé AVANT que le trimestre naisse : dès qu'un trimestre existe, l'application
+        // n'est plus « vide », et sans ce choix le prochain démarrage donnerait la vue étendue.
+        _ecrireChoix(D().VUES.SIMPLE);
         try {
             const groupe = actif || await _naitreGroupe(nomCours);
             const r = await _inscrire(lecture.fiches, groupe);
             if (!r.ecrit) throw new Error('élèves non inscrits');
             if (!actif) await _activerGroupeNe(groupe);
-            _ecrireChoix(D().VUES.SIMPLE);   // bâtir sa classe ici vaut un choix : la vue simple reste au prochain démarrage
             const mot = actif ? MOTS.classeAjoutes(r.ajoutes, r.deja) : MOTS.classeCreee(r.ajoutes);
             _rendreClasse(`<p class="vs-succes" role="status">${esc(mot)}</p>${_refuseesHTML(lecture.refusees)}`);
         } catch (e) {
@@ -483,16 +526,16 @@
         return (typeof MODELES_PRATIQUES_PREDEFINIS !== 'undefined' && MODELES_PRATIQUES_PREDEFINIS[id]) || null;
     }
 
-    /** L'échelle qu'un modèle par standards reçoit : l'échelle de départ du trimestre, sinon la première qui porte des niveaux. */
+    /** L'échelle de départ proposée : celle que l'application sème dans le trimestre, sinon la première qui porte des niveaux. */
     function _echelleDeDepart() {
         const echelles = (db.getSync(cle('echellesTemplates'), []) || []).filter((e) => e && Array.isArray(e.niveaux) && e.niveaux.length);
         return echelles.find((e) => e.id === 'ECHELLE_IDME_DEPART') || echelles[0] || null;
     }
 
+    /** L'échelle que la pratique lit : la sienne (née avec elle), sinon celle du trimestre qu'elle désigne. */
     function _echelleDeLaPratique(pratique) {
         const id = pratique && pratique.configuration && pratique.configuration.echelleId;
-        const echelle = (id && typeof obtenirEchelleResolue === 'function') ? obtenirEchelleResolue(id) : null;
-        return echelle || _echelleDeDepart();
+        return (id && (db.getSync(cle('echellesTemplates'), []) || []).find((e) => e && e.id === id)) || null;
     }
 
     /** Les mots de la règle des standards : ceux de l'assistant et de la fiche (registre, validés le 29 oct. 2026). */
@@ -501,34 +544,124 @@
         return { meilleurs: m.modeMeilleurs || 'N meilleures productions', recents: m.modeDerniers || 'N dernières productions', tous: m.modeTous || 'Toutes les productions' };
     }
 
-    function _regleStdHTML(pratique) {
-        const regle = D().regleStd(pratique);
-        if (regle.methode === 'autre') {
-            const phrase = window.TableauNotation ? window.TableauNotation.phraseRegleStd(pratique.configuration, false) : '';
-            return `<p class="vs-intro">${esc(phrase)}</p><p class="vs-note">${esc(MOTS.regleAutre)}</p>`;
-        }
-        const mots = _motsRegleStd();
-        const choix = D().REGLES_STD.map((m) => `<label class="vs-choix"><input type="radio" name="vs-regle" value="${esc(m)}"${regle.methode === m ? ' checked' : ''}> ${esc(mots[m])}</label>`).join('');
-        const echelle = _echelleDeLaPratique(pratique);
-        const niveaux = echelle ? (echelle.niveaux || []).map((n) => `<span class="vs-niveau"><strong>${esc(n.code)}</strong> ${esc(n.nom || '')} ${esc(String(n.valeurCalcul != null ? n.valeurCalcul : (n.valeur != null ? n.valeur : '')))}</span>`).join('') : '';
-        return `<fieldset class="vs-regle"><legend class="u-lecteur-ecran">${esc(MOTS.pratiqueRegle)}</legend>${choix}</fieldset>
-            <div class="groupe-form vs-nombre"><label for="vs-regle-nombre">${esc(MOTS.regleNombre)}</label>
-                <input type="number" id="vs-regle-nombre" class="controle-form" min="1" max="99" value="${esc(String(regle.nombre || 1))}"></div>
-            ${niveaux ? `<p class="vs-niveaux"><span class="vs-niveaux-titre">${esc(MOTS.niveaux)}</span> ${niveaux}</p>` : ''}`;
+    /* ---------- LE RÉGLAGE : un brouillon, ouvert par « Régler », écrit par « Enregistrer » ---------- */
+
+    let _reglage = null;     // 'regle' | 'niveaux' | 'types' | 'paliers' : le seul réglage ouvert, ou null
+    let _brouillon = null;   // ce que le réglage ouvert montre ; rien n'est écrit avant « Enregistrer »
+
+    function _fermerReglage() { _reglage = null; _brouillon = null; }
+
+    /** Le nombre de résultats du trimestre qui portent cette lettre dans cette échelle (les copies remplacées ne comptent pas). */
+    function _compterResultats(echelle) {
+        const evaluations = db.getSync(cle('evaluationsSauvegardees'), []) || [];
+        return (lettre) => !echelle ? 0 : evaluations.filter((e) => e && !e.remplaceeParId && e.echelleId === echelle.id && String(e.niveauFinal) === String(lettre)).length;
     }
 
-    function _regleSpeHTML(pratique) {
+    /** Le nombre de productions de ce type, dans les cours des groupes qui ont cette pratique. */
+    function _compterProductions(pratique) {
+        const cours = new Set(_groupes().filter((g) => g.pratiqueId === pratique.id).map((g) => g.coursId));
+        const productions = (db.getSync(cle('productions'), []) || []).filter((p) => p && (!p.coursId || cours.has(p.coursId)));
+        return (type) => productions.filter((p) => window.productionEstDuType(p, type)).length;
+    }
+
+    function _boutonRegler(quoi) {
+        return `<button type="button" class="btn btn-secondaire vs-regler" data-action="VueSimple.regler" data-param="${esc(quoi)}">${esc(MOTS.regler)}</button>`;
+    }
+
+    function _gestesDuReglageHTML() {
+        return `<div id="vs-reglage-retour"></div>
+            <p class="vs-gestes"><button type="button" class="btn btn-principal" data-action="VueSimple.enregistrerReglage">${esc(MOTS.reglerEnregistrer)}</button>
+                <button type="button" class="btn btn-secondaire" data-action="VueSimple.annulerReglage">${esc(MOTS.reglerAnnuler)}</button></p>`;
+    }
+
+    /** Un bloc de la pratique : son titre, sa valeur lue et « Régler » à côté ; ou, ouvert, son réglage. */
+    function _blocHTML(quoi, titre, lectureHTML, reglageHTML, reglable) {
+        const ouvert = _reglage === quoi;
+        const tete = `<div class="vs-bloc-tete"><h3 class="vs-sous-titre">${esc(titre)}</h3>${(!ouvert && reglable) ? _boutonRegler(quoi) : ''}</div>`;
+        return `<div class="vs-bloc" id="vs-bloc-${esc(quoi)}">${tete}${ouvert ? reglageHTML() + _gestesDuReglageHTML() : lectureHTML}</div>`;
+    }
+
+    /* ---------- la règle des standards ---------- */
+
+    function _regleLueHTML(pratique) {
+        const phrase = window.TableauNotation ? window.TableauNotation.phraseRegleStd(pratique.configuration, false) : '';
+        const autre = D().regleStd(pratique).methode === 'autre' ? `<p class="vs-note">${esc(MOTS.regleAutre)}</p>` : '';
+        return `<p class="vs-valeur">${esc(phrase)}</p>${autre}`;
+    }
+
+    function _regleReglageHTML() {
+        const mots = _motsRegleStd();
+        const choix = D().REGLES_STD.map((m) => `<label class="vs-choix"><input type="radio" name="vs-regle" value="${esc(m)}"${_brouillon.methode === m ? ' checked' : ''}> ${esc(mots[m])}</label>`).join('');
+        return `<fieldset class="vs-regle"><legend class="u-lecteur-ecran">${esc(MOTS.pratiqueRegle)}</legend>${choix}</fieldset>
+            <div class="groupe-form vs-nombre"><label for="vs-regle-nombre">${esc(MOTS.regleNombre)}</label>
+                <input type="number" id="vs-regle-nombre" class="controle-form" min="1" max="99" value="${esc(String(_brouillon.nombre || 1))}"></div>`;
+    }
+
+    /* ---------- les niveaux ---------- */
+
+    function _niveauxLusHTML(echelle) {
+        const niveaux = (echelle && echelle.niveaux) || [];
+        if (!niveaux.length) return `<p class="vs-note">${esc(MOTS.niveauxAucun)}</p>`;
+        const puces = niveaux.map((n) => `<span class="vs-niveau"><strong>${esc(n.code)}</strong> ${esc(n.nom || '')} <span class="vs-niveau-valeur">${esc(String(n.valeurCalcul != null ? n.valeurCalcul : ''))}</span></span>`).join('');
+        return `<p class="vs-niveaux">${puces}</p>`;
+    }
+
+    function _niveauxReglageHTML() {
+        const dernier = _brouillon.niveaux.length - 1;
+        const rangees = _brouillon.niveaux.map((n, i) => `<tr class="vs-niveau-rangee">
+                <td><input type="text" class="controle-form vs-n-code" maxlength="3" value="${esc(n.code)}" aria-label="${esc(MOTS.niveauColonnes[0] + ' ' + (i + 1))}"></td>
+                <td><input type="text" class="controle-form vs-n-nom" maxlength="40" value="${esc(n.nom)}" aria-label="${esc(MOTS.niveauColonnes[1] + ' ' + (i + 1))}"></td>
+                <td><input type="number" class="controle-form vs-n-valeur" min="0" max="100" step="any" value="${esc(String(n.valeur))}" aria-label="${esc(MOTS.niveauColonnes[2] + ' ' + (i + 1))}"></td>
+                <td class="vs-rangee-gestes">
+                    <button type="button" class="btn btn-secondaire vs-petit" data-action="VueSimple.niveauGeste" data-param="monter" data-param2="${i}"${i === 0 ? ' disabled' : ''} aria-label="${esc(MOTS.niveauMonter + ' ' + (n.nom || n.code))}">↑</button>
+                    <button type="button" class="btn btn-secondaire vs-petit" data-action="VueSimple.niveauGeste" data-param="descendre" data-param2="${i}"${i === dernier ? ' disabled' : ''} aria-label="${esc(MOTS.niveauDescendre + ' ' + (n.nom || n.code))}">↓</button>
+                    <button type="button" class="btn btn-secondaire vs-petit" data-action="VueSimple.niveauGeste" data-param="retirer" data-param2="${i}">${esc(MOTS.niveauRetirer)}</button></td></tr>`).join('');
+        const tetes = MOTS.niveauColonnes.map((c) => `<th scope="col">${esc(c)}</th>`).join('');
+        return `<p class="vs-note">${esc(MOTS.niveauxAide)}</p>
+            <div class="vs-cadre-table"><table class="vs-table vs-reglage"><thead><tr>${tetes}<th scope="col"></th></tr></thead><tbody>${rangees}</tbody></table></div>
+            <p class="vs-gestes"><button type="button" class="btn btn-secondaire" data-action="VueSimple.niveauGeste" data-param="ajouter">${esc(MOTS.niveauAjouter)}</button></p>`;
+    }
+
+    /* ---------- les types et les paliers ---------- */
+
+    function _typesLusHTML(pratique) {
+        const types = (pratique.configuration.typesTravaux || []).map((t) => `<span class="vs-niveau"><strong>${esc(t.nom || t.id)}</strong></span>`).join('');
+        return `<p class="vs-niveaux">${types}</p>`;
+    }
+
+    function _typesReglageHTML() {
+        const rangees = _brouillon.types.map((t, i) => `<tr><td><input type="text" class="controle-form vs-type-nom" maxlength="40" value="${esc(t.nom)}" aria-label="${esc(MOTS.typeNom + ' ' + (i + 1))}"></td>
+                <td class="vs-rangee-gestes"><button type="button" class="btn btn-secondaire vs-petit" data-action="VueSimple.typeGeste" data-param="retirer" data-param2="${i}">${esc(MOTS.typeRetirer)}</button></td></tr>`).join('');
+        return `<p class="vs-note">${esc(MOTS.typesAide)}</p>
+            <div class="vs-cadre-table"><table class="vs-table vs-reglage"><thead><tr><th scope="col">${esc(MOTS.typeNom)}</th><th scope="col"></th></tr></thead><tbody>${rangees}</tbody></table></div>
+            <p class="vs-gestes"><button type="button" class="btn btn-secondaire" data-action="VueSimple.typeGeste" data-param="ajouter">${esc(MOTS.typeAjouter)}</button></p>`;
+    }
+
+    function _paliersLusHTML(pratique) {
         const c = pratique.configuration || {};
-        const types = c.typesTravaux || [];
+        const nomType = (id) => { const t = (c.typesTravaux || []).find((x) => String(x.id) === String(id)); return t ? (t.nom || id) : id; };
+        const lignes = (c.forfaits || []).slice().sort((a, b) => b.note - a.note).map((f) => {
+            const exigences = Object.keys(f.travaux || {}).filter((id) => f.travaux[id] > 0).map((id) => `${nomType(id)} : ${f.travaux[id]}`).join(', ');
+            return `<li><strong>${esc(f.lettre || '')}</strong> <span class="vs-niveau-valeur">${esc(String(f.note))}</span> · ${esc(exigences || MOTS.palierSansExigence)}</li>`;
+        }).join('');
+        return `<ul class="vs-paliers-lus">${lignes}</ul>`;
+    }
+
+    function _paliersReglageHTML() {
+        const types = _brouillon.types;
         const tetes = types.map((t) => `<th scope="col">${esc(t.nom || t.id)}</th>`).join('');
-        const rangees = (c.forfaits || []).map((f) => {
-            const cases = types.map((t) => `<td><input type="number" class="controle-form vs-palier-nombre" min="0" max="99" data-palier="${esc(f.id)}" data-type="${esc(t.id)}" value="${esc(String((f.travaux || {})[t.id] || 0))}" aria-label="${esc((f.lettre || '') + ', ' + (t.nom || t.id))}"></td>`).join('');
-            return `<tr><th scope="row">${esc(f.lettre || '')}</th>
-                <td><input type="number" class="controle-form vs-palier-note" min="0" max="100" data-palier="${esc(f.id)}" value="${esc(String(f.note))}" aria-label="${esc((f.lettre || '') + ', ' + MOTS.paliersNote)}"></td>${cases}</tr>`;
+        const rangees = _brouillon.paliers.map((f, i) => {
+            const cases = types.map((t) => `<td><input type="number" class="controle-form vs-palier-nombre" min="0" max="99" data-type="${esc(t.id)}" value="${esc(String((f.travaux || {})[t.id] || 0))}" aria-label="${esc((f.lettre || '') + ', ' + (t.nom || t.id))}"></td>`).join('');
+            return `<tr class="vs-palier-rangee"><td><input type="text" class="controle-form vs-palier-nom" maxlength="40" value="${esc(f.lettre)}" aria-label="${esc(MOTS.paliersNom + ' ' + (i + 1))}"></td>
+                <td><input type="number" class="controle-form vs-palier-note" min="0" max="100" step="any" value="${esc(String(f.note))}" aria-label="${esc((f.lettre || '') + ', ' + MOTS.paliersNote)}"></td>${cases}
+                <td class="vs-rangee-gestes"><button type="button" class="btn btn-secondaire vs-petit" data-action="VueSimple.palierGeste" data-param="retirer" data-param2="${i}">${esc(MOTS.palierRetirer)}</button></td></tr>`;
         }).join('');
         return `<p class="vs-note">${esc(MOTS.paliersAide)}</p>
-            <div class="vs-cadre-table"><table class="vs-table vs-paliers"><thead><tr><th scope="col"></th><th scope="col">${esc(MOTS.paliersNote)}</th>${tetes}</tr></thead><tbody>${rangees}</tbody></table></div>`;
+            <div class="vs-cadre-table"><table class="vs-table vs-reglage vs-paliers"><thead><tr><th scope="col">${esc(MOTS.paliersNom)}</th><th scope="col">${esc(MOTS.paliersNote)}</th>${tetes}<th scope="col"></th></tr></thead><tbody>${rangees}</tbody></table></div>
+            <p class="vs-gestes"><button type="button" class="btn btn-secondaire" data-action="VueSimple.palierGeste" data-param="ajouter">${esc(MOTS.palierAjouter)}</button></p>`;
     }
+
+    /* ---------- l'écran ---------- */
 
     function _choixModeleHTML() {
         const cartes = MOTS.modeles.map((m) => `<li class="vs-etape">
@@ -551,24 +684,32 @@
         _ecrire(hote, tete + _pratiqueChoisieHTML(groupe, famille, retourHTML));
     }
 
-    /** La pratique du groupe : son modèle, sa règle (réglable ici, ou seulement lue), et les gestes. */
+    function _blocsStdHTML(pratique, reglable) {
+        const regleReglable = reglable && D().regleStd(pratique).methode !== 'autre';
+        return _blocHTML('regle', MOTS.pratiqueRegle, _regleLueHTML(pratique), _regleReglageHTML, regleReglable)
+            + _blocHTML('niveaux', MOTS.niveauxTitre, _niveauxLusHTML(_echelleDeLaPratique(pratique) || _echelleDeDepart()), _niveauxReglageHTML, reglable);
+    }
+
+    function _blocsSpeHTML(pratique, reglable) {
+        return _blocHTML('paliers', MOTS.paliersTitre, _paliersLusHTML(pratique), _paliersReglageHTML, reglable)
+            + _blocHTML('types', MOTS.typesTitre, _typesLusHTML(pratique), _typesReglageHTML, reglable);
+    }
+
+    /** La pratique du groupe : son modèle, puis chaque valeur qui entre dans la note, lue, avec « Régler » à côté. */
     function _pratiqueChoisieHTML(groupe, famille, retourHTML) {
         const pratique = _pratiqueDuGroupe(groupe);
         const std = famille === D().FAMILLES.STD;
         const nomFamille = (MOTS.modeles.find((m) => m.famille === famille) || {}).titre || '';
         const noms = [nomFamille, pratique.nom].filter((x, i, t) => x && t.indexOf(x) === i).join(' · ');
-        // Une pratique importée sous l'ancienne forme (`.config`) se lit, elle ne se règle pas ici.
-        const lisible = !!pratique.configuration;
-        const regle = !lisible ? `<p class="vs-note">${esc(MOTS.regleAutre)}</p>` : (std ? _regleStdHTML(pratique) : _regleSpeHTML(pratique));
-        const modifiable = lisible && !(std && D().regleStd(pratique).methode === 'autre');
+        // Une pratique importée sous l'ancienne forme (`.config`) se lit en vue étendue, elle ne se règle pas ici.
+        const reglable = !!pratique.configuration;
+        const blocs = !reglable ? `<p class="vs-note">${esc(MOTS.regleAutre)}</p>` : (std ? _blocsStdHTML(pratique, true) : _blocsSpeHTML(pratique, true));
         return `<p class="vs-intro"><span class="vs-libelle">${esc(MOTS.pratiqueModele)}</span> ${esc(noms)}</p>
-            <div class="vs-bloc"><h3 class="vs-sous-titre">${esc(MOTS.pratiqueRegle)}</h3>${regle}${modifiable ? _reglePartageeHTML(pratique) : ''}
-                <div id="vs-pratique-retour">${retourHTML || ''}</div>
-                <p class="vs-gestes">${modifiable ? `<button type="button" class="btn btn-principal" data-action="VueSimple.enregistrerRegle">${esc(MOTS.regleEnregistrer)}</button>` : ''}
-                    <button type="button" class="btn btn-secondaire" data-action="VueSimple.aller" data-param="resultats">${esc(MOTS.pratiqueSuite)}</button>${_changerModeleHTML(groupe)}</p></div>`;
+            <div id="vs-pratique-retour">${retourHTML || ''}</div>${reglable ? _reglePartageeHTML(pratique) : ''}${blocs}
+            <p class="vs-gestes"><button type="button" class="btn btn-principal" data-action="VueSimple.aller" data-param="resultats">${esc(MOTS.pratiqueSuite)}</button>${_changerModeleHTML(groupe)}</p>`;
     }
 
-    /** La règle est celle de la PRATIQUE : si d'autres groupes l'ont aussi, l'écran le dit avant qu'on l'enregistre. */
+    /** Un réglage est celui de la PRATIQUE : si d'autres groupes l'ont aussi, l'écran le dit avant qu'on l'enregistre. */
     function _reglePartageeHTML(pratique) {
         const n = _groupes().filter((g) => g.pratiqueId === pratique.id).length;
         return n > 1 ? `<p class="vs-note">${esc(MOTS.reglePartagee(n))}</p>` : '';
@@ -585,10 +726,157 @@
         if (typeof window.calculerEtStockerIndicesCP === 'function') window.calculerEtStockerIndicesCP();
     }
 
+    /* ---------- les gestes du réglage ---------- */
+
+    /** « Régler », depuis l'écran Pratique ou depuis le tableau : ouvre CE réglage, sur l'écran Pratique. */
+    function regler(quoi) {
+        const groupe = _groupeActif();
+        const pratique = _pratiqueDuGroupe(groupe);
+        if (!pratique || !pratique.configuration || ['regle', 'niveaux', 'types', 'paliers'].indexOf(quoi) < 0) { aller('pratique'); return; }
+        if (_ecran !== 'pratique') aller('pratique');
+        _reglage = quoi;
+        _brouillon = D().brouillonDeLaPratique(pratique, _echelleDeLaPratique(pratique) || _echelleDeDepart());
+        _rendrePratique();
+        const bloc = document.getElementById('vs-bloc-' + quoi);
+        const champ = bloc && bloc.querySelector('input');
+        if (champ) champ.focus();
+        if (bloc && typeof bloc.scrollIntoView === 'function') bloc.scrollIntoView({ block: 'nearest' });
+    }
+
+    function annulerReglage() { _fermerReglage(); _rendrePratique(); }
+
+    /** Ce que les champs du réglage ouvert disent, reporté dans le brouillon (avant un geste, avant d'enregistrer). */
+    function _lireLeReglage() {
+        const b = _brouillon;
+        const valeurs = (selecteur) => Array.from(document.querySelectorAll('#vs-bloc-' + _reglage + ' ' + selecteur)).map((el) => el.value);
+        if (_reglage === 'regle') {
+            const coche = document.querySelector('input[name="vs-regle"]:checked');
+            return Object.assign({}, b, { methode: coche ? coche.value : b.methode, nombre: (document.getElementById('vs-regle-nombre') || {}).value });
+        }
+        if (_reglage === 'niveaux') {
+            const codes = valeurs('.vs-n-code'), noms = valeurs('.vs-n-nom'), vals = valeurs('.vs-n-valeur');
+            return Object.assign({}, b, { niveaux: b.niveaux.map((n, i) => Object.assign({}, n, { code: codes[i], nom: noms[i], valeur: vals[i] })) });
+        }
+        if (_reglage === 'types') {
+            const noms = valeurs('.vs-type-nom');
+            return Object.assign({}, b, { types: b.types.map((t, i) => Object.assign({}, t, { nom: noms[i] })) });
+        }
+        const rangees = Array.from(document.querySelectorAll('#vs-bloc-paliers .vs-palier-rangee'));
+        return Object.assign({}, b, { paliers: b.paliers.map((p, i) => {
+            const travaux = {};
+            rangees[i].querySelectorAll('.vs-palier-nombre').forEach((el) => { travaux[el.dataset.type] = el.value; });
+            return Object.assign({}, p, { lettre: rangees[i].querySelector('.vs-palier-nom').value, note: rangees[i].querySelector('.vs-palier-note').value, travaux });
+        }) });
+    }
+
+    function _direRefus(refus) {
+        const dire = MOTS.refus[refus.refus];
+        _ecrire(document.getElementById('vs-reglage-retour'), `<p class="vs-erreur" role="alert">${esc(dire ? dire(refus) : '')}</p>`);
+    }
+
+    /** Applique un geste au brouillon : il rend un brouillon neuf, ou un refus que l'écran dit (rien n'est effacé, rien n'est écrit). */
+    function _geste(resultat) {
+        if (resultat && resultat.refus) { _direRefus(resultat); return; }
+        _brouillon = resultat;
+        _rendrePratique();
+    }
+
+    function niveauGeste(quoi, index) {
+        if (_reglage !== 'niveaux') return;
+        const b = _lireLeReglage();
+        const pratique = _pratiqueDuGroupe(_groupeActif());
+        _brouillon = b;
+        if (quoi === 'ajouter') _geste(D().gestes.niveauAjouter(b));
+        else if (quoi === 'monter') _geste(D().gestes.niveauDeplacer(b, index, -1));
+        else if (quoi === 'descendre') _geste(D().gestes.niveauDeplacer(b, index, 1));
+        else if (quoi === 'retirer') _geste(D().gestes.niveauRetirer(b, index, _compterResultats(_echelleDeLaPratique(pratique))));
+    }
+
+    function typeGeste(quoi, index) {
+        if (_reglage !== 'types') return;
+        const b = _lireLeReglage();
+        _brouillon = b;
+        if (quoi === 'ajouter') _geste(D().gestes.typeAjouter(b));
+        else if (quoi === 'retirer') _geste(D().gestes.typeRetirer(b, index, _compterProductions(_pratiqueDuGroupe(_groupeActif()))));
+    }
+
+    function palierGeste(quoi, index) {
+        if (_reglage !== 'paliers') return;
+        const b = _lireLeReglage();
+        _brouillon = b;
+        if (quoi === 'ajouter') _geste(D().gestes.palierAjouter(b));
+        else if (quoi === 'retirer') _geste(D().gestes.palierRetirer(b, index));
+    }
+
+    async function _ecrirePratique(nouvelle, geste) {
+        return window.modifierEtAnnoncer(cle('pratiquesConfigurables'), (lues) => (lues || []).map((p) => (p && p.id === nouvelle.id) ? nouvelle : p), [], { geste });
+    }
+
+    /**
+     * Les niveaux réglés. L'échelle APPARTIENT à la pratique : née avec elle, elle est réécrite ; sinon (pratique de la vue
+     * étendue qui lit une échelle du trimestre), elle est COPIÉE et la pratique lit la copie — l'échelle du trimestre, que
+     * d'autres pratiques, des productions ou des grilles peuvent lire, n'est jamais modifiée.
+     * Les résultats déjà saisis ne sont pas touchés : ils gardent la valeur écrite à la saisie (règle du tableau).
+     */
+    async function _enregistrerNiveaux(pratique, b) {
+        const echelle = _echelleDeLaPratique(pratique);
+        const refus = D().refusDesNiveaux(b, _compterResultats(echelle));
+        if (refus) return { refus };
+        if (!D().niveauxChanges(echelle, b.niveaux)) return { ecrit: true };
+        const r = D().echelleReglee(echelle, pratique, b.niveaux, { idNeuf: window.genererIdUnique('ECH_'), maintenant: new Date().toISOString() });
+        const ecrit = await window.modifierEtAnnoncer(cle('echellesTemplates'), (lues) => {
+            const liste = (lues || []).filter((e) => e && e.id !== r.echelle.id);
+            return liste.concat([r.echelle]);
+        }, [], { geste: MOTS.niveauxTitre });
+        if (!ecrit) return { ecrit: false };
+        if (!r.copiee) return { ecrit: true };
+        const nouvelle = JSON.parse(JSON.stringify(pratique));
+        nouvelle.configuration.echelleId = r.echelle.id;
+        return { ecrit: !!(await _ecrirePratique(nouvelle, MOTS.niveauxTitre)) };
+    }
+
+    async function _enregistrerLeReglage(pratique, b) {
+        if (_reglage === 'niveaux') return Object.assign({ mot: MOTS.niveauxEnregistres }, await _enregistrerNiveaux(pratique, b));
+        if (_reglage === 'regle') {
+            return { mot: MOTS.regleEnregistree, ecrit: !!(await _ecrirePratique(D().poserRegleStd(pratique, { methode: b.methode, nombre: b.nombre }), MOTS.pratiqueRegle)) };
+        }
+        const refus = D().refusDesSpecifications(b);
+        if (refus) return { refus };
+        const mot = _reglage === 'types' ? MOTS.typesEnregistres : MOTS.paliersEnregistres;
+        return { mot, ecrit: !!(await _ecrirePratique(D().poserSpecifications(pratique, b), mot)) };
+    }
+
+    /** « Enregistrer » du réglage ouvert : ce réglage-là s'écrit, les autres valeurs de la pratique ne bougent pas. */
+    async function enregistrerReglage() {
+        const pratique = _pratiqueDuGroupe(_groupeActif());
+        if (!pratique || !pratique.configuration || !_reglage || !_brouillon) return;
+        _brouillon = _lireLeReglage();
+        const r = await _enregistrerLeReglage(pratique, _brouillon);
+        if (r.refus) { _direRefus(r.refus); return; }
+        if (r.ecrit) { _apresEcriturePratique(); _fermerReglage(); }
+        _rendrePratique(r.ecrit ? `<p class="vs-succes" role="status">${esc(r.mot)}</p>` : `<p class="vs-erreur" role="alert">${esc(MOTS.pratiqueEchec)}</p>`);
+    }
+
+    /* ---------- le modèle ---------- */
+
     /** Une pratique déjà installée de ce modèle, qu'aucun groupe n'emploie (laissée par « Changer de modèle ») : on la reprend. */
     function _pratiqueLibreDuModele(idModele) {
         const prises = new Set(_groupes().map((g) => g.pratiqueId).filter(Boolean));
         return _pratiques().find((p) => p.inspireDe && p.inspireDe.sourceId === idModele && p.dansBibliotheque !== false && !prises.has(p.id)) || null;
+    }
+
+    /**
+     * L'échelle qui naît avec une pratique par standards : une copie de l'échelle de départ, à elle (« Mes niveaux »). Ses
+     * niveaux sont un départ proposé, que l'enseignant·e règle ; aucune autre pratique ne la lit.
+     */
+    async function _naitreEchelle(pratique) {
+        if (typeof window.assurerEchelleIdmeDeDepart === 'function') await window.assurerEchelleIdmeDeDepart();
+        const depart = _echelleDeDepart();
+        if (!depart) return null;
+        const niveaux = D().brouillonDeLaPratique(pratique, depart).niveaux;
+        const r = D().echelleReglee(depart, pratique, niveaux, { idNeuf: window.genererIdUnique('ECH_'), maintenant: new Date().toISOString() });
+        const ecrit = await window.modifierEtAnnoncer(cle('echellesTemplates'), (lues) => (lues || []).concat([r.echelle]), [], { geste: MOTS.pratiqueTitre });
+        return ecrit ? r.echelle : null;
     }
 
     /** Installe un modèle existant dans le trimestre et l'assigne au groupe actif (les chemins de la vue étendue). */
@@ -596,15 +884,16 @@
         const groupe = _groupeActif();
         const modele = _modele(idModele);
         if (!groupe || !modele || _famille(groupe) !== null) return;
+        _fermerReglage();
         try {
-            if (modele.type === D().FAMILLES.STD && typeof window.assurerEchelleIdmeDeDepart === 'function') await window.assurerEchelleIdmeDeDepart();
-            const echelle = _echelleDeDepart();
             const libre = _pratiqueLibreDuModele(idModele);
             if (libre) { await window.PratiqueManager.changerPratiqueActive(libre.id); _rendrePratique(); return; }
             const titre = (MOTS.modeles.find((m) => m.modele === idModele) || {}).titre;
-            const pratique = D().pratiqueDepuisModele(modele, {
-                nom: titre, id: window.genererIdUnique('PRAT_'), echelleId: echelle ? echelle.id : null, maintenant: new Date().toISOString()
-            });
+            const pratique = D().pratiqueDepuisModele(modele, { nom: titre, id: window.genererIdUnique('PRAT_'), echelleId: null, maintenant: new Date().toISOString() });
+            if (modele.type === D().FAMILLES.STD) {
+                const echelle = await _naitreEchelle(pratique);
+                pratique.configuration.echelleId = echelle ? echelle.id : null;
+            }
             const ecrit = await window.modifierEtAnnoncer(cle('pratiquesConfigurables'), (lues) => (lues || []).concat([pratique]), [], { geste: MOTS.pratiqueTitre });
             if (!ecrit) throw new Error('pratique non écrite');
             await window.PratiqueManager.changerPratiqueActive(pratique.id);
@@ -619,33 +908,11 @@
     async function changerModele() {
         const groupe = _groupeActif();
         if (!groupe || _productionsDuCours(groupe.coursId).length) return;
+        _fermerReglage();
         try {
             await window.PratiqueManager.changerPratiqueActive(null);
         } catch (e) { console.error('[Vue simple] modèle non changé :', e); }
         _rendrePratique();
-    }
-
-    function _lireRegle(pratique, famille) {
-        if (famille === D().FAMILLES.STD) {
-            const coche = document.querySelector('input[name="vs-regle"]:checked');
-            return D().poserRegleStd(pratique, { methode: coche ? coche.value : null, nombre: (document.getElementById('vs-regle-nombre') || {}).value });
-        }
-        const paliers = {};
-        document.querySelectorAll('.vs-palier-note').forEach((el) => { (paliers[el.dataset.palier] = paliers[el.dataset.palier] || { id: el.dataset.palier, travaux: {} }).note = el.value; });
-        document.querySelectorAll('.vs-palier-nombre').forEach((el) => { (paliers[el.dataset.palier] = paliers[el.dataset.palier] || { id: el.dataset.palier, travaux: {} }).travaux[el.dataset.type] = el.value; });
-        return D().poserPaliersSpe(pratique, Object.keys(paliers).map((k) => paliers[k]));
-    }
-
-    async function enregistrerRegle() {
-        const groupe = _groupeActif();
-        const pratique = _pratiqueDuGroupe(groupe);
-        const famille = _famille(groupe);
-        if (!pratique || !pratique.configuration || (famille !== D().FAMILLES.STD && famille !== D().FAMILLES.SPE)) return;
-        const nouvelle = _lireRegle(pratique, famille);
-        const ecrit = await window.modifierEtAnnoncer(cle('pratiquesConfigurables'),
-            (lues) => (lues || []).map((p) => (p && p.id === nouvelle.id) ? nouvelle : p), [], { geste: MOTS.regleEnregistrer });
-        if (ecrit) _apresEcriturePratique();
-        _rendrePratique(ecrit ? `<p class="vs-succes" role="status">${esc(MOTS.regleEnregistree)}</p>` : `<p class="vs-erreur" role="alert">${esc(MOTS.pratiqueEchec)}</p>`);
     }
 
     /* ============================== RÉSULTATS ============================== */
@@ -678,7 +945,10 @@
             hote,
             mots: MOTS.tableau,
             aUneGrille: _aUneGrille,
-            reglages: { action: 'VueSimple.aller', param: 'pratique' },
+            // Chaque valeur du tableau qui entre dans la note est à un geste de son réglage : la phrase de la règle, les niveaux
+            // (standards), les types et les paliers (spécifications).
+            reglages: { action: 'VueSimple.regler', param: _famille(_groupeActif()) === D().FAMILLES.SPE ? 'types' : 'regle', libelle: MOTS.regler },
+            reglerRepere: { action: 'VueSimple.regler', param: _famille(_groupeActif()) === D().FAMILLES.SPE ? 'paliers' : 'niveaux', libelle: MOTS.regler },
             gestes: {
                 'aucune-pratique': { libelle: MOTS.cartes[1].lien, action: 'VueSimple.aller', param: 'pratique' },
                 'aucun-eleve': { libelle: MOTS.cartes[0].lien, action: 'VueSimple.aller', param: 'classe' },
@@ -829,7 +1099,8 @@
     window.VueSimple = {
         MOTS, estSimple, vueCourante, basculer, demarrer, aller,
         changerGroupe, creerClasse: _unALaFois(creerClasse), choisirModele: _unALaFois(choisirModele),
-        changerModele: _unALaFois(changerModele), enregistrerRegle: _unALaFois(enregistrerRegle),
+        changerModele: _unALaFois(changerModele), enregistrerReglage: _unALaFois(enregistrerReglage),
+        regler, annulerReglage, niveauGeste, typeGeste, palierGeste,
         ouvrirProduction, fermerProduction, ajouterProduction: _unALaFois(ajouterProduction),
         enteteDuMenuSauvegarder
     };

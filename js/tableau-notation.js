@@ -381,11 +381,17 @@
         return `La note retient ${base}${avecTerminale ? ', et la terminale' : ''}.`;
     }
 
+    /** Vue simple : « Régler », à côté des niveaux ou des paliers que le tableau montre (un geste jusqu'à leur réglage). */
+    function _reglerRepereHTML() {
+        const g = _presentation && _presentation.reglerRepere;
+        return g ? `<a href="#" class="tn-reglages" data-prevent data-action="${esc(g.action)}" data-param="${esc(g.param)}">${esc(g.libelle)}</a>` : '';
+    }
+
     function _echelleHTML(ctx) {
         const niveaux = D().niveauxSaisissables(ctx.echelle).map(n =>
             `<span class="tn-niveau" style="--tn-couleur: ${esc(couleurSure(n.couleur))}" title="${esc(n.nom)}"><span class="tn-niveau-code">${esc(n.code)}</span> ${esc(String(n.valeur))}</span>`).join('');
         const nom = ctx.echelle && ctx.echelle.echelle_nom ? `Échelle « ${esc(ctx.echelle.echelle_nom)} » :` : 'Échelle :';
-        return `<div class="tn-repere"><span class="tn-repere-titre">${nom}</span>${niveaux}</div>`;
+        return `<div class="tn-repere"><span class="tn-repere-titre">${nom}</span>${niveaux}${_reglerRepereHTML()}</div>`;
     }
 
     function _forfaitsHTML(ctx) {
@@ -395,7 +401,7 @@
             const titre = [b.label || b.description, b.noteFixe].filter(x => x !== undefined && x !== null && x !== '').join(' · ');
             return `<span class="tn-forfait"><span class="tn-forfait-titre">${esc(titre)}</span><span class="tn-forfait-requis">${esc(requis)}</span></span>`;
         }).join('');
-        return `<div class="tn-repere">${paliers}</div>`;
+        return `<div class="tn-repere">${paliers}${_reglerRepereHTML()}</div>`;
     }
 
     function _bandeauHTML(ctx) {
@@ -411,7 +417,7 @@
         const ajout = g ? `<button type="button" class="btn btn-principal" data-action="${esc(g.action)}">${esc(g.libelle)}</button>` : '';
         return `<div class="tn-bandeau">
             <div class="tn-pratique">${badge}<span class="tn-pratique-nom">${esc(ctx.pratiqueNom)}</span><span class="tn-regle">${esc(regle)}</span>
-                <a href="#" class="tn-reglages" data-prevent data-action="${esc(reglages.action)}" data-param="${esc(reglages.param)}">${esc(MOTS.reglages)}</a></div>
+                <a href="#" class="tn-reglages" data-prevent data-action="${esc(reglages.action)}" data-param="${esc(reglages.param)}">${esc(reglages.libelle || MOTS.reglages)}</a></div>
             <div class="tn-gestes">${ajout}<button type="button" class="btn btn-secondaire" id="tn-annuler" data-action="TableauNotation.annuler"${_gesteAnnulable() ? '' : ' disabled'}>${esc(MOTS.annuler)}</button>
             <button type="button" class="btn btn-secondaire" data-action="exporterSyntheseResultatsCSV">${esc(MOTS.exporter)}</button></div>
         </div>

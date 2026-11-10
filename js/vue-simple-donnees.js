@@ -17,6 +17,10 @@
      *  ni dans l'empreinte des données (mesuré : l'export n'écarte que `_codex_*`, js/codex.js, `genererCodex`). */
     const CLE_CHOIX = 'laboCodex.vue';
 
+    /** La marque que porte le FICHIER : la vue d'où il a été enregistré. Écrite dans le fichier à l'enregistrement
+     *  (`genererCodex`), jamais à la bascule ; lue au démarrage quand l'appareil n'a fait aucun choix. */
+    const CLE_MARQUE = 'vueDuFichier';
+
     /** Les cinq écrans de la vue simple, dans l'ordre de la navigation (décidé par Cowork). */
     const ECRANS = Object.freeze(['accueil', 'classe', 'pratique', 'resultats', 'note']);
 
@@ -27,19 +31,13 @@
     }
 
     /**
-     * L'application est-elle vide sur cet appareil ? Vide : aucun élève inscrit, dans aucun trimestre. La démonstration
-     * ne compte pas ; un codex ouvert ou importé compte (ses trimestres sont là).
-     * SUPPOSÉ : les élèves sont une liste plate par trimestre (`<id>_groupeEtudiants`), pas rangés dans un objet « groupe » ;
-     * « aucun groupe avec au moins un élève » se lit donc « aucun élève inscrit ».
+     * L'application est-elle vide sur cet appareil ? Vide : aucun trimestre hors démonstration (décision de Cowork du
+     * 9 nov. 2026, 19 h 40, sur la recommandation du rapport : qui a bâti un trimestre en vue étendue, même sans
+     * étudiant·es, a des données). La démonstration ne compte pas ; un codex ouvert ou importé compte (ses trimestres sont là).
      * @param {Array} trimestres - la liste `trimestres`
-     * @param {function(string): Array} lireEleves - rend la liste des élèves d'un trimestre, par son id
      */
-    function applicationVide(trimestres, lireEleves) {
-        return !(trimestres || []).some((t) => {
-            if (_estDemo(t) || !t.id) return false;
-            const eleves = lireEleves(t.id);
-            return Array.isArray(eleves) && eleves.some((e) => e && e.da);
-        });
+    function applicationVide(trimestres) {
+        return !(trimestres || []).some((t) => !_estDemo(t) && !!t.id);
     }
 
     /**
@@ -48,7 +46,7 @@
      * La démonstration ouverte donne la vue étendue : elle ne s'ouvre que de là, et ses données ne sont pas « ta classe »
      * (ajout de Claude Code à la décision de Cowork, signalé au rapport).
      */
-    function vueAuDemarrage({ choix, vide, demoOuverte, pilote }) {
+    function vueAuDemarrage({ choix, vide, demoOuverte, pilote, marque }) {
         if (choix === VUES.SIMPLE || choix === VUES.ETENDUE) return choix;
         // PILOTÉ PAR UN BANC (`navigator.webdriver`) : la vue étendue. Les quelque 340 bancs Playwright du projet ouvrent une
         // application vide et y naviguent dans la vue étendue ; sans ceci, ils s'ouvriraient tous en vue simple, barre
@@ -56,6 +54,9 @@
         // vue simple éteint ce drapeau pour éprouver la vraie règle. Aucun utilisateur n'a ce drapeau.
         if (pilote) return VUES.ETENDUE;
         if (demoOuverte) return VUES.ETENDUE;
+        // LA VUE VOYAGE AVEC LE FICHIER (décision de Cowork, 9 nov. 2026, 19 h 40) : un fichier enregistré depuis la vue
+        // simple porte une marque ; ouvert sur un appareil qui n'a fait aucun choix, il s'ouvre en vue simple.
+        if (marque === VUES.SIMPLE) return VUES.SIMPLE;
         return vide ? VUES.SIMPLE : VUES.ETENDUE;
     }
 
@@ -189,6 +190,9 @@
             p.configuration.echelleId = echelleId || null;
             p.configuration.notesFinales = false;
             p.configuration.portfolio = Object.assign({ actif: true, utiliser: true }, p.configuration.portfolio || {});
+            // Décision de Grégoire (9 nov. 2026, 19 h 35) : en vue simple, la règle arrive sur « Toutes les productions »,
+            // pas sur les « 7 meilleures » du modèle. Le nombre du modèle reste, pour qui choisit ensuite « N meilleures ».
+            p.configuration.portfolio.methodeSelection = 'tous';
         }
         return p;
     }
@@ -213,20 +217,180 @@
         return p;
     }
 
-    /** Pose les paliers des spécifications : pour chacun, la note et le nombre de productions acceptables par type. */
-    function poserPaliersSpe(pratique, paliers) {
-        const p = _copie(pratique);
-        const forfaits = p.configuration.forfaits || [];
-        (paliers || []).forEach((palier) => {
-            const f = forfaits.find((x) => String(x.id) === String(palier.id));
-            if (!f) return;
-            const note = parseInt(palier.note, 10);
-            if (note >= 0 && note <= 100) f.note = note;
-            Object.keys(palier.travaux || {}).forEach((typeId) => {
-                const n = parseInt(palier.travaux[typeId], 10);
-                if (n >= 0 && n <= 99) { f.travaux = f.travaux || {}; f.travaux[typeId] = n; }
-            });
+    /* ============================== LA PRATIQUE SE RÈGLE (principe de Grégoire, 9 nov. 2026, 19 h 39) ==============================
+       « Ma pratique ne doit pas être codée en dur. […] Dans Excel, un utilisateur peut mettre les valeurs qu'il veut. »
+       La vue simple convertit la notation DE L'UTILISATEUR en note : ses niveaux (nom, lettre, valeur, ordre), ses types,
+       ses paliers. Le BROUILLON est ce que l'écran « Pratique » montre et modifie ; rien n'est écrit avant « Enregistrer ». */
+
+    function _valeurDuNiveau(n) {
+        const v = (n && n.valeurCalcul != null && n.valeurCalcul !== '') ? Number(n.valeurCalcul) : NaN;
+        return isNaN(v) ? '' : v;
+    }
+
+    /** Le brouillon d'une pratique : sa règle, et ses niveaux (standards) ou ses types et paliers (spécifications). */
+    function brouillonDeLaPratique(pratique, echelle) {
+        const c = (pratique && pratique.configuration) || {};
+        const regle = regleStd(pratique);
+        return {
+            pratiqueId: pratique ? pratique.id : null,
+            methode: regle.methode, nombre: regle.nombre || 1,
+            // `origine` : la lettre que le niveau porte dans l'échelle enregistrée (null pour un niveau ajouté ici).
+            niveaux: ((echelle && echelle.niveaux) || []).map((n) => ({ origine: String(n.code), code: String(n.code), nom: n.nom || '', valeur: _valeurDuNiveau(n) })),
+            types: (c.typesTravaux || []).map((t) => ({ id: t.id, nom: t.nom || '' })),
+            paliers: (c.forfaits || []).map((f) => ({ id: f.id, lettre: f.lettre || '', note: f.note, travaux: Object.assign({}, f.travaux || {}) }))
+        };
+    }
+
+    function _deplacer(liste, index, pas) {
+        const cible = index + pas;
+        if (index < 0 || index >= liste.length || cible < 0 || cible >= liste.length) return liste;
+        const copie = liste.slice();
+        copie.splice(cible, 0, copie.splice(index, 1)[0]);
+        return copie;
+    }
+
+    function _idSuivant(liste) {
+        return liste.reduce((max, x) => Math.max(max, parseInt(x.id, 10) || 0), 0) + 1;
+    }
+
+    const MIN_NIVEAUX = 2;
+    const MIN_TYPES = 1;
+    const MIN_PALIERS = 1;
+
+    /** Les gestes du brouillon. Chacun rend un brouillon neuf (l'ancien n'est pas muté), ou `{ refus }` avec sa raison. */
+    const gestes = {
+        niveauAjouter: (b) => Object.assign({}, b, { niveaux: b.niveaux.concat([{ origine: null, code: '', nom: '', valeur: '' }]) }),
+        niveauDeplacer: (b, index, pas) => Object.assign({}, b, { niveaux: _deplacer(b.niveaux, index, pas) }),
+        /** @param {function(string): number} compterResultats - le nombre de résultats du tableau qui portent cette lettre */
+        niveauRetirer: (b, index, compterResultats) => {
+            const niveau = b.niveaux[index];
+            if (!niveau) return b;
+            if (b.niveaux.length <= MIN_NIVEAUX) return { refus: 'minimumNiveaux' };
+            const n = niveau.origine ? compterResultats(niveau.origine) : 0;
+            if (n > 0) return { refus: 'niveauUtilise', n, nom: niveau.nom || niveau.code };
+            return Object.assign({}, b, { niveaux: b.niveaux.filter((_, i) => i !== index) });
+        },
+        typeAjouter: (b) => Object.assign({}, b, { types: b.types.concat([{ id: _idSuivant(b.types), nom: '', neuf: true }]) }),
+        /** @param {function(Object): number} compterProductions - le nombre de productions de ce type */
+        typeRetirer: (b, index, compterProductions) => {
+            const type = b.types[index];
+            if (!type) return b;
+            if (b.types.length <= MIN_TYPES) return { refus: 'minimumTypes' };
+            const n = type.neuf ? 0 : compterProductions(type);
+            if (n > 0) return { refus: 'typeUtilise', n, nom: type.nom };
+            const paliers = b.paliers.map((p) => { const t = Object.assign({}, p.travaux); delete t[type.id]; return Object.assign({}, p, { travaux: t }); });
+            return Object.assign({}, b, { types: b.types.filter((_, i) => i !== index), paliers });
+        },
+        palierAjouter: (b) => Object.assign({}, b, { paliers: b.paliers.concat([{ id: _idSuivant(b.paliers), lettre: '', note: '', travaux: {} }]) }),
+        palierRetirer: (b, index) => {
+            if (!b.paliers[index]) return b;
+            if (b.paliers.length <= MIN_PALIERS) return { refus: 'minimumPaliers' };
+            return Object.assign({}, b, { paliers: b.paliers.filter((_, i) => i !== index) });
+        }
+    };
+
+    function _nombreEntre(v, min, max) {
+        if (v === '' || v === null || v === undefined) return null;
+        const n = Number(String(v).replace(',', '.'));
+        return (isNaN(n) || n < min || n > max) ? null : n;
+    }
+
+    function _doublon(valeurs) {
+        const vus = new Set();
+        return valeurs.some((v) => { const k = String(v).trim().toLowerCase(); if (vus.has(k)) return true; vus.add(k); return false; });
+    }
+
+    /**
+     * Ce qui empêche d'enregistrer les niveaux, ou null. Une lettre déjà inscrite dans des résultats ne se change pas :
+     * les résultats la portent, ils ne seraient plus lus.
+     * @param {function(string): number} compterResultats
+     */
+    function refusDesNiveaux(b, compterResultats) {
+        const n = b.niveaux;
+        if (n.length < MIN_NIVEAUX) return { refus: 'minimumNiveaux' };
+        if (n.some((x) => !String(x.code).trim() || !String(x.nom).trim())) return { refus: 'niveauIncomplet' };
+        if (n.some((x) => _nombreEntre(x.valeur, 0, 100) === null)) return { refus: 'valeurNiveau' };
+        if (_doublon(n.map((x) => x.code))) return { refus: 'lettreEnDouble' };
+        const change = n.find((x) => x.origine && String(x.code).trim() !== x.origine && compterResultats(x.origine) > 0);
+        if (change) return { refus: 'lettreUtilisee', n: compterResultats(change.origine), nom: change.origine };
+        return null;
+    }
+
+    /** Ce qui empêche d'enregistrer les types et les paliers, ou null. */
+    function refusDesSpecifications(b) {
+        if (b.types.length < MIN_TYPES) return { refus: 'minimumTypes' };
+        if (b.types.some((t) => !String(t.nom).trim())) return { refus: 'typeSansNom' };
+        if (_doublon(b.types.map((t) => t.nom))) return { refus: 'typeEnDouble' };
+        if (b.paliers.length < MIN_PALIERS) return { refus: 'minimumPaliers' };
+        if (b.paliers.some((p) => !String(p.lettre).trim())) return { refus: 'palierSansNom' };
+        if (b.paliers.some((p) => _nombreEntre(p.note, 0, 100) === null)) return { refus: 'notePalier' };
+        return null;
+    }
+
+    /**
+     * Les niveaux d'une échelle, tels que le brouillon les règle. Un niveau gardé conserve tout ce que l'écran ne montre
+     * pas (sa couleur, sa description) ; un niveau ajouté n'a pas de couleur à lui (le tableau lui donne la couleur neutre).
+     * LES BORNES (`min`, `max`) servent à convertir un pourcentage en niveau quand on évalue avec une grille, en vue
+     * étendue ; elles sont recalées sur les valeurs : chaque niveau commence à sa valeur, le plus bas à 0, et finit juste
+     * avant le suivant, le plus haut à 100. Un niveau dont la valeur n'a pas bougé garde sa borne d'avant quand elle
+     * tient entre ses voisins (« Étendu », qui vaut 100, commence à 85).
+     */
+    function niveauxRegles(anciens, brouillon) {
+        const parLettre = new Map((anciens || []).map((n) => [String(n.code), n]));
+        const niveaux = brouillon.map((x) => {
+            const avant = x.origine ? parLettre.get(x.origine) : null;
+            const valeur = _nombreEntre(x.valeur, 0, 100);
+            const n = Object.assign({}, avant || {}, { code: String(x.code).trim(), nom: String(x.nom).trim(), valeurCalcul: valeur });
+            n._bornePrecedente = (avant && Number(avant.valeurCalcul) === valeur && typeof avant.min === 'number') ? avant.min : null;
+            return n;
         });
+        const parValeur = niveaux.slice().sort((a, b) => a.valeurCalcul - b.valeurCalcul);
+        parValeur.forEach((n, i) => {
+            const plancher = i === 0 ? 0 : parValeur[i - 1].min;
+            const gardee = n._bornePrecedente !== null && (i === 0 || n._bornePrecedente > plancher) && n._bornePrecedente <= n.valeurCalcul;
+            n.min = i === 0 ? 0 : (gardee ? n._bornePrecedente : n.valeurCalcul);
+        });
+        parValeur.forEach((n, i) => { n.max = i === parValeur.length - 1 ? 100 : Math.max(n.min, Math.round((parValeur[i + 1].min - 0.01) * 100) / 100); });
+        niveaux.forEach((n) => { delete n._bornePrecedente; });
+        return niveaux;
+    }
+
+    /** Le nom de l'échelle née avec une pratique de la vue simple. PROPOSÉ (ni « IDME », ni « de départ »). */
+    const NOM_ECHELLE = 'Mes niveaux';
+
+    /**
+     * L'échelle de la pratique, réglée. Elle APPARTIENT à la pratique (`pratiqueId`) : née avec elle en vue simple, ou
+     * copiée ici à la première modification quand la pratique lisait une échelle du trimestre (que d'autres pratiques,
+     * des productions ou des grilles peuvent lire aussi : elle n'est jamais modifiée).
+     * @returns {{echelle: Object, copiee: boolean}}
+     */
+    function echelleReglee(echelle, pratique, niveauxDuBrouillon, { idNeuf, maintenant }) {
+        const propre = !!echelle && echelle.pratiqueId === pratique.id;
+        const base = propre ? _copie(echelle) : { id: idNeuf, nom: NOM_ECHELLE, pratiqueId: pratique.id, dansBibliotheque: true, verrouille: false, dateCreation: maintenant };
+        base.niveaux = niveauxRegles(echelle ? echelle.niveaux : [], niveauxDuBrouillon);
+        base.dateModification = maintenant;
+        return { echelle: base, copiee: !propre };
+    }
+
+    /** L'échelle a-t-elle changé ? (une règle changée sans toucher aux niveaux ne copie ni n'écrit aucune échelle) */
+    function niveauxChanges(echelle, niveauxDuBrouillon) {
+        const avant = ((echelle && echelle.niveaux) || []).map((n) => [String(n.code), n.nom || '', _valeurDuNiveau(n)]);
+        const apres = niveauxDuBrouillon.map((x) => [String(x.code).trim(), String(x.nom).trim(), _nombreEntre(x.valeur, 0, 100)]);
+        return JSON.stringify(avant) !== JSON.stringify(apres);
+    }
+
+    /** Pose les types et les paliers du brouillon. Un palier sans aucune exigence est le palier plancher (lecture du calcul). */
+    function poserSpecifications(pratique, brouillon) {
+        const p = _copie(pratique);
+        const avant = new Map((p.configuration.typesTravaux || []).map((t) => [String(t.id), t]));
+        p.configuration.typesTravaux = brouillon.types.map((t) => Object.assign({}, avant.get(String(t.id)) || {}, { id: t.id, nom: String(t.nom).trim() }));
+        const ids = new Set(brouillon.types.map((t) => String(t.id)));
+        const forfaits = new Map((p.configuration.forfaits || []).map((f) => [String(f.id), f]));
+        p.configuration.forfaits = brouillon.paliers.map((x) => {
+            const travaux = {};
+            Object.keys(x.travaux || {}).forEach((id) => { const n = _nombreEntre(x.travaux[id], 0, 99); if (ids.has(String(id)) && n) travaux[id] = Math.round(n); });
+            return Object.assign({}, forfaits.get(String(x.id)) || {}, { id: x.id, lettre: String(x.lettre).trim(), note: _nombreEntre(x.note, 0, 100), travaux });
+        }).sort((a, b) => b.note - a.note);
         return p;
     }
 
@@ -245,10 +409,11 @@
     }
 
     window.VueSimpleDonnees = {
-        VUES, CLE_CHOIX, ECRANS, FAMILLES, REGLES_STD, GROUPE_SIMPLE, RAISONS,
+        VUES, CLE_CHOIX, CLE_MARQUE, ECRANS, FAMILLES, REGLES_STD, GROUPE_SIMPLE, RAISONS,
         applicationVide, vueAuDemarrage,
         analyserListeCollee, trimestreDeLaDate, ficheEleve, groupeCoursLeger, productionLegere,
-        pratiqueDepuisModele, regleStd, poserRegleStd, poserPaliersSpe,
+        pratiqueDepuisModele, regleStd, poserRegleStd,
+        brouillonDeLaPratique, gestes, refusDesNiveaux, refusDesSpecifications, niveauxRegles, echelleReglee, niveauxChanges, poserSpecifications, NOM_ECHELLE,
         aUneGrille, rangDeProduction
     };
 })();

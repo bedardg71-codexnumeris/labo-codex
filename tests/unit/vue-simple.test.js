@@ -23,30 +23,37 @@ const lire = (f) => readFileSync(path.join(racine, f), 'utf8');
 const D = chargerScript('js/vue-simple-donnees.js', {}, {}).VueSimpleDonnees;
 
 describe('A. La vue au démarrage', () => {
-    const eleves = { a2026: [{ da: '9990001', nom: 'Albatros', prenom: 'Ada' }], demo: [{ da: '9990009', nom: 'Démo', prenom: 'Dédé' }] };
-    const lire_ = (id) => eleves[id] || [];
-
     it('aucun trimestre : l\'application est vide, la vue est simple', () => {
-        expect(D.applicationVide([], lire_)).toBe(true);
+        expect(D.applicationVide([])).toBe(true);
         expect(D.vueAuDemarrage({ choix: null, vide: true, demoOuverte: false })).toBe('simple');
     });
 
-    it('un trimestre sans élève ne compte pas : toujours vide', () => {
-        expect(D.applicationVide([{ id: 'h2027', actif: true }], lire_)).toBe(true);
-    });
-
     it('la démonstration ne compte pas comme des données', () => {
-        expect(D.applicationVide([{ id: 'demo', isDemo: true }], lire_)).toBe(true);
-        expect(D.applicationVide([{ id: 'autre', isDemo: true }], () => [{ da: '9990008' }])).toBe(true);
+        expect(D.applicationVide([{ id: 'demo', isDemo: true }])).toBe(true);
+        expect(D.applicationVide([{ id: 'autre', isDemo: true }])).toBe(true);
     });
 
-    it('un codex ouvert ou importé compte : ses élèves sont là, la vue est étendue', () => {
-        expect(D.applicationVide([{ id: 'demo', isDemo: true }, { id: 'a2026' }], lire_)).toBe(false);
+    it('un trimestre hors démonstration compte comme des données, même sans étudiant·es (décision de Cowork, 9 nov. 2026)', () => {
+        expect(D.applicationVide([{ id: 'h2027', actif: true }])).toBe(false);
+        expect(D.applicationVide([{ id: 'demo', isDemo: true }, { id: 'a2026', actif: false }])).toBe(false);
         expect(D.vueAuDemarrage({ choix: null, vide: false, demoOuverte: false })).toBe('etendue');
     });
 
-    it('un élève dans un trimestre qui n\'est PAS l\'actif compte aussi (« dans aucun trimestre »)', () => {
-        expect(D.applicationVide([{ id: 'h2027', actif: true }, { id: 'a2026', actif: false }], lire_)).toBe(false);
+    it('la vue voyage avec le fichier : sans choix sur l\'appareil, un fichier marqué « simple » s\'ouvre en vue simple', () => {
+        expect(D.vueAuDemarrage({ choix: null, vide: false, demoOuverte: false, marque: 'simple' })).toBe('simple');
+        expect(D.vueAuDemarrage({ choix: null, vide: false, demoOuverte: false, marque: 'etendue' })).toBe('etendue');
+        expect(D.vueAuDemarrage({ choix: null, vide: false, demoOuverte: false, marque: null })).toBe('etendue');
+        // Le choix fait sur l'appareil prime toujours.
+        expect(D.vueAuDemarrage({ choix: 'etendue', vide: false, demoOuverte: false, marque: 'simple' })).toBe('etendue');
+        expect(D.CLE_MARQUE).toBe('vueDuFichier');
+    });
+
+    it('la marque s\'écrit dans le fichier à l\'enregistrement, jamais dans les données de l\'appareil ni à la bascule', () => {
+        const ecran = lire('js/vue-simple.js');
+        expect(ecran).not.toMatch(/db\.(set|setSync|modifier)\([^)]*CLE_MARQUE/);
+        const codex = lire('js/codex.js');
+        expect(codex).toContain('donnees[window.VueSimpleDonnees.CLE_MARQUE] = window.VueSimple.vueCourante();');
+        expect(tranche(codex, 'async function genererCodex(', 'zip.file(NOM_DONNEES, json);')).toContain('_marquerLaVue(donnees);');   // posée avant que le fichier soit écrit
     });
 
     it('le choix de l\'utilisateur prime, dans les deux sens', () => {
@@ -216,7 +223,7 @@ describe('D. Ce qui naît en coulisse', () => {
         const p = D.pratiqueDepuisModele(MODELES['STD-n-meilleurs'], { id: 'PRAT_1', nom: 'Par standards', echelleId: 'ECHELLE_IDME_DEPART', maintenant: 'm' });
         expect(p).toMatchObject({ id: 'PRAT_1', nom: 'Par standards', type: 'standards', dansBibliotheque: true, jetons: { actif: false }, inspireDe: { sourceId: 'STD-n-meilleurs' } });
         expect(p.configuration).toMatchObject({ type: 'standards', echelleId: 'ECHELLE_IDME_DEPART', notesFinales: false,
-            portfolio: { actif: true, utiliser: true, methodeSelection: 'meilleurs', nombreARetenir: 7, minimumCompletion: 7 } });
+            portfolio: { actif: true, utiliser: true, methodeSelection: 'tous', nombreARetenir: 7, minimumCompletion: 7 } });   // « Toutes les productions » (Grégoire, 9 nov. 2026)
         expect(p.estGabarit).toBeUndefined();
         expect(p.auteur).toBeUndefined();   // « Demo Labo Codex » la ferait masquer dans Conception › Pratiques (`BibliothequeUI.estItemDemo`)
         expect(MODELES['STD-n-meilleurs'].id).toBe('STD-n-meilleurs');   // le modèle n'est pas touché
@@ -237,17 +244,141 @@ describe('D. Ce qui naît en coulisse', () => {
         expect(D.poserRegleStd(regle, { methode: 'tous', nombre: '3' }).configuration.portfolio).toMatchObject({ nombreARetenir: 3, minimumCompletion: 1 });
         expect(D.poserRegleStd(regle, { methode: 'meilleurs', nombre: '5' }).configuration.portfolio).toMatchObject({ nombreARetenir: 5, minimumCompletion: 1 });
         expect(q.configuration.echelleId).toBe('E');
-        expect(D.regleStd(p)).toEqual({ methode: 'meilleurs', nombre: 7 });   // l'original n'est pas muté
+        expect(D.regleStd(p)).toEqual({ methode: 'tous', nombre: 7 });   // l'original n'est pas muté
         expect(D.regleStd({ configuration: { portfolio: { methodeSelection: 'derniers', nombreARetenir: 4 } } }).methode).toBe('recents');
         expect(D.regleStd({ configuration: { portfolio: { methodeSelection: 'hybride' } } }).methode).toBe('autre');
-        expect(D.poserRegleStd(p, { methode: 'inconnue', nombre: '0' }).configuration.portfolio).toMatchObject({ methodeSelection: 'meilleurs', nombreARetenir: 7 });
+        expect(D.poserRegleStd(p, { methode: 'inconnue', nombre: '0' }).configuration.portfolio).toMatchObject({ methodeSelection: 'tous', nombreARetenir: 7 });
     });
 
-    it('les paliers des spécifications : la note et les nombres ; une valeur hors bornes est ignorée', () => {
-        const p = D.pratiqueDepuisModele(MODELES['SPE-simple'], { id: 'PRAT_2', maintenant: 'm' });
-        const q = D.poserPaliersSpe(p, [{ id: '1', note: '95', travaux: { 1: '3', 2: '-1' } }, { id: '2', note: '170', travaux: {} }]);
-        expect(q.configuration.forfaits[0]).toMatchObject({ note: 95, travaux: { 1: 3, 2: 1 } });
-        expect(q.configuration.forfaits[1].note).toBe(70);
+});
+
+describe('F. La pratique se règle : les niveaux, les types, les paliers', () => {
+    const bibliotheque = lire('js/pratiques-bibliotheque.js');
+    const MODELES = new Function(tranche(bibliotheque, 'const MODELES_PRATIQUES_PREDEFINIS', '/**\n * Obtenir toutes les configurations') + '\nreturn MODELES_PRATIQUES_PREDEFINIS;')();
+    const DEPART = { id: 'ECHELLE_IDME_DEPART', nom: 'Échelle de départ (IDME)', niveaux: [
+        { code: 'PS', nom: 'Préstructurel', min: 0, max: 39.99, valeurCalcul: 0, couleur: 'var(--gris-moyen)' },
+        { code: 'I', nom: 'Incomplet', min: 40, max: 64.99, valeurCalcul: 40, couleur: 'var(--niveau-attention-critique)' },
+        { code: 'D', nom: 'Développement', min: 65, max: 74.99, valeurCalcul: 65, couleur: 'var(--niveau-attention-modere)' },
+        { code: 'M', nom: 'Maîtrise', min: 75, max: 84.99, valeurCalcul: 75, couleur: 'var(--niveau-attention-minimal)' },
+        { code: 'E', nom: 'Étendu', min: 85, max: 100, valeurCalcul: 100, couleur: 'var(--niveau-attention-nul)' }] };
+    const std = () => D.pratiqueDepuisModele(MODELES['STD-n-meilleurs'], { id: 'PRAT_1', nom: 'Par standards', echelleId: null, maintenant: 'm' });
+    const spe = () => D.pratiqueDepuisModele(MODELES['SPE-simple'], { id: 'PRAT_2', nom: 'Par spécifications', maintenant: 'm' });
+    const aucun = () => 0;
+
+    it('l\'échelle née avec la pratique est UNE COPIE à elle, nommée « Mes niveaux » ; l\'échelle de départ n\'est pas touchée', () => {
+        const avant = JSON.stringify(DEPART);
+        const p = std();
+        const r = D.echelleReglee(DEPART, p, D.brouillonDeLaPratique(p, DEPART).niveaux, { idNeuf: 'ECH_1', maintenant: 'm' });
+        expect(r.copiee).toBe(true);
+        expect(r.echelle).toMatchObject({ id: 'ECH_1', nom: 'Mes niveaux', pratiqueId: 'PRAT_1' });
+        expect(r.echelle.nom).not.toMatch(/IDME|départ/i);
+        expect(r.echelle.niveaux).toEqual(DEPART.niveaux);   // même départ : lettres, noms, valeurs, bornes, couleurs
+        expect(JSON.stringify(DEPART)).toBe(avant);
+        // Réglée ensuite, sa propre échelle est réécrite sous le même identifiant : rien n'est copié une seconde fois.
+        const b = D.brouillonDeLaPratique(p, r.echelle).niveaux.map((n) => (n.code === 'M' ? Object.assign({}, n, { valeur: '80' }) : n));
+        const r2 = D.echelleReglee(r.echelle, p, b, { idNeuf: 'ECH_2', maintenant: 'm2' });
+        expect(r2.copiee).toBe(false);
+        expect(r2.echelle.id).toBe('ECH_1');
+        expect(r2.echelle.niveaux.find((n) => n.code === 'M').valeurCalcul).toBe(80);
+    });
+
+    it('une pratique qui lit une échelle du trimestre : au premier réglage, l\'échelle est copiée, jamais modifiée', () => {
+        const partagee = { id: 'E_PARTAGEE', nom: 'Échelle fictive', niveaux: DEPART.niveaux };
+        const avant = JSON.stringify(partagee);
+        const p = std();
+        const b = D.brouillonDeLaPratique(p, partagee).niveaux.map((n) => (n.code === 'D' ? Object.assign({}, n, { valeur: 60 }) : n));
+        const r = D.echelleReglee(partagee, p, b, { idNeuf: 'ECH_9', maintenant: 'm' });
+        expect(r).toMatchObject({ copiee: true, echelle: { id: 'ECH_9', pratiqueId: 'PRAT_1' } });
+        expect(JSON.stringify(partagee)).toBe(avant);
+    });
+
+    it('quatre niveaux aux valeurs inventées : lettres, noms, valeurs et ordre sont ceux du brouillon ; les bornes suivent les valeurs', () => {
+        const brouillon = [{ origine: null, code: 'A', nom: 'Abouti', valeur: '95' }, { origine: null, code: 'B', nom: 'Bien', valeur: '82' },
+            { origine: null, code: 'C', nom: 'En chemin', valeur: '61,5' }, { origine: null, code: 'Z', nom: 'À reprendre', valeur: '30' }];
+        const n = D.niveauxRegles([], brouillon);
+        expect(n.map((x) => [x.code, x.nom, x.valeurCalcul, x.min, x.max])).toEqual([
+            ['A', 'Abouti', 95, 95, 100], ['B', 'Bien', 82, 82, 94.99], ['C', 'En chemin', 61.5, 61.5, 81.99], ['Z', 'À reprendre', 30, 0, 61.49]]);
+    });
+
+    it('un niveau gardé conserve sa couleur ; un niveau ajouté n\'en a pas (le tableau lui donne la couleur neutre)', () => {
+        const p = std();
+        const b = D.gestes.niveauAjouter(D.brouillonDeLaPratique(p, DEPART));
+        b.niveaux[5] = { origine: null, code: 'X', nom: 'Exemplaire', valeur: 110 };
+        expect(D.refusDesNiveaux(b, aucun)).toEqual({ refus: 'valeurNiveau' });
+        b.niveaux[5].valeur = 90;
+        const n = D.niveauxRegles(DEPART.niveaux, b.niveaux);
+        expect(n.find((x) => x.code === 'E').couleur).toBe('var(--niveau-attention-nul)');
+        expect(n.find((x) => x.code === 'X').couleur).toBeUndefined();
+    });
+
+    it('retirer un niveau : deux au minimum ; un niveau inscrit dans des résultats ne se retire pas, et le brouillon ne bouge pas', () => {
+        const b = D.brouillonDeLaPratique(std(), DEPART);
+        const compter = (lettre) => (lettre === 'M' ? 3 : 0);
+        expect(D.gestes.niveauRetirer(b, 3, compter)).toEqual({ refus: 'niveauUtilise', n: 3, nom: 'Maîtrise' });
+        const sansE = D.gestes.niveauRetirer(b, 4, compter);
+        expect(sansE.niveaux.map((n) => n.code)).toEqual(['PS', 'I', 'D', 'M']);
+        expect(b.niveaux).toHaveLength(5);   // l'ancien brouillon n'est pas muté
+        const deux = { niveaux: b.niveaux.slice(0, 2) };
+        expect(D.gestes.niveauRetirer(deux, 0, aucun)).toEqual({ refus: 'minimumNiveaux' });
+    });
+
+    it('la lettre d\'un niveau inscrit dans des résultats ne se change pas ; deux niveaux ne portent pas la même lettre', () => {
+        const b = D.brouillonDeLaPratique(std(), DEPART);
+        b.niveaux[3] = Object.assign({}, b.niveaux[3], { code: 'B' });
+        expect(D.refusDesNiveaux(b, (l) => (l === 'M' ? 2 : 0))).toEqual({ refus: 'lettreUtilisee', n: 2, nom: 'M' });
+        expect(D.refusDesNiveaux(b, aucun)).toBeNull();
+        b.niveaux[3].code = 'd';
+        expect(D.refusDesNiveaux(b, aucun)).toEqual({ refus: 'lettreEnDouble' });
+        b.niveaux[3].code = '';
+        expect(D.refusDesNiveaux(b, aucun)).toEqual({ refus: 'niveauIncomplet' });
+    });
+
+    it('changer l\'ordre des niveaux : monter, descendre ; rien ne sort de la liste', () => {
+        const b = D.brouillonDeLaPratique(std(), DEPART);
+        expect(D.gestes.niveauDeplacer(b, 4, -1).niveaux.map((n) => n.code)).toEqual(['PS', 'I', 'D', 'E', 'M']);
+        expect(D.gestes.niveauDeplacer(b, 0, -1).niveaux.map((n) => n.code)).toEqual(['PS', 'I', 'D', 'M', 'E']);
+        expect(D.gestes.niveauDeplacer(b, 4, 1).niveaux).toHaveLength(5);
+    });
+
+    it('une règle changée sans toucher aux niveaux n\'écrit aucune échelle', () => {
+        const b = D.brouillonDeLaPratique(std(), DEPART);
+        expect(D.niveauxChanges(DEPART, b.niveaux)).toBe(false);
+        b.niveaux[1] = Object.assign({}, b.niveaux[1], { valeur: 45 });
+        expect(D.niveauxChanges(DEPART, b.niveaux)).toBe(true);
+    });
+
+    it('les types : renommer, ajouter, retirer (un au minimum) ; un type porté par une production ne se retire pas', () => {
+        const p = spe();
+        let b = D.brouillonDeLaPratique(p, null);
+        expect(b.types).toEqual([{ id: 1, nom: 'Projet' }, { id: 2, nom: 'Examen' }]);
+        expect(D.gestes.typeRetirer(b, 0, () => 2)).toEqual({ refus: 'typeUtilise', n: 2, nom: 'Projet' });
+        b = D.gestes.typeAjouter(b);
+        expect(b.types[2]).toEqual({ id: 3, nom: '', neuf: true });
+        expect(D.refusDesSpecifications(b)).toEqual({ refus: 'typeSansNom' });
+        b.types[2].nom = 'Atelier';
+        b.types[0].nom = 'Travail long';
+        b = D.gestes.typeRetirer(b, 1, aucun);   // « Examen » part, et ses exigences avec lui
+        expect(b.paliers.map((x) => x.travaux)).toEqual([{ 1: 2 }, { 1: 1 }]);
+        const q = D.poserSpecifications(p, b);
+        expect(q.configuration.typesTravaux).toEqual([{ id: 1, nom: 'Travail long', description: 'Travail pratique ou créatif' }, { id: 3, nom: 'Atelier' }]);
+        expect(D.gestes.typeRetirer({ types: [{ id: 1, nom: 'Seul' }], paliers: [] }, 0, aucun)).toEqual({ refus: 'minimumTypes' });
+        expect(p.configuration.typesTravaux).toHaveLength(2);   // la pratique d'origine n'est pas mutée
+    });
+
+    it('les paliers : ajouter, retirer (un au minimum), leur note et leurs exigences ; sans exigence, c\'est le plancher', () => {
+        const p = spe();
+        let b = D.gestes.palierAjouter(D.brouillonDeLaPratique(p, null));
+        expect(D.refusDesSpecifications(b)).toEqual({ refus: 'palierSansNom' });
+        b.paliers[2] = Object.assign({}, b.paliers[2], { lettre: 'Sous la réussite', note: '45', travaux: { 1: '0', 2: '' } });
+        b.paliers[0] = Object.assign({}, b.paliers[0], { note: '95', travaux: { 1: '3', 2: '1', 9: '4' } });
+        expect(D.refusDesSpecifications(b)).toBeNull();
+        const q = D.poserSpecifications(p, b);
+        expect(q.configuration.forfaits.map((f) => [f.lettre, f.note, f.travaux])).toEqual([
+            ['Excellence', 95, { 1: 3, 2: 1 }], ['Réussite', 70, { 1: 1, 2: 1 }], ['Sous la réussite', 45, {}]]);
+        b.paliers[1] = Object.assign({}, b.paliers[1], { note: '170' });
+        expect(D.refusDesSpecifications(b)).toEqual({ refus: 'notePalier' });
+        expect(D.gestes.palierRetirer({ paliers: [{ id: 1 }] }, 0)).toEqual({ refus: 'minimumPaliers' });
+        expect(D.gestes.palierRetirer(b, 2).paliers).toHaveLength(2);
     });
 });
 
