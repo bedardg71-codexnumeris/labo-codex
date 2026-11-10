@@ -162,6 +162,51 @@ body.mode-clair {
 .parcours-bulle-sortie:hover { color: var(--texte-principal); }
 .parcours-bulle-sortie:focus-visible { outline: 2px solid var(--focus-ring-color); outline-offset: 2px; }
 
+/* ---------- Les bulles en pages (lot du 9 nov. 2026, js/parcours-moteur.js) ----------
+   Sous le texte, « ← 1/3 → » ; la tête ne garde que « n sur N » (décision du 9 nov., 17 h 55). Les pages
+   qu'on ne lit pas restent dans le texte, cachées à l'œil (u-lecteur-ecran) : le lecteur d'écran lit tout. */
+.parcours-bulle-pages {
+    min-width: 3ch;
+    font-size: 13px;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+    color: var(--texte-secondaire);
+    text-align: center;
+    white-space: nowrap;
+}
+
+.parcours-bulle-nav[hidden] { display: none; }
+
+/* Une page du texte (un span par page) : la courante seule se voit ; les autres passent en u-lecteur-ecran,
+   pour que le lecteur d'écran lise tout, dans l'ordre. Le span reste en ligne, dans le paragraphe. */
+.parcours-bulle-page { display: inline; }
+
+.parcours-bulle-nav {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 8px;
+    margin-top: -4px;
+}
+
+.parcours-bulle-fleche {
+    min-width: 44px;
+    min-height: 44px;
+    padding: 0 10px;
+    background: var(--surface-conteneur, transparent);
+    color: var(--texte-principal);
+    border: 1px solid var(--bordure-moyenne);
+    border-radius: var(--radius-moyen, 8px);
+    font: inherit;
+    font-size: 16px;
+    line-height: 1;
+    cursor: pointer;
+}
+
+.parcours-bulle-fleche:hover:not(:disabled) { border-color: var(--parcours-contour); }
+.parcours-bulle-fleche:disabled { opacity: 0.4; cursor: default; }
+.parcours-bulle-fleche:focus-visible { outline: 2px solid var(--focus-ring-color); outline-offset: 2px; }
+
 /* ---------- La bulle sur téléphone (lot du 9 nov. 2026) ----------
    Jusqu'à 500 px de large (SEUIL_TELEPHONE de js/parcours-moteur.js) : pleine largeur, rangée au
    bord de l'écran par le moteur ; repliée, la tête seule (titre et « n sur N ») ; la tête est un
