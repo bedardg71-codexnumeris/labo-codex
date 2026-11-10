@@ -182,6 +182,72 @@
         return Array.from(parCause.values());
     }
 
+    /* ============================== LE RETRAIT D'UN GROUPE ============================== */
+
+    /**
+     * Les clés du trimestre qui portent ce qu'on ne retire jamais en retirant un groupe : résultats, présences, copies et
+     * leurs annotations, corbeille, portfolios, interventions, jugements, notes des rapports (registre docs/DATA-OWNERSHIP.md).
+     * Pas `<trim>_resultatsUlterieurs` : un stock sans écrivain depuis #915 (sentinelle-913), qu'un groupe né en vue simple
+     * ne peut pas porter. Limite de Grégoire (20 sept. 2026) : aucun geste n'efface un résultat de façon irréversible.
+     */
+    const CLES_DE_RESULTATS = Object.freeze(['evaluationsSauvegardees', 'presences', 'fichiersTravaux', 'annotationsTravaux',
+        'corbeilleFichiers', 'portfoliosEleves', 'interventions', 'jugementsDenotation', 'notesRapport']);
+    /** Les clés composées d'un groupe-cours (`<trim>_<préfixe><id>`) : présentes et non vides, elles portent des données. */
+    const PREFIXES_DU_GROUPE = Object.freeze(['snapshots_', 'etudiantsSuivis_gc_', 'datesVerrouillees_gc_']);
+    const CHAMPS_DA = ['etudiantDA', 'etudiantDa', 'da'];
+
+    function _numeroDeGroupe(g) { return String(g == null ? '' : g).trim().replace(/^0+(?=.)/, ''); }
+
+    /**
+     * Les étudiant·es d'un groupe, par la règle de `obtenirEtudiantsCoursActif` (modes.js) : le même cours ; et le même
+     * numéro de groupe, sauf pour un groupe sans numéro, en mode « tous groupes » ou dans un service.
+     */
+    function elevesDuGroupe(groupe, etudiants, { service } = {}) {
+        const tous = !groupe.groupeNum || groupe.modeCours || service;
+        return (etudiants || []).filter((e) => e && e.coursId === groupe.coursId
+            && (tous || _numeroDeGroupe(e.groupeReel || e.groupe) === _numeroDeGroupe(groupe.groupeNum)));
+    }
+
+    function _nommeUnDa(objet, das) {
+        return CHAMPS_DA.some((c) => objet[c] != null && das.has(String(objet[c])));
+    }
+
+    /** Une entrée nomme-t-elle un de ces DA ou une de ces productions, à son niveau ou dans une liste qu'elle porte ? */
+    function _touche(it, das, productions) {
+        if (!it || typeof it !== 'object') return das.has(String(it));
+        if (_nommeUnDa(it, das) || productions.has(it.productionId)) return true;
+        return Object.values(it).some((v) => Array.isArray(v) && v.some((x) => (x && typeof x === 'object') ? _nommeUnDa(x, das) : das.has(String(x))));
+    }
+
+    /**
+     * Ce que les magasins portent de ces étudiant·es et de ces productions, compté par clé. FERMÉE dans le doute : une entrée
+     * qui nomme un de ces DA dans un champ de DA (ou dans une liste), ou une de ces productions, compte. Un magasin rangé par
+     * DA (un objet) compte ses clés.
+     * @returns {Object<string, number>} vide : rien ne s'oppose au retrait
+     */
+    function porteursDeResultats(magasins, das, productionIds) {
+        const D = new Set((das || []).map(String));
+        const P = new Set(productionIds || []);
+        const porteurs = {};
+        Object.keys(magasins || {}).forEach((k) => {
+            const v = magasins[k];
+            let n = 0;
+            if (Array.isArray(v)) n = v.filter((it) => _touche(it, D, P)).length;
+            else if (v && typeof v === 'object') n = Object.keys(v).filter((x) => D.has(x)).length + Object.values(v).filter((it) => _touche(it, D, P)).length;
+            if (n) porteurs[k] = n;
+        });
+        return porteurs;
+    }
+
+    /** Le nom de cours par défaut d'un nouveau groupe : « Mon cours », puis « Mon cours 2 », « Mon cours 3 »… (PROPOSÉ) */
+    function nomCoursParDefaut(defaut, nomsPris) {
+        const pris = new Set((nomsPris || []).map((n) => String(n || '').trim().toLowerCase()));
+        if (!pris.has(defaut.toLowerCase())) return defaut;
+        let i = 2;
+        while (pris.has(`${defaut} ${i}`.toLowerCase())) i++;
+        return `${defaut} ${i}`;
+    }
+
     /* ============================== CE QUI NAÎT EN COULISSE ============================== */
 
     /** Le trimestre d'une date : janvier à mai, hiver ; juin et juillet, été ; août à décembre, automne (règle de rencontres.js). */
@@ -548,7 +614,8 @@
     window.VueSimpleDonnees = {
         VUES, CLE_CHOIX, CLE_MARQUE, ECRANS, FAMILLES, REGLES_STD, GROUPE_SIMPLE, RAISONS,
         applicationVide, vueAuDemarrage,
-        analyserListeCollee, refusParCause, trimestreDeLaDate, ficheEleve, groupeCoursLeger, productionLegere,
+        analyserListeCollee, refusParCause, CLES_DE_RESULTATS, PREFIXES_DU_GROUPE, elevesDuGroupe, porteursDeResultats, nomCoursParDefaut,
+        trimestreDeLaDate, ficheEleve, groupeCoursLeger, productionLegere,
         pratiqueDepuisModele, regleStd, poserRegleStd,
         brouillonDeLaPratique, gestes, refusDesNiveaux, refusDesSpecifications, niveauxRegles, echelleReglee, niveauxChanges, poserSpecifications, NOM_ECHELLE,
         resultatsAMettreAJour, appliquerMiseAJour, colonneModifiee, poserCompte,

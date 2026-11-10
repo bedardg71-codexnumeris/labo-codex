@@ -18,6 +18,10 @@ Prises sous WebKit (Playwright, Mac) sur `main` local après la fusion de `lot/v
 | 14 | « Garder les anciennes valeurs » : le signe « ≠ » sur les deux M saisis avant, et sa ligne de légende |
 | 15 | la note finale |
 | 16 | l'accueil avec la classe |
+| 17 | la classe avec deux groupes (le sélecteur, « Nouveau groupe », « Retirer ce groupe ») |
+| 18 | la question avant de retirer un groupe vide |
+| 19 | un groupe qui porte des résultats : pas de bouton de retrait, la ligne qui dit pourquoi |
 
-À relire (Cowork) : à 820 px, la colonne « Note provisoire » prend près de la moitié de la largeur du tableau ; deux
-productions seulement se voient, la troisième coupée par le bord estompé.
+**Reprises le 10 nov. 2026 vers 14 h** (lot « plusieurs groupes ») : les 16 écrans refaits, trois ajoutés (76 images).
+Les écrans 05 (deux boutons neufs) et 12, 14 (la colonne « Note provisoire ») sont ceux qui changent. À 820 px, la note
+est bornée à 9,5 rem en vue simple : quatre productions se voient (deux avant), la cinquième sous le bord estompé.

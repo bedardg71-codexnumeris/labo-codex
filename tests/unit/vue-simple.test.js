@@ -254,6 +254,42 @@ describe('C. La liste collée', () => {
     });
 });
 
+describe('C bis. Plusieurs groupes, et le retrait d\'un groupe vide (décision de Grégoire, 10 nov. 2026, 13 h 26)', () => {
+    const g1 = { id: 'GC_1', coursId: 'C_1', groupeNum: '1' };
+    const g2 = { id: 'GC_2', coursId: 'C_2', groupeNum: '1' };
+    const etudiants = [
+        { da: '9990001', coursId: 'C_1', groupe: '1' }, { da: '9990002', coursId: 'C_1', groupe: '00001' },
+        { da: '9990003', coursId: 'C_2', groupe: '1' }, { da: '9990004', coursId: 'C_1', groupe: '2' }
+    ];
+
+    it('les étudiant·es d\'un groupe : le même cours et le même numéro de groupe (zéros de tête ignorés), comme l\'écran les montre', () => {
+        expect(D.elevesDuGroupe(g1, etudiants).map((e) => e.da)).toEqual(['9990001', '9990002']);
+        expect(D.elevesDuGroupe(g2, etudiants).map((e) => e.da)).toEqual(['9990003']);
+        expect(D.elevesDuGroupe({ id: 'S', coursId: 'C_1', groupeNum: '1' }, etudiants, { service: true }).map((e) => e.da)).toEqual(['9990001', '9990002', '9990004']);
+    });
+
+    it('un résultat, une présence, une copie ou une intervention qui nomme un de ses étudiant·es s\'oppose au retrait', () => {
+        const das = ['9990001'];
+        expect(D.porteursDeResultats({ evaluationsSauvegardees: [{ etudiantDA: '9990009', productionId: 'P_X' }] }, das, [])).toEqual({});
+        expect(D.porteursDeResultats({ evaluationsSauvegardees: [{ etudiantDA: '9990001', productionId: 'P_X' }] }, das, [])).toEqual({ evaluationsSauvegardees: 1 });
+        expect(D.porteursDeResultats({ presences: [{ da: '9990001', date: '2026-11-02' }] }, das, [])).toEqual({ presences: 1 });
+        expect(D.porteursDeResultats({ fichiersTravaux: [{ etudiantDA: '9990009', productionId: 'P_1' }] }, das, ['P_1'])).toEqual({ fichiersTravaux: 1 });
+        expect(D.porteursDeResultats({ interventions: [{ id: 'I', etudiants: ['9990001'] }] }, das, [])).toEqual({ interventions: 1 });
+        expect(D.porteursDeResultats({ portfoliosEleves: { 9990001: { artefactsRetenus: [] } } }, das, [])).toEqual({ portfoliosEleves: 1 });
+        expect(D.porteursDeResultats({ evaluationsSauvegardees: null, presences: [] }, das, [])).toEqual({});
+    });
+
+    it('les clés que la garde lit sont celles des résultats du registre', () => {
+        expect(D.CLES_DE_RESULTATS).toEqual(expect.arrayContaining(['evaluationsSauvegardees', 'presences', 'fichiersTravaux', 'corbeilleFichiers', 'interventions']));
+    });
+
+    it('le nom de cours par défaut d\'un nouveau groupe ne reprend pas un nom pris', () => {
+        expect(D.nomCoursParDefaut('Mon cours', [])).toBe('Mon cours');
+        expect(D.nomCoursParDefaut('Mon cours', ['Mon cours'])).toBe('Mon cours 2');
+        expect(D.nomCoursParDefaut('Mon cours', ['mon cours', 'Mon cours 2', 'Atelier'])).toBe('Mon cours 3');
+    });
+});
+
 describe('D. Ce qui naît en coulisse', () => {
     it('le trimestre vient de la date du jour : hiver, été, automne', () => {
         expect(D.trimestreDeLaDate(new Date(2026, 10, 9))).toEqual({ session: 'A', annee: '2026', id: 'a2026' });

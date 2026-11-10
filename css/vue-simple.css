@@ -634,3 +634,13 @@ body.vue-simple .entete-bouton-icone {
 .vs-page .tn-reglages {
     justify-content: center;
 }
+
+/* La colonne « Note provisoire » en vue simple (constat de Cowork, captures du 10 nov. 2026) : laissée à la mise en page
+   automatique, elle prenait la largeur de sa phrase la plus longue (« Aucune production retenue… »), près de la moitié du
+   tableau à 820 px. Bornée ici, la phrase se replie et trois productions au moins se voient à 820 px. La vue étendue n'est
+   pas touchée (.vs-page). */
+.vs-page .tn-col-note,
+.vs-page .tn-note {
+    width: 9.5rem;
+    min-width: 9.5rem;   /* la largeur seule suffit (break-test du 10 nov. : sans ce bloc, deux productions visibles) */
+}

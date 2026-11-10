@@ -6,6 +6,95 @@ Consigne de Cowork du 9 nov. 2026, 17 h 40. Branche `lot/vue-simple`, partie de 
 
 ---
 
+## 10 NOV., 14 H 15 — PLUSIEURS GROUPES, RETIRER UN GROUPE VIDE, LA COLONNE DE LA NOTE À 820 PX (sur `main` local, rien de poussé)
+
+Constat vécu par Grégoire (13 h 21) : une fois la classe créée, on ne pouvait ni recommencer ni créer un deuxième groupe. Décision de Grégoire (13 h 26) : deux boutons sur « Ta classe ». Noms inventés partout.
+
+### Ce qui change à l'écran
+
+1. **« Nouveau groupe »** rouvre le formulaire de création (nom du cours, liste collée), avec « Annuler ». Le groupe créé devient le groupe actif. Le sélecteur de groupe paraît dès qu'il y a deux groupes, sur Classe, Pratique, Résultats et Note finale : il existait, seule la création manquait.
+2. **« Retirer ce groupe »**, seulement si le groupe ne porte aucun résultat. Une question d'abord, sur le modèle de la colonne. Retirer le dernier groupe ramène à « Colle ta liste… ». Un groupe qui porte un résultat n'a pas le bouton ; une ligne dit pourquoi.
+3. **La colonne « Note provisoire » en vue simple** a une largeur fixe de 9,5 rem, et sa phrase se replie. À 820 px, quatre productions se voient, deux avant. La vue étendue n'est pas touchée (règle limitée à `.vs-page`).
+
+### Textes
+
+- Repris de la consigne, PROPOSÉS : « Nouveau groupe », « Retirer ce groupe », « Retirer « {nom} » et ses {n} étudiant·es ? Ce groupe ne porte aucun résultat. », « Ce groupe porte des résultats : il ne se retire pas ici. », « Groupe retiré. »
+- Variantes que j'ai ajoutées : à une personne, « … et son étudiant·e ? » ; à zéro, « Retirer « {nom} » ? ».
+- **Neufs, PROPOSÉS** :
+  - « déjà dans un groupe de ce trimestre » ;
+  - « Toutes ces personnes sont déjà inscrites ce trimestre : le groupe n’a pas été créé. » ;
+  - le nom de cours par défaut « Mon cours 2 », « Mon cours 3 »… quand « Mon cours » est pris, pour que deux groupes ne portent pas le même nom dans le sélecteur.
+- J'ai d'abord repris le motif validé de la vue étendue, « Déjà inscrit·e ce trimestre ». Le banc des mots de la vue simple l'a refusé : aucun accord au point médian en vue simple (décision du 9 nov., 20 h 49). D'où la tournure neutre.
+
+### Le même DA dans deux groupes : ce que fait le modèle de la vue étendue, et je le suis
+
+**Mesuré.**
+- `groupeEtudiants` est UNE liste par trimestre, une fiche par personne, avec un seul `coursId` et un seul `groupe`.
+- L'import de la vue étendue refuse un DA déjà présent dans le trimestre, tous cours confondus (`_jugerLignesImportV2`, « Déjà inscrit·e ce trimestre », décision de Grégoire du 19 sept. 2026).
+
+**Ce que fait « Nouveau groupe ».** Une personne déjà inscrite reste dans son premier groupe : elle n'est ni déplacée, ni doublée, ni perdue. Elle est nommée sous le message de succès. Si toute la liste est déjà inscrite, le groupe n'est pas créé.
+
+**Ce que ça ne permet pas.** Une même personne dans deux cours du même enseignant au même trimestre ne peut pas exister. Le changer serait un choix de modèle de données, pas un choix technique : je ne l'ai pas fait. **À Grégoire, s'il le vit.**
+
+**Deux groupes du même cours.** Ils n'arrivent pas en vue simple : chaque « Nouveau groupe » crée son propre cours. Un tel groupe venu de la vue étendue est lu par la règle de `obtenirEtudiantsCoursActif` : même cours ET même numéro de groupe. Rien ne s'y mélange.
+
+### Ce que le retrait emporte, exactement
+
+**Fonctions existantes.**
+- La vue étendue a deux suppressions de groupe-cours (`supprimerGroupeCoursV2`, `supprimerGroupeCoursDepuisBibliotheque`). Elles passent par un `confirm()` et le codex à part (#1007), et **n'emportent que la ligne du groupe-cours** : ni ses étudiant·es, ni son cours. Je ne les ai pas appelées : elles ne font pas ce qui est demandé et ouvrent une fenêtre du navigateur.
+- J'appelle ce qui sert : le recensement du cours (`recenserDependancesCours`, cours.js) et le changement de groupe actif (`changerGroupeCoursActifV2`, qui accepte « aucun »).
+
+**Part :**
+1. la ligne du groupe-cours ;
+2. ses étudiant·es, par la règle de l'écran (même cours, même numéro de groupe) ;
+3. si son cours ne sert à aucun autre groupe-cours, dans aucun trimestre : les colonnes de ce cours, vides par construction (relu au moment de l'écriture : une colonne pleine reste), puis la fiche du cours, seulement si le recensement de la vue étendue ne trouve plus aucune clé qui la nomme.
+
+**Reste :**
+- la pratique du groupe : elle redevient libre et sera reprise au prochain choix du même modèle, comme « Changer de modèle » le fait déjà ;
+- son échelle, l'horaire, et tout ce qui est partagé avec un autre groupe.
+
+**La garde (fermée dans le doute).** S'oppose au retrait toute entrée de ces clés qui nomme un de ses étudiant·es (champ de DA, ou une liste de DA) ou une colonne qui partirait :
+- résultats, présences, copies, annotations, corbeille, portfolios, interventions, jugements, notes des rapports ;
+- les clés propres au groupe : captures, suivis, dates verrouillées.
+
+La garde est relue au premier geste, au second, et **à l'instant de l'écriture**. L'action appelée deux fois directement, sur un groupe qui porte un résultat, est refusée : un banc le prouve.
+
+**Pas d'« Annuler ».** Le témoin d'enregistrement n'en a pas (mesuré dans `temoin-enregistrement.js`). Le retrait ne se défait donc pas ; il ne touche qu'un groupe sans aucun résultat. Pas de codex à part non plus, comme pour la colonne vide.
+
+### La preuve
+
+- **Vitest**, `tests/unit/vue-simple.test.js` : les étudiant·es d'un groupe, la garde (résultat, présence, copie, intervention, portfolio rangé par DA), le nom de cours par défaut. Break-tests : quatre mutations, quatre rouges. **Vitest complet : 11 354/11 354.**
+- **WebKit**, « Vue simple · plusieurs groupes », quatre essais :
+  1. deux groupes gardent chacun leurs étudiant·es, et le sélecteur paraît à deux sur Classe, Résultats et Note finale ;
+  2. un groupe vide se retire après la question, son cours part avec lui, et le dernier retiré ramène à la création ;
+  3. un groupe avec un résultat : pas de bouton, ligne qui dit pourquoi, action directe refusée, base inchangée ;
+  4. à 820 px, au moins trois productions visibles.
+- **Break-tests WebKit**, chacun rouge sur son essai :
+  - nouveau groupe versé dans le groupe actif ;
+  - sélecteur demandé à trois groupes ;
+  - retrait qui ne retire rien ;
+  - garde éteinte ;
+  - bloc CSS de la note retiré (2 productions visibles au lieu de 3 ou plus).
+- **Fichier entier : 42/42 sous WebKit.** Un essai répété six fois : 24/24.
+- **Captures** (`captures-2026-11-10-vue-simple-webkit/`) : les 16 écrans refaits, trois ajoutés (17 deux groupes, 18 la question, 19 un groupe qui porte des résultats), à 1180 et 820 px, sombre et clair : 76 images.
+
+### Écarts et choses trouvées en chemin
+
+- **Un défaut de mon banc, corrigé.** Une première mutation CSS a fait rougir l'essai du retrait, sans rapport avec elle. Je l'ai rejoué 4 fois dans la même condition : 1 rouge. Cause : l'essai lisait la base juste après le clic, sans attendre le message de succès. L'aide attend maintenant le message ; 24/24 ensuite.
+- **Deux lignes mortes de mon CSS, retirées.** `max-width` et `white-space` ne servaient pas : la même mutation laissait le banc de la colonne vert. Seule la largeur borne la colonne.
+- **Deux sentinelles rougies par mon lot, et réglées dans le lot :**
+  - la clé `resultatsUlterieurs`, qu'aucun fichier ne doit plus nommer (stock sans écrivain), retirée de ma liste ;
+  - `creerClasse` montée à 16 de complexité, ramenée sous 15 par `_nomCoursSaisi`.
+
+### Supposé
+
+- « Nouveau groupe » crée toujours un cours neuf : un groupe par cours en vue simple.
+- Après un retrait, le groupe actif devient le premier groupe qui reste.
+- Le bouton « Retirer ce groupe » est offert aussi pour un groupe venu de la vue étendue, avec la même garde.
+- Rien n'est offert pendant la démonstration.
+
+---
+
 ## 10 NOV., 13 H 20 — LA LISTE DE LÉA, COLLÉE TELLE QUELLE (sur `main` local, rien de poussé)
 
 Défaut vécu par Grégoire à son essai (12 h 42) : la liste exportée de Léa, collée dans « Ta classe », rendait « Aucune ligne lue » et 28 lignes refusées (« le DA doit compter 7 chiffres »). Cause : la vue simple découpait la ligne elle-même et ne retirait pas l'écriture `="…"` ; le DA lu était `="2600001"`, refusé. Aucun nom réel ici ni dans les bancs.

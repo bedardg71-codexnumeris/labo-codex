@@ -443,6 +443,122 @@ test.describe('Vue simple · la liste de Léa, collée telle quelle', () => {
     });
 });
 
+/* ============================== PLUSIEURS GROUPES ==============================
+   Décision de Grégoire (10 nov. 2026, 13 h 26), après son essai : « Nouveau groupe » et « Retirer ce groupe » sur « Ta
+   classe ». Le retrait n'est offert que pour un groupe qui ne porte aucun résultat (limite du 20 sept. 2026). Noms inventés. */
+const LISTE_ATELIER = '9990011, Ulmaire, Ulysse\n9990012, Verveine, Victoire\n9990013, Wapiti, Wanda\n9990002, Baobab, Bruno';
+
+const groupesEnBase = (page) => page.evaluate(() => (window.db.getSync(window.cle('groupesCours'), []) || []).map((g) => {
+    const cours = (window.db.getSync('cours', []) || []).find((c) => c.id === g.coursId);
+    const das = (window.db.getSync(window.cle('groupeEtudiants'), []) || []).filter((e) => e.coursId === g.coursId).map((e) => e.da).sort();
+    return { cours: cours ? cours.nomCours : null, das };
+}));
+
+async function nouveauGroupe(page, nomCours, liste) {
+    await allerA(page, 'classe');
+    await ecran(page, 'classe').locator('[data-action="VueSimple.nouveauGroupe"]').click();
+    if (nomCours) await page.fill('#vs-nom-cours', nomCours);
+    await page.fill('#vs-liste', liste);
+    await ecran(page, 'classe').locator('[data-action="VueSimple.creerClasse"]').click();
+    // Le geste écrit en plusieurs temps (cours, groupe, étudiant·es) : rien ne se lit en base avant son message.
+    await expect(ecran(page, 'classe').locator('.vs-succes')).toBeVisible();
+}
+
+test.describe('Vue simple · plusieurs groupes', () => {
+    test('deux groupes créés en vue simple gardent chacun leurs étudiant·es ; le sélecteur paraît à deux, sur Classe, Résultats et Note finale', async ({ page }) => {
+        const erreurs = await ouvrir(page);
+        await collerLaClasse(page);
+        await expect(ecran(page, 'classe').locator('.vs-select')).toHaveCount(0);
+        await nouveauGroupe(page, 'Atelier fictif', LISTE_ATELIER);
+        await expect(ecran(page, 'classe').locator('.vs-succes')).toHaveText('Classe créée : 3 étudiant·es.');
+        // La même personne ne s'inscrit qu'une fois par trimestre (règle de l'import de la vue étendue) : nommée, jamais déplacée.
+        await expect(ecran(page, 'classe').locator('.vs-refusees li')).toHaveText(['Baobab Bruno 9990002 : déjà dans un groupe de ce trimestre']);
+        expect(await groupesEnBase(page)).toEqual([
+            { cours: 'Mon cours', das: ['9990001', '9990002', '9990003', '9990004'] },
+            { cours: 'Atelier fictif', das: ['9990011', '9990012', '9990013'] }
+        ]);
+        await expect(ecran(page, 'classe').locator('.vs-table tbody tr')).toHaveCount(3);
+        for (const nom of ['classe', 'resultats', 'note']) {
+            await allerA(page, nom);
+            await expect(ecran(page, nom).locator('.vs-select option')).toHaveText(['Mon cours · groupe 1', 'Atelier fictif · groupe 1']);
+        }
+        await allerA(page, 'classe');
+        await page.selectOption('#vs-select-groupe-classe', { label: 'Mon cours · groupe 1' });
+        await expect(ecran(page, 'classe').locator('.vs-table tbody tr')).toHaveCount(4);
+        expect(erreurs).toEqual([]);
+    });
+
+    test('un groupe vide se retire après la question ; retirer le dernier ramène à l\'écran de création', async ({ page }) => {
+        const erreurs = await ouvrir(page);
+        await collerLaClasse(page);
+        await nouveauGroupe(page, '', LISTE_ATELIER);
+        expect((await groupesEnBase(page)).map((g) => g.cours)).toEqual(['Mon cours', 'Mon cours 2']);
+        const classe = ecran(page, 'classe');
+        await classe.locator('[data-action="VueSimple.retirerGroupe"]').click();
+        await expect(classe.locator('.vs-question p').first()).toHaveText('Retirer « Mon cours 2 · groupe 1 » et ses 3 étudiant·es ? Ce groupe ne porte aucun résultat.');
+        expect(await groupesEnBase(page)).toHaveLength(2);   // la question seule n'écrit rien
+        await classe.locator('.vs-question [data-action="VueSimple.retirerGroupe"]').click();
+        await expect(classe.locator('.vs-succes')).toHaveText('Groupe retiré.');
+        expect(await groupesEnBase(page)).toEqual([{ cours: 'Mon cours', das: ['9990001', '9990002', '9990003', '9990004'] }]);
+        const restes = await page.evaluate(() => ({
+            cours: (window.db.getSync('cours', []) || []).filter((c) => !c.isDemo).map((c) => c.nomCours),
+            eleves: (window.db.getSync(window.cle('groupeEtudiants'), []) || []).length
+        }));
+        expect(restes).toEqual({ cours: ['Mon cours'], eleves: 4 });   // le cours né avec le groupe est parti avec lui
+        await expect(classe.locator('.vs-select')).toHaveCount(0);
+        await expect(classe.locator('.vs-table tbody tr')).toHaveCount(4);
+        await classe.locator('[data-action="VueSimple.retirerGroupe"]').click();
+        await classe.locator('.vs-question [data-action="VueSimple.retirerGroupe"]').click();
+        await expect(classe.locator('.vs-intro')).toHaveText('Colle ta liste d’étudiant·es, une ligne par étudiant·e : DA, nom, prénom.');
+        await expect(classe.locator('[data-action="VueSimple.creerClasse"]')).toHaveText('Créer ma classe');
+        expect(await groupesEnBase(page)).toEqual([]);
+        expect(erreurs).toEqual([]);
+    });
+
+    test('un groupe qui porte un résultat n\'a pas le bouton, et l\'action appelée directement est refusée', async ({ page }) => {
+        const erreurs = await ouvrir(page);
+        await collerLaClasse(page);
+        await choisirLeModele(page, 'STD-n-meilleurs');
+        await allerA(page, 'resultats');
+        await ajouterProduction(page, 'Production 1', '2026-11-02');
+        await caseTn(page, 1, 1).focus();
+        await page.keyboard.press('m');
+        await expect(caseTn(page, 1, 1)).toHaveText('M');
+        await allerA(page, 'classe');
+        const classe = ecran(page, 'classe');
+        await expect(classe.locator('[data-action="VueSimple.retirerGroupe"]')).toHaveCount(0);
+        await expect(classe.locator('[data-vs-groupe="porte-resultats"]')).toHaveText('Ce groupe porte des résultats : il ne se retire pas ici.');
+        const avant = await page.evaluate(() => ({ g: window.db.getSync(window.cle('groupesCours'), []).length, e: window.db.getSync(window.cle('groupeEtudiants'), []).length, r: window.db.getSync(window.cle('evaluationsSauvegardees'), []).length }));
+        expect(avant.r).toBeGreaterThan(0);
+        await page.evaluate(async () => { await window.VueSimple.retirerGroupe(); await window.VueSimple.retirerGroupe(); });
+        await expect(classe.locator('.vs-erreur')).toHaveText('Ce groupe porte des résultats : il ne se retire pas ici.');
+        const apres = await page.evaluate(() => ({ g: window.db.getSync(window.cle('groupesCours'), []).length, e: window.db.getSync(window.cle('groupeEtudiants'), []).length, r: window.db.getSync(window.cle('evaluationsSauvegardees'), []).length }));
+        expect(apres).toEqual(avant);
+        expect(erreurs).toEqual([]);
+    });
+
+    test('à 820 px, la colonne « Note provisoire » laisse voir au moins trois productions', async ({ page }) => {
+        test.setTimeout(120000);
+        await page.setViewportSize({ width: 820, height: 1180 });
+        const erreurs = await ouvrir(page);
+        await collerLaClasse(page);
+        await choisirLeModele(page, 'STD-n-meilleurs');
+        await allerA(page, 'resultats');
+        for (const n of ['Production 1', 'Production 2', 'Production 3', 'Production 4', 'Production 5']) await ajouterProduction(page, n, '2026-11-02');
+        await auRepos(page);
+        const mesure = await page.evaluate(() => {
+            const hote = document.querySelector('#vs-tableau-hote');
+            const note = hote.querySelector('.tn-col-note').getBoundingClientRect();
+            const premiere = hote.querySelector('thead th').getBoundingClientRect();   // la colonne des noms, collée à gauche
+            const titres = [...hote.querySelectorAll('.tn-col-production')].map((t) => t.getBoundingClientRect());
+            return { noteLargeur: note.width, visibles: titres.filter((r) => r.left >= premiere.right - 1 && r.right <= note.left + 1).length, total: titres.length };
+        });
+        expect(mesure.total).toBe(5);
+        expect(mesure.visibles).toBeGreaterThanOrEqual(3);
+        expect(erreurs).toEqual([]);
+    });
+});
+
 test.describe('Vue simple · les gestes tiennent', () => {
     test('deux clics de suite ne créent ni deux cours, ni deux pratiques, ni deux colonnes', async ({ page }) => {
         const erreurs = await ouvrir(page);

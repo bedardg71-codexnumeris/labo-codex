@@ -61,6 +61,17 @@
         classeCause: (n, raison) => `${n} ligne${n > 1 ? 's' : ''} : ${raison}.`,
         classeCauseExemple: 'Par exemple :',
         classeCeQuiMarche: 'Ce qui marche : une ligne par étudiant·e, « 1234567, Tremblay, Alice », ou ta liste de Léa collée telle quelle.',
+        // Décidés par Grégoire (10 nov. 2026, 13 h 26), PROPOSÉS et corrigeables : plusieurs groupes, et le retrait d'un groupe vide.
+        groupeNouveau: 'Nouveau groupe',
+        groupeRetirer: 'Retirer ce groupe',
+        groupeRetirerQuestion: (nom, n) => `Retirer « ${nom} »${n ? ` et ${n > 1 ? `ses ${n} étudiant·es` : 'son étudiant·e'}` : ''} ? Ce groupe ne porte aucun résultat.`,
+        groupePorteResultats: 'Ce groupe porte des résultats : il ne se retire pas ici.',
+        groupeRetire: 'Groupe retiré.',
+        // PROPOSÉ par Claude Code (10 nov. 2026) : la même personne ne s'inscrit qu'une fois par trimestre (règle de la vue étendue).
+        groupeAucunNouveau: 'Toutes ces personnes sont déjà inscrites ce trimestre : le groupe n’a pas été créé.',
+        // PROPOSÉ : la cause de l'import de la vue étendue (« Déjà inscrit… ce trimestre », validée le 19 sept. 2026), tournée
+        // sans accord, comme tous les mots de la vue simple (décision de Grégoire du 9 nov., 20 h 49).
+        dejaInscrit: 'déjà dans un groupe de ce trimestre',
         classeInactifs: (n) => `${n} personne${n > 1 ? 's' : ''} de ta liste ${n > 1 ? 'ont' : 'a'} le statut « Inactif » : mise${n > 1 ? 's' : ''} de côté.`,
         classeCreee: (n) => `Classe créée : ${n} étudiant·e${n > 1 ? 's' : ''}.`,
         classeAjoutes: (n, deja) => `${n} étudiant·e${n > 1 ? 's' : ''} de plus dans ta classe.` + (deja ? ` ${deja} y ${deja > 1 ? 'étaient' : 'était'} déjà.` : ''),
@@ -213,6 +224,8 @@
     let _formulaireProduction = false;
     let _colonne = null;       // la colonne (production) que le formulaire règle ; null : « + Production »
     let _retraitDemande = null;   // la colonne dont on a demandé le retrait : il se fait au second geste
+    let _nouveauGroupe = false;   // « Nouveau groupe » : l'écran Classe montre le formulaire de création, même avec un groupe actif
+    let _retraitGroupe = null;    // le groupe dont on a demandé le retrait : il se fait au second geste
     let _miseAJour = null;     // la question posée après un réglage de niveaux : { lot, groupes }
 
     /* ============================== LA VUE ============================== */
@@ -355,6 +368,8 @@
         _formulaireProduction = false;
         _colonne = null;
         _miseAJour = null;
+        _nouveauGroupe = false;
+        _retraitGroupe = null;
         _fermerReglage();
         if (typeof afficherSection === 'function') afficherSection('simple-' + ecran);
         RENDUS[ecran]();
@@ -388,6 +403,8 @@
         _miseAJour = null;  // ni la question de mise à jour, ni le formulaire d'une colonne
         _colonne = null;
         _formulaireProduction = false;
+        _nouveauGroupe = false;
+        _retraitGroupe = null;
         await changerGroupeCoursActifV2(id);
         _rafraichir();
     }
@@ -469,8 +486,9 @@
             _ecrire(hote, `${tete}${_selecteurGroupeHTML()}`);
             return;
         }
-        if (!groupe) {
-            _ecrire(hote, `${tete}<p class="vs-intro">${esc(MOTS.classeIntro)}</p><div class="vs-bloc">${_champListeHTML(true)}</div>`);
+        if (!groupe || _nouveauGroupe) {
+            const annuler = groupe ? `<p><button type="button" class="btn btn-secondaire" data-action="VueSimple.annulerNouveauGroupe">${esc(MOTS.productionAnnuler)}</button></p>` : '';
+            _ecrire(hote, `${tete}${retourHTML || ''}<p class="vs-intro">${esc(MOTS.classeIntro)}</p><div class="vs-bloc">${_champListeHTML(true)}${annuler}</div>`);
             return;
         }
         const rangees = eleves.map((e) => `<tr><td>${esc(e.da)}</td><td>${esc(e.nom)}</td><td>${esc(e.prenom)}</td></tr>`).join('');
@@ -479,7 +497,7 @@
             ? `<p><button type="button" class="btn btn-principal" data-action="VueSimple.aller" data-param="pratique">${esc(MOTS.classeSuite)}</button></p>` : '';
         _ecrire(hote, `${tete}${_selecteurGroupeHTML()}
             <p class="vs-intro">${esc(_nomGroupe(groupe))} · ${esc(MOTS.classeCompte(eleves.length))}</p>
-            ${retourHTML || ''}${suite}
+            ${retourHTML || ''}${suite}${_gestesDuGroupeHTML(groupe)}
             <div class="vs-cadre-table"><table class="vs-table"><thead><tr>${colonnes}</tr></thead><tbody>${rangees}</tbody></table></div>
             <details class="vs-bloc vs-ajout"><summary>${esc(MOTS.classeAjouterTitre)}</summary>${_champListeHTML(false)}</details>`);
     }
@@ -548,7 +566,28 @@
         try { await peuplerDropdownGroupeCoursActif(); } catch (e) { console.warn('[Vue simple] en-tête non rafraîchi :', e); }
     }
 
-    /** « Créer ma classe » et « Ajouter à ma classe » : la liste collée devient des élèves ; trimestre, cours et groupe naissent en coulisse. */
+    /** Les personnes de la liste déjà inscrites ce trimestre, dans un autre groupe : nommées, jamais déplacées ni doublées. */
+    function _dejaInscrits(fiches) {
+        const presents = new Set((_trimestreActif() ? (db.getSync(cle('groupeEtudiants'), []) || []) : []).map((e) => e && String(e.da)));
+        return fiches.filter((f) => presents.has(f.da)).map((f) => ({ ligne: `${f.nom} ${f.prenom} ${f.da}`, raison: MOTS.dejaInscrit }));
+    }
+
+    /** Le nom de cours d'un groupe créé sans nom : « Mon cours », puis « Mon cours 2 »… (deux groupes ne portent pas le même nom). */
+    function _nomCoursParDefaut() {
+        return D().nomCoursParDefaut(MOTS.classeNomCoursDefaut, _groupes().map((g) => (_cours(g.coursId) || {}).nomCours));
+    }
+
+    /** Le nom de cours tapé ; à défaut, pour un groupe qui naît, « Mon cours », « Mon cours 2 »… */
+    function _nomCoursSaisi(actif) {
+        const saisi = ((document.getElementById('vs-nom-cours') || {}).value || '').trim();
+        return saisi || (actif ? '' : _nomCoursParDefaut());
+    }
+
+    /**
+     * « Créer ma classe », « Nouveau groupe » et « Ajouter à ma classe » : la liste collée devient des étudiant·es ; trimestre,
+     * cours et groupe naissent en coulisse. Une personne déjà inscrite ce trimestre (dans un autre groupe) n'est ni déplacée
+     * ni doublée : la règle de l'import de la vue étendue (`_jugerLignesImportV2`, « Déjà inscrit·e ce trimestre »).
+     */
     async function creerClasse() {
         const zone = document.getElementById('vs-liste');
         const retour = document.getElementById('vs-classe-retour');
@@ -556,8 +595,13 @@
         const lecture = D().analyserListeCollee(zone ? zone.value : '');
         const refus = _refusDeLaListe(lecture);
         if (refus) { dire(refus); if (zone) zone.focus(); return; }
-        const nomCours = ((document.getElementById('vs-nom-cours') || {}).value || '').trim();
-        const actif = _groupeActif();
+        const actif = _nouveauGroupe ? null : _groupeActif();
+        const deja = actif ? [] : _dejaInscrits(lecture.fiches);
+        if (deja.length === lecture.fiches.length) {
+            dire(`<p class="vs-erreur" role="alert">${esc(MOTS.groupeAucunNouveau)}</p>${_refuseesHTML(deja)}`);
+            return;
+        }
+        const nomCours = _nomCoursSaisi(actif);
         // Bâtir sa classe ici vaut un choix, posé AVANT que le trimestre naisse : dès qu'un trimestre existe, l'application
         // n'est plus « vide », et sans ce choix le prochain démarrage donnerait la vue étendue.
         _ecrireChoix(D().VUES.SIMPLE);
@@ -566,12 +610,120 @@
             const r = await _inscrire(lecture.fiches, groupe);
             if (!r.ecrit) throw new Error('élèves non inscrits');
             if (!actif) await _activerGroupeNe(groupe);
+            _nouveauGroupe = false;
             const mot = actif ? MOTS.classeAjoutes(r.ajoutes, r.deja) : MOTS.classeCreee(r.ajoutes);
-            _rendreClasse(`<p class="vs-succes" role="status">${esc(mot)}</p>${_refuseesHTML(lecture.refusees)}${_inactifsHTML(lecture.inactifs)}`);
+            _rendreClasse(`<p class="vs-succes" role="status">${esc(mot)}</p>${_refuseesHTML(lecture.refusees.concat(deja))}${_inactifsHTML(lecture.inactifs)}`);
         } catch (e) {
             console.error('[Vue simple] classe non créée :', e);
             dire(`<p class="vs-erreur" role="alert">${esc(MOTS.classeEchec)}</p>`);
         }
+    }
+
+    /* ---------- PLUSIEURS GROUPES : en créer un autre, retirer un groupe vide ---------- */
+
+    function nouveauGroupe() { _nouveauGroupe = true; _retraitGroupe = null; _rendreClasse(); }
+    function annulerNouveauGroupe() { _nouveauGroupe = false; _rendreClasse(); }
+    function annulerRetraitGroupe() { _retraitGroupe = null; _rendreClasse(); }
+
+    function _nonVide(v) {
+        if (v == null || v === '') return false;
+        if (Array.isArray(v)) return v.length > 0;
+        return typeof v !== 'object' || Object.keys(v).length > 0;
+    }
+
+    /** Le cours de ce groupe sert-il à un AUTRE groupe-cours, dans ce trimestre ou un autre ? Alors ni lui ni ses productions ne partent. */
+    function _coursServiAilleurs(groupe) {
+        return (db.getSync('trimestres', []) || []).some((t) => t && t.id
+            && (db.getSync(t.id + '_groupesCours', []) || []).some((g) => g && g.id !== groupe.id && g.coursId === groupe.coursId));
+    }
+
+    /**
+     * Ce que le retrait d'un groupe emporterait, et ce qui s'y oppose ; relu à chaque geste et à l'instant de l'écriture.
+     * S'y opposent : tout résultat, présence, copie, annotation, intervention… qui nomme un de ses étudiant·es, ou une
+     * production de son cours quand ce cours partirait avec lui ; les clés composées du groupe (captures, suivis, dates).
+     */
+    function _planDuRetrait(groupe) {
+        const cours = _cours(groupe.coursId);
+        const service = !!(cours && cours.nature === 'service');
+        const eleves = D().elevesDuGroupe(groupe, db.getSync(cle('groupeEtudiants'), []) || [], { service });
+        const coursPart = !_coursServiAilleurs(groupe);
+        const productions = coursPart ? (db.getSync(cle('productions'), []) || []).filter((p) => p && p.coursId === groupe.coursId) : [];
+        const magasins = {};
+        D().CLES_DE_RESULTATS.forEach((k) => { magasins[k] = db.getSync(cle(k), null); });
+        const porteurs = D().porteursDeResultats(magasins, eleves.map((e) => e.da), productions.map((p) => p.id));
+        D().PREFIXES_DU_GROUPE.forEach((prefixe) => { if (_nonVide(db.getSync(cle(prefixe + groupe.id), null))) porteurs[prefixe] = 1; });
+        return { service, eleves, coursPart, productions, porteurs, porte: Object.keys(porteurs).length > 0 };
+    }
+
+    /** « Nouveau groupe », et « Retirer ce groupe » seulement s'il ne porte aucun résultat ; sinon, la ligne qui dit pourquoi. */
+    function _gestesDuGroupeHTML(groupe) {
+        if (_demoOuverte()) return '';
+        const nouveau = `<button type="button" class="btn btn-secondaire" data-action="VueSimple.nouveauGroupe">${esc(MOTS.groupeNouveau)}</button>`;
+        if (_planDuRetrait(groupe).porte) return `<p class="vs-gestes">${nouveau}</p><p class="vs-note" data-vs-groupe="porte-resultats">${esc(MOTS.groupePorteResultats)}</p>`;
+        return `<p class="vs-gestes">${nouveau}<button type="button" class="btn btn-secondaire" data-action="VueSimple.retirerGroupe">${esc(MOTS.groupeRetirer)}</button></p>`;
+    }
+
+    function _questionRetraitHTML(groupe, plan) {
+        return `<div class="vs-question" role="alertdialog"><p>${esc(MOTS.groupeRetirerQuestion(_nomGroupe(groupe), plan.eleves.length))}</p>
+            <p class="vs-gestes"><button type="button" class="btn btn-principal" data-action="VueSimple.retirerGroupe">${esc(MOTS.colonneRetirerOui)}</button>
+                <button type="button" class="btn btn-secondaire" data-action="VueSimple.annulerRetraitGroupe">${esc(MOTS.productionAnnuler)}</button></p></div>`;
+    }
+
+    /**
+     * « Retirer ce groupe » : SEULEMENT s'il ne porte aucun résultat (`_planDuRetrait`), au second geste, la garde relue à
+     * l'instant de l'écriture. Part : le groupe-cours, ses étudiant·es ; et, si son cours ne sert à aucun autre groupe-cours,
+     * les colonnes vides de ce cours et la fiche du cours (si plus rien ne la nomme : `recenserDependancesCours`, cours.js).
+     * Reste : sa pratique (libre, reprise au prochain choix du même modèle), son échelle, l'horaire. Rien qui porte un
+     * résultat n'est jamais effacé (limite de Grégoire, 20 sept. 2026).
+     */
+    async function retirerGroupe() {
+        const groupe = _groupeActif();
+        if (!groupe || _demoOuverte()) return;
+        const refus = `<p class="vs-erreur" role="alert">${esc(MOTS.groupePorteResultats)}</p>`;
+        if (_planDuRetrait(groupe).porte) { _retraitGroupe = null; _rendreClasse(refus); return; }
+        if (_retraitGroupe !== groupe.id) { _retraitGroupe = groupe.id; _rendreClasse(_questionRetraitHTML(groupe, _planDuRetrait(groupe))); return; }
+        _retraitGroupe = null;
+        let plan = null;
+        const ecrit = await window.modifierEtAnnoncer(cle('groupesCours'), (lus) => {
+            plan = _planDuRetrait(groupe);
+            if (plan.porte) return undefined;
+            return (lus || []).filter((g) => !g || g.id !== groupe.id);
+        }, [], { geste: MOTS.groupeRetirer });
+        if (!ecrit) { _rendreClasse(plan && plan.porte ? refus : `<p class="vs-erreur" role="alert">${esc(MOTS.classeEchec)}</p>`); return; }
+        await _retirerCeQuiPendait(groupe, plan);
+        const reste = _groupes();
+        if (typeof changerGroupeCoursActifV2 === 'function') await changerGroupeCoursActifV2(reste.length ? reste[0].id : null);
+        if (typeof peuplerDropdownGroupeCoursActif === 'function') {
+            try { await peuplerDropdownGroupeCoursActif(); } catch (e) { console.warn('[Vue simple] en-tête non rafraîchi :', e); }
+        }
+        _rendreClasse(`<p class="vs-succes" role="status">${esc(MOTS.groupeRetire)}</p>`);
+    }
+
+    /** Après le groupe-cours : ses étudiant·es ; puis, si son cours part avec lui, ses colonnes vides et sa fiche. */
+    async function _retirerCeQuiPendait(groupe, plan) {
+        if (plan.eleves.length) {
+            await window.modifierEtAnnoncer(cle('groupeEtudiants'), (lus) => {
+                const partent = new Set(D().elevesDuGroupe(groupe, lus || [], { service: plan.service }));
+                return partent.size ? (lus || []).filter((e) => !partent.has(e)) : undefined;
+            }, [], { geste: MOTS.groupeRetirer });
+        }
+        if (!plan.coursPart) return;
+        const ids = plan.productions.map((p) => p.id);
+        if (ids.length) {
+            await window.modifierEtAnnoncer(cle('productions'), (lues) => {
+                if (window.compterEmploisProduction(ids).total > 0) return undefined;   // une colonne pleine reste, avec son cours
+                return (lues || []).filter((p) => !p || ids.indexOf(p.id) < 0);
+            }, [], { geste: MOTS.groupeRetirer });
+        }
+        await _retirerLeCoursSiPlusRienNeLeNomme(groupe.coursId);
+    }
+
+    /** La fiche du cours né en coulisse part seulement si plus aucune clé ne la nomme (le recensement de la vue étendue). */
+    async function _retirerLeCoursSiPlusRienNeLeNomme(coursId) {
+        if (typeof recenserDependancesCours !== 'function') return;   // dans le doute, le cours reste
+        const recensement = await recenserDependancesCours(coursId);
+        if (!recensement.fiches.length || recensement.refs.length) return;
+        await window.modifierEtAnnoncer('cours', (lus) => (lus || []).filter((c) => !c || c.id !== coursId), [], { geste: MOTS.groupeRetirer });
     }
 
     /* ============================== PRATIQUE ============================== */
@@ -1448,7 +1600,8 @@
 
     window.VueSimple = {
         MOTS, estSimple, vueCourante, basculer, demarrer, aller,
-        changerGroupe, creerClasse: _unALaFois(creerClasse), choisirModele: _unALaFois(choisirModele),
+        changerGroupe, creerClasse: _unALaFois(creerClasse),
+        nouveauGroupe, annulerNouveauGroupe, annulerRetraitGroupe, retirerGroupe: _unALaFois(retirerGroupe), choisirModele: _unALaFois(choisirModele),
         changerModele: _unALaFois(changerModele), enregistrerReglage: _unALaFois(enregistrerReglage),
         regler, annulerReglage, niveauGeste, typeGeste, palierGeste,
         ouvrirProduction, fermerProduction, ajouterProduction: _unALaFois(ajouterProduction),
