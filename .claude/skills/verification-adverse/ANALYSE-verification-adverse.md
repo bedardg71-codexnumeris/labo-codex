@@ -98,7 +98,8 @@ Le gap réel comblé = la discipline adverse (mouvements **B** break-test + **D*
 et P1/P7 attestation-vs-preuve). Ce que l'existant couvrait déjà, et qu'on ne redit pas :
 - le skill `fin-de-session-labo-codex` §2 = mouvement **C** (balayage mécanique) en auto-posture →
   le skill l'**étend** d'un §4 adverse au lieu de le dupliquer.
-- le skill `debut-de-session-labo-codex` = une partie de **A** (re-dériver le baseline factuel).
+- le skill `debut-de-session-labo-codex` = une partie de **A** (re-dériver le baseline factuel ; depuis le
+  10 nov. 2026, ces mesures vivent dans son fichier voisin `mesures-sous-condition.md`).
 - le skill `hygiene-donnees-partagees` ↔ le skill `integrite-globaux` = le **patron**
   parent abstrait / enfant concret imité ici.
 - ADR-012 (audit annuel) = holistique, orthogonal.

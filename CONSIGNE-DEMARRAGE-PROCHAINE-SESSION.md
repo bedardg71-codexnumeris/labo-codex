@@ -373,7 +373,7 @@
    **consommée** : ses temps 1 et 2 sont faits, son temps 4 est tranché.
 4. `CLAUDE.md`, puis `OBJECTIF-COHORTE-1.md` (les huit énoncés).
 
-Puis le rituel : skill `debut-de-session-labo-codex`, **délégué au subagent `audit-debut-session`**.
+Puis le rituel : skill `debut-de-session-labo-codex`, appliqué au premier tour, dans la session (l'agent `audit-debut-session` est retiré depuis le 10 nov. 2026).
 
 ⚠ Les trois entrées périmées de la version précédente ont été retirées, pas corrigées : le ménage
 documentaire est livré, la consigne du dépistage du français est archivée sans avoir été exécutée
@@ -617,7 +617,7 @@ arrivé quelque part, et huit fichiers en portent la trace (`181d608a`, `a4b58ed
 | Ce qui a quitté ce fichier | Où c'est maintenant |
 |---|---|
 | Le piège du répertoire de démarrage (session hors dépôt → skills muets) | skill `debut-de-session-labo-codex` §0.5 |
-| Les deux mesures d'ouverture (`rev-list`, verdict Playwright) | skill `debut-de-session-labo-codex` §2 |
+| Les deux mesures d'ouverture (`rev-list`, verdict Playwright) | skill `debut-de-session-labo-codex`, fichier voisin `mesures-sous-condition.md` §2 (sous condition depuis le 10 nov. 2026) |
 | « Push réussi ≠ suite verte » | `CLAUDE.md`, §Avant chaque commit |
 | L'ordre `commit → relecture → verdict → push`, et pourquoi le hook ne peut pas lancer la suite | skill `fin-de-session-labo-codex` §4.5 |
 | **Le bump à quatre emplacements**, et `version.js` qui n'y était pas nommé | skill `release-et-changelog` §3 |

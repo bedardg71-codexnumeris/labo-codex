@@ -350,7 +350,9 @@ seulement une machine assez généreuse.
 un push pour laisser finir un run GitHub — le run annulé par `cancel-in-progress` n'est pas perdu,
 le suivant juge le sommet de la branche, qui contient tout ce qui précède ; le verdict au jeton
 local (`scripts/pousser.sh`) reste le dernier geste avant chaque push, et le rituel d'ouverture lit
-les JOBS du dernier run (jugé vert, jugé rouge, non jugé).
+les JOBS du dernier run (jugé vert, jugé rouge, non jugé) — depuis le 10 nov. 2026, seulement
+quand le mandat demande une release, un verdict ou un push sur `main`
+(`debut-de-session-labo-codex/mesures-sous-condition.md`, §2.1).
 
 ### 4.6.2 Le verdict Playwright local ne se prend pas à deux outils ouverts (ex-règle 8, 12 septembre 2026)
 

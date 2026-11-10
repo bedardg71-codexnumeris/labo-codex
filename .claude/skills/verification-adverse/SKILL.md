@@ -404,7 +404,7 @@ Chaque projet l'instancie via ses rituels et ses cas concrets.
 | Posture | Instanciation projet | Rôle |
 |---|---|---|
 | Mode A (auto, avant commit) | le skill `fin-de-session-labo-codex` §4 | Applique le break-test aux tests neufs/modifiés + confronte les affirmations de session au diff. Le balayage mécanique (P3) y est déjà couvert par §2 (audit sécurité statique). |
-| Mode A (baseline d'entrée) | le skill `debut-de-session-labo-codex` | Re-dérive l'état factuel (P1) : git/tests/version, prémisse vs réel. |
+| Mode A (baseline d'entrée) | le skill `debut-de-session-labo-codex` | Mesure la branche du mandat et rapporte les écarts mandat vs réel. L'état factuel complet (P1 : tests, verdict, version) vient de son fichier voisin `mesures-sous-condition.md`, lu seulement si le mandat demande une release, un verdict ou un push sur `main`. |
 | Mode B (audit tiers) | Rapports `Rapports/AUDIT-*` | Gabarits de rapport : verdict par chantier (Confirmé/Réserve/Problème) + risques résiduels + preuves reproductibles (break-tests réalisés). |
 
 ### Consignes de chargement (réciproques)
@@ -412,7 +412,9 @@ Chaque projet l'instancie via ses rituels et ses cas concrets.
 - **Si un rituel projet l'invoque** (le skill `fin-de-session-labo-codex` §4), charger ce
   parent pour le « pourquoi » et la procédure de break-test (§4) — ne pas la
   dupliquer dans le rituel.
-- **En mode B**, charger aussi le skill `debut-de-session-labo-codex` (baseline factuel) et,
+- **En mode B**, prendre aussi la base factuelle (tests, verdict, version) dans
+  `.claude/skills/debut-de-session-labo-codex/mesures-sous-condition.md` — le skill
+  `debut-de-session-labo-codex` lui-même ne se déclenche qu'au premier tour d'une session — et,
   si le travail touche les données, le skill `hygiene-donnees-partagees` /
   le skill `integrite-globaux` (les invariants à vérifier aux coutures, P4).
 

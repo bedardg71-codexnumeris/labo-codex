@@ -36,18 +36,17 @@ session. Si un merge doit attendre, remplir `RELAIS.md` et le pousser sur `main`
 SEUL — le seul point que toute session lit, quelle que soit la branche. Motif : le
 8 août, deux sessions parties du même commit ont livré deux « 1.55.0 ».
 
-**EN TOUT PREMIER, AU DÉBUT DE CHAQUE SESSION** : **déléguer le rituel au
-subagent `audit-debut-session`** (skill `debut-de-session-labo-codex` en contexte
-isolé, ~500 tokens au lieu de ~135 000) : audit git + tests + version, lecture
-ciblée de `SESSION.md`/`BACKLOG.md`, comparaison avec la prémisse. Lecture seule.
-Acté le 28 mai 2026 après un écart de 24 h.
+**EN TOUT PREMIER** : au premier tour d'une session, applique le skill
+`debut-de-session-labo-codex`. Lecture seule. Acté le 28 mai 2026 après un écart
+de 24 h ; recentré le 10 novembre 2026.
 
 ⚠ **Vitest se lance DEPUIS `tests/`** : de la racine il balaie
 `.claude/worktrees/` sans la config et rend 217 fichiers rouges.
 
 ⚠ **Lectures ciblées obligatoires.** `SESSION.md`, `BACKLOG.md` et `RELAIS.md`
 pèsent chacun des centaines de milliers d'octets. **Jamais sans `offset`/`limit`** :
-un `Read` par défaut sur `SESSION.md` coûte plus de 100 000 tokens. En-tête, puis cibler.
+un `Read` par défaut sur `SESSION.md` coûte plus de 100 000 tokens. Ni `SESSION.md`
+ni `BACKLOG.md` ne se lisent à l'ouverture : on les cible quand le chantier le demande.
 
 Ensuite, selon le chantier :
 

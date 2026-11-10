@@ -5,7 +5,37 @@
 `.claude/skills/debut-de-session-labo-codex/SKILL.md`. Aucun fichier de `js/`, pas de verdict, pas de release, pas de
 fusion : la session principale fusionnera après le groupe 3.
 
-> **Relais** : le lot est fait et poussé. Restent à trancher, hors de ce lot : les renvois listés plus bas (dont deux
+> **Relais du 10 nov. 2026, second passage (décisions techniques de Cowork sur ce rapport)** : fait et poussé, rien
+> fusionné. **Le skill chargé à chaque ouverture pèse 16 109 octets (272 lignes)**, contre 22 745 (465 lignes) au
+> départ et 24 281 après le premier passage. Les mesures sous condition vivent à côté, dans
+> `mesures-sous-condition.md` (10 321 octets, 180 lignes), lu seulement si le mandat demande une release, un verdict
+> ou un push sur `main`.
+>
+> Ce qui a changé à ce passage : (a) les trois suppositions sont retenues ; (b) `cat RELAIS.md` retiré du §1.0 — rien
+> de `RELAIS.md` si le mandat nomme la branche, sinon sa dernière entrée seule, avec `offset`/`limit` ; (c) l'arrêt
+> « branche distante plus récente que `main` » retiré, **et avec lui le balayage `for-each-ref`, qui ne servait qu'à
+> le nourrir** (ma décision : une commande sans conséquence est du bruit) ; (d) §2, §2.1 et §3 sortis mot pour mot
+> (vérifié par `diff` contre le texte d'origine) ; (e) agent retiré ; (f) `CLAUDE.md` ; (g) renvois mis à jour.
+>
+> **Fichiers touchés à ce passage** :
+> - `.claude/skills/debut-de-session-labo-codex/SKILL.md` (modifié)
+> - `.claude/skills/debut-de-session-labo-codex/mesures-sous-condition.md` (neuf)
+> - `.claude/agents/audit-debut-session.md` (retiré ; le dossier `.claude/agents/` n'existe plus, c'était son seul fichier)
+> - `CLAUDE.md` (deux passages : la délégation à l'agent, la règle des lectures ciblées ; 249 lignes)
+> - `.claude/skills/verification-adverse/SKILL.md` et `ANALYSE-verification-adverse.md`
+> - `.claude/skills/fin-de-session-labo-codex/SKILL.md`
+> - `FICHE-RELECTURE.md`, `CONSIGNE-DEMARRAGE-PROCHAINE-SESSION.md`
+> - ce rapport
+>
+> **Un renvoi reste faux, laissé tel quel** : `Modèle de consigne de démarrage à froid.txt`, l. 5-6, dit encore
+> « délègue l'audit de début de session au subagent `audit-debut-session` ». C'est un exemple daté du 30 août
+> (1.106.3), hors de la liste (g) : je l'ai traité comme un récit historique. S'il sert encore de gabarit à Cowork,
+> il est à corriger.
+>
+> **Non vérifié** : le déclenchement réel du skill dans une session neuve. Les sections plus bas décrivent l'état
+> après le PREMIER passage ; les « deux renvois qui annulent l'effet » et les trois questions sont désormais réglés.
+>
+> **Relais du premier passage** : le lot est fait et poussé. Restent à trancher, hors de ce lot : les renvois listés plus bas (dont deux
 > qui annulent une partie de l'effet tant qu'ils ne sont pas corrigés), et trois questions en fin de rapport.
 
 ## La taille, avant et après
