@@ -237,7 +237,11 @@
             // `origine` : la lettre que le niveau porte dans l'échelle enregistrée (null pour un niveau ajouté ici).
             niveaux: ((echelle && echelle.niveaux) || []).map((n) => ({ origine: String(n.code), code: String(n.code), nom: n.nom || '', valeur: _valeurDuNiveau(n) })),
             types: (c.typesTravaux || []).map((t) => ({ id: t.id, nom: t.nom || '' })),
-            paliers: (c.forfaits || []).map((f) => ({ id: f.id, lettre: f.lettre || '', note: f.note, travaux: Object.assign({}, f.travaux || {}) }))
+            paliers: (c.forfaits || []).map((f) => ({ id: f.id, lettre: f.lettre || '', note: f.note, travaux: Object.assign({}, f.travaux || {}) })),
+            // Les identifiants déjà portés : un type ou un palier ajouté après un retrait ne reprend JAMAIS l'identifiant du
+            // retiré (il hériterait de ses champs que l'écran ne montre pas, et de ses productions).
+            idsTypes: (c.typesTravaux || []).map((t) => t.id),
+            idsPaliers: (c.forfaits || []).map((f) => f.id)
         };
     }
 
@@ -249,8 +253,8 @@
         return copie;
     }
 
-    function _idSuivant(liste) {
-        return liste.reduce((max, x) => Math.max(max, parseInt(x.id, 10) || 0), 0) + 1;
+    function _idSuivant(ids) {
+        return (ids || []).reduce((max, id) => Math.max(max, parseInt(id, 10) || 0), 0) + 1;
     }
 
     const MIN_NIVEAUX = 2;
@@ -270,7 +274,7 @@
             if (n > 0) return { refus: 'niveauUtilise', n, nom: niveau.nom || niveau.code };
             return Object.assign({}, b, { niveaux: b.niveaux.filter((_, i) => i !== index) });
         },
-        typeAjouter: (b) => Object.assign({}, b, { types: b.types.concat([{ id: _idSuivant(b.types), nom: '', neuf: true }]) }),
+        typeAjouter: (b) => { const id = _idSuivant(b.idsTypes); return Object.assign({}, b, { types: b.types.concat([{ id, nom: '', neuf: true }]), idsTypes: (b.idsTypes || []).concat([id]) }); },
         /** @param {function(Object): number} compterProductions - le nombre de productions de ce type */
         typeRetirer: (b, index, compterProductions) => {
             const type = b.types[index];
@@ -281,7 +285,7 @@
             const paliers = b.paliers.map((p) => { const t = Object.assign({}, p.travaux); delete t[type.id]; return Object.assign({}, p, { travaux: t }); });
             return Object.assign({}, b, { types: b.types.filter((_, i) => i !== index), paliers });
         },
-        palierAjouter: (b) => Object.assign({}, b, { paliers: b.paliers.concat([{ id: _idSuivant(b.paliers), lettre: '', note: '', travaux: {} }]) }),
+        palierAjouter: (b) => { const id = _idSuivant(b.idsPaliers); return Object.assign({}, b, { paliers: b.paliers.concat([{ id, lettre: '', note: '', travaux: {} }]), idsPaliers: (b.idsPaliers || []).concat([id]) }); },
         palierRetirer: (b, index) => {
             if (!b.paliers[index]) return b;
             if (b.paliers.length <= MIN_PALIERS) return { refus: 'minimumPaliers' };
@@ -324,6 +328,14 @@
         if (b.paliers.length < MIN_PALIERS) return { refus: 'minimumPaliers' };
         if (b.paliers.some((p) => !String(p.lettre).trim())) return { refus: 'palierSansNom' };
         if (b.paliers.some((p) => _nombreEntre(p.note, 0, 100) === null)) return { refus: 'notePalier' };
+        // Un palier sans exigence est le PLANCHER : le calcul le donne à qui n'atteint rien d'autre. Deux planchers, ou un
+        // plancher qui n'est pas la note la plus basse, donneraient la note haute à qui n'a rien d'acceptable.
+        const ids = b.types.map((t) => String(t.id));
+        const sansExigence = (p) => !ids.some((id) => _nombreEntre((p.travaux || {})[id], 0, 99) > 0);
+        const planchers = b.paliers.filter(sansExigence);
+        if (planchers.length > 1) return { refus: 'deuxPlanchers' };
+        const notes = b.paliers.map((p) => _nombreEntre(p.note, 0, 100));
+        if (planchers.length === 1 && _nombreEntre(planchers[0].note, 0, 100) > Math.min.apply(null, notes)) return { refus: 'plancherTropHaut', nom: String(planchers[0].lettre).trim() };
         return null;
     }
 
@@ -341,7 +353,9 @@
             const avant = x.origine ? parLettre.get(x.origine) : null;
             const valeur = _nombreEntre(x.valeur, 0, 100);
             const n = Object.assign({}, avant || {}, { code: String(x.code).trim(), nom: String(x.nom).trim(), valeurCalcul: valeur });
-            n._bornePrecedente = (avant && Number(avant.valeurCalcul) === valeur && typeof avant.min === 'number') ? avant.min : null;
+            // La borne d'avant peut être une chaîne dans un stock importé : elle se lit en nombre.
+            const borne = avant && avant.min !== '' && avant.min != null ? Number(avant.min) : NaN;
+            n._bornePrecedente = (avant && Number(avant.valeurCalcul) === valeur && !isNaN(borne)) ? borne : null;
             return n;
         });
         const parValeur = niveaux.slice().sort((a, b) => a.valeurCalcul - b.valeurCalcul);
@@ -364,9 +378,13 @@
      * des productions ou des grilles peuvent lire aussi : elle n'est jamais modifiée).
      * @returns {{echelle: Object, copiee: boolean}}
      */
-    function echelleReglee(echelle, pratique, niveauxDuBrouillon, { idNeuf, maintenant }) {
-        const propre = !!echelle && echelle.pratiqueId === pratique.id;
-        const base = propre ? _copie(echelle) : { id: idNeuf, nom: NOM_ECHELLE, pratiqueId: pratique.id, dansBibliotheque: true, verrouille: false, dateCreation: maintenant };
+    function echelleReglee(echelle, pratique, niveauxDuBrouillon, { idNeuf, maintenant, lueAilleurs }) {
+        // À ELLE SEULE : née avec cette pratique ET lue par personne d'autre (`lueAilleurs` : une autre pratique — une
+        // copie faite en vue étendue garde le même identifiant d'échelle —, ou une production). Sinon, on copie.
+        const propre = !!echelle && echelle.pratiqueId === pratique.id && !lueAilleurs;
+        // `copieDe` : l'échelle d'où vient la copie. Les résultats déjà saisis la portent encore ; c'est par elle que le
+        // tableau pose le signe « ≠ » et que le retrait d'un niveau utilisé reste refusé (relecture neuve, 10 nov. 2026).
+        const base = propre ? _copie(echelle) : { id: idNeuf, nom: NOM_ECHELLE, pratiqueId: pratique.id, copieDe: echelle ? echelle.id : null, dansBibliotheque: true, verrouille: false, dateCreation: maintenant };
         base.niveaux = niveauxRegles(echelle ? echelle.niveaux : [], niveauxDuBrouillon);
         base.dateModification = maintenant;
         return { echelle: base, copiee: !propre };

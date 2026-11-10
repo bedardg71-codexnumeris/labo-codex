@@ -502,7 +502,8 @@ async function genererCodex(options = {}) {
     donnees = _sansLeDemo(donnees, partDuDemo);
     // 1 bis'. Vue simple (9 nov. 2026, décision de Cowork) : la vue voyage avec le FICHIER. Il porte la vue d'où il est
     //         enregistré ; ouvert sur un appareil qui n'a fait aucun choix, il s'ouvre dans cette vue. La marque s'écrit
-    //         ICI, dans le fichier, jamais dans les données de l'appareil ni à la bascule.
+    //         ICI, dans le fichier, jamais à la bascule. À l'OUVERTURE d'un fichier, elle arrive dans la base avec le reste
+    //         de ses données ; une fusion ne l'importe pas (REGLAGES_DE_L_APPAREIL).
     _marquerLaVue(donnees);
     // 1 ter. #1184 : une copie marquée aux archives (la marque des données qu'on écrit, comme à
     //        l'ouverture) ne part pas, même si son fichier est encore ici : ni son fichier, ni sa
@@ -2165,7 +2166,10 @@ var REGLAGES_DE_L_APPAREIL = [
     'planif-fond-canvas', 'planif-liens-contourner',
     'elementsMasques', 'categoriesMasquees', 'categoriesTamponsRepliees', 'couleursCategories', 'ordreCategories', 'raccourcisAnnotation',
     'modeApplication', 'trimestreActif', 'groupeCoursActif', 'demo-chargees', 'demo-version-installee',
-    'fsapi_persistance_handles'
+    'fsapi_persistance_handles',
+    // Vue simple (10 nov. 2026) : la vue d'où le fichier a été enregistré. Elle sert au démarrage d'un appareil sans choix ;
+    // une fusion ne l'importe pas et ne la met pas en conflit (relecture neuve).
+    'vueDuFichier'
 ];
 
 // Les valeurs calculées (nues ou préfixées d'un trimestre).

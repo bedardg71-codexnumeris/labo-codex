@@ -48,12 +48,15 @@ describe('A. La vue au démarrage', () => {
         expect(D.CLE_MARQUE).toBe('vueDuFichier');
     });
 
-    it('la marque s\'écrit dans le fichier à l\'enregistrement, jamais dans les données de l\'appareil ni à la bascule', () => {
+    it('la marque s\'écrit dans le fichier à l\'enregistrement, jamais par l\'écran ni à la bascule ; une fusion ne l\'importe pas', () => {
         const ecran = lire('js/vue-simple.js');
         expect(ecran).not.toMatch(/db\.(set|setSync|modifier)\([^)]*CLE_MARQUE/);
         const codex = lire('js/codex.js');
         expect(codex).toContain('donnees[window.VueSimpleDonnees.CLE_MARQUE] = window.VueSimple.vueCourante();');
         expect(tranche(codex, 'async function genererCodex(', 'zip.file(NOM_DONNEES, json);')).toContain('_marquerLaVue(donnees);');   // posée avant que le fichier soit écrit
+        // À l'ouverture d'un fichier, la marque arrive dans la base avec ses données ; à la fusion, elle est « de l'appareil » :
+        // ni importée, ni mise en conflit.
+        expect(tranche(codex, 'var REGLAGES_DE_L_APPAREIL = [', '];')).toContain("'vueDuFichier'");
     });
 
     it('le choix de l\'utilisateur prime, dans les deux sens', () => {
@@ -282,6 +285,21 @@ describe('F. La pratique se règle : les niveaux, les types, les paliers', () =>
         expect(r2.echelle.niveaux.find((n) => n.code === 'M').valeurCalcul).toBe(80);
     });
 
+    it('une échelle née avec la pratique mais lue aussi ailleurs (une pratique dupliquée, une production) est copiée, pas réécrite', () => {
+        const p = std();
+        const aElle = { id: 'ECH_1', nom: 'Mes niveaux', pratiqueId: 'PRAT_1', niveaux: DEPART.niveaux };
+        const b = D.brouillonDeLaPratique(p, aElle).niveaux;
+        expect(D.echelleReglee(aElle, p, b, { idNeuf: 'ECH_2', maintenant: 'm', lueAilleurs: false })).toMatchObject({ copiee: false, echelle: { id: 'ECH_1' } });
+        const r = D.echelleReglee(aElle, p, b, { idNeuf: 'ECH_2', maintenant: 'm', lueAilleurs: true });
+        expect(r).toMatchObject({ copiee: true, echelle: { id: 'ECH_2', pratiqueId: 'PRAT_1', copieDe: 'ECH_1' } });   // `copieDe` : les résultats d'avant portent encore ECH_1
+    });
+
+    it('des bornes en chaînes (stock importé) se lisent en nombres : sans rien changer, « Étendu » garde sa borne à 85', () => {
+        const chaines = DEPART.niveaux.map((n) => Object.assign({}, n, { min: String(n.min), max: String(n.max) }));
+        const n = D.niveauxRegles(chaines, D.brouillonDeLaPratique(std(), { niveaux: chaines }).niveaux);
+        expect(n.map((x) => [x.code, x.min, x.max])).toEqual([['PS', 0, 39.99], ['I', 40, 64.99], ['D', 65, 74.99], ['M', 75, 84.99], ['E', 85, 100]]);
+    });
+
     it('une pratique qui lit une échelle du trimestre : au premier réglage, l\'échelle est copiée, jamais modifiée', () => {
         const partagee = { id: 'E_PARTAGEE', nom: 'Échelle fictive', niveaux: DEPART.niveaux };
         const avant = JSON.stringify(partagee);
@@ -354,6 +372,9 @@ describe('F. La pratique se règle : les niveaux, les types, les paliers', () =>
         expect(D.gestes.typeRetirer(b, 0, () => 2)).toEqual({ refus: 'typeUtilise', n: 2, nom: 'Projet' });
         b = D.gestes.typeAjouter(b);
         expect(b.types[2]).toEqual({ id: 3, nom: '', neuf: true });
+        // Un type ajouté après un retrait ne reprend jamais l'identifiant du retiré (il hériterait de ses champs cachés et de ses productions).
+        const reprise = D.gestes.typeAjouter(D.gestes.typeRetirer(b, 2, aucun));
+        expect(reprise.types.map((t) => t.id)).toEqual([1, 2, 4]);
         expect(D.refusDesSpecifications(b)).toEqual({ refus: 'typeSansNom' });
         b.types[2].nom = 'Atelier';
         b.types[0].nom = 'Travail long';
@@ -378,6 +399,16 @@ describe('F. La pratique se règle : les niveaux, les types, les paliers', () =>
         b.paliers[1] = Object.assign({}, b.paliers[1], { note: '170' });
         expect(D.refusDesSpecifications(b)).toEqual({ refus: 'notePalier' });
         expect(D.gestes.palierRetirer({ paliers: [{ id: 1 }] }, 0)).toEqual({ refus: 'minimumPaliers' });
+        // Un seul plancher, et c'est la note la plus basse : sinon qui n'a rien d'acceptable recevrait la note haute.
+        const c = D.gestes.palierAjouter(D.brouillonDeLaPratique(p, null));
+        c.paliers[2] = Object.assign({}, c.paliers[2], { lettre: 'Bonus', note: '100', travaux: {} });
+        expect(D.refusDesSpecifications(c)).toEqual({ refus: 'plancherTropHaut', nom: 'Bonus' });
+        c.paliers[2].note = '40';
+        expect(D.refusDesSpecifications(c)).toBeNull();
+        const d = D.gestes.palierAjouter(c);
+        d.paliers[3] = Object.assign({}, d.paliers[3], { lettre: 'Autre plancher', note: '20', travaux: { 1: '0' } });
+        expect(D.refusDesSpecifications(d)).toEqual({ refus: 'deuxPlanchers' });
+        expect(d.paliers.map((x) => x.id)).toEqual([1, 2, 3, 4]);
         expect(D.gestes.palierRetirer(b, 2).paliers).toHaveLength(2);
     });
 });

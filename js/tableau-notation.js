@@ -287,8 +287,18 @@
      */
     function _valeurChangee(ev, ctx) {
         if (ctx.famille !== 'STD' || !ev || ev.sansGrille !== true || typeof ev.noteFinale !== 'number') return null;
-        const niveau = D().niveauxSaisissables(_echelleParId(ev.echelleId)).find(n => n.code === ev.niveauFinal);
+        const niveau = D().niveauxSaisissables(_echelleDuResultat(ev, ctx)).find(n => n.code === ev.niveauFinal);
         return (niveau && niveau.valeur !== ev.noteFinale) ? ev.noteFinale : null;
+    }
+
+    /**
+     * L'échelle à laquelle comparer la valeur écrite d'un résultat : la sienne ; ou, si l'échelle de la pratique en est une
+     * COPIE réglée depuis (`copieDe`, vue simple : une échelle du trimestre n'est jamais modifiée, elle est copiée), cette copie.
+     */
+    function _echelleDuResultat(ev, ctx) {
+        const actuelle = ctx.echelle && ctx.echelle.id && typeof obtenirEchelleResolue === 'function' ? obtenirEchelleResolue(ctx.echelle.id) : null;
+        if (actuelle && actuelle.copieDe && actuelle.copieDe === ev.echelleId) return _utilisable(actuelle);
+        return _echelleParId(ev.echelleId);
     }
 
     /** La phrase du signe « échelle modifiée » (infobulle et libellé lu), ou '' quand la valeur écrite est celle du niveau. */

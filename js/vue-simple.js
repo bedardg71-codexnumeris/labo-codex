@@ -122,7 +122,10 @@
             typeEnDouble: () => 'Deux types portent le même nom.',
             minimumPaliers: () => 'Il faut au moins un palier.',
             palierSansNom: () => 'Chaque palier a un nom.',
-            notePalier: () => 'Chaque palier a une note, de 0 à 100.'
+            notePalier: () => 'Chaque palier a une note, de 0 à 100.',
+            deuxPlanchers: () => 'Un seul palier peut n’avoir aucune exigence : c’est le plancher.',
+            plancherTropHaut: (r) => `« ${r.nom} » n’a aucune exigence : c’est le plancher, sa note doit être la plus basse.`,
+            typeRattache: (r) => `Le nom « ${r.nom} » rattacherait ou détacherait des productions de ton tableau : choisis-en un autre.`
         },
         pratiqueChanger: 'Changer de modèle',
         pratiqueAutre: 'La pratique de ce groupe n’est ni par standards ni par spécifications : elle se règle en vue étendue.',
@@ -348,6 +351,7 @@
     async function changerGroupe(el) {
         const id = el && el.value;
         if (!id || typeof changerGroupeCoursActifV2 !== 'function') return;
+        _fermerReglage();   // le réglage ouvert est celui de la pratique de l'AUTRE groupe : il ne suit pas
         await changerGroupeCoursActifV2(id);
         _rafraichir();
     }
@@ -532,10 +536,30 @@
         return echelles.find((e) => e.id === 'ECHELLE_IDME_DEPART') || echelles[0] || null;
     }
 
-    /** L'échelle que la pratique lit : la sienne (née avec elle), sinon celle du trimestre qu'elle désigne. */
-    function _echelleDeLaPratique(pratique) {
+    /**
+     * L'échelle que la pratique lit, résolue COMME LE CALCUL la résout (`construireConfigComplete`, registre) : une échelle
+     * embarquée dans la pratique passe avant tout ; sinon celle que désigne `configuration.echelleId`, par son identifiant
+     * ou par son identifiant d'origine (une échelle importée d'un autre trimestre).
+     * @returns {{echelle: ?Object, reglable: boolean}} `reglable` : faux pour une échelle embarquée ou introuvable — la
+     *          régler ici écrirait à côté de ce que le calcul lit ; elle se règle en vue étendue.
+     */
+    function _echelleLue(pratique) {
+        const embarquee = pratique && (pratique.echelle || (pratique.config && pratique.config.echelle));
+        if (embarquee && !embarquee.introuvable) return { echelle: { niveaux: embarquee.niveaux || [] }, reglable: false };
         const id = pratique && pratique.configuration && pratique.configuration.echelleId;
-        return (id && (db.getSync(cle('echellesTemplates'), []) || []).find((e) => e && e.id === id)) || null;
+        if (!id) return { echelle: null, reglable: true };   // aucune échelle encore : le départ proposé, copié au premier réglage
+        const echelle = (typeof resoudreModeleParId === 'function') ? resoudreModeleParId('echelle', id)
+            : ((db.getSync(cle('echellesTemplates'), []) || []).find((e) => e && (e.id === id || e.idOriginal === id)) || null);
+        return { echelle, reglable: !!echelle };
+    }
+
+    function _echelleDeLaPratique(pratique) { return _echelleLue(pratique).echelle; }
+
+    /** L'échelle est-elle lue par une AUTRE pratique du trimestre, ou par une production ? (elle n'est alors pas à cette pratique seule) */
+    function _echelleLueAilleurs(echelle, pratique) {
+        if (!echelle) return false;
+        const autres = _pratiques().some((p) => p.id !== pratique.id && p.configuration && p.configuration.echelleId === echelle.id);
+        return autres || (db.getSync(cle('productions'), []) || []).some((p) => p && p.echelleId === echelle.id);
     }
 
     /** Les mots de la règle des standards : ceux de l'assistant et de la fiche (registre, validés le 29 oct. 2026). */
@@ -554,14 +578,41 @@
     /** Le nombre de résultats du trimestre qui portent cette lettre dans cette échelle (les copies remplacées ne comptent pas). */
     function _compterResultats(echelle) {
         const evaluations = db.getSync(cle('evaluationsSauvegardees'), []) || [];
-        return (lettre) => !echelle ? 0 : evaluations.filter((e) => e && !e.remplaceeParId && e.echelleId === echelle.id && String(e.niveauFinal) === String(lettre)).length;
+        // Les résultats saisis AVANT la copie d'une échelle portent encore l'identifiant de l'échelle d'origine (`copieDe`).
+        const ids = echelle ? [echelle.id, echelle.copieDe].filter(Boolean) : [];
+        return (lettre) => evaluations.filter((e) => e && !e.remplaceeParId && ids.indexOf(e.echelleId) >= 0 && String(e.niveauFinal) === String(lettre)).length;
     }
 
     /** Le nombre de productions de ce type, dans les cours des groupes qui ont cette pratique. */
     function _compterProductions(pratique) {
         const cours = new Set(_groupes().filter((g) => g.pratiqueId === pratique.id).map((g) => g.coursId));
         const productions = (db.getSync(cle('productions'), []) || []).filter((p) => p && (!p.coursId || cours.has(p.coursId)));
-        return (type) => productions.filter((p) => window.productionEstDuType(p, type)).length;
+        // Le type ENREGISTRÉ, pas celui du brouillon : un nom changé dans le champ ne fait pas disparaître ses productions du compte.
+        const enregistres = (pratique.configuration.typesTravaux || []);
+        return (type) => {
+            const t = enregistres.find((x) => String(x.id) === String(type.id)) || type;
+            return productions.filter((p) => window.productionEstDuType(p, t)).length;
+        };
+    }
+
+    /** Pour chaque type, les productions qui s'y rattachent (par l'identifiant, ou par le NOM : `productionEstDuType`). */
+    function _rattachements(pratique, types) {
+        const cours = new Set(_groupes().filter((g) => g.pratiqueId === pratique.id).map((g) => g.coursId));
+        const productions = (db.getSync(cle('productions'), []) || []).filter((p) => p && (!p.coursId || cours.has(p.coursId)));
+        const carte = {};
+        types.forEach((t) => { carte[String(t.id)] = productions.filter((p) => window.productionEstDuType(p, t)).map((p) => p.id).sort().join(','); });
+        return carte;
+    }
+
+    /**
+     * Un nom de type rattache aussi des productions (celles de la vue étendue, dont le type porte ce nom). Renommer ne doit
+     * ni en détacher ni en attacher : la note changerait sans qu'on l'ait dit. @returns {?Object} le refus, ou null
+     */
+    function _refusDesNomsDeTypes(pratique, b) {
+        const avant = _rattachements(pratique, pratique.configuration.typesTravaux || []);
+        const apres = _rattachements(pratique, b.types.map((t) => ({ id: t.id, nom: String(t.nom).trim() })));
+        const touche = b.types.find((t) => (avant[String(t.id)] || '') !== (apres[String(t.id)] || ''));
+        return touche ? { refus: 'typeRattache', nom: String(touche.nom).trim() } : null;
     }
 
     function _boutonRegler(quoi) {
@@ -684,15 +735,28 @@
         _ecrire(hote, tete + _pratiqueChoisieHTML(groupe, famille, retourHTML));
     }
 
-    function _blocsStdHTML(pratique, reglable) {
-        const regleReglable = reglable && D().regleStd(pratique).methode !== 'autre';
-        return _blocHTML('regle', MOTS.pratiqueRegle, _regleLueHTML(pratique), _regleReglageHTML, regleReglable)
-            + _blocHTML('niveaux', MOTS.niveauxTitre, _niveauxLusHTML(_echelleDeLaPratique(pratique) || _echelleDeDepart()), _niveauxReglageHTML, reglable);
+    /** Ce qui se règle ICI : faux quand le réglage écrirait à côté de ce que le calcul lit (formes de la vue étendue). */
+    function _reglable(pratique, quoi) {
+        if (!pratique || !pratique.configuration) return false;
+        if (quoi === 'regle') return D().regleStd(pratique).methode !== 'autre';
+        if (quoi === 'niveaux') return _echelleLue(pratique).reglable;
+        // Types et paliers : le calcul lit `tableBundles` avant `forfaits` ; une pratique sous cette forme se règle en vue étendue.
+        return Array.isArray(pratique.configuration.forfaits) && !Array.isArray(pratique.configuration.tableBundles);
     }
 
-    function _blocsSpeHTML(pratique, reglable) {
-        return _blocHTML('paliers', MOTS.paliersTitre, _paliersLusHTML(pratique), _paliersReglageHTML, reglable)
-            + _blocHTML('types', MOTS.typesTitre, _typesLusHTML(pratique), _typesReglageHTML, reglable);
+    function _nonReglableHTML(pratique, quoi) {
+        return _reglable(pratique, quoi) ? '' : `<p class="vs-note">${esc(MOTS.regleAutre)}</p>`;
+    }
+
+    function _blocsStdHTML(pratique) {
+        const echelle = _echelleDeLaPratique(pratique) || _echelleDeDepart();
+        return _blocHTML('regle', MOTS.pratiqueRegle, _regleLueHTML(pratique), _regleReglageHTML, _reglable(pratique, 'regle'))
+            + _blocHTML('niveaux', MOTS.niveauxTitre, _niveauxLusHTML(echelle) + _nonReglableHTML(pratique, 'niveaux'), _niveauxReglageHTML, _reglable(pratique, 'niveaux'));
+    }
+
+    function _blocsSpeHTML(pratique) {
+        return _blocHTML('paliers', MOTS.paliersTitre, _paliersLusHTML(pratique) + _nonReglableHTML(pratique, 'paliers'), _paliersReglageHTML, _reglable(pratique, 'paliers'))
+            + _blocHTML('types', MOTS.typesTitre, _typesLusHTML(pratique), _typesReglageHTML, _reglable(pratique, 'types'));
     }
 
     /** La pratique du groupe : son modèle, puis chaque valeur qui entre dans la note, lue, avec « Régler » à côté. */
@@ -703,7 +767,7 @@
         const noms = [nomFamille, pratique.nom].filter((x, i, t) => x && t.indexOf(x) === i).join(' · ');
         // Une pratique importée sous l'ancienne forme (`.config`) se lit en vue étendue, elle ne se règle pas ici.
         const reglable = !!pratique.configuration;
-        const blocs = !reglable ? `<p class="vs-note">${esc(MOTS.regleAutre)}</p>` : (std ? _blocsStdHTML(pratique, true) : _blocsSpeHTML(pratique, true));
+        const blocs = !reglable ? `<p class="vs-note">${esc(MOTS.regleAutre)}</p>` : (std ? _blocsStdHTML(pratique) : _blocsSpeHTML(pratique));
         return `<p class="vs-intro"><span class="vs-libelle">${esc(MOTS.pratiqueModele)}</span> ${esc(noms)}</p>
             <div id="vs-pratique-retour">${retourHTML || ''}</div>${reglable ? _reglePartageeHTML(pratique) : ''}${blocs}
             <p class="vs-gestes"><button type="button" class="btn btn-principal" data-action="VueSimple.aller" data-param="resultats">${esc(MOTS.pratiqueSuite)}</button>${_changerModeleHTML(groupe)}</p>`;
@@ -732,7 +796,7 @@
     function regler(quoi) {
         const groupe = _groupeActif();
         const pratique = _pratiqueDuGroupe(groupe);
-        if (!pratique || !pratique.configuration || ['regle', 'niveaux', 'types', 'paliers'].indexOf(quoi) < 0) { aller('pratique'); return; }
+        if (['regle', 'niveaux', 'types', 'paliers'].indexOf(quoi) < 0 || !_reglable(pratique, quoi)) { aller('pratique'); return; }
         if (_ecran !== 'pratique') aller('pratique');
         _reglage = quoi;
         _brouillon = D().brouillonDeLaPratique(pratique, _echelleDeLaPratique(pratique) || _echelleDeDepart());
@@ -823,7 +887,10 @@
         const refus = D().refusDesNiveaux(b, _compterResultats(echelle));
         if (refus) return { refus };
         if (!D().niveauxChanges(echelle, b.niveaux)) return { ecrit: true };
-        const r = D().echelleReglee(echelle, pratique, b.niveaux, { idNeuf: window.genererIdUnique('ECH_'), maintenant: new Date().toISOString() });
+        // Sans échelle encore, le départ proposé sert de base : ses couleurs suivent les niveaux gardés.
+        const base = echelle || _echelleDeDepart();
+        const r = D().echelleReglee(base, pratique, b.niveaux, { idNeuf: window.genererIdUnique('ECH_'), maintenant: new Date().toISOString(),
+            lueAilleurs: !echelle || _echelleLueAilleurs(echelle, pratique) });
         const ecrit = await window.modifierEtAnnoncer(cle('echellesTemplates'), (lues) => {
             const liste = (lues || []).filter((e) => e && e.id !== r.echelle.id);
             return liste.concat([r.echelle]);
@@ -840,7 +907,7 @@
         if (_reglage === 'regle') {
             return { mot: MOTS.regleEnregistree, ecrit: !!(await _ecrirePratique(D().poserRegleStd(pratique, { methode: b.methode, nombre: b.nombre }), MOTS.pratiqueRegle)) };
         }
-        const refus = D().refusDesSpecifications(b);
+        const refus = D().refusDesSpecifications(b) || _refusDesNomsDeTypes(pratique, b);
         if (refus) return { refus };
         const mot = _reglage === 'types' ? MOTS.typesEnregistres : MOTS.paliersEnregistres;
         return { mot, ecrit: !!(await _ecrirePratique(D().poserSpecifications(pratique, b), mot)) };
@@ -849,7 +916,9 @@
     /** « Enregistrer » du réglage ouvert : ce réglage-là s'écrit, les autres valeurs de la pratique ne bougent pas. */
     async function enregistrerReglage() {
         const pratique = _pratiqueDuGroupe(_groupeActif());
-        if (!pratique || !pratique.configuration || !_reglage || !_brouillon) return;
+        if (!pratique || !_reglage || !_brouillon) return;
+        // Le brouillon est celui d'UNE pratique : il ne s'écrit jamais dans une autre (groupe changé, modèle changé).
+        if (_brouillon.pratiqueId !== pratique.id || !_reglable(pratique, _reglage)) { _fermerReglage(); _rendrePratique(); return; }
         _brouillon = _lireLeReglage();
         const r = await _enregistrerLeReglage(pratique, _brouillon);
         if (r.refus) { _direRefus(r.refus); return; }
