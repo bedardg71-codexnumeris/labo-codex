@@ -96,14 +96,14 @@ test.describe('Fenêtre d\'aperçu — les mots du codex, et ceux des vrais tél
 
         // 1. Menu Codex › « Mettre à jour le codex ».
         await page.click('#btn-codex');
-        await page.click('#codex-menu [data-action="Codex.actionEnregistrer"]');
+        await page.click('#codex-menu .codex-menu-item:not(.codex-menu-item--simple)[data-action="Codex.actionEnregistrer"]');
         // Le « i » : une seule aide pour tous les appelants, sans « export » ni « téléchargement » (24 oct.).
         expect(await lireAide(page)).toEqual({ nom: 'Aide : ce que contient le fichier', titre: 'Ce que contient le fichier' });
         expect(await lireEtAnnuler(page)).toEqual(MOTS_DU_CODEX);
 
         // 2. Menu Codex › « Enregistrer sous » : même verbe (D4).
         await page.click('#btn-codex');
-        await page.click('#codex-menu [data-action="Codex.actionEnregistrerSous"]');
+        await page.click('#codex-menu .codex-menu-item:not(.codex-menu-item--simple)[data-action="Codex.actionEnregistrerSous"]');
         expect(await lireEtAnnuler(page)).toEqual(MOTS_DU_CODEX);
 
         // 3. Le codex à part avant une suppression : la fenêtre de choix, puis l'aperçu. Il n'écrit

@@ -206,7 +206,7 @@ async function mettreAJourLeCodex(page, { copiesManquantes = false } = {}) {
         const el = document.getElementById('codex-menu-enreg-info');
         return el.classList.contains('u-hide') ? null : el.textContent;
     });
-    await page.locator('#codex-menu [data-action="Codex.actionEnregistrer"]').click();
+    await page.locator('#codex-menu .codex-menu-item:not(.codex-menu-item--simple)[data-action="Codex.actionEnregistrer"]').click();
     if (copiesManquantes) {
         // Des copies de l'espace n'ont pas de fichier : l'avertissement passe d'abord (banc
         // `codex-1012-avertissement`). Ici, on le traverse pour voir où le codex serait écrit.

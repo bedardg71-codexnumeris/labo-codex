@@ -50,7 +50,7 @@ for (const [largeur, hauteur] of LARGEURS) {
                 return { sel, texte: el.textContent.replace(/\s+/g, ' ').trim(), deborde: el.scrollWidth > el.clientWidth + 1, horsEcran: r.left < 0 || r.right > window.innerWidth + 1 };
             };
             return [
-                mes('[data-action="Codex.actionEnregistrer"]'),
+                mes('.codex-menu-item:not(.codex-menu-item--simple)[data-action="Codex.actionEnregistrer"]'),
                 mes('[data-action="Codex.actionEnregistrerSous"]'),
                 mes('#codex-menu-statut-haut .codex-statut-etat')
             ];

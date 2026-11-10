@@ -475,7 +475,7 @@ test.describe('Lot J0 bis (#988) — le partage du codex après une préparation
                 sauvegarderDonneesSelonMode('banc_j0bis_reel_' + ms + '_' + Date.now(), { n: 1 });
             }, retardMs);
             await page.click('#btn-codex');
-            await page.click('#codex-menu [data-action="Codex.actionEnregistrer"]');
+            await page.click('#codex-menu .codex-menu-item:not(.codex-menu-item--simple)[data-action="Codex.actionEnregistrer"]');
             await page.waitForSelector('.export-preview-modal .btn-confirmer', { timeout: 30000 });
             const mettreAJour = await centreDe('.export-preview-modal .btn-confirmer', 'Mettre à jour');
             await page.mouse.click(mettreAJour.x, mettreAJour.y);      // le dernier toucher avant le partage

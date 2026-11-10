@@ -73,7 +73,15 @@
         return !!(m && !m.classList.contains('u-hide') && visible(m));
     }
 
-    function dansLeMenu(sel) { return menuOuvert() ? q('#codex-menu ' + sel) : null; }
+    // L'élément VISIBLE (fusion de la vue simple, 10 nov. 2026) : le menu porte deux boutons pour la même action, celui de
+    // la vue simple (`codex-menu-item--simple`) et celui de la vue étendue ; une seule paraît. Le premier trouvé était le
+    // bouton caché : le contour de l'étape 2 disparaissait.
+    function dansLeMenu(sel) {
+        if (!menuOuvert()) return null;
+        var tous = document.querySelectorAll('#codex-menu ' + sel);
+        for (var k = 0; k < tous.length; k++) if (visible(tous[k])) return tous[k];
+        return null;
+    }
     function itemMettreAJour() { return dansLeMenu('[data-action="Codex.actionEnregistrer"]'); }
     function itemOuvrir() { return dansLeMenu('[data-action="Codex.actionOuvrir"]'); }
     function hautDuMenu() { return dansLeMenu('#codex-menu-statut-haut'); }

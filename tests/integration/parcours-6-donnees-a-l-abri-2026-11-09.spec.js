@@ -154,9 +154,9 @@ async function jusquALApercu(page, { capturer = '', avantApercu = null } = {}) {
     if (capturer) await capture(page, capturer + '-etape-1');
     await page.click('#btn-codex');
     await attendreEtape(page, 2);
-    await contourSur(page, '#codex-menu [data-action="Codex.actionEnregistrer"]');
+    await contourSur(page, '#codex-menu .codex-menu-item:not(.codex-menu-item--simple)[data-action="Codex.actionEnregistrer"]');
     if (capturer) await capture(page, capturer + '-etape-2');
-    await page.click('#codex-menu [data-action="Codex.actionEnregistrer"]');
+    await page.click('#codex-menu .codex-menu-item:not(.codex-menu-item--simple)[data-action="Codex.actionEnregistrer"]');
     if (avantApercu) await avantApercu();
     await expect(page.locator('.export-preview-modal')).toBeVisible();
     await attendreEtape(page, 3);
@@ -287,7 +287,7 @@ async function ecrireEtAttendreEtape4(page, { ilYEst = false, capturer = '' } = 
     }
     await attendreEtape(page, 4);
     await expect(page.locator('#codex-menu-statut-haut')).toContainText('Ton codex est à jour');
-    await contourSur(page, '#codex-menu [data-action="Codex.actionOuvrir"]');
+    await contourSur(page, '#codex-menu .codex-menu-item:not(.codex-menu-item--simple)[data-action="Codex.actionOuvrir"]');
 }
 
 test('panneau : le parcours inscrit ; sans trimestre réel, « Commencer » ne lance rien et le panneau dit pourquoi ; le haut du menu sans codex', async ({ page }) => {
@@ -364,7 +364,7 @@ for (const clair of [false, true]) {
 
         // « Ouvrir un codex… » est éclairé, mais ne fait rien pendant le parcours.
         // Le répartiteur des data-action (main.js) répond dans le clic même : rien à attendre.
-        await page.click('#codex-menu [data-action="Codex.actionOuvrir"]');
+        await page.click('#codex-menu .codex-menu-item:not(.codex-menu-item--simple)[data-action="Codex.actionOuvrir"]');
         expect(await page.evaluate(() => window.__ouvertures)).toBe(0);
         // Le toucher a pris le focus : la bulle reste, à la même étape.
         await expect(bulle(page).locator('.parcours-bulle-rang')).toHaveText('4 sur 4');
@@ -381,7 +381,7 @@ for (const clair of [false, true]) {
         expect(jours).toBeGreaterThan(13);
         // Hors parcours, « Ouvrir un codex… » répond de nouveau.
         await page.click('#btn-codex');
-        await page.click('#codex-menu [data-action="Codex.actionOuvrir"]');
+        await page.click('#codex-menu .codex-menu-item:not(.codex-menu-item--simple)[data-action="Codex.actionOuvrir"]');
         expect(await page.evaluate(() => window.__ouvertures)).toBe(1);
 
         if (clair) { expect(erreurs).toEqual([]); return; }
