@@ -507,6 +507,8 @@
         titre: 'Monter ton cours',
         ligne: 'De la compétence à ta production : un outil facultatif qui garde pour toi les liens entre ce que tu enseignes et ce que tu évalues.',
         total: ETAPES.length,
+        // Pas sur téléphone (file de Cowork, 9 nov. : à la fusion du groupe 3, avec la bulle sur téléphone).
+        grandEcranSeulement: true,
         refus: condition,
         lancer: lancer
     });

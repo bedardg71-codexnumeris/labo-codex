@@ -822,6 +822,8 @@
             var c = lireCtx();
             return Array.isArray(c.chemin) && c.chemin.length ? c.chemin.length : ORDRE.length - 1;
         },
+        // Pas sur téléphone (file de Cowork, 9 nov. : à la fusion du groupe 3, avec la bulle sur téléphone).
+        grandEcranSeulement: true,
         refus: refus,
         lancer: lancer
     });

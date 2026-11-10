@@ -302,7 +302,7 @@ test('panneau : le parcours inscrit ; sans trimestre réel, « Commencer » ne l
     await expect(item.locator('.assistance-parcours-titre')).toHaveText("Mettre tes données à l'abri");
     await expect(item.locator('.assistance-parcours-ligne')).toHaveText('Une copie complète de ton travail, hors du navigateur et rangée dans un lieu protégé : ton codex.');
     await expect(item.locator('.assistance-parcours-etat')).toHaveText('À faire');
-    // Le compteur suit le registre : six avec les parcours 3 à 5, trois sur cette branche.
+    // Le compteur suit le registre (neuf sur main depuis le groupe 3 ; le banc du registre en fixe le nombre et l’ordre).
     const n = await page.evaluate(() => window.Assistance.parcours().length);
     await expect(page.locator('#assistance-menu-rang')).toHaveText('1 sur ' + n);
 
