@@ -49,6 +49,7 @@ Décision de Cowork du 9 nov. 2026, 21 h 43. Branche `lot/niveau-sans-seuils`, p
 - **Playwright, Chromium** : 4 essais neufs par l'interface (`tests/integration/niveau-sans-seuils.spec.js`) ; 65 sur 65 sur les bancs voisins (vue simple, tableau, Suivi, partage, PDF, échelles), lancés avant les suites de la relecture.
 - **Break-tests** : 23, tous rouges. Un était resté vert (un seuil à zéro, seul) : essai durci, rejoué rouge.
 - **Relecture par un agent neuf** : rien de bloquant ; sept constats. Suivis dans le lot : la note au-dessus d'un plus haut seuil sous 100 (déclarée et tenue par un essai), trois comportements sans essai (essais ajoutés), le champ jumeau `valeur` encore borné (aligné), le nom non échappé (corrigé). Les autres sont au tableau ci-dessus.
+- **Une sentinelle existante mise à jour, et dit** : `sentinelle-partage-echelle-valeur` figeait la borne à 100 du champ `valeur`. Elle tient maintenant la règle neuve (zéro ou plus, les deux champs jumeaux identiques).
 - Des bancs existants chargeaient le Suivi sans `echelles.js` : leurs harnais reçoivent les vraies fonctions, extraites du fichier (aucune copie de la règle).
 
 **Non vérifié** : WebKit, iPad, la suite Playwright entière, le PDF réellement généré (seuls l'aperçu et la fonction commune aux quatre sorties sont exécutés), le graphique rendu à l'écran, des données réelles.
