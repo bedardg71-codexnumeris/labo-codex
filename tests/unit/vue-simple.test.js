@@ -397,5 +397,12 @@ describe('E. La vue simple ne nomme rien qui n\'existe pas', () => {
         expect(ecran).toContain("phraseSauvegarder: 'Tes données restent dans ce navigateur. Enregistre-les dans un fichier, ton codex, pour ne pas les perdre et pour les rouvrir ailleurs.'");
         expect(ecran).toContain("vueSimple: 'Vue simple'");
         expect(ecran).toContain("vueEtendue: 'Vue étendue'");
+        // Arrêtés le 9 nov. 2026, 19 h 35 : la carte 4, et « étudiant·e » partout (jamais « élève »).
+        expect(ecran).toContain("texte: 'Vois la note de chaque étudiant·e et exporte-les en CSV, prêtes pour ton relevé.'");
+        expect(ecran).toContain("sousTitreAccueil: 'Quatre étapes, de ta liste d’étudiant·es à ta note finale.'");
+        expect(ecran).toContain("texte: 'Colle ta liste d’étudiant·es : DA, nom, prénom.'");
+        const mots = tranche(ecran, 'const MOTS = Object.freeze({', '    /**\n     * Le seul point d\'écriture de HTML');
+        const sansCommentaires = mots.split('\n').map((l) => l.replace(/\/\/.*$/, '')).join('\n');   // les commentaires disent le mot qu'on écarte
+        expect(sansCommentaires.match(/élèves?|élève/gi)).toBeNull();
     });
 });
