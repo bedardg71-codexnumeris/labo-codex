@@ -196,7 +196,7 @@ test.describe('Vue simple · le parcours d\'un nouvel arrivant', () => {
         // 1. Application vide : vue simple, accueil à quatre cartes.
         await expect(page.locator('body')).toHaveClass(/vue-simple/);
         await expect(page.locator('#section-simple-accueil')).toBeVisible();
-        await expect(ecran(page, 'accueil').locator('.vs-titre')).toHaveText('Ta notation alternative');
+        await expect(ecran(page, 'accueil').locator('.vs-titre')).toHaveText('La notation alternative, simplifiée');   // Grégoire, 10 nov., 13 h 39
         await expect(ecran(page, 'accueil').locator('.vs-etape')).toHaveCount(4);
         await expect(page.locator('.navigation-vue-simple button')).toHaveText(['Accueil', 'Classe', 'Pratique', 'Résultats', 'Note finale']);
         await expect(page.locator('.navigation-principale:not(.navigation-vue-simple)')).toBeHidden();
@@ -463,6 +463,55 @@ async function nouveauGroupe(page, nomCours, liste) {
     // Le geste écrit en plusieurs temps (cours, groupe, étudiant·es) : rien ne se lit en base avant son message.
     await expect(ecran(page, 'classe').locator('.vs-succes')).toBeVisible();
 }
+
+const NOTE_CONFIDENTIALITE = 'Tes données restent chez toi. Tout ce que tu entres ici est gardé dans ton navigateur, sur cet appareil. Rien n’est transmis à un serveur, personne d’autre n’y a accès. Pour en garder une copie, utilise « Sauvegarder ».';
+
+test.describe('Vue simple · l\'accueil : le titre et la note de confidentialité (Grégoire, 10 nov. 2026)', () => {
+    test('le titre et la note sont à l\'accueil de la vue simple, absents de la vue étendue ; « Sauvegarder » est le mot du bouton', async ({ page }) => {
+        const erreurs = await ouvrir(page);
+        const accueil = ecran(page, 'accueil');
+        await expect(accueil.locator('.vs-titre')).toHaveText('La notation alternative, simplifiée');
+        await expect(accueil.locator('.vs-intro')).toHaveText('Quatre étapes, de ta liste d’étudiant·es à ta note finale.');
+        const note = accueil.locator('.vs-confidentialite');
+        await expect(note).toHaveText(NOTE_CONFIDENTIALITE);
+        await expect(note.locator('strong')).toHaveText('Tes données restent chez toi.');
+        await expect(page.locator('#btn-codex')).toContainText('Sauvegarder');
+        // Sous les quatre cartes, pas au-dessus.
+        const ordre = await page.evaluate(() => {
+            const n = document.querySelector('#simple-accueil-contenu .vs-confidentialite');
+            const cartes = document.querySelector('#simple-accueil-contenu .vs-etapes');
+            return !!(cartes.compareDocumentPosition(n) & Node.DOCUMENT_POSITION_FOLLOWING);
+        });
+        expect(ordre).toBe(true);
+        await basculer(page, 'etendue');
+        const visibles = await page.evaluate(() => {
+            const vus = (texte) => [...document.querySelectorAll('body *')].filter((n) => n.children.length === 0 && n.checkVisibility && n.checkVisibility() && (n.textContent || '').includes(texte)).length;
+            return { titre: vus('La notation alternative, simplifiée'), note: vus('Tes données restent chez toi.') };
+        });
+        expect(visibles).toEqual({ titre: 0, note: 0 });
+        expect(erreurs).toEqual([]);
+    });
+
+    for (const [largeur, hauteur] of [[820, 1180], [390, 844]]) {
+        test(`à ${largeur} px, la note ne pousse pas les cartes hors de l'écran et ne déborde pas`, async ({ page }) => {
+            await page.setViewportSize({ width: largeur, height: hauteur });
+            const erreurs = await ouvrir(page);
+            await auRepos(page);
+            const m = await page.evaluate(() => {
+                const r = (sel) => document.querySelector(sel).getBoundingClientRect();
+                const premiere = r('#simple-accueil-contenu .vs-etape');
+                const note = r('#simple-accueil-contenu .vs-confidentialite');
+                return { premiereEnHaut: premiere.top, hauteur: innerHeight, noteGauche: note.left, noteDroite: note.right, largeur: document.documentElement.clientWidth,
+                    defilementHorizontal: document.documentElement.scrollWidth > document.documentElement.clientWidth };
+            });
+            expect(m.premiereEnHaut).toBeLessThan(m.hauteur);   // la première carte reste dans le premier écran
+            expect(m.noteGauche).toBeGreaterThanOrEqual(0);
+            expect(m.noteDroite).toBeLessThanOrEqual(m.largeur);
+            expect(m.defilementHorizontal).toBe(false);
+            expect(erreurs).toEqual([]);
+        });
+    }
+});
 
 test.describe('Vue simple · plusieurs groupes', () => {
     test('deux groupes créés en vue simple gardent chacun leurs étudiant·es ; le sélecteur paraît à deux, sur Classe, Résultats et Note finale', async ({ page }) => {

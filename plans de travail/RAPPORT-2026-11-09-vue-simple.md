@@ -6,6 +6,49 @@ Consigne de Cowork du 9 nov. 2026, 17 h 40. Branche `lot/vue-simple`, partie de 
 
 ---
 
+## 10 NOV., 14 H 50 — L'ACCUEIL : LE TITRE ET LA NOTE DE CONFIDENTIALITÉ (sur `main` local, rien de poussé)
+
+**Idées reçues de Grégoire directement depuis 13 h 51 : aucune.** Tout ce qui suit vient du relais de Cowork de 14 h 05.
+
+### Ce qui change à l'écran
+
+1. **Le titre de l'accueil** devient « La notation alternative, simplifiée » (mot validé). L'accueil avait déjà un titre distinct de la ligne, « Ta notation alternative » : il est remplacé à sa place. La ligne « Quatre étapes… » reste dessous.
+2. **Sous les quatre cartes, la note de confidentialité**, mot pour mot, avec « Tes données restent chez toi. » en gras. Elle prend la couleur du texte secondaire, comme les autres notes de la vue simple (`.vs-note`) : pas d'alerte, pas de couleur d'avertissement. Sa largeur de lecture est bornée à 68 caractères.
+   - **« Sauvegarder » est bien le mot du bouton** (`MOTS.boutonSauvegarder`). Il est interpolé dans la phrase : si le bouton change de nom, la phrase suit.
+
+### La phrase dit vrai : vérifié avant de l'écrire
+
+Commandes : `grep -rnE '\bfetch\(|XMLHttpRequest|sendBeacon|WebSocket|EventSource\(' js` et le relevé des URL de `js/` et d'`index.html`.
+
+- **Deux appels réseau seulement, et aucun n'emporte une donnée saisie.**
+  - `version.json` (`init-inline.js:488`, `rechargement-sur.js:40`) : une lecture sur la même origine, sans rien envoyer.
+  - Le worker de PDF.js (`travaux-visionneuse.js:118`, `libs/pdf.worker.min.js`) : un fichier de l'application.
+- Aucun `XMLHttpRequest`, `sendBeacon`, `WebSocket` ni `EventSource`.
+- Le partage et la licence ne font aucun appel. Les URL externes sont des liens que l'utilisateur clique lui-même (blog, soutien, AQPC, licence).
+- **La CSP** (`index.html:10`, `default-src 'self'`, sans `connect-src`) interdit à la page toute connexion vers une autre origine.
+- **Nuance, sans conséquence sur la phrase** : en ligne, la page elle-même et `version.json` viennent du serveur de l'application. Rien de ce que l'utilisateur entre n'y part.
+
+### La preuve
+
+- **WebKit**, « l'accueil : le titre et la note de confidentialité », trois essais :
+  1. titre, ligne et note à l'accueil de la vue simple, la note sous les cartes, le mot du bouton ; ni le titre ni la note ne se voient en vue étendue ;
+  2. à 820 px, la première carte reste dans le premier écran, la note ne déborde pas, aucun défilement horizontal ;
+  3. la même chose à 390 px (téléphone).
+- **Break-tests**, rouges à chaque fois :
+  - note retirée : 3 rouges ;
+  - note qui fuit dans l'en-tête de la vue étendue : 1 rouge ;
+  - note plus large que l'écran : 2 rouges.
+- **Fichier entier : 45/45 sous WebKit. Vitest complet : 11 354/11 354.**
+- **Les mots validés sont figés** dans le banc Vitest des mots arrêtés. L'ancien titre y était figé, ainsi que dans l'essai du parcours d'un nouvel arrivant : les deux suivent le mot décidé par Grégoire. Ce n'est pas un banc ajusté pour repasser au vert.
+- **Captures** : l'accueil vide (01) et l'accueil avec la classe (16), à 1180 et 820 px, clair et sombre. Elles sont en page entière cette fois, pour montrer la note : 8 images.
+
+### Supposé
+
+- L'apostrophe typographique (’) dans la note, comme partout dans les mots de la vue simple. Les mots eux-mêmes sont ceux de Grégoire.
+- « Discrète mais lisible » = le style des notes existantes de la vue simple (texte secondaire, 0,88 rem). Aucune règle de `design-system.html` ne décrit une note de confidentialité ; j'ai repris le composant le plus proche.
+
+---
+
 ## 10 NOV., 14 H 15 — PLUSIEURS GROUPES, RETIRER UN GROUPE VIDE, LA COLONNE DE LA NOTE À 820 PX (sur `main` local, rien de poussé)
 
 Constat vécu par Grégoire (13 h 21) : une fois la classe créée, on ne pouvait ni recommencer ni créer un deuxième groupe. Décision de Grégoire (13 h 26) : deux boutons sur « Ta classe ». Noms inventés partout.

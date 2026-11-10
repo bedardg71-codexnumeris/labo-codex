@@ -198,6 +198,13 @@ body.vue-simple .codex-menu {
     border-radius: var(--radius-grand);
 }
 
+/* La note de confidentialité de l'accueil (10 nov. 2026) : discrète mais lisible, la couleur du texte secondaire
+   (`.vs-note`), jamais celle d'une alerte ; sa largeur de lecture bornée. */
+.vs-confidentialite {
+    margin: var(--espacement-moyen) 0 0;
+    max-width: 68ch;
+}
+
 .vs-etapes--deux {
     grid-template-columns: repeat(2, minmax(0, 1fr));
 }

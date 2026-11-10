@@ -25,3 +25,6 @@ Prises sous WebKit (Playwright, Mac) sur `main` local après la fusion de `lot/v
 **Reprises le 10 nov. 2026 vers 14 h** (lot « plusieurs groupes ») : les 16 écrans refaits, trois ajoutés (76 images).
 Les écrans 05 (deux boutons neufs) et 12, 14 (la colonne « Note provisoire ») sont ceux qui changent. À 820 px, la note
 est bornée à 9,5 rem en vue simple : quatre productions se voient (deux avant), la cinquième sous le bord estompé.
+
+**Reprises le 10 nov. 2026 vers 14 h 45** (titre et note de confidentialité de l'accueil) : les écrans 01 et 16 seuls,
+en page entière cette fois pour montrer la note sous les cartes (8 images). Les autres écrans ne changent pas.

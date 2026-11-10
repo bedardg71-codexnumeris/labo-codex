@@ -25,13 +25,19 @@
 
     const MOTS = Object.freeze({
         // ARRÊTÉ par Grégoire, mot pour mot (9 nov. 2026)
-        titreAccueil: 'Ta notation alternative',
+        // VALIDÉ par Grégoire (10 nov. 2026, 13 h 39), à la place de « Ta notation alternative ».
+        titreAccueil: 'La notation alternative, simplifiée',
         boutonSauvegarder: 'Sauvegarder',
         phraseSauvegarder: 'Tes données restent dans ce navigateur. Enregistre-les dans un fichier, ton codex, pour ne pas les perdre et pour les rouvrir ailleurs.',
         vueSimple: 'Vue simple',
         vueEtendue: 'Vue étendue',
         // ARRÊTÉ par Grégoire (9 nov. 2026, 19 h 35) : « étudiant·e », « étudiant·es » partout en vue simple, jamais « élève » ;
         // le texte de la carte 4, mot pour mot.
+        // VALIDÉE par Grégoire (10 nov. 2026, 13 h 53), sous les quatre cartes. « Sauvegarder » est le mot du bouton
+        // (`boutonSauvegarder`), interpolé pour ne jamais en diverger. Vérifié avant de l'écrire : rien de ce qui est saisi ne
+        // part vers un serveur (rapport de la vue simple, 10 nov., 14 h 40).
+        confidentialiteTete: 'Tes données restent chez toi.',
+        confidentialite: (sauvegarder) => `Tout ce que tu entres ici est gardé dans ton navigateur, sur cet appareil. Rien n’est transmis à un serveur, personne d’autre n’y a accès. Pour en garder une copie, utilise « ${sauvegarder} ».`,
         sousTitreAccueil: 'Quatre étapes, de ta liste d’étudiant·es à ta note finale.',
         cartes: [
             { ecran: 'classe', titre: 'Ta classe', texte: 'Colle ta liste d’étudiant·es : DA, nom, prénom.', lien: 'Coller ma liste' },
@@ -442,7 +448,8 @@
             </li>`).join('');
         _ecrire(hote, `<h2 class="vs-titre">${esc(MOTS.titreAccueil)}</h2>
             <p class="vs-intro">${esc(MOTS.sousTitreAccueil)}</p>
-            <ol class="vs-etapes">${cartes}</ol>`);
+            <ol class="vs-etapes">${cartes}</ol>
+            <p class="vs-note vs-confidentialite"><strong>${esc(MOTS.confidentialiteTete)}</strong> ${esc(MOTS.confidentialite(MOTS.boutonSauvegarder))}</p>`);
     }
 
     /* ============================== CLASSE ============================== */

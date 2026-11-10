@@ -582,7 +582,10 @@ describe('E. La vue simple ne nomme rien qui n\'existe pas', () => {
 
     it('les mots arrêtés par Grégoire, mot pour mot', () => {
         const ecran = lire('js/vue-simple.js');
-        expect(ecran).toContain("titreAccueil: 'Ta notation alternative'");
+        // Le titre de l'accueil, changé par Grégoire le 10 nov. 2026 (13 h 39) ; la note de confidentialité (13 h 53).
+        expect(ecran).toContain("titreAccueil: 'La notation alternative, simplifiée'");
+        expect(ecran).toContain("confidentialiteTete: 'Tes données restent chez toi.'");
+        expect(ecran).toContain("confidentialite: (sauvegarder) => `Tout ce que tu entres ici est gardé dans ton navigateur, sur cet appareil. Rien n’est transmis à un serveur, personne d’autre n’y a accès. Pour en garder une copie, utilise « ${sauvegarder} ».`,");
         expect(ecran).toContain("boutonSauvegarder: 'Sauvegarder'");
         expect(ecran).toContain("phraseSauvegarder: 'Tes données restent dans ce navigateur. Enregistre-les dans un fichier, ton codex, pour ne pas les perdre et pour les rouvrir ailleurs.'");
         expect(ecran).toContain("vueSimple: 'Vue simple'");
