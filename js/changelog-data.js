@@ -21,15 +21,30 @@
 
     var CHANGELOG = [
         {
+            // 1.241 (groupe 3 du 9 nov. 2026 : les parcours 3, 4, 5, 8 et 9, les bulles en pages, le tableau de notation,
+            // la complétion qui suit la remise) — titre et cinq lignes validés par Grégoire, mot pour mot (9 nov., 21 h 33).
+            version: '1.241',
+            couleur: 'vert',
+            titre: 'Cinq parcours de plus, et le tableau de notation',
+            items: [
+                'Le panneau «&nbsp;Assistance&nbsp;» compte maintenant neuf parcours, dans l’ordre où tu en as besoin. «&nbsp;Évaluer une première production&nbsp;», «&nbsp;Recevoir les productions, rendre tes rétroactions&nbsp;» et «&nbsp;Monter ton cours&nbsp;» suivent «&nbsp;Mettre ta classe en place&nbsp;». «&nbsp;Automatiser tes commentaires&nbsp;» et «&nbsp;Mettre en place ta notation alternative&nbsp;» ferment la liste. «&nbsp;Monter ton cours&nbsp;» et «&nbsp;Automatiser tes commentaires&nbsp;» se font sur un écran plus grand qu’un téléphone.',
+                'Une bulle trop longue se coupe en pages, à une fin de phrase, avec «&nbsp;← 1/2 →&nbsp;» sous le texte. Ce qu’il faut faire, en orange, reste visible sur chaque page.',
+                'Évaluation › Liste a une seconde vue, «&nbsp;Tableau de notation&nbsp;»&nbsp;: tes étudiant·es en lignes, tes productions en colonnes, la note dans la dernière. En standards ou en spécifications, tu y saisis d’un toucher le résultat d’une production évaluée ailleurs, sans grille.',
+                'Une copie importée compte comme remise dès sa réception, quelle que soit ta pratique de notation.',
+                'Là où une note manque, «&nbsp;Aucune production n’est encore évaluée.&nbsp;» remplace «&nbsp;Aucun artefact du portfolio n’est encore évalué.&nbsp;»'
+            ]
+        },
+        {
             // 1.240 (groupe 2 du 9 nov. 2026 : la bulle sur téléphone, les parcours 6 et 7, la non-participation de
-            // l'absent·e total·e, le compteur de l'export Léa) — titre et cinq lignes validés par Grégoire, mot pour mot.
+            // l'absent·e total·e, le compteur de l'export Léa) — titre et cinq lignes validés par Grégoire, mot pour mot. Le 9 nov.,
+            // 21 h 33 (Grégoire) : les rangs retirés (« Troisième », « Quatrième ») ; un parcours se nomme par son titre.
             version: '1.240',
             couleur: 'vert',
             titre: 'Deux parcours de plus',
             items: [
                 'Sur un téléphone, la bulle des parcours se range au bas de l’écran, repliée&nbsp;: son titre et l’étape. Touche-la pour la lire&nbsp;; elle ne couvre pas ce qu’il faut toucher. Une bulle trop haute pour l’écran fait défiler son texte.',
-                'Troisième parcours, «&nbsp;Mettre tes données à l’abri&nbsp;»&nbsp;: mettre ton codex à jour, puis savoir comment le rouvrir. Pendant un parcours, le rappel «&nbsp;Mets ton codex à jour&nbsp;» attend la fin.',
-                'Quatrième parcours, «&nbsp;Lire ta classe et intervenir&nbsp;»&nbsp;: avant chaque cours, voir qui a besoin de toi et de quoi&nbsp;; puis, si tu le décides, noter une intervention.',
+                '«&nbsp;Mettre tes données à l’abri&nbsp;»&nbsp;: mettre ton codex à jour, puis savoir comment le rouvrir. Pendant un parcours, le rappel «&nbsp;Mets ton codex à jour&nbsp;» attend la fin.',
+                '«&nbsp;Lire ta classe et intervenir&nbsp;»&nbsp;: avant chaque cours, voir qui a besoin de toi et de quoi&nbsp;; puis, si tu le décides, noter une intervention.',
                 'Suivi&nbsp;: une personne absente à toutes les séances passées, sans aucune production, est lue en non-participation (niveau 3), quand le groupe permet d’en juger. Son profil a son Accompagnement et «&nbsp;+ Nouvelle intervention&nbsp;».',
                 '«&nbsp;Exporter pour Léa&nbsp;»&nbsp;: quand rien n’est verrouillé, le compteur dit «&nbsp;Aucune évaluation verrouillée&nbsp;».'
             ]
