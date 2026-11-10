@@ -19,7 +19,7 @@ const lire = (f) => readFileSync(path.join(racineProjet, f), 'utf8');
 // La lecture commune, extraite du VRAI fichier (aucune copie de la règle ici).
 const sourceEchelles = lire('js/echelles.js');
 const lecture = new Function(tranche(sourceEchelles, 'function _seuilLu(v) {', 'function valeurNumeriqueDuNiveau(niveau) {')
-    + '\nreturn { niveauADesSeuils, niveauQuiRecoit };')();
+    + '\nreturn { niveauADesSeuils, niveauQuiRecoit, niveauAuDessusDuPlusHautSeuil };')();
 
 // L'échelle née en vue simple (formes mesurées), plus le niveau ajouté : une valeur, aucun seuil.
 const NIVEAUX = [
@@ -93,6 +93,36 @@ describe('niveau sans seuils · R — le niveau qui reçoit un pourcentage', () 
         expect(lecture.niveauQuiRecoit(undefined, 50)).toBeNull();
         expect(lecture.niveauQuiRecoit(NIVEAUX, NaN)).toBeNull();
         expect(lecture.niveauQuiRecoit(NIVEAUX, -5)).toBeNull();
+    });
+});
+
+describe('niveau sans seuils · A — le niveau atteint du profil et des interventions suit la même règle', () => {
+    // Le VRAI `situerPourcentageDansEchelle`, chargé avec la vraie règle (le harnais la fournit, extraite d'echelles.js).
+    const profil = chargerScript('js/profil-etudiant-helpers.js', {});
+    const situer = (p, niveaux) => code(profil.situerPourcentageDansEchelle(p, { niveaux }));
+
+    it('A.a au-dessus de 100 : le plus haut niveau, comme la répartition (mesuré avant : aucun)', () => {
+        expect([100.5, 110, 250].map(p => situer(p, NIVEAUX))).toEqual(['E', 'E', 'E']);
+        expect([100.5, 110, 250].map(p => code(lecture.niveauQuiRecoit(NIVEAUX, p)))).toEqual(['E', 'E', 'E']);
+    });
+
+    it('A.b un plus haut seuil sous 100 : la note au-dessus va au niveau qui porte ce seuil', () => {
+        expect([89, 95, 100].map(p => situer(p, [{ code: 'H', min: 60, max: 89 }, { code: 'B', min: 0, max: 59 }]))).toEqual(['H', 'H', 'H']);
+    });
+
+    it('A.c ce qui ne change pas : dans une plage, le niveau de la plage ; dans un trou ou sous toute plage, aucun ; jamais le niveau sans seuils', () => {
+        expect([0, 39.99, 40, 84.99, 85, 100].map(p => situer(p, NIVEAUX))).toEqual(['PS', 'PS', 'I', 'M', 'E', 'E']);
+        expect(situer(55, [{ code: 'B', min: 0, max: 50 }, { code: 'H', min: 60, max: 100 }])).toBeNull();
+        expect(situer(-5, NIVEAUX)).toBeNull();
+        expect(situer(110, [NIVEAUX[5]])).toBeNull();
+        for (let p = 0; p <= 200; p += 2.5) expect(situer(p, NIVEAUX)).not.toBe('X');
+    });
+
+    it('A.d la règle est écrite UNE fois : les deux lecteurs l\'appellent, aucun ne la recopie', () => {
+        expect(sourceEchelles.split('niveauAuDessusDuPlusHautSeuil(aSeuils, pourcentage)').length - 1).toBe(1);
+        const helpers = lire('js/profil-etudiant-helpers.js');
+        expect(tranche(helpers, 'function situerPourcentageDansEchelle(', '\n}\n')).toContain('window.niveauAuDessusDuPlusHautSeuil(aSeuils, pourcentage)');
+        expect((sourceEchelles + helpers).split('.bornes.max === plafond').length - 1).toBe(1);
     });
 });
 

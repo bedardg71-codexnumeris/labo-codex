@@ -208,14 +208,19 @@ function situerPourcentageDansEchelle(pourcentage, echelle) {
     const niveaux = (echelle && Array.isArray(echelle.niveaux)) ? echelle.niveaux : null;
     if (!niveaux || niveaux.length === 0) return null;
 
-    const trouve = niveaux.find(function(n) {
+    const aSeuils = [];
+    niveaux.forEach(function(n) {
         const min = _borneNumeriqueOuNull(n && n.min);
         const max = _borneNumeriqueOuNull(n && n.max);
-        if (min === null || max === null) return false;
-        return pourcentage >= min && pourcentage <= max;
+        if (min !== null && max !== null) aSeuils.push({ niveau: n, bornes: { min: min, max: max } });
     });
+    const trouve = aSeuils.find(function(x) { return pourcentage >= x.bornes.min && pourcentage <= x.bornes.max; });
+    if (trouve) return trouve.niveau;
 
-    return trouve || null;
+    // Lot « niveau sans seuils » (décision de Grégoire, 9 nov. 2026, 23 h) : au-dessus du plus haut seuil, le plus haut
+    // niveau — la même règle que la répartition du Suivi, écrite une seule fois (echelles.js). Avant : `null`, et un
+    // critère à 110 % n'avait aucun niveau au profil. Sous une plage ou dans un trou : toujours `null`.
+    return window.niveauAuDessusDuPlusHautSeuil(aSeuils, pourcentage);
 }
 
 /**

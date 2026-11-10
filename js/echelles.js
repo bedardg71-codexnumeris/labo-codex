@@ -2583,9 +2583,24 @@ function niveauQuiRecoit(niveaux, pourcentage) {
     for (let i = aSeuils.length - 1; i >= 0; i--) {
         if (pourcentage >= aSeuils[i].bornes.min && pourcentage <= aSeuils[i].bornes.max) return aSeuils[i].niveau;
     }
-    const plafond = aSeuils.reduce((m, x) => Math.max(m, x.bornes.max), -Infinity);
-    if (aSeuils.length === 0 || pourcentage <= plafond) return null;
-    return aSeuils.filter(x => x.bornes.max === plafond).pop().niveau;
+    return niveauAuDessusDuPlusHautSeuil(aSeuils, pourcentage);
+}
+
+/**
+ * LA règle (Grégoire, 9 nov. 2026, 23 h) : une note AU-DESSUS du plus haut seuil d'une échelle se range dans le plus
+ * haut niveau, y compris quand ce dernier seuil est sous 100. Une seule écriture, lue par la répartition du Suivi
+ * (`niveauQuiRecoit`) et par le niveau atteint du profil et des interventions (`situerPourcentageDansEchelle`,
+ * profil-etudiant-helpers.js). Chaque lecteur garde SA lecture des bornes et la passe ici.
+ * @param {Array<{niveau: Object, bornes: {min: number, max: number}}>} candidats - les niveaux à seuils, bornes lues
+ * @param {number} pourcentage
+ * @returns {Object|null} le niveau qui porte le plus haut `max` (à égalité, celui qui commence le plus haut), ou null
+ *   quand le pourcentage ne dépasse pas ce seuil
+ */
+function niveauAuDessusDuPlusHautSeuil(candidats, pourcentage) {
+    const liste = candidats || [];
+    const plafond = liste.reduce((m, x) => Math.max(m, x.bornes.max), -Infinity);
+    if (liste.length === 0 || !(pourcentage > plafond)) return null;
+    return liste.filter(x => x.bornes.max === plafond).sort((a, b) => a.bornes.min - b.bornes.min).pop().niveau;
 }
 
 /**
@@ -3800,6 +3815,7 @@ window.refusChampNiveau = refusChampNiveau;                                 // #
 window.valeurNumeriqueDuNiveau = valeurNumeriqueDuNiveau;                   // #525 — LA règle, pour tous les lecteurs
 window.niveauADesSeuils = niveauADesSeuils;                                 // lot « niveau sans seuils » (10 nov. 2026)
 window.niveauQuiRecoit = niveauQuiRecoit;                                   // lot « niveau sans seuils » (10 nov. 2026)
+window.niveauAuDessusDuPlusHautSeuil = niveauAuDessusDuPlusHautSeuil;       // lot « niveau sans seuils » — LA règle au-dessus du plus haut seuil
 window.optionsNiveauSOLOEchelle = optionsNiveauSOLOEchelle;                 // #542 lot 2 — UN seul producteur pour les deux éditeurs
 window.ligneNiveauEchelleHtml = ligneNiveauEchelleHtml;                   // #1117 — la ligne de l'échelle enregistrée, éprouvée par sa sentinelle
 window.NIVEAUX_SOLO_ECHELLE = NIVEAUX_SOLO_ECHELLE;                         // #542 lot 2 — les cinq niveaux canoniques

@@ -93,6 +93,20 @@ test.describe('niveau sans seuils — la vue étendue', () => {
         expect(erreurs).toEqual([]);
     });
 
+    test('le niveau de la note globale, au profil, suit la même règle : 110 se lit au plus haut niveau, plus « hors échelle »', async ({ page }) => {
+        const erreurs = await classeNoteeAvecUnNiveauAjoute(page);
+        await page.evaluate(() => window.naviguerVers('suivi', 'profil'));
+        await expect(page.locator('#suivi-profil')).toContainText('Note provisoire');
+        // La lecture que le profil fait de la note, exécutée dans l'application sur ses vraies données (mesuré avant ce
+        // lot : `niveau` absent, raison « hors-echelle »). L'écran qui l'affiche n'est pas regardé ici.
+        const lu = await page.evaluate(() => {
+            const lire = (da, pct) => { const l = window.lireNiveauNoteGlobale(da, pct); return [l.niveau ? l.niveau.code : null, l.raison]; };
+            return { ada: lire('9990001', 110), dario: lire('9990004', 75), chloe: lire('9990003', 0) };
+        });
+        expect(lu).toEqual({ ada: ['E', null], dario: ['M', null], chloe: ['PS', null] });
+        expect(erreurs).toEqual([]);
+    });
+
     test('le PDF de l\'échelle imprime un tiret pour la plage du niveau sans seuils, et les vraies plages des autres', async ({ page }) => {
         await classeNoteeAvecUnNiveauAjoute(page);
         const echelle = await page.evaluateHandle(echelleDuGroupe);
