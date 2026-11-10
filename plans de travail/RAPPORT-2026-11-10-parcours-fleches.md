@@ -16,7 +16,9 @@
    plus bas et attend son verdict.
 3. **Le voile retenait trois gestes qui cassent une étape.** Ils sont maintenant retenus par une garde dans la
    définition de l'étape, comme la consigne le demande.
-4. **Passe finale des bancs des parcours sous Chromium : PASSE_FINALE.**
+4. **Passe finale des bancs des parcours sous Chromium : 87 verts, 10 rouges, 18 sautés** (les sautés sont des
+   essais de captures). Neuf des dix rouges sont rouges aussi sur `main` sous Chromium ; le dixième est passé deux
+   fois sur deux une fois rejoué seul. Détail plus bas. **Aucun de ces chiffres ne vaut verdict : la cible est WebKit.**
 
 ---
 
@@ -219,7 +221,9 @@ détour autour d'une autre cible, tracé gardé dans l'écran, petite cible), le
 déplacement, la sentinelle des coordonnées, le retrait du voile dans le moteur, la feuille de style et les neuf
 définitions, le pointillé fixe.
 
-Suite complète au dernier push : **VITEST_FINAL** (hook de pré-push).
+Suite complète : 912 fichiers, 11 289 essais, tous verts au dernier lancement complet que j'ai lu (après le
+scindage de `placerBulle`). Les pushs suivants sont passés par le hook de pré-push, qui relance la suite et
+refuse un rouge ; je n'ai pas relu son compte.
 
 Trois sentinelles du dépôt ont rougi en route, à raison, et ont été satisfaites : la découpe du source par
 `indexOf` (passée par `tranche()`), le plafond de complexité (`placerBulle` scindé), les jetons anti-cache.
@@ -259,20 +263,30 @@ Chaque défense a été retirée, l'essai qui la nomme lancé, puis la défense 
 | P13 | Poignée de 30 px | 1 rouge |
 | P14 | Flèche à l'encre orange | 1 rouge |
 | P15 | Flèches non redessinées | 1 rouge |
+| P16 | Un second doigt prend la poignée | 1 rouge |
 
 Trois de ces break-tests ont d'abord laissé l'essai vert, et ont fait corriger quelque chose : B2 a montré une
 ligne redondante dans le moteur (retirée) ; P11 et B14, des essais trop lâches (resserrés, puis rejoués rouges).
 
-Non rejoués après les corrections de la relecture : P1 à P15 l'ont été avant ; les essais ajoutés ensuite (second
-doigt, gardes des étapes 3, 4 et 8 au clavier) n'ont pas chacun leur break-test. Le relecteur avait montré que
-l'essai du second doigt passait sans la défense ; il a été réécrit, **son break-test n'a pas été joué**.
+P1 à P15 ont été joués avant les corrections de la relecture, et pas rejoués après. Ajouté ensuite : **P16**, un
+second doigt prend la poignée (la garde `etat.glisse` retirée) : 1 rouge. Les essais ajoutés pour les gardes de
+l'étape 4 et pour le clavier sur le statut de l'étape 8 **n'ont pas leur propre break-test** : ils passent par la
+même garde que P1, jouée sur la pastille de l'étape 3.
 
 ### Playwright (Chromium)
 
 Banc neuf : `tests/integration/parcours-fleches-2026-11-10.spec.js`, 6 essais et 4 de captures ; aides :
 `tests/integration/harness/fleches-de-banc.js`.
 
-Passe finale, 14 fichiers : **PASSE_FINALE_DETAIL**
+Passe finale, 14 fichiers, 15 minutes, sur le code de `c99e872d` : **87 verts, 10 rouges, 18 sautés**.
+
+- Le banc neuf des flèches : 6 verts sur 6 (ses 4 essais de captures sont sautés hors captures).
+- Les bancs des parcours 3, 4, 5, 6, 7 et 9, `bulles-en-pages`, `registre-des-parcours` : tout vert.
+- Les 10 rouges : 9 sont dans le tableau « Les rouges qui ne viennent pas du lot » ; le dixième est
+  `parcours-8-commentaires`, « sans fichier, sur une grille déjà employée » (la rétroaction attendue n'était pas
+  encore écrite). Il était vert à la première passe ; rejoué seul, vert deux fois sur deux. **Un rouge sur quatre
+  lancements, non élucidé.** Il a rougi pendant que la suite Vitest du pré-push tournait sur la même machine :
+  c'est une circonstance, pas une cause établie. À rejouer sous WebKit, seul.
 
 Les bancs qui ont changé, et pourquoi (réécrits, pas desserrés) :
 
@@ -302,6 +316,8 @@ Rejoués sur une copie de `main` (`77679dd`), sous Chromium, pour les départage
 | `parcours-2-ma-classe`, « de Découvrir à sa propre classe » | rouge | Délai dépassé |
 | `parcours-2-ma-classe`, « une flèche didactique ouverte… » | rouge | Délai dépassé |
 | `parcours-9`, « captures : standards, 390 px » | rouge | Ne tourne qu'avec les captures |
+| `bulle-sur-telephone`, « le refus suit la largeur » | instable (rouge 2 fois, vert 2 fois, sur les deux arbres) | « Element is outside of the viewport » |
+| `bulles-au-doigt-540`, trois essais | rouge | Hors parcours ; le toucher simulé de Chromium |
 
 Ce sont des écarts de Chromium (le dépôt le dit : la config Chromium est « un outil de reproduction ciblée, pas une
 suite verte »). **Ces essais ne prouvent donc rien pour ce lot, ni pour ni contre** : seul WebKit sur le Mac les juge.
@@ -316,7 +332,7 @@ Faite sur le diff, sans navigateur. Ses constats, et leur disposition :
 | Étape 5 de « Découvrir » hors de la règle des étapes 6 et 7 | **Remonté à Grégoire** (point 2 de « Ce qui attend ») |
 | Section actuelle perdue si un rendu réécrit les classes de l'onglet | **Corrigé** |
 | Essai « le tracé reste dans l'écran » trop lâche | **Corrigé**, break-test B13 |
-| Essai du second doigt qui n'envoyait pas de second doigt | **Corrigé** (break-test non joué, dit plus haut) |
+| Essai du second doigt qui n'envoyait pas de second doigt | **Corrigé**, break-test P16 |
 | Un glisser sans assertion dans le banc | **Retiré** |
 | Gardes des étapes 3 et 4 et clavier sur le statut sans essai | **Corrigé** : essais ajoutés |
 | La couche ne peut pas montrer le défaut iPad sous Chromium | **Vrai, assumé** : dit dans « Ce que je n'ai pas pu vérifier » |
@@ -358,5 +374,5 @@ qu'elles montrent (aucune ne touche les étapes 3, 5, 6 et 7 à l'œil), mais el
    touche à ce que le parcours doit laisser faire.
 3. **Parcours 9, étape 3 à 820 px** : la bulle couvre la section qu'elle décrit (pas de place à côté). C'était
    déjà le cas avec le voile. **Issue : commenter et oublier** ; la poignée permet maintenant de la pousser.
-4. **Les six essais rouges sous Chromium sur `main`** (tableau plus haut). **Issue : commenter et oublier** :
+4. **Les essais rouges sous Chromium sur `main`** (tableau plus haut). **Issue : commenter et oublier** :
    Chromium n'est pas la cible.
