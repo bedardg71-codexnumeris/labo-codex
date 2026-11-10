@@ -23103,6 +23103,10 @@ body.planif-plein-ecran-actif #planif-guide-panel {
     inset: 0;
     overflow: auto;
     cursor: default;
+    /* 10 nov. 2026 : une carte posée en coordonnées n'a pas à être réancrée par le navigateur. Sous WebKit, pendant un
+       glisser du cinquième parcours, l'ancrage du défilement décalait la carte de 72 px puis la rétablissait, sous le
+       doigt (l'évaluation posée ailleurs que sous l'activité). Banc : parcours-5-monter-ton-cours, « aucun saut ». */
+    overflow-anchor: none;
 }
 
 #planif-guides-overlay {
