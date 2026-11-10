@@ -148,6 +148,12 @@
 > sous quel protocole l'application était ouverte, alors que c'est exactement ce qui départage les deux
 > affichages — il a fallu le déduire. Inscrit au BACKLOG : ajouter `location.protocol` au rapport de bug.
 
+## Corrigés (10 novembre 2026 — « Aucun travail importé » sur Préparer ; corrigé dans le cloud, PR n° 15, fusionné sur le `main` local le 10 nov., pas en ligne)
+
+| # | Testeur | Date | Description | Correctif |
+|---|---------|------|-------------|-----------|
+| 1269 | Grégoire (`BUG_grégoire_2026-11-10_15-20-18`, 1.241.0, build `1109-2301`, iPad) | 10 nov. 2026, 15 h 20 | **Préparer dit « Aucun travail importé » alors que le groupe a des copies.** | 2.5, état résiduel et jugement par l'écran : Préparer ne montre jamais les copies importées. `etats-vides.js` lit les copies du groupe actif et la file d'import (`estVide`), et `afficherImport` retire le bandeau resté (`retirerSiPeuplee`) — `a0d680884`, fusion `1235c0553`. Bancs : `tests/unit/etats-vides-preparer-copies-importees.test.js` (7 essais) et `tests/integration/etats-vides-preparer-copies.spec.js` (WebKit). |
+
 ## Corrigés (5 novembre 2026 — trois rapports iPad du matin ; en ligne en 1.235.0, poussée le 5 nov. à 17 h 49 ; porte iPad de la réparation passée le 6 nov. à 6 h 45 ; inscrit aux corrigés le 8 nov.)
 
 | # | Testeur | Date | Description | Correctif |

@@ -553,3 +553,13 @@ troisième catégorie ; elle ne lui retire pas l'arbitrage.
 
 - **Un mot que lisent les étudiant·es** (le PDF, la rétroaction, tout ce qu'ils reçoivent) **attend le oui de Grégoire.**
 - **Un mot que lit seulement l'enseignant·e à l'écran**, proposé « à corriger si tu veux, sinon c'est celui-là », **part tel quel s'il ne répond pas, et reste corrigeable ensuite.**
+
+---
+
+## Règle 14 — un bug vu sur l'iPad : corrigé dans le cloud, fusionné sur le Mac (10 novembre 2026)
+
+**Norme fixée par Grégoire (10 nov. 2026, 18 h)**, premier cas : PR n° 15, `lot/bandeau-preparer`, fusionnée le soir même.
+
+- **Dans le cloud** : une branche partie de `origin/main`, avec son banc, son break-test et Vitest complet, et une pull request. Le cloud n'écrit ni `SUIVI-BUGS.md` ni `BACKLOG.md` : il propose la ligne de suivi dans le corps de la PR.
+- **Sur le Mac** : la session principale fusionne (`git merge --no-ff`) dans le `main` local, rejoue le banc et Vitest, passe le correctif sous WebKit, puis inscrit la ligne de suivi en prenant le numéro du compteur de `BACKLOG.md` (règle 9), qui avance ici.
+- ⛔ **Jamais de fusion par GitHub** : elle mettrait `main` en ligne aussitôt, sans verdict WebKit, et ferait diverger le `main` local. La PR se ferme d'elle-même au push de `main`.
