@@ -16,8 +16,9 @@ function monter(store) {
         localStorage,
         db: {
             keys: async () => Object.keys(store),
-            get: async (k) => (k in store ? JSON.parse(JSON.stringify(store[k])) : null),
-            getSync: () => null, set: async (k) => ecritures.push(k), setSync: (k) => ecritures.push(k), modifier: async (k) => ecritures.push(k), removeSync: (k) => ecritures.push(k)
+            // Groupe 3 (9 nov.) : la sonde lit par getSync (db.get recopiait dans IndexedDB) ; get ne sert plus à rien ici.
+            get: async () => { throw new Error('la sonde ne lit plus par db.get'); },
+            getSync: (k) => (k in store ? JSON.parse(JSON.stringify(store[k])) : null), set: async (k) => ecritures.push(k), setSync: (k) => ecritures.push(k), modifier: async (k) => ecritures.push(k), removeSync: (k) => ecritures.push(k)
         }
     };
     const journal = [];
