@@ -5,6 +5,51 @@
 `.claude/skills/debut-de-session-labo-codex/SKILL.md`. Aucun fichier de `js/`, pas de verdict, pas de release, pas de
 fusion : la session principale fusionnera après le groupe 3.
 
+> **Relais du 10 nov. 2026, quatrième passage (décision de Grégoire de 8 h 43 sur les mots ; décisions techniques de
+> Cowork sur `PROTOCOLE.md`)** : fait et poussé, rien fusionné, rien dans `js/`.
+>
+> **`PROTOCOLE.md` : 607 lignes avant, 571 après** (plafond déclaré : 575), règle 13 comprise.
+> Fichiers touchés : `PROTOCOLE.md`, `Modèle de consigne de démarrage à froid.txt` (figé : trois lignes datées en
+> tête, contenu intact), ce rapport. **`CLAUDE.md` n'est pas touché** : son point 3 (« les mots que ses élèves
+> liront » attendent sa réponse) dit la même chose que la première moitié de la règle, et rien sur la seconde.
+>
+> **Posé (a)** : règle 13, datée du 10 nov., 8 h 43, dans les termes de Grégoire — un mot que lisent les étudiant·es
+> attend son oui ; un mot que lit seulement l'enseignant·e à l'écran part tel quel sans réponse, et reste corrigeable.
+> La section « Ce qui reste hors protocole » y renvoie.
+>
+> **Passages changés (b)** :
+> - l. 8 : l'état courant vit dans la relève de Cowork, hors du dépôt ;
+> - « Qui écrit quoi » : Cowork écrit le mandat (il arrive par le relais), tient la relève et la page de tri ;
+>   Claude Code écrit `RELAIS.md` et le rapport de sa branche. Le motif (on se relit soi-même) est gardé ;
+> - règle 3, renommée « Une règle a UNE destination, selon sa nature » : le critère des trois sessions et le tableau
+>   des destinations restent ; ce qui parlait de la consigne de démarrage part ;
+> - règle 4, renommée « Le rapport et le relais s'écrivent à la clôture de chaque lot » : même règle, même motif,
+>   « l'état mesuré » remplacé ;
+> - « La console » : c'est la page de tri, artefact que tient Cowork. La règle de Grégoire du 2 sept. (« on fait
+>   court, et ce qui est fini disparaît »), son motif et la mise à jour par Cowork sont gardés mot pour mot ; les
+>   preuves restent au dépôt dans le rapport de la branche et `RELAIS.md` ;
+> - règle 11 : la ligne d'état d'un chantier quitté va dans la relève de Cowork, plus au § 3 de la consigne Cowork.
+>
+> **Retiré (c), périmé ou en double** :
+> - règle 1 : la phrase qui rattachait la règle au « vérifié comment » d'`OU-EN-EST-ON.md` ;
+> - règle 3 : la définition de ce que porte la consigne de démarrage, et « le nom sans date, exprès » ;
+> - console : « sa vue d'`OU-EN-EST-ON.md` », l'histoire du titre (« Ce qu'il reste à faire ») et « le ruban des
+>   huit » ;
+> - la section « La question restée ouverte » et son « premier paiement » du 2 sept. (historique ; ce qui s'applique
+>   encore, retirer autant qu'on ajoute dans `CLAUDE.md`, est remonté dans la règle 3) ;
+> - en-tête : le paragraphe « Produit par une révision contradictoire » (historique), et la note du 2 sept. sur
+>   l'accès de Cowork aux skills, ramenée à une phrase (le fait est gardé) ;
+> - règle 4 : la fin de la note sur la réduction du nombre d'outils (la réfutation et sa mesure sont gardées).
+>
+> **Aucune règle retirée.** Supposé, à corriger si faux : la section « Les consignes passent par un FICHIER » est
+> encore appliquée (des `CONSIGNE-LOT-…` datent du 9 nov.), donc laissée telle quelle, bien qu'elle nomme
+> `CONSIGNE-DU-JOUR.md` ; et la page de tri porte encore « ce qui reste ouvert, ce qui attend une décision, ce qu'il
+> doit aller voir » — je ne vois pas l'artefact.
+>
+> **Vu, non touché** : `PROTOCOLE.md` dit encore « une seule session écrit à la fois » (rôles) et « une seule session
+> écrit dans `js/` » (règle 5), alors que le groupe 2 du 9 nov. a fusionné quatre branches de lot ; et `CLAUDE.md`
+> dit « Cowork ne lit pas `.claude/` », ce que la note du 2 sept. de `PROTOCOLE.md` contredit. À trancher par Cowork.
+>
 > **Relais du 10 nov. 2026, troisième passage (décision de Grégoire de 8 h 20 : il ne lit pas `OU-EN-EST-ON.md` ;
 > décisions techniques de Cowork)** : fait et poussé, rien fusionné, rien dans `js/`.
 >

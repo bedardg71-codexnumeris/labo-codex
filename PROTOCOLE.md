@@ -5,7 +5,7 @@
 >
 > Ce fichier porte **comment nous travaillons ensemble**. Il ne porte ni les
 > chantiers (skills), ni les règles du code (`CLAUDE.md`), ni l'état courant
-> (`OU-EN-EST-ON.md`, `CONSIGNE-DEMARRAGE-PROCHAINE-SESSION.md`).
+> (la relève de Cowork, hors du dépôt).
 >
 > **À lire au début de toute session, Cowork ou Claude Code.** C'est le fichier
 > de coordination de référence pour les deux.
@@ -13,17 +13,7 @@
 > **Ne rien ajouter ici sans retirer autant. Plafond : 575 lignes** — ce qu'il pesait le 13 septembre 2026 au soir, règles 7 et 8 déplacées vers le rituel de fin de session (mesuré par `wc -l`, pas choisi). C'est le seul texte que les deux sessions lisent en entier à chaque démarrage ; il avait pris 110 lignes le 13.
 > Le critère de ce qui part : ce fichier dit QUI FAIT QUOI ET PAR QUEL CANAL ; un skill dit COMMENT BIEN FAIRE UN GESTE. Ce qui part laisse une ligne de renvoi qui nomme le skill.
 >
-> ↻ **Corrigé le 2 septembre 2026.** Ce fichier affirmait que « Cowork n'a pas
-> accès à `.claude/skills/` ». C'est faux quand le dépôt est monté : `ls
-> .claude/skills/` rend les quinze skills, lisibles. Témoin du périmètre : le
-> même `ls` sur un dossier hors du montage échoue. La conséquence pratique est
-> que Cowork peut VÉRIFIER si une promotion de la règle 3 est bien arrivée à
-> destination, au lieu de la supposer arrivée. Le 2 septembre, les deux
-> promotions déjà arrêtées visaient des sections périmées.
->
-> Produit par une révision contradictoire : Cowork a proposé quatre règles,
-> Claude Code en a réfuté une, amendé deux et resserré une. Ce qui suit est ce
-> qui a survécu à la contradiction, pas ce qui a été proposé.
+> ↻ **Corrigé le 2 septembre 2026.** Quand le dépôt est monté, Cowork lit `.claude/skills/` (`ls .claude/skills/` rend les skills) : il peut donc VÉRIFIER qu'une règle montée (règle 3) est arrivée à destination, au lieu de la supposer arrivée.
 
 ---
 
@@ -38,10 +28,10 @@
 - **Claude Code** exécute, mesure, teste, commite et pousse. Une seule session
   écrit à la fois.
 
-### Qui écrit quoi dans la consigne de démarrage
+### Qui écrit quoi (aligné le 10 novembre 2026)
 
-**Claude Code rend l'ÉTAT MESURÉ** : des faits datés, rien d'autre.
-**Cowork écrit le MANDAT** et la séquence, à froid, avec Grégoire.
+**Cowork écrit le MANDAT** d'une session, à froid, avec Grégoire : il arrive par le relais. Cowork tient aussi la relève (l'état d'ensemble et les priorités, hors du dépôt) et la page de tri, qui est la console de Grégoire.
+**Claude Code écrit `RELAIS.md`** (le journal des sessions entre elles) **et le rapport de sa branche** (`plans de travail/RAPPORT-…`) : des faits datés, rien d'autre.
 
 Motif : une session qui rédige sa propre consigne **se relit elle-même**. Elle
 transmet ce qu'elle a vu, pas ce qu'elle a manqué. C'est la relecture croisée,
@@ -185,9 +175,6 @@ mémoire périmée sur `release.mjs`, un chiffre importé d'un diaporama GitHub
 Copilot dans une architecture où le mécanisme diffère). Le geste correcteur
 est identique dans les deux cas, d'où leur réunion ici.
 
-C'est la règle « vérifié comment » d'`OU-EN-EST-ON.md`, étendue des états aux
-mesures, et des sessions aux sous-agents.
-
 **Ce qui la falsifierait** : si les rapports deviennent illisibles sous les
 commandes, ou si personne ne les rejoue jamais.
 
@@ -239,13 +226,9 @@ sur ces lots-là, le périmètre est mal choisi.
 
 ---
 
-## Règle 3 — La consigne ne porte que ce qui périme
+## Règle 3 — Une règle a UNE destination, selon sa nature
 
-`CONSIGNE-DEMARRAGE-PROCHAINE-SESSION.md` ne porte que **l'état mesuré, le
-mandat et ce qui est dû**. Ce qui a survécu à trois sessions n'est plus une
-consigne, c'est une règle : ça monte, et **ça quitte la consigne**.
-
-**Destination par défaut de la promotion, selon la nature :**
+*Réécrite le 10 novembre 2026 : la consigne de démarrage, que cette règle tenait courte, est figée.* Ce qui a survécu à trois sessions n'est plus une consigne, c'est une règle : ça monte, et **ça quitte** le mandat, le relais ou le rapport où c'est né.
 
 | Nature | Destination |
 |---|---|
@@ -253,20 +236,16 @@ consigne, c'est une règle : ça monte, et **ça quitte la consigne**.
 | Comment on mène un chantier (livrer, tester, noter) | le skill concerné |
 | Ce qui gouverne le code | `CLAUDE.md` |
 
-⚠ `CLAUDE.md` a un plafond de 250 lignes et il y est. Sans destination par
-défaut, la règle 3 remplit le seul fichier qui ne peut pas grossir.
-
-⚠ **Le nom de `CONSIGNE-DEMARRAGE-PROCHAINE-SESSION.md` est sans date, exprès.**
-La date d'écriture est en tête du fichier, et c'est elle qui fait foi. Un nom qui
-ne peut pas rôtir vaut mieux qu'une date qu'on oublie de retirer.
+⚠ `CLAUDE.md` a un plafond de 250 lignes : toute promotion vers lui retire autant qu'elle ajoute, et l'arbitrage appartient à qui a le fichier sous les yeux.
 
 **Ce qui la falsifierait** : si le tri fait perdre une leçon chère, le critère
 des trois sessions est trop court.
 
 ---
 
-## Règle 4 — L'état mesuré s'écrit à la clôture de chaque lot
+## Règle 4 — Le rapport et le relais s'écrivent à la clôture de chaque lot
 
+*Alignée le 10 novembre 2026 : c'était « l'état mesuré » de la consigne de démarrage ; c'est le rapport de la branche, et l'entrée de `RELAIS.md` quand la session en écrit une.*
 Pas à la clôture de la session. Une session qui a livré trois lots a écrit trois
 fois, chaque fois avec assez de place pour se relire.
 
@@ -282,15 +261,11 @@ la personne qu'on veut décharger peut relever n'est pas un filet.
 
 **Signal de remplacement, auto-observable et gratuit** : si Claude Code se
 surprend à refaire une mesure déjà faite dans la session, à relire un fichier
-déjà lu ou à relancer ce qui vient de tourner, **il écrit l'état mesuré et clôt
+déjà lu ou à relancer ce qui vient de tourner, **il écrit son rapport et clôt
 le lot**. Deux occurrences documentées le 1er septembre, contre zéro pour le
 seuil.
 
-⛔ **RÉFUTÉE ET RETIRÉE, à ne pas reproposer** : la réduction du nombre d'outils.
-Mesuré le 1er septembre : environ 95 outils visibles dont 81 différés, et un
-outil différé ne coûte que son nom, pas son schéma. La comparaison « 17 outils
-contre 52 » venait d'une installation où tous les schémas sont chargés d'emblée.
-Le mécanisme ne tient pas ici.
+⛔ **RÉFUTÉE ET RETIRÉE, à ne pas reproposer** : la réduction du nombre d'outils. Mesuré le 1er septembre : environ 95 outils visibles dont 81 différés, et un outil différé ne coûte que son nom, pas son schéma.
 
 ---
 
@@ -407,25 +382,20 @@ coûté deux sessions d'enquête et deux hypothèses réfutées.
 personnelle** — ni DA, ni nom, ni note. Il ne sait pas écrire, et ça ne doit pas
 changer.
 
-### La console : « Les huit gestes »
+### La console : la page de tri
 
-C'est un artefact publié, sa vue d'`OU-EN-EST-ON.md`. **Il n'y en a qu'une.** Ne
-jamais en fabriquer une seconde : deux pages qui divergent seraient pires que rien.
-Si son adresse manque, la demander plutôt que de la deviner.
+*Alignée le 10 novembre 2026. Elle s'appelait « Les huit gestes » et se donnait pour la vue d'`OU-EN-EST-ON.md`, figé depuis.*
+C'est un artefact publié, que tient Cowork. **Il n'y en a qu'une.** Ne jamais en fabriquer une seconde : deux pages qui divergent seraient pires que rien. Si son adresse manque, la demander plutôt que de la deviner.
 
-↻ **Son titre à l'écran est « Ce qu'il reste à faire » depuis le 2 septembre 2026 ;
-son nom d'artefact reste « Les huit gestes ».** Même page, ne pas en chercher une autre.
-
-Elle porte : le ruban des huit, **ce qui reste ouvert**, ce qui attend une décision
-de lui, et ce qu'il doit aller voir à l'écran.
+Elle porte **ce qui reste ouvert**, ce qui attend une décision de lui, et ce qu'il doit aller voir à l'écran.
 
 ⛔ **RÈGLE ARRÊTÉE PAR GRÉGOIRE LE 2 SEPTEMBRE 2026 — ON FAIT COURT, ET CE QUI EST
 FINI DISPARAÎT.** Ses mots : *« Quand un point est fini, on le retire. On le compte
 comme du travail fait, mais on ne l'affiche plus. On passe au point suivant. »*
 
-⮕ **Un geste fini est RETIRÉ de la page et COMPTÉ dans le ruban.** Les preuves et le
-détail restent dans `OU-EN-EST-ON.md`, au dépôt — la page n'est pas l'archive, elle
-est la vue de ce qui reste.
+⮕ **Un geste fini est RETIRÉ de la page et COMPTÉ.** Les preuves et le détail restent au
+dépôt, dans le rapport de la branche et dans `RELAIS.md` — la page n'est pas l'archive,
+elle est la vue de ce qui reste.
 ⚠ **Le motif, et il est plus grave qu'une préférence de forme** : le 2 septembre au
 matin, il a dit être en **surcharge cognitive** — trop d'information, impossible de
 retenir, donc impossible de décider. **Une page qui accumule redevient illisible en
@@ -517,24 +487,9 @@ seul jugement que ni Cowork ni Claude Code n'aurait pu rendre (`minor` ou
 celui de Grégoire. Le goulot est aussi le garde-fou.
 
 **Ce qui remonte jusqu'à lui ne change pas** (détail dans `CLAUDE.md`) : la
-didactique, ses données réelles, les mots que ses élèves et ses utilisateurs
-lisent, ce qui l'engage publiquement. La règle 2 ajoute un second regard sur la
+didactique, ses données réelles, les mots que lisent ses étudiant·es (règle 13
+pour ceux que lit seulement l'enseignant·e), ce qui l'engage publiquement. La règle 2 ajoute un second regard sur la
 troisième catégorie ; elle ne lui retire pas l'arbitrage.
-
-## La question restée ouverte
-
-La règle 3 pousse du contenu vers le haut ; `CLAUDE.md` a un plafond et il y est.
-La destination par nature résout le cas courant, pas le cas où la leçon vaut pour
-toute session quel que soit le chantier. Quand ça arrivera, il faudra retirer
-autant qu'on ajoute, et l'arbitrage appartient à qui a le fichier sous les yeux.
-
-↻ **Premier paiement, 2 septembre 2026.** Le tri de la consigne a promu deux
-leçons vers `CLAUDE.md` (« push réussi ≠ suite verte » et les notes A2025/H2026 non
-rouvertes) et il a fallu retirer autant : quatre lignes de §Avant chaque commit qui
-recopiaient le §4 de `fin-de-session`, et l'étape 5 de §Procédure de développement,
-qui est intégralement ce rituel. `CLAUDE.md` est passé de 246 à **250 lignes,
-exactement au plafond**. La prochaine promotion vers lui exigera un retrait
-délibéré, pas une compression.
 
 ---
 
@@ -590,7 +545,7 @@ délibéré, pas une compression.
 
 **Le 30 septembre, trois chantiers étaient ouverts en même temps** (la carte d'alignement et l'enregistrement, le codex, les archives), et la page du tri n'en montrait qu'un. Chaque passage avait sa raison : un échec sur ses vraies données le matin, puis la borne de 2 Go du codex. Aucun n'avait laissé de trace de ce qu'il interrompait. Grégoire a découvert l'empilement en posant la question.
 
-⮕ **Avant d'ouvrir un chantier, Cowork écrit sur la page du tri l'état de celui qu'on quitte : « clos », ou « suspendu, il reste X »**, X dit en gestes d'utilisateur. La même ligne va au § 3 de `CONSIGNE-DEMARRAGE-COWORK.md`.
+⮕ **Avant d'ouvrir un chantier, Cowork écrit sur la page du tri l'état de celui qu'on quitte : « clos », ou « suspendu, il reste X »**, X dit en gestes d'utilisateur. La même ligne va dans la relève de Cowork.
 
 **Elle n'empêche pas de changer de cap** : un retour de testeur passe toujours avant tout, et Grégoire décide de l'ordre. Elle oblige à voir ce qu'on laisse. **Un plan qui nomme des lots restants est un chantier ouvert** tant que la page ne dit pas le contraire : à l'ouverture d'une session, Cowork compte les plans ouverts, pas seulement le lot en cours.
 
@@ -605,3 +560,12 @@ délibéré, pas une compression.
 **9 octobre 2026** — **Règle de Grégoire (9 oct., 14 h 42)** : d'abord ce qui se fait sans lui, puis la qualité (robustesse, logique).
 
 **22 octobre 2026** — ⚠ **Le port 22 vers github.com est bloqué sur ce réseau** : `pousser.sh` a poussé par le port 443 (`GIT_CONFIG_COUNT=1 GIT_CONFIG_KEY_0=url.ssh://git@ssh.github.com:443/.insteadOf GIT_CONFIG_VALUE_0=git@github.com:`), sans toucher à la configuration.
+
+---
+
+## Règle 13 — les mots : ce qui attend le oui de Grégoire, ce qui part tel quel (10 novembre 2026)
+
+**Décision de Grégoire (10 nov. 2026, 8 h 43)** : il garde, bornée, sa règle du 11 septembre (« un mot proposé sans réponse vaut tel quel »).
+
+- **Un mot que lisent les étudiant·es** (le PDF, la rétroaction, tout ce qu'ils reçoivent) **attend le oui de Grégoire.**
+- **Un mot que lit seulement l'enseignant·e à l'écran**, proposé « à corriger si tu veux, sinon c'est celui-là », **part tel quel s'il ne répond pas, et reste corrigeable ensuite.**
