@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { readFileSync, readdirSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { tranche } from './_helpers/tranche.js';
 
 // SENTINELLE — LES FLÈCHES DES PARCOURS (lot du 10 nov. 2026, plans de travail/CONSIGNE-LOT-2026-11-09-parcours-fleches.md).
 //
@@ -149,7 +150,7 @@ describe('Les coordonnées de la couche des flèches', () => {
     const regle = (regles.match(/\.parcours-fleches\s*\{([^}]*)\}/) || [])[1] || '';
 
     it('la couche est dimensionnée en px sur innerWidth × innerHeight, à chaque passage de la sonde', () => {
-        const sonde = code.slice(code.indexOf('function sonder()'), code.indexOf('function placerSelonEtape'));
+        const sonde = tranche(code, 'function sonder() {', 'function placerSelonEtape', { longueurMin: 400 });
         expect(sonde).toMatch(/svg\.setAttribute\('width', String\(window\.innerWidth\)\)/);
         expect(sonde).toMatch(/svg\.setAttribute\('height', String\(window\.innerHeight\)\)/);
         expect(sonde).toMatch(/svg\.style\.width = window\.innerWidth \+ 'px'/);
@@ -192,7 +193,7 @@ describe('Le voile est retiré', () => {
     });
 
     it('la pulsation s’arrête sous prefers-reduced-motion : un contour pointillé fixe', () => {
-        const reduit = css.slice(css.indexOf('@media (prefers-reduced-motion: reduce)'));
+        const reduit = tranche(css, '@media (prefers-reduced-motion: reduce)', 'Parcours 6 : la bulle au-dessus des fenêtres', { longueurMin: 150 });
         const contour = (reduit.match(/\.parcours-contour\s*\{([^}]*)\}/) || [])[1] || '';
         expect(contour).toMatch(/animation:\s*none/);
         expect(contour).toMatch(/border:\s*3px dashed/);
@@ -200,7 +201,7 @@ describe('Le voile est retiré', () => {
 
     it('les flèches ont leur propre préfixe, pas celui des flèches didactiques', () => {
         expect(sansCommentaires(moteur)).not.toMatch(/fleche-didactique/);
-        expect(sansCommentaires(css.slice(0, css.indexOf('Le panneau « Assistance »')))).not.toMatch(/fleche-didactique/);
+        expect(sansCommentaires(css)).not.toMatch(/fleche-didactique/);
     });
 });
 

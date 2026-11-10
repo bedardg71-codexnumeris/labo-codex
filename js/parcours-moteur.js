@@ -817,9 +817,56 @@
     }
 
     /**
+     * La place de la bulle (bw × bh) près de `cible`, dans un écran vw × vh. Un côté après l'autre (bas, haut, droite,
+     * gauche), à ECART_FLECHE de la cible quand la place y est (la longueur d'une flèche), sinon à ECART, comme avant.
+     * D'abord une place qui tient sans couvrir `obstacle` (ce qu'il faut toucher) ; à défaut une place qui tient ; à
+     * défaut le côté le plus libre, au bord de l'écran.
+     */
+    function placePresDe(cible, obstacle, bw, bh, vw, vh) {
+        var haut = hautEntete();
+        var hautMin = Math.max(MARGE, haut + MARGE);
+        var ox = obstacle ? (obstacle.left + obstacle.right) / 2 : null;
+        var oy = obstacle ? (obstacle.top + obstacle.bottom) / 2 : null;
+        // La bulle posée d'un côté de la cible ; le long de ce côté, elle s'écarte du contour quand il est à côté.
+        var poser = function (cote, ecart) {
+            var px, py;
+            if (cote === 'bas' || cote === 'haut') {
+                px = cible.left + cible.width / 2 - bw / 2;
+                if (obstacle && ox < cible.left) px = cible.left;
+                else if (obstacle && ox > cible.right) px = cible.right - bw;
+                py = cote === 'bas' ? cible.bottom + ecart : cible.top - ecart - bh;
+            } else {
+                py = cible.top + cible.height / 2 - bh / 2;
+                if (obstacle && oy < cible.top) py = cible.top;
+                else if (obstacle && oy > cible.bottom) py = cible.bottom - bh;
+                px = cote === 'droite' ? cible.right + ecart : cible.left - ecart - bw;
+            }
+            px = Math.min(Math.max(MARGE, px), vw - bw - MARGE);
+            py = Math.min(Math.max(Math.min(haut, vh - bh - MARGE), py), vh - bh - MARGE);
+            return { x: px, y: Math.max(MARGE, py) };
+        };
+        var tient = function (cote, ecart) {
+            if (cote === 'bas') return vh - cible.bottom - ecart - MARGE >= bh;
+            if (cote === 'haut') return cible.top - ecart - hautMin >= bh;
+            if (cote === 'droite') return vw - cible.right - ecart - MARGE >= bw;
+            return cible.left - ecart - MARGE >= bw;
+        };
+        var places = [];
+        ['bas', 'haut', 'droite', 'gauche'].forEach(function (cote) {
+            [ECART_FLECHE, ECART].forEach(function (ecart) {
+                if (tient(cote, ecart)) places.push(poser(cote, ecart));
+            });
+        });
+        var libres = places.filter(function (p) {
+            return !obstacle || !seCroisent({ left: p.x, top: p.y, right: p.x + bw, bottom: p.y + bh }, obstacle, MARGE);
+        });
+        return libres[0] || places[0] || poser((vh - cible.bottom) >= cible.top ? 'bas' : 'haut', ECART);
+    }
+
+    /**
      * La bulle, hors téléphone : près de ce dont elle parle (`cibleRect` : l'union des zones ; sans zone, le
-     * contour), sans couvrir ce qu'il faut toucher (`obstacle` : le contour, quand il n'est pas la cible). À
-     * ECART_FLECHE de la cible quand la place y est (la longueur d'une flèche), sinon à ECART, comme avant.
+     * contour), sans couvrir ce qu'il faut toucher (`obstacle` : le contour, quand il n'est pas la cible). Déplacée
+     * par la personne, elle garde sa place pour l'étape.
      */
     function placerBulle(etape, cibleRect, obstacle) {
         var b = etat.elements.bulle;
@@ -829,62 +876,15 @@
         b.style.maxHeight = Math.max(0, vh - 2 * MARGE) + 'px';
         if (etat.deplacee) { poserDeplacee(); return; }
         var bw = b.offsetWidth, bh = b.offsetHeight;
-        var x, y;
+        var place;
         if (etape.centre || !cibleRect) {
-            x = (vw - bw) / 2;
-            y = Math.max(hautEntete() + 16, (vh - bh) / 2);
-            if (y + bh > vh - MARGE) y = Math.max(MARGE, vh - bh - MARGE);
+            place = { x: (vw - bw) / 2, y: Math.max(hautEntete() + 16, (vh - bh) / 2) };
+            if (place.y + bh > vh - MARGE) place.y = Math.max(MARGE, vh - bh - MARGE);
         } else {
-            var haut = hautEntete();
-            var hautMin = Math.max(MARGE, haut + MARGE);
-            var ox = obstacle ? (obstacle.left + obstacle.right) / 2 : null;
-            var oy = obstacle ? (obstacle.top + obstacle.bottom) / 2 : null;
-            // La bulle posée d'un côté de la cible ; le long de ce côté, elle s'écarte du contour quand il est à côté.
-            var poser = function (cote, ecart) {
-                var px, py;
-                if (cote === 'bas' || cote === 'haut') {
-                    px = cibleRect.left + cibleRect.width / 2 - bw / 2;
-                    if (obstacle && ox < cibleRect.left) px = cibleRect.left;
-                    else if (obstacle && ox > cibleRect.right) px = cibleRect.right - bw;
-                    py = cote === 'bas' ? cibleRect.bottom + ecart : cibleRect.top - ecart - bh;
-                } else {
-                    py = cibleRect.top + cibleRect.height / 2 - bh / 2;
-                    if (obstacle && oy < cibleRect.top) py = cibleRect.top;
-                    else if (obstacle && oy > cibleRect.bottom) py = cibleRect.bottom - bh;
-                    px = cote === 'droite' ? cibleRect.right + ecart : cibleRect.left - ecart - bw;
-                }
-                px = Math.min(Math.max(MARGE, px), vw - bw - MARGE);
-                py = Math.min(Math.max(Math.min(haut, vh - bh - MARGE), py), vh - bh - MARGE);
-                py = Math.max(MARGE, py);
-                return { x: px, y: py };
-            };
-            var tient = function (cote, ecart) {
-                if (cote === 'bas') return vh - cibleRect.bottom - ecart - MARGE >= bh;
-                if (cote === 'haut') return cibleRect.top - ecart - hautMin >= bh;
-                if (cote === 'droite') return vw - cibleRect.right - ecart - MARGE >= bw;
-                return cibleRect.left - ecart - MARGE >= bw;
-            };
-            var cotes = ['bas', 'haut', 'droite', 'gauche'];
-            var ecarts = [ECART_FLECHE, ECART];
-            var choix = null;
-            // D'abord une place qui tient sans couvrir le contour ; à défaut, une place qui tient.
-            for (var passe = 0; passe < 2 && !choix; passe++) {
-                for (var k = 0; k < cotes.length && !choix; k++) {
-                    for (var e = 0; e < ecarts.length && !choix; e++) {
-                        if (!tient(cotes[k], ecarts[e])) continue;
-                        var p = poser(cotes[k], ecarts[e]);
-                        var couvre = passe === 0 && obstacle &&
-                            seCroisent({ left: p.x, top: p.y, right: p.x + bw, bottom: p.y + bh }, obstacle, MARGE);
-                        if (!couvre) choix = p;
-                    }
-                }
-            }
-            // Rien ne tient sans couvrir : le côté le plus libre, bord de l'écran.
-            if (!choix) choix = poser((vh - cibleRect.bottom) >= cibleRect.top ? 'bas' : 'haut', ECART);
-            x = choix.x; y = choix.y;
+            place = placePresDe(cibleRect, obstacle, bw, bh, vw, vh);
         }
-        b.style.left = Math.round(x) + 'px';
-        b.style.top = Math.round(y) + 'px';
+        b.style.left = Math.round(place.x) + 'px';
+        b.style.top = Math.round(place.y) + 'px';
     }
 
     // ---------- La poignée : déplacer la bulle ----------
