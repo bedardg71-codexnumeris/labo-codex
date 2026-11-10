@@ -7,6 +7,28 @@
 
 ---
 
+## 9 NOV. 2026, 19 H 30 (Claude Code) : **1.240.0 POUSSÉE, VERDICT VERT ; GROUPE 2 EN LIGNE**
+
+`main` = `origin/main` = `a600312d7` (+ le commit de docs qui porte ce relais). Version en ligne : 1.240.0, build `1109-1558`. Feu vert de Grégoire pour assembler (Cowork, 15 h 28), puis pour le verdict.
+
+- **Le groupe 2**, fusionné dans cet ordre : `lot/bulle-sur-telephone` (`19b3f4640`, captures approuvées par Grégoire à 15 h 28), `lot/parcours-6-donnees-a-l-abri` (`ae5285c95`), `lot/parcours-7-lire-ta-classe` (`6a825b52f`, avec la retouche de 13 h 44 : l'absent·e à toutes les séances lu·e en non-participation), `lot/compteur-lea-aucune-verrouillee` (`d02af36dd`). Nouvelles 1.240 « Deux parcours de plus » : titre et cinq lignes validés par Grégoire mot pour mot.
+- **Unifié à la fusion** : la condition d'entrée d'un parcours s'appelle `refus` (comme 7, 8, 9 ; le 6 l'appelait `condition`, comme 3 et 5, qui passeront à `refus` au groupe 3) ; « un parcours joue » se lit partout sur `ParcoursMoteur.actif()` (le rappel du codex du 6, et la garde des flèches du groupe 1, alignée ; 8 et 9 ont la même) ; les bancs des parcours 1, 2 et 6 lisent le nombre de parcours sur le registre.
+- **Les six textes de la non-participation** (rapport du septième parcours) validés par Grégoire et posés, la carte RàI du profil en deux phrases (présent·e au moins une fois ; absent·e à toutes les séances passées). Sentinelle neuve, break-testée.
+- **Le relevé des rétroactions retouchées n'était pas en lecture seule** : `db.get` recopie dans IndexedDB une clé trouvée seulement dans le localStorage (`js/db.js`, `_getIndexedDB`). Corrigé en `db.getSync` (version de Cowork, déjà lancée par Grégoire) ; sentinelle neuve : tout `scripts/releve-*.js` reste en lecture seule. C'était le seul relevé ; 13 scripts `diagnostic-*.js` appellent encore `db.get`, non touchés.
+- **Résultat du relevé** (Grégoire, 9 nov.) : 3 rétroactions retouchées sur 195 évaluations d'A2026, toutes dans l'Artefact 4, verrouillées ; 53 évaluations plus anciennes sans marque. Grégoire ne retouche pas l'Artefact 4 : on n'y revient pas.
+- **BACKLOG** : #1257 à #1268, les sections « À inscrire » des rapports des parcours 6 et 7. Non inscrit : le focus qui ne revient pas au « i » (parcours 6, n° 5, aucun symptôme vécu).
+- **Bancs** : Vitest 11 000/11 000 ; specs ciblées sous WebKit (bulle, parcours 1-2, 2, 6, 7, export Léa, rappel du codex, aide) vertes après deux corrections de bancs (le nombre de parcours en dur ; l'alerte sans « présent·e »).
+- **Premier verdict complet** sur `69ee762c3` : rouge sur un essai (1 481 essais : 1 479 verts, 1 au second essai (`grilles-sous-criteres-condense`, Mac, sans rapport avec le groupe 2), 1 rouge, 44 sautés ; pression mémoire normale tout du long). Le parcours 7, « les neuf étapes » à 1180 px en sombre : relancé seul, 2 rouges sur 6, erreur console de WebKit « Problem parsing d= … v--2.42 ». **Le défaut était dans `trouRect` (`js/parcours-moteur.js`), identique dans la 1.239.0 en ligne** : quand moins de 12 px de la cible restent visibles, les coins arrondis de 6 px rendent un côté de longueur négative et WebKit refuse le tracé du voile (une image sans trou, rien sur les données ni les notes). Corrigé par cette release (`a600312d7` : le rayon borné à la moitié d'un côté), sentinelle neuve rouge sans la correction ; le banc du parcours 7, 6 verts sur 6 après.
+- **Second verdict complet** sur `a600312d7` (décision de Grégoire et de Cowork, 17 h 50) : **vert franc**, 1 481 essais : 1 481 verts, 0 au second essai, 0 rouge, 44 sautés ; pression mémoire normale (1) dans les dix morceaux, aucune veille. Push : `e924c5015..a600312d7`, le hook a lu le verdict à jour.
+- **Écart assumé à la règle 8 de `PROTOCOLE.md`** : les deux verdicts ont tourné avec Cowork ouvert (décision de Grégoire, sur la recommandation de Cowork : le verdict du groupe 1 était sorti vert ainsi ; Cowork sans travail lourd sur le Mac pendant le verdict). Chrome et Safari fermés.
+- **Relecture neuve de la fusion** (agent neuf, sans navigateur, pendant le verdict) : rien de bloquant ; aucun code perdu ni dupliqué, `ParcoursMoteur.actif()` et la classe `parcours-actif` vrais aux mêmes instants. Deux défauts mineurs, inscrits pour le groupe 3 dans la file des sessions : aucun banc ne fixe le nombre ni l'ordre du registre des parcours (et un commentaire « trois sur cette branche » à corriger) ; la phrase de refus du parcours 6 a pris le style de celle du 7.
+
+- **Plan déposé par Cowork à 17 h 50** : `plans de travail/PLAN-2026-11-09-vue-simple.md`, commité tel quel avec ce relais, pour que les sessions du cloud le lisent sur `main`.
+
+**Reste ouvert** : la personne marquée inactive qui est venue au moins une fois, sans production, reste au niveau 3 (à trancher, Cowork) ; les parcours 5 et 8 déclareront « grand écran seulement » à leur fusion (groupe 3) ; au groupe 3, le parcours 9, étape 1, à 820 px sous WebKit. La session principale attend le feu vert d'assemblage du groupe 3.
+
+---
+
 ## 9 NOV. 2026, 14 H 50 (Claude Code) : **1.239.0 POUSSÉE, VERDICT VERT ; GROUPE 1 EN LIGNE ; LE GROUPE 2 ATTEND LES BRANCHES DU CLOUD**
 
 `main` = `origin/main` = `5ef6adcb7` (+ le commit de docs qui porte ce relais). Version en ligne : 1.239.0, build `1109-1302` (`b864809cf`). Feu vert de Grégoire pour le groupe 1, relayé par Cowork.

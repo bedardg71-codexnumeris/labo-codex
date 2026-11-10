@@ -15,6 +15,16 @@
 > **Mis à jour à la fin de chaque journée de travail.** Une ligne ne change
 > d'état que si quelqu'un écrit **comment** il l'a vérifié.
 
+✅ **LE 9 NOVEMBRE 2026, 19 H 27 : LA 1.240.0 EST EN LIGNE — DEUX PARCOURS DE PLUS.** *Écrit par Claude Code.*
+
+**Ce qui change pour toi** : ce que disent les cinq lignes de la 1.240 dans les Nouvelles, validées par toi mot pour mot le 9 nov. Deux parcours dans « Assistance » : « Mettre tes données à l'abri » et « Lire ta classe et intervenir ». La bulle des parcours se range au bord de l'écran sur un téléphone. Une personne absente à toutes les séances passées, sans production, est lue en non-participation, et les six textes de l'Aide qui le disent ont été réécrits avec toi. Sous « Exporter pour Léa », quand rien n'est verrouillé, le compteur dit « Aucune évaluation verrouillée · N évaluations non verrouillées laissées de côté ». Et un défaut du voile des parcours, présent aussi dans la 1.239.0 : quand la cible était presque sortie de l'écran, le voile perdait son trou le temps d'une image ; c'est corrigé.
+
+**Ce qui reste à toi** : rien pour cette version. Le groupe 3 attend ton feu vert d'assemblage.
+
+**Vérifié comment** : deux vérifications complètes au navigateur WebKit. La première, sur la version avant correction, a trouvé le défaut du voile (un essai du parcours 7, rouge 2 fois sur 6 quand on le relançait seul) ; la seconde, sur le commit poussé (`a600312d7`) : 1 481 essais, tous verts du premier coup, 44 sautés. Une relecture de la fusion par un agent neuf : rien de bloquant, deux retouches mineures reportées au groupe 3. Les deux vérifications ont tourné avec Cowork ouvert, Chrome et Safari fermés, sur ta décision.
+
+**Pas vérifié** : le vrai Safari, l'iPad ; la bulle sur un vrai téléphone (vue en captures, approuvées par toi).
+
 ✅ **LE 9 NOVEMBRE 2026, 14 H 48 : LA 1.239.0 EST EN LIGNE — DEUX PARCOURS POUR COMMENCER.** *Écrit par Claude Code.*
 
 **Ce qui change pour toi** : ce que disent les quatre lignes de la 1.239 dans les Nouvelles, validées par toi mot pour mot le 9 nov. Le menu de l'en-tête a une ligne « Assistance » : le parcours « Découvrir » (la démo en huit étapes) et le parcours « Mettre ta classe en place » (trimestre, cours, profil, classe, horaire, groupe-cours, première saisie des présences), lancé aussi par « Commencer » à l'accueil. Hors de la démo, les menus du Cadre ne montrent plus le matériel de la démo. « Exporter pour Léa » n'envoie que les évaluations verrouillées. Une évaluation remplacée par une reprise s'ouvre en lecture seule.
