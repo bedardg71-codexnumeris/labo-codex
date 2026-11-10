@@ -291,6 +291,7 @@ test('« Monter ton cours » : les sept étapes, la variante ⚠, « Plus tard �
     await n(page, 4, 'Ton objectif');
     await contourSur(page, `${noeud(lecon)} .planif-badge-objectif`);
     await toucher(page, `${noeud(lecon)} .planif-badge-objectif`);
+    await degage(page, `${noeud(lecon)} .planif-noeud-objectif[data-premiere]`);   // le badge déplace la leçon : la bulle la suit au passage suivant de la sonde
     await toucher(page, `${noeud(lecon)} .planif-noeud-objectif[data-premiere]`);
     await ecrireLentement(page, 'Sera en mesure de repérer les procédés d’un incipit', '.planif-noeud-objectif');
     // Question 13 : la pastille « ! » paraît en quittant le champ, sans Entrée. Lu AUSSITÔT, sans attendre : une
