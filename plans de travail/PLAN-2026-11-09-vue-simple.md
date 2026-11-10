@@ -1,4 +1,4 @@
-# Vue simple : plan de codage, révisé (9 nov. 2026, 17 h 38)
+# Vue simple : plan de codage, révisé (9 nov. 2026, 19 h 45)
 
 > Révision par Cowork (coordination) du plan écrit le même jour dans le Projet. Rien ici n'est une mesure du code de la navigation. Ce que Cowork a mesuré aujourd'hui porte sur le tableau de notation (branche `lot/tableau-de-notation-1-bis`, captures et rapport) et sur l'ébauche (toile « Vue réduite : ébauches », lue à 17 h 20). Les passages changés ou ajoutés sont marqués **(révisé)** ou **(ajouté)**.
 
@@ -26,6 +26,36 @@ Principe : alléger, pas ajouter ; masquer, jamais retirer.
 - **Le novice nomme ses productions depuis le tableau (ajouté, 16 h 51)**, par « + Production » : pas de carte à part. L'accueil garde ses quatre cartes.
 - **Autorisation de toucher à `js/config.js` et `js/navigation.js` pour ce lot (17 h 26)**, bornée : la session n'y ajoute que le masquage selon la vue, et un banc prouve que la navigation de la vue étendue est identique avant et après. Rien d'autre n'y change.
 - **En vue simple, le bouton de l'en-tête s'appelle « Sauvegarder » (ajouté, 17 h 21)**, pas « Codex » : il dit le geste, pas le nom de l'objet. Même place, même point d'état. En vue étendue, il reste « Codex ».
+
+## Le principe d'ouverture (Grégoire, 9 nov., 19 h 39)
+
+« Ma pratique ne doit pas être codée en dur. La qualité première de l'application devrait être son ouverture et sa souplesse. Dans Excel, un utilisateur peut mettre les valeurs qu'il veut. Il faut absolument trouver la même chose dans l'application. »
+
+La vue simple convertit la notation de l'utilisateur en note ; elle ne lui fait pas adopter celle de Grégoire. Conséquences relayées à la session à 19 h 40 :
+
+- **Par standards, les niveaux se règlent** : nom, lettre, valeur, ajout, retrait, ordre. L'échelle existante n'est que le départ proposé ; son nom montré au novice n'est ni « IDME » ni « de départ ».
+- **Par spécifications, les types et les paliers se règlent** : les types (« Projet », « Examen ») se renomment, s'ajoutent, se retirent.
+- **Aucun retrait n'efface un résultat** : retirer un niveau ou un type déjà utilisé est refusé, avec son motif.
+- **La session dresse la liste de ce qui reste fixe** (la formule, l'arrondi, les seuils, le DA à 7 chiffres) avec, pour chacun, ce qu'il en coûterait de l'ouvrir.
+
+### Proposé, pas imposé (Grégoire, 19 h 43 et 19 h 44)
+
+« Même si nous cherchons à simplifier les choses, l'application ne doit rien imposer à l'utilisateur. » La vue étendue est plus paramétrable qu'on ne le croit ; la vue simple doit l'être autant.
+
+La règle qui concilie souplesse et simplicité, validée à 19 h 44 : **tout ce qui entre dans la note a une valeur de départ et se règle, mais rien ne se règle avant d'avoir une note.** Imposé (une valeur fixe que l'utilisateur ne peut pas atteindre) : à éliminer. Proposé (une valeur de départ qui marche, à un geste de son réglage) : la norme. Comme dans un tableur, la formule est dans la cellule et ne se voit que si on la touche.
+
+Tout ouvrir d'ici le 11 n'est pas réaliste : la session dresse la liste de ce qui reste fixe ; Grégoire et Cowork y choisissent ce qui entre avant le 11 (ce qui change la note) et avant le 27.
+
+## Décisions du 9 nov. au soir, sur le rapport de la session (19 h 35 à 19 h 40)
+
+- **État** : la session « Vue simple » a livré le parcours entier sur `lot/vue-simple` (rapport final à 19 h 01, 80 captures). Elle n'a pas eu à toucher à `js/config.js` ni à `js/navigation.js`.
+- **Carte 4**, validée : « Vois la note de chaque étudiant·e et exporte-les en CSV, prêtes pour ton relevé. » « Notes finalisées » ne s'offre pas en vue simple dans cette version.
+- **En standards, la règle arrive sur « Toutes les productions »**, pas sur « 7 meilleures ».
+- **« N dernières » suit l'ordre de création des colonnes, pas leur date** : limite connue, acceptée, à reprendre après le 27 novembre.
+- **En spécifications, « + Production » garde le champ « Type »**.
+- **« Étudiant·e », « étudiant·es » partout en vue simple**, jamais « élève ». Tous les textes de ce plan qui disent « élèves » se lisent ainsi.
+- **Décidé par Cowork** : « Mon cours » reste le nom par défaut ; « codex » reste dans les fenêtres d'enregistrement et le rappel ; la vue voyage avec le fichier (un fichier enregistré depuis la vue simple s'ouvre en vue simple sur un appareil qui n'a fait aucun choix ; la marque s'écrit à l'enregistrement, jamais à la bascule) ; un trimestre hors démonstration compte comme des données.
+- **Défauts préexistants trouvés par la session, non corrigés dans ce lot** : un groupe sans horaire hérite des séances du dernier groupe activé (`js/horaire.js:179`) ; assigner une pratique écrit même dans un trimestre clos.
 
 ## Décidé par Claude (à contester si la mesure dit mieux)
 
