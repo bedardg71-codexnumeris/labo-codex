@@ -1016,3 +1016,13 @@ body.aide-contextuelle-active .btn-aide-contextuelle,
 body.aide-par-dessus-les-fenetres .aide-contextuelle-overlay { z-index: 100010; }
 body.aide-par-dessus-les-fenetres .aide-contextuelle-modal { z-index: 100011; }
 body.aide-par-dessus-les-fenetres .glossaire-micropopup { z-index: 100012; }
+
+/* --- Pendant un parcours, l'aide dans les pages se tait (corrections du huitième parcours, 9 nov. 2026) ------
+   js/accompagnement.js (`parcoursEnCours`) n'en ouvre plus aucune pendant un parcours ; ces règles cachent celles
+   qui étaient déjà affichées quand il commence (le moteur pose `parcours-actif` sur le body). La bulle d'une
+   description touchée (`tooltip-bulle--ancree`) n'est pas une aide : elle reste. */
+body.parcours-actif .tooltip-bulle:not(.tooltip-bulle--ancree),
+body.parcours-actif #fleche-didactique-host,
+body.parcours-actif .bulle-decouverte {
+    display: none;
+}

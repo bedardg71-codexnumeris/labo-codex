@@ -51,8 +51,8 @@ body.mode-clair {
 .parcours-voile--normal path { fill-opacity: 0.55; }
 .parcours-voile--leger path  { fill-opacity: 0.3; }
 .parcours-voile--dense path  { fill-opacity: 0.65; }
-/* « Sans voile » (septième parcours, étape 9) : rien n'est assombri ni retenu, la bulle seule parle ;
-   la page reste à portée de main derrière elle. */
+/* « Sans voile » (septième parcours, étape 9 ; la dernière bulle du huitième ; le neuvième, et le troisième sur les
+   écrans pleine largeur) : rien n'est assombri ni retenu, la bulle seule parle ; la page reste visible et touchable derrière elle. */
 .parcours-voile--aucun path  { fill-opacity: 0; pointer-events: none; }
 
 /* ---------- Le contour : il marque où toucher, sans capter le toucher ---------- */
@@ -506,6 +506,15 @@ body.parcours-actif .transition-bandeau { display: none; }
 }
 
 .assistance-parcours-bouton:hover { background: rgba(106, 172, 184, 0.15); }
+
+/* Le refus d'un parcours qui attend une condition (le huitième : une production et sa grille). */
+.assistance-parcours-refus {
+    margin: 0;
+    padding-left: 10px;
+    border-left: 2px solid var(--icone-aide-config);
+    font-size: 13px;
+    line-height: 1.45;
+}
 .assistance-parcours-bouton--plein:hover { background: var(--acc-surface); }
 
 .assistance-filet {
@@ -624,9 +633,6 @@ body.parcours-actif .transition-bandeau { display: none; }
    pour que la fenêtre et les questions qu'elle ouvre restent touchables. Posé par le parcours. */
 body.parcours-sur-modale .parcours-contour { z-index: 10010; }
 body.parcours-sur-modale .parcours-bulle { z-index: 10011; }
-/* « Sans voile » (neuvième parcours, repris par le troisième sur les écrans pleine largeur) : rien n'assombrit ni ne
-   capte le toucher. */
-.parcours-voile--aucun path  { fill-opacity: 0; pointer-events: none; }
 /* Le cinquième parcours (« Monter ton cours », 9 nov. 2026) : l'Inspecteur de la carte passe devant les palettes
    flottantes. Ouverte par défaut, la palette « Planificateur » (z-index 80) recouvre l'Inspecteur (60) à 1180 px : la
    case de l'objectif servi (étape 5) et celle de l'objectif vérifié (étape 6) étaient dessous (mesuré : `elementFromPoint`

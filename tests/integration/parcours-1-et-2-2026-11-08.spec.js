@@ -103,6 +103,8 @@ async function bulleNeCouvrePasLeContour(page) {
     expect(chevauche).toBe(false);
 }
 
+// ↻ 9 nov. 2026 (lot du huitième parcours) : « Automatiser tes commentaires » s'inscrit au panneau ; le compte
+// passe à 3 sur cette branche. À la fusion des autres parcours, ces comptes suivent (huit, puis neuf).
 const MENU_ATTENDU = ['Assistance', 'Aide', 'Signaler', 'Soutenir', 'Réglages'];
 
 // Parcours 6 (9 nov.) : les lots suivants inscrivent leurs parcours après ces deux-là. Le rang
@@ -133,7 +135,8 @@ test('panneau : titre, phrase, « Tes parcours », deux parcours à faire, l’a
     expect(await deuxPremiers(p.locator('.assistance-parcours-titre'))).toEqual(['Découvrir', 'Mettre ta classe en place']);
     expect(await deuxPremiers(p.locator('.assistance-parcours-ligne'))).toEqual([
         "Ce que Labo Codex te montre avant d'entrer en classe, sur une classe de démonstration.",
-        "De ton trimestre à ta première saisie de présences : ta classe d'un coup d'œil."
+        "De ton trimestre à ta première saisie de présences : ta classe d'un coup d'œil.",
+        "De ta grille à une rétroaction qui s'écrit seule, à partir de ce que tu relèves et comptes dans chaque production."
     ]);
     expect(await deuxPremiers(p.locator('.assistance-parcours-etat'))).toEqual(['À faire', 'À faire']);
     expect(await deuxPremiers(p.locator('.assistance-parcours-bouton'))).toEqual(['Commencer', 'Commencer']);

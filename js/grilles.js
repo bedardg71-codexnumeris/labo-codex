@@ -5148,14 +5148,19 @@ function _bornesSousCriteres() {
 }
 
 /**
- * Le code d'un sous-critère neuf : le plus grand code numérique du critère, plus un ; le rang s'il n'y en a aucun.
+ * Le code d'un sous-critère neuf : le plus grand code numérique du critère, plus un ; s'il n'y en a aucun, le rang
+ * compté depuis 1.
  * F1 du verdict du 20 oct. : le rang seul (`length`) redonnait, après un retrait, un code déjà porté (0, 1, 2 ; on
  * retire 0 ; on ajoute : « 2 » deux fois) — inerte hors algorithmique, mais le second ne serait pas posable si le
  * critère le devenait (`_depuisSousCriteres` : le premier gagne).
+ * Parcours 8 (9 nov. 2026, décision de Cowork) : le premier code commence au numéro 1, comme la liste du français
+ * écrit (1 à 10). Avant, il portait 0, que le clavier ne peut pas choisir (la touche 0 sert le code 10,
+ * `codes-annotation.js`). Les codes déjà créés ne sont pas renumérotés : un critère qui porte déjà un 0 le garde,
+ * et son code suivant prend 1. Vaut pour tout sous-critère : hors algorithmique, le code est inerte.
  */
 function codeSousCritereNeuf(scs) {
     const numeros = scs.map(sc => String(sc && sc.code != null ? sc.code : '').trim()).filter(c => /^\d+$/.test(c)).map(Number);
-    return String(numeros.length ? Math.max(...numeros) + 1 : scs.length);
+    return String(numeros.length ? Math.max(...numeros) + 1 : scs.length + 1);
 }
 
 /** Le refus d'un sous-critère de plus, quand le critère en porte déjà `n` ; sinon `null`. */

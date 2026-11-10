@@ -311,7 +311,9 @@
                 };
                 // La dissection, lot 9b : la marque « à compléter », que lit la garde de la note (`calculerPortee`).
                 if (isNaN(pond)) cr.ponderationACompleter = true;
-                // La forme de l'éditeur (`grilles.js`, `ajouterSousCritere`), dans l'ordre des lignes.
+                // La forme de l'éditeur (`grilles.js`, `ajouterSousCritere`), dans l'ordre des lignes, sauf le code : ici
+                // le rang depuis 0, l'éditeur depuis 1 depuis le 9 nov. 2026 (huitième parcours). Inerte tant que le critère
+                // n'est pas algorithmique ; inscrit au rapport du lot pour le cas où il le devient.
                 // Absent si aucun, comme un critère de l'éditeur sans sous-critère.
                 var sous = (c.sousCriteres || []).filter(Boolean);
                 if (sous.length) {

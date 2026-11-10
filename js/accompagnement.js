@@ -199,6 +199,20 @@ function definirAccompagnementActif(actif) {
     window.dispatchEvent(new Event('modeChanged'));
 }
 
+/**
+ * Corrections du huitième parcours (9 nov. 2026, décision de Cowork) : pendant tout parcours, les bulles de l'aide
+ * dans les pages se taisent : l'infobulle du survol, les flèches didactiques, les bulles de découverte. Le parcours
+ * a sa propre bulle ; une seconde la couvrait (« Clique ici pour activer les outils d'annotation… », à l'étape 9).
+ * Même lecture que le rappel du codex au sixième parcours : `ParcoursMoteur.actif()`, sans toucher au moteur ; c'est
+ * aussi la garde des flèches didactiques (lot « Les deux parcours », partie 2 ; alignée au groupe 2).
+ * Restent : le « i » et sa fenêtre, que la personne ouvre elle-même ; la bulle d'une description touchée
+ * (`basculerBulleAncree`), qui n'est pas une aide. Ce qui était déjà affiché au lancement est caché par
+ * css/accompagnement.css (`body.parcours-actif`).
+ */
+function parcoursEnCours() {
+    return !!(window.ParcoursMoteur && typeof window.ParcoursMoteur.actif === 'function' && window.ParcoursMoteur.actif());
+}
+
 // Accès granulaire conservé comme alias (tous retournent l'état unifié).
 // Simplifie la conversion des call sites existants sans diff inutile.
 function prefTooltipsActive() { return estAccompagnementActif(); }
@@ -328,6 +342,7 @@ function hoverPositionnerBulle(cible, bulle) {
 function afficherHover(cible) {
     if (hoverCibleAncree) return;   // jamais deux bulles à la fois : celle qu'on a demandée reste
     if (!prefTooltipsActive()) return;
+    if (parcoursEnCours()) return;   // 9 nov. : l'aide dans les pages se tait pendant tout parcours
     const cle = cible.dataset.tooltip;
     if (!cle) return;
 
@@ -683,14 +698,8 @@ function autoPositionner(cible, direction) {
     positionner(h, cible, direction);
 }
 
-// Lot « Les deux parcours », partie 2 (9 nov. 2026 ; décision de Grégoire après la capture WebKit de l'étape 7) :
-// pendant un parcours, la bulle parle seule — aucune flèche didactique ne s'y ajoute ; la flèche n'est pas marquée
-// vue, elle reviendra hors parcours. Groupe 2 (9 nov.) : la même lecture que le rappel du codex (sixième parcours),
-// `ParcoursMoteur.actif()`, une seule source pour « un parcours joue ».
-function parcoursEnCours() {
-    return !!(window.ParcoursMoteur && typeof window.ParcoursMoteur.actif === 'function' && window.ParcoursMoteur.actif());
-}
-
+// Pendant un parcours, aucune flèche didactique (lot « Les deux parcours », partie 2) : elle n'est pas marquée vue,
+// elle reviendra hors parcours. `parcoursEnCours` est défini plus haut (groupe 3 : une seule définition).
 function afficherAutoReveal(id, optionsExterne) {
     if (!prefFlechesActives()) return;
     if (estVue(id)) return;
@@ -1129,6 +1138,9 @@ function initialiserPopup() {
 // --- Bulle de découverte (petit helper de aide-contextuelle.js) --------------
 
 function afficherBulleDecouverte({ cible, message, position = 'bas', duree = 8000 }) {
+    // 9 nov. : l'aide dans les pages se tait pendant tout parcours. Sans suite (relecture du 9 nov.) : travaux-ui.js marque
+    // la bulle « Clique ici pour activer les outils d'annotation… » vue même quand elle se tait ; elle ne reparaît pas de la session.
+    if (parcoursEnCours()) return;
     const el = document.querySelector(cible);
     if (!el) return;
     const existante = document.querySelector('.bulle-decouverte');
