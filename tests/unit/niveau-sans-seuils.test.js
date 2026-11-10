@@ -44,6 +44,7 @@ describe('niveau sans seuils · S — qui a des seuils', () => {
         expect(lecture.niveauADesSeuils({ min: 0, max: 39.99 })).toBe(true);
         expect(lecture.niveauADesSeuils({ min: '0', max: '' })).toBe(true);
         expect(lecture.niveauADesSeuils({ max: 54 })).toBe(true);
+        expect(lecture.niveauADesSeuils({ min: 0 })).toBe(true);   // zéro, seul : c'est encore un seuil
     });
 });
 
