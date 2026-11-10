@@ -6,6 +6,55 @@ Consigne de Cowork du 9 nov. 2026, 17 h 40. Branche `lot/vue-simple`, partie de 
 
 ---
 
+## LISTE DE TRAVAIL — ce qui entre dans la note, et où ça se règle (10 nov. 2026)
+
+Demandée par le relais de 19 h 44, poussée AVANT la fin des réglages A et B. Règle validée par Grégoire : tout ce qui entre dans la note a une valeur de départ et se règle ; rien ne se règle avant d'avoir une note ; chaque réglage est à un geste de la valeur qu'il règle.
+
+**Méthode.** Chaque ligne est lue dans le code du calcul (`js/profil-etudiant-actions.js`, `js/pratiques/pratique-pan-specifications.js`, `js/pratiques/pratique-registre.js`, `js/portfolio.js`), pas dans ses commentaires. Rien n'a été exécuté pour cette liste, sauf la dernière ligne du tableau « Constats ».
+
+**La vue simple peut-elle ouvrir le réglage de la vue étendue plutôt que d'en bâtir un second ?** Mesuré : non, pas tel quel. Les réglages de la vue étendue sont des panneaux dans de grandes pages (la fiche de la pratique dans Conception › Pratiques, l'éditeur dans Conception › Échelles), pas des fenêtres ouvrables seules ; les montrer, c'est montrer la page entière, avec ses mots (grille, cartouche, jetons). Seul l'assistant de pratique est une fenêtre autonome, mais il traverse des étapes que le novice ne doit pas lire. **Ce que je fais donc : un réglage étroit en vue simple qui écrit LE MÊME champ des mêmes données.** Il n'y a pas de seconde source : ce qui est réglé d'un côté se lit de l'autre.
+
+### Temps 1 — ce qui change la note (candidats pour le 11)
+
+| # | Valeur | Départ proposé | Réglable en vue étendue ? | En vue simple | Coût | État / recommandation |
+|---|---|---|---|---|---|---|
+| 1 | **Les niveaux** (standards) : lettre, nom, valeur, nombre, ordre | Cinq niveaux, valeurs 0, 40, 65, 75, 100 | Oui : Conception › Échelles | « Régler », à côté des niveaux (écran Pratique et tableau) | Fait | **En cours de livraison (A)** |
+| 2 | **La règle de sélection** (standards) : toutes, N meilleures, N dernières ; le nombre N | Toutes les productions | Oui : fiche de la pratique | « Régler », à côté de la phrase de la règle | Fait | **En cours de livraison** |
+| 3 | **Les types** (spécifications) : nom, ajout, retrait | Projet, Examen | Oui : fiche de la pratique | « Régler », à côté des types | Fait | **En cours de livraison (B)** |
+| 4 | **Les paliers** (spécifications) : nom, note, exigences par type, ajout, retrait | Excellence 90, Réussite 70 | Oui : fiche de la pratique | « Régler », à côté des paliers | Fait | **En cours de livraison (B)** |
+| 5 | **La note quand aucun palier n'est atteint** (spécifications) | Aucune : « pas de note », avec la cause | Oui : un palier sans exigence | C'est le réglage des paliers : un palier sans exigence est le plancher | Fait avec la ligne 4 | À dire dans l'écran (une phrase y est) |
+| 6 | **Les productions qui comptent dans la note** (standards) | Toutes comptent | Oui : fiche de la pratique, « Productions qui comptent dans la note » | Rien aujourd'hui | Petit : une marque par colonne du tableau, même champ | **Candidat pour le 11.** Je ne le construis pas sans accord |
+| 7 | **Retirer ou renommer une production ; changer son type ou sa date** | — | Oui : Conception › Productions | Rien aujourd'hui : une colonne créée par erreur reste | Petit à moyen : retirer demande de dire ce que deviennent ses résultats (sens d'une suppression, donc à Grégoire) | **Candidat pour le 11** pour renommer, la date et le type ; retirer attend sa décision |
+| 8 | **Une case vide** : ignorée, ou zéro | Ignorée (elle n'entre pas dans la moyenne) | En partie : « Notes finalisées » compte zéro, seulement pour une production obligatoire d'une pratique à catégories | Rien, et « Notes finalisées » est exclue de cette version | Touche le calcul partagé | **À trancher par Grégoire** : c'est le sens de la note. Hors du 11 |
+| 9 | **La formule qui passe des valeurs retenues à la note** (standards) | Moyenne simple | **Non : codée en dur**, dans les deux vues | Rien | Touche le calcul partagé (une moyenne pondérée, une médiane, un mode sont des décisions de pédagogie) | **À trancher par Grégoire.** Hors du 11 |
+| 10 | **Une production terminale et son poids** (« le reste × X % + terminale × Y % ») | Aucune terminale : les productions valent 100 % | Oui : type et pondération de la production | Rien : « + Production » ne crée pas de terminale | Moyen : deux champs de plus à « + Production », et les mots de cette variante | Candidat pour le 27 |
+| 11 | **Les catégories** (une part choisie, une part obligatoire, 65 % et 35 %) | Éteintes | Oui : fiche de la pratique | Rien : la règle se lit, « se change en vue étendue » | Grand | Candidat pour le 27, ou réservé à la vue étendue |
+
+### Temps 2 — le reste (candidats pour le 27, ou rien à ouvrir)
+
+| # | Valeur | Départ | Réglable en vue étendue ? | Coût en vue simple | Recommandation |
+|---|---|---|---|---|---|
+| 12 | **L'arrondi** de la note | À l'entier, demi vers le haut | **Non : codé en dur** (`js/portfolio.js:309`, refait au tableau) | Touche le calcul partagé et l'export | 27 : à décider avec la ligne 9 |
+| 13 | **La base** de la note | Sur 100 | **Non : codée en dur** | Touche le calcul, l'export, les valeurs des niveaux | Après le 27 |
+| 14 | **« Acceptable / non acceptable »** : les deux mots | Ces deux mots | Non : libellés fixes | Moyen : libellés partagés par la Liste et le tableau | 27. Ne change pas la note, change ce qu'on lit |
+| 15 | **L'ordre que lit « N dernières »** | L'ordre de création des colonnes | Non : aucun écran n'écrit ce rang | Touche le calcul partagé | **Limite connue, acceptée par Grégoire** ; à reprendre après le 27 |
+| 16 | **Un·e étudiant·e exclu·e** (abandon, etc.) | Compte comme les autres | Oui : son statut, dans Cadre › Trimestre | Petit | 27. À savoir : masqué·e au tableau et à l'écran Note finale, mais **présent·e dans le CSV** (comportement d'avant le lot) |
+| 17 | **Le DA à 7 chiffres** | 7 chiffres | **Non : imposé aussi en vue étendue** ; le calcul des spécifications ne rend aucune note pour un DA d'une autre longueur | Touche l'import, la fiche et le calcul | Après le 27 |
+| 18 | **L'échelle propre à une production** | Celle de la pratique | Oui : fiche de la production | Moyen | 27 |
+| 19 | **La couleur d'un niveau** | Celle du niveau de départ ; neutre pour un niveau ajouté | Oui : Conception › Échelles | Petit | 27. Ne change pas la note |
+| 20 | Le seuil « acceptable » (75 %) des spécifications | 75 | Oui | — | **Rien à ouvrir** : sans effet sur un résultat saisi au tableau (il ne sert qu'à une copie évaluée avec une grille) |
+| 21 | Le minimum d'évaluations (7) | 7 | Oui | — | **Rien à ouvrir** : sans effet sur la note (il ne sert qu'aux indices du Suivi) |
+| 22 | Les reprises, les jetons, la copie non recevable | — | — | — | **Rien à ouvrir** : ces cas n'existent pas pour un résultat saisi au tableau |
+
+### Quatre surprises de la mesure
+
+- **La moyenne simple et l'arrondi à l'entier ne se règlent nulle part**, pas même en vue étendue (lignes 9 et 12). Ce sont les deux valeurs qui touchent le plus directement le principe de Grégoire.
+- **La valeur d'un niveau est copiée dans le résultat au moment de la saisie.** Changer la valeur ensuite ne change pas les notes déjà construites : la case montre le signe « ≠ » jusqu'à ce qu'on ressaisisse. C'est la règle du tableau, confirmée ; elle surprendra quiconque vient d'un tableur, où changer une valeur recalcule tout.
+- **Les valeurs de repli ne sont pas les mêmes partout** pour le nombre de productions retenues : 4 au calcul, 5 à la fiche, 3 ailleurs, 7 dans le modèle. Sans effet tant que la pratique porte son nombre, ce qui est le cas en vue simple.
+- **Deux réglages de la vue étendue n'agissent pas sur la note** bien qu'ils se lisent comme tels : le « minimum d'évaluations », et le seuil des spécifications pour un résultat sans grille.
+
+---
+
 ## RAPPORT FINAL (10 nov. 2026)
 
 ### Ce qui est fait, en gestes
