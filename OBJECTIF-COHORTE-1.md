@@ -62,6 +62,7 @@ qu'on annonce. *(#560 résiduel, #647, #648, #649)*
 
 - la dette invisible à l'usage (courses de lecture-écriture, legacy, variables CSS
   fantômes, doubles définitions) ;
+- Le premier lancement à froid de la vue étendue : couvert par les chroniques, l'aide, l'accompagnement et la démo (décision de Grégoire, 1er septembre). Celui de la vue simple est la cible.
 - les notes d'A2025 et d'H2026 — **décision pédagogique définitive** : on n'y
   revient pas ;
 - le confort d'interface qui n'empêche pas la cible.
