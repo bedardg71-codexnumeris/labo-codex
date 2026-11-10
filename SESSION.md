@@ -1,3 +1,7 @@
+> ⛔ **FIGÉ DEPUIS LE 10 NOVEMBRE 2026** (décision de Grégoire, 8 h 20 ; décisions techniques de Cowork).
+> Ce fichier ne se lit plus à l'ouverture d'une session et ne s'écrit plus : ce qui suit est conservé tel quel, sans mise à jour.
+> Le mandat d'une session arrive désormais par le relais.
+
 <!-- =====================================================================
      📌 SIGNET PERSISTANT — garder EN TÊTE de fichier, au-dessus des blocs de session. Le REMONTER au-dessus du prochain bloc à chaque relais.
      CHANTIER D'ENSEMBLE — STABILITÉ MI-AOÛT (CoP / expérimentateurs).

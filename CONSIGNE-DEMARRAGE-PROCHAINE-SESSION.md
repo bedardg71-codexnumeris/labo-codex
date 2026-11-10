@@ -1,3 +1,7 @@
+> ⛔ **FIGÉ DEPUIS LE 10 NOVEMBRE 2026** (décision de Grégoire, 8 h 20 ; décisions techniques de Cowork).
+> Ce fichier ne se lit plus à l'ouverture d'une session et ne s'écrit plus : ce qui suit est conservé tel quel, sans mise à jour.
+> Le mandat d'une session arrive désormais par le relais.
+
 # Consigne de démarrage à froid — les sessions qui prennent le relais
 
 > ↻ **ÉTAT MESURÉ par Claude Code le 31 octobre 2026, 19 h 20 (Toronto) : `1.229.0` EN LIGNE** (build `1031-1415`) — Netlify `6ae6779b`, `commit_ref` `6ab4f080`, `state: ready`, publié à 23:20:13 Z. Verdict du Mac **vert** sur `6ab4f080` (1 220 essais, 4 rouges connus, 0 instable). #1212 fait, le banc seul (`plans de travail/RAPPORT-2026-10-31-cause-essai-g.md`). **Ouverts** : les gestes de Grégoire du § 4 de `CONSIGNE-LOT-2026-10-31-mise-en-ligne-1229.md` ; l'artefact jumeau de la porte des palettes, à publier par Cowork.
@@ -373,7 +377,7 @@
    **consommée** : ses temps 1 et 2 sont faits, son temps 4 est tranché.
 4. `CLAUDE.md`, puis `OBJECTIF-COHORTE-1.md` (les huit énoncés).
 
-Puis le rituel : skill `debut-de-session-labo-codex`, **délégué au subagent `audit-debut-session`**.
+Puis le rituel : skill `debut-de-session-labo-codex`, appliqué au premier tour, dans la session (l'agent `audit-debut-session` est retiré depuis le 10 nov. 2026).
 
 ⚠ Les trois entrées périmées de la version précédente ont été retirées, pas corrigées : le ménage
 documentaire est livré, la consigne du dépistage du français est archivée sans avoir été exécutée
@@ -617,7 +621,7 @@ arrivé quelque part, et huit fichiers en portent la trace (`181d608a`, `a4b58ed
 | Ce qui a quitté ce fichier | Où c'est maintenant |
 |---|---|
 | Le piège du répertoire de démarrage (session hors dépôt → skills muets) | skill `debut-de-session-labo-codex` §0.5 |
-| Les deux mesures d'ouverture (`rev-list`, verdict Playwright) | skill `debut-de-session-labo-codex` §2 |
+| Les deux mesures d'ouverture (`rev-list`, verdict Playwright) | skill `debut-de-session-labo-codex`, fichier voisin `mesures-sous-condition.md` §2 (sous condition depuis le 10 nov. 2026) |
 | « Push réussi ≠ suite verte » | `CLAUDE.md`, §Avant chaque commit |
 | L'ordre `commit → relecture → verdict → push`, et pourquoi le hook ne peut pas lancer la suite | skill `fin-de-session-labo-codex` §4.5 |
 | **Le bump à quatre emplacements**, et `version.js` qui n'y était pas nommé | skill `release-et-changelog` §3 |
