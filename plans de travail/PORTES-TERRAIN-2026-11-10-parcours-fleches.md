@@ -11,7 +11,7 @@ l'artefact jumeau (avec son bouton « Copier mes résultats »).
 Pourquoi une porte, alors que la règle est de ne pas en faire pour l'apparence : le défaut que tu as vécu (les
 zones qui ne tombent pas sur les boutons) est sur iPad, et aucune machine d'ici ne peut y répondre. La session du
 cloud n'a que Chromium ; le Mac a WebKit, mais ni l'un ni l'autre n'a la barre d'adresse de Safari sur iPad, qui est
-la cause supposée. Cinq portes, pas plus. Tout le reste est mesuré par les bancs.
+la cause supposée. Six portes, pas plus (la sixième, le zoom au pincement, ajoutée le 11 nov.). Tout le reste est mesuré par les bancs.
 
 Ce qui échoue devient un item de backlog avec son numéro de porte, pas une note mentale.
 
@@ -23,6 +23,15 @@ Ce qui échoue devient un item de backlog avec son numéro de porte, pas une not
   bas de page.
   ⮕ Attendu : la version que Cowork écrit ici à la mise en ligne : `__________`. Si le numéro est plus petit,
   arrête-toi : le lot n'est pas encore chez toi.
+  `iPad`
+
+**Ou, avant la fusion, sur l'aperçu** (ajouté le 11 nov., nuit) : la PR n° 17 publie la branche
+`lot/parcours-fleches-apercu` à part, sans toucher à `app.codexnumeris.org`.
+
+- [ ] **0.2** Sur l'iPad, dans Safari, ouvre `https://deploy-preview-17--codexnumeris-051225.netlify.app`, recharge.
+  Menu ☰ › Assistance › « Découvrir » › Commencer.
+  ⮕ Attendu : une bulle avec une poignée ⠿ en haut à droite, et aucune zone grisée autour des boutons. Sans
+  poignée, tu es sur l'ancienne version : recharge, ou attends que Netlify ait fini de publier.
   `iPad`
 
 Aucune sauvegarde à faire : ces portes se jouent sur la démo et n'écrivent rien dans tes trimestres.
@@ -71,8 +80,11 @@ Rien. Ce lot ne touche à aucune donnée.
 - [ ] **2.3** Reviens au début du parcours (« Quitter le parcours », puis Assistance › Reprendre te ramène à ton
   étape ; ou refais-le) et arrête-toi à la bulle « Ce qui le met à l'écart » (3 sur 8). Fais défiler la page d'un
   doigt, lentement, puis lève le doigt.
-  ⮕ Attendu : une fois la page arrêtée, les flèches touchent toujours les cartes « Assiduité » et « Complétion ».
-  Pendant le défilement, un léger retard est normal ; ce qui compte, c'est l'arrêt.
+  ⮕ Attendu : **deux flèches**, une vers « Assiduité », une vers « Complétion » (la seconde est courte et arrive
+  par le haut de la carte). Une fois la page arrêtée, elles touchent toujours leurs cartes. Pendant le
+  défilement, un léger retard est normal ; ce qui compte, c'est l'arrêt.
+  *(11 nov. : sous WebKit à 1180 px, la flèche de « Complétion » manquait — la bulle, faute de place, se collait à
+  la carte. Corrigé en `ee0dace27`. Une seule flèche ici : la porte échoue.)*
   `iPad`
 
 ### 2.4 Déplacer la bulle au doigt
@@ -85,6 +97,21 @@ Rien. Ce lot ne touche à aucune donnée.
   `iPad`
 - [ ] **2.4 b** Essaie de pousser la bulle hors de l'écran, en haut puis en bas.
   ⮕ Attendu : elle s'arrête sous l'en-tête et au-dessus du bandeau vert « Mode démonstration ». Elle ne sort pas.
+  `iPad`
+
+### 2.5 Zoomer au pincement
+
+> **Pourquoi.** Le zoom à deux doigts change ce que Safari appelle la partie visible de la page, sans changer la
+> page elle-même. Le moteur écoute ce changement, mais aucune machine d'ici ne sait pincer : seul l'iPad répond.
+
+- [ ] **2.5 a** À l'étape « Ce qui le met à l'écart » (3 sur 8), écarte deux doigts sur la carte « Assiduité »
+  pour l'agrandir, puis lève les doigts.
+  ⮕ Attendu : le halo orange, les flèches et la bulle grossissent avec la page et restent accrochés à ce qu'ils
+  désignent. Une partie de la bulle peut sortir de l'écran pendant le zoom : c'est normal.
+  `iPad`
+- [ ] **2.5 b** Pince pour revenir à la taille normale, puis touche « Suivant » dans la bulle.
+  ⮕ Attendu : tout revient en place ; à l'étape suivante, la bulle est entière dans l'écran et ses flèches
+  partent de son bord.
   `iPad`
 
 ---
@@ -106,8 +133,10 @@ place. Écris ta réponse, ne coche pas.
 
 ## §4 · Ce que la session n'a pas pu vérifier
 
-- **Rien n'a été vu sous WebKit ni sur iPad.** La session du cloud n'a que Chromium. Les bancs sont écrits pour
-  WebKit (aucune mesure prise pendant un défilement, cibles tactiles à 46 px), mais ils n'y ont pas tourné.
+- **Rien n'a été vu sur iPad.** Les bancs ont tourné sous WebKit sur le Mac le 11 nov., la nuit (rapport du lot,
+  « Relance WebKit de nuit ») ; WebKit n'a ni la barre d'adresse de Safari sur iPad, ni le zoom au pincement.
+- **Le zoom au pincement (2.5) est une inférence** : les flèches, le halo et la bulle sont posés dans le même
+  repère que la page, ils devraient donc grossir avec elle. Jamais mesuré.
 - **La cause du décalage sur iPad reste une inférence.** Elle a été lue dans le code (une couche en hauteur de
   fenêtre des feuilles de style, des trous calculés sur la hauteur intérieure), jamais mesurée sur l'appareil. Le
   lot retire la couche en cause ; si le décalage persiste aux portes 2.1 ou 2.2, la cause était ailleurs.

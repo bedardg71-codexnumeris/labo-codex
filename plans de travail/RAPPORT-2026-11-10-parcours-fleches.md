@@ -5,7 +5,9 @@
 `plans de travail/CONSIGNE-LOT-2026-11-09-parcours-fleches.md`, avec les trois ajouts de Cowork du 10 nov., 11 h 30.
 
 **Dernier relais : 11 nov., nuit, Mac, WebKit** — relance des rouges de `lot/parcours-fleches-apercu` après la
-fusion de la 1.242.1 (`91968b201`). Section « Relance WebKit de nuit » juste dessous ; en cours.
+fusion de la 1.242.1 (`91968b201`). Section « Relance WebKit de nuit » juste dessous. **Arrêtée** : le système a
+coupé la reprise des deux derniers rouges (mémoire basse). Deux rouges du lot corrigés (`ee0dace27`) ; deux autres
+sans explication (`parcours-8` l. 557, `parcours-fleches` l. 321). **Branche non poussée.**
 
 ---
 
@@ -54,6 +56,34 @@ WebKit : verts (`5-fleches-apres-correctif.log`).
 
 Vert seul, puis **18 verts sur 18** (`--repeat-each=6 --retries=0` : trois chemins × six). Le rouge de la course
 coupée était un `page.goto` jamais chargé en 30 s : un délai, pas une assertion. Rien contre l'essai.
+
+### Les 179, sur `ee0dace27` (après le correctif)
+
+Les 19 specs de la course coupée du 10 nov. (liste reconstituée depuis son journal : 179 essais, compte vérifié par
+`--list`). **14,3 min, 157 verts, 1 rouge, 1 instable, 20 sautés** (captures). Mémoire libre relevée chaque minute :
+76 % au départ, puis 75, 65, 59, 50, 43, 44, 41, 34, 31, 32, 36, 32, 32, 32 % — **la course WebKit seule fait
+descendre la mémoire libre de 76 à 31 %**, sans autre application ouverte.
+
+| Essai | Message | Seul, ensuite |
+|---|---|---|
+| `parcours-8`, l. 557, « 1180 × 820 : aucun avis ne couvre la bulle… » | **rouge**. 1er essai : `aucun avis n'a couvert la bulle` — reçu « Tes productions : Grille enregistrée : ses critères totali… » (l. 181, `afterEach`). Retry : autre échec, `toContainText("Code 1")`, chaîne vide, 5 000 ms (l. 494, `finirLeCheminAvecFichier`) | vert, vert ; puis rouge en 2,4 min et 6,0 min |
+| `parcours-fleches`, l. 321, « la poignée au clavier… » | **instable** : `[32, 16]` attendu, `[32, 15]` reçu (l. 339) ; vert au retry | vert, vert ; puis rouge en 2,5 min et 1,8 min |
+
+**Coupé par le système** (mémoire basse) pendant la reprise `--repeat-each=6 --retries=0` de ces deux essais, à
+l'essai 8 sur 12. Conformément au mandat : arrêt, pas de relance. Les essais 5 à 8 durent des minutes au lieu de
+2 à 15 s : ils ont tourné sous pression mémoire et **ne prouvent rien contre les essais**. Les messages des rouges 5
+à 8 ne sont pas au journal (course tuée avant le résumé).
+
+**Ce qui n'est PAS établi** : ni l'un ni l'autre de ces deux rouges n'a d'explication. Pistes, non mesurées :
+`parcours-8` — un avis « Grille enregistrée » qui passe sur la bulle à « Tes productions » (lot ou `main` ? à
+rejouer sur `902d01774` et sur `origin/main`, `parcours-8` n'est pas un fichier du lot) ; `parcours-fleches` l. 321
+— 1 px de moins en vertical : soit la bulle bornée par le bas de l'écran utile, soit `b0` mesuré avant que la sonde
+ait fini de placer la bulle (le banc lui-même).
+
+**Non poussé** : le mandat dit de pousser quand chaque rouge a une explication ; deux n'en ont pas.
+Journaux (dossier temporaire de la session `22c598c4`, effacé au redémarrage) : `1-trois-rouges-apres-fusion.log`,
+`2-fleches-avant-fusion-902d01774.log`, `3-parcours-6-l465-x6.log`, `4-diag-webkit.log`,
+`5-fleches-apres-correctif.log`, `6-les-179.log`, `6-memoire-pendant.log`, `7-deux-seuls-x6.log`.
 
 
 ## En tête : ce qu'il faut savoir avant de lire le reste
