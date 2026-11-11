@@ -83,6 +83,9 @@ const configurationsOnglets = {
     'evaluations': [
         { id: 'importer', label: 'Préparer' },
         { id: 'liste', label: 'Liste' },
+        // 11 nov. 2026 (Grégoire, 7 h 33 ; autorisation de toucher cette zone protégée, 7 h 39) : le tableau de notation
+        // n'est plus une bascule en haut de la Liste, qu'il n'avait pas vue, mais une entrée de la sous-navigation.
+        { id: 'tableau', label: 'Tableau de notation' },
         { id: 'annoter', label: 'Annoter' },
         { id: 'exporter', label: 'Exporter' }
     ],

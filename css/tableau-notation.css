@@ -1,54 +1,15 @@
 /* =========================================================================
    TABLEAU DE NOTATION — lot 1 (9 nov. 2026)
-   La seconde vue de Évaluation › Liste (js/tableau-notation.js). Ébauches :
+   Évaluation › Tableau de notation (js/tableau-notation.js) ; une sous-section depuis le 11 nov. 2026. Ébauches :
    plans de travail/EBAUCHE-2026-11-09-tableau-standards.dc.html et -specifications.
    Couleurs : variables de styles.css seulement ; la couleur d'un niveau vient
    de l'échelle (--tn-couleur, posée sur la case, filtrée par `couleurSure`).
    ========================================================================= */
 
-/* ---------- La bascule Liste / Tableau ---------- */
-.tn-bascule {
-    display: inline-flex;
-    gap: 6px;
-    margin: 0 0 16px;
-    flex-wrap: wrap;
-}
-
-.tn-bascule-btn {
-    min-height: 44px;
-    padding: 0 18px;
-    border-radius: 22px;
-    border: 1px solid var(--bordure-moyenne);
-    background: transparent;
-    color: var(--texte-principal);
-    font: inherit;
-    font-weight: 500;
-    cursor: pointer;
-}
-
-.tn-bascule-btn.actif {
-    background: var(--accent-primaire);
-    border-color: var(--accent-primaire);
-    color: var(--surface-page);
-    font-weight: 600;
-}
-
-.tn-bascule-btn:focus-visible,
+/* La bascule Liste / Tableau (lot 1) est partie le 11 nov. 2026 : le tableau a sa sous-section. */
 .tn-case:focus-visible {
     outline: var(--focus-ring-width) solid var(--focus-ring-color);
     outline-offset: var(--focus-ring-offset);
-}
-
-/* En vue Tableau, les morceaux de la Liste se retirent ; ils gardent leur état et reviennent tels quels. */
-.vue-tableau-notation > .carte-grise-mb20,
-.vue-tableau-notation > .eval-colonnes-selecteur,
-.vue-tableau-notation > #eval-barre-selection,
-.vue-tableau-notation > #bandeau-doublons-evaluations,
-.vue-tableau-notation > #zone-chargement-evaluations,
-.vue-tableau-notation > #conteneur-tableau-evaluations,
-.vue-tableau-notation > #message-aucun-resultat,
-.vue-tableau-notation #stats-evaluations {   /* les compteurs de la Liste : ils ne disent pas le tableau */
-    display: none !important;
 }
 
 /* ---------- L'en-tête ---------- */

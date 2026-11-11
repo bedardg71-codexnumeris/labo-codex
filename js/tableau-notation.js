@@ -2,8 +2,8 @@
  * TABLEAU DE NOTATION — l'écran (lot 1, 9 nov. 2026)
  *
  * Plan : `plans de travail/PLAN-2026-11-09-tableau-de-notation.md` ; ébauches `EBAUCHE-2026-11-09-tableau-*.dc.html`.
- * Une seconde vue des MÊMES évaluations, dans Évaluation › Liste (décidé par Cowork : aucune entrée de navigation
- * neuve). Élèves en lignes, productions en colonnes, la note en bout de ligne. On y saisit, au toucher ou au
+ * Une seconde vue des MÊMES évaluations, dans sa propre sous-section, Évaluation › Tableau de notation, depuis le
+ * 11 nov. 2026 (Grégoire, 7 h 33 : il n'avait pas vu la bascule « Liste | Tableau de notation » du lot 1). Élèves en lignes, productions en colonnes, la note en bout de ligne. On y saisit, au toucher ou au
  * clavier, ce que la pratique demande : un niveau (standards), acceptable ou non (spécifications). Une copie évaluée
  * avec une grille s'y lit et s'ouvre au toucher ; elle ne s'y modifie pas.
  *
@@ -52,7 +52,10 @@
         palierEchec: 'palier d’échec'
     });
 
-    let _affiche = false;
+    /** Le tableau est-il à l'écran ? Dans la vue simple (sa présentation), ou dans sa sous-section de la vue étendue. */
+    function _estAffiche() {
+        return !!_presentation || (typeof sousSectionActive !== 'undefined' && sousSectionActive === 'evaluations-tableau');
+    }
     /* LA VUE SIMPLE (lot « Vue simple », 9 nov. 2026) : le même tableau, monté dans un autre hôte, avec une présentation
        qui ne nomme rien qui n'existe pas dans les données de l'utilisateur (règle arrêtée par Grégoire). La présentation
        est donnée par `vue-simple.js` (`afficherDans`) ; sans elle, rien ne change : les mots validés restent ceux de `MOTS`. */
@@ -501,10 +504,13 @@
 
     function _hote() { return (_presentation && _presentation.hote) || document.getElementById('tableau-notation-hote'); }
 
-    /** La case qui a le focus, s'il est dans le tableau : un rendu venu d'ailleurs (la Liste rechargée) le lui rend. */
+    /** La case — ou le titre — qui a le focus, s'il est dans le tableau : un rendu venu d'ailleurs (la Liste rechargée) le
+        lui rend. Le titre (11 nov. 2026) : l'ouverture de la sous-section l'y pose, et la Liste rechargée juste après le perdait. */
     function _focusActuel(hote) {
         const actif = document.activeElement;
-        if (!actif || !hote.contains(actif) || !actif.classList.contains('tn-case')) return null;
+        if (!actif || !hote.contains(actif)) return null;
+        if (actif.classList.contains('tn-titre')) return { titre: true };
+        if (!actif.classList.contains('tn-case')) return null;
         return { da: actif.dataset.da, production: actif.dataset.production };
     }
 
@@ -527,6 +533,11 @@
     }
 
     function _reprendreFocus(hote, focus) {
+        if (focus.titre) {
+            const titre = hote.querySelector('.tn-titre');
+            if (titre) titre.focus();
+            return;
+        }
         const cible = hote.querySelector(`.tn-case[data-da="${CSS.escape(focus.da)}"][data-production="${CSS.escape(focus.production)}"]`);
         if (cible) _donnerLeFocus(cible);
     }
@@ -663,7 +674,7 @@
             window._moyennesToutes = null;
             _planifierIndices();
         }
-        if (_affiche) {
+        if (_estAffiche()) {
             rendre(geste.lot ? null : { da: geste.da, production: geste.productionId });
             if (!geste.lot) _annoncerNote(geste.da);
         }
@@ -694,7 +705,7 @@
 
     /** ⌘Z ou Ctrl+Z, quand le tableau est à l'écran et qu'on n'écrit pas dans un champ (son propre « annuler » passe d'abord). */
     function _surRaccourciAnnuler(e) {
-        if (!_affiche || !(e.metaKey || e.ctrlKey) || e.shiftKey || e.altKey || String(e.key).toLowerCase() !== 'z') return;
+        if (!_estAffiche() || !(e.metaKey || e.ctrlKey) || e.shiftKey || e.altKey || String(e.key).toLowerCase() !== 'z') return;
         const hote = _hote();
         if (!hote || hote.offsetParent === null) return;
         const cible = e.target;
@@ -783,43 +794,25 @@
         hote._tnEcoutes = true;
         hote.addEventListener('click', _surClic);
         hote.addEventListener('keydown', _surTouche);
-        if (_ecoutesCommunes) return;   // deux hôtes (la Liste, la vue simple), une seule paire d'écoutes communes
+        if (_ecoutesCommunes) return;   // deux hôtes (la sous-section, la vue simple), une seule paire d'écoutes communes
         _ecoutesCommunes = true;
         document.addEventListener('keydown', _surRaccourciAnnuler);
         window.addEventListener('resize', _marquerDebordement);
     }
 
-    /* ============================== LA BASCULE ============================== */
-
-    function _poserBascule(tableau) {
-        const carte = document.getElementById('carte-liste-evaluations');
-        if (carte) carte.classList.toggle('vue-tableau-notation', tableau);
-        const hote = _hote();
-        if (hote) hote.classList.toggle('u-hide', !tableau);
-        [['tn-vue-liste', !tableau], ['tn-vue-tableau', tableau]].forEach(([id, actif]) => {
-            const b = document.getElementById(id);
-            if (!b) return;
-            b.classList.toggle('actif', actif);
-            b.setAttribute('aria-pressed', actif ? 'true' : 'false');
-        });
-    }
-
-    /** Vue simple : le tableau monté dans l'hôte donné, avec sa présentation. La Liste de la vue étendue n'est pas touchée. */
+    /** Vue simple : le tableau monté dans l'hôte donné, avec sa présentation. La sous-section de la vue étendue n'est pas touchée. */
     function afficherDans(presentation) {
         _presentation = presentation;
-        _affiche = true;
         rendre(null);
     }
 
-    /** Vue simple quittée (autre écran, ou retour à la vue étendue) : l'hôte est vidé, le tableau de la Liste reprend sa place. */
+    /** Vue simple quittée (autre écran, ou retour à la vue étendue) : l'hôte est vidé ; si la sous-section du tableau est
+        celle de la vue étendue, son tableau est redessiné dans son hôte. */
     function quitterPresentation() {
         if (!_presentation) return;
         if (_presentation.hote) _presentation.hote.innerHTML = '';
         _presentation = null;
-        // La Liste de la vue étendue retrouve l'état où elle était : son tableau, s'il y était ouvert, est redessiné dans son hôte.
-        const carte = document.getElementById('carte-liste-evaluations');
-        _affiche = !!(carte && carte.classList.contains('vue-tableau-notation'));
-        if (_affiche) rendre(null);
+        if (_estAffiche()) rendre(null);
     }
 
     /**
@@ -838,31 +831,25 @@
         return { etat: ctx.etat, finales: !!(ctx.config && ctx.config.notesFinales === true), lignes, famille: ctx.famille, pratiqueNom: ctx.pratiqueNom, types: ctx.types || [] };
     }
 
+    /** La sous-section Évaluation › Tableau de notation : son ouverture (navigation.js), et « Consulter » ou « Modifier »
+        un résultat saisi sans grille, depuis la Liste. Hors de la sous-section, y aller : son ouverture rappelle cette fonction. */
     function afficher() {
-        if (typeof afficherSousSection === 'function' && typeof sousSectionActive !== 'undefined' && sousSectionActive !== 'evaluations-liste') {
-            afficherSousSection('evaluations-liste');
+        if (typeof afficherSousSection === 'function' && typeof sousSectionActive !== 'undefined' && sousSectionActive !== 'evaluations-tableau') {
+            afficherSousSection('evaluations-tableau');
+            return;
         }
-        _affiche = true;
-        _poserBascule(true);
         rendre(null);
         const titre = _hote() && _hote().querySelector('.tn-titre');
         if (titre) titre.focus();
     }
 
-    function afficherListe() {
-        _affiche = false;
-        _poserBascule(false);
-        if (typeof initialiserListeEvaluations === 'function') initialiserListeEvaluations();
-    }
-
     /** Appelé quand la Liste se recharge (groupe-cours changé, évaluation enregistrée ailleurs). */
     function rafraichirSiAffiche() {
-        if (_affiche) rendre(null);
+        if (_estAffiche()) rendre(null);
     }
 
     window.TableauNotation = {
-        afficher,              // la bascule, « Consulter » et « Modifier » de la Liste
-        afficherListe,         // la bascule
+        afficher,              // la sous-section (navigation.js), « Consulter » et « Modifier » de la Liste
         annuler,               // le bouton « Annuler » ; ⌘Z passe par la même fonction
         rafraichirSiAffiche,   // initialiserListeEvaluations
         afficherDans,          // vue simple : le tableau dans l'écran « Résultats »

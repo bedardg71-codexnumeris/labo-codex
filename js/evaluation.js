@@ -2181,11 +2181,12 @@ function appliquerJetonDelaiDepuisSidebar() {
 
 /**
  * Tableau de notation (9 nov. 2026) — CE QUE DIT LE FORMULAIRE D'UN RÉSULTAT SAISI SANS GRILLE. Il n'a ni grille
- * ni critères : le formulaire ne peut ni l'afficher ni le modifier. Mots validés par Grégoire, mot pour mot (9 nov. 2026).
+ * ni critères : le formulaire ne peut ni l'afficher ni le modifier. Mots validés par Grégoire, mot pour mot (9 nov. 2026) ;
+ * le chemin suit la sous-section du tableau (11 nov. 2026).
  */
 function _direResultatSansGrille() {
     notifications.info('Résultat saisi sans grille',
-        'Cette production a été évaluée au tableau de notation (Évaluation › Liste). C\'est là que tu changes son résultat.');
+        'Cette production a été évaluée dans Évaluation › Tableau de notation. C\'est là que tu changes son résultat.');
 }
 
 /**

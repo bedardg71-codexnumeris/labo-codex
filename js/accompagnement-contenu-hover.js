@@ -744,6 +744,8 @@ const TOOLTIPS = {
         'Évaluation des productions : grilles critériées, niveaux de performance et rétroaction différenciée automatique.',
     'nav-eval-liste':
         'Tableau exhaustif des évaluations : résultats, niveaux de performance, jetons et dossiers PDF.',
+    'nav-eval-tableau':
+        'La synthèse des résultats de la classe : une rangée par étudiant·e, une colonne par production, et la note.',
     'nav-eval-importer':
         'Importe les travaux de tes étudiant·es (PDF, images) et prépare les fichiers (rotation, assemblage).',
     'nav-eval-annoter':

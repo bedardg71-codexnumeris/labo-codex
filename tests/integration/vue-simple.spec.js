@@ -317,8 +317,7 @@ test.describe('Vue simple · le parcours d\'un nouvel arrivant', () => {
         await expect(page.locator('.navigation-vue-simple')).toBeHidden();
         await expect(page.locator('#btn-codex .codex-label-btn')).toHaveText('Codex');
         await expect(page.locator('#codex-indicateur')).toBeVisible();   // le même point d'état, dans les deux vues
-        await page.evaluate(() => window.naviguerVers('evaluations', 'liste'));
-        await page.evaluate(() => window.TableauNotation.afficher());
+        await page.evaluate(() => window.naviguerVers('evaluations', 'tableau'));   // sa sous-section depuis le 11 nov. 2026
         await expect(page.locator('#tableau-notation-hote .tn-case')).toHaveCount(12);
         await expect(page.locator('#tableau-notation-hote tbody tr:nth-child(1) .tn-note-valeur')).toHaveText('88');
         await expect(page.locator('#tableau-notation-hote .tn-avis')).toBeVisible();   // en vue étendue, les mots validés ne bougent pas
@@ -1036,7 +1035,7 @@ test.describe('Vue simple · les seuils, la mise à jour des valeurs, les colonn
         expect(await lire()).toBe(dansB);
         // Ni depuis la vue étendue.
         await basculer(page, 'etendue');
-        await page.evaluate(() => { window.naviguerVers('evaluations', 'liste'); window.TableauNotation.afficher(); });
+        await page.evaluate(() => window.naviguerVers('evaluations', 'tableau'));
         await expect(page.locator('#tableau-notation-hote #tn-annuler')).toBeDisabled();
         expect(await page.evaluate(() => window.TableauNotation.annuler())).toBe('rien');
         expect(await lire()).toBe(dansB);

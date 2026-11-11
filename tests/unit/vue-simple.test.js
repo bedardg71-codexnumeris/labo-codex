@@ -101,7 +101,8 @@ describe('B. La navigation de la vue étendue, identique avant et après', () =>
         conception: ['materiel:Mon matériel', 'carte:Alignement', 'productions:Productions', 'grille-criteres:Grilles', 'echelle-performance:Échelles', 'retroactions:Cartouches', 'pratiques-notation:Pratiques'],
         calendrier: ['trimestre:Trimestre', 'vue:Calendrier'],
         suivi: ['groupe:Groupe', 'liste:Étudiant·es', 'saisie:Présences', 'profil:Profils', 'interventions:Interventions', 'rencontres:Rencontres', 'animation:Animation'],
-        evaluations: ['importer:Préparer', 'liste:Liste', 'annoter:Annoter', 'exporter:Exporter'],
+        // 11 nov. 2026 : « Tableau de notation » entre après « Liste » (Grégoire, 7 h 33 ; zone protégée ouverte par lui, 7 h 39).
+        evaluations: ['importer:Préparer', 'liste:Liste', 'tableau:Tableau de notation', 'annoter:Annoter', 'exporter:Exporter'],
         labo: ['accompagnement:Observation', 'modelisation:Modélisation', 'comparateur:Exploration', 'rythme:Rythme', 'etudes:Études', 'bilan:Bilan', 'longitudinal:Suivi longitudinal'],
         aide: ['commencer:Commencer', 'cadre:Cadre', 'conception:Conception', 'evaluation:Évaluation', 'suivi:Suivi', 'labo:Labo', 'codex-archives:Codex et archives', 'reference:Référence'],
         reglages: ['preferences:Préférences', 'donnees:Données', 'a-propos:À propos']
@@ -119,8 +120,10 @@ describe('B. La navigation de la vue étendue, identique avant et après', () =>
 
     it('les deux fichiers protégés n\'ont pas bougé d\'un octet depuis la base du lot', () => {
         const empreinte = (f) => createHash('sha256').update(readFileSync(path.join(racine, f))).digest('hex');
-        expect(empreinte('js/config.js')).toBe('378a90d2399dc981d48c7785e42e814d8eb5f611b4722a319ef9031467ed4d5b');
-        expect(empreinte('js/navigation.js')).toBe('2aa0307b1b91475866d5ec95cb9d6b166914a99e16f88cffdcae17bcb540ec88');
+        // Réempreintes le 11 nov. 2026 : la sous-section « Tableau de notation » (autorisation de Grégoire, 7 h 39, pour ce
+        // changement seulement). Base précédente : config 378a90d2…, navigation 2aa0307b….
+        expect(empreinte('js/config.js')).toBe('0ed9d3e506a60eaf7644ddd9c13de41a7870ee5040b99c1c77445c36f2f79b2f');
+        expect(empreinte('js/navigation.js')).toBe('c7fc34667636d55bbbe1f4f3709857d6017801fe721986ce55099fa31b2373e6');
     });
 
     const decoder = (t) => t.replace(/&Eacute;/g, 'É').replace(/&eacute;/g, 'é');

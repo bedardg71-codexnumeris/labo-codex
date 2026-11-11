@@ -429,21 +429,25 @@ describe('F · les mots validés', () => {
         expect(finalisee).toContain('>Note finale<');
         expect(finalisee).not.toContain('Note provisoire');
     });
-    it('F2 les états sans tableau, la légende des spécifications, la bascule et l\'avis du formulaire', () => {
+    it('F2 les états sans tableau, la légende des spécifications, la sous-section et l\'avis du formulaire', () => {
         expect(ecran.construireHTML({ etat: 'autre-famille' })).toContain('Le tableau de notation sert aux pratiques par standards et par spécifications. Pour la pratique de ce groupe-cours, la Liste reste la vue de tes évaluations.');
         expect(ecran.construireHTML({ etat: 'aucune-pratique' })).toContain('Ce groupe-cours n’a pas de pratique de notation. Choisis-en une dans Conception › Pratiques : le tableau suivra ses réglages.');
         const source = lire('js/tableau-notation.js');
         expect(source).toContain("aideSpe: 'Touche une case pour changer le résultat. Au clavier : A ou N, Retour arrière pour vider, les flèches pour se déplacer.',");
         expect(source).toContain('annulerAuClavier: (raccourci) => `${raccourci} annule le dernier geste.`');
         // Le refus d'une reprise sur un résultat sans grille (validé le 9 nov., 16 h 20).
-        expect(lire('js/evaluation-jetons.js')).toContain("notifications.info('Résultat saisi sans grille', 'Cette production a été évaluée au tableau de notation : c\\'est là que tu changes son résultat, sans reprise.')");
+        // 11 nov. 2026 : le chemin suit la sous-section du tableau.
+        expect(lire('js/evaluation-jetons.js')).toContain("notifications.info('Résultat saisi sans grille', 'Cette production a été évaluée dans Évaluation › Tableau de notation : c\\'est là que tu changes son résultat, sans reprise.')");
         expect(source).toContain("legendeSpe: ['✓ Acceptable', '✗ Non acceptable', 'Pointillé : à saisir', 'Point : évaluée avec une grille']");
+        // 11 nov. 2026 (Grégoire, 7 h 33) : la bascule de la Liste est partie ; le tableau est une entrée de la sous-navigation,
+        // juste après « Liste », avec le mot de la bascule (validé le 9 nov.).
         const index = lire('index.html');
-        expect(index).toMatch(/id="tn-vue-liste"[^>]*>Liste<\/button>/);
-        expect(index).toMatch(/id="tn-vue-tableau"[^>]*>Tableau de notation<\/button>/);
+        expect(index).not.toMatch(/id="tn-vue-|class="tn-bascule/);
+        expect(index).toMatch(/<div id="evaluations-tableau" class="sous-section">\s*<div class="carte">\s*<div id="tableau-notation-hote"/);
+        expect(lire('js/config.js')).toMatch(/\{ id: 'liste', label: 'Liste' \},\s*(\/\/[^\n]*\n\s*)*\{ id: 'tableau', label: 'Tableau de notation' \},\s*\{ id: 'annoter'/);
         const formulaire = lire('js/evaluation.js');
         expect(formulaire).toContain("notifications.info('Résultat saisi sans grille',");
-        expect(formulaire).toContain("'Cette production a été évaluée au tableau de notation (Évaluation › Liste). C\\'est là que tu changes son résultat.'");
+        expect(formulaire).toContain("'Cette production a été évaluée dans Évaluation › Tableau de notation. C\\'est là que tu changes son résultat.'");
         expect(registre.LIBELLES_JUGEMENT_SANS_GRILLE).toEqual({ acceptable: 'Acceptable', nonAcceptable: 'Non acceptable' });
     });
     // Décision de Cowork (9 nov., 16 h 21) : la légende affiche le raccourci du poste.

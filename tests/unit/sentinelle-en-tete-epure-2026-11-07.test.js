@@ -110,7 +110,8 @@ describe('en-tête épuré · navigation secondaire et bande pâle', () => {
     it('les libellés courts des onglets, validés par Grégoire', () => {
         expect(labelsDe('calendrier')).toEqual(['Trimestre', 'Calendrier']);
         expect(labelsDe('conception')).toEqual(['Mon matériel', 'Alignement', 'Productions', 'Grilles', 'Échelles', 'Cartouches', 'Pratiques']);
-        expect(labelsDe('evaluations')).toEqual(['Préparer', 'Liste', 'Annoter', 'Exporter']);
+        // 11 nov. 2026 : « Tableau de notation » après « Liste » (Grégoire, 7 h 33 ; le mot de la bascule, validé le 9 nov.).
+        expect(labelsDe('evaluations')).toEqual(['Préparer', 'Liste', 'Tableau de notation', 'Annoter', 'Exporter']);
         expect(labelsDe('suivi')).toEqual(['Groupe', 'Étudiant·es', 'Présences', 'Profils', 'Interventions', 'Rencontres', 'Animation']);
         expect(labelsDe('labo')).toEqual(['Observation', 'Modélisation', 'Exploration', 'Rythme', 'Études', 'Bilan', 'Suivi longitudinal']);
         // le repli de bilan-reflexif.js (config.js en cache) dit le même mot
