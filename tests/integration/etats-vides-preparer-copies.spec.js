@@ -115,6 +115,7 @@ test('Préparer : sans copie, le bandeau paraît et part au premier import ; ave
     await champ.click();
     await champ.fill('2390001');
     await page.locator('.pipeline-autocomplete-item[data-param2="2390001"]').dispatchEvent('mousedown');
+    // Le clic qu'on éprouve : l'import réel, qui redessine Préparer (fin-de-session §4.1 bis).
     await page.click('[data-action="travauxUI.appliquerEtImporter"]');
     await expect(page.locator('.modal-overlay.actif')).toContainText('1 fichier(s) seront importés');
     await page.locator('.modal-overlay.actif button', { hasText: 'Oui, importer' }).click();

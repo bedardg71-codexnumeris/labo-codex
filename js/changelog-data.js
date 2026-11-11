@@ -34,7 +34,12 @@
                 'Inscris tes résultats dans un tableau, comme dans un tableur&nbsp;: les notes se calculent à mesure.',
                 'Exporte tes notes en CSV et sauvegarde tes données d’un bouton.',
                 'Passe à la vue étendue quand tu veux, puis reviens&nbsp;: ta classe, ta pratique et tes résultats te suivent.',
-                'En vue étendue, un niveau peut exister sans seuils et une note peut dépasser 100.'
+                'En vue étendue, un niveau peut exister sans seuils et une note peut dépasser 100.',
+                // 1.242.1 (10 nov. 2026, soir) : quatre lignes validées par Grégoire en collant le relais de Cowork (20 h 12).
+                '«&nbsp;Aide dans les pages&nbsp;» est maintenant en haut du panneau d’assistance.',
+                'À l’import, les pages d’une production se suivent d’un seul tenant, et «&nbsp;Réunir&nbsp;» ne prend que les pages que tu as cochées.',
+                'Sur Préparer, «&nbsp;Aucun travail importé&nbsp;» ne s’affiche plus quand ton groupe a déjà des copies.',
+                'Dans l’en-tête, les bulles repassent derrière le logo et la navigation.'
             ]
         },
         {
