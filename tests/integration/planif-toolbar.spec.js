@@ -95,13 +95,13 @@ test('plein écran carte mentale — titre de section masqué, module seul visib
 
     // 3. La navigation principale est masquée (demande terrain du 4 août :
     //    rien d'autre que le module en plein écran, comme Annoter).
-    await expect(page.locator('.navigation-principale')).toBeHidden();
+    await expect(page.locator('.navigation-principale:not(.navigation-vue-simple)')).toBeHidden();
 
     // Sortir du plein écran (Échap) : le titre et la navigation reviennent.
     await page.keyboard.press('Escape');
     await page.waitForTimeout(300);
     await expect(h2).toHaveClass(/titre-page-masque/);   // lot 3 : présent pour les lecteurs d'écran
-    await expect(page.locator('.navigation-principale')).toBeVisible();
+    await expect(page.locator('.navigation-principale:not(.navigation-vue-simple)')).toBeVisible();
 
     expect(erreurs).toEqual([]);
 });

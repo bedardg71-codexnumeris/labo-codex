@@ -485,7 +485,9 @@
                         nom: { type: 'chaine', requis: true, max: 200 },
                         min: { type: 'nombre', minValeur: 0, maxValeur: 100 },
                         max: { type: 'nombre', minValeur: 0, maxValeur: 100 },
-                        valeurCalcul: { type: 'nombre', minValeur: 0, maxValeur: 100 },
+                        // Lot « niveau sans seuils » (10 nov. 2026) : la valeur d'un niveau n'a pas de plafond (décision de Grégoire
+                        // du 9 nov. 2026, 20 h 55 : « un niveau peut valoir plus de 100 »). Les seuils, eux, restent des pourcentages.
+                        valeurCalcul: { type: 'nombre', minValeur: 0 },
                         // ⚠ `valeur` VOYAGE AUSSI — mesuré le 1er septembre 2026.
                         // Le canal d'import-export transporte les DEUX depuis
                         // l'audit du 28 août (`SCHEMAS_IMPORT.echelle`), pour une
@@ -503,7 +505,8 @@
                         // rendait `null` chez le destinataire : sa première évaluation
                         // affichait 0,0 % sans un mot. La liste blanche ne signale pas
                         // ce qu'elle oublie, elle le fait disparaître (#511).
-                        valeur: { type: 'nombre', minValeur: 0, maxValeur: 100 },
+                        // Lot « niveau sans seuils » (10 nov. 2026) : même règle que `valeurCalcul`, pas de plafond.
+                        valeur: { type: 'nombre', minValeur: 0 },
                         couleur: { type: 'chaine', max: 30 },
                         // #680 (25 sept. 2026) — la description du niveau et son
                         // étiquette SOLO se saisissent dans l'éditeur d'échelle ;

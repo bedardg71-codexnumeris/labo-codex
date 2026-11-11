@@ -75,7 +75,10 @@ describe('énoncé 6 · une échelle partagée arrive avec ses valeurs ponctuell
     it('AD · le schéma FERMÉ accepte `valeur` — sinon un package fidèle serait rejeté à l\'entrée', () => {
         const champsNiveau = win.partageSchemas.SCHEMA_ENTITE.echelle.champs.niveaux.schema;
         expect(Object.keys(champsNiveau)).toContain('valeur');
-        expect(champsNiveau.valeur).toEqual({ type: 'nombre', minValeur: 0, maxValeur: 100 });
+        // ↻ Lot « niveau sans seuils » (10 nov. 2026) : la valeur d'un niveau n'a plus de plafond (décision de Grégoire du
+        // 9 nov., 20 h 55 : un niveau peut valoir plus de 100). Les deux champs jumeaux portent la même règle.
+        expect(champsNiveau.valeur).toEqual({ type: 'nombre', minValeur: 0 });
+        expect(champsNiveau.valeurCalcul).toEqual(champsNiveau.valeur);
     });
 
     it('AE · le reste du niveau voyage toujours — le correctif n\'a rien évincé', () => {

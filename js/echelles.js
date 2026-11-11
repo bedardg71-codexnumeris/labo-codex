@@ -2541,6 +2541,68 @@ function blocReperesEchelle(echelle, options) {
  * ⮕ Le refus est donc posé ICI, sur le chemin vivant, et il vaut pour les deux
  * éditeurs (échelle neuve et échelle existante).
  */
+/* ===============================
+   UN NIVEAU SANS SEUILS, UNE NOTE AU-DESSUS DU PLUS HAUT SEUIL (lot « niveau sans seuils », 10 nov. 2026)
+   Un niveau ajouté en vue simple n'a ni `min` ni `max` : sa VALEUR dit ce qu'il pèse dans la note, il n'a pas encore de
+   plage de pourcentages. La conversion d'un pourcentage l'ignore déjà (`niveauDuPourcentage`, evaluation-calcul.js).
+   Mesuré par exécution le 10 nov. : la répartition du Suivi, elle, lui prêtait la plage 0 à 100 et y comptait un·e
+   étudiant·e à 0 ; le PDF d'une échelle imprimait « 0 % - 100 % » ; le graphique lui traçait une zone sans bornes.
+   Ces fonctions sont la lecture COMMUNE de ces écrans.
+   ⚠ « Sans seuils » veut dire SANS AUCUN des deux. Un niveau qui n'en a qu'un garde la lecture d'avant ce lot (0 pour
+   un `min` absent, 100 pour un `max` absent) : rien ne change pour lui.
+   =============================== */
+
+function _seuilLu(v) {
+    return (v == null || String(v).trim() === '') ? NaN : Number(v);
+}
+
+/** Un niveau a-t-il au moins un seuil ? Deux champs absents, vides ou qui ne sont pas des nombres : non. */
+function niveauADesSeuils(niveau) {
+    return !!niveau && (!isNaN(_seuilLu(niveau.min)) || !isNaN(_seuilLu(niveau.max)));
+}
+
+/** Les bornes d'un niveau à seuils, telles que la répartition les lisait déjà : `min` absent = 0, `max` absent = 100. */
+function _bornesDuNiveau(niveau) {
+    return { min: _seuilLu(niveau.min) || 0, max: _seuilLu(niveau.max) || 100 };
+}
+
+/**
+ * Le niveau qui REÇOIT un pourcentage, pour une répartition : celui dont la plage le contient (le plus haut, si deux
+ * plages se touchent) ; au-dessus du plus haut seuil (une note de 110), le plus haut niveau à seuils — SUPPOSÉ : une
+ * note qui dépasse l'échelle se range avec les meilleures, plutôt que nulle part. Un niveau sans seuils ne reçoit
+ * personne.
+ * @param {Array} niveaux - les niveaux d'une échelle, dans n'importe quel ordre
+ * @param {number} pourcentage - de 0 à 100, ou davantage
+ * @returns {Object|null} le niveau, ou null (aucun niveau à seuils, ou un pourcentage qu'aucune plage ne contient)
+ */
+function niveauQuiRecoit(niveaux, pourcentage) {
+    if (typeof pourcentage !== 'number' || isNaN(pourcentage)) return null;
+    const aSeuils = (niveaux || []).filter(niveauADesSeuils)
+        .map(n => ({ niveau: n, bornes: _bornesDuNiveau(n) }))
+        .sort((a, b) => a.bornes.min - b.bornes.min);
+    for (let i = aSeuils.length - 1; i >= 0; i--) {
+        if (pourcentage >= aSeuils[i].bornes.min && pourcentage <= aSeuils[i].bornes.max) return aSeuils[i].niveau;
+    }
+    return niveauAuDessusDuPlusHautSeuil(aSeuils, pourcentage);
+}
+
+/**
+ * LA règle (Grégoire, 9 nov. 2026, 23 h) : une note AU-DESSUS du plus haut seuil d'une échelle se range dans le plus
+ * haut niveau, y compris quand ce dernier seuil est sous 100. Une seule écriture, lue par la répartition du Suivi
+ * (`niveauQuiRecoit`) et par le niveau atteint du profil et des interventions (`situerPourcentageDansEchelle`,
+ * profil-etudiant-helpers.js). Chaque lecteur garde SA lecture des bornes et la passe ici.
+ * @param {Array<{niveau: Object, bornes: {min: number, max: number}}>} candidats - les niveaux à seuils, bornes lues
+ * @param {number} pourcentage
+ * @returns {Object|null} le niveau qui porte le plus haut `max` (à égalité, celui qui commence le plus haut), ou null
+ *   quand le pourcentage ne dépasse pas ce seuil
+ */
+function niveauAuDessusDuPlusHautSeuil(candidats, pourcentage) {
+    const liste = candidats || [];
+    const plafond = liste.reduce((m, x) => Math.max(m, x.bornes.max), -Infinity);
+    if (liste.length === 0 || !(pourcentage > plafond)) return null;
+    return liste.filter(x => x.bornes.max === plafond).sort((a, b) => a.bornes.min - b.bornes.min).pop().niveau;
+}
+
 /**
  * #525 (26 août 2026) — LA VALEUR D'UN NIVEAU, DÉCIDÉE UNE FOIS POUR TOUS.
  *
@@ -3751,6 +3813,9 @@ window.supprimerNiveauEchelle = supprimerNiveauEchelle;
 window.modifierNiveauEchelle = modifierNiveauEchelle;
 window.refusChampNiveau = refusChampNiveau;                                 // #524
 window.valeurNumeriqueDuNiveau = valeurNumeriqueDuNiveau;                   // #525 — LA règle, pour tous les lecteurs
+window.niveauADesSeuils = niveauADesSeuils;                                 // lot « niveau sans seuils » (10 nov. 2026)
+window.niveauQuiRecoit = niveauQuiRecoit;                                   // lot « niveau sans seuils » (10 nov. 2026)
+window.niveauAuDessusDuPlusHautSeuil = niveauAuDessusDuPlusHautSeuil;       // lot « niveau sans seuils » — LA règle au-dessus du plus haut seuil
 window.optionsNiveauSOLOEchelle = optionsNiveauSOLOEchelle;                 // #542 lot 2 — UN seul producteur pour les deux éditeurs
 window.ligneNiveauEchelleHtml = ligneNiveauEchelleHtml;                   // #1117 — la ligne de l'échelle enregistrée, éprouvée par sa sentinelle
 window.NIVEAUX_SOLO_ECHELLE = NIVEAUX_SOLO_ECHELLE;                         // #542 lot 2 — les cinq niveaux canoniques

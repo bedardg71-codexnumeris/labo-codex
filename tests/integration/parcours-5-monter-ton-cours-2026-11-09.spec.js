@@ -291,6 +291,7 @@ test('« Monter ton cours » : les sept étapes, la variante ⚠, « Plus tard �
     await n(page, 4, 'Ton objectif');
     await contourSur(page, `${noeud(lecon)} .planif-badge-objectif`);
     await toucher(page, `${noeud(lecon)} .planif-badge-objectif`);
+    await degage(page, `${noeud(lecon)} .planif-noeud-objectif[data-premiere]`);   // le badge déplace la leçon : la bulle la suit au passage suivant de la sonde
     await toucher(page, `${noeud(lecon)} .planif-noeud-objectif[data-premiere]`);
     await ecrireLentement(page, 'Sera en mesure de repérer les procédés d’un incipit', '.planif-noeud-objectif');
     // Question 13 : la pastille « ! » paraît en quittant le champ, sans Entrée. Lu AUSSITÔT, sans attendre : une
@@ -303,6 +304,22 @@ test('« Monter ton cours » : les sept étapes, la variante ⚠, « Plus tard �
 
     // 5. L'activité : glissée dans la leçon par sa poignée, deux touchers, la case de l'objectif.
     await n(page, 5, 'Ton activité', { focus: false });
+    // 10 nov. 2026 : aucun saut de la carte pendant les glisser des étapes 5 et 6. Sous WebKit, l'ancrage du défilement
+    // la décalait de 72 px puis la rétablissait, sans qu'aucun code ne la fasse défiler : le glisser de l'étape 6 posait
+    // alors l'évaluation ailleurs que sous l'activité (3 sur 24). Un défilement que le code écrit lui-même ne compte pas.
+    // Break-test : la règle overflow-anchor de #planif-zone-travail retirée → ROUGE.
+    await page.evaluate(() => {
+        const z = document.getElementById('planif-zone-travail');
+        const d = Object.getOwnPropertyDescriptor(Element.prototype, 'scrollTop');
+        window.__sautsDeLaCarte = [];
+        let ecrit = false, avant = z.scrollTop;
+        Object.defineProperty(z, 'scrollTop', { configurable: true, get() { return d.get.call(this); }, set(v) { ecrit = true; d.set.call(this, v); } });
+        z.addEventListener('scroll', () => {
+            const t = d.get.call(z);
+            if (t !== avant && !ecrit) window.__sautsDeLaCarte.push(avant + ' → ' + t);
+            avant = t; ecrit = false;
+        });
+    });
     await capture(page, DOSSIER, `p5-5-${cap}`);
     await contourSur(page, '#planif-palette .planif-palette-btn[data-type="activite"]');
     const act = await creer(page, 'activite', 'Annoter un incipit');
@@ -349,6 +366,7 @@ test('« Monter ton cours » : les sept étapes, la variante ⚠, « Plus tard �
     await glisser(page, await rect(page, prise(ev)), { x: bas.x - 40, y: bas.t + bas.h + 30 });
     // Sous l'activité, la pastille passe à ✓ ; sans production, l'étape attend, et la bulle revient à son texte.
     await expect.poll(() => pastilleEvaluation(page, ev)).toBe('avant');
+    expect(await page.evaluate(() => window.__sautsDeLaCarte), 'la carte n’a pas sauté pendant les glisser des étapes 5 et 6').toEqual([]);
     await deuxSondes(page);
     expect(await rangActuel(page)).toBe(5);
     await expect(texteBulle(page)).not.toHaveText(await page.evaluate(() => ParcoursCours.texteVariante));

@@ -1095,10 +1095,15 @@
      * sans image périmée.
      */
     function suivreAtteint(etape, zones, contourEl) {
+        var hauteur = etat.elements.bulle.offsetHeight;
         var ok = false;
         try { ok = !!etape.atteint(); } catch (e) { ok = false; }
         if (ok) { allerA(etat.i + 1); return; }
-        if (suivreLargeurDesPages()) placerSelonEtape(etape, zones, contourEl);
+        // La hauteur aussi (10 nov. 2026) : une étape qui fait paraître un bouton à la vérification (« Continuer » du
+        // huitième parcours) fait grandir la bulle ; replacée seulement au passage suivant, le bouton sautait sous le
+        // doigt (le toucher sur le bouton, le relâcher sur la bulle). Banc : bouton-de-bulle-ne-saute-pas-2026-11-10.
+        var largeur = suivreLargeurDesPages();
+        if (largeur || etat.elements.bulle.offsetHeight !== hauteur) placerSelonEtape(etape, zones, contourEl);
     }
 
     /** Prépare la page pour l'étape i (`avant`), puis attend deux images qu'elle soit dessinée. */

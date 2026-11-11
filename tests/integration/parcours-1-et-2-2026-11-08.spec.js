@@ -115,7 +115,8 @@ async function bullePasSousLeBouton(page, selecteur, contexte) {
 
 // ↻ 9 nov. 2026 (lot du huitième parcours) : « Automatiser tes commentaires » s'inscrit au panneau ; le compte
 // passe à 3 sur cette branche. À la fusion des autres parcours, ces comptes suivent (huit, puis neuf).
-const MENU_ATTENDU = ['Assistance', 'Aide', 'Signaler', 'Soutenir', 'Réglages'];
+// Fusion de la vue simple (10 nov. 2026) : la bascule des deux vues ferme le menu (le nom et sa ligne, collés par textContent).
+const MENU_ATTENDU = ['Assistance', 'Aide', 'Signaler', 'Soutenir', 'Réglages', 'Vue simpleTa notation seulement', 'Vue étendueToutes les fonctions'];
 
 // Parcours 6 (9 nov.) : les lots suivants inscrivent leurs parcours après ces deux-là. Le rang
 // se lit sur le registre, et les deux premiers parcours de la liste sont ceux de la partie 1.

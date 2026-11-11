@@ -8,7 +8,7 @@
 import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { chargerScript, completerEcrivainsParDefaut, completerNoteParDefaut, completerMenuSelectionParDefaut, completerJetonsResolusParDefaut } from './charger-script.js';
+import { chargerScript, completerEcrivainsParDefaut, completerNoteParDefaut, completerMenuSelectionParDefaut, completerJetonsResolusParDefaut, completerSeuilsParDefaut } from './charger-script.js';
 import { chargerPredicatsCopie } from './predicats-copie.js';
 
 export const RACINE = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..', '..');
@@ -27,6 +27,7 @@ export function chargerAvecInterne(chemin, globaux, win, noms) {
     globaux = completerNoteParDefaut(globaux);             // 21 oct. 2026 (voir charger-script.js)
     globaux = completerMenuSelectionParDefaut(globaux, win, globaux.document);   // #1147 (voir charger-script.js)
     completerJetonsResolusParDefaut(win, chemin);   // jetons par défaut, 29 oct. 2026 (voir charger-script.js)
+    completerSeuilsParDefaut(win, chemin);          // lot « niveau sans seuils », 10 nov. 2026 (voir charger-script.js)
     const { document: doc, localStorage: ls, ...autres } = globaux;
     const storage = () => ({ _d: {}, getItem(k) { return k in this._d ? this._d[k] : null; }, setItem(k, v) { this._d[k] = String(v); }, removeItem(k) { delete this._d[k]; }, clear() { this._d = {}; } });
     const nomsG = ['window', 'document', 'console', 'localStorage', 'sessionStorage', ...Object.keys(autres)];

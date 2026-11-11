@@ -21,6 +21,23 @@
 
     var CHANGELOG = [
         {
+            // 1.242 (la vue simple, la liste de Léa, plusieurs groupes, l'accueil ; le niveau sans seuils en vue étendue) —
+            // titre et sept lignes validés par Grégoire, mot pour mot (10 nov. 2026, 14 h 18) ; apostrophes typographiques et
+            // espaces insécables comme ailleurs dans ce fichier.
+            version: '1.242',
+            couleur: 'vert',
+            titre: 'La notation alternative, simplifiée',
+            items: [
+                'Une vue simple accueille désormais toute personne qui ouvre Labo Codex pour la première fois&nbsp;: quatre étapes, de ta liste d’étudiant·es à ta note finale.',
+                'Colle ta liste telle que Léa l’exporte&nbsp;: ta classe se crée d’un coup. Tu peux ajouter d’autres groupes.',
+                'Choisis un modèle de pratique, par standards ou par spécifications, puis règle ses valeurs à ta façon.',
+                'Inscris tes résultats dans un tableau, comme dans un tableur&nbsp;: les notes se calculent à mesure.',
+                'Exporte tes notes en CSV et sauvegarde tes données d’un bouton.',
+                'Passe à la vue étendue quand tu veux, puis reviens&nbsp;: ta classe, ta pratique et tes résultats te suivent.',
+                'En vue étendue, un niveau peut exister sans seuils et une note peut dépasser 100.'
+            ]
+        },
+        {
             // 1.241 (groupe 3 du 9 nov. 2026 : les parcours 3, 4, 5, 8 et 9, les bulles en pages, le tableau de notation,
             // la complétion qui suit la remise) — titre et cinq lignes validés par Grégoire, mot pour mot (9 nov., 21 h 33).
             version: '1.241',

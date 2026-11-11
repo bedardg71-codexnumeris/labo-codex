@@ -150,7 +150,8 @@ Claude Code neuve, à la racine du dépôt :**
    charger **seul**
 3. Dire « je touche à `import-export.js` » → `integrite-globaux` et
    `securite-donnees` doivent se charger **seuls**
-4. Dire « on commence » → `debut-de-session-labo-codex` doit se déclencher
+4. Ouvrir une session neuve → `debut-de-session-labo-codex` doit se déclencher au
+   premier tour ; dire « on commence » en cours de session ne doit PAS le déclencher
 
 Si l'un ne se déclenche pas, sa `description` est en cause, pas le principe. Le
 correctif est local : enrichir les mots-clés de ce seul frontmatter.

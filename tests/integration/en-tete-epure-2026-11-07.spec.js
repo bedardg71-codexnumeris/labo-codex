@@ -37,7 +37,7 @@ test('bureau (1440) : bande du haut de 84 px, logo de 60, mots centrés sur la p
     expect(logo.height).toBe(60);
     expect(Math.abs((nav.left + nav.right) / 2 - 720)).toBeLessThan(1);
     // Les mots : sans icône, 15 px demi-gras, zone de toucher d'au moins 44 px
-    const mots = await page.evaluate(() => [...document.querySelectorAll('.navigation-boutons > *')].map((b) => {
+    const mots = await page.evaluate(() => [...document.querySelectorAll('.navigation-principale:not(.navigation-vue-simple) .navigation-boutons > *')].map((b) => {
         // Le mot À L'ÉCRAN : la pastille des nouveautés (lot 3) ajoute « (nouveautés disponibles) » pour les lecteurs d'écran.
         const vu = b.cloneNode(true); vu.querySelectorAll('.u-lecteur-ecran').forEach((e) => e.remove());
         const s = getComputedStyle(b); return { mot: vu.textContent.trim(), h: b.getBoundingClientRect().height, taille: s.fontSize, graisse: s.fontWeight, icones: b.querySelectorAll('.nav-icon, img').length };
@@ -102,7 +102,7 @@ test('iPad vertical (820) : la même disposition, mots à 7 px de marge, sur une
         window.afficherSection('suivi');
     });
     const g = await page.evaluate(() => {
-        const mots = [...document.querySelectorAll('.navigation-boutons > *')];
+        const mots = [...document.querySelectorAll('.navigation-principale:not(.navigation-vue-simple) .navigation-boutons > *')];
         return { tops: [...new Set(mots.map((m) => Math.round(m.getBoundingClientRect().top)))],
             marge: getComputedStyle(mots[0]).paddingLeft,
             nav: document.querySelector('.navigation-boutons').getBoundingClientRect().toJSON(),
@@ -126,7 +126,7 @@ test('iPhone (390) : variante C — 56 px, logo de 40, section active, onglets q
     const haut = await boite(page, '.entete');
     expect(haut.height).toBe(56);
     expect((await boite(page, '.entete-logo img')).height).toBe(40);
-    expect(await page.locator('.navigation-principale').isVisible()).toBe(false);
+    expect(await page.locator('.navigation-principale:not(.navigation-vue-simple)').isVisible()).toBe(false);
     await expect(page.locator('#entete-section-bouton')).toHaveText('Suivi');
     const bouton = await boite(page, '#entete-section-bouton');
     const sous = await boite(page, '#sous-navigation');
@@ -168,15 +168,18 @@ test('iPhone (390) : la liste des sept sections, l\'active marquée ; un choix c
         .toEqual(['Observation', 'Modélisation', 'Exploration', 'Rythme', 'Études', 'Bilan', 'Suivi longitudinal']);
 });
 
-test('le menu : cinq lignes dans l\'ordre, Réglages en dernier ; Échap, clic extérieur et choix le ferment ; le focus revient au bouton', async ({ page }) => {
+test('le menu : cinq lignes dans l\'ordre, Réglages en dernier, puis « Vue simple » sous un filet ; Échap, clic extérieur et choix le ferment ; le focus revient au bouton', async ({ page }) => {
     await ouvrirDemo(page, 1180);
     const bouton = page.locator('#entete-menu-bouton');
     const panneau = page.locator('#entete-menu-panneau');
     await bouton.click();
     await expect(panneau).toBeVisible();
     await expect(bouton).toHaveAttribute('aria-expanded', 'true');
-    expect(await panneau.locator('.entete-menu-mot').allTextContents())
+    expect(await panneau.locator('.entete-menu-item:not(.entete-menu-vue) .entete-menu-mot').allTextContents())
         .toEqual(['Assistance', 'Aide', 'Signaler', 'Soutenir', 'Réglages']); // ↻ lot « Les deux parcours », 8 nov.
+    // ↻ La bascule des vues (arrêtée par Grégoire le 9 nov.) : en vue étendue, sous le filet, « Vue simple » seule.
+    await expect(panneau.locator('#menu-vue-simple')).toBeVisible();
+    await expect(panneau.locator('#menu-vue-etendue')).toBeHidden();
     // ~210 px (correction du 7 nov.), aligné à droite sous le bouton
     const p = await boite(page, '#entete-menu-panneau');
     const b = await boite(page, '#entete-menu-bouton');

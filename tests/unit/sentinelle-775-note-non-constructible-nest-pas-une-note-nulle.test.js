@@ -26,7 +26,7 @@ import { describe, it, expect } from 'vitest';
 import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { chargerScript, completerNoteParDefaut } from './_helpers/charger-script.js';
+import { chargerScript, completerNoteParDefaut, completerSeuilsParDefaut } from './_helpers/charger-script.js';
 import { chargerPredicatsCopie } from './_helpers/predicats-copie.js';   // lot A (16 sept. 2026) : les deux prédicats réels du registre
 
 const RACINE = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..');
@@ -90,6 +90,7 @@ function monter({ noteConstructible }) {
     chargerScript('js/profil-etudiant-calculs.js', globaux, win);
     chargerScript('js/profil-etudiant-helpers.js', globaux, win);
     // Les trois lecteurs de la carte ne sont pas exportés : accesseurs injectés avant le `})();` final.
+    completerSeuilsParDefaut(win, 'js/tableau-bord-apercu.js');   // lot « niveau sans seuils » (10 nov. 2026) : la vraie lecture des seuils
     let code = readFileSync(path.join(RACINE, 'js/tableau-bord-apercu.js'), 'utf8');
     const fin = code.lastIndexOf('})();');
     code = code.slice(0, fin)

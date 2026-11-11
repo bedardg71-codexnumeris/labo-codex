@@ -9,11 +9,9 @@
 ---
 ## Lecture obligatoire
 
-**Commence TOUJOURS par** : `OU-EN-EST-ON.md` (racine) — où en est chacun des huit
-gestes, en français, sans numéros de fiche ; mis à jour EN FIN DE SESSION, et une ligne
-ne passe à « fait » qu'avec sa phrase « vérifié comment ». Puis
-`CONSIGNE-DEMARRAGE-PROCHAINE-SESSION.md` (état mesuré, mandat courant) et
-`OBJECTIF-COHORTE-1.md` (la ligne d'arrivée, arrêtée).
+**Le premier message reçu est le mandat**, et le skill `debut-de-session-labo-codex`
+dit quoi mesurer. `RELAIS.md` reste le journal des sessions entre elles, toujours lu
+par greps ciblés. `OBJECTIF-COHORTE-1.md` : la cible du 27 novembre, et les acquis.
 
 **Puis `PROTOCOLE.md` (racine)** — comment nous trois travaillons ensemble : les rôles,
 la preuve exigée d'une mesure, la relecture croisée, ce qui monte hors de la consigne.
@@ -36,25 +34,20 @@ session. Si un merge doit attendre, remplir `RELAIS.md` et le pousser sur `main`
 SEUL — le seul point que toute session lit, quelle que soit la branche. Motif : le
 8 août, deux sessions parties du même commit ont livré deux « 1.55.0 ».
 
-**EN TOUT PREMIER, AU DÉBUT DE CHAQUE SESSION** : **déléguer le rituel au
-subagent `audit-debut-session`** (skill `debut-de-session-labo-codex` en contexte
-isolé, ~500 tokens au lieu de ~135 000) : audit git + tests + version, lecture
-ciblée de `SESSION.md`/`BACKLOG.md`, comparaison avec la prémisse. Lecture seule.
-Acté le 28 mai 2026 après un écart de 24 h.
+**EN TOUT PREMIER** : au premier tour d'une session, applique le skill
+`debut-de-session-labo-codex`. Lecture seule. Acté le 28 mai 2026 après un écart
+de 24 h ; recentré le 10 novembre 2026.
 
 ⚠ **Vitest se lance DEPUIS `tests/`** : de la racine il balaie
 `.claude/worktrees/` sans la config et rend 217 fichiers rouges.
 
 ⚠ **Lectures ciblées obligatoires.** `SESSION.md`, `BACKLOG.md` et `RELAIS.md`
 pèsent chacun des centaines de milliers d'octets. **Jamais sans `offset`/`limit`** :
-un `Read` par défaut sur `SESSION.md` coûte plus de 100 000 tokens. En-tête, puis cibler.
+un `Read` par défaut sur `SESSION.md` coûte plus de 100 000 tokens. `SESSION.md` est
+figé (10 nov. 2026) ; `BACKLOG.md` se cible quand le chantier le demande, pas à l'ouverture.
 
-Ensuite, selon le chantier :
-
-1. `BACKLOG.md` (tâches en attente) et `SESSION.md` (contexte récent)
-2. `ETAT-PROJET.md` pour les objectifs de stabilité, pérennité et qualité
-3. Le module concerné dans `docs/modules/`, et `docs/legacy/` pour les
-   problèmes connus
+Ensuite, selon le chantier : le module concerné dans `docs/modules/`, et
+`docs/legacy/` pour les problèmes connus.
 
 **Les skills métier se chargent tout seuls** selon le chantier (architecture,
 notation, cadre pédagogique, RàI, sécurité, intégrité des globaux, portes terrain,

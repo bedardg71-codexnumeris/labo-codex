@@ -490,6 +490,8 @@ async function finirLeCheminAvecFichier(page, grille, cap = async () => {}) {
     // La rétroaction : la phrase du compte sous le critère (la « Générale ») ; les deux codes dans « Spécifique ».
     await expect(page.locator('#retroactionFinale1')).toHaveValue(/Ta production contient 2 unités manquantes pour 12 calculs\./);
     await toucher(page, page.locator('#travaux-palette-eval-retro .retro-vues-radios label', { hasText: 'Spécifique' }));
+    // Attendre le rendu de « Spécifique » avant de le lire (10 nov. : lu une fois, il était parfois encore vide, 1 sur 14).
+    await expect(page.locator('#contenuRetroSpecifique')).toContainText('Code 1');
     const specifique = (await page.locator('#contenuRetroSpecifique').innerText()).replace(/\s+/g, ' ');
     // Corrections du 9 nov. (Cowork) : le premier code d'un critère commence au numéro 1 (avant : « Code 0 »,
     // qu'aucune touche ne choisit). Break-test : codeSousCritereNeuf remis au rang depuis 0 → ROUGE.

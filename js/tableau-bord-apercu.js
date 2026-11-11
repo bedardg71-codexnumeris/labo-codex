@@ -933,7 +933,9 @@ function genererInterpretationPerformance(etudiants, echelle) {
     const patterns = db.getSync(cle('indicesPatternsRaI'), null) || db.getSync('indicesPatternsRaI', {});
 
     // Classifier les étudiants par niveau IDME
-    const niveaux = echelle.niveaux.filter(n => n.code !== '0' && n.code !== 0);
+    // Lot « niveau sans seuils » (10 nov. 2026) : un niveau sans seuils ne reçoit personne (avant : la plage 0 à 100 lui
+    // était prêtée), et une note au-dessus du plus haut seuil se range dans le plus haut niveau (`niveauQuiRecoit`).
+    const niveaux = echelle.niveaux.filter(n => n.code !== '0' && n.code !== 0 && window.niveauADesSeuils(n));
     const parNiveau = {};
 
     niveaux.forEach(niveau => {
@@ -941,16 +943,8 @@ function genererInterpretationPerformance(etudiants, echelle) {
     });
 
     etudiants.forEach(etudiant => {
-        const valeurPct = etudiant.valeur * 100;
-        for (let i = niveaux.length - 1; i >= 0; i--) {
-            const niveau = niveaux[i];
-            const min = niveau.min || 0;
-            const max = niveau.max || 100;
-            if (valeurPct >= min && valeurPct <= max) {
-                parNiveau[niveau.code].push(etudiant);
-                break;
-            }
-        }
+        const niveau = window.niveauQuiRecoit(niveaux, etudiant.valeur * 100);
+        if (niveau) parNiveau[niveau.code].push(etudiant);
     });
 
     // Analyser selon les objectifs pédagogiques
@@ -1036,9 +1030,12 @@ function calculerDistributionPerformance(etudiants) {
     }
 
     // Trier les niveaux par valeur min croissante et exclure le niveau "0"
+    // Lot « niveau sans seuils » (10 nov. 2026) : seuls les niveaux qui ont leurs seuils découpent les pourcentages. Un
+    // niveau ajouté en vue simple (une valeur, pas encore de seuils) ne paraît pas dans la répartition : mesuré, il s'y
+    // rangeait en deuxième et comptait l'étudiant·e à 0.
     const niveaux = echelle.niveaux
-        .filter(n => n.code !== '0' && n.code !== 0) // Exclure niveau 0 (plagiat)
-        .sort((a, b) => (a.min || 0) - (b.min || 0));
+        .filter(n => n.code !== '0' && n.code !== 0 && window.niveauADesSeuils(n)) // Exclure niveau 0 (plagiat)
+        .sort((a, b) => (Number(a.min) || 0) - (Number(b.min) || 0));
 
 
     if (niveaux.length === 0) {
@@ -1053,19 +1050,9 @@ function calculerDistributionPerformance(etudiants) {
     });
 
     etudiants.forEach(etudiant => {
-        const valeurPct = etudiant.valeur * 100; // Convertir 0-1 en 0-100%
-
-        // Trouver le niveau correspondant
-        for (let i = niveaux.length - 1; i >= 0; i--) {
-            const niveau = niveaux[i];
-            const min = niveau.min || 0;
-            const max = niveau.max || 100;
-
-            if (valeurPct >= min && valeurPct <= max) {
-                compteurs[niveau.code]++;
-                break;
-            }
-        }
+        // Une note au-dessus du plus haut seuil (110 %) se range dans le plus haut niveau : avant, nulle part.
+        const niveau = window.niveauQuiRecoit(niveaux, etudiant.valeur * 100); // 0-1 → 0-100 %
+        if (niveau) compteurs[niveau.code]++;
     });
 
 
@@ -1073,7 +1060,8 @@ function calculerDistributionPerformance(etudiants) {
     const parts = niveaux.map(niveau => {
         const count = compteurs[niveau.code] || 0;
         // Utiliser le nom complet du niveau au lieu du code
-        return `${niveau.nom} : ${count}`;
+        // Le nom d'un niveau est saisi par l'enseignant·e (éditeur d'échelle, vue simple) et cette chaîne entre dans un innerHTML.
+        return `${echapperHtml(niveau.nom)} : ${count}`;
     });
 
     const result = parts.join(' <span class="tb-m-horizontal-6">•</span> ');
@@ -1783,6 +1771,23 @@ function determinerModeAffichageTableauBord(config) {
 // #830 — phrase validée par Grégoire le 23 sept. 2026, mot pour mot.
 const TEXTE_A_SANS_PERIODES = 'Assiduité non calculée : aucune séance de l\'horaire ne porte son nombre de périodes. Tu peux le saisir dans Cadre › Trimestre › Horaire.';
 
+// PROPOSÉ (lot « Vue simple », 9 nov. 2026 ; à valider par Grégoire), sur le patron de la phrase de #830 : un groupe sans
+// horaire — né en vue simple, par exemple — lisait « 1 séance en attente », alors qu'aucune séance ne peut venir.
+const TEXTE_A_SANS_HORAIRE = 'Assiduité non calculée : ce groupe n\'a pas d\'horaire. Tu peux le donner dans Cadre › Trimestre › Horaire.';
+
+/**
+ * Ce que dit la barre A quand elle est vide. Sans horaire : il manque l'horaire (lot « Vue simple »). Sinon, « N séance
+ * en attente » garde la priorité, puis l'horaire dont aucune séance ne porte son nombre de périodes (#830).
+ * @param {string} texteAttenteA - « N séance(s) en attente », ou ''
+ * @param {Array} seances - séances de `obtenirSeancesHoraire()`
+ * @returns {string}
+ */
+function texteDeLaBarreA(texteAttenteA, seances) {
+    const service = typeof window.contexteActifEstService === 'function' && window.contexteActifEstService();   // un service n'a pas d'horaire à donner
+    if (texteAttenteA && !service && Array.isArray(seances) && seances.length === 0) return TEXTE_A_SANS_HORAIRE;
+    return texteAttenteA || (horaireSansAucunePeriode(seances) ? TEXTE_A_SANS_PERIODES : '');
+}
+
 /**
  * #830 — vrai quand l'horaire a des séances et qu'AUCUNE ne porte un nombre de périodes.
  * Même lecture que le dénominateur de l'assiduité (`obtenirPeriodesPrevuesParHoraire`,
@@ -1904,9 +1909,7 @@ function afficherMetriquesGlobales(etudiants) {
     // connue. Sans présence saisie, « N séance en attente » garde la priorité (cas inchangé). Mesuré :
     // le cache des séances suit l'horaire et le rendu recalcule A — aucun A connu ne survit à cet
     // horaire, d'où l'absence de garde côté élèves.
-    const texteBarreA = texteAttenteA || (
-        horaireSansAucunePeriode(typeof obtenirSeancesHoraire === 'function' ? obtenirSeancesHoraire() : [])
-            ? TEXTE_A_SANS_PERIODES : '');
+    const texteBarreA = texteDeLaBarreA(texteAttenteA, typeof obtenirSeancesHoraire === 'function' ? obtenirSeancesHoraire() : []);
 
     // 🆕 BETA 96.1: Pour P, exiger des évaluations réelles (pas seulement des présences)
     const etudiantsAvecEvalsSOM = etudiants.filter(e =>

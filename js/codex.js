@@ -453,6 +453,12 @@ function _estVignetteAuxArchives(nomCle, auxArchives) {
 /** Les mots de l'aperçu pour « Mettre à jour le codex » et « Enregistrer sous » (Grégoire, 24 oct. 2026). */
 const MOTS_APERCU_CODEX = { titre: 'Mettre à jour le codex', texteConfirmer: 'Mettre à jour' };
 
+/** Vue simple : pose dans les données DU FICHIER la vue d'où il est enregistré (`VueSimpleDonnees.CLE_MARQUE`). */
+function _marquerLaVue(donnees) {
+    if (!window.VueSimple || !window.VueSimpleDonnees) return;
+    donnees[window.VueSimpleDonnees.CLE_MARQUE] = window.VueSimple.vueCourante();
+}
+
 async function genererCodex(options = {}) {
     if (typeof JSZip === 'undefined') {
         throw new Error('JSZip non disponible. Impossible de générer le codex.');
@@ -494,6 +500,11 @@ async function genererCodex(options = {}) {
     //        vignettes). Les listes de fichiers et le manifeste se lisent après ce retrait.
     const partDuDemo = _partDuDemo(donnees);
     donnees = _sansLeDemo(donnees, partDuDemo);
+    // 1 bis'. Vue simple (9 nov. 2026, décision de Cowork) : la vue voyage avec le FICHIER. Il porte la vue d'où il est
+    //         enregistré ; ouvert sur un appareil qui n'a fait aucun choix, il s'ouvre dans cette vue. La marque s'écrit
+    //         ICI, dans le fichier, jamais à la bascule. À l'OUVERTURE d'un fichier, elle arrive dans la base avec le reste
+    //         de ses données ; une fusion ne l'importe pas (REGLAGES_DE_L_APPAREIL).
+    _marquerLaVue(donnees);
     // 1 ter. #1184 : une copie marquée aux archives (la marque des données qu'on écrit, comme à
     //        l'ouverture) ne part pas, même si son fichier est encore ici : ni son fichier, ni sa
     //        vignette. Sans risque : la marque n'est posée que si l'archive rend le même fichier.
@@ -2179,7 +2190,10 @@ var REGLAGES_DE_L_APPAREIL = [
     'planif-fond-canvas', 'planif-liens-contourner',
     'elementsMasques', 'categoriesMasquees', 'categoriesTamponsRepliees', 'couleursCategories', 'ordreCategories', 'raccourcisAnnotation',
     'modeApplication', 'trimestreActif', 'groupeCoursActif', 'demo-chargees', 'demo-version-installee',
-    'fsapi_persistance_handles'
+    'fsapi_persistance_handles',
+    // Vue simple (10 nov. 2026) : la vue d'où le fichier a été enregistré. Elle sert au démarrage d'un appareil sans choix ;
+    // une fusion ne l'importe pas et ne la met pas en conflit (relecture neuve).
+    'vueDuFichier'
 ];
 
 // Les valeurs calculées (nues ou préfixées d'un trimestre).
@@ -3230,7 +3244,14 @@ function _fermerMenuExterne(e) {
 function _actualiserMenu() {
     // Bandeau de statut en haut du menu (#230)
     var statutHaut = document.getElementById('codex-menu-statut-haut');
-    if (statutHaut) {
+    // Vue simple (9 nov. 2026) : le bouton s'appelle « Sauvegarder » et son menu s'ouvre sur la phrase arrêtée par
+    // Grégoire ; les mots viennent de vue-simple.js. En vue étendue, `enteteVueSimple` est null : rien ne change.
+    var enteteVueSimple = (window.VueSimple && typeof window.VueSimple.enteteDuMenuSauvegarder === 'function')
+        ? window.VueSimple.enteteDuMenuSauvegarder({ actif: !!_etat.actif, modifie: !!_etat.modificationsDepuis }) : null;
+    if (statutHaut && enteteVueSimple !== null) {
+        statutHaut.innerHTML = enteteVueSimple;   // security-ok: mots fixes de vue-simple.js, échappés là-bas
+        statutHaut.classList.remove('u-hide');
+    } else if (statutHaut) {
         if (_etat.actif) {
             var modifie = !!_etat.modificationsDepuis;
             var classePastille = modifie ? 'codex-statut-pastille--orange' : 'codex-statut-pastille--vert';

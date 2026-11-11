@@ -224,7 +224,7 @@ async function ouvrirSansCertainesCopies(page, chemin, refus) {
 /** Le vrai geste : le menu Codex, puis la ligne visée. */
 async function gesteDuMenu(page, action) {
     await page.locator('#btn-codex').click();
-    await page.locator('#codex-menu [data-action="' + action + '"]').click();
+    await page.locator('#codex-menu [data-action="' + action + '"]:not(.codex-menu-item--simple)').click();
 }
 const METTRE_A_JOUR = 'Codex.actionEnregistrer';
 const ENREGISTRER_SOUS = 'Codex.actionEnregistrerSous';

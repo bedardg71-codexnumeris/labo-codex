@@ -184,6 +184,9 @@ function ecrirePref(cle, valeur) {
 // Préférence unique depuis le 20 avril 2026. Les 4 sous-systèmes (tooltips
 // hover, aide popup, flèches autoReveal, visite guidée) partagent cette pref.
 function estAccompagnementActif() {
+    // Vue simple (9 nov. 2026, arrêté par Grégoire) : aucun parcours ne se lance ni ne se propose, et les infobulles,
+    // flèches et bulles nomment des objets de la vue étendue. La préférence n'est pas touchée : elle reprend en vue étendue.
+    if (document.body && document.body.classList.contains('vue-simple')) return false;
     return lirePref('accompagnementActif', true) !== false;
 }
 

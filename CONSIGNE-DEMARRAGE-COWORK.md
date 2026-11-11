@@ -1,3 +1,7 @@
+> ⛔ **FIGÉ DEPUIS LE 10 NOVEMBRE 2026** (décision de Grégoire, 8 h 20 ; décisions techniques de Cowork).
+> Ce fichier ne se lit plus à l'ouverture d'une session et ne s'écrit plus : ce qui suit est conservé tel quel, sans mise à jour.
+> Le mandat d'une session arrive désormais par le relais.
+
 # Consigne de démarrage – la session Cowork qui prend le relais
 
 > **Réécrite le mercredi 7 octobre 2026, 18 h 58 (Toronto)**, à la demande de Grégoire, après la mise en ligne de 1.189.0 (les équipes de Mathieu) et sa décision de s'arrêter avant le lot « Écraser » (#967).

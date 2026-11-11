@@ -243,7 +243,7 @@ async function ouvrirParLaCase(page, fichier, { sauf = [], seulement = null } = 
 /** Le vrai geste : le menu Codex, « Mettre à jour le codex », jusqu'à la fin de la tentative. */
 async function mettreAJourLeCodex(page) {
     await page.locator('#btn-codex').click();
-    await page.locator('#codex-menu [data-action="Codex.actionEnregistrer"]').click();
+    await page.locator('#codex-menu .codex-menu-item:not(.codex-menu-item--simple)[data-action="Codex.actionEnregistrer"]').click();
     await expect.poll(() => page.evaluate(() => (Codex.derniereTentative() || {}).issue), { timeout: 30000 }).not.toBe('en cours');
     return page.evaluate(() => ({
         issue: Codex.derniereTentative().issue,
