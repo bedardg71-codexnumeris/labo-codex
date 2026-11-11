@@ -126,6 +126,12 @@
      * clair → encre, fond sombre → papier. Une couleur illisible (nom CSS,
      * gradient, vide) garde le papier, comme avant : on ne devine pas.
      */
+    /** Une couleur de la norme n'entre dans un style en ligne que si elle en est une (hex ou rgb) ; sinon null. */
+    function couleurImprimable(couleur) {
+        const c = String(couleur || '').trim();
+        return /^(#[0-9a-f]{3,8}|rgba?\(\s*[0-9.,\s%]+\))$/i.test(c) ? c : null;
+    }
+
     function texteSur(fond) {
         const m = /^#?([0-9a-f]{3}|[0-9a-f]{6})$/i.exec(String(fond || '').trim());
         if (!m) return PAPER;
@@ -192,6 +198,46 @@
             </header>`;
     }
 
+    /**
+     * Le style d'une case de la bande. 11 nov. 2026 (Grégoire) : les normes du tableau de notation (`t.forme`, lue par
+     * construireTrimestre dans `TableauNotation.normeDeLEleve`). Plein : la production compte dans la note ; contour :
+     * évaluée, non retenue ; pointillé : à saisir ou à venir. La double bordure noire des « retenues » est partie avec elle.
+     */
+    // LA LÉGENDE DE LA BANDE (Grégoire, 11 nov. 2026, 9 h 05, mot pour mot) : imprimée seulement quand la bande montre la
+    // norme du tableau (standards, spécifications). Ce sont les mots du PDF (« ta note ») : ceux du tableau et du profil
+    // restent les leurs.
+    const LEGENDE_DE_LA_BANDE = {
+        STD: ['Plein : compte dans ta note', 'Contour : évaluée, non retenue', 'Pointillé : à venir'],
+        SPE: ['✓ Acceptable', '✗ Non acceptable', 'Pointillé : à venir']
+    };
+
+    function legendeDeLaBande(trim) {
+        const famille = (trim.find(t => t && t.famille) || {}).famille;
+        const mots = LEGENDE_DE_LA_BANDE[famille];
+        if (!mots) return '';
+        return `<div data-legende-de-la-bande="" style="font-family: ${FONT_MONO}; font-size: 7px; line-height: 1.3; color: ${INK}; text-align: right;">${mots.map(m => `<div>${esc(m)}</div>`).join('')}</div>`;
+    }
+
+    // LE CONTOUR SUR PAPIER (11 nov. 2026, décision de Claude, relais du Projet de 9 h 08) : une fine bordure intérieure à
+    // l'encre, dans la bande du PDF seulement. Imprimée en niveaux de gris, une case en contour se distingue alors d'une case
+    // pleine du même niveau même quand sa couleur est claire. Au profil, à l'écran, la pastille reste celle du tableau.
+    const ENCRE_DU_CONTOUR = `box-sizing: border-box; width: 100%; height: 100%; border: 1px solid ${INK}; border-radius: 1px; display: flex; align-items: center; justify-content: center;`;
+
+    function styleDeLaCase(t, ctx, evaluee) {
+        const numero = t.n != null ? String(t.n) : '';
+        const pointille = { bg: 'transparent', color: MUTED, border: `1px dashed ${LINE}`, contenu: numero };
+        // La couleur : celle de l'échelle imprimée sur la page (sa légende des critères), pour qu'un même niveau n'y ait qu'une
+        // couleur ; sinon celle de la norme (✓ et ✗ des spécifications, un niveau absent de cette échelle).
+        const teinte = ctx.codeColor[t.libelle || t.code] || couleurImprimable(t.couleur) || MUTED;
+        if (t.forme === 'plein') return { bg: teinte, color: texteSur(teinte), border: `1px solid ${teinte}`, contenu: t.libelle || t.code || numero };
+        if (t.forme === 'contour') return { bg: PAPER, color: INK, border: `2px solid ${teinte}`, contenu: t.libelle || t.code || numero, encre: true };
+        if (t.forme === 'vide' || !evaluee) return pointille;
+        // Hors standards et spécifications : toute case évaluée est pleine, à la couleur de son niveau. L'artefact courant
+        // est marqué par un ▼ au-dessus de la case (indicateurHaut).
+        const fond = ctx.codeColor[t.code] || MUTED;
+        return { bg: fond, color: texteSur(fond), border: `1px solid ${fond}`, contenu: t.code || numero };
+    }
+
     function renderTrimestreBar(ctx) {
         const trim = ctx.feedback.trimestre || [];
         if (!trim.length) return '<div></div>';
@@ -201,31 +247,8 @@
             const done   = t.status === 'done';
             const todo   = t.status === 'todo';
 
-            let bg = 'transparent';
-            let color = MUTED;
-            // Bordure transparente par défaut (pour préserver les dimensions
-            // exactes du carré quand on ajoute une bordure noire pour les
-            // retenus, grâce à box-sizing: border-box).
-            let border = `1px dashed ${LINE}`;
-            let contenu = t.n != null ? String(t.n) : '';
-
-            if (active) {
-                // L'artefact courant est marqué par un ▼ au-dessus de la case
-                // (cf. indicateurHaut plus bas) ; la case elle-même prend la
-                // couleur IDME comme un done normal — plus de fond noir.
-                bg = ctx.codeColor[t.code] || MUTED; color = texteSur(bg); border = `1px solid ${bg}`;
-                contenu = t.code || (t.n != null ? String(t.n) : '');
-            } else if (done) {
-                bg = ctx.codeColor[t.code] || MUTED; color = texteSur(bg); border = `1px solid ${bg}`;
-                contenu = t.code || (t.n != null ? String(t.n) : '');
-            }
-
-            // Encadrement des artefacts retenus dans le portfolio : double bordure
-            // noire (override la bordure de fond ; box-sizing préserve 22×22 mais
-            // réduit l'espace intérieur à ~16px ce qui reste lisible pour 1 lettre IDME).
-            if (t.retenu) {
-                border = `3px double ${INK}`;
-            }
+            const { bg, color, border, contenu, encre } = styleDeLaCase(t, ctx, active || done);
+            const dedans = encre ? `<div style="${ENCRE_DU_CONTOUR}">${esc(contenu)}</div>` : esc(contenu);
 
             // Indicateur au-dessus de la case : ▼ pour l'artefact courant,
             // sinon ● si obligatoire, sinon espace vide pour préserver l'alignement.
@@ -253,7 +276,7 @@
             return `
                 <div style="width: 26px; display: flex; flex-direction: column; align-items: center; gap: 1px;">
                     ${indicateurHaut}
-                    <div style="box-sizing: border-box; width: 22px; height: 22px; border-radius: 2px; background: ${bg}; color: ${color}; border: ${border}; display: flex; align-items: center; justify-content: center; font-family: ${FONT_MONO}; font-weight: 700; font-size: 10px;">${esc(contenu)}</div>
+                    <div style="box-sizing: border-box; width: 22px; height: 22px; border-radius: 2px; background: ${bg}; color: ${color}; border: ${border}; display: flex; align-items: center; justify-content: center; font-family: ${FONT_MONO}; font-weight: 700; font-size: 10px;">${dedans}</div>
                     ${numero}
                     ${dateDue}
                 </div>`;
@@ -263,6 +286,7 @@
             <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 3px;">
                 <div style="font-family: ${FONT_MONO}; font-size: 7.5px; color: ${MUTED}; letter-spacing: 0.3px;">PROGRESSION · TRIMESTRE</div>
                 <div style="display: flex; gap: 2px;">${cases}</div>
+                ${legendeDeLaBande(trim)}
             </div>`;
     }
 

@@ -211,19 +211,48 @@
     touch-action: manipulation;   /* des touchers rapides font tourner les niveaux, sans zoomer (iPad) */
 }
 
-.tn-case--vide {
+/* La pastille (11 nov. 2026) : la case du tableau, en petit, pour les résultats d'une seule personne (profil, onglet
+   « Productions »). Mêmes formes que la case (règles ci-dessous, partagées) ; la norme vient de `normeDeLEleve`. */
+.tn-pastille {
+    --tn-couleur: var(--accent-primaire);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+    min-width: 34px;
+    height: 26px;
+    padding: 0 6px;
+    border-radius: 6px;
+    font-weight: 700;
+    color: var(--texte-principal);
+}
+
+.tn-pastille-note {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.tn-legende--profil {
+    margin-top: 12px;
+}
+
+.tn-case--vide,
+.tn-pastille--vide {
     background: transparent;
     border: 1px dashed var(--bordure-moyenne);
     color: var(--texte-secondaire);
     font-weight: 400;
 }
 
-.tn-case--plein {
+.tn-case--plein,
+.tn-pastille--plein {
     background: color-mix(in srgb, var(--tn-couleur) 45%, var(--surface-carte));
     border: 2px solid var(--tn-couleur);
 }
 
-.tn-case--contour {
+.tn-case--contour,
+.tn-pastille--contour {
     background: transparent;
     border: 2px solid var(--tn-couleur);
 }
