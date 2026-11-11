@@ -148,6 +148,12 @@
 > sous quel protocole l'application était ouverte, alors que c'est exactement ce qui départage les deux
 > affichages — il a fallu le déduire. Inscrit au BACKLOG : ajouter `location.protocol` au rapport de bug.
 
+## Corrigés (10 novembre 2026, soir — les bulles de l'en-tête repassent derrière ; corrigé dans le cloud, PR n° 16, fusionné sur le `main` local le 10 nov., pas en ligne)
+
+| # | Testeur | Date | Description | Correctif |
+|---|---------|------|-------------|-----------|
+| 1272 | Grégoire (constat sur captures, 1.242.0, build `1110-1423`) | 10 nov. 2026, 19 h | **En vue étendue, les bulles de l'en-tête disparaissent sous le logo, la navigation, le groupe et « Codex ».** | 2.7, mécanisme qui masque : le masque par colonne du nouvel en-tête (`masquerBullesSousLeContenu`, `js/main.js`) retiré ; les bulles restent derrière par le z-index (décision de Grégoire, 19 h 07) — `64a274681`. Banc : `tests/unit/sentinelle-en-tete-epure-2026-11-07.test.js`. Mesuré sous WebKit (démo, 1440 px) : aucun masque, et aux onze chevauchements bulle/élément de l'en-tête, l'élément est au-dessus. |
+
 ## Corrigés (10 novembre 2026 — « Aucun travail importé » sur Préparer ; corrigé dans le cloud, PR n° 15, fusionné sur le `main` local le 10 nov., pas en ligne)
 
 | # | Testeur | Date | Description | Correctif |
