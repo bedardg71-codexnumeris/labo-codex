@@ -1,4 +1,7 @@
 import { test } from '@playwright/test';
+import { releverLaBulle } from './harness/releve-bulle.js';
+// La bulle ne couvre jamais ses zones quand une place les laisse libres (Grégoire, 11 nov. 2026) : relevé à chaque essai.
+releverLaBulle(test);
 import { leParcoursEntier } from './harness/parcours-3-de-banc.js';
 
 // =======================================================================

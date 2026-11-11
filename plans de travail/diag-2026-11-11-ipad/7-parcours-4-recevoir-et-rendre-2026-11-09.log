@@ -1,0 +1,69 @@
+
+Running 4 tests using 1 worker
+
+  ✘  1 [webkit] › integration/parcours-4-recevoir-et-rendre-2026-11-09.spec.js:151:1 › « Recevoir les productions, rendre tes rétroactions », la voie des fichiers : deux remises (une à réunir), les tampons, le verrou, « Plus tard » et « Reprendre » à l’étape 8, l’export Léa (1180 px) (4.1m)
+  ✓  2 [webkit] › integration/parcours-4-recevoir-et-rendre-2026-11-09.spec.js:297:1 › « Recevoir les productions, rendre tes rétroactions », la voie sans fichier : « Rien à importer », « n sur 4 », retenue pour « Reprendre » et « Refaire » (1180 px) (30.7s)
+  ✓  3 [webkit] › integration/parcours-4-recevoir-et-rendre-2026-11-09.spec.js:350:1 › « Recevoir les productions, rendre tes rétroactions », étape 2 à 820 px (l’iPad en portrait) : la bulle sous les trois colonnes empilées et « Importer » (25.4s)
+  ✓  4 [webkit] › integration/parcours-4-recevoir-et-rendre-2026-11-09.spec.js:365:1 › « Recevoir les productions, rendre tes rétroactions » : sans production prête (la grille seule), le refus (7.8s)
+
+
+  1) [webkit] › integration/parcours-4-recevoir-et-rendre-2026-11-09.spec.js:151:1 › « Recevoir les productions, rendre tes rétroactions », la voie des fichiers : deux remises (une à réunir), les tampons, le verrou, « Plus tard » et « Reprendre » à l’étape 8, l’export Léa (1180 px) 
+
+    [31mTest timeout of 240000ms exceeded.[39m
+
+    Error: page.click: Test timeout of 240000ms exceeded.
+    Call log:
+    [2m  - waiting for locator('#wizard-v2-btn-suivant')[22m
+    [2m    - locator resolved to <button class="btn btn-principal" id="wizard-v2-btn-suivant" data-action="etapeSuivanteV2">↵                        Suivant →↵              …</button>[22m
+    [2m  - attempting click action[22m
+    [2m    2 × waiting for element to be visible, enabled and stable[22m
+    [2m      - element is visible, enabled and stable[22m
+    [2m      - scrolling into view if needed[22m
+    [2m      - done scrolling[22m
+    [2m      - <div role="dialog" tabindex="-1" aria-modal="false" id="parcours-bulle" class="parcours-bulle" aria-labelledby="parcours-bulle-titre">…</div> intercepts pointer events[22m
+    [2m    - retrying click action[22m
+    [2m    - waiting 20ms[22m
+    [2m    2 × waiting for element to be visible, enabled and stable[22m
+    [2m      - element is visible, enabled and stable[22m
+    [2m      - scrolling into view if needed[22m
+    [2m      - done scrolling[22m
+    [2m      - <div role="dialog" tabindex="-1" aria-modal="false" id="parcours-bulle" class="parcours-bulle" aria-labelledby="parcours-bulle-titre">…</div> intercepts pointer events[22m
+    [2m    - retrying click action[22m
+    [2m      - waiting 100ms[22m
+    [2m    396 × waiting for element to be visible, enabled and stable[22m
+    [2m        - element is visible, enabled and stable[22m
+    [2m        - scrolling into view if needed[22m
+    [2m        - done scrolling[22m
+    [2m        - <div role="dialog" tabindex="-1" aria-modal="false" id="parcours-bulle" class="parcours-bulle" aria-labelledby="parcours-bulle-titre">…</div> intercepts pointer events[22m
+    [2m      - retrying click action[22m
+    [2m        - waiting 500ms[22m
+    [2m    - waiting for element to be visible, enabled and stable[22m
+
+
+       at harness/parcours-3-de-banc.js:214
+
+      212 |     await page.click('#wizard-v2-btn-suivant');
+      213 |     await page.locator('#modalWizardPratiqueV2 input[name="modeleChoisi"][value="SOM-litterature"]').check({ force: true });
+    > 214 |     await page.click('#wizard-v2-btn-suivant');
+          |                ^
+      215 |     await page.click('#wizard-v2-btn-creer');
+      216 |
+      217 |     await etape(page, 6, "L'appliquer à ton cours", { focus: false });
+        at etapes5et6 (/Users/kuekatsheu/Documents/GitHub/labo-codex-fleches-apercu/tests/integration/harness/parcours-3-de-banc.js:214:16)
+        at leParcoursEntier (/Users/kuekatsheu/Documents/GitHub/labo-codex-fleches-apercu/tests/integration/harness/parcours-3-de-banc.js:356:5)
+        at espaceDuTroisiemeParcours (/Users/kuekatsheu/Documents/GitHub/labo-codex-fleches-apercu/tests/integration/parcours-4-recevoir-et-rendre-2026-11-09.spec.js:129:5)
+        at /Users/kuekatsheu/Documents/GitHub/labo-codex-fleches-apercu/tests/integration/parcours-4-recevoir-et-rendre-2026-11-09.spec.js:154:17
+
+    Error Context: ../plans de travail/diag-2026-11-11-ipad/7-results-parcours-4-recevoir-et-rendre-2026-11-09/parcours-4-recevoir-et-ren-949c8-ape-8-l’export-Léa-1180-px--webkit/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    ../plans de travail/diag-2026-11-11-ipad/7-results-parcours-4-recevoir-et-rendre-2026-11-09/parcours-4-recevoir-et-ren-949c8-ape-8-l’export-Léa-1180-px--webkit/trace.zip
+    Usage:
+
+        npx playwright show-trace "../plans de travail/diag-2026-11-11-ipad/7-results-parcours-4-recevoir-et-rendre-2026-11-09/parcours-4-recevoir-et-ren-949c8-ape-8-l’export-Léa-1180-px--webkit/trace.zip"
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  1 failed
+    [webkit] › integration/parcours-4-recevoir-et-rendre-2026-11-09.spec.js:151:1 › « Recevoir les productions, rendre tes rétroactions », la voie des fichiers : deux remises (une à réunir), les tampons, le verrou, « Plus tard » et « Reprendre » à l’étape 8, l’export Léa (1180 px) 
+  3 passed (5.2m)

@@ -1,4 +1,7 @@
 import { test, expect } from '@playwright/test';
+import { releverLaBulle } from './harness/releve-bulle.js';
+// La bulle ne couvre jamais ses zones quand une place les laisse libres (Grégoire, 11 nov. 2026) : relevé à chaque essai.
+releverLaBulle(test);
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -102,15 +105,6 @@ async function bulleNeCouvrePasLeContour(page) {
         return !(a.right <= b.left || b.right <= a.left || a.bottom <= b.top || b.bottom <= a.top);
     });
     expect(chevauche).toBe(false);
-}
-
-/** La bulle n'est pas posée sous (ni sur) le prochain bouton : aucune colonne commune avec lui. */
-async function bullePasSousLeBouton(page, selecteur, contexte) {
-    await expect.poll(() => page.evaluate((sel) => {
-        const a = document.querySelector(sel).getBoundingClientRect(), b = document.getElementById('parcours-bulle').getBoundingClientRect();
-        return a.right <= b.left + 1 || b.right <= a.left + 1 ? 'à côté'
-            : `sous le bouton (bulle de ${Math.round(b.left)} à ${Math.round(b.right)}, bouton de ${Math.round(a.left)} à ${Math.round(a.right)})`;
-    }, selecteur), { message: contexte + ' : la bulle n’est pas sous le prochain bouton' }).toBe('à côté');
 }
 
 // ↻ 9 nov. 2026 (lot du huitième parcours) : « Automatiser tes commentaires » s'inscrit au panneau ; le compte
@@ -238,14 +232,15 @@ test('« Découvrir » de bout en bout sur la démo, en faisant les gestes (1180
     await capture(page, 'decouvrir-4-1180-sombre');
     await bulle(page).getByRole('button', { name: 'Continuer' }).click();
 
-    // Étape 5 : la bulle au centre ; ce qu'il faut toucher, « Évaluation ».
+    // Étape 5 : ce qu'il faut toucher, « Évaluation » (la pulsation, sans flèche : 11 nov. 2026) ; la flèche va aux
+    // signaux, le badge de « Contexte d'apprentissage ».
     await attendreEtape(page, 5);
     await contourSur(page, '.navigation-boutons button[data-onglet="evaluations"]');
     // ↻ 10 nov. 2026 (« Les flèches des parcours ») : l'essai lisait ici le voile « dense », et à l'étape 6 le voile
     // « léger ». Le voile est retiré. À sa place : la pulsation sur ce qu'il faut toucher, la flèche vers ce dont parle
     // la bulle, la section actuelle mise en évidence, et plus rien qui retienne le toucher.
     expect((await styleDuContour(page)).animation).toBe('parcours-pulsation');
-    await flecheVers(page, '.navigation-boutons button[data-onglet="evaluations"]', 'étape 5');
+    await flecheVers(page, '#profil-contenu-dynamique .profil-carte:has([data-tooltip="profil-accomp-contexte"]) .badge-sys', 'étape 5');
     await sectionActuelleSur(page, '.navigation-boutons button[data-onglet="suivi"]', 'étape 5');
     await rienNeRetientLeToucher(page, [[12, 300], [600, 700], [1100, 400]], 'étape 5');
     await capture(page, 'decouvrir-5-1180-sombre');
@@ -257,9 +252,11 @@ test('« Découvrir » de bout en bout sur la démo, en faisant les gestes (1180
     await expect(page.locator('#evaluations-importer')).toBeVisible();
     await contourSur(page, '.navigation-boutons button[data-onglet="conception"]');
     await flecheVers(page, '.navigation-boutons button[data-onglet="evaluations"]', 'étape 6');
+    await flecheVers(page, '#travaux-drop-zone', 'étape 6, la zone de dépôt');
     await sectionActuelleSur(page, '.navigation-boutons button[data-onglet="evaluations"]', 'étape 6');
+    // ↻ 11 nov. 2026 : « pas sous le prochain bouton » (9 nov.) cède à la règle de l'iPad — la bulle au bord le plus
+    // éloigné de ses zones, sans les couvrir ni couvrir le contour (le relevé de la bulle le juge à chaque étape).
     await bulleNeCouvrePasLeContour(page);
-    await bullePasSousLeBouton(page, '.navigation-boutons button[data-onglet="conception"]', 'étape 6');
     await capture(page, 'decouvrir-6-1180-sombre');
     await page.click('.navigation-boutons button[data-onglet="conception"]');
 
@@ -268,18 +265,21 @@ test('« Découvrir » de bout en bout sur la démo, en faisant les gestes (1180
     await expect(page.locator('#conception-materiel')).toBeVisible();
     await contourSur(page, '.navigation-boutons button[data-onglet="calendrier"]');
     await flecheVers(page, '.navigation-boutons button[data-onglet="conception"]', 'étape 7');
+    await flecheVers(page, '#section-conception .materiel-intro p', 'étape 7, « Ton matériel existe déjà ? »');
     await sectionActuelleSur(page, '.navigation-boutons button[data-onglet="conception"]', 'étape 7');
-    await bullePasSousLeBouton(page, '.navigation-boutons button[data-onglet="calendrier"]', 'étape 7');
+    await bulleNeCouvrePasLeContour(page);
     await capture(page, 'decouvrir-7-1180-sombre');
     await page.click('.navigation-boutons button[data-onglet="calendrier"]');
 
-    // Étape 8 : Cadre › Trimestre, la bulle au centre, deux boutons, pas de lien de sortie.
+    // Étape 8 : Cadre › Trimestre, deux boutons, pas de lien de sortie. ↻ 11 nov. 2026 : la bulle n'est plus au centre
+    // (elle couvrait la barre d'étapes qu'elle explique) ; deux flèches, vers la barre et vers « Cadre ».
     await attendreEtape(page, 8);
     await expect(page.locator('#calendrier-trimestre')).toBeVisible();
     await expect(bulle(page).locator('.parcours-bulle-sortie')).toHaveCount(0);
     await expect(bulle(page).locator('.parcours-bulle-boutons button')).toHaveText(['Commencer avec ma classe', "Continuer d'explorer la démo"]);
-    // Rien de désigné : ni flèche, ni pulsation, ni section mise en évidence.
-    expect((await etatFleches(page)).fleches).toEqual([]);
+    // Rien à toucher dans la page : ni pulsation, ni section mise en évidence.
+    await flecheVers(page, '.navigation-boutons button[data-onglet="calendrier"]', 'étape 8, la section');
+    await flecheVers(page, '#section-calendrier :has(> .bc-etape)', 'étape 8, la barre d’étapes');
     await expect(page.locator('#parcours-contour')).toBeHidden();
     await expect(page.locator('.parcours-section-actuelle')).toHaveCount(0);
     await capture(page, 'decouvrir-8-1180-sombre');

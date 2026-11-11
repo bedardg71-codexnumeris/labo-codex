@@ -318,6 +318,7 @@
         ligne: LIGNE,
         total: ETAPES.length,
         refus: function () { return aUnTrimestreReel() ? null : REFUS_SANS_TRIMESTRE; },
+        prealable: 'classe',
         lancer: lancer
     });
 

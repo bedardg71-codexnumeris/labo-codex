@@ -320,7 +320,13 @@
                 await ouvrirProfil(memoire.da, 'mobilisation');
                 await attendre(function () { return carteQuiCommencePar('Complétion'); }, 2000);
             },
-            zones: function () { return [carteQuiCommencePar('Assiduité'), carteQuiCommencePar('Complétion')].filter(Boolean); },
+            // 11 nov. 2026 : ce que nomme la bulle, pas les cartes entières — les absences datées, sous Assiduité ; les
+            // productions remises et manquantes, sous Complétion.
+            zones: function () {
+                return [carteQuiCommencePar('Assiduité'), carteQuiCommencePar('Complétion')].filter(Boolean).reduce(function (z, c) {
+                    return z.concat([].slice.call(c.querySelectorAll('.badges-centres')));
+                }, []);
+            },
             // Les pastilles d'absence et de production ne répondent pas : touchées, elles quittent le profil.
             gardes: function () { return actionsDans([carteQuiCommencePar('Assiduité'), carteQuiCommencePar('Complétion')]); },
             contour: function () { return ongletProfil('accompagnement'); },
@@ -333,7 +339,12 @@
                 await ouvrirProfil(memoire.da, 'accompagnement');
                 await attendre(carteRai, 2000);
             },
-            zones: function () { return [carteContexte(), carteRai()].filter(Boolean); },
+            // 11 nov. 2026 : la phrase du contexte, le niveau, le défi principal, que nomme la bulle.
+            zones: function () {
+                var c = carteContexte(), r = carteRai();
+                var defi = r ? [].slice.call(r.querySelectorAll('p')).find(function (p) { return /D\u00e9fi principal/.test(p.textContent); }) : null;
+                return [c && c.querySelector('.badge-sys'), r && r.querySelector('.badge-sys'), defi].filter(Boolean);
+            },
             // Rien à toucher dans la page : les liens des deux cartes ne répondent pas.
             gardes: function () { return actionsDans([carteContexte(), carteRai()]); },
             boutons: [{
@@ -509,6 +520,8 @@
         ligne: "Avant chaque cours, voir qui a besoin de toi et de quoi ; puis, si tu le décides, noter une intervention.",
         total: ETAPES.length,
         refus: refus,
+        // Seul le refus « sans présences » renvoie à un parcours ; les autres disent un réglage ou un mode.
+        prealable: function (raison) { return raison === REFUS.sansPresences ? 'classe' : null; },
         lancer: lancer
     });
 

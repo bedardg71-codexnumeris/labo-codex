@@ -18,6 +18,11 @@
    Rien ne démarre de lui-même : un parcours se lance par « Commencer », « Reprendre »
    ou « Refaire ».
 
+   LE REFUS MONTRE OÙ COMMENCER (Grégoire, 11 nov. 2026, sur l'iPad : le toucher semblait ne rien faire) : une
+   définition déclare `prealable` (l'id du parcours qu'il faut avoir fait, ou une fonction du motif qui le rend) ;
+   au refus, la pulsation des parcours va sur le bouton du premier parcours non fait de la chaîne des préalables.
+   Le motif reste dessous, mot pour mot ; lui ne pulse pas, on ne le touche pas.
+
    Un parcours qui déclare `grandEcranSeulement: true` (lot « La bulle sur téléphone »,
    9 nov. 2026) n'est pas proposé sur téléphone (ParcoursMoteur.surTelephone, 500 px) : sous son
    titre, le texte validé par Grégoire, et son bouton ne lance rien.
@@ -171,7 +176,7 @@
             // lue dans les données au toucher. Refusé, le parcours ne part pas : le panneau reste
             // ouvert et dit pourquoi, sous le bouton.
             var raison = typeof def.refus === 'function' ? def.refus() : null;
-            if (raison) { direRefus(corps, raison); return; }
+            if (raison) { direRefus(corps, raison); appelerPrealable(def, raison); return; }
             var depuis = e.etat === 'en-cours' ? e.etape : 0;
             fermerPanneau({ sansRetourFocus: true });
             def.lancer(depuis);
@@ -219,6 +224,44 @@
             corps.appendChild(p);
         }
         p.textContent = texte;
+    }
+
+    function definitionDe(id) {
+        return registre.find(function (p) { return p.id === id; }) || null;
+    }
+
+    function prealableDe(def, raison) {
+        if (!def) return null;
+        return (typeof def.prealable === 'function' ? def.prealable(raison) : def.prealable) || null;
+    }
+
+    /**
+     * Le parcours à faire d'abord : le premier non fait de la chaîne des préalables, en partant de sa racine. Une
+     * chaîne toute faite (les données ont pu changer depuis) : le préalable direct. Rien si aucun n'est déclaré.
+     */
+    function parcoursAFaireDAbord(def, raison) {
+        var chaine = [];
+        var id = prealableDe(def, raison);
+        while (id && chaine.indexOf(id) === -1 && definitionDe(id)) {
+            chaine.unshift(id);
+            id = prealableDe(definitionDe(id));
+        }
+        if (!chaine.length) return null;
+        return chaine.find(function (x) { return etatDe(x).etat !== 'fait'; }) || chaine[chaine.length - 1];
+    }
+
+    /** Au refus : la pulsation sur le bouton du parcours à faire d'abord, et sur lui seul. */
+    function appelerPrealable(def, raison) {
+        var liste = document.getElementById('assistance-parcours-liste');
+        if (!liste) return;
+        [].forEach.call(liste.querySelectorAll('.assistance-parcours-bouton--appel'), function (b) {
+            b.classList.remove('assistance-parcours-bouton--appel');
+        });
+        var id = parcoursAFaireDAbord(def, raison);
+        var b = id ? liste.querySelector('[data-parcours="' + id + '"] .assistance-parcours-bouton') : null;
+        if (!b) return;
+        b.classList.add('assistance-parcours-bouton--appel');
+        if (typeof b.scrollIntoView === 'function') b.scrollIntoView({ block: 'nearest' });
     }
 
     function construirePanneau() {

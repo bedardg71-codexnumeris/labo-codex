@@ -561,6 +561,10 @@ body.parcours-actif .transition-bandeau { display: none; }
     line-height: 1.45;
 }
 
+/* Au refus (11 nov. 2026, Grégoire) : la pulsation des parcours sur le bouton du parcours à faire d'abord. Le motif,
+   dessous, ne pulse pas : on ne le touche pas. */
+.assistance-parcours-bouton--appel { animation: parcours-pulsation 2.6s ease-in-out infinite; }
+
 .assistance-parcours-bouton:hover { background: rgba(106, 172, 184, 0.15); }
 
 .assistance-parcours-bouton--plein:hover { background: var(--acc-surface); }
@@ -654,6 +658,11 @@ body.parcours-actif .transition-bandeau { display: none; }
         animation: none;
         box-shadow: none;
         border: 3px dashed var(--parcours-contour);
+    }
+    .assistance-parcours-bouton--appel {
+        animation: none;
+        outline: 3px dashed var(--parcours-contour);
+        outline-offset: 3px;
     }
     .assistance-panneau,
     .assistance-interrupteur::before,

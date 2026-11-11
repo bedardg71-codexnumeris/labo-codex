@@ -578,6 +578,7 @@
         // Sur la voie sans fichier, le panneau compte « n sur 4 » (tranché par Cowork).
         get total() { return VOIES[voie()].length; },
         refus: condition,
+        prealable: 'evaluer',
         lancer: lancer
     });
 

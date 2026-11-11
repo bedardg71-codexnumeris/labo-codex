@@ -1,0 +1,18 @@
+parcours-1-et-2-2026-11-08 · mémoire libre 75 % · 06:56:01
+  1 failed   1 skipped   6 passed (25.3s) 
+parcours-2-ma-classe-2026-11-09 · mémoire libre 75 % · 06:56:27
+  1 skipped   3 passed (30.2s) 
+parcours-3-evaluer-2026-11-09 · mémoire libre 74 % · 06:56:58
+    Error: expect(locator).toBeInViewport() failed     Error: expect(locator).toBeInViewport() failed     Error: expect(locator).toBeInViewport() failed     Error: expect(locator).toBeInViewport() failed   4 failed 
+parcours-4-recevoir-et-rendre-2026-11-09 · mémoire libre 74 % · 06:58:31
+    Error: expect(locator).toBeInViewport() failed   1 failed   3 passed (1.5m) 
+parcours-5-monter-ton-cours-2026-11-09 · mémoire libre 72 % · 07:00:02
+  3 passed (1.1m) 
+parcours-6-donnees-a-l-abri-2026-11-09 · mémoire libre 70 % · 07:01:09
+  8 failed   6 passed (44.1s) 
+parcours-7-lire-ta-classe-2026-11-09 · mémoire libre 71 % · 07:01:53
+  3 skipped   7 passed (1.5m) 
+parcours-8-commentaires-2026-11-09 · mémoire libre 71 % · 07:03:21
+  3 failed   5 skipped   7 passed (1.3m) 
+parcours-9-notation-alternative-2026-11-09 · mémoire libre 69 % · 07:04:38
+  5 skipped   16 passed (1.0m) 

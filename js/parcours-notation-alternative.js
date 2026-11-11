@@ -318,7 +318,9 @@
      * moins. Le coût d'une place : l'aire qu'elle couvre de chaque garde, multipliée par son poids. Les places essayées :
      * celles que l'étape propose d'abord (`places`, chacune avec sa hauteur bornée au besoin : la bulle défile alors),
      * puis neuf places (trois colonnes, trois rangées, sous l'en-tête). La place du moteur reste si elle ne couvre rien.
-     * Même règle que le huitième parcours (`bulleHors`), propre à ce fichier : le moteur n'est pas touché ; à unifier.
+     * Propre à cette étape : ses places proposées (hauteur bornée) passent avant. Le huitième parcours avait la même règle
+     * (`bulleHors`), retirée le 11 nov. 2026 quand le moteur a pris le moindre recouvrement, le contour pesé ; celle-ci
+     * reste, à unifier avec le moteur (le relevé de la bulle la juge, vert le 11 nov.).
      * @param {Array<{el: Element, poids: number}>} gardes
      * @param {Array<{x: number, y: number, hauteur?: number}>} [places]
      */
@@ -829,6 +831,7 @@
         ligne: LIGNE,
         get total() { return cheminDe(lireCtx()).length; },
         refus: motifRefus,
+        prealable: 'evaluer',
         lancer: lancer
     });
 

@@ -23,7 +23,7 @@ const css = lire('css/parcours.css');
 // Le moteur ne touche au DOM qu'à l'appel : chargé dans une fenêtre vide, il expose sa géométrie.
 const fenetre = {};
 new Function('window', 'document', moteur)(fenetre, {});
-const { tracerFleche, grouperCibles, bornerDeplacement } = fenetre.ParcoursMoteur.geometrie;
+const { tracerFleche, grouperCibles, bornerDeplacement, placerLoin } = fenetre.ParcoursMoteur.geometrie;
 
 const ECRAN = { largeur: 1180, hauteur: 820 };
 const BULLE = { left: 400, top: 300, right: 780, bottom: 520 };
@@ -165,6 +165,85 @@ describe('Le déplacement de la bulle', () => {
 
     it('une bulle plus haute que l’écran utile se cale en haut', () => {
         expect(bornerDeplacement(300, 400, 380, 900, CADRE)).toEqual({ x: 300, y: 72 });
+    });
+});
+
+describe('La place de la bulle : loin de ce dont elle parle, sans le couvrir (Grégoire, 11 nov. 2026)', () => {
+    // L'ORACLE, indépendant du moteur : toutes les places de l'écran utile, au pas de 4 px, et le plus petit
+    // recouvrement qu'on peut y atteindre. Le moteur doit faire au moins aussi bien : aucun recouvrement quand une place
+    // libre existe ; sinon, pas plus que le plus petit (à la tolérance du pas près, qui ne joue qu'en faveur de l'oracle).
+    const aire = (p, rs) => rs.reduce((t, r) => {
+        const l = Math.min(p.right, r.right) - Math.max(p.left, r.left), h = Math.min(p.bottom, r.bottom) - Math.max(p.top, r.top);
+        return t + (l > 0 && h > 0 ? l * h : 0);
+    }, 0);
+    const oracle = (rs, bw, bh, c) => {
+        let min = Infinity;
+        for (let x = c.gauche; x <= c.droite - bw; x += 4) {
+            for (let y = c.haut; y <= Math.max(c.haut, c.bas - bh); y += 4) {
+                min = Math.min(min, aire({ left: x, top: y, right: x + bw, bottom: y + bh }, rs));
+            }
+        }
+        return min;
+    };
+    // Un générateur déterministe (les mêmes cas à chaque course).
+    const hasard = (graine) => () => { graine = (graine * 1103515245 + 12345) % 2147483648; return graine / 2147483648; };
+    const ECRANS = {
+        'l’iPad en paysage, 1180 × 820': { gauche: 8, haut: 72, droite: 1172, bas: 812 },
+        'l’iPad en portrait, 820 × 1180': { gauche: 8, haut: 72, droite: 812, bas: 1172 }
+    };
+
+    for (const [nom, cadre] of Object.entries(ECRANS)) {
+        it(`${nom} : 300 dispositions au hasard, jamais plus couverte que le moindre recouvrement possible`, () => {
+            const h = hasard(nom.length * 7919);
+            let libres = 0, contraintes = 0;
+            for (let k = 0; k < 300; k++) {
+                const W = cadre.droite - cadre.gauche, H = cadre.bas - cadre.haut;
+                const n = 1 + Math.floor(h() * 4);
+                const zones = Array.from({ length: n }, () => {
+                    const w = 40 + h() * W * 0.5, hh = 24 + h() * H * 0.35;
+                    const x = cadre.gauche + h() * (W - w), y = cadre.haut + h() * (H - hh);
+                    return rect(Math.round(x), Math.round(y), Math.round(x + w), Math.round(y + hh));
+                });
+                const bw = 380, bh = 160 + Math.round(h() * 340);
+                const p = placerLoin(zones, bw, bh, cadre);
+                const place = { left: p.x, top: p.y, right: p.x + bw, bottom: p.y + bh };
+                // Dans l'écran utile.
+                expect(place.left).toBeGreaterThanOrEqual(cadre.gauche);
+                expect(place.right).toBeLessThanOrEqual(cadre.droite);
+                expect(place.top).toBeGreaterThanOrEqual(cadre.haut);
+                const min = oracle(zones, bw, bh, cadre);
+                const couvert = aire(place, zones);
+                if (min === 0) { libres++; expect(couvert, `cas ${k} : une place libre existe`).toBe(0); }
+                else { contraintes++; expect(couvert, `cas ${k} : le moindre recouvrement`).toBeLessThanOrEqual(min + 1); }
+            }
+            // Le banc a bien vu les deux familles de cas.
+            expect(libres).toBeGreaterThan(50);
+            expect(contraintes).toBeGreaterThan(5);
+        });
+    }
+
+    it('au bord le plus éloigné : la zone à gauche, la bulle va à droite ; la zone en haut à droite, la bulle en bas à gauche', () => {
+        const c = ECRANS['l’iPad en paysage, 1180 × 820'];
+        const p1 = placerLoin([rect(70, 300, 470, 420)], 380, 300, c);
+        expect(p1.x).toBe(c.droite - 380);
+        const p2 = placerLoin([rect(800, 80, 1150, 200)], 380, 300, c);
+        expect(p2).toMatchObject({ x: c.gauche, y: c.bas - 300 });
+    });
+
+    it('les cas de l’iPad du 11 nov. : une carte au milieu de l’écran n’est jamais sous la bulle', () => {
+        // « Découvrir » 7 (les onglets de Conception et la carte 2) ; 8 (la barre d'étapes du cadre) ; « Mettre ta classe
+        // en place » 1 (les champs de dates).
+        const c = ECRANS['l’iPad en paysage, 1180 × 820'];
+        for (const zones of [[rect(380, 90, 900, 130), rect(110, 380, 384, 405)], [rect(125, 295, 1053, 325)], [rect(70, 294, 584, 426)]]) {
+            const p = placerLoin(zones, 380, 360, c);
+            expect(aire({ left: p.x, top: p.y, right: p.x + 380, bottom: p.y + 360 }, zones)).toBe(0);
+        }
+    });
+
+    it('est déterministe : les mêmes rectangles rendent la même place', () => {
+        const c = ECRANS['l’iPad en portrait, 820 × 1180'];
+        const z = [rect(100, 200, 700, 600), rect(50, 700, 760, 1100)];
+        expect(placerLoin(z, 380, 400, c)).toEqual(placerLoin(z, 380, 400, c));
     });
 });
 

@@ -1,0 +1,18 @@
+
+Running 12 tests using 1 worker
+
+  -   1 [webkit] › integration/parcours-fleches-2026-11-10.spec.js:130:9 › captures de « Découvrir », étapes 3, 5, 6 et 7, et une bulle déplacée (1180-sombre)
+  -   2 [webkit] › integration/parcours-fleches-2026-11-10.spec.js:130:9 › captures de « Découvrir », étapes 3, 5, 6 et 7, et une bulle déplacée (1180-clair)
+  -   3 [webkit] › integration/parcours-fleches-2026-11-10.spec.js:130:9 › captures de « Découvrir », étapes 3, 5, 6 et 7, et une bulle déplacée (820-sombre)
+  -   4 [webkit] › integration/parcours-fleches-2026-11-10.spec.js:130:9 › captures de « Découvrir », étapes 3, 5, 6 et 7, et une bulle déplacée (820-clair)
+  ✓   5 [webkit] › integration/parcours-fleches-2026-11-10.spec.js:156:1 › étapes 3, 6 et 7 de « Découvrir » : la flèche va à ce dont parle la bulle, la pulsation à ce qu’il faut toucher, et la page se touche partout (1180 px) (2.7s)
+  ✓   6 [webkit] › integration/parcours-fleches-2026-11-10.spec.js:203:1 › prefers-reduced-motion : la pulsation devient un contour pointillé fixe (1.6s)
+  ✓   7 [webkit] › integration/parcours-fleches-2026-11-10.spec.js:210:1 › la flèche suit le défilement et le redimensionnement ; une cible sortie de l’écran : la flèche va au bord, de son côté (2.1s)
+  ✓   8 [webkit] › integration/parcours-fleches-2026-11-10.spec.js:251:5 › les huit étapes de « Découvrir » à 1180 × 820 : la bulle ne couvre pas ses zones, chaque flèche va à une zone, aucune au bouton à toucher (9.3s)
+  ✓   9 [webkit] › integration/parcours-fleches-2026-11-10.spec.js:251:5 › les huit étapes de « Découvrir » à 820 × 1180 : la bulle ne couvre pas ses zones, chaque flèche va à une zone, aucune au bouton à toucher (10.3s)
+  ✓  10 [webkit] › integration/parcours-fleches-2026-11-10.spec.js:285:1 › la poignée : 46 px, à la souris et au doigt ; la bulle reste dans l’écran utile ; les flèches suivent ; cachée, la cible n’a plus de flèche ; l’étape suivante replace la bulle (3.9s)
+  ✓  11 [webkit] › integration/parcours-fleches-2026-11-10.spec.js:390:1 › la poignée au clavier : les flèches déplacent la bulle de 16 px sans changer de page de bulle ; sur la bulle, elles changent de page (2.2s)
+  ✓  12 [webkit] › integration/parcours-fleches-2026-11-10.spec.js:426:1 › téléphone (390 px) : pas de poignée, la bulle garde sa forme rangée et repliable ; aucune couche ne retient le toucher (1.9s)
+
+  4 skipped
+  8 passed (35.6s)

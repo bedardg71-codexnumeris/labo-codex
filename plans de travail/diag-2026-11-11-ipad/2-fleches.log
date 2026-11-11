@@ -1,0 +1,108 @@
+System-wide memory free percentage: 74%
+
+Running 12 tests using 1 worker
+
+  -   1 [webkit] › integration/parcours-fleches-2026-11-10.spec.js:114:9 › captures de « Découvrir », étapes 3, 5, 6 et 7, et une bulle déplacée (1180-sombre)
+  -   2 [webkit] › integration/parcours-fleches-2026-11-10.spec.js:114:9 › captures de « Découvrir », étapes 3, 5, 6 et 7, et une bulle déplacée (1180-clair)
+  -   3 [webkit] › integration/parcours-fleches-2026-11-10.spec.js:114:9 › captures de « Découvrir », étapes 3, 5, 6 et 7, et une bulle déplacée (820-sombre)
+  -   4 [webkit] › integration/parcours-fleches-2026-11-10.spec.js:114:9 › captures de « Découvrir », étapes 3, 5, 6 et 7, et une bulle déplacée (820-clair)
+  ✓   5 [webkit] › integration/parcours-fleches-2026-11-10.spec.js:140:1 › étapes 3, 6 et 7 de « Découvrir » : la flèche va à ce dont parle la bulle, la pulsation à ce qu’il faut toucher, et la page se touche partout (1180 px) (3.0s)
+  ✓   6 [webkit] › integration/parcours-fleches-2026-11-10.spec.js:187:1 › prefers-reduced-motion : la pulsation devient un contour pointillé fixe (1.6s)
+  ✓   7 [webkit] › integration/parcours-fleches-2026-11-10.spec.js:194:1 › la flèche suit le défilement et le redimensionnement ; une cible sortie de l’écran : la flèche va au bord, de son côté (2.2s)
+  ✘   8 [webkit] › integration/parcours-fleches-2026-11-10.spec.js:235:5 › les huit étapes de « Découvrir » à 1180 × 820 : la bulle ne couvre pas ses zones, chaque flèche va à une zone, aucune au bouton à toucher (3.7s)
+  ✘   9 [webkit] › integration/parcours-fleches-2026-11-10.spec.js:235:5 › les huit étapes de « Découvrir » à 820 × 1180 : la bulle ne couvre pas ses zones, chaque flèche va à une zone, aucune au bouton à toucher (3.7s)
+  ✘  10 [webkit] › integration/parcours-fleches-2026-11-10.spec.js:265:1 › la poignée : 46 px, à la souris et au doigt ; la bulle reste dans l’écran utile ; les flèches suivent ; cachée, la cible n’a plus de flèche ; l’étape suivante replace la bulle (2.4s)
+  ✓  11 [webkit] › integration/parcours-fleches-2026-11-10.spec.js:363:1 › la poignée au clavier : les flèches déplacent la bulle de 16 px sans changer de page de bulle ; sur la bulle, elles changent de page (2.3s)
+  ✓  12 [webkit] › integration/parcours-fleches-2026-11-10.spec.js:408:1 › téléphone (390 px) : pas de poignée, la bulle garde sa forme rangée et repliable ; aucune couche ne retient le toucher (1.9s)
+
+
+  1) [webkit] › integration/parcours-fleches-2026-11-10.spec.js:235:5 › les huit étapes de « Découvrir » à 1180 × 820 : la bulle ne couvre pas ses zones, chaque flèche va à une zone, aucune au bouton à toucher 
+
+    Error: [2mexpect([22m[31mreceived[39m[2m).[22mtoBeGreaterThanOrEqual[2m([22m[32mexpected[39m[2m)[22m
+
+    Expected: >= [32m8[39m
+    Received:    [31m6[39m
+
+      257 |         }
+      258 |         // Le relevé a bien regardé les huit bulles.
+    > 259 |         expect((await bullesRelevees(page)).filter((v) => v.includes(`${largeur} × ${hauteur}`)).length).toBeGreaterThanOrEqual(8);
+          |                                                                                                          ^
+      260 |     });
+      261 | }
+      262 |
+        at /Users/kuekatsheu/Documents/GitHub/labo-codex-fleches-apercu/tests/integration/parcours-fleches-2026-11-10.spec.js:259:106
+
+    Error Context: ../plans de travail/diag-2026-11-11-ipad/2-results/parcours-fleches-2026-11-1-afec5--aucune-au-bouton-à-toucher-webkit/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    ../plans de travail/diag-2026-11-11-ipad/2-results/parcours-fleches-2026-11-1-afec5--aucune-au-bouton-à-toucher-webkit/trace.zip
+    Usage:
+
+        npx playwright show-trace "../plans de travail/diag-2026-11-11-ipad/2-results/parcours-fleches-2026-11-1-afec5--aucune-au-bouton-à-toucher-webkit/trace.zip"
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  2) [webkit] › integration/parcours-fleches-2026-11-10.spec.js:235:5 › les huit étapes de « Découvrir » à 820 × 1180 : la bulle ne couvre pas ses zones, chaque flèche va à une zone, aucune au bouton à toucher 
+
+    Error: [2mexpect([22m[31mreceived[39m[2m).[22mtoBeGreaterThanOrEqual[2m([22m[32mexpected[39m[2m)[22m
+
+    Expected: >= [32m8[39m
+    Received:    [31m6[39m
+
+      257 |         }
+      258 |         // Le relevé a bien regardé les huit bulles.
+    > 259 |         expect((await bullesRelevees(page)).filter((v) => v.includes(`${largeur} × ${hauteur}`)).length).toBeGreaterThanOrEqual(8);
+          |                                                                                                          ^
+      260 |     });
+      261 | }
+      262 |
+        at /Users/kuekatsheu/Documents/GitHub/labo-codex-fleches-apercu/tests/integration/parcours-fleches-2026-11-10.spec.js:259:106
+
+    Error Context: ../plans de travail/diag-2026-11-11-ipad/2-results/parcours-fleches-2026-11-1-b14b9--aucune-au-bouton-à-toucher-webkit/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    ../plans de travail/diag-2026-11-11-ipad/2-results/parcours-fleches-2026-11-1-b14b9--aucune-au-bouton-à-toucher-webkit/trace.zip
+    Usage:
+
+        npx playwright show-trace "../plans de travail/diag-2026-11-11-ipad/2-results/parcours-fleches-2026-11-1-b14b9--aucune-au-bouton-à-toucher-webkit/trace.zip"
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  3) [webkit] › integration/parcours-fleches-2026-11-10.spec.js:265:1 › la poignée : 46 px, à la souris et au doigt ; la bulle reste dans l’écran utile ; les flèches suivent ; cachée, la cible n’a plus de flèche ; l’étape suivante replace la bulle 
+
+    Error: [2mexpect([22m[31mreceived[39m[2m).[22mtoEqual[2m([22m[32mexpected[39m[2m) // deep equality[22m
+
+    [32m- Expected  - 1[39m
+    [31m+ Received  + 1[39m
+
+    [2m  Array [[22m
+    [2m    150,[22m
+    [32m-   220,[39m
+    [31m+   171,[39m
+    [2m  ][22m
+
+      287 |     await page.mouse.up();
+      288 |     const b1 = await rectDe(page, '#parcours-bulle');
+    > 289 |     expect([Math.round(b1.left - b0.left), Math.round(b1.top - b0.top)]).toEqual(geste);
+          |                                                                          ^
+      290 |     await flecheVers(page, NAV('evaluations'), 'la bulle déplacée');
+      291 |     // La place est gardée pour l'étape : deux passages de la sonde ne la reprennent pas.
+      292 |     await page.waitForFunction(() => { window.__n = (window.__n || 0) + 1; return window.__n > 3; }, null, { polling: 150 });
+        at /Users/kuekatsheu/Documents/GitHub/labo-codex-fleches-apercu/tests/integration/parcours-fleches-2026-11-10.spec.js:289:74
+
+    Error Context: ../plans de travail/diag-2026-11-11-ipad/2-results/parcours-fleches-2026-11-1-2c948-e-suivante-replace-la-bulle-webkit/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    ../plans de travail/diag-2026-11-11-ipad/2-results/parcours-fleches-2026-11-1-2c948-e-suivante-replace-la-bulle-webkit/trace.zip
+    Usage:
+
+        npx playwright show-trace "../plans de travail/diag-2026-11-11-ipad/2-results/parcours-fleches-2026-11-1-2c948-e-suivante-replace-la-bulle-webkit/trace.zip"
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  3 failed
+    [webkit] › integration/parcours-fleches-2026-11-10.spec.js:235:5 › les huit étapes de « Découvrir » à 1180 × 820 : la bulle ne couvre pas ses zones, chaque flèche va à une zone, aucune au bouton à toucher 
+    [webkit] › integration/parcours-fleches-2026-11-10.spec.js:235:5 › les huit étapes de « Découvrir » à 820 × 1180 : la bulle ne couvre pas ses zones, chaque flèche va à une zone, aucune au bouton à toucher 
+    [webkit] › integration/parcours-fleches-2026-11-10.spec.js:265:1 › la poignée : 46 px, à la souris et au doigt ; la bulle reste dans l’écran utile ; les flèches suivent ; cachée, la cible n’a plus de flèche ; l’étape suivante replace la bulle 
+  4 skipped
+  5 passed (24.1s)

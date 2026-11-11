@@ -1,0 +1,8 @@
+
+Running 3 tests using 1 worker
+
+  ✓  1 [webkit] › integration/parcours-5-monter-ton-cours-2026-11-09.spec.js:211:1 › « Monter ton cours » : les sept étapes, la variante ⚠, « Plus tard » et « Reprendre » à l’étape 4 (1180 px) (48.5s)
+  ✓  2 [webkit] › integration/parcours-5-monter-ton-cours-2026-11-09.spec.js:408:1 › « Monter ton cours » : sans production, le refus ; les deux pages du guide ; le panneau à 390 px (9.5s)
+  ✓  3 [webkit] › integration/parcours-5-monter-ton-cours-2026-11-09.spec.js:440:5 › Les cercles d’attache au doigt (question 10) › sous `pointer: coarse`, chaque cercle et la poignée ⠿ portent une zone de 44 px tournée vers l’extérieur ; leur dessin ne change pas (7.8s)
+
+  3 passed (1.1m)

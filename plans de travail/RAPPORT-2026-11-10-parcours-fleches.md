@@ -4,12 +4,97 @@
 `origin/main` à `77679dd` (1.241.0), poussée, non fusionnée. Consigne :
 `plans de travail/CONSIGNE-LOT-2026-11-09-parcours-fleches.md`, avec les trois ajouts de Cowork du 10 nov., 11 h 30.
 
-**Dernier relais : 11 nov., 6 h 15, Mac, WebKit.** Branche **poussée** (`24fdc8c65`, hook contourné, voir
-dessous) ; aperçu de la PR n° 17 prêt à 6 h 03 sur ce commit. Les deux rouges sans explication, rejoués seuls :
-`parcours-8` l. 557, **non reproduit** (12 verts sur 12, `main` et `902d01774`) ; `parcours-fleches` l. 321,
-**instable, cause mesurée : le banc**. Restent avant toute fusion dans `main` : deux rouges Vitest du correctif.
-Section « Matin du 11 nov. » juste dessous ; la nuit, sous elle.
+**Dernier relais : 11 nov., matin, Mac, WebKit.** Retours de Grégoire sur l'iPad (6 h 19 à 6 h 39) : trois
+corrections sur `lot/parcours-fleches-apercu`, pour que l'aperçu de la PR n° 17 suive. Section « Retours de l'iPad »
+juste dessous ; le matin et la nuit, sous elle. **Préalables de la fusion dans `main`** : le verdict complet (il viendra
+à la fusion) et les portes 2.2 à 2.5 sur l'aperçu.
 ---
+
+## Retours de l'iPad (11 nov., 6 h 41) : la place de la bulle, la cible des flèches, le refus
+
+### 1. La place de la bulle
+
+`placerLoin` (`js/parcours-moteur.js`, pure) remplace `placePresDe` : la bulle va au bord de l'écran utile le plus
+éloigné de ce qu'elle évite (ses zones visibles et le contour), sans les couvrir ; quand aucune place n'est libre, le
+moindre recouvrement. Places essayées : les huit bords et coins de l'écran utile, et la grille que tracent les bords
+de chaque zone (à 0 et à 12 px) — le recouvrement est linéaire par morceaux dans chaque direction, son minimum est
+à un coin de cette grille. Sans rien de désigné, la bulle reste au centre. `ECART_FLECHE` et `placePresDe` sont
+retirés. « Découvrir » 5 et 8 perdent `centre: true` (8 au centre couvrait la barre d'étapes qu'elle explique).
+Le contour pèse dix mille fois une zone (`POIDS_CONTOUR`) : la bulle ne couvre ce qu'il faut toucher que faute de
+mieux. À égale distance, la droite d'abord (la place décidée pour la bulle étroite de « Mettre tes données à
+l'abri », 3, à droite de l'aperçu).
+
+**Trouvé par le relevé, et retiré** : le huitième parcours plaçait encore sa bulle lui-même (`bulleHors`, 9 nov.),
+après le moteur, sur un autre ensemble d'éléments. À « Poser tes codes », elle couvrait 22 464 px² de ses zones quand
+13 525 suffisaient (1180 × 820 ; même écart à 820 × 1180 et 1180 × 900). Le moteur fait maintenant ce calcul, le
+contour pesé de même : `bulleHors` est retirée (huit appels). Le neuvième parcours garde la sienne (`bulleHorsDe`,
+une étape, places proposées d'abord) : le relevé la juge, verte ; à unifier, inscrit dans son commentaire.
+Ce que `bulleHors` protégeait en plus du contour (la chaîne de l'atelier, l'aperçu, le nom de la grille, « Annoter ▾ »
+et la palette) passe dans un champ neuf d'une étape, `aussiEviter` : pesé comme le contour, sans flèche. Le banc
+l'a exigé : sans lui, la bulle se posait sur « Annoter ▾ » et retenait le toucher (deux délais dépassés du huitième
+banc). Même cas dans l'assistant « Nouvelle pratique » d'Évaluer (étape 5) : la bulle, qui doit couvrir une partie de
+la fenêtre, se posait sur « Suivant » (quatre délais du troisième banc) ; ses boutons sont dans `aussiEviter`.
+**Évaluer 7** : la flèche allant à la bande, le moteur ne faisait plus monter le titre « Performance (P) » dans la vue
+(quatre rouges du troisième banc, un du quatrième) ; l'étape amène le bloc sous l'en-tête elle-même.
+
+**Bancs.** (a) Vitest, `sentinelle-parcours-fleches` : un oracle indépendant (toutes les places au pas de 4 px)
+sur 300 dispositions au hasard, à 1180 × 820 et à 820 × 1180 ; aucune place libre manquée, jamais plus que le
+moindre recouvrement ; plus les trois cas vus sur l'iPad. **Il a d'abord rougi** sur la première version (places
+collées aux zones seulement : cas 159 et 39) — d'où la grille. (b) Playwright, `harness/releve-bulle.js`, posé dans
+les bancs des neuf parcours et celui des flèches : quatre relevés par seconde, oracle au pas de 8 px, un écart
+compté sur deux relevés de suite à page immobile ; hors téléphone et hors bulle déplacée. (c) « Découvrir », les huit
+étapes à 1180 × 820 et à 820 × 1180 : le relevé voit les huit bulles à chaque taille.
+
+**Ce que le banc ne couvre pas** : les huit autres parcours aux deux tailles. Le relevé les juge aux tailles de
+leurs bancs (1180 px surtout ; 820 × 1180 pour le troisième, le quatrième et le huitième).
+
+### 2. La cible des flèches
+
+Règle (c) dans le moteur : **plus jamais de flèche vers le contour** (`ciblesDesFleches` ne s'y rabat plus). Les
+cibles à moins de 20 px se fondent (`FUSION`, les champs d'une même rangée ; c'était 6 px).
+
+| Parcours, étape | Avant | Maintenant (ce que nomme la bulle) |
+|---|---|---|
+| Découvrir 1 | le bloc Assiduité | la bande des points |
+| Découvrir 2 | la ligne de Loyal (avec « A 84 % », le contour) | son nom |
+| Découvrir 3 | les cartes Assiduité et Complétion | « 5 absences ou retards », « 2 productions non remises… » (validé) |
+| Découvrir 4 | la carte RàI | « Niveau 2 - Préventif » et « Défi principal : Nuance » |
+| Découvrir 5 | « Évaluation » (= le contour) | le badge de « Contexte d'apprentissage » ; l'étape rouvre le profil à la reprise |
+| Découvrir 6 | « Évaluation » | la zone de dépôt de Préparer + « Évaluation » (la section) |
+| Découvrir 7 | « Conception » | « Ton matériel existe déjà ? » + « Conception » (la section) |
+| Découvrir 8 | rien (au centre) | la barre d'étapes du cadre + « Cadre » (la section) |
+| Ta classe 1 à 3, 5, 6 | le formulaire entier | les champs nommés (nom, session, année et les trois dates ; code et nom du cours ; prénom, nom, courriel, établissement ; les lignes des séances ; les cinq morceaux, sans la pratique) |
+| Ta classe 4 | la section d'import | ses deux façons : coller, ou importer un fichier |
+| Ta classe 8, Évaluer 7 | le bloc Assiduité, le bloc Performance | la bande des points |
+| Évaluer 2, 5, 6, 8 (hors fiche) | la rangée qui porte le bouton à toucher | rien : la pulsation suffit |
+| Lire ta classe 3 | les cartes Assiduité et Complétion | les absences datées, les productions remises et manquantes |
+| Lire ta classe 4 | les cartes Contexte et RàI | le badge du contexte, le niveau, le défi principal |
+| Recevoir, Monter ton cours, Données, Commentaires, Notation alternative | — | inchangés à la lecture du code : zones déjà à l'élément nommé, ou égales au contour (elles perdent leur flèche par la règle c). **Non vus à l'écran un à un.** |
+
+### 3. Le refus montre où commencer
+
+`js/assistance.js` : une définition déclare `prealable` (Évaluer et Données → Ta classe ; Recevoir, Monter ton cours,
+Commentaires, Notation alternative → Évaluer ; Lire ta classe → Ta classe pour le seul refus « sans présences »). Au
+refus, la pulsation des parcours (`parcours-pulsation`) va sur le bouton du premier parcours non fait de la chaîne ;
+une chaîne toute faite (les données ont changé) : le préalable direct. Le motif reste dessous, mot pour mot, sans
+pulser. Sous `prefers-reduced-motion`, un contour pointillé fixe. Banc : `assistance-refus-2026-11-11` (2 essais) ;
+break-test fait : l'appel retiré, l'essai rougit.
+
+### Les deux rouges Vitest de la nuit, et le banc de la l. 321
+
+- **Complexité** : `tracerFleche` découpée en quatre fonctions sous 16 (`versLeBordDeLEcran`, `versLaCible`,
+  `parUnAutreBord`, `croise`) ; `placePresDe` partie. Compte au-dessus de 15 : 435, le plafond.
+- **Anti-cache** : `release.mjs --build-only` à la fin du lot (jetons et build du jour).
+- **`parcours-fleches` l. 321** : `b0` se lit la bulle posée (`bullePosee`, deux lectures égales à 400 ms) ; même
+  lecture pour l'essai de la poignée à la souris, qui avait la même fragilité.
+
+### Ce que j'ai supposé
+
+1. « La bulle ne couvre jamais ses zones » vaut aussi pour le contour (ce qu'il faut toucher) : il est dans ce
+   qu'elle évite, et pèse dix mille fois plus quand il faut choisir quoi couvrir.
+2. « Le bord le plus éloigné » : la place libre la plus loin de la zone la plus proche (distance de bord à bord).
+3. La règle (c) vaut pour tout contour, pas seulement un bouton : une zone égale au contour perd sa flèche.
+4. Les cibles choisies aux étapes autres que « Découvrir » 3 (tableau ci-dessus) : à juger sur l'aperçu.
 
 ## Matin du 11 nov. : le push, l'aperçu, les deux rouges
 

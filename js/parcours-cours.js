@@ -503,6 +503,7 @@
         // Pas sur téléphone (file de Cowork, 9 nov. : à la fusion du groupe 3, avec la bulle sur téléphone).
         grandEcranSeulement: true,
         refus: condition,
+        prealable: 'evaluer',
         lancer: lancer
     });
 

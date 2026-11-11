@@ -114,6 +114,38 @@
         return cartesProfil().find(function (c) { return c.textContent.trim().indexOf(mot) === 0; }) || null;
     }
 
+    // Ce que nomme la bulle, à la ligne près (Grégoire, 11 nov. 2026, sur l'iPad : visant une carte entière, la flèche
+    // tombait dans son coin, à côté de l'information).
+    function dans(parent, sel) {
+        return parent ? parent.querySelector(sel) : null;
+    }
+
+    function titreDeCarte(mot, motif) {
+        var c = carteQuiCommencePar(mot);
+        return c ? [].slice.call(c.querySelectorAll('h4')).find(function (h) { return motif.test(h.textContent); }) || null : null;
+    }
+
+    function carteContexte() {
+        return cartesProfil().find(function (c) {
+            var h = c.querySelector('h2, h3');
+            return h && /Contexte d.apprentissage/.test(h.textContent);
+        }) || null;
+    }
+
+    function ligneDuDefi(carte) {
+        return carte ? [].slice.call(carte.querySelectorAll('p')).find(function (p) { return /D\u00e9fi principal/.test(p.textContent); }) || null : null;
+    }
+
+    function nomDeLoyal() {
+        var p = pastilleDeLoyal();
+        return p ? [].slice.call(p.querySelectorAll('span')).find(function (s) { return /Suricate/.test(s.textContent); }) || p : null;
+    }
+
+    function barreDuCadre() {
+        var e = document.querySelector('#section-calendrier .bc-etape');
+        return e ? e.parentElement : null;
+    }
+
     function carteRai() {
         return cartesProfil().find(function (c) {
             var h = c.querySelector('h2, h3');
@@ -146,7 +178,8 @@
                 var p = panneauPastilles();
                 if (p && p.classList.contains('ouvert')) p.classList.remove('ouvert');
             },
-            zones: function () { return [blocAssiduite()]; },
+            // La bande des points (pas le bloc et son titre) : « chaque point blanc est une personne ».
+            zones: function () { return [dans(blocAssiduite(), '.barre-indicateur') || blocAssiduite()]; },
             contour: function () { return document.getElementById('btn-toggle-panneau-prioritaire'); },
             atteint: pastillesOuvertes
         },
@@ -162,7 +195,8 @@
                 }
                 await attendre(pastilleDeLoyal, 2000);
             },
-            zones: function () { return [pastilleDeLoyal()]; },
+            // Son nom : la ligne porte aussi « A 84 % », ce qu'il faut toucher (la pulsation le désigne).
+            zones: function () { return [nomDeLoyal()]; },
             contour: function () {
                 var p = pastilleDeLoyal();
                 return p ? p.querySelector('.prioritaire-indice') : null;
@@ -177,7 +211,8 @@
                 await ouvrirProfilDeLoyal('mobilisation');
                 await attendre(function () { return carteQuiCommencePar('Complétion'); }, 2000);
             },
-            zones: function () { return [carteQuiCommencePar('Assiduité'), carteQuiCommencePar('Complétion')]; },
+            // Les deux lignes que nomme la bulle (exemple validé par Grégoire, 11 nov. 2026).
+            zones: function () { return [titreDeCarte('Assiduité', /absences ou retards/), titreDeCarte('Complétion', /non remise/)]; },
             contour: function () { return ongletProfil('accompagnement'); },
             atteint: function () { return ongletActif('accompagnement'); }
         },
@@ -188,16 +223,17 @@
                 await ouvrirProfilDeLoyal('accompagnement');
                 await attendre(carteRai, 2000);
             },
-            zones: function () { return [carteRai()]; },
+            // Le niveau et le défi, que nomme la bulle.
+            zones: function () { var c = carteRai(); return [dans(c, '.badge-sys'), ligneDuDefi(c)]; },
             boutons: [{ libelle: 'Continuer', primaire: true, action: function (m) { m.allerA(4); } }]
         },
         {
             titre: "D'où viennent ces signaux",
             texte: "Voilà le geste : savoir, avant d'entrer en classe, qui a besoin de toi et de quoi. Ces signaux ne viennent pas de nulle part, et ils ne valent que ce qui les nourrit. Remontons d'où ils viennent : tu sauras ce qu'il faudra faire pour les obtenir avec ta classe.",
             geste: "Touche « Évaluation », en haut.",
-            centre: true,
-            avant: async function () { window.scrollTo(0, 0); },
-            zones: function () { return zonesNav('evaluations'); },
+            // Ces signaux : le badge de « Contexte d'apprentissage » (11 nov. 2026). « Évaluation » a la pulsation.
+            avant: async function () { await ouvrirProfilDeLoyal('accompagnement'); await attendre(carteContexte, 2000); },
+            zones: function () { return [dans(carteContexte(), '.badge-sys')]; },
             contour: function () { return boutonNav('evaluations'); },
             atteint: function () { return sectionCourante() === 'evaluations'; }
         },
@@ -206,9 +242,9 @@
             texte: "Ici, tu reçois les productions de tes étudiant·es et tu les évalues, comme tu en as l'habitude. La différence : chaque geste laisse une trace. Chaque évaluation nourrit leur performance, chaque remise leur complétion. L'assiduité, elle, vient des présences que tu prends dans Suivi. Mais pour évaluer, il te faut tes outils.",
             geste: "Touche « Conception » pour voir d'où viennent tes outils.",
             avant: async function () { aller('evaluations', 'importer'); window.scrollTo(0, 0); },
-            // 10 nov. 2026 (« Les flèches des parcours ») : la zone est la section dont parle la bulle, « Évaluation »,
-            // et non plus le prochain bouton (il a sa pulsation). La flèche et la bulle vont à elle.
-            zones: function () { return zonesNav('evaluations'); },
+            // 11 nov. 2026 : « tu reçois les productions » — la zone de dépôt de Préparer ; et la section présentée,
+            // « Évaluation », dans le menu. Pas « Conception » : la pulsation la désigne.
+            zones: function () { return [document.getElementById('travaux-drop-zone')].concat(zonesNav('evaluations')); },
             contour: function () { return boutonNav('conception'); },
             atteint: function () { return sectionCourante() === 'conception'; }
         },
@@ -217,17 +253,22 @@
             texte: "Tes outils : les productions que tu demandes, tes grilles, tes échelles. Ce sont tes critères qui permettent à l'application de nommer un défi, comme la nuance tout à l'heure. Tu n'as pas à partir de zéro : commence par apporter ce que tu utilises déjà, puisque tes grilles disent déjà ce que tu juges important. Et tout cela s'inscrit dans un cadre.",
             geste: 'Touche « Cadre ».',
             avant: async function () { aller('conception', 'materiel'); window.scrollTo(0, 0); },
-            // Même règle qu'à l'étape 6 : la zone est « Conception », la section dont parle la bulle.
-            zones: function () { return zonesNav('conception'); },
+            // Même règle qu'à l'étape 6 : « apporter ce que tu utilises déjà » — « Ton matériel existe déjà ? » ; et la
+            // section présentée, « Conception ».
+            zones: function () {
+                var intro = document.querySelector('#section-conception .materiel-intro p');
+                return [intro].concat(zonesNav('conception'));
+            },
             contour: function () { return boutonNav('calendrier'); },
             atteint: function () { return sectionCourante() === 'calendrier'; }
         },
         {
             titre: 'Poser ton cadre',
             texte: "Tout repose ici : ton trimestre, tes cours, tes groupes. Les dates de ton trimestre et ton horaire donnent tes séances, et les présences s'y accrochent, comme la matière manquée. Tu viens de faire le chemin à rebours ; avec ta classe, tu le feras à l'endroit : Cadre, Conception, Évaluation. Pas besoin de tout configurer pour voir un premier résultat : dès ta première prise de présences, ta classe apparaît, un point par étudiant·e.",
-            centre: true,
             sansSortie: true,
             avant: async function () { aller('calendrier', 'trimestre'); window.scrollTo(0, 0); },
+            // La barre d'étapes du cadre (« ton trimestre, tes cours, tes groupes ») et la section présentée, « Cadre ».
+            zones: function () { return [barreDuCadre()].concat(zonesNav('calendrier')); },
             boutons: [
                 { libelle: 'Commencer avec ma classe', primaire: true, action: function () { commencerAvecMaClasse(); } },
                 { libelle: "Continuer d'explorer la démo", action: function () { continuerLaDemo(); } }

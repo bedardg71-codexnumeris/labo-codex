@@ -1,4 +1,7 @@
 import { test, expect } from '@playwright/test';
+import { releverLaBulle } from './harness/releve-bulle.js';
+// La bulle ne couvre jamais ses zones quand une place les laisse libres (Grégoire, 11 nov. 2026) : relevé à chaque essai.
+releverLaBulle(test);
 import { ouvrirPanneau, attendreEtape, contourSur, bulleNeCouvrePas, capture, bulle, ouvrirEspaceVide, mettreLaClasseEnPlace } from './harness/classe-de-banc.js';
 import { flecheVers, rienNeRetientLeToucher } from './harness/fleches-de-banc.js';
 import { leParcoursEntier, dossierDesCaptures } from './harness/parcours-3-de-banc.js';

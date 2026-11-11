@@ -320,48 +320,6 @@
         if (zone) zone.hidden = ![].some.call(zone.children, function (x) { return !x.hidden; });
     }
 
-    /**
-     * Quand ce qu'il faut toucher occupe presque tout l'écran (la production qu'on annote, les trois
-     * palettes du mode Évaluer), le moteur, qui pose la bulle hors de toutes les zones éclairées, se
-     * rabat sur un bord : la bulle tombait sur la production, ou sur le champ à remplir, et captait le
-     * toucher. La sonde de l'étape (elle passe après celle du moteur : sa place l'emporte) essaie
-     * quelques places et garde celle qui couvre le moins ces éléments ; couvrir un élément prioritaire
-     * (le contour, le bouton du geste suivant) coûte dix mille fois plus : il n'est couvert que faute de mieux. La place du moteur est gardée si
-     * aucune ne couvre moins. Le moteur n'a pas cette règle : voir le rapport du lot.
-     */
-    function bulleHors(elements, prioritaires) {
-        var b = document.getElementById('parcours-bulle');
-        if (!b) return;
-        var marge = 8, haut = 0;
-        var e = document.querySelector('header.entete');
-        if (e) haut = Math.max(0, e.getBoundingClientRect().bottom);
-        var vw = window.innerWidth, vh = window.innerHeight, bw = b.offsetWidth, bh = b.offsetHeight;
-        var rects = [];
-        (elements || []).forEach(function (el) { if (el && M().visible(el)) rects.push({ r: el.getBoundingClientRect(), poids: 1 }); });
-        (prioritaires || []).forEach(function (el) { if (el && M().visible(el)) rects.push({ r: el.getBoundingClientRect(), poids: 10000 }); });
-        function cout(x, y) {
-            return rects.reduce(function (t, o) {
-                var w = Math.min(x + bw, o.r.right) - Math.max(x, o.r.left);
-                var h = Math.min(y + bh, o.r.bottom) - Math.max(y, o.r.top);
-                return t + (w > 0 && h > 0 ? w * h * o.poids : 0);
-            }, 0);
-        }
-        // La place du moteur d'abord : elle ne change que si une autre couvre moins.
-        var meilleur = { x: parseFloat(b.style.left) || 0, y: parseFloat(b.style.top) || 0 };
-        meilleur.cout = cout(meilleur.x, meilleur.y);
-        if (meilleur.cout === 0) return;
-        var xs = [marge, (vw - bw) / 2, vw - bw - marge];
-        var ys = [Math.max(marge, haut + marge), Math.max(marge, (vh - bh) / 2), Math.max(marge, vh - bh - marge)];
-        xs.forEach(function (x) {
-            ys.forEach(function (y) {
-                var c = cout(x, y);
-                if (c < meilleur.cout) meilleur = { x: x, y: y, cout: c };
-            });
-        });
-        b.style.left = Math.round(Math.max(marge, meilleur.x)) + 'px';
-        b.style.top = Math.round(meilleur.y) + 'px';
-    }
-
     function suivante() {
         var i = M().etapeCourante();
         if (i !== null) M().allerA(i + 1);
@@ -536,6 +494,8 @@
             atteint: function () { return !!atelier(); }
         }),
         compte: Object.assign({}, TEXTES.compte, {
+            // Ce que la bulle ne couvre que faute de mieux (11 nov. 2026 : la règle de `bulleHors`, retirée, passe au moteur).
+            aussiEviter: function () { var a = atelier(); return [a && a.querySelector('.atelier-algo-chaine')]; },
             avant: function () { return assurerAtelier('compte'); },
             zones: function () { var a = atelier(); return a ? [a.querySelector('.atelier-algo-chaine'), sectionAtelier('compte')] : []; },
             contour: function () {
@@ -543,8 +503,6 @@
                 return corps ? ancetreCommun([].slice.call(corps.querySelectorAll('input[type="text"]'))) : null;
             },
             atteint: function () {
-                var a = atelier();
-                bulleHors([sectionAtelier('compte')], [a && a.querySelector('.atelier-algo-chaine'), ETAPES.compte.contour()]);
                 return reglee('compte');
             }
         }),
@@ -557,7 +515,6 @@
                 var c = critere(), C = window.codesAnnotation;
                 var n = c && C && typeof C.apercuCodes === 'function' ? C.apercuCodes(c).length : 0;
                 montrerBouton('Continuer', n > 0);
-                bulleHors([sectionAtelier('codes')], [ETAPES.codes.contour()]);
                 return false;
             }
         }),
@@ -574,11 +531,12 @@
             boutons: [{ libelle: 'Continuer', primaire: true, action: suivante }],
             atteint: function () {
                 montrerBouton('Continuer', reglee('note'));
-                bulleHors([sectionAtelier('note')], [ETAPES.note.contour()]);
                 return false;
             }
         }),
         cas: Object.assign({}, TEXTES.cas, {
+            // Ce que la bulle ne couvre que faute de mieux (11 nov. 2026 : la règle de `bulleHors`, retirée, passe au moteur).
+            aussiEviter: function () { var a = atelier(); return [a ? vis(a.querySelector('.apercu-algo')) : null]; },
             avant: function () { return assurerAtelier('paliers'); },
             zones: function () { var a = atelier(); return [sectionAtelier('paliers'), a ? a.querySelector('.apercu-algo') : null]; },
             contour: function () {
@@ -589,13 +547,13 @@
             },
             boutons: [{ libelle: 'Continuer', primaire: true, action: suivante }],
             atteint: function () {
-                var a = atelier();
                 montrerBouton('Continuer', reglee('paliers'));
-                bulleHors([sectionAtelier('paliers')], [ETAPES.cas.contour(), a ? vis(a.querySelector('.apercu-algo')) : null]);
                 return false;
             }
         }),
         lit: Object.assign({}, TEXTES.lit, {
+            // Ce que la bulle ne couvre que faute de mieux (11 nov. 2026 : la règle de `bulleHors`, retirée, passe au moteur).
+            aussiEviter: function () { return [enCreation() ? vis(document.getElementById('nomGrilleTemplate')) : null]; },
             avant: function () { return assurerAtelier('eleve'); },
             // Une grille nouvelle : le nom et « Créer la grille » restent touchables ; le contour est sur les
             // trois phrases, puis sur « Créer la grille » dès que la grille a un nom (la consigne : « puis »).
@@ -612,7 +570,6 @@
             boutons: [{ libelle: 'Continuer', primaire: true, action: suivante }],
             atteint: function () {
                 montrerBouton('Continuer', !enCreation());
-                bulleHors([sectionAtelier('eleve')], [ETAPES.lit.contour(), enCreation() ? vis(document.getElementById('nomGrilleTemplate')) : null]);
                 if (enCreation()) { creationVue = true; return false; }
                 // Une grille nouvelle : l'étape avance quand elle est créée (« Créer la grille » peut refuser).
                 var g = grilleOuverte();
@@ -656,6 +613,10 @@
             atteint: function () { return fichiersImportes(productionsDuParcours()).length > 0; }
         }),
         poser: Object.assign({}, TEXTES.poser, {
+            // Ce que la bulle ne couvre que faute de mieux (11 nov. 2026 : la règle de `bulleHors`, retirée, passe au moteur).
+            aussiEviter: function () {
+                return annoterOuvert() ? [palette('travaux-palette-erreurs-fr'), vis(document.getElementById('travaux-btn-actions'))] : [];
+            },
             avant: async function () {
                 if (annoterOuvert() || evaluationOuverte()) return;
                 aller('evaluations', 'liste');
@@ -676,10 +637,6 @@
                 return menuActions('annoter');
             },
             atteint: function () {
-                if (annoterOuvert()) {
-                    bulleHors([vis(document.getElementById('travaux-canvas-annotation'))],
-                        [palette('travaux-palette-erreurs-fr'), vis(document.getElementById('travaux-btn-actions'))]);
-                }
                 return evaluationOuverte();
             }
         }),
@@ -697,7 +654,6 @@
             },
             contour: function () { return evaluationOuverte() ? contourEvaluation(false) : menuActions('annoter'); },
             atteint: function () {
-                if (evaluationOuverte()) bulleHors(zonesEvaluation(), [contourEvaluation(false)]);
                 return verrouNeuf();
             }
         }),
@@ -715,7 +671,6 @@
             },
             contour: function () { return evaluationOuverte() ? contourEvaluation(true) : menuActions('evaluer'); },
             atteint: function () {
-                if (evaluationOuverte()) bulleHors(zonesEvaluation(), [contourEvaluation(true)]);
                 return verrouNeuf();
             }
         }),
@@ -844,6 +799,7 @@
         // Pas sur téléphone (file de Cowork, 9 nov. : à la fusion du groupe 3, avec la bulle sur téléphone).
         grandEcranSeulement: true,
         refus: refus,
+        prealable: 'evaluer',
         lancer: lancer
     });
 

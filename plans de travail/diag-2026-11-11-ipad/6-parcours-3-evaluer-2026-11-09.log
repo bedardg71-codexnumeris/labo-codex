@@ -1,0 +1,170 @@
+
+Running 4 tests using 1 worker
+
+  ✘  1 [webkit] › integration/parcours-3-evaluer-2026-11-09.spec.js:38:1 › « Évaluer une première production », grille à niveaux : le panneau, les neuf étapes, « Plus tard » et « Reprendre » à l’étape 3 (1180 px) (23.4s)
+  ✘  2 [webkit] › integration/parcours-3-evaluer-2026-11-09.spec.js:42:1 › « Évaluer une première production », grille à niveaux, l’échelle laissée vide sur la fiche : l’étape 4 la demande, le contour s’y pose (1180 px) (21.4s)
+  ✘  3 [webkit] › integration/parcours-3-evaluer-2026-11-09.spec.js:46:1 › « Évaluer une première production », étape 8 à 820 px (l’iPad en portrait) : le menu « Cartouche de rétroaction » amené dans la vue, la bulle à côté (23.4s)
+  ✘  4 [webkit] › integration/parcours-3-evaluer-2026-11-09.spec.js:50:1 › « Évaluer une première production », grille en points : la bulle du choix, et la cartouche ajoute le commentaire de son palier (1180 px) (21.1s)
+
+
+  1) [webkit] › integration/parcours-3-evaluer-2026-11-09.spec.js:38:1 › « Évaluer une première production », grille à niveaux : le panneau, les neuf étapes, « Plus tard » et « Reprendre » à l’étape 3 (1180 px) 
+
+    Error: [2mexpect([22m[31mlocator[39m[2m).[22mtoBeInViewport[2m([22m[2m)[22m failed
+
+    Locator:  locator('#section-suivi h4[data-tooltip="tdb-performance"]')
+    Expected: in viewport
+    Received: viewport ratio 0
+    Timeout:  5000ms
+
+    Call log:
+    [2m  - Expect "toBeInViewport" with timeout 5000ms[22m
+    [2m  - waiting for locator('#section-suivi h4[data-tooltip="tdb-performance"]')[22m
+    [2m    13 × locator resolved to <h4 class="tb-titre-simple" data-tooltip="tdb-performance">Performance (P)</h4>[22m
+    [2m       - unexpected value "viewport ratio 0"[22m
+
+
+       at harness/parcours-3-de-banc.js:233
+
+      231 |     await etape(page, 7, "Le point qui s'allume", { focus: false });
+      232 |     await expect(page.locator('#suivi-groupe')).toBeVisible();
+    > 233 |     await expect(page.locator('#section-suivi h4[data-tooltip="tdb-performance"]')).toBeInViewport();
+          |                                                                                     ^
+      234 |     await capture(page, DOSSIER, `p3-7-${cap}`);
+      235 |     await bulle(page).getByRole('button', { name: 'Continuer' }).click();
+      236 | }
+        at etape7 (/Users/kuekatsheu/Documents/GitHub/labo-codex-fleches-apercu/tests/integration/harness/parcours-3-de-banc.js:233:85)
+        at leParcoursEntier (/Users/kuekatsheu/Documents/GitHub/labo-codex-fleches-apercu/tests/integration/harness/parcours-3-de-banc.js:357:5)
+        at /Users/kuekatsheu/Documents/GitHub/labo-codex-fleches-apercu/tests/integration/parcours-3-evaluer-2026-11-09.spec.js:39:5
+
+    Error Context: ../plans de travail/diag-2026-11-11-ipad/6-results-parcours-3-evaluer-2026-11-09/parcours-3-evaluer-2026-11-0c814-ndre-»-à-l’étape-3-1180-px--webkit/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    ../plans de travail/diag-2026-11-11-ipad/6-results-parcours-3-evaluer-2026-11-09/parcours-3-evaluer-2026-11-0c814-ndre-»-à-l’étape-3-1180-px--webkit/trace.zip
+    Usage:
+
+        npx playwright show-trace "../plans de travail/diag-2026-11-11-ipad/6-results-parcours-3-evaluer-2026-11-09/parcours-3-evaluer-2026-11-0c814-ndre-»-à-l’étape-3-1180-px--webkit/trace.zip"
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  2) [webkit] › integration/parcours-3-evaluer-2026-11-09.spec.js:42:1 › « Évaluer une première production », grille à niveaux, l’échelle laissée vide sur la fiche : l’étape 4 la demande, le contour s’y pose (1180 px) 
+
+    Error: [2mexpect([22m[31mlocator[39m[2m).[22mtoBeInViewport[2m([22m[2m)[22m failed
+
+    Locator:  locator('#section-suivi h4[data-tooltip="tdb-performance"]')
+    Expected: in viewport
+    Received: viewport ratio 0
+    Timeout:  5000ms
+
+    Call log:
+    [2m  - Expect "toBeInViewport" with timeout 5000ms[22m
+    [2m  - waiting for locator('#section-suivi h4[data-tooltip="tdb-performance"]')[22m
+    [2m    13 × locator resolved to <h4 class="tb-titre-simple" data-tooltip="tdb-performance">Performance (P)</h4>[22m
+    [2m       - unexpected value "viewport ratio 0"[22m
+
+
+       at harness/parcours-3-de-banc.js:233
+
+      231 |     await etape(page, 7, "Le point qui s'allume", { focus: false });
+      232 |     await expect(page.locator('#suivi-groupe')).toBeVisible();
+    > 233 |     await expect(page.locator('#section-suivi h4[data-tooltip="tdb-performance"]')).toBeInViewport();
+          |                                                                                     ^
+      234 |     await capture(page, DOSSIER, `p3-7-${cap}`);
+      235 |     await bulle(page).getByRole('button', { name: 'Continuer' }).click();
+      236 | }
+        at etape7 (/Users/kuekatsheu/Documents/GitHub/labo-codex-fleches-apercu/tests/integration/harness/parcours-3-de-banc.js:233:85)
+        at leParcoursEntier (/Users/kuekatsheu/Documents/GitHub/labo-codex-fleches-apercu/tests/integration/harness/parcours-3-de-banc.js:357:5)
+        at /Users/kuekatsheu/Documents/GitHub/labo-codex-fleches-apercu/tests/integration/parcours-3-evaluer-2026-11-09.spec.js:43:5
+
+    Error Context: ../plans de travail/diag-2026-11-11-ipad/6-results-parcours-3-evaluer-2026-11-09/parcours-3-evaluer-2026-11-d87dd-e-contour-s’y-pose-1180-px--webkit/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    ../plans de travail/diag-2026-11-11-ipad/6-results-parcours-3-evaluer-2026-11-09/parcours-3-evaluer-2026-11-d87dd-e-contour-s’y-pose-1180-px--webkit/trace.zip
+    Usage:
+
+        npx playwright show-trace "../plans de travail/diag-2026-11-11-ipad/6-results-parcours-3-evaluer-2026-11-09/parcours-3-evaluer-2026-11-d87dd-e-contour-s’y-pose-1180-px--webkit/trace.zip"
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  3) [webkit] › integration/parcours-3-evaluer-2026-11-09.spec.js:46:1 › « Évaluer une première production », étape 8 à 820 px (l’iPad en portrait) : le menu « Cartouche de rétroaction » amené dans la vue, la bulle à côté 
+
+    Error: [2mexpect([22m[31mlocator[39m[2m).[22mtoBeInViewport[2m([22m[2m)[22m failed
+
+    Locator:  locator('#section-suivi h4[data-tooltip="tdb-performance"]')
+    Expected: in viewport
+    Received: viewport ratio 0
+    Timeout:  5000ms
+
+    Call log:
+    [2m  - Expect "toBeInViewport" with timeout 5000ms[22m
+    [2m  - waiting for locator('#section-suivi h4[data-tooltip="tdb-performance"]')[22m
+    [2m    13 × locator resolved to <h4 class="tb-titre-simple" data-tooltip="tdb-performance">Performance (P)</h4>[22m
+    [2m       - unexpected value "viewport ratio 0"[22m
+
+
+       at harness/parcours-3-de-banc.js:233
+
+      231 |     await etape(page, 7, "Le point qui s'allume", { focus: false });
+      232 |     await expect(page.locator('#suivi-groupe')).toBeVisible();
+    > 233 |     await expect(page.locator('#section-suivi h4[data-tooltip="tdb-performance"]')).toBeInViewport();
+          |                                                                                     ^
+      234 |     await capture(page, DOSSIER, `p3-7-${cap}`);
+      235 |     await bulle(page).getByRole('button', { name: 'Continuer' }).click();
+      236 | }
+        at etape7 (/Users/kuekatsheu/Documents/GitHub/labo-codex-fleches-apercu/tests/integration/harness/parcours-3-de-banc.js:233:85)
+        at leParcoursEntier (/Users/kuekatsheu/Documents/GitHub/labo-codex-fleches-apercu/tests/integration/harness/parcours-3-de-banc.js:357:5)
+        at /Users/kuekatsheu/Documents/GitHub/labo-codex-fleches-apercu/tests/integration/parcours-3-evaluer-2026-11-09.spec.js:47:5
+
+    Error Context: ../plans de travail/diag-2026-11-11-ipad/6-results-parcours-3-evaluer-2026-11-09/parcours-3-evaluer-2026-11-5f5f3-dans-la-vue-la-bulle-à-côté-webkit/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    ../plans de travail/diag-2026-11-11-ipad/6-results-parcours-3-evaluer-2026-11-09/parcours-3-evaluer-2026-11-5f5f3-dans-la-vue-la-bulle-à-côté-webkit/trace.zip
+    Usage:
+
+        npx playwright show-trace "../plans de travail/diag-2026-11-11-ipad/6-results-parcours-3-evaluer-2026-11-09/parcours-3-evaluer-2026-11-5f5f3-dans-la-vue-la-bulle-à-côté-webkit/trace.zip"
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  4) [webkit] › integration/parcours-3-evaluer-2026-11-09.spec.js:50:1 › « Évaluer une première production », grille en points : la bulle du choix, et la cartouche ajoute le commentaire de son palier (1180 px) 
+
+    Error: [2mexpect([22m[31mlocator[39m[2m).[22mtoBeInViewport[2m([22m[2m)[22m failed
+
+    Locator:  locator('#section-suivi h4[data-tooltip="tdb-performance"]')
+    Expected: in viewport
+    Received: viewport ratio 0
+    Timeout:  5000ms
+
+    Call log:
+    [2m  - Expect "toBeInViewport" with timeout 5000ms[22m
+    [2m  - waiting for locator('#section-suivi h4[data-tooltip="tdb-performance"]')[22m
+    [2m    13 × locator resolved to <h4 class="tb-titre-simple" data-tooltip="tdb-performance">Performance (P)</h4>[22m
+    [2m       - unexpected value "viewport ratio 0"[22m
+
+
+       at harness/parcours-3-de-banc.js:233
+
+      231 |     await etape(page, 7, "Le point qui s'allume", { focus: false });
+      232 |     await expect(page.locator('#suivi-groupe')).toBeVisible();
+    > 233 |     await expect(page.locator('#section-suivi h4[data-tooltip="tdb-performance"]')).toBeInViewport();
+          |                                                                                     ^
+      234 |     await capture(page, DOSSIER, `p3-7-${cap}`);
+      235 |     await bulle(page).getByRole('button', { name: 'Continuer' }).click();
+      236 | }
+        at etape7 (/Users/kuekatsheu/Documents/GitHub/labo-codex-fleches-apercu/tests/integration/harness/parcours-3-de-banc.js:233:85)
+        at leParcoursEntier (/Users/kuekatsheu/Documents/GitHub/labo-codex-fleches-apercu/tests/integration/harness/parcours-3-de-banc.js:357:5)
+        at /Users/kuekatsheu/Documents/GitHub/labo-codex-fleches-apercu/tests/integration/parcours-3-evaluer-2026-11-09.spec.js:51:5
+
+    Error Context: ../plans de travail/diag-2026-11-11-ipad/6-results-parcours-3-evaluer-2026-11-09/parcours-3-evaluer-2026-11-e6a83-aire-de-son-palier-1180-px--webkit/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    ../plans de travail/diag-2026-11-11-ipad/6-results-parcours-3-evaluer-2026-11-09/parcours-3-evaluer-2026-11-e6a83-aire-de-son-palier-1180-px--webkit/trace.zip
+    Usage:
+
+        npx playwright show-trace "../plans de travail/diag-2026-11-11-ipad/6-results-parcours-3-evaluer-2026-11-09/parcours-3-evaluer-2026-11-e6a83-aire-de-son-palier-1180-px--webkit/trace.zip"
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  4 failed
+    [webkit] › integration/parcours-3-evaluer-2026-11-09.spec.js:38:1 › « Évaluer une première production », grille à niveaux : le panneau, les neuf étapes, « Plus tard » et « Reprendre » à l’étape 3 (1180 px) 
+    [webkit] › integration/parcours-3-evaluer-2026-11-09.spec.js:42:1 › « Évaluer une première production », grille à niveaux, l’échelle laissée vide sur la fiche : l’étape 4 la demande, le contour s’y pose (1180 px) 
+    [webkit] › integration/parcours-3-evaluer-2026-11-09.spec.js:46:1 › « Évaluer une première production », étape 8 à 820 px (l’iPad en portrait) : le menu « Cartouche de rétroaction » amené dans la vue, la bulle à côté 
+    [webkit] › integration/parcours-3-evaluer-2026-11-09.spec.js:50:1 › « Évaluer une première production », grille en points : la bulle du choix, et la cartouche ajoute le commentaire de son palier (1180 px) 

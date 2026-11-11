@@ -191,6 +191,12 @@
     // Le formulaire du bloc, sans la rangée de sélection au-dessus (bibliothèque, menu, « + Nouveau… ») :
     // éclairer tout l'accordéon faisait sortir de l'écran le haut d'un grand formulaire, ou passer
     // la bulle dessus (captures du 9 nov., étapes 1 et 6).
+    // Les champs que nomme la bulle (11 nov. 2026, Grégoire : la flèche va à ce que nomme la bulle, pas au formulaire
+    // entier ; et la bulle ne couvre plus les champs qu'elle demande de remplir). Ceux d'une même rangée se fondent.
+    function champs(ids) {
+        return ids.map(function (id) { var c = el(id); return c ? (c.closest('.groupe-form') || c) : null; }).filter(Boolean);
+    }
+
     function blocDuFormulaire(idEtape) {
         var acc = accordeon(idEtape);
         return acc ? acc.querySelector('.panneau-formulaire') : null;
@@ -271,7 +277,8 @@
             titre: 'Ton trimestre',
             texte: "Commençons par ton trimestre : tout ce que tu feras s'y range, tes groupes, tes présences, tes évaluations. Donne-lui un nom, sa session et son année, puis trois dates : le début, la fin des cours et la fin du trimestre. Ces dates bornent le calendrier de tes séances. Le reste, comme les journées sans cours, peut attendre.",
             avant: function () { return ouvrirBloc('trimestre'); },
-            zones: function () { return [blocDuFormulaire('trimestre')]; },
+            // Le nom, la session, l'année ; puis les trois dates.
+            zones: function () { return champs(['v2-nomTrimestre', 'v2-sessionTrimestre', 'v2-anneeTrimestre', 'v2-debutTrimestre', 'v2-finCours', 'v2-finTrimestre']); },
             contour: function () { return el(BOUTON_CREER.trimestre); },
             atteint: function () { return reglee('trimestre'); }
         },
@@ -279,7 +286,8 @@
             titre: 'Ton cours',
             texte: "Ajoute le cours que tu donnes à ce groupe. Tes productions se rangeront sous lui : si tu donnes le même cours à deux groupes, tu les prépares une seule fois. Si tu donnes plusieurs cours, un seul suffit pour l'instant.",
             avant: function () { return ouvrirBloc('cours'); },
-            zones: function () { return [blocDuFormulaire('cours')]; },
+            // « Le cours que tu donnes » : son code et son nom.
+            zones: function () { return champs(['v2-codeCours', 'v2-nomCours']); },
             contour: function () { return el(BOUTON_CREER.cours); },
             atteint: function () { return reglee('cours'); }
         },
@@ -287,7 +295,8 @@
             titre: 'Ton profil',
             texte: "Ton prénom, ton nom, ton courriel et ton établissement. Ils servent à deux choses : ton groupe-cours a besoin de savoir qui le donne, et ils accompagnent les ressources que tu partageras.",
             avant: function () { return ouvrirBloc('enseignant'); },
-            zones: function () { return [blocDuFormulaire('enseignant')]; },
+            // Le prénom, le nom, le courriel et l'établissement.
+            zones: function () { return champs(['v2-ens-prenom', 'v2-ens-nom', 'v2-ens-courriel', 'v2-ens-institution']); },
             contour: function () { return el(BOUTON_CREER.enseignant); },
             atteint: function () { return reglee('enseignant'); }
         },
@@ -296,8 +305,8 @@
             texte: "Ajoute tes étudiant·es. Le plus simple : copie la liste de ton groupe depuis le système de ton établissement et colle-la ici, ou importe-la en fichier texte. La liste de Léa, dans Omnivox (format Excel, dans ses paramètres d'affichage), arrive déjà dans le bon ordre ; sinon, une ligne par personne : DA, groupe, nom, prénom. Le DA reconnaît chaque personne partout dans l'application, jusque dans le nom des fichiers que tu importeras. Le numéro de groupe servira à ton horaire et à ton groupe-cours. Le reste peut attendre.",
             avant: function () { return ouvrirBloc('etudiants'); },
             zones: function () {
-                var acc = accordeon('etudiants');
-                return [acc ? acc.querySelector('.section-import-droite') : null];
+                // « Colle-la ici, ou importe-la en fichier texte » : les deux façons, chacune sa flèche.
+                return [el('v2-donneesCollees'), el('v2-fichierCsvEntree')].map(function (c) { return c ? (c.closest('.import-option') || c) : null; });
             },
             // « Prévisualiser », puis, l'aperçu affiché, « Confirmer » : c'est lui qui importe.
             contour: function () {
@@ -312,7 +321,11 @@
             titre: 'Ton horaire',
             texte: "Indique les jours et les périodes où tu vois ce groupe. L'application en tire le calendrier de tes séances : c'est à chacune que s'attacheront tes présences, et plus tard ce que tu y enseignes.",
             avant: function () { return ouvrirBloc('horaire'); },
-            zones: function () { return [blocDuFormulaire('horaire')]; },
+            // « Les jours et les périodes » : les lignes des séances.
+            zones: function () {
+                var b = blocDuFormulaire('horaire');
+                return b ? [].slice.call(b.querySelectorAll('.seance-horaire-ligne')) : [];
+            },
             contour: function () { return el(BOUTON_CREER.horaire); },
             atteint: function () { return reglee('horaire'); }
         },
@@ -320,7 +333,8 @@
             titre: 'Ton groupe-cours',
             texte: "Réunis les cinq morceaux : le trimestre, le cours, le numéro de groupe, l'horaire et toi. Ton groupe apparaît alors dans l'en-tête : c'est sur lui que travaillent le Suivi et l'Évaluation, et c'est là que tu passeras d'un groupe à l'autre. Chacun de tes groupes aura le sien ; un seul suffit pour l'instant. La pratique de notation viendra plus tard : c'est là que tu décides comment tu construis la note du cours. La note de chaque évaluation, elle, n'en dépend pas.",
             avant: function () { return ouvrirBloc('groupe-cours'); },
-            zones: function () { return [blocDuFormulaire('groupe-cours')]; },
+            // « Les cinq morceaux » : trimestre, cours, groupe, horaire, enseignant·e (pas la pratique, « plus tard »).
+            zones: function () { return champs(['v2-gc-trimestre', 'v2-gc-cours', 'v2-gc-groupe', 'v2-gc-horaire', 'v2-gc-enseignant']); },
             contour: function () { return el(BOUTON_CREER['groupe-cours']); },
             atteint: function () { return reglee('groupe-cours'); }
         },
@@ -363,7 +377,8 @@
                 aller('suivi', 'groupe');
                 await attendre(blocAssiduite, 2000);
             },
-            zones: function () { return [blocAssiduite()]; },
+            // La bande des points (« chaque point blanc est un·e de tes étudiant·es »), pas le bloc et son titre.
+            zones: function () { var b = blocAssiduite(); return [(b && b.querySelector('.barre-indicateur')) || b]; },
             boutons: [{ libelle: 'Terminer', primaire: true, action: function () { terminer(); } }]
         }
     ];

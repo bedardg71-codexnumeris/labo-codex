@@ -1,0 +1,21 @@
+
+Running 15 tests using 1 worker
+
+  ✓   1 [webkit] › integration/parcours-8-commentaires-2026-11-09.spec.js:190:1 › panneau : sans production avec sa grille, « Commencer » ne lance rien et le panneau dit pourquoi (2.5s)
+  ✓   2 [webkit] › integration/parcours-8-commentaires-2026-11-09.spec.js:203:1 › panneau : la démo et un service d’orthopédagogie font refuser ; avec une production et sa grille, le parcours part sur Conception › Grilles (2.9s)
+  ✓   3 [webkit] › integration/parcours-8-commentaires-2026-11-09.spec.js:329:1 › étape 1, sans voile : le « Type » d’un critère déjà là ne répond pas (rien ne s’écrit, l’étape n’avance pas) ; celui du critère ajouté, oui (3.4s)
+  ✓   4 [webkit] › integration/parcours-8-commentaires-2026-11-09.spec.js:517:1 › de bout en bout, avec fichier : une grille neuve, deux codes posés, la rétroaction s’écrit seule ; le verrou mène à la fin (12.9s)
+  ✓   5 [webkit] › integration/parcours-8-commentaires-2026-11-09.spec.js:527:1 › l’étape 8 sautée : la production associée à l’étape 7 a déjà ses fichiers (8 sur 10) ; une grille restée ouverte au lancement n’est pas celle du parcours (5.6s)
+  ✓   6 [webkit] › integration/parcours-8-commentaires-2026-11-09.spec.js:549:1 › 820 px : aucun avis ne couvre la bulle, l’orange de la grille restant affiché de l’étape 7 à la fin (12.7s)
+  ✓   7 [webkit] › integration/parcours-8-commentaires-2026-11-09.spec.js:560:1 › 1180 × 820 : aucun avis ne couvre la bulle, même quand aucun coin ne la laisse libre (13.9s)
+  ✓   8 [webkit] › integration/parcours-8-commentaires-2026-11-09.spec.js:576:1 › 820 × 600 : un orange affiché avant le lancement ne couvre pas la bulle (1.9s)
+  ✓   9 [webkit] › integration/parcours-8-commentaires-2026-11-09.spec.js:600:1 › pendant un parcours, l’aide dans les pages se tait (bulle de découverte, flèche, infobulle) ; hors parcours, elle parle (3.8s)
+  -  10 [webkit] › integration/parcours-8-commentaires-2026-11-09.spec.js:658:5 › captures : le chemin avec fichier à 1180 px, sombre
+  -  11 [webkit] › integration/parcours-8-commentaires-2026-11-09.spec.js:658:5 › captures : le chemin avec fichier à 1180 px, clair
+  -  12 [webkit] › integration/parcours-8-commentaires-2026-11-09.spec.js:658:5 › captures : le chemin avec fichier à 820 px, sombre
+  -  13 [webkit] › integration/parcours-8-commentaires-2026-11-09.spec.js:658:5 › captures : le chemin avec fichier à 390 px, sombre
+  ✓  14 [webkit] › integration/parcours-8-commentaires-2026-11-09.spec.js:793:1 › sans fichier, sur une grille déjà employée : l’étape 7 sautée hors du compte, « Plus tard », un rechargement puis « Reprendre », « Rien à importer » ; un verrou d’avant ne fait pas avancer (10.2s)
+  -  15 [webkit] › integration/parcours-8-commentaires-2026-11-09.spec.js:799:1 › captures : le chemin sans fichier à 1180 px, sombre
+
+  5 skipped
+  10 passed (1.2m)

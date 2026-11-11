@@ -1,4 +1,7 @@
 import { test, expect } from '@playwright/test';
+import { releverLaBulle } from './harness/releve-bulle.js';
+// La bulle ne couvre jamais ses zones quand une place les laisse libres (Grégoire, 11 nov. 2026) : relevé à chaque essai.
+releverLaBulle(test);
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -318,7 +321,8 @@ async function parcourir(page, { largeur, theme, designee }) {
     await attendreEtape(page, 3);
     expect(await page.evaluate(() => window.ParcoursLireTaClasse.memoire.da)).toBe(ECARTE.da);
     await contourSur(page, '#contenuProfilEtudiant [data-action="changerSectionProfil"][data-param="accompagnement"]');
-    await flecheVers(page, '#profil-contenu-dynamique .profil-carte:has(.badge-absence)', 'étape 3');
+    // 11 nov. 2026 : la flèche va aux absences datées, pas à la carte entière.
+    await flecheVers(page, '#profil-contenu-dynamique .profil-carte:has(.badge-absence) .badges-centres', 'étape 3');
     // Tout ce que l'étape garde (pastilles d'absence ET de production) est nommé par elle : rien n'en est oublié.
     const gardes3 = await page.evaluate(() => {
         const e = window.ParcoursLireTaClasse.etapes[2].gardes();

@@ -495,7 +495,8 @@
             },
             zones: function () {
                 if (ficheProductionOuverte()) return surLaFiche(ouToucherProduction());
-                return [qs('#conception-productions .rangee-selection')];
+                // 11 nov. 2026 : la rangée ne porte que « + Nouvelle production », que la pulsation désigne : pas de flèche.
+                return [];
             },
             contour: function () {
                 if (ficheProductionOuverte()) return ouToucherProduction();
@@ -541,7 +542,11 @@
             zones: function () {
                 surModale(wizardOuvert());
                 if (wizardOuvert()) return [qs('#modalWizardPratiqueV2 .modal-contenu')];
-                return [qs('#conception-pratiques-notation .rangee-selection')];
+                return [];   // « + Nouvelle pratique » a la pulsation (11 nov. 2026)
+            },
+            // 11 nov. 2026 : la bulle couvre forcément une partie de la fenêtre ; jamais ses boutons du geste suivant.
+            aussiEviter: function () {
+                return wizardOuvert() ? ['wizard-v2-btn-precedent', 'wizard-v2-btn-suivant', 'wizard-v2-btn-creer'].map(el) : [];
             },
             contour: function () {
                 if (!wizardOuvert()) return qs('#conception-pratiques-notation [data-action="creerNouvellePratique"]');
@@ -565,7 +570,7 @@
             zones: function () {
                 if (fichePratiqueOuverte()) { amenerAppliquer(); return [boutonAppliquer()]; }
                 appliquerAmene = 0;
-                return [el('selectionPratiques')];
+                return [];   // le menu en haut est ce qu'il faut toucher : la pulsation le désigne (11 nov. 2026)
             },
             contour: function () {
                 if (fichePratiqueOuverte()) return boutonAppliquer();
@@ -579,8 +584,14 @@
             avant: async function () {
                 aller('suivi', 'groupe');
                 await attendre(blocPerformance, 3000);
+                // La flèche va à la bande (11 nov. 2026) ; son titre, « Performance (P) », reste dans la vue : le bloc est
+                // amené sous l'en-tête, et le moteur n'a plus à faire défiler pour la bande.
+                var bloc = blocPerformance(), entete = qs('header.entete');
+                var haut = entete ? Math.max(0, entete.getBoundingClientRect().bottom) : 0;
+                if (bloc) window.scrollTo(0, Math.max(0, window.scrollY + bloc.getBoundingClientRect().top - haut - 16));
             },
-            zones: function () { return [blocPerformance()]; },
+            // « Son point en performance » : la bande des points, pas le bloc et son titre (11 nov. 2026).
+            zones: function () { var b = blocPerformance(); return [(b && b.querySelector('.barre-indicateur')) || b]; },
             boutons: [{ libelle: 'Continuer', primaire: true, action: function (m) { m.allerA(7); } }]
         },
         {
@@ -593,7 +604,7 @@
             zones: function () {
                 if (cartoucheCreee()) return zonesPourNommer();
                 if (ficheCartoucheOuverte()) return surLaCible(ouToucherCartouche());
-                return [qs('#conception-retroactions .rangee-selection')];
+                return [];   // « + Nouvelle cartouche » a la pulsation (11 nov. 2026)
             },
             contour: function () {
                 if (cartoucheCreee()) return ouNommerLaCartouche();
@@ -688,6 +699,7 @@
         ligne: 'De ta grille à ta première rétroaction, réécrite avec tes mots.',
         total: ETAPES.length,
         refus: condition,
+        prealable: 'classe',
         lancer: lancer
     });
 

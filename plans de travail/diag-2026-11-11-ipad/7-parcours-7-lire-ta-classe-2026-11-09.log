@@ -1,0 +1,16 @@
+
+Running 10 tests using 1 worker
+
+  ✓   1 [webkit] › integration/parcours-7-lire-ta-classe-2026-11-09.spec.js:254:1 › le bouton refuse sans présences, refuse quand personne ne s’écarte, lance avec une seule personne sous le seuil d’assiduité et aucune évaluation (9.1s)
+  ✓   2 [webkit] › integration/parcours-7-lire-ta-classe-2026-11-09.spec.js:451:1 › les neuf étapes en faisant les gestes, sans grille de dépistage désignée (1180 px, sombre) (12.7s)
+  ✓   3 [webkit] › integration/parcours-7-lire-ta-classe-2026-11-09.spec.js:460:1 › avec une grille de dépistage désignée, l’étape 4 mène à l’étape 6 (1180 px, sombre) (11.8s)
+  ✓   4 [webkit] › integration/parcours-7-lire-ta-classe-2026-11-09.spec.js:482:1 › une personne absente à toutes les séances (0 %) : son Accompagnement et « + Nouvelle intervention », le parcours la suit ; une personne arrivée après les séances (aucune donnée) : l’étape 2 dit pourquoi elle ramène aux noms (13.4s)
+  ✓   5 [webkit] › integration/parcours-7-lire-ta-classe-2026-11-09.spec.js:546:1 › non-participation : l’absente à toutes les séances passées, sans production, au niveau 3 partout ; l’inactive et l’arrivée après les séances restent hors des signaux (17.0s)
+  ✓   6 [webkit] › integration/parcours-7-lire-ta-classe-2026-11-09.spec.js:627:1 › « Plus tard » ferme la bulle, le parcours attend à la même étape ; « Reprendre » y revient (9.6s)
+  ✓   7 [webkit] › integration/parcours-7-lire-ta-classe-2026-11-09.spec.js:655:1 › les refus validés le 9 nov. : la démo, l’option RàI décochée, le mode anonymisation (11.7s)
+  -   8 [webkit] › integration/parcours-7-lire-ta-classe-2026-11-09.spec.js:696:1 › captures : les neuf étapes à 1180 px en clair
+  -   9 [webkit] › integration/parcours-7-lire-ta-classe-2026-11-09.spec.js:707:5 › captures : les étapes 1, 2 et 7 à 390 px (sombre)
+  -  10 [webkit] › integration/parcours-7-lire-ta-classe-2026-11-09.spec.js:707:5 › captures : les étapes 1, 2 et 7 à 390 px (clair)
+
+  3 skipped
+  7 passed (1.4m)

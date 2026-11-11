@@ -1,4 +1,7 @@
 import { test, expect } from '@playwright/test';
+import { releverLaBulle, bullesRelevees, foisRelevee } from './harness/releve-bulle.js';
+// La bulle ne couvre jamais ses zones quand une place les laisse libres (Grégoire, 11 nov. 2026) : relevé à chaque essai.
+releverLaBulle(test);
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -98,6 +101,25 @@ async function allerAEtape(page, n) {
     await attendreEtape(page, n);
 }
 
+// 11 nov. 2026 : la flèche de l'étape 3 va à la ligne « 5 absences ou retards », pas à la carte entière.
+const LIGNE_ABSENCES = '#profil-contenu-dynamique .profil-carte:has(.badge-absence) h4.profil-section-titre';
+
+/**
+ * La bulle, lue une fois posée : tant que la personne ne l'a pas déplacée, la sonde (120 ms) peut encore la replacer d'un
+ * pixel (mesuré le 11 nov. 2026 : 247 puis 246, sans geste ; c'était le rouge instable de « la poignée au clavier »).
+ * Deux lectures égales à 400 ms d'écart.
+ */
+async function bullePosee(page) {
+    let b = await rectDe(page, '#parcours-bulle');
+    await expect.poll(async () => {
+        const r = await rectDe(page, '#parcours-bulle');
+        const pareil = r.left === b.left && r.top === b.top;
+        b = r;
+        return pareil;
+    }, { message: 'la bulle est posée', intervals: [400] }).toBe(true);
+    return b;
+}
+
 const chevauchent = (a, b) => !(a.right <= b.left || b.right <= a.left || a.bottom <= b.top || b.bottom <= a.top);
 
 // ---------- Les captures : 1180 et 820 px, en sombre et en clair ----------
@@ -137,9 +159,8 @@ test('étapes 3, 6 et 7 de « Découvrir » : la flèche va à ce dont parle la 
     await decouvrirA(page, 3);
     await coucheDansLeRepereDeLaFenetre(page, 'étape 3');
 
-    // Étape 3 : deux cartes, deux flèches ; la pulsation sur « Accompagnement » ; l'onglet du moment mis en évidence.
-    const assiduite = '#profil-contenu-dynamique .profil-carte:has(.badge-absence)';
-    await flecheVers(page, assiduite, 'étape 3, la carte Assiduité');
+    // Étape 3 : deux lignes, deux flèches ; la pulsation sur « Accompagnement » ; l'onglet du moment mis en évidence.
+    await flecheVers(page, LIGNE_ABSENCES, 'étape 3, la ligne des absences');
     await nombreDeFleches(page, 2, 'étape 3');
     const contour = await styleDuContour(page);
     expect(contour.animation, 'le contour pulse').toBe('parcours-pulsation');
@@ -157,12 +178,14 @@ test('étapes 3, 6 et 7 de « Découvrir » : la flèche va à ce dont parle la 
     const f = (await etatFleches(page)).fleches[0];
     await rienNeRetientLeToucher(page, [[12, 400], [1160, 700], [600, 30], [f.pointe.x, f.pointe.y]], 'étape 3');
 
-    // Étapes 6 et 7 : la section dont parle la bulle reçoit la flèche et la mise en évidence ; le prochain bouton pulse,
-    // et la bulle n'est ni sur lui ni sous lui.
-    for (const [n, actuelle, prochaine] of [[6, 'evaluations', 'conception'], [7, 'conception', 'calendrier']]) {
+    // Étapes 6 et 7 : ce que nomme la bulle ET la section qu'elle présente reçoivent chacun leur flèche (11 nov. 2026) ;
+    // la section, la mise en évidence ; le prochain bouton pulse, sans flèche, et la bulle ne le couvre pas.
+    for (const [n, actuelle, prochaine, nommee] of [[6, 'evaluations', 'conception', '#travaux-drop-zone'],
+        [7, 'conception', 'calendrier', '#section-conception .materiel-intro p']]) {
         await allerAEtape(page, n);
-        await flecheVers(page, NAV(actuelle), 'étape ' + n);
-        await nombreDeFleches(page, 1, 'étape ' + n);
+        await flecheVers(page, NAV(actuelle), 'étape ' + n + ', la section');
+        await flecheVers(page, nommee, 'étape ' + n + ', ce que nomme la bulle');
+        await nombreDeFleches(page, 2, 'étape ' + n);
         await sectionActuelleSur(page, NAV(actuelle), 'étape ' + n);
         await expect.poll(async () => {
             const c = await rectDe(page, '#parcours-contour'), p = await rectDe(page, NAV(prochaine));
@@ -170,7 +193,6 @@ test('étapes 3, 6 et 7 de « Découvrir » : la flèche va à ce dont parle la 
         }, { message: `étape ${n} : la pulsation est sur le prochain bouton` }).toBe(true);
         const b = await rectDe(page, '#parcours-bulle'), p = await rectDe(page, NAV(prochaine));
         expect(chevauchent(b, p), `étape ${n} : la bulle ne couvre pas le prochain bouton`).toBe(false);
-        expect(p.right <= b.left + 1 || b.right <= p.left + 1, `étape ${n} : la bulle n’est pas sous le prochain bouton`).toBe(true);
     }
 
     // À la sortie, rien ne reste : ni couche, ni contour, ni mise en évidence.
@@ -189,7 +211,7 @@ test('la flèche suit le défilement et le redimensionnement ; une cible sortie 
     test.setTimeout(90000);
     await ouvrirEspaceVide(page, 1180, { hauteur: 700 });
     await decouvrirA(page, 3);
-    const assiduite = '#profil-contenu-dynamique .profil-carte:has(.badge-absence)';
+    const assiduite = LIGNE_ABSENCES;
     const avant = await flecheVers(page, assiduite, 'avant le défilement');
 
     // Un défilement : la mesure est prise la page immobile (`flecheVers` attend que la flèche ait rejoint la carte).
@@ -220,6 +242,43 @@ test('la flèche suit le défilement et le redimensionnement ; une cible sortie 
     }, { message: 'la pointe va au bord bas de l’écran (420 − 10)' }).toBe('410');
 });
 
+// ---------- Les huit étapes de « Découvrir », aux deux tailles de l'iPad (Grégoire, 11 nov. 2026) ----------
+// La bulle ne couvre jamais ses zones (le relevé, `releverLaBulle`, juge chaque bulle) ; chaque flèche va à une zone de
+// l'étape, jamais à ce qu'il faut toucher ; à 1180 × 820, le compte des flèches de chaque étape.
+const FLECHES_A_1180 = { 1: 1, 2: 1, 3: 2, 4: 2, 5: 1, 6: 2, 7: 2, 8: 2 };
+
+for (const [largeur, hauteur] of [[1180, 820], [820, 1180]]) {
+    test(`les huit étapes de « Découvrir » à ${largeur} × ${hauteur} : la bulle ne couvre pas ses zones, chaque flèche va à une zone, aucune au bouton à toucher`, async ({ page }) => {
+        test.setTimeout(120000);
+        await ouvrirEspaceVide(page, largeur, { hauteur });
+        for (let n = 1; n <= 8; n++) {
+            if (n === 1) await decouvrirA(page, 1); else await allerAEtape(page, n);
+            if (largeur === 1180) await nombreDeFleches(page, FLECHES_A_1180[n], 'étape ' + n);
+            // Le relevé a regardé cette bulle au moins trois fois (un écart compte sur deux relevés de suite).
+            await expect.poll(() => foisRelevee(page, `(${n} sur 8, ${largeur} × ${hauteur})`),
+                { message: `étape ${n} : relevée trois fois` }).toBeGreaterThanOrEqual(3);
+            await expect.poll(() => page.evaluate(() => {
+                const pl = window.ParcoursMoteur.placement();
+                const rs = pl.zones.filter((z) => z && z !== pl.contour && !(pl.contour && pl.contour.contains(z)))
+                    .map((z) => z.getBoundingClientRect()).filter((r) => r.width > 0);
+                const pointes = [...document.querySelectorAll('#parcours-fleches g.parcours-fleche')].map((g) => {
+                    const d = g.getAttribute('data-trace').split(' M')[0].split(' ');
+                    const fin = d[d.length - 1].split(',').map(Number);
+                    return { x: fin[0], y: fin[1] };
+                });
+                const loin = (p, r) => Math.hypot(Math.max(r.left - p.x, 0, p.x - r.right), Math.max(r.top - p.y, 0, p.y - r.bottom));
+                // Une flèche vers une union de zones (plus de trois) s'arrête au bord de l'union : elle est dans sa boîte.
+                const u = rs.reduce((a, r) => ({ left: Math.min(a.left, r.left), top: Math.min(a.top, r.top), right: Math.max(a.right, r.right), bottom: Math.max(a.bottom, r.bottom) }),
+                    { left: Infinity, top: Infinity, right: -Infinity, bottom: -Infinity });
+                const perdues = pointes.filter((p) => !rs.some((r) => loin(p, r) <= 9) && loin(p, u) > 9);
+                return perdues.length ? perdues.length + ' flèche(s) hors des zones' : 'toutes vers une zone';
+            }), { message: `étape ${n} : chaque flèche va à une zone de l'étape` }).toBe('toutes vers une zone');
+        }
+        // Le relevé a bien regardé les huit bulles.
+        expect((await bullesRelevees(page)).filter((v) => v.includes(`${largeur} × ${hauteur}`)).length).toBeGreaterThanOrEqual(8);
+    });
+}
+
 // ---------- La poignée ----------
 
 test('la poignée : 46 px, à la souris et au doigt ; la bulle reste dans l’écran utile ; les flèches suivent ; cachée, la cible n’a plus de flèche ; l’étape suivante replace la bulle', async ({ page }) => {
@@ -232,19 +291,28 @@ test('la poignée : 46 px, à la souris et au doigt ; la bulle reste dans l’é
     const p = await poignee(page).boundingBox();
     expect(p.width).toBeGreaterThanOrEqual(46);
     expect(p.height).toBeGreaterThanOrEqual(46);
-    const b0 = await rectDe(page, '#parcours-bulle');
+    const b0 = await bullePosee(page);
     expect(p.x >= b0.left && p.y >= b0.top && p.x + p.width <= b0.right && p.y + p.height <= b0.bottom, 'la poignée est dans la bulle').toBe(true);
     await expect(poignee(page)).toHaveAttribute('aria-label', 'Déplacer la bulle');
     expect(await poignee(page).evaluate((el) => getComputedStyle(el).touchAction)).toBe('none');
 
     // À la souris : la bulle suit le pointeur du même écart, et la flèche part de sa nouvelle place.
+    // Vers le milieu de l'écran : la bulle est posée à un bord (11 nov. 2026), le geste ne doit pas la faire buter.
     const prise = { x: p.x + p.width / 2, y: p.y + p.height / 2 };
+    const bornes = await page.evaluate(() => ({
+        haut: document.querySelector('header.entete').getBoundingClientRect().bottom + 8,
+        bas: document.getElementById('bandeau-demo').getBoundingClientRect().top - 8,
+        droite: window.innerWidth - 8
+    }));
+    const versLaPlace = (avant, apres, voulu) => (apres >= avant ? Math.min(voulu, Math.floor(apres) - 2) : -Math.min(voulu, Math.floor(avant) - 2));
+    const geste = [versLaPlace(b0.left - 8, bornes.droite - b0.right, 150), versLaPlace(b0.top - bornes.haut, bornes.bas - b0.bottom, 220)];
+    expect(Math.abs(geste[0]) > 40 && Math.abs(geste[1]) > 40, 'la bulle a la place de bouger dans les deux sens').toBe(true);
     await page.mouse.move(prise.x, prise.y);
     await page.mouse.down();
-    await page.mouse.move(prise.x - 150, prise.y + 220, { steps: 8 });
+    await page.mouse.move(prise.x + geste[0], prise.y + geste[1], { steps: 8 });
     await page.mouse.up();
     const b1 = await rectDe(page, '#parcours-bulle');
-    expect([Math.round(b1.left - b0.left), Math.round(b1.top - b0.top)]).toEqual([-150, 220]);
+    expect([Math.round(b1.left - b0.left), Math.round(b1.top - b0.top)]).toEqual(geste);
     await flecheVers(page, NAV('evaluations'), 'la bulle déplacée');
     // La place est gardée pour l'étape : deux passages de la sonde ne la reprennent pas.
     await page.waitForFunction(() => { window.__n = (window.__n || 0) + 1; return window.__n > 3; }, null, { polling: 150 });
@@ -293,29 +361,29 @@ test('la poignée : 46 px, à la souris et au doigt ; la bulle reste dans l’é
     await poignee(page).evaluate((el) => el.dispatchEvent(new PointerEvent('pointermove', { pointerId: 41, pointerType: 'touch', clientX: 5, clientY: 5, bubbles: true })));
     expect(await rectDe(page, '#parcours-bulle')).toEqual(b3);
 
-    // L'étape suivante reprend le placement automatique : la bulle n'est plus où on l'avait laissée, elle est
-    // revenue près de ce dont elle parle (deux flèches, vers les deux cartes).
+    // L'étape suivante reprend le placement automatique : la bulle n'est plus où on l'avait laissée (deux flèches, vers
+    // les deux lignes).
     await allerAEtape(page, 3);
-    await flecheVers(page, '#profil-contenu-dynamique .profil-carte:has(.badge-absence)', 'étape 3, placement automatique');
+    await flecheVers(page, LIGNE_ABSENCES, 'étape 3, placement automatique');
     await nombreDeFleches(page, 2, 'étape 3, avant de déplacer la bulle');
-    const carte = await rectDe(page, '#profil-contenu-dynamique .profil-carte:has(.badge-absence)');
+    const ligne = await rectDe(page, LIGNE_ABSENCES);
     const r = await poignee(page).boundingBox();
     const bb = await rectDe(page, '#parcours-bulle');
     await page.mouse.move(r.x + r.width / 2, r.y + r.height / 2);
     await page.mouse.down();
-    // La bulle (380 px) posée sur la carte Assiduité (342 px) : son centre est dessous.
-    await page.mouse.move(r.x + r.width / 2 - (bb.left - carte.left) - 20, r.y + r.height / 2 + 60, { steps: 6 });
+    // La bulle (380 px) posée sur la ligne des absences : son centre est dessous.
+    await page.mouse.move(r.x + r.width / 2 + (ligne.left - 20 - bb.left), r.y + r.height / 2 + (ligne.top - 40 - bb.top), { steps: 6 });
     await page.mouse.up();
     await expect.poll(async () => {
-        const b = await rectDe(page, '#parcours-bulle'), c = await rectDe(page, '#profil-contenu-dynamique .profil-carte:has(.badge-absence)');
-        const cx = (c.left + c.right) / 2, cy = (Math.max(0, c.top) + Math.min(await page.evaluate(() => innerHeight), c.bottom)) / 2;
+        const b = await rectDe(page, '#parcours-bulle'), c = await rectDe(page, LIGNE_ABSENCES);
+        const cx = (c.left + c.right) / 2, cy = (c.top + c.bottom) / 2;
         return cx > b.left && cx < b.right && cy > b.top && cy < b.bottom;
-    }, { message: 'la bulle couvre le centre de la carte' }).toBe(true);
-    // La carte cachée sous la bulle n'a plus de flèche : aucune pointe ne s'arrête à son bord.
+    }, { message: 'la bulle couvre le centre de la ligne' }).toBe(true);
+    // La ligne cachée sous la bulle n'a plus de flèche : aucune pointe ne s'arrête à son bord.
     await expect.poll(async () => {
-        const e = await etatFleches(page), c = await rectDe(page, '#profil-contenu-dynamique .profil-carte:has(.badge-absence)');
+        const e = await etatFleches(page), c = await rectDe(page, LIGNE_ABSENCES);
         return e.fleches.filter((f) => Math.hypot(Math.max(c.left - f.pointe.x, 0, f.pointe.x - c.right), Math.max(c.top - f.pointe.y, 0, f.pointe.y - c.bottom)) <= 9).length;
-    }, { message: 'aucune flèche vers la carte cachée sous la bulle' }).toBe(0);
+    }, { message: 'aucune flèche vers la ligne cachée sous la bulle' }).toBe(0);
 });
 
 test('la poignée au clavier : les flèches déplacent la bulle de 16 px sans changer de page de bulle ; sur la bulle, elles changent de page', async ({ page }) => {
@@ -329,7 +397,7 @@ test('la poignée au clavier : les flèches déplacent la bulle de 16 px sans ch
 
     await poignee(page).focus();
     await expect(poignee(page)).toBeFocused();
-    const b0 = await rectDe(page, '#parcours-bulle');
+    const b0 = await bullePosee(page);
     await page.keyboard.press('ArrowRight');
     // Dès la première flèche : la bulle a bougé, sa page n'a pas changé (l'événement ne remonte pas à la bulle).
     expect((await pages()).page, 'la flèche droite sur la poignée ne change pas de page').toBe(0);

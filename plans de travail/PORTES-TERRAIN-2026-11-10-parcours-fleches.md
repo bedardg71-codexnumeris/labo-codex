@@ -3,7 +3,11 @@
 Lot `lot/parcours-fleches`, 10 nov. 2026. Consigne : `plans de travail/CONSIGNE-LOT-2026-11-09-parcours-fleches.md`.
 Rapport : `plans de travail/RAPPORT-2026-11-10-parcours-fleches.md`.
 
-**État : EN ATTENTE. Cette porte ne se fait pas avant que le lot soit fusionné dans `main` et en ligne.**
+**État : EN COURS SUR L'APERÇU (PR n° 17).** Premier passage de Grégoire le 11 nov., 6 h 19 à 6 h 25, iPad en
+paysage (sept captures, hors dépôt) : §0.2, §2.1 a et b réussies ; §2.2 vue en partie ; §2.3 échouée (corrigée,
+à refaire) ; §2.4 et §2.5 sur le prochain aperçu ; §3.2 tranchée. Trois corrections décidées de 6 h 28 à 6 h 39,
+poussées sur la même branche (rapport du lot, « Retours de l'iPad »).
+*Avant le 11 nov. :* EN ATTENTE. Cette porte ne se fait pas avant que le lot soit fusionné dans `main` et en ligne.
 Tant que la branche n'est que poussée, `https://app.codexnumeris.org` montre encore le voile : tu jugerais la
 version d'avant. Cowork remplit la ligne « version attendue » ci-dessous au moment de la mise en ligne, et publie
 l'artefact jumeau (avec son bouton « Copier mes résultats »).
@@ -28,11 +32,11 @@ Ce qui échoue devient un item de backlog avec son numéro de porte, pas une not
 **Ou, avant la fusion, sur l'aperçu** (ajouté le 11 nov., nuit) : la PR n° 17 publie la branche
 `lot/parcours-fleches-apercu` à part, sans toucher à `app.codexnumeris.org`.
 
-- [ ] **0.2** Sur l'iPad, dans Safari, ouvre `https://deploy-preview-17--codexnumeris-051225.netlify.app`, recharge.
+- [x] **0.2** Sur l'iPad, dans Safari, ouvre `https://deploy-preview-17--codexnumeris-051225.netlify.app`, recharge.
   Menu ☰ › Assistance › « Découvrir » › Commencer.
   ⮕ Attendu : une bulle avec une poignée ⠿ en haut à droite, et aucune zone grisée autour des boutons. Sans
   poignée, tu es sur l'ancienne version : recharge, ou attends que Netlify ait fini de publier.
-  `iPad`
+  `iPad` · **Réussie le 11 nov., 6 h 19.**
 
 Aucune sauvegarde à faire : ces portes se jouent sur la démo et n'écrivent rien dans tes trimestres.
 
@@ -52,15 +56,16 @@ Rien. Ce lot ne touche à aucune donnée.
 > menus qu'elles désignaient. Les zones claires n'existent plus ; ce qui désigne maintenant, c'est un halo orange
 > qui pulse et une flèche.
 
-- [ ] **2.1 a** iPad à l'horizontale, **barre d'adresse de Safari visible**. Menu ☰ › Assistance › « Découvrir » ›
+- [x] **2.1 a** iPad à l'horizontale, **barre d'adresse de Safari visible**. Menu ☰ › Assistance › « Découvrir » ›
   Commencer (ou Refaire). Avance jusqu'à la bulle « Évaluer » (6 sur 8) en faisant les gestes demandés.
   ⮕ Attendu : le halo orange entoure exactement le mot « Conception », en haut. Avant : la zone claire était
   décalée vers le bas.
-  `iPad`
-- [ ] **2.1 b** Sans quitter l'étape, regarde la flèche qui sort de la bulle.
+  `iPad` · **Réussie le 11 nov., à la lettre** (« Évaluer », 6 sur 8, barre d'adresse visible).
+- [x] **2.1 b** Sans quitter l'étape, regarde la flèche qui sort de la bulle.
   ⮕ Attendu : sa pointe s'arrête juste sous le mot « Évaluation », qui est encadré. Elle ne pointe ni dans le
   vide, ni vers « Conception ».
-  `iPad`
+  `iPad` · **Réussie le 11 nov.** *Depuis (point 2 des retours) : une seconde flèche, vers la zone de dépôt de
+  Préparer ; toujours aucune vers « Conception ».*
 
 ### 2.2 Même chose, barre d'adresse masquée
 
@@ -70,7 +75,8 @@ Rien. Ce lot ne touche à aucune donnée.
 - [ ] **2.2** Toujours à l'étape « Évaluer » : fais disparaître la barre d'adresse (bouton « ᴀA » › « Masquer la
   barre d'outils », ou un petit défilement de la page vers le haut).
   ⮕ Attendu : le halo reste sur « Conception », la pointe de la flèche reste sous « Évaluation ». Rien ne glisse.
-  `iPad`
+  `iPad` · **Vue en partie le 11 nov.** : à l'étape 5 seulement, barre masquée, halo juste. L'étape 6 barre
+  masquée reste à voir.
 
 ### 2.3 La flèche suit quand la page défile
 
@@ -85,12 +91,17 @@ Rien. Ce lot ne touche à aucune donnée.
   défilement, un léger retard est normal ; ce qui compte, c'est l'arrêt.
   *(11 nov. : sous WebKit à 1180 px, la flèche de « Complétion » manquait — la bulle, faute de place, se collait à
   la carte. Corrigé en `ee0dace27`. Une seule flèche ici : la porte échoue.)*
-  `iPad`
+  `iPad` · **Échouée le 11 nov.** : deux flèches à l'arrêt, mais aux coins des cartes, à côté de l'information.
+  Corrigé (point 2 des retours) : **à refaire sur le prochain aperçu, avec cet attendu** — une flèche vers la
+  ligne « 5 absences ou retards », une vers « 2 productions non remises… », et la bulle sur un bord de l'écran,
+  loin des deux cartes.
 
 ### 2.4 Déplacer la bulle au doigt
 
 > **Pourquoi.** La bulle se posait parfois sur ce que tu voulais lire. Elle a maintenant une poignée ⠿, en haut à
 > droite, pour la pousser ailleurs.
+
+*2.4 et 2.5 : pas encore faites ; sur le prochain aperçu.*
 
 - [ ] **2.4 a** À la même étape, pose le doigt sur la poignée ⠿ et glisse la bulle vers le bas de l'écran.
   ⮕ Attendu : la bulle suit ton doigt, la page ne défile pas, et les flèches suivent la bulle.
@@ -126,7 +137,9 @@ place. Écris ta réponse, ne coche pas.
 - **3.2** Aux étapes 6 et 7 de « Découvrir », la flèche et la bulle vont maintenant à la section dont la bulle
   parle (« Évaluation », puis « Conception »), et non au prochain bouton. C'est la lecture que la session a faite
   de tes captures ; la consigne écrite donnait l'inverse pour ces deux étapes (voir le rapport, « Ce que j'ai
-  supposé »). Est-ce bien ce que tu voulais ? `______________________`
+  supposé »). Est-ce bien ce que tu voulais ? **Tranchée le 11 nov. (6 h 28 à 6 h 39)** : une flèche vers
+  l'élément précis que nomme la bulle, une seconde vers la section dans le menu quand la bulle présente une
+  section (« Découvrir » 6, 7 et 8), jamais vers le bouton à toucher. Appliqué ; le crible des neuf parcours est au rapport du lot.
 - **3.3** La flèche est-elle assez visible, ou trop ? (épaisseur, longueur) `______________________`
 
 ---
