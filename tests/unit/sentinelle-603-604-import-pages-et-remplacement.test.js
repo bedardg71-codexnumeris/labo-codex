@@ -484,11 +484,14 @@ describe('#876 — une file restaurée recalcule sa clé de regroupement', () =>
         const groupes = win.travauxImport.regrouperParDocument();
         expect(groupes.size).toBe(1);
         expect(win.travauxImport.detecterDoublonsStockage()).toEqual([]);
-        // La date revient de JSON en chaîne : rendue en Date, elle range
-        // encore les pages (persistées dans l'ordre 45, 55, 04).
+        // La date revient de JSON en chaîne : elle est rendue en Date (le tri par
+        // ordre de remise d'un dépôt suivant la lit). Lot « d'un seul tenant »
+        // (10 nov. 2026) : LA LISTE FAIT FOI — la file restaurée est rassemblée
+        // sans retri, et l'assemblage suit son ordre (persistée 45, 55, 04). Le tri
+        // par date se fait au dépôt (import-productions-d-un-tenant.test.js).
         const pages = [...groupes.values()][0];
         expect(pages[0].parseLea.dateRemise).toBeInstanceOf(Date);
-        expect(pages.map(f => f.parseLea.dateRemise.getUTCSeconds())).toEqual([4, 45, 55]);
+        expect(pages.map(f => f.parseLea.dateRemise.getUTCSeconds())).toEqual([45, 55, 4]);
     });
 
     it('une clé vidée à la main (« Défaire le regroupement ») reste vide', () => {

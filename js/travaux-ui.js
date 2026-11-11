@@ -1971,6 +1971,79 @@
         return nom + ', ' + prenom;
     }
 
+    /** Un nom de famille comparable : sans accents, sans casse, espaces resserrés. */
+    function nomDeFamilleComparable(nom) {
+        return String(nom || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/\s+/g, ' ').trim();
+    }
+
+    /**
+     * Lot « d'un seul tenant » (10 nov. 2026, effet C accepté par Grégoire) — les noms de
+     * famille que portent au moins deux personnes du groupe actif. Vécu : deux homonymes
+     * paraissaient identiques dans l'Aperçu, qui n'affiche que le nom de famille.
+     * @returns {Set<string>} noms comparables (`nomDeFamilleComparable`)
+     */
+    function nomsDeFamillePartages() {
+        const etudiants = typeof obtenirEtudiantsCoursActif === 'function'
+            ? (obtenirEtudiantsCoursActif() || [])
+            : (obtenirDonneesSelonMode('groupeEtudiants') || []);
+        const vus = new Set();
+        const partages = new Set();
+        etudiants.forEach(e => {
+            const n = nomDeFamilleComparable(e && e.nom);
+            if (!n) return;
+            if (vus.has(n)) partages.add(n);
+            vus.add(n);
+        });
+        return partages;
+    }
+
+    /**
+     * Le nom d'un fichier dans l'Aperçu : le nom de famille, ou « Nom, Prénom » quand une
+     * autre personne du groupe actif porte le même (comparé sans accents ni casse).
+     * L'anonymisation garde la priorité (`nomEleveDuFichier`). Non échappé.
+     * @param {Object} f - Fichier de la file
+     * @param {Set<string>} [homonymes] - `nomsDeFamillePartages()`, calculé une fois par rendu
+     */
+    function nomDansLApercu(f, homonymes) {
+        const nom = nomEleveDuFichier(f, 'nom');
+        if (!nom) return '';
+        const partages = homonymes || nomsDeFamillePartages();
+        const anonyme = typeof anonymiserNom === 'function'
+            ? anonymiserNom(f.etudiantDA || (f.etudiantAssocie && f.etudiantAssocie.da) || '')
+            : null;
+        if (anonyme || !partages.has(nomDeFamilleComparable(nom))) return nom;
+        return nomEleveDuFichier(f, 'nom, prenom');
+    }
+
+    /**
+     * Lot « d'un seul tenant » (10 nov. 2026) — le cadre d'une production autour d'une ligne de
+     * « Originaux » : il encadre une SUITE de lignes contiguës de même clé, jamais au-delà. Il
+     * s'ouvrait au premier fichier d'une production et se fermait à son dernier : une file
+     * entrelacée mettait les autres fichiers dedans et emboîtait les cadres en escalier. La
+     * file est désormais d'un seul tenant (`rassemblerLaFile`) ; le rendu tient même sans elle.
+     * @param {Array} queue
+     * @param {number} index
+     * @param {boolean} multi - la clé de la ligne est portée par au moins deux fichiers
+     * @returns {{avant: string, apres: string}} le HTML à poser avant et après la ligne
+     */
+    function cadreDeLaLigne(queue, index, multi) {
+        const groupeId = queue[index].groupeDocumentId;
+        if (!multi) return { avant: '', apres: '' };
+        const memeCle = (i) => i >= 0 && i < queue.length && queue[i].groupeDocumentId === groupeId;
+        let avant = '';
+        if (!memeCle(index - 1)) {
+            let fin = index;
+            while (memeCle(fin + 1)) fin++;
+            const suite = queue.slice(index, fin + 1);
+            avant = `<div class="pipeline-groupe-encadre" data-groupe-id="${echapperHtml(groupeId)}">
+                    <div class="pipeline-groupe-entete">
+                        <span class="pipeline-groupe-badge">${suite.length} ${suite.some(g => g.estPDF) ? 'fichiers' : 'pages'} &rarr; 1 PDF</span>
+                        <button class="pipeline-groupe-defaire" data-stop data-action="travauxUI.defaireGroupePipeline" data-param="${echapperHtml(groupeId)}" title="Défaire le regroupement"><img src="icons/icons8-trash.svg" alt="" class="btn-delete-icon"></button>
+                    </div>`;
+        }
+        return { avant: avant, apres: memeCle(index + 1) ? '' : '</div>' };
+    }
+
     /**
      * La colonne « Originaux » de l'étape Optimisation : les fichiers déposés,
      * leurs copies à plusieurs fichiers encadrées, et (#1231) la coche de
@@ -2000,10 +2073,8 @@
         let colGauche = '<div class="pipeline-col-originaux">';
         colGauche += '<div class="pipeline-col-titre">Originaux</div>';
         if (queue.length >= 2) {
-            colGauche += `<button type="button" class="btn btn-secondaire btn-sm pipeline-btn-reunir" data-action="travauxUI.reunirCopiePipeline" ${selectionReunir.size < 2 ? 'disabled' : ''}>R\u00e9unir en une copie</button>`;
+            colGauche += `<button type="button" class="btn btn-secondaire btn-sm pipeline-btn-reunir" data-action="travauxUI.reunirCopiePipeline" ${selectionReunir.size < 2 ? 'disabled' : ''}>R\u00e9unir en une production</button>`;
         }
-        const groupesOuverts = new Set(); // pour tracker les debuts de groupe
-
         queue.forEach((f, index) => {
             const thumb = f.thumbnailDataUrl || travauxStockage.obtenirThumbnailSync(f.id);
             const icone = contenuApercuAbsent(f);
@@ -2034,14 +2105,8 @@
             // Debut d'un groupe multi-fichiers
             const groupeId = f.groupeDocumentId;
             const indicesGroupe = groupeId ? groupesMulti.get(groupeId) : null;
-            if (indicesGroupe && !groupesOuverts.has(groupeId)) {
-                groupesOuverts.add(groupeId);
-                colGauche += `<div class="pipeline-groupe-encadre" data-groupe-id="${echapperHtml(groupeId)}">
-                    <div class="pipeline-groupe-entete">
-                        <span class="pipeline-groupe-badge">${indicesGroupe.length} ${indicesGroupe.some(i => queue[i].estPDF) ? 'fichiers' : 'pages'} &rarr; 1 PDF</span>
-                        <button class="pipeline-groupe-defaire" data-stop data-action="travauxUI.defaireGroupePipeline" data-param="${echapperHtml(groupeId)}" title="Défaire le regroupement"><img src="icons/icons8-trash.svg" alt="" class="btn-delete-icon"></button>
-                    </div>`;
-            }
+            const cadre = cadreDeLaLigne(queue, index, !!indicesGroupe);
+            colGauche += cadre.avant;
 
             // #1231 — une page d'une copie ne sort pas de sa copie par les flèches
             // (travauxImport.monterFichier refuse) : le bouton le montre.
@@ -2049,7 +2114,7 @@
             const bloqueBas = index === queue.length - 1 || (indicesGroupe && queue[index + 1].groupeDocumentId !== groupeId);
             const coche = selectionReunir.has(f);
             const caseReunir = queue.length >= 2
-                ? `<button type="button" class="pipeline-case-reunir" role="checkbox" aria-checked="${coche ? 'true' : 'false'}" aria-label="Cocher pour r\u00e9unir en une copie" data-stop data-action="travauxUI.cocherPourReunir" data-param="${index}"><input type="checkbox" tabindex="-1" aria-hidden="true" ${coche ? 'checked' : ''}></button>`
+                ? `<button type="button" class="pipeline-case-reunir" role="checkbox" aria-checked="${coche ? 'true' : 'false'}" aria-label="Cocher pour r\u00e9unir en une production" data-stop data-action="travauxUI.cocherPourReunir" data-param="${index}"><input type="checkbox" tabindex="-1" aria-hidden="true" ${coche ? 'checked' : ''}></button>`
                 : '';
             colGauche += `<div class="pipeline-fichier-ligne${selectionne ? ' pipeline-fichier-selectionne' : ''}${indicesGroupe ? ' pipeline-fichier-groupe' : ''}" data-action="travauxUI.selectionnerFichierPipeline" data-param="${index}">
                 ${caseReunir}
@@ -2069,10 +2134,7 @@
                 <button class="pipeline-btn-retirer" data-stop data-action="travauxUI.retirerFichierPipeline" data-param="${index}" title="Retirer ce fichier"><img src="icons/icons8-trash.svg" alt="" class="btn-delete-icon"></button>
             </div>`;
 
-            // Fin d'un groupe multi-fichiers
-            if (indicesGroupe && index === indicesGroupe[indicesGroupe.length - 1]) {
-                colGauche += '</div>'; // fermer .pipeline-groupe-encadre
-            }
+            colGauche += cadre.apres; // fin d'un groupe multi-fichiers : la fin de SA suite de lignes
         });
         colGauche += '</div>';
         return colGauche;
@@ -2260,12 +2322,13 @@
         // === Colonne droite : Apercu post-traitement ===
         let colDroite = '<div class="pipeline-col-confirmes">';
         colDroite += '<div class="pipeline-col-titre">Aper\u00e7u</div>';
+        const homonymes = nomsDeFamillePartages();
         queue.forEach((f, index) => {
             const dims = calculerDimensionsCibles(f);
             const tailleEst = estimerTailleFichier(dims.w, dims.h, f);
             const resCible = f.estPDF ? 'PDF' : `${dims.w} x ${dims.h}`;
             const thumb = f.thumbnailDataUrl || travauxStockage.obtenirThumbnailSync(f.id);
-            const nomEtudiant = echapperHtml(nomEleveDuFichier(f, 'nom'));
+            const nomEtudiant = echapperHtml(nomDansLApercu(f, homonymes));
 
             let badgeSpecifique = '';
             if (f.operations && f.operations.length > 0) {
@@ -2458,6 +2521,14 @@
         const queue = travauxImport.obtenirFileDAttente();
         const indices = queue.map((f, i) => (selectionReunir.has(f) ? i : -1)).filter(i => i >= 0);
         const resultat = travauxImport.reunirEnUneCopie(indices);
+        // Lot « d'un seul tenant » (10 nov. 2026) : le geste vécu ne faisait rien, sans un mot.
+        // Les coches restent : on corrige sa sélection sans tout recocher.
+        if (resultat && resultat.dejaUneProduction) {
+            if (typeof notifications !== 'undefined' && typeof notifications.info === 'function') {
+                notifications.info('Ces pages forment d\u00e9j\u00e0 une production.');
+            }
+            return;
+        }
         selectionReunir.clear();
         if (resultat) fichierSelectionneIndex = resultat.debut;
         rafraichirPipelineUI();
@@ -8050,6 +8121,8 @@
         sauvegarderEdition: sauvegarderEdition,
         reparerImagePerdue: reparerImagePerdue,   // #1233
         originesDesPages: originesDesPages,   // #1075, point 7 : lue par son banc
+        genererColonneOriginaux: genererColonneOriginaux,   // lot « d'un seul tenant » (10 nov.) : lue par son banc
+        nomDansLApercu: nomDansLApercu,                     // lot « d'un seul tenant » (10 nov.) : lue par son banc
         // Fusion depuis editeur
         ouvrirModalFusionEditeur: ouvrirModalFusionEditeur,
         confirmerFusionEditeur: confirmerFusionEditeur,
