@@ -148,6 +148,12 @@
 > sous quel protocole l'application était ouverte, alors que c'est exactement ce qui départage les deux
 > affichages — il a fallu le déduire. Inscrit au BACKLOG : ajouter `location.protocol` au rapport de bug.
 
+## Corrigés (10 novembre 2026, soir — les pages d'une production se suivent à l'import ; codé sur `lot/import-productions-d-un-tenant`, non fusionné, pas en ligne)
+
+| # | Testeur | Date | Description | Correctif |
+|---|---------|------|-------------|-----------|
+| 1270 | Grégoire (deux rapports de bug du 10 nov., 1.241.0, iPad puis Mac ; noms réels, gardés hors du dépôt) | 10 nov. 2026, 15 h 10 | **Préparer › Optimisation : les pages d'une production se dispersent dans la file, les cadres s'emboîtent en escalier, deux homonymes paraissent identiques dans l'Aperçu, et « Réunir » sur deux pages d'une production ne fait rien.** | La file d'un seul tenant au dépôt (ordre de remise) et à la restauration (sans retri), `rassemblerLaFile` ; l'assemblage suit l'ordre de la file ; un cadre par suite contiguë (`cadreDeLaLigne`) ; « Réunir » prend les seules pages cochées, et dit « Ces pages forment déjà une production. » ; « Nom, Prénom » pour les homonymes (`nomDansLApercu`). Bancs : `tests/unit/import-productions-d-un-tenant.test.js` (17 essais), `tests/integration/import-productions-d-un-tenant-2026-11-10.spec.js` (WebKit, 820 et 1180 px). Fiche #1270. |
+
 ## Corrigés (10 novembre 2026 — « Aucun travail importé » sur Préparer ; corrigé dans le cloud, PR n° 15, fusionné sur le `main` local le 10 nov., pas en ligne)
 
 | # | Testeur | Date | Description | Correctif |
