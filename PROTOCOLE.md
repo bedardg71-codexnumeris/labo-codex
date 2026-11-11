@@ -556,10 +556,10 @@ troisième catégorie ; elle ne lui retire pas l'arbitrage.
 
 ---
 
-## Règle 14 — un bug vu sur l'iPad : corrigé dans le cloud, fusionné sur le Mac (10 novembre 2026)
+## Règle 14 — un bug vu sur l'iPad : corrigé dans le cloud, fusionné et mis en ligne sur le Mac (10 novembre 2026)
 
 **Norme fixée par Grégoire (10 nov. 2026, 18 h)**, premier cas : PR n° 15, `lot/bandeau-preparer`, fusionnée le soir même.
 
-- **Dans le cloud** : une branche partie de `origin/main`, avec son banc, son break-test et Vitest complet, et une pull request. Le cloud n'écrit ni `SUIVI-BUGS.md` ni `BACKLOG.md` : il propose la ligne de suivi dans le corps de la PR.
-- **Sur le Mac** : la session principale fusionne (`git merge --no-ff`) dans le `main` local, rejoue le banc et Vitest, passe le correctif sous WebKit, puis inscrit la ligne de suivi en prenant le numéro du compteur de `BACKLOG.md` (règle 9), qui avance ici.
-- ⛔ **Jamais de fusion par GitHub** : elle mettrait `main` en ligne aussitôt, sans verdict WebKit, et ferait diverger le `main` local. La PR se ferme d'elle-même au push de `main`.
+- **Dans le cloud** : une conversation du Projet répertorie le bug et le corrige sur une branche partie de `origin/main`, avec son banc et son break-test, et ouvre une pull request. Le cloud n'écrit ni `SUIVI-BUGS.md` ni `BACKLOG.md` : il propose la ligne de suivi dans le corps de la PR.
+- **Sur le Mac, par la session principale** : la fusion (`git merge --no-ff`) dans le `main` local, le passage sous WebKit, le numéro au registre (compteur de `BACKLOG.md`, règle 9, qui avance ici) et la mise en ligne.
+- ⛔ **Jamais de fusion par l'application GitHub** : Netlify publie chaque `main`, si bien qu'elle mettrait le correctif en ligne aussitôt, sans verdict WebKit, et ferait diverger le `main` local. La PR se ferme d'elle-même au push de `main`.
