@@ -85,8 +85,23 @@ describe('La flèche : du bord de la bulle à la cible', () => {
         expect(tracerFleche(BULLE, rect(380, 380, 700, 460), ECRAN)).toBeNull();
     });
 
-    it('une cible collée à la bulle : pas de flèche illisible (moins de 24 px)', () => {
-        expect(tracerFleche(BULLE, rect(400, 532, 780, 600), ECRAN)).toBeNull();
+    it('une cible collée à la bulle : jamais de flèche illisible (moins de 24 px) ; un autre bord si la place y est', () => {
+        const longueur = (f) => Math.hypot(f.pointe.x - f.depart.x, f.pointe.y - f.depart.y);
+        // Plus large que la bulle, 12 px dessous : aucun bord assez loin sans traverser la cible, pas de flèche.
+        expect(tracerFleche(BULLE, rect(300, 532, 900, 600), ECRAN)).toBeNull();
+        // De la largeur de la bulle, 12 px dessous : le plus court (6 px) ne se lit pas, la flèche passe par le côté.
+        const cote = tracerFleche(BULLE, rect(400, 532, 780, 600), ECRAN);
+        expect(cote).not.toBeNull();
+        expect(longueur(cote)).toBeGreaterThanOrEqual(24);
+        expect(cote.pointe.x).toBeLessThan(400);                   // à gauche de la cible, pas sur elle
+        // Le cas de l'iPad à 1180 px (étape 3 de « Découvrir », 11 nov.) : la bulle à 12 px de la carte de droite,
+        // faute de place à 32 px. Les deux cartes reçoivent leur flèche.
+        const bulle = rect(776, 252, 1156, 544);
+        const gauche = rect(50, 252, 397, 820), droite = rect(417, 252, 764, 820);
+        const versDroite = tracerFleche(bulle, droite, ECRAN, [gauche]);
+        expect(versDroite).not.toBeNull();
+        expect(longueur(versDroite)).toBeGreaterThanOrEqual(24);
+        expect(tracerFleche(bulle, gauche, ECRAN, [droite])).not.toBeNull();
         expect(tracerFleche(BULLE, rect(400, 560, 780, 600), ECRAN)).not.toBeNull();
     });
 

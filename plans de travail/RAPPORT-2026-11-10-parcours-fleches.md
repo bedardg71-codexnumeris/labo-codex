@@ -4,7 +4,57 @@
 `origin/main` à `77679dd` (1.241.0), poussée, non fusionnée. Consigne :
 `plans de travail/CONSIGNE-LOT-2026-11-09-parcours-fleches.md`, avec les trois ajouts de Cowork du 10 nov., 11 h 30.
 
+**Dernier relais : 11 nov., nuit, Mac, WebKit** — relance des rouges de `lot/parcours-fleches-apercu` après la
+fusion de la 1.242.1 (`91968b201`). Section « Relance WebKit de nuit » juste dessous ; en cours.
+
 ---
+
+## Relance WebKit de nuit (11 nov. 2026)
+
+Mac seul, aucune autre application. **Pression mémoire avant de lancer** (`memory_pressure`) : *System-wide memory
+free percentage: 78 %*. Toutes les courses : `--project=webkit --workers=1 --reporter=list
+--trace=retain-on-failure`, sous `caffeinate -i`, sortie copiée par `tee`.
+
+### Les trois rouges de la course coupée, rejoués seuls (sur `91968b201`, après fusion)
+
+| Essai | Course coupée (10 nov., 23 h) | Seul, cette nuit |
+|---|---|---|
+| `parcours-fleches`, l. 134, « étapes 3, 6 et 7 de « Découvrir »… (1180 px) » | rouge : `étape 3 : nombre de flèches` — attendu 2, reçu 1 (`expect.poll`, 5 000 ms) | **rouge**, retry compris, même message |
+| `parcours-fleches`, l. 225, « la poignée : 46 px… l'étape suivante replace la bulle » | rouge : `étape 3, avant de déplacer la bulle : nombre de flèches` — attendu 2, reçu 1 | **rouge**, retry compris, même message (l. 300) |
+| `parcours-6`, l. 465, « 1440 px, copies-manquantes : la bulle 3… ni « Annuler » » | rouge : `page.goto: Test timeout of 30000ms exceeded` (navigation vers `index.html`, jamais `load`) | **vert** (les deux chemins de la l. 465) |
+
+### Les deux rouges de `parcours-fleches` : c'est le lot, pas la fusion
+
+Rejoués dans un worktree détaché sur `902d01774` (la branche avant la fusion de la 1.242.1) : **rouges aussi**,
+retry compris, mêmes messages (`étape 3 : nombre de flèches`, attendu 2, reçu 1). Rouges des deux côtés.
+
+**Cause, mesurée** (essai de diagnostic temporaire, retiré) : à 1180 px sous WebKit, les cartes Assiduité
+(50 → 397) et Complétion (417 → 764) sont bien là, séparées de 20 px. La bulle (380 px) n'a pas la place à
+`ECART_FLECHE` (32 px) à droite de leur union : 764 + 32 + 380 = 1 176 > 1 180 − 8. `placePresDe` se rabat sur
+`ECART` (12 px) ; le tracé direct vers Complétion fait alors 6 px, sous `FLECHE_MIN` (24), et `tracerFleche`
+rendait `null` sans essayer d'autre bord. Sous Chromium, la barre de défilement (15 px) rétrécit les cartes et
+la place à 32 px y est : d'où le vert de la session du cloud. **WebKit a des barres superposées, comme l'iPad à
+1 180 px en paysage : Grégoire aurait vu une seule flèche à l'étape 3.**
+
+**Correctif (le lot, sur la branche)** : quand le tracé direct est trop court pour se lire, `tracerFleche` essaie
+les autres bords de la cible, comme il le faisait déjà devant un obstacle ; aucun bord assez loin : `null`. Une
+cible dont le centre est sous la bulle reste sans flèche (garde explicite, elle ne dépend plus du seuil). Aucune
+flèche sous 24 px n'est tracée. À 1 180 px, la flèche de Complétion fait ~28 px et arrive par le haut de la carte,
+près de son coin droit. Jeton du moteur : `20261111a`.
+
+**Supposition nommée** : la consigne dit « une flèche vers chaque zone » ; la sentinelle « collée à la bulle »
+disait « pas de flèche » pour une cible à 12 px. J'ai suivi la consigne, et récrit la sentinelle sur son intention
+(« jamais de flèche illisible, moins de 24 px ») : une cible plus large que la bulle, collée dessous, reste sans
+flèche ; une cible de la largeur de la bulle reçoit une flèche par le côté ; le cas de l'iPad à 1 180 px est
+ajouté. **L'apparence de cette flèche courte qui passe le coin se juge sur capture (Cowork).** Break-tests :
+rétablir `if (!direct) return null` → rouge ; retirer le seuil de 24 px dans `courbe` → rouge. Les deux essais
+WebKit : verts (`5-fleches-apres-correctif.log`).
+
+### `parcours-6`, bulle 3 à 1440 px
+
+Vert seul, puis **18 verts sur 18** (`--repeat-each=6 --retries=0` : trois chemins × six). Le rouge de la course
+coupée était un `page.goto` jamais chargé en 30 s : un délai, pas une assertion. Rien contre l'essai.
+
 
 ## En tête : ce qu'il faut savoir avant de lire le reste
 

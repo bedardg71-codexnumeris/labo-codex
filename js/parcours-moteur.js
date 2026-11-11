@@ -652,7 +652,8 @@
      * (la sonde tourne toutes les 120 ms, la flèche ne frémit pas).
      *  · d'abord le plus court : du point de la bulle le plus proche de la cible au point de la cible le plus proche ;
      *  · la cible sortie de l'écran : la flèche va au bord de l'écran, du côté de la cible ;
-     *  · la cible sous la bulle, ou trop près pour qu'une flèche se lise (FLECHE_MIN) : null ;
+     *  · la cible sous la bulle : null ; le plus court trop court pour se lire (FLECHE_MIN) : un autre bord de la
+     *    cible, comme pour un obstacle ; aucun bord assez loin : null ;
      *  · la pointe s'arrête à FLECHE_RETRAIT px du bord de la cible ; deux traits ouverts, pas de triangle ;
      *  · si ce tracé passe sur un obstacle (une autre cible, ce qu'il faut toucher), le bombement change de côté ;
      *    sinon la flèche arrive par un autre bord de la cible, par le chemin le plus court qui ne croise rien ; si
@@ -685,11 +686,14 @@
             return f.points.some(function (p) { return rects.some(function (r) { return dansRect(p, r); }); });
         };
         // Le plus court : le point de la cible le plus proche du départ.
+        // Le centre de la cible sous la bulle : elle est cachée, pas de flèche.
+        if (sx === cx && sy === cy) return null;
         var direct = courbe(sx, sy, borne(sx, c.left, c.right), borne(sy, c.top, c.bottom), FLECHE_RETRAIT, 1, ecran);
-        if (!direct) return null;
-        if (!obstacles.length || !croise(direct, obstacles)) return finir(direct);
-        var envers = courbe(sx, sy, borne(sx, c.left, c.right), borne(sy, c.top, c.bottom), FLECHE_RETRAIT, -1, ecran);
+        if (direct && (!obstacles.length || !croise(direct, obstacles))) return finir(direct);
+        var envers = direct && courbe(sx, sy, borne(sx, c.left, c.right), borne(sy, c.top, c.bottom), FLECHE_RETRAIT, -1, ecran);
         if (envers && !croise(envers, obstacles)) return finir(envers);
+        // Le plus court trop court pour se lire (la bulle posée à ECART, faute de place à ECART_FLECHE : l'iPad à
+        // 1180 px, barres de défilement superposées) : un autre bord, s'il en est un assez loin. Sinon, null.
         // Par un autre bord de la cible : le point de ce bord le plus proche de la bulle, à 16 px des coins (au milieu d'un bord plus court),
         // la pointe à FLECHE_RETRAIT du bord.
         var bcx = (bulle.left + bulle.right) / 2, bcy = (bulle.top + bulle.bottom) / 2;
@@ -706,7 +710,8 @@
                 if (f && !croise(f, interdits) && (!meilleure || f.longueur < meilleure.longueur - 0.5)) meilleure = f;
             });
         });
-        return finir(meilleure || direct);
+        var retenue = meilleure || direct;
+        return retenue ? finir(retenue) : null;
     }
 
     /**
