@@ -60,11 +60,15 @@ async function fermerLeRappel(page) {
     });
 }
 
-/** Ouvre Évaluation › Préparer, et laisse passer l'injection des états vides (350 ms après l'affichage). */
+/**
+ * Ouvre Évaluation › Préparer, puis fait juger la page par etats-vides.js tout de suite : le
+ * même jugement que l'injection différée (350 ms après l'affichage), sans pause fixe
+ * (sentinelle-pauses-apres-ouverture). L'injection différée, quand elle vient, rend le même verdict.
+ */
 async function ouvrirPreparer(page) {
     await page.evaluate(() => { afficherSection('evaluations'); afficherSousSection('evaluations-importer'); });
     await page.waitForFunction(() => !!document.getElementById('travaux-drop-zone'));
-    await page.waitForTimeout(1200);
+    await page.evaluate(() => window.etatsVides.afficherPourSousSection('evaluations-importer'));
 }
 
 const nbCopies = (page) => page.evaluate(() => (travauxStockage.obtenirFichiersGroupeActif() || []).length);
