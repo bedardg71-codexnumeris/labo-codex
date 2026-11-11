@@ -7,6 +7,26 @@
 
 ---
 
+## 10 NOV. 2026, 22 H 50 (Claude Code) : **1.242.1 POUSSÉE ET EN LIGNE, VERDICT VERT**
+
+Feu vert de Grégoire (relais de Cowork à 20 h 12, puis « tout est fermé » et « vas-y »). **`origin/main` = `48f118bf5`** (1.242.1, build `1110-2019`, release `571e928b4`, Nouvelles fondues `48f118bf5`) ; 19 commits depuis la 1.242.0. Netlify `6af3e5a4`, `ready` à 22 h 49 sur ce SHA. PR n° 15 et n° 16 : fermées comme fusionnées par le push.
+
+**Ce qui part** : la bannière « Aucun travail importé » de Préparer (#1269) ; les pages d'une production d'un seul tenant à l'import, « Réunir en une production » sur les seules pages cochées, « Nom, Prénom » pour les homonymes (#1270) ; les bulles de l'en-tête derrière le logo, la navigation et le groupe (#1272) ; le pied de page (« Nouveautés » à côté de la version, la devise dessous) et « Aide dans les pages » en haut du panneau Assistance.
+
+**Verdict** sur `48f118bf5` : `verdict-en-morceaux.mjs`, code 0, sans refus. 1 602 essais, 1 602 verts, **0 au second essai**, 0 rouge, 63 sautés. Secteur, sans veille, pression mémoire 1, Cowork et navigateurs fermés. Hook : « verdict vert à jour pour ce commit ». Ce commit de relais, poussé après, n'a pas de verdict (documentation seule).
+
+**Complexité** (1.242.0 `9386cccf8` → 1.242.1 `48f118bf5`) :
+- fichiers de plus de 1 000 lignes : 41 → 41 ; lignes de code : 167 771 → 167 830 (Δ +59 : `js/travaux-ui.js` 5 439 → 5 481, `js/travaux-import.js` 1 383 → 1 408, `js/changelog-data.js` 2 652 → 2 653) ;
+- au-dessus de 15 : 435 → 435 (Δ 0) ; somme au-dessus de 15 : 10 977 → 10 972 (Δ −5) ;
+- au-dessus de 30 : 77 → 77 (Δ 0) ; maximum : 130 ; fonctions : 16 981 → 16 988.
+
+**Ce qui reste ouvert** :
+- #1271 : `productionSelectionnee` de l'Inspecteur jamais remise à zéro (inscrit, sans correctif).
+- Les points ouverts de l'entrée de 18 h 20 ci-dessous (liste de Léa en vue étendue, `bareme-3` › invariant 1, parcours 5 étape 5).
+- **Ensuite (étape 6, sans toucher `main`)** : l'aperçu des flèches, branche de test depuis ce `main` + `origin/lot/parcours-fleches` (`4ef662ffd`), PR sans fusion. Une PR n° 17 « APERÇU des flèches : ne pas fusionner » existe déjà sur GitHub.
+
+---
+
 ## 10 NOV. 2026, 18 H 20 (Claude Code) : **1.242.0 POUSSÉE ET EN LIGNE, VERDICT VERT ; LA VUE SIMPLE EST SERVIE**
 
 Feu vert de Grégoire (14 h 13), relayé par Cowork (14 h 20) : « mettre en ligne la vue simple ». **`origin/main` = `9386cccf8`** ; Netlify `6af3a691`, `ready` à 18 h 20 sur ce SHA (le site est derrière Cloudflare Access : la version se lit au SHA déployé). La release est `8d05f0ee8` (1.242.0, build `1110-1423`). Le passage de la 1.241.0 à la 1.242.0 compte 47 commits. Ni les flèches (`lot/parcours-fleches`) ni le groupe 4 ne sont partis.
