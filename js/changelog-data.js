@@ -21,6 +21,23 @@
 
     var CHANGELOG = [
         {
+            // 1.243 (11 nov. 2026 : les flèches des parcours, « Tableau de notation » dans la sous-navigation, les normes du
+            // tableau au profil et au PDF, la pastille au pied de l'accueil) — titre et huit lignes validés par Grégoire, mot pour mot (11 nov. 2026, après 15 h 30).
+            version: '1.243',
+            couleur: 'vert',
+            titre: 'Les parcours te montrent où toucher',
+            items: [
+                'Pendant un parcours, l’écran ne s’assombrit plus. Une flèche relie la bulle à ce dont elle parle, et un halo désigne ce qu’il faut toucher, dès l’ouverture de chaque étape.',
+                'Chaque étape dit en une ligne le geste à faire. La flèche et le halo passent au geste suivant à mesure que tu avances.',
+                'Rien n’est désigné sous une palette ou une fenêtre. Dans «&nbsp;Monter ton cours&nbsp;», une leçon neuve paraît entre les deux palettes, jamais sous le «&nbsp;Planificateur&nbsp;».',
+                'Quand «&nbsp;Continuer&nbsp;» attend quelque chose, il reste visible et une phrase dessous dit ce qui manque.',
+                'L’export pour Léa dit tout de suite «&nbsp;Préparation…&nbsp;» pendant que les PDF se préparent.',
+                '«&nbsp;Tableau de notation&nbsp;» a sa place dans la sous-navigation d’Évaluation, après «&nbsp;Liste&nbsp;».',
+                'En standards et en spécifications, le profil d’un·e étudiant·e et son PDF montrent chaque production comme le tableau de notation&nbsp;: plein si elle compte dans la note, contour si elle est évaluée sans être retenue, pointillé si elle est à venir. Une légende accompagne la bande «&nbsp;Progression · trimestre&nbsp;» du PDF.',
+                'Au pied de l’accueil, une pastille signale aussi les Nouveautés, et le numéro de build suit la version.'
+            ]
+        },
+        {
             // 1.242 (la vue simple, la liste de Léa, plusieurs groupes, l'accueil ; le niveau sans seuils en vue étendue) —
             // titre et sept lignes validés par Grégoire, mot pour mot (10 nov. 2026, 14 h 18) ; apostrophes typographiques et
             // espaces insécables comme ailleurs dans ce fichier. 1.242.1 (10 nov., soir) : six de ces lignes fondues deux à deux,
