@@ -333,6 +333,27 @@ async function etape9(page, { cap }) {
     expect(await page.evaluate(() => Assistance.etatDe('evaluer').etat)).toBe('fait');
 }
 
+/**
+ * « Ta grille » à 820 × 1180 (l'iPad en portrait), le texte validé par Grégoire le 11 nov. (8 h 38) : la bulle tient
+ * entière dans la fenêtre, son texte ne défile pas (en pages s'il le faut), et elle ne couvre pas la zone de collage.
+ */
+export async function laGrilleEnPortrait(page) {
+    test.setTimeout(120000);
+    await ouvrirEspaceVide(page, 820, { hauteur: 1180 });
+    await mettreLaClasseEnPlace(page);
+    await page.evaluate(() => Assistance.parcours().find((p) => p.id === 'evaluer').lancer(0));
+    await etape(page, 1, 'Ta grille', { focus: false });
+    await expect(bulle(page).locator('.parcours-bulle-texte')).toContainText('ta grille servira ensuite à chaque copie que tu évalueras avec elle');
+    await entierDansLaFenetre(page, '#parcours-bulle', 'Ta grille, 820 × 1180');
+    const defile = await page.evaluate(() => {
+        const t = document.querySelector('#parcours-bulle .parcours-bulle-texte');
+        return t.scrollHeight > t.clientHeight + 1;
+    });
+    expect(defile, 'le texte de « Ta grille » tient sans défiler').toBe(false);
+    await bulleNeCouvrePas(page, '#materiel-accueil .materiel-collage', 'Ta grille, 820 × 1180');
+    await capture(page, DOSSIER, 'p3-1-820x1180-texte-du-11-nov');
+}
+
 export async function leParcoursEntier(page, { niveaux, cap, echelleVide = false, fenetreEtape8 = null }) {
     test.setTimeout(240000);
     await ouvrirEspaceVide(page, 1180);

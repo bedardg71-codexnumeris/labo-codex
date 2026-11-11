@@ -144,6 +144,11 @@ describe('Les cibles des flèches', () => {
         expect(g[0]).toEqual(rect(100, 100, 300, 150));
     });
 
+    it('à 20 px tout juste, deux cibles gardent chacune sa flèche ; à 19 px, elles se fondent (11 nov. 2026, « Ta classe », 4)', () => {
+        expect(grouperCibles([rect(56, 787, 400, 849), rect(420, 787, 764, 822)], 3)).toHaveLength(2);
+        expect(grouperCibles([rect(56, 787, 400, 849), rect(419, 787, 764, 822)], 3)).toHaveLength(1);
+    });
+
     it('au-delà de trois zones, une seule flèche vers leur union', () => {
         const quatre = [rect(0, 0, 10, 10), rect(100, 0, 110, 10), rect(200, 0, 210, 10), rect(300, 200, 310, 210)];
         expect(grouperCibles(quatre.slice(0, 3), 3)).toHaveLength(3);

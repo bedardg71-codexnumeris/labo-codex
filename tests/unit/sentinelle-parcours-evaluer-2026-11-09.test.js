@@ -40,6 +40,9 @@ function titreDeLaConsigne(n) {
 // LES SIX CORRECTIONS DU 9 NOV., telles que relayées : [étape, phrase de la consigne, phrase validée].
 // `null` : le texte entier est remplacé (étape 9).
 const CORRECTIONS = [
+    // Le 11 nov., 8 h 38 (second essai sur l'iPad) : la longueur de la dissection, dite d'avance.
+    [1, "C'est ainsi qu'elle pourra lire tes évaluations, puis nommer le critère où un·e étudiant·e bute.",
+        "C'est ainsi qu'elle pourra lire tes évaluations, puis nommer le critère où un·e étudiant·e bute. C'est souvent long, parce que chaque grille est construite à sa façon et que l'application ne peut pas deviner le rôle de chaque morceau. Mais tu ne le fais qu'une fois : ta grille servira ensuite à chaque copie que tu évalueras avec elle."],
     // Le 9 nov., 13 h 37 (question 2 du rapport) : l'échelle associée avec la grille.
     [2, 'Puis associe-lui la grille que tu viens de créer.',
         'Puis associe-lui la grille que tu viens de créer, et son échelle si elle en a une.'],

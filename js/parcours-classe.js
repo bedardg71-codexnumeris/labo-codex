@@ -188,15 +188,9 @@
         await attendre(pageImmobile(acc), 2000);
     }
 
-    // Le formulaire du bloc, sans la rangée de sélection au-dessus (bibliothèque, menu, « + Nouveau… ») :
-    // éclairer tout l'accordéon faisait sortir de l'écran le haut d'un grand formulaire, ou passer
-    // la bulle dessus (captures du 9 nov., étapes 1 et 6).
-    // Les champs que nomme la bulle (11 nov. 2026, Grégoire : la flèche va à ce que nomme la bulle, pas au formulaire
-    // entier ; et la bulle ne couvre plus les champs qu'elle demande de remplir). Ceux d'une même rangée se fondent.
-    function champs(ids) {
-        return ids.map(function (id) { var c = el(id); return c ? (c.closest('.groupe-form') || c) : null; }).filter(Boolean);
-    }
-
+    // Le formulaire du bloc, sans la rangée de sélection au-dessus (bibliothèque, menu, « + Nouveau… »).
+    // Les étapes 1, 2, 3, 5 et 6 le déclarent (`formulaire`) : le moteur en tire les champs obligatoires, et pose une
+    // flèche sur chacun de ceux qui sont encore vides (Grégoire, 11 nov. 2026, 8 h 26).
     function blocDuFormulaire(idEtape) {
         var acc = accordeon(idEtape);
         return acc ? acc.querySelector('.panneau-formulaire') : null;
@@ -206,16 +200,39 @@
 
     function champDate() { return el('date-cours'); }
 
-    function groupeDuChampDate() {
-        var c = champDate();
-        return c ? (c.closest('.groupe-form') || c) : null;
-    }
-
     function boutonVerrou() { return el('btnVerrouillerSaisiePresences'); }
 
-    function tableauPresences() {
+    /** « Choisis un cours » : la rangée Précédent · date · Suivant. */
+    function choixDuCours() {
+        var c = champDate();
+        return c ? (c.closest('.d-flex-gap8-center') || c) : null;
+    }
+
+    /**
+     * « Tout le monde est présent par défaut […] tu ne notes que les absences et les retards » : la colonne Présence (son
+     * en-tête et ses cases), pas le tableau entier. Ses cellules se touchent : une seule flèche, et la bulle peut se poser
+     * sur les autres colonnes (11 nov. 2026, second essai : le tableau entier et le compteur, déclarés, ne laissaient
+     * aucune place libre, et la bulle se posait sur le choix du cours et les premières rangées).
+     */
+    function colonnePresence() {
         var corps = el('tbody-saisie-presences');
-        return corps ? corps.closest('table') : null;
+        var table = corps ? corps.closest('table') : null;
+        if (!table) return [];
+        var tete = table.querySelector('[data-tooltip="presences-presence-col"]');
+        var cases = [].map.call(corps.querySelectorAll('.input-periodes'), function (i) { return i.closest('td'); });
+        return [tete ? tete.closest('th') : null].concat(cases).filter(Boolean);
+    }
+
+    /**
+     * Les DA, prénoms et noms de la saisie : la bulle ne les nomme pas, mais il faut les voir pour noter une absence. Elle
+     * les évite comme ses zones, sans flèche (11 nov. 2026 : à 1180 × 746, posée en bas à gauche, elle les couvrait).
+     */
+    function nomsDeLaSaisie() {
+        var corps = el('tbody-saisie-presences');
+        if (!corps) return [];
+        return [].concat.apply([], [].map.call(corps.querySelectorAll('tr'), function (tr) {
+            return [].slice.call(tr.children, 0, 3);
+        }));
     }
 
     function blocAssiduite() {
@@ -277,8 +294,7 @@
             titre: 'Ton trimestre',
             texte: "Commençons par ton trimestre : tout ce que tu feras s'y range, tes groupes, tes présences, tes évaluations. Donne-lui un nom, sa session et son année, puis trois dates : le début, la fin des cours et la fin du trimestre. Ces dates bornent le calendrier de tes séances. Le reste, comme les journées sans cours, peut attendre.",
             avant: function () { return ouvrirBloc('trimestre'); },
-            // Le nom, la session, l'année ; puis les trois dates.
-            zones: function () { return champs(['v2-nomTrimestre', 'v2-sessionTrimestre', 'v2-anneeTrimestre', 'v2-debutTrimestre', 'v2-finCours', 'v2-finTrimestre']); },
+            formulaire: function () { return blocDuFormulaire('trimestre'); },
             contour: function () { return el(BOUTON_CREER.trimestre); },
             atteint: function () { return reglee('trimestre'); }
         },
@@ -286,8 +302,7 @@
             titre: 'Ton cours',
             texte: "Ajoute le cours que tu donnes à ce groupe. Tes productions se rangeront sous lui : si tu donnes le même cours à deux groupes, tu les prépares une seule fois. Si tu donnes plusieurs cours, un seul suffit pour l'instant.",
             avant: function () { return ouvrirBloc('cours'); },
-            // « Le cours que tu donnes » : son code et son nom.
-            zones: function () { return champs(['v2-codeCours', 'v2-nomCours']); },
+            formulaire: function () { return blocDuFormulaire('cours'); },
             contour: function () { return el(BOUTON_CREER.cours); },
             atteint: function () { return reglee('cours'); }
         },
@@ -295,8 +310,7 @@
             titre: 'Ton profil',
             texte: "Ton prénom, ton nom, ton courriel et ton établissement. Ils servent à deux choses : ton groupe-cours a besoin de savoir qui le donne, et ils accompagnent les ressources que tu partageras.",
             avant: function () { return ouvrirBloc('enseignant'); },
-            // Le prénom, le nom, le courriel et l'établissement.
-            zones: function () { return champs(['v2-ens-prenom', 'v2-ens-nom', 'v2-ens-courriel', 'v2-ens-institution']); },
+            formulaire: function () { return blocDuFormulaire('enseignant'); },
             contour: function () { return el(BOUTON_CREER.enseignant); },
             atteint: function () { return reglee('enseignant'); }
         },
@@ -304,10 +318,10 @@
             titre: 'Ta classe',
             texte: "Ajoute tes étudiant·es. Le plus simple : copie la liste de ton groupe depuis le système de ton établissement et colle-la ici, ou importe-la en fichier texte. La liste de Léa, dans Omnivox (format Excel, dans ses paramètres d'affichage), arrive déjà dans le bon ordre ; sinon, une ligne par personne : DA, groupe, nom, prénom. Le DA reconnaît chaque personne partout dans l'application, jusque dans le nom des fichiers que tu importeras. Le numéro de groupe servira à ton horaire et à ton groupe-cours. Le reste peut attendre.",
             avant: function () { return ouvrirBloc('etudiants'); },
-            zones: function () {
-                // « Colle-la ici, ou importe-la en fichier texte » : les deux façons, chacune sa flèche.
-                return [el('v2-donneesCollees'), el('v2-fichierCsvEntree')].map(function (c) { return c ? (c.closest('.import-option') || c) : null; });
-            },
+            // « Colle-la ici, ou importe-la en fichier texte » : les deux champs eux-mêmes, chacun sa flèche (11 nov. 2026,
+            // second essai : la bulle couvrait « Fichier » ; les deux cadres `.import-option`, à 20 px l'un de l'autre, se
+            // fondaient en une seule cible tracée entre les deux).
+            zones: function () { return [el('v2-donneesCollees'), el('v2-fichierCsvEntree')]; },
             // « Prévisualiser », puis, l'aperçu affiché, « Confirmer » : c'est lui qui importe.
             contour: function () {
                 var acc = accordeon('etudiants');
@@ -321,11 +335,7 @@
             titre: 'Ton horaire',
             texte: "Indique les jours et les périodes où tu vois ce groupe. L'application en tire le calendrier de tes séances : c'est à chacune que s'attacheront tes présences, et plus tard ce que tu y enseignes.",
             avant: function () { return ouvrirBloc('horaire'); },
-            // « Les jours et les périodes » : les lignes des séances.
-            zones: function () {
-                var b = blocDuFormulaire('horaire');
-                return b ? [].slice.call(b.querySelectorAll('.seance-horaire-ligne')) : [];
-            },
+            formulaire: function () { return blocDuFormulaire('horaire'); },
             contour: function () { return el(BOUTON_CREER.horaire); },
             atteint: function () { return reglee('horaire'); }
         },
@@ -333,8 +343,7 @@
             titre: 'Ton groupe-cours',
             texte: "Réunis les cinq morceaux : le trimestre, le cours, le numéro de groupe, l'horaire et toi. Ton groupe apparaît alors dans l'en-tête : c'est sur lui que travaillent le Suivi et l'Évaluation, et c'est là que tu passeras d'un groupe à l'autre. Chacun de tes groupes aura le sien ; un seul suffit pour l'instant. La pratique de notation viendra plus tard : c'est là que tu décides comment tu construis la note du cours. La note de chaque évaluation, elle, n'en dépend pas.",
             avant: function () { return ouvrirBloc('groupe-cours'); },
-            // « Les cinq morceaux » : trimestre, cours, groupe, horaire, enseignant·e (pas la pratique, « plus tard »).
-            zones: function () { return champs(['v2-gc-trimestre', 'v2-gc-cours', 'v2-gc-groupe', 'v2-gc-horaire', 'v2-gc-enseignant']); },
+            formulaire: function () { return blocDuFormulaire('groupe-cours'); },
             contour: function () { return el(BOUTON_CREER['groupe-cours']); },
             atteint: function () { return reglee('groupe-cours'); }
         },
@@ -363,8 +372,9 @@
             },
             zones: function () {
                 if (avantPremierCours) return [];
-                return [groupeDuChampDate(), el('compteur-presences'), tableauPresences()];
+                return [choixDuCours()].concat(colonnePresence(), nomsDeLaSaisie());
             },
+            fleches: function () { return avantPremierCours ? [] : [choixDuCours()].concat(colonnePresence()); },
             contour: function () { return avantPremierCours ? null : boutonVerrou(); },
             atteint: function () { return !avantPremierCours && seanceVerrouillee(); }
         },

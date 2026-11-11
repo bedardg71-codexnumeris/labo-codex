@@ -4,10 +4,87 @@
 `origin/main` à `77679dd` (1.241.0), poussée, non fusionnée. Consigne :
 `plans de travail/CONSIGNE-LOT-2026-11-09-parcours-fleches.md`, avec les trois ajouts de Cowork du 10 nov., 11 h 30.
 
-**Dernier relais : 11 nov., matin, Mac, WebKit.** Retours de Grégoire sur l'iPad (6 h 19 à 6 h 39) : trois
-corrections sur `lot/parcours-fleches-apercu`, pour que l'aperçu de la PR n° 17 suive. Section « Retours de l'iPad »
-juste dessous ; le matin et la nuit, sous elle. **Préalables de la fusion dans `main`** : le verdict complet (il viendra
-à la fusion) et les portes 2.2 à 2.5 sur l'aperçu.
+**Dernier relais : 11 nov., 9 h, Mac, WebKit.** Second essai de Grégoire sur l'iPad (8 h 04 à 8 h 47) : quatre
+corrections sur `lot/parcours-fleches-apercu` (les formulaires, la bulle sur ce qu'elle explique, le zoom au pincement,
+le texte « Ta grille »). Section « Second essai sur l'iPad » juste dessous ; le premier essai (6 h 41), le matin et la
+nuit, sous elle. **Préalables de la fusion dans `main`** : le verdict complet (il viendra à la fusion), et sur l'aperçu
+les portes 2.5 a et b et 2.6 (porte terrain du lot).
+---
+
+## Second essai sur l'iPad (11 nov., 8 h 52) : les formulaires, la bulle, le zoom, « Ta grille »
+
+### 1. Les formulaires (Grégoire, 8 h 26)
+
+Le moteur lit un champ neuf d'une étape, `formulaire: () => Element` : ses zones sont les champs obligatoires visibles
+du formulaire (`required`, `aria-required`, ou l'astérisque rouge `.champ-requis` de leur étiquette), et les flèches
+vont à ceux qui sont ENCORE VIDES, une par champ, sans fusion ni plafond (`designe`, `champsObligatoires`). Un champ
+rempli perd sa flèche ; plus aucun : le halo du bouton seul. « Mettre ta classe en place » 1, 2, 3, 5 et 6 déclarent
+leur bloc ; les listes de champs écrites à la main sont retirées (`champs()`). Mesuré dans WebKit, 1180 × 820 :
+trimestre 6 flèches, cours 3 (code, pondération, discipline ; le nom n'est pas obligatoire), profil 4 (au second
+essai : une seule, les quatre champs dépassaient le plafond de trois et se fondaient en une union), horaire : le nom et
+les périodes de chaque séance. Les périodes portent maintenant `required` (`js/trimestre-v2-horaires.js`) : la
+sauvegarde les refusait déjà vides (`_refuserHoraireV2`), aucun style ne s'y accroche.
+
+### 2. La bulle sur ce qu'elle explique
+
+- **« Ta classe », 4** : les zones sont les deux champs eux-mêmes (« Coller les données », « Fichier CSV/TSV »), et non
+  plus leurs cadres `.import-option`. **Non reproduit dans WebKit** : à 820 × 1180, 1180 × 820, 820 × 1106 et 1180 × 746,
+  avant et après « Prévisualiser », la bulle ne couvre jamais « Fichier ». Trouvé en chemin, et corrigé (mon lot) :
+  les deux cadres, à 20 px tout juste l'un de l'autre, se fondaient en UNE cible, tracée entre les deux ; la fusion est
+  maintenant stricte (« à moins de 20 px », comme le dit `FUSION`) : deux flèches. Porte 2.6 a pour l'iPad.
+- **« Ton premier cours », 7** : mesuré à 820 × 1180, la bulle mordait sur « Date du cours ». Cause : les zones (le
+  bloc du compteur et le tableau entier) remplissaient l'écran, il n'y avait aucune place libre. Les zones sont
+  maintenant ce que nomme la bulle : la rangée « ← Précédent · date · Suivant → » et la colonne Présence (en-tête et
+  cases) ; plus, sans flèche, les DA, prénoms et noms (champ neuf `fleches` : la bulle évite toutes les zones, les
+  flèches ne vont qu'à celles-là). Sans eux, à 1180 × 746, la bulle se posait sur les noms qu'il faut voir pour noter
+  une absence. Le relevé « la bulle ne couvre jamais ses zones » les prend, puisqu'ils sont des zones.
+
+### 3. Le zoom au pincement (§2.5 a)
+
+Sous Safari iPad, `innerWidth × innerHeight` suivent la partie visible pendant le zoom ; la sonde replaçait la bulle
+sur ces mesures à chaque passage (et la passait sous 500 px à la forme du téléphone). Maintenant, deux doigts posés
+(`touchstart`/`touchend`) ou `visualViewport.scale` ≠ 1 : rien ne se replace, ni la bulle, ni sa forme, ni la couche
+des flèches (l'écran gardé est celui d'avant le zoom, `ecranGarde`) ; le halo et les flèches suivent leurs cibles. À
+l'échelle 1, la sonde reprend : même mise en page, même place. Le « replacer une fois au lever des doigts » du relais
+tombe de lui-même : la place n'a pas changé, il n'y a rien à ramener.
+
+### 4. « Ta grille »
+
+Le texte validé à 8 h 38, mot pour mot (vérifié par comparaison de chaînes) ; la sentinelle d'« Évaluer » porte la
+correction (étape 1). À 820 × 1180 : banc neuf, `laGrilleEnPortrait`.
+
+### Bancs
+
+WebKit sur le Mac, une course à la fois, `memory_pressure` lu avant chacune (58 à 62 % libres), sous `caffeinate -i`
+(journal : `plans de travail/diag-2026-11-11-second-essai/serie.log`). Les flèches 9/9 (4 captures sautées), le refus
+2/2, parcours 1 et 2 7/7, parcours 2 4/4, 3 5/5, 4 4/4, 5 3/3, 6 14/14, 7 7/7, 8 10/10, 9 16/16 ; **le parcours 2 six
+fois de suite, 4/4 chaque fois.** Vitest : 11 403 sur 11 403 après les jetons (build 1111-0929) ; un rouge à la première course (la sentinelle des pauses : le
+banc du zoom attendait par `waitForTimeout`), corrigé (relevé fait dans la page) ; la sentinelle 6/6, le banc 1/1.
+
+Bancs neufs, chacun cassé avant d'être cru :
+- **parcours 2, « les formulaires du Cadre »** : 6 flèches au trimestre, 5 le nom rempli, 3 avec la session et l'année,
+  0 tout rempli et le halo sur « Créer le trimestre » ; cours 3, profil 4 puis 3, classe 2, horaire le nom et les
+  périodes. Break-test : la flèche gardée sur un champ rempli → ROUGE (« le nom rempli : 6 au lieu de 5 »).
+- **parcours 2, bout en bout, étape 7** : les flèches au choix du cours et à la colonne Présence ; la bulle ne couvre ni
+  la rangée de la date, ni les noms des trois rangées.
+- **les flèches, « sous le zoom au pincement »** : échelle 2 et fenêtre rapportée à 590 × 410 (ce que rapporte Safari
+  iPad, sans changer la mise en page) ; dix passages de la sonde, la bulle immobile, pas de forme téléphone, la couche
+  à 1180 ; à l'échelle 1, la même place. Break-test : la garde de l'échelle retirée → ROUGE dès le premier passage
+  (c'est le symptôme de l'iPad, reproduit).
+- **parcours 3, « Ta grille » à 820 × 1180** : la bulle entière dans la fenêtre, son texte sans défilement, la zone de
+  collage libre ; plus le relevé de la bulle.
+- **sentinelle des flèches** : deux cibles à 20 px tout juste en gardent deux ; à 19 px, une.
+
+### Ce que j'ai supposé
+
+1. La bulle d'une étape à formulaire évite TOUS les champs obligatoires, remplis ou non (pas seulement ceux qui ont
+   une flèche) : sinon elle sauterait d'un coin à l'autre pendant qu'on remplit, et couvrirait un champ à corriger.
+2. Les périodes de l'horaire sont obligatoires au sens de la règle (la sauvegarde les exige), sans astérisque visible :
+   `required` seulement. Une astérisque serait un changement visuel, non demandé.
+3. La règle des formulaires vaut pour le Cadre. Les fiches d'« Évaluer » (production, cartouche), dont le halo va
+   déjà de champ en champ (décision du 9 nov.), sont inchangées.
+4. Les noms de la saisie des présences, à éviter sans flèche.
+5. Sous le zoom, rien ne se replace tant que la page reste zoomée, pas seulement pendant le pincement.
 ---
 
 ## Retours de l'iPad (11 nov., 6 h 41) : la place de la bulle, la cible des flèches, le refus

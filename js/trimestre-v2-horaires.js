@@ -1092,6 +1092,8 @@ function mettreAJourSeancesHoraireV2() {
     // disparaissait à la saisie, et le « 2 » restant ne disait plus ce qu'il compte (le
     // `title` n'existe pas au toucher). Décision de Grégoire, 17 sept. 2026 : ni rangée ni
     // largeur ajoutées, donc le mot se loge dans la colonne des périodes.
+    // 11 nov. 2026 : `required` sur les périodes, que la sauvegarde exige déjà (_refuserHoraireV2) ; le parcours
+    // « Mettre ta classe en place » y lit les champs obligatoires et y pose ses flèches. Aucun style ne s'y accroche.
 
     for (let i = 0; i < nbSeances; i++) {
         const jourDefaut = jours[i % jours.length];
@@ -1106,7 +1108,7 @@ function mettreAJourSeancesHoraireV2() {
                 <input type="time" id="v2-hor-seance-${i}-fin" class="controle-form" value="${FIN_PAR_DEFAUT}" data-on-change="sauvegarderChampHoraireV2">
                 <div class="seance-horaire-periodes">
                     <input type="number" id="v2-hor-seance-${i}-periodes" class="controle-form controle-form-compact"
-                           min="1" max="8" step="1" title="Nombre de périodes de cette séance"
+                           min="1" max="8" step="1" title="Nombre de périodes de cette séance" required
                            aria-describedby="v2-hor-seance-${i}-periodes-unite"
                            data-on-input="majResumeFormatHoraireV2" data-on-change="sauvegarderChampHoraireV2">
                     <span id="v2-hor-seance-${i}-periodes-unite" class="seance-horaire-unite">pér.</span>

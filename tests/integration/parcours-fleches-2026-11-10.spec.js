@@ -386,6 +386,48 @@ test('la poignée : 46 px, à la souris et au doigt ; la bulle reste dans l’é
     }, { message: 'aucune flèche vers la ligne cachée sous la bulle' }).toBe(0);
 });
 
+// 11 nov. 2026, second essai sur l'iPad (§2.5 a) : pendant le zoom au pincement, la bulle « se déplace un peu partout ».
+// Sous Safari iPad, innerWidth × innerHeight suivent la partie visible de la page pendant le zoom ; Playwright ne pince
+// pas : le banc simule ce que Safari rapporte (visualViewport.scale à 2, innerWidth × innerHeight divisés par deux,
+// sans changer la mise en page) et juge que rien ne se replace, puis que la bulle revient à sa place à l'échelle 1.
+// Ce qu'on voit sur l'iPad pendant le pincement, Grégoire le juge.
+test('sous le zoom au pincement, rien ne se replace : la bulle garde sa place et sa forme, la couche garde l’écran d’avant ; à l’échelle 1, la même place', async ({ page }) => {
+    test.setTimeout(60000);
+    await ouvrirEspaceVide(page, 1180);
+    await decouvrirA(page, 6);
+    await flecheVers(page, NAV('evaluations'));
+    const b0 = await bullePosee(page);
+    await page.evaluate(() => {
+        Object.defineProperty(window.visualViewport, 'scale', { configurable: true, get: () => 2 });
+        Object.defineProperty(window, 'innerWidth', { configurable: true, get: () => 590 });
+        Object.defineProperty(window, 'innerHeight', { configurable: true, get: () => 410 });
+        window.visualViewport.dispatchEvent(new Event('resize'));
+    });
+    // Dix passages de la sonde (120 ms), relevés dans la page : la bulle n'a pas bougé, n'a pas pris la forme du téléphone.
+    const releves = await page.evaluate(() => new Promise((fin) => {
+        const vus = [];
+        const tour = () => {
+            const r = document.getElementById('parcours-bulle').getBoundingClientRect();
+            vus.push({ left: r.left, top: r.top, right: r.right, bottom: r.bottom, width: r.width, height: r.height });
+            if (vus.length < 10) setTimeout(tour, 130); else fin(vus);
+        };
+        setTimeout(tour, 130);
+    }));
+    releves.forEach((r, k) => expect(r, `sous le zoom, passage ${k + 1}`).toEqual(b0));
+    expect(await page.evaluate(() => window.ParcoursMoteur.placement().telephone)).toBe(false);
+    expect(await page.evaluate(() => document.getElementById('parcours-fleches').getAttribute('width'))).toBe('1180');
+    await flecheVers(page, NAV('evaluations'), 'sous le zoom');
+    await page.evaluate(() => {
+        delete window.visualViewport.scale;
+        delete window.innerWidth;
+        delete window.innerHeight;
+        window.visualViewport.dispatchEvent(new Event('resize'));
+    });
+    expect(await page.evaluate(() => window.visualViewport.scale)).toBe(1);
+    const b1 = await bullePosee(page);
+    expect(b1).toEqual(b0);
+});
+
 test('la poignée au clavier : les flèches déplacent la bulle de 16 px sans changer de page de bulle ; sur la bulle, elles changent de page', async ({ page }) => {
     test.setTimeout(90000);
     await ouvrirEspaceVide(page, 1180);

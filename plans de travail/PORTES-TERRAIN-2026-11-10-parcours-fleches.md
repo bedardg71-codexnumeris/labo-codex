@@ -7,6 +7,10 @@ Rapport : `plans de travail/RAPPORT-2026-11-10-parcours-fleches.md`.
 paysage (sept captures, hors dépôt) : §0.2, §2.1 a et b réussies ; §2.2 vue en partie ; §2.3 échouée (corrigée,
 à refaire) ; §2.4 et §2.5 sur le prochain aperçu ; §3.2 tranchée. Trois corrections décidées de 6 h 28 à 6 h 39,
 poussées sur la même branche (rapport du lot, « Retours de l'iPad »).
+**Second passage le 11 nov., 8 h 04 à 8 h 47** (`2e9edab10`) : §2.4 a et b réussies ; §2.5 a échouée (corrigée, à
+refaire), §2.5 b non faite ; §2.2 tenue pour faite (décision du Projet) ; §2.3 refaite sans défaut signalé ; §3.1 et
+§3.3 : on garde. Quatre corrections décidées de 8 h 26 à 8 h 38 (rapport du lot, « Second essai sur l'iPad ») ;
+une porte ajoutée, §2.6, pour ce que WebKit n'a pas reproduit.
 *Avant le 11 nov. :* EN ATTENTE. Cette porte ne se fait pas avant que le lot soit fusionné dans `main` et en ligne.
 Tant que la branche n'est que poussée, `https://app.codexnumeris.org` montre encore le voile : tu jugerais la
 version d'avant. Cowork remplit la ligne « version attendue » ci-dessous au moment de la mise en ligne, et publie
@@ -15,7 +19,7 @@ l'artefact jumeau (avec son bouton « Copier mes résultats »).
 Pourquoi une porte, alors que la règle est de ne pas en faire pour l'apparence : le défaut que tu as vécu (les
 zones qui ne tombent pas sur les boutons) est sur iPad, et aucune machine d'ici ne peut y répondre. La session du
 cloud n'a que Chromium ; le Mac a WebKit, mais ni l'un ni l'autre n'a la barre d'adresse de Safari sur iPad, qui est
-la cause supposée. Six portes, pas plus (la sixième, le zoom au pincement, ajoutée le 11 nov.). Tout le reste est mesuré par les bancs.
+la cause supposée. Sept portes, pas plus (la sixième, le zoom au pincement, ajoutée le 11 nov. ; la septième, §2.6, au second essai). Tout le reste est mesuré par les bancs.
 
 Ce qui échoue devient un item de backlog avec son numéro de porte, pas une note mentale.
 
@@ -75,8 +79,8 @@ Rien. Ce lot ne touche à aucune donnée.
 - [ ] **2.2** Toujours à l'étape « Évaluer » : fais disparaître la barre d'adresse (bouton « ᴀA » › « Masquer la
   barre d'outils », ou un petit défilement de la page vers le haut).
   ⮕ Attendu : le halo reste sur « Conception », la pointe de la flèche reste sous « Évaluation ». Rien ne glisse.
-  `iPad` · **Vue en partie le 11 nov.** : à l'étape 5 seulement, barre masquée, halo juste. L'étape 6 barre
-  masquée reste à voir.
+  `iPad` · **Vue en partie le 11 nov.** : à l'étape 5 seulement, barre masquée, halo juste. **Tenue pour faite**
+  (décision du Projet, 11 nov., 8 h 52) : l'étape 5 vue au premier essai, halo juste.
 
 ### 2.3 La flèche suit quand la page défile
 
@@ -95,20 +99,19 @@ Rien. Ce lot ne touche à aucune donnée.
   Corrigé (point 2 des retours) : **à refaire sur le prochain aperçu, avec cet attendu** — une flèche vers la
   ligne « 5 absences ou retards », une vers « 2 productions non remises… », et la bulle sur un bord de l'écran,
   loin des deux cartes.
+  **Refaite le 11 nov. (second essai, 8 h 04 à 8 h 47)** : « Découvrir » rejoué, aucun défaut signalé à l'étape 3.
 
 ### 2.4 Déplacer la bulle au doigt
 
 > **Pourquoi.** La bulle se posait parfois sur ce que tu voulais lire. Elle a maintenant une poignée ⠿, en haut à
 > droite, pour la pousser ailleurs.
 
-*2.4 et 2.5 : pas encore faites ; sur le prochain aperçu.*
-
-- [ ] **2.4 a** À la même étape, pose le doigt sur la poignée ⠿ et glisse la bulle vers le bas de l'écran.
+- [x] **2.4 a** À la même étape, pose le doigt sur la poignée ⠿ et glisse la bulle vers le bas de l'écran.
   ⮕ Attendu : la bulle suit ton doigt, la page ne défile pas, et les flèches suivent la bulle.
-  `iPad`
-- [ ] **2.4 b** Essaie de pousser la bulle hors de l'écran, en haut puis en bas.
+  `iPad` · **Réussie le 11 nov., 8 h 04 à 8 h 47** (« le mouvement est fluide »).
+- [x] **2.4 b** Essaie de pousser la bulle hors de l'écran, en haut puis en bas.
   ⮕ Attendu : elle s'arrête sous l'en-tête et au-dessus du bandeau vert « Mode démonstration ». Elle ne sort pas.
-  `iPad`
+  `iPad` · **Réussie le 11 nov., 8 h 04 à 8 h 47.**
 
 ### 2.5 Zoomer au pincement
 
@@ -119,10 +122,30 @@ Rien. Ce lot ne touche à aucune donnée.
   pour l'agrandir, puis lève les doigts.
   ⮕ Attendu : le halo orange, les flèches et la bulle grossissent avec la page et restent accrochés à ce qu'ils
   désignent. Une partie de la bulle peut sortir de l'écran pendant le zoom : c'est normal.
-  `iPad`
+  `iPad` · **Échouée le 11 nov., 8 h 04 à 8 h 47** : la bulle « se déplace un peu partout ». Corrigé (rapport du
+  lot, « Second essai », point 3) : pendant le pincement et tant que la page reste zoomée, plus rien ne se replace.
+  **À refaire sur le prochain aperçu, même attendu.**
 - [ ] **2.5 b** Pince pour revenir à la taille normale, puis touche « Suivant » dans la bulle.
   ⮕ Attendu : tout revient en place ; à l'étape suivante, la bulle est entière dans l'écran et ses flèches
   partent de son bord.
+  `iPad` · *Non faite le 11 nov. ; à faire avec 2.5 a.* Attendu précisé : revenue à la taille normale, la bulle est
+  à la place qu'elle avait avant le zoom.
+
+### 2.6 La bulle ne couvre plus ce qu'elle explique (« Mettre ta classe en place »)
+
+> **Pourquoi.** Au second essai, la bulle couvrait le champ « Fichier » à l'étape 4 et le choix du cours à
+> l'étape 7. Sous WebKit, sur le Mac, l'étape 7 se reproduit et est corrigée ; l'étape 4, non (à quatre tailles,
+> la bulle ne couvre jamais « Fichier ») : seul l'iPad dira si c'est réglé.
+
+- [ ] **2.6 a** Menu ☰ › Assistance › « Mettre ta classe en place » (sur un espace d'essai), jusqu'à « Ta classe »
+  (4 sur 8). Lis la bulle sans la déplacer.
+  ⮕ Attendu : deux flèches, une vers la case « Coller les données », une vers le champ « Fichier CSV/TSV » ; la
+  bulle ne couvre ni l'une ni l'autre. Si elle couvre « Fichier », note ce qui était à l'écran (page défilée ?
+  aperçu affiché ?).
+  `iPad`
+- [ ] **2.6 b** Jusqu'à « Ton premier cours » (7 sur 8).
+  ⮕ Attendu : une flèche vers la rangée « ← Précédent · date · Suivant → », une vers la colonne « Présence » ; la
+  bulle ne couvre ni la date, ni les noms des étudiant·es.
   `iPad`
 
 ---
@@ -133,14 +156,15 @@ Ce ne sont pas des vérifications : ce sont des choix que la session a posés fa
 place. Écris ta réponse, ne coche pas.
 
 - **3.1** Le nom de la poignée pour le lecteur d'écran : « Déplacer la bulle » (PROPOSÉ). Tu ne le vois pas à
-  l'écran ; VoiceOver le lit. Ton verdict : `______________________`
+  l'écran ; VoiceOver le lit. **Tranchée le 11 nov. (second essai) : on garde.**
 - **3.2** Aux étapes 6 et 7 de « Découvrir », la flèche et la bulle vont maintenant à la section dont la bulle
   parle (« Évaluation », puis « Conception »), et non au prochain bouton. C'est la lecture que la session a faite
   de tes captures ; la consigne écrite donnait l'inverse pour ces deux étapes (voir le rapport, « Ce que j'ai
   supposé »). Est-ce bien ce que tu voulais ? **Tranchée le 11 nov. (6 h 28 à 6 h 39)** : une flèche vers
   l'élément précis que nomme la bulle, une seconde vers la section dans le menu quand la bulle présente une
   section (« Découvrir » 6, 7 et 8), jamais vers le bouton à toucher. Appliqué ; le crible des neuf parcours est au rapport du lot.
-- **3.3** La flèche est-elle assez visible, ou trop ? (épaisseur, longueur) `______________________`
+- **3.3** La flèche est-elle assez visible, ou trop ? (épaisseur, longueur) **Tranchée le 11 nov. (second
+  essai) : on garde telle quelle** (« les flèches marchent bien »).
 
 ---
 
@@ -148,8 +172,9 @@ place. Écris ta réponse, ne coche pas.
 
 - **Rien n'a été vu sur iPad.** Les bancs ont tourné sous WebKit sur le Mac le 11 nov., la nuit (rapport du lot,
   « Relance WebKit de nuit ») ; WebKit n'a ni la barre d'adresse de Safari sur iPad, ni le zoom au pincement.
-- **Le zoom au pincement (2.5) est une inférence** : les flèches, le halo et la bulle sont posés dans le même
-  repère que la page, ils devraient donc grossir avec elle. Jamais mesuré.
+- **Le zoom au pincement (2.5)** : la cause retenue (sous Safari iPad, innerWidth × innerHeight suivent la partie
+  visible pendant le zoom, et la sonde replaçait la bulle sur ces mesures) est une inférence du relecteur, lue dans
+  le code. Le banc la simule (échelle 2, fenêtre rapportée moitié moins grande) ; il ne pince pas.
 - **La cause du décalage sur iPad reste une inférence.** Elle a été lue dans le code (une couche en hauteur de
   fenêtre des feuilles de style, des trous calculés sur la hauteur intérieure), jamais mesurée sur l'appareil. Le
   lot retire la couche en cause ; si le décalage persiste aux portes 2.1 ou 2.2, la cause était ailleurs.

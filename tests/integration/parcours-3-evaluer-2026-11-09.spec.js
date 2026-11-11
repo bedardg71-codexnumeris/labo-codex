@@ -2,7 +2,7 @@ import { test } from '@playwright/test';
 import { releverLaBulle } from './harness/releve-bulle.js';
 // La bulle ne couvre jamais ses zones quand une place les laisse libres (Grégoire, 11 nov. 2026) : relevé à chaque essai.
 releverLaBulle(test);
-import { leParcoursEntier } from './harness/parcours-3-de-banc.js';
+import { leParcoursEntier, laGrilleEnPortrait } from './harness/parcours-3-de-banc.js';
 
 // =======================================================================
 // LE TROISIÈME PARCOURS, « ÉVALUER UNE PREMIÈRE PRODUCTION » (9 NOVEMBRE 2026)
@@ -49,4 +49,8 @@ test('« Évaluer une première production », étape 8 à 820 px (l’iPad en p
 
 test('« Évaluer une première production », grille en points : la bulle du choix, et la cartouche ajoute le commentaire de son palier (1180 px)', async ({ page }) => {
     await leParcoursEntier(page, { niveaux: false, cap: '1180-sombre-points' });
+});
+
+test('« Ta grille » à 820 × 1180 (l’iPad en portrait), le texte du 11 nov. : la bulle tient, son texte ne défile pas, la zone de collage reste libre', async ({ page }) => {
+    await laGrilleEnPortrait(page);
 });

@@ -16,6 +16,18 @@
    LES FLÈCHES VONT À CE QUE NOMME LA BULLE (11 nov. 2026) : l'élément précis (la ligne, pas la carte), et la
    section dans le menu quand la bulle présente une section ; JAMAIS vers ce qu'il faut toucher, que la
    pulsation désigne déjà. Les définitions choisissent leurs zones selon cette règle.
+   LES FORMULAIRES (Grégoire, 11 nov. 2026, 8 h 26) : dans une étape qui montre un formulaire (`formulaire`), les
+   flèches vont aux champs obligatoires (astérisque rouge `.champ-requis`, `required`, `aria-required`) ENCORE VIDES,
+   une par champ, sans fusion ni plafond ; chacune disparaît quand son champ est rempli ; quand il n'en reste aucun,
+   seul le halo du bouton demeure. La bulle évite TOUS les champs obligatoires, remplis ou non : elle ne saute pas
+   d'un coin à l'autre pendant qu'on remplit, et elle ne couvre pas un champ qu'on voudrait corriger.
+   LE ZOOM AU PINCEMENT (11 nov. 2026, second essai sur l'iPad : « la bulle se déplace un peu partout ») : sous
+   Safari iPad, innerWidth × innerHeight suivent la partie VISIBLE de la page pendant le zoom, alors que la bulle, le
+   halo et les flèches sont fixés dans la page entière. La sonde replaçait donc la bulle à chaque image du pincement
+   (et la croyait sur un téléphone sous 500 px de large). Pendant un pincement (deux doigts posés) et tant que la page
+   reste zoomée (`visualViewport.scale` ≠ 1), le moteur NE REPLACE RIEN : la bulle garde sa place, l'écran gardé est
+   celui d'avant le zoom ; le halo et les flèches suivent leurs cibles. Revenue à l'échelle 1, la sonde la replace
+   comme avant. Playwright ne pince pas : jugé sur l'iPad.
    LES COORDONNÉES : la couche des flèches est fixée en (0, 0) et dimensionnée en px sur
    innerWidth × innerHeight à chaque passage, SANS viewBox : le même repère que le contour (des px
    lus par getBoundingClientRect). Une sentinelle Vitest l'exige (le voile, lui, était en 100vh).
@@ -26,6 +38,10 @@
      { titre, texte, geste?, centre?: bool,
        avant?: async () => void,   // place la page (idempotent : sert aussi à la reprise)
        zones?: () => Element[],    // ce dont parle la bulle (la flèche y va)
+       fleches?: () => Element[],  // parmi les zones, celles où vont les flèches (groupées) ; les autres, la bulle les
+                                   // évite seulement (les noms de la saisie des présences, qu'il faut voir pour noter)
+       formulaire?: () => Element, // l'étape montre un formulaire : ses zones sont ses champs obligatoires, une flèche
+                                   // par champ ENCORE VIDE (voir « LES FORMULAIRES » plus bas)
        contour?: () => Element,    // où toucher (la pulsation)
        aussiEviter?: () => Element[], // ce que la bulle ne couvre pas non plus, pesé comme le contour, sans flèche
                                    // (les boutons du geste suivant dans une fenêtre que la bulle doit couvrir)
@@ -112,6 +128,47 @@
         return (els || []).filter(visible).map(function (el) { return el.getBoundingClientRect(); });
     }
 
+    var CONTROLES = 'input, select, textarea';
+
+    /**
+     * Les champs obligatoires visibles d'un formulaire, dans l'ordre du document : `required`, `aria-required`, ou
+     * une astérisque rouge (`.champ-requis`) visible dans leur étiquette (le contrôle nommé par `for`, sinon le
+     * premier de l'étiquette ou de son conteneur).
+     */
+    function champsObligatoires(form) {
+        if (!visible(form)) return [];
+        var liste = [];
+        var ajouter = function (c) { if (c && !c.disabled && visible(c) && liste.indexOf(c) === -1) liste.push(c); };
+        [].forEach.call(form.querySelectorAll('[required], [aria-required="true"]'), ajouter);
+        [].forEach.call(form.querySelectorAll('.champ-requis'), function (a) {
+            var lab = visible(a) ? a.closest('label') : null;
+            if (!lab) return;
+            var c = lab.htmlFor ? document.getElementById(lab.htmlFor) : lab.querySelector(CONTROLES);
+            ajouter(c || (lab.parentElement ? lab.parentElement.querySelector(CONTROLES) : null));
+        });
+        return liste.sort(function (a, b) { return a.compareDocumentPosition(b) & Node.DOCUMENT_POSITION_FOLLOWING ? -1 : 1; });
+    }
+
+    function champVide(c) {
+        if (c.type === 'file') return !(c.files && c.files.length);
+        if (c.type === 'checkbox' || c.type === 'radio') return !c.checked;
+        return String(c.value == null ? '' : c.value).trim() === '';
+    }
+
+    /**
+     * Ce que l'étape désigne : `zones` (ce que la bulle évite) et `fleches` (où vont les flèches ; `null` : les zones).
+     * `une` : une flèche par élément, sans fusion ni plafond (une étape à formulaire : ses champs obligatoires, et les
+     * flèches à ceux qui sont encore vides) ; sinon les cibles sont groupées.
+     */
+    function designe(etape) {
+        var zones = etape.zones ? (etape.zones() || []).filter(Boolean) : [];
+        if (etape.formulaire) {
+            var champs = champsObligatoires(etape.formulaire());
+            return { zones: champs.concat(zones), fleches: champs.filter(champVide), une: true };
+        }
+        return { zones: zones, fleches: etape.fleches ? (etape.fleches() || []).filter(Boolean) : null, une: false };
+    }
+
     function union(rects) {
         if (!rects.length) return null;
         var u = { left: Infinity, top: Infinity, right: -Infinity, bottom: -Infinity };
@@ -131,9 +188,25 @@
         return r.bottom > 0 ? r.bottom : 0;
     }
 
+    /** Un pincement en cours (deux doigts posés), ou la page zoomée : le moteur ne replace rien. */
+    function sousLeZoom() {
+        var vv = window.visualViewport;
+        return !!(etat && etat.doigts >= 2) || !!(vv && Math.abs(vv.scale - 1) > 0.01);
+    }
+
+    /** L'écran de la page : celui d'avant le zoom tant qu'il dure (innerWidth × innerHeight suivent la partie visible). */
+    function ecranGarde() {
+        if (etat && etat.ecran && sousLeZoom()) return etat.ecran;
+        return { largeur: window.innerWidth, hauteur: window.innerHeight };
+    }
+
+    function compterDoigts(ev) {
+        if (etat) etat.doigts = ev.touches ? ev.touches.length : 0;
+    }
+
     /** La largeur du téléphone : la fenêtre, pas l'appareil (l'iPad en écran partagé étroit en est). */
     function surTelephone() {
-        return window.innerWidth <= SEUIL_TELEPHONE;
+        return ecranGarde().largeur <= SEUIL_TELEPHONE;   // sous le zoom, l'écran d'avant (pas la partie visible)
     }
 
     /**
@@ -142,7 +215,8 @@
      */
     function basVisible() {
         var vv = window.visualViewport;
-        if (!vv || Math.abs(vv.scale - 1) > 0.01) return window.innerHeight;
+        if (sousLeZoom()) return ecranGarde().hauteur;
+        if (!vv) return window.innerHeight;
         return Math.min(window.innerHeight, Math.round(vv.offsetTop + vv.height));
     }
 
@@ -591,8 +665,10 @@
             for (var a = 0; a < liste.length && !change; a++) {
                 for (var b = a + 1; b < liste.length && !change; b++) {
                     var A = liste[a], B = liste[b];
-                    var touche = !(A.right + pad < B.left || B.right + pad < A.left ||
-                                   A.bottom + pad < B.top || B.bottom + pad < A.top);
+                    // À MOINS de `pad` px : deux champs côte à côte à 20 px tout juste (les deux façons d'importer de
+                    // « Ta classe », 4) gardent chacun sa flèche (11 nov. 2026).
+                    var touche = !(A.right + pad <= B.left || B.right + pad <= A.left ||
+                                   A.bottom + pad <= B.top || B.bottom + pad <= A.top);
                     if (touche) {
                         liste[a] = { left: Math.min(A.left, B.left), top: Math.min(A.top, B.top),
                                      right: Math.max(A.right, B.right), bottom: Math.max(A.bottom, B.bottom) };
@@ -832,7 +908,7 @@
 
     /** L'écran utile d'une bulle : sous l'en-tête, au-dessus du bandeau de la démo et du clavier. */
     function cadreUtile() {
-        return { gauche: MARGE, haut: hautUtile(), droite: window.innerWidth - MARGE, bas: basEcran() - MARGE };
+        return { gauche: MARGE, haut: hautUtile(), droite: ecranGarde().largeur - MARGE, bas: basEcran() - MARGE };
     }
 
     /** La bulle déplacée par la personne : sa place gardée pour l'étape, ramenée dans l'écran utile s'il a changé. */
@@ -934,7 +1010,7 @@
         etat.deplacee = { x: x, y: y };
         // La place gardée est celle où la bulle s'est arrêtée (bornée), pas celle que le pointeur visait hors de l'écran.
         etat.deplacee = poserDeplacee();
-        if (etat.vus) dessinerFleches(etat.vus.zones, etat.vus.contourEl);
+        if (etat.vus) dessinerFleches(etat.vus.zones, etat.vus.contourEl, etat.vus.vise);
     }
 
     function debutGlisser(ev) {
@@ -990,15 +1066,20 @@
         return grouperCibles(rectsDe(sujets(zones, contourEl)), FLECHES_MAX);
     }
 
-    /** Trace les flèches de la bulle vers ses cibles ; un tracé inchangé n'est pas réécrit. */
-    function dessinerFleches(zones, contourEl) {
+    /**
+     * Trace les flèches de la bulle vers ses cibles ; un tracé inchangé n'est pas réécrit. `vise.fleches` : où vont
+     * les flèches parmi les zones ; `vise.une` (une étape à formulaire) : une par champ, sans fusion ni plafond.
+     */
+    function dessinerFleches(zones, contourEl, vise) {
         var svg = etat.elements.svg;
         var b = etat.elements.bulle;
         var traces = [];
         if (visible(b)) {
             var rb = b.getBoundingClientRect();
-            var ecran = { largeur: window.innerWidth, hauteur: window.innerHeight };
-            var cibles = ciblesDesFleches(zones, contourEl);
+            var ecran = ecranGarde();
+            var fl = vise && vise.fleches;
+            var cibles = !fl ? ciblesDesFleches(zones, contourEl)
+                : vise.une ? rectsDe(sujets(fl, contourEl)) : ciblesDesFleches(fl, contourEl);
             // Une flèche évite de passer sur une autre cible, et sur ce qu'il faut toucher.
             var rc = visible(contourEl) ? contourEl.getBoundingClientRect() : null;
             cibles.forEach(function (r) {
@@ -1080,18 +1161,26 @@
         if (!etat || etat.enTransition) return;
         var etape = etapeCourante();
         if (etat.opts.verifier && !etat.opts.verifier()) { fermer(); return; }
-        suivreSeuil();
+        var zoom = sousLeZoom();
+        if (!zoom) {
+            suivreSeuil();
+            etat.ecran = { largeur: window.innerWidth, hauteur: window.innerHeight };
+        }
 
-        var zones = etape.zones ? (etape.zones() || []) : [];
+        var vise = designe(etape);
+        var zones = vise.zones;
         var contourEl = etape.contour ? etape.contour() : null;
-        etat.vus = { zones: zones, contourEl: contourEl };
+        etat.vus = { zones: zones, contourEl: contourEl, vise: vise };
 
-        // La couche des flèches : en px, sur innerWidth × innerHeight, à chaque passage (le repère du contour).
+        // La couche des flèches : en px, sur innerWidth × innerHeight, à chaque passage (le repère du contour). Sous le
+        // zoom, elle garde l'écran d'avant : innerWidth × innerHeight n'en sont plus que la partie visible.
         var svg = etat.elements.svg;
-        svg.setAttribute('width', String(window.innerWidth));
-        svg.setAttribute('height', String(window.innerHeight));
-        svg.style.width = window.innerWidth + 'px';
-        svg.style.height = window.innerHeight + 'px';
+        if (!zoom) {
+            svg.setAttribute('width', String(window.innerWidth));
+            svg.setAttribute('height', String(window.innerHeight));
+            svg.style.width = window.innerWidth + 'px';
+            svg.style.height = window.innerHeight + 'px';
+        }
 
         var c = etat.elements.contour;
         if (visible(contourEl)) {
@@ -1106,22 +1195,28 @@
         }
         marquerSectionActuelle(sectionActuelleDe(contourEl));
 
+        if (zoom) {
+            // Sous le zoom : rien ne se replace ; les flèches suivent leurs cibles depuis la bulle où elle est.
+            dessinerFleches(zones, contourEl, vise);
+            if (etape.atteint) suivreAtteint(etape, zones, contourEl, vise);
+            return;
+        }
         // La découpe suit la largeur de la bulle (une sonde d'étape a pu la changer), avant sa place.
         suivreLargeurDesPages();
-        placerSelonEtape(zones, contourEl);
-        if (etape.atteint) suivreAtteint(etape, zones, contourEl);
+        placerSelonEtape(zones, contourEl, vise);
+        if (etape.atteint) suivreAtteint(etape, zones, contourEl, vise);
     }
 
     /**
      * La bulle loin de ce qu'elle évite (ses zones et le contour), puis ses flèches. Sur téléphone, rien ne change : la
      * bulle rangée au bord évite les zones ET le contour.
      */
-    function placerSelonEtape(zones, contourEl) {
+    function placerSelonEtape(zones, contourEl, vise) {
         var c = visible(contourEl) ? contourEl : null;
         var evites = rectsDe(zones.concat(c ? [c] : []));
         if (etat.telephone) placerBulleTelephone(union(evites), c);
         else placerBulleLoin(zones, prioritaires(c));
-        dessinerFleches(zones, contourEl);
+        dessinerFleches(zones, contourEl, vise);
     }
 
     /** Ce que la bulle évite : ses zones, pesées 1, et ce qu'elle ne couvre que faute de mieux, pesé POIDS_CONTOUR. */
@@ -1142,16 +1237,17 @@
      * neuvième parcours la pose dans `atteint`) : la découpe et la place suivent dans le même passage,
      * sans image périmée.
      */
-    function suivreAtteint(etape, zones, contourEl) {
+    function suivreAtteint(etape, zones, contourEl, vise) {
         var hauteur = etat.elements.bulle.offsetHeight;
         var ok = false;
         try { ok = !!etape.atteint(); } catch (e) { ok = false; }
         if (ok) { allerA(etat.i + 1); return; }
+        if (sousLeZoom()) return;
         // La hauteur aussi (10 nov. 2026) : une étape qui fait paraître un bouton à la vérification (« Continuer » du
         // huitième parcours) fait grandir la bulle ; replacée seulement au passage suivant, le bouton sautait sous le
         // doigt (le toucher sur le bouton, le relâcher sur la bulle). Banc : bouton-de-bulle-ne-saute-pas-2026-11-10.
         var largeur = suivreLargeurDesPages();
-        if (largeur || etat.elements.bulle.offsetHeight !== hauteur) placerSelonEtape(zones, contourEl);
+        if (largeur || etat.elements.bulle.offsetHeight !== hauteur) placerSelonEtape(zones, contourEl, vise);
     }
 
     /** Prépare la page pour l'étape i (`avant`), puis attend deux images qu'elle soit dessinée. */
@@ -1170,8 +1266,7 @@
      */
     function elementsVises(etape) {
         var vise = etape.contour ? [etape.contour()] : [];
-        if (etape.zones) vise = vise.concat(etape.zones() || []);
-        return vise.filter(Boolean);
+        return vise.concat(designe(etape).zones).filter(Boolean);
     }
 
     async function allerA(i) {
@@ -1218,7 +1313,7 @@
         retirerElements();
         etat = { def: def, i: 0, opts: opts || {}, elements: creerElements(), enTransition: false,
                  telephone: surTelephone(), replie: false, reglerJusqua: 0, texte: '', pages: [], page: 0, largeurPages: 0,
-                 deplacee: null, glisse: null, vus: null, sectionActuelle: null };
+                 deplacee: null, glisse: null, vus: null, sectionActuelle: null, doigts: 0, ecran: null };
         document.body.classList.add('parcours-actif');
         if (window.transitions && typeof window.transitions.fermerBandeau === 'function') window.transitions.fermerBandeau();
         // 9 nov. 2026 : une flèche didactique déjà ouverte se retire, sans être marquée vue (la bulle parle seule).
@@ -1232,6 +1327,7 @@
             window.visualViewport.addEventListener('scroll', surRedimension);
         }
         ['wheel', 'touchstart', 'keydown'].forEach(function (t) { window.addEventListener(t, arreterReglage, { passive: true, capture: true }); });
+        ['touchstart', 'touchend', 'touchcancel'].forEach(function (t) { window.addEventListener(t, compterDoigts, { passive: true, capture: true }); });
         etat.timer = setInterval(sonder, SONDE_MS);
         var depuis = Math.max(0, Math.min((opts && opts.depuis) || 0, def.etapes.length - 1));
         return allerA(depuis);
@@ -1248,6 +1344,7 @@
             window.visualViewport.removeEventListener('scroll', surRedimension);
         }
         ['wheel', 'touchstart', 'keydown'].forEach(function (t) { window.removeEventListener(t, arreterReglage, { passive: true, capture: true }); });
+        ['touchstart', 'touchend', 'touchcancel'].forEach(function (t) { window.removeEventListener(t, compterDoigts, { passive: true, capture: true }); });
         marquerSectionActuelle(null);
         etat = null;
         retirerElements();
