@@ -175,6 +175,7 @@ const TOOLTIPS_SOUS_NAV = {
     // Évaluations
     'evaluations-importer': 'nav-eval-importer',
     'evaluations-liste': 'nav-eval-liste',
+    'evaluations-tableau': 'nav-eval-tableau',   // 11 nov. 2026 (autorisation de Grégoire, 7 h 39)
     'evaluations-annoter': 'nav-eval-annoter',
     'evaluations-exporter': 'nav-eval-exporter',
     // Boîte à outils
@@ -309,6 +310,10 @@ const INITIALISATEURS_SOUS_SECTION = {
         } else {
             console.error('   ❌ initialiserListeEvaluations n\'est pas une fonction!');
         }
+    },
+    // 11 nov. 2026 (autorisation de Grégoire, 7 h 39) : le tableau de notation, sa propre sous-section.
+    'evaluations-tableau': function () {
+        if (window.TableauNotation) window.TableauNotation.afficher();
     },
     'evaluations-annoter': function () {
         if (typeof initialiserModuleTravaux === 'function') {

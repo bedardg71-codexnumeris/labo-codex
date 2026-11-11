@@ -64,6 +64,9 @@ const COPIE_GRILLE = { id: 'EG1', etudiantDA: '9990011', productionId: 'P2', gri
     verrouillee: true, statutRemise: 'evalue', statutIntegrite: 'recevable', criteres: [{ critereId: 'c', critereNom: 'Critère', niveauSelectionne: 'M', ponderation: 100 }],
     dateEvaluation: '2026-09-26T12:00:00.000Z', coursId: 'cours-tn', groupeCoursId: 'GC_TN' };
 
+const SOUS_NAV_TABLEAU = '#sous-navigation [data-sous-onglet="evaluations-tableau"]';
+const SOUS_NAV_LISTE = '#sous-navigation [data-sous-onglet="evaluations-liste"]';
+
 async function monter(page, famille, evaluations = []) {
     const erreurs = [];
     const garder = (m) => { if (!patternsAttendus.some((re) => re.test(m))) erreurs.push(m); };
@@ -73,8 +76,9 @@ async function monter(page, famille, evaluations = []) {
     await page.goto(indexHtml);
     await attendreApplication(page);
     await page.evaluate(amorcer, { T, famille, evaluations });
+    // 11 nov. 2026 : le tableau a sa sous-section ; on y entre par la sous-navigation d'Évaluation, comme l'enseignant·e.
     await page.evaluate(() => { window.afficherSection('evaluations'); window.afficherSousSection('evaluations-liste'); });
-    await page.evaluate(() => window.TableauNotation.afficher());
+    await page.locator(SOUS_NAV_TABLEAU).click();
     await expect(page.locator('#tableau-notation-hote .tn-tableau')).toBeVisible();
     return erreurs;
 }
@@ -84,11 +88,35 @@ const note = (page, rangee) => page.locator(`#tableau-notation-hote tbody tr:nth
 const copies = (page) => page.evaluate((T) => window.db.getSync(T + '_evaluationsSauvegardees', []), T);
 const sansGrilleDe = async (page, da, pid) => (await copies(page)).find((e) => e.etudiantDA === da && e.productionId === pid && e.sansGrille);
 
+// 11 nov. 2026 (Grégoire, 7 h 33) : il n'avait pas vu la bascule « Liste | Tableau de notation » en haut de la Liste.
+test.describe('Tableau de notation · sa sous-section (11 nov. 2026)', () => {
+    test('la sous-navigation d\'Évaluation a cinq entrées, « Tableau de notation » juste après « Liste », et l\'ouvre ; la Liste n\'a plus de bascule', async ({ page }) => {
+        const erreurs = await monter(page, 'STD');   // entre par la sous-navigation
+        const entrees = (await page.locator('#sous-navigation button[data-sous-onglet]').allTextContents()).map((t) => t.trim());
+        expect(entrees).toEqual(['Préparer', 'Liste', 'Tableau de notation', 'Annoter', 'Exporter']);
+        await expect(page.locator(SOUS_NAV_TABLEAU)).toHaveClass(/actif/);
+        await expect(page.locator('#evaluations-tableau')).toBeVisible();
+        await expect(page.locator('#tableau-notation-hote .tn-titre'), 'le focus va au titre de la vue').toBeFocused();
+        // La Liste redevient la seule liste des évaluations : ni bascule, ni hôte du tableau.
+        await page.locator(SOUS_NAV_LISTE).click();
+        await expect(page.locator('#evaluations-liste')).toBeVisible();
+        await expect(page.locator('#evaluations-tableau')).toBeHidden();
+        await expect(page.locator('#tn-vue-liste, #tn-vue-tableau, .tn-bascule')).toHaveCount(0);
+        await expect(page.locator('#evaluations-liste #tableau-notation-hote')).toHaveCount(0);
+        await expect(page.locator('#conteneur-tableau-evaluations')).toBeVisible();
+        // « Consulter » ou « Modifier » un résultat sans grille, depuis la Liste, mène à la sous-section.
+        await page.evaluate(() => window.TableauNotation.afficher());
+        await expect(page.locator(SOUS_NAV_TABLEAU)).toHaveClass(/actif/);
+        await expect(page.locator('#tableau-notation-hote .tn-tableau')).toBeVisible();
+        expect(erreurs).toEqual([]);
+    });
+});
+
 test.describe('Tableau de notation · standards', () => {
     test('toucher une case fait le tour des niveaux et écrit un résultat sans grille ; la note suit, comme à l\'export', async ({ page }) => {
         const erreurs = await monter(page, 'STD', [COPIE_GRILLE]);
         await expect(page.locator('#tableau-notation-hote .tn-case')).toHaveCount(4 * 5);
-        await expect(page.locator('#carte-liste-evaluations > #conteneur-tableau-evaluations')).toBeHidden();
+        await expect(page.locator('#evaluations-liste'), 'la Liste n\'est pas à l\'écran').toBeHidden();
         for (let i = 0; i < 4; i++) await kase(page, 1, 1).click();   // '' → PS → I → D → M
         await expect(kase(page, 1, 1)).toHaveText('M');
         expect(await sansGrilleDe(page, '9990010', 'P1')).toMatchObject({ sansGrille: true, grilleId: null, criteres: [], niveauFinal: 'M', noteFinale: 75, echelleId: 'E_TN', verrouillee: true });
@@ -144,7 +172,7 @@ test.describe('Tableau de notation · standards', () => {
         const erreurs = await monter(page, 'STD');
         await kase(page, 1, 1).focus();
         await page.keyboard.press('m');
-        await page.locator('#tn-vue-liste').click();
+        await page.locator(SOUS_NAV_LISTE).click();
         await expect(page.locator('#tableau-notation-hote')).toBeHidden();
         const ligne = page.locator('#corps-tableau-evaluations tr').filter({ hasText: 'Albatros' }).filter({ hasText: 'Production 1' });
         await expect(ligne).toHaveCount(1);
@@ -167,7 +195,7 @@ test.describe('Tableau de notation · standards', () => {
             s.value = '9990010';
             s.dispatchEvent(new Event('change', { bubbles: true }));
         });
-        await expect(page.getByText('Cette production a été évaluée au tableau de notation (Évaluation › Liste). C\'est là que tu changes son résultat.')).toBeVisible({ timeout: 15000 });
+        await expect(page.getByText('Cette production a été évaluée dans Évaluation › Tableau de notation. C\'est là que tu changes son résultat.')).toBeVisible({ timeout: 15000 });
         // « Verrouiller » n'a rien à verrouiller ici : masqué (Cowork, 9 nov.) ; il revient pour une évaluation à grille.
         await expect(page.locator('#btnVerrouillerEvaluation')).toBeHidden();
         await expect(page.locator('#selectGrille1')).toBeDisabled();
@@ -210,7 +238,7 @@ test.describe('Tableau de notation · spécifications', () => {
         await expect(kase(page, 2, 1)).toHaveText('✗');
         await expect(note(page, 2)).toHaveText('50');
         await expect(page.locator('#tableau-notation-hote .tn-bandeau .badge-type-pratique')).toHaveText('SPE');
-        await page.locator('#tn-vue-liste').click();
+        await page.locator(SOUS_NAV_LISTE).click();
         const ligne = page.locator('#corps-tableau-evaluations tr').filter({ hasText: 'Baobab' }).filter({ hasText: 'Exercice 1' });
         await expect(ligne).toContainText('Non acceptable');
         expect(erreurs).toEqual([]);
@@ -280,7 +308,7 @@ test.describe('Tableau de notation · la consigne', () => {
         });
         expect(lea).toEqual({ retenues: ['EG1'], nonVerrouillees: 0 });
         // La Liste : « Dossier PDF » sur la copie à grille, pas sur le résultat sans grille.
-        await page.locator('#tn-vue-liste').click();
+        await page.locator(SOUS_NAV_LISTE).click();
         const options = (nom) => page.locator('#corps-tableau-evaluations tr').filter({ hasText: nom }).filter({ hasText: 'Production 2' }).locator('select option').allTextContents();
         await expect(page.locator('#corps-tableau-evaluations tr').filter({ hasText: 'Albatros' }).filter({ hasText: 'Production 2' })).toContainText('Évalué');
         expect(await options('Baobab')).toContain('Dossier PDF');
