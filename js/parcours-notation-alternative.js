@@ -677,6 +677,7 @@
             },
             zones: function () { return [document.querySelector('#conteneurEditionPratique [data-action="appliquerPratiqueAuCoursActive"]')]; },
             contour: function () { return document.querySelector('#conteneurEditionPratique [data-action="appliquerPratiqueAuCoursActive"]'); },
+            nommeLeContour: true,   // « Appliquer au cours actif » (Grégoire, 11 nov. 2026, 9 h 47 : la flèche va à ce que la bulle nomme)
             atteint: function () {
                 var id = lireCtx().pratiqueId;
                 if (!id || idActive() !== id) return false;
@@ -705,6 +706,7 @@
                 if (enEvaluation()) return productionJugee() ? el('btnVerrouillerEvaluation') : paletteRetro();
                 return menuActions(ligneAEvaluer());
             },
+            nommeLeContour: function () { return !enEvaluation(); },   // « Actions › Évaluer » sur la Liste (11 nov. 2026)
             atteint: function () {
                 var avant = lireCtx().verrouilleesAvant || [];
                 var e = verrouillees().find(function (x) { return avant.indexOf(x.id) === -1; });
@@ -722,6 +724,7 @@
             },
             zones: function () { return [ligneEvaluee() || el('conteneur-tableau-evaluations')].filter(Boolean); },
             contour: function () { return menuActions(ligneEvaluee()); },
+            nommeLeContour: true,   // « Actions › Dossier PDF » (11 nov. 2026)
             boutons: [CONTINUER],
             atteint: function () {
                 montrerBouton('Continuer', pdfLivre);

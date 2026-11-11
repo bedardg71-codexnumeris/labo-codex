@@ -15,11 +15,22 @@
      pour la déplacer, texte, geste, boutons, lien de sortie. Elle prend le focus et s'annonce (aria-live poli).
    LES FLÈCHES VONT À CE QUE NOMME LA BULLE (11 nov. 2026) : l'élément précis (la ligne, pas la carte), et la
    section dans le menu quand la bulle présente une section ; JAMAIS vers ce qu'il faut toucher, que la
-   pulsation désigne déjà. Les définitions choisissent leurs zones selon cette règle.
+   pulsation désigne déjà, SAUF quand la bulle le nomme (Grégoire, 11 nov. 2026, 9 h 35, troisième essai : sur la
+   Liste, la bulle dit « Actions › Évaluer » ; la flèche montait à la cellule « Niveau »). Une étape qui nomme ce qu'il
+   faut toucher le déclare (`nommeLeContour`) : la flèche va alors au contour, et à lui seul ; ses zones, la bulle les
+   évite encore. « Jamais vers ce qu'il faut toucher » ne vaut plus que pour ce que la bulle ne nomme pas.
+   L'ÉCRAN CHANGE DANS UNE ÉTAPE (11 nov. 2026, capture 18 : « Actions › Évaluer » touché, l'écran d'évaluation ouvert,
+   la bulle restait à sa page 1/2, qui redisait de toucher « Actions › Évaluer », et le premier critère, sous le bas de
+   l'écran, portait le halo sans qu'on le voie) : une étape à plusieurs écrans dit, par un passage de son texte, de quoi
+   parle l'écran visible (`pageQuiDit`). Quand ce passage change, la bulle passe à la page qui le porte, et ce que
+   l'étape désigne est amené dans la vue, une fois, comme à l'entrée de l'étape.
+   L'AVIS (11 nov. 2026, capture 19) : une phrase sous le texte, que l'étape pose quand la page n'est pas dans l'état
+   qu'elle attend (`avis`) ; elle part quand l'état revient. Le texte de l'étape, lui, ne change pas.
    LES FORMULAIRES (Grégoire, 11 nov. 2026, 8 h 26) : dans une étape qui montre un formulaire (`formulaire`), les
    flèches vont aux champs obligatoires (astérisque rouge `.champ-requis`, `required`, `aria-required`) ENCORE VIDES,
    une par champ, sans fusion ni plafond ; chacune disparaît quand son champ est rempli ; quand il n'en reste aucun,
-   seul le halo du bouton demeure. La bulle évite TOUS les champs obligatoires, remplis ou non : elle ne saute pas
+   les flèches vont à ce que l'étape déclare dans `fleches` (« Ta production » : l'échelle d'une grille par niveaux
+   restée à « Aucune », 11 nov. 2026, 9 h 35), et sinon seul le halo du bouton demeure. La bulle évite TOUS les champs obligatoires, remplis ou non : elle ne saute pas
    d'un coin à l'autre pendant qu'on remplit, et elle ne couvre pas un champ qu'on voudrait corriger.
    LE ZOOM AU PINCEMENT (11 nov. 2026, second essai sur l'iPad : « la bulle se déplace un peu partout ») : sous
    Safari iPad, innerWidth × innerHeight suivent la partie VISIBLE de la page pendant le zoom, alors que la bulle, le
@@ -41,8 +52,11 @@
        fleches?: () => Element[],  // parmi les zones, celles où vont les flèches (groupées) ; les autres, la bulle les
                                    // évite seulement (les noms de la saisie des présences, qu'il faut voir pour noter)
        formulaire?: () => Element, // l'étape montre un formulaire : ses zones sont ses champs obligatoires, une flèche
-                                   // par champ ENCORE VIDE (voir « LES FORMULAIRES » plus bas)
+                                   // par champ ENCORE VIDE ; tous remplis, une par élément de `fleches`
        contour?: () => Element,    // où toucher (la pulsation)
+       nommeLeContour?: bool | () => bool, // la bulle nomme ce qu'il faut toucher : la flèche va au contour, seule
+       pageQuiDit?: () => string,  // un passage du texte, celui dont parle l'écran visible (null : rien ne change)
+       avis?: () => string,        // une phrase sous le texte, tant que la page n'est pas dans l'état attendu
        aussiEviter?: () => Element[], // ce que la bulle ne couvre pas non plus, pesé comme le contour, sans flèche
                                    // (les boutons du geste suivant dans une fenêtre que la bulle doit couvrir)
        atteint?: () => bool,       // l'état qui fait avancer
@@ -162,11 +176,16 @@
      */
     function designe(etape) {
         var zones = etape.zones ? (etape.zones() || []).filter(Boolean) : [];
+        var n = etape.nommeLeContour;
+        var auContour = typeof n === 'function' ? !!n() : !!n;
         if (etape.formulaire) {
             var champs = champsObligatoires(etape.formulaire());
-            return { zones: champs.concat(zones), fleches: champs.filter(champVide), une: true };
+            var vides = champs.filter(champVide);
+            // Les champs obligatoires remplis : les flèches vont à ce que l'étape déclare ensuite.
+            var ensuite = !vides.length && etape.fleches ? (etape.fleches() || []).filter(Boolean) : [];
+            return { zones: champs.concat(zones, ensuite), fleches: vides.concat(ensuite), une: true, auContour: auContour };
         }
-        return { zones: zones, fleches: etape.fleches ? (etape.fleches() || []).filter(Boolean) : null, une: false };
+        return { zones: zones, fleches: etape.fleches ? (etape.fleches() || []).filter(Boolean) : null, une: false, auContour: auContour };
     }
 
     function union(rects) {
@@ -1078,7 +1097,9 @@
             var rb = b.getBoundingClientRect();
             var ecran = ecranGarde();
             var fl = vise && vise.fleches;
-            var cibles = !fl ? ciblesDesFleches(zones, contourEl)
+            // La bulle nomme ce qu'il faut toucher : une flèche, vers lui seul (11 nov. 2026, 9 h 35).
+            var cibles = vise && vise.auContour ? rectsDe([contourEl])
+                : !fl ? ciblesDesFleches(zones, contourEl)
                 : vise.une ? rectsDe(sujets(fl, contourEl)) : ciblesDesFleches(fl, contourEl);
             // Une flèche évite de passer sur une autre cible, et sur ce qu'il faut toucher.
             var rc = visible(contourEl) ? contourEl.getBoundingClientRect() : null;
@@ -1156,6 +1177,49 @@
         try { etat.elements.bulle.focus({ preventScroll: true }); } catch (e) { etat.elements.bulle.focus(); }
     }
 
+    /** La page de la bulle qui porte ce passage du texte (−1 : aucune). */
+    function pageQuiPorte(passage) {
+        var t = typographier(passage);
+        for (var k = 0; k < (etat.pages || []).length; k++) if (etat.pages[k].indexOf(t) !== -1) return k;
+        return -1;
+    }
+
+    /**
+     * L'écran a changé dans l'étape (`pageQuiDit`, voir « L'ÉCRAN CHANGE DANS UNE ÉTAPE ») : la bulle passe à la page
+     * qui en parle, et ce que l'étape désigne est amené dans la vue, une fois. Un passage inchangé ne fait rien : la
+     * personne peut tourner les pages, défiler à son gré.
+     */
+    function suivreEcran(etape) {
+        if (!etape.pageQuiDit) return;
+        var passage = null;
+        try { passage = etape.pageQuiDit() || null; } catch (e) { passage = null; }
+        if (!passage || passage === etat.pageDite) return;
+        etat.pageDite = passage;
+        var k = pageQuiPorte(passage);
+        if (k !== -1 && k !== etat.page) {
+            montrerPage(k);
+            etat.elements.annonce.textContent = 'page ' + (k + 1) + ' de ' + etat.pages.length;
+        }
+        amenerDansLaVue(elementsVises(etape), etat.elements.bulle.offsetHeight);
+    }
+
+    /** L'avis de l'étape (voir « L'AVIS ») : posé sous le texte, changé, ou retiré ; annoncé par son rôle. */
+    function poserAvis(etape) {
+        var b = etat.elements.bulle;
+        var texte = '';
+        try { texte = etape.avis ? typographier(etape.avis() || '') : ''; } catch (e) { texte = ''; }
+        var p = b.querySelector('.parcours-bulle-avis');
+        if (!texte) { if (p) p.remove(); return; }
+        if (!p) {
+            p = document.createElement('p');
+            p.className = 'parcours-bulle-avis';
+            p.setAttribute('role', 'status');
+            var nav = b.querySelector('.parcours-bulle-nav');
+            b.insertBefore(p, nav ? nav.nextSibling : null);
+        }
+        if (p.textContent !== texte) p.textContent = texte;
+    }
+
     /** Un passage de la sonde : contour, section actuelle, bulle, flèches, puis l'état atteint. */
     function sonder() {
         if (!etat || etat.enTransition) return;
@@ -1166,6 +1230,9 @@
             suivreSeuil();
             etat.ecran = { largeur: window.innerWidth, hauteur: window.innerHeight };
         }
+
+        poserAvis(etape);
+        if (!zoom) suivreEcran(etape);
 
         var vise = designe(etape);
         var zones = vise.zones;
@@ -1290,6 +1357,9 @@
         // repliée ; quand le geste est dans la bulle (« Continuer »), elle s'ouvre dépliée.
         etat.replie = !!etape.contour;
         rendreBulle();
+        // L'écran où l'étape s'ouvre (une reprise peut tomber sur le second) : sa page, sans défilement de plus.
+        etat.pageDite = etape.pageQuiDit ? (etape.pageQuiDit() || null) : null;
+        if (etat.pageDite && pageQuiPorte(etat.pageDite) > 0) montrerPage(pageQuiPorte(etat.pageDite));
         if (!etape.centre || etat.telephone) amenerDansLaVue(elementsVises(etape), etat.elements.bulle.offsetHeight);
         etat.enTransition = false;
         etat.reglerJusqua = Date.now() + REGLAGE_MS;
@@ -1313,7 +1383,7 @@
         retirerElements();
         etat = { def: def, i: 0, opts: opts || {}, elements: creerElements(), enTransition: false,
                  telephone: surTelephone(), replie: false, reglerJusqua: 0, texte: '', pages: [], page: 0, largeurPages: 0,
-                 deplacee: null, glisse: null, vus: null, sectionActuelle: null, doigts: 0, ecran: null };
+                 deplacee: null, glisse: null, vus: null, sectionActuelle: null, doigts: 0, ecran: null, pageDite: null };
         document.body.classList.add('parcours-actif');
         if (window.transitions && typeof window.transitions.fermerBandeau === 'function') window.transitions.fermerBandeau();
         // 9 nov. 2026 : une flèche didactique déjà ouverte se retire, sans être marquée vue (la bulle parle seule).

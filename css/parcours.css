@@ -192,6 +192,15 @@ body.mode-clair {
     color: var(--parcours-geste);
 }
 
+/* L'avis (11 nov. 2026, capture 19) : la phrase que l'étape pose quand la page n'est pas dans l'état attendu ; la
+   couleur du geste, ce qui est à faire maintenant. */
+.parcours-bulle-avis {
+    margin: 0;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--parcours-geste);
+}
+
 .parcours-bulle-boutons {
     display: flex;
     flex-wrap: wrap;

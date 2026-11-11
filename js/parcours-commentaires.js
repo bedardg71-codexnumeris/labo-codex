@@ -636,6 +636,8 @@
                 if (annoterOuvert()) return palette('travaux-palette-erreurs-fr') || vis(document.getElementById('travaux-btn-actions'));
                 return menuActions('annoter');
             },
+            // Sur la Liste, « Actions › Annoter » : la bulle le nomme, la flèche y va (11 nov. 2026, 9 h 47).
+            nommeLeContour: function () { return !annoterOuvert() && !evaluationOuverte(); },
             atteint: function () {
                 return evaluationOuverte();
             }
@@ -653,6 +655,7 @@
                 return s ? [s.closest('tr')] : [];
             },
             contour: function () { return evaluationOuverte() ? contourEvaluation(false) : menuActions('annoter'); },
+            nommeLeContour: function () { return !evaluationOuverte(); },   // « Actions › Annoter » sur la Liste (11 nov. 2026)
             atteint: function () {
                 return verrouNeuf();
             }
@@ -670,6 +673,7 @@
                 return s ? [s.closest('tr')] : [];
             },
             contour: function () { return evaluationOuverte() ? contourEvaluation(true) : menuActions('evaluer'); },
+            nommeLeContour: function () { return !evaluationOuverte(); },   // « Actions › Évaluer » sur la Liste (11 nov. 2026)
             atteint: function () {
                 return verrouNeuf();
             }

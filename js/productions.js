@@ -1510,12 +1510,33 @@ async function peuplerCartouchesProduction(grilleId) {
     if (!selectCartouche) return;
     if (!grilleId) {
         selectCartouche.innerHTML = '<option value="">Aucune</option>';
+        direCartoucheAbsente(null);
         return;
     }
     const cartouches = await db.get(cle(`cartouches_${grilleId}`)) || [];
     // security-ok: id et nom passent par echapperHtml dans l'interpolation interne
     selectCartouche.innerHTML = '<option value="">Aucune</option>' +
         cartouches.map(c => `<option value="${echapperHtml(c.id)}">${echapperHtml(c.nom)}</option>`).join('');
+    direCartoucheAbsente(cartouches.length ? null : grilleId);
+}
+
+/**
+ * 11 nov. 2026 (Grégoire, troisième essai sur l'iPad, capture 20) : le menu « Cartouche de rétroaction » ne liste que
+ * les cartouches rangées sous la grille de la production ; sans aucune, il n'offrait que « Aucune », et rien ne disait
+ * pourquoi. Une ligne sous le menu le dit et nomme la grille. `grilleId` nul : la ligne part.
+ * Phrase PROPOSÉE (11 nov. 2026, à valider par Grégoire) : lue par l'enseignant·e.
+ */
+function direCartoucheAbsente(grilleId) {
+    const ligne = document.getElementById('productionCartoucheVide');
+    if (!ligne) return;
+    const grille = grilleId ? (db.getSync(cle('grillesTemplates'), []) || []).find(g => g && g.id === grilleId) : null;
+    if (!grille) {
+        ligne.textContent = '';
+        ligne.classList.add('u-hide');
+        return;
+    }
+    ligne.textContent = `Aucune cartouche n'est rangée sous la grille « ${grille.nom || 'sans nom'} » : écris-en une dans Conception › Cartouches, avec cette grille, pour la choisir ici.`;
+    ligne.classList.remove('u-hide');
 }
 
 // #453 §3 — pose une référence (grilleId/echelleId/cartoucheId) dans un

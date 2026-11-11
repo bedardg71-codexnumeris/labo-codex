@@ -233,29 +233,36 @@
         await attendre(function () { return ficheDe(id); }, 2000);
     }
 
-    /** Étape 2 : les champs que la bulle nomme, dans l'ordre de la fiche, puis « Créer la production ». */
-    function ouToucherProduction() {
-        var creer = el('btnCreerProduction');
-        if (!vis(creer)) return el('actionsFicheProduction');
-        var champs = ['productionTitre', 'productionType', 'productionActivite', 'productionPonderation', 'productionGrille'];
-        if (echelleDeLaGrilleChoisie()) champs.push('productionEchelle');
-        return premierAFaire(champs, creer);
+    /** Le menu de la fiche et son étiquette (« Grille de critères d'évaluation », « Échelle de performance »). */
+    function groupeDe(id) {
+        var s = el(id);
+        return s ? (s.closest('.groupe-form') || s) : null;
     }
 
     /**
-     * « … et son échelle si elle en a une » (Grégoire, 9 nov., 13 h 37) : l'échelle d'une grille, c'est celle de ses
-     * descripteurs (`criteres[].descripteurs.echelleId`, posée par Mon matériel quand la grille a des niveaux ; l'éditeur
-     * ne pose pas `grille.echelleId`, cartouches.js:439). Seulement si le menu « Échelle » de la fiche l'offre.
+     * « … et son échelle si elle en a une » (Grégoire, 9 nov., 13 h 37 ; 11 nov., 9 h 35). L'échelle est attendue tant
+     * qu'elle est à « Aucune » et que la grille choisie se note par niveaux : une grille entièrement en points n'en
+     * demande pas (`grilleEntierementEnPoints`, la règle de l'évaluation, #941). Avant le 11 nov., l'échelle n'était
+     * cherchée que dans les descripteurs de la grille, que l'éditeur de Conception › Grilles ne pose pas : une grille
+     * composée à la main n'y passait jamais (capture 16). Seulement si le menu offre au moins une échelle.
      */
-    function echelleDeLaGrilleChoisie() {
+    function echelleAttendue() {
         var sg = el('productionGrille'), se = el('productionEchelle');
-        if (!sg || !sg.value || !se) return null;
-        var g = (typeof db !== 'undefined' && typeof cle === 'function' ? (db.getSync(cle('grillesTemplates'), []) || []) : [])
-            .find(function (x) { return x && x.id === sg.value; });
-        var cr = g && Array.isArray(g.criteres)
-            ? g.criteres.find(function (c) { return c && c.descripteurs && c.descripteurs.echelleId; }) : null;
-        var id = cr ? cr.descripteurs.echelleId : null;
-        return id && [].some.call(se.options, function (o) { return o.value === id; }) ? id : null;
+        if (!sg || !sg.value || !se || se.value) return false;
+        var g = parId(grilles(), sg.value);
+        if (!g || typeof window.grilleEntierementEnPoints !== 'function' || window.grilleEntierementEnPoints(g)) return false;
+        return [].some.call(se.options, function (o) { return !!o.value; });
+    }
+
+    /**
+     * Étape 2, les champs obligatoires remplis (la règle des formulaires, `formulaire`) : la grille si elle manque, puis
+     * l'échelle attendue. « Puis associe-lui la grille que tu viens de créer, et son échelle si elle en a une. »
+     */
+    function aAssocier() {
+        if (!ficheProductionOuverte()) return [];
+        var sg = el('productionGrille');
+        if (vis(sg) && !sg.value) return [groupeDe('productionGrille')];
+        return echelleAttendue() ? [groupeDe('productionEchelle')] : [];
     }
 
     /**
@@ -264,10 +271,7 @@
      * la bulle hors de leur union. La bulle accrochée au champ (gardé, même décision).
      */
     function surLaFiche(cible) {
-        var menus = ['productionGrille', 'productionEchelle'].map(function (id) {
-            var s = el(id);
-            return s ? (s.closest('.groupe-form') || s) : null;
-        });
+        var menus = ['productionGrille', 'productionEchelle'].map(groupeDe);
         return surLaCible(cible).concat(menus.filter(vis));
     }
 
@@ -339,6 +343,13 @@
     }
 
     function boutonVerrou() { return el('btnVerrouillerEvaluation'); }
+
+    /** L'écran d'évaluation a fini de se dessiner : ses critères sont là, ou il demande l'échelle. */
+    function evaluationPrete() {
+        if (!ecranEvaluationVisible()) return false;
+        if (qs('#listeCriteresGrille1 select[id^="eval_"], #listeCriteresGrille1 input[id^="eval_pts_"]')) return true;
+        return ouToucherEnEvaluant() === el('selectEchelle1');
+    }
 
     /** Étape 9 : « Déverrouiller », puis la cartouche, puis « Verrouiller ». */
     function ouToucherEnReecrivant() {
@@ -455,10 +466,68 @@
         return [cible];
     }
 
-    /** Étape 8 : le nom, ta grille, ton échelle, puis « Créer la cartouche » (les commentaires sont dans la matrice). */
+    function nomDeGrille(id) {
+        var g = parId(grilles(), id);
+        return g ? (g.nom || 'sans nom') : '';
+    }
+
+    /**
+     * La grille sous laquelle est rangée la cartouche ouverte : celle de la cartouche en base, sinon (en création) celle
+     * que montre son menu « Grille (critères) ».
+     */
+    function grilleDeLaCartoucheOuverte() {
+        var c = window.cartoucheActuel;
+        if (c && c.id && c.grilleId && cartouchesDe(c.grilleId).some(function (x) { return x && x.id === c.id; })) return c.grilleId;
+        var s = el('selectGrilleCartouche');
+        return s && vis(s) ? s.value : '';
+    }
+
+    /**
+     * La cartouche ouverte est rangée sous une autre grille que celle du parcours (11 nov. 2026, captures 19 et 20,
+     * BLOQUANT : « Cartouche de départ (copie) », sous « Grille de départ » ; la fiche de la production, grille « Test 1 »,
+     * n'offrait que « Aucune », puisque son menu ne liste que les cartouches de SA grille). Mesuré sous WebKit : choisir
+     * l'autre grille vide le menu de l'échelle, et rien ne se passe avant qu'une échelle soit choisie ; alors
+     * l'application pose sa question et copie la cartouche sous la grille choisie (`traiterChangementDeGrilleCartouche`).
+     * Cette copie est une cartouche neuve de la grille du parcours : l'étape la compte.
+     */
+    function cartoucheHorsDeLaGrille() {
+        if (!ficheCartoucheOuverte() || cartoucheCreee()) return false;
+        var g = grilleDeLaCartoucheOuverte(), id = laGrilleId();
+        return !!(g && id && g !== id);
+    }
+
+    /** La grille du parcours déjà choisie dans la fiche, la cartouche pas encore copiée : reste l'échelle. */
+    function grilleChoisieEchelleAttendue() {
+        var s = el('selectGrilleCartouche'), e = el('selectEchelleCartouche');
+        return cartoucheHorsDeLaGrille() && !!s && s.value === laGrilleId() && vis(e) && !e.value;
+    }
+
+    // Phrases PROPOSÉES (11 nov. 2026, à valider par Grégoire) : lues par l'enseignant·e.
+    function avisCartouche() {
+        if (!cartoucheHorsDeLaGrille()) return null;
+        if (grilleChoisieEchelleAttendue()) {
+            return "Choisis maintenant l'échelle : une copie de cette cartouche sera rangée sous « " + nomDeGrille(laGrilleId()) +
+                " », et l'originale restera telle quelle.";
+        }
+        return "Cette cartouche est rangée sous la grille « " + nomDeGrille(grilleDeLaCartoucheOuverte()) +
+            " » : pour que ta production la trouve, choisis « " + nomDeGrille(laGrilleId()) + " » dans « Grille (critères) ».";
+    }
+
+    /** Le menu à toucher quand la cartouche est hors de la grille : « Grille (critères) », puis l'échelle. */
+    function menuHorsDeLaGrille() {
+        return el(grilleChoisieEchelleAttendue() ? 'selectEchelleCartouche' : 'selectGrilleCartouche');
+    }
+
+    /**
+     * Étape 8 : la grille, si la cartouche ouverte n'est pas sous celle du parcours ; sinon, en création, le nom, ta
+     * grille, ton échelle, puis « Créer la cartouche ». Une cartouche déjà enregistrée n'a aucun geste utile à désigner :
+     * rien (11 nov. 2026 : le halo tombait sur « Dupliquer · Supprimer · Fermer » ; jamais sur un groupe qui porte
+     * « Supprimer »).
+     */
     function ouToucherCartouche() {
+        if (cartoucheHorsDeLaGrille()) return menuHorsDeLaGrille();
         var creer = el('btnCreerCartouche');
-        if (!vis(creer)) return el('actionsFicheCartouche');
+        if (!vis(creer)) return null;
         return premierAFaire(['nomCartouche', 'selectGrilleCartouche', 'selectEchelleCartouche'], creer);
     }
 
@@ -494,13 +563,18 @@
                 aller('conception', 'productions');
                 await attendre(function () { return sousSectionVisible('conception-productions'); }, 2000);
             },
+            // La règle des formulaires (11 nov. 2026, 9 h 35, capture 16) : une flèche par champ obligatoire encore vide ;
+            // puis la grille, puis l'échelle attendue (`aAssocier`) ; le halo sur « Créer la production ».
+            formulaire: function () { return ficheProductionOuverte() ? el('formulaireProduction') : null; },
+            fleches: aAssocier,
             zones: function () {
-                if (ficheProductionOuverte()) return surLaFiche(ouToucherProduction());
+                if (ficheProductionOuverte()) return surLaFiche(null);
                 // 11 nov. 2026 : la rangée ne porte que « + Nouvelle production », que la pulsation désigne : pas de flèche.
                 return [];
             },
             contour: function () {
-                if (ficheProductionOuverte()) return ouToucherProduction();
+                // La fiche d'une production déjà enregistrée : aucun bouton à désigner (sa rangée porte « Supprimer »).
+                if (ficheProductionOuverte()) return vis(el('btnCreerProduction')) ? el('btnCreerProduction') : null;
                 return qs('#conception-productions [data-action="creerNouvelleProduction"]');
             },
             atteint: productionCreee
@@ -512,6 +586,7 @@
             // La date et la case, ensemble : la bulle se pose au-dessus ou au-dessous du bloc, sans couvrir la date.
             zones: function () { return [el('sectionPlanification') || caseConsignes()]; },
             contour: caseConsignes,
+            nommeLeContour: true,   // « coche « Consignes transmises » » (11 nov. 2026, 9 h 47)
             atteint: consignesTransmises
         },
         {
@@ -531,6 +606,15 @@
                 if (ecranEvaluationVisible()) return ouToucherEnEvaluant();
                 return ligneDeLaListe(lireCtx().productionId);
             },
+            // « Actions › Évaluer », un niveau par critère, « Verrouiller » : la bulle nomme ce qu'il faut toucher, la
+            // flèche y va (11 nov. 2026, 9 h 35, capture 17 : elle montait à la cellule « Niveau » de la rangée).
+            nommeLeContour: true,
+            // Capture 18 : l'écran d'évaluation ouvert, la bulle passe à la page des critères et le premier critère est
+            // amené dans la vue ; revenue à la Liste, à celle d'« Actions › Évaluer ».
+            pageQuiDit: function () {
+                if (!ecranEvaluationVisible()) return 'Rien à importer';
+                return evaluationPrete() ? 'Pour chaque critère' : null;
+            },
             atteint: evaluationVerrouillee
         },
         {
@@ -549,6 +633,7 @@
             aussiEviter: function () {
                 return wizardOuvert() ? ['wizard-v2-btn-precedent', 'wizard-v2-btn-suivant', 'wizard-v2-btn-creer'].map(el) : [];
             },
+            nommeLeContour: true,   // « + Nouvelle pratique », puis « Partir d'un modèle » (11 nov. 2026, 9 h 47)
             contour: function () {
                 if (!wizardOuvert()) return qs('#conception-pratiques-notation [data-action="creerNouvellePratique"]');
                 var r = qs('#modalWizardPratiqueV2 input[name="porteEntree"][value="modele"]');
@@ -577,6 +662,7 @@
                 if (fichePratiqueOuverte()) return boutonAppliquer();
                 return qs('#selectionPratiques select') || el('selectionPratiques');
             },
+            nommeLeContour: true,   // « le menu en haut de la page », puis « Appliquer au cours actif » (11 nov. 2026)
             atteint: pratiqueEstAppliquee
         },
         {
@@ -604,9 +690,12 @@
             },
             zones: function () {
                 if (cartoucheCreee()) return zonesPourNommer();
+                // « Grille (critères) », puis l'échelle, l'étiquette avec son menu : la flèche y va, l'avis le nomme.
+                if (cartoucheHorsDeLaGrille()) { var s = menuHorsDeLaGrille(); return [s.closest('.groupe-form') || s]; }
                 if (ficheCartoucheOuverte()) return surLaCible(ouToucherCartouche());
                 return [];   // « + Nouvelle cartouche » a la pulsation (11 nov. 2026)
             },
+            avis: avisCartouche,
             contour: function () {
                 if (cartoucheCreee()) return ouNommerLaCartouche();
                 if (ficheCartoucheOuverte()) return ouToucherCartouche();
@@ -636,6 +725,8 @@
                 var ctx = lireCtx();
                 return ligneDeLaListe(ctx.productionId, ctx.evaluationDA);
             },
+            // « Actions › Consulter », « Déverrouiller », ta cartouche, « verrouille » (11 nov. 2026, 9 h 47).
+            nommeLeContour: true,
             boutons: [{ libelle: 'Terminer', primaire: true, action: function () { terminer(); } }]
         }
     ];

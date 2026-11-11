@@ -389,6 +389,7 @@
         },
         zones: function () { return [rangeeDe(menuActions('annoter'))]; },
         contour: function () { return menuActions('annoter'); },
+        nommeLeContour: true,   // « Actions › Annoter » (Grégoire, 11 nov. 2026, 9 h 47 : la flèche va à ce que la bulle nomme)
         atteint: annotationOuverteRetenue
     };
 
@@ -431,6 +432,7 @@
         // « Évaluer », le geste même qu'elle demande, mesuré à 1180 px) et le contour passe sur « Évaluer ».
         zones: function () { var m = menuAnnoterOuvert(); return m ? [el('travaux-btn-actions'), m] : [el('travaux-btn-actions')]; },
         contour: function () { return menuAnnoterOuvert() && vis(el('travaux-btn-evaluer')) ? el('travaux-btn-evaluer') : el('travaux-btn-actions'); },
+        nommeLeContour: true,   // « Annoter ▾ », puis « Évaluer » (11 nov. 2026, 9 h 47)
         atteint: function () { return mode() === 'evaluer' && vis(el('travaux-palette-eval-gauche')); }
     };
 
@@ -467,6 +469,7 @@
             return [rangeeDe(menuActions('evaluer'))];
         },
         contour: function () { return ecranEvaluationVisible() ? critereAAttribuer() : menuActions('evaluer'); },
+        nommeLeContour: true,   // « Actions › Évaluer », puis chaque critère (11 nov. 2026, 9 h 47)
         atteint: critereTenuSansFichier
     };
 
@@ -476,6 +479,7 @@
         avant: function () { return revenirALaProduction('evaluer'); },
         zones: function () { return [boutonVerrou()]; },
         contour: boutonVerrou,
+        nommeLeContour: true,   // le cadenas « Verrouiller » (11 nov. 2026, 9 h 47)
         atteint: verrouNeuf
     };
 
@@ -484,6 +488,7 @@
         texte: texte7(TEXTE_7_SANS_FICHIER),
         zones: function () { return [boutonVerrou()]; },
         contour: boutonVerrou,
+        nommeLeContour: true,   // le cadenas « Verrouiller » (11 nov. 2026, 9 h 47)
         atteint: verrouNeuf
     };
 
@@ -497,6 +502,7 @@
         },
         zones: function () { return [carteExportLea()]; },
         contour: boutonExportLea,
+        nommeLeContour: true,   // « Exporter pour Léa » (11 nov. 2026, 9 h 47)
         atteint: exportFini
     };
 

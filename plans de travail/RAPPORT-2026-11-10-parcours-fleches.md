@@ -4,11 +4,121 @@
 `origin/main` à `77679dd` (1.241.0), poussée, non fusionnée. Consigne :
 `plans de travail/CONSIGNE-LOT-2026-11-09-parcours-fleches.md`, avec les trois ajouts de Cowork du 10 nov., 11 h 30.
 
-**Dernier relais : 11 nov., 9 h, Mac, WebKit.** Second essai de Grégoire sur l'iPad (8 h 04 à 8 h 47) : quatre
-corrections sur `lot/parcours-fleches-apercu` (les formulaires, la bulle sur ce qu'elle explique, le zoom au pincement,
-le texte « Ta grille »). Section « Second essai sur l'iPad » juste dessous ; le premier essai (6 h 41), le matin et la
-nuit, sous elle. **Préalables de la fusion dans `main`** : le verdict complet (il viendra à la fusion), et sur l'aperçu
-les portes 2.5 a et b et 2.6 (porte terrain du lot).
+**Dernier relais : 11 nov., vers 11 h, Mac, WebKit.** Troisième essai de Grégoire sur l'iPad (9 h 11 à 9 h 26,
+« Évaluer une première production », grille « Test 1 » composée dans Conception › Grilles) : quatre corrections sur
+`lot/parcours-fleches-apercu` (la règle des formulaires à « Ta production », la flèche vers ce que nomme la bulle,
+l'écran d'évaluation, « Ta cartouche »). Section « Troisième essai sur l'iPad » juste dessous ; le second essai, le
+premier, le matin et la nuit, sous elle. **Préalables de la fusion dans `main`** : le quatrième essai de Grégoire
+(porte terrain §2.7), puis le verdict unique du groupe (flèches, normes, pastille, sous-navigation ; `RELAIS.md`).
+---
+
+## Troisième essai sur l'iPad (11 nov., 9 h 47) : « Ta production », la Liste, l'écran d'évaluation, « Ta cartouche »
+
+Relais du Projet, 11 nov., 9 h 47, sur le second aperçu (`2e9edab10`), grille « Test 1 » composée dans
+Conception › Grilles. Captures hors dépôt (des noms d'étudiant·es y paraissent). Banc neuf :
+`tests/integration/parcours-3-quatrieme-essai-2026-11-11.spec.js` (WebKit, 1180 × 820, le parcours entier avec
+une grille composée à la main) ; le harnais du parcours 3 juge désormais les flèches de chaque étape.
+
+### Le moteur : trois mécanismes (`js/parcours-moteur.js`, en-tête)
+
+- `nommeLeContour` : quand la bulle nomme ce qu'il faut toucher, la flèche va au contour, et à lui seul ; « jamais
+  vers ce qu'il faut toucher » ne vaut plus que pour ce que la bulle ne nomme pas (point 2).
+- `pageQuiDit` : une étape à deux écrans dit, par un passage de son texte, de quoi parle l'écran visible ; quand le
+  passage change, la bulle passe à la page qui le porte et ce que l'étape désigne est amené dans la vue, une fois.
+- `avis` : une phrase sous le texte (rôle `status`), tant que la page n'est pas dans l'état attendu.
+- Dans une étape à `formulaire`, les champs obligatoires remplis, les flèches vont à ce que l'étape déclare dans
+  `fleches`.
+
+### 1. « Ta production » (capture 16)
+
+La règle des formulaires : une flèche par champ obligatoire vide (nom, type, pondération), le halo sur « Créer la
+production » ; puis la grille ; puis « Échelle de performance » tant qu'elle est à « Aucune » et que la grille se
+note par niveaux (`grilleEntierementEnPoints` faux, la règle de l'évaluation, #941). `echelleDeLaGrilleChoisie`
+(l'échelle cherchée dans les descripteurs, que l'éditeur de Grilles ne pose pas) est retirée ; la sentinelle
+`bareme-1-editeur` I.b ne compte plus `parcours-evaluer.js` parmi les lecteurs de `descripteurs`.
+
+### 2. La flèche vers ce que nomme la bulle (capture 17)
+
+Étapes touchées : **Évaluer** 3 (« Consignes transmises »), 4 (« Actions › Évaluer », chaque critère,
+« Verrouiller »), 5 (« + Nouvelle pratique », « Partir d'un modèle »), 6 (le menu, « Appliquer au cours actif »),
+9 (« Actions › Consulter », « Déverrouiller », la cartouche, « Verrouiller ») ; **Recevoir** 3 (« Actions ›
+Annoter »), 5 (« Annoter ▾ », « Évaluer »), 6 sans fichier (« Actions › Évaluer »), 7 avec et sans fichier
+(« Verrouiller »), 8 (« Exporter pour Léa ») ; **Commentaires** « Poser tes codes », « Ta rétroaction s'écrit
+seule » (×2), sur la Liste seulement ; **Notation alternative** « L'appliquer à ton cours », « Évaluer une
+production » (sur la Liste), « Ta synthèse » (« Actions › Dossier PDF »).
+Non touchées, la bulle ne nommant pas ce qu'il faut toucher, ou le nommant parmi d'autres sujets qui ont leur
+flèche : « Mettre ta classe en place », « Monter ton cours », « Tes données à l'abri », Recevoir 4 (« Tampons »),
+Commentaires « Ta grille » et « Ta production » (le contour est la rangée, pas le bouton), Notation alternative
+« Ta pratique ». **Laissées en l'état, à trancher (porte terrain §3.5)** : « Découvrir » 1, 3, 6, 7, 8 et « Lire ta
+classe » 1, 3, 5, 6 nomment le bouton dans leur ligne de geste (« Touche « Détails » », « Touche « Évaluation »,
+en haut », « Touche « + Nouvelle intervention » »…), mais leurs flèches vont à ce que la bulle présente, selon la
+décision §3.2 de 6 h 28, que leurs bancs verrouillent (« aucune flèche au bouton à toucher »). Y appliquer la règle
+de 9 h 35 défairait cette décision : je ne l'ai pas fait sans toi.
+
+### 3. L'écran d'évaluation (capture 18) : la cause
+
+L'hypothèse ne tient pas : mesuré sous WebKit à 1180 × 820, `ecranEvaluationVisible` reconnaît bien l'écran
+(`#evaluations-contenu-evaluation`, 1 121 × 1 273 px, « Étudiant·e 1 de 3 »). Le halo était posé sur le premier
+critère, **sous le bas de l'écran** (le formulaire fait 1 273 px de haut) ; la flèche, elle, l'excluait parce que
+c'était ce qu'il faut toucher ; et la bulle restait à sa page 1/2, rien ne la faisant tourner. Corrigé par
+`pageQuiDit` (« Rien à importer » sur la Liste, « Pour chaque critère » sur l'écran prêt) et `nommeLeContour`.
+
+### 4. « Ta cartouche » (captures 19 et 20)
+
+(a) Hors de la grille du parcours (la grille de la cartouche en base, sinon celle de son menu) : l'avis, la flèche
+vers « Grille (critères) », le halo sur son menu. **Mesuré en chemin** : choisir l'autre grille vide le menu de
+l'échelle, et rien ne part avant qu'une échelle soit choisie ; alors l'application pose sa question et copie la
+cartouche. L'étape désigne donc l'échelle dans cet état (seconde phrase, flèche et halo dessus). (b) Sur une
+cartouche déjà enregistrée, plus rien de désigné (avant : « Dupliquer · Supprimer · Fermer »). (c) Dans la fiche
+d'une production, `#productionCartoucheVide` sous le menu, posée par `peuplerCartouchesProduction`.
+
+**Stock** : rien. Aucune donnée écrite ; la ligne (c) se lit à l'ouverture de chaque fiche.
+
+### Phrases proposées (lues par l'enseignant·e ; porte terrain §3.4)
+
+- « Cette cartouche est rangée sous la grille « Grille de départ » : pour que ta production la trouve, choisis
+  « Test 1 » dans « Grille (critères) ». »
+- « Choisis maintenant l'échelle : une copie de cette cartouche sera rangée sous « Test 1 », et l'originale
+  restera telle quelle. »
+- « Aucune cartouche n'est rangée sous la grille « Test 1 » : écris-en une dans Conception › Cartouches, avec
+  cette grille, pour la choisir ici. »
+
+### Bancs
+
+Mac, WebKit, build `1111-1040`. **Les bancs des neuf parcours** (`npx playwright test parcours registre-des-parcours`) :
+93 verts, 19 sautés, 1 rouge, `parcours-5` l. 211 (`#planif-panneau` sans `visible`), fichier non touché : le rouge
+connu de `main` (« 1 fois sur 6 », relais du 10 nov., 18 h 20), vert rejoué seul. Le banc neuf : 3 sur 3 ; le
+parcours 3 : 5 sur 5 (le harnais juge maintenant les flèches des étapes 2, 3, 4, 5, 6 et 9). **Vitest** :
+11 403 sur 11 403 après le build (la sentinelle `bareme-1-editeur` I.b mise à jour, voir le point 1).
+
+**Break-tests** (chacun rejoué seul sur le banc neuf, le fichier restauré ensuite) — huit sur huit ROUGES :
+1. `echelleAttendue` rendue fausse → « étape 2, l'échelle : nombre de flèches ».
+2. `nommeLeContour` retiré de l'étape 4 → « étape 4, « Actions › Évaluer » : une flèche va de la bulle à … ».
+3. `pageQuiDit` retiré de l'étape 4 → la page visible redit « Rien à importer… ».
+4. `cartoucheHorsDeLaGrille` rendue fausse → l'avis absent.
+5. `direCartoucheAbsente` neutralisée → la ligne sous « Cartouche de rétroaction » absente.
+6. `ouToucherCartouche` rendant `actionsFicheCartouche` → le halo visible sur une cartouche enregistrée.
+7. Le moteur ignorant `auContour` → « étape 3, « Consignes transmises » : une flèche va… ».
+8. Le moteur ignorant `fleches` après le formulaire → « étape 2, la grille : une flèche va… ».
+
+Dans le worktree, des sorties de diagnostic non suivies (`diag-2026-11-11-ipad/6-…` à `8-…`,
+`diag-2026-11-11-second-essai/*.log`) sont apparues pendant la session sans venir d'elle : non versées.
+
+### Ce que j'ai supposé
+
+- À « Ta production », une flèche vers la grille quand elle manque (après les champs obligatoires) : la bulle la
+  nomme (« associe-lui la grille »), le relais ne le demandait pas.
+- La règle du point 2 donne une seule flèche, vers le contour ; les zones de l'étape, la bulle les évite encore.
+- Étape 9 d'« Évaluer » : `nommeLeContour`, sans `pageQuiDit` (non demandé).
+
+### Trouvailles (inscrites, hors du lot)
+
+- Étape 7 d'« Évaluer » à 1180 × 820 : le titre « Performance (P) » sort de la vue après coup, deux essais sur trois
+  du banc neuf (jamais à 900 px de haut, jamais en sautant directement à l'étape 7). Non jugé dans le banc neuf ;
+  le banc du parcours 3 le juge à 900. À voir sur l'iPad (l'essai de Grégoire n'en a rien dit).
+- Le choix d'un modèle dans l'assistant de pratique, coché juste après « Suivant », est effacé par le redessin des
+  cartes (mesuré à 1180 × 820) : le harnais recoche jusqu'à ce que le choix tienne. Un doigt n'est pas aussi rapide.
+
 ---
 
 ## Second essai sur l'iPad (11 nov., 8 h 52) : les formulaires, la bulle, le zoom, « Ta grille »

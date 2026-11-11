@@ -11,6 +11,8 @@ poussées sur la même branche (rapport du lot, « Retours de l'iPad »).
 refaire), §2.5 b non faite ; §2.2 tenue pour faite (décision du Projet) ; §2.3 refaite sans défaut signalé ; §3.1 et
 §3.3 : on garde. Quatre corrections décidées de 8 h 26 à 8 h 38 (rapport du lot, « Second essai sur l'iPad ») ;
 une porte ajoutée, §2.6, pour ce que WebKit n'a pas reproduit.
+**Troisième essai le 11 nov., 9 h 11 à 9 h 26** (`2e9edab10`, « Évaluer une première production », grille « Test 1 ») :
+quatre corrections sur le quatrième aperçu ; une porte ajoutée, §2.7, et la décision §3.4 (trois phrases).
 *Avant le 11 nov. :* EN ATTENTE. Cette porte ne se fait pas avant que le lot soit fusionné dans `main` et en ligne.
 Tant que la branche n'est que poussée, `https://app.codexnumeris.org` montre encore le voile : tu jugerais la
 version d'avant. Cowork remplit la ligne « version attendue » ci-dessous au moment de la mise en ligne, et publie
@@ -19,7 +21,7 @@ l'artefact jumeau (avec son bouton « Copier mes résultats »).
 Pourquoi une porte, alors que la règle est de ne pas en faire pour l'apparence : le défaut que tu as vécu (les
 zones qui ne tombent pas sur les boutons) est sur iPad, et aucune machine d'ici ne peut y répondre. La session du
 cloud n'a que Chromium ; le Mac a WebKit, mais ni l'un ni l'autre n'a la barre d'adresse de Safari sur iPad, qui est
-la cause supposée. Sept portes, pas plus (la sixième, le zoom au pincement, ajoutée le 11 nov. ; la septième, §2.6, au second essai). Tout le reste est mesuré par les bancs.
+la cause supposée. Huit portes, pas plus (la sixième, le zoom au pincement, ajoutée le 11 nov. ; la septième, §2.6, au second essai ; la huitième, §2.7, au troisième). Tout le reste est mesuré par les bancs.
 
 Ce qui échoue devient un item de backlog avec son numéro de porte, pas une note mentale.
 
@@ -148,6 +150,34 @@ Rien. Ce lot ne touche à aucune donnée.
   bulle ne couvre ni la date, ni les noms des étudiant·es.
   `iPad`
 
+### 2.7 « Évaluer une première production », avec une grille composée à la main (quatrième aperçu)
+
+> **Pourquoi.** Au troisième essai (11 nov., 9 h 11 à 9 h 26), avec « Test 1 » composée dans Conception › Grilles :
+> la flèche de « Ta production » n'allait pas à l'échelle, celle de la Liste montait à la cellule « Niveau », l'écran
+> d'évaluation n'avait ni flèche ni halo visibles, et l'étape 8 bloquait. Le banc les joue sous WebKit à
+> 1180 × 820 ; l'iPad dit si on les voit. Sur un espace d'essai, une grille composée dans Conception › Grilles
+> (« Partir de zéro »), sans cartouche.
+
+- [ ] **2.7 a** « Ta production » (2 sur 9), « + Nouvelle production ».
+  ⮕ Attendu : une flèche vers chaque champ à astérisque encore vide (nom, type, pondération), qui part quand tu le
+  remplis ; le halo sur « Créer la production ». Les trois remplis : une flèche vers la grille ; la grille choisie
+  (la tienne, par niveaux), une flèche vers « Échelle de performance » tant qu'elle est à « Aucune ». Sous
+  « Cartouche de rétroaction », une ligne dit que ta grille n'a encore aucune cartouche.
+  `iPad`
+- [ ] **2.7 b** « Une première production » (4 sur 9), sur la Liste.
+  ⮕ Attendu : une seule flèche, vers le menu « Actions… » de la rangée, et le halo dessus.
+  `iPad`
+- [ ] **2.7 c** « Actions › Évaluer ».
+  ⮕ Attendu : la bulle passe d'elle-même à sa page 2/2 (« Pour chaque critère… ») ; le premier critère sans niveau
+  est à l'écran, avec le halo et la flèche ; tous choisis, halo et flèche passent à « Verrouiller ».
+  `iPad`
+- [ ] **2.7 d** « Ta cartouche » (8 sur 9) : ouvre « Cartouche de départ », touche « Dupliquer ».
+  ⮕ Attendu : une phrase sous le texte de la bulle dit que la cartouche est rangée sous « Grille de départ » ; la
+  flèche et le halo vont à « Grille (critères) », jamais au groupe « Dupliquer · Supprimer · Fermer ». Ta grille
+  choisie : une autre phrase demande l'échelle, flèche et halo dessus ; l'échelle choisie, l'application demande
+  de confirmer la copie ; accepte. Puis, dans la fiche de ta production, le menu offre la copie.
+  `iPad`
+
 ---
 
 ## §3 · Décisions — ce qui attend ton verdict
@@ -165,6 +195,20 @@ place. Écris ta réponse, ne coche pas.
   section (« Découvrir » 6, 7 et 8), jamais vers le bouton à toucher. Appliqué ; le crible des neuf parcours est au rapport du lot.
 - **3.3** La flèche est-elle assez visible, ou trop ? (épaisseur, longueur) **Tranchée le 11 nov. (second
   essai) : on garde telle quelle** (« les flèches marchent bien »).
+- **3.4** Trois phrases PROPOSÉES (11 nov., quatrième aperçu), lues par l'enseignant·e ; elles partent telles
+  quelles et restent corrigeables :
+  - dans la bulle de « Ta cartouche » : « Cette cartouche est rangée sous la grille « Grille de départ » : pour que
+    ta production la trouve, choisis « Test 1 » dans « Grille (critères) ». »
+  - puis, ta grille choisie : « Choisis maintenant l'échelle : une copie de cette cartouche sera rangée sous
+    « Test 1 », et l'originale restera telle quelle. »
+  - sous « Cartouche de rétroaction », dans la fiche d'une production : « Aucune cartouche n'est rangée sous la
+    grille « Test 1 » : écris-en une dans Conception › Cartouches, avec cette grille, pour la choisir ici. »
+- **3.5** La règle de 9 h 35 (« quand la bulle nomme le bouton à toucher, la flèche y va ») est appliquée à
+  « Évaluer », « Recevoir », « Commentaires » et « Notation alternative » (liste au rapport). « Découvrir » et
+  « Lire ta classe » nomment aussi leur bouton, dans la ligne du geste (« Touche « Détails » », « Touche
+  « Évaluation », en haut »), mais leurs flèches suivent ta décision §3.2 (vers ce que la bulle présente, jamais vers
+  le bouton). Laissées ainsi. Veux-tu qu'elles suivent la nouvelle règle (une flèche vers le bouton nommé, en plus
+  ou à la place) ?
 
 ---
 
