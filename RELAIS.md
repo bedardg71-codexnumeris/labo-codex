@@ -7,6 +7,60 @@
 
 ---
 
+## 10 NOV. 2026, 22 H 50 (Claude Code) : **1.242.1 POUSSÉE ET EN LIGNE, VERDICT VERT**
+
+Feu vert de Grégoire (relais de Cowork à 20 h 12, puis « tout est fermé » et « vas-y »). **`origin/main` = `48f118bf5`** (1.242.1, build `1110-2019`, release `571e928b4`, Nouvelles fondues `48f118bf5`) ; 19 commits depuis la 1.242.0. Netlify `6af3e5a4`, `ready` à 22 h 49 sur ce SHA. PR n° 15 et n° 16 : fermées comme fusionnées par le push.
+
+**Ce qui part** : la bannière « Aucun travail importé » de Préparer (#1269) ; les pages d'une production d'un seul tenant à l'import, « Réunir en une production » sur les seules pages cochées, « Nom, Prénom » pour les homonymes (#1270) ; les bulles de l'en-tête derrière le logo, la navigation et le groupe (#1272) ; le pied de page (« Nouveautés » à côté de la version, la devise dessous) et « Aide dans les pages » en haut du panneau Assistance.
+
+**Verdict** sur `48f118bf5` : `verdict-en-morceaux.mjs`, code 0, sans refus. 1 602 essais, 1 602 verts, **0 au second essai**, 0 rouge, 63 sautés. Secteur, sans veille, pression mémoire 1, Cowork et navigateurs fermés. Hook : « verdict vert à jour pour ce commit ». Ce commit de relais, poussé après, n'a pas de verdict (documentation seule).
+
+**Complexité** (1.242.0 `9386cccf8` → 1.242.1 `48f118bf5`) :
+- fichiers de plus de 1 000 lignes : 41 → 41 ; lignes de code : 167 771 → 167 830 (Δ +59 : `js/travaux-ui.js` 5 439 → 5 481, `js/travaux-import.js` 1 383 → 1 408, `js/changelog-data.js` 2 652 → 2 653) ;
+- au-dessus de 15 : 435 → 435 (Δ 0) ; somme au-dessus de 15 : 10 977 → 10 972 (Δ −5) ;
+- au-dessus de 30 : 77 → 77 (Δ 0) ; maximum : 130 ; fonctions : 16 981 → 16 988.
+
+**Ce qui reste ouvert** :
+- #1271 : `productionSelectionnee` de l'Inspecteur jamais remise à zéro (inscrit, sans correctif).
+- Les points ouverts de l'entrée de 18 h 20 ci-dessous (liste de Léa en vue étendue, `bareme-3` › invariant 1, parcours 5 étape 5).
+- **Ensuite (étape 6, sans toucher `main`)** : l'aperçu des flèches, branche de test depuis ce `main` + `origin/lot/parcours-fleches` (`4ef662ffd`), PR sans fusion. Une PR n° 17 « APERÇU des flèches : ne pas fusionner » existe déjà sur GitHub.
+
+---
+
+## 10 NOV. 2026, 18 H 20 (Claude Code) : **1.242.0 POUSSÉE ET EN LIGNE, VERDICT VERT ; LA VUE SIMPLE EST SERVIE**
+
+Feu vert de Grégoire (14 h 13), relayé par Cowork (14 h 20) : « mettre en ligne la vue simple ». **`origin/main` = `9386cccf8`** ; Netlify `6af3a691`, `ready` à 18 h 20 sur ce SHA (le site est derrière Cloudflare Access : la version se lit au SHA déployé). La release est `8d05f0ee8` (1.242.0, build `1110-1423`). Le passage de la 1.241.0 à la 1.242.0 compte 47 commits. Ni les flèches (`lot/parcours-fleches`) ni le groupe 4 ne sont partis.
+
+**Le premier verdict, sur `8d05f0ee8`, était rouge** : 1 595 essais, 11 rouges nouveaux, 4 au second essai. **Les 11 rouges venaient du groupe et avaient une seule cause : les sélecteurs des essais.** La barre de la vue simple porte `.navigation-principale`, et l'entrée « Enregistrer dans un fichier » du menu Codex porte l'action de « Mettre à jour le codex ». Cachées en vue étendue, elles doublaient ce que quatre specs visaient : `en-tete-epure`, `codex-1012`, `planif-toolbar` et `planif-planificateur-dates`. **La correction est `9386cccf8`** : des sélecteurs bornés à la vue étendue, aucune attente desserrée. Le menu de l'en-tête suit la bascule arrêtée le 9 nov. Rejoués seuls, les quatre fichiers sont verts.
+
+**Le second verdict, sur `9386cccf8`, est vert** : `verdict-en-morceaux.mjs`, sans refus, code 0. Il compte 1 595 essais, 1 592 verts, 3 au second essai, 0 rouge et 63 sautés. Le Mac était sur secteur, sans veille, avec une pression mémoire de 1. Hook : « verdict vert à jour pour ce commit ».
+
+**Les rattrapés, rejoués seuls six fois** :
+- `parcours-8` (bulles) : 6/6.
+- `grilles-sous-criteres-condense` iPad : 6/6.
+- `erreurs-700` : 6/6.
+- **`bareme-3-evaluer` › invariant 1 : 1 échec sur 6, puis 1 sur 8. Étranger au groupe** : la page WebKit se ferme 1,5 s après le début de `exporterDossierComplet`, à la 13ᵉ s d'un essai de 90 s, et **la 1.241.0 fait pareil, 2 échecs sur 8**. Ce n'est pas réglé ; je n'y ai pas touché.
+- `grilles-sous-criteres-condense` Mac : 1 échec sur 6, instable depuis le 22 oct.
+
+**Complexité** (`node tests/unit/_helpers/complexite.js`, 1.241.0 en ligne `77679dd3d` → 1.242.0 `9386cccf8`) :
+- fichiers de plus de 1 000 lignes : 40 → 41 (`js/vue-simple.js`, 1 243 lignes, franchit le seuil) ;
+- lignes de code : 165 971 → 167 771 (Δ +1 800, surtout les deux fichiers neufs de la vue simple ; ailleurs : `js/echelles.js` 2 156 → 2 184, `js/codex.js` 3 112 → 3 123, `js/changelog-data.js` 2 638 → 2 652, `js/export-pdf.js` 2 612 → 2 616, `js/tableau-bord-apercu.js` 2 293 → 2 281) ;
+- au-dessus de 15 : 435 → 435 (Δ 0) ; somme au-dessus de 15 : 10 975 → 10 977 (Δ +2) ;
+- au-dessus de 30 : 78 → 77 (Δ −1) ; maximum : 130.
+
+**Ce qui reste ouvert** (rapport `plans de travail/RAPPORT-2026-11-09-vue-simple.md`, en tête) :
+- **La CI de GitHub** : voir le tableau du rapport.
+- **La vue étendue lit mal la liste de Léa** (`analyserListeEtudiantsCollee`) : le statut tombe dans le programme, le SA se perd, un inactif est importé. Inscrit et laissé, pour Cowork.
+- Le saut de 72 px de la carte n'est pas expliqué.
+- Le parcours 5, étape 5, échoue 1 fois sur 6.
+- `bareme-3` › invariant 1 : la page WebKit ferme pendant l'export PDF, aussi sur la 1.241.0.
+
+**Branches qui attendent** :
+- `lot/parcours-fleches` (GitHub, `4ef662ffd`) ;
+- `lot/parcours-fleches-mac-9nov` (local, trois commits du 9 nov. au soir, worktree `labo-codex-parcours-fleches`).
+
+---
+
 ## 10 NOV. 2026, 12 H 50 (Claude Code) : **PASSATION — `main` LOCAL A 33 COMMITS D'AVANCE, NON POUSSÉS ; LA VUE SIMPLE FUSIONNÉE EN LOCAL ; AUCUN VERDICT PRIS DESSUS**
 
 La session principale passe la main (Cowork, 12 h 45). En ligne : 1.241.0 (`579f6ace6`, verdict vert sur l'ancêtre testé `d570e8864`) ; `origin/main` = `77679dd3d` (relais du groupe 3). **`main` local = ce commit de passation, 33 commits devant `origin/main`, rien de poussé** (consigne : Grégoire essaie d'abord la vue simple sur son iPad).

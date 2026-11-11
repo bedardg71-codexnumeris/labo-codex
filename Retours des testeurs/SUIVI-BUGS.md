@@ -148,6 +148,24 @@
 > sous quel protocole l'application était ouverte, alors que c'est exactement ce qui départage les deux
 > affichages — il a fallu le déduire. Inscrit au BACKLOG : ajouter `location.protocol` au rapport de bug.
 
+## Corrigés (10 novembre 2026, soir — les bulles de l'en-tête repassent derrière ; corrigé dans le cloud, PR n° 16, fusionné sur le `main` local le 10 nov., pas en ligne)
+
+| # | Testeur | Date | Description | Correctif |
+|---|---------|------|-------------|-----------|
+| 1272 | Grégoire (constat sur captures, 1.242.0, build `1110-1423`) | 10 nov. 2026, 19 h | **En vue étendue, les bulles de l'en-tête disparaissent sous le logo, la navigation, le groupe et « Codex ».** | 2.7, mécanisme qui masque : le masque par colonne du nouvel en-tête (`masquerBullesSousLeContenu`, `js/main.js`) retiré ; les bulles restent derrière par le z-index (décision de Grégoire, 19 h 07) — `64a274681`. Banc : `tests/unit/sentinelle-en-tete-epure-2026-11-07.test.js`. Mesuré sous WebKit (démo, 1440 px) : aucun masque, et aux onze chevauchements bulle/élément de l'en-tête, l'élément est au-dessus. |
+
+## Corrigés (10 novembre 2026, soir — les pages d'une production se suivent à l'import ; codé sur `lot/import-productions-d-un-tenant`, fusionné sur le `main` local le 10 nov. au soir)
+
+| # | Testeur | Date | Description | Correctif |
+|---|---------|------|-------------|-----------|
+| 1270 | Grégoire (deux rapports de bug du 10 nov., 1.241.0, iPad puis Mac ; noms réels, gardés hors du dépôt) | 10 nov. 2026, 15 h 10 | **Préparer › Optimisation : les pages d'une production se dispersent dans la file, les cadres s'emboîtent en escalier, deux homonymes paraissent identiques dans l'Aperçu, et « Réunir » sur deux pages d'une production ne fait rien.** | La file d'un seul tenant au dépôt (ordre de remise) et à la restauration (sans retri), `rassemblerLaFile` ; l'assemblage suit l'ordre de la file ; un cadre par suite contiguë (`cadreDeLaLigne`) ; « Réunir » prend les seules pages cochées, et dit « Ces pages forment déjà une production. » ; « Nom, Prénom » pour les homonymes (`nomDansLApercu`). Bancs : `tests/unit/import-productions-d-un-tenant.test.js` (17 essais), `tests/integration/import-productions-d-un-tenant-2026-11-10.spec.js` (WebKit, 820 et 1180 px). Fiche #1270. |
+
+## Corrigés (10 novembre 2026 — « Aucun travail importé » sur Préparer ; corrigé dans le cloud, PR n° 15, fusionné sur le `main` local le 10 nov., pas en ligne)
+
+| # | Testeur | Date | Description | Correctif |
+|---|---------|------|-------------|-----------|
+| 1269 | Grégoire (`BUG_grégoire_2026-11-10_15-20-18`, 1.241.0, build `1109-2301`, iPad) | 10 nov. 2026, 15 h 20 | **Préparer dit « Aucun travail importé » alors que le groupe a des copies.** | 2.5, état résiduel et jugement par l'écran : Préparer ne montre jamais les copies importées. `etats-vides.js` lit les copies du groupe actif et la file d'import (`estVide`), et `afficherImport` retire le bandeau resté (`retirerSiPeuplee`) — `a0d680884`, fusion `1235c0553`. Bancs : `tests/unit/etats-vides-preparer-copies-importees.test.js` (7 essais) et `tests/integration/etats-vides-preparer-copies.spec.js` (WebKit). |
+
 ## Corrigés (5 novembre 2026 — trois rapports iPad du matin ; en ligne en 1.235.0, poussée le 5 nov. à 17 h 49 ; porte iPad de la réparation passée le 6 nov. à 6 h 45 ; inscrit aux corrigés le 8 nov.)
 
 | # | Testeur | Date | Description | Correctif |

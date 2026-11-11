@@ -20,7 +20,7 @@
 // init-inline.js compare cette valeur au BUILD_ID lu depuis version.json :
 // si différent, Safari file:// a probablement un main.js périmé en cache,
 // et la séquence reload+bandeau s'enclenche. SYNCHRONISER À CHAQUE BUMP.
-window._SCRIPT_BUILD_main = '1110-2015';
+window._SCRIPT_BUILD_main = '1110-2251';
 
 /* ===============================
    FONCTION GLOBALE: Génération d'ID uniques
@@ -1080,58 +1080,14 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    // Les bulles sont DERRIÈRE le contenu (z-index), mais le logo, les mots de la navigation,
-    // les onglets et le sélecteur du groupe sont posés sur un fond en partie transparent : on y
-    // verrait passer les bulles. La consigne dit « jamais par-dessus un texte, le logo ou un
-    // bouton » : chaque conteneur reçoit un masque horizontal qui efface les bulles dans la
-    // colonne de chaque obstacle (fondu de 16 px), recalculé à chaque changement de taille.
-    // « L'en-tête épuré » (7 nov. 2026) : bande du haut, puis .entete-bas (onglets et groupe).
-    const OBSTACLES_BULLES = {
-        'bulles-container': ['.entete-logo img', '.navigation-boutons', '.entete-actions'],
-        'bulles-container-nav': ['.entete-section-mobile', '.sous-navigation', '.bande-groupe-centre', '.bande-groupe-anonymisation']
-    };
-    const FONDU_BULLES = 16;
-
-    function masquerBullesSousLeContenu() {
-        Object.keys(OBSTACLES_BULLES).forEach(function (id) {
-            const container = document.getElementById(id);
-            if (!container || !container.parentElement) return;
-            const parent = container.parentElement;
-            const cadre = parent.getBoundingClientRect();
-            const plages = [];
-            OBSTACLES_BULLES[id].forEach(function (sel) {
-                const el = parent.querySelector(sel);
-                if (!el) return;
-                const r = el.getBoundingClientRect();
-                if (r.width === 0 || r.height === 0) return;
-                plages.push([r.left - cadre.left, r.right - cadre.left]);
-            });
-            if (plages.length === 0) {
-                container.style.webkitMaskImage = container.style.maskImage = '';
-                return;
-            }
-            plages.sort(function (a, b) { return a[0] - b[0]; });
-            const arrets = ['#000 0px'];
-            plages.forEach(function (p) {
-                const debut = Math.max(0, p[0] - FONDU_BULLES), fin = p[1] + FONDU_BULLES;
-                arrets.push(`#000 ${debut.toFixed(1)}px`, `transparent ${p[0].toFixed(1)}px`,
-                            `transparent ${p[1].toFixed(1)}px`, `#000 ${fin.toFixed(1)}px`);
-            });
-            const masque = `linear-gradient(to right, ${arrets.join(', ')})`;
-            container.style.webkitMaskImage = masque;
-            container.style.maskImage = masque;
-        });
-    }
+    // Les bulles passent DERRIÈRE le contenu (z-index 0, sous les rangées à 1 et 2) et restent
+    // visibles à travers son fond, sous le logo, les mots, les onglets et le groupe. Décision de
+    // Grégoire du 10 nov. 2026 : le masque du 7 nov. (« jamais par-dessus un texte », lu comme
+    // « jamais visibles là ») les effaçait sur toute la hauteur de chaque colonne et faisait un
+    // fond opaque en vue étendue. Retiré, comme ses mesures au redimensionnement.
 
     // Générer les bulles au chargement
     genererBullesApprentissage();
-    masquerBullesSousLeContenu();
-    // ResizeObserver : Safari 13.1+, iPadOS 13.4+ — toutes les cibles de l'app.
-    const observateurBulles = new ResizeObserver(masquerBullesSousLeContenu);
-    ['.entete', '.entete-bas', '.groupe-selecteur', '.navigation-boutons', '#sous-navigation'].forEach(function (sel) {
-        const el = document.querySelector(sel);
-        if (el) observateurBulles.observe(el);
-    });
 
     // Régénérer si la liste d'étudiants change
     window.addEventListener('storage', function(e) {

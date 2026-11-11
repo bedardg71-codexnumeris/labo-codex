@@ -553,3 +553,13 @@ troisième catégorie ; elle ne lui retire pas l'arbitrage.
 
 - **Un mot que lisent les étudiant·es** (le PDF, la rétroaction, tout ce qu'ils reçoivent) **attend le oui de Grégoire.**
 - **Un mot que lit seulement l'enseignant·e à l'écran**, proposé « à corriger si tu veux, sinon c'est celui-là », **part tel quel s'il ne répond pas, et reste corrigeable ensuite.**
+
+---
+
+## Règle 14 — un bug vu sur l'iPad : corrigé dans le cloud, fusionné et mis en ligne sur le Mac (10 novembre 2026)
+
+**Norme fixée par Grégoire (10 nov. 2026, 18 h)**, premier cas : PR n° 15, `lot/bandeau-preparer`, fusionnée le soir même.
+
+- **Dans le cloud** : une conversation du Projet répertorie le bug et le corrige sur une branche partie de `origin/main`, avec son banc et son break-test, et ouvre une pull request. Le cloud n'écrit ni `SUIVI-BUGS.md` ni `BACKLOG.md` : il propose la ligne de suivi dans le corps de la PR.
+- **Sur le Mac, par la session principale** : la fusion (`git merge --no-ff`) dans le `main` local, le passage sous WebKit, le numéro au registre (compteur de `BACKLOG.md`, règle 9, qui avance ici) et la mise en ligne.
+- ⛔ **Jamais de fusion par l'application GitHub** : Netlify publie chaque `main`, si bien qu'elle mettrait le correctif en ligne aussitôt, sans verdict WebKit, et ferait diverger le `main` local. La PR se ferme d'elle-même au push de `main`.

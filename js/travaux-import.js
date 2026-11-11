@@ -746,6 +746,10 @@
             }
         }
 
+        // Lot « d'un seul tenant » (10 nov. 2026) : les pages d'une production se suivent dès
+        // le dépôt, dans l'ordre de remise. Seules les productions qui viennent de recevoir une
+        // page sont triées ; les autres gardent l'ordre réglé aux flèches.
+        rassemblerLaFile(new Set(acceptes.map(f => f.groupeDocumentId).filter(Boolean)));
         persisterFileDAttente();
         return acceptes;
     }
@@ -1168,6 +1172,10 @@
                 format11x17: !!d.format11x17
             }));
 
+            // Lot « d'un seul tenant » (10 nov. 2026) : une file persistée avant le correctif
+            // garde l'ordre du dépôt. Rassemblée sans retri (l'ordre des flèches est gardé), et
+            // persistée seulement si elle a bougé.
+            if (rassemblerLaFile(null)) persisterFileDAttente();
         } catch (e) {
             console.warn('[Travaux-Import] Erreur restauration sessionStorage:', e);
         }
@@ -1352,28 +1360,67 @@
             if (!groupes.has(cle)) groupes.set(cle, []);
             groupes.get(cle).push(f);
         });
-        // Trier au sein de chaque groupe : numero de page d'abord, date ensuite.
-        // #603 — Quand des pages portent la meme `dateRemise`, la date ne
-        // departage rien : sans le numero, l'ordre retombait sur l'ordre de
-        // selection. #873 — la date, elle, range les remises successives
-        // d'un meme eleve : la plus recente arrive en dernier.
-        groupes.forEach((fichiers, cleGroupe) => {
-            // #1231 — une copie réunie à la main garde l'ordre de la file, réglé
-            // aux flèches : c'est l'ordre de ses pages.
-            if (estCopieReunie(cleGroupe)) return;
-            fichiers.sort((a, b) => {
-                const pa = a.parseLea && a.parseLea.page;
-                const pb = b.parseLea && b.parseLea.page;
-                if (pa && pb && pa !== pb) return pa - pb;
-                const da = a.parseLea.dateRemise;
-                const db = b.parseLea.dateRemise;
-                if (!da && !db) return 0;
-                if (!da) return 1;
-                if (!db) return -1;
-                return da - db;
-            });
-        });
+        // Lot « d'un seul tenant » (10 nov. 2026) — LA LISTE FAIT FOI : les pages de chaque
+        // production sont dans l'ordre de la file, pour TOUTES les productions. Le tri par
+        // numéro de page puis date (#603, #873) se fait au dépôt (`rassemblerLaFile`) ; le
+        // refaire ici défaisait, à l'assemblage, l'ordre réglé aux flèches d'une production Léa.
         return groupes;
+    }
+
+    /**
+     * L'ordre de remise de deux pages d'une même production : numéro de page d'abord, date
+     * de remise Léa ensuite. #603 — quand des pages portent la même `dateRemise`, la date ne
+     * départage rien : sans le numéro, l'ordre retombait sur l'ordre de sélection. #873 — la
+     * date range les remises successives d'un même élève : la plus récente arrive en dernier.
+     * Ni l'un ni l'autre : 0 (le tri est stable, l'ordre de la file reste).
+     */
+    function comparerOrdreDeRemise(a, b) {
+        const la = (a && a.parseLea) || {};
+        const lb = (b && b.parseLea) || {};
+        if (la.page && lb.page && la.page !== lb.page) return la.page - lb.page;
+        const da = la.dateRemise;
+        const db = lb.dateRemise;
+        if (!da && !db) return 0;
+        if (!da) return 1;
+        if (!db) return -1;
+        return da - db;
+    }
+
+    /**
+     * Lot « d'un seul tenant » (10 nov. 2026) — rend la file D'UN SEUL TENANT : chaque
+     * production (clé `groupeDocumentId`) prend la place de son premier fichier, ses autres
+     * pages se rangent derrière lui ; les fichiers seuls gardent leur ordre. Stable. Modifie
+     * la file EN PLACE (`obtenirFileDAttente` rend sa référence). Ne persiste pas.
+     *
+     * Vécu par Grégoire (1.241.0) : déposées d'un coup, les remises Léa d'un groupe gardaient
+     * l'ordre du dépôt ; « Originaux » emboîtait les cadres en escalier.
+     *
+     * @param {Set<string>|null} clesATrier - productions dont les pages sont rangées par ordre
+     *   de remise (`comparerOrdreDeRemise`) ; jamais une production réunie à la main.
+     * @returns {boolean} true si la file a bougé
+     */
+    function rassemblerLaFile(clesATrier) {
+        const pagesParCle = new Map();
+        fichiersEnAttente.forEach(f => {
+            const k = f && f.groupeDocumentId;
+            if (!k) return;
+            if (!pagesParCle.has(k)) pagesParCle.set(k, []);
+            pagesParCle.get(k).push(f);
+        });
+        const rangee = [];
+        const placees = new Set();
+        fichiersEnAttente.forEach(f => {
+            const k = f && f.groupeDocumentId;
+            if (!k) { rangee.push(f); return; }
+            if (placees.has(k)) return;
+            placees.add(k);
+            const pages = pagesParCle.get(k);
+            if (clesATrier && clesATrier.has(k) && !estCopieReunie(k)) pages.sort(comparerOrdreDeRemise);
+            rangee.push(...pages);
+        });
+        const aBouge = rangee.some((f, i) => f !== fichiersEnAttente[i]);
+        if (aBouge) fichiersEnAttente.splice(0, fichiersEnAttente.length, ...rangee);
+        return aBouge;
     }
 
     /* ===============================
@@ -2053,28 +2100,37 @@
     }
 
     /**
-     * « Réunir en une copie » : les fichiers cochés (et, s'ils appartiennent
-     * déjà à une copie, toute cette copie) deviennent UNE copie. Ils se placent
-     * ensemble à la position du premier, dans leur ordre de la file ; ils
-     * reçoivent une clé de regroupement posée à la main, et l'élève et la
-     * production (ou le jeton de reprise) du premier fichier qui en porte.
+     * « Réunir en une production » : EXACTEMENT les fichiers cochés deviennent UNE
+     * production (lot « d'un seul tenant », 10 nov. 2026, règle B acceptée par Grégoire ;
+     * #1231 prenait toute la production d'un fichier coché, si bien que « Réunir » ne
+     * pouvait pas détacher des pages, et refaisait à l'identique une production dont on
+     * cochait deux pages). Ils se placent ensemble à la position du premier coché, dans
+     * leur ordre de la file ; les pages non cochées restent dans leur production d'origine,
+     * qui se referme (`rassemblerLaFile`). Ils reçoivent une clé posée à la main, et l'élève
+     * et la production (ou le jeton de reprise) du premier fichier qui en porte.
+     *
+     * Si les fichiers cochés forment déjà exactement une production entière, rien ne bouge :
+     * le retour porte `dejaUneProduction`.
      *
      * Tout l'aval sait déjà traiter un groupe : la colonne « Originaux »,
      * `assemblerPDFGroupe`, l'exemption des doublons, le jeton.
      *
      * @param {number[]} indices - indices de la file
-     * @returns {{debut: number, nombre: number, cle: string}|null}
+     * @returns {{debut: number, nombre: number, cle: string, dejaUneProduction?: boolean}|null}
      */
     function reunirEnUneCopie(indices) {
         const valides = Array.from(new Set((indices || []).map(Number)))
             .filter(i => Number.isInteger(i) && i >= 0 && i < fichiersEnAttente.length);
         if (valides.length < 2) return null;
 
-        // Une copie déjà formée entre entière : on ne coupe pas une copie en deux.
-        const retenus = new Set();
-        valides.forEach(i => indicesDeLaCopie(i).forEach(j => retenus.add(j)));
-        const ordre = Array.from(retenus).sort((a, b) => a - b);
+        const ordre = valides.sort((a, b) => a - b);
         const membres = ordre.map(i => fichiersEnAttente[i]);
+
+        const cleCommune = membres[0].groupeDocumentId;
+        if (cleCommune && membres.every(f => f.groupeDocumentId === cleCommune)
+            && fichiersEnAttente.filter(f => f && f.groupeDocumentId === cleCommune).length === membres.length) {
+            return { debut: ordre[0], nombre: membres.length, cle: cleCommune, dejaUneProduction: true };
+        }
 
         const sourceEleve = membres.find(f => f.etudiantDA) || null;
         const sourceProduction = membres.find(f => f.estReprise || f.productionId) || null;
@@ -2094,13 +2150,14 @@
             }
         });
 
-        // Les rendre contigus, à la place du premier.
-        const debut = ordre[0];
+        // Les rendre contigus, à la place du premier coché ; puis la production d'origine
+        // dont on a détaché des pages se referme.
         for (let k = ordre.length - 1; k >= 0; k--) fichiersEnAttente.splice(ordre[k], 1);
-        fichiersEnAttente.splice(debut, 0, ...membres);
+        fichiersEnAttente.splice(ordre[0], 0, ...membres);
+        rassemblerLaFile(null);
 
         persisterFileDAttente();
-        return { debut: debut, nombre: membres.length, cle: cleCopie };
+        return { debut: fichiersEnAttente.indexOf(membres[0]), nombre: membres.length, cle: cleCopie };
     }
 
     /**

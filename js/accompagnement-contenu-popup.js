@@ -504,7 +504,7 @@ const AIDE_CONTEXTUELLE = {
             {
                 // #1231 — mots proposés à Grégoire (rapport du 5 nov. 2026).
                 type: 'conseil',
-                contenu: 'Sans DA dans le nom (des photos prises au téléphone, par exemple), coche dans « Originaux » les fichiers d\'une même copie, puis « Réunir en une copie » : ils deviennent un seul document, dans l\'ordre réglé aux flèches, et tu choisis l\'étudiant·e et la production une seule fois.'
+                contenu: 'Sans DA dans le nom (des photos prises au téléphone, par exemple), coche dans « Originaux » les fichiers d\'une même copie, puis « Réunir en une production » : ils deviennent un seul document, dans l\'ordre réglé aux flèches, et tu choisis l\'étudiant·e et la production une seule fois.'
             },
             {
                 type: 'liste',

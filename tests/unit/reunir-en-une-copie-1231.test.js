@@ -13,7 +13,10 @@ import { chargerScript } from './_helpers/charger-script.js';
 //   1. restauration : remettre `(d.groupeDocumentId && cleDocumentLea(d.parseLea)) || …`
 //      sans la branche `estCopieReunie` → « survit au rechargement » rougit.
 //   2. `regrouperParDocument` : retirer le `return` des copies réunies → « l'ordre des
-//      flèches » rougit (le tri par numéro de page Léa reprend la main).
+//      flèches » rougit (le tri par numéro de page Léa reprend la main). ↻ Lot « d'un seul
+//      tenant » (10 nov. 2026) : ce tri est parti de `regrouperParDocument` (la liste fait
+//      foi, pour toutes les productions) ; le break-test équivalent est dans
+//      import-productions-d-un-tenant.test.js.
 //   3. `detecterDoublonsStockage` : retirer le saut des fichiers suivants d'une copie →
 //      « une copie, un doublon » rougit (3 au lieu de 1).
 
@@ -108,7 +111,11 @@ describe('#1231 — « Réunir en une copie » pose une clé et une identité su
         expect(file.map((f) => f.etudiantDA || '')).toEqual(['9000058', '9000058', '']);
     });
 
-    it('cocher un fichier d\'une copie Léa l\'emmène entière : on ne coupe pas une copie en deux', () => {
+    // ↻ Lot « d'un seul tenant » (10 nov. 2026, règle B acceptée par Grégoire) : cet essai
+    // verrouillait l'ancienne règle, « cocher un fichier d'une copie Léa l'emmène entière ».
+    // C'est elle qui rendait « Réunir » sans effet quand on cochait deux pages d'une
+    // production pour les en séparer. « Réunir » prend maintenant exactement les cochées.
+    it('cocher une page d\'une production Léa la détache : seules les pages cochées sont réunies', () => {
         ti.ajouterFichiersEnAttente([
             'Exemple_9000058_Artefact-6-p1_Remis_le_2026-11-05_09h00m00s.pdf',
             'Exemple_9000058_Artefact-6-p2_Remis_le_2026-11-05_09h00m05s.pdf',
@@ -116,7 +123,9 @@ describe('#1231 — « Réunir en une copie » pose une clé et une identité su
         ].map(faireFichier));
         ti.reunirEnUneCopie([1, 2]);
         const file = ti.obtenirFileDAttente();
-        expect(new Set(file.map((f) => f.groupeDocumentId)).size).toBe(1);
+        expect(file[0].groupeDocumentId).toBe('9000058_Artefact-6');
+        expect(file[1].groupeDocumentId).toBe(file[2].groupeDocumentId);
+        expect(ti.estCopieReunie(file[1].groupeDocumentId)).toBe(true);
     });
 
     it('moins de deux fichiers : rien ne se passe', () => {
@@ -158,19 +167,25 @@ describe('#1231 — la copie réunie survit au rechargement de la file', () => {
 });
 
 describe('#1231 — l\'ordre des pages est celui des flèches', () => {
+    // ↻ Lot « d'un seul tenant » (10 nov. 2026) : l'essai réunissait les deux pages d'une
+    // production Léa ; elles forment déjà une production entière, et la règle B laisse alors
+    // tout en place. Il réunit maintenant ces deux pages et une photo.
     it('une copie réunie garde l\'ordre de la file, même contre les numéros de page Léa', () => {
         ti.ajouterFichiersEnAttente([
             'Exemple_9000058_Artefact-6-p2_Remis_le_2026-11-05_09h00m05s.pdf',
-            'Exemple_9000058_Artefact-6-p1_Remis_le_2026-11-05_09h00m00s.pdf'
+            'Exemple_9000058_Artefact-6-p1_Remis_le_2026-11-05_09h00m00s.pdf',
+            'IMG_photo.pdf'
         ].map(faireFichier));
-        // Sans réunion à la main, le groupe Léa se trie par page : p1, p2.
+        // Au dépôt, la production Léa se range par page : p1, p2.
         const lea = [...ti.regrouperParDocument().values()][0].map((f) => f.nomFichier);
         expect(lea[0]).toContain('-p1_');
 
-        ti.reunirEnUneCopie([0, 1]);
+        ti.reunirEnUneCopie([0, 1, 2]);
+        ti.monterFichier(1);   // p2 passe devant p1, dans la copie
         const copie = [...ti.regrouperParDocument().values()][0].map((f) => f.nomFichier);
         expect(copie[0]).toContain('-p2_');
         expect(copie[1]).toContain('-p1_');
+        expect(copie[2]).toBe('IMG_photo.pdf');
     });
 
     it('une page ne sort pas de sa copie par les flèches ; un fichier seul saute la copie entière', () => {

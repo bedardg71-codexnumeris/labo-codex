@@ -36,6 +36,9 @@ const CORRECTIONS = [
     // titre, à toutes les largeurs. Remplace la correction de 15 h 55 (« touche le fichier et choisis-le au centre »).
     [2, "Avant d'importer, vérifie trois choses. En haut, la production : elle s'applique à tout le lot. À droite, pour chaque fichier, l'étudiant·e que l'application a trouvé·e par son DA ; s'il manque un nom, choisis-le. À gauche, les pages remises par un·e même étudiant·e :",
         "Avant d'importer, vérifie trois choses. Sous « Inspecteur », la production : elle s'applique à tout le lot. Sous « Aperçu », pour chaque fichier, l'étudiant·e que l'application a trouvé·e par son DA ; s'il manque un nom, touche le fichier et choisis-le sous « Inspecteur ». Sous « Originaux », les pages remises par un·e même étudiant·e :"],
+    // Le 10 nov. au soir (consigne de Cowork, 20 h 12) : le bouton s'appelle « Réunir en une production » depuis le lot
+    // « d'un seul tenant » ; la bulle le nomme tel qu'il est. Seul le nom du bouton change.
+    [2, '« Réunir en une copie »', '« Réunir en une production »'],
     // Le 9 nov., 15 h 55 (question 3 du rapport) : l'emoji à la place de l'image.
     [4, 'réécris les autres, change leur image ou crée tes propres tampons,', 'réécris les autres, change leur image (ou mets un emoji à sa place), ou crée tes propres tampons,'],
     [5, 'Quand tu as fini, touche « Actions › Évaluer », au-dessus de la production.',
