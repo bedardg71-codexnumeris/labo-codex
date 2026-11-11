@@ -3,7 +3,7 @@
 Lot `lot/parcours-fleches`, 10 nov. 2026. Consigne : `plans de travail/CONSIGNE-LOT-2026-11-09-parcours-fleches.md`.
 Rapport : `plans de travail/RAPPORT-2026-11-10-parcours-fleches.md`.
 
-**État : EN COURS SUR L'APERÇU (PR n° 17).** Premier passage de Grégoire le 11 nov., 6 h 19 à 6 h 25, iPad en
+**État : FUSIONNÉE DANS `main` LE 11 NOV. (release de l'après-midi) ; six portes restent ouvertes, non faites avant la release.** Avant : Premier passage de Grégoire le 11 nov., 6 h 19 à 6 h 25, iPad en
 paysage (sept captures, hors dépôt) : §0.2, §2.1 a et b réussies ; §2.2 vue en partie ; §2.3 échouée (corrigée,
 à refaire) ; §2.4 et §2.5 sur le prochain aperçu ; §3.2 tranchée. Trois corrections décidées de 6 h 28 à 6 h 39,
 poussées sur la même branche (rapport du lot, « Retours de l'iPad »).
@@ -16,6 +16,10 @@ quatre corrections sur le quatrième aperçu ; une porte ajoutée, §2.7, et la 
 **Quatrième essai le 11 nov., 11 h 15 à 11 h 53** (build 1111-1040, captures 21 à 34) : « En général, ça va très
 bien » ; des flèches trop tardives ou absentes, des boutons « Continuer » sans raison dite. Cinquième aperçu : une
 porte ajoutée, §2.8 ; §3.5 tranchée (relais de 11 h 45) ; les mots proposés en §3.6.
+**Cinquième essai le 11 nov., 15 h 04 à 15 h 27** (`68b1e18d5`, iPad) : §2.8 a à g réussies ; §2.7 a et b réussies ;
+les mots de §3.6 partent tels quels ; captures 25 et 34 corrigées à l'écran (la cause de la 34 reste non établie,
+rien à faire) ; la capture 35 inscrite au backlog (#1273). **Non faites avant la release, et laissées ouvertes** :
+§2.5 a et b, §2.6 a et b, §2.7 c et d. Décision de Grégoire (15 h 28) : on fusionne et on met en ligne.
 *Avant le 11 nov. :* EN ATTENTE. Cette porte ne se fait pas avant que le lot soit fusionné dans `main` et en ligne.
 Tant que la branche n'est que poussée, `https://app.codexnumeris.org` montre encore le voile : tu jugerais la
 version d'avant. Cowork remplit la ligne « version attendue » ci-dessous au moment de la mise en ligne, et publie
@@ -129,12 +133,12 @@ Rien. Ce lot ne touche à aucune donnée.
   désignent. Une partie de la bulle peut sortir de l'écran pendant le zoom : c'est normal.
   `iPad` · **Échouée le 11 nov., 8 h 04 à 8 h 47** : la bulle « se déplace un peu partout ». Corrigé (rapport du
   lot, « Second essai », point 3) : pendant le pincement et tant que la page reste zoomée, plus rien ne se replace.
-  **À refaire sur le prochain aperçu, même attendu.**
+  **À refaire sur le prochain aperçu, même attendu.** *Non faite avant la release (11 nov.) ; reste ouverte.*
 - [ ] **2.5 b** Pince pour revenir à la taille normale, puis touche « Suivant » dans la bulle.
   ⮕ Attendu : tout revient en place ; à l'étape suivante, la bulle est entière dans l'écran et ses flèches
   partent de son bord.
   `iPad` · *Non faite le 11 nov. ; à faire avec 2.5 a.* Attendu précisé : revenue à la taille normale, la bulle est
-  à la place qu'elle avait avant le zoom.
+  à la place qu'elle avait avant le zoom. *Non faite avant la release (11 nov.) ; reste ouverte.*
 
 ### 2.6 La bulle ne couvre plus ce qu'elle explique (« Mettre ta classe en place »)
 
@@ -147,11 +151,11 @@ Rien. Ce lot ne touche à aucune donnée.
   ⮕ Attendu : deux flèches, une vers la case « Coller les données », une vers le champ « Fichier CSV/TSV » ; la
   bulle ne couvre ni l'une ni l'autre. Si elle couvre « Fichier », note ce qui était à l'écran (page défilée ?
   aperçu affiché ?).
-  `iPad`
+  `iPad` · *Non faite avant la release (11 nov.) ; reste ouverte.*
 - [ ] **2.6 b** Jusqu'à « Ton premier cours » (7 sur 8).
   ⮕ Attendu : une flèche vers la rangée « ← Précédent · date · Suivant → », une vers la colonne « Présence » ; la
   bulle ne couvre ni la date, ni les noms des étudiant·es.
-  `iPad`
+  `iPad` · *Non faite avant la release (11 nov.) ; reste ouverte.*
 
 ### 2.7 « Évaluer une première production », avec une grille composée à la main (quatrième aperçu)
 
@@ -161,25 +165,25 @@ Rien. Ce lot ne touche à aucune donnée.
 > 1180 × 820 ; l'iPad dit si on les voit. Sur un espace d'essai, une grille composée dans Conception › Grilles
 > (« Partir de zéro »), sans cartouche.
 
-- [ ] **2.7 a** « Ta production » (2 sur 9), « + Nouvelle production ».
+- [x] **2.7 a** « Ta production » (2 sur 9), « + Nouvelle production ».
   ⮕ Attendu : une flèche vers chaque champ à astérisque encore vide (nom, type, pondération), qui part quand tu le
   remplis ; le halo sur « Créer la production ». Les trois remplis : une flèche vers la grille ; la grille choisie
   (la tienne, par niveaux), une flèche vers « Échelle de performance » tant qu'elle est à « Aucune ». Sous
   « Cartouche de rétroaction », une ligne dit que ta grille n'a encore aucune cartouche.
-  `iPad`
-- [ ] **2.7 b** « Une première production » (4 sur 9), sur la Liste.
+  `iPad` · **Réussie le 11 nov., 15 h 04 à 15 h 27.**
+- [x] **2.7 b** « Une première production » (4 sur 9), sur la Liste.
   ⮕ Attendu : une seule flèche, vers le menu « Actions… » de la rangée, et le halo dessus.
-  `iPad`
+  `iPad` · **Réussie le 11 nov., 15 h 04 à 15 h 27.**
 - [ ] **2.7 c** « Actions › Évaluer ».
   ⮕ Attendu : la bulle passe d'elle-même à sa page 2/2 (« Pour chaque critère… ») ; le premier critère sans niveau
   est à l'écran, avec le halo et la flèche ; tous choisis, halo et flèche passent à « Verrouiller ».
-  `iPad`
+  `iPad` · *Non faite avant la release (11 nov.) ; reste ouverte.*
 - [ ] **2.7 d** « Ta cartouche » (8 sur 9) : ouvre « Cartouche de départ », touche « Dupliquer ».
   ⮕ Attendu : une phrase sous le texte de la bulle dit que la cartouche est rangée sous « Grille de départ » ; la
   flèche et le halo vont à « Grille (critères) », jamais au groupe « Dupliquer · Supprimer · Fermer ». Ta grille
   choisie : une autre phrase demande l'échelle, flèche et halo dessus ; l'échelle choisie, l'application demande
   de confirmer la copie ; accepte. Puis, dans la fiche de ta production, le menu offre la copie.
-  `iPad`
+  `iPad` · *Non faite avant la release (11 nov.) ; reste ouverte.*
 
 ### 2.8 Nommer, pointer, un geste à la fois (cinquième aperçu)
 
@@ -189,38 +193,38 @@ Rien. Ce lot ne touche à aucune donnée.
 > (une ligne du geste, une flèche vers ce qu'il faut toucher, rien vers ce qui ne se voit pas) ; l'iPad dit si on
 > les voit. Sur un espace d'essai.
 
-- [ ] **2.8 a** L'accueil, au pied de la page.
+- [x] **2.8 a** L'accueil, au pied de la page.
   ⮕ Attendu : « Bêta publique 1.242.1 · 1111-1445 », sur la même ligne
   que « Nouveautés », sans déborder, à l'horizontale comme à la verticale.
-  `iPad`
-- [ ] **2.8 b** Ouvre successivement « Monter ton cours » (« Ta compétence »), « Mettre tes données à l'abri »
+  `iPad` · **Réussie le 11 nov., 15 h 04 à 15 h 27.**
+- [x] **2.8 b** Ouvre successivement « Monter ton cours » (« Ta compétence »), « Mettre tes données à l'abri »
   (« Pourquoi un codex », puis « Mettre à jour »), « Automatiser tes commentaires » (« Ta grille »), sans rien toucher
   à l'ouverture de chaque étape.
   ⮕ Attendu : dès l'ouverture, une flèche et le halo sur ce que nomme la ligne du geste (« Compétence », « Codex »,
   puis « Mettre à jour le codex », la rangée des grilles) ; ensuite, à chaque geste, ils passent au suivant (le menu
   « Type »).
-  `iPad`
-- [ ] **2.8 c** « Lire ta classe et intervenir » : « Ta classe d'un coup d'œil », puis « Ton intervention ».
+  `iPad` · **Réussie le 11 nov., 15 h 04 à 15 h 27.**
+- [x] **2.8 c** « Lire ta classe et intervenir » : « Ta classe d'un coup d'œil », puis « Ton intervention ».
   ⮕ Attendu : une flèche vers « Détails » dès l'ouverture ; à « Ton intervention », une flèche vers le titre (et la
   date, si elle est vide) et une vers « Créer l'intervention ».
-  `iPad`
-- [ ] **2.8 d** « Monter ton cours », « Ta leçon » : touche « Leçon » dans la palette.
+  `iPad` · **Réussie le 11 nov., 15 h 04 à 15 h 27.**
+- [x] **2.8 d** « Monter ton cours », « Ta leçon » : touche « Leçon » dans la palette.
   ⮕ Attendu : la leçon neuve paraît entre les deux palettes, jamais sous le « Planificateur » ; aucun halo sur la
   palette.
-  `iPad`
-- [ ] **2.8 e** « Recevoir… », « Rends tes rétroactions » : touche « Exporter pour Léa », avec au moins deux PDF.
+  `iPad` · **Réussie le 11 nov., 15 h 04 à 15 h 27.**
+- [x] **2.8 e** « Recevoir… », « Rends tes rétroactions » : touche « Exporter pour Léa », avec au moins deux PDF.
   ⮕ Attendu : tout de suite, le bouton dit « Préparation… », inactif, et la phrase « Préparation des PDF : ça peut
   prendre un moment. » paraît, la barre partie ; le bouton revient après le téléchargement.
-  `iPad`
-- [ ] **2.8 f** « Automatiser tes commentaires », « Ta note » sans pondération, puis « Tes cas » : touche « Fixer une
+  `iPad` · **Réussie le 11 nov., 15 h 04 à 15 h 27.**
+- [x] **2.8 f** « Automatiser tes commentaires », « Ta note » sans pondération, puis « Tes cas » : touche « Fixer une
   limite ».
   ⮕ Attendu : « Continuer » toujours visible, inactif, avec dessous la phrase de ce qui manque ; le halo et la flèche
   sur la pondération (amenée à l'écran), puis sur la longueur, puis sur la tolérance ; « Continuer » s'active.
-  `iPad`
-- [ ] **2.8 g** « Notation alternative », « Ta synthèse » : reviens à l'écran d'évaluation (« Annoter et évaluer »).
+  `iPad` · **Réussie le 11 nov., 15 h 04 à 15 h 27.**
+- [x] **2.8 g** « Notation alternative », « Ta synthèse » : reviens à l'écran d'évaluation (« Annoter et évaluer »).
   ⮕ Attendu : flèche et halo sur « Liste » ; la Liste ouverte, sur « Actions » de la ligne évaluée ; « Continuer »
   visible, inactif, la phrase dessous, jusqu'au PDF téléchargé.
-  `iPad`
+  `iPad` · **Réussie le 11 nov., 15 h 04 à 15 h 27.**
 
 ---
 
@@ -255,7 +259,7 @@ place. Écris ta réponse, ne coche pas.
   ou à la place) ? **Tranchée le 11 nov. (relais de 11 h 45) : en plus.** Ce qu'il faut toucher reçoit sa flèche
   dès l'ouverture, dans les neuf parcours ; les sujets gardent la leur.
 - **3.6** Mots PROPOSÉS au cinquième aperçu (11 nov.), lus par l'enseignant·e ; ils partent tels quels et restent
-  corrigeables :
+  corrigeables : **partis tels quels à la release du 11 nov. (essai de 15 h 04 à 15 h 27)** ;
   - au pied de l'accueil : « Bêta publique 1.242.1 · 1111-1445 » (le lecteur d'écran lit « build » devant le
     numéro ; « (build 1111-1040) » ne tenait pas sur la ligne de « Nouveautés » à 820 px) ;
   - l'export pour Léa : le bouton « Préparation… », la phrase « Préparation des PDF : ça peut prendre un moment. »,

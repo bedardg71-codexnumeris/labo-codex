@@ -455,6 +455,23 @@ test('capture 25 : une leçon neuve tombée sous le « Planificateur » est amen
         return r.left < p.right && p.left < r.right && r.top < p.bottom && p.top < r.bottom;
     }));
     expect(surLaPalette, 'aucun halo sur le « Planificateur »').toBe(false);
+    // Le filtre `seVoit` des halos ajoutés, isolé (11 nov. 2026, avant la release) : la leçon déjà amenée, le
+    // « Planificateur » est REMIS par-dessus. La carte ne la déplace plus ; seul le filtre retient le halo de la semaine.
+    await page.evaluate((sel) => {
+        const p = document.getElementById('planif-palette-nav');
+        const s = document.querySelector(sel).getBoundingClientRect();
+        const parent = p.offsetParent.getBoundingClientRect();
+        p.style.left = (s.left - 20 - parent.left) + 'px';
+        p.style.right = 'auto';
+        p.style.top = (s.top - 20 - parent.top) + 'px';
+    }, `${noeud(lecon)} .planif-noeud-semaine`);
+    await expect.poll(() => page.evaluate(() => {
+        const p = document.getElementById('planif-palette-nav').getBoundingClientRect();
+        return [...document.querySelectorAll('[id^="parcours-contour-extra-"]')].filter((c) => !c.hidden).some((c) => {
+            const r = c.getBoundingClientRect();
+            return r.width > 0 && r.left < p.right && p.left < r.right && r.top < p.bottom && p.top < r.bottom;
+        });
+    }), { message: 'le « Planificateur » remis sur la leçon : aucun halo ajouté par-dessus', timeout: 3000 }).toBe(false);
 });
 
 test('« Monter ton cours » : sans production, le refus ; les deux pages du guide ; le panneau à 390 px', async ({ page }) => {
