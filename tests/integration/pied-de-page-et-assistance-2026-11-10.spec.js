@@ -56,7 +56,13 @@ for (const largeur of [820, 390]) {
             const attendu = await page.evaluate(() => `Bêta publique ${window.__VERSION__.beta} · build ${window.__VERSION__.build}`);
             expect(attendu).toMatch(/^Bêta publique \d+\.\d+\.\d+ · build \d{4}-\d{4}$/);   // « build », lu au lecteur d'écran
             await expect(ligne.locator('.accueil-pied-version')).toHaveText(attendu);
-            await expect(ligne.locator('.accueil-pied-lien')).toHaveText('Nouveautés');
+            // Le libellé du lien, sans la pastille : depuis la fusion avec la pastille du pied (11 nov. 2026), un espace
+            // neuf a des Nouveautés non vues, et la pastille ajoute « (disponibles) » pour le lecteur d'écran — son banc
+            // est `pages-sans-doublons-2026-11-07`. Ici, on juge la ligne (le lien et la version côte à côte), avec elle.
+            await expect(ligne.locator('.accueil-pied-lien')).toHaveText(/^Nouveautés( \(disponibles\))?$/);
+            expect(await ligne.locator('.accueil-pied-lien').evaluate((b) => [...b.childNodes]
+                .filter((n) => !(n.nodeType === 1 && n.classList.contains('pastille-nouveautes')))
+                .map((n) => n.textContent).join(''))).toBe('Nouveautés');
             const devise = pied.locator('.accueil-pied-tagline');
             await expect(devise).toHaveText(DEVISE);
             expect(await devise.evaluate((e) => getComputedStyle(e).fontStyle)).toBe('italic');

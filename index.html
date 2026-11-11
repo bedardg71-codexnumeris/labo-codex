@@ -977,10 +977,17 @@
         }
         /* 11 nov. 2026 : la pastille des Nouveautés, la même que celle d'« Accueil » (styles.css), placée
            en exposant comme dans le menu ; le bouton est en flex, où `vertical-align` ne joue pas. */
+        /* 11 nov. 2026, à la fusion avec le build du pied : le point sort du flux, suspendu 4 px après le mot, pour
+           ne pas allonger la ligne. Dans le flux, il ajoutait 11 px, et à 820 px « Nouveautés » passait sous la version
+           (mesuré sous WebKit : 289 px pour 282 de place). Il pend dans l'espace qui sépare le texte du logo. */
+        .accueil-pied-lien {
+            position: relative;
+        }
         .accueil-pied-lien .pastille-nouveautes.pastille-active {
-            align-self: flex-start;
-            margin-top: 7px;
-            margin-left: 0;
+            position: absolute;
+            top: 7px;
+            right: -11px;
+            margin: 0;
         }
         .accueil-pied-lien:focus-visible {
             outline: 2px solid var(--accent-primaire);
