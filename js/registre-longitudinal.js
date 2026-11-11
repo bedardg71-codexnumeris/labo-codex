@@ -66,6 +66,10 @@
    le DOM (textContent) : les mots viennent de MOTS, les noms d'élèves du stock. Les champs
    de saisie portent `.rl-champ` : l'exception NOMMÉE de la garde CSS du mode archive
    (index.html) — le registre n'est la donnée d'aucun trimestre.
+
+   DEUX ONGLETS (11 nov. 2026, décision de Grégoire) — « Registre » (tout ce qui précède, inchangé) et « Tendances »
+   (js/suivi-tendances.js, qui LIT le registre par les lecteurs exposés ici et n'écrit rien). Les onglets vivent
+   DANS la section : ni config.js ni navigation.js ne les connaissent. L'onglet choisi est une mémoire de séance.
    =============================================================== */
 
 (function () {
@@ -179,6 +183,9 @@
     let daSaisie = '';
     let dernierCours = '';
     let dernierTrimestre = '';
+    // Mémoire de SÉANCE, jamais écrite : l'onglet de la section, et le dossier que « Voir son dossier » (Tendances) vient d'ouvrir.
+    let ongletActif = 'registre';
+    let daDossierOuvert = '';
 
     /* ---------- Lecture du registre ---------- */
 
@@ -812,6 +819,7 @@
         const dossiers = Array.isArray(eleve.dossiers) ? eleve.dossiers : [];
         if (!dossiers.length) return;
         const details = poser(li, 'details', 'rl-dossier');
+        if (daDossierOuvert && String(eleve.da) === daDossierOuvert) details.open = true;
         poser(details, 'summary', 'rl-cible', MOTS.voirDossier);
         dossiers.forEach((d) => {
             const bloc = poser(details, 'section', 'rl-dossier-bloc');
@@ -964,6 +972,19 @@
         const conteneur = document.getElementById('registre-longitudinal-conteneur');
         if (!conteneur) return;
         conteneur.textContent = '';
+        // Les onglets n'existent que si l'onglet « Tendances » est chargé ; « Registre » reste l'écran d'avant, À LA MÊME PLACE
+        // (ses zones sont les enfants directs du conteneur, comme ses bancs les lisent) : les onglets se posent devant.
+        const tendances = typeof window.afficherTendancesLongitudinal === 'function';
+        if (!tendances) ongletActif = 'registre';
+        if (tendances) rendreOnglets(conteneur);
+        if (ongletActif === 'tendances') {
+            const panneau = poser(conteneur, 'div', 'rl-panneau');
+            panneau.id = 'rl-panneau';
+            panneau.setAttribute('role', 'tabpanel');
+            panneau.setAttribute('aria-labelledby', 'rl-onglet-tendances');
+            window.afficherTendancesLongitudinal(panneau);
+            return;
+        }
         poser(conteneur, 'p', 'text-muted', MOTS.sousTitre);
         poser(conteneur, 'p', 'texte-aide', MOTS.perennite);
         const recherche = poser(conteneur, 'section', 'rl-zone-recherche');
@@ -976,6 +997,48 @@
         const inscrits = poser(conteneur, 'section', 'rl-zone-inscrits');
         inscrits.id = 'rl-zone-inscrits';
         rendreInscrits(inscrits);
+    }
+
+    /** Les deux onglets de la section. Leurs mots viennent de js/suivi-tendances.js, qui porte le second. */
+    function rendreOnglets(conteneur) {
+        const mots = window.MOTS_TENDANCES_LONGITUDINAL || {};
+        const barre = poser(conteneur, 'div', 'rl-onglets');
+        barre.setAttribute('role', 'tablist');
+        [['registre', mots.ongletRegistre], ['tendances', mots.ongletTendances]].forEach(([id, mot]) => {
+            const onglet = poser(barre, 'button', 'rl-onglet' + (id === ongletActif ? ' actif' : ''), mot);
+            onglet.type = 'button';
+            onglet.id = 'rl-onglet-' + id;
+            onglet.setAttribute('role', 'tab');
+            onglet.setAttribute('aria-selected', id === ongletActif ? 'true' : 'false');
+            onglet.setAttribute('data-action', 'choisirOngletLongitudinal');
+            onglet.dataset.onglet = id;
+        });
+    }
+
+    function choisirOngletLongitudinal(el) {
+        const id = el && el.dataset ? String(el.dataset.onglet || '') : '';
+        if (id !== 'registre' && id !== 'tendances') return;
+        ongletActif = id;
+        daDossierOuvert = '';
+        afficherRegistreLongitudinal();
+        const onglet = document.getElementById('rl-onglet-' + id);
+        if (onglet && typeof onglet.focus === 'function') onglet.focus();
+    }
+
+    /** « Voir son dossier » (onglet Tendances) : l'onglet « Registre », sur le dossier OUVERT de cet·te inscrit·e. Lit, rend, n'écrit rien. */
+    function ouvrirDossierLongitudinal(da) {
+        ongletActif = 'registre';
+        daDossierOuvert = String(da || '');
+        afficherRegistreLongitudinal();
+        const conteneur = document.getElementById('registre-longitudinal-conteneur');
+        const ligne = conteneur && typeof conteneur.querySelectorAll === 'function'
+            ? Array.from(conteneur.querySelectorAll('.rl-eleve')).filter((li) => li.dataset.da === daDossierOuvert)[0]
+            : null;
+        if (!ligne) return;
+        // La rangée entière monte en haut de l'écran : le nom d'abord, son dossier ouvert dessous.
+        if (typeof ligne.scrollIntoView === 'function') ligne.scrollIntoView({ block: 'start' });
+        const resume = ligne.querySelector('.rl-dossier > summary');
+        if (resume && typeof resume.focus === 'function') resume.focus({ preventScroll: true });
     }
 
     /** Après un geste qui change le registre : la saisie (son sélecteur d'élèves) et la liste, sans toucher à la recherche en cours. */
@@ -1073,6 +1136,8 @@
     window.ajouterResultatLongitudinal = ajouterResultatLongitudinal;
     window.retirerResultatLongitudinal = retirerResultatLongitudinal;
     window.retirerEleveLongitudinal = retirerEleveLongitudinal;
+    window.choisirOngletLongitudinal = choisirOngletLongitudinal;
+    window.ouvrirDossierLongitudinal = ouvrirDossierLongitudinal;
     // Pour les bancs : tout sans passer par le DOM. (L'export de recherche, lui, lit la CLÉ — trimestres.js.)
     window.registreLongitudinal = {
         NOM_CLE, FORMAT, VERSION,
