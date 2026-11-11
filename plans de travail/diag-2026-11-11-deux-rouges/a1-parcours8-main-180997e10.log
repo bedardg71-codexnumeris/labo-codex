@@ -1,0 +1,14 @@
+commit 180997e10 · 06:03:08
+System-wide memory free percentage: 78%
+
+Running 6 tests using 1 worker
+
+  ✓  1 [webkit] › integration/parcours-8-commentaires-2026-11-09.spec.js:525:1 › 1180 × 820 : aucun avis ne couvre la bulle, même quand aucun coin ne la laisse libre (13.8s)
+  ✓  2 [webkit] › integration/parcours-8-commentaires-2026-11-09.spec.js:525:1 › 1180 × 820 : aucun avis ne couvre la bulle, même quand aucun coin ne la laisse libre (13.7s)
+  ✓  3 [webkit] › integration/parcours-8-commentaires-2026-11-09.spec.js:525:1 › 1180 × 820 : aucun avis ne couvre la bulle, même quand aucun coin ne la laisse libre (13.7s)
+  ✓  4 [webkit] › integration/parcours-8-commentaires-2026-11-09.spec.js:525:1 › 1180 × 820 : aucun avis ne couvre la bulle, même quand aucun coin ne la laisse libre (13.4s)
+  ✓  5 [webkit] › integration/parcours-8-commentaires-2026-11-09.spec.js:525:1 › 1180 × 820 : aucun avis ne couvre la bulle, même quand aucun coin ne la laisse libre (13.6s)
+  ✓  6 [webkit] › integration/parcours-8-commentaires-2026-11-09.spec.js:525:1 › 1180 × 820 : aucun avis ne couvre la bulle, même quand aucun coin ne la laisse libre (13.4s)
+
+  6 passed (1.5m)
+System-wide memory free percentage: 77%

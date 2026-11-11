@@ -1,0 +1,58 @@
+diag temporaire sur 24fdc8c65 · 06:07:14
+System-wide memory free percentage: 72%
+
+Running 8 tests using 1 worker
+
+DIAG b0 {"top":246,"left":419,"bottom":611.53125,"h":365.53125,"ih":820} b0+500ms {"top":246,"left":419,"h":365.53125}
+  ✓  1 [webkit] › integration/zz-diag-poignee-temporaire.spec.js:322:6 › la poignée au clavier : les flèches déplacent la bulle de 16 px sans changer de page de bulle ; sur la bulle, elles changent de page (3.0s)
+DIAG b0 {"top":255,"left":419,"bottom":620.53125,"h":365.53125,"ih":820} b0+500ms {"top":255,"left":419,"h":365.53125}
+  ✓  2 [webkit] › integration/zz-diag-poignee-temporaire.spec.js:322:6 › la poignée au clavier : les flèches déplacent la bulle de 16 px sans changer de page de bulle ; sur la bulle, elles changent de page (2.9s)
+DIAG b0 {"top":246,"left":419,"bottom":611.53125,"h":365.53125,"ih":820} b0+500ms {"top":246,"left":419,"h":365.53125}
+  ✓  3 [webkit] › integration/zz-diag-poignee-temporaire.spec.js:322:6 › la poignée au clavier : les flèches déplacent la bulle de 16 px sans changer de page de bulle ; sur la bulle, elles changent de page (2.9s)
+DIAG b0 {"top":246,"left":419,"bottom":611.53125,"h":365.53125,"ih":820} b0+500ms {"top":246,"left":419,"h":365.53125}
+  ✓  4 [webkit] › integration/zz-diag-poignee-temporaire.spec.js:322:6 › la poignée au clavier : les flèches déplacent la bulle de 16 px sans changer de page de bulle ; sur la bulle, elles changent de page (3.0s)
+DIAG b0 {"top":247,"left":419,"bottom":612.53125,"h":365.53125,"ih":820} b0+500ms {"top":247,"left":419,"h":365.53125}
+  ✓  5 [webkit] › integration/zz-diag-poignee-temporaire.spec.js:322:6 › la poignée au clavier : les flèches déplacent la bulle de 16 px sans changer de page de bulle ; sur la bulle, elles changent de page (2.9s)
+DIAG b0 {"top":247,"left":419,"bottom":612.53125,"h":365.53125,"ih":820} b0+500ms {"top":246,"left":419,"h":365.53125}
+  ✘  6 [webkit] › integration/zz-diag-poignee-temporaire.spec.js:322:6 › la poignée au clavier : les flèches déplacent la bulle de 16 px sans changer de page de bulle ; sur la bulle, elles changent de page (2.9s)
+DIAG b0 {"top":255,"left":419,"bottom":620.53125,"h":365.53125,"ih":820} b0+500ms {"top":255,"left":419,"h":365.53125}
+  ✓  7 [webkit] › integration/zz-diag-poignee-temporaire.spec.js:322:6 › la poignée au clavier : les flèches déplacent la bulle de 16 px sans changer de page de bulle ; sur la bulle, elles changent de page (2.8s)
+DIAG b0 {"top":246,"left":419,"bottom":611.53125,"h":365.53125,"ih":820} b0+500ms {"top":246,"left":419,"h":365.53125}
+  ✓  8 [webkit] › integration/zz-diag-poignee-temporaire.spec.js:322:6 › la poignée au clavier : les flèches déplacent la bulle de 16 px sans changer de page de bulle ; sur la bulle, elles changent de page (2.8s)
+
+
+  1) [webkit] › integration/zz-diag-poignee-temporaire.spec.js:322:6 › la poignée au clavier : les flèches déplacent la bulle de 16 px sans changer de page de bulle ; sur la bulle, elles changent de page 
+
+    Error: [2mexpect([22m[31mreceived[39m[2m).[22mtoEqual[2m([22m[32mexpected[39m[2m) // deep equality[22m
+
+    [32m- Expected  - 1[39m
+    [31m+ Received  + 1[39m
+
+    [2m  Array [[22m
+    [2m    32,[22m
+    [32m-   16,[39m
+    [31m+   15,[39m
+    [2m  ][22m
+
+      342 |     await page.keyboard.press('ArrowDown');
+      343 |     const b1 = await rectDe(page, '#parcours-bulle');
+    > 344 |     expect([Math.round(b1.left - b0.left), Math.round(b1.top - b0.top)]).toEqual([32, 16]);
+          |                                                                          ^
+      345 |     await page.keyboard.press('ArrowLeft');
+      346 |     await page.keyboard.press('ArrowUp');
+      347 |     const b2 = await rectDe(page, '#parcours-bulle');
+        at /Users/kuekatsheu/Documents/GitHub/labo-codex-fleches-apercu/tests/integration/zz-diag-poignee-temporaire.spec.js:344:74
+
+    Error Context: ../plans de travail/diag-2026-11-11-deux-rouges/b2-results/zz-diag-poignee-temporaire-6424b-ulle-elles-changent-de-page-webkit-repeat5/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    ../plans de travail/diag-2026-11-11-deux-rouges/b2-results/zz-diag-poignee-temporaire-6424b-ulle-elles-changent-de-page-webkit-repeat5/trace.zip
+    Usage:
+
+        npx playwright show-trace "../plans de travail/diag-2026-11-11-deux-rouges/b2-results/zz-diag-poignee-temporaire-6424b-ulle-elles-changent-de-page-webkit-repeat5/trace.zip"
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  1 failed
+    [webkit] › integration/zz-diag-poignee-temporaire.spec.js:322:6 › la poignée au clavier : les flèches déplacent la bulle de 16 px sans changer de page de bulle ; sur la bulle, elles changent de page 
+  7 passed (26.9s)

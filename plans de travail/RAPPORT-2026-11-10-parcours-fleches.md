@@ -4,12 +4,68 @@
 `origin/main` à `77679dd` (1.241.0), poussée, non fusionnée. Consigne :
 `plans de travail/CONSIGNE-LOT-2026-11-09-parcours-fleches.md`, avec les trois ajouts de Cowork du 10 nov., 11 h 30.
 
-**Dernier relais : 11 nov., nuit, Mac, WebKit** — relance des rouges de `lot/parcours-fleches-apercu` après la
-fusion de la 1.242.1 (`91968b201`). Section « Relance WebKit de nuit » juste dessous. **Arrêtée** : le système a
-coupé la reprise des deux derniers rouges (mémoire basse). Deux rouges du lot corrigés (`ee0dace27`) ; deux autres
-sans explication (`parcours-8` l. 557, `parcours-fleches` l. 321). **Branche non poussée.**
-
+**Dernier relais : 11 nov., 6 h 15, Mac, WebKit.** Branche **poussée** (`24fdc8c65`, hook contourné, voir
+dessous) ; aperçu de la PR n° 17 prêt à 6 h 03 sur ce commit. Les deux rouges sans explication, rejoués seuls :
+`parcours-8` l. 557, **non reproduit** (12 verts sur 12, `main` et `902d01774`) ; `parcours-fleches` l. 321,
+**instable, cause mesurée : le banc**. Restent avant toute fusion dans `main` : deux rouges Vitest du correctif.
+Section « Matin du 11 nov. » juste dessous ; la nuit, sous elle.
 ---
+
+## Matin du 11 nov. : le push, l'aperçu, les deux rouges
+
+Mac seul, Chrome et Safari fermés. Mémoire libre avant chaque course : 78, 77, 74, 72 % (jamais sous 50 %). Toutes
+les courses : `--project=webkit --workers=1 --reporter=list --trace=retain-on-failure`, sous `caffeinate -i`.
+Journaux dans `plans de travail/diag-2026-11-11-deux-rouges/` (commités). Les traces des rouges (`b-results/`,
+`b2-results/`, 8,8 Mo) restent sur le disque du Mac, à côté, **non commitées** : la branche est publiée par Netlify.
+
+### Le push : le hook refusait, contourné sur décision
+
+`git push` refusé par le pre-push : **Vitest 2 rouges sur 11 397**, tous deux créés par le correctif `ee0dace27`
+(sortie complète : `vitest-prepush-20261111.txt`).
+
+| Sentinelle | Message | Ce qu'il en coûte |
+|---|---|---|
+| `sentinelle-anticache-fichiers-modifies` | `js/parcours-moteur.js : ?v=20261111a (build 1110-2251)` | aucun risque de cache : le jeton a changé (`20261110b` → `20261111a`). Le remède prescrit (`release.mjs --build-only`) aurait porté le moteur à `20261111b` et rebumpé 13 fichiers |
+| `sentinelle-contenir-complexite`, règle 2 | 436 fonctions au-dessus de 15, plafond 435 | `tracerFleche` passe au-dessus de 15 (la garde du centre, `direct &&`, `retenue ?`) |
+
+Décision (question fermée, réponse : « --no-verify ») : poussé **avec `--no-verify`**, pour que l'aperçu serve
+exactement le code vérifié cette nuit. **Ces deux rouges sont des préalables de la fusion dans `main`** : redescendre
+`tracerFleche` sous 16 (ou une hausse assumée, écrite), puis le build.
+
+### L'aperçu
+
+Netlify, déploiement `6af44b4708a9fef8137e4bc1`, `ready` à 6 h 03, `commit_ref` = `24fdc8c65`, dont l'`index.html`
+porte `parcours-moteur.js?v=20261111a`. **Non lu sur l'aperçu lui-même** : il est protégé par mot de passe, et un
+`curl` rend la page de connexion. Le build reste `1110-2251` (`version.json` inchangé, voir l'anti-cache
+ci-dessus) : sur l'iPad, c'est le jeton du moteur qui fait foi, pas le build.
+
+### (a) `parcours-8` l. 557 (1180 × 820, « aucun avis ne couvre la bulle ») : non reproduit
+
+| Commit | Ligne | Résultat (`--repeat-each=6 --retries=0`) |
+|---|---|---|
+| `origin/main`, `180997e10` | 525 (même titre) | **6 verts sur 6**, 13,4 à 13,8 s chacun |
+| `902d01774` (avant la fusion) | 557 | **6 verts sur 6**, 13,5 à 14,0 s chacun |
+
+Verdict : **non établi** — ni préexistant ni lot, faute de rouge. Seul fait mesuré : ses rouges de la nuit sont
+tous venus en fin de longue course, l'essai durant alors 2,4 à 6 min au lieu de 14 s, la mémoire libre à 31-50 %.
+Piste, non mesurée : la charge, pas le code.
+
+### (b) `parcours-fleches` l. 321 (la poignée au clavier, `[32, 15]`) : instable, cause dans le banc
+
+Sur `24fdc8c65`, `--repeat-each=6 --retries=0` : **2 rouges sur 6**, en 17 s au total, toujours `[32, 15]` au
+lieu de `[32, 16]` (l. 339). Il se reproduit **hors de toute pression mémoire**.
+
+**Cause, mesurée** (banc de diagnostic temporaire qui journalise la bulle, retiré, 8 essais :
+`b2-diag-positions.log`) : la position de départ varie d'un essai à l'autre (`top` = 246, 247 ou 255) et, sur
+l'essai rouge, **la bulle remonte d'un pixel après la lecture de `b0`, sans aucune touche** : `top` 247 à la
+lecture, 246 500 ms plus tard. La sonde (120 ms) replace encore la bulle tant que la poignée n'a pas été touchée ;
+le banc lit `b0` avant ce dernier placement, et le pas de 16 px se mesure depuis une position périmée. Les sept
+essais verts : `top` identique à la lecture et 500 ms après. Le moteur fait bien 16 px par pas.
+
+Verdict : **instable, cause dans le banc** (lecture de `b0` avant que la bulle soit posée). Aucun correctif ici,
+selon le mandat. Ce que le correctif aurait à décider : attendre que la bulle soit stable avant `b0`, ou lire `b0`
+après la première flèche. Le replacement d'un pixel lui-même relève du moteur (invisible à l'œil, inscrit pour
+mémoire).
 
 ## Relance WebKit de nuit (11 nov. 2026)
 
