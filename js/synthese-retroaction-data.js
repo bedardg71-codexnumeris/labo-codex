@@ -402,7 +402,7 @@
             return prod.dateLimite || prod.dateRemise || null;
         };
 
-        return ordonnees.map(production => {
+        return ordonnerLaBandeParEcheance(ordonnees.map(production => {
             const evalProduction = evalsEleve.find(e => e.productionId === production.id);
             const estEnCours = production.id === evaluation.productionId;
 
@@ -428,7 +428,30 @@
                 obligatoire: !!production.obligatoire,
                 due:         obtenirDue(production)
             }, champsDeLaNorme(norme, production, status));
-        });
+        }));
+    }
+
+    /** Une échéance comparable (« AAAA-MM-JJ »), ou null. */
+    function cleDEcheance(due) {
+        if (!due) return null;
+        if (due instanceof Date) return isNaN(due.getTime()) ? null : due.toISOString().slice(0, 10);
+        const m = /^(\d{4}-\d{2}-\d{2})/.exec(String(due));
+        return m ? m[1] : null;
+    }
+
+    /**
+     * L'ORDRE DE LA BANDE (Grégoire, 11 nov. 2026, 9 h 07) : les cases suivent l'ordre des échéances, la date imprimée sous
+     * chacune (`due`) ; une production sans échéance va au bout, dans son ordre d'avant ; à échéance égale, l'ordre d'avant.
+     * Seule la bande change : ni `numero` (chaque case garde le sien, `n`) ni l'ordre de Conception › Productions. Pure.
+     */
+    function ordonnerLaBandeParEcheance(cases) {
+        return cases.map((c, i) => ({ c, i, cle: cleDEcheance(c.due) }))
+            .sort((a, b) => {
+                if (a.cle && b.cle && a.cle !== b.cle) return a.cle < b.cle ? -1 : 1;
+                if (!a.cle !== !b.cle) return a.cle ? -1 : 1;
+                return a.i - b.i;
+            })
+            .map(x => x.c);
     }
 
     /**
@@ -437,8 +460,10 @@
      */
     function champsDeLaNorme(norme, production, status) {
         const n = norme ? norme.de(production) : null;
-        if (!n) return { forme: null, libelle: null, couleur: null };
+        if (!n) return { forme: null, libelle: null, couleur: null, famille: null };
         return {
+            // La famille (STD, SPE) : la bande imprime la légende de sa norme (11 nov. 2026, 9 h 05).
+            famille: norme.famille || null,
             forme:   (n.valeur || status === 'todo') ? n.forme : null,
             libelle: n.libelle,
             couleur: couleurPourLePapier(n.couleur)
@@ -1824,6 +1849,8 @@
         // Lot 3a (26 oct. 2026) — la ligne « principalement » de « Points récurrents », exposée pour le banc
         // `critere-algorithmique-table-de-cas` (ses noms et sa règle d'égalité).
         construireFrancaisResume: construireFrancaisResume,
+        // 11 nov. 2026 — l'ordre de la bande « PROGRESSION · TRIMESTRE » par échéance, exposé pour son banc.
+        ordonnerLaBandeParEcheance: ordonnerLaBandeParEcheance,
         // #942 — LE groupe-cours d'un élève, exposé pour que le profil (leçon manquée d'une
         // absence) résolve le groupe comme le PDF le fait pour les échéances : une seule règle.
         groupeCoursIdDeLEleve: obtenirGcIdEleve,

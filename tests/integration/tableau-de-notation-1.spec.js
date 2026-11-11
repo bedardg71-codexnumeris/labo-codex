@@ -690,9 +690,20 @@ test.describe('Les normes du tableau, pour une personne (11 nov. 2026)', () => {
         });
         expect(source).toEqual([['contour', 'I'], ['plein', 'D'], ['plein', 'M'], ['plein', 'E'], ['vide', '']]);
         expect(await formesDuTableau(page)).toEqual(source.map((c) => c[0]));
+        // Le trait du contour au tableau, pour le comparer à celui du profil (9 h 08 : au profil, rien ne change).
+        const traitDuContour = (el) => { const c = getComputedStyle(el); return [c.borderTopWidth, c.borderTopStyle, c.boxShadow]; };
+        const traitAuTableau = await kase(page, 1, 1).evaluate(traitDuContour);
         // Le profil : la pastille de la case, puis la note ; la légende du tableau sous la liste.
         await ouvrirProfil(page);
         expect(await pastilles(page)).toEqual(source);
+        // L'encre intérieure du contour est au PDF seulement : la pastille du profil garde le trait du tableau, sans cadre dedans.
+        // Lu par `expect.poll` : le profil se redessine après son ouverture, et un nœud remplacé n'a plus de style calculé.
+        const contourAuProfil = page.locator('#contenuProfilEtudiant .tn-pastille--contour').first();
+        await expect.poll(() => contourAuProfil.evaluate((p) => {
+            const c = getComputedStyle(p);
+            return p.isConnected ? [c.borderTopWidth, c.borderTopStyle, c.boxShadow] : null;
+        }), { message: 'le contour du profil a le trait du tableau' }).toEqual(traitAuTableau);
+        expect(await contourAuProfil.evaluate((p) => [...p.querySelectorAll('*')].some((e) => e.hasAttribute('style')))).toBe(false);
         await expect(page.locator('#contenuProfilEtudiant tbody tr').nth(2)).toContainText('75');
         await expect(page.locator('#contenuProfilEtudiant .tn-legende--profil')).toHaveText(/Plein : compte dans la note.*Contour : évaluée, non retenue.*Pointillé : à saisir/);
         await expect(page.locator('#contenuProfilEtudiant tbody tr').nth(0).locator('.u-lecteur-ecran')).toHaveText('Incomplet, évaluée, non retenue');
@@ -702,6 +713,19 @@ test.describe('Les normes du tableau, pour une personne (11 nov. 2026)', () => {
             return window.syntheseRetroactionData.construireFeedback(ev).trimestre.map((t) => [t.forme, t.libelle, /^#[0-9a-f]{6}$/i.test(t.couleur || '')]);
         });
         expect(bande).toEqual(source.map(([f, l]) => [f, l, f !== 'vide']));
+        // La bande rendue (9 h 05, 9 h 08) : la légende des standards, mot pour mot ; le contour (P1) porte son encre dedans.
+        const rendue = await page.evaluate(() => {
+            const ev = window.db.getSync('atn_evaluationsSauvegardees', []).find((e) => e.etudiantDA === '9990010' && e.productionId === 'P3');
+            const html = window.syntheseRetroactionRendu.rendreSyntheseHTML(window.syntheseRetroactionData.construireFeedback(ev));
+            const hote = document.createElement('div');
+            hote.innerHTML = html;   // security-ok: banc, le HTML vient du rendu échappé de l'application
+            const legende = hote.querySelector('[data-legende-de-la-bande]');
+            const cases = [...hote.querySelectorAll('div[style*="width: 22px; height: 22px"]')];
+            return { legende: legende ? [...legende.children].map((d) => d.textContent) : null,
+                     encre: cases.map((c) => !!c.querySelector('div[style*="border: 1px solid #141414"]')) };
+        });
+        expect(rendue.legende).toEqual(['Plein : compte dans ta note', 'Contour : évaluée, non retenue', 'Pointillé : à venir']);
+        expect(rendue.encre).toEqual(source.map(([f]) => f === 'contour'));
         expect(erreurs).toEqual([]);
     });
 
@@ -725,6 +749,22 @@ test.describe('Les normes du tableau, pour une personne (11 nov. 2026)', () => {
             return window.syntheseRetroactionData.construireFeedback(ev).trimestre.slice(0, 3).map((t) => [t.forme, t.libelle]);
         });
         expect(bande).toEqual(source);
+        // L'ordre de la bande (9 h 07) : celui des échéances. Projet 1 (23 oct.) passe avant Exercice 4 (6 nov.) ; chaque
+        // case garde son numéro (le 5 de Projet 1, à venir, est celui que la case imprime). La légende des spécifications.
+        const ordre = await page.evaluate(() => {
+            const ev = window.db.getSync('atn_evaluationsSauvegardees', []).find((e) => e.etudiantDA === '9990010' && e.productionId === 'EX1');
+            const fb = window.syntheseRetroactionData.construireFeedback(ev);
+            const hote = document.createElement('div');
+            hote.innerHTML = window.syntheseRetroactionRendu.rendreSyntheseHTML(fb);   // security-ok: banc, rendu échappé de l'application
+            const legende = hote.querySelector('[data-legende-de-la-bande]');
+            return { cases: fb.trimestre.map((t) => [t.label, t.n, t.due]),
+                     contenus: [...hote.querySelectorAll('div[style*="width: 22px; height: 22px"]')].map((c) => c.textContent.trim()),
+                     legende: legende ? [...legende.children].map((d) => d.textContent) : null };
+        });
+        expect(ordre.cases).toEqual([['Exercice 1', 1, '2026-09-11'], ['Exercice 2', 2, '2026-09-25'], ['Exercice 3', 3, '2026-10-09'],
+            ['Projet 1', 5, '2026-10-23'], ['Exercice 4', 4, '2026-11-06'], ['Projet 2', 6, '2026-12-04']]);
+        expect(ordre.contenus).toEqual(['✓', '✗', '3', '5', '4', '6']);
+        expect(ordre.legende).toEqual(['✓ Acceptable', '✗ Non acceptable', 'Pointillé : à venir']);
         expect(erreurs).toEqual([]);
     });
 });

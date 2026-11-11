@@ -25,8 +25,14 @@ const VERT = '#2e7d4f', JAUNE = '#d9a514';
 function cases(trimestre) {
     const html = rendreSyntheseHTML({ course: {}, artefact: {}, student: {}, criteria: [], scale: [{ code: 'M', color: VERT }, { code: 'D', color: JAUNE }], trimestre });
     const bande = tranche(html, 'PROGRESSION · TRIMESTRE');   // jette si la bande manque
-    return [...bande.matchAll(/<div style="box-sizing: border-box; width: 22px; height: 22px;([^"]*)">([^<]*)<\/div>/g)]
-        .map((m) => ({ style: m[1], contenu: m[2] }));
+    // Le contour porte, dedans, sa bordure à l'encre (11 nov. 2026, 9 h 08) : le contenu est alors dans ce cadre intérieur.
+    return [...bande.matchAll(/<div style="box-sizing: border-box; width: 22px; height: 22px;([^"]*)">(?:<div style="([^"]*)">)?([^<]*)(?:<\/div>)?<\/div>/g)]
+        .map((m) => ({ style: m[1], interieur: m[2] || null, contenu: m[3] }));
+}
+/** La bande seule, rendue (pour la légende). */
+function bande(trimestre) {
+    const html = rendreSyntheseHTML({ course: {}, artefact: {}, student: {}, criteria: [], scale: [{ code: 'M', color: VERT }, { code: 'D', color: JAUNE }], trimestre });
+    return tranche(html, 'PROGRESSION · TRIMESTRE');
 }
 const t = (o) => Object.assign({ n: 1, status: 'done', code: null, obligatoire: false, due: null }, o);
 
@@ -92,3 +98,41 @@ describe('la bande du PDF suit la norme du tableau', () => {
         expect(aFaire.style).toContain('dashed');
     });
 });
+
+// 11 nov. 2026, relais du Projet de 9 h 08 : la légende (mots de Grégoire, 9 h 05), l'encre du contour (le papier en gris).
+describe('la légende de la bande et le contour sur papier', () => {
+    const LEGENDE_STD = ['Plein : compte dans ta note', 'Contour : évaluée, non retenue', 'Pointillé : à venir'];
+    const LEGENDE_SPE = ['✓ Acceptable', '✗ Non acceptable', 'Pointillé : à venir'];
+    const lignes = (html) => {
+        const m = /data-legende-de-la-bande=""[^>]*>(.*?)<\/div><\/div>/s.exec(html);
+        return m ? [...(m[1] + '</div>').matchAll(/<div>([^<]*)<\/div>/g)].map((x) => x[1]) : null;
+    };
+
+    it('standards : la légende, mot pour mot, sous les cases', () => {
+        const b = bande([t({ famille: 'STD', forme: 'plein', libelle: 'M', couleur: VERT }), t({ n: 2, status: 'todo', famille: 'STD', forme: 'vide' })]);
+        expect(lignes(b)).toEqual(LEGENDE_STD);
+        expect(b.indexOf('data-legende-de-la-bande')).toBeGreaterThan(b.indexOf('width: 22px'));
+    });
+
+    it('spécifications : ✓, ✗, pointillé', () => {
+        expect(lignes(bande([t({ famille: 'SPE', forme: 'plein', libelle: '✓', couleur: '#34c759' })]))).toEqual(LEGENDE_SPE);
+    });
+
+    it('hors norme (aucune famille) : aucune légende, rien ne change', () => {
+        expect(bande([t({ code: 'M' }), t({ n: 2, status: 'todo' })])).not.toContain('data-legende-de-la-bande');
+    });
+
+    it('le contour porte, dedans, une fine bordure à l\'encre ; le plein et le pointillé non', () => {
+        const [plein, contour, vide] = cases([
+            t({ famille: 'STD', forme: 'plein', libelle: 'D', couleur: JAUNE }),
+            t({ n: 2, famille: 'STD', forme: 'contour', libelle: 'D', couleur: JAUNE }),
+            t({ n: 3, status: 'todo', famille: 'STD', forme: 'vide' })
+        ]);
+        expect(contour.interieur).toContain('border: 1px solid #141414');
+        expect(contour.contenu).toBe('D');
+        expect(contour.style).toContain(`border: 2px solid ${JAUNE}`);
+        expect(plein.interieur).toBeNull();
+        expect(vide.interieur).toBeNull();
+    });
+});
+
