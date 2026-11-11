@@ -4,8 +4,9 @@
 
    Une seule entrée du menu, « Assistance », remplace « Visite guidée » et la ligne à
    interrupteur. Elle porte en petit le rang du parcours en cours ou à venir (« 2 sur 3 »),
-   plus rien quand tout est fait, et ouvre ce panneau : les parcours, reliés comme des
-   étapes, puis « Aide dans les pages » et l'interrupteur d'avant (même préférence).
+   plus rien quand tout est fait, et ouvre ce panneau : « Aide dans les pages » et
+   l'interrupteur d'avant (même préférence ; en haut depuis le 10 nov. 2026), puis les
+   parcours, reliés comme des étapes.
 
    Les parcours s'inscrivent eux-mêmes, dans l'ordre (Assistance.enregistrer) : la liste
    est construite pour qu'un troisième s'y ajoute avec son lot, sans toucher à ce fichier.
@@ -258,24 +259,8 @@
         intro.textContent = 'Des parcours où tu fais les gestes toi-même, accompagné·e pas à pas : quoi faire, comment le faire, et pourquoi.';
         panneau.appendChild(intro);
 
-        var intitule = document.createElement('p');
-        intitule.className = 'assistance-intitule';
-        intitule.id = 'assistance-intitule';
-        intitule.textContent = 'Tes parcours';
-        panneau.appendChild(intitule);
-
-        var liste = document.createElement('ol');
-        liste.className = 'assistance-parcours';
-        liste.id = 'assistance-parcours-liste';
-        liste.setAttribute('aria-labelledby', 'assistance-intitule');
-        remplirListe(liste);
-        panneau.appendChild(liste);
-
-        var filet = document.createElement('div');
-        filet.className = 'assistance-filet';
-        filet.setAttribute('aria-hidden', 'true');
-        panneau.appendChild(filet);
-
+        // 10 nov. 2026 (Grégoire, 20 h, sur captures) : « Aide dans les pages » monte en haut du panneau,
+        // juste sous la présentation, avant « Tes parcours ». Aucun mot ne change ; le filet sépare.
         var aide = document.createElement('div');
         aide.className = 'assistance-aide';
         var aideTexte = document.createElement('div');
@@ -303,6 +288,25 @@
         aide.appendChild(aideTexte);
         aide.appendChild(inter);
         panneau.appendChild(aide);
+
+        var filet = document.createElement('div');
+        filet.className = 'assistance-filet';
+        filet.setAttribute('aria-hidden', 'true');
+        panneau.appendChild(filet);
+
+        var intitule = document.createElement('p');
+        intitule.className = 'assistance-intitule';
+        intitule.id = 'assistance-intitule';
+        intitule.textContent = 'Tes parcours';
+        panneau.appendChild(intitule);
+
+        var liste = document.createElement('ol');
+        liste.className = 'assistance-parcours';
+        liste.id = 'assistance-parcours-liste';
+        liste.setAttribute('aria-labelledby', 'assistance-intitule');
+        remplirListe(liste);
+        panneau.appendChild(liste);
+
 
         panneau.addEventListener('keydown', pieger);
         return { voile: voile, panneau: panneau };

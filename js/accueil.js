@@ -235,8 +235,11 @@ function afficherAccueilContenu(conteneur) {
         <footer class="accueil-pied">
             <div class="accueil-pied-moitie accueil-pied-application">
                 <div class="accueil-pied-texte">
-                    <span class="accueil-pied-version">Bêta publique ${version}</span>
-                    <button type="button" class="accueil-pied-lien" data-action="afficherModalNouveautes">Nouveautés</button>
+                    <div class="accueil-pied-ligne">
+                        <span class="accueil-pied-version">Bêta publique ${version}</span>
+                        <button type="button" class="accueil-pied-lien" data-action="afficherModalNouveautes">Nouveautés</button>
+                    </div>
+                    <span class="accueil-pied-tagline">Suivre l’apprentissage, soutenir l’enseignement.</span>
                 </div>
                 <img src="img/labo-codex-logo-blanc.svg" alt="Labo Codex" class="accueil-pied-logo">
             </div>

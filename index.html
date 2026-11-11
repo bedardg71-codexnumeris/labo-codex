@@ -903,7 +903,8 @@
         }
 
         /* Pied de page (7 nov. 2026) : deux moitiés symétriques séparées par un filet vertical.
-           À gauche, la version et « Nouveautés », alignés à droite contre le logo de l'application ;
+           À gauche, la version et « Nouveautés » (sur une ligne depuis le 10 nov.), puis la devise,
+           alignés à droite contre le logo de l'application ;
            à droite, le logo de Codex Numeris, puis le blogue et la devise. Logos à la même hauteur,
            atténués. */
         .accueil-pied {
@@ -936,6 +937,16 @@
         }
         .accueil-pied-application .accueil-pied-texte {
             align-items: flex-end;
+        }
+        /* 10 nov. 2026 (Grégoire, 20 h) : la version et « Nouveautés » sur une même ligne, séparées
+           comme les éléments de ce pied de page ; dessous, la devise de l'application, dans le style de
+           celle de Codex Numeris. Sur un téléphone, le lien passe sous la version plutôt que de déborder. */
+        .accueil-pied-ligne {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: flex-end;
+            align-items: baseline;
+            column-gap: 10px;
         }
         /* Sur le fond de la page, pas d'une carte : --texte-muted y tombait à 4,4:1 en clair. Le secondaire
            donne 5,71:1 (clair) et 6,76:1 (sombre), mesuré le 7 nov. 2026. */
@@ -976,9 +987,19 @@
             display: inline-block;
             line-height: 0;
         }
+        /* Sur un téléphone (10 nov. 2026) : les deux moitiés s'empilent. Côte à côte, la moitié de
+           l'application n'offrait que 111 px au texte (mesuré à 390 px) : la version se coupait, et la
+           devise tenait sur quatre lignes. Empilées, la version et « Nouveautés » restent côte à côte. */
         @media (max-width: 600px) {
-            .accueil-pied-application { padding-right: 12px; }
-            .accueil-pied-codex-numeris { padding-left: 12px; }
+            .accueil-pied { grid-template-columns: 1fr; row-gap: 14px; }
+            .accueil-pied-application {
+                justify-content: center;
+                padding-right: 0;
+                padding-bottom: 14px;
+                border-right: none;
+                border-bottom: 1px solid var(--bordure-claire);
+            }
+            .accueil-pied-codex-numeris { justify-content: center; padding-left: 0; }
             .accueil-pied-moitie { gap: 10px; }
             .accueil-pied-logo { height: 36px; }
         }
@@ -11812,7 +11833,7 @@
     <script src="js/migrations.js?v=20260927d"></script> <!-- #374-bis : dédoublonnage par contenu (congés recréés à la main, 6 août) -->
 
     <!-- Page d'accueil (Chantier 3) -->
-    <script src="js/accueil.js?v=20261109e"></script> <!-- « Commencer » lance le parcours « Mettre ta classe en place » (9 nov.) · Le texte de l’accueil (28 oct. au soir), remplacé en entier par Grégoire · Trois portes d’entrée (28 oct.) · Les textes des cartes de l’accueil (19 oct.), arrêtés par Grégoire · Refonte nav SP5 : data-param calendrier -->
+    <script src="js/accueil.js?v=20261110g"></script> <!-- « Commencer » lance le parcours « Mettre ta classe en place » (9 nov.) · Le texte de l’accueil (28 oct. au soir), remplacé en entier par Grégoire · Trois portes d’entrée (28 oct.) · Les textes des cartes de l’accueil (19 oct.), arrêtés par Grégoire · Refonte nav SP5 : data-param calendrier -->
     <!-- Guidage contextuel démo (Chantier 4) -->
     <script src="js/guidage-demo.js?v=20261107b"></script> <!-- Le guidage de la démo (29 oct.) : les 17 bulles validées ; la bulle du Suivi du groupe sous sa vraie clé · #1039 : bandeau de l'Animation · Beta 99.42 b0512-0840 : retrait entrée evaluations-apercu morte -->
 
@@ -11838,7 +11859,7 @@
     <!-- Lot « Les deux parcours » (8 nov. 2026) : le moteur des parcours, le panneau « Assistance », puis les parcours dans l'ordre du panneau -->
     <link rel="stylesheet" href="css/parcours.css?v=20261110a">
     <script src="js/parcours-moteur.js?v=20261110a"></script>
-    <script src="js/assistance.js?v=20261110a"></script>
+    <script src="js/assistance.js?v=20261110g"></script>
     <script src="js/parcours-decouvrir.js?v=20261109c"></script>
     <script src="js/parcours-classe.js?v=20261109d"></script>
     <script src="js/parcours-evaluer.js?v=20261110a"></script> <!-- Parcours 3 (9 nov.) : « Évaluer une première production » ; le menu « Cartouche » amené dans la vue (17 h 52) ; la cartouche nommée par la production (15 h 55) ; la ligne du panneau, l’échelle à la fiche (13 h 37) -->
