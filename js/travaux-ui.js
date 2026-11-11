@@ -3987,7 +3987,7 @@
     /**
      * Lance l'export Lea depuis l'UI
      */
-    function lancerExportLea() {
+    async function lancerExportLea() {
         const productionId = document.getElementById('travaux-archivage-lea-production')?.value;
         if (!productionId) {
             alert('Veuillez sélectionner une production.');
@@ -3995,8 +3995,25 @@
         }
         const da = document.getElementById('travaux-archivage-lea-etudiant')?.value || null;
         const reprisesSeulement = document.getElementById('travaux-lea-reprises-seulement')?.checked || false;
-        travauxArchivage.lancerExportLea(productionId, da, reprisesSeulement);
+        await enPreparation(document.querySelector('[data-action="travauxUI.lancerExportLea"]'),
+            () => travauxArchivage.lancerExportLea(productionId, da, reprisesSeulement));
     }
+
+    /**
+     * Dès le toucher, le bouton dit qu'il prépare, inactif jusqu'à la fin (Grégoire, 11 nov. 2026, capture 21 : « rien
+     * ne semble se passer pendant un moment ») ; un second toucher ne relance rien.
+     */
+    async function enPreparation(bouton, travail) {
+        if (!bouton) return travail();
+        if (bouton.disabled) return;
+        const libelle = bouton.textContent;
+        bouton.disabled = true;
+        bouton.textContent = TEXTES_EXPORT_LEA.bouton;
+        try { await travail(); } finally { bouton.disabled = false; bouton.textContent = libelle; }
+    }
+
+    // PROPOSÉ (11 nov. 2026, à valider par Grégoire) : ce que lit l'enseignant·e pendant la préparation de l'export.
+    const TEXTES_EXPORT_LEA = { bouton: 'Préparation…' };
 
     /**
      * Met a jour le compteur d'evaluations pour la selection Lea

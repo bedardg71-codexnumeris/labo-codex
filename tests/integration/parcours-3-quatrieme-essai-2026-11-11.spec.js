@@ -113,7 +113,7 @@ test('« Évaluer une première production » avec une grille composée dans Con
     await expect(page.locator(AVIS)).toHaveAttribute('role', 'status');
     await contourSur(page, '#selectGrilleCartouche');
     await flecheVers(page, GROUPE_GRILLE_CARTOUCHE, 'étape 8, « Grille (critères) »');
-    await nombreDeFleches(page, 1, 'étape 8, hors de la grille');
+    await nombreDeFleches(page, 2, 'étape 8, hors de la grille');   // ↻ 11 nov. 2026 : le groupe du menu (une zone qui contient le contour garde sa flèche) et le menu
     await haloLoinDeSupprimer(page, 'étape 8, la copie ouverte');
     await capture(page, DOSSIER, 'p3-8-hors-grille-1180x820');
     expect(await page.evaluate(() => ParcoursMoteur.etapeCourante())).toBe(7);

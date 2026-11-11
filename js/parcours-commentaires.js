@@ -94,6 +94,7 @@
         loin: {
             titre: "Pour aller plus loin",
             texte: "Te voilà avec une première rétroaction écrite à partir de tes règles. Chaque production que tu évalueras avec cette grille recevra la sienne de la même façon. Tu n'as rien de plus à faire ; si tu veux aller plus loin, à ton rythme, tout se trouve dans l'atelier du critère. « Montrer d'où vient chaque phrase », dans la simulation, et l'encadré « Ce que l'application choisit sans toi », dans l'étape « Cas d'interprétation », disent comment chaque phrase se construit. Une table de cas ajoute un texte selon une valeur de la production, comme la note ou le code le plus fréquent. « Composer ton propre calcul » va au-delà des trois calculs prêts. Un palier peut nommer un service d'aide, ou te signaler l'étudiant·e à côté de son niveau RàI. « Enregistrer ces paliers sous un nom… » les garde pour une autre grille. Pour un prochain critère, crée-le dans Grilles : tant qu'il n'a aucun code, Conception › Mon matériel y colle d'un coup une liste tirée d'un tableur.",
+            geste: "Touche « Terminer ».",
         }
     };
 
@@ -303,21 +304,33 @@
         ouvrirEtape(id);
     }
 
-    // ---------- Le bouton qui ne paraît qu'à une condition (le moteur ne l'a pas) ----------
+    // ---------- Ce qu'attend « Continuer » (le moteur : `attend`, 11 nov. 2026, captures 32 et 33) ----------
+    // PROPOSÉ (11 nov. 2026, à valider par Grégoire) : les phrases lues sous « Continuer », inactif tant que manque ce
+    // qu'elles disent. Le bouton ne se cache plus : « je ne sais pas ce qu'il faut faire pour voir le bouton ».
+    var ATTENTES = {
+        codes: "Pour continuer, ajoute un premier code : touche « + Ajouter un sous-critère ».",
+        ponderation: "Pour continuer, écris la pondération de ton critère, à côté de son type.",
+        calcul: "Pour continuer, règle ton calcul : son réglage doit dépasser 0.",
+        limite: "Pour continuer, écris la longueur de référence et la tolérance, ou touche « Retirer la limite ».",
+        grille: "Pour continuer, donne un nom à ta grille, puis touche « Créer la grille »."
+    };
 
-    function boutonDeLaBulle(libelle) {
-        var b = document.querySelectorAll('#parcours-bulle .parcours-bulle-boutons button');
-        for (var k = 0; k < b.length; k++) if (b[k].textContent === libelle) return b[k];
-        return null;
+    function nombreDeCodes() {
+        var c = critere(), C = window.codesAnnotation;
+        return c && C && typeof C.apercuCodes === 'function' ? C.apercuCodes(c).length : 0;
     }
 
-    /** Montre ou cache un bouton de la bulle ; sa zone se cache avec lui quand elle est vide. */
-    function montrerBouton(libelle, oui) {
-        var b = boutonDeLaBulle(libelle);
-        if (!b) return;
-        b.hidden = !oui;
-        var zone = b.parentElement;
-        if (zone) zone.hidden = ![].some.call(zone.children, function (x) { return !x.hidden; });
+    function ponderationManque() {
+        var p = champPonderation(carteDuCritere());
+        return !!p && !(Number(p.value) > 0);
+    }
+
+    /** La limite fixée, son premier nombre encore vide (la longueur, puis la tolérance) : le geste suivant. */
+    function champDeLimiteVide() {
+        var corps = corpsAtelier('paliers');
+        if (!corps || reglee('paliers')) return null;
+        var champs = ['motsReference', 'erreursTolerees'].map(function (k) { return vis(corps.querySelector('[data-param-cle="' + k + '"]')); });
+        return champs.find(function (c) { return c && !(Number(c.value) > 0); }) || null;
     }
 
     function suivante() {
@@ -510,13 +523,9 @@
             avant: function () { return assurerAtelier('codes'); },
             zones: function () { return [sectionAtelier('codes')]; },
             contour: function () { return boutonQuiDit(corpsAtelier('codes'), 'Ajouter un sous-crit'); },
-            boutons: [{ libelle: 'Continuer', primaire: true, action: suivante }],
-            atteint: function () {
-                var c = critere(), C = window.codesAnnotation;
-                var n = c && C && typeof C.apercuCodes === 'function' ? C.apercuCodes(c).length : 0;
-                montrerBouton('Continuer', n > 0);
-                return false;
-            }
+            boutons: [{ libelle: 'Continuer', primaire: true, action: suivante,
+                attend: function () { return nombreDeCodes() > 0 ? '' : ATTENTES.codes; } }],
+            atteint: function () { return false; }
         }),
         note: Object.assign({}, TEXTES.note, {
             avant: function () { return assurerAtelier('note'); },
@@ -528,28 +537,31 @@
                 return corps ? (corps.querySelector('.formules-algo, .gabarit-algo-formules, [role="radiogroup"]')
                     || ancetreCommun([].slice.call(corps.querySelectorAll('input[type="radio"]')))) : null;
             },
-            boutons: [{ libelle: 'Continuer', primaire: true, action: suivante }],
-            atteint: function () {
-                montrerBouton('Continuer', reglee('note'));
-                return false;
-            }
+            boutons: [{ libelle: 'Continuer', primaire: true, action: suivante,
+                attend: function () { return reglee('note') ? '' : (ponderationManque() ? ATTENTES.ponderation : ATTENTES.calcul); } }],
+            atteint: function () { return false; }
         }),
         cas: Object.assign({}, TEXTES.cas, {
             // Ce que la bulle ne couvre que faute de mieux (11 nov. 2026 : la règle de `bulleHors`, retirée, passe au moteur).
-            aussiEviter: function () { var a = atelier(); return [a ? vis(a.querySelector('.apercu-algo')) : null]; },
+            // « ou touche « Retirer la limite » » (la phrase sous « Continuer », 11 nov. 2026) : la bulle ne le couvre pas non plus.
+            aussiEviter: function () {
+                var a = atelier();
+                return [a ? vis(a.querySelector('.apercu-algo')) : null, champDeLimiteVide() ? boutonQuiDit(corpsAtelier('paliers'), 'Retirer la limite') : null];
+            },
             avant: function () { return assurerAtelier('paliers'); },
             zones: function () { var a = atelier(); return [sectionAtelier('paliers'), a ? a.querySelector('.apercu-algo') : null]; },
             contour: function () {
+                // La limite fixée et incomplète : son premier nombre vide, un geste à la fois (capture 33).
+                var vide = champDeLimiteVide();
+                if (vide) return vide;
                 var fixer = boutonQuiDit(corpsAtelier('paliers'), 'Fixer une limite');
                 if (fixer) return fixer;
                 var a = atelier();
                 return a ? vis(a.querySelector('.apercu-algo')) : null;
             },
-            boutons: [{ libelle: 'Continuer', primaire: true, action: suivante }],
-            atteint: function () {
-                montrerBouton('Continuer', reglee('paliers'));
-                return false;
-            }
+            boutons: [{ libelle: 'Continuer', primaire: true, action: suivante,
+                attend: function () { return reglee('paliers') ? '' : ATTENTES.limite; } }],
+            atteint: function () { return false; }
         }),
         lit: Object.assign({}, TEXTES.lit, {
             // Ce que la bulle ne couvre que faute de mieux (11 nov. 2026 : la règle de `bulleHors`, retirée, passe au moteur).
@@ -567,9 +579,9 @@
                 if (enCreation() && nom && !vide(nom)) return vis(document.getElementById('btnCreerGrille'));
                 return corpsAtelier('eleve');
             },
-            boutons: [{ libelle: 'Continuer', primaire: true, action: suivante }],
+            boutons: [{ libelle: 'Continuer', primaire: true, action: suivante,
+                attend: function () { return enCreation() ? ATTENTES.grille : ''; } }],
             atteint: function () {
-                montrerBouton('Continuer', !enCreation());
                 if (enCreation()) { creationVue = true; return false; }
                 // Une grille nouvelle : l'étape avance quand elle est créée (« Créer la grille » peut refuser).
                 var g = grilleOuverte();

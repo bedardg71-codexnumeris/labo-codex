@@ -85,6 +85,17 @@ describe('La flèche : du bord de la bulle à la cible', () => {
         expect(tracerFleche(BULLE, rect(380, 380, 700, 460), ECRAN)).toBeNull();
     });
 
+    it('la bulle posée sur une grande cible (captures 28 et 29, 11 nov. 2026) : la flèche entre dans la partie qu’elle laisse voir', () => {
+        // Les bandes de « Ta classe d'un coup d'œil » sous la bulle : la plus grande bande libre est au-dessus d'elle.
+        const cible = rect(50, 100, 1000, 400);
+        const f = tracerFleche(BULLE, cible, ECRAN);
+        expect(f).not.toBeNull();
+        expect(dans(f.pointe, cible)).toBe(true);
+        expect(dans(f.pointe, BULLE)).toBe(false);
+        expect(f.pointe).toEqual({ x: 525, y: 200 });   // le milieu de la bande libre, au-dessus de la bulle
+        expect(f.depart).toEqual({ x: 525, y: 300 });   // le bord de la bulle le plus proche
+    });
+
     it('une cible collée à la bulle : jamais de flèche illisible (moins de 24 px) ; un autre bord si la place y est', () => {
         const longueur = (f) => Math.hypot(f.pointe.x - f.depart.x, f.pointe.y - f.depart.y);
         // Plus large que la bulle, 12 px dessous : aucun bord assez loin sans traverser la cible, pas de flèche.

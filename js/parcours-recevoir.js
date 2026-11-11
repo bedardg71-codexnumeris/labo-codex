@@ -281,7 +281,8 @@
     function majExtras() {
         extras.forEach(function (x) {
             var cible = x.cible();
-            if (!M().actif() || !vis(cible)) { x.div.hidden = true; return; }
+            // Rien sur ce qui ne se voit pas (une palette, la bulle par-dessus : 11 nov. 2026, capture 25).
+            if (!M().actif() || !vis(cible) || !M().seVoit(cible)) { x.div.hidden = true; return; }
             var r = cible.getBoundingClientRect();
             x.div.hidden = false;
             x.div.style.left = (r.left - 5) + 'px';
@@ -347,6 +348,7 @@
 
     var ETAPE_1 = {
         titre: 'Leurs productions',
+        geste: "Dépose leurs fichiers dans la zone, ou touche « Rien à importer ».",
         texte: "Tes étudiant·es t'ont remis leurs productions en ligne, dans Léa par exemple ? Télécharge-les dans un dossier, décompresse-les si elles arrivent en ZIP, puis dépose les fichiers ici. Garde leur nom tel quel : il porte le DA de l'étudiant·e, la production et la date de remise, et l'application s'en sert pour ranger chacune. Ta production n'a pas de fichier à importer : elle est sur papier, ou c'est un exposé, une performance, une entrevue ? Touche « Rien à importer » : on passe directement à l'évaluation.",
         avant: async function () {
             aller('evaluations', 'importer');
@@ -360,6 +362,7 @@
 
     var ETAPE_2 = {
         titre: "Vérifie avant d'importer",
+        geste: "Choisis ta production, vérifie chaque fichier, puis touche « Importer » et confirme.",
         texte: "Avant d'importer, vérifie trois choses. Sous « Inspecteur », la production : elle s'applique à tout le lot. Sous « Aperçu », pour chaque fichier, l'étudiant·e que l'application a trouvé·e par son DA ; s'il manque un nom, touche le fichier et choisis-le sous « Inspecteur ». Sous « Originaux », les pages remises par un·e même étudiant·e : si elles arrivent séparées, coche-les, touche « Réunir en une production », puis remets-les dans l'ordre. Une photo est de travers ou trop sombre ? « Réglages spécifiques » la pivote, la recadre et en règle le contraste. Touche ensuite « Importer », puis confirme. Un fichier mal associé se règle ici d'un geste ; une fois importé, il faut passer par la liste.",
         avant: async function () {
             aller('evaluations', 'importer');
@@ -368,7 +371,18 @@
             bulleSousLesColonnes(true);
         },
         zones: function () { bulleSousLesColonnes(true); return zonesSousLesColonnes(); },
-        contour: function () { return qs('.pipeline-production-selecteur'); },
+        // Un geste à la fois (Grégoire, 11 nov. 2026, 12 h 05) : la production d'abord, puis « Importer ».
+        contour: function () {
+            // « puis confirme » : la confirmation ouverte, son « Oui, importer ».
+            var oui = [].slice.call(document.querySelectorAll('.modal-overlay.actif button')).find(function (b) {
+                return vis(b) && b.textContent.trim().indexOf('Oui, importer') === 0;
+            });
+            if (oui) return oui;
+            var s = qs('.pipeline-production-selecteur');
+            var menu = s ? s.querySelector('select') : null;
+            var importer = qs('[data-action="travauxUI.appliquerEtImporter"]');
+            return menu && menu.value && vis(importer) ? importer : s;
+        },
         // « Importer » ouvre la confirmation (une fenêtre à 9999) : elle reste au-dessus de la bulle et des contours, ses
         // boutons doivent rester touchables (mesuré : par-dessus, la bulle les couvrait).
         atteint: function () {
@@ -380,6 +394,7 @@
 
     var ETAPE_3 = {
         titre: 'La liste',
+        geste: "Touche « Actions › Annoter » sur la ligne d'un·e étudiant·e.",
         texte: "Leurs productions sont importées. Chacune est rangée sous le nom de son étudiant·e, avec le statut « Importé » ; les étudiant·es qui n'ont rien remis restent « Non reçu » : tu vois d'un coup d'œil qui relancer. Une production est sous le mauvais nom ? « Actions › Réassigner » la déplace. Touche maintenant « Actions › Annoter » sur la ligne d'un·e étudiant·e pour l'ouvrir.",
         avant: async function () {
             retirerExtras();
@@ -395,6 +410,7 @@
 
     var ETAPE_4 = {
         titre: 'Tes tampons',
+        geste: "Touche l'engrenage de la palette, règle tes tampons, puis touche « Enregistrer ».",
         texte: "Avant d'annoter, regarde tes tampons. Chaque tampon que tu poses ajoute sa phrase à la synthèse de rétroaction de ton étudiant·e. Ceux de départ ont été écrits pour l'analyse littéraire : lis leurs phrases avant de t'en servir. Touche l'engrenage de la palette « Tampons » : garde les phrases qui disent ce que tu dirais, réécris les autres, change leur image (ou mets un emoji à sa place), ou crée tes propres tampons, une catégorie par cours si tu en donnes plusieurs. Puis touche « Enregistrer » : tes tampons te suivront d'un trimestre à l'autre, et tu pourras les partager avec tes collègues.",
         avant: async function () {
             tamponsEnregistres = false;
@@ -426,6 +442,7 @@
 
     var ETAPE_5 = {
         titre: 'Annoter',
+        geste: "Pose tes tampons, puis touche « Annoter ▾ » et choisis « Évaluer ».",
         texte: "Annote la production comme tu le ferais sur papier : souligne, encercle, écris dans la marge. Ces traces restent sur le fichier que ton étudiant·e recevra. Pose aussi tes tampons là où tu observes quelque chose : sur la production, le tampon montre l'endroit ; dans la synthèse, sa phrase dit ce que tu as observé, et combien de fois. Quand tu as fini, touche « Annoter ▾ », au-dessus de la production, et choisis « Évaluer ».",
         avant: function () { return revenirALaProduction(); },
         // Groupe 3 (9 nov., WebKit) : « Annoter ▾ » ouvert, son menu entre dans l'étape. La bulle l'évite (elle couvrait
@@ -447,6 +464,7 @@
 
     var ETAPE_6_FICHIER = {
         titre: 'Évaluer',
+        geste: "Choisis le niveau ou les points de chaque critère.",
         texte: "Te voici en mode Évaluer. Dans « Paramètres », ta grille, ton échelle et ta cartouche sont déjà choisies : ce sont celles de ta production. Dans « Évaluation », choisis pour chaque critère le niveau ou les points que tu attribues ; la note se calcule à mesure.",
         avant: async function () { critereTenu.reprendre(); await revenirALaProduction('evaluer'); },
         zones: function () { return [critereAAttribuer() || el('travaux-palette-eval-droite')]; },
@@ -456,6 +474,7 @@
 
     var ETAPE_6_SANS_FICHIER = {
         titre: 'Évaluer',
+        geste: "Touche « Actions › Évaluer » sur sa ligne, puis choisis le niveau ou les points de chaque critère.",
         texte: "Rien à importer : touche « Actions › Évaluer » sur la ligne de l'étudiant·e. Ta grille, ton échelle et ta cartouche sont déjà choisies : ce sont celles de ta production. Pour chaque critère, choisis le niveau ou les points que tu attribues.",
         avant: async function () {
             critereTenuSansFichier.reprendre();
@@ -475,6 +494,7 @@
 
     var ETAPE_7_FICHIER = {
         titre: 'Ta rétroaction',
+        geste: "Relis sa rétroaction, puis touche le cadenas « Verrouiller ».",
         texte: texte7(TEXTE_7_SPECIFIQUE),
         avant: function () { return revenirALaProduction('evaluer'); },
         zones: function () { return [boutonVerrou()]; },
@@ -485,6 +505,7 @@
 
     var ETAPE_7_SANS_FICHIER = {
         titre: 'Ta rétroaction',
+        geste: "Relis sa rétroaction, puis touche le cadenas « Verrouiller ».",
         texte: texte7(TEXTE_7_SANS_FICHIER),
         zones: function () { return [boutonVerrou()]; },
         contour: boutonVerrou,
@@ -494,6 +515,7 @@
 
     var ETAPE_8 = {
         titre: 'Rends tes rétroactions',
+        geste: "Choisis ta production, puis touche « Exporter pour Léa ».",
         texte: "Évalue de la même façon les productions des autres étudiant·es : « Plus tard » garde le parcours ici, et « Reprendre » t'y ramène. Quand tes évaluations sont faites et verrouillées, il reste à rendre tes rétroactions. Choisis la production, laisse « Tous » pour tout le groupe, puis touche « Exporter pour Léa ». Chaque étudiant·e reçoit un PDF : sa synthèse de rétroaction, précédée de sa production annotée si tu l'as importée. Le nom du fichier porte son DA : c'est ce qui permet de le remettre à la bonne personne. Avec plusieurs étudiant·es, les PDF arrivent réunis dans un ZIP.",
         avant: async function () {
             exportTelecharge = false;
@@ -508,6 +530,7 @@
 
     var ETAPE_9 = {
         titre: 'Remets-les',
+        geste: "Touche « Terminer ».",
         texte: "Dernier geste, hors de l'application : remettre les PDF. Dans Léa, par exemple, renomme le ZIP « Travaux.zip », dépose-le dans la liste des travaux de la production, puis touche « Transmettre » : chaque PDF rejoint l'étudiant·e dont il porte le DA. Ailleurs, dépose chaque PDF là où tes étudiant·es reçoivent leurs travaux évalués ; sans fichier, imprime la synthèse et remets-la, avec la production si elle est sur papier. Tu as bouclé le cycle pour lequel Labo Codex existe : recevoir, évaluer, rendre.",
         centre: true,
         sansSortie: true,

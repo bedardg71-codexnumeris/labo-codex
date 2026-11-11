@@ -223,6 +223,11 @@ function genererTache(t) {
  */
 function afficherAccueilContenu(conteneur) {
     const version = window.VERSION_MAJEURE || '';
+    // Le build à côté de la version (Grégoire, 11 nov. 2026 : « c'est le lieu le plus rapide pour l'identifier »), lu de
+    // version.js (window.BUILD_ID, établi par init-inline.js) : celui du code chargé. Insécable : il ne se coupe pas.
+    // « · 1111-1040 », le mot « build » pour le lecteur d'écran seulement : « (build …) » ne tenait pas sur la ligne de
+    // « Nouveautés » à 820 et à 390 px (mesuré sous WebKit : 36 px de trop), que Grégoire veut sur une même ligne (10 nov.).
+    const build = window.BUILD_ID || '';
 
     conteneur.innerHTML = `
         ${genererBanniereBienvenue()}
@@ -236,7 +241,7 @@ function afficherAccueilContenu(conteneur) {
             <div class="accueil-pied-moitie accueil-pied-application">
                 <div class="accueil-pied-texte">
                     <div class="accueil-pied-ligne">
-                        <span class="accueil-pied-version">Bêta publique ${version}</span>
+                        <span class="accueil-pied-version">Bêta publique ${version}${build ? ` <span class="accueil-pied-build">· <span class="u-lecteur-ecran">build </span>${build}</span>` : ''}</span>
                         <button type="button" class="accueil-pied-lien" data-action="afficherModalNouveautes">Nouveautés</button>
                     </div>
                     <span class="accueil-pied-tagline">Suivre l’apprentissage, soutenir l’enseignement.</span>

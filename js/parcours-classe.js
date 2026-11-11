@@ -292,6 +292,7 @@
     var ETAPES = [
         {
             titre: 'Ton trimestre',
+            geste: "Remplis les champs obligatoires, puis touche « Créer le trimestre ».",
             texte: "Commençons par ton trimestre : tout ce que tu feras s'y range, tes groupes, tes présences, tes évaluations. Donne-lui un nom, sa session et son année, puis trois dates : le début, la fin des cours et la fin du trimestre. Ces dates bornent le calendrier de tes séances. Le reste, comme les journées sans cours, peut attendre.",
             avant: function () { return ouvrirBloc('trimestre'); },
             formulaire: function () { return blocDuFormulaire('trimestre'); },
@@ -300,6 +301,7 @@
         },
         {
             titre: 'Ton cours',
+            geste: "Remplis les champs obligatoires, puis touche « Créer le cours ».",
             texte: "Ajoute le cours que tu donnes à ce groupe. Tes productions se rangeront sous lui : si tu donnes le même cours à deux groupes, tu les prépares une seule fois. Si tu donnes plusieurs cours, un seul suffit pour l'instant.",
             avant: function () { return ouvrirBloc('cours'); },
             formulaire: function () { return blocDuFormulaire('cours'); },
@@ -308,6 +310,7 @@
         },
         {
             titre: 'Ton profil',
+            geste: "Remplis les champs obligatoires, puis touche « Créer le profil ».",
             texte: "Ton prénom, ton nom, ton courriel et ton établissement. Ils servent à deux choses : ton groupe-cours a besoin de savoir qui le donne, et ils accompagnent les ressources que tu partageras.",
             avant: function () { return ouvrirBloc('enseignant'); },
             formulaire: function () { return blocDuFormulaire('enseignant'); },
@@ -316,6 +319,7 @@
         },
         {
             titre: 'Ta classe',
+            geste: "Colle ta liste ou choisis ton fichier, touche « Prévisualiser », puis « Confirmer ».",
             texte: "Ajoute tes étudiant·es. Le plus simple : copie la liste de ton groupe depuis le système de ton établissement et colle-la ici, ou importe-la en fichier texte. La liste de Léa, dans Omnivox (format Excel, dans ses paramètres d'affichage), arrive déjà dans le bon ordre ; sinon, une ligne par personne : DA, groupe, nom, prénom. Le DA reconnaît chaque personne partout dans l'application, jusque dans le nom des fichiers que tu importeras. Le numéro de groupe servira à ton horaire et à ton groupe-cours. Le reste peut attendre.",
             avant: function () { return ouvrirBloc('etudiants'); },
             // « Colle-la ici, ou importe-la en fichier texte » : les deux champs eux-mêmes, chacun sa flèche (11 nov. 2026,
@@ -333,6 +337,7 @@
         },
         {
             titre: 'Ton horaire',
+            geste: "Remplis les champs obligatoires, puis touche « Créer l'horaire ».",
             texte: "Indique les jours et les périodes où tu vois ce groupe. L'application en tire le calendrier de tes séances : c'est à chacune que s'attacheront tes présences, et plus tard ce que tu y enseignes.",
             avant: function () { return ouvrirBloc('horaire'); },
             formulaire: function () { return blocDuFormulaire('horaire'); },
@@ -341,6 +346,7 @@
         },
         {
             titre: 'Ton groupe-cours',
+            geste: "Remplis les champs obligatoires, puis touche « Créer le groupe-cours ».",
             texte: "Réunis les cinq morceaux : le trimestre, le cours, le numéro de groupe, l'horaire et toi. Ton groupe apparaît alors dans l'en-tête : c'est sur lui que travaillent le Suivi et l'Évaluation, et c'est là que tu passeras d'un groupe à l'autre. Chacun de tes groupes aura le sien ; un seul suffit pour l'instant. La pratique de notation viendra plus tard : c'est là que tu décides comment tu construis la note du cours. La note de chaque évaluation, elle, n'en dépend pas.",
             avant: function () { return ouvrirBloc('groupe-cours'); },
             formulaire: function () { return blocDuFormulaire('groupe-cours'); },
@@ -356,6 +362,10 @@
             get centre() { return avantPremierCours; },
             get sansSortie() { return avantPremierCours; },
             get boutons() { return avantPremierCours ? BOUTONS_7_AVANT : null; },
+            get geste() {
+                return avantPremierCours ? "Touche « D'accord »."
+                    : "Choisis ton cours, note les absences et les retards, puis touche « Verrouiller la saisie ».";
+            },
             avant: async function () {
                 aller('suivi', 'saisie');
                 await attendre(function () { return sousSectionVisible('suivi-saisie'); }, 2000);
@@ -380,6 +390,7 @@
         },
         {
             titre: "Ta classe d'un coup d'œil",
+            geste: "Touche « Terminer ».",
             texte: "Voici ta classe. Chaque point blanc est un·e de tes étudiant·es, et tous y sont dès ce premier cours. Au fil du trimestre, chaque point se déplace selon l'assiduité de la personne ; le graphique, dessous, garde la trace de ces déplacements. Une absence isolée ne dit pas grand-chose, des absences qui s'accumulent, oui : c'est le coup d'œil à donner avant d'entrer en classe. La complétion et la performance s'allumeront quand tu évalueras tes premiers travaux, et leurs points bougeront de la même façon.",
             sansSortie: true,
             avant: async function () {

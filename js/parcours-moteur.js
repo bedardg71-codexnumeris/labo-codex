@@ -14,11 +14,18 @@
      contour (Grégoire, 11 nov. 2026, sur l'iPad : la flèche fait le lien) : titre, « n sur N », poignée
      pour la déplacer, texte, geste, boutons, lien de sortie. Elle prend le focus et s'annonce (aria-live poli).
    LES FLÈCHES VONT À CE QUE NOMME LA BULLE (11 nov. 2026) : l'élément précis (la ligne, pas la carte), et la
-   section dans le menu quand la bulle présente une section ; JAMAIS vers ce qu'il faut toucher, que la
-   pulsation désigne déjà, SAUF quand la bulle le nomme (Grégoire, 11 nov. 2026, 9 h 35, troisième essai : sur la
-   Liste, la bulle dit « Actions › Évaluer » ; la flèche montait à la cellule « Niveau »). Une étape qui nomme ce qu'il
-   faut toucher le déclare (`nommeLeContour`) : la flèche va alors au contour, et à lui seul ; ses zones, la bulle les
-   évite encore. « Jamais vers ce qu'il faut toucher » ne vaut plus que pour ce que la bulle ne nomme pas.
+   section dans le menu quand la bulle présente une section. CE QU'IL FAUT TOUCHER REÇOIT SA FLÈCHE DÈS L'OUVERTURE
+   DE L'ÉTAPE (Grégoire, 11 nov. 2026, 11 h 45, quatrième aperçu : « Ta compétence », « Pourquoi un codex »,
+   « Ta grille » restaient sans flèche jusqu'au premier toucher) : une étape qui a un contour n'est jamais sans flèche ;
+   les sujets qui ne sont pas le contour gardent la leur. Une étape qui ne nomme QUE ce qu'il faut toucher le déclare
+   (`nommeLeContour`) : la flèche va alors au contour, et à lui seul ; ses zones, la bulle les évite encore.
+   NI FLÈCHE NI PULSATION SUR CE QUI NE SE VOIT PAS (`seVoit`, 11 nov. 2026, capture 25) : ce qu'une palette flottante,
+   une fenêtre ou la bulle couvre en entier ; pas de flèche vers un sujet tout entier hors de l'écran (`aLEcran`,
+   capture 31). Ce qu'il faut toucher qui change dans l'étape (le geste suivant) est amené à l'écran (`suivreContour`).
+   LES BOUTONS QUI ATTENDENT (Grégoire, 11 nov. 2026, 12 h 05, captures 32 à 34 : « je ne sais pas ce qu'il faut faire
+   pour voir le bouton « Continuer » ») : un bouton de bulle qui attend une condition le déclare (`attend`, qui rend la
+   phrase de ce qui manque, ou rien) ; il reste visible, inactif tant qu'elle manque, la phrase dessous ; le contour de
+   l'étape va à ce qui manque.
    L'ÉCRAN CHANGE DANS UNE ÉTAPE (11 nov. 2026, capture 18 : « Actions › Évaluer » touché, l'écran d'évaluation ouvert,
    la bulle restait à sa page 1/2, qui redisait de toucher « Actions › Évaluer », et le premier critère, sous le bas de
    l'écran, portait le halo sans qu'on le voie) : une étape à plusieurs écrans dit, par un passage de son texte, de quoi
@@ -30,7 +37,7 @@
    flèches vont aux champs obligatoires (astérisque rouge `.champ-requis`, `required`, `aria-required`) ENCORE VIDES,
    une par champ, sans fusion ni plafond ; chacune disparaît quand son champ est rempli ; quand il n'en reste aucun,
    les flèches vont à ce que l'étape déclare dans `fleches` (« Ta production » : l'échelle d'une grille par niveaux
-   restée à « Aucune », 11 nov. 2026, 9 h 35), et sinon seul le halo du bouton demeure. La bulle évite TOUS les champs obligatoires, remplis ou non : elle ne saute pas
+   restée à « Aucune », 11 nov. 2026, 9 h 35) ; le bouton à toucher a la sienne dès l'ouverture (la règle du contour). La bulle évite TOUS les champs obligatoires, remplis ou non : elle ne saute pas
    d'un coin à l'autre pendant qu'on remplit, et elle ne couvre pas un champ qu'on voudrait corriger.
    LE ZOOM AU PINCEMENT (11 nov. 2026, second essai sur l'iPad : « la bulle se déplace un peu partout ») : sous
    Safari iPad, innerWidth × innerHeight suivent la partie VISIBLE de la page pendant le zoom, alors que la bulle, le
@@ -53,14 +60,14 @@
                                    // évite seulement (les noms de la saisie des présences, qu'il faut voir pour noter)
        formulaire?: () => Element, // l'étape montre un formulaire : ses zones sont ses champs obligatoires, une flèche
                                    // par champ ENCORE VIDE ; tous remplis, une par élément de `fleches`
-       contour?: () => Element,    // où toucher (la pulsation)
-       nommeLeContour?: bool | () => bool, // la bulle nomme ce qu'il faut toucher : la flèche va au contour, seule
+       contour?: () => Element,    // où toucher (la pulsation, et une flèche dès l'ouverture)
+       nommeLeContour?: bool | () => bool, // la bulle ne nomme que ce qu'il faut toucher : la flèche va au contour, seule
        pageQuiDit?: () => string,  // un passage du texte, celui dont parle l'écran visible (null : rien ne change)
        avis?: () => string,        // une phrase sous le texte, tant que la page n'est pas dans l'état attendu
        aussiEviter?: () => Element[], // ce que la bulle ne couvre pas non plus, pesé comme le contour, sans flèche
                                    // (les boutons du geste suivant dans une fenêtre que la bulle doit couvrir)
        atteint?: () => bool,       // l'état qui fait avancer
-       boutons?: [{ libelle, primaire?, action }],
+       boutons?: [{ libelle, primaire?, action, attend?: () => string }], // attend : ce qui manque (rien : actif)
        sansSortie?: bool }
    API : window.ParcoursMoteur.lancer(def, { depuis, surEtape, surQuitter, surEchap, verifier }),
          .fermer(), .actif(), .etapeCourante(), .joue(def), .surTelephone().
@@ -637,10 +644,16 @@
                 btn.type = 'button';
                 btn.className = 'btn ' + (def.primaire ? 'btn-principal' : 'btn-secondaire');
                 btn.textContent = def.libelle;
-                btn.addEventListener('click', function () { def.action(api); });
+                btn.addEventListener('click', function () { if (!btn.disabled) def.action(api); });
                 zone.appendChild(btn);
             });
             b.appendChild(zone);
+            // Ce qu'attend un bouton conditionnel (`attend`), dit sous les boutons (voir « LES BOUTONS QUI ATTENDENT »).
+            var attente = document.createElement('p');
+            attente.className = 'parcours-bulle-attente';
+            attente.setAttribute('role', 'status');
+            attente.hidden = true;
+            b.appendChild(attente);
         }
 
         if (!etape.sansSortie && etat.def.lienSortie) {
@@ -777,11 +790,42 @@
         var f = hors ? versLeBordDeLEcran(bulle, sx, sy, cx, cy, ecran)
             // Le centre de la cible sous la bulle : elle est cachée, pas de flèche.
             : (sx === cx && sy === cy) ? null : versLaCible(bulle, c, sx, sy, ecran, obstacles);
+        if (!f && !hors) f = faute(bulle, c, sx, sy, cx, cy, ecran, obstacles);
         if (!f) return null;
         f.horsEcran = hors;
         delete f.points;
         delete f.longueur;
         return f;
+    }
+
+    /**
+     * Faute de tracé : d'abord sans les obstacles (passer sur une autre cible vaut mieux qu'aucune flèche) ; puis, la
+     * bulle posée sur la cible (aucune place libre : les bandes de « Ta classe d'un coup d'œil », la fiche plus haute que
+     * l'écran de « Ton intervention », captures 28 et 29), la partie que la bulle laisse voir. Pure.
+     */
+    function faute(bulle, c, sx, sy, cx, cy, ecran, obstacles) {
+        var f = obstacles.length && !(sx === cx && sy === cy) ? versLaCible(bulle, c, sx, sy, ecran, []) : null;
+        return f || (seCroisent(bulle, c, 0) ? versLaPartieVisible(bulle, c, ecran) : null);
+    }
+
+    /**
+     * La cible que la bulle chevauche : la plus grande des quatre bandes de la cible hors de la bulle (à gauche, à droite,
+     * au-dessus, au-dessous) ; la flèche part du bord de la bulle le plus proche du milieu de cette bande et y entre. Null
+     * si aucune bande n'a FLECHE_MIN px dans ses deux sens. Pure.
+     */
+    function versLaPartieVisible(bulle, c, ecran) {
+        var bandes = [
+            { left: c.left, top: c.top, right: Math.min(c.right, bulle.left), bottom: c.bottom },
+            { left: Math.max(c.left, bulle.right), top: c.top, right: c.right, bottom: c.bottom },
+            { left: c.left, top: c.top, right: c.right, bottom: Math.min(c.bottom, bulle.top) },
+            { left: c.left, top: Math.max(c.top, bulle.bottom), right: c.right, bottom: c.bottom }
+        ].filter(function (b) { return b.right - b.left >= FLECHE_MIN && b.bottom - b.top >= FLECHE_MIN; });
+        if (!bandes.length) return null;
+        var b = bandes.reduce(function (m, x) {
+            return (x.right - x.left) * (x.bottom - x.top) > (m.right - m.left) * (m.bottom - m.top) ? x : m;
+        });
+        var mx = (b.left + b.right) / 2, my = (b.top + b.bottom) / 2;
+        return courbe(borne(mx, bulle.left, bulle.right), borne(my, bulle.top, bulle.bottom), mx, my, 0, 1, ecran);
     }
 
     /** La cible sortie de l'écran : la flèche va au bord de l'écran, du côté de la cible. Pure. */
@@ -1070,17 +1114,50 @@
 
     // ---------- Les flèches, la section actuelle ----------
 
-    /** Ce dont parle la bulle : les zones qui ne sont pas ce qu'il faut toucher (le contour a sa pulsation). */
+    /**
+     * L'élément se voit-il ? Sa partie à l'écran n'est pas couverte en entier par autre chose : une palette flottante
+     * (le « Planificateur » de la carte, 11 nov. 2026, capture 25), la bulle, une fenêtre. Le test de l'œil : en cinq
+     * points de sa partie à l'écran, ce que le toucher y trouverait est lui ou l'un de ses descendants, au moins une
+     * fois. Les couches du moteur ne comptent pas (elles ne prennent pas le toucher), la bulle, si. Un élément tout
+     * entier hors de l'écran n'est pas jugé ici : sa flèche va au bord de l'écran, de son côté (`tracerFleche`).
+     */
+    function seVoit(el) {
+        if (!visible(el)) return false;
+        var r = el.getBoundingClientRect();
+        var e = ecranGarde();
+        var g = Math.max(0, r.left), h = Math.max(0, r.top), d = Math.min(e.largeur, r.right), b = Math.min(e.hauteur, r.bottom);
+        if (d <= g || b <= h) return true;
+        var points = [[0.5, 0.5], [0.25, 0.25], [0.75, 0.25], [0.25, 0.75], [0.75, 0.75]];
+        for (var k = 0; k < points.length; k++) {
+            var t = document.elementFromPoint(g + (d - g) * points[k][0], h + (b - h) * points[k][1]);
+            if (t && (t === el || el.contains(t))) return true;
+        }
+        return false;
+    }
+
+    /**
+     * Ce dont parle la bulle : les zones qui ne sont pas ce qu'il faut toucher (ni dedans), à l'écran, et qui se voient.
+     * Une zone qui contient le contour garde sa flèche (relais du 11 nov. 2026, 11 h 45 : « les zones de sujet qui ne sont
+     * pas le contour gardent leur flèche »).
+     */
     function sujets(zones, contourEl) {
         return (zones || []).filter(function (z) {
-            return visible(z) && z !== contourEl && !(contourEl && contourEl.contains(z));
+            return visible(z) && z !== contourEl && !(contourEl && contourEl.contains(z)) && aLEcran(z) && seVoit(z);
         });
     }
 
     /**
-     * Les cibles des flèches : les sujets, groupés. Jamais ce qu'il faut toucher, que la pulsation désigne déjà
-     * (Grégoire, 11 nov. 2026) : sans sujet, aucune flèche.
+     * Une partie de l'élément est à l'écran. Un sujet tout entier hors de l'écran n'a pas de flèche (Grégoire, 11 nov.
+     * 2026, capture 31 : « il faut défiler pour voir où pointe réellement la flèche du haut ») ; ce qu'il faut toucher,
+     * lui, garde la sienne vers le bord de l'écran, de son côté, quand la personne l'a fait défiler hors de la vue.
      */
+    function aLEcran(el) {
+        var r = el.getBoundingClientRect();
+        var e = ecranGarde();
+        return r.right > 0 && r.bottom > 0 && r.left < e.largeur && r.top < e.hauteur;   // l'en-tête compris (ses sections)
+    }
+
+    /** Les cibles des sujets : groupées (fondues quand elles se touchent, leur union au-delà de FLECHES_MAX). */
     function ciblesDesFleches(zones, contourEl) {
         return grouperCibles(rectsDe(sujets(zones, contourEl)), FLECHES_MAX);
     }
@@ -1088,6 +1165,9 @@
     /**
      * Trace les flèches de la bulle vers ses cibles ; un tracé inchangé n'est pas réécrit. `vise.fleches` : où vont
      * les flèches parmi les zones ; `vise.une` (une étape à formulaire) : une par champ, sans fusion ni plafond.
+     * LA RÈGLE DU CONTOUR (Grégoire, 11 nov. 2026, 11 h 45, quatrième aperçu) : ce qu'il faut toucher reçoit sa flèche
+     * dès l'ouverture de l'étape, en plus de celles des sujets ; une étape qui a un contour n'est jamais sans flèche.
+     * `nommeLeContour` : la sienne seule. Rien vers ce qui ne se voit pas (`seVoit`).
      */
     function dessinerFleches(zones, contourEl, vise) {
         var svg = etat.elements.svg;
@@ -1097,17 +1177,19 @@
             var rb = b.getBoundingClientRect();
             var ecran = ecranGarde();
             var fl = vise && vise.fleches;
-            // La bulle nomme ce qu'il faut toucher : une flèche, vers lui seul (11 nov. 2026, 9 h 35).
-            var cibles = vise && vise.auContour ? rectsDe([contourEl])
-                : !fl ? ciblesDesFleches(zones, contourEl)
-                : vise.une ? rectsDe(sujets(fl, contourEl)) : ciblesDesFleches(fl, contourEl);
+            // (Un contour qui est aussi un champ du formulaire n'a qu'une flèche : `sujets` l'écarte des champs.)
+            var auContour = visible(contourEl) && seVoit(contourEl) ? rectsDe([contourEl]) : [];
+            var cibles = vise && vise.auContour ? auContour
+                : (!fl ? ciblesDesFleches(zones, contourEl)
+                    : vise.une ? rectsDe(sujets(fl, contourEl)) : ciblesDesFleches(fl, contourEl)).concat(auContour);
             // Une flèche évite de passer sur une autre cible, et sur ce qu'il faut toucher.
             var rc = visible(contourEl) ? contourEl.getBoundingClientRect() : null;
             cibles.forEach(function (r) {
                 var obstacles = cibles.filter(function (o) { return o !== r; });
                 if (rc && !seCroisent(rc, r, 0)) obstacles.push(rc);
                 var t = tracerFleche(rb, r, ecran, obstacles);
-                if (t) traces.push(t.d);
+                // La cible visée, pour les bancs (le relevé des ouvertures, tests/integration/harness/releve-bulle.js).
+                if (t) traces.push({ d: t.d, cible: [r.left, r.top, r.right, r.bottom].map(Math.round).join(','), hors: t.horsEcran });
             });
         }
         var ns = 'http://www.w3.org/2000/svg';
@@ -1122,12 +1204,14 @@
             });
             svg.appendChild(g);
         }
-        traces.forEach(function (d, k) {
+        traces.forEach(function (t, k) {
             var g = svg.childNodes[k];
-            if (g.getAttribute('data-trace') === d) return;
-            g.setAttribute('data-trace', d);
-            g.firstChild.setAttribute('d', d);
-            g.lastChild.setAttribute('d', d);
+            g.setAttribute('data-cible', t.cible);
+            if (t.hors) g.setAttribute('data-hors-ecran', ''); else g.removeAttribute('data-hors-ecran');
+            if (g.getAttribute('data-trace') === t.d) return;
+            g.setAttribute('data-trace', t.d);
+            g.firstChild.setAttribute('d', t.d);
+            g.lastChild.setAttribute('d', t.d);
         });
     }
 
@@ -1220,6 +1304,85 @@
         if (p.textContent !== texte) p.textContent = texte;
     }
 
+    /**
+     * Les boutons qui attendent (`attend`, voir « LES BOUTONS QUI ATTENDENT ») : visibles toujours, inactifs tant que la
+     * condition manque, et la raison dite dessous. Un bouton sans `attend` reste actif.
+     */
+    function poserAttentes(etape) {
+        var b = etat.elements.bulle;
+        var zone = b.querySelector('.parcours-bulle-boutons');
+        var ligne = b.querySelector('.parcours-bulle-attente');
+        if (!zone || !ligne || !etape.boutons) return;
+        var raisons = etape.boutons.map(function (def, k) {
+            var btn = zone.children[k], r = '';
+            try { r = btn && def.attend ? def.attend() || '' : ''; } catch (e) { r = ''; }
+            if (btn && def.attend && btn.disabled !== !!r) btn.disabled = !!r;
+            return r ? typographier(r) : '';
+        });
+        var texte = raisons.filter(Boolean).join(' ');
+        if (ligne.textContent !== texte) ligne.textContent = texte;
+        ligne.hidden = !texte;
+    }
+
+    /**
+     * Ce qu'il faut toucher a changé dans l'étape (le geste suivant : un champ, puis un bouton) : il est amené à l'écran,
+     * une fois, s'il n'y est pas (Grégoire, 11 nov. 2026, 12 h 05 : « nommer, pointer, passer par les étapes une après
+     * l'autre » ; capture 32, la pondération défilée hors de l'écran). Reconnu par ce qu'il est, pas par son nœud : un
+     * élément redessiné à l'identique ne fait rien défiler, et la personne garde la main sur le défilement.
+     */
+    function signatureDe(el) {
+        if (!el) return '';
+        // Pas son texte : il change sous les gestes (la dissection compte ses morceaux), et chaque changement relançait le
+        // défilement (mesuré sous WebKit le 11 nov. 2026 : la palette de la dissection ne tenait plus en place).
+        return [el.tagName, el.id, el.getAttribute('data-action') || '', el.getAttribute('name') || ''].join('|');
+    }
+    /**
+     * Le contour de l'ouverture vient d'être amené avec le reste : il n'est pas « neuf » pour `suivreContour`. S'il ne se
+     * voit pas encore (dans un tableau qui défile de côté : « Actions »), `suivreContour` l'amènera.
+     */
+    function retenirContourDOuverture(etape) {
+        var c0 = etape.contour ? etape.contour() : null;
+        etat.contourSuivi = visible(c0) && aLAise(c0) ? signatureDe(c0) : '';
+    }
+    /** Tout entier à l'écran, sous l'en-tête, et vu (rien ne le couvre). */
+    function aLAise(el) {
+        var r = el.getBoundingClientRect();
+        var haut = hautEntete(), bas = basEcran();
+        // Plus haut que l'écran (une zone de collage, une fiche) : amené dès qu'il y entre.
+        if (r.height > bas - haut) return r.bottom > haut && r.top < bas && !rogne(el);
+        return r.top >= haut && r.bottom <= bas && r.left >= 0 && r.right <= ecranGarde().largeur && !rogne(el);
+    }
+    /**
+     * Rogné par son propre conteneur (un tableau qui défile de côté : « Actions ») : en son milieu, le toucher trouve un
+     * de ses ancêtres. Couvert par autre chose (une palette flottante), il n'est pas « rogné » : défiler n'y changerait
+     * rien, et la page bougerait sans fin.
+     */
+    function rogne(el) {
+        var r = el.getBoundingClientRect();
+        var t = document.elementFromPoint(Math.min(Math.max((r.left + r.right) / 2, 0), ecranGarde().largeur - 1),
+            Math.min(Math.max((r.top + r.bottom) / 2, 0), ecranGarde().hauteur - 1));
+        return !!t && t !== el && t.contains(el);
+    }
+    function suivreContour(contourEl) {
+        var s = visible(contourEl) ? signatureDe(contourEl) : '';
+        if (s === etat.contourSuivi) return;
+        etat.contourSuivi = s;
+        if (!s || aLAise(contourEl)) return;
+        try { contourEl.scrollIntoView({ block: 'center', inline: 'nearest', behavior: 'auto' }); } catch (e) { contourEl.scrollIntoView(); }
+    }
+
+    /** La pulsation autour de ce qu'il faut toucher ; pas sur ce que couvre une palette flottante (11 nov. 2026, capture 25). */
+    function poserPulsation(contourEl) {
+        var c = etat.elements.contour;
+        if (!visible(contourEl) || !seVoit(contourEl)) { c.hidden = true; return; }
+        var r = contourEl.getBoundingClientRect();
+        c.hidden = false;
+        c.style.left = (r.left - 5) + 'px';
+        c.style.top = (r.top - 5) + 'px';
+        c.style.width = (r.width + 10) + 'px';
+        c.style.height = (r.height + 10) + 'px';
+    }
+
     /** Un passage de la sonde : contour, section actuelle, bulle, flèches, puis l'état atteint. */
     function sonder() {
         if (!etat || etat.enTransition) return;
@@ -1232,12 +1395,15 @@
         }
 
         poserAvis(etape);
+        poserAttentes(etape);
         if (!zoom) suivreEcran(etape);
 
         var vise = designe(etape);
         var zones = vise.zones;
         var contourEl = etape.contour ? etape.contour() : null;
+        if (!zoom) suivreContour(contourEl);
         etat.vus = { zones: zones, contourEl: contourEl, vise: vise };
+        etat.passages = (etat.passages || 0) + 1;
 
         // La couche des flèches : en px, sur innerWidth × innerHeight, à chaque passage (le repère du contour). Sous le
         // zoom, elle garde l'écran d'avant : innerWidth × innerHeight n'en sont plus que la partie visible.
@@ -1249,17 +1415,7 @@
             svg.style.height = window.innerHeight + 'px';
         }
 
-        var c = etat.elements.contour;
-        if (visible(contourEl)) {
-            var r = contourEl.getBoundingClientRect();
-            c.hidden = false;
-            c.style.left = (r.left - 5) + 'px';
-            c.style.top = (r.top - 5) + 'px';
-            c.style.width = (r.width + 10) + 'px';
-            c.style.height = (r.height + 10) + 'px';
-        } else {
-            c.hidden = true;
-        }
+        poserPulsation(contourEl);
         marquerSectionActuelle(sectionActuelleDe(contourEl));
 
         if (zoom) {
@@ -1361,6 +1517,7 @@
         etat.pageDite = etape.pageQuiDit ? (etape.pageQuiDit() || null) : null;
         if (etat.pageDite && pageQuiPorte(etat.pageDite) > 0) montrerPage(pageQuiPorte(etat.pageDite));
         if (!etape.centre || etat.telephone) amenerDansLaVue(elementsVises(etape), etat.elements.bulle.offsetHeight);
+        retenirContourDOuverture(etape);
         etat.enTransition = false;
         etat.reglerJusqua = Date.now() + REGLAGE_MS;
         sonder();
@@ -1383,7 +1540,8 @@
         retirerElements();
         etat = { def: def, i: 0, opts: opts || {}, elements: creerElements(), enTransition: false,
                  telephone: surTelephone(), replie: false, reglerJusqua: 0, texte: '', pages: [], page: 0, largeurPages: 0,
-                 deplacee: null, glisse: null, vus: null, sectionActuelle: null, doigts: 0, ecran: null, pageDite: null };
+                 deplacee: null, glisse: null, vus: null, sectionActuelle: null, doigts: 0, ecran: null, pageDite: null,
+                 contourSuivi: '' };
         document.body.classList.add('parcours-actif');
         if (window.transitions && typeof window.transitions.fermerBandeau === 'function') window.transitions.fermerBandeau();
         // 9 nov. 2026 : une flèche didactique déjà ouverte se retire, sans être marquée vue (la bulle parle seule).
@@ -1443,6 +1601,7 @@
         allerA: function (i) { return allerA(i); },
         // Utilitaires pour les définitions de parcours.
         visible: visible,
+        seVoit: seVoit,
         premierVisible: premierVisible,
         surTelephone: surTelephone,
         mouvementReduit: mouvementReduit,
@@ -1453,7 +1612,7 @@
         placement: function () {
             if (!etat || !etat.vus) return null;
             return { zones: etat.vus.zones.slice(), contour: etat.vus.contourEl, prioritaires: prioritaires(etat.vus.contourEl),
-                     deplacee: !!etat.deplacee,
+                     deplacee: !!etat.deplacee, passages: etat.passages || 0, zoom: sousLeZoom(),
                      telephone: etat.telephone, cadre: cadreUtile() };
         }
     };

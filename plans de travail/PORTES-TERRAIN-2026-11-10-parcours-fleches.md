@@ -13,6 +13,9 @@ refaire), §2.5 b non faite ; §2.2 tenue pour faite (décision du Projet) ; §2
 une porte ajoutée, §2.6, pour ce que WebKit n'a pas reproduit.
 **Troisième essai le 11 nov., 9 h 11 à 9 h 26** (`2e9edab10`, « Évaluer une première production », grille « Test 1 ») :
 quatre corrections sur le quatrième aperçu ; une porte ajoutée, §2.7, et la décision §3.4 (trois phrases).
+**Quatrième essai le 11 nov., 11 h 15 à 11 h 53** (build 1111-1040, captures 21 à 34) : « En général, ça va très
+bien » ; des flèches trop tardives ou absentes, des boutons « Continuer » sans raison dite. Cinquième aperçu : une
+porte ajoutée, §2.8 ; §3.5 tranchée (relais de 11 h 45) ; les mots proposés en §3.6.
 *Avant le 11 nov. :* EN ATTENTE. Cette porte ne se fait pas avant que le lot soit fusionné dans `main` et en ligne.
 Tant que la branche n'est que poussée, `https://app.codexnumeris.org` montre encore le voile : tu jugerais la
 version d'avant. Cowork remplit la ligne « version attendue » ci-dessous au moment de la mise en ligne, et publie
@@ -21,7 +24,7 @@ l'artefact jumeau (avec son bouton « Copier mes résultats »).
 Pourquoi une porte, alors que la règle est de ne pas en faire pour l'apparence : le défaut que tu as vécu (les
 zones qui ne tombent pas sur les boutons) est sur iPad, et aucune machine d'ici ne peut y répondre. La session du
 cloud n'a que Chromium ; le Mac a WebKit, mais ni l'un ni l'autre n'a la barre d'adresse de Safari sur iPad, qui est
-la cause supposée. Huit portes, pas plus (la sixième, le zoom au pincement, ajoutée le 11 nov. ; la septième, §2.6, au second essai ; la huitième, §2.7, au troisième). Tout le reste est mesuré par les bancs.
+la cause supposée. Neuf portes, pas plus (la sixième, le zoom au pincement, ajoutée le 11 nov. ; la septième, §2.6, au second essai ; la huitième, §2.7, au troisième ; la neuvième, §2.8, au quatrième). Tout le reste est mesuré par les bancs.
 
 Ce qui échoue devient un item de backlog avec son numéro de porte, pas une note mentale.
 
@@ -178,6 +181,47 @@ Rien. Ce lot ne touche à aucune donnée.
   de confirmer la copie ; accepte. Puis, dans la fiche de ta production, le menu offre la copie.
   `iPad`
 
+### 2.8 Nommer, pointer, un geste à la fois (cinquième aperçu)
+
+> **Pourquoi.** Au quatrième essai (11 nov., 11 h 15 à 11 h 53) : des flèches n'arrivaient qu'après le premier
+> toucher, ou jamais ; une leçon neuve sous le « Planificateur » ; l'export pour Léa sans signe ; « Continuer »
+> caché sans dire pourquoi. Le banc les rejoue sous WebKit à 1180 × 820, et son relevé juge les neuf parcours
+> (une ligne du geste, une flèche vers ce qu'il faut toucher, rien vers ce qui ne se voit pas) ; l'iPad dit si on
+> les voit. Sur un espace d'essai.
+
+- [ ] **2.8 a** L'accueil, au pied de la page.
+  ⮕ Attendu : « Bêta publique 1.242.1 · 1111-1445 », sur la même ligne
+  que « Nouveautés », sans déborder, à l'horizontale comme à la verticale.
+  `iPad`
+- [ ] **2.8 b** Ouvre successivement « Monter ton cours » (« Ta compétence »), « Mettre tes données à l'abri »
+  (« Pourquoi un codex », puis « Mettre à jour »), « Automatiser tes commentaires » (« Ta grille »), sans rien toucher
+  à l'ouverture de chaque étape.
+  ⮕ Attendu : dès l'ouverture, une flèche et le halo sur ce que nomme la ligne du geste (« Compétence », « Codex »,
+  puis « Mettre à jour le codex », la rangée des grilles) ; ensuite, à chaque geste, ils passent au suivant (le menu
+  « Type »).
+  `iPad`
+- [ ] **2.8 c** « Lire ta classe et intervenir » : « Ta classe d'un coup d'œil », puis « Ton intervention ».
+  ⮕ Attendu : une flèche vers « Détails » dès l'ouverture ; à « Ton intervention », une flèche vers le titre (et la
+  date, si elle est vide) et une vers « Créer l'intervention ».
+  `iPad`
+- [ ] **2.8 d** « Monter ton cours », « Ta leçon » : touche « Leçon » dans la palette.
+  ⮕ Attendu : la leçon neuve paraît entre les deux palettes, jamais sous le « Planificateur » ; aucun halo sur la
+  palette.
+  `iPad`
+- [ ] **2.8 e** « Recevoir… », « Rends tes rétroactions » : touche « Exporter pour Léa », avec au moins deux PDF.
+  ⮕ Attendu : tout de suite, le bouton dit « Préparation… », inactif, et la phrase « Préparation des PDF : ça peut
+  prendre un moment. » paraît, la barre partie ; le bouton revient après le téléchargement.
+  `iPad`
+- [ ] **2.8 f** « Automatiser tes commentaires », « Ta note » sans pondération, puis « Tes cas » : touche « Fixer une
+  limite ».
+  ⮕ Attendu : « Continuer » toujours visible, inactif, avec dessous la phrase de ce qui manque ; le halo et la flèche
+  sur la pondération (amenée à l'écran), puis sur la longueur, puis sur la tolérance ; « Continuer » s'active.
+  `iPad`
+- [ ] **2.8 g** « Notation alternative », « Ta synthèse » : reviens à l'écran d'évaluation (« Annoter et évaluer »).
+  ⮕ Attendu : flèche et halo sur « Liste » ; la Liste ouverte, sur « Actions » de la ligne évaluée ; « Continuer »
+  visible, inactif, la phrase dessous, jusqu'au PDF téléchargé.
+  `iPad`
+
 ---
 
 ## §3 · Décisions — ce qui attend ton verdict
@@ -208,7 +252,25 @@ place. Écris ta réponse, ne coche pas.
   « Lire ta classe » nomment aussi leur bouton, dans la ligne du geste (« Touche « Détails » », « Touche
   « Évaluation », en haut »), mais leurs flèches suivent ta décision §3.2 (vers ce que la bulle présente, jamais vers
   le bouton). Laissées ainsi. Veux-tu qu'elles suivent la nouvelle règle (une flèche vers le bouton nommé, en plus
-  ou à la place) ?
+  ou à la place) ? **Tranchée le 11 nov. (relais de 11 h 45) : en plus.** Ce qu'il faut toucher reçoit sa flèche
+  dès l'ouverture, dans les neuf parcours ; les sujets gardent la leur.
+- **3.6** Mots PROPOSÉS au cinquième aperçu (11 nov.), lus par l'enseignant·e ; ils partent tels quels et restent
+  corrigeables :
+  - au pied de l'accueil : « Bêta publique 1.242.1 · 1111-1445 » (le lecteur d'écran lit « build » devant le
+    numéro ; « (build 1111-1040) » ne tenait pas sur la ligne de « Nouveautés » à 820 px) ;
+  - l'export pour Léa : le bouton « Préparation… », la phrase « Préparation des PDF : ça peut prendre un moment. »,
+    puis « Réunion des PDF dans un ZIP… » ;
+  - sous « Continuer » (Commentaires) : « Pour continuer, ajoute un premier code : touche « + Ajouter un
+    sous-critère ». » · « Pour continuer, écris la pondération de ton critère, à côté de son type. » · « Pour
+    continuer, règle ton calcul : son réglage doit dépasser 0. » · « Pour continuer, écris la longueur de référence et
+    la tolérance, ou touche « Retirer la limite ». » · « Pour continuer, donne un nom à ta grille, puis touche
+    « Créer la grille ». »
+  - sous « Continuer » (Notation alternative) : « Pour continuer, ajoute au moins un type de production. » ·
+    « Pour continuer, ajoute au moins un forfait à la table. » · « Pour continuer, écris au moins une cible. » ·
+    « Pour continuer, télécharge son dossier : « Actions › Dossier PDF », sur la ligne de la production que tu viens
+    d'évaluer. »
+  - les lignes du geste neuves des neuf parcours (une cinquantaine), mot pour mot dans
+    `tests/unit/_helpers/gestes-proposes-2026-11-11.js`.
 
 ---
 

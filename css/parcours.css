@@ -725,3 +725,12 @@ body.parcours-actif.parcours-place-sous-les-colonnes #evaluations-importer { pad
 .parcours-bulle.parcours-bulle--reduite { padding: 10px 14px; gap: 0; }
 .parcours-bulle--reduite > :not(.parcours-bulle-geste) { display: none; }
 .parcours-bulle.parcours-bulle--large { width: min(560px, calc(100vw - 32px)); }
+
+/* Ce qu'attend un bouton de bulle (11 nov. 2026, captures 32 à 34) : sous les boutons, la couleur du geste, ce qui est à
+   faire maintenant pour que le bouton s'active. */
+.parcours-bulle-attente {
+    margin: 0;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--parcours-geste);
+}

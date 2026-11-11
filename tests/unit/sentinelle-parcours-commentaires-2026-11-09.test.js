@@ -22,6 +22,7 @@ import { tranche } from './_helpers/tranche.js';
 import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { TOUS as GESTES_PROPOSES } from './_helpers/gestes-proposes-2026-11-11.js';
 
 const racine = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..');
 const lire = (f) => readFileSync(path.join(racine, f), 'utf8');
@@ -67,10 +68,10 @@ describe('« Automatiser tes commentaires » : les bulles, mot pour mot', () => 
     const textes = chaines(PARCOURS, 'texte');
     const gestes = chaines(PARCOURS, 'geste');
 
-    it('douze bulles (les onze étapes et la variante sans fichier de l’étape 10), douze textes ; onze gestes (l’étape 11 n’en a pas)', () => {
+    it('douze bulles (les onze étapes et la variante sans fichier de l’étape 10), douze textes ; douze gestes (celui de l’étape 11 proposé le 11 nov. 2026)', () => {
         expect(titres).toHaveLength(12);
         expect(textes).toHaveLength(12);
-        expect(gestes).toHaveLength(11);
+        expect(gestes).toHaveLength(12);
     });
 
     it('les titres sont ceux de la consigne, dans l’ordre des onze étapes (la variante reprend celui de l’étape 10)', () => {
@@ -85,7 +86,8 @@ describe('« Automatiser tes commentaires » : les bulles, mot pour mot', () => 
         expect(CONSIGNE).toContain(`Texte : « ${texte} »`);
     });
 
-    it.each(gestes.map((g) => [g]))('le geste « %s » est celui de la consigne', (geste) => {
+    it.each(gestes.map((g) => [g]))('le geste « %s » est celui de la consigne, ou proposé le 11 nov. 2026', (geste) => {
+        if (GESTES_PROPOSES.includes(geste)) return;
         expect(CONSIGNE).toContain(`Geste : « ${geste} »`);
     });
 
@@ -103,6 +105,7 @@ describe('« Automatiser tes commentaires » : les bulles, mot pour mot', () => 
             const ligne = lignes[i];
             expect(ligne, e.cle + ' : le texte').toContain(`Texte : « ${champ(e.corps, 'texte')} »`);
             const geste = champ(e.corps, 'geste');
+            if (geste && GESTES_PROPOSES.includes(geste)) return;   // proposé le 11 nov. 2026, hors de la consigne
             if (geste) expect(ligne, e.cle + ' : le geste').toContain(`Geste : « ${geste} »`);
             else expect(ligne, e.cle + ' : pas de geste').not.toContain('Geste : «');
         });

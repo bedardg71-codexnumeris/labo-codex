@@ -304,6 +304,8 @@ async function parcourir(page, { largeur, theme, designee }) {
     // Étape 1 : les trois bandes, le contour sur « Détails ».
     await attendreEtape(page, 1);
     await contourSur(page, '#btn-toggle-panneau-prioritaire');
+    // Capture 28 : « Détails » a sa flèche dès l'ouverture.
+    await flecheVers(page, '#btn-toggle-panneau-prioritaire', 'étape 1, « Détails »');
     await expect(bulle(page).locator('.parcours-bulle-sortie')).toHaveText('Plus tard');
     await capture(page, `p7-etape-1-${suffixe}`);
     await page.click('#btn-toggle-panneau-prioritaire');
@@ -389,12 +391,17 @@ async function parcourir(page, { largeur, theme, designee }) {
     await capture(page, `p7-etape-6-${suffixe}`);
     await nouvelle.click();
 
-    // Étape 7 : la fiche, son nom coché d'avance ; le contour sur « Créer l'intervention ».
+    // Étape 7 : la fiche, son nom coché d'avance. Capture 29 : un geste à la fois — le titre, vide, a le contour et la
+    // flèche dès l'ouverture, amené dans la vue ; écrit, ils passent à « Créer l'intervention ».
     await attendreEtape(page, 7);
     await expect(page.locator(`#etud-${ECARTE.da}`)).toBeChecked();
-    await contourSur(page, '[data-fiche-intervention] [data-action="sauvegarderPresencesIntervention"]');
+    await contourSur(page, '#interventionTitre');
+    await flecheVers(page, '#interventionTitre', 'étape 7, le titre');
+    await expect(page.locator('#interventionTitre')).toBeInViewport();
     await capture(page, `p7-etape-7-${suffixe}`);
     await page.fill('#interventionTitre', 'Rattrapage de la séance du 27 août');
+    await contourSur(page, '[data-fiche-intervention] [data-action="sauvegarderPresencesIntervention"]');
+    await flecheVers(page, '[data-fiche-intervention] [data-action="sauvegarderPresencesIntervention"]', 'étape 7, « Créer l’intervention »');
     await page.click('[data-fiche-intervention] [data-action="sauvegarderPresencesIntervention"]');
 
     // Étape 8 : l'intervention est créée ; la pulsation sur le statut, qui ne répond pas (il écrirait sur l'intervention).

@@ -4,13 +4,107 @@
 `origin/main` à `77679dd` (1.241.0), poussée, non fusionnée. Consigne :
 `plans de travail/CONSIGNE-LOT-2026-11-09-parcours-fleches.md`, avec les trois ajouts de Cowork du 10 nov., 11 h 30.
 
-**Dernier relais : 11 nov., vers 11 h, Mac, WebKit.** Troisième essai de Grégoire sur l'iPad (9 h 11 à 9 h 26,
-« Évaluer une première production », grille « Test 1 » composée dans Conception › Grilles) : quatre corrections sur
-`lot/parcours-fleches-apercu` (la règle des formulaires à « Ta production », la flèche vers ce que nomme la bulle,
-l'écran d'évaluation, « Ta cartouche »). Section « Troisième essai sur l'iPad » juste dessous ; le second essai, le
-premier, le matin et la nuit, sous elle. **Préalables de la fusion dans `main`** : le quatrième essai de Grégoire
-(porte terrain §2.7), puis le verdict unique du groupe (flèches, normes, pastille, sous-navigation ; `RELAIS.md`).
+**Dernier relais : 11 nov., après-midi, Mac, WebKit.** Quatrième essai de Grégoire (11 h 15 à 11 h 53, build
+1111-1040, captures 21 à 34) : cinquième aperçu sur `lot/parcours-fleches-apercu` (relais du Projet de 11 h 45 et
+complément de 12 h 05). Section « Cinquième aperçu » juste dessous ; les essais précédents, sous elle. **Préalables de la
+fusion dans `main`** : le cinquième essai de Grégoire (porte terrain §2.7 et §2.8, mots §3.6), puis le verdict unique
+du groupe (flèches, normes, pastille, sous-navigation ; `RELAIS.md`).
 ---
+
+## Cinquième aperçu (11 nov., après-midi) : nommer, pointer, un geste à la fois
+
+Relais du Projet de 11 h 45 et complément de 12 h 05, sur le quatrième essai (captures 21 à 34). Sous WebKit, sur le Mac
+(`caffeinate -i`). Le texte des bulles validées ne change pas ; les mots neufs sont PROPOSÉS (porte §3.6).
+
+### Ce qui change, et où
+
+- **La règle du contour** (moteur, `dessinerFleches`) : ce qu'il faut toucher reçoit sa flèche dès l'ouverture de
+  l'étape, dans les neuf parcours, en plus des sujets ; `nommeLeContour` garde « la sienne seule ». Une zone qui contient
+  le contour garde sa flèche (le relais : « les zones de sujet qui ne sont pas le contour gardent leur flèche »).
+  Étapes des captures : « Ta compétence », « Ton idée maîtresse », « Ta leçon », « Ton évaluation » (la palette),
+  « Pourquoi un codex », « Ta classe d'un coup d'œil » (« Détails »), « Ton intervention », « Ta grille » (Commentaires).
+  `nommeLeContour` n'arrivait jamais au moteur dans « Notation alternative » (`construireEtape` ne le copiait pas) :
+  corrigé.
+- **Rien vers ce qui ne se voit pas** (`seVoit`) : ni flèche ni halo sur ce qu'une palette, une fenêtre ou la bulle
+  couvre ; pas de flèche vers un sujet tout entier hors de l'écran (capture 31). La bulle posée sur sa cible (aucune
+  place libre) : la flèche entre dans la partie visible (`versLaPartieVisible`, captures 28 et 29).
+- **Un geste à la fois** : quand ce qu'il faut toucher change dans l'étape, il est amené à l'écran une fois
+  (`suivreContour`), seulement s'il en sort ou si son conteneur le rogne. Passages un à un ajoutés : « Tes consignes »
+  (la date, puis la case), « Vérifie avant d'importer » (la production, « Importer », puis « Oui, importer »),
+  « Ta pratique » (le modèle, « Suivant → », « Créer la pratique »), « Ton intervention » (le titre, la date, puis
+  « Créer l'intervention »), « Tes cas » (la longueur, puis la tolérance), « Range ton fichier » (le « × » de l'aide de
+  l'aperçu, s'il est ouvert), « Ta synthèse » (« Liste », puis « Actions »).
+- **Les boutons qui attendent** (moteur, `attend`) : « Continuer » reste visible, inactif tant que manque ce qu'il
+  attend, la raison écrite dessous. Commentaires 3 à 6, Notation alternative (types, forfaits, cibles, synthèse) ;
+  `montrerBouton` retiré des deux parcours.
+- **Les lignes du geste** : 41 lignes neuves (49 emplacements), dans les sept parcours qui en manquaient
+  (`tests/unit/_helpers/gestes-proposes-2026-11-11.js`, mot pour mot ; sentinelle `sentinelle-gestes-proposes-2026-11-11`).
+- **Point 1, le build à l'accueil** : « Bêta publique 1.242.1 · 1111-1040 », lu de `version.js` (`window.BUILD_ID`) ; le
+  lecteur d'écran lit « build ». « (build 1111-1040) » ne tenait pas sur la ligne de « Nouveautés » à 820 et 390 px
+  (36 px de trop, mesuré) ; le build un cran plus petit (0,72 rem). `#build-numero` et `#version-entete` retirés de
+  `init-inline.js` (plus aucune page ne les portait) ; la sentinelle #849 lit Réglages › À propos.
+- **Point 4, la leçon sous le « Planificateur »** : un bloc neuf hors de tout bloc est amené une fois au milieu du
+  canevas libre, puis hors de toute palette (la plus large bande libre à sa hauteur). La carte écarte déjà les palettes
+  à gauche ou à droite ; ma lecture (INFÉRÉE, non vue chez Grégoire) : le « Planificateur » glissé vers le milieu n'est
+  ni l'un ni l'autre, et la leçon s'y pose dessous. C'est le cas que le banc rejoue. Les halos ajoutés par les parcours
+  (`poserExtras`) passent aussi par `seVoit`.
+- **Point 5, l'export pour Léa** : dès le toucher, le bouton dit « Préparation… », inactif ; la phrase « Préparation des
+  PDF : ça peut prendre un moment. » et la barre à 3 %, peintes avant le premier PDF ; « Réunion des PDF dans un ZIP… »
+  avant la compression. **Mesuré avant (2 PDF, WebKit) : premier signe à 2 292 ms** ; après : à la première image.
+
+### Les causes demandées
+
+- **Captures 28 et 29** : la bulle chevauche sa zone. Ni les bandes (1 000 × 464 px) ni la fiche (1 639 px de haut, plus
+  haute que l'écran) ne laissent de place libre à 1180 × 820 ; le tracé refusait toute flèche qui part dans la cible ou
+  la traverse (`tracerFleche` rendait null). Hypothèse de la capture 29 confirmée par la mesure.
+- **Capture 30** : rejouée sous WebKit à 1180 × 820 (« Grille algo », « Critère », « Algorithmique ») : l'atelier
+  s'ouvre et l'étape avance. Le blocage venait du guidage (aucune flèche à l'ouverture), que la règle du contour corrige.
+- **Capture 34** : **non reproduite**. Sur le banc, `avant` mène bien à la Liste (assertion ajoutée). La cause du maintien
+  sur l'écran d'évaluation chez Grégoire n'est pas établie ; la correction ne dépend pas d'elle : hors de la Liste, la
+  flèche et le halo vont à « Liste ».
+
+### Ce qui coûte, à voir sur l'iPad
+
+- La ligne du geste grandit la bulle. À 1180 × 820, la bulle de « Ta production » chevauche le haut du champ « Nom »
+  (la flèche entre dans sa partie visible) ; celle de « Tes tampons », la palette. Dans l'assistant de « Ta pratique »,
+  elle couvrait le modèle à choisir : elle évite maintenant les cartes de choix.
+- Deux flèches vers des cibles emboîtées (le groupe du menu et le menu, « Ta cartouche » ; la carte du critère et son
+  « Type ») : la règle du relais, appliquée telle quelle.
+
+### Le balayage
+
+Le relevé des ouvertures (`tests/integration/harness/releve-bulle.js`), posé dans les bancs des neuf parcours, juge à
+chaque ouverture d'étape et à chaque changement de contour, hors téléphone, la page immobile (et une sonde du moteur
+passée) : une ligne du geste ; aucun bouton de bulle caché, la raison écrite sous un bouton inactif ; le contour à
+l'écran, sa pulsation, au moins une flèche ; aucune flèche ni halo vers ce qui est hors de l'écran ou ne se voit pas ;
+aucun contour de parcours sur une palette ou la bulle. Un écart ne compte que s'il tient une seconde ; rien n'est jugé
+pendant une progression de l'application. **Sur le code d'avant**, il trouvait les étapes sans flèche (« Compétence »,
+« Idée maîtresse », « Leçon », « Évaluation », « Codex », `#selectEchelleCartouche`, `#dissection-creer-choix`).
+Ce qu'il a fait corriger en chemin : la confirmation d'import et l'aide de l'aperçu (le contour les suit), les sections
+de l'en-tête (exclues à tort par ma première version), « Suivant → » et « Actions » hors de la vue à l'ouverture.
+
+### Bancs et break-tests
+
+- **Passage final (WebKit, Mac, `caffeinate -i`)** : les treize bancs des parcours, du pied de page et de l'accueil,
+  **97 passés, 0 échec**, 25 sautés (les essais de captures, sans `CAPTURES_PARCOURS`) ; Vitest **11 462 / 11 462**.
+  Pas de Playwright complet (>10 min, hors de ces bancs) : le verdict du groupe se prend à la fusion.
+- Break-tests, chacun rouge (la défense retirée, le banc qui la juge) : la règle du contour (« Codex » sans flèche,
+  « Ta grille » sans flèche) ; `nommeLeContour` de « Mettre à jour » (2 flèches) ; une ligne du geste retirée (le relevé) ;
+  le contour de « Ton intervention » (pas sur le titre) ; `attend` (« Continuer » actif) ; « Liste » à « Ta synthèse »
+  (contour absent) ; le build à l'accueil ; l'export d'avant (premier signe à 2 292 ms > 100) ; la leçon amenée hors des
+  palettes ; `versLaPartieVisible` (sentinelle Vitest). **Non isolé** : le filtre `seVoit` des halos ajoutés (le banc de
+  la capture 25 déplace la leçon avant ; retiré seul, il reste vert).
+- **Rouge intermittent, antérieur au lot** : « 820 px : aucun avis ne couvre la bulle » (Commentaires), la bulle de « Ce
+  que tu comptes » couvre 10 445 px² pour un moindre de 10 301 : rouge à `144913cad` sans mes changements, vert au passage
+  final.
+- Une leçon du jour : sans `caffeinate -i`, deux bancs ont dépassé leur délai (la veille du Mac, déjà payée le 6 nov.).
+
+### Trouvailles en chemin, et leur issue
+
+- `nommeLeContour` ignoré par « Notation alternative » : **corrigé** (il casse ce que l'on livre).
+- La cause de la capture 34 : **inscrite** ici, à revoir si Grégoire la revit.
+- Le recouvrement de « Ce que tu comptes » à 820 px : **inscrit**, antérieur au lot.
+
 
 ## Troisième essai sur l'iPad (11 nov., 9 h 47) : « Ta production », la Liste, l'écran d'évaluation, « Ta cartouche »
 

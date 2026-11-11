@@ -229,7 +229,7 @@ test('pied de page : deux moitiés symétriques autour d\'un filet, logos à la 
     expect(g.filet).toBe('1px');
     expect(g.logos).toEqual([46, 46]);
     expect(g.logosAlignes).toBeLessThanOrEqual(1);
-    expect(g.version).toMatch(/^Bêta publique \d+\.\d+\.\d+$/);
+    expect(g.version).toMatch(/^Bêta publique \d+\.\d+\.\d+ · build \d{4}-\d{4}$/);   // le build à côté (11 nov. 2026)
     expect(g.blogue).toBe('Le blog : codexnumeris.org (s’ouvre dans un nouvel onglet)');
     await page.getByRole('button', { name: /^Nouveautés/ }).click();
     await expect(page.locator('#modal-nouveautes, .modal-overlay.actif').first()).toBeVisible();

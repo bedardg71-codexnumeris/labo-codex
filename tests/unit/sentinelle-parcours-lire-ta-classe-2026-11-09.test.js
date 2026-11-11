@@ -19,6 +19,7 @@ import { tranche } from './_helpers/tranche.js';
 import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { TOUS as GESTES_PROPOSES } from './_helpers/gestes-proposes-2026-11-11.js';
 
 const racine = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..');
 const lire = (f) => readFileSync(path.join(racine, f), 'utf8');
@@ -41,10 +42,10 @@ describe('les neuf bulles, mot pour mot', () => {
     const textes = chaines(ETAPES, 'texte');
     const gestes = chaines(ETAPES, 'geste');
 
-    it('neuf étapes, neuf titres, neuf textes, cinq gestes (les étapes 4, 5, 8 et 9 n’en ont pas)', () => {
+    it('neuf étapes, neuf titres, neuf textes, neuf gestes (ceux des étapes 4, 5, 8 et 9 proposés le 11 nov. 2026)', () => {
         expect(titres).toHaveLength(9);
         expect(textes).toHaveLength(9);
-        expect(gestes).toHaveLength(5);
+        expect(gestes).toHaveLength(9);
     });
 
     it.each(titres.map((t, i) => [i + 1, t]))('étape %i : le titre « %s » est celui de la consigne', (n, titre) => {
@@ -55,7 +56,8 @@ describe('les neuf bulles, mot pour mot', () => {
         expect(CONSIGNE).toContain(`Texte : « ${texte} »`);
     });
 
-    it.each(gestes.map((g) => [g]))('le geste « %s » est celui de la consigne', (geste) => {
+    it.each(gestes.map((g) => [g]))('le geste « %s » est celui de la consigne, ou proposé le 11 nov. 2026', (geste) => {
+        if (GESTES_PROPOSES.includes(geste)) return;
         expect(CONSIGNE).toContain(`Geste : « ${geste} »`);
     });
 

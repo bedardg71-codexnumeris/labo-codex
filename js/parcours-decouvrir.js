@@ -218,6 +218,7 @@
         },
         {
             titre: 'De quoi il a besoin',
+            geste: "Touche « Continuer ».",
             texte: "De quoi a-t-il besoin ? L'application le situe au niveau 2 (préventif) et nomme son défi principal : la nuance, l'un des critères de la grille. Ses absences et ses travaux non remis y sont peut-être pour quelque chose : moins de pratique, des modélisations manquées en classe. L'application ne peut pas l'affirmer, mais elle met les deux sous tes yeux. Avec tes présences, ton calendrier et ta carte d'alignement, elle te dira même quelle matière il a manquée. Le niveau dit l'intensité de l'aide, le défi dit où la porter ; l'intervention, c'est toi qui la décides.",
             avant: async function () {
                 await ouvrirProfilDeLoyal('accompagnement');
@@ -264,6 +265,7 @@
         },
         {
             titre: 'Poser ton cadre',
+            geste: "Touche « Commencer avec ma classe », ou « Continuer d'explorer la démo ».",
             texte: "Tout repose ici : ton trimestre, tes cours, tes groupes. Les dates de ton trimestre et ton horaire donnent tes séances, et les présences s'y accrochent, comme la matière manquée. Tu viens de faire le chemin à rebours ; avec ta classe, tu le feras à l'endroit : Cadre, Conception, Évaluation. Pas besoin de tout configurer pour voir un premier résultat : dès ta première prise de présences, ta classe apparaît, un point par étudiant·e.",
             sansSortie: true,
             avant: async function () { aller('calendrier', 'trimestre'); window.scrollTo(0, 0); },

@@ -10,7 +10,7 @@ import {
     etiqueterExemple, choisirDesNiveaux
 } from './classe-de-banc.js';
 import { attendreApplication } from './attendre-application.js';
-import { flecheVers, nombreDeFleches } from './fleches-de-banc.js';
+import { flecheVers, nombreDeFleches, flecheVisant } from './fleches-de-banc.js';
 
 let DOSSIER = process.env.CAPTURES_PARCOURS || '';
 /** Le dossier des captures (vide : aucune). */
@@ -89,17 +89,19 @@ export async function etape2(page, { cap, niveaux, echelleVide, grilleId = null,
     await capture(page, DOSSIER, `p3-2-${cap}`);
     await page.click('#conception-productions [data-action="creerNouvelleProduction"]');
     await contourSur(page, '#btnCreerProduction');
-    await nombreDeFleches(page, 3, 'étape 2, la fiche vide : le nom, le type, la pondération');
-    await flecheVers(page, '#productionTitre', 'étape 2, le nom');
+    await nombreDeFleches(page, 4, 'étape 2, la fiche vide : le nom, le type, la pondération, et « Créer la production »');
+    // ↻ 11 nov. 2026 (cinquième aperçu) : la ligne du geste grandit la bulle ; à 1180 × 820, faute de place libre, elle
+    // chevauche le haut du champ « Nom », et la flèche entre dans sa partie visible (`flecheVisant`).
+    await flecheVisant(page, '#productionTitre', 'étape 2, le nom');
     await menusLibres(page, 'étape 2, le titre');
     await page.fill('#productionTitre', 'Journal de lecture 1');
-    await nombreDeFleches(page, 2, 'étape 2, le nom rempli');
+    await nombreDeFleches(page, 3, 'étape 2, le nom rempli');
     await menusLibres(page, 'étape 2, le type');
     await page.selectOption('#productionType', 'travail');
     await page.fill('#productionActivite', 'Lire un roman et en rendre compte');
     await page.fill('#productionPonderation', '20');
     // Les champs obligatoires remplis : la grille, que la bulle nomme (« associe-lui la grille »).
-    await nombreDeFleches(page, 1, 'étape 2, la grille à choisir');
+    await nombreDeFleches(page, 2, 'étape 2, la grille à choisir, et le bouton');
     await flecheVers(page, GROUPE_GRILLE, 'étape 2, la grille');
     await contourSur(page, '#btnCreerProduction');
     await menusLibres(page, 'étape 2, la grille');
@@ -108,7 +110,7 @@ export async function etape2(page, { cap, niveaux, echelleVide, grilleId = null,
     await page.selectOption('#productionGrille', grille);
     if (niveaux) {
         // « … et son échelle si elle en a une » : la flèche va à « Échelle de performance », restée à « Aucune ».
-        await nombreDeFleches(page, 1, 'étape 2, l’échelle');
+        await nombreDeFleches(page, 2, 'étape 2, l’échelle, et le bouton');
         await flecheVers(page, GROUPE_ECHELLE, 'étape 2, l’échelle');
         await menusLibres(page, 'étape 2, l’échelle');
         await capture(page, DOSSIER, `p3-2-fiche-echelle-${cap}`);
@@ -121,8 +123,10 @@ export async function etape2(page, { cap, niveaux, echelleVide, grilleId = null,
         // Laissée vide, l'échelle reste ce qui manque : sa flèche reste ; on crée la production quand même.
         await flecheVers(page, GROUPE_ECHELLE, 'étape 2, l’échelle laissée vide');
     } else {
-        // Une grille en points n'en demande pas ; l'échelle choisie, plus rien : le halo seul.
-        await nombreDeFleches(page, 0, 'étape 2, tout est choisi');
+        // Une grille en points n'en demande pas ; l'échelle choisie, plus rien que le bouton : sa flèche et son halo (la
+        // règle du contour, 11 nov. 2026, 11 h 45 : une étape qui a un contour n'est jamais sans flèche).
+        await nombreDeFleches(page, 1, 'étape 2, tout est choisi');
+        await flecheVers(page, '#btnCreerProduction', 'étape 2, tout est choisi');
         await bulleNeCouvrePas(page, '#btnCreerProduction', 'étape 2');
     }
     await contourSur(page, '#btnCreerProduction');
@@ -139,10 +143,10 @@ export async function etape2(page, { cap, niveaux, echelleVide, grilleId = null,
 /** Étape 3 : « Plus tard », un rechargement, « Reprendre » ; puis la date et « Consignes transmises ». */
 export async function etape3(page, { cap, plusTard }) {
     await etape(page, 3, 'Tes consignes', { focus: false });
-    await contourSur(page, '.echeance-simple-ligne');
-    // « coche « Consignes transmises » » : la bulle le nomme, la flèche y va (11 nov. 2026, 9 h 47).
+    // Un geste à la fois (11 nov. 2026, 12 h 05) : la date de remise d'abord, puis « Consignes transmises ».
+    await contourSur(page, '#productionDateEcheance');
     await nombreDeFleches(page, 1, 'étape 3');
-    await flecheVers(page, '.echeance-simple-ligne', 'étape 3, « Consignes transmises »');
+    await flecheVers(page, '#productionDateEcheance', 'étape 3, la date de remise');
     await bulleNeCouvrePas(page, '#productionDateEcheance', 'étape 3');
     await bulleNeCouvrePas(page, '#productionEcheanceAssignee', 'étape 3');
     await capture(page, DOSSIER, `p3-3-${cap}`);
@@ -160,10 +164,13 @@ export async function etape3(page, { cap, plusTard }) {
         await capture(page, DOSSIER, `panneau-${cap}-en-cours`);
         await item(page).locator('.assistance-parcours-bouton').click();
         await etape(page, 3, 'Tes consignes');
-        await contourSur(page, '.echeance-simple-ligne');
+        await contourSur(page, '#productionDateEcheance');
     }
     await page.fill('#productionDateEcheance', '2026-11-03');
     expect(await page.evaluate(() => ParcoursMoteur.etapeCourante())).toBe(2);   // la date seule ne suffit pas
+    // La date écrite : flèche et halo passent à la case (« coche « Consignes transmises » », 11 nov. 2026, 9 h 47).
+    await contourSur(page, '.echeance-simple-ligne');
+    await flecheVers(page, '.echeance-simple-ligne', 'étape 3, « Consignes transmises »');
     await page.check('#productionEcheanceAssignee');
 }
 

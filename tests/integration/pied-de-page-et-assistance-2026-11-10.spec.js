@@ -51,7 +51,11 @@ for (const largeur of [820, 390]) {
             const pied = page.locator('.accueil-pied-application');
             await expect(pied).toBeVisible();
             const ligne = pied.locator('.accueil-pied-ligne');
-            await expect(ligne.locator('.accueil-pied-version')).toHaveText(/^Bêta publique \d+\.\d+\.\d+$/);
+            // Le build à côté de la version (Grégoire, 11 nov. 2026 : « c'est le lieu le plus rapide pour l'identifier »),
+            // lu de version.js : celui du code chargé.
+            const attendu = await page.evaluate(() => `Bêta publique ${window.__VERSION__.beta} · build ${window.__VERSION__.build}`);
+            expect(attendu).toMatch(/^Bêta publique \d+\.\d+\.\d+ · build \d{4}-\d{4}$/);   // « build », lu au lecteur d'écran
+            await expect(ligne.locator('.accueil-pied-version')).toHaveText(attendu);
             await expect(ligne.locator('.accueil-pied-lien')).toHaveText('Nouveautés');
             const devise = pied.locator('.accueil-pied-tagline');
             await expect(devise).toHaveText(DEVISE);

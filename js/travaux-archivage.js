@@ -894,6 +894,12 @@
      * @param {string} productionId - ID de la production
      * @param {string|null} da - DA d'un etudiant specifique (null = tous)
      */
+    // PROPOSÉ (11 nov. 2026, à valider par Grégoire) : ce que lit l'enseignant·e avant le premier PDF, puis au ZIP.
+    const TEXTES_LEA = {
+        preparation: 'Préparation des PDF : ça peut prendre un moment.',
+        zip: 'Réunion des PDF dans un ZIP…'
+    };
+
     async function lancerExportLea(productionId, da, reprisesSeulement) {
         if (!productionId) {
             alert('Sélectionne une production.');
@@ -904,6 +910,13 @@
             const date = new Date().toISOString().split('T')[0];
 
             _reinitialiserBarreProgression('travaux-barre-progression-lea', 'travaux-texte-progression-lea');
+            // Le premier signe, tout de suite (11 nov. 2026, capture 21) : la phrase et le départ de la barre, peints
+            // avant que la préparation du premier PDF ne retienne la page (une image, puis la suite).
+            const texteLea = document.getElementById('travaux-texte-progression-lea');
+            if (texteLea) texteLea.textContent = TEXTES_LEA.preparation;
+            const barreLea = document.getElementById('travaux-barre-progression-lea');
+            if (barreLea) barreLea.style.width = '3%';
+            await new Promise(function(fin) { requestAnimationFrame(function() { setTimeout(fin, 0); }); });
 
             const { blobs, nomProd, echecs, sansSynthese } = await exporterPourLea(productionId, da, reprisesSeulement, (traites, total) => {
                 const pourcent = Math.round((traites / total) * 100);
@@ -931,6 +944,8 @@
                 for (const { blob, nom } of blobs) {
                     zip.file(nom, blob);
                 }
+                const texteZip = document.getElementById('travaux-texte-progression-lea');
+                if (texteZip) texteZip.textContent = TEXTES_LEA.zip;
                 const zipBlob = await zip.generateAsync({ type: 'blob', compression: 'DEFLATE', compressionOptions: { level: 6 } });
                 telechargerBlob(zipBlob, `Lea_${nomProd}_${date}.zip`);
             }

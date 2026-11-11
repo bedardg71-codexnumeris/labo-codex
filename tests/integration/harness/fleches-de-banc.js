@@ -109,3 +109,31 @@ export async function rienNeRetientLeToucher(page, points, contexte = '') {
     expect(pris, (contexte ? contexte + ' : ' : '') + 'aucune couche du moteur ne capte le toucher').toEqual([]);
     await expect(page.locator('#parcours-voile'), 'le voile n’existe plus').toHaveCount(0);
 }
+
+/**
+ * Une flèche VISE l'élément (sa cible, `data-cible`, est la boîte de l'élément) et sa pointe s'arrête à 9 px au plus de
+ * lui, ou dans la partie que la bulle laisse voir quand la bulle le chevauche (11 nov. 2026, captures 28 et 29 : faute
+ * de place libre, la flèche entre dans ce qui reste visible). Rend la flèche trouvée.
+ */
+export async function flecheVisant(page, selecteur, contexte = '') {
+    let trouvee = null;
+    await expect.poll(async () => {
+        const cible = await page.evaluate(`(${UNION})(${JSON.stringify([selecteur])})`);
+        const marques = await page.evaluate(() => [...document.querySelectorAll('#parcours-fleches g.parcours-fleche')]
+            .map((g) => ({ cible: (g.getAttribute('data-cible') || '').split(',').map(Number), trace: g.getAttribute('data-trace') })));
+        const e = await etatFleches(page);
+        if (!cible) return 'cible absente';
+        if (!e || !e.fleches.length) return 'aucune flèche';
+        // Sa cible est l'élément, ou contient l'élément (des cibles qui se touchent sont fondues en une).
+        const k = marques.findIndex((m) => m.cible[0] <= cible.left + 2 && m.cible[1] <= cible.top + 2
+            && m.cible[2] >= cible.right - 2 && m.cible[3] >= cible.bottom - 2);
+        if (k === -1) return 'aucune flèche ne vise ' + selecteur;
+        trouvee = e.fleches.find((f) => f.trace === marques[k].trace) || null;
+        if (!trouvee) return 'flèche introuvable';
+        const [l, t, r, bas] = marques[k].cible;
+        const d = distance(trouvee.pointe, { left: l, top: t, right: r, bottom: bas }), b = e.bulle;
+        const dansLaBulle = trouvee.pointe.x > b.left && trouvee.pointe.x < b.right && trouvee.pointe.y > b.top && trouvee.pointe.y < b.bottom;
+        return d <= 9 && !dansLaBulle && distance(trouvee.depart, b) <= 1.5 ? 'posée' : `pointe à ${Math.round(d)} px`;
+    }, { message: (contexte ? contexte + ' : ' : '') + 'une flèche vise ' + selecteur, timeout: 5000 }).toBe('posée');
+    return trouvee;
+}

@@ -3,7 +3,7 @@ import { releverLaBulle } from './harness/releve-bulle.js';
 // La bulle ne couvre jamais ses zones quand une place les laisse libres (Grégoire, 11 nov. 2026) : relevé à chaque essai.
 releverLaBulle(test);
 import { ouvrirPanneau, attendreEtape, contourSur, bulleNeCouvrePas, capture, bulle, ouvrirEspaceVide, mettreLaClasseEnPlace } from './harness/classe-de-banc.js';
-import { flecheVers, rienNeRetientLeToucher } from './harness/fleches-de-banc.js';
+import { flecheVers, flecheVisant, rienNeRetientLeToucher } from './harness/fleches-de-banc.js';
 import { leParcoursEntier, dossierDesCaptures } from './harness/parcours-3-de-banc.js';
 import { attendreApplication } from './harness/attendre-application.js';
 
@@ -219,7 +219,8 @@ test('« Recevoir les productions, rendre tes rétroactions », la voie des fich
     await contourSur(page, '#travaux-palette-tampons [title="Personnaliser"]');
     // ↻ 10 nov. 2026 (« Les flèches des parcours ») : l'essai lisait ici le voile « normal ». Le voile est retiré : la
     // palette revenue est ce dont parle la bulle (une flèche y va), et rien ne retient plus le toucher.
-    await flecheVers(page, '#travaux-palette-tampons', 'étape 4, à la reprise');
+    // ↻ 11 nov. 2026 : la bulle, plus haute de sa ligne du geste, chevauche la palette ; la flèche entre dans sa partie visible.
+    await flecheVisant(page, '#travaux-palette-tampons', 'étape 4, à la reprise');
     await rienNeRetientLeToucher(page, [[12, 12], [600, 400]], 'étape 4, à la reprise');
     await capture(page, DOSSIER, `p4-4-reprise-${cap}`);
     await page.locator('#travaux-palette-tampons [title="Personnaliser"]').click();
@@ -277,9 +278,36 @@ test('« Recevoir les productions, rendre tes rétroactions », la voie des fich
     await item(page).locator('.assistance-parcours-bouton').click();
     await n(page, 8, 9, 'Rends tes rétroactions');
     await page.selectOption('#travaux-archivage-lea-production', pid);
+    // Le premier signe (Grégoire, 11 nov. 2026, capture 21 : « rien ne semble se passer pendant un moment ») : mesuré du
+    // toucher au premier signe peint (le bouton inactif qui dit qu'il prépare, la phrase, la barre partie), à chaque image.
+    await page.evaluate(() => {
+        const b = document.querySelector('[data-action="travauxUI.lancerExportLea"]');
+        window.__lea = { t0: 0, signe: null, telecharge: null, libelle: b.textContent };
+        b.addEventListener('click', () => {
+            window.__lea.t0 = performance.now();
+            const regarder = () => {
+                const barre = document.getElementById('travaux-barre-progression-lea');
+                const texte = document.getElementById('travaux-texte-progression-lea');
+                if (b.disabled || (texte && texte.textContent.trim()) || (barre && parseFloat(barre.style.width) > 0)) {
+                    window.__lea.signe = performance.now() - window.__lea.t0;
+                    window.__lea.etat = { inactif: b.disabled, bouton: b.textContent, texte: texte && texte.textContent, barre: barre && barre.style.width };
+                    return;
+                }
+                requestAnimationFrame(regarder);
+            };
+            requestAnimationFrame(regarder);
+        }, { capture: true, once: true });
+        window.addEventListener('travaux-export-lea-telecharge', () => { window.__lea.telecharge = performance.now() - window.__lea.t0; }, { once: true });
+    });
     const telechargement = page.waitForEvent('download');
     await page.click('[data-action="travauxUI.lancerExportLea"]');
     expect((await telechargement).suggestedFilename()).toBe('Lea_Journal-de-lecture-1_2026-11-10.zip');
+    const lea = await page.evaluate(() => window.__lea);
+    test.info().annotations.push({ type: 'export Léa, 2 PDF', description: `premier signe à ${Math.round(lea.signe)} ms, téléchargement à ${Math.round(lea.telecharge)} ms` });
+    expect(lea.signe, 'un signe dès la première image après le toucher').toBeLessThan(100);
+    expect(lea.etat).toEqual({ inactif: true, bouton: 'Préparation…', texte: 'Préparation des PDF : ça peut prendre un moment.', barre: '3%' });
+    await expect(page.locator('[data-action="travauxUI.lancerExportLea"]'), 'le bouton revient après le téléchargement').toBeEnabled();
+    await expect(page.locator('[data-action="travauxUI.lancerExportLea"]')).toHaveText(lea.libelle);
 
     // 9. Remets-les : la bulle au centre, « Terminer ».
     await n(page, 9, 9, 'Remets-les', { focus: false });

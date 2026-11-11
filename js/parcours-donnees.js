@@ -194,6 +194,7 @@
     var ETAPES = [
         {
             titre: 'Pourquoi un codex',
+            geste: "Touche « Codex », en haut de l'écran.",
             texte: TEXTE_1,
             avant: async function () {
                 auDessusDesFenetres(false);
@@ -206,6 +207,7 @@
         },
         {
             titre: 'Mettre à jour',
+            geste: "Touche « Mettre à jour le codex ».",
             texte: TEXTE_2,
             avant: async function () {
                 auDessusDesFenetres(false);
@@ -213,12 +215,16 @@
                 ouvrirMenu();
             },
             zones: function () { return [hautDuMenu()]; },
+            // La bulle ne nomme que « Mettre à jour le codex » : la flèche y va, pas au haut du menu (Grégoire, 11 nov.
+            // 2026, capture 27 : « pointe à côté »).
+            nommeLeContour: true,
             // Le menu refermé (un toucher à côté), le contour revient sur « Codex ».
             contour: function () { return itemMettreAJour() || (tentativeEnCours() ? null : boutonCodex()); },
             atteint: function () { return !!apercu(); }
         },
         {
             titre: 'Range ton fichier',
+            geste: "Touche « Mettre à jour », puis range ton fichier dans un lieu protégé.",
             texte: texteEtape3('fenetre', false),
             avant: async function () {
                 auDessusDesFenetres(true);
@@ -248,6 +254,9 @@
                 return p ? [p] : [];
             },
             contour: function () {
+                // Le « i » de l'aperçu ouvert (son explication couvre « Mettre à jour ») : d'abord le refermer (11 nov. 2026).
+                var fermer = q('.aide-contextuelle-modal .primo-popup-fermer');
+                if (fermer && visible(fermer)) return fermer;
                 var b = boutonDeLApercu();
                 if (b) return b;
                 if (fenetreDeDialogue() || tentativeEnCours()) return null;
@@ -263,6 +272,7 @@
         },
         {
             titre: 'Quand le rouvrir',
+            geste: "Touche « Terminer ».",
             texte: TEXTE_4,
             sansSortie: true,
             avant: async function () {

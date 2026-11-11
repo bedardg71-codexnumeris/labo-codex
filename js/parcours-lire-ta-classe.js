@@ -334,6 +334,7 @@
         },
         {
             titre: 'De quoi il ou elle a besoin',
+            geste: "Touche « Continuer ».",
             texte: "Ici, l'application passe de ce qu'elle observe à ce qu'elle en tire. La carte « Contexte d'apprentissage » résume son assiduité et sa complétion en une phrase, avec une piste : quand l'une ou l'autre est basse, une rencontre peut aider à comprendre ce qui se passe. La carte de la Réponse à l'intervention le ou la situe à un niveau, d'après ses évaluations et ton seuil minimal de réussite ; la phrase qui suit dit pourquoi. Elle nomme aussi son défi principal : le critère de ta grille où il ou elle bute. Si ses productions ne montrent pas encore de difficulté, le niveau reste au 1 ou « En attente » : c'est alors le contexte qui parle. Ces pistes sont des propositions : c'est toi qui décides.",
             avant: async function () {
                 await ouvrirProfil(memoire.da, 'accompagnement');
@@ -355,6 +356,7 @@
         },
         {
             titre: 'Ta grille de dépistage',
+            geste: "Touche « Régler les outils d'observation », puis choisis ta grille dans « Grille de critères pour le dépistage ».",
             texte: "Son profil ne nomme aucun défi : l'application ne sait pas encore à quels critères comparer ses résultats. Il lui faut ta grille de dépistage. Choisis celle dont les critères reviennent le plus souvent dans tes évaluations. L'application reconnaît un critère à son nom : dans tes autres grilles, elle ne retient que les critères qui portent le même nom qu'un critère de celle-ci. Touche « Régler les outils d'observation », puis choisis ta grille dans « Grille de critères pour le dépistage ». Tu reviendras ensuite à son profil.",
             avant: async function () {
                 if (!sousSectionVisible('labo-accompagnement')) {
@@ -406,9 +408,17 @@
                 await attendre(fiche, 2000);
             },
             zones: function () { return [fiche()]; },
+            // La règle des formulaires (11 nov. 2026, capture 29) : une flèche par champ obligatoire encore vide (le
+            // titre, la date) ; la fiche, plus haute que l'écran, n'en reçoit plus (son centre tombait sous la bulle).
+            formulaire: fiche,
+            // Un geste à la fois (11 nov. 2026, 12 h 05, capture 29) : le titre, puis la date, tant qu'ils sont vides (la fiche
+            // est plus haute que l'écran : ce qu'il faut toucher est amené dans la vue) ; puis « Créer l'intervention ».
             contour: function () {
                 var f = fiche();
-                return f ? f.querySelector('[data-action="sauvegarderPresencesIntervention"]') : null;
+                if (!f) return null;
+                var vide = ['interventionTitre', 'interventionDate'].map(function (id) { return document.getElementById(id); })
+                    .find(function (c) { return c && M().visible(c) && !String(c.value || '').trim(); });
+                return vide || f.querySelector('[data-action="sauvegarderPresencesIntervention"]');
             },
             atteint: function () {
                 // La création est faite quand la fiche est en base (« Intervention créée. » s'affiche alors).
@@ -420,6 +430,7 @@
         },
         {
             titre: "Après l'intervention",
+            geste: "Touche « Continuer ».",
             texte: "Ton intervention est créée, en préparation. Une fois que tu l'auras donnée, rouvre-la, depuis Suivi › Interventions ou depuis son profil : coche les personnes présentes, note tes observations, puis choisis « Complétée ». Une case te propose alors de reporter ces présences dans ta saisie : la présence à l'intervention compensera une absence au cours ; ce report ne se fait qu'une fois. Le bilan apparaît ensuite : pour chaque critère ciblé, la moyenne avant et après des personnes cochées, puis « Objectif atteint ? » et « Suite envisagée ». Il ne compare ni l'assiduité, ni la complétion, ni l'écart avec le reste du groupe. Et une remontée n'est qu'un indice : qui part du plus bas remonte souvent un peu, même sans intervention.",
             avant: async function () {
                 if (!fiche() && interventionEnregistree(memoire.ficheId) && typeof window.naviguerVersIntervention === 'function') {
@@ -442,6 +453,7 @@
         },
         {
             titre: 'Pour aller plus loin',
+            geste: "Touche « Terminer ».",
             texte: "Te voilà avec une première intervention notée. Tu n'as rien de plus à retenir : l'application garde pour toi les signaux, l'historique et l'« avant » de chaque intervention. Si tu veux aller plus loin, à ton rythme : dans son profil, « Confidentiel » range ce qui ne doit pas circuler, comme un diagnostic ou son parcours antérieur ; l'onglet « Rapport » prépare à la demande une synthèse à copier, par exemple pour l'aide pédagogique individuelle, avec les sections que tu choisis ; dans Labo › Observation, tu règles tes seuils d'assiduité et de complétion, ta grille de dépistage et le seuil de défi d'un critère. Avant chaque cours, un coup d'œil à Suivi › Groupe te dira qui a besoin de toi.",
             centre: true,
             sansSortie: true,

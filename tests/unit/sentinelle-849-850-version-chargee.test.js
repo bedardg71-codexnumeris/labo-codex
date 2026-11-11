@@ -43,7 +43,7 @@ function element() {
 
 function monter({ version, idb = {}, reponseServeur = null }) {
     const ids = ['bandeau-mise-a-jour', 'bandeau-mise-a-jour-build', 'bandeau-mise-a-jour-texte',
-        'bandeau-mise-a-jour-date', 'version-entete', 'build-numero'];
+        'bandeau-mise-a-jour-date', 'apropos-version-beta', 'apropos-version-build'];
     const dom = Object.fromEntries(ids.map((id) => [id, element()]));
     const stock = new Map(Object.entries(idb));
     const ls = new Map([...stock].map(([k, v]) => [k, JSON.stringify(v)]));
@@ -91,7 +91,8 @@ describe('#849 · la version affichée est celle du code chargé', () => {
         await h.run('verifierMiseAJourDistante()');
         expect(h.ctx.VERSION_MAJEURE).toBe('9.9.0');
         expect(h.ctx.BUILD_ID).toBe('0101-0900');
-        expect(h.dom['build-numero'].textContent).toBe('(Build 0101-0900)');
+        // Réglages › À propos (#build-numero est parti le 11 nov. 2026 : plus aucune page ne le portait).
+        expect(h.dom['apropos-version-build'].textContent).toBe('0101-0900');
         expect(h.dom['bandeau-mise-a-jour-build'].textContent).toBe('BÊTA PUBLIQUE 9.9.0 (BUILD 0101-0900)');
         expect(h.dom['bandeau-mise-a-jour-texte'].textContent).toContain('Nouvelle version chargée');
     });

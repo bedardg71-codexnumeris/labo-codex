@@ -416,45 +416,47 @@ test('la porte de l’accueil commence à la première étape non faite ; avant 
 });
 
 // 11 nov. 2026 (Grégoire, 8 h 26) : dans une étape qui montre un formulaire, une flèche par champ obligatoire ENCORE VIDE ;
-// chacune disparaît quand son champ est rempli ; quand il n'en reste aucune, seul le halo du bouton demeure.
-test('les formulaires du Cadre : une flèche par champ obligatoire vide, qui part quand il est rempli ; à la fin, le halo seul', async ({ page }) => {
+// chacune disparaît quand son champ est rempli. ↻ 11 nov. 2026, 11 h 45 (la règle du contour) : le bouton à toucher a la
+// sienne dès l'ouverture, en plus ; quand il ne reste aucun champ, sa flèche et son halo demeurent.
+test('les formulaires du Cadre : une flèche par champ obligatoire vide, qui part quand il est rempli, et celle du bouton ; à la fin, le bouton seul', async ({ page }) => {
     test.setTimeout(120000);
     await ouvrirEspaceVide(page, 1180, { hauteur: 820 });
     await ouvrirPanneau(page);
     await page.click('#panneau-assistance [data-parcours="classe"] .assistance-parcours-bouton');
     await attendreEtape(page, 1, 'Ton trimestre');
     const TRIMESTRE = ['#v2-nomTrimestre', '#v2-sessionTrimestre', '#v2-anneeTrimestre', '#v2-debutTrimestre', '#v2-finCours', '#v2-finTrimestre'];
-    await nombreDeFleches(page, 6, 'étape 1');
+    await nombreDeFleches(page, 7, 'étape 1');
     for (const sel of TRIMESTRE) await flecheVers(page, sel, 'étape 1');
     await page.fill('#v2-nomTrimestre', 'Automne 2026');
-    await nombreDeFleches(page, 5, 'étape 1, le nom rempli');
+    await nombreDeFleches(page, 6, 'étape 1, le nom rempli');
     await page.selectOption('#v2-sessionTrimestre', 'automne');
     await page.fill('#v2-anneeTrimestre', '2026');
-    await nombreDeFleches(page, 3, 'étape 1, il reste les trois dates');
+    await nombreDeFleches(page, 4, 'étape 1, il reste les trois dates');
     await page.fill('#v2-debutTrimestre', '2026-08-24');
     await page.fill('#v2-finCours', '2026-12-11');
     await page.fill('#v2-finTrimestre', '2026-12-21');
-    await nombreDeFleches(page, 0, 'étape 1, tout est rempli');
+    await nombreDeFleches(page, 1, 'étape 1, tout est rempli');
     await contourSur(page, '#v2-btnCreerTrimestre');
+    await flecheVers(page, '#v2-btnCreerTrimestre', 'étape 1, tout est rempli');
     await page.click('#v2-btnCreerTrimestre');
 
     // Le cours : le code, la pondération, la discipline (le nom n'est pas obligatoire).
     await attendreEtape(page, 2, 'Ton cours');
-    await nombreDeFleches(page, 3, 'étape 2');
+    await nombreDeFleches(page, 4, 'étape 2');
     for (const sel of ['#v2-codeCours', '#v2-ponderation', '#v2-disciplineCours']) await flecheVers(page, sel, 'étape 2');
     await remplirCours(page);
 
     // Le profil : les quatre champs que nomme la bulle (au second essai, une seule flèche, vers « Institution »).
     await attendreEtape(page, 3, 'Ton profil');
-    await nombreDeFleches(page, 4, 'étape 3');
+    await nombreDeFleches(page, 5, 'étape 3');
     for (const sel of ['#v2-ens-prenom', '#v2-ens-nom', '#v2-ens-courriel', '#v2-ens-institution']) await flecheVers(page, sel, 'étape 3');
     await page.fill('#v2-ens-prenom', 'Camille');
-    await nombreDeFleches(page, 3, 'étape 3, le prénom rempli');
+    await nombreDeFleches(page, 4, 'étape 3, le prénom rempli');
     await remplirProfil(page);
 
     // La classe : les deux façons, chacune sa flèche.
     await attendreEtape(page, 4, 'Ta classe');
-    await nombreDeFleches(page, 2, 'étape 4');
+    await nombreDeFleches(page, 3, 'étape 4');
     await flecheVers(page, '#v2-donneesCollees', 'étape 4');
     await flecheVers(page, '#v2-fichierCsvEntree', 'étape 4');
     await bulleNeCouvrePas(page, '#v2-fichierCsvEntree', 'étape 4');

@@ -541,6 +541,10 @@
         {
             titre: 'Ta grille',
             get texte() { return choixRendu ? TEXTE_1_CHOIX : TEXTE_1; },
+            get geste() {
+                return choixRendu ? "Choisis les points ou les niveaux."
+                    : "Colle ta grille, montre ce qu'est chaque morceau, puis touche « Créer » ; ou touche « Partir de zéro ».";
+            },
             avant: async function () {
                 choixRendu = choixVisible();
                 // La personne est peut-être déjà dans la dissection, ou dans l'éditeur (« Partir de zéro ») : rien ne bouge.
@@ -558,6 +562,7 @@
         },
         {
             titre: 'Ta production',
+            geste: "Touche « + Nouvelle production », remplis les champs obligatoires, choisis ta grille, puis touche « Créer la production ».",
             texte: "Une production, c'est ce que tes étudiant·es font dans une activité d'apprentissage : un texte, mais aussi un stage, un film, un enregistrement, une entrevue, un labo. Ce n'est pas toujours un objet qu'on remet : c'est ce que l'étudiant·e fait quand il ou elle apprend, et c'est cet apprentissage que tu évalues à travers elle. Décris celle que tu demandes : son titre, son type, sa pondération, et surtout l'activité d'apprentissage : c'est ce que tes étudiant·es retrouveront en tête de leur synthèse de rétroaction. Puis associe-lui la grille que tu viens de créer, et son échelle si elle en a une. La production relie ce que tu demandes à la façon dont tu l'évalues : ce que chaque étudiant·e fait s'y rattache, et sa pondération dit ce qu'elle pèsera dans la note du cours.",
             avant: async function () {
                 aller('conception', 'productions');
@@ -581,16 +586,23 @@
         },
         {
             titre: 'Tes consignes',
+            geste: "Écris la date de remise, puis coche « Consignes transmises ».",
             texte: "Écris ce que tes étudiant·es doivent savoir pour réussir : l'objectif d'apprentissage, la tâche, les consignes précises. Touche « Préparer le PDF » : la feuille de consignes et ta grille en sortent prêtes à remettre. Remettre la grille avec la tâche, c'est leur dire d'avance sur quoi leur production sera évaluée. Quand la feuille est remise, pose la date de remise et coche « Consignes transmises » : la production entre alors au calendrier. Dès ta première évaluation, ce que tes étudiant·es ont remis compte dans leur complétion, et tes évaluations, dans leur performance.",
             avant: ouvrirLaProduction,
             // La date et la case, ensemble : la bulle se pose au-dessus ou au-dessous du bloc, sans couvrir la date.
             zones: function () { return [el('sectionPlanification') || caseConsignes()]; },
-            contour: caseConsignes,
+            // Un geste à la fois (11 nov. 2026, 12 h 05) : la date de remise d'abord, puis la case.
+            contour: function () {
+                var s = el('sectionPlanification');
+                var date = s ? s.querySelector('input[type="date"]') : null;
+                return date && vis(date) && !date.value ? date : caseConsignes();
+            },
             nommeLeContour: true,   // « coche « Consignes transmises » » (11 nov. 2026, 9 h 47)
             atteint: consignesTransmises
         },
         {
             titre: 'Une première production',
+            geste: "Touche « Actions › Évaluer » sur sa ligne, choisis un niveau par critère, puis touche « Verrouiller ».",
             texte: "Évalue une première production. Elle est sur papier, ou c'est un exposé, une performance ? Rien à importer : touche « Actions › Évaluer » sur la ligne de l'étudiant·e. Pour chaque critère, choisis le niveau ou les points que tu attribuerais : la note se calcule à mesure, et une rétroaction s'écrit sous tes yeux : chaque critère de ta grille, avec ce que tu lui attribues. Tu y mettras bientôt tes propres mots. Quand tu es satisfait·e, touche « Verrouiller » : l'évaluation ne bougera plus par mégarde, et tu pourras la rouvrir au besoin.",
             avant: async function () {
                 if (ecranEvaluationVisible()) return;
@@ -619,6 +631,7 @@
         },
         {
             titre: 'Ta pratique',
+            geste: "Touche « + Nouvelle pratique », choisis « Partir d'un modèle », puis suis l'assistant jusqu'à « Créer la pratique ».",
             texte: "Ta première évaluation est faite. Reste à décider comment tu construis la note du cours : c'est ta pratique de notation. Touche « + Nouvelle pratique », puis « Partir d'un modèle », et choisis le tien : « Modèle sommatif » si la note du cours est la moyenne de tes travaux selon leur pondération. Si tu pratiques une notation alternative, ton modèle y est aussi : par standards (niveaux de maîtrise), par spécifications, par dénotation. Tu ne sais pas lequel te correspond ? Touche « Décrire ma pratique » : à partir de quelques questions, l'assistant le trouve pour toi. La note que tu viens d'attribuer ne changera pas.",
             avant: async function () {
                 aller('conception', 'pratiques-notation');
@@ -631,13 +644,24 @@
             },
             // 11 nov. 2026 : la bulle couvre forcément une partie de la fenêtre ; jamais ses boutons du geste suivant.
             aussiEviter: function () {
-                return wizardOuvert() ? ['wizard-v2-btn-precedent', 'wizard-v2-btn-suivant', 'wizard-v2-btn-creer'].map(el) : [];
+                if (!wizardOuvert()) return [];
+                // Les cartes de choix de la page affichée aussi (11 nov. 2026, cinquième aperçu : la ligne du geste a grandi
+                // la bulle, qui couvrait le modèle à choisir).
+                var cartes = [].slice.call(document.querySelectorAll('#modalWizardPratiqueV2 .wizard-v2-radio-card')).filter(vis);
+                return ['wizard-v2-btn-precedent', 'wizard-v2-btn-suivant', 'wizard-v2-btn-creer'].map(el).concat(cartes);
             },
             nommeLeContour: true,   // « + Nouvelle pratique », puis « Partir d'un modèle » (11 nov. 2026, 9 h 47)
             contour: function () {
                 if (!wizardOuvert()) return qs('#conception-pratiques-notation [data-action="creerNouvellePratique"]');
                 var r = qs('#modalWizardPratiqueV2 input[name="porteEntree"][value="modele"]');
-                return r && vis(r.closest('.wizard-v2-radio-card') || r) ? (r.closest('.wizard-v2-radio-card') || r) : null;
+                var carte = r ? (r.closest('.wizard-v2-radio-card') || r) : null;
+                if (carte && vis(carte) && !r.checked) return carte;
+                // Puis l'assistant, un geste à la fois (11 nov. 2026, 12 h 05) : « Créer la pratique » quand il paraît,
+                // sinon « Suivant → ».
+                var creer = el('wizard-v2-btn-creer');
+                if (vis(creer)) return creer;
+                var suivant = el('wizard-v2-btn-suivant');
+                return vis(suivant) ? suivant : (carte && vis(carte) ? carte : null);
             },
             atteint: function () {
                 var ok = pratiqueCreee();
@@ -647,6 +671,7 @@
         },
         {
             titre: "L'appliquer à ton cours",
+            geste: "Choisis ta pratique dans le menu en haut de la page, puis touche « Appliquer au cours actif ».",
             texte: "Ta pratique est créée, mais elle ne s'applique encore à aucun cours. Une pratique se prépare une fois et peut resservir, à toi comme à tes collègues, avec qui tu peux la partager. Choisis-la dans le menu en haut de la page, puis touche « Appliquer au cours actif ». Sans pratique appliquée, l'application ne sait pas comment tu construis ta note : elle n'en calcule aucune.",
             avant: async function () {
                 surModale(false);
@@ -667,6 +692,7 @@
         },
         {
             titre: "Le point qui s'allume",
+            geste: "Touche « Continuer ».",
             texte: "Regarde : l'étudiant·e dont tu viens d'évaluer la production a maintenant son point en performance. Les autres n'y sont pas encore : ils apparaîtront à mesure que tu évalueras leur production. La complétion, elle, suit la remise : dès ta première évaluation, chaque production importée pour ce travail compte comme remise ; sans fichier, c'est ton évaluation qui confirme la remise. Évaluation après évaluation, c'est ainsi que se construit le coup d'œil sur ta classe.",
             avant: async function () {
                 aller('suivi', 'groupe');
@@ -683,6 +709,7 @@
         },
         {
             titre: 'Ta cartouche',
+            geste: "Touche « + Nouvelle cartouche », remplis-la, enregistre-la, puis choisis-la dans la fiche de ta production.",
             texte: "La rétroaction de ton évaluation vient de ta grille. Pour qu'elle parle avec tes mots, écris ta cartouche : choisis ta grille, puis ton échelle de performance : celle que Mon matériel a créée avec ta grille si elle a des niveaux ; si elle est en points, les paliers de l'échelle de départ, dont tu peux ajuster les bornes. Puis, pour chaque critère et chaque niveau de l'échelle, note le commentaire que tu écrirais dans la marge. Tu l'écris une fois ; ensuite, chaque évaluation compose la rétroaction à partir de tes phrases. Tes étudiant·es reçoivent un commentaire cohérent d'une évaluation à l'autre, et tu n'as plus à le réécrire chaque fois. Puis, dans la fiche de ta production, choisis cette cartouche : elle s'y appliquera à chaque évaluation.",
             avant: async function () {
                 aller('conception', 'retroactions');
@@ -706,6 +733,7 @@
         },
         {
             titre: 'Ta rétroaction, avec tes mots',
+            geste: "Touche « Actions › Consulter », puis « Déverrouiller » ; écris ton mot, verrouille, puis touche « Terminer ».",
             texte: "Reviens à ta première évaluation : touche « Actions › Consulter », puis « Déverrouiller ». Choisis ta cartouche : la rétroaction se réécrit avec tes phrases. Relis-la comme ton étudiant·e la lira, dans sa synthèse de rétroaction. Un mot personnel ? Écris-le dans « Un mot pour ton étudiant·e ». Puis verrouille. Désormais, chaque production que tu évalueras recevra sa rétroaction de la même façon.",
             sansSortie: true,
             avant: async function () {

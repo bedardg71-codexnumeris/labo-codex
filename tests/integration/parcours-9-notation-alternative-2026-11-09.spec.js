@@ -6,6 +6,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { attendreApplication } from './harness/attendre-application.js';
+import { flecheVers } from './harness/fleches-de-banc.js';
 
 // =======================================================================
 // LE NEUVIÈME PARCOURS, « METTRE EN PLACE TA NOTATION ALTERNATIVE » — 8 NOV. 2026, NUIT
@@ -206,6 +207,24 @@ async function toucher(page, selecteur) {
 /** Le bouton de la bulle par son nom, visible ou caché (`montrerBouton`). */
 const boutonBulle = (page, nom) => bulle(page).locator('.parcours-bulle-boutons button', { hasText: nom });
 
+/** « Continuer » attend (11 nov. 2026, 12 h 05, capture 34) : visible, inactif, la raison écrite dessous. */
+async function continuerAttend(page, raison) {
+    await expect(boutonBulle(page, 'Continuer')).toBeVisible();
+    await expect(boutonBulle(page, 'Continuer')).toBeDisabled();
+    await expect(bulle(page).locator('.parcours-bulle-attente')).toHaveText(raison);
+}
+
+/** La pulsation est posée sur l'élément (même centre, à 3 px près). */
+async function contourSur(page, selecteur) {
+    await expect.poll(() => page.evaluate((sel) => {
+        const c = document.getElementById('parcours-contour');
+        const el = document.querySelector(sel);
+        if (!c || c.hidden || !el) return 'absent';
+        const a = c.getBoundingClientRect(), b = el.getBoundingClientRect();
+        return Math.abs((a.left + a.right) / 2 - (b.left + b.right) / 2) < 3 && Math.abs((a.top + a.bottom) / 2 - (b.top + b.bottom) / 2) < 3 ? 'posé' : 'décalé';
+    }, selecteur), { message: 'contour posé sur ' + selecteur, timeout: 5000 }).toBe('posé');
+}
+
 test('panneau : le neuvième parcours garde son rang ; sans production avec sa grille, son bouton refuse et le panneau dit par où commencer', async ({ page }) => {
     await monter(page, { grille: false });
     await ouvrirPanneau(page);
@@ -274,7 +293,7 @@ for (const cas of [
     });
 }
 
-test('dénotation : « Continuer » ne paraît que si une cible est nommée', async ({ page }) => {
+test('dénotation : « Continuer » attend qu’une cible soit nommée, et le dit', async ({ page }) => {
     await page.goto(indexHtml);
     await attendreApplication(page);
     const pratiques = await pratiquesDesModeles(page);
@@ -284,10 +303,10 @@ test('dénotation : « Continuer » ne paraît que si une cible est nommée', as
     await attendreEtape(page, "L'ouvrir", '1 sur 7');
     await page.selectOption('#menuPratiques', 'pratique_banc_2');
     await attendreEtape(page, 'Tes cibles', '2 sur 7');
-    await expect(boutonBulle(page, 'Continuer')).toBeVisible();
-    // La cible effacée à l'écran : « Continuer » part.
+    await expect(boutonBulle(page, 'Continuer')).toBeEnabled();
+    // La cible effacée à l'écran : « Continuer » reste, inactif, et dit ce qui manque (11 nov. 2026, 12 h 05).
     await page.locator('#mat-den-cibles input[type="text"]').first().fill('');
-    await expect(boutonBulle(page, 'Continuer')).toBeHidden();
+    await continuerAttend(page, 'Pour continuer, écris au moins une cible.');
 });
 
 test('étape 1 : une sommative créée ne fait pas avancer ; une alternative, oui ; « Reprendre » retrouve celle créée entre-temps', async ({ page }) => {
@@ -532,10 +551,21 @@ async function parcoursEntier(page, { famille, modele, largeur = 1180, clair = f
     await expect.poll(() => page.evaluate(() => (db.getSync(cle('evaluationsSauvegardees'), []) || [])
         .filter((e) => e.verrouillee === true).map((e) => e.optionsAffichage && e.optionsAffichage.affichageNote))).toEqual(['lettre']);
 
-    // 7. « Ta synthèse » : Actions › Dossier PDF ; « Continuer » paraît quand le PDF est téléchargé.
+    // 7. « Ta synthèse » : la Liste à l'écran (son `avant` y va) ; « Continuer » attend le PDF, et le dit.
     await attendreEtape(page, 'Ta synthèse', n(k + 3));
-    await expect(boutonBulle(page, 'Continuer')).toBeHidden();
+    await expect(page.locator('#evaluations-liste')).toBeVisible();
+    await continuerAttend(page, 'Pour continuer, télécharge son dossier : «\u00a0Actions › Dossier PDF\u00a0», sur la ligne de la production que tu viens d\'évaluer.');
     await cap('etape-7');
+    // Capture 34 (Grégoire, 11 nov. 2026) : revenu à l'écran d'évaluation, ni halo ni flèche. Hors de la Liste, la flèche
+    // et le halo vont à « Liste » ; la Liste rouverte, à « Actions » de la ligne évaluée.
+    const ligneP1 = '#conteneur-tableau-evaluations tr[data-da="9000001"][data-production-id="P1"] select.eval-actions-select';
+    await page.evaluate(() => naviguerVers('evaluations', 'annoter'));
+    await expect(page.locator('#evaluations-liste')).toBeHidden();
+    await contourSur(page, '#sous-navigation [data-sous-onglet="evaluations-liste"]');
+    await flecheVers(page, '#sous-navigation [data-sous-onglet="evaluations-liste"]', 'Ta synthèse, hors de la Liste');
+    await page.click('#sous-navigation [data-sous-onglet="evaluations-liste"]');
+    await contourSur(page, ligneP1);
+    await flecheVers(page, ligneP1, 'Ta synthèse, sur la Liste');
     const telechargement = page.waitForEvent('download');
     await page.locator('#conteneur-tableau-evaluations tr[data-da="9000001"][data-production-id="P1"] select.eval-actions-select')
         .selectOption('dossier|9000001|P1');

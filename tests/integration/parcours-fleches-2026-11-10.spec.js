@@ -161,7 +161,7 @@ test('étapes 3, 6 et 7 de « Découvrir » : la flèche va à ce dont parle la 
 
     // Étape 3 : deux lignes, deux flèches ; la pulsation sur « Accompagnement » ; l'onglet du moment mis en évidence.
     await flecheVers(page, LIGNE_ABSENCES, 'étape 3, la ligne des absences');
-    await nombreDeFleches(page, 2, 'étape 3');
+    await nombreDeFleches(page, 3, 'étape 3');   // les deux lignes, et « Accompagnement » (la règle du contour, 11 nov. 2026)
     const contour = await styleDuContour(page);
     expect(contour.animation, 'le contour pulse').toBe('parcours-pulsation');
     expect(contour.touche, 'le contour ne capte pas le toucher').toBe('none');
@@ -179,13 +179,15 @@ test('étapes 3, 6 et 7 de « Découvrir » : la flèche va à ce dont parle la 
     await rienNeRetientLeToucher(page, [[12, 400], [1160, 700], [600, 30], [f.pointe.x, f.pointe.y]], 'étape 3');
 
     // Étapes 6 et 7 : ce que nomme la bulle ET la section qu'elle présente reçoivent chacun leur flèche (11 nov. 2026) ;
-    // la section, la mise en évidence ; le prochain bouton pulse, sans flèche, et la bulle ne le couvre pas.
+    // la section, la mise en évidence ; le prochain bouton pulse, et reçoit sa flèche (la règle du contour, 11 nov. 2026,
+    // 11 h 45) ; la bulle ne le couvre pas.
     for (const [n, actuelle, prochaine, nommee] of [[6, 'evaluations', 'conception', '#travaux-drop-zone'],
         [7, 'conception', 'calendrier', '#section-conception .materiel-intro p']]) {
         await allerAEtape(page, n);
         await flecheVers(page, NAV(actuelle), 'étape ' + n + ', la section');
         await flecheVers(page, nommee, 'étape ' + n + ', ce que nomme la bulle');
-        await nombreDeFleches(page, 2, 'étape ' + n);
+        await flecheVers(page, NAV(prochaine), 'étape ' + n + ', le prochain bouton');
+        await nombreDeFleches(page, 3, 'étape ' + n);
         await sectionActuelleSur(page, NAV(actuelle), 'étape ' + n);
         await expect.poll(async () => {
             const c = await rectDe(page, '#parcours-contour'), p = await rectDe(page, NAV(prochaine));
@@ -244,16 +246,18 @@ test('la flèche suit le défilement et le redimensionnement ; une cible sortie 
 
 // ---------- Les huit étapes de « Découvrir », aux deux tailles de l'iPad (Grégoire, 11 nov. 2026) ----------
 // La bulle ne couvre jamais ses zones (le relevé, `releverLaBulle`, juge chaque bulle) ; chaque flèche va à une zone de
-// l'étape, jamais à ce qu'il faut toucher ; à 1180 × 820, le compte des flèches de chaque étape.
+// l'étape ou à ce qu'il faut toucher (↻ la règle du contour, 11 nov. 2026, 11 h 45) ; à 1180 × 820, le compte des
+// flèches de chaque étape : celles de ses zones, plus celle du contour quand il pulse.
 const FLECHES_A_1180 = { 1: 1, 2: 1, 3: 2, 4: 2, 5: 1, 6: 2, 7: 2, 8: 2 };
 
 for (const [largeur, hauteur] of [[1180, 820], [820, 1180]]) {
-    test(`les huit étapes de « Découvrir » à ${largeur} × ${hauteur} : la bulle ne couvre pas ses zones, chaque flèche va à une zone, aucune au bouton à toucher`, async ({ page }) => {
+    test(`les huit étapes de « Découvrir » à ${largeur} × ${hauteur} : la bulle ne couvre pas ses zones, chaque flèche va à une zone ou au bouton à toucher`, async ({ page }) => {
         test.setTimeout(120000);
         await ouvrirEspaceVide(page, largeur, { hauteur });
         for (let n = 1; n <= 8; n++) {
             if (n === 1) await decouvrirA(page, 1); else await allerAEtape(page, n);
-            if (largeur === 1180) await nombreDeFleches(page, FLECHES_A_1180[n], 'étape ' + n);
+            const pulse = await page.evaluate(() => { const c = document.getElementById('parcours-contour'); return c && !c.hidden ? 1 : 0; });
+            if (largeur === 1180) await nombreDeFleches(page, FLECHES_A_1180[n] + pulse, 'étape ' + n);
             // Le relevé a regardé cette bulle au moins trois fois (un écart compte sur deux relevés de suite).
             await expect.poll(() => foisRelevee(page, `(${n} sur 8, ${largeur} × ${hauteur})`),
                 { message: `étape ${n} : relevée trois fois` }).toBeGreaterThanOrEqual(3);
@@ -261,6 +265,7 @@ for (const [largeur, hauteur] of [[1180, 820], [820, 1180]]) {
                 const pl = window.ParcoursMoteur.placement();
                 const rs = pl.zones.filter((z) => z && z !== pl.contour && !(pl.contour && pl.contour.contains(z)))
                     .map((z) => z.getBoundingClientRect()).filter((r) => r.width > 0);
+                const rc = pl.contour ? [pl.contour.getBoundingClientRect()] : [];
                 const pointes = [...document.querySelectorAll('#parcours-fleches g.parcours-fleche')].map((g) => {
                     const d = g.getAttribute('data-trace').split(' M')[0].split(' ');
                     const fin = d[d.length - 1].split(',').map(Number);
@@ -270,7 +275,7 @@ for (const [largeur, hauteur] of [[1180, 820], [820, 1180]]) {
                 // Une flèche vers une union de zones (plus de trois) s'arrête au bord de l'union : elle est dans sa boîte.
                 const u = rs.reduce((a, r) => ({ left: Math.min(a.left, r.left), top: Math.min(a.top, r.top), right: Math.max(a.right, r.right), bottom: Math.max(a.bottom, r.bottom) }),
                     { left: Infinity, top: Infinity, right: -Infinity, bottom: -Infinity });
-                const perdues = pointes.filter((p) => !rs.some((r) => loin(p, r) <= 9) && loin(p, u) > 9);
+                const perdues = pointes.filter((p) => !rs.concat(rc).some((r) => loin(p, r) <= 9) && loin(p, u) > 9);
                 return perdues.length ? perdues.length + ' flèche(s) hors des zones' : 'toutes vers une zone';
             }), { message: `étape ${n} : chaque flèche va à une zone de l'étape` }).toBe('toutes vers une zone');
         }
@@ -365,7 +370,7 @@ test('la poignée : 46 px, à la souris et au doigt ; la bulle reste dans l’é
     // les deux lignes).
     await allerAEtape(page, 3);
     await flecheVers(page, LIGNE_ABSENCES, 'étape 3, placement automatique');
-    await nombreDeFleches(page, 2, 'étape 3, avant de déplacer la bulle');
+    await nombreDeFleches(page, 3, 'étape 3, avant de déplacer la bulle');   // deux lignes et le contour (11 nov. 2026)
     const ligne = await rectDe(page, LIGNE_ABSENCES);
     const r = await poignee(page).boundingBox();
     const bb = await rectDe(page, '#parcours-bulle');
