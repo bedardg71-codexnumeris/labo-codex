@@ -1,23 +1,31 @@
 /**
  * SENTINELLE — SUIVI LONGITUDINAL, LOT 1 : L'ONGLET « TENDANCES », LE NUAGE DE POINTS (11 nov. 2026).
  *
- * Décision de Grégoire (11 nov.) : à côté du registre, un onglet montre si les étudiant·es de son 101 réussissent
- * ensuite le 102, puis le 103. Ce banc tient le CALCUL (js/suivi-tendances.js, fonctions pures) et ce que le rendu
- * promet sans navigateur :
- *   1. le choix des données — le dossier de 101 le plus récent, le résultat le plus récent (trimestre en texte libre),
- *      une note de 101 non constructible n'est pas placée et se compte, sans dossier de 101 on n'est d'aucune cohorte ;
- *   2. les comptes des trois zones ;
- *   3. le r de Pearson ;
- *   4. les trois phrases de « Ce que ça dit », leurs seuils et leurs accords ;
- *   5. les filtres de saison ;
- *   6. le pseudonyme en anonymisation, « Voir son dossier », et la lecture seule (aucune écriture) ;
- *   7. les règles du dépôt sur le fichier neuf (une seule source pour la sphère, #540, pas d'innerHTML).
- * Tous les noms sont fictifs. Chaque essai a son break-test (rapport du lot).
+ * Décision de Grégoire (11 nov.) : à côté du registre, un onglet pose deux mesures face à face pour les inscrit·es.
+ * RÉVISÉ le soir même, à l'aperçu : la séquence de cours est DÉCLARÉE par l'enseignant·e (rien de propre à une
+ * discipline dans le code), l'écran ne commente ni les données ni l'échantillon (des comptes, aucun lien calculé),
+ * et le nuage reçoit une COMPARAISON (deux mesures, un groupe) sans rien savoir des cours.
+ *
+ * Ce banc tient le calcul (js/suivi-tendances.js, fonctions pures) et ce que le rendu promet sans navigateur :
+ *   1. la séquence déclarée — les cours offerts sont ceux du registre, sa forme, son écriture au geste seulement ;
+ *   2. le choix des données — le dossier d'origine le plus récent, le résultat le plus récent (trimestre en texte
+ *      libre), une note non constructible n'est pas placée et se compte, sans dossier d'origine : d'aucune cohorte ;
+ *   3. les comptes des trois zones ;
+ *   4. « Ce que ça dit » : des comptes accordés, et RIEN qui juge les données ;
+ *   5. les filtres de cohortes ;
+ *   6. le pseudonyme en anonymisation, « Voir son dossier », et ce qui s'écrit (la séquence, rien d'autre) ;
+ *   7. les règles du dépôt : aucun mot de discipline en dur, une seule source pour la sphère, #540, pas d'innerHTML.
+ * Tous les noms sont fictifs, et les cours du banc ne sont PAS ceux de la littérature : c'est l'essai même.
  */
 import { describe, it, expect } from 'vitest';
 import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { monter, storeBase, RACINE } from './_helpers/bac-suivi.js';
+import { tranche } from './_helpers/tranche.js';
+
+const ORIGINE = '201-NYA-05';     // un cours d'une autre discipline : rien ici ne dit « 101 »
+const SUIVANT = '201-NYB-05';
+const AUTRE = '201-NYC-05';
 
 const dossier = (trimestre, trimestreNom, coursCode, P, constructible = true) => ({
     capteLe: '2026-09-18T12:00:00.000Z', trimestre, trimestreNom, coursId: 'C', coursCode, groupe: '00001',
@@ -27,12 +35,14 @@ const dossier = (trimestre, trimestreNom, coursCode, P, constructible = true) =>
 const eleve = (da, nom, prenom, dossiers, resultats) => ({ da, nom, prenom, inscritLe: '2026-09-18', reprise913: true, dossiers, resultatsUlterieurs: resultats });
 const registre = (eleves) => ({ format: 'registre-longitudinal', version: 1, modeles: { grilles: {}, echelles: {} },
     eleves: Object.fromEntries(eleves.map((e) => [e.da, e])) });
-const r102 = (note, trimestre = 'H2026') => ({ cours: '601-102-MQ', trimestre, note });
+const note = (n, trimestre = 'H2026', cours = SUIVANT) => ({ cours, trimestre, note: n });
+const sequence = (suivants = [SUIVANT]) => ({ version: 1, origine: ORIGINE, suivants });
 
-function banc(reg, anonyme = { actif: false }) {
+function banc(reg, { anonyme = false, declaree = sequence() } = {}) {
     const store = storeBase();
     Object.keys(store).filter((k) => k.startsWith('test_')).forEach((k) => delete store[k]);
     Object.assign(store, { trimestres: [], cours: [], registreLongitudinal: reg });
+    if (declaree) store.tendancesSequence = declaree;
     const journal = [];
     const b = monter(store, {
         journal,
@@ -40,17 +50,17 @@ function banc(reg, anonyme = { actif: false }) {
         objetsExportes: ['registreLongitudinal', 'tendancesLongitudinal'],
         globaux: {
             cle: (k) => 'h2026_' + k, cleSource: (k, t) => t + '_' + k,
-            obtenirTrimestres: () => [], estModeAnonymisation: () => anonyme.actif,
+            obtenirTrimestres: () => [], estModeAnonymisation: () => anonyme,
             calculerEtStockerIndicesCP: () => {}, calculerTousLesIndices: () => ({})
         }
     });
-    b.win.estModeAnonymisation = () => anonyme.actif;
-    return Object.assign(b, { api: b.win.tendancesLongitudinal, journal });
+    b.win.estModeAnonymisation = () => anonyme;
+    return Object.assign(b, { api: b.win.tendancesLongitudinal, journal, store });
 }
 
 /** Rend l'onglet dans une zone NEUVE (le faux DOM ne vide pas ses enfants) et la rend. */
 function rendre(b) {
-    const zone = b.document ? b.document.createElement('div') : null;
+    const zone = b.document.createElement('div');
     b.win.afficherTendancesLongitudinal(zone);
     return zone;
 }
@@ -66,48 +76,102 @@ function toutLeTexte(el) {
 const trouver = (el, test) => { const t = []; parcourir(el, (n) => { if (test(n)) t.push(n); }); return t; };
 const deClasse = (el, classe) => trouver(el, (n) => String(n.className || '').split(' ').includes(classe));
 
-/** n billes de 101 réussi dont le r de Pearson avec la note suivante est piloté par `pente` et `bruit`. */
-function nuage(n, f) {
-    return Array.from({ length: n }, (_, i) => ({ da: String(i), cohorte: 'a2025', x: 60 + i * 2, y: f(i) }));
-}
-
 const api = banc(registre([])).api;
+const comparer = (reg, suivant = SUIVANT) => api.preparer(reg, api.comparaisonDeCours(ORIGINE, suivant));
+
+describe('Tendances — la séquence déclarée par l\'enseignant·e', () => {
+    const reg = registre([
+        eleve('1', 'Bouleau', 'Fictanne', [dossier('a2025', 'Automne 2025', ORIGINE, 72), dossier('h2026', 'Hiver 2026', '  201-nya-05 ', 60)], [note(80), note(70, 'A2026', AUTRE)]),
+        eleve('2', 'Cèdre', 'Fictbob', [dossier('a2025', 'Automne 2025', '109-101-MQ', 65)], [note(61, 'H2026', '201-nyb-05')])
+    ]);
+
+    it('les cours offerts sont ceux que le registre connaît : dossiers pour l\'origine, résultats pour les suivants', () => {
+        expect(api.coursConnus(reg)).toEqual({ origines: ['109-101-MQ', ORIGINE], suivants: [SUIVANT, AUTRE] });
+    });
+    it('un cours se compare à la casse, aux accents et aux espaces près ; son écriture affichée reste la première vue', () => {
+        expect(api.cleDeCours('  201-NYA-05 ')).toBe(api.cleDeCours('201-nya-05'));
+        expect(api.cleDeCours('Écriture  et littérature')).toBe('ecriture et litterature');
+        expect(api.dossierDuCours(reg.eleves['1'], ORIGINE).nb).toBe(2);
+        expect(api.dossierDuCours(reg.eleves['1'], '201-NYA').nb).toBe(0);   // pas de « contient » : le cours entier
+    });
+    it('une séquence absente, étrangère ou abîmée se lit comme vide, sans doublon, et l\'origine n\'est pas son propre suivant', () => {
+        expect(api.sequencePropre(null)).toEqual({ version: 1, origine: '', suivants: [] });
+        expect(api.sequencePropre('n\'importe quoi')).toEqual({ version: 1, origine: '', suivants: [] });
+        expect(api.sequencePropre({ origine: ' A ', suivants: ['B', 'b', 'a', 7, 'C'] })).toEqual({ version: 1, origine: 'A', suivants: ['B', 'C'] });
+        expect([api.sequenceComplete(api.sequencePropre({ origine: 'A' })), api.sequenceComplete(api.sequencePropre({ origine: 'A', suivants: ['B'] }))]).toEqual([false, true]);
+    });
+    it('rien n\'est déclaré : l\'onglet invite à déclarer, n\'affiche aucun nuage, et n\'écrit rien', () => {
+        const b = banc(reg, { declaree: null });
+        const zone = rendre(b);
+        expect(toutLeTexte(zone)).toContain('Choisis un cours d\'origine et au moins un cours suivant pour voir le nuage.');
+        expect(deClasse(zone, 'tend-cible').length + deClasse(zone, 'tend-plan').length).toBe(0);
+        // La déclaration est offerte : la liste des origines, une bascule par cours suivant connu, aucune enfoncée.
+        const liste = deClasse(zone, 'tend-origine')[0];
+        expect(liste.children.map((o) => [o.value, o.textContent])).toEqual([['', 'Choisir…'], ['109-101-MQ', '109-101-MQ'], [ORIGINE, ORIGINE]]);
+        expect(deClasse(deClasse(zone, 'tend-sequence')[0], 'tend-bascule').map((x) => [x.dataset.cours, x['attr_aria-pressed']])).toEqual([[SUIVANT, 'false'], [AUTRE, 'false']]);
+        expect(b.journal).toEqual([]);
+        expect('tendancesSequence' in b.store).toBe(false);
+    });
+    it('déclarer écrit la séquence, sous SA clé, et rien d\'autre ; retirer un suivant aussi', async () => {
+        const b = banc(reg, { declaree: null });
+        await b.win.declarerOrigineTendances({ value: ORIGINE });
+        await b.win.declarerSuivantTendances({ dataset: { cours: SUIVANT } });
+        await b.win.declarerSuivantTendances({ dataset: { cours: AUTRE } });
+        expect(b.store.tendancesSequence).toEqual({ version: 1, origine: ORIGINE, suivants: [SUIVANT, AUTRE] });
+        await b.win.declarerSuivantTendances({ dataset: { cours: SUIVANT } });
+        expect(b.store.tendancesSequence.suivants).toEqual([AUTRE]);
+        expect([...new Set(b.journal.map((e) => e.k))]).toEqual(['tendancesSequence']);
+        expect(b.store.registreLongitudinal).toEqual(reg);
+    });
+    it('la clé est globale : inscrite à CLES_GLOBALES (trimestres.js)', () => {
+        expect(api.NOM_CLE).toBe('tendancesSequence');
+        const globales = tranche(readFileSync(path.join(RACINE, 'js/trimestres.js'), 'utf8'), 'const CLES_GLOBALES = [', '];');
+        expect(globales).toContain("'tendancesSequence'");
+    });
+});
 
 describe('Tendances — le choix des données', () => {
     const reg = registre([
-        // Deux dossiers de 101 : le plus récent (Automne 2025) l'emporte sur l'hiver de la même année.
-        eleve('1', 'Bouleau', 'Fictanne', [dossier('a2025', 'Automne 2025', '601-101-MQ', 72), dossier('h2025', 'Hiver 2025', '601-101-MQ', 41)], [r102(80)]),
-        // Deux résultats de 102 : le plus récent, lu dans le texte libre ; le 103 ne compte pas pour le 102.
-        eleve('2', 'Cèdre', 'Fictbob', [dossier('a2024', 'Automne 2024', '601-101-MQ', 65.4)],
-            [r102(48, 'Hiver 2025'), r102(66, 'A25'), { cours: '601-103-MQ', trimestre: 'H2026', note: 90 }]),
-        // Note de 101 non constructible : pas placé·e, compté·e.
-        eleve('3', 'Dorine', 'Fictcam', [dossier('a2024', 'Automne 2024', '601-101-MQ', 55, false)], [r102(70)]),
-        // Pas de dossier de 101 (un 102 donné par l'enseignant·e) : d'aucune cohorte.
-        eleve('4', 'Épinette', 'Fictdev', [dossier('h2026', 'Hiver 2026', '601-102-MQ', 77)], [r102(88)]),
-        // Un dossier de 101, aucune note du cours : la cohorte existe, sans note.
-        eleve('5', 'Frêne', 'Fictéva', [dossier('h2026', 'Hiver 2026', '601-101-MQ', 81)], [{ cours: '601-102-MQ', trimestre: 'A2026', note: 'EC' }])
+        // Deux dossiers du cours d'origine : le plus récent (Automne 2025) l'emporte sur l'hiver de la même année.
+        eleve('1', 'Bouleau', 'Fictanne', [dossier('a2025', 'Automne 2025', ORIGINE, 72), dossier('h2025', 'Hiver 2025', ORIGINE, 41)], [note(80)]),
+        // Deux résultats du cours suivant : le plus récent, lu dans le texte libre ; l'autre cours ne compte pas pour lui.
+        eleve('2', 'Cèdre', 'Fictbob', [dossier('a2024', 'Automne 2024', ORIGINE, 65.4)], [note(48, 'Hiver 2025'), note(66, 'A25'), note(90, 'H2026', AUTRE)]),
+        // Note d'origine non constructible : pas placé·e, compté·e.
+        eleve('3', 'Dorine', 'Fictcam', [dossier('a2024', 'Automne 2024', ORIGINE, 55, false)], [note(70)]),
+        // Pas de dossier du cours d'origine : d'aucune cohorte.
+        eleve('4', 'Épinette', 'Fictdev', [dossier('h2026', 'Hiver 2026', SUIVANT, 77)], [note(88)]),
+        // Un dossier d'origine, aucune note chiffrée du cours suivant : la cohorte existe, sans note.
+        eleve('5', 'Frêne', 'Fictéva', [dossier('h2026', 'Hiver 2026', ORIGINE, 81)], [{ cours: SUIVANT, trimestre: 'A2026', note: 'EC' }])
     ]);
-    const d = api.preparer(reg, '102');
+    const d = comparer(reg);
 
-    it('une bille par inscrit·e qui a une note de 101 constructible et une note chiffrée du cours', () => {
+    it('une bille par inscrit·e qui a ses deux mesures', () => {
         expect(d.points.map((p) => p.da).sort()).toEqual(['1', '2']);
     });
-    it('deux dossiers de 101 : le plus récent, et le point le sait', () => {
+    it('deux dossiers du cours d\'origine : le plus récent, et le point le sait', () => {
         const p = d.points.find((x) => x.da === '1');
-        expect([p.x, p.cohorte, p.nbDossiers101]).toEqual([72, 'a2025', 2]);
+        expect([p.x, p.cohorte, p.nbX]).toEqual([72, 'a2025', 2]);
     });
     it('deux résultats du même cours : le plus récent par le trimestre en texte libre', () => {
         const p = d.points.find((x) => x.da === '2');
-        expect([p.x, p.y, p.nbResultats, p.trimestreResultat]).toEqual([65.4, 66, 2, 'A25']);
-        expect(api.preparer(reg, '103').points.map((x) => [x.da, x.y])).toEqual([['2', 90]]);
+        expect([p.x, p.y, p.nbY]).toEqual([65.4, 66, 2]);
+        expect(comparer(reg, AUTRE).points.map((x) => [x.da, x.y])).toEqual([['2', 90]]);
     });
-    it('note de 101 non constructible : non placé·e, compté·e ; sans dossier de 101 : ni l\'un ni l\'autre', () => {
+    it('note d\'origine non constructible : non placé·e, compté·e ; sans dossier d\'origine : ni l\'un ni l\'autre', () => {
         expect(d.nonPlaces).toEqual([{ da: '3', cohorte: 'a2024' }]);
         expect(d.points.concat(d.nonPlaces).some((p) => p.da === '4')).toBe(false);
     });
-    it('les cohortes sont les trimestres de 101, dans le temps, chacune avec sa saison, sa teinte et « a des notes »', () => {
+    it('les cohortes sont les trimestres du cours d\'origine, dans le temps, chacune avec sa saison, sa teinte et « a des notes »', () => {
         expect(d.cohortes.map((c) => [c.id, c.saison, c.teinte, c.aDesNotes])).toEqual([
             ['a2024', 'automne', 0, true], ['a2025', 'automne', 1, true], ['h2026', 'hiver', 2, false]]);
+    });
+    it('le nuage ne sait rien des cours : une comparaison quelconque (deux mesures, un groupe) le nourrit', () => {
+        const parProgramme = { nomX: 'x', nomY: 'y',
+            groupeDe: (e) => ({ id: e.nom[0], nom: 'Groupe ' + e.nom[0], saison: null, rang: e.nom.charCodeAt(0) }),
+            lireX: (e) => ({ valeur: Number(e.da) * 10, nb: 1 }), lireY: (e) => (e.da === '5' ? null : { valeur: Number(e.da), nb: 1 }) };
+        const libre = api.preparer(reg, parProgramme);
+        expect(libre.points.map((p) => [p.da, p.cohorte, p.x, p.y])).toEqual([['1', 'B', 10, 1], ['2', 'C', 20, 2], ['3', 'D', 30, 3], ['4', 'É', 40, 4]]);
+        expect(libre.cohortes.map((c) => [c.nom, c.aDesNotes])).toEqual([['Groupe B', true], ['Groupe C', true], ['Groupe D', true], ['Groupe F', false], ['Groupe É', true]]);
     });
     it('le trimestre en texte libre se lit : année, saison, ordre', () => {
         expect(api.lireTrimestre('Hiver 2026')).toEqual({ annee: 2026, saison: 'hiver', rang: 20261 });
@@ -117,94 +181,54 @@ describe('Tendances — le choix des données', () => {
         expect(api.lireTrimestre('H2026').rang).toBeGreaterThan(api.lireTrimestre('A2025').rang);
     });
     it('à trimestre illisible ou égal, le dernier saisi l\'emporte', () => {
-        expect(api.resultatDuCours([r102(50, '?'), r102(61, '?')], '102').note).toBe(61);
-        expect(api.resultatDuCours([r102(70, 'H2026'), r102(61, '?')], '102').note).toBe(70);
+        expect(api.resultatDuCours([note(50, '?'), note(61, '?')], SUIVANT).note).toBe(61);
+        expect(api.resultatDuCours([note(70, 'H2026'), note(61, '?')], SUIVANT).note).toBe(70);
     });
     it('une note hors de l\'échelle se pose au bord, et le dit', () => {
-        expect(api.position(35, api.AXE_SUITE)).toEqual({ pourcent: 0, horsEchelle: true });
-        expect(api.position(75, api.AXE_101)).toEqual({ pourcent: 50, horsEchelle: false });
+        expect(api.position(35, api.AXE_Y)).toEqual({ pourcent: 0, horsEchelle: true });
+        expect(api.position(75, api.AXE_X)).toEqual({ pourcent: 50, horsEchelle: false });
     });
 });
 
 describe('Tendances — les comptes des zones', () => {
-    it('réussite aux deux, réussite en 101 et échec ensuite, sous 60 en 101 ; 60 réussit', () => {
+    it('réussite aux deux, réussite à l\'origine et échec ensuite, sous le seuil à l\'origine ; le seuil réussit', () => {
+        expect(api.seuilReussite()).toBe(60);
         const points = [{ x: 60, y: 60 }, { x: 85, y: 91 }, { x: 60, y: 59.9 }, { x: 59.9, y: 95 }, { x: 52, y: 44 }, { x: 59, y: 60 }];
-        expect(api.compterZones(points)).toEqual({ reussite: 2, echecSuite: 1, sous60: 3 });
+        expect(api.compterZones(points)).toEqual({ reussite: 2, echecSuite: 1, sousLeSeuil: 3 });
     });
 });
 
-describe('Tendances — le r de Pearson', () => {
-    it('vaut 1 et -1 sur une droite, et la valeur attendue sur un jeu connu', () => {
-        expect(api.pearson(nuage(5, (i) => 50 + i * 3))).toBeCloseTo(1, 10);
-        expect(api.pearson(nuage(5, (i) => 90 - i * 3))).toBeCloseTo(-1, 10);
-        // x = 1..5, y = 2, 4, 5, 4, 5 : r = 0,7746 (exemple classique).
-        const jeu = [2, 4, 5, 4, 5].map((y, i) => ({ x: i + 1, y }));
-        expect(api.pearson(jeu)).toBeCloseTo(0.7746, 4);
-    });
-    it('ne se calcule pas sous deux billes, ni quand une note ne varie pas', () => {
-        expect(api.pearson([{ x: 70, y: 70 }])).toBeNull();
-        expect(api.pearson(nuage(6, () => 75))).toBeNull();
-    });
-});
+describe('Tendances — « Ce que ça dit » : des comptes, aucun jugement', () => {
+    const dire = (points, nbNonPlaces = 0) => api.phrases(points, { origine: ORIGINE, suivant: SUIVANT, nbNonPlaces });
+    const pts = (reussis, echecs) => [...Array(reussis).fill({ x: 70, y: 80 }), ...Array(echecs).fill({ x: 70, y: 50 }), { x: 55, y: 90 }];
 
-describe('Tendances — « Ce que ça dit »', () => {
-    const dire = (points, plus = {}) => api.phrases(points, Object.assign({ cours: '102', nbNonPlaces: 0, saisonsMelees: false }, plus));
-
-    it('ce qu\'on voit : k des m, accordé', () => {
-        const pts = (reussis, echecs) => [...Array(reussis).fill({ x: 70, y: 80 }), ...Array(echecs).fill({ x: 70, y: 50 }), { x: 55, y: 90 }];
-        expect(dire(pts(3, 2))[0]).toBe('3 des 5 étudiant·es qui ont réussi ton 101 ont aussi réussi le 102.');
-        expect(dire(pts(1, 4))[0]).toBe('1 des 5 étudiant·es qui ont réussi ton 101 a aussi réussi le 102.');
-        expect(dire(pts(0, 4))[0]).toBe('Aucun·e des 4 étudiant·es qui ont réussi ton 101 n\'a réussi le 102.');
-        expect(dire(pts(1, 0))[0]).toBe('L\'étudiant·e qui a réussi ton 101 a aussi réussi le 102.');
-        expect(dire(pts(0, 1))[0]).toBe('L\'étudiant·e qui a réussi ton 101 n\'a pas réussi le 102.');
-        expect(dire(pts(0, 0))[0]).toBe('Aucun·e des étudiant·es affiché·es n\'a réussi ton 101.');
+    it('le compte de réussite, accordé, aux noms des cours déclarés', () => {
+        expect(dire(pts(3, 2))).toEqual(['3 des 5 étudiant·es qui ont réussi le 201-NYA-05 ont aussi réussi le 201-NYB-05.']);
+        expect(dire(pts(1, 4))[0]).toBe('1 des 5 étudiant·es qui ont réussi le 201-NYA-05 a aussi réussi le 201-NYB-05.');
+        expect(dire(pts(0, 4))[0]).toBe('Aucun·e des 4 étudiant·es qui ont réussi le 201-NYA-05 n\'a réussi le 201-NYB-05.');
+        expect(dire(pts(1, 0))[0]).toBe('L\'étudiant·e qui a réussi le 201-NYA-05 a aussi réussi le 201-NYB-05.');
+        expect(dire(pts(0, 1))[0]).toBe('L\'étudiant·e qui a réussi le 201-NYA-05 n\'a pas réussi le 201-NYB-05.');
+        expect(dire(pts(0, 0))[0]).toBe('Aucun·e des étudiant·es affiché·es n\'a réussi le 201-NYA-05.');
     });
-
-    it('le lien : trop tôt sous 15 billes, même sur une droite parfaite', () => {
-        expect(dire(nuage(14, (i) => 60 + i))[1]).toBe('Avec 14 étudiant·es, il est trop tôt pour dire si la note de 101 annonce celle de 102.');
-        expect(dire(nuage(1, () => 70))[1]).toBe('Avec 1 étudiant·e, il est trop tôt pour dire si la note de 101 annonce celle de 102.');
-        expect(dire(nuage(15, (i) => 60 + i))[1]).not.toContain('trop tôt');
+    it('le compte des non placé·es s\'ajoute quand il y en a, accordé', () => {
+        expect(dire(pts(3, 2), 2)[1]).toBe('2 inscrit·es n\'ont pas de note de 201-NYA-05 calculable et ne sont pas placé·es.');
+        expect(dire(pts(3, 2), 1)[1]).toBe('1 inscrit·e n\'a pas de note de 201-NYA-05 calculable et n\'est pas placé·e.');
     });
-
-    it('le lien : quatre phrases selon le r, aux seuils de 0,3 et de 0,5', () => {
-        expect(api.SEUILS).toEqual({ BILLES_MIN_POUR_DIRE_UN_LIEN: 15, R_LIEN_LEGER: 0.3, R_LIEN_NET: 0.5 });
-        // Une pente, plus un bruit alterné : l'ampleur du bruit règle le r.
-        const jeu = (bruit, sens = 1) => nuage(16, (i) => 70 + sens * i + (i % 2 ? bruit : -bruit));
-        const cas = [
-            [jeu(2), 0.5, 1, 'En général, plus la note de 101 est haute, plus celle de 102 l\'est aussi.'],
-            [jeu(8.5), 0.5, 1, 'En général, plus la note de 101 est haute, plus celle de 102 l\'est aussi.'],
-            [jeu(10), 0.3, 0.5, 'La note de 101 annonce un peu celle de 102, sans plus.'],
-            [jeu(14), 0.3, 0.5, 'La note de 101 annonce un peu celle de 102, sans plus.'],
-            [jeu(40), -0.3, 0.3, 'Les notes de 101 n\'annoncent pas clairement celles de 102.'],
-            [jeu(10, -1), -1, -0.3, 'Les notes de 101 et de 102 vont plutôt en sens inverse : à regarder de près.']
-        ];
-        cas.forEach(([points, min, max, phrase]) => {
-            const r = api.pearson(points);
-            expect(r, phrase).toBeGreaterThanOrEqual(min);
-            expect(r, phrase).toBeLessThan(max);
-            expect(dire(points)[1]).toBe(phrase);
+    it('l\'écran ne commente ni les données ni l\'échantillon, à 2 billes comme à 40 (décision du 11 nov.)', () => {
+        const droite = (n) => Array.from({ length: n }, (_, i) => ({ x: 60 + i, y: 60 + i }));
+        [2, 14, 15, 40].forEach((n) => {
+            const dites = dire(droite(n), 3);
+            expect(dites.length, String(n)).toBe(2);
+            expect(dites.join(' '), String(n)).not.toMatch(/peu|preuve|piste|trop tôt|annonce|en général|correcteur|façon de noter|hors séquence|tendance/i);
         });
-        // Une note qui ne varie pas : aucun r, donc aucun lien clair.
-        expect(dire(nuage(15, () => 75))[1]).toBe('Les notes de 101 n\'annoncent pas clairement celles de 102.');
-    });
-
-    it('la limite, toujours ; les saisons mêlées et les non placé·es s\'y ajoutent, accordés', () => {
-        const base = ' c\'est peu : c\'est une piste, pas une preuve. Les notes de 103 viennent d\'un autre correcteur, avec une autre façon de noter.';
-        expect(dire(nuage(12, (i) => 60 + i), { cours: '103' })[2]).toBe('12 étudiant·es,' + base);
-        expect(dire(nuage(1, () => 70), { cours: '103' })[2]).toBe('1 étudiant·e,' + base);
-        expect(dire(nuage(3, (i) => 60 + i), { saisonsMelees: true, nbNonPlaces: 2 })[2]).toMatch(
-            /façon de noter\. Tu mêles des groupes d'automne et d'hiver ; ceux d'hiver sont hors séquence\. 2 inscrit·es n'ont pas de note de 101 calculable et ne sont pas placé·es\.$/);
-        expect(dire(nuage(3, (i) => 60 + i), { nbNonPlaces: 1 })[2]).toMatch(/façon de noter\. 1 inscrit·e n'a pas de note de 101 calculable et n'est pas placé·e\.$/);
+        // Le calcul de corrélation est RETIRÉ, pas masqué.
+        expect(['pearson', 'SEUILS'].filter((nom) => nom in api)).toEqual([]);
     });
 });
 
-describe('Tendances — les filtres de saison', () => {
+describe('Tendances — les filtres de cohortes', () => {
     const cohortes = [{ id: 'a2024', saison: 'automne' }, { id: 'h2025', saison: 'hiver' }, { id: 'a2025', saison: 'automne' }];
 
-    it('à l\'ouverture : les cohortes d\'automne ; sans automne, toutes', () => {
-        expect(api.selectionParDefaut(cohortes)).toEqual(['a2024', 'a2025']);
-        expect(api.selectionParDefaut([cohortes[1]])).toEqual(['h2025']);
-    });
     it('un bouton de saison coche d\'un toucher les cohortes de sa saison', () => {
         expect(api.cohortesDeSaison(cohortes, 'hiver')).toEqual(['h2025']);
         expect(api.cohortesDeSaison(cohortes, 'toutes')).toEqual(['a2024', 'h2025', 'a2025']);
@@ -216,58 +240,81 @@ describe('Tendances — les filtres de saison', () => {
         expect(api.saisonEnfoncee(cohortes, ['a2024', 'a2025', 'h2025'], 'toutes')).toBe(true);
         expect(api.saisonEnfoncee([cohortes[0]], [], 'hiver')).toBe(false);
     });
-    it('le filtre garde les billes des cohortes cochées, compte leurs non placé·es et voit le mélange des saisons', () => {
+    it('le filtre garde les billes des cohortes cochées et compte leurs non placé·es', () => {
         const donnees = { cohortes, points: [{ da: '1', cohorte: 'a2024' }, { da: '2', cohorte: 'h2025' }], nonPlaces: [{ da: '3', cohorte: 'h2025' }, { da: '4', cohorte: 'a2025' }] };
-        expect(api.filtrer(donnees, ['a2024', 'a2025'])).toEqual({ points: [{ da: '1', cohorte: 'a2024' }], nbNonPlaces: 1, saisonsMelees: false });
-        const tout = api.filtrer(donnees, ['a2024', 'h2025', 'a2025']);
-        expect([tout.points.length, tout.nbNonPlaces, tout.saisonsMelees]).toEqual([2, 2, true]);
+        expect(api.filtrer(donnees, ['a2024', 'a2025'])).toEqual({ points: [{ da: '1', cohorte: 'a2024' }], nbNonPlaces: 1 });
+        expect(api.filtrer(donnees, ['a2024', 'h2025', 'a2025']).nbNonPlaces).toBe(2);
     });
 });
 
-describe('Tendances — le rendu : pseudonyme, « Voir son dossier », lecture seule', () => {
+describe('Tendances — le rendu', () => {
     const reg = () => registre([
-        eleve('2000001', 'Genévrier', 'Fictlou', [dossier('a2025', 'Automne 2025', '601-101-MQ', 78)], [r102(81)]),
-        eleve('2000002', 'Mélèze', 'Fictnoé', [dossier('a2025', 'Automne 2025', '601-101-MQ', 58)], [r102(64)])
+        eleve('2000001', 'Genévrier', 'Fictlou', [dossier('a2025', 'Automne 2025', ORIGINE, 78)], [note(81), note(74, 'A2026', AUTRE)]),
+        eleve('2000002', 'Mélèze', 'Fictnoé', [dossier('h2025', 'Hiver 2025', ORIGINE, 58)], [note(64)])
     ]);
+    const enfonces = (zone) => deClasse(deClasse(zone, 'tend-filtres')[0], 'tend-bascule').filter((x) => x['attr_aria-pressed'] === 'true')
+        .map((x) => x.dataset.cours || x.dataset.saison || x.dataset.cohorte);
 
-    it('chaque bille est un bouton nommé : le nom, la cohorte, les deux notes', () => {
-        const b0 = banc(reg());
-        const zone = rendre(b0);
+    it('à l\'ouverture, TOUTES les cohortes sont affichées : aucune saison n\'est choisie d\'office', () => {
+        const zone = rendre(banc(reg()));
+        expect(enfonces(zone)).toEqual(['toutes', 'h2025', 'a2025']);
+        expect(deClasse(zone, 'tend-cible').length).toBe(2);
+    });
+    it('les saisons sont des raccourcis de sélection ; une saison sans cohorte n\'a pas de bouton', () => {
+        const b = banc(reg());
+        b.win.choisirSaisonTendances({ dataset: { saison: 'hiver' } });
+        expect(enfonces(rendre(b))).toEqual(['hiver', 'h2025']);
+        const r = reg();
+        delete r.eleves['2000002'];
+        const boutons = deClasse(deClasse(rendre(banc(r)), 'tend-filtres')[0], 'tend-bascule').map((x) => x.dataset.saison).filter(Boolean);
+        expect(boutons).toEqual(['toutes', 'automne']);
+    });
+    it('les mots prennent les noms des cours déclarés : axes, zones, étiquette de la bille', () => {
+        const zone = rendre(banc(reg()));
+        const texte = toutLeTexte(zone);
+        ['Note finale en 201-NYA-05', 'Note en 201-NYB-05', 'Réussite en 201-NYA-05 et en 201-NYB-05', 'Réussite en 201-NYA-05, échec en 201-NYB-05', 'Sous 60 en 201-NYA-05']
+            .forEach((mot) => expect(texte, mot).toContain(mot));
         const cibles = deClasse(zone, 'tend-cible');
         expect(cibles.map((c) => [c.tagName, c.attr_type || c.type, c['attr_aria-label']])).toEqual([
-            ['BUTTON', 'button', 'Genévrier, Fictlou, Automne 2025, 101 : 78 · 102 : 81'],
-            ['BUTTON', 'button', 'Mélèze, Fictnoé, Automne 2025, 101 : 58 · 102 : 64']]);
+            ['BUTTON', 'button', 'Genévrier, Fictlou, Automne 2025, 201-NYA-05 : 78 · 201-NYB-05 : 81'],
+            ['BUTTON', 'button', 'Mélèze, Fictnoé, Hiver 2025, 201-NYA-05 : 58 · 201-NYB-05 : 64']]);
         // La bille est celle du suivi des groupes : la classe de la sphère, plus la teinte de la cohorte.
-        expect(cibles[0].children.map((c) => c.className)).toEqual(['barre-etudiant tend-bille tend-teinte-0']);
-        // La place porte les deux notes : 78 sur l'axe de 50 à 100, 81 sur l'axe de 40 à 100.
-        expect(b0.api.seuilReussite()).toBe(60);
+        expect(cibles[0].children.map((c) => c.className)).toEqual(['barre-etudiant tend-bille tend-teinte-1']);
+        // La place porte les deux notes : 78 sur l'axe de 50 à 100, 81 sur l'axe de 40 à 100 (depuis le haut).
         expect(parseFloat(cibles[0].style.left)).toBeCloseTo(56, 6);
-        expect(parseFloat(cibles[0].style.top)).toBeCloseTo(100 - (81 - 40) / 60 * 100, 6);   // depuis le haut : une note haute est en haut
+        expect(parseFloat(cibles[0].style.top)).toBeCloseTo(100 - (81 - 40) / 60 * 100, 6);
     });
-
+    it('deux cours suivants déclarés : un filtre « Cours suivant » ; un seul : pas de filtre', () => {
+        const b = banc(reg(), { declaree: sequence([SUIVANT, AUTRE]) });
+        const choix = (zone) => deClasse(deClasse(zone, 'tend-filtres')[0], 'tend-bascule').filter((x) => x.dataset.cours).map((x) => [x.dataset.cours, x['attr_aria-pressed']]);
+        expect(choix(rendre(b))).toEqual([[SUIVANT, 'true'], [AUTRE, 'false']]);
+        b.win.choisirSuivantTendances({ dataset: { cours: AUTRE } });
+        const zone = rendre(b);
+        expect(choix(zone)).toEqual([[SUIVANT, 'false'], [AUTRE, 'true']]);
+        expect(deClasse(zone, 'tend-cible').map((c) => c['attr_aria-label'])).toEqual(['Genévrier, Fictlou, Automne 2025, 201-NYA-05 : 78 · 201-NYC-05 : 74']);
+        expect(choix(rendre(banc(reg())))).toEqual([]);
+    });
     it('toucher une bille ouvre sa bulle au bon nom ; un second toucher la ferme', () => {
         const b = banc(reg());
         b.win.ouvrirBilleTendances({ dataset: { da: '2000002' } });
         let zone = rendre(b);
         const bulle = deClasse(zone, 'tend-bulle');
         expect(bulle.length).toBe(1);
-        expect(toutLeTexte(bulle[0])).toContain('Mélèze, Fictnoé | Automne 2025 | 101 : 58 · 102 : 64');
+        expect(toutLeTexte(bulle[0])).toContain('Mélèze, Fictnoé | Hiver 2025 | 201-NYA-05 : 58 | 201-NYB-05 : 64');
         expect(toutLeTexte(bulle[0])).not.toContain('Genévrier');
         expect(deClasse(zone, 'tend-cible').map((c) => c['attr_aria-expanded'])).toEqual(['false', 'true']);
         b.win.ouvrirBilleTendances({ dataset: { da: '2000002' } });
         zone = rendre(b);
         expect(deClasse(zone, 'tend-bulle').length).toBe(0);
     });
-
     it('en anonymisation : le pseudonyme partout, aucun nom ni prénom', () => {
-        const b = banc(reg(), { actif: true });
+        const b = banc(reg(), { anonyme: true });
         b.win.ouvrirBilleTendances({ dataset: { da: '2000001' } });
         const rendu = toutLeTexte(rendre(b));
         ['Genévrier', 'Fictlou', 'Mélèze', 'Fictnoé'].forEach((nom) => expect(rendu, nom).not.toContain(nom));
-        expect(rendu).toContain('Élève R1, Automne 2025, 101 : 78 · 102 : 81');
-        expect(rendu).toContain('Élève R2, Automne 2025');
+        expect(rendu).toContain('Élève R1, Automne 2025, 201-NYA-05 : 78 · 201-NYB-05 : 81');
+        expect(rendu).toContain('Élève R2, Hiver 2025');
     });
-
     it('« Voir son dossier » ramène à l\'onglet « Registre », sur le dossier ouvert de cet·te étudiant·e', () => {
         const b = banc(reg());
         b.win.choisirOngletLongitudinal({ dataset: { onglet: 'tendances' } });
@@ -279,17 +326,13 @@ describe('Tendances — le rendu : pseudonyme, « Voir son dossier », lecture s
         b.win.voirDossierTendances(lien);
         // Le faux DOM empile les rendus : on lit le dernier (ce que ce geste vient de poser).
         const rendu = { children: conteneur.children.slice(avant) };
-        const onglets = deClasse(rendu, 'rl-onglet');
-        expect(onglets.map((o) => [o.textContent, o['attr_aria-selected']])).toEqual([['Registre', 'true'], ['Tendances', 'false']]);
-        const lignes = deClasse(rendu, 'rl-eleve');
-        const ouverts = lignes.map((li) => [li.dataset.da, !!deClasse(li, 'rl-dossier')[0].open]);
-        expect(ouverts).toEqual([['2000001', false], ['2000002', true]]);
+        expect(deClasse(rendu, 'rl-onglet').map((o) => [o.textContent, o['attr_aria-selected']])).toEqual([['Registre', 'true'], ['Tendances', 'false']]);
+        expect(deClasse(rendu, 'rl-eleve').map((li) => [li.dataset.da, !!deClasse(li, 'rl-dossier')[0].open])).toEqual([['2000001', false], ['2000002', true]]);
     });
-
-    it('lecture seule : ouvrir l\'onglet, filtrer, toucher une bille, voir un dossier n\'écrivent RIEN', () => {
-        const b = banc(reg());
+    it('ouvrir l\'onglet, filtrer, toucher une bille, voir un dossier n\'écrivent RIEN', () => {
+        const b = banc(reg(), { declaree: sequence([SUIVANT, AUTRE]) });
         b.win.choisirOngletLongitudinal({ dataset: { onglet: 'tendances' } });
-        b.win.choisirCoursTendances({ dataset: { cours: '103' } });
+        b.win.choisirSuivantTendances({ dataset: { cours: AUTRE } });
         b.win.choisirSaisonTendances({ dataset: { saison: 'toutes' } });
         b.win.basculerCohorteTendances({ dataset: { cohorte: 'a2025' } });
         b.win.ouvrirBilleTendances({ dataset: { da: '2000001' } });
@@ -297,21 +340,21 @@ describe('Tendances — le rendu : pseudonyme, « Voir son dossier », lecture s
         b.win.voirDossierTendances({ dataset: { da: '2000001' } });
         expect(b.journal).toEqual([]);
     });
-
-    it('registre vide, ou sans note ultérieure : un état vide dit quoi faire', () => {
-        expect(toutLeTexte(rendre(banc(registre([]))))).toContain('Inscris d\'abord des étudiant·es dans l\'onglet « Registre »');
-        const sansNote = registre([eleve('2000001', 'Genévrier', 'Fictlou', [dossier('a2025', 'Automne 2025', '601-101-MQ', 78)], [])]);
-        const rendu = toutLeTexte(rendre(banc(sansNote)));
-        expect(rendu).toContain('Aucune note de 102 ou de 103 au registre.');
-        expect(rendu).not.toContain('tend-cible');
+    it('registre vide : un état vide dit quoi faire, sans déclaration à remplir', () => {
+        const zone = rendre(banc(registre([]), { declaree: null }));
+        expect(toutLeTexte(zone)).toContain('Inscris d\'abord des étudiant·es dans l\'onglet « Registre »');
+        expect(deClasse(zone, 'tend-sequence').length).toBe(0);
     });
-
-    it('une cohorte sans note pour le cours choisi garde sa puce, avec « pas encore de note »', () => {
+    it('aucune note ultérieure au registre : la déclaration le dit, à la place des cours suivants', () => {
+        const sansNote = registre([eleve('2000001', 'Genévrier', 'Fictlou', [dossier('a2025', 'Automne 2025', ORIGINE, 78)], [])]);
+        expect(toutLeTexte(rendre(banc(sansNote, { declaree: null })))).toContain('Aucune note ultérieure au registre.');
+    });
+    it('une cohorte sans note pour le cours suivant garde sa puce, avec « pas encore de note »', () => {
         const r = reg();
-        r.eleves['2000003'] = eleve('2000003', 'Noyer', 'Fictzoé', [dossier('h2026', 'Hiver 2026', '601-101-MQ', 70)], []);
+        r.eleves['2000003'] = eleve('2000003', 'Noyer', 'Fictzoé', [dossier('h2026', 'Hiver 2026', ORIGINE, 70)], []);
         const puces = deClasse(rendre(banc(r)), 'tend-puce');
         expect(puces.map((p) => [p.dataset.cohorte, p['attr_aria-pressed'], toutLeTexte(p).includes('pas encore de note')])).toEqual([
-            ['a2025', 'true', false], ['h2026', 'false', true]]);
+            ['h2025', 'true', false], ['a2025', 'true', false], ['h2026', 'true', true]]);
     });
 });
 
@@ -319,14 +362,18 @@ describe('Tendances — les règles du dépôt sur le fichier neuf', () => {
     const js = readFileSync(path.join(RACINE, 'js/suivi-tendances.js'), 'utf8');
     const css = readFileSync(path.join(RACINE, 'styles.css'), 'utf8');
     const sansCommentaires = (s) => s.replace(/\/\*[\s\S]*?\*\//g, '');
+    const code = sansCommentaires(js).replace(/(^|[^:])\/\/.*$/gm, '$1');
 
-    it('le module bâtit par le DOM : ni innerHTML, ni handler en ligne, ni console.log, ni écriture', () => {
-        const code = sansCommentaires(js).replace(/(^|[^:])\/\/.*$/gm, '$1');
-        ['innerHTML', 'insertAdjacentHTML', 'console.log', 'onclick', 'db.set', 'setSync', 'localStorage'].forEach((mot) => expect(code, mot).not.toContain(mot));
+    it('RIEN de propre à une discipline dans le code : ni numéro de cours, ni « ton cours », ni saison « hors séquence »', () => {
+        ['101', '102', '103', '601', 'ton 1', 'hors séquence', 'correcteur', 'façon de noter'].forEach((mot) => expect(code, mot).not.toContain(mot));
+    });
+    it('le module bâtit par le DOM : ni innerHTML, ni handler en ligne, ni console.log ; une seule écriture, celle de sa clé', () => {
+        ['innerHTML', 'insertAdjacentHTML', 'console.log', 'onclick', 'setSync', 'localStorage'].forEach((mot) => expect(code, mot).not.toContain(mot));
+        expect(code.match(/db\.set\([^)]*/g)).toEqual(['db.set(NOM_CLE, sequencePropre(sequence']);
     });
     it('les mots de l\'écran disent « étudiant·es », jamais « élèves »', () => {
         const mots = banc(registre([])).win.MOTS_TENDANCES_LONGITUDINAL;
-        const tous = Object.values(mots).map((m) => (typeof m === 'function' ? m(2, 3, '102') : String(m))).join(' ');
+        const tous = Object.values(mots).map((m) => (typeof m === 'function' ? m(2, 3, 'A', 'B') : String(m))).join(' ');
         expect(tous).not.toMatch(/[ée]l[èe]ve/i);
         expect(tous).toContain('étudiant·es');
     });

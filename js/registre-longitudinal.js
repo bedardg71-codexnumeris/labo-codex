@@ -68,7 +68,8 @@
    (index.html) — le registre n'est la donnée d'aucun trimestre.
 
    DEUX ONGLETS (11 nov. 2026, décision de Grégoire) — « Registre » (tout ce qui précède, inchangé) et « Tendances »
-   (js/suivi-tendances.js, qui LIT le registre par les lecteurs exposés ici et n'écrit rien). Les onglets vivent
+   (js/suivi-tendances.js, qui LIT le registre par les lecteurs exposés ici et ne l'écrit jamais ; sa seule écriture est
+   sa propre clé, `tendancesSequence`). Les onglets vivent
    DANS la section : ni config.js ni navigation.js ne les connaissent. L'onglet choisi est une mémoire de séance.
    =============================================================== */
 
