@@ -2000,19 +2000,15 @@
     /**
      * Le nom d'un fichier dans l'Aperçu : le nom de famille, ou « Nom, Prénom » quand une
      * autre personne du groupe actif porte le même (comparé sans accents ni casse).
-     * L'anonymisation garde la priorité (`nomEleveDuFichier`). Non échappé.
+     * L'anonymisation garde la priorité : `nomEleveDuFichier` rend le pseudonyme sous toutes
+     * ses formes. Non échappé.
      * @param {Object} f - Fichier de la file
      * @param {Set<string>} [homonymes] - `nomsDeFamillePartages()`, calculé une fois par rendu
      */
     function nomDansLApercu(f, homonymes) {
         const nom = nomEleveDuFichier(f, 'nom');
-        if (!nom) return '';
         const partages = homonymes || nomsDeFamillePartages();
-        const anonyme = typeof anonymiserNom === 'function'
-            ? anonymiserNom(f.etudiantDA || (f.etudiantAssocie && f.etudiantAssocie.da) || '')
-            : null;
-        if (anonyme || !partages.has(nomDeFamilleComparable(nom))) return nom;
-        return nomEleveDuFichier(f, 'nom, prenom');
+        return nom && partages.has(nomDeFamilleComparable(nom)) ? nomEleveDuFichier(f, 'nom, prenom') : nom;
     }
 
     /**
