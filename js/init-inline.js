@@ -165,6 +165,9 @@ function mettreAJourPastille() {
     // Lot 3 (7 nov. 2026, décision de Cowork) : la pastille vit à côté d'« Accueil », dans la navigation
     // (les mots en ligne et la liste des sections de l'iPhone). Un point dessiné en CSS ; les lecteurs
     // d'écran entendent « nouveautés disponibles » après « Accueil ».
+    // 11 nov. 2026 : la même pastille à côté du lien « Nouveautés » du pied de l'accueil. Là, le nom du
+    // bouton dit déjà « Nouveautés » : `data-annonce` y porte « (disponibles) », pour que l'annonce
+    // entendue reste « Nouveautés (disponibles) » sans répéter le mot.
     const { aDesNouveautes } = verifierNouveautes();
     document.querySelectorAll('.pastille-nouveautes').forEach(function (pastille) {
         pastille.classList.toggle('pastille-active', aDesNouveautes);
@@ -172,7 +175,7 @@ function mettreAJourPastille() {
         if (aDesNouveautes) {
             const dit = document.createElement('span');
             dit.className = 'u-lecteur-ecran';
-            dit.textContent = ' (nouveautés disponibles)';
+            dit.textContent = pastille.dataset.annonce || ' (nouveautés disponibles)';
             pastille.appendChild(dit);
         }
     });

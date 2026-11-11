@@ -159,7 +159,7 @@ describe('#859 · le repère « build vu » s\'écrit une seule fois', () => {
         h.ctx.db.setSync = (k, v) => { if (k === 'monitorage-build-vu') ecritures.push(v); setSync(k, v); };
         // La pastille (relecture neuve) : ce geste est désormais seul à la remettre à jour.
         const classes = new Set();
-        const pastille = { textContent: '', appendChild() {}, classList: { toggle: (c, f) => (f ? classes.add(c) : classes.delete(c)) } };
+        const pastille = { textContent: '', dataset: {}, appendChild() {}, classList: { toggle: (c, f) => (f ? classes.add(c) : classes.delete(c)) } };
         h.ctx.document.querySelectorAll = (sel) => (sel === '.pastille-nouveautes' ? [pastille] : []);
         h.ctx.document.createElement = () => ({ className: '', textContent: '' });
         h.run('mettreAJourPastille()');

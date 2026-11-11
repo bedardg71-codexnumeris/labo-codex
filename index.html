@@ -969,6 +969,13 @@
             text-underline-offset: 2px;
             cursor: pointer;
         }
+        /* 11 nov. 2026 : la pastille des Nouveautés, la même que celle d'« Accueil » (styles.css), placée
+           en exposant comme dans le menu ; le bouton est en flex, où `vertical-align` ne joue pas. */
+        .accueil-pied-lien .pastille-nouveautes.pastille-active {
+            align-self: flex-start;
+            margin-top: 7px;
+            margin-left: 0;
+        }
         .accueil-pied-lien:focus-visible {
             outline: 2px solid var(--accent-primaire);
             outline-offset: 2px;
@@ -11833,7 +11840,7 @@
     <script src="js/migrations.js?v=20260927d"></script> <!-- #374-bis : dédoublonnage par contenu (congés recréés à la main, 6 août) -->
 
     <!-- Page d'accueil (Chantier 3) -->
-    <script src="js/accueil.js?v=20261110h"></script> <!-- « Commencer » lance le parcours « Mettre ta classe en place » (9 nov.) · Le texte de l’accueil (28 oct. au soir), remplacé en entier par Grégoire · Trois portes d’entrée (28 oct.) · Les textes des cartes de l’accueil (19 oct.), arrêtés par Grégoire · Refonte nav SP5 : data-param calendrier -->
+    <script src="js/accueil.js?v=20261110i"></script> <!-- « Commencer » lance le parcours « Mettre ta classe en place » (9 nov.) · Le texte de l’accueil (28 oct. au soir), remplacé en entier par Grégoire · Trois portes d’entrée (28 oct.) · Les textes des cartes de l’accueil (19 oct.), arrêtés par Grégoire · Refonte nav SP5 : data-param calendrier -->
     <!-- Guidage contextuel démo (Chantier 4) -->
     <script src="js/guidage-demo.js?v=20261107b"></script> <!-- Le guidage de la démo (29 oct.) : les 17 bulles validées ; la bulle du Suivi du groupe sous sa vraie clé · #1039 : bandeau de l'Animation · Beta 99.42 b0512-0840 : retrait entrée evaluations-apercu morte -->
 
@@ -11880,7 +11887,7 @@
     <script src="js/vue-simple.js?v=20261110b"></script> <!-- Vue simple (9 nov. 2026) : l'écran ; après main.js, qui câble la navigation -->
 
     <!-- PRIORITÉ 9: Scripts inline externalisés (Phase 6 CSP) -->
-    <script src="js/init-inline.js?v=20261110d"></script> <!-- #1152, lot 1 (24 oct.) : la recherche de l’Aide retombe sur « Commencer » ; la paire aide-apropos-* retirée · Beta 99.48 b0518-0540 : refactor profil-etudiant sessions A+B+C+D LIVRÉES (7 sous-modules autonomes : helpers + calculs + rapport + diagnostics + confidentiel + actions + sections-affichage ; 102 fonctions extraites ; profil-etudiant.js renommé en sections-affichage.js + afficherProfilComplet cyc 58 éclaté en 5 helpers privés — étape 4 partielle, 5 fonctions cyc > 30 héritages documentées) -->
+    <script src="js/init-inline.js?v=20261110e"></script> <!-- #1152, lot 1 (24 oct.) : la recherche de l’Aide retombe sur « Commencer » ; la paire aide-apropos-* retirée · Beta 99.48 b0518-0540 : refactor profil-etudiant sessions A+B+C+D LIVRÉES (7 sous-modules autonomes : helpers + calculs + rapport + diagnostics + confidentiel + actions + sections-affichage ; 102 fonctions extraites ; profil-etudiant.js renommé en sections-affichage.js + afficherProfilComplet cyc 58 éclaté en 5 helpers privés — étape 4 partielle, 5 fonctions cyc > 30 héritages documentées) -->
 
     <!-- Défense A : sandbox iframe pour l'aperçu d'objets importés (Phase 1 sécurité) -->
     <script src="js/securite-apercu-sandbox.js?v=2026050803"></script>

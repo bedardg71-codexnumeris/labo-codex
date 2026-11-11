@@ -58,16 +58,32 @@ test('un titre qui répète son onglet n\'occupe plus l\'écran, mais reste le t
     await expect(page.locator('#suivi-rencontres h2')).toBeVisible();
 });
 
-test('la pastille des Nouveautés s\'allume à côté d\'« Accueil », dans la navigation', async ({ page }) => {
+test('la pastille des Nouveautés s\'allume à côté d\'« Accueil » ET du lien « Nouveautés » du pied de l\'accueil ; les ouvrir éteint les deux, sans recharger', async ({ page }) => {
+    // 7 nov. : la pastille vivait seule dans la navigation. 11 nov. (Grégoire, 7 h 25) : « Sinon on ne sait
+    // pas pourquoi il y a une pastille. La 2e nous le fait comprendre. » — la même, au pied de l'accueil.
     await ouvrir(page, 1180, 820, { demo: false });
-    const p = await page.evaluate(() => {
-        localStorage.removeItem('labo_version_vue');
-        window.mettreAJourPastille && window.mettreAJourPastille();
-        const el = document.querySelector('.navigation-principale [data-onglet="accueil"] .pastille-nouveautes');
-        return el ? { classe: el.className, lu: el.textContent } : null;
+    // Un build non vu : la version majeure est vue, le build ne l'est pas.
+    await page.evaluate(() => {
+        db.setSync('monitorage-version-vue', window.VERSION_MAJEURE);
+        db.setSync('monitorage-build-vu', '0000-0000');
+        afficherSection('accueil');
     });
-    expect(p).not.toBeNull();
-    expect(await page.locator('#accueil-contenu .pastille-nouveautes').count(), 'plus au pied de l\'accueil').toBe(0);
+    const etat = () => page.evaluate(() => ({
+        menu: document.querySelector('.navigation-principale [data-onglet="accueil"] .pastille-nouveautes')?.classList.contains('pastille-active') ?? null,
+        pied: document.querySelector('#accueil-contenu .accueil-pied .pastille-nouveautes')?.classList.contains('pastille-active') ?? null,
+    }));
+    expect(await etat()).toEqual({ menu: true, pied: true });
+    const lien = page.locator('#accueil-contenu .accueil-pied').getByRole('button', { name: 'Nouveautés (disponibles)', exact: true });
+    await expect(lien, 'l\'annonce, une fois : « Nouveautés (disponibles) »').toBeVisible();
+    const pastillePied = await page.locator('#accueil-contenu .accueil-pied .pastille-nouveautes').boundingBox();
+    expect(pastillePied && pastillePied.width >= 6 && pastillePied.height >= 6, 'le point est à l\'écran').toBe(true);
+    // Ouvrir les Nouveautés par le lien du pied : les deux s'éteignent, la page n'est pas rechargée.
+    await page.evaluate(() => { window.__memePage = true; });
+    await lien.click();
+    await expect(page.locator('#modalNouveautes')).toHaveClass(/actif/);
+    expect(await etat()).toEqual({ menu: false, pied: false });
+    await expect(page.locator('#accueil-contenu .accueil-pied').getByRole('button', { name: 'Nouveautés', exact: true })).toBeVisible();
+    expect(await page.evaluate(() => window.__memePage === true), 'aucun rechargement').toBe(true);
 });
 
 /** Vrai si la phrase de la fenêtre d'aide « Données démo » est À L'ÉCRAN (la fenêtre fermée peut rester au DOM). */

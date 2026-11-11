@@ -214,7 +214,7 @@ function genererTache(t) {
  *     (28 oct. 2026 ; la porte de l'orthopédagogie, consigne du 12 sept. — Grégoire : « Je veux
  *     que l'orthopédagogue sente qu'elle entre par la porte principale. »).
  *   - Tâches : neuf cartes.
- *   - Pied de page : l'application et sa version, Nouveautés ; Codex Numeris et le blogue.
+ *   - Pied de page : l'application et sa version, Nouveautés (et sa pastille, 11 nov.) ; Codex Numeris et le blogue.
  * Retirés le 7 nov. : « Utilitaires » (Ton codex, Nouveautés) et « Aide » (Assistance, Données
  * démo). Ton codex et Assistance sont dans l'en-tête et son menu ; Nouveautés, au pied de page ;
  * la démo s'ouvre par « Explorer » et se quitte par le bandeau vert.
@@ -237,7 +237,7 @@ function afficherAccueilContenu(conteneur) {
                 <div class="accueil-pied-texte">
                     <div class="accueil-pied-ligne">
                         <span class="accueil-pied-version">Bêta publique ${version}</span>
-                        <button type="button" class="accueil-pied-lien" data-action="afficherModalNouveautes">Nouveautés</button>
+                        <button type="button" class="accueil-pied-lien" data-action="afficherModalNouveautes">Nouveautés<span class="pastille-nouveautes" data-annonce=" (disponibles)"></span></button>
                     </div>
                     <span class="accueil-pied-tagline">Suivre l’apprentissage, soutenir l’enseignement.</span>
                 </div>
@@ -255,6 +255,9 @@ function afficherAccueilContenu(conteneur) {
         </footer>
     `;
 
+    // 11 nov. 2026 (Grégoire, 7 h 25) : la pastille d'« Accueil » se répète à côté de « Nouveautés »,
+    // qui dit pourquoi elle est là. Le pied vient d'être redessiné : l'allumer selon l'état courant.
+    if (typeof mettreAJourPastille === 'function') mettreAJourPastille();
 }
 
 /**
