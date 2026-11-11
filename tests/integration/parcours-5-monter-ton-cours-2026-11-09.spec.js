@@ -1,4 +1,7 @@
 import { test, expect } from '@playwright/test';
+import { releverLaBulle } from './harness/releve-bulle.js';
+// La bulle ne couvre jamais ses zones quand une place les laisse libres (Grégoire, 11 nov. 2026) : relevé à chaque essai.
+releverLaBulle(test);
 import { ouvrirEspaceVide, ouvrirPanneau, attendreEtape, contourSur, bulleNeCouvrePas, capture, bulle, mettreLaClasseEnPlace } from './harness/classe-de-banc.js';
 import { leParcoursEntier, dossierDesCaptures } from './harness/parcours-3-de-banc.js';
 import { attendreApplication } from './harness/attendre-application.js';
@@ -89,14 +92,14 @@ async function quitterLeChamp(page) {
 
 /** « Touche « <type> » dans la palette », puis écris son titre : le bloc naît au centre, son titre à l'écriture. */
 /**
- * Deux passages de la sonde du moteur : le voile reçoit une marque, et chaque passage la remplace (`sonder` dessine le
- * voile, puis lit l'état atteint, d'un seul tenant). Une condition observable, pas un délai : après elle, une étape qui
+ * Deux passages de la sonde du moteur : la couche des flèches reçoit une marque (sa largeur), et chaque passage la
+ * remplace (`sonder` la dimensionne, puis lit l'état atteint, d'un seul tenant ; 10 nov. 2026 : le voile est retiré). Une condition observable, pas un délai : après elle, une étape qui
  * devait avancer l'a fait.
  */
 async function deuxSondes(page) {
     for (let k = 0; k < 2; k++) {
-        await page.evaluate(() => document.querySelector('#parcours-voile path').setAttribute('d', 'M0,0'));
-        await page.waitForFunction(() => document.querySelector('#parcours-voile path').getAttribute('d') !== 'M0,0');
+        await page.evaluate(() => document.getElementById('parcours-fleches').setAttribute('width', '1'));
+        await page.waitForFunction(() => document.getElementById('parcours-fleches').getAttribute('width') !== '1');
     }
 }
 const rangActuel = (page) => page.evaluate(() => ParcoursMoteur.etapeCourante());
@@ -400,6 +403,58 @@ test('« Monter ton cours » : les sept étapes, la variante ⚠, « Plus tard �
     await page.evaluate(() => Assistance.parcours().find((p) => p.id === 'decouvrir').lancer(0));
     await expect.poll(() => page.evaluate(() => document.body.classList.contains('parcours-inspecteur-devant'))).toBe(false);
     await expect(page.locator('[id^="parcours-contour-extra-"]')).toHaveCount(0);
+});
+
+// LA CAPTURE 25 (Grégoire, 11 nov. 2026, quatrième aperçu : « la surbrillance et le planificateur entrent en conflit ») :
+// la leçon neuve, posée « à côté du dernier bloc », tombait sous la palette « Planificateur » ; la flèche visait son
+// en-tête caché, et le halo de la semaine et de la séance se dessinait par-dessus la palette. Rejoué : l'idée maîtresse
+// amenée contre le « Planificateur » avant de toucher « Leçon ». Attendu : la leçon amenée hors de la palette, dans le
+// canevas libre ; aucun halo sur la palette (le relevé des ouvertures le juge aussi, à chaque contour).
+test('capture 25 : une leçon neuve tombée sous le « Planificateur » est amenée dans le canevas libre ; aucun halo sur la palette (1180 × 820)', async ({ page }) => {
+    test.setTimeout(360000);
+    await espaceDuTroisiemeParcours(page);
+    await page.setViewportSize({ width: 1180, height: 820 });
+    await fermerLeRappel(page);
+    await ouvrirPanneau(page);
+    await item(page).locator('.assistance-parcours-bouton').click();
+    await n(page, 1, 'Ta compétence');
+    const comp = await creer(page, 'competence', 'Analyser des textes littéraires', { lent: true });
+    await n(page, 2, 'Ton idée maîtresse', { focus: false });
+    const idee = await creer(page, 'idee-maitresse', 'Le texte comme système');
+    await relier(page, comp, idee);
+    await n(page, 3, 'Ta leçon', { focus: false });
+    // Le « Planificateur » glissé au milieu du canevas, sur la place où la carte posera la leçon (à droite de l'idée
+    // maîtresse) : ni à gauche ni à droite, la carte ne l'écarte pas, et la leçon se pose dessous.
+    await page.evaluate((id) => {
+        const p = document.getElementById('planif-palette-nav');
+        const b = document.getElementById(id).getBoundingClientRect();
+        const z = document.getElementById('planif-zone-travail').getBoundingClientRect();
+        const q = p.getBoundingClientRect();
+        const parent = p.offsetParent.getBoundingClientRect();
+        // Sa gauche juste à gauche du milieu, son haut à hauteur de l'idée : il couvre la place à droite de l'idée.
+        p.style.left = (Math.min(b.right + 20, (z.left + z.right) / 2 - 10) - parent.left) + 'px';
+        p.style.right = 'auto';
+        p.style.top = (b.top - parent.top) + 'px';
+        void q;
+    }, idee);
+    await page.evaluate(() => new Promise((fin) => requestAnimationFrame(() => requestAnimationFrame(fin))));
+    const lecon = await creer(page, 'lecon', 'Lire un incipit');
+    const dedans = () => page.evaluate((id) => {
+        const r = document.getElementById(id).getBoundingClientRect();
+        const z = document.getElementById('planif-zone-travail').getBoundingClientRect();
+        const sous = ['planif-palette', 'planif-palette-nav'].some((pid) => {
+            const q = document.getElementById(pid).getBoundingClientRect();
+            return r.left < q.right && q.left < r.right && r.top < q.bottom && q.top < r.bottom;
+        });
+        return !sous && r.left >= Math.max(z.left, 0) - 1 && r.right <= Math.min(z.right, innerWidth) + 1;
+    }, lecon);
+    await expect.poll(dedans, { message: 'la leçon neuve, amenée hors des palettes', timeout: 5000 }).toBe(true);
+    await contourSur(page, `${noeud(lecon)} .planif-noeud-semaine`, 'parcours-contour-extra-0');
+    const surLaPalette = await page.evaluate(() => [...document.querySelectorAll('[id^="parcours-contour"]')].filter((c) => !c.hidden).some((c) => {
+        const r = c.getBoundingClientRect(), p = document.getElementById('planif-palette-nav').getBoundingClientRect();
+        return r.left < p.right && p.left < r.right && r.top < p.bottom && p.top < r.bottom;
+    }));
+    expect(surLaPalette, 'aucun halo sur le « Planificateur »').toBe(false);
 });
 
 test('« Monter ton cours » : sans production, le refus ; les deux pages du guide ; le panneau à 390 px', async ({ page }) => {

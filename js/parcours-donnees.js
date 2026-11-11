@@ -132,10 +132,11 @@
 
     // ---------- Les éléments du moteur, pour CE parcours ----------
 
-    // Le moteur ne dit pas quel parcours il joue : ses éléments, recréés à chaque lancement,
-    // portent notre marque. La garde et la bulle au-dessus des fenêtres ne valent que pour eux.
+    // Les éléments du moteur, recréés à chaque lancement, portent notre marque : la garde et la bulle
+    // au-dessus des fenêtres ne valent que pour eux. (Depuis le 10 nov. 2026, le moteur sait aussi dire
+    // quel parcours il joue, `joue(def)` ; la marque reste, elle sert en plus aux feuilles de style.)
     function elementsDuMoteur() {
-        return [document.getElementById('parcours-bulle'), document.getElementById('parcours-contour')].filter(Boolean);
+        return ['parcours-bulle', 'parcours-contour', 'parcours-fleches'].map(function (id) { return document.getElementById(id); }).filter(Boolean);
     }
 
     function cestNotreParcours() {
@@ -193,6 +194,7 @@
     var ETAPES = [
         {
             titre: 'Pourquoi un codex',
+            geste: "Touche « Codex », en haut de l'écran.",
             texte: TEXTE_1,
             avant: async function () {
                 auDessusDesFenetres(false);
@@ -205,6 +207,7 @@
         },
         {
             titre: 'Mettre à jour',
+            geste: "Touche « Mettre à jour le codex ».",
             texte: TEXTE_2,
             avant: async function () {
                 auDessusDesFenetres(false);
@@ -212,14 +215,17 @@
                 ouvrirMenu();
             },
             zones: function () { return [hautDuMenu()]; },
+            // La bulle ne nomme que « Mettre à jour le codex » : la flèche y va, pas au haut du menu (Grégoire, 11 nov.
+            // 2026, capture 27 : « pointe à côté »).
+            nommeLeContour: true,
             // Le menu refermé (un toucher à côté), le contour revient sur « Codex ».
             contour: function () { return itemMettreAJour() || (tentativeEnCours() ? null : boutonCodex()); },
             atteint: function () { return !!apercu(); }
         },
         {
             titre: 'Range ton fichier',
+            geste: "Touche « Mettre à jour », puis range ton fichier dans un lieu protégé.",
             texte: texteEtape3('fenetre', false),
-            voile: 'leger',
             avant: async function () {
                 auDessusDesFenetres(true);
                 // La phrase se choisit maintenant, l'aperçu ouvert : avant le toucher qui ouvrira
@@ -248,6 +254,9 @@
                 return p ? [p] : [];
             },
             contour: function () {
+                // Le « i » de l'aperçu ouvert (son explication couvre « Mettre à jour ») : d'abord le refermer (11 nov. 2026).
+                var fermer = q('.aide-contextuelle-modal .primo-popup-fermer');
+                if (fermer && visible(fermer)) return fermer;
                 var b = boutonDeLApercu();
                 if (b) return b;
                 if (fenetreDeDialogue() || tentativeEnCours()) return null;
@@ -263,6 +272,7 @@
         },
         {
             titre: 'Quand le rouvrir',
+            geste: "Touche « Terminer ».",
             texte: TEXTE_4,
             sansSortie: true,
             avant: async function () {
@@ -318,6 +328,7 @@
         ligne: LIGNE,
         total: ETAPES.length,
         refus: function () { return aUnTrimestreReel() ? null : REFUS_SANS_TRIMESTRE; },
+        prealable: 'classe',
         lancer: lancer
     });
 

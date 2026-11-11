@@ -1,0 +1,10 @@
+
+Running 4 tests using 1 worker
+
+  ✓  1 [webkit] › integration/parcours-2-ma-classe-2026-11-09.spec.js:245:1 › de « Découvrir » à sa propre classe : « Commencer avec ma classe », le Cadre bloc par bloc, « Plus tard » puis « Reprendre », la première saisie, la bande (1180 px) (14.3s)
+  ✓  2 [webkit] › integration/parcours-2-ma-classe-2026-11-09.spec.js:367:1 › la porte de l’accueil commence à la première étape non faite ; avant le premier cours, l’étape 7 le dit, « D’accord » la ferme, « Reprendre » la rouvre (12.9s)
+  ✓  3 [webkit] › integration/parcours-2-ma-classe-2026-11-09.spec.js:411:1 › une flèche didactique ouverte avant le parcours se retire au lancement, sans être marquée vue, même si l’on clique sa cible (2.3s)
+  -  4 [webkit] › integration/parcours-2-ma-classe-2026-11-09.spec.js:434:1 › captures de l’iPhone (390 px) : les étapes 1, 7 et 8
+
+  1 skipped
+  3 passed (30.2s)

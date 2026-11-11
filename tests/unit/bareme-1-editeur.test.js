@@ -522,9 +522,10 @@ describe('barème 1 · I — aucun calcul ne lit le barème', () => {
     it('I.b ni les réponses ni le barème : aucun module d’évaluation, de note ou de bilan ne lit `descripteurs`', () => {
         const lecteurs = readdirSync(path.join(racine, 'js')).filter(f => f.endsWith('.js'))
             .filter(f => /\.descripteurs\b|\bdescripteurs\s*(?:\.[a-zA-Z]|\[)/.test(readFileSync(path.join(racine, 'js', f), 'utf8')));
-        // `parcours-evaluer.js` (troisième parcours d'assistance, 9 nov. 2026) lit `descripteurs.echelleId` pour savoir si
-        // la grille choisie a une échelle, et poser le contour sur le menu « Échelle » de la fiche : il ne calcule rien.
-        expect(lecteurs.sort()).toEqual(['bareme.js', 'grilles.js', 'import-export.js', 'materiel-assistant.js', 'materiel-creation.js', 'parcours-evaluer.js']);
+        // `parcours-evaluer.js` (troisième parcours d'assistance) y était du 9 au 11 nov. 2026 : il cherchait l'échelle d'une
+        // grille dans ses descripteurs. Depuis le 11 nov., il lit `grilleEntierementEnPoints` (une grille composée dans
+        // Conception › Grilles n'a pas de descripteurs) : il n'y est plus.
+        expect(lecteurs.sort()).toEqual(['bareme.js', 'grilles.js', 'import-export.js', 'materiel-assistant.js', 'materiel-creation.js']);
     });
 
     it('I.c mêmes points, même note : la portée d’une évaluation enregistrée, avec et sans barème', () => {

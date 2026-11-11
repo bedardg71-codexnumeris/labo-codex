@@ -1,8 +1,12 @@
 import { test, expect } from '@playwright/test';
+import { releverLaBulle } from './harness/releve-bulle.js';
+// La bulle ne couvre jamais ses zones quand une place les laisse libres (Grégoire, 11 nov. 2026) : relevé à chaque essai.
+releverLaBulle(test);
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { attendreApplication } from './harness/attendre-application.js';
+import { flecheVers, nombreDeFleches } from './harness/fleches-de-banc.js';
 
 // =======================================================================
 // LE SIXIÈME PARCOURS, « METTRE TES DONNÉES À L'ABRI » — 9 NOVEMBRE 2026
@@ -53,7 +57,7 @@ async function capture(page, nom) {
     await page.evaluate(() => window.accompagnement && window.accompagnement.masquerHover && window.accompagnement.masquerHover());
     await page.waitForFunction(() => document.getAnimations()
         .filter((a) => a.effect && a.effect.target && a.effect.target.closest
-            && a.effect.target.closest('#panneau-assistance, #parcours-voile, #parcours-bulle, .aide-contextuelle-modal, .aide-contextuelle-overlay'))
+            && a.effect.target.closest('#panneau-assistance, #parcours-bulle, .aide-contextuelle-modal, .aide-contextuelle-overlay'))
         .every((a) => a.playState !== 'running'));
     await page.screenshot({ path: path.join(CAPTURES, nom + '.jpg'), type: 'jpeg', quality: 85 });
 }
@@ -151,10 +155,15 @@ async function lancerLeParcours(page) {
 async function jusquALApercu(page, { capturer = '', avantApercu = null } = {}) {
     await attendreEtape(page, 1);
     await contourSur(page, '#btn-codex');
+    // « Touche « Codex » » : sa flèche dès l'ouverture (la règle du contour, 11 nov. 2026, capture 26).
+    await flecheVers(page, '#btn-codex', 'étape 1, « Codex »');
     if (capturer) await capture(page, capturer + '-etape-1');
     await page.click('#btn-codex');
     await attendreEtape(page, 2);
     await contourSur(page, '#codex-menu .codex-menu-item:not(.codex-menu-item--simple)[data-action="Codex.actionEnregistrer"]');
+    // Capture 27 (« pointe à côté ») : une seule flèche, vers « Mettre à jour le codex », pas vers le haut du menu.
+    await flecheVers(page, '#codex-menu .codex-menu-item:not(.codex-menu-item--simple)[data-action="Codex.actionEnregistrer"]', 'étape 2');
+    await nombreDeFleches(page, 1, 'étape 2');
     if (capturer) await capture(page, capturer + '-etape-2');
     await page.click('#codex-menu .codex-menu-item:not(.codex-menu-item--simple)[data-action="Codex.actionEnregistrer"]');
     if (avantApercu) await avantApercu();

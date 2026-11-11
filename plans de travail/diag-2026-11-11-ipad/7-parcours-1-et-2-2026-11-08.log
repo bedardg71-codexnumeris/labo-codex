@@ -1,0 +1,69 @@
+
+Running 8 tests using 1 worker
+
+  ✓  1 [webkit] › integration/parcours-1-et-2-2026-11-08.spec.js:120:1 › menu : une seule entrée « Assistance », avant Aide, Signaler, Soutenir, Réglages ; le rang du parcours à venir (1.6s)
+  ✓  2 [webkit] › integration/parcours-1-et-2-2026-11-08.spec.js:131:1 › panneau : titre, phrase, « Tes parcours », les parcours à faire, l’aide dans les pages ; Échap, voile et bouton le ferment (2.8s)
+  ✓  3 [webkit] › integration/parcours-1-et-2-2026-11-08.spec.js:180:1 › « À propos » : le lien « Assistance » ouvre le panneau (1.4s)
+  ✘  4 [webkit] › integration/parcours-1-et-2-2026-11-08.spec.js:190:1 › « Découvrir » de bout en bout sur la démo, en faisant les gestes (1180 px) (5.6s)
+  ✓  5 [webkit] › integration/parcours-1-et-2-2026-11-08.spec.js:300:1 › « Quitter le parcours » referme la démo qu’il a ouverte, ramène où l’on était, puis « Reprendre » repart à la même étape (4.1s)
+  ✓  6 [webkit] › integration/parcours-1-et-2-2026-11-08.spec.js:334:1 › sentinelle : les chiffres des étapes 2 à 4 sont ceux du pack démo (sinon, revoir leurs textes) (2.1s)
+  ✓  7 [webkit] › integration/parcours-1-et-2-2026-11-08.spec.js:362:1 › iPhone (390 px) : les étapes 1, 5 et 8 ; la navigation passe par le bouton de section (3.9s)
+  -  8 [webkit] › integration/parcours-1-et-2-2026-11-08.spec.js:400:1 › captures du menu et du panneau : 1180 et 390 px, sombre et clair, trois états
+
+
+  1) [webkit] › integration/parcours-1-et-2-2026-11-08.spec.js:190:1 › « Découvrir » de bout en bout sur la démo, en faisant les gestes (1180 px) 
+
+    Error: [2mexpect([22m[31mreceived[39m[2m).[22mtoEqual[2m([22m[32mexpected[39m[2m) // deep equality[22m
+
+    [32m- Expected  -  1[39m
+    [31m+ Received  + 24[39m
+
+    [32m- Array [][39m
+    [31m+ Array [[39m
+    [31m+   Object {[39m
+    [31m+     "depart": Object {[39m
+    [31m+       "x": 792,[39m
+    [31m+       "y": 475,[39m
+    [31m+     },[39m
+    [31m+     "pointe": Object {[39m
+    [31m+       "x": 792,[39m
+    [31m+       "y": 340,[39m
+    [31m+     },[39m
+    [31m+     "trace": "M792,475 Q767.7,407.5 792,340 M783,348 L792,340 L793.8,351.9",[39m
+    [31m+   },[39m
+    [31m+   Object {[39m
+    [31m+     "depart": Object {[39m
+    [31m+       "x": 792,[39m
+    [31m+       "y": 475,[39m
+    [31m+     },[39m
+    [31m+     "pointe": Object {[39m
+    [31m+       "x": 411.2,[39m
+    [31m+       "y": 48,[39m
+    [31m+     },[39m
+    [31m+     "trace": "M792,475 Q622.5,242.9 411.2,48 M415,59.4 L411.2,48 L422.8,50.9",[39m
+    [31m+   },[39m
+    [31m+ ][39m
+
+      278 |     await expect(bulle(page).locator('.parcours-bulle-boutons button')).toHaveText(['Commencer avec ma classe', "Continuer d'explorer la démo"]);
+      279 |     // Rien de désigné : ni flèche, ni pulsation, ni section mise en évidence.
+    > 280 |     expect((await etatFleches(page)).fleches).toEqual([]);
+          |                                               ^
+      281 |     await expect(page.locator('#parcours-contour')).toBeHidden();
+      282 |     await expect(page.locator('.parcours-section-actuelle')).toHaveCount(0);
+      283 |     await capture(page, 'decouvrir-8-1180-sombre');
+        at /Users/kuekatsheu/Documents/GitHub/labo-codex-fleches-apercu/tests/integration/parcours-1-et-2-2026-11-08.spec.js:280:47
+
+    Error Context: ../plans de travail/diag-2026-11-11-ipad/7-results-parcours-1-et-2-2026-11-08/parcours-1-et-2-2026-11-08-f896c-faisant-les-gestes-1180-px--webkit/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    ../plans de travail/diag-2026-11-11-ipad/7-results-parcours-1-et-2-2026-11-08/parcours-1-et-2-2026-11-08-f896c-faisant-les-gestes-1180-px--webkit/trace.zip
+    Usage:
+
+        npx playwright show-trace "../plans de travail/diag-2026-11-11-ipad/7-results-parcours-1-et-2-2026-11-08/parcours-1-et-2-2026-11-08-f896c-faisant-les-gestes-1180-px--webkit/trace.zip"
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  1 failed
+    [webkit] › integration/parcours-1-et-2-2026-11-08.spec.js:190:1 › « Découvrir » de bout en bout sur la démo, en faisant les gestes (1180 px) 
+  1 skipped
+  6 passed (23.0s)

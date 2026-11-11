@@ -1,0 +1,27 @@
+
+Running 21 tests using 1 worker
+
+  ✓   1 [webkit] › integration/parcours-9-notation-alternative-2026-11-09.spec.js:209:1 › panneau : le neuvième parcours garde son rang ; sans production avec sa grille, son bouton refuse et le panneau dit par où commencer (2.6s)
+  ✓   2 [webkit] › integration/parcours-9-notation-alternative-2026-11-09.spec.js:224:1 › panneau : sur la démo, le bouton refuse aussi (le parcours se joue sur les vraies données) (2.8s)
+  ✓   3 [webkit] › integration/parcours-9-notation-alternative-2026-11-09.spec.js:239:5 › étape 1 sautée (une pratique alternative appliquée) ; une pratique standards ouverte à l'étape 2 mène à « Ta sélection » (3.7s)
+  ✓   4 [webkit] › integration/parcours-9-notation-alternative-2026-11-09.spec.js:239:5 › étape 1 sautée (une pratique alternative appliquée) ; une pratique specifications ouverte à l'étape 2 mène à « Tes types de productions » (3.8s)
+  ✓   5 [webkit] › integration/parcours-9-notation-alternative-2026-11-09.spec.js:239:5 › étape 1 sautée (une pratique alternative appliquée) ; une pratique denotation ouverte à l'étape 2 mène à « Tes cibles » (3.6s)
+  ✓   6 [webkit] › integration/parcours-9-notation-alternative-2026-11-09.spec.js:277:1 › dénotation : « Continuer » ne paraît que si une cible est nommée (3.1s)
+  ✓   7 [webkit] › integration/parcours-9-notation-alternative-2026-11-09.spec.js:293:1 › étape 1 : une sommative créée ne fait pas avancer ; une alternative, oui ; « Reprendre » retrouve celle créée entre-temps (3.2s)
+  ✓   8 [webkit] › integration/parcours-9-notation-alternative-2026-11-09.spec.js:314:1 › étape 5 : la pratique déjà appliquée ne fait pas passer l’étape seule ; « Appliquer au cours actif » la fait avancer (3.8s)
+  ✓   9 [webkit] › integration/parcours-9-notation-alternative-2026-11-09.spec.js:338:1 › question 11 : hors de la démo, une pratique dont l’auteur dit « Demo Labo Codex » est au menu, modifiable, et s’applique ; rien n’est réécrit (2.5s)
+  ✓  10 [webkit] › integration/parcours-9-notation-alternative-2026-11-09.spec.js:362:5 › étape 3, standards, 1180 × 900 : la bulle laisse le nombre à retenir, le mode et le minimum libres (3.3s)
+  ✓  11 [webkit] › integration/parcours-9-notation-alternative-2026-11-09.spec.js:362:5 › étape 3, standards, 1180 × 820 : la bulle laisse le nombre à retenir, le mode et le minimum libres (3.2s)
+  ✓  12 [webkit] › integration/parcours-9-notation-alternative-2026-11-09.spec.js:362:5 › étape 3, standards, 1180 × 770 : la bulle laisse le nombre à retenir, le mode et le minimum libres (3.3s)
+  ✓  13 [webkit] › integration/parcours-9-notation-alternative-2026-11-09.spec.js:383:1 › étape 5 : sur une évaluation verrouillée, « Note chiffrée » et « Niveau de performance » sont désactivés ; « Déverrouiller » les rend (4.3s)
+  ✓  14 [webkit] › integration/parcours-9-notation-alternative-2026-11-09.spec.js:415:1 › pendant le parcours, l’aide dans les pages se tait ; après « Plus tard », elle parle (2.5s)
+  ✓  15 [webkit] › integration/parcours-9-notation-alternative-2026-11-09.spec.js:558:1 › le parcours entier en spécifications, de « + Nouvelle pratique » à « Terminer » (1180 px) (7.2s)
+  ✓  16 [webkit] › integration/parcours-9-notation-alternative-2026-11-09.spec.js:563:1 › le parcours entier en standards, l’échelle demandée par l’assistant (1180 px) (7.1s)
+  -  17 [webkit] › integration/parcours-9-notation-alternative-2026-11-09.spec.js:577:5 › captures : specifications, 1180 px, clair
+  -  18 [webkit] › integration/parcours-9-notation-alternative-2026-11-09.spec.js:577:5 › captures : standards, 1180 px, clair
+  -  19 [webkit] › integration/parcours-9-notation-alternative-2026-11-09.spec.js:577:5 › captures : standards, 820 px, sombre
+  -  20 [webkit] › integration/parcours-9-notation-alternative-2026-11-09.spec.js:577:5 › captures : standards, 820 px, clair
+  -  21 [webkit] › integration/parcours-9-notation-alternative-2026-11-09.spec.js:577:5 › captures : standards, 390 px, sombre
+
+  5 skipped
+  16 passed (1.0m)

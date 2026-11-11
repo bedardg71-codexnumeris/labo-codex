@@ -1,0 +1,8 @@
+System-wide memory free percentage: 75%
+
+Running 2 tests using 1 worker
+
+  ✓  1 [webkit] › integration/assistance-refus-2026-11-11.spec.js:39:1 › au refus, la pulsation va au bouton du premier parcours préalable non fait ; le motif reste dessous, sans pulser (2.3s)
+  ✓  2 [webkit] › integration/assistance-refus-2026-11-11.spec.js:68:1 › prefers-reduced-motion : le bouton appelé porte un contour pointillé fixe (1.2s)
+
+  2 passed (4.0s)

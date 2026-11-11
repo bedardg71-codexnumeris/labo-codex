@@ -1,8 +1,12 @@
 import { test, expect } from '@playwright/test';
+import { releverLaBulle } from './harness/releve-bulle.js';
+// La bulle ne couvre jamais ses zones quand une place les laisse libres (Grégoire, 11 nov. 2026) : relevé à chaque essai.
+releverLaBulle(test);
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { attendreApplication } from './harness/attendre-application.js';
+import { etatFleches, flecheVers, sectionActuelleSur, styleDuContour, rienNeRetientLeToucher } from './harness/fleches-de-banc.js';
 
 // =======================================================================
 // LOT « LES DEUX PARCOURS » — 8 NOVEMBRE 2026, PARTIE 1
@@ -30,10 +34,10 @@ async function capture(page, nom) {
     // Le pointeur du banc reste sur le dernier bouton touché : son infobulle n'est pas ce qu'on juge.
     await page.mouse.move(2, (page.viewportSize().height / 2) | 0);
     await page.evaluate(() => window.accompagnement && window.accompagnement.masquerHover && window.accompagnement.masquerHover());
-    // Le panneau glisse, le voile s'assombrit : la capture attend que leurs transitions soient finies.
+    // Le panneau glisse : la capture attend que les transitions soient finies.
     await page.waitForFunction(() => document.getAnimations()
         .filter((a) => a.effect && a.effect.target && a.effect.target.closest
-            && a.effect.target.closest('#panneau-assistance, #parcours-voile, #parcours-bulle, #entete-menu-panneau'))
+            && a.effect.target.closest('#panneau-assistance, #parcours-bulle, #entete-menu-panneau'))
         .every((a) => a.playState !== 'running'));
     await page.screenshot({ path: path.join(CAPTURES, nom + '.png') });
 }
@@ -92,7 +96,7 @@ async function contourSur(page, selecteur) {
     }, selecteur), { message: 'contour posé sur ' + selecteur, timeout: 3000 }).toBe('posé');
 }
 
-/** La bulle ne couvre pas la zone éclairée (les trous du voile). */
+/** La bulle ne couvre pas ce qu'il faut toucher (le contour, sa pulsation). */
 async function bulleNeCouvrePasLeContour(page) {
     const chevauche = await page.evaluate(() => {
         const c = document.getElementById('parcours-contour');
@@ -228,18 +232,31 @@ test('« Découvrir » de bout en bout sur la démo, en faisant les gestes (1180
     await capture(page, 'decouvrir-4-1180-sombre');
     await bulle(page).getByRole('button', { name: 'Continuer' }).click();
 
-    // Étape 5 : la bulle au centre, seul « Évaluation » éclairé.
+    // Étape 5 : ce qu'il faut toucher, « Évaluation » (la pulsation, sans flèche : 11 nov. 2026) ; la flèche va aux
+    // signaux, le badge de « Contexte d'apprentissage ».
     await attendreEtape(page, 5);
     await contourSur(page, '.navigation-boutons button[data-onglet="evaluations"]');
-    await expect(page.locator('#parcours-voile')).toHaveClass(/parcours-voile--dense/);
+    // ↻ 10 nov. 2026 (« Les flèches des parcours ») : l'essai lisait ici le voile « dense », et à l'étape 6 le voile
+    // « léger ». Le voile est retiré. À sa place : la pulsation sur ce qu'il faut toucher, la flèche vers ce dont parle
+    // la bulle, la section actuelle mise en évidence, et plus rien qui retienne le toucher.
+    expect((await styleDuContour(page)).animation).toBe('parcours-pulsation');
+    await flecheVers(page, '#profil-contenu-dynamique .profil-carte:has([data-tooltip="profil-accomp-contexte"]) .badge-sys', 'étape 5');
+    await sectionActuelleSur(page, '.navigation-boutons button[data-onglet="suivi"]', 'étape 5');
+    await rienNeRetientLeToucher(page, [[12, 300], [600, 700], [1100, 400]], 'étape 5');
     await capture(page, 'decouvrir-5-1180-sombre');
     await page.click('.navigation-boutons button[data-onglet="evaluations"]');
 
-    // Étape 6 : Évaluation › Préparer sous un voile léger, « Conception » éclairé.
+    // Étape 6 : Évaluation › Préparer ; la bulle parle d'« Évaluation » (la flèche, la mise en évidence), la pulsation
+    // est sur « Conception », et la bulle n'est plus posée sous ce prochain bouton (les captures de Grégoire, 9 nov.).
     await attendreEtape(page, 6);
     await expect(page.locator('#evaluations-importer')).toBeVisible();
-    await expect(page.locator('#parcours-voile')).toHaveClass(/parcours-voile--leger/);
     await contourSur(page, '.navigation-boutons button[data-onglet="conception"]');
+    await flecheVers(page, '.navigation-boutons button[data-onglet="evaluations"]', 'étape 6');
+    await flecheVers(page, '#travaux-drop-zone', 'étape 6, la zone de dépôt');
+    await sectionActuelleSur(page, '.navigation-boutons button[data-onglet="evaluations"]', 'étape 6');
+    // ↻ 11 nov. 2026 : « pas sous le prochain bouton » (9 nov.) cède à la règle de l'iPad — la bulle au bord le plus
+    // éloigné de ses zones, sans les couvrir ni couvrir le contour (le relevé de la bulle le juge à chaque étape).
+    await bulleNeCouvrePasLeContour(page);
     await capture(page, 'decouvrir-6-1180-sombre');
     await page.click('.navigation-boutons button[data-onglet="conception"]');
 
@@ -247,19 +264,30 @@ test('« Découvrir » de bout en bout sur la démo, en faisant les gestes (1180
     await attendreEtape(page, 7);
     await expect(page.locator('#conception-materiel')).toBeVisible();
     await contourSur(page, '.navigation-boutons button[data-onglet="calendrier"]');
+    await flecheVers(page, '.navigation-boutons button[data-onglet="conception"]', 'étape 7');
+    await flecheVers(page, '#section-conception .materiel-intro p', 'étape 7, « Ton matériel existe déjà ? »');
+    await sectionActuelleSur(page, '.navigation-boutons button[data-onglet="conception"]', 'étape 7');
+    await bulleNeCouvrePasLeContour(page);
     await capture(page, 'decouvrir-7-1180-sombre');
     await page.click('.navigation-boutons button[data-onglet="calendrier"]');
 
-    // Étape 8 : Cadre › Trimestre, la bulle au centre, deux boutons, pas de lien de sortie.
+    // Étape 8 : Cadre › Trimestre, deux boutons, pas de lien de sortie. ↻ 11 nov. 2026 : la bulle n'est plus au centre
+    // (elle couvrait la barre d'étapes qu'elle explique) ; deux flèches, vers la barre et vers « Cadre ».
     await attendreEtape(page, 8);
     await expect(page.locator('#calendrier-trimestre')).toBeVisible();
     await expect(bulle(page).locator('.parcours-bulle-sortie')).toHaveCount(0);
     await expect(bulle(page).locator('.parcours-bulle-boutons button')).toHaveText(['Commencer avec ma classe', "Continuer d'explorer la démo"]);
+    // Rien à toucher dans la page : ni pulsation, ni section mise en évidence.
+    await flecheVers(page, '.navigation-boutons button[data-onglet="calendrier"]', 'étape 8, la section');
+    await flecheVers(page, '#section-calendrier :has(> .bc-etape)', 'étape 8, la barre d’étapes');
+    await expect(page.locator('#parcours-contour')).toBeHidden();
+    await expect(page.locator('.parcours-section-actuelle')).toHaveCount(0);
     await capture(page, 'decouvrir-8-1180-sombre');
     await bulle(page).getByRole('button', { name: "Continuer d'explorer la démo" }).click();
 
     // Fin : le parcours fermé, la démo reste ouverte, « Découvrir » est fait, le menu passe au 2.
     await expect(bulle(page)).toHaveCount(0);
+    await expect(page.locator('#parcours-fleches, #parcours-contour, .parcours-section-actuelle')).toHaveCount(0);
     expect(await page.evaluate(() => document.body.classList.contains('parcours-actif'))).toBe(false);
     expect(await page.evaluate(() => estEnModeDemo())).toBe(true);
     expect(await page.evaluate(() => Assistance.etatDe('decouvrir').etat)).toBe('fait');

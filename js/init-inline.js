@@ -100,7 +100,7 @@ function definirModeExpertFromEl(el) {
 // code chargé, pas celle du serveur (#849). Les valeurs ici servent de repli si
 // version.js manque ; release.mjs les tient à jour.
 let VERSION_MAJEURE = '1.242.1';
-let BUILD_ID = '1111-0938';
+let BUILD_ID = '1111-1445';
 // Snapshot du build contenu dans CE fichier script (pour détecter les scripts périmés)
 const _SCRIPT_BUILD = BUILD_ID;
 
@@ -246,18 +246,10 @@ function fermerModalNouveautes() {
 }
 
 /**
- * Affiche la version chargée partout où elle s'écrit : l'entête, Réglages ›
- * À propos, et la page À propos de l'aide.
+ * Affiche la version chargée dans Réglages › À propos. Le pied de l'accueil la lit lui-même (accueil.js).
+ * 11 nov. 2026 : `#version-entete` et `#build-numero` retirés, plus aucune page ne les portait.
  */
 function afficherBuildNumero() {
-    const spanVersion = document.getElementById('version-entete');
-    if (spanVersion) {
-        spanVersion.textContent = `Bêta publique ${VERSION_MAJEURE}`;
-    }
-    const span = document.getElementById('build-numero');
-    if (span) {
-        span.textContent = `(Build ${BUILD_ID})`;
-    }
     // #1152, lot 1 (24 oct. 2026) : la paire « aide-apropos-* » est partie avec la carte « À propos » de l'Aide
     [['apropos-version-beta', 'apropos-version-build']].forEach(function (ids) {
         const elBeta = document.getElementById(ids[0]);

@@ -20,9 +20,10 @@
    famille, la pratique ouverte, l'évaluation verrouillée), pour « Reprendre ».
 
    Ce qu'il a fallu au moteur, sans le refondre (dit dans le rapport) : les étapes se reconstruisent
-   quand la famille est connue (le moteur relit `def.etapes`) ; « Continuer » paraît selon l'état
-   (`montrerBouton`, appelé à chaque passage de la sonde) ; la bulle passe au-dessus de l'assistant
-   (classe `parcours-sur-modale`) ; « sans voile » (`voile: 'aucun'`) ; « Dossier PDF » annonce son
+   quand la famille est connue (le moteur relit `def.etapes`) ; « Continuer » reste visible, inactif tant
+   que manque ce qu'il attend, la raison dite dessous (`attend` du moteur, 11 nov. 2026, capture 34 ; il
+   se cachait jusque-là) ; la bulle passe au-dessus de l'assistant
+   (classe `parcours-sur-modale`) ; « Dossier PDF » annonce son
    fichier (`dossierPdfLivre`, travaux-export-pdf.js).
    ================================================================= */
 (function () {
@@ -87,11 +88,13 @@
         },
         "synthese": {
             "titre": "Ta synthèse",
-            "texte": "Voici ce que ton étudiant·e recevra. Sur la ligne de la production que tu viens d'évaluer, touche « Actions › Dossier PDF » : le PDF se télécharge. Il contient sa production annotée suivie de sa synthèse de rétroaction, ou la synthèse seule si rien n'a été importé. Ouvre-le et lis-le comme il ou elle le lira. Avec « Niveau de performance », la synthèse dit le niveau de la production et de chaque critère, sans note chiffrée. En standards, elle montre aussi une « Note provisoire » : les productions que ta pratique retient pour l'instant et celles qui sont à venir. Elle peut rassurer des étudiant·es habitué·es aux notes chiffrées ; avec « Niveau de performance », elle ne porte aucune note chiffrée. En spécifications et en dénotation, la note du cours n'y paraît pas. Tes étudiant·es y lisent où en est leur compétence ; la note chiffrée qu'exige le règlement viendra à la fin du trimestre."
+            "texte": "Voici ce que ton étudiant·e recevra. Sur la ligne de la production que tu viens d'évaluer, touche « Actions › Dossier PDF » : le PDF se télécharge. Il contient sa production annotée suivie de sa synthèse de rétroaction, ou la synthèse seule si rien n'a été importé. Ouvre-le et lis-le comme il ou elle le lira. Avec « Niveau de performance », la synthèse dit le niveau de la production et de chaque critère, sans note chiffrée. En standards, elle montre aussi une « Note provisoire » : les productions que ta pratique retient pour l'instant et celles qui sont à venir. Elle peut rassurer des étudiant·es habitué·es aux notes chiffrées ; avec « Niveau de performance », elle ne porte aucune note chiffrée. En spécifications et en dénotation, la note du cours n'y paraît pas. Tes étudiant·es y lisent où en est leur compétence ; la note chiffrée qu'exige le règlement viendra à la fin du trimestre.",
+            "geste": "Touche « Actions › Dossier PDF » sur la ligne de ta production, puis « Continuer »."
         },
         "plus-loin": {
             "titre": "Pour aller plus loin",
-            "texte": "Te voilà avec une pratique alternative appliquée à ton cours, et une première synthèse telle que tes étudiant·es la liront. Le reste viendra à ton rythme. En dénotation, pose ta note à la fin du trimestre dans le profil de chaque étudiant·e, section « Jugement » : confirme les cibles atteintes, puis écris la note et sa justification, et touche « Enregistrer le jugement ». Quand tes notes sont arrêtées, coche « Notes finalisées » dans la fiche de ta pratique : l'export les marque « final » ; en standards, la synthèse s'intitule alors « Note finale » et ne montre plus ce qui était à venir. Dans Suivi › Groupe, « Exporter la synthèse (CSV) », dans la carte « Résultats finaux », produit une ligne par étudiant·e : c'est la note chiffrée qu'exige le règlement, à reporter dans le système de ton établissement. Au bas de la fiche, « Système de jetons » offre des reprises et des délais. Labo › Exploration compare, sur des profils fictifs, la façon dont deux ou trois pratiques construisent la note."
+            "texte": "Te voilà avec une pratique alternative appliquée à ton cours, et une première synthèse telle que tes étudiant·es la liront. Le reste viendra à ton rythme. En dénotation, pose ta note à la fin du trimestre dans le profil de chaque étudiant·e, section « Jugement » : confirme les cibles atteintes, puis écris la note et sa justification, et touche « Enregistrer le jugement ». Quand tes notes sont arrêtées, coche « Notes finalisées » dans la fiche de ta pratique : l'export les marque « final » ; en standards, la synthèse s'intitule alors « Note finale » et ne montre plus ce qui était à venir. Dans Suivi › Groupe, « Exporter la synthèse (CSV) », dans la carte « Résultats finaux », produit une ligne par étudiant·e : c'est la note chiffrée qu'exige le règlement, à reporter dans le système de ton établissement. Au bas de la fiche, « Système de jetons » offre des reprises et des délais. Labo › Exploration compare, sur des profils fictifs, la façon dont deux ou trois pratiques construisent la note.",
+            "geste": "Touche « Terminer »."
         }
     };
 
@@ -318,7 +321,9 @@
      * moins. Le coût d'une place : l'aire qu'elle couvre de chaque garde, multipliée par son poids. Les places essayées :
      * celles que l'étape propose d'abord (`places`, chacune avec sa hauteur bornée au besoin : la bulle défile alors),
      * puis neuf places (trois colonnes, trois rangées, sous l'en-tête). La place du moteur reste si elle ne couvre rien.
-     * Même règle que le huitième parcours (`bulleHors`), propre à ce fichier : le moteur n'est pas touché ; à unifier.
+     * Propre à cette étape : ses places proposées (hauteur bornée) passent avant. Le huitième parcours avait la même règle
+     * (`bulleHors`), retirée le 11 nov. 2026 quand le moteur a pris le moindre recouvrement, le contour pesé ; celle-ci
+     * reste, à unifier avec le moteur (le relevé de la bulle la juge, vert le 11 nov.).
      * @param {Array<{el: Element, poids: number}>} gardes
      * @param {Array<{x: number, y: number, hauteur?: number}>} [places]
      */
@@ -386,26 +391,6 @@
             { el: el('mat-portfolio-selection'), poids: 100 },
             { el: el('mat-portfolio-minimum'), poids: 100 }
         ], places);
-    }
-
-    /** « Continuer » paraît selon l'état : le moteur rend la bulle une fois, la sonde la retouche ici. */
-    function montrerBouton(libelle, montrer) {
-        var b = el('parcours-bulle');
-        if (!b) return;
-        var zone = b.querySelector('.parcours-bulle-boutons');
-        if (!zone) return;
-        var visibles = 0;
-        [].forEach.call(zone.querySelectorAll('button'), function (x) {
-            if (x.textContent === libelle) x.style.display = montrer ? '' : 'none';
-            if (x.style.display !== 'none') visibles++;
-        });
-        zone.style.display = visibles ? '' : 'none';
-    }
-
-    /** Le voile d'une étape qui change de lieu en cours de route (le moteur le pose à l'entrée de l'étape). */
-    function poserVoile(nom) {
-        var v = el('parcours-voile');
-        if (v) v.setAttribute('class', 'parcours-voile parcours-voile--' + nom);
     }
 
     function suivante(m) {
@@ -570,6 +555,18 @@
 
     var CONTINUER = { libelle: 'Continuer', primaire: true, action: suivante };
 
+    // PROPOSÉ (11 nov. 2026, à valider par Grégoire) : ce qu'attend « Continuer », dit sous lui tant que ça manque.
+    var ATTENTES = {
+        types: "Pour continuer, ajoute au moins un type de production.",
+        forfaits: "Pour continuer, ajoute au moins un forfait à la table.",
+        cibles: "Pour continuer, écris au moins une cible.",
+        dossier: "Pour continuer, télécharge son dossier : « Actions › Dossier PDF », sur la ligne de la production que tu viens d'évaluer."
+    };
+    function continuerSi(raison) { return Object.assign({}, CONTINUER, { attend: raison }); }
+
+    /** La Liste des évaluations est à l'écran. */
+    function surLaListe() { return vis(el('evaluations-liste')); }
+
     var DEFINITIONS = {
         pratique: {
             avant: async function () {
@@ -635,11 +632,8 @@
             },
             zones: function () { return [groupeDe('mat-spec-seuil'), parentDe('mat-spec-types-travaux-liste')]; },
             contour: function () { return seuilTouche ? parentDe('mat-spec-types-travaux-liste') : groupeDe('mat-spec-seuil'); },
-            boutons: [CONTINUER],
-            atteint: function () {
-                montrerBouton('Continuer', (configDeLaPratique().typesTravaux || []).length > 0);
-                return false;
-            }
+            boutons: [continuerSi(function () { return (configDeLaPratique().typesTravaux || []).length > 0 ? '' : ATTENTES.types; })],
+            atteint: function () { return false; }
         },
         'spe-forfaits': {
             avant: async function () {
@@ -651,21 +645,15 @@
             },
             zones: function () { return [parentDe('mat-spec-forfaits-liste')]; },
             contour: function () { return parentDe('mat-spec-forfaits-liste'); },
-            boutons: [CONTINUER],
-            atteint: function () {
-                montrerBouton('Continuer', (configDeLaPratique().forfaits || []).length > 0);
-                return false;
-            }
+            boutons: [continuerSi(function () { return (configDeLaPratique().forfaits || []).length > 0 ? '' : ATTENTES.forfaits; })],
+            atteint: function () { return false; }
         },
         den: {
             avant: ouvrirLaPratique,
             zones: function () { return [groupeDe('mat-den-cibles')]; },
             contour: function () { return groupeDe('mat-den-cibles'); },
-            boutons: [CONTINUER],
-            atteint: function () {
-                montrerBouton('Continuer', ciblesNommees());
-                return false;
-            }
+            boutons: [continuerSi(function () { return ciblesNommees() ? '' : ATTENTES.cibles; })],
+            atteint: function () { return false; }
         },
         affichage: {
             avant: ouvrirLaPratique,
@@ -681,6 +669,7 @@
             },
             zones: function () { return [document.querySelector('#conteneurEditionPratique [data-action="appliquerPratiqueAuCoursActive"]')]; },
             contour: function () { return document.querySelector('#conteneurEditionPratique [data-action="appliquerPratiqueAuCoursActive"]'); },
+            nommeLeContour: true,   // « Appliquer au cours actif » (Grégoire, 11 nov. 2026, 9 h 47 : la flèche va à ce que la bulle nomme)
             atteint: function () {
                 var id = lireCtx().pratiqueId;
                 if (!id || idActive() !== id) return false;
@@ -690,7 +679,6 @@
             }
         },
         evaluer: {
-            voile: 'leger',
             avant: async function () {
                 if (!enEvaluation()) { aller('evaluations', 'liste'); window.scrollTo(0, 0); }
                 // Ce qui était déjà verrouillé : seule une évaluation verrouillée ensuite fait avancer.
@@ -699,7 +687,7 @@
                 }
             },
             zones: function () {
-                // Dans l'évaluation, sans voile (voir `atteint`) : la zone ne sert qu'à poser la bulle près de ce
+                // Dans l'évaluation : la zone ne sert qu'à poser la bulle près de ce
                 // qu'il faut toucher. Sans copie, les trois panneaux s'empilent sur toute la page : éclairés ensemble,
                 // ils ne laissaient à la bulle aucune place, et elle couvrait le cadenas.
                 if (enEvaluation()) return [this.contour()].filter(Boolean);
@@ -710,10 +698,8 @@
                 if (enEvaluation()) return productionJugee() ? el('btnVerrouillerEvaluation') : paletteRetro();
                 return menuActions(ligneAEvaluer());
             },
+            nommeLeContour: function () { return !enEvaluation(); },   // « Actions › Évaluer » sur la Liste (11 nov. 2026)
             atteint: function () {
-                // Le voile suit le lieu : léger sur la liste, aucun dans l'évaluation, où la personne touche les
-                // critères, la palette « Rétroaction » et le cadenas, loin les uns des autres.
-                poserVoile(enEvaluation() ? 'aucun' : 'leger');
                 var avant = lireCtx().verrouilleesAvant || [];
                 var e = verrouillees().find(function (x) { return avant.indexOf(x.id) === -1; });
                 if (!e) return false;
@@ -728,17 +714,19 @@
                 window.scrollTo(0, 0);
                 await attendre(ligneEvaluee, 2000);
             },
-            zones: function () { return [ligneEvaluee() || el('conteneur-tableau-evaluations')].filter(Boolean); },
-            contour: function () { return menuActions(ligneEvaluee()); },
-            boutons: [CONTINUER],
-            atteint: function () {
-                montrerBouton('Continuer', pdfLivre);
-                return false;
-            }
+            // Hors de la Liste (Grégoire, 11 nov. 2026, capture 34 : resté sur l'écran d'évaluation, ni halo ni flèche), la
+            // flèche et le halo vont à « Liste » ; sur la Liste, à « Actions » de la ligne évaluée.
+            zones: function () { return surLaListe() ? [ligneEvaluee() || el('conteneur-tableau-evaluations')].filter(Boolean) : []; },
+            contour: function () {
+                var liste = document.querySelector('#sous-navigation [data-sous-onglet="evaluations-liste"]');
+                return surLaListe() ? menuActions(ligneEvaluee()) : (vis(liste) ? liste : null);
+            },
+            nommeLeContour: true,   // « Actions › Dossier PDF », ou « Liste » pour y revenir (11 nov. 2026)
+            boutons: [continuerSi(function () { return pdfLivre ? '' : ATTENTES.dossier; })],
+            atteint: function () { return false; }
         },
         'plus-loin': {
             centre: true,
-            voile: 'aucun',
             sansSortie: true,
             boutons: [{ libelle: 'Terminer', primaire: true, action: function () { terminer(); } }]
         }
@@ -754,7 +742,8 @@
         // `sansSortie` au toucher : vrai, il passe la touche à `surEchap`.
         if (id === 'pratique') Object.defineProperty(etape, 'sansSortie', { get: wizardOuvert, enumerable: true });
         if (TEXTES[id].geste) etape.geste = TEXTES[id].geste;
-        ['voile', 'centre', 'sansSortie', 'avant', 'zones', 'contour', 'atteint', 'boutons'].forEach(function (k) {
+        // `nommeLeContour` aussi (11 nov. 2026) : il était déclaré sur quatre étapes et n'arrivait jamais au moteur.
+        ['centre', 'sansSortie', 'avant', 'zones', 'contour', 'nommeLeContour', 'atteint', 'boutons'].forEach(function (k) {
             if (d[k] !== undefined) etape[k] = d[k];
         });
         // Chaque étape repart de la forme ordinaire de la bulle (corrections du 9 nov. : étapes 1 et 3).
@@ -840,6 +829,7 @@
         ligne: LIGNE,
         get total() { return cheminDe(lireCtx()).length; },
         refus: motifRefus,
+        prealable: 'evaluer',
         lancer: lancer
     });
 

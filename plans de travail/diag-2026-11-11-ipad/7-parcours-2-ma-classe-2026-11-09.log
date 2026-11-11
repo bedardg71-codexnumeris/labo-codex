@@ -1,0 +1,38 @@
+
+Running 4 tests using 1 worker
+
+  ✘  1 [webkit] › integration/parcours-2-ma-classe-2026-11-09.spec.js:245:1 › de « Découvrir » à sa propre classe : « Commencer avec ma classe », le Cadre bloc par bloc, « Plus tard » puis « Reprendre », la première saisie, la bande (1180 px) (3.0m)
+  ✓  2 [webkit] › integration/parcours-2-ma-classe-2026-11-09.spec.js:367:1 › la porte de l’accueil commence à la première étape non faite ; avant le premier cours, l’étape 7 le dit, « D’accord » la ferme, « Reprendre » la rouvre (12.8s)
+  ✓  3 [webkit] › integration/parcours-2-ma-classe-2026-11-09.spec.js:411:1 › une flèche didactique ouverte avant le parcours se retire au lancement, sans être marquée vue, même si l’on clique sa cible (2.3s)
+  -  4 [webkit] › integration/parcours-2-ma-classe-2026-11-09.spec.js:434:1 › captures de l’iPhone (390 px) : les étapes 1, 7 et 8
+
+
+  1) [webkit] › integration/parcours-2-ma-classe-2026-11-09.spec.js:245:1 › de « Découvrir » à sa propre classe : « Commencer avec ma classe », le Cadre bloc par bloc, « Plus tard » puis « Reprendre », la première saisie, la bande (1180 px) 
+
+    [31mTest timeout of 180000ms exceeded.[39m
+
+    Error: page.evaluate: Test timeout of 180000ms exceeded.
+
+      342 |     // s'ouvre de nouveau (sur une cible stable : la cellule des présences peut être redessinée pendant l'attente).
+      343 |     expect(await page.evaluate(() => localStorage.getItem('accompagnement-vu__suivi-presences-premiere-saisie'))).toBeNull();
+    > 344 |     const revient = await page.evaluate(() => new Promise((ok) => {
+          |                                ^
+      345 |         window.accompagnement.afficherFleche('essai-fleche-hors-parcours', { sectionActive: 'essai', cibleSelector: '#btn-assistance-menu', message: 'Essai', direction: 'bas' });
+      346 |         setTimeout(() => ok(document.getElementById('fleche-didactique-host').classList.contains('visible')), 400);
+      347 |     }));
+        at /Users/kuekatsheu/Documents/GitHub/labo-codex-fleches-apercu/tests/integration/parcours-2-ma-classe-2026-11-09.spec.js:344:32
+
+    Error Context: ../plans de travail/diag-2026-11-11-ipad/7-results-parcours-2-ma-classe-2026-11-09/parcours-2-ma-classe-2026--51165-re-saisie-la-bande-1180-px--webkit/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    ../plans de travail/diag-2026-11-11-ipad/7-results-parcours-2-ma-classe-2026-11-09/parcours-2-ma-classe-2026--51165-re-saisie-la-bande-1180-px--webkit/trace.zip
+    Usage:
+
+        npx playwright show-trace "../plans de travail/diag-2026-11-11-ipad/7-results-parcours-2-ma-classe-2026-11-09/parcours-2-ma-classe-2026--51165-re-saisie-la-bande-1180-px--webkit/trace.zip"
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  1 failed
+    [webkit] › integration/parcours-2-ma-classe-2026-11-09.spec.js:245:1 › de « Découvrir » à sa propre classe : « Commencer avec ma classe », le Cadre bloc par bloc, « Plus tard » puis « Reprendre », la première saisie, la bande (1180 px) 
+  1 skipped
+  2 passed (3.3m)

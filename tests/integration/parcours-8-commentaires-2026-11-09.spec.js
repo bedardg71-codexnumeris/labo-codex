@@ -1,7 +1,11 @@
 import { test, expect } from '@playwright/test';
+import { releverLaBulle } from './harness/releve-bulle.js';
+// La bulle ne couvre jamais ses zones quand une place les laisse libres (Grégoire, 11 nov. 2026) : relevé à chaque essai.
+releverLaBulle(test);
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { flecheVers } from './harness/fleches-de-banc.js';
 
 // =======================================================================
 // LE HUITIÈME PARCOURS, « AUTOMATISER TES COMMENTAIRES » — 9 NOVEMBRE 2026
@@ -34,7 +38,7 @@ async function capture(page, nom) {
     await page.evaluate(() => window.accompagnement && window.accompagnement.masquerHover && window.accompagnement.masquerHover());
     await page.waitForFunction(() => document.getAnimations()
         .filter((a) => a.effect && a.effect.target && a.effect.target.closest
-            && a.effect.target.closest('#panneau-assistance, #parcours-voile, #parcours-bulle, #entete-menu-panneau'))
+            && a.effect.target.closest('#panneau-assistance, #parcours-bulle, #entete-menu-panneau'))
         .every((a) => a.playState !== 'running'));
     await page.screenshot({ path: path.join(CAPTURES, nom + '.png') });
 }
@@ -257,6 +261,34 @@ async function bulleNeCouvrePasLeContour(page) {
 const boutonBulle = (page, libelle) => bulle(page).locator('.parcours-bulle-boutons button', { hasText: libelle });
 
 /**
+ * « Continuer » attend (Grégoire, 11 nov. 2026, 12 h 05, captures 32 et 33) : visible, inactif, et la raison écrite
+ * dessous — jamais caché (« je ne sais pas ce qu'il faut faire pour voir le bouton »).
+ */
+async function continuerAttend(page, raison) {
+    await expect(boutonBulle(page, 'Continuer')).toBeVisible();
+    await expect(boutonBulle(page, 'Continuer')).toBeDisabled();
+    await expect(bulle(page).locator('.parcours-bulle-attente')).toHaveText(raison);
+}
+async function continuerPret(page) {
+    await expect(boutonBulle(page, 'Continuer')).toBeEnabled();
+    await expect(bulle(page).locator('.parcours-bulle-attente')).toBeHidden();
+}
+const ATTENTE = {
+    codes: 'Pour continuer, ajoute un premier code : touche «\u00a0+ Ajouter un sous-critère\u00a0».',
+    ponderation: 'Pour continuer, écris la pondération de ton critère, à côté de son type.',
+    limite: 'Pour continuer, écris la longueur de référence et la tolérance, ou touche «\u00a0Retirer la limite\u00a0».',
+    grille: 'Pour continuer, donne un nom à ta grille, puis touche «\u00a0Créer la grille\u00a0».'
+};
+/** Ce qu'il faut toucher est à l'écran, sous l'en-tête (le moteur l'y amène, un geste à la fois). */
+async function aLEcran(page, selecteur) {
+    await expect.poll(() => page.evaluate((sel) => {
+        const r = document.querySelector(sel).getBoundingClientRect();
+        const h = document.querySelector('header.entete').getBoundingClientRect().bottom;
+        return r.top >= h - 1 && r.bottom <= innerHeight + 1;
+    }, selecteur), { message: selecteur + ' à l’écran', timeout: 5000 }).toBe(true);
+}
+
+/**
  * Toucher ce que la bulle désigne. Au-dessus de 800 px, un vrai clic : s'il est couvert (par la bulle, le
  * voile), le banc échoue. Sous 800 px (l'iPhone), le moteur ne sait pas toujours poser une bulle longue sans
  * couvrir ce qu'il faut toucher : le banc le RELÈVE (fichier joint aux captures) et touche par programme,
@@ -320,6 +352,63 @@ async function ecrireLesQuatreFormes(page) {
 }
 
 /** Les étapes 1 à 6 sur une grille NEUVE : le critère algorithmique réglé dans son atelier, deux codes. */
+// ↻ 10 nov. 2026 (« Les flèches des parcours ») : le voile du moteur est retiré, toute la page se touche. À l'étape 1,
+// le « Type » d'un critère DÉJÀ LÀ était sous le voile ; changé, il s'écrirait dans la grille enregistrée et ferait
+// avancer l'étape. La garde `garderLeType` (js/parcours-commentaires.js) le neutralise le temps de l'étape.
+test('étape 1, sans voile : le « Type » d’un critère déjà là ne répond pas (rien ne s’écrit, l’étape n’avance pas) ; celui du critère ajouté, oui', async ({ page }) => {
+    await ouvrirEspace(page, 1180);
+    await ouvrirPanneau(page);
+    await item(page).locator('.assistance-parcours-bouton').click();
+    await attendreTitre(page, 'Ta grille');
+    await page.selectOption('#menuGrilles', 'G_P8_1');
+    const types = '#listeCriteres select[data-on-change="modifierTypeCritereGrilleHandler"]';
+    await expect(page.locator(types)).toHaveCount(1);
+    const typeEnBase = () => page.evaluate((t) => (window.db.getSync(t + '_grillesTemplates', []).find((g) => g.id === 'G_P8_1').criteres || []).map((c) => c.type || 'holistique'), T);
+    const avant = await typeEnBase();
+    const affiche = await page.locator(types).first().inputValue();
+    expect(affiche).not.toBe('algorithmique');
+
+    // Le critère déjà là : le menu reprend sa valeur, rien ne s'écrit, l'étape reste la première.
+    await page.locator(types).first().selectOption('algorithmique');
+    await expect(page.locator(types).first()).toHaveValue(affiche);
+    await page.waitForFunction(() => { window.__g = (window.__g || 0) + 1; return window.__g > 3; }, null, { polling: 150 });
+    expect(await typeEnBase()).toEqual(avant);
+    await expect(rang(page)).toHaveText(/^1 sur /);
+    await expect(bulle(page).locator('.parcours-bulle-titre')).toHaveText('Ta grille');
+
+    // Le critère ajouté : son « Type » répond, et l'étape avance (ce que l'étape demande).
+    await page.click('#conteneurEditionGrille [data-action="ajouterCritereGrille"]');
+    await expect(page.locator(types)).toHaveCount(2);
+    await page.locator(types).last().selectOption('algorithmique');
+    await attendreTitre(page, 'Ce que tu comptes');
+    expect(await typeEnBase()).toEqual(avant.concat(['algorithmique']));
+});
+
+// LA CAPTURE 30 (Grégoire, 11 nov. 2026, 11 h 15 à 11 h 29, quatrième aperçu : « on dirait que je suis bloqué ici »),
+// rejouée sous WebKit à 1180 × 820 : une grille neuve « Grille algo », son critère « Critère », « Algorithmique » dans son
+// menu « Type ». L'atelier s'ouvre et l'étape avance : le blocage venait du guidage (aucune flèche à l'ouverture, la
+// bulle au milieu de l'écran), que la règle du contour corrige — une flèche vers la rangée des grilles dès l'ouverture,
+// puis vers le menu « Type ».
+test('capture 30, rejouée à 1180 × 820 : « Grille algo », « Critère », « Algorithmique » ouvre l’atelier ; une flèche vers ce qu’il faut toucher dès l’ouverture, puis vers « Type »', async ({ page }) => {
+    await ouvrirEspace(page, 1180, { hauteur: 820 });
+    await ouvrirPanneau(page);
+    await item(page).locator('.assistance-parcours-bouton').click();
+    await attendreTitre(page, 'Ta grille');
+    await contourSur(page, '#conception-grille-criteres .rangee-selection');
+    await flecheVers(page, '#conception-grille-criteres .rangee-selection', 'Ta grille, à l’ouverture');
+    await toucher(page, '#conception-grille-criteres [data-action="creerNouvelleGrille"]');
+    const type = '#listeCriteres select[data-on-change="modifierTypeCritereTempHandler"]';
+    await contourSur(page, type);
+    await flecheVers(page, type, 'Ta grille, le menu « Type »');
+    await page.fill('#nomGrilleTemplate', 'Grille algo');
+    await page.locator('#nomGrilleTemplate').dispatchEvent('change');
+    await page.fill('#listeCriteres input[data-champ="nom"]', 'Critère');
+    await page.locator('#listeCriteres input[data-champ="nom"]').blur();
+    await page.selectOption(type, 'algorithmique');
+    await attendreTitre(page, 'Ce que tu comptes');
+    await expect(page.locator('#listeCriteres .atelier-algo-etape[data-etape="compte"]')).toHaveAttribute('data-ouverte', '');
+});
+
 async function reglerUneGrilleNeuve(page, cap = async () => {}) {
     await ouvrirPanneau(page);
     await item(page).locator('.assistance-parcours-bouton').click();
@@ -341,37 +430,55 @@ async function reglerUneGrilleNeuve(page, cap = async () => {}) {
 
     await attendreTitre(page, 'Tes codes');
     await expect(rang(page)).toHaveText('3 sur 11');
-    // « Continuer » ne paraît qu'une fois qu'un code pèse plus de 0.
-    await expect(boutonBulle(page, 'Continuer')).toBeHidden();
+    // « Continuer » attend qu'un code pèse plus de 0 : visible, inactif, la raison dessous (11 nov. 2026, 12 h 05).
+    await continuerAttend(page, ATTENTE.codes);
     await cap(3);
     for (let k = 0; k < 2; k++) {
         await toucher(page, '#listeCriteres .atelier-algo-etape[data-etape="codes"] [data-action="ajouterSousCritere"]');
     }
-    await expect(boutonBulle(page, 'Continuer')).toBeVisible();
+    await continuerPret(page);
     await boutonBulle(page, 'Continuer').click();
 
+    // 4. Ta note (capture 32) : sans pondération, « Continuer » le dit ; le champ, à côté du type, est amené à l'écran.
     await attendreTitre(page, 'Ta note');
     await expect(rang(page)).toHaveText('4 sur 11');
-    await expect(boutonBulle(page, 'Continuer')).toBeHidden();
+    await continuerAttend(page, ATTENTE.ponderation);
     await contourSur(page, '#listeCriteres input[data-on-change="modifierPonderationCritereTempHandler"]');
+    await aLEcran(page, '#listeCriteres input[data-on-change="modifierPonderationCritereTempHandler"]');
     await cap(4);
     await page.fill('#listeCriteres input[data-on-change="modifierPonderationCritereTempHandler"]', '20');
     await page.locator('#listeCriteres input[data-on-change="modifierPonderationCritereTempHandler"]').dispatchEvent('change');
-    await expect(boutonBulle(page, 'Continuer')).toBeVisible();
+    await continuerPret(page);
     await boutonBulle(page, 'Continuer').click();
 
+    // 5. Tes cas (capture 33) : sans limite, réglée ; une limite fixée et vide, « Continuer » attend, et la flèche et le
+    // halo vont à la longueur, puis à la tolérance, un geste à la fois ; la limite retirée, l'étape est réglée de nouveau.
     await attendreTitre(page, 'Tes cas');
     await expect(rang(page)).toHaveText('5 sur 11');
     await contourSur(page, '#listeCriteres .table-cas-fixer');
-    // Sans limite, l'étape est réglée : « Continuer » est toujours là.
-    await expect(boutonBulle(page, 'Continuer')).toBeVisible();
+    await continuerPret(page);
     await cap(5);
+    await toucher(page, '#listeCriteres .table-cas-fixer');
+    await continuerAttend(page, ATTENTE.limite);
+    const longueur = '#listeCriteres [data-param-cle="motsReference"]', tolerance = '#listeCriteres [data-param-cle="erreursTolerees"]';
+    await contourSur(page, longueur);
+    await aLEcran(page, longueur);
+    await page.fill(longueur, '12');
+    await page.locator(longueur).dispatchEvent('change');
+    await contourSur(page, tolerance);
+    await page.fill(tolerance, '4');
+    await page.locator(tolerance).dispatchEvent('change');
+    await continuerPret(page);
+    // Le banc retire la limite pour garder la suite de l'essai inchangée : ce n'est pas un geste du parcours (la limite
+    // complète, la bulle peut couvrir ce bouton), d'où le clic posé sans passer par l'écran.
+    await page.locator('#listeCriteres button', { hasText: 'Retirer la limite' }).first().evaluate((b) => b.click());
+    await continuerPret(page);
     await boutonBulle(page, 'Continuer').click();
 
     await attendreTitre(page, "Ce que l'étudiant·e lit");
     await expect(rang(page)).toHaveText('6 sur 11');
-    // Une grille nouvelle : pas de « Continuer » ; elle avance quand la grille est créée.
-    await expect(boutonBulle(page, 'Continuer')).toBeHidden();
+    // Une grille nouvelle : elle avance quand la grille est créée ; « Continuer » attend, et le dit.
+    await continuerAttend(page, ATTENTE.grille);
     await contourSur(page, '#listeCriteres .atelier-algo-etape[data-etape="eleve"] .atelier-algo-etape-corps');
     await cap(6);
     await page.fill('#nomGrilleTemplate', 'Grille de la rédaction 2');

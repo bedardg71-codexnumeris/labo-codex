@@ -1,0 +1,9 @@
+
+Running 4 tests using 1 worker
+
+  ✓  1 [webkit] › integration/parcours-3-evaluer-2026-11-09.spec.js:38:1 › « Évaluer une première production », grille à niveaux : le panneau, les neuf étapes, « Plus tard » et « Reprendre » à l’étape 3 (1180 px) (23.1s)
+  ✓  2 [webkit] › integration/parcours-3-evaluer-2026-11-09.spec.js:42:1 › « Évaluer une première production », grille à niveaux, l’échelle laissée vide sur la fiche : l’étape 4 la demande, le contour s’y pose (1180 px) (21.1s)
+  ✓  3 [webkit] › integration/parcours-3-evaluer-2026-11-09.spec.js:46:1 › « Évaluer une première production », étape 8 à 820 px (l’iPad en portrait) : le menu « Cartouche de rétroaction » amené dans la vue, la bulle à côté (20.5s)
+  ✓  4 [webkit] › integration/parcours-3-evaluer-2026-11-09.spec.js:50:1 › « Évaluer une première production », grille en points : la bulle du choix, et la cartouche ajoute le commentaire de son palier (1180 px) (21.6s)
+
+  4 passed (1.4m)

@@ -53,19 +53,6 @@
 
     function sousSectionVisible(id) { return vis(el(id)); }
 
-    /**
-     * LE VOILE D'UNE ÉTAPE QUI CHANGE D'ÉCRAN EN ROUTE (le moteur le pose à l'entrée de l'étape). Sur une fiche ou un
-     * écran pleine largeur (la production, l'évaluation, la cartouche), un voile percé laisse la bulle sans place : le
-     * moteur la range au bord de l'écran, et elle couvrait ce qu'il faut toucher (« Verrouiller », « Consignes
-     * transmises », mesuré sous Chromium le 9 nov.). Là, pas de voile (`aucun`, la règle des parcours 8 et 9) : tout
-     * reste touchable, et la bulle s'accroche à ce qu'il faut toucher, qu'elle suit au défilement.
-     */
-    function poserVoile(nom) {
-        var v = el('parcours-voile');
-        var cls = 'parcours-voile parcours-voile--' + nom;
-        if (v && v.getAttribute('class') !== cls) v.setAttribute('class', cls);
-    }
-
     /** Le premier champ visible encore vide de la liste (par id), sinon `fin` : le contour suit ce qui reste à remplir. */
     function premierAFaire(idsChamps, fin) {
         for (var k = 0; k < idsChamps.length; k++) {
@@ -75,9 +62,8 @@
         return fin;
     }
 
-    /** Une zone pleine largeur : pas de voile, et seule la cible est désignée (la bulle s'y accroche). */
+    /** Une zone pleine largeur : seule la cible est désignée (la bulle s'y accroche, qu'elle suit au défilement). */
     function surLaCible(cible) {
-        poserVoile('aucun');
         return [cible];
     }
 
@@ -247,41 +233,45 @@
         await attendre(function () { return ficheDe(id); }, 2000);
     }
 
-    /** Étape 2 : les champs que la bulle nomme, dans l'ordre de la fiche, puis « Créer la production ». */
-    function ouToucherProduction() {
-        var creer = el('btnCreerProduction');
-        if (!vis(creer)) return el('actionsFicheProduction');
-        var champs = ['productionTitre', 'productionType', 'productionActivite', 'productionPonderation', 'productionGrille'];
-        if (echelleDeLaGrilleChoisie()) champs.push('productionEchelle');
-        return premierAFaire(champs, creer);
+    /** Le menu de la fiche et son étiquette (« Grille de critères d'évaluation », « Échelle de performance »). */
+    function groupeDe(id) {
+        var s = el(id);
+        return s ? (s.closest('.groupe-form') || s) : null;
     }
 
     /**
-     * « … et son échelle si elle en a une » (Grégoire, 9 nov., 13 h 37) : l'échelle d'une grille, c'est celle de ses
-     * descripteurs (`criteres[].descripteurs.echelleId`, posée par Mon matériel quand la grille a des niveaux ; l'éditeur
-     * ne pose pas `grille.echelleId`, cartouches.js:439). Seulement si le menu « Échelle » de la fiche l'offre.
+     * « … et son échelle si elle en a une » (Grégoire, 9 nov., 13 h 37 ; 11 nov., 9 h 35). L'échelle est attendue tant
+     * qu'elle est à « Aucune » et que la grille choisie se note par niveaux : une grille entièrement en points n'en
+     * demande pas (`grilleEntierementEnPoints`, la règle de l'évaluation, #941). Avant le 11 nov., l'échelle n'était
+     * cherchée que dans les descripteurs de la grille, que l'éditeur de Conception › Grilles ne pose pas : une grille
+     * composée à la main n'y passait jamais (capture 16). Seulement si le menu offre au moins une échelle.
      */
-    function echelleDeLaGrilleChoisie() {
+    function echelleAttendue() {
         var sg = el('productionGrille'), se = el('productionEchelle');
-        if (!sg || !sg.value || !se) return null;
-        var g = (typeof db !== 'undefined' && typeof cle === 'function' ? (db.getSync(cle('grillesTemplates'), []) || []) : [])
-            .find(function (x) { return x && x.id === sg.value; });
-        var cr = g && Array.isArray(g.criteres)
-            ? g.criteres.find(function (c) { return c && c.descripteurs && c.descripteurs.echelleId; }) : null;
-        var id = cr ? cr.descripteurs.echelleId : null;
-        return id && [].some.call(se.options, function (o) { return o.value === id; }) ? id : null;
+        if (!sg || !sg.value || !se || se.value) return false;
+        var g = parId(grilles(), sg.value);
+        if (!g || typeof window.grilleEntierementEnPoints !== 'function' || window.grilleEntierementEnPoints(g)) return false;
+        return [].some.call(se.options, function (o) { return !!o.value; });
+    }
+
+    /**
+     * Étape 2, les champs obligatoires remplis (la règle des formulaires, `formulaire`) : la grille si elle manque, puis
+     * l'échelle attendue. « Puis associe-lui la grille que tu viens de créer, et son échelle si elle en a une. »
+     */
+    function aAssocier() {
+        if (!ficheProductionOuverte()) return [];
+        var sg = el('productionGrille');
+        if (vis(sg) && !sg.value) return [groupeDe('productionGrille')];
+        return echelleAttendue() ? [groupeDe('productionEchelle')] : [];
     }
 
     /**
      * Sur la fiche de la production, la bulle ne couvre jamais les menus « Grille de critères d'évaluation » ni
      * « Échelle de performance » (Grégoire, 9 nov., 13 h 37) : ils sont désignés avec le champ visé, et le moteur pose
-     * la bulle hors de leur union. Pas de voile, la bulle accrochée au champ (gardé, même décision).
+     * la bulle hors de leur union. La bulle accrochée au champ (gardé, même décision).
      */
     function surLaFiche(cible) {
-        var menus = ['productionGrille', 'productionEchelle'].map(function (id) {
-            var s = el(id);
-            return s ? (s.closest('.groupe-form') || s) : null;
-        });
+        var menus = ['productionGrille', 'productionEchelle'].map(groupeDe);
         return surLaCible(cible).concat(menus.filter(vis));
     }
 
@@ -354,6 +344,13 @@
 
     function boutonVerrou() { return el('btnVerrouillerEvaluation'); }
 
+    /** L'écran d'évaluation a fini de se dessiner : ses critères sont là, ou il demande l'échelle. */
+    function evaluationPrete() {
+        if (!ecranEvaluationVisible()) return false;
+        if (qs('#listeCriteresGrille1 select[id^="eval_"], #listeCriteresGrille1 input[id^="eval_pts_"]')) return true;
+        return ouToucherEnEvaluant() === el('selectEchelle1');
+    }
+
     /** Étape 9 : « Déverrouiller », puis la cartouche, puis « Verrouiller ». */
     function ouToucherEnReecrivant() {
         if (evaluationOuverteVerrouillee()) return boutonVerrou();
@@ -394,7 +391,7 @@
     function boutonAppliquer() { return qs('#conteneurEditionPratique [data-action="appliquerPratiqueAuCoursActive"]'); }
 
     // « Appliquer au cours actif » est au pied de la fiche (à y ≈ 1 867 px pour 900 px d'écran, mesuré par la session H) :
-    // la fiche ouverte, il est amené dans la vue ; le voile ne laisserait pas défiler jusqu'à lui. La fiche se dessine
+    // la fiche ouverte, il est amené dans la vue. La fiche se dessine
     // en plusieurs temps et peut remonter la page : il y est ramené pendant les vingt premiers passages de la sonde
     // (environ deux secondes et demie), puis la personne garde la main.
     var appliquerAmene = 0;
@@ -466,27 +463,88 @@
         var cible = ouNommerLaCartouche();
         if (ficheDe(lireCtx().productionId)) { amenerLaCartouche(); return surLaFiche(cible); }
         cartoucheAmenee = 0;
-        // Sur la page des cartouches, la matrice reste touchable (pas de voile) ; dans la liste, la ligne est éclairée.
-        poserVoile(sousSectionVisible('conception-productions') ? 'normal' : 'aucun');
         return [cible];
     }
 
-    /** Étape 8 : le nom, ta grille, ton échelle, puis « Créer la cartouche » (les commentaires sont dans la matrice). */
+    function nomDeGrille(id) {
+        var g = parId(grilles(), id);
+        return g ? (g.nom || 'sans nom') : '';
+    }
+
+    /**
+     * La grille sous laquelle est rangée la cartouche ouverte : celle de la cartouche en base, sinon (en création) celle
+     * que montre son menu « Grille (critères) ».
+     */
+    function grilleDeLaCartoucheOuverte() {
+        var c = window.cartoucheActuel;
+        if (c && c.id && c.grilleId && cartouchesDe(c.grilleId).some(function (x) { return x && x.id === c.id; })) return c.grilleId;
+        var s = el('selectGrilleCartouche');
+        return s && vis(s) ? s.value : '';
+    }
+
+    /**
+     * La cartouche ouverte est rangée sous une autre grille que celle du parcours (11 nov. 2026, captures 19 et 20,
+     * BLOQUANT : « Cartouche de départ (copie) », sous « Grille de départ » ; la fiche de la production, grille « Test 1 »,
+     * n'offrait que « Aucune », puisque son menu ne liste que les cartouches de SA grille). Mesuré sous WebKit : choisir
+     * l'autre grille vide le menu de l'échelle, et rien ne se passe avant qu'une échelle soit choisie ; alors
+     * l'application pose sa question et copie la cartouche sous la grille choisie (`traiterChangementDeGrilleCartouche`).
+     * Cette copie est une cartouche neuve de la grille du parcours : l'étape la compte.
+     */
+    function cartoucheHorsDeLaGrille() {
+        if (!ficheCartoucheOuverte() || cartoucheCreee()) return false;
+        var g = grilleDeLaCartoucheOuverte(), id = laGrilleId();
+        return !!(g && id && g !== id);
+    }
+
+    /** La grille du parcours déjà choisie dans la fiche, la cartouche pas encore copiée : reste l'échelle. */
+    function grilleChoisieEchelleAttendue() {
+        var s = el('selectGrilleCartouche'), e = el('selectEchelleCartouche');
+        return cartoucheHorsDeLaGrille() && !!s && s.value === laGrilleId() && vis(e) && !e.value;
+    }
+
+    // Phrases PROPOSÉES (11 nov. 2026, à valider par Grégoire) : lues par l'enseignant·e.
+    function avisCartouche() {
+        if (!cartoucheHorsDeLaGrille()) return null;
+        if (grilleChoisieEchelleAttendue()) {
+            return "Choisis maintenant l'échelle : une copie de cette cartouche sera rangée sous « " + nomDeGrille(laGrilleId()) +
+                " », et l'originale restera telle quelle.";
+        }
+        return "Cette cartouche est rangée sous la grille « " + nomDeGrille(grilleDeLaCartoucheOuverte()) +
+            " » : pour que ta production la trouve, choisis « " + nomDeGrille(laGrilleId()) + " » dans « Grille (critères) ».";
+    }
+
+    /** Le menu à toucher quand la cartouche est hors de la grille : « Grille (critères) », puis l'échelle. */
+    function menuHorsDeLaGrille() {
+        return el(grilleChoisieEchelleAttendue() ? 'selectEchelleCartouche' : 'selectGrilleCartouche');
+    }
+
+    /**
+     * Étape 8 : la grille, si la cartouche ouverte n'est pas sous celle du parcours ; sinon, en création, le nom, ta
+     * grille, ton échelle, puis « Créer la cartouche ». Une cartouche déjà enregistrée n'a aucun geste utile à désigner :
+     * rien (11 nov. 2026 : le halo tombait sur « Dupliquer · Supprimer · Fermer » ; jamais sur un groupe qui porte
+     * « Supprimer »).
+     */
     function ouToucherCartouche() {
+        if (cartoucheHorsDeLaGrille()) return menuHorsDeLaGrille();
         var creer = el('btnCreerCartouche');
-        if (!vis(creer)) return el('actionsFicheCartouche');
+        if (!vis(creer)) return null;
         return premierAFaire(['nomCartouche', 'selectGrilleCartouche', 'selectEchelleCartouche'], creer);
     }
 
     // ---------- Les neuf étapes ----------
 
-    var TEXTE_1 = "Pour évaluer une première production, il te faut ta grille. Apporte celle que tu utilises déjà : colle-la ici, puis montre à l'application ce que veut dire chaque morceau (un critère, un niveau, des points). C'est ainsi qu'elle pourra lire tes évaluations, puis nommer le critère où un·e étudiant·e bute. Pas de grille sous la main ? Touche « Partir de zéro ».";
+    // Les deux phrases sur la longueur de la dissection : validées par Grégoire mot pour mot (11 nov. 2026, 8 h 38).
+    var TEXTE_1 = "Pour évaluer une première production, il te faut ta grille. Apporte celle que tu utilises déjà : colle-la ici, puis montre à l'application ce que veut dire chaque morceau (un critère, un niveau, des points). C'est ainsi qu'elle pourra lire tes évaluations, puis nommer le critère où un·e étudiant·e bute. C'est souvent long, parce que chaque grille est construite à sa façon et que l'application ne peut pas deviner le rôle de chaque morceau. Mais tu ne le fais qu'une fois : ta grille servira ensuite à chaque copie que tu évalueras avec elle. Pas de grille sous la main ? Touche « Partir de zéro ».";
     var TEXTE_1_CHOIX = "Ta grille porte des points et des niveaux. Le résultat d'une évaluation viendra de l'un ou de l'autre : des points qui s'additionnent en une note, ou un niveau par critère (comme « maîtrisé »), que ton échelle traduit ensuite en note. Choisis ce qui correspond à ta façon d'évaluer.";
 
     var ETAPES = [
         {
             titre: 'Ta grille',
             get texte() { return choixRendu ? TEXTE_1_CHOIX : TEXTE_1; },
+            get geste() {
+                return choixRendu ? "Choisis les points ou les niveaux."
+                    : "Colle ta grille, montre ce qu'est chaque morceau, puis touche « Créer » ; ou touche « Partir de zéro ».";
+            },
             avant: async function () {
                 choixRendu = choixVisible();
                 // La personne est peut-être déjà dans la dissection, ou dans l'éditeur (« Partir de zéro ») : rien ne bouge.
@@ -504,34 +562,47 @@
         },
         {
             titre: 'Ta production',
+            geste: "Touche « + Nouvelle production », remplis les champs obligatoires, choisis ta grille, puis touche « Créer la production ».",
             texte: "Une production, c'est ce que tes étudiant·es font dans une activité d'apprentissage : un texte, mais aussi un stage, un film, un enregistrement, une entrevue, un labo. Ce n'est pas toujours un objet qu'on remet : c'est ce que l'étudiant·e fait quand il ou elle apprend, et c'est cet apprentissage que tu évalues à travers elle. Décris celle que tu demandes : son titre, son type, sa pondération, et surtout l'activité d'apprentissage : c'est ce que tes étudiant·es retrouveront en tête de leur synthèse de rétroaction. Puis associe-lui la grille que tu viens de créer, et son échelle si elle en a une. La production relie ce que tu demandes à la façon dont tu l'évalues : ce que chaque étudiant·e fait s'y rattache, et sa pondération dit ce qu'elle pèsera dans la note du cours.",
             avant: async function () {
                 aller('conception', 'productions');
                 await attendre(function () { return sousSectionVisible('conception-productions'); }, 2000);
             },
+            // La règle des formulaires (11 nov. 2026, 9 h 35, capture 16) : une flèche par champ obligatoire encore vide ;
+            // puis la grille, puis l'échelle attendue (`aAssocier`) ; le halo sur « Créer la production ».
+            formulaire: function () { return ficheProductionOuverte() ? el('formulaireProduction') : null; },
+            fleches: aAssocier,
             zones: function () {
-                if (ficheProductionOuverte()) return surLaFiche(ouToucherProduction());
-                poserVoile('normal');
-                return [qs('#conception-productions .rangee-selection')];
+                if (ficheProductionOuverte()) return surLaFiche(null);
+                // 11 nov. 2026 : la rangée ne porte que « + Nouvelle production », que la pulsation désigne : pas de flèche.
+                return [];
             },
             contour: function () {
-                if (ficheProductionOuverte()) return ouToucherProduction();
+                // La fiche d'une production déjà enregistrée : aucun bouton à désigner (sa rangée porte « Supprimer »).
+                if (ficheProductionOuverte()) return vis(el('btnCreerProduction')) ? el('btnCreerProduction') : null;
                 return qs('#conception-productions [data-action="creerNouvelleProduction"]');
             },
             atteint: productionCreee
         },
         {
             titre: 'Tes consignes',
+            geste: "Écris la date de remise, puis coche « Consignes transmises ».",
             texte: "Écris ce que tes étudiant·es doivent savoir pour réussir : l'objectif d'apprentissage, la tâche, les consignes précises. Touche « Préparer le PDF » : la feuille de consignes et ta grille en sortent prêtes à remettre. Remettre la grille avec la tâche, c'est leur dire d'avance sur quoi leur production sera évaluée. Quand la feuille est remise, pose la date de remise et coche « Consignes transmises » : la production entre alors au calendrier. Dès ta première évaluation, ce que tes étudiant·es ont remis compte dans leur complétion, et tes évaluations, dans leur performance.",
-            voile: 'aucun',
             avant: ouvrirLaProduction,
             // La date et la case, ensemble : la bulle se pose au-dessus ou au-dessous du bloc, sans couvrir la date.
             zones: function () { return [el('sectionPlanification') || caseConsignes()]; },
-            contour: caseConsignes,
+            // Un geste à la fois (11 nov. 2026, 12 h 05) : la date de remise d'abord, puis la case.
+            contour: function () {
+                var s = el('sectionPlanification');
+                var date = s ? s.querySelector('input[type="date"]') : null;
+                return date && vis(date) && !date.value ? date : caseConsignes();
+            },
+            nommeLeContour: true,   // « coche « Consignes transmises » » (11 nov. 2026, 9 h 47)
             atteint: consignesTransmises
         },
         {
             titre: 'Une première production',
+            geste: "Touche « Actions › Évaluer » sur sa ligne, choisis un niveau par critère, puis touche « Verrouiller ».",
             texte: "Évalue une première production. Elle est sur papier, ou c'est un exposé, une performance ? Rien à importer : touche « Actions › Évaluer » sur la ligne de l'étudiant·e. Pour chaque critère, choisis le niveau ou les points que tu attribuerais : la note se calcule à mesure, et une rétroaction s'écrit sous tes yeux : chaque critère de ta grille, avec ce que tu lui attribues. Tu y mettras bientôt tes propres mots. Quand tu es satisfait·e, touche « Verrouiller » : l'évaluation ne bougera plus par mégarde, et tu pourras la rouvrir au besoin.",
             avant: async function () {
                 if (ecranEvaluationVisible()) return;
@@ -541,17 +612,26 @@
             },
             zones: function () {
                 if (ecranEvaluationVisible()) return surLaCible(ouToucherEnEvaluant());
-                poserVoile('normal');
                 return [rangeeDe(ligneDeLaListe(lireCtx().productionId))];
             },
             contour: function () {
                 if (ecranEvaluationVisible()) return ouToucherEnEvaluant();
                 return ligneDeLaListe(lireCtx().productionId);
             },
+            // « Actions › Évaluer », un niveau par critère, « Verrouiller » : la bulle nomme ce qu'il faut toucher, la
+            // flèche y va (11 nov. 2026, 9 h 35, capture 17 : elle montait à la cellule « Niveau » de la rangée).
+            nommeLeContour: true,
+            // Capture 18 : l'écran d'évaluation ouvert, la bulle passe à la page des critères et le premier critère est
+            // amené dans la vue ; revenue à la Liste, à celle d'« Actions › Évaluer ».
+            pageQuiDit: function () {
+                if (!ecranEvaluationVisible()) return 'Rien à importer';
+                return evaluationPrete() ? 'Pour chaque critère' : null;
+            },
             atteint: evaluationVerrouillee
         },
         {
             titre: 'Ta pratique',
+            geste: "Touche « + Nouvelle pratique », choisis « Partir d'un modèle », puis suis l'assistant jusqu'à « Créer la pratique ».",
             texte: "Ta première évaluation est faite. Reste à décider comment tu construis la note du cours : c'est ta pratique de notation. Touche « + Nouvelle pratique », puis « Partir d'un modèle », et choisis le tien : « Modèle sommatif » si la note du cours est la moyenne de tes travaux selon leur pondération. Si tu pratiques une notation alternative, ton modèle y est aussi : par standards (niveaux de maîtrise), par spécifications, par dénotation. Tu ne sais pas lequel te correspond ? Touche « Décrire ma pratique » : à partir de quelques questions, l'assistant le trouve pour toi. La note que tu viens d'attribuer ne changera pas.",
             avant: async function () {
                 aller('conception', 'pratiques-notation');
@@ -560,12 +640,28 @@
             zones: function () {
                 surModale(wizardOuvert());
                 if (wizardOuvert()) return [qs('#modalWizardPratiqueV2 .modal-contenu')];
-                return [qs('#conception-pratiques-notation .rangee-selection')];
+                return [];   // « + Nouvelle pratique » a la pulsation (11 nov. 2026)
             },
+            // 11 nov. 2026 : la bulle couvre forcément une partie de la fenêtre ; jamais ses boutons du geste suivant.
+            aussiEviter: function () {
+                if (!wizardOuvert()) return [];
+                // Les cartes de choix de la page affichée aussi (11 nov. 2026, cinquième aperçu : la ligne du geste a grandi
+                // la bulle, qui couvrait le modèle à choisir).
+                var cartes = [].slice.call(document.querySelectorAll('#modalWizardPratiqueV2 .wizard-v2-radio-card')).filter(vis);
+                return ['wizard-v2-btn-precedent', 'wizard-v2-btn-suivant', 'wizard-v2-btn-creer'].map(el).concat(cartes);
+            },
+            nommeLeContour: true,   // « + Nouvelle pratique », puis « Partir d'un modèle » (11 nov. 2026, 9 h 47)
             contour: function () {
                 if (!wizardOuvert()) return qs('#conception-pratiques-notation [data-action="creerNouvellePratique"]');
                 var r = qs('#modalWizardPratiqueV2 input[name="porteEntree"][value="modele"]');
-                return r && vis(r.closest('.wizard-v2-radio-card') || r) ? (r.closest('.wizard-v2-radio-card') || r) : null;
+                var carte = r ? (r.closest('.wizard-v2-radio-card') || r) : null;
+                if (carte && vis(carte) && !r.checked) return carte;
+                // Puis l'assistant, un geste à la fois (11 nov. 2026, 12 h 05) : « Créer la pratique » quand il paraît,
+                // sinon « Suivant → ».
+                var creer = el('wizard-v2-btn-creer');
+                if (vis(creer)) return creer;
+                var suivant = el('wizard-v2-btn-suivant');
+                return vis(suivant) ? suivant : (carte && vis(carte) ? carte : null);
             },
             atteint: function () {
                 var ok = pratiqueCreee();
@@ -575,6 +671,7 @@
         },
         {
             titre: "L'appliquer à ton cours",
+            geste: "Choisis ta pratique dans le menu en haut de la page, puis touche « Appliquer au cours actif ».",
             texte: "Ta pratique est créée, mais elle ne s'applique encore à aucun cours. Une pratique se prépare une fois et peut resservir, à toi comme à tes collègues, avec qui tu peux la partager. Choisis-la dans le menu en haut de la page, puis touche « Appliquer au cours actif ». Sans pratique appliquée, l'application ne sait pas comment tu construis ta note : elle n'en calcule aucune.",
             avant: async function () {
                 surModale(false);
@@ -584,26 +681,35 @@
             zones: function () {
                 if (fichePratiqueOuverte()) { amenerAppliquer(); return [boutonAppliquer()]; }
                 appliquerAmene = 0;
-                return [el('selectionPratiques')];
+                return [];   // le menu en haut est ce qu'il faut toucher : la pulsation le désigne (11 nov. 2026)
             },
             contour: function () {
                 if (fichePratiqueOuverte()) return boutonAppliquer();
                 return qs('#selectionPratiques select') || el('selectionPratiques');
             },
+            nommeLeContour: true,   // « le menu en haut de la page », puis « Appliquer au cours actif » (11 nov. 2026)
             atteint: pratiqueEstAppliquee
         },
         {
             titre: "Le point qui s'allume",
+            geste: "Touche « Continuer ».",
             texte: "Regarde : l'étudiant·e dont tu viens d'évaluer la production a maintenant son point en performance. Les autres n'y sont pas encore : ils apparaîtront à mesure que tu évalueras leur production. La complétion, elle, suit la remise : dès ta première évaluation, chaque production importée pour ce travail compte comme remise ; sans fichier, c'est ton évaluation qui confirme la remise. Évaluation après évaluation, c'est ainsi que se construit le coup d'œil sur ta classe.",
             avant: async function () {
                 aller('suivi', 'groupe');
                 await attendre(blocPerformance, 3000);
+                // La flèche va à la bande (11 nov. 2026) ; son titre, « Performance (P) », reste dans la vue : le bloc est
+                // amené sous l'en-tête, et le moteur n'a plus à faire défiler pour la bande.
+                var bloc = blocPerformance(), entete = qs('header.entete');
+                var haut = entete ? Math.max(0, entete.getBoundingClientRect().bottom) : 0;
+                if (bloc) window.scrollTo(0, Math.max(0, window.scrollY + bloc.getBoundingClientRect().top - haut - 16));
             },
-            zones: function () { return [blocPerformance()]; },
+            // « Son point en performance » : la bande des points, pas le bloc et son titre (11 nov. 2026).
+            zones: function () { var b = blocPerformance(); return [(b && b.querySelector('.barre-indicateur')) || b]; },
             boutons: [{ libelle: 'Continuer', primaire: true, action: function (m) { m.allerA(7); } }]
         },
         {
             titre: 'Ta cartouche',
+            geste: "Touche « + Nouvelle cartouche », remplis-la, enregistre-la, puis choisis-la dans la fiche de ta production.",
             texte: "La rétroaction de ton évaluation vient de ta grille. Pour qu'elle parle avec tes mots, écris ta cartouche : choisis ta grille, puis ton échelle de performance : celle que Mon matériel a créée avec ta grille si elle a des niveaux ; si elle est en points, les paliers de l'échelle de départ, dont tu peux ajuster les bornes. Puis, pour chaque critère et chaque niveau de l'échelle, note le commentaire que tu écrirais dans la marge. Tu l'écris une fois ; ensuite, chaque évaluation compose la rétroaction à partir de tes phrases. Tes étudiant·es reçoivent un commentaire cohérent d'une évaluation à l'autre, et tu n'as plus à le réécrire chaque fois. Puis, dans la fiche de ta production, choisis cette cartouche : elle s'y appliquera à chaque évaluation.",
             avant: async function () {
                 aller('conception', 'retroactions');
@@ -611,10 +717,12 @@
             },
             zones: function () {
                 if (cartoucheCreee()) return zonesPourNommer();
+                // « Grille (critères) », puis l'échelle, l'étiquette avec son menu : la flèche y va, l'avis le nomme.
+                if (cartoucheHorsDeLaGrille()) { var s = menuHorsDeLaGrille(); return [s.closest('.groupe-form') || s]; }
                 if (ficheCartoucheOuverte()) return surLaCible(ouToucherCartouche());
-                poserVoile('normal');
-                return [qs('#conception-retroactions .rangee-selection')];
+                return [];   // « + Nouvelle cartouche » a la pulsation (11 nov. 2026)
             },
+            avis: avisCartouche,
             contour: function () {
                 if (cartoucheCreee()) return ouNommerLaCartouche();
                 if (ficheCartoucheOuverte()) return ouToucherCartouche();
@@ -625,6 +733,7 @@
         },
         {
             titre: 'Ta rétroaction, avec tes mots',
+            geste: "Touche « Actions › Consulter », puis « Déverrouiller » ; écris ton mot, verrouille, puis touche « Terminer ».",
             texte: "Reviens à ta première évaluation : touche « Actions › Consulter », puis « Déverrouiller ». Choisis ta cartouche : la rétroaction se réécrit avec tes phrases. Relis-la comme ton étudiant·e la lira, dans sa synthèse de rétroaction. Un mot personnel ? Écris-le dans « Un mot pour ton étudiant·e ». Puis verrouille. Désormais, chaque production que tu évalueras recevra sa rétroaction de la même façon.",
             sansSortie: true,
             avant: async function () {
@@ -636,7 +745,6 @@
             },
             zones: function () {
                 if (ecranEvaluationVisible()) return surLaCible(ouToucherEnReecrivant());
-                poserVoile('normal');
                 var ctx = lireCtx();
                 return [rangeeDe(ligneDeLaListe(ctx.productionId, ctx.evaluationDA))];
             },
@@ -645,6 +753,8 @@
                 var ctx = lireCtx();
                 return ligneDeLaListe(ctx.productionId, ctx.evaluationDA);
             },
+            // « Actions › Consulter », « Déverrouiller », ta cartouche, « verrouille » (11 nov. 2026, 9 h 47).
+            nommeLeContour: true,
             boutons: [{ libelle: 'Terminer', primaire: true, action: function () { terminer(); } }]
         }
     ];
@@ -709,6 +819,7 @@
         ligne: 'De ta grille à ta première rétroaction, réécrite avec tes mots.',
         total: ETAPES.length,
         refus: condition,
+        prealable: 'classe',
         lancer: lancer
     });
 

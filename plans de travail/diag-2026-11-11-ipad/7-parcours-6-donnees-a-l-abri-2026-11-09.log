@@ -1,0 +1,19 @@
+
+Running 14 tests using 1 worker
+
+  ✓   1 [webkit] › integration/parcours-6-donnees-a-l-abri-2026-11-09.spec.js:296:1 › panneau : le parcours inscrit ; sans trimestre réel, « Commencer » ne lance rien et le panneau dit pourquoi ; le haut du menu sans codex (2.2s)
+  ✓   2 [webkit] › integration/parcours-6-donnees-a-l-abri-2026-11-09.spec.js:326:5 › de bout en bout, fenêtre de choix (1180, sombre) : chaque étape sur l'état atteint ; « Ouvrir un codex… » sans effet ; le rappel attend ; « Refaire » dit le fichier tenu (7.5s)
+  ✓   3 [webkit] › integration/parcours-6-donnees-a-l-abri-2026-11-09.spec.js:326:5 › de bout en bout, fenêtre de choix (1180, clair) : chaque étape sur l'état atteint ; « Ouvrir un codex… » sans effet ; le rappel attend ; « Refaire » dit le fichier tenu (4.8s)
+  ✓   4 [webkit] › integration/parcours-6-donnees-a-l-abri-2026-11-09.spec.js:404:1 › feuille de partage, puis téléchargement et « Il y est » (1180, sombre) : la phrase du chemin ; la bulle cède la place à « Il y est » (6.2s)
+  ✓   5 [webkit] › integration/parcours-6-donnees-a-l-abri-2026-11-09.spec.js:426:1 › des copies manquent (1180, sombre) : l’avertissement passe pendant l’étape 2, la phrase de la fenêtre perd celle de la réécriture (3.8s)
+  ✓   6 [webkit] › integration/parcours-6-donnees-a-l-abri-2026-11-09.spec.js:449:5 › 390 px, partage : l'étape 1 et l'étape 3 ; la bulle tient au-dessus de « Mettre à jour » sans le couvrir (3.6s)
+  ✓   7 [webkit] › integration/parcours-6-donnees-a-l-abri-2026-11-09.spec.js:449:5 › 390 px, telechargement : l'étape 1 et l'étape 3 ; la bulle tient au-dessus de « Mettre à jour » sans le couvrir (3.8s)
+  ✓   8 [webkit] › integration/parcours-6-donnees-a-l-abri-2026-11-09.spec.js:468:5 › 1440 px, fenetre : la bulle 3 à droite de l'aperçu ne couvre ni la mise en garde, ni la liste, ni « Mettre à jour », ni « Annuler » (3.5s)
+  ✓   9 [webkit] › integration/parcours-6-donnees-a-l-abri-2026-11-09.spec.js:468:5 › 1440 px, partage : la bulle 3 à droite de l'aperçu ne couvre ni la mise en garde, ni la liste, ni « Mettre à jour », ni « Annuler » (3.5s)
+  ✓  10 [webkit] › integration/parcours-6-donnees-a-l-abri-2026-11-09.spec.js:468:5 › 1440 px, copies-manquantes : la bulle 3 à droite de l'aperçu ne couvre ni la mise en garde, ni la liste, ni « Mettre à jour », ni « Annuler » (3.7s)
+  ✓  11 [webkit] › integration/parcours-6-donnees-a-l-abri-2026-11-09.spec.js:492:1 › 1180 × 820 (iPad à l’horizontale), fenêtre de choix : la bulle 3 à droite de l’aperçu, sans rien en couvrir (3.7s)
+  ✓  12 [webkit] › integration/parcours-6-donnees-a-l-abri-2026-11-09.spec.js:501:1 › 1179 px : sous 1180, la bulle 3 garde la place d’avant (au-dessus de « Mettre à jour », largeur ordinaire) (2.5s)
+  ✓  13 [webkit] › integration/parcours-6-donnees-a-l-abri-2026-11-09.spec.js:520:5 › menu Codex, partage : sous « Mettre à jour le codex », « Partage un nouveau fichier » (1.4s)
+  ✓  14 [webkit] › integration/parcours-6-donnees-a-l-abri-2026-11-09.spec.js:520:5 › menu Codex, telechargement : sous « Mettre à jour le codex », « Télécharge un nouveau fichier » (1.4s)
+
+  14 passed (52.1s)

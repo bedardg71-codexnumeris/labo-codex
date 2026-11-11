@@ -1,0 +1,309 @@
+
+Running 14 tests using 1 worker
+
+  ✓   1 [webkit] › integration/parcours-6-donnees-a-l-abri-2026-11-09.spec.js:296:1 › panneau : le parcours inscrit ; sans trimestre réel, « Commencer » ne lance rien et le panneau dit pourquoi ; le haut du menu sans codex (2.2s)
+  ✘   2 [webkit] › integration/parcours-6-donnees-a-l-abri-2026-11-09.spec.js:326:5 › de bout en bout, fenêtre de choix (1180, sombre) : chaque étape sur l'état atteint ; « Ouvrir un codex… » sans effet ; le rappel attend ; « Refaire » dit le fichier tenu (3.0s)
+  ✘   3 [webkit] › integration/parcours-6-donnees-a-l-abri-2026-11-09.spec.js:326:5 › de bout en bout, fenêtre de choix (1180, clair) : chaque étape sur l'état atteint ; « Ouvrir un codex… » sans effet ; le rappel attend ; « Refaire » dit le fichier tenu (3.1s)
+  ✘   4 [webkit] › integration/parcours-6-donnees-a-l-abri-2026-11-09.spec.js:404:1 › feuille de partage, puis téléchargement et « Il y est » (1180, sombre) : la phrase du chemin ; la bulle cède la place à « Il y est » (2.9s)
+  ✘   5 [webkit] › integration/parcours-6-donnees-a-l-abri-2026-11-09.spec.js:426:1 › des copies manquent (1180, sombre) : l’avertissement passe pendant l’étape 2, la phrase de la fenêtre perd celle de la réécriture (3.1s)
+  ✓   6 [webkit] › integration/parcours-6-donnees-a-l-abri-2026-11-09.spec.js:449:5 › 390 px, partage : l'étape 1 et l'étape 3 ; la bulle tient au-dessus de « Mettre à jour » sans le couvrir (3.8s)
+  ✓   7 [webkit] › integration/parcours-6-donnees-a-l-abri-2026-11-09.spec.js:449:5 › 390 px, telechargement : l'étape 1 et l'étape 3 ; la bulle tient au-dessus de « Mettre à jour » sans le couvrir (3.5s)
+  ✘   8 [webkit] › integration/parcours-6-donnees-a-l-abri-2026-11-09.spec.js:468:5 › 1440 px, fenetre : la bulle 3 à droite de l'aperçu ne couvre ni la mise en garde, ni la liste, ni « Mettre à jour », ni « Annuler » (2.8s)
+  ✘   9 [webkit] › integration/parcours-6-donnees-a-l-abri-2026-11-09.spec.js:468:5 › 1440 px, partage : la bulle 3 à droite de l'aperçu ne couvre ni la mise en garde, ni la liste, ni « Mettre à jour », ni « Annuler » (3.0s)
+  ✘  10 [webkit] › integration/parcours-6-donnees-a-l-abri-2026-11-09.spec.js:468:5 › 1440 px, copies-manquantes : la bulle 3 à droite de l'aperçu ne couvre ni la mise en garde, ni la liste, ni « Mettre à jour », ni « Annuler » (3.1s)
+  ✘  11 [webkit] › integration/parcours-6-donnees-a-l-abri-2026-11-09.spec.js:492:1 › 1180 × 820 (iPad à l’horizontale), fenêtre de choix : la bulle 3 à droite de l’aperçu, sans rien en couvrir (2.9s)
+  ✓  12 [webkit] › integration/parcours-6-donnees-a-l-abri-2026-11-09.spec.js:501:1 › 1179 px : sous 1180, la bulle 3 garde la place d’avant (au-dessus de « Mettre à jour », largeur ordinaire) (2.9s)
+  ✓  13 [webkit] › integration/parcours-6-donnees-a-l-abri-2026-11-09.spec.js:520:5 › menu Codex, partage : sous « Mettre à jour le codex », « Partage un nouveau fichier » (1.4s)
+  ✓  14 [webkit] › integration/parcours-6-donnees-a-l-abri-2026-11-09.spec.js:520:5 › menu Codex, telechargement : sous « Mettre à jour le codex », « Télécharge un nouveau fichier » (1.4s)
+
+
+  1) [webkit] › integration/parcours-6-donnees-a-l-abri-2026-11-09.spec.js:326:5 › de bout en bout, fenêtre de choix (1180, sombre) : chaque étape sur l'état atteint ; « Ouvrir un codex… » sans effet ; le rappel attend ; « Refaire » dit le fichier tenu 
+
+    Error: [2mexpect([22m[31mreceived[39m[2m).[22mtoEqual[2m([22m[32mexpected[39m[2m) // deep equality[22m
+
+    [32m- Expected  - 1[39m
+    [31m+ Received  + 1[39m
+
+    [2m  Object {[22m
+    [32m-   "aDroite": true,[39m
+    [31m+   "aDroite": false,[39m
+    [2m    "couvreI": false,[22m
+    [2m    "couvreListe": false,[22m
+    [2m    "couvreMiseEnGarde": false,[22m
+    [2m  }[22m
+
+      201 |     if (largeur >= 1180) {
+      202 |         expect({ aDroite: g.aDroite, couvreMiseEnGarde: g.couvreMiseEnGarde, couvreListe: g.couvreListe, couvreI: g.couvreI })
+    > 203 |             .toEqual({ aDroite: true, couvreMiseEnGarde: false, couvreListe: false, couvreI: false });
+          |              ^
+      204 |         // Ce qui est couvert se voit aussi au toucher : le milieu de chacun répond, pas la bulle.
+      205 |         const libres = await page.evaluate(() => ['.export-preview-note', '.export-preview-liste', '.btn-confirmer', '.btn-annuler']
+      206 |             .map((s) => {
+        at bulleSurLApercuSansCouvrirSesBoutons (/Users/kuekatsheu/Documents/GitHub/labo-codex-fleches-apercu/tests/integration/parcours-6-donnees-a-l-abri-2026-11-09.spec.js:203:14)
+        at /Users/kuekatsheu/Documents/GitHub/labo-codex-fleches-apercu/tests/integration/parcours-6-donnees-a-l-abri-2026-11-09.spec.js:346:9
+
+    Error Context: ../plans de travail/diag-2026-11-11-ipad/6-results-parcours-6-donnees-a-l-abri-2026-11-09/parcours-6-donnees-a-l-abr-fd0dc-faire-»-dit-le-fichier-tenu-webkit/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    ../plans de travail/diag-2026-11-11-ipad/6-results-parcours-6-donnees-a-l-abri-2026-11-09/parcours-6-donnees-a-l-abr-fd0dc-faire-»-dit-le-fichier-tenu-webkit/trace.zip
+    Usage:
+
+        npx playwright show-trace "../plans de travail/diag-2026-11-11-ipad/6-results-parcours-6-donnees-a-l-abri-2026-11-09/parcours-6-donnees-a-l-abr-fd0dc-faire-»-dit-le-fichier-tenu-webkit/trace.zip"
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  2) [webkit] › integration/parcours-6-donnees-a-l-abri-2026-11-09.spec.js:326:5 › de bout en bout, fenêtre de choix (1180, clair) : chaque étape sur l'état atteint ; « Ouvrir un codex… » sans effet ; le rappel attend ; « Refaire » dit le fichier tenu 
+
+    Error: [2mexpect([22m[31mreceived[39m[2m).[22mtoEqual[2m([22m[32mexpected[39m[2m) // deep equality[22m
+
+    [32m- Expected  - 1[39m
+    [31m+ Received  + 1[39m
+
+    [2m  Object {[22m
+    [32m-   "aDroite": true,[39m
+    [31m+   "aDroite": false,[39m
+    [2m    "couvreI": false,[22m
+    [2m    "couvreListe": false,[22m
+    [2m    "couvreMiseEnGarde": false,[22m
+    [2m  }[22m
+
+      201 |     if (largeur >= 1180) {
+      202 |         expect({ aDroite: g.aDroite, couvreMiseEnGarde: g.couvreMiseEnGarde, couvreListe: g.couvreListe, couvreI: g.couvreI })
+    > 203 |             .toEqual({ aDroite: true, couvreMiseEnGarde: false, couvreListe: false, couvreI: false });
+          |              ^
+      204 |         // Ce qui est couvert se voit aussi au toucher : le milieu de chacun répond, pas la bulle.
+      205 |         const libres = await page.evaluate(() => ['.export-preview-note', '.export-preview-liste', '.btn-confirmer', '.btn-annuler']
+      206 |             .map((s) => {
+        at bulleSurLApercuSansCouvrirSesBoutons (/Users/kuekatsheu/Documents/GitHub/labo-codex-fleches-apercu/tests/integration/parcours-6-donnees-a-l-abri-2026-11-09.spec.js:203:14)
+        at /Users/kuekatsheu/Documents/GitHub/labo-codex-fleches-apercu/tests/integration/parcours-6-donnees-a-l-abri-2026-11-09.spec.js:346:9
+
+    Error Context: ../plans de travail/diag-2026-11-11-ipad/6-results-parcours-6-donnees-a-l-abri-2026-11-09/parcours-6-donnees-a-l-abr-7ebb6-faire-»-dit-le-fichier-tenu-webkit/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    ../plans de travail/diag-2026-11-11-ipad/6-results-parcours-6-donnees-a-l-abri-2026-11-09/parcours-6-donnees-a-l-abr-7ebb6-faire-»-dit-le-fichier-tenu-webkit/trace.zip
+    Usage:
+
+        npx playwright show-trace "../plans de travail/diag-2026-11-11-ipad/6-results-parcours-6-donnees-a-l-abri-2026-11-09/parcours-6-donnees-a-l-abr-7ebb6-faire-»-dit-le-fichier-tenu-webkit/trace.zip"
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  3) [webkit] › integration/parcours-6-donnees-a-l-abri-2026-11-09.spec.js:404:1 › feuille de partage, puis téléchargement et « Il y est » (1180, sombre) : la phrase du chemin ; la bulle cède la place à « Il y est » 
+
+    Error: [2mexpect([22m[31mreceived[39m[2m).[22mtoEqual[2m([22m[32mexpected[39m[2m) // deep equality[22m
+
+    [32m- Expected  - 1[39m
+    [31m+ Received  + 1[39m
+
+    [2m  Object {[22m
+    [32m-   "aDroite": true,[39m
+    [31m+   "aDroite": false,[39m
+    [2m    "couvreI": false,[22m
+    [2m    "couvreListe": false,[22m
+    [2m    "couvreMiseEnGarde": false,[22m
+    [2m  }[22m
+
+      201 |     if (largeur >= 1180) {
+      202 |         expect({ aDroite: g.aDroite, couvreMiseEnGarde: g.couvreMiseEnGarde, couvreListe: g.couvreListe, couvreI: g.couvreI })
+    > 203 |             .toEqual({ aDroite: true, couvreMiseEnGarde: false, couvreListe: false, couvreI: false });
+          |              ^
+      204 |         // Ce qui est couvert se voit aussi au toucher : le milieu de chacun répond, pas la bulle.
+      205 |         const libres = await page.evaluate(() => ['.export-preview-note', '.export-preview-liste', '.btn-confirmer', '.btn-annuler']
+      206 |             .map((s) => {
+        at bulleSurLApercuSansCouvrirSesBoutons (/Users/kuekatsheu/Documents/GitHub/labo-codex-fleches-apercu/tests/integration/parcours-6-donnees-a-l-abri-2026-11-09.spec.js:203:14)
+        at /Users/kuekatsheu/Documents/GitHub/labo-codex-fleches-apercu/tests/integration/parcours-6-donnees-a-l-abri-2026-11-09.spec.js:410:5
+
+    Error Context: ../plans de travail/diag-2026-11-11-ipad/6-results-parcours-6-donnees-a-l-abri-2026-11-09/parcours-6-donnees-a-l-abr-3b9f0-ède-la-place-à-«-Il-y-est-»-webkit/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    ../plans de travail/diag-2026-11-11-ipad/6-results-parcours-6-donnees-a-l-abri-2026-11-09/parcours-6-donnees-a-l-abr-3b9f0-ède-la-place-à-«-Il-y-est-»-webkit/trace.zip
+    Usage:
+
+        npx playwright show-trace "../plans de travail/diag-2026-11-11-ipad/6-results-parcours-6-donnees-a-l-abri-2026-11-09/parcours-6-donnees-a-l-abr-3b9f0-ède-la-place-à-«-Il-y-est-»-webkit/trace.zip"
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  4) [webkit] › integration/parcours-6-donnees-a-l-abri-2026-11-09.spec.js:426:1 › des copies manquent (1180, sombre) : l’avertissement passe pendant l’étape 2, la phrase de la fenêtre perd celle de la réécriture 
+
+    Error: [2mexpect([22m[31mreceived[39m[2m).[22mtoEqual[2m([22m[32mexpected[39m[2m) // deep equality[22m
+
+    [32m- Expected  - 1[39m
+    [31m+ Received  + 1[39m
+
+    [2m  Object {[22m
+    [32m-   "aDroite": true,[39m
+    [31m+   "aDroite": false,[39m
+    [2m    "couvreI": false,[22m
+    [2m    "couvreListe": false,[22m
+    [2m    "couvreMiseEnGarde": false,[22m
+    [2m  }[22m
+
+      201 |     if (largeur >= 1180) {
+      202 |         expect({ aDroite: g.aDroite, couvreMiseEnGarde: g.couvreMiseEnGarde, couvreListe: g.couvreListe, couvreI: g.couvreI })
+    > 203 |             .toEqual({ aDroite: true, couvreMiseEnGarde: false, couvreListe: false, couvreI: false });
+          |              ^
+      204 |         // Ce qui est couvert se voit aussi au toucher : le milieu de chacun répond, pas la bulle.
+      205 |         const libres = await page.evaluate(() => ['.export-preview-note', '.export-preview-liste', '.btn-confirmer', '.btn-annuler']
+      206 |             .map((s) => {
+        at bulleSurLApercuSansCouvrirSesBoutons (/Users/kuekatsheu/Documents/GitHub/labo-codex-fleches-apercu/tests/integration/parcours-6-donnees-a-l-abri-2026-11-09.spec.js:203:14)
+        at /Users/kuekatsheu/Documents/GitHub/labo-codex-fleches-apercu/tests/integration/parcours-6-donnees-a-l-abri-2026-11-09.spec.js:441:5
+
+    Error Context: ../plans de travail/diag-2026-11-11-ipad/6-results-parcours-6-donnees-a-l-abri-2026-11-09/parcours-6-donnees-a-l-abr-4d6e2-perd-celle-de-la-réécriture-webkit/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    ../plans de travail/diag-2026-11-11-ipad/6-results-parcours-6-donnees-a-l-abri-2026-11-09/parcours-6-donnees-a-l-abr-4d6e2-perd-celle-de-la-réécriture-webkit/trace.zip
+    Usage:
+
+        npx playwright show-trace "../plans de travail/diag-2026-11-11-ipad/6-results-parcours-6-donnees-a-l-abri-2026-11-09/parcours-6-donnees-a-l-abr-4d6e2-perd-celle-de-la-réécriture-webkit/trace.zip"
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  5) [webkit] › integration/parcours-6-donnees-a-l-abri-2026-11-09.spec.js:468:5 › 1440 px, fenetre : la bulle 3 à droite de l'aperçu ne couvre ni la mise en garde, ni la liste, ni « Mettre à jour », ni « Annuler » 
+
+    Error: [2mexpect([22m[31mreceived[39m[2m).[22mtoEqual[2m([22m[32mexpected[39m[2m) // deep equality[22m
+
+    [32m- Expected  - 1[39m
+    [31m+ Received  + 1[39m
+
+    [2m  Object {[22m
+    [32m-   "aDroite": true,[39m
+    [31m+   "aDroite": false,[39m
+    [2m    "couvreI": false,[22m
+    [2m    "couvreListe": false,[22m
+    [2m    "couvreMiseEnGarde": false,[22m
+    [2m  }[22m
+
+      201 |     if (largeur >= 1180) {
+      202 |         expect({ aDroite: g.aDroite, couvreMiseEnGarde: g.couvreMiseEnGarde, couvreListe: g.couvreListe, couvreI: g.couvreI })
+    > 203 |             .toEqual({ aDroite: true, couvreMiseEnGarde: false, couvreListe: false, couvreI: false });
+          |              ^
+      204 |         // Ce qui est couvert se voit aussi au toucher : le milieu de chacun répond, pas la bulle.
+      205 |         const libres = await page.evaluate(() => ['.export-preview-note', '.export-preview-liste', '.btn-confirmer', '.btn-annuler']
+      206 |             .map((s) => {
+        at bulleSurLApercuSansCouvrirSesBoutons (/Users/kuekatsheu/Documents/GitHub/labo-codex-fleches-apercu/tests/integration/parcours-6-donnees-a-l-abri-2026-11-09.spec.js:203:14)
+        at /Users/kuekatsheu/Documents/GitHub/labo-codex-fleches-apercu/tests/integration/parcours-6-donnees-a-l-abri-2026-11-09.spec.js:483:9
+
+    Error Context: ../plans de travail/diag-2026-11-11-ipad/6-results-parcours-6-donnees-a-l-abri-2026-11-09/parcours-6-donnees-a-l-abr-b3250-tre-à-jour-»-ni-«-Annuler-»-webkit/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    ../plans de travail/diag-2026-11-11-ipad/6-results-parcours-6-donnees-a-l-abri-2026-11-09/parcours-6-donnees-a-l-abr-b3250-tre-à-jour-»-ni-«-Annuler-»-webkit/trace.zip
+    Usage:
+
+        npx playwright show-trace "../plans de travail/diag-2026-11-11-ipad/6-results-parcours-6-donnees-a-l-abri-2026-11-09/parcours-6-donnees-a-l-abr-b3250-tre-à-jour-»-ni-«-Annuler-»-webkit/trace.zip"
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  6) [webkit] › integration/parcours-6-donnees-a-l-abri-2026-11-09.spec.js:468:5 › 1440 px, partage : la bulle 3 à droite de l'aperçu ne couvre ni la mise en garde, ni la liste, ni « Mettre à jour », ni « Annuler » 
+
+    Error: [2mexpect([22m[31mreceived[39m[2m).[22mtoEqual[2m([22m[32mexpected[39m[2m) // deep equality[22m
+
+    [32m- Expected  - 1[39m
+    [31m+ Received  + 1[39m
+
+    [2m  Object {[22m
+    [32m-   "aDroite": true,[39m
+    [31m+   "aDroite": false,[39m
+    [2m    "couvreI": false,[22m
+    [2m    "couvreListe": false,[22m
+    [2m    "couvreMiseEnGarde": false,[22m
+    [2m  }[22m
+
+      201 |     if (largeur >= 1180) {
+      202 |         expect({ aDroite: g.aDroite, couvreMiseEnGarde: g.couvreMiseEnGarde, couvreListe: g.couvreListe, couvreI: g.couvreI })
+    > 203 |             .toEqual({ aDroite: true, couvreMiseEnGarde: false, couvreListe: false, couvreI: false });
+          |              ^
+      204 |         // Ce qui est couvert se voit aussi au toucher : le milieu de chacun répond, pas la bulle.
+      205 |         const libres = await page.evaluate(() => ['.export-preview-note', '.export-preview-liste', '.btn-confirmer', '.btn-annuler']
+      206 |             .map((s) => {
+        at bulleSurLApercuSansCouvrirSesBoutons (/Users/kuekatsheu/Documents/GitHub/labo-codex-fleches-apercu/tests/integration/parcours-6-donnees-a-l-abri-2026-11-09.spec.js:203:14)
+        at /Users/kuekatsheu/Documents/GitHub/labo-codex-fleches-apercu/tests/integration/parcours-6-donnees-a-l-abri-2026-11-09.spec.js:483:9
+
+    Error Context: ../plans de travail/diag-2026-11-11-ipad/6-results-parcours-6-donnees-a-l-abri-2026-11-09/parcours-6-donnees-a-l-abr-a76ad-tre-à-jour-»-ni-«-Annuler-»-webkit/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    ../plans de travail/diag-2026-11-11-ipad/6-results-parcours-6-donnees-a-l-abri-2026-11-09/parcours-6-donnees-a-l-abr-a76ad-tre-à-jour-»-ni-«-Annuler-»-webkit/trace.zip
+    Usage:
+
+        npx playwright show-trace "../plans de travail/diag-2026-11-11-ipad/6-results-parcours-6-donnees-a-l-abri-2026-11-09/parcours-6-donnees-a-l-abr-a76ad-tre-à-jour-»-ni-«-Annuler-»-webkit/trace.zip"
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  7) [webkit] › integration/parcours-6-donnees-a-l-abri-2026-11-09.spec.js:468:5 › 1440 px, copies-manquantes : la bulle 3 à droite de l'aperçu ne couvre ni la mise en garde, ni la liste, ni « Mettre à jour », ni « Annuler » 
+
+    Error: [2mexpect([22m[31mreceived[39m[2m).[22mtoEqual[2m([22m[32mexpected[39m[2m) // deep equality[22m
+
+    [32m- Expected  - 1[39m
+    [31m+ Received  + 1[39m
+
+    [2m  Object {[22m
+    [32m-   "aDroite": true,[39m
+    [31m+   "aDroite": false,[39m
+    [2m    "couvreI": false,[22m
+    [2m    "couvreListe": false,[22m
+    [2m    "couvreMiseEnGarde": false,[22m
+    [2m  }[22m
+
+      201 |     if (largeur >= 1180) {
+      202 |         expect({ aDroite: g.aDroite, couvreMiseEnGarde: g.couvreMiseEnGarde, couvreListe: g.couvreListe, couvreI: g.couvreI })
+    > 203 |             .toEqual({ aDroite: true, couvreMiseEnGarde: false, couvreListe: false, couvreI: false });
+          |              ^
+      204 |         // Ce qui est couvert se voit aussi au toucher : le milieu de chacun répond, pas la bulle.
+      205 |         const libres = await page.evaluate(() => ['.export-preview-note', '.export-preview-liste', '.btn-confirmer', '.btn-annuler']
+      206 |             .map((s) => {
+        at bulleSurLApercuSansCouvrirSesBoutons (/Users/kuekatsheu/Documents/GitHub/labo-codex-fleches-apercu/tests/integration/parcours-6-donnees-a-l-abri-2026-11-09.spec.js:203:14)
+        at /Users/kuekatsheu/Documents/GitHub/labo-codex-fleches-apercu/tests/integration/parcours-6-donnees-a-l-abri-2026-11-09.spec.js:483:9
+
+    Error Context: ../plans de travail/diag-2026-11-11-ipad/6-results-parcours-6-donnees-a-l-abri-2026-11-09/parcours-6-donnees-a-l-abr-900fd-tre-à-jour-»-ni-«-Annuler-»-webkit/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    ../plans de travail/diag-2026-11-11-ipad/6-results-parcours-6-donnees-a-l-abri-2026-11-09/parcours-6-donnees-a-l-abr-900fd-tre-à-jour-»-ni-«-Annuler-»-webkit/trace.zip
+    Usage:
+
+        npx playwright show-trace "../plans de travail/diag-2026-11-11-ipad/6-results-parcours-6-donnees-a-l-abri-2026-11-09/parcours-6-donnees-a-l-abr-900fd-tre-à-jour-»-ni-«-Annuler-»-webkit/trace.zip"
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  8) [webkit] › integration/parcours-6-donnees-a-l-abri-2026-11-09.spec.js:492:1 › 1180 × 820 (iPad à l’horizontale), fenêtre de choix : la bulle 3 à droite de l’aperçu, sans rien en couvrir 
+
+    Error: [2mexpect([22m[31mreceived[39m[2m).[22mtoEqual[2m([22m[32mexpected[39m[2m) // deep equality[22m
+
+    [32m- Expected  - 1[39m
+    [31m+ Received  + 1[39m
+
+    [2m  Object {[22m
+    [32m-   "aDroite": true,[39m
+    [31m+   "aDroite": false,[39m
+    [2m    "couvreI": false,[22m
+    [2m    "couvreListe": false,[22m
+    [2m    "couvreMiseEnGarde": false,[22m
+    [2m  }[22m
+
+      201 |     if (largeur >= 1180) {
+      202 |         expect({ aDroite: g.aDroite, couvreMiseEnGarde: g.couvreMiseEnGarde, couvreListe: g.couvreListe, couvreI: g.couvreI })
+    > 203 |             .toEqual({ aDroite: true, couvreMiseEnGarde: false, couvreListe: false, couvreI: false });
+          |              ^
+      204 |         // Ce qui est couvert se voit aussi au toucher : le milieu de chacun répond, pas la bulle.
+      205 |         const libres = await page.evaluate(() => ['.export-preview-note', '.export-preview-liste', '.btn-confirmer', '.btn-annuler']
+      206 |             .map((s) => {
+        at bulleSurLApercuSansCouvrirSesBoutons (/Users/kuekatsheu/Documents/GitHub/labo-codex-fleches-apercu/tests/integration/parcours-6-donnees-a-l-abri-2026-11-09.spec.js:203:14)
+        at /Users/kuekatsheu/Documents/GitHub/labo-codex-fleches-apercu/tests/integration/parcours-6-donnees-a-l-abri-2026-11-09.spec.js:496:5
+
+    Error Context: ../plans de travail/diag-2026-11-11-ipad/6-results-parcours-6-donnees-a-l-abri-2026-11-09/parcours-6-donnees-a-l-abr-9fb9a-aperçu-sans-rien-en-couvrir-webkit/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    ../plans de travail/diag-2026-11-11-ipad/6-results-parcours-6-donnees-a-l-abri-2026-11-09/parcours-6-donnees-a-l-abr-9fb9a-aperçu-sans-rien-en-couvrir-webkit/trace.zip
+    Usage:
+
+        npx playwright show-trace "../plans de travail/diag-2026-11-11-ipad/6-results-parcours-6-donnees-a-l-abri-2026-11-09/parcours-6-donnees-a-l-abr-9fb9a-aperçu-sans-rien-en-couvrir-webkit/trace.zip"
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  8 failed
+    [webkit] › integration/parcours-6-donnees-a-l-abri-2026-11-09.spec.js:326:5 › de bout en bout, fenêtre de choix (1180, sombre) : chaque étape sur l'état atteint ; « Ouvrir un codex… » sans effet ; le rappel attend ; « Refaire » dit le fichier tenu 
+    [webkit] › integration/parcours-6-donnees-a-l-abri-2026-11-09.spec.js:326:5 › de bout en bout, fenêtre de choix (1180, clair) : chaque étape sur l'état atteint ; « Ouvrir un codex… » sans effet ; le rappel attend ; « Refaire » dit le fichier tenu 
+    [webkit] › integration/parcours-6-donnees-a-l-abri-2026-11-09.spec.js:404:1 › feuille de partage, puis téléchargement et « Il y est » (1180, sombre) : la phrase du chemin ; la bulle cède la place à « Il y est » 
+    [webkit] › integration/parcours-6-donnees-a-l-abri-2026-11-09.spec.js:426:1 › des copies manquent (1180, sombre) : l’avertissement passe pendant l’étape 2, la phrase de la fenêtre perd celle de la réécriture 
+    [webkit] › integration/parcours-6-donnees-a-l-abri-2026-11-09.spec.js:468:5 › 1440 px, fenetre : la bulle 3 à droite de l'aperçu ne couvre ni la mise en garde, ni la liste, ni « Mettre à jour », ni « Annuler » 
+    [webkit] › integration/parcours-6-donnees-a-l-abri-2026-11-09.spec.js:468:5 › 1440 px, partage : la bulle 3 à droite de l'aperçu ne couvre ni la mise en garde, ni la liste, ni « Mettre à jour », ni « Annuler » 
+    [webkit] › integration/parcours-6-donnees-a-l-abri-2026-11-09.spec.js:468:5 › 1440 px, copies-manquantes : la bulle 3 à droite de l'aperçu ne couvre ni la mise en garde, ni la liste, ni « Mettre à jour », ni « Annuler » 
+    [webkit] › integration/parcours-6-donnees-a-l-abri-2026-11-09.spec.js:492:1 › 1180 × 820 (iPad à l’horizontale), fenêtre de choix : la bulle 3 à droite de l’aperçu, sans rien en couvrir 
+  6 passed (44.1s)

@@ -1,0 +1,53 @@
+
+Running 8 tests using 1 worker
+
+  ✓  1 [webkit] › integration/parcours-1-et-2-2026-11-08.spec.js:129:1 › menu : une seule entrée « Assistance », avant Aide, Signaler, Soutenir, Réglages ; le rang du parcours à venir (1.6s)
+  ✓  2 [webkit] › integration/parcours-1-et-2-2026-11-08.spec.js:140:1 › panneau : titre, phrase, « Tes parcours », les parcours à faire, l’aide dans les pages ; Échap, voile et bouton le ferment (2.7s)
+  ✓  3 [webkit] › integration/parcours-1-et-2-2026-11-08.spec.js:189:1 › « À propos » : le lien « Assistance » ouvre le panneau (1.4s)
+  ✘  4 [webkit] › integration/parcours-1-et-2-2026-11-08.spec.js:199:1 › « Découvrir » de bout en bout sur la démo, en faisant les gestes (1180 px) (8.3s)
+  ✓  5 [webkit] › integration/parcours-1-et-2-2026-11-08.spec.js:305:1 › « Quitter le parcours » referme la démo qu’il a ouverte, ramène où l’on était, puis « Reprendre » repart à la même étape (3.9s)
+  ✓  6 [webkit] › integration/parcours-1-et-2-2026-11-08.spec.js:339:1 › sentinelle : les chiffres des étapes 2 à 4 sont ceux du pack démo (sinon, revoir leurs textes) (2.1s)
+  ✓  7 [webkit] › integration/parcours-1-et-2-2026-11-08.spec.js:367:1 › iPhone (390 px) : les étapes 1, 5 et 8 ; la navigation passe par le bouton de section (3.9s)
+  -  8 [webkit] › integration/parcours-1-et-2-2026-11-08.spec.js:405:1 › captures du menu et du panneau : 1180 et 390 px, sombre et clair, trois états
+
+
+  1) [webkit] › integration/parcours-1-et-2-2026-11-08.spec.js:199:1 › « Découvrir » de bout en bout sur la démo, en faisant les gestes (1180 px) 
+
+    Error: étape 5 : une flèche va de la bulle à .navigation-boutons button[data-onglet="evaluations"]
+
+    étape 5 : une flèche va de la bulle à .navigation-boutons button[data-onglet="evaluations"]
+
+    [2mexpect([22m[31mreceived[39m[2m).[22mtoBe[2m([22m[32mexpected[39m[2m) // Object.is equality[22m
+
+    Expected: [32m"po[7msé[27me"[39m
+    Received: [31m"po[7mintes à 625 px de la cibl[27me"[39m
+
+    Call Log:
+    - Timeout 5000ms exceeded while waiting on the predicate
+
+       at harness/fleches-de-banc.js:58
+
+      56 |         }) || null;
+      57 |         return trouvee ? 'posée' : 'pointes à ' + e.fleches.map((f) => Math.round(distance(f.pointe, cible))).join(', ') + ' px de la cible';
+    > 58 |     }, { message: (contexte ? contexte + ' : ' : '') + 'une flèche va de la bulle à ' + sels.join(' + '), timeout: 5000 }).toBe('posée');
+         |                                                                                                                            ^
+      59 |     return trouvee;
+      60 | }
+      61 |
+        at flecheVers (/Users/kuekatsheu/Documents/GitHub/labo-codex-fleches-apercu/tests/integration/harness/fleches-de-banc.js:58:124)
+        at /Users/kuekatsheu/Documents/GitHub/labo-codex-fleches-apercu/tests/integration/parcours-1-et-2-2026-11-08.spec.js:251:11
+
+    Error Context: ../plans de travail/diag-2026-11-11-ipad/6-results-parcours-1-et-2-2026-11-08/parcours-1-et-2-2026-11-08-f896c-faisant-les-gestes-1180-px--webkit/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    ../plans de travail/diag-2026-11-11-ipad/6-results-parcours-1-et-2-2026-11-08/parcours-1-et-2-2026-11-08-f896c-faisant-les-gestes-1180-px--webkit/trace.zip
+    Usage:
+
+        npx playwright show-trace "../plans de travail/diag-2026-11-11-ipad/6-results-parcours-1-et-2-2026-11-08/parcours-1-et-2-2026-11-08-f896c-faisant-les-gestes-1180-px--webkit/trace.zip"
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  1 failed
+    [webkit] › integration/parcours-1-et-2-2026-11-08.spec.js:199:1 › « Découvrir » de bout en bout sur la démo, en faisant les gestes (1180 px) 
+  1 skipped
+  6 passed (25.3s)

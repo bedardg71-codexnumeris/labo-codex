@@ -1,0 +1,52 @@
+
+Running 4 tests using 1 worker
+
+  ✘  1 [webkit] › integration/parcours-4-recevoir-et-rendre-2026-11-09.spec.js:151:1 › « Recevoir les productions, rendre tes rétroactions », la voie des fichiers : deux remises (une à réunir), les tampons, le verrou, « Plus tard » et « Reprendre » à l’étape 8, l’export Léa (1180 px) (23.5s)
+  ✓  2 [webkit] › integration/parcours-4-recevoir-et-rendre-2026-11-09.spec.js:297:1 › « Recevoir les productions, rendre tes rétroactions », la voie sans fichier : « Rien à importer », « n sur 4 », retenue pour « Reprendre » et « Refaire » (1180 px) (32.0s)
+  ✓  3 [webkit] › integration/parcours-4-recevoir-et-rendre-2026-11-09.spec.js:350:1 › « Recevoir les productions, rendre tes rétroactions », étape 2 à 820 px (l’iPad en portrait) : la bulle sous les trois colonnes empilées et « Importer » (25.1s)
+  ✓  4 [webkit] › integration/parcours-4-recevoir-et-rendre-2026-11-09.spec.js:365:1 › « Recevoir les productions, rendre tes rétroactions » : sans production prête (la grille seule), le refus (7.6s)
+
+
+  1) [webkit] › integration/parcours-4-recevoir-et-rendre-2026-11-09.spec.js:151:1 › « Recevoir les productions, rendre tes rétroactions », la voie des fichiers : deux remises (une à réunir), les tampons, le verrou, « Plus tard » et « Reprendre » à l’étape 8, l’export Léa (1180 px) 
+
+    Error: [2mexpect([22m[31mlocator[39m[2m).[22mtoBeInViewport[2m([22m[2m)[22m failed
+
+    Locator:  locator('#section-suivi h4[data-tooltip="tdb-performance"]')
+    Expected: in viewport
+    Received: viewport ratio 0
+    Timeout:  5000ms
+
+    Call log:
+    [2m  - Expect "toBeInViewport" with timeout 5000ms[22m
+    [2m  - waiting for locator('#section-suivi h4[data-tooltip="tdb-performance"]')[22m
+    [2m    13 × locator resolved to <h4 class="tb-titre-simple" data-tooltip="tdb-performance">Performance (P)</h4>[22m
+    [2m       - unexpected value "viewport ratio 0"[22m
+
+
+       at harness/parcours-3-de-banc.js:233
+
+      231 |     await etape(page, 7, "Le point qui s'allume", { focus: false });
+      232 |     await expect(page.locator('#suivi-groupe')).toBeVisible();
+    > 233 |     await expect(page.locator('#section-suivi h4[data-tooltip="tdb-performance"]')).toBeInViewport();
+          |                                                                                     ^
+      234 |     await capture(page, DOSSIER, `p3-7-${cap}`);
+      235 |     await bulle(page).getByRole('button', { name: 'Continuer' }).click();
+      236 | }
+        at etape7 (/Users/kuekatsheu/Documents/GitHub/labo-codex-fleches-apercu/tests/integration/harness/parcours-3-de-banc.js:233:85)
+        at leParcoursEntier (/Users/kuekatsheu/Documents/GitHub/labo-codex-fleches-apercu/tests/integration/harness/parcours-3-de-banc.js:357:5)
+        at espaceDuTroisiemeParcours (/Users/kuekatsheu/Documents/GitHub/labo-codex-fleches-apercu/tests/integration/parcours-4-recevoir-et-rendre-2026-11-09.spec.js:129:5)
+        at /Users/kuekatsheu/Documents/GitHub/labo-codex-fleches-apercu/tests/integration/parcours-4-recevoir-et-rendre-2026-11-09.spec.js:154:17
+
+    Error Context: ../plans de travail/diag-2026-11-11-ipad/6-results-parcours-4-recevoir-et-rendre-2026-11-09/parcours-4-recevoir-et-ren-949c8-ape-8-l’export-Léa-1180-px--webkit/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    ../plans de travail/diag-2026-11-11-ipad/6-results-parcours-4-recevoir-et-rendre-2026-11-09/parcours-4-recevoir-et-ren-949c8-ape-8-l’export-Léa-1180-px--webkit/trace.zip
+    Usage:
+
+        npx playwright show-trace "../plans de travail/diag-2026-11-11-ipad/6-results-parcours-4-recevoir-et-rendre-2026-11-09/parcours-4-recevoir-et-ren-949c8-ape-8-l’export-Léa-1180-px--webkit/trace.zip"
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  1 failed
+    [webkit] › integration/parcours-4-recevoir-et-rendre-2026-11-09.spec.js:151:1 › « Recevoir les productions, rendre tes rétroactions », la voie des fichiers : deux remises (une à réunir), les tampons, le verrou, « Plus tard » et « Reprendre » à l’étape 8, l’export Léa (1180 px) 
+  3 passed (1.5m)

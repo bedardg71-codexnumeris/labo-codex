@@ -1,0 +1,82 @@
+commit 24fdc8c65 · 06:06:18
+System-wide memory free percentage: 74%
+
+Running 6 tests using 1 worker
+
+  ✓  1 [webkit] › integration/parcours-fleches-2026-11-10.spec.js:321:1 › la poignée au clavier : les flèches déplacent la bulle de 16 px sans changer de page de bulle ; sur la bulle, elles changent de page (2.3s)
+  ✘  2 [webkit] › integration/parcours-fleches-2026-11-10.spec.js:321:1 › la poignée au clavier : les flèches déplacent la bulle de 16 px sans changer de page de bulle ; sur la bulle, elles changent de page (2.4s)
+  ✘  3 [webkit] › integration/parcours-fleches-2026-11-10.spec.js:321:1 › la poignée au clavier : les flèches déplacent la bulle de 16 px sans changer de page de bulle ; sur la bulle, elles changent de page (2.3s)
+  ✓  4 [webkit] › integration/parcours-fleches-2026-11-10.spec.js:321:1 › la poignée au clavier : les flèches déplacent la bulle de 16 px sans changer de page de bulle ; sur la bulle, elles changent de page (2.3s)
+  ✓  5 [webkit] › integration/parcours-fleches-2026-11-10.spec.js:321:1 › la poignée au clavier : les flèches déplacent la bulle de 16 px sans changer de page de bulle ; sur la bulle, elles changent de page (2.4s)
+  ✓  6 [webkit] › integration/parcours-fleches-2026-11-10.spec.js:321:1 › la poignée au clavier : les flèches déplacent la bulle de 16 px sans changer de page de bulle ; sur la bulle, elles changent de page (2.3s)
+
+
+  1) [webkit] › integration/parcours-fleches-2026-11-10.spec.js:321:1 › la poignée au clavier : les flèches déplacent la bulle de 16 px sans changer de page de bulle ; sur la bulle, elles changent de page 
+
+    Error: [2mexpect([22m[31mreceived[39m[2m).[22mtoEqual[2m([22m[32mexpected[39m[2m) // deep equality[22m
+
+    [32m- Expected  - 1[39m
+    [31m+ Received  + 1[39m
+
+    [2m  Array [[22m
+    [2m    32,[22m
+    [32m-   16,[39m
+    [31m+   15,[39m
+    [2m  ][22m
+
+      337 |     await page.keyboard.press('ArrowDown');
+      338 |     const b1 = await rectDe(page, '#parcours-bulle');
+    > 339 |     expect([Math.round(b1.left - b0.left), Math.round(b1.top - b0.top)]).toEqual([32, 16]);
+          |                                                                          ^
+      340 |     await page.keyboard.press('ArrowLeft');
+      341 |     await page.keyboard.press('ArrowUp');
+      342 |     const b2 = await rectDe(page, '#parcours-bulle');
+        at /Users/kuekatsheu/Documents/GitHub/labo-codex-fleches-apercu/tests/integration/parcours-fleches-2026-11-10.spec.js:339:74
+
+    Error Context: ../plans de travail/diag-2026-11-11-deux-rouges/b-results/parcours-fleches-2026-11-1-368de-ulle-elles-changent-de-page-webkit-repeat1/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    ../plans de travail/diag-2026-11-11-deux-rouges/b-results/parcours-fleches-2026-11-1-368de-ulle-elles-changent-de-page-webkit-repeat1/trace.zip
+    Usage:
+
+        npx playwright show-trace "../plans de travail/diag-2026-11-11-deux-rouges/b-results/parcours-fleches-2026-11-1-368de-ulle-elles-changent-de-page-webkit-repeat1/trace.zip"
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  2) [webkit] › integration/parcours-fleches-2026-11-10.spec.js:321:1 › la poignée au clavier : les flèches déplacent la bulle de 16 px sans changer de page de bulle ; sur la bulle, elles changent de page 
+
+    Error: [2mexpect([22m[31mreceived[39m[2m).[22mtoEqual[2m([22m[32mexpected[39m[2m) // deep equality[22m
+
+    [32m- Expected  - 1[39m
+    [31m+ Received  + 1[39m
+
+    [2m  Array [[22m
+    [2m    32,[22m
+    [32m-   16,[39m
+    [31m+   15,[39m
+    [2m  ][22m
+
+      337 |     await page.keyboard.press('ArrowDown');
+      338 |     const b1 = await rectDe(page, '#parcours-bulle');
+    > 339 |     expect([Math.round(b1.left - b0.left), Math.round(b1.top - b0.top)]).toEqual([32, 16]);
+          |                                                                          ^
+      340 |     await page.keyboard.press('ArrowLeft');
+      341 |     await page.keyboard.press('ArrowUp');
+      342 |     const b2 = await rectDe(page, '#parcours-bulle');
+        at /Users/kuekatsheu/Documents/GitHub/labo-codex-fleches-apercu/tests/integration/parcours-fleches-2026-11-10.spec.js:339:74
+
+    Error Context: ../plans de travail/diag-2026-11-11-deux-rouges/b-results/parcours-fleches-2026-11-1-368de-ulle-elles-changent-de-page-webkit-repeat2/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    ../plans de travail/diag-2026-11-11-deux-rouges/b-results/parcours-fleches-2026-11-1-368de-ulle-elles-changent-de-page-webkit-repeat2/trace.zip
+    Usage:
+
+        npx playwright show-trace "../plans de travail/diag-2026-11-11-deux-rouges/b-results/parcours-fleches-2026-11-1-368de-ulle-elles-changent-de-page-webkit-repeat2/trace.zip"
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  2 failed
+    [webkit] › integration/parcours-fleches-2026-11-10.spec.js:321:1 › la poignée au clavier : les flèches déplacent la bulle de 16 px sans changer de page de bulle ; sur la bulle, elles changent de page 
+    [webkit] › integration/parcours-fleches-2026-11-10.spec.js:321:1 › la poignée au clavier : les flèches déplacent la bulle de 16 px sans changer de page de bulle ; sur la bulle, elles changent de page 
+  4 passed (16.8s)
+System-wide memory free percentage: 73%

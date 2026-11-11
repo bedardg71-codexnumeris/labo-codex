@@ -28,6 +28,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { chargerScript } from './_helpers/charger-script.js';
 import { tranche } from './_helpers/tranche.js';
+import { TOUS as GESTES_PROPOSES } from './_helpers/gestes-proposes-2026-11-11.js';
 
 const racine = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..');
 const lire = (f) => readFileSync(path.join(racine, f), 'utf8');
@@ -81,13 +82,14 @@ describe('le neuvième parcours : les onze bulles et le panneau, mot pour mot', 
         expect(CONSIGNE).toContain(`Texte : « ${P.TEXTES[id].texte} »`);
     });
 
-    it.each(ORDRE.filter((id) => P.TEXTES[id].geste))('%s : le geste est celui de la consigne', (id) => {
+    it.each(ORDRE.filter((id) => P.TEXTES[id].geste))('%s : le geste est celui de la consigne, ou proposé le 11 nov. 2026', (id) => {
+        if (GESTES_PROPOSES.includes(P.TEXTES[id].geste)) return;
         expect(CONSIGNE).toContain(`Geste : « ${P.TEXTES[id].geste} »`);
     });
 
-    it('les étapes 7 et 8 n’ont pas de geste (la consigne n’en donne pas)', () => {
-        expect(P.TEXTES.synthese.geste).toBeUndefined();
-        expect(P.TEXTES['plus-loin'].geste).toBeUndefined();
+    it('les étapes 7 et 8 : la consigne n’en donnait pas ; leurs gestes sont ceux proposés le 11 nov. 2026', () => {
+        expect(GESTES_PROPOSES).toContain(P.TEXTES.synthese.geste);
+        expect(GESTES_PROPOSES).toContain(P.TEXTES['plus-loin'].geste);
     });
 
     it('le panneau : neuvième, son titre, sa ligne, son refus', () => {

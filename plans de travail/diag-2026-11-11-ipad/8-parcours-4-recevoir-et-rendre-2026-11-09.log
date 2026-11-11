@@ -1,0 +1,9 @@
+
+Running 4 tests using 1 worker
+
+  ✓  1 [webkit] › integration/parcours-4-recevoir-et-rendre-2026-11-09.spec.js:151:1 › « Recevoir les productions, rendre tes rétroactions », la voie des fichiers : deux remises (une à réunir), les tampons, le verrou, « Plus tard » et « Reprendre » à l’étape 8, l’export Léa (1180 px) (37.1s)
+  ✓  2 [webkit] › integration/parcours-4-recevoir-et-rendre-2026-11-09.spec.js:297:1 › « Recevoir les productions, rendre tes rétroactions », la voie sans fichier : « Rien à importer », « n sur 4 », retenue pour « Reprendre » et « Refaire » (1180 px) (32.0s)
+  ✓  3 [webkit] › integration/parcours-4-recevoir-et-rendre-2026-11-09.spec.js:350:1 › « Recevoir les productions, rendre tes rétroactions », étape 2 à 820 px (l’iPad en portrait) : la bulle sous les trois colonnes empilées et « Importer » (25.0s)
+  ✓  4 [webkit] › integration/parcours-4-recevoir-et-rendre-2026-11-09.spec.js:365:1 › « Recevoir les productions, rendre tes rétroactions » : sans production prête (la grille seule), le refus (8.4s)
+
+  4 passed (1.7m)

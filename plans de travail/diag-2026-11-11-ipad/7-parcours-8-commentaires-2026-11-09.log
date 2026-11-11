@@ -1,0 +1,208 @@
+
+Running 15 tests using 1 worker
+
+  ✓   1 [webkit] › integration/parcours-8-commentaires-2026-11-09.spec.js:190:1 › panneau : sans production avec sa grille, « Commencer » ne lance rien et le panneau dit pourquoi (2.5s)
+  ✓   2 [webkit] › integration/parcours-8-commentaires-2026-11-09.spec.js:203:1 › panneau : la démo et un service d’orthopédagogie font refuser ; avec une production et sa grille, le parcours part sur Conception › Grilles (2.8s)
+  ✓   3 [webkit] › integration/parcours-8-commentaires-2026-11-09.spec.js:329:1 › étape 1, sans voile : le « Type » d’un critère déjà là ne répond pas (rien ne s’écrit, l’étape n’avance pas) ; celui du critère ajouté, oui (3.4s)
+  ✘   4 [webkit] › integration/parcours-8-commentaires-2026-11-09.spec.js:517:1 › de bout en bout, avec fichier : une grille neuve, deux codes posés, la rétroaction s’écrit seule ; le verrou mène à la fin (2.0m)
+  ✓   5 [webkit] › integration/parcours-8-commentaires-2026-11-09.spec.js:527:1 › l’étape 8 sautée : la production associée à l’étape 7 a déjà ses fichiers (8 sur 10) ; une grille restée ouverte au lancement n’est pas celle du parcours (5.9s)
+  ✘   6 [webkit] › integration/parcours-8-commentaires-2026-11-09.spec.js:549:1 › 820 px : aucun avis ne couvre la bulle, l’orange de la grille restant affiché de l’étape 7 à la fin (3.0m)
+  ✓   7 [webkit] › integration/parcours-8-commentaires-2026-11-09.spec.js:560:1 › 1180 × 820 : aucun avis ne couvre la bulle, même quand aucun coin ne la laisse libre (14.2s)
+  ✓   8 [webkit] › integration/parcours-8-commentaires-2026-11-09.spec.js:576:1 › 820 × 600 : un orange affiché avant le lancement ne couvre pas la bulle (1.8s)
+  ✓   9 [webkit] › integration/parcours-8-commentaires-2026-11-09.spec.js:600:1 › pendant un parcours, l’aide dans les pages se tait (bulle de découverte, flèche, infobulle) ; hors parcours, elle parle (3.8s)
+  -  10 [webkit] › integration/parcours-8-commentaires-2026-11-09.spec.js:658:5 › captures : le chemin avec fichier à 1180 px, sombre
+  -  11 [webkit] › integration/parcours-8-commentaires-2026-11-09.spec.js:658:5 › captures : le chemin avec fichier à 1180 px, clair
+  -  12 [webkit] › integration/parcours-8-commentaires-2026-11-09.spec.js:658:5 › captures : le chemin avec fichier à 820 px, sombre
+  -  13 [webkit] › integration/parcours-8-commentaires-2026-11-09.spec.js:658:5 › captures : le chemin avec fichier à 390 px, sombre
+  ✓  14 [webkit] › integration/parcours-8-commentaires-2026-11-09.spec.js:793:1 › sans fichier, sur une grille déjà employée : l’étape 7 sautée hors du compte, « Plus tard », un rechargement puis « Reprendre », « Rien à importer » ; un verrou d’avant ne fait pas avancer (10.2s)
+  -  15 [webkit] › integration/parcours-8-commentaires-2026-11-09.spec.js:799:1 › captures : le chemin sans fichier à 1180 px, sombre
+
+
+  1) [webkit] › integration/parcours-8-commentaires-2026-11-09.spec.js:517:1 › de bout en bout, avec fichier : une grille neuve, deux codes posés, la rétroaction s’écrit seule ; le verrou mène à la fin 
+
+    [31mTest timeout of 120000ms exceeded.[39m
+
+    Error: locator.click: Test timeout of 120000ms exceeded.
+    Call log:
+    [2m  - waiting for locator('#travaux-btn-actions').first()[22m
+    [2m    - locator resolved to <button id="travaux-btn-actions" class="travaux-btn-action">Annoter ▾</button>[22m
+    [2m  - attempting click action[22m
+    [2m    2 × waiting for element to be visible, enabled and stable[22m
+    [2m      - element is visible, enabled and stable[22m
+    [2m      - scrolling into view if needed[22m
+    [2m      - done scrolling[22m
+    [2m      - <span data-page="0" class="parcours-bulle-page">Dans la liste, touche « Actions › Annoter » sur l…</span> from <div role="dialog" tabindex="-1" aria-modal="false" id="parcours-bulle" class="parcours-bulle" aria-labelledby="parcours-bulle-titre">…</div> subtree intercepts pointer events[22m
+    [2m    - retrying click action[22m
+    [2m    - waiting 20ms[22m
+    [2m    - waiting for element to be visible, enabled and stable[22m
+    [2m    - element is visible, enabled and stable[22m
+    [2m    - scrolling into view if needed[22m
+    [2m    - done scrolling[22m
+    [2m    - <span data-page="0" class="parcours-bulle-page">Dans la liste, touche « Actions › Annoter » sur l…</span> from <div role="dialog" tabindex="-1" aria-modal="false" id="parcours-bulle" class="parcours-bulle" aria-labelledby="parcours-bulle-titre">…</div> subtree intercepts pointer events[22m
+    [2m  2 × retrying click action[22m
+    [2m      - waiting 100ms[22m
+    [2m      - waiting for element to be visible, enabled and stable[22m
+    [2m      - element is visible, enabled and stable[22m
+    [2m      - scrolling into view if needed[22m
+    [2m      - done scrolling[22m
+    [2m      - <div role="dialog" tabindex="-1" aria-modal="false" id="parcours-bulle" class="parcours-bulle" aria-labelledby="parcours-bulle-titre">…</div> intercepts pointer events[22m
+    [2m  48 × retrying click action[22m
+    [2m       - waiting 500ms[22m
+    [2m       - waiting for element to be visible, enabled and stable[22m
+    [2m       - element is visible, enabled and stable[22m
+    [2m       - scrolling into view if needed[22m
+    [2m       - done scrolling[22m
+    [2m       - <span data-page="0" class="parcours-bulle-page">Dans la liste, touche « Actions › Annoter » sur l…</span> from <div role="dialog" tabindex="-1" aria-modal="false" id="parcours-bulle" class="parcours-bulle" aria-labelledby="parcours-bulle-titre">…</div> subtree intercepts pointer events[22m
+    [2m     - retrying click action[22m
+    [2m       - waiting 500ms[22m
+    [2m       - waiting for element to be visible, enabled and stable[22m
+    [2m       - element is visible, enabled and stable[22m
+    [2m       - scrolling into view if needed[22m
+    [2m       - done scrolling[22m
+    [2m       - <span data-page="0" class="parcours-bulle-page">Dans la liste, touche « Actions › Annoter » sur l…</span> from <div role="dialog" tabindex="-1" aria-modal="false" id="parcours-bulle" class="parcours-bulle" aria-labelledby="parcours-bulle-titre">…</div> subtree intercepts pointer events[22m
+    [2m     - retrying click action[22m
+    [2m       - waiting 500ms[22m
+    [2m       - waiting for element to be visible, enabled and stable[22m
+    [2m       - element is visible, enabled and stable[22m
+    [2m       - scrolling into view if needed[22m
+    [2m       - done scrolling[22m
+    [2m       - <div role="dialog" tabindex="-1" aria-modal="false" id="parcours-bulle" class="parcours-bulle" aria-labelledby="parcours-bulle-titre">…</div> intercepts pointer events[22m
+    [2m     - retrying click action[22m
+    [2m       - waiting 500ms[22m
+    [2m       - waiting for element to be visible, enabled and stable[22m
+    [2m       - element is visible, enabled and stable[22m
+    [2m       - scrolling into view if needed[22m
+    [2m       - done scrolling[22m
+    [2m       - <div role="dialog" tabindex="-1" aria-modal="false" id="parcours-bulle" class="parcours-bulle" aria-labelledby="parcours-bulle-titre">…</div> intercepts pointer events[22m
+    [2m  2 × retrying click action[22m
+    [2m      - waiting 500ms[22m
+    [2m      - waiting for element to be visible, enabled and stable[22m
+    [2m      - element is visible, enabled and stable[22m
+    [2m      - scrolling into view if needed[22m
+    [2m      - done scrolling[22m
+    [2m      - <span data-page="0" class="parcours-bulle-page">Dans la liste, touche « Actions › Annoter » sur l…</span> from <div role="dialog" tabindex="-1" aria-modal="false" id="parcours-bulle" class="parcours-bulle" aria-labelledby="parcours-bulle-titre">…</div> subtree intercepts pointer events[22m
+    [2m  - retrying click action[22m
+    [2m    - waiting 500ms[22m
+    [2m    - waiting for element to be visible, enabled and stable[22m
+    [2m    - element is visible, enabled and stable[22m
+    [2m    - scrolling into view if needed[22m
+    [2m    - done scrolling[22m
+    [2m    - <div role="dialog" tabindex="-1" aria-modal="false" id="parcours-bulle" class="parcours-bulle" aria-labelledby="parcours-bulle-titre">…</div> intercepts pointer events[22m
+    [2m  - retrying click action[22m
+    [2m    - waiting 500ms[22m
+
+
+      268 | async function toucher(page, cible) {
+      269 |     const loc = typeof cible === 'string' ? page.locator(cible).first() : cible;
+    > 270 |     if (page.viewportSize().width >= 800) { await loc.click(); return; }
+          |                                                       ^
+      271 |     await loc.scrollIntoViewIfNeeded();
+      272 |     const libre = await loc.evaluate((el) => {
+      273 |         const r = el.getBoundingClientRect();
+        at toucher (/Users/kuekatsheu/Documents/GitHub/labo-codex-fleches-apercu/tests/integration/parcours-8-commentaires-2026-11-09.spec.js:270:55)
+        at finirLeCheminAvecFichier (/Users/kuekatsheu/Documents/GitHub/labo-codex-fleches-apercu/tests/integration/parcours-8-commentaires-2026-11-09.spec.js:482:11)
+        at /Users/kuekatsheu/Documents/GitHub/labo-codex-fleches-apercu/tests/integration/parcours-8-commentaires-2026-11-09.spec.js:522:5
+
+    Error Context: ../plans de travail/diag-2026-11-11-ipad/7-results-parcours-8-commentaires-2026-11-09/parcours-8-commentaires-20-e3aa9-ule-le-verrou-mène-à-la-fin-webkit/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    ../plans de travail/diag-2026-11-11-ipad/7-results-parcours-8-commentaires-2026-11-09/parcours-8-commentaires-20-e3aa9-ule-le-verrou-mène-à-la-fin-webkit/trace.zip
+    Usage:
+
+        npx playwright show-trace "../plans de travail/diag-2026-11-11-ipad/7-results-parcours-8-commentaires-2026-11-09/parcours-8-commentaires-20-e3aa9-ule-le-verrou-mène-à-la-fin-webkit/trace.zip"
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  2) [webkit] › integration/parcours-8-commentaires-2026-11-09.spec.js:549:1 › 820 px : aucun avis ne couvre la bulle, l’orange de la grille restant affiché de l’étape 7 à la fin 
+
+    [31mTest timeout of 180000ms exceeded.[39m
+
+    Error: locator.click: Test timeout of 180000ms exceeded.
+    Call log:
+    [2m  - waiting for locator('#travaux-btn-actions').first()[22m
+    [2m    - locator resolved to <button id="travaux-btn-actions" class="travaux-btn-action">Annoter ▾</button>[22m
+    [2m  - attempting click action[22m
+    [2m    2 × waiting for element to be visible, enabled and stable[22m
+    [2m      - element is visible, enabled and stable[22m
+    [2m      - scrolling into view if needed[22m
+    [2m      - done scrolling[22m
+    [2m      - <span data-page="0" class="parcours-bulle-page">Dans la liste, touche « Actions › Annoter » sur l…</span> from <div role="dialog" tabindex="-1" aria-modal="false" id="parcours-bulle" class="parcours-bulle" aria-labelledby="parcours-bulle-titre">…</div> subtree intercepts pointer events[22m
+    [2m    - retrying click action[22m
+    [2m    - waiting 20ms[22m
+    [2m    - waiting for element to be visible, enabled and stable[22m
+    [2m    - element is visible, enabled and stable[22m
+    [2m    - scrolling into view if needed[22m
+    [2m    - done scrolling[22m
+    [2m    - <span data-page="0" class="parcours-bulle-page">Dans la liste, touche « Actions › Annoter » sur l…</span> from <div role="dialog" tabindex="-1" aria-modal="false" id="parcours-bulle" class="parcours-bulle" aria-labelledby="parcours-bulle-titre">…</div> subtree intercepts pointer events[22m
+    [2m  2 × retrying click action[22m
+    [2m      - waiting 100ms[22m
+    [2m      - waiting for element to be visible, enabled and stable[22m
+    [2m      - element is visible, enabled and stable[22m
+    [2m      - scrolling into view if needed[22m
+    [2m      - done scrolling[22m
+    [2m      - <div role="dialog" tabindex="-1" aria-modal="false" id="parcours-bulle" class="parcours-bulle" aria-labelledby="parcours-bulle-titre">…</div> intercepts pointer events[22m
+    [2m  75 × retrying click action[22m
+    [2m       - waiting 500ms[22m
+    [2m       - waiting for element to be visible, enabled and stable[22m
+    [2m       - element is visible, enabled and stable[22m
+    [2m       - scrolling into view if needed[22m
+    [2m       - done scrolling[22m
+    [2m       - <span data-page="0" class="parcours-bulle-page">Dans la liste, touche « Actions › Annoter » sur l…</span> from <div role="dialog" tabindex="-1" aria-modal="false" id="parcours-bulle" class="parcours-bulle" aria-labelledby="parcours-bulle-titre">…</div> subtree intercepts pointer events[22m
+    [2m     - retrying click action[22m
+    [2m       - waiting 500ms[22m
+    [2m       - waiting for element to be visible, enabled and stable[22m
+    [2m       - element is visible, enabled and stable[22m
+    [2m       - scrolling into view if needed[22m
+    [2m       - done scrolling[22m
+    [2m       - <span data-page="0" class="parcours-bulle-page">Dans la liste, touche « Actions › Annoter » sur l…</span> from <div role="dialog" tabindex="-1" aria-modal="false" id="parcours-bulle" class="parcours-bulle" aria-labelledby="parcours-bulle-titre">…</div> subtree intercepts pointer events[22m
+    [2m     - retrying click action[22m
+    [2m       - waiting 500ms[22m
+    [2m       - waiting for element to be visible, enabled and stable[22m
+    [2m       - element is visible, enabled and stable[22m
+    [2m       - scrolling into view if needed[22m
+    [2m       - done scrolling[22m
+    [2m       - <div role="dialog" tabindex="-1" aria-modal="false" id="parcours-bulle" class="parcours-bulle" aria-labelledby="parcours-bulle-titre">…</div> intercepts pointer events[22m
+    [2m     - retrying click action[22m
+    [2m       - waiting 500ms[22m
+    [2m       - waiting for element to be visible, enabled and stable[22m
+    [2m       - element is visible, enabled and stable[22m
+    [2m       - scrolling into view if needed[22m
+    [2m       - done scrolling[22m
+    [2m       - <div role="dialog" tabindex="-1" aria-modal="false" id="parcours-bulle" class="parcours-bulle" aria-labelledby="parcours-bulle-titre">…</div> intercepts pointer events[22m
+    [2m  - retrying click action[22m
+    [2m    - waiting 500ms[22m
+    [2m    - waiting for element to be visible, enabled and stable[22m
+    [2m    - element is visible, enabled and stable[22m
+    [2m    - scrolling into view if needed[22m
+    [2m    - done scrolling[22m
+    [2m    - <span data-page="0" class="parcours-bulle-page">Dans la liste, touche « Actions › Annoter » sur l…</span> from <div role="dialog" tabindex="-1" aria-modal="false" id="parcours-bulle" class="parcours-bulle" aria-labelledby="parcours-bulle-titre">…</div> subtree intercepts pointer events[22m
+    [2m  - retrying click action[22m
+    [2m    - waiting 500ms[22m
+
+
+      268 | async function toucher(page, cible) {
+      269 |     const loc = typeof cible === 'string' ? page.locator(cible).first() : cible;
+    > 270 |     if (page.viewportSize().width >= 800) { await loc.click(); return; }
+          |                                                       ^
+      271 |     await loc.scrollIntoViewIfNeeded();
+      272 |     const libre = await loc.evaluate((el) => {
+      273 |         const r = el.getBoundingClientRect();
+        at toucher (/Users/kuekatsheu/Documents/GitHub/labo-codex-fleches-apercu/tests/integration/parcours-8-commentaires-2026-11-09.spec.js:270:55)
+        at finirLeCheminAvecFichier (/Users/kuekatsheu/Documents/GitHub/labo-codex-fleches-apercu/tests/integration/parcours-8-commentaires-2026-11-09.spec.js:482:11)
+        at /Users/kuekatsheu/Documents/GitHub/labo-codex-fleches-apercu/tests/integration/parcours-8-commentaires-2026-11-09.spec.js:553:5
+
+    Error Context: ../plans de travail/diag-2026-11-11-ipad/7-results-parcours-8-commentaires-2026-11-09/parcours-8-commentaires-20-00d12-fiché-de-l’étape-7-à-la-fin-webkit/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    ../plans de travail/diag-2026-11-11-ipad/7-results-parcours-8-commentaires-2026-11-09/parcours-8-commentaires-20-00d12-fiché-de-l’étape-7-à-la-fin-webkit/trace.zip
+    Usage:
+
+        npx playwright show-trace "../plans de travail/diag-2026-11-11-ipad/7-results-parcours-8-commentaires-2026-11-09/parcours-8-commentaires-20-00d12-fiché-de-l’étape-7-à-la-fin-webkit/trace.zip"
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  2 failed
+    [webkit] › integration/parcours-8-commentaires-2026-11-09.spec.js:517:1 › de bout en bout, avec fichier : une grille neuve, deux codes posés, la rétroaction s’écrit seule ; le verrou mène à la fin 
+    [webkit] › integration/parcours-8-commentaires-2026-11-09.spec.js:549:1 › 820 px : aucun avis ne couvre la bulle, l’orange de la grille restant affiché de l’étape 7 à la fin 
+  5 skipped
+  8 passed (5.9m)

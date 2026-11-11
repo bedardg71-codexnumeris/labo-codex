@@ -10,6 +10,7 @@ import {
     etiqueterExemple, choisirDesNiveaux
 } from './classe-de-banc.js';
 import { attendreApplication } from './attendre-application.js';
+import { flecheVers, nombreDeFleches, flecheVisant } from './fleches-de-banc.js';
 
 let DOSSIER = process.env.CAPTURES_PARCOURS || '';
 /** Le dossier des captures (vide : aucune). */
@@ -26,11 +27,11 @@ const TEXTE_CHOIX = "Ta grille porte des points et des niveaux. Le résultat d'u
 const REFUS = 'Commence par « Mettre ta classe en place » : il faut une classe pour évaluer une production.';
 
 /** Une option du menu « Actions… » de la Liste, choisie comme une personne la choisit. */
-async function actionDeLaListe(page, valeur) {
+export async function actionDeLaListe(page, valeur) {
     await page.locator('#evaluations-liste select.eval-actions-select', { has: page.locator(`option[value="${valeur}"]`) }).selectOption(valeur);
 }
 
-async function valeursActions(page, fragment) {
+export async function valeursActions(page, fragment) {
     return page.evaluate((f) => [...document.querySelectorAll('#evaluations-liste select.eval-actions-select option')]
         .map((o) => o.value).filter((v) => v.includes(f)), fragment);
 }
@@ -50,7 +51,7 @@ async function lePanneauSansClasse(page, cap) {
 }
 
 /** Étape 1 : la grille, de l'accueil de Mon matériel au choix, puis « Créer ma grille ». */
-async function etape1(page, { niveaux, cap }) {
+export async function etape1(page, { niveaux, cap }) {
     await etape(page, 1, 'Ta grille');
     await expect(page.locator('#conception-materiel')).toBeVisible();
     await contourSur(page, '#materiel-zone-collage');
@@ -68,50 +69,67 @@ async function etape1(page, { niveaux, cap }) {
 }
 
 /** Sur la fiche, la bulle ne couvre jamais les menus « Grille de critères d'évaluation » ni « Échelle » (9 nov., 13 h 37). */
-async function menusLibres(page, contexte) {
+export async function menusLibres(page, contexte) {
     for (const id of ['productionGrille', 'productionEchelle']) await bulleNeCouvrePas(page, `#champGrille .groupe-form:has(#${id})`, contexte);
 }
 
+const GROUPE_GRILLE = '#champGrille .groupe-form:has(#productionGrille)';
+const GROUPE_ECHELLE = '#champGrille .groupe-form:has(#productionEchelle)';
+
 /**
- * Étape 2 : la production, champ par champ (le contour suit), puis « Créer la production ». Une grille à niveaux a son
- * échelle (celle que Mon matériel a créée avec elle) : le contour passe par le menu « Échelle », et la fiche la reçoit,
- * sauf dans l'essai où on la laisse vide (`echelleVide`). Une grille en points n'en a pas : le contour saute le menu.
+ * Étape 2 : la règle des formulaires (11 nov. 2026, 9 h 35, capture 16) : une flèche par champ obligatoire encore vide
+ * (le nom, le type, la pondération), le halo sur « Créer la production » ; les trois remplis, une flèche à la grille, puis,
+ * la grille choisie, à « Échelle de performance » tant qu'elle est à « Aucune » et que la grille se note par niveaux. La
+ * fiche reçoit l'échelle, sauf dans l'essai où on la laisse vide (`echelleVide`). Une grille en points n'en demande pas.
+ * `grilleId` : la grille à choisir (par défaut, celle que le parcours a vu naître) ; `nomEchelle` : celle à choisir.
  */
-async function etape2(page, { cap, niveaux, echelleVide }) {
+export async function etape2(page, { cap, niveaux, echelleVide, grilleId = null, nomEchelle = /Journal de lecture/ }) {
     await etape(page, 2, 'Ta production', { focus: false });
     await contourSur(page, '#conception-productions [data-action="creerNouvelleProduction"]');
     await capture(page, DOSSIER, `p3-2-${cap}`);
     await page.click('#conception-productions [data-action="creerNouvelleProduction"]');
-    await contourSur(page, '#productionTitre');
+    await contourSur(page, '#btnCreerProduction');
+    await nombreDeFleches(page, 4, 'étape 2, la fiche vide : le nom, le type, la pondération, et « Créer la production »');
+    // ↻ 11 nov. 2026 (cinquième aperçu) : la ligne du geste grandit la bulle ; à 1180 × 820, faute de place libre, elle
+    // chevauche le haut du champ « Nom », et la flèche entre dans sa partie visible (`flecheVisant`).
+    await flecheVisant(page, '#productionTitre', 'étape 2, le nom');
     await menusLibres(page, 'étape 2, le titre');
     await page.fill('#productionTitre', 'Journal de lecture 1');
-    await contourSur(page, '#productionType');
+    await nombreDeFleches(page, 3, 'étape 2, le nom rempli');
     await menusLibres(page, 'étape 2, le type');
     await page.selectOption('#productionType', 'travail');
     await page.fill('#productionActivite', 'Lire un roman et en rendre compte');
     await page.fill('#productionPonderation', '20');
-    await contourSur(page, '#productionGrille');
+    // Les champs obligatoires remplis : la grille, que la bulle nomme (« associe-lui la grille »).
+    await nombreDeFleches(page, 2, 'étape 2, la grille à choisir, et le bouton');
+    await flecheVers(page, GROUPE_GRILLE, 'étape 2, la grille');
+    await contourSur(page, '#btnCreerProduction');
     await menusLibres(page, 'étape 2, la grille');
-    const grilleId = (await ctx(page)).grilleId;
-    expect(grilleId).toBeTruthy();
-    await page.selectOption('#productionGrille', grilleId);
+    const grille = grilleId || (await ctx(page)).grilleId;
+    expect(grille).toBeTruthy();
+    await page.selectOption('#productionGrille', grille);
     if (niveaux) {
-        // « … et son échelle si elle en a une » : le contour passe au menu « Échelle ».
-        await contourSur(page, '#productionEchelle');
+        // « … et son échelle si elle en a une » : la flèche va à « Échelle de performance », restée à « Aucune ».
+        await nombreDeFleches(page, 2, 'étape 2, l’échelle, et le bouton');
+        await flecheVers(page, GROUPE_ECHELLE, 'étape 2, l’échelle');
         await menusLibres(page, 'étape 2, l’échelle');
         await capture(page, DOSSIER, `p3-2-fiche-echelle-${cap}`);
         if (!echelleVide) {
-            const echelle = await page.evaluate(() => [...document.querySelectorAll('#productionEchelle option')].find((o) => /Journal de lecture/.test(o.textContent)).value);
+            const echelle = await page.evaluate((src) => [...document.querySelectorAll('#productionEchelle option')].find((o) => new RegExp(src).test(o.textContent)).value, nomEchelle.source);
             await page.selectOption('#productionEchelle', echelle);
         }
     }
     if (echelleVide) {
-        // Laissée vide, l'échelle reste ce qui manque : le contour y reste ; on crée la production quand même.
-        await contourSur(page, '#productionEchelle');
+        // Laissée vide, l'échelle reste ce qui manque : sa flèche reste ; on crée la production quand même.
+        await flecheVers(page, GROUPE_ECHELLE, 'étape 2, l’échelle laissée vide');
     } else {
-        await contourSur(page, '#btnCreerProduction');
+        // Une grille en points n'en demande pas ; l'échelle choisie, plus rien que le bouton : sa flèche et son halo (la
+        // règle du contour, 11 nov. 2026, 11 h 45 : une étape qui a un contour n'est jamais sans flèche).
+        await nombreDeFleches(page, 1, 'étape 2, tout est choisi');
+        await flecheVers(page, '#btnCreerProduction', 'étape 2, tout est choisi');
         await bulleNeCouvrePas(page, '#btnCreerProduction', 'étape 2');
     }
+    await contourSur(page, '#btnCreerProduction');
     await menusLibres(page, 'étape 2, « Créer la production »');
     await capture(page, DOSSIER, `p3-2-fiche-${cap}`);
     await page.click('#btnCreerProduction');
@@ -123,9 +141,12 @@ async function etape2(page, { cap, niveaux, echelleVide }) {
 }
 
 /** Étape 3 : « Plus tard », un rechargement, « Reprendre » ; puis la date et « Consignes transmises ». */
-async function etape3(page, { cap, plusTard }) {
+export async function etape3(page, { cap, plusTard }) {
     await etape(page, 3, 'Tes consignes', { focus: false });
-    await contourSur(page, '.echeance-simple-ligne');
+    // Un geste à la fois (11 nov. 2026, 12 h 05) : la date de remise d'abord, puis « Consignes transmises ».
+    await contourSur(page, '#productionDateEcheance');
+    await nombreDeFleches(page, 1, 'étape 3');
+    await flecheVers(page, '#productionDateEcheance', 'étape 3, la date de remise');
     await bulleNeCouvrePas(page, '#productionDateEcheance', 'étape 3');
     await bulleNeCouvrePas(page, '#productionEcheanceAssignee', 'étape 3');
     await capture(page, DOSSIER, `p3-3-${cap}`);
@@ -143,22 +164,46 @@ async function etape3(page, { cap, plusTard }) {
         await capture(page, DOSSIER, `panneau-${cap}-en-cours`);
         await item(page).locator('.assistance-parcours-bouton').click();
         await etape(page, 3, 'Tes consignes');
-        await contourSur(page, '.echeance-simple-ligne');
+        await contourSur(page, '#productionDateEcheance');
     }
     await page.fill('#productionDateEcheance', '2026-11-03');
     expect(await page.evaluate(() => ParcoursMoteur.etapeCourante())).toBe(2);   // la date seule ne suffit pas
+    // La date écrite : flèche et halo passent à la case (« coche « Consignes transmises » », 11 nov. 2026, 9 h 47).
+    await contourSur(page, '.echeance-simple-ligne');
+    await flecheVers(page, '.echeance-simple-ligne', 'étape 3, « Consignes transmises »');
     await page.check('#productionEcheanceAssignee');
 }
 
+/** La page de la bulle qu'on voit (les autres sont cachées à l'œil, pas au lecteur d'écran). */
+export const pageDeLaBulle = (page) => bulle(page).locator('.parcours-bulle-page:not(.u-lecteur-ecran)');
+
+/**
+ * Capture 18 (11 nov. 2026) : l'écran d'évaluation ouvert, la bulle passe à la page qui en parle (« Pour chaque
+ * critère… »), le premier critère sans niveau est amené dans la vue, le halo s'y pose et la flèche y va.
+ */
+export async function premierCritereDesigne(page, id) {
+    await expect(pageDeLaBulle(page)).toContainText('Pour chaque critère');
+    await contourSur(page, '#' + id);
+    await expect(page.locator('#' + id)).toBeInViewport();
+    await nombreDeFleches(page, 1, 'étape 4, le premier critère');
+    await flecheVers(page, '#' + id, 'étape 4, le premier critère');
+    await bulleNeCouvrePas(page, '#' + id, 'étape 4, le premier critère');
+}
+
 /** Étape 4 : la Liste, « Actions › Évaluer » sans fichier, chaque critère, la rétroaction, « Verrouiller ». */
-async function etape4(page, { niveaux, cap, echelleVide }) {
+export async function etape4(page, { niveaux, cap, echelleVide, nCriteres = 4, niveau = 'S' }) {
     await etape(page, 4, 'Une première production', { focus: false });
     const pid = (await ctx(page)).productionId;
     const evaluer = (await valeursActions(page, pid)).find((v) => v.startsWith('evaluer|2390001|'));
     expect(evaluer).toBeTruthy();
-    await contourSur(page, `#evaluations-liste select.eval-actions-select:has(option[value="${evaluer}"])`);
+    const menu = `#evaluations-liste select.eval-actions-select:has(option[value="${evaluer}"])`;
+    await contourSur(page, menu);
     // La colonne « Actions » est amenée dans la vue (le tableau dépasse l'écran à 1180 px).
-    await expect(page.locator(`#evaluations-liste select.eval-actions-select:has(option[value="${evaluer}"])`)).toBeInViewport();
+    await expect(page.locator(menu)).toBeInViewport();
+    // La bulle nomme « Actions › Évaluer » : la flèche va au menu de la rangée, seule (11 nov. 2026, capture 17).
+    await nombreDeFleches(page, 1, 'étape 4, la Liste');
+    await flecheVers(page, menu, 'étape 4, « Actions › Évaluer »');
+    await expect(pageDeLaBulle(page)).toContainText('Rien à importer');
     await capture(page, DOSSIER, `p3-4-${cap}`);
     await actionDeLaListe(page, evaluer);
     await expect(page.locator('#evaluations-contenu-evaluation')).toBeVisible();
@@ -176,18 +221,19 @@ async function etape4(page, { niveaux, cap, echelleVide }) {
         await expect(page.locator('#selectEchelle1')).not.toHaveValue('');
         await expect(page.locator('#listeCriteresGrille1')).not.toContainText('Choisis maintenant une échelle de performance');
     }
-    await expect.poll(async () => (await lireChamps()).length).toBe(4);
+    await expect.poll(async () => (await lireChamps()).length).toBe(nCriteres);
     const champs = await lireChamps();
-    await contourSur(page, '#' + champs[0]);
+    await premierCritereDesigne(page, champs[0]);
     for (const id of champs) {
-        if (niveaux) await page.selectOption('#' + id, 'S');
+        if (niveaux) await page.selectOption('#' + id, niveau);
         else await page.fill('#' + id, '4');
     }
     await contourSur(page, '#btnVerrouillerEvaluation');
+    await nombreDeFleches(page, 1, 'étape 4, « Verrouiller »');   // la bulle le nomme : la flèche y va
     await bulleNeCouvrePas(page, '#btnVerrouillerEvaluation', 'étape 4');
     // « une rétroaction s'écrit sous tes yeux : chaque critère de ta grille, avec ce que tu lui attribues »
     const retro = await page.inputValue('#retroactionFinale1');
-    expect(retro).toContain(niveaux ? '— S' : '— 4 / ');
+    expect(retro).toContain(niveaux ? '— ' + niveau : '— 4 / ');
     expect(retro).not.toContain('MOT-DE-CARTOUCHE');
     await capture(page, DOSSIER, `p3-4-evaluation-${cap}`);
     // Pas avant le verrou. Mesuré le 9 nov. (relecture neuve) : avant « Verrouiller », une évaluation NEUVE n'est pas
@@ -199,18 +245,25 @@ async function etape4(page, { niveaux, cap, echelleVide }) {
 }
 
 /** Étapes 5 et 6 : « + Nouvelle pratique », « Partir d'un modèle », « Modèle sommatif » ; le menu, « Appliquer ». */
-async function etapes5et6(page, { cap }) {
+export async function etapes5et6(page, { cap }) {
     await etape(page, 5, 'Ta pratique', { focus: false });
     await contourSur(page, '#conception-pratiques-notation [data-action="creerNouvellePratique"]');
+    // « Touche « + Nouvelle pratique » », puis « Partir d'un modèle » : la flèche va à ce que la bulle nomme (11 nov.).
+    await flecheVers(page, '#conception-pratiques-notation [data-action="creerNouvellePratique"]', 'étape 5, « + Nouvelle pratique »');
+    await nombreDeFleches(page, 1, 'étape 5');
     await capture(page, DOSSIER, `p3-5-${cap}`);
     await page.click('#conception-pratiques-notation [data-action="creerNouvellePratique"]');
     await expect(page.locator('#modalWizardPratiqueV2')).toHaveClass(/actif/);
     await expect(page.locator('body')).toHaveClass(/parcours-sur-modale/);
     await contourSur(page, '#modalWizardPratiqueV2 .wizard-v2-radio-card:has(input[value="modele"])');
+    await flecheVers(page, '#modalWizardPratiqueV2 .wizard-v2-radio-card:has(input[value="modele"])', 'étape 5, « Partir d’un modèle »');
     await capture(page, DOSSIER, `p3-5-assistant-${cap}`);
     await page.locator('#modalWizardPratiqueV2 input[name="porteEntree"][value="modele"]').check({ force: true });
     await page.click('#wizard-v2-btn-suivant');
-    await page.locator('#modalWizardPratiqueV2 input[name="modeleChoisi"][value="SOM-litterature"]').check({ force: true });
+    // L'assistant redessine ses cartes juste après « Suivant » : coché trop tôt, le choix était effacé (mesuré à
+    // 1180 × 820 le 11 nov. 2026). On recoche jusqu'à ce que le choix tienne.
+    const sommatif = page.locator('#modalWizardPratiqueV2 input[name="modeleChoisi"][value="SOM-litterature"]');
+    await expect(async () => { await sommatif.check({ force: true }); await expect(sommatif).toBeChecked({ timeout: 500 }); }).toPass({ timeout: 5000 });
     await page.click('#wizard-v2-btn-suivant');
     await page.click('#wizard-v2-btn-creer');
 
@@ -219,15 +272,20 @@ async function etapes5et6(page, { cap }) {
     expect(await page.evaluate(() => designerPratiqueActive().idBrut)).toBeFalsy();
     await capture(page, DOSSIER, `p3-6-${cap}`);
     const pratiqueId = (await ctx(page)).pratiqueId;
+    // « Choisis-la dans le menu en haut de la page » : la flèche y va (11 nov. 2026, 9 h 47).
+    await contourSur(page, '#selectionPratiques select');
+    await flecheVers(page, '#selectionPratiques select', 'étape 6, le menu des pratiques');
     await page.selectOption('#menuPratiques', pratiqueId);
     await contourSur(page, '#conteneurEditionPratique [data-action="appliquerPratiqueAuCoursActive"]');
     await expect(page.locator('#conteneurEditionPratique [data-action="appliquerPratiqueAuCoursActive"]')).toBeInViewport();
+    await flecheVers(page, '#conteneurEditionPratique [data-action="appliquerPratiqueAuCoursActive"]', 'étape 6, « Appliquer au cours actif »');
+    await nombreDeFleches(page, 1, 'étape 6');
     await capture(page, DOSSIER, `p3-6-fiche-${cap}`);
     await page.click('#conteneurEditionPratique [data-action="appliquerPratiqueAuCoursActive"]');
 }
 
 /** Étape 7 : la bande de performance, le point de l'étudiant·e évalué·e ; « Continuer ». */
-async function etape7(page, { cap }) {
+export async function etape7(page, { cap }) {
     await etape(page, 7, "Le point qui s'allume", { focus: false });
     await expect(page.locator('#suivi-groupe')).toBeVisible();
     await expect(page.locator('#section-suivi h4[data-tooltip="tdb-performance"]')).toBeInViewport();
@@ -295,7 +353,7 @@ async function etape8(page, { niveaux, cap }) {
 }
 
 /** Étape 9 : « Actions › Consulter », « Déverrouiller », la cartouche, le mot, « Verrouiller », « Terminer ». */
-async function etape9(page, { cap }) {
+export async function etape9(page, { cap }) {
     await etape(page, 9, 'Ta rétroaction, avec tes mots', { focus: false });
     await expect(bulle(page).locator('.parcours-bulle-sortie')).toHaveCount(0);   // la dernière : pas de « Plus tard »
     await expect(bulle(page).locator('.parcours-bulle-boutons button')).toHaveText(['Terminer']);
@@ -303,6 +361,9 @@ async function etape9(page, { cap }) {
     const consulter = (await valeursActions(page, c.evaluationId)).find((v) => v.startsWith('consulter|'));
     await contourSur(page, `#evaluations-liste select.eval-actions-select:has(option[value="${consulter}"])`);
     await expect(page.locator(`#evaluations-liste select.eval-actions-select:has(option[value="${consulter}"])`)).toBeInViewport();
+    // « Actions › Consulter » : la bulle le nomme, la flèche y va (11 nov. 2026, 9 h 47).
+    await flecheVers(page, `#evaluations-liste select.eval-actions-select:has(option[value="${consulter}"])`, 'étape 9, « Actions › Consulter »');
+    await nombreDeFleches(page, 1, 'étape 9');
     await capture(page, DOSSIER, `p3-9-${cap}`);
     await actionDeLaListe(page, consulter);
     await expect(page.locator('#evaluations-contenu-evaluation')).toBeVisible();
@@ -331,6 +392,27 @@ async function etape9(page, { cap }) {
     await bulle(page).getByRole('button', { name: 'Terminer' }).click();
     await expect(bulle(page)).toHaveCount(0);
     expect(await page.evaluate(() => Assistance.etatDe('evaluer').etat)).toBe('fait');
+}
+
+/**
+ * « Ta grille » à 820 × 1180 (l'iPad en portrait), le texte validé par Grégoire le 11 nov. (8 h 38) : la bulle tient
+ * entière dans la fenêtre, son texte ne défile pas (en pages s'il le faut), et elle ne couvre pas la zone de collage.
+ */
+export async function laGrilleEnPortrait(page) {
+    test.setTimeout(120000);
+    await ouvrirEspaceVide(page, 820, { hauteur: 1180 });
+    await mettreLaClasseEnPlace(page);
+    await page.evaluate(() => Assistance.parcours().find((p) => p.id === 'evaluer').lancer(0));
+    await etape(page, 1, 'Ta grille', { focus: false });
+    await expect(bulle(page).locator('.parcours-bulle-texte')).toContainText('ta grille servira ensuite à chaque copie que tu évalueras avec elle');
+    await entierDansLaFenetre(page, '#parcours-bulle', 'Ta grille, 820 × 1180');
+    const defile = await page.evaluate(() => {
+        const t = document.querySelector('#parcours-bulle .parcours-bulle-texte');
+        return t.scrollHeight > t.clientHeight + 1;
+    });
+    expect(defile, 'le texte de « Ta grille » tient sans défiler').toBe(false);
+    await bulleNeCouvrePas(page, '#materiel-accueil .materiel-collage', 'Ta grille, 820 × 1180');
+    await capture(page, DOSSIER, 'p3-1-820x1180-texte-du-11-nov');
 }
 
 export async function leParcoursEntier(page, { niveaux, cap, echelleVide = false, fenetreEtape8 = null }) {
