@@ -7,6 +7,28 @@
 
 ---
 
+## 11 NOV. 2026, 10 H 50 (Claude Code) : **QUATRE BRANCHES ATTENDENT LEUR FUSION, EN GROUPE** — `main` inchangé
+
+Demandé par la conversation du Projet (11 nov., 9 h 47). **`origin/main` = `180997e10`** (1.242.1, en ligne). Les
+quatre branches partent toutes de ce commit (aucune en retard sur `main`), poussées, non fusionnées. **Elles se
+fusionnent ensemble, après le quatrième essai de Grégoire sur l'aperçu, et sous UN verdict unique** ; pas une par une.
+
+| Branche | HEAD | Ce qu'elle porte | Ce qu'elle attend |
+|---|---|---|---|
+| `lot/parcours-fleches-apercu` | `144913cad` (build `1111-1040`) | les flèches des parcours, avec les corrections des trois essais de l'iPad (11 nov., 6 h 41, 8 h 04, 9 h 11) ; PR n° 17 « APERÇU : ne pas fusionner » | le quatrième essai (porte terrain `PORTES-TERRAIN-2026-11-10-parcours-fleches.md`, §2.5 à §2.7 ; décisions §3.4 et §3.5) ; rapport `RAPPORT-2026-11-10-parcours-fleches.md` |
+| `lot/normes-tableau-profil-pdf` | `5b681da17` | 2 commits : les résultats d'une personne suivent les normes du tableau de notation (profil, PDF) ; la bande « PROGRESSION · TRIMESTRE » | le verdict du groupe |
+| `lot/pastille-nouveautes-pied` | `20d46acbc` | 1 commit : la pastille des Nouveautés aussi à côté du lien « Nouveautés » du pied de l'accueil | le verdict du groupe |
+| `lot/tableau-notation-sous-nav` | `e51dc5b85` | 1 commit : « Tableau de notation » devient une entrée de la sous-navigation d'Évaluation, après « Liste » | le verdict du groupe |
+
+**À la fusion** : les jetons `?v=` se croisent (le pré-commit a refusé `main.js` et `init-inline.js` à `c`, déjà
+servis par `5b681da17` ; les flèches les posent à `d`) : relancer `node scripts/release.mjs --build-only` après la
+dernière fusion, puis le verdict. Rouge connu, hors de ces branches : `parcours-5` l. 211 (1 fois sur 6).
+
+**Ce qui reste ouvert** : les points de l'entrée de 22 h 50 ci-dessous ; et, trouvé sur l'aperçu des flèches, l'étape 7
+d'« Évaluer » à 1180 × 820 (le titre « Performance (P) » sort de la vue deux fois sur trois au banc ; rapport du lot).
+
+---
+
 ## 10 NOV. 2026, 22 H 50 (Claude Code) : **1.242.1 POUSSÉE ET EN LIGNE, VERDICT VERT**
 
 Feu vert de Grégoire (relais de Cowork à 20 h 12, puis « tout est fermé » et « vas-y »). **`origin/main` = `48f118bf5`** (1.242.1, build `1110-2019`, release `571e928b4`, Nouvelles fondues `48f118bf5`) ; 19 commits depuis la 1.242.0. Netlify `6af3e5a4`, `ready` à 22 h 49 sur ce SHA. PR n° 15 et n° 16 : fermées comme fusionnées par le push.
