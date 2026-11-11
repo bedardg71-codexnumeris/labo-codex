@@ -568,6 +568,7 @@ for (const v of [
     { largeur: 1180, clair: true, famille: 'specifications', modele: 'SPE-simple' },
     { largeur: 1180, clair: true, famille: 'standards', modele: 'STD-n-meilleurs' },
     { largeur: 820, clair: false, famille: 'standards', modele: 'STD-n-meilleurs' },
+    { largeur: 820, clair: true, famille: 'standards', modele: 'STD-n-meilleurs' }, // manquait au lot des flèches (10 nov.)
     { largeur: 390, clair: false, famille: 'standards', modele: 'STD-n-meilleurs' }
 ]) {
     test(`captures : ${v.famille}, ${v.largeur} px, ${v.clair ? 'clair' : 'sombre'}`, async ({ page }) => {
