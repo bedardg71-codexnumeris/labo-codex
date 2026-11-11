@@ -133,12 +133,20 @@ describe('en-tête épuré · navigation secondaire et bande pâle', () => {
         expect(bas).toMatch(/<span class="groupe-affichage" aria-hidden="true">/);
         expect(bas).toMatch(/<select id="selectGroupeCoursHeader"[^>]*aria-label="Groupe-cours actif"/);
     });
-    it('les bulles : une bande en haut, une en bas ; les obstacles de main.js sont ceux du nouvel en-tête', () => {
+    it('les bulles : une bande en haut, une en bas, derrière le contenu, sans masque (Grégoire, 10 nov. 2026)', () => {
         expect(entete).toContain('id="bulles-container"');
         expect(bas).toContain('id="bulles-container-nav"');
-        const obstacles = tranche(lire('js/main.js'), 'const OBSTACLES_BULLES = {', '};');
-        expect(obstacles).toContain("'.navigation-boutons', '.entete-actions'");
-        expect(obstacles).toContain("'.sous-navigation', '.bande-groupe-centre', '.bande-groupe-anonymisation'");
+        // Le masque par colonne du 7 nov. effaçait les bulles sur toute la hauteur, sous le logo, la
+        // navigation, le groupe et le bloc « Codex » : un fond opaque en vue étendue. Il ne revient pas.
+        const main = lire('js/main.js');
+        expect(main).not.toMatch(/maskImage|webkitMaskImage|OBSTACLES_BULLES|masquerBullesSousLeContenu/);
+        expect(css).not.toMatch(/\.bulles-container[^{]*\{[^}]*mask/);
+        // « Derrière » : le conteneur à 0, les rangées de contenu au-dessus.
+        const regle = (sel) => tranche(css, '\n' + sel + ' {', '}');
+        expect(html).toMatch(/\.bulles-container \{[^}]*z-index: 0;/);
+        expect(regle('.entete-ligne1')).toMatch(/position: relative;\s*z-index: 1;/);
+        expect(regle('.entete-rangee-sections')).toMatch(/z-index: 2;/);
+        expect(regle('.bande-groupe')).toMatch(/position: relative;\s*z-index: 1;/);
     });
     it('les seuils : marges de 7 px à ≤ 1000 px, variante C à ≤ 779 px (mesuré)', () => {
         expect(css).toMatch(/@media \(max-width: 1000px\) \{\s*body \{\s*--nav-mot-marge: 7px;/);
