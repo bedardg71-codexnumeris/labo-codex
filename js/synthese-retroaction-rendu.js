@@ -126,6 +126,12 @@
      * clair → encre, fond sombre → papier. Une couleur illisible (nom CSS,
      * gradient, vide) garde le papier, comme avant : on ne devine pas.
      */
+    /** Une couleur de la norme n'entre dans un style en ligne que si elle en est une (hex ou rgb) ; sinon null. */
+    function couleurImprimable(couleur) {
+        const c = String(couleur || '').trim();
+        return /^(#[0-9a-f]{3,8}|rgba?\(\s*[0-9.,\s%]+\))$/i.test(c) ? c : null;
+    }
+
     function texteSur(fond) {
         const m = /^#?([0-9a-f]{3}|[0-9a-f]{6})$/i.exec(String(fond || '').trim());
         if (!m) return PAPER;
@@ -192,6 +198,26 @@
             </header>`;
     }
 
+    /**
+     * Le style d'une case de la bande. 11 nov. 2026 (Grégoire) : les normes du tableau de notation (`t.forme`, lue par
+     * construireTrimestre dans `TableauNotation.normeDeLEleve`). Plein : la production compte dans la note ; contour :
+     * évaluée, non retenue ; pointillé : à saisir ou à venir. La double bordure noire des « retenues » est partie avec elle.
+     */
+    function styleDeLaCase(t, ctx, evaluee) {
+        const numero = t.n != null ? String(t.n) : '';
+        const pointille = { bg: 'transparent', color: MUTED, border: `1px dashed ${LINE}`, contenu: numero };
+        // La couleur : celle de l'échelle imprimée sur la page (sa légende des critères), pour qu'un même niveau n'y ait qu'une
+        // couleur ; sinon celle de la norme (✓ et ✗ des spécifications, un niveau absent de cette échelle).
+        const teinte = ctx.codeColor[t.libelle || t.code] || couleurImprimable(t.couleur) || MUTED;
+        if (t.forme === 'plein') return { bg: teinte, color: texteSur(teinte), border: `1px solid ${teinte}`, contenu: t.libelle || t.code || numero };
+        if (t.forme === 'contour') return { bg: PAPER, color: INK, border: `2px solid ${teinte}`, contenu: t.libelle || t.code || numero };
+        if (t.forme === 'vide' || !evaluee) return pointille;
+        // Hors standards et spécifications : toute case évaluée est pleine, à la couleur de son niveau. L'artefact courant
+        // est marqué par un ▼ au-dessus de la case (indicateurHaut).
+        const fond = ctx.codeColor[t.code] || MUTED;
+        return { bg: fond, color: texteSur(fond), border: `1px solid ${fond}`, contenu: t.code || numero };
+    }
+
     function renderTrimestreBar(ctx) {
         const trim = ctx.feedback.trimestre || [];
         if (!trim.length) return '<div></div>';
@@ -201,31 +227,7 @@
             const done   = t.status === 'done';
             const todo   = t.status === 'todo';
 
-            let bg = 'transparent';
-            let color = MUTED;
-            // Bordure transparente par défaut (pour préserver les dimensions
-            // exactes du carré quand on ajoute une bordure noire pour les
-            // retenus, grâce à box-sizing: border-box).
-            let border = `1px dashed ${LINE}`;
-            let contenu = t.n != null ? String(t.n) : '';
-
-            if (active) {
-                // L'artefact courant est marqué par un ▼ au-dessus de la case
-                // (cf. indicateurHaut plus bas) ; la case elle-même prend la
-                // couleur IDME comme un done normal — plus de fond noir.
-                bg = ctx.codeColor[t.code] || MUTED; color = texteSur(bg); border = `1px solid ${bg}`;
-                contenu = t.code || (t.n != null ? String(t.n) : '');
-            } else if (done) {
-                bg = ctx.codeColor[t.code] || MUTED; color = texteSur(bg); border = `1px solid ${bg}`;
-                contenu = t.code || (t.n != null ? String(t.n) : '');
-            }
-
-            // Encadrement des artefacts retenus dans le portfolio : double bordure
-            // noire (override la bordure de fond ; box-sizing préserve 22×22 mais
-            // réduit l'espace intérieur à ~16px ce qui reste lisible pour 1 lettre IDME).
-            if (t.retenu) {
-                border = `3px double ${INK}`;
-            }
+            const { bg, color, border, contenu } = styleDeLaCase(t, ctx, active || done);
 
             // Indicateur au-dessus de la case : ▼ pour l'artefact courant,
             // sinon ● si obligatoire, sinon espace vide pour préserver l'alignement.

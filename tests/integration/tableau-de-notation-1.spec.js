@@ -659,3 +659,73 @@ test.describe('Tableau de notation · captures', () => {
         }
     }
 });
+
+// 11 nov. 2026 (Grégoire, 7 h 33 à 7 h 48) : le profil et le PDF d'une personne suivent les normes du tableau, lues à la
+// même source (`TableauNotation.normeDeLEleve`) : plein si la production compte, contour si elle est évaluée sans être
+// retenue, pointillé si elle reste à saisir ; ✓ et ✗ en spécifications. Ce que la case du tableau montre, le profil et la
+// bande du PDF le montrent.
+test.describe('Les normes du tableau, pour une personne (11 nov. 2026)', () => {
+    const formesDuTableau = (page) => page.locator('#tableau-notation-hote tbody tr:nth-child(1) .tn-case')
+        .evaluateAll((cs) => cs.map((c) => (c.className.match(/tn-case--(plein|contour|vide)/) || [])[1]));
+    const ouvrirProfil = async (page) => {
+        await page.evaluate(() => { window.afficherSection('suivi'); window.afficherSousSection('suivi-profil'); window.afficherProfilComplet('9990010'); });
+        await expect(page.locator('#contenuProfilEtudiant .tn-pastille').first()).toBeVisible();
+    };
+    const pastilles = (page) => page.locator('#contenuProfilEtudiant table.tableau tbody tr').evaluateAll((rs) => rs.map((r) => {
+        const p = r.querySelector('.tn-pastille');
+        return p ? [(p.className.match(/tn-pastille--(plein|contour|vide)/) || [])[1], p.querySelector('[aria-hidden]').textContent] : null;
+    }));
+
+    test('standards : la source, le tableau, le profil et la bande disent la même chose (plein, contour, pointillé)', async ({ page }) => {
+        const erreurs = await monter(page, 'STD');
+        // Ada : I, D, M, E ; la pratique retient les 3 plus récentes (P2 à P4) ; P5 reste à saisir.
+        for (const [col, touche] of [[1, 'i'], [2, 'd'], [3, 'm'], [4, 'e']]) {
+            await kase(page, 1, col).focus();
+            await page.keyboard.press(touche);
+        }
+        await expect(note(page, 1)).not.toHaveText('–');
+        const source = await page.evaluate(() => {
+            const n = window.TableauNotation.normeDeLEleve('9990010');
+            return window.db.getSync('atn_productions', []).map((p) => { const c = n.de(p); return [c.forme, c.libelle]; });
+        });
+        expect(source).toEqual([['contour', 'I'], ['plein', 'D'], ['plein', 'M'], ['plein', 'E'], ['vide', '']]);
+        expect(await formesDuTableau(page)).toEqual(source.map((c) => c[0]));
+        // Le profil : la pastille de la case, puis la note ; la légende du tableau sous la liste.
+        await ouvrirProfil(page);
+        expect(await pastilles(page)).toEqual(source);
+        await expect(page.locator('#contenuProfilEtudiant tbody tr').nth(2)).toContainText('75');
+        await expect(page.locator('#contenuProfilEtudiant .tn-legende--profil')).toHaveText(/Plein : compte dans la note.*Contour : évaluée, non retenue.*Pointillé : à saisir/);
+        await expect(page.locator('#contenuProfilEtudiant tbody tr').nth(0).locator('.u-lecteur-ecran')).toHaveText('Incomplet, évaluée, non retenue');
+        // La bande du PDF : la même norme, ses couleurs lisibles hors de la page (html2canvas).
+        const bande = await page.evaluate(() => {
+            const ev = window.db.getSync('atn_evaluationsSauvegardees', []).find((e) => e.etudiantDA === '9990010' && e.productionId === 'P3');
+            return window.syntheseRetroactionData.construireFeedback(ev).trimestre.map((t) => [t.forme, t.libelle, /^#[0-9a-f]{6}$/i.test(t.couleur || '')]);
+        });
+        expect(bande).toEqual(source.map(([f, l]) => [f, l, f !== 'vide']));
+        expect(erreurs).toEqual([]);
+    });
+
+    test('spécifications : ✓ et ✗ au profil et dans la bande, comme au tableau', async ({ page }) => {
+        const erreurs = await monter(page, 'SPE');
+        for (const [col, touche] of [[1, 'a'], [2, 'n']]) {
+            await kase(page, 1, col).focus();
+            await page.keyboard.press(touche);
+        }
+        const source = await page.evaluate(() => {
+            const n = window.TableauNotation.normeDeLEleve('9990010');
+            return window.db.getSync('atn_productions', []).slice(0, 3).map((p) => { const c = n.de(p); return [c.forme, c.libelle]; });
+        });
+        expect(source).toEqual([['plein', '✓'], ['plein', '✗'], ['vide', '']]);
+        expect((await formesDuTableau(page)).slice(0, 3)).toEqual(source.map((c) => c[0]));
+        await ouvrirProfil(page);
+        expect((await pastilles(page)).slice(0, 3)).toEqual(source);
+        await expect(page.locator('#contenuProfilEtudiant .tn-legende--profil')).toHaveText(/✓ Acceptable.*✗ Non acceptable.*Pointillé : à saisir/);
+        const bande = await page.evaluate(() => {
+            const ev = window.db.getSync('atn_evaluationsSauvegardees', []).find((e) => e.etudiantDA === '9990010' && e.productionId === 'EX1');
+            return window.syntheseRetroactionData.construireFeedback(ev).trimestre.slice(0, 3).map((t) => [t.forme, t.libelle]);
+        });
+        expect(bande).toEqual(source);
+        expect(erreurs).toEqual([]);
+    });
+});
+

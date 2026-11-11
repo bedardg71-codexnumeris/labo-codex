@@ -2707,6 +2707,58 @@ function _prefixeNiveau(evaluation) {
     return niv ? niv + ' ' : '';
 }
 
+/**
+ * 11 nov. 2026 (Grégoire, 7 h 33 à 7 h 48) — LA CELLULE « NOTE » AUX NORMES DU TABLEAU DE NOTATION : la pastille de la case
+ * (niveau à la couleur de l'échelle ; plein si la production compte dans la note, contour si elle est évaluée mais non
+ * retenue, pointillé si elle reste à saisir ; ✓ et ✗ en spécifications), puis la note. La norme vient de
+ * `TableauNotation.normeDeLEleve` (`ligne.norme`) ; aucune règle n'est recopiée ici.
+ * « Non remis », « Non recevable », « Incomplet » et les jetons gardent leur forme : la fonction rend null, et la cellule
+ * garde son rendu. Une copie évaluée que la norme ne sait pas lire (en points, sans niveau) le garde aussi.
+ * @returns {string|null}
+ */
+function _celluleNoteNorme(ligne) {
+    const n = ligne.norme;
+    if (!n || ligne.travailEnCours || ligne.estNonRecevable) return null;
+    const evaluee = ligne.statut === 'evalue';
+    if (!evaluee && ligne.evaluationId) return null;   // « Non remis » ou « Retard » saisis : leur forme
+    if (evaluee && !n.valeur) return null;
+    const style = n.couleur ? ` style="--tn-couleur: ${echapperHtml(n.couleur)}"` : '';
+    const pastille = `<span class="tn-pastille tn-pastille--${echapperHtml(n.forme)}"${style} title="${echapperHtml(n.dit)}">`
+        + `<span aria-hidden="true">${echapperHtml(n.libelle)}</span><span class="u-lecteur-ecran">${echapperHtml(n.dit)}</span></span>`;
+    return evaluee
+        ? `<span class="tn-pastille-note">${pastille}<strong>${ligne.noteSeule}</strong></span>`
+        : `<span class="tn-pastille-note">${pastille}</span>`;
+}
+
+/** 11 nov. 2026 : la norme du tableau de notation pour cette personne (`TableauNotation.normeDeLEleve`), ou null. */
+function _normeDuProfil(da) {
+    const tn = window.TableauNotation;
+    return (tn && typeof tn.normeDeLEleve === 'function') ? tn.normeDeLEleve(da) : null;
+}
+
+function _normeDeLaProduction(norme, production) {
+    return norme ? norme.de(production) : null;
+}
+
+/** La légende du tableau, ses mots validés (9 nov. 2026), sous la liste ; rien hors standards et spécifications. */
+function _legendeNormeHTML(norme) {
+    if (!norme) return '';
+    return `<div class="tn-legende tn-legende--profil">${norme.legende.map(t => `<span class="tn-legende-item">${echapperHtml(t)}</span>`).join('')}</div>`;
+}
+
+/** La cellule « Note » d'une ligne du profil : la pastille du tableau quand la norme la lit, sinon le rendu d'avant. */
+function _celluleNoteProfil(ligne) {
+    const norme = _celluleNoteNorme(ligne);
+    if (norme) return norme;
+    if (ligne.travailEnCours) return '<span class="badge-jeton badge-jeton-incomplet">Incomplet ; travail en cours</span>';
+    const nonRemis = '<span class="badge-non-remis-wrapper"><span class="badge-jeton-titre">Non remis</span></span>';
+    if (ligne.statutRemise === 'non-remis' || ligne.statutRemise === 'retard') return nonRemis;
+    if (ligne.estNonRecevable) {
+        return `<span class="badge-non-recevable-wrapper" title="${ligne.statutIntegrite === 'plagiat' ? 'Plagiat détecté' : 'Utilisation IA non autorisée'}"><span class="badge-jeton-titre">Non recevable</span></span>`;
+    }
+    return ligne.statut === 'evalue' ? `<strong>${ligne.note}</strong>` : nonRemis;
+}
+
 function _construireLigneProductionEvaluee(production, evaluation, indexArtefact) {
     const statutRemise = evaluation.statutRemise || 'evalue';
     const statutIntegrite = evaluation.statutIntegrite || 'recevable';
@@ -2720,6 +2772,10 @@ function _construireLigneProductionEvaluee(production, evaluation, indexArtefact
         note: (typeof noteDiffereeActive === 'function' && noteDiffereeActive())
             ? `${_prefixeNiveau(evaluation)}${badgeNoteDifferee()}`   // #321 : niveau IDME gardé, % masqué
             : `${_prefixeNiveau(evaluation)}${formaterNotePourcentage(evaluation.noteFinale)}`,   // 21 oct. 2026 : une décimale au plus
+        // 11 nov. 2026 : la note sans son niveau, quand la pastille du tableau dit déjà le niveau (`_celluleNoteNorme`).
+        noteSeule: (typeof noteDiffereeActive === 'function' && noteDiffereeActive())
+            ? badgeNoteDifferee()
+            : formaterNotePourcentage(evaluation.noteFinale),
         date: _calculerEcheanceFormateeProduction(production),
         statut: estNonRemis ? 'non-remis' : 'evalue',
         statutRemise: statutRemise,
@@ -2822,12 +2878,17 @@ function genererSectionProductions(da) {
     const evaluationsEleve = evaluations.filter(e => e.etudiantDA === da);
 
     // Construire les lignes du tableau
+    // 11 nov. 2026 (Grégoire) : la colonne « Note » suit les normes du tableau de notation (js/tableau-notation.js,
+    // `normeDeLEleve`) ; hors standards et spécifications, `norme` est null et la colonne ne change pas.
+    const norme = _normeDuProfil(da);
     const lignes = productionsAEvaluer.map((production, index) => {
         const evaluation = _trouverEvaluationActive(evaluationsEleve, production.id);
         const indexArtefact = _rangsProductions[production.id] || (index + 1);
-        return evaluation
+        const ligne = evaluation
             ? _construireLigneProductionEvaluee(production, evaluation, indexArtefact)
             : _construireLigneProductionNonRemise(production, indexArtefact);
+        ligne.norme = _normeDeLaProduction(norme, production);
+        return ligne;
     });
 
     // Calculer les détails de la note finale de session
@@ -3139,16 +3200,7 @@ function genererSectionProductions(da) {
                                     ${badgeJeton}
                                 </td>
                                 <td style="padding: 12px; text-align: center;">
-                                    ${ligne.travailEnCours
-                                        ? '<span class="badge-jeton badge-jeton-incomplet">Incomplet ; travail en cours</span>'
-                                        : (ligne.statutRemise === 'non-remis' || ligne.statutRemise === 'retard')
-                                        ? '<span class="badge-non-remis-wrapper"><span class="badge-jeton-titre">Non remis</span></span>'
-                                        : (ligne.estNonRecevable
-                                            ? `<span class="badge-non-recevable-wrapper" title="${ligne.statutIntegrite === 'plagiat' ? 'Plagiat détecté' : 'Utilisation IA non autorisée'}"><span class="badge-jeton-titre">Non recevable</span></span>`
-                                            : (ligne.statut === 'evalue'
-                                                ? `<strong>${ligne.note}</strong>`
-                                                : '<span class="badge-non-remis-wrapper"><span class="badge-jeton-titre">Non remis</span></span>'))
-                                    }
+                                    ${_celluleNoteProfil(ligne)}
                                 </td>
                                 <td style="padding: 12px; text-align: center; color: var(--gris-moyen);">${ligne.date}</td>
                                 <td style="padding: 12px; text-align: center; white-space: nowrap;">
@@ -3180,6 +3232,7 @@ function genererSectionProductions(da) {
                     </tbody>
                 </table>
             </div>
+            ${_legendeNormeHTML(norme)}
         </div>
         ${htmlNoteFinale}
     `;

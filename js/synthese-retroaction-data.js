@@ -382,20 +382,15 @@
         const evalsEleve = evaluations.filter(e => e.etudiantDA === da && !e.remplaceeParId)
             .map(sansNoteNiNiveauxSiNonRecevable);   // 28 oct. 2026 : aucune case ne porte le niveau d'une copie non recevable
 
-        // IDs des productions retenues dans le portfolio (les N meilleures selon
-        // la pratique de notation). Permet de marquer ces cases visuellement
-        // dans la TrimestreBar — sans afficher de note chiffrée.
-        const idsRetenus = new Set();
-        if (typeof calculerDetailsNoteFinale === 'function') {
-            try {
-                const details = calculerDetailsNoteFinale(da);
-                if (details && details.portfolio && Array.isArray(details.portfolio.artefactsRetenus)) {
-                    details.portfolio.artefactsRetenus.forEach(art => {
-                        if (art && art.productionId) idsRetenus.add(art.productionId);
-                    });
-                }
-            } catch (e) { /* silencieux : la marque retenu disparaît */ }
-        }
+        // 11 nov. 2026 (Grégoire) : la bande suit les normes du tableau de notation — plein si la production compte dans
+        // la note, contour si elle est évaluée mais non retenue, pointillé si elle reste à saisir ou à venir ; ✓ et ✗ en
+        // spécifications. La norme vient de `TableauNotation.normeDeLEleve` (aucune règle recopiée) ; elle remplace la
+        // marque « retenu » (double bordure noire). Hors standards et spécifications, `norme` est null : la bande d'avant.
+        let norme = null;
+        try {
+            norme = (window.TableauNotation && typeof window.TableauNotation.normeDeLEleve === 'function')
+                ? window.TableauNotation.normeDeLEleve(da) : null;
+        } catch (e) { norme = null; }
 
         // gcId de l'ELEVE pour resoudre echeancesParGroupe sur la TrimestreBar
         const gcIdEleve = obtenirGcIdEleve(da);
@@ -425,16 +420,42 @@
                 code = evalProduction.niveauFinal;
             }
 
-            return {
+            return Object.assign({
                 n:           production.numero || null,
                 label:       production.titre || production.nom || '',
                 status:      status,
                 code:        code,
                 obligatoire: !!production.obligatoire,
-                retenu:      idsRetenus.has(production.id),
                 due:         obtenirDue(production)
-            };
+            }, champsDeLaNorme(norme, production, status));
         });
+    }
+
+    /**
+     * La norme du tableau pour une case de la bande, quand elle sait la lire : forme, libellé (code, ✓, ✗) et couleur pour le
+     * papier. Une case évaluée sans valeur (une copie en points) garde le rendu d'avant (forme nulle).
+     */
+    function champsDeLaNorme(norme, production, status) {
+        const n = norme ? norme.de(production) : null;
+        if (!n) return { forme: null, libelle: null, couleur: null };
+        return {
+            forme:   (n.valeur || status === 'todo') ? n.forme : null,
+            libelle: n.libelle,
+            couleur: couleurPourLePapier(n.couleur)
+        };
+    }
+
+    /**
+     * Le PDF garde ses styles en ligne (html2canvas ne résout pas `var(--…)` sur un nœud détaché) : une couleur de la
+     * norme écrite en variable (les ✓ et ✗ des spécifications) est lue ici, dans la page vivante. Une valeur illisible : null.
+     */
+    function couleurPourLePapier(couleur) {
+        const c = String(couleur || '').trim();
+        const v = /^var\((--[a-z0-9-]+)\)$/i.exec(c);
+        if (!v) return c || null;
+        try {
+            return getComputedStyle(document.documentElement).getPropertyValue(v[1]).trim() || null;
+        } catch (e) { return null; }
     }
 
     /* =====================================================================

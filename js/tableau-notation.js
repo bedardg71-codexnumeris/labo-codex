@@ -350,6 +350,48 @@
         return `<tr><th scope="row" class="tn-eleve">${esc(nom)}</th>${cases}${comptes}${_noteHTML(resultat)}</tr>`;
     }
 
+    /* ============================== LA NORME, POUR UNE PERSONNE ============================== */
+
+    /**
+     * LA NORME DU TABLEAU POUR UN·E SEUL·E ÉTUDIANT·E (11 nov. 2026, décision de Grégoire, 7 h 33 à 7 h 48) : le profil et
+     * le PDF montrent les résultats d'une personne avec les MÊMES normes que le tableau. Ils la lisent ici, là où la case du
+     * tableau la lit (`_etatCase`, `_couleurDeLaValeur`, `_libelleDeLaValeur`, `_motDeLaValeur`), sans recopier de règle :
+     *   forme 'plein'   la production compte dans la note (retenue en standards, compte en spécifications) ;
+     *   forme 'contour' évaluée, non retenue ;
+     *   forme 'vide'    à saisir ou à venir (pointillé).
+     * N'importe quelle production se lit, même hors des colonnes du tableau (un diagnostic) : non retenue, elle est en contour.
+     * @returns {null|{famille: string, legende: string[], de: function(Object): {valeur, forme, couleur, libelle, mot, dit, nonRecevable}}}
+     *          null hors standards et spécifications : le profil et le PDF gardent alors leur rendu.
+     */
+    function normeDeLEleve(da) {
+        const ctx = construireContexte();
+        if (!ctx.famille || ctx.etat === 'sans-echelle') return null;
+        const resultat = _resultatEleve(da, ctx);
+        const etudiant = { da };
+        return {
+            famille: ctx.famille,
+            legende: (ctx.famille === 'SPE' ? MOTS.legendeSpe : MOTS.legendeStd).slice(0, -1),   // sans « Point : évaluée avec une grille »
+            de(production) {
+                const etat = _etatCase(etudiant, production, ctx, resultat);
+                const mot = etat.nonRecevable || _motDeLaValeur(etat.valeur, ctx, production.id, etat.echelleId);
+                // Ce que dit la forme, avec les mots de la légende des standards (« Plein : compte dans la note »…).
+                const rang = { plein: 0, contour: 1 }[etat.forme];
+                const forme = (ctx.famille === 'STD' && rang !== undefined && !etat.nonRecevable) ? MOTS.legendeStd[rang].split(' : ')[1] : '';
+                return {
+                    valeur: etat.valeur,
+                    forme: etat.forme,
+                    // Une valeur hors de l'échelle (« -- », faute de niveau) n'a pas de couleur à elle : null, et le lecteur garde la sienne.
+                    couleur: (etat.valeur && (ctx.famille === 'SPE' || _niveauDe(etat.valeur, ctx, production.id, etat.echelleId)))
+                        ? _couleurDeLaValeur(etat.valeur, ctx, production.id, etat.echelleId) : null,
+                    libelle: etat.nonRecevable ? '--' : (etat.valeur ? _libelleDeLaValeur(etat.valeur, ctx) : ''),
+                    mot,
+                    dit: forme ? `${mot}, ${forme}` : mot,   // pour le lecteur d'écran et l'infobulle
+                    nonRecevable: etat.nonRecevable || null
+                };
+            }
+        };
+    }
+
     /* ============================== L'EN-TÊTE ============================== */
 
     function _dateCourte(production) {
@@ -869,6 +911,7 @@
         quitterPresentation,   // vue simple quittée
         notesDuGroupe,         // vue simple : l'écran « Note finale »
         noterGesteLot,         // vue simple : la mise à jour des valeurs, que « Annuler » défait en un geste
+        normeDeLEleve,         // le profil et le PDF : la norme du tableau pour une personne (11 nov. 2026)
         MOTS,                  // vue simple : les mots validés, repris tels quels (gelés)
         construireHTML,        // exposés pour le banc (tests/unit/tableau-notation-1.test.js)
         phraseRegleStd,
