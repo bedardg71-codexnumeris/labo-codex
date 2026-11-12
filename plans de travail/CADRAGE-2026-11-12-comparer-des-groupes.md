@@ -1,4 +1,4 @@
-# Cadrage — Comparer des groupes : l'outil d'étude du Labo (12 nov. 2026, v6)
+# Cadrage — Comparer des groupes : l'outil d'étude du Labo (12 nov. 2026, v7)
 
 > Page d'EXPLORATION, à corriger par Grégoire. Aucun code n'en découle tant qu'elle n'est pas relue.
 > Née à l'aperçu du lot « Tendances » (PR #18, non fusionnée), quand le suivi longitudinal s'est
@@ -186,7 +186,11 @@ pratiques comparables, on pourra regarder au-delà du seuil ; pas avant.
   réussissent mon cours puis échouent tous le suivant, on peut légitimement se demander s'ils étaient
   bien préparés, et pas seulement conclure que le second cours était plus difficile.
 - **Ce que l'enseignant·e peut faire dès maintenant** : comparer ses propres cohortes entre elles.
-- **Conséquence pour la forme (à confirmer)** : la mesure de l'étude n° 1 est « a réussi / n'a pas
+- **Forme retenue par Grégoire (v7)** : LES DEUX, le tableau de comptes D'ABORD, le nuage ensuite. Le
+  nuage apporte une nuance que le tableau n'a pas (où se situe chaque personne, pas seulement de quel
+  côté du seuil) ; elle se lit avec prudence et ne s'extrapole pas. (Lecture de Claude Code d'une phrase
+  ambiguë — « le tableau offre une nuance que les colonnes n'offrent pas » —, à confirmer.)
+- **Le raisonnement qui y mène** : la mesure de l'étude n° 1 est « a réussi / n'a pas
   réussi », dans chacun des deux cours. Le nuage, lui, place la note exacte du cours suivant : il montre
   donc plus que ce qu'on s'autorise à lire. La lecture juste serait un tableau de comptes par cohorte
   (réussi les deux ; réussi le premier, pas le second ; n'a pas réussi le premier), comparé d'une
