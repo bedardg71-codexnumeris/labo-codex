@@ -21,6 +21,18 @@
 
     var CHANGELOG = [
         {
+            // 1.244 (12 nov. 2026 : la dissection sur l'iPad, la carte des parcours à droite, une seule barre au
+            // chargement) — lignes proposées par la conversation du Projet, validées par Grégoire (12 nov.)
+            version: '1.244',
+            couleur: 'vert',
+            titre: 'Ta grille, sur l’iPad',
+            items: [
+                'Ta grille, sur l’iPad&nbsp;: la légende des étiquettes montre qu’elle défile, un doigt qui fait défiler ne pose plus d’étiquette, et la bulle te guide un manque à la fois, avec un exemple à voir ou à faire toi-même.',
+                'Sur l’iPad, la carte des parcours se pose à droite et se glisse jusqu’au bord de l’écran.',
+                'Au chargement, l’en-tête ne montre plus qu’une barre.'
+            ]
+        },
+        {
             // 1.243 (11 nov. 2026 : les flèches des parcours, « Tableau de notation » dans la sous-navigation, les normes du
             // tableau au profil et au PDF, la pastille au pied de l'accueil) — titre et huit lignes validés par Grégoire, mot pour mot (11 nov. 2026, après 15 h 30).
             version: '1.243',
