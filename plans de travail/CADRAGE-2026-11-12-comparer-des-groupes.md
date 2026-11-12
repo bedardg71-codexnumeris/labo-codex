@@ -117,7 +117,7 @@ pose problème s'il promet plus que ce que l'outil livre.
 |---|---|---|
 | Labo | gardé | un nom de lieu, au sens courant : on y essaie des choses |
 | Observations | gardé | c'est exactement ce qu'on fait |
-| Hypothèse | gardé pour l'instant | le garde-fou 2 (dire ce qui donnerait tort) lui donne son sens |
+| **Hypothèse** | **retiré des libellés, déplié en deux phrases** (ci-dessous) | « hypothèse » pourra figurer entre parenthèses si on veut clarifier (Grégoire) |
 | **Étude** | **remplacé par « question »** | Grégoire : « c'est le terme qui m'a toujours le plus embarrassé ». En recherche, il promet un protocole et un résultat qui fait autorité. |
 | **Conclusion** | **remplacé par « ce que j'en retiens »** | « conclusion » dit quelque chose de clos et contredit le garde-fou 5 |
 
@@ -128,8 +128,28 @@ pose problème s'il promet plus que ce que l'outil livre.
 - **Une faiblesse mesurée** : le Journal contient aussi le questionnaire du bilan, adressé aux
   étudiant·es (`questionnaireBilan`). « Mes questions » et « questionnaire » voisineraient avec deux
   sens. À traiter au moment d'écrire les écrans.
-- **Ouvert** : « hypothèse » pourrait devenir « ce que j'attends », par symétrie avec « ce que j'en
-  retiens ». Non discuté.
+
+**Les cinq temps d'une question, à la première personne (retenus par Grégoire, 12 nov.)** :
+
+| Temps | Libellé | Ce qu'il porte |
+|---|---|---|
+| 1 | **Ce que je m'attends à voir** | l'hypothèse (le mot peut suivre entre parenthèses) |
+| 2 | **Ce qui me donnerait tort** | le garde-fou 2 |
+| 3 | **Ce que j'observe** | le renvoi vers Observations |
+| 4 | **Ce qui pourrait l'expliquer autrement** | le garde-fou 3 |
+| 5 | **Ce que j'en retiens** | l'ancienne « conclusion », datée et reprenable |
+
+- **Pourquoi « m'attendre à voir »** et non « attendre » : « ce que j'attends » peut se lire comme un
+  souhait ; « m'attendre à voir » oblige à nommer quelque chose d'observable. Avec le temps 2, les deux
+  phrases font le travail du mot « hypothèse », et l'exigent davantage que lui.
+- **Le « je »** (Grégoire) : ces phrases qui parlent à la place de l'utilisateur·trice mettent dans une
+  position de praticien réflexif.
+- **Une règle de voix proposée par Claude Code, non contredite** : l'application dit « tu » quand elle
+  propose (elle tutoie déjà : « Ce que tes seuils donnent sur ton groupe ») ; le Journal dit « je »
+  parce que c'est l'enseignant·e qui y écrit. C'est le § 5, rendu visible par la grammaire.
+- **Ouvert** : le temps 4 est-il un champ à part, ou une invitation à l'intérieur du temps 5 ? Cinq
+  champs peuvent peser sur qui veut seulement noter une intuition.
+- Entre nous, dans ce cadrage, « hypothèse » reste le mot commode pour désigner le temps 1.
 - **Où est le vrai risque (inférence de Claude Code)** : moins dans les noms que dans les verbes
   employés à la sortie de l'application (« prouve », « démontre », « confirme »), le jour où une
   question se partage.
