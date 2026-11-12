@@ -1,4 +1,4 @@
-# Cadrage — Comparer des groupes : l'outil d'étude du Labo (12 nov. 2026, v10)
+# Cadrage — Comparer des groupes : l'outil d'étude du Labo (12 nov. 2026, v11)
 
 > Page d'EXPLORATION, à corriger par Grégoire. Aucun code n'en découle tant qu'elle n'est pas relue.
 > Née à l'aperçu du lot « Tendances » (PR #18, non fusionnée), quand le suivi longitudinal s'est
@@ -101,8 +101,10 @@ trois formes, pas une.
     lecture dans le temps.
   - « Dynamique des corrélations » (`js/correlations-longitudinales.js`) : le lien entre P et
     l'assiduité, la complétion, l'engagement, les interventions, semaine par semaine.
-- **Labo › Comparateur** : autre chose. Il compare des PRATIQUES de notation sur des profils-types,
-  pas des groupes réels.
+- **Labo › Comparateur** (affiché « Exploration ») : autre chose. Il compare des PRATIQUES de notation.
+  **Corrigé en v11** : il a deux sources, des profils-types générés ET le groupe actif réel
+  (`js/comparateur-pratiques.js`, source `'reel'`). Grégoire : il sert à explorer des pratiques avant
+  de les mettre en œuvre, mais aussi à comparer des pratiques déjà mises en œuvre.
 - **Le lot « Tendances »** (aperçu) : un nuage qui reçoit déjà « deux mesures et un groupe » sans rien
   savoir des cours (`comparaisonDeCours`). C'est la première brique de la lecture appariée.
 
@@ -137,14 +139,16 @@ dynamique des groupes.
 
 1. ~~Par quoi commencer ?~~ **Tranché (v2)** : la n° 1, puis les jetons et le changement de méthode.
 1 bis. ~~Que note le journal ?~~ **Tranché (v3)** : l'hypothèse, l'observation, la conclusion (§ 1 ter).
-   Reste : où vit-il (dans Bilan, dans l'outil, ou l'outil EST ce journal) ?
+   ~~Reste : où vit-il ?~~ **Tranché (v11)** : dans le Journal (§ 6 quater).
 2. **Une tension à nommer.** La carte « Dynamique des corrélations » calcule un r et s'impose un minimum
    d'étudiant·es ; la décision du 11 nov. a retiré du lot « Tendances » le lien calculé et tout jugement
    sur l'échantillon. Les deux ne se contredisent pas forcément (un r décrit, il ne juge pas), mais si
    Études rejoint l'outil, il faudra dire laquelle des deux règles gouverne.
-3. **Le nom de l'outil**, et sa place : une sous-section neuve du Labo, ou Études refondue ?
-4. **Le sort de l'onglet « Tendances »** : il reste dans Suivi longitudinal comme première comparaison,
-   ou il déménage dans l'outil dès que celui-ci existe ?
+3. ~~Le nom de l'outil, et sa place.~~ **Tranché (v11)** : ni sous-section neuve, ni « microscope » au
+   menu. Études et Suivi longitudinal se fondent dans « Observations » (§ 6 quater).
+4. ~~Le sort de l'onglet « Tendances ».~~ **Tranché (v11)** : il déménage dans Observations.
+5. **Ouvert (v11)** : le nom d'« Exploration », qui dépend de la façon dont on situe la comparaison de
+   pratiques par rapport à Observations.
 
 ## 6 bis. La première étude, de bout en bout (v5) — pour voir ce qui manque
 
@@ -228,6 +232,46 @@ qu'il ou elle en attend.
 **Deux regards, deux moments** : le comparateur de pratiques regarde AVANT (sur des profils-types, ce
 qu'une autre pratique donnerait) ; le microscope regarde APRÈS (sur les vrais groupes, ce qui s'est
 passé). Une étude peut s'ouvrir sur le premier et se conclure sur le second.
+
+## 6 quater. La place dans le Labo (v11 — Grégoire, 12 nov., 2e séance)
+
+**Le Labo, tel qu'il se dessine : Observations · Journal · Exploration · Outils.** Quatre sous-onglets
+au lieu de sept, tous liés à l'expérimentation. Grégoire : « n'hésitons pas à renommer et déplacer les
+concepts que représentent les onglets ». Les noms pourront être repris.
+
+| Aujourd'hui | Devient | Ce qu'on y fait |
+|---|---|---|
+| Études + Suivi longitudinal | **Observations** | on regarde ce qui s'est passé : le cours suivant, les corrélations, les jetons. On n'y écrit pas. |
+| Bilan | **Journal** | on réfléchit et on écrit. Trois volets : le bilan du trimestre, les changements entre trimestres, les études. |
+| Exploration | Exploration (nom en suspens) | on compare des pratiques, simulées ou appliquées au groupe réel |
+| Observation | **Outils** | on règle les lentilles : affichages, seuils, paramètres d'analyse |
+| Modélisation | part vers Suivi › Animation | (Animation sera réaménagée avec les trois outils qu'elle contient) |
+| Rythme | part vers Évaluation | c'est un outil de gestion du temps d'évaluation, pas d'expérimentation |
+
+- **Pourquoi « Outils »** (mesuré) : le sous-onglet « Observation » ne contient que des préférences
+  d'affichage, des paramètres d'analyse et des seuils ; son titre de page est déjà « Outils
+  d'observation ». Grégoire : des réglages, des filtres, des lentilles à travers lesquels on regarde.
+- **Pourquoi « Journal »** : le bilan est un MOMENT (après le trimestre) ; le lieu accueille aussi
+  l'inter-trimestres et les études. Le mot reprend le § 1 ter. « Codex » écarté : il désigne déjà un
+  des quatre concepts de données.
+- **Où se forment l'hypothèse et la conclusion (Grégoire)** : le bilan réflexif (post-trimestre) et
+  les changements observés (inter-trimestres) sont les lieux où l'on réfléchit à la pratique à moyen
+  ou long terme. C'est là que se forment à la fois les hypothèses et les conclusions, dans un
+  mouvement itératif : réflexion, observation, réflexion.
+- **L'étude : un seul objet, deux portes.** Elle s'écrit dans le Journal (nom, hypothèse datée, renvoi
+  vers la ou les observations, conclusions datées et reprenables). Depuis Observations, on voit
+  quelles études portent sur ce qu'on regarde, et on retourne au Journal pour conclure. L'étude ne
+  copie pas les données : elle les montre à jour.
+- **« Avant de voir les données »** : non imposé, mais tracé. L'hypothèse est datée, et l'écran compte
+  les cohortes arrivées depuis, sans commenter (§ 5). Accepté par Grégoire « pour l'instant ».
+- **Une tension gardée** : une hypothèse peut naître en regardant, devant un nuage qui surprend.
+  L'écriture étant au Journal, ce cas demande un aller-retour.
+- **Supposé par Claude Code, à confirmer au moment de coder** : une étude traverse les trimestres,
+  donc elle se range hors du trimestre, comme le registre.
+- **Conséquence** : la tension du § 6, point 2 (le r calculé et son minimum d'étudiant·es, face à
+  « l'écran donne des comptes ») n'est plus conditionnelle, puisque les corrélations rejoignent
+  Observations. Elle reste à trancher.
+- **Zone protégée** : ces renommages touchent `js/config.js` et `js/navigation.js`. Rien n'est engagé.
 
 ## 7. Hors de ce cadrage
 

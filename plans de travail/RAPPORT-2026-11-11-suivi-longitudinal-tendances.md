@@ -10,6 +10,12 @@ PR est ARRÊTÉE à sa demande. `RELAIS.md` (sur `main`) n'a PAS été touché :
 EXPLORATION, sans code : le suivi longitudinal s'est révélé un cas particulier d'un outil plus large. Tout est dans
 **`plans de travail/CADRAGE-2026-11-12-comparer-des-groupes.md` (v10)** — à lire en premier à la reprise.
 
+**Reprise du 12 nov., 2e séance (exploration, aucun code).** Le premier fil ouvert ci-dessous est traité : le
+cadrage passe en **v11**, § 6 quater. Le Labo se dessine en quatre sous-onglets (Observations · Journal ·
+Exploration · Outils) ; l'étude s'écrit dans le Journal ; Rythme part vers Évaluation, Modélisation vers Animation.
+Cette séance a tourné sur `claude/awesome-bohr-q7rsa1` (posée sur la tête de la branche du lot, `5b76121`) : la
+session nuage ne pousse que sur la sienne. À ramener sur la branche du lot par avance rapide.
+
 **Ce que Grégoire a décidé pendant l'exploration (12 nov.)** :
 1. L'objet du Labo est d'étudier les données en COMPARANT ; le longitudinal est une option parmi d'autres.
 2. Ce qu'on compare, au fond : des VERSIONS de son enseignement. Les groupes en sont le moyen.
