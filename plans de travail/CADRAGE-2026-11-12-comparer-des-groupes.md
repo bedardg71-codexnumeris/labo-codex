@@ -553,7 +553,44 @@ les premiers réussissent presque tous le 102, et nettement plus souvent que les
   réussir le 102 à 60 % est une barre basse pour qui avait 75 %, donc « se maintient-elle ? » demande
   plus que ce que le seuil de réussite (v6) peut montrer — tension laissée visible ; et les effectifs
   sous 75 % parmi les élèves suivis seront petits.
-- **Le temps 2 n'est pas écrit.**
+
+**L'hypothèse, dans les mots de Grégoire (12 nov., après la contre-vérification ci-dessous)** : « Si,
+en tant qu'enseignant, je certifie la maîtrise à 75 %, cette maîtrise devrait être durable. […]
+Est-ce que le jugement que je porte en me basant sur la taxonomie SOLO est un jugement valable ? Est-ce
+que les données montrent que ce jugement est valable ? C'est ça la question. » Les analyses de 2025 ne
+comptent pas, ni pour ni contre : « on repart à zéro à partir de maintenant avec un échantillon plus
+large ». C'est pourquoi, depuis 2024, il demande à chaque trimestre les résultats du cours ultérieur.
+
+**Où en sont les données** : les résultats du 102 reçus en juin 2026 sont entrés au registre, mais
+RIEN n'a été analysé (« j'ai construit le registre pour le faire, mais le travail n'a pas été fait »).
+Nuance de Claude Code : les saisir un à un, c'est les avoir vus passer ; aucun compte n'a été fait, et
+c'est le compte qui répond. Ils sont tenus pour non regardés.
+
+**Temps 2, écrit le 12 nov. 2026 — AVANT toute analyse des résultats du 102.** Les quatre réglages
+sont de Grégoire ; la phrase qui les assemble est de Claude Code, à confirmer par lui :
+
+> Ce qui me donnerait tort : que, parmi mes élèves certifié·es à 75 % ou plus, plus de deux sur dix
+> échouent le 102 ; ou que mes élèves ayant réussi entre 60 et 74 % réussissent le 102 aussi souvent,
+> ou plus souvent, que les premiers. On ne juge qu'à partir de dix élèves dans chaque groupe, toutes
+> cohortes cumulées ; d'ici là, c'est trop tôt pour le dire.
+
+| Réglage | Décision de Grégoire |
+|---|---|
+| Combien d'échecs au 102 parmi les certifié·es à 75 % ou plus ? | plus de 2 sur 10 lui donne tort |
+| Le contraste avec les 60-74 % peut-il lui donner tort ? | oui : c'est la ligne de 75 % elle-même qui est mise à l'épreuve |
+| Quel écart ? | aucun écart dans le bon sens lui donne tort (les 60-74 % réussissent aussi souvent, ou plus) |
+| À partir de combien d'élèves ? | 10 dans chaque groupe ; les cohortes se cumulent |
+
+- **Proposé par Claude Code, non contredit** : un abandon du 102 n'est pas un échec, il se compte à
+  part parmi « ceux qu'on ne voit pas » (si les résultats reçus le distinguent) ; l'écran garde le
+  détail par cohorte à côté du cumul.
+- **Deux affirmations, pas une** : « la maîtrise que je certifie est durable » (premier réglage) et
+  « ma ligne de 75 % sépare deux réalités » (le contraste). Grégoire met les deux à l'épreuve.
+- **Limites** : le résultat vaut pour les élèves qui ont donné leur permission ; et réussir le 102 à
+  60 % reste une barre basse pour dire qu'une maîtrise « se maintient ».
+- **Non dit** : combien d'élèves sont inscrit·es au registre, et leur répartition de part et d'autre
+  de 75 % (elle se lit sans regarder les résultats du 102).
+- ⚠ **Tant que la phrase n'est pas confirmée, ne pas ouvrir la comparaison sur les vraies données.**
 
 ### Contre-vérification des analyses de 2025 (demandée par Grégoire)
 
