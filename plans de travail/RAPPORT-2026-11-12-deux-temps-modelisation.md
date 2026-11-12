@@ -199,18 +199,32 @@ démo, avec du matériel fourni, puis avec le tien. « Mettre ta classe en place
 verts (après avoir ajouté `keysSync` à la doublure de la sentinelle T7, et sorti le bouton de la carte en fonction
 pour tenir le plafond de complexité à 434).
 
-**Bancs voisins, rejoués** : @@VOISINS@@
+**Bancs voisins, rejoués** : `assistance-refus` 2 sur 2, `registre-des-parcours` 1 sur 1 ; les bancs de la démo
+(`demo-saisie-presences`, `guidage-demo`, `noms-demo-totems`, `t3-retirer-les-copies`, `copie-demo-bibliotheque`)
+10 sur 11 ; `parcours-1-et-2` 6 sur 7 ; `parcours-2-ma-classe` 2 sur 4 ; `pied-de-page-et-assistance` 2 sur 4 ; les
+parcours 3 à 9 et `parcours-fleches` 68 sur 73 au premier passage. Chaque rouge a été rejoué sur `main` :
+aucun n'est propre à ce lot. Deux d'entre eux (`parcours-3`, « grille en points » ; `parcours-8`, « sans fichier, sur
+une grille déjà employée ») passent sur `main` et passent aussi sur la branche au second essai : instables, un contour
+attendu 5 s.
 
 **Rouges nommés, tous rouges aussi sur `main` (`271dc9177`) sous Chromium, mesurés dans un second arbre** :
 - `parcours-1-et-2`, « panneau : titre, phrase… » : le panneau mesuré à −126 px du bord droit (pris pendant son entrée).
 - `pied-de-page-et-assistance`, 820 px, sombre et clair : la version et « Nouveautés » ne sont pas sur la même ligne.
 - `parcours-2-ma-classe`, deux essais : une minuterie dans la page ne part pas sous l'horloge figée (le parcours réel,
   lui, y est joué jusqu'à « Terminer » avant ce point).
+- `parcours-3`, « étape 8 à 820 px » ; `parcours-8`, « 820 px : aucun avis ne couvre la bulle » ; `parcours-fleches`,
+  « la flèche suit le défilement et le redimensionnement » : non creusés.
 - `copie-demo-bibliotheque`, « rien sans le geste » : **une grille dupliquée dans la démo se retrouve dans
   `a2031_grillesTemplates`, le vrai trimestre, après la sortie.** Vert au verdict WebKit du 11 nov. (1 623 sur 1 624) ;
   sous Chromium, c'est une écriture de la démo dans des données réelles. Non creusé : hors du lot, à ton jugement
   (issue 2, non inscrit).
 
+
+**Les écrivains d'un cours, passés en revue** (`CoursEntite.creer`) : le formulaire du Cadre, en création et en
+duplication (marqué par ce lot) ; le service de Suivi › Rencontres (déjà marqué) ; la vue simple (`js/vue-simple.js`),
+qui ne s'ouvre pas dans la démo. Rituel de fin de session : aucun `innerHTML`, aucun gestionnaire en ligne, aucun
+`console.log`, aucun nom réel dans le diff ; le hook de commit signale une écriture sans assainissement, dans le banc
+(un test, acquitté ici).
 
 ## 6. Ce que j'ai supposé
 
