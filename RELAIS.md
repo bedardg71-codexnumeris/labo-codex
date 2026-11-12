@@ -7,6 +7,28 @@
 
 ---
 
+## 11 NOV. 2026, 20 H 30 (Claude Code) : **1.243.0 POUSSÉE ET EN LIGNE, VERDICT VERT** — les quatre branches fusionnées
+
+Décision de Grégoire (15 h 28, relais du Projet de 15 h 30) : « envoyer les corrections en ligne ». **`origin/main` = `66c2a464f`** (1.243.0, build `1111-1637`, release `8f3e05b94`) ; Netlify `6af51614`, `ready` à 20 h 28 sur ce SHA. PR n° 17 fermée comme fusionnée ; les trois autres branches n'avaient pas de PR.
+
+**Fusions** (`--no-ff`, dans cet ordre) : pastille `20d46acbc`, sous-navigation `e51dc5b85`, normes `5b681da17`, flèches `68b1e18d5` (cinquième aperçu). Conflits : les jetons `?v=` d'`index.html` (pour chaque fichier, le jeton qui avait déjà servi le contenu fusionné ; sinon un jeton neuf), le build (`version.*`, `init-inline.js`, `main.js`), et un vrai dans `js/accueil.js` : la ligne du pied garde le build (flèches) ET la pastille (pastille). Puis `release.mjs --build-only`, puis `minor`.
+
+**Premier verdict, sur `8f3e05b94` : rouge**, 5 nouveaux. 4 du groupe (`pied-de-page-et-assistance`, 390 et 820 px) : le banc attendait « Nouveautés » sans l'annonce de la pastille, et à 820 px la pastille dans le flux faisait passer « Nouveautés » sous la version (289 px pour 282). **Correction `66c2a464f`** : le point sort du flux, suspendu 4 px après le mot (capture vérifiée) ; le banc lit le libellé sans l'annonce. Le 5e, `grilles-sous-criteres-condense` (iPad), instable connu depuis le 22 oct. : 8/8 seul.
+**Second verdict, sur `66c2a464f` : vert**, `verdict-en-morceaux.mjs`, code 0 : 1 624 essais, 1 623 verts, 1 au second essai (`bareme-3` › invariant 1, déjà ouvert le 10 nov. ; 5/6 rejoué seul), 0 rouge, 68 sautés. Secteur, sans veille, pression 1, navigateurs fermés. Les rattrapés du groupe au premier verdict, rejoués seuls six fois : `parcours-5` (sept étapes) 6/6, `pages-sans-doublons` 6/6. Hook : « verdict vert à jour pour ce commit ». Ce commit de relais n'a pas de verdict (documentation seule).
+
+**Fait aussi** : le filtre `seVoit` des halos ajoutés est isolé (l'essai de la capture 25 remet le « Planificateur » sur la leçon ; retiré, rouge 2/2). Porte terrain : §2.8 a-g et §2.7 a-b réussies (15 h 04 à 15 h 27) ; §2.5 a-b, §2.6 a-b, §2.7 c-d ouvertes, « non faites avant la release ». Backlog : **#1273** (capture 35 : la grille créée avant « Commencer » ; ira avec la consigne de la dissection), **#1274** (« Performance (P) » hors de la vue, étape 7 d'« Évaluer »), **#1275** (le rouge intermittent de 820 px, « Ce que tu comptes »). Nouvelles 1.243 « Les parcours te montrent où toucher », huit lignes validées par Grégoire. Les sorties de diagnostic non suivies (`*-results/`) restent dans le worktree des flèches ; les `.log` de 6 à 8 et de `second-essai` étaient déjà committés sur la branche (`2e9edab10`, `ee8bf0bf6`) et sont arrivés avec elle.
+
+**Complexité** (1.242.1 `48f118bf5` → 1.243.0 `66c2a464f`) :
+- fichiers de plus de 1 000 lignes : 41 → 43 (`js/parcours-moteur.js` 1 072, `js/synthese-retroaction-data.js` 1 008) ; lignes de code : 167 830 → 168 590 (Δ +760) ;
+- au-dessus de 15 : 435 → 434 (Δ −1) ; somme au-dessus de 15 : 10 972 → 10 954 (Δ −18) ;
+- au-dessus de 30 : 77 → 77 (Δ 0) ; maximum : 130 ; fonctions : 16 988 → 17 156.
+
+**Trouvaille, non inscrite (ni vécue ni bloquante)** : GitHub juge maintenant Playwright au push (20 morceaux, WebKit Linux) ; les trois derniers push de `main` y sont rouges. Sur `48f118bf` : 9 specs nouvellement rouges sous Linux (`codex-1184`, `en-tete-epure`, `palette-evaluation-compacte`, `parcours-2` ×3, `parcours-7`, `tableau-de-notation-1`), alors que le Mac était vert 1 602/1 602. Vitest y est vert. Le skill `debut-de-session` (§2.1) dit encore « Playwright à la demande seulement » : périmé.
+
+**Ce qui reste ouvert** : la dissection sur l'iPad et les parcours en deux temps (version suivante, partie de `main`) ; les six portes ouvertes ; #1271 ; les points de l'entrée de 22 h 50 du 10 nov.
+
+---
+
 ## 11 NOV. 2026, 10 H 50 (Claude Code) : **QUATRE BRANCHES ATTENDENT LEUR FUSION, EN GROUPE** — `main` inchangé
 
 Demandé par la conversation du Projet (11 nov., 9 h 47). **`origin/main` = `180997e10`** (1.242.1, en ligne). Les
