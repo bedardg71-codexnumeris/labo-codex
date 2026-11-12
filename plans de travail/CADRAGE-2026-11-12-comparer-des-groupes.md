@@ -404,8 +404,12 @@ Les trois mesures que le rapport demandait « avant de promettre ».
 
 ### Ce que Grégoire a dans son application (dit par lui, 12 nov. — non mesuré par Claude Code)
 
-- **Quatre trimestres** : A24 (notes finales seulement ; le détail est dans un tableur), A25, H26, et
-  A26 en cours. (Lecture de Claude Code : A24 présent mais partiel. Non confirmée explicitement.)
+- **Quatre trimestres** : A24 (partiel, confirmé : seule la note finale y est entrée), A25, H26, et
+  A26 en cours.
+- **L'histoire** : la version d'origine de l'application est un tableur Numbers, élaboré de l'automne
+  2024 à l'hiver 2025. L'application existe depuis l'automne 2025. Pour A24, tous les résultats de
+  tous les élèves, avec les critères de chaque évaluation, restent disponibles dans ce tableur. (H25
+  n'est pas dans l'application ; inférence : il est dans le tableur aussi.)
 - **Une seule carte d'alignement : celle d'A26, et elle n'est pas encore complète.**
 - **Conséquences (inférences)** :
   - le journal des changements ne peut RIEN constater sur l'alignement pour le passé. Pour A25 et
@@ -413,8 +417,11 @@ Les trois mesures que le rapport demandait « avant de promettre ».
     son application) et ce que Grégoire en dit de mémoire ;
   - **A26 est le point de départ** : le premier passage où l'application pourra constater un
     changement d'alignement est A26 vers H27. La carte d'A26 en est la référence ;
-  - une entrée du journal sur un changement passé est écrite APRÈS avoir vu les résultats. Le
-    garde-fou 1 ne la protège pas : la date de l'entrée le dira, sans commentaire ;
+  - **entrées rétrospectives et entrées prospectives (distinction confirmée par Grégoire)** : une
+    entrée du journal sur un changement passé est écrite APRÈS avoir vu les résultats, et le
+    garde-fou 1 ne la protège pas. Ce n'est pas une raison de s'en priver, mais elle n'a pas le même
+    statut qu'une entrée écrite à partir de maintenant. La date de l'entrée le dit, sans que l'écran
+    le commente ;
   - A24 peut servir de cohorte dans une comparaison côte à côte sur la note finale, rien de plus ;
   - revoir les archives reste juste, mais n'est plus un préalable : cela devient nécessaire le jour
     où un trimestre quitte l'application.
