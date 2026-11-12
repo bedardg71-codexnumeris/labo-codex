@@ -410,7 +410,12 @@ Les trois mesures que le rapport demandait « avant de promettre ».
   2024 à l'hiver 2025. L'application existe depuis l'automne 2025. Pour A24, tous les résultats de
   tous les élèves, avec les critères de chaque évaluation, restent disponibles dans ce tableur.
 - **Les versions de son enseignement, dans l'ordre (dit par Grégoire)** :
-  - **H24** : une pratique sommative et alternative EN TRANSITION. Hors de l'application. Il a les
+  - **du début de sa carrière à H14** : le cours 101 en pratique sommative traditionnelle. Il en a
+    toutes les notes. Il n'a pas les résultats du cours suivant pour tous ces trimestres (à préciser :
+    pour aucun, ou pour quelques-uns) ;
+  - **de 2014 à 2024** : dix ans sans donner le 101 (cours de cinéma, cours de 103) ;
+  - **H24** : retour au 101 (la 20e fois qu'il le donne), et début du tableur. Une pratique sommative
+    et alternative EN TRANSITION. Hors de l'application. Il a les
     résultats de tous les travaux (21 ou 24 artefacts à l'époque) ; il ne se souvient pas s'il a les
     critères de chaque évaluation ;
   - **A24** : le PREMIER trimestre avec un portfolio d'apprentissage et une pratique alternative de
@@ -433,6 +438,26 @@ Les trois mesures que le rapport demandait « avant de promettre ».
   - A24 peut servir de cohorte dans une comparaison côte à côte sur la note finale, rien de plus ;
   - revoir les archives reste juste, mais n'est plus un préalable : cela devient nécessaire le jour
     où un trimestre quitte l'application.
+
+### Ce que le passé permet de comparer, et ce qu'il ne permet pas (12 nov.)
+
+- **Le piège de l'instrument (analyse de Claude Code)** : une note finale en pratique sommative et une
+  note finale en pratique alternative ne mesurent pas la même chose, puisque la façon de noter a
+  changé. Mettre côte à côte les notes du cours avant et après comparerait deux instruments, pas deux
+  apprentissages.
+- **Pourquoi la question n° 1 y échappe** : sa mesure est extérieure au changement. C'est la note du
+  cours suivant, donnée par quelqu'un d'autre, selon une pratique que Grégoire n'a pas modifiée.
+- **Ce que la série d'avant ne peut pas porter** : les cohortes sommatives du 101 ont plus de dix ans
+  (jusqu'à H14), sans résultats du cours suivant pour toutes. Dix ans d'écart changent la population,
+  le programme, les collègues du cours suivant et l'enseignant lui-même : trop d'autres explications
+  (garde-fou 3) pour y lire l'effet d'une pratique.
+- **Ce qui en découle (inférence, à confirmer par Grégoire)** : il n'y a pas de cohorte « d'avant »
+  utilisable, sinon H24, en transition et d'hiver. L'outil regarde donc vers l'avant : il compare des
+  versions À L'INTÉRIEUR de la pratique alternative (A24, A25, H26, A26 et la suite), et situe chaque
+  cohorte par rapport au seuil de réussite (§ 6 bis, point de repère). Le passé donne du contexte, pas
+  une preuve. C'est cohérent avec « A26 est le point de départ ».
+- **Une erreur de Claude Code, corrigée ici** : il avait compris une série sommative continue de
+  l'automne 2014 à l'hiver 2024. C'est l'inverse : le 101 s'arrête à H14 et reprend à H24.
 
 ## 7. Hors de ce cadrage
 
