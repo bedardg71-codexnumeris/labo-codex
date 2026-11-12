@@ -488,10 +488,34 @@ métacognitif qui l'accompagne existe pour conscientiser la correction de l'erre
   trimestre ; et un jeton suit un travail raté, après quoi le suivant est souvent meilleur de toute façon.
 - **Ce que l'application garde (mesuré, `js/evaluation-jetons.js`)** : une reprise crée une nouvelle
   évaluation reliée à l'originale (`repriseDeId`). Si l'originale est gardée, la chaîne par critère est
-  observable. Si elle est supprimée (réglage de la pratique), l'avant disparaît. (Non répondu : Grégoire
-  garde-t-il les originales ?)
+  observable. Si elle est supprimée (réglage de la pratique), l'avant disparaît. **Grégoire garde
+  l'originale, archivée** : la chaîne est donc complète chez lui.
 - **Ce qu'elle ne garde pas** : le critère ciblé (il ne se déduit que de ce qui a monté entre
   l'originale et la reprise) ; et l'exercice métacognitif, sans aucune trace.
+
+**Temps 2, écrit le 12 nov. 2026 — AVANT la fin du trimestre A26.** Les trois réglages sont de
+Grégoire ; la phrase qui les assemble est de Claude Code, à confirmer par lui :
+
+> Ce qui me donnerait tort : que la majorité des reprises (50 % + 1) retombent. Une reprise est
+> retombée quand, dans la majorité des productions qui la suivent jusqu'à la fin du trimestre, le
+> critère ciblé revient à son niveau d'avant la reprise, ou plus bas.
+
+| Réglage | Décision de Grégoire |
+|---|---|
+| Que veut dire « retomber » ? | revenir au niveau d'AVANT la reprise (ou plus bas). Un cran perdu sans revenir au point de départ est une fluctuation. |
+| Dans combien de productions ? | la majorité des productions suivantes |
+| Chez combien ? | la majorité, 50 % + 1 |
+
+- **Proposé par Claude Code, non contredit** : compter par REPRISE et non par élève (un·e élève peut en
+  faire plus d'une) ; lire le résultat en nombres (« 7 sur 18 ») plutôt qu'en pourcentage ; compter à
+  part, parmi « ceux qu'on ne voit pas » (garde-fou 4), les reprises suivies de trop peu de productions
+  pour que la majorité ait un sens.
+- **Non dit** : combien de productions il reste après les reprises du 3 novembre.
+- **Non mesuré** : si un même critère s'évalue de façon comparable d'une production à l'autre quand
+  elles sont de nature différente. Sinon, un niveau plus bas peut venir de la production.
+- **Pourquoi la date compte (garde-fou 1)** : la fiche est du 3 novembre, l'attente et ce qui donnerait
+  tort sont écrits le 12, et les productions suivantes ne sont pas toutes évaluées. A26 est le premier
+  cas où une question du Journal est posée avant de voir.
 
 **Le formulaire « Ma reprise : de la rétroaction à l'objectif » (3 nov. 2026, remis par Grégoire)** —
 une fiche papier de deux pages, en cinq étapes : lire sa synthèse et choisir UN critère prioritaire
