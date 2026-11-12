@@ -7,6 +7,21 @@
 
 ---
 
+## 12 NOV. 2026, 10 H 05 (Claude Code) : **LA DISSECTION SUR L'IPAD ATTEND L'ESSAI DE GRÉGOIRE** — `main` inchangé
+
+Mandat : relais de la conversation du Projet, 12 nov., 6 h 35 (huit points, étape « Ta grille »). **Le travail vit sur
+`lot/dissection-ipad`** (`39284dee3`, code en `556422384`, build `1112-0755`, version 1.243.0 inchangée), partie de
+`271dc9177`. **PR #21, aperçu `https://deploy-preview-21--codexnumeris-051225.netlify.app`. Pas de fusion** avant
+l'essai de Grégoire sur l'iPad (porte `plans de travail/PORTES-TERRAIN-2026-11-12-dissection-ipad.md`, sept décisions
+au §3). Vitest 920 / 11 490 verts ; verdict Playwright WebKit local vert sur `556422384` (0 échec, 1 au second essai
+hors lot, `grilles-sous-criteres-condense`). Rapport : `plans de travail/RAPPORT-2026-11-12-dissection-ipad.md`, avec la
+ligne des Nouvelles PROPOSÉE (non écrite).
+
+**Ce qui reste ouvert** : le verdict iPad puis la fusion de `lot/dissection-ipad` ; les parcours en deux temps ; ce
+qu'énumère l'entrée du 11 nov., 20 h 30.
+
+---
+
 ## 11 NOV. 2026, 20 H 30 (Claude Code) : **1.243.0 POUSSÉE ET EN LIGNE, VERDICT VERT** — les quatre branches fusionnées
 
 Décision de Grégoire (15 h 28, relais du Projet de 15 h 30) : « envoyer les corrections en ligne ». **`origin/main` = `66c2a464f`** (1.243.0, build `1111-1637`, release `8f3e05b94`) ; Netlify `6af51614`, `ready` à 20 h 28 sur ce SHA. PR n° 17 fermée comme fusionnée ; les trois autres branches n'avaient pas de PR.
