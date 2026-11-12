@@ -411,8 +411,8 @@ Les trois mesures que le rapport demandait « avant de promettre ».
   tous les élèves, avec les critères de chaque évaluation, restent disponibles dans ce tableur.
 - **Les versions de son enseignement, dans l'ordre (dit par Grégoire)** :
   - **du début de sa carrière à H14** : le cours 101 en pratique sommative traditionnelle. Il en a
-    toutes les notes. Il n'a pas les résultats du cours suivant pour tous ces trimestres (à préciser :
-    pour aucun, ou pour quelques-uns) ;
+    toutes les notes. Il n'a AUCUN résultat du cours suivant (102, 103) pour ces élèves (précisé par
+    lui) ;
   - **de 2014 à 2024** : dix ans sans donner le 101 (cours de cinéma, cours de 103) ;
   - **H24** : retour au 101 (la 20e fois qu'il le donne), et début du tableur. Une pratique sommative
     et alternative EN TRANSITION. Hors de l'application. Il a les
@@ -451,11 +451,19 @@ Les trois mesures que le rapport demandait « avant de promettre ».
   (jusqu'à H14), sans résultats du cours suivant pour toutes. Dix ans d'écart changent la population,
   le programme, les collègues du cours suivant et l'enseignant lui-même : trop d'autres explications
   (garde-fou 3) pour y lire l'effet d'une pratique.
-- **Ce qui en découle (inférence, à confirmer par Grégoire)** : il n'y a pas de cohorte « d'avant »
-  utilisable, sinon H24, en transition et d'hiver. L'outil regarde donc vers l'avant : il compare des
+- **Le déplacement, ACCEPTÉ par Grégoire (12 nov.)** : de « alternative contre sommative » vers « une
+  version contre la précédente ». Il n'y a pas de cohorte « d'avant » utilisable, sinon H24, en
+  transition et d'hiver. L'outil regarde donc vers l'avant : il compare des
   versions À L'INTÉRIEUR de la pratique alternative (A24, A25, H26, A26 et la suite), et situe chaque
   cohorte par rapport au seuil de réussite (§ 6 bis, point de repère). Le passé donne du contexte, pas
   une preuve. C'est cohérent avec « A26 est le point de départ ».
+- **La permission des élèves** : Grégoire ne demande à ses élèves la permission de suivre leurs
+  résultats ultérieurs que depuis l'automne 2024 ou 2025 (« voir registre »). Mesuré dans le code : le
+  registre ne garde AUCUNE trace de cette permission ; c'est l'inscription au registre qui en tient
+  lieu, avec sa date (`inscritLe`). Conséquence pour la question n° 1 : chaque cohorte y est réduite à
+  celles et ceux qui ont dit oui. Le garde-fou 4 s'applique tel quel : afficher combien d'élèves du
+  groupe ne sont pas dans la comparaison. (Autre explication à nommer, garde-fou 3 : celles et ceux
+  qui acceptent d'être suivi·es ne ressemblent pas forcément aux autres.)
 - **Une erreur de Claude Code, corrigée ici** : il avait compris une série sommative continue de
   l'automne 2014 à l'hiver 2024. C'est l'inverse : le 101 s'arrête à H14 et reprend à H24.
 
