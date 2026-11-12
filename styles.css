@@ -11039,6 +11039,473 @@ summary.rl-tuile-entete::after {
     border-top: 1px solid var(--gris-clair);
 }
 
+/* Suivi longitudinal, lot 1 (11 nov. 2026) — LES DEUX ONGLETS DE LA SECTION (« Registre », « Tendances »).
+   Ils vivent dans la section, pas dans la navigation. Cibles de 44 px ; survol sous `hover: hover` (#540). */
+.rl-onglets {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 2px;
+    margin-bottom: 16px;
+    border-bottom: 1px solid var(--bordure-moyenne);
+}
+
+.rl-onglet {
+    min-height: 44px;
+    margin-bottom: -1px;
+    padding: 0 18px;
+    background: transparent;
+    border: none;
+    border-bottom: 2px solid transparent;
+    border-radius: var(--radius-moyen) var(--radius-moyen) 0 0;
+    color: var(--texte-secondaire);
+    font-size: 0.95rem;
+    font-weight: 500;
+    cursor: pointer;
+}
+
+.rl-onglet.actif {
+    color: var(--accent-primaire);
+    border-bottom-color: var(--accent-primaire);
+    font-weight: 600;
+}
+
+.rl-onglet:focus-visible,
+.tend-bascule:focus-visible,
+.tend-bulle-fermer:focus-visible {
+    outline: var(--focus-ring-width) solid var(--focus-ring-color);
+    outline-offset: -3px;
+}
+
+/* L'ONGLET « TENDANCES » : le nuage de points (js/suivi-tendances.js).
+   LA PALETTE DES COHORTES — huit teintes de clartés différentes, voisines contrastées, pour que deux cohortes qui se
+   suivent ne se confondent pas ; les mêmes dans les deux modes (la sphère porte son ombre). Variables NEUVES, bornées
+   à cette section : aucune teinte de la palette de l'application n'est une série de données, et le bleu de sélection
+   peut être celui d'une cohorte. La teinte d'une bille vient de `.tend-teinte-N` ; au-delà de huit cohortes, elle reprend. */
+#registre-longitudinal-conteneur {
+    --tend-cohorte-0: #2f7fd1;
+    --tend-cohorte-1: #f2b134;
+    --tend-cohorte-2: #8a4fc7;
+    --tend-cohorte-3: #6fd6b0;
+    --tend-cohorte-4: #d6455d;
+    --tend-cohorte-5: #a9d8f7;
+    --tend-cohorte-6: #b5651d;
+    --tend-cohorte-7: #f29cc8;
+    --tend-anneau: #ffffff;   /* l'anneau de la bille touchée : blanc dans les deux modes (décision du 11 nov.) */
+}
+
+.tend-teinte-0 { --tend-teinte: var(--tend-cohorte-0); }
+.tend-teinte-1 { --tend-teinte: var(--tend-cohorte-1); }
+.tend-teinte-2 { --tend-teinte: var(--tend-cohorte-2); }
+.tend-teinte-3 { --tend-teinte: var(--tend-cohorte-3); }
+.tend-teinte-4 { --tend-teinte: var(--tend-cohorte-4); }
+.tend-teinte-5 { --tend-teinte: var(--tend-cohorte-5); }
+.tend-teinte-6 { --tend-teinte: var(--tend-cohorte-6); }
+.tend-teinte-7 { --tend-teinte: var(--tend-cohorte-7); }
+
+/* La séquence déclarée par l'enseignant·e : un cours d'origine (liste), des cours suivants (bascules). */
+.tend-sequence {
+    margin: 12px 0 16px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--bordure-moyenne);
+}
+
+.tend-sequence .tend-filtre {
+    margin-top: 8px;
+}
+
+.tend-sequence .tend-origine {
+    width: auto;
+    min-width: 12em;
+    max-width: 100%;
+}
+
+.tend-filtres {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin: 12px 0 16px;
+}
+
+.tend-filtre,
+.tend-puces {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+}
+
+.tend-puces {
+    flex-basis: 100%;
+}
+
+.tend-filtre-nom {
+    min-width: 6.5em;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--texte-secondaire);
+}
+
+.tend-bascule {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    min-height: 44px;
+    padding: 0 14px;
+    background: transparent;
+    border: 1px solid var(--bordure-moyenne);
+    border-radius: var(--radius-pill);
+    color: var(--texte-principal);
+    font-size: 0.85rem;
+    cursor: pointer;
+}
+
+.tend-bascule[aria-pressed="true"] {
+    background: var(--alerte-fond-information);
+    border-color: var(--accent-primaire);
+    box-shadow: inset 0 0 0 1px var(--accent-primaire);
+    font-weight: 600;
+}
+
+/* La puce d'une cohorte : sa pastille, son nom, et « pas encore de note » quand le cours choisi n'en a aucune. */
+.tend-puce {
+    padding-left: 10px;
+}
+
+.tend-puce-note {
+    font-size: 0.75rem;
+    font-weight: 400;
+    color: var(--texte-secondaire);
+}
+
+.tend-puce-note::before {
+    content: '· ';
+}
+
+.tend-corps {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 280px;
+    gap: 24px;
+    align-items: start;
+}
+
+@media (max-width: 1000px) {
+    .tend-corps {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}
+
+.tend-cadre {
+    display: grid;
+    grid-template-columns: 30px minmax(0, 1fr);
+    grid-template-rows: auto 24px;
+}
+
+.tend-graduations-y,
+.tend-graduations-x {
+    position: relative;
+}
+
+.tend-graduations-x {
+    grid-column: 2;
+}
+
+.tend-graduation {
+    position: absolute;
+    font-size: 0.7rem;
+    line-height: 1;
+    color: var(--texte-secondaire);
+}
+
+.tend-graduation-x {
+    top: 6px;
+    transform: translateX(-50%);
+}
+
+.tend-graduation-y {
+    right: 8px;
+    transform: translateY(-50%);
+}
+
+.tend-graduation-seuil {
+    font-weight: 700;
+    color: var(--texte-principal);
+}
+
+.tend-axe-nom {
+    margin: 0 0 6px;
+    font-size: 0.8rem;
+    color: var(--texte-secondaire);
+}
+
+.tend-axe-nom-x {
+    margin: 6px 0 0 30px;
+    text-align: center;
+}
+
+.tend-plan {
+    position: relative;
+    height: clamp(320px, 52vh, 480px);
+    background: var(--surface-carte);
+    border: 1px solid var(--bordure-moyenne);
+    border-radius: var(--radius-moyen);
+}
+
+/* Trois zones teintées, découpées par le seuil de réussite : leur bord mobile (left, top, width, height) est posé par le rendu. */
+.tend-zone {
+    position: absolute;
+    display: flex;
+    gap: 6px;
+    padding: 6px 8px;
+    font-size: 0.75rem;
+    line-height: 1.25;
+    color: var(--texte-secondaire);
+    pointer-events: none;
+}
+
+.tend-zone-compte {
+    font-size: 0.95rem;
+    font-weight: 700;
+    line-height: 1;
+    color: var(--texte-principal);
+}
+
+.tend-zone-reussite {
+    top: 0;
+    right: 0;
+    justify-content: flex-end;
+    align-items: flex-start;
+    background: var(--alerte-fond-succes);
+}
+
+.tend-zone-echec {
+    right: 0;
+    bottom: 0;
+    justify-content: flex-end;
+    align-items: flex-end;
+    background: var(--alerte-fond-erreur);
+}
+
+.tend-zone-sous-seuil {
+    top: 0;
+    bottom: 0;
+    left: 0;
+    flex-direction: column;
+    background: var(--surface-input);
+}
+
+.tend-seuil {
+    position: absolute;
+    pointer-events: none;
+}
+
+.tend-seuil-x {
+    top: 0;
+    bottom: 0;
+    border-left: 1px dashed var(--texte-secondaire);
+}
+
+.tend-seuil-y {
+    right: 0;
+    left: 0;
+    border-top: 1px dashed var(--texte-secondaire);
+}
+
+.tend-nuage-vide {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0;
+    padding: 0 16px;
+    text-align: center;
+    font-size: 0.9rem;
+    color: var(--texte-secondaire);
+    pointer-events: none;
+}
+
+/* La cible : un vrai bouton de 28 px autour d'une bille de 11 px. Sa place (left, top) porte les deux notes. */
+.tend-cible {
+    position: absolute;
+    z-index: 2;
+    width: 28px;
+    height: 28px;
+    padding: 0;
+    background: transparent;
+    border: none;
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.tend-cible:focus-visible {
+    outline: 2px solid var(--focus-ring-color);
+    outline-offset: 0;
+}
+
+.tend-cible-ouverte {
+    z-index: 5;
+}
+
+/* LA BILLE EST CELLE DU SUIVI DES GROUPES : l'élément porte `.barre-etudiant`, qui reste la seule source de la sphère
+   (dégradé éclairé à 30 % 30 %, ombre portée). Ici : sa taille, AUCUNE animation (sa hauteur porte la note), et la
+   teinte de sa cohorte, multipliée au dégradé — sans teinte, la sphère reste telle quelle. Elle ne reçoit pas le
+   pointeur (c'est le bouton qui le reçoit) : les règles de survol et de sélection de `.barre-etudiant` ne s'y posent pas. */
+.barre-etudiant.tend-bille {
+    width: 11px;
+    height: 11px;
+    animation: none;
+    pointer-events: none;
+    background-color: var(--tend-teinte, transparent);
+    background-blend-mode: multiply;
+}
+
+.tend-cible .barre-etudiant.tend-bille {
+    top: 50%;
+    left: 50%;
+}
+
+/* La bille touchée grossit et prend un anneau blanc — pas le bleu de sélection, qui peut être la teinte d'une cohorte.
+   L'anneau est un élément à part (la sphère garde son ombre) ; son liseré sombre le détache du fond clair. */
+.tend-cible-ouverte .barre-etudiant.tend-bille {
+    transform: translate(-50%, -50%) scale(1.55);
+}
+
+.tend-anneau {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 24px;
+    height: 24px;
+    box-sizing: border-box;
+    border: 2px solid var(--tend-anneau);
+    border-radius: 50%;
+    box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.45), inset 0 0 0 1px rgba(0, 0, 0, 0.3);
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+}
+
+.tend-legende-anneau {
+    position: relative;
+    flex: none;
+    width: 24px;
+    height: 24px;
+    margin-left: -6px;
+}
+
+.tend-legende-anneau .barre-etudiant.tend-bille {
+    top: 50%;
+    left: 50%;
+}
+
+/* La même bille, posée dans le texte (puce de cohorte, légende). */
+.barre-etudiant.tend-bille.tend-pastille {
+    position: relative;
+    top: auto;
+    left: auto;
+    flex: none;
+    display: inline-block;
+    transform: none;
+}
+
+/* La bulle reprend l'habit de `.barre-etudiant-info` (fond, texte, ombre, mode clair) ; posée DANS le plan par le
+   rendu, elle reçoit le pointeur et son texte passe à la ligne. Sa pointe part : la bulle est bornée au cadre. */
+.barre-etudiant-info.tend-bulle {
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 20;
+    width: max-content;
+    max-width: min(260px, calc(100% - 8px));
+    padding: 10px 44px 10px 12px;
+    white-space: normal;
+    pointer-events: auto;
+}
+
+.barre-etudiant-info.tend-bulle::after {
+    display: none;
+}
+
+.tend-bulle p {
+    margin: 0 0 2px;
+}
+
+.tend-bulle-nom,
+.tend-bulle-notes {
+    font-weight: 700;
+}
+
+.tend-bulle-fermer {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 44px;
+    height: 44px;
+    padding: 0;
+    background: transparent;
+    border: none;
+    color: inherit;
+    font-size: 1.3rem;
+    line-height: 1;
+    cursor: pointer;
+}
+
+.tend-bulle-dossier {
+    min-height: 44px;
+    margin-top: 8px;
+}
+
+.tend-phrases {
+    margin: 0 0 16px;
+    padding-left: 18px;
+    font-size: 0.9rem;
+    color: var(--texte-principal);
+}
+
+.tend-phrases li {
+    margin-bottom: 8px;
+}
+
+.tend-legende {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    font-size: 0.8rem;
+    color: var(--texte-secondaire);
+}
+
+.tend-legende li {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-height: 24px;
+}
+
+.tend-legende-seuil {
+    flex: none;
+    width: 17px;
+    border-top: 1px dashed var(--texte-secondaire);
+}
+
+@media (hover: hover) {
+    .rl-onglet:hover {
+        color: var(--texte-principal);
+    }
+
+    .tend-bascule:hover {
+        border-color: var(--accent-primaire);
+    }
+
+    .tend-cible:hover .barre-etudiant.tend-bille {
+        transform: translate(-50%, -50%) scale(1.25);
+    }
+
+    .tend-cible-ouverte:hover .barre-etudiant.tend-bille {
+        transform: translate(-50%, -50%) scale(1.55);
+    }
+}
+
 /* --- Horaire (Beta 95.2) --- */
 
 .section-config-periode {

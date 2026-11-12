@@ -221,6 +221,11 @@
         // supprimerTrimestre (le filtre `includes(id)` ne l'atteint pas). Seul écrivain :
         // js/registre-longitudinal.js.
         'registreLongitudinal',
+        // Suivi longitudinal, lot 1 (11 nov. 2026) : la séquence de cours déclarée dans l'onglet
+        // « Tendances » (un cours d'origine, des cours suivants). Elle compare des cohortes de
+        // trimestres différents : globale, comme le registre qu'elle lit. Seul écrivain :
+        // js/suivi-tendances.js.
+        'tendancesSequence',
         // Lot E2 de l'enregistrement (28 sept. 2026) : les profils enseignants sont partagés
         // entre trimestres depuis toujours (lus et écrits sans préfixe). Inscrits ici pour que
         // `sauvegarderDonneesSelonMode('enseignants', …)` — le témoin commun — les écrive au
