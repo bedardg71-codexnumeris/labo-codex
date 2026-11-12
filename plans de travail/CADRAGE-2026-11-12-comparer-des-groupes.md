@@ -402,6 +402,23 @@ Les trois mesures que le rapport demandait « avant de promettre ».
   dans `evaluation.journal[]`). Ce n'est pas un écran du Labo ; le nom du sous-onglet peut tenir, il
   faudra distinguer les deux au moment de coder.
 
+### Ce que Grégoire a dans son application (dit par lui, 12 nov. — non mesuré par Claude Code)
+
+- **Quatre trimestres** : A24 (notes finales seulement ; le détail est dans un tableur), A25, H26, et
+  A26 en cours. (Lecture de Claude Code : A24 présent mais partiel. Non confirmée explicitement.)
+- **Une seule carte d'alignement : celle d'A26, et elle n'est pas encore complète.**
+- **Conséquences (inférences)** :
+  - le journal des changements ne peut RIEN constater sur l'alignement pour le passé. Pour A25 et
+    H26, il ne reste que ce que l'application garde des pratiques et des modalités (à vérifier dans
+    son application) et ce que Grégoire en dit de mémoire ;
+  - **A26 est le point de départ** : le premier passage où l'application pourra constater un
+    changement d'alignement est A26 vers H27. La carte d'A26 en est la référence ;
+  - une entrée du journal sur un changement passé est écrite APRÈS avoir vu les résultats. Le
+    garde-fou 1 ne la protège pas : la date de l'entrée le dira, sans commentaire ;
+  - A24 peut servir de cohorte dans une comparaison côte à côte sur la note finale, rien de plus ;
+  - revoir les archives reste juste, mais n'est plus un préalable : cela devient nécessaire le jour
+    où un trimestre quitte l'application.
+
 ## 7. Hors de ce cadrage
 
 Aucun code. L'onglet « Tendances » reste tel quel dans l'aperçu, sans fusion. Les cartes d'Études ne
