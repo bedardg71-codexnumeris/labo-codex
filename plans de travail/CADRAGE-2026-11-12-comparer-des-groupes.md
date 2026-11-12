@@ -1,4 +1,4 @@
-# Cadrage — Comparer des groupes : l'outil d'étude du Labo (12 nov. 2026, v8)
+# Cadrage — Comparer des groupes : l'outil d'étude du Labo (12 nov. 2026, v9)
 
 > Page d'EXPLORATION, à corriger par Grégoire. Aucun code n'en découle tant qu'elle n'est pas relue.
 > Née à l'aperçu du lot « Tendances » (PR #18, non fusionnée), quand le suivi longitudinal s'est
@@ -197,6 +197,28 @@ pratiques comparables, on pourra regarder au-delà du seuil ; pas avant.
   donc plus que ce qu'on s'autorise à lire. La lecture juste serait un tableau de comptes par cohorte
   (réussi les deux ; réussi le premier, pas le second ; n'a pas réussi le premier), comparé d'une
   cohorte à l'autre.
+
+## 6 ter. Le journal des changements (v9)
+
+**Ce sur quoi il repose (Grégoire, 12 nov.)** : pas seulement sur les résultats observés, mais sur
+**l'alignement constructif du cours** (ses objectifs, ses activités, leur ordre) et sur **les systèmes
+qu'il met en place** (la pratique alternative de notation, les jetons). La carte d'alignement et le
+comparateur de pratiques peuvent donc servir à cette observation.
+
+**Ce que l'application garde déjà, par trimestre (lu dans `trimestres.js`, `CLES_NAMESPACEES`)** :
+- la carte d'alignement : `planification_mindmap`, `planification_seances` ;
+- les systèmes : `pratiquesConfigurables`, `modalitesEvaluation` (les jetons sont un réglage de la pratique) ;
+- le bilan : `questionnaireBilan`, `resultatsBilan`, `parcoursBilan`, `autoreflexionBilan`.
+
+**Ce que ça ouvre** : chaque trimestre porte un ÉTAT du cours. Un changement est une différence entre
+deux états, et l'application peut la voir sans qu'on la lui déclare (une activité déplacée, un jeton
+ajouté, une pratique remplacée). Le journal aurait donc deux sources : ce que l'application CONSTATE
+entre deux trimestres, et ce que l'enseignant·e en DIT — pourquoi ce changement, ce qu'il ou elle en
+attend. (À mesurer avant de promettre : ce que ces deux états permettent réellement de comparer.)
+
+**Deux regards, deux moments** : le comparateur de pratiques regarde AVANT (sur des profils-types, ce
+qu'une autre pratique donnerait) ; le microscope regarde APRÈS (sur les vrais groupes, ce qui s'est
+passé). Une étude peut s'ouvrir sur le premier et se conclure sur le second.
 
 ## 7. Hors de ce cadrage
 
