@@ -1,4 +1,4 @@
-# Cadrage — Comparer des groupes : l'outil d'étude du Labo (12 nov. 2026, v1)
+# Cadrage — Comparer des groupes : l'outil d'étude du Labo (12 nov. 2026, v2)
 
 > Page d'EXPLORATION, à corriger par Grégoire. Aucun code n'en découle tant qu'elle n'est pas relue.
 > Née à l'aperçu du lot « Tendances » (PR #18, non fusionnée), quand le suivi longitudinal s'est
@@ -12,13 +12,40 @@ même cours donné deux fois, un cours et celui qui le suit. Le suivi longitudin
 ces comparaisons. L'application possède déjà une bonne part des données qu'il faut ; le registre, lui,
 n'ajoute que ce qu'on saisit à la main.
 
+### 1 bis. À quoi sert l'outil (Grégoire, 12 nov. — v2)
+
+Labo Codex est un outil de **développement professionnel** : suivre l'apprentissage, soutenir
+l'enseignement. Avec les micro-données recueillies en classe et dans les travaux, il donne à voir
+l'écosystème enseignement-apprentissage. L'outil d'étude — le « microscope » — sert à **voir l'effet
+des choix d'enseignement sur l'apprentissage, y compris à long terme**.
+
+- **L'hypothèse d'origine** : la façon de donner le cours (pratique alternative, jetons) bâtit une base
+  assez solide et durable pour la réussite des cours suivants. C'est la comparaison n° 1 du § 4, et
+  c'est par elle qu'on commence.
+- **Ce qu'on compare, au fond, ce sont des VERSIONS de son enseignement.** Les groupes sont le moyen de
+  les observer. Un·e enseignant·e change quelque chose (par exemple : des jetons structurés autour d'une
+  réflexion métacognitive), puis veut voir si la nouvelle version fait mieux que celle d'il y a un
+  trimestre ou deux. Un jeton ne vaut pas par la hausse d'un chiffre : son effet se cherche dans
+  l'apprentissage.
+- **Le journal des changements** (accepté par Grégoire) : l'application connaît les trimestres, les
+  notes et l'usage des jetons, mais pas ce qui a changé dans le cours. L'enseignant·e le note — « quoi »,
+  « depuis quel trimestre » — et ce journal devient le facteur de comparaison « avant / après ».
+- **Sa lignée** : Labo › Bilan porte déjà l'introspection de l'enseignant·e sur sa pratique
+  (questionnaire aux étudiant·es, parcours, auto-réflexion : `js/bilan-reflexif*.js`). Le journal
+  s'inscrit dans cette lignée ; s'il doit y vivre ou seulement s'y relier reste à voir (§ 6).
+- **Une limite pour nous, pas pour l'écran** : l'outil montre des différences, pas leurs causes. Un
+  groupe qui réussit mieux après un changement peut le devoir au changement, au groupe, à la saison ou
+  au hasard ; la lecture se raffermit avec le nombre de trimestres comparés. L'écran, lui, continue de
+  donner des comptes sans commenter (§ 5).
+
 ## 2. Une grammaire commune (proposition)
 
 Toute comparaison se dit avec quatre mots :
 
 - **Groupe** — un ensemble d'étudiant·es : un groupe-cours, une cohorte (un trimestre), un programme.
-- **Facteur** — ce qui distingue les groupes qu'on oppose : le trimestre, la saison, le cours, le
-  programme, avoir utilisé un jeton ou non, avoir reçu une intervention ou non.
+- **Facteur** — ce qui distingue les groupes qu'on oppose. Le premier en importance (v2) : **ce que
+  l'enseignant·e a changé dans son cours**, tel que son journal le dit. Puis : le trimestre, la saison,
+  le cours, le programme, avoir utilisé un jeton ou non, avoir reçu une intervention ou non.
 - **Mesure** — ce qu'on regarde : la note finale, un indice (assiduité, complétion, performance),
   le niveau à un critère, la réussite (oui ou non).
 - **Lecture** — la forme qui convient, et elle dépend d'UNE question : compare-t-on la même personne
@@ -63,6 +90,11 @@ trois formes, pas une.
 | 4 | Automne et hiver donnent-ils les mêmes résultats ? | saison | note | côte à côte | trimestres, archives |
 | 5 | Les jetons changent-ils quelque chose ? | jeton | P | dans le temps | existe (Études) |
 | 6 | Tel programme réussit-il autrement ? | programme | note | côte à côte | trimestres |
+| 7 | Ce que j'ai changé dans mon cours a-t-il eu un effet ? (v2) | un changement du journal | note, indices, n° 1 et n° 5 | avant / après | journal + trimestres, archives, registre |
+
+**Ordre retenu par Grégoire (12 nov.)** : la n° 1 d'abord, c'est l'origine de la recherche. Les jetons
+(n° 5) et le changement de méthode (n° 7) viennent ensuite ; automne et hiver (n° 4) pour comprendre la
+dynamique des groupes.
 
 ## 5. Décisions déjà prises, qui valent pour tout l'outil
 
@@ -72,7 +104,9 @@ trois formes, pas une.
 
 ## 6. Ce qui reste à trancher (à Grégoire)
 
-1. **Par quoi commencer ?** Quelles comparaisons du § 4 répondent à un besoin que tu as VÉCU ?
+1. ~~Par quoi commencer ?~~ **Tranché (v2)** : la n° 1, puis les jetons et le changement de méthode.
+1 bis. **Le journal des changements** : où vit-il (dans Bilan, dans l'outil), et que note-t-on au juste —
+   un titre et un trimestre de départ, ou aussi ce qu'on en attend ?
 2. **Une tension à nommer.** La carte « Dynamique des corrélations » calcule un r et s'impose un minimum
    d'étudiant·es ; la décision du 11 nov. a retiré du lot « Tendances » le lien calculé et tout jugement
    sur l'échantillon. Les deux ne se contredisent pas forcément (un r décrit, il ne juge pas), mais si
