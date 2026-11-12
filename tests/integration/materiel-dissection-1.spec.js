@@ -90,7 +90,7 @@ test('dissection · coller, poser deux étiquettes au pointeur, lire la grille c
     await expect(page.locator('#dissection-palette .dis-t-code, #dissection-palette .dis-t-nomcode, #dissection-palette .dis-t-poids, #dissection-palette .dis-t-commentaire')).toHaveCount(4);
     await expect(page.locator('#dissection-palette .dissection-outil')).toHaveCount(2);
     await expect(page.locator('#dissection-palette [data-param="suite"] + [data-param="couper"] + [data-param="rattacher"]')).toHaveCount(1);
-    await expect(page.locator('#dissection-comprise')).toContainText('Surligne ta grille');
+    await expect(page.locator('#dissection-comprise')).toContainText('Étiquette ta grille');
 
     // Sans étiquette en main, le canevas défile au doigt sur les morceaux.
     const touchAction = () => page.evaluate(() => getComputedStyle(document.querySelector('#dissection-contenu .dissection-morceau')).touchAction);
@@ -122,7 +122,7 @@ test('dissection · coller, poser deux étiquettes au pointeur, lire la grille c
     await page.keyboard.press('Escape');
     await expect(page.locator('#dissection-terminer')).toBeHidden();
     await expect(page.locator('#dissection-bandeau-precision')).toBeHidden();
-    await expect(page.locator('#dissection-bandeau-texte')).toHaveText('Touche une étiquette dans la palette : elle devient ton surligneur.');
+    await expect(page.locator('#dissection-bandeau-texte')).toHaveText('Touche une étiquette dans la légende.');
     expect(await touchAction()).toBe('auto');
 
     // La grille comprise : un critère, deux réponses, sans points.

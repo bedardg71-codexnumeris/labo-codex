@@ -1,9 +1,10 @@
 # Rapport du lot `lot/dissection-ipad` — la dissection sur l'iPad (12 nov. 2026)
 
-**Relais.** Branche `lot/dissection-ipad`, partie de `main` (`271dc9177`, la 1.243.0). Mandat : relais de la
-conversation du Projet, 12 nov., 6 h 35 (huit points). **Fait** : les huit points, sur la branche, PR d'aperçu
-ouverte. **Reste** : l'essai de Grégoire sur l'iPad (porte terrain `PORTES-TERRAIN-2026-11-12-dissection-ipad.md`,
-un geste par tour) ; la fusion attend son verdict. Commit, build, aperçu : section « Livraison ».
+**Relais.** Branche `lot/dissection-ipad`, partie de `main` (`271dc9177`, la 1.243.0). Mandats : relais de la
+conversation du Projet, 12 nov., 6 h 35 (huit points), puis 11 h 25 (huit corrections après la porte). **Fait** : les
+deux relais, sur la branche, PR d'aperçu n° 21 ; la porte passée de 9 h 58 à 11 h 23 (dans la conversation, sans
+artefact). **Reste** : la section « Après correction » de la porte, un geste par tour ; la fusion viendra par un relais
+à part (avec les deux temps et l'en-tête). Commit, build : « Second relais », en fin de rapport.
 
 ## Livraison
 
@@ -122,3 +123,83 @@ un geste par tour) ; la fusion attend son verdict. Commit, build, aperçu : sect
 
 « Ta grille, sur l'iPad : la liste des étiquettes montre qu'elle défile, un doigt qui fait défiler ne pose plus
 d'étiquette, et la bulle te guide un manque à la fois, avec un exemple à voir ou à faire toi-même. »
+
+## Second relais (12 nov., 11 h 25) : les corrections après la porte
+
+**Livraison.** Un seul commit, celui de cette section ; build 1112-1157 (1.243.0 inchangée), poussé sur `lot/dissection-ipad` ; l'aperçu n° 21 se
+met à jour. Pas de fusion.
+
+1. **« Composer ma grille »** (accueil d'« Apporter mon matériel ») : `btn btn-secondaire`, comme ses voisins.
+2. **La légende.** Titre visible « Légende » au-dessus de la liste ; `aria-label` « Légende ». Consigne mot pour mot ;
+   la phrase du milieu suit l'appareil (`majConsigne`), posée à l'ouverture de la dissection : sans geste encore,
+   `(pointer: coarse)` → le doigt, sinon la souris ; ensuite, le type du dernier pointeur posé dans l'application. Pas
+   au toucher même : la consigne changée déplaçait la grille entre l'appui et le lever (bancs « Couper » et
+   « Rattacher » rouges à 820 × 1180, mesuré). Bandeau, statut, lecture vide, manques de
+   `D.creation` et étape 3 de l'accueil : phrases proposées ci-dessous. « Couper » et « Rattacher » intouchés.
+3. **Un exemple de forme.** Précisions de « Pondération » et « Points » mot pour mot ; noms inchangés. « Points » posé
+   sur un morceau « / N » : l'aide le dit AVANT le premier manque (une telle grille peut être lisible et fausse) et
+   propose « Pondération » sur ce morceau (`pointsSurPonderation`).
+4. **Les points sans réponse.** `libreAvantDansLaCase` : le plus proche morceau libre qui précède les points dans leur
+   case ; à défaut, la phrase sans morceau. **Les deux autres usages de `libreDansRangee`, gardés** : un critère (ou un
+   code) ouvre sa rangée, dans sa première colonne ; le premier morceau libre de la rangée, dans l'ordre de lecture,
+   est bien lui. Le défaut du point 4 tenait à ce que les points vivent dans une case du MILIEU de la rangée.
+5. **Les flèches d'étiquetage** : le défilement de la légende appelle `planifierDessin` (elles restent bornées à son
+   cadre, `dessiner`).
+6. **La flèche de la carte.** « Rien ne vise ce qui ne se voit pas » : l'étiquette désignée, cachée par un défilement
+   de la personne, est remplacée pour la carte par la pastille de son côté (« ▲ … plus haut » / « ▼ … plus bas »), qui
+   y mène (`etiquetteOuSonChemin`) ; le moteur redessine à chaque défilement (écoute en capture), la flèche suit.
+   **Pourquoi `amenerDansLaListe` n'a pas suffi** — mesuré sous WebKit : il n'agit qu'au changement d'étiquette
+   désignée ET après chaque geste d'étiquetage (`finSurlignage` remet le repère) ; un défilement de la personne, sans
+   geste après lui, cache l'étiquette déjà désignée et rien ne la ramène ; le moteur visait alors l'élément tel quel
+   (`visible()` ne tient pas compte du cadre de la liste), d'où la flèche au-dessus de la légende. *Inférence* sur
+   l'iPad : la liste a été défilée jusqu'à « Poids » après le dernier geste qui avait amené « Pondération ». Non
+   mesurable ici : qu'iOS ignore un défilement programmé pendant un élan du doigt.
+7. **Les pastilles hors de la liste.** Au-dessus et au-dessous de la liste qui défile (dans `#dissection-legende`), leur
+   place gardée tant que la liste défile ; une étiquette désignée est amenée entière dans le cadre (`dansLeCadre`),
+   donc sous la pastille.
+8. **Le skill d'ouverture** : §0.5 attend `…/Documents/GitHub/labo-codex` ; ligne d'historique.
+
+**Phrases proposées** (elles partent telles quelles et restent corrigeables) :
+- bandeau, une étiquette choisie : « Étiquette « Critère » : touche les morceaux de ta grille qu'elle désigne. Touche un
+  morceau déjà étiqueté pour retirer son étiquette. »
+- statut, une étiquette choisie : « Étiquette « Critère » choisie : touche les morceaux de ta grille qu'elle désigne. »
+- statut d'un tableau collé : « Tableau collé : 3 rangées, 9 morceaux. Touche une étiquette dans la légende, puis les
+  morceaux qu'elle désigne. »
+- lecture vide : « Étiquette ta grille : la lecture de l'application apparaîtra ici. » ; sans critère : « Aucun
+  critère pour l'instant : pose « Critère » sur une question que tu te poses devant la copie, ou « Descripteur » sur des
+  réponses. »
+- manques : « … pose l'étiquette « Pondération » sur le poids de chaque critère, ou l'étiquette « Points » sur ce que
+  vaut chaque réponse » ; « … pose l'étiquette « Points » sur ce que vaut chaque réponse, ou l'étiquette « Niveau » sur
+  le nom de chaque niveau » ; « au moins un code : pose l'étiquette « Code » sur chaque code »
+- accueil, étape 3 : « Avec les étiquettes de la légende, tu identifies tes sections, tes critères, tes points ; … »
+- sous la lecture : « Elle se refait à chaque morceau étiqueté. »
+- aide, point 3 : « « / 10 » ressemble au poids d'un critère (sur combien il se note), pas à ce que vaut une réponse :
+  prends « Pondération », puis touche « / 10 ». »
+- l'`aria-label` d'une étiquette : « …, 2 morceaux étiquetés ».
+
+**Bancs et break-tests.**
+- Vitest `tests/unit/dissection-legende-2026-11-12.test.js` (7). Break-tests, chacun rouge puis rétabli :
+  `libreDansRangee` remis pour les points → R.a, R.b ; la règle « Points » sur « / N » neutralisée → P.b ; « palette »
+  remis au bandeau → L.b ; « palette » remis dans la consigne d'`index.html` → L.a.
+- Playwright WebKit `tests/integration/dissection-legende-2026-11-12.spec.js` (7, à 1180 × 820 et 820 × 1180).
+  Break-tests, chacun rouge : « palette » au bandeau → L2 (×2) ; le défilement sans `planifierDessin` → L5 ; la carte
+  qui vise l'étiquette cachée → L6 (×2) ; le repère non remis après un geste → L6 (×2) ; les pastilles d'avant (index,
+  styles et JS de `39284dee3`) → L7 (×2).
+- Bancs existants adaptés : les mots du bandeau et de la lecture vide (`materiel-dissection-1`), les trois manques
+  (Vitest). Rejoués sur l’état final (build 1112-1157) : Vitest 921 fichiers, 11 497 tests, verts ; WebKit, les bancs de la dissection (`materiel-dissection-*`, `materiel-*`, `dissection-*`, `bareme-1`, `critere-algorithmique-coller-codes`) et du parcours « Évaluer » (`parcours-3-*`, `parcours-fleches`, `registre-des-parcours`) : 59 verts, 4 ignorés par leurs propres conditions, 0 rouge. Une correction en chemin : la consigne changée au toucher même déplaçait la grille (« Couper » et « Rattacher » rouges), voir le point 2.
+
+**Ce que j'ai supposé.**
+- Point 6 : la légende ne défile pas d'elle-même tant que la personne la fait défiler sans geste (sinon elle lui
+  reprend la main, et « Poids » ne se laisse plus atteindre) ; dans ce cas, la carte vise la pastille qui mène à
+  l'étiquette. Elle la ramène, entière, au prochain changement d'étiquette désignée ou au prochain geste.
+- Point 3 : la forme « / N » seule (« / 10 », « /5 », « / 7,5 ») ; « sur 10 » ou « 10 pts » ne déclenchent rien.
+- Point 7 : la place des pastilles est gardée tant que la liste défile (une centaine de pixels de liste en moins).
+- Le titre « Légende » est caché aux lecteurs d'écran (`aria-hidden`), la liste portant déjà ce nom.
+
+**Nouvelles (proposée, pas écrite).** « Ta grille, sur l'iPad : la légende montre qu'elle défile, un doigt qui fait
+défiler ne pose plus d'étiquette, et la bulle te guide un manque à la fois, avec un exemple à voir ou à faire
+toi-même. »
+
+**Trouvaille (hors du lot, inscrire et continuer).** `.claude/skills/portes-terrain/SKILL.md` l. 171 nomme encore un
+clone `~/Documents/GitHub/Monitorage_v6` : vrai ou périmé, à vérifier.
+

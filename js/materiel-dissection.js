@@ -132,6 +132,24 @@
         bas: function (n) { return '▼ ' + pluriel(n, 'étiquette', 'étiquettes') + ' plus bas'; }
     };
 
+    /**
+     * Relais du 12 nov. 2026, 11 h 25, point 2 : la légende remplace le surligneur (un surligneur se glisse sur le texte,
+     * geste qui fait désormais défiler). `aucune` et `plusieurs` : mots de Grégoire (10 h 31) ; les autres, PROPOSÉS par
+     * Claude Code le 12 nov. : ils partent tels quels et restent corrigeables. `plusieurs` suit l'appareil (`majConsigne`).
+     */
+    var TEXTES_LEGENDE = {
+        aucune: 'Touche une étiquette dans la légende.',
+        plusieurs: {
+            doigt: 'Pour en étiqueter plusieurs d’un coup, garde le doigt posé un instant, puis glisse.',
+            souris: 'Pour en étiqueter plusieurs d’un coup, glisse dessus.'
+        },
+        bandeau: function (nom) { return 'Étiquette « ' + nom + ' » : touche les morceaux de ta grille qu’elle désigne. Touche un morceau déjà étiqueté pour retirer son étiquette.'; },
+        choisie: function (nom) { return 'Étiquette « ' + nom + ' » choisie : touche les morceaux de ta grille qu’elle désigne.'; },
+        tableau: 'Touche une étiquette dans la légende, puis les morceaux qu’elle désigne.',
+        lectureVide: 'Étiquette ta grille : la lecture de l’application apparaîtra ici.',
+        aucunCritere: 'Aucun critère pour l’instant : pose « Critère » sur une question que tu te poses devant la copie, ou « Descripteur » sur des réponses.'
+    };
+
     function D() { return window.materielDissectionLecture; }
     function el(id) { return document.getElementById(id); }
 
@@ -331,9 +349,13 @@
                 var pas = Math.max(80, pal.clientHeight * 0.8) * (sens === 'haut' ? -1 : 1);
                 try { pal.scrollBy({ top: pas, behavior: 'smooth' }); } catch (e) { pal.scrollTop += pas; }
             });
-            if (sens === 'haut') pal.insertBefore(b, pal.firstChild); else pal.appendChild(b);
+            // Point 7 du relais du 12 nov., 11 h 25 : hors de la liste qui défile, au-dessus et au-dessous d'elle (dans la
+            // légende) ; sur elle, « ▲ … plus haut » couvrait le nom de la première étiquette visible.
+            pal.parentNode.insertBefore(b, sens === 'haut' ? pal : pal.nextSibling);
         });
         pal.addEventListener('scroll', majDefilementPalette, { passive: true });
+        // Point 5 : les flèches d'étiquetage suivent le défilement de la légende (bornées à son cadre, `dessiner`).
+        pal.addEventListener('scroll', planifierDessin, { passive: true });
         var defs = el('dissection-pointes');
         if (defs && !defs.childNodes.length) {
             // Lot 7 : « Rattacher » a sa pointe, pour la flèche d'une suite vers son morceau.
@@ -356,9 +378,14 @@
      * n'est pas à sa fin ; N compte les étiquettes (et outils) qui dépassent de ce côté. Liste entière visible : rien.
      */
     function majDefilementPalette() {
-        var pal = el('dissection-palette'), h = el('dissection-palette-haut'), b = el('dissection-palette-bas');
-        if (!pal || !h || !b) return;
-        var defile = getComputedStyle(pal).overflowY !== 'visible' && pal.scrollHeight > pal.clientHeight + 1;
+        var pal = el('dissection-palette'), h = el('dissection-palette-haut'), b = el('dissection-palette-bas'), lg = el('dissection-legende');
+        if (!pal || !h || !b || !lg) return;
+        // Point 7 : les pastilles prennent leur place seulement quand la liste défile ; la place qu'elles prennent est
+        // comptée, pour qu'une liste qui tiendrait sans elles les rende (sans aller-retour d'une image à l'autre).
+        var avec = lg.classList.contains('dissection-legende-defile');
+        var place = avec ? h.offsetHeight + b.offsetHeight + 12 : 0;
+        var defile = getComputedStyle(pal).overflowY !== 'visible' && pal.scrollHeight > pal.clientHeight + place + 1;
+        if (defile !== avec) { lg.classList.toggle('dissection-legende-defile', defile); planifierDessin(); majDefilementPalette(); return; }
         var nh = 0, nb = 0;
         if (defile) {
             var pr = pal.getBoundingClientRect();
@@ -384,7 +411,7 @@
             var t = b.getAttribute('data-type'), T = enMain(t);
             b.setAttribute('aria-pressed', t === etat.actif ? 'true' : 'false');
             b.querySelector('.dissection-etiquette-compte').textContent = compte[t] ? String(compte[t]) : '';
-            b.setAttribute('aria-label', T.nom + ' : ' + T.aide + (compte[t] ? ', ' + pluriel(compte[t], 'morceau surligné', 'morceaux surlignés') : ''));
+            b.setAttribute('aria-label', T.nom + ' : ' + T.aide + (compte[t] ? ', ' + pluriel(compte[t], 'morceau étiqueté', 'morceaux étiquetés') : ''));
         });
     }
 
@@ -411,8 +438,8 @@
             : etat.actif === 'rattacher'
                 ? (etat.choix ? TEXTES_LIEN.bandeauChoix(mots(etat.choix), D().estRattache(etat.rattachements, etat.choix)) : TEXTES_LIEN.bandeau)
             : T
-                ? 'Surligneur « ' + T.nom + ' » : touche ou surligne les morceaux de ta grille qu’il désigne. Touche un morceau déjà surligné pour le retirer.'
-                : 'Touche une étiquette dans la palette : elle devient ton surligneur.';
+                ? TEXTES_LEGENDE.bandeau(T.nom)
+                : TEXTES_LEGENDE.aucune;
         var pr = el('dissection-bandeau-precision');
         pr.textContent = T && T.precision ? T.nom + ' : ' + T.precision : '';
         pr.classList.toggle('u-hide', !(T && T.precision));
@@ -427,7 +454,7 @@
         majPalette(); majBandeau(); planifierDessin();
         if (etat.actif === 'couper') dire(TEXTES_COUPE.enMain);
         else if (etat.actif === 'rattacher') dire(TEXTES_LIEN.enMain);
-        else dire(etat.actif ? 'Surligneur « ' + D().TYPE[etat.actif].nom + ' » en main : touche ou surligne les morceaux de ta grille qu’il désigne.' : '');
+        else dire(etat.actif ? TEXTES_LEGENDE.choisie(D().TYPE[etat.actif].nom) : '');
     }
 
     function terminer() {
@@ -470,7 +497,7 @@
             var t = typeDe(id);
             if (etat.rattachements[id] != null) dire(TEXTES_LIEN.suiteDe(mots(etat.rattachements[id])));
             else if (t) { eclair(t); dire('Ce morceau porte l’étiquette « ' + D().TYPE[t].nom + ' ». Pour la changer, touche une autre étiquette, puis ce morceau.'); }
-            else dire('Touche d’abord une étiquette dans la palette : elle devient ton surligneur.');
+            else dire(TEXTES_LEGENDE.aucune);
             return;
         }
         if (etat.actif === 'couper') { gesteCoupe(e, id); return; }
@@ -888,7 +915,7 @@
         lg.classList.add('u-hide');
         rendreCreer(R);
         if (!Object.keys(etat.liens).length) {
-            cp.appendChild(noeud('p', 'dissection-vide', 'Surligne ta grille : la lecture de l’application apparaîtra ici.'));
+            cp.appendChild(noeud('p', 'dissection-vide', TEXTES_LEGENDE.lectureVide));
             return;
         }
         rendreSansPlace(sp, R);
@@ -903,7 +930,7 @@
         rendreConstats(cs, R, b);
         if (R.description.length) cp.appendChild(noeud('p', 'dissection-crit-desc', R.description.join(' ')));
         if (!R.criteres.length) {
-            cp.appendChild(noeud('p', 'dissection-vide', 'Aucun critère pour l’instant : surligne une question que tu te poses devant la copie avec « Critère », ou des réponses avec « Descripteur ».'));
+            cp.appendChild(noeud('p', 'dissection-vide', TEXTES_LEGENDE.aucunCritere));
         } else {
             cp.appendChild(tableComprise(R));
         }
@@ -1342,11 +1369,32 @@
     // ------------------------------------------------------------------
 
     function brancher() {
-        var contenu = el('dissection-contenu');
+        var contenu = el('dissection-contenu'), vue = el('materiel-dissection');
         if (contenu && !contenu.dataset.dissectionBranche) {
             contenu.addEventListener('pointerdown', surPointeur);
             contenu.dataset.dissectionBranche = '1';
         }
+        // Point 2b : le dernier pointeur posé dans l'application (doigt ou stylet, souris) est retenu, sans rien changer à
+        // l'écran ; la consigne le suit à l'ouverture de la dissection. Changée au toucher même, elle déplaçait la grille
+        // entre l'appui et le lever du doigt (mesuré sous WebKit le 12 nov. : « Couper » et « Rattacher » manquaient leur morceau).
+        if (vue && !vue.dataset.consigneBranchee) {
+            window.addEventListener('pointerdown', function (e) { appareilVu = e.pointerType === 'mouse' ? 'souris' : 'doigt'; }, { capture: true, passive: true });
+            vue.dataset.consigneBranchee = '1';
+        }
+        majConsigne();
+    }
+
+    /**
+     * Relais du 12 nov. 2026, 11 h 25, point 2b : la phrase du milieu de la consigne, au doigt ou à la souris, posée à
+     * l'ouverture de la dissection. Sans geste encore, l'appareil : `(pointer: coarse)` (l'iPad, un téléphone) → le doigt ;
+     * sinon la souris. Ensuite, le type du dernier pointeur posé dans l'application (un iPad au trackpad passe à la souris,
+     * un écran tactile au doigt), à la prochaine ouverture.
+     */
+    var appareilVu = null;
+    function majConsigne() {
+        var m = appareilVu || (window.matchMedia && window.matchMedia('(pointer: coarse)').matches ? 'doigt' : 'souris');
+        var s = el('dissection-consigne-plusieurs');
+        if (s && s.textContent !== TEXTES_LEGENDE.plusieurs[m]) s.textContent = TEXTES_LEGENDE.plusieurs[m];
     }
 
     /**
@@ -1384,7 +1432,7 @@
         majDefilementPalette();
         var n = etat.morceaux.ordre.length;
         dire(message || (exemple ? TEXTES_EXEMPLE[exemple] : null) || (doc.mode === 'table'
-            ? 'Tableau collé : ' + pluriel(doc.rows.length, 'rangée', 'rangées') + ', ' + pluriel(n, 'morceau', 'morceaux') + '. Touche une étiquette, puis surligne.'
+            ? 'Tableau collé : ' + pluriel(doc.rows.length, 'rangée', 'rangées') + ', ' + pluriel(n, 'morceau', 'morceaux') + '. ' + TEXTES_LEGENDE.tableau
             // Validé G. 18 oct. 9 h 52 avec « rattachera » ; revu pour le nom de l'outil du lot 7, validé G. 18 oct. 17 h 18.
             : 'Texte collé : ' + pluriel(n, 'ligne', 'lignes') + ', sans tableau. L’application rangera les morceaux selon leur ordre.'));
         var titre = el('dissection-titre');
@@ -1450,17 +1498,40 @@
         if (r.left < c.left + m || r.right > c.right - m) cv.scrollLeft += r.left - c.left - m;
         if (r.top < c.top + m || r.bottom > c.bottom - m) cv.scrollTop += (r.top + r.height / 2) - (c.top + c.height / 2);
     }
+    /** Vrai si la légende défile dans son cadre (à 661 px et moins, elle s'étale : tout s'y voit). */
+    function legendeDefile(pal) {
+        return !!pal && getComputedStyle(pal).overflowY !== 'visible' && pal.scrollHeight > pal.clientHeight + 1;
+    }
+    /** Point 7 : l'étiquette entièrement dans le cadre de la légende (les pastilles sont hors de lui, rien ne la couvre). */
+    function dansLeCadre(b, pal) {
+        var r = b.getBoundingClientRect(), pr = pal.getBoundingClientRect();
+        return r.top >= pr.top - 0.5 && r.bottom <= pr.bottom + 0.5;
+    }
     function amenerDansLaListe(b) {
         var pal = el('dissection-palette');
-        if (!b || !pal || pal.scrollHeight <= pal.clientHeight + 1) return;
-        var r = b.getBoundingClientRect(), pr = pal.getBoundingClientRect(), garde = 60;
-        if (r.top >= pr.top + garde && r.bottom <= pr.bottom - garde) return;
+        if (!b || !legendeDefile(pal) || dansLeCadre(b, pal)) return;
+        var r = b.getBoundingClientRect(), pr = pal.getBoundingClientRect();
         pal.scrollTop += (r.top + r.height / 2) - (pr.top + pr.height / 2);
     }
+    /**
+     * Point 6 du relais du 12 nov., 11 h 25 : « rien ne vise ce qui ne se voit pas ». L'étiquette désignée, si la personne a
+     * fait défiler la légende au point de la cacher : à sa place, la pastille de son côté (« ▲ … plus haut » ou « ▼ … plus
+     * bas »), qui y mène. La flèche et le halo de la carte la suivent ainsi au fil du défilement (le moteur redessine à
+     * chaque défilement). `null` si ni l'une ni l'autre ne se voit.
+     */
+    function etiquetteOuSonChemin(b) {
+        var pal = el('dissection-palette');
+        if (!b || !legendeDefile(pal) || dansLeCadre(b, pal)) return b;
+        var dessus = b.getBoundingClientRect().top < pal.getBoundingClientRect().top;
+        var p = el(dessus ? 'dissection-palette-haut' : 'dissection-palette-bas');
+        return p && p.classList.contains('est-visible') ? p : null;
+    }
+
 
     /**
      * Point 4 : l'aide pas à pas de la bulle « Ta grille », pour la dissection ouverte (null sinon). `D.aide` sur le
-     * PREMIER manque, puis ce qu'elle désigne dans la page : `etiquetteEl` (le bouton de la palette), `morceauEl` (le
+     * PREMIER manque, puis ce qu'elle désigne dans la page : `etiquetteEl` (le bouton de la légende, ou la pastille qui y
+     * mène quand il est caché : `etiquetteOuSonChemin`), `morceauEl` (le
      * morceau où toucher, quand l'application le sait), `cibleEl` (un champ sous la lecture, ou « Créer ma grille »),
      * `enMain` (l'étiquette à prendre est déjà le surligneur). Rien ne s'écrit.
      */
@@ -1468,9 +1539,13 @@
         if (!etat.doc) return null;
         var R = lire(), m = manques(R);
         var a = D().aide({ doc: etat.doc, liens: etat.liens, rattachements: etat.rattachements, manque: m[0] || null, enCodes: D().estListeDeCodes(R) });
-        a.etiquetteEl = a.etiquette ? document.querySelector('#dissection-palette .dissection-etiquette[data-type="' + a.etiquette + '"]') : null;
+        var b = a.etiquette ? document.querySelector('#dissection-palette .dissection-etiquette[data-type="' + a.etiquette + '"]') : null;
         a.morceauEl = a.morceau && blocs[a.morceau] ? blocs[a.morceau] : null;
-        if (a.etiquette !== etiquetteAmenee) { etiquetteAmenee = a.etiquette; amenerDansLaListe(a.etiquetteEl); }
+        // Amenée quand l'étiquette désignée change, et après chaque geste d'étiquetage (`finSurlignage` remet le repère).
+        // Point 6 du relais du 12 nov., 11 h 25 : un défilement de la personne seul ne la ramène pas (elle garde la main
+        // sur la légende) ; cachée par lui, la carte vise la pastille qui y mène, jamais l'étiquette hors du cadre.
+        if (a.etiquette !== etiquetteAmenee) { etiquetteAmenee = a.etiquette; amenerDansLaListe(b); }
+        a.etiquetteEl = etiquetteOuSonChemin(b);
         if (a.morceau !== morceauAmene) { morceauAmene = a.morceau; amenerDansLeCanevas(a.morceauEl); }
         a.cibleEl = a.cible ? cibleDeLAide(a.cible) : null;
         a.enMain = !!a.etiquette && etat.actif === a.etiquette;

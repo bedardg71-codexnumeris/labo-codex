@@ -393,7 +393,7 @@ describe('N — aucun renvoi à l’assistant', () => {
         expect(D.bilan(R).logique).toBe('points');
         const c = D.creation(R, {});
         // Lot 9 : à compléter, sans bloquer ; ici, c'est le morceau « beaucoup », sans place, qui bloque.
-        expect(c.aCompleter).toContain('les points de chaque critère : surligne le poids de chaque critère avec l’étiquette « Pondération », ou ce que vaut chaque réponse avec l’étiquette « Points »');
+        expect(c.aCompleter).toContain('les points de chaque critère : pose l’étiquette « Pondération » sur le poids de chaque critère, ou l’étiquette « Points » sur ce que vaut chaque réponse');
         expect(c.raisons).toContain('une place pour le morceau étiqueté listé plus bas');
         sansRenvoiAssistant(c.raisons.concat(c.aCompleter));
         // L'assistant, lui, garde son message.

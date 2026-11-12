@@ -98,7 +98,7 @@ describe('étape 5 · R — les refus nomment le code', () => {
     it('R.c plus de 30 codes ; aucun code', () => {
         const trop = Array.from({ length: 31 }, (_, i) => ['C' + i, 'code']);
         expect(avec(trop)).toEqual(['au plus 30 codes (ta liste en a 31)']);
-        expect(avec([['Un commentaire fictif', 'commentaire']])).toContain('au moins un code : surligne chaque code avec l’étiquette « Code »');
+        expect(avec([['Un commentaire fictif', 'commentaire']])).toContain('au moins un code : pose l’étiquette « Code » sur chaque code');
     });
 });
 
