@@ -188,8 +188,8 @@ pratiques comparables, on pourra regarder au-delà du seuil ; pas avant.
 - **Ce que l'enseignant·e peut faire dès maintenant** : comparer ses propres cohortes entre elles.
 - **Forme retenue par Grégoire (v7)** : LES DEUX, le tableau de comptes D'ABORD, le nuage ensuite. Le
   nuage apporte une nuance que le tableau n'a pas (où se situe chaque personne, pas seulement de quel
-  côté du seuil) ; elle se lit avec prudence et ne s'extrapole pas. (Lecture de Claude Code d'une phrase
-  ambiguë — « le tableau offre une nuance que les colonnes n'offrent pas » —, à confirmer.)
+  côté du seuil) ; elle se lit avec prudence et ne s'extrapole pas. (Mots de Grégoire, corrigés par lui :
+  « le nuage offre une nuance que le tableau en colonnes n'offre pas ».)
 - **Le raisonnement qui y mène** : la mesure de l'étude n° 1 est « a réussi / n'a pas
   réussi », dans chacun des deux cours. Le nuage, lui, place la note exacte du cours suivant : il montre
   donc plus que ce qu'on s'autorise à lire. La lecture juste serait un tableau de comptes par cohorte
