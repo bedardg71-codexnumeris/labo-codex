@@ -4,6 +4,8 @@
 (le mandat nommait `lot/deux-temps` ; la session du cloud impose ce nom), partie de `origin/main` à `271dc9177`
 (1.243.0), poussée, non fusionnée. Mandat : relais de la conversation du Projet, 12 nov., 8 h 20.
 Porte terrain : `plans de travail/PORTES-TERRAIN-2026-11-12-deux-temps-modelisation.md`.
+**Aperçu** : PR n° 20 (brouillon, à ne pas fusionner), `https://deploy-preview-20--codexnumeris-051225.netlify.app`,
+build 1112-0943. Netlify le dit prêt ; il n'a pas pu être ouvert depuis le conteneur (le réseau y bloque `netlify.app`).
 
 **Dernier relais : 12 nov., session du cloud.** Fait : le panneau (texte en quatre temps, choix du matériel, carte
 sans modélisation, « Remettre la démo à neuf »), la modélisation de « Mettre ta classe en place » (huit bulles dans la

@@ -17,7 +17,8 @@ un espace vide. Rien de ce que tu y fais ne touche ton application.
 
 ## §0 · Préalable
 
-- **0.1** Ouvre l'adresse de l'aperçu (donnée dans le rapport), sur l'iPad, en paysage. Recharge la page.
+- **0.1** Ouvre `https://deploy-preview-20--codexnumeris-051225.netlify.app` (l'aperçu de la PR n° 20), sur l'iPad,
+  en paysage. Recharge la page.
   ⮕ Attendu : en bas de l'accueil, la version **1.243.0 · build 1112-0943** (ce lot ne change pas le numéro de
   version, seulement le build ; il partira avec la release du jour). Un autre build : c'est une autre version que
   celle de cette porte.
