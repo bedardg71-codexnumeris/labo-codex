@@ -1,4 +1,4 @@
-# Cadrage — Comparer des groupes : l'outil d'étude du Labo (12 nov. 2026, v2)
+# Cadrage — Comparer des groupes : l'outil d'étude du Labo (12 nov. 2026, v3)
 
 > Page d'EXPLORATION, à corriger par Grégoire. Aucun code n'en découle tant qu'elle n'est pas relue.
 > Née à l'aperçu du lot « Tendances » (PR #18, non fusionnée), quand le suivi longitudinal s'est
@@ -37,6 +37,26 @@ des choix d'enseignement sur l'apprentissage, y compris à long terme**.
   groupe qui réussit mieux après un changement peut le devoir au changement, au groupe, à la saison ou
   au hasard ; la lecture se raffermit avec le nombre de trimestres comparés. L'écran, lui, continue de
   donner des comptes sans commenter (§ 5).
+
+### 1 ter. Le cycle : une hypothèse, une observation, une conclusion (Grégoire, 12 nov. — v3)
+
+Le nom dit le concept. **Le labo** est le lieu de l'expérimentation : on y observe. **Le codex** est le
+livre, le journal qu'on tient : la part introspective et analytique. C'est leur combinaison qui améliore
+l'enseignement, parce que la réflexion repose sur des données observées en classe.
+
+Le journal des changements ne note donc pas seulement « quoi » et « depuis quand ». Chaque entrée suit
+le cycle entier :
+
+1. **J'ai une hypothèse** — ce que je change, et ce que j'en attends, écrit AVANT de voir les données ;
+2. **J'observe** — la ou les comparaisons qui s'y rapportent (§ 4) ;
+3. **Je conclus** — ce que j'en retiens, écrit par l'enseignant·e. L'application montre ; elle ne
+   conclut pas à sa place (§ 5).
+
+Proposition de Claude Code, à confirmer : cette unité — une hypothèse, ses observations, sa conclusion —
+est **une étude**. Le mot existe déjà dans le Labo (« Études ») ; il prendrait là son sens plein.
+
+Conséquence assumée par Grégoire : il y aura des réaménagements, peut-être des sections à redécouper.
+On raffine les outils ET la cohésion qu'ils ont entre eux. Rien de cela n'est engagé ici.
 
 ## 2. Une grammaire commune (proposition)
 
@@ -105,8 +125,8 @@ dynamique des groupes.
 ## 6. Ce qui reste à trancher (à Grégoire)
 
 1. ~~Par quoi commencer ?~~ **Tranché (v2)** : la n° 1, puis les jetons et le changement de méthode.
-1 bis. **Le journal des changements** : où vit-il (dans Bilan, dans l'outil), et que note-t-on au juste —
-   un titre et un trimestre de départ, ou aussi ce qu'on en attend ?
+1 bis. ~~Que note le journal ?~~ **Tranché (v3)** : l'hypothèse, l'observation, la conclusion (§ 1 ter).
+   Reste : où vit-il (dans Bilan, dans l'outil, ou l'outil EST ce journal) ?
 2. **Une tension à nommer.** La carte « Dynamique des corrélations » calcule un r et s'impose un minimum
    d'étudiant·es ; la décision du 11 nov. a retiré du lot « Tendances » le lien calculé et tout jugement
    sur l'échantillon. Les deux ne se contredisent pas forcément (un r décrit, il ne juge pas), mais si
