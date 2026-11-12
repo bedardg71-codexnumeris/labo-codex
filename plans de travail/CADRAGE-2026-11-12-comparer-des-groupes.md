@@ -363,6 +363,45 @@ concepts que représentent les onglets ». Les noms pourront être repris.
   Observations. Elle reste à trancher.
 - **Zone protégée** : ces renommages touchent `js/config.js` et `js/navigation.js`. Rien n'est engagé.
 
+## 6 quinquies. Ce que les sources permettent — mesuré le 12 nov. (lecture seule)
+
+Les trois mesures que le rapport demandait « avant de promettre ».
+
+| Question | Verdict | Source |
+|---|---|---|
+| La marque d'un jeton est-elle dans les copies du registre ? | **Oui** | la marque est une propriété de l'évaluation, et le registre copie les évaluations entières (`js/registre-longitudinal.js`, `copie()` et `construireDossier`) |
+| Les deux états du cours se comparent-ils entre trimestres ? | **Oui, tant que le trimestre vit dans l'application** | carte, séances, pratiques, modalités et bilan sont rangés par trimestre, lisibles par `cleSource` sans changer de trimestre actif (`js/trimestres.js`) |
+| Un fichier d'archives (codex data) permet-il la même chose ? | **En partie seulement** | voir ci-dessous |
+
+- **Jetons, deux limites** : la copie du registre est figée à sa date (un jeton appliqué après n'y est
+  pas tant qu'on n'a pas fait « Refaire la copie ») ; et il y a TROIS sortes de jetons, pas une
+  (`jetonDelaiApplique`, `jetonRepriseApplique`, `jetonRepriseCibleeApplique`). Le facteur « a utilisé
+  un jeton ou non » devra dire lequel.
+- **Où se perd l'information des archives (fait, `js/codex-data.js`, `_construireBibliotheques` et
+  `_retirerBibliothequesDuGroupe`)** : à l'EXTRACTION, pas à l'archivage. Quand un fichier codex data
+  réunit plusieurs trimestres, les grilles, échelles, productions et pratiques sont prises dans
+  l'archive la plus récente seulement, puis retirées de chaque groupe. Les pratiques de chaque
+  trimestre ancien n'y sont donc plus : le journal des changements ne pourrait pas y constater « la
+  pratique a changé ».
+- **Ce que ça laisse espérer (inférence, à vérifier sur une vraie archive)** : chaque archive d'origine
+  porterait encore ses propres pratiques, puisque l'extraction les lit dans le `donnees.json` de
+  chacune avant de n'en garder qu'une. Le stock de Grégoire serait donc intact, et seule l'extraction
+  serait à revoir.
+- **Non mesuré** : si une archive emporte la carte d'alignement et les modalités (le code laisse passer
+  toutes les autres clés, mais aucune vraie archive n'était sous la main) ; et combien de trimestres
+  vivent encore dans l'application de Grégoire.
+- **Décision de Grégoire (12 nov.)** : s'il le faut, on revoit comment les archives sont créées. « Le
+  but des archives est de pouvoir servir plus tard. Si le traitement actuel nous prive de certaines
+  informations qui devraient se retrouver dans les archives, nous allons revoir les archives. » Le
+  moment est bon : il est à peu près le seul à avoir plusieurs trimestres, et le seul à avoir des
+  archives. ⚠ Ses archives sont ses données réelles : toute réécriture du stock remonte à lui.
+- **La voie sûre en attendant (inférence)** : le journal des changements s'appuie sur les trimestres
+  encore présents dans l'application, pas sur les fichiers d'archives.
+- **Une trouvaille, disposition « inscrire et continuer »** : le mot « journal » est déjà pris dans le
+  code. `js/journal.js` est le journal de bord des productions (la trace de chaque évaluation, rangée
+  dans `evaluation.journal[]`). Ce n'est pas un écran du Labo ; le nom du sous-onglet peut tenir, il
+  faudra distinguer les deux au moment de coder.
+
 ## 7. Hors de ce cadrage
 
 Aucun code. L'onglet « Tendances » reste tel quel dans l'aperçu, sans fusion. Les cartes d'Études ne
