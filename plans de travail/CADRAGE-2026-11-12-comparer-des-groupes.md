@@ -81,8 +81,31 @@ prétends pas à la recherche scientifique. » Question née de la chronique de 
 Ce que fait l'enseignant·e dans le Labo est une **enquête de praticien** (le praticien réflexif, la
 recherche-action), pas de la recherche : elle vise une décision mieux éclairée dans son propre cours,
 et peut affirmer « voici ce que j'ai observé chez moi, et ce que j'en fais », pas « ceci cause cela ».
-Deux suites ouvertes : les garde-fous qui conviennent à cette enquête, puis les mots (« hypothèse »,
-« étude », « Labo »), à choisir à cette hauteur.
+Une suite ouverte : les mots (« hypothèse », « étude », « Labo »), à choisir à cette hauteur.
+
+**Les cinq garde-fous d'une enquête de praticien (retenus tous les cinq par Grégoire, 12 nov.)** —
+chacun répond à une façon précise de se tromper soi-même :
+
+| Garde-fou | Ce contre quoi il protège | Ce que l'application ferait |
+|---|---|---|
+| **1. Écrire l'attente avant** | ajuster l'hypothèse à ce qu'on a vu | dater l'hypothèse, compter les cohortes venues après (§ 6 quater) |
+| **2. Dire d'avance ce qui me donnerait tort** | une hypothèse que tout confirme | un second texte dans l'étude, écrit avec l'hypothèse |
+| **3. Nommer les autres explications** | attribuer l'effet à son changement alors que le groupe, la saison ou un autre changement suffisent | proposer ce qu'elle constate : les autres changements entre les mêmes trimestres, la saison, la taille des groupes |
+| **4. Tout montrer, y compris ce qui manque** | ne regarder que les cohortes favorables, ou que les étudiant·es resté·es | afficher toutes les cohortes de l'étude, et le compte de ceux et celles qu'on ne voit pas (abandons, notes non saisies) |
+| **5. Conclure provisoirement** | tirer une leçon d'un seul trimestre | dater chaque conclusion, afficher sur combien de cohortes elle repose, la laisser reprendre |
+
+- **Qui les tient** : les 1, 4 et 5 sont mécaniques, l'application les tient seule. Les 2 et 3 demandent
+  d'écrire : l'application invite, l'enseignant·e écrit (§ 5).
+- **Le 2 répond à une question laissée ouverte au rapport** (« qu'est-ce qui confirmerait l'hypothèse de
+  l'étude n° 1 ? »), retournée : qu'est-ce qui l'infirmerait ? La réponse pour l'étude n° 1 reste à écrire
+  par Grégoire.
+- **Une frontière mince avec le § 5** (« l'écran ne commente ni les données ni l'échantillon ») : les 3 et
+  4 s'en approchent. Lecture de Claude Code, non contredite : un compte d'absent·es ou une liste de
+  changements constatés sont des faits, pas des jugements. À surveiller au moment d'écrire les écrans.
+- **Leur limite** : ils réduisent l'aveuglement, ils ne donnent pas la preuve d'une cause. Aucun ne
+  remplace un groupe témoin.
+- **Un sixième, hors de ce cadrage** : le regard d'un·e collègue, qui tient lieu de relecture par les
+  pairs. Grégoire : il émergerait d'une éventuelle communauté de pratique.
 
 ## 2. Une grammaire commune (proposition)
 
