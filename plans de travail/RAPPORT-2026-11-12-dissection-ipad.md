@@ -1,10 +1,12 @@
 # Rapport du lot `lot/dissection-ipad` — la dissection sur l'iPad (12 nov. 2026)
 
 **Relais.** Branche `lot/dissection-ipad`, partie de `main` (`271dc9177`, la 1.243.0). Mandats : relais de la
-conversation du Projet, 12 nov., 6 h 35 (huit points), puis 11 h 25 (huit corrections après la porte). **Fait** : les
-deux relais, sur la branche, PR d'aperçu n° 21 ; la porte passée de 9 h 58 à 11 h 23 (dans la conversation, sans
-artefact). **Reste** : la section « Après correction » de la porte, un geste par tour ; la fusion viendra par un relais
-à part (avec les deux temps et l'en-tête). Commit, build : « Second relais », en fin de rapport.
+conversation du Projet, 12 nov., 6 h 35 (huit points), 11 h 25 (huit corrections après la porte), puis 13 h 10 (la
+bulle bloquée aux deux tiers gauches de l'écran). **Fait** : les trois relais, sur la branche, PR d'aperçu n° 21 ; la
+porte passée de 9 h 58 à 11 h 23, sa section « Après correction » de 12 h 20 à 13 h 07 (C.1 à C.8 réussis), dans la
+conversation, sans artefact. **Reste** : la section « Après correction 2 » de la porte (D.1, D.2), un geste par tour ;
+la fusion viendra par un relais à part (avec les deux temps et l'en-tête). Commit, build : « Troisième relais », en fin
+de rapport.
 
 ## Livraison
 
@@ -203,3 +205,46 @@ toi-même. »
 **Trouvaille (hors du lot, inscrire et continuer).** `.claude/skills/portes-terrain/SKILL.md` l. 171 nomme encore un
 clone `~/Documents/GitHub/Monitorage_v6` : vrai ou périmé, à vérifier.
 
+## Troisième relais (12 nov., 13 h 10) : la bulle va à droite
+
+**Livraison.** Build 1112-1328 (1.243.0 inchangée), poussé sur `lot/dissection-ipad` ; l'aperçu n° 21 se met à jour.
+Pas de fusion.
+
+**La cause : supposée, pas mesurée sur l'iPad.** Mesuré : le symptôme (left ≈ 433 = 820 − 8 − 380) est exactement ce
+que rend le moteur quand sa largeur vaut 820 dans une page de 1180 (break-test 1 : `cadre.droite` 812 au lieu de
+1172). D'où vient 820 sur l'iPad de Grégoire, la session ne peut pas le mesurer. Les deux pistes du relais sont
+fermées ensemble : (b) la largeur ne se lit plus sur `innerWidth` ; (a) le compte des doigts ne reste plus bloqué à 2
+quand la cible d'un toucher quitte le DOM, et l'écran gardé ne porte plus de largeur.
+
+**Ce qui a changé** (`js/parcours-moteur.js`) :
+1. `largeurPage()` : `document.documentElement.clientWidth` (la mise en page, où se posent les `position: fixed`), à
+   défaut `innerWidth`. Le lisent : `ecranGarde` (donc `cadreUtile`, `placerLoin`, `bornerDeplacement`, le glisser, les
+   flèches hors écran), `surTelephone`, le placement centré de `placerBulle`, et la largeur de la couche des flèches
+   (à 820, elle aurait coupé toute flèche au-delà).
+2. `etat.ecran` retiré : seule la hauteur reste gardée sous le zoom (`etat.hauteurGardee`). La hauteur n'est pas
+   touchée autrement (le glisser vertical marchait).
+3. `compterDoigts` : la cible d'un `touchstart` écoute aussi sa propre fin (`touchend`, `touchcancel`), qui ne remonte
+   plus à `window` quand elle a quitté le DOM.
+
+**Bancs.** Neuf : `tests/integration/bulle-largeur-ipad-2026-11-12.spec.js` (WebKit). L1, aux deux orientations, au
+pointeur souris et au toucher : la bulle se pose d'elle-même à droite de la grille quand elle y a la place (paysage :
+au-delà de 433), et sa poignée la mène au bord droit, à 8 px près. L2 : `innerWidth` forcé à 820 dans une page de
+1180, puis deux doigts dont la cible quitte le DOM avant son `touchend` : le moteur ne se croit pas sous le zoom, le
+cadre va à 1172, la bulle se pose à droite et se glisse au bord droit, la couche des flèches fait 1180.
+Adaptée : la sentinelle Vitest des flèches (la couche sur `largeurPage()`, plus `innerWidth`).
+Break-tests, chacun rouge : `largeurPage` rendue à `innerWidth` → L2 (`cadre.droite` 812 au lieu de 1172) ; la cible
+qui n'écoute plus sa fin de toucher → L2 (le moteur reste « sous le zoom »).
+Rejoués sur l'état final (build 1112-1328), WebKit du Mac : les bancs des parcours (`parcours-*`, flèches et bulles
+comprises), de la bulle (`bulle*`, `bouton-de-bulle-*`), de la dissection (`dissection-*`), `registre-des-parcours` et
+`pied-de-page-et-assistance` : 135 verts, dont 1 au second essai (son nom n'a pas été relevé : le filtre de la commande
+l'a écarté), 0 rouge ; Vitest 921 fichiers, 11 497 tests, verts. Le verdict de la release fera le reste.
+
+**Ce que j'ai supposé.**
+- `documentElement.clientWidth` vaut la largeur de la mise en page sous Safari iPad, zoom ou non (comportement
+  documenté de WebKit, non mesuré sur l'appareil) : D.1 et D.2 le jugent.
+- Sous une barre de défilement classique (Windows, souris branchée), la bulle s'arrête désormais avant la barre
+  (`clientWidth` l'exclut), au lieu de passer dessous.
+- Le compte des doigts bloqué n'est qu'une des deux pistes ; il est corrigé parce que le break-test du relais l'exerce,
+  sans preuve qu'il ait joué sur l'iPad.
+
+**Trouvailles.** La ligne du skill `portes-terrain` (l. 171, `Monitorage_v6`) : corrigée, avec sa ligne d'historique.

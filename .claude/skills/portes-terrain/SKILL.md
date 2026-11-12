@@ -168,7 +168,7 @@ ne portait sur la vraie variable.
   ⚠⚠ **NE LUI DEMANDE NI `git pull` NI RIEN QUI TOUCHE SON CLONE : SON APPLICATION
   N'EN VIENT PLUS.** (Réécrit le 8 septembre 2026 ; avant cette date, ce bloc disait
   le contraire — voir la note de fin.) Grégoire ouvre `https://app.codexnumeris.org`,
-  la version **déployée**. Son clone `~/Documents/GitHub/Monitorage_v6` reste l'arbre
+  la version **déployée**. Son clone `~/Documents/GitHub/labo-codex` (`Monitorage_v6` avant) reste l'arbre
   de travail des sessions, mais il ne sert plus rien à l'écran chez lui. Règle et
   fondement : `PROTOCOLE.md`, « L'application : UNE SEULE ADRESSE porte ses données
   réelles ».
@@ -414,6 +414,7 @@ n'existe pas.
 
 | Date | Changement |
 |---|---|
+| 2026-11-12 | Le clone de Grégoire se nomme `~/Documents/GitHub/labo-codex` (le texte disait encore `Monitorage_v6`, l’ancien nom du dépôt ; trouvaille du lot `lot/dissection-ipad`). |
 | 2026-09-08 | **Une porte terrain vise le SITE WEB, plus le fichier local.** Grégoire a arrêté que `https://app.codexnumeris.org` porte ses données réelles (`PROTOCOLE.md`, règle des deux instances) : son clone n'alimente plus son écran. Conséquence sur le §0 — plus de `git pull`, et **un lot seulement commité n'est pas encore chez lui : il doit être poussé et déployé** (30-60 s). Le bloc du 27 août sur le `git pull` inutile est conservé comme leçon de méthode, marqué périmé. |
 | 2026-08-24 | **Les deux règles de tête** (§0) : une porte n'existe que si aucune machine ne peut répondre ; la vérification préalable n'est due que si un raté est irréversible. Adoptées après que Grégoire eut dit son découragement devant 24 portes d'une session et 35 d'une autre — dont 19 étaient déjà mesurées par les tests. Le gabarit avait été appliqué mécaniquement, y compris 3 portes iPad sur un chantier sans une ligne de CSS. |
 | 2026-08-11 | Bouton « Copier mes résultats » rendu obligatoire, éprouvé au navigateur avant publication. Et la leçon de son premier usage : une case à cocher ne porte ni un nombre ni un verdict — les rangées du §3 et les rangées de mesure prennent un champ de saisie, pas une bascule. |

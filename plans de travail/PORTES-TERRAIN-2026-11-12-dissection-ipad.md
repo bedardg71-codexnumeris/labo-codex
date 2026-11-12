@@ -6,8 +6,10 @@ conversation du Projet, 12 nov., 6 h 35. Rapport : `plans de travail/RAPPORT-202
 **État : PASSÉE le 12 nov., de 9 h 58 à 11 h 23, menée dans la conversation du Projet, sans artefact** (un geste par
 tour). Réussis : 0.1, 0.2, 2.1 a-b, 2.2 a-c, 2.3 a-c, 2.4 a-b, 2.5 a, 2.6 a. Décisions du §3 : 3.1 à 3.3 validées ; 3.4
 à 3.7 vues en contexte, sans objection, elles partent telles quelles. Huit corrections demandées (relais de 11 h 25),
-faites sur la même branche : **à refaire une par tour, section « Après correction »** en fin de porte. Pas de fusion
-avant.
+faites sur la même branche, puis la section « Après correction » **passée le 12 nov., de 12 h 20 à 13 h 07** (dans la
+conversation du Projet, sans artefact) : C.1 à C.8 réussis. Une correction de plus (relais de 13 h 10, la bulle bloquée
+aux deux tiers gauches de l'écran) : **à refaire une par tour, section « Après correction 2 »** en fin de porte. Pas de
+fusion avant.
 
 Pourquoi une porte, alors que la règle est de ne pas en faire pour le confort : ce que tu as vécu le 11 nov. (la
 liste qui ne montrait pas qu'elle défile, le doigt qui posait des étiquettes en voulant défiler) n'existe que sous
@@ -166,41 +168,62 @@ réponse, ne coche pas. Tous ces mots sont PROPOSÉS : ils partent tels quels et
 
 ## Après correction — un geste par point, un par tour
 
+**Passée le 12 nov., de 12 h 20 à 13 h 07**, dans la conversation du Projet, sans artefact : C.1 à C.8 réussis. C.6 :
+ta grille n'avait encore aucun code, la carte a donc visé « Code » plutôt que « Pondération » ; sa flèche et son halo
+sont allés à « ▲ 11 étiquettes plus haut », jamais au-dessus de la légende.
+
 Relais de la conversation du Projet, 12 nov., 11 h 25. Sur l'aperçu `https://deploy-preview-21--codexnumeris-051225.netlify.app`,
 rechargé : en bas de l'accueil, 1.243.0, build **1112-1157**. Chaque geste se fait sur l'iPad, en paysage sauf mention.
 
-- [ ] **C.1** Conception › Apporter mon matériel : regarde la rangée « Étiqueter le texte ci-dessus · Essayer avec un
+- [x] **C.1** Conception › Apporter mon matériel : regarde la rangée « Étiqueter le texte ci-dessus · Essayer avec un
   exemple · Composer ma grille ».
   ⮕ Attendu : « Composer ma grille » est un bouton, comme ses deux voisins.
   `iPad`
-- [ ] **C.2** Touche « Essayer avec un exemple ».
+- [x] **C.2** Touche « Essayer avec un exemple ».
   ⮕ Attendu : au-dessus de la liste des étiquettes, le titre « Légende » ; la consigne dit « Touche une étiquette dans la
   légende. », puis « … garde le doigt posé un instant, puis glisse. » ; nulle part « surligneur » ni « palette ».
   `iPad`
-- [ ] **C.3** Dans la légende, lis « Pondération » et « Points ».
+- [x] **C.3** Dans la légende, lis « Pondération » et « Points ».
   ⮕ Attendu : « Sur combien il se note (par ex. « / 10 ») » ; « Ce qu'elle vaut, en chiffres (par ex. « 3 », « 4-5 ») ».
   (Si la légende est trop étroite pour les montrer, choisis l'étiquette : la précision paraît dans le bandeau.)
   `iPad`
-- [ ] **C.4** Parcours « Évaluer une première production » › « Faire l'exercice soi-même » ; prends « Titre » et touche
+- [x] **C.4** Parcours « Évaluer une première production » › « Faire l'exercice soi-même » ; prends « Titre » et touche
   « Journal de lecture », prends « Critère » et touche « L'étudiant·e résume l'œuvre avec justesse », prends « Points »
   et touche « 2 ».
   ⮕ Attendu : la bulle dit de prendre « Descripteur », puis de toucher « Résume quelques événements » (plus
   « · Repérage des événements principaux »).
   `iPad`
-- [ ] **C.5** Une étiquette posée sur des morceaux (par ex. « Points » sur « 2 »), toujours en main : fais défiler la
+- [x] **C.5** Une étiquette posée sur des morceaux (par ex. « Points » sur « 2 »), toujours en main : fais défiler la
   légende du doigt.
   ⮕ Attendu : les flèches de l'étiquette suivent la liste ; sortie du cadre, elles partent de son bord.
   `iPad`
-- [ ] **C.6** « Passer à ma grille », colle une de tes grilles ; pose « Poids » sur un « / N ». Fais défiler la légende
+- [x] **C.6** « Passer à ma grille », colle une de tes grilles ; pose « Poids » sur un « / N ». Fais défiler la légende
   jusqu'en bas, reprends « Poids » et touche un autre « / N ».
   ⮕ Attendu : en défilant, la flèche et le halo de la bulle vont à « ▲ … plus haut », jamais au-dessus de la liste ;
   après ton toucher, la légende remonte d'elle-même jusqu'à « Pondération », entière, et la flèche y va.
   `iPad`
-- [ ] **C.7** Fais défiler la légende de haut en bas, lentement.
+- [x] **C.7** Fais défiler la légende de haut en bas, lentement.
   ⮕ Attendu : « ▲ … plus haut » et « ▼ … plus bas » sont au-dessus et au-dessous de la liste ; aucune ne cache le nom
   d'une étiquette ; l'étiquette que la bulle désigne paraît entière, sous la pastille.
   `iPad`
-- [ ] **C.8** Pose « Points » sur un « / N » de ta grille.
+- [x] **C.8** Pose « Points » sur un « / N » de ta grille.
   ⮕ Attendu : la bulle dit que « / N » ressemble au poids d'un critère, et propose « Pondération » sur ce morceau.
   `iPad`
 
+---
+
+## Après correction 2 — un geste par point, un par tour
+
+Relais de la conversation du Projet, 12 nov., 13 h 10 (ton constat de 12 h 54 : « la carte de l'assistance n'est pas
+déplaçable vers la droite. Elle semble bloquer au centre. »). Sur l'aperçu
+`https://deploy-preview-21--codexnumeris-051225.netlify.app`, rechargé : en bas de l'accueil, 1.243.0, build
+**1112-1328**. L'iPad en paysage, posé comme à 12 h 54 ; « Évaluer une première production », étape « Ta grille », une
+de tes grilles collée.
+
+- [ ] **D.1** Regarde où la carte du parcours se pose d'elle-même, sans y toucher.
+  ⮕ Attendu : à droite de ta grille, contre le bord droit de l'écran, quand elle y a la place ; elle ne couvre plus le
+  milieu de ta grille.
+  `iPad`
+- [ ] **D.2** Glisse la carte par sa poignée (⠿) vers la gauche, puis ramène-la tout à droite.
+  ⮕ Attendu : elle va jusqu'au bord droit de l'écran (une marge de quelques pixels), plus seulement jusqu'au milieu.
+  `iPad`
