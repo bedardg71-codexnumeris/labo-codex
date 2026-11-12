@@ -536,6 +536,73 @@ par l'enseignant ; faire la reprise ; comparer et juger (objectif atteint : oui,
   faire à l'enseignant·e sur son cours — une attente, des repères observables, une comparaison, un
   jugement appuyé sur les repères « et pas sur une impression ».
 
+## 6 septies. La question du cours suivant, reformulée (12 nov.)
+
+**Ce que Grégoire veut savoir** : non pas si ses élèves font mieux qu'ailleurs (le taux de réussite des
+autres cours ne l'intéresse pas), mais si son propre jugement de maîtrise dit vrai. « Si je dis qu'un
+élève maîtrise l'ensemble des critères, est-ce que cette maîtrise est réelle et se maintient-elle ? »
+Dans son cours, le niveau de maîtrise est à 75 %. Le 101 est préalable au 102.
+
+**Temps 1 (confirmé)** : celles et ceux qui réussissent mon cours réussissent le cours suivant.
+**Forme de la question (contraste accepté par Grégoire)** : comparer deux groupes de ses propres
+élèves — au-dessus du seuil de maîtrise (75 %), et ayant réussi sans l'atteindre (60 à 74 %). Attente :
+les premiers réussissent presque tous le 102, et nettement plus souvent que les seconds.
+
+- **Trois réserves de Claude Code, gardées** : « tous » est trop strict (un échec au 102 peut venir d'un
+  abandon, d'une maladie, d'un emploi : il faut une tolérance, et distinguer l'échec de l'abandon) ;
+  réussir le 102 à 60 % est une barre basse pour qui avait 75 %, donc « se maintient-elle ? » demande
+  plus que ce que le seuil de réussite (v6) peut montrer — tension laissée visible ; et les effectifs
+  sous 75 % parmi les élèves suivis seront petits.
+- **Le temps 2 n'est pas écrit.**
+
+### Contre-vérification des analyses de 2025 (demandée par Grégoire)
+
+Cette attente vient d'une observation faite par Claude à l'automne 2025 sur la cohorte A2024, dans
+cinq documents remis par Grégoire : « Analyse de corrélation 101-102 » (v1, 12 sept. 2025), « Analyse
+des seuils SOLO » (parties 1, 2, 3), « Validation complète », et le « Modèle théorique du monitorage »
+(6 nov. 2025). Grégoire : l'échantillon était si petit qu'il ne sait pas ce que vaut l'affirmation.
+
+**Verdict de Claude Code (lecture des documents seuls, sans les données brutes)** : les affirmations
+ne sont pas soutenues telles qu'écrites. Cela ne dit pas qu'elles sont fausses : la question est
+ouverte, pas confirmée.
+
+- **Le tableau de la v1 contredit ses propres constats.** Constat annoncé : sous 65 % au 101, 5 échecs
+  au 102 sur 5 ; au-dessus, 10 réussites sur 10 ; 10 réussites sur 15 en tout. Le tableau des 15
+  élèves montre : sous 65 %, 3 réussites sur 5 ; au-dessus, 9 sur 10 ; 12 sur 15 en tout.
+- **Un contre-exemple direct** : l'élève n° 47 du tableau, 80 % au 101, 56 % au 102, échec. Les
+  documents suivants affirment 100 % de réussite au 102 à partir de 75 %.
+- **Des données suspectes** : pour 11 élèves sur 15, la note du 102 est identique à celle du 101, au
+  point près. Un élève porte « Reprise 101 » avec une note de 102. Une colonne a probablement été
+  recopiée. L'élève n° 1 a 77 puis 77 dans la v1, 77 puis 68 dans la partie 1.
+- **« 52 élèves avec suivi longitudinal » est inexact** : les histogrammes totalisent 21 élèves
+  (partie 1) ou 23 (partie 3). 52 est sans doute la taille de la cohorte ; le suivi au 102 porte sur
+  15 à 23 élèves selon le document.
+- **Des tranches minuscules** : 70-74 % contient UN élève, 85 % et plus en contient deux. Les
+  « ruptures naturelles » à 64, 70 et 75 % et les stabilités (±5 %, ±2,5 %) reposent sur ces effectifs.
+  Les bornes des tranches changent d'un document à l'autre (60-65, 60-64, 60-63).
+- **Des taux qui se contredisent entre documents** : la zone 65-70 % a « 100 % de réussite » (partie 1)
+  puis « ~67 % » (Validation, où une moyenne semble prise pour un taux) ; « élèves D échouent » (étape
+  2) contre « 100 % réussite » en zone D (partie 1).
+- **Circularité** : les seuils sont tirés des données, puis déclarés « validés » par les mêmes données.
+- **Des affirmations sans donnée visible** : « 95 % en 101 = 95 % en 102 » (aucun élève à 95 % dans les
+  tableaux) ; « garantit », « prédit avec précision », « validation empirique complète ».
+- **Les citations de Biggs & Collis ne sont pas vérifiées** par Claude Code (il n'a pas l'ouvrage). La
+  correspondance entre niveaux SOLO et pourcentages (75 % = relationnel) est une construction des
+  documents, pas de la taxonomie ; et les documents citent eux-mêmes la mise en garde des auteurs
+  contre l'usage quantitatif sommatif de SOLO.
+- **Le ton** : « validation de ton intuition », « exemplaire », « c'est la vraie maîtrise ! ». C'est la
+  complaisance que le garde-fou 1 existe pour contrer.
+
+**Ce qui tient malgré tout** : le seuil de 75 % comme choix PÉDAGOGIQUE (le niveau relationnel, le
+jugement de Grégoire sur ce qu'est maîtriser) ne dépend pas de ces analyses. Ce qui ne tient pas, c'est
+de dire que des données l'ont validé.
+
+**Conséquence** : la cohorte A2024 a servi à former l'attente ; elle ne peut pas servir à la confirmer.
+La question se pose à neuf, sur les cohortes suivantes, avec un temps 2 écrit avant de regarder. Un
+recomptage sur les données brutes d'A2024 (tableur + notes du 102) dirait seulement ce que cette
+cohorte montrait vraiment. Biais possible de Claude Code : la critique performative d'un travail
+antérieur ; il n'a lu que les rapports, pas les données.
+
 ## 7. Hors de ce cadrage
 
 Aucun code. L'onglet « Tendances » reste tel quel dans l'aperçu, sans fusion. Les cartes d'Études ne
