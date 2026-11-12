@@ -64,6 +64,26 @@ l'instrument ; l'étude est la démarche qu'on y conduit.
 Conséquence assumée par Grégoire : il y aura des réaménagements, peut-être des sections à redécouper.
 On raffine les outils ET la cohésion qu'ils ont entre eux. Rien de cela n'est engagé ici.
 
+### 1 quater. Ce que la démarche prétend, et ce qu'elle ne prétend pas (12 nov., 2e séance — v11)
+
+Grégoire : « Je ne suis pas un chercheur. Je suis un praticien. […] Je ne veux pas jouer aux apprentis
+sorciers. Je veux que la démarche proposée par l'application soit cohérente et solide, mais je ne
+prétends pas à la recherche scientifique. » Question née de la chronique de Paul Kirschner du 12 nov.
+2026 (« Everyone's a learning scientist these days… apparently »), qu'il juge légitime.
+
+**Le paragraphe à garder (Claude Code, retenu par Grégoire)** :
+
+> La question n'est pas de se conformer à la démarche scientifique, que l'outil ne peut pas porter : pas
+> de groupe témoin, de petits effectifs, un seul observateur qui est aussi l'acteur. Elle est de rendre
+> l'enquête honnête, c'est-à-dire de protéger l'enseignant·e contre le biais le plus courant, celui de
+> voir ce qu'on espère.
+
+Ce que fait l'enseignant·e dans le Labo est une **enquête de praticien** (le praticien réflexif, la
+recherche-action), pas de la recherche : elle vise une décision mieux éclairée dans son propre cours,
+et peut affirmer « voici ce que j'ai observé chez moi, et ce que j'en fais », pas « ceci cause cela ».
+Deux suites ouvertes : les garde-fous qui conviennent à cette enquête, puis les mots (« hypothèse »,
+« étude », « Labo »), à choisir à cette hauteur.
+
 ## 2. Une grammaire commune (proposition)
 
 Toute comparaison se dit avec quatre mots :
