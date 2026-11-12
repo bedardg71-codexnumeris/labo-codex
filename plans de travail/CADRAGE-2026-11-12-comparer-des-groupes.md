@@ -1,4 +1,4 @@
-# Cadrage — Comparer des groupes : l'outil d'étude du Labo (12 nov. 2026, v9)
+# Cadrage — Comparer des groupes : l'outil d'étude du Labo (12 nov. 2026, v10)
 
 > Page d'EXPLORATION, à corriger par Grégoire. Aucun code n'en découle tant qu'elle n'est pas relue.
 > Née à l'aperçu du lot « Tendances » (PR #18, non fusionnée), quand le suivi longitudinal s'est
@@ -127,6 +127,11 @@ dynamique des groupes.
 - Rien de propre à une discipline n'est écrit en dur : ce qu'on compare est déclaré par l'enseignant·e.
 - L'écran ne commente ni la qualité des données ni celle de l'échantillon : il donne des comptes.
 - Aucun nom réel hors de l'application ; le mode anonymisation s'applique partout.
+- **Le partage des rôles (Grégoire, 12 nov. — v10) : l'application propose, l'enseignant·e écrit.**
+  L'application soutient la réflexion et la pratique : elle soulage d'une charge mentale (rassembler,
+  disposer, constater ce qui a changé), mais **la réflexion ne se délègue pas**. C'est une des raisons
+  pour lesquelles il n'y a pas d'IA dans l'application, pour l'instant. Les décisions précédentes en
+  découlent : l'écran ne commente pas les données, et il ne conclut pas à la place de l'enseignant·e.
 
 ## 6. Ce qui reste à trancher (à Grégoire)
 
@@ -215,6 +220,10 @@ deux états, et l'application peut la voir sans qu'on la lui déclare (une activ
 ajouté, une pratique remplacée). Le journal aurait donc deux sources : ce que l'application CONSTATE
 entre deux trimestres, et ce que l'enseignant·e en DIT — pourquoi ce changement, ce qu'il ou elle en
 attend. (À mesurer avant de promettre : ce que ces deux états permettent réellement de comparer.)
+
+**Qui tient la plume (tranché, v10)** : les deux. L'application PROPOSE les différences qu'elle
+constate entre deux trimestres ; l'enseignant·e ÉCRIT — retient ce qui compte, dit pourquoi, dit ce
+qu'il ou elle en attend.
 
 **Deux regards, deux moments** : le comparateur de pratiques regarde AVANT (sur des profils-types, ce
 qu'une autre pratique donnerait) ; le microscope regarde APRÈS (sur les vrais groupes, ce qui s'est
