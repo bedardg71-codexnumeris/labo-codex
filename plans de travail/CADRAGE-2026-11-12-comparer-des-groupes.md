@@ -1,4 +1,4 @@
-# Cadrage — Comparer des groupes : l'outil d'étude du Labo (12 nov. 2026, v4)
+# Cadrage — Comparer des groupes : l'outil d'étude du Labo (12 nov. 2026, v5)
 
 > Page d'EXPLORATION, à corriger par Grégoire. Aucun code n'en découle tant qu'elle n'est pas relue.
 > Née à l'aperçu du lot « Tendances » (PR #18, non fusionnée), quand le suivi longitudinal s'est
@@ -140,6 +140,40 @@ dynamique des groupes.
 3. **Le nom de l'outil**, et sa place : une sous-section neuve du Labo, ou Études refondue ?
 4. **Le sort de l'onglet « Tendances »** : il reste dans Suivi longitudinal comme première comparaison,
    ou il déménage dans l'outil dès que celui-ci existe ?
+
+## 6 bis. La première étude, de bout en bout (v5) — pour voir ce qui manque
+
+**Étude n° 1 : mes étudiant·es réussissent-ils le cours suivant ?**
+
+1. **J'ai une hypothèse.** L'enseignant·e l'écrit, avant de regarder : « La façon dont je donne mon
+   cours — la pratique alternative, les jetons — bâtit une base assez solide pour la réussite du cours
+   suivant. » Puis ce qui est attendu, dans ses mots, et les cohortes visées.
+2. **J'observe.** Le microscope montre :
+   - le nuage du lot « Tendances » : pour chaque inscrit·e, sa note dans le cours d'origine face à sa
+     note dans le suivant, par cohorte ; et les comptes (combien ont réussi les deux) ;
+   - la même chose selon un FACTEUR tiré de l'hypothèse : a utilisé un jeton ou non. La donnée existe :
+     l'usage d'un jeton est une marque posée sur l'évaluation (`jetonRepriseApplique`), et le registre
+     copie les évaluations entières (inférence à mesurer : la marque doit donc être dans la copie) ;
+   - d'une cohorte à l'autre, si un changement du journal s'intercale : avant, après.
+3. **Je conclus.** L'enseignant·e écrit ce qu'il ou elle en retient, daté. L'étude reste ouverte : une
+   cohorte de plus, et l'observation s'enrichit ; la conclusion peut être reprise.
+
+**Ce qui manque entre l'onglet « Tendances » d'aujourd'hui et cette étude** :
+
+| Manque | Aujourd'hui | Pour l'étude |
+|---|---|---|
+| Un lieu pour l'hypothèse et la conclusion | rien | deux textes, attachés à l'étude |
+| L'étude comme objet | seule la séquence de cours est gardée | ce qu'on compare + hypothèse + conclusion, sous un nom |
+| Un facteur autre que la cohorte | les billes se teintent par cohorte seulement | teinter ou séparer par jeton, par changement du journal |
+| Le journal des changements | rien | « quoi », « depuis quel trimestre » |
+| La saisie des notes du cours suivant | une à une, à la main, au registre | à voir : c'est le coût réel de cette étude |
+| Un point de repère | aucun : on ne voit que ses propres étudiant·es | à décider par Grégoire (voir ci-dessous) |
+
+**Le point de repère, une question de fond.** « Assez solide » se juge par rapport à quoi ? Le
+microscope ne voit que les étudiant·es de l'enseignant·e. Il peut comparer ses cohortes entre elles
+(avant et après un changement) ; il ne peut pas les comparer à celles de collègues, faute de leurs
+données. L'étude n° 1 répond donc bien à « est-ce que ça s'améliore chez moi ? », moins bien à
+« est-ce mieux qu'ailleurs ? ». À l'enseignant·e d'écrire, dans son hypothèse, ce qui la confirmerait.
 
 ## 7. Hors de ce cadrage
 
