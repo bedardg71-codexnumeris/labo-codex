@@ -30154,11 +30154,29 @@ body.mode-clair {
     --dis-hauteur: max(460px, min(76vh, 920px));
     position: relative; display: grid; grid-template-columns: 220px minmax(0, 1fr); gap: 12px; align-items: start; min-width: 0;
 }
+/* Relais du 12 nov. 2026, 11 h 25, points 2 et 7 : la légende, titrée ; la liste défile entre ses deux pastilles,
+   qui ne la couvrent plus (elles sont hors d'elle). */
+.dissection-legende {
+    position: sticky; top: 8px; display: flex; flex-direction: column; gap: 6px; min-width: 0; max-height: var(--dis-hauteur);
+}
+.dissection-legende-titre { font-size: 0.93rem; font-weight: 700; color: var(--texte-principal); }
 .dissection-palette {
-    position: sticky; top: 8px; display: flex; flex-direction: column; gap: 12px; min-width: 0;
-    max-height: var(--dis-hauteur); overflow-y: auto; overscroll-behavior: contain; padding: 4px; margin: -4px;
+    display: flex; flex-direction: column; gap: 12px; min-width: 0; min-height: 0; flex: 1 1 auto;
+    overflow-y: auto; overscroll-behavior: contain; padding: 4px; margin: 0 -4px;
 }
 .dissection-groupe { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+/* Point 1 (iPad, 11 nov.) : la liste dit ce qu'elle cache, en haut et en bas. Point 7 du relais du 12 nov., 11 h 25 :
+   au-dessus et au-dessous de la liste, plus sur elle. Leur place est gardée tant que la liste défile (`.dissection-legende-defile`) :
+   paraître ou disparaître ne la déplace pas ; une liste qui tient entière n'en a pas. */
+.dissection-palette-plus {
+    display: none; flex: 0 0 auto; align-self: center; min-height: 44px; padding: 0 14px;
+    font: inherit; font-size: 0.85rem; font-weight: 600; color: var(--texte-secondaire); cursor: pointer;
+    background: var(--surface-carte); border: 1px solid var(--bordure-moyenne); border-radius: var(--radius-pill); box-shadow: var(--shadow-normal);
+    visibility: hidden; pointer-events: none;
+}
+.dissection-legende-defile .dissection-palette-plus { display: block; }
+.dissection-palette-plus.est-visible { visibility: visible; pointer-events: auto; }
+.dissection-palette-plus:focus-visible { outline: 3px solid var(--accent-primaire); outline-offset: 2px; }
 .dissection-groupe-nom { font-size: 0.74rem; letter-spacing: .08em; text-transform: uppercase; color: var(--texte-muted); }
 .dissection-etiquette {
     font: inherit; display: grid; grid-template-columns: 12px minmax(0, 1fr) auto; gap: 0 9px; align-items: start;
@@ -30203,7 +30221,9 @@ body.mode-clair {
 .dissection-morceau.dissection-marque { background: var(--dis-h); box-shadow: inset 3px 0 0 var(--dis-c); }
 /* Une étiquette en main : les morceaux prennent le doigt (plus de défilement sur eux), la sélection de texte se tait. */
 .dissection-pointage .dissection-feuille { user-select: none; -webkit-user-select: none; }
-.dissection-pointage .dissection-morceau { cursor: pointer; touch-action: none; }
+/* Lot de la dissection sur l'iPad (12 nov. 2026, point 2) : plus de `touch-action: none` ; au doigt, la feuille défile
+   et une étiquette se pose au toucher (js/materiel-dissection.js, `gesteTactile`). Pas de bulle d'appel sur un doigt maintenu. */
+.dissection-pointage .dissection-morceau { cursor: pointer; touch-action: manipulation; -webkit-touch-callout: none; }
 /* --dis-actif : la couleur de l'étiquette en main, résolue sur le canevas (un morceau surligné garde la sienne dans --dis-c). */
 .dissection-pointage { --dis-actif: var(--dis-c); }
 .dissection-pointage .dissection-morceau:hover { outline: 2px dashed var(--dis-actif); outline-offset: 1px; }
@@ -30295,7 +30315,9 @@ body.mode-clair {
 }
 @container dissection (max-width: 661px) {
     .dissection-atelier { grid-template-columns: minmax(0, 1fr); }
-    .dissection-palette { position: static; flex-direction: row; flex-wrap: wrap; max-height: none; overflow: visible; }
+    .dissection-legende { position: static; max-height: none; }
+    .dissection-palette { flex-direction: row; flex-wrap: wrap; overflow: visible; }
+    .dissection-legende-defile .dissection-palette-plus { display: none; }
     .dissection-groupe { flex: 1 1 200px; }
 }
 

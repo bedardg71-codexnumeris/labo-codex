@@ -71,46 +71,51 @@ l'allait chercher. Le hook pré-push n'y peut rien (il laisse passer faute de ve
 local, par décision du 26 août — Grégoire pousse depuis GitHub Desktop) ; la CI juge
 chaque push de toute façon. **Le manque était la lecture.**
 
-⚠⚠ **DEPUIS LE 10 OCTOBRE 2026, GITHUB NE JUGE PLUS AU NAVIGATEUR QU'À LA DEMANDE.**
-Décision de Grégoire (journal de `tests.yml`, point 8 ; #1048) : le passage de nuit
-(`schedule`) est retiré — ses huit derniers runs étaient coupés à 60 min et ne jugeaient
-plus rien. Le job `Garde` est retiré avec lui. Donc :
-· **le verdict de Vitest** vient du run du **dernier push** (GitHub) ;
-· **le verdict au navigateur** est celui du **Mac** : le jeton
-  `scripts/.verdict-playwright.json` (ci-dessus), rendu par `pousser.sh` avant chaque push
-  de code. **Aucun run GitHub planifié n'existe : son absence n'est ni un manque ni un
-  succès — ne pas la rapporter.**
-· un run **demandé** (`workflow_dispatch`) peut exister, si Grégoire l'a lancé : alors,
-  et alors seulement, lire ses jobs.
-Sur le run d'un push, `Playwright (WebKit)` est `skipped` : c'est la forme attendue, pas
-un « non jugé » à signaler.
+⚠⚠ **DEPUIS LE 16 OCTOBRE 2026, GITHUB JUGE AU NAVIGATEUR SUR LE PUSH ET À LA DEMANDE**
+(corrigé le 12 novembre 2026 : ce paragraphe disait encore « à la demande seulement », l'état
+du 10 octobre, point 8 de `tests.yml`). Le dépôt est public, les minutes sont gratuites
+(point 9 de `tests.yml`) : un push sur `main` qui touche un chemin OBSERVABLE
+(`scripts/lot-observable.sh`, dans le doute oui) fait jouer Playwright sur WebKit Linux, en
+20 morceaux parallèles (`total=` dans le job `decision`), puis un job `verdict` les juge
+contre `scripts/playwright-baseline-linux.json` : seule une rougeur NOUVELLE fait échouer.
+Un `workflow_dispatch` (`gh workflow run tests.yml --ref main`) fait la même chose à la
+demande. Donc :
+· **le verdict de Vitest ET le verdict de GitHub au navigateur** viennent du run du
+  **dernier push** ;
+· **le verdict du Mac** reste le jeton `scripts/.verdict-playwright.json` (ci-dessus), rendu
+  par `pousser.sh` avant chaque push de code. Les deux ne se remplacent pas : WebKit Linux
+  n'est pas Safari macOS, et le Mac vert peut côtoyer un rouge Linux (mesuré le 11 nov. :
+  1 602/1 602 sur le Mac, 9 specs rouges sous Linux sur `48f118bf`) ;
+· un push qui ne touche aucun chemin observable : `decision` dit non, les morceaux et le
+  verdict sont `skipped` — c'est la forme attendue, le dire tel quel.
 
 **La mesure, dix secondes — pas de script neuf :**
 
 ```bash
-# 1. Vitest : le run du dernier push
+# Le run du dernier push (Vitest, puis Playwright s'il a joué), job par job
 gh run list --branch main --event push --limit 1 --json databaseId,conclusion,createdAt,headSha \
   --jq '.[0] | "push · run \(.databaseId) · \(.conclusion) · \(.createdAt) · commit \(.headSha[0:8])"'
-# 2. Navigateur, à la demande seulement (souvent vide : c'est normal)
+gh run view <id> --json jobs --jq '.jobs[] | select(.name | test("Vitest|décider|juger|verdict")) | "  \(.name) · \(.conclusion)"'
+# Un run demandé, s'il y en a un (souvent vide : c'est normal)
 gh run list --workflow tests.yml --event workflow_dispatch --limit 3 --json databaseId,conclusion,createdAt,headSha \
   --jq '.[] | "workflow_dispatch · run \(.databaseId) · \(.conclusion) · \(.createdAt) · commit \(.headSha[0:8])"'
-gh run view <id du plus récent, s'il y en a un> --json jobs --jq '.jobs[] | "  \(.name) · \(.conclusion)"'
 git rev-parse --short=8 HEAD
 ```
 
-⚠ **Besoin d'un verdict GitHub au navigateur** : `gh workflow run tests.yml --ref main` —
-mais c'est 35 à 55 minutes facturées, et le plafond de 60 min peut le couper : le proposer
-à Grégoire, ne pas le lancer de soi-même.
+⚠ **Besoin d'un verdict GitHub au navigateur sur un commit que le push n'a pas jugé** :
+`gh workflow run tests.yml --ref main` (gratuit depuis le 16 oct., une demi-heure environ) —
+le proposer à Grégoire, ne pas le lancer de soi-même.
 
-⚠⚠ **LIRE LES JOBS, PAS SEULEMENT LE RUN** (depuis le 2 septembre au soir). Le workflow
-a deux jobs : `Vitest` (push, pull request, à la demande) et `Playwright (WebKit)` (à la
-demande seulement). **Un run de push rend donc `success` avec Playwright `skipped`** — et
-c'est exactement la confusion qui a coûté deux jours : un verdict absent pris pour un
-verdict bon. La seconde commande rend un état PAR JOB ; c'est lui qu'on rapporte.
+⚠⚠ **LIRE LES JOBS, PAS SEULEMENT LE RUN** (depuis le 2 septembre au soir). Le workflow a
+quatre jobs : `Vitest`, `Playwright doit-il juger ?` (`decision`), `Playwright (WebKit) n/20`
+(chacun joue sa part et ne juge pas) et `Playwright — verdict` (qui juge). **C'est le job
+`Playwright — verdict` qui porte le verdict au navigateur** ; un morceau `failure` sans
+verdict rouge n'est pas un rouge, un morceau manquant rend le verdict NON JUGÉ (rouge, et
+le dire comme tel). La seconde commande rend un état PAR JOB ; c'est lui qu'on rapporte.
 
-⮕ **À rendre en français, dans le rapport d'état, pour un run DEMANDÉ, en distinguant
-TROIS états** :
-· **jugé et vert** — les deux jobs `success` ;
+⮕ **À rendre en français, dans le rapport d'état, pour un run qui a joué Playwright (push ou
+demandé), en distinguant TROIS états** :
+· **jugé et vert** — `Vitest` et `Playwright — verdict` `success` ;
 · **jugé et rouge** — un job `failure` : lequel, et (`gh run view <id> --log-failed`)
   quelle étape, quel(s) fichier(s) ; un job `cancelled` après 60 min est coupé par le
   plafond, pas rouge : le dire ;
@@ -130,9 +135,8 @@ Et toujours : *le <date>, sur le commit <sha>* — **et si ce commit est `HEAD`*
 `scripts/lire-verdict.mjs` : **un verdict qui ne porte pas le SHA jugé ne dit pas sur quoi
 il porte.** Un vert vieux de trois semaines n'est pas un vert.
 
-⚠ **Pour le verdict de VITEST, si le SHA ne correspond pas à `HEAD`, deux cas, à
-distinguer avant de conclure** (le verdict au navigateur, lui, est le jeton du Mac — voir
-plus haut) **:**
+⚠ **Pour le verdict de GitHub, si le SHA ne correspond pas à `HEAD`, deux cas, à
+distinguer avant de conclure** (le verdict du Mac, lui, est le jeton — voir plus haut) **:**
 · `HEAD` ne touche que de la documentation (`paths-ignore` de
   `.github/workflows/tests.yml`) → **aucun run ne le porte, et c'est normal** ; le verdict
   vaut pour le dernier commit qui touchait du code. Le dire tel quel.

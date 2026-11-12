@@ -5,7 +5,9 @@
  * (`CONSIGNE-LOT-2026-10-17-…-2.md`, la création), étape 6 (« Aller plus loin avec ta grille »).
  *
  * Un collage, le texte de la zone et l'exemple ouvrent la DISSECTION (`materiel-dissection.js`, depuis le
- * 18 oct.) ; « Partir de zéro » (« Taper ma grille à la main » jusqu’au 9 nov. 2026, décision de Grégoire du 8 nov.) mène vers Grilles de critères. La dissection crée la grille
+ * 18 oct.) ; « Composer ma grille » (« Taper ma grille à la main » jusqu’au 9 nov. 2026, puis un autre nom jusqu’au 12 nov., décisions
+ * de Grégoire du 8 et du 11 nov.) mène vers Grilles de critères, depuis l'accueil comme depuis la dissection, sans effacer son
+ * brouillon. La dissection crée la grille
  * (`materielCreation`), puis la confirmation s'affiche ici (`montrerCreee`). La dissection, lot 11 : à
  * l'ouverture de l'onglet, son brouillon la rouvre telle qu'elle était (`reprendreDissection`) ; « Coller une
  * autre grille » (`recommencer`) l'efface. #1119 : la confirmation la rouvre aussi (`revenirDissection`).
@@ -213,6 +215,18 @@
             if (window.materielDissection && window.materielDissection.estOuverte()) return;
             var collage = el('materiel-zone-collage');   // aucun ou illisible : l'accueil, et le focus y va
             if (collage) collage.focus();
+        },
+        /**
+         * Lot de la dissection sur l'iPad (12 nov. 2026, point 5) : l'exemple du parcours se ferme ; l'accueil revient, et
+         * le brouillon de l'enseignant·e, s'il existe, rouvre sa dissection telle qu'elle était (la reprise du lot 11).
+         */
+        quitterExemple: function () {
+            if (!window.materielDissection || !window.materielDissection.exempleOuvert()) return;
+            window.materielDissection.fermer();
+            etat = { ecran: 'accueil', resume: null };
+            rendre();
+            montrerErreur('');
+            reprendreDissection();
         },
         /** La dissection, lot 2a : sa grille est créée ; la dissection se ferme, la confirmation s'affiche. */
         montrerCreee: function (resume) {

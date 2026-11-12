@@ -43,6 +43,8 @@ const CORRECTIONS = [
     // Le 11 nov., 8 h 38 (second essai sur l'iPad) : la longueur de la dissection, dite d'avance.
     [1, "C'est ainsi qu'elle pourra lire tes évaluations, puis nommer le critère où un·e étudiant·e bute.",
         "C'est ainsi qu'elle pourra lire tes évaluations, puis nommer le critère où un·e étudiant·e bute. C'est souvent long, parce que chaque grille est construite à sa façon et que l'application ne peut pas deviner le rôle de chaque morceau. Mais tu ne le fais qu'une fois : ta grille servira ensuite à chaque copie que tu évalueras avec elle."],
+    // Le 11 nov., 8 h 58 (relais du 12 nov., point 6) : « Composer ma grille » remplace « Partir de zéro ».
+    [1, 'Pas de grille sous la main ? Touche « Partir de zéro ».', 'Pas de grille sous la main ? Touche « Composer ma grille ».'],
     // Le 9 nov., 13 h 37 (question 2 du rapport) : l'échelle associée avec la grille.
     [2, 'Puis associe-lui la grille que tu viens de créer.',
         'Puis associe-lui la grille que tu viens de créer, et son échelle si elle en a une.'],
@@ -125,13 +127,16 @@ describe('« Évaluer une première production » : les neuf bulles, mot pour mo
         expect(etapes[8].sansSortie).toBe(true);
         expect(etapes[6].boutons.map((b) => b.libelle)).toEqual(['Continuer']);
         expect(etapes[8].boutons.map((b) => b.libelle)).toEqual(['Terminer']);
-        expect(etapes.filter((e) => e.boutons).length).toBe(2);
+        // Lot de la dissection sur l'iPad (12 nov.) : l'étape 1 porte « Prendre une grille déjà créée » (point 7).
+        expect(etapes.filter((e) => e.boutons).length).toBe(3);
+        expect(etapes[0].boutons.map((b) => b.libelle)).toEqual(['Prendre une grille déjà créée']);
         expect(lire('js/parcours-evaluer.js')).toContain("lienSortie: 'Plus tard'");
     });
 
-    it('« Partir de zéro » remplace « Taper ma grille à la main », partout où il est nommé (décision du 8 nov., 6 h 32)', () => {
+    it('« Composer ma grille » remplace « Partir de zéro » (11 nov., 8 h 58), qui remplaçait « Taper ma grille à la main » (8 nov.)', () => {
         const index = lire('index.html');
-        expect(index).toContain('data-tooltip="materiel-taper-main">Partir de zéro</button>');
+        expect(index).toContain('data-tooltip="materiel-taper-main">Composer ma grille</button>');
+        expect(index).not.toContain('Partir de zéro');
         expect(index).not.toContain('Taper ma grille à la main');
         expect(lire('js/accompagnement-contenu-hover.js')).not.toContain('Taper ma grille');
     });

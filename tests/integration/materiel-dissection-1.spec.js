@@ -10,12 +10,13 @@ const indexHtml = 'file://' + path.join(path.resolve(__dirname, '..', '..'), 'in
 //   · un tableau fictif collé s'ouvre dans la dissection, pas dans l'assistant en sept étapes ;
 //   · deux étiquettes posées par des événements de POINTEUR (toucher, glisser), sans clic à l'aveugle
 //     ni délai ; la grille comprise se refait ; Échap pose le surligneur ;
-//   · `touch-action: none` seulement quand une étiquette est en main ;
+//   · `touch-action` jamais à `none` : au doigt, la feuille défile toujours (12 nov. 2026, la dissection sur l'iPad,
+//     point 2 ; avant : `none` quand une étiquette était en main) ; les gestes de ce banc sont à la souris ;
 //   · à la largeur de l'iPad (820), la page ne défile pas de côté ; étiquettes et « Terminer » ≥ 44 px ;
 //   · C1 (relecture du 18 oct.) : la palette reste à GAUCHE du canevas, debout (820) comme couché (1180) ;
 //     la précision de l'étiquette en main passe dans le bandeau ;
 //   · C2 : « Coller une autre grille » demande confirmation dès qu'une étiquette est posée ;
-//   · un collage piégé n'entre pas dans la page ; l'exemple et « Partir de zéro » (« Taper ma grille à la main » jusqu'au 9 nov.).
+//   · un collage piégé n'entre pas dans la page ; l'exemple et « Composer ma grille » (« Partir de zéro » jusqu'au 12 nov.).
 
 async function ouvrirConception(page) {
     await page.goto(indexHtml);
@@ -62,7 +63,7 @@ async function geste(page, textes) {
     await page.evaluate((ts) => {
         const blocs = ts.map((t) => [...document.querySelectorAll('#dissection-contenu .dissection-morceau')].find((b) => b.textContent === t));
         const centre = (b) => { b.scrollIntoView({ block: 'center', inline: 'center' }); const r = b.getBoundingClientRect(); return { clientX: r.left + r.width / 2, clientY: r.top + r.height / 2 }; };
-        const ev = (type, b) => new PointerEvent(type, Object.assign({ bubbles: true, cancelable: true, pointerId: 7, pointerType: 'touch', isPrimary: true }, centre(b)));
+        const ev = (type, b) => new PointerEvent(type, Object.assign({ bubbles: true, cancelable: true, pointerId: 7, pointerType: 'mouse', isPrimary: true }, centre(b)));
         blocs[0].dispatchEvent(ev('pointerdown', blocs[0]));
         blocs.slice(1).forEach((b) => b.dispatchEvent(ev('pointermove', b)));
         const der = blocs[blocs.length - 1];
@@ -89,7 +90,7 @@ test('dissection · coller, poser deux étiquettes au pointeur, lire la grille c
     await expect(page.locator('#dissection-palette .dis-t-code, #dissection-palette .dis-t-nomcode, #dissection-palette .dis-t-poids, #dissection-palette .dis-t-commentaire')).toHaveCount(4);
     await expect(page.locator('#dissection-palette .dissection-outil')).toHaveCount(2);
     await expect(page.locator('#dissection-palette [data-param="suite"] + [data-param="couper"] + [data-param="rattacher"]')).toHaveCount(1);
-    await expect(page.locator('#dissection-comprise')).toContainText('Surligne ta grille');
+    await expect(page.locator('#dissection-comprise')).toContainText('Étiquette ta grille');
 
     // Sans étiquette en main, le canevas défile au doigt sur les morceaux.
     const touchAction = () => page.evaluate(() => getComputedStyle(document.querySelector('#dissection-contenu .dissection-morceau')).touchAction);
@@ -100,7 +101,7 @@ test('dissection · coller, poser deux étiquettes au pointeur, lire la grille c
     await expect(page.locator('#dissection-palette [data-param="critere"]')).toHaveAttribute('aria-pressed', 'true');
     await expect(page.locator('#dissection-terminer')).toBeVisible();
     await expect(page.locator('#dissection-bandeau-precision')).toHaveText('Critère : Ce qui est attendu : la question que tu te poses devant la copie');
-    expect(await touchAction()).toBe('none');
+    expect(await touchAction()).toBe('manipulation');   // 12 nov. 2026 : plus `none`, la feuille défile au doigt
     await geste(page, ['Question 1 : le sens du passage fictif']);
     // La flèche de l'étiquette en main vers son morceau.
     await expect(page.locator('#dissection-traits path.dissection-trait')).toHaveCount(1);
@@ -121,7 +122,7 @@ test('dissection · coller, poser deux étiquettes au pointeur, lire la grille c
     await page.keyboard.press('Escape');
     await expect(page.locator('#dissection-terminer')).toBeHidden();
     await expect(page.locator('#dissection-bandeau-precision')).toBeHidden();
-    await expect(page.locator('#dissection-bandeau-texte')).toHaveText('Touche une étiquette dans la palette : elle devient ton surligneur.');
+    await expect(page.locator('#dissection-bandeau-texte')).toHaveText('Touche une étiquette dans la légende.');
     expect(await touchAction()).toBe('auto');
 
     // La grille comprise : un critère, deux réponses, sans points.
@@ -215,7 +216,7 @@ test('dissection · un collage piégé n’entre pas dans la page : rien ne s’
     expect(r.textes).toEqual(['Critère', 'A', '<b>gras</b>', '1']);
 });
 
-test('dissection · « Essayer avec un exemple » ouvre une grille fictive ; « Partir de zéro » mène à Grilles de critères', async ({ page }) => {
+test('dissection · « Essayer avec un exemple » ouvre une grille fictive ; « Composer ma grille » mène à Grilles de critères', async ({ page }) => {
     const erreurs = [];
     page.on('pageerror', (e) => erreurs.push(e.message));
     await ouvrirConception(page);
@@ -227,7 +228,7 @@ test('dissection · « Essayer avec un exemple » ouvre une grille fictive ; « 
     await page.locator('#materiel-dissection [data-action="materielDissection.collerAutre"]').click();
     await expect(page.locator('#materiel-accueil')).toBeVisible();
 
-    await expect(page.locator('#materiel-accueil [data-action="materiel.taperMain"]')).toHaveText('Partir de zéro');   // 8 nov. 2026, Grégoire
+    await expect(page.locator('#materiel-accueil [data-action="materiel.taperMain"]')).toHaveText('Composer ma grille');   // 11 nov. 2026, Grégoire (« Partir de zéro » depuis le 8 nov.)
     await page.locator('#materiel-accueil [data-action="materiel.taperMain"]').click();
     await expect(page.locator('#conception-grille-criteres')).toBeVisible();
     await expect(page.locator('#conception-materiel')).toBeHidden();

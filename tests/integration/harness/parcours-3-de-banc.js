@@ -54,8 +54,10 @@ async function lePanneauSansClasse(page, cap) {
 export async function etape1(page, { niveaux, cap }) {
     await etape(page, 1, 'Ta grille');
     await expect(page.locator('#conception-materiel')).toBeVisible();
+    // 12 nov. 2026 (la dissection sur l'iPad, point 5) : l'exemple est offert d'abord ; ce banc passe à sa grille.
+    await bulle(page).getByRole('button', { name: 'Passer à ma grille' }).click();
     await contourSur(page, '#materiel-zone-collage');
-    await expect(page.locator('#materiel-accueil [data-action="materiel.taperMain"]')).toHaveText('Partir de zéro');
+    await expect(page.locator('#materiel-accueil [data-action="materiel.taperMain"]')).toHaveText('Composer ma grille');
     await capture(page, DOSSIER, `p3-1-${cap}`);
     await etiqueterExemple(page);
     // La bulle du choix : le même rang, son propre texte, le contour sur le choix.
@@ -404,6 +406,7 @@ export async function laGrilleEnPortrait(page) {
     await mettreLaClasseEnPlace(page);
     await page.evaluate(() => Assistance.parcours().find((p) => p.id === 'evaluer').lancer(0));
     await etape(page, 1, 'Ta grille', { focus: false });
+    await bulle(page).getByRole('button', { name: 'Passer à ma grille' }).click();
     await expect(bulle(page).locator('.parcours-bulle-texte')).toContainText('ta grille servira ensuite à chaque copie que tu évalueras avec elle');
     await entierDansLaFenetre(page, '#parcours-bulle', 'Ta grille, 820 × 1180');
     const defile = await page.evaluate(() => {

@@ -204,7 +204,7 @@ describe('R — quand « Créer ma grille » est refusé, et pourquoi', () => {
     it('R.c — ni points ni niveaux : il manque des points ou des niveaux', () => {
         const c = D.creation(compriseTexte([['Grille fictive', 'titre'], ['Critère fictif', 'critere']]));
         expect(c.enNiveaux).toBe(false);
-        expect(c.raisons[0]).toBe('des points ou des niveaux : surligne ce que vaut chaque réponse avec l’étiquette « Points », ou le nom de chaque niveau avec l’étiquette « Niveau »');
+        expect(c.raisons[0]).toBe('des points ou des niveaux : pose l’étiquette « Points » sur ce que vaut chaque réponse, ou l’étiquette « Niveau » sur le nom de chaque niveau');
     });
 
     it('R.d — les mots de calculs(m).manquants, tels quels : points non entiers, nom déjà pris', () => {

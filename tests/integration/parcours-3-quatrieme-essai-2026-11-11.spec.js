@@ -12,7 +12,7 @@ import {
 // « ÉVALUER UNE PREMIÈRE PRODUCTION » : LE TROISIÈME ESSAI DE GRÉGOIRE SUR L'IPAD (11 NOV. 2026, 9 H 11 À 9 H 26)
 // =======================================================================
 // Relais de la conversation du Projet, 11 nov., 9 h 47. Une grille COMPOSÉE DANS CONCEPTION › GRILLES (« Test 1 »,
-// « Partir de zéro »), pas par la dissection. Le banc joue le parcours de bout en bout avec elle, à 1180 × 820 (l'iPad
+// « Composer ma grille », « Partir de zéro » jusqu'au 12 nov.), pas par la dissection. Le banc joue le parcours de bout en bout avec elle, à 1180 × 820 (l'iPad
 // en paysage), et juge les quatre points :
 //   1. « Ta production » (capture 16) : la règle des formulaires (une flèche par champ obligatoire vide, le halo sur
 //      « Créer la production ») ; puis la grille ; puis « Échelle de performance », restée à « Aucune », la grille se
@@ -68,9 +68,11 @@ async function composerUneGrille(page, nomGrille) {
     await page.click('#btnCreerGrille');
 }
 
-/** Étape 1, par « Partir de zéro » : « Test 1 », composée dans Conception › Grilles. */
+/** Étape 1, par « Composer ma grille » : « Test 1 », composée dans Conception › Grilles. */
 async function composerTest1(page) {
     await etape(page, 1, 'Ta grille');
+    // 12 nov. 2026 : l'exemple est offert d'abord ; ce banc passe à sa grille.
+    await bulle(page).getByRole('button', { name: 'Passer à ma grille' }).click();
     await page.click('#materiel-accueil [data-action="materiel.taperMain"]');
     await composerUneGrille(page, 'Test 1');
     await etape(page, 2, 'Ta production');

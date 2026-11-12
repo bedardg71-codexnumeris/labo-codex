@@ -70,7 +70,7 @@ describe('étape 5 · L — la lecture d’une liste de codes', () => {
             ['Nom orphelin', 'nomcode'],
             ['7', 'code'], ['Code fictif', 'nomcode'], ['1,5', 'poids'], ['Un commentaire fictif', 'commentaire'], ['qui continue.', 'suite']
         ]);
-        expect(R.sansPlace).toEqual([{ t: 'Nom orphelin', type: 'nomcode', raison: 'aucun code avant lui' }]);
+        expect(R.sansPlace).toMatchObject([{ t: 'Nom orphelin', type: 'nomcode', raison: 'aucun code avant lui' }]);
         expect(D.codesCompris(R).codes).toEqual([{ code: '7', nom: 'Code fictif', poids: 1.5, commentaire: 'Un commentaire fictif qui continue.' }]);
     });
 
@@ -98,7 +98,7 @@ describe('étape 5 · R — les refus nomment le code', () => {
     it('R.c plus de 30 codes ; aucun code', () => {
         const trop = Array.from({ length: 31 }, (_, i) => ['C' + i, 'code']);
         expect(avec(trop)).toEqual(['au plus 30 codes (ta liste en a 31)']);
-        expect(avec([['Un commentaire fictif', 'commentaire']])).toContain('au moins un code : surligne chaque code avec l’étiquette « Code »');
+        expect(avec([['Un commentaire fictif', 'commentaire']])).toContain('au moins un code : pose l’étiquette « Code » sur chaque code');
     });
 });
 

@@ -33,6 +33,10 @@
    l'étape désigne est amené dans la vue, une fois, comme à l'entrée de l'étape.
    L'AVIS (11 nov. 2026, capture 19) : une phrase sous le texte, que l'étape pose quand la page n'est pas dans l'état
    qu'elle attend (`avis`) ; elle part quand l'état revient. Le texte de l'étape, lui, ne change pas.
+   LA LIGNE DU GESTE SUIT L'ÉTAT (12 nov. 2026, la dissection sur l'iPad : « nommer, pointer, passer par les étapes une
+   après l'autre ») : un `geste` qui change pendant l'étape (un getter : « Ta grille » suit le premier manque de la
+   dissection) est relu à chaque passage de la sonde ; changé, il remplace la ligne du geste et s'annonce. La bulle n'est
+   pas refaite : ni focus déplacé, ni page tournée.
    LES FORMULAIRES (Grégoire, 11 nov. 2026, 8 h 26) : dans une étape qui montre un formulaire (`formulaire`), les
    flèches vont aux champs obligatoires (astérisque rouge `.champ-requis`, `required`, `aria-required`) ENCORE VIDES,
    une par champ, sans fusion ni plafond ; chacune disparaît quand son champ est rempli ; quand il n'en reste aucun,
@@ -43,11 +47,14 @@
    Safari iPad, innerWidth × innerHeight suivent la partie VISIBLE de la page pendant le zoom, alors que la bulle, le
    halo et les flèches sont fixés dans la page entière. La sonde replaçait donc la bulle à chaque image du pincement
    (et la croyait sur un téléphone sous 500 px de large). Pendant un pincement (deux doigts posés) et tant que la page
-   reste zoomée (`visualViewport.scale` ≠ 1), le moteur NE REPLACE RIEN : la bulle garde sa place, l'écran gardé est
-   celui d'avant le zoom ; le halo et les flèches suivent leurs cibles. Revenue à l'échelle 1, la sonde la replace
+   reste zoomée (`visualViewport.scale` ≠ 1), le moteur NE REPLACE RIEN : la bulle garde sa place, la hauteur gardée est
+   celle d'avant le zoom ; le halo et les flèches suivent leurs cibles. Revenue à l'échelle 1, la sonde la replace
    comme avant. Playwright ne pince pas : jugé sur l'iPad.
+   LA LARGEUR (12 nov. 2026, 12 h 54, l'iPad en paysage : « la carte […] semble bloquer au centre ») : elle se lit sur la
+   mise en page (`document.documentElement.clientWidth`, `largeurPage`), jamais sur innerWidth ni sur un écran gardé —
+   la place de la bulle, son glisser, la forme de téléphone et la couche des flèches. Banc : bulle-largeur-ipad-2026-11-12.
    LES COORDONNÉES : la couche des flèches est fixée en (0, 0) et dimensionnée en px sur
-   innerWidth × innerHeight à chaque passage, SANS viewBox : le même repère que le contour (des px
+   la largeur de la mise en page × innerHeight à chaque passage, SANS viewBox : le même repère que le contour (des px
    lus par getBoundingClientRect). Une sentinelle Vitest l'exige (le voile, lui, était en 100vh).
    Une étape avance quand l'état attendu est ATTEINT (`atteint()`), quel que soit le chemin :
    le moteur le sonde, il n'écoute pas le toucher d'un bouton précis.
@@ -220,14 +227,43 @@
         return !!(etat && etat.doigts >= 2) || !!(vv && Math.abs(vv.scale - 1) > 0.01);
     }
 
-    /** L'écran de la page : celui d'avant le zoom tant qu'il dure (innerWidth × innerHeight suivent la partie visible). */
-    function ecranGarde() {
-        if (etat && etat.ecran && sousLeZoom()) return etat.ecran;
-        return { largeur: window.innerWidth, hauteur: window.innerHeight };
+    /**
+     * La largeur de la mise en page, où se posent la bulle, le halo et les flèches (`position: fixed`) : celle de la
+     * racine, qui ne suit ni le zoom au pincement ni un état gardé. Pas `innerWidth` : sous Safari iPad, il suit la
+     * partie visible, et la bulle restait dans les deux tiers gauches de l'écran en paysage (Grégoire, 12 nov. 2026,
+     * 12 h 54 : « elle semble bloquer au centre » ; posée à left ≈ 433 = 820 − 8 − 380, sur un écran de 1180).
+     */
+    function largeurPage() {
+        var r = document.documentElement;
+        return (r && r.clientWidth) || window.innerWidth;
     }
 
+    /**
+     * L'écran de la page : la largeur de la mise en page ; la hauteur d'avant le zoom tant qu'il dure (innerHeight
+     * suit la partie visible).
+     */
+    function ecranGarde() {
+        var hauteur = etat && etat.hauteurGardee && sousLeZoom() ? etat.hauteurGardee : window.innerHeight;
+        return { largeur: largeurPage(), hauteur: hauteur };
+    }
+
+    /**
+     * Les doigts posés. Un `touchend` va à la cible du `touchstart` même quand elle a quitté le DOM ; il ne remonte
+     * alors plus jusqu'à `window`, et le compte restait à 2 : le moteur se croyait sous le zoom et ne replaçait plus
+     * rien. La cible écoute donc aussi la fin de son toucher (banc : bulle-largeur-ipad-2026-11-12).
+     */
     function compterDoigts(ev) {
-        if (etat) etat.doigts = ev.touches ? ev.touches.length : 0;
+        if (!etat) return;
+        etat.doigts = ev.touches ? ev.touches.length : 0;
+        var t = ev.target;
+        if (ev.type !== 'touchstart' || !t || typeof t.addEventListener !== 'function') return;
+        var fin = function (e) {
+            t.removeEventListener('touchend', fin, true);
+            t.removeEventListener('touchcancel', fin, true);
+            if (etat) etat.doigts = e.touches ? e.touches.length : 0;
+        };
+        t.addEventListener('touchend', fin, { capture: true, passive: true });
+        t.addEventListener('touchcancel', fin, { capture: true, passive: true });
     }
 
     /** La largeur du téléphone : la fenêtre, pas l'appareil (l'iPad en écran partagé étroit en est). */
@@ -774,7 +810,7 @@
      *    tout croise, le plus court est gardé.
      * @param {{left,top,right,bottom}} bulle
      * @param {{left,top,right,bottom}} cible
-     * @param {{largeur:number, hauteur:number}} ecran  innerWidth × innerHeight
+     * @param {{largeur:number, hauteur:number}} ecran  la largeur de la mise en page × innerHeight (ecranGarde)
      * @param {Array<{left,top,right,bottom}>} [obstacles]  ce que la flèche évite de croiser
      * @returns {null|{d:string, depart:{x,y}, pointe:{x,y}, controle:{x,y}, horsEcran:boolean}}
      */
@@ -1050,7 +1086,7 @@
     function placerBulle(evites) {
         var b = etat.elements.bulle;
         poserReserveBas(0);
-        var vw = window.innerWidth, vh = basEcran();
+        var vw = largeurPage(), vh = basEcran();
         // Le filet : jamais plus haute que l'écran utile ; au-delà, son texte défile.
         b.style.maxHeight = Math.max(0, vh - 2 * MARGE) + 'px';
         if (etat.deplacee) { poserDeplacee(); return; }
@@ -1287,6 +1323,16 @@
         amenerDansLaVue(elementsVises(etape), etat.elements.bulle.offsetHeight);
     }
 
+    /** La ligne du geste, relue (voir « LA LIGNE DU GESTE SUIT L'ÉTAT ») : changée, elle s'annonce, seule. */
+    function poserGeste(etape) {
+        var g = etat.elements.bulle.querySelector('.parcours-bulle-geste');
+        var texte = '';
+        try { texte = etape.geste ? typographier(etape.geste) : ''; } catch (e) { texte = ''; }
+        if (!g || !texte || g.textContent === texte) return;
+        g.textContent = texte;
+        etat.elements.annonce.textContent = texte;
+    }
+
     /** L'avis de l'étape (voir « L'AVIS ») : posé sous le texte, changé, ou retiré ; annoncé par son rôle. */
     function poserAvis(etape) {
         var b = etat.elements.bulle;
@@ -1334,7 +1380,10 @@
         if (!el) return '';
         // Pas son texte : il change sous les gestes (la dissection compte ses morceaux), et chaque changement relançait le
         // défilement (mesuré sous WebKit le 11 nov. 2026 : la palette de la dissection ne tenait plus en place).
-        return [el.tagName, el.id, el.getAttribute('data-action') || '', el.getAttribute('name') || ''].join('|');
+        // `data-param` et `data-id` (12 nov. 2026, la dissection sur l'iPad) : les étiquettes de la palette partagent leur
+        // action, les morceaux n'en ont pas ; sans eux, passer d'une étiquette (ou d'un morceau) à une autre ne se voyait pas.
+        return [el.tagName, el.id, el.getAttribute('data-action') || '', el.getAttribute('name') || '',
+            el.getAttribute('data-param') || '', el.getAttribute('data-id') || ''].join('|');
     }
     /**
      * Le contour de l'ouverture vient d'être amené avec le reste : il n'est pas « neuf » pour `suivreContour`. S'il ne se
@@ -1391,9 +1440,10 @@
         var zoom = sousLeZoom();
         if (!zoom) {
             suivreSeuil();
-            etat.ecran = { largeur: window.innerWidth, hauteur: window.innerHeight };
+            etat.hauteurGardee = window.innerHeight;
         }
 
+        poserGeste(etape);
         poserAvis(etape);
         poserAttentes(etape);
         if (!zoom) suivreEcran(etape);
@@ -1405,13 +1455,13 @@
         etat.vus = { zones: zones, contourEl: contourEl, vise: vise };
         etat.passages = (etat.passages || 0) + 1;
 
-        // La couche des flèches : en px, sur innerWidth × innerHeight, à chaque passage (le repère du contour). Sous le
-        // zoom, elle garde l'écran d'avant : innerWidth × innerHeight n'en sont plus que la partie visible.
+        // La couche des flèches : en px, sur la largeur de la mise en page × innerHeight, à chaque passage (le repère du
+        // contour et de la bulle). Sous le zoom, elle garde l'écran d'avant : innerHeight n'en est plus que la partie visible.
         var svg = etat.elements.svg;
         if (!zoom) {
-            svg.setAttribute('width', String(window.innerWidth));
+            svg.setAttribute('width', String(largeurPage()));
             svg.setAttribute('height', String(window.innerHeight));
-            svg.style.width = window.innerWidth + 'px';
+            svg.style.width = largeurPage() + 'px';
             svg.style.height = window.innerHeight + 'px';
         }
 
@@ -1540,7 +1590,7 @@
         retirerElements();
         etat = { def: def, i: 0, opts: opts || {}, elements: creerElements(), enTransition: false,
                  telephone: surTelephone(), replie: false, reglerJusqua: 0, texte: '', pages: [], page: 0, largeurPages: 0,
-                 deplacee: null, glisse: null, vus: null, sectionActuelle: null, doigts: 0, ecran: null, pageDite: null,
+                 deplacee: null, glisse: null, vus: null, sectionActuelle: null, doigts: 0, hauteurGardee: 0, pageDite: null,
                  contourSuivi: '' };
         document.body.classList.add('parcours-actif');
         if (window.transitions && typeof window.transitions.fermerBandeau === 'function') window.transitions.fermerBandeau();

@@ -54,9 +54,10 @@
         { k: 'total', nom: 'Total', aide: 'La ligne du total', groupe: 'La grille' },
         { k: 'critere', nom: 'Critère', aide: 'Ce que tu évalues', precision: 'Ce qui est attendu : la question que tu te poses devant la copie', groupe: 'Les critères' },
         { k: 'souscritere', nom: 'Élément observable', aide: 'Un sous-critère', precision: 'Ce que tu regardes dans toutes les copies pour juger du critère', groupe: 'Les critères' },
-        { k: 'ponderation', nom: 'Pondération', aide: 'Le poids d’un critère', groupe: 'Les critères' },
+        // Relais du 12 nov. 2026, 11 h 25, point 3 (mots de Grégoire, 11 h 11) : un exemple de forme, « Points » posé sur un « / 10 ».
+        { k: 'ponderation', nom: 'Pondération', aide: 'Le poids d’un critère', precision: 'Sur combien il se note (par ex. « / 10 »)', groupe: 'Les critères' },
         { k: 'descripteur', nom: 'Descripteur', aide: 'Ce que tu vois dans une copie, à un niveau donné', precision: 'Une réponse possible à la question du critère (une seule vaut pour une copie)', groupe: 'Les réponses' },
-        { k: 'points', nom: 'Points', aide: 'Les points d’une réponse', precision: 'Ce qu’elle vaut, en chiffres', groupe: 'Les réponses' },
+        { k: 'points', nom: 'Points', aide: 'Les points d’une réponse', precision: 'Ce qu’elle vaut, en chiffres (par ex. « 3 », « 4-5 »)', groupe: 'Les réponses' },
         { k: 'niveau', nom: 'Niveau', aide: 'Le nom d’un niveau de réussite', precision: 'Un stade de qualité du travail observé (par ex. « Sommaire », « Efficace »)', groupe: 'Les réponses' },
         // Étape 5 du critère algorithmique (22 oct. 2026) : une liste de codes, collée seule. Textes de Claude Code,
         // validés par Grégoire le 22 oct. 2026, retouches de Cowork comprises (consigne `CONSIGNE-LOT-2026-10-22-critere-algorithmique-coller-codes.md`).
@@ -499,7 +500,13 @@
     // (places des morceaux), nivIdx { colonne: rang du niveau }, avecNiveaux, section et enCours
     // (où l'on en est), parRangee { rangée: critère }, suite (ce qu'une « Suite » complète).
 
-    function sansPlace(x, tx, t, raison) { x.R.sansPlace.push({ t: tx, type: t, raison: raison }); }
+    /**
+     * Un morceau étiqueté sans place. Lot de la dissection sur l'iPad (12 nov. 2026) : il garde son identifiant et, dans
+     * un tableau, sa rangée (`r`, sinon `null`) : l'aide pas à pas (`D.aide`) pointe le morceau sans relire la grille.
+     */
+    function sansPlace(x, id, tx, t, raison) {
+        x.R.sansPlace.push({ t: tx, type: t, raison: raison, id: id, r: x.table && x.pos[id] ? x.pos[id].r : null });
+    }
 
     /** Les niveaux nommés : par colonne dans un tableau, par ordre d'apparition dans un texte. */
     function lireNiveaux(x, ordre, texte, typeDe) {
@@ -570,7 +577,7 @@
         }
         var ni;
         if (x.table) ni = idxNiveau(x, x.pos[id]); else { ni = cr.nDesc < x.R.niveaux.length ? cr.nDesc : null; cr.nDesc += 1; }
-        if (ni == null) { sansPlace(x, tx, t, x.table ? 'aucun niveau nommé dans sa colonne' : 'plus de réponses que de niveaux'); return; }
+        if (ni == null) { sansPlace(x, id, tx, t, x.table ? 'aucun niveau nommé dans sa colonne' : 'plus de réponses que de niveaux'); return; }
         cr.dernierNiv = ni;
         ranger(x, caseDe(cr, ni).desc, tx);
     }
@@ -585,14 +592,14 @@
 
     function lirePoints(x, cr, id, tx, t) {
         var nn = nombres(tx);
-        if (!nn.length) { sansPlace(x, tx, t, 'aucun nombre'); return; }
+        if (!nn.length) { sansPlace(x, id, tx, t, 'aucun nombre'); return; }
         var dest = null;
         if (x.avecNiveaux) {
             var ip = x.table ? idxNiveau(x, x.pos[id]) : null;
             if (ip == null) ip = cr.dernierNiv;
             if (ip != null) dest = caseDe(cr, ip);
         } else dest = reponsePourPoints(x, cr, id);
-        if (!dest) { sansPlace(x, tx, t, 'aucune réponse pour ces points'); return; }
+        if (!dest) { sansPlace(x, id, tx, t, 'aucune réponse pour ces points'); return; }
         dest.pts.push(intervalle(nn));
         dest.ecrits.push(tx);
     }
@@ -602,11 +609,11 @@
         souscritere: function (x, cr, id, tx) { ranger(x, cr.sous, tx.replace(/^[·•\-–]\s*/, '')); },
         ponderation: function (x, cr, id, tx, t) {
             var np = nombres(tx);
-            if (!np.length) { sansPlace(x, tx, t, 'aucun nombre'); return; }
+            if (!np.length) { sansPlace(x, id, tx, t, 'aucun nombre'); return; }
             if (cr.auto && cr.reponses.length) { cr.reponses[cr.reponses.length - 1].pondApres = np[np.length - 1]; return; }
             // Lot 5 : une seconde Pondération (celle d'une ligne de total, après le dernier critère) ne
             // remplace plus en silence celle du critère. Texte validé G. 18 oct. 13 h 48.
-            if (cr.pond != null) { sansPlace(x, tx, t, 'son critère a déjà une pondération (' + formaterNombre(cr.pond) + ') ; une ligne de total prend l’étiquette « Total »'); return; }
+            if (cr.pond != null) { sansPlace(x, id, tx, t, 'son critère a déjà une pondération (' + formaterNombre(cr.pond) + ') ; une ligne de total prend l’étiquette « Total »'); return; }
             cr.pond = np[np.length - 1];
         },
         descripteur: lireDescripteur,
@@ -661,8 +668,8 @@
         commentaire: function (x, e, id, tx) { ranger(x, e.commentaire, tx); },
         poids: function (x, e, id, tx, t) {
             var n = nombres(tx);
-            if (!n.length) { sansPlace(x, tx, t, 'aucun nombre'); return; }
-            if (e.poids != null) { sansPlace(x, tx, t, 'son code a déjà un poids (' + formaterNombre(e.poids) + ')'); return; }
+            if (!n.length) { sansPlace(x, id, tx, t, 'aucun nombre'); return; }
+            if (e.poids != null) { sansPlace(x, id, tx, t, 'son code a déjà un poids (' + formaterNombre(e.poids) + ')'); return; }
             e.poids = n[0];
             e.poidsNegatif = /[-−]\s*\d/.test(tx);
         }
@@ -672,13 +679,13 @@
     function lireMorceauDeCode(x, id, t, tx) {
         if (t === 'code') { nouveauCode(x, id, tx); return; }
         var e = codeDe(x, id);
-        if (!e) { sansPlace(x, tx, t, x.table ? 'aucun code dans sa rangée' : 'aucun code avant lui'); return; }
+        if (!e) { sansPlace(x, id, tx, t, x.table ? 'aucun code dans sa rangée' : 'aucun code avant lui'); return; }
         LIRE_CODE[t](x, e, id, tx, t);
     }
 
     function lireMorceau(x, id, t, tx) {
         if (t === 'ignorer' || t === 'niveau') return;
-        if (t === 'suite') { if (x.suite) x.suite(tx); else sansPlace(x, tx, t, 'aucun morceau à compléter avant elle'); return; }
+        if (t === 'suite') { if (x.suite) x.suite(tx); else sansPlace(x, id, tx, t, 'aucun morceau à compléter avant elle'); return; }
         // Lot 2a (trouvaille 1 du lot 1, tranchée par Cowork) : une « Suite » complète le dernier TEXTE
         // lu ; des points, une pondération et un poids sont des nombres, pas du texte à continuer.
         if (['points', 'ponderation', 'poids'].indexOf(t) < 0) x.suite = null;
@@ -687,7 +694,7 @@
         var cr = t === 'ponderation' ? ciblePonderation(x, id) : cible(x, id);
         // Une réponse sans critère, quand aucun niveau n'est nommé : un critère « à nommer ».
         if (t === 'descripteur' && !cr && !x.avecNiveaux) cr = nouveauCritere(x, null, true);
-        if (!cr) { sansPlace(x, tx, t, raisonSansCritere(x, t)); return; }
+        if (!cr) { sansPlace(x, id, tx, t, raisonSansCritere(x, t)); return; }
         LIRE_SOUS_CRITERE[t](x, cr, id, tx, t);
     }
 
@@ -1024,7 +1031,7 @@
         // Le seul message de `calculs` qui renvoie à une étape de l'assistant (`NOMS_ETAPES.roles`).
         if (t.indexOf('les points de chaque critère') === 0 && t.indexOf('« ' + A.NOMS_ETAPES.roles + ' »') > 0) {
             // Sans aucune logique, « des points ou des niveaux » l'a déjà dit.
-            return b.logique ? 'les points de chaque critère : surligne le poids de chaque critère avec l’étiquette « Pondération », ou ce que vaut chaque réponse avec l’étiquette « Points »' : null;
+            return b.logique ? 'les points de chaque critère : pose l’étiquette « Pondération » sur le poids de chaque critère, ou l’étiquette « Points » sur ce que vaut chaque réponse' : null;
         }
         if (t === 'les points d’un critère' || /^les points de \d+ critères$/.test(t)) return t + ' (' + nommer(criteresOu(sansPoids)) + ')';
         if (t === 'la pondération d’un critère' || /^la pondération de \d+ critères$/.test(t)) return t + ' (' + nommer(criteresOu(sansPoids)) + ')';
@@ -1062,30 +1069,43 @@
         var b = D.bilan(R);
         var m = D.modele(R, nom, saisie);
         var enNiveaux = !m.enPoints;
-        var raisons = [], aCompleter = [];
+        // Lot de la dissection sur l'iPad (12 nov. 2026) : chaque raison porte sa SORTE, dans le même ordre (`manques`) ;
+        // l'aide pas à pas de « Ta grille » suit la première (`D.aide`). `raisons` reste la liste affichée, inchangée.
+        var raisons = [], manques = [], aCompleter = [];
+        function manque(texte, sorte, plus) { raisons.push(texte); manques.push(Object.assign({ sorte: sorte, texte: texte }, plus || {})); }
         // C3 : un nom vide (ni Titre étiqueté, ni nom tapé) ; la raison remplace celle du Titre.
         var sansNom = !m.nom.valeur;
-        if (sansNom) raisons.push('un nom pour ta grille');
-        if (R.sansPlace.length) raisons.push(compte(R.sansPlace.length, 'une place pour le morceau étiqueté listé plus bas', 'une place pour les # morceaux étiquetés listés plus bas'));
-        if (!b.logique) raisons.push('des points ou des niveaux : surligne ce que vaut chaque réponse avec l’étiquette « Points », ou le nom de chaque niveau avec l’étiquette « Niveau »');
+        if (sansNom) manque('un nom pour ta grille', 'nom');
+        if (R.sansPlace.length) manque(compte(R.sansPlace.length, 'une place pour le morceau étiqueté listé plus bas', 'une place pour les # morceaux étiquetés listés plus bas'), 'sansPlace', { morceau: R.sansPlace[0] });
+        if (!b.logique) manque('des points ou des niveaux : pose l’étiquette « Points » sur ce que vaut chaque réponse, ou l’étiquette « Niveau » sur le nom de chaque niveau', 'logique');
         m.criteres.forEach(function (c) {
             if (!c.parCle) return;
-            if (c.parCle.length > D.MAX_REPONSES) raisons.push('au plus ' + D.MAX_REPONSES + ' réponses par critère (« ' + c.nom.valeur + ' » en a ' + c.parCle.length + ')');
-            if (c.parCle.some(function (x) { return x.cle.charAt(0) === '_'; })) raisons.push('des points qui ne commencent pas par « _ » (« ' + c.nom.valeur + ' »)');
+            if (c.parCle.length > D.MAX_REPONSES) manque('au plus ' + D.MAX_REPONSES + ' réponses par critère (« ' + c.nom.valeur + ' » en a ' + c.parCle.length + ')', 'calcul');
+            if (c.parCle.some(function (x) { return x.cle.charAt(0) === '_'; })) manque('des points qui ne commencent pas par « _ » (« ' + c.nom.valeur + ' »)', 'calcul');
         });
         var longues = [];
         m.criteres.forEach(function (c) { (c.parCle || []).forEach(function (x) { if (x.texte.length > D.MAX_REPONSE) longues.push(x.texte); }); });
-        if (longues.length) raisons.push(aCouper('des réponses plus courtes (5 000 caractères au plus)', longues));
+        if (longues.length) manque(aCouper('des réponses plus courtes (5 000 caractères au plus)', longues), 'couper');
         var calc = window.materielAssistant.calculs(m, contexte);
         calc.manquants.forEach(function (t) {
             // Sans nom, « le nom de la grille » redirait la première raison.
             if (sansNom && t === 'le nom de la grille') return;
             var r = raisonDissection(t, R, m, b);
-            if (r != null) (estACompleter(t) ? aCompleter : raisons).push(r);
+            if (r == null) return;
+            if (estACompleter(t)) aCompleter.push(r);
+            else manque(r, sorteDuCalcul(t, r));
         });
         var avertissements = enNiveaux ? [calc.avertPlages, calc.avertNotes].filter(Boolean) : [];
-        return { enNiveaux: enNiveaux, raisons: raisons, aCompleter: aCompleter, avertissements: avertissements, modele: m };
+        return { enNiveaux: enNiveaux, raisons: raisons, manques: manques, aCompleter: aCompleter, avertissements: avertissements, modele: m };
     };
+
+    /** La sorte d'une raison venue de `calculs` : le nom de la grille, une coupe, ce que vaut chaque niveau, sinon « calcul ». */
+    function sorteDuCalcul(t, r) {
+        if (t.indexOf('un autre nom de grille') === 0 || t.indexOf('un nom de grille plus court') === 0) return 'nomChamp';
+        if (r.indexOf('avec « Couper »') >= 0) return 'couper';
+        if (/^(une plage de notes|la note retenue)/.test(t)) return 'niveaux';
+        return 'calcul';
+    }
 
     // ------------------------------------------------------------------
     // 3 bis. UNE LISTE DE CODES (étape 5 du critère algorithmique, 22 oct. 2026)
@@ -1117,12 +1137,14 @@
      * ou un commentaire absent reste vide. Les raisons NOMMENT le code en cause.
      */
     D.codesCompris = function (R) {
-        var raisons = [];
+        // Lot de la dissection sur l'iPad (12 nov. 2026) : chaque raison porte sa sorte (`manques`), comme dans `creation`.
+        var raisons = [], manques = [];
+        function manque(texte, sorte, plus) { raisons.push(texte); manques.push(Object.assign({ sorte: sorte || 'calcul', texte: texte }, plus || {})); }
         if (DE_GRILLE.some(function (t) { return (R.nb[t] || 0) > 0; })) {
-            raisons.push('une liste de codes seule : retire les étiquettes de grille (critères, réponses, titre…), ou celles des codes');
+            manque('une liste de codes seule : retire les étiquettes de grille (critères, réponses, titre…), ou celles des codes', 'melange');
         }
-        if (!R.codes.length) raisons.push('au moins un code : surligne chaque code avec l’étiquette « Code »');
-        if (R.codes.length > D.MAX_CODES) raisons.push('au plus ' + D.MAX_CODES + ' codes (ta liste en a ' + R.codes.length + ')');
+        if (!R.codes.length) manque('au moins un code : pose l’étiquette « Code » sur chaque code', 'aucunCode');
+        if (R.codes.length > D.MAX_CODES) manque('au plus ' + D.MAX_CODES + ' codes (ta liste en a ' + R.codes.length + ')');
         var vus = {}, illisibles = [], doubles = [], sansPoids = [], tropLourds = [];
         var codes = R.codes.map(function (e) {
             var code = propre(e.code);
@@ -1134,16 +1156,16 @@
             else if (poids > D.MAX_POIDS) tropLourds.push(code);
             return { code: code, nom: e.nom.join(' ').trim(), poids: poids, commentaire: e.commentaire.join('\n').trim() };
         });
-        if (illisibles.length) raisons.push('des codes faits de lettres, de chiffres, de « - » ou de « _ », 20 caractères au plus (' + nommer(illisibles) + ')');
-        if (doubles.length) raisons.push('des codes différents (' + nommer(doubles) + ' en double)');
-        if (sansPoids.length) raisons.push('un poids plus grand que 0 (' + nommer(sansPoids) + ')');
-        if (tropLourds.length) raisons.push('un poids de ' + D.MAX_POIDS + ' au plus (' + nommer(tropLourds) + ')');
+        if (illisibles.length) manque('des codes faits de lettres, de chiffres, de « - » ou de « _ », 20 caractères au plus (' + nommer(illisibles) + ')');
+        if (doubles.length) manque('des codes différents (' + nommer(doubles) + ' en double)');
+        if (sansPoids.length) manque('un poids plus grand que 0 (' + nommer(sansPoids) + ')');
+        if (tropLourds.length) manque('un poids de ' + D.MAX_POIDS + ' au plus (' + nommer(tropLourds) + ')');
         var noms = codes.filter(function (c) { return c.nom.length > D.MAX_NOM_CODE; }).map(function (c) { return c.code; });
-        if (noms.length) raisons.push('des noms plus courts (' + D.MAX_NOM_CODE + ' caractères au plus) pour ' + nommer(noms));
+        if (noms.length) manque('des noms plus courts (' + D.MAX_NOM_CODE + ' caractères au plus) pour ' + nommer(noms));
         var longs = codes.filter(function (c) { return c.commentaire.length > D.MAX_COMMENTAIRE; }).map(function (c) { return c.code; });
-        if (longs.length) raisons.push('des commentaires plus courts (5 000 caractères au plus) pour ' + nommer(longs));
-        if (R.sansPlace.length) raisons.push(compte(R.sansPlace.length, 'une place pour le morceau étiqueté listé plus bas', 'une place pour les # morceaux étiquetés listés plus bas'));
-        return { codes: codes, raisons: raisons };
+        if (longs.length) manque('des commentaires plus courts (5 000 caractères au plus) pour ' + nommer(longs));
+        if (R.sansPlace.length) manque(compte(R.sansPlace.length, 'une place pour le morceau étiqueté listé plus bas', 'une place pour les # morceaux étiquetés listés plus bas'), 'sansPlace', { morceau: R.sansPlace[0] });
+        return { codes: codes, raisons: raisons, manques: manques };
     };
 
     // Les motifs d'un critère qui ne peut pas recevoir la liste. PROVISOIRES (Claude Code).
@@ -1181,8 +1203,222 @@
     };
 
     // ------------------------------------------------------------------
+    // 3 ter. L'AIDE PAS À PAS (lot de la dissection sur l'iPad, 12 nov. 2026)
+    // Consigne de la conversation du Projet, point 4 (Grégoire, 11 nov., 8 h 40) : la bulle de « Ta grille » suit le
+    // PREMIER manque de « Avant de créer, il reste » (`creation(...).manques`, ou `codesCompris(...).manques`, la seule
+    // source, dans son ordre), le dit en une phrase et pointe : l'étiquette à prendre, le morceau où la poser quand
+    // l'application le sait. Point 3 : quand des étiquettes de grille et de codes se mêlent, elle dit laquelle est de
+    // trop et ce qu'elle veut dire. Aucune seconde lecture de la grille : les morceaux viennent de `R.sansPlace`, et
+    // les candidats de leur rangée ou de leur colonne, des places de `morceauxLus`.
+    // ------------------------------------------------------------------
+
+    /**
+     * Les phrases de l'aide, une par sorte de manque. PROPOSÉES (12 nov. 2026, Claude Code) : lues par l'enseignant·e,
+     * elles partent telles quelles et restent corrigeables (Grégoire les valide sur l'iPad).
+     */
+    function g(t) { return '« ' + premiersMots(t) + ' »'; }
+    D.TEXTES_AIDE = {
+        nom: 'Ta grille n’a pas encore de nom : prends « Titre », puis touche son nom dans ta grille.',
+        nomPris: function (nom) { return '« ' + nom + ' » est déjà le nom d’une de tes grilles : change-le dans « Nom de ta grille ».'; },
+        nomLong: 'Le nom de ta grille est trop long : raccourcis-le dans « Nom de ta grille ».',
+        critereRangee: function (m, c) { return g(m) + ' n’a aucun critère dans sa rangée : prends « Critère », puis touche ' + g(c) + '.'; },
+        totalSeul: function (m) { return g(m) + ' est seul dans sa rangée : si c’est un total, prends « Total », puis touche-le.'; },
+        critereAvant: function (m) { return g(m) + ' n’a aucun critère avant lui : prends « Critère », puis touche le critère qu’il complète.'; },
+        niveauColonne: function (m, c) { return g(m) + ' n’a aucun niveau nommé dans sa colonne : prends « Niveau », puis touche ' + g(c) + '.'; },
+        niveauEnTete: function (m) { return g(m) + ' n’a aucun niveau nommé dans sa colonne : prends « Niveau », puis touche le nom du niveau en tête de sa colonne.'; },
+        niveauDeTrop: function (m) { return g(m) + ' est une réponse de plus que tes niveaux : prends « Niveau », puis touche le nom du niveau qui manque.'; },
+        reponseRangee: function (m, c) { return g(m) + ' n’a aucune réponse à qui donner ces points : prends « Descripteur », puis touche ' + g(c) + '.'; },
+        reponseAvant: function (m) { return g(m) + ' n’a aucune réponse à qui donner ces points : prends « Descripteur », puis touche la réponse qu’ils valent.'; },
+        dejaPonderation: function (m) { return g(m) + ' : son critère a déjà une pondération ; si c’est un total, prends « Total », puis touche-le.'; },
+        codeRangee: function (m, c) { return g(m) + ' n’a aucun code dans sa rangée : prends « Code », puis touche ' + g(c) + '.'; },
+        codeAvant: function (m) { return g(m) + ' n’a aucun code avant lui : prends « Code », puis touche le code qu’il complète.'; },
+        retirer: function (m, nom, raison) { return g(m) + ' ne peut pas garder l’étiquette « ' + nom + ' » (' + raison + ') : prends « ' + nom + ' », puis touche-le pour la retirer.'; },
+        logique: 'Il manque ce que vaut chaque réponse : prends « Points », puis touche les points d’une réponse (ou « Niveau », pour le nom d’un niveau).',
+        pointsSurPonderation: function (m) { return g(m) + ' ressemble au poids d’un critère (sur combien il se note), pas à ce que vaut une réponse : prends « Pondération », puis touche ' + g(m) + '.'; },
+        poidsDeTrop: function (m) { return '« Poids » sert aux listes de codes (ce que pèse un code posé) : pour le poids d’un critère, prends « Pondération », puis touche ' + g(m) + '.'; },
+        codeDeTrop: function (nom, aide, m) { return '« ' + nom + ' » sert aux listes de codes (' + aide.charAt(0).toLowerCase() + aide.slice(1) + ') : prends « ' + nom + ' », puis touche ' + g(m) + ' pour la retirer.'; },
+        grilleDeTrop: function (nom, m) { return '« ' + nom + ' » sert aux grilles, pas aux listes de codes : prends « ' + nom + ' », puis touche ' + g(m) + ' pour la retirer.'; },
+        aucunCode: 'Ta liste n’a encore aucun code : prends « Code », puis touche chaque code.',
+        niveaux: 'Il reste ce que vaut chaque niveau : écris sa plage et sa note retenue dans « Ce que vaut chaque niveau ».',
+        destination: 'Choisis le critère qui recevra ces codes, dans « Où vont ces codes ? ».',
+        reste: function (texte) { return 'Avant de créer, il reste ' + texte + '.'; },
+        pret: 'Ta grille est prête : touche « Créer ma grille ».',
+        pretCodes: 'Ta liste est prête : touche « Ajouter ces codes ».'
+    };
+
+    // Étape 5 du critère algorithmique : ce que « Poids » veut dire dans une grille.
+    var EN_GRILLE = { poids: 'ponderation' };
+
+    /** Le premier morceau sans étiquette de la rangée `r` (cases fusionnées comprises), autre que `sauf`. */
+    function libreDansRangee(M, liens, r, sauf) {
+        if (r == null) return null;
+        for (var k = 0; k < M.ordre.length; k++) {
+            var id = M.ordre[k], p = M.pos[id];
+            if (id !== sauf && !liens[id] && p.r != null && p.r <= r && r < p.r + p.rs && propre(M.texte[id])) return id;
+        }
+        return null;
+    }
+
+    /**
+     * Relais du 12 nov. 2026, 11 h 25, point 4 : la réponse à qui donner des points, dans leur CASE : le plus proche morceau
+     * sans étiquette qui les précède dans la même case (« Résume quelques événements » au-dessus de « 2 »). Pas le premier
+     * morceau libre de la rangée : dans l'exemple, c'était un élément observable (« · Repérage des événements principaux »).
+     */
+    function libreAvantDansLaCase(M, liens, id) {
+        var p = M.pos[id], meilleur = null;
+        if (!p || p.r == null) return null;
+        M.ordre.forEach(function (q) {
+            var pq = M.pos[q];
+            if (q === id || liens[q] || pq.r !== p.r || pq.c !== p.c || pq.k >= p.k || !propre(M.texte[q])) return;
+            if (!meilleur || pq.k > M.pos[meilleur].k) meilleur = q;
+        });
+        return meilleur;
+    }
+
+    /** Au-dessus du morceau, dans sa colonne, le plus proche morceau sans étiquette d'une case d'une seule colonne. */
+    function libreEnTete(M, liens, id) {
+        var p = M.pos[id], meilleur = null;
+        if (!p || p.r == null) return null;
+        M.ordre.forEach(function (q) {
+            var pq = M.pos[q];
+            if (liens[q] || pq.r >= p.r || pq.cs !== 1 || pq.c !== p.c || !propre(M.texte[q])) return;
+            if (!meilleur || pq.r > M.pos[meilleur].r) meilleur = q;
+        });
+        return meilleur;
+    }
+
+    /** Un morceau sans place → l'aide : la phrase, l'étiquette à prendre, le morceau où toucher. */
+    function aideSansPlace(sp, M, liens) {
+        var A = D.TEXTES_AIDE, m = M.texte[sp.id] || sp.t, nom = TYPE[sp.type] ? TYPE[sp.type].nom : sp.type, c;
+        function retirer() { return { phrase: A.retirer(m, nom, sp.raison), etiquette: sp.type, morceau: sp.id, retirer: true }; }
+        if (/^aucun critère (dans sa rangée|avant lui)/.test(sp.raison)) {
+            c = libreDansRangee(M, liens, sp.r, sp.id);
+            if (c) return { phrase: A.critereRangee(m, M.texte[c]), etiquette: 'critere', morceau: c };
+            if (sp.type === 'ponderation' && sp.r != null) return { phrase: A.totalSeul(m), etiquette: 'total', morceau: sp.id };
+            return { phrase: A.critereAvant(m), etiquette: 'critere', morceau: null };
+        }
+        if (sp.raison === 'aucun niveau nommé dans sa colonne') {
+            c = libreEnTete(M, liens, sp.id);
+            return c ? { phrase: A.niveauColonne(m, M.texte[c]), etiquette: 'niveau', morceau: c } : { phrase: A.niveauEnTete(m), etiquette: 'niveau', morceau: null };
+        }
+        if (sp.raison === 'plus de réponses que de niveaux') return { phrase: A.niveauDeTrop(m), etiquette: 'niveau', morceau: null };
+        if (sp.raison === 'aucune réponse pour ces points') {
+            c = libreAvantDansLaCase(M, liens, sp.id);
+            return c ? { phrase: A.reponseRangee(m, M.texte[c]), etiquette: 'descripteur', morceau: c } : { phrase: A.reponseAvant(m), etiquette: 'descripteur', morceau: null };
+        }
+        if (sp.raison.indexOf('son critère a déjà une pondération') === 0) return { phrase: A.dejaPonderation(m), etiquette: 'total', morceau: sp.id };
+        if (/^aucun code (dans sa rangée|avant lui)/.test(sp.raison)) {
+            c = libreDansRangee(M, liens, sp.r, sp.id);
+            return c ? { phrase: A.codeRangee(m, M.texte[c]), etiquette: 'code', morceau: c } : { phrase: A.codeAvant(m), etiquette: 'code', morceau: null };
+        }
+        return retirer();   // « aucun nombre », une « Suite » sans texte avant elle, un second poids : l'étiquette est de trop
+    }
+
+    /**
+     * Point 3 : des étiquettes de grille et des étiquettes de codes mêlées. Le groupe le moins nombreux est de trop
+     * (à égalité, les codes : une liste de codes ne porte jamais de grille) ; son premier morceau, dans l'ordre de la
+     * grille, est nommé. « Poids » dit ce qu'il veut dire, et l'étiquette de grille qui convient (« Pondération »).
+     */
+    function aideMelange(M, liens) {
+        var A = D.TEXTES_AIDE, grille = [], codes = [];
+        M.ordre.forEach(function (id) {
+            var t = liens[id];
+            if (DE_GRILLE.indexOf(t) >= 0) grille.push(id);
+            else if (['code', 'nomcode', 'poids', 'commentaire'].indexOf(t) >= 0) codes.push(id);
+        });
+        var codesDeTrop = codes.length <= grille.length, id = (codesDeTrop ? codes : grille)[0];
+        if (!id) return null;
+        var t = liens[id], T = TYPE[t], m = M.texte[id];
+        if (!codesDeTrop) return { phrase: A.grilleDeTrop(T.nom, m), etiquette: t, morceau: id, retirer: true };
+        if (EN_GRILLE[t]) return { phrase: A.poidsDeTrop(m), etiquette: EN_GRILLE[t], morceau: id };
+        return { phrase: A.codeDeTrop(T.nom, T.aide, m), etiquette: t, morceau: id, retirer: true };
+    }
+
+    /**
+     * L'aide d'un manque : `{ sorte, phrase, etiquette, morceau, retirer, cible }`. `etiquette` : la clé de l'étiquette
+     * (ou de l'outil) à prendre dans la palette ; `morceau` : l'identifiant du morceau où toucher, quand l'application le
+     * sait (sinon `null`) ; `retirer` : le geste retire l'étiquette du morceau ; `cible` : un champ sous la lecture plutôt
+     * qu'un morceau ('nom', 'niveaux', 'destination', 'raisons', 'creer'). Sans manque, la grille est prête (`pret`).
+     * Fonction pure.
+     * @param {{doc: object, liens: object, rattachements?: object, manque?: object, enCodes?: boolean}} o
+     */
+    /** L'aide de chaque sorte de manque (une table : la complexité reste dans chaque entrée). */
+    var AIDE_PAR_SORTE = {
+        nom: function () { return { phrase: D.TEXTES_AIDE.nom, etiquette: 'titre' }; },
+        nomChamp: function (mq) {
+            var pris = /existe déjà/.test(mq.texte) && /« (.*) »/.exec(mq.texte);
+            return { phrase: pris ? D.TEXTES_AIDE.nomPris(pris[1]) : D.TEXTES_AIDE.nomLong, cible: 'nom' };
+        },
+        sansPlace: function (mq, M, liens) { return aideSansPlace(mq.morceau, M, liens); },
+        logique: function () { return { phrase: D.TEXTES_AIDE.logique, etiquette: 'points' }; },
+        melange: function (mq, M, liens) { return aideMelange(M, liens) || { phrase: D.TEXTES_AIDE.reste(mq.texte), cible: 'raisons' }; },
+        aucunCode: function () { return { phrase: D.TEXTES_AIDE.aucunCode, etiquette: 'code' }; },
+        destination: function () { return { phrase: D.TEXTES_AIDE.destination, cible: 'destination' }; },
+        niveaux: function () { return { phrase: D.TEXTES_AIDE.niveaux, cible: 'niveaux' }; },
+        couper: function (mq) { return { phrase: D.TEXTES_AIDE.reste(mq.texte), etiquette: 'couper' }; }
+    };
+
+    /**
+     * Relais du 12 nov. 2026, 11 h 25, point 3 (Grégoire a posé « Points » sur un « / 10 » : « J'ai confondu ») : « Points »
+     * posé sur un morceau de la forme « / N », le premier dans l'ordre de la grille. Comme « Poids » (`poidsDeTrop`), l'aide
+     * dit à quoi il ressemble et propose « Pondération » sur ce morceau. Avant le premier manque : une telle grille peut
+     * être lisible (les points rattachés à une réponse) et pourtant fausse.
+     */
+    var FORME_PONDERATION = /^\/\s*\d+(?:[.,]\d+)?$/;
+    function pointsSurPonderation(M, liens) {
+        for (var k = 0; k < M.ordre.length; k++) {
+            var id = M.ordre[k];
+            if (liens[id] === 'points' && FORME_PONDERATION.test(propre(M.texte[id]))) return id;
+        }
+        return null;
+    }
+
+    D.aide = function (o) {
+        var A = D.TEXTES_AIDE, mq = o.manque;
+        function sortie(sorte, x) { return Object.assign({ sorte: sorte, phrase: '', etiquette: null, morceau: null, retirer: false, cible: null }, x); }
+        if (!o.enCodes && o.doc) {
+            var M = D.morceauxLus(o.doc, o.rattachements), ps = pointsSurPonderation(M, o.liens || {});
+            if (ps) return sortie('pointsSurPonderation', { phrase: A.pointsSurPonderation(M.texte[ps]), etiquette: 'ponderation', morceau: ps });
+        }
+        if (!mq) return sortie(o.enCodes ? 'pretCodes' : 'pret', { phrase: o.enCodes ? A.pretCodes : A.pret, cible: 'creer' });
+        var f = AIDE_PAR_SORTE[mq.sorte];
+        if (!f) return sortie(mq.sorte || 'calcul', { phrase: A.reste(mq.texte), cible: 'raisons' });
+        return sortie(mq.sorte, f(mq, D.morceauxLus(o.doc, o.rattachements), o.liens || {}));
+    };
+
+    // ------------------------------------------------------------------
     // 4. L'EXEMPLE : une grille FICTIVE, de la forme d'une grille à sections et niveaux
     // ------------------------------------------------------------------
+
+    /**
+     * Point 5 (Grégoire, 11 nov., 8 h 47) : l'exemple « avec toutes ses étiquettes posées » (« voir le travail
+     * complet »). PROPOSÉ (12 nov. 2026) : Grégoire valide l'étiquetage sur capture. La première rangée : le Titre, puis
+     * la Description ; une rangée de section : la Section, puis le nom de chaque Niveau ; une rangée de critère : le
+     * Critère, ses Éléments observables (« · »), puis dans chaque case la réponse (Descripteur) et ses Points ; la
+     * dernière rangée : le Total. Rien d'inventé : chaque morceau de `exempleDoc` reçoit une étiquette.
+     * @param {object} doc - un document de `exempleDoc` (ses identifiants)
+     * @returns {Object<string, string>} les liens { idDuMorceau: type }
+     */
+    D.exempleLiens = function (doc) {
+        var liens = {};
+        if (!doc || doc.mode !== 'table') return liens;
+        var der = doc.rows.length - 1;
+        doc.rows.forEach(function (row, r) {
+            var section = /^PARTIE /.test(propre(row[0].lines[0].t));
+            row.forEach(function (cell, j) {
+                cell.lines.forEach(function (L, k) {
+                    var t;
+                    if (r === 0) t = j === 0 ? 'titre' : 'description';
+                    else if (r === der) t = 'total';
+                    else if (section) t = j === 0 ? 'section' : 'niveau';
+                    else if (j === 0) t = k === 0 ? 'critere' : 'souscritere';
+                    else t = k === 0 ? 'descripteur' : 'points';
+                    liens[L.id] = t;
+                });
+            });
+        });
+        return liens;
+    };
 
     /**
      * « Essayer avec un exemple » : une grille fictive (aucun texte réel), sans étiquette. Deux

@@ -53,7 +53,7 @@ async function etiqueter(page, type, textes) {
     await page.evaluate((ts) => {
         const blocs = [...document.querySelectorAll('#dissection-contenu .dissection-morceau')].filter((b) => ts.includes(b.textContent));
         const centre = (b) => { b.scrollIntoView({ block: 'center', inline: 'center' }); const r = b.getBoundingClientRect(); return { clientX: r.left + r.width / 2, clientY: r.top + r.height / 2 }; };
-        const ev = (t, b) => new PointerEvent(t, Object.assign({ bubbles: true, cancelable: true, pointerId: 7, pointerType: 'touch', isPrimary: true }, centre(b)));
+        const ev = (t, b) => new PointerEvent(t, Object.assign({ bubbles: true, cancelable: true, pointerId: 7, pointerType: 'mouse', isPrimary: true }, centre(b)));
         blocs[0].dispatchEvent(ev('pointerdown', blocs[0]));
         blocs.slice(1).forEach((b) => b.dispatchEvent(ev('pointermove', b)));
         const der = blocs[blocs.length - 1];

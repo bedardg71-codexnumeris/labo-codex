@@ -10,7 +10,8 @@ import { tranche } from './_helpers/tranche.js';
 //   1. la géométrie de la flèche, en fonction pure : du bord de la bulle à la cible, la cible hors de l'écran, la cible
 //      sous la bulle, la forme déterministe, les cibles groupées ;
 //   2. le bornage d'une bulle déplacée : elle reste dans l'écran utile ;
-//   3. les coordonnées : la couche des flèches est dimensionnée en px sur innerWidth × innerHeight, sans viewBox ni unité
+//   3. les coordonnées : la couche des flèches est dimensionnée en px sur la largeur de la mise en page × innerHeight
+//      (innerWidth × innerHeight jusqu'au 12 nov. 2026), sans viewBox ni unité
 //      de fenêtre. Le voile retiré était en 100vw × 100vh avec un viewBox en innerWidth × innerHeight : sous Safari iPad,
 //      barre d'adresse visible, les deux diffèrent et le dessin glisse (inférence de Cowork, non mesurée sur l'appareil).
 // Et le retrait lui-même : plus de voile ni dans le moteur, ni dans la feuille de style, ni dans les neuf définitions.
@@ -268,11 +269,13 @@ describe('Les coordonnées de la couche des flèches', () => {
     const regles = sansCommentaires(css);
     const regle = (regles.match(/\.parcours-fleches\s*\{([^}]*)\}/) || [])[1] || '';
 
-    it('la couche est dimensionnée en px sur innerWidth × innerHeight, à chaque passage de la sonde', () => {
+    // 12 nov. 2026 : la largeur se lit sur la mise en page (`largeurPage`), pas sur innerWidth, qui suit la partie
+    // visible sous Safari iPad (la bulle restait dans les deux tiers gauches de l'écran en paysage).
+    it('la couche est dimensionnée en px sur la largeur de la mise en page × innerHeight, à chaque passage de la sonde', () => {
         const sonde = tranche(code, 'function sonder() {', 'function placerSelonEtape', { longueurMin: 400 });
-        expect(sonde).toMatch(/svg\.setAttribute\('width', String\(window\.innerWidth\)\)/);
+        expect(sonde).toMatch(/svg\.setAttribute\('width', String\(largeurPage\(\)\)\)/);
         expect(sonde).toMatch(/svg\.setAttribute\('height', String\(window\.innerHeight\)\)/);
-        expect(sonde).toMatch(/svg\.style\.width = window\.innerWidth \+ 'px'/);
+        expect(sonde).toMatch(/svg\.style\.width = largeurPage\(\) \+ 'px'/);
         expect(sonde).toMatch(/svg\.style\.height = window\.innerHeight \+ 'px'/);
     });
 

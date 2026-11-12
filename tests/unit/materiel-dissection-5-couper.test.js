@@ -338,18 +338,18 @@ describe('R — des raisons qui nomment', () => {
 
     it('R.e — une Pondération sans critère : la raison dit qu’une ligne de total prend « Total » (tableau : « dans sa rangée »)', () => {
         const grille = [[{ l: [['Titre fictif', 'titre']] }], [{ l: [[SECTIONS_D[0], 'section']] }], [{ l: [[TOTAUX_D[0], 'ponderation']] }]];
-        expect(lire(collerD(grille)).sansPlace).toEqual([{ t: TOTAUX_D[0], type: 'ponderation', raison: 'aucun critère dans sa rangée ; une ligne de total prend l’étiquette « Total »' }]);
+        expect(lire(collerD(grille)).sansPlace).toMatchObject([{ t: TOTAUX_D[0], type: 'ponderation', raison: 'aucun critère dans sa rangée ; une ligne de total prend l’étiquette « Total »' }]);
         // Dans un texte brut, l'ordre fait foi : « avant lui ».
         const doc = D.docDepuisPressePapiers({ texte: ['Titre fictif', TOTAUX_D[0]].join('\n') });
         const R = D.comprendre(doc, liensPar(D.morceaux(doc).ordre, ['titre', 'ponderation']));
-        expect(R.sansPlace).toEqual([{ t: TOTAUX_D[0], type: 'ponderation', raison: 'aucun critère avant lui ; une ligne de total prend l’étiquette « Total »' }]);
+        expect(R.sansPlace).toMatchObject([{ t: TOTAUX_D[0], type: 'ponderation', raison: 'aucun critère avant lui ; une ligne de total prend l’étiquette « Total »' }]);
     });
 
     it('R.f — une seconde Pondération pour un même critère : sans place, plus en silence (même rangée ; texte brut)', () => {
         const grille = [[{ l: [['Titre fictif', 'titre']] }], [{ l: [['Critère fictif', 'critere'], ['/ 10', 'ponderation'], ['/ 70', 'ponderation']] }]];
         const R = lire(collerD(grille));
         expect(R.criteres[0].pond).toBe(10);
-        expect(R.sansPlace).toEqual([{ t: '/ 70', type: 'ponderation', raison: 'son critère a déjà une pondération (10) ; une ligne de total prend l’étiquette « Total »' }]);
+        expect(R.sansPlace).toMatchObject([{ t: '/ 70', type: 'ponderation', raison: 'son critère a déjà une pondération (10) ; une ligne de total prend l’étiquette « Total »' }]);
         const doc = D.docDepuisPressePapiers({ texte: ['Critère fictif', '/ 25', TOTAUX_D[0]].join('\n') });
         const T = D.comprendre(doc, liensPar(D.morceaux(doc).ordre, ['critere', 'ponderation', 'ponderation']));
         expect(T.criteres[0].pond).toBe(25);
@@ -360,7 +360,7 @@ describe('R — des raisons qui nomment', () => {
         // (d) telle que collée (critères sur leur ligne entière), une Pondération sur chaque total : la forme de ce midi.
         const R = lire(collerD());
         expect(R.criteres.map((c) => c.pond)).toEqual([null, null, null, null, null, null]);
-        expect(R.sansPlace).toEqual(TOTAUX_D.map((t) => ({ t, type: 'ponderation', raison: 'aucun critère dans sa rangée ; une ligne de total prend l’étiquette « Total »' })));
+        expect(R.sansPlace).toMatchObject(TOTAUX_D.map((t) => ({ t, type: 'ponderation', raison: 'aucun critère dans sa rangée ; une ligne de total prend l’étiquette « Total »' })));
         // Coupée, ses totaux encore en Pondération : chaque critère garde la sienne, les totaux restent sans place.
         const e = dDecoupee();
         TOTAUX_D.forEach((t) => { e.liens[idDe(e.doc, t)] = 'ponderation'; });
@@ -393,7 +393,7 @@ describe('N — aucun renvoi à l’assistant', () => {
         expect(D.bilan(R).logique).toBe('points');
         const c = D.creation(R, {});
         // Lot 9 : à compléter, sans bloquer ; ici, c'est le morceau « beaucoup », sans place, qui bloque.
-        expect(c.aCompleter).toContain('les points de chaque critère : surligne le poids de chaque critère avec l’étiquette « Pondération », ou ce que vaut chaque réponse avec l’étiquette « Points »');
+        expect(c.aCompleter).toContain('les points de chaque critère : pose l’étiquette « Pondération » sur le poids de chaque critère, ou l’étiquette « Points » sur ce que vaut chaque réponse');
         expect(c.raisons).toContain('une place pour le morceau étiqueté listé plus bas');
         sansRenvoiAssistant(c.raisons.concat(c.aCompleter));
         // L'assistant, lui, garde son message.
