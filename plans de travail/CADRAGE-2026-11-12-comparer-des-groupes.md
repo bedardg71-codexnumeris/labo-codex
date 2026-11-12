@@ -494,7 +494,7 @@ métacognitif qui l'accompagne existe pour conscientiser la correction de l'erre
   l'originale et la reprise) ; et l'exercice métacognitif, sans aucune trace.
 
 **Temps 2, écrit le 12 nov. 2026 — AVANT la fin du trimestre A26.** Les trois réglages sont de
-Grégoire ; la phrase qui les assemble est de Claude Code, à confirmer par lui :
+Grégoire ; la phrase qui les assemble est de Claude Code, **confirmée par lui le même jour** :
 
 > Ce qui me donnerait tort : que la majorité des reprises (50 % + 1) retombent. Une reprise est
 > retombée quand, dans la majorité des productions qui la suivent jusqu'à la fin du trimestre, le
