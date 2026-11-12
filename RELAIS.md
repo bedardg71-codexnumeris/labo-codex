@@ -7,6 +7,29 @@
 
 ---
 
+## 12 NOV. 2026, 17 H 20 (Claude Code) : **1.244.0 POUSSÉE ET EN LIGNE, VERDICT VERT** — deux lots fusionnés
+
+Mandat : relais de la conversation du Projet, 12 nov., 14 h 50 (décision de Grégoire, 14 h 48 : la version part avec DEUX lots). **`origin/main` = `1661ade8c`** (1.244.0, build `1112-1457`) ; Netlify `6af639e8`, `ready` à 17 h 13 sur ce SHA. PR n° 21 et n° 19 fusionnées.
+
+**Fusions** (`--no-ff`, partie de `b8cb81fdf`) : `lot/dissection-ipad` `3e77b97e4` (après `c76c3e06c` : porte « Après correction 2 » passée, D.1 à D.3 réussis de 14 h 28 à 14 h 31, porte close) ; `lot/en-tete-une-barre` `da229cb36`. Aucun conflit (`index.html` fusionné seul). Release `1661ade8c` : `js/vue-simple.js` passe de `20261111a` (jeton du 11, refusé par la sentinelle anti-cache) à `20261112a`, `js/parcours-moteur.js` à `20261112d`, `js/changelog-data.js` à `20261112c`.
+
+**Le lot « en-tête, une barre » (PR n° 19, `176100e41`)**, sans rapport ni porte : pendant le chargement, aucune barre ne se montre tant que `js/vue-simple.js` n'a pas posé `vue-posee` (règle du `<head>`, repli à 10 s en vue étendue) ; banc `tests/integration/vue-simple.spec.js`. Vérifié par Grégoire sur l'iPad à 14 h 37 (aperçu n° 19, vue étendue, trois rechargements : jamais deux barres).
+
+**Regard WebKit après la fusion** : l'en-tête, relevé à chaque image du chargement (≈ 60 par vue), jamais deux barres, en vue étendue comme en vue simple ; à « Ta grille » (« Évaluer une première production »), la carte se pose contre le bord droit (1172 sur 1180 ; 812 sur 820 en portrait).
+
+**Verdict** (`verdict-en-morceaux.mjs`, sur `1661ade8c`, secteur, pression 1) : 1 644 essais, 1 643 verts, 1 au second essai, 0 rouge, 68 sautés. Le second essai : `parcours-5-monter-ton-cours` › les sept étapes… (1180 px), du groupe ; rejoué seul 6/6 (`--retries=0`). Celui du rapport de 13 h 10 reste sans nom (`test-results/` vidé à chaque course) ; le groupe (22 specs) rejoué sur la release : 135/135 au premier essai. `parcours-5` était déjà rattrapé au premier verdict de la 1.243.0 : s'il revient, c'est un sujet (#685). Vitest 921 fichiers, 11 497 tests.
+
+**Nouvelles 1.244** (« Ta grille, sur l'iPad »), validées par Grégoire avant le verdict : les trois lignes du relais de 14 h 50, à la typographie près.
+
+**Complexité** (1.243.0 `66c2a464f` → 1.244.0 `1661ade8c`) :
+- fichiers de plus de 1 000 lignes : 43 → 43 ; lignes de code : 168 590 → 169 091 (Δ +501) ;
+- au-dessus de 15 : 434 → 434 (Δ 0) ; somme au-dessus de 15 : 10 954 → 10 954 (Δ 0) ;
+- au-dessus de 30 : 77 → 77 (Δ 0) ; maximum : 130 ; fonctions : 17 156 → 17 256.
+
+**Ce qui reste ouvert** : `claude/deux-temps-modelisation-da3icr` (PR n° 20), non fusionnée, attend ses modèles dans la démo et ses libellés de 14 h 46 ; laissée telle quelle.
+
+---
+
 ## 12 NOV. 2026, 10 H 05 (Claude Code) : **LA DISSECTION SUR L'IPAD ATTEND L'ESSAI DE GRÉGOIRE** — `main` inchangé
 
 Mandat : relais de la conversation du Projet, 12 nov., 6 h 35 (huit points, étape « Ta grille »). **Le travail vit sur
