@@ -1685,3 +1685,74 @@ test.describe('Vue simple · quelqu\'un qui a déjà des données', () => {
         expect(erreurs).toEqual([]);
     });
 });
+
+// UNE SEULE BARRE, TOUJOURS (lot « en-tête, une barre », 12 nov. 2026). Vécu par Grégoire le 11 nov. : pendant le chargement,
+// l'en-tête montrait la barre de la vue étendue ET celle de la vue simple. La règle du <head> d'index.html masque les deux
+// tant que `_poser` (js/vue-simple.js) n'a pas posé « vue-posee » sur le body. Écrit et éprouvé sous Chromium (session cloud).
+test.describe('En-tête · une seule barre de navigation, y compris pendant le chargement', () => {
+    /** Ce que l'œil voit de l'en-tête : chaque barre, et la rangée du bas (`.entete-bas`). */
+    const lireEntete = (page) => page.evaluate(() => {
+        const vu = (el) => {
+            if (!el || el.getClientRects().length === 0) return false;
+            return getComputedStyle(el).visibility === 'visible';
+        };
+        return {
+            etendue: vu(document.querySelector('.entete .navigation-principale:not(.navigation-vue-simple)')),
+            simple: vu(document.querySelector('.entete .navigation-vue-simple')),
+            bas: vu(document.querySelector('.entete-bas'))
+        };
+    });
+    /** L'état d'avant le script : ni « vue-posee » ni « vue-simple » sur le body ; `feuille` dit si css/vue-simple.css est arrivée. */
+    const avantLeScript = (page, feuille) => page.evaluate((arrivee) => {
+        document.body.classList.remove('vue-posee', 'vue-simple');
+        document.querySelector('link[href*="css/vue-simple.css"]').disabled = !arrivee;
+    }, feuille);
+    /** Retire la règle du <head> (et son repli). Rend le nombre de règles retirées. */
+    const retirerLaRegleDuHead = (page) => page.evaluate(() => {
+        let n = 0;
+        for (const feuille of document.styleSheets) {
+            if (feuille.ownerNode.tagName !== 'STYLE') continue;
+            for (let i = feuille.cssRules.length - 1; i >= 0; i--) {
+                if (/vue-posee|entete-vue-repli/.test(feuille.cssRules[i].cssText)) { feuille.deleteRule(i); n++; }
+            }
+        }
+        return n;
+    });
+
+    test('après le chargement : « vue-posee » est posée, la barre étendue seule ; après la bascule, la barre simple seule', async ({ page }) => {
+        const erreurs = await ouvrir(page);
+        await page.evaluate(() => window.VueSimple.basculer('etendue'));
+        await expect(page.locator('body')).toHaveClass(/(^|\s)vue-posee(\s|$)/);
+        expect(await lireEntete(page)).toEqual({ etendue: true, simple: false, bas: true });
+
+        await page.evaluate(() => window.VueSimple.basculer('simple'));
+        await expect(page.locator('body')).toHaveClass(/(^|\s)vue-posee(\s|$)/);
+        expect(await lireEntete(page)).toEqual({ etendue: false, simple: true, bas: false });
+        expect(erreurs).toEqual([]);
+    });
+
+    test('avant le script : aucune barre, feuille arrivée ou non ; sans la règle du <head>, les deux barres', async ({ page }) => {
+        await ouvrir(page);
+        const hauteur = () => page.evaluate(() => document.querySelector('.entete').getBoundingClientRect().height);
+        await page.evaluate(() => window.VueSimple.basculer('etendue'));
+        const hauteurPosee = await hauteur();
+
+        // La feuille du bas de page n'est pas arrivée : c'est l'état où les deux barres se montraient.
+        await avantLeScript(page, false);
+        expect(await lireEntete(page)).toEqual({ etendue: false, simple: false, bas: false });
+        // La feuille est arrivée, le script n'a pas tourné : la barre étendue se montrait, même à qui a choisi la simple.
+        await avantLeScript(page, true);
+        expect(await lireEntete(page)).toEqual({ etendue: false, simple: false, bas: false });
+        // Le masque ne retire rien du flux : l'en-tête ne saute pas quand la vue se pose.
+        expect(await hauteur()).toBe(hauteurPosee);
+
+        // Le repli : si js/vue-simple.js ne s'exécute jamais, le délai échu rend l'en-tête, en vue étendue.
+        await page.evaluate(() => document.getAnimations().filter((a) => a.animationName === 'entete-vue-repli').forEach((a) => a.finish()));
+        expect(await lireEntete(page)).toEqual({ etendue: true, simple: false, bas: true });
+
+        // La contre-épreuve, dans le banc : c'est bien la règle du <head> qui tient. Sans elle, l'état vécu revient.
+        expect(await retirerLaRegleDuHead(page)).toBe(2);
+        await avantLeScript(page, false);
+        expect(await lireEntete(page)).toEqual({ etendue: true, simple: true, bas: true });
+    });
+});

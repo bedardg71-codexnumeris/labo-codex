@@ -262,6 +262,7 @@
         _vue = vue;
         const simple = estSimple();
         document.body.classList.toggle('vue-simple', simple);
+        document.body.classList.add('vue-posee'); // lève le masque du <head> d'index.html : une seule barre, dès qu'on sait laquelle
         const bouton = document.getElementById('btn-codex');
         const libelle = bouton && bouton.querySelector('.codex-label-btn');
         if (libelle) libelle.textContent = simple ? MOTS.boutonSauvegarder : 'Codex';
