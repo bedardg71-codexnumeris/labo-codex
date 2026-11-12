@@ -567,7 +567,8 @@ Nuance de Claude Code : les saisir un à un, c'est les avoir vus passer ; aucun 
 c'est le compte qui répond. Ils sont tenus pour non regardés.
 
 **Temps 2, écrit le 12 nov. 2026 — AVANT toute analyse des résultats du 102.** Les quatre réglages
-sont de Grégoire ; la phrase qui les assemble est de Claude Code, à confirmer par lui :
+sont de Grégoire ; la phrase qui les assemble est de Claude Code, **confirmée par lui le même jour**
+(« la phrase dit très bien ce que je veux dire ») :
 
 > Ce qui me donnerait tort : que, parmi mes élèves certifié·es à 75 % ou plus, plus de deux sur dix
 > échouent le 102 ; ou que mes élèves ayant réussi entre 60 et 74 % réussissent le 102 aussi souvent,
@@ -590,7 +591,10 @@ sont de Grégoire ; la phrase qui les assemble est de Claude Code, à confirmer 
   60 % reste une barre basse pour dire qu'une maîtrise « se maintient ».
 - **Non dit** : combien d'élèves sont inscrit·es au registre, et leur répartition de part et d'autre
   de 75 % (elle se lit sans regarder les résultats du 102).
-- ⚠ **Tant que la phrase n'est pas confirmée, ne pas ouvrir la comparaison sur les vraies données.**
+- **La phrase est confirmée : la comparaison peut être ouverte sur les vraies données.** Mais
+  l'instrument manque : le tableau de comptes par groupe (75 % et plus ; 60 à 74 %) n'est codé nulle
+  part, et l'onglet « Tendances » n'existe que dans l'aperçu (PR #18, non fusionnée). Aucun code sans
+  l'accord de Grégoire.
 
 ### Contre-vérification des analyses de 2025 (demandée par Grégoire)
 

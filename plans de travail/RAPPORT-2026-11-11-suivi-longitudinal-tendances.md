@@ -18,6 +18,10 @@ mots changés (« étude » devient « question », « conclusion » devient « 
 Puis : les sources mesurées (§ 6 quinquies), le déplacement accepté (« une version contre la précédente », pas
 « alternative contre sommative »), et la question des jetons (§ 6 sexies). **À porter au BACKLOG par la session
 principale** : la reprise ciblée, retirée de l'application (#563) mais toujours faite en classe (§ 6 sexies).
+**Deux questions du Journal sont posées, temps 1 et 2 écrits et confirmés AVANT de voir** : les jetons (§ 6 sexies)
+et le jugement de maîtrise à 75 % face au 102 (§ 6 septies, avec la contre-vérification des analyses de 2025, écartées).
+Les résultats du 102 reçus en juin 2026 sont au registre, non analysés. **L'instrument manque** pour la seconde : le
+tableau de comptes par groupe n'est pas codé. Aucun code sans l'accord de Grégoire.
 Cette séance a tourné sur `claude/awesome-bohr-q7rsa1` (posée sur la tête de la branche du lot, `5b76121`) : la
 session nuage ne pousse que sur la sienne. À ramener sur la branche du lot par avance rapide.
 
