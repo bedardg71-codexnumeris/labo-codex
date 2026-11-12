@@ -52,7 +52,10 @@ le cycle entier :
 3. **Je conclus** — ce que j'en retiens, écrit par l'enseignant·e. L'application montre ; elle ne
    conclut pas à sa place (§ 5).
 
-**Une étude** (mot confirmé par Grégoire, v4) : cette unité — une hypothèse, ses observations, sa
+⚠ **Mot remplacé en v11 : « étude » devient « question »** (§ 1 quater, « Les mots »). Le texte
+ci-dessous et la suite du cadrage gardent « étude » là où il a été écrit ; lire « question ».
+
+**Une étude** (mot confirmé par Grégoire, v4 ; remplacé en v11) : cette unité — une hypothèse, ses observations, sa
 conclusion. Le mot existe déjà dans le Labo (« Études ») ; il prend ici son sens plein. Son fondement,
 dans les mots de Grégoire : un·e enseignant·e est avant tout un·e apprenant·e, et l'application le
 soutient en lui permettant d'observer les effets de ce qu'il ou elle fait.
@@ -81,7 +84,7 @@ prétends pas à la recherche scientifique. » Question née de la chronique de 
 Ce que fait l'enseignant·e dans le Labo est une **enquête de praticien** (le praticien réflexif, la
 recherche-action), pas de la recherche : elle vise une décision mieux éclairée dans son propre cours,
 et peut affirmer « voici ce que j'ai observé chez moi, et ce que j'en fais », pas « ceci cause cela ».
-Une suite ouverte : les mots (« hypothèse », « étude », « Labo »), à choisir à cette hauteur.
+Les mots sont choisis à cette hauteur (ci-dessous, « Les mots »).
 
 **Les cinq garde-fous d'une enquête de praticien (retenus tous les cinq par Grégoire, 12 nov.)** —
 chacun répond à une façon précise de se tromper soi-même :
@@ -106,6 +109,30 @@ chacun répond à une façon précise de se tromper soi-même :
   remplace un groupe témoin.
 - **Un sixième, hors de ce cadrage** : le regard d'un·e collègue, qui tient lieu de relecture par les
   pairs. Grégoire : il émergerait d'une éventuelle communauté de pratique.
+
+**Les mots (tranchés par Grégoire, 12 nov. — « tout est toujours provisoire »)**. Le critère : un mot
+pose problème s'il promet plus que ce que l'outil livre.
+
+| Mot | Décision | Motif |
+|---|---|---|
+| Labo | gardé | un nom de lieu, au sens courant : on y essaie des choses |
+| Observations | gardé | c'est exactement ce qu'on fait |
+| Hypothèse | gardé pour l'instant | le garde-fou 2 (dire ce qui donnerait tort) lui donne son sens |
+| **Étude** | **remplacé par « question »** | Grégoire : « c'est le terme qui m'a toujours le plus embarrassé ». En recherche, il promet un protocole et un résultat qui fait autorité. |
+| **Conclusion** | **remplacé par « ce que j'en retiens »** | « conclusion » dit quelque chose de clos et contredit le garde-fou 5 |
+
+- **Pourquoi « question »** : le § 4 l'employait déjà (colonne « Question d'enseignant·e »). Poser une
+  question n'affirme aucun résultat, et une question peut rester ouverte. Le Journal aurait un volet
+  « Mes questions » ; chacune porte ce qui est attendu, ce qui donnerait tort, ce qu'on observe, ce
+  qu'on en retient. Écartés : « essai », « enquête », « expérience ».
+- **Une faiblesse mesurée** : le Journal contient aussi le questionnaire du bilan, adressé aux
+  étudiant·es (`questionnaireBilan`). « Mes questions » et « questionnaire » voisineraient avec deux
+  sens. À traiter au moment d'écrire les écrans.
+- **Ouvert** : « hypothèse » pourrait devenir « ce que j'attends », par symétrie avec « ce que j'en
+  retiens ». Non discuté.
+- **Où est le vrai risque (inférence de Claude Code)** : moins dans les noms que dans les verbes
+  employés à la sortie de l'application (« prouve », « démontre », « confirme »), le jour où une
+  question se partage.
 
 ## 2. Une grammaire commune (proposition)
 
@@ -285,7 +312,7 @@ concepts que représentent les onglets ». Les noms pourront être repris.
 | Aujourd'hui | Devient | Ce qu'on y fait |
 |---|---|---|
 | Études + Suivi longitudinal | **Observations** | on regarde ce qui s'est passé : le cours suivant, les corrélations, les jetons. On n'y écrit pas. |
-| Bilan | **Journal** | on réfléchit et on écrit. Trois volets : le bilan du trimestre, les changements entre trimestres, les études. |
+| Bilan | **Journal** | on réfléchit et on écrit. Trois volets : le bilan du trimestre, les changements entre trimestres, les questions (dites « études » jusqu'à la v11). |
 | Exploration | Exploration (nom en suspens) | on compare des pratiques, simulées ou appliquées au groupe réel |
 | Observation | **Outils** | on règle les lentilles : affichages, seuils, paramètres d'analyse |
 | Modélisation | part vers Suivi › Animation | (Animation sera réaménagée avec les trois outils qu'elle contient) |

@@ -13,6 +13,8 @@ EXPLORATION, sans code : le suivi longitudinal s'est révélé un cas particulie
 **Reprise du 12 nov., 2e séance (exploration, aucun code).** Le premier fil ouvert ci-dessous est traité : le
 cadrage passe en **v11**, § 6 quater. Le Labo se dessine en quatre sous-onglets (Observations · Journal ·
 Exploration · Outils) ; l'étude s'écrit dans le Journal ; Rythme part vers Évaluation, Modélisation vers Animation.
+Puis, § 1 quater : la démarche est une enquête de praticien, pas de la recherche ; cinq garde-fous retenus ; deux
+mots changés (« étude » devient « question », « conclusion » devient « ce que j'en retiens »).
 Cette séance a tourné sur `claude/awesome-bohr-q7rsa1` (posée sur la tête de la branche du lot, `5b76121`) : la
 session nuage ne pousse que sur la sienne. À ramener sur la branche du lot par avance rapide.
 
