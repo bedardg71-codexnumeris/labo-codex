@@ -18,10 +18,9 @@ Rien de tout cela n'écrit dans tes trimestres : l'aperçu a son propre espace, 
 
 ## §0 · Préalable
 
-- [ ] **0.1** Sur l'iPad, dans Safari, ouvre l'aperçu de la PR (adresse au rapport du lot, ligne « Aperçu »),
+- [ ] **0.1** Sur l'iPad, dans Safari, ouvre l'aperçu `https://deploy-preview-21--codexnumeris-051225.netlify.app`,
   recharge, et lis le numéro en bas de l'accueil.
-  ⮕ Attendu : le build que donne le rapport du lot (ligne « Build »). Sinon, recharge, ou attends que Netlify ait
-  fini de publier.
+  ⮕ Attendu : 1.243.0, build 1112-0755. Sinon, recharge, ou attends que Netlify ait fini de publier.
   `iPad`
 - [ ] **0.2** Mets ta classe en place sur l'aperçu (Assistance › « Mettre ta classe en place »), avec des noms
   inventés.

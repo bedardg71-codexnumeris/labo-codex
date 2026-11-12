@@ -7,7 +7,14 @@ un geste par tour) ; la fusion attend son verdict. Commit, build, aperçu : sect
 
 ## Livraison
 
-(Rempli au push : commit, build, adresse de l'aperçu, verdicts.)
+- **Commit** : `556422384` (le code du lot) ; ce rapport et la porte suivent dans un commit de documents.
+- **Build** : 1112-0755 (version 1.243.0 inchangée ; jetons `?v=20261112a` sur les neuf fichiers touchés).
+- **Aperçu** : PR #21, `https://deploy-preview-21--codexnumeris-051225.netlify.app` (vérifié : sert
+  `materiel-dissection.js?v=20261112a` et « Composer ma grille »).
+- **Vitest** : 920 fichiers, 11 490 tests, verts.
+- **Verdict Playwright WebKit (Mac, `556422384`)** : vert, 0 échec ; une spec verte au second essai, hors du lot
+  (`grilles-sous-criteres-condense.spec.js`, iPad, sous-critères). Hook pré-push : vert, sans contournement.
+- **Pas de fusion** : elle attend l'essai de Grégoire sur l'iPad.
 
 ## Ce qui a été fait, point par point
 
