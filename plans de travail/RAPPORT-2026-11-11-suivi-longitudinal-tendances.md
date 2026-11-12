@@ -1,11 +1,43 @@
 # Rapport — Suivi longitudinal, lot 1 : l'onglet « Tendances » (11 nov. 2026)
 
-**Dernier relais.** Branche `claude/lot-suivi-longitudinal-tendances-wi505g` (la consigne nommait
-`lot/suivi-longitudinal-tendances` ; la session nuage ne pousse que sur la sienne), partie de `main` à `9aa3ff284`.
-PR #18 d'aperçu, à NE PAS fusionner (ordre de Grégoire, 11 nov., 12 h 17). Aucune release, aucune ligne de Nouvelles.
-**Fait** : les deux onglets, le nuage, les filtres, la bulle, « Voir son dossier », puis la RÉVISION du soir (ci-dessous).
-**Reste** : le titre de l'onglet (Grégoire choisit entre trois ; « D'un cours au suivant » est provisoire) ; la relecture
-des mots ; le passage sous WebKit (Mac) ; le lot 2 (graphiques par critère, mentions « échec » et « abandon »).
+**Dernier relais (12 nov. 2026, fin de séance — Grégoire reprend plus tard).**
+Branche `claude/lot-suivi-longitudinal-tendances-wi505g` (la consigne nommait `lot/suivi-longitudinal-tendances` ;
+la session nuage ne pousse que sur la sienne), partie de `main` à `9aa3ff284`. PR #18 d'aperçu, en brouillon, à NE
+PAS fusionner (ordre de Grégoire, 11 nov., 12 h 17). Aucune release, aucune ligne de Nouvelles. La surveillance de la
+PR est ARRÊTÉE à sa demande. `RELAIS.md` (sur `main`) n'a PAS été touché : cette session ne pousse pas sur `main`.
+
+**Où on en est.** Le lot 1 est codé et révisé (ci-dessous), visible à l'aperçu. Puis la séance est devenue une
+EXPLORATION, sans code : le suivi longitudinal s'est révélé un cas particulier d'un outil plus large. Tout est dans
+**`plans de travail/CADRAGE-2026-11-12-comparer-des-groupes.md` (v10)** — à lire en premier à la reprise.
+
+**Ce que Grégoire a décidé pendant l'exploration (12 nov.)** :
+1. L'objet du Labo est d'étudier les données en COMPARANT ; le longitudinal est une option parmi d'autres.
+2. Ce qu'on compare, au fond : des VERSIONS de son enseignement. Les groupes en sont le moyen.
+3. **Le microscope** (nom de travail) : l'instrument où l'on observe les micro-données.
+   **Une étude** (mot confirmé) : une hypothèse, des observations, une conclusion.
+4. **L'application propose, l'enseignant·e écrit ; la réflexion ne se délègue pas** (d'où : pas d'IA pour l'instant).
+   L'écran ne commente ni les données ni l'échantillon, et ne conclut pas.
+5. Le journal des changements : il repose sur l'alignement du cours et sur ses systèmes (pratique, jetons) ;
+   l'application constate les différences entre deux trimestres, l'enseignant·e dit pourquoi et ce qu'il en attend.
+6. L'étude n° 1 (le cours suivant) : pour l'instant, seul le SEUIL DE RÉUSSITE se compare ; l'enseignant·e compare ses
+   propres cohortes. À l'écran, les deux cohabitent : le nuage d'abord, le tableau de comptes ensuite (le tableau est
+   une lecture du nuage).
+
+**Ce qui reste ouvert, dans l'ordre où Grégoire voulait le reprendre** :
+- la place du microscope dans le Labo, et ce que deviennent Études et Bilan (fil proposé, pas entamé) ;
+- les autres études possibles, au-delà du cours suivant ;
+- une question laissée sans réponse : qu'est-ce qui confirmerait l'hypothèse de l'étude n° 1 ?
+- le titre de l'onglet (« D'un cours au suivant » est provisoire ; deux autres proposés) — sans doute caduc si
+  l'onglet déménage dans le microscope ;
+- à mesurer avant de promettre : ce que les archives et les deux « états du cours » permettent vraiment de comparer ;
+  si la marque d'un jeton est bien dans les copies du registre.
+
+**Ce qui n'est PAS fait, et ne doit pas l'être sans son accord** : aucun code de l'exploration (tableau de comptes,
+hypothèse et conclusion, journal). Proposé par Claude Code comme deuxième version de l'aperçu ; Grégoire a répondu
+« on explore encore un peu ». Le passage sous WebKit (Mac) du lot 1 reste à faire.
+
+**Pour essayer l'aperçu** : https://deploy-preview-18--codexnumeris-051225.netlify.app — un codex fictif (44 inscrit·es
+inventé·es) a été remis à Grégoire dans la conversation ; il n'est pas au dépôt. Déclarer la séquence dans l'onglet.
 
 ## La révision du 11 nov. au soir (décisions de Grégoire, à l'aperçu)
 
