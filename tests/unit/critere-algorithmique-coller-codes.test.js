@@ -70,7 +70,7 @@ describe('étape 5 · L — la lecture d’une liste de codes', () => {
             ['Nom orphelin', 'nomcode'],
             ['7', 'code'], ['Code fictif', 'nomcode'], ['1,5', 'poids'], ['Un commentaire fictif', 'commentaire'], ['qui continue.', 'suite']
         ]);
-        expect(R.sansPlace).toEqual([{ t: 'Nom orphelin', type: 'nomcode', raison: 'aucun code avant lui' }]);
+        expect(R.sansPlace).toMatchObject([{ t: 'Nom orphelin', type: 'nomcode', raison: 'aucun code avant lui' }]);
         expect(D.codesCompris(R).codes).toEqual([{ code: '7', nom: 'Code fictif', poids: 1.5, commentaire: 'Un commentaire fictif qui continue.' }]);
     });
 

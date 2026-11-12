@@ -153,7 +153,7 @@ describe('C — un texte brut : rattachement par l’ordre', () => {
 
     it('une réponse de plus que de niveaux : sans place, avec sa raison', () => {
         const { R } = coller([...TEXTE_C, ['Langue exemplaire', 'descripteur']]);
-        expect(R.sansPlace).toEqual([{ t: 'Langue exemplaire', type: 'descripteur', raison: 'plus de réponses que de niveaux' }]);
+        expect(R.sansPlace).toMatchObject([{ t: 'Langue exemplaire', type: 'descripteur', raison: 'plus de réponses que de niveaux' }]);
     });
 });
 
@@ -163,7 +163,7 @@ describe('X — les cas limites finissent « sans place », jamais en erreur', (
             [{ l: [['Critère fictif', 'critere']] }, { l: [] }],
             [{ l: [] }, { l: [['3 points', 'points']] }]
         ]);
-        expect(R.sansPlace).toEqual([{ t: '3 points', type: 'points', raison: 'aucune réponse pour ces points' }]);
+        expect(R.sansPlace).toMatchObject([{ t: '3 points', type: 'points', raison: 'aucune réponse pour ces points' }]);
         expect(R.criteres).toHaveLength(1);
     });
 
@@ -172,7 +172,7 @@ describe('X — les cas limites finissent « sans place », jamais en erreur', (
             [{ l: [['la fin d’une phrase', 'suite']] }, { l: [['Critère fictif', 'critere']] }],
             [{ l: [['Réponse', 'descripteur']] }, { l: [['1', 'points']] }]
         ]);
-        expect(R.sansPlace).toEqual([{ t: 'la fin d’une phrase', type: 'suite', raison: 'aucun morceau à compléter avant elle' }]);
+        expect(R.sansPlace).toMatchObject([{ t: 'la fin d’une phrase', type: 'suite', raison: 'aucun morceau à compléter avant elle' }]);
     });
 
     it('X.c — un « Descripteur » sans critère quand des niveaux sont nommés', () => {

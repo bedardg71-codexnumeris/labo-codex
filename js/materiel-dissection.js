@@ -38,9 +38,12 @@
  * jamais inséré (le document disséqué ne porte que du texte). Boutons par `data-action` (dispatcher
  * de main.js) ; les gestes sur la feuille, par des écouteurs de pointeur posés ici, aucun handler inline.
  *
- * iPad : les gestes passent par les événements de pointeur (pas de glisser-déposer HTML5) ;
- * `touch-action: none` ne vaut sur les morceaux que lorsqu'une étiquette est en main
- * (classe `dissection-pointage`), pour que le canevas défile au doigt le reste du temps.
+ * iPad : les gestes passent par les événements de pointeur (pas de glisser-déposer HTML5). Lot de la dissection sur
+ * l'iPad (12 nov. 2026, point 2) : `touch-action: none` est retiré ; au doigt, la feuille défile toujours, et une
+ * étiquette se pose au TOUCHER (au lever, sans glisser) ; garder le doigt posé, puis glisser, surligne plusieurs
+ * morceaux (`gesteTactile`). La souris garde son geste : appuyer et glisser.
+ * Même lot : la palette montre qu'elle défile (`majDefilementPalette`) et s'ouvre en haut ; l'exemple du parcours
+ * (`ouvrirExemple`) n'écrit rien ; l'aide pas à pas de la bulle « Ta grille » (`aide`) suit le premier manque.
  *
  * Textes d'écran de Claude Code ou de l'ébauche : validé G. 18 oct. (étape 3 du plan ; L3 réécrit ce jour-là).
  */
@@ -57,8 +60,10 @@
     function etatNeuf(doc) {
         // Étape 5 du critère algorithmique (22 oct. 2026) : `destination`, le critère choisi pour une liste de codes
         // (« grilleId\ncritereId ») ; `codesAjoutes`, ce que la confirmation dit. Ni l'un ni l'autre n'entre au brouillon.
+        // Lot de la dissection sur l'iPad (12 nov. 2026) : `exemple`, l'exemple du parcours (« complet » ou « exercice ») ;
+        // il n'écrit rien (ni brouillon, ni grille) et n'efface pas le brouillon de l'enseignant·e.
         return { doc: doc, liens: {}, actif: null, morceaux: doc ? D().morceaux(doc) : null, erreur: '', enCours: false, nomSaisi: null, compte: 'points', valeurs: {}, coupes: [], rattachements: {}, choix: null,
-            destination: null, codesAjoutes: null };
+            destination: null, codesAjoutes: null, exemple: null };
     }
     var etat = etatNeuf(null);
     var blocs = {};
@@ -108,6 +113,25 @@
         reprise: 'Dissection reprise telle que tu l’as laissée.'
     };
 
+    /**
+     * Lot de la dissection sur l'iPad (12 nov. 2026), point 5 : l'exemple du parcours « Évaluer une première production ».
+     * Textes PROPOSÉS (Claude Code), lus par l'enseignant·e, corrigeables.
+     */
+    var TEXTES_EXEMPLE = {
+        complet: 'L’exemple, avec toutes ses étiquettes posées. Il ne s’enregistre pas.',
+        exercice: 'L’exemple, sans étiquettes : à toi de les poser. Il ne s’enregistre pas.',
+        note: 'C’est l’exemple : il ne devient pas une de tes grilles.'
+    };
+
+    /**
+     * Point 1 : la liste des étiquettes montre qu'elle défile (sur l'iPad, la barre de défilement est invisible). En haut
+     * et en bas de la palette, ce qui reste à voir, compté ; touché, il fait défiler d'une hauteur de liste. PROPOSÉ.
+     */
+    var TEXTES_DEFILEMENT = {
+        haut: function (n) { return '▲ ' + pluriel(n, 'étiquette', 'étiquettes') + ' plus haut'; },
+        bas: function (n) { return '▼ ' + pluriel(n, 'étiquette', 'étiquettes') + ' plus bas'; }
+    };
+
     function D() { return window.materielDissectionLecture; }
     function el(id) { return document.getElementById(id); }
 
@@ -135,7 +159,7 @@
     function enregistrer() {
         clearTimeout(minuterieSaisie);
         minuterieSaisie = null;
-        if (!etat.doc || typeof window.sauvegarderDonneesSelonMode !== 'function') return;
+        if (!etat.doc || etat.exemple || typeof window.sauvegarderDonneesSelonMode !== 'function') return;
         window.sauvegarderDonneesSelonMode(CLE_BROUILLON, D().brouillon(etat), { geste: TEXTES_BROUILLON.geste });
     }
 
@@ -149,6 +173,8 @@
     function oublierBrouillon() {
         clearTimeout(minuterieSaisie);
         minuterieSaisie = null;
+        // L'exemple ouvert : le brouillon n'est pas le sien, il reste (« Coller une autre grille » depuis l'exemple).
+        if (etat.exemple) return;
         if (typeof window.cle === 'function') db.removeSync(window.cle(CLE_BROUILLON));
     }
 
@@ -294,6 +320,20 @@
                 D().OUTILS.forEach(function (o) { if (o.apres === k) { bouton(o); placer(o.k); } });
             })(t.k);
         });
+        // Point 1 : ce qui reste à voir, en haut et en bas de la liste (collés à ses bords, ils ne la déplacent pas).
+        ['haut', 'bas'].forEach(function (sens) {
+            var b = noeud('button', 'dissection-palette-plus dissection-palette-plus-' + sens);
+            b.type = 'button';
+            b.id = 'dissection-palette-' + sens;
+            b.tabIndex = -1;   // au clavier, la liste se parcourt par ses étiquettes : le défilement suit le focus
+            b.setAttribute('aria-hidden', 'true');
+            b.addEventListener('click', function () {
+                var pas = Math.max(80, pal.clientHeight * 0.8) * (sens === 'haut' ? -1 : 1);
+                try { pal.scrollBy({ top: pas, behavior: 'smooth' }); } catch (e) { pal.scrollTop += pas; }
+            });
+            if (sens === 'haut') pal.insertBefore(b, pal.firstChild); else pal.appendChild(b);
+        });
+        pal.addEventListener('scroll', majDefilementPalette, { passive: true });
         var defs = el('dissection-pointes');
         if (defs && !defs.childNodes.length) {
             // Lot 7 : « Rattacher » a sa pointe, pour la flèche d'une suite vers son morceau.
@@ -309,6 +349,30 @@
                 defs.appendChild(m);
             });
         }
+    }
+
+    /**
+     * Point 1 : « ▲ N étiquettes plus haut » quand la liste n'est pas à son début, « ▼ N étiquettes plus bas » quand elle
+     * n'est pas à sa fin ; N compte les étiquettes (et outils) qui dépassent de ce côté. Liste entière visible : rien.
+     */
+    function majDefilementPalette() {
+        var pal = el('dissection-palette'), h = el('dissection-palette-haut'), b = el('dissection-palette-bas');
+        if (!pal || !h || !b) return;
+        var defile = getComputedStyle(pal).overflowY !== 'visible' && pal.scrollHeight > pal.clientHeight + 1;
+        var nh = 0, nb = 0;
+        if (defile) {
+            var pr = pal.getBoundingClientRect();
+            Array.prototype.forEach.call(pal.querySelectorAll('.dissection-etiquette'), function (e) {
+                var r = e.getBoundingClientRect();
+                if (r.top < pr.top - 0.5) nh++;
+                else if (r.bottom > pr.bottom + 0.5) nb++;
+            });
+        }
+        [[h, nh, TEXTES_DEFILEMENT.haut], [b, nb, TEXTES_DEFILEMENT.bas]].forEach(function (x) {
+            var t = x[1] ? x[2](x[1]) : '';
+            if (x[0].textContent !== t) x[0].textContent = t;
+            x[0].classList.toggle('est-visible', !!x[1]);
+        });
     }
 
     function majPalette() {
@@ -411,6 +475,7 @@
         }
         if (etat.actif === 'couper') { gesteCoupe(e, id); return; }
         if (etat.actif === 'rattacher') { gesteToucher(e, function () { toucherLien(id); }); return; }
+        if (e.pointerType === 'touch' || e.pointerType === 'pen') { gesteTactile(e, id); return; }
         e.preventDefault();
         var feuille = e.currentTarget;
         var mode = etat.liens[id] === etat.actif ? 'retirer' : 'ajouter';
@@ -419,24 +484,86 @@
         suiteTouchee = null;
         appliquer(id, mode);
         try { feuille.setPointerCapture(e.pointerId); } catch (er) { /* sans capture, le surlignage s'arrête au bord */ }
-        function bouger(ev) {
+        var bouger = surlignerSous(feuille, vus, mode);
+        function fin() {
+            feuille.removeEventListener('pointermove', bouger);
+            feuille.removeEventListener('pointerup', fin);
+            feuille.removeEventListener('pointercancel', fin);
+            finSurlignage();
+        }
+        feuille.addEventListener('pointermove', bouger);
+        feuille.addEventListener('pointerup', fin);
+        feuille.addEventListener('pointercancel', fin);
+    }
+
+    /** Au glisser : chaque morceau neuf sous le doigt (ou la souris) reçoit le même geste que le premier. */
+    function surlignerSous(feuille, vus, mode) {
+        return function (ev) {
             var cible = document.elementFromPoint(ev.clientX, ev.clientY);
             var bb = cible && cible.closest ? cible.closest('.dissection-morceau') : null;
             if (bb && feuille.contains(bb)) {
                 var i2 = bb.getAttribute('data-id');
                 if (!vus[i2]) { vus[i2] = 1; appliquer(i2, mode); }
             }
+        };
+    }
+
+    /** Un surlignage fini : la palette, la lecture, le brouillon ; un membre rattaché touché, dit. */
+    function finSurlignage() {
+        // Après un geste, ce que l'aide désigne est amené de nouveau s'il est sorti de la vue (entre deux gestes, la
+        // personne garde la main sur le défilement).
+        etiquetteAmenee = morceauAmene = null;
+        desarmer();
+        majPalette();
+        rendreLecture();
+        enregistrer();
+        if (suiteTouchee) { dire(TEXTES_LIEN.sansEtiquette(mots(etat.rattachements[suiteTouchee]))); suiteTouchee = null; }
+    }
+
+    /**
+     * Point 2 (iPad, 11 nov.) : sur un écran tactile, un doigt qui fait défiler ne pose AUCUNE étiquette ; poser une
+     * étiquette reste un geste simple. Le geste proposé (Grégoire le juge sur l'iPad) :
+     *  · TOUCHER (poser, lever sans glisser) : l'étiquette se pose ou se retire, au lever ;
+     *  · GLISSER aussitôt : la feuille défile (le navigateur la fait défiler : `touch-action` le permet), rien n'est posé ;
+     *  · GARDER LE DOIGT POSÉ (MAINTIEN_MS), PUIS GLISSER : le surlignage de plusieurs morceaux d'un coup, comme à la
+     *    souris ; la feuille ne défile pas pendant ce glisser (`touchmove` retenu).
+     * Un geste repris par le navigateur (`pointercancel`, un défilement ou un pincement) ne pose rien.
+     */
+    var MAINTIEN_MS = 350, SEUIL_GLISSE = 10;
+    function gesteTactile(e, id) {
+        var feuille = e.currentTarget, x = e.clientX, y = e.clientY, pid = e.pointerId;
+        var phase = 'attente';   // 'attente' → 'surligne' (maintenu) | 'defile' (glissé aussitôt)
+        var mode = etat.liens[id] === etat.actif ? 'retirer' : 'ajouter';
+        var vus = {};
+        vus[id] = 1;
+        suiteTouchee = null;
+        var bougerSurlignage = surlignerSous(feuille, vus, mode);
+        var minuterie = setTimeout(function () {
+            if (phase !== 'attente') return;
+            phase = 'surligne';
+            try { feuille.setPointerCapture(pid); } catch (er) { /* sans capture, le surlignage s'arrête au bord */ }
+            appliquer(id, mode);
+        }, MAINTIEN_MS);
+        // Le doigt maintenu surligne : son glisser ne fait pas défiler la feuille (un `touchmove` non passif, retenu).
+        function retenir(ev) { if (phase === 'surligne' && ev.cancelable) ev.preventDefault(); }
+        function bouger(ev) {
+            if (ev.pointerId !== pid) return;
+            if (phase === 'attente' && (Math.abs(ev.clientX - x) > SEUIL_GLISSE || Math.abs(ev.clientY - y) > SEUIL_GLISSE)) {
+                phase = 'defile';
+                clearTimeout(minuterie);
+            } else if (phase === 'surligne') bougerSurlignage(ev);
         }
-        function fin() {
+        function fin(ev) {
+            if (ev.pointerId !== pid) return;
+            clearTimeout(minuterie);
             feuille.removeEventListener('pointermove', bouger);
             feuille.removeEventListener('pointerup', fin);
             feuille.removeEventListener('pointercancel', fin);
-            desarmer();
-            majPalette();
-            rendreLecture();
-            enregistrer();
-            if (suiteTouchee) { dire(TEXTES_LIEN.sansEtiquette(mots(etat.rattachements[suiteTouchee]))); suiteTouchee = null; }
+            document.removeEventListener('touchmove', retenir, { passive: false });
+            if (phase === 'attente' && ev.type === 'pointerup') { appliquer(id, mode); phase = 'pose'; }
+            if (phase === 'pose' || phase === 'surligne') finSurlignage();
         }
+        document.addEventListener('touchmove', retenir, { passive: false });
         feuille.addEventListener('pointermove', bouger);
         feuille.addEventListener('pointerup', fin);
         feuille.addEventListener('pointercancel', fin);
@@ -795,6 +922,7 @@
     // ------------------------------------------------------------------
 
     function nomsGrilles() {
+        if (etat.exemple) return [];   // l'exemple ne se crée pas : le nom d'une grille existante ne le bloque pas
         try {
             return (db.getSync(cle('grillesTemplates'), []) || []).map(function (g) { return g && g.nom; }).filter(Boolean);
         } catch (err) { return []; }
@@ -939,11 +1067,16 @@
         var z = el('dissection-creer-actions'), champ = el('dissection-nom-grille');
         if (!z) return;
         z.textContent = '';
-        var b = noeud('button', 'btn btn-principal', etat.enCours ? TEXTES_CREER.enCours : TEXTES_CREER.bouton);
-        b.type = 'button';
-        b.setAttribute('data-action', 'materielDissection.creer');
-        b.setAttribute('data-tooltip', 'materiel-creer');   // C11
-        b.disabled = c.raisons.length > 0 || etat.enCours;
+        // L'exemple du parcours ne se crée pas : à la place du bouton, la phrase qui le dit (`TEXTES_EXEMPLE.note`).
+        var b = etat.exemple ? noeud('p', 'dissection-exemple-note', TEXTES_EXEMPLE.note)
+            : noeud('button', 'btn btn-principal', etat.enCours ? TEXTES_CREER.enCours : TEXTES_CREER.bouton);
+        if (etat.exemple) b.id = 'dissection-exemple-note';
+        else {
+            b.type = 'button';
+            b.setAttribute('data-action', 'materielDissection.creer');
+            b.setAttribute('data-tooltip', 'materiel-creer');   // C11
+            b.disabled = c.raisons.length > 0 || etat.enCours;
+        }
         z.appendChild(b);
         if (champ) champ.removeAttribute('aria-describedby');
         if (c.raisons.length) {
@@ -1018,7 +1151,7 @@
      * pendant l'écriture est sans effet.
      */
     async function creer() {
-        if (etat.enCours || !etat.doc) return;
+        if (etat.enCours || !etat.doc || etat.exemple) return;   // l'exemple n'entre jamais dans les grilles
         var c = creation(lire());
         if (c.raisons.length) { rendreLecture(); return; }
         var doc = etat.doc;
@@ -1169,7 +1302,7 @@
      * autre (il a des codes) : un second toucher n'ajoute rien.
      */
     async function ajouterCodes() {
-        if (etat.enCours || !etat.doc) return;
+        if (etat.enCours || !etat.doc || etat.exemple) return;
         var R = lire();
         if (raisonsCodes(R).length) { rendreLecture(); return; }
         var parts = etat.destination.split('\n'), doc = etat.doc;
@@ -1222,12 +1355,20 @@
      * est un geste, il écrit le brouillon (il remplace celui d'avant). `reprise` : ce que porte un
      * brouillon relu (`reprendre`), qui ne s'écrit pas de nouveau.
      */
-    function ouvrir(doc, message, reprise) {
+    function ouvrir(doc, message, reprise, exemple) {
         var vue = el('materiel-dissection'), accueil = el('materiel-accueil');
         if (!doc || !vue) return false;
+        // Une frappe en attente d'une dissection de l'enseignant·e s'écrit avant que l'exemple la remplace dans la page.
+        if (minuterieSaisie) enregistrer();
         etat = etatNeuf(doc);
         if (reprise) {
             ['liens', 'coupes', 'rattachements', 'nomSaisi', 'compte', 'valeurs'].forEach(function (k) { etat[k] = reprise[k]; });
+        }
+        etiquetteAmenee = null;
+        morceauAmene = null;
+        if (exemple) {
+            etat.exemple = exemple;
+            if (exemple === 'complet') etat.liens = D().exempleLiens(doc);
         }
         desarmer();
         brancher();
@@ -1236,8 +1377,13 @@
         majPalette(); majBandeau(); rendreLecture(); planifierDessin();
         if (accueil) accueil.classList.add('u-hide');
         vue.classList.remove('u-hide');
+        // Point 1 (iPad, 11 nov.) : la liste des étiquettes s'ouvre en montrant le haut. Après l'affichage : sur une vue
+        // masquée, WebKit ignore le geste et rend, au retour, le défilement de la dissection d'avant (mesuré le 12 nov.).
+        var pal = el('dissection-palette');
+        if (pal) pal.scrollTop = 0;
+        majDefilementPalette();
         var n = etat.morceaux.ordre.length;
-        dire(message || (doc.mode === 'table'
+        dire(message || (exemple ? TEXTES_EXEMPLE[exemple] : null) || (doc.mode === 'table'
             ? 'Tableau collé : ' + pluriel(doc.rows.length, 'rangée', 'rangées') + ', ' + pluriel(n, 'morceau', 'morceaux') + '. Touche une étiquette, puis surligne.'
             // Validé G. 18 oct. 9 h 52 avec « rattachera » ; revu pour le nom de l'outil du lot 7, validé G. 18 oct. 17 h 18.
             : 'Texte collé : ' + pluriel(n, 'ligne', 'lignes') + ', sans tableau. L’application rangera les morceaux selon leur ordre.'));
@@ -1249,6 +1395,87 @@
 
     /** Vrai si une dissection est ouverte dans la page. */
     function estOuverte() { return !!etat.doc; }
+
+    /**
+     * Point 5 : l'exemple du parcours, « complet » (toutes ses étiquettes posées) ou « exercice » (sans étiquettes). Il
+     * n'écrit rien : ni brouillon, ni grille ; le brouillon de l'enseignant·e reste où il est (`quitterExemple`).
+     */
+    function ouvrirExemple(complet) {
+        return ouvrir(D().exempleDoc(), null, null, complet ? 'complet' : 'exercice');
+    }
+
+    /** L'exemple ouvert : 'complet', 'exercice', ou null. */
+    function exempleOuvert() { return etat.doc ? etat.exemple : null; }
+
+    /** Les manques de la dissection ouverte, dans l'ordre de « Avant de créer, il reste » (ou « Avant d'ajouter »). */
+    function manques(R) {
+        if (!D().estListeDeCodes(R)) return creation(R).manques;
+        var m = D().codesCompris(R).manques.slice();
+        var choisie = destinations().some(function (d) { return !d.motif && cleDestination(d) === etat.destination; });
+        if (!choisie) m.push({ sorte: 'destination', texte: TEXTES_CODES.choisir });
+        return m;
+    }
+
+    /** Le champ sous la lecture que nomme une aide (`cible`), dans la page. */
+    function cibleDeLAide(cible) {
+        if (cible === 'nom') return el('dissection-nom-grille');
+        if (cible === 'raisons') return el('dissection-creer-raisons');
+        if (cible === 'creer') return etat.exemple ? null : document.querySelector('[data-action="materielDissection.creer"], [data-action="materielDissection.ajouterCodes"]');
+        if (cible === 'destination') {
+            var r = document.querySelector('#dissection-destinations input[type="radio"]:not(:disabled)');
+            return r ? (r.closest('label') || r) : el('dissection-destinations');
+        }
+        if (cible === 'niveaux') {
+            var champs = document.querySelectorAll('#dissection-creer-niveaux input');
+            for (var k = 0; k < champs.length; k++) if (!String(champs[k].value).trim()) return champs[k];
+            return el('dissection-creer-niveaux');
+        }
+        return null;
+    }
+
+    /**
+     * L'étiquette que l'aide désigne, amenée au milieu de la liste, une fois par changement : sinon, en haut ou en bas,
+     * elle restait sous « ▲ … plus haut » (mesuré sous WebKit le 12 nov. : la flèche et le halo ne la trouvaient pas).
+     */
+    var etiquetteAmenee = null, morceauAmene = null;
+
+    /**
+     * Le morceau que l'aide désigne, amené dans le canevas (lui seul défile, la page ne bouge pas), une fois par
+     * changement : défilé de côté hors du canevas, il ne recevait pas de flèche (mesuré à 820 × 1180, le 12 nov.).
+     */
+    function amenerDansLeCanevas(b) {
+        var cv = el('dissection-canevas');
+        if (!b || !cv) return;
+        var r = b.getBoundingClientRect(), c = cv.getBoundingClientRect(), m = 16;
+        if (r.left < c.left + m || r.right > c.right - m) cv.scrollLeft += r.left - c.left - m;
+        if (r.top < c.top + m || r.bottom > c.bottom - m) cv.scrollTop += (r.top + r.height / 2) - (c.top + c.height / 2);
+    }
+    function amenerDansLaListe(b) {
+        var pal = el('dissection-palette');
+        if (!b || !pal || pal.scrollHeight <= pal.clientHeight + 1) return;
+        var r = b.getBoundingClientRect(), pr = pal.getBoundingClientRect(), garde = 60;
+        if (r.top >= pr.top + garde && r.bottom <= pr.bottom - garde) return;
+        pal.scrollTop += (r.top + r.height / 2) - (pr.top + pr.height / 2);
+    }
+
+    /**
+     * Point 4 : l'aide pas à pas de la bulle « Ta grille », pour la dissection ouverte (null sinon). `D.aide` sur le
+     * PREMIER manque, puis ce qu'elle désigne dans la page : `etiquetteEl` (le bouton de la palette), `morceauEl` (le
+     * morceau où toucher, quand l'application le sait), `cibleEl` (un champ sous la lecture, ou « Créer ma grille »),
+     * `enMain` (l'étiquette à prendre est déjà le surligneur). Rien ne s'écrit.
+     */
+    function aide() {
+        if (!etat.doc) return null;
+        var R = lire(), m = manques(R);
+        var a = D().aide({ doc: etat.doc, liens: etat.liens, rattachements: etat.rattachements, manque: m[0] || null, enCodes: D().estListeDeCodes(R) });
+        a.etiquetteEl = a.etiquette ? document.querySelector('#dissection-palette .dissection-etiquette[data-type="' + a.etiquette + '"]') : null;
+        a.morceauEl = a.morceau && blocs[a.morceau] ? blocs[a.morceau] : null;
+        if (a.etiquette !== etiquetteAmenee) { etiquetteAmenee = a.etiquette; amenerDansLaListe(a.etiquetteEl); }
+        if (a.morceau !== morceauAmene) { morceauAmene = a.morceau; amenerDansLeCanevas(a.morceauEl); }
+        a.cibleEl = a.cible ? cibleDeLAide(a.cible) : null;
+        a.enMain = !!a.etiquette && etat.actif === a.etiquette;
+        return a;
+    }
 
     /**
      * Lot 11, à l'ouverture de l'onglet : le brouillon lisible rouvre la dissection telle qu'elle était,
@@ -1344,6 +1571,7 @@
         // Lot 11 : une frappe en attente s'écrit avant que la page parte.
         window.addEventListener('pagehide', function () { if (minuterieSaisie) enregistrer(); });
         window.addEventListener('resize', planifierDessin);
+        window.addEventListener('resize', majDefilementPalette);
         window.addEventListener('scroll', planifierDessin, { passive: true });
         var cv = el('dissection-canevas');
         if (cv) cv.addEventListener('scroll', planifierDessin, { passive: true });
@@ -1354,6 +1582,9 @@
 
     window.materielDissection = {
         ouvrir: ouvrir,
+        ouvrirExemple: ouvrirExemple,
+        exempleOuvert: exempleOuvert,
+        aide: aide,
         fermer: fermer,
         reprendre: reprendre,
         estOuverte: estOuverte,

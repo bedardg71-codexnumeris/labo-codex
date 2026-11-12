@@ -33,6 +33,10 @@
    l'étape désigne est amené dans la vue, une fois, comme à l'entrée de l'étape.
    L'AVIS (11 nov. 2026, capture 19) : une phrase sous le texte, que l'étape pose quand la page n'est pas dans l'état
    qu'elle attend (`avis`) ; elle part quand l'état revient. Le texte de l'étape, lui, ne change pas.
+   LA LIGNE DU GESTE SUIT L'ÉTAT (12 nov. 2026, la dissection sur l'iPad : « nommer, pointer, passer par les étapes une
+   après l'autre ») : un `geste` qui change pendant l'étape (un getter : « Ta grille » suit le premier manque de la
+   dissection) est relu à chaque passage de la sonde ; changé, il remplace la ligne du geste et s'annonce. La bulle n'est
+   pas refaite : ni focus déplacé, ni page tournée.
    LES FORMULAIRES (Grégoire, 11 nov. 2026, 8 h 26) : dans une étape qui montre un formulaire (`formulaire`), les
    flèches vont aux champs obligatoires (astérisque rouge `.champ-requis`, `required`, `aria-required`) ENCORE VIDES,
    une par champ, sans fusion ni plafond ; chacune disparaît quand son champ est rempli ; quand il n'en reste aucun,
@@ -1287,6 +1291,16 @@
         amenerDansLaVue(elementsVises(etape), etat.elements.bulle.offsetHeight);
     }
 
+    /** La ligne du geste, relue (voir « LA LIGNE DU GESTE SUIT L'ÉTAT ») : changée, elle s'annonce, seule. */
+    function poserGeste(etape) {
+        var g = etat.elements.bulle.querySelector('.parcours-bulle-geste');
+        var texte = '';
+        try { texte = etape.geste ? typographier(etape.geste) : ''; } catch (e) { texte = ''; }
+        if (!g || !texte || g.textContent === texte) return;
+        g.textContent = texte;
+        etat.elements.annonce.textContent = texte;
+    }
+
     /** L'avis de l'étape (voir « L'AVIS ») : posé sous le texte, changé, ou retiré ; annoncé par son rôle. */
     function poserAvis(etape) {
         var b = etat.elements.bulle;
@@ -1334,7 +1348,10 @@
         if (!el) return '';
         // Pas son texte : il change sous les gestes (la dissection compte ses morceaux), et chaque changement relançait le
         // défilement (mesuré sous WebKit le 11 nov. 2026 : la palette de la dissection ne tenait plus en place).
-        return [el.tagName, el.id, el.getAttribute('data-action') || '', el.getAttribute('name') || ''].join('|');
+        // `data-param` et `data-id` (12 nov. 2026, la dissection sur l'iPad) : les étiquettes de la palette partagent leur
+        // action, les morceaux n'en ont pas ; sans eux, passer d'une étiquette (ou d'un morceau) à une autre ne se voyait pas.
+        return [el.tagName, el.id, el.getAttribute('data-action') || '', el.getAttribute('name') || '',
+            el.getAttribute('data-param') || '', el.getAttribute('data-id') || ''].join('|');
     }
     /**
      * Le contour de l'ouverture vient d'être amené avec le reste : il n'est pas « neuf » pour `suivreContour`. S'il ne se
@@ -1394,6 +1411,7 @@
             etat.ecran = { largeur: window.innerWidth, hauteur: window.innerHeight };
         }
 
+        poserGeste(etape);
         poserAvis(etape);
         poserAttentes(etape);
         if (!zoom) suivreEcran(etape);

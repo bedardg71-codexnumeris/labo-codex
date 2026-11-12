@@ -30159,6 +30159,20 @@ body.mode-clair {
     max-height: var(--dis-hauteur); overflow-y: auto; overscroll-behavior: contain; padding: 4px; margin: -4px;
 }
 .dissection-groupe { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+/* Point 1 (iPad, 11 nov.) : la liste dit ce qu'elle cache, en haut et en bas, collé à ses bords. La hauteur est
+   rendue par une marge négative (gap compris) : paraître ou disparaître ne déplace pas la liste. */
+.dissection-palette-plus {
+    position: sticky; z-index: 1; align-self: center; min-height: 44px; padding: 0 14px;
+    font: inherit; font-size: 0.85rem; font-weight: 600; color: var(--texte-secondaire); cursor: pointer;
+    background: var(--surface-carte); border: 1px solid var(--bordure-moyenne); border-radius: var(--radius-pill); box-shadow: var(--shadow-normal);
+    visibility: hidden; pointer-events: none;
+}
+.dissection-palette-plus.est-visible { visibility: visible; pointer-events: auto; }
+.dissection-palette-plus:focus-visible { outline: 3px solid var(--accent-primaire); outline-offset: 2px; }
+/* Une étiquette amenée au bord (au clavier, par le parcours) s'arrête hors des pastilles. */
+.dissection-palette { scroll-padding-block: 56px; }
+.dissection-palette-plus-haut { top: 0; margin-bottom: -56px; }
+.dissection-palette-plus-bas { bottom: 0; margin-top: -56px; }
 .dissection-groupe-nom { font-size: 0.74rem; letter-spacing: .08em; text-transform: uppercase; color: var(--texte-muted); }
 .dissection-etiquette {
     font: inherit; display: grid; grid-template-columns: 12px minmax(0, 1fr) auto; gap: 0 9px; align-items: start;
@@ -30203,7 +30217,9 @@ body.mode-clair {
 .dissection-morceau.dissection-marque { background: var(--dis-h); box-shadow: inset 3px 0 0 var(--dis-c); }
 /* Une étiquette en main : les morceaux prennent le doigt (plus de défilement sur eux), la sélection de texte se tait. */
 .dissection-pointage .dissection-feuille { user-select: none; -webkit-user-select: none; }
-.dissection-pointage .dissection-morceau { cursor: pointer; touch-action: none; }
+/* Lot de la dissection sur l'iPad (12 nov. 2026, point 2) : plus de `touch-action: none` ; au doigt, la feuille défile
+   et une étiquette se pose au toucher (js/materiel-dissection.js, `gesteTactile`). Pas de bulle d'appel sur un doigt maintenu. */
+.dissection-pointage .dissection-morceau { cursor: pointer; touch-action: manipulation; -webkit-touch-callout: none; }
 /* --dis-actif : la couleur de l'étiquette en main, résolue sur le canevas (un morceau surligné garde la sienne dans --dis-c). */
 .dissection-pointage { --dis-actif: var(--dis-c); }
 .dissection-pointage .dissection-morceau:hover { outline: 2px dashed var(--dis-actif); outline-offset: 1px; }
@@ -30296,6 +30312,7 @@ body.mode-clair {
 @container dissection (max-width: 661px) {
     .dissection-atelier { grid-template-columns: minmax(0, 1fr); }
     .dissection-palette { position: static; flex-direction: row; flex-wrap: wrap; max-height: none; overflow: visible; }
+    .dissection-palette-plus { display: none; }
     .dissection-groupe { flex: 1 1 200px; }
 }
 

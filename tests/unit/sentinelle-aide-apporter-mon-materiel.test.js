@@ -52,7 +52,8 @@ const cles = (texte, attr) => [...texte.matchAll(new RegExp(attr + '="([^"]+)"',
 describe('« Apporter mon matériel » — les bulles et l’aide « i » ont leur entrée au catalogue', () => {
     it('le catalogue est bien chargé (la tranche n’est pas vide)', () => {
         expect(Object.keys(cat).length).toBeGreaterThan(300);
-        expect(cles(ONGLET, 'data-tooltip').length).toBe(6);
+        // 7 depuis le 12 nov. 2026 : « Composer ma grille » aussi dans l'étiquetage, avec la bulle de celui de l'accueil.
+        expect(cles(ONGLET, 'data-tooltip').length).toBe(7);
         expect(cles(ONGLET, 'data-aide')).toEqual(['conception-materiel', 'conception-materiel']);
     });
 

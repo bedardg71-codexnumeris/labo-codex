@@ -196,17 +196,17 @@ const DESCRIPTEURS_EXEMPLE = ['Résumé absent ou erroné', 'Résume quelques é
     'Liens absents', 'Établit un lien', 'Établit quelques liens', 'Établit des liens nombreux et pertinents',
     'Appréciation absente', 'Donne une opinion', 'Justifie son opinion', 'Argumente avec nuance'];
 
-/** Une étiquette en main, puis un geste de pointeur sur les morceaux nommés. Sans Échap : il fermerait un parcours. */
+/**
+ * Une étiquette en main, puis un toucher de souris sur CHAQUE morceau nommé (12 nov. 2026 : plus un glisser, qui relit le
+ * point touché et tombait sur la bulle, placée selon l'aide pas à pas). Sans Échap : il fermerait un parcours.
+ */
 export async function etiqueter(page, type, textes) {
     await page.locator('#dissection-palette [data-param="' + type + '"]').click();
     await page.evaluate((ts) => {
         const blocs = [...document.querySelectorAll('#dissection-contenu .dissection-morceau')].filter((b) => ts.includes(b.textContent));
         const centre = (b) => { b.scrollIntoView({ block: 'center', inline: 'center' }); const r = b.getBoundingClientRect(); return { clientX: r.left + r.width / 2, clientY: r.top + r.height / 2 }; };
-        const ev = (t, b) => new PointerEvent(t, Object.assign({ bubbles: true, cancelable: true, pointerId: 7, pointerType: 'touch', isPrimary: true }, centre(b)));
-        blocs[0].dispatchEvent(ev('pointerdown', blocs[0]));
-        blocs.slice(1).forEach((b) => b.dispatchEvent(ev('pointermove', b)));
-        const der = blocs[blocs.length - 1];
-        der.dispatchEvent(ev('pointerup', der));
+        const ev = (t, p) => new PointerEvent(t, Object.assign({ bubbles: true, cancelable: true, pointerId: 7, pointerType: 'mouse', isPrimary: true }, p));
+        blocs.forEach((b) => { const p = centre(b); b.dispatchEvent(ev('pointerdown', p)); b.dispatchEvent(ev('pointerup', p)); });
     }, textes);
 }
 

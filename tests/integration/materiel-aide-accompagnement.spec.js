@@ -65,7 +65,7 @@ test('aide d’« Apporter mon matériel » · l’aide « i » aux deux écrans
     await ouvrirAideI(page, '#materiel-accueil');
     await survoler(page, page.locator('[data-action="materiel.essayerExemple"]'),
         'Ouvre une grille fictive, pour essayer l’étiquetage sans ton propre document.');
-    await survoler(page, page.locator('[data-action="materiel.taperMain"]'),
+    await survoler(page, page.locator('#materiel-accueil [data-action="materiel.taperMain"]'),
         'Mène à Grilles, pour composer une grille directement dans l’application.');
 
     // L'écran d'étiquetage : l'aide « i », les boutons de son en-tête, et les deux outils nés en JavaScript.

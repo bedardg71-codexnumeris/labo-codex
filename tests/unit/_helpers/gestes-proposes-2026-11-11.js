@@ -44,7 +44,14 @@ export const GESTES_PROPOSES = {
     ],
     'js/parcours-evaluer.js': [
         "Choisis les points ou les niveaux.",
-        "Colle ta grille, montre ce qu'est chaque morceau, puis touche « Créer » ; ou touche « Partir de zéro ».",
+        // Lot de la dissection sur l'iPad (12 nov. 2026, point 7) : les boutons nommés tels qu'ils sont écrits ; l'exemple,
+        // une grille déjà là, Conception › Grilles. PROPOSÉES.
+        "Colle ta grille, montre ce qu'est chaque morceau, puis touche « Créer ma grille » ; ou touche « Composer ma grille ».",
+        "Touche « + Nouvelle grille », compose-la, puis touche « Créer la grille » ; ou ouvre une de tes grilles.",
+        "Touche « Prendre cette grille » pour évaluer avec la grille ouverte ; ou ouvre-en une autre.",
+        "Touche « Voir le travail complet » ou « Faire l'exercice soi-même » ; ou « Passer à ma grille ».",
+        "Regarde chaque étiquette, puis la grille lue en dessous ; touche ensuite « Faire l'exercice soi-même » ou « Passer à ma grille ».",
+        "L'exemple est étiqueté : touche « Passer à ma grille ».",
         "Touche « + Nouvelle production », remplis les champs obligatoires, choisis ta grille, puis touche « Créer la production ».",
         "Écris la date de remise, puis coche « Consignes transmises ».",
         "Touche « Actions › Évaluer » sur sa ligne, choisis un niveau par critère, puis touche « Verrouiller ».",
