@@ -240,4 +240,5 @@ qui ne s'ouvre pas dans la démo. Rituel de fin de session : aucun `innerHTML`, 
   le calendrier, les indices et les verrous de la démo survivraient.
 - La sortie de la démo retire `seancesCompletes_gc_GC_DEMO` chez qui l'a déjà (un cache de la démo).
 - « Commencer avec ma classe », à la fin de « Découvrir », part toujours sur les vraies données : non touché.
-- Aucune release ni ligne de Nouvelles écrite : la version reste 1.243.0 jusqu'à la release du jour.
+- Aucune release ni ligne de Nouvelles écrite : la version reste 1.243.0. Le build passe à **1112-0943**
+  (`release.mjs --build-only`) : la garde anti-cache l'exige pour que les jetons `?v=` des fichiers du lot changent.

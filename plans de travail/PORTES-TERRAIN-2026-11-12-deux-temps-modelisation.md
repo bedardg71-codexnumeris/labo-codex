@@ -18,8 +18,9 @@ un espace vide. Rien de ce que tu y fais ne touche ton application.
 ## §0 · Préalable
 
 - **0.1** Ouvre l'adresse de l'aperçu (donnée dans le rapport), sur l'iPad, en paysage. Recharge la page.
-  ⮕ Attendu : en bas de l'accueil, la version **1.243.0** (ce lot ne change pas le numéro ; il partira avec la
-  release du jour).
+  ⮕ Attendu : en bas de l'accueil, la version **1.243.0 · build 1112-0943** (ce lot ne change pas le numéro de
+  version, seulement le build ; il partira avec la release du jour). Un autre build : c'est une autre version que
+  celle de cette porte.
 - **0.2** Ouvre le menu à trois traits, puis « Assistance ».
   ⮕ Attendu : le panneau commence par « **Apprendre l'application, en quatre temps.** ». Si tu lis encore « Des
   parcours où tu fais les gestes toi-même… », c'est l'ancienne version : recharge en vidant le cache.
