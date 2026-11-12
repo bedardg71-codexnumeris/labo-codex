@@ -15,6 +15,9 @@ cadrage passe en **v11**, § 6 quater. Le Labo se dessine en quatre sous-onglets
 Exploration · Outils) ; l'étude s'écrit dans le Journal ; Rythme part vers Évaluation, Modélisation vers Animation.
 Puis, § 1 quater : la démarche est une enquête de praticien, pas de la recherche ; cinq garde-fous retenus ; deux
 mots changés (« étude » devient « question », « conclusion » devient « ce que j'en retiens »).
+Puis : les sources mesurées (§ 6 quinquies), le déplacement accepté (« une version contre la précédente », pas
+« alternative contre sommative »), et la question des jetons (§ 6 sexies). **À porter au BACKLOG par la session
+principale** : la reprise ciblée, retirée de l'application (#563) mais toujours faite en classe (§ 6 sexies).
 Cette séance a tourné sur `claude/awesome-bohr-q7rsa1` (posée sur la tête de la branche du lot, `5b76121`) : la
 session nuage ne pousse que sur la sienne. À ramener sur la branche du lot par avance rapide.
 

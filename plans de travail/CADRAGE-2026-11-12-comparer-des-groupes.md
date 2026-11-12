@@ -467,6 +467,51 @@ Les trois mesures que le rapport demandait « avant de promettre ».
 - **Une erreur de Claude Code, corrigée ici** : il avait compris une série sommative continue de
   l'automne 2014 à l'hiver 2024. C'est l'inverse : le 101 s'arrête à H14 et reprend à H24.
 
+## 6 sexies. La question des jetons (12 nov.) — celle qui intéresse le plus Grégoire
+
+**La question (Grégoire)** : les jetons ont-ils, sur le parcours de l'élève, l'impact pérenne qu'il
+souhaite ? « Pérenne » : jusqu'à la fin du trimestre ; au-delà, ce n'est pas mesurable. Le jeton
+devrait participer à une CONSOLIDATION de ce qui était ciblé lors de son application ; l'exercice
+métacognitif qui l'accompagne existe pour conscientiser la correction de l'erreur.
+
+**Temps 1, reformulé par Claude Code et confirmé par Grégoire** :
+
+> Ce que je m'attends à voir : le critère ciblé par une reprise se consolide. Il reste au niveau
+> atteint à la reprise, ou près, dans les productions suivantes jusqu'à la fin du trimestre, malgré des
+> fluctuations dues à la variété des productions.
+
+- **La lecture qui convient** : comparer l'élève À LUI-MÊME (avant la reprise, à la reprise, dans les
+  productions suivantes), et non ceux qui utilisent un jeton à ceux qui n'en utilisent pas : ces deux
+  groupes ne se ressemblent pas au départ. La carte « Impact des jetons » actuelle fait la seconde
+  comparaison, sur la performance moyenne (`js/impact-jetons.js`) : elle ne répond pas à la question.
+- **Autres explications à nommer (garde-fou 3)** : presque tout le monde progresse au fil du
+  trimestre ; et un jeton suit un travail raté, après quoi le suivant est souvent meilleur de toute façon.
+- **Ce que l'application garde (mesuré, `js/evaluation-jetons.js`)** : une reprise crée une nouvelle
+  évaluation reliée à l'originale (`repriseDeId`). Si l'originale est gardée, la chaîne par critère est
+  observable. Si elle est supprimée (réglage de la pratique), l'avant disparaît. (Non répondu : Grégoire
+  garde-t-il les originales ?)
+- **Ce qu'elle ne garde pas** : le critère ciblé (il ne se déduit que de ce qui a monté entre
+  l'originale et la reprise) ; et l'exercice métacognitif, sans aucune trace.
+
+**Le formulaire « Ma reprise : de la rétroaction à l'objectif » (3 nov. 2026, remis par Grégoire)** —
+une fiche papier de deux pages, en cinq étapes : lire sa synthèse et choisir UN critère prioritaire
+(Structure, Rigueur, Plausibilité, Nuance, Français écrit) ; dire ce qu'on a manqué, d'où ça vient
+(quatre causes à cocher) et se fixer un objectif (« J'apprends à… pour atteindre le niveau… au
+critère… ») ; se donner deux ou trois repères observables, vérifiés dans la première version et validés
+par l'enseignant ; faire la reprise ; comparer et juger (objectif atteint : oui, en partie, non).
+
+- **Ce qu'il porte, et que l'application n'a pas** : le critère visé, le niveau visé, la cause que
+  l'élève se donne, son propre jugement sur l'atteinte de l'objectif, la validation de l'enseignant.
+- **Un écart entre l'application et la réalité (Grégoire)** : le geste de reprise ciblée a été retiré
+  de l'application le 29 août 2026 (#563), mais la reprise ciblée continue d'être faite en classe, « à
+  tel point que c'est peut-être la seule reprise qui existe vraiment. Il faudrait le clarifier dans
+  l'application. » Symptôme vécu : à porter au BACKLOG par la session principale (cette session ne
+  pousse pas sur `main` et ne prend pas de numéro, pour éviter une collision d'identifiants). Ce qu'une
+  reprise EST relève de la pédagogie : à trancher par Grégoire.
+- **Remarqué par Claude Code** : la fiche fait faire à l'élève, sur son texte, ce que le Journal fait
+  faire à l'enseignant·e sur son cours — une attente, des repères observables, une comparaison, un
+  jugement appuyé sur les repères « et pas sur une impression ».
+
 ## 7. Hors de ce cadrage
 
 Aucun code. L'onglet « Tendances » reste tel quel dans l'aperçu, sans fusion. Les cartes d'Études ne
