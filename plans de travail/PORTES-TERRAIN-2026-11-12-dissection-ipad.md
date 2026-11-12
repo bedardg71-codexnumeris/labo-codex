@@ -8,8 +8,9 @@ tour). Réussis : 0.1, 0.2, 2.1 a-b, 2.2 a-c, 2.3 a-c, 2.4 a-b, 2.5 a, 2.6 a. D�
 à 3.7 vues en contexte, sans objection, elles partent telles quelles. Huit corrections demandées (relais de 11 h 25),
 faites sur la même branche, puis la section « Après correction » **passée le 12 nov., de 12 h 20 à 13 h 07** (dans la
 conversation du Projet, sans artefact) : C.1 à C.8 réussis. Une correction de plus (relais de 13 h 10, la bulle bloquée
-aux deux tiers gauches de l'écran) : **à refaire une par tour, section « Après correction 2 »** en fin de porte. Pas de
-fusion avant.
+aux deux tiers gauches de l'écran) : la section « Après correction 2 » **passée le 12 nov., de 14 h 28 à 14 h 31**
+(dans la conversation du Projet, sans artefact) : D.1, D.2 et D.3 (ajouté par la conversation) réussis. **Porte close ;
+le lot part dans la release du 12 nov.**
 
 Pourquoi une porte, alors que la règle est de ne pas en faire pour le confort : ce que tu as vécu le 11 nov. (la
 liste qui ne montrait pas qu'elle défile, le doigt qui posait des étiquettes en voulant défiler) n'existe que sous
@@ -220,10 +221,18 @@ déplaçable vers la droite. Elle semble bloquer au centre. »). Sur l'aperçu
 **1112-1328**. L'iPad en paysage, posé comme à 12 h 54 ; « Évaluer une première production », étape « Ta grille », une
 de tes grilles collée.
 
-- [ ] **D.1** Regarde où la carte du parcours se pose d'elle-même, sans y toucher.
+**Passée le 12 nov., de 14 h 28 à 14 h 31**, dans la conversation du Projet, sans artefact : D.1 et D.2 réussis, plus
+un D.3 ajouté par la conversation, réussi lui aussi. La supposition du rapport (`documentElement.clientWidth` vaut la
+largeur de la mise en page sous Safari iPad, zoom ou non) tient donc sur l'iPad de Grégoire.
+
+- [x] **D.1** Regarde où la carte du parcours se pose d'elle-même, sans y toucher.
   ⮕ Attendu : à droite de ta grille, contre le bord droit de l'écran, quand elle y a la place ; elle ne couvre plus le
   milieu de ta grille.
   `iPad`
-- [ ] **D.2** Glisse la carte par sa poignée (⠿) vers la gauche, puis ramène-la tout à droite.
+- [x] **D.2** Glisse la carte par sa poignée (⠿) vers la gauche, puis ramène-la tout à droite.
   ⮕ Attendu : elle va jusqu'au bord droit de l'écran (une marge de quelques pixels), plus seulement jusqu'au milieu.
+  `iPad`
+- [x] **D.3** *(ajouté par la conversation du Projet)* Pince la grille pour zoomer, la carte à droite, puis reviens à
+  la taille normale.
+  ⮕ Attendu : la carte ne bouge pas pendant le pincement ; au retour, toujours à droite, et glissable jusqu'au bord.
   `iPad`

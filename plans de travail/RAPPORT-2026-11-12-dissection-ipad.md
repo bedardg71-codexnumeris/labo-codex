@@ -241,7 +241,7 @@ l'a écarté), 0 rouge ; Vitest 921 fichiers, 11 497 tests, verts. Le verdict de
 
 **Ce que j'ai supposé.**
 - `documentElement.clientWidth` vaut la largeur de la mise en page sous Safari iPad, zoom ou non (comportement
-  documenté de WebKit, non mesuré sur l'appareil) : D.1 et D.2 le jugent.
+  documenté de WebKit, non mesuré sur l'appareil) : D.1 et D.2 le jugent ; réussis le 12 nov. à 14 h 31, avec un D.3 sous le pincement : la supposition tient sur l'iPad.
 - Sous une barre de défilement classique (Windows, souris branchée), la bulle s'arrête désormais avant la barre
   (`clientWidth` l'exclut), au lieu de passer dessous.
 - Le compte des doigts bloqué n'est qu'une des deux pistes ; il est corrigé parce que le break-test du relais l'exerce,
