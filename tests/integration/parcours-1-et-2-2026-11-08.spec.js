@@ -134,7 +134,9 @@ test('panneau : titre, phrase, « Tes parcours », les parcours à faire, l’ai
     const p = page.locator('#panneau-assistance');
     await expect(p).toHaveAttribute('role', 'dialog');
     await expect(p.locator('.assistance-titre')).toHaveText('Assistance');
-    await expect(p.locator('.assistance-intro')).toHaveText('Des parcours où tu fais les gestes toi-même, accompagné·e pas à pas : quoi faire, comment le faire, et pourquoi.');
+    // 12 nov. 2026 (les deux temps) : la présentation est le texte en quatre temps ; son mot pour mot est jugé par
+    // deux-temps-modelisation-2026-11-12.spec.js.
+    await expect(p.locator('.assistance-intro strong').first()).toHaveText("Apprendre l'application, en quatre temps.");
     await expect(p.locator('.assistance-intitule')).toHaveText('Tes parcours');
     await expect(p.locator('.assistance-parcours-titre')).toHaveCount(await nParcours(page));
     expect(await deuxPremiers(p.locator('.assistance-parcours-titre'))).toEqual(['Découvrir', 'Mettre ta classe en place']);

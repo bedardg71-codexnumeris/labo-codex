@@ -40,7 +40,9 @@ function base(enDemo = true) {
         db: {
             getSync: (k, d) => (k in store ? store[k] : d),
             setSync: (k, v) => { store[k] = v; },
-            removeSync: (k) => { delete store[k]; }
+            removeSync: (k) => { delete store[k]; },
+            // Lot « deux temps » (12 nov. 2026) : la sortie énumère les clés pour retirer les séances des groupes de la démo.
+            keysSync: () => Object.keys(store)
         }
     };
 }

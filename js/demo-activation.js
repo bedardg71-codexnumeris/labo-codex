@@ -256,7 +256,15 @@ async function activerModeDemo() {
             trimestres: trimestresAvant,
             listeCours: db.getSync('listeCours', []),
             cours: db.getSync('cours', []),
-            enseignants: db.getSync('enseignants', [])
+            enseignants: db.getSync('enseignants', []),
+            // Lot « deux temps » (12 nov. 2026) : les clés que l'entrée écrit et qui n'existaient pas avant.
+            // La sortie les retire si elles sont revenues à vide, au lieu de laisser un `[]` ou un
+            // « normal » là où il n'y avait rien (mesuré : `listeCours` ∅ → [], `modeApplication` ∅ → "normal").
+            // L'état du tirage au sort (Animation) : clé sans préfixe, réécrite à chaque changement de
+            // groupe (`initialiserTirage`, js/boite-outils.js). Passer d'un groupe à l'autre dans la démo
+            // remettait à zéro le tirage réel (mesuré le 12 nov. 2026). La sortie le remet tel qu'il était.
+            etatTirage: db.getSync('etatTirage', null),
+            absentes: CLES_ECRITES_A_L_ENTREE.filter(function(c) { return db.getSync(c, null) === null; })
             // #358 (G3) : grilles/échelles NON capturées — sous le namespacing,
             // les modèles démo vivent dans demo_grillesTemplates/demo_echellesTemplates
             // (permanents, jamais touchés par l'activation/désactivation). Le global
@@ -426,7 +434,7 @@ function retirerItemsDemoDesGlobaux() {
     // listeCours : ID dans le pack ET flag isDemo
     var idsListeCours = idsDuPack('listeCours');
     db.setSync('listeCours', (db.getSync('listeCours', []) || []).filter(function(c) {
-        return !(idsListeCours.has(c.id) && estItemDemo(c));
+        return !((idsListeCours.has(c.id) || c.creeEnDemonstration === true) && estItemDemo(c));
     }));
 
     // cours (clé canonique) : mêmes IDs que listeCours — PLUS un service créé pendant la
@@ -506,10 +514,68 @@ function importEmpecheLaBascule(versLaDemo) {
     return true;
 }
 
+/*
+ * LE CONFINEMENT DE CE QU'ON CRÉE DANS LA DÉMO (lot « deux temps », 12 nov. 2026).
+ * Mesuré avant tout code, un trimestre réel peuplé au départ : les étudiant·es, l'horaire, le
+ * groupe-cours et les présences créés dans la démo s'écrivent sous `demo_*` (cle() y route). Trois
+ * choses sortaient de la démo :
+ *   · le COURS créé dans la démo restait dans la vraie clé `cours` (globale) ;
+ *   · les séances d'un groupe-cours de la démo vivent sous `seancesCompletes_gc_<id>`, sans préfixe ;
+ *   · `listeCours` et `modeApplication`, absentes avant l'entrée, restaient à `[]` et à « normal ».
+ * Un cours créé dans la démo porte `isDemo` et `creeEnDemonstration` (posés par sauvegarderCoursV2,
+ * comme le service de Suivi › Rencontres). À la sortie il est RANGÉ dans `demo_listeCours`, d'où
+ * l'entrée le remet dans les globaux, puis retiré des globaux : il reste dans la démo, il disparaît
+ * des vraies données.
+ */
+var CLES_ECRITES_A_L_ENTREE = ['trimestres', 'listeCours', 'cours', 'enseignants', 'modeApplication'];
+
+/** Avant le retrait : les cours créés dans la démo passent dans `demo_listeCours` (ceux qu'on y a supprimés en sortent). */
+function rangerCoursCreesDansLaDemo() {
+    function cree(c) { return !!(c && c.creeEnDemonstration === true && c.isDemo === true); }
+    var crees = (db.getSync('cours', []) || []).filter(cree);
+    var liste = db.getSync('demo_listeCours', []) || [];
+    if (!crees.length && !liste.some(cree)) return;
+    db.setSync('demo_listeCours', liste.filter(function(c) { return !cree(c); }).concat(crees));
+}
+
+/**
+ * Les séances des groupes-cours de la démo (`seancesCompletes_gc_<id>`, clé sans préfixe) : un cache
+ * que la démo régénère à l'entrée et à l'arrivée dans la saisie. Retiré par IDENTITÉ : les ids de
+ * `demo_groupesCours`, moins tout id que porte aussi un groupe-cours d'un trimestre réel.
+ */
+function retirerSeancesDesGroupesDeLaDemo() {
+    var reels = {};
+    db.keysSync().forEach(function(c) {
+        if (c.indexOf('demo_') === 0 || !/(^|_)groupesCours$/.test(c)) return;
+        var liste = db.getSync(c, []);
+        (Array.isArray(liste) ? liste : []).forEach(function(g) { if (g && g.id) reels[g.id] = true; });
+    });
+    (db.getSync('demo_groupesCours', []) || []).forEach(function(g) {
+        if (g && g.id && !reels[g.id]) db.removeSync('seancesCompletes_gc_' + g.id);
+    });
+}
+
+/** Une clé absente avant l'entrée et revenue à vide redevient absente. */
+function retirerClesAbsentesAvant(etat) {
+    ((etat && etat.absentes) || []).forEach(function(c) {
+        if (CLES_ECRITES_A_L_ENTREE.indexOf(c) === -1) return;
+        var v = db.getSync(c, null);
+        var vide = c === 'modeApplication' ? v === 'normal' : (Array.isArray(v) && v.length === 0);
+        if (vide) db.removeSync(c);
+    });
+}
+
 async function desactiverModeDemo() {
     if (importEmpecheLaBascule(false)) return;
     try {
         var etat = db.getSync('demo-etat-precedent', null);
+
+        // 0. Ce qu'on a créé dans la démo y reste (lot « deux temps ») : seulement si la démo est
+        //    ouverte, sinon la liste rangée serait vidée par une sortie sans entrée.
+        if (db.getSync('demo-actif', null) === 'true') {
+            rangerCoursCreesDansLaDemo();
+            retirerSeancesDesGroupesDeLaDemo();
+        }
 
         // 1. Filtrer les 6 globaux pour retirer items isDemo/estDemo
         retirerItemsDemoDesGlobaux();
@@ -550,6 +616,15 @@ async function desactiverModeDemo() {
                 : (etat.modeApplication || 'normal');
             db.setSync('modeApplication', mode);
         }
+
+        // 4 bis. Le tirage au sort redevient celui d'avant l'entrée (ou absent, s'il n'existait pas).
+        if (etat) {
+            if (etat.etatTirage) db.setSync('etatTirage', etat.etatTirage);
+            else db.removeSync('etatTirage');
+        }
+
+        // 4 ter. Les clés que l'entrée a écrites là où il n'y avait rien redeviennent absentes.
+        retirerClesAbsentesAvant(etat);
 
         // 5. Nettoyer flags (mais PAS les clés demo_* — elles restent permanentes)
         db.removeSync('demo-actif');
@@ -718,6 +793,63 @@ async function actionRetirerCopiesDuDemo() {
     await majBoutonRetirerCopiesDemo();
 }
 
+// ============================================
+// Une bascule à la fois (lot « deux temps », 12 nov. 2026)
+// ============================================
+
+/*
+ * L'entrée attend ses dérivées (la reconstruction des captures écrit séance par séance, sous la clé
+ * du contexte du moment). Mesuré le 12 nov. : une sortie demandée PENDANT l'entrée laissait la fin de
+ * cette reconstruction écrire des séances de la démo sous la clé du trimestre réel
+ * (`a2026_snapshots_…`). L'entrée et la sortie passent donc l'une après l'autre : la seconde attend
+ * que la première ait fini.
+ */
+var _basculeEnCours = Promise.resolve();
+
+function _enFile(bascule) {
+    var suivante = _basculeEnCours.then(bascule, bascule);
+    _basculeEnCours = suivante.catch(function() { /* l'échec est déjà dit par la bascule */ });
+    return suivante;
+}
+
+/** L'entrée et la sortie telles que le reste de l'application les appelle (`window.activerModeDemo`, …). */
+function entrerDansLaDemo() { return _enFile(activerModeDemo); }
+
+function sortirDeLaDemo() { return _enFile(desactiverModeDemo); }
+
+// ============================================
+// « Remettre la démo à neuf » (panneau Assistance, décision de Grégoire du 12 nov. 2026, 8 h 15)
+// ============================================
+
+/**
+ * La démo revient telle que le pack la donne. Sans confirmation : le panneau la demande.
+ * Seules les clés `demo_*` sont effacées puis réécrites (`reinstallerDemoDuPack`,
+ * js/demo-namespace.js) ; les copies importées dans la démo partent par le retrait de T3
+ * (fichiers et vignettes compris), qui ne travaille que la démo ouverte. La démo ouverte se
+ * referme d'abord (ce qu'elle a posé dans les globaux en sort), et se rouvre ensuite.
+ * @returns {Promise<boolean>} true si la démo a été remise à neuf
+ */
+async function remettreDemoANeuf() {
+    if (_importEnCours()) {
+        if (window.notifications && typeof window.notifications.warning === 'function') {
+            window.notifications.warning('Import en cours', 'Attends la fin de l\'import des copies avant de remettre la démo à neuf.');
+        }
+        return false;
+    }
+    if (window.ParcoursMoteur && window.ParcoursMoteur.actif()) window.ParcoursMoteur.fermer();
+    var etaitEnDemo = _enDemo();
+    var aDesCopies = window.Codex ? Object.keys((await planDuRetraitDesCopiesDuDemo()).ids).length > 0 : false;
+    if (!etaitEnDemo && aDesCopies) await entrerDansLaDemo();
+    if (_enDemo()) {
+        if (aDesCopies) await retirerCopiesDuDemo();
+        await sortirDeLaDemo();
+    }
+    if (_enDemo()) return false;
+    var fait = await window.reinstallerDemoDuPack();
+    if (etaitEnDemo) await entrerDansLaDemo();
+    return fait;
+}
+
 function _enDemo() {
     return typeof window.estEnModeDemo === 'function' && window.estEnModeDemo();
 }
@@ -730,13 +862,14 @@ function _importEnCours() {
 // Exports
 // ============================================
 
-window.activerModeDemo = activerModeDemo;
-window.desactiverModeDemo = desactiverModeDemo;
+window.activerModeDemo = entrerDansLaDemo;      // une bascule à la fois (lot « deux temps »)
+window.desactiverModeDemo = sortirDeLaDemo;
 window.importEmpecheLaBascule = importEmpecheLaBascule;   // T7
 window.majBoutonRetirerCopiesDemo = majBoutonRetirerCopiesDemo;   // T3
 window.actionRetirerCopiesDuDemo = actionRetirerCopiesDuDemo;     // T3, le bouton du bandeau
 window.planDuRetraitDesCopiesDuDemo = planDuRetraitDesCopiesDuDemo;
 window.retirerCopiesDuDemo = retirerCopiesDuDemo;
+window.remettreDemoANeuf = remettreDemoANeuf;   // lot « deux temps »
 window.afficherBandeauDemo = afficherBandeauDemo;
 window.initialiserBandeauDemoSiActif = initialiserBandeauDemoSiActif;
 window.migrerResidusPhase5 = migrerResidusPhase5;
