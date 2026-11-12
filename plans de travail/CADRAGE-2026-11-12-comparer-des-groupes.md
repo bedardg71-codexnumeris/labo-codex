@@ -1,4 +1,4 @@
-# Cadrage — Comparer des groupes : l'outil d'étude du Labo (12 nov. 2026, v3)
+# Cadrage — Comparer des groupes : l'outil d'étude du Labo (12 nov. 2026, v4)
 
 > Page d'EXPLORATION, à corriger par Grégoire. Aucun code n'en découle tant qu'elle n'est pas relue.
 > Née à l'aperçu du lot « Tendances » (PR #18, non fusionnée), quand le suivi longitudinal s'est
@@ -52,8 +52,14 @@ le cycle entier :
 3. **Je conclus** — ce que j'en retiens, écrit par l'enseignant·e. L'application montre ; elle ne
    conclut pas à sa place (§ 5).
 
-Proposition de Claude Code, à confirmer : cette unité — une hypothèse, ses observations, sa conclusion —
-est **une étude**. Le mot existe déjà dans le Labo (« Études ») ; il prendrait là son sens plein.
+**Une étude** (mot confirmé par Grégoire, v4) : cette unité — une hypothèse, ses observations, sa
+conclusion. Le mot existe déjà dans le Labo (« Études ») ; il prend ici son sens plein. Son fondement,
+dans les mots de Grégoire : un·e enseignant·e est avant tout un·e apprenant·e, et l'application le
+soutient en lui permettant d'observer les effets de ce qu'il ou elle fait.
+
+**Le microscope** (nom de TRAVAIL, v4) : l'instrument où l'on observe les micro-données, puisque toute
+l'application repose sur elles. On y mène des études. Deux mots, deux choses : le microscope est
+l'instrument ; l'étude est la démarche qu'on y conduit.
 
 Conséquence assumée par Grégoire : il y aura des réaménagements, peut-être des sections à redécouper.
 On raffine les outils ET la cohésion qu'ils ont entre eux. Rien de cela n'est engagé ici.
