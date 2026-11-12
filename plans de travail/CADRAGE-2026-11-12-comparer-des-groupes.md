@@ -408,8 +408,16 @@ Les trois mesures que le rapport demandait « avant de promettre ».
   A26 en cours.
 - **L'histoire** : la version d'origine de l'application est un tableur Numbers, élaboré de l'automne
   2024 à l'hiver 2025. L'application existe depuis l'automne 2025. Pour A24, tous les résultats de
-  tous les élèves, avec les critères de chaque évaluation, restent disponibles dans ce tableur. (H25
-  n'est pas dans l'application ; inférence : il est dans le tableur aussi.)
+  tous les élèves, avec les critères de chaque évaluation, restent disponibles dans ce tableur.
+- **Les versions de son enseignement, dans l'ordre (dit par Grégoire)** :
+  - **H24** : une pratique sommative et alternative EN TRANSITION. Hors de l'application. Il a les
+    résultats de tous les travaux (21 ou 24 artefacts à l'époque) ; il ne se souvient pas s'il a les
+    critères de chaque évaluation ;
+  - **A24** : le PREMIER trimestre avec un portfolio d'apprentissage et une pratique alternative de
+    notation ;
+  - **H25** : aucune donnée, il était en congé (une inférence contraire de Claude Code, écrite ici
+    au commit précédent, était fausse) ;
+  - **A25** : l'application commence ; puis H26, et A26 en cours.
 - **Une seule carte d'alignement : celle d'A26, et elle n'est pas encore complète.**
 - **Conséquences (inférences)** :
   - le journal des changements ne peut RIEN constater sur l'alignement pour le passé. Pour A25 et
