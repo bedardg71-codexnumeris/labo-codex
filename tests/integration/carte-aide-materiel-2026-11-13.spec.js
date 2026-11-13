@@ -82,6 +82,38 @@ async function carteTient(page, contexte) {
     expect(r.defile, contexte + ' : le texte de la carte ne défile pas').toBeLessThanOrEqual(1);
 }
 
+/**
+ * La place de l'interrupteur (Grégoire, 13 nov. 2026, 10 h 00 : « après le paragraphe, à droite ») : sous `dessus`, son
+ * bord droit sur le sien, dans l'écran, et jamais sous la carte quand elle est ouverte.
+ */
+async function placeDeLInterrupteur(page, dessus, contexte) {
+    const r = await page.evaluate(([d]) => {
+        const b = (e) => { const x = e.getBoundingClientRect(); return { haut: x.top, bas: x.bottom, gauche: x.left, droite: x.right }; };
+        const zone = document.getElementById('materiel-aide-interrupteur');
+        const bulle = document.getElementById('parcours-bulle');
+        const i = b(zone.querySelector('label.interrupteur')), u = bulle ? b(bulle) : null;
+        return { i, dessus: b(document.querySelector(d)), bordDroit: b(document.querySelector(d)).droite,
+            suit: zone.previousElementSibling === document.querySelector(d), carte: u, iw: document.documentElement.clientWidth, ih: innerHeight,
+            sousLaCarte: !!u && !(i.droite <= u.gauche || u.droite <= i.gauche || i.bas <= u.haut || u.bas <= i.haut) };
+    }, [dessus]);
+    const dit = contexte + ' (' + JSON.stringify(r) + ')';
+    expect(r.suit, dit + ' : l’interrupteur suit ' + dessus).toBe(true);
+    expect(r.i.haut, dit + ' : sous ' + dessus).toBeGreaterThanOrEqual(r.dessus.bas - 1);
+    // À droite : son bord droit sur celui du texte qu'il suit ; à l'accueil sur écran large, il s'arrête avant la place de la
+    // carte (380 px à 8 px du bord).
+    if (r.i.droite < r.bordDroit - 2) expect(r.i.droite, dit + ' : avant la place de la carte').toBeLessThanOrEqual(r.iw - 388);
+    expect(r.i.droite, dit + ' : à droite').toBeLessThanOrEqual(r.bordDroit + 2);
+    expect(r.i.droite, dit + ' : à droite, au-delà du milieu').toBeGreaterThan((r.dessus.gauche + r.dessus.droite) / 2);
+    expect(r.i.gauche >= 0 && r.i.droite <= r.iw && r.i.haut >= 0 && r.i.bas <= r.ih, dit + ' : dans l’écran').toBe(true);
+    expect(r.sousLaCarte, dit + ' : jamais sous la carte').toBe(false);
+}
+
+/** L'interrupteur sous le paragraphe ne pousse pas la zone de collage hors de l'écran. */
+async function zoneDeCollageALEcran(page, contexte) {
+    const r = await page.evaluate(() => { const z = document.getElementById('materiel-zone-collage').getBoundingClientRect(); return { haut: z.top, bas: z.bottom, ih: innerHeight }; });
+    expect(r.haut >= 0 && r.bas <= r.ih, contexte + ' : la zone de collage entière à l’écran (' + JSON.stringify(r) + ')').toBe(true);
+}
+
 /** Aucune phrase ne se lit deux fois dans la carte (son texte, toutes pages, et sa ligne du geste). */
 async function aucunePhraseDeuxFois(page, contexte) {
     const texte = (await texteDeLaCarte(page)) + ' ' + norm(await bulle(page).locator('.parcours-bulle-geste').textContent());
@@ -170,8 +202,9 @@ for (const [L, H] of TAILLES) {
         await carteDeLaPage(page);
         const cible = await page.locator('label.interrupteur').boundingBox();
         expect(cible.height, 'la cible tactile de l’interrupteur').toBeGreaterThanOrEqual(44);
-        // En haut de la page, au-dessus de l'accueil.
-        expect(cible.y).toBeLessThan((await page.locator('#materiel-accueil').boundingBox()).y);
+        // Sa place (Grégoire, 13 nov., 10 h 00) : après le paragraphe, à droite ; la zone de collage reste à l'écran.
+        await placeDeLInterrupteur(page, '#materiel-accueil .materiel-intro', 'l’accueil, ouvert');
+        await zoneDeCollageALEcran(page, 'l’accueil, ouvert');
 
         // L'accueil : ses trois cartes sont dans la carte, mot pour mot, plus dans la page.
         await expect(page.locator('#conception-materiel .materiel-etapes')).toHaveCount(0);
@@ -198,6 +231,8 @@ for (const [L, H] of TAILLES) {
         await expect(bascule(page)).not.toBeChecked();
         await aucuneCarte(page);
         await pageSansConsignes(page, 'fermé, à l’accueil');
+        await placeDeLInterrupteur(page, '#materiel-accueil .materiel-intro', 'l’accueil, fermé');
+        await zoneDeCollageALEcran(page, 'l’accueil, fermé');
         await capture(page, DOSSIER, `i1-accueil-ferme-${cap}`);
         await coller(page, CAPTURE);
         await aucuneCarte(page);
@@ -260,6 +295,8 @@ for (const [L, H] of TAILLES) {
                 + 'Pour en étiqueter plusieurs d’un coup, glisse dessus. Touche un morceau déjà étiqueté pour retirer son étiquette. '
                 + '3. En bas, lis la grille que l’application en tirerait, puis crée-la.');
         await pageSansConsignes(page, 'ouvert, dans l’étiquetage');
+        // Dans l'étiquetage : sous l'en-tête, à droite, jamais sous la carte.
+        await placeDeLInterrupteur(page, '#materiel-dissection .dissection-tete', 'l’étiquetage, ouvert');
         await gesteEst(page, 'Ta grille n’a pas encore de nom : prends « Titre », puis touche son nom dans ta grille.');
         await contourSur(page, etiquette('titre'));
         await flecheVers(page, etiquette('titre'), 'le nom');

@@ -29955,7 +29955,18 @@ body.mode-clair {
 /* Lot « La carte d'aide dans Apporter mon matériel » (13 nov. 2026) : les trois cartes de l'accueil sont dans la carte
    (js/materiel-aide.js). L'interrupteur qui l'offre : une case à cocher (role="switch") sous une piste dessinée ; la
    rangée entière se touche (44 px), le focus se voit sur la piste. Couleurs : variables seulement, clair comme sombre. */
-.materiel-aide-interrupteur { margin: 0 0 16px; }
+/* Sa place (Grégoire, 13 nov. 2026, 10 h 00) : après le paragraphe, à droite ; même règle sous l'en-tête de l'étiquetage
+   (js/materiel-aide.js, `placer`). Les marges négatives reprennent une part de l'écart de la colonne : la zone de collage
+   et la grille ne descendent que d'une trentaine de pixels. */
+.materiel-aide-interrupteur { display: flex; justify-content: flex-end; margin: 0; }
+/* À l'accueil, à droite DU PARAGRAPHE (sa colonne de 780 px), pas de la page. Écran large (iPad couché) : la carte se
+   pose en haut à droite, 380 px de large à 8 px du bord (css/parcours.css) ; l'interrupteur s'arrête avant elle, carte
+   ouverte ou non : il ne saute pas quand on le touche (mesuré le 13 nov. à 1180 × 820 : il passait dessous). */
+.materiel-accueil > .materiel-aide-interrupteur { margin: -12px 0; max-width: 780px; }
+@media (min-width: 1000px) {
+    .materiel-accueil > .materiel-aide-interrupteur { max-width: min(780px, calc(100% - 396px)); }
+}
+.dissection > .materiel-aide-interrupteur { margin: -4px 0; }
 .interrupteur { display: inline-flex; align-items: center; gap: 12px; min-height: 44px; cursor: pointer; position: relative; -webkit-user-select: none; user-select: none; }
 .interrupteur-case { position: absolute; opacity: 0; width: 52px; height: 44px; margin: 0; left: 0; top: 50%; transform: translateY(-50%); cursor: pointer; }
 .interrupteur-piste {

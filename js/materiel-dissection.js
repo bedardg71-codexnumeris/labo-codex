@@ -1454,6 +1454,8 @@
         majPalette(); majBandeau(); rendreLecture(); planifierDessin();
         if (accueil) accueil.classList.add('u-hide');
         vue.classList.remove('u-hide');
+        // L'interrupteur de la carte d'aide suit l'écran (13 nov. 2026) : il passe sous l'en-tête de l'étiquetage.
+        if (window.MaterielAide) window.MaterielAide.regler();
         // Point 1 (iPad, 11 nov.) : la liste des étiquettes s'ouvre en montrant le haut. Après l'affichage : sur une vue
         // masquée, WebKit ignore le geste et rend, au retour, le défilement de la dissection d'avant (mesuré le 12 nov.).
         var pal = el('dissection-palette');

@@ -106,9 +106,11 @@
      * une partie) : quand la lecture est à l'écran, la carte l'évite.
      */
     function aussiEviter() {
-        if (!dissectionOuverte()) return [];
-        if (exempleOuvert() === 'complet') { var l = lectureALEcran(); return l ? [l] : []; }
-        return ciblesDeLAide(aideOuverte());
+        // L'interrupteur (13 nov. 2026, sa place à droite) : la carte ne le couvre pas, il est ce qui la ferme.
+        var i = [qs('#materiel-aide-interrupteur .interrupteur')].filter(vis);
+        if (!dissectionOuverte()) return i;
+        if (exempleOuvert() === 'complet') { var l = lectureALEcran(); return (l ? [l] : []).concat(i); }
+        return ciblesDeLAide(aideOuverte()).concat(i);
     }
 
     function contour() {
@@ -231,6 +233,17 @@
     }
 
     /**
+     * La place de l'interrupteur (Grégoire, 13 nov. 2026, 10 h 00 : « après le paragraphe, à droite ») : à l'accueil,
+     * sous le paragraphe d'introduction ; dans l'étiquetage, sous son en-tête. Un seul élément, déplacé : une seule
+     * case à cocher, un seul état.
+     */
+    function placer(zone) {
+        var apres = dissectionOuverte() ? qs('#materiel-dissection .dissection-tete')
+            : accueilVisible() ? qs('#materiel-accueil .materiel-intro') : null;
+        if (apres && zone.previousElementSibling !== apres) apres.insertAdjacentElement('afterend', zone);
+    }
+
+    /**
      * Règle l'interrupteur et la carte sur l'état de la page. Appelé après chaque changement : une sous-section
      * affichée, l'accueil ou la confirmation rendus, le moteur lancé ou fermé, l'interrupteur touché.
      */
@@ -245,6 +258,7 @@
             return;
         }
         if (!surLaPage) { surLaPage = true; ouvert = aLArrivee(); }
+        placer(zone);
         var parcours = parcoursEnCours();
         zone.classList.toggle('u-hide', parcours || !ecranGuide());
         bascule.checked = ouvert;
