@@ -7,6 +7,16 @@
 
 ---
 
+## 13 NOV. 2026, 9 H 35 (Claude Code) : **DEUX LOTS ATTENDENT L'ESSAI DE GRÉGOIRE** — `main` inchangé
+
+Mandats : relève de Cowork, 13 nov., 5 h 05 ; consigne `plans de travail/CONSIGNE-LOT-2026-11-13-deux-temps-modeles.md` (conversation du Projet, 12 nov., 20 h 10). **Le travail le plus récent vit sur `lot/deux-temps-modeles`** (code `683ce5902`, build `1113-0921`, version 1.244.0 inchangée), partie de la tête de `lot/carte-aide-materiel` (`5c43a014e`). **PR d'aperçu n° 23, NON fusionnée : elle porte aussi la carte d'aide (PR n° 22)** et reprend la première partie des deux temps (PR n° 20). Ni release, ni Nouvelles.
+
+- **Livré sur la branche** : A, les libellés « Modélisation » et « Pratique guidée », plus de phrase sans modèle, la liste de dix ; B, le modèle d'« Évaluer une première production » dans la démo, sur le deuxième groupe, avec le matériel de Grégoire. Rapport : `plans de travail/RAPPORT-2026-11-13-deux-temps-modeles.md` (sur la branche).
+- **Remonte à Grégoire** (§3 de la porte) : la grille collée naît en points et le modèle passe par quatre menus « Type » ; la production prend sa description pour nom ; les commentaires s'importent d'un fichier ; le choix du modèle par standards ; la fin de la dernière bulle ; les mots des bulles.
+- **Reste** : deux portes iPad, sans artefact (`PORTES-TERRAIN-2026-11-13-carte-aide-materiel.md`, onze gestes ; `PORTES-TERRAIN-2026-11-13-deux-temps-modeles.md`, quatorze gestes) ; la fusion, par un relais à part ; **aucun verdict complet pris** (passages ciblés seulement).
+- **Hors du lot, corrigé parce que le confinement en dépendait** : la migration des vignettes ne pose plus son témoin global depuis la démo (`js/travaux-stockage.js`).
+- **Le Mac** : piste mesurée, sans lien établi avec la panique de 1 h 06 : `virusbarriers` (Intego), plus gros processus de l'événement Jetsam de 6 h 06 ; la charge moyenne monte par moments à 99 et fait dépasser des délais.
+
 ## 13 NOV. 2026, 7 H 50 (Claude Code) : **LA CARTE D'AIDE ATTEND L'ESSAI DE GRÉGOIRE** — `main` inchangé
 
 Mandats : relais de la conversation du Projet, 12 nov., 19 h 15 ; relève de Cowork, 13 nov., 5 h 05 (le Mac a paniqué à 1 h 06 ; le lot était indexé, non committé). **Le travail vit sur `lot/carte-aide-materiel`** (`5c43a014e` ; code `eda8b2bce`, build `1113-0737`, version 1.244.0 inchangée), partie de `main` (`f9c49ec8c`). **PR d'aperçu n° 22, NON fusionnée** ; ni release, ni Nouvelles. `main` reste à `f9c49ec8c` plus cette entrée.
