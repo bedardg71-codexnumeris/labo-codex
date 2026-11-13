@@ -1,6 +1,7 @@
 import { test, expect } from '@playwright/test';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { collerLExemple } from './harness/exemple-colle.js';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const indexHtml = 'file://' + path.join(path.resolve(__dirname, '..', '..'), 'index.html');
 
@@ -63,13 +64,13 @@ test('aide d’« Apporter mon matériel » · l’aide « i » aux deux écrans
 
     // L'accueil : l'aide « i », deux bulles.
     await ouvrirAideI(page, '#materiel-accueil');
-    await survoler(page, page.locator('[data-action="materiel.essayerExemple"]'),
-        'Ouvre une grille fictive, pour essayer l’étiquetage sans ton propre document.');
+    // 13 nov. 2026 : « Essayer avec un exemple » est parti, son infobulle aussi ; les deux boutons de l'exemple n'en ont pas.
+    await expect(page.locator('#materiel-accueil [data-action="materiel.ouvrirExemple"]')).toHaveCount(2);
     await survoler(page, page.locator('#materiel-accueil [data-action="materiel.taperMain"]'),
         'Mène à Grilles, pour composer une grille directement dans l’application.');
 
     // L'écran d'étiquetage : l'aide « i », les boutons de son en-tête, et les deux outils nés en JavaScript.
-    await page.locator('[data-action="materiel.essayerExemple"]').click();
+    await collerLExemple(page);
     await expect(page.locator('#materiel-dissection')).toBeVisible();
     await ouvrirAideI(page, '#materiel-dissection');
     await survoler(page, page.locator('[data-action="materielDissection.toutRetirer"]'),

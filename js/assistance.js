@@ -23,6 +23,16 @@
    au refus, la pulsation des parcours va sur le bouton du premier parcours non fait de la chaîne des préalables.
    Le motif reste dessous, mot pour mot ; lui ne pulse pas, on ne le touche pas.
 
+   LES DEUX TEMPS (décision de Grégoire, 11 et 12 nov. 2026) : un parcours se fait d'abord dans la démo, avec le
+   matériel fourni (la modélisation, où la personne fait elle-même chaque geste), puis sur ses vraies données. Un
+   seul choix pour toute la liste, « Modélisation » ou « Pratique guidée » ; « Commencer » part dans le matériel
+   choisi. Une définition déclare `lancerModele(depuis)` et `totalModele` quand elle a sa modélisation ;
+   `dansLaDemo: true` quand elle ne se joue que dans la démo (« Découvrir ») : elle part de la même façon sous les
+   deux choix. Sans l'un ni l'autre, sous « Modélisation », le bouton de la carte est inactif, sans phrase (13 nov.).
+   Le choix et l'état des modélisations restent sur l'appareil (`localStorage`, clé `laboCodex.assistance`, HORS
+   de `db`, comme `laboCodex.vue`) : ce qu'on fait dans la démo n'écrit rien dans les données.
+   « Remettre la démo à neuf » (Grégoire, 12 nov., 8 h 15), sous le choix, visible avec « Modélisation ».
+
    Un parcours qui déclare `grandEcranSeulement: true` (lot « La bulle sur téléphone »,
    9 nov. 2026) n'est pas proposé sur téléphone (ParcoursMoteur.surTelephone, 500 px) : sous son
    titre, le texte validé par Grégoire, et son bouton ne lance rien.
@@ -39,6 +49,82 @@
     }
     var registre = [];
     var focusAvant = null;
+
+    // ---------- Le matériel choisi et l'état des modélisations : sur l'appareil, hors des données ----------
+
+    var CLE_APPAREIL = 'laboCodex.assistance';
+    var MATERIEL = { DEMO: 'demo', MIEN: 'mien' };
+    // Décidés par Grégoire (12 nov. 2026, 14 h 46 à 15 h 08), mot pour mot : le nom, et dessous, en plus petit, le matériel.
+    var MOTS_MATERIEL = {
+        demo: { nom: 'Modélisation', sous: 'avec le matériel de la démo' },
+        mien: { nom: 'Pratique guidée', sous: 'avec mon matériel' }
+    };
+    var MOTS_NEUF = {
+        bouton: 'Remettre la démo à neuf',
+        question: 'Tout ce que tu as fait dans la démo s\'efface : ce que tu y as créé, modifié, évalué ou importé. '
+            + 'La démo revient telle qu\'elle était au départ. Tes données, elles, ne bougent pas.',
+        confirmer: 'Remettre à neuf',
+        fait: 'La démo est remise à neuf.',
+        rate: 'La démo n\'a pas pu être remise à neuf. Rien n\'a été effacé.'
+    };
+
+    var appareil = null; // relu une fois ; le repli quand le stockage refuse l'écriture
+
+    function etatAppareil() {
+        if (appareil) return appareil;
+        try {
+            var v = JSON.parse(localStorage.getItem(CLE_APPAREIL) || 'null');
+            appareil = v && typeof v === 'object' ? v : {};
+        } catch (e) { appareil = {}; }
+        return appareil;
+    }
+
+    function ecrireAppareil(v) {
+        appareil = v;
+        try { localStorage.setItem(CLE_APPAREIL, JSON.stringify(v)); } catch (e) { /* stockage indisponible : le choix vaut pour la page */ }
+    }
+
+    /**
+     * Le matériel choisi. Sans choix sur l'appareil : « Modélisation » (décision du 12 nov. 2026).
+     * PILOTÉ PAR UN BANC (`navigator.webdriver`), sans choix : « Pratique guidée ». Les bancs Playwright des neuf parcours
+     * ouvrent le panneau et touchent « Commencer » pour jouer le parcours sur les vraies données ; sans ceci, ils
+     * partiraient tous dans la démo, ou ne partiraient pas. Même règle que la vue au démarrage (`vueAuDemarrage`,
+     * js/vue-simple-donnees.js) ; le banc des deux temps éteint ce drapeau pour éprouver le vrai défaut. Aucun
+     * utilisateur n'a ce drapeau.
+     */
+    function materiel() {
+        var choix = etatAppareil().materiel;
+        if (choix === MATERIEL.MIEN || choix === MATERIEL.DEMO) return choix;
+        var pilote = typeof navigator !== 'undefined' && navigator.webdriver === true;
+        return pilote ? MATERIEL.MIEN : MATERIEL.DEMO;
+    }
+
+    function definirMateriel(m) {
+        ecrireAppareil(Object.assign({}, etatAppareil(), { materiel: m === MATERIEL.MIEN ? MATERIEL.MIEN : MATERIEL.DEMO }));
+    }
+
+    function etatModeleDe(id) {
+        var e = (etatAppareil().modeles || {})[id];
+        if (!e || (e.etat !== 'en-cours' && e.etat !== 'fait')) return { etat: 'a-faire', etape: 0 };
+        return { etat: e.etat, etape: typeof e.etape === 'number' ? e.etape : 0 };
+    }
+
+    function definirEtatModele(id, etatParcours, etape) {
+        var modeles = Object.assign({}, etatAppareil().modeles || {});
+        modeles[id] = { etat: etatParcours, etape: etape || 0 };
+        ecrireAppareil(Object.assign({}, etatAppareil(), { modeles: modeles }));
+    }
+
+    /** La démo remise à neuf : ses modélisations sont à refaire. */
+    function oublierModeles() {
+        ecrireAppareil(Object.assign({}, etatAppareil(), { modeles: {} }));
+    }
+
+    /** Sous « Modélisation » : 'modele' (sa modélisation), 'demo' (ne se joue que là), ou 'aucun'. */
+    function jeuDansLaDemo(def) {
+        if (typeof def.lancerModele === 'function') return 'modele';
+        return def.dansLaDemo ? 'demo' : 'aucun';
+    }
 
     function lireTout() {
         var v = typeof obtenirPreference === 'function' ? obtenirPreference(CLE_PREF) : null;
@@ -108,8 +194,50 @@
         return e ? Math.max(0, e.getBoundingClientRect().bottom) : 0;
     }
 
+    /**
+     * Le bouton d'une carte : « Commencer », « Reprendre » ou « Refaire », et ce qu'il lance selon le matériel choisi.
+     * @param {Object} o - { etat, jeu ('mien' | 'modele' | 'demo' | 'aucun'), refuse (écran trop petit), titre, corps }
+     */
+    function creerBoutonParcours(def, o) {
+        var e = o.etat, jeu = o.jeu, refuse = o.refuse;
+        var btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'assistance-parcours-bouton' + (e.etat === 'en-cours' ? ' assistance-parcours-bouton--plein' : '');
+        btn.textContent = e.etat === 'fait' ? 'Refaire' : e.etat === 'en-cours' ? 'Reprendre' : 'Commencer';
+        btn.setAttribute('aria-describedby', o.titre.id + (refuse ? ' assistance-parcours-grand-ecran-' + def.id : ''));
+        // Sur téléphone, un parcours pour grand écran : le bouton reste lisible, il ne lance rien.
+        // Sans modèle, sous « Modélisation » (13 nov. 2026) : de même, et sans phrase. Les deux temps ne partiront en ligne
+        // que lorsque chaque parcours aura son modèle ; d'ici là, le bouton reste inactif.
+        if (refuse || jeu === 'aucun') btn.setAttribute('aria-disabled', 'true');
+        btn.addEventListener('click', function () {
+            if (tropPetitPour(def) || jeu === 'aucun') return;
+            if (jeu === 'modele') {
+                // La modélisation se joue dans la démo : les conditions d'entrée (`refus`) lisent les
+                // vraies données, elles ne la concernent pas. Elle a la sienne (`refusModele`, 13 nov. 2026) :
+                // le modèle d'« Évaluer » se joue sur le groupe que monte celui de « Mettre ta classe en place ».
+                var raisonModele = typeof def.refusModele === 'function' ? def.refusModele() : null;
+                if (raisonModele) { direRefus(o.corps, raisonModele); appelerPrealable(def, raisonModele); return; }
+                fermerPanneau({ sansRetourFocus: true });
+                def.lancerModele(e.etat === 'en-cours' ? e.etape : 0);
+                return;
+            }
+            // La condition d'entrée d'un parcours (`refus`, lot du septième parcours, 9 nov. 2026) :
+            // lue dans les données au toucher. Refusé, le parcours ne part pas : le panneau reste
+            // ouvert et dit pourquoi, sous le bouton.
+            var raison = typeof def.refus === 'function' ? def.refus() : null;
+            if (raison) { direRefus(o.corps, raison); appelerPrealable(def, raison); return; }
+            var depuis = e.etat === 'en-cours' ? e.etape : 0;
+            fermerPanneau({ sansRetourFocus: true });
+            def.lancer(depuis);
+        });
+        return btn;
+    }
+
     function creerParcoursItem(def) {
-        var e = etatDe(def.id);
+        // Le matériel choisi décide de l'état montré, du compte des étapes et de ce que lance le bouton.
+        var jeu = materiel() === MATERIEL.DEMO ? jeuDansLaDemo(def) : 'mien';
+        var e = jeu === 'modele' ? etatModeleDe(def.id) : jeu === 'aucun' ? { etat: 'a-faire', etape: 0 } : etatDe(def.id);
+        var total = jeu === 'modele' ? def.totalModele : def.total;
         var li = document.createElement('li');
         li.className = 'assistance-parcours-item';
         li.dataset.etat = e.etat;
@@ -137,7 +265,7 @@
         var etatTxt = document.createElement('span');
         etatTxt.className = 'assistance-parcours-etat';
         etatTxt.textContent = e.etat === 'fait' ? 'Fait'
-            : e.etat === 'en-cours' ? 'Étape ' + (e.etape + 1) + ' sur ' + def.total
+            : e.etat === 'en-cours' ? 'Étape ' + (e.etape + 1) + ' sur ' + total
             : 'À faire';
         l1.appendChild(h);
         l1.appendChild(etatTxt);
@@ -163,24 +291,9 @@
             corps.appendChild(p);
         }
 
-        var btn = document.createElement('button');
-        btn.type = 'button';
-        btn.className = 'assistance-parcours-bouton' + (e.etat === 'en-cours' ? ' assistance-parcours-bouton--plein' : '');
-        btn.textContent = e.etat === 'fait' ? 'Refaire' : e.etat === 'en-cours' ? 'Reprendre' : 'Commencer';
-        btn.setAttribute('aria-describedby', h.id + (refuse ? ' assistance-parcours-grand-ecran-' + def.id : ''));
-        // Sur téléphone, un parcours pour grand écran : le bouton reste lisible, il ne lance rien.
-        if (refuse) btn.setAttribute('aria-disabled', 'true');
-        btn.addEventListener('click', function () {
-            if (tropPetitPour(def)) return;
-            // La condition d'entrée d'un parcours (`refus`, lot du septième parcours, 9 nov. 2026) :
-            // lue dans les données au toucher. Refusé, le parcours ne part pas : le panneau reste
-            // ouvert et dit pourquoi, sous le bouton.
-            var raison = typeof def.refus === 'function' ? def.refus() : null;
-            if (raison) { direRefus(corps, raison); appelerPrealable(def, raison); return; }
-            var depuis = e.etat === 'en-cours' ? e.etape : 0;
-            fermerPanneau({ sansRetourFocus: true });
-            def.lancer(depuis);
-        });
+        if (jeu === 'aucun') li.dataset.modele = 'absent';
+
+        var btn = creerBoutonParcours(def, { etat: e, jeu: jeu, refuse: refuse, titre: h, corps: corps });
         corps.appendChild(btn);
 
         li.appendChild(corps);
@@ -201,9 +314,9 @@
     }
 
     /** Panneau ouvert, la fenêtre franchit le seuil du téléphone : la liste suit (refus, bouton). */
-    function rafraichirListe() {
+    function rafraichirListe(ev, force) {
         var liste = document.getElementById('assistance-parcours-liste');
-        if (!liste || surTelephone() === listeTelephone) return;
+        if (!liste || (!force && surTelephone() === listeTelephone)) return;
         var focusDedans = liste.contains(document.activeElement)
             ? document.activeElement.closest('[data-parcours]') : null;
         var id = focusDedans ? focusDedans.dataset.parcours : null;
@@ -264,6 +377,128 @@
         if (typeof b.scrollIntoView === 'function') b.scrollIntoView({ block: 'nearest' });
     }
 
+    // ---------- La présentation en quatre temps (texte VALIDÉ par Grégoire, mot pour mot, 12 nov. 2026) ----------
+
+    var QUATRE_TEMPS = {
+        titre: "Apprendre l'application, en quatre temps.",
+        suite: "Passe de l'un à l'autre à ton rythme.",
+        temps: [
+            ['Découvrir par toi-même.', "Explore la démo : un groupe de dix étudiant·es fictif·ves t'y attend, avec ses productions, ses évaluations et ses présences."],
+            ['Regarder un modèle.', "Dans la démo, un parcours te montre, geste par geste, comment se crée le matériel et ce qu'il donne. C'est toi qui fais les gestes, avec le matériel fourni."],
+            ['Mettre en pratique.', 'Refais le parcours avec ta vraie liste, ton vrai cours, tes vraies activités.'],
+            ['Continuer en autonomie.', "Bâtis ton propre parcours, partage ton matériel, pose tes hypothèses. L'aide dans les pages reste là au besoin."]
+        ]
+    };
+
+    /** L'espace insécable du français, devant les deux-points et dans les guillemets. */
+    function typo(t) {
+        return String(t).replace(/ :/g, '\u00a0:').replace(/« /g, '«\u00a0').replace(/ »/g, '\u00a0»');
+    }
+
+    function grasPuisTexte(balise, gras, texte) {
+        var el = document.createElement(balise);
+        var b = document.createElement('strong');
+        b.textContent = gras;
+        el.appendChild(b);
+        el.appendChild(document.createTextNode(' ' + typo(texte)));
+        return el;
+    }
+
+    function construireIntro() {
+        var intro = document.createElement('div');
+        intro.className = 'assistance-intro';
+        var tete = grasPuisTexte('p', QUATRE_TEMPS.titre, QUATRE_TEMPS.suite);
+        tete.className = 'assistance-intro-titre';
+        intro.appendChild(tete);
+        var ol = document.createElement('ul');
+        ol.className = 'assistance-intro-temps';
+        QUATRE_TEMPS.temps.forEach(function (t) { ol.appendChild(grasPuisTexte('li', t[0], t[1])); });
+        intro.appendChild(ol);
+        return intro;
+    }
+
+    // ---------- Le choix du matériel, et « Remettre la démo à neuf » ----------
+
+    function majChoixMateriel(panneau) {
+        var m = materiel();
+        [].forEach.call(panneau.querySelectorAll('.assistance-materiel-option'), function (b) {
+            var choisi = b.dataset.materiel === m;
+            b.setAttribute('aria-checked', choisi ? 'true' : 'false');
+            b.tabIndex = choisi ? 0 : -1;
+        });
+        var neuf = panneau.querySelector('#assistance-demo-neuf');
+        if (neuf) neuf.hidden = m !== MATERIEL.DEMO;
+    }
+
+    function choisirMateriel(m, panneau) {
+        if (materiel() !== m) {
+            definirMateriel(m);
+            rafraichirListe(null, true);
+        }
+        majChoixMateriel(panneau);
+    }
+
+    function construireChoixMateriel(panneau) {
+        var groupe = document.createElement('div');
+        groupe.className = 'assistance-materiel';
+        groupe.id = 'assistance-materiel';
+        groupe.setAttribute('role', 'radiogroup');
+        groupe.setAttribute('aria-label', 'Le matériel des parcours');
+        [MATERIEL.DEMO, MATERIEL.MIEN].forEach(function (m) {
+            var b = document.createElement('button');
+            b.type = 'button';
+            b.className = 'assistance-materiel-option';
+            b.dataset.materiel = m;
+            b.setAttribute('role', 'radio');
+            ['nom', 'sous'].forEach(function (partie) {
+                var s = document.createElement('span');
+                s.className = 'assistance-materiel-' + partie;
+                s.textContent = MOTS_MATERIEL[m][partie];
+                b.appendChild(s);
+            });
+            b.addEventListener('click', function () { choisirMateriel(m, panneau); });
+            groupe.appendChild(b);
+        });
+        // Un groupe de boutons radio : les flèches passent de l'un à l'autre et choisissent.
+        groupe.addEventListener('keydown', function (ev) {
+            if (['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'].indexOf(ev.key) === -1) return;
+            ev.preventDefault();
+            var autre = materiel() === MATERIEL.DEMO ? MATERIEL.MIEN : MATERIEL.DEMO;
+            choisirMateriel(autre, panneau);
+            var b = groupe.querySelector('[data-materiel="' + autre + '"]');
+            if (b) b.focus();
+        });
+        return groupe;
+    }
+
+    async function remettreANeuf() {
+        var accepte = await window.uiDialogues.confirmerAction({
+            titre: MOTS_NEUF.bouton,
+            message: typo(MOTS_NEUF.question),
+            texteAnnuler: 'Annuler',
+            texteConfirmer: MOTS_NEUF.confirmer,
+            variante: 'danger'   // « Annuler » a le focus ; Entrée le suit
+        });
+        if (accepte !== true || typeof window.remettreDemoANeuf !== 'function') return;
+        fermerPanneau({ sansRetourFocus: true });
+        var fait = await window.remettreDemoANeuf();
+        if (fait) oublierModeles();
+        if (window.notifications) {
+            if (fait && typeof window.notifications.succes === 'function') window.notifications.succes(MOTS_NEUF.fait);
+            if (!fait && typeof window.notifications.warning === 'function') window.notifications.warning(MOTS_NEUF.bouton, MOTS_NEUF.rate);
+        }
+    }
+
+    function construireBoutonNeuf() {
+        var b = document.createElement('button');
+        b.type = 'button';
+        b.className = 'assistance-demo-neuf';
+        b.id = 'assistance-demo-neuf';
+        b.textContent = MOTS_NEUF.bouton;
+        b.addEventListener('click', function () { remettreANeuf(); });
+        return b;
+    }
+
     function construirePanneau() {
         var voile = document.createElement('div');
         voile.className = 'assistance-voile';
@@ -297,10 +532,7 @@
         tete.appendChild(fermerBtn);
         panneau.appendChild(tete);
 
-        var intro = document.createElement('p');
-        intro.className = 'assistance-intro';
-        intro.textContent = 'Des parcours où tu fais les gestes toi-même, accompagné·e pas à pas : quoi faire, comment le faire, et pourquoi.';
-        panneau.appendChild(intro);
+        panneau.appendChild(construireIntro());
 
         // 10 nov. 2026 (Grégoire, 20 h, sur captures) : « Aide dans les pages » monte en haut du panneau,
         // juste sous la présentation, avant « Tes parcours ». Aucun mot ne change ; le filet sépare.
@@ -343,6 +575,11 @@
         intitule.textContent = 'Tes parcours';
         panneau.appendChild(intitule);
 
+        // Un seul choix pour toute la liste (12 nov. 2026) ; dessous, la remise à neuf de la démo.
+        panneau.appendChild(construireChoixMateriel(panneau));
+        panneau.appendChild(construireBoutonNeuf());
+        majChoixMateriel(panneau);
+
         var liste = document.createElement('ol');
         liste.className = 'assistance-parcours';
         liste.id = 'assistance-parcours-liste';
@@ -360,7 +597,9 @@
         if (ev.key === 'Escape') { ev.stopPropagation(); fermerPanneau(); return; }
         if (ev.key !== 'Tab') return;
         var p = document.getElementById('panneau-assistance');
-        var f = [].slice.call(p.querySelectorAll('button:not([disabled])'));
+        var f = [].slice.call(p.querySelectorAll('button:not([disabled])')).filter(function (b) {
+            return !b.hidden && b.tabIndex !== -1;
+        });
         if (!f.length) return;
         var premier = f[0], dernier = f[f.length - 1];
         if (ev.shiftKey && document.activeElement === premier) { ev.preventDefault(); dernier.focus(); }
@@ -420,6 +659,11 @@
         ouvrirPanneau: ouvrirPanneau,
         fermerPanneau: fermerPanneau,
         majMenu: majMenu,
+        // Les deux temps (12 nov. 2026) : le matériel choisi, l'état des modélisations (sur l'appareil).
+        materiel: materiel,
+        definirMateriel: definirMateriel,
+        etatModeleDe: etatModeleDe,
+        definirEtatModele: definirEtatModele,
         parcours: function () { return registre.slice(); }
     };
     // Le dispatcher data-action de main.js : le menu, « À propos », l'aide de la visite.

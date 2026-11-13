@@ -1196,6 +1196,14 @@ function _refuserCoursV2(phrase, geste) {
  * « Enregistré » ; le formulaire reste ouvert, menus et synthèse relus.
  */
 function _apresEcritureCoursV2(cours, creation) {
+    // Lot « deux temps » (12 nov. 2026) : `cours` est une clé GLOBALE. Un cours créé pendant la démo
+    // resterait dans la vraie liste après la sortie (mesuré). Il reçoit la marque du service de
+    // Suivi › Rencontres (`isDemo` et `creeEnDemonstration`, qu'aucun chemin hors démo n'écrit) :
+    // la sortie le range dans la démo et le retire des globaux (js/demo-activation.js).
+    if (creation && cours && typeof estEnModeDemo === 'function' && estEnModeDemo()) {
+        db.setSync('cours', (db.getSync('cours', []) || []).map(c => (c && c.id === cours.id)
+            ? Object.assign({}, c, { isDemo: true, creeEnDemonstration: true }) : c));
+    }
     chargerDropdownCoursV2();
     const selectCours = document.getElementById('v2-selectCours');
     if (creation) {

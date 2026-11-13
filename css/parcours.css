@@ -246,6 +246,15 @@ body.mode-clair {
    pour que le lecteur d'écran lise tout, dans l'ordre. Le span reste en ligne, dans le paragraphe. */
 .parcours-bulle-page { display: inline; }
 
+/* Le complément (lot « La carte d'aide dans Apporter mon matériel », 13 nov. 2026) : les consignes d'une page, à la suite
+   du texte, comme des pages de plus. Une liste : des blocs dans le paragraphe, le rang dans la marge, le titre en gras. */
+.parcours-bulle-page--liste { display: block; }
+.parcours-bulle-texte[hidden] { display: none; }
+.parcours-bulle-item { display: block; position: relative; padding-left: 1.5em; font-size: 13.5px; line-height: 1.45; }
+.parcours-bulle-item + .parcours-bulle-item { margin-top: 2px; }
+.parcours-bulle-item--seul { padding-left: 0; }
+.parcours-bulle-item-rang { position: absolute; left: 0; top: 0; font-weight: 600; color: var(--texte-secondaire); font-variant-numeric: tabular-nums; }
+
 .parcours-bulle-nav {
     display: flex;
     justify-content: flex-end;
@@ -411,6 +420,85 @@ body.parcours-actif .transition-bandeau { display: none; }
     line-height: 1.5;
     opacity: 0.85;
 }
+
+/* Le panneau est une colonne qui défile : ce qu'on y ajoute garde sa hauteur (sans cela, la colonne les écrase). */
+.assistance-intro,
+.assistance-materiel,
+.assistance-demo-neuf { flex: none; }
+
+/* La présentation en quatre temps (12 nov. 2026) : un titre, puis quatre lignes, le début de chacune en gras. */
+.assistance-intro-titre { margin: 0; }
+
+.assistance-intro-temps {
+    margin: 8px 0 0;
+    padding: 0;
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    font-size: 13px;
+    line-height: 1.45;
+}
+
+/* Le choix du matériel (12 nov. 2026) : deux options côte à côte, pour toute la liste. */
+.assistance-materiel {
+    display: flex;
+    border: 1px solid var(--assistance-trait);
+    border-radius: var(--radius-moyen, 6px);
+    overflow: hidden;
+}
+
+.assistance-materiel-option {
+    flex: 1;
+    min-height: 44px;
+    padding: 6px 10px;
+    font: inherit;
+    font-size: 13px;
+    font-weight: 600;
+    color: inherit;
+    background: transparent;
+    border: 0;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 1px;
+}
+
+/* 13 nov. 2026 : le nom du temps, et dessous, en plus petit, le matériel avec lequel il se joue. */
+.assistance-materiel-sous { font-size: 11px; font-weight: 400; line-height: 1.3; }
+
+.assistance-materiel-option + .assistance-materiel-option { border-left: 1px solid var(--assistance-trait); }
+
+.assistance-materiel-option:hover { background: rgba(106, 172, 184, 0.15); }
+
+/* L'option choisie : pleine, dans l'orange de l'aide, comme « Reprendre ». */
+.assistance-materiel-option[aria-checked="true"],
+.assistance-materiel-option[aria-checked="true"]:hover {
+    background: var(--icone-aide-config);
+    color: var(--acc-texte);
+}
+
+.assistance-materiel-option:focus-visible { box-shadow: inset 0 0 0 2px var(--focus-ring-color); outline: none; }
+
+/* « Remettre la démo à neuf » : un geste discret, sous le choix. */
+.assistance-demo-neuf {
+    align-self: flex-start;
+    min-height: 44px;
+    padding: 0 12px;
+    font: inherit;
+    font-size: 13px;
+    color: inherit;
+    background: transparent;
+    border: 1px solid var(--assistance-trait);
+    border-radius: var(--radius-moyen, 6px);
+    cursor: pointer;
+}
+
+.assistance-demo-neuf[hidden] { display: none; }
+.assistance-demo-neuf:hover { background: rgba(106, 172, 184, 0.15); }
+.assistance-demo-neuf:focus-visible { outline: 2px solid var(--focus-ring-color); outline-offset: 2px; }
 
 .assistance-intitule {
     margin: 4px 0 0;
@@ -733,4 +821,13 @@ body.parcours-actif.parcours-place-sous-les-colonnes #evaluations-importer { pad
     font-size: 14px;
     font-weight: 600;
     color: var(--parcours-geste);
+}
+
+/* « Copier la liste » (modélisation, 12 nov. 2026) : le champ d'où part la copie quand le presse-papiers
+   asynchrone manque. Hors de l'écran, le temps de la copie. */
+.parcours-tampon-copie {
+    position: fixed;
+    top: 0;
+    left: -9999px;
+    opacity: 0;
 }

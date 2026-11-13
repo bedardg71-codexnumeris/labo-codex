@@ -2,6 +2,7 @@ import { test, expect } from '@playwright/test';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { GRILLE_B, enHtml } from '../unit/_helpers/grilles-fictives-dissection.js';
+import { collerLExemple } from './harness/exemple-colle.js';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const indexHtml = 'file://' + path.join(path.resolve(__dirname, '..', '..'), 'index.html');
 
@@ -122,7 +123,7 @@ test('dissection · coller, poser deux étiquettes au pointeur, lire la grille c
     await page.keyboard.press('Escape');
     await expect(page.locator('#dissection-terminer')).toBeHidden();
     await expect(page.locator('#dissection-bandeau-precision')).toBeHidden();
-    await expect(page.locator('#dissection-bandeau-texte')).toHaveText('Touche une étiquette dans la légende.');
+    await expect(page.locator('#dissection-bandeau')).toBeHidden();   // 13 nov. 2026 : la consigne est dans la carte ; rien en main, le bandeau ne s'affiche pas
     expect(await touchAction()).toBe('auto');
 
     // La grille comprise : un critère, deux réponses, sans points.
@@ -216,11 +217,11 @@ test('dissection · un collage piégé n’entre pas dans la page : rien ne s’
     expect(r.textes).toEqual(['Critère', 'A', '<b>gras</b>', '1']);
 });
 
-test('dissection · « Essayer avec un exemple » ouvre une grille fictive ; « Composer ma grille » mène à Grilles de critères', async ({ page }) => {
+test('dissection · la grille fictive, collée, s’ouvre ; « Composer ma grille » mène à Grilles de critères', async ({ page }) => {
     const erreurs = [];
     page.on('pageerror', (e) => erreurs.push(e.message));
     await ouvrirConception(page);
-    await page.locator('#materiel-accueil [data-action="materiel.essayerExemple"]').click();
+    await collerLExemple(page);
     await expect(page.locator('#materiel-dissection')).toBeVisible();
     await expect(page.locator('#dissection-contenu')).toContainText('Journal de lecture');
     await expect(page.locator('#dissection-contenu')).toContainText('TOTAL : / 30');

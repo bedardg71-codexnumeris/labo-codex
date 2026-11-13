@@ -42,16 +42,23 @@ export const GESTES_PROPOSES = {
         "Touche « Mettre à jour », puis range ton fichier dans un lieu protégé.",
         "Touche « Terminer ».",
     ],
+    // Lot « La carte d'aide dans Apporter mon matériel » (13 nov. 2026) : les lignes de l'accueil et de l'exemple ouvert
+    // vivent dans le module que « Ta grille » et la carte de la page appellent toutes deux ; les deux dernières, la sortie
+    // de l'exemple dans la page, sont PROPOSÉES ce jour-là.
+    'js/materiel-aide.js': [
+        "Colle ta grille, montre ce qu'est chaque morceau, puis touche « Créer ma grille » ; ou touche « Composer ma grille ».",
+        "Regarde chaque étiquette, puis la grille lue en dessous ; touche ensuite « Faire l'exercice soi-même » ou « Passer à ma grille ».",
+        "L'exemple est étiqueté : touche « Passer à ma grille ».",
+        "Regarde chaque étiquette, puis la grille lue en dessous ; touche ensuite « Quitter l'exemple ».",
+        "L'exemple est étiqueté : touche « Quitter l'exemple ».",
+    ],
     'js/parcours-evaluer.js': [
         "Choisis les points ou les niveaux.",
         // Lot de la dissection sur l'iPad (12 nov. 2026, point 7) : les boutons nommés tels qu'ils sont écrits ; l'exemple,
         // une grille déjà là, Conception › Grilles. PROPOSÉES.
-        "Colle ta grille, montre ce qu'est chaque morceau, puis touche « Créer ma grille » ; ou touche « Composer ma grille ».",
         "Touche « + Nouvelle grille », compose-la, puis touche « Créer la grille » ; ou ouvre une de tes grilles.",
         "Touche « Prendre cette grille » pour évaluer avec la grille ouverte ; ou ouvre-en une autre.",
         "Touche « Voir le travail complet » ou « Faire l'exercice soi-même » ; ou « Passer à ma grille ».",
-        "Regarde chaque étiquette, puis la grille lue en dessous ; touche ensuite « Faire l'exercice soi-même » ou « Passer à ma grille ».",
-        "L'exemple est étiqueté : touche « Passer à ma grille ».",
         "Touche « + Nouvelle production », remplis les champs obligatoires, choisis ta grille, puis touche « Créer la production ».",
         "Écris la date de remise, puis coche « Consignes transmises ».",
         "Touche « Actions › Évaluer » sur sa ligne, choisis un niveau par critère, puis touche « Verrouiller ».",

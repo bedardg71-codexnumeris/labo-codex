@@ -257,6 +257,16 @@ describe('La place de la bulle : loin de ce dont elle parle, sans le couvrir (Gr
         }
     });
 
+    it('un bord fractionnaire : la place collée sous le contour s’arrondit du côté libre (13 nov. 2026)', () => {
+        // Les rectangles relevés sur `parcours-8-commentaires` à 820 × 1180, étape 2 : arrondie au plus proche, la place
+        // sous le contour (bas à 152,45) tombait à 152, mordait sur lui, et la bulle se posait à 164, quatre pixels de
+        // zone couverts en trop. Break-test : `apres` remis à `Math.round` → 164, ROUGE.
+        const c = { gauche: 8, haut: 8, droite: 812, bas: 1172 };
+        const zones = [rect(52, 252.296875, 468, 1016.4375),
+            { ...rect(69, 734, 451, 985.4375), poids: 10000 }, { ...rect(52, 100.453125, 784, 152.453125), poids: 10000 }];
+        expect(placerLoin(zones, 380, 378, c)).toMatchObject({ x: 432, y: 153 });
+    });
+
     it('est déterministe : les mêmes rectangles rendent la même place', () => {
         const c = ECRANS['l’iPad en portrait, 820 × 1180'];
         const z = [rect(100, 200, 700, 600), rect(50, 700, 760, 1100)];

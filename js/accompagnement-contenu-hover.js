@@ -885,8 +885,6 @@ const TOOLTIPS = {
     // Les six dernières clés sont posées en JavaScript par js/materiel-dissection.js.
     // =================================================================
 
-    'materiel-essayer-exemple':
-        'Ouvre une grille fictive, pour essayer l’étiquetage sans ton propre document.',
     'materiel-taper-main':
         'Mène à Grilles, pour composer une grille directement dans l’application.',
     'materiel-coller-autre':

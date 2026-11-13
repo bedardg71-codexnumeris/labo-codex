@@ -360,7 +360,10 @@
         titre: 'Découvrir',
         ligne: "Ce que Labo Codex te montre avant d'entrer en classe, sur une classe de démonstration.",
         total: ETAPES.length,
-        lancer: lancer
+        lancer: lancer,
+        // Les deux temps (12 nov. 2026) : ce parcours ne se joue que dans la démo ; il part de la même façon
+        // sous « Modélisation » et sous « Pratique guidée » (js/assistance.js).
+        dansLaDemo: true
     });
 
     // Pour la sentinelle des textes (tests/unit) : les étapes telles qu'elles sont posées.

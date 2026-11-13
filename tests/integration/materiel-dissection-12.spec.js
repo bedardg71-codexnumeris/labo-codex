@@ -138,7 +138,7 @@ test('dissection 12 · les touchers de la capture, dans son ordre : le nom entie
     await outil(page).click();
     await toucher(page, milieu);
     await expect(morceau(page, milieu)).toHaveClass(/dissection-choisi/);
-    await expect(page.locator('#dissection-bandeau-texte')).toHaveText('Outil « Rattacher » : touche maintenant le morceau à joindre à « (exemples, contrastes, ». Retouche « (exemples, contrastes, » pour le détacher.');
+    await expect.poll(() => page.evaluate(() => window.materielDissection.consignes().outil)).toBe('Outil « Rattacher » : touche maintenant le morceau à joindre à « (exemples, contrastes, ». Retouche « (exemples, contrastes, » pour le détacher.');   // 13 nov. 2026 : la phrase de l'outil se lit dans la carte
     await toucher(page, milieu);
     await expect(statut(page)).toHaveText('Lien défait : « (exemples, contrastes, » redevient un morceau à part.');
     await expect(morceau(page, milieu)).not.toHaveClass(/dissection-rattache/);

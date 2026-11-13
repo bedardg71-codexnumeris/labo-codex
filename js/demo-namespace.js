@@ -314,10 +314,28 @@ async function initialiserDemoNamespace() {
     }
 }
 
+/**
+ * « Remettre la démo à neuf » (lot « deux temps », 12 nov. 2026) : toutes les clés `demo_*` sont
+ * effacées, puis le pack les réécrit. Rien hors de ce préfixe n'est lu ni écrit. Si le pack ne se
+ * charge pas, rien n'est effacé. L'appelant (`remettreDemoANeuf`, js/demo-activation.js) referme
+ * d'abord la démo.
+ * @returns {Promise<boolean>} true si la démo a été réécrite
+ */
+async function reinstallerDemoDuPack() {
+    const pack = await chargerPackDemarrage();
+    if (!pack) return false;
+    (await db.keys()).filter(function(c) { return c.indexOf('demo_') === 0; })
+        .forEach(function(c) { db.removeSync(c); });
+    peuplerNamespace(pack);
+    try { localStorage.setItem(CLE_VERSION, (pack._metadata && pack._metadata.version) || '0'); } catch (e) { /* storage indisponible */ }
+    return true;
+}
+
 // ============================================
 // Exports
 // ============================================
 
+window.reinstallerDemoDuPack = reinstallerDemoDuPack;
 window.cleDemo = cleDemo;
 window.initialiserDemoNamespace = initialiserDemoNamespace;
 window.CARTE_DEMO_ALIGNEMENT = CARTE_DEMO_ALIGNEMENT;

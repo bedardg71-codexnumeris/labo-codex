@@ -1,6 +1,7 @@
 import { test, expect } from '@playwright/test';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { collerLExemple } from './harness/exemple-colle.js';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const indexHtml = 'file://' + path.join(path.resolve(__dirname, '..', '..'), 'index.html');
 
@@ -30,7 +31,7 @@ test('lot 1 · Conception s’ouvre sur « Apporter mon matériel » ; l’exemp
     await expect(page.locator('#materiel-zone-collage')).toBeVisible();
 
     // La dissection, lot 1 (18 oct.) : l'exemple s'ouvre dans la dissection, sans étiquette.
-    await page.locator('[data-action="materiel.essayerExemple"]').click();
+    await collerLExemple(page);
     await expect(page.locator('#materiel-dissection')).toBeVisible();
     await expect(page.locator('#materiel-accueil')).toBeHidden();
     await expect(page.locator('#materiel-lecture')).toBeHidden();

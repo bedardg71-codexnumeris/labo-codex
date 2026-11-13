@@ -11,6 +11,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { attendreApplication } from './attendre-application.js';
+import { collerLExemple } from './exemple-colle.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 export const indexHtml = 'file://' + path.join(path.resolve(__dirname, '..', '..', '..'), 'index.html');
@@ -212,7 +213,7 @@ export async function etiqueter(page, type, textes) {
 
 /** L'exemple étiqueté jusqu'au choix « des points / des niveaux » (la grille porte les deux). */
 export async function etiqueterExemple(page) {
-    await page.click('#materiel-accueil [data-action="materiel.essayerExemple"]');
+    await collerLExemple(page);
     await expect(page.locator('#materiel-dissection')).toBeVisible();
     await etiqueter(page, 'titre', ['Journal de lecture']);
     await etiqueter(page, 'section', ['PARTIE A : COMPRÉHENSION', 'PARTIE B : RÉFLEXION']);
