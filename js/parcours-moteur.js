@@ -75,7 +75,17 @@
                                    // (les boutons du geste suivant dans une fenêtre que la bulle doit couvrir)
        atteint?: () => bool,       // l'état qui fait avancer
        boutons?: [{ libelle, primaire?, action, attend?: () => string }], // attend : ce qui manque (rien : actif)
+       complement?: () => [{ titre?, texte }], // des consignes à la suite du texte, en pages (voir « LE COMPLÉMENT »)
        sansSortie?: bool }
+   Une définition : { id, etapes, lienSortie?, sansRang?: bool (pas de « n sur N » : une carte qui n'est pas un parcours),
+       sansEchap?: bool (Échap reste à la page : la carte ne se ferme que par son lien de sortie) }.
+   LE COMPLÉMENT (lot « La carte d'aide dans Apporter mon matériel », 13 nov. 2026) : les consignes d'une page entrent
+   dans la bulle, à la suite du texte de l'étape, comme des pages de plus (« ← 2/3 → ») : une liste numérotée, un item
+   seul sans numéro. Elles suivent l'écran : relues à chaque passage de la sonde ; changées, la découpe est refaite, la
+   bulle passe à leur première page et les annonce. Une page de consignes ne dépasse pas LIGNES_PAR_PAGE lignes quand
+   ses items le permettent : la bulle n'est jamais plus haute qu'avec son texte seul.
+   LE SIGNAL : au lancement et à la fermeture, `document` reçoit « parcoursMoteur » ({ actif }) ; la carte d'une page
+   s'y règle (elle se retire devant un parcours, revient après lui).
    API : window.ParcoursMoteur.lancer(def, { depuis, surEtape, surQuitter, surEchap, verifier }),
          .fermer(), .actif(), .etapeCourante(), .joue(def), .surTelephone().
 
@@ -435,26 +445,94 @@
     }
 
     /**
+     * Le contenu d'une page, posé dans `cible` : un texte, ou les items d'un complément (une liste : des blocs dans le
+     * paragraphe, chacun son rang quand ils sont plusieurs, son titre en gras s'il en a un).
+     */
+    function remplirPage(cible, contenu) {
+        cible.textContent = '';
+        if (typeof contenu === 'string') { cible.textContent = contenu; return; }
+        contenu.forEach(function (item, k) {
+            if (k > 0) cible.appendChild(document.createTextNode(' '));   // lu d'un trait (l'annonce, une copie), les items restent séparés
+            var bloc = document.createElement('span');
+            bloc.className = 'parcours-bulle-item' + (item.n ? '' : ' parcours-bulle-item--seul');
+            bloc.setAttribute('role', 'listitem');
+            if (item.n) {
+                var rang = document.createElement('span');
+                rang.className = 'parcours-bulle-item-rang';
+                rang.textContent = item.n + '.';
+                bloc.appendChild(rang);
+                bloc.appendChild(document.createTextNode(' '));
+            }
+            if (item.titre) {
+                var t = document.createElement('strong');
+                t.textContent = item.titre;
+                bloc.appendChild(t);
+                bloc.appendChild(document.createTextNode(' '));
+            }
+            bloc.appendChild(document.createTextNode(item.texte));
+            cible.appendChild(bloc);
+        });
+    }
+
+    /** Le texte d'une page de complément, à plat (l'annonce, `pageQuiDit`). */
+    function texteDesItems(items) {
+        return items.map(function (x) { return (x.titre ? x.titre + ' ' : '') + x.texte; }).join(' ');
+    }
+
+    /** Le complément de l'étape, lu : ses items typographiés, numérotés quand ils sont plusieurs. */
+    function itemsDuComplement(etape) {
+        var liste = [];
+        try { liste = etape.complement ? (etape.complement() || []) : []; } catch (e) { liste = []; }
+        liste = liste.filter(function (x) { return x && x.texte; });
+        return liste.map(function (x, k) {
+            return { n: liste.length > 1 ? k + 1 : 0, titre: x.titre ? typographier(x.titre) : '', texte: typographier(x.texte) };
+        });
+    }
+
+    /**
+     * Les pages du complément, à la largeur de `p` : ses items dans l'ordre, une page tant qu'ils tiennent sous le
+     * `plafond` ; un item plus haut que lui a sa page à lui. Le plafond : la hauteur de la plus haute page du texte de
+     * l'étape (le complément ne grandit pas la bulle : mesuré sous WebKit le 13 nov. 2026, à 820 × 1180, neuf lignes au
+     * lieu de huit, et « Ta grille » couvrait la zone de collage) ; sans texte, LIGNES_PAR_PAGE lignes.
+     */
+    function pagesDuComplement(p, items, textes) {
+        if (!items.length) return [];
+        var ligne = parseFloat(getComputedStyle(p).lineHeight) || 22;
+        var plafond = LIGNES_PAR_PAGE * ligne + 1;
+        if (textes.length) plafond = Math.max.apply(null, textes.map(function (t) { p.textContent = t; return p.scrollHeight; })) + 1;
+        var pages = [], page = [];
+        items.forEach(function (item) {
+            remplirPage(p, page.concat([item]));
+            if (page.length && p.scrollHeight > plafond) { pages.push(page); page = []; }
+            page.push(item);
+        });
+        pages.push(page);
+        return pages;
+    }
+
+    /**
      * Toutes les pages prennent la hauteur de la plus haute (sa base flex) : « ← » et « → » ne bougent pas
      * sous le doigt d'une page à l'autre. Sous la contrainte du filet, le texte se resserre encore.
      */
-    function egaliserPages(p, pages) {
+    function egaliserPages(p, contenus) {
         p.style.flexBasis = '';
-        if (pages.length < 2) return;
+        if (contenus.length < 2) return;
         var haute = 0;
-        pages.forEach(function (pg) { p.textContent = pg; haute = Math.max(haute, p.scrollHeight); });
+        contenus.forEach(function (c) { remplirPage(p, c); haute = Math.max(haute, p.scrollHeight); });
         p.style.flexBasis = haute + 'px';
     }
 
     /** Pose les pages dans le texte de la bulle : toutes, dans l'ordre ; celle qu'on lit est visible. */
-    function ecrirePages(p, pages) {
+    function ecrirePages(p, contenus) {
         p.textContent = '';
-        pages.forEach(function (pg, k) {
+        contenus.forEach(function (c, k) {
             if (k > 0) p.appendChild(document.createTextNode(' '));
             var span = document.createElement('span');
-            span.className = 'parcours-bulle-page';
+            var liste = typeof c !== 'string';
+            span.className = 'parcours-bulle-page' + (liste ? ' parcours-bulle-page--liste' : '');
+            if (liste) span.setAttribute('role', 'list');
             span.dataset.page = String(k);
-            span.textContent = pg;
+            remplirPage(span, c);
             p.appendChild(span);
         });
     }
@@ -530,9 +608,18 @@
         var p = b.querySelector('.parcours-bulle-texte');
         if (!p) return;
         etat.largeurPages = p.offsetWidth;
-        etat.pages = decouperEnPages(p, etat.texte);
-        egaliserPages(p, etat.pages);
-        ecrirePages(p, etat.pages);
+        // Le texte de l'étape (aucun : la carte d'une page n'a que ses consignes), puis les pages de son complément.
+        p.hidden = false;
+        p.style.minHeight = '';   // une hauteur gardée fausserait la mesure (scrollHeight ne descend pas sous elle)
+        p.style.flexBasis = '';
+        var textes = etat.texte ? decouperEnPages(p, etat.texte) : [];
+        var listes = pagesDuComplement(p, etat.complement || [], textes);
+        var contenus = textes.concat(listes);
+        etat.pages = textes.concat(listes.map(texteDesItems));
+        etat.pageComplement = listes.length ? textes.length : -1;
+        p.hidden = !contenus.length;
+        egaliserPages(p, contenus);
+        ecrirePages(p, contenus);
         var plusieurs = etat.pages.length > 1;
         var nav = b.querySelector('.parcours-bulle-nav');
         if (nav) nav.hidden = !plusieurs;
@@ -583,6 +670,15 @@
         return String(t == null ? '' : t).replace(/« /g, '«\u00a0').replace(/ »/g, '\u00a0»');
     }
 
+    /** « n sur N », dans la tête ; rien pour une carte qui n'est pas un parcours (`sansRang`). */
+    function rangDeLEtape(total) {
+        if (etat.def.sansRang) return [];
+        var rang = document.createElement('span');
+        rang.className = 'parcours-bulle-rang';
+        rang.textContent = (etat.i + 1) + ' sur ' + total;
+        return [rang];
+    }
+
     function rendreBulle(opts) {
         var etape = etapeCourante();
         var b = etat.elements.bulle;
@@ -601,11 +697,8 @@
         h.className = 'parcours-bulle-titre';
         h.id = 'parcours-bulle-titre';
         h.textContent = typographier(etape.titre);
-        var rang = document.createElement('span');
-        rang.className = 'parcours-bulle-rang';
-        rang.textContent = (etat.i + 1) + ' sur ' + total;
         tete.appendChild(h);
-        tete.appendChild(rang);
+        rangDeLEtape(total).forEach(function (rang) { tete.appendChild(rang); });
         if (etat.telephone) {
             // Un bouton posé sur la tête (une tête de section ne va pas DANS un bouton) : son nom
             // est le titre, son état dit si la bulle est dépliée.
@@ -663,6 +756,8 @@
         // Seule la forme change (le seuil du téléphone franchi) : la page affichée reste.
         // Les espaces insécables des guillemets (typographier) avant la découpe : les pages les gardent.
         etat.texte = typographier(etape.texte);
+        etat.complement = itemsDuComplement(etape);
+        etat.signatureComplement = JSON.stringify(etat.complement);
         paginer(opts && opts.sansAnnonce ? etat.page : 0);
 
         if (etape.geste) {
@@ -704,13 +799,19 @@
         // L'annonce : le titre et le texte, puis le geste. Vidée d'abord, pour qu'un même
         // texte soit relu s'il revient. Pas d'annonce quand seule la forme change (le seuil franchi).
         if (opts && opts.sansAnnonce) { appliquerRepli(); return; }
+        annoncerEtape(etape);
+        appliquerRepli();
+    }
+
+    /** L'annonce d'une étape : son titre, son texte, son complément, puis son geste. */
+    function annoncerEtape(etape) {
         var a = etat.elements.annonce;
         a.textContent = '';
         setTimeout(function () {
             if (!etat) return;
-            a.textContent = etape.titre + '. ' + etape.texte + (etape.geste ? ' ' + etape.geste : '');
+            var suite = (etat.complement || []).length ? ' ' + texteDesItems(etat.complement) : '';
+            a.textContent = etape.titre + '. ' + etape.texte + suite + (etape.geste ? ' ' + etape.geste : '');
         }, 50);
-        appliquerRepli();
     }
 
     /** La hauteur de la bulle si son texte ne défilait pas (le texte est la seule zone qui défile). */
@@ -1052,9 +1153,13 @@
         // À égale distance, la droite d'abord (la place de la bulle étroite à droite de l'aperçu, « Mettre tes données à
         // l'abri », 3) ; puis le haut.
         var xs = [d, mx, g], ys = [h, my, b];
+        // Une place qui longe une zone s'arrondit du côté LIBRE (13 nov. 2026) : arrondie au plus proche, la place
+        // collée sous un bord à 152,45 tombait à 152, mordait d'un demi-pixel sur le contour (pesé dix mille fois) et
+        // perdait contre la place à ECART px, quatre pixels de recouvrement plus bas (parcours-8, 820 px, étape 2).
+        var avant = Math.floor, apres = Math.ceil;
         evites.forEach(function (r) {
-            xs.push(r.left - bw, r.left - ECART - bw, r.left, r.right - bw, r.right, r.right + ECART);
-            ys.push(r.top - bh, r.top - ECART - bh, r.top, r.bottom - bh, r.bottom, r.bottom + ECART);
+            xs.push(avant(r.left - bw), avant(r.left - ECART - bw), r.left, r.right - bw, apres(r.right), apres(r.right + ECART));
+            ys.push(avant(r.top - bh), avant(r.top - ECART - bh), r.top, r.bottom - bh, apres(r.bottom), apres(r.bottom + ECART));
         });
         var places = [];
         xs.forEach(function (x) {
@@ -1333,6 +1438,22 @@
         etat.elements.annonce.textContent = texte;
     }
 
+    /**
+     * Le complément, relu (voir « LE COMPLÉMENT ») : changé avec l'écran, la découpe est refaite, la bulle passe à sa
+     * première page et l'annonce. Inchangé : rien, la personne tourne les pages à son gré.
+     */
+    function suivreComplement(etape) {
+        if (!etape.complement) return;
+        var items = itemsDuComplement(etape), s = JSON.stringify(items);
+        if (s === etat.signatureComplement) return;
+        etat.complement = items;
+        etat.signatureComplement = s;
+        paginer(etat.page);
+        if (etat.pageComplement === -1) return;
+        montrerPage(etat.pageComplement);
+        etat.elements.annonce.textContent = texteDesItems(items);
+    }
+
     /** L'avis de l'étape (voir « L'AVIS ») : posé sous le texte, changé, ou retiré ; annoncé par son rôle. */
     function poserAvis(etape) {
         var b = etat.elements.bulle;
@@ -1444,6 +1565,7 @@
         }
 
         poserGeste(etape);
+        suivreComplement(etape);
         poserAvis(etape);
         poserAttentes(etape);
         if (!zoom) suivreEcran(etape);
@@ -1575,7 +1697,7 @@
     }
 
     function surTouche(ev) {
-        if (!etat || ev.key !== 'Escape') return;
+        if (!etat || ev.key !== 'Escape' || etat.def.sansEchap) return;
         var etape = etapeCourante();
         ev.stopPropagation();
         ev.preventDefault();
@@ -1591,8 +1713,9 @@
         etat = { def: def, i: 0, opts: opts || {}, elements: creerElements(), enTransition: false,
                  telephone: surTelephone(), replie: false, reglerJusqua: 0, texte: '', pages: [], page: 0, largeurPages: 0,
                  deplacee: null, glisse: null, vus: null, sectionActuelle: null, doigts: 0, hauteurGardee: 0, pageDite: null,
-                 contourSuivi: '' };
+                 contourSuivi: '', complement: [], signatureComplement: '[]', pageComplement: -1 };
         document.body.classList.add('parcours-actif');
+        signaler();
         if (window.transitions && typeof window.transitions.fermerBandeau === 'function') window.transitions.fermerBandeau();
         // 9 nov. 2026 : une flèche didactique déjà ouverte se retire, sans être marquée vue (la bulle parle seule).
         if (window.accompagnement && typeof window.accompagnement.masquerFleche === 'function') window.accompagnement.masquerFleche();
@@ -1628,6 +1751,12 @@
         retirerElements();
         document.documentElement.style.removeProperty('--parcours-reserve-bas');
         document.body.classList.remove('parcours-actif');
+        signaler();
+    }
+
+    /** Le signal du moteur (voir « LE SIGNAL ») : lancé ou fermé. */
+    function signaler() {
+        try { document.dispatchEvent(new CustomEvent('parcoursMoteur', { detail: { actif: !!etat } })); } catch (e) { /* rien à dire */ }
     }
 
     function quitter() {

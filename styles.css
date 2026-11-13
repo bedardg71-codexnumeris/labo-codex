@@ -29952,26 +29952,45 @@ body.mode-clair {
 .materiel-intro { max-width: 780px; }
 .materiel-intro h2 { margin: 0 0 12px; }
 .materiel-intro p { margin: 0; font-size: 1.1rem; line-height: 1.55; color: var(--texte-secondaire); }
-.materiel-etapes { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 12px; }
-.materiel-etapes li {
-    flex: 1 1 240px; display: flex; gap: 12px; align-items: flex-start;
-    background: var(--surface-carte); border: 1px solid var(--bordure-claire);
-    border-radius: var(--radius-grand); padding: 16px;
+/* Lot « La carte d'aide dans Apporter mon matériel » (13 nov. 2026) : les trois cartes de l'accueil sont dans la carte
+   (js/materiel-aide.js). L'interrupteur qui l'offre : une case à cocher (role="switch") sous une piste dessinée ; la
+   rangée entière se touche (44 px), le focus se voit sur la piste. Couleurs : variables seulement, clair comme sombre. */
+/* Sa place (Grégoire, 13 nov. 2026, 10 h 00) : après le paragraphe, à droite ; même règle sous l'en-tête de l'étiquetage
+   (js/materiel-aide.js, `placer`). Les marges négatives reprennent une part de l'écart de la colonne : la zone de collage
+   et la grille ne descendent que d'une trentaine de pixels. */
+.materiel-aide-interrupteur { display: flex; justify-content: flex-end; margin: 0; }
+/* À l'accueil, à droite DU PARAGRAPHE (sa colonne de 780 px), pas de la page. Écran large (iPad couché) : la carte se
+   pose en haut à droite, 380 px de large à 8 px du bord (css/parcours.css) ; l'interrupteur s'arrête avant elle, carte
+   ouverte ou non : il ne saute pas quand on le touche (mesuré le 13 nov. à 1180 × 820 : il passait dessous). */
+.materiel-accueil > .materiel-aide-interrupteur { margin: -12px 0; max-width: 780px; }
+@media (min-width: 1000px) {
+    .materiel-accueil > .materiel-aide-interrupteur { max-width: min(780px, calc(100% - 396px)); }
 }
-.materiel-etapes li > div { display: flex; flex-direction: column; gap: 4px; }
-.materiel-etapes li span:not(.materiel-etape-numero) { color: var(--texte-muted); font-size: 0.9rem; line-height: 1.45; }
-.materiel-etape-numero {
-    flex: none; width: 32px; height: 32px; border-radius: 50%;
-    display: flex; align-items: center; justify-content: center; font-weight: 700;
-    background: var(--accent-primaire); color: var(--surface-carte);
+.dissection > .materiel-aide-interrupteur { margin: -4px 0; }
+.interrupteur { display: inline-flex; align-items: center; gap: 12px; min-height: 44px; cursor: pointer; position: relative; -webkit-user-select: none; user-select: none; }
+.interrupteur-case { position: absolute; opacity: 0; width: 52px; height: 44px; margin: 0; left: 0; top: 50%; transform: translateY(-50%); cursor: pointer; }
+.interrupteur-piste {
+    flex: none; position: relative; width: 52px; height: 30px; box-sizing: border-box; border-radius: 15px;
+    border: 2px solid var(--texte-secondaire); background: transparent; transition: background-color 0.15s ease, border-color 0.15s ease;
 }
+.interrupteur-piste::after {
+    content: ''; position: absolute; top: 3px; left: 3px; width: 20px; height: 20px; border-radius: 50%;
+    background: var(--texte-secondaire); transition: transform 0.15s ease, background-color 0.15s ease;
+}
+.interrupteur-case:checked + .interrupteur-piste { background: var(--accent-primaire); border-color: var(--accent-primaire); }
+.interrupteur-case:checked + .interrupteur-piste::after { transform: translateX(22px); background: var(--surface-carte); }
+.interrupteur-case:focus-visible + .interrupteur-piste { outline: 3px solid var(--focus-ring-color); outline-offset: 2px; }
+.interrupteur-libelle { font-weight: 600; color: var(--texte-principal); line-height: 1.3; }
+@media (prefers-reduced-motion: reduce) { .interrupteur-piste, .interrupteur-piste::after { transition: none; } }
 .materiel-collage {
     display: flex; flex-direction: column; gap: 14px;
     background: var(--surface-carte); border: 1px solid var(--bordure-claire);
     border-radius: var(--radius-grand); padding: 24px;
 }
 .materiel-collage label { font-weight: 600; font-size: 1rem; }
-.materiel-zone { width: 100%; min-height: 160px; border: 2px dashed var(--bordure-moyenne); resize: vertical; line-height: 1.4; }
+/* 13 nov. 2026 : 96 px (160 avant). Les trois cartes de l'accueil parties dans la carte, la zone remonte ; debout sur l'iPad,
+   « Ta grille » n'a plus sa place au-dessus d'elle : elle se range dessous, si la zone lui laisse la hauteur. */
+.materiel-zone { width: 100%; min-height: 96px; border: 2px dashed var(--bordure-moyenne); resize: vertical; line-height: 1.4; }
 .materiel-collage .alerte { margin: 0; }
 .materiel-actions { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
 .materiel-actions .btn { min-height: 44px; }
@@ -30144,8 +30163,10 @@ body.mode-clair {
 .dissection h2, .dissection h3, .dissection p { margin: 0; }
 .dissection-tete { display: flex; flex-wrap: wrap; gap: 14px 28px; align-items: flex-end; justify-content: space-between; }
 .dissection-tete-texte { display: flex; flex-direction: column; gap: 6px; min-width: 0; max-width: 78ch; }
-.dissection-consignes { margin: 4px 0 0; padding-left: 1.3em; color: var(--texte-secondaire); display: flex; flex-direction: column; gap: 2px; line-height: 1.45; }
-.dissection-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+/* 13 nov. 2026 (la carte d'aide) : les consignes parties, les boutons restent sur leur rangée, à gauche sous le titre
+   (où ils se rangeaient sous elles). À droite du titre, la carte, qui se pose en haut à droite, couvrait « Composer ma
+   grille » (mesuré sous WebKit à 1180 × 820). */
+.dissection-actions { display: flex; flex-wrap: wrap; gap: 8px; flex: 1 0 100%; }
 .dissection-actions .btn, .dissection-bandeau .btn { min-height: 44px; }
 .dissection-statut { min-height: 1.5em; color: var(--texte-secondaire); font-size: 0.92rem; }
 
@@ -30203,6 +30224,8 @@ body.mode-clair {
     background: var(--surface-carte); border: 2px solid var(--bordure-moyenne); border-radius: var(--radius-moyen); padding: 8px 12px;
 }
 .dissection-bandeau.dissection-bandeau-actif { border-color: var(--dis-c, var(--accent-primaire)); }
+/* 13 nov. 2026 : sans étiquette ni outil en main, le bandeau n'a ni texte ni bouton : il ne s'affiche pas, sa place reste. */
+.dissection-bandeau.dissection-bandeau-vide { visibility: hidden; }
 .dissection-bandeau-textes { display: flex; flex-direction: column; gap: 2px; min-width: 0; flex: 1 1 320px; }
 .dissection-bandeau-precision { font-size: 0.88rem; font-style: italic; color: var(--texte-secondaire); }
 .dissection-canevas {

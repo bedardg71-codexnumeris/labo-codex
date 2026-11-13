@@ -15,6 +15,7 @@
 import { test, expect } from '@playwright/test';
 import { ouvrirEspaceVide, mettreLaClasseEnPlace, attendreEtape, contourSur, bulle, bulleNeCouvrePas, capture } from './harness/classe-de-banc.js';
 import { flecheVers } from './harness/fleches-de-banc.js';
+import { collerLExemple } from './harness/exemple-colle.js';
 
 const DOSSIER = process.env.CAPTURES_PARCOURS || '';
 const TAILLES = [[1180, 820], [820, 1180]];
@@ -117,34 +118,35 @@ for (const [L, H] of TAILLES) {
         await ouvrirEspaceVide(page, L, { hauteur: H });
         await page.evaluate(() => naviguerVers('conception', 'materiel'));
         expect(await aLEcran(page), 'l’accueil').not.toMatch(INTERDITS);
-        await page.click('#materiel-accueil [data-action="materiel.essayerExemple"]');
+        await collerLExemple(page);
         await expect(page.locator('.dissection-legende-titre')).toHaveText('Légende');
         await expect(page.locator('#dissection-palette')).toHaveAttribute('aria-label', 'Légende');
-        await expect(page.locator('#dissection-bandeau-texte')).toHaveText('Touche une étiquette dans la légende.');
-        await expect(page.locator('.dissection-consignes li').nth(1)).toHaveText('Touche les morceaux de ta grille qu’elle désigne : ils prennent sa couleur. Pour en étiqueter plusieurs d’un coup, glisse dessus. Touche un morceau déjà étiqueté pour retirer son étiquette.');
+        await expect(page.locator('#dissection-bandeau')).toBeHidden();   // 13 nov. 2026 : la consigne est dans la carte ; rien en main, le bandeau ne s'affiche pas
+        expect(await page.evaluate(() => window.materielDissection.consignes().etapes[0])).toBe('Touche une étiquette dans la légende.');
+        expect(await page.evaluate(() => window.materielDissection.consignes().etapes[1])).toBe('Touche les morceaux de ta grille qu’elle désigne : ils prennent sa couleur. Pour en étiqueter plusieurs d’un coup, glisse dessus. Touche un morceau déjà étiqueté pour retirer son étiquette.');
         expect(await aLEcran(page), 'la dissection ouverte').not.toMatch(INTERDITS);
         await toucher(page, 'Journal de lecture');   // sans étiquette choisie
         await expect(page.locator('#dissection-statut')).toHaveText('Touche une étiquette dans la légende.');
         await page.click(etiquette('critere'));
-        await expect(page.locator('#dissection-bandeau-texte')).toHaveText('Étiquette « Critère » : touche les morceaux de ta grille qu’elle désigne. Touche un morceau déjà étiqueté pour retirer son étiquette.');
+        await expect(page.locator('#dissection-statut')).toHaveText('Étiquette « Critère » choisie.');   // 13 nov. 2026 : le fait reste, la consigne est dans la carte
         await toucher(page, 'L’étudiant·e résume l’œuvre avec justesse');
         expect(await aLEcran(page), 'une étiquette choisie et posée').not.toMatch(INTERDITS);
         await capture(page, DOSSIER, `l2-legende-${L}x${H}`);
         // Un doigt posé dans l'application : la phrase du doigt, à la prochaine ouverture (pas sous le doigt : la grille bougerait).
-        const consigne = page.locator('#dissection-consigne-plusieurs');
+        const consigne = () => page.evaluate(() => window.materielDissection.consignes().etapes[1]);   // 13 nov. 2026 : la consigne se lit dans la carte
         await page.evaluate(() => {
             const b = document.querySelector('#dissection-contenu .dissection-morceau');
             b.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true, cancelable: true, pointerId: 31, pointerType: 'touch', isPrimary: true }));
             b.dispatchEvent(new PointerEvent('pointercancel', { bubbles: true, cancelable: true, pointerId: 31, pointerType: 'touch', isPrimary: true }));
         });
-        await expect(consigne).toHaveText('Pour en étiqueter plusieurs d’un coup, glisse dessus.');
+        expect(await consigne()).toContain('Pour en étiqueter plusieurs d’un coup, glisse dessus.');
         await collerUneAutre(page);
         await page.evaluate(() => {
-            const b = document.querySelector('#materiel-accueil [data-action="materiel.essayerExemple"]');
+            const b = document.querySelector('#materiel-accueil [data-action="materiel.ouvrirExemple"][data-param="exercice"]');
             b.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true, cancelable: true, pointerId: 32, pointerType: 'touch', isPrimary: true }));
             b.click();
         });
-        await expect(consigne).toHaveText('Pour en étiqueter plusieurs d’un coup, garde le doigt posé un instant, puis glisse.');
+        expect(await consigne()).toContain('Pour en étiqueter plusieurs d’un coup, garde le doigt posé un instant, puis glisse.');
     });
 }
 
@@ -154,7 +156,7 @@ for (const [L, H] of TAILLES) {
 test('L5 · 1180 × 820 : les flèches d’étiquetage suivent le défilement de la légende, bornées à son cadre', async ({ page }) => {
     await ouvrirEspaceVide(page, 1180, { hauteur: 820 });
     await page.evaluate(() => naviguerVers('conception', 'materiel'));
-    await page.click('#materiel-accueil [data-action="materiel.essayerExemple"]');
+    await collerLExemple(page);
     expect(await defile(page), 'à 1180 × 820, la légende défile').toBe(true);
     await poser(page, 'points', ['2', '3']);
     // Le départ de la première flèche, et celui qu'elle doit avoir : le bord de l'étiquette en main, borné au cadre.

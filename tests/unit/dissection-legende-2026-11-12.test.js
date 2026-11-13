@@ -65,7 +65,9 @@ describe('L — la légende, nulle part le surligneur', () => {
         const zone = doc.getElementById('conception-materiel');
         expect(zone, 'la sous-section existe').toBeTruthy();
         const texte = zone.textContent.replace(/\s+/g, ' ');
-        expect(texte).toContain('Touche une étiquette dans la légende.');
+        // 13 nov. 2026 (la carte d'aide) : les consignes ont quitté la page ; la carte les dit (`consignes`).
+        expect(texte).not.toContain('Touche une étiquette dans la légende.');
+        expect(lire('js/materiel-dissection.js')).toContain("aucune: 'Touche une étiquette dans la légende.'");
         expect(texte.match(new RegExp('.{0,40}(' + INTERDITS.source + ').{0,40}', 'gi')) || []).toEqual([]);
         const attributs = [...zone.querySelectorAll('[aria-label], [title], [placeholder]')]
             .flatMap((e) => ['aria-label', 'title', 'placeholder'].map((a) => e.getAttribute(a)).filter(Boolean));

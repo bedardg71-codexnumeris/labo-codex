@@ -139,7 +139,7 @@ test('dissection 5 · « Couper » : (d) refusée en nommant, coupée au pointeu
     // « Couper » en main : le bandeau, « Terminer », pas encore d'annulation ; l'outil ne compte rien.
     await page.locator('#dissection-palette [data-param="couper"]').click();
     await expect(page.locator('#dissection-palette [data-param="couper"]')).toHaveAttribute('aria-pressed', 'true');
-    await expect(page.locator('#dissection-bandeau-texte')).toHaveText('Outil « Couper » : touche l’endroit d’un morceau où le séparer en deux. La coupe tombe entre deux mots.');
+    await expect.poll(() => page.evaluate(() => window.materielDissection.consignes().outil)).toBe('Outil « Couper » : touche l’endroit d’un morceau où le séparer en deux. La coupe tombe entre deux mots.');   // 13 nov. 2026 : la phrase de l'outil se lit dans la carte
     await expect(page.locator('#dissection-terminer')).toBeVisible();
     await expect(page.locator('#dissection-annuler-coupe')).toBeHidden();
 

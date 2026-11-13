@@ -100,7 +100,7 @@ test('dissection 7 · « Rattacher » : deux touchers au pointeur, marque et fl�
 
     // Un lien seul (aucune étiquette) suffit à faire confirmer « Coller une autre grille ».
     await outil(page).click();
-    await expect(page.locator('#dissection-bandeau-texte')).toHaveText('Outil « Rattacher » : touche deux morceaux d’un même texte, dans l’ordre que tu veux ; l’application les lit dans l’ordre de ta grille. Touche deux fois un morceau rattaché pour le détacher.');
+    await expect.poll(() => page.evaluate(() => window.materielDissection.consignes().outil)).toBe('Outil « Rattacher » : touche deux morceaux d’un même texte, dans l’ordre que tu veux ; l’application les lit dans l’ordre de ta grille. Touche deux fois un morceau rattaché pour le détacher.');   // 13 nov. 2026 : la phrase de l'outil se lit dans la carte
     await toucher(page, NOM_D7[2]);
     await toucher(page, NOM_D7[0]);
     await page.keyboard.press('Escape');
@@ -126,7 +126,7 @@ test('dissection 7 · « Rattacher » : deux touchers au pointeur, marque et fl�
     await outil(page).click();
     await expect(autre).toHaveText('Coller une autre grille');
     await toucher(page, NOM_D7[2]);
-    await expect(statut(page)).toHaveText('Morceau choisi : « renvois) ». Touche maintenant celui à lui joindre, ou retouche-le pour le détacher.');
+    await expect(statut(page)).toHaveText('Morceau choisi : « renvois) ».');
     await toucher(page, NOM_D7[2]);
     await expect(statut(page)).toHaveText('Lien défait : « renvois) » redevient un morceau à part.');
     await expect(morceau(page, NOM_D7[2])).not.toHaveClass(/dissection-rattache/);
@@ -147,8 +147,8 @@ test('dissection 7 · « Rattacher » : deux touchers au pointeur, marque et fl�
     await expect(outil(page)).toHaveAttribute('aria-pressed', 'true');
     await toucher(page, NOM_D7[2]);
     await expect(morceau(page, NOM_D7[2])).toHaveClass(/dissection-choisi/);
-    await expect(page.locator('#dissection-bandeau-texte')).toHaveText('Outil « Rattacher » : touche maintenant le morceau à joindre à « renvois) ». Retouche « renvois) » pour annuler.');
-    await expect(statut(page)).toHaveText('Morceau choisi : « renvois) ». Touche maintenant celui à lui joindre.');
+    await expect.poll(() => page.evaluate(() => window.materielDissection.consignes().outil)).toBe('Outil « Rattacher » : touche maintenant le morceau à joindre à « renvois) ». Retouche « renvois) » pour annuler.');   // 13 nov. 2026 : la phrase de l'outil se lit dans la carte
+    await expect(statut(page)).toHaveText('Morceau choisi : « renvois) ».');
     await toucher(page, NOM_D7[2]);
     await expect(morceau(page, NOM_D7[2])).not.toHaveClass(/dissection-choisi/);
     await expect(statut(page)).toHaveText('Choix annulé : aucun lien créé.');

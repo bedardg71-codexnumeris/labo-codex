@@ -246,6 +246,15 @@ body.mode-clair {
    pour que le lecteur d'écran lise tout, dans l'ordre. Le span reste en ligne, dans le paragraphe. */
 .parcours-bulle-page { display: inline; }
 
+/* Le complément (lot « La carte d'aide dans Apporter mon matériel », 13 nov. 2026) : les consignes d'une page, à la suite
+   du texte, comme des pages de plus. Une liste : des blocs dans le paragraphe, le rang dans la marge, le titre en gras. */
+.parcours-bulle-page--liste { display: block; }
+.parcours-bulle-texte[hidden] { display: none; }
+.parcours-bulle-item { display: block; position: relative; padding-left: 1.5em; font-size: 13.5px; line-height: 1.45; }
+.parcours-bulle-item + .parcours-bulle-item { margin-top: 2px; }
+.parcours-bulle-item--seul { padding-left: 0; }
+.parcours-bulle-item-rang { position: absolute; left: 0; top: 0; font-weight: 600; color: var(--texte-secondaire); font-variant-numeric: tabular-nums; }
+
 .parcours-bulle-nav {
     display: flex;
     justify-content: flex-end;

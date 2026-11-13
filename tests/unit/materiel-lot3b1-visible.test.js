@@ -138,8 +138,10 @@ describe('lot 3b1 · C et T — la confirmation, les textes', () => {
     });
 
     // 19 oct. 2026 : le message « aucun tableau » est parti avec l'assistant en sept étapes, qui seul l'affichait.
-    it('T.a l’étape 1 de l’accueil parle du fichier d’origine', () => {
-        const html = readFileSync(path.join(racine, 'index.html'), 'utf8');
+    // 13 nov. 2026 (la carte d'aide) : les trois cartes de l'accueil ont quitté la page pour la carte, mot pour mot.
+    it('T.a l’étape 1 de l’accueil parle du fichier d’origine (dans la carte, plus dans la page)', () => {
+        expect(readFileSync(path.join(racine, 'index.html'), 'utf8')).not.toContain('Ouvre ta grille dans son fichier d’origine');
+        const html = readFileSync(path.join(racine, 'js', 'materiel-aide.js'), 'utf8');
         expect(html).toContain('Ouvre ta grille dans son fichier d’origine (Word, Pages ou un autre traitement de texte), sélectionne le tableau entier – pas seulement le texte de ses cases (ou ses cellules), mais bien le tableau –, puis copie-le. Le texte copié d’un PDF est accepté aussi, mais il arrive sans ses cases : le fichier d’origine donne un meilleur résultat.');
     });
 });

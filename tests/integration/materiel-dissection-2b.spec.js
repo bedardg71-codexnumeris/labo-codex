@@ -2,6 +2,7 @@ import { test, expect } from '@playwright/test';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { GRILLE_N, enHtml } from '../unit/_helpers/grilles-fictives-dissection.js';
+import { collerLExemple } from './harness/exemple-colle.js';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const indexHtml = 'file://' + path.join(path.resolve(__dirname, '..', '..'), 'index.html');
 
@@ -80,7 +81,7 @@ test('dissection 2b · l’exemple, « des niveaux » choisi, le tableau rempli,
     page.on('pageerror', (e) => erreurs.push(e.message));
     await page.setViewportSize({ width: 820, height: 1180 });
     await ouvrirConception(page);
-    await page.locator('[data-action="materiel.essayerExemple"]').click();
+    await collerLExemple(page);
     await etiqueter(page, 'titre', ['Journal de lecture']);
     await etiqueter(page, 'section', ['PARTIE A : COMPRÉHENSION', 'PARTIE B : RÉFLEXION']);
     await etiqueter(page, 'niveau', NIVEAUX);
