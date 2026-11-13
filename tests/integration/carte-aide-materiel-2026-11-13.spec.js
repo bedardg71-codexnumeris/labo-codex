@@ -17,7 +17,7 @@
 // Break-tests : `plans de travail/RAPPORT-2026-11-13-carte-aide-materiel.md`. Grilles FICTIVES ; noms fictifs.
 import { test, expect } from '@playwright/test';
 import { ouvrirEspaceVide, mettreLaClasseEnPlace, attendreEtape, contourSur, deuxSondes, bulle, bulleNeCouvrePas, capture } from './harness/classe-de-banc.js';
-import { flecheVers } from './harness/fleches-de-banc.js';
+import { flecheVers, flecheVersMorceau } from './harness/fleches-de-banc.js';
 import { attendreApplication } from './harness/attendre-application.js';
 
 const DOSSIER = process.env.CAPTURES_PARCOURS || '';
@@ -311,7 +311,8 @@ for (const [L, H] of TAILLES) {
         await gesteEst(page, '« / 5 » n’a aucun critère dans sa rangée : prends « Critère », puis touche « Introduction ».');
         await contourSur(page, etiquette('critere'));
         await flecheVers(page, etiquette('critere'), 'l’étiquette à prendre');
-        await flecheVers(page, await morceau(page, 'Introduction'), 'le morceau');
+        // 13 nov. 2026 : après un étiquetage dans la colonne de droite, « Introduction » n'est plus ramené dans le canevas.
+        await flecheVersMorceau(page, await morceau(page, 'Introduction'), 'le morceau');
         await capture(page, DOSSIER, `i2-etiquette-a-prendre-${cap}`);
         await page.locator(etiquette('critere')).evaluate((b) => b.click());
         await contourSur(page, await morceau(page, 'Introduction'));

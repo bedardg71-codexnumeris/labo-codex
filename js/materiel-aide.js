@@ -70,7 +70,9 @@
     function premierGesteDeLAide(a) {
         if (!a) return null;
         if (vis(a.etiquetteEl) && !a.enMain) return a.etiquetteEl;
-        if (vis(a.morceauEl)) return a.morceauEl;
+        // 13 nov. 2026 : un morceau défilé hors du canevas n'est pas entouré ; le moteur l'aurait amené (`suivreContour`),
+        // et la feuille aurait bougé sous la personne qui étiquette ailleurs.
+        if (vis(a.morceauEl)) return a.morceauVu ? a.morceauEl : null;
         return vis(a.cibleEl) ? a.cibleEl : null;
     }
 
@@ -278,6 +280,10 @@
     function basculer(bascule) {
         ouvert = !!(bascule && bascule.checked);
         ecrirePref({ ouvert: ouvert });
+        // 13 nov. 2026 : la carte rouverte par la personne amène dans le canevas le morceau qu'elle désigne (un geste
+        // d'étiquetage, lui, ne déplace plus la feuille).
+        var d = dissection();
+        if (ouvert && d) d.amenerLeMorceauDesigne();
         regler();
     }
 

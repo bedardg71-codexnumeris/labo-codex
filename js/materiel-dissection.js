@@ -545,9 +545,9 @@
 
     /** Un surlignage fini : la palette, la lecture, le brouillon ; un membre rattaché touché, dit. */
     function finSurlignage() {
-        // Après un geste, ce que l'aide désigne est amené de nouveau s'il est sorti de la vue (entre deux gestes, la
-        // personne garde la main sur le défilement).
-        etiquetteAmenee = morceauAmene = null;
+        // 13 nov. 2026 (rapport de Grégoire, 16 h 46, iPad : « à chaque fois que je clique sur un élément, l'affichage de la
+        // grille remonte ») : un geste d'étiquetage ne remet plus les repères de l'amenée. Avant, le redessin suivant
+        // ramenait le canevas et la légende à ce que l'aide désigne, où que la personne soit en train d'étiqueter.
         desarmer();
         majPalette();
         rendreLecture();
@@ -1447,7 +1447,7 @@
             ['liens', 'coupes', 'rattachements', 'nomSaisi', 'compte', 'valeurs'].forEach(function (k) { etat[k] = reprise[k]; });
         }
         etiquetteAmenee = null;
-        morceauAmene = null;
+        canevasAAmener = true;
         if (exemple) {
             etat.exemple = exemple;
             if (exemple === 'complet') etat.liens = D().exempleLiens(doc);
@@ -1520,18 +1520,30 @@
      * L'étiquette que l'aide désigne, amenée au milieu de la liste, une fois par changement : sinon, en haut ou en bas,
      * elle restait sous « ▲ … plus haut » (mesuré sous WebKit le 12 nov. : la flèche et le halo ne la trouvaient pas).
      */
-    var etiquetteAmenee = null, morceauAmene = null;
+    var etiquetteAmenee = null;
 
     /**
-     * Le morceau que l'aide désigne, amené dans le canevas (lui seul défile, la page ne bouge pas), une fois par
-     * changement : défilé de côté hors du canevas, il ne recevait pas de flèche (mesuré à 820 × 1180, le 12 nov.).
+     * Le morceau que l'aide désigne, amené dans le canevas (lui seul défile, la page ne bouge pas) : défilé de côté hors
+     * du canevas, il ne recevait pas de flèche (mesuré à 820 × 1180, le 12 nov.). 13 nov. 2026 : il n'y est amené qu'à
+     * l'ouverture de la dissection et quand la personne agit sur la carte (`amenerLeMorceauDesigne`, l'interrupteur) ;
+     * jamais à la suite d'un geste dans le canevas, même si le morceau désigné change : la feuille reste où elle est.
      */
+    var canevasAAmener = false;
+    function amenerLeMorceauDesigne() { canevasAAmener = true; }
     function amenerDansLeCanevas(b) {
         var cv = el('dissection-canevas');
         if (!b || !cv) return;
         var r = b.getBoundingClientRect(), c = cv.getBoundingClientRect(), m = 16;
         if (r.left < c.left + m || r.right > c.right - m) cv.scrollLeft += r.left - c.left - m;
         if (r.top < c.top + m || r.bottom > c.bottom - m) cv.scrollTop += (r.top + r.height / 2) - (c.top + c.height / 2);
+    }
+    /** Le morceau se voit dans le canevas : son milieu est dans le cadre (défilé hors de lui, il ne se voit pas). */
+    function vuDansLeCanevas(b) {
+        var cv = el('dissection-canevas');
+        if (!b || !cv) return false;
+        var r = b.getBoundingClientRect(), c = cv.getBoundingClientRect();
+        var x = (r.left + r.right) / 2, y = (r.top + r.bottom) / 2;
+        return x >= c.left && x <= c.right && y >= c.top && y <= c.bottom;
     }
     /** Vrai si la légende défile dans son cadre (à 661 px et moins, elle s'étale : tout s'y voit). */
     function legendeDefile(pal) {
@@ -1567,7 +1579,7 @@
      * Point 4 : l'aide pas à pas de la bulle « Ta grille », pour la dissection ouverte (null sinon). `D.aide` sur le
      * PREMIER manque, puis ce qu'elle désigne dans la page : `etiquetteEl` (le bouton de la légende, ou la pastille qui y
      * mène quand il est caché : `etiquetteOuSonChemin`), `morceauEl` (le
-     * morceau où toucher, quand l'application le sait), `cibleEl` (un champ sous la lecture, ou « Créer ma grille »),
+     * morceau où toucher, quand l'application le sait ; `morceauVu` : il se voit dans le canevas), `cibleEl` (un champ sous la lecture, ou « Créer ma grille »),
      * `enMain` (l'étiquette à prendre est déjà le surligneur). Rien ne s'écrit.
      */
     function aide() {
@@ -1576,12 +1588,16 @@
         var a = D().aide({ doc: etat.doc, liens: etat.liens, rattachements: etat.rattachements, manque: m[0] || null, enCodes: D().estListeDeCodes(R) });
         var b = a.etiquette ? document.querySelector('#dissection-palette .dissection-etiquette[data-type="' + a.etiquette + '"]') : null;
         a.morceauEl = a.morceau && blocs[a.morceau] ? blocs[a.morceau] : null;
-        // Amenée quand l'étiquette désignée change, et après chaque geste d'étiquetage (`finSurlignage` remet le repère).
+        // La légende : amenée quand l'étiquette désignée CHANGE, pas après chaque geste d'étiquetage (13 nov. 2026).
         // Point 6 du relais du 12 nov., 11 h 25 : un défilement de la personne seul ne la ramène pas (elle garde la main
         // sur la légende) ; cachée par lui, la carte vise la pastille qui y mène, jamais l'étiquette hors du cadre.
         if (a.etiquette !== etiquetteAmenee) { etiquetteAmenee = a.etiquette; amenerDansLaListe(b); }
         a.etiquetteEl = etiquetteOuSonChemin(b);
-        if (a.morceau !== morceauAmene) { morceauAmene = a.morceau; amenerDansLeCanevas(a.morceauEl); }
+        // Le canevas : une seule fois par demande (l'ouverture, la carte) ; sans morceau désigné, la demande s'éteint.
+        if (canevasAAmener) { canevasAAmener = false; amenerDansLeCanevas(a.morceauEl); }
+        // `morceauVu` : hors de la vue du canevas, le morceau désigné n'est pas le contour de la carte (`materiel-aide.js`) ;
+        // sinon le moteur l'amenait lui-même (`suivreContour`, `scrollIntoView`), et la feuille bougeait sous la personne.
+        a.morceauVu = vuDansLeCanevas(a.morceauEl);
         a.cibleEl = a.cible ? cibleDeLAide(a.cible) : null;
         a.enMain = !!a.etiquette && etat.actif === a.etiquette;
         return a;
@@ -1707,6 +1723,7 @@
         ouvrirExemple: ouvrirExemple,
         exempleOuvert: exempleOuvert,
         aide: aide,
+        amenerLeMorceauDesigne: amenerLeMorceauDesigne,
         consignes: consignes,
         fermer: fermer,
         reprendre: reprendre,
