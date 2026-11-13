@@ -7,6 +7,18 @@
 
 ---
 
+## 13 NOV. 2026, 13 H 00 (Claude Code) : **1.245.0 POUSSÉE ET EN LIGNE, VERDICT VERT** — carte d'aide et rapport de bug fusionnés
+
+Mandat : relais de Cowork, 13 nov., 10 h 15 (Grégoire décide la mise en ligne). **`origin/main` = `d6e5677a7`** (1.245.0, build `1113-1055`, « Ta grille, pas à pas ») ; Netlify `6af74ee5`, `ready` à 12 h 55 sur ce SHA. **Le travail le plus récent vit sur `main`.** PR n° 22 fusionnée.
+
+- **Fusionné** : `lot/carte-aide-materiel` (`30560b0d4`) et `lot/rapport-bug-actions` (`72c6ca1f5`, #1280). **Pas `lot/deux-temps-modeles`** (PR n° 23, décision de Grégoire du 12 nov., 14 h 46) : elle part de l'ancienne tête de la carte d'aide et **n'a pas la correction de l'interrupteur** ; à rebaser sur `main` avant sa fusion.
+- **Porte iPad de la carte d'aide : close**, onze sur onze (9 h 58 à 10 h 07, aperçu n° 22). Demande de Grégoire à 10 h 00, livrée (`de1e0f18b`, `e669fade7`) : l'interrupteur « M'accompagner pour étiqueter ma grille » vient après le paragraphe, à droite ; à l'étiquetage, sous le titre, à droite. Un seul élément, déplacé par `placer()` (`js/materiel-aide.js`). Supposé : « à droite » = le bord droit de la colonne du paragraphe ; iPad couché, il s'arrête avant la place de la carte.
+- **Nouvelles** : titre et lignes 1 et 3 de Claude Code, ligne 2 de Grégoire (son oui est au message du commit de release).
+- **Verdict du Mac** sur `d6e5677a7` : 1 652 essais, 1 651 verts, 1 au second essai, 0 rouge, 68 sautés. L'essai repris : `pages-sans-emboitement-2026-11-07.spec.js` › Préparer (clair), la zone de dépôt. Hors du groupe (les lots ne touchent ni `travaux-ui.js` ni la page Préparer) ; rejoué seul : 1 échec sur 30 sur la release, 0 sur 24 sur `ade84ca2c`. Il lit `.travaux-zero-state` sans l'attendre. Non inscrit au backlog (rien de vécu) ; le hook dit : « si la même revient, c'est un vrai sujet (#685) ».
+- **Vu, non corrigé, non inscrit** : iPad couché, à l'accueil de « Mon matériel », la carte couvre la fin des deux premières lignes du paragraphe ; à l'étiquetage, elle couvre le titre et les deux boutons. Déjà ainsi sur le build que Grégoire a passé.
+- **`scripts/release.mjs`** propose des jetons `?v=` déjà servis sur des branches non fusionnées ; le hook de pré-commit l'attrape (trois refus), on applique les lettres qu'il propose.
+- **GitHub** : le passage WebKit Linux était rouge sur `1661ade8` avant la session (douze specs, connu depuis le 11 nov.) ; celui de `d6e5677a7` (run 43477454528) tournait à la clôture, non lu.
+
 ## 13 NOV. 2026, 9 H 35 (Claude Code) : **DEUX LOTS ATTENDENT L'ESSAI DE GRÉGOIRE** — `main` inchangé
 
 Mandats : relève de Cowork, 13 nov., 5 h 05 ; consigne `plans de travail/CONSIGNE-LOT-2026-11-13-deux-temps-modeles.md` (conversation du Projet, 12 nov., 20 h 10). **Le travail le plus récent vit sur `lot/deux-temps-modeles`** (code `683ce5902`, build `1113-0921`, version 1.244.0 inchangée), partie de la tête de `lot/carte-aide-materiel` (`5c43a014e`). **PR d'aperçu n° 23, NON fusionnée : elle porte aussi la carte d'aide (PR n° 22)** et reprend la première partie des deux temps (PR n° 20). Ni release, ni Nouvelles.
