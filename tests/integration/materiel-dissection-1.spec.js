@@ -87,7 +87,8 @@ test('dissection · coller, poser deux étiquettes au pointeur, lire la grille c
     await expect(page.locator('#dissection-contenu .dissection-morceau')).toHaveCount(24);
     // Douze étiquettes, plus les outils « Couper » (lot 5), juste après « Suite », et « Rattacher » (lot 7), après « Couper ».
     // Étape 5 du critère algorithmique (22 oct. 2026) : seize, avec les quatre du groupe « Les codes ».
-    await expect(page.locator('#dissection-palette .dissection-etiquette:not(.dissection-outil)')).toHaveCount(16);
+    // Lot « étiquette Sous-total » (13 nov. 2026) : dix-sept, avec « Sous-total ».
+    await expect(page.locator('#dissection-palette .dissection-etiquette:not(.dissection-outil)')).toHaveCount(17);
     await expect(page.locator('#dissection-palette .dis-t-code, #dissection-palette .dis-t-nomcode, #dissection-palette .dis-t-poids, #dissection-palette .dis-t-commentaire')).toHaveCount(4);
     await expect(page.locator('#dissection-palette .dissection-outil')).toHaveCount(2);
     await expect(page.locator('#dissection-palette [data-param="suite"] + [data-param="couper"] + [data-param="rattacher"]')).toHaveCount(1);
