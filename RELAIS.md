@@ -7,6 +7,16 @@
 
 ---
 
+## 13 NOV. 2026, 7 H 50 (Claude Code) : **LA CARTE D'AIDE ATTEND L'ESSAI DE GRÉGOIRE** — `main` inchangé
+
+Mandats : relais de la conversation du Projet, 12 nov., 19 h 15 ; relève de Cowork, 13 nov., 5 h 05 (le Mac a paniqué à 1 h 06 ; le lot était indexé, non committé). **Le travail vit sur `lot/carte-aide-materiel`** (`5c43a014e` ; code `eda8b2bce`, build `1113-0737`, version 1.244.0 inchangée), partie de `main` (`f9c49ec8c`). **PR d'aperçu n° 22, NON fusionnée** ; ni release, ni Nouvelles. `main` reste à `f9c49ec8c` plus cette entrée.
+
+- **Livré sur la branche** : les consignes d'« Apporter mon matériel » quittent la page pour la carte d'aide ; la carte s'offre hors parcours par un interrupteur (préférence `laboCodex.aideMateriel`) ; l'exemple ne prend plus la place du brouillon. Rapport : `plans de travail/RAPPORT-2026-11-13-carte-aide-materiel.md` (sur la branche).
+- **Un correctif qui touche tous les parcours** : le placement de la bulle arrondit du côté libre les places qui longent une zone (`placesEssayees`, `js/parcours-moteur.js`). `parcours-8-commentaires:621` rougissait 4 fois sur 6 sur `main` ; 6/6 après.
+- **Reste** : la porte `plans de travail/PORTES-TERRAIN-2026-11-13-carte-aide-materiel.md` (onze gestes, iPad, sans artefact) ; la fusion, par un relais à part ; **pas de verdict complet pris** (passages ciblés seulement).
+- **Suite en cours** : `lot/deux-temps-modeles`, partie de la tête de `lot/carte-aide-materiel` (consigne : `plans de travail/CONSIGNE-LOT-2026-11-13-deux-temps-modeles.md`, sur la branche).
+- **Mémoire du Mac** : un passage Playwright de plus de cent essais fait tomber la mémoire libre de moitié. Passages de quarante essais au plus, un seul à la fois, aucun shell laissé en fond.
+
 ## 12 NOV. 2026, 17 H 20 (Claude Code) : **1.244.0 POUSSÉE ET EN LIGNE, VERDICT VERT** — deux lots fusionnés
 
 Mandat : relais de la conversation du Projet, 12 nov., 14 h 50 (décision de Grégoire, 14 h 48 : la version part avec DEUX lots). **`origin/main` = `1661ade8c`** (1.244.0, build `1112-1457`) ; Netlify `6af639e8`, `ready` à 17 h 13 sur ce SHA. PR n° 21 et n° 19 fusionnées.
