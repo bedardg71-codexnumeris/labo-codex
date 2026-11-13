@@ -17,7 +17,7 @@
 // Grilles FICTIVES ; noms d'étudiant·es fictifs (classe-de-banc.js).
 import { test, expect } from '@playwright/test';
 import { ouvrirEspaceVide, mettreLaClasseEnPlace, attendreEtape, contourSur, bulle, bulleNeCouvrePas, capture } from './harness/classe-de-banc.js';
-import { flecheVers } from './harness/fleches-de-banc.js';
+import { flecheVers, flecheVersMorceau } from './harness/fleches-de-banc.js';
 import { collerLExemple } from './harness/exemple-colle.js';
 
 const DOSSIER = process.env.CAPTURES_PARCOURS || '';
@@ -244,7 +244,8 @@ for (const [L, H] of TAILLES) {
         await gesteEst(page, '« / 5 » n’a aucun critère dans sa rangée : prends « Critère », puis touche « Introduction ».');
         await contourSur(page, etiquette('critere'));
         await flecheVers(page, etiquette('critere'), 'tableau, l’étiquette');
-        await flecheVers(page, await morceau(page, 'Introduction'), 'tableau, le morceau');
+        // 13 nov. 2026 : après un étiquetage dans la colonne de droite, « Introduction » n'est plus ramené dans le canevas.
+        await flecheVersMorceau(page, await morceau(page, 'Introduction'), 'tableau, le morceau');
         await capture(page, DOSSIER, `p4-tableau-critere-${cap}`);
         await page.click(etiquette('critere'));
         await contourSur(page, await morceau(page, 'Introduction'));   // le premier geste fait : le halo passe au morceau

@@ -7,7 +7,7 @@
 //        l'appareil (souris, puis doigt dès un toucher) ;
 //   L5 · les flèches d'étiquetage suivent le défilement de la légende (bornées à son cadre) ;
 //   L6 · la flèche de la carte ne vise jamais une étiquette cachée : défilée hors du cadre par la personne, la carte vise
-//        la pastille qui y mène ; après un geste d'étiquetage, la légende la ramène, entière ;
+//        la pastille qui y mène ; un geste d'étiquetage ne la ramène pas (13 nov. 2026 : « la grille remonte ») ;
 //   L7 · aucune pastille ne couvre un nom d'étiquette, à aucune position de la liste ; l'étiquette que l'aide désigne
 //        est amenée entièrement visible, sous la pastille.
 // Break-tests : voir le rapport du lot (`plans de travail/RAPPORT-2026-11-12-dissection-ipad.md`, second relais).
@@ -185,7 +185,7 @@ test('L5 · 1180 × 820 : les flèches d’étiquetage suivent le défilement de
 // L6 — la carte ne vise jamais une étiquette cachée
 // ---------------------------------------------------------------------------------------------------------------
 for (const [L, H] of TAILLES) {
-    test(`L6 · ${L} × ${H} : la flèche de la carte ne vise jamais une étiquette cachée ; un geste la ramène`, async ({ page }) => {
+    test(`L6 · ${L} × ${H} : la flèche de la carte ne vise jamais une étiquette cachée ; un geste d’étiquetage ne la ramène pas`, async ({ page }) => {
         test.setTimeout(180000);
         await ouvrirEspaceVide(page, L, { hauteur: H });
         await mettreLaClasseEnPlace(page);
@@ -221,13 +221,17 @@ for (const [L, H] of TAILLES) {
         await capture(page, DOSSIER, `l6-cachee-${L}x${H}`);
 
         // « Poids » repris en bas de la légende, posé sur un autre « / N » : l'étiquette désignée ne change pas
-        // (« Pondération ») ; le geste la ramène (`finSurlignage`), entière, et la flèche y va.
+        // (« Pondération »). 13 nov. 2026 (rapport de Grégoire, « la grille remonte ») : un geste d'étiquetage ne ramène plus
+        // rien ; la légende reste où la personne l'a laissée, et la carte vise toujours la pastille qui mène à l'étiquette.
+        const legendeAvant = await page.evaluate(() => document.getElementById('dissection-palette').scrollTop);
         await poser(page, 'poids', ['/ 5']);
         await gesteEst(page, phrase('/ 5'));
-        await expect.poll(() => placeDans(page, 'ponderation'), { message: 'après le geste, « Pondération » est ramenée' }).toBe('dedans');
-        await flecheVers(page, etiquette('ponderation'), 'ramenée');
-        await contourSur(page, etiquette('ponderation'));
-        await capture(page, DOSSIER, `l6-ramenee-${L}x${H}`);
+        await page.evaluate(() => new Promise((ok) => requestAnimationFrame(() => requestAnimationFrame(() => setTimeout(ok, 250)))));
+        expect(await placeDans(page, 'ponderation'), 'après le geste, la légende n’a pas bougé : « Pondération » reste cachée').toBe('dessus');
+        expect(Math.abs(await page.evaluate(() => document.getElementById('dissection-palette').scrollTop) - legendeAvant), 'la légende n’a pas défilé').toBeLessThanOrEqual(1);
+        await contourSur(page, '#dissection-palette-haut');
+        await flecheVers(page, '#dissection-palette-haut', 'après le geste, la pastille');
+        await capture(page, DOSSIER, `l6-apres-le-geste-${L}x${H}`);
     });
 }
 
