@@ -18,6 +18,7 @@
 import { test, expect } from '@playwright/test';
 import { ouvrirEspaceVide, mettreLaClasseEnPlace, attendreEtape, contourSur, bulle, bulleNeCouvrePas, capture } from './harness/classe-de-banc.js';
 import { flecheVers } from './harness/fleches-de-banc.js';
+import { collerLExemple } from './harness/exemple-colle.js';
 
 const DOSSIER = process.env.CAPTURES_PARCOURS || '';
 const TAILLES = [[1180, 820], [820, 1180]];
@@ -101,7 +102,7 @@ for (const [L, H] of TAILLES) {
     test(`P1 · ${L} × ${H} : la liste des étiquettes dit ce qu'elle cache, et s'ouvre en haut`, async ({ page }) => {
         await ouvrirEspaceVide(page, L, { hauteur: H });
         await page.evaluate(() => naviguerVers('conception', 'materiel'));
-        await page.click('#materiel-accueil [data-action="materiel.essayerExemple"]');
+        await collerLExemple(page);
         await expect(page.locator('#materiel-dissection')).toBeVisible();
         const pal = page.locator('#dissection-palette');
         const etat = () => pal.evaluate((p) => ({
@@ -127,7 +128,7 @@ for (const [L, H] of TAILLES) {
         // Rouverte (une autre grille), elle montre de nouveau le haut.
         await pal.evaluate((p) => { p.scrollTop = p.scrollHeight; });
         await collerUneAutre(page);
-        await page.click('#materiel-accueil [data-action="materiel.essayerExemple"]');
+        await collerLExemple(page);
         expect((await etat()).haut).toBe(0);
     });
 }
@@ -140,7 +141,7 @@ test.describe('P2 · au doigt (contexte tactile, 1180 × 820)', () => {
     test('un défilement ne pose aucune étiquette ; un toucher en pose une ; maintenu puis glissé, plusieurs', async ({ page }) => {
         await ouvrirEspaceVide(page, 1180, { hauteur: 820 });
         await page.evaluate(() => naviguerVers('conception', 'materiel'));
-        await page.click('#materiel-accueil [data-action="materiel.essayerExemple"]');
+        await collerLExemple(page);
         await page.tap(etiquette('critere'));
         await expect(page.locator(etiquette('critere'))).toHaveAttribute('aria-pressed', 'true');
         const premier = await morceau(page, 'L’étudiant·e résume l’œuvre avec justesse');

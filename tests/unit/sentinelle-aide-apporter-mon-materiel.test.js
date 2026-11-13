@@ -53,7 +53,9 @@ describe('« Apporter mon matériel » — les bulles et l’aide « i » ont le
     it('le catalogue est bien chargé (la tranche n’est pas vide)', () => {
         expect(Object.keys(cat).length).toBeGreaterThan(300);
         // 7 depuis le 12 nov. 2026 : « Composer ma grille » aussi dans l'étiquetage, avec la bulle de celui de l'accueil.
-        expect(cles(ONGLET, 'data-tooltip').length).toBe(7);
+        // 6 depuis le 13 nov. 2026 (la carte d'aide) : « Essayer avec un exemple » est parti, son infobulle aussi.
+        expect(cles(ONGLET, 'data-tooltip').length).toBe(6);
+        expect(Object.keys(cat)).not.toContain('materiel-essayer-exemple');
         expect(cles(ONGLET, 'data-aide')).toEqual(['conception-materiel', 'conception-materiel']);
     });
 

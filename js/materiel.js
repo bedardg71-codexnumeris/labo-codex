@@ -139,6 +139,8 @@
     function rendre() {
         var zone = el('materiel-lecture'), accueil = el('materiel-accueil');
         if (!zone || !accueil) return;
+        // La carte d'aide suit l'écran (13 nov. 2026) : elle se ferme sur la confirmation, revient avec l'accueil.
+        if (window.MaterielAide) window.MaterielAide.regler();
         if (etat.ecran === 'accueil') {
             zone.innerHTML = '';
             zone.classList.add('u-hide');
@@ -179,8 +181,15 @@
             var zone = el('materiel-zone-collage');
             ouvrirDissection(window.materielDissectionLecture.docDepuisPressePapiers({ texte: zone ? zone.value : '' }));
         },
-        essayerExemple: function () {
-            ouvrirDissection(window.materielDissectionLecture.exempleDoc());
+        /**
+         * « Voir le travail complet » et « Faire l'exercice soi-même » (lot de la carte d'aide, 13 nov. 2026 ; Grégoire,
+         * 12 nov., 10 h 55) : l'exemple, ouvert sans rien écrire (`materielDissection.ouvrirExemple`) ; le brouillon de
+         * l'enseignant·e reste où il est. Ils remplacent « Essayer avec un exemple », qui ouvrait l'exemple comme un
+         * collage et écrivait donc le brouillon à la place du sien (mesuré dans la 1.244.0).
+         */
+        ouvrirExemple: function (quoi) {
+            montrerErreur('');
+            window.materielDissection.ouvrirExemple(quoi === 'complet');
         },
         /** Vers l'éditeur de Grilles de critères : la façon de créer qui reste (« nous allons garder les deux »). */
         taperMain: function () {
@@ -219,6 +228,7 @@
         /**
          * Lot de la dissection sur l'iPad (12 nov. 2026, point 5) : l'exemple du parcours se ferme ; l'accueil revient, et
          * le brouillon de l'enseignant·e, s'il existe, rouvre sa dissection telle qu'elle était (la reprise du lot 11).
+         * 13 nov. 2026 : c'est aussi la sortie de l'exemple dans la page (« Quitter l'exemple », `collerAutre`).
          */
         quitterExemple: function () {
             if (!window.materielDissection || !window.materielDissection.exempleOuvert()) return;

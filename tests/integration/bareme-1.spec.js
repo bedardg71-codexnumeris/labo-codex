@@ -2,6 +2,7 @@ import { test, expect } from '@playwright/test';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { GRILLE_B, enHtml } from '../unit/_helpers/grilles-fictives-dissection.js';
+import { collerLExemple } from './harness/exemple-colle.js';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const indexHtml = 'file://' + path.join(path.resolve(__dirname, '..', '..'), 'index.html');
 
@@ -77,7 +78,7 @@ const DESCRIPTEURS = ['Résumé absent ou erroné', 'Résume quelques événemen
 
 /** L'exemple fictif, étiqueté en points, créé (spec 2a) ; rend l'identifiant de la grille. */
 async function creerExemple(page) {
-    await page.locator('[data-action="materiel.essayerExemple"]').click();
+    await collerLExemple(page);
     await etiqueter(page, 'section', ['PARTIE A : COMPRÉHENSION', 'PARTIE B : RÉFLEXION']);
     await etiqueter(page, 'niveau', ['Insuffisant', 'Partiel', 'Satisfaisant', 'Remarquable']);
     await etiqueter(page, 'critere', CRITERES);

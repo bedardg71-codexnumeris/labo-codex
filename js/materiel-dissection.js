@@ -69,10 +69,15 @@
     var blocs = {};
     var dessinPrevu = false;
 
-    /** Lot 5, « Couper » : textes de Claude Code (18 oct.), validé G. 18 oct. 13 h 48. */
+    /**
+     * Lot 5, « Couper » : textes de Claude Code (18 oct.), validé G. 18 oct. 13 h 48.
+     * Lot « La carte d'aide dans Apporter mon matériel » (13 nov. 2026) : une phrase qui dit quoi faire part dans la
+     * carte (`consignes`), une phrase qui dit ce qui vient de se passer reste dans la page. `bandeau` : la phrase de
+     * l'outil, que la carte dit mot pour mot ; `enMain` ne garde que le fait (sa consigne redisait `bandeau`).
+     */
     var TEXTES_COUPE = {
         bandeau: 'Outil « Couper » : touche l’endroit d’un morceau où le séparer en deux. La coupe tombe entre deux mots.',
-        enMain: 'Outil « Couper » en main : touche l’endroit d’un morceau où le séparer en deux.',
+        enMain: 'Outil « Couper » en main.',
         coupe: function (a, b) { return 'Morceau coupé en deux : « ' + a + ' » et « ' + b + ' ».'; },
         unMot: 'Ce morceau n’a qu’un mot : il ne se coupe pas.',
         annulee: function (t) { return 'Coupe annulée : « ' + t + ' » est recollé.'; },
@@ -91,8 +96,9 @@
     var TEXTES_LIEN = {
         bandeau: 'Outil « Rattacher » : touche deux morceaux d’un même texte, dans l’ordre que tu veux ; l’application les lit dans l’ordre de ta grille. Touche deux fois un morceau rattaché pour le détacher.',
         bandeauChoix: function (b, rattache) { return 'Outil « Rattacher » : touche maintenant le morceau à joindre à « ' + b + ' ». Retouche « ' + b + ' » pour ' + (rattache ? 'le détacher.' : 'annuler.'); },
-        enMain: 'Outil « Rattacher » en main : touche un morceau, puis celui à lui joindre.',
-        choisi: function (b, rattache) { return 'Morceau choisi : « ' + b + ' ». Touche maintenant celui à lui joindre' + (rattache ? ', ou retouche-le pour le détacher.' : '.'); },
+        // 13 nov. 2026 : `bandeau` et `bandeauChoix` se lisent dans la carte ; `enMain` et `choisi` ne gardent que le fait.
+        enMain: 'Outil « Rattacher » en main.',
+        choisi: function (b) { return 'Morceau choisi : « ' + b + ' ».'; },
         annule: 'Choix annulé : aucun lien créé.',
         lie: function (t) { return 'Morceaux rattachés : l’application lit « ' + t + ' ».'; },
         etiquetteRetiree: function (nom) { return ' L’étiquette « ' + nom + ' » de la suite est retirée : celle du premier morceau vaut pour le texte entier.'; },
@@ -120,7 +126,9 @@
     var TEXTES_EXEMPLE = {
         complet: 'L’exemple, avec toutes ses étiquettes posées. Il ne s’enregistre pas.',
         exercice: 'L’exemple, sans étiquettes : à toi de les poser. Il ne s’enregistre pas.',
-        note: 'C’est l’exemple : il ne devient pas une de tes grilles.'
+        note: 'C’est l’exemple : il ne devient pas une de tes grilles.',
+        // PROPOSÉ (13 nov. 2026) : la sortie de l'exemple dans la page, à la place de « Coller une autre grille ».
+        quitter: 'Quitter l’exemple'
     };
 
     /**
@@ -135,7 +143,11 @@
     /**
      * Relais du 12 nov. 2026, 11 h 25, point 2 : la légende remplace le surligneur (un surligneur se glisse sur le texte,
      * geste qui fait désormais défiler). `aucune` et `plusieurs` : mots de Grégoire (10 h 31) ; les autres, PROPOSÉS par
-     * Claude Code le 12 nov. : ils partent tels quels et restent corrigeables. `plusieurs` suit l'appareil (`majConsigne`).
+     * Claude Code le 12 nov. : ils partent tels quels et restent corrigeables. `plusieurs` suit l'appareil (`appareil`).
+     * 13 nov. 2026 (la carte d'aide) : les trois étapes de l'étiquetage quittent la page pour la carte (`consignes`) :
+     * `aucune`, puis `designe` + `plusieurs` + `retirer`, puis `lire`, mot pour mot ceux de la page. `bandeau(nom)` et
+     * `tableau` redisaient les deux premières : retirés. `choisie` ne garde que le fait. `aucune` reste aussi la réponse
+     * à un morceau touché sans étiquette en main (un refus).
      */
     var TEXTES_LEGENDE = {
         aucune: 'Touche une étiquette dans la légende.',
@@ -143,9 +155,10 @@
             doigt: 'Pour en étiqueter plusieurs d’un coup, garde le doigt posé un instant, puis glisse.',
             souris: 'Pour en étiqueter plusieurs d’un coup, glisse dessus.'
         },
-        bandeau: function (nom) { return 'Étiquette « ' + nom + ' » : touche les morceaux de ta grille qu’elle désigne. Touche un morceau déjà étiqueté pour retirer son étiquette.'; },
-        choisie: function (nom) { return 'Étiquette « ' + nom + ' » choisie : touche les morceaux de ta grille qu’elle désigne.'; },
-        tableau: 'Touche une étiquette dans la légende, puis les morceaux qu’elle désigne.',
+        designe: 'Touche les morceaux de ta grille qu’elle désigne : ils prennent sa couleur.',
+        retirer: 'Touche un morceau déjà étiqueté pour retirer son étiquette.',
+        lire: 'En bas, lis la grille que l’application en tirerait, puis crée-la.',
+        choisie: function (nom) { return 'Étiquette « ' + nom + ' » choisie.'; },
         lectureVide: 'Étiquette ta grille : la lecture de l’application apparaîtra ici.',
         aucunCritere: 'Aucun critère pour l’instant : pose « Critère » sur une question que tu te poses devant la copie, ou « Descripteur » sur des réponses.'
     };
@@ -416,9 +429,10 @@
     }
 
     /**
-     * Le bandeau du surligneur, toujours à sa place au-dessus de l'atelier (C1, relecture du 18 oct.) :
-     * sans étiquette en main, la consigne ; avec, son nom, sa PRÉCISION (que la palette étroite ne
-     * montre plus) et « Terminer ».
+     * Le bandeau de l'étiquette en main, toujours à sa place au-dessus de l'atelier (C1, relecture du 18 oct.) : sa
+     * PRÉCISION (que la palette étroite ne montre plus) et « Terminer ». 13 nov. 2026 : ses consignes sont dans la carte
+     * (`consignes`) ; sans étiquette ni outil en main, il n'a ni texte ni bouton et ne s'affiche pas — sa place reste
+     * (`dissection-bandeau-vide`) : la grille ne bouge pas quand on prend une étiquette.
      */
     function majBandeau() {
         var bd = el('dissection-bandeau'), cv = el('dissection-canevas');
@@ -427,19 +441,13 @@
         cv.classList.toggle('dissection-pointage', !!T);
         cv.classList.toggle('dissection-coupe', coupe);
         bd.classList.toggle('dissection-bandeau-actif', !!T);
+        bd.classList.toggle('dissection-bandeau-vide', !T);
         classeType(bd, etat.actif);
         classeType(cv, etat.actif);
         el('dissection-terminer').classList.toggle('u-hide', !T);
         // Lot 5 : tant que « Couper » est en main, « Annuler la dernière coupe » dès qu'une coupe est faite.
         var annuler = el('dissection-annuler-coupe');
         if (annuler) annuler.classList.toggle('u-hide', !(coupe && etat.coupes.length));
-        el('dissection-bandeau-texte').textContent = coupe
-            ? TEXTES_COUPE.bandeau
-            : etat.actif === 'rattacher'
-                ? (etat.choix ? TEXTES_LIEN.bandeauChoix(mots(etat.choix), D().estRattache(etat.rattachements, etat.choix)) : TEXTES_LIEN.bandeau)
-            : T
-                ? TEXTES_LEGENDE.bandeau(T.nom)
-                : TEXTES_LEGENDE.aucune;
         var pr = el('dissection-bandeau-precision');
         pr.textContent = T && T.precision ? T.nom + ' : ' + T.precision : '';
         pr.classList.toggle('u-hide', !(T && T.precision));
@@ -709,7 +717,7 @@
         if (!c) {
             etat.choix = id;
             apresLien();
-            dire(TEXTES_LIEN.choisi(mots(id), D().estRattache(etat.rattachements, id)));
+            dire(TEXTES_LIEN.choisi(mots(id)));
             return;
         }
         etat.choix = null;
@@ -1195,6 +1203,8 @@
             if (b) b.focus();
             return;
         }
+        // La carte d'aide (13 nov. 2026) : une première grille créée par l'étiquetage ; l'interrupteur garde désormais son état.
+        if (window.MaterielAide) window.MaterielAide.noterGrilleCreee();
         window.materiel.montrerCreee(r.resume);
     }
 
@@ -1381,20 +1391,39 @@
             window.addEventListener('pointerdown', function (e) { appareilVu = e.pointerType === 'mouse' ? 'souris' : 'doigt'; }, { capture: true, passive: true });
             vue.dataset.consigneBranchee = '1';
         }
-        majConsigne();
+        appareilALOuverture = appareil();
     }
 
     /**
-     * Relais du 12 nov. 2026, 11 h 25, point 2b : la phrase du milieu de la consigne, au doigt ou à la souris, posée à
+     * Relais du 12 nov. 2026, 11 h 25, point 2b : la phrase du milieu de la consigne, au doigt ou à la souris, arrêtée à
      * l'ouverture de la dissection. Sans geste encore, l'appareil : `(pointer: coarse)` (l'iPad, un téléphone) → le doigt ;
      * sinon la souris. Ensuite, le type du dernier pointeur posé dans l'application (un iPad au trackpad passe à la souris,
      * un écran tactile au doigt), à la prochaine ouverture.
      */
-    var appareilVu = null;
-    function majConsigne() {
-        var m = appareilVu || (window.matchMedia && window.matchMedia('(pointer: coarse)').matches ? 'doigt' : 'souris');
-        var s = el('dissection-consigne-plusieurs');
-        if (s && s.textContent !== TEXTES_LEGENDE.plusieurs[m]) s.textContent = TEXTES_LEGENDE.plusieurs[m];
+    var appareilVu = null, appareilALOuverture = null;
+    function appareil() {
+        return appareilVu || (window.matchMedia && window.matchMedia('(pointer: coarse)').matches ? 'doigt' : 'souris');
+    }
+
+    /**
+     * Lot « La carte d'aide dans Apporter mon matériel » (13 nov. 2026) : ce que la page disait de faire, pour la carte
+     * (`materiel-aide.js`), mot pour mot. `etapes` : les trois étapes de l'étiquetage (mots de Grégoire, 12 nov., 10 h 31) ;
+     * `outil` : la phrase de l'outil en main (« Couper », « Rattacher », un morceau choisi), sinon null. Null sans dissection.
+     */
+    function consignes() {
+        if (!etat.doc) return null;
+        var outil = etat.actif === 'couper' ? TEXTES_COUPE.bandeau
+            : etat.actif === 'rattacher'
+                ? (etat.choix ? TEXTES_LIEN.bandeauChoix(mots(etat.choix), D().estRattache(etat.rattachements, etat.choix)) : TEXTES_LIEN.bandeau)
+                : null;
+        return {
+            outil: outil,
+            etapes: [
+                TEXTES_LEGENDE.aucune,
+                TEXTES_LEGENDE.designe + ' ' + TEXTES_LEGENDE.plusieurs[appareilALOuverture || appareil()] + ' ' + TEXTES_LEGENDE.retirer,
+                TEXTES_LEGENDE.lire
+            ]
+        };
     }
 
     /**
@@ -1432,7 +1461,7 @@
         majDefilementPalette();
         var n = etat.morceaux.ordre.length;
         dire(message || (exemple ? TEXTES_EXEMPLE[exemple] : null) || (doc.mode === 'table'
-            ? 'Tableau collé : ' + pluriel(doc.rows.length, 'rangée', 'rangées') + ', ' + pluriel(n, 'morceau', 'morceaux') + '. ' + TEXTES_LEGENDE.tableau
+            ? 'Tableau collé : ' + pluriel(doc.rows.length, 'rangée', 'rangées') + ', ' + pluriel(n, 'morceau', 'morceaux') + '.'
             // Validé G. 18 oct. 9 h 52 avec « rattachera » ; revu pour le nom de l'outil du lot 7, validé G. 18 oct. 17 h 18.
             : 'Texte collé : ' + pluriel(n, 'ligne', 'lignes') + ', sans tableau. L’application rangera les morceaux selon leur ordre.'));
         var titre = el('dissection-titre');
@@ -1591,11 +1620,21 @@
         'materielDissection.collerAutre': { repos: 'Coller une autre grille', armee: 'Confirmer : coller une autre grille' }
     };
 
-    /** Tout autre geste (une étiquette, un surlignage, une autre grille) désarme les boutons. */
+    /**
+     * Tout autre geste (une étiquette, un surlignage, une autre grille) désarme les boutons. 13 nov. 2026 : l'exemple
+     * ouvert, « Coller une autre grille » est sa sortie et le dit (`TEXTES_EXEMPLE.quitter`) ; son infobulle, qui parle
+     * de retirer la grille, se tait.
+     */
+    var INFOBULLE_COLLER = 'materiel-coller-autre';
     function desarmer() {
         Object.keys(DEUX_TEMPS).forEach(function (action) {
             var b = document.querySelector('[data-action="' + action + '"]');
-            if (b) { b.removeAttribute('data-confirmer'); b.textContent = DEUX_TEMPS[action].repos; }
+            if (!b) return;
+            var sortie = action === 'materielDissection.collerAutre' && !!etat.exemple;
+            b.removeAttribute('data-confirmer');
+            b.textContent = sortie ? TEXTES_EXEMPLE.quitter : DEUX_TEMPS[action].repos;
+            if (action !== 'materielDissection.collerAutre') return;
+            if (sortie) b.removeAttribute('data-tooltip'); else b.setAttribute('data-tooltip', INFOBULLE_COLLER);
         });
     }
 
@@ -1617,6 +1656,8 @@
      * premier toucher demande confirmation.
      */
     function collerAutre(bouton) {
+        // L'exemple (13 nov. 2026) : sa sortie, sans confirmation ; rien ne s'efface, la dissection de la personne revient.
+        if (etat.exemple) { if (window.materiel) window.materiel.quitterExemple(); return; }
         var travail = Object.keys(etat.liens).length || etat.coupes.length || Object.keys(etat.rattachements).length;
         if (travail && !confirme(bouton, 'materielDissection.collerAutre')) return;
         if (window.materiel) window.materiel.recommencer();
@@ -1660,6 +1701,7 @@
         ouvrirExemple: ouvrirExemple,
         exempleOuvert: exempleOuvert,
         aide: aide,
+        consignes: consignes,
         fermer: fermer,
         reprendre: reprendre,
         estOuverte: estOuverte,

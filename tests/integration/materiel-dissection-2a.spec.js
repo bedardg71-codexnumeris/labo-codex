@@ -2,6 +2,7 @@ import { test, expect } from '@playwright/test';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { GRILLE_B, enHtml } from '../unit/_helpers/grilles-fictives-dissection.js';
+import { collerLExemple } from './harness/exemple-colle.js';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const indexHtml = 'file://' + path.join(path.resolve(__dirname, '..', '..'), 'index.html');
 
@@ -93,7 +94,7 @@ test('dissection 2a · l’exemple étiqueté, refusé sans nom, un échec rées
     page.on('pageerror', (e) => erreurs.push(e.message));
     await page.setViewportSize({ width: 820, height: 1180 });
     await ouvrirConception(page);
-    await page.locator('[data-action="materiel.essayerExemple"]').click();
+    await collerLExemple(page);
     await expect(page.locator('#materiel-dissection')).toBeVisible();
     await expect(page.locator('#dissection-creer')).toBeHidden();   // rien d'étiqueté, rien à créer
     await etiqueterExemple(page);
@@ -206,7 +207,7 @@ test('dissection 2a · C3 : l’exemple recréé est refusé (nom pris), renomm�
     const bouton = page.locator('#dissection-creer [data-action="materielDissection.creer"]');
     const champ = page.locator('#dissection-nom-grille');
 
-    await page.locator('[data-action="materiel.essayerExemple"]').click();
+    await collerLExemple(page);
     await etiqueterExemple(page);
     await etiqueter(page, 'titre', ['Journal de lecture']);
     await bouton.click();
@@ -214,7 +215,7 @@ test('dissection 2a · C3 : l’exemple recréé est refusé (nom pris), renomm�
 
     // « Coller une autre grille », puis le même exemple : refusé, la raison à côté du champ.
     await page.locator('.materiel-confirmation [data-action="materiel.recommencer"]').click();
-    await page.locator('[data-action="materiel.essayerExemple"]').click();
+    await collerLExemple(page);
     await etiqueterExemple(page);
     await etiqueter(page, 'titre', ['Journal de lecture']);
     await expect(champ).toHaveValue('Journal de lecture');
