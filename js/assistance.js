@@ -213,7 +213,10 @@
             if (tropPetitPour(def) || jeu === 'aucun') return;
             if (jeu === 'modele') {
                 // La modélisation se joue dans la démo : les conditions d'entrée (`refus`) lisent les
-                // vraies données, elles ne la concernent pas.
+                // vraies données, elles ne la concernent pas. Elle a la sienne (`refusModele`, 13 nov. 2026) :
+                // le modèle d'« Évaluer » se joue sur le groupe que monte celui de « Mettre ta classe en place ».
+                var raisonModele = typeof def.refusModele === 'function' ? def.refusModele() : null;
+                if (raisonModele) { direRefus(o.corps, raisonModele); appelerPrealable(def, raisonModele); return; }
                 fermerPanneau({ sansRetourFocus: true });
                 def.lancerModele(e.etat === 'en-cours' ? e.etape : 0);
                 return;

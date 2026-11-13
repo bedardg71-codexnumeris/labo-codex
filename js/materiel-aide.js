@@ -199,6 +199,9 @@
     }
 
     function ecrirePref(maj) {
+        // Dans la démo (13 nov. 2026), rien ne se retient : une grille créée par un modèle n'est pas une grille de la
+        // personne, et l'interrupteur de sa page doit encore l'accueillir ouvert. L'état vaut pour la visite.
+        if (typeof estEnModeDemo === 'function' && estEnModeDemo()) return;
         try { window.localStorage.setItem(CLE, JSON.stringify(Object.assign(lirePref(), maj))); } catch (e) { /* stockage refusé : l'état vaut pour la visite */ }
     }
 

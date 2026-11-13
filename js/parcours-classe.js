@@ -562,9 +562,12 @@
         return !!(menu && M().visible(menu) && cours && menu.value !== cours.id);
     }
 
-    /** Copie la liste fournie dans le presse-papiers : c'est la personne qui la colle. */
-    async function copierLaListe() {
-        var texte = listeFournie(), copie = false;
+    /**
+     * Copie un texte fourni dans le presse-papiers : c'est la personne qui le colle. Commun aux modèles (13 nov. 2026 :
+     * le modèle d'« Évaluer une première production » s'en sert aussi). `mots` : { fait, titre, rate }.
+     */
+    async function copierTexte(texte, mots) {
+        var copie = false;
         try {
             if (navigator.clipboard && typeof navigator.clipboard.writeText === 'function') {
                 await navigator.clipboard.writeText(texte);
@@ -583,8 +586,25 @@
             tampon.remove();
         }
         if (!window.notifications) return;
-        if (copie && typeof window.notifications.succes === 'function') window.notifications.succes(MOTS_MODELE.listeCopiee);
-        if (!copie && typeof window.notifications.warning === 'function') window.notifications.warning(MOTS_MODELE.copierLaListe, MOTS_MODELE.listeNonCopiee);
+        if (copie && typeof window.notifications.succes === 'function') window.notifications.succes(mots.fait);
+        if (!copie && typeof window.notifications.warning === 'function') window.notifications.warning(mots.titre, mots.rate);
+    }
+
+    function copierLaListe() {
+        return copierTexte(listeFournie(), { fait: MOTS_MODELE.listeCopiee, titre: MOTS_MODELE.copierLaListe, rate: MOTS_MODELE.listeNonCopiee });
+    }
+
+    /**
+     * Le deuxième groupe de la démo, celui que monte cette modélisation et que traversent les autres modèles : son
+     * groupe-cours, s'il a ses étudiant·es. Lu dans les clés de la démo, qu'elle soit ouverte ou non (le panneau le
+     * demande avant d'y entrer).
+     */
+    function deuxiemeGroupe() {
+        if (typeof db === 'undefined') return null;
+        var liste = function (nom) { var v = db.getSync('demo_' + nom, []); return Array.isArray(v) ? v : []; };
+        var g = liste('groupesCours').find(function (x) { return x && x.id && x.id !== 'GC_DEMO'; });
+        var n = liste('groupeEtudiants').filter(function (e) { return e && e.da && String(e.da).indexOf('DEMO') !== 0; }).length;
+        return g && n ? g : null;
     }
 
     // ---------- Les huit étapes de la modélisation (textes PROPOSÉS, 12 nov. 2026) ----------
@@ -798,7 +818,10 @@
     // Pour la sentinelle des textes et les bancs : le matériel fourni et les étapes de la modélisation.
     window.ParcoursClasse = Object.freeze({
         materiel: MATERIEL,
-        etapesModele: ETAPES_MODELE
+        etapesModele: ETAPES_MODELE,
+        copierTexte: copierTexte,
+        deuxiemeGroupe: deuxiemeGroupe,
+        mots: MOTS_MODELE
     });
 
 })();

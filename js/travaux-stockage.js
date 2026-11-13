@@ -1283,6 +1283,10 @@
      */
     async function _migrerThumbnailsVersIDB() {
         if (db.getSync('_migration_thumbnails_done', false)) return;
+        // 13 nov. 2026 : pas dans la démo. Elle y lisait les fichiers de la démo (le pack n'en porte aucun à migrer),
+        // puis posait son témoin, qui est GLOBAL : les fichiers du vrai trimestre n'étaient alors jamais migrés, et une
+        // clé changeait hors de la démo (banc `deux-temps-modeles-2026-11-13`). Elle passera hors de la démo.
+        if (typeof estEnModeDemo === 'function' && estEnModeDemo()) return;
 
         var compteur = 0;
 
