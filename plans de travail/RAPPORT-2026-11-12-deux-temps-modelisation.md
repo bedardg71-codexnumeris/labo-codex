@@ -4,6 +4,8 @@
 (le mandat nommait `lot/deux-temps` ; la session du cloud impose ce nom), partie de `origin/main` à `271dc9177`
 (1.243.0), poussée, non fusionnée. Mandat : relais de la conversation du Projet, 12 nov., 8 h 20.
 Porte terrain : `plans de travail/PORTES-TERRAIN-2026-11-12-deux-temps-modelisation.md`.
+**Aperçu** : PR n° 20 (brouillon, à ne pas fusionner), `https://deploy-preview-20--codexnumeris-051225.netlify.app`,
+build 1112-0943. Netlify le dit prêt ; il n'a pas pu être ouvert depuis le conteneur (le réseau y bloque `netlify.app`).
 
 **Dernier relais : 12 nov., session du cloud.** Fait : le panneau (texte en quatre temps, choix du matériel, carte
 sans modélisation, « Remettre la démo à neuf »), la modélisation de « Mettre ta classe en place » (huit bulles dans la
@@ -240,4 +242,5 @@ qui ne s'ouvre pas dans la démo. Rituel de fin de session : aucun `innerHTML`, 
   le calendrier, les indices et les verrous de la démo survivraient.
 - La sortie de la démo retire `seancesCompletes_gc_GC_DEMO` chez qui l'a déjà (un cache de la démo).
 - « Commencer avec ma classe », à la fin de « Découvrir », part toujours sur les vraies données : non touché.
-- Aucune release ni ligne de Nouvelles écrite : la version reste 1.243.0 jusqu'à la release du jour.
+- Aucune release ni ligne de Nouvelles écrite : la version reste 1.243.0. Le build passe à **1112-0943**
+  (`release.mjs --build-only`) : la garde anti-cache l'exige pour que les jetons `?v=` des fichiers du lot changent.
