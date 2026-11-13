@@ -390,6 +390,21 @@ function enregistrerAction(type, details) {
 }
 
 /**
+ * #1280 (12 nov. 2026) — UN CLIC FAIT DANS LA FENÊTRE DU RAPPORT N'ENTRE PAS AU JOURNAL. Vécu sur
+ * l'iPad le 10 nov. : 19 des 20 dernières actions venaient de la fenêtre elle-même (la description
+ * dictée, puis touchée pour la corriger), et chassaient du tampon tout ce qui avait été fait avant
+ * le signalement, la seule partie utile. Toute la fenêtre est écartée, dans ses deux modes (bug et
+ * commentaire), pas le seul champ de description. Le clic qui l'ouvre est fait hors d'elle : il
+ * reste, et marque le moment du signalement. Fonction pure, verrouillée par
+ * `tests/unit/sentinelle-1280-rapport-bug-actions-d-avant.test.js`.
+ * @param {EventTarget} target
+ * @returns {boolean}
+ */
+function clicDansFenetreRapport(target) {
+    return !!target && typeof target.closest === 'function' && !!target.closest('#modalRapportBug');
+}
+
+/**
  * #1075, point 10 (22 oct. 2026) — CE QU'UN CLIC LAISSE DANS L'HISTORIQUE : l'élément, jamais son
  * texte. Avant, les 30 premiers caractères du texte cliqué y entraient : un nom d'élève cliqué dans
  * une liste partait avec le rapport, hors mode anonymisé. Restent l'id, la première classe et le
@@ -415,6 +430,7 @@ function decrireElementClique(target) {
 
 // Intercepter les clics
 document.addEventListener('click', (event) => {
+    if (clicDansFenetreRapport(event.target)) return;   // #1280
     enregistrerAction('clic', decrireElementClique(event.target));
 }, true);
 
@@ -1267,6 +1283,7 @@ window.telechargerRapportTxt = telechargerRapportTxt;
 window.envoyerRapportParCourriel = envoyerRapportParCourriel;
 window.enregistrerAction = enregistrerAction;
 window.decrireElementClique = decrireElementClique;   // #1075, point 10 : lu par son banc
+window.clicDansFenetreRapport = clicDansFenetreRapport;   // #1280 : lu par son banc
 // Gestion des rapports archivés
 window.ouvrirModalRapportsArchives = ouvrirModalRapportsArchives;
 window.fermerModalRapportsArchives = fermerModalRapportsArchives;
