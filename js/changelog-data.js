@@ -21,6 +21,18 @@
 
     var CHANGELOG = [
         {
+            // 1.245 (13 nov. 2026 : la carte d'aide dans « Apporter mon matériel », le rapport de bug #1280) — titre et
+            // lignes 1 et 3 proposés par Claude Code, ligne 2 écrite par Grégoire ; son oui du 13 nov. 2026.
+            version: '1.245',
+            couleur: 'vert',
+            titre: 'Ta grille, pas à pas',
+            items: [
+                'Dans Conception › Mon matériel, l’interrupteur «&nbsp;M’accompagner pour étiqueter ma grille&nbsp;» ouvre une carte qui te guide pas à pas, de la copie de ton tableau à «&nbsp;Créer ma grille&nbsp;». Éteint, la page n’affiche plus de consignes.',
+                'Sur la même page, «&nbsp;Essayer avec un exemple&nbsp;» devient «&nbsp;Voir le travail complet&nbsp;» et «&nbsp;Faire l’exercice soi-même&nbsp;». L’exemple n’écrit plus par-dessus ton brouillon&nbsp;: tu le retrouves en quittant l’exemple.',
+                'Le rapport de bug montre tes dernières actions d’avant le signalement, plus celles faites dans sa fenêtre.'
+            ]
+        },
+        {
             // 1.244 (12 nov. 2026 : la dissection sur l'iPad, la carte des parcours à droite, une seule barre au
             // chargement) — lignes proposées par la conversation du Projet, validées par Grégoire (12 nov.)
             version: '1.244',
