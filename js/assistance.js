@@ -25,13 +25,13 @@
 
    LES DEUX TEMPS (décision de Grégoire, 11 et 12 nov. 2026) : un parcours se fait d'abord dans la démo, avec le
    matériel fourni (la modélisation, où la personne fait elle-même chaque geste), puis sur ses vraies données. Un
-   seul choix pour toute la liste, « Matériel de la démo » ou « Mon matériel » ; « Commencer » part dans le matériel
+   seul choix pour toute la liste, « Modélisation » ou « Pratique guidée » ; « Commencer » part dans le matériel
    choisi. Une définition déclare `lancerModele(depuis)` et `totalModele` quand elle a sa modélisation ;
    `dansLaDemo: true` quand elle ne se joue que dans la démo (« Découvrir ») : elle part de la même façon sous les
-   deux choix. Sans l'un ni l'autre, sous « Matériel de la démo », la carte le dit et « Commencer » ne part pas.
+   deux choix. Sans l'un ni l'autre, sous « Modélisation », le bouton de la carte est inactif, sans phrase (13 nov.).
    Le choix et l'état des modélisations restent sur l'appareil (`localStorage`, clé `laboCodex.assistance`, HORS
    de `db`, comme `laboCodex.vue`) : ce qu'on fait dans la démo n'écrit rien dans les données.
-   « Remettre la démo à neuf » (Grégoire, 12 nov., 8 h 15), sous le choix, visible avec « Matériel de la démo ».
+   « Remettre la démo à neuf » (Grégoire, 12 nov., 8 h 15), sous le choix, visible avec « Modélisation ».
 
    Un parcours qui déclare `grandEcranSeulement: true` (lot « La bulle sur téléphone »,
    9 nov. 2026) n'est pas proposé sur téléphone (ParcoursMoteur.surTelephone, 500 px) : sous son
@@ -54,10 +54,11 @@
 
     var CLE_APPAREIL = 'laboCodex.assistance';
     var MATERIEL = { DEMO: 'demo', MIEN: 'mien' };
-    // Mots validés par Grégoire (12 nov. 2026), mot pour mot.
-    var MOTS_MATERIEL = { demo: 'Matériel de la démo', mien: 'Mon matériel' };
-    // Phrases PROPOSÉES (12 nov. 2026), à valider par Grégoire sur l'aperçu.
-    var TEXTE_SANS_MODELE = 'Ce parcours n\'a pas encore son modèle dans la démo. Pour le faire dès maintenant, choisis « Mon matériel ».';
+    // Décidés par Grégoire (12 nov. 2026, 14 h 46 à 15 h 08), mot pour mot : le nom, et dessous, en plus petit, le matériel.
+    var MOTS_MATERIEL = {
+        demo: { nom: 'Modélisation', sous: 'avec le matériel de la démo' },
+        mien: { nom: 'Pratique guidée', sous: 'avec mon matériel' }
+    };
     var MOTS_NEUF = {
         bouton: 'Remettre la démo à neuf',
         question: 'Tout ce que tu as fait dans la démo s\'efface : ce que tu y as créé, modifié, évalué ou importé. '
@@ -84,8 +85,8 @@
     }
 
     /**
-     * Le matériel choisi. Sans choix sur l'appareil : « Matériel de la démo » (décision du 12 nov. 2026).
-     * PILOTÉ PAR UN BANC (`navigator.webdriver`), sans choix : « Mon matériel ». Les bancs Playwright des neuf parcours
+     * Le matériel choisi. Sans choix sur l'appareil : « Modélisation » (décision du 12 nov. 2026).
+     * PILOTÉ PAR UN BANC (`navigator.webdriver`), sans choix : « Pratique guidée ». Les bancs Playwright des neuf parcours
      * ouvrent le panneau et touchent « Commencer » pour jouer le parcours sur les vraies données ; sans ceci, ils
      * partiraient tous dans la démo, ou ne partiraient pas. Même règle que la vue au démarrage (`vueAuDemarrage`,
      * js/vue-simple-donnees.js) ; le banc des deux temps éteint ce drapeau pour éprouver le vrai défaut. Aucun
@@ -119,7 +120,7 @@
         ecrireAppareil(Object.assign({}, etatAppareil(), { modeles: {} }));
     }
 
-    /** Sous « Matériel de la démo » : 'modele' (sa modélisation), 'demo' (ne se joue que là), ou 'aucun'. */
+    /** Sous « Modélisation » : 'modele' (sa modélisation), 'demo' (ne se joue que là), ou 'aucun'. */
     function jeuDansLaDemo(def) {
         if (typeof def.lancerModele === 'function') return 'modele';
         return def.dansLaDemo ? 'demo' : 'aucun';
@@ -193,15 +194,6 @@
         return e ? Math.max(0, e.getBoundingClientRect().bottom) : 0;
     }
 
-    /** Sous « Matériel de la démo », un parcours qui n'a pas encore sa modélisation le dit sur sa carte. */
-    function creerAvisSansModele(def) {
-        var p = document.createElement('p');
-        p.className = 'assistance-parcours-sans-modele';
-        p.id = 'assistance-parcours-sans-modele-' + def.id;
-        p.textContent = TEXTE_SANS_MODELE;
-        return p;
-    }
-
     /**
      * Le bouton d'une carte : « Commencer », « Reprendre » ou « Refaire », et ce qu'il lance selon le matériel choisi.
      * @param {Object} o - { etat, jeu ('mien' | 'modele' | 'demo' | 'aucun'), refuse (écran trop petit), titre, corps }
@@ -212,10 +204,10 @@
         btn.type = 'button';
         btn.className = 'assistance-parcours-bouton' + (e.etat === 'en-cours' ? ' assistance-parcours-bouton--plein' : '');
         btn.textContent = e.etat === 'fait' ? 'Refaire' : e.etat === 'en-cours' ? 'Reprendre' : 'Commencer';
-        btn.setAttribute('aria-describedby', o.titre.id + (refuse ? ' assistance-parcours-grand-ecran-' + def.id : '')
-            + (jeu === 'aucun' ? ' assistance-parcours-sans-modele-' + def.id : ''));
+        btn.setAttribute('aria-describedby', o.titre.id + (refuse ? ' assistance-parcours-grand-ecran-' + def.id : ''));
         // Sur téléphone, un parcours pour grand écran : le bouton reste lisible, il ne lance rien.
-        // Sans modélisation, sous « Matériel de la démo » : de même.
+        // Sans modèle, sous « Modélisation » (13 nov. 2026) : de même, et sans phrase. Les deux temps ne partiront en ligne
+        // que lorsque chaque parcours aura son modèle ; d'ici là, le bouton reste inactif.
         if (refuse || jeu === 'aucun') btn.setAttribute('aria-disabled', 'true');
         btn.addEventListener('click', function () {
             if (tropPetitPour(def) || jeu === 'aucun') return;
@@ -296,10 +288,7 @@
             corps.appendChild(p);
         }
 
-        if (jeu === 'aucun') {
-            li.dataset.modele = 'absent';
-            corps.appendChild(creerAvisSansModele(def));
-        }
+        if (jeu === 'aucun') li.dataset.modele = 'absent';
 
         var btn = creerBoutonParcours(def, { etat: e, jeu: jeu, refuse: refuse, titre: h, corps: corps });
         corps.appendChild(btn);
@@ -458,7 +447,12 @@
             b.className = 'assistance-materiel-option';
             b.dataset.materiel = m;
             b.setAttribute('role', 'radio');
-            b.textContent = MOTS_MATERIEL[m];
+            ['nom', 'sous'].forEach(function (partie) {
+                var s = document.createElement('span');
+                s.className = 'assistance-materiel-' + partie;
+                s.textContent = MOTS_MATERIEL[m][partie];
+                b.appendChild(s);
+            });
             b.addEventListener('click', function () { choisirMateriel(m, panneau); });
             groupe.appendChild(b);
         });

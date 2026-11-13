@@ -52,8 +52,21 @@ describe('le panneau « Assistance » : le texte en quatre temps, mot pour mot',
         expect(ASSISTANCE).not.toContain('Des parcours où tu fais les gestes toi-même');
     });
 
-    it('les deux mots du choix, validés : « Matériel de la démo » et « Mon matériel »', () => {
-        expect(ASSISTANCE).toContain("var MOTS_MATERIEL = { demo: 'Matériel de la démo', mien: 'Mon matériel' };");
+    it('les libellés du choix, décidés le 12 nov. (14 h 46 à 15 h 08) : le nom du temps, et dessous son matériel', () => {
+        expect(ASSISTANCE).toContain("demo: { nom: 'Modélisation', sous: 'avec le matériel de la démo' }");
+        expect(ASSISTANCE).toContain("mien: { nom: 'Pratique guidée', sous: 'avec mon matériel' }");
+        expect(CLASSE).toContain("refaire: 'Refaire avec mon matériel'");
+    });
+
+    it('la phrase des cartes sans modèle est partie, et rien ne la remplace (13 nov. 2026)', () => {
+        expect(ASSISTANCE).not.toMatch(/TEXTE_SANS_MODELE|creerAvisSansModele|sans-modele/);
+        expect(ASSISTANCE).not.toContain('pas encore son modèle');
+    });
+
+    it('le texte de la liste dit « dix », et le geste « Importer 10 étudiant·es »', () => {
+        expect(CLASSE).toContain('liste de dix étudiant·es');
+        expect(CLASSE).toContain('touche « Importer 10 étudiant·es »');
+        expect(tranche(CLASSE, 'var ETAPES_MODELE', 'var DEF_MODELE')).not.toMatch(/\bhuit\b/);
     });
 });
 
@@ -76,10 +89,10 @@ describe('la liste fournie : la règle de la démo (29 oct. 2026)', () => {
     const bloc = tranche(CLASSE, 'etudiants: Object.freeze([', '])');
     const lignes = [...bloc.matchAll(/\['(\d+)', '([^']+)', '([^']+)'\]/g)].map((m) => ({ da: m[1], nom: m[2], prenom: m[3] }));
 
-    it('huit personnes, des DA de sept chiffres tous différents', () => {
-        expect(lignes).toHaveLength(8);
+    it('dix personnes (13 nov. 2026 : le deuxième groupe de la démo), des DA de sept chiffres tous différents', () => {
+        expect(lignes).toHaveLength(10);
         lignes.forEach((l) => expect(l.da).toMatch(/^\d{7}$/));
-        expect(new Set(lignes.map((l) => l.da)).size).toBe(8);
+        expect(new Set(lignes.map((l) => l.da)).size).toBe(10);
     });
 
     it('aucun prénom ni nom déjà dans le pack', () => {
@@ -88,15 +101,16 @@ describe('la liste fournie : la règle de la démo (29 oct. 2026)', () => {
         expect(lignes.flatMap((l) => [l.nom, l.prenom]).filter((mot) => duPack.includes(mot))).toEqual([]);
     });
 
-    it('la parité : quatre noms accordés au féminin, quatre au masculin', () => {
-        const FEMININS = ['Enjouée', 'Généreuse', 'Vaillante', 'Bienveillante'];
-        const MASCULINS = ['Câlin', 'Rieur', 'Doux', 'Amical'];
+    it('la parité : cinq noms accordés au féminin, cinq au masculin', () => {
+        const FEMININS = ['Enjouée', 'Généreuse', 'Vaillante', 'Bienveillante', 'Souriante'];
+        const MASCULINS = ['Câlin', 'Rieur', 'Doux', 'Amical', 'Attentionné'];
         expect(lignes.map((l) => l.nom).sort()).toEqual([...FEMININS, ...MASCULINS].sort());
     });
 
     it('le prénom est un animal, d’une faune des cinq continents', () => {
-        // Koala (Océanie), Loutre et Hermine (Europe), Lémur et Antilope (Afrique), Tapir (Amériques), Yack (Asie), Cigogne.
-        expect(lignes.map((l) => l.prenom)).toEqual(['Koala', 'Loutre', 'Lémur', 'Hermine', 'Tapir', 'Antilope', 'Yack', 'Cigogne']);
+        // Koala (Océanie), Loutre et Hermine (Europe), Lémur et Antilope (Afrique), Tapir, Caribou et Toucan (Amériques),
+        // Yack (Asie), Cigogne.
+        expect(lignes.map((l) => l.prenom)).toEqual(['Koala', 'Loutre', 'Lémur', 'Hermine', 'Tapir', 'Antilope', 'Yack', 'Cigogne', 'Caribou', 'Toucan']);
     });
 });
 

@@ -82,7 +82,7 @@ async function ouvrirPanneau(page) {
     await expect(page.locator('#panneau-assistance')).toBeVisible();
 }
 
-/** Le panneau ouvert, « Matériel de la démo » choisi (sous un banc piloté, le défaut est « Mon matériel »). */
+/** Le panneau ouvert, « Modélisation » choisi (sous un banc piloté, le défaut est « Pratique guidée »). */
 async function ouvrirPanneauSurLaDemo(page) {
     await ouvrirPanneau(page);
     await page.locator('#assistance-materiel [data-materiel="demo"]').click();
@@ -237,7 +237,7 @@ async function faireLaModelisation(page, { capturer = '' } = {}) {
     await page.keyboard.press('ControlOrMeta+V');
     await expect.poll(() => page.inputValue('#v2-donneesCollees')).toContain('9900001\t' + m.groupe + '\tCâlin\tKoala');
     const liste = await page.inputValue('#v2-donneesCollees');
-    expect(liste.split('\n')).toHaveLength(8);
+    expect(liste.split('\n')).toHaveLength(10);
     await gesteDesigne(page, '#accordeon-groupe-etudiants [data-action="previsualiserDonneesV2"]', 'étape 2, « Prévisualiser »');
     await page.click('#accordeon-groupe-etudiants [data-action="previsualiserDonneesV2"]');
 
@@ -254,7 +254,7 @@ async function faireLaModelisation(page, { capturer = '' } = {}) {
     await contourSur(page, '#v2-importCoursCible');
     await page.selectOption('#v2-importCoursCible', await optionDont(page, '#v2-importCoursCible', m.cours.code));
     await gesteDesigne(page, '#v2-btnConfirmerImport', 'étape 3, le bouton qui importe');
-    await expect(page.locator('#v2-btnConfirmerImport')).toHaveText('Importer 8 étudiant·es');
+    await expect(page.locator('#v2-btnConfirmerImport')).toHaveText('Importer 10 étudiant·es');
     await page.click('#v2-btnConfirmerImport');
 
     // 4. Un horaire.
@@ -288,9 +288,9 @@ async function faireLaModelisation(page, { capturer = '' } = {}) {
     await capture(page, 'modele-6-' + capturer);
     await page.selectOption('#selectGroupeCoursHeader', await optionDont(page, '#selectGroupeCoursHeader', m.cours.code));
 
-    // 7. Un premier cours : les huit de la liste, une absence, « Verrouiller la saisie ».
+    // 7. Un premier cours : les dix de la liste, une absence, « Verrouiller la saisie ».
     await attendreEtape(page, 7, TOTAL, 'Un premier cours');
-    await expect(page.locator('#tbody-saisie-presences tr')).toHaveCount(8);
+    await expect(page.locator('#tbody-saisie-presences tr')).toHaveCount(10);
     await expect(page.locator('#tbody-saisie-presences')).toContainText('Koala');
     // La saisie garde la date du groupe d'avant (un mercredi) : la bulle le dit et montre « Précédent ».
     expect(await page.inputValue('#date-cours')).toBe('2025-12-10');
@@ -322,7 +322,7 @@ async function faireLaModelisation(page, { capturer = '' } = {}) {
 // ---------- Les bancs ----------
 
 test('le panneau : le texte en quatre temps, le choix du matériel qui se souvient, la carte sans modélisation, « Remettre la démo à neuf »', async ({ page }) => {
-    // Sous un banc (`navigator.webdriver`), le matériel par défaut est « Mon matériel » et la vue est étendue, pour ne
+    // Sous un banc (`navigator.webdriver`), le matériel par défaut est « Pratique guidée » et la vue est étendue, pour ne
     // pas déplacer les autres bancs. Ce banc éteint le drapeau pour éprouver le vrai défaut, et garde la vue étendue.
     await page.addInitScript(() => {
         Object.defineProperty(Navigator.prototype, 'webdriver', { get: () => false });
@@ -339,9 +339,16 @@ test('le panneau : le texte en quatre temps, le choix du matériel qui se souvie
     expect((await p.locator('.assistance-intro strong').allTextContents()).map(sansInsecable)).toEqual([
         "Apprendre l'application, en quatre temps.", 'Découvrir par toi-même.', 'Regarder un modèle.', 'Mettre en pratique.', 'Continuer en autonomie.']);
 
-    // (b) Un seul choix, entre « Tes parcours » et la liste ; par défaut, « Matériel de la démo ».
+    // (b) Un seul choix, entre « Tes parcours » et la liste ; par défaut, « Modélisation ».
     const options = p.locator('#assistance-materiel [role="radio"]');
-    await expect(options).toHaveText(['Matériel de la démo', 'Mon matériel']);
+    // 13 nov. 2026 (Grégoire, mot pour mot) : le nom du temps, et dessous, en plus petit, le matériel.
+    await expect(options.locator('.assistance-materiel-nom')).toHaveText(['Modélisation', 'Pratique guidée']);
+    await expect(options.locator('.assistance-materiel-sous')).toHaveText(['avec le matériel de la démo', 'avec mon matériel']);
+    expect(await options.nth(0).evaluate((b) => {
+        const t = (c) => b.querySelector(c), px = (e) => parseFloat(getComputedStyle(e).fontSize);
+        return t('.assistance-materiel-sous').getBoundingClientRect().top >= t('.assistance-materiel-nom').getBoundingClientRect().bottom - 1
+            && px(t('.assistance-materiel-sous')) < px(t('.assistance-materiel-nom'));
+    }), 'le matériel est écrit sous le nom, en plus petit').toBe(true);
     await expect(options.nth(0)).toHaveAttribute('aria-checked', 'true');
     expect(await page.evaluate(() => {
         const ordre = ['assistance-intitule', 'assistance-materiel', 'assistance-demo-neuf', 'assistance-parcours-liste'].map((id) => document.getElementById(id));
@@ -349,8 +356,8 @@ test('le panneau : le texte en quatre temps, le choix du matériel qui se souvie
     })).toBe(true);
     for (const o of await options.all()) expect((await o.boundingBox()).height).toBeGreaterThanOrEqual(44);
 
-    // (c) Sous « Matériel de la démo » : « Découvrir » tel quel, « Mettre ta classe en place » avec sa modélisation,
-    // les autres le disent sur leur carte et leur « Commencer » ne part pas.
+    // (c) Sous « Modélisation » : « Découvrir » tel quel, « Mettre ta classe en place » avec sa modélisation,
+    // les autres ont leur bouton inactif, sans phrase (13 nov. 2026), et leur « Commencer » ne part pas.
     await expect(carte(page, 'decouvrir').locator('.assistance-parcours-sans-modele')).toHaveCount(0);
     await expect(carte(page, 'decouvrir').locator('.assistance-parcours-bouton')).not.toHaveAttribute('aria-disabled', 'true');
     await expect(carte(page, 'classe').locator('.assistance-parcours-sans-modele')).toHaveCount(0);
@@ -358,7 +365,8 @@ test('le panneau : le texte en quatre temps, le choix du matériel qui se souvie
     const sans = await page.evaluate(() => Assistance.parcours().filter((d) => !d.dansLaDemo && typeof d.lancerModele !== 'function').map((d) => d.id));
     expect(sans.length).toBeGreaterThan(0);
     for (const id of sans) {
-        await expect(carte(page, id).locator('.assistance-parcours-sans-modele')).toHaveText(/n.a pas encore son modèle dans la démo/);
+        await expect(carte(page, id).locator('.assistance-parcours-sans-modele')).toHaveCount(0);
+        await expect(carte(page, id)).not.toContainText('modèle');
         await expect(carte(page, id).locator('.assistance-parcours-bouton')).toHaveAttribute('aria-disabled', 'true');
     }
     await carte(page, sans[0]).locator('.assistance-parcours-bouton').click({ force: true });
@@ -367,7 +375,7 @@ test('le panneau : le texte en quatre temps, le choix du matériel qui se souvie
     expect(await enDemo(page)).toBe(false);
     await capture(page, 'panneau-materiel-de-la-demo');
 
-    // (d) « Remettre la démo à neuf » : visible avec « Matériel de la démo », caché avec « Mon matériel ».
+    // (d) « Remettre la démo à neuf » : visible avec « Modélisation », caché avec « Pratique guidée ».
     await expect(p.locator('#assistance-demo-neuf')).toBeVisible();
     await expect(p.locator('#assistance-demo-neuf')).toHaveText('Remettre la démo à neuf');
     await options.nth(1).click();
@@ -401,17 +409,17 @@ test('la modélisation de « Mettre ta classe en place », de bout en bout dans 
     const avant = await releve(page);
     expect(Object.keys(avant).filter((k) => /^db:a2026_/.test(k)).length, 'un trimestre réel peuplé').toBeGreaterThan(4);
 
-    // « Commencer », sous « Matériel de la démo » : la démo s'ouvre, la modélisation part.
+    // « Commencer », sous « Modélisation » : la démo s'ouvre, la modélisation part.
     await ouvrirPanneauSurLaDemo(page);
     expect(ecarts(avant, await releve(page), horsDeLaDemo), 'le choix du matériel n\'écrit rien dans les données').toEqual([]);
     await carte(page, 'classe').locator('.assistance-parcours-bouton').click();
     await faireLaModelisation(page, { capturer: '1180' });
 
-    // La liste fournie : huit totems, aucun du pack, la parité (quatre noms accordés au féminin).
+    // La liste fournie : dix totems (13 nov. 2026), aucun du pack, la parité (cinq noms accordés au féminin).
     const m = await materiel(page);
-    expect(m.etudiants).toHaveLength(8);
+    expect(m.etudiants).toHaveLength(10);
     expect(m.etudiants.flatMap((e) => [e[1], e[2]]).filter((mot) => TOTEMS_DU_PACK.includes(mot))).toEqual([]);
-    expect(m.etudiants.filter((e) => /e$/.test(e[1])).length).toBe(4);
+    expect(m.etudiants.filter((e) => /e$/.test(e[1])).length).toBe(5);
 
     // Pendant la démo : ce qui est créé vit sous `demo_*`, sauf le cours (clé globale), marqué.
     const cree = await page.evaluate(() => ({
@@ -422,7 +430,7 @@ test('la modélisation de « Mettre ta classe en place », de bout en bout dans 
         etat: Assistance.etatModeleDe('classe'),
         reel: Assistance.etatDe('classe')
     }));
-    expect(cree).toEqual({ cours: [[m.cours.code, true]], etudiants: 18, horaires: 2, groupes: 2,
+    expect(cree).toEqual({ cours: [[m.cours.code, true]], etudiants: 20, horaires: 2, groupes: 2,
         etat: { etat: 'en-cours', etape: 7 }, reel: { etat: 'a-faire', etape: 0 } });
 
     // La dernière bulle : en principal, la suite dans la démo ; en second, « Refaire avec mon matériel ».

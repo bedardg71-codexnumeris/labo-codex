@@ -362,7 +362,7 @@
         total: ETAPES.length,
         lancer: lancer,
         // Les deux temps (12 nov. 2026) : ce parcours ne se joue que dans la démo ; il part de la même façon
-        // sous « Matériel de la démo » et sous « Mon matériel » (js/assistance.js).
+        // sous « Modélisation » et sous « Pratique guidée » (js/assistance.js).
         dansLaDemo: true
     });
 

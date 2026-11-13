@@ -24,7 +24,7 @@
      elle s'ouvre en route, il se ferme et attend.
 
    LA MODÉLISATION (lot « deux temps », 12 nov. 2026 ; décisions de Grégoire des 11 et 12 nov.) : sous
-   « Matériel de la démo », le même parcours se joue DANS LA DÉMO, avec le matériel fourni. La personne
+   « Modélisation », le même parcours se joue DANS LA DÉMO, avec le matériel fourni. La personne
    fait elle-même chaque geste (rien ne se remplit ni ne se clique tout seul) : elle crée un second
    groupe à côté de celui de la démo. Huit étapes (ETAPES_MODELE) : un cours, une liste à coller, son
    rattachement au cours, un horaire, un groupe-cours, le passage d'un groupe à l'autre dans l'en-tête, une saisie de
@@ -427,7 +427,7 @@
     // =================================================================
 
     /*
-     * LE MATÉRIEL FOURNI. La liste : huit noms manifestement fictifs, selon la règle de la démo arrêtée
+     * LE MATÉRIEL FOURNI. La liste : dix noms manifestement fictifs, selon la règle de la démo arrêtée
      * par Grégoire le 29 oct. 2026 (des totems scouts : le prénom est un animal, le nom une qualité de
      * caractère bienveillante qui ne touche pas au travail scolaire ; la parité ; une faune des cinq
      * continents ; aucun nom déjà dans le pack). Une ligne par personne : DA, groupe, nom, prénom.
@@ -444,7 +444,10 @@
             ['9900005', 'Doux', 'Tapir'],
             ['9900006', 'Vaillante', 'Antilope'],
             ['9900007', 'Amical', 'Yack'],
-            ['9900008', 'Bienveillante', 'Cigogne']
+            ['9900008', 'Bienveillante', 'Cigogne'],
+            // 13 nov. 2026 (Grégoire) : le deuxième groupe de la démo, celui qui traversera tous les modèles, passe à dix.
+            ['9900009', 'Attentionné', 'Caribou'],
+            ['9900010', 'Souriante', 'Toucan']
         ])
     });
 
@@ -615,7 +618,7 @@
         {
             titre: "Une liste d'étudiant·es",
             geste: "Touche « Copier la liste », colle-la dans le champ, puis touche « Prévisualiser ».",
-            texte: "Voici une liste de huit étudiant·es fictif·ves, comme celle que tu copieras du système de ton établissement : une ligne par personne, avec le DA, le groupe, le nom et le prénom. Copie-la, puis colle-la dans le champ. Le DA reconnaît chaque personne partout dans l'application ; le numéro de groupe, " + MATERIEL.groupe + ", servira à l'horaire et au groupe-cours.",
+            texte: "Voici une liste de dix étudiant·es fictif·ves, comme celle que tu copieras du système de ton établissement : une ligne par personne, avec le DA, le groupe, le nom et le prénom. Copie-la, puis colle-la dans le champ. Le DA reconnaît chaque personne partout dans l'application ; le numéro de groupe, " + MATERIEL.groupe + ", servira à l'horaire et au groupe-cours.",
             avant: function () { return ouvrirBlocModele('etudiants', FAIT_MODELE[1]); },
             zones: function () { return [champListe()]; },
             // Un geste à la fois : le champ où coller, puis « Prévisualiser ».
@@ -628,8 +631,8 @@
         },
         {
             titre: 'Le cours de la liste',
-            geste: "Choisis le cours " + MATERIEL.cours.code + ", puis touche « Importer 8 étudiant·es ».",
-            texte: "L'aperçu montre les huit personnes, telles qu'elles seront importées. Dessous, l'application demande à quel cours les rattacher : elle propose le cours actif, celui de la démo. Choisis le cours que tu viens de créer, puis confirme l'import.",
+            geste: "Choisis le cours " + MATERIEL.cours.code + ", puis touche « Importer 10 étudiant·es ».",
+            texte: "L'aperçu montre les dix personnes, telles qu'elles seront importées. Dessous, l'application demande à quel cours les rattacher : elle propose le cours actif, celui de la démo. Choisis le cours que tu viens de créer, puis confirme l'import.",
             avant: function () { return ouvrirBlocModele('etudiants', FAIT_MODELE[2]); },
             zones: function () { return [el('v2-previewTable')]; },
             // L'aperçu refermé (« Annuler ») : la bulle le dit, et montre « Prévisualiser ».
@@ -690,7 +693,7 @@
         {
             titre: "Le groupe d'un coup d'œil",
             get geste() { return suivantDansLaDemo() ? 'Choisis la suite.' : 'Explore la démo, ou refais le parcours avec ton matériel.'; },
-            texte: "Voici le groupe que tu viens de monter. Chaque point blanc est une des huit personnes de la liste, placée selon son assiduité : l'absence que tu as notée s'y voit déjà. C'est le coup d'œil à donner avant d'entrer en classe. Tu as fait tous les gestes : il reste à les refaire avec ta vraie liste, ton vrai cours et ton vrai horaire.",
+            texte: "Voici le groupe que tu viens de monter. Chaque point blanc est une des dix personnes de la liste, placée selon son assiduité : l'absence que tu as notée s'y voit déjà. C'est le coup d'œil à donner avant d'entrer en classe. Tu as fait tous les gestes : il reste à les refaire avec ta vraie liste, ton vrai cours et ton vrai horaire.",
             sansSortie: true,
             avant: async function () {
                 retirerSecondContour();
