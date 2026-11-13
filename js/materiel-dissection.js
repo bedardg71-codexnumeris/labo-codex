@@ -1357,6 +1357,19 @@
         if (cible) { if (!r.erreur) cible.tabIndex = -1; cible.focus(); }
     }
 
+    /**
+     * Lot « étiquette Sous-total » (13 nov. 2026) : une pastille par tranche en écart ; si toutes celles qui se
+     * comparent tombent juste, une seule. Textes de la consigne du lot, proposés à Grégoire tels quels.
+     */
+    function rendreConstatsSousTotaux(constat, sousTotaux) {
+        var juges = sousTotaux.filter(function (st) { return st.ok != null; });
+        var ecarts = juges.filter(function (st) { return !st.ok; });
+        ecarts.forEach(function (st) {
+            constat('Sous-total de ' + formaterNombre(st.ecrit) + ' : ses critères donnent ' + formaterNombre(st.somme) + ' : écart', 'dissection-constat-ecart');
+        });
+        if (juges.length && !ecarts.length) constat('Sous-totaux ✓', 'dissection-constat-ok');
+    }
+
     /** Les constats en pastilles : titre, sections, critères, niveaux, réponses, somme et total, morceaux sans étiquette. */
     function rendreConstats(cs, R, b) {
         function constat(t, cl) { cs.appendChild(noeud('span', 'dissection-constat' + (cl ? ' ' + cl : ''), t)); }
@@ -1371,6 +1384,7 @@
             constat('Somme des pondérations : ' + formaterNombre(b.somme) + ' · ton total : ' + formaterNombre(b.total) + (b.totalOk ? ' ✓' : ' : écart'),
                 b.totalOk ? 'dissection-constat-ok' : 'dissection-constat-ecart');
         } else if (b.aDesPoids) constat('Somme des pondérations : ' + formaterNombre(b.somme));
+        rendreConstatsSousTotaux(constat, b.sousTotaux || []);
         constat(pluriel(R.sansEtiquette, 'morceau sans étiquette', 'morceaux sans étiquette'));
     }
 

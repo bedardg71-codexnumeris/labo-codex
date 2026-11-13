@@ -30109,6 +30109,9 @@ body.mode-clair {
     --dis-c-description: #6cc3cc; --dis-h-description: rgba(108, 195, 204, .16);
     --dis-c-section: #9da2f0;     --dis-h-section: rgba(157, 162, 240, .18);
     --dis-c-total: #c79ae6;       --dis-h-total: rgba(199, 154, 230, .18);
+    /* Variable NEUVE (13 nov. 2026), raison : « Sous-total » et « Total » se posent côte à côte sur la même grille,
+       et le lot existe pour qu'on les distingue ; aucun des douze surligneurs n'est libre sur une grille. */
+    --dis-c-soustotal: #e58fe0;   --dis-h-soustotal: rgba(229, 143, 224, .18);
     --dis-c-critere: #f2cf3a;     --dis-h-critere: rgba(242, 207, 58, .26);
     --dis-c-souscritere: #f0a35a; --dis-h-souscritere: rgba(240, 163, 90, .22);
     --dis-c-ponderation: #ff8a50; --dis-h-ponderation: rgba(255, 138, 80, .22);
@@ -30126,6 +30129,7 @@ body.mode-clair {
     --dis-c-description: #2f7680; --dis-h-description: rgba(47, 118, 128, .16);
     --dis-c-section: #4a4fb3;     --dis-h-section: rgba(74, 79, 179, .17);
     --dis-c-total: #7b3fa0;       --dis-h-total: rgba(123, 63, 160, .17);
+    --dis-c-soustotal: #a3239c;   --dis-h-soustotal: rgba(200, 60, 190, .17);
     --dis-c-critere: #8a6700;     --dis-h-critere: rgba(255, 214, 0, .48);
     --dis-c-souscritere: #a85a14; --dis-h-souscritere: rgba(255, 168, 60, .30);
     --dis-c-ponderation: #c2410c; --dis-h-ponderation: rgba(234, 88, 12, .24);
@@ -30139,6 +30143,7 @@ body.mode-clair {
 .dis-t-titre { --dis-c: var(--dis-c-titre); --dis-h: var(--dis-h-titre); }
 .dis-t-description { --dis-c: var(--dis-c-description); --dis-h: var(--dis-h-description); }
 .dis-t-section { --dis-c: var(--dis-c-section); --dis-h: var(--dis-h-section); }
+.dis-t-soustotal { --dis-c: var(--dis-c-soustotal); --dis-h: var(--dis-h-soustotal); }
 .dis-t-total { --dis-c: var(--dis-c-total); --dis-h: var(--dis-h-total); }
 .dis-t-critere { --dis-c: var(--dis-c-critere); --dis-h: var(--dis-h-critere); }
 .dis-t-souscritere { --dis-c: var(--dis-c-souscritere); --dis-h: var(--dis-h-souscritere); }
