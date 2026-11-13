@@ -7,6 +7,17 @@
 
 ---
 
+## 13 NOV. 2026, 17 H 40 (Claude Code) : **DEUX LOTS POUSSÉS, NON FUSIONNÉS** — `main` inchangé (`2a7aa59b8`, 1.245.0)
+
+Mandats : deux relais de Cowork du 13 nov. (retours terrain de Grégoire sur l'iPad, Conception › Mon matériel). **Le travail le plus récent vit sur deux branches, parties toutes deux de `2a7aa59b8`** ; la fusion revient à Grégoire, du Mac.
+
+- **`lot/dissection-defilement-aide`** (`a969bb3c2`) — **#1276**, « la grille remonte à chaque clic ». Deux causes : `finSurlignage` remettait les repères de l'amenée ; le moteur de la carte amenait un contour hors de vue (`suivreContour`). Le canevas n'est plus amené qu'à l'ouverture et quand la carte est rouverte par son interrupteur. Conséquence assumée : un morceau désigné hors de vue ne reçoit ni flèche ni halo tant qu'on n'y revient pas. Rapport : `plans de travail/RAPPORT-2026-11-13-dissection-defilement-aide.md` (sur la branche).
+- **`lot/etiquette-sous-total`** (`ee6230942`) — l'étiquette « Sous-total » ; #1106 intact, source et stock. **#1277 inscrit, non corrigé** (la conversion « Résultat sur 80 », question de didactique pour Grégoire). Textes et teinte à valider. Rapport : `plans de travail/RAPPORT-2026-11-13-etiquette-sous-total.md` (sur la branche).
+- **À la fusion** : conflit VOULU dans `index.html` sur le jeton de `js/materiel-dissection.js` (`20261113f` d'un côté, `20261113g` de l'autre) : garder une lettre jamais servie. `BACKLOG.md` : l'en-tête (numéros pris) est à jour sur le lot du défilement, l'item #1277 sur le lot Sous-total.
+- **Verdicts** : sur chaque branche, Vitest complet vert (923 et 925 fichiers) et un passage WebKit ciblé du Mac (57 et 46 essais, verts). **La suite Playwright complète n'a été passée sur aucune des deux** : à passer à la fusion.
+- **Gestes à rendre à Grégoire, sur l'iPad** : carte ouverte, descendre et étiqueter plusieurs morceaux, la grille reste en place ; prendre « Sous-total », toucher « /18 », la pastille dit si les critères au-dessus donnent 18.
+- `lot/deux-temps-modeles` : inchangé, toujours à part.
+
 ## 13 NOV. 2026, 13 H 00 (Claude Code) : **1.245.0 POUSSÉE ET EN LIGNE, VERDICT VERT** — carte d'aide et rapport de bug fusionnés
 
 Mandat : relais de Cowork, 13 nov., 10 h 15 (Grégoire décide la mise en ligne). **`origin/main` = `d6e5677a7`** (1.245.0, build `1113-1055`, « Ta grille, pas à pas ») ; Netlify `6af74ee5`, `ready` à 12 h 55 sur ce SHA. **Le travail le plus récent vit sur `main`.** PR n° 22 fusionnée.
