@@ -200,7 +200,8 @@ function _trimestreActifDuRegistre() {
 function trimestreEnCreationSaisi() {
     if (!_ficheEnCreation()) return false;
     const valeur = (id) => (document.getElementById(id)?.value || '').trim();
-    return ['v2-nomTrimestre', 'v2-sessionTrimestre', 'v2-anneeTrimestre', 'v2-debutTrimestre',
+    // (Le nom n'y est plus : il se crée de la session et de l'année, il n'est pas une saisie.)
+    return ['v2-sessionTrimestre', 'v2-anneeTrimestre', 'v2-debutTrimestre',
         'v2-finCours', 'v2-finTrimestre'].some(id => valeur(id));
 }
 if (window.uiDialogues) window.uiDialogues.declarerFicheEnCreation('trimestre', trimestreEnCreationSaisi);
@@ -233,6 +234,36 @@ function _trimestreADesDonnees(trimestreId) {
 
 const GESTE_IDENTIFICATION = 'Identification du trimestre';
 const SESSIONS_CODES = { 'hiver': 'H', 'automne': 'A', 'ete': 'E' };
+const SESSIONS_LIBELLES = { H: 'Hiver', A: 'Automne', E: 'Été' };
+
+/**
+ * 14 nov. 2026 (essai novice) — le nom d'un trimestre se CRÉE de sa session et de son année :
+ * « Hiver 2027 ». Il ne se saisit plus (Grégoire répondait deux fois la même chose).
+ * @returns {string} le nom, ou '' tant que la paire n'est pas complète et valide
+ */
+function nomTrimestreGenere(sessionCode, annee) {
+    const libelle = SESSIONS_LIBELLES[sessionCode];
+    return (libelle && /^\d{4}$/.test(String(annee))) ? `${libelle} ${annee}` : '';
+}
+
+/**
+ * Le champ « Nom du trimestre » (lecture seule) suit la session et l'année SAISIES. Affichage
+ * seulement : aucune écriture, donc permis à la frappe de l'année.
+ *
+ * ⚠ STOCK : un trimestre déjà enregistré garde le nom qu'il porte tant que ni sa session ni son
+ * année ne changent ; ce nom-là est relu du registre par `chargerIdentificationTrimestreV2`.
+ * Ici, tant que la paire saisie est celle du trimestre actif, on ne touche donc pas au champ.
+ */
+function afficherNomTrimestreV2() {
+    const champ = document.getElementById('v2-nomTrimestre');
+    if (!champ) return;
+    const saisie = _identificationSaisieV2();
+    if (!_ficheEnCreation()) {
+        const actif = _trimestreActifDuRegistre();
+        if (!saisie || saisie.id === actif.id) { champ.value = actif.nom || ''; return; }
+    }
+    champ.value = saisie ? saisie.nom : '';
+}
 
 /**
  * Lot E2 (D3, décisions techniques de Cowork du 28 sept.) — lit l'identification saisie.
@@ -240,14 +271,13 @@ const SESSIONS_CODES = { 'hiver': 'H', 'automne': 'A', 'ete': 'E' };
  * changée, année pas encore) n'est ni une erreur ni une écriture.
  */
 function _identificationSaisieV2() {
-    const nom = document.getElementById('v2-nomTrimestre')?.value?.trim() || '';
     const session = document.getElementById('v2-sessionTrimestre')?.value || '';
     const annee = String(document.getElementById('v2-anneeTrimestre')?.value || '').trim();
     if (!SESSIONS_CODES[session] || !/^\d{4}$/.test(annee)) return null;
     const sessionCode = SESSIONS_CODES[session];
     return {
         id: `${sessionCode.toLowerCase()}${annee}`,
-        nom: nom || `${session.charAt(0).toUpperCase() + session.slice(1)} ${annee}`,
+        nom: nomTrimestreGenere(sessionCode, annee),
         session: sessionCode,
         annee: parseInt(annee, 10)
     };
@@ -272,32 +302,6 @@ function _rafraichirListesTrimestresV2() {
 }
 
 /**
- * Lot E2 (D3) — le NOM du trimestre actif s'enregistre au changement du champ, seul :
- * il ne touche ni l'id ni le préfixe des clés. Vide : le nom généré (« Automne 2026 »),
- * comme avant. Sans trimestre actif, rien : c'est « Créer le trimestre » qui écrit.
- */
-function sauvegarderNomTrimestreV2() {
-    if (_ficheEnCreation()) return false;
-    const actif = _trimestreActifDuRegistre();
-    const champ = document.getElementById('v2-nomTrimestre');
-    let nom = champ?.value?.trim() || '';
-    if (!nom) {
-        const libelles = { H: 'Hiver', A: 'Automne', E: 'Été' };
-        nom = `${libelles[actif.session] || ''} ${actif.annee || ''}`.trim();
-        if (champ) champ.value = nom;
-    }
-    if (actif.nom === nom) return true;
-    // Une COPIE : le registre lu peut être l'objet du cache de `db` ; le modifier avant une
-    // écriture qui échoue le laisserait faux en mémoire.
-    const trimestres = JSON.parse(JSON.stringify(db.getSync('trimestres', []) || []));
-    const index = trimestres.findIndex(t => t && t.actif === true);
-    trimestres[index].nom = nom;
-    if (!sauvegarderDonneesSelonMode('trimestres', trimestres, { geste: GESTE_IDENTIFICATION })) return false;
-    _rafraichirListesTrimestresV2();
-    return true;
-}
-
-/**
  * Lot E2 (D3) — la SESSION et l'ANNÉE du trimestre actif s'écrivent ENSEMBLE, au
  * changement de l'un ou l'autre champ, et seulement quand les deux sont valides.
  *
@@ -310,11 +314,12 @@ function sauvegarderNomTrimestreV2() {
  * @returns {boolean} true si l'identification en base est celle des champs
  */
 function sauvegarderIdentificationTrimestreV2() {
+    afficherNomTrimestreV2();                          // le nom suit la paire saisie (affichage seul)
     if (_ficheEnCreation()) return false;
     const actif = _trimestreActifDuRegistre();
     const saisie = _identificationSaisieV2();
     if (!saisie) return false;                         // état intermédiaire : ni écriture, ni erreur
-    if (saisie.id === actif.id) return true;           // rien ne change (le nom a son propre champ)
+    if (saisie.id === actif.id) return true;           // rien ne change : le nom en stock reste aussi
 
     // Une COPIE : le registre lu peut être l'objet du cache de `db` ; le modifier avant une
     // écriture qui échoue le laisserait faux en mémoire.
@@ -334,6 +339,8 @@ function sauvegarderIdentificationTrimestreV2() {
     trimestres[index].id = saisie.id;
     trimestres[index].session = saisie.session;
     trimestres[index].annee = saisie.annee;
+    // 14 nov. 2026 : la paire change, le nom la suit (il ne se saisit plus).
+    trimestres[index].nom = saisie.nom;
     if (!sauvegarderDonneesSelonMode('trimestres', trimestres, { geste: GESTE_IDENTIFICATION })) {
         chargerIdentificationTrimestreV2();
         return false;
@@ -862,7 +869,8 @@ window.chargerIdentificationTrimestreV2 = chargerIdentificationTrimestreV2;
 window.sauvegarderIdentificationTrimestreV2 = sauvegarderIdentificationTrimestreV2;
 window.chargerCadreCalendrierV2 = chargerCadreCalendrierV2;
 window.sauvegarderCadreCalendrierV2 = sauvegarderCadreCalendrierV2;
-window.sauvegarderNomTrimestreV2 = sauvegarderNomTrimestreV2;
+window.afficherNomTrimestreV2 = afficherNomTrimestreV2;
+window.nomTrimestreGenere = nomTrimestreGenere;
 window.creerTrimestreV2 = creerTrimestreV2;
 window.ouvrirCreationTrimestreV2 = ouvrirCreationTrimestreV2;
 window.annulerCreationTrimestreV2 = annulerCreationTrimestreV2;

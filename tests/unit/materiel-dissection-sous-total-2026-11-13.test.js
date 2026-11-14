@@ -39,7 +39,7 @@ describe('l’étiquette « Sous-total » dans la légende', () => {
     it('« Sous-total », juste avant « Total », dans « La grille »', () => {
         const k = D.TYPES.map((t) => t.k);
         expect(k.indexOf('soustotal')).toBe(k.indexOf('total') - 1);
-        expect(D.TYPE.soustotal).toMatchObject({ nom: 'Sous-total', aide: 'Le total d’une partie de la grille', groupe: 'La grille' });
+        expect(D.TYPE.soustotal).toMatchObject({ nom: 'Sous-total', aide: 'Le total d’un groupe de critères', groupe: 'La grille' });
     });
 
     it('une étiquette de grille : posée à côté de codes, la liste de codes est refusée', () => {

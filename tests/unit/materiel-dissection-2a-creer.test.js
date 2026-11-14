@@ -198,7 +198,7 @@ describe('R — quand « Créer ma grille » est refusé, et pourquoi', () => {
 
     it('R.b — un morceau étiqueté sans place empêche de créer', () => {
         const c = D.creation(compriseTexte([...TEXTE_C, ['Langue exemplaire', 'descripteur']]));
-        expect(c.raisons).toEqual(['une place pour le morceau étiqueté listé plus bas']);
+        expect(c.raisons).toEqual(['une place pour la partie étiquetée listée plus bas']);
     });
 
     it('R.c — ni points ni niveaux : il manque des points ou des niveaux', () => {

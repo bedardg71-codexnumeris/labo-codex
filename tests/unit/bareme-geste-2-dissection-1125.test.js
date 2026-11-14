@@ -46,7 +46,7 @@ function exempleEtiquete() {
     const doc = D.exempleDoc();
     const M = D.morceaux(doc);
     const PAR_TEXTE = {
-        section: ['PARTIE A : COMPRÉHENSION', 'PARTIE B : RÉFLEXION'],
+        section: ['SECTION A : COMPRÉHENSION', 'SECTION B : RÉFLEXION'],
         niveau: ['Insuffisant', 'Partiel', 'Satisfaisant', 'Remarquable'],
         critere: ['L’étudiant·e résume l’œuvre avec justesse', 'L’étudiant·e relève des procédés d’écriture',
             'L’étudiant·e relie l’œuvre aux notions du cours', 'L’étudiant·e exprime une appréciation argumentée'],

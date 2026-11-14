@@ -16,6 +16,7 @@ import { test, expect } from '@playwright/test';
 import { ouvrirEspaceVide, mettreLaClasseEnPlace, attendreEtape, contourSur, bulle, bulleNeCouvrePas, capture } from './harness/classe-de-banc.js';
 import { flecheVers } from './harness/fleches-de-banc.js';
 import { collerLExemple } from './harness/exemple-colle.js';
+import { passerLOuverture, boutonExemple } from './harness/ouverture-evaluer.js';
 
 const DOSSIER = process.env.CAPTURES_PARCOURS || '';
 const TAILLES = [[1180, 820], [820, 1180]];
@@ -84,7 +85,7 @@ const CAPTURE = '<table><tr><td colspan="3">Grille fictive d’analyse</td></tr>
 /** Le parcours lancé, à l'étape 1 (l'exemple offert). */
 async function lancerEvaluer(page) {
     await page.evaluate(() => Assistance.parcours().find((p) => p.id === 'evaluer').lancer(0));
-    await etape(page, 1, 'Ta grille', { focus: false });
+    await passerLOuverture(page);   // 14 nov. 2026 : deux bulles d'ouverture avant « Ta grille »
 }
 
 
@@ -123,7 +124,7 @@ for (const [L, H] of TAILLES) {
         await expect(page.locator('#dissection-palette')).toHaveAttribute('aria-label', 'Légende');
         await expect(page.locator('#dissection-bandeau')).toBeHidden();   // 13 nov. 2026 : la consigne est dans la carte ; rien en main, le bandeau ne s'affiche pas
         expect(await page.evaluate(() => window.materielDissection.consignes().etapes[0])).toBe('Touche une étiquette dans la légende.');
-        expect(await page.evaluate(() => window.materielDissection.consignes().etapes[1])).toBe('Touche les morceaux de ta grille qu’elle désigne : ils prennent sa couleur. Pour en étiqueter plusieurs d’un coup, glisse dessus. Touche un morceau déjà étiqueté pour retirer son étiquette.');
+        expect(await page.evaluate(() => window.materielDissection.consignes().etapes[1])).toBe('Touche les parties de ta grille qu’elle désigne : elles prennent sa couleur. Pour en étiqueter plusieurs d’un coup, glisse dessus. Touche une partie déjà étiquetée pour retirer son étiquette.');
         expect(await aLEcran(page), 'la dissection ouverte').not.toMatch(INTERDITS);
         await toucher(page, 'Journal de lecture');   // sans étiquette choisie
         await expect(page.locator('#dissection-statut')).toHaveText('Touche une étiquette dans la légende.');
@@ -190,7 +191,6 @@ for (const [L, H] of TAILLES) {
         await ouvrirEspaceVide(page, L, { hauteur: H });
         await mettreLaClasseEnPlace(page);
         await lancerEvaluer(page);
-        await bulle(page).getByRole('button', { name: 'Passer à ma grille' }).click();
         await coller(page, CAPTURE);
         await poser(page, 'titre', ['Grille fictive d’analyse']);
         await poser(page, 'critere', ['Introduction', 'Développement', 'Conclusion']);
@@ -244,7 +244,7 @@ for (const [L, H] of TAILLES) {
         await ouvrirEspaceVide(page, L, { hauteur: H });
         await mettreLaClasseEnPlace(page);
         await lancerEvaluer(page);
-        await bulle(page).getByRole('button', { name: "Faire l'exercice soi-même" }).click();
+        await boutonExemple(page, 'exercice').click();   // 14 nov. 2026 : le bouton est sur la page, plus dans la bulle
         await gesteEst(page, 'Ta grille n’a pas encore de nom : prends « Titre », puis touche son nom dans ta grille.');
         // À chaque position de la liste, la partie visible de chaque nom ne touche aucune pastille visible.
         const couverts = () => page.evaluate(async () => {

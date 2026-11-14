@@ -53,7 +53,7 @@
         { k: 'section', nom: 'Section', aide: 'Un regroupement de critères', groupe: 'La grille' },
         // Lot « étiquette Sous-total » (13 nov. 2026) : une étiquette ne suffisait pas à dire lequel est un sous-total et
         // lequel est le total. Nom et aide : textes de la consigne du lot, proposés à Grégoire tels quels.
-        { k: 'soustotal', nom: 'Sous-total', aide: 'Le total d’une partie de la grille', groupe: 'La grille' },
+        { k: 'soustotal', nom: 'Sous-total', aide: 'Le total d’un groupe de critères', groupe: 'La grille' },
         { k: 'total', nom: 'Total', aide: 'La ligne du total', groupe: 'La grille' },
         { k: 'critere', nom: 'Critère', aide: 'Ce que tu évalues', precision: 'Ce qui est attendu : la question que tu te poses devant la copie', groupe: 'Les critères' },
         { k: 'souscritere', nom: 'Élément observable', aide: 'Un sous-critère', precision: 'Ce que tu regardes dans toutes les copies pour juger du critère', groupe: 'Les critères' },
@@ -68,7 +68,7 @@
         { k: 'nomcode', nom: 'Nom du code', aide: 'Ce que le code désigne', groupe: 'Les codes' },
         { k: 'poids', nom: 'Poids', aide: 'Ce que pèse un code posé', precision: 'Un nombre plus grand que 0 ; sans poids, le code pèse 1. Il devient la pondération de son sous-critère.', groupe: 'Les codes' },
         { k: 'commentaire', nom: 'Commentaire', aide: 'Ce que l’étudiant·e lit pour ce code', precision: 'Il passe tel quel dans la rétroaction', groupe: 'Les codes' },
-        { k: 'suite', nom: 'Suite', aide: 'La fin d’un morceau coupé en deux par la mise en page', groupe: 'Le reste' },
+        { k: 'suite', nom: 'Suite', aide: 'La fin d’une partie coupée en deux par la mise en page', groupe: 'Le reste' },
         { k: 'ignorer', nom: 'À ignorer', aide: 'Un symbole, une décoration', groupe: 'Le reste' }
     ];
     var TYPE = {};
@@ -204,9 +204,9 @@
      * pas des étiquettes. Ils ne surlignent rien et ne comptent rien. Nom et aide : validé G. 18 oct. 13 h 48.
      */
     D.OUTILS = [
-        { k: 'couper', nom: 'Couper', aide: 'Sépare un morceau en deux, là où tu touches', groupe: 'Le reste', apres: 'suite' },
+        { k: 'couper', nom: 'Couper', aide: 'Sépare une partie en deux, là où tu touches', groupe: 'Le reste', apres: 'suite' },
         // Lot 7 : nom et aide validés par Grégoire (18 oct., 16 h 44).
-        { k: 'rattacher', nom: 'Rattacher', aide: 'Joint un morceau à celui dont il est la suite', groupe: 'Le reste', apres: 'couper' }
+        { k: 'rattacher', nom: 'Rattacher', aide: 'Joint une partie à celle dont elle est la suite', groupe: 'Le reste', apres: 'couper' }
     ];
     var OUTIL = {};
     D.OUTILS.forEach(function (o) { OUTIL[o.k] = o; });
@@ -699,7 +699,7 @@
 
     function lireMorceau(x, id, t, tx) {
         if (t === 'ignorer' || t === 'niveau') return;
-        if (t === 'suite') { if (x.suite) x.suite(tx); else sansPlace(x, id, tx, t, 'aucun morceau à compléter avant elle'); return; }
+        if (t === 'suite') { if (x.suite) x.suite(tx); else sansPlace(x, id, tx, t, 'aucune partie à compléter avant elle'); return; }
         // Lot 2a (trouvaille 1 du lot 1, tranchée par Cowork) : une « Suite » complète le dernier TEXTE
         // lu ; des points, une pondération et un poids sont des nombres, pas du texte à continuer.
         if (['points', 'ponderation', 'poids'].indexOf(t) < 0) x.suite = null;
@@ -1122,7 +1122,7 @@
         // C3 : un nom vide (ni Titre étiqueté, ni nom tapé) ; la raison remplace celle du Titre.
         var sansNom = !m.nom.valeur;
         if (sansNom) manque('un nom pour ta grille', 'nom');
-        if (R.sansPlace.length) manque(compte(R.sansPlace.length, 'une place pour le morceau étiqueté listé plus bas', 'une place pour les # morceaux étiquetés listés plus bas'), 'sansPlace', { morceau: R.sansPlace[0] });
+        if (R.sansPlace.length) manque(compte(R.sansPlace.length, 'une place pour la partie étiquetée listée plus bas', 'une place pour les # parties étiquetées listées plus bas'), 'sansPlace', { morceau: R.sansPlace[0] });
         if (!b.logique) manque('des points ou des niveaux : pose l’étiquette « Points » sur ce que vaut chaque réponse, ou l’étiquette « Niveau » sur le nom de chaque niveau', 'logique');
         m.criteres.forEach(function (c) {
             if (!c.parCle) return;
@@ -1210,7 +1210,7 @@
         if (noms.length) manque('des noms plus courts (' + D.MAX_NOM_CODE + ' caractères au plus) pour ' + nommer(noms));
         var longs = codes.filter(function (c) { return c.commentaire.length > D.MAX_COMMENTAIRE; }).map(function (c) { return c.code; });
         if (longs.length) manque('des commentaires plus courts (5 000 caractères au plus) pour ' + nommer(longs));
-        if (R.sansPlace.length) manque(compte(R.sansPlace.length, 'une place pour le morceau étiqueté listé plus bas', 'une place pour les # morceaux étiquetés listés plus bas'), 'sansPlace', { morceau: R.sansPlace[0] });
+        if (R.sansPlace.length) manque(compte(R.sansPlace.length, 'une place pour la partie étiquetée listée plus bas', 'une place pour les # parties étiquetées listées plus bas'), 'sansPlace', { morceau: R.sansPlace[0] });
         return { codes: codes, raisons: raisons, manques: manques };
     };
 
@@ -1450,7 +1450,7 @@
         if (!doc || doc.mode !== 'table') return liens;
         var der = doc.rows.length - 1;
         doc.rows.forEach(function (row, r) {
-            var section = /^PARTIE /.test(propre(row[0].lines[0].t));
+            var section = /^SECTION /.test(propre(row[0].lines[0].t));
             row.forEach(function (cell, j) {
                 cell.lines.forEach(function (L, k) {
                     var t;
@@ -1483,12 +1483,12 @@
         }
         return { mode: 'table', rows: [
             [cell(['Journal de lecture']), cell(['Rendre compte d’une lecture personnelle et la relier aux notions vues en classe.'], 4)],
-            rangeeSection('PARTIE A : COMPRÉHENSION'),
+            rangeeSection('SECTION A : COMPRÉHENSION'),
             rangeeCritere('L’étudiant·e résume l’œuvre avec justesse', ['Repérage des événements principaux', 'Exactitude des faits rapportés'],
                 [['Résumé absent ou erroné'], ['Résume quelques événements', '2'], ['Résume l’essentiel', '3-4'], ['Résume avec précision et concision', '5']]),
             rangeeCritere('L’étudiant·e relève des procédés d’écriture', ['Procédés nommés correctement', 'Exemples tirés du texte'],
                 [['Aucun procédé relevé'], ['Relève un procédé', '3'], ['Relève quelques procédés', '4'], ['Relève et illustre plusieurs procédés', '5']]),
-            rangeeSection('PARTIE B : RÉFLEXION'),
+            rangeeSection('SECTION B : RÉFLEXION'),
             rangeeCritere('L’étudiant·e relie l’œuvre aux notions du cours', ['Liens explicites avec les notions', 'Pertinence des rapprochements'],
                 [['Liens absents'], ['Établit un lien', '4-5'], ['Établit quelques liens', '6-7'], ['Établit des liens nombreux et pertinents', '8-10']]),
             rangeeCritere('L’étudiant·e exprime une appréciation argumentée', ['Opinion formulée clairement', 'Arguments appuyés sur le texte'],

@@ -77,9 +77,9 @@ test('aide d’« Apporter mon matériel » · l’aide « i » aux deux écrans
         'Enlève toutes les étiquettes posées sur cette grille, pour recommencer l’étiquetage. Le texte collé reste.');
     // Break-test (fait le 19 oct.) : la ligne `BULLES_OUTILS[t.k]` retirée de materiel-dissection.js → rouge ici.
     await survoler(page, page.locator('#dissection-palette [data-param="couper"]'),
-        'Quand une case porte deux choses sur une même ligne (un critère et ses points, par exemple), touche l’endroit entre les deux : le morceau devient deux, que tu étiquettes chacun.');
+        'Quand une case porte deux choses sur une même ligne (un critère et ses points, par exemple), touche l’endroit entre les deux : la partie devient deux, que tu étiquettes chacune.');
     await survoler(page, page.locator('#dissection-palette [data-param="rattacher"]'),
-        'Quand un nom s’étend sur plusieurs lignes, touche ses morceaux : l’application les lit comme un seul texte, dans l’ordre de ta grille.');
+        'Quand un nom s’étend sur plusieurs lignes, touche ses parties : l’application les lit comme un seul texte, dans l’ordre de ta grille.');
     // Les étiquettes ont déjà leur phrase dans la palette : aucune bulle ne s'y ajoute.
     await expect(page.locator('#dissection-palette [data-tooltip]')).toHaveCount(2);
 

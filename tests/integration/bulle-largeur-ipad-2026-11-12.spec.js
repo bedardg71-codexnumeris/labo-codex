@@ -14,6 +14,7 @@
 // Grille FICTIVE ; noms d'étudiant·es fictifs (classe-de-banc.js).
 import { test, expect } from '@playwright/test';
 import { ouvrirEspaceVide, mettreLaClasseEnPlace, attendreEtape, bulle, capture } from './harness/classe-de-banc.js';
+import { passerLOuverture } from './harness/ouverture-evaluer.js';
 
 const DOSSIER = process.env.CAPTURES_PARCOURS || '';
 const TAILLES = [[1180, 820], [820, 1180]];
@@ -29,8 +30,7 @@ async function aTaGrille(page, L, H) {
     await ouvrirEspaceVide(page, L, { hauteur: H });
     await mettreLaClasseEnPlace(page);
     await page.evaluate(() => Assistance.parcours().find((p) => p.id === 'evaluer').lancer(0));
-    await attendreEtape(page, 1, 9, 'Ta grille', { focus: false });
-    await bulle(page).getByRole('button', { name: 'Passer à ma grille' }).click();
+    await passerLOuverture(page);   // 14 nov. 2026 : deux bulles d'ouverture avant « Ta grille »
     await expect(page.locator('#materiel-accueil')).toBeVisible();
     await page.evaluate((h) => {
         const zone = document.getElementById('materiel-zone-collage');
@@ -70,7 +70,13 @@ for (const [L, H] of TAILLES) {
     for (const type of ['mouse', 'touch']) {
         test(`L1 · ${L} × ${H} · ${type} : la bulle se pose à droite de la grille quand elle y a la place, et va au bord droit`, async ({ page }) => {
             await aTaGrille(page, L, H);
-            const pl = await page.evaluate(() => ParcoursMoteur.placement());
+            // 14 nov. 2026 : la grille collée, la bulle passe de l'accueil à l'étiquetage et se redessine ; le placement
+            // se lit quand elle est posée de nouveau.
+            // (La bulle de l'accueil porte des lignes ; celle de l'étiquetage, non : lue d'un trait, quand elle est posée.)
+            const lirePlacement = () => page.evaluate(() => (document.querySelector('#parcours-bulle .parcours-bulle-ligne') ? null : ParcoursMoteur.placement()));
+            await expect.poll(async () => !!(await lirePlacement())).toBe(true);
+            const pl = await lirePlacement();
+            expect(pl, 'la bulle de l’étiquetage est posée').toBeTruthy();
             expect(pl.zoom).toBe(false);
             expect(pl.cadre.droite, 'le cadre de la bulle va jusqu’au bord droit de la page').toBe(L - MARGE);
             const r = await rectBulle(page);

@@ -175,12 +175,16 @@ test('#540-E1 · le résumé DIT ce qui manque au lieu d\'un total partiel', asy
         nb.value = '2';
         nb.dispatchEvent(new Event('change', { bubbles: true }));
 
+        // 14 nov. 2026 : les périodes naissent PROPOSÉES (2, pour 8 h à 10 h). Ce cas éprouve
+        // toujours le résumé devant un champ vide : on vide donc la seconde séance à la main.
+        const p1 = document.getElementById('v2-hor-seance-1-periodes');
+        p1.value = '';
+        p1.dispatchEvent(new Event('input', { bubbles: true }));
         const p0 = document.getElementById('v2-hor-seance-0-periodes');
         p0.value = '3';
         p0.dispatchEvent(new Event('input', { bubbles: true }));
         const uneSeuleRemplie = document.getElementById('v2-hor-formatResume')?.textContent || '';
 
-        const p1 = document.getElementById('v2-hor-seance-1-periodes');
         p1.value = '2';
         p1.dispatchEvent(new Event('input', { bubbles: true }));
         const lesDeux = document.getElementById('v2-hor-formatResume')?.textContent || '';

@@ -120,33 +120,50 @@
     }
 
     // Lignes du geste PROPOSÉES (12 nov. 2026, à valider par Grégoire) : elles nomment les boutons tels qu'ils sont écrits.
-    var GESTE_ACCUEIL = "Colle ta grille, montre ce qu'est chaque morceau, puis touche « Créer ma grille » ; ou touche « Composer ma grille ».";
-    // L'exemple ouvert : sa ligne nomme sa sortie. Dans la carte du parcours qui l'offre, « Passer à ma grille » (12 nov.) ;
-    // dans la page, « Quitter l'exemple » (PROPOSÉES le 13 nov. 2026).
-    var GESTE_EXEMPLE_COMPLET = "Regarde chaque étiquette, puis la grille lue en dessous ; touche ensuite « Faire l'exercice soi-même » ou « Passer à ma grille ».";
-    var GESTE_EXEMPLE_FAIT = "L'exemple est étiqueté : touche « Passer à ma grille ».";
+    var GESTE_ACCUEIL = "Colle ta grille, montre ce qu'est chaque partie, puis touche « Créer ma grille » ; ou touche « Composer ma grille ».";
+    // L'exemple ouvert : sa ligne nomme sa sortie, qui est sur la page, « Quitter l'exemple » (PROPOSÉES le 13 nov. 2026).
+    // 14 nov. 2026 (lot 4c) : la carte du parcours n'offre plus l'exemple ni sa sortie (« Passer à ma grille ») ; les
+    // deux lignes qui la nommaient sont parties avec elle.
     var GESTE_EXEMPLE_COMPLET_PAGE = "Regarde chaque étiquette, puis la grille lue en dessous ; touche ensuite « Quitter l'exemple ».";
     var GESTE_EXEMPLE_FAIT_PAGE = "L'exemple est étiqueté : touche « Quitter l'exemple ».";
+    // ÉCRIT le 14 nov. 2026 (à valider par Grégoire) : ce que dit la carte quand la grille de l'exemple se lit déjà,
+    // mais que des parties restent sans étiquette.
+    function gesteIlReste(n) {
+        return n > 1 ? 'Il reste ' + n + ' parties sans étiquette : pose une étiquette sur chacune.'
+            : 'Il reste une partie sans étiquette : pose-lui une étiquette.';
+    }
+
+    /** Les parties de la grille ouverte qui n'ont pas encore d'étiquette (0 quand rien n'est ouvert). */
+    function partiesSansEtiquette() {
+        var d = dissection(), R = d && typeof d.comprise === 'function' ? d.comprise() : null;
+        return R && R.sansEtiquette > 0 ? R.sansEtiquette : 0;
+    }
 
     /**
      * La ligne du geste : dans l'étiquetage, elle suit le premier manque (`materielDissection.aide()`) ; l'exemple
-     * complet, sa ligne ; à l'accueil, la sienne. `exempleDuParcours` : l'exemple est celui que la carte du parcours
-     * offre (sa sortie est dans la carte).
+     * complet, sa ligne ; à l'accueil, la sienne.
+     *
+     * ⚠ « L'exemple est étiqueté » NE S'AFFICHE JAMAIS TANT QUE DES PARTIES RESTENT SANS ÉTIQUETTE (vécu par Grégoire
+     * le 14 nov. 2026 : après UN critère, UN descripteur et UNE valeur de points, la carte le disait déjà). L'aide
+     * rend « prêt » dès que l'application sait lire une grille ; l'exercice, lui, n'est fait que tout étiqueté.
      */
-    function geste(exempleDuParcours) {
+    function geste() {
         var a = aideOuverte();
         if (a) {
-            if (exempleOuvert() && (a.sorte === 'pret' || a.sorte === 'pretCodes')) return exempleDuParcours ? GESTE_EXEMPLE_FAIT : GESTE_EXEMPLE_FAIT_PAGE;
+            if (exempleOuvert() && (a.sorte === 'pret' || a.sorte === 'pretCodes')) {
+                var reste = partiesSansEtiquette();
+                return reste ? gesteIlReste(reste) : GESTE_EXEMPLE_FAIT_PAGE;
+            }
             return a.phrase;
         }
-        if (exempleOuvert() === 'complet') return exempleDuParcours ? GESTE_EXEMPLE_COMPLET : GESTE_EXEMPLE_COMPLET_PAGE;
+        if (exempleOuvert() === 'complet') return GESTE_EXEMPLE_COMPLET_PAGE;
         return GESTE_ACCUEIL;
     }
 
     // Les trois cartes de l'accueil, mot pour mot celles de la page (validées par Grégoire le 18 oct. 2026).
     var ETAPES_ACCUEIL = [
         { titre: 'Copie ton tableau', texte: 'Ouvre ta grille dans son fichier d’origine (Word, Pages ou un autre traitement de texte), sélectionne le tableau entier – pas seulement le texte de ses cases (ou ses cellules), mais bien le tableau –, puis copie-le. Le texte copié d’un PDF est accepté aussi, mais il arrive sans ses cases : le fichier d’origine donne un meilleur résultat.' },
-        { titre: 'Colle-le ici', texte: 'Ta grille s’affiche telle quelle, chaque ligne de chaque case devenue un morceau.' },
+        { titre: 'Colle-le ici', texte: 'Ta grille s’affiche telle quelle, chaque ligne de chaque case devenue une partie.' },
         { titre: 'Étiquette, puis crée', texte: 'Avec les étiquettes de la légende, tu identifies tes sections, tes critères, tes points ; l’application te montre ensuite la grille telle qu’elle la comprend. Clique sur « Créer ma grille » afin de la ranger dans « Grilles de critères ».' }
     ];
 
@@ -182,7 +199,7 @@
         etapes: [{
             titre: TITRE,
             texte: '',
-            get geste() { return geste(false); },
+            get geste() { return geste(); },
             complement: complement,
             zones: zones,
             fleches: fleches,

@@ -136,7 +136,6 @@ async function choisirPremiere(page, id) {
 export async function mettreLaClasseEnPlace(page) {
     await page.evaluate(() => Assistance.parcours().find((p) => p.id === 'classe').lancer(0));
     await attendreEtape(page, 1, 8, 'Ton trimestre', { focus: false });
-    await page.fill('#v2-nomTrimestre', 'Automne 2026');
     await page.selectOption('#v2-sessionTrimestre', 'automne');
     await page.fill('#v2-anneeTrimestre', '2026');
     await page.fill('#v2-debutTrimestre', '2026-08-24');
@@ -178,7 +177,7 @@ export async function mettreLaClasseEnPlace(page) {
     for (const id of ['v2-gc-trimestre', 'v2-gc-cours', 'v2-gc-groupe', 'v2-gc-horaire', 'v2-gc-enseignant']) await choisirPremiere(page, id);
     await page.click('#v2-btnCreerGroupeCours');
 
-    await attendreEtape(page, 7, 8, 'Ton premier cours', { focus: false });
+    await attendreEtape(page, 7, 8, 'Prendre les présences', { focus: false });
     await expect(page.locator('#btnVerrouillerSaisiePresences')).toBeVisible();
     await page.click('#btnVerrouillerSaisiePresences');
     await attendreEtape(page, 8, 8, "Ta classe d'un coup d'œil", { focus: false });
@@ -216,7 +215,7 @@ export async function etiqueterExemple(page) {
     await collerLExemple(page);
     await expect(page.locator('#materiel-dissection')).toBeVisible();
     await etiqueter(page, 'titre', ['Journal de lecture']);
-    await etiqueter(page, 'section', ['PARTIE A : COMPRÉHENSION', 'PARTIE B : RÉFLEXION']);
+    await etiqueter(page, 'section', ['SECTION A : COMPRÉHENSION', 'SECTION B : RÉFLEXION']);
     await etiqueter(page, 'niveau', NIVEAUX_EXEMPLE);
     await etiqueter(page, 'critere', CRITERES_EXEMPLE);
     await etiqueter(page, 'descripteur', DESCRIPTEURS_EXEMPLE);

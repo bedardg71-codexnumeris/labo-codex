@@ -166,13 +166,19 @@
     function exempleOuvert() { var d = dissection(); return dissectionOuverte() && d ? d.exempleOuvert() : null; }
 
     /**
-     * Lot de la dissection sur l'iPad (12 nov. 2026). L'étape 1 a quatre façons de se montrer (`modeEtape1`) :
-     *  · 'exemple' : l'exemple offert à « Commencer » (point 5), avant que la personne passe à sa grille ;
+     * Lot de la dissection sur l'iPad (12 nov. 2026), revu le 14 nov. 2026 (essai novice de Grégoire, lot 4). L'étape 1
+     * a plusieurs façons de se montrer (`modeEtape1`) :
+     *  · 'pourquoi', puis 'apprends' : les deux bulles d'ouverture, avant « Ta grille » (lot 4b) ;
+     *  · 'accueil' : la page d'accueil de « Mon matériel ». La bulle ne porte plus de bouton d'action (règle 5 : « la
+     *    bulle guide, la page agit ») : elle montre la zone où coller et les deux boutons de l'exemple, qui sont sur la
+     *    page (lot 4c). L'exemple n'est plus « offert » par la bulle ;
+     *  · 'exemple-haut', 'exemple-bas' : devant l'exemple étiqueté, puis devant la grille telle que l'application la
+     *    comprend, quand elle est à l'écran (lots 4d et 4e) ;
      *  · 'choix' : la bulle du choix des points ou des niveaux (inchangée) ;
      *  · 'existante' : une grille déjà dans l'application, ouverte dans Conception › Grilles (point 7) : « Prendre cette
      *    grille » fait passer à « Ta production » avec elle ;
      *  · 'composer' : Conception › Grilles sans grille ouverte (« Composer ma grille », 13 nov. 2026) ;
-     *  · 'grille' : coller sa grille et l'étiqueter (l'aide pas à pas, point 4).
+     *  · 'grille' : l'étiquetage (sa grille, ou l'exercice sur l'exemple) : l'aide pas à pas, point 4.
      * Le moteur rend la bulle une fois par étape : quand la façon change, la même étape est rendue de nouveau (`allerA`,
      * sans refondre le moteur) ; `avant` ne déplace rien. Dans une même façon, la ligne du geste suit l'état (le moteur la relit).
      */
@@ -186,12 +192,33 @@
     }
 
     function modeEtape1() {
-        if (lireCtx().exemple === 'offert') return 'exemple';
+        // Les deux bulles d'ouverture : seulement à « Commencer » et à « Refaire » (`poserLeRepere`) ; un parcours en
+        // cours avant ce lot n'a pas `ouverture` dans son repère, et reprend où il était.
+        var ouverture = lireCtx().ouverture;
+        if (ouverture === 0) return 'pourquoi';
+        if (ouverture === 1) return 'apprends';
         if (choixVisible() && !exempleOuvert()) return 'choix';
         if (grilleOuverteDansLEditeur()) return 'existante';
         // 13 nov. 2026 : dans Conception › Grilles (« Composer ma grille »), l'étape a son texte (`TEXTE_1_COMPOSER`).
         if (editeurGrilleVisible() && !dissectionOuverte()) return 'composer';
+        if (exempleOuvert() === 'complet') return lectureDevant() ? 'exemple-bas' : 'exemple-haut';
+        if (!dissectionOuverte() && vis(el('materiel-accueil'))) return 'accueil';
         return 'grille';
+    }
+
+    /**
+     * L'exemple étiqueté : la grille « telle que l'application la comprendrait » est-elle devant la personne ? Son haut
+     * a passé le milieu de l'écran. (Pas « une partie à l'écran » : la bulle changerait dès que son titre paraît.)
+     */
+    function lectureDevant() {
+        var r = qs('#materiel-dissection .dissection-resultat');
+        if (!vis(r)) return false;
+        return r.getBoundingClientRect().top < window.innerHeight / 2;
+    }
+
+    function continuerLOuverture() {
+        majCtx({ ouverture: (lireCtx().ouverture || 0) + 1 });
+        M().allerA(0);
     }
 
     function grilleCreee() {
@@ -212,21 +239,6 @@
         if (g) majCtx({ grilleId: g.id, grillePrise: true });
     }
 
-    /** Point 5 : l'exemple, ouvert dans Mon matériel (« complet » ou « exercice »). Rien ne s'écrit. */
-    async function ouvrirLExemple(complet) {
-        aller('conception', 'materiel');
-        await attendre(function () { return sousSectionVisible('conception-materiel'); }, 2000);
-        var d = dissection();
-        if (d) d.ouvrirExemple(complet);
-    }
-
-    /** « Passer à ma grille » : l'exemple se ferme (le brouillon de la personne revient, s'il existe) ; l'étape passe à sa grille. */
-    function passerAMaGrille() {
-        if (window.materiel && typeof window.materiel.quitterExemple === 'function') window.materiel.quitterExemple();
-        majCtx({ exemple: 'passe' });
-        M().allerA(0);
-    }
-
     /**
      * Lot « La carte d'aide dans Apporter mon matériel » (13 nov. 2026) : ce qui guide l'accueil, l'étiquetage et
      * l'exemple ne dépend que de la page ; il vit dans `materiel-aide.js`, que cette étape et la carte de la page
@@ -241,21 +253,39 @@
 
     function zonesEtape1() {
         if (modeRendu === 'choix') return [el('dissection-creer-choix')];
+        // Les deux bulles d'ouverture ne désignent rien, mais elles ne couvrent ni le texte de la page ni la zone où
+        // coller (vécu le 14 nov. : la bulle, au centre, cachait les deux) : la bulle les évite, sans flèche.
+        if (modeRendu === 'pourquoi' || modeRendu === 'apprends') return [qs('#materiel-accueil .materiel-intro'), qs('#materiel-accueil .materiel-collage')].filter(vis);
+        if (modeRendu === 'exemple-bas') return ciblesDeLaLecture();
         if (dissectionOuverte()) return A().zones();
-        if (modeRendu === 'exemple') return [];   // les trois choix sont dans la bulle
         if (editeurGrilleVisible()) return [el('conception-grille-criteres')];
+        if (modeRendu === 'accueil') return [el('materiel-zone-collage')].concat(boutonsDeLExemple());
         return A().zones();
     }
 
     /** Dans la dissection, la bulle ne couvre jamais ce que l'aide désigne ; l'exemple complet : sa lecture. */
     function aussiEviterEtape1() {
+        // Les bulles d'ouverture : la zone où coller d'abord. Quand l'écran n'a pas de place libre (1180 × 820), la
+        // bulle mord sur le texte de la page plutôt que sur le formulaire.
+        if (modeRendu === 'pourquoi' || modeRendu === 'apprends') return [el('materiel-zone-collage')].filter(vis);
         return dissectionOuverte() ? A().aussiEviter() : [];
     }
 
+    /** Les deux boutons de l'exemple, sur la page d'accueil (« Voir un exemple de grille étiquetée », « Étiqueter l'exemple moi-même »). */
+    function boutonsDeLExemple() {
+        return [].slice.call(document.querySelectorAll('#materiel-accueil [data-action="materiel.ouvrirExemple"]')).filter(vis);
+    }
+
+    /** Devant la grille comprise : la grille refaite, son résumé, le choix du résultat ; une flèche par ligne de la bulle. */
+    function ciblesDeLaLecture() {
+        return [el('dissection-comprise'), el('dissection-constats'), el('dissection-creer-choix')].filter(vis);
+    }
+
     function contourEtape1() {
+        if (modeRendu === 'pourquoi' || modeRendu === 'apprends') return null;
+        if (modeRendu === 'exemple-haut' || modeRendu === 'exemple-bas') return null;   // rien à toucher : on regarde
         if (modeRendu === 'choix') return el('dissection-creer-choix');
         if (dissectionOuverte()) return A().contour();
-        if (modeRendu === 'exemple') return null;
         if (modeRendu === 'existante') return null;   // « Prendre cette grille » est dans la bulle
         if (editeurGrilleVisible()) {
             if (vis(el('btnCreerGrille'))) return el('btnCreerGrille');
@@ -269,41 +299,33 @@
     // Celles de l'accueil, de l'étiquetage et de l'exemple ouvert : `materiel-aide.js` (`geste`).
     var GESTE_GRILLES = "Touche « + Nouvelle grille », compose-la, puis touche « Créer la grille » ; ou ouvre une de tes grilles.";
     var GESTE_EXISTANTE = "Touche « Prendre cette grille » pour évaluer avec la grille ouverte ; ou ouvre-en une autre.";
-    var GESTE_EXEMPLE = "Touche « Voir le travail complet » ou « Faire l'exercice soi-même » ; ou « Passer à ma grille ».";
 
     function gesteEtape1() {
+        // Les bulles en lignes portent leur consigne en dernière ligne (règle 2) : pas de ligne du geste à part.
+        if (LIGNES_1[modeRendu]) return '';
         if (modeRendu === 'choix') return "Choisis les points ou les niveaux.";
-        // L'exemple offert par la bulle a sa sortie dans la bulle (« Passer à ma grille ») ; ouvert de la page, dans la page.
-        if (dissectionOuverte()) return A().geste(modeRendu === 'exemple');
-        if (modeRendu === 'exemple') return GESTE_EXEMPLE;
+        if (dissectionOuverte()) return A().geste();
         if (modeRendu === 'existante') return GESTE_EXISTANTE;
         if (editeurGrilleVisible()) return GESTE_GRILLES;
-        return A().geste(false);
+        return A().geste();
     }
 
     /**
      * Le complément de la bulle (13 nov. 2026) : les consignes que la page ne dit plus, à la suite du texte validé, qui
-     * ne change pas. À l'accueil et dans l'étiquetage seulement : ni devant le choix des points ou des niveaux, ni
-     * devant l'exemple offert, ni dans Conception › Grilles.
+     * ne change pas. Dans l'étiquetage seulement : ni devant le choix des points ou des niveaux, ni dans Conception ›
+     * Grilles, ni dans une bulle en lignes (elle tient en une page, 14 nov. 2026).
      */
     function complementEtape1() {
-        if (modeRendu === 'choix') return null;
-        if (dissectionOuverte()) return A().complement();
         if (modeRendu !== 'grille') return null;
         return A().complement();
     }
 
     /** Les boutons de la bulle, selon la façon dont l'étape se montre (rendus avec la bulle). */
     function boutonsEtape1() {
-        if (modeRendu === 'exemple') {
-            return [
-                { libelle: 'Voir le travail complet', action: function () { ouvrirLExemple(true); } },
-                { libelle: "Faire l'exercice soi-même", action: function () { ouvrirLExemple(false); } },
-                { libelle: 'Passer à ma grille', primaire: true, action: passerAMaGrille }
-            ];
-        }
+        if (modeRendu === 'pourquoi' || modeRendu === 'apprends') return [{ libelle: 'Continuer', primaire: true, action: continuerLOuverture }];
         if (modeRendu === 'existante') return [{ libelle: 'Prendre cette grille', primaire: true, action: prendreCetteGrille }];
-        if (modeRendu === 'grille') return [{ libelle: 'Prendre une grille déjà créée', action: function () { aller('conception', 'grille-criteres'); } }];
+        // 14 nov. 2026 (règle 5) : « Prendre une grille déjà créée » n'est plus dans la bulle ; « Composer ma grille », sur
+        // la page, mène au même endroit (Conception › Grilles), où une grille ouverte se prend (« Prendre cette grille »).
         return null;
     }
 
@@ -650,18 +672,78 @@
 
     // Les deux phrases sur la longueur de la dissection : validées par Grégoire mot pour mot (11 nov. 2026, 8 h 38).
     // « Composer ma grille », dernière phrase de TEXTE_1 (Grégoire, 11 nov., 8 h 58 ; mots validés).
-    var TEXTE_1 = "Pour évaluer une première production, il te faut ta grille. Apporte celle que tu utilises déjà : colle-la ici, puis montre à l'application ce que veut dire chaque morceau (un critère, un niveau, des points). C'est ainsi qu'elle pourra lire tes évaluations, puis nommer le critère où un·e étudiant·e bute. C'est souvent long, parce que chaque grille est construite à sa façon et que l'application ne peut pas deviner le rôle de chaque morceau. Mais tu ne le fais qu'une fois : ta grille servira ensuite à chaque copie que tu évalueras avec elle. Pas de grille sous la main ? Touche « Composer ma grille ».";
-    // PROPOSÉ (12 nov. 2026, à valider par Grégoire) : la bulle de l'exemple, avant sa grille (point 5).
-    var TEXTE_1_EXEMPLE = "Avant ta grille, un exemple : une grille fictive, avec deux sections, quatre critères et quatre niveaux. Tu peux voir le travail complet, toutes ses étiquettes posées, ou faire l'exercice toi-même : la bulle te guide, une étiquette à la fois. Rien ne s'enregistre : l'exemple ne devient pas une de tes grilles. Ensuite, tu passes à ta grille.";
+    var TEXTE_1 = "Pour évaluer une première production, il te faut ta grille. Apporte celle que tu utilises déjà : colle-la ici, puis montre à l'application ce que veut dire chaque partie (un critère, un niveau, des points). C'est ainsi qu'elle pourra lire tes évaluations, puis nommer le critère où un·e étudiant·e bute. C'est souvent long, parce que chaque grille est construite à sa façon et que l'application ne peut pas deviner le rôle de chaque partie. Mais tu ne le fais qu'une fois : ta grille servira ensuite à chaque copie que tu évalueras avec elle. Pas de grille sous la main ? Touche « Composer ma grille ».";
     // PROPOSÉ (13 nov. 2026, à valider par Grégoire) : dans Conception › Grilles (« Composer ma grille »), la bulle disait
     // encore « colle-la ici » (essai du 12 nov.). `TEXTE_1` ne change pas ailleurs.
     var TEXTE_1_COMPOSER = "Pour évaluer une première production, il te faut ta grille. Ici, tu la composes à la main : donne-lui un nom, puis ajoute ses critères un à un, avec leur pondération. C'est ainsi que l'application pourra lire tes évaluations, puis nommer le critère où un·e étudiant·e bute. Tu ne le fais qu'une fois : ta grille servira ensuite à chaque copie que tu évalueras avec elle. Ta grille existe déjà dans un document ? Reviens à « Mon matériel » pour la coller.";
     var TEXTE_1_CHOIX = "Ta grille porte des points et des niveaux. Le résultat d'une évaluation viendra de l'un ou de l'autre : des points qui s'additionnent en une note, ou un niveau par critère (comme « maîtrisé »), que ton échelle traduit ensuite en note. Choisis ce qui correspond à ta façon d'évaluer.";
 
+    // ---------- Les bulles en lignes de l'étape 1 (essai novice du 14 nov. 2026, lot 4 b à e) ----------
+    // plans de travail/CONSIGNE-2026-11-14-essai-novice.md. « Tu es dans « Conception », à l'onglet « Mon matériel ». »
+    // est écrite par le moteur (`lieu`), d'après le menu.
+    function note(texte) { return { texte: texte, note: true }; }
+    function consigne(texte) { return { texte: texte, geste: true }; }
+
+    var TITRES_1 = {
+        // PROPOSÉ par Cowork (le texte de la bulle est validé, « sauf le titre »).
+        pourquoi: 'Pourquoi étiqueter',
+        apprends: 'Tu apprends aussi',
+        'exemple-haut': "L'exemple étiqueté",
+        'exemple-bas': "La grille, comprise par l'application"
+    };
+
+    var LIGNES_1 = {
+        // Validé par Grégoire, 14 nov. 2026.
+        pourquoi: [
+            note("Ici, tu numérises ta grille. Une photo n'en garderait que l'apparence : l'application, elle, doit savoir ce que chaque partie veut dire. C'est toi qui le lui expliques, en posant une étiquette sur chaque partie : critère, niveau, pondération."),
+            consigne("Touche « Continuer »")
+        ],
+        // Proposé par Cowork, d'après les mots de Grégoire.
+        apprends: [
+            note("Ces mots sont les mêmes pour toutes les disciplines, alors que chaque grille est faite à sa façon. En expliquant la tienne, tu découvriras peut-être un critère flou ou un total qui ne tombe pas juste. C'est normal : ici, l'enseignant·e apprend aussi, et l'erreur fait partie du travail."),
+            consigne("Touche « Continuer »")
+        ],
+        // ÉCRIT le 14 nov. 2026 (à valider par Grégoire) : la consigne dit seulement que la bulle « montre la zone où
+        // coller et les deux boutons de la page », sans en donner les mots.
+        accueil: [
+            { texte: "Colle ici la grille que tu utilises déjà (copie le tableau entier, depuis Word ou Pages)" },
+            { texte: "Pas de grille sous la main ? Ces deux boutons ouvrent un exemple" },
+            consigne("Colle ta grille, ou touche un des deux boutons")
+        ],
+        // Proposé par Cowork. Les couleurs nommées tiennent en clair et en sombre (lu dans styles.css le 14 nov. : le
+        // fond d'une partie étiquetée est jaune pour « Critère », bleu pour « Descripteur », rose pour « Points », dans
+        // les deux thèmes ; seul le trait fonce en clair).
+        'exemple-haut': [
+            { texte: "Chaque couleur est une étiquette : la légende, à gauche, les nomme" },
+            { texte: "Regarde une rangée : le critère en jaune, ses descriptions en bleu, ses points en rose" },
+            { texte: "Descends voir la grille telle que l'application la comprend" }
+        ],
+        // Validé par Grégoire, 14 nov. 2026 ; une flèche par ligne (`ciblesDeLaLecture`).
+        'exemple-bas': [
+            { texte: "C'est la grille de l'exemple, refaite d'après ses étiquettes" },
+            { texte: "Ce résumé dit ce que l'application y a trouvé : 4 critères, 4 niveaux de performance, un total de 30 qui tombe juste" },
+            { texte: "Le résultat d'une copie peut se compter en points, ou se dire par un niveau de performance, d'« Insuffisant » à « Remarquable »" }
+        ]
+    };
+
+    function texteEtape1() {
+        if (LIGNES_1[modeRendu]) return '';
+        if (modeRendu === 'choix') return TEXTE_1_CHOIX;
+        if (modeRendu === 'composer') return TEXTE_1_COMPOSER;
+        // Dans l'étiquetage, la grille est déjà collée : la bulle ne redit pas « colle-la ici ». Elle ne porte que les
+        // consignes de l'étiquetage (le complément) et la ligne du geste, qui suit le premier manque.
+        return dissectionOuverte() ? '' : TEXTE_1;
+    }
+
     var ETAPES = [
         {
-            titre: 'Ta grille',
-            get texte() { return modeRendu === 'choix' ? TEXTE_1_CHOIX : modeRendu === 'exemple' ? TEXTE_1_EXEMPLE : modeRendu === 'composer' ? TEXTE_1_COMPOSER : TEXTE_1; },
+            get titre() { return TITRES_1[modeRendu] || 'Ta grille'; },
+            get texte() { return texteEtape1(); },
+            lignes: function () { return LIGNES_1[modeRendu] || []; },
+            // La page change à l'ouverture du parcours : la première bulle dit où l'on est, la page s'ouvre en haut.
+            get lieu() { return modeRendu === 'pourquoi'; },
+            // Devant l'exemple, la personne défile pour regarder : la bulle changée ne ramène rien dans la vue.
+            get centre() { return modeRendu === 'exemple-haut' || modeRendu === 'exemple-bas'; },
             get geste() { return gesteEtape1(); },
             get boutons() { return boutonsEtape1(); },
             avant: async function () {
@@ -673,7 +755,13 @@
             },
             zones: zonesEtape1,
             // L'aide : une flèche vers l'étiquette à prendre, une vers le morceau (ou le champ) ; l'exemple complet : ses zones.
-            fleches: function () { return dissectionOuverte() ? A().fleches() : null; },
+            // Une bulle en lignes : ses flèches vont à ses zones (la zone de collage et les deux boutons ; la légende et
+            // la grille ; la grille comprise, son résumé, le choix).
+            fleches: function () {
+                if (modeRendu === 'pourquoi' || modeRendu === 'apprends') return [];
+                if (LIGNES_1[modeRendu]) return zonesEtape1();
+                return dissectionOuverte() ? A().fleches() : null;
+            },
             complement: complementEtape1,
             aussiEviter: aussiEviterEtape1,
             contour: contourEtape1,
@@ -895,8 +983,9 @@
             // nommer une grille déjà là, avec ses cartouches : l'étape 8 n'avançait alors sur aucune cartouche neuve.
             grilleId: null, cartouchesAvant: toutesLesCartouches(), productionId: null, evaluationId: null, evaluationDA: null,
             pratiqueId: null, cartoucheId: null,
-            // Lot de la dissection sur l'iPad (12 nov. 2026) : l'exemple offert d'abord ; aucune grille déjà là prise.
-            exemple: 'offert', grillePrise: false
+            // 14 nov. 2026 (lot 4b) : les deux bulles d'ouverture d'abord ; aucune grille déjà là prise. (L'exemple
+            // n'est plus « offert » par la bulle : ses deux boutons sont sur la page.)
+            ouverture: 0, grillePrise: false
         });
     }
 

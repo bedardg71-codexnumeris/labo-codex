@@ -394,7 +394,7 @@ describe('N — aucun renvoi à l’assistant', () => {
         const c = D.creation(R, {});
         // Lot 9 : à compléter, sans bloquer ; ici, c'est le morceau « beaucoup », sans place, qui bloque.
         expect(c.aCompleter).toContain('les points de chaque critère : pose l’étiquette « Pondération » sur le poids de chaque critère, ou l’étiquette « Points » sur ce que vaut chaque réponse');
-        expect(c.raisons).toContain('une place pour le morceau étiqueté listé plus bas');
+        expect(c.raisons).toContain('une place pour la partie étiquetée listée plus bas');
         sansRenvoiAssistant(c.raisons.concat(c.aCompleter));
         // L'assistant, lui, garde son message.
         expect(A.calculs(c.modele, {}).manquants.some((t) => t.includes('« ' + A.NOMS_ETAPES.roles + ' »'))).toBe(true);

@@ -23,6 +23,10 @@ const racine = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', 
 const lire = (f) => readFileSync(path.join(racine, f), 'utf8');
 const CONSIGNE = lire('plans de travail/CONSIGNE-LOT-2026-11-08-parcours-1-et-2.md');
 const DECOUVRIR = lire('js/parcours-decouvrir.js');
+// 14 nov. 2026 (essai novice, validé par Grégoire) : à la fin, « Continuer d'explorer la démo » faisait attendre
+// d'autres bulles ; le bouton devient « Explorer la démo par moi-même », et la consigne le nomme.
+const CONSIGNE_14 = lire('plans de travail/CONSIGNE-2026-11-14-essai-novice.md');
+const GESTE_DE_FIN = 'Touche « Commencer avec ma classe », ou « Explorer la démo par moi-même ».';
 
 /** Les chaînes d'un champ (titre, texte, geste, libelle) dans le bloc ETAPES, guillemets simples ou doubles. */
 function chaines(source, champ) {
@@ -54,14 +58,16 @@ describe('« Découvrir » : les huit bulles, mot pour mot', () => {
 
     it.each(gestes.map((g) => [g]))('le geste « %s » est celui de la consigne, ou proposé le 11 nov. 2026', (geste) => {
         if (GESTES_PROPOSES.includes(geste)) return;
+        if (geste === GESTE_DE_FIN) { expect(CONSIGNE_14).toContain(`la consigne : « ${geste} »`); return; }
         expect(CONSIGNE).toContain(`Geste : « ${geste} »`);
     });
 
-    it('les boutons : « Continuer » (étape 4), « Commencer avec ma classe » et « Continuer d’explorer la démo » (étape 8)', () => {
-        expect(chaines(DECOUVRIR, 'libelle')).toEqual(['Continuer', 'Commencer avec ma classe', "Continuer d'explorer la démo"]);
+    it('les boutons : « Continuer » (étape 4), « Commencer avec ma classe » et « Explorer la démo par moi-même » (étape 8)', () => {
+        expect(chaines(DECOUVRIR, 'libelle')).toEqual(['Continuer', 'Commencer avec ma classe', 'Explorer la démo par moi-même']);
         expect(CONSIGNE).toContain('Bouton « Continuer »');
         expect(CONSIGNE).toContain('« Commencer avec ma classe »');
-        expect(CONSIGNE).toContain("« Continuer d'explorer la démo »");
+        expect(CONSIGNE_14).toContain('Il devient « Explorer la démo par moi-même »');
+        expect(chaines(DECOUVRIR, 'geste')).toContain(GESTE_DE_FIN);
     });
 
     it('le lien de sortie et le message de reprise', () => {

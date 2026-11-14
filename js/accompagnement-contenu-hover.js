@@ -728,7 +728,7 @@ const TOOLTIPS = {
         'Configuration de l\'évaluation : productions, grilles, échelles, cartouches et pratiques de notation.',
     // « Apporter mon matériel » — réécrite après le retrait de l'assistant (A1, validé par Grégoire le 19 oct. 2026, 19 h 01).
     'nav-conception-materiel':
-        'Apporte une grille que tu as déjà, copiée depuis Word, Pages ou un autre traitement de texte : tu montres à l’application ce que veut dire chaque morceau, puis elle la range dans tes grilles de critères.',
+        'Apporte une grille que tu as déjà, copiée depuis Word, Pages ou un autre traitement de texte : tu montres à l’application ce que veut dire chaque partie, puis elle la range dans tes grilles de critères.',
     'nav-conception-productions':
         'Définis les productions de tes étudiant·es : portfolios, artefacts et travaux avec pondérations et échéances.',
     'nav-conception-grilles':
@@ -892,13 +892,13 @@ const TOOLTIPS = {
     'materiel-retirer-etiquettes':
         'Enlève toutes les étiquettes posées sur cette grille, pour recommencer l’étiquetage. Le texte collé reste.',
     'materiel-annuler-coupe':
-        'Recolle le dernier morceau que tu as coupé.',
+        'Recolle la dernière partie que tu as coupée.',
     'materiel-terminer':
         'Repose ce que tu as en main : une étiquette, « Couper » ou « Rattacher ». La touche Échap fait la même chose.',
     'materiel-outil-couper':
-        'Quand une case porte deux choses sur une même ligne (un critère et ses points, par exemple), touche l’endroit entre les deux : le morceau devient deux, que tu étiquettes chacun.',
+        'Quand une case porte deux choses sur une même ligne (un critère et ses points, par exemple), touche l’endroit entre les deux : la partie devient deux, que tu étiquettes chacune.',
     'materiel-outil-rattacher':
-        'Quand un nom s’étend sur plusieurs lignes, touche ses morceaux : l’application les lit comme un seul texte, dans l’ordre de ta grille.',
+        'Quand un nom s’étend sur plusieurs lignes, touche ses parties : l’application les lit comme un seul texte, dans l’ordre de ta grille.',
     'materiel-nom-grille':
         'Ce nom s’imprime sur le PDF que tes étudiant·es reçoivent après l’évaluation.',
     'materiel-compte':

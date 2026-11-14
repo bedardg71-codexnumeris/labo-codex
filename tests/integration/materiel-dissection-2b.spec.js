@@ -83,7 +83,7 @@ test('dissection 2b · l’exemple, « des niveaux » choisi, le tableau rempli,
     await ouvrirConception(page);
     await collerLExemple(page);
     await etiqueter(page, 'titre', ['Journal de lecture']);
-    await etiqueter(page, 'section', ['PARTIE A : COMPRÉHENSION', 'PARTIE B : RÉFLEXION']);
+    await etiqueter(page, 'section', ['SECTION A : COMPRÉHENSION', 'SECTION B : RÉFLEXION']);
     await etiqueter(page, 'niveau', NIVEAUX);
     await etiqueter(page, 'critere', CRITERES);
     await etiqueter(page, 'descripteur', DESCRIPTEURS);

@@ -9,7 +9,7 @@
 //        puis glissé surligne plusieurs morceaux ; `touch-action` n'est jamais `none` ;
 //   P4 · l'aide pas à pas suit les manques dans l'ordre de « Avant de créer, il reste », sur trois grilles (un tableau,
 //        un texte brut, un cas mêlé grille et code), une flèche visible à chaque manque, le halo sur le premier geste ;
-//   P5 · l'exemple s'ouvre étiqueté, se vide sur « Faire l'exercice soi-même », et n'écrit rien dans les données ;
+//   P5 · l'exemple s'ouvre étiqueté, se vide sur « Étiqueter l'exemple moi-même », et n'écrit rien dans les données ;
 //   P6 · « Composer ma grille » est visible dans l'étiquetage, mène à Grilles, le brouillon survit, et une grille composée
 //        là fait passer le parcours à « Ta production » ;
 //   P7 · une grille déjà là fait aussi passer l'étape 1 (« Prendre une grille déjà créée », puis « Prendre cette grille »).
@@ -19,6 +19,7 @@ import { test, expect } from '@playwright/test';
 import { ouvrirEspaceVide, mettreLaClasseEnPlace, attendreEtape, contourSur, bulle, bulleNeCouvrePas, capture } from './harness/classe-de-banc.js';
 import { flecheVers, flecheVersMorceau } from './harness/fleches-de-banc.js';
 import { collerLExemple } from './harness/exemple-colle.js';
+import { passerLOuverture, boutonExemple } from './harness/ouverture-evaluer.js';
 
 const DOSSIER = process.env.CAPTURES_PARCOURS || '';
 const TAILLES = [[1180, 820], [820, 1180]];
@@ -87,7 +88,7 @@ const CAPTURE = '<table><tr><td colspan="3">Grille fictive d’analyse</td></tr>
 /** Le parcours lancé, à l'étape 1 (l'exemple offert). */
 async function lancerEvaluer(page) {
     await page.evaluate(() => Assistance.parcours().find((p) => p.id === 'evaluer').lancer(0));
-    await etape(page, 1, 'Ta grille', { focus: false });
+    await passerLOuverture(page);   // 14 nov. 2026 : deux bulles d'ouverture avant « Ta grille »
 }
 
 const lireDonnees = (page) => page.evaluate(() => ({
@@ -196,26 +197,33 @@ for (const [L, H] of TAILLES) {
         const avant = await lireDonnees(page);
         await lancerEvaluer(page);
 
-        // P5 · l'exemple offert, trois choix dans la bulle.
-        for (const nom of ['Voir le travail complet', "Faire l'exercice soi-même", 'Passer à ma grille']) {
-            await expect(bulle(page).getByRole('button', { name: nom })).toBeVisible();
-        }
-        await gesteEst(page, "Touche « Voir le travail complet » ou « Faire l'exercice soi-même » ; ou « Passer à ma grille ».");
-        await capture(page, DOSSIER, `p5-exemple-offert-${cap}`);
+        // P5 · 14 nov. 2026 (essai novice, lot 4c) : la bulle « Ta grille » ne porte plus de bouton ; elle montre la zone
+        // où coller et les deux boutons de la page, renommés.
+        await expect(bulle(page).locator('.parcours-bulle-boutons')).toHaveCount(0);
+        await expect(boutonExemple(page, 'complet')).toHaveText('Voir un exemple de grille étiquetée');
+        await expect(boutonExemple(page, 'exercice')).toHaveText('Étiqueter l’exemple moi-même');
+        await expect(bulle(page).locator('.parcours-bulle-ligne--geste')).toHaveText('Colle ta grille, ou touche un des deux boutons');
+        await contourSur(page, '#materiel-zone-collage');
+        await flecheVers(page, '#materiel-zone-collage', 'accueil, la zone de collage');
+        await capture(page, DOSSIER, `p5-accueil-${cap}`);
 
-        // « Voir le travail complet » : chaque morceau étiqueté, aucun « Créer ma grille », la note de l'exemple.
-        await bulle(page).getByRole('button', { name: 'Voir le travail complet' }).click();
+        // « Voir un exemple de grille étiquetée » : chaque partie étiquetée, aucun « Créer ma grille », la note de l'exemple ;
+        // la bulle change (lot 4d).
+        await boutonExemple(page, 'complet').click();
         await expect.poll(() => page.evaluate(() => {
             const e = window.materielDissection.etatCourant();
             return e.exemple === 'complet' && Object.keys(e.liens).length === e.morceaux.ordre.length;
         })).toBe(true);
         await expect(page.locator('#dissection-exemple-note')).toBeVisible();
         await expect(page.locator('[data-action="materielDissection.creer"]')).toHaveCount(0);
-        await gesteEst(page, "Regarde chaque étiquette, puis la grille lue en dessous ; touche ensuite « Faire l'exercice soi-même » ou « Passer à ma grille ».");
+        await expect(bulle(page).locator('.parcours-bulle-titre')).toHaveText(/^(L'exemple étiqueté|La grille, comprise par l'application)$/);
+        await expect(bulle(page).locator('.parcours-bulle-ligne')).toHaveCount(3);
         await capture(page, DOSSIER, `p5-exemple-complet-${cap}`);
 
-        // « Faire l'exercice soi-même » : l'exemple se vide ; l'aide commence (le nom : prends « Titre »).
-        await bulle(page).getByRole('button', { name: "Faire l'exercice soi-même" }).click();
+        // « Quitter l'exemple », puis « Étiqueter l'exemple moi-même » : l'exemple se vide ; l'aide commence (le nom : prends « Titre »).
+        await page.locator('#materiel-dissection [data-action="materielDissection.collerAutre"]').click();
+        await expect(page.locator('#materiel-accueil')).toBeVisible();
+        await boutonExemple(page, 'exercice').click();
         await expect.poll(() => page.evaluate(() => Object.keys(window.materielDissection.etatCourant().liens).length)).toBe(0);
         await gesteEst(page, 'Ta grille n’a pas encore de nom : prends « Titre », puis touche son nom dans ta grille.');
         await contourSur(page, etiquette('titre'));
@@ -230,10 +238,9 @@ for (const [L, H] of TAILLES) {
         // L'exemple n'a rien écrit : ni brouillon, ni grille.
         expect(await lireDonnees(page)).toEqual(avant);
 
-        // « Passer à ma grille » : l'accueil ; la bulle nomme les boutons tels qu'ils sont écrits.
-        await bulle(page).getByRole('button', { name: 'Passer à ma grille' }).click();
+        // « Quitter l'exemple » (sur la page) : l'accueil ; la bulle montre de nouveau la zone où coller.
+        await page.locator('#materiel-dissection [data-action="materielDissection.collerAutre"]').click();
         await expect(page.locator('#materiel-accueil')).toBeVisible();
-        await gesteEst(page, "Colle ta grille, montre ce qu'est chaque morceau, puis touche « Créer ma grille » ; ou touche « Composer ma grille ».");
         await contourSur(page, '#materiel-zone-collage');
         expect(await lireDonnees(page)).toEqual(avant);
 
@@ -334,8 +341,9 @@ test('P7 · 1180 × 820 : une grille déjà dans l’application, prise à l’�
     await page.evaluate(() => naviguerVers('conception', 'materiel'));
 
     await lancerEvaluer(page);
-    await bulle(page).getByRole('button', { name: 'Passer à ma grille' }).click();
-    await bulle(page).getByRole('button', { name: 'Prendre une grille déjà créée' }).click();
+    // 14 nov. 2026 (règle 5) : « Prendre une grille déjà créée » n'est plus dans la bulle ; « Composer ma grille », sur la
+    // page, mène au même endroit.
+    await page.click('#materiel-accueil [data-action="materiel.taperMain"]');
     await expect(page.locator('#conception-grille-criteres')).toBeVisible();
     await page.evaluate((g) => window.ouvrirGrilleDepuisListe(g), id);
     await expect(bulle(page).getByRole('button', { name: 'Prendre cette grille' })).toBeVisible();
