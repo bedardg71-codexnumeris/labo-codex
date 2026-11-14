@@ -7,6 +7,19 @@
 
 ---
 
+## 14 NOV. 2026, 15 H 10 (Claude Code) : **LE TRAVAIL VIT SUR `lot/essai-novice-14-nov`, NON FUSIONNÉ** — `main` inchangé (`22e67a309`, 1.246.0) ; PR #24 pour l'aperçu
+
+Mandat : consigne de Cowork du 14 nov., 12 h 10 (`plans de travail/CONSIGNE-2026-11-14-essai-novice.md`, versionnée SUR LA BRANCHE), session autonome pendant le repos de Grégoire. **Ni fusion, ni release, ni Nouvelles, ni verdict complet : Grégoire lance le verdict à son retour.** `origin/lot/essai-novice-14-nov` = `3e1526788`, cinq commits au-dessus de `main`.
+
+- **Lot 1** (`188694510`) : le nom du trimestre se crée de la session et de l'année (lecture seule) ; heures d'un cours = (théorie + labo) × 15, quel que soit le calendrier ; « pér. » se propose d'après le début et la fin, dans un NOUVEL horaire seulement.
+- **Lot 2** (`d4151a3cd`) : le moteur des parcours — lignes qui se grisent au crochet, « n sur N » devenu un bouton (liste des étapes, étape faite revue en visite), « Tu es dans… » avec halo au menu et page en haut, « Parcours suivant » et « Terminer » de même poids. `js/config.js` et `js/navigation.js` non touchés.
+- **Lot 3** (`c19e3a0f6`) : les huit bulles de « Mettre ta classe en place » en lignes ; « Refaire » rejoue le parcours en visite au lieu de mener à 8 sur 8 ; fin de « Découvrir » : « Explorer la démo par moi-même ».
+- **Lot 4** (`4a73f7cf1`) : « partie » remplace « morceau » ; deux bulles d'ouverture d'« Évaluer » ; la bulle « Ta grille » sans bouton, les deux boutons de la page renommés ; bulles devant l'exemple ; « L'exemple est étiqueté » ne paraît plus trop tôt. **LAISSÉ : le reste de 4f** (ordre fixe de l'exercice, « Comment étiqueter ? », « Voir la suite de l'exemple », la carte hors parcours).
+- **Relecture croisée** (`3e1526788`, agent en lecture seule) : douze constats, neuf corrigés, dont deux de STOCK (rien ne se propose plus dans un horaire enregistré). Trois laissés, nommés dans la PR.
+- **Lot 5, mesures sans changement** : chargement à froid en local (WebKit, `file://`), 0,6 à 0,8 s jusqu'à l'application prête : les 50 s vécues en ligne ne viennent ni de l'analyse ni de l'exécution, mais du réseau (250 scripts synchrones, 13,9 Mo bruts, 3,9 Mo compressés). Verdict du 13 nov. : 111 min, 1 726 résultats, 3,8 s en moyenne, 385 fichiers, aucun point chaud (les 20 plus longs font 30 %) ; les dix morceaux font 8 à 15 min chacun, à la suite : ils ne raccourcissent rien.
+- **Jugé** : Vitest complet vert (925 fichiers, 11 584 essais) ; WebKit en passages ciblés, verts. **Non jugé : le verdict complet.**
+- **Encore dû** : le verdict complet par Grégoire, puis la fusion ; ses validations de textes (liste au rapport de la session) ; dix gestes sur l'iPad (`plans de travail/PORTES-2026-11-14-essai-novice.md`, sur la branche ; l'artefact est à publier par Cowork).
+
 ## 13 NOV. 2026, 21 H 05 (Claude Code) : **1.246.0 POUSSÉE ET EN LIGNE, VERDICT VERT** — les deux lots du 13 nov. fusionnés
 
 Mandat : relais de Cowork, 13 nov., 18 h 50 (fusion, un seul verdict, mise en ligne). **`origin/main` = `9b2bea833`** (1.246.0, build `1113-1906`, « Sous-totaux, et une grille qui reste en place ») ; Netlify `6af7c094`, `ready` à 21 h 00 sur ce SHA. **Le travail le plus récent vit sur `main`.**
