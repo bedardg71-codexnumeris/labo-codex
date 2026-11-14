@@ -224,7 +224,14 @@ describe('D — le relevé du verdict du nuage', () => {
         expect(lireLesRuns([autre]).code).toBe(3);
         expect(lireLesRuns([autre, run(8, 'failure')])).toMatchObject({ code: 1, run: 8 });
         // Les deux bouts de la marque : le nom que le workflow donne au run, et le lecteur.
-        expect(WORKFLOW).toMatch(new RegExp(`^run-name: .*format\\('${MARQUE_AUTRE_REFERENCE} : \\{0\\}', inputs\\.branche\\)`, 'm'));
+        expect(WORKFLOW).toMatch(new RegExp(`^run-name: "\\$\\{\\{ .*format\\('${MARQUE_AUTRE_REFERENCE} : \\{0\\}', inputs\\.branche\\).* \\}\\}"$`, 'm'));
+    });
+
+    it('D.b bis le workflow reste un YAML lisible : aucune ligne de premier niveau ne porte « : » hors guillemets dans sa valeur', () => {
+        // Vécu le 14 nov. (b9c5495e) : un `run-name` nu contenant « : » rendait le fichier illisible,
+        // et GitHub refusait tout lancement à la demande (« Workflow does not have 'workflow_dispatch' trigger »).
+        const fautives = WORKFLOW.split('\n').filter((l) => /^[a-z-]+: [^"'#\[{|>&*!].*: /.test(l));
+        expect(fautives).toEqual([]);
     });
 
     it('D.c un run en cours se dit, sans passer pour un verdict', () => {

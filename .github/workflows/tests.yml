@@ -298,7 +298,10 @@ name: Tests
 # le champ `branche`, il joue une AUTRE référence que son propre commit : son nom le
 # dit, et scripts/verdict-nuage.mjs l'écarte (MARQUE_AUTRE_REFERENCE) — il ne juge
 # pas le commit qui le porte. Vide hors demande : GitHub garde son nom habituel.
-run-name: ${{ github.event_name == 'workflow_dispatch' && format('Verdict du nuage — {0}', inputs.branche && format('autre référence : {0}', inputs.branche) || github.ref_name) || '' }}
+# ⚠ Entre guillemets : la marque porte « : », qu'un scalaire YAML nu ne tolère pas — sans
+# eux le fichier ne se lit plus, et GitHub répond « Workflow does not have
+# 'workflow_dispatch' trigger » (vécu le 14 nov., b9c5495e).
+run-name: "${{ github.event_name == 'workflow_dispatch' && format('Verdict du nuage — {0}', inputs.branche && format('autre référence : {0}', inputs.branche) || github.ref_name) || '' }}"
 
 on:
   push:
