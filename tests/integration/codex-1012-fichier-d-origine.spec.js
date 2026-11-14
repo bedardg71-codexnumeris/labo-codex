@@ -259,8 +259,12 @@ test.describe('#1012 — le fichier d\'origine n\'est tenu qu\'après une ouvert
 
         await test.step('B choisi par le menu, refusé au pré-vol (trop peu d\'espace accordé)', async () => {
             await neuf.page.evaluate(() => {
+                const estimer = async () => ({ quota: 50 * 1024 * 1024, usage: 0 });
                 // Sur le prototype : sous WebKit, la même propriété posée sur `navigator.storage` n'est pas lue.
-                StorageManager.prototype.estimate = async () => ({ quota: 50 * 1024 * 1024, usage: 0 });
+                // Le WebKit de Linux n'a ni `StorageManager` ni `navigator.storage` en file:// (run 43543782094) :
+                // l'essai y pose l'API qu'il simule de toute façon.
+                if (typeof StorageManager !== 'undefined') StorageManager.prototype.estimate = estimer;
+                else Object.defineProperty(navigator, 'storage', { configurable: true, value: { estimate: estimer } });
             });
             await choisirParLeMenu(neuf.page, versFichier(fichiers.B), B.fichier);
             await neuf.page.evaluate(() => window.__ouverture);

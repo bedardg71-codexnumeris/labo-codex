@@ -299,8 +299,12 @@ test.describe('#1011 — un codex ouvert sans assez d\'espace va jusqu\'à son b
 
             const neuf = await ouvrirEspaceNeuf(browser);
             await neuf.page.evaluate(({ quota, usage }) => {
+                const estimer = async () => ({ quota, usage });
                 // Sur le prototype : sous WebKit, la même propriété posée sur `navigator.storage` n'est pas lue.
-                StorageManager.prototype.estimate = async () => ({ quota, usage });
+                // Le WebKit de Linux n'a ni `StorageManager` ni `navigator.storage` en file:// (run 43543782094,
+                // « Can't find variable: StorageManager ») : l'essai y pose l'API qu'il simule de toute façon.
+                if (typeof StorageManager !== 'undefined') StorageManager.prototype.estimate = estimer;
+                else Object.defineProperty(navigator, 'storage', { configurable: true, value: { estimate: estimer } });
             }, cas);
             expect(await neuf.page.evaluate(() => navigator.storage.estimate()), 'témoin : le navigateur dit l\'espace du banc')
                 .toEqual({ quota: cas.quota, usage: cas.usage });

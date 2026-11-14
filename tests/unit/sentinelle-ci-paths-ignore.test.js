@@ -289,8 +289,9 @@ describe('CI · Playwright juge à la demande et sur un push observable, en morc
         const codeDecl = declencheurs.split('\n').filter((l) => !l.trim().startsWith('#')).join('\n');
         expect(codeDecl, 'le passage de nuit est revenu (#1048)').not.toMatch(/schedule:|- cron:/);
         expect(codeDecl).toMatch(/^  workflow_dispatch:/m);
-        // Un push ne doit pas annuler un run lancé à la demande.
-        expect(workflow).toMatch(/^  group: tests-\$\{\{ github\.ref \}\}-\$\{\{ github\.event_name \}\}$/m);
+        // Un push ne doit pas annuler un run lancé à la demande ; ni deux verdicts demandés
+        // sur deux références jugées (14 nov. 2026, point 12a du journal de tests.yml).
+        expect(workflow).toMatch(/^  group: tests-\$\{\{ github\.ref \}\}-\$\{\{ github\.event_name \}\}-\$\{\{ inputs\.branche \}\}$/m);
     });
 
     describe('la décision DÉCIDE — banc git jetable, le vrai script', () => {
