@@ -177,7 +177,7 @@ export async function mettreLaClasseEnPlace(page) {
     for (const id of ['v2-gc-trimestre', 'v2-gc-cours', 'v2-gc-groupe', 'v2-gc-horaire', 'v2-gc-enseignant']) await choisirPremiere(page, id);
     await page.click('#v2-btnCreerGroupeCours');
 
-    await attendreEtape(page, 7, 8, 'Ton premier cours', { focus: false });
+    await attendreEtape(page, 7, 8, 'Prendre les présences', { focus: false });
     await expect(page.locator('#btnVerrouillerSaisiePresences')).toBeVisible();
     await page.click('#btnVerrouillerSaisiePresences');
     await attendreEtape(page, 8, 8, "Ta classe d'un coup d'œil", { focus: false });

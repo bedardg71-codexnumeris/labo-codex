@@ -8,17 +8,9 @@
 // sentinelle-gestes-proposes-2026-11-11.test.js vérifie que chacune est posée, telle quelle, dans son parcours.
 
 export const GESTES_PROPOSES = {
-    'js/parcours-classe.js': [
-        "Remplis les champs obligatoires, puis touche « Créer le trimestre ».",
-        "Remplis les champs obligatoires, puis touche « Créer le cours ».",
-        "Remplis les champs obligatoires, puis touche « Créer le profil ».",
-        "Colle ta liste ou choisis ton fichier, touche « Prévisualiser », puis « Confirmer ».",
-        "Remplis les champs obligatoires, puis touche « Créer l'horaire ».",
-        "Remplis les champs obligatoires, puis touche « Créer le groupe-cours ».",
-        "Touche « D'accord ».",
-        "Choisis ton cours, note les absences et les retards, puis touche « Verrouiller la saisie ».",
-        "Touche « Terminer ».",
-    ],
+    // « Mettre ta classe en place » n'a plus de ligne du geste à part (14 nov. 2026, essai novice) : chaque bulle est
+    // une liste de lignes, la consigne en dernier, et toutes viennent de plans de travail/CONSIGNE-2026-11-14-essai-novice.md
+    // (sentinelle-parcours-classe-2026-11-09.test.js, qui nomme aussi ce que la session a écrit).
     'js/parcours-commentaires.js': [
         "Touche « Terminer ».",
     ],
@@ -34,7 +26,8 @@ export const GESTES_PROPOSES = {
     ],
     'js/parcours-decouvrir.js': [
         "Touche « Continuer ».",
-        "Touche « Commencer avec ma classe », ou « Continuer d'explorer la démo ».",
+        // « Touche « Commencer avec ma classe », ou « Explorer la démo par moi-même ». » n'est plus proposée : validée
+        // par Grégoire le 14 nov. 2026, elle est dans sa consigne (sentinelle-parcours-decouvrir-2026-11-08.test.js).
     ],
     'js/parcours-donnees.js': [
         "Touche « Codex », en haut de l'écran.",

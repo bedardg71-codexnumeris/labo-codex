@@ -947,14 +947,35 @@
     /** À chaque passage de la sonde : une ligne dont le geste est fait se grise (et le dit) ; défait, elle revient. */
     function majLignes(silence) {
         if (!etat || !etat.lignes) return;
+        var vientDEtreFaite = false;
         etat.lignes.forEach(function (l) {
             var faite = ligneFaite(l.def);
             if (faite === l.faite) return;
             l.faite = faite;
             l.el.classList.toggle('est-faite', faite);
             l.dit.textContent = faite ? ' (fait)' : '';
-            if (faite && !silence) etat.elements.annonce.textContent = 'Fait : ' + l.def.texte;
+            if (faite && !silence) { etat.elements.annonce.textContent = 'Fait : ' + l.def.texte; vientDEtreFaite = true; }
         });
+        if (vientDEtreFaite && !sousLeZoom()) amenerLeGesteSuivant();
+    }
+
+    /**
+     * Un geste vient d'être fait : le suivant est amené à l'écran s'il n'y est pas — le premier champ encore vide
+     * d'une ligne à faire, sinon ce qu'il faut toucher (« nommer, pointer, passer par les étapes une après l'autre »).
+     * Une étape ouverte en haut de sa page (`lieu`) laisse son formulaire plus bas : c'est ici qu'il vient, au fil
+     * des gestes, jamais à l'ouverture. Une fois par geste fait : la personne garde la main sur le défilement.
+     */
+    function amenerLeGesteSuivant() {
+        var etape = etapeCourante();
+        var suivant = null;
+        etat.lignes.some(function (l) {
+            if (l.faite) return false;
+            suivant = champsDe(l.def).filter(champVide)[0] || null;
+            return !!suivant;
+        });
+        if (!suivant && etape.contour) suivant = etape.contour();
+        if (!visible(suivant) || aLAise(suivant)) return;
+        try { suivant.scrollIntoView({ block: 'center', inline: 'nearest', behavior: 'auto' }); } catch (e) { suivant.scrollIntoView(); }
     }
 
     /** Le texte des lignes, à plat (l'annonce de l'étape). */

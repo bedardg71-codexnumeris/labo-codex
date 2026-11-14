@@ -276,14 +276,14 @@ test('« Découvrir » de bout en bout sur la démo, en faisant les gestes (1180
     await attendreEtape(page, 8);
     await expect(page.locator('#calendrier-trimestre')).toBeVisible();
     await expect(bulle(page).locator('.parcours-bulle-sortie')).toHaveCount(0);
-    await expect(bulle(page).locator('.parcours-bulle-boutons button')).toHaveText(['Commencer avec ma classe', "Continuer d'explorer la démo"]);
+    await expect(bulle(page).locator('.parcours-bulle-boutons button')).toHaveText(['Commencer avec ma classe', 'Explorer la démo par moi-même']);
     // Rien à toucher dans la page : ni pulsation, ni section mise en évidence.
     await flecheVers(page, '.navigation-boutons button[data-onglet="calendrier"]', 'étape 8, la section');
     await flecheVers(page, '#section-calendrier :has(> .bc-etape)', 'étape 8, la barre d’étapes');
     await expect(page.locator('#parcours-contour')).toBeHidden();
     await expect(page.locator('.parcours-section-actuelle')).toHaveCount(0);
     await capture(page, 'decouvrir-8-1180-sombre');
-    await bulle(page).getByRole('button', { name: "Continuer d'explorer la démo" }).click();
+    await bulle(page).getByRole('button', { name: 'Explorer la démo par moi-même' }).click();
 
     // Fin : le parcours fermé, la démo reste ouverte, « Découvrir » est fait, le menu passe au 2.
     await expect(bulle(page)).toHaveCount(0);

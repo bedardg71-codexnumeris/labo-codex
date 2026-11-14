@@ -184,7 +184,7 @@ test('390 px : « Découvrir », étapes 1, 5 et 8 — repliée, dépliée, la z
     e = await etatBulle(page);
     expect(e).toMatchObject({ telephone: true, repliee: false, texteVisible: true });
     expect(e.bas).toBeLessThanOrEqual(e.hauteurFenetre);
-    await expect(bulle(page).locator('.parcours-bulle-boutons button')).toHaveText(['Commencer avec ma classe', "Continuer d'explorer la démo"]);
+    await expect(bulle(page).locator('.parcours-bulle-boutons button')).toHaveText(['Commencer avec ma classe', 'Explorer la démo par moi-même']);
     for (const b of await bulle(page).locator('.parcours-bulle-boutons button').all()) await expect(b).toBeInViewport({ ratio: 1 });
     await capture(page, 'decouvrir-8-390-depliee');
     await bascule(page).click();

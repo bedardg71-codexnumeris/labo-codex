@@ -8,9 +8,12 @@
    « Découvrir », et « Commencer » sur la carte enseignant de l'accueil (commencerParLeTrimestre).
    Il ne démarre jamais de lui-même.
 
-   ⚠ Les huit textes, la variante d'avant le premier cours et leurs boutons sont ceux que
-   Grégoire a validés un à un le 8 nov. au matin, posés mot pour mot :
-   tests/unit/sentinelle-parcours-classe-2026-11-09.test.js les confronte à la consigne.
+   ⚠ LES HUIT BULLES SONT EN LIGNES (essai novice de Grégoire, 14 nov. 2026 ;
+   plans de travail/CONSIGNE-2026-11-14-essai-novice.md, lot 3) : une ligne par geste, la raison d'une
+   question entre parenthèses, le document à avoir sous la main nommé d'abord, la consigne en dernière
+   ligne. Les textes des étapes 1 et 7 sont validés par Grégoire mot pour mot ; les autres sont proposés
+   par Cowork (« institution », et les deux raisons de l'étape 2, sont de Grégoire). Ils sont posés tels
+   quels : tests/unit/sentinelle-parcours-classe-2026-11-09.test.js les confronte à la consigne.
 
    · Une étape du Cadre ouvre son bloc (et, s'il n'existe encore aucun élément, son formulaire
      « + Nouveau… »), l'éclaire, pose le contour sur le bouton de création, et avance quand la
@@ -188,14 +191,6 @@
         await attendre(pageImmobile(acc), 2000);
     }
 
-    // Le formulaire du bloc, sans la rangée de sélection au-dessus (bibliothèque, menu, « + Nouveau… »).
-    // Les étapes 1, 2, 3, 5 et 6 le déclarent (`formulaire`) : le moteur en tire les champs obligatoires, et pose une
-    // flèche sur chacun de ceux qui sont encore vides (Grégoire, 11 nov. 2026, 8 h 26).
-    function blocDuFormulaire(idEtape) {
-        var acc = accordeon(idEtape);
-        return acc ? acc.querySelector('.panneau-formulaire') : null;
-    }
-
     // ---------- La saisie des présences (étape 7) et la bande (étape 8) ----------
 
     function champDate() { return el('date-cours'); }
@@ -283,50 +278,152 @@
     // Décidé à la préparation de l'étape 7, avant que sa bulle soit rendue.
     var avantPremierCours = false;
 
+    // ---------- Les lignes des bulles ----------
+
+    /** Les champs d'une ligne, par leur identifiant (ceux qui la rendent faite, et où vont ses flèches). */
+    function champs() {
+        var ids = [].slice.call(arguments);
+        return function () { return ids.map(el); };
+    }
+
+    function note(texte) { return { texte: texte, note: true }; }
+
+    function consigne(texte) { return { texte: texte, geste: true }; }
+
+    function rempli(id) {
+        var c = el(id);
+        if (!c) return false;
+        if (c.type === 'file') return !!(c.files && c.files.length);
+        return String(c.value || '').trim() !== '';
+    }
+
+    /** L'aperçu de l'import est à l'écran (« Prévisualiser », ou un fichier choisi). */
+    function apercuDeLImport() { return M().visible(el('v2-previewZone')); }
+
+    /**
+     * Étape 4 : une des deux voies est prise (la liste collée, ou le fichier choisi). Vécu le 14 nov. : après avoir
+     * choisi un fichier, les flèches vers la zone de collage et vers le fichier restaient.
+     */
+    function listeApportee() {
+        return rempli('v2-donneesCollees') || rempli('v2-fichierCsvEntree') || apercuDeLImport();
+    }
+
+    /**
+     * Étape 8 : la personne a-t-elle noté une absence ou un retard dans une séance verrouillée de son groupe ? Lu dans
+     * les présences, sans rien écrire. On ne fait jamais inventer une absence sur une vraie liste : la bulle dit
+     * seulement ce que la bande montre.
+     */
+    function absenceNotee() {
+        var gc = groupeCoursActif();
+        if (!gc || typeof window.lireDatesVerrouilleesSansSemis !== 'function') return false;
+        var seances = seancesDuGroupe();
+        var dates = window.lireDatesVerrouilleesSansSemis().filter(function (d) {
+            return Array.isArray(seances[d]) && seances[d].length > 0;
+        });
+        var presences = db.getSync(cle('presences'), []) || [];
+        return presences.some(function (p) {
+            if (!p || dates.indexOf(p.date) === -1) return false;
+            if (p.coursId && gc.coursId && p.coursId !== gc.coursId) return false;
+            var prevues = typeof window.obtenirNombrePeriodesSeance === 'function' ? window.obtenirNombrePeriodesSeance(p.date) : 0;
+            var presentes = Number(p.periodesPresentes);
+            return prevues > 0 ? presentes < prevues : presentes === 0;
+        });
+    }
+
     // ---------- Les huit étapes ----------
 
-    var TEXTE_7 = "Choisis un cours déjà donné, ou celui d'aujourd'hui : l'application te propose le plus récent. Tout le monde est présent par défaut, pour que la saisie ne te prenne que quelques secondes : tu ne notes que les absences et les retards, et tout s'enregistre au fur et à mesure. Quand c'est fini, verrouille la saisie : c'est ce qui dit à l'application que ce cours a eu lieu, même si personne n'était absent.";
-    var TEXTE_7_AVANT = "Ton premier cours n'a pas encore eu lieu. Reviens après l'avoir donné : le parcours reprendra ici, avec ta première saisie de présences. En attendant, tu peux préparer tes outils dans Conception.";
+    // Étape 7 (validé par Grégoire le 14 nov. 2026 ; le titre remplace « Ton premier cours »).
+    var LIGNES_7 = [
+        note("Ta classe est en place. Ce qui suit, tu le referas à chaque séance."),
+        { texte: "Choisis une séance déjà donnée, ou celle d'aujourd'hui (l'application propose la plus récente)" },
+        { texte: "Note seulement les absences et les retards (tout le monde est présent par défaut)" },
+        consigne("Touche « Verrouiller la saisie » (c'est ce qui dit à l'application que cette séance a eu lieu)")
+    ];
+    // La variante d'avant la première séance, gardée, dans la même forme. RETOUCHÉE le 14 nov. 2026 (à valider par
+    // Grégoire) : le texte du 8 nov. disait « Ton premier cours n'a pas encore eu lieu. Reviens après l'avoir donné » ;
+    // la règle 6 réserve « cours » au cours qu'on donne et dit « séance » pour une rencontre avec le groupe.
+    var LIGNES_7_AVANT = [
+        note("Ta première séance n'a pas encore eu lieu."),
+        { texte: "Reviens après l'avoir donnée : le parcours reprendra ici, avec ta première saisie de présences" },
+        { texte: "En attendant, tu peux préparer tes outils dans « Conception »" },
+        consigne("Touche « D'accord »")
+    ];
     var BOUTONS_7_AVANT = [{ libelle: "D'accord", primaire: true, action: function () { attendreLePremierCours(); } }];
 
     var ETAPES = [
         {
+            // Validé par Grégoire, 14 nov. 2026.
             titre: 'Ton trimestre',
-            geste: "Remplis les champs obligatoires, puis touche « Créer le trimestre ».",
-            texte: "Commençons par ton trimestre : tout ce que tu feras s'y range, tes groupes, tes présences, tes évaluations. Donne-lui un nom, sa session et son année, puis trois dates : le début, la fin des cours et la fin du trimestre. Ces dates bornent le calendrier de tes séances. Le reste, comme les journées sans cours, peut attendre.",
+            lieu: true,
+            lignes: function () {
+                return [
+                    note("Aie sous la main le calendrier scolaire de ton collège."),
+                    { texte: "Choisis la session et l'année (elles serviront à identifier ton trimestre)", champs: champs('v2-sessionTrimestre', 'v2-anneeTrimestre') },
+                    { texte: "Donne trois dates (elles serviront à bâtir ton calendrier de séances) :", sous: [
+                        { texte: "le début du trimestre", champs: champs('v2-debutTrimestre') },
+                        { texte: "la fin des cours réguliers", champs: champs('v2-finCours') },
+                        { texte: "la fin du trimestre", champs: champs('v2-finTrimestre') }
+                    ] },
+                    consigne("Touche « Créer le trimestre »"),
+                    note("Le reste du formulaire peut attendre.")
+                ];
+            },
             avant: function () { return ouvrirBloc('trimestre'); },
-            formulaire: function () { return blocDuFormulaire('trimestre'); },
             contour: function () { return el(BOUTON_CREER.trimestre); },
             atteint: function () { return reglee('trimestre'); }
         },
         {
+            // Proposé par Cowork ; les deux raisons sont de Grégoire.
             titre: 'Ton cours',
-            geste: "Remplis les champs obligatoires, puis touche « Créer le cours ».",
-            texte: "Ajoute le cours que tu donnes à ce groupe. Tes productions se rangeront sous lui : si tu donnes le même cours à deux groupes, tu les prépares une seule fois. Si tu donnes plusieurs cours, un seul suffit pour l'instant.",
+            lignes: function () {
+                return [
+                    note("Aie sous la main ton plan de cours."),
+                    { texte: "Le code du cours (ex. : 601-101-MQ)", champs: champs('v2-codeCours') },
+                    { texte: "Sa pondération (elle servira à calculer tes heures de cours)", champs: champs('v2-ponderation') },
+                    { texte: "Sa discipline (elle servira à identifier le matériel que tu partageras)", champs: champs('v2-disciplineCours') },
+                    consigne("Touche « Créer le cours »"),
+                    note("Tu donnes plusieurs cours ? Un seul suffit pour l'instant.")
+                ];
+            },
             avant: function () { return ouvrirBloc('cours'); },
-            formulaire: function () { return blocDuFormulaire('cours'); },
             contour: function () { return el(BOUTON_CREER.cours); },
             atteint: function () { return reglee('cours'); }
         },
         {
+            // Proposé par Cowork ; « institution » validé.
             titre: 'Ton profil',
-            geste: "Remplis les champs obligatoires, puis touche « Créer le profil ».",
-            texte: "Ton prénom, ton nom, ton courriel et ton établissement. Ils servent à deux choses : ton groupe-cours a besoin de savoir qui le donne, et ils accompagnent les ressources que tu partageras.",
+            lignes: function () {
+                return [
+                    { texte: "Ton prénom et ton nom (ton groupe-cours doit savoir qui le donne)", champs: champs('v2-ens-prenom', 'v2-ens-nom') },
+                    { texte: "Ton courriel et ton institution (ils accompagnent les ressources que tu partageras)", champs: champs('v2-ens-courriel', 'v2-ens-institution') },
+                    consigne("Touche « Créer le profil »"),
+                    note("Le reste du formulaire peut attendre.")
+                ];
+            },
             avant: function () { return ouvrirBloc('enseignant'); },
-            formulaire: function () { return blocDuFormulaire('enseignant'); },
             contour: function () { return el(BOUTON_CREER.enseignant); },
             atteint: function () { return reglee('enseignant'); }
         },
         {
+            // Proposé par Cowork, en UNE page. Les trois sous-lignes décrivent le format : elles ne se grisent pas.
             titre: 'Ta classe',
-            geste: "Colle ta liste ou choisis ton fichier, touche « Prévisualiser », puis « Confirmer ».",
-            texte: "Ajoute tes étudiant·es. Le plus simple : copie la liste de ton groupe depuis le système de ton établissement et colle-la ici, ou importe-la en fichier texte. La liste de Léa, dans Omnivox (format Excel, dans ses paramètres d'affichage), arrive déjà dans le bon ordre ; sinon, une ligne par personne : DA, groupe, nom, prénom. Le DA reconnaît chaque personne partout dans l'application, jusque dans le nom des fichiers que tu importeras. Le numéro de groupe servira à ton horaire et à ton groupe-cours. Le reste peut attendre.",
+            lignes: function () {
+                return [
+                    note("Aie sous la main la liste de ton groupe (dans Léa, sur Omnivox : format Excel)."),
+                    // « Colle ta liste ou choisis ton fichier » : les deux champs eux-mêmes, chacun sa flèche ; elles
+                    // partent toutes deux dès qu'une des deux voies est prise (`listeApportee`).
+                    { texte: "Colle ta liste ou choisis ton fichier. Une ligne par personne :",
+                        champs: champs('v2-donneesCollees', 'v2-fichierCsvEntree'), fait: listeApportee, sous: [
+                            { texte: "son DA (il l'identifie partout dans l'application)" },
+                            { texte: "son numéro de groupe (il servira à ton horaire et à ton groupe-cours)" },
+                            { texte: "son nom et son prénom" }
+                        ] },
+                    { texte: "Vérifie l'aperçu", fait: apercuDeLImport },
+                    consigne("Touche « Importer »")
+                ];
+            },
             avant: function () { return ouvrirBloc('etudiants'); },
-            // « Colle-la ici, ou importe-la en fichier texte » : les deux champs eux-mêmes, chacun sa flèche (11 nov. 2026,
-            // second essai : la bulle couvrait « Fichier » ; les deux cadres `.import-option`, à 20 px l'un de l'autre, se
-            // fondaient en une seule cible tracée entre les deux).
-            zones: function () { return [el('v2-donneesCollees'), el('v2-fichierCsvEntree')]; },
-            // « Prévisualiser », puis, l'aperçu affiché, « Confirmer » : c'est lui qui importe.
+            // « Prévisualiser », puis, l'aperçu affiché, « Importer N étudiant·es » : c'est lui qui importe.
             contour: function () {
                 var acc = accordeon('etudiants');
                 var confirmer = el('v2-btnConfirmerImport');
@@ -336,45 +433,60 @@
             atteint: function () { return reglee('etudiants'); }
         },
         {
+            // Proposé par Cowork, non vu par Grégoire.
             titre: 'Ton horaire',
-            geste: "Remplis les champs obligatoires, puis touche « Créer l'horaire ».",
-            texte: "Indique les jours et les périodes où tu vois ce groupe. L'application en tire le calendrier de tes séances : c'est à chacune que s'attacheront tes présences, et plus tard ce que tu y enseignes.",
+            lignes: function () {
+                return [
+                    note("Aie sous la main ton horaire."),
+                    { texte: "Choisis le groupe (l'horaire lui sera lié)", champs: champs('v2-hor-groupeAssocie') },
+                    { texte: "Nomme l'horaire (ex. : Lun-Mar)", champs: champs('v2-hor-nom') },
+                    // Le jour et les heures naissent avec un défaut : rien ne dit que la personne les a regardés.
+                    // Cette ligne ne se grise donc pas.
+                    { texte: "Pour chaque séance : le jour, le début et la fin (le nombre de périodes s'écrit d'après ces heures ; corrige-le au besoin)" },
+                    consigne("Touche « Créer l'horaire »")
+                ];
+            },
             avant: function () { return ouvrirBloc('horaire'); },
-            formulaire: function () { return blocDuFormulaire('horaire'); },
             contour: function () { return el(BOUTON_CREER.horaire); },
             atteint: function () { return reglee('horaire'); }
         },
         {
+            // Proposé par Cowork. Le novice choisit lui-même dans les quatre listes (décision de Grégoire, 14 nov. 2026 :
+            // « il faut faire le geste pour apprendre ») : le formulaire neuf n'y présélectionne rien, et le parcours
+            // non plus (mesuré sous WebKit le 14 nov. ; verrouillé par parcours-2-ma-classe, étape 6).
             titre: 'Ton groupe-cours',
-            geste: "Remplis les champs obligatoires, puis touche « Créer le groupe-cours ».",
-            texte: "Réunis les cinq morceaux : le trimestre, le cours, le numéro de groupe, l'horaire et toi. Ton groupe apparaît alors dans l'en-tête : c'est sur lui que travaillent le Suivi et l'Évaluation, et c'est là que tu passeras d'un groupe à l'autre. Chacun de tes groupes aura le sien ; un seul suffit pour l'instant. La pratique de notation viendra plus tard : c'est là que tu décides comment tu construis la note du cours. La note de chaque évaluation, elle, n'en dépend pas.",
+            lignes: function () {
+                return [
+                    note("Réunis ce que tu viens de créer :"),
+                    { texte: "ton cours", champs: champs('v2-gc-cours') },
+                    { texte: "ton numéro de groupe", champs: champs('v2-gc-groupe') },
+                    { texte: "ton horaire", champs: champs('v2-gc-horaire') },
+                    { texte: "toi, comme enseignant·e", champs: champs('v2-gc-enseignant') },
+                    consigne("Touche « Créer le groupe-cours » (ton groupe apparaîtra dans l'en-tête de l'application)"),
+                    note("La pratique de notation peut attendre.")
+                ];
+            },
             avant: function () { return ouvrirBloc('groupe-cours'); },
-            formulaire: function () { return blocDuFormulaire('groupe-cours'); },
             contour: function () { return el(BOUTON_CREER['groupe-cours']); },
             atteint: function () { return reglee('groupe-cours'); }
         },
         {
-            // Deux bulles sous un même rang : la saisie, ou, si aucun cours du groupe n'a encore eu
-            // lieu, la variante d'avant le premier cours. `avantPremierCours` est fixé par `avant`,
-            // que le moteur appelle avant de lire la bulle.
-            titre: 'Ton premier cours',
-            get texte() { return avantPremierCours ? TEXTE_7_AVANT : TEXTE_7; },
-            get centre() { return avantPremierCours; },
+            // Deux bulles sous un même rang : la saisie, ou, si aucune séance du groupe n'a encore eu lieu, la
+            // variante d'avant la première séance. `avantPremierCours` est fixé par `avant`, que le moteur appelle
+            // avant de lire la bulle.
+            titre: 'Prendre les présences',
+            lieu: true,
+            lignes: function () { return avantPremierCours ? LIGNES_7_AVANT : LIGNES_7; },
             get sansSortie() { return avantPremierCours; },
             get boutons() { return avantPremierCours ? BOUTONS_7_AVANT : null; },
-            get geste() {
-                return avantPremierCours ? "Touche « D'accord »."
-                    : "Choisis ton cours, note les absences et les retards, puis touche « Verrouiller la saisie ».";
-            },
             avant: async function () {
                 aller('suivi', 'saisie');
                 await attendre(function () { return sousSectionVisible('suivi-saisie'); }, 2000);
-                // Sans date à l'arrivée, la saisie propose le cours le plus récent (js/saisie-presences.js).
+                // Sans date à l'arrivée, la saisie propose la séance la plus récente (js/saisie-presences.js).
                 await attendre(function () { var c = champDate(); return !!(c && c.value); }, 1500);
                 avantPremierCours = !premierCoursPasse();
                 if (avantPremierCours) {
                     retirerSecondContour();
-                    window.scrollTo(0, 0);
                 } else {
                     await attendre(function () { return M().visible(boutonVerrou()); }, 1500);
                     poserSecondContour();
@@ -389,16 +501,29 @@
             atteint: function () { return !avantPremierCours && seanceVerrouillee(); }
         },
         {
+            // Proposé par Cowork, en UNE page. Des explications : rien ne se grise.
             titre: "Ta classe d'un coup d'œil",
-            geste: "Touche « Terminer ».",
-            texte: "Voici ta classe. Chaque point blanc est un·e de tes étudiant·es, et tous y sont dès ce premier cours. Au fil du trimestre, chaque point se déplace selon l'assiduité de la personne ; le graphique, dessous, garde la trace de ces déplacements. Une absence isolée ne dit pas grand-chose, des absences qui s'accumulent, oui : c'est le coup d'œil à donner avant d'entrer en classe. La complétion et la performance s'allumeront quand tu évalueras tes premiers travaux, et leurs points bougeront de la même façon.",
+            lieu: true,
+            lignes: function () {
+                return [
+                    note("Reviens-y avant chaque séance."),
+                    { texte: "Chaque point blanc est un·e étudiant·e" },
+                    { texte: "La bande « Assiduité » le place selon ses présences : à droite, il vient à ses cours ; s'il glisse vers la gauche, ses absences s'accumulent" },
+                    { texte: "Les bandes « Complétion » et « Performance » sont vides : elles s'allumeront à tes premières évaluations" },
+                    // Selon ce que la personne vient de saisir : jamais d'absence à inventer sur une vraie liste.
+                    note(absenceNotee() ? "Ce point à l'écart, c'est l'absence que tu viens de noter."
+                        : "Tout le monde était là : un point s'écartera à la première absence."),
+                    // ÉCRIT le 14 nov. 2026 (à valider par Grégoire) : la consigne des deux suites, offertes à égalité.
+                    consigne("Touche « Parcours suivant », ou « Terminer »")
+                ];
+            },
             sansSortie: true,
             avant: async function () {
                 retirerSecondContour();
                 aller('suivi', 'groupe');
                 await attendre(blocAssiduite, 2000);
             },
-            // La bande des points (« chaque point blanc est un·e de tes étudiant·es »), pas le bloc et son titre.
+            // La bande des points (« chaque point blanc est un·e étudiant·e »), pas le bloc et son titre.
             zones: function () { var b = blocAssiduite(); return [(b && b.querySelector('.barre-indicateur')) || b]; },
             boutons: [{ libelle: 'Terminer', primaire: true, action: function () { terminer(); } }]
         }
