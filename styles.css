@@ -4535,6 +4535,14 @@ p.apercu-algo-si { margin: 0; display: flex; flex-wrap: wrap; align-items: basel
     box-shadow: var(--focus-ring), 0 0 0 3px rgba(106, 172, 184, 0.2);
 }
 
+/* 14 nov. 2026 — un champ que l'application remplit seule (le nom du trimestre) : il se lit,
+   il ne se saisit pas. Bordure en tirets et fond de la page : il ne ressemble pas à une case à remplir. */
+.controle-form[readonly] {
+    background: transparent;
+    border-style: dashed;
+    cursor: default;
+}
+
 /* Style de base pour TOUS les textarea - fix texte invisible */
 textarea {
     color: var(--texte-principal, #d0e0e4);
@@ -14763,7 +14771,7 @@ label:has(+ textarea:disabled) {
 /* Grille 3 colonnes pour identification trimestre */
 .grille-identification {
     display: grid;
-    grid-template-columns: 2fr 1fr 1fr;
+    grid-template-columns: 1fr 1fr 2fr;
     gap: 15px;
     align-items: end;
 }

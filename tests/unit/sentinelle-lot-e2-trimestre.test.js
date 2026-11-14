@@ -118,12 +118,75 @@ describe('lot E2 · trimestre existant — la session et l\'année s\'écrivent 
     });
 });
 
-describe('lot E2 · trimestre existant — le nom et les dates s\'enregistrent seuls', () => {
-    it('le nom : écrit seul, l\'id ne bouge pas', () => {
-        const e = monter({ registre: AUTOMNE_VIDE, champs: { 'v2-nomTrimestre': 'Automne 2026 — groupe fictif' } });
-        expect(e.win.sauvegarderNomTrimestreV2()).toBe(true);
-        expect(e.store.trimestres[0]).toMatchObject({ id: 'a2026', nom: 'Automne 2026 — groupe fictif' });
+// 14 nov. 2026 (essai novice) — le nom ne se saisit plus : il se crée de la session et de l'année,
+// « Hiver 2027 ». Son écrivain (`sauvegarderNomTrimestreV2`) est retiré.
+describe('14 nov. 2026 · le nom du trimestre se crée seul de la session et de l\'année', () => {
+    it('la forme : session en toutes lettres, année complète ; « Été » avec ses accents', () => {
+        const e = monter();
+        expect(e.win.nomTrimestreGenere('H', 2027)).toBe('Hiver 2027');
+        expect(e.win.nomTrimestreGenere('A', '2026')).toBe('Automne 2026');
+        expect(e.win.nomTrimestreGenere('E', 2027)).toBe('Été 2027');
+        expect(e.win.nomTrimestreGenere('H', '20')).toBe('');
+        expect(e.win.nomTrimestreGenere('X', 2027)).toBe('');
     });
+
+    it('en création : le champ suit la saisie, à l\'affichage seulement (rien d\'écrit)', () => {
+        const e = monter({ champs: { 'v2-sessionTrimestre': 'hiver', 'v2-anneeTrimestre': '202' } });
+        e.win.afficherNomTrimestreV2();
+        expect(e.elements['v2-nomTrimestre'].value).toBe('');
+        e.elements['v2-anneeTrimestre'].value = '2027';
+        e.win.afficherNomTrimestreV2();
+        expect(e.elements['v2-nomTrimestre'].value).toBe('Hiver 2027');
+        expect(e.ecritures).toEqual([]);
+        expect(e.sauvegarder).not.toHaveBeenCalled();
+    });
+
+    it('« Créer le trimestre » : le nom enregistré est le nom généré, quoi que porte le champ', () => {
+        const e = monter({ champs: { 'v2-nomTrimestre': 'reste d\'un autre trimestre', 'v2-sessionTrimestre': 'ete', 'v2-anneeTrimestre': '2027' } });
+        expect(e.win.creerTrimestreV2()).toBe(true);
+        expect(e.store.trimestres[0]).toMatchObject({ id: 'e2027', nom: 'Été 2027' });
+        expect(e.elements['v2-nomTrimestre'].value).toBe('Été 2027');
+    });
+
+    it('STOCK · un trimestre existant garde son nom tant que ni sa session ni son année ne changent', () => {
+        const registre = [{ id: 'a2026', nom: 'Automne 2026 — groupe fictif', session: 'A', annee: 2026, actif: true }];
+        const e = monter({ registre, champs: { 'v2-nomTrimestre': 'Automne 2026 — groupe fictif', 'v2-sessionTrimestre': 'automne', 'v2-anneeTrimestre': '2026' } });
+        expect(e.win.sauvegarderIdentificationTrimestreV2()).toBe(true);
+        e.win.afficherNomTrimestreV2();
+        expect(e.sauvegarder).not.toHaveBeenCalled();
+        expect(e.store.trimestres[0].nom).toBe('Automne 2026 — groupe fictif');
+        expect(e.elements['v2-nomTrimestre'].value).toBe('Automne 2026 — groupe fictif');
+        // Un état intermédiaire (année en cours de frappe) ne l'efface pas non plus.
+        e.elements['v2-anneeTrimestre'].value = '202';
+        e.win.afficherNomTrimestreV2();
+        expect(e.elements['v2-nomTrimestre'].value).toBe('Automne 2026 — groupe fictif');
+    });
+
+    it('la session ou l\'année change (trimestre sans données) : le nom suit, dans la même écriture', () => {
+        const registre = [{ id: 'a2026', nom: 'Automne 2026 — groupe fictif', session: 'A', annee: 2026, actif: true }];
+        const e = monter({ registre, champs: { 'v2-nomTrimestre': 'Automne 2026 — groupe fictif', 'v2-sessionTrimestre': 'hiver', 'v2-anneeTrimestre': '2027' } });
+        expect(e.win.sauvegarderIdentificationTrimestreV2()).toBe(true);
+        expect(e.sauvegarder).toHaveBeenCalledTimes(1);
+        expect(e.store.trimestres[0]).toMatchObject({ id: 'h2027', nom: 'Hiver 2027' });
+        expect(e.elements['v2-nomTrimestre'].value).toBe('Hiver 2027');
+    });
+
+    it('un changement refusé (le trimestre a des données) : le nom affiché revient à celui du stock', () => {
+        const e = monter({ registre: AUTOMNE_VIDE, champs: { 'v2-nomTrimestre': 'Automne 2026', 'v2-sessionTrimestre': 'hiver', 'v2-anneeTrimestre': '2027' } });
+        e.db.memoryCache.set('a2026_evaluationsSauvegardees', [{ id: 'EV1' }]);
+        expect(e.win.sauvegarderIdentificationTrimestreV2()).toBe(false);
+        expect(e.store.trimestres[0].nom).toBe('Automne 2026');
+        expect(e.elements['v2-nomTrimestre'].value).toBe('Automne 2026');
+    });
+
+    it('l\'écrivain du nom est retiré, pas laissé dormant', () => {
+        const e = monter();
+        expect(e.win.sauvegarderNomTrimestreV2).toBeUndefined();
+        expect(readFileSync(path.join(racine, 'index.html'), 'utf8')).not.toContain('sauvegarderNomTrimestreV2');
+    });
+});
+
+describe('lot E2 · trimestre existant — les dates s\'enregistrent seules', () => {
 
     it('une date seule : le cadre partiel est écrit, le calendrier généré est retiré, pas régénéré', () => {
         const e = monter({ registre: AUTOMNE_VIDE, champs: { 'v2-debutTrimestre': '2026-08-25' }, donnees: { a2026_calendrierComplet: { x: 1 } } });
@@ -155,7 +218,7 @@ describe('lot E2 · aucun trimestre actif — « Créer le trimestre »', () => 
     it('rien n\'est écrit avant le clic : ni l\'identification, ni le nom, ni les dates', () => {
         const e = monter({ champs: SAISIE });
         e.win.sauvegarderIdentificationTrimestreV2();
-        e.win.sauvegarderNomTrimestreV2();
+        e.win.afficherNomTrimestreV2();
         e.win.sauvegarderCadreCalendrierV2();
         expect(e.sauvegarder).not.toHaveBeenCalled();
         expect(e.ecritures).toEqual([]);
@@ -226,7 +289,7 @@ describe('#975 · un trimestre actif — « + Nouveau trimestre » ouvre la fich
     it('pendant la saisie, ni le nom, ni la session et l\'année, ni les dates n\'écrivent dans le trimestre actif', () => {
         const e = ouvrir();
         saisir(e, { 'v2-nomTrimestre': 'Automne fictif', 'v2-sessionTrimestre': 'automne', 'v2-anneeTrimestre': '2026', 'v2-debutTrimestre': '2026-08-25' });
-        expect(e.win.sauvegarderNomTrimestreV2()).toBe(false);
+        e.win.afficherNomTrimestreV2();
         expect(e.win.sauvegarderIdentificationTrimestreV2()).toBe(false);
         expect(e.win.sauvegarderCadreCalendrierV2()).toBe(false);
         expect(e.sauvegarder).not.toHaveBeenCalled();
@@ -333,9 +396,7 @@ describe('#975 suite · « Annuler » quitte la création demandée sans rien é
         expect(e.annulerCache()).toBe(true);
         // La création est bien quittée : les champs écrivent de nouveau dans le trimestre actif.
         expect(e.fiches.trimestre()).toBe(false);
-        e.elements['v2-nomTrimestre'].value = 'Automne fictif';
-        expect(e.win.sauvegarderNomTrimestreV2()).toBe(true);
-        expect(e.store.trimestres[0].nom).toBe('Automne fictif');
+        expect(e.win.sauvegarderIdentificationTrimestreV2()).toBe(true);
     });
 
     it('hors création demandée, « Annuler » ne fait rien', () => {
@@ -358,11 +419,19 @@ describe('lot E2 · index.html — chaque champ a son écrivain, au changement',
     const balise = (id) => (html.match(new RegExp('<[^>]*id="' + id + '"[^>]*>')) || [''])[0];
 
     it('le nom, la session, l\'année, et les huit dates', () => {
-        expect(balise('v2-nomTrimestre')).toContain('data-on-change="sauvegarderNomTrimestreV2"');
+        // 14 nov. 2026 : le nom n'a plus d'écrivain ; il se lit (readonly), sans astérisque, à droite.
+        expect(balise('v2-nomTrimestre')).toContain('readonly');
+        expect(balise('v2-nomTrimestre')).not.toContain('data-on-');
+        expect(html).toMatch(/<label for="v2-nomTrimestre">Nom du trimestre<\/label>/);
+        const rang = (id) => html.indexOf('id="' + id + '"');
+        expect(rang('v2-sessionTrimestre')).toBeLessThan(rang('v2-anneeTrimestre'));
+        expect(rang('v2-anneeTrimestre')).toBeLessThan(rang('v2-nomTrimestre'));
         for (const id of ['v2-sessionTrimestre', 'v2-anneeTrimestre']) {
             expect(balise(id)).toContain('data-on-change="sauvegarderIdentificationTrimestreV2"');
-            expect(balise(id)).not.toContain('data-on-input');   // jamais à la frappe
+            expect(balise(id)).not.toContain('data-on-input="sauvegarder');   // jamais d'ÉCRITURE à la frappe
         }
+        // À la frappe de l'année, seul l'affichage du nom suit.
+        expect(balise('v2-anneeTrimestre')).toContain('data-on-input="afficherNomTrimestreV2"');
         for (const id of IDS_DATES) expect(balise(id)).toContain('data-on-change="sauvegarderCadreCalendrierV2"');
     });
 

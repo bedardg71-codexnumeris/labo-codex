@@ -146,7 +146,6 @@ const bullesVues = (page) => page.evaluate(() => window.__bullesVues);
 // ---------- Les gestes de chaque étape, tels qu'une personne les fait ----------
 
 async function remplirTrimestre(page, { debut = '2026-08-24' } = {}) {
-    await page.fill('#v2-nomTrimestre', 'Automne 2026');
     await page.selectOption('#v2-sessionTrimestre', 'automne');
     await page.fill('#v2-anneeTrimestre', '2026');
     await page.fill('#v2-debutTrimestre', debut);

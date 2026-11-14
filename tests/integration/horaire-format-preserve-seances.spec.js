@@ -204,10 +204,13 @@ test('CT-01 · réduire 2 → 1 séance garde la première ; « Nouvel horaire �
     // #540 lot E1 : la fin par défaut redevient « 10:00 ». Le lot C la dérivait du format
     // déclaré (08:00 + 2 × 50 min = 09:40) ; E1 a retiré la durée de période qui rendait
     // cette dérivation possible — et elle était fausse de toute façon, puisqu'elle
-    // ignorait les pauses. Début et fin restent des défauts de formulaire VISIBLES ; les
-    // périodes, elles, naissent VIDES : c'est la donnée qui compte au dénominateur.
+    // ignorait les pauses. Début et fin restent des défauts de formulaire VISIBLES.
+    // 14 nov. 2026 (essai novice) : les périodes ne naissent plus vides, elles se PROPOSENT
+    // d'après ces heures (8 h à 10 h : 2). L'invariant de CT-01 tient toujours : ce 2 est la
+    // proposition du défaut, pas un reste de l'horaire précédent (qui portait 2 aussi, mais
+    // de 10 h à 12 h et de 14 h à 16 h : les heures, elles, disent bien qu'on repart de zéro).
     expect(r.lignesNeuves.length).toBe(2);
-    expect(r.lignesNeuves[0]).toEqual({ jour: 'Lundi', debut: '08:00', fin: '10:00', periodes: '', local: '' });
-    expect(r.lignesNeuves[1]).toEqual({ jour: 'Mardi', debut: '08:00', fin: '10:00', periodes: '', local: '' });
+    expect(r.lignesNeuves[0]).toEqual({ jour: 'Lundi', debut: '08:00', fin: '10:00', periodes: '2', local: '' });
+    expect(r.lignesNeuves[1]).toEqual({ jour: 'Mardi', debut: '08:00', fin: '10:00', periodes: '2', local: '' });
     expect(erreurs, `Erreurs console : ${erreurs.join(' | ')}`).toEqual([]);
 });

@@ -136,7 +136,6 @@ async function choisirPremiere(page, id) {
 export async function mettreLaClasseEnPlace(page) {
     await page.evaluate(() => Assistance.parcours().find((p) => p.id === 'classe').lancer(0));
     await attendreEtape(page, 1, 8, 'Ton trimestre', { focus: false });
-    await page.fill('#v2-nomTrimestre', 'Automne 2026');
     await page.selectOption('#v2-sessionTrimestre', 'automne');
     await page.fill('#v2-anneeTrimestre', '2026');
     await page.fill('#v2-debutTrimestre', '2026-08-24');

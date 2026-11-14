@@ -252,7 +252,10 @@ test('#540-F · le handler data-on-input fonctionne enfin (export manquant corri
     expect(erreurs, `Erreurs console : ${erreurs.join(' | ')}`).toEqual([]);
 });
 
-test('#540-G · lot B — la proposition d\'heures suit le calendrier réel', async ({ page }) => {
+// 14 nov. 2026 (essai novice, fait donné par Grégoire) : un cours donné en session intensive a le
+// même total d'heures qu'en trimestre ordinaire. Le lot B multipliait par les semaines réelles
+// (28 h proposées au lieu de 60 dans un trimestre de sept semaines) ; c'est × 15, toujours.
+test('#540-G · la proposition d\'heures est (théorie + labo) × 15, quel que soit le calendrier', async ({ page }) => {
     const { erreurs } = brancherEcouteurs(page);
     await preparer(page);
 
@@ -292,22 +295,24 @@ test('#540-G · lot B — la proposition d\'heures suit le calendrier réel', as
 
         return {
             regulier: await essai(15, '2-2-3'),   // littérature : (2+2) × 15 = 60
-            ecourte: await essai(11, '2-2-3'),    // trimestre écourté : 44, PAS 60
-            chimieEte: await essai(7, '3-2-3')    // session d'été : (3+2) × 7 = 35
+            ecourte: await essai(11, '2-2-3'),    // trimestre écourté : 60 aussi
+            intensif: await essai(7, '2-2-3'),    // sept semaines : 60, PAS 28 (le vécu du 14 nov.)
+            chimieEte: await essai(7, '3-2-3')    // session d'été : (3+2) × 15 = 75
         };
     });
 
     expect(r.erreur, `Erreur eval : ${r.erreur}`).toBeUndefined();
     expect(r.regulier.heures).toBe('60');
-    expect(r.regulier.repere).toBe('(2 + 2) × 15 semaines = 60 h');
-    // Le cœur du lot B : avec le « × 15 » en dur, celui-ci valait 60 lui aussi.
-    expect(r.ecourte.heures).toBe('44');
-    expect(r.ecourte.repere).toBe('(2 + 2) × 11 semaines = 44 h');
-    expect(r.chimieEte.heures).toBe('35');
+    expect(r.regulier.repere).toBe('(2 + 2) × 15 = 60 h');
+    expect(r.ecourte.heures).toBe('60');
+    expect(r.ecourte.repere).toBe('(2 + 2) × 15 = 60 h');
+    expect(r.intensif.heures, 'trimestre de 7 semaines : 60 h proposées').toBe('60');
+    expect(r.intensif.repere).toBe('(2 + 2) × 15 = 60 h');
+    expect(r.chimieEte.heures).toBe('75');
     expect(erreurs, `Erreurs console : ${erreurs.join(' | ')}`).toEqual([]);
 });
 
-test('#540-H · lot B — sans calendrier, rien n\'est proposé, et c\'est DIT', async ({ page }) => {
+test('#540-H · sans calendrier, la proposition se fait quand même : le calendrier n\'y est pour rien', async ({ page }) => {
     const { erreurs } = brancherEcouteurs(page);
     await preparer(page);
 
@@ -325,10 +330,7 @@ test('#540-H · lot B — sans calendrier, rien n\'est proposé, et c\'est DIT',
         };
     });
 
-    // Aucun total inventé : le champ reste vide, l'utilisateur saisit ou définit son trimestre.
-    expect(r.heures, 'un total a été proposé sans calendrier pour l\'appuyer').toBe('');
-    expect(r.repere).toContain('4 h par semaine');
-    expect(r.repere).toContain('calendrier');
-    expect(r.repere).not.toContain('60');
+    expect(r.heures).toBe('60');
+    expect(r.repere).toBe('(2 + 2) × 15 = 60 h');
     expect(erreurs, `Erreurs console : ${erreurs.join(' | ')}`).toEqual([]);
 });

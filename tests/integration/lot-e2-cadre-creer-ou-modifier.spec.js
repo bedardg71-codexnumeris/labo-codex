@@ -97,9 +97,10 @@ test('(a) trimestre, date, profil, fiche d\'étudiant·e : s\'écrivent sans bou
     await attendreRepos(page);
     expect(await visible(page, '#v2-btnCreerTrimestre'), 'trimestre existant : pas de « Créer le trimestre »').toBe(false);
 
-    await changer(page, '#v2-nomTrimestre', 'Trimestre fictif banc E2');
-    expect(await temoinSucces(page)).toBe(true);
-    expect(await page.evaluate(() => (db.getSync('trimestres', []) || []).find(t => t.actif).nom)).toBe('Trimestre fictif banc E2');
+    // 14 nov. 2026 (essai novice) : le nom ne se saisit plus, il se crée de la session et de l'année.
+    // Le champ se lit seulement, et montre le nom que le trimestre porte déjà (stock intact).
+    await expect(page.locator('#v2-nomTrimestre')).not.toBeEditable();
+    expect(await page.inputValue('#v2-nomTrimestre')).toBe(actif.nom);
 
     await fermerTemoin(page);
     await changer(page, '#v2-remiseNotes', '2026-12-30');
@@ -363,7 +364,8 @@ test('relecture 5 · une ligne de séance régénérée ne garde pas les valeurs
         window.mettreAJourSeancesHoraireV2();
         return lire();
     });
-    expect(r[0]).toEqual({ debut: '08:00', fin: '10:00', periodes: '', local: '' });
+    // 14 nov. 2026 : les périodes se proposent d'après les heures du défaut (8 h à 10 h : 2), pas le 3 hérité.
+    expect(r[0]).toEqual({ debut: '08:00', fin: '10:00', periodes: '2', local: '' });
 });
 
 test('placement : « Fermer » et « Créer le cours » à 360, 768, 1024 et 1180 px, dans l\'écran et hors du témoin', async ({ page }) => {

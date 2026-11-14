@@ -819,60 +819,41 @@ function majRepereUnitesCours() {
 }
 
 /**
- * Nombre de semaines du trimestre ACTIF, lu au calendrier — jamais supposé.
+ * Les heures d'un cours ne dépendent PAS du calendrier : (théorie + labo) × 15, toujours.
  *
- * #540 lot B (26 août 2026) : `proposerHeuresEnseignementDepuisPonderation` multipliait
- * par `15` en dur. Or `calculerStatistiquesCalendrier` (`trimestre-v2.js`, #366) compte
- * déjà les semaines réelles, et son en-tête dit pourquoi elle existe : elle « remplace
- * les constantes de repli 15/75 qui affichaient un chiffre inventé ». Cette
- * multiplication-là avait échappé au balayage.
+ * 14 nov. 2026 (fait donné par Grégoire) : un cours donné en session intensive (l'été, tous
+ * les jours, peu de semaines) a le même total d'heures qu'en trimestre ordinaire. La
+ * pondération du devis dit des heures par semaine d'un trimestre de QUINZE semaines ; c'est
+ * une convention du devis, pas un compte du calendrier.
  *
- * Un trimestre ne fait pas toujours quinze semaines — session d'été, calendrier écourté,
- * cours intensif. Et quinze semaines de calendrier ne font pas quinze semaines de cours
- * si des congés tombent dedans : c'est `maxSemaine` du calendrier qui fait foi.
- *
- * @returns {number} le nombre de semaines, ou 0 si le calendrier ne dit rien.
- *          0 est un refus de répondre, PAS une valeur — l'appelant ne propose alors rien.
+ * ⮕ CE QUE CECI DÉFAIT. #540 lot B (26 août 2026) avait remplacé ce 15 par les semaines
+ * réelles (`calculerStatistiquesCalendrier`, #366), au motif qu'un nombre en dur est un
+ * arbitraire. Pour compter les semaines d'un calendrier, le motif tient toujours, et
+ * `calculerStatistiquesCalendrier` reste la seule source. Pour les heures d'un cours, il
+ * menait à 28 h proposées au lieu de 60 dans un trimestre de sept semaines.
  */
-function _semainesDuTrimestreActif() {
-    try {
-        if (typeof calculerStatistiquesCalendrier !== 'function') return 0;
-        const calendrier = db.getSync(cle('calendrierComplet'), null);
-        const stats = calculerStatistiquesCalendrier(calendrier);
-        return (stats && stats.semaines > 0) ? stats.semaines : 0;
-    } catch (e) {
-        return 0;
-    }
-}
+const SEMAINES_DU_DEVIS = 15;
 
 /**
  * Handler live (data-on-input sur #v2-ponderation) : propose les heures d'enseignement
- * dérivées de la pondération — (théorie + labo) × semaines RÉELLES du trimestre — SANS
- * écraser une valeur déjà saisie manuellement (les heures d'enseignement restent la
- * source de vérité de la conformité).
- *
- * #540 lot B : quand le calendrier ne dit rien, on ne propose RIEN et on le DIT sous le
- * champ. Même règle que #538 pour la durée d'une séance : une dérivation est une
- * conséquence logique, un nombre écrit dans le code est un arbitraire.
+ * dérivées de la pondération, (théorie + labo) × 15, SANS écraser une valeur déjà saisie
+ * (les heures d'enseignement restent la source de vérité de la conformité).
  */
 function proposerHeuresEnseignementDepuisPonderation() {
     const champHeures = document.getElementById('v2-heuresEnseignement');
     const pond = _parserPonderation(document.getElementById('v2-ponderation')?.value);
-    const semaines = _semainesDuTrimestreActif();
 
-    if (champHeures && pond && semaines > 0
-        && (champHeures.value === '' || champHeures.value === undefined)) {
+    if (champHeures && pond && (champHeures.value === '' || champHeures.value === undefined)) {
         // Proposition seulement : ne remplit que si le champ est vide.
-        champHeures.value = (pond.theorie + pond.labo) * semaines;
+        champHeures.value = (pond.theorie + pond.labo) * SEMAINES_DU_DEVIS;
     }
     majRepereUnitesCours();
     majRepereHeuresCours();
 }
 
 /**
- * Dit sur quelle base la proposition d'heures a été faite — ou pourquoi elle ne l'a pas
- * été. #540 lot B : sans ce repère, un champ qui reste vide ressemble à une panne.
- * Le calcul devient lisible : « (2 + 2) × 15 semaines = 60 h ».
+ * Dit sur quelle base la proposition d'heures a été faite : « (2 + 2) × 15 = 60 h ».
+ * #540 lot B : sans ce repère, le nombre proposé ne dit pas d'où il vient.
  */
 function majRepereHeuresCours() {
     const repere = document.getElementById('v2-repereHeures');
@@ -881,17 +862,8 @@ function majRepereHeuresCours() {
     const pond = _parserPonderation(document.getElementById('v2-ponderation')?.value);
     if (!pond) { repere.textContent = ''; return; }
 
-    const semaines = _semainesDuTrimestreActif();
-    const heuresSemaine = pond.theorie + pond.labo;
-
-    if (semaines > 0) {
-        repere.textContent = '(' + pond.theorie + ' + ' + pond.labo + ') × '
-            + semaines + ' semaines = ' + (heuresSemaine * semaines) + ' h';
-    } else {
-        // On NOMME l'absence plutôt que d'inventer un nombre de semaines.
-        repere.textContent = heuresSemaine + ' h par semaine — le calendrier du trimestre '
-            + 'ne dit pas encore combien de semaines.';
-    }
+    repere.textContent = '(' + pond.theorie + ' + ' + pond.labo + ') × ' + SEMAINES_DU_DEVIS
+        + ' = ' + ((pond.theorie + pond.labo) * SEMAINES_DU_DEVIS) + ' h';
 }
 
 /**
@@ -1395,7 +1367,6 @@ window._normaliserPonderation = _normaliserPonderation;
 
 // #540 lot B — le repère des heures et sa source de semaines.
 window.majRepereHeuresCours = majRepereHeuresCours;
-window._semainesDuTrimestreActif = _semainesDuTrimestreActif;
 window._parserPonderation = _parserPonderation;
 
 })();

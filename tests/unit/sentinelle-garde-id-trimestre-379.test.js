@@ -17,7 +17,7 @@ import { chargerScript } from './_helpers/charger-script.js';
 // ↻ Lot E2 de l'enregistrement (28 sept. 2026, D3) : la session et l'année s'écrivent
 // ensemble AU CHANGEMENT (plus de bouton « Enregistrer ») ; les deux gardes sont les
 // mêmes, et leur refus parle par le TÉMOIN COMMUN (« Non enregistré – Identification du
-// trimestre : … »), plus par notifications.erreur. Le nom a son propre écrivain.
+// trimestre : … »), plus par notifications.erreur. Le nom se crée de la session et de l'année (14 nov. 2026).
 
 /**
  * Environnement : champs du formulaire + registre trimestres + deux couches
@@ -120,14 +120,15 @@ describe('#379 — gardes sur le changement d\'id du trimestre actif', () => {
         expect(store.trimestreActif).toBe('a2026');
     });
 
-    it('AUTORISE un changement de nom seul (id inchangé) même avec des données', () => {
-        const { win, store, temoin, notifications } = creerEnvironnement({
+    // 14 nov. 2026 : le nom ne se saisit plus (son écrivain est retiré). Ce qui reste vrai : une
+    // paire inchangée n'écrit rien, et le nom déjà porté par le trimestre reste le sien.
+    it('paire inchangée, trimestre avec données : rien d\'écrit, le nom en stock reste', () => {
+        const { win, store, temoin } = creerEnvironnement({
             champs: champs('hiver', '2026', 'Hiver 2026 — groupe pilote'),
-            trimestres: [{ id: 'h2026', nom: 'Hiver 2026', session: 'H', annee: 2026, actif: true }],
+            trimestres: [{ id: 'h2026', nom: 'Hiver 2026 — groupe pilote', session: 'H', annee: 2026, actif: true }],
             donneesLS: { h2026_groupeEtudiants: [{ da: '111' }] }
         });
-        win.sauvegarderNomTrimestreV2();          // le nom : son propre écrivain
-        win.sauvegarderIdentificationTrimestreV2(); // session/année inchangées : rien à écrire
+        expect(win.sauvegarderIdentificationTrimestreV2()).toBe(true);
         expect(temoin.nonEnregistre).not.toHaveBeenCalled();
         expect(store.trimestres[0].id).toBe('h2026');
         expect(store.trimestres[0].nom).toBe('Hiver 2026 — groupe pilote');
