@@ -21,9 +21,9 @@ Mandat : relais de Cowork, 13 nov., 18 h 50 (fusion, un seul verdict, mise en li
 - **GitHub** : le passage WebKit Linux de la 1.245.0 (`d6e5677a`, run 43477454528) a fini ROUGE, 13 specs nouvellement rouges (parcours 2, 3, 5, 7, 9, tableau de notation, vue simple, en-tête épuré, palette compacte, polygone), Mac vert sur le même commit ; non touché. Celui de `9b2bea833` (run 43543782094) tournait à la clôture, non lu.
 
 **Complexité** (1.245.0 `d6e5677a7` → 1.246.0 `9b2bea833`) :
-- fichiers de plus de 1 000 lignes : 43 → 43 ; lignes de code : 169 390 → 169 433 (Δ +43) ;
+- fichiers de plus de 1 000 lignes : 43 → 43 ; lignes de code : 169 390 → 169 445 (Δ +55) ;
 - au-dessus de 15 : 434 → 434 (Δ 0) ; somme au-dessus de 15 : 10 954 → 10 954 (Δ 0) ;
-- au-dessus de 30 : 77 → 77 (Δ 0) ; maximum : 130 ; fonctions : 17 312 → 17 324.
+- au-dessus de 30 : 77 → 77 (Δ 0) ; maximum : 130 ; fonctions : 17 312 → 17 326.
 
 ## 13 NOV. 2026, 17 H 40 (Claude Code) : **DEUX LOTS POUSSÉS, NON FUSIONNÉS** — `main` inchangé (`2a7aa59b8`, 1.245.0)
 
