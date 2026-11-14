@@ -193,7 +193,7 @@ async function remplirGroupeCours(page) {
 
 // Ce que chaque étape demande de remplir (les champs requis) : à l'écran, hors de la bulle.
 const CHAMPS = {
-    1: ['#v2-nomTrimestre', '#v2-sessionTrimestre', '#v2-anneeTrimestre', '#v2-debutTrimestre', '#v2-finCours', '#v2-finTrimestre'],
+    1: ['#v2-sessionTrimestre', '#v2-anneeTrimestre', '#v2-debutTrimestre', '#v2-finCours', '#v2-finTrimestre'],
     2: ['#v2-codeCours', '#v2-nomCours', '#v2-ponderation', '#v2-disciplineCours'],
     3: ['#v2-ens-prenom', '#v2-ens-nom', '#v2-ens-courriel', '#v2-ens-institution'],
     4: ['#v2-donneesCollees'],
@@ -339,7 +339,8 @@ test('de « Découvrir » à sa propre classe : « Commencer avec ma classe », 
     await expect(page.locator('#parcours-contour-date')).toHaveCount(0);
     await expect(page.locator('#suivi-groupe')).toBeVisible();
     await expect(bulle(page).locator('.parcours-bulle-sortie')).toHaveCount(0);
-    await expect(bulle(page).locator('.parcours-bulle-boutons button')).toHaveText(['Terminer']);
+    // 14 nov. 2026 (lot 2e) : la dernière bulle offre « Parcours suivant » et « Terminer », de même poids.
+    await expect(bulle(page).locator('.parcours-bulle-boutons button')).toHaveText(['Parcours suivant', 'Terminer']);
     await capture(page, 'classe-8-1180-sombre');
     await bulle(page).getByRole('button', { name: 'Terminer' }).click();
 
@@ -361,12 +362,33 @@ test('de « Découvrir » à sa propre classe : « Commencer avec ma classe », 
     await expect(item.locator('.assistance-parcours-etat')).toHaveText('Fait');
     await expect(item.locator('.assistance-parcours-bouton')).toHaveText('Refaire');
 
-    // « Refaire », tout étant en place : la première étape non faite est la dernière ; aucune autre
-    // bulle ne paraît, même un instant.
-    await noterLesBulles(page);
+    // 14 nov. 2026 (essai novice, lot 2b) — vécu par Grégoire : « Refaire » menait droit à la bulle 8 sur 8 ; on ne
+    // pouvait ni revoir le parcours, ni le montrer à quelqu'un. Il se rejoue maintenant depuis sa première bulle, EN
+    // VISITE : chaque étape déjà réglée se montre avec « Continuer », rien n'avance seul, rien ne s'écrit.
+    const avant = await page.evaluate(() => JSON.stringify(Object.keys(localStorage).sort().map((k) => [k, localStorage.getItem(k)])));
     await item.locator('.assistance-parcours-bouton').click();
-    await attendreEtape(page, 8, "Ta classe d'un coup d'œil");
-    expect(await bullesVues(page)).toEqual(["Ta classe d'un coup d'œil"]);
+    const TITRES = ['Ton trimestre', 'Ton cours', 'Ton profil', 'Ta classe', 'Ton horaire', 'Ton groupe-cours'];
+    for (let k = 0; k < TITRES.length; k++) {
+        await attendreEtape(page, k + 1, TITRES[k], { focus: false });
+        expect(await page.evaluate(() => window.ParcoursMoteur.enVisite()), 'étape ' + (k + 1) + ' : en visite').toBe(true);
+        await expect(bulle(page).locator('.parcours-bulle-boutons button')).toHaveText(['Continuer']);
+        await bulle(page).getByRole('button', { name: 'Continuer' }).click();
+    }
+    await attendreEtape(page, 7, null, { focus: false });
+    await bulle(page).getByRole('button', { name: 'Continuer' }).click();
+    await attendreEtape(page, 8, "Ta classe d'un coup d'œil", { focus: false });
+    // La liste des étapes : toutes faites, toutes se revoient.
+    await bulle(page).locator('.parcours-bulle-rang').click();
+    expect(await bulle(page).locator('.parcours-bulle-etape').evaluateAll((bs) => bs.map((b) => b.disabled))).toEqual(Array(8).fill(false));
+    expect(await bulle(page).locator('.parcours-bulle-etape.est-faite').count()).toBe(8);
+    await bulle(page).locator('.parcours-bulle-etape').nth(1).click();
+    await attendreEtape(page, 2, 'Ton cours', { focus: false });
+    await bulle(page).locator('.parcours-bulle-rang').click();
+    await bulle(page).locator('.parcours-bulle-etape').nth(7).click();
+    await attendreEtape(page, 8, "Ta classe d'un coup d'œil", { focus: false });
+    // Rien ne s'est écrit pendant la visite : le parcours est resté « fait », les données sont les mêmes.
+    expect(await page.evaluate(() => Assistance.etatDe('classe'))).toEqual({ etat: 'fait', etape: 0 });
+    expect(await page.evaluate(() => JSON.stringify(Object.keys(localStorage).sort().map((k) => [k, localStorage.getItem(k)]))), 'la visite n\'écrit rien').toBe(avant);
     await bulle(page).getByRole('button', { name: 'Terminer' }).click();
 });
 
@@ -423,11 +445,10 @@ test('les formulaires du Cadre : une flèche par champ obligatoire vide, qui par
     await ouvrirPanneau(page);
     await page.click('#panneau-assistance [data-parcours="classe"] .assistance-parcours-bouton');
     await attendreEtape(page, 1, 'Ton trimestre');
-    const TRIMESTRE = ['#v2-nomTrimestre', '#v2-sessionTrimestre', '#v2-anneeTrimestre', '#v2-debutTrimestre', '#v2-finCours', '#v2-finTrimestre'];
-    await nombreDeFleches(page, 7, 'étape 1');
+    // 14 nov. 2026 : le nom du trimestre se crée seul (lecture seule, sans astérisque) : il n'a plus de flèche.
+    const TRIMESTRE = ['#v2-sessionTrimestre', '#v2-anneeTrimestre', '#v2-debutTrimestre', '#v2-finCours', '#v2-finTrimestre'];
+    await nombreDeFleches(page, 6, 'étape 1');
     for (const sel of TRIMESTRE) await flecheVers(page, sel, 'étape 1');
-    await page.fill('#v2-nomTrimestre', 'Automne 2026');
-    await nombreDeFleches(page, 6, 'étape 1, le nom rempli');
     await page.selectOption('#v2-sessionTrimestre', 'automne');
     await page.fill('#v2-anneeTrimestre', '2026');
     await nombreDeFleches(page, 4, 'étape 1, il reste les trois dates');
@@ -465,7 +486,8 @@ test('les formulaires du Cadre : une flèche par champ obligatoire vide, qui par
 
     // L'horaire : le nom (au second essai, désigné par rien) et les périodes de chaque séance.
     await attendreEtape(page, 5, 'Ton horaire');
-    for (const sel of ['#v2-hor-nom', '#v2-hor-seance-0-periodes', '#v2-hor-seance-1-periodes']) await flecheVers(page, sel, 'étape 5');
+    // 14 nov. 2026 (lot 1c) : les périodes naissent proposées d'après les heures ; plus de flèche vers elles.
+    for (const sel of ['#v2-hor-nom']) await flecheVers(page, sel, 'étape 5');
     await remplirHoraire(page);
     await attendreEtape(page, 6, 'Ton groupe-cours');
     await remplirGroupeCours(page);

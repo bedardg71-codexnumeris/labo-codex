@@ -165,11 +165,91 @@ body.mode-clair {
     color: var(--texte-principal);
 }
 
+/* « n sur N » : un bouton (14 nov. 2026, essai novice). Il ouvre la liste des étapes. Sa cible fait 44 px de haut
+   sous le doigt (l'iPad) : ses marges négatives la gardent dans la tête sans la grandir. Le soulignement en pointillé
+   dit qu'il se touche, sans le confondre avec les flèches « ← 1/2 → » des pages. Au-dessus de la bascule du téléphone. */
 .parcours-bulle-rang {
+    position: relative;
+    z-index: 1;
+    flex: none;
+    align-self: center;
+    min-height: 44px;
+    min-width: 44px;
+    margin: -14px -6px;
+    padding: 0 6px;
+    background: none;
+    border: 0;
+    border-radius: var(--radius-moyen, 8px);
+    font: inherit;
     font-size: 12px;
     color: var(--texte-secondaire);
     white-space: nowrap;
+    text-decoration: underline dotted;
+    text-underline-offset: 3px;
+    cursor: pointer;
 }
+.parcours-bulle-rang:hover,
+.parcours-bulle-rang[aria-expanded="true"] { color: var(--texte-principal); }
+.parcours-bulle-rang:focus-visible { outline: 2px solid var(--focus-ring-color); outline-offset: -4px; }
+
+/* La liste des étapes, sous la tête : tant qu'elle est ouverte, elle remplace le corps de la bulle. */
+.parcours-bulle-etapes[hidden] { display: none; }
+.parcours-bulle.montre-etapes > :not(.parcours-bulle-tete):not(.parcours-bulle-etapes) { display: none; }
+.parcours-bulle-etapes { display: flex; flex-direction: column; gap: 6px; min-height: 0; overflow-y: auto; overscroll-behavior: contain; }
+.parcours-bulle-etapes-titre { margin: 0; font-size: 12px; color: var(--texte-secondaire); }
+.parcours-bulle-etapes ol { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; }
+.parcours-bulle-etape {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    width: 100%;
+    min-height: 44px;
+    padding: 4px 28px 4px 8px;
+    position: relative;
+    background: none;
+    border: 0;
+    border-radius: var(--radius-moyen, 8px);
+    font: inherit;
+    font-size: 14.5px;
+    color: var(--texte-principal);
+    text-align: left;
+    cursor: pointer;
+}
+.parcours-bulle-etape-rang { flex: none; min-width: 1.4em; color: var(--texte-secondaire); font-variant-numeric: tabular-nums; }
+.parcours-bulle-etape:hover:not(:disabled) { background: rgba(106, 172, 184, 0.15); }
+.parcours-bulle-etape:focus-visible { outline: 2px solid var(--focus-ring-color); outline-offset: -2px; }
+.parcours-bulle-etape:disabled { color: var(--texte-secondaire); opacity: 0.6; cursor: default; }
+.parcours-bulle-etape[aria-current="step"] { font-weight: 600; box-shadow: inset 0 0 0 1px var(--bordure-moyenne); }
+.parcours-bulle-etape.est-faite::after { content: '\2713'; position: absolute; right: 10px; color: var(--vert-leger); }
+
+/* ---------- Les lignes d'une bulle (14 nov. 2026, essai novice : règles 2 et 3) ----------
+   Une ligne par geste. Faite, elle se grise et son tiret devient un crochet : elle ne disparaît pas, sa hauteur ne
+   change pas, la bulle ne bouge pas. La consigne, dernière ligne de la liste, garde la couleur du geste. */
+.parcours-bulle-lignes[hidden] { display: none; }
+.parcours-bulle-lignes {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    font-size: 14.5px;
+    line-height: 1.45;
+    flex: 0 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
+}
+/* La phrase du lieu (« Tu es dans « X », à l'onglet « Y ». ») et les notes : des phrases, hors de la liste. */
+.parcours-bulle-lieu,
+.parcours-bulle-note { margin: 0; }
+.parcours-bulle-lieu { color: var(--texte-secondaire); }
+.parcours-bulle-lignes ul { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 5px; }
+.parcours-bulle-ligne { position: relative; padding-left: 1.5em; }
+.parcours-bulle-ligne > ul { margin-top: 5px; }
+.parcours-bulle-ligne::before { content: '\2013'; position: absolute; left: 0.15em; top: 0; color: var(--texte-secondaire); }
+.parcours-bulle-ligne.est-faite > .parcours-bulle-ligne-texte { color: var(--texte-secondaire); }
+.parcours-bulle-ligne.est-faite::before { content: '\2713'; left: 0; color: var(--vert-leger); }
+.parcours-bulle-ligne--geste > .parcours-bulle-ligne-texte { font-weight: 600; color: var(--parcours-geste); }
+.parcours-bulle-ligne--geste::before { color: var(--parcours-geste); }
 
 .parcours-bulle-texte {
     margin: 0;

@@ -408,16 +408,32 @@
 
     // ---------- Le lancement, « Plus tard », la fin ----------
 
+    /**
+     * 14 nov. 2026 (essai novice) — vécu par Grégoire : sur le parcours déjà fait, « Refaire » (et « Commencer avec ma
+     * classe », à la fin de « Découvrir ») menait droit à la bulle 8 sur 8, puisqu'on partait de la première étape non
+     * faite. On ne pouvait ni revoir le parcours, ni le montrer à quelqu'un.
+     * · Le parcours FAIT se rejoue depuis sa première bulle, EN VISITE (js/parcours-moteur.js) : chaque étape déjà
+     *   réglée se montre, rien n'avance tout seul, rien ne s'écrit (l'état « fait » du parcours reste tel quel), et
+     *   la bulle offre « Continuer ».
+     * · Le parcours à faire ou en cours part toujours de la première étape non faite ; le compteur « n sur N » ouvre
+     *   la liste des étapes, où l'on revoit celles d'avant.
+     */
     async function lancer() {
         // « Ta classe » : les vraies données. La démo ouverte se referme d'abord.
         if (enDemo() && typeof desactiverModeDemo === 'function') await desactiverModeDemo();
         // Un import en cours empêche la sortie de la démo : rien ne part.
         if (enDemo()) return;
-        var depuis = premiereNonFaite();
-        window.Assistance.definirEtat(ID, 'en-cours', depuis);
+        var refaire = window.Assistance.etatDe(ID).etat === 'fait';
+        var acquis = premiereNonFaite();
+        var depuis = refaire ? 0 : acquis;
+        if (!refaire) window.Assistance.definirEtat(ID, 'en-cours', depuis);
         return M().lancer(DEF, {
             depuis: depuis,
-            surEtape: function (i) { window.Assistance.definirEtat(ID, 'en-cours', i); },
+            acquis: acquis,
+            visite: refaire,
+            toutFait: refaire && acquis === ETAPES.length - 1,
+            // Rejoué en visite, le parcours reste « fait » : aucune étape revue ne le rouvre.
+            surEtape: function (i) { if (!refaire) window.Assistance.definirEtat(ID, 'en-cours', i); },
             // « Plus tard » (et Échap) : la bulle se ferme, le parcours attend à cette étape.
             surQuitter: function () { retirerSecondContour(); },
             // Les bulles sans « Plus tard » : la variante d'avant le premier cours, et la dernière.

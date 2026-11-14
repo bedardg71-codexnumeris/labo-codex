@@ -59,8 +59,28 @@
    Une étape avance quand l'état attendu est ATTEINT (`atteint()`), quel que soit le chemin :
    le moteur le sonde, il n'écoute pas le toucher d'un bouton précis.
 
+   LES LIGNES D'UNE BULLE (essai novice de Grégoire, 14 nov. 2026 ; plans de travail/CONSIGNE-2026-11-14-essai-novice.md,
+   règles 2 et 3) : une étape peut porter, à la place d'un paragraphe, une LISTE de lignes (`lignes`), une par geste.
+   Une ligne liée à ce qui la rend faite (`champs` : ses champs remplis ; `fait` : une condition) se grise, avec un
+   crochet, quand son geste est fait ; elle ne disparaît pas, la bulle ne bouge pas. Des sous-lignes (`sous`) se grisent
+   une à une, la ligne mère quand toutes le sont. Une ligne sans rien qui la rende faite est une explication : elle ne
+   se grise pas. Une `note` est une phrase hors de la liste (le document à avoir sous la main, ce qui peut attendre).
+   La consigne (`geste: true`) est la DERNIÈRE ligne de la liste, dans la couleur du geste. La flèche vers un champ part
+   quand sa ligne est faite. Une bulle à lignes tient en une page : ni découpe, ni « ← 1/2 → ».
+   OÙ SUIS-JE (règle 4) : une étape où la page change le déclare (`lieu`). Sa première ligne dit « Tu es dans « X », à
+   l'onglet « Y ». » (les noms sont LUS dans le menu, jamais recopiés), les deux entrées du menu reçoivent le halo de la
+   section actuelle, et la page s'ouvre EN HAUT, navigation visible : rien n'y est amené dans la vue à l'ouverture.
+   LE COMPTEUR (règle du lot 2b) : « n sur N » est un bouton. Il ouvre la liste des étapes par leur titre ; on y choisit
+   une étape FAITE (ou celle où l'on est rendu) pour la revoir, jamais une étape au-delà. Une étape revue dont l'état
+   est déjà atteint se joue EN VISITE : rien n'avance tout seul, rien ne s'écrit, et la bulle offre « Continuer » à la
+   place d'une attente. La visite cesse à la première étape qui reste à faire.
+   LA FIN (lot 2e) : la dernière bulle d'un parcours dit « Pour revoir une étape, touche « N sur N ». » ; quand elle
+   n'offre que « Terminer », elle offre aussi « Parcours suivant », de même poids (aucun bouton mis en avant).
+
    Une étape :
-     { titre, texte, geste?, centre?: bool,
+     { titre, texte?, geste?, centre?: bool,
+       lignes?: () => [{ texte, champs?: () => Element[], fait?: () => bool, sous?: [ligne], note?: bool, geste?: bool }],
+       lieu?: bool | () => bool,   // la page change à cette étape : « Tu es dans… », le halo au menu, la page en haut
        avant?: async () => void,   // place la page (idempotent : sert aussi à la reprise)
        zones?: () => Element[],    // ce dont parle la bulle (la flèche y va)
        fleches?: () => Element[],  // parmi les zones, celles où vont les flèches (groupées) ; les autres, la bulle les
@@ -86,7 +106,8 @@
    ses items le permettent : la bulle n'est jamais plus haute qu'avec son texte seul.
    LE SIGNAL : au lancement et à la fermeture, `document` reçoit « parcoursMoteur » ({ actif }) ; la carte d'une page
    s'y règle (elle se retire devant un parcours, revient après lui).
-   API : window.ParcoursMoteur.lancer(def, { depuis, surEtape, surQuitter, surEchap, verifier }),
+   API : window.ParcoursMoteur.lancer(def, { depuis, surEtape, surQuitter, surEchap, verifier,
+           visite?: bool (jouer en visite ce qui est déjà réglé), acquis?: n (l'étape la plus loin déjà faite) }),
          .fermer(), .actif(), .etapeCourante(), .joue(def), .surTelephone().
 
    LA BULLE SUR TÉLÉPHONE (lot du 9 nov. 2026, plans de travail/CONSIGNE-LOT-2026-11-09-bulle-sur-telephone.md) :
@@ -202,6 +223,23 @@
         var zones = etape.zones ? (etape.zones() || []).filter(Boolean) : [];
         var n = etape.nommeLeContour;
         var auContour = typeof n === 'function' ? !!n() : !!n;
+        if (etape.lignes) {
+            // Les champs de ses lignes : la bulle les évite tous ; une flèche par champ encore vide d'une ligne à faire.
+            var tous = [], aFaire = [];
+            (function lire(liste) {
+                liste.forEach(function (l) {
+                    var cs = champsDe(l);
+                    var faite = ligneFaite(l);
+                    cs.forEach(function (c) {
+                        if (tous.indexOf(c) === -1) tous.push(c);
+                        if (!faite && champVide(c) && aFaire.indexOf(c) === -1) aFaire.push(c);
+                    });
+                    if (l.sous) lire(l.sous);
+                });
+            })(lignesDeLEtape(etape));
+            var suite = !aFaire.length && etape.fleches ? (etape.fleches() || []).filter(Boolean) : [];
+            return { zones: tous.concat(zones, suite), fleches: aFaire.concat(suite), une: true, auContour: auContour };
+        }
         if (etape.formulaire) {
             var champs = champsObligatoires(etape.formulaire());
             var vides = champs.filter(champVide);
@@ -210,6 +248,75 @@
             return { zones: champs.concat(zones, ensuite), fleches: vides.concat(ensuite), une: true, auContour: auContour };
         }
         return { zones: zones, fleches: etape.fleches ? (etape.fleches() || []).filter(Boolean) : null, une: false, auContour: auContour };
+    }
+
+    // ---------- Les lignes d'une bulle (voir « LES LIGNES D'UNE BULLE ») ----------
+
+    /** Les lignes de l'étape, lues (une fonction ou un tableau) ; rien si l'étape n'en porte pas. */
+    function lignesDeLEtape(etape) {
+        var l = [];
+        try { l = typeof etape.lignes === 'function' ? etape.lignes() : etape.lignes; } catch (e) { l = []; }
+        return (l || []).filter(function (x) { return x && x.texte; });
+    }
+
+    /** Les champs d'une ligne, visibles (ceux que la bulle évite et que ses flèches visent). */
+    function champsDe(ligne) {
+        var cs = [];
+        try { cs = ligne.champs ? ligne.champs() || [] : []; } catch (e) { cs = []; }
+        return cs.filter(function (c) { return c && visible(c); });
+    }
+
+    /** La ligne dit un geste qui peut être fait (elle se grisera) ; sinon c'est une explication. */
+    function ligneSeFait(ligne) {
+        if (ligne.note) return false;
+        if (ligne.fait || ligne.champs) return true;
+        return !!ligne.sous && ligne.sous.some(ligneSeFait);
+    }
+
+    /**
+     * Le geste de la ligne est fait : sa condition (`fait`), sinon ses champs tous remplis ; une ligne mère, quand
+     * toutes ses sous-lignes qui se font le sont. En visite, tout ce qui se fait est fait (l'étape est déjà réglée).
+     */
+    function ligneFaite(ligne) {
+        if (!ligneSeFait(ligne)) return false;
+        if (etat && etat.enVisite) return true;
+        try {
+            if (ligne.fait) return !!ligne.fait();
+            if (ligne.champs) {
+                var cs = champsDe(ligne);
+                return cs.length > 0 && cs.every(function (c) { return !champVide(c); });
+            }
+        } catch (e) { return false; }
+        return ligne.sous.filter(ligneSeFait).every(ligneFaite);
+    }
+
+    /**
+     * OÙ SUIS-JE : les deux entrées actives du menu (la section, puis son onglet), lues dans la page. Leurs noms sont
+     * ceux que l'écran montre ; js/navigation.js et js/config.js ne sont ni lus par ce code, ni modifiés.
+     * @returns {{section:string, onglet:string, entrees:Element[]}|null}
+     */
+    function lireLieu() {
+        var nom = function (b) {
+            var l = b ? b.querySelector('.nav-label') : null;
+            return String((l || b || {}).textContent || '').replace(/\s+/g, ' ').trim();
+        };
+        var actifs = [].slice.call(document.querySelectorAll('.navigation-principale button.actif'));
+        var section = actifs.filter(visible)[0] || actifs[0] || null;
+        var onglets = [].slice.call(document.querySelectorAll('.sous-navigation button.actif'));
+        var onglet = onglets.filter(visible)[0] || onglets[0] || null;
+        if (!section || !nom(section)) return null;
+        return { section: nom(section), onglet: onglet ? nom(onglet) : '', entrees: [section, onglet].filter(Boolean) };
+    }
+
+    /** « Tu es dans « X », à l'onglet « Y ». » — la première ligne d'une étape où la page change. */
+    function phraseDuLieu(lieu) {
+        if (!lieu) return '';
+        return 'Tu es dans « ' + lieu.section + ' »' + (lieu.onglet ? ", à l'onglet « " + lieu.onglet + ' »' : '') + '.';
+    }
+
+    function aUnLieu(etape) {
+        var l = etape && etape.lieu;
+        try { return typeof l === 'function' ? !!l() : !!l; } catch (e) { return false; }
     }
 
     function union(rects) {
@@ -670,13 +777,239 @@
         return String(t == null ? '' : t).replace(/« /g, '«\u00a0').replace(/ »/g, '\u00a0»');
     }
 
-    /** « n sur N », dans la tête ; rien pour une carte qui n'est pas un parcours (`sansRang`). */
+    // PROPOSÉ (14 nov. 2026, à valider par Grégoire) : le titre de la liste des étapes, et le nom du compteur pour le
+    // lecteur d'écran. Lus par l'enseignant·e.
+    var TITRE_ETAPES = 'Les étapes';
+    var LIBELLE_RANG = 'voir les étapes';
+
+    /**
+     * « n sur N », dans la tête : un bouton qui ouvre la liste des étapes (voir « LE COMPTEUR ») ; rien pour une carte
+     * qui n'est pas un parcours (`sansRang`). Le texte reste « n sur N », tel quel : les bancs et l'œil le lisent ainsi.
+     */
     function rangDeLEtape(total) {
         if (etat.def.sansRang) return [];
-        var rang = document.createElement('span');
+        var rang = document.createElement('button');
+        rang.type = 'button';
         rang.className = 'parcours-bulle-rang';
+        rang.id = 'parcours-bulle-rang';
         rang.textContent = (etat.i + 1) + ' sur ' + total;
+        rang.setAttribute('aria-label', 'Étape ' + (etat.i + 1) + ' sur ' + total + ' : ' + LIBELLE_RANG);
+        rang.setAttribute('aria-expanded', 'false');
+        rang.setAttribute('aria-controls', 'parcours-bulle-etapes');
+        rang.addEventListener('click', function (ev) { ev.stopPropagation(); basculerEtapes(); });
         return [rang];
+    }
+
+    /** L'étape la plus loin où l'on peut aller : la dernière faite, ou celle où l'on est rendu. */
+    function plusLoin() {
+        return Math.max(etat.plusLoin || 0, etat.i);
+    }
+
+    /**
+     * La liste des étapes, par leur titre (cachée tant qu'on ne touche pas le compteur). Une étape faite porte son
+     * crochet et se choisit ; celle où l'on est rendu aussi ; au-delà, le titre se lit mais ne se touche pas : on ne
+     * saute pas par-dessus une étape non faite.
+     */
+    function listeDesEtapes() {
+        var boite = document.createElement('div');
+        boite.className = 'parcours-bulle-etapes';
+        boite.id = 'parcours-bulle-etapes';
+        boite.hidden = true;
+        var t = document.createElement('p');
+        t.className = 'parcours-bulle-etapes-titre';
+        t.id = 'parcours-bulle-etapes-titre';
+        t.textContent = TITRE_ETAPES;
+        boite.appendChild(t);
+        var ol = document.createElement('ol');
+        ol.setAttribute('aria-labelledby', 'parcours-bulle-etapes-titre');
+        var loin = plusLoin();
+        etat.def.etapes.forEach(function (e, k) {
+            var li = document.createElement('li');
+            var b = document.createElement('button');
+            b.type = 'button';
+            b.className = 'parcours-bulle-etape';
+            b.dataset.etape = String(k);
+            var faite = k < loin || !!etat.toutFait;
+            if (faite) b.classList.add('est-faite');
+            if (k === etat.i) b.setAttribute('aria-current', 'step');
+            b.disabled = k > loin;
+            var rang = document.createElement('span');
+            rang.className = 'parcours-bulle-etape-rang';
+            rang.textContent = (k + 1) + '.';
+            b.appendChild(rang);
+            b.appendChild(document.createTextNode(' ' + typographier(e.titre)));
+            if (faite) {
+                var dit = document.createElement('span');
+                dit.className = 'u-lecteur-ecran';
+                dit.textContent = ' (faite)';
+                b.appendChild(dit);
+            }
+            b.addEventListener('click', function () { revoir(k); });
+            li.appendChild(b);
+            ol.appendChild(li);
+        });
+        boite.appendChild(ol);
+        return boite;
+    }
+
+    function etapesOuvertes() {
+        return !!etat && etat.elements.bulle.classList.contains('montre-etapes');
+    }
+
+    /** Ouvre ou referme la liste des étapes ; la bulle se replace à sa nouvelle hauteur. */
+    function basculerEtapes(ouvrir) {
+        if (!etat) return;
+        var b = etat.elements.bulle;
+        var boite = b.querySelector('.parcours-bulle-etapes');
+        var rang = b.querySelector('.parcours-bulle-rang');
+        if (!boite || !rang) return;
+        var ouvre = ouvrir === undefined ? boite.hidden : !!ouvrir;
+        // Sur téléphone, la bulle repliée se déplie d'abord : la liste ne se verrait pas.
+        if (ouvre && etat.telephone && etat.replie) { etat.replie = false; appliquerRepli(); }
+        boite.hidden = !ouvre;
+        b.classList.toggle('montre-etapes', ouvre);
+        rang.setAttribute('aria-expanded', ouvre ? 'true' : 'false');
+        var cible = ouvre ? (boite.querySelector('[aria-current="step"]') || boite.querySelector('button:not(:disabled)')) : rang;
+        try { if (cible) cible.focus({ preventScroll: true }); } catch (e) { if (cible) cible.focus(); }
+        sonder();
+    }
+
+    /** Revoir l'étape `k`, choisie dans la liste : celle où l'on est referme la liste ; une autre s'ouvre en visite. */
+    function revoir(k) {
+        if (!etat || k > plusLoin()) return;
+        if (k === etat.i) { basculerEtapes(false); return; }
+        etat.visite = true;
+        allerA(k, { revoir: true });
+    }
+
+    // ---------- Le rendu des lignes ----------
+
+    /**
+     * Pose les lignes de l'étape dans la bulle : la phrase du lieu d'abord, puis, dans l'ordre, les notes (des phrases)
+     * et la liste (une ligne par geste, ses sous-lignes dessous). Garde chaque ligne avec son élément (`etat.lignes`),
+     * pour que la sonde la grise sans refaire la bulle.
+     */
+    function ecrireLignes(boite, etape) {
+        boite.textContent = '';
+        etat.lignes = [];
+        var lieu = aUnLieu(etape) ? lireLieu() : null;
+        etat.lieu = lieu;
+        var lignes = etape.lignes ? lignesDeLEtape(etape) : [];
+        // LA FIN : la dernière bulle d'un parcours dit où revoir une étape, juste avant sa consigne.
+        if (!etat.def.sansRang && etat.i === etat.def.etapes.length - 1) {
+            var n = etat.def.etapes.length;
+            var revue = { texte: 'Pour revoir une étape, touche « ' + n + ' sur ' + n + ' ».', note: true };
+            var k = lignes.length;
+            while (k > 0 && lignes[k - 1].geste) k--;
+            lignes = lignes.slice(0, k).concat([revue], lignes.slice(k));
+        }
+        if (lieu) {
+            var ou = document.createElement('p');
+            ou.className = 'parcours-bulle-lieu';
+            ou.textContent = typographier(phraseDuLieu(lieu));
+            boite.appendChild(ou);
+        }
+        var ul = null;
+        var poser = function (ligne, dans) {
+            var li = document.createElement('li');
+            li.className = 'parcours-bulle-ligne' + (ligne.geste ? ' parcours-bulle-ligne--geste' : '');
+            var t = document.createElement('span');
+            t.className = 'parcours-bulle-ligne-texte';
+            t.textContent = typographier(ligne.texte);
+            li.appendChild(t);
+            var dit = document.createElement('span');
+            dit.className = 'u-lecteur-ecran';
+            li.appendChild(dit);
+            dans.appendChild(li);
+            etat.lignes.push({ def: ligne, el: li, dit: dit, faite: null });
+            if (ligne.sous && ligne.sous.length) {
+                var sous = document.createElement('ul');
+                ligne.sous.forEach(function (x) { if (x && x.texte) poser(x, sous); });
+                li.appendChild(sous);
+            }
+        };
+        lignes.forEach(function (ligne) {
+            if (ligne.note) {
+                ul = null;
+                var p = document.createElement('p');
+                p.className = 'parcours-bulle-note';
+                p.textContent = typographier(ligne.texte);
+                boite.appendChild(p);
+                return;
+            }
+            if (!ul) { ul = document.createElement('ul'); boite.appendChild(ul); }
+            poser(ligne, ul);
+        });
+        boite.hidden = !boite.firstChild;
+        majLignes(true);
+    }
+
+    /** À chaque passage de la sonde : une ligne dont le geste est fait se grise (et le dit) ; défait, elle revient. */
+    function majLignes(silence) {
+        if (!etat || !etat.lignes) return;
+        etat.lignes.forEach(function (l) {
+            var faite = ligneFaite(l.def);
+            if (faite === l.faite) return;
+            l.faite = faite;
+            l.el.classList.toggle('est-faite', faite);
+            l.dit.textContent = faite ? ' (fait)' : '';
+            if (faite && !silence) etat.elements.annonce.textContent = 'Fait : ' + l.def.texte;
+        });
+    }
+
+    /** Le texte des lignes, à plat (l'annonce de l'étape). */
+    function texteDesLignes() {
+        var boite = etat.elements.bulle.querySelector('.parcours-bulle-lignes');
+        return boite && !boite.hidden ? ' ' + String(boite.textContent || '').replace(/\s+/g, ' ').trim() : '';
+    }
+
+    /**
+     * Le halo des deux entrées du menu (voir « OÙ SUIS-JE ») : posé tant que l'étape a un lieu, relu à chaque passage
+     * (le menu se redessine), retiré à l'étape suivante. Jamais retiré d'un élément que la section actuelle du contour
+     * porte aussi.
+     */
+    function marquerLieu(etape) {
+        var entrees = aUnLieu(etape) ? ((lireLieu() || {}).entrees || []) : [];
+        (etat.entreesDuLieu || []).forEach(function (e) {
+            if (entrees.indexOf(e) === -1 && e !== etat.sectionActuelle) e.classList.remove('parcours-section-actuelle');
+        });
+        entrees.forEach(function (e) { e.classList.add('parcours-section-actuelle'); });
+        etat.entreesDuLieu = entrees;
+    }
+
+    /** LA FIN : le parcours qui suit celui-ci dans le panneau « Assistance » (rien : c'était le dernier). */
+    function parcoursSuivant() {
+        var a = window.Assistance;
+        if (!a || typeof a.suivantDe !== 'function' || !etat.def.id) return null;
+        return a.suivantDe(etat.def.id);
+    }
+
+    /**
+     * Les boutons de la bulle, tels qu'elle les montre.
+     * · En visite, une étape déjà réglée offre « Continuer » à la place de son attente.
+     * · LA FIN : la dernière bulle qui n'offre que « Terminer » offre aussi « Parcours suivant » ; les deux de même
+     *   poids (règle 7 : aucun bouton mis en avant quand la personne choisit son rythme).
+     */
+    function boutonsDeLEtape(etape) {
+        var boutons = (etape.boutons || []).slice();
+        var derniere = etat.i === etat.def.etapes.length - 1;
+        if (etat.enVisite && !derniere) {
+            boutons.push({ libelle: 'Continuer', primaire: true, action: function () { allerA(etat.i + 1); } });
+        }
+        if (derniere && !etat.def.sansRang && boutons.length === 1 && boutons[0].libelle === 'Terminer') {
+            var terminer = boutons[0];
+            var suivant = parcoursSuivant();
+            if (suivant) {
+                boutons = [
+                    { libelle: 'Parcours suivant', action: function (m) {
+                        terminer.action(m);
+                        window.Assistance.lancerParcours(suivant.id);
+                    } },
+                    { libelle: 'Terminer', action: terminer.action, attend: terminer.attend }
+                ];
+            }
+        }
+        return boutons;
     }
 
     function rendreBulle(opts) {
@@ -725,6 +1058,7 @@
         etat.glisse = null;
         if (etat.telephone) etat.deplacee = null;
         b.appendChild(tete);
+        if (!etat.def.sansRang) b.appendChild(listeDesEtapes());
 
         var p = document.createElement('p');
         p.className = 'parcours-bulle-texte';
@@ -760,6 +1094,13 @@
         etat.signatureComplement = JSON.stringify(etat.complement);
         paginer(opts && opts.sansAnnonce ? etat.page : 0);
 
+        // Les lignes (voir « LES LIGNES D'UNE BULLE »), sous le texte s'il y en a un ; la phrase du lieu et celle de
+        // la fin y logent aussi, pour toutes les bulles.
+        var lignes = document.createElement('div');
+        lignes.className = 'parcours-bulle-lignes';
+        b.appendChild(lignes);
+        ecrireLignes(lignes, etape);
+
         if (etape.geste) {
             var g = document.createElement('p');
             g.className = 'parcours-bulle-geste';
@@ -767,10 +1108,11 @@
             b.appendChild(g);
         }
 
-        if (etape.boutons && etape.boutons.length) {
+        etat.boutons = boutonsDeLEtape(etape);
+        if (etat.boutons.length) {
             var zone = document.createElement('div');
             zone.className = 'parcours-bulle-boutons';
-            etape.boutons.forEach(function (def) {
+            etat.boutons.forEach(function (def) {
                 var btn = document.createElement('button');
                 btn.type = 'button';
                 btn.className = 'btn ' + (def.primaire ? 'btn-principal' : 'btn-secondaire');
@@ -810,7 +1152,7 @@
         setTimeout(function () {
             if (!etat) return;
             var suite = (etat.complement || []).length ? ' ' + texteDesItems(etat.complement) : '';
-            a.textContent = etape.titre + '. ' + etape.texte + suite + (etape.geste ? ' ' + etape.geste : '');
+            a.textContent = etape.titre + '. ' + (etape.texte || '') + suite + texteDesLignes() + (etape.geste ? ' ' + etape.geste : '');
         }, 50);
     }
 
@@ -1197,7 +1539,12 @@
         if (etat.deplacee) { poserDeplacee(); return; }
         var bw = b.offsetWidth, bh = b.offsetHeight;
         var place;
-        if (!evites.length) {
+        if (!evites.length && aUnLieu(etapeCourante())) {
+            // La bulle guide, la page agit (règle 5) : une bulle qui présente une page, sans rien y désigner, se range
+            // dans son coin, en bas à droite ; au centre, elle couvrait le texte de la page et son formulaire.
+            var cadre = cadreUtile();
+            place = { x: Math.max(cadre.gauche, cadre.droite - bw), y: Math.max(cadre.haut, cadre.bas - bh) };
+        } else if (!evites.length) {
             place = { x: (vw - bw) / 2, y: Math.max(hautEntete() + 16, (vh - bh) / 2) };
             if (place.y + bh > vh - MARGE) place.y = Math.max(MARGE, vh - bh - MARGE);
         } else {
@@ -1479,8 +1826,8 @@
         var b = etat.elements.bulle;
         var zone = b.querySelector('.parcours-bulle-boutons');
         var ligne = b.querySelector('.parcours-bulle-attente');
-        if (!zone || !ligne || !etape.boutons) return;
-        var raisons = etape.boutons.map(function (def, k) {
+        if (!zone || !ligne || !etat.boutons) return;
+        var raisons = etat.boutons.map(function (def, k) {
             var btn = zone.children[k], r = '';
             try { r = btn && def.attend ? def.attend() || '' : ''; } catch (e) { r = ''; }
             if (btn && def.attend && btn.disabled !== !!r) btn.disabled = !!r;
@@ -1568,6 +1915,7 @@
         suivreComplement(etape);
         poserAvis(etape);
         poserAttentes(etape);
+        majLignes();
         if (!zoom) suivreEcran(etape);
 
         var vise = designe(etape);
@@ -1589,6 +1937,7 @@
 
         poserPulsation(contourEl);
         marquerSectionActuelle(sectionActuelleDe(contourEl));
+        marquerLieu(etape);
 
         if (zoom) {
             // Sous le zoom : rien ne se replace ; les flèches suivent leurs cibles depuis la bulle où elle est.
@@ -1636,7 +1985,8 @@
         var hauteur = etat.elements.bulle.offsetHeight;
         var ok = false;
         try { ok = !!etape.atteint(); } catch (e) { ok = false; }
-        if (ok) { allerA(etat.i + 1); return; }
+        // En visite, l'état déjà atteint ne fait rien avancer : « Continuer » est dans la bulle.
+        if (ok && !etat.enVisite) { allerA(etat.i + 1); return; }
         if (sousLeZoom()) return;
         // La hauteur aussi (10 nov. 2026) : une étape qui fait paraître un bouton à la vérification (« Continuer » du
         // huitième parcours) fait grandir la bulle ; replacée seulement au passage suivant, le bouton sautait sous le
@@ -1664,12 +2014,49 @@
         return vise.concat(designe(etape).zones).filter(Boolean);
     }
 
-    async function allerA(i) {
+    /**
+     * Une étape REVUE (choisie dans la liste, ou suivie en visite) ne déplace pas le parcours : le rang gardé par la
+     * définition (« Reprendre ») reste le plus loin atteint.
+     */
+    function estRevue(i, mode) {
+        return !!(mode && mode.revoir) || (etat.visite && i < etat.plusLoin);
+    }
+
+    /**
+     * EN VISITE : l'état de l'étape est déjà atteint, elle se montre sans rien attendre. Une étape qui reste à faire
+     * met fin à la visite : le parcours reprend son cours.
+     */
+    function suivreLaVisite(etape) {
+        if (!etat.visite || !etape.atteint) return;
+        var deja = false;
+        try { deja = !!etape.atteint(); } catch (e) { deja = false; }
+        etat.enVisite = deja;
+        if (!deja) etat.visite = false;
+    }
+
+    /**
+     * La page, à l'ouverture de l'étape. OÙ SUIS-JE : une étape où la page change s'ouvre en haut, navigation visible ;
+     * rien n'y est amené dans la vue, et ce qu'il faut toucher n'est pas « neuf » pour `suivreContour` (il ferait
+     * défiler la page au premier passage). Sinon, ce que l'étape désigne est amené dans la vue, comme avant.
+     */
+    function ouvrirLaPage(etape) {
+        if (aUnLieu(etape)) {
+            window.scrollTo(0, 0);
+            var c0 = etape.contour ? etape.contour() : null;
+            etat.contourSuivi = visible(c0) ? signatureDe(c0) : '';
+            return;
+        }
+        if (!etape.centre || etat.telephone) amenerDansLaVue(elementsVises(etape), etat.elements.bulle.offsetHeight);
+        retenirContourDOuverture(etape);
+    }
+
+    async function allerA(i, mode) {
         if (!etat) return;
         if (i >= etat.def.etapes.length) { fermer(); return; }
         etat.enTransition = true;
+        etat.plusLoin = Math.max(plusLoin(), i);
         etat.i = i;
-        if (etat.opts.surEtape) etat.opts.surEtape(i);
+        if (etat.opts.surEtape && !estRevue(i, mode)) etat.opts.surEtape(i);
         var etape = etapeCourante();
         etat.elements.contour.hidden = true;
         // L'étape suivante reprend le placement automatique ; ses flèches et sa section actuelle seront les siennes.
@@ -1678,9 +2065,12 @@
         etat.vus = null;
         effacerFleches();
         marquerSectionActuelle(null);
+        marquerLieu(null);
+        etat.enVisite = false;
         await preparer(etape, i);
         // Le parcours a pu être fermé, ou avancé ailleurs, pendant la préparation.
         if (!etat || etat.i !== i) return;
+        suivreLaVisite(etape);
         // Sur téléphone, une étape qui désigne quoi toucher sur la page (un contour) ouvre la bulle
         // repliée ; quand le geste est dans la bulle (« Continuer »), elle s'ouvre dépliée.
         etat.replie = !!etape.contour;
@@ -1688,8 +2078,7 @@
         // L'écran où l'étape s'ouvre (une reprise peut tomber sur le second) : sa page, sans défilement de plus.
         etat.pageDite = etape.pageQuiDit ? (etape.pageQuiDit() || null) : null;
         if (etat.pageDite && pageQuiPorte(etat.pageDite) > 0) montrerPage(pageQuiPorte(etat.pageDite));
-        if (!etape.centre || etat.telephone) amenerDansLaVue(elementsVises(etape), etat.elements.bulle.offsetHeight);
-        retenirContourDOuverture(etape);
+        ouvrirLaPage(etape);
         etat.enTransition = false;
         etat.reglerJusqua = Date.now() + REGLAGE_MS;
         sonder();
@@ -1701,6 +2090,7 @@
         var etape = etapeCourante();
         ev.stopPropagation();
         ev.preventDefault();
+        if (etapesOuvertes()) { basculerEtapes(false); return; }   // Échap referme d'abord la liste des étapes
         if (!etape.sansSortie) quitter();
         else if (etat.opts.surEchap) etat.opts.surEchap(api);
     }
@@ -1713,7 +2103,9 @@
         etat = { def: def, i: 0, opts: opts || {}, elements: creerElements(), enTransition: false,
                  telephone: surTelephone(), replie: false, reglerJusqua: 0, texte: '', pages: [], page: 0, largeurPages: 0,
                  deplacee: null, glisse: null, vus: null, sectionActuelle: null, doigts: 0, hauteurGardee: 0, pageDite: null,
-                 contourSuivi: '', complement: [], signatureComplement: '[]', pageComplement: -1 };
+                 contourSuivi: '', complement: [], signatureComplement: '[]', pageComplement: -1,
+                 lignes: [], lieu: null, entreesDuLieu: [], boutons: [], visite: !!(opts && opts.visite), enVisite: false,
+                 plusLoin: 0, toutFait: false };
         document.body.classList.add('parcours-actif');
         signaler();
         if (window.transitions && typeof window.transitions.fermerBandeau === 'function') window.transitions.fermerBandeau();
@@ -1731,6 +2123,10 @@
         ['touchstart', 'touchend', 'touchcancel'].forEach(function (t) { window.addEventListener(t, compterDoigts, { passive: true, capture: true }); });
         etat.timer = setInterval(sonder, SONDE_MS);
         var depuis = Math.max(0, Math.min((opts && opts.depuis) || 0, def.etapes.length - 1));
+        // Jusqu'où le parcours est déjà fait : ce que dit la définition (`acquis`), sinon l'étape de départ.
+        var acquis = opts && typeof opts.acquis === 'number' ? opts.acquis : depuis;
+        etat.plusLoin = Math.max(0, Math.min(acquis, def.etapes.length - 1));
+        etat.toutFait = !!(opts && opts.toutFait);
         return allerA(depuis);
     }
 
@@ -1747,6 +2143,7 @@
         ['wheel', 'touchstart', 'keydown'].forEach(function (t) { window.removeEventListener(t, arreterReglage, { passive: true, capture: true }); });
         ['touchstart', 'touchend', 'touchcancel'].forEach(function (t) { window.removeEventListener(t, compterDoigts, { passive: true, capture: true }); });
         marquerSectionActuelle(null);
+        marquerLieu(null);
         etat = null;
         retirerElements();
         document.documentElement.style.removeProperty('--parcours-reserve-bas');
@@ -1778,6 +2175,12 @@
         // Les bulles en pages : la page affichée et leur nombre (0 et 1 quand le texte tient).
         pageCourante: function () { return etat ? { page: etat.page, pages: etat.pages.length, largeur: etat.largeurPages } : null; },
         allerA: function (i) { return allerA(i); },
+        // Le compteur (14 nov. 2026) : la liste des étapes, l'étape la plus loin atteinte, la visite.
+        basculerEtapes: basculerEtapes,
+        revoir: revoir,
+        enVisite: function () { return !!(etat && etat.enVisite); },
+        plusLoin: function () { return etat ? plusLoin() : null; },
+        lireLieu: lireLieu,
         // Utilitaires pour les définitions de parcours.
         visible: visible,
         seVoit: seVoit,
