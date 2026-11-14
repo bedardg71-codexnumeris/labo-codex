@@ -1,9 +1,9 @@
 {
     "_lisezMoi": "Liste des essais Playwright que LINUX NE JUGE PAS (régime du 14 nov. 2026 : le nuage juge le verdict complet, le Mac en complément). Lue par le job « Playwright — verdict » de GitHub (scripts/juger-rapport-playwright.mjs) et par le complément du Mac (scripts/complement-mac.mjs), qui rejoue ces essais sous le WebKit de macOS. Deux listes : echecsConnus = rouge à chacun des trois derniers passages complets ; jouée verte, le juge la dit « à retirer ». echecsIntermittents = rouge à au moins un passage, pas à tous ; ni son rouge ni son vert ne bloquent. Seule une rouge hors des deux listes fait échouer le verdict du nuage. RÈGLE (PROTOCOLE.md, règle 7) : un essai qui rougit sous Linux et reste vert au Mac se classe ICI, avec sa cause, dans le lot qui l'amène. Chaque entrée a sa ligne dans `causes` : une famille (geometrie-rendu, minutage, api-absente, plateforme, non-elucide) et une cause lue dans un journal ; une entrée sans cause est refusée par tests/unit/sentinelle-verdict-nuage-2026-11-14.test.js. Une entrée réparée se retire, avec sa cause.",
     "genereLe": "2026-11-14",
-    "source": "Reclassée le 14 nov. 2026 sur sept passages complets de main, 20 rapports sur 20 chacun, tous sur ubuntu-24.04 : 42843784363 (579f6ace), 42922436058 (9386cccf), 42955190295 (48f118bf), 43134669084 (66c2a464), 43317816490 (1661ade8), 43477454528 (d6e5677a), 43543782094 (9b2bea83). Lus dans les journaux des morceaux (reporter list). Rouge aux trois derniers : echecsConnus ; rouge à au moins un des sept, pas aux trois derniers, et encore jouée au dernier : echecsIntermittents. Les 35 entrées de la liste du 7 nov. jamais rouges sur ces sept passages sont retirées (jouées vertes au dernier). Cinq essais sortent parce qu'ils sont réparés dans ce lot : codex-1011 (deux), codex-1012 (un) et planif-menu-vue (deux) posent désormais eux-mêmes leur prémisse (API d'estimation de l'espace, plateforme Mac).",
+    "source": "Reclassée le 14 nov. 2026 sur sept passages complets de main, 20 rapports sur 20 chacun, tous sur ubuntu-24.04 : 42843784363 (579f6ace), 42922436058 (9386cccf), 42955190295 (48f118bf), 43134669084 (66c2a464), 43317816490 (1661ade8), 43477454528 (d6e5677a), 43543782094 (9b2bea83). Lus dans les journaux des morceaux (reporter list). Rouge aux trois derniers : echecsConnus ; rouge à au moins un des sept, pas aux trois derniers, et encore jouée au dernier : echecsIntermittents. Les 35 entrées de la liste du 7 nov. jamais rouges sur ces sept passages sont retirées (jouées vertes au dernier). Quatre essais sortent parce qu'ils sont réparés dans ce lot et verts au run 43642642137 : codex-1011 (deux) et planif-menu-vue (deux) posent désormais eux-mêmes leur prémisse (API d'estimation de l'espace, plateforme Mac). codex-1012, réparé de même, reste ici pour une autre cause. Quatre intermittentes ajoutées au premier verdict de la branche (run 43642642137, cc588d6a).",
     "totalEchecsConnus": 19,
-    "totalEchecsIntermittents": 32,
+    "totalEchecsIntermittents": 36,
     "echecsConnus": [
         "1007-codex-a-part-avant-suppression.spec.js › #1007 — avant de supprimer, un codex à part › X1, fenêtre de choix (Chrome) : « Annuler » à chaque étape ne supprime rien ; le fichier à part, puis la suppression comme avant ; le fichier tenu n'est pas touché",
         "1007-propose-codex-avant-suppression.spec.js › #1007, second lot — avant de supprimer, le codex proposé › P8 (évaluation) : sans codex, à jour, pas à jour (trois boutons), échec et abandon de l'écriture",
@@ -30,14 +30,17 @@
         "1007-propose-codex-avant-suppression.spec.js › #1007, second lot — avant de supprimer, le codex proposé › Une porte par famille : élève (P2), pratique (P29), paramètre « enseignants » et clé hors liste, corbeille (G1)",
         "aide-cp-suit-la-case-1086.spec.js › une seule aide « C et P » visible : sur la ligne de la case, pas à la date",
         "bibliotheque-liste-1159.spec.js › à 1440 px › les trois fenêtres tiennent dans la largeur ; cibles de 44 px ; Échap ferme",
+        "bulle-largeur-ipad-2026-11-12.spec.js › L1 · 1180 × 820 · mouse : la bulle se pose à droite de la grille quand elle y a la place, et va au bord droit",
         "bulle-largeur-ipad-2026-11-12.spec.js › L1 · 1180 × 820 · touch : la bulle se pose à droite de la grille quand elle y a la place, et va au bord droit",
         "bulle-largeur-ipad-2026-11-12.spec.js › L1 · 820 × 1180 · mouse : la bulle se pose à droite de la grille quand elle y a la place, et va au bord droit",
         "bulle-largeur-ipad-2026-11-12.spec.js › L2 · au doigt (contexte tactile) › L2 · 1180 × 820 : innerWidth faux et deux doigts « restés posés » ne bloquent ni la place ni le glisser",
+        "codex-1012-fichier-d-origine.spec.js › #1012 — le fichier d'origine n'est tenu qu'après une ouverture complète › (1) annulation ou refus d'avant toute écriture : l'application garde le fichier d'avant",
         "codex-1184-copies-aux-archives.spec.js › #1184 — le codex et les copies aux archives › ouvrir un codex qui porte la marque l'installe, à la place de la marque locale",
         "codex-1184-copies-aux-archives.spec.js › #1184 — le codex et les copies aux archives › ouvrir un codex sans marque (d'avant #1028) ne touche pas la marque locale",
         "codex-991-selection-aller-retour.spec.js › #991 — « Exporter une sélection » passe par assemblerZip › les copies sont rangées, et le fichier s'ouvre exactement comme celui d'avant",
         "en-tete-epure-2026-11-07.spec.js › une rangée d'onglets qui déborde au bureau défile, avec un fondu au bord",
         "evaluer-868-avec-ou-sans-copie.spec.js › Porte #868 · avec copie : « Évaluer » ouvre la copie de l'élève, en mode Évaluer",
+        "evaluer-868-avec-ou-sans-copie.spec.js › Porte #868 · sans copie, puis avec, puis sans : un seul verrou, une seule sous-barre, chaque fois le bon élève",
         "exporter-des-travaux-une-carte-895.spec.js › #895 · un filtre sans fichier ne télécharge rien et le dit dans la carte, sans dialogue",
         "exporter-des-travaux-une-carte-895.spec.js › #895 · « Toutes / Tous » + « Télécharger » : l'archive de tout le groupe, par élève et par production",
         "lot-i-bis-la-case-ouvre-un-codex.spec.js › Lot I bis — la case « Ouvrir un Codex » ouvre un codex › (1) un codex choisi dans la case s'ouvre par le chemin du menu Codex, sans alerte",
@@ -49,6 +52,7 @@
         "parcours-2-ma-classe-2026-11-09.spec.js › les formulaires du Cadre : une flèche par champ obligatoire vide, qui part quand il est rempli, et celle du bouton ; à la fin, le bouton seul",
         "parcours-2-ma-classe-2026-11-09.spec.js › une flèche didactique ouverte avant le parcours se retire au lancement, sans être marquée vue, même si l’on clique sa cible",
         "parcours-3-evaluer-2026-11-09.spec.js › « Évaluer une première production », étape 8 à 820 px (l’iPad en portrait) : le menu « Cartouche de rétroaction » amené dans la vue, la bulle à côté",
+        "parcours-5-monter-ton-cours-2026-11-09.spec.js › « Monter ton cours » : les sept étapes, la variante ⚠, « Plus tard » et « Reprendre » à l’étape 4 (1180 px)",
         "parcours-7-lire-ta-classe-2026-11-09.spec.js › les neuf étapes en faisant les gestes, sans grille de dépistage désignée (1180 px, sombre)",
         "parcours-8-commentaires-2026-11-09.spec.js › 1180 × 820 : aucun avis ne couvre la bulle, même quand aucun coin ne la laisse libre",
         "parcours-8-commentaires-2026-11-09.spec.js › de bout en bout, avec fichier : une grille neuve, deux codes posés, la rétroaction s’écrit seule ; le verrou mène à la fin",
@@ -92,6 +96,10 @@
             "famille": "minutage",
             "cause": "Lu au run 43477454528 : « Test timeout of 30000ms exceeded. ». Rouge à 1 passage(s) sur 7 joué(s), du 10 au 14 nov. 2026."
         },
+        "bulle-largeur-ipad-2026-11-12.spec.js › L1 · 1180 × 820 · mouse : la bulle se pose à droite de la grille quand elle y a la place, et va au bord droit": {
+            "famille": "minutage",
+            "cause": "Lu au run 43642642137 : « Test timeout of 30000ms exceeded. | locator.click, waiting for locator(#parcours-bulle) button Terminer | waiting for element to be visible, enabled and stable ». Trois autres variantes du même fichier sont déjà ici pour le même délai. Verte aux sept passages du 10 au 14 nov. ; rouge au huitième, run 43642642137 (cc588d6a), le premier verdict de la branche de ce lot : classée dans le lot qui l’amène."
+        },
         "bulle-largeur-ipad-2026-11-12.spec.js › L1 · 1180 × 820 · touch : la bulle se pose à droite de la grille quand elle y a la place, et va au bord droit": {
             "famille": "minutage",
             "cause": "Lu au run 43317816490 : « Test timeout of 30000ms exceeded. ». Rouge à 1 passage(s) sur 3 joué(s), du 10 au 14 nov. 2026."
@@ -103,6 +111,10 @@
         "bulle-largeur-ipad-2026-11-12.spec.js › L2 · au doigt (contexte tactile) › L2 · 1180 × 820 : innerWidth faux et deux doigts « restés posés » ne bloquent ni la place ni le glisser": {
             "famille": "minutage",
             "cause": "Lu au run 43543782094 : « Test timeout of 30000ms exceeded. | Error: locator.click: Test timeout of 30000ms exceeded. | - waiting for locator('#parcours-bulle').getByRole('button', { name: 'Passer à ma grille' }) ». Rouge à 1 passage(s) sur 3 joué(s), du 10 au 14 nov. 2026."
+        },
+        "codex-1012-fichier-d-origine.spec.js › #1012 — le fichier d'origine n'est tenu qu'après une ouverture complète › (1) annulation ou refus d'avant toute écriture : l'application garde le fichier d'avant": {
+            "famille": "geometrie-rendu",
+            "cause": "Réparée dans ce lot pour l’API absente (StorageManager) : l’essai va maintenant plus loin, et s’arrête sur un clic que couvre une notification. Lu au run 43642642137 : « locator.click: Timeout 15000ms exceeded. | #codex-menu [data-action=Codex.actionEnregistrer] | div.notification-texte from #notifications-pile subtree intercepts pointer events ». Même pile que notifications-pile-1224. Rouge aux sept passages précédents pour l’API ; à ce passage pour la pile."
         },
         "codex-1184-copies-aux-archives.spec.js › #1184 — le codex et les copies aux archives › ouvrir un codex qui porte la marque l'installe, à la place de la marque locale": {
             "famille": "minutage",
@@ -123,6 +135,10 @@
         "evaluer-868-avec-ou-sans-copie.spec.js › Porte #868 · avec copie : « Évaluer » ouvre la copie de l'élève, en mode Évaluer": {
             "famille": "non-elucide",
             "cause": "Lu au run 43543782094 : « Error: expect(received).toEqual(expected) // deep equality | - Expected - 1 | + Received + 1 ». Rouge à 2 passage(s) sur 7 joué(s), du 10 au 14 nov. 2026."
+        },
+        "evaluer-868-avec-ou-sans-copie.spec.js › Porte #868 · sans copie, puis avec, puis sans : un seul verrou, une seule sous-barre, chaque fois le bon élève": {
+            "famille": "non-elucide",
+            "cause": "Lu au run 43642642137 : « expect(received).toEqual(expected) | - production: p868-2 | + production: (vide) ». L’essai voisin du même fichier (« avec copie ») est déjà ici pour la même égalité. Verte aux sept passages du 10 au 14 nov. ; rouge au huitième, run 43642642137 (cc588d6a), le premier verdict de la branche de ce lot : classée dans le lot qui l’amène."
         },
         "evaluer-un-doigt-ne-ramene-pas-1217.spec.js › #1217 · en Évaluer, un doigt parcourt la copie sans revenir en Annoter › sous Sélection, un défilement à deux doigts laisse en Évaluer, et la copie défile": {
             "famille": "geometrie-rendu",
@@ -211,6 +227,10 @@
         "parcours-3-evaluer-2026-11-09.spec.js › « Évaluer une première production », étape 8 à 820 px (l’iPad en portrait) : le menu « Cartouche de rétroaction » amené dans la vue, la bulle à côté": {
             "famille": "geometrie-rendu",
             "cause": "Lu au run 43543782094 : « Error: contour posé sur #productionCartouche | Expected: \"posé\" | Received: \"absent\" ». Rouge à 1 passage(s) sur 2 joué(s), du 10 au 14 nov. 2026."
+        },
+        "parcours-5-monter-ton-cours-2026-11-09.spec.js › « Monter ton cours » : les sept étapes, la variante ⚠, « Plus tard » et « Reprendre » à l’étape 4 (1180 px)": {
+            "famille": "non-elucide",
+            "cause": "Lu au run 43642642137 : « expect(locator).toHaveClass(expected) failed | #planif-panneau | Expected pattern: /visible/, Received string: (vide) | 13 lectures en 5000 ms ». Même erreur le même jour sur lot/essai-novice-14-nov (run 43641104331, be0d7bdf). Verte aux sept passages du 10 au 14 nov. ; rouge au huitième, run 43642642137 (cc588d6a), le premier verdict de la branche de ce lot : classée dans le lot qui l’amène."
         },
         "parcours-7-lire-ta-classe-2026-11-09.spec.js › les neuf étapes en faisant les gestes, sans grille de dépistage désignée (1180 px, sombre)": {
             "famille": "geometrie-rendu",
