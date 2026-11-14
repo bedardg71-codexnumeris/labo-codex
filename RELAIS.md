@@ -7,6 +7,24 @@
 
 ---
 
+## 13 NOV. 2026, 21 H 05 (Claude Code) : **1.246.0 POUSSÉE ET EN LIGNE, VERDICT VERT** — les deux lots du 13 nov. fusionnés
+
+Mandat : relais de Cowork, 13 nov., 18 h 50 (fusion, un seul verdict, mise en ligne). **`origin/main` = `9b2bea833`** (1.246.0, build `1113-1906`, « Sous-totaux, et une grille qui reste en place ») ; Netlify `6af7c094`, `ready` à 21 h 00 sur ce SHA. **Le travail le plus récent vit sur `main`.**
+
+- **Fusionné** : `lot/dissection-defilement-aide` (`f30980b25`, #1276) puis `lot/etiquette-sous-total` (`05801c98d`). Un seul conflit, l'attendu : le jeton de `js/materiel-dissection.js` (`h` à la fusion, `i` à la release). `BACKLOG.md` : l'en-tête des numéros pris et #1277, tous deux gardés. **Pas `lot/deux-temps-modeles`**, toujours à part.
+- **Croisement des deux lots** : essai D3 ajouté à `dissection-defilement-aide-2026-11-13.spec.js` (`6deb7b5c9`) — carte ouverte, canevas en bas, « Sous-total » posé : rien ne bouge. Break-test rouge (canevas 714 → 0).
+- **Relecture indépendante du diff fusionné** (agent en lecture seule, état d'avant cartographié) : six constats. **Un corrigé** (`00253ee8d`) : sans « Total », la somme des sous-totaux n'est le total visé que s'ils couvrent tous les critères pesés (avant : « ton total : 40 : écart » pendant qu'on étiquette les sous-totaux un à un). Les cinq autres ont leur disposition aux deux rapports du 13 nov. (`plans de travail/RAPPORT-2026-11-13-*.md`), aucun inscrit au backlog (rien de vécu).
+- **Verdict du Mac** sur `9b2bea833` (`verdict-en-morceaux.mjs`, dix morceaux, aucune veille) : 1 658 essais, 1 658 verts, 0 au second essai, 0 rouge, 68 sautés. Vitest : 924 fichiers, 11 526 essais. Le hook de push a lu le jeton à jour.
+- **Nouvelles** : titre et deux lignes de Claude Code d'après les mots du relais ; **non relus par Grégoire**.
+- **Encore dû** : les textes et la teinte de « Sous-total » à valider par Grégoire ; **deux gestes sur l'iPad** — carte ouverte, étiqueter plusieurs morceaux de suite plus bas, la grille reste en place ; prendre « Sous-total », toucher « /18 », la pastille dit si les critères donnent 18. ⚠ Si « ça remonte » revient : la relecture note que `suivreContour` (`js/parcours-moteur.js`) peut encore faire défiler la PAGE quand la carte change d'étiquette désignée (non mesuré).
+- **#1277** (« Résultat sur 80 ») : inscrit, non traité, question de didactique pour Grégoire.
+- **GitHub** : le passage WebKit Linux de la 1.245.0 (`d6e5677a`, run 43477454528) a fini ROUGE, 13 specs nouvellement rouges (parcours 2, 3, 5, 7, 9, tableau de notation, vue simple, en-tête épuré, palette compacte, polygone), Mac vert sur le même commit ; non touché. Celui de `9b2bea833` (run 43543782094) tournait à la clôture, non lu.
+
+**Complexité** (1.245.0 `d6e5677a7` → 1.246.0 `9b2bea833`) :
+- fichiers de plus de 1 000 lignes : 43 → 43 ; lignes de code : 169 390 → 169 433 (Δ +43) ;
+- au-dessus de 15 : 434 → 434 (Δ 0) ; somme au-dessus de 15 : 10 954 → 10 954 (Δ 0) ;
+- au-dessus de 30 : 77 → 77 (Δ 0) ; maximum : 130 ; fonctions : 17 312 → 17 324.
+
 ## 13 NOV. 2026, 17 H 40 (Claude Code) : **DEUX LOTS POUSSÉS, NON FUSIONNÉS** — `main` inchangé (`2a7aa59b8`, 1.245.0)
 
 Mandats : deux relais de Cowork du 13 nov. (retours terrain de Grégoire sur l'iPad, Conception › Mon matériel). **Le travail le plus récent vit sur deux branches, parties toutes deux de `2a7aa59b8`** ; la fusion revient à Grégoire, du Mac.
