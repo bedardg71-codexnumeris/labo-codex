@@ -4,7 +4,7 @@
 **Décision de Grégoire (15 h 51)** : GitHub devient le juge du verdict complet, le Mac en complément. Elle revient sur celle du 10 oct.
 **Fait** : le déclencheur, la liste Linux avec ses causes, le complément du Mac, le jugement à deux parts, les règles réécrites, les délais à l'échelle du runner.
 **Reste** : mesurer le complément sur le Mac (non lancé dans ce lot, par consigne) ; confirmer sur d'autres passages que le nuage reste vert ; `lot/essai-novice-14-nov` doit prendre `main` après la fusion de ce lot avant d'être rejugée.
-**Dernier verdict du nuage sur la branche** : voir « Les passages du jour », dernière ligne, et la PR.
+**Dernier verdict du nuage sur la branche** : **vert** sur `2c8cc7a3f` (run 43650508547, 33 min). Ce rapport est le seul commit posé après ; il ne touche rien d'observable, le verdict vaut pour lui (`jugeSur`).
 
 ## Le déclencheur
 
@@ -34,8 +34,9 @@ Reclassée sur sept passages complets de `main` (10 au 14 nov.), puis complété
 | 43642783326 | `19e8dd0f5` (ce lot + un essai rouge exprès) | 47 min, file comprise | 1 653 | 34 | 5 | rouge, **l'essai voulu est nommé** |
 | 43646117379 | `7a88938e4` (ce lot, 4 essais classés) | 31 min | 1 652 | 27 | 2 | rouge |
 | 43647118579 | `53676a101` (le même + délais × 2,5) | 36 min | 1 652 | 24 | 0 | **vert** |
+| 43650508547 | `2c8cc7a3f` (ce lot, sommet : délais × 2,5, 61 entrées) | 33 min | 1 652 | 30 | 0 | **vert** |
 
-**Constat** : la liste seule ne tarit pas la source. Chaque passage a amené 2 à 4 intermittents hors liste, jamais les mêmes (11 distincts en quatre passages), presque tous sur un délai. Le runner joue la suite 2,64 fois plus lentement que le Mac ; les délais par défaut de Playwright y valent, en temps de Mac, 11 s par essai et 1,9 s par attente. Mis à l'échelle sous la variable de la CI seulement (× 2,5, `retries` inchangé), ils ont donné le premier verdict vert du nuage depuis sa création. **Un passage est un indice, pas une preuve.**
+**Constat** : la liste seule ne tarit pas la source. Chaque passage a amené 2 à 4 intermittents hors liste, jamais les mêmes (11 distincts en quatre passages), presque tous sur un délai. Le runner joue la suite 2,64 fois plus lentement que le Mac ; les délais par défaut de Playwright y valent, en temps de Mac, 11 s par essai et 1,9 s par attente. Mis à l'échelle sous la variable de la CI seulement (× 2,5, `retries` inchangé), ils ont donné le premier verdict vert du nuage depuis sa création, puis un second sur le sommet du lot. **Deux passages sont un indice, pas une preuve**, et l'effet des délais ne se sépare pas de celui de la liste : le second vert compte 30 rouges, autant qu'avant l'échelle ; ce qui a changé, c'est qu'aucun n'est hors liste (15 des 45 intermittents ont rougi). Au sommet, le juge dit une entrée constante jouée verte (`materiel-aide-accompagnement`, l'aide « i ») : elle passe aux intermittentes au prochain lot qui touche la liste, pas ici, pour ne pas périmer le verdict.
 
 ## La comparaison avec le Mac sur `be0d7bdf1`
 
