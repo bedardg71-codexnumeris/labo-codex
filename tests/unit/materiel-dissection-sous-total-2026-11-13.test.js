@@ -83,7 +83,23 @@ describe('la lecture des tranches', () => {
             ['Sous-total : / 4', 'soustotal'], ['Critère fictif 2', 'critere'], ['/ 6', 'ponderation']]);
         expect(R.sansPlace.map((s) => [s.t, s.type, s.raison])).toEqual([['Sous-total', 'soustotal', 'aucun nombre']]);
         expect(tranches(R)).toEqual([[4, 4, true]]);
-        expect(D.bilan(R)).toMatchObject({ somme: 10, total: 4, totalOk: false });
+        // Relecture de la fusion (13 nov., soir) : un critère qui pèse hors de toute tranche, la somme des sous-totaux
+        // n'est pas un total. Avant : « ton total : 4 : écart », sans qu'aucun total n'ait été étiqueté.
+        expect(D.bilan(R)).toMatchObject({ somme: 10, total: null, jusqua: 10, totalOk: null });
+    });
+
+    it('des sous-totaux étiquetés un à un, sans « Total » : tant qu’un critère pesé reste hors tranche, aucun total visé, aucun écart', () => {
+        const lignes = [['Critère fictif 1', 'critere'], ['/ 40', 'ponderation'], ['Sous-total : / 40', 'soustotal'],
+            ['Critère fictif 2', 'critere'], ['/ 60', 'ponderation'], ['Sous-total : / 60', null]];
+        const enCours = compriseTexte(lignes);
+        expect(tranches(enCours)).toEqual([[40, 40, true]]);
+        expect(D.bilan(enCours)).toMatchObject({ somme: 100, total: null, jusqua: 100, totalOk: null });
+        // Le second sous-total étiqueté : tous les critères sont couverts, leur somme redevient le total visé.
+        lignes[5][1] = 'soustotal';
+        expect(D.bilan(compriseTexte(lignes))).toMatchObject({ somme: 100, total: 100, totalOk: true });
+        // Un critère SANS poids hors tranche ne retire pas le total (rien à additionner).
+        const sansPoids = compriseTexte([['Critère fictif 1', 'critere'], ['/ 40', 'ponderation'], ['Sous-total : / 40', 'soustotal'], ['Critère fictif 2', 'critere']]);
+        expect(D.bilan(sansPoids)).toMatchObject({ somme: 40, total: 40, totalOk: true });
     });
 
     it('une tranche dont aucun critère n’a de poids ne se compare pas (`ok` : null)', () => {

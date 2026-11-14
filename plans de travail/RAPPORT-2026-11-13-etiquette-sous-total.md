@@ -83,3 +83,19 @@ critères donnent 15,5 : écart » ; « Sous-totaux ✓ ».
 
 Sur l'iPad, dans « Étiquette ta grille », prendre « Sous-total », toucher « /18 » : la pastille dit si les critères
 au-dessus donnent bien 18.
+
+## Relecture de la fusion (13 nov. 2026, soir, Claude Code) — trois constats, trois dispositions
+
+Relecture indépendante du diff fusionné (`ce8de3943..HEAD`), en lecture seule, état d'avant cartographié.
+
+- **Corrigé (casse le parcours livré)** : sans « Total », la somme des sous-totaux devenait le total visé même quand
+  elle ne couvrait pas tous les critères. Qui étiquetait ses sous-totaux un à un lisait « Somme des pondérations : 100 ·
+  ton total : 40 : écart » à côté de « Sous-totaux ✓ », sans avoir étiqueté aucun total. `totalDuBilan` ne prend plus
+  cette somme que si aucun critère pesé n'est hors tranche (`horsTranche`). Essai neuf et essai réécrit dans
+  `tests/unit/materiel-dissection-sous-total-2026-11-13.test.js` ; break-test : correctif retiré, 2 rouges.
+  Jeton de `js/materiel-dissection-lecture.js` : `20261113b`. Supposé : c'est un contrôle de cohérence, pas un choix
+  de didactique.
+- **Refusé à l'inscription (rien de vécu), dit ici** : les tranches suivent l'ordre de LECTURE. Un sous-total dans une
+  case fusionnée à droite de sa partie, ou placé AVANT ses critères, donne un faux écart sur une grille juste.
+- **Refusé à l'inscription (rien de vécu), dit ici** : une « Pondération » posée sur le « / 40 » d'une ligne de
+  sous-total reçoit encore l'aide « si c'est un total, prends « Total » » (`totalSeul`), pas « Sous-total ».

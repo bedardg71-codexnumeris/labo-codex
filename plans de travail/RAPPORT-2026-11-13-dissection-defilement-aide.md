@@ -68,3 +68,19 @@ Source seulement. Rien n'est écrit chez les gens ; aucun brouillon ne change de
 
 Sur l'iPad, carte ouverte, descendre dans la grille et étiqueter plusieurs morceaux de suite : la grille reste où il
 l'a laissée.
+
+## Fusion et relecture (13 nov. 2026, soir, Claude Code)
+
+- **Fusion** : ce lot (`f30980b25`), puis `lot/etiquette-sous-total` (`05801c98d`). Seul conflit, attendu : le jeton de
+  `js/materiel-dissection.js` dans `index.html`, résolu en `20261113h` (jamais servi).
+- **D3, le croisement des deux lots** (`6deb7b5c9`) : carte ouverte, canevas en bas, « Sous-total » posé sur « / 180 » ;
+  ni le canevas ni la légende ne bougent. Break-test : `finSurlignage` qui redemande l'amenée, canevas 714 → 0, rouge.
+- **Relecture indépendante, trois constats sur ce lot, trois dispositions** :
+  - *assumé, déjà dit au relais* : après un collage neuf, le premier manque est le titre (aucun morceau désigné) ; la
+    demande d'amenée s'éteint sans rien amener, et un morceau désigné hors du cadre n'a ensuite ni contour ni flèche
+    tant que l'interrupteur n'est pas refait ;
+  - *refusé à l'inscription (non mesuré), remis au geste de l'iPad* : la légende défile encore quand l'étiquette
+    désignée CHANGE (voulu), et `suivreContour` (`js/parcours-moteur.js`) peut encore faire défiler la PAGE quand le
+    contour devient un bouton de la légende mal placé. Si « ça remonte » revient sur l'iPad, c'est là qu'il faut lire ;
+  - *refusé (sans conséquence pendant l'étiquetage)* : carte fermée à l'ouverture, `canevasAAmener` reste armé jusqu'au
+    premier `aide()` suivant.

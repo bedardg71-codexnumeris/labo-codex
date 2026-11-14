@@ -805,11 +805,17 @@
      * quand la somme des pondérations tombe sur le dernier, c'est lui le total visé.
      * Lot « étiquette Sous-total » (13 nov. 2026) : les « Sous-total » ne s'additionnent jamais aux « Total ». Le total
      * visé est le « Total » étiqueté ; sans lui, la somme des sous-totaux. Sans « Sous-total », rien ne change.
+     * Relecture de la fusion (13 nov. 2026, soir) : cette somme n'est un total que si les sous-totaux couvrent TOUS les
+     * critères qui pèsent. Un critère lu après le dernier « Sous-total » (une partie sans sous-total, ou des sous-totaux
+     * qu'on étiquette un à un) et la pastille disait « ton total : 18 : écart » à qui n'avait étiqueté aucun total.
      */
+    function horsTranche(R) {
+        return R.criteres.some(function (c) { return !R.sousTotaux[c.tranche] && (c.pond != null || c.pondDeduite != null); });
+    }
     function totalDuBilan(R, somme, aDesPoids) {
         var totaux = R.totaux || [], sousTotaux = R.sousTotaux || [];
         if (aDesPoids && totaux.length > 1 && Math.abs(somme - totaux[totaux.length - 1]) < 1e-9) return totaux[totaux.length - 1];
-        if (R.totalNb == null && sousTotaux.length) return sousTotaux.reduce(function (a, st) { return a + st.ecrit; }, 0);
+        if (R.totalNb == null && sousTotaux.length && !horsTranche(R)) return sousTotaux.reduce(function (a, st) { return a + st.ecrit; }, 0);
         return R.totalNb;
     }
 
