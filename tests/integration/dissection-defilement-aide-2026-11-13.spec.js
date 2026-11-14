@@ -10,6 +10,9 @@
 //        bas, trois morceaux du bas étiquetés : après chaque geste, ni le canevas ni la légende n'ont bougé (à 1 px près) ;
 //   D2 · un geste dans le canevas qui CHANGE le morceau désigné ne fait pas défiler le canevas non plus ; l'interrupteur
 //        de la carte, fermé puis rouvert (la personne agit sur la carte), l'y amène.
+//   D3 · le croisement avec `lot/etiquette-sous-total` (fusion du 13 nov.) : carte ouverte, canevas défilé vers le bas,
+//        « Sous-total » pris dans la légende et posé sur « / 180 » : le morceau la porte, la lecture le compte, et ni le
+//        canevas ni la légende n'ont bougé.
 // Break-tests : `plans de travail/RAPPORT-2026-11-13-dissection-defilement-aide.md`. Grille FICTIVE ; aucun nom réel.
 import { test, expect } from '@playwright/test';
 import { ouvrirEspaceVide, bulle } from './harness/classe-de-banc.js';
@@ -27,7 +30,10 @@ const LONGUE = '<table><tr><td colspan="3">Grille fictive longue</td></tr>'
     + Array.from({ length: N }, (x, i) => `<tr><td>Critère fictif ${i + 1}</td><td>Ce que la copie fictive ${i + 1} montre</td><td>/ ${i + 4}</td></tr>`).join('')
     + '</table>';
 
-async function ouvrir(page) {
+// La même, fermée par une rangée de sous-total (D3) ; « / 180 » n'est le texte d'aucun autre morceau.
+const LONGUE_SOUS_TOTAL = LONGUE.replace('</table>', '<tr><td colspan="2">Sous-total fictif</td><td>/ 180</td></tr></table>');
+
+async function ouvrir(page, html = LONGUE) {
     // Sous un banc, l'interrupteur arrive fermé (`navigator.webdriver`, js/materiel-aide.js) : ce banc éteint le drapeau.
     await page.addInitScript(() => {
         Object.defineProperty(Navigator.prototype, 'webdriver', { get: () => false });
@@ -41,7 +47,7 @@ async function ouvrir(page) {
         const ev = new Event('paste', { bubbles: true, cancelable: true });
         Object.defineProperty(ev, 'clipboardData', { value: { getData: (k) => (k === 'text/html' ? h : '') } });
         zone.dispatchEvent(ev);
-    }, LONGUE);
+    }, html);
     await expect(page.locator('#materiel-dissection')).toBeVisible();
 }
 
@@ -157,4 +163,25 @@ test(`D2 · ${L} × ${H} : le morceau désigné change à la suite d’un geste 
         return r.top >= c.top && r.bottom <= c.bottom;
     });
     expect(vu, '« / 3 » se voit dans le canevas').toBe(true);
+});
+
+test(`D3 · ${L} × ${H} : « Sous-total » posé en bas, carte ouverte, le canevas et la légende ne bougent pas`, async ({ page }) => {
+    test.setTimeout(180000);
+    await ouvrir(page, LONGUE_SOUS_TOTAL);
+    await etiqueterLeHaut(page);
+    await auBas(page);
+    expect((await defilements(page)).canevas, 'le canevas est défilé vers le bas').toBeGreaterThan(300);
+    await prendre(page, 'soustotal');
+    await expect(page.locator(etiquette('soustotal'))).toHaveAttribute('aria-pressed', 'true');
+    await laisserRedessiner(page);
+    const avant = await defilements(page);
+    await toucher(page, '/ 180');
+    await laisserRedessiner(page);
+    const apres = await defilements(page);
+    expect(Math.abs(apres.canevas - avant.canevas), `après « Sous-total » sur « / 180 », le canevas n’a pas bougé (${avant.canevas} → ${apres.canevas})`).toBeLessThanOrEqual(1);
+    expect(Math.abs(apres.legende - avant.legende), `après « Sous-total » sur « / 180 », la légende n’a pas bougé (${avant.legende} → ${apres.legende})`).toBeLessThanOrEqual(1);
+    // L'étiquette est bien posée (le banc n'a pas mesuré un geste sans effet) : le morceau la porte, la lecture la compte.
+    await expect(page.locator('#dissection-contenu .dissection-morceau.dis-t-soustotal')).toHaveText('/ 180');
+    expect(await page.evaluate(() => Object.values(materielDissection.etatCourant().liens).filter((t) => t === 'soustotal').length)).toBe(1);
+    await gesteContient(page, '« / 2 » est seul dans sa rangée');
 });
