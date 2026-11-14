@@ -70,11 +70,32 @@ export function motifDuComplement(identite) {
     return new RegExp(identite.split(' › ').map(echapper).join('.*'));
 }
 
+// LES DÉLAIS PAR DÉFAUT À L'ÉCHELLE DU RUNNER — 14 novembre 2026.
+// Le runner Linux de GitHub joue la suite 2,64 fois plus lentement que le Mac (292 min
+// de suite cumulée contre 110, même commit 9b2bea83, run 43543782094). Les délais par
+// défaut de Playwright (30 s par essai, 5 s par attente d'`expect`) y valent donc, en
+// temps de Mac, 11 s et 1,9 s : ce jour-là, quatre verdicts de suite ont rougi sur 2 à
+// 4 essais intermittents, jamais les mêmes (11 distincts), presque tous sur un délai.
+// ⮕ SOUS LA VARIABLE DE LA CI SEULEMENT (PW_EXCLURE_WEBKIT_LINUX=1), ces deux délais
+//   sont multipliés par 2,5. Sur le Mac, rien ne change : 30 s et 5 s.
+// ⚠ Ce n'est PAS `retries` : un essai n'a pas plus d'essais, il a le même temps
+//   rapporté à sa machine. Un délai écrit dans une spec ou un harnais (`timeout: 5000`,
+//   `setDefaultTimeout`) n'est pas touché.
+// ⚠ MESURÉ UNE FOIS : run 43647118579 (53676a10), même code sans cette échelle rouge à
+//   2 et 4 essais hors liste (runs 43646117379, 43642642137) ; avec elle, 0 hors liste,
+//   24 rouges au lieu de 27 à 30, morceau le plus long 27 min au lieu de 31. Un passage
+//   est un indice, pas une preuve : si les verdicts suivants rougissent encore sur des
+//   intermittents neufs, le dire, et ne pas monter ce chiffre en boucle.
+export const ECHELLE_DELAIS_LINUX = 2.5;
+const echelle = process.env.PW_EXCLURE_WEBKIT_LINUX === '1' ? ECHELLE_DELAIS_LINUX : 1;
+
 export default defineConfig({
     testDir: './integration',
     testMatch: '**/*.spec.js',
     grepInvert: process.env.PW_EXCLURE_WEBKIT_LINUX === '1' ? MOTIFS_EXCLUS_WEBKIT_LINUX : undefined,
     grep: process.env.PW_COMPLEMENT_MAC === '1' ? listeDuComplement().map(motifDuComplement) : undefined,
+    timeout: 30000 * echelle,
+    expect: { timeout: 5000 * echelle },
     fullyParallel: false,
     // Un seul worker : tous les specs ouvrent le MÊME index.html en file:// et
     // partagent donc le localStorage de l'origine file://. Plusieurs workers

@@ -24,6 +24,9 @@ import { tranche } from './_helpers/tranche.js';
 //      joué un autre (champ `branche`).
 //   E. LE DÉCLENCHEUR juge une branche avant sa fusion, à la demande.
 //
+//   F. LES DÉLAIS PAR DÉFAUT sont à l'échelle du runner sous la variable de la CI, et
+//      là seulement ; `retries` ne bouge pas.
+//
 // BREAK-TESTS (faits le 14 nov.) — la cause d'une entrée retirée du fichier réel →
 // A.a rouge ; `parts.nuage === 0 &&` retiré de jugerLeJeton → B.c rouge ; le filtre
 // MARQUE_AUTRE_REFERENCE retiré de lireLesRuns → D.b rouge ; le `break` de
@@ -260,6 +263,21 @@ describe('D bis — le report : un commit sans rien d’observable garde le verd
     it('D.f le jeton dit sur quel commit le verdict a été rendu, quand ce n’est pas celui qui part', () => {
         expect(jetonAvecNuage({}, { sha: SHA, lecture: { code: 0, run: 7, url: 'u', jugeSur: AUTRE }, luLe: 'x' }).nuage).toEqual({ sha: SHA, code: 0, run: 7, url: 'u', luLe: 'x', jugeSur: AUTRE });
         expect(jetonAvecNuage({}, { sha: SHA, lecture: { code: 0, run: 7, url: 'u', jugeSur: SHA }, luLe: 'x' }).nuage.jugeSur).toBeUndefined();
+    });
+});
+
+describe('F — les délais par défaut à l’échelle du runner, sous la variable de la CI seulement', () => {
+    const charger = (env) => {
+        const r = spawnSync('node', ['--input-type=module', '-e', "const c = (await import('./playwright.config.js')).default; console.log(JSON.stringify({ timeout: c.timeout, expect: c.expect.timeout, retries: c.retries }))"], { cwd: path.join(racine, 'tests'), encoding: 'utf8', env: { ...process.env, PW_EXCLURE_WEBKIT_LINUX: '', PW_COMPLEMENT_MAC: '', ...env } });
+        expect(r.status, r.stderr).toBe(0);
+        return JSON.parse(r.stdout);
+    };
+    it('F.a sur le Mac : 30 s par essai, 5 s par attente — rien ne change', () => {
+        expect(charger({})).toEqual({ timeout: 30000, expect: 5000, retries: 1 });
+    });
+    it('F.b sous la variable de la CI : les deux délais × 2,5, et pas un essai de reprise de plus', () => {
+        expect(cfg.ECHELLE_DELAIS_LINUX).toBe(2.5);
+        expect(charger({ PW_EXCLURE_WEBKIT_LINUX: '1' })).toEqual({ timeout: 75000, expect: 12500, retries: 1 });
     });
 });
 

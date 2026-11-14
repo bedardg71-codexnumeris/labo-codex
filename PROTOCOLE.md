@@ -495,7 +495,7 @@ troisième catégorie ; elle ne lui retire pas l'arbitrage.
 ## Règle 8 — ce que le Mac joue sous Playwright ne se prend pas à deux outils ouverts (12 septembre 2026)
 
 ⮕ Le geste (quand le verdict se lance, et quand il attend le lendemain) est déplacé le 13 septembre 2026 vers le skill `fin-de-session-labo-codex`, §4.6.2.
-**Reste ici, parce que c'est de la coordination : c'est GRÉGOIRE qui ferme Cowork, pas Cowork lui-même.** Claude Code le lui dit avant de lancer (« ferme Cowork, je lance le complément »), et Grégoire rouvre Cowork après. Depuis le 14 nov. 2026, ce que le Mac joue est le complément (règle 7 : 61 essais ce jour-là, 7,9 min d'après la passe du 13 nov., pas encore mesuré seul) ; la règle s'y applique tant qu'une mesure n'a pas dit le contraire.
+**Reste ici, parce que c'est de la coordination : c'est GRÉGOIRE qui ferme Cowork, pas Cowork lui-même.** Claude Code le lui dit avant de lancer (« ferme Cowork, je lance le complément »), et Grégoire rouvre Cowork après. Depuis le 14 nov. 2026, ce que le Mac joue est le complément (règle 7 : 67 essais ce jour-là, 9,3 min d'après la passe du 13 nov., pas encore mesuré seul) ; la règle s'y applique tant qu'une mesure n'a pas dit le contraire.
 
 ## Règle 9 — un seul compteur pour les fiches et les bugs, et le lien entre les deux (12 septembre 2026)
 

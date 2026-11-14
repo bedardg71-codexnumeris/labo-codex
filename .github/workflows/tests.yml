@@ -280,6 +280,15 @@
 #         (scripts/verdict-en-morceaux.mjs) ; plus rien ne l'exige.
 #      e) INCHANGÉ : le push sur `main` qui touche un chemin OBSERVABLE est rejugé
 #         ici (le crochet pré-push avertit sans bloquer : c'est le dernier filet).
+#      f) LA LISTE SEULE NE TARIT PAS LA SOURCE (mesuré ce jour) : quatre verdicts de
+#         suite (runs 43641104331, 43642642137, 43642783326, 43646117379) ont rougi
+#         sur 2 à 4 intermittents hors liste, jamais les mêmes, 11 distincts. Les
+#         délais PAR DÉFAUT de Playwright sont donc mis à l'échelle de ce runner, 2,64
+#         fois plus lent que le Mac : × 2,5 sous PW_EXCLURE_WEBKIT_LINUX
+#         (tests/playwright.config.js, ECHELLE_DELAIS_LINUX), `retries` inchangé.
+#         Premier verdict VERT du nuage avec elle : run 43647118579 (53676a10), 1 652
+#         essais, 24 rouges tous dans la liste, morceau le plus long 27 min. ⚠ Un
+#         passage : un indice, pas une preuve.
 #
 # Deux leviers, dans l'ordre de poids :
 #   1. `paths-ignore` — un commit qui ne touche que de la doc ne déclenche plus
