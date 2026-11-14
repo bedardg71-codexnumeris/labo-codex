@@ -364,8 +364,9 @@ test('relecture 5 · une ligne de séance régénérée ne garde pas les valeurs
         window.mettreAJourSeancesHoraireV2();
         return lire();
     });
-    // 14 nov. 2026 : les périodes se proposent d'après les heures du défaut (8 h à 10 h : 2), pas le 3 hérité.
-    expect(r[0]).toEqual({ debut: '08:00', fin: '10:00', periodes: '2', local: '' });
+    // (14 nov. 2026 : dans un NOUVEL horaire, les périodes naissent proposées ; dans un horaire enregistré, comme
+    // ici, rien ne se propose : le champ régénéré est vide, et la sauvegarde le refuse.)
+    expect(r[0]).toEqual({ debut: '08:00', fin: '10:00', periodes: '', local: '' });
 });
 
 test('placement : « Fermer » et « Créer le cours » à 360, 768, 1024 et 1180 px, dans l\'écran et hors du témoin', async ({ page }) => {

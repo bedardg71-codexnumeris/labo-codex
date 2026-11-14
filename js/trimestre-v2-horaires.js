@@ -741,9 +741,8 @@ function editerHoraireV2(horaire) {
             if (inputPeriodes) {
                 const reprises = s.nombrePeriodes || horaire.periodesParSeance || '';
                 inputPeriodes.value = reprises > 0 ? String(reprises) : '';
-                // 14 nov. 2026 — STOCK : le chiffre d'un horaire enregistré fait foi. Il perd la
-                // marque « proposé », donc changer ses heures ne le recalcule pas en silence
-                // (c'est le dénominateur de l'assiduité). Seul un champ resté vide se propose.
+                // 14 nov. 2026 — STOCK : le chiffre d'un horaire enregistré fait foi ; rien ne s'y propose
+                // (`_proposerPeriodesSeance`), ni au changement d'heure, ni sur une séance ajoutée.
                 _seancesAuxPeriodesProposees.delete(i);
             }
             // Local par séance ou fallback vers local global (migration)
@@ -896,10 +895,10 @@ function sauvegarderHoraireV2() {
             return _refuserHoraireV2(`Séance ${i + 1} : heure de fin manquante. Elle situe la séance dans la journée.`, geste);
         }
 
-        // #540 lot E1 : le nombre de périodes est SAISI, jamais déduit des heures — une
-        // période comprend sa pause, et la convention varie d'un cégep à l'autre. C'est
-        // ce nombre qui fait le dénominateur de l'assiduité : on le refuse absent plutôt
-        // que d'en proposer un.
+        // #540 lot E1 : c'est le nombre du CHAMP qui fait foi, et il fait le dénominateur de
+        // l'assiduité : absent, on le refuse. (14 nov. 2026 : dans un NOUVEL horaire, le champ
+        // naît proposé d'après les heures, sous les yeux, corrigeable ; jamais dans un horaire
+        // enregistré.)
         const nombrePeriodes = parseInt(document.getElementById(`v2-hor-seance-${i}-periodes`)?.value, 10);
         if (!(nombrePeriodes > 0)) {
             return _refuserHoraireV2(`Séance ${i + 1} : nombre de périodes manquant. ` +
@@ -1183,6 +1182,11 @@ const _seancesAuxPeriodesProposees = new Set();
  * @returns {boolean} true si le champ a été écrit
  */
 function _proposerPeriodesSeance(i) {
+    // ⚠ STOCK (relecture croisée du 14 nov. 2026) : JAMAIS dans un horaire enregistré. Ses champs s'écrivent seuls au
+    // changement : une proposition y deviendrait une écriture que personne n'a regardée (une séance ajoutée à 2
+    // périodes par défaut, un champ resté vide depuis avant #540 lot E1, rempli au premier changement d'heure), et ce
+    // nombre est le dénominateur de l'assiduité. Là, un champ vide reste vide, et la sauvegarde le refuse et le dit.
+    if (horaireEnEditionId) return false;
     const champ = document.getElementById(`v2-hor-seance-${i}-periodes`);
     if (!champ) return false;
     const libre = String(champ.value || '') === '' || _seancesAuxPeriodesProposees.has(i);

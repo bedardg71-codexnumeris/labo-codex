@@ -4536,8 +4536,9 @@ p.apercu-algo-si { margin: 0; display: flex; flex-wrap: wrap; align-items: basel
 }
 
 /* 14 nov. 2026 — un champ que l'application remplit seule (le nom du trimestre) : il se lit,
-   il ne se saisit pas. Bordure en tirets et fond de la page : il ne ressemble pas à une case à remplir. */
-.controle-form[readonly] {
+   il ne se saisit pas. Bordure en tirets et fond de la page : il ne ressemble pas à une case à remplir. Ce champ
+   seulement : d'autres champs en lecture seule (la fiche d'une production) gardent leur dessin. */
+#v2-nomTrimestre[readonly] {
     background: transparent;
     border-style: dashed;
     cursor: default;

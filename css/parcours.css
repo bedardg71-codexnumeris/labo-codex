@@ -248,6 +248,8 @@ body.mode-clair {
 .parcours-bulle-ligne::before { content: '\2013'; position: absolute; left: 0.15em; top: 0; color: var(--texte-secondaire); }
 .parcours-bulle-ligne.est-faite > .parcours-bulle-ligne-texte { color: var(--texte-secondaire); }
 .parcours-bulle-ligne.est-faite::before { content: '\2713'; left: 0; color: var(--vert-leger); }
+/* Le crochet est pour l'œil : le lecteur d'écran entend « (fait) », une seule fois. */
+@supports (content: 'x' / '') { .parcours-bulle-ligne.est-faite::before { content: '\2713' / ''; } .parcours-bulle-ligne::before { content: '\2013' / ''; } }
 .parcours-bulle-ligne--geste > .parcours-bulle-ligne-texte { font-weight: 600; color: var(--parcours-geste); }
 .parcours-bulle-ligne--geste::before { color: var(--parcours-geste); }
 

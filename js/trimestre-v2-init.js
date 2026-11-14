@@ -200,7 +200,8 @@ function _trimestreActifDuRegistre() {
 function trimestreEnCreationSaisi() {
     if (!_ficheEnCreation()) return false;
     const valeur = (id) => (document.getElementById(id)?.value || '').trim();
-    return ['v2-nomTrimestre', 'v2-sessionTrimestre', 'v2-anneeTrimestre', 'v2-debutTrimestre',
+    // (Le nom n'y est plus : il se crée de la session et de l'année, il n'est pas une saisie.)
+    return ['v2-sessionTrimestre', 'v2-anneeTrimestre', 'v2-debutTrimestre',
         'v2-finCours', 'v2-finTrimestre'].some(id => valeur(id));
 }
 if (window.uiDialogues) window.uiDialogues.declarerFicheEnCreation('trimestre', trimestreEnCreationSaisi);

@@ -17,7 +17,7 @@ const indexHtml = 'file://' + path.join(path.resolve(__dirname, '..', '..'), 'in
 //       bulle bouge ; les sous-lignes une à une, la mère quand toutes le sont ; une explication ne
 //       se grise pas ; la consigne est la dernière ligne ; la flèche d'un champ part avec sa ligne ;
 //   (b) le compteur « n sur N » : un bouton (44 px), la liste des étapes, une étape faite se revoit
-//       EN VISITE (« Continuer », rien n'avance seul, le rang du parcours ne recule pas), une étape
+//       EN VISITE (« Continuer », rien n'avance seul, l'étape la plus loin atteinte reste connue), une étape
 //       au-delà ne se touche pas ;
 //   (c) « Tu es dans « X », à l'onglet « Y ». », le halo sur les deux entrées du menu, la page en haut ;
 //   (d) une bulle qui présente une page sans rien y désigner se range dans son coin, pas au centre ;
@@ -207,7 +207,8 @@ test('(b) le compteur : la liste des étapes, une étape faite revue en visite, 
     expect(await page.evaluate(() => window.ParcoursMoteur.enVisite())).toBe(true);
     await expect(page.locator('#parcours-bulle .parcours-bulle-boutons .btn')).toHaveText(['Continuer']);
     expect((await lignes(page)).filter((x) => x.faite).length, 'ce qui se fait est montré fait').toBe(5);
-    expect(await page.evaluate(() => window.__banc.surEtape), 'une étape revue ne déplace pas le parcours').toEqual([0, 1]);
+    // `surEtape` est appelé à chaque étape, revue ou non : les définitions y rangent ce que l'étape quittée a posé.
+    expect(await page.evaluate(() => window.__banc.surEtape)).toEqual([0, 1, 0]);
     expect(await page.evaluate(() => window.ParcoursMoteur.plusLoin())).toBe(1);
     await expect(page.locator('#parcours-bulle .parcours-bulle-rang')).toHaveText('1 sur 3');
 

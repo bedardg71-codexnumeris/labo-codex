@@ -1365,7 +1365,7 @@ window.changerNatureCoursV2 = changerNatureCoursV2;
 // la présence de l'appel.
 window._normaliserPonderation = _normaliserPonderation;
 
-// #540 lot B — le repère des heures et sa source de semaines.
+// #540 lot B — le repère des heures.
 window.majRepereHeuresCours = majRepereHeuresCours;
 window._parserPonderation = _parserPonderation;
 

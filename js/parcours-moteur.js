@@ -764,6 +764,7 @@
 
     function basculerRepli() {
         if (!etat || !etat.telephone) return;
+        if (etapesOuvertes()) basculerEtapes(false);   // repliée, la liste ne se voit plus : son état le dit aussi
         etat.replie = !etat.replie;
         etat.reglerJusqua = Date.now() + REGLAGE_MS;
         appliquerRepli();
@@ -882,7 +883,7 @@
         if (!etat || k > plusLoin()) return;
         if (k === etat.i) { basculerEtapes(false); return; }
         etat.visite = true;
-        allerA(k, { revoir: true });
+        allerA(k);
     }
 
     // ---------- Le rendu des lignes ----------
@@ -896,7 +897,6 @@
         boite.textContent = '';
         etat.lignes = [];
         var lieu = aUnLieu(etape) ? lireLieu() : null;
-        etat.lieu = lieu;
         var lignes = etape.lignes ? lignesDeLEtape(etape) : [];
         // LA FIN : la dernière bulle d'un parcours dit où revoir une étape, juste avant sa consigne.
         if (!etat.def.sansRang && etat.i === etat.def.etapes.length - 1) {
@@ -959,7 +959,20 @@
             l.dit.textContent = faite ? ' (fait)' : '';
             if (faite && !silence) { etat.elements.annonce.textContent = 'Fait : ' + l.def.texte; vientDEtreFaite = true; }
         });
-        if (vientDEtreFaite && !sousLeZoom()) amenerLeGesteSuivant();
+        if (vientDEtreFaite) etat.gesteAAmener = true;
+        // Le geste suivant vient à l'écran quand la personne a fini de taper, pas à sa première lettre (relecture
+        // croisée du 14 nov. 2026 : une ligne est faite dès que son champ n'est plus vide, et la page défilait sous
+        // les doigts, clavier ouvert).
+        if (etat.gesteAAmener && !sousLeZoom() && !saisieEnCours()) { etat.gesteAAmener = false; amenerLeGesteSuivant(); }
+    }
+
+    /** La personne tape dans un champ de la page (le curseur y est encore). */
+    function saisieEnCours() {
+        var a = document.activeElement;
+        if (!a || !a.matches || etat.elements.bulle.contains(a)) return false;
+        if (a.tagName === 'TEXTAREA') return true;
+        // Les champs où l'on TAPE : pas une date, une heure, une liste, une case (un geste les règle d'un coup).
+        return a.tagName === 'INPUT' && ['text', 'number', 'email', 'search', 'tel', 'url', 'password', ''].indexOf(a.getAttribute('type') || '') !== -1;
     }
 
     /**
@@ -2039,14 +2052,6 @@
     }
 
     /**
-     * Une étape REVUE (choisie dans la liste, ou suivie en visite) ne déplace pas le parcours : le rang gardé par la
-     * définition (« Reprendre ») reste le plus loin atteint.
-     */
-    function estRevue(i, mode) {
-        return !!(mode && mode.revoir) || (etat.visite && i < etat.plusLoin);
-    }
-
-    /**
      * EN VISITE : l'état de l'étape est déjà atteint, elle se montre sans rien attendre. Une étape qui reste à faire
      * met fin à la visite : le parcours reprend son cours.
      */
@@ -2074,13 +2079,17 @@
         retenirContourDOuverture(etape);
     }
 
-    async function allerA(i, mode) {
+    async function allerA(i) {
         if (!etat) return;
         if (i >= etat.def.etapes.length) { fermer(); return; }
         etat.enTransition = true;
         etat.plusLoin = Math.max(plusLoin(), i);
         etat.i = i;
-        if (etat.opts.surEtape && !estRevue(i, mode)) etat.opts.surEtape(i);
+        // `surEtape` est appelé à CHAQUE étape, revue ou non (relecture croisée du 14 nov. 2026) : les définitions y
+        // rangent ce que l'étape quittée a posé (extras, classes de la page, chemin), pas seulement le rang. Le rang
+        // noté suit donc l'étape montrée, comme avant ce lot ; une définition rejouée en visite garde le sien elle-même
+        // (« Mettre ta classe en place »).
+        if (etat.opts.surEtape) etat.opts.surEtape(i);
         var etape = etapeCourante();
         etat.elements.contour.hidden = true;
         // L'étape suivante reprend le placement automatique ; ses flèches et sa section actuelle seront les siennes.
@@ -2128,7 +2137,7 @@
                  telephone: surTelephone(), replie: false, reglerJusqua: 0, texte: '', pages: [], page: 0, largeurPages: 0,
                  deplacee: null, glisse: null, vus: null, sectionActuelle: null, doigts: 0, hauteurGardee: 0, pageDite: null,
                  contourSuivi: '', complement: [], signatureComplement: '[]', pageComplement: -1,
-                 lignes: [], lieu: null, entreesDuLieu: [], boutons: [], visite: !!(opts && opts.visite), enVisite: false,
+                 lignes: [], gesteAAmener: false, entreesDuLieu: [], boutons: [], visite: !!(opts && opts.visite), enVisite: false,
                  plusLoin: 0, toutFait: false };
         document.body.classList.add('parcours-actif');
         signaler();
@@ -2204,7 +2213,6 @@
         revoir: revoir,
         enVisite: function () { return !!(etat && etat.enVisite); },
         plusLoin: function () { return etat ? plusLoin() : null; },
-        lireLieu: lireLieu,
         // Utilitaires pour les définitions de parcours.
         visible: visible,
         seVoit: seVoit,

@@ -154,6 +154,36 @@ describe('1c · STOCK — le chiffre d\'un horaire enregistré fait foi', () => 
         expect(e.stores.a2026_horaires[0].seances[0]).toMatchObject({ heureFin: '12:00', nombrePeriodes: 3 });
     });
 
+    // Relecture croisée du 14 nov. 2026 : dans un horaire enregistré, RIEN ne se propose. Ses champs s'écrivent seuls
+    // au changement : une proposition y deviendrait une écriture que personne n'a regardée.
+    it('une séance AJOUTÉE à un horaire enregistré naît sans périodes ; la sauvegarde la refuse, rien n\'est écrit', () => {
+        const e = monter({ nbSeances: '2' });
+        e.ids['v2-hor-nbSeances'].value = '1';
+        e.win.changerHoraireSelectionneV2('HOR_1');
+        // Comme la page : la seconde ligne n'existe pas avant que le nombre de séances passe à 2 ; elle naît quand la
+        // liste est régénérée (`innerHTML` du conteneur).
+        const neuve = {};
+        for (const c of ['jour', 'debut', 'fin', 'periodes', 'local']) { neuve[c] = e.ids[`v2-hor-seance-1-${c}`]; delete e.ids[`v2-hor-seance-1-${c}`]; }
+        Object.defineProperty(e.ids['v2-hor-seances'], 'innerHTML', { set() { for (const c of Object.keys(neuve)) e.ids[`v2-hor-seance-1-${c}`] = neuve[c]; }, get() { return ''; } });
+        e.ids['v2-hor-nbSeances'].value = '2';
+        e.win.changerFormatSeancesHoraireV2();
+        expect(e.champ(0, 'periodes').value).toBe('3');
+        expect(e.champ(1, 'periodes').value, 'la séance ajoutée : 8 h à 10 h, et aucun chiffre proposé').toBe('');
+        expect(e.sauvegarder).not.toHaveBeenCalled();
+        expect(e.stores.a2026_horaires[0].seances).toHaveLength(1);
+    });
+
+    it('un champ resté vide dans le stock (un horaire d\'avant #540 lot E1) ne se remplit pas au changement d\'heure', () => {
+        const ancien = { id: 'HOR_2', groupeAssocie: '00001', nom: 'Ancien fictif', seances: [{ jour: 'Lundi', heureDebut: '08:00', heureFin: '10:00', local: '' }] };
+        const e = monter({ horaires: [ancien] });
+        e.win.changerHoraireSelectionneV2('HOR_2');
+        expect(e.champ(0, 'periodes').value).toBe('');
+        e.champ(0, 'fin').value = '12:00';
+        expect(e.win.changerHeuresSeanceHoraireV2(0)).toBe(false);
+        expect(e.champ(0, 'periodes').value).toBe('');
+        expect(e.sauvegarder).not.toHaveBeenCalled();
+    });
+
     it('rouvrir l\'horaire n\'écrit rien', () => {
         const e = monter();
         e.win.changerHoraireSelectionneV2('HOR_1');
