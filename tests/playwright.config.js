@@ -1,4 +1,5 @@
 import { defineConfig, devices } from '@playwright/test';
+import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -42,10 +43,38 @@ export const MOTIFS_EXCLUS_WEBKIT_LINUX = EXCLUS_WEBKIT_LINUX.map(
     (e) => new RegExp(echapper(e.fichier) + '.*' + echapper(e.titre))
 );
 
+// LE COMPLÉMENT DU MAC — 14 novembre 2026 (le nuage juge le verdict complet).
+// Ce que Linux ne juge pas se rejoue sous le WebKit de macOS, et seulement cela :
+// les deux listes de scripts/playwright-baseline-linux.json (rouges constants et
+// intermittents sous Linux) et les exclus ci-dessus. Une seule source pour les
+// trois lecteurs : cette configuration (PW_COMPLEMENT_MAC=1, posée par
+// scripts/complement-mac.mjs et par lui seul), le script, et la sentinelle
+// tests/unit/sentinelle-verdict-nuage-2026-11-14.test.js.
+const BASELINE_LINUX = path.join(__dirname, '..', 'scripts', 'playwright-baseline-linux.json');
+
+/** Les identités (« fichier › bloc › titre ») de ce que Linux ne juge pas. */
+export function listeDuComplement(baseline = JSON.parse(readFileSync(BASELINE_LINUX, 'utf8'))) {
+    return [
+        ...(baseline.echecsConnus ?? []),
+        ...(baseline.echecsIntermittents ?? []),
+        ...EXCLUS_WEBKIT_LINUX.map((e) => `${e.fichier} › ${e.titre}`)
+    ];
+}
+
+/**
+ * Le motif d'une identité : ses segments, dans l'ordre. Il sert deux fois : à
+ * Playwright (`grep`, qui lit « fichier bloc titre » séparés d'espaces) et au
+ * complément, pour retrouver l'essai dans le rapport (« fichier › bloc › titre »).
+ */
+export function motifDuComplement(identite) {
+    return new RegExp(identite.split(' › ').map(echapper).join('.*'));
+}
+
 export default defineConfig({
     testDir: './integration',
     testMatch: '**/*.spec.js',
     grepInvert: process.env.PW_EXCLURE_WEBKIT_LINUX === '1' ? MOTIFS_EXCLUS_WEBKIT_LINUX : undefined,
+    grep: process.env.PW_COMPLEMENT_MAC === '1' ? listeDuComplement().map(motifDuComplement) : undefined,
     fullyParallel: false,
     // Un seul worker : tous les specs ouvrent le MÊME index.html en file:// et
     // partagent donc le localStorage de l'origine file://. Plusieurs workers

@@ -15,19 +15,27 @@
 # by remote host », suivi du verdict — juste, vert, et arrivé trop tard. Le
 # push échouait alors que rien n'était cassé, ce qui pousse au --no-verify
 # systématique, c'est-à-dire à la perte de la garde entière.
-# La suite tourne désormais EN AMONT, via scripts/pousser.sh, et y dépose son
-# verdict ; il ne reste ici qu'une lecture instantanée. Ce hook ne dépasse plus
-# la durée de Vitest, une trentaine de secondes.
+# Le jugement se rend désormais EN AMONT et dépose son verdict ; il ne reste ici
+# qu'une lecture instantanée, sans réseau. Ce hook ne dépasse plus la durée de
+# Vitest, une trentaine de secondes.
+#
+# ⚠ LE JUGE A CHANGÉ LE 14 NOV. 2026 (décision de Grégoire, qui revient sur celle
+# du 10 oct.). Le jugement d'un commit = le verdict du NUAGE vert pour ce SHA
+# (GitHub, 20 machines Linux ; relevé par scripts/verdict-nuage.mjs) + le
+# COMPLÉMENT du Mac vert pour ce SHA (scripts/complement-mac.mjs : ce que Linux ne
+# juge pas, quelques minutes). Le verdict complet du Mac
+# (scripts/verdict-en-morceaux.mjs) reste accepté à lui seul ; plus rien ne l'exige.
+# scripts/lire-verdict.mjs lit les trois dans le même jeton.
 #
 # Trois conditions tenues, parce qu'un hook inapplicable se contourne au lieu
 # de servir :
 #   1. le verdict n'est exigé QUE si le push touche du code observable au
 #      navigateur (motif partagé : scripts/lot-observable.sh) — un push
 #      documentaire ne demande rien ;
-#   2. le jugement reste celui de `scripts/playwright-baseline.json`, le cliché
-#      de la dette connue de #456 : seule une rougeur NOUVELLE bloque ;
-#   3. il passe (fail-open) là où WebKit n'existe pas — tous les conteneurs.
-#      Le Mac de Grégoire est le seul poste capable de rendre ce verdict.
+#   2. seule une rougeur NOUVELLE bloque : hors de scripts/playwright-baseline-linux.json
+#      pour le nuage, hors de scripts/playwright-baseline.json pour le Mac ;
+#   3. il passe (fail-open) là où rien n'a été jugé : une branche de lot se pousse
+#      AVANT son verdict — c'est poussée que GitHub la juge.
 #
 # Pré-requis : `tests/node_modules/` installé. Si absent, le hook le
 # détecte et passe (fail-open) — un développeur qui n'a pas installé
@@ -154,9 +162,9 @@ fi
 node "$REPO_ROOT/scripts/lire-verdict.mjs" "$SHA_POUSSE"
 CODE_PW=$?
 
-# 0 = verdict vert, rendu sur CE commit.
+# 0 = jugement vert, rendu sur CE commit (nuage + complément, ou verdict complet du Mac).
 if [ $CODE_PW -eq 0 ]; then
-    printf "${VERT}✓ Sentinelle Playwright : verdict vert à jour pour ce commit.${RAZ}\n"
+    printf "${VERT}✓ Sentinelle Playwright : jugement vert à jour pour ce commit.${RAZ}\n"
     # #685, 1er sept. 2026 — un vert RATTRAPÉ au second essai ne doit pas
     # ressembler à un vert franc. Le jeton porte désormais la liste ; sans cette
     # ligne, elle n'existerait que dans le stderr d'un run que personne ne relit.
@@ -170,8 +178,8 @@ fi
 
 # 1 = rougeur NOUVELLE, la seule qui bloque au fond.
 if [ $CODE_PW -eq 1 ]; then
-    printf "\n${ROUGE}✗ Sentinelle Playwright : rougeur NOUVELLE au dernier passage — push bloqué.${RAZ}\n"
-    printf "  Relance pour le détail : ${JAUNE}node scripts/verifier-playwright.mjs${RAZ}\n"
+    printf "\n${ROUGE}✗ Sentinelle Playwright : rougeur NOUVELLE au dernier jugement de ce commit — push bloqué.${RAZ}\n"
+    printf "  Le détail : ${JAUNE}node scripts/verdict-nuage.mjs${RAZ} (le nuage), ${JAUNE}node scripts/complement-mac.mjs${RAZ} (le Mac)\n"
     exit 1
 fi
 
@@ -184,8 +192,9 @@ if [ $CODE_PW -eq 2 ]; then
     exit 0
 fi
 
-# 3 = aucun verdict à jour. Le lot touche du code observable au navigateur et
-# personne n'a jugé CE commit.
+# 3 = jugement absent ou incomplet. Le lot touche du code observable au
+# navigateur et CE commit n'a pas ses deux parts vertes (lire-verdict.mjs vient de
+# dire laquelle manque, s'il en a une).
 #
 # ⚠⚠ ON AVERTIT, ON NE BLOQUE PAS — et c'est une correction du 26 août 2026,
 # le jour même où ce mécanisme est né. La première version refusait. Elle a
@@ -194,16 +203,18 @@ fi
 # l'outil où il se produit. C'est mot pour mot le « hook inapplicable » contre
 # lequel ce fichier met en garde depuis août — il s'était mis à le devenir.
 #
-# Ce que ce fail-open ne perd pas : la CI (.github/workflows/tests.yml) lance
-# Vitest ET Playwright WebKit à CHAQUE push. Le verdict existe donc de toute
-# façon, quelques minutes plus tard. Ce que le hook garde, c'est le refus d'un
-# push dont on SAIT déjà que WebKit est rouge (code 1 ci-dessus) — le cas où
-# l'on pousserait une régression connue.
-printf "\n${JAUNE}⚠ Sentinelle Playwright : aucun verdict local pour ce commit.${RAZ}\n"
-printf "  Ce lot touche du code observable au navigateur ; WebKit n'a rien dit dessus ICI.\n"
-printf "  ${JAUNE}Push laissé passer — la CI le jugera. Pour juger avant, au terminal :${RAZ}\n\n"
-printf "      ${VERT}cd %s && scripts/pousser.sh${RAZ}\n\n" "$REPO_ROOT"
-printf "  (ou ${VERT}node scripts/verifier-playwright.mjs${RAZ} pour juger seulement, ~4 min)\n"
-printf "  ${JAUNE}Ne lance PAS la suite depuis ce hook : la connexion au serveur est\n"
+# Ce que ce fail-open ne perd pas : une branche de lot DOIT partir avant d'être
+# jugée (GitHub juge ce qu'il a reçu), et un push sur `main` qui touche du code
+# observable est rejugé par la CI (.github/workflows/tests.yml). Ce que le hook
+# garde, c'est le refus d'un push dont on SAIT déjà qu'il est rouge (code 1
+# ci-dessus) — le cas où l'on pousserait une régression connue.
+printf "\n${JAUNE}⚠ Sentinelle Playwright : ce commit n'a pas encore son jugement complet.${RAZ}\n"
+printf "  Ce lot touche du code observable au navigateur. Push laissé passer.\n"
+printf "  ${JAUNE}Une branche de lot se juge une fois poussée ; avant de fusionner dans main :${RAZ}\n\n"
+printf "      ${VERT}node scripts/verdict-nuage.mjs --lancer${RAZ}   le verdict du nuage (une demi-heure, Mac libre)\n"
+printf "        (du téléphone : application GitHub ▸ Actions ▸ Tests ▸ Run workflow ▸ la branche)\n"
+printf "      ${VERT}node scripts/complement-mac.mjs${RAZ}          ce que Linux ne juge pas (quelques minutes)\n"
+printf "      ${VERT}cd %s && scripts/pousser.sh${RAZ}   sur main : relève les deux, puis pousse\n\n" "$REPO_ROOT"
+printf "  ${JAUNE}Ne lance PAS de suite depuis ce hook : la connexion au serveur est\n"
 printf "  déjà ouverte, et six minutes de silence la font fermer (#533).${RAZ}\n"
 exit 0

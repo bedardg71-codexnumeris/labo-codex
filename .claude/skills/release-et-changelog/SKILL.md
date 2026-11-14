@@ -128,10 +128,13 @@ sur cette machine, et six minutes de silence ferment la connexion au serveur
 (#533). Corrigé ici le 2 septembre 2026 ; ce skill disait encore `npm test`.
 
 ⚠ **« Push réussi » ne signifie pas « suite complète verte ».** Le hook pre-push
-ne lance que Vitest ; pour Playwright, il constate qu'aucun verdict local n'existe
-et **laisse passer**. L'ordre qui fait qu'un push est réellement jugé est dans le
-skill `fin-de-session-labo-codex` : **committer d'abord**, puis
-`cd tests && node ../scripts/verifier-playwright.mjs`, puis pousser.
+ne lance que Vitest ; pour Playwright, il lit un jeton et **laisse passer** un commit
+qui n'a pas son jugement. L'ordre qui fait qu'une release est réellement jugée est
+dans le skill `fin-de-session-labo-codex`, §4.5 (règle 7 de `PROTOCOLE.md`, 14 nov.
+2026) : **le bump se committe sur la branche**, la branche est poussée, le verdict du
+nuage (`node scripts/verdict-nuage.mjs --lancer`) et le complément du Mac
+(`node scripts/complement-mac.mjs`) jugent CE commit, puis `main` avance dessus et
+`scripts/pousser.sh` pousse. Un bump posé après le verdict le périme.
 
 > `version.json` reste la **source unique de vérité**. « Bêta publique » est un
 > libellé d'affichage (`init-inline.js`, `rapport-bug.js`), pas le numéro.

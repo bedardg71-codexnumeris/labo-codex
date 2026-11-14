@@ -98,15 +98,17 @@ describe('#685 · A — la garde : attendre, et au plafond NE PAS lancer', () =>
 
 describe('#685 · B — pousser.sh : la garde passe AVANT le verdict, et son refus arrête tout', () => {
 
-    it('B.a le fragment est sourcé, et la garde est appelée avant verifier-playwright.mjs', () => {
+    // 14 nov. 2026 — le nuage juge : ce que le Mac joue encore est le complément
+    // (scripts/complement-mac.mjs). La garde de charge le précède, comme elle précédait la suite.
+    it('B.a le fragment est sourcé, et la garde est appelée avant complement-mac.mjs', () => {
         expect(POUSSER).toContain('. "$REPO_ROOT/scripts/garde-charge.sh"');
         const iGarde = position(POUSSER, '    attendre_charge_basse\n');
-        const iVerdict = position(POUSSER, 'node "$REPO_ROOT/scripts/verifier-playwright.mjs"');
+        const iVerdict = position(POUSSER, 'node "$REPO_ROOT/scripts/complement-mac.mjs"');
         expect(iGarde).toBeLessThan(iVerdict);
     });
 
     it('B.b entre la garde et le verdict, un code non nul SORT du script — aucun lancement par défaut', () => {
-        const entre = tranche(POUSSER, '    attendre_charge_basse\n', 'node "$REPO_ROOT/scripts/verifier-playwright.mjs"', { longueurMin: 80 });
+        const entre = tranche(POUSSER, '    attendre_charge_basse\n', 'node "$REPO_ROOT/scripts/complement-mac.mjs"', { longueurMin: 80 });
         expect(entre).toMatch(/CODE_CHARGE=\$\?/);
         expect(entre).toMatch(/if \[ \$CODE_CHARGE -ne 0 \]; then\s+exit 3\s+fi/);
         // Et rien dans cet intervalle ne pousse.

@@ -146,7 +146,7 @@ describe('#533 · C — l\'absence de verdict ne vaut pas « tout va bien »', (
         // seule issue une commande de terminal. Un refus dont la solution est
         // hors de portée de l'outil où il se produit est le « hook
         // inapplicable » que ce fichier combat depuis août.
-        const bloc = HOOK.slice(HOOK.indexOf('aucun verdict local pour ce commit'));
+        const bloc = HOOK.slice(HOOK.indexOf('ce commit n\'a pas encore son jugement complet'));
         expect(bloc, 'le message d\'avertissement a disparu').toBeTruthy();
         const sortie = bloc.match(/^exit (\d)/m);
         expect(
@@ -156,9 +156,13 @@ describe('#533 · C — l\'absence de verdict ne vaut pas « tout va bien »', (
     });
 
     it('C.f mais il donne le geste COMPLET, terminal compris', () => {
-        const bloc = HOOK.slice(HOOK.indexOf('aucun verdict local pour ce commit'));
+        const bloc = HOOK.slice(HOOK.indexOf('ce commit n\'a pas encore son jugement complet'));
         expect(bloc, 'sans `cd`, la commande n\'est pas copiable telle quelle').toContain('cd %s && scripts/pousser.sh');
-        expect(bloc).toContain('node scripts/verifier-playwright.mjs');
+        // 14 nov. 2026 — le nuage juge : le geste complet nomme les deux parts du jugement,
+        // et la voie du téléphone (un refus dont l'issue serait hors de portée, encore).
+        expect(bloc).toContain('node scripts/verdict-nuage.mjs --lancer');
+        expect(bloc).toContain('node scripts/complement-mac.mjs');
+        expect(bloc).toContain('Run workflow');
     });
 
     it('C.g un verdict ROUGE, lui, bloque toujours — c\'est ce qui reste gardé', () => {
@@ -237,8 +241,10 @@ describe('#534 · G — une reprise se dit, elle ne se cache pas', () => {
 
 describe('#533 · F — dans pousser.sh, la garde vient AVANT le push', () => {
 
+    // 14 nov. 2026 — le nuage juge : la garde n'est plus la suite entière du Mac, mais
+    // le verdict du nuage RELEVÉ pour ce commit, puis le complément du Mac.
     it('F.a l\'ordre des deux appels est le sujet même de ce script', () => {
-        const garde = POUSSER.indexOf('node "$REPO_ROOT/scripts/verifier-playwright.mjs"');
+        const garde = POUSSER.indexOf('node "$REPO_ROOT/scripts/complement-mac.mjs"');
         const push = POUSSER.indexOf('git push "$@"');
         expect(garde, 'la garde a disparu du script').toBeGreaterThan(-1);
         expect(push, 'le push a disparu du script').toBeGreaterThan(-1);
@@ -250,9 +256,24 @@ describe('#533 · F — dans pousser.sh, la garde vient AVANT le push', () => {
 
     it('F.b une rougeur nouvelle arrête le script avant toute connexion', () => {
         const entre = POUSSER.slice(
-            POUSSER.indexOf('node "$REPO_ROOT/scripts/verifier-playwright.mjs"'),
+            POUSSER.indexOf('node "$REPO_ROOT/scripts/complement-mac.mjs"'),
             POUSSER.indexOf('git push "$@"')
         );
         expect(entre).toMatch(/CODE_PW -eq 1[\s\S]*exit 1/);
+        // Un complément NON JUGÉ n'est pas un vert : il arrête aussi.
+        expect(entre).toMatch(/CODE_PW -ne 0[\s\S]*exit 3/);
+    });
+
+    it('F.c (14 nov.) le verdict du nuage est relevé AVANT le complément ; rouge, il arrête ; absent, main ne part pas, une branche de lot part', () => {
+        const nuage = POUSSER.indexOf('node "$REPO_ROOT/scripts/verdict-nuage.mjs"');
+        const complement = POUSSER.indexOf('node "$REPO_ROOT/scripts/complement-mac.mjs"');
+        expect(nuage).toBeGreaterThan(-1);
+        expect(nuage).toBeLessThan(complement);
+        const entre = POUSSER.slice(nuage, complement);
+        expect(entre).toMatch(/CODE_NUAGE -eq 1[\s\S]*?exit 1/);
+        expect(entre).toMatch(/CODE_NUAGE -ne 0[\s\S]*?if \[ "\$BRANCHE" = "main" \]; then[\s\S]*?exit 3\s+fi[\s\S]*?JUGER_APRES=1/);
+        // Le script ne lance plus la suite entière du Mac : elle reste possible, à la main.
+        const code = POUSSER.split('\n').filter((l) => !/^\s*(#|printf)/.test(l)).join('\n');
+        expect(code).not.toMatch(/verifier-playwright\.mjs|verdict-en-morceaux\.mjs/);
     });
 });

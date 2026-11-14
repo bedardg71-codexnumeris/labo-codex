@@ -61,8 +61,8 @@ Mesure du 13 septembre : **sur trois lots ouverts, trois fiches se sont révél�
 2. **CADRER** (Cowork). La consigne va dans un bloc de code, complet, que Grégoire colle ; un fichier `CONSIGNE-LOT-…` seulement si elle est trop longue pour un bloc (règle 6, « Les consignes »). Elle porte : ce que le lot livre, ce que la mesure corrige de la fiche, la portée, les pièges connus, la preuve exigée, ce qui n'entre PAS, et les écritures de backlog dues.
 3. **CODER** (Claude Code). Un lot, un commit. Les trouvailles en chemin reçoivent l'une des trois issues de `CLAUDE.md`, nommées dans le rapport.
 4. **CONTRE-VÉRIFIER** (Cowork). Reprendre au code ce que le rapport affirme. Voir « Deux méthodes » ci-dessous.
-5. **ÉPROUVER** (Claude Code). Suite complète, verdict Playwright pris **Cowork fermé** (règle 8).
-6. **LIVRER** (Grégoire). Le `git push`.
+5. **ÉPROUVER** (Claude Code). Vitest complet ; la branche poussée, le verdict du nuage, puis le complément du Mac pris **Cowork fermé** (règles 7 et 8).
+6. **LIVRER** (Grégoire). Le `git push` de `main`.
 
 ⚠ **Le temps 6 se fait depuis le Mac de Grégoire, et par une seule des deux sessions.** **Claude Code pousse**, par `scripts/pousser.sh`, à la demande de Grégoire. **Cowork ne pousse pas** : son shell n'atteint pas le dépôt en SSH (« Host key verification failed », mesuré le 13). ⮕ **Corrigé le 13 au soir, après une affirmation fausse de Cowork** qui avait écrit que personne n'avait la clé : il avait mesuré son propre environnement et conclu sur le rôle. La règle 5, qui disait depuis le 8 août « aucune session ne pousse », est corrigée dans ce sens.
 
@@ -194,12 +194,12 @@ données ; il n'exigeait pas de second regard.
 **Ordre fixe, parce qu'il a un prix en minutes :**
 
 ```
-commit → relecture croisée → corrections → verdict → push
+commit → relecture croisée → corrections → push de la branche → verdict du nuage + complément du Mac → `main` avance, push
 ```
 
-Le verdict Playwright est **toujours le dernier geste avant le push**, jamais
-avant la relecture : toute correction issue de la relecture périme un verdict
-déjà pris. Le 1er septembre, **cinq lancements ont été gaspillés** pour un seul
+Le jugement (règle 7) est **toujours le dernier geste avant que `main` avance**, jamais
+avant la relecture : il est rattaché au SHA, et toute correction issue de la relecture
+le périme. Le 1er septembre, **cinq lancements ont été gaspillés** pour un seul
 verdict utile — quatre verdicts (un mené à terme puis périmé par un `--amend`,
 trois arrêtés en cours) et un `npm test` qui lançait Playwright sans qu'on le
 sache. Chiffre corrigé après recomptage : le fichier disait « trois », ce qui
@@ -477,22 +477,25 @@ troisième catégorie ; elle ne lui retire pas l'arbitrage.
 
 ---
 
-## Règle 7 — la cadence des verdicts : les lots le jour, un seul verdict le soir (11 octobre 2026)
+## Règle 7 — le nuage juge le verdict complet, le Mac en complément ; chaque lot laisse le nuage vert (14 novembre 2026)
 
-**Décision de Grégoire (11 oct. 2026, de vive voix)** : le verdict Playwright mobilise tout son Mac pendant environ une heure et l'empêche de travailler en parallèle.
+**Décision de Grégoire (14 nov. 2026, 15 h 51)**, qui revient sur celle du 10 oct. (« le Mac est le juge du push ») et réécrit la cadence du 11 oct. (« un seul verdict le soir », dont le motif était le Mac immobilisé) : le verdict du Mac durait 111 min et exigeait sa présence ; GitHub rend le même commit en 33 min sur 20 machines (mesure du 14 nov., run 43543782094).
 
-1. **Pendant la journée**, les lots s'enchaînent, chacun avec sa relecture croisée par Cowork (règle 2), ses break-tests et Vitest complet. **Aucun verdict Playwright, aucune release.** Les lots relus s'accumulent.
-2. **Le soir**, au signal de Grégoire (sa journée est finie ; Chrome, Safari et Cowork fermés ; Mac sur secteur), **une seule release** groupe tout ce qui a passé la relecture, avec **un seul verdict complet**, pris sur le commit de release (jamais sur un commit antérieur). Push seulement si vert. Si le verdict rougit, les commits séparés disent quel lot : le nommer.
-3. **La nuit**, le Mac reste ouvert, branché, sans mise en veille : le verdict peut tourner pendant que Grégoire dort. Un Mac endormi ou sous pression mémoire fait échouer le verdict ou redémarrer la machine : **vérifier le secteur et la charge avant de lancer**, et le dire s'ils ne conviennent pas.
-4. **Exception** : un défaut gênant peut aller en ligne tout de suite, à la demande de Grégoire, avec son verdict à ce moment-là. Un lot qui touche une zone sous les règles de sécurité (`import-export.js`, `db.js`, `travaux-stockage.js`) garde son verdict obligatoire : il attend celui du soir.
-5. **Un lot codé pendant qu'une release attend** se fait sur une branche partie de `main` ; il ne rejoint `main` qu'après la mise en ligne de la release, et part dans la suivante (premier cas : `lot8-cadre`, 11 oct. 2026). Motif : si le verdict rougit, on sait dans quel paquet chercher.
+1. **Le jugement d'un commit** = le verdict du nuage vert pour ce SHA (job « Playwright — verdict » de `tests.yml`) **et** le complément du Mac vert pour ce SHA (`node scripts/complement-mac.mjs` : ce que Linux ne juge pas, rejoué sous le WebKit de macOS). `scripts/lire-verdict.mjs` lit les deux dans le jeton. Le verdict complet du Mac (`node scripts/verdict-en-morceaux.mjs`) reste possible et vaut à lui seul ; plus rien ne l'exige.
+2. **Chaque lot se juge sur sa branche, avant sa fusion.** La branche est poussée, puis le verdict se lance à la demande : du téléphone (application GitHub ▸ Actions ▸ Tests ▸ Run workflow ▸ la branche ▸ Run workflow) ou du terminal (`node scripts/verdict-nuage.mjs --lancer`). Un verdict par lot, après la relecture, pas à chaque poussée. `main` n'avance que sur un commit jugé : `scripts/pousser.sh` le refuse sinon.
+3. **Vert, pour le nuage** : aucun essai rouge hors de `scripts/playwright-baseline-linux.json`. **Cette liste ne dérive plus.** Un essai qui rougit sous Linux et reste vert au Mac s'y classe **dans le lot qui l'amène**, avec sa famille (géométrie ou rendu, minutage, API absente, plateforme, non élucidé) et sa cause, lue dans un journal. Une entrée sans cause est refusée : la sentinelle rougit, et le juge rend NON JUGÉ. Avant de classer, on répare ce qui est petit (un essai qui présume le Mac pose lui-même sa prémisse) ; une entrée réparée se retire avec sa cause. Pas de tournée hebdomadaire : chaque lot laisse le nuage vert.
+4. **La release** se juge comme un lot : le bump se fait sur la branche, AVANT le verdict, et c'est le commit de release qui est jugé (jamais un commit antérieur). Si le nuage rougit, les commits séparés disent quel lot : le nommer.
+5. **Exception** : un défaut gênant peut aller en ligne tout de suite, à la demande de Grégoire, avec son jugement à ce moment-là. Un lot qui touche une zone sous les règles de sécurité (`import-export.js`, `db.js`, `travaux-stockage.js`) garde son jugement obligatoire.
+6. **Un lot codé pendant qu'une release attend** se fait sur une branche partie de `main` ; il ne rejoint `main` qu'après la mise en ligne de la release, et part dans la suivante (premier cas : `lot8-cadre`, 11 oct. 2026). Motif : si le verdict rougit, on sait dans quel paquet chercher.
+
+**Ce qui ne change pas** : l'interdit de fusion par l'application GitHub (« Hors de la consigne », plus bas) ; les portes terrain de l'iPad restent le seul juge du toucher et de Safari.
 
 *Ancien contenu de la règle 7 (« un vert local ne prouve rien sur ce que la CI exécute ») : déplacé le 13 septembre 2026 vers le skill `fin-de-session-labo-codex`, §4.6.1 (geste de clôture).*
 
-## Règle 8 — le verdict Playwright local ne se prend pas à deux outils ouverts (12 septembre 2026)
+## Règle 8 — ce que le Mac joue sous Playwright ne se prend pas à deux outils ouverts (12 septembre 2026)
 
 ⮕ Le geste (quand le verdict se lance, et quand il attend le lendemain) est déplacé le 13 septembre 2026 vers le skill `fin-de-session-labo-codex`, §4.6.2.
-**Reste ici, parce que c'est de la coordination : c'est GRÉGOIRE qui ferme Cowork, pas Cowork lui-même.** Claude Code le lui dit avant de lancer le verdict (« ferme Cowork, je lance le verdict »), et Grégoire rouvre Cowork après.
+**Reste ici, parce que c'est de la coordination : c'est GRÉGOIRE qui ferme Cowork, pas Cowork lui-même.** Claude Code le lui dit avant de lancer (« ferme Cowork, je lance le complément »), et Grégoire rouvre Cowork après. Depuis le 14 nov. 2026, ce que le Mac joue est le complément (règle 7 : 57 essais ce jour-là, 6,7 min d'après la passe du 13 nov., pas encore mesuré seul) ; la règle s'y applique tant qu'une mesure n'a pas dit le contraire.
 
 ## Règle 9 — un seul compteur pour les fiches et les bugs, et le lien entre les deux (12 septembre 2026)
 
@@ -562,4 +565,4 @@ troisième catégorie ; elle ne lui retire pas l'arbitrage.
 
 - **Dans le cloud** : une conversation du Projet répertorie le bug et le corrige sur une branche partie de `origin/main`, avec son banc et son break-test, et ouvre une pull request. Le cloud n'écrit ni `SUIVI-BUGS.md` ni `BACKLOG.md` : il propose la ligne de suivi dans le corps de la PR.
 - **Sur le Mac, par la session principale** : la fusion (`git merge --no-ff`) dans le `main` local, le passage sous WebKit, le numéro au registre (compteur de `BACKLOG.md`, règle 9, qui avance ici) et la mise en ligne.
-- ⛔ **Jamais de fusion par l'application GitHub** : Netlify publie chaque `main`, si bien qu'elle mettrait le correctif en ligne aussitôt, sans verdict WebKit, et ferait diverger le `main` local. La PR se ferme d'elle-même au push de `main`.
+- ⛔ **Jamais de fusion par l'application GitHub** : Netlify publie chaque `main`, si bien qu'elle mettrait le correctif en ligne aussitôt, sans jugement (règle 7), et ferait diverger le `main` local. La PR se ferme d'elle-même au push de `main`.

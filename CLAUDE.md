@@ -177,9 +177,9 @@ exemples et modèle de menaces : skill `securite-donnees`.)
    fonction pure → Vitest `tests/unit/` ; navigateur → Playwright `tests/integration/`.
 6. **Aucun nom d'élève réel** dans le code, tests, rapports, plans, exemples : noms fictifs (22 sept. 2026).
 
-Avant un commit touchant `js/securite-*.js`, `js/import-export.js`,
-`js/cc-license.js` ou la CSP : `cd tests && npm test` — il enchaîne Vitest ET
-Playwright (>10 min) ; Vitest seul = `npm run test:unit`. Doc : `docs/securite/TESTS-AUTOMATISES.md`.
+Un lot touchant `js/securite-*.js`, `js/import-export.js`, `js/cc-license.js` ou la
+CSP ne rejoint pas `main` sans son jugement (nuage + complément du Mac, ci-dessous) ;
+avant le commit, `cd tests && npm run test:unit`. Doc : `docs/securite/TESTS-AUTOMATISES.md`.
 
 ---
 
@@ -212,9 +212,10 @@ les signaler. Seul l'automne 2026 compte.
 un `major`.**
 
 ⚠ **« PUSH RÉUSSI » NE SIGNIFIE PAS « SUITE COMPLÈTE VERTE ».** Le hook pre-push
-ne lance que Vitest ; faute de verdict Playwright local, il laisse passer. L'ordre
-qui fait qu'un push est jugé est au §4.5 de `fin-de-session` : commit, relecture,
-**puis** verdict, **puis** push.
+ne lance que Vitest ; faute de jugement pour ce commit, il laisse passer. Depuis le
+14 nov. 2026, **le nuage juge** (GitHub, sur la branche poussée) et **le Mac complète**
+(`scripts/complement-mac.mjs`) : §4.5 de `fin-de-session`, règle 7 de `PROTOCOLE.md`.
+Commit, relecture, push de la branche, **puis** jugement, **puis** `main` avance.
 
 ---
 

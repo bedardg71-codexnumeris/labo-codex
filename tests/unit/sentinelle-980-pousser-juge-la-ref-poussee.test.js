@@ -33,6 +33,9 @@ describe('#980 · pousser.sh refuse une autre référence que la branche courant
         const src = readFileSync(path.join(racine, 'scripts', 'pousser.sh'), 'utf8');
         const i = src.indexOf('ref_poussee_conforme "$BRANCHE" "$@" || exit 1');
         expect(i).toBeGreaterThan(-1);
-        expect(i).toBeLessThan(src.indexOf('verifier-playwright.mjs'));
+        // 14 nov. 2026 — le premier jugement que le script appelle est le relevé du nuage.
+        const verdict = src.indexOf('node "$REPO_ROOT/scripts/verdict-nuage.mjs"');
+        expect(verdict).toBeGreaterThan(-1);
+        expect(i).toBeLessThan(verdict);
     });
 });

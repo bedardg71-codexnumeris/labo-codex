@@ -101,6 +101,30 @@ export function vertsDuRapport(rapport) {
     return specsDuRapport(rapport, (spec) => spec.ok !== false && (spec.tests ?? []).some((t) => t.status === 'expected' || t.status === 'flaky'));
 }
 
+/** Les familles de cause d'une entrée de la liste Linux (14 nov. 2026). */
+export const FAMILLES_DE_CAUSE = ['geometrie-rendu', 'minutage', 'api-absente', 'plateforme', 'non-elucide'];
+
+/**
+ * La liste Linux ne dérive plus (14 nov. 2026, PROTOCOLE.md règle 7) : chaque
+ * entrée des deux listes porte, dans `causes`, une famille connue et une cause
+ * écrite. Rend ce qui manque à la règle, une ligne par défaut ; `[]` si tout y est.
+ * Une cause sans entrée est un reste : l'essai réparé se retire AVEC sa cause.
+ */
+export function defautsDesCauses({ echecsConnus = [], echecsIntermittents = [], causes = {} } = {}) {
+    const defauts = [];
+    const entrees = [...echecsConnus, ...echecsIntermittents];
+    for (const id of entrees) {
+        const c = causes[id];
+        if (!c) defauts.push(`sans cause : ${id}`);
+        else if (!FAMILLES_DE_CAUSE.includes(c.famille)) defauts.push(`famille inconnue (« ${c.famille} ») : ${id}`);
+        else if (typeof c.cause !== 'string' || c.cause.trim().length < 20) defauts.push(`cause vide ou trop courte pour dire quelque chose : ${id}`);
+    }
+    const connues = new Set(entrees);
+    for (const id of Object.keys(causes)) if (!connues.has(id)) defauts.push(`cause sans entrée (essai retiré de la liste ?) : ${id}`);
+    for (const id of echecsConnus) if (echecsIntermittents.includes(id)) defauts.push(`dans les deux listes : ${id}`);
+    return defauts;
+}
+
 /**
  * Compare les échecs à la baseline, qui tient deux listes (#1114, 28 oct. 2026) :
  *   · `echecsConnus` — rouges à chaque fois ; elles doivent le rester ;

@@ -26,6 +26,11 @@
  * n'est « redevenue verte » que jouée et verte (absente : « non jouée ») ; une
  * intermittente ne bloque ni rouge ni verte, le juge dit combien sont rouges.
  *
+ * 14 nov. 2026 : le nuage juge le verdict complet. La liste Linux tient, pour
+ * chaque entrée, sa famille et sa cause (`causes`) ; une entrée sans cause rend
+ * le verdict NON JUGÉ. Ce que cette liste soustrait au jugement d'ici est rejoué
+ * sous le WebKit du Mac par scripts/complement-mac.mjs.
+ *
  * Code de sortie : 0 = rien de neuf · 1 = échec nouveau · 2 = impossible à juger.
  * Si GITHUB_STEP_SUMMARY est posée, le verdict s'y écrit aussi : c'est ce que
  * l'application GitHub du téléphone affiche.
@@ -34,7 +39,7 @@
 import { readFileSync, existsSync, appendFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { echecsDuRapport, flakyDuRapport, vertsDuRapport, sansNavigateurDuRapport, comparerALaBaseline } from './rapport-playwright.mjs';
+import { echecsDuRapport, flakyDuRapport, vertsDuRapport, sansNavigateurDuRapport, comparerALaBaseline, defautsDesCauses } from './rapport-playwright.mjs';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const BASELINE = process.argv[3] ? path.resolve(process.argv[3]) : path.join(__dirname, 'playwright-baseline.json');
@@ -84,6 +89,13 @@ if (sansNavigateur.length > 0 && echecs.length === 0 && vertsDuRapport(rapport).
 
 const instables = flakyDuRapport(rapport);
 const baseline = JSON.parse(readFileSync(BASELINE, 'utf8'));
+// 14 nov. 2026 — une liste qui tient des causes (celle de Linux) les tient TOUTES :
+// une entrée sans cause est une rougeur qu'on a rangée sans la lire. Le juge refuse
+// de s'appuyer dessus, comme la sentinelle (sentinelle-verdict-nuage-2026-11-14).
+if (baseline.causes) {
+    const defauts = defautsDesCauses(baseline);
+    if (defauts.length > 0) nonJuge(`${path.basename(BASELINE)} : ${defauts.length} entrée(s) hors règle (chaque entrée a sa famille et sa cause) :\n\n${defauts.map((d) => `- ${d}`).join('\n')}`);
+}
 const { nouveaux, reparees, aPasserAuxIntermittentes, nonJouees, intermittentesRouges } = comparerALaBaseline({ echecs, verts: vertsDuRapport(rapport), instables }, baseline);
 const nIntermittentes = (baseline.echecsIntermittents ?? []).length;
 

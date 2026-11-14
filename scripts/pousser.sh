@@ -17,15 +17,30 @@
 # d'échec qui apprend à taper --no-verify par réflexe, et fait perdre la garde
 # entière pour un problème de calendrier.
 #
-# Ce script renverse l'ordre : la garde lourde d'abord, la connexion ensuite.
-# Chaque suite ne tourne qu'une fois — Playwright ici, Vitest dans le hook.
+# Ce script renverse l'ordre : le jugement d'abord, la connexion ensuite.
+#
+# LE JUGE A CHANGÉ LE 14 NOV. 2026 (décision de Grégoire, qui revient sur celle du
+# 10 oct.). Ce script ne lance plus la suite entière sur le Mac (111 min le 13 nov.,
+# machine immobilisée). Le jugement d'un commit tient en deux parts :
+#   1. le verdict du NUAGE — GitHub, 20 machines, une demi-heure, lancé sur la
+#      branche une fois poussée (scripts/verdict-nuage.mjs --lancer, ou du téléphone).
+#      Ici, il est seulement RELEVÉ pour le commit qui part ;
+#   2. le COMPLÉMENT du Mac — scripts/complement-mac.mjs : ce que Linux ne juge pas,
+#      quelques minutes, lancé ici s'il n'est pas déjà vert pour ce commit.
+# Deux cas, donc :
+#   · une branche de LOT part AVANT son verdict (GitHub juge ce qu'il a reçu) : ce
+#     script la pousse et dit comment la faire juger ;
+#   · `main` ne reçoit par ce script qu'un commit JUGÉ : sans verdict du nuage vert
+#     pour ce SHA, rien ne part. On juge la branche, puis on avance `main` dessus.
+# Le verdict complet du Mac reste possible (node scripts/verdict-en-morceaux.mjs) et
+# le crochet l'accepte à lui seul ; plus rien ne l'exige.
 #
 # USAGE
 #   scripts/pousser.sh              # pousse la branche courante vers origin
 #   scripts/pousser.sh origin main  # arguments passés tels quels à git push ; « main »
 #                                   # doit être la branche courante (#980)
 #
-# La suite Playwright n'est lancée que si le lot emporte du code observable au
+# Le jugement n'est demandé que si le lot emporte du code observable au
 # navigateur ; un push documentaire part directement.
 
 set -eu
@@ -57,8 +72,8 @@ set -eu
 #   processeur ; la sauvegarde Time Machine du 18 (charge 93, six specs au second essai)
 #   pèse sur le disque, et l'application se charge par file://. La charge moyenne la voit
 #   monter (93 ce jour-là), mais rien ne prouve que ce seuil-ci la juge bien.
-# ⚠ La garde juge le LANCEMENT, pas la durée du verdict : une charge qui arrive pendant
-#   les ~45 min de la suite n'est pas vue (#987 : mesure du 29 sept.).
+# ⚠ La garde juge le LANCEMENT, pas la durée du complément : une charge qui arrive
+#   pendant qu'il tourne n'est pas vue (#987 : mesure du 29 sept., sur la suite entière).
 #
 # Les trois variables LABO_* servent à la sentinelle et à la démonstration sous charge
 # fabriquée. Lever le seuil pour forcer un lancement est un geste explicite, jamais un défaut.
@@ -116,43 +131,68 @@ elif printf '%s\n' "$FICHIERS" | lot_observable; then
     LANCER=1
 fi
 
+JUGER_APRES=0
 if [ $LANCER -eq 1 ]; then
-    # La garde de charge, AVANT le verdict : un verdict rendu sous charge ne juge pas le
-    # code (seuils et mesure en tête de ce script). Plafond atteint : on ne lance pas, on
-    # ne pousse pas — aucun lancement par défaut.
+    # 1. Le verdict du NUAGE, relevé pour le commit qui part. Aucune suite n'est lancée
+    #    ici : le script interroge GitHub et écrit sa part du jeton, que le hook lira.
+    #    `set -e` ne doit pas tuer le script sur un code non nul : c'est nous qui décidons.
+    printf "${VERT}→ Verdict du nuage pour ce commit, AVANT d'ouvrir la connexion...${RAZ}\n"
     set +e
-    attendre_charge_basse
-    CODE_CHARGE=$?
-    set -e
-    if [ $CODE_CHARGE -ne 0 ]; then
-        exit 3
-    fi
-
-    printf "${VERT}→ Sentinelle Playwright, AVANT d'ouvrir la connexion (~45 min)...${RAZ}\n"
-    # Le script dépose son verdict dans scripts/.verdict-playwright.json ; le
-    # hook pré-push le lira. `set -e` ne doit pas tuer le script sur un code
-    # non nul : c'est nous qui décidons quoi en faire.
-    set +e
-    node "$REPO_ROOT/scripts/verifier-playwright.mjs"
-    CODE_PW=$?
+    node "$REPO_ROOT/scripts/verdict-nuage.mjs"
+    CODE_NUAGE=$?
     set -e
 
-    if [ $CODE_PW -eq 1 ]; then
-        printf "\n${ROUGE}✗ Rougeur nouvelle — rien n'a été poussé.${RAZ}\n"
+    if [ $CODE_NUAGE -eq 1 ]; then
+        printf "\n${ROUGE}✗ Le nuage a jugé ce commit ROUGE — rien n'a été poussé.${RAZ}\n"
         exit 1
     fi
-    # #1008 — un code 2 rendu par la garde-éveil ou la garde mémoire n'est pas
-    # « WebKit absent » : le Mac pouvait juger, il n'était pas en état. Comme la
-    # garde de charge, on ne pousse pas ; le hook, lui, laisserait passer.
-    if [ $CODE_PW -eq 2 ] && node -e 'process.exit(JSON.parse(require("fs").readFileSync(process.argv[1],"utf8")).garde?.nonJuge ? 0 : 1)' "${VERDICT_PLAYWRIGHT:-$REPO_ROOT/scripts/.verdict-playwright.json}" 2>/dev/null; then
-        printf "\n${ROUGE}✗ Verdict non jugé par la garde (raison ci-dessus) — rien n'a été poussé.${RAZ}\n"
-        exit 3
+
+    if [ $CODE_NUAGE -ne 0 ]; then
+        # Pas de verdict vert pour ce SHA (pas lancé, en cours, ou illisible d'ici).
+        if [ "$BRANCHE" = "main" ]; then
+            printf "\n${ROUGE}✗ main ne reçoit qu'un commit jugé : aucun verdict du nuage vert pour ce SHA — rien n'a été poussé.${RAZ}\n"
+            printf "  Juge la branche du lot (poussée), puis avance main dessus :\n"
+            printf "      ${VERT}node scripts/verdict-nuage.mjs --lancer${RAZ}   (du téléphone : Actions ▸ Tests ▸ Run workflow ▸ la branche)\n"
+            exit 3
+        fi
+        # Une branche de lot part AVANT son verdict : GitHub juge ce qu'il a reçu.
+        printf "${JAUNE}→ Branche de lot : elle part avant son verdict.${RAZ}\n"
+        JUGER_APRES=1
+    else
+        # 2. Le COMPLÉMENT du Mac : ce que Linux ne juge pas. Il se tait s'il est déjà
+        #    vert pour ce commit. La garde de charge passe AVANT : un essai joué sous
+        #    charge ne juge pas le code (seuils et mesure en tête de ce script). Plafond
+        #    atteint : on ne lance pas, on ne pousse pas — aucun lancement par défaut.
+        set +e
+        attendre_charge_basse
+        CODE_CHARGE=$?
+        set -e
+        if [ $CODE_CHARGE -ne 0 ]; then
+            exit 3
+        fi
+
+        printf "${VERT}→ Complément du Mac, AVANT d'ouvrir la connexion (quelques minutes)...${RAZ}\n"
+        set +e
+        node "$REPO_ROOT/scripts/complement-mac.mjs"
+        CODE_PW=$?
+        set -e
+
+        if [ $CODE_PW -eq 1 ]; then
+            printf "\n${ROUGE}✗ Rougeur au complément du Mac — rien n'a été poussé.${RAZ}\n"
+            exit 1
+        fi
+        # Un complément non jugé (essai de la liste non joué, arbre faussé) n'est pas un
+        # vert : comme la garde de charge, on ne pousse pas ; le hook, lui, laisserait passer.
+        if [ $CODE_PW -ne 0 ]; then
+            printf "\n${ROUGE}✗ Complément du Mac non jugé (raison ci-dessus) — rien n'a été poussé.${RAZ}\n"
+            exit 3
+        fi
     fi
 else
     printf "${VERT}✓ Sentinelle Playwright : sans objet (aucun code observable dans ce lot).${RAZ}\n"
 fi
 
-printf "${VERT}→ Push (le hook enchaîne Vitest, puis lit le verdict)...${RAZ}\n"
+printf "${VERT}→ Push (le hook enchaîne Vitest, puis lit le jugement)...${RAZ}\n"
 
 if [ $# -gt 0 ]; then
     git push "$@"
@@ -161,3 +201,10 @@ else
 fi
 
 printf "${VERT}✓ Poussé.${RAZ}\n"
+
+if [ $JUGER_APRES -eq 1 ]; then
+    printf "\n${JAUNE}Cette branche n'est pas encore jugée. Avant de la fusionner dans main :${RAZ}\n"
+    printf "      ${VERT}node scripts/verdict-nuage.mjs --lancer${RAZ}   le verdict du nuage (une demi-heure, Mac libre)\n"
+    printf "        (du téléphone : application GitHub ▸ Actions ▸ Tests ▸ Run workflow ▸ %s)\n" "$BRANCHE"
+    printf "      ${VERT}node scripts/complement-mac.mjs${RAZ}          ce que Linux ne juge pas (quelques minutes)\n"
+fi

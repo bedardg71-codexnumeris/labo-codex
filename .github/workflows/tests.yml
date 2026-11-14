@@ -294,6 +294,12 @@
 
 name: Tests
 
+# Point 12a : un verdict demandé se reconnaît dans la liste du téléphone. Lancé avec
+# le champ `branche`, il joue une AUTRE référence que son propre commit : son nom le
+# dit, et scripts/verdict-nuage.mjs l'écarte (MARQUE_AUTRE_REFERENCE) — il ne juge
+# pas le commit qui le porte. Vide hors demande : GitHub garde son nom habituel.
+run-name: ${{ github.event_name == 'workflow_dispatch' && format('Verdict du nuage — {0}', inputs.branche && format('autre référence : {0}', inputs.branche) || github.ref_name) || '' }}
+
 on:
   push:
     branches: [main]
