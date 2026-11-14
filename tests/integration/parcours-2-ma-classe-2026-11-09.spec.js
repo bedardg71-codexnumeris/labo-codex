@@ -468,6 +468,74 @@ test('la porte de l’accueil commence à la première étape non faite ; avant 
     expect(await page.evaluate(() => Assistance.etatDe('classe'))).toEqual({ etat: 'en-cours', etape: 6 });
 });
 
+// 14 nov. 2026 (relecture de Cowork) : « Ce point à l'écart, c'est l'absence que tu viens de noter. » ne se dit que si
+// l'absence est dans le groupe-cours actif, à la séance que la personne vient de verrouiller. Une présence ne porte pas
+// son groupe, seulement son cours : avant, l'absence d'un·e étudiant·e d'un AUTRE groupe du même cours, le même jour,
+// faisait dire à la bulle un point que la bande ne montre pas.
+// Break-test (14 nov.) : le filtre par étudiant·es du groupe retiré de `absenceNotee` → ROUGE au premier temps ; la
+// séance « qui vient d'être verrouillée » remplacée par toute séance verrouillée → ROUGE au troisième.
+test('étape 8 : l’absence ne se dit que pour le groupe-cours actif, à la séance qui vient d’être verrouillée (deux groupes)', async ({ page }) => {
+    test.setTimeout(180000);
+    await ouvrirEspaceVide(page, 1180);
+    await page.evaluate(() => { window.Assistance.lancerParcours('classe'); });
+    await faireLeCadre(page, { champsALEcran: false });
+    await attendreEtape(page, 7, 'Prendre les présences', { focus: false });
+    await expect(page.locator('#date-cours')).toHaveValue('2026-11-10');
+    await page.click('#btnVerrouillerSaisiePresences');
+    await attendreEtape(page, 8, "Ta classe d'un coup d'œil", { focus: false });
+    const TOUS_LA = 'Tout le monde était là : un point s\'écartera à la première absence.';
+    const A_L_ECART = 'Ce point à l\'écart, c\'est l\'absence que tu viens de noter.';
+    const phrase = () => bulle(page).locator('.parcours-bulle-note').nth(1);
+    const rejouer = async () => {
+        await page.evaluate(() => window.ParcoursMoteur.allerA(7));
+        await attendreEtape(page, 8, "Ta classe d'un coup d'œil", { focus: false });
+    };
+    await expect(phrase()).toHaveText(TOUS_LA);
+
+    // Premier temps : un second groupe du même cours, et l'absence d'une de ses étudiant·es, le même jour.
+    const mesure = await page.evaluate(() => {
+        const etudiants = db.getSync(cle('groupeEtudiants'), []);
+        const presences = db.getSync(cle('presences'), []);
+        const autre = Object.assign({}, etudiants[0], { da: '2390009', groupe: '00002', nom: 'Dromadaire', prenom: 'Dany' });
+        if ('groupeReel' in autre) autre.groupeReel = '00002';
+        db.setSync(cle('groupeEtudiants'), etudiants.concat([autre]));
+        db.setSync(cle('presences'), presences.concat([Object.assign({}, presences[0], { da: '2390009', date: '2026-11-10', periodesPresentes: 0 })]));
+        return { duGroupe: window.obtenirEtudiantsCoursActif().map((e) => e.da).sort(), saisies: presences.map((p) => p.da + ' ' + p.date + ' ' + p.periodesPresentes).sort(),
+            memeCours: presences[0].coursId === db.getSync('groupeCoursActif', null).coursId };
+    });
+    // Le banc dit ce qu'il a monté : trois étudiant·es dans le groupe actif, la quatrième ailleurs, sous le même cours.
+    expect(mesure.duGroupe).toEqual(['2390001', '2390002', '2390003']);
+    expect(mesure.saisies).toHaveLength(3);
+    expect(mesure.memeCours, 'la présence porte le cours du groupe actif').toBe(true);
+    await rejouer();
+    await expect(phrase()).toHaveText(TOUS_LA);
+
+    // Deuxième temps : l'absence est dans SON groupe, à la séance verrouillée → la bulle la dit.
+    await page.evaluate(() => {
+        const presences = db.getSync(cle('presences'), []);
+        db.setSync(cle('presences'), presences.map((p) => (p.da === '2390001' && p.date === '2026-11-10' ? Object.assign({}, p, { periodesPresentes: 0 }) : p)));
+    });
+    await rejouer();
+    await expect(phrase()).toHaveText(A_L_ECART);
+
+    // Troisième temps : l'absence de son groupe est à une AUTRE séance, verrouillée elle aussi (le mardi d'avant) ;
+    // celle qu'elle vient de verrouiller n'en a pas → la bulle ne la dit pas.
+    const prevues = await page.evaluate(() => {
+        const presences = db.getSync(cle('presences'), []);
+        const n = presences.find((p) => p.da === '2390002' && p.date === '2026-11-10').periodesPresentes;
+        db.setSync(cle('presences'), presences.map((p) => (p.da === '2390001' && p.date === '2026-11-10'
+            ? Object.assign({}, p, { periodesPresentes: n }) : p)).concat([Object.assign({}, presences.find((p) => p.da === '2390001'), { date: '2026-11-03', periodesPresentes: 0 })]));
+        const k = Object.keys(localStorage).find((x) => x.includes('datesVerrouillees_gc_'));
+        db.setSync(k, db.getSync(k, []).concat(['2026-11-03']));
+        return { n, verrous: window.lireDatesVerrouilleesSansSemis().slice().sort(), seance: window.obtenirNombrePeriodesSeance('2026-11-03') };
+    });
+    expect(prevues.verrous).toEqual(['2026-11-03', '2026-11-10']);
+    expect(prevues.seance, 'le 3 novembre est une séance du groupe').toBeGreaterThan(0);
+    // `rejouer` repasse par la bulle 8 sans repasser par la 7 : le repère pris à l'étape 7 tient.
+    await rejouer();
+    await expect(phrase()).toHaveText(TOUS_LA);
+});
+
 // 11 nov. 2026 (Grégoire, 8 h 26) : dans une étape qui montre un formulaire, une flèche par champ obligatoire ENCORE VIDE ;
 // chacune disparaît quand son champ est rempli. ↻ 11 nov. 2026, 11 h 45 (la règle du contour) : le bouton à toucher a la
 // sienne dès l'ouverture, en plus ; quand il ne reste aucun champ, sa flèche et son halo demeurent.

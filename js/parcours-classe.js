@@ -98,13 +98,7 @@
      * croisée avec les séances du groupe : une date d'un autre trimestre, venue du stock d'avant le
      * 11 sept., ne compte pas (relecture du 9 nov.).
      */
-    function seanceVerrouillee() {
-        if (!groupeCoursActif() || typeof window.lireDatesVerrouilleesSansSemis !== 'function') return false;
-        var seances = seancesDuGroupe();
-        return window.lireDatesVerrouilleesSansSemis().some(function (d) {
-            return Array.isArray(seances[d]) && seances[d].length > 0;
-        });
-    }
+    function seanceVerrouillee() { return seancesVerrouillees().length > 0; }
 
     /**
      * Le premier cours a eu lieu : une séance du groupe-cours actif tombe aujourd'hui ou avant.
@@ -308,23 +302,47 @@
         return rempli('v2-donneesCollees') || rempli('v2-fichierCsvEntree') || apercuDeLImport();
     }
 
+    // Les séances du groupe déjà verrouillées à l'arrivée de l'étape 7 : celle qui s'y ajoute est la saisie du parcours.
+    var verrousAvant = null;
+
+    /** Les dates verrouillées qui sont des séances du groupe-cours actif (lues sans semis, sans rien écrire). */
+    function seancesVerrouillees() {
+        if (!groupeCoursActif() || typeof window.lireDatesVerrouilleesSansSemis !== 'function') return [];
+        var seances = seancesDuGroupe();
+        return window.lireDatesVerrouilleesSansSemis().filter(function (d) {
+            return Array.isArray(seances[d]) && seances[d].length > 0;
+        });
+    }
+
     /**
-     * Étape 8 : la personne a-t-elle noté une absence ou un retard dans une séance verrouillée de son groupe ? Lu dans
-     * les présences, sans rien écrire. On ne fait jamais inventer une absence sur une vraie liste : la bulle dit
-     * seulement ce que la bande montre.
+     * La séance que la personne vient de verrouiller : celle qui n'était pas verrouillée à l'arrivée de l'étape 7.
+     * Sans ce repère (parcours repris à l'étape 8, ou rejoué en visite), la séance verrouillée la plus récente.
+     */
+    function seanceQuiVientDEtreVerrouillee() {
+        var dates = seancesVerrouillees();
+        var neuves = verrousAvant ? dates.filter(function (d) { return verrousAvant.indexOf(d) === -1; }) : [];
+        return (neuves.length ? neuves : dates).slice().sort().pop() || null;
+    }
+
+    /**
+     * Étape 8 : la personne a-t-elle noté une absence ou un retard, dans SON groupe, à la séance qu'elle vient de
+     * verrouiller ? Lu dans les présences, sans rien écrire. On ne fait jamais inventer une absence sur une vraie
+     * liste : la bulle dit seulement ce que la bande montre.
+     * 14 nov. 2026 (relecture de Cowork) : une présence ne porte pas son groupe, seulement son cours. L'absence d'un·e
+     * étudiant·e d'un autre groupe du même cours, le même jour, n'est pas un point de cette bande : on ne retient que
+     * les étudiant·es du groupe-cours actif (les mêmes que la bande, `obtenirEtudiantsCoursActif`).
      */
     function absenceNotee() {
         var gc = groupeCoursActif();
-        if (!gc || typeof window.lireDatesVerrouilleesSansSemis !== 'function') return false;
-        var seances = seancesDuGroupe();
-        var dates = window.lireDatesVerrouilleesSansSemis().filter(function (d) {
-            return Array.isArray(seances[d]) && seances[d].length > 0;
-        });
+        var date = seanceQuiVientDEtreVerrouillee();
+        if (!gc || !date || typeof window.obtenirEtudiantsCoursActif !== 'function') return false;
+        var duGroupe = {};
+        (window.obtenirEtudiantsCoursActif() || []).forEach(function (e) { if (e && e.da) duGroupe[String(e.da)] = true; });
+        var prevues = typeof window.obtenirNombrePeriodesSeance === 'function' ? window.obtenirNombrePeriodesSeance(date) : 0;
         var presences = db.getSync(cle('presences'), []) || [];
         return presences.some(function (p) {
-            if (!p || dates.indexOf(p.date) === -1) return false;
+            if (!p || p.date !== date || !duGroupe[String(p.da)]) return false;
             if (p.coursId && gc.coursId && p.coursId !== gc.coursId) return false;
-            var prevues = typeof window.obtenirNombrePeriodesSeance === 'function' ? window.obtenirNombrePeriodesSeance(p.date) : 0;
             var presentes = Number(p.periodesPresentes);
             return prevues > 0 ? presentes < prevues : presentes === 0;
         });
@@ -485,6 +503,7 @@
                 // Sans date à l'arrivée, la saisie propose la séance la plus récente (js/saisie-presences.js).
                 await attendre(function () { var c = champDate(); return !!(c && c.value); }, 1500);
                 avantPremierCours = !premierCoursPasse();
+                verrousAvant = seancesVerrouillees();
                 if (avantPremierCours) {
                     retirerSecondContour();
                 } else {
@@ -513,8 +532,8 @@
                     // Selon ce que la personne vient de saisir : jamais d'absence à inventer sur une vraie liste.
                     note(absenceNotee() ? "Ce point à l'écart, c'est l'absence que tu viens de noter."
                         : "Tout le monde était là : un point s'écartera à la première absence."),
-                    // ÉCRIT le 14 nov. 2026 (à valider par Grégoire) : la consigne des deux suites, offertes à égalité.
-                    consigne("Touche « Parcours suivant », ou « Terminer »")
+                    // Quand la bulle offre aussi « Parcours suivant », le moteur dit les deux suites (sa consigne de la fin).
+                    consigne("Touche « Terminer »")
                 ];
             },
             sansSortie: true,

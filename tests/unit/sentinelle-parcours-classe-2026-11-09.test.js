@@ -47,8 +47,9 @@ const ECRITS = [
     "Reviens après l'avoir donnée : le parcours reprendra ici, avec ta première saisie de présences",
     "En attendant, tu peux préparer tes outils dans « Conception »",
     "Touche « D'accord »",
-    // La consigne de la dernière bulle : deux suites offertes à égalité (lot 2e, règle 7).
-    'Touche « Parcours suivant », ou « Terminer »'
+    // La consigne de la dernière bulle. Quand la bulle offre aussi « Parcours suivant », le moteur dit les deux suites :
+    // cette phrase-là n'est écrite que dans js/parcours-moteur.js (sentinelle-consigne-de-la-fin-2026-11-14.test.js).
+    'Touche « Terminer »'
 ];
 
 describe('« Mettre ta classe en place » : les huit bulles, mot pour mot', () => {

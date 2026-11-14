@@ -76,6 +76,7 @@
    place d'une attente. La visite cesse à la première étape qui reste à faire.
    LA FIN (lot 2e) : la dernière bulle d'un parcours dit « Pour revoir une étape, touche « N sur N ». » ; quand elle
    n'offre que « Terminer », elle offre aussi « Parcours suivant », de même poids (aucun bouton mis en avant).
+   Sa consigne suit ses boutons : « Touche « Terminer » » y devient « Touche « Parcours suivant », ou « Terminer » ».
 
    Une étape :
      { titre, texte?, geste?, centre?: bool,
@@ -156,6 +157,8 @@
     var SEUIL_TELEPHONE = 500; // px de large de la fenêtre : en deçà, la bulle prend sa forme de téléphone
     var REGLAGE_MS = 1200;     // sur téléphone, le temps où le moteur peut faire défiler pour ranger la bulle en bas
     var LIGNES_PAR_PAGE = 10;  // au-delà, à la largeur de la bulle, le texte se coupe en pages
+    // LA FIN : la consigne de la dernière bulle quand elle offre ses deux suites. Sa seule écriture (voir consigneDeLaFin).
+    var CONSIGNE_DEUX_SUITES = 'Touche « Parcours suivant », ou « Terminer »';
     var PAGES_MAX = 3;
 
     // PROPOSÉ (10 nov. 2026, à valider par Grégoire) : le nom de la poignée pour le lecteur d'écran.
@@ -904,7 +907,9 @@
             var revue = { texte: 'Pour revoir une étape, touche « ' + n + ' sur ' + n + ' ».', note: true };
             var k = lignes.length;
             while (k > 0 && lignes[k - 1].geste) k--;
-            lignes = lignes.slice(0, k).concat([revue], lignes.slice(k));
+            lignes = lignes.slice(0, k).concat([revue], lignes.slice(k).map(function (l) {
+                return Object.assign({}, l, { texte: consigneDeLaFin(etape, l.texte) });
+            }));
         }
         if (lieu) {
             var ou = document.createElement('p');
@@ -1022,6 +1027,32 @@
     }
 
     /**
+     * LA FIN : le parcours que la dernière bulle offre de lancer (« Parcours suivant »), ou rien. Elle l'offre quand
+     * son seul bouton est « Terminer », dans un parcours qui a un rang, et qu'un parcours le suit dans le panneau.
+     */
+    function suiteOfferte(etape) {
+        var boutons = etape.boutons || [];
+        if (etat.i !== etat.def.etapes.length - 1 || etat.def.sansRang) return null;
+        if (boutons.length !== 1 || boutons[0].libelle !== 'Terminer') return null;
+        return parcoursSuivant();
+    }
+
+    /**
+     * LA FIN : la consigne suit les boutons (14 nov. 2026, décision de Cowork). Un parcours écrit « Touche
+     * « Terminer » » ; quand la bulle offre aussi « Parcours suivant », cette consigne devient celle des deux suites.
+     * La phrase n'est écrite qu'ICI : aucun parcours ne la recopie. Le point final suit celui de la consigne
+     * d'origine (une ligne de liste n'en porte pas, la ligne du geste en porte un).
+     */
+    function consigneDeLaFin(etape, texte) {
+        if (typeof texte !== 'string') return texte;
+        var m = /^Touche « Terminer »(\.?)$/.exec(texte.trim());
+        return m && suiteOfferte(etape) ? CONSIGNE_DEUX_SUITES + m[1] : texte;
+    }
+
+    /** La ligne du geste de l'étape, telle que la bulle la dit. */
+    function gesteDeLEtape(etape) { return consigneDeLaFin(etape, etape.geste); }
+
+    /**
      * Les boutons de la bulle, tels qu'elle les montre.
      * · En visite, une étape déjà réglée offre « Continuer » à la place de son attente.
      * · LA FIN : la dernière bulle qui n'offre que « Terminer » offre aussi « Parcours suivant » ; les deux de même
@@ -1033,18 +1064,16 @@
         if (etat.enVisite && !derniere) {
             boutons.push({ libelle: 'Continuer', primaire: true, action: function () { allerA(etat.i + 1); } });
         }
-        if (derniere && !etat.def.sansRang && boutons.length === 1 && boutons[0].libelle === 'Terminer') {
+        var suivant = suiteOfferte(etape);
+        if (suivant) {
             var terminer = boutons[0];
-            var suivant = parcoursSuivant();
-            if (suivant) {
-                boutons = [
-                    { libelle: 'Parcours suivant', action: function (m) {
-                        terminer.action(m);
-                        window.Assistance.lancerParcours(suivant.id);
-                    } },
-                    { libelle: 'Terminer', action: terminer.action, attend: terminer.attend }
-                ];
-            }
+            boutons = [
+                { libelle: 'Parcours suivant', action: function (m) {
+                    terminer.action(m);
+                    window.Assistance.lancerParcours(suivant.id);
+                } },
+                { libelle: 'Terminer', action: terminer.action, attend: terminer.attend }
+            ];
         }
         return boutons;
     }
@@ -1138,10 +1167,11 @@
         b.appendChild(lignes);
         ecrireLignes(lignes, etape);
 
-        if (etape.geste) {
+        var geste = gesteDeLEtape(etape);
+        if (geste) {
             var g = document.createElement('p');
             g.className = 'parcours-bulle-geste';
-            g.textContent = typographier(etape.geste);
+            g.textContent = typographier(geste);
             b.appendChild(g);
         }
 
@@ -1189,7 +1219,7 @@
         setTimeout(function () {
             if (!etat) return;
             var suite = (etat.complement || []).length ? ' ' + texteDesItems(etat.complement) : '';
-            a.textContent = etape.titre + '. ' + (etape.texte || '') + suite + texteDesLignes() + (etape.geste ? ' ' + etape.geste : '');
+            a.textContent = etape.titre + '. ' + (etape.texte || '') + suite + texteDesLignes() + (gesteDeLEtape(etape) ? ' ' + gesteDeLEtape(etape) : '');
         }, 50);
     }
 
@@ -1816,7 +1846,7 @@
     function poserGeste(etape) {
         var g = etat.elements.bulle.querySelector('.parcours-bulle-geste');
         var texte = '';
-        try { texte = etape.geste ? typographier(etape.geste) : ''; } catch (e) { texte = ''; }
+        try { texte = etape.geste ? typographier(gesteDeLEtape(etape)) : ''; } catch (e) { texte = ''; }
         if (!g || !texte || g.textContent === texte) return;
         g.textContent = texte;
         etat.elements.annonce.textContent = texte;

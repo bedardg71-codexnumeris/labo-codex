@@ -276,6 +276,8 @@ test('(e) la fin : « Parcours suivant » et « Terminer » de même poids, et l
     const boutons = page.locator('#parcours-bulle .parcours-bulle-boutons .btn');
     await expect(boutons).toHaveText(['Parcours suivant', 'Terminer']);
     expect(await boutons.evaluateAll((bs) => bs.map((b) => b.className)), 'aucun bouton mis en avant').toEqual(['btn btn-secondaire', 'btn btn-secondaire']);
+    // La consigne suit les boutons : le parcours écrit « Touche « Terminer ». », la bulle dit les deux suites.
+    await expect(page.locator('#parcours-bulle .parcours-bulle-geste')).toHaveText('Touche «\u00a0Parcours suivant\u00a0», ou «\u00a0Terminer\u00a0».');
     // La phrase est avant la consigne, qui reste la dernière ligne de texte.
     expect(await page.evaluate(() => {
         const n = document.querySelector('#parcours-bulle .parcours-bulle-note'), g = document.querySelector('#parcours-bulle .parcours-bulle-geste');
@@ -294,6 +296,7 @@ test('(e) le dernier parcours du panneau n\'offre que « Terminer » ; une carte
     const ids = await page.evaluate(() => window.Assistance.parcours().map((p) => p.id));
     await lancerLeFictif(page, { id: ids[ids.length - 1], lancer: { depuis: 2 } });
     await expect(page.locator('#parcours-bulle .parcours-bulle-boutons .btn')).toHaveText(['Terminer']);
+    await expect(page.locator('#parcours-bulle .parcours-bulle-geste')).toHaveText('Touche «\u00a0Terminer\u00a0».');
     await page.evaluate(() => {
         window.ParcoursMoteur.fermer();
         const def = Object.assign({}, window.__banc.def, { sansRang: true });
@@ -303,4 +306,87 @@ test('(e) le dernier parcours du panneau n\'offre que « Terminer » ; une carte
     await expect(page.locator('#parcours-bulle .parcours-bulle-rang')).toHaveCount(0);
     await expect(page.locator('#parcours-bulle .parcours-bulle-etapes')).toHaveCount(0);
     await expect(page.locator('#parcours-bulle .parcours-bulle-note')).toHaveCount(0);
+});
+
+// 14 nov. 2026 (retouche demandée par Cowork) : dans CHAQUE parcours du panneau, la consigne de la dernière bulle
+// correspond à ses boutons. Le banc prend la vraie dernière étape de chaque parcours (sa consigne, ses boutons),
+// lue en interceptant son lancement, et la joue dans le moteur sous l'identité du parcours : la place dans le
+// panneau décide du second bouton. Les gestes propres à chaque parcours ont leurs bancs à eux.
+// Break-test (14 nov.) : `consigneDeLaFin` qui rend le texte tel quel → ROUGE ici (sept parcours disent « Terminer »
+// seul sous deux boutons).
+test('(e) dans chaque parcours du panneau, la consigne de la dernière bulle correspond à ses boutons', async ({ page }) => {
+    test.setTimeout(180000);
+    await ouvrir(page);
+    const fins = await page.evaluate(async () => {
+        const vrai = window.ParcoursMoteur.lancer;
+        // La dernière étape de chacun. Cinq parcours l'exposent pour les bancs ; les quatre autres la livrent au moteur à
+        // leur lancement, intercepté ici (rien ne part). Aucun n'est lancé pour de vrai : leurs conditions d'entrée
+        // ne sont pas ce qu'on juge.
+        const EXPOSES = {
+            evaluer: () => window.ParcoursEvaluer.etapes(),
+            monter: () => window.ParcoursCours.etapes(),
+            'lire-ta-classe': () => window.ParcoursLireTaClasse.etapes,
+            // Ses étapes ne sont construites qu'au lancement, selon la famille : le banc prend le texte de sa dernière
+            // bulle (TEXTES) et son bouton « Terminer » (DEFINITIONS['plus-loin'], jugé par son propre banc).
+            'notation-alternative': () => [{ titre: window.ParcoursNotationAlternative.TEXTES['plus-loin'].titre,
+                geste: window.ParcoursNotationAlternative.TEXTES['plus-loin'].geste, boutons: [{ libelle: 'Terminer', primaire: true }] }],
+            recevoir: () => Object.values(window.ParcoursRecevoir.voies())[0]
+        };
+        const defs = [];
+        for (const p of window.Assistance.parcours()) {
+            let def = null;
+            if (EXPOSES[p.id]) {
+                def = { etapes: EXPOSES[p.id]() };
+            } else {
+                window.ParcoursMoteur.lancer = (d) => { def = d; return Promise.resolve(); };
+                try { await Promise.race([Promise.resolve(p.lancer()), new Promise((ok) => setTimeout(ok, 4000))]); } catch (e) { /* le banc ne juge pas le lancement */ }
+                window.ParcoursMoteur.lancer = vrai;
+            }
+            defs.push({ id: p.id, def: def && def.etapes && def.etapes.length ? def : null });
+        }
+        const lus = [];
+        for (const { id, def } of defs) {
+            if (!def) { lus.push({ id, sansDef: true }); continue; }
+            const fin = def.etapes[def.etapes.length - 1];
+            let geste = null, lignes = null;
+            try { geste = fin.geste || null; } catch (e) { geste = null; }
+            try { lignes = fin.lignes ? fin.lignes() : null; } catch (e) { lignes = null; }
+            const propre = geste || ((lignes || []).filter((l) => l.geste).pop() || {}).texte || null;
+            window.ParcoursMoteur.fermer();
+            await vrai({ id, etapes: [{
+                titre: fin.titre, texte: lignes ? undefined : 'Banc.', geste: geste || undefined,
+                lignes: lignes ? () => lignes : undefined, sansSortie: true, centre: true,
+                boutons: (fin.boutons || []).map((b) => ({ libelle: b.libelle, primaire: b.primaire, action: () => window.ParcoursMoteur.fermer() }))
+            }] }, {});
+            const b = document.getElementById('parcours-bulle');
+            const dite = b.querySelector('.parcours-bulle-geste') || [...b.querySelectorAll('.parcours-bulle-ligne--geste')].pop();
+            lus.push({ id, propre, aUnSuivant: !!window.Assistance.suivantDe(id),
+                boutons: [...b.querySelectorAll('.parcours-bulle-boutons .btn')].map((x) => x.textContent),
+                dite: dite ? dite.textContent.replace(/\u00a0/g, ' ') : null });
+            window.ParcoursMoteur.fermer();
+        }
+        return lus;
+    });
+    expect(fins.filter((f) => f.sansDef).map((f) => f.id), 'chaque parcours a livré sa définition').toEqual([]);
+    const simple = (t) => /^Touche « Terminer »\.?$/.test(t || '');
+    const simples = fins.filter((f) => simple(f.propre));
+    expect(fins).toHaveLength(9);
+    // Les sept parcours dont la fin dit « Touche « Terminer » » ; les deux autres ont leur consigne à eux.
+    expect(simples.map((f) => f.id).sort()).toEqual(['classe', 'commentaires', 'monter', 'donnees', 'lire-ta-classe', 'notation-alternative', 'recevoir'].sort());
+    expect(simples.some((f) => f.aUnSuivant)).toBe(true);
+    for (const f of simples) {
+        const point = f.propre.endsWith('.') ? '.' : '';
+        if (f.aUnSuivant) {
+            expect(f.boutons, f.id).toEqual(['Parcours suivant', 'Terminer']);
+            expect(f.dite, f.id).toBe('Touche « Parcours suivant », ou « Terminer »' + point);
+        } else {
+            expect(f.boutons, f.id).toEqual(['Terminer']);
+            expect(f.dite, f.id).toBe('Touche « Terminer »' + point);
+        }
+    }
+    // Hors de la règle, nommés : « Découvrir » offre ses deux boutons à lui ; « Évaluer » finit sur un geste composé
+    // (« … verrouille, puis touche « Terminer ». ») que le moteur ne réécrit pas (signalé à Cowork le 14 nov.).
+    const autres = fins.filter((f) => !simple(f.propre));
+    expect(autres.map((f) => f.id).sort()).toEqual(['decouvrir', 'evaluer']);
+    for (const f of autres) expect(f.dite, f.id).toBe(f.propre);
 });
