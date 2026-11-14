@@ -21,6 +21,17 @@
 
     var CHANGELOG = [
         {
+            // 1.246 (13 nov. 2026, soir : #1276, la grille ne remonte plus pendant l'étiquetage ; l'étiquette « Sous-total »)
+            // — titre et lignes de Claude Code, d'après les mots du relais de Cowork (13 nov., 18 h 50) ; non relus par Grégoire.
+            version: '1.246',
+            couleur: 'vert',
+            titre: 'Sous-totaux, et une grille qui reste en place',
+            items: [
+                'Dans Conception › Mon matériel, ta grille reste en place pendant que tu l’étiquettes&nbsp;: elle ne remonte plus après chaque geste.',
+                'Une nouvelle étiquette, «&nbsp;Sous-total&nbsp;», pour le total d’une partie de ta grille. Chaque sous-total est comparé à la somme de ses critères, et un écart te le dit.'
+            ]
+        },
+        {
             // 1.245 (13 nov. 2026 : la carte d'aide dans « Apporter mon matériel », le rapport de bug #1280) — titre et
             // lignes 1 et 3 proposés par Claude Code, ligne 2 écrite par Grégoire ; son oui du 13 nov. 2026.
             version: '1.245',
