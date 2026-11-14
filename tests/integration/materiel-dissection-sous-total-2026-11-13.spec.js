@@ -87,7 +87,7 @@ test('S1 · « Sous-total » dans la légende, avant « Total », à sa couleur 
     expect(legende.indexOf('soustotal'), '« Sous-total » juste avant « Total »').toBe(legende.indexOf('total') - 1);
     const bouton = page.locator(etiquette('soustotal'));
     await expect(bouton.locator('.dissection-etiquette-nom')).toHaveText('Sous-total');
-    await expect(bouton.locator('.dissection-etiquette-aide')).toHaveText('Le total d’une partie de la grille');
+    await expect(bouton.locator('.dissection-etiquette-aide')).toHaveText('Le total d’un groupe de critères');
     expect((await bouton.boundingBox()).height, 'cible tactile').toBeGreaterThanOrEqual(44);
     // Sa couleur n'est celle d'aucune autre étiquette de grille (sombre, puis clair).
     for (const clair of [false, true]) {

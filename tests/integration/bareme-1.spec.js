@@ -79,7 +79,7 @@ const DESCRIPTEURS = ['Résumé absent ou erroné', 'Résume quelques événemen
 /** L'exemple fictif, étiqueté en points, créé (spec 2a) ; rend l'identifiant de la grille. */
 async function creerExemple(page) {
     await collerLExemple(page);
-    await etiqueter(page, 'section', ['PARTIE A : COMPRÉHENSION', 'PARTIE B : RÉFLEXION']);
+    await etiqueter(page, 'section', ['SECTION A : COMPRÉHENSION', 'SECTION B : RÉFLEXION']);
     await etiqueter(page, 'niveau', ['Insuffisant', 'Partiel', 'Satisfaisant', 'Remarquable']);
     await etiqueter(page, 'critere', CRITERES);
     await etiqueter(page, 'descripteur', DESCRIPTEURS);

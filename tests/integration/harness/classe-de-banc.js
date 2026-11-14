@@ -215,7 +215,7 @@ export async function etiqueterExemple(page) {
     await collerLExemple(page);
     await expect(page.locator('#materiel-dissection')).toBeVisible();
     await etiqueter(page, 'titre', ['Journal de lecture']);
-    await etiqueter(page, 'section', ['PARTIE A : COMPRÉHENSION', 'PARTIE B : RÉFLEXION']);
+    await etiqueter(page, 'section', ['SECTION A : COMPRÉHENSION', 'SECTION B : RÉFLEXION']);
     await etiqueter(page, 'niveau', NIVEAUX_EXEMPLE);
     await etiqueter(page, 'critere', CRITERES_EXEMPLE);
     await etiqueter(page, 'descripteur', DESCRIPTEURS_EXEMPLE);

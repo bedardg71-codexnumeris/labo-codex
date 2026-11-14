@@ -155,7 +155,7 @@ const AIDE_CONTEXTUELLE = {
         sections: [
             {
                 type: 'texte',
-                contenu: 'Cet outil range dans Labo Codex une grille d’évaluation que tu as déjà créée à l’extérieur de l’application. Tu la colles ici, tu poses une étiquette sur chaque morceau (critère, pondération, descripteur, points, niveau…), puis « Créer ma grille » la range dans Grilles. Rien n’entre dans tes grilles avant ce dernier geste.'
+                contenu: 'Cet outil range dans Labo Codex une grille d’évaluation que tu as déjà créée à l’extérieur de l’application. Tu la colles ici, tu poses une étiquette sur chaque partie (critère, pondération, descripteur, points, niveau…), puis « Créer ma grille » la range dans Grilles. Rien n’entre dans tes grilles avant ce dernier geste.'
             },
             {
                 type: 'texte',
@@ -163,7 +163,7 @@ const AIDE_CONTEXTUELLE = {
             },
             {
                 type: 'conseil',
-                contenu: 'Copie ta grille depuis son fichier d’origine (Word, Pages) plutôt que depuis un PDF : le tableau arrive avec ses cases, et la place de chaque morceau dit déjà à quel critère et à quel niveau il appartient.'
+                contenu: 'Copie ta grille depuis son fichier d’origine (Word, Pages) plutôt que depuis un PDF : le tableau arrive avec ses cases, et la place de chaque partie dit déjà à quel critère et à quel niveau elle appartient.'
             }
         ],
         voirAussi: ['construction-grilles', 'construction-echelles', 'grille-type-critere-detail']

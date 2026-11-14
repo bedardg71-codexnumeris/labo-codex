@@ -243,7 +243,7 @@ describe('R — quand « Créer ma grille » est refusé en niveaux, et pourquoi
         expect(D.creation(R, {}, '  ', { valeurs: valeurs(R, TROIS) }).raisons).toEqual(['un nom pour ta grille']);
         const lignes = TEXTE_C.filter((x) => x[1] !== 'points');
         const Rp = compriseTexte([...lignes, ['Langue exemplaire', 'descripteur']]);
-        expect(D.creation(Rp, {}, undefined, { valeurs: valeurs(Rp, TROIS) }).raisons).toEqual(['une place pour le morceau étiqueté listé plus bas']);
+        expect(D.creation(Rp, {}, undefined, { valeurs: valeurs(Rp, TROIS) }).raisons).toEqual(['une place pour la partie étiquetée listée plus bas']);
     });
 
     it('R.e — les avertissements de plages et de note retenue, tels quels, n’empêchent rien', () => {

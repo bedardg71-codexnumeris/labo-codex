@@ -39,9 +39,9 @@ export const GESTES_PROPOSES = {
     // vivent dans le module que « Ta grille » et la carte de la page appellent toutes deux ; les deux dernières, la sortie
     // de l'exemple dans la page, sont PROPOSÉES ce jour-là.
     'js/materiel-aide.js': [
-        "Colle ta grille, montre ce qu'est chaque morceau, puis touche « Créer ma grille » ; ou touche « Composer ma grille ».",
-        "Regarde chaque étiquette, puis la grille lue en dessous ; touche ensuite « Faire l'exercice soi-même » ou « Passer à ma grille ».",
-        "L'exemple est étiqueté : touche « Passer à ma grille ».",
+        "Colle ta grille, montre ce qu'est chaque partie, puis touche « Créer ma grille » ; ou touche « Composer ma grille ».",
+        // 14 nov. 2026 (essai novice, lot 4c) : la carte du parcours n'offre plus l'exemple ; les deux lignes qui nommaient
+        // sa sortie dans la carte (« Passer à ma grille ») sont parties avec elle.
         "Regarde chaque étiquette, puis la grille lue en dessous ; touche ensuite « Quitter l'exemple ».",
         "L'exemple est étiqueté : touche « Quitter l'exemple ».",
     ],
@@ -51,7 +51,6 @@ export const GESTES_PROPOSES = {
         // une grille déjà là, Conception › Grilles. PROPOSÉES.
         "Touche « + Nouvelle grille », compose-la, puis touche « Créer la grille » ; ou ouvre une de tes grilles.",
         "Touche « Prendre cette grille » pour évaluer avec la grille ouverte ; ou ouvre-en une autre.",
-        "Touche « Voir le travail complet » ou « Faire l'exercice soi-même » ; ou « Passer à ma grille ».",
         "Touche « + Nouvelle production », remplis les champs obligatoires, choisis ta grille, puis touche « Créer la production ».",
         "Écris la date de remise, puis coche « Consignes transmises ».",
         "Touche « Actions › Évaluer » sur sa ligne, choisis un niveau par critère, puis touche « Verrouiller ».",

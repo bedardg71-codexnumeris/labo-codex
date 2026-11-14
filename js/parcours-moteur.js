@@ -223,8 +223,11 @@
         var zones = etape.zones ? (etape.zones() || []).filter(Boolean) : [];
         var n = etape.nommeLeContour;
         var auContour = typeof n === 'function' ? !!n() : !!n;
-        if (etape.lignes) {
-            // Les champs de ses lignes : la bulle les évite tous ; une flèche par champ encore vide d'une ligne à faire.
+        // (Une étape à plusieurs façons peut ne rendre aucune ligne dans l'une d'elles : elle garde alors ses flèches d'avant.)
+        var sesLignes = etape.lignes ? lignesDeLEtape(etape) : [];
+        if (sesLignes.length) {
+            // Les champs de ses lignes : la bulle les évite tous ; une flèche par champ encore vide d'une ligne à faire,
+            // et une vers chaque élément que l'étape déclare dans `fleches`.
             var tous = [], aFaire = [];
             (function lire(liste) {
                 liste.forEach(function (l) {
@@ -236,8 +239,8 @@
                     });
                     if (l.sous) lire(l.sous);
                 });
-            })(lignesDeLEtape(etape));
-            var suite = !aFaire.length && etape.fleches ? (etape.fleches() || []).filter(Boolean) : [];
+            })(sesLignes);
+            var suite = etape.fleches ? (etape.fleches() || []).filter(Boolean) : [];
             return { zones: tous.concat(zones, suite), fleches: aFaire.concat(suite), une: true, auContour: auContour };
         }
         if (etape.formulaire) {

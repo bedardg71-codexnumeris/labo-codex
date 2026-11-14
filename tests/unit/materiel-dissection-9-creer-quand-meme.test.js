@@ -82,7 +82,7 @@ describe('L — la lecture : ce qui manque de points ne bloque plus', () => {
     it('L.d — un morceau étiqueté sans place : bloque toujours', () => {
         const grille = [[{ l: [['Titre fictif', 'titre']] }], [{ l: [['/ 5', 'ponderation']] }], [{ l: [['Critère A fictif', 'critere'], ['/ 10', 'ponderation']] }]];
         const c = D.creation(lire(coller(grille)), {});
-        expect(c.raisons).toContain('une place pour le morceau étiqueté listé plus bas');
+        expect(c.raisons).toContain('une place pour la partie étiquetée listée plus bas');
     });
 
     it('L.e — des points hors de 0 à 100 : bloquent toujours (un objet faux)', () => {

@@ -138,7 +138,7 @@ test('dissection · coller, poser deux étiquettes au pointeur, lire la grille c
     await expect(lecture).toContainText('Question 1 : le sens du passage fictif');
     await expect(lecture).toContainText('Réponse juste, mais incomplète');
     await expect(page.locator('#dissection-constats')).toContainText('1 critère');
-    await expect(page.locator('#dissection-constats')).toContainText('21 morceaux sans étiquette');
+    await expect(page.locator('#dissection-constats')).toContainText('21 parties sans étiquette');
 
     // iPad debout puis couché (C1) : la palette reste à gauche du canevas, leurs hauts au même niveau ;
     // la page ne défile pas de côté ; le canevas, lui, défile ; la palette tient dans la hauteur du canevas.

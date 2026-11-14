@@ -7,6 +7,7 @@ import { flecheVers, nombreDeFleches } from './harness/fleches-de-banc.js';
 import {
     etape2, etape3, etape4, etapes5et6, etape9, menusLibres, dossierDesCaptures
 } from './harness/parcours-3-de-banc.js';
+import { passerLOuverture } from './harness/ouverture-evaluer.js';
 
 // =======================================================================
 // « ÉVALUER UNE PREMIÈRE PRODUCTION » : LE TROISIÈME ESSAI DE GRÉGOIRE SUR L'IPAD (11 NOV. 2026, 9 H 11 À 9 H 26)
@@ -70,9 +71,7 @@ async function composerUneGrille(page, nomGrille) {
 
 /** Étape 1, par « Composer ma grille » : « Test 1 », composée dans Conception › Grilles. */
 async function composerTest1(page) {
-    await etape(page, 1, 'Ta grille');
-    // 12 nov. 2026 : l'exemple est offert d'abord ; ce banc passe à sa grille.
-    await bulle(page).getByRole('button', { name: 'Passer à ma grille' }).click();
+    await passerLOuverture(page);   // 14 nov. 2026 : deux bulles d'ouverture avant « Ta grille »
     await page.click('#materiel-accueil [data-action="materiel.taperMain"]');
     await composerUneGrille(page, 'Test 1');
     await etape(page, 2, 'Ta production');
