@@ -79,7 +79,7 @@ const DESCRIPTEURS = ['Résumé absent ou erroné', 'Résume quelques événemen
 
 /** L'exemple fictif, étiqueté en points (sans son Titre). */
 async function etiqueterExemple(page) {
-    await etiqueter(page, 'section', ['PARTIE A : COMPRÉHENSION', 'PARTIE B : RÉFLEXION']);
+    await etiqueter(page, 'section', ['SECTION A : COMPRÉHENSION', 'SECTION B : RÉFLEXION']);
     await etiqueter(page, 'niveau', ['Insuffisant', 'Partiel', 'Satisfaisant', 'Remarquable']);
     await etiqueter(page, 'critere', CRITERES);
     await etiqueter(page, 'souscritere', ['· Repérage des événements principaux', '· Exactitude des faits rapportés']);
@@ -156,10 +156,10 @@ test('dissection 2a · l’exemple étiqueté, refusé sans nom, un échec rées
     expect(g.nom).toBe('Journal de lecture');
     expect(g.description).toBe('Rendre compte d’une lecture personnelle et la relier aux notions vues en classe.');
     expect(g.criteres.map((c) => [c.nom, c.ponderation])).toEqual([
-        ['Partie A : compréhension – L’étudiant·e résume l’œuvre avec justesse', 5],
-        ['Partie A : compréhension – L’étudiant·e relève des procédés d’écriture', 5],
-        ['Partie B : réflexion – L’étudiant·e relie l’œuvre aux notions du cours', 10],
-        ['Partie B : réflexion – L’étudiant·e exprime une appréciation argumentée', 10]
+        ['Section A : compréhension – L’étudiant·e résume l’œuvre avec justesse', 5],
+        ['Section A : compréhension – L’étudiant·e relève des procédés d’écriture', 5],
+        ['Section B : réflexion – L’étudiant·e relie l’œuvre aux notions du cours', 10],
+        ['Section B : réflexion – L’étudiant·e exprime une appréciation argumentée', 10]
     ]);
     // #1125 (22 oct. 2026) : un barème, les points des tranches en nombres, le texte sans eux ; aucun descripteur.
     expect(g.criteres[0].bareme.map((t) => [t.nom, t.pointsMin, t.pointsMax, t.texte])[2]).toEqual(['Satisfaisant', 3, 4, 'Résume l’essentiel']);

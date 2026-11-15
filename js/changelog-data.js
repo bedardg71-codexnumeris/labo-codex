@@ -21,6 +21,19 @@
 
     var CHANGELOG = [
         {
+            // 1.247 (14 nov. 2026 : l'essai novice — les parcours en lignes, le compteur, le Cadre, « partie ») — titre et
+            // quatre lignes validés par Grégoire, mot pour mot (relais de Cowork du 14 nov.).
+            version: '1.247',
+            couleur: 'vert',
+            titre: 'Des parcours plus légers',
+            items: [
+                'Dans les parcours, chaque bulle est maintenant une courte liste. Une ligne se coche quand son geste est fait, et la bulle dit où tu es dans l’application.',
+                'Dans une bulle, touche le compteur («&nbsp;3 sur 8&nbsp;») pour revoir une étape déjà faite. «&nbsp;Refaire&nbsp;» rejoue tout le parcours, sans rien changer à tes données.',
+                'Dans Cadre, le nom du trimestre se crée tout seul à partir de la session et de l’année, et les périodes d’une séance se proposent d’après ses heures.',
+                'Dans Conception › Mon matériel, «&nbsp;morceau&nbsp;» devient «&nbsp;partie&nbsp;». «&nbsp;Voir le travail complet&nbsp;» devient «&nbsp;Voir un exemple de grille étiquetée&nbsp;», et «&nbsp;Faire l’exercice soi-même&nbsp;» devient «&nbsp;Étiqueter l’exemple moi-même&nbsp;».'
+            ]
+        },
+        {
             // 1.246 (13 nov. 2026, soir : #1276, la grille ne remonte plus pendant l'étiquetage ; l'étiquette « Sous-total »)
             // — titre et lignes de Claude Code, d'après les mots du relais de Cowork (13 nov., 18 h 50) ; non relus par Grégoire.
             version: '1.246',

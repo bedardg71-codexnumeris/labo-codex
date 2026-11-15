@@ -96,11 +96,11 @@ test('dissection 7 · « Rattacher » : deux touchers au pointeur, marque et fl�
     const reste = await page.locator('#dissection-palette .dissection-etiquette').evaluateAll((bs) => bs.map((b) => b.getAttribute('data-param')).slice(-4));
     expect(reste).toEqual(['suite', 'couper', 'rattacher', 'ignorer']);
     await expect(outil(page)).toContainText('Rattacher');
-    await expect(outil(page)).toContainText('Joint un morceau à celui dont il est la suite');
+    await expect(outil(page)).toContainText('Joint une partie à celle dont elle est la suite');
 
     // Un lien seul (aucune étiquette) suffit à faire confirmer « Coller une autre grille ».
     await outil(page).click();
-    await expect.poll(() => page.evaluate(() => window.materielDissection.consignes().outil)).toBe('Outil « Rattacher » : touche deux morceaux d’un même texte, dans l’ordre que tu veux ; l’application les lit dans l’ordre de ta grille. Touche deux fois un morceau rattaché pour le détacher.');   // 13 nov. 2026 : la phrase de l'outil se lit dans la carte
+    await expect.poll(() => page.evaluate(() => window.materielDissection.consignes().outil)).toBe('Outil « Rattacher » : touche deux parties d’un même texte, dans l’ordre que tu veux ; l’application les lit dans l’ordre de ta grille. Touche deux fois une partie rattachée pour la détacher.');   // 13 nov. 2026 : la phrase de l'outil se lit dans la carte
     await toucher(page, NOM_D7[2]);
     await toucher(page, NOM_D7[0]);
     await page.keyboard.press('Escape');
@@ -126,9 +126,9 @@ test('dissection 7 · « Rattacher » : deux touchers au pointeur, marque et fl�
     await outil(page).click();
     await expect(autre).toHaveText('Coller une autre grille');
     await toucher(page, NOM_D7[2]);
-    await expect(statut(page)).toHaveText('Morceau choisi : « renvois) ».');
+    await expect(statut(page)).toHaveText('Partie choisie : « renvois) ».');
     await toucher(page, NOM_D7[2]);
-    await expect(statut(page)).toHaveText('Lien défait : « renvois) » redevient un morceau à part.');
+    await expect(statut(page)).toHaveText('Lien défait : « renvois) » redevient une partie à part.');
     await expect(morceau(page, NOM_D7[2])).not.toHaveClass(/dissection-rattache/);
     await page.keyboard.press('Escape');
 
@@ -147,8 +147,8 @@ test('dissection 7 · « Rattacher » : deux touchers au pointeur, marque et fl�
     await expect(outil(page)).toHaveAttribute('aria-pressed', 'true');
     await toucher(page, NOM_D7[2]);
     await expect(morceau(page, NOM_D7[2])).toHaveClass(/dissection-choisi/);
-    await expect.poll(() => page.evaluate(() => window.materielDissection.consignes().outil)).toBe('Outil « Rattacher » : touche maintenant le morceau à joindre à « renvois) ». Retouche « renvois) » pour annuler.');   // 13 nov. 2026 : la phrase de l'outil se lit dans la carte
-    await expect(statut(page)).toHaveText('Morceau choisi : « renvois) ».');
+    await expect.poll(() => page.evaluate(() => window.materielDissection.consignes().outil)).toBe('Outil « Rattacher » : touche maintenant la partie à joindre à « renvois) ». Retouche « renvois) » pour annuler.');   // 13 nov. 2026 : la phrase de l'outil se lit dans la carte
+    await expect(statut(page)).toHaveText('Partie choisie : « renvois) ».');
     await toucher(page, NOM_D7[2]);
     await expect(morceau(page, NOM_D7[2])).not.toHaveClass(/dissection-choisi/);
     await expect(statut(page)).toHaveText('Choix annulé : aucun lien créé.');
@@ -165,7 +165,7 @@ test('dissection 7 · « Rattacher » : deux touchers au pointeur, marque et fl�
     await expect(fin).toHaveClass(/dissection-rattache/);
     await expect(fin).toHaveAttribute('data-suite-de', idNom);
     await expect(fin).not.toHaveAttribute('data-type', /.+/);
-    await expect(statut(page)).toHaveText('Morceaux rattachés : l’application lit « Nuances fictives du propos renvois) ». L’étiquette « Critère » de la suite est retirée : celle du premier morceau vaut pour le texte entier.');
+    await expect(statut(page)).toHaveText('Parties rattachées : l’application lit « Nuances fictives du propos renvois) ». L’étiquette « Critère » de la suite est retirée : celle de la première partie vaut pour le texte entier.');
     const fleche = page.locator('#dissection-traits path.dissection-trait-lien');
     await expect(fleche).toHaveCount(1);
     await expect(fleche).toHaveAttribute('data-de', await fin.getAttribute('data-id'));
@@ -179,14 +179,14 @@ test('dissection 7 · « Rattacher » : deux touchers au pointeur, marque et fl�
     // de la grille (pas celui des gestes).
     await toucher(page, NOM_D7[1]);
     await toucher(page, NOM_D7[2]);
-    await expect(statut(page)).toHaveText(/^Morceaux rattachés : l’application lit « Nuances fictives du propos \(exemples, contrastes, renvois\) »\./);
+    await expect(statut(page)).toHaveText(/^Parties rattachées : l’application lit « Nuances fictives du propos \(exemples, contrastes, renvois\) »\./);
     await expect(morceau(page, NOM_D7[1])).toHaveAttribute('data-suite-de', idNom);
     await expect(fleche).toHaveCount(2);
 
     // Deux membres d'un même groupe : rien ne change, et cela se dit ; le choix tombe.
     await toucher(page, NOM_D7[0]);
     await toucher(page, NOM_D7[2]);
-    await expect(statut(page)).toHaveText('Ces deux morceaux sont déjà rattachés : rien ne change.');
+    await expect(statut(page)).toHaveText('Ces deux parties sont déjà rattachées : rien ne change.');
     await expect(fleche).toHaveCount(2);
     await expect(morceau(page, NOM_D7[0])).not.toHaveClass(/dissection-choisi/);
 
@@ -209,7 +209,7 @@ test('dissection 7 · « Rattacher » : deux touchers au pointeur, marque et fl�
     await page.locator('#dissection-palette [data-param="descripteur"]').click();
     await toucher(page, NOM_D7[2]);
     await expect(fin).not.toHaveAttribute('data-type', /.+/);
-    await expect(statut(page)).toHaveText('Ce morceau est la suite de « Nuances fictives du propos » : l’étiquette de « Nuances fictives du propos » vaut pour le texte entier. Détache-le avec « Rattacher » pour l’étiqueter à part.');
+    await expect(statut(page)).toHaveText('Cette partie est la suite de « Nuances fictives du propos » : l’étiquette de « Nuances fictives du propos » vaut pour le texte entier. Détache-la avec « Rattacher » pour l’étiqueter à part.');
     await page.keyboard.press('Escape');
 
     // La lecture : un seul critère, sous le nom entier, sa pondération et ses cases.

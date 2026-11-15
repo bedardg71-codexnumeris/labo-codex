@@ -76,10 +76,10 @@
      * l'outil, que la carte dit mot pour mot ; `enMain` ne garde que le fait (sa consigne redisait `bandeau`).
      */
     var TEXTES_COUPE = {
-        bandeau: 'Outil « Couper » : touche l’endroit d’un morceau où le séparer en deux. La coupe tombe entre deux mots.',
+        bandeau: 'Outil « Couper » : touche l’endroit d’une partie où la séparer en deux. La coupe tombe entre deux mots.',
         enMain: 'Outil « Couper » en main.',
-        coupe: function (a, b) { return 'Morceau coupé en deux : « ' + a + ' » et « ' + b + ' ».'; },
-        unMot: 'Ce morceau n’a qu’un mot : il ne se coupe pas.',
+        coupe: function (a, b) { return 'Partie coupée en deux : « ' + a + ' » et « ' + b + ' ».'; },
+        unMot: 'Cette partie n’a qu’un mot : elle ne se coupe pas.',
         annulee: function (t) { return 'Coupe annulée : « ' + t + ' » est recollé.'; },
         // Lot 7 : quand l'annulation défait un lien. Validé G. 18 oct. 17 h 18.
         lienDefait: ' Le lien qui touchait ses parties est défait.'
@@ -94,19 +94,19 @@
      * Les textes collés y entrent par leurs premiers mots (`premiersMots`).
      */
     var TEXTES_LIEN = {
-        bandeau: 'Outil « Rattacher » : touche deux morceaux d’un même texte, dans l’ordre que tu veux ; l’application les lit dans l’ordre de ta grille. Touche deux fois un morceau rattaché pour le détacher.',
-        bandeauChoix: function (b, rattache) { return 'Outil « Rattacher » : touche maintenant le morceau à joindre à « ' + b + ' ». Retouche « ' + b + ' » pour ' + (rattache ? 'le détacher.' : 'annuler.'); },
+        bandeau: 'Outil « Rattacher » : touche deux parties d’un même texte, dans l’ordre que tu veux ; l’application les lit dans l’ordre de ta grille. Touche deux fois une partie rattachée pour la détacher.',
+        bandeauChoix: function (b, rattache) { return 'Outil « Rattacher » : touche maintenant la partie à joindre à « ' + b + ' ». Retouche « ' + b + ' » pour ' + (rattache ? 'la détacher.' : 'annuler.'); },
         // 13 nov. 2026 : `bandeau` et `bandeauChoix` se lisent dans la carte ; `enMain` et `choisi` ne gardent que le fait.
         enMain: 'Outil « Rattacher » en main.',
-        choisi: function (b) { return 'Morceau choisi : « ' + b + ' ».'; },
+        choisi: function (b) { return 'Partie choisie : « ' + b + ' ».'; },
         annule: 'Choix annulé : aucun lien créé.',
-        lie: function (t) { return 'Morceaux rattachés : l’application lit « ' + t + ' ».'; },
-        etiquetteRetiree: function (nom) { return ' L’étiquette « ' + nom + ' » de la suite est retirée : celle du premier morceau vaut pour le texte entier.'; },
-        reportee: function (nom) { return ' L’étiquette « ' + nom + ' » passe au premier morceau : elle vaut pour le texte entier.'; },
-        defait: function (b) { return 'Lien défait : « ' + b + ' » redevient un morceau à part.'; },
-        rien: 'Ces deux morceaux sont déjà rattachés : rien ne change.',
-        sansEtiquette: function (a) { return 'Ce morceau est la suite de « ' + a + ' » : l’étiquette de « ' + a + ' » vaut pour le texte entier. Détache-le avec « Rattacher » pour l’étiqueter à part.'; },
-        suiteDe: function (a) { return 'Ce morceau est la suite de « ' + a + ' » : l’application les lit comme un seul texte.'; },
+        lie: function (t) { return 'Parties rattachées : l’application lit « ' + t + ' ».'; },
+        etiquetteRetiree: function (nom) { return ' L’étiquette « ' + nom + ' » de la suite est retirée : celle de la première partie vaut pour le texte entier.'; },
+        reportee: function (nom) { return ' L’étiquette « ' + nom + ' » passe à la première partie : elle vaut pour le texte entier.'; },
+        defait: function (b) { return 'Lien défait : « ' + b + ' » redevient une partie à part.'; },
+        rien: 'Ces deux parties sont déjà rattachées : rien ne change.',
+        sansEtiquette: function (a) { return 'Cette partie est la suite de « ' + a + ' » : l’étiquette de « ' + a + ' » vaut pour le texte entier. Détache-la avec « Rattacher » pour l’étiqueter à part.'; },
+        suiteDe: function (a) { return 'Cette partie est la suite de « ' + a + ' » : l’application les lit comme un seul texte.'; },
         nomEntier: function (t) { return 'L’application lit : « ' + t + ' »'; }
     };
 
@@ -124,8 +124,10 @@
      * Textes PROPOSÉS (Claude Code), lus par l'enseignant·e, corrigeables.
      */
     var TEXTES_EXEMPLE = {
-        complet: 'L’exemple, avec toutes ses étiquettes posées. Il ne s’enregistre pas.',
-        exercice: 'L’exemple, sans étiquettes : à toi de les poser. Il ne s’enregistre pas.',
+        // 14 nov. 2026 (essai novice, lot 4e) : la page ne dit plus qu'UNE fois que l'exemple ne s'enregistre pas, en
+        // bas, près du nom (`note`). Ces deux phrases le redisaient en haut (« Il ne s'enregistre pas. »).
+        complet: 'L’exemple, avec toutes ses étiquettes posées.',
+        exercice: 'L’exemple, sans étiquettes : à toi de les poser.',
         note: 'C’est l’exemple : il ne devient pas une de tes grilles.',
         // PROPOSÉ (13 nov. 2026) : la sortie de l'exemple dans la page, à la place de « Coller une autre grille ».
         quitter: 'Quitter l’exemple'
@@ -155,8 +157,8 @@
             doigt: 'Pour en étiqueter plusieurs d’un coup, garde le doigt posé un instant, puis glisse.',
             souris: 'Pour en étiqueter plusieurs d’un coup, glisse dessus.'
         },
-        designe: 'Touche les morceaux de ta grille qu’elle désigne : ils prennent sa couleur.',
-        retirer: 'Touche un morceau déjà étiqueté pour retirer son étiquette.',
+        designe: 'Touche les parties de ta grille qu’elle désigne : elles prennent sa couleur.',
+        retirer: 'Touche une partie déjà étiquetée pour retirer son étiquette.',
         lire: 'En bas, lis la grille que l’application en tirerait, puis crée-la.',
         choisie: function (nom) { return 'Étiquette « ' + nom + ' » choisie.'; },
         lectureVide: 'Étiquette ta grille : la lecture de l’application apparaîtra ici.',
@@ -424,7 +426,7 @@
             var t = b.getAttribute('data-type'), T = enMain(t);
             b.setAttribute('aria-pressed', t === etat.actif ? 'true' : 'false');
             b.querySelector('.dissection-etiquette-compte').textContent = compte[t] ? String(compte[t]) : '';
-            b.setAttribute('aria-label', T.nom + ' : ' + T.aide + (compte[t] ? ', ' + pluriel(compte[t], 'morceau étiqueté', 'morceaux étiquetés') : ''));
+            b.setAttribute('aria-label', T.nom + ' : ' + T.aide + (compte[t] ? ', ' + pluriel(compte[t], 'partie étiquetée', 'parties étiquetées') : ''));
         });
     }
 
@@ -504,7 +506,7 @@
         if (!etat.actif) {
             var t = typeDe(id);
             if (etat.rattachements[id] != null) dire(TEXTES_LIEN.suiteDe(mots(etat.rattachements[id])));
-            else if (t) { eclair(t); dire('Ce morceau porte l’étiquette « ' + D().TYPE[t].nom + ' ». Pour la changer, touche une autre étiquette, puis ce morceau.'); }
+            else if (t) { eclair(t); dire('Cette partie porte l’étiquette « ' + D().TYPE[t].nom + ' ». Pour la changer, touche une autre étiquette, puis cette partie.'); }
             else dire(TEXTES_LEGENDE.aucune);
             return;
         }
@@ -929,7 +931,7 @@
         rendreSansPlace(sp, R);
         if (D().estListeDeCodes(R)) {
             cs.appendChild(noeud('span', 'dissection-constat', pluriel(R.codes.length, 'code', 'codes')));
-            cs.appendChild(noeud('span', 'dissection-constat', pluriel(R.sansEtiquette, 'morceau sans étiquette', 'morceaux sans étiquette')));
+            cs.appendChild(noeud('span', 'dissection-constat', pluriel(R.sansEtiquette, 'partie sans étiquette', 'parties sans étiquette')));
             if (R.codes.length) cp.appendChild(tableCodes(R));
             return;
         }
@@ -946,7 +948,7 @@
 
     function rendreSansPlace(sp, R) {
         if (!R.sansPlace.length) return;
-        sp.appendChild(noeud('p', null, 'Ces morceaux ont une étiquette, mais l’application ne saurait pas où les ranger :'));
+        sp.appendChild(noeud('p', null, 'Ces parties ont une étiquette, mais l’application ne saurait pas où les ranger :'));
         var ul = noeud('ul');
         R.sansPlace.forEach(function (s) { ul.appendChild(noeud('li', null, '« ' + s.t + ' » (' + D().TYPE[s.type].nom + ') : ' + s.raison)); });
         sp.appendChild(ul);
@@ -974,7 +976,7 @@
         // Lot 2b : le choix (logique « les deux » seulement) et le tableau des niveaux.
         choix: 'Le résultat d’une copie viendrait :',
         choixPoints: 'des points',
-        choixNiveaux: 'des niveaux',
+        choixNiveaux: 'des niveaux de performance',   // 14 nov. 2026 (règle 6 : « niveau de performance »)
         niveaux: 'Ce que vaut chaque niveau',
         niveauxAide: 'Pour chaque niveau : la plage de notes qu’il couvre, et la note qu’une copie reçoit à ce niveau.',
         de: 'de',
@@ -1385,7 +1387,7 @@
                 b.totalOk ? 'dissection-constat-ok' : 'dissection-constat-ecart');
         } else if (b.aDesPoids) constat('Somme des pondérations : ' + formaterNombre(b.somme));
         rendreConstatsSousTotaux(constat, b.sousTotaux || []);
-        constat(pluriel(R.sansEtiquette, 'morceau sans étiquette', 'morceaux sans étiquette'));
+        constat(pluriel(R.sansEtiquette, 'partie sans étiquette', 'parties sans étiquette'));
     }
 
     // ------------------------------------------------------------------
@@ -1481,9 +1483,9 @@
         majDefilementPalette();
         var n = etat.morceaux.ordre.length;
         dire(message || (exemple ? TEXTES_EXEMPLE[exemple] : null) || (doc.mode === 'table'
-            ? 'Tableau collé : ' + pluriel(doc.rows.length, 'rangée', 'rangées') + ', ' + pluriel(n, 'morceau', 'morceaux') + '.'
+            ? 'Tableau collé : ' + pluriel(doc.rows.length, 'rangée', 'rangées') + ', ' + pluriel(n, 'partie', 'parties') + '.'
             // Validé G. 18 oct. 9 h 52 avec « rattachera » ; revu pour le nom de l'outil du lot 7, validé G. 18 oct. 17 h 18.
-            : 'Texte collé : ' + pluriel(n, 'ligne', 'lignes') + ', sans tableau. L’application rangera les morceaux selon leur ordre.'));
+            : 'Texte collé : ' + pluriel(n, 'ligne', 'lignes') + ', sans tableau. L’application rangera les parties selon leur ordre.'));
         var titre = el('dissection-titre');
         if (titre) titre.focus();   // règle SPA : le focus suit le changement de vue
         if (!reprise) enregistrer();

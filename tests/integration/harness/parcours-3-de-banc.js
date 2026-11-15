@@ -11,6 +11,7 @@ import {
 } from './classe-de-banc.js';
 import { attendreApplication } from './attendre-application.js';
 import { flecheVers, nombreDeFleches, flecheVisant } from './fleches-de-banc.js';
+import { passerLOuverture } from './ouverture-evaluer.js';
 
 let DOSSIER = process.env.CAPTURES_PARCOURS || '';
 /** Le dossier des captures (vide : aucune). */
@@ -52,10 +53,9 @@ async function lePanneauSansClasse(page, cap) {
 
 /** Étape 1 : la grille, de l'accueil de Mon matériel au choix, puis « Créer ma grille ». */
 export async function etape1(page, { niveaux, cap }) {
-    await etape(page, 1, 'Ta grille');
+    // 14 nov. 2026 (essai novice, lot 4b) : deux bulles d'ouverture avant « Ta grille » ; la bulle n'offre plus l'exemple.
+    await passerLOuverture(page);
     await expect(page.locator('#conception-materiel')).toBeVisible();
-    // 12 nov. 2026 (la dissection sur l'iPad, point 5) : l'exemple est offert d'abord ; ce banc passe à sa grille.
-    await bulle(page).getByRole('button', { name: 'Passer à ma grille' }).click();
     await contourSur(page, '#materiel-zone-collage');
     await expect(page.locator('#materiel-accueil [data-action="materiel.taperMain"]')).toHaveText('Composer ma grille');
     await capture(page, DOSSIER, `p3-1-${cap}`);
@@ -358,7 +358,8 @@ async function etape8(page, { niveaux, cap }) {
 export async function etape9(page, { cap }) {
     await etape(page, 9, 'Ta rétroaction, avec tes mots', { focus: false });
     await expect(bulle(page).locator('.parcours-bulle-sortie')).toHaveCount(0);   // la dernière : pas de « Plus tard »
-    await expect(bulle(page).locator('.parcours-bulle-boutons button')).toHaveText(['Terminer']);
+    // 14 nov. 2026 (essai novice, lot 2e) : la dernière bulle offre « Parcours suivant » et « Terminer », de même poids.
+    await expect(bulle(page).locator('.parcours-bulle-boutons button')).toHaveText(['Parcours suivant', 'Terminer']);
     const c = await ctx(page);
     const consulter = (await valeursActions(page, c.evaluationId)).find((v) => v.startsWith('consulter|'));
     await contourSur(page, `#evaluations-liste select.eval-actions-select:has(option[value="${consulter}"])`);
@@ -405,9 +406,9 @@ export async function laGrilleEnPortrait(page) {
     await ouvrirEspaceVide(page, 820, { hauteur: 1180 });
     await mettreLaClasseEnPlace(page);
     await page.evaluate(() => Assistance.parcours().find((p) => p.id === 'evaluer').lancer(0));
-    await etape(page, 1, 'Ta grille', { focus: false });
-    await bulle(page).getByRole('button', { name: 'Passer à ma grille' }).click();
-    await expect(bulle(page).locator('.parcours-bulle-texte')).toContainText('ta grille servira ensuite à chaque copie que tu évalueras avec elle');
+    await passerLOuverture(page);
+    // 14 nov. 2026 (lot 4c) : devant l'accueil, la bulle est une liste de lignes ; elle ne réexplique plus ce que dit la page.
+    await expect(bulle(page).locator('.parcours-bulle-ligne').first()).toContainText('Colle ici la grille que tu utilises déjà');
     await entierDansLaFenetre(page, '#parcours-bulle', 'Ta grille, 820 × 1180');
     const defile = await page.evaluate(() => {
         const t = document.querySelector('#parcours-bulle .parcours-bulle-texte');
