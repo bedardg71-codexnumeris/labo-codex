@@ -3865,8 +3865,7 @@ async function ecrireCodexAPartAvantSuppression(premierePhrase) {
    `modalitesEvaluation`). Codex à jour : rien ne change. Sinon, avant la confirmation
    habituelle du geste, une fenêtre propose la mise à jour, par le chemin même de
    « Mettre à jour le codex » (`_mettreAJourLeCodex`). Une seule fonction pour toutes
-   les portes. Lot 2a-2 : les gestes sans question (fusion, pages, « Effacer la page »)
-   ne l'appellent que si quelque chose sera effacé. Mots de la fenêtre acceptés par
+   les portes. Lot 2a-2 : les gestes sans question (fusion, pages) ne l'appellent que si quelque chose sera effacé. Mots de la fenêtre acceptés par
    Grégoire le 2 oct. 2026 (20 h 29) ; les variantes de la première phrase, une par
    geste, sont dans ce registre et à lui.
    =============================== */
@@ -3921,7 +3920,6 @@ var PROPOSITIONS_AVANT_SUPPRESSION = {
     // va à la corbeille, qui l'efface pour de bon après 30 jours. Mots proposés, à Grégoire avant la release.
     copieRemplacee:        { premiere: 'Remplacer ce fichier envoie l\'ancien à la corbeille, qui l\'efface pour de bon après 30 jours.', pronom: 'le', infinitif: 'remplacer' },
     seance:                { premiere: 'Réinitialiser cette séance efface pour de bon ses présences et ses notes.', pronom: 'les' },
-    annotationsPage:       { premiere: '« Effacer la page » efface pour de bon les annotations de cette page.', pronom: 'les' },
     registreLongitudinal:  { premiere: 'Retirer cet·te étudiant·e du registre efface pour de bon sa copie et ses résultats ultérieurs.', pronom: 'les' },
     resultatsBilan:        { premiere: 'Supprimer ces résultats les efface pour de bon.', pronom: 'les' },
     // Lot 2b (3 oct. 2026) : une ligne d'éditeur, seulement si une évaluation l'emploie

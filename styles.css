@@ -19185,7 +19185,10 @@ tr.ligne-import-ecartee td {
    On utilise plutot des colonnes scrollables independantes. */
 .pipeline-3col-grid {
     display: grid;
-    grid-template-columns: 250px 1fr 250px;
+    /* 15 nov. 2026 : « Originaux » passe de 250 à 300 px. Entre la case, le numéro, les chevrons,
+       la vignette et la corbeille, il restait 72 px aux mots : la définition d'un PDF s'y cassait
+       sur cinq lignes (Grégoire, iPad couché). */
+    grid-template-columns: 300px 1fr 250px;
     gap: 16px;
     margin-top: 12px;
 }
@@ -19621,6 +19624,12 @@ tr.ligne-import-ecartee td {
 .pipeline-meta-taille {
     font-size: 0.7rem;
     color: var(--texte-secondaire);
+}
+
+/* Une ligne de mots par rangée, d'un seul tenant : « PDF, 4 pages », « min. 1632 x 3042 px ». */
+.pipeline-meta-ligne {
+    display: block;
+    white-space: nowrap;
 }
 
 @media (max-width: 850px) {
@@ -27723,6 +27732,22 @@ body.mode-clair {
 .prop-fichier-apercu-meta {
     font-size: 0.78rem;
     color: var(--texte-secondaire);
+}
+/* 15 nov. 2026 : la définition de chaque page, en pixels, dans les Propriétés. */
+.prop-fichier-definition {
+    margin: 0 0 12px 0;
+    font-size: 0.85em;
+    color: var(--texte-secondaire);
+}
+.prop-fichier-definition-titre { display: block; }
+.prop-fichier-definition ul {
+    margin: 4px 0 0 0;
+    padding: 0;
+    list-style: none;
+    max-height: 7.5em;
+    overflow-y: auto;
+    color: var(--texte-principal);
+    font-variant-numeric: tabular-nums;
 }
 .prop-fichier-jeton {
     display: flex;
