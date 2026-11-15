@@ -488,6 +488,18 @@ troisième catégorie ; elle ne lui retire pas l'arbitrage.
 5. **Exception** : un défaut gênant peut aller en ligne tout de suite, à la demande de Grégoire, avec son jugement à ce moment-là. Un lot qui touche une zone sous les règles de sécurité (`import-export.js`, `db.js`, `travaux-stockage.js`) garde son jugement obligatoire.
 6. **Un lot codé pendant qu'une release attend** se fait sur une branche partie de `main` ; il ne rejoint `main` qu'après la mise en ligne de la release, et part dans la suivante (premier cas : `lot8-cadre`, 11 oct. 2026). Motif : si le verdict rougit, on sait dans quel paquet chercher.
 
+**Le rythme des mises en ligne (décision de Grégoire, 14 nov. 2026 ; à l'essai).**
+
+- **Les nouveautés** partent une ou deux fois par semaine : **le lundi et le jeudi, vers midi**. Ce sont des fenêtres, pas des obligations : rien de mûr, rien de publié.
+- **Les bugs signalés par les testeurs, et ce qui bloque l'enseignement de Grégoire, partent tout de suite**, comme avant (point 5).
+- **Conséquence : on regroupe.** Une release porte les lots de nouveautés mûrs à la fenêtre ; Claude Code ne propose plus une release par lot. Netlify publie chaque `main` : entre deux fenêtres, un lot de nouveautés jugé attend sur sa branche poussée, et `RELAIS.md`, poussé seul sur `main`, dit où il vit (règle de relais de `CLAUDE.md`). À la fenêtre, les lots mûrs se fusionnent, le bump se pose, et c'est ce commit qui est jugé (point 4).
+
+**Ce régime est À L'ESSAI pour trois lots** (condition de Cowork à sa relecture, 15 nov. 2026).
+
+- **Chaque verdict du nuage se consigne** dans `plans de travail/ESSAI-VERDICT-NUAGE.md` : la date, le SHA, la durée, l'issue (**vert**, **rouge par intermittent**, **rouge vrai**) et les essais en cause. La ligne s'écrit par la session qui a lancé le verdict, dans un commit qui ne touche rien d'observable.
+- **Pendant l'essai, le verdict complet du Mac reste le repli permis** (`node scripts/verdict-en-morceaux.mjs`) : il vaut à lui seul, et son emploi se consigne au même fichier, avec son motif.
+- **Après le troisième lot**, Claude Code remet un bilan à Cowork, qui le porte à Grégoire : le régime se confirme, se corrige ou se retire.
+
 **Ce qui ne change pas** : l'interdit de fusion par l'application GitHub (« Hors de la consigne », plus bas) ; les portes terrain de l'iPad restent le seul juge du toucher et de Safari.
 
 *Ancien contenu de la règle 7 (« un vert local ne prouve rien sur ce que la CI exécute ») : déplacé le 13 septembre 2026 vers le skill `fin-de-session-labo-codex`, §4.6.1 (geste de clôture).*

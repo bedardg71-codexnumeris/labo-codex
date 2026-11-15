@@ -15,7 +15,7 @@
 
 ## La liste Linux (`scripts/playwright-baseline-linux.json`)
 
-Reclassée sur sept passages complets de `main` (10 au 14 nov.), puis complétée par les passages du jour. **61 entrées** : 16 rouges constants, 45 intermittents. Par famille : géométrie ou rendu 24, non élucidé 19, minutage 17, API absente 1, plateforme 0. Les 35 entrées de la liste du 7 nov. jamais rouges sur les sept passages sont retirées. S'y ajoutent les 6 exclus de `tests/playwright.config.js` (inchangés).
+Reclassée sur sept passages complets de `main` (10 au 14 nov.), puis complétée par les passages du jour. **61 entrées** : 15 rouges constants, 46 intermittents (16 et 45 jusqu'au 15 nov. : voir « Retouches du 15 nov. »). Par famille : géométrie ou rendu 24, non élucidé 19, minutage 17, API absente 1, plateforme 0. Les 35 entrées de la liste du 7 nov. jamais rouges sur les sept passages sont retirées. S'y ajoutent les 6 exclus de `tests/playwright.config.js` (inchangés).
 
 **Réparé** : `codex-1011` (deux essais) et `planif-menu-vue` (deux essais) posent eux-mêmes la prémisse qu'ils présumaient du Mac ; verts au nuage depuis. `codex-1012`, réparé de même pour l'API, va plus loin et s'arrête parfois sur un clic que couvre une notification : classé intermittent, géométrie. `lot-j0-bis` (le vrai `navigator.share`) ne se conditionne pas sans cesser de juger : il reste dans la liste, famille « API absente », jugé par le complément.
 
@@ -36,7 +36,7 @@ Reclassée sur sept passages complets de `main` (10 au 14 nov.), puis complété
 | 43647118579 | `53676a101` (le même + délais × 2,5) | 36 min | 1 652 | 24 | 0 | **vert** |
 | 43650508547 | `2c8cc7a3f` (ce lot, sommet : délais × 2,5, 61 entrées) | 33 min | 1 652 | 30 | 0 | **vert** |
 
-**Constat** : la liste seule ne tarit pas la source. Chaque passage a amené 2 à 4 intermittents hors liste, jamais les mêmes (11 distincts en quatre passages), presque tous sur un délai. Le runner joue la suite 2,64 fois plus lentement que le Mac ; les délais par défaut de Playwright y valent, en temps de Mac, 11 s par essai et 1,9 s par attente. Mis à l'échelle sous la variable de la CI seulement (× 2,5, `retries` inchangé), ils ont donné le premier verdict vert du nuage depuis sa création, puis un second sur le sommet du lot. **Deux passages sont un indice, pas une preuve**, et l'effet des délais ne se sépare pas de celui de la liste : le second vert compte 30 rouges, autant qu'avant l'échelle ; ce qui a changé, c'est qu'aucun n'est hors liste (15 des 45 intermittents ont rougi). Au sommet, le juge dit une entrée constante jouée verte (`palette-evaluation-compacte`, « la bulle : toucher un nom ouvre sa description ») : elle passe aux intermittentes au prochain lot qui touche la liste, pas ici, pour ne pas périmer le verdict.
+**Constat** : la liste seule ne tarit pas la source. Chaque passage a amené 2 à 4 intermittents hors liste, jamais les mêmes (11 distincts en quatre passages), presque tous sur un délai. Le runner joue la suite 2,64 fois plus lentement que le Mac ; les délais par défaut de Playwright y valent, en temps de Mac, 11 s par essai et 1,9 s par attente. Mis à l'échelle sous la variable de la CI seulement (× 2,5, `retries` inchangé), ils ont donné le premier verdict vert du nuage depuis sa création, puis un second sur le sommet du lot. **Deux passages sont un indice, pas une preuve**, et l'effet des délais ne se sépare pas de celui de la liste : le second vert compte 30 rouges, autant qu'avant l'échelle ; ce qui a changé, c'est qu'aucun n'est hors liste (15 des 45 intermittents ont rougi). Au sommet, le juge dit une entrée constante jouée verte (`palette-evaluation-compacte`, « la bulle : toucher un nom ouvre sa description ») : elle est passée aux intermittentes le 15 nov. (retouche 4 de Cowork).
 
 ## La comparaison avec le Mac sur `be0d7bdf1`
 
@@ -54,6 +54,16 @@ Le verdict du Mac existe : jeton vert rendu le 14 nov. à 17 h 00 par `verifier-
 ## Les textes de règles changés
 
 `PROTOCOLE.md` : étape 5 de la chaîne, l'ordre (« commit → relecture croisée → corrections → push de la branche → verdict du nuage + complément du Mac → `main` avance, push »), la règle 7 (réécrite en entier), la règle 8 (titre et dernière phrase), l'interdit de fusion par l'application (« sans jugement (règle 7) »). `fin-de-session-labo-codex` §4.5 (réécrit), §4.6.1 et §4.6.2. `mesures-sous-condition.md` §2 et §2.1. `release-et-changelog`. `CLAUDE.md` (deux passages). `tests.yml` (point 12 du journal). Le diff fait foi : `git diff main...lot/verdict-nuage -- PROTOCOLE.md`.
+
+## Retouches du 15 nov. (conditions de Cowork avant la fusion)
+
+1. `main` (`41f68d315`, 1.247.0) fusionné dans la branche (`ce8300e05`), sans conflit ; Vitest : 927 fichiers, 11 835 essais, verts.
+2. Règle 7 de `PROTOCOLE.md` : le rythme des mises en ligne décidé par Grégoire le 14 nov. (nouveautés le lundi et le jeudi vers midi, lots regroupés ; bugs de testeurs et blocages de son enseignement tout de suite ; à l'essai). Accordés : `release-et-changelog` (§2.1 neuf, §6), `fin-de-session-labo-codex` (§5bis.2), `CLAUDE.md` (règle de relais).
+3. Période d'essai de trois lots, écrite à la règle 7 ; journal : `plans de travail/ESSAI-VERDICT-NUAGE.md` ; le verdict complet du Mac reste le repli permis ; bilan à Cowork après le troisième lot.
+4. Liste Linux : « la bulle : toucher un nom… » de `palette-evaluation-compacte` passe aux intermittentes (15 constantes, 46 intermittentes, 61 entrées).
+5. Le complément du Mac : lancé par Grégoire, application Claude fermée ; durée et résultat au journal de l'essai.
+
+**Supposé à ces retouches** : (a) Netlify publiant chaque `main`, un lot de nouveautés jugé hors fenêtre attend sur sa branche, et `RELAIS.md` le dit sur `main` ; la règle de relais du 8 août (« on fusionne à la fin de chaque session ») garde son cas prévu, « si un merge doit attendre ». (b) Les trois lots de l'essai se comptent après la fusion de celui-ci. (c) « Rouge par intermittent » = un rouge hors liste, vert au Mac ou vert à la relance sur le même SHA.
 
 ## Ce que j'ai supposé
 

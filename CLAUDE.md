@@ -33,6 +33,9 @@ doit être ICI. Oublié le 1er sept. 2026.
 session. Si un merge doit attendre, remplir `RELAIS.md` et le pousser sur `main`
 SEUL — le seul point que toute session lit, quelle que soit la branche. Motif : le
 8 août, deux sessions parties du même commit ont livré deux « 1.55.0 ».
+⮕ **Les nouveautés attendent leur fenêtre** (lundi et jeudi vers midi, à l'essai,
+règle 7 de `PROTOCOLE.md`) : on regroupe, pas une release par lot. Bug de testeur
+ou blocage de l'enseignement de Grégoire : tout de suite.
 
 **EN TOUT PREMIER** : au premier tour d'une session, applique le skill
 `debut-de-session-labo-codex`. Lecture seule. Acté le 28 mai 2026 après un écart

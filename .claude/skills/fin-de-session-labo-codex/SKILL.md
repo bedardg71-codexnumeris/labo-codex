@@ -281,6 +281,12 @@ rapport du lot, le relais) : `verdict-nuage.mjs` reporte celui du plus proche an
 tant qu'aucun fichier de la liste OBSERVABLE n'a bougé, et le jeton dit sur quel
 commit il a été rendu (`jugeSur`). Le complément du Mac, lui, se rejoue : il est court.
 
+**Le régime est à l'essai pour trois lots** (règle 7 de `PROTOCOLE.md`) : chaque verdict
+du nuage se consigne dans `plans de travail/ESSAI-VERDICT-NUAGE.md` (date, SHA, durée,
+issue — vert, rouge par intermittent, rouge vrai —, essais en cause), dans un commit qui
+ne touche rien d'observable. Pendant l'essai, le verdict complet du Mac reste le repli
+permis ; son emploi se consigne au même fichier.
+
 **Si le nuage rougit sur un essai qui est vert au Mac** : ce n'est pas un rouge à
 contourner, c'est une entrée due à `scripts/playwright-baseline-linux.json`, dans CE
 lot, avec sa famille et sa cause lue dans le journal du run (règle 7, point 3). Si
@@ -466,7 +472,12 @@ instruits.
 ### 5bis.2 Si le merge doit vraiment attendre
 
 Cas légitimes : travail à mi-chemin, validation terrain en suspens, décision de
-Grégoire non prise. Alors, et **seulement** alors :
+Grégoire non prise, et, **depuis le 14 nov. 2026 (à l'essai), un lot de nouveautés
+fini hors fenêtre**. Les nouveautés partent le lundi et le jeudi vers midi, regroupées
+(règle 7 de `PROTOCOLE.md`, « Le rythme des mises en ligne » ; skill
+`release-et-changelog`, §2.1) : Netlify publie chaque `main`, si bien que le lot jugé
+attend sur sa branche poussée, sans bump (§5). Un bug signalé par un testeur, ou ce qui
+bloque l'enseignement de Grégoire, n'attend pas : §5bis.1. Alors, et **seulement** alors :
 
 1. remplir `RELAIS.md` à la racine (modèle à la fin du fichier) en nommant la
    branche, sa version, et ce qu'elle porte ;
@@ -592,3 +603,4 @@ Prochaines étapes possibles (à choisir par Grégoire) :
 | 2026-06-14 | Nouveau §4 « Vérification adverse » (break-test des tests neufs/modifiés + confrontation récit↔diff + passe « connexions »), instanciant le skill `verification-adverse` (mode A). Renumérotation §4-6 → §5-7. Né des audits du 13-14 juin (7 break-tests, défaut transversal #340). |
 | 2026-09-13 | Nouveau §4.6 : les règles 7 et 8 de `PROTOCOLE.md` déplacées ici (gestes de clôture) ; le protocole garde le renvoi et « qui ferme Cowork ». Au rapport, le témoin « `verification-adverse` chargé seul », condition de levée de la règle 10. |
 | 2026-11-14 | **Le nuage juge le verdict complet, le Mac en complément** (décision de Grégoire, 15 h 51 ; règle 7 de `PROTOCOLE.md`). §4.5 réécrit : la branche du lot est poussée, le verdict du nuage se lance à la demande (`scripts/verdict-nuage.mjs`, ou l'application GitHub), le complément du Mac rejoue ce que Linux ne juge pas (`scripts/complement-mac.mjs`), `pousser.sh` refuse sur `main` un commit non jugé. Un rouge propre à Linux se classe dans le lot, avec sa cause. Le verdict complet du Mac reste possible, plus exigé. §4.6.1 et §4.6.2 mis d'accord. |
+| 2026-11-15 | Retouches demandées par Cowork à sa relecture. §4.5 : le régime est à l'essai pour trois lots, chaque verdict du nuage se consigne dans `plans de travail/ESSAI-VERDICT-NUAGE.md`, le verdict complet du Mac reste le repli permis. §5bis.2 : un lot de nouveautés fini hors fenêtre attend (lundi et jeudi vers midi, lots regroupés ; décision de Grégoire du 14 nov., à l'essai). |
