@@ -12,6 +12,17 @@
 //   5. Le parcours réel n'a pas bougé : ses huit étapes restent entre `var ETAPES = [` et `var DEF = `.
 // Break-tests (12 nov.) : « à ton rythme » changé en « à ton propre rythme » → ROUGE (1) ; « Câlin » remplacé par
 // « Jovial » (un nom du pack) → ROUGE (3) ; `creeEnDemonstration: true` retiré de js/trimestre-v2-cours.js → ROUGE (4).
+//
+// REMIS À JOUR LE 15 NOV. 2026 (`plans de travail/CONSIGNE-2026-11-15-deux-temps-remise-a-jour.md`) :
+//   1. Le texte du panneau est celui du 14 nov. (9 h 21 et 10 h 58, validé), en quatre temps NUMÉROTÉS ; le choix
+//      unique du matériel est retiré : chaque parcours porte deux états, un par temps.
+//   6. Les mots de main (1.247.0 et 1.248.0) valent dans les modèles : ni « établissement », ni « morceau », ni
+//      « pastille », ni « aujourd'hui » ; « séance » pour une rencontre avec le groupe.
+//   7. La règle de la Modélisation (14 nov., 12 h 08) : « Remplir avec l'exemple » n'écrit que dans la démo ; un modèle
+//      ne se joue jamais en visite ; son « Refaire » remet d'abord la démo à neuf.
+// Break-tests (15 nov.) : « 3. Pratique guidée : » changé en « 3. Mettre en pratique : » → ROUGE (1) ; `if (!enDemo())
+// return false;` retiré de `remplir` → ROUGE (7) ; `visite: true` ajouté au lancement du modèle → ROUGE (7) ;
+// « (ils viennent du système de ton établissement) » ajouté à une ligne du modèle → ROUGE (6).
 
 import { describe, it, expect } from 'vitest';
 import { tranche } from './_helpers/tranche.js';
@@ -32,15 +43,10 @@ describe('le panneau « Assistance » : le texte en quatre temps, mot pour mot',
     // Le mandat, tel que Grégoire l'a validé.
     const VALIDE = [
         "Apprendre l'application, en quatre temps.",
-        "Passe de l'un à l'autre à ton rythme.",
-        'Découvrir par toi-même.',
-        "Explore la démo : un groupe de dix étudiant·es fictif·ves t'y attend, avec ses productions, ses évaluations et ses présences.",
-        'Regarder un modèle.',
-        "Dans la démo, un parcours te montre, geste par geste, comment se crée le matériel et ce qu'il donne. C'est toi qui fais les gestes, avec le matériel fourni.",
-        'Mettre en pratique.',
-        'Refais le parcours avec ta vraie liste, ton vrai cours, tes vraies activités.',
-        'Continuer en autonomie.',
-        "Bâtis ton propre parcours, partage ton matériel, pose tes hypothèses. L'aide dans les pages reste là au besoin."
+        '1. Découvrir par toi-même :', 'explore la démo et son groupe fictif.',
+        '2. Modélisation :', 'un parcours te guide, avec le matériel de la démo.',
+        '3. Pratique guidée :', 'refais le parcours avec ton matériel.',
+        '4. Continuer en autonomie :', "l'aide dans les pages reste là."
     ];
     const bloc = tranche(ASSISTANCE, 'var QUATRE_TEMPS = {', 'function grasPuisTexte');
 
@@ -52,10 +58,18 @@ describe('le panneau « Assistance » : le texte en quatre temps, mot pour mot',
         expect(ASSISTANCE).not.toContain('Des parcours où tu fais les gestes toi-même');
     });
 
-    it('les libellés du choix, décidés le 12 nov. (14 h 46 à 15 h 08) : le nom du temps, et dessous son matériel', () => {
-        expect(ASSISTANCE).toContain("demo: { nom: 'Modélisation', sous: 'avec le matériel de la démo' }");
-        expect(ASSISTANCE).toContain("mien: { nom: 'Pratique guidée', sous: 'avec mon matériel' }");
-        expect(CLASSE).toContain("refaire: 'Refaire avec mon matériel'");
+    it('le choix unique du matériel est retiré (14 nov. 2026) : ni radio, ni défaut piloté par un banc', () => {
+        expect(ASSISTANCE).not.toMatch(/assistance-materiel|definirMateriel|navigator\.webdriver|role', 'radio/);
+    });
+
+    it('les libellés des deux temps, décidés le 12 nov. (14 h 46 à 15 h 08) : le nom du temps, et son matériel', () => {
+        expect(ASSISTANCE).toContain("modele: { nom: 'Modélisation', sous: 'avec le matériel de la démo' }");
+        expect(ASSISTANCE).toContain("pratique: { nom: 'Pratique guidée', sous: 'avec mon matériel' }");
+        // La fin à trois boutons (14 nov., 10 h 58) remplace « Refaire avec mon matériel ».
+        expect(CLASSE).toContain("refaire: 'Le refaire avec ma classe'");
+        expect(CLASSE).toContain("suivant: 'Voir le parcours suivant'");
+        expect(CLASSE).toContain("terminer: 'Terminer'");
+        expect(CLASSE).not.toContain('Refaire avec mon matériel');
     });
 
     it('la phrase des cartes sans modèle est partie, et rien ne la remplace (13 nov. 2026)', () => {
@@ -64,15 +78,15 @@ describe('le panneau « Assistance » : le texte en quatre temps, mot pour mot',
     });
 
     it('le texte de la liste dit « dix », et le geste « Importer 10 étudiant·es »', () => {
-        expect(CLASSE).toContain('liste de dix étudiant·es');
-        expect(CLASSE).toContain('touche « Importer 10 étudiant·es »');
+        expect(CLASSE).toContain('Dix étudiant·es fictif·ves');
+        expect(CLASSE).toContain('Touche « Importer 10 étudiant·es »');
         expect(tranche(CLASSE, 'var ETAPES_MODELE', 'var DEF_MODELE')).not.toMatch(/\bhuit\b/);
     });
 });
 
-describe('le choix du matériel et l’état des modélisations : sur l’appareil, hors des données', () => {
+describe('l’état des modélisations : sur l’appareil, hors des données', () => {
     it('une clé de `localStorage`, jamais `db` ni les préférences', () => {
-        const bloc = tranche(ASSISTANCE, "var CLE_APPAREIL = 'laboCodex.assistance';", 'function jeuDansLaDemo');
+        const bloc = tranche(ASSISTANCE, "var CLE_APPAREIL = 'laboCodex.assistance';", 'function premierModele');
         expect(bloc).toContain('localStorage.setItem(CLE_APPAREIL');
         expect(bloc).not.toMatch(/\bdb\.|definirPreference|obtenirPreference/);
     });
@@ -80,7 +94,7 @@ describe('le choix du matériel et l’état des modélisations : sur l’appare
     it('la modélisation de « Mettre ta classe en place » n’écrit pas l’état du parcours réel', () => {
         const modele = tranche(CLASSE, 'async function lancerModele()', '// ---------- Le lancement, « Plus tard », la fin ----------');
         expect(modele).toContain('definirEtatModele(ID,');
-        // `refaireAvecMonMateriel` relance le parcours réel par `lancer()`, qui écrit son état lui-même.
+        // « Le refaire avec ma classe » relance le parcours réel par le panneau (`lancerParcours`), qui écrit son état lui-même.
         expect(modele).not.toMatch(/Assistance\.definirEtat\(/);
     });
 });
@@ -158,5 +172,95 @@ describe('le parcours réel n’a pas bougé', () => {
         const lancer = tranche(CLASSE, 'async function lancer() {', 'function attendreLePremierCours');
         expect(lancer).toContain('if (enDemo() && typeof desactiverModeDemo === \'function\') await desactiverModeDemo();');
         expect(lancer).toContain('verifier: function () { return !enDemo(); }');
+    });
+});
+
+describe('les mots de main valent dans les modèles (15 nov. 2026)', () => {
+    const EVALUER = lire('js/parcours-evaluer.js');
+    const MODELES = [
+        ['« Mettre ta classe en place »', tranche(CLASSE, 'var MOTS_MODELE = {', 'var DEF_MODELE')],
+        ['« Évaluer une première production »', tranche(EVALUER, 'var MOTS_M = {', 'function premiereNonFaiteModele')]
+    ];
+    // Les chaînes du code, sans ses commentaires : ce que la bulle peut dire.
+    const chaines = (bloc) => [...bloc.replace(/\/\/.*$/gm, '').matchAll(/"((?:[^"\\]|\\.)*)"/g)].map((m) => m[1]);
+
+    it.each(MODELES)('%s : ni « établissement », ni « morceau », ni « pastille », ni « aujourd’hui », ni « matériel fourni »', (nom, bloc) => {
+        const dites = chaines(bloc);
+        expect(dites.length).toBeGreaterThan(10);
+        expect(dites.filter((t) => /établissement|morceau|pastille|aujourd.hui|matériel fourni|premier cours/i.test(t))).toEqual([]);
+    });
+
+    it('le modèle de la classe a huit étapes, et l’horaire de l’exemple deux séances de 2 périodes, mardi et vendredi, de 8 h à 10 h', () => {
+        const horaire = tranche(CLASSE, 'horaire: Object.freeze({', 'etudiants: Object.freeze([');
+        expect(horaire).toContain("{ jour: 'Mardi', debut: '08:00', fin: '10:00', periodes: 2 }");
+        expect(horaire).toContain("{ jour: 'Vendredi', debut: '08:00', fin: '10:00', periodes: 2 }");
+        expect(CLASSE).not.toMatch(/periodes: 4|fin: '12:00'/);
+        expect(tranche(CLASSE, 'var ETAPES_MODELE = [', 'var DEF_MODELE').match(/\n {8}(?:etapeEnTroisTemps\()?\{\n/g)).toHaveLength(8);
+    });
+
+    it('les présences de l’exemple : deux absences et un retard, trois totems de la liste de dix', () => {
+        const p = /presences: Object\.freeze\(\{ absents: Object\.freeze\(\[('\d{7}', '\d{7}')\]\), retard: '(\d{7})', periodesDuRetard: 1 \}\)/.exec(CLASSE);
+        expect(p).not.toBeNull();
+        const das = p[1].replace(/'/g, '').split(', ').concat([p[2]]);
+        expect(new Set(das).size).toBe(3);
+        const liste = tranche(CLASSE, 'etudiants: Object.freeze([', '])');
+        das.forEach((da) => expect(liste).toContain("['" + da + "'"));
+    });
+
+    it('« Deux-Rives » partout, plus de « Madawigouche », de chapitre ni de « refonte A26 » ; l’échéance est un mardi de l’automne 2025', () => {
+        expect(EVALUER).toContain("description: 'Appliquer des stratégies de lecture variées (Deux-Rives)'");
+        expect(EVALUER).toContain('tache: "Annoter le texte «\\u00a0Deux-Rives\\u00a0» en y appliquant');
+        const materiel = tranche(EVALUER, 'var MATERIEL = Object.freeze({', 'function tableauDeLaGrille');
+        expect(materiel.replace(/\/\/.*$/gm, '')).not.toMatch(/Madawigouche|Rivières-aux-Cartouches|refonte A26|le chapitre/);
+        expect(materiel).toContain("echeance: '2025-09-09'");
+        expect(new Date(2025, 8, 9).getDay()).toBe(2);
+    });
+});
+
+describe('la règle de la Modélisation (14 nov. 2026)', () => {
+    const EVALUER = lire('js/parcours-evaluer.js');
+
+    it('« Remplir avec l’exemple » n’écrit que dans la démo : la garde vient avant les gestes', () => {
+        const remplir = tranche(CLASSE, 'function remplir(gestes) {', 'return true;');
+        expect(remplir.indexOf('if (!enDemo()) return false;')).toBeGreaterThan(-1);
+        expect(remplir.indexOf('if (!enDemo()) return false;')).toBeLessThan(remplir.indexOf('gestes();'));
+    });
+
+    it('le bouton de la bulle passe toujours par cette garde, dans les deux modèles', () => {
+        expect(tranche(CLASSE, 'function troisTemps(o) {', 'function etapeEnTroisTemps')).toContain('action: function () { remplir(o.gestes); }');
+        expect(EVALUER).toContain('action: function () { C().remplir(ouvrirLaGrilleDeLExemple); }');
+        // Aucun modèle n'écrit dans un champ sans passer par les outils communs.
+        expect(tranche(EVALUER, 'function remplirLaProduction() {', '// ---------- Les textes du modèle').match(/C\(\)\.(poser|choisir)\(/g).length).toBeGreaterThanOrEqual(12);
+    });
+
+    it('un modèle ne se joue jamais en visite : ni `visite`, ni `acquis` à son lancement', () => {
+        const classe = tranche(CLASSE, 'async function lancerModele() {', 'function terminerModele() {');
+        const evaluer = tranche(EVALUER, 'async function lancerModele() {', 'function terminerModele() {');
+        [classe, evaluer].forEach((bloc) => {
+            expect(bloc).toContain('M().lancer(');
+            expect(bloc).not.toMatch(/\bvisite\s*:|\bacquis\s*:/);
+        });
+    });
+
+    it('« Refaire » une Modélisation : la confirmation, la démo remise à neuf, puis le premier modèle ; rien sans accord', () => {
+        const refaire = tranche(ASSISTANCE, 'async function refaireModele(def) {', 'function construireBoutonNeuf');
+        const accord = refaire.indexOf('if (accepte !== true) return;');
+        const neuf = refaire.indexOf('if (!(await remettreEtDire())) return;');
+        const depart = refaire.indexOf('premier.lancerModele();');
+        expect(accord).toBeGreaterThan(-1);
+        expect(neuf).toBeGreaterThan(accord);
+        expect(depart).toBeGreaterThan(neuf);
+        // Le bouton d'une Modélisation faite y mène, avant toute autre voie.
+        expect(tranche(ASSISTANCE, 'function creerBoutonModele(def, o) {', 'function creerTemps')).toContain("if (e.etat === 'fait') { refaireModele(def); return; }");
+    });
+
+    it('la fin d’une Modélisation : trois suites de même poids, aucune mise en avant, la consigne suit les boutons', () => {
+        const suites = tranche(CLASSE, 'function suitesDuModele(id, terminerLeModele) {', 'return suites;');
+        expect(suites).not.toContain('primaire');
+        expect(suites.indexOf('MOTS_MODELE.refaire')).toBeLessThan(suites.indexOf('MOTS_MODELE.suivant'));
+        expect(suites.indexOf('MOTS_MODELE.suivant')).toBeLessThan(suites.indexOf('MOTS_MODELE.terminer'));
+        expect(suites).toContain('if (suivant) suites.push(');
+        expect(CLASSE).toContain('consigne(consigneDesSuites(suitesDuModele(ID, terminerModele)))');
+        expect(EVALUER).toContain('consigne(C().consigneDesSuites(C().suitesDuModele(ID, terminerModele)))');
     });
 });

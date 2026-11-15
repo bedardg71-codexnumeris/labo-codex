@@ -4,7 +4,9 @@ Lot `lot/deux-temps-modeles`, 13 nov. 2026, partie de la tête de `lot/carte-aid
 `plans de travail/CONSIGNE-LOT-2026-11-13-deux-temps-modeles.md`. PR d'aperçu n° 23 (non fusionnée ; elle porte aussi
 la carte d'aide). Rapport : `plans de travail/RAPPORT-2026-11-13-deux-temps-modeles.md`.
 
-**État : À PASSER.** Sans artefact jumeau : un geste par tour, dans la conversation du Projet. **Quatorze gestes** :
+**État : REMPLACÉE le 15 nov. 2026** par `PORTES-TERRAIN-2026-11-15-deux-temps-remise-a-jour.md` (la règle de la
+Modélisation du 14 nov. : « Remplir avec l'exemple » ; plus rien à copier ni à télécharger). Gardée pour la trace ; ne
+plus la passer. *État d'origine : à passer.* Sans artefact jumeau : un geste par tour, dans la conversation du Projet. **Quatorze gestes** :
 un préalable, trois qui reprennent l'essai de la première partie où il s'est arrêté le 12 nov. (§2.1 c de sa porte,
 avec les nouveaux libellés), dix pour le modèle d'« Évaluer une première production ».
 

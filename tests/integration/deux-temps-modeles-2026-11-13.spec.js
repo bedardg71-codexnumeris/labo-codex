@@ -4,32 +4,38 @@ import { releverLaBulle } from './harness/releve-bulle.js';
 releverLaBulle(test);
 import { attendreApplication } from './harness/attendre-application.js';
 import {
-    ouvrirEspaceVide, ouvrirPanneau, ouvrirPanneauSurLaDemo, bulle, carte, enDemo, attendreEtape, contourSur,
-    releve, ecarts, horsDeLaDemo, DE_LA_DEMO, peuplerUnTrimestreReel, materiel, faireLaModelisation
+    ouvrirEspaceVide, ouvrirPanneau, boutonModele, boutonPratique, bulle, carte, enDemo, attendreEtape, contourSur,
+    releve, ecarts, horsDeLaDemo, DE_LA_DEMO, peuplerUnTrimestreReel, materiel, faireLaModelisation,
+    lireBulle, attendreRemplir, remplirPuisVoir, REMPLIR
 } from './harness/deux-temps-de-banc.js';
 import { etiqueter } from './harness/classe-de-banc.js';
 import { actionDeLaListe, valeursActions } from './harness/parcours-3-de-banc.js';
 
 // =======================================================================
-// LOT « LES DEUX TEMPS, LES MODÈLES » (13 NOVEMBRE 2026)
+// LOT « LES DEUX TEMPS, LES MODÈLES » (13 NOVEMBRE 2026) — REMIS À JOUR LE 15 NOVEMBRE 2026
 // =======================================================================
-// Consigne : `plans de travail/CONSIGNE-LOT-2026-11-13-deux-temps-modeles.md`. Sous WebKit, aux deux orientations de
-// l'iPad (1180 × 820 et 820 × 1180).
-//   A · le panneau : « Modélisation » et « Pratique guidée », leur matériel dessous ; la liste de dix ; sous
-//       « Modélisation », un parcours sans modèle ne se lance pas et ne dit aucune phrase ; le modèle d'« Évaluer »
-//       refuse tant que le deuxième groupe n'existe pas, nomme « Mettre ta classe en place » et y met la pulsation.
-//   B · le modèle d'« Évaluer une première production », de bout en bout, avec le SEUL matériel fourni (copié de la
-//       bulle, collé au clavier ; le fichier des commentaires téléchargé de la bulle, puis importé) ; la rétroaction
-//       réécrite porte les quatre commentaires du profil (Structure M, Rigueur D, Plausibilité D, Nuance D) et « Bon
-//       départ ! » ; le confinement : la grille, la production, la pratique, la cartouche et l'évaluation vivent dans la
-//       démo, aucune clé hors d'elle ne change, et « Remettre la démo à neuf » les efface.
+// Consignes : `plans de travail/CONSIGNE-LOT-2026-11-13-deux-temps-modeles.md`, puis
+// `plans de travail/CONSIGNE-2026-11-15-deux-temps-remise-a-jour.md`. Sous WebKit, aux deux orientations de l'iPad
+// (1180 × 820 et 820 × 1180).
+//   A · le panneau : la liste de dix ; le modèle d'« Évaluer » refuse tant que le deuxième groupe n'existe pas, nomme
+//       « Mettre ta classe en place » et met la pulsation sur le bouton de SA Modélisation ; « Le refaire avec ma
+//       classe » lance la Pratique guidée par les gardes du panneau.
+//   B · le modèle d'« Évaluer une première production », de bout en bout, en trois temps (« Remplir avec l'exemple »,
+//       puis le bouton de la page) : la grille de l'exemple entre dans l'étiquetage, que la personne fait elle-même ;
+//       la production, les consignes (échéance : le mardi 9 septembre 2025) et la cartouche (ses vingt commentaires)
+//       sont remplies par la bulle ; la rétroaction réécrite porte les quatre commentaires du profil (Structure M,
+//       Rigueur D, Plausibilité D, Nuance D) et « Bon départ ! » ; la fin à deux boutons (« Recevoir » n'a pas encore
+//       son modèle) ; le confinement : la grille, la production, la pratique, la cartouche et l'évaluation vivent dans
+//       la démo, aucune clé hors d'elle ne change, et « Remettre la démo à neuf » les efface.
+// MESURE DU 15 NOV. 2026 (ancienne décision 3.1) : la grille de l'exemple, étiquetée, n'offre PAS le choix « des
+// points » / « des niveaux de performance » (il ne paraît que pour une grille qui porte les deux) : elle naît en
+// points, et le détour par les quatre menus « Type » reste. Ce banc le vérifie à chaque passage.
 
 const ORIENTATIONS = [[1180, 820], [820, 1180]];
 const M = (page) => page.evaluate(() => JSON.parse(JSON.stringify(window.ParcoursEvaluer.materiel)));
 const TOTAL = 9;
 const etape = (page, n, titre) => attendreEtape(page, n, TOTAL, titre);
 const boutonDeBulle = (page, nom) => bulle(page).getByRole('button', { name: nom, exact: true });
-const coller = async (page, selecteur) => { await page.focus(selecteur); await page.keyboard.press('ControlOrMeta+V'); };
 /**
  * Une étiquette posée sur chaque morceau nommé, et vérifiée : le harnais touche les morceaux aussitôt l'étiquette prise,
  * et un morceau redessiné entre-temps restait parfois sans étiquette (13 nov. 2026, « Créer ma grille » restait inactif).
@@ -69,76 +75,94 @@ const ceQuiEstCree = (page) => page.evaluate(() => {
     };
 });
 
+test('« Le refaire avec ma classe » passe par les gardes du panneau : sans classe, le panneau dit pourquoi ; avec, la Pratique guidée part sur les vraies données', async ({ page }) => {
+    test.setTimeout(180000);
+    await ouvrirEspaceVide(page, 1180, 820);
+    const refaire = () => page.evaluate(() => ParcoursClasse.suitesDuModele('evaluer', () => {})[0].action());
+    expect(await page.evaluate(() => ParcoursClasse.suitesDuModele('evaluer', () => {}).map((b) => b.libelle))).toEqual(['Le refaire avec ma classe', 'Terminer']);
+    // Sans classe en place : rien ne part ; le panneau s'ouvre et nomme le préalable.
+    await refaire();
+    await expect(page.locator('#panneau-assistance')).toBeVisible();
+    await expect(carte(page, 'evaluer').locator('.assistance-parcours-refus')).toContainText('Mettre ta classe en place');
+    await expect(bulle(page)).toHaveCount(0);
+    await page.evaluate(() => Assistance.fermerPanneau());
+    // Avec une classe : la Pratique guidée part, sur les vraies données.
+    await peuplerUnTrimestreReel(page);
+    await refaire();
+    await expect(bulle(page).locator('.parcours-bulle-rang')).toHaveText('1 sur 9', { timeout: 10000 });
+    expect(await enDemo(page)).toBe(false);
+    expect(await page.evaluate(() => Assistance.etatDe('evaluer').etat)).toBe('en-cours');
+    expect((await lireBulle(page)).boutons, 'en Pratique guidée, la bulle ne remplit rien').not.toContain(REMPLIR);
+    await page.evaluate(() => ParcoursMoteur.fermer());
+});
+
 for (const [L, H] of ORIENTATIONS) {
-    test(`A · ${L} × ${H} : les libellés du choix, la liste de dix, aucun lancement sans modèle sous « Modélisation », le refus du modèle d’« Évaluer » sans le deuxième groupe`, async ({ page }) => {
+    test(`A · ${L} × ${H} : la liste de dix, le refus du modèle d’« Évaluer » sans le deuxième groupe, la pulsation sur la Modélisation à faire d’abord`, async ({ page }) => {
         test.setTimeout(120000);
         await ouvrirEspaceVide(page, L, H);
-        await ouvrirPanneauSurLaDemo(page);
-        const options = page.locator('#assistance-materiel [role="radio"]');
-        await expect(options.locator('.assistance-materiel-nom')).toHaveText(['Modélisation', 'Pratique guidée']);
-        await expect(options.locator('.assistance-materiel-sous')).toHaveText(['avec le matériel de la démo', 'avec mon matériel']);
-        for (const o of await options.all()) {
-            const b = await o.boundingBox();
-            expect(b.height).toBeGreaterThanOrEqual(44);
-            expect(await o.evaluate((el) => el.scrollWidth <= el.clientWidth + 1), 'le libellé tient dans son bouton').toBe(true);
-        }
+        await ouvrirPanneau(page);
         expect((await materiel(page)).etudiants).toHaveLength(10);
-
-        // Sans modèle : le bouton est là, inactif, sans phrase ; touché, rien ne part, ni dans la démo ni sur les vraies données.
-        const sans = await page.evaluate(() => Assistance.parcours().filter((d) => !d.dansLaDemo && typeof d.lancerModele !== 'function').map((d) => d.id));
-        expect(sans.length).toBeGreaterThan(0);
-        expect(sans).not.toContain('evaluer');
-        for (const id of sans) {
-            await expect(carte(page, id).locator('.assistance-parcours-bouton')).toHaveAttribute('aria-disabled', 'true');
-            await expect(carte(page, id).locator('p:not(.assistance-parcours-ligne)')).toHaveCount(0);
-            await carte(page, id).locator('.assistance-parcours-bouton').click({ force: true });
-            await expect(bulle(page)).toHaveCount(0);
-            await expect(page.locator('#panneau-assistance')).toBeVisible();
-            expect(await enDemo(page)).toBe(false);
+        for (const b of [boutonModele(page, 'classe'), boutonPratique(page, 'classe'), boutonModele(page, 'evaluer'), boutonPratique(page, 'evaluer')]) {
+            expect((await b.boundingBox()).height).toBeGreaterThanOrEqual(44);
+            expect(await b.evaluate((el) => el.scrollWidth <= el.clientWidth + 1), 'le libellé tient dans son bouton').toBe(true);
         }
+        // Rien ne déborde du panneau, aux deux orientations.
+        expect(await page.locator('#panneau-assistance').evaluate((p) => p.scrollWidth <= p.clientWidth + 1)).toBe(true);
 
-        // Le modèle d'« Évaluer » : son préalable est la modélisation de « Mettre ta classe en place ».
+        // Le modèle d'« Évaluer » : son préalable est la Modélisation de « Mettre ta classe en place ».
         // Break-test (13 nov. 2026) : `refusModele` retiré de l'enregistrement → ROUGE (le refus manque). Rétabli → vert.
-        await expect(carte(page, 'evaluer').locator('.assistance-parcours-bouton')).not.toHaveAttribute('aria-disabled', 'true');
-        await carte(page, 'evaluer').locator('.assistance-parcours-bouton').click();
+        await expect(boutonModele(page, 'evaluer')).not.toHaveAttribute('aria-disabled', 'true');
+        await boutonModele(page, 'evaluer').click();
         await expect(carte(page, 'evaluer').locator('.assistance-parcours-refus')).toContainText('Mettre ta classe en place');
-        await expect(carte(page, 'classe').locator('.assistance-parcours-bouton')).toHaveClass(/assistance-parcours-bouton--appel/);
+        await expect(boutonModele(page, 'classe')).toHaveClass(/assistance-parcours-bouton--appel/);
+        await expect(boutonPratique(page, 'classe')).not.toHaveClass(/assistance-parcours-bouton--appel/);
         await expect(bulle(page)).toHaveCount(0);
         expect(await enDemo(page)).toBe(false);
     });
 
-    test(`B · ${L} × ${H} : le modèle d’« Évaluer une première production », de bout en bout avec le seul matériel fourni ; le confinement ; la remise à neuf`, async ({ page, context }) => {
+    test(`B · ${L} × ${H} : le modèle d’« Évaluer une première production », de bout en bout, en trois temps ; le confinement ; la remise à neuf`, async ({ page }) => {
         test.setTimeout(300000);
         page.setDefaultTimeout(20000);   // un geste qui n'aboutit pas se dit en vingt secondes, pas à la fin de l'essai
-        await context.grantPermissions(['clipboard-read', 'clipboard-write']).catch(() => {});
         await ouvrirEspaceVide(page, L, H);
         await peuplerUnTrimestreReel(page);
         const avant = await releve(page);
         const duPack = Object.fromEntries(Object.entries(avant).filter(([k]) => DE_LA_DEMO.test(k)));
 
-        // Le préalable : la modélisation de « Mettre ta classe en place » ; sa dernière bulle offre la suite par son titre.
-        await ouvrirPanneauSurLaDemo(page);
-        await carte(page, 'classe').locator('.assistance-parcours-bouton').click();
+        // Le préalable : la Modélisation de « Mettre ta classe en place » ; sa dernière bulle offre « Voir le parcours suivant ».
+        await ouvrirPanneau(page);
+        await boutonModele(page, 'classe').click();
         await faireLaModelisation(page);
-        await expect(bulle(page).locator('.parcours-bulle-boutons button')).toHaveText(['Évaluer une première production', 'Refaire avec mon matériel']);
-        await boutonDeBulle(page, 'Évaluer une première production').click();
+        await expect(bulle(page).locator('.parcours-bulle-boutons button')).toHaveText(['Le refaire avec ma classe', 'Voir le parcours suivant', 'Terminer']);
+        await boutonDeBulle(page, 'Voir le parcours suivant').click();
         const m = await M(page);
 
-        // 1. La grille : copiée de la bulle, collée, étiquetée, créée ; puis ses critères, jugés par niveaux.
-        await etape(page, 1, 'Ta grille');
+        // 1. Les deux bulles d'ouverture (c'est ici qu'on étiquette pour la première fois), puis la grille de l'exemple.
+        await etape(page, 1, 'Pourquoi étiqueter');
         expect(await enDemo(page)).toBe(true);
-        await expect(bulle(page)).toContainText(m.grille.nom);
-        await boutonDeBulle(page, 'Copier la grille').click();
-        await coller(page, '#materiel-zone-collage');
+        await boutonDeBulle(page, 'Continuer').click();
+        await etape(page, 1, 'Tu apprends aussi');
+        await boutonDeBulle(page, 'Continuer').click();
+        await etape(page, 1, 'Ta grille');
+        await attendreRemplir(page, 'étape 1');
+        await boutonDeBulle(page, REMPLIR).click();
         await expect(page.locator('#materiel-dissection')).toBeVisible();
-        // Ce que le champ lit d'un copier depuis la bulle : un tableau, un morceau par case (2 + 4 × 3).
+        // La grille de l'exemple, lue comme un collage : un tableau, une partie par case (2 + 4 × 3).
         await expect(page.locator('#dissection-contenu .dissection-morceau')).toHaveCount(14);
+        await expect(page.locator('#dissection-contenu')).toContainText(m.grille.nom);
+        // L'étiquetage reste le geste de la personne : la bulle n'offre plus « Remplir ».
+        await expect.poll(async () => (await lireBulle(page)).boutons).not.toContain(REMPLIR);
         await etiqueterTous(page, 'titre', [m.grille.nom]);
         await etiqueterTous(page, 'description', [m.grille.description].concat(m.grille.criteres.map((c) => c[1])));
         await etiqueterTous(page, 'critere', m.grille.criteres.map((c) => c[0]));
         await etiqueterTous(page, 'ponderation', m.grille.criteres.map((c) => c[2]));
+        // MESURE (ancienne décision 3.1) : cette grille ne porte ni points ni niveaux nommés ; le choix « des points » /
+        // « des niveaux de performance » ne lui est pas offert.
+        await expect(page.locator('#dissection-creer-choix')).toBeHidden();
         await page.locator('#materiel-dissection button', { hasText: 'Créer ma grille' }).click();
-        await expect(bulle(page)).toContainText('passe chacun de ses quatre critères à « Holistique »'.replace(/« /g, '« ').replace(/ »/g, ' »'));
+        // … elle naît donc en points, et le détour par les quatre menus « Type » reste.
+        await expect(bulle(page)).toContainText('passe chacun de ses quatre critères à « Holistique »');
+        expect(await page.evaluate(() => (db.getSync(cle('grillesTemplates'), []) || []).find((g) => g.nom === 'G4H Sans français').criteres.map((c) => c.type)))
+            .toEqual(['analytique', 'analytique', 'analytique', 'analytique']);
         await contourSur(page, '#conception-materiel [data-action="materiel.voir"][data-param="grille-criteres"]');
         await page.click('#conception-materiel [data-action="materiel.voir"][data-param="grille-criteres"]');
         const types = '#listeCriteres select[data-on-change="modifierTypeCritereGrilleHandler"]';
@@ -152,28 +176,38 @@ for (const [L, H] of ORIENTATIONS) {
             await page.locator(types).nth(k).selectOption('holistique');
         }
 
-        // 2. La production : son nom copié de la bulle (la démo a déjà un « Artefact 1 »), le type, la grille, l'échelle.
+        // 2. La production : « + Nouvelle production » (le geste de la page), puis les trois temps.
         await etape(page, 2, 'Ta production');
-        await expect(bulle(page)).toContainText(m.production.description);
+        expect((await lireBulle(page)).consignes).toEqual(['Touche « + Nouvelle production »']);
+        expect((await lireBulle(page)).boutons).toEqual([]);
+        await contourSur(page, '#conception-productions [data-action="creerNouvelleProduction"]');
         await page.click('#conception-productions [data-action="creerNouvelleProduction"]');
-        await boutonDeBulle(page, 'Copier le nom').click();
-        await coller(page, '#productionTitre');
-        await expect(page.locator('#productionTitre')).toHaveValue(m.production.description);
-        await coller(page, '#productionActivite');
-        await page.selectOption('#productionType', m.production.type);
+        await attendreRemplir(page, 'étape 2');
+        await remplirPuisVoir(page, { consigne: 'Touche « Créer la production »', bouton: '#btnCreerProduction', contexte: 'étape 2' });
         const grilleId = await page.evaluate(() => (db.getSync(cle('grillesTemplates'), []) || []).find((g) => g.nom === 'G4H Sans français').id);
-        await page.selectOption('#productionGrille', grilleId);
-        await page.selectOption('#productionEchelle', { label: m.echelle });
+        // Le nom dit ce qu'elle fait faire (la démo a déjà un « Artefact 1 »), repris en « Activité d'apprentissage ».
+        await expect(page.locator('#productionTitre')).toHaveValue('Appliquer des stratégies de lecture variées (Deux-Rives)');
+        await expect(page.locator('#productionActivite')).toHaveValue(m.production.description);
+        await expect(page.locator('#productionType')).toHaveValue(m.production.type);
+        await expect(page.locator('#productionGrille')).toHaveValue(grilleId);
+        expect(await page.locator('#productionEchelle').evaluate((s) => s.selectedOptions[0].textContent)).toContain(m.echelle);
         await page.click('#btnCreerProduction');
 
-        // 3. Les consignes : l'objectif, la tâche et les consignes copiés de la bulle ; la date ; la case.
+        // 3. Les consignes et l'échéance : le mardi 9 septembre 2025, une séance du deuxième groupe.
         await etape(page, 3, 'Tes consignes');
-        for (const [bouton, champ, valeur] of [["Copier l'objectif", '#productionObjectif', m.production.objectif], ['Copier la tâche', '#productionTache', m.production.tache], ['Copier les consignes', '#productionDetailTache', m.production.detailTache]]) {
-            await boutonDeBulle(page, bouton).click();
-            await coller(page, champ);
-            await expect(page.locator(champ)).toHaveValue(valeur);
-        }
-        await page.fill('#productionDateEcheance', '2025-12-09');
+        await attendreRemplir(page, 'étape 3');
+        await remplirPuisVoir(page, { consigne: 'Coche « Consignes transmises » (la production entre alors au calendrier du groupe)', bouton: null, contexte: 'étape 3' });
+        await expect(page.locator('#productionObjectif')).toHaveValue(m.production.objectif);
+        await expect(page.locator('#productionTache')).toHaveValue(m.production.tache);
+        expect(m.production.tache.replace(/ /g, ' ')).toMatch(/^Annoter le texte « Deux-Rives » en y appliquant/);
+        await expect(page.locator('#productionDetailTache')).toHaveValue(m.production.detailTache);
+        await expect(page.locator('#productionDateEcheance')).toHaveValue('2025-09-09');
+        expect(await page.evaluate(() => {
+            const s = obtenirSeancesCompletesDuGroupe(db.getSync('groupeCoursActif', null).id);
+            return Array.isArray(s['2025-09-09']) && s['2025-09-09'].length > 0;
+        }), 'le 2025-09-09 est une séance du deuxième groupe').toBe(true);
+        await expect(bulle(page)).toContainText('le mardi 9 septembre 2025');
+        await expect(bulle(page)).not.toContainText(/aujourd/);
         await page.check('#productionEcheanceAssignee');
 
         // 4. L'étudiant·e de la ligne que la bulle pointe, nommé·e dans la bulle ; les niveaux imposés ; « Verrouiller ».
@@ -183,6 +217,7 @@ for (const [L, H] of ORIENTATIONS) {
         const da = evaluer.split('|')[1];
         const qui = await page.evaluate((d) => { const e = obtenirEtudiantsCoursActif().find((x) => String(x.da) === d); return e.prenom + ' ' + e.nom; }, da);
         await expect(bulle(page)).toContainText(qui);
+        await expect(bulle(page)).toContainText("choisis le niveau de l'exemple");
         await expect(bulle(page)).toContainText('Structure M, Rigueur D, Plausibilité D, Nuance D');
         await contourSur(page, `#evaluations-liste select.eval-actions-select:has(option[value="${evaluer}"])`);
         await actionDeLaListe(page, evaluer);
@@ -217,36 +252,54 @@ for (const [L, H] of ORIENTATIONS) {
         await etape(page, 7, "Le point qui s'allume");
         await boutonDeBulle(page, 'Continuer').click();
 
-        // 8. La cartouche : la grille, l'échelle du pack (aucune échelle neuve), les vingt commentaires importés du fichier
-        // que la bulle fournit ; puis la production la nomme.
+        // 8. La cartouche : « + Nouvelle cartouche », puis les trois temps ; l'échelle du pack (aucune échelle neuve) et
+        // les vingt commentaires, remplis par la bulle (plus de fichier à télécharger) ; puis la production la nomme.
         await etape(page, 8, 'Ta cartouche');
+        expect((await lireBulle(page)).consignes).toEqual(['Touche « + Nouvelle cartouche »']);
         await page.click('#conception-retroactions [data-action="creerNouvelleCartouche"]');
-        await page.fill('#nomCartouche', 'Stratégies de lecture');
-        await page.selectOption('#selectGrilleCartouche', grilleId);
-        await expect.poll(() => page.locator('#selectEchelleCartouche option').count()).toBeGreaterThan(1);
-        // L'échelle du pack, par son nom (le menu ajoute « (5 niv.) ») : aucune échelle neuve.
-        await page.selectOption('#selectEchelleCartouche', await page.evaluate((nom) => [...document.querySelectorAll('#selectEchelleCartouche option')].find((o) => o.textContent.includes(nom)).value, m.echelle));
+        await attendreRemplir(page, 'étape 8');
+        const echellesAvant = await page.evaluate(() => (db.getSync(cle('echellesTemplates'), []) || []).length);
+        await remplirPuisVoir(page, { consigne: 'Touche « Créer la cartouche »', bouton: '#btnCreerCartouche', contexte: 'étape 8' });
+        await expect(page.locator('#nomCartouche')).toHaveValue(m.cartouche);
+        expect(m.cartouche).not.toMatch(/refonte|A26/);
+        await expect(page.locator('#selectGrilleCartouche')).toHaveValue(grilleId);
+        expect(await page.locator('#selectEchelleCartouche').evaluate((s) => s.selectedOptions[0].textContent)).toContain(m.echelle);
         await expect(page.locator('#cartoucheZonePrincipale textarea[id^="comm_"]')).toHaveCount(20);
-        await contourSur(page, '#conception-retroactions [data-action="ouvrirImportTxtCartouche"]');
-        const [telechargement] = await Promise.all([page.waitForEvent('download'), boutonDeBulle(page, 'Télécharger les commentaires').click()]);
-        expect(telechargement.suggestedFilename()).toBe(m.fichierCommentaires);
-        await page.setInputFiles('#fichier-import-txt-cartouche', await telechargement.path());
-        // Les vingt cases, le niveau 0 compris (#531).
-        await expect.poll(() => page.evaluate(() => [...document.querySelectorAll('#cartoucheZonePrincipale textarea[id^="comm_"]')].filter((t) => t.value.trim()).length)).toBe(20);
+        // Les vingt cases, le niveau 0 compris (#531), chacune avec le commentaire de son critère et de son niveau.
+        const cases = await page.evaluate((g) => {
+            const noms = Object.fromEntries((db.getSync(cle('grillesTemplates'), []) || []).find((x) => x.id === g).criteres.map((c) => [c.id, c.nom.toUpperCase()]));
+            return [...document.querySelectorAll('#cartoucheZonePrincipale textarea[id^="comm_"]')].map((t) => {
+                const reste = t.id.slice(5), coupe = reste.lastIndexOf('_');
+                return [noms[reste.slice(0, coupe)] + ' (' + reste.slice(coupe + 1) + ')', t.value];
+            });
+        }, grilleId);
+        for (const [caseDite, texte] of cases) expect(m.commentaires, caseDite).toContain('**' + caseDite + '** : ' + texte);
+        expect(new Set(cases.map((c) => c[0])).size).toBe(20);
+        // Ce que la page dit d'elle-même quand on écrit dans une cartouche pas encore créée (#517) : un avertissement, une
+        // fois par cartouche. Il dit ce que dit la consigne de la bulle. Laissé tel quel (c'est la page, pas le modèle),
+        // nommé au rapport ; le banc le retire pour toucher l'en-tête plus loin.
+        await page.evaluate(() => document.querySelectorAll('.notifications-pile > *').forEach((n) => n.remove()));
         await page.click('#btnCreerCartouche');
         await expect.poll(async () => (await ceQuiEstCree(page)).cartouches).toBe(1);
+        expect(await page.evaluate(() => (db.getSync(cle('echellesTemplates'), []) || []).length), 'aucune échelle neuve').toBe(echellesAvant);
+        await expect.poll(async () => (await lireBulle(page)).consignes).toEqual(['Dans la fiche de la production, choisis cette cartouche (elle s\'appliquera à chaque évaluation)']);
         await page.click('#sous-navigation [data-sous-onglet="conception-productions"]');
         if (!(await page.locator('#formulaireProduction').isVisible())) await page.click(`#conception-productions [data-action="modifierProduction"][data-param="${pid}"]`);
         const cartoucheId = await page.evaluate((g) => (db.getSync(cle('cartouches_' + g), []) || [])[0].id, grilleId);
         await contourSur(page, '#productionCartouche');
         await page.selectOption('#productionCartouche', cartoucheId);
 
-        // 9. La rétroaction réécrite : les quatre commentaires du profil, et le mot.
+        // 9. La rétroaction réécrite : les quatre commentaires du profil, et le mot. LA FIN : « Recevoir » n'a pas encore
+        // son modèle : « Voir le parcours suivant » n'y est pas, et la consigne suit les boutons présents.
         await etape(page, 9, 'Ta rétroaction, avec tes mots');
         await expect(bulle(page)).toContainText(m.mot);
         await expect(bulle(page).locator('.parcours-bulle-sortie')).toHaveCount(0);
-        // La fin : le parcours suivant n'a pas encore son modèle ; la suite dans la démo, puis les vraies données.
-        await expect(bulle(page).locator('.parcours-bulle-boutons button')).toHaveText(['Explorer la démo', 'Refaire avec mon matériel']);
+        await expect(bulle(page).locator('.parcours-bulle-boutons button')).toHaveText(['Le refaire avec ma classe', 'Terminer']);
+        const fin = await lireBulle(page);
+        expect(fin.principal, 'aucun bouton mis en avant').toEqual([]);
+        expect(fin.consignes).toEqual(['Touche « Le refaire avec ma classe », ou « Terminer »']);
+        expect(fin.derniere).toBe(fin.consignes[0]);
+        await expect(bulle(page).locator('.parcours-bulle-note').last()).toHaveText(/Pour revoir une étape, touche «\s9 sur 9\s»\./);
         const evaluationId = await page.evaluate((p) => (db.getSync(cle('evaluationsSauvegardees'), []) || []).find((e) => e.productionId === p).id, pid);
         const consulter = (await valeursActions(page, evaluationId)).find((v) => v.startsWith('consulter|'));
         await actionDeLaListe(page, consulter);
@@ -255,7 +308,6 @@ for (const [L, H] of ORIENTATIONS) {
             return !!ec && ec.idModification === id && !window._chargementsEvaluationEnCours && !!b && b.title === 'Déverrouiller l’évaluation';
         }, evaluationId, { timeout: 10000 });
         await page.click('#btnVerrouillerEvaluation');
-        await contourSur(page, '#selectCartoucheEval');
         await page.selectOption('#selectCartoucheEval', cartoucheId);
         const attendus = m.niveaux.map(([critere, niveau]) => new RegExp('\\*\\*' + critere.toUpperCase() + ' \\(' + niveau + '\\)\\*\\* : (.*)').exec(m.commentaires)[1]);
         expect(attendus).toHaveLength(4);
@@ -274,7 +326,7 @@ for (const [L, H] of ORIENTATIONS) {
             grille: m.grille.criteres.map((c) => [c[0], 'holistique', parseInt(c[2], 10)]),
             production: [m.production.description, m.production.type, true, true], pratiques: 1, cartouches: 1, evaluations: 1
         });
-        await boutonDeBulle(page, 'Explorer la démo').click();
+        await boutonDeBulle(page, 'Terminer').click();
         await expect(bulle(page)).toHaveCount(0);
         expect(await page.evaluate(() => Assistance.etatModeleDe('evaluer').etat)).toBe('fait');
         expect(await page.evaluate(() => Assistance.etatDe('evaluer').etat)).toBe('a-faire');
@@ -293,7 +345,7 @@ for (const [L, H] of ORIENTATIONS) {
         expect((await ceQuiEstCree(page)).evaluations).toBe(1);
 
         // « Remettre la démo à neuf » les efface : la démo revient telle que le pack la donne.
-        await ouvrirPanneauSurLaDemo(page);
+        await ouvrirPanneau(page);
         await page.click('#assistance-demo-neuf');
         await page.getByRole('dialog').filter({ hasText: 'Remettre la démo à neuf' }).last().getByRole('button', { name: 'Remettre à neuf' }).click();
         await expect(page.locator('.notifications-pile')).toContainText('La démo est remise à neuf.', { timeout: 15000 });
@@ -303,7 +355,9 @@ for (const [L, H] of ORIENTATIONS) {
         expect(await ceQuiEstCree(page)).toEqual({ grille: null, production: null, pratiques: 0, cartouches: 0, evaluations: 0 });
         // Le deuxième groupe parti avec elle : le modèle refuse de nouveau, et nomme son préalable.
         if (!(await page.locator('#panneau-assistance').isVisible())) await ouvrirPanneau(page);
-        await carte(page, 'evaluer').locator('.assistance-parcours-bouton').click();
+        // (La remise à neuf a oublié les Modélisations : celle d'« Évaluer » est de nouveau « À faire ».)
+        await expect(carte(page, 'evaluer').locator('.assistance-modele-etat')).toHaveText('À faire');
+        await boutonModele(page, 'evaluer').click();
         await expect(carte(page, 'evaluer').locator('.assistance-parcours-refus')).toContainText('Mettre ta classe en place');
         await expect(bulle(page)).toHaveCount(0);
     });

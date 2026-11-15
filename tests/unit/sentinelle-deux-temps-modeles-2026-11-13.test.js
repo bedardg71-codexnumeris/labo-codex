@@ -13,6 +13,13 @@ import { tranche } from './_helpers/tranche.js';
 //   2. Le modèle reprend les neuf étapes du parcours, sans en ajouter ni en retirer, et le parcours réel ne bouge pas.
 //   3. Ce que le modèle retient reste en mémoire : il n'écrit ni préférence ni donnée, et ne remplit aucun champ.
 //   4. Le panneau refuse le modèle tant que le deuxième groupe n'existe pas (`refusModele`).
+//
+// REMIS À JOUR LE 15 NOV. 2026 (`plans de travail/CONSIGNE-2026-11-15-deux-temps-remise-a-jour.md`) :
+//   1. deux retouches décidées au matériel : « Deux-Rives » remplace « Madawigouche » (Grégoire, 15 nov., 10 h 02), et
+//      la tâche ne dit plus « le chapitre … de Rivières-aux-Cartouches » ; le reste est toujours mot pour mot.
+//   3. la règle du 14 nov. remplace « rien ne se remplit tout seul » : le modèle remplit par « Remplir avec
+//      l'exemple », et seulement par les outils communs (`poser`, `choisir`), derrière la garde de la démo.
+// Break-test (15 nov.) : « (Deux-Rives) » remis à « (Madawigouche) » → ROUGE (1).
 
 const RACINE = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..');
 const lire = (f) => readFileSync(path.join(RACINE, f), 'utf8');
@@ -21,11 +28,14 @@ const ASSISTANCE = lire('js/assistance.js');
 const CONSIGNE = lire('plans de travail/CONSIGNE-LOT-2026-11-13-deux-temps-modeles.md');
 
 // Le fichier, chargé hors du navigateur : ce qu'il enregistre au panneau et ce qu'il expose aux bancs.
+// « Mettre ta classe en place » d'abord, comme dans index.html : il porte les outils communs aux modèles.
+const definitions = {};
 const fenetre = {
-    Assistance: { enregistrer: (def) => { fenetre.definition = def; }, parcours: () => [] },
-    ParcoursClasse: { mots: { explorer: 'Explorer la démo', refaire: 'Refaire avec mon matériel' } }
+    Assistance: { enregistrer: (def) => { definitions[def.id] = def; }, parcours: () => [], suivantDe: () => null }
 };
+new Function('window', lire('js/parcours-classe.js'))(fenetre);
 new Function('window', EVALUER)(fenetre);
+fenetre.definition = definitions.evaluer;
 const M = fenetre.ParcoursEvaluer.materiel;
 const blocs = [...CONSIGNE.matchAll(/```(text|json)\n([\s\S]*?)\n```/g)].map((b) => ({ sorte: b[1], texte: b[2] }));
 
@@ -46,15 +56,27 @@ describe('le matériel du modèle : celui de Grégoire, mot pour mot', () => {
             [[M.grille.nom, M.grille.description].join('\t')].concat(M.grille.criteres.map((r) => r.join('\t'))));
     });
 
-    it('l’Artefact 1 : le titre, la description, le type, l’objectif, la tâche et les consignes', () => {
+    it('l’Artefact 1 : le titre, le type, l’objectif et les consignes, mot pour mot ; la description et la tâche, retouchées comme décidé', () => {
         const artefact = JSON.parse(blocs[1].texte);
-        for (const champ of ['titre', 'description', 'type', 'objectif', 'tache', 'detailTache']) expect(M.production[champ], champ).toBe(artefact[champ]);
+        for (const champ of ['titre', 'type', 'objectif', 'detailTache']) expect(M.production[champ], champ).toBe(artefact[champ]);
+        // « Deux-Rives », le texte créé pour l'exercice (Grégoire, 15 nov. 2026, 10 h 02) : un seul mot change.
+        expect(M.production.description).toBe(artefact.description.replace('Madawigouche', 'Deux-Rives'));
+        // « Deux-Rives » n'est pas un chapitre de Rivières-aux-Cartouches : seul le début de la tâche change.
+        // (Les guillemets gardent leurs espaces insécables, comme dans la consigne.)
+        const debut = /^Annoter le chapitre «\s*Madawigouche\s*» de Rivières-aux-Cartouches/;
+        expect(artefact.tache).toMatch(debut);
+        expect(M.production.tache).toBe(artefact.tache.replace(debut, 'Annoter le texte «\u00a0Deux-Rives\u00a0»'));
     });
 
-    it('les vingt commentaires, niveau 0 compris, et le fichier qui les porte', () => {
+    it('les vingt commentaires, niveau 0 compris ; plus de fichier à télécharger', () => {
         expect(M.commentaires).toBe(blocs[2].texte);
         expect(M.commentaires.match(/^\*\*[^*]+ \((0|I|D|M|E)\)\*\* : /gm)).toHaveLength(20);
-        expect(M.fichierCommentaires).toMatch(/\.txt$/);
+        expect(M.fichierCommentaires).toBeUndefined();
+        expect(EVALUER).not.toMatch(/telechargerLesCommentaires|createObjectURL|\.download\s*=/);
+        // La lecture d'une ligne (« **CRITÈRE (niveau)** : texte ») rend bien vingt cases, une par critère et par niveau.
+        const lues = M.commentaires.split('\n').map((l) => /^\*\*(.+?) \((.+?)\)\*\* : (.*)$/.exec(l)).filter(Boolean);
+        expect(new Set(lues.map((m) => m[1] + '_' + m[2])).size).toBe(20);
+        expect(tranche(EVALUER, 'function commentairesParCase() {', 'return cases;')).toContain('/^\\*\\*(.+?) \\((.+?)\\)\\*\\* : (.*)$/');
     });
 
     it('les niveaux imposés (Structure M, Rigueur D, Plausibilité D, Nuance D), l’échelle du pack et le mot', () => {
@@ -83,19 +105,22 @@ describe('le modèle : les neuf étapes du parcours, dans la démo', () => {
     });
 
     it('chaque bulle donne son matériel', () => {
-        const texte = (i) => modele[i].texte;
-        expect(texte(1)).toContain(M.production.description);
-        expect(texte(1)).toContain(M.grille.nom);
-        expect(texte(1)).toContain(M.echelle);
-        expect(texte(4)).toContain(M.pratique.nom);
-        expect(texte(7)).toContain(M.echelle);
-        expect(texte(8)).toContain(M.mot);
-        expect(modele[1].boutons.map((b) => b.libelle)).toEqual(['Copier le nom']);
-        expect(modele[2].boutons.map((b) => b.libelle)).toEqual(["Copier l'objectif", 'Copier la tâche', 'Copier les consignes']);
-        expect(modele[7].boutons.map((b) => b.libelle)).toEqual(['Télécharger les commentaires']);
-        // La fin : la suite dans la démo, puis les vraies données ; « Étudiant·es », jamais « élèves ».
-        expect(modele[8].boutons.map((b) => b.libelle)).toEqual(['Explorer la démo', 'Refaire avec mon matériel']);
-        for (let i = 0; i < 9; i++) if (typeof Object.getOwnPropertyDescriptor(modele[i], 'texte')?.value === 'string') expect(texte(i)).not.toMatch(/élève/i);
+        expect(modele[4].texte).toContain(M.pratique.nom);
+        expect(modele[4].texte).toContain(M.echelle);
+        const bloc = tranche(EVALUER, 'function construireLesEtapesDuModele() {', 'var defDuModele = null;');
+        for (const dit of ['MATERIEL.production.nomDuType', 'MATERIEL.grille.nom', 'MATERIEL.echelle', 'MATERIEL.production.echeanceDite', 'MATERIEL.mot']) expect(bloc, dit).toContain(dit);
+        // Plus rien à copier ni à télécharger : « Remplir avec l'exemple », par les trois temps.
+        expect(EVALUER).not.toMatch(/Copier (la grille|le nom|l'objectif|la tâche|les consignes)|Télécharger les commentaires/);
+        expect(bloc.match(/enTroisTemps\(\{/g)).toHaveLength(3);
+        // La fin : « Recevoir » n'a pas encore son modèle, « Voir le parcours suivant » n'y est donc pas.
+        // (Lues aux outils communs : hors du navigateur, l'étape ne se sait pas sur le deuxième groupe et n'offre rien.)
+        const suites = fenetre.ParcoursClasse.suitesDuModele('evaluer', () => {});
+        expect(suites.map((b) => b.libelle)).toEqual(['Le refaire avec ma classe', 'Terminer']);
+        expect(suites.some((b) => b.primaire)).toBe(false);
+        expect(fenetre.ParcoursClasse.consigneDesSuites(suites)).toBe('Touche « Le refaire avec ma classe », ou « Terminer »');
+        expect(modele[8].boutons).toBeNull();
+        expect(fenetre.ParcoursClasse.consigneDesSuites([{ libelle: 'A' }, { libelle: 'B' }, { libelle: 'C' }])).toBe('Touche « A », « B », ou « C »');
+        expect(bloc).not.toMatch(/élève/i);
     });
 
     it('le parcours réel ne bouge pas : ses textes validés sont toujours là', () => {
@@ -104,8 +129,8 @@ describe('le modèle : les neuf étapes du parcours, dans la démo', () => {
     });
 });
 
-describe('le confinement : le modèle ne retient rien hors de la démo et ne fait aucun geste à la place de la personne', () => {
-    const bloc = tranche(EVALUER, '// LE MODÈLE (13 nov. 2026)', 'window.Assistance.enregistrer({');
+describe('le confinement : le modèle ne retient rien hors de la démo, et ne remplit que par les outils communs', () => {
+    const bloc = tranche(EVALUER, '// LE MODÈLE (13 nov. 2026 ; règle du 14 nov.)', 'window.Assistance.enregistrer({');
 
     it('ce qu’il retient reste en mémoire : `lireCtx` et `majCtx` ne touchent pas aux préférences pendant le modèle', () => {
         expect(tranche(EVALUER, 'function lireCtx() {', 'function majCtx')).toMatch(/if \(enModele\) return ctxModele;\s+var v = typeof obtenirPreference/);
@@ -113,12 +138,13 @@ describe('le confinement : le modèle ne retient rien hors de la démo et ne fai
         expect(tranche(EVALUER, 'async function lancer(depuis) {', 'if (enDemo()')).toContain('enModele = false;');
     });
 
-    it('il n’écrit ni préférence ni donnée, et ne remplit aucun champ', () => {
+    it('il n’écrit ni préférence ni donnée, et aucun champ directement (`poser` et `choisir`, derrière la garde de la démo)', () => {
         expect(bloc).not.toMatch(/definirPreference|db\.set|setSync|localStorage|\.value\s*=[^=]|\.checked\s*=[^=]|selectedIndex\s*=/);
     });
 
     it('le panneau refuse le modèle sans le deuxième groupe, et le fichier le déclare', () => {
-        expect(ASSISTANCE).toMatch(/var raisonModele = typeof def\.refusModele === 'function' \? def\.refusModele\(\) : null;\s+if \(raisonModele\) \{ direRefus\(o\.corps, raisonModele\); appelerPrealable\(def, raisonModele\); return; \}/);
+        const bouton = tranche(ASSISTANCE, 'function creerBoutonModele(def, o) {', 'function creerTemps');
+        expect(bouton).toMatch(/var raison = typeof def\.refusModele === 'function' \? def\.refusModele\(\) : null;\s+if \(raison\) \{ direRefus\(o\.corps, raison\); appelerPrealable\(def, raison, true\); return; \}/);
         expect(typeof fenetre.definition.refusModele).toBe('function');
         expect(typeof fenetre.definition.lancerModele).toBe('function');
         expect(fenetre.definition.prealable).toBe('classe');

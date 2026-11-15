@@ -1036,42 +1036,52 @@
 
 
     // =================================================================
-    // LE MODÈLE (13 nov. 2026) : le même parcours, dans la démo, sur le deuxième groupe, avec le matériel fourni
+    // LE MODÈLE (13 nov. 2026 ; règle du 14 nov.) : le même parcours, dans la démo, sur le deuxième groupe
     // =================================================================
-    // Consigne : `plans de travail/CONSIGNE-LOT-2026-11-13-deux-temps-modeles.md`. Les étapes sont celles du parcours
-    // (`ETAPES`) : chacune est reprise telle quelle (ses zones, ses flèches, son halo, ce qui la fait avancer), avec un
-    // texte qui donne le matériel et, quand il est long, un bouton qui le copie. La personne fait chaque geste : rien ne
-    // se remplit ni ne se clique tout seul.
+    // Consignes : `plans de travail/CONSIGNE-LOT-2026-11-13-deux-temps-modeles.md`, puis
+    // `plans de travail/CONSIGNE-2026-11-15-deux-temps-remise-a-jour.md`. Les étapes sont celles du parcours
+    // (`ETAPES`) : chacune est reprise telle quelle (ses zones, son halo, ce qui la fait avancer). LA RÈGLE (Grégoire,
+    // 14 nov. 2026, 12 h 08) : une bulle qui porte un formulaire va en trois temps — « Remplir avec l'exemple », dans la
+    // bulle ; ce qui vient d'apparaître, expliqué ; puis le bouton de la PAGE, que la personne touche elle-même
+    // (js/parcours-classe.js, `troisTemps`). L'étiquetage de la grille, l'évaluation, la pratique et le mot restent
+    // les gestes de la personne (Grégoire, 14 nov., 11 h 47 : « l'application ne devine rien »).
 
     /*
-     * LE MATÉRIEL FOURNI : celui de Grégoire, tiré de son cours 601-101, MOT POUR MOT (aucune retouche). Sa grille
-     * « G4H Sans français », son Artefact 1, les niveaux qu'il impose (12 nov., 19 h 51), ses vingt commentaires, son mot.
+     * LE MATÉRIEL DE L'EXEMPLE : celui de Grégoire, tiré de son cours 601-101. Sa grille « G4H Sans français », son
+     * Artefact 1, les niveaux qu'il impose (12 nov., 19 h 51), ses vingt commentaires, son mot. Retouches décidées :
+     * « Deux-Rives », le texte créé pour l'exercice, remplace « Madawigouche » (Grégoire, 15 nov. 2026, 10 h 02) ; la
+     * tâche ne dit donc plus « le chapitre … de Rivières-aux-Cartouches » ; l'échéance est le mardi 9 septembre 2025,
+     * en semaine 4 de la démo (tout le matériel se cale sur son automne 2025 : décision de Cowork).
      */
     var MATERIEL = Object.freeze({
         grille: Object.freeze({
             nom: 'G4H Sans français',
             description: 'Grille à 4 critères | sans français écrit',
             criteres: Object.freeze([
-                ['Structure', "Établir et rendre lisibles les relations entre les éléments de son travail : pour chaque élément, on peut dire de quoi il dépend et ce qu'il sert.", '20\u00a0%'],
-                ['Rigueur', "Rendre compte avec exactitude de ce que dit le texte : relever les éléments importants sans en omettre, les nommer avec le terme juste, et expliquer ce qu'on avance sans laisser le lecteur deviner.", '30\u00a0%'],
-                ['Plausibilité', "Fonder son interprétation sur le texte : chaque idée avancée s'appuie sur des éléments précis du texte, et chaque élément retenu sert une idée.", '15\u00a0%'],
-                ['Nuance', "Interpréter au lieu de s'en tenir à la lecture évidente : dire ce qu'un élément révèle, ce que le rapprochement de deux éléments fait voir (une nuance, une tension, une contradiction qu'on explique), et ce que l'analyse permet de conclure.", '35\u00a0%']
+                ['Structure', "Établir et rendre lisibles les relations entre les éléments de son travail : pour chaque élément, on peut dire de quoi il dépend et ce qu'il sert.", '20 %'],
+                ['Rigueur', "Rendre compte avec exactitude de ce que dit le texte : relever les éléments importants sans en omettre, les nommer avec le terme juste, et expliquer ce qu'on avance sans laisser le lecteur deviner.", '30 %'],
+                ['Plausibilité', "Fonder son interprétation sur le texte : chaque idée avancée s'appuie sur des éléments précis du texte, et chaque élément retenu sert une idée.", '15 %'],
+                ['Nuance', "Interpréter au lieu de s'en tenir à la lecture évidente : dire ce qu'un élément révèle, ce que le rapprochement de deux éléments fait voir (une nuance, une tension, une contradiction qu'on explique), et ce que l'analyse permet de conclure.", '35 %']
             ])
         }),
         production: Object.freeze({
             titre: 'Artefact 1',
-            description: 'Appliquer des stratégies de lecture variées (Madawigouche)',
+            description: 'Appliquer des stratégies de lecture variées (Deux-Rives)',
             type: 'artefact-portfolio',
             nomDuType: 'Artefact',
             objectif: "Développer ta capacité à choisir les stratégies de lecture qu'appelle un texte donné, plutôt que de les appliquer au hasard.",
-            tache: "Annoter le chapitre « Madawigouche » de Rivières-aux-Cartouches en y appliquant au moins trois stratégies de lecture, puis formuler une première hypothèse d'objectif de communication.",
-            detailTache: "Une stratégie de lecture te fait regarder le texte sous un angle précis. En en appliquant plusieurs, tu vois des choses qu'une simple lecture ne montre pas.\n\n1. Lis et annote l'extrait \nApplique au moins trois stratégies de lecture différentes, choisies parmi les quinze du Manuel\nLaisse des traces visibles directement sur le texte imprimé\n\n2. Identifie chaque stratégie utilisée • Écris le nom de la stratégie en haut de la page • Utilise un système de couleurs et de symboles constant • Assure-toi que tes annotations restent lisibles\n\n3. Formule ton hypothèse d'objectif de communication \nÉcris ton HOC en bas de la page, en une phrase complète \nElle doit refléter ce que tu comprends du texte après avoir appliqué tes stratégies\n\nRappels importants \nTrois stratégies, c'est un minimum, pas un objectif. \nUne stratégie appliquée à moitié ne compte pas : va au bout de chacune."
+            tache: "Annoter le texte «\u00a0Deux-Rives\u00a0» en y appliquant au moins trois stratégies de lecture, puis formuler une première hypothèse d'objectif de communication.",
+            detailTache: "Une stratégie de lecture te fait regarder le texte sous un angle précis. En en appliquant plusieurs, tu vois des choses qu'une simple lecture ne montre pas.\n\n1. Lis et annote l'extrait \nApplique au moins trois stratégies de lecture différentes, choisies parmi les quinze du Manuel\nLaisse des traces visibles directement sur le texte imprimé\n\n2. Identifie chaque stratégie utilisée • Écris le nom de la stratégie en haut de la page • Utilise un système de couleurs et de symboles constant • Assure-toi que tes annotations restent lisibles\n\n3. Formule ton hypothèse d'objectif de communication \nÉcris ton HOC en bas de la page, en une phrase complète \nElle doit refléter ce que tu comprends du texte après avoir appliqué tes stratégies\n\nRappels importants \nTrois stratégies, c'est un minimum, pas un objectif. \nUne stratégie appliquée à moitié ne compte pas : va au bout de chacune.",
+            // Le mardi 9 septembre 2025 : une séance du deuxième groupe (mardi et vendredi), en semaine 4 de la démo.
+            echeance: '2025-09-09',
+            echeanceDite: 'le mardi 9 septembre 2025'
         }),
         niveaux: Object.freeze([['Structure', 'M'], ['Rigueur', 'D'], ['Plausibilité', 'D'], ['Nuance', 'D']]),
         echelle: 'IDME et niv 0',
         // Le modèle par standards de l'assistant (`STD-n-meilleurs`, celui que la vue simple appelle « Par standards »).
         pratique: Object.freeze({ id: 'STD-n-meilleurs', nom: 'N meilleures évaluations' }),
-        fichierCommentaires: 'commentaires-artefact-1.txt',
+        // SUPPOSITION (15 nov. 2026) : le matériel ne nomme pas la cartouche ; elle prend le titre de la production.
+        cartouche: 'Artefact 1',
         commentaires: [
             "## STRUCTURE",
             "**STRUCTURE (0)** : Le travail n'est pas recevable.",
@@ -1107,42 +1117,30 @@
         return [[g.nom, g.description].join('\t')].concat(g.criteres.map(function (c) { return c.join('\t'); })).join('\n');
     }
 
-    // Mots PROPOSÉS (13 nov. 2026), lus par l'enseignant·e : ils partent tels quels et restent corrigeables.
+    /** Les vingt commentaires, par « CRITÈRE_niveau » (« STRUCTURE_M ») : lus dans le texte fourni, sans le retoucher. */
+    function commentairesParCase() {
+        var cases = {};
+        MATERIEL.commentaires.split('\n').forEach(function (ligne) {
+            var m = /^\*\*(.+?) \((.+?)\)\*\* : (.*)$/.exec(ligne);
+            if (m) cases[m[1] + '_' + m[2]] = m[3];
+        });
+        return cases;
+    }
+
+    // Les outils communs aux modèles (js/parcours-classe.js) : « Remplir avec l'exemple », les trois temps, la fin.
+    function C() { return window.ParcoursClasse; }
+
+    // Mots PROPOSÉS (15 nov. 2026), lus par l'enseignant·e : ils partent tels quels et restent corrigeables.
     var MOTS_M = {
-        refus: "Commence par la modélisation de « Mettre ta classe en place » : ce modèle se joue sur le groupe que tu y montes.",
+        refus: "Commence par la Modélisation de « Mettre ta classe en place » : ce modèle se joue sur le groupe que tu y montes.",
         groupe: "Ce modèle se joue sur le deuxième groupe de la démo : choisis-le dans l'en-tête.",
-        copierGrille: 'Copier la grille', grilleCopiee: 'Grille copiée. Colle-la dans la zone de collage.',
-        copierNom: 'Copier le nom', nomCopie: 'Nom copié. Colle-le dans le champ.',
-        copierObjectif: "Copier l'objectif", objectifCopie: 'Objectif copié. Colle-le dans son champ.',
-        copierTache: 'Copier la tâche', tacheCopiee: 'Tâche copiée. Colle-la dans son champ.',
-        copierConsignes: 'Copier les consignes', consignesCopiees: 'Consignes copiées. Colle-les dans leur champ.',
-        nonCopie: "Le texte n'a pas pu être copié. Essaie de nouveau.",
-        telecharger: 'Télécharger les commentaires',
-        telecharge: 'Fichier « ' + MATERIEL.fichierCommentaires + ' » téléchargé. Importe-le dans la cartouche.'
+        choisirLeGroupe: "Choisis le deuxième groupe dans l'en-tête (ce modèle se joue sur lui)"
     };
-
-    function copier(texte, libelle, fait) {
-        return window.ParcoursClasse.copierTexte(texte, { fait: fait, titre: libelle, rate: MOTS_M.nonCopie });
-    }
-
-    /** Les vingt commentaires, en fichier texte : la cartouche les importe par « Importer depuis un fichier texte ». */
-    function telechargerLesCommentaires() {
-        var url = URL.createObjectURL(new Blob([MATERIEL.commentaires], { type: 'text/plain;charset=utf-8' }));
-        var a = document.createElement('a');
-        a.href = url;
-        a.download = MATERIEL.fichierCommentaires;
-        a.className = 'parcours-tampon-copie';
-        document.body.appendChild(a);
-        a.click();
-        a.remove();
-        setTimeout(function () { URL.revokeObjectURL(url); }, 2000);
-        if (window.notifications && typeof window.notifications.succes === 'function') window.notifications.succes(MOTS_M.telecharge);
-    }
 
     // ---------- Le deuxième groupe, et ce que la démo contient déjà du modèle ----------
 
     function deuxiemeGroupe() {
-        return window.ParcoursClasse && typeof window.ParcoursClasse.deuxiemeGroupe === 'function' ? window.ParcoursClasse.deuxiemeGroupe() : null;
+        return C() && typeof C().deuxiemeGroupe === 'function' ? C().deuxiemeGroupe() : null;
     }
 
     function refusModele() { return deuxiemeGroupe() ? null : MOTS_M.refus; }
@@ -1161,6 +1159,8 @@
      * Le repère du modèle, refait à chaque lancement : tout ce que la démo contient, sauf ce qui vient du modèle (sa
      * grille par son nom, la production qui la porte, une pratique qui n'est pas du pack, les cartouches de sa grille).
      * Les étapes avancent alors sur ce qui a déjà été fait, comme à une reprise, sans rien écrire hors de la démo.
+     * Les deux bulles d'ouverture (« Pourquoi étiqueter », « Tu apprends aussi ») ne se montrent que si la grille
+     * reste à créer : c'est dans la Modélisation qu'on étiquette pour la première fois.
      */
     function poserLeRepereModele() {
         var miennes = ids(grillesDuModele());
@@ -1175,11 +1175,12 @@
                 return g && miennes.indexOf(g.id) === -1 ? acc.concat(ids(cartouchesDe(g.id))) : acc;
             }, []),
             grilleId: null, productionId: null, evaluationId: null, evaluationDA: null, pratiqueId: null, cartoucheId: null,
-            exemple: 'passe', grillePrise: false
+            exemple: 'passe', grillePrise: false,
+            ouverture: miennes.length ? 2 : 0
         };
     }
 
-    // ---------- Étape 1 du modèle : la grille collée, étiquetée, créée ; puis ses critères, jugés par niveaux ----------
+    // ---------- Étape 1 du modèle : la grille de l'exemple dans l'étiquetage ; puis ses critères, jugés par niveaux ----------
 
     function grilleDuModele() {
         grilleCreee();
@@ -1187,9 +1188,22 @@
     }
 
     /**
-     * Mesuré le 13 nov. 2026 : étiquetée (nom, description, pondération), la grille fournie est créée EN POINTS, ses
-     * critères analytiques (une grille sans niveau nommé se compte en points). Celle de Grégoire se juge par niveaux :
-     * tant qu'un de ses critères ne l'est pas, l'étape montre où le passer à « Holistique ».
+     * « Remplir avec l'exemple », à l'accueil de « Mon matériel » : la grille de l'exemple entre dans l'étiquetage,
+     * comme un collage (la même lecture que le presse-papiers). L'étiquetage reste le geste de la personne.
+     */
+    function ouvrirLaGrilleDeLExemple() {
+        var lecture = window.materielDissectionLecture, dissection = window.materielDissection;
+        if (!lecture || !dissection) return;
+        var doc = lecture.docDepuisPressePapiers({ texte: tableauDeLaGrille() });
+        if (doc) dissection.ouvrir(doc);
+    }
+
+    /**
+     * REMESURÉ le 15 nov. 2026 (ancienne décision 3.1). Depuis la 1.247.0, la page offre « des points » ou « des
+     * niveaux de performance », mais seulement à une grille qui porte LES DEUX (js/materiel-dissection.js). Celle de
+     * l'exemple ne porte ni points ni niveaux nommés (un nom, une description, une pondération par critère) : le choix
+     * ne paraît pas, et elle naît EN POINTS, ses critères analytiques. Le détour reste donc : tant qu'un de ses critères
+     * n'est pas jugé par niveaux, l'étape montre où le passer à « Holistique ».
      */
     function grilleEnPoints() {
         var g = grilleDuModele();
@@ -1238,6 +1252,53 @@
         return "Touche « La voir dans Grilles de critères ».";
     }
 
+    // ---------- Étape 2 du modèle : la fiche de la production, remplie avec l'exemple ----------
+
+    function fait() { return true; }
+
+    function texteChoisi(id) {
+        var s = el(id);
+        return s && s.selectedOptions && s.selectedOptions[0] ? s.selectedOptions[0].textContent : '';
+    }
+
+    function productionRemplie() {
+        var g = grilleDuModele();
+        return !!g && String((el('productionTitre') || {}).value) === MATERIEL.production.description
+            && String((el('productionGrille') || {}).value) === String(g.id)
+            && texteChoisi('productionEchelle').indexOf(MATERIEL.echelle) !== -1;
+    }
+
+    /** Le nom de la production est ce qu'elle fait faire (décision 3.2 : la démo a déjà un « Artefact 1 »), repris en « Activité d'apprentissage ». */
+    function remplirLaProduction() {
+        var g = grilleDuModele(), p = MATERIEL.production;
+        if (!g) return;
+        C().poser(el('productionTitre'), p.description);
+        C().poser(el('productionActivite'), p.description);
+        C().poser(el('productionType'), p.type);
+        C().poser(el('productionGrille'), g.id);
+        C().choisir(el('productionEchelle'), MATERIEL.echelle);
+    }
+
+    // ---------- Étape 3 du modèle : les consignes et l'échéance ----------
+
+    function champEcheance() {
+        var s = el('sectionPlanification');
+        return s ? s.querySelector('input[type="date"]') : null;
+    }
+
+    function consignesRemplies() {
+        var d = champEcheance();
+        return String((el('productionObjectif') || {}).value) === MATERIEL.production.objectif && !!d && d.value === MATERIEL.production.echeance;
+    }
+
+    function remplirLesConsignes() {
+        var p = MATERIEL.production;
+        C().poser(el('productionObjectif'), p.objectif);
+        C().poser(el('productionTache'), p.tache);
+        C().poser(el('productionDetailTache'), p.detailTache);
+        C().poser(champEcheance(), p.echeance);
+    }
+
     // ---------- Étape 4 du modèle : l'étudiant·e de la ligne que la bulle pointe ----------
 
     function etudiantDeLaLigne() {
@@ -1250,37 +1311,56 @@
         return e ? [e.prenom, e.nom].filter(Boolean).join(' ') : '';
     }
 
-    // ---------- Étape 8 du modèle : les commentaires, importés d'un fichier ----------
+    // ---------- Étape 8 du modèle : la cartouche, remplie avec l'exemple (décision 3.3 : plus de fichier à télécharger) ----------
 
-    function boutonImporter() { return qs('#conception-retroactions [data-action="ouvrirImportTxtCartouche"]'); }
-
-    /** La fiche de la cartouche en création, sa grille et son échelle choisies, aucun commentaire encore écrit. */
-    function commentairesAImporter() {
-        if (!vis(el('btnCreerCartouche')) || !vis(boutonImporter())) return false;
-        if (premierAFaire(['nomCartouche', 'selectGrilleCartouche', 'selectEchelleCartouche'], null)) return false;
-        var cases = document.querySelectorAll('#cartoucheZonePrincipale textarea[id^="comm_"]');
-        return cases.length > 0 && ![].some.call(cases, function (t) { return String(t.value || '').trim() !== ''; });
+    function casesDeCommentaires() {
+        return [].slice.call(document.querySelectorAll('#cartoucheZonePrincipale textarea[id^="comm_"]'));
     }
 
-    // ---------- Les textes du modèle (PROPOSÉS, 13 nov. 2026) ----------
+    /** La fiche d'une cartouche en création est ouverte. */
+    function cartoucheEnCreation() { return vis(el('btnCreerCartouche')); }
+
+    function cartoucheRemplie() {
+        var cases = casesDeCommentaires();
+        return cases.length > 0 && cases.every(function (t) { return String(t.value || '').trim() !== ''; });
+    }
+
+    /**
+     * Le nom, la grille du modèle, l'échelle du pack (aucune échelle neuve), puis les vingt commentaires, chacun dans sa
+     * case (« comm_<critère>_<niveau> »). La page redessine son échelle puis sa matrice : chaque geste attend le suivant.
+     */
+    async function remplirLaCartouche() {
+        var g = grilleDuModele();
+        if (!g) return;
+        C().poser(el('nomCartouche'), MATERIEL.cartouche);
+        C().poser(el('selectGrilleCartouche'), g.id);
+        await attendre(function () { return C().choisir(el('selectEchelleCartouche'), MATERIEL.echelle); }, 3000);
+        await attendre(function () { return casesDeCommentaires().length > 0; }, 3000);
+        if (!enDemo() || !cartoucheEnCreation()) return;
+        var textes = commentairesParCase();
+        var noms = {};
+        (g.criteres || []).forEach(function (c) { noms[String(c.id)] = String(c.nom || '').toUpperCase(); });
+        casesDeCommentaires().forEach(function (t) {
+            var reste = t.id.slice('comm_'.length), coupe = reste.lastIndexOf('_');
+            var texte = textes[noms[reste.slice(0, coupe)] + '_' + reste.slice(coupe + 1)];
+            if (texte) C().poser(t, texte);
+        });
+    }
+
+    // ---------- Les textes du modèle (PROPOSÉS, 15 nov. 2026) ----------
 
     var NIVEAUX_DITS = MATERIEL.niveaux.map(function (n) { return n[0] + ' ' + n[1]; }).join(', ');
 
     var TEXTES_M = {
-        grille: "Dans la démo, tu vas évaluer une première production du deuxième groupe, geste par geste, avec du matériel fourni. D'abord la grille : « " + MATERIEL.grille.nom + " », quatre critères, chacun avec sa description et sa pondération. Touche « Copier la grille », colle-la dans la zone de collage, puis montre à l'application ce qu'est chaque morceau : le nom de la grille (« Titre »), les descriptions (« Description »), les critères (« Critère ») et les pourcentages (« Pondération »). C'est le geste que tu feras avec ta propre grille, copiée de son document.",
-        types: "Ta grille est créée. Elle n'a pas de niveaux : l'application l'a donc lue comme une grille en points. Celle-ci se juge par niveaux, avec une échelle que tu choisiras ensuite. Ouvre-la dans « Grilles de critères » et passe chacun de ses quatre critères à « Holistique » : ses pondérations ne changent pas.",
-        production: "La grille est prête. Décris maintenant la production qu'elle servira à évaluer. Le matériel : le nom « " + MATERIEL.production.description + " » (touche « Copier le nom »), à coller aussi dans « Activité d'apprentissage » ; le type « " + MATERIEL.production.nomDuType + " » ; la grille « " + MATERIEL.grille.nom + " » ; l'échelle « " + MATERIEL.echelle + " ». La démo a déjà un « " + MATERIEL.production.titre + " » dans le cours de son premier groupe : celui-ci prend pour nom ce qu'il fait faire.",
-        consignes: "Écris ce que les étudiant·es doivent savoir pour réussir. Le matériel : l'objectif, la tâche et les consignes d'une vraie production. Copie chacun, puis colle-le dans son champ. Ensuite, pose une date de remise (celle d'aujourd'hui convient) et coche « Consignes transmises » : la production entre alors au calendrier du groupe.",
+        types: "Ta grille est créée. Elle n'a pas de niveaux : l'application l'a donc lue comme une grille en points. Celle-ci se juge par niveaux de performance, avec une échelle que tu choisiras ensuite. Ouvre-la dans « Grilles de critères » et passe chacun de ses quatre critères à « Holistique » : ses pondérations ne changent pas.",
         pratique: "La première évaluation est faite. Reste à dire comment se construit la note du cours : c'est la pratique de notation. Touche « + Nouvelle pratique », puis « Partir d'un modèle », et choisis « " + MATERIEL.pratique.nom + " » : le modèle par standards, où la note vient des niveaux de maîtrise. Suis l'assistant jusqu'à « Créer la pratique » : il te demande alors l'échelle. Choisis « " + MATERIEL.echelle + " », puis touche « Adopter ». La note que tu viens d'attribuer ne changera pas.",
-        appliquer: "La pratique est créée, mais elle ne s'applique encore à aucun cours. Choisis-la dans le menu en haut de la page, puis touche « Appliquer au cours actif » : c'est le cours du deuxième groupe. Sans pratique appliquée, l'application ne calcule aucune note.",
-        cartouche: "La rétroaction vient de la grille. Pour qu'elle parle avec des mots d'enseignant·e, crée une cartouche : donne-lui un nom, choisis la grille « " + MATERIEL.grille.nom + " », puis l'échelle « " + MATERIEL.echelle + " ». Le matériel : vingt commentaires, un par critère et par niveau. Touche « Télécharger les commentaires », puis « Importer depuis un fichier texte » et choisis le fichier téléchargé : la matrice se remplit d'un coup. Touche « Créer la cartouche ». Puis, dans la fiche de la production, choisis cette cartouche : elle s'y appliquera à chaque évaluation.",
-        retroaction: "Reviens à la première évaluation : touche « Actions › Consulter », puis « Déverrouiller ». Choisis la cartouche : la rétroaction se réécrit avec ses commentaires, un par critère, selon le niveau attribué. Dans « Un mot pour ton étudiant·e », écris « " + MATERIEL.mot + " ». Puis verrouille. Tu as fait tous les gestes : il reste à les refaire avec ta grille, ta production et tes mots."
+        appliquer: "La pratique est créée, mais elle ne s'applique encore à aucun cours. Choisis-la dans le menu en haut de la page, puis touche « Appliquer au cours actif » : c'est le cours du deuxième groupe. Sans pratique appliquée, l'application ne calcule aucune note."
     };
 
     function texteEvaluation() {
         var qui = etudiantDeLaLigne();
         return "Évalue une première production : celle " + (qui ? "de " + qui + ", sur la ligne que la bulle pointe" : "de la ligne que la bulle pointe") +
-            ". Rien à importer : touche « Actions › Évaluer ». Pour chaque critère, choisis le niveau fourni : " + NIVEAUX_DITS +
+            ". Rien à importer : touche « Actions › Évaluer ». Pour chaque critère, choisis le niveau de l'exemple : " + NIVEAUX_DITS +
             ". La note se calcule à mesure, et une rétroaction s'écrit sous tes yeux. Puis touche « Verrouiller » : l'évaluation ne bougera plus par mégarde.";
     }
 
@@ -1288,32 +1368,75 @@
 
     /**
      * Une étape du parcours, reprise pour le modèle : ce qu'elle désigne et ce qui la fait avancer ne changent pas ; `plus`
-     * la surcharge (un texte, un geste, des boutons). Tant que le deuxième groupe n'est pas le groupe actif, l'étape
-     * n'avance pas : elle montre le menu de l'en-tête, et le dit.
+     * la surcharge (des lignes, un texte, un geste, des boutons). Tant que le deuxième groupe n'est pas le groupe
+     * actif, l'étape n'avance pas : elle montre le menu de l'en-tête et le dit (une bulle en lignes, par sa seule
+     * consigne, sans bouton : « Remplir avec l'exemple » ne remplit jamais la fiche d'un autre groupe).
      */
     function pourLeModele(etape, plus) {
         var e = Object.create(etape);
         Object.keys(plus).forEach(function (k) { Object.defineProperty(e, k, Object.getOwnPropertyDescriptor(plus, k)); });
         var d = {};
-        ['zones', 'fleches', 'contour', 'aussiEviter', 'formulaire', 'complement', 'avis', 'atteint'].forEach(function (k) { d[k] = e[k]; });
+        ['zones', 'fleches', 'contour', 'aussiEviter', 'formulaire', 'complement', 'avis', 'atteint', 'lignes'].forEach(function (k) { d[k] = e[k]; });
+        var sesBoutons = Object.getOwnPropertyDescriptor(plus, 'boutons');
         var sinon = function (k, repli) {
             return function () { return surLeDeuxiemeGroupe() ? (typeof d[k] === 'function' ? d[k].apply(e, arguments) : repli) : null; };
         };
+        var enLignes = Object.prototype.hasOwnProperty.call(plus, 'lignes');
         e.zones = function () { return surLeDeuxiemeGroupe() ? (d.zones ? d.zones.call(e) : []) : []; };
         e.contour = function () { return surLeDeuxiemeGroupe() ? (d.contour ? d.contour.call(e) : null) : el('selectGroupeCoursHeader'); };
-        e.avis = function () { return surLeDeuxiemeGroupe() ? (d.avis ? d.avis.call(e) : '') : MOTS_M.groupe; };
+        e.avis = function () { return surLeDeuxiemeGroupe() ? (d.avis ? d.avis.call(e) : '') : (enLignes ? '' : MOTS_M.groupe); };
         ['fleches', 'aussiEviter', 'formulaire', 'complement'].forEach(function (k) { if (d[k]) e[k] = sinon(k, null); });
         if (d.atteint) e.atteint = function () { return surLeDeuxiemeGroupe() && d.atteint.call(e); };
+        if (enLignes) {
+            e.lignes = function () { return surLeDeuxiemeGroupe() ? d.lignes.call(e) : [consigne(MOTS_M.choisirLeGroupe)]; };
+            if (sesBoutons) {
+                Object.defineProperty(e, 'boutons', { get: function () {
+                    if (!surLeDeuxiemeGroupe()) return null;
+                    return sesBoutons.get ? sesBoutons.get.call(e) : sesBoutons.value;
+                } });
+            }
+        }
         return e;
     }
 
-    var ETAPES_MODELE = [
+    /** Les surcharges d'une étape en trois temps : ses lignes et son bouton ; ni paragraphe, ni ligne du geste, ni flèches du formulaire. */
+    function enTroisTemps(o, plus) {
+        var t = C().troisTemps(o);
+        var e = { texte: '', geste: '', fleches: function () { return []; } };
+        [t, plus || {}].forEach(function (src) {
+            Object.keys(src).forEach(function (k) { Object.defineProperty(e, k, Object.getOwnPropertyDescriptor(src, k)); });
+        });
+        return e;
+    }
+
+    // Construites au premier besoin : elles s'appuient sur les outils communs de js/parcours-classe.js (`C()`), que
+    // ce fichier ne suppose pas chargés à sa lecture.
+    var etapesDuModele = null;
+    function etapesModele() {
+        if (!etapesDuModele) etapesDuModele = construireLesEtapesDuModele();
+        return etapesDuModele;
+    }
+
+    function construireLesEtapesDuModele() { return [
         pourLeModele(ETAPES[0], {
-            get texte() { return modeRendu === 'types' ? TEXTES_M.types : TEXTES_M.grille; },
+            get texte() { return modeRendu === 'types' ? TEXTES_M.types : texteEtape1(); },
+            // À l'accueil : la seule consigne « Remplir avec l'exemple » ; la grille entre alors dans l'étiquetage, où
+            // la bulle du parcours prend le relais (« une étiquette à la fois »).
+            lignes: function () {
+                if (modeRendu === 'types') return [];
+                if (modeRendu === 'accueil') {
+                    return [
+                        note("Dans la démo, tu évalues une première production du deuxième groupe, avec le matériel de l'exemple. D'abord, sa grille."),
+                        consigne(C().mots.toucheRemplir)
+                    ];
+                }
+                return LIGNES_1[modeRendu] || [];
+            },
             get geste() { return modeRendu === 'types' ? gesteDesTypes() : gesteEtape1(); },
             get boutons() {
-                if (modeRendu === 'types' || dissectionOuverte()) return null;
-                return [{ libelle: MOTS_M.copierGrille, primaire: true, action: function () { copier(tableauDeLaGrille(), MOTS_M.copierGrille, MOTS_M.grilleCopiee); } }];
+                if (modeRendu === 'types') return null;
+                if (modeRendu === 'accueil') return [{ libelle: C().mots.remplir, primaire: true, action: function () { C().remplir(ouvrirLaGrilleDeLExemple); } }];
+                return boutonsEtape1();
             },
             avant: async function () {
                 modeRendu = modeModele1();
@@ -1322,10 +1445,16 @@
                 await attendre(function () { return sousSectionVisible('conception-materiel'); }, 2000);
             },
             zones: function () { return modeRendu === 'types' ? surLaCible(ouPasserAuxNiveaux()) : zonesEtape1(); },
-            fleches: function () { return modeRendu !== 'types' && dissectionOuverte() ? A().fleches() : null; },
+            fleches: function () {
+                if (modeRendu === 'types') return null;
+                if (modeRendu === 'accueil' || modeRendu === 'pourquoi' || modeRendu === 'apprends') return [];
+                if (LIGNES_1[modeRendu]) return zonesEtape1();
+                return dissectionOuverte() ? A().fleches() : null;
+            },
             complement: function () { return modeRendu === 'types' ? null : complementEtape1(); },
             aussiEviter: function () { return modeRendu === 'types' ? [] : aussiEviterEtape1(); },
-            contour: function () { return modeRendu === 'types' ? ouPasserAuxNiveaux() : contourEtape1(); },
+            // À l'accueil, le geste est dans la bulle : rien n'est désigné sur la page.
+            contour: function () { return modeRendu === 'types' ? ouPasserAuxNiveaux() : modeRendu === 'accueil' ? null : contourEtape1(); },
             nommeLeContour: true,
             atteint: function () {
                 if (grilleDuModele() && !grilleEnPoints()) return true;
@@ -1333,23 +1462,46 @@
                 return false;
             }
         }),
-        pourLeModele(ETAPES[1], {
-            texte: TEXTES_M.production,
-            geste: "Touche « + Nouvelle production », remplis-la avec le matériel fourni, puis touche « Créer la production ».",
-            boutons: [{ libelle: MOTS_M.copierNom, primaire: true, action: function () { copier(MATERIEL.production.description, MOTS_M.copierNom, MOTS_M.nomCopie); } }]
-        }),
-        pourLeModele(ETAPES[2], {
-            texte: TEXTES_M.consignes,
-            geste: "Colle l'objectif, la tâche et les consignes ; écris la date de remise, puis coche « Consignes transmises ».",
-            boutons: [
-                { libelle: MOTS_M.copierObjectif, action: function () { copier(MATERIEL.production.objectif, MOTS_M.copierObjectif, MOTS_M.objectifCopie); } },
-                { libelle: MOTS_M.copierTache, action: function () { copier(MATERIEL.production.tache, MOTS_M.copierTache, MOTS_M.tacheCopiee); } },
-                { libelle: MOTS_M.copierConsignes, action: function () { copier(MATERIEL.production.detailTache, MOTS_M.copierConsignes, MOTS_M.consignesCopiees); } }
-            ]
-        }),
+        pourLeModele(ETAPES[1], enTroisTemps({
+            dAbord: function () {
+                if (ficheProductionOuverte()) return null;
+                return [note("La grille est prête. Décris la production qu'elle servira à évaluer."), consigne("Touche « + Nouvelle production »")];
+            },
+            rempli: productionRemplie,
+            gestes: remplirLaProduction,
+            apres: function () {
+                return [
+                    { texte: "Son nom dit ce qu'elle fait faire ; il est repris dans « Activité d'apprentissage » (c'est ce que les étudiant·es lisent en tête de leur synthèse de rétroaction)", montre: function () { return [el('productionTitre'), el('productionActivite')]; } },
+                    { texte: "Son type : « " + MATERIEL.production.nomDuType + " »", montre: function () { return [el('productionType')]; } },
+                    { texte: "Sa grille, « " + MATERIEL.grille.nom + " », et son échelle, « " + MATERIEL.echelle + " »", montre: function () { return [el('productionGrille'), el('productionEchelle')]; } }
+                ];
+            },
+            creer: "Touche « Créer la production »"
+        }, {
+            contour: function () {
+                if (!ficheProductionOuverte()) return qs('#conception-productions [data-action="creerNouvelleProduction"]');
+                return productionRemplie() && vis(el('btnCreerProduction')) ? el('btnCreerProduction') : null;
+            }
+        })),
+        pourLeModele(ETAPES[2], enTroisTemps({
+            rempli: consignesRemplies,
+            gestes: remplirLesConsignes,
+            apres: function () {
+                return [
+                    // Une flèche, vers le premier des trois champs : à trois grands champs évités, la bulle n'avait
+                    // plus de place libre (mesuré le 15 nov. 2026, 1180 × 820).
+                    { texte: "L'objectif, la tâche et les consignes : ce que les étudiant·es doivent savoir pour réussir", montre: function () { return [el('productionObjectif')]; } },
+                    { texte: "La date de remise : " + MATERIEL.production.echeanceDite + ", une séance du groupe", montre: function () { return [champEcheance()]; } }
+                ];
+            },
+            creer: "Coche « Consignes transmises » (la production entre alors au calendrier du groupe)"
+        }, {
+            contour: function () { return consignesRemplies() ? caseConsignes() : null; },
+            nommeLeContour: false
+        })),
         pourLeModele(ETAPES[3], {
             get texte() { return texteEvaluation(); },
-            geste: "Touche « Actions › Évaluer » sur sa ligne, choisis les niveaux fournis, puis touche « Verrouiller »."
+            geste: "Touche « Actions › Évaluer » sur sa ligne, choisis les niveaux de l'exemple, puis touche « Verrouiller »."
         }),
         pourLeModele(ETAPES[4], {
             texte: TEXTES_M.pratique,
@@ -1360,50 +1512,73 @@
                 var z = ETAPES[4].zones(), q = el('ui-dialogue-question');
                 if (q) z = z.concat([q.closest('.modal-contenu') || q.parentElement]);
                 return z.filter(Boolean);
+            },
+            // Ses choix et ses boutons (« Adopter ») : jamais sous la bulle, qui couvre forcément une partie de la
+            // fenêtre (mesuré le 15 nov. 2026, 1180 × 820 : la ligne du geste couvrait « Adopter »).
+            aussiEviter: function () {
+                var base = ETAPES[4].aussiEviter() || [], o = el('overlay-ui-dialogue');
+                if (!vis(o)) return base;
+                return base.concat([o.querySelector('.modal-actions')], [].slice.call(o.querySelectorAll('.ui-dialogue-choix-ligne'))).filter(Boolean);
             }
         }),
         pourLeModele(ETAPES[5], { texte: TEXTES_M.appliquer }),
         pourLeModele(ETAPES[6], {}),
-        pourLeModele(ETAPES[7], {
-            texte: TEXTES_M.cartouche,
-            geste: "Touche « + Nouvelle cartouche », règle-la, importe les commentaires, crée-la, puis choisis-la dans la fiche de la production.",
-            boutons: [{ libelle: MOTS_M.telecharger, action: function () { telechargerLesCommentaires(); } }],
+        pourLeModele(ETAPES[7], enTroisTemps({
+            dAbord: function () {
+                if (cartoucheCreee() || ficheCartoucheOuverte()) return null;
+                return [note("La rétroaction vient de la grille. Pour qu'elle parle avec des mots d'enseignant·e, il lui faut une cartouche."), consigne("Touche « + Nouvelle cartouche »")];
+            },
+            ensuite: function () {
+                if (!cartoucheCreee()) return null;
+                return [
+                    { texte: "La cartouche est créée", fait: fait },
+                    consigne("Dans la fiche de la production, choisis cette cartouche (elle s'appliquera à chaque évaluation)")
+                ];
+            },
+            rempli: cartoucheRemplie,
+            gestes: function () { remplirLaCartouche(); },
+            apres: function () {
+                return [
+                    { texte: "Son nom, sa grille, « " + MATERIEL.grille.nom + " », et son échelle, « " + MATERIEL.echelle + " »", montre: function () { return [el('nomCartouche'), el('selectGrilleCartouche'), el('selectEchelleCartouche')]; } },
+                    { texte: "Vingt commentaires : un par critère et par niveau de performance, tels qu'on les écrirait dans la marge", montre: function () { return [el('cartoucheZonePrincipale')]; } }
+                ];
+            },
+            creer: "Touche « Créer la cartouche »"
+        }, {
             contour: function () {
-                if (commentairesAImporter()) return boutonImporter();
-                return ETAPES[7].contour();
+                if (cartoucheCreee()) return ouNommerLaCartouche();
+                if (!ficheCartoucheOuverte()) return qs('#conception-retroactions [data-action="creerNouvelleCartouche"]');
+                return cartoucheRemplie() ? el('btnCreerCartouche') : null;
             },
             zones: function () {
-                if (commentairesAImporter()) return surLaCible(boutonImporter());
-                return ETAPES[7].zones();
-            }
-        }),
+                if (cartoucheCreee()) return zonesPourNommer();
+                return [];
+            },
+            avis: function () { return ''; }
+        })),
         pourLeModele(ETAPES[8], {
-            texte: TEXTES_M.retroaction,
-            geste: "Touche « Actions › Consulter », puis « Déverrouiller » ; choisis la cartouche, écris le mot, verrouille, puis choisis la suite.",
-            // La fin (consigne du 13 nov.) : la suite dans la démo, puis le même parcours sur les vraies données. Le
-            // parcours suivant porte son titre quand il a son modèle ; d'ici là, comme dans « Mettre ta classe en place »,
-            // « Explorer la démo » : il ne se lance pas sur les vraies données, et aucune phrase ne le dit.
-            get boutons() {
-                var suivant = suivantDansLaDemo();
+            texte: '',
+            geste: '',
+            // La fin (Grégoire, 14 nov. 2026, 10 h 58) : trois suites de même poids ; « Voir le parcours suivant »
+            // n'y est que lorsque le parcours suivant a son modèle (« Recevoir » ne l'a pas encore), et la consigne
+            // suit les boutons présents. Le moteur pose, au-dessus, « Pour revoir une étape, touche « 9 sur 9 ». ».
+            lignes: function () {
                 return [
-                    suivant
-                        ? { libelle: suivant.titre, primaire: true, action: function () { terminerModele(); suivant.lancerModele(0); } }
-                        : { libelle: window.ParcoursClasse.mots.explorer, primaire: true, action: function () { terminerModele(); } },
-                    { libelle: window.ParcoursClasse.mots.refaire, action: function () { refaireAvecMonMateriel(); } }
+                    { texte: "Reviens à la première évaluation : touche « Actions › Consulter », puis « Déverrouiller »" },
+                    { texte: "Choisis la cartouche : la rétroaction se réécrit avec ses commentaires, un par critère, selon le niveau attribué" },
+                    { texte: "Dans « Un mot pour ton étudiant·e », écris « " + MATERIEL.mot + " », puis verrouille" },
+                    consigne(C().consigneDesSuites(C().suitesDuModele(ID, terminerModele)))
                 ];
-            }
+            },
+            get boutons() { return C().suitesDuModele(ID, terminerModele); }
         })
-    ];
+    ]; }
 
-    /** Le parcours qui suit celui-ci dans le panneau, s'il a son modèle. */
-    function suivantDansLaDemo() {
-        var liste = window.Assistance.parcours();
-        var k = liste.findIndex(function (p) { return p.id === ID; });
-        var suivant = k >= 0 ? liste[k + 1] : null;
-        return suivant && typeof suivant.lancerModele === 'function' ? suivant : null;
+    var defDuModele = null;
+    function definitionDuModele() {
+        if (!defDuModele) defDuModele = { id: ID + '-modele', etapes: etapesModele(), lienSortie: 'Plus tard' };
+        return defDuModele;
     }
-
-    var DEF_MODELE = { id: ID + '-modele', etapes: ETAPES_MODELE, lienSortie: 'Plus tard' };
 
     /** La première étape du modèle que la démo n'a pas encore : une reprise y revient, sans rien retenir hors de la démo. */
     function premiereNonFaiteModele() {
@@ -1418,6 +1593,10 @@
         return cartoucheCreee() && productionNommeLaCartouche() ? 8 : 6;
     }
 
+    /**
+     * Le modèle part de sa première étape non faite, gestes compris : JAMAIS en visite (Grégoire, 14 nov. 2026, 10 h 56).
+     * Fait, il ne repart que par « Refaire », au panneau, qui remet d'abord la démo à neuf (js/assistance.js).
+     */
     async function lancerModele() {
         // Le modèle se joue dans la démo : il l'ouvre si elle ne l'est pas. Un import en cours l'en empêche : rien ne part.
         if (!enDemo() && typeof activerModeDemo === 'function') await activerModeDemo();
@@ -1426,7 +1605,7 @@
             // Le deuxième groupe n'est plus là (la démo remise à neuf entre-temps) : le panneau se rouvre et le dit.
             if (window.Assistance && typeof window.Assistance.ouvrirPanneau === 'function') {
                 window.Assistance.ouvrirPanneau();
-                var b = document.querySelector('#panneau-assistance [data-parcours="' + ID + '"] .assistance-parcours-bouton');
+                var b = document.querySelector('#panneau-assistance [data-parcours="' + ID + '"] .assistance-modele-bouton');
                 if (b) b.click();
             }
             return;
@@ -1436,11 +1615,11 @@
         vientDeCreer = false;
         var depuis = premiereNonFaiteModele();
         window.Assistance.definirEtatModele(ID, 'en-cours', depuis);
-        return M().lancer(DEF_MODELE, {
+        return M().lancer(definitionDuModele(), {
             depuis: depuis,
             surEtape: function (i) { window.Assistance.definirEtatModele(ID, 'en-cours', i); },
             surQuitter: function () { surModale(false); },
-            // La dernière bulle n'a pas de « Plus tard » : Échap vaut « Explorer la démo ».
+            // La dernière bulle n'a pas de « Plus tard » : Échap vaut « Terminer ».
             surEchap: function () { terminerModele(); },
             // Sortie de la démo en cours de route (le bandeau vert) : le modèle se ferme et attend.
             verifier: enDemo
@@ -1453,13 +1632,6 @@
         M().fermer();
     }
 
-    /** « Refaire avec mon matériel » : la démo se referme, le même parcours repart sur les vraies données. */
-    async function refaireAvecMonMateriel() {
-        terminerModele();
-        window.Assistance.definirMateriel('mien');
-        await lancer(0);
-    }
-
     window.Assistance.enregistrer({
         id: ID,
         titre: 'Évaluer une première production',
@@ -1470,7 +1642,7 @@
         prealable: 'classe',
         lancer: lancer,
         // Les deux temps (13 nov. 2026) : le modèle, dans la démo, sur le deuxième groupe.
-        totalModele: ETAPES_MODELE.length,
+        totalModele: ETAPES.length,   // le modèle reprend les étapes du parcours, une pour une
         lancerModele: lancerModele,
         refusModele: refusModele
     });
@@ -1483,7 +1655,7 @@
         texteDuChoix: TEXTE_1_CHOIX,
         // Le modèle : son matériel, ses étapes, le tableau de sa grille, ce qu'il retient (en mémoire).
         materiel: MATERIEL,
-        etapesModele: function () { return ETAPES_MODELE; },
+        etapesModele: etapesModele,
         tableauDeLaGrille: tableauDeLaGrille,
         refusModele: refusModele
     };

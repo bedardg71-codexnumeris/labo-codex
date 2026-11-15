@@ -26,21 +26,26 @@
    · Il se joue sur les vraies données : si la démo est ouverte, il la referme d'abord ; si
      elle s'ouvre en route, il se ferme et attend.
 
-   LA MODÉLISATION (lot « deux temps », 12 nov. 2026 ; décisions de Grégoire des 11 et 12 nov.) : sous
-   « Modélisation », le même parcours se joue DANS LA DÉMO, avec le matériel fourni. La personne
-   fait elle-même chaque geste (rien ne se remplit ni ne se clique tout seul) : elle crée un second
-   groupe à côté de celui de la démo. Huit étapes (ETAPES_MODELE) : un cours, une liste à coller, son
-   rattachement au cours, un horaire, un groupe-cours, le passage d'un groupe à l'autre dans l'en-tête, une saisie de
-   présences, la bande d'assiduité.
-   · Le trimestre et le profil n'y sont pas : la démo a son trimestre (en créer un en sortirait), et
-     le profil est une donnée globale et personnelle (`enseignants`, `profilEnseignant`) : le créer
-     dans la démo l'écrirait dans les vraies données. Le groupe-cours prend l'enseignant de la démo.
+   LA MODÉLISATION (lot « deux temps », 12 nov. 2026 ; règle du 14 nov. 2026) : sous « Modélisation », le même
+   parcours se joue DANS LA DÉMO, avec le matériel de la démo : un deuxième groupe, à côté de celui du pack. Huit
+   étapes (ETAPES_MODELE) : un cours, une liste, son rattachement au cours, un horaire, un groupe-cours, le passage
+   d'un groupe à l'autre dans l'en-tête, une saisie de présences, la bande d'assiduité.
+   · LA RÈGLE (Grégoire, 14 nov. 2026, 12 h 08 ; elle remplace « rien ne se remplit tout seul », du 12 nov.) : la
+     Modélisation va plus vite parce que le matériel est déjà là. Une bulle qui porte un formulaire va en trois
+     temps : « Touche « Remplir avec l'exemple » » (le bouton est DANS la bulle : la seule exception à « la bulle
+     guide, la page agit », et seulement ici) ; puis les lignes qui expliquent ce qui vient d'apparaître, chacune avec
+     sa flèche ; puis, en dernière ligne, le bouton de la PAGE, que la personne touche elle-même.
+   · « Remplir avec l'exemple » n'écrit que dans la démo (`remplir`) : hors de la démo, il ne fait rien.
+   · Le trimestre et le profil n'y sont pas : la démo a son trimestre (en créer un en sortirait), et le profil est
+     une donnée globale et personnelle (`enseignants`, `profilEnseignant`) : le créer dans la démo l'écrirait dans
+     les vraies données. Le groupe-cours prend l'enseignant de la démo.
    · Ce qui est créé reste dans la démo (clés `demo_*` ; le cours, marqué, y est rangé à la sortie :
-     js/demo-activation.js). L'état de la modélisation reste sur l'appareil (Assistance.definirEtatModele).
-   · Elle commence à la première étape non faite, lue dans ce que la démo contient.
-   · La dernière bulle offre la suite dans la démo et « Refaire avec mon matériel » : la démo se
-     referme et le parcours repart sur les vraies données.
-   ⚠ Les textes de la modélisation sont PROPOSÉS : Grégoire les juge sur l'aperçu.
+     js/demo-activation.js). L'état de la Modélisation reste sur l'appareil (Assistance.definirEtatModele).
+   · Elle commence à la première étape non faite, lue dans ce que la démo contient. Faite, elle se REFAIT gestes
+     compris : le panneau remet d'abord la démo à neuf (js/assistance.js, « REFAIRE »).
+   · La dernière bulle offre trois suites de même poids : « Le refaire avec ma classe », « Voir le parcours suivant »
+     (quand il a son modèle), « Terminer » (Grégoire, 14 nov., 10 h 58).
+   ⚠ Les textes de la Modélisation sont PROPOSÉS : Grégoire les relit sur l'aperçu.
    ================================================================= */
 (function () {
     'use strict';
@@ -572,19 +577,32 @@
     var DEF = { id: ID, etapes: ETAPES, lienSortie: 'Plus tard' };
 
     // =================================================================
-    // LA MODÉLISATION : le même parcours, dans la démo, avec le matériel fourni
+    // LA MODÉLISATION : le même parcours, dans la démo, avec le matériel de la démo
     // =================================================================
 
     /*
-     * LE MATÉRIEL FOURNI. La liste : dix noms manifestement fictifs, selon la règle de la démo arrêtée
-     * par Grégoire le 29 oct. 2026 (des totems scouts : le prénom est un animal, le nom une qualité de
-     * caractère bienveillante qui ne touche pas au travail scolaire ; la parité ; une faune des cinq
-     * continents ; aucun nom déjà dans le pack). Une ligne par personne : DA, groupe, nom, prénom.
+     * LE MATÉRIEL DE L'EXEMPLE. La liste : dix noms manifestement fictifs, selon la règle de la démo arrêtée par
+     * Grégoire le 29 oct. 2026 (des totems scouts : le prénom est un animal, le nom une qualité de caractère
+     * bienveillante qui ne touche pas au travail scolaire ; la parité ; une faune des cinq continents ; aucun nom
+     * déjà dans le pack). Une ligne par personne : DA, groupe, nom, prénom.
+     * L'HORAIRE (Grégoire, 15 nov. 2026, 10 h 06 : un cours de littérature a 4 périodes par semaine, en un bloc de 4
+     * ou en deux blocs de 2 ; décision de Cowork : deux blocs, comme dans sa carte d'alignement) : le mardi et le
+     * vendredi, de 8 h à 10 h, 2 périodes chacune.
+     * LES PRÉSENCES de la première séance : deux absences et un retard (une période sur deux), trois totems de la liste.
+     * Ce sont les trois premiers de la saisie, qui range par nom (Amical, Attentionné, Bienveillante) : leurs cases se
+     * suivent, en haut du tableau, et se voient ensemble sur l'iPad (mesuré le 15 nov. 2026 : à 900 px de haut, les
+     * rangées 5 et 8 étaient sous le bas de l'écran, et leurs flèches manquaient).
      */
     var MATERIEL = Object.freeze({
         cours: Object.freeze({ code: '601-999-DM', nom: 'Littérature et imaginaire', discipline: '601 Français (langue et littérature)', ponderation: '3-1-3' }),
         groupe: '00002',
-        horaire: Object.freeze({ nom: 'Mardi matin', jour: 'Mardi', debut: '08:00', fin: '12:00', periodes: 4 }),
+        horaire: Object.freeze({
+            nom: 'Mar-Ven',
+            seances: Object.freeze([
+                Object.freeze({ jour: 'Mardi', debut: '08:00', fin: '10:00', periodes: 2 }),
+                Object.freeze({ jour: 'Vendredi', debut: '08:00', fin: '10:00', periodes: 2 })
+            ])
+        }),
         etudiants: Object.freeze([
             ['9900001', 'Câlin', 'Koala'],
             ['9900002', 'Enjouée', 'Loutre'],
@@ -597,11 +615,90 @@
             // 13 nov. 2026 (Grégoire) : le deuxième groupe de la démo, celui qui traversera tous les modèles, passe à dix.
             ['9900009', 'Attentionné', 'Caribou'],
             ['9900010', 'Souriante', 'Toucan']
-        ])
+        ]),
+        presences: Object.freeze({ absents: Object.freeze(['9900007', '9900009']), retard: '9900008', periodesDuRetard: 1 })
     });
 
     function listeFournie() {
         return MATERIEL.etudiants.map(function (e) { return [e[0], MATERIEL.groupe, e[1], e[2]].join('\t'); }).join('\n');
+    }
+
+    // ---------- « Remplir avec l'exemple » : ce qui écrit dans les champs de la page ----------
+
+    /** Écrit une valeur dans un champ de la page, comme si on l'y avait tapée : ses écouteurs suivent. */
+    function poser(champ, valeur) {
+        if (!champ) return false;
+        champ.value = valeur;
+        champ.dispatchEvent(new Event('input', { bubbles: true }));
+        champ.dispatchEvent(new Event('change', { bubbles: true }));
+        return true;
+    }
+
+    /** La valeur de la première option offerte dont le libellé contient `texte` (rien : null). */
+    function optionDont(select, texte) {
+        if (!select) return null;
+        var o = [].find.call(select.options || [], function (x) { return !x.disabled && x.value && x.textContent.indexOf(texte) !== -1; });
+        return o ? o.value : null;
+    }
+
+    function choisir(select, texte) {
+        var v = optionDont(select, texte);
+        return v !== null && poser(select, v);
+    }
+
+    /**
+     * « Remplir avec l'exemple » : les gestes d'une étape, faits pour la personne. N'ÉCRIT QUE DANS LA DÉMO : hors de
+     * la démo (elle a pu se refermer sous la bulle), rien n'est touché. Commun aux modèles.
+     * @returns {boolean} true si les gestes ont été faits
+     */
+    function remplir(gestes) {
+        if (!enDemo()) return false;
+        gestes();
+        return true;
+    }
+
+    /** La dernière ligne d'une fin à plusieurs suites : « Touche « A », « B », ou « C » » (elle suit les boutons présents). */
+    function consigneDesSuites(boutons) {
+        var noms = boutons.map(function (b) { return '« ' + b.libelle + ' »'; });
+        if (noms.length < 2) return 'Touche ' + noms.join('');
+        return 'Touche ' + noms.slice(0, -1).join(', ') + ', ou ' + noms[noms.length - 1];
+    }
+
+    /**
+     * Une bulle en trois temps (la règle du 14 nov. 2026). Avant : la seule consigne « Touche « Remplir avec
+     * l'exemple » », et son bouton, dans la bulle. Après : cette ligne, faite ; les lignes de `apres()`, qui
+     * expliquent ce qui vient d'apparaître ; puis la consigne de la page (`creer`). `avantTout` : des notes gardées
+     * en tête dans les deux temps. `dAbord()` : les lignes d'un geste de la PAGE qui vient avant tout (ouvrir le
+     * formulaire : « Touche « + Nouvelle production » ») ; tant qu'elle en rend, la bulle ne dit que cela, sans bouton.
+     * `ensuite()` : de même, pour ce qui suit le bouton de la page (la cartouche créée, à choisir dans la production).
+     * @param {Object} o - { rempli: () => bool, gestes: () => void, apres: () => ligne[], creer: string,
+     *                       avantTout?: ligne[], dAbord?: () => ligne[]|null, ensuite?: () => ligne[]|null }
+     */
+    function troisTemps(o) {
+        var tete = o.avantTout || [];
+        var horsDesTroisTemps = function () {
+            return (o.ensuite && o.ensuite()) || (o.dAbord && o.dAbord()) || null;
+        };
+        return {
+            lignesVivantes: true,
+            lignes: function () {
+                var autres = horsDesTroisTemps();
+                if (autres) return autres;
+                if (!o.rempli()) return tete.concat([consigne(MOTS_MODELE.toucheRemplir)]);
+                return tete.concat([{ texte: MOTS_MODELE.toucheRemplir, fait: function () { return true; } }], o.apres(), [consigne(o.creer)]);
+            },
+            get boutons() {
+                if (horsDesTroisTemps() || o.rempli()) return null;
+                return [{ libelle: MOTS_MODELE.remplir, primaire: true, action: function () { remplir(o.gestes); } }];
+            }
+        };
+    }
+
+    /** Une étape : ses trois temps, puis ce qu'elle désigne. */
+    function etapeEnTroisTemps(base, o) {
+        var e = troisTemps(o);
+        Object.keys(base).forEach(function (k) { Object.defineProperty(e, k, Object.getOwnPropertyDescriptor(base, k)); });
+        return e;
     }
 
     // ---------- Ce que la démo contient déjà de la modélisation ----------
@@ -675,21 +772,16 @@
         await attendre(pageImmobile(acc), 2000);
     }
 
-    // ---------- La saisie des présences du groupe créé ----------
-
-    /** La date affichée est un cours du groupe-cours actif (ses séances, lues dans leur cache). */
-    function dateEstUnCoursDuGroupe() {
-        var c = champDate(), seances = seancesDuGroupe();
-        return !!(c && c.value && Array.isArray(seances[c.value]) && seances[c.value].length > 0);
+    function vaut(id, valeur) {
+        var c = el(id);
+        return !!c && String(c.value) === String(valeur);
     }
 
-    /** « Précédent », dans la rangée du choix du cours. */
-    function boutonPrecedent() {
-        var rangee = choixDuCours();
-        return rangee ? rangee.querySelector('button') : null;
+    function coursRempli() {
+        return vaut('v2-codeCours', MATERIEL.cours.code) && vaut('v2-ponderation', MATERIEL.cours.ponderation);
     }
 
-    // ---------- La liste à coller ----------
+    // ---------- La liste ----------
 
     function champListe() { return el('v2-donneesCollees'); }
 
@@ -700,47 +792,135 @@
         return acc ? acc.querySelector('[data-action="previsualiserDonneesV2"]') : null;
     }
 
-    /** L'aperçu de l'import est à l'écran (« Prévisualiser » touché, la liste collée). */
+    /** L'aperçu de l'import est à l'écran (« Prévisualiser » touché, la liste dans le champ). */
     function apercuOuvert() {
         return M().visible(el('v2-btnConfirmerImport'));
     }
 
-    /** L'aperçu de l'import est affiché et son menu de rattachement ne nomme pas le cours créé. */
-    function rattachementAChoisir() {
+    function listeRemplie() {
+        var c = champListe();
+        return !!c && c.value.indexOf(MATERIEL.etudiants[0][0]) !== -1;
+    }
+
+    function rattachementFait() {
         var menu = menuRattachement(), cours = coursCree();
-        return !!(menu && M().visible(menu) && cours && menu.value !== cours.id);
+        return !!(menu && cours && menu.value === cours.id);
+    }
+
+    // ---------- L'horaire, le groupe-cours ----------
+
+    function champSeance(k, quoi) { return el('v2-hor-seance-' + k + '-' + quoi); }
+
+    function horaireRempli() {
+        return vaut('v2-hor-nom', MATERIEL.horaire.nom) && MATERIEL.horaire.seances.every(function (se, k) {
+            return vaut('v2-hor-seance-' + k + '-jour', se.jour) && vaut('v2-hor-seance-' + k + '-debut', se.debut)
+                && vaut('v2-hor-seance-' + k + '-fin', se.fin) && vaut('v2-hor-seance-' + k + '-periodes', se.periodes);
+        });
+    }
+
+    function remplirLHoraire() {
+        choisir(el('v2-hor-groupeAssocie'), MATERIEL.groupe);
+        poser(el('v2-hor-nom'), MATERIEL.horaire.nom);
+        // Le nombre de séances d'abord : la page redessine alors ses rangées.
+        poser(el('v2-hor-nbSeances'), String(MATERIEL.horaire.seances.length));
+        MATERIEL.horaire.seances.forEach(function (se, k) {
+            poser(champSeance(k, 'jour'), se.jour);
+            poser(champSeance(k, 'debut'), se.debut);
+            poser(champSeance(k, 'fin'), se.fin);
+            // Le nombre de périodes s'écrit d'après les heures (essai novice, lot 1c) : il n'est posé que s'il manque.
+            if (!vaut('v2-hor-seance-' + k + '-periodes', se.periodes)) poser(champSeance(k, 'periodes'), String(se.periodes));
+        });
+    }
+
+    var CHAMPS_GC = ['v2-gc-cours', 'v2-gc-groupe', 'v2-gc-horaire', 'v2-gc-enseignant'];
+    var ENSEIGNANT_DEMO = 'Primo Primavera';
+
+    function groupeCoursRempli() {
+        var cours = el('v2-gc-cours');
+        var choisi = cours && cours.selectedOptions && cours.selectedOptions[0] ? cours.selectedOptions[0].textContent : '';
+        return choisi.indexOf(MATERIEL.cours.code) !== -1 && CHAMPS_GC.every(rempli);
+    }
+
+    function remplirLeGroupeCours() {
+        // Le trimestre de la démo, s'il n'est pas déjà choisi : le premier offert (la démo n'en a qu'un).
+        var trimestre = el('v2-gc-trimestre');
+        if (trimestre && !trimestre.value) {
+            var premier = [].find.call(trimestre.options, function (o) { return o.value && !o.disabled; });
+            if (premier) poser(trimestre, premier.value);
+        }
+        choisir(el('v2-gc-cours'), MATERIEL.cours.code);
+        choisir(el('v2-gc-groupe'), MATERIEL.groupe);
+        choisir(el('v2-gc-horaire'), MATERIEL.horaire.nom);
+        choisir(el('v2-gc-enseignant'), 'Primavera');
+    }
+
+    // ---------- La saisie des présences du deuxième groupe ----------
+
+    /** La première séance du groupe-cours actif, au calendrier de la démo (lue dans le cache des séances). */
+    function premiereSeance() {
+        var seances = seancesDuGroupe();
+        return Object.keys(seances).filter(function (d) { return Array.isArray(seances[d]) && seances[d].length > 0; }).sort()[0] || null;
+    }
+
+    function casePresence(da) { return el('periodes_' + da); }
+
+    /** Les trois présences de l'exemple : [DA, périodes présentes]. */
+    function presencesDeLExemple() {
+        var p = MATERIEL.presences;
+        return p.absents.map(function (da) { return [da, 0]; }).concat([[p.retard, p.periodesDuRetard]]);
+    }
+
+    function presencesRemplies() {
+        var date = premiereSeance();
+        return !!date && vaut('date-cours', date) && presencesDeLExemple().every(function (x) {
+            var c = casePresence(x[0]);
+            return !!c && Number(c.value) === x[1];
+        });
+    }
+
+    /** La séance choisie, la page redessine sa saisie ; les trois présences sont notées quand ses cases sont là. */
+    async function remplirLesPresences() {
+        var date = premiereSeance();
+        if (!date) return;
+        poser(champDate(), date);
+        await attendre(function () {
+            var c = casePresence(MATERIEL.presences.retard);
+            return !!c && c.getAttribute('data-date-str') === date && !c.disabled;
+        }, 2000);
+        if (!enDemo()) return;
+        presencesDeLExemple().forEach(function (x) { poser(casePresence(x[0]), String(x[1])); });
+        amenerLesCasesDeLExemple();
     }
 
     /**
-     * Copie un texte fourni dans le presse-papiers : c'est la personne qui le colle. Commun aux modèles (13 nov. 2026 :
-     * le modèle d'« Évaluer une première production » s'en sert aussi). `mots` : { fait, titre, rate }.
+     * La page s'est ouverte en haut (où suis-je) : la saisie est plus bas. Ce qui vient d'apparaître est amené à
+     * l'écran, une fois : les trois cases, autour de celle du milieu, si l'une d'elles n'y est pas en entier.
      */
-    async function copierTexte(texte, mots) {
-        var copie = false;
-        try {
-            if (navigator.clipboard && typeof navigator.clipboard.writeText === 'function') {
-                await navigator.clipboard.writeText(texte);
-                copie = true;
-            }
-        } catch (e) { copie = false; }
-        if (!copie) {
-            // Sans presse-papiers asynchrone (page ouverte en fichier, navigateur ancien) : la copie d'une sélection.
-            var tampon = document.createElement('textarea');
-            tampon.value = texte;
-            tampon.setAttribute('readonly', '');
-            tampon.className = 'parcours-tampon-copie';
-            document.body.appendChild(tampon);
-            tampon.select();
-            try { copie = document.execCommand('copy'); } catch (e2) { copie = false; }
-            tampon.remove();
-        }
-        if (!window.notifications) return;
-        if (copie && typeof window.notifications.succes === 'function') window.notifications.succes(mots.fait);
-        if (!copie && typeof window.notifications.warning === 'function') window.notifications.warning(mots.titre, mots.rate);
+    function amenerLesCasesDeLExemple() {
+        var cases = casesDeLExemple();
+        if (cases.length < 2) return;
+        var entete = document.querySelector('header.entete');
+        var haut = entete ? Math.max(0, entete.getBoundingClientRect().bottom) : 0;
+        var dehors = cases.some(function (c) { var r = c.getBoundingClientRect(); return r.top < haut || r.bottom > window.innerHeight; });
+        if (dehors) cases[1].scrollIntoView({ block: 'center', inline: 'nearest', behavior: 'auto' });
     }
 
-    function copierLaListe() {
-        return copierTexte(listeFournie(), { fait: MOTS_MODELE.listeCopiee, titre: MOTS_MODELE.copierLaListe, rate: MOTS_MODELE.listeNonCopiee });
+    /** « le vendredi 22 août » : la date d'une séance, dite en clair. */
+    function dateDite(ymd) {
+        if (!ymd) return '';
+        var p = ymd.split('-').map(Number);
+        return 'le ' + new Date(p[0], p[1] - 1, p[2]).toLocaleDateString('fr-CA', { weekday: 'long', day: 'numeric', month: 'long' });
+    }
+
+    function casesDeLExemple() {
+        return presencesDeLExemple().map(function (x) { var c = casePresence(x[0]); return c ? c.closest('td') : null; }).filter(Boolean);
+    }
+
+    /** Les trois points à l'écart, sur la bande d'assiduité (Grégoire, 14 nov. 2026, 10 h 53). */
+    function pointsALEcart() {
+        var b = blocAssiduite();
+        if (!b) return [];
+        return presencesDeLExemple().map(function (x) { return b.querySelector('.barre-etudiant[data-da="' + x[0] + '"]'); }).filter(Boolean);
     }
 
     /**
@@ -756,113 +936,195 @@
         return g && n ? g : null;
     }
 
-    // ---------- Les huit étapes de la modélisation (textes PROPOSÉS, 12 nov. 2026) ----------
+    // ---------- Les huit étapes de la modélisation (textes PROPOSÉS, 15 nov. 2026, selon les dix règles) ----------
 
     var MOTS_MODELE = {
-        copierLaListe: 'Copier la liste',
-        listeCopiee: 'Liste copiée. Colle-la dans le champ.',
-        listeNonCopiee: "La liste n'a pas pu être copiée. Essaie de nouveau.",
-        pasUnCours: "Ce jour-là, ce groupe n'a pas cours : touche « Précédent » pour revenir à son dernier cours.",
+        remplir: "Remplir avec l'exemple",
+        toucheRemplir: "Touche « Remplir avec l'exemple »",
         apercuFerme: "L'aperçu est refermé : touche « Prévisualiser » pour le rouvrir.",
-        explorer: 'Explorer la démo',
-        refaire: 'Refaire avec mon matériel'
+        // La fin à trois boutons (Grégoire, 14 nov. 2026, 10 h 58, validé).
+        refaire: 'Le refaire avec ma classe',
+        suivant: 'Voir le parcours suivant',
+        terminer: 'Terminer'
     };
 
-    /** Le parcours suivant, s'il a sa modélisation : le bouton principal de la dernière bulle porte son titre. */
-    function suivantDansLaDemo() {
-        var suivant = window.Assistance.parcours().find(function (p) { return p.id === 'evaluer'; });
+    /** Le parcours qui suit `id` dans le panneau, s'il a son modèle et que rien ne l'empêche de partir. */
+    function suivantQuiASonModele(id) {
+        var suivant = window.Assistance.suivantDe(id);
         return suivant && typeof suivant.lancerModele === 'function' ? suivant : null;
     }
 
+    /**
+     * Les trois suites d'une Modélisation, de même poids (aucune mise en avant) : le même parcours sur les vraies
+     * données, le parcours suivant quand il a son modèle, « Terminer ». Commun aux modèles.
+     * @param {string} id - le parcours ; @param {Function} terminerLeModele - ferme le modèle et le note fait
+     */
+    function suitesDuModele(id, terminerLeModele) {
+        var suites = [{ libelle: MOTS_MODELE.refaire, action: function () { terminerLeModele(); window.Assistance.lancerParcours(id); } }];
+        var suivant = suivantQuiASonModele(id);
+        if (suivant) suites.push({ libelle: MOTS_MODELE.suivant, action: function () { terminerLeModele(); suivant.lancerModele(); } });
+        suites.push({ libelle: MOTS_MODELE.terminer, action: function () { terminerLeModele(); } });
+        return suites;
+    }
+
     var ETAPES_MODELE = [
-        {
+        etapeEnTroisTemps({
             titre: 'Un cours',
-            geste: "Remplis les champs obligatoires avec le matériel fourni, puis touche « Créer le cours ».",
-            texte: "Dans la démo, tu vas monter un second groupe, geste par geste, avec du matériel fourni. D'abord son cours. Le matériel : le code " + MATERIEL.cours.code + ", le nom « " + MATERIEL.cours.nom + " », la discipline « " + MATERIEL.cours.discipline + " » et la pondération " + MATERIEL.cours.ponderation + ". Les productions se rangent sous le cours : si tu donnes le même cours à deux groupes, tu les prépares une seule fois.",
+            lieu: true,
             avant: function () { return ouvrirBlocModele('cours', FAIT_MODELE[0]); },
-            formulaire: function () { return blocDuFormulaire('cours'); },
-            contour: function () { return el(BOUTON_CREER.cours); },
+            contour: function () { return coursRempli() ? el(BOUTON_CREER.cours) : null; },
             atteint: FAIT_MODELE[0]
-        },
-        {
-            titre: "Une liste d'étudiant·es",
-            geste: "Touche « Copier la liste », colle-la dans le champ, puis touche « Prévisualiser ».",
-            texte: "Voici une liste de dix étudiant·es fictif·ves, comme celle que tu copieras du système de ton établissement : une ligne par personne, avec le DA, le groupe, le nom et le prénom. Copie-la, puis colle-la dans le champ. Le DA reconnaît chaque personne partout dans l'application ; le numéro de groupe, " + MATERIEL.groupe + ", servira à l'horaire et au groupe-cours.",
-            avant: function () { return ouvrirBlocModele('etudiants', FAIT_MODELE[1]); },
-            zones: function () { return [champListe()]; },
-            // Un geste à la fois : le champ où coller, puis « Prévisualiser ».
-            contour: function () {
-                var champ = champListe();
-                return champ && !champ.value.trim() ? champ : boutonPrevisualiser();
+        }, {
+            avantTout: [note("Dans la démo, tu montes un deuxième groupe, avec le matériel de l'exemple.")],
+            rempli: coursRempli,
+            gestes: function () {
+                poser(el('v2-codeCours'), MATERIEL.cours.code);
+                poser(el('v2-nomCours'), MATERIEL.cours.nom);
+                poser(el('v2-disciplineCours'), MATERIEL.cours.discipline);
+                poser(el('v2-ponderation'), MATERIEL.cours.ponderation);
             },
-            boutons: [{ libelle: MOTS_MODELE.copierLaListe, primaire: true, action: function () { copierLaListe(); } }],
+            apres: function () {
+                return [
+                    { texte: "Le code du cours : " + MATERIEL.cours.code, montre: champs('v2-codeCours') },
+                    { texte: "Sa pondération : " + MATERIEL.cours.ponderation + " (elle sert à calculer les heures de cours)", montre: champs('v2-ponderation') },
+                    { texte: "Sa discipline (elle sert à identifier le matériel partagé)", montre: champs('v2-disciplineCours') }
+                ];
+            },
+            creer: "Touche « Créer le cours »"
+        }),
+        etapeEnTroisTemps({
+            titre: "Une liste d'étudiant·es",
+            avant: function () { return ouvrirBlocModele('etudiants', FAIT_MODELE[1]); },
+            contour: function () { return listeRemplie() ? boutonPrevisualiser() : null; },
             atteint: FAIT_MODELE[1]
-        },
-        {
+        }, {
+            rempli: listeRemplie,
+            gestes: function () { poser(champListe(), listeFournie()); },
+            apres: function () {
+                return [
+                    { texte: "Dix étudiant·es fictif·ves, une ligne par personne :", montre: function () { return [champListe()]; }, sous: [
+                        { texte: "son DA (il l'identifie partout dans l'application)" },
+                        { texte: "son numéro de groupe, " + MATERIEL.groupe + " (il servira à l'horaire et au groupe-cours)" },
+                        { texte: "son nom et son prénom" }
+                    ] }
+                ];
+            },
+            creer: "Touche « Prévisualiser »"
+        }),
+        etapeEnTroisTemps({
             titre: 'Le cours de la liste',
-            geste: "Choisis le cours " + MATERIEL.cours.code + ", puis touche « Importer 10 étudiant·es ».",
-            texte: "L'aperçu montre les dix personnes, telles qu'elles seront importées. Dessous, l'application demande à quel cours les rattacher : elle propose le cours actif, celui de la démo. Choisis le cours que tu viens de créer, puis confirme l'import.",
             avant: function () { return ouvrirBlocModele('etudiants', FAIT_MODELE[2]); },
-            zones: function () { return [el('v2-previewTable')]; },
             // L'aperçu refermé (« Annuler ») : la bulle le dit, et montre « Prévisualiser ».
             avis: function () { return apercuOuvert() ? '' : MOTS_MODELE.apercuFerme; },
-            // Un geste à la fois : le menu du cours, puis le bouton qui importe.
             contour: function () {
                 if (!apercuOuvert()) return boutonPrevisualiser();
-                return rattachementAChoisir() ? menuRattachement() : el('v2-btnConfirmerImport');
+                return rattachementFait() ? el('v2-btnConfirmerImport') : null;
             },
             atteint: FAIT_MODELE[2]
-        },
-        {
+        }, {
+            rempli: rattachementFait,
+            gestes: function () { var cours = coursCree(); if (cours) poser(menuRattachement(), cours.id); },
+            apres: function () {
+                return [
+                    { texte: "L'aperçu montre les dix personnes, telles qu'elles seront importées", montre: champs('v2-previewTable') },
+                    { texte: "Leur cours : " + MATERIEL.cours.code + ", celui que tu viens de créer (l'application proposait le cours actif)", montre: function () { return [menuRattachement()]; } }
+                ];
+            },
+            creer: "Touche « Importer 10 étudiant·es »"
+        }),
+        etapeEnTroisTemps({
             titre: 'Un horaire',
-            geste: "Remplis les champs obligatoires avec le matériel fourni, puis touche « Créer l'horaire ».",
-            texte: "Le nouveau groupe a besoin d'un horaire. Le matériel : le groupe " + MATERIEL.groupe + ", le nom « " + MATERIEL.horaire.nom + " », une séance, le mardi de 8 h à 12 h, quatre périodes. L'application en tire le calendrier des séances : c'est à chacune que s'attachent les présences.",
             avant: function () { return ouvrirBlocModele('horaire', FAIT_MODELE[3]); },
-            formulaire: function () { return blocDuFormulaire('horaire'); },
-            contour: function () { return el(BOUTON_CREER.horaire); },
+            contour: function () { return horaireRempli() ? el(BOUTON_CREER.horaire) : null; },
             atteint: FAIT_MODELE[3]
-        },
-        {
+        }, {
+            rempli: horaireRempli,
+            gestes: remplirLHoraire,
+            apres: function () {
+                return [
+                    { texte: "Le groupe : " + MATERIEL.groupe + " (l'horaire lui est lié)", montre: champs('v2-hor-groupeAssocie') },
+                    { texte: "Le nom de l'horaire : " + MATERIEL.horaire.nom, montre: champs('v2-hor-nom') },
+                    { texte: "Deux séances par semaine : le mardi et le vendredi, de 8 h à 10 h", montre: champs('v2-hor-seance-0-jour', 'v2-hor-seance-1-jour') },
+                    { texte: "2 périodes par séance (le nombre s'écrit d'après les heures)", montre: champs('v2-hor-seance-0-periodes', 'v2-hor-seance-1-periodes') }
+                ];
+            },
+            creer: "Touche « Créer l'horaire »"
+        }),
+        etapeEnTroisTemps({
             titre: 'Un groupe-cours',
-            geste: "Choisis les cinq morceaux, puis touche « Créer le groupe-cours ».",
-            texte: "Réunis les cinq morceaux : le trimestre « Démonstration », le cours " + MATERIEL.cours.code + ", le groupe " + MATERIEL.groupe + ", l'horaire « " + MATERIEL.horaire.nom + " » et l'enseignant de la démo, Primo Primavera. Le groupe-cours relie tout : c'est sur lui que travaillent le Suivi et l'Évaluation.",
             avant: function () { return ouvrirBlocModele('groupe-cours', FAIT_MODELE[4]); },
-            formulaire: function () { return blocDuFormulaire('groupe-cours'); },
-            contour: function () { return el(BOUTON_CREER['groupe-cours']); },
+            contour: function () { return groupeCoursRempli() ? el(BOUTON_CREER['groupe-cours']) : null; },
             atteint: FAIT_MODELE[4]
-        },
+        }, {
+            rempli: groupeCoursRempli,
+            gestes: remplirLeGroupeCours,
+            apres: function () {
+                return [
+                    { texte: "Le groupe-cours réunit ce que tu viens de créer :", sous: [
+                        { texte: "le cours " + MATERIEL.cours.code, montre: champs('v2-gc-cours') },
+                        { texte: "le groupe " + MATERIEL.groupe, montre: champs('v2-gc-groupe') },
+                        { texte: "l'horaire « " + MATERIEL.horaire.nom + " »", montre: champs('v2-gc-horaire') },
+                        { texte: "l'enseignant de la démo, " + ENSEIGNANT_DEMO, montre: champs('v2-gc-enseignant') }
+                    ] }
+                ];
+            },
+            creer: "Touche « Créer le groupe-cours » (le groupe apparaîtra dans l'en-tête de l'application)"
+        }),
         {
+            // Pas de formulaire : le geste est celui de la personne.
             titre: "D'un groupe à l'autre",
-            geste: "Dans l'en-tête, choisis le groupe " + MATERIEL.cours.code + ".",
-            texte: "Le nouveau groupe est maintenant dans l'en-tête, à côté de celui de la démo. C'est là que tu passes d'un groupe à l'autre : tout ce que montrent le Suivi et l'Évaluation suit le groupe choisi. Choisis celui que tu viens de créer.",
+            lignes: function () {
+                return [
+                    { texte: "Ton deuxième groupe est dans l'en-tête, à côté de celui de la démo" },
+                    { texte: "Le Suivi et l'Évaluation montrent toujours le groupe choisi ici" },
+                    consigne("Choisis le groupe " + MATERIEL.cours.code + " dans l'en-tête")
+                ];
+            },
             nommeLeContour: true,
             contour: function () { return el('selectGroupeCoursHeader'); },
             atteint: FAIT_MODELE[5]
         },
-        {
-            titre: 'Un premier cours',
-            geste: "Choisis un cours du groupe, note une absence ou un retard, puis touche « Verrouiller la saisie ».",
-            texte: "Voici la saisie des présences du nouveau groupe. Choisis un de ses cours : « Précédent » et « Suivant » passent de l'un à l'autre. Tout le monde est présent par défaut : tu ne notes que les absences et les retards, et tout s'enregistre au fur et à mesure. Note une absence pour l'exemple, puis verrouille la saisie : c'est ce qui dit à l'application que ce cours a eu lieu.",
+        etapeEnTroisTemps({
+            titre: 'Prendre les présences',
+            lieu: true,
             avant: async function () {
                 avantPremierCours = false;
+                retirerSecondContour();
                 aller('suivi', 'saisie');
                 await attendre(function () { return sousSectionVisible('suivi-saisie'); }, 2000);
                 await attendre(function () { var c = champDate(); return !!(c && c.value); }, 1500);
                 await attendre(function () { return M().visible(boutonVerrou()); }, 1500);
-                poserSecondContour();
             },
-            zones: function () { return [choixDuCours()].concat(colonnePresence(), nomsDeLaSaisie()); },
-            fleches: function () { return [choixDuCours()].concat(colonnePresence()); },
-            // La saisie garde la date du groupe d'avant : tant qu'elle n'est pas un cours de ce groupe-ci, la
-            // bulle le dit et montre « Précédent » (mesuré le 12 nov. : il revient au dernier cours du groupe).
-            avis: function () { return dateEstUnCoursDuGroupe() ? '' : MOTS_MODELE.pasUnCours; },
-            contour: function () { return dateEstUnCoursDuGroupe() ? boutonVerrou() : boutonPrecedent(); },
+            // Les noms de la saisie : la bulle les évite, sans flèche (il faut les voir pour lire les présences).
+            zones: function () { return colonnePresence().concat(nomsDeLaSaisie()); },
+            fleches: function () { return []; },
+            contour: function () { return presencesRemplies() ? boutonVerrou() : null; },
             atteint: FAIT_MODELE[6]
-        },
+        }, {
+            avantTout: [note("Ce qui suit, tu le referas à chaque séance.")],
+            rempli: presencesRemplies,
+            gestes: function () { remplirLesPresences(); },
+            apres: function () {
+                return [
+                    { texte: "La séance : la première du groupe, " + dateDite(premiereSeance()), montre: function () { return [choixDuCours()]; } },
+                    { texte: "Deux absences et un retard sont notés (tout le monde est présent par défaut)", montre: casesDeLExemple }
+                ];
+            },
+            creer: "Touche « Verrouiller la saisie » (c'est ce qui dit à l'application que cette séance a eu lieu)"
+        }),
         {
+            // Des explications : rien ne se grise. La fin à trois boutons de même poids.
             titre: "Le groupe d'un coup d'œil",
-            get geste() { return suivantDansLaDemo() ? 'Choisis la suite.' : 'Explore la démo, ou refais le parcours avec ton matériel.'; },
-            texte: "Voici le groupe que tu viens de monter. Chaque point blanc est une des dix personnes de la liste, placée selon son assiduité : l'absence que tu as notée s'y voit déjà. C'est le coup d'œil à donner avant d'entrer en classe. Tu as fait tous les gestes : il reste à les refaire avec ta vraie liste, ton vrai cours et ton vrai horaire.",
+            lieu: true,
+            lignes: function () {
+                return [
+                    note("Reviens-y avant chaque séance."),
+                    { texte: "Chaque point blanc est un·e des dix étudiant·es" },
+                    { texte: "La bande « Assiduité » le place selon ses présences : à droite, il vient à ses cours" },
+                    { texte: "Trois points sont à l'écart : les deux absences et le retard de la séance", montre: pointsALEcart },
+                    consigne(consigneDesSuites(suitesDuModele(ID, terminerModele)))
+                ];
+            },
             sansSortie: true,
             avant: async function () {
                 retirerSecondContour();
@@ -870,22 +1132,18 @@
                 await attendre(blocAssiduite, 2000);
             },
             zones: function () { var b = blocAssiduite(); return [(b && b.querySelector('.barre-indicateur')) || b]; },
-            // En principal, la suite dans la démo : le parcours suivant quand il a sa modélisation
-            // (nommé par son titre), sinon la démo à explorer. En second, le même parcours sur les vraies données.
-            get boutons() {
-                var suivant = suivantDansLaDemo();
-                return [
-                    suivant
-                        ? { libelle: suivant.titre, primaire: true, action: function () { terminerModele(); suivant.lancerModele(0); } }
-                        : { libelle: MOTS_MODELE.explorer, primaire: true, action: function () { terminerModele(); } },
-                    { libelle: MOTS_MODELE.refaire, action: function () { refaireAvecMonMateriel(); } }
-                ];
-            }
+            fleches: function () { return []; },
+            get boutons() { return suitesDuModele(ID, terminerModele); }
         }
     ];
 
     var DEF_MODELE = { id: ID + '-modele', etapes: ETAPES_MODELE, lienSortie: 'Plus tard' };
 
+    /**
+     * La Modélisation part de sa première étape non faite, gestes compris : JAMAIS en visite (Grégoire, 14 nov. 2026,
+     * 10 h 56). Faite, elle ne repart que par « Refaire », au panneau, qui remet d'abord la démo à neuf : elle
+     * retrouve alors sa première étape à faire.
+     */
     async function lancerModele() {
         // La modélisation se joue dans la démo : elle l'ouvre si elle ne l'est pas.
         if (!enDemo() && typeof activerModeDemo === 'function') await activerModeDemo();
@@ -897,7 +1155,7 @@
             depuis: depuis,
             surEtape: function (i) { window.Assistance.definirEtatModele(ID, 'en-cours', i); },
             surQuitter: function () { retirerSecondContour(); },
-            // La dernière bulle n'a pas de « Plus tard » : Échap vaut « Explorer la démo ».
+            // La dernière bulle n'a pas de « Plus tard » : Échap vaut « Terminer ».
             surEchap: function () { terminerModele(); },
             // Sortie de la démo en cours de route (le bandeau vert) : la modélisation se ferme et attend.
             verifier: enDemo
@@ -908,13 +1166,6 @@
         retirerSecondContour();
         window.Assistance.definirEtatModele(ID, 'fait', 0);
         M().fermer();
-    }
-
-    /** « Refaire avec mon matériel » : la démo se referme, le même parcours repart sur les vraies données. */
-    async function refaireAvecMonMateriel() {
-        terminerModele();
-        window.Assistance.definirMateriel('mien');
-        await lancer();
     }
 
     // ---------- Le lancement, « Plus tard », la fin ----------
@@ -984,13 +1235,19 @@
         lancerModele: lancerModele
     });
 
-    // Pour la sentinelle des textes et les bancs : le matériel fourni et les étapes de la modélisation.
+    // Pour la sentinelle des textes, les bancs et les autres modèles : le matériel de l'exemple, les étapes, les outils.
     window.ParcoursClasse = Object.freeze({
         materiel: MATERIEL,
         etapesModele: ETAPES_MODELE,
-        copierTexte: copierTexte,
         deuxiemeGroupe: deuxiemeGroupe,
-        mots: MOTS_MODELE
+        mots: MOTS_MODELE,
+        // Communs aux modèles : « Remplir avec l'exemple » (il n'écrit que dans la démo), les trois temps, la fin.
+        remplir: remplir,
+        poser: poser,
+        choisir: choisir,
+        troisTemps: troisTemps,
+        suitesDuModele: suitesDuModele,
+        consigneDesSuites: consigneDesSuites
     });
 
 })();

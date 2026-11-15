@@ -23,15 +23,20 @@
    au refus, la pulsation des parcours va sur le bouton du premier parcours non fait de la chaîne des préalables.
    Le motif reste dessous, mot pour mot ; lui ne pulse pas, on ne le touche pas.
 
-   LES DEUX TEMPS (décision de Grégoire, 11 et 12 nov. 2026) : un parcours se fait d'abord dans la démo, avec le
-   matériel fourni (la modélisation, où la personne fait elle-même chaque geste), puis sur ses vraies données. Un
-   seul choix pour toute la liste, « Modélisation » ou « Pratique guidée » ; « Commencer » part dans le matériel
-   choisi. Une définition déclare `lancerModele(depuis)` et `totalModele` quand elle a sa modélisation ;
-   `dansLaDemo: true` quand elle ne se joue que dans la démo (« Découvrir ») : elle part de la même façon sous les
-   deux choix. Sans l'un ni l'autre, sous « Modélisation », le bouton de la carte est inactif, sans phrase (13 nov.).
-   Le choix et l'état des modélisations restent sur l'appareil (`localStorage`, clé `laboCodex.assistance`, HORS
-   de `db`, comme `laboCodex.vue`) : ce qu'on fait dans la démo n'écrit rien dans les données.
-   « Remettre la démo à neuf » (Grégoire, 12 nov., 8 h 15), sous le choix, visible avec « Modélisation ».
+   LES DEUX TEMPS (décisions de Grégoire, 11, 12 et 14 nov. 2026) : un parcours se fait d'abord dans la démo, avec le
+   matériel de la démo (la Modélisation), puis sur ses vraies données (la Pratique guidée). Une définition déclare
+   `lancerModele()` et `totalModele` quand elle a sa Modélisation : sa carte porte alors DEUX états, un par temps
+   (à faire, en cours, fait), chacun avec son bouton (« Commencer », « Reprendre », « Refaire »). Sans Modélisation,
+   la carte est celle d'avant : un état, un bouton. Le choix unique « Modélisation / Pratique guidée » du 12 nov. est
+   retiré (14 nov., 9 h 21 : deux états par parcours).
+   L'état des Modélisations reste sur l'appareil (`localStorage`, clé `laboCodex.assistance`, HORS de `db`, comme
+   `laboCodex.vue`) : ce qu'on fait dans la démo n'écrit rien dans les données.
+   « REFAIRE » (15 nov. 2026) : celui d'une Pratique guidée rejoue le parcours EN VISITE (js/parcours-moteur.js : rien
+   ne s'écrit). Celui d'une Modélisation rejoue ses gestes dans la démo (Grégoire, 14 nov., 10 h 56). Pour cela la démo
+   revient à son état de départ : elle est REMISE À NEUF, après une confirmation qui le dit, et les modèles se rejouent
+   depuis le premier (le modèle d'« Évaluer » se joue sur le groupe que monte celui de « Mettre ta classe en place » :
+   défaire un modèle sans défaire ceux qui en dépendent laisserait la démo dans un état qu'aucun modèle n'a produit).
+   « Remettre la démo à neuf » (Grégoire, 12 nov., 8 h 15) reste offert sous « Tes parcours ».
 
    Un parcours qui déclare `grandEcranSeulement: true` (lot « La bulle sur téléphone »,
    9 nov. 2026) n'est pas proposé sur téléphone (ParcoursMoteur.surTelephone, 500 px) : sous son
@@ -50,14 +55,13 @@
     var registre = [];
     var focusAvant = null;
 
-    // ---------- Le matériel choisi et l'état des modélisations : sur l'appareil, hors des données ----------
+    // ---------- L'état des Modélisations : sur l'appareil, hors des données ----------
 
     var CLE_APPAREIL = 'laboCodex.assistance';
-    var MATERIEL = { DEMO: 'demo', MIEN: 'mien' };
     // Décidés par Grégoire (12 nov. 2026, 14 h 46 à 15 h 08), mot pour mot : le nom, et dessous, en plus petit, le matériel.
-    var MOTS_MATERIEL = {
-        demo: { nom: 'Modélisation', sous: 'avec le matériel de la démo' },
-        mien: { nom: 'Pratique guidée', sous: 'avec mon matériel' }
+    var MOTS_TEMPS = {
+        modele: { nom: 'Modélisation', sous: 'avec le matériel de la démo' },
+        pratique: { nom: 'Pratique guidée', sous: 'avec mon matériel' }
     };
     var MOTS_NEUF = {
         bouton: 'Remettre la démo à neuf',
@@ -66,6 +70,17 @@
         confirmer: 'Remettre à neuf',
         fait: 'La démo est remise à neuf.',
         rate: 'La démo n\'a pas pu être remise à neuf. Rien n\'a été effacé.'
+    };
+    // « Refaire » une Modélisation (15 nov. 2026) : textes PROPOSÉS, lus par l'enseignant·e.
+    var MOTS_REFAIRE = {
+        titre: 'Refaire ce modèle',
+        seul: 'Pour refaire ce modèle, la démo est remise à neuf : tout ce que tu y as fait s\'efface. '
+            + 'Tes données, elles, ne bougent pas.',
+        depuis: function (titre) {
+            return 'Pour refaire ce modèle, la démo est remise à neuf : tout ce que tu y as fait s\'efface, et les modèles '
+                + 'se rejouent depuis le premier, « ' + titre + ' ». Tes données, elles, ne bougent pas.';
+        },
+        confirmer: 'Remettre à neuf et refaire'
     };
 
     var appareil = null; // relu une fois ; le repli quand le stockage refuse l'écriture
@@ -82,25 +97,6 @@
     function ecrireAppareil(v) {
         appareil = v;
         try { localStorage.setItem(CLE_APPAREIL, JSON.stringify(v)); } catch (e) { /* stockage indisponible : le choix vaut pour la page */ }
-    }
-
-    /**
-     * Le matériel choisi. Sans choix sur l'appareil : « Modélisation » (décision du 12 nov. 2026).
-     * PILOTÉ PAR UN BANC (`navigator.webdriver`), sans choix : « Pratique guidée ». Les bancs Playwright des neuf parcours
-     * ouvrent le panneau et touchent « Commencer » pour jouer le parcours sur les vraies données ; sans ceci, ils
-     * partiraient tous dans la démo, ou ne partiraient pas. Même règle que la vue au démarrage (`vueAuDemarrage`,
-     * js/vue-simple-donnees.js) ; le banc des deux temps éteint ce drapeau pour éprouver le vrai défaut. Aucun
-     * utilisateur n'a ce drapeau.
-     */
-    function materiel() {
-        var choix = etatAppareil().materiel;
-        if (choix === MATERIEL.MIEN || choix === MATERIEL.DEMO) return choix;
-        var pilote = typeof navigator !== 'undefined' && navigator.webdriver === true;
-        return pilote ? MATERIEL.MIEN : MATERIEL.DEMO;
-    }
-
-    function definirMateriel(m) {
-        ecrireAppareil(Object.assign({}, etatAppareil(), { materiel: m === MATERIEL.MIEN ? MATERIEL.MIEN : MATERIEL.DEMO }));
     }
 
     function etatModeleDe(id) {
@@ -120,10 +116,9 @@
         ecrireAppareil(Object.assign({}, etatAppareil(), { modeles: {} }));
     }
 
-    /** Sous « Modélisation » : 'modele' (sa modélisation), 'demo' (ne se joue que là), ou 'aucun'. */
-    function jeuDansLaDemo(def) {
-        if (typeof def.lancerModele === 'function') return 'modele';
-        return def.dansLaDemo ? 'demo' : 'aucun';
+    /** Le premier parcours qui a sa Modélisation : celui d'où les modèles se rejouent. */
+    function premierModele() {
+        return registre.find(function (p) { return typeof p.lancerModele === 'function'; }) || null;
     }
 
     function lireTout() {
@@ -194,33 +189,29 @@
         return e ? Math.max(0, e.getBoundingClientRect().bottom) : 0;
     }
 
+    function libelleDuBouton(e) {
+        return e.etat === 'fait' ? 'Refaire' : e.etat === 'en-cours' ? 'Reprendre' : 'Commencer';
+    }
+
+    function etatDit(e, total) {
+        return e.etat === 'fait' ? 'Fait' : e.etat === 'en-cours' ? 'Étape ' + (e.etape + 1) + ' sur ' + total : 'À faire';
+    }
+
     /**
-     * Le bouton d'une carte : « Commencer », « Reprendre » ou « Refaire », et ce qu'il lance selon le matériel choisi.
-     * @param {Object} o - { etat, jeu ('mien' | 'modele' | 'demo' | 'aucun'), refuse (écran trop petit), titre, corps }
+     * Le bouton de la Pratique guidée (et d'un parcours sans Modélisation) : « Commencer », « Reprendre » ou
+     * « Refaire ». Le parcours fait se rejoue en visite : sa définition le décide (`lancer`).
      */
     function creerBoutonParcours(def, o) {
-        var e = o.etat, jeu = o.jeu, refuse = o.refuse;
+        var e = o.etat, refuse = o.refuse;
         var btn = document.createElement('button');
         btn.type = 'button';
         btn.className = 'assistance-parcours-bouton' + (e.etat === 'en-cours' ? ' assistance-parcours-bouton--plein' : '');
-        btn.textContent = e.etat === 'fait' ? 'Refaire' : e.etat === 'en-cours' ? 'Reprendre' : 'Commencer';
-        btn.setAttribute('aria-describedby', o.titre.id + (refuse ? ' assistance-parcours-grand-ecran-' + def.id : ''));
+        btn.textContent = libelleDuBouton(e);
+        btn.setAttribute('aria-describedby', o.titre.id + (o.temps ? ' ' + o.temps.id : '') + (refuse ? ' assistance-parcours-grand-ecran-' + def.id : ''));
         // Sur téléphone, un parcours pour grand écran : le bouton reste lisible, il ne lance rien.
-        // Sans modèle, sous « Modélisation » (13 nov. 2026) : de même, et sans phrase. Les deux temps ne partiront en ligne
-        // que lorsque chaque parcours aura son modèle ; d'ici là, le bouton reste inactif.
-        if (refuse || jeu === 'aucun') btn.setAttribute('aria-disabled', 'true');
+        if (refuse) btn.setAttribute('aria-disabled', 'true');
         btn.addEventListener('click', function () {
-            if (tropPetitPour(def) || jeu === 'aucun') return;
-            if (jeu === 'modele') {
-                // La modélisation se joue dans la démo : les conditions d'entrée (`refus`) lisent les
-                // vraies données, elles ne la concernent pas. Elle a la sienne (`refusModele`, 13 nov. 2026) :
-                // le modèle d'« Évaluer » se joue sur le groupe que monte celui de « Mettre ta classe en place ».
-                var raisonModele = typeof def.refusModele === 'function' ? def.refusModele() : null;
-                if (raisonModele) { direRefus(o.corps, raisonModele); appelerPrealable(def, raisonModele); return; }
-                fermerPanneau({ sansRetourFocus: true });
-                def.lancerModele(e.etat === 'en-cours' ? e.etape : 0);
-                return;
-            }
+            if (tropPetitPour(def)) return;
             // La condition d'entrée d'un parcours (`refus`, lot du septième parcours, 9 nov. 2026) :
             // lue dans les données au toucher. Refusé, le parcours ne part pas : le panneau reste
             // ouvert et dit pourquoi, sous le bouton.
@@ -233,13 +224,63 @@
         return btn;
     }
 
+    /**
+     * Le bouton de la Modélisation. Elle se joue dans la démo : les conditions d'entrée (`refus`) lisent les vraies
+     * données, elles ne la concernent pas. Elle a la sienne (`refusModele`, 13 nov. 2026) : le modèle d'« Évaluer » se
+     * joue sur le groupe que monte celui de « Mettre ta classe en place ». Faite, « Refaire » rejoue ses gestes : la
+     * démo est d'abord remise à neuf (`refaireModele`).
+     */
+    function creerBoutonModele(def, o) {
+        var e = o.etat, refuse = o.refuse;
+        var btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'assistance-modele-bouton' + (e.etat === 'en-cours' ? ' assistance-parcours-bouton--plein' : '');
+        btn.textContent = libelleDuBouton(e);
+        btn.setAttribute('aria-describedby', o.titre.id + ' ' + o.temps.id + (refuse ? ' assistance-parcours-grand-ecran-' + def.id : ''));
+        if (refuse) btn.setAttribute('aria-disabled', 'true');
+        btn.addEventListener('click', function () {
+            if (tropPetitPour(def)) return;
+            if (e.etat === 'fait') { refaireModele(def); return; }
+            var raison = typeof def.refusModele === 'function' ? def.refusModele() : null;
+            if (raison) { direRefus(o.corps, raison); appelerPrealable(def, raison, true); return; }
+            fermerPanneau({ sansRetourFocus: true });
+            def.lancerModele();
+        });
+        return btn;
+    }
+
+    /** Un temps d'une carte à deux temps : son nom, son matériel, son état, son bouton. */
+    function creerTemps(def, quel, e, total, bouton) {
+        var bloc = document.createElement('div');
+        bloc.className = 'assistance-temps';
+        bloc.dataset.temps = quel;
+        bloc.dataset.etat = e.etat;
+        var mots = document.createElement('p');
+        mots.className = 'assistance-temps-mots';
+        mots.id = 'assistance-temps-' + quel + '-' + def.id;
+        ['nom', 'sous'].forEach(function (partie) {
+            var sp = document.createElement('span');
+            sp.className = 'assistance-temps-' + partie;
+            sp.textContent = MOTS_TEMPS[quel][partie];
+            mots.appendChild(sp);
+            mots.appendChild(document.createTextNode(' '));
+        });
+        var etatTxt = document.createElement('span');
+        // L'état de la Pratique guidée garde la classe de l'état d'une carte à un temps : c'est le même état.
+        etatTxt.className = quel === 'pratique' ? 'assistance-parcours-etat' : 'assistance-modele-etat';
+        etatTxt.textContent = etatDit(e, total);
+        bloc.appendChild(mots);
+        bloc.appendChild(etatTxt);
+        bloc.appendChild(bouton(mots));
+        return bloc;
+    }
+
     function creerParcoursItem(def) {
-        // Le matériel choisi décide de l'état montré, du compte des étapes et de ce que lance le bouton.
-        var jeu = materiel() === MATERIEL.DEMO ? jeuDansLaDemo(def) : 'mien';
-        var e = jeu === 'modele' ? etatModeleDe(def.id) : jeu === 'aucun' ? { etat: 'a-faire', etape: 0 } : etatDe(def.id);
-        var total = jeu === 'modele' ? def.totalModele : def.total;
+        var aModele = typeof def.lancerModele === 'function';
+        var e = etatDe(def.id);
         var li = document.createElement('li');
         li.className = 'assistance-parcours-item';
+        // L'état de la carte est celui du parcours sur les vraies données (le rang du menu le lit aussi).
         li.dataset.etat = e.etat;
         li.dataset.parcours = def.id;
 
@@ -262,13 +303,13 @@
         h.className = 'assistance-parcours-titre';
         h.id = 'assistance-parcours-titre-' + def.id;
         h.textContent = def.titre;
-        var etatTxt = document.createElement('span');
-        etatTxt.className = 'assistance-parcours-etat';
-        etatTxt.textContent = e.etat === 'fait' ? 'Fait'
-            : e.etat === 'en-cours' ? 'Étape ' + (e.etape + 1) + ' sur ' + total
-            : 'À faire';
         l1.appendChild(h);
-        l1.appendChild(etatTxt);
+        if (!aModele) {
+            var etatTxt = document.createElement('span');
+            etatTxt.className = 'assistance-parcours-etat';
+            etatTxt.textContent = etatDit(e, def.total);
+            l1.appendChild(etatTxt);
+        }
         corps.appendChild(l1);
 
         // Lu à la construction pour l'affichage ; relu au toucher (la fenêtre a pu changer de largeur),
@@ -291,10 +332,19 @@
             corps.appendChild(p);
         }
 
-        if (jeu === 'aucun') li.dataset.modele = 'absent';
-
-        var btn = creerBoutonParcours(def, { etat: e, jeu: jeu, refuse: refuse, titre: h, corps: corps });
-        corps.appendChild(btn);
+        if (!aModele) {
+            corps.appendChild(creerBoutonParcours(def, { etat: e, refuse: refuse, titre: h, corps: corps }));
+        } else {
+            // Deux temps, deux états, chacun son bouton (Grégoire, 14 nov. 2026, 9 h 21).
+            li.dataset.temps = 'deux';
+            var em = etatModeleDe(def.id);
+            corps.appendChild(creerTemps(def, 'modele', em, def.totalModele, function (mots) {
+                return creerBoutonModele(def, { etat: em, refuse: refuse, titre: h, temps: mots, corps: corps });
+            }));
+            corps.appendChild(creerTemps(def, 'pratique', e, def.total, function (mots) {
+                return creerBoutonParcours(def, { etat: e, refuse: refuse, titre: h, temps: mots, corps: corps });
+            }));
+        }
 
         li.appendChild(corps);
         return li;
@@ -314,9 +364,9 @@
     }
 
     /** Panneau ouvert, la fenêtre franchit le seuil du téléphone : la liste suit (refus, bouton). */
-    function rafraichirListe(ev, force) {
+    function rafraichirListe() {
         var liste = document.getElementById('assistance-parcours-liste');
-        if (!liste || (!force && surTelephone() === listeTelephone)) return;
+        if (!liste || surTelephone() === listeTelephone) return;
         var focusDedans = liste.contains(document.activeElement)
             ? document.activeElement.closest('[data-parcours]') : null;
         var id = focusDedans ? focusDedans.dataset.parcours : null;
@@ -364,29 +414,30 @@
     }
 
     /** Au refus : la pulsation sur le bouton du parcours à faire d'abord, et sur lui seul. */
-    function appelerPrealable(def, raison) {
+    function appelerPrealable(def, raison, modele) {
         var liste = document.getElementById('assistance-parcours-liste');
         if (!liste) return;
         [].forEach.call(liste.querySelectorAll('.assistance-parcours-bouton--appel'), function (b) {
             b.classList.remove('assistance-parcours-bouton--appel');
         });
-        var id = parcoursAFaireDAbord(def, raison);
-        var b = id ? liste.querySelector('[data-parcours="' + id + '"] .assistance-parcours-bouton') : null;
+        // Une Modélisation refusée appelle la Modélisation à faire d'abord (son préalable direct), pas la Pratique guidée.
+        var id = modele ? prealableDe(def, raison) : parcoursAFaireDAbord(def, raison);
+        var b = id ? liste.querySelector('[data-parcours="' + id + '"] ' + (modele ? '.assistance-modele-bouton' : '.assistance-parcours-bouton')) : null;
         if (!b) return;
         b.classList.add('assistance-parcours-bouton--appel');
         if (typeof b.scrollIntoView === 'function') b.scrollIntoView({ block: 'nearest' });
     }
 
-    // ---------- La présentation en quatre temps (texte VALIDÉ par Grégoire, mot pour mot, 12 nov. 2026) ----------
+    // ---------- La présentation en quatre temps ----------
+    // Texte de Grégoire (14 nov. 2026, 9 h 21 et 10 h 58, validé) ; les chiffres visibles : décision de Cowork.
 
     var QUATRE_TEMPS = {
         titre: "Apprendre l'application, en quatre temps.",
-        suite: "Passe de l'un à l'autre à ton rythme.",
         temps: [
-            ['Découvrir par toi-même.', "Explore la démo : un groupe de dix étudiant·es fictif·ves t'y attend, avec ses productions, ses évaluations et ses présences."],
-            ['Regarder un modèle.', "Dans la démo, un parcours te montre, geste par geste, comment se crée le matériel et ce qu'il donne. C'est toi qui fais les gestes, avec le matériel fourni."],
-            ['Mettre en pratique.', 'Refais le parcours avec ta vraie liste, ton vrai cours, tes vraies activités.'],
-            ['Continuer en autonomie.', "Bâtis ton propre parcours, partage ton matériel, pose tes hypothèses. L'aide dans les pages reste là au besoin."]
+            ['1. Découvrir par toi-même :', 'explore la démo et son groupe fictif.'],
+            ['2. Modélisation :', 'un parcours te guide, avec le matériel de la démo.'],
+            ['3. Pratique guidée :', 'refais le parcours avec ton matériel.'],
+            ['4. Continuer en autonomie :', "l'aide dans les pages reste là."]
         ]
     };
 
@@ -398,16 +449,16 @@
     function grasPuisTexte(balise, gras, texte) {
         var el = document.createElement(balise);
         var b = document.createElement('strong');
-        b.textContent = gras;
+        b.textContent = typo(gras);
         el.appendChild(b);
-        el.appendChild(document.createTextNode(' ' + typo(texte)));
+        if (texte) el.appendChild(document.createTextNode(' ' + typo(texte)));
         return el;
     }
 
     function construireIntro() {
         var intro = document.createElement('div');
         intro.className = 'assistance-intro';
-        var tete = grasPuisTexte('p', QUATRE_TEMPS.titre, QUATRE_TEMPS.suite);
+        var tete = grasPuisTexte('p', QUATRE_TEMPS.titre, '');
         tete.className = 'assistance-intro-titre';
         intro.appendChild(tete);
         var ol = document.createElement('ul');
@@ -417,59 +468,7 @@
         return intro;
     }
 
-    // ---------- Le choix du matériel, et « Remettre la démo à neuf » ----------
-
-    function majChoixMateriel(panneau) {
-        var m = materiel();
-        [].forEach.call(panneau.querySelectorAll('.assistance-materiel-option'), function (b) {
-            var choisi = b.dataset.materiel === m;
-            b.setAttribute('aria-checked', choisi ? 'true' : 'false');
-            b.tabIndex = choisi ? 0 : -1;
-        });
-        var neuf = panneau.querySelector('#assistance-demo-neuf');
-        if (neuf) neuf.hidden = m !== MATERIEL.DEMO;
-    }
-
-    function choisirMateriel(m, panneau) {
-        if (materiel() !== m) {
-            definirMateriel(m);
-            rafraichirListe(null, true);
-        }
-        majChoixMateriel(panneau);
-    }
-
-    function construireChoixMateriel(panneau) {
-        var groupe = document.createElement('div');
-        groupe.className = 'assistance-materiel';
-        groupe.id = 'assistance-materiel';
-        groupe.setAttribute('role', 'radiogroup');
-        groupe.setAttribute('aria-label', 'Le matériel des parcours');
-        [MATERIEL.DEMO, MATERIEL.MIEN].forEach(function (m) {
-            var b = document.createElement('button');
-            b.type = 'button';
-            b.className = 'assistance-materiel-option';
-            b.dataset.materiel = m;
-            b.setAttribute('role', 'radio');
-            ['nom', 'sous'].forEach(function (partie) {
-                var s = document.createElement('span');
-                s.className = 'assistance-materiel-' + partie;
-                s.textContent = MOTS_MATERIEL[m][partie];
-                b.appendChild(s);
-            });
-            b.addEventListener('click', function () { choisirMateriel(m, panneau); });
-            groupe.appendChild(b);
-        });
-        // Un groupe de boutons radio : les flèches passent de l'un à l'autre et choisissent.
-        groupe.addEventListener('keydown', function (ev) {
-            if (['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'].indexOf(ev.key) === -1) return;
-            ev.preventDefault();
-            var autre = materiel() === MATERIEL.DEMO ? MATERIEL.MIEN : MATERIEL.DEMO;
-            choisirMateriel(autre, panneau);
-            var b = groupe.querySelector('[data-materiel="' + autre + '"]');
-            if (b) b.focus();
-        });
-        return groupe;
-    }
+    // ---------- « Remettre la démo à neuf », et « Refaire » une Modélisation ----------
 
     async function remettreANeuf() {
         var accepte = await window.uiDialogues.confirmerAction({
@@ -481,12 +480,39 @@
         });
         if (accepte !== true || typeof window.remettreDemoANeuf !== 'function') return;
         fermerPanneau({ sansRetourFocus: true });
+        await remettreEtDire();
+    }
+
+    /** La démo remise à neuf, ses Modélisations oubliées, et le mot qui le dit. @returns {Promise<boolean>} */
+    async function remettreEtDire() {
         var fait = await window.remettreDemoANeuf();
         if (fait) oublierModeles();
         if (window.notifications) {
             if (fait && typeof window.notifications.succes === 'function') window.notifications.succes(MOTS_NEUF.fait);
             if (!fait && typeof window.notifications.warning === 'function') window.notifications.warning(MOTS_NEUF.bouton, MOTS_NEUF.rate);
         }
+        return !!fait;
+    }
+
+    /**
+     * « Refaire » une Modélisation faite (voir « REFAIRE », en tête) : une confirmation dit que la démo sera remise à
+     * neuf et d'où les modèles se rejouent ; acceptée, la démo est remise à neuf et le PREMIER modèle part, gestes
+     * compris. Refusée, ou la remise à neuf ratée : rien ne change, rien ne part. Rien ne sort jamais de la démo.
+     */
+    async function refaireModele(def) {
+        var premier = premierModele();
+        if (!premier || typeof window.remettreDemoANeuf !== 'function') return;
+        var accepte = await window.uiDialogues.confirmerAction({
+            titre: MOTS_REFAIRE.titre,
+            message: typo(premier.id === def.id ? MOTS_REFAIRE.seul : MOTS_REFAIRE.depuis(premier.titre)),
+            texteAnnuler: 'Annuler',
+            texteConfirmer: MOTS_REFAIRE.confirmer,
+            variante: 'danger'   // « Annuler » a le focus ; Entrée le suit
+        });
+        if (accepte !== true) return;
+        fermerPanneau({ sansRetourFocus: true });
+        if (!(await remettreEtDire())) return;
+        premier.lancerModele();
     }
 
     function construireBoutonNeuf() {
@@ -575,10 +601,8 @@
         intitule.textContent = 'Tes parcours';
         panneau.appendChild(intitule);
 
-        // Un seul choix pour toute la liste (12 nov. 2026) ; dessous, la remise à neuf de la démo.
-        panneau.appendChild(construireChoixMateriel(panneau));
+        // La remise à neuf de la démo (12 nov. 2026), au-dessus de la liste.
         panneau.appendChild(construireBoutonNeuf());
-        majChoixMateriel(panneau);
 
         var liste = document.createElement('ol');
         liste.className = 'assistance-parcours';
@@ -597,9 +621,7 @@
         if (ev.key === 'Escape') { ev.stopPropagation(); fermerPanneau(); return; }
         if (ev.key !== 'Tab') return;
         var p = document.getElementById('panneau-assistance');
-        var f = [].slice.call(p.querySelectorAll('button:not([disabled])')).filter(function (b) {
-            return !b.hidden && b.tabIndex !== -1;
-        });
+        var f = [].slice.call(p.querySelectorAll('button:not([disabled])'));
         if (!f.length) return;
         var premier = f[0], dernier = f[f.length - 1];
         if (ev.shiftKey && document.activeElement === premier) { ev.preventDefault(); dernier.focus(); }
@@ -690,9 +712,7 @@
         ouvrirPanneau: ouvrirPanneau,
         fermerPanneau: fermerPanneau,
         majMenu: majMenu,
-        // Les deux temps (12 nov. 2026) : le matériel choisi, l'état des modélisations (sur l'appareil).
-        materiel: materiel,
-        definirMateriel: definirMateriel,
+        // Les deux temps (12 nov. 2026) : l'état des Modélisations (sur l'appareil).
         etatModeleDe: etatModeleDe,
         definirEtatModele: definirEtatModele,
         parcours: function () { return registre.slice(); }

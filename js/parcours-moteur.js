@@ -88,13 +88,21 @@
    qui forme un même bloc (les cellules d'une colonne), puis, au-delà de EVITES_MAX, fond de proche en proche ; les
    abscisses et les ordonnées essayées sont dédoublonnées. Les cibles des flèches d'une étape en lignes qui se
    touchent n'en font qu'une : une flèche vers la colonne, pas une par rangée.
+   CE QU'UNE LIGNE MONTRE (15 nov. 2026, la règle de la Modélisation) : une ligne d'explication peut désigner ce dont
+   elle parle (`montre`) : une flèche y va, la bulle l'évite, et la ligne ne se grise pas pour autant.
+   LES LIGNES QUI SUIVENT L'ÉCRAN (`lignesVivantes`, même date) : une étape dont la liste change pendant qu'elle est à
+   l'écran (la Modélisation, en trois temps : « Remplir avec l'exemple », ce qui vient d'apparaître, puis le bouton
+   de la page) le déclare. Ses lignes et ses boutons sont relus à chaque passage de la sonde ; changés, la bulle est
+   récrite sur place, sans changer d'étape ni rejouer `avant`, et sa consigne s'annonce.
    LA FIN (lot 2e) : la dernière bulle d'un parcours dit « Pour revoir une étape, touche « N sur N ». » ; quand elle
    n'offre que « Terminer », elle offre aussi « Parcours suivant », de même poids (aucun bouton mis en avant).
    Sa consigne suit ses boutons : « Touche « Terminer » » y devient « Touche « Parcours suivant », ou « Terminer » ».
 
    Une étape :
      { titre, texte?, geste?, centre?: bool,
-       lignes?: () => [{ texte, champs?: () => Element[], fait?: () => bool, sous?: [ligne], note?: bool, geste?: bool }],
+       lignes?: () => [{ texte, champs?: () => Element[], fait?: () => bool, montre?: () => Element[], sous?: [ligne],
+                         note?: bool, geste?: bool }],
+       lignesVivantes?: bool,      // la liste et les boutons changent dans l'étape : relus à chaque passage
        lieu?: bool | () => bool,   // la page change à cette étape : « Tu es dans… », le halo au menu, la page en haut
        avant?: async () => void,   // place la page (idempotent : sert aussi à la reprise)
        zones?: () => Element[],    // ce dont parle la bulle (la flèche y va)
@@ -261,6 +269,11 @@
                         if (tous.indexOf(c) === -1) tous.push(c);
                         if (!faite && champVide(c) && aFaire.indexOf(c) === -1) aFaire.push(c);
                     });
+                    // Ce qu'une ligne montre : évité par la bulle, et sa flèche, que la ligne se fasse ou non.
+                    montresDe(l).forEach(function (c) {
+                        if (tous.indexOf(c) === -1) tous.push(c);
+                        if (aFaire.indexOf(c) === -1) aFaire.push(c);
+                    });
                     if (l.sous) lire(l.sous);
                 });
             })(sesLignes);
@@ -291,6 +304,28 @@
         var cs = [];
         try { cs = ligne.champs ? ligne.champs() || [] : []; } catch (e) { cs = []; }
         return cs.filter(function (c) { return c && visible(c); });
+    }
+
+    /** Ce que la ligne montre (voir « CE QU'UNE LIGNE MONTRE »), visible. */
+    function montresDe(ligne) {
+        var ms = [];
+        try { ms = ligne.montre ? ligne.montre() || [] : []; } catch (e) { ms = []; }
+        return ms.filter(function (c) { return c && visible(c); });
+    }
+
+    /** Ce que la bulle dit et offre, à plat : ses lignes et ses boutons (voir « LES LIGNES QUI SUIVENT L'ÉCRAN »). */
+    function signatureDesLignes(etape) {
+        var dire = function (liste) {
+            return liste.map(function (l) { return (l.geste ? '!' : l.note ? '#' : '-') + l.texte + (l.sous ? '[' + dire(l.sous.filter(Boolean)) + ']' : ''); }).join('|');
+        };
+        var boutons = [];
+        try { boutons = (etape.boutons || []).map(function (b) { return b.libelle; }); } catch (e) { boutons = []; }
+        return dire(lignesDeLEtape(etape)) + '§' + boutons.join('|');
+    }
+
+    /** La signature de la bulle qu'on vient d'écrire : gardée pour une étape aux lignes vivantes, sinon rien. */
+    function retenirSignatureDesLignes(etape) {
+        etat.signatureLignes = etape.lignesVivantes ? signatureDesLignes(etape) : null;
     }
 
     /** La ligne dit un geste qui peut être fait (elle se grisera) ; sinon c'est une explication. */
@@ -1229,6 +1264,7 @@
         lignes.className = 'parcours-bulle-lignes';
         b.appendChild(lignes);
         ecrireLignes(lignes, etape);
+        retenirSignatureDesLignes(etape);
 
         var geste = gesteDeLEtape(etape);
         if (geste) {
@@ -1999,6 +2035,30 @@
         etat.elements.annonce.textContent = texteDesItems(items);
     }
 
+    /**
+     * Les lignes qui suivent l'écran (`lignesVivantes`) : la liste ou les boutons ont changé, la bulle est récrite sur
+     * place. Sa page reste, l'étape ne change pas, `avant` n'est pas rejoué ; le focus, s'il était dans la bulle (le
+     * bouton qu'on vient de toucher n'existe plus), y revient ; la consigne neuve s'annonce.
+     */
+    function suivreLignes(etape) {
+        if (!etape.lignesVivantes || etat.signatureLignes === null) return;
+        if (signatureDesLignes(etape) === etat.signatureLignes) return;
+        // Sous le zoom au pincement, rien ne se refait (voir « LE ZOOM AU PINCEMENT ») : la bulle suivra au retour.
+        if (sousLeZoom()) return;
+        var b = etat.elements.bulle;
+        var dedans = b.contains(document.activeElement);
+        var replie = etat.replie;
+        rendreBulle({ sansAnnonce: true });
+        etat.replie = replie;
+        appliquerRepli();
+        if (dedans) { try { b.focus({ preventScroll: true }); } catch (e) { b.focus(); } }
+        // Un geste vient d'être fait (la bulle a changé) : le suivant est amené à l'écran s'il n'y est pas, comme
+        // pour une ligne qui se grise (`majLignes`).
+        etat.gesteAAmener = true;
+        var consigne = b.querySelector('.parcours-bulle-ligne--geste .parcours-bulle-ligne-texte');
+        etat.elements.annonce.textContent = consigne ? consigne.textContent : texteDesLignes().trim();
+    }
+
     /** L'avis de l'étape (voir « L'AVIS ») : posé sous le texte, changé, ou retiré ; annoncé par son rôle. */
     function poserAvis(etape) {
         var b = etat.elements.bulle;
@@ -2109,6 +2169,7 @@
             etat.hauteurGardee = window.innerHeight;
         }
 
+        suivreLignes(etape);
         poserGeste(etape);
         suivreComplement(etape);
         poserAvis(etape);
@@ -2298,7 +2359,7 @@
                  telephone: surTelephone(), replie: false, reglerJusqua: 0, texte: '', pages: [], page: 0, largeurPages: 0,
                  deplacee: null, glisse: null, vus: null, sectionActuelle: null, doigts: 0, hauteurGardee: 0, pageDite: null,
                  contourSuivi: '', complement: [], signatureComplement: '[]', pageComplement: -1,
-                 lignes: [], gesteAAmener: false, entreesDuLieu: [], boutons: [], visite: !!(opts && opts.visite), enVisite: false,
+                 lignes: [], signatureLignes: null, gesteAAmener: false, entreesDuLieu: [], boutons: [], visite: !!(opts && opts.visite), enVisite: false,
                  plusLoin: 0, toutFait: false };
         document.body.classList.add('parcours-actif');
         signaler();
