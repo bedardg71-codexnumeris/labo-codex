@@ -21,6 +21,22 @@
 
     var CHANGELOG = [
         {
+            // 1.248 (15 nov. 2026 : le gel de l'étape des présences et « Refaire » ; la définition gardée, la définition
+            // affichée, la confirmation d'« Effacer la page », la bande des copies) — titres et lignes validés par Grégoire,
+            // mot pour mot (relais de Cowork du 15 nov., 13 h 04). Le relais donnait deux blocs titrés ; l'entrée n'admet
+            // qu'un titre : « Des copies qui restent nettes » gardé, la ligne du gel en premier (repli prévu par le relais).
+            version: '1.248',
+            couleur: 'vert',
+            titre: 'Des copies qui restent nettes',
+            items: [
+                'Dans «&nbsp;Mettre ta classe en place&nbsp;», l’étape «&nbsp;Prendre les présences&nbsp;» ne gèle plus quand la classe est grande. Quand tu revois un parcours déjà fait, la bulle ne t’invite plus à toucher un bouton qui changerait tes données.',
+                'Réordonner, retirer ou pivoter une page dans l’éditeur de pages, ou réunir plusieurs fichiers à l’import, ne réduit plus la définition de la copie.',
+                'Les Propriétés d’un fichier et l’écran d’import donnent les dimensions en pixels de chaque page, PDF compris.',
+                '«&nbsp;Effacer la page&nbsp;» demande une confirmation.',
+                'Après le remplacement d’une copie, la bande des copies d’Annoter se met à jour sans recharger la page.'
+            ]
+        },
+        {
             // 1.247 (14 nov. 2026 : l'essai novice — les parcours en lignes, le compteur, le Cadre, « partie ») — titre et
             // quatre lignes validés par Grégoire, mot pour mot (relais de Cowork du 14 nov.).
             version: '1.247',
