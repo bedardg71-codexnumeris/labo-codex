@@ -7,6 +7,24 @@
 
 ---
 
+## 14 NOV. 2026, 20 H 35 (Claude Code) : **1.247.0 POUSSÉE ET EN LIGNE, VERDICT VERT** — l'essai novice du 14 nov. fusionné
+
+Mandat : deux relais de Cowork du 14 nov. (deux retouches avant le verdict ; puis, au vert, fusion, release mineure, mise en ligne). **`origin/main` = `3b16daa50`** (1.247.0, build `1114-1819`, « Des parcours plus légers ») ; Netlify `6af90b55`, `ready` à 20 h 31 sur ce SHA ; le `version.js` du permalien dit `1.247.0`, build `1114-1819`. **Le travail le plus récent vit sur `main`.**
+
+- **Deux retouches** (`be0d7bdf1`, sur la branche) : la consigne de la dernière bulle suit ses boutons (« Touche « Parcours suivant », ou « Terminer » » quand les deux sont offerts ; source unique dans `js/parcours-moteur.js`) ; à l'étape 8 de « Mettre ta classe en place », l'absence ne se dit que pour le groupe-cours actif et pour la séance qui vient d'être verrouillée. Break-tests rouges pour les deux. Suppositions nommées au rapport de la session (la séance « qui vient d'être verrouillée » = la date nouvellement verrouillée depuis l'étape 7, sinon la plus récente).
+- **Verdict de Grégoire sur la branche** (`be0d7bdf1`, `verifier-playwright.mjs`, d'un bloc) : vert, aucune veille.
+- **Fusionné** : `lot/essai-novice-14-nov` dans `main`, `--no-ff` (`f5d64b858`), sans conflit. **Ni `lot/verdict-nuage` ni `lot/deux-temps-modeles`**, non touchés.
+- **Verdict du Mac** sur `3b16daa50` (`verdict-en-morceaux.mjs`, dix morceaux, aucune veille, secteur) : 1 671 essais, 1 670 verts, 1 au second essai (`grilles-sous-criteres-condense.spec.js`, iPad, #534), 0 rouge, 68 sautés. Vitest : 926 fichiers, 11 807 essais. Le hook de push a lu le jeton à jour. ⚠ L'app Claude était ouverte pendant le passage (la garde ne l'a pas refusé ; mémoire libre à 80 % à la fin).
+- **Nouvelles** : titre et quatre lignes **validés par Grégoire, mot pour mot** (relais de Cowork).
+- **Inscrits, non commencés** : **#1281** (le reste du lot 4 f : ordre fixe de l'exercice, « Comment étiqueter ? », « Voir la suite de l'exemple », la carte hors parcours) ; **#1282** (la dernière bulle d'« Évaluer une première production » dit « … verrouille, puis touche « Terminer ». » sous deux boutons). #1278 et #1279 restent libres.
+- **Encore dû** : les dix gestes sur l'iPad, sur la version en ligne (`plans de travail/PORTES-2026-11-14-essai-novice.md` ; l'artefact est à publier par Cowork) ; les validations de textes de Grégoire (liste au rapport de la session du 14 nov.).
+- **GitHub** : le passage WebKit Linux de `3b16daa50` tournait à la clôture, non lu.
+
+**Complexité** (1.246.0 `9b2bea833` → 1.247.0 `3b16daa50`) :
+- fichiers de plus de 1 000 lignes : 43 → 43 ; lignes de code : 169 445 → 169 979 (Δ +534) ;
+- au-dessus de 15 : 434 → 434 (Δ 0) ; somme au-dessus de 15 : 10 954 → 10 954 (Δ 0) ;
+- au-dessus de 30 : 77 → 77 (Δ 0) ; maximum : 130 ; fonctions : 17 326 → 17 398.
+
 ## 14 NOV. 2026, 15 H 10 (Claude Code) : **LE TRAVAIL VIT SUR `lot/essai-novice-14-nov`, NON FUSIONNÉ** — `main` inchangé (`22e67a309`, 1.246.0) ; PR #24 pour l'aperçu
 
 Mandat : consigne de Cowork du 14 nov., 12 h 10 (`plans de travail/CONSIGNE-2026-11-14-essai-novice.md`, versionnée SUR LA BRANCHE), session autonome pendant le repos de Grégoire. **Ni fusion, ni release, ni Nouvelles, ni verdict complet : Grégoire lance le verdict à son retour.** `origin/lot/essai-novice-14-nov` = `3e1526788`, cinq commits au-dessus de `main`.
