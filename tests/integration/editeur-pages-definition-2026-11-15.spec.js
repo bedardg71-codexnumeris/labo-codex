@@ -79,6 +79,17 @@ async function monterLeBanc(page) {
         fichiers.push({ ...base, id: 'FT_TEXTE', evaluationId: '', nomFichier: 'COURAGEUX_FT_TEXTE.pdf', typeMIME: 'application/pdf', nombrePages: 1, tailleFichier: window.__pdfTexte.size });
         window.__pdfNumerise = window.__blobs.get('FT_ORDRE');
 
+        // Le même PDF numérisé, pris pour celui d'un autre producteur (le numériseur d'un élève) :
+        // le lecteur de l'application le refuse, la définition se lit autrement.
+        const o = new Uint8Array(await window.__pdfNumerise.arrayBuffer());
+        const motif = Array.from('/Producer (jsPDF', (c) => c.charCodeAt(0));
+        for (let i = o.length - motif.length; i >= 0; i--) {
+            if (motif.every((c, k) => o[i + k] === c)) { o[i + 11] = 0x78; break; }   // « jsPDF » → « xsPDF »
+        }
+        window.__pdfAutre = new Blob([o], { type: 'application/pdf' });
+        window.__blobs.set('FT_AUTRE', window.__pdfAutre);
+        fichiers.push({ ...base, id: 'FT_AUTRE', evaluationId: '', nomFichier: 'COURAGEUX_FT_AUTRE.pdf', typeMIME: 'application/pdf', nombrePages: 2, tailleFichier: window.__pdfAutre.size });
+
         window.db.setSync(window.cle('fichiersTravaux'), fichiers); // security-ok: fixture de test
     }, [GRANDE, PETITE]);
     return suivi;
@@ -220,6 +231,8 @@ test.describe('15 nov. 2026 — l’éditeur de pages garde la définition', () 
         expect(numerise.textes).toEqual(['Page 1 : 2728 x 1748 px', 'Page 2 : 1700 x 2200 px']);
         expect(numerise.meta).toMatch(/2 pages · [\d,]+ (Ko|Mo)/);   // le poids du fichier
         expect((await lignes('FT_TEXTE')).textes).toEqual(['Page 1 : Lettre (page de texte)']);
+        // Le PDF d'un autre producteur : les mêmes pixels, dans l'ordre des pages.
+        expect((await lignes('FT_AUTRE')).textes).toEqual(numerise.textes);
         // Une copie restée en image : ses pixels (celle du banc fait 400 x 600).
         expect((await lignes('FT651')).textes[0]).toBe('Page 1 : 400 x 600 px');
         expect(suivi.erreurs).toEqual([]);
@@ -235,8 +248,14 @@ test.describe('15 nov. 2026 — l’éditeur de pages garde la définition', () 
             window.travauxImport.ajouterFichiersEnAttente([
                 new File([window.__pdfNumerise], 'Fictivenom_Alma_9000001_Devoir_1.pdf', { type: 'application/pdf' }),
                 new File([window.__pdfTexte], 'Fictivenom_Basile_9000002_Devoir_1.pdf', { type: 'application/pdf' }),
-                new File([pareil], 'Fictivenom_Clara_9000003_Devoir_1.pdf', { type: 'application/pdf' })
+                new File([pareil], 'Fictivenom_Clara_9000003_Devoir_1.pdf', { type: 'application/pdf' }),
+                new File([window.__pdfAutre], 'Fictivenom_Denis_9000004_Devoir_1.pdf', { type: 'application/pdf' })
             ]);
+            // À l'import, aucune image n'est décodée pour dire la définition : pdf.js ne lit aucune liste d'opérations.
+            let listesLues = 0;
+            const proto = Object.getPrototypeOf(await (await pdfjsLib.getDocument({ data: await window.__pdfTexte.arrayBuffer() }).promise).getPage(1));
+            const lireListe = proto.getOperatorList;
+            proto.getOperatorList = function () { listesLues++; return lireListe.apply(this, arguments); };
             const file = () => window.travauxImport.obtenirFileDAttente();
             for (let i = 0; i < 200 && !file().every((f) => f.definitionPDF); i++) await new Promise((r) => setTimeout(r, 100));
             window.travauxUI.afficherImport();
@@ -246,13 +265,16 @@ test.describe('15 nov. 2026 — l’éditeur de pages garde la définition', () 
             const originaux = lire('.pipeline-meta-resolution:not([id])');
             const apercu = lire('.pipeline-meta-resolution[id^="pipeline-res-cible-"]');
             window.travauxImport.viderFileDAttente();
-            return { originaux, apercu };
+            proto.getOperatorList = lireListe;
+            return { originaux, apercu, listesLues };
         });
         expect(r.originaux).toEqual([
             'PDF, 2 pages · la plus petite : 1700 x 2200 px',
             'PDF, 1 page · Lettre',
-            'PDF, 2 pages · 2728 x 1748 px'
+            'PDF, 2 pages · 2728 x 1748 px',
+            'PDF, 2 pages · la plus petite : 1700 x 2200 px'
         ]);
+        expect(r.listesLues).toBe(0);
         expect(r.apercu).toEqual(r.originaux.map((mots) => mots + ' (aucun traitement)'));
         expect(suivi.erreurs).toEqual([]);
     });

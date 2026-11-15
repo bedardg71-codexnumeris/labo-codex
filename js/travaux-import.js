@@ -1340,7 +1340,7 @@
                 fichierPrepare.nombrePages = result.nombrePages;
                 // 15 nov. 2026 : l'écran d'import dit la définition de tous les fichiers.
                 try {
-                    fichierPrepare.definitionPDF = await definitionDuPDF(fichierPrepare.fichier);
+                    fichierPrepare.definitionPDF = await definitionDuPDF(fichierPrepare.fichier, { sansOrdre: true });
                 } catch (e) {
                     console.warn('[Travaux-Import] Définition du PDF illisible (' + fichierPrepare.nomFichier + '):', e.message || e);
                 }
@@ -2225,6 +2225,11 @@
         ['A4', 595, 842], ['A3', 842, 1191], ['A5', 420, 595]
     ];
 
+    /** Le déterminant d'une matrice PDF [a b c d e f] : le facteur d'aire. */
+    function determinant(m) {
+        return m ? m[0] * m[3] - m[1] * m[2] : 1;
+    }
+
     /**
      * Le nom d'un format de page : « Lettre », « Lettre (paysage) », ou ses côtés en pouces.
      * @param {number} largeurPt
@@ -2236,67 +2241,123 @@
         const grand = Math.max(largeurPt, hauteurPt);
         const connu = FORMATS_PAPIER.find((f) => Math.abs(f[1] - petit) <= 6 && Math.abs(f[2] - grand) <= 6);
         if (connu) return connu[0] + (largeurPt > hauteurPt ? ' (paysage)' : '');
-        const po = (pt) => String(Math.round(pt / 72 * 10) / 10).replace('.', ',');
+        const po = (pt) => window.formaterNombre(Math.round(pt / 72 * 10) / 10);
         return po(largeurPt) + ' x ' + po(hauteurPt) + ' po';
     }
 
-    /** Le déterminant d'une matrice PDF [a b c d e f] : le facteur d'aire. */
-    function determinant(m) {
-        return m ? m[0] * m[3] - m[1] * m[2] : 1;
+    /** Les pixels de l'image que peint une opération de pdf.js : [largeur, hauteur] ; `null` si elle n'en peint pas. */
+    function pixelsDeLImagePeinte(fn, args) {
+        if (fn === pdfjsLib.OPS.paintImageXObject) return [args[1], args[2]];
+        if (fn === pdfjsLib.OPS.paintInlineImageXObject && args[0]) return [args[0].width, args[0].height];
+        return null;
+    }
+
+    /**
+     * La plus grande image qui couvre la page, lue dans la liste d'opérations de pdf.js.
+     * L'aire qu'occupe une image est le déterminant de la matrice courante, suivi au fil
+     * des opérations (`save`, `restore`, `transform`, entrée et sortie d'un formulaire).
+     *
+     * @param {{fnArray: number[], argsArray: Array}} ops
+     * @param {number} airePage - en points carrés
+     * @returns {{largeur: number, hauteur: number}|null} ses pixels ; `null` sans image pleine page
+     */
+    function imagePleinePage(ops, airePage) {
+        const OPS = pdfjsLib.OPS;
+        let aire = 1;
+        const pile = [];
+        const empiler = () => { pile.push(aire); };
+        const depiler = () => { if (pile.length) aire = pile.pop(); };
+        const gestes = {
+            [OPS.save]: empiler,
+            [OPS.restore]: depiler,
+            [OPS.transform]: (args) => { aire *= Math.abs(determinant(args)); },
+            [OPS.paintFormXObjectBegin]: (args) => { empiler(); aire *= Math.abs(determinant(args && args[0])); },
+            [OPS.paintFormXObjectEnd]: depiler
+        };
+        let image = null;
+        ops.fnArray.forEach((fn, i) => {
+            const args = ops.argsArray[i];
+            if (gestes[fn]) { gestes[fn](args); return; }
+            const px = pixelsDeLImagePeinte(fn, args);
+            if (!px || !(px[0] > 0 && px[1] > 0) || aire < PART_IMAGE_PLEINE_PAGE * airePage) return;
+            if (!image || px[0] * px[1] > image.largeur * image.hauteur) image = { largeur: px[0], hauteur: px[1] };
+        });
+        return image;
     }
 
     /**
      * Ce qu'est une page de PDF : une image numérisée (ses pixels) ou du texte (son format).
      *
-     * La page est dite numérisée quand une image en couvre au moins les quatre cinquièmes.
-     * L'aire de chaque image se lit dans la liste d'opérations de pdf.js (le déterminant
-     * de la matrice courante) ; les pixels sont ceux de l'image, pas ceux d'un rendu.
+     * La page est dite numérisée quand une image en couvre au moins les quatre cinquièmes
+     * (`imagePleinePage`) ; les pixels sont ceux de l'image, pas ceux d'un rendu.
      *
      * @param {PDFPageProxy} page
      * @returns {Promise<{sorte: 'image', largeur: number, hauteur: number}|{sorte: 'texte', format: string, largeurPt: number, hauteurPt: number}>}
      */
     async function decrirePagePDF(page) {
         const vue = page.getViewport({ scale: 1 });
-        const airePage = vue.width * vue.height;
-        const ops = await page.getOperatorList();
-        const OPS = pdfjsLib.OPS;
-        let aire = 1;
-        const pile = [];
-        let image = null;
-        for (let i = 0; i < ops.fnArray.length; i++) {
-            const fn = ops.fnArray[i];
-            const args = ops.argsArray[i];
-            if (fn === OPS.save) pile.push(aire);
-            else if (fn === OPS.restore) aire = pile.length ? pile.pop() : aire;
-            else if (fn === OPS.transform) aire *= Math.abs(determinant(args));
-            else if (fn === OPS.paintFormXObjectBegin) { pile.push(aire); aire *= Math.abs(determinant(args && args[0])); }
-            else if (fn === OPS.paintFormXObjectEnd) aire = pile.length ? pile.pop() : aire;
-            else if (fn === OPS.paintImageXObject || fn === OPS.paintInlineImageXObject) {
-                const l = fn === OPS.paintImageXObject ? args[1] : (args[0] && args[0].width);
-                const h = fn === OPS.paintImageXObject ? args[2] : (args[0] && args[0].height);
-                if (l > 0 && h > 0 && aire >= PART_IMAGE_PLEINE_PAGE * airePage && (!image || l * h > image.largeur * image.hauteur)) {
-                    image = { largeur: l, hauteur: h };
-                }
-            }
-        }
+        const image = imagePleinePage(await page.getOperatorList(), vue.width * vue.height);
         if (!image) {
             return { sorte: 'texte', format: nomDuFormat(vue.width, vue.height), largeurPt: vue.width, hauteurPt: vue.height };
         }
         // Une image posée de côté (page tournée) : ses pixels se disent dans le sens de la page.
-        const couchee = (image.largeur > image.hauteur) !== (vue.width > vue.height)
-            && Math.abs(image.largeur - image.hauteur) > 2 && Math.abs(vue.width - vue.height) > 2;
+        const carree = Math.abs(image.largeur - image.hauteur) <= 2 || Math.abs(vue.width - vue.height) <= 2;
+        const couchee = !carree && (image.largeur > image.hauteur) !== (vue.width > vue.height);
         return couchee
             ? { sorte: 'image', largeur: image.hauteur, hauteur: image.largeur }
             : { sorte: 'image', largeur: image.largeur, hauteur: image.hauteur };
     }
 
+    /** Plus petit côté, en pixels, d'une image qu'on peut prendre pour une page numérisée. */
+    const COTE_MIN_PAGE_NUMERISEE = 600;
+
+    /** Deux rapports de côtés se valent-ils, dans un sens ou dans l'autre (à 5 % près) ? */
+    function memesProportions(l1, h1, l2, h2) {
+        const r1 = Math.max(l1, h1) / Math.min(l1, h1);
+        const r2 = Math.max(l2, h2) / Math.min(l2, h2);
+        return Math.abs(r1 - r2) <= 0.05 * r2;
+    }
+
     /**
-     * La définition de chaque page d'un PDF, sans le rendre.
-     * @param {Blob} blob - Le PDF
-     * @returns {Promise<{nombrePages: number, pages: Array}>} `pages` : voir `decrirePagePDF`
+     * La définition d'un PDF lue dans ses dictionnaires d'images, SANS DÉCODER aucune image.
+     *
+     * Mesuré le 15 nov. 2026 : lire la liste d'opérations de pdf.js décode chaque image
+     * (quatre pages de 4 000 x 3 000 px : 1,9 s et 673 Mo de pic). À l'import, où des
+     * dizaines de fichiers arrivent ensemble sur l'iPad, c'est exclu.
+     *
+     * Rend une réponse quand le PDF se lit sans doute : aucune image (du texte), ou une
+     * image par page, chacune aux proportions d'une page. Sinon `null` : l'appelant passe
+     * par pdf.js. ⚠ Les images sont dans l'ordre du FICHIER, pas des pages : assez pour
+     * dire la plus petite définition, pas pour dire « Page 2 ».
+     *
+     * @param {Uint8Array} octets - Rendus inutilisables : pdf.js les garde
+     * @returns {Promise<{nombrePages: number, pages: Array}|null>}
      */
-    async function definitionDuPDF(blob) {
-        if (typeof pdfjsLib === 'undefined') throw new Error('PDF.js non disponible');
+    async function definitionSansDecodage(octets) {
+        const images = typeof PdfImagePerdue !== 'undefined' ? PdfImagePerdue.dimensionsDesImages(octets) : null;
+        if (!images) return null;
+        const pdf = await pdfjsLib.getDocument({ data: octets }).promise;
+        try {
+            const formats = [];
+            for (let n = 1; n <= pdf.numPages; n++) {
+                const vue = (await pdf.getPage(n)).getViewport({ scale: 1 });
+                formats.push({ sorte: 'texte', format: nomDuFormat(vue.width, vue.height), largeurPt: vue.width, hauteurPt: vue.height });
+            }
+            if (!images.length) return { nombrePages: pdf.numPages, pages: formats };
+            const pageNumerisee = (im) => Math.min(im.largeur, im.hauteur) >= COTE_MIN_PAGE_NUMERISEE
+                && formats.some((f) => memesProportions(im.largeur, im.hauteur, f.largeurPt, f.hauteurPt));
+            if (images.length !== pdf.numPages || !images.every(pageNumerisee)) return null;
+            return { nombrePages: pdf.numPages, pages: images.map((im) => ({ sorte: 'image', largeur: im.largeur, hauteur: im.hauteur })) };
+        } finally {
+            pdf.destroy();
+        }
+    }
+
+    /**
+     * La définition de chaque page d'un PDF, par pdf.js : exacte et dans l'ordre des pages,
+     * mais chaque image est décodée (voir `definitionSansDecodage`).
+     */
+    async function definitionParPdfJs(blob) {
         const pdf = await pdfjsLib.getDocument({ data: await blob.arrayBuffer() }).promise;
         try {
             const pages = [];
@@ -2309,6 +2370,34 @@
         } finally {
             pdf.destroy();
         }
+    }
+
+    /**
+     * La définition de chaque page d'un PDF, sans le rendre.
+     *
+     * Du moins coûteux au plus coûteux :
+     *  1. un PDF écrit par l'application : les pixels de l'image de chaque page, lus dans
+     *     le fichier, dans l'ordre des pages, sans décodage ;
+     *  2. si l'ordre des pages n'importe pas (`sansOrdre`, l'écran d'import, qui ne dit
+     *     que la plus petite définition) : `definitionSansDecodage` ;
+     *  3. sinon pdf.js (`definitionParPdfJs`), qui décode.
+     *
+     * @param {Blob} blob - Le PDF
+     * @param {{sansOrdre?: boolean}} [options]
+     * @returns {Promise<{nombrePages: number, pages: Array}>} `pages` : voir `decrirePagePDF`
+     */
+    async function definitionDuPDF(blob, options) {
+        if (typeof pdfjsLib === 'undefined') throw new Error('PDF.js non disponible');
+        const octets = new Uint8Array(await blob.arrayBuffer());
+        const deLApplication = typeof PdfImagePerdue !== 'undefined' ? PdfImagePerdue.lireImagesDesPages(octets) : null;
+        if (deLApplication && deLApplication.every(Boolean)) {
+            return {
+                nombrePages: deLApplication.length,
+                pages: deLApplication.map((p) => ({ sorte: 'image', largeur: p.largeur, hauteur: p.hauteur }))
+            };
+        }
+        const rapide = options && options.sansOrdre ? await definitionSansDecodage(octets) : null;
+        return rapide || definitionParPdfJs(blob);
     }
 
     /**
@@ -2330,7 +2419,7 @@
         const images = definition.pages.filter((p) => p.sorte === 'image');
         const textes = definition.pages.filter((p) => p.sorte === 'texte');
         const plusPetite = (liste, aire) => liste.reduce((a, b) => (aire(b) < aire(a) ? b : a));
-        const toutesPareilles = (liste, cle) => liste.every((p) => cle(p) === cle(liste[0]));
+        const toutesPareilles = (liste, trait) => liste.every((p) => trait(p) === trait(liste[0]));
 
         const direImages = () => {
             const p = plusPetite(images, (x) => x.largeur * x.hauteur);
