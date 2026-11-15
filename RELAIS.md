@@ -7,6 +7,19 @@
 
 ---
 
+## 15 NOV. 2026, 9 H 05 (Claude Code) : **LE TRAVAIL VIT SUR `lot/gel-etape-7`, NON FUSIONNÉ** — `main` inchangé pour le code (1.247.0) ; en attente de la relecture de Cowork
+
+Mandats : deux relais de Cowork du 15 nov. (diagnostic du gel vécu par Grégoire sur l'iPad à 7 h 12 ; puis correctif des points 1, 2 et 4 pour la fenêtre du lundi 16 nov. vers midi). **Ni fusion, ni release, ni verdict complet avant la relecture de Cowork.** `origin/lot/gel-etape-7` = `856d72d99`, un commit au-dessus de `main` (`41f68d315`).
+
+- **Le gel** : à l'étape 7 de « Mettre ta classe en place », le placement de la bulle coûtait le cube du nombre de zones (une par cellule de la saisie). Mesuré sous WebKit au premier passage, hors « Refaire » : la page répondait en 7 s à 24 rangées, en 22 à 27 s à 36. Après : 43 et 58 ms. Corrigé dans le moteur (`reduireEvites`, bords dédoublonnés), pas dans l'étape.
+- **Les flèches** : les cibles qui se touchent n'en font qu'une (une flèche vers la colonne Présence, plus une par rangée).
+- **La visite** (« Refaire », et toute étape faite revue par le compteur) : ni contour ni flèche sur un contrôle qui écrit ; la consigne devient la phrase de Grégoire. Ce que le moteur tient pour « un contrôle qui écrit » est dit au rapport.
+- **Vérifié** : Vitest complet (927 fichiers, 11 814 essais, verts) ; WebKit ciblé sur les parcours (trois passages : 43, 48, 47 essais, verts) et les 3 essais neufs ; break-tests rouges pour chaque défense. **Pas de verdict Playwright complet** : il se prend après la relecture.
+- **Inscrit** : **#1278** (le témoin « Non enregistré » tait la clé et l'erreur ; sans urgence). #1279 reste libre.
+- **Encore dû** : la relecture de Cowork ; le verdict du Mac ; la fusion ; un patch, avec sa ligne de Nouvelles (proposée au rapport, à valider par Grégoire) ; un regard sur l'iPad après la mise en ligne (tableau coupé, page vide au retour : non reproduits).
+- **Rapport** : `plans de travail/RAPPORT-2026-11-15-gel-refaire.md`, versionné SUR LA BRANCHE.
+- ⚠ `index.html` : les jetons anti-cache de `parcours-moteur.js` et `parcours-classe.js` passent à `20261114b` sur la branche ; `lot/editeur-pages-definition` touche aussi `index.html` (autre session, même matin).
+
 ## 15 NOV. 2026, 8 H 50 (Claude Code) : **LE TRAVAIL VIT SUR `lot/editeur-pages-definition`, NON FUSIONNÉ** — `main` inchangé (`41f68d315`, 1.247.0)
 
 Mandat : consigne de Cowork du 15 nov., 8 h 14, sur un défaut VÉCU par Grégoire (iPad, 1.247.0) : une copie de 2 728 x 1 748 px floue dans Annoter après avoir inversé ses pages dans l'éditeur de pages. **Ni verdict complet, ni fusion, ni release.** `origin/lot/editeur-pages-definition` = `d1495856e`, deux commits au-dessus de `main`. Rapport : `plans de travail/RAPPORT-2026-11-15-editeur-pages-definition.md`, SUR LA BRANCHE.
