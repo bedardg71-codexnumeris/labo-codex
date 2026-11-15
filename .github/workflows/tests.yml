@@ -251,6 +251,45 @@
 #        le premier run qui le traverse dit s'il tient — les essais se lisent
 #        dans le journal de l'étape (« ::warning::install-deps, essai N »).
 #
+# (12) 14 NOV. 2026 — LE NUAGE JUGE LE VERDICT COMPLET, LE MAC EN COMPLÉMENT.
+#      Décision de Grégoire (15 h 51), qui revient sur celle du 10 oct. (« le Mac est
+#      le juge du push ») : le verdict du Mac dure 111 min (mesuré le 13 nov., 1 726
+#      essais), immobilise la machine et exige sa présence ; celui d'ici rend le même
+#      commit en 33 min sur 20 machines (run 43543782094, 9b2bea83), mais son job
+#      `verdict` n'avait jamais conclu vert en 80 passages (16 oct. au 14 nov.).
+#      a) UNE BRANCHE SE JUGE AVANT SA FUSION, À LA DEMANDE : `workflow_dispatch`
+#         lancé sur la branche du lot (application GitHub : Actions ▸ Tests ▸ Run
+#         workflow ▸ la branche ▸ Run workflow ; ou `node scripts/verdict-nuage.mjs
+#         --lancer`). Le champ `branche` ne sert qu'à juger une référence qui ne porte
+#         pas ce workflow (une branche partie d'avant ce régime) : les essais joués
+#         sont alors ceux de cette référence, le juge et la liste ceux d'ici.
+#      b) PAS SUR LA PULL REQUEST. Mesuré le 12 nov. : onze passages `pull_request`
+#         en 80 min sur une seule branche. Chacun aurait pris les 20 machines (la
+#         limite du compte, d'après la documentation de GitHub) et annulé le
+#         précédent : le verdict ne conclurait qu'au dernier, et la règle 7 du
+#         protocole veut UN verdict par lot, au moment choisi. La pull request garde
+#         Vitest. Le cliquet (sentinelle-ci-paths-ignore) tient déjà cette porte.
+#      c) « VERT » : aucun essai rouge hors de scripts/playwright-baseline-linux.json,
+#         reclassée ce jour sur sept passages complets, chaque entrée avec sa cause.
+#         Elle ne se tient plus par tournée : un essai qui rougit ici et reste vert au
+#         Mac s'y classe DANS le lot qui l'amène (PROTOCOLE.md, règle 7).
+#      d) Ce que Linux ne juge pas (cette liste, et les six exclus du point 5) est
+#         rejoué sous le WebKit du Mac par scripts/complement-mac.mjs. Le jugement
+#         d'un commit = verdict d'ici vert pour ce SHA + complément vert pour ce SHA
+#         (scripts/lire-verdict.mjs). Le verdict complet du Mac reste possible
+#         (scripts/verdict-en-morceaux.mjs) ; plus rien ne l'exige.
+#      e) INCHANGÉ : le push sur `main` qui touche un chemin OBSERVABLE est rejugé
+#         ici (le crochet pré-push avertit sans bloquer : c'est le dernier filet).
+#      f) LA LISTE SEULE NE TARIT PAS LA SOURCE (mesuré ce jour) : quatre verdicts de
+#         suite (runs 43641104331, 43642642137, 43642783326, 43646117379) ont rougi
+#         sur 2 à 4 intermittents hors liste, jamais les mêmes, 11 distincts. Les
+#         délais PAR DÉFAUT de Playwright sont donc mis à l'échelle de ce runner, 2,64
+#         fois plus lent que le Mac : × 2,5 sous PW_EXCLURE_WEBKIT_LINUX
+#         (tests/playwright.config.js, ECHELLE_DELAIS_LINUX), `retries` inchangé.
+#         Premier verdict VERT du nuage avec elle : run 43647118579 (53676a10), 1 652
+#         essais, 24 rouges tous dans la liste, morceau le plus long 27 min. ⚠ Un
+#         passage : un indice, pas une preuve.
+#
 # Deux leviers, dans l'ordre de poids :
 #   1. `paths-ignore` — un commit qui ne touche que de la doc ne déclenche plus
 #      rien. ⚠ La liste est VÉRIFIÉE par un cliquet
@@ -263,6 +302,15 @@
 # Référence : audit/PLAN-MOYEN-TERME.md §5.3 (OpenSSF Scorecard).
 
 name: Tests
+
+# Point 12a : un verdict demandé se reconnaît dans la liste du téléphone. Lancé avec
+# le champ `branche`, il joue une AUTRE référence que son propre commit : son nom le
+# dit, et scripts/verdict-nuage.mjs l'écarte (MARQUE_AUTRE_REFERENCE) — il ne juge
+# pas le commit qui le porte. Vide hors demande : GitHub garde son nom habituel.
+# ⚠ Entre guillemets : la marque porte « : », qu'un scalaire YAML nu ne tolère pas — sans
+# eux le fichier ne se lit plus, et GitHub répond « Workflow does not have
+# 'workflow_dispatch' trigger » (vécu le 14 nov., b9c5495e).
+run-name: "${{ github.event_name == 'workflow_dispatch' && format('Verdict du nuage — {0}', inputs.branche && format('autre référence : {0}', inputs.branche) || github.ref_name) || '' }}"
 
 on:
   push:
@@ -309,15 +357,22 @@ on:
   pull_request:
     branches: [main]
     paths-ignore: *doc
-  # Point (8) : la seule voie de Playwright. Plus de `schedule` depuis le 10 oct. 2026.
+  # Point (12) : le verdict d'une branche, avant sa fusion. Plus de `schedule` depuis le 10 oct. 2026.
   workflow_dispatch:
+    inputs:
+      branche:
+        description: "Seulement pour juger une AUTRE référence que celle choisie plus haut (branche ou SHA)"
+        required: false
+        type: string
+        default: ''
 
 permissions:
   contents: read
 
 # Par ÉVÉNEMENT (point 7e) : un push ne doit pas annuler un run lancé à la demande.
+# Par RÉFÉRENCE JUGÉE (point 12a) : deux verdicts demandés d'ici sur deux branches ne s'annulent pas.
 concurrency:
-  group: tests-${{ github.ref }}-${{ github.event_name }}
+  group: tests-${{ github.ref }}-${{ github.event_name }}-${{ inputs.branche }}
   cancel-in-progress: true
 
 env:
@@ -341,6 +396,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.branche || github.sha }}
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -358,7 +415,7 @@ jobs:
         run: npm run test:unit
 
   # ── Job 2 : la décision — Playwright doit-il juger ce run ? (point 9) ──
-  # À la demande : toujours. Sur un push : seulement si le lot touche un chemin
+  # À la demande : toujours (le verdict d'une branche, point 12). Sur un push : seulement si le lot touche un chemin
   # OBSERVABLE, lu par scripts/lot-observable.sh (la règle du crochet, une seule
   # source). Sur une pull request : jamais (le job est sauté).
   # Il porte aussi le NOMBRE DE MORCEAUX, en un seul endroit : la matrice et le
@@ -377,6 +434,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
         with:
+          ref: ${{ inputs.branche || github.sha }}
           fetch-depth: 0
 
       - name: Décider
@@ -386,6 +444,7 @@ jobs:
           EVENEMENT: ${{ github.event_name }}
           AVANT: ${{ github.event.before }}
           APRES: ${{ github.sha }}
+          BRANCHE: ${{ inputs.branche }}
         run: |
           set -euo pipefail
           # ⚠ LE NOMBRE DE MORCEAUX vit ICI et nulle part ailleurs (point 9a).
@@ -413,8 +472,10 @@ jobs:
           echo "juger=$juger" >> "$GITHUB_OUTPUT"
           echo "total=$total" >> "$GITHUB_OUTPUT"
           echo "morceaux=[$morceaux]" >> "$GITHUB_OUTPUT"
-          echo "Playwright : $juger ($raison) — $total morceaux."
-          echo "Playwright : **$juger** ($raison) — $total morceaux." >> "$GITHUB_STEP_SUMMARY"
+          # Point 12a : le commit JUGÉ se dit, là où le téléphone le lit.
+          juge="$(git rev-parse HEAD)"
+          echo "Playwright : $juger ($raison) — $total morceaux. Commit jugé : $juge (${BRANCHE:-${GITHUB_REF_NAME:-}})."
+          echo "Playwright : **$juger** ($raison) — $total morceaux. Commit jugé : $juge (${BRANCHE:-${GITHUB_REF_NAME:-}})." >> "$GITHUB_STEP_SUMMARY"
 
   # ── Job 3 : Playwright, EN MORCEAUX, chacun sur sa machine (point 9). ──
   # ⚠ Sauté = `skipped`, jamais `success`. Sur une pull request, ou un push qui
@@ -455,6 +516,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.branche || github.sha }}
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -582,6 +645,8 @@ jobs:
           retention-days: 7
 
   # ── Job 4 : le verdict — fusionne les morceaux, juge contre la baseline. ──
+  # Point 12a : ce job garde le juge et la liste de la référence d'où part le run,
+  # même quand `branche` en fait jouer une autre.
   # Comme le Mac (scripts/verifier-playwright.mjs) : seule une rougeur absente de
   # la baseline fait échouer. #1114 (25 oct. 2026) : la baseline est celle de
   # Linux, scripts/playwright-baseline-linux.json (les rougeurs propres à Linux,

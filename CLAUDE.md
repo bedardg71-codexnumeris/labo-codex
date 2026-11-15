@@ -33,6 +33,9 @@ doit être ICI. Oublié le 1er sept. 2026.
 session. Si un merge doit attendre, remplir `RELAIS.md` et le pousser sur `main`
 SEUL — le seul point que toute session lit, quelle que soit la branche. Motif : le
 8 août, deux sessions parties du même commit ont livré deux « 1.55.0 ».
+⮕ **Les nouveautés attendent leur fenêtre** (lundi et jeudi vers midi, à l'essai,
+règle 7 de `PROTOCOLE.md`) : on regroupe, pas une release par lot. Bug de testeur
+ou blocage de l'enseignement de Grégoire : tout de suite.
 
 **EN TOUT PREMIER** : au premier tour d'une session, applique le skill
 `debut-de-session-labo-codex`. Lecture seule. Acté le 28 mai 2026 après un écart
@@ -177,9 +180,9 @@ exemples et modèle de menaces : skill `securite-donnees`.)
    fonction pure → Vitest `tests/unit/` ; navigateur → Playwright `tests/integration/`.
 6. **Aucun nom d'élève réel** dans le code, tests, rapports, plans, exemples : noms fictifs (22 sept. 2026).
 
-Avant un commit touchant `js/securite-*.js`, `js/import-export.js`,
-`js/cc-license.js` ou la CSP : `cd tests && npm test` — il enchaîne Vitest ET
-Playwright (>10 min) ; Vitest seul = `npm run test:unit`. Doc : `docs/securite/TESTS-AUTOMATISES.md`.
+Un lot touchant `js/securite-*.js`, `js/import-export.js`, `js/cc-license.js` ou la
+CSP ne rejoint pas `main` sans son jugement (nuage + complément du Mac, ci-dessous) ;
+avant le commit, `cd tests && npm run test:unit`. Doc : `docs/securite/TESTS-AUTOMATISES.md`.
 
 ---
 
@@ -212,9 +215,10 @@ les signaler. Seul l'automne 2026 compte.
 un `major`.**
 
 ⚠ **« PUSH RÉUSSI » NE SIGNIFIE PAS « SUITE COMPLÈTE VERTE ».** Le hook pre-push
-ne lance que Vitest ; faute de verdict Playwright local, il laisse passer. L'ordre
-qui fait qu'un push est jugé est au §4.5 de `fin-de-session` : commit, relecture,
-**puis** verdict, **puis** push.
+ne lance que Vitest ; faute de jugement pour ce commit, il laisse passer. Depuis le
+14 nov. 2026, **le nuage juge** (GitHub, sur la branche poussée) et **le Mac complète**
+(`scripts/complement-mac.mjs`) : §4.5 de `fin-de-session`, règle 7 de `PROTOCOLE.md`.
+Commit, relecture, push de la branche, **puis** jugement, **puis** `main` avance.
 
 ---
 

@@ -32,8 +32,9 @@ Elles prennent dix secondes et elles ont trouvé deux retards le 31 août.
 
 ```bash
 git rev-list --count origin/main..HEAD    # doit rendre 0
-cat scripts/.verdict-playwright.json      # LIRE le verdict déjà rendu : sha, code, rendule
-git rev-parse HEAD                        # à comparer au sha du jeton
+cat scripts/.verdict-playwright.json      # LIRE le jugement déjà rendu : `nuage` et `complement`, chacun avec son sha et son code
+git rev-parse HEAD                        # à comparer aux sha du jeton
+node scripts/verdict-nuage.mjs            # relève le verdict du nuage pour HEAD (lecture ; ne lance rien)
 ```
 
 ⮕ La première rendait **8** : tout le travail d'un trio, son propre relais compris,
@@ -52,12 +53,15 @@ lancé ; il a été tué à 30 minutes, sans verdict. Ni `verifier-playwright.mj
 
 ⚠ **Lire le JETON** (`scripts/.verdict-playwright.json`), pas un code de sortie
 tuyauté : `echo "CODE=$?"` après un `| tail` rend le code de `tail`. Le jeton porte
-le SHA du commit jugé (`sha`), le résultat (`code`, 0 = vert) et l'heure (`rendule`,
-en UTC) ; **s'il ne correspond pas à `HEAD`, le verdict est périmé.** Un verdict
+deux parts depuis le 14 nov. 2026 (règle 7 de `PROTOCOLE.md`) : `nuage` (le verdict
+complet, rendu par GitHub) et `complement` (ce que Linux ne juge pas, rejoué sur le
+Mac), chacune avec le SHA jugé (`sha`) et le résultat (`code`, 0 = vert) ; le haut du
+jeton (`sha`, `code`, `rendule`) est un verdict complet du Mac, quand il en a été pris
+un. **Une part qui ne correspond pas à `HEAD` est périmée.** Un verdict
 périmé ou absent se RAPPORTE (sha jugé, heure, nombre de commits depuis :
 `git rev-list --count <sha>..HEAD`, et combien touchent `js/` ou `tests/`) ; il ne
-se rattrape pas ici. Le verdict complet se prend à la clôture, par
-`scripts/pousser.sh` (skill `fin-de-session-labo-codex`, §4.5).
+se rattrape pas ici. Le jugement se prend à la clôture : verdict du nuage sur la
+branche poussée, puis complément du Mac (skill `fin-de-session-labo-codex`, §4.5).
 ⚠ **Un spec seul se lance en secondes** et départage mieux qu'une suite complète :
 `cd tests && npx playwright test integration/<spec>.js`.
 
@@ -80,12 +84,14 @@ du 10 octobre, point 8 de `tests.yml`). Le dépôt est public, les minutes sont 
 contre `scripts/playwright-baseline-linux.json` : seule une rougeur NOUVELLE fait échouer.
 Un `workflow_dispatch` (`gh workflow run tests.yml --ref main`) fait la même chose à la
 demande. Donc :
-· **le verdict de Vitest ET le verdict de GitHub au navigateur** viennent du run du
-  **dernier push** ;
-· **le verdict du Mac** reste le jeton `scripts/.verdict-playwright.json` (ci-dessus), rendu
-  par `pousser.sh` avant chaque push de code. Les deux ne se remplacent pas : WebKit Linux
-  n'est pas Safari macOS, et le Mac vert peut côtoyer un rouge Linux (mesuré le 11 nov. :
-  1 602/1 602 sur le Mac, 9 specs rouges sous Linux sur `48f118bf`) ;
+· **DEPUIS LE 14 NOV. 2026, GITHUB EST LE JUGE DU VERDICT COMPLET** (décision de Grégoire,
+  règle 7 de `PROTOCOLE.md`) : une branche se juge AVANT sa fusion, par un run demandé sur
+  elle (`workflow_dispatch`, nommé « Verdict du nuage — <branche> ») ; le run du push sur
+  `main` rejuge le même commit, en dernier filet ;
+· **le Mac complète** : `scripts/complement-mac.mjs` rejoue sous le WebKit de macOS ce que
+  Linux ne juge pas (la liste `playwright-baseline-linux.json` et les exclus), et écrit la
+  part `complement` du jeton. WebKit Linux n'est pas Safari macOS : c'est pour cela que la
+  liste existe, chaque entrée avec sa cause ;
 · un push qui ne touche aucun chemin observable : `decision` dit non, les morceaux et le
   verdict sont `skipped` — c'est la forme attendue, le dire tel quel.
 
@@ -102,9 +108,10 @@ gh run list --workflow tests.yml --event workflow_dispatch --limit 3 --json data
 git rev-parse --short=8 HEAD
 ```
 
-⚠ **Besoin d'un verdict GitHub au navigateur sur un commit que le push n'a pas jugé** :
-`gh workflow run tests.yml --ref main` (gratuit depuis le 16 oct., une demi-heure environ) —
-le proposer à Grégoire, ne pas le lancer de soi-même.
+⚠ **Besoin d'un verdict du nuage sur un commit qui n'en a pas** :
+`node scripts/verdict-nuage.mjs --lancer` sur la branche poussée (gratuit depuis le 16 oct.,
+une demi-heure environ). À l'OUVERTURE, le proposer à Grégoire, ne pas le lancer de
+soi-même ; à la clôture d'un lot, c'est le geste normal (fin-de-session, §4.5).
 
 ⚠⚠ **LIRE LES JOBS, PAS SEULEMENT LE RUN** (depuis le 2 septembre au soir). Le workflow a
 quatre jobs : `Vitest`, `Playwright doit-il juger ?` (`decision`), `Playwright (WebKit) n/20`

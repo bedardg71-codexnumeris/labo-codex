@@ -242,54 +242,72 @@ Pas de correction automatique.
 
 ### ⚠⚠ « Push réussi » ne signifie pas « suite complète verte », et ne le signifiera jamais
 
-Le hook pre-push lance **Vitest seulement**. Pour Playwright, il constate qu'aucun
-verdict local n'existe **et laisse passer**. Ce n'est pas une prudence, c'est une
-**impossibilité structurelle** : la suite dure plus de dix minutes sur cette
-machine, et six minutes de silence ferment la connexion au serveur (#533). **Le
-hook ne PEUT pas la lancer.**
+Le hook pre-push lance **Vitest seulement**. Pour Playwright, il LIT un jeton, sans
+réseau, et **laisse passer** quand le commit n'a pas son jugement. Ce n'est pas une
+prudence, c'est une **impossibilité structurelle** : six minutes de silence ferment
+la connexion au serveur (#533), et une branche de lot doit partir AVANT d'être jugée
+(GitHub juge ce qu'il a reçu). **Le hook ne PEUT pas juger.**
 
-### La méthode qui ferme ce trou
+### La méthode qui ferme ce trou — le nuage juge, le Mac complète (14 novembre 2026)
 
-Le hook ne peut pas lancer la suite, **mais il sait lire un verdict**. L'ordre qui
-marche, vérifié quatre fois le 1er septembre 2026 :
+**Décision de Grégoire (14 nov. 2026)**, règle 7 de `PROTOCOLE.md` : le jugement d'un
+commit = le verdict du **nuage** vert pour ce SHA + le **complément du Mac** vert pour
+ce SHA. L'ordre :
 
 ```
-commit → relecture croisée → corrections → verdict → push
+commit → relecture croisée → corrections → push de la branche → verdict du nuage + complément du Mac → main avance, push
 ```
 
 ```bash
-# 1. committer d'abord
-# 2. (règle 2 de PROTOCOLE.md, si le lot est dans son périmètre) relecture croisée
-# 3. seulement ensuite :
-cd tests && node ../scripts/verifier-playwright.mjs
-# 4. puis pousser
+# 1. committer d'abord ; (règle 2 de PROTOCOLE.md, si le lot est dans son périmètre) relecture croisée
+# 2. pousser la BRANCHE du lot (le hook lance Vitest, avertit, laisse passer)
+git push origin <branche>
+# 3. le verdict du nuage : 20 machines, une demi-heure, le Mac libre
+node scripts/verdict-nuage.mjs --lancer     # du téléphone : application GitHub ▸ Actions ▸ Tests ▸ Run workflow ▸ la branche
+node scripts/verdict-nuage.mjs --attendre   # relève le verdict et écrit sa part du jeton
+# 4. le complément du Mac : ce que Linux ne juge pas, quelques minutes (Cowork fermé, §4.6.2)
+node scripts/complement-mac.mjs
+# 5. main avance sur CE commit, puis :
+scripts/pousser.sh                          # relève les deux parts ; sur main, refuse un commit non jugé
 ```
 
-Le jeton porte alors le SHA du commit, et le hook affiche « ✓ Sentinelle
-Playwright : **verdict vert à jour pour ce commit** » au lieu de « aucun verdict
-local ». **C'est la seule façon qu'un push soit réellement jugé.**
+Le jeton (`scripts/.verdict-playwright.json`) porte alors ses deux parts, `nuage` et
+`complement`, chacune avec le SHA, et le hook affiche « ✓ Sentinelle Playwright :
+**jugement vert à jour pour ce commit** ». **C'est la seule façon qu'un push de `main`
+soit réellement jugé.**
 
-Les gardes du verdict (éveil complet, veilles, mémoire ; #1008) vivent dans
-`scripts/verifier-playwright.mjs` lui-même : un lancement à la main en est
-couvert comme `pousser.sh`, et un code 2 « non jugé » dit laquelle a refusé.
+**Un commit qui ne touche rien d'observable ne périme pas le verdict du nuage** (le
+rapport du lot, le relais) : `verdict-nuage.mjs` reporte celui du plus proche ancêtre
+tant qu'aucun fichier de la liste OBSERVABLE n'a bougé, et le jeton dit sur quel
+commit il a été rendu (`jugeSur`). Le complément du Mac, lui, se rejoue : il est court.
 
-### Le verdict en dix morceaux : `scripts/verdict-en-morceaux.mjs` (27 octobre 2026)
+**Le régime est à l'essai pour trois lots** (règle 7 de `PROTOCOLE.md`) : chaque verdict
+du nuage se consigne dans `plans de travail/ESSAI-VERDICT-NUAGE.md` (date, SHA, durée,
+issue — vert, rouge par intermittent, rouge vrai —, essais en cause), dans un commit qui
+ne touche rien d'observable. Pendant l'essai, le verdict complet du Mac reste le repli
+permis ; son emploi se consigne au même fichier.
 
-D'un bloc, la suite ne tient plus dans la mémoire du Mac à côté de Cowork. Le
-geste du soir est désormais :
+**Si le nuage rougit sur un essai qui est vert au Mac** : ce n'est pas un rouge à
+contourner, c'est une entrée due à `scripts/playwright-baseline-linux.json`, dans CE
+lot, avec sa famille et sa cause lue dans le journal du run (règle 7, point 3). Si
+l'essai présume le Mac sans le dire, on le répare au lieu de le classer.
+
+### Le verdict complet du Mac reste possible : `scripts/verdict-en-morceaux.mjs`
+
+Plus rien ne l'exige ; le hook l'accepte à lui seul. Il sert quand le nuage est
+indisponible, ou pour mesurer :
 
 ```bash
-node scripts/verdict-en-morceaux.mjs            # dix morceaux, fusion, jugement, jeton
+node scripts/verdict-en-morceaux.mjs            # dix morceaux, fusion, jugement, jeton (près de deux heures)
 node scripts/verdict-en-morceaux.mjs --reporter # reporter un vert sur un commit de tests seulement
 ```
 
 Avant : Cowork, Chrome et Safari fermés, Mac sur secteur. Il juge contre
-`playwright-baseline.json`, comme `verifier-playwright.mjs`, et écrit le même
-jeton : le hook le lit sans changement. Puis `git push` (et non `pousser.sh`,
-qui relancerait la suite d'un bloc). Codes : 0 vert, 1 rougeur nouvelle,
-2 NON JUGÉ (la garde qui a refusé est nommée), 3 report refusé (la suite entière
-repasse). `--reporter` n'accepte qu'un diff limité à `plans de travail/`,
+`playwright-baseline.json` et écrit le haut du jeton. Codes : 0 vert, 1 rougeur
+nouvelle, 2 NON JUGÉ (la garde qui a refusé est nommée), 3 report refusé.
+`--reporter` n'accepte qu'un diff limité à `plans de travail/`,
 `tests/integration/*.spec.js` et `tests/unit/`, et rejoue chaque spec touchée.
+`scripts/verifier-playwright.mjs` (la suite d'un bloc) garde ses gardes (#1008).
 
 ⚠ **Repli, gardé tant que le script n'a pas fait ses preuves** (première course :
 la vérification du soir du 27 oct.) : la procédure à la main —
@@ -299,10 +317,10 @@ la vérification du soir du 27 oct.) : la procédure à la main —
 (sa `garde.raison` le dit). Si le script refuse ou casse, on reprend à la main,
 et le refus va dans le rapport du soir.
 
-⚠ **Un commit APRÈS le verdict le périme.** Refaire dans cet ordre, ou accepter
-que le push passe sans jugement, et le DIRE.
-⚠ **Le verdict est le DERNIER geste avant le push, jamais avant la relecture** :
-toute correction issue de la relecture périme un verdict déjà pris. Le
+⚠ **Un commit APRÈS le jugement le périme** (les deux parts sont rattachées au
+SHA). Refaire dans cet ordre, ou accepter que le push passe sans jugement, et le DIRE.
+⚠ **Le jugement est le DERNIER geste avant que `main` avance, jamais avant la
+relecture** : toute correction issue de la relecture périme un verdict déjà pris. Le
 1er septembre, **cinq lancements ont été gaspillés pour un seul verdict utile**.
 ⚠ Lire le **jeton** (`scripts/.verdict-playwright.json`), pas un code de sortie
 tuyauté. Il porte aussi `instables` : un vert rattrapé au second essai ne
@@ -348,13 +366,13 @@ seulement une machine assez généreuse.
 
 ⮕ **Ajouté le 4 septembre 2026 (décision de Grégoire, consigne du jour §10)** : on ne retient plus
 un push pour laisser finir un run GitHub — le run annulé par `cancel-in-progress` n'est pas perdu,
-le suivant juge le sommet de la branche, qui contient tout ce qui précède ; le verdict au jeton
-local (`scripts/pousser.sh`) reste le dernier geste avant chaque push, et le rituel d'ouverture lit
+le suivant juge le sommet de la branche, qui contient tout ce qui précède ; le jugement au jeton
+(nuage et complément, §4.5) reste le dernier geste avant que `main` avance, et le rituel d'ouverture lit
 les JOBS du dernier run (jugé vert, jugé rouge, non jugé) — depuis le 10 nov. 2026, seulement
 quand le mandat demande une release, un verdict ou un push sur `main`
 (`debut-de-session-labo-codex/mesures-sous-condition.md`, §2.1).
 
-### 4.6.2 Le verdict Playwright local ne se prend pas à deux outils ouverts (ex-règle 8, 12 septembre 2026)
+### 4.6.2 Ce que le Mac joue sous Playwright ne se prend pas à deux outils ouverts (ex-règle 8, 12 septembre 2026)
 
 **Fait mesuré par Grégoire le 12 septembre au matin** : les redémarrages nocturnes des 9, 10 et 11 septembre sont des paniques
 noyau par chien de garde (`watchdog timeout`, `kernel_task`), précédées de vingt minutes de pression mémoire extrême sur 16 Go
@@ -365,7 +383,8 @@ Le 11, la marche a été coupée entre le verdict et le push : 1.135.0 committé
 `af574fd2` sous un faux numéro.
 
 **La règle** :
-1. Le verdict Playwright local (`scripts/verifier-playwright.mjs`) **ne se lance pas pendant qu'une session Cowork est ouverte**.
+1. Ce que le Mac joue sous Playwright — depuis le 14 nov. 2026 le complément (`scripts/complement-mac.mjs`), ou un verdict
+   complet choisi — **ne se lance pas pendant qu'une session Cowork est ouverte**.
    Qui la ferme, et ce que Claude Code dit avant de lancer : `PROTOCOLE.md`, règle 8 (c'est de la coordination, elle y reste).
 2. En fin de journée, **la marche s'arrête AVANT le verdict** si Grégoire ferme ; le verdict et le push se prennent le lendemain
    matin, Cowork fermé. Une livraison ne se termine pas la nuit, sans personne — c'est aussi la règle 6 de `PROTOCOLE.md`
@@ -374,8 +393,8 @@ Le 11, la marche a été coupée entre le verdict et le push : 1.135.0 committé
    Moniteur d'activité doit rester verte.
 4. Un push qui suit un verdict interrompu n'a pas de verdict : on le dit, on ne le suppose pas (`git reflog show origin/main` fait foi).
 
-**Ce qui ne change pas** : la CI GitHub reste le second verdict (§4.6.1) ; tant que `#833` la laisse rouge sur des specs sans
-rapport, le verdict local est le seul, d'où l'importance de le prendre dans de bonnes conditions.
+**Ce qui a changé le 14 nov. 2026** : la CI GitHub n'est plus le second verdict, elle est le juge du verdict complet (§4.5) ;
+le Mac ne joue plus que le complément, quelques minutes au lieu de près de deux heures. Les points 2 à 4 valent pour lui.
 
 ---
 
@@ -453,7 +472,12 @@ instruits.
 ### 5bis.2 Si le merge doit vraiment attendre
 
 Cas légitimes : travail à mi-chemin, validation terrain en suspens, décision de
-Grégoire non prise. Alors, et **seulement** alors :
+Grégoire non prise, et, **depuis le 14 nov. 2026 (à l'essai), un lot de nouveautés
+fini hors fenêtre**. Les nouveautés partent le lundi et le jeudi vers midi, regroupées
+(règle 7 de `PROTOCOLE.md`, « Le rythme des mises en ligne » ; skill
+`release-et-changelog`, §2.1) : Netlify publie chaque `main`, si bien que le lot jugé
+attend sur sa branche poussée, sans bump (§5). Un bug signalé par un testeur, ou ce qui
+bloque l'enseignement de Grégoire, n'attend pas : §5bis.1. Alors, et **seulement** alors :
 
 1. remplir `RELAIS.md` à la racine (modèle à la fin du fichier) en nommant la
    branche, sa version, et ce qu'elle porte ;
@@ -578,3 +602,5 @@ Prochaines étapes possibles (à choisir par Grégoire) :
 | 2026-06-11 | §4 réécrite : bump de version par `scripts/release.mjs` (4 points de vérité, `--dry-run`) au lieu de l'édition manuelle de `index.html` (fallbacks déplacés dans `init-inline.js`). Renvoi CLAUDE.md pour §2.1-2.3, dispatcher recité (`[data-action]` ≈ 780-836). |
 | 2026-06-14 | Nouveau §4 « Vérification adverse » (break-test des tests neufs/modifiés + confrontation récit↔diff + passe « connexions »), instanciant le skill `verification-adverse` (mode A). Renumérotation §4-6 → §5-7. Né des audits du 13-14 juin (7 break-tests, défaut transversal #340). |
 | 2026-09-13 | Nouveau §4.6 : les règles 7 et 8 de `PROTOCOLE.md` déplacées ici (gestes de clôture) ; le protocole garde le renvoi et « qui ferme Cowork ». Au rapport, le témoin « `verification-adverse` chargé seul », condition de levée de la règle 10. |
+| 2026-11-14 | **Le nuage juge le verdict complet, le Mac en complément** (décision de Grégoire, 15 h 51 ; règle 7 de `PROTOCOLE.md`). §4.5 réécrit : la branche du lot est poussée, le verdict du nuage se lance à la demande (`scripts/verdict-nuage.mjs`, ou l'application GitHub), le complément du Mac rejoue ce que Linux ne juge pas (`scripts/complement-mac.mjs`), `pousser.sh` refuse sur `main` un commit non jugé. Un rouge propre à Linux se classe dans le lot, avec sa cause. Le verdict complet du Mac reste possible, plus exigé. §4.6.1 et §4.6.2 mis d'accord. |
+| 2026-11-15 | Retouches demandées par Cowork à sa relecture. §4.5 : le régime est à l'essai pour trois lots, chaque verdict du nuage se consigne dans `plans de travail/ESSAI-VERDICT-NUAGE.md`, le verdict complet du Mac reste le repli permis. §5bis.2 : un lot de nouveautés fini hors fenêtre attend (lundi et jeudi vers midi, lots regroupés ; décision de Grégoire du 14 nov., à l'essai). |

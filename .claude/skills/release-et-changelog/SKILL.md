@@ -49,6 +49,20 @@ C'est un jugement, pas un calcul :
 ⚠ **Confirmer avec Grégoire avant un `major`** : c'est un acte visible
 publiquement. `patch` et `minor` relèvent du jugement courant.
 
+### 2.1 Quand la release part (décision de Grégoire, 14 nov. 2026 ; à l'essai)
+
+Règle 7 de `PROTOCOLE.md`, « Le rythme des mises en ligne » :
+
+| Ce qui part | Quand |
+|---|---|
+| Les nouveautés | **Le lundi et le jeudi, vers midi.** Des fenêtres, pas des obligations : rien de mûr, rien de publié. |
+| Un bug signalé par un testeur ; ce qui bloque l'enseignement de Grégoire | **Tout de suite**, comme avant. |
+
+⮕ **On regroupe les lots de nouveautés : ne pas proposer une release par lot.** Un
+lot de nouveautés fini et jugé hors fenêtre attend sur sa branche poussée ; `RELAIS.md`
+le dit sur `main` (§6). À la fenêtre, une seule release porte les lots mûrs, avec
+une seule entrée de « Nouvelles » (§5).
+
 ---
 
 ## 3. Lancer le script de release
@@ -128,10 +142,13 @@ sur cette machine, et six minutes de silence ferment la connexion au serveur
 (#533). Corrigé ici le 2 septembre 2026 ; ce skill disait encore `npm test`.
 
 ⚠ **« Push réussi » ne signifie pas « suite complète verte ».** Le hook pre-push
-ne lance que Vitest ; pour Playwright, il constate qu'aucun verdict local n'existe
-et **laisse passer**. L'ordre qui fait qu'un push est réellement jugé est dans le
-skill `fin-de-session-labo-codex` : **committer d'abord**, puis
-`cd tests && node ../scripts/verifier-playwright.mjs`, puis pousser.
+ne lance que Vitest ; pour Playwright, il lit un jeton et **laisse passer** un commit
+qui n'a pas son jugement. L'ordre qui fait qu'une release est réellement jugée est
+dans le skill `fin-de-session-labo-codex`, §4.5 (règle 7 de `PROTOCOLE.md`, 14 nov.
+2026) : **le bump se committe sur la branche**, la branche est poussée, le verdict du
+nuage (`node scripts/verdict-nuage.mjs --lancer`) et le complément du Mac
+(`node scripts/complement-mac.mjs`) jugent CE commit, puis `main` avance dessus et
+`scripts/pousser.sh` pousse. Un bump posé après le verdict le périme.
 
 > `version.json` reste la **source unique de vérité**. « Bêta publique » est un
 > libellé d'affichage (`init-inline.js`, `rapport-bug.js`), pas le numéro.
@@ -170,6 +187,11 @@ Couleurs : `vert` (fonctionnalités), `bleu` (améliorations), `orange` (correct
 On **FUSIONNE vers `main` à la fin de CHAQUE session**. Si un merge doit vraiment
 attendre, remplir `RELAIS.md` à la racine et le pousser sur `main` SEUL.
 
+⮕ **Depuis le 14 nov. 2026 (à l'essai), un lot de nouveautés attend sa fenêtre**
+(§2.1) : Netlify publie chaque `main`, si bien que fusionner, c'est mettre en ligne.
+C'est le cas prévu ci-dessus : la branche est poussée, et `RELAIS.md` dit où le
+travail vit.
+
 Motif : le 8 août, deux sessions sont parties du même commit sans se voir. Chacune
 a livré une « 1.55.0 » différente et pris les mêmes identifiants de backlog. La
 seconde avait fait le rituel et vérifié la prémisse : elle a trouvé zéro écart,
@@ -189,3 +211,4 @@ branche non mergée, la consigne qui le dit y vit aussi.
 |---|---|
 | 2026-08-17 | Création. Extrait de `CLAUDE.md` (sections « Avant chaque commit » et « Changelog »), désormais réduites à un pointeur. |
 | 2026-10-12 | §6 : ligne « complexité » dans le relais de chaque release (chantier « contenir », lot 24). |
+| 2026-11-15 | §2.1 (neuf) et §6 : le rythme des mises en ligne décidé par Grégoire le 14 nov., à l'essai — nouveautés le lundi et le jeudi vers midi, lots regroupés ; bugs de testeurs et blocages de son enseignement tout de suite. |

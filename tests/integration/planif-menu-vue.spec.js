@@ -33,6 +33,15 @@ const patternsAttendus = [
 ];
 const estErreurAttendue = (msg) => patternsAttendus.some((re) => re.test(msg));
 
+// Les deux essais qui jugent l'affichage « sur un Mac » POSENT leur prémisse : la carte lit
+// `navigator.platform` (js/planification-carte.js), et le WebKit de Linux y répond « Linux » — les
+// raccourcis s'y affichent en « Ctrl », à raison (run 43543782094 : « Annuler (Ctrl+Z) » reçu).
+async function surUnMac(page) {
+    await page.addInitScript(() => {
+        Object.defineProperty(navigator, 'platform', { configurable: true, get: () => 'MacIntel' });
+    });
+}
+
 async function ouvrirCarte(page) {
     const erreurs = [];
     page.on('pageerror', (e) => {
@@ -441,13 +450,14 @@ const ESSAIS_RACCOURCIS = {
 };
 
 test('chaque raccourci affiché a son essai, et chaque essai son raccourci affiché', async ({ page }) => {
+    await surUnMac(page);
     const erreurs = await ouvrirCarte(page);
     const affiches = await page.$$eval('#planif-raccourcis-table tr', (trs) => trs.map((t) => t.dataset.raccourci));
     const source = await etat(page, () => window.planificationCarte.RACCOURCIS_CARTE.map((r) => r.id));
     expect(affiches).toEqual(source);
     expect(affiches.length).toBeGreaterThan(0);
     expect([...affiches].sort()).toEqual(Object.keys(ESSAIS_RACCOURCIS).sort());
-    // Sur Mac (la cible WebKit est « Desktop Safari ») : ⌘, et plus ⌘1.
+    // Sur Mac (prémisse posée par surUnMac) : ⌘, et plus ⌘1.
     const touches = await page.$$eval('#planif-raccourcis-table kbd', (ks) => ks.map((k) => k.textContent));
     expect(touches).toContain('⌘A');
     expect(touches.join(' ')).not.toContain('⌘1');
@@ -575,6 +585,7 @@ test('au clavier : Entrée ouvre et entre dans le menu, les flèches y circulent
 });
 
 test('le bouton « Annuler » annonce ⌘Z sur un Mac, plus « Ctrl+Z »', async ({ page }) => {
+    await surUnMac(page);
     const erreurs = await ouvrirCarte(page);
     await expect(page.locator('#planif-btn-annuler')).toHaveAttribute('title', 'Annuler (⌘Z)');
     expect(erreurs).toEqual([]);
