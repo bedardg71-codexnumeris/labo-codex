@@ -6,7 +6,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { attendreApplication } from './harness/attendre-application.js';
-import { flecheVers, nombreDeFleches } from './harness/fleches-de-banc.js';
+import { etatFleches, flecheVers, nombreDeFleches } from './harness/fleches-de-banc.js';
 
 // =======================================================================
 // LOT « LES DEUX PARCOURS » — PARTIE 2 (9 NOVEMBRE 2026) : « METTRE TA CLASSE EN PLACE »
@@ -146,7 +146,6 @@ const bullesVues = (page) => page.evaluate(() => window.__bullesVues);
 // ---------- Les gestes de chaque étape, tels qu'une personne les fait ----------
 
 async function remplirTrimestre(page, { debut = '2026-08-24' } = {}) {
-    await page.fill('#v2-nomTrimestre', 'Automne 2026');
     await page.selectOption('#v2-sessionTrimestre', 'automne');
     await page.fill('#v2-anneeTrimestre', '2026');
     await page.fill('#v2-debutTrimestre', debut);
@@ -194,7 +193,7 @@ async function remplirGroupeCours(page) {
 
 // Ce que chaque étape demande de remplir (les champs requis) : à l'écran, hors de la bulle.
 const CHAMPS = {
-    1: ['#v2-nomTrimestre', '#v2-sessionTrimestre', '#v2-anneeTrimestre', '#v2-debutTrimestre', '#v2-finCours', '#v2-finTrimestre'],
+    1: ['#v2-sessionTrimestre', '#v2-anneeTrimestre', '#v2-debutTrimestre', '#v2-finCours', '#v2-finTrimestre'],
     2: ['#v2-codeCours', '#v2-nomCours', '#v2-ponderation', '#v2-disciplineCours'],
     3: ['#v2-ens-prenom', '#v2-ens-nom', '#v2-ens-courriel', '#v2-ens-institution'],
     4: ['#v2-donneesCollees'],
@@ -266,11 +265,21 @@ test('de « Découvrir » à sa propre classe : « Commencer avec ma classe », 
     expect(await page.evaluate(() => Assistance.etatDe('classe'))).toEqual({ etat: 'en-cours', etape: 0 });
     await expect(page.locator('#calendrier-trimestre')).toBeVisible();
     await expect(rang(page)).toHaveText('2 sur ' + await nParcours(page));
-    // Le haut du formulaire (nom, session, année) et « Créer le trimestre » sont à l'écran, la bulle à côté.
-    for (const sel of ['#v2-nomTrimestre', '#v2-sessionTrimestre', '#v2-anneeTrimestre', '#v2-finTrimestre', '#v2-btnCreerTrimestre']) {
+    // 14 nov. 2026 (essai novice, règle 4) : la page change, donc la bulle dit où l'on est, les deux entrées du menu
+    // ont leur halo, et la page s'ouvre EN HAUT, navigation visible. Le haut du formulaire (session, année, nom) est à
+    // l'écran, la bulle à côté ; « Créer le trimestre », plus bas, viendra dans la vue quand les lignes seront faites.
+    await expect(bulle(page).locator('.parcours-bulle-lieu')).toHaveText('Tu es dans «\u00a0Cadre\u00a0», à l\'onglet «\u00a0Trimestre\u00a0».');
+    expect(await page.evaluate(() => [...document.querySelectorAll('.parcours-section-actuelle')].map((e) => e.textContent.trim()).sort())).toEqual(['Cadre', 'Trimestre']);
+    expect(await page.evaluate(() => Math.round(window.scrollY))).toBe(0);
+    await expect(page.locator('.navigation-principale button.actif').first()).toBeInViewport();
+    for (const sel of ['#v2-nomTrimestre', '#v2-sessionTrimestre', '#v2-anneeTrimestre']) {
         await expect(page.locator(sel)).toBeInViewport();
         await bulleNeCouvrePas(page, sel);
     }
+    // La forme de la bulle (règles 2 et 3) : le document d'abord, une ligne par geste, la consigne en dernier.
+    await expect(bulle(page).locator('.parcours-bulle-note').first()).toHaveText('Aie sous la main le calendrier scolaire de ton collège.');
+    await expect(bulle(page).locator('.parcours-bulle-ligne--geste')).toHaveText('Touche «\u00a0Créer le trimestre\u00a0»');
+    await expect(bulle(page).locator('.parcours-bulle-nav')).toBeHidden();
     await contourSur(page, '#v2-btnCreerTrimestre');
     await capture(page, 'classe-1-1180-sombre');
 
@@ -314,8 +323,11 @@ test('de « Découvrir » à sa propre classe : « Commencer avec ma classe », 
     // Étape 7 : Suivi › Présences, la date du cours le plus récent proposée DÈS L'ARRIVÉE (le défaut
     // de la consigne), les deux contours : la date et « Verrouiller la saisie ».
     // Break-test (9 nov.) : la correction retirée de js/saisie-presences.js → ROUGE ici (date vide).
-    await attendreEtape(page, 7, 'Ton premier cours');
+    await attendreEtape(page, 7, 'Prendre les présences');
     await expect(page.locator('#suivi-saisie')).toBeVisible();
+    await expect(bulle(page).locator('.parcours-bulle-lieu')).toHaveText(/^Tu es dans «\u00a0Suivi\u00a0», à l'onglet «\u00a0.+\u00a0»\.$/);
+    expect(await page.evaluate(() => Math.round(window.scrollY)), 'étape 7 : la page s\'ouvre en haut').toBe(0);
+    await expect(page.locator('.navigation-principale button.actif').first()).toBeInViewport();
     await expect(page.locator('#date-cours')).toHaveValue('2026-11-10');
     await expect(page.locator('#btnVerrouillerSaisiePresences')).toBeVisible();
     await contourSur(page, '#btnVerrouillerSaisiePresences');
@@ -339,8 +351,21 @@ test('de « Découvrir » à sa propre classe : « Commencer avec ma classe », 
     await attendreEtape(page, 8, "Ta classe d'un coup d'œil");
     await expect(page.locator('#parcours-contour-date')).toHaveCount(0);
     await expect(page.locator('#suivi-groupe')).toBeVisible();
+    // 14 nov. 2026 (règle 4, vécu aux étapes 7 et 8 : l'en-tête était hors de l'écran) : la bulle dit où l'on est, le
+    // menu a son halo, la page est en haut. Des explications : rien ne se grise. Personne n'était absent : la bulle
+    // le dit, elle ne fait pas inventer une absence.
+    await expect(bulle(page).locator('.parcours-bulle-lieu')).toHaveText('Tu es dans «\u00a0Suivi\u00a0», à l\'onglet «\u00a0Groupe\u00a0».');
+    expect(await page.evaluate(() => [...document.querySelectorAll('.parcours-section-actuelle')].map((e) => e.textContent.trim()).sort())).toEqual(['Groupe', 'Suivi']);
+    expect(await page.evaluate(() => Math.round(window.scrollY))).toBe(0);
+    await expect(page.locator('.sous-navigation button.actif')).toBeInViewport();
+    await expect(bulle(page).locator('.parcours-bulle-note')).toHaveText(['Reviens-y avant chaque séance.',
+        'Tout le monde était là : un point s\'écartera à la première absence.', 'Pour revoir une étape, touche «\u00a08 sur 8\u00a0».']);
+    expect(await bulle(page).locator('.parcours-bulle-ligne.est-faite').count()).toBe(0);
+    await expect(bulle(page).locator('.parcours-bulle-ligne--geste')).toHaveText('Touche «\u00a0Parcours suivant\u00a0», ou «\u00a0Terminer\u00a0»');
+    await expect(bulle(page).locator('.parcours-bulle-nav')).toBeHidden();
     await expect(bulle(page).locator('.parcours-bulle-sortie')).toHaveCount(0);
-    await expect(bulle(page).locator('.parcours-bulle-boutons button')).toHaveText(['Terminer']);
+    // 14 nov. 2026 (lot 2e) : la dernière bulle offre « Parcours suivant » et « Terminer », de même poids.
+    await expect(bulle(page).locator('.parcours-bulle-boutons button')).toHaveText(['Parcours suivant', 'Terminer']);
     await capture(page, 'classe-8-1180-sombre');
     await bulle(page).getByRole('button', { name: 'Terminer' }).click();
 
@@ -362,12 +387,33 @@ test('de « Découvrir » à sa propre classe : « Commencer avec ma classe », 
     await expect(item.locator('.assistance-parcours-etat')).toHaveText('Fait');
     await expect(item.locator('.assistance-parcours-bouton')).toHaveText('Refaire');
 
-    // « Refaire », tout étant en place : la première étape non faite est la dernière ; aucune autre
-    // bulle ne paraît, même un instant.
-    await noterLesBulles(page);
+    // 14 nov. 2026 (essai novice, lot 2b) — vécu par Grégoire : « Refaire » menait droit à la bulle 8 sur 8 ; on ne
+    // pouvait ni revoir le parcours, ni le montrer à quelqu'un. Il se rejoue maintenant depuis sa première bulle, EN
+    // VISITE : chaque étape déjà réglée se montre avec « Continuer », rien n'avance seul, rien ne s'écrit.
+    const avant = await page.evaluate(() => JSON.stringify(Object.keys(localStorage).sort().map((k) => [k, localStorage.getItem(k)])));
     await item.locator('.assistance-parcours-bouton').click();
-    await attendreEtape(page, 8, "Ta classe d'un coup d'œil");
-    expect(await bullesVues(page)).toEqual(["Ta classe d'un coup d'œil"]);
+    const TITRES = ['Ton trimestre', 'Ton cours', 'Ton profil', 'Ta classe', 'Ton horaire', 'Ton groupe-cours'];
+    for (let k = 0; k < TITRES.length; k++) {
+        await attendreEtape(page, k + 1, TITRES[k], { focus: false });
+        expect(await page.evaluate(() => window.ParcoursMoteur.enVisite()), 'étape ' + (k + 1) + ' : en visite').toBe(true);
+        await expect(bulle(page).locator('.parcours-bulle-boutons button')).toHaveText(['Continuer']);
+        await bulle(page).getByRole('button', { name: 'Continuer' }).click();
+    }
+    await attendreEtape(page, 7, null, { focus: false });
+    await bulle(page).getByRole('button', { name: 'Continuer' }).click();
+    await attendreEtape(page, 8, "Ta classe d'un coup d'œil", { focus: false });
+    // La liste des étapes : toutes faites, toutes se revoient.
+    await bulle(page).locator('.parcours-bulle-rang').click();
+    expect(await bulle(page).locator('.parcours-bulle-etape').evaluateAll((bs) => bs.map((b) => b.disabled))).toEqual(Array(8).fill(false));
+    expect(await bulle(page).locator('.parcours-bulle-etape.est-faite').count()).toBe(8);
+    await bulle(page).locator('.parcours-bulle-etape').nth(1).click();
+    await attendreEtape(page, 2, 'Ton cours', { focus: false });
+    await bulle(page).locator('.parcours-bulle-rang').click();
+    await bulle(page).locator('.parcours-bulle-etape').nth(7).click();
+    await attendreEtape(page, 8, "Ta classe d'un coup d'œil", { focus: false });
+    // Rien ne s'est écrit pendant la visite : le parcours est resté « fait », les données sont les mêmes.
+    expect(await page.evaluate(() => Assistance.etatDe('classe'))).toEqual({ etat: 'fait', etape: 0 });
+    expect(await page.evaluate(() => JSON.stringify(Object.keys(localStorage).sort().map((k) => [k, localStorage.getItem(k)]))), 'la visite n\'écrit rien').toBe(avant);
     await bulle(page).getByRole('button', { name: 'Terminer' }).click();
 });
 
@@ -391,9 +437,16 @@ test('la porte de l’accueil commence à la première étape non faite ; avant 
     expect(await page.evaluate(() => Assistance.etatDe('classe'))).toEqual({ etat: 'en-cours', etape: 1 });
     await faireLeCadre(page, { depuis: 2 });
 
-    await attendreEtape(page, 7, 'Ton premier cours');
-    const texte = "Ton premier cours n'a pas encore eu lieu. Reviens après l'avoir donné : le parcours reprendra ici, avec ta première saisie de présences. En attendant, tu peux préparer tes outils dans Conception.";
-    await expect(bulle(page).locator('.parcours-bulle-texte')).toHaveText(texte);
+    await attendreEtape(page, 7, 'Prendre les présences');
+    // 14 nov. 2026 : la variante d'avant la première séance, gardée, en lignes (« cours » y est devenu « séance », règle 6).
+    const variante = async () => {
+        await expect(bulle(page).locator('.parcours-bulle-note')).toHaveText("Ta première séance n'a pas encore eu lieu.");
+        await expect(bulle(page).locator('.parcours-bulle-ligne')).toHaveText([
+            "Reviens après l'avoir donnée : le parcours reprendra ici, avec ta première saisie de présences",
+            'En attendant, tu peux préparer tes outils dans «\u00a0Conception\u00a0»',
+            'Touche «\u00a0D\'accord\u00a0»']);
+    };
+    await variante();
     await expect(bulle(page).locator('.parcours-bulle-sortie')).toHaveCount(0);
     await expect(bulle(page).locator('.parcours-bulle-boutons button')).toHaveText(["D'accord"]);
     await expect(page.locator('#parcours-contour')).toBeHidden();
@@ -407,12 +460,80 @@ test('la porte de l’accueil commence à la première étape non faite ; avant 
     const item = page.locator('#panneau-assistance [data-parcours="classe"]');
     await expect(item.locator('.assistance-parcours-etat')).toHaveText('Étape 7 sur 8');
     await item.locator('.assistance-parcours-bouton').click();
-    await attendreEtape(page, 7, 'Ton premier cours');
-    await expect(bulle(page).locator('.parcours-bulle-texte')).toHaveText(texte);
+    await attendreEtape(page, 7, 'Prendre les présences');
+    await variante();
     // Échap équivaut à « D'accord ».
     await page.keyboard.press('Escape');
     await expect(bulle(page)).toHaveCount(0);
     expect(await page.evaluate(() => Assistance.etatDe('classe'))).toEqual({ etat: 'en-cours', etape: 6 });
+});
+
+// 14 nov. 2026 (relecture de Cowork) : « Ce point à l'écart, c'est l'absence que tu viens de noter. » ne se dit que si
+// l'absence est dans le groupe-cours actif, à la séance que la personne vient de verrouiller. Une présence ne porte pas
+// son groupe, seulement son cours : avant, l'absence d'un·e étudiant·e d'un AUTRE groupe du même cours, le même jour,
+// faisait dire à la bulle un point que la bande ne montre pas.
+// Break-test (14 nov.) : le filtre par étudiant·es du groupe retiré de `absenceNotee` → ROUGE au premier temps ; la
+// séance « qui vient d'être verrouillée » remplacée par toute séance verrouillée → ROUGE au troisième.
+test('étape 8 : l’absence ne se dit que pour le groupe-cours actif, à la séance qui vient d’être verrouillée (deux groupes)', async ({ page }) => {
+    test.setTimeout(180000);
+    await ouvrirEspaceVide(page, 1180);
+    await page.evaluate(() => { window.Assistance.lancerParcours('classe'); });
+    await faireLeCadre(page, { champsALEcran: false });
+    await attendreEtape(page, 7, 'Prendre les présences', { focus: false });
+    await expect(page.locator('#date-cours')).toHaveValue('2026-11-10');
+    await page.click('#btnVerrouillerSaisiePresences');
+    await attendreEtape(page, 8, "Ta classe d'un coup d'œil", { focus: false });
+    const TOUS_LA = 'Tout le monde était là : un point s\'écartera à la première absence.';
+    const A_L_ECART = 'Ce point à l\'écart, c\'est l\'absence que tu viens de noter.';
+    const phrase = () => bulle(page).locator('.parcours-bulle-note').nth(1);
+    const rejouer = async () => {
+        await page.evaluate(() => window.ParcoursMoteur.allerA(7));
+        await attendreEtape(page, 8, "Ta classe d'un coup d'œil", { focus: false });
+    };
+    await expect(phrase()).toHaveText(TOUS_LA);
+
+    // Premier temps : un second groupe du même cours, et l'absence d'une de ses étudiant·es, le même jour.
+    const mesure = await page.evaluate(() => {
+        const etudiants = db.getSync(cle('groupeEtudiants'), []);
+        const presences = db.getSync(cle('presences'), []);
+        const autre = Object.assign({}, etudiants[0], { da: '2390009', groupe: '00002', nom: 'Dromadaire', prenom: 'Dany' });
+        if ('groupeReel' in autre) autre.groupeReel = '00002';
+        db.setSync(cle('groupeEtudiants'), etudiants.concat([autre]));
+        db.setSync(cle('presences'), presences.concat([Object.assign({}, presences[0], { da: '2390009', date: '2026-11-10', periodesPresentes: 0 })]));
+        return { duGroupe: window.obtenirEtudiantsCoursActif().map((e) => e.da).sort(), saisies: presences.map((p) => p.da + ' ' + p.date + ' ' + p.periodesPresentes).sort(),
+            memeCours: presences[0].coursId === db.getSync('groupeCoursActif', null).coursId };
+    });
+    // Le banc dit ce qu'il a monté : trois étudiant·es dans le groupe actif, la quatrième ailleurs, sous le même cours.
+    expect(mesure.duGroupe).toEqual(['2390001', '2390002', '2390003']);
+    expect(mesure.saisies).toHaveLength(3);
+    expect(mesure.memeCours, 'la présence porte le cours du groupe actif').toBe(true);
+    await rejouer();
+    await expect(phrase()).toHaveText(TOUS_LA);
+
+    // Deuxième temps : l'absence est dans SON groupe, à la séance verrouillée → la bulle la dit.
+    await page.evaluate(() => {
+        const presences = db.getSync(cle('presences'), []);
+        db.setSync(cle('presences'), presences.map((p) => (p.da === '2390001' && p.date === '2026-11-10' ? Object.assign({}, p, { periodesPresentes: 0 }) : p)));
+    });
+    await rejouer();
+    await expect(phrase()).toHaveText(A_L_ECART);
+
+    // Troisième temps : l'absence de son groupe est à une AUTRE séance, verrouillée elle aussi (le mardi d'avant) ;
+    // celle qu'elle vient de verrouiller n'en a pas → la bulle ne la dit pas.
+    const prevues = await page.evaluate(() => {
+        const presences = db.getSync(cle('presences'), []);
+        const n = presences.find((p) => p.da === '2390002' && p.date === '2026-11-10').periodesPresentes;
+        db.setSync(cle('presences'), presences.map((p) => (p.da === '2390001' && p.date === '2026-11-10'
+            ? Object.assign({}, p, { periodesPresentes: n }) : p)).concat([Object.assign({}, presences.find((p) => p.da === '2390001'), { date: '2026-11-03', periodesPresentes: 0 })]));
+        const k = Object.keys(localStorage).find((x) => x.includes('datesVerrouillees_gc_'));
+        db.setSync(k, db.getSync(k, []).concat(['2026-11-03']));
+        return { n, verrous: window.lireDatesVerrouilleesSansSemis().slice().sort(), seance: window.obtenirNombrePeriodesSeance('2026-11-03') };
+    });
+    expect(prevues.verrous).toEqual(['2026-11-03', '2026-11-10']);
+    expect(prevues.seance, 'le 3 novembre est une séance du groupe').toBeGreaterThan(0);
+    // `rejouer` repasse par la bulle 8 sans repasser par la 7 : le repère pris à l'étape 7 tient.
+    await rejouer();
+    await expect(phrase()).toHaveText(TOUS_LA);
 });
 
 // 11 nov. 2026 (Grégoire, 8 h 26) : dans une étape qui montre un formulaire, une flèche par champ obligatoire ENCORE VIDE ;
@@ -424,11 +545,10 @@ test('les formulaires du Cadre : une flèche par champ obligatoire vide, qui par
     await ouvrirPanneau(page);
     await page.click('#panneau-assistance [data-parcours="classe"] .assistance-parcours-bouton');
     await attendreEtape(page, 1, 'Ton trimestre');
-    const TRIMESTRE = ['#v2-nomTrimestre', '#v2-sessionTrimestre', '#v2-anneeTrimestre', '#v2-debutTrimestre', '#v2-finCours', '#v2-finTrimestre'];
-    await nombreDeFleches(page, 7, 'étape 1');
+    // 14 nov. 2026 : le nom du trimestre se crée seul (lecture seule, sans astérisque) : il n'a plus de flèche.
+    const TRIMESTRE = ['#v2-sessionTrimestre', '#v2-anneeTrimestre', '#v2-debutTrimestre', '#v2-finCours', '#v2-finTrimestre'];
+    await nombreDeFleches(page, 6, 'étape 1');
     for (const sel of TRIMESTRE) await flecheVers(page, sel, 'étape 1');
-    await page.fill('#v2-nomTrimestre', 'Automne 2026');
-    await nombreDeFleches(page, 6, 'étape 1, le nom rempli');
     await page.selectOption('#v2-sessionTrimestre', 'automne');
     await page.fill('#v2-anneeTrimestre', '2026');
     await nombreDeFleches(page, 4, 'étape 1, il reste les trois dates');
@@ -456,21 +576,48 @@ test('les formulaires du Cadre : une flèche par champ obligatoire vide, qui par
 
     // La classe : les deux façons, chacune sa flèche.
     await attendreEtape(page, 4, 'Ta classe');
-    await nombreDeFleches(page, 3, 'étape 4');
     await flecheVers(page, '#v2-donneesCollees', 'étape 4');
-    await flecheVers(page, '#v2-fichierCsvEntree', 'étape 4');
+    await bulleNeCouvrePas(page, '#v2-donneesCollees', 'étape 4');
     await bulleNeCouvrePas(page, '#v2-fichierCsvEntree', 'étape 4');
+    // ⚠ 14 nov. 2026, MESURÉ ET LAISSÉ : à 1180 × 820, la page est au bout de son défilement et la bulle en lignes
+    // (392 px) ne tient qu'au-dessus des deux champs, à 8 px du champ « Fichier ». Le moteur ne trace pas une flèche de
+    // moins de 24 px (FLECHE_MIN) : « Fichier » a alors la bulle collée au-dessus de lui, sans flèche. Deux flèches (la
+    // zone de collage, « Prévisualiser ») ou trois, selon la place. Dit au rapport ; à voir sur l'iPad.
+    expect((await etatFleches(page)).fleches.length, 'étape 4 : la zone de collage et « Prévisualiser », au moins').toBeGreaterThanOrEqual(2);
+    // Vécu le 14 nov. : un fichier choisi, les flèches vers la zone de collage et vers le fichier restaient. Elles
+    // partent toutes deux dès qu'une des deux voies est prise ; la ligne se grise, les trois lignes du format non.
+    const lignes4 = () => bulle(page).locator('.parcours-bulle-ligne').evaluateAll((ls) => ls.map((l) => l.classList.contains('est-faite')));
+    expect(await lignes4()).toEqual([false, false, false, false, false, false]);
+    await page.fill('#v2-donneesCollees', ELEVES);
+    await nombreDeFleches(page, 1, 'étape 4, la liste collée : il ne reste que « Prévisualiser »');
+    await expect.poll(lignes4).toEqual([true, false, false, false, false, false]);
+    await page.click('#accordeon-groupe-etudiants [data-action="previsualiserDonneesV2"]');
+    await expect.poll(lignes4, { message: 'l\'aperçu affiché : « Vérifie l\'aperçu » se grise' }).toEqual([true, false, false, false, true, false]);
+    await contourSur(page, '#v2-btnConfirmerImport');
+    await expect(page.locator('#v2-btnConfirmerImport')).toHaveText(/^Importer 3 étudiant/);
     await page.fill('#v2-donneesCollees', ELEVES);
     await page.click('#accordeon-groupe-etudiants [data-action="previsualiserDonneesV2"]');
     await page.click('#v2-btnConfirmerImport');
 
     // L'horaire : le nom (au second essai, désigné par rien) et les périodes de chaque séance.
     await attendreEtape(page, 5, 'Ton horaire');
-    for (const sel of ['#v2-hor-nom', '#v2-hor-seance-0-periodes', '#v2-hor-seance-1-periodes']) await flecheVers(page, sel, 'étape 5');
+    // 14 nov. 2026 (lot 1c) : les périodes naissent proposées d'après les heures ; plus de flèche vers elles.
+    for (const sel of ['#v2-hor-nom']) await flecheVers(page, sel, 'étape 5');
     await remplirHoraire(page);
     await attendreEtape(page, 6, 'Ton groupe-cours');
+    // 14 nov. 2026 (décision de Grégoire : « il faut faire le geste pour apprendre ») : rien n'est présélectionné dans
+    // les quatre listes ; chacune a sa flèche, sa ligne se grise quand on y choisit, et rien n'a été écrit.
+    const QUATRE = ['v2-gc-cours', 'v2-gc-groupe', 'v2-gc-horaire', 'v2-gc-enseignant'];
+    expect(await page.evaluate((ids) => ids.map((i) => document.getElementById(i).value), QUATRE)).toEqual(['', '', '', '']);
+    expect(await page.evaluate(() => (db.getSync('groupesCours', []) || []).length)).toBe(0);
+    for (const id of QUATRE) await flecheVers(page, '#' + id, 'étape 6');
+    const lignes6 = () => bulle(page).locator('.parcours-bulle-ligne').evaluateAll((ls) => ls.map((l) => l.classList.contains('est-faite')));
+    expect(await lignes6()).toEqual([false, false, false, false, false]);
+    const premier = await page.evaluate(() => [...document.querySelectorAll('#v2-gc-cours option')].map((o) => o.value).find(Boolean));
+    await page.selectOption('#v2-gc-cours', premier);
+    await expect.poll(lignes6, { message: '« ton cours » se grise' }).toEqual([true, false, false, false, false]);
     await remplirGroupeCours(page);
-    await attendreEtape(page, 7, 'Ton premier cours');
+    await attendreEtape(page, 7, 'Prendre les présences');
 });
 
 test('une flèche didactique ouverte avant le parcours se retire au lancement, sans être marquée vue, même si l’on clique sa cible', async ({ page }) => {
@@ -505,7 +652,7 @@ test('captures de l’iPhone (390 px) : les étapes 1, 7 et 8', async ({ page })
     await capture(page, 'classe-1-390-sombre');
     // Sur l'iPhone, un formulaire du Cadre est plus haut que l'écran : on le fait défiler (rapport).
     await faireLeCadre(page, { champsALEcran: false });
-    await attendreEtape(page, 7, 'Ton premier cours');
+    await attendreEtape(page, 7, 'Prendre les présences');
     await expect(page.locator('#date-cours')).toHaveValue('2026-11-10');
     await capture(page, 'classe-7-390-sombre');
     await page.click('#btnVerrouillerSaisiePresences');

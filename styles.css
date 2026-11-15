@@ -4535,6 +4535,15 @@ p.apercu-algo-si { margin: 0; display: flex; flex-wrap: wrap; align-items: basel
     box-shadow: var(--focus-ring), 0 0 0 3px rgba(106, 172, 184, 0.2);
 }
 
+/* 14 nov. 2026 — un champ que l'application remplit seule (le nom du trimestre) : il se lit,
+   il ne se saisit pas. Bordure en tirets et fond de la page : il ne ressemble pas à une case à remplir. Ce champ
+   seulement : d'autres champs en lecture seule (la fiche d'une production) gardent leur dessin. */
+#v2-nomTrimestre[readonly] {
+    background: transparent;
+    border-style: dashed;
+    cursor: default;
+}
+
 /* Style de base pour TOUS les textarea - fix texte invisible */
 textarea {
     color: var(--texte-principal, #d0e0e4);
@@ -14763,7 +14772,7 @@ label:has(+ textarea:disabled) {
 /* Grille 3 colonnes pour identification trimestre */
 .grille-identification {
     display: grid;
-    grid-template-columns: 2fr 1fr 1fr;
+    grid-template-columns: 1fr 1fr 2fr;
     gap: 15px;
     align-items: end;
 }
@@ -19176,7 +19185,10 @@ tr.ligne-import-ecartee td {
    On utilise plutot des colonnes scrollables independantes. */
 .pipeline-3col-grid {
     display: grid;
-    grid-template-columns: 250px 1fr 250px;
+    /* 15 nov. 2026 : « Originaux » passe de 250 à 300 px. Entre la case, le numéro, les chevrons,
+       la vignette et la corbeille, il restait 72 px aux mots : la définition d'un PDF s'y cassait
+       sur cinq lignes (Grégoire, iPad couché). */
+    grid-template-columns: 300px 1fr 250px;
     gap: 16px;
     margin-top: 12px;
 }
@@ -19612,6 +19624,12 @@ tr.ligne-import-ecartee td {
 .pipeline-meta-taille {
     font-size: 0.7rem;
     color: var(--texte-secondaire);
+}
+
+/* Une ligne de mots par rangée, d'un seul tenant : « PDF, 4 pages », « min. 1632 x 3042 px ». */
+.pipeline-meta-ligne {
+    display: block;
+    white-space: nowrap;
 }
 
 @media (max-width: 850px) {
@@ -27715,6 +27733,22 @@ body.mode-clair {
     font-size: 0.78rem;
     color: var(--texte-secondaire);
 }
+/* 15 nov. 2026 : la définition de chaque page, en pixels, dans les Propriétés. */
+.prop-fichier-definition {
+    margin: 0 0 12px 0;
+    font-size: 0.85em;
+    color: var(--texte-secondaire);
+}
+.prop-fichier-definition-titre { display: block; }
+.prop-fichier-definition ul {
+    margin: 4px 0 0 0;
+    padding: 0;
+    list-style: none;
+    max-height: 7.5em;
+    overflow-y: auto;
+    color: var(--texte-principal);
+    font-variant-numeric: tabular-nums;
+}
 .prop-fichier-jeton {
     display: flex;
     align-items: flex-start;
@@ -29955,7 +29989,18 @@ body.mode-clair {
 /* Lot « La carte d'aide dans Apporter mon matériel » (13 nov. 2026) : les trois cartes de l'accueil sont dans la carte
    (js/materiel-aide.js). L'interrupteur qui l'offre : une case à cocher (role="switch") sous une piste dessinée ; la
    rangée entière se touche (44 px), le focus se voit sur la piste. Couleurs : variables seulement, clair comme sombre. */
-.materiel-aide-interrupteur { margin: 0 0 16px; }
+/* Sa place (Grégoire, 13 nov. 2026, 10 h 00) : après le paragraphe, à droite ; même règle sous l'en-tête de l'étiquetage
+   (js/materiel-aide.js, `placer`). Les marges négatives reprennent une part de l'écart de la colonne : la zone de collage
+   et la grille ne descendent que d'une trentaine de pixels. */
+.materiel-aide-interrupteur { display: flex; justify-content: flex-end; margin: 0; }
+/* À l'accueil, à droite DU PARAGRAPHE (sa colonne de 780 px), pas de la page. Écran large (iPad couché) : la carte se
+   pose en haut à droite, 380 px de large à 8 px du bord (css/parcours.css) ; l'interrupteur s'arrête avant elle, carte
+   ouverte ou non : il ne saute pas quand on le touche (mesuré le 13 nov. à 1180 × 820 : il passait dessous). */
+.materiel-accueil > .materiel-aide-interrupteur { margin: -12px 0; max-width: 780px; }
+@media (min-width: 1000px) {
+    .materiel-accueil > .materiel-aide-interrupteur { max-width: min(780px, calc(100% - 396px)); }
+}
+.dissection > .materiel-aide-interrupteur { margin: -4px 0; }
 .interrupteur { display: inline-flex; align-items: center; gap: 12px; min-height: 44px; cursor: pointer; position: relative; -webkit-user-select: none; user-select: none; }
 .interrupteur-case { position: absolute; opacity: 0; width: 52px; height: 44px; margin: 0; left: 0; top: 50%; transform: translateY(-50%); cursor: pointer; }
 .interrupteur-piste {
@@ -30098,6 +30143,9 @@ body.mode-clair {
     --dis-c-description: #6cc3cc; --dis-h-description: rgba(108, 195, 204, .16);
     --dis-c-section: #9da2f0;     --dis-h-section: rgba(157, 162, 240, .18);
     --dis-c-total: #c79ae6;       --dis-h-total: rgba(199, 154, 230, .18);
+    /* Variable NEUVE (13 nov. 2026), raison : « Sous-total » et « Total » se posent côte à côte sur la même grille,
+       et le lot existe pour qu'on les distingue ; aucun des douze surligneurs n'est libre sur une grille. */
+    --dis-c-soustotal: #e58fe0;   --dis-h-soustotal: rgba(229, 143, 224, .18);
     --dis-c-critere: #f2cf3a;     --dis-h-critere: rgba(242, 207, 58, .26);
     --dis-c-souscritere: #f0a35a; --dis-h-souscritere: rgba(240, 163, 90, .22);
     --dis-c-ponderation: #ff8a50; --dis-h-ponderation: rgba(255, 138, 80, .22);
@@ -30115,6 +30163,7 @@ body.mode-clair {
     --dis-c-description: #2f7680; --dis-h-description: rgba(47, 118, 128, .16);
     --dis-c-section: #4a4fb3;     --dis-h-section: rgba(74, 79, 179, .17);
     --dis-c-total: #7b3fa0;       --dis-h-total: rgba(123, 63, 160, .17);
+    --dis-c-soustotal: #a3239c;   --dis-h-soustotal: rgba(200, 60, 190, .17);
     --dis-c-critere: #8a6700;     --dis-h-critere: rgba(255, 214, 0, .48);
     --dis-c-souscritere: #a85a14; --dis-h-souscritere: rgba(255, 168, 60, .30);
     --dis-c-ponderation: #c2410c; --dis-h-ponderation: rgba(234, 88, 12, .24);
@@ -30128,6 +30177,7 @@ body.mode-clair {
 .dis-t-titre { --dis-c: var(--dis-c-titre); --dis-h: var(--dis-h-titre); }
 .dis-t-description { --dis-c: var(--dis-c-description); --dis-h: var(--dis-h-description); }
 .dis-t-section { --dis-c: var(--dis-c-section); --dis-h: var(--dis-h-section); }
+.dis-t-soustotal { --dis-c: var(--dis-c-soustotal); --dis-h: var(--dis-h-soustotal); }
 .dis-t-total { --dis-c: var(--dis-c-total); --dis-h: var(--dis-h-total); }
 .dis-t-critere { --dis-c: var(--dis-c-critere); --dis-h: var(--dis-h-critere); }
 .dis-t-souscritere { --dis-c: var(--dis-c-souscritere); --dis-h: var(--dis-h-souscritere); }

@@ -15,6 +15,7 @@
 // js/parcours-evaluer.js → ROUGE (étape 5), rétabli → vert.
 
 import { describe, it, expect } from 'vitest';
+import { tranche } from './_helpers/tranche.js';
 import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -42,7 +43,10 @@ function titreDeLaConsigne(n) {
 const CORRECTIONS = [
     // Le 11 nov., 8 h 38 (second essai sur l'iPad) : la longueur de la dissection, dite d'avance.
     [1, "C'est ainsi qu'elle pourra lire tes évaluations, puis nommer le critère où un·e étudiant·e bute.",
-        "C'est ainsi qu'elle pourra lire tes évaluations, puis nommer le critère où un·e étudiant·e bute. C'est souvent long, parce que chaque grille est construite à sa façon et que l'application ne peut pas deviner le rôle de chaque morceau. Mais tu ne le fais qu'une fois : ta grille servira ensuite à chaque copie que tu évalueras avec elle."],
+        "C'est ainsi qu'elle pourra lire tes évaluations, puis nommer le critère où un·e étudiant·e bute. C'est souvent long, parce que chaque grille est construite à sa façon et que l'application ne peut pas deviner le rôle de chaque partie. Mais tu ne le fais qu'une fois : ta grille servira ensuite à chaque copie que tu évalueras avec elle."],
+    // Le 14 nov. (essai novice, lot 4a) : « partie » remplace « morceau » dans tous les textes de l'étiquetage.
+    [1, 'ce que veut dire chaque morceau (un critère, un niveau, des points)', 'ce que veut dire chaque partie (un critère, un niveau, des points)'],
+    // (La phrase « … le rôle de chaque partie. » vient de la correction du 11 nov., plus bas : elle y est écrite ainsi.)
     // Le 11 nov., 8 h 58 (relais du 12 nov., point 6) : « Composer ma grille » remplace « Partir de zéro ».
     [1, 'Pas de grille sous la main ? Touche « Partir de zéro ».', 'Pas de grille sous la main ? Touche « Composer ma grille ».'],
     // Le 9 nov., 13 h 37 (question 2 du rapport) : l'échelle associée avec la grille.
@@ -127,10 +131,65 @@ describe('« Évaluer une première production » : les neuf bulles, mot pour mo
         expect(etapes[8].sansSortie).toBe(true);
         expect(etapes[6].boutons.map((b) => b.libelle)).toEqual(['Continuer']);
         expect(etapes[8].boutons.map((b) => b.libelle)).toEqual(['Terminer']);
-        // Lot de la dissection sur l'iPad (12 nov.) : l'étape 1 porte « Prendre une grille déjà créée » (point 7).
-        expect(etapes.filter((e) => e.boutons).length).toBe(3);
-        expect(etapes[0].boutons.map((b) => b.libelle)).toEqual(['Prendre une grille déjà créée']);
+        // 14 nov. 2026 (essai novice, règle 5 : « la bulle guide, la page agit ») : devant sa grille, l'étape 1 ne porte
+        // plus aucun bouton (« Prendre une grille déjà créée » et les trois de l'exemple sont partis).
+        expect(etapes.filter((e) => e.boutons).length).toBe(2);
+        expect(etapes[0].boutons).toBeFalsy();
+        const source = lire('js/parcours-evaluer.js');
+        expect(source).not.toMatch(/libelle:\s*["'](?:Prendre une grille déjà créée|Voir le travail complet|Faire l'exercice soi-même|Passer à ma grille)/);
         expect(lire('js/parcours-evaluer.js')).toContain("lienSortie: 'Plus tard'");
+    });
+
+    // ESSAI NOVICE DU 14 NOV. 2026, LOT 4 (b à e) — les bulles en lignes de l'étape 1, contre
+    // plans de travail/CONSIGNE-2026-11-14-essai-novice.md : la ligne ENTIÈRE, pas un morceau d'elle.
+    describe('étape 1 · les bulles en lignes du 14 nov. 2026 (ouverture, accueil, devant l’exemple)', () => {
+        const source = lire('js/parcours-evaluer.js');
+        const LOT_4 = tranche(lire('plans de travail/CONSIGNE-2026-11-14-essai-novice.md'), '## Lot 4 :', '## Lot 5 :');
+        const lignesDeLaConsigne = LOT_4.split('\n').map((l) => l.replace(/^\s*-\s+/, '').trim());
+        const bloc = tranche(source, 'var LIGNES_1 = {', 'function texteEtape1()');
+        const facons = Object.fromEntries([...bloc.matchAll(/\n {8}(?:'([\w-]+)'|(\w+)): \[\n([\s\S]*?)\n {8}\]/g)]
+            .map((m) => [m[1] || m[2], [...m[3].matchAll(/(?:texte:\s*|note\(|consigne\()"((?:[^"\\]|\\.)*)"/g)].map((x) => x[1])]));
+        // Ce que la session a écrit, faute de mots dans la consigne (à valider par Grégoire).
+        const ECRITS = ['Colle ici la grille que tu utilises déjà (copie le tableau entier, depuis Word ou Pages)',
+            'Pas de grille sous la main ? Ces deux boutons ouvrent un exemple', 'Colle ta grille, ou touche un des deux boutons'];
+
+        it('cinq façons en lignes : pourquoi, apprends, accueil, exemple-haut, exemple-bas', () => {
+            expect(Object.keys(facons)).toEqual(['pourquoi', 'apprends', 'accueil', 'exemple-haut', 'exemple-bas']);
+            expect(Object.values(facons).map((l) => l.length)).toEqual([2, 2, 3, 3, 3]);
+        });
+
+        it.each(['pourquoi', 'apprends', 'exemple-haut', 'exemple-bas'])('« %s » : chaque ligne est une ligne de la consigne', (facon) => {
+            for (const t of facons[facon]) expect(lignesDeLaConsigne, t).toContain(t);
+        });
+
+        it('l’accueil : trois lignes écrites par la session, nommées ici, absentes de la consigne', () => {
+            expect(facons.accueil).toEqual(ECRITS);
+            for (const t of ECRITS) expect(lignesDeLaConsigne).not.toContain(t);
+        });
+
+        it('les titres : « Pourquoi étiqueter », « Tu apprends aussi », « L’exemple étiqueté », « La grille, comprise par l’application »', () => {
+            for (const t of ['Pourquoi étiqueter', 'Tu apprends aussi', "L'exemple étiqueté", "La grille, comprise par l'application"]) {
+                expect(tranche(source, 'var TITRES_1 = {', 'var LIGNES_1 = {'), t).toContain(t);
+                expect(LOT_4, t).toContain(t);
+            }
+        });
+
+        it('les deux boutons de la page portent les noms validés ; « partie », « section », « groupe de critères »', () => {
+            const index = lire('index.html');
+            expect(index).toContain('data-param="complet">Voir un exemple de grille étiquetée</button>');
+            expect(index).toContain('data-param="exercice">Étiqueter l’exemple moi-même</button>');
+            const lecture = lire('js/materiel-dissection-lecture.js');
+            expect(lecture).toContain("nom: 'Sous-total', aide: 'Le total d’un groupe de critères'");
+            expect(lecture).toContain("rangeeSection('SECTION A : COMPRÉHENSION')");
+            expect(lecture).toContain('/^SECTION /.test(');
+            expect(lire('js/materiel-dissection.js')).toContain("choixNiveaux: 'des niveaux de performance'");
+        });
+
+        it('la page ne dit qu’une fois que l’exemple ne s’enregistre pas', () => {
+            const textes = tranche(lire('js/materiel-dissection.js'), 'var TEXTES_EXEMPLE = {', '};');
+            expect(textes).not.toContain('Il ne s’enregistre pas');
+            expect((textes.match(/il ne devient pas une de tes grilles/g) || []).length).toBe(1);
+        });
     });
 
     it('« Composer ma grille » remplace « Partir de zéro » (11 nov., 8 h 58), qui remplaçait « Taper ma grille à la main » (8 nov.)', () => {

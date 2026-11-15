@@ -51,6 +51,9 @@
         { k: 'titre', nom: 'Titre', aide: 'Le nom de ta grille', groupe: 'La grille' },
         { k: 'description', nom: 'Description', aide: 'Une phrase qui présente la grille ou un critère', groupe: 'La grille' },
         { k: 'section', nom: 'Section', aide: 'Un regroupement de critères', groupe: 'La grille' },
+        // Lot « étiquette Sous-total » (13 nov. 2026) : une étiquette ne suffisait pas à dire lequel est un sous-total et
+        // lequel est le total. Nom et aide : textes de la consigne du lot, proposés à Grégoire tels quels.
+        { k: 'soustotal', nom: 'Sous-total', aide: 'Le total d’un groupe de critères', groupe: 'La grille' },
         { k: 'total', nom: 'Total', aide: 'La ligne du total', groupe: 'La grille' },
         { k: 'critere', nom: 'Critère', aide: 'Ce que tu évalues', precision: 'Ce qui est attendu : la question que tu te poses devant la copie', groupe: 'Les critères' },
         { k: 'souscritere', nom: 'Élément observable', aide: 'Un sous-critère', precision: 'Ce que tu regardes dans toutes les copies pour juger du critère', groupe: 'Les critères' },
@@ -65,7 +68,7 @@
         { k: 'nomcode', nom: 'Nom du code', aide: 'Ce que le code désigne', groupe: 'Les codes' },
         { k: 'poids', nom: 'Poids', aide: 'Ce que pèse un code posé', precision: 'Un nombre plus grand que 0 ; sans poids, le code pèse 1. Il devient la pondération de son sous-critère.', groupe: 'Les codes' },
         { k: 'commentaire', nom: 'Commentaire', aide: 'Ce que l’étudiant·e lit pour ce code', precision: 'Il passe tel quel dans la rétroaction', groupe: 'Les codes' },
-        { k: 'suite', nom: 'Suite', aide: 'La fin d’un morceau coupé en deux par la mise en page', groupe: 'Le reste' },
+        { k: 'suite', nom: 'Suite', aide: 'La fin d’une partie coupée en deux par la mise en page', groupe: 'Le reste' },
         { k: 'ignorer', nom: 'À ignorer', aide: 'Un symbole, une décoration', groupe: 'Le reste' }
     ];
     var TYPE = {};
@@ -201,9 +204,9 @@
      * pas des étiquettes. Ils ne surlignent rien et ne comptent rien. Nom et aide : validé G. 18 oct. 13 h 48.
      */
     D.OUTILS = [
-        { k: 'couper', nom: 'Couper', aide: 'Sépare un morceau en deux, là où tu touches', groupe: 'Le reste', apres: 'suite' },
+        { k: 'couper', nom: 'Couper', aide: 'Sépare une partie en deux, là où tu touches', groupe: 'Le reste', apres: 'suite' },
         // Lot 7 : nom et aide validés par Grégoire (18 oct., 16 h 44).
-        { k: 'rattacher', nom: 'Rattacher', aide: 'Joint un morceau à celui dont il est la suite', groupe: 'Le reste', apres: 'couper' }
+        { k: 'rattacher', nom: 'Rattacher', aide: 'Joint une partie à celle dont elle est la suite', groupe: 'Le reste', apres: 'couper' }
     ];
     var OUTIL = {};
     D.OUTILS.forEach(function (o) { OUTIL[o.k] = o; });
@@ -524,7 +527,8 @@
     function idxNiveau(x, p) { for (var c = p.c; c < p.c + p.cs; c++) if (c in x.nivIdx) return x.nivIdx[c]; return null; }
 
     function nouveauCritere(x, nom, auto) {
-        var c = { nom: nom, auto: !!auto, section: x.section, desc: [], sous: [], pond: null, niv: {}, reponses: [], nDesc: 0, dernierNiv: null };
+        // `tranche` : le rang du « Sous-total » qui fermera ce critère (celui qui n'est pas encore lu).
+        var c = { nom: nom, auto: !!auto, section: x.section, tranche: x.R.sousTotaux.length, desc: [], sous: [], pond: null, niv: {}, reponses: [], nDesc: 0, dernierNiv: null };
         x.R.criteres.push(c); x.enCours = c; return c;
     }
 
@@ -557,6 +561,16 @@
             x.R.total = tx; var n = nombres(tx);
             if (n.length) x.R.totaux.push(n[n.length - 1]);
             x.R.totalNb = totalVise(x.R.totaux);
+        },
+        // Lot « étiquette Sous-total » (13 nov. 2026) : un « Sous-total » ferme la TRANCHE des critères lus depuis le
+        // « Sous-total » précédent (ou depuis le début), pas depuis la « Section » : une section peut tenir deux
+        // tableaux et deux sous-totaux. Il ferme aussi le critère en cours : ce qui suit n'est plus à lui. Il n'entre
+        // pas dans `R.totaux` : la règle #1106 ne lit que les « Total », comme avant.
+        soustotal: function (x, id, tx) {
+            var n = nombres(tx);
+            if (!n.length) { sansPlace(x, id, tx, 'soustotal', 'aucun nombre'); return; }
+            x.R.sousTotaux.push({ t: tx, id: id, ecrit: n[n.length - 1], somme: 0, ok: null });
+            x.enCours = null;
         },
         critere: function (x, id, tx) {
             var nc = nouveauCritere(x, tx, false);
@@ -685,7 +699,7 @@
 
     function lireMorceau(x, id, t, tx) {
         if (t === 'ignorer' || t === 'niveau') return;
-        if (t === 'suite') { if (x.suite) x.suite(tx); else sansPlace(x, id, tx, t, 'aucun morceau à compléter avant elle'); return; }
+        if (t === 'suite') { if (x.suite) x.suite(tx); else sansPlace(x, id, tx, t, 'aucune partie à compléter avant elle'); return; }
         // Lot 2a (trouvaille 1 du lot 1, tranchée par Cowork) : une « Suite » complète le dernier TEXTE
         // lu ; des points, une pondération et un poids sont des nombres, pas du texte à continuer.
         if (['points', 'ponderation', 'poids'].indexOf(t) < 0) x.suite = null;
@@ -707,7 +721,7 @@
             c.reponses.forEach(function (rep) {
                 var mx = rep.pts.length ? Math.max.apply(null, rep.pts.map(function (p) { return p[1]; })) : null;
                 if (!groupe || (mx != null && prec != null && mx >= prec)) {
-                    groupe = { nom: null, auto: true, section: c.section, desc: [], sous: [], pond: null, niv: {}, reponses: [] };
+                    groupe = { nom: null, auto: true, section: c.section, tranche: c.tranche, desc: [], sous: [], pond: null, niv: {}, reponses: [] };
                     final.push(groupe); prec = null;
                 }
                 groupe.reponses.push(rep);
@@ -732,6 +746,21 @@
     }
 
     /**
+     * Lot « étiquette Sous-total » (13 nov. 2026) : chaque tranche reçoit la somme des pondérations de ses critères
+     * (lues, ou tirées des points) et son verdict. `ok` reste `null` quand aucun de ses critères n'a de poids : rien
+     * à comparer, comme `totalOk` dans `D.bilan`. Les critères lus après le dernier « Sous-total » n'ont pas de tranche.
+     */
+    function fermerTranches(R) {
+        var pese = {};
+        R.criteres.forEach(function (c) {
+            var st = R.sousTotaux[c.tranche], p = c.pond != null ? c.pond : c.pondDeduite;
+            if (!st || p == null) return;
+            st.somme += p; pese[c.tranche] = true;
+        });
+        R.sousTotaux.forEach(function (st, i) { st.ok = pese[i] ? Math.abs(st.somme - st.ecrit) < 1e-9 : null; });
+    }
+
+    /**
      * La grille comprise. Dans un tableau, c'est la PLACE d'un morceau qui dit à quel critère et
      * à quel niveau il appartient (la rangée d'un critère, la colonne d'un niveau) ; dans un
      * texte brut, c'est son ORDRE.
@@ -742,14 +771,14 @@
      * @param {object} doc - le document disséqué
      * @param {Object<string, string>} liens - { idDuMorceau: type }
      * @param {Object<string, string>} [rattachements] - lot 7 : { idMembre: idTete } (lot 12)
-     * @returns {object} R : titre, description, criteres, niveaux, total, totalNb, sansEtiquette,
+     * @returns {object} R : titre, description, criteres, niveaux, total, totalNb, sousTotaux [{ t, id, ecrit, somme, ok }], sansEtiquette,
      *   sansPlace [{ t, type, raison }], nb { type: compte }, aNommer, avecNiveaux, aPoints
      */
     D.comprendre = function (doc, liens, rattachements) {
         var M = D.morceauxLus(doc, rattachements);
         liens = liens || {};
         function typeDe(id) { var t = liens[id]; return TYPE[t] ? t : null; }
-        var R = { titre: [], description: [], criteres: [], niveaux: [], codes: [], total: null, totalNb: null, totaux: [], sansEtiquette: 0, sansPlace: [], nb: {} };
+        var R = { titre: [], description: [], criteres: [], niveaux: [], codes: [], total: null, totalNb: null, totaux: [], sousTotaux: [], sansEtiquette: 0, sansPlace: [], nb: {} };
         var x = { R: R, table: !!doc && doc.mode === 'table', pos: M.pos, nivIdx: {}, avecNiveaux: false, section: null, enCours: null, parRangee: {}, suite: null,
             codeEnCours: null, codeParRangee: {} };
         lireNiveaux(x, M.ordre, M.texte, typeDe);
@@ -761,6 +790,7 @@
         });
         R.criteres = couperSansNom(R.criteres);
         numeroterEtDeduire(R);
+        fermerTranches(R);
         R.avecNiveaux = x.avecNiveaux;
         // Lot 5 : sans niveaux, des pondérations suffisent à une grille en points : chaque critère est noté
         // sur sa pondération, telle qu'écrite (aucune conversion). Lot 9 : il suffit qu'UN critère en ait une ;
@@ -769,6 +799,25 @@
         R.aPoints = (R.nb.points || 0) > 0 || pondsLues;
         return R;
     };
+
+    /**
+     * Le total visé d'un bilan. #1106 — plusieurs « Total » restent ambigus (sous-totaux, total courant, total répété) :
+     * quand la somme des pondérations tombe sur le dernier, c'est lui le total visé.
+     * Lot « étiquette Sous-total » (13 nov. 2026) : les « Sous-total » ne s'additionnent jamais aux « Total ». Le total
+     * visé est le « Total » étiqueté ; sans lui, la somme des sous-totaux. Sans « Sous-total », rien ne change.
+     * Relecture de la fusion (13 nov. 2026, soir) : cette somme n'est un total que si les sous-totaux couvrent TOUS les
+     * critères qui pèsent. Un critère lu après le dernier « Sous-total » (une partie sans sous-total, ou des sous-totaux
+     * qu'on étiquette un à un) et la pastille disait « ton total : 18 : écart » à qui n'avait étiqueté aucun total.
+     */
+    function horsTranche(R) {
+        return R.criteres.some(function (c) { return !R.sousTotaux[c.tranche] && (c.pond != null || c.pondDeduite != null); });
+    }
+    function totalDuBilan(R, somme, aDesPoids) {
+        var totaux = R.totaux || [], sousTotaux = R.sousTotaux || [];
+        if (aDesPoids && totaux.length > 1 && Math.abs(somme - totaux[totaux.length - 1]) < 1e-9) return totaux[totaux.length - 1];
+        if (R.totalNb == null && sousTotaux.length && !horsTranche(R)) return sousTotaux.reduce(function (a, st) { return a + st.ecrit; }, 0);
+        return R.totalNb;
+    }
 
     /**
      * Le bilan d'une grille comprise : la somme des pondérations (lues, ou tirées des points),
@@ -782,18 +831,15 @@
             if (p != null) { somme += p; aDesPoids = true; }
         });
         var logique = R.avecNiveaux && R.aPoints ? 'deux' : (R.aPoints ? 'points' : (R.avecNiveaux ? 'niveaux' : null));
-        // #1106 — plusieurs « Total » restent ambigus (sous-totaux, total courant, total répété) :
-        // quand la somme des pondérations tombe sur le dernier, c'est lui le total visé.
-        var totalNb = R.totalNb;
-        var totaux = R.totaux || [];
-        if (aDesPoids && totaux.length > 1 && Math.abs(somme - totaux[totaux.length - 1]) < 1e-9) totalNb = totaux[totaux.length - 1];
+        var totalNb = totalDuBilan(R, somme, aDesPoids), sousTotaux = R.sousTotaux || [];
         return {
             somme: somme,
             aDesPoids: aDesPoids,
             total: totalNb,
             jusqua: totalNb != null ? totalNb : (aDesPoids ? somme : null),
             totalOk: aDesPoids && totalNb != null ? Math.abs(somme - totalNb) < 1e-9 : null,
-            logique: logique
+            logique: logique,
+            sousTotaux: sousTotaux
         };
     };
 
@@ -1076,7 +1122,7 @@
         // C3 : un nom vide (ni Titre étiqueté, ni nom tapé) ; la raison remplace celle du Titre.
         var sansNom = !m.nom.valeur;
         if (sansNom) manque('un nom pour ta grille', 'nom');
-        if (R.sansPlace.length) manque(compte(R.sansPlace.length, 'une place pour le morceau étiqueté listé plus bas', 'une place pour les # morceaux étiquetés listés plus bas'), 'sansPlace', { morceau: R.sansPlace[0] });
+        if (R.sansPlace.length) manque(compte(R.sansPlace.length, 'une place pour la partie étiquetée listée plus bas', 'une place pour les # parties étiquetées listées plus bas'), 'sansPlace', { morceau: R.sansPlace[0] });
         if (!b.logique) manque('des points ou des niveaux : pose l’étiquette « Points » sur ce que vaut chaque réponse, ou l’étiquette « Niveau » sur le nom de chaque niveau', 'logique');
         m.criteres.forEach(function (c) {
             if (!c.parCle) return;
@@ -1124,7 +1170,7 @@
     // Le code vit dans un identifiant posé sur la copie (`errfr_<code>`) : la règle de `codes-annotation.js`.
     var CODE_VALIDE = /^[A-Za-z0-9_-]{1,20}$/;
     // Les étiquettes d'une grille : avec des codes, elles n'auraient nulle part où aller.
-    var DE_GRILLE = ['titre', 'description', 'section', 'total', 'critere', 'souscritere', 'ponderation', 'descripteur', 'points', 'niveau'];
+    var DE_GRILLE = ['titre', 'description', 'section', 'soustotal', 'total', 'critere', 'souscritere', 'ponderation', 'descripteur', 'points', 'niveau'];
 
     /** La dissection porte-t-elle une liste de codes (au moins un morceau étiqueté du groupe « Les codes ») ? */
     D.estListeDeCodes = function (R) {
@@ -1164,7 +1210,7 @@
         if (noms.length) manque('des noms plus courts (' + D.MAX_NOM_CODE + ' caractères au plus) pour ' + nommer(noms));
         var longs = codes.filter(function (c) { return c.commentaire.length > D.MAX_COMMENTAIRE; }).map(function (c) { return c.code; });
         if (longs.length) manque('des commentaires plus courts (5 000 caractères au plus) pour ' + nommer(longs));
-        if (R.sansPlace.length) manque(compte(R.sansPlace.length, 'une place pour le morceau étiqueté listé plus bas', 'une place pour les # morceaux étiquetés listés plus bas'), 'sansPlace', { morceau: R.sansPlace[0] });
+        if (R.sansPlace.length) manque(compte(R.sansPlace.length, 'une place pour la partie étiquetée listée plus bas', 'une place pour les # parties étiquetées listées plus bas'), 'sansPlace', { morceau: R.sansPlace[0] });
         return { codes: codes, raisons: raisons, manques: manques };
     };
 
@@ -1404,7 +1450,7 @@
         if (!doc || doc.mode !== 'table') return liens;
         var der = doc.rows.length - 1;
         doc.rows.forEach(function (row, r) {
-            var section = /^PARTIE /.test(propre(row[0].lines[0].t));
+            var section = /^SECTION /.test(propre(row[0].lines[0].t));
             row.forEach(function (cell, j) {
                 cell.lines.forEach(function (L, k) {
                     var t;
@@ -1437,12 +1483,12 @@
         }
         return { mode: 'table', rows: [
             [cell(['Journal de lecture']), cell(['Rendre compte d’une lecture personnelle et la relier aux notions vues en classe.'], 4)],
-            rangeeSection('PARTIE A : COMPRÉHENSION'),
+            rangeeSection('SECTION A : COMPRÉHENSION'),
             rangeeCritere('L’étudiant·e résume l’œuvre avec justesse', ['Repérage des événements principaux', 'Exactitude des faits rapportés'],
                 [['Résumé absent ou erroné'], ['Résume quelques événements', '2'], ['Résume l’essentiel', '3-4'], ['Résume avec précision et concision', '5']]),
             rangeeCritere('L’étudiant·e relève des procédés d’écriture', ['Procédés nommés correctement', 'Exemples tirés du texte'],
                 [['Aucun procédé relevé'], ['Relève un procédé', '3'], ['Relève quelques procédés', '4'], ['Relève et illustre plusieurs procédés', '5']]),
-            rangeeSection('PARTIE B : RÉFLEXION'),
+            rangeeSection('SECTION B : RÉFLEXION'),
             rangeeCritere('L’étudiant·e relie l’œuvre aux notions du cours', ['Liens explicites avec les notions', 'Pertinence des rapprochements'],
                 [['Liens absents'], ['Établit un lien', '4-5'], ['Établit quelques liens', '6-7'], ['Établit des liens nombreux et pertinents', '8-10']]),
             rangeeCritere('L’étudiant·e exprime une appréciation argumentée', ['Opinion formulée clairement', 'Arguments appuyés sur le texte'],

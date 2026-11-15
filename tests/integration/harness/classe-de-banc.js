@@ -134,9 +134,31 @@ async function choisirPremiere(page, id) {
  * la première saisie de présences verrouillée.
  */
 export async function mettreLaClasseEnPlace(page) {
+    await mettreLeCadreEnPlace(page);
+    await attendreEtape(page, 7, 8, 'Prendre les présences', { focus: false });
+    await expect(page.locator('#btnVerrouillerSaisiePresences')).toBeVisible();
+    await page.click('#btnVerrouillerSaisiePresences');
+    await attendreEtape(page, 8, 8, "Ta classe d'un coup d'œil", { focus: false });
+    await bulle(page).getByRole('button', { name: 'Terminer' }).click();
+    await expect(bulle(page)).toHaveCount(0);
+    expect(await page.evaluate(() => Assistance.etatDe('classe').etat)).toBe('fait');
+}
+
+/** Des étudiant·es manifestement fictifs, en lignes à coller (DA, groupe, nom, prénom) : une classe de la taille voulue. */
+export function elevesFictifs(n) {
+    return Array.from({ length: n }, (_, k) => {
+        const rang = String(k + 1).padStart(2, '0');
+        return (2390001 + k) + '\t00001\tFictif-' + rang + '\tPersonne-' + rang;
+    }).join('\n');
+}
+
+/**
+ * Les six étapes du Cadre de « Mettre ta classe en place », jouées par leurs gestes, jusqu'au toucher de « Créer le
+ * groupe-cours » : l'étape 7 s'ouvre ensuite, et c'est à l'appelant de l'attendre (un banc y mesure le moteur).
+ */
+export async function mettreLeCadreEnPlace(page, eleves = ELEVES) {
     await page.evaluate(() => Assistance.parcours().find((p) => p.id === 'classe').lancer(0));
     await attendreEtape(page, 1, 8, 'Ton trimestre', { focus: false });
-    await page.fill('#v2-nomTrimestre', 'Automne 2026');
     await page.selectOption('#v2-sessionTrimestre', 'automne');
     await page.fill('#v2-anneeTrimestre', '2026');
     await page.fill('#v2-debutTrimestre', '2026-08-24');
@@ -160,7 +182,7 @@ export async function mettreLaClasseEnPlace(page) {
     await page.click('#v2-btnCreerEnseignant');
 
     await attendreEtape(page, 4, 8, 'Ta classe', { focus: false });
-    await page.fill('#v2-donneesCollees', ELEVES);
+    await page.fill('#v2-donneesCollees', eleves);
     await page.click('#accordeon-groupe-etudiants [data-action="previsualiserDonneesV2"]');
     await page.click('#v2-btnConfirmerImport');
 
@@ -177,14 +199,6 @@ export async function mettreLaClasseEnPlace(page) {
     await attendreEtape(page, 6, 8, 'Ton groupe-cours', { focus: false });
     for (const id of ['v2-gc-trimestre', 'v2-gc-cours', 'v2-gc-groupe', 'v2-gc-horaire', 'v2-gc-enseignant']) await choisirPremiere(page, id);
     await page.click('#v2-btnCreerGroupeCours');
-
-    await attendreEtape(page, 7, 8, 'Ton premier cours', { focus: false });
-    await expect(page.locator('#btnVerrouillerSaisiePresences')).toBeVisible();
-    await page.click('#btnVerrouillerSaisiePresences');
-    await attendreEtape(page, 8, 8, "Ta classe d'un coup d'œil", { focus: false });
-    await bulle(page).getByRole('button', { name: 'Terminer' }).click();
-    await expect(bulle(page)).toHaveCount(0);
-    expect(await page.evaluate(() => Assistance.etatDe('classe').etat)).toBe('fait');
 }
 
 // ---------- Mon matériel : l'exemple « Journal de lecture », étiqueté (les gestes du banc de la dissection, 2b) ----------
@@ -216,7 +230,7 @@ export async function etiqueterExemple(page) {
     await collerLExemple(page);
     await expect(page.locator('#materiel-dissection')).toBeVisible();
     await etiqueter(page, 'titre', ['Journal de lecture']);
-    await etiqueter(page, 'section', ['PARTIE A : COMPRÉHENSION', 'PARTIE B : RÉFLEXION']);
+    await etiqueter(page, 'section', ['SECTION A : COMPRÉHENSION', 'SECTION B : RÉFLEXION']);
     await etiqueter(page, 'niveau', NIVEAUX_EXEMPLE);
     await etiqueter(page, 'critere', CRITERES_EXEMPLE);
     await etiqueter(page, 'descripteur', DESCRIPTEURS_EXEMPLE);

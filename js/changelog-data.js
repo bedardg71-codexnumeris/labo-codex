@@ -21,6 +21,58 @@
 
     var CHANGELOG = [
         {
+            // 1.248 (15 nov. 2026 : le gel de l'étape des présences et « Refaire » ; la définition gardée, la définition
+            // affichée, la confirmation d'« Effacer la page », la bande des copies) — titres et lignes validés par Grégoire,
+            // mot pour mot (relais de Cowork du 15 nov., 13 h 04). Le relais donnait deux blocs titrés ; l'entrée n'admet
+            // qu'un titre : « Des copies qui restent nettes » gardé, la ligne du gel en premier (repli prévu par le relais).
+            version: '1.248',
+            couleur: 'vert',
+            titre: 'Des copies qui restent nettes',
+            items: [
+                'Dans «&nbsp;Mettre ta classe en place&nbsp;», l’étape «&nbsp;Prendre les présences&nbsp;» ne gèle plus quand la classe est grande. Quand tu revois un parcours déjà fait, la bulle ne t’invite plus à toucher un bouton qui changerait tes données.',
+                'Réordonner, retirer ou pivoter une page dans l’éditeur de pages, ou réunir plusieurs fichiers à l’import, ne réduit plus la définition de la copie.',
+                'Les Propriétés d’un fichier et l’écran d’import donnent les dimensions en pixels de chaque page, PDF compris.',
+                '«&nbsp;Effacer la page&nbsp;» demande une confirmation.',
+                'Après le remplacement d’une copie, la bande des copies d’Annoter se met à jour sans recharger la page.'
+            ]
+        },
+        {
+            // 1.247 (14 nov. 2026 : l'essai novice — les parcours en lignes, le compteur, le Cadre, « partie ») — titre et
+            // quatre lignes validés par Grégoire, mot pour mot (relais de Cowork du 14 nov.).
+            version: '1.247',
+            couleur: 'vert',
+            titre: 'Des parcours plus légers',
+            items: [
+                'Dans les parcours, chaque bulle est maintenant une courte liste. Une ligne se coche quand son geste est fait, et la bulle dit où tu es dans l’application.',
+                'Dans une bulle, touche le compteur («&nbsp;3 sur 8&nbsp;») pour revoir une étape déjà faite. «&nbsp;Refaire&nbsp;» rejoue tout le parcours, sans rien changer à tes données.',
+                'Dans Cadre, le nom du trimestre se crée tout seul à partir de la session et de l’année, et les périodes d’une séance se proposent d’après ses heures.',
+                'Dans Conception › Mon matériel, «&nbsp;morceau&nbsp;» devient «&nbsp;partie&nbsp;». «&nbsp;Voir le travail complet&nbsp;» devient «&nbsp;Voir un exemple de grille étiquetée&nbsp;», et «&nbsp;Faire l’exercice soi-même&nbsp;» devient «&nbsp;Étiqueter l’exemple moi-même&nbsp;».'
+            ]
+        },
+        {
+            // 1.246 (13 nov. 2026, soir : #1276, la grille ne remonte plus pendant l'étiquetage ; l'étiquette « Sous-total »)
+            // — titre et lignes de Claude Code, d'après les mots du relais de Cowork (13 nov., 18 h 50) ; non relus par Grégoire.
+            version: '1.246',
+            couleur: 'vert',
+            titre: 'Sous-totaux, et une grille qui reste en place',
+            items: [
+                'Dans Conception › Mon matériel, ta grille reste en place pendant que tu l’étiquettes&nbsp;: elle ne remonte plus après chaque geste.',
+                'Une nouvelle étiquette, «&nbsp;Sous-total&nbsp;», pour le total d’une partie de ta grille. Chaque sous-total est comparé à la somme de ses critères, et un écart te le dit.'
+            ]
+        },
+        {
+            // 1.245 (13 nov. 2026 : la carte d'aide dans « Apporter mon matériel », le rapport de bug #1280) — titre et
+            // lignes 1 et 3 proposés par Claude Code, ligne 2 écrite par Grégoire ; son oui du 13 nov. 2026.
+            version: '1.245',
+            couleur: 'vert',
+            titre: 'Ta grille, pas à pas',
+            items: [
+                'Dans Conception › Mon matériel, l’interrupteur «&nbsp;M’accompagner pour étiqueter ma grille&nbsp;» ouvre une carte qui te guide pas à pas, de la copie de ton tableau à «&nbsp;Créer ma grille&nbsp;». Éteint, la page n’affiche plus de consignes.',
+                'Sur la même page, «&nbsp;Essayer avec un exemple&nbsp;» devient «&nbsp;Voir le travail complet&nbsp;» et «&nbsp;Faire l’exercice soi-même&nbsp;». L’exemple n’écrit plus par-dessus ton brouillon&nbsp;: tu le retrouves en quittant l’exemple.',
+                'Le rapport de bug montre tes dernières actions d’avant le signalement, plus celles faites dans sa fenêtre.'
+            ]
+        },
+        {
             // 1.244 (12 nov. 2026 : la dissection sur l'iPad, la carte des parcours à droite, une seule barre au
             // chargement) — lignes proposées par la conversation du Projet, validées par Grégoire (12 nov.)
             version: '1.244',

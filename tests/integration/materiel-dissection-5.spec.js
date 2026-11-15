@@ -139,7 +139,7 @@ test('dissection 5 · « Couper » : (d) refusée en nommant, coupée au pointeu
     // « Couper » en main : le bandeau, « Terminer », pas encore d'annulation ; l'outil ne compte rien.
     await page.locator('#dissection-palette [data-param="couper"]').click();
     await expect(page.locator('#dissection-palette [data-param="couper"]')).toHaveAttribute('aria-pressed', 'true');
-    await expect.poll(() => page.evaluate(() => window.materielDissection.consignes().outil)).toBe('Outil « Couper » : touche l’endroit d’un morceau où le séparer en deux. La coupe tombe entre deux mots.');   // 13 nov. 2026 : la phrase de l'outil se lit dans la carte
+    await expect.poll(() => page.evaluate(() => window.materielDissection.consignes().outil)).toBe('Outil « Couper » : touche l’endroit d’une partie où la séparer en deux. La coupe tombe entre deux mots.');   // 13 nov. 2026 : la phrase de l'outil se lit dans la carte
     await expect(page.locator('#dissection-terminer')).toBeVisible();
     await expect(page.locator('#dissection-annuler-coupe')).toBeHidden();
 
@@ -148,7 +148,7 @@ test('dissection 5 · « Couper » : (d) refusée en nommant, coupée au pointeu
     await toucher(page, ligneD(0), nom0.length - 3);
     await expect(morceau(page, nom0)).toHaveAttribute('data-type', 'critere');
     await expect(morceau(page, ligneD(0).slice(nom0.length + 1))).not.toHaveAttribute('data-type', /.+/);
-    await expect(page.locator('#dissection-statut')).toHaveText('Morceau coupé en deux : « ' + nom0 + ' » et « ' + ligneD(0).slice(nom0.length + 1) + ' ».');
+    await expect(page.locator('#dissection-statut')).toHaveText('Partie coupée en deux : « ' + nom0 + ' » et « ' + ligneD(0).slice(nom0.length + 1) + ' ».');
     await expect(page.locator('#dissection-annuler-coupe')).toBeVisible();
     await expect(page.locator('#dissection-palette [data-param="couper"] .dissection-etiquette-compte')).toHaveText('');
 

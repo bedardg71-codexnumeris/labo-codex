@@ -652,7 +652,38 @@
         focusAvant = null;
     }
 
+    /** Le parcours qui suit `id` dans la liste (rien : c'était le dernier). */
+    function suivantDe(id) {
+        var k = registre.findIndex(function (p) { return p.id === id; });
+        return k !== -1 && registre[k + 1] ? registre[k + 1] : null;
+    }
+
+    /**
+     * Lance un parcours comme le fait son bouton dans le panneau (« Parcours suivant », à la fin d'un parcours,
+     * 14 nov. 2026) : mêmes gardes. Refusé (l'écran trop petit, la condition d'entrée), il ne part pas : le panneau
+     * s'ouvre et dit pourquoi, sous son bouton.
+     * @returns {boolean} true s'il est parti
+     */
+    function lancerParcours(id) {
+        var def = definitionDe(id);
+        if (!def) return false;
+        var petit = tropPetitPour(def);
+        var raison = petit ? null : (typeof def.refus === 'function' ? def.refus() : null);
+        if (petit || raison) {
+            ouvrirPanneau();
+            var corps = document.querySelector('#panneau-assistance [data-parcours="' + id + '"] .assistance-parcours-corps');
+            if (corps && raison) { direRefus(corps, raison); appelerPrealable(def, raison); }
+            return false;
+        }
+        var e = etatDe(id);
+        fermerPanneau({ sansRetourFocus: true });
+        def.lancer(e.etat === 'en-cours' ? e.etape : 0);
+        return true;
+    }
+
     window.Assistance = {
+        suivantDe: suivantDe,
+        lancerParcours: lancerParcours,
         enregistrer: enregistrer,
         etatDe: etatDe,
         definirEtat: definirEtat,

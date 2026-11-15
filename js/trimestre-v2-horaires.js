@@ -673,6 +673,7 @@ async function nouveauHoraireV2() {
 
     // Générer les champs de séances
     mettreAJourSeancesHoraireV2();
+    majResumeFormatHoraireV2();   // 14 nov. 2026 : les périodes proposées comptent au résumé
 
     // Afficher le formulaire
     const etatVide = document.getElementById('v2-horaireEtatVide');
@@ -740,6 +741,9 @@ function editerHoraireV2(horaire) {
             if (inputPeriodes) {
                 const reprises = s.nombrePeriodes || horaire.periodesParSeance || '';
                 inputPeriodes.value = reprises > 0 ? String(reprises) : '';
+                // 14 nov. 2026 — STOCK : le chiffre d'un horaire enregistré fait foi ; rien ne s'y propose
+                // (`_proposerPeriodesSeance`), ni au changement d'heure, ni sur une séance ajoutée.
+                _seancesAuxPeriodesProposees.delete(i);
             }
             // Local par séance ou fallback vers local global (migration)
             if (inputLocal) inputLocal.value = s.local || localGlobal;
@@ -774,7 +778,9 @@ function horaireEnCreationSaisi() {
     const val = (id) => String(document.getElementById(id)?.value || '').trim();
     if (val('v2-hor-nom') || val('v2-hor-groupeAssocie')) return true;
     for (let i = 0; document.getElementById(`v2-hor-seance-${i}-jour`); i++) {
-        if (val(`v2-hor-seance-${i}-periodes`) || val(`v2-hor-seance-${i}-local`)) return true;
+        // 14 nov. 2026 : un nombre de périodes PROPOSÉ est un défaut, comme les heures.
+        const tapees = val(`v2-hor-seance-${i}-periodes`) && !_seancesAuxPeriodesProposees.has(i);
+        if (tapees || val(`v2-hor-seance-${i}-local`)) return true;
     }
     return false;
 }
@@ -889,10 +895,10 @@ function sauvegarderHoraireV2() {
             return _refuserHoraireV2(`Séance ${i + 1} : heure de fin manquante. Elle situe la séance dans la journée.`, geste);
         }
 
-        // #540 lot E1 : le nombre de périodes est SAISI, jamais déduit des heures — une
-        // période comprend sa pause, et la convention varie d'un cégep à l'autre. C'est
-        // ce nombre qui fait le dénominateur de l'assiduité : on le refuse absent plutôt
-        // que d'en proposer un.
+        // #540 lot E1 : c'est le nombre du CHAMP qui fait foi, et il fait le dénominateur de
+        // l'assiduité : absent, on le refuse. (14 nov. 2026 : dans un NOUVEL horaire, le champ
+        // naît proposé d'après les heures, sous les yeux, corrigeable ; jamais dans un horaire
+        // enregistré.)
         const nombrePeriodes = parseInt(document.getElementById(`v2-hor-seance-${i}-periodes`)?.value, 10);
         if (!(nombrePeriodes > 0)) {
             return _refuserHoraireV2(`Séance ${i + 1} : nombre de périodes manquant. ` +
@@ -1065,6 +1071,7 @@ function mettreAJourSeancesHoraireV2() {
 
     const jours = ['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi'];
     let html = '';
+    _seancesAuxPeriodesProposees.clear();   // les lignes sont refaites : leurs marques aussi
 
     // #540 lot E1 — CHAQUE SÉANCE PORTE SES PÉRIODES (décision de Grégoire, 26 août 2026,
     // après le lot C).
@@ -1080,11 +1087,13 @@ function mettreAJourSeancesHoraireV2() {
     // données, toutes deux lues sur l'horaire officiel, qu'aucune convention ne relie de
     // façon portable. On les demande donc toutes les deux, et on ne convertit plus rien.
     //
-    // ⮕ CE QUI PORTE UN DÉFAUT, ET CE QUI N'EN PORTE PAS. Le jour et l'heure de début
-    // sont des défauts de formulaire : visibles, modifiables, sans effet sur un calcul
-    // tant qu'ils ne sont pas relus en silence. Le nombre de périodes, lui, naît VIDE —
-    // c'est la donnée qui pilote le dénominateur, elle se saisit à l'œil ouvert. La
-    // sauvegarde la refuse absente plutôt que d'en proposer une.
+    // ⮕ CE QUI PORTE UN DÉFAUT. Le jour et les heures sont des défauts de formulaire :
+    // visibles, modifiables. Le nombre de périodes naissait VIDE (lot E1) ; depuis le
+    // 14 nov. 2026 il se PROPOSE d'après le début et la fin (`periodesProposees`), parce
+    // qu'une période avec sa pause occupe environ une heure à l'horaire, 50 + 10 comme
+    // 55 + 5. Ce n'est pas la division du lot C qui revient : celle-là divisait par la
+    // durée d'enseignement seule. La proposition est sous les yeux, se corrige, et le
+    // chiffre du champ fait foi ; la sauvegarde refuse toujours un champ vide.
     const DEBUT_PAR_DEFAUT = '08:00';
     const FIN_PAR_DEFAUT = '10:00';
 
@@ -1103,14 +1112,14 @@ function mettreAJourSeancesHoraireV2() {
                 <select id="v2-hor-seance-${i}-jour" class="controle-form" data-on-change="sauvegarderChampHoraireV2">
                     ${jours.map(j => `<option value="${j}" ${j === jourDefaut ? 'selected' : ''}>${j}</option>`).join('')}
                 </select>
-                <input type="time" id="v2-hor-seance-${i}-debut" class="controle-form" value="${DEBUT_PAR_DEFAUT}" data-on-change="sauvegarderChampHoraireV2">
+                <input type="time" id="v2-hor-seance-${i}-debut" class="controle-form" value="${DEBUT_PAR_DEFAUT}" data-on-change="changerHeuresSeanceHoraireV2" data-param="${i}">
                 <span>à</span>
-                <input type="time" id="v2-hor-seance-${i}-fin" class="controle-form" value="${FIN_PAR_DEFAUT}" data-on-change="sauvegarderChampHoraireV2">
+                <input type="time" id="v2-hor-seance-${i}-fin" class="controle-form" value="${FIN_PAR_DEFAUT}" data-on-change="changerHeuresSeanceHoraireV2" data-param="${i}">
                 <div class="seance-horaire-periodes">
                     <input type="number" id="v2-hor-seance-${i}-periodes" class="controle-form controle-form-compact"
                            min="1" max="8" step="1" title="Nombre de périodes de cette séance" required
                            aria-describedby="v2-hor-seance-${i}-periodes-unite"
-                           data-on-input="majResumeFormatHoraireV2" data-on-change="sauvegarderChampHoraireV2">
+                           data-on-input="saisirPeriodesSeanceHoraireV2" data-on-change="sauvegarderChampHoraireV2" data-param="${i}">
                     <span id="v2-hor-seance-${i}-periodes-unite" class="seance-horaire-unite">pér.</span>
                 </div>
                 <input type="text" id="v2-hor-seance-${i}-local" class="controle-form" placeholder="Local" data-on-change="sauvegarderChampHoraireV2">
@@ -1137,7 +1146,70 @@ function mettreAJourSeancesHoraireV2() {
         poser('fin', FIN_PAR_DEFAUT);
         poser('periodes', '');
         poser('local', '');
+        _proposerPeriodesSeance(i);
     }
+}
+
+/**
+ * 14 nov. 2026 (essai novice) — le nombre de périodes PROPOSÉ pour une séance : sa durée à
+ * l'horaire, arrondie à l'heure près (8 h à 10 h : 2 ; 8 h à 9 h 50 : 2).
+ *
+ * Faits donnés par Grégoire : une période dure 50 ou 55 minutes selon le collège et la pause
+ * varie, mais une période AVEC sa pause occupe toujours environ une heure à l'horaire. Rien
+ * ne se déduit de la pondération (elle ne dit pas comment les heures se répartissent).
+ * @returns {number} 1 à 8, ou 0 quand les heures ne disent rien (vides, fin avant début)
+ */
+function periodesProposees(heureDebut, heureFin) {
+    const minutes = (hhmm) => {
+        const m = /^(\d{1,2}):(\d{2})$/.exec(String(hhmm || ''));
+        return m ? Number(m[1]) * 60 + Number(m[2]) : NaN;
+    };
+    const duree = minutes(heureFin) - minutes(heureDebut);
+    if (!(duree > 0)) return 0;
+    return Math.min(8, Math.max(1, Math.round(duree / 60)));
+}
+
+/**
+ * Les séances (par leur rang dans la fiche ouverte) dont le nombre de périodes est une
+ * PROPOSITION de l'application : ni tapé, ni relu d'un horaire enregistré. État de la fiche,
+ * jamais écrit : il se vide dès qu'on tape, et à chaque fiche chargée du stock.
+ */
+const _seancesAuxPeriodesProposees = new Set();
+
+/**
+ * Pose la proposition dans le champ « pér. » de la séance `i`, SEULEMENT s'il est vide ou
+ * porte encore une proposition : un chiffre tapé, ou relu d'un horaire enregistré, fait foi.
+ * @returns {boolean} true si le champ a été écrit
+ */
+function _proposerPeriodesSeance(i) {
+    // ⚠ STOCK (relecture croisée du 14 nov. 2026) : JAMAIS dans un horaire enregistré. Ses champs s'écrivent seuls au
+    // changement : une proposition y deviendrait une écriture que personne n'a regardée (une séance ajoutée à 2
+    // périodes par défaut, un champ resté vide depuis avant #540 lot E1, rempli au premier changement d'heure), et ce
+    // nombre est le dénominateur de l'assiduité. Là, un champ vide reste vide, et la sauvegarde le refuse et le dit.
+    if (horaireEnEditionId) return false;
+    const champ = document.getElementById(`v2-hor-seance-${i}-periodes`);
+    if (!champ) return false;
+    const libre = String(champ.value || '') === '' || _seancesAuxPeriodesProposees.has(i);
+    if (!libre) return false;
+    const n = periodesProposees(
+        document.getElementById(`v2-hor-seance-${i}-debut`)?.value,
+        document.getElementById(`v2-hor-seance-${i}-fin`)?.value);
+    champ.value = n > 0 ? String(n) : '';
+    if (n > 0) _seancesAuxPeriodesProposees.add(i); else _seancesAuxPeriodesProposees.delete(i);
+    return true;
+}
+
+/** `data-on-change` du début et de la fin d'une séance : la proposition suit, puis le reste. */
+function changerHeuresSeanceHoraireV2(i) {
+    _proposerPeriodesSeance(i);
+    majResumeFormatHoraireV2();
+    return sauvegarderChampHoraireV2();
+}
+
+/** `data-on-input` du champ « pér. » : dès qu'on y tape, ce chiffre fait foi. */
+function saisirPeriodesSeanceHoraireV2(i) {
+    _seancesAuxPeriodesProposees.delete(i);
+    majResumeFormatHoraireV2();
 }
 
 /**
@@ -1159,6 +1231,8 @@ function changerFormatSeancesHoraireV2() {
             // changer le nombre de séances effacerait une saisie, exactement le défaut
             // que CT-01 (#460) a fermé pour les heures.
             periodes: document.getElementById(`v2-hor-seance-${i}-periodes`)?.value || '',
+            // 14 nov. 2026 : la marque « proposé » voyage avec le chiffre.
+            propose: _seancesAuxPeriodesProposees.has(i),
             local: document.getElementById(`v2-hor-seance-${i}-local`)?.value || ''
         });
     }
@@ -1176,7 +1250,10 @@ function changerFormatSeancesHoraireV2() {
         if (inputFin) inputFin.value = s.heureFin;
         if (inputLocal) inputLocal.value = s.local;
         const inputPeriodes = document.getElementById(`v2-hor-seance-${i}-periodes`);
-        if (inputPeriodes) inputPeriodes.value = s.periodes;
+        if (inputPeriodes) {
+            inputPeriodes.value = s.periodes;
+            if (s.propose) _seancesAuxPeriodesProposees.add(i); else _seancesAuxPeriodesProposees.delete(i);
+        }
     });
     majResumeFormatHoraireV2();
     // Lot E2 : sur un horaire existant, le nouveau nombre de séances s'enregistre (une séance
@@ -1211,6 +1288,9 @@ window.sauvegarderChampHoraireV2 = sauvegarderChampHoraireV2;
 window.rendreModeFicheHoraireV2 = rendreModeFicheHoraireV2;
 window.mettreAJourSeancesHoraireV2 = mettreAJourSeancesHoraireV2;
 window.changerFormatSeancesHoraireV2 = changerFormatSeancesHoraireV2;
+window.periodesProposees = periodesProposees;
+window.changerHeuresSeanceHoraireV2 = changerHeuresSeanceHoraireV2;
+window.saisirPeriodesSeanceHoraireV2 = saisirPeriodesSeanceHoraireV2;
 window.chargerHorairesV2 = chargerHorairesV2;
 // #478 (b) : lu par `chargerListeEtudiantsV2` (trimestre-v2-etudiants.js), une AUTRE IIFE.
 // Sans cet export, son `typeof` rendait toujours faux : un groupe ajouté n'apparaissait

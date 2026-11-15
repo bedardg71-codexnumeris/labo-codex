@@ -3475,17 +3475,38 @@
 
     /**
      * « Effacer la page » : les annotations de la page courante.
-     * #1007 (2a-2) — le codex est proposé seulement si la page en porte au moins une. Après
-     * l'attente, la page est relue (`_viderPageCourante`), et rien n'est effacé si le fichier
+     * Rien n'est demandé si la page n'en porte aucune. Après l'attente de la confirmation,
+     * la page est relue (`_viderPageCourante`), et rien n'est effacé si le fichier
      * ou la page affichés ont changé pendant ce temps.
      */
     async function effacerPage() {
         if (_compterAnnotationsPage() === 0) return;
+        const nombre = _compterAnnotationsPage();
         const fichierAvant = fichierId;
         const pageAvant = travauxVisionneuse.getPageActuelle();
-        if (typeof Codex !== 'undefined' && !(await Codex.proposerAvantSuppression('annotationsPage'))) return;
+        // 15 nov. 2026 (Grégoire, iPad, 8 h 54 : touché deux fois sans qu'on lui demande rien ;
+        // 11 h 44 : toujours la confirmation simple). Codex ouvert ou non, à jour ou non : la
+        // fenêtre du codex ne sert plus pour ce geste, que le retour arrière annule.
+        if (!(await _confirmerEffacerPage(nombre))) return;
         if (fichierId !== fichierAvant || travauxVisionneuse.getPageActuelle() !== pageAvant) return;
         _viderPageCourante();
+    }
+
+    /**
+     * La confirmation de « Effacer la page ». Mots approuvés par Grégoire le 15 nov. 2026.
+     * @param {number} nombre - Annotations de la page
+     * @returns {Promise<boolean>} true sur « Effacer » ; true aussi sans la fenêtre de l'application
+     */
+    async function _confirmerEffacerPage(nombre) {
+        if (typeof uiDialogues === 'undefined') return true;
+        const une = nombre === 1;
+        return (await uiDialogues.confirmerAction({
+            titre: une ? 'Effacer l\'annotation de cette page ?' : 'Effacer les ' + nombre + ' annotations de cette page ?',
+            message: une ? 'Tu pourras la rétablir avec la flèche de retour arrière.' : 'Tu pourras les rétablir avec la flèche de retour arrière.',
+            texteAnnuler: 'Annuler',
+            texteConfirmer: 'Effacer',
+            variante: 'danger'
+        })) === true;
     }
 
     /** Le nombre d'annotations de la page courante (0 sans annotation ouverte). */

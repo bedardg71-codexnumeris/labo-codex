@@ -103,7 +103,7 @@ test('dissection 12 · les touchers de la capture, dans son ordre : le nom entie
     await outil(page).click();
     await toucher(page, debut);
     await toucher(page, fin);
-    await expect(statut(page)).toHaveText('Morceaux rattachés : l’application lit « ' + debut + ' ' + fin + ' ». L’étiquette « Critère » de la suite est retirée : celle du premier morceau vaut pour le texte entier.');
+    await expect(statut(page)).toHaveText('Parties rattachées : l’application lit « ' + debut + ' ' + fin + ' ». L’étiquette « Critère » de la suite est retirée : celle de la première partie vaut pour le texte entier.');
     await expect(morceau(page, debut)).not.toHaveClass(/dissection-rattache/);
     await expect(morceau(page, debut)).toHaveAttribute('data-type', 'critere');
     await expect(morceau(page, fin)).toHaveAttribute('data-suite-de', idDebut);
@@ -111,7 +111,7 @@ test('dissection 12 · les touchers de la capture, dans son ordre : le nom entie
     // Puis le milieu, puis la fin : il se joint au même groupe.
     await toucher(page, milieu);
     await toucher(page, fin);
-    await expect(statut(page)).toHaveText(/^Morceaux rattachés : l’application lit « Nuances fictives du propos \(exemples, contrastes, renvois\) »\./);
+    await expect(statut(page)).toHaveText(/^Parties rattachées : l’application lit « Nuances fictives du propos \(exemples, contrastes, renvois\) »\./);
     await expect(morceau(page, milieu)).toHaveAttribute('data-suite-de', idDebut);
     await expect(morceau(page, milieu)).toHaveClass(/dissection-rattache/);
     await expect(morceau(page, milieu)).toHaveClass(/dis-t-critere/);
@@ -138,15 +138,15 @@ test('dissection 12 · les touchers de la capture, dans son ordre : le nom entie
     await outil(page).click();
     await toucher(page, milieu);
     await expect(morceau(page, milieu)).toHaveClass(/dissection-choisi/);
-    await expect.poll(() => page.evaluate(() => window.materielDissection.consignes().outil)).toBe('Outil « Rattacher » : touche maintenant le morceau à joindre à « (exemples, contrastes, ». Retouche « (exemples, contrastes, » pour le détacher.');   // 13 nov. 2026 : la phrase de l'outil se lit dans la carte
+    await expect.poll(() => page.evaluate(() => window.materielDissection.consignes().outil)).toBe('Outil « Rattacher » : touche maintenant la partie à joindre à « (exemples, contrastes, ». Retouche « (exemples, contrastes, » pour la détacher.');   // 13 nov. 2026 : la phrase de l'outil se lit dans la carte
     await toucher(page, milieu);
-    await expect(statut(page)).toHaveText('Lien défait : « (exemples, contrastes, » redevient un morceau à part.');
+    await expect(statut(page)).toHaveText('Lien défait : « (exemples, contrastes, » redevient une partie à part.');
     await expect(morceau(page, milieu)).not.toHaveClass(/dissection-rattache/);
     await expect(sous).toHaveText('L’application lit : « ' + debut + ' ' + fin + ' »');
     await expect(fleche).toHaveCount(1);
     await toucher(page, debut);
     await toucher(page, debut);
-    await expect(statut(page)).toHaveText('Lien défait : « ' + debut + ' » redevient un morceau à part.');
+    await expect(statut(page)).toHaveText('Lien défait : « ' + debut + ' » redevient une partie à part.');
     await expect(sous).toHaveCount(0);
     await expect(fleche).toHaveCount(0);
     await expect(morceau(page, fin)).not.toHaveClass(/dissection-rattache/);

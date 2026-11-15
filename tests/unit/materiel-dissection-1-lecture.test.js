@@ -172,7 +172,7 @@ describe('X — les cas limites finissent « sans place », jamais en erreur', (
             [{ l: [['la fin d’une phrase', 'suite']] }, { l: [['Critère fictif', 'critere']] }],
             [{ l: [['Réponse', 'descripteur']] }, { l: [['1', 'points']] }]
         ]);
-        expect(R.sansPlace).toMatchObject([{ t: 'la fin d’une phrase', type: 'suite', raison: 'aucun morceau à compléter avant elle' }]);
+        expect(R.sansPlace).toMatchObject([{ t: 'la fin d’une phrase', type: 'suite', raison: 'aucune partie à compléter avant elle' }]);
     });
 
     it('X.c — un « Descripteur » sans critère quand des niveaux sont nommés', () => {

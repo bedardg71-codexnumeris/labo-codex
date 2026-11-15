@@ -87,7 +87,8 @@ test('dissection · coller, poser deux étiquettes au pointeur, lire la grille c
     await expect(page.locator('#dissection-contenu .dissection-morceau')).toHaveCount(24);
     // Douze étiquettes, plus les outils « Couper » (lot 5), juste après « Suite », et « Rattacher » (lot 7), après « Couper ».
     // Étape 5 du critère algorithmique (22 oct. 2026) : seize, avec les quatre du groupe « Les codes ».
-    await expect(page.locator('#dissection-palette .dissection-etiquette:not(.dissection-outil)')).toHaveCount(16);
+    // Lot « étiquette Sous-total » (13 nov. 2026) : dix-sept, avec « Sous-total ».
+    await expect(page.locator('#dissection-palette .dissection-etiquette:not(.dissection-outil)')).toHaveCount(17);
     await expect(page.locator('#dissection-palette .dis-t-code, #dissection-palette .dis-t-nomcode, #dissection-palette .dis-t-poids, #dissection-palette .dis-t-commentaire')).toHaveCount(4);
     await expect(page.locator('#dissection-palette .dissection-outil')).toHaveCount(2);
     await expect(page.locator('#dissection-palette [data-param="suite"] + [data-param="couper"] + [data-param="rattacher"]')).toHaveCount(1);
@@ -137,7 +138,7 @@ test('dissection · coller, poser deux étiquettes au pointeur, lire la grille c
     await expect(lecture).toContainText('Question 1 : le sens du passage fictif');
     await expect(lecture).toContainText('Réponse juste, mais incomplète');
     await expect(page.locator('#dissection-constats')).toContainText('1 critère');
-    await expect(page.locator('#dissection-constats')).toContainText('21 morceaux sans étiquette');
+    await expect(page.locator('#dissection-constats')).toContainText('21 parties sans étiquette');
 
     // iPad debout puis couché (C1) : la palette reste à gauche du canevas, leurs hauts au même niveau ;
     // la page ne défile pas de côté ; le canevas, lui, défile ; la palette tient dans la hauteur du canevas.

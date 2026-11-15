@@ -56,7 +56,7 @@ const AIDE_CONTEXTUELLE = {
             },
             {
                 type: 'texte',
-                contenu: "Les heures d'enseignement sont le temps où l'enseignant est en présence des étudiants, pour un enseignement théorique ou pratique. On les obtient en additionnant les deux premiers chiffres de la pondération et en multipliant par le nombre de semaines du trimestre. Exemple : pondération 2-2-3 dans un trimestre de 15 semaines → (2 + 2) × 15 = 60 heures d'enseignement. L'application compte les semaines dans ton calendrier plutôt que de les supposer : un trimestre écourté ou une session d'été donnent un autre total."
+                contenu: "Les heures d'enseignement sont le temps où l'enseignant est en présence des étudiants, pour un enseignement théorique ou pratique. On les obtient en additionnant les deux premiers chiffres de la pondération et en multipliant par 15. Exemple : pondération 2-2-3 → (2 + 2) × 15 = 60 heures d'enseignement. Ce total ne dépend pas de ton calendrier : un cours donné en session intensive, l'été, garde le même nombre d'heures. Le nombre proposé se corrige : c'est celui du champ qui fait foi."
             },
             {
                 type: 'alerte',
@@ -155,7 +155,7 @@ const AIDE_CONTEXTUELLE = {
         sections: [
             {
                 type: 'texte',
-                contenu: 'Cet outil range dans Labo Codex une grille d’évaluation que tu as déjà créée à l’extérieur de l’application. Tu la colles ici, tu poses une étiquette sur chaque morceau (critère, pondération, descripteur, points, niveau…), puis « Créer ma grille » la range dans Grilles. Rien n’entre dans tes grilles avant ce dernier geste.'
+                contenu: 'Cet outil range dans Labo Codex une grille d’évaluation que tu as déjà créée à l’extérieur de l’application. Tu la colles ici, tu poses une étiquette sur chaque partie (critère, pondération, descripteur, points, niveau…), puis « Créer ma grille » la range dans Grilles. Rien n’entre dans tes grilles avant ce dernier geste.'
             },
             {
                 type: 'texte',
@@ -163,7 +163,7 @@ const AIDE_CONTEXTUELLE = {
             },
             {
                 type: 'conseil',
-                contenu: 'Copie ta grille depuis son fichier d’origine (Word, Pages) plutôt que depuis un PDF : le tableau arrive avec ses cases, et la place de chaque morceau dit déjà à quel critère et à quel niveau il appartient.'
+                contenu: 'Copie ta grille depuis son fichier d’origine (Word, Pages) plutôt que depuis un PDF : le tableau arrive avec ses cases, et la place de chaque partie dit déjà à quel critère et à quel niveau elle appartient.'
             }
         ],
         voirAussi: ['construction-grilles', 'construction-echelles', 'grille-type-critere-detail']

@@ -76,10 +76,10 @@
      * l'outil, que la carte dit mot pour mot ; `enMain` ne garde que le fait (sa consigne redisait `bandeau`).
      */
     var TEXTES_COUPE = {
-        bandeau: 'Outil « Couper » : touche l’endroit d’un morceau où le séparer en deux. La coupe tombe entre deux mots.',
+        bandeau: 'Outil « Couper » : touche l’endroit d’une partie où la séparer en deux. La coupe tombe entre deux mots.',
         enMain: 'Outil « Couper » en main.',
-        coupe: function (a, b) { return 'Morceau coupé en deux : « ' + a + ' » et « ' + b + ' ».'; },
-        unMot: 'Ce morceau n’a qu’un mot : il ne se coupe pas.',
+        coupe: function (a, b) { return 'Partie coupée en deux : « ' + a + ' » et « ' + b + ' ».'; },
+        unMot: 'Cette partie n’a qu’un mot : elle ne se coupe pas.',
         annulee: function (t) { return 'Coupe annulée : « ' + t + ' » est recollé.'; },
         // Lot 7 : quand l'annulation défait un lien. Validé G. 18 oct. 17 h 18.
         lienDefait: ' Le lien qui touchait ses parties est défait.'
@@ -94,19 +94,19 @@
      * Les textes collés y entrent par leurs premiers mots (`premiersMots`).
      */
     var TEXTES_LIEN = {
-        bandeau: 'Outil « Rattacher » : touche deux morceaux d’un même texte, dans l’ordre que tu veux ; l’application les lit dans l’ordre de ta grille. Touche deux fois un morceau rattaché pour le détacher.',
-        bandeauChoix: function (b, rattache) { return 'Outil « Rattacher » : touche maintenant le morceau à joindre à « ' + b + ' ». Retouche « ' + b + ' » pour ' + (rattache ? 'le détacher.' : 'annuler.'); },
+        bandeau: 'Outil « Rattacher » : touche deux parties d’un même texte, dans l’ordre que tu veux ; l’application les lit dans l’ordre de ta grille. Touche deux fois une partie rattachée pour la détacher.',
+        bandeauChoix: function (b, rattache) { return 'Outil « Rattacher » : touche maintenant la partie à joindre à « ' + b + ' ». Retouche « ' + b + ' » pour ' + (rattache ? 'la détacher.' : 'annuler.'); },
         // 13 nov. 2026 : `bandeau` et `bandeauChoix` se lisent dans la carte ; `enMain` et `choisi` ne gardent que le fait.
         enMain: 'Outil « Rattacher » en main.',
-        choisi: function (b) { return 'Morceau choisi : « ' + b + ' ».'; },
+        choisi: function (b) { return 'Partie choisie : « ' + b + ' ».'; },
         annule: 'Choix annulé : aucun lien créé.',
-        lie: function (t) { return 'Morceaux rattachés : l’application lit « ' + t + ' ».'; },
-        etiquetteRetiree: function (nom) { return ' L’étiquette « ' + nom + ' » de la suite est retirée : celle du premier morceau vaut pour le texte entier.'; },
-        reportee: function (nom) { return ' L’étiquette « ' + nom + ' » passe au premier morceau : elle vaut pour le texte entier.'; },
-        defait: function (b) { return 'Lien défait : « ' + b + ' » redevient un morceau à part.'; },
-        rien: 'Ces deux morceaux sont déjà rattachés : rien ne change.',
-        sansEtiquette: function (a) { return 'Ce morceau est la suite de « ' + a + ' » : l’étiquette de « ' + a + ' » vaut pour le texte entier. Détache-le avec « Rattacher » pour l’étiqueter à part.'; },
-        suiteDe: function (a) { return 'Ce morceau est la suite de « ' + a + ' » : l’application les lit comme un seul texte.'; },
+        lie: function (t) { return 'Parties rattachées : l’application lit « ' + t + ' ».'; },
+        etiquetteRetiree: function (nom) { return ' L’étiquette « ' + nom + ' » de la suite est retirée : celle de la première partie vaut pour le texte entier.'; },
+        reportee: function (nom) { return ' L’étiquette « ' + nom + ' » passe à la première partie : elle vaut pour le texte entier.'; },
+        defait: function (b) { return 'Lien défait : « ' + b + ' » redevient une partie à part.'; },
+        rien: 'Ces deux parties sont déjà rattachées : rien ne change.',
+        sansEtiquette: function (a) { return 'Cette partie est la suite de « ' + a + ' » : l’étiquette de « ' + a + ' » vaut pour le texte entier. Détache-la avec « Rattacher » pour l’étiqueter à part.'; },
+        suiteDe: function (a) { return 'Cette partie est la suite de « ' + a + ' » : l’application les lit comme un seul texte.'; },
         nomEntier: function (t) { return 'L’application lit : « ' + t + ' »'; }
     };
 
@@ -124,8 +124,10 @@
      * Textes PROPOSÉS (Claude Code), lus par l'enseignant·e, corrigeables.
      */
     var TEXTES_EXEMPLE = {
-        complet: 'L’exemple, avec toutes ses étiquettes posées. Il ne s’enregistre pas.',
-        exercice: 'L’exemple, sans étiquettes : à toi de les poser. Il ne s’enregistre pas.',
+        // 14 nov. 2026 (essai novice, lot 4e) : la page ne dit plus qu'UNE fois que l'exemple ne s'enregistre pas, en
+        // bas, près du nom (`note`). Ces deux phrases le redisaient en haut (« Il ne s'enregistre pas. »).
+        complet: 'L’exemple, avec toutes ses étiquettes posées.',
+        exercice: 'L’exemple, sans étiquettes : à toi de les poser.',
         note: 'C’est l’exemple : il ne devient pas une de tes grilles.',
         // PROPOSÉ (13 nov. 2026) : la sortie de l'exemple dans la page, à la place de « Coller une autre grille ».
         quitter: 'Quitter l’exemple'
@@ -155,8 +157,8 @@
             doigt: 'Pour en étiqueter plusieurs d’un coup, garde le doigt posé un instant, puis glisse.',
             souris: 'Pour en étiqueter plusieurs d’un coup, glisse dessus.'
         },
-        designe: 'Touche les morceaux de ta grille qu’elle désigne : ils prennent sa couleur.',
-        retirer: 'Touche un morceau déjà étiqueté pour retirer son étiquette.',
+        designe: 'Touche les parties de ta grille qu’elle désigne : elles prennent sa couleur.',
+        retirer: 'Touche une partie déjà étiquetée pour retirer son étiquette.',
         lire: 'En bas, lis la grille que l’application en tirerait, puis crée-la.',
         choisie: function (nom) { return 'Étiquette « ' + nom + ' » choisie.'; },
         lectureVide: 'Étiquette ta grille : la lecture de l’application apparaîtra ici.',
@@ -424,7 +426,7 @@
             var t = b.getAttribute('data-type'), T = enMain(t);
             b.setAttribute('aria-pressed', t === etat.actif ? 'true' : 'false');
             b.querySelector('.dissection-etiquette-compte').textContent = compte[t] ? String(compte[t]) : '';
-            b.setAttribute('aria-label', T.nom + ' : ' + T.aide + (compte[t] ? ', ' + pluriel(compte[t], 'morceau étiqueté', 'morceaux étiquetés') : ''));
+            b.setAttribute('aria-label', T.nom + ' : ' + T.aide + (compte[t] ? ', ' + pluriel(compte[t], 'partie étiquetée', 'parties étiquetées') : ''));
         });
     }
 
@@ -504,7 +506,7 @@
         if (!etat.actif) {
             var t = typeDe(id);
             if (etat.rattachements[id] != null) dire(TEXTES_LIEN.suiteDe(mots(etat.rattachements[id])));
-            else if (t) { eclair(t); dire('Ce morceau porte l’étiquette « ' + D().TYPE[t].nom + ' ». Pour la changer, touche une autre étiquette, puis ce morceau.'); }
+            else if (t) { eclair(t); dire('Cette partie porte l’étiquette « ' + D().TYPE[t].nom + ' ». Pour la changer, touche une autre étiquette, puis cette partie.'); }
             else dire(TEXTES_LEGENDE.aucune);
             return;
         }
@@ -545,9 +547,9 @@
 
     /** Un surlignage fini : la palette, la lecture, le brouillon ; un membre rattaché touché, dit. */
     function finSurlignage() {
-        // Après un geste, ce que l'aide désigne est amené de nouveau s'il est sorti de la vue (entre deux gestes, la
-        // personne garde la main sur le défilement).
-        etiquetteAmenee = morceauAmene = null;
+        // 13 nov. 2026 (rapport de Grégoire, 16 h 46, iPad : « à chaque fois que je clique sur un élément, l'affichage de la
+        // grille remonte ») : un geste d'étiquetage ne remet plus les repères de l'amenée. Avant, le redessin suivant
+        // ramenait le canevas et la légende à ce que l'aide désigne, où que la personne soit en train d'étiqueter.
         desarmer();
         majPalette();
         rendreLecture();
@@ -929,7 +931,7 @@
         rendreSansPlace(sp, R);
         if (D().estListeDeCodes(R)) {
             cs.appendChild(noeud('span', 'dissection-constat', pluriel(R.codes.length, 'code', 'codes')));
-            cs.appendChild(noeud('span', 'dissection-constat', pluriel(R.sansEtiquette, 'morceau sans étiquette', 'morceaux sans étiquette')));
+            cs.appendChild(noeud('span', 'dissection-constat', pluriel(R.sansEtiquette, 'partie sans étiquette', 'parties sans étiquette')));
             if (R.codes.length) cp.appendChild(tableCodes(R));
             return;
         }
@@ -946,7 +948,7 @@
 
     function rendreSansPlace(sp, R) {
         if (!R.sansPlace.length) return;
-        sp.appendChild(noeud('p', null, 'Ces morceaux ont une étiquette, mais l’application ne saurait pas où les ranger :'));
+        sp.appendChild(noeud('p', null, 'Ces parties ont une étiquette, mais l’application ne saurait pas où les ranger :'));
         var ul = noeud('ul');
         R.sansPlace.forEach(function (s) { ul.appendChild(noeud('li', null, '« ' + s.t + ' » (' + D().TYPE[s.type].nom + ') : ' + s.raison)); });
         sp.appendChild(ul);
@@ -974,7 +976,7 @@
         // Lot 2b : le choix (logique « les deux » seulement) et le tableau des niveaux.
         choix: 'Le résultat d’une copie viendrait :',
         choixPoints: 'des points',
-        choixNiveaux: 'des niveaux',
+        choixNiveaux: 'des niveaux de performance',   // 14 nov. 2026 (règle 6 : « niveau de performance »)
         niveaux: 'Ce que vaut chaque niveau',
         niveauxAide: 'Pour chaque niveau : la plage de notes qu’il couvre, et la note qu’une copie reçoit à ce niveau.',
         de: 'de',
@@ -1357,6 +1359,19 @@
         if (cible) { if (!r.erreur) cible.tabIndex = -1; cible.focus(); }
     }
 
+    /**
+     * Lot « étiquette Sous-total » (13 nov. 2026) : une pastille par tranche en écart ; si toutes celles qui se
+     * comparent tombent juste, une seule. Textes de la consigne du lot, proposés à Grégoire tels quels.
+     */
+    function rendreConstatsSousTotaux(constat, sousTotaux) {
+        var juges = sousTotaux.filter(function (st) { return st.ok != null; });
+        var ecarts = juges.filter(function (st) { return !st.ok; });
+        ecarts.forEach(function (st) {
+            constat('Sous-total de ' + formaterNombre(st.ecrit) + ' : ses critères donnent ' + formaterNombre(st.somme) + ' : écart', 'dissection-constat-ecart');
+        });
+        if (juges.length && !ecarts.length) constat('Sous-totaux ✓', 'dissection-constat-ok');
+    }
+
     /** Les constats en pastilles : titre, sections, critères, niveaux, réponses, somme et total, morceaux sans étiquette. */
     function rendreConstats(cs, R, b) {
         function constat(t, cl) { cs.appendChild(noeud('span', 'dissection-constat' + (cl ? ' ' + cl : ''), t)); }
@@ -1371,7 +1386,8 @@
             constat('Somme des pondérations : ' + formaterNombre(b.somme) + ' · ton total : ' + formaterNombre(b.total) + (b.totalOk ? ' ✓' : ' : écart'),
                 b.totalOk ? 'dissection-constat-ok' : 'dissection-constat-ecart');
         } else if (b.aDesPoids) constat('Somme des pondérations : ' + formaterNombre(b.somme));
-        constat(pluriel(R.sansEtiquette, 'morceau sans étiquette', 'morceaux sans étiquette'));
+        rendreConstatsSousTotaux(constat, b.sousTotaux || []);
+        constat(pluriel(R.sansEtiquette, 'partie sans étiquette', 'parties sans étiquette'));
     }
 
     // ------------------------------------------------------------------
@@ -1426,6 +1442,11 @@
         };
     }
 
+    /** L'interrupteur de la carte d'aide suit l'écran (13 nov. 2026) : il passe sous l'en-tête de l'étiquetage. */
+    function aideSuitLEcran() {
+        if (window.MaterielAide) window.MaterielAide.regler();
+    }
+
     /**
      * Ouvre la dissection sur un document disséqué (`materielDissectionLecture.docDepuisPressePapiers`
      * ou `exempleDoc`) : l'accueil se masque, la grille s'affiche sans étiquette. Lot 11 : le collage
@@ -1442,7 +1463,7 @@
             ['liens', 'coupes', 'rattachements', 'nomSaisi', 'compte', 'valeurs'].forEach(function (k) { etat[k] = reprise[k]; });
         }
         etiquetteAmenee = null;
-        morceauAmene = null;
+        canevasAAmener = true;
         if (exemple) {
             etat.exemple = exemple;
             if (exemple === 'complet') etat.liens = D().exempleLiens(doc);
@@ -1454,6 +1475,7 @@
         majPalette(); majBandeau(); rendreLecture(); planifierDessin();
         if (accueil) accueil.classList.add('u-hide');
         vue.classList.remove('u-hide');
+        aideSuitLEcran();
         // Point 1 (iPad, 11 nov.) : la liste des étiquettes s'ouvre en montrant le haut. Après l'affichage : sur une vue
         // masquée, WebKit ignore le geste et rend, au retour, le défilement de la dissection d'avant (mesuré le 12 nov.).
         var pal = el('dissection-palette');
@@ -1461,9 +1483,9 @@
         majDefilementPalette();
         var n = etat.morceaux.ordre.length;
         dire(message || (exemple ? TEXTES_EXEMPLE[exemple] : null) || (doc.mode === 'table'
-            ? 'Tableau collé : ' + pluriel(doc.rows.length, 'rangée', 'rangées') + ', ' + pluriel(n, 'morceau', 'morceaux') + '.'
+            ? 'Tableau collé : ' + pluriel(doc.rows.length, 'rangée', 'rangées') + ', ' + pluriel(n, 'partie', 'parties') + '.'
             // Validé G. 18 oct. 9 h 52 avec « rattachera » ; revu pour le nom de l'outil du lot 7, validé G. 18 oct. 17 h 18.
-            : 'Texte collé : ' + pluriel(n, 'ligne', 'lignes') + ', sans tableau. L’application rangera les morceaux selon leur ordre.'));
+            : 'Texte collé : ' + pluriel(n, 'ligne', 'lignes') + ', sans tableau. L’application rangera les parties selon leur ordre.'));
         var titre = el('dissection-titre');
         if (titre) titre.focus();   // règle SPA : le focus suit le changement de vue
         if (!reprise) enregistrer();
@@ -1514,18 +1536,30 @@
      * L'étiquette que l'aide désigne, amenée au milieu de la liste, une fois par changement : sinon, en haut ou en bas,
      * elle restait sous « ▲ … plus haut » (mesuré sous WebKit le 12 nov. : la flèche et le halo ne la trouvaient pas).
      */
-    var etiquetteAmenee = null, morceauAmene = null;
+    var etiquetteAmenee = null;
 
     /**
-     * Le morceau que l'aide désigne, amené dans le canevas (lui seul défile, la page ne bouge pas), une fois par
-     * changement : défilé de côté hors du canevas, il ne recevait pas de flèche (mesuré à 820 × 1180, le 12 nov.).
+     * Le morceau que l'aide désigne, amené dans le canevas (lui seul défile, la page ne bouge pas) : défilé de côté hors
+     * du canevas, il ne recevait pas de flèche (mesuré à 820 × 1180, le 12 nov.). 13 nov. 2026 : il n'y est amené qu'à
+     * l'ouverture de la dissection et quand la personne agit sur la carte (`amenerLeMorceauDesigne`, l'interrupteur) ;
+     * jamais à la suite d'un geste dans le canevas, même si le morceau désigné change : la feuille reste où elle est.
      */
+    var canevasAAmener = false;
+    function amenerLeMorceauDesigne() { canevasAAmener = true; }
     function amenerDansLeCanevas(b) {
         var cv = el('dissection-canevas');
         if (!b || !cv) return;
         var r = b.getBoundingClientRect(), c = cv.getBoundingClientRect(), m = 16;
         if (r.left < c.left + m || r.right > c.right - m) cv.scrollLeft += r.left - c.left - m;
         if (r.top < c.top + m || r.bottom > c.bottom - m) cv.scrollTop += (r.top + r.height / 2) - (c.top + c.height / 2);
+    }
+    /** Le morceau se voit dans le canevas : son milieu est dans le cadre (défilé hors de lui, il ne se voit pas). */
+    function vuDansLeCanevas(b) {
+        var cv = el('dissection-canevas');
+        if (!b || !cv) return false;
+        var r = b.getBoundingClientRect(), c = cv.getBoundingClientRect();
+        var x = (r.left + r.right) / 2, y = (r.top + r.bottom) / 2;
+        return x >= c.left && x <= c.right && y >= c.top && y <= c.bottom;
     }
     /** Vrai si la légende défile dans son cadre (à 661 px et moins, elle s'étale : tout s'y voit). */
     function legendeDefile(pal) {
@@ -1561,7 +1595,7 @@
      * Point 4 : l'aide pas à pas de la bulle « Ta grille », pour la dissection ouverte (null sinon). `D.aide` sur le
      * PREMIER manque, puis ce qu'elle désigne dans la page : `etiquetteEl` (le bouton de la légende, ou la pastille qui y
      * mène quand il est caché : `etiquetteOuSonChemin`), `morceauEl` (le
-     * morceau où toucher, quand l'application le sait), `cibleEl` (un champ sous la lecture, ou « Créer ma grille »),
+     * morceau où toucher, quand l'application le sait ; `morceauVu` : il se voit dans le canevas), `cibleEl` (un champ sous la lecture, ou « Créer ma grille »),
      * `enMain` (l'étiquette à prendre est déjà le surligneur). Rien ne s'écrit.
      */
     function aide() {
@@ -1570,12 +1604,16 @@
         var a = D().aide({ doc: etat.doc, liens: etat.liens, rattachements: etat.rattachements, manque: m[0] || null, enCodes: D().estListeDeCodes(R) });
         var b = a.etiquette ? document.querySelector('#dissection-palette .dissection-etiquette[data-type="' + a.etiquette + '"]') : null;
         a.morceauEl = a.morceau && blocs[a.morceau] ? blocs[a.morceau] : null;
-        // Amenée quand l'étiquette désignée change, et après chaque geste d'étiquetage (`finSurlignage` remet le repère).
+        // La légende : amenée quand l'étiquette désignée CHANGE, pas après chaque geste d'étiquetage (13 nov. 2026).
         // Point 6 du relais du 12 nov., 11 h 25 : un défilement de la personne seul ne la ramène pas (elle garde la main
         // sur la légende) ; cachée par lui, la carte vise la pastille qui y mène, jamais l'étiquette hors du cadre.
         if (a.etiquette !== etiquetteAmenee) { etiquetteAmenee = a.etiquette; amenerDansLaListe(b); }
         a.etiquetteEl = etiquetteOuSonChemin(b);
-        if (a.morceau !== morceauAmene) { morceauAmene = a.morceau; amenerDansLeCanevas(a.morceauEl); }
+        // Le canevas : une seule fois par demande (l'ouverture, la carte) ; sans morceau désigné, la demande s'éteint.
+        if (canevasAAmener) { canevasAAmener = false; amenerDansLeCanevas(a.morceauEl); }
+        // `morceauVu` : hors de la vue du canevas, le morceau désigné n'est pas le contour de la carte (`materiel-aide.js`) ;
+        // sinon le moteur l'amenait lui-même (`suivreContour`, `scrollIntoView`), et la feuille bougeait sous la personne.
+        a.morceauVu = vuDansLeCanevas(a.morceauEl);
         a.cibleEl = a.cible ? cibleDeLAide(a.cible) : null;
         a.enMain = !!a.etiquette && etat.actif === a.etiquette;
         return a;
@@ -1701,6 +1739,7 @@
         ouvrirExemple: ouvrirExemple,
         exempleOuvert: exempleOuvert,
         aide: aide,
+        amenerLeMorceauDesigne: amenerLeMorceauDesigne,
         consignes: consignes,
         fermer: fermer,
         reprendre: reprendre,

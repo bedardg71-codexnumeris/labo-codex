@@ -7,6 +7,148 @@
 
 ---
 
+## 15 NOV. 2026, 17 H 20 (Claude Code) : **1.248.0 POUSSÉE ET EN LIGNE, VERDICT VERT** — `lot/gel-etape-7` et `lot/editeur-pages-definition` fusionnés
+
+Mandat : relais de Cowork du 15 nov., 13 h 04 (fusion des deux lots, une release mineure, un seul verdict, mise en ligne décidée par Grégoire). **`origin/main` = `513609dd5`** (1.248.0, build `1115-1307`, « Des copies qui restent nettes ») ; Netlify `6afa2ef7`, `ready` à 17 h 15 sur ce SHA ; le `version.json` du permalien dit `1.248.0`, build `1115-1307`. **Le travail le plus récent vit sur `main`.** Remplace les entrées de 9 h 21, 9 h 05 et 8 h 50 (la première citait encore `4863237dc` ; le lot a été fusionné à `6aa4f2ca5`).
+
+- **Fusionné**, `--no-ff`, le gel d'abord : `2a2854414` (`lot/gel-etape-7`, `856d72d99`, sans conflit), puis `891a150df` (`lot/editeur-pages-definition`, `6aa4f2ca5`, PR n° 26 passée à « fusionnée » au push). Un seul conflit : `BACKLOG.md` (les deux sections gardées ; **Dernier ID : #1283** ; #1279 reste libre). `index.html` fusionné sans conflit. Fait dans un arbre à part, `/Users/kuekatsheu/Documents/GitHub/labo-codex-fusion` : l'arbre principal était sur `lot/gel-etape-7`, deux autres sessions y étaient ouvertes à 13 h 05.
+- **Relu ensemble** : les deux lots ne se recoupent que sur `BACKLOG.md` et `index.html` ; aucun sélecteur retiré par la définition n'est cité par les parcours. Sentinelle 1007 : P14 (« Effacer la page ») sorti du registre des gestes proposés au codex, l'ordre « rien à effacer, confirmation, vidage » gardé. Cliquet de complexité : `initialiserModuleTravaux` 37 → 34 (resserré).
+- **Release** `08ad0df23` (mineure, `scripts/release.mjs`). Le hook de commit a refusé `js/codex.js?v=20261115a` (déjà servi par `5bfe15862`, sur l'aperçu n° 26) : posé `20261115b`, comme il le proposait.
+- **Premier verdict** sur `08ad0df23` : 1 688 essais, 1 686 verts, 1 au second essai (`profil-rangee-1151.spec.js`, hors du groupe), **1 rouge du groupe** : `import-bandeaux-612.spec.js`, cas 2, attendait encore « Choisissez un groupe-cours » alors que la retouche de `6aa4f2ca5` tutoie. Corrigé dans la spec seule (`513609dd5`), aucun code touché.
+- **Second verdict** sur `513609dd5` (`verdict-en-morceaux.mjs`, dix morceaux, secteur, app Claude fermée, mémoire libre entre 82 et 85 %) : 1 688 essais, 1 684 verts, 4 au second essai, 0 rouge, 68 sautés. Du groupe, rejoués seuls **six fois sur six verts** : `reunir-en-une-copie-1231.spec.js` (« une production habituelle en trois photos ») et `parcours-3-evaluer-2026-11-09.spec.js` (étape 8 à 820 px). Hors du groupe, nommés : `grilles-sous-criteres-condense.spec.js` (iPad, #534, déjà au jeton du 14) et `palette-evaluation-compacte.spec.js` (la bulle). « Une copie réunie survit au rechargement » n'a pas rougi. Vitest : 927 fichiers, 11 811 essais.
+- **Nouvelles** : mots **validés par Grégoire** (relais de Cowork). L'entrée n'admet qu'un titre : « Des copies qui restent nettes » gardé, la ligne du gel en premier item (repli prévu par le relais), cinq items.
+- **Stock** (inchangé depuis le rapport du lot) : les copies déjà réduites le restent ; rien n'est réparé d'office.
+- **Encore dû** : le sixième geste de l'iPad, admis ; un regard sur l'iPad après la mise en ligne pour le gel (tableau coupé, page vide au retour : non reproduits) ; #1278 et #1283, inscrits, non commencés.
+- **GitHub** : le passage WebKit Linux de `513609dd5` tournait à la clôture (run 43768254302), non lu.
+
+**Complexité** (1.247.0 `3b16daa50` → 1.248.0 `513609dd5`) :
+- fichiers de plus de 1 000 lignes : 43 → 43 ; lignes de code : 169 979 → 170 322 (Δ +343) ;
+- au-dessus de 15 : 434 → 434 (Δ 0) ; somme au-dessus de 15 : 10 954 → 10 953 (Δ −1) ;
+- au-dessus de 30 : 77 → 77 (Δ 0) ; maximum : 130 ; fonctions : 17 398 → 17 463.
+
+## 15 NOV. 2026, 9 H 21 (Claude Code) : **`lot/editeur-pages-definition` AVANCE À `4863237dc`, TOUJOURS NON FUSIONNÉ** — trois ajouts du mandat de Cowork de 9 h 00
+
+Remplace l'état donné à l'entrée de 8 h 50 pour ce lot. Rapport à jour sur la branche : `plans de travail/RAPPORT-2026-11-15-editeur-pages-definition.md` (§ 10 à 15). Arbre de travail : `/Users/kuekatsheu/Documents/GitHub/labo-codex-editeur-pages`.
+
+- **Ajouté** : le PDF réuni à l'import garde sa définition (#880) ; « Effacer la page » demande une confirmation, aux mots de Grégoire ; le carrousel d'Annoter suit les copies après un remplacement (bug vécu, iPad, 1.247.0 : il n'était pas refait à l'arrivée par « Annoter » de la Liste).
+- **Jugé** : Vitest complet vert (926 fichiers, 11 805 essais) ; deux passages WebKit ciblés, verts (55 puis 40 essais). **Non jugé : le verdict complet.**
+- **Encore dû** avant une mise en ligne : le verdict complet ; un essai de Grégoire sur l'iPad avec une vraie copie (fichiers bien plus lourds qu'avant) ; la relecture croisée ; trois approbations (« (réuni en un seul PDF) », la règle « une seule question » avec le codex, la ligne de Nouvelles).
+
+## 15 NOV. 2026, 9 H 05 (Claude Code) : **LE TRAVAIL VIT SUR `lot/gel-etape-7`, NON FUSIONNÉ** — `main` inchangé pour le code (1.247.0) ; en attente de la relecture de Cowork
+
+Mandats : deux relais de Cowork du 15 nov. (diagnostic du gel vécu par Grégoire sur l'iPad à 7 h 12 ; puis correctif des points 1, 2 et 4 pour la fenêtre du lundi 16 nov. vers midi). **Ni fusion, ni release, ni verdict complet avant la relecture de Cowork.** `origin/lot/gel-etape-7` = `856d72d99`, un commit au-dessus de `main` (`41f68d315`).
+
+- **Le gel** : à l'étape 7 de « Mettre ta classe en place », le placement de la bulle coûtait le cube du nombre de zones (une par cellule de la saisie). Mesuré sous WebKit au premier passage, hors « Refaire » : la page répondait en 7 s à 24 rangées, en 22 à 27 s à 36. Après : 43 et 58 ms. Corrigé dans le moteur (`reduireEvites`, bords dédoublonnés), pas dans l'étape.
+- **Les flèches** : les cibles qui se touchent n'en font qu'une (une flèche vers la colonne Présence, plus une par rangée).
+- **La visite** (« Refaire », et toute étape faite revue par le compteur) : ni contour ni flèche sur un contrôle qui écrit ; la consigne devient la phrase de Grégoire. Ce que le moteur tient pour « un contrôle qui écrit » est dit au rapport.
+- **Vérifié** : Vitest complet (927 fichiers, 11 814 essais, verts) ; WebKit ciblé sur les parcours (trois passages : 43, 48, 47 essais, verts) et les 3 essais neufs ; break-tests rouges pour chaque défense. **Pas de verdict Playwright complet** : il se prend après la relecture.
+- **Inscrit** : **#1278** (le témoin « Non enregistré » tait la clé et l'erreur ; sans urgence). #1279 reste libre.
+- **Encore dû** : la relecture de Cowork ; le verdict du Mac ; la fusion ; un patch, avec sa ligne de Nouvelles (proposée au rapport, à valider par Grégoire) ; un regard sur l'iPad après la mise en ligne (tableau coupé, page vide au retour : non reproduits).
+- **Rapport** : `plans de travail/RAPPORT-2026-11-15-gel-refaire.md`, versionné SUR LA BRANCHE.
+- ⚠ `index.html` : les jetons anti-cache de `parcours-moteur.js` et `parcours-classe.js` passent à `20261114b` sur la branche ; `lot/editeur-pages-definition` touche aussi `index.html` (autre session, même matin).
+
+## 15 NOV. 2026, 8 H 50 (Claude Code) : **LE TRAVAIL VIT SUR `lot/editeur-pages-definition`, NON FUSIONNÉ** — `main` inchangé (`41f68d315`, 1.247.0)
+
+Mandat : consigne de Cowork du 15 nov., 8 h 14, sur un défaut VÉCU par Grégoire (iPad, 1.247.0) : une copie de 2 728 x 1 748 px floue dans Annoter après avoir inversé ses pages dans l'éditeur de pages. **Ni verdict complet, ni fusion, ni release.** `origin/lot/editeur-pages-definition` = `d1495856e`, deux commits au-dessus de `main`. Rapport : `plans de travail/RAPPORT-2026-11-15-editeur-pages-definition.md`, SUR LA BRANCHE.
+
+- **Fait** : l'éditeur de pages garde la définition (les octets JPEG de chaque page repris tels quels dans le PDF de l'application ; pivot à pleine définition) ; les Propriétés disent les pixels de chaque page ; l'écran d'import dit la définition des PDF ; le gabarit de « Rés. max. » suit l'orientation de l'image.
+- **Jugé** : Vitest complet vert (926 fichiers, 11 807 essais) ; WebKit en un passage ciblé de 26 essais, vert ; les huit essais neufs rouges sur `41f68d315`. **Non jugé : le verdict complet.**
+- **Stock** : les copies déjà réduites le restent ; rien n'est réparé d'office, Grégoire réimporte les originaux.
+- **Encore dû** : verdict complet, relecture croisée, fusion ; les mots d'écran et la ligne de Nouvelles à approuver (au rapport) ; un constat à inscrire ou non (l'import groupé de PDF, #880, rend encore chaque page à 1 400 px au plus).
+- ⚠ **Arbres de travail** : ce lot vit dans `/Users/kuekatsheu/Documents/GitHub/labo-codex-editeur-pages`. La session a d'abord écrit dans l'arbre principal pendant que `lot/gel-etape-7` y travaillait (8 h 15 à 8 h 28) ; ses changements en ont été retirés, aucun fichier de l'autre session n'a été touché. Détail au rapport, § 8.
+
+## 14 NOV. 2026, 20 H 35 (Claude Code) : **1.247.0 POUSSÉE ET EN LIGNE, VERDICT VERT** — l'essai novice du 14 nov. fusionné
+
+Mandat : deux relais de Cowork du 14 nov. (deux retouches avant le verdict ; puis, au vert, fusion, release mineure, mise en ligne). **`origin/main` = `3b16daa50`** (1.247.0, build `1114-1819`, « Des parcours plus légers ») ; Netlify `6af90b55`, `ready` à 20 h 31 sur ce SHA ; le `version.js` du permalien dit `1.247.0`, build `1114-1819`. **Le travail le plus récent vit sur `main`.**
+
+- **Deux retouches** (`be0d7bdf1`, sur la branche) : la consigne de la dernière bulle suit ses boutons (« Touche « Parcours suivant », ou « Terminer » » quand les deux sont offerts ; source unique dans `js/parcours-moteur.js`) ; à l'étape 8 de « Mettre ta classe en place », l'absence ne se dit que pour le groupe-cours actif et pour la séance qui vient d'être verrouillée. Break-tests rouges pour les deux. Suppositions nommées au rapport de la session (la séance « qui vient d'être verrouillée » = la date nouvellement verrouillée depuis l'étape 7, sinon la plus récente).
+- **Verdict de Grégoire sur la branche** (`be0d7bdf1`, `verifier-playwright.mjs`, d'un bloc) : vert, aucune veille.
+- **Fusionné** : `lot/essai-novice-14-nov` dans `main`, `--no-ff` (`f5d64b858`), sans conflit. **Ni `lot/verdict-nuage` ni `lot/deux-temps-modeles`**, non touchés.
+- **Verdict du Mac** sur `3b16daa50` (`verdict-en-morceaux.mjs`, dix morceaux, aucune veille, secteur) : 1 671 essais, 1 670 verts, 1 au second essai (`grilles-sous-criteres-condense.spec.js`, iPad, #534), 0 rouge, 68 sautés. Vitest : 926 fichiers, 11 807 essais. Le hook de push a lu le jeton à jour. ⚠ L'app Claude était ouverte pendant le passage (la garde ne l'a pas refusé ; mémoire libre à 80 % à la fin).
+- **Nouvelles** : titre et quatre lignes **validés par Grégoire, mot pour mot** (relais de Cowork).
+- **Inscrits, non commencés** : **#1281** (le reste du lot 4 f : ordre fixe de l'exercice, « Comment étiqueter ? », « Voir la suite de l'exemple », la carte hors parcours) ; **#1282** (la dernière bulle d'« Évaluer une première production » dit « … verrouille, puis touche « Terminer ». » sous deux boutons). #1278 et #1279 restent libres.
+- **Encore dû** : les dix gestes sur l'iPad, sur la version en ligne (`plans de travail/PORTES-2026-11-14-essai-novice.md` ; l'artefact est à publier par Cowork) ; les validations de textes de Grégoire (liste au rapport de la session du 14 nov.).
+- **GitHub** : le passage WebKit Linux de `3b16daa50` tournait à la clôture, non lu.
+
+**Complexité** (1.246.0 `9b2bea833` → 1.247.0 `3b16daa50`) :
+- fichiers de plus de 1 000 lignes : 43 → 43 ; lignes de code : 169 445 → 169 979 (Δ +534) ;
+- au-dessus de 15 : 434 → 434 (Δ 0) ; somme au-dessus de 15 : 10 954 → 10 954 (Δ 0) ;
+- au-dessus de 30 : 77 → 77 (Δ 0) ; maximum : 130 ; fonctions : 17 326 → 17 398.
+
+## 14 NOV. 2026, 15 H 10 (Claude Code) : **LE TRAVAIL VIT SUR `lot/essai-novice-14-nov`, NON FUSIONNÉ** — `main` inchangé (`22e67a309`, 1.246.0) ; PR #24 pour l'aperçu
+
+Mandat : consigne de Cowork du 14 nov., 12 h 10 (`plans de travail/CONSIGNE-2026-11-14-essai-novice.md`, versionnée SUR LA BRANCHE), session autonome pendant le repos de Grégoire. **Ni fusion, ni release, ni Nouvelles, ni verdict complet : Grégoire lance le verdict à son retour.** `origin/lot/essai-novice-14-nov` = `3e1526788`, cinq commits au-dessus de `main`.
+
+- **Lot 1** (`188694510`) : le nom du trimestre se crée de la session et de l'année (lecture seule) ; heures d'un cours = (théorie + labo) × 15, quel que soit le calendrier ; « pér. » se propose d'après le début et la fin, dans un NOUVEL horaire seulement.
+- **Lot 2** (`d4151a3cd`) : le moteur des parcours — lignes qui se grisent au crochet, « n sur N » devenu un bouton (liste des étapes, étape faite revue en visite), « Tu es dans… » avec halo au menu et page en haut, « Parcours suivant » et « Terminer » de même poids. `js/config.js` et `js/navigation.js` non touchés.
+- **Lot 3** (`c19e3a0f6`) : les huit bulles de « Mettre ta classe en place » en lignes ; « Refaire » rejoue le parcours en visite au lieu de mener à 8 sur 8 ; fin de « Découvrir » : « Explorer la démo par moi-même ».
+- **Lot 4** (`4a73f7cf1`) : « partie » remplace « morceau » ; deux bulles d'ouverture d'« Évaluer » ; la bulle « Ta grille » sans bouton, les deux boutons de la page renommés ; bulles devant l'exemple ; « L'exemple est étiqueté » ne paraît plus trop tôt. **LAISSÉ : le reste de 4f** (ordre fixe de l'exercice, « Comment étiqueter ? », « Voir la suite de l'exemple », la carte hors parcours).
+- **Relecture croisée** (`3e1526788`, agent en lecture seule) : douze constats, neuf corrigés, dont deux de STOCK (rien ne se propose plus dans un horaire enregistré). Trois laissés, nommés dans la PR.
+- **Lot 5, mesures sans changement** : chargement à froid en local (WebKit, `file://`), 0,6 à 0,8 s jusqu'à l'application prête : les 50 s vécues en ligne ne viennent ni de l'analyse ni de l'exécution, mais du réseau (250 scripts synchrones, 13,9 Mo bruts, 3,9 Mo compressés). Verdict du 13 nov. : 111 min, 1 726 résultats, 3,8 s en moyenne, 385 fichiers, aucun point chaud (les 20 plus longs font 30 %) ; les dix morceaux font 8 à 15 min chacun, à la suite : ils ne raccourcissent rien.
+- **Jugé** : Vitest complet vert (925 fichiers, 11 584 essais) ; WebKit en passages ciblés, verts. **Non jugé : le verdict complet.**
+- **Encore dû** : le verdict complet par Grégoire, puis la fusion ; ses validations de textes (liste au rapport de la session) ; dix gestes sur l'iPad (`plans de travail/PORTES-2026-11-14-essai-novice.md`, sur la branche ; l'artefact est à publier par Cowork).
+
+## 13 NOV. 2026, 21 H 05 (Claude Code) : **1.246.0 POUSSÉE ET EN LIGNE, VERDICT VERT** — les deux lots du 13 nov. fusionnés
+
+Mandat : relais de Cowork, 13 nov., 18 h 50 (fusion, un seul verdict, mise en ligne). **`origin/main` = `9b2bea833`** (1.246.0, build `1113-1906`, « Sous-totaux, et une grille qui reste en place ») ; Netlify `6af7c094`, `ready` à 21 h 00 sur ce SHA. **Le travail le plus récent vit sur `main`.**
+
+- **Fusionné** : `lot/dissection-defilement-aide` (`f30980b25`, #1276) puis `lot/etiquette-sous-total` (`05801c98d`). Un seul conflit, l'attendu : le jeton de `js/materiel-dissection.js` (`h` à la fusion, `i` à la release). `BACKLOG.md` : l'en-tête des numéros pris et #1277, tous deux gardés. **Pas `lot/deux-temps-modeles`**, toujours à part.
+- **Croisement des deux lots** : essai D3 ajouté à `dissection-defilement-aide-2026-11-13.spec.js` (`6deb7b5c9`) — carte ouverte, canevas en bas, « Sous-total » posé : rien ne bouge. Break-test rouge (canevas 714 → 0).
+- **Relecture indépendante du diff fusionné** (agent en lecture seule, état d'avant cartographié) : six constats. **Un corrigé** (`00253ee8d`) : sans « Total », la somme des sous-totaux n'est le total visé que s'ils couvrent tous les critères pesés (avant : « ton total : 40 : écart » pendant qu'on étiquette les sous-totaux un à un). Les cinq autres ont leur disposition aux deux rapports du 13 nov. (`plans de travail/RAPPORT-2026-11-13-*.md`), aucun inscrit au backlog (rien de vécu).
+- **Verdict du Mac** sur `9b2bea833` (`verdict-en-morceaux.mjs`, dix morceaux, aucune veille) : 1 658 essais, 1 658 verts, 0 au second essai, 0 rouge, 68 sautés. Vitest : 924 fichiers, 11 526 essais. Le hook de push a lu le jeton à jour.
+- **Nouvelles** : titre et deux lignes de Claude Code d'après les mots du relais ; **non relus par Grégoire**.
+- **Encore dû** : les textes et la teinte de « Sous-total » à valider par Grégoire ; **deux gestes sur l'iPad** — carte ouverte, étiqueter plusieurs morceaux de suite plus bas, la grille reste en place ; prendre « Sous-total », toucher « /18 », la pastille dit si les critères donnent 18. ⚠ Si « ça remonte » revient : la relecture note que `suivreContour` (`js/parcours-moteur.js`) peut encore faire défiler la PAGE quand la carte change d'étiquette désignée (non mesuré).
+- **#1277** (« Résultat sur 80 ») : inscrit, non traité, question de didactique pour Grégoire.
+- **GitHub** : le passage WebKit Linux de la 1.245.0 (`d6e5677a`, run 43477454528) a fini ROUGE, 13 specs nouvellement rouges (parcours 2, 3, 5, 7, 9, tableau de notation, vue simple, en-tête épuré, palette compacte, polygone), Mac vert sur le même commit ; non touché. Celui de `9b2bea833` (run 43543782094) tournait à la clôture, non lu.
+
+**Complexité** (1.245.0 `d6e5677a7` → 1.246.0 `9b2bea833`) :
+- fichiers de plus de 1 000 lignes : 43 → 43 ; lignes de code : 169 390 → 169 445 (Δ +55) ;
+- au-dessus de 15 : 434 → 434 (Δ 0) ; somme au-dessus de 15 : 10 954 → 10 954 (Δ 0) ;
+- au-dessus de 30 : 77 → 77 (Δ 0) ; maximum : 130 ; fonctions : 17 312 → 17 326.
+
+## 13 NOV. 2026, 17 H 40 (Claude Code) : **DEUX LOTS POUSSÉS, NON FUSIONNÉS** — `main` inchangé (`2a7aa59b8`, 1.245.0)
+
+Mandats : deux relais de Cowork du 13 nov. (retours terrain de Grégoire sur l'iPad, Conception › Mon matériel). **Le travail le plus récent vit sur deux branches, parties toutes deux de `2a7aa59b8`** ; la fusion revient à Grégoire, du Mac.
+
+- **`lot/dissection-defilement-aide`** (`a969bb3c2`) — **#1276**, « la grille remonte à chaque clic ». Deux causes : `finSurlignage` remettait les repères de l'amenée ; le moteur de la carte amenait un contour hors de vue (`suivreContour`). Le canevas n'est plus amené qu'à l'ouverture et quand la carte est rouverte par son interrupteur. Conséquence assumée : un morceau désigné hors de vue ne reçoit ni flèche ni halo tant qu'on n'y revient pas. Rapport : `plans de travail/RAPPORT-2026-11-13-dissection-defilement-aide.md` (sur la branche).
+- **`lot/etiquette-sous-total`** (`ee6230942`) — l'étiquette « Sous-total » ; #1106 intact, source et stock. **#1277 inscrit, non corrigé** (la conversion « Résultat sur 80 », question de didactique pour Grégoire). Textes et teinte à valider. Rapport : `plans de travail/RAPPORT-2026-11-13-etiquette-sous-total.md` (sur la branche).
+- **À la fusion** : conflit VOULU dans `index.html` sur le jeton de `js/materiel-dissection.js` (`20261113f` d'un côté, `20261113g` de l'autre) : garder une lettre jamais servie. `BACKLOG.md` : l'en-tête (numéros pris) est à jour sur le lot du défilement, l'item #1277 sur le lot Sous-total.
+- **Verdicts** : sur chaque branche, Vitest complet vert (923 et 925 fichiers) et un passage WebKit ciblé du Mac (57 et 46 essais, verts). **La suite Playwright complète n'a été passée sur aucune des deux** : à passer à la fusion.
+- **Gestes à rendre à Grégoire, sur l'iPad** : carte ouverte, descendre et étiqueter plusieurs morceaux, la grille reste en place ; prendre « Sous-total », toucher « /18 », la pastille dit si les critères au-dessus donnent 18.
+- `lot/deux-temps-modeles` : inchangé, toujours à part.
+
+## 13 NOV. 2026, 13 H 00 (Claude Code) : **1.245.0 POUSSÉE ET EN LIGNE, VERDICT VERT** — carte d'aide et rapport de bug fusionnés
+
+Mandat : relais de Cowork, 13 nov., 10 h 15 (Grégoire décide la mise en ligne). **`origin/main` = `d6e5677a7`** (1.245.0, build `1113-1055`, « Ta grille, pas à pas ») ; Netlify `6af74ee5`, `ready` à 12 h 55 sur ce SHA. **Le travail le plus récent vit sur `main`.** PR n° 22 fusionnée.
+
+- **Fusionné** : `lot/carte-aide-materiel` (`30560b0d4`) et `lot/rapport-bug-actions` (`72c6ca1f5`, #1280). **Pas `lot/deux-temps-modeles`** (PR n° 23, décision de Grégoire du 12 nov., 14 h 46) : elle part de l'ancienne tête de la carte d'aide et **n'a pas la correction de l'interrupteur** ; à rebaser sur `main` avant sa fusion.
+- **Porte iPad de la carte d'aide : close**, onze sur onze (9 h 58 à 10 h 07, aperçu n° 22). Demande de Grégoire à 10 h 00, livrée (`de1e0f18b`, `e669fade7`) : l'interrupteur « M'accompagner pour étiqueter ma grille » vient après le paragraphe, à droite ; à l'étiquetage, sous le titre, à droite. Un seul élément, déplacé par `placer()` (`js/materiel-aide.js`). Supposé : « à droite » = le bord droit de la colonne du paragraphe ; iPad couché, il s'arrête avant la place de la carte.
+- **Nouvelles** : titre et lignes 1 et 3 de Claude Code, ligne 2 de Grégoire (son oui est au message du commit de release).
+- **Verdict du Mac** sur `d6e5677a7` : 1 652 essais, 1 651 verts, 1 au second essai, 0 rouge, 68 sautés. L'essai repris : `pages-sans-emboitement-2026-11-07.spec.js` › Préparer (clair), la zone de dépôt. Hors du groupe (les lots ne touchent ni `travaux-ui.js` ni la page Préparer) ; rejoué seul : 1 échec sur 30 sur la release, 0 sur 24 sur `ade84ca2c`. Il lit `.travaux-zero-state` sans l'attendre. Non inscrit au backlog (rien de vécu) ; le hook dit : « si la même revient, c'est un vrai sujet (#685) ».
+- **Vu, non corrigé, non inscrit** : iPad couché, à l'accueil de « Mon matériel », la carte couvre la fin des deux premières lignes du paragraphe ; à l'étiquetage, elle couvre le titre et les deux boutons. Déjà ainsi sur le build que Grégoire a passé.
+- **`scripts/release.mjs`** propose des jetons `?v=` déjà servis sur des branches non fusionnées ; le hook de pré-commit l'attrape (trois refus), on applique les lettres qu'il propose.
+- **GitHub** : le passage WebKit Linux était rouge sur `1661ade8` avant la session (douze specs, connu depuis le 11 nov.) ; celui de `d6e5677a7` (run 43477454528) tournait à la clôture, non lu.
+
+## 13 NOV. 2026, 9 H 35 (Claude Code) : **DEUX LOTS ATTENDENT L'ESSAI DE GRÉGOIRE** — `main` inchangé
+
+Mandats : relève de Cowork, 13 nov., 5 h 05 ; consigne `plans de travail/CONSIGNE-LOT-2026-11-13-deux-temps-modeles.md` (conversation du Projet, 12 nov., 20 h 10). **Le travail le plus récent vit sur `lot/deux-temps-modeles`** (code `683ce5902`, build `1113-0921`, version 1.244.0 inchangée), partie de la tête de `lot/carte-aide-materiel` (`5c43a014e`). **PR d'aperçu n° 23, NON fusionnée : elle porte aussi la carte d'aide (PR n° 22)** et reprend la première partie des deux temps (PR n° 20). Ni release, ni Nouvelles.
+
+- **Livré sur la branche** : A, les libellés « Modélisation » et « Pratique guidée », plus de phrase sans modèle, la liste de dix ; B, le modèle d'« Évaluer une première production » dans la démo, sur le deuxième groupe, avec le matériel de Grégoire. Rapport : `plans de travail/RAPPORT-2026-11-13-deux-temps-modeles.md` (sur la branche).
+- **Remonte à Grégoire** (§3 de la porte) : la grille collée naît en points et le modèle passe par quatre menus « Type » ; la production prend sa description pour nom ; les commentaires s'importent d'un fichier ; le choix du modèle par standards ; la fin de la dernière bulle ; les mots des bulles.
+- **Reste** : deux portes iPad, sans artefact (`PORTES-TERRAIN-2026-11-13-carte-aide-materiel.md`, onze gestes ; `PORTES-TERRAIN-2026-11-13-deux-temps-modeles.md`, quatorze gestes) ; la fusion, par un relais à part ; **aucun verdict complet pris** (passages ciblés seulement).
+- **Hors du lot, corrigé parce que le confinement en dépendait** : la migration des vignettes ne pose plus son témoin global depuis la démo (`js/travaux-stockage.js`).
+- **Le Mac** : piste mesurée, sans lien établi avec la panique de 1 h 06 : `virusbarriers` (Intego), plus gros processus de l'événement Jetsam de 6 h 06 ; la charge moyenne monte par moments à 99 et fait dépasser des délais.
+
+## 13 NOV. 2026, 7 H 50 (Claude Code) : **LA CARTE D'AIDE ATTEND L'ESSAI DE GRÉGOIRE** — `main` inchangé
+
+Mandats : relais de la conversation du Projet, 12 nov., 19 h 15 ; relève de Cowork, 13 nov., 5 h 05 (le Mac a paniqué à 1 h 06 ; le lot était indexé, non committé). **Le travail vit sur `lot/carte-aide-materiel`** (`5c43a014e` ; code `eda8b2bce`, build `1113-0737`, version 1.244.0 inchangée), partie de `main` (`f9c49ec8c`). **PR d'aperçu n° 22, NON fusionnée** ; ni release, ni Nouvelles. `main` reste à `f9c49ec8c` plus cette entrée.
+
+- **Livré sur la branche** : les consignes d'« Apporter mon matériel » quittent la page pour la carte d'aide ; la carte s'offre hors parcours par un interrupteur (préférence `laboCodex.aideMateriel`) ; l'exemple ne prend plus la place du brouillon. Rapport : `plans de travail/RAPPORT-2026-11-13-carte-aide-materiel.md` (sur la branche).
+- **Un correctif qui touche tous les parcours** : le placement de la bulle arrondit du côté libre les places qui longent une zone (`placesEssayees`, `js/parcours-moteur.js`). `parcours-8-commentaires:621` rougissait 4 fois sur 6 sur `main` ; 6/6 après.
+- **Reste** : la porte `plans de travail/PORTES-TERRAIN-2026-11-13-carte-aide-materiel.md` (onze gestes, iPad, sans artefact) ; la fusion, par un relais à part ; **pas de verdict complet pris** (passages ciblés seulement).
+- **Suite en cours** : `lot/deux-temps-modeles`, partie de la tête de `lot/carte-aide-materiel` (consigne : `plans de travail/CONSIGNE-LOT-2026-11-13-deux-temps-modeles.md`, sur la branche).
+- **Mémoire du Mac** : un passage Playwright de plus de cent essais fait tomber la mémoire libre de moitié. Passages de quarante essais au plus, un seul à la fois, aucun shell laissé en fond.
+
 ## 12 NOV. 2026, 17 H 20 (Claude Code) : **1.244.0 POUSSÉE ET EN LIGNE, VERDICT VERT** — deux lots fusionnés
 
 Mandat : relais de la conversation du Projet, 12 nov., 14 h 50 (décision de Grégoire, 14 h 48 : la version part avec DEUX lots). **`origin/main` = `1661ade8c`** (1.244.0, build `1112-1457`) ; Netlify `6af639e8`, `ready` à 17 h 13 sur ce SHA. PR n° 21 et n° 19 fusionnées.

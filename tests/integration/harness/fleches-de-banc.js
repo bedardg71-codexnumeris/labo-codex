@@ -137,3 +137,44 @@ export async function flecheVisant(page, selecteur, contexte = '') {
     }, { message: (contexte ? contexte + ' : ' : '') + 'une flèche vise ' + selecteur, timeout: 5000 }).toBe('posée');
     return trouvee;
 }
+
+/**
+ * La flèche vers un morceau du canevas de la dissection (13 nov. 2026, « la grille ne remonte plus »). Un geste
+ * d'étiquetage ne ramène plus le morceau désigné : défilé hors du canevas, RIEN ne le vise (aucune flèche ne
+ * l'a pour cible) et le canevas ne bouge pas ; la personne y revient (ce banc fait défiler le canevas, comme elle), et la flèche
+ * s'y pose. Vu d'emblée, la flèche s'y pose tout de suite. Rend 'vu' ou 'caché' (ce qu'il était à l'arrivée).
+ */
+export async function flecheVersMorceau(page, selecteur, contexte = '') {
+    const lire = () => page.evaluate((s) => {
+        const b = document.querySelector(s), cv = document.getElementById('dissection-canevas');
+        const r = b.getBoundingClientRect(), c = cv.getBoundingClientRect();
+        const x = (r.left + r.right) / 2, y = (r.top + r.bottom) / 2;
+        const fleches = [...document.querySelectorAll('#parcours-fleches g.parcours-fleche')];
+        const pointes = fleches.map((g) => {
+            const n = g.getAttribute('data-trace').match(/-?\d+(\.\d+)?/g).map(Number);
+            return Math.hypot(Math.max(r.left - n[4], 0, n[4] - r.right), Math.max(r.top - n[5], 0, n[5] - r.bottom));
+        });
+        // 14 nov. 2026 : ce qu'une flèche VISE, c'est sa cible déclarée (`data-cible`, posée par le moteur), pas ce dont
+        // sa pointe passe près. Une flèche vers l'étiquette de la légende finissait à 11 px du morceau caché, à 820 × 1180,
+        // depuis que la bulle est moins haute (son bouton « Prendre une grille déjà créée » est parti) : rien ne le visait.
+        const visent = fleches.map((g) => {
+            const [g0, h0, d0, b0] = (g.getAttribute('data-cible') || '').split(',').map(Number);
+            return Math.min(d0, r.right) - Math.max(g0, r.left) > 1 && Math.min(b0, r.bottom) - Math.max(h0, r.top) > 1;
+        });
+        return { vu: x >= c.left && x <= c.right && y >= c.top && y <= c.bottom, pointes, visent, haut: cv.scrollTop, gauche: cv.scrollLeft };
+    }, selecteur);
+    const a = await lire();
+    if (a.vu) { await flecheVers(page, selecteur, contexte); return 'vu'; }
+    await page.evaluate(() => new Promise((ok) => requestAnimationFrame(() => requestAnimationFrame(() => setTimeout(ok, 250)))));
+    const b = await lire();
+    expect(b.visent.some(Boolean), contexte + ' : caché, aucune flèche ne l’a pour cible (pointes à ' + b.pointes.map(Math.round).join(', ') + ' px)').toBe(false);
+    expect([b.haut, b.gauche], contexte + ' : le canevas n’a pas bougé').toEqual([a.haut, a.gauche]);
+    await page.evaluate((s) => {
+        const m = document.querySelector(s), cv = document.getElementById('dissection-canevas');
+        const r = m.getBoundingClientRect(), c = cv.getBoundingClientRect();
+        cv.scrollLeft += (r.left + r.width / 2) - (c.left + c.width / 2);
+        cv.scrollTop += (r.top + r.height / 2) - (c.top + c.height / 2);
+    }, selecteur);
+    await flecheVers(page, selecteur, contexte + ' (la personne y est revenue)');
+    return 'caché';
+}

@@ -76,7 +76,7 @@ describe('« Apporter mon matériel » — les bulles et l’aide « i » ont le
     });
 
     it('la bulle du menu décrit l’onglet d’aujourd’hui, plus l’assistant retiré', () => {
-        expect(cat['nav-conception-materiel'].hover).toContain('tu montres à l’application ce que veut dire chaque morceau');
+        expect(cat['nav-conception-materiel'].hover).toContain('tu montres à l’application ce que veut dire chaque partie');
         expect(cat['nav-conception-materiel'].hover).not.toContain('ce qu’elle en a compris');
     });
 

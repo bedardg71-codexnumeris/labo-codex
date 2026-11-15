@@ -265,7 +265,8 @@
         },
         {
             titre: 'Poser ton cadre',
-            geste: "Touche « Commencer avec ma classe », ou « Continuer d'explorer la démo ».",
+            // 14 nov. 2026 (validé par Grégoire) : « Continuer d'explorer la démo » faisait attendre d'autres bulles.
+            geste: "Touche « Commencer avec ma classe », ou « Explorer la démo par moi-même ».",
             texte: "Tout repose ici : ton trimestre, tes cours, tes groupes. Les dates de ton trimestre et ton horaire donnent tes séances, et les présences s'y accrochent, comme la matière manquée. Tu viens de faire le chemin à rebours ; avec ta classe, tu le feras à l'endroit : Cadre, Conception, Évaluation. Pas besoin de tout configurer pour voir un premier résultat : dès ta première prise de présences, ta classe apparaît, un point par étudiant·e.",
             sansSortie: true,
             avant: async function () { aller('calendrier', 'trimestre'); window.scrollTo(0, 0); },
@@ -273,7 +274,7 @@
             zones: function () { return [barreDuCadre()].concat(zonesNav('calendrier')); },
             boutons: [
                 { libelle: 'Commencer avec ma classe', primaire: true, action: function () { commencerAvecMaClasse(); } },
-                { libelle: "Continuer d'explorer la démo", action: function () { continuerLaDemo(); } }
+                { libelle: 'Explorer la démo par moi-même', action: function () { continuerLaDemo(); } }
             ]
         }
     ];
@@ -318,7 +319,7 @@
             depuis: depuis || 0,
             surEtape: function (i) { window.Assistance.definirEtat(ID, 'en-cours', i); },
             surQuitter: quitter,
-            // À la dernière bulle, sans lien de sortie, Échap vaut « Continuer d'explorer la démo ».
+            // À la dernière bulle, sans lien de sortie, Échap vaut « Explorer la démo par moi-même ».
             surEchap: function () { continuerLaDemo(); },
             // Sortie de la démo en cours de route (le bandeau vert) : le parcours se ferme et attend.
             verifier: enDemo

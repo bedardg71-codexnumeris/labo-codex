@@ -670,6 +670,54 @@
        =============================== */
 
     /**
+     * Le carrousel d'Annoter refait à partir des copies d'aujourd'hui : les badges, le menu des
+     * productions (ses compteurs), le filtre. Le défilement est gardé.
+     * @param {HTMLElement} badgeStrip - `.annot-toolbar-fichiers`
+     * @param {Array} fichiersTravaux - Les copies à montrer
+     */
+    function _regenererCarrousel(badgeStrip, fichiersTravaux) {
+        const defilement = badgeStrip.scrollLeft;
+        _htmlBadgesGrille = genererGrilleFichiers(fichiersTravaux, 'ouvrirFichier');
+        badgeStrip.innerHTML = _htmlBadgesGrille;
+        badgeStrip.scrollLeft = defilement;
+        // Le dropdown production porte des compteurs : le remplacer, ou le restaurer si absent
+        const prodExistant = document.querySelector('.annot-toolbar-production');
+        if (prodExistant) {
+            prodExistant.innerHTML = _htmlDropdownProduction;
+        } else if (_htmlDropdownProduction) {
+            var prodDiv = document.createElement('div');
+            prodDiv.className = 'annot-toolbar-production';
+            prodDiv.innerHTML = _htmlDropdownProduction;
+            badgeStrip.parentNode.insertBefore(prodDiv, badgeStrip);
+        }
+        if (productionFiltreActive) filtrerBadgesParProduction();
+    }
+
+    /**
+     * LE CARROUSEL SUIT LES COPIES (15 nov. 2026, bug vécu par Grégoire sur l'iPad, 1.247.0).
+     *
+     * Il avait mis la copie d'un élève à la corbeille, puis réimporté la même production. Dans
+     * Annoter, toucher la copie de cet élève ne l'affichait pas : « Fichier introuvable », et la
+     * copie précédente restait à l'écran. Le carrousel n'était refait que par `afficherFichiers`
+     * et par le retour simple dans Annoter. Arriver par un geste qui ouvre une copie (« Annoter »
+     * d'une ligne de la Liste, le profil) saute ces deux chemins, pour ne pas reconstruire sous
+     * l'ouverture qui vient : le carrousel d'avant restait, avec le badge de la copie partie et
+     * sans celui de la copie arrivée. Un rechargement le refaisait.
+     *
+     * Appelée à chaque ouverture d'une copie : ne refait le carrousel que si ses badges ne sont
+     * plus ceux des copies d'aujourd'hui.
+     */
+    function _mettreLeCarrouselAJour() {
+        const badgeStrip = document.querySelector('.annot-toolbar-fichiers');
+        if (!badgeStrip) return;
+        const fichiersTravaux = travauxStockage.obtenirFichiersAffiches();
+        if (fichiersTravaux.length === 0) return;
+        const montres = Array.from(badgeStrip.querySelectorAll('.annot-badge')).map((b) => b.dataset.fichierId).sort().join('|');
+        const attendus = fichiersTravaux.map((f) => f.id).sort().join('|');
+        if (montres !== attendus) _regenererCarrousel(badgeStrip, fichiersTravaux);
+    }
+
+    /**
      * Initialise le module complet Travaux
      */
     async function initialiserModuleTravaux() {
@@ -726,25 +774,11 @@
                     // faite dans « Exporter les travaux » : les copies jetées restaient au carrousel.
                     const badgeStrip = document.querySelector('.annot-toolbar-fichiers');
                     if (badgeStrip && fichiersTravaux.length > 0) {
-                        const defilement = badgeStrip.scrollLeft;
-                        _htmlBadgesGrille = genererGrilleFichiers(fichiersTravaux, 'ouvrirFichier');
-                        badgeStrip.innerHTML = _htmlBadgesGrille;
-                        badgeStrip.scrollLeft = defilement;
+                        _regenererCarrousel(badgeStrip, fichiersTravaux);
                         // Marquer le badge actif. Sa pastille renaît à son état d'origine : elle redevient celle de la
                         // copie ouverte (mesuré le 1er nov. 2026 : une copie ouverte revenait « Importé » après un détour).
                         const badgeActif = badgeStrip.querySelector('[data-fichier-id="' + fichierOuvert.id + '"]');
                         if (badgeActif) _marquerBadgeOuvert(badgeActif);
-                        // Le dropdown production porte des compteurs : le remplacer, ou le restaurer si absent
-                        const prodExistant = document.querySelector('.annot-toolbar-production');
-                        if (prodExistant) {
-                            prodExistant.innerHTML = _htmlDropdownProduction;
-                        } else if (_htmlDropdownProduction) {
-                            var prodDiv = document.createElement('div');
-                            prodDiv.className = 'annot-toolbar-production';
-                            prodDiv.innerHTML = _htmlDropdownProduction;
-                            badgeStrip.parentNode.insertBefore(prodDiv, badgeStrip);
-                        }
-                        if (productionFiltreActive) filtrerBadgesParProduction();
                     }
                     if (typeof travauxAnnotation !== 'undefined' && travauxAnnotation.activerAnnotation) {
                         travauxAnnotation.activerAnnotation();
@@ -1496,8 +1530,34 @@
        =============================== */
 
     /**
-     * Calcule les dimensions cibles apres uniformisation DPI
-     * Reprend la logique de uniformiser200DPI() sans toucher aux pixels
+     * Les dimensions d'une image une fois ajustée au gabarit de « Rés. max. ».
+     *
+     * Le gabarit est Lettre (8,5 x 11 po) sous 2 500 px, 11 x 17 po au-dessus, à `dpi`
+     * points par pouce. 15 nov. 2026 : il suit l'orientation de l'image. Il restait
+     * debout ; une image couchée était donc ajustée à son PETIT côté (à 200 ppp,
+     * 2 728 x 1 748 devenait 2 200 x 1 410 alors qu'elle tient dans 3 400 x 2 200).
+     *
+     * Source unique de `calculerDimensionsCibles` (ce que l'écran annonce) et de
+     * `uniformiser200DPI` (ce qui est fait) : elles ne peuvent plus se contredire.
+     *
+     * @param {number} w - Largeur en pixels
+     * @param {number} h - Hauteur en pixels
+     * @param {number} dpi - Points par pouce du gabarit
+     * @returns {{w: number, h: number}} Inchangées si l'image tient dans le gabarit
+     */
+    function dimensionsResMax(w, h, dpi) {
+        const grand = w > 2500 || h > 2500;
+        const court = Math.round((grand ? 11 : 8.5) * dpi);
+        const long = Math.round((grand ? 17 : 11) * dpi);
+        const maxW = w > h ? long : court;
+        const maxH = w > h ? court : long;
+        if (w <= maxW && h <= maxH) return { w: w, h: h };
+        const ratio = Math.min(maxW / w, maxH / h);
+        return { w: Math.round(w * ratio), h: Math.round(h * ratio) };
+    }
+
+    /**
+     * Calcule les dimensions cibles apres uniformisation DPI, sans toucher aux pixels
      * @param {Object} f - Fichier prepare
      * @returns {{w: number, h: number}} Dimensions cibles
      */
@@ -1511,24 +1571,41 @@
             return { w: f.largeurOriginale, h: f.hauteurOriginale };
         }
 
-        let w = f.largeurOriginale;
-        let h = f.hauteurOriginale;
+        return dimensionsResMax(f.largeurOriginale, f.hauteurOriginale, dpi);
+    }
 
-        let maxW, maxH;
-        if (w > 2500 || h > 2500) {
-            // Tabloid 11"x17"
-            maxW = Math.round(11 * dpi); maxH = Math.round(17 * dpi);
-        } else {
-            // Lettre 8.5"x11"
-            maxW = Math.round(8.5 * dpi); maxH = Math.round(11 * dpi);
+    /**
+     * Des lignes de mots d'écran, une par rangée, chacune d'un seul tenant (`.pipeline-meta-ligne`).
+     * @param {string[]} lignes
+     * @returns {string} HTML
+     */
+    function lignesMeta(lignes) {
+        return lignes.map((l) => '<span class="pipeline-meta-ligne">' + echapperHtml(l) + '</span>').join('');
+    }
+
+    /**
+     * La définition d'un PDF dans la colonne « Aperçu », et ce qui lui arrive.
+     *
+     * Un PDF seul n'est pas traité : « (aucun traitement) ». Un PDF réuni à d'autres
+     * fichiers du même élève est réécrit dans le PDF commun (`assemblerPDFGroupe`) : ses
+     * pages gardent leur définition, mais ce n'est plus « aucun traitement », et l'écran
+     * ne le dit plus (15 nov. 2026).
+     *
+     * @param {Object} f - Fichier prepare (PDF)
+     * @returns {string[]} les lignes de la définition, puis ce qui lui arrive
+     */
+    function definitionPDFSansTraitement(f) {
+        return travauxImport.lignesDefinitionPDF(f.definitionPDF, f.nombrePages)
+            .concat([seraReuni(f) ? '(réuni en un seul PDF)' : '(aucun traitement)']);
+    }
+
+    /** Ce fichier sera-t-il réuni à d'autres en un seul PDF (`assemblerGroupesPipeline`) ? */
+    function seraReuni(f) {
+        for (const fichiers of travauxImport.regrouperParDocument().values()) {
+            const reunis = fichiers.filter((x) => x.estImage || x.estPDF);
+            if (reunis.length >= 2 && reunis.indexOf(f) !== -1) return true;
         }
-
-        if (w <= maxW && h <= maxH) {
-            return { w, h };
-        }
-
-        const ratio = Math.min(maxW / w, maxH / h);
-        return { w: Math.round(w * ratio), h: Math.round(h * ratio) };
+        return false;
     }
 
     /**
@@ -1804,9 +1881,13 @@
             const tailleEl = document.getElementById('pipeline-taille-cible-' + index);
 
             if (resEl) {
-                resEl.textContent = f.estPDF
-                    ? 'PDF (aucun traitement)'
-                    : `${dims.w} x ${dims.h}`;
+                // Une ligne de mots par rangée, posée en éléments (les mêmes que `lignesMeta`).
+                resEl.replaceChildren(...(f.estPDF ? definitionPDFSansTraitement(f) : [`${dims.w} x ${dims.h}`]).map((mots) => {
+                    const ligne = document.createElement('span');
+                    ligne.className = 'pipeline-meta-ligne';
+                    ligne.textContent = mots;
+                    return ligne;
+                }));
             }
             if (tailleEl) {
                 tailleEl.textContent = window.TailleFichier.dire(tailleEst, { decimales: 1 });
@@ -2087,13 +2168,14 @@
             // remplace l'ancien repli « PDF », qui affichait un HEIC comme un PDF.
             let resolution;
             if (f.largeurOriginale && f.hauteurOriginale) {
-                resolution = `${f.largeurOriginale} x ${f.hauteurOriginale}`;
+                resolution = [`${f.largeurOriginale} x ${f.hauteurOriginale}`];
             } else if (f.estPDF) {
-                resolution = 'PDF';
+                // 15 nov. 2026 : la définition de TOUS les fichiers, PDF compris, en deux lignes au plus.
+                resolution = travauxImport.lignesDefinitionPDF(f.definitionPDF, f.nombrePages);
             } else if (f.heicEchec) {
-                resolution = 'HEIC non décodé';
+                resolution = ['HEIC non décodé'];
             } else {
-                resolution = 'Dimensions inconnues';
+                resolution = ['Dimensions inconnues'];
             }
             const poids = window.TailleFichier.dire(f.tailleFichier, { decimales: 1 });
             const selectionne = (index === fichierSelectionneIndex);
@@ -2124,7 +2206,7 @@
                 </div>
                 <div class="pipeline-fichier-meta-col">
                     <span class="pipeline-meta-nom" title="${echapperHtml(nomFichierAff)}">${echapperHtml(nomCourt)}</span>
-                    <span class="pipeline-meta-resolution"${f.heicRaison ? ` title="${echapperHtml(f.heicRaison)}"` : ''}>${resolution}</span>
+                    <span class="pipeline-meta-resolution"${f.heicRaison ? ` title="${echapperHtml(f.heicRaison)}"` : ''}>${lignesMeta(resolution)}</span>
                     <span class="pipeline-meta-taille">${poids}</span>
                 </div>
                 <button class="pipeline-btn-retirer" data-stop data-action="travauxUI.retirerFichierPipeline" data-param="${index}" title="Retirer ce fichier"><img src="icons/icons8-trash.svg" alt="" class="btn-delete-icon"></button>
@@ -2221,7 +2303,7 @@
             const idx = fichierSelectionneIndex;
             const dims = calculerDimensionsCibles(f);
             const tailleEst = estimerTailleFichier(dims.w, dims.h, f);
-            const resCible = f.estPDF ? 'PDF (aucun traitement)' : `${dims.w} x ${dims.h}`;
+            const resCible = lignesMeta(f.estPDF ? definitionPDFSansTraitement(f) : [`${dims.w} x ${dims.h}`]);
 
             colCentre += '<div class="pipeline-col-titre">Aper\u00e7u page par page</div>';
 
@@ -2322,7 +2404,7 @@
         queue.forEach((f, index) => {
             const dims = calculerDimensionsCibles(f);
             const tailleEst = estimerTailleFichier(dims.w, dims.h, f);
-            const resCible = f.estPDF ? 'PDF' : `${dims.w} x ${dims.h}`;
+            const resCible = lignesMeta(f.estPDF ? definitionPDFSansTraitement(f) : [`${dims.w} x ${dims.h}`]);
             const thumb = f.thumbnailDataUrl || travauxStockage.obtenirThumbnailSync(f.id);
             const nomEtudiant = echapperHtml(nomDansLApercu(f, homonymes));
 
@@ -3767,6 +3849,15 @@
         const evalDiv = document.getElementById('evaluations-contenu-evaluation');
         if (evalDiv && !window._modifierEvaluationEnCours) evalDiv.classList.add('u-hide');
 
+        // 15 nov. 2026 : le carrousel d'avant un import ou une mise à la corbeille est refait ici.
+        _mettreLeCarrouselAJour();
+        // Une copie qui n'existe plus (badge d'un carrousel périmé) : rien à ouvrir, et la copie
+        // affichée garde son badge actif. Le carrousel vient d'être refait sans elle.
+        if (!travauxStockage.obtenirFichierParId(fichierId)) {
+            console.warn('[Travaux-UI] Copie introuvable, carrousel refait :', fichierId);
+            return;
+        }
+
         // Highlight du badge actif : pill → "EN COURS" orange
         document.querySelectorAll('.annot-badge').forEach(b => {
             const estActif = b.dataset.fichierId === fichierId;
@@ -4542,7 +4633,7 @@
         const gcActifImport = (typeof db !== 'undefined') ? db.getSync('groupeCoursActif', null) : null;
         if (!gcActifImport || !gcActifImport.id) {
             if (typeof notifications !== 'undefined' && typeof notifications.erreur === 'function') {
-                notifications.erreur('Import refusé : aucun groupe-cours actif. Les fichiers seraient enregistrés sans groupe et n\'apparaîtraient dans aucune liste. Choisissez un groupe-cours dans l\'en-tête, puis relancez l\'import.');
+                notifications.erreur('Import refusé : aucun groupe-cours actif. Les fichiers seraient enregistrés sans groupe et n\'apparaîtraient dans aucune liste. Choisis un groupe-cours dans l\'en-tête, puis relance l\'import.');
             }
             return;
         }
@@ -5073,7 +5164,8 @@
 
     /**
      * Uniformise une image au DPI cible
-     * Lettre (8.5"x11") ou Tabloid (11"x17") selon les dimensions originales
+     * Lettre (8.5"x11") ou Tabloid (11"x17") selon les dimensions originales,
+     * couché pour une image couchée (`dimensionsResMax`)
      * @param {Blob} blob - Le blob image
      * @param {number} dpi - DPI cible (200, 250 ou 300)
      * @returns {Promise<Blob>} Le blob redimensionne
@@ -5086,30 +5178,14 @@
             img.onload = () => {
                 URL.revokeObjectURL(url);
 
-                let w = img.width;
-                let h = img.height;
-
-                // Determiner le format cible par seuil de dimension
-                let maxW, maxH;
-                if (w > 2500 || h > 2500) {
-                    // Tabloid 11"x17"
-                    maxW = Math.round(11 * dpi);
-                    maxH = Math.round(17 * dpi);
-                } else {
-                    // Lettre 8.5"x11"
-                    maxW = Math.round(8.5 * dpi);
-                    maxH = Math.round(11 * dpi);
-                }
+                // Le gabarit, couché pour une image couchée : `dimensionsResMax`.
+                const { w, h } = dimensionsResMax(img.width, img.height, dpi);
 
                 // Redimensionner proportionnellement si necessaire
-                if (w <= maxW && h <= maxH) {
+                if (w === img.width && h === img.height) {
                     resolve(blob);
                     return;
                 }
-
-                const ratio = Math.min(maxW / w, maxH / h);
-                w = Math.round(w * ratio);
-                h = Math.round(h * ratio);
 
                 const canvas = document.createElement('canvas');
                 canvas.width = w;
@@ -6763,25 +6839,7 @@
                 const blob = await travauxStockage.recupererBlob(fichierId);
                 if (!blob) throw new Error('Blob introuvable pour ' + fichierId);
 
-                const dataUrl = await new Promise(function(resolve, reject) {
-                    const reader = new FileReader();
-                    reader.onload = function() { resolve(reader.result); };
-                    reader.onerror = reject;
-                    reader.readAsDataURL(blob);
-                });
-                const dims = await new Promise(function(resolve, reject) {
-                    const img = new Image();
-                    img.onload = function() { resolve({ width: img.width, height: img.height }); };
-                    img.onerror = reject;
-                    img.src = dataUrl;
-                });
-                editionPages = [{
-                    pageNum: 1,
-                    blob: blob,
-                    dataUrl: dataUrl,
-                    largeur: dims.width,
-                    hauteur: dims.height
-                }];
+                editionPages = [Object.assign({ pageNum: 1 }, await travauxImport.pageDepuisImage(blob))];
             }
 
             _marquerOrigine(editionPages, fichierId);   // #1075, point 7
@@ -6933,35 +6991,27 @@
     }
 
     /**
-     * Pivote une page de 90 degres dans le sens horaire
+     * Pivote une page de 90 degres dans le sens horaire.
+     *
+     * 15 nov. 2026 — seule la vignette tourne ici. Le quart de tour est noté sur la page
+     * (`quarts`) et fait à l'enregistrement, sur l'image à pleine définition
+     * (`travauxImport.reassemblerPages`). Avant, c'est l'image affichée, déjà réduite,
+     * qui était tournée puis enregistrée.
      */
-    function pivoterPageEditeur(index) {
+    async function pivoterPageEditeur(index) {
         var page = editionPages[index];
         if (!page) return;
-
-        var img = new Image();
-        img.onload = function() {
-            var canvas = document.createElement('canvas');
-            // Inverser largeur/hauteur pour rotation 90°
-            canvas.width = img.height;
-            canvas.height = img.width;
-            var ctx = canvas.getContext('2d');
-            ctx.translate(canvas.width / 2, canvas.height / 2);
-            ctx.rotate(Math.PI / 2);
-            ctx.drawImage(img, -img.width / 2, -img.height / 2);
-
-            page.dataUrl = canvas.toDataURL('image/png');
-            var ancienneLargeur = page.largeur;
-            page.largeur = page.hauteur;
-            page.hauteur = ancienneLargeur;
-
-            // Mettre a jour le blob
-            canvas.toBlob(function(blob) {
-                if (blob) page.blob = blob;
-                renderEditeurPages();
-            }, 'image/png');
-        };
-        img.src = page.dataUrl;
+        try {
+            page.dataUrl = await travauxImport.pivoterVignette(page.dataUrl);
+        } catch (err) {
+            console.error('[Editeur Pages] Erreur pivot:', err);
+            return;
+        }
+        page.quarts = ((page.quarts || 0) + 1) % 4;
+        var ancienneLargeur = page.largeur;
+        page.largeur = page.hauteur;
+        page.hauteur = ancienneLargeur;
+        renderEditeurPages();
     }
 
     /**
@@ -6997,14 +7047,13 @@
             for (const fichier of input.files) {
                 if (fichier.type === 'application/pdf') {
                     try {
-                        const arrayBuffer = await fichier.arrayBuffer();
-                        const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+                        // 15 nov. 2026 : chaque page à sa pleine définition (elle était rendue à 800 px).
+                        const pagesPDF = await travauxImport.pagesDuPDF(fichier);
                         const nomBase = (fichier.name || 'document').replace(/\.pdf$/i, '');
-                        for (let i = 1; i <= pdf.numPages; i++) {
-                            const pageData = await rendrePagePDF(pdf, i);
+                        for (const pageData of pagesPDF) {
                             fichiersAdHoc.push({
                                 fichier: pageData.blob,
-                                nomFichier: nomBase + ' - page ' + i + '.jpg',
+                                nomFichier: nomBase + ' - page ' + pageData.pageNum + '.jpg',
                                 typeMIME: 'image/jpeg',
                                 tailleFichier: pageData.blob.size,
                                 estImage: true,
@@ -7068,59 +7117,12 @@
             if (!blobFinal) continue;
 
             try {
-                const dataUrl = await new Promise((resolve, reject) => {
-                    const reader = new FileReader();
-                    reader.onload = () => resolve(reader.result);
-                    reader.onerror = reject;
-                    reader.readAsDataURL(blobFinal);
-                });
-                const dims = await new Promise((resolve, reject) => {
-                    const img = new Image();
-                    img.onload = () => resolve({ width: img.width, height: img.height });
-                    img.onerror = reject;
-                    img.src = dataUrl;
-                });
-                editionPages.push({
-                    pageNum: editionPages.length + 1,
-                    blob: blobFinal,
-                    dataUrl: dataUrl,
-                    largeur: dims.width,
-                    hauteur: dims.height
-                });
+                editionPages.push(Object.assign({ pageNum: editionPages.length + 1 }, await travauxImport.pageDepuisImage(blobFinal)));
             } catch (e) {
                 console.error('[Editeur Pages] Erreur insertion page:', e);
             }
         }
         renderEditeurPages();
-    }
-
-    /**
-     * Rend une page PDF en image (utilitaire pour l'editeur)
-     * @param {PDFDocumentProxy} pdf - Document PDF
-     * @param {number} pageNum - Numero de page (1-based)
-     * @returns {Promise<Object>} {pageNum, blob, dataUrl, largeur, hauteur}
-     */
-    async function rendrePagePDF(pdf, pageNum) {
-        const page = await pdf.getPage(pageNum);
-        const scale = 800 / page.getViewport({ scale: 1 }).width;
-        const viewport = page.getViewport({ scale: scale });
-
-        const canvas = document.createElement('canvas');
-        canvas.width = viewport.width;
-        canvas.height = viewport.height;
-        const ctx = canvas.getContext('2d');
-        await page.render({ canvasContext: ctx, viewport: viewport }).promise;
-
-        const dataUrl = canvas.toDataURL('image/jpeg', 0.85);
-        const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/jpeg', 0.85));
-
-        return {
-            pageNum: pageNum,
-            blob: blob,
-            dataUrl: dataUrl,
-            largeur: viewport.width,
-            hauteur: viewport.height
-        };
     }
 
     /**
@@ -7490,25 +7492,7 @@
                     var blob = await travauxStockage.recupererBlob(fId);
                     if (!blob) continue;
 
-                    var dataUrl = await new Promise(function(resolve, reject) {
-                        var reader = new FileReader();
-                        reader.onload = function() { resolve(reader.result); };
-                        reader.onerror = reject;
-                        reader.readAsDataURL(blob);
-                    });
-                    var dims = await new Promise(function(resolve, reject) {
-                        var img = new Image();
-                        img.onload = function() { resolve({ width: img.width, height: img.height }); };
-                        img.onerror = reject;
-                        img.src = dataUrl;
-                    });
-                    editionPages.push({
-                        pageNum: editionPages.length + 1,
-                        blob: blob,
-                        dataUrl: dataUrl,
-                        largeur: dims.width,
-                        hauteur: dims.height
-                    });
+                    editionPages.push(Object.assign({ pageNum: editionPages.length + 1 }, await travauxImport.pageDepuisImage(blob)));
                 }
 
                 // Marquer le fichier pour suppression apres sauvegarde
@@ -7632,25 +7616,7 @@
                     // serait effacée à l'enregistrement. Le chargement s'arrête et le dit.
                     if (!blob) throw new Error(MOT_FUSION_SANS_FICHIER);
 
-                    const dataUrl = await new Promise(function(resolve, reject) {
-                        const reader = new FileReader();
-                        reader.onload = function() { resolve(reader.result); };
-                        reader.onerror = reject;
-                        reader.readAsDataURL(blob);
-                    });
-                    const dims = await new Promise(function(resolve, reject) {
-                        const img = new Image();
-                        img.onload = function() { resolve({ width: img.width, height: img.height }); };
-                        img.onerror = reject;
-                        img.src = dataUrl;
-                    });
-                    editionPages.push({
-                        pageNum: editionPages.length + 1,
-                        blob: blob,
-                        dataUrl: dataUrl,
-                        largeur: dims.width,
-                        hauteur: dims.height
-                    });
+                    editionPages.push(Object.assign({ pageNum: editionPages.length + 1 }, await travauxImport.pageDepuisImage(blob)));
                 }
                 _marquerOrigine(editionPages.slice(debut), f.id);
             }
@@ -8130,6 +8096,7 @@
         descendrePageEditeur: descendrePageEditeur,
         supprimerPageEditeur: supprimerPageEditeur,
         pivoterPageEditeur: pivoterPageEditeur,
+        dimensionsResMax: dimensionsResMax,   // 15 nov. 2026 : lue par son banc
         ajouterPagesEditeur: ajouterPagesEditeur,
         sauvegarderEdition: sauvegarderEdition,
         reparerImagePerdue: reparerImagePerdue,   // #1233
