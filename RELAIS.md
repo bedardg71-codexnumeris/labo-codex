@@ -7,6 +7,25 @@
 
 ---
 
+## 15 NOV. 2026, 17 H 20 (Claude Code) : **1.248.0 POUSSÉE ET EN LIGNE, VERDICT VERT** — `lot/gel-etape-7` et `lot/editeur-pages-definition` fusionnés
+
+Mandat : relais de Cowork du 15 nov., 13 h 04 (fusion des deux lots, une release mineure, un seul verdict, mise en ligne décidée par Grégoire). **`origin/main` = `513609dd5`** (1.248.0, build `1115-1307`, « Des copies qui restent nettes ») ; Netlify `6afa2ef7`, `ready` à 17 h 15 sur ce SHA ; le `version.json` du permalien dit `1.248.0`, build `1115-1307`. **Le travail le plus récent vit sur `main`.** Remplace les entrées de 9 h 21, 9 h 05 et 8 h 50 (la première citait encore `4863237dc` ; le lot a été fusionné à `6aa4f2ca5`).
+
+- **Fusionné**, `--no-ff`, le gel d'abord : `2a2854414` (`lot/gel-etape-7`, `856d72d99`, sans conflit), puis `891a150df` (`lot/editeur-pages-definition`, `6aa4f2ca5`, PR n° 26 passée à « fusionnée » au push). Un seul conflit : `BACKLOG.md` (les deux sections gardées ; **Dernier ID : #1283** ; #1279 reste libre). `index.html` fusionné sans conflit. Fait dans un arbre à part, `/Users/kuekatsheu/Documents/GitHub/labo-codex-fusion` : l'arbre principal était sur `lot/gel-etape-7`, deux autres sessions y étaient ouvertes à 13 h 05.
+- **Relu ensemble** : les deux lots ne se recoupent que sur `BACKLOG.md` et `index.html` ; aucun sélecteur retiré par la définition n'est cité par les parcours. Sentinelle 1007 : P14 (« Effacer la page ») sorti du registre des gestes proposés au codex, l'ordre « rien à effacer, confirmation, vidage » gardé. Cliquet de complexité : `initialiserModuleTravaux` 37 → 34 (resserré).
+- **Release** `08ad0df23` (mineure, `scripts/release.mjs`). Le hook de commit a refusé `js/codex.js?v=20261115a` (déjà servi par `5bfe15862`, sur l'aperçu n° 26) : posé `20261115b`, comme il le proposait.
+- **Premier verdict** sur `08ad0df23` : 1 688 essais, 1 686 verts, 1 au second essai (`profil-rangee-1151.spec.js`, hors du groupe), **1 rouge du groupe** : `import-bandeaux-612.spec.js`, cas 2, attendait encore « Choisissez un groupe-cours » alors que la retouche de `6aa4f2ca5` tutoie. Corrigé dans la spec seule (`513609dd5`), aucun code touché.
+- **Second verdict** sur `513609dd5` (`verdict-en-morceaux.mjs`, dix morceaux, secteur, app Claude fermée, mémoire libre entre 82 et 85 %) : 1 688 essais, 1 684 verts, 4 au second essai, 0 rouge, 68 sautés. Du groupe, rejoués seuls **six fois sur six verts** : `reunir-en-une-copie-1231.spec.js` (« une production habituelle en trois photos ») et `parcours-3-evaluer-2026-11-09.spec.js` (étape 8 à 820 px). Hors du groupe, nommés : `grilles-sous-criteres-condense.spec.js` (iPad, #534, déjà au jeton du 14) et `palette-evaluation-compacte.spec.js` (la bulle). « Une copie réunie survit au rechargement » n'a pas rougi. Vitest : 927 fichiers, 11 811 essais.
+- **Nouvelles** : mots **validés par Grégoire** (relais de Cowork). L'entrée n'admet qu'un titre : « Des copies qui restent nettes » gardé, la ligne du gel en premier item (repli prévu par le relais), cinq items.
+- **Stock** (inchangé depuis le rapport du lot) : les copies déjà réduites le restent ; rien n'est réparé d'office.
+- **Encore dû** : le sixième geste de l'iPad, admis ; un regard sur l'iPad après la mise en ligne pour le gel (tableau coupé, page vide au retour : non reproduits) ; #1278 et #1283, inscrits, non commencés.
+- **GitHub** : le passage WebKit Linux de `513609dd5` tournait à la clôture (run 43768254302), non lu.
+
+**Complexité** (1.247.0 `3b16daa50` → 1.248.0 `513609dd5`) :
+- fichiers de plus de 1 000 lignes : 43 → 43 ; lignes de code : 169 979 → 170 322 (Δ +343) ;
+- au-dessus de 15 : 434 → 434 (Δ 0) ; somme au-dessus de 15 : 10 954 → 10 953 (Δ −1) ;
+- au-dessus de 30 : 77 → 77 (Δ 0) ; maximum : 130 ; fonctions : 17 398 → 17 463.
+
 ## 15 NOV. 2026, 9 H 21 (Claude Code) : **`lot/editeur-pages-definition` AVANCE À `4863237dc`, TOUJOURS NON FUSIONNÉ** — trois ajouts du mandat de Cowork de 9 h 00
 
 Remplace l'état donné à l'entrée de 8 h 50 pour ce lot. Rapport à jour sur la branche : `plans de travail/RAPPORT-2026-11-15-editeur-pages-definition.md` (§ 10 à 15). Arbre de travail : `/Users/kuekatsheu/Documents/GitHub/labo-codex-editeur-pages`.
