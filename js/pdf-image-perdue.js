@@ -14,6 +14,8 @@
  *    ne se lit pas ainsi (alors on ne répare pas) ;
  *  - `reconstruire(pages)` : le PDF refait page par page, aux tailles de ses
  *    `/MediaBox`, les autres images gardant leurs octets JPEG sans recompression.
+ *  - `lireImagesDesPages(octets)` : la position des octets JPEG de chaque page, pour
+ *    l'éditeur de pages, qui les reprend sans les réencoder (15 nov. 2026).
  *
  * Décision de Grégoire du 5 nov. 2026, 12 h 34 : un geste lancé par l'usager,
  * codex proposé juste avant ; jamais de réparation d'office.
@@ -79,7 +81,7 @@
                 if (texte[d] === '\n') d++;
                 const n = parseInt(longueur[1], 10);
                 if (d + n > texte.length) return null;
-                objets[m[1]] = { dict, flux: texte.slice(d, d + n) };
+                objets[m[1]] = { dict, flux: texte.slice(d, d + n), debut: d, longueur: n };
                 re.lastIndex = d + n;
             } else {
                 objets[m[1]] = { dict: texte.slice(debut, posFin), flux: null };
@@ -146,8 +148,8 @@
         return appels[0].slice(1, -3).trim().replace(/[^\w]/g, '');
     }
 
-    /** Une page : sa taille et son image ; `null` si elle ne se lit pas ainsi. */
-    function lirePage(objets, page) {
+    /** L'objet image de la page, si elle n'est qu'une image pleine page ; `null` sinon. */
+    function objetImageDeLaPage(objets, page) {
         if (!page || !/\/Type \/Page\b/.test(page.dict)) return null;
         const boite = /\/MediaBox \[\s*0 0 ([\d.]+) ([\d.]+)\s*\]/.exec(page.dict);
         const contenu = objets[(/\/Contents (\d+) 0 R/.exec(page.dict) || [])[1]];
@@ -159,8 +161,43 @@
         const xobjets = nom && /\/XObject\s*<<([\s\S]*?)>>/.exec(ressources.dict);
         const ref = xobjets && new RegExp('/' + nom + ' (\\d+) 0 R').exec(xobjets[1]);
         const image = ref && objets[ref[1]];
-        const lue = image && image.flux !== null ? octetsDeLImage(image) : null;
-        return lue ? { largeur, hauteur, format: lue.format, octets: lue.octets, perdue: lue.perdue } : null;
+        return image && image.flux !== null ? { image, largeur, hauteur } : null;
+    }
+
+    /** Une page : sa taille et son image ; `null` si elle ne se lit pas ainsi. */
+    function lirePage(objets, page) {
+        const trouvee = objetImageDeLaPage(objets, page);
+        const lue = trouvee ? octetsDeLImage(trouvee.image) : null;
+        return lue ? { largeur: trouvee.largeur, hauteur: trouvee.hauteur, format: lue.format, octets: lue.octets, perdue: lue.perdue } : null;
+    }
+
+    /**
+     * Où sont, dans le fichier, les octets JPEG de chaque page (15 nov. 2026, l'éditeur de pages).
+     *
+     * Un PDF écrit par l'application porte une image pleine page par page, et jsPDF y colle
+     * le JPEG tel quel. Le reprendre par sa position (`blob.slice`) rend la page à sa pleine
+     * définition, sans la redessiner ni la réencoder, et sans copie en mémoire.
+     *
+     * @param {Uint8Array} octets
+     * @returns {Array<{debut: number, longueur: number}|null>|null} une entrée par page, `null`
+     *   pour une page qui ne se lit pas ainsi (PNG, masque, image perdue, dessin) ; `null`
+     *   tout court si le PDF n'est pas de l'application.
+     */
+    function lireImagesDesPages(octets) {
+        if (!octets || octets.length < 8) return null;
+        const texte = enTexte(octets);
+        if (!/\/Producer \(jsPDF /.test(texte)) return null;
+        const objets = lireObjets(texte);
+        const numeros = objets && numerosDesPages(objets);
+        if (!numeros) return null;
+        return numeros.map((n) => {
+            const trouvee = objetImageDeLaPage(objets, objets[n]);
+            const image = trouvee && trouvee.image;
+            if (!image || estImagePerdue(image)) return null;
+            if (!/\/Filter \/DCTDecode\b/.test(image.dict) || /\/SMask\b/.test(image.dict)) return null;
+            if (image.flux.charCodeAt(0) !== 0xFF || image.flux.charCodeAt(1) !== 0xD8 || image.flux.charCodeAt(2) !== 0xFF) return null;
+            return { debut: image.debut, longueur: image.longueur };
+        });
     }
 
     /**
@@ -199,5 +236,5 @@
         return doc.output('blob');
     }
 
-    window.PdfImagePerdue = { aLeDefaut, lirePages, reconstruire };
+    window.PdfImagePerdue = { aLeDefaut, lirePages, lireImagesDesPages, reconstruire };
 })();

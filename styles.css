@@ -27724,6 +27724,22 @@ body.mode-clair {
     font-size: 0.78rem;
     color: var(--texte-secondaire);
 }
+/* 15 nov. 2026 : la définition de chaque page, en pixels, dans les Propriétés. */
+.prop-fichier-definition {
+    margin: 0 0 12px 0;
+    font-size: 0.85em;
+    color: var(--texte-secondaire);
+}
+.prop-fichier-definition-titre { display: block; }
+.prop-fichier-definition ul {
+    margin: 4px 0 0 0;
+    padding: 0;
+    list-style: none;
+    max-height: 7.5em;
+    overflow-y: auto;
+    color: var(--texte-principal);
+    font-variant-numeric: tabular-nums;
+}
 .prop-fichier-jeton {
     display: flex;
     align-items: flex-start;

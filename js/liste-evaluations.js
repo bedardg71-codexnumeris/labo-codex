@@ -2101,6 +2101,7 @@ function ouvrirProprieteFichier(fichierId) {
             '<button class="modal-fermer" data-action="fermerOverlayParent"><img src="icons/icon-close-window.svg" alt="" class="modal-close-icon"></button>' +
             '<h3 class="modal-titre">Propri\u00e9t\u00e9s du fichier</h3>' +
             apercuHTML +
+            '<div class="prop-fichier-definition" id="prop-fichier-definition"><span class="prop-fichier-definition-titre">' + echapperHtml(MOTS_DEFINITION_FICHIER.titre) + '</span><span>' + echapperHtml(MOTS_DEFINITION_FICHIER.lecture) + '</span></div>' +
             '<label style="font-size: 0.85em; color: var(--texte-secondaire);">Nom du document :</label>' +
             '<input type="text" id="prop-fichier-nom" class="controle-form" style="margin: 4px 0 12px 0; width: 100%;" value="' + echapperHtml(typeof anonymiserNomFichier === 'function' ? anonymiserNomFichier(fichier.nomFichier, fichier.etudiantDA) : (fichier.nomFichier || '')) + '">' +
             '<label style="font-size: 0.85em; color: var(--texte-secondaire);">\u00c9tudiant\u00b7e :</label>' +
@@ -2132,6 +2133,9 @@ function ouvrirProprieteFichier(fichierId) {
     if (!vignette && typeof travauxStockage.chargerThumbnailsConteneur === 'function') {
         travauxStockage.chargerThumbnailsConteneur(overlay);
     }
+
+    // 15 nov. 2026 : la définition de chaque page, lue dans le fichier lui-même.
+    remplirDefinitionFichier(fichier, document.getElementById('prop-fichier-definition'));
 
     var fermer = function() { overlay.remove(); };
     overlay.addEventListener('click', function(e) { if (e.target === overlay) fermer(); });
@@ -2188,6 +2192,72 @@ function ouvrirProprieteFichier(fichierId) {
     };
 }
 window.ouvrirProprieteFichier = ouvrirProprieteFichier;
+
+/** Mots de la définition dans les Propriétés (15 nov. 2026) ; proposés, à Grégoire avec les Nouvelles. */
+var MOTS_DEFINITION_FICHIER = {
+    titre: 'Définition des pages',
+    lecture: 'Lecture des pages…',
+    absent: 'Non lue : le fichier n’est pas sur cet appareil.',
+    illisible: 'Non lue : le fichier ne se lit pas.',
+    texte: ' (page de texte)',
+    poids: 'Poids du fichier : '
+};
+
+/**
+ * Les lignes de la définition d'un fichier : une par page, en PIXELS (jamais en ppp).
+ * Une page de PDF faite de texte ou de dessin n'a pas de pixels : son format.
+ *
+ * @param {Object} fichier - Métadonnées du fichier
+ * @param {Blob} blob - Le fichier
+ * @returns {Promise<string[]>}
+ */
+async function lignesDefinitionFichier(fichier, blob) {
+    var lignes;
+    if (fichier.typeMIME === 'application/pdf') {
+        var definition = await travauxImport.definitionDuPDF(blob);
+        lignes = definition.pages.map(function(p, i) {
+            return 'Page ' + (i + 1) + ' : ' + (p.sorte === 'image'
+                ? p.largeur + ' x ' + p.hauteur + ' px'
+                : p.format + MOTS_DEFINITION_FICHIER.texte);
+        });
+    } else {
+        var image = await travauxImport.pageDepuisImage(blob);
+        lignes = ['Page 1 : ' + image.largeur + ' x ' + image.hauteur + ' px'];
+    }
+    // Le poids est déjà sous le nom quand les métadonnées le portent ; sinon il se dit ici.
+    if (!fichier.tailleFichier && window.TailleFichier) {
+        lignes.push(MOTS_DEFINITION_FICHIER.poids + window.TailleFichier.dire(blob.size, { decimales: 1 }));
+    }
+    return lignes;
+}
+
+/**
+ * Remplit le bloc « Définition des pages » des Propriétés. Sans écriture.
+ * @param {Object} fichier - Métadonnées du fichier
+ * @param {HTMLElement} zone - Le bloc à remplir
+ */
+async function remplirDefinitionFichier(fichier, zone) {
+    if (!zone) return;
+    var dire = function(lignes) {
+        if (!zone.isConnected) return;   // la fenêtre a été fermée pendant la lecture
+        while (zone.children.length > 1) zone.removeChild(zone.lastChild);
+        var liste = document.createElement('ul');
+        lignes.forEach(function(ligne) {
+            var li = document.createElement('li');
+            li.textContent = ligne;
+            liste.appendChild(li);
+        });
+        zone.appendChild(liste);
+    };
+    try {
+        var blob = await travauxStockage.recupererBlob(fichier.id);
+        if (!blob) { dire([MOTS_DEFINITION_FICHIER.absent]); return; }
+        dire(await lignesDefinitionFichier(fichier, blob));
+    } catch (err) {
+        console.warn('[Propriétés] Définition non lue :', err);
+        dire([MOTS_DEFINITION_FICHIER.illisible]);
+    }
+}
 
 /**
  * Marque une copie comme reprise et applique le jeton sur l'évaluation active de

@@ -1071,6 +1071,7 @@
                 estReprise: !!f.estReprise,
                 largeurOriginale: f.largeurOriginale || 0,
                 hauteurOriginale: f.hauteurOriginale || 0,
+                definitionPDF: f.definitionPDF || null,
                 // #558 B3 — six champs qui manquaient, tous CONSOMMÉS ailleurs :
                 // sans eux, le round-trip sessionStorage les perdait en silence.
                 //   · productionIdParFichier : second drapeau d'intention, jumeau de
@@ -1159,6 +1160,7 @@
                 estReprise: !!d.estReprise,
                 largeurOriginale: d.largeurOriginale || 0,
                 hauteurOriginale: d.hauteurOriginale || 0,
+                definitionPDF: d.definitionPDF || null,
                 // #558 B3 — pendant de l'écriture : le mapping est explicite des
                 // DEUX côtés, donc persister sans restaurer n'aurait servi à rien.
                 productionIdParFichier: !!d.productionIdParFichier,
@@ -1336,6 +1338,12 @@
                 const result = await travauxStockage.genererMiniaturePDF(fichierPrepare.fichier);
                 fichierPrepare.thumbnailDataUrl = result.thumbnail;
                 fichierPrepare.nombrePages = result.nombrePages;
+                // 15 nov. 2026 : l'écran d'import dit la définition de tous les fichiers.
+                try {
+                    fichierPrepare.definitionPDF = await definitionDuPDF(fichierPrepare.fichier);
+                } catch (e) {
+                    console.warn('[Travaux-Import] Définition du PDF illisible (' + fichierPrepare.nomFichier + '):', e.message || e);
+                }
             }
         } catch (e) {
             console.warn('[Travaux-Import] Erreur thumbnail queue:', e);
@@ -2181,53 +2189,336 @@
        (Editeur de pages)
        =============================== */
 
-    /**
-     * Decompose un PDF importe en pages individuelles (images JPEG)
-     * @param {string} fichierId - ID du fichier importe
-     * @returns {Promise<Array>} Tableau de {pageNum, blob, dataUrl, largeur, hauteur}
+    /*
+     * LA DÉFINITION EST GARDÉE (15 nov. 2026).
+     *
+     * Vécu par Grégoire sur l'iPad (1.247.0) : une copie de deux pages, dont une photo de
+     * 2 728 × 1 748 px, floue dans Annoter même à 400 %, après qu'il a inversé l'ordre de ses
+     * pages. Chaque page était redessinée à 1 000 px de large (JPEG 0,85) à l'ouverture de
+     * l'éditeur, et le pivot tournait cette image déjà réduite.
+     *
+     * Le moyen :
+     *  - une page d'un PDF écrit par l'application est une image JPEG pleine page : ses
+     *    OCTETS sont repris tels quels dans le fichier (`PdfImagePerdue.lireImagesDesPages`,
+     *    `blob.slice` : ni décodage, ni réencodage, ni copie en mémoire) ;
+     *  - toute autre page (PDF d'un autre producteur, PNG, image à balise EXIF) est rendue
+     *    par pdf.js à la définition de son image numérisée, ou à 250 ppp si elle est du
+     *    texte ou du dessin ;
+     *  - l'éditeur n'affiche qu'une vignette (`COTE_VIGNETTE_EDITEUR`) ; la pleine définition
+     *    n'est décodée qu'une page à la fois ;
+     *  - un pivot se note en quarts de tour et se fait à l'enregistrement, sur la page à
+     *    pleine définition (`reassemblerPages`). Quatre quarts : la page repart intacte.
      */
-    async function decomposerPDF(fichierId) {
-        const blob = await travauxStockage.recupererBlob(fichierId);
-        if (!blob) throw new Error('Blob introuvable pour ' + fichierId);
 
+    /** Plus grand côté de la vignette d'une page dans l'éditeur, en pixels. */
+    const COTE_VIGNETTE_EDITEUR = 1000;
+    /** Aire maximale d'un canevas sur l'iPad (Safari : largeur × hauteur ≤ 16 777 216). */
+    const AIRE_MAX_CANEVAS = 16777216;
+    /** Définition du rendu d'une page de texte ou de dessin, en points par pouce. */
+    const PPP_PAGE_TEXTE = 250;
+    /** Part de la page qu'une image doit couvrir pour que la page soit dite numérisée. */
+    const PART_IMAGE_PLEINE_PAGE = 0.8;
+
+    /** Formats de papier connus, en points (1/72 po), petit côté puis grand côté. */
+    const FORMATS_PAPIER = [
+        ['Lettre', 612, 792], ['Légal', 612, 1008], ['11 x 17 po', 792, 1224],
+        ['A4', 595, 842], ['A3', 842, 1191], ['A5', 420, 595]
+    ];
+
+    /**
+     * Le nom d'un format de page : « Lettre », « Lettre (paysage) », ou ses côtés en pouces.
+     * @param {number} largeurPt
+     * @param {number} hauteurPt
+     * @returns {string}
+     */
+    function nomDuFormat(largeurPt, hauteurPt) {
+        const petit = Math.min(largeurPt, hauteurPt);
+        const grand = Math.max(largeurPt, hauteurPt);
+        const connu = FORMATS_PAPIER.find((f) => Math.abs(f[1] - petit) <= 6 && Math.abs(f[2] - grand) <= 6);
+        if (connu) return connu[0] + (largeurPt > hauteurPt ? ' (paysage)' : '');
+        const po = (pt) => String(Math.round(pt / 72 * 10) / 10).replace('.', ',');
+        return po(largeurPt) + ' x ' + po(hauteurPt) + ' po';
+    }
+
+    /** Le déterminant d'une matrice PDF [a b c d e f] : le facteur d'aire. */
+    function determinant(m) {
+        return m ? m[0] * m[3] - m[1] * m[2] : 1;
+    }
+
+    /**
+     * Ce qu'est une page de PDF : une image numérisée (ses pixels) ou du texte (son format).
+     *
+     * La page est dite numérisée quand une image en couvre au moins les quatre cinquièmes.
+     * L'aire de chaque image se lit dans la liste d'opérations de pdf.js (le déterminant
+     * de la matrice courante) ; les pixels sont ceux de l'image, pas ceux d'un rendu.
+     *
+     * @param {PDFPageProxy} page
+     * @returns {Promise<{sorte: 'image', largeur: number, hauteur: number}|{sorte: 'texte', format: string, largeurPt: number, hauteurPt: number}>}
+     */
+    async function decrirePagePDF(page) {
+        const vue = page.getViewport({ scale: 1 });
+        const airePage = vue.width * vue.height;
+        const ops = await page.getOperatorList();
+        const OPS = pdfjsLib.OPS;
+        let aire = 1;
+        const pile = [];
+        let image = null;
+        for (let i = 0; i < ops.fnArray.length; i++) {
+            const fn = ops.fnArray[i];
+            const args = ops.argsArray[i];
+            if (fn === OPS.save) pile.push(aire);
+            else if (fn === OPS.restore) aire = pile.length ? pile.pop() : aire;
+            else if (fn === OPS.transform) aire *= Math.abs(determinant(args));
+            else if (fn === OPS.paintFormXObjectBegin) { pile.push(aire); aire *= Math.abs(determinant(args && args[0])); }
+            else if (fn === OPS.paintFormXObjectEnd) aire = pile.length ? pile.pop() : aire;
+            else if (fn === OPS.paintImageXObject || fn === OPS.paintInlineImageXObject) {
+                const l = fn === OPS.paintImageXObject ? args[1] : (args[0] && args[0].width);
+                const h = fn === OPS.paintImageXObject ? args[2] : (args[0] && args[0].height);
+                if (l > 0 && h > 0 && aire >= PART_IMAGE_PLEINE_PAGE * airePage && (!image || l * h > image.largeur * image.hauteur)) {
+                    image = { largeur: l, hauteur: h };
+                }
+            }
+        }
+        if (!image) {
+            return { sorte: 'texte', format: nomDuFormat(vue.width, vue.height), largeurPt: vue.width, hauteurPt: vue.height };
+        }
+        // Une image posée de côté (page tournée) : ses pixels se disent dans le sens de la page.
+        const couchee = (image.largeur > image.hauteur) !== (vue.width > vue.height)
+            && Math.abs(image.largeur - image.hauteur) > 2 && Math.abs(vue.width - vue.height) > 2;
+        return couchee
+            ? { sorte: 'image', largeur: image.hauteur, hauteur: image.largeur }
+            : { sorte: 'image', largeur: image.largeur, hauteur: image.hauteur };
+    }
+
+    /**
+     * La définition de chaque page d'un PDF, sans le rendre.
+     * @param {Blob} blob - Le PDF
+     * @returns {Promise<{nombrePages: number, pages: Array}>} `pages` : voir `decrirePagePDF`
+     */
+    async function definitionDuPDF(blob) {
+        if (typeof pdfjsLib === 'undefined') throw new Error('PDF.js non disponible');
+        const pdf = await pdfjsLib.getDocument({ data: await blob.arrayBuffer() }).promise;
+        try {
+            const pages = [];
+            for (let n = 1; n <= pdf.numPages; n++) {
+                const page = await pdf.getPage(n);
+                pages.push(await decrirePagePDF(page));
+                page.cleanup();
+            }
+            return { nombrePages: pdf.numPages, pages: pages };
+        } finally {
+            pdf.destroy();
+        }
+    }
+
+    /**
+     * La définition d'un PDF, en mots d'écran (écran d'import, Propriétés).
+     *
+     * « PDF, 2 pages · 2728 x 1748 px » ; « PDF, 1 page · Lettre » ; quand les pages
+     * diffèrent, la plus petite, et c'est dit : « PDF, 3 pages · la plus petite :
+     * 1700 x 2200 px ». Un PDF qui mêle pages numérisées et pages de texte dit les deux.
+     *
+     * @param {{nombrePages: number, pages: Array}|null} definition - de `definitionDuPDF`
+     * @param {number} [nombrePages] - connu avant la définition (miniature)
+     * @returns {string}
+     */
+    function direDefinitionPDF(definition, nombrePages) {
+        const n = (definition && definition.nombrePages) || nombrePages || 0;
+        const tete = n ? 'PDF, ' + n + (n > 1 ? ' pages' : ' page') : 'PDF';
+        if (!definition || !definition.pages || !definition.pages.length) return tete;
+
+        const images = definition.pages.filter((p) => p.sorte === 'image');
+        const textes = definition.pages.filter((p) => p.sorte === 'texte');
+        const plusPetite = (liste, aire) => liste.reduce((a, b) => (aire(b) < aire(a) ? b : a));
+        const toutesPareilles = (liste, cle) => liste.every((p) => cle(p) === cle(liste[0]));
+
+        const direImages = () => {
+            const p = plusPetite(images, (x) => x.largeur * x.hauteur);
+            const mots = p.largeur + ' x ' + p.hauteur + ' px';
+            return toutesPareilles(images, (x) => x.largeur + 'x' + x.hauteur) ? mots : 'la plus petite : ' + mots;
+        };
+        const direTextes = () => {
+            const p = plusPetite(textes, (x) => x.largeurPt * x.hauteurPt);
+            return toutesPareilles(textes, (x) => x.format) ? p.format : 'le plus petit format : ' + p.format;
+        };
+
+        if (!textes.length) return tete + ' · ' + direImages();
+        if (!images.length) return tete + ' · ' + direTextes();
+        return tete + ' · ' + images.length + (images.length > 1 ? ' numérisées' : ' numérisée') + ', ' + direImages()
+            + ' · ' + textes.length + ' en texte, ' + direTextes();
+    }
+
+    /** Une image chargée depuis une adresse (blob: ou data:). */
+    function chargerImage(adresse) {
+        return new Promise((resolve, reject) => {
+            const img = new Image();
+            img.onload = () => resolve(img);
+            img.onerror = () => reject(new Error('Image illisible'));
+            img.src = adresse;
+        });
+    }
+
+    /**
+     * Une image dessinée sur un canevas, tournée de `quarts` quarts de tour horaires et
+     * réduite au besoin pour tenir dans `coteMax` et dans l'aire d'un canevas d'iPad.
+     * L'appelant libère le canevas (`canvas.width = 0`).
+     */
+    function dessinerTournee(img, quarts, coteMax) {
+        const l = img.naturalWidth;
+        const h = img.naturalHeight;
+        let facteur = Math.min(1, Math.sqrt(AIRE_MAX_CANEVAS / (l * h)));
+        if (coteMax) facteur = Math.min(facteur, coteMax / Math.max(l, h));
+        const lc = Math.max(1, Math.round(l * facteur));
+        const hc = Math.max(1, Math.round(h * facteur));
+        const q = ((quarts || 0) % 4 + 4) % 4;
+        const canvas = document.createElement('canvas');
+        canvas.width = q % 2 ? hc : lc;
+        canvas.height = q % 2 ? lc : hc;
+        const ctx = canvas.getContext('2d');
+        // Un JPEG n'a pas de transparence : le fond d'un PNG ne doit pas sortir noir.
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.translate(canvas.width / 2, canvas.height / 2);
+        ctx.rotate(q * Math.PI / 2);
+        ctx.drawImage(img, -lc / 2, -hc / 2, lc, hc);
+        return canvas;
+    }
+
+    /**
+     * Une page de l'éditeur à partir d'une image : le blob INTACT, ses pixels, et une
+     * vignette pour l'écran. La pleine définition n'est pas gardée décodée.
+     * @param {Blob} blob - L'image de la page
+     * @returns {Promise<{blob: Blob, dataUrl: string, largeur: number, hauteur: number}>}
+     */
+    async function pageDepuisImage(blob) {
+        const adresse = URL.createObjectURL(blob);
+        try {
+            const img = await chargerImage(adresse);
+            const canvas = dessinerTournee(img, 0, COTE_VIGNETTE_EDITEUR);
+            const dataUrl = canvas.toDataURL('image/jpeg', 0.8);
+            canvas.width = 0;
+            return { blob: blob, dataUrl: dataUrl, largeur: img.naturalWidth, hauteur: img.naturalHeight };
+        } finally {
+            URL.revokeObjectURL(adresse);
+        }
+    }
+
+    /**
+     * Une image tournée de `quarts` quarts de tour horaires, à sa pleine définition.
+     * @param {Blob} blob
+     * @param {number} quarts
+     * @returns {Promise<Blob>} JPEG ; le blob reçu si `quarts` est un tour complet
+     */
+    async function pivoterImage(blob, quarts) {
+        if (!(((quarts || 0) % 4 + 4) % 4)) return blob;
+        const adresse = URL.createObjectURL(blob);
+        try {
+            const canvas = dessinerTournee(await chargerImage(adresse), quarts, 0);
+            const tournee = await new Promise((resolve) => canvas.toBlob(resolve, 'image/jpeg', 0.92));
+            canvas.width = 0;
+            if (!tournee) throw new Error('Pivot impossible : image trop grande pour cet appareil');
+            return tournee;
+        } finally {
+            URL.revokeObjectURL(adresse);
+        }
+    }
+
+    /** La vignette d'une page, tournée d'un quart de tour horaire. */
+    async function pivoterVignette(dataUrl) {
+        const canvas = dessinerTournee(await chargerImage(dataUrl), 1, 0);
+        const tournee = canvas.toDataURL('image/jpeg', 0.8);
+        canvas.width = 0;
+        return tournee;
+    }
+
+    /**
+     * Une page de PDF rendue en image à sa pleine définition : celle de son image
+     * numérisée, ou 250 ppp pour du texte. Repli des pages dont les octets ne se
+     * reprennent pas tels quels.
+     * @param {PDFPageProxy} page
+     * @returns {Promise<Blob>} JPEG
+     */
+    async function rendrePagePleineDefinition(page) {
+        const description = await decrirePagePDF(page);
+        const base = page.getViewport({ scale: 1 });
+        let echelle = description.sorte === 'image' ? description.largeur / base.width : PPP_PAGE_TEXTE / 72;
+        let largeur = description.sorte === 'image' ? description.largeur : Math.round(base.width * echelle);
+        let hauteur = description.sorte === 'image' ? description.hauteur : Math.round(base.height * echelle);
+        if (largeur * hauteur > AIRE_MAX_CANEVAS) {
+            const facteur = Math.sqrt(AIRE_MAX_CANEVAS / (largeur * hauteur));
+            echelle *= facteur;
+            largeur = Math.floor(largeur * facteur);
+            hauteur = Math.floor(hauteur * facteur);
+        }
+        const canvas = document.createElement('canvas');
+        canvas.width = largeur;
+        canvas.height = hauteur;
+        await page.render({ canvasContext: canvas.getContext('2d'), viewport: page.getViewport({ scale: echelle }) }).promise;
+        const image = await new Promise((resolve) => canvas.toBlob(resolve, 'image/jpeg', 0.92));
+        canvas.width = 0;
+        page.cleanup();
+        if (!image) throw new Error('Page illisible : rendu vide');
+        return image;
+    }
+
+    /**
+     * Les pages d'un PDF, chacune en image à sa pleine définition, pour l'éditeur de pages.
+     * Une page d'un PDF de l'application garde ses octets (`sansPerte`) ; les autres sont
+     * rendues par pdf.js. Une page à la fois : jamais deux pleines définitions décodées.
+     *
+     * @param {Blob} blob - Le PDF
+     * @returns {Promise<Array<{pageNum: number, blob: Blob, dataUrl: string, largeur: number, hauteur: number, sansPerte: boolean}>>}
+     *   `dataUrl` est une vignette ; `largeur` et `hauteur` sont les pixels de `blob`
+     */
+    async function pagesDuPDF(blob) {
         if (typeof pdfjsLib === 'undefined') {
             throw new Error('PDF.js non disponible');
         }
+        const octets = new Uint8Array(await blob.arrayBuffer());
+        const positions = (typeof PdfImagePerdue !== 'undefined' && PdfImagePerdue.lireImagesDesPages(octets)) || null;
+        const reprises = (positions || []).map((p) => {
+            if (!p) return null;
+            // Un PDF ignore la balise EXIF ; `imagePourPDF` la suivrait. Une telle page est rendue.
+            const tete = octets.subarray(p.debut, p.debut + Math.min(p.longueur, 65536));
+            return lireOrientationExif(tete) === 1 ? blob.slice(p.debut, p.debut + p.longueur, 'image/jpeg') : null;
+        });
 
-        const arrayBuffer = await blob.arrayBuffer();
-        const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+        let pdf = null;
         const pages = [];
-
-        for (let i = 1; i <= pdf.numPages; i++) {
-            const page = await pdf.getPage(i);
-            const scale = 1000 / page.getViewport({ scale: 1 }).width;
-            const viewport = page.getViewport({ scale: scale });
-
-            const canvas = document.createElement('canvas');
-            canvas.width = viewport.width;
-            canvas.height = viewport.height;
-            const ctx = canvas.getContext('2d');
-            await page.render({ canvasContext: ctx, viewport: viewport }).promise;
-
-            const dataUrl = canvas.toDataURL('image/jpeg', 0.85);
-            const pageBlob = await new Promise(resolve => canvas.toBlob(resolve, 'image/jpeg', 0.85));
-
-            pages.push({
-                pageNum: i,
-                blob: pageBlob,
-                dataUrl: dataUrl,
-                largeur: viewport.width,
-                hauteur: viewport.height
-            });
+        try {
+            if (!positions || reprises.some((r) => !r)) {
+                // pdf.js garde les octets qu'on lui donne : il reçoit les siens.
+                pdf = await pdfjsLib.getDocument({ data: octets }).promise;
+            }
+            const nombre = pdf ? pdf.numPages : reprises.length;
+            for (let i = 0; i < nombre; i++) {
+                const reprise = reprises[i] || null;
+                const image = reprise || await rendrePagePleineDefinition(await pdf.getPage(i + 1));
+                pages.push(Object.assign({ pageNum: i + 1, sansPerte: !!reprise }, await pageDepuisImage(image)));
+            }
+        } finally {
+            if (pdf) pdf.destroy();
         }
-
         return pages;
     }
 
     /**
+     * Decompose un PDF importe en pages individuelles, à leur pleine définition
+     * @param {string} fichierId - ID du fichier importe
+     * @returns {Promise<Array>} Voir `pagesDuPDF`
+     */
+    async function decomposerPDF(fichierId) {
+        const blob = await travauxStockage.recupererBlob(fichierId);
+        if (!blob) throw new Error('Blob introuvable pour ' + fichierId);
+        return pagesDuPDF(blob);
+    }
+
+    /**
      * Reassemble un tableau de pages (blobs images) en un PDF
-     * @param {Array} pages - Tableau de {blob, ...} ; la taille de chaque page vient
-     *   de son image (`imagePourPDF`), pas des champs `largeur`/`hauteur`
+     * @param {Array} pages - Tableau de {blob, quarts?, ...} ; la taille de chaque page vient
+     *   de son image (`imagePourPDF`), pas des champs `largeur`/`hauteur`. `quarts` : les
+     *   quarts de tour horaires demandés dans l'éditeur, faits ici à pleine définition.
+     *   Une page sans pivot part avec ses octets, sans recompression.
      * @returns {Promise<Blob>} Le blob PDF reassemble
      */
     async function reassemblerPages(pages) {
@@ -2237,7 +2528,8 @@
         for (let i = 0; i < pages.length; i++) {
             // L'image telle qu'affichée, et SES dimensions : jamais `page.largeur/hauteur`,
             // qui peuvent décrire une image vue droite quand les octets sont couchés (EXIF).
-            const { imgData, largeur, hauteur } = await imagePourPDF(pages[i].blob);
+            const source = await pivoterImage(pages[i].blob, pages[i].quarts);
+            const { imgData, largeur, hauteur } = await imagePourPDF(source);
 
             // Dimensions en mm (250 DPI)
             const mmPerPx = 25.4 / 250;
@@ -2495,6 +2787,13 @@
         // Editeur de pages
         decomposerPDF: decomposerPDF,
         reassemblerPages: reassemblerPages,
+        // La définition gardée (15 nov. 2026)
+        pagesDuPDF: pagesDuPDF,
+        pageDepuisImage: pageDepuisImage,
+        pivoterVignette: pivoterVignette,
+        definitionDuPDF: definitionDuPDF,
+        direDefinitionPDF: direDefinitionPDF,
+        nomDuFormat: nomDuFormat,
         // Image droite pour le PDF (EXIF, 5 nov. 2026)
         lireOrientationExif: lireOrientationExif,
         // Etat

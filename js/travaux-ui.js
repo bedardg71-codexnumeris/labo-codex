@@ -1496,8 +1496,34 @@
        =============================== */
 
     /**
-     * Calcule les dimensions cibles apres uniformisation DPI
-     * Reprend la logique de uniformiser200DPI() sans toucher aux pixels
+     * Les dimensions d'une image une fois ajustée au gabarit de « Rés. max. ».
+     *
+     * Le gabarit est Lettre (8,5 x 11 po) sous 2 500 px, 11 x 17 po au-dessus, à `dpi`
+     * points par pouce. 15 nov. 2026 : il suit l'orientation de l'image. Il restait
+     * debout ; une image couchée était donc ajustée à son PETIT côté (à 200 ppp,
+     * 2 728 x 1 748 devenait 2 200 x 1 410 alors qu'elle tient dans 3 400 x 2 200).
+     *
+     * Source unique de `calculerDimensionsCibles` (ce que l'écran annonce) et de
+     * `uniformiser200DPI` (ce qui est fait) : elles ne peuvent plus se contredire.
+     *
+     * @param {number} w - Largeur en pixels
+     * @param {number} h - Hauteur en pixels
+     * @param {number} dpi - Points par pouce du gabarit
+     * @returns {{w: number, h: number}} Inchangées si l'image tient dans le gabarit
+     */
+    function dimensionsResMax(w, h, dpi) {
+        const grand = w > 2500 || h > 2500;
+        const court = Math.round((grand ? 11 : 8.5) * dpi);
+        const long = Math.round((grand ? 17 : 11) * dpi);
+        const maxW = w > h ? long : court;
+        const maxH = w > h ? court : long;
+        if (w <= maxW && h <= maxH) return { w: w, h: h };
+        const ratio = Math.min(maxW / w, maxH / h);
+        return { w: Math.round(w * ratio), h: Math.round(h * ratio) };
+    }
+
+    /**
+     * Calcule les dimensions cibles apres uniformisation DPI, sans toucher aux pixels
      * @param {Object} f - Fichier prepare
      * @returns {{w: number, h: number}} Dimensions cibles
      */
@@ -1511,24 +1537,16 @@
             return { w: f.largeurOriginale, h: f.hauteurOriginale };
         }
 
-        let w = f.largeurOriginale;
-        let h = f.hauteurOriginale;
+        return dimensionsResMax(f.largeurOriginale, f.hauteurOriginale, dpi);
+    }
 
-        let maxW, maxH;
-        if (w > 2500 || h > 2500) {
-            // Tabloid 11"x17"
-            maxW = Math.round(11 * dpi); maxH = Math.round(17 * dpi);
-        } else {
-            // Lettre 8.5"x11"
-            maxW = Math.round(8.5 * dpi); maxH = Math.round(11 * dpi);
-        }
-
-        if (w <= maxW && h <= maxH) {
-            return { w, h };
-        }
-
-        const ratio = Math.min(maxW / w, maxH / h);
-        return { w: Math.round(w * ratio), h: Math.round(h * ratio) };
+    /**
+     * La définition d'un PDF sous le grand aperçu : un PDF n'est pas traité, et c'est dit.
+     * @param {Object} f - Fichier prepare (PDF)
+     * @returns {string}
+     */
+    function definitionPDFSansTraitement(f) {
+        return travauxImport.direDefinitionPDF(f.definitionPDF, f.nombrePages) + ' (aucun traitement)';
     }
 
     /**
@@ -1805,7 +1823,7 @@
 
             if (resEl) {
                 resEl.textContent = f.estPDF
-                    ? 'PDF (aucun traitement)'
+                    ? definitionPDFSansTraitement(f)
                     : `${dims.w} x ${dims.h}`;
             }
             if (tailleEl) {
@@ -2089,7 +2107,8 @@
             if (f.largeurOriginale && f.hauteurOriginale) {
                 resolution = `${f.largeurOriginale} x ${f.hauteurOriginale}`;
             } else if (f.estPDF) {
-                resolution = 'PDF';
+                // 15 nov. 2026 : la définition de TOUS les fichiers, PDF compris.
+                resolution = travauxImport.direDefinitionPDF(f.definitionPDF, f.nombrePages);
             } else if (f.heicEchec) {
                 resolution = 'HEIC non décodé';
             } else {
@@ -2221,7 +2240,7 @@
             const idx = fichierSelectionneIndex;
             const dims = calculerDimensionsCibles(f);
             const tailleEst = estimerTailleFichier(dims.w, dims.h, f);
-            const resCible = f.estPDF ? 'PDF (aucun traitement)' : `${dims.w} x ${dims.h}`;
+            const resCible = f.estPDF ? definitionPDFSansTraitement(f) : `${dims.w} x ${dims.h}`;
 
             colCentre += '<div class="pipeline-col-titre">Aper\u00e7u page par page</div>';
 
@@ -2322,7 +2341,7 @@
         queue.forEach((f, index) => {
             const dims = calculerDimensionsCibles(f);
             const tailleEst = estimerTailleFichier(dims.w, dims.h, f);
-            const resCible = f.estPDF ? 'PDF' : `${dims.w} x ${dims.h}`;
+            const resCible = f.estPDF ? definitionPDFSansTraitement(f) : `${dims.w} x ${dims.h}`;
             const thumb = f.thumbnailDataUrl || travauxStockage.obtenirThumbnailSync(f.id);
             const nomEtudiant = echapperHtml(nomDansLApercu(f, homonymes));
 
@@ -5073,7 +5092,8 @@
 
     /**
      * Uniformise une image au DPI cible
-     * Lettre (8.5"x11") ou Tabloid (11"x17") selon les dimensions originales
+     * Lettre (8.5"x11") ou Tabloid (11"x17") selon les dimensions originales,
+     * couché pour une image couchée (`dimensionsResMax`)
      * @param {Blob} blob - Le blob image
      * @param {number} dpi - DPI cible (200, 250 ou 300)
      * @returns {Promise<Blob>} Le blob redimensionne
@@ -5086,30 +5106,14 @@
             img.onload = () => {
                 URL.revokeObjectURL(url);
 
-                let w = img.width;
-                let h = img.height;
-
-                // Determiner le format cible par seuil de dimension
-                let maxW, maxH;
-                if (w > 2500 || h > 2500) {
-                    // Tabloid 11"x17"
-                    maxW = Math.round(11 * dpi);
-                    maxH = Math.round(17 * dpi);
-                } else {
-                    // Lettre 8.5"x11"
-                    maxW = Math.round(8.5 * dpi);
-                    maxH = Math.round(11 * dpi);
-                }
+                // Le gabarit, couché pour une image couchée : `dimensionsResMax`.
+                const { w, h } = dimensionsResMax(img.width, img.height, dpi);
 
                 // Redimensionner proportionnellement si necessaire
-                if (w <= maxW && h <= maxH) {
+                if (w === img.width && h === img.height) {
                     resolve(blob);
                     return;
                 }
-
-                const ratio = Math.min(maxW / w, maxH / h);
-                w = Math.round(w * ratio);
-                h = Math.round(h * ratio);
 
                 const canvas = document.createElement('canvas');
                 canvas.width = w;
@@ -6763,25 +6767,7 @@
                 const blob = await travauxStockage.recupererBlob(fichierId);
                 if (!blob) throw new Error('Blob introuvable pour ' + fichierId);
 
-                const dataUrl = await new Promise(function(resolve, reject) {
-                    const reader = new FileReader();
-                    reader.onload = function() { resolve(reader.result); };
-                    reader.onerror = reject;
-                    reader.readAsDataURL(blob);
-                });
-                const dims = await new Promise(function(resolve, reject) {
-                    const img = new Image();
-                    img.onload = function() { resolve({ width: img.width, height: img.height }); };
-                    img.onerror = reject;
-                    img.src = dataUrl;
-                });
-                editionPages = [{
-                    pageNum: 1,
-                    blob: blob,
-                    dataUrl: dataUrl,
-                    largeur: dims.width,
-                    hauteur: dims.height
-                }];
+                editionPages = [Object.assign({ pageNum: 1 }, await travauxImport.pageDepuisImage(blob))];
             }
 
             _marquerOrigine(editionPages, fichierId);   // #1075, point 7
@@ -6933,35 +6919,27 @@
     }
 
     /**
-     * Pivote une page de 90 degres dans le sens horaire
+     * Pivote une page de 90 degres dans le sens horaire.
+     *
+     * 15 nov. 2026 — seule la vignette tourne ici. Le quart de tour est noté sur la page
+     * (`quarts`) et fait à l'enregistrement, sur l'image à pleine définition
+     * (`travauxImport.reassemblerPages`). Avant, c'est l'image affichée, déjà réduite,
+     * qui était tournée puis enregistrée.
      */
-    function pivoterPageEditeur(index) {
+    async function pivoterPageEditeur(index) {
         var page = editionPages[index];
         if (!page) return;
-
-        var img = new Image();
-        img.onload = function() {
-            var canvas = document.createElement('canvas');
-            // Inverser largeur/hauteur pour rotation 90°
-            canvas.width = img.height;
-            canvas.height = img.width;
-            var ctx = canvas.getContext('2d');
-            ctx.translate(canvas.width / 2, canvas.height / 2);
-            ctx.rotate(Math.PI / 2);
-            ctx.drawImage(img, -img.width / 2, -img.height / 2);
-
-            page.dataUrl = canvas.toDataURL('image/png');
-            var ancienneLargeur = page.largeur;
-            page.largeur = page.hauteur;
-            page.hauteur = ancienneLargeur;
-
-            // Mettre a jour le blob
-            canvas.toBlob(function(blob) {
-                if (blob) page.blob = blob;
-                renderEditeurPages();
-            }, 'image/png');
-        };
-        img.src = page.dataUrl;
+        try {
+            page.dataUrl = await travauxImport.pivoterVignette(page.dataUrl);
+        } catch (err) {
+            console.error('[Editeur Pages] Erreur pivot:', err);
+            return;
+        }
+        page.quarts = ((page.quarts || 0) + 1) % 4;
+        var ancienneLargeur = page.largeur;
+        page.largeur = page.hauteur;
+        page.hauteur = ancienneLargeur;
+        renderEditeurPages();
     }
 
     /**
@@ -6997,14 +6975,13 @@
             for (const fichier of input.files) {
                 if (fichier.type === 'application/pdf') {
                     try {
-                        const arrayBuffer = await fichier.arrayBuffer();
-                        const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+                        // 15 nov. 2026 : chaque page à sa pleine définition (elle était rendue à 800 px).
+                        const pagesPDF = await travauxImport.pagesDuPDF(fichier);
                         const nomBase = (fichier.name || 'document').replace(/\.pdf$/i, '');
-                        for (let i = 1; i <= pdf.numPages; i++) {
-                            const pageData = await rendrePagePDF(pdf, i);
+                        for (const pageData of pagesPDF) {
                             fichiersAdHoc.push({
                                 fichier: pageData.blob,
-                                nomFichier: nomBase + ' - page ' + i + '.jpg',
+                                nomFichier: nomBase + ' - page ' + pageData.pageNum + '.jpg',
                                 typeMIME: 'image/jpeg',
                                 tailleFichier: pageData.blob.size,
                                 estImage: true,
@@ -7068,59 +7045,12 @@
             if (!blobFinal) continue;
 
             try {
-                const dataUrl = await new Promise((resolve, reject) => {
-                    const reader = new FileReader();
-                    reader.onload = () => resolve(reader.result);
-                    reader.onerror = reject;
-                    reader.readAsDataURL(blobFinal);
-                });
-                const dims = await new Promise((resolve, reject) => {
-                    const img = new Image();
-                    img.onload = () => resolve({ width: img.width, height: img.height });
-                    img.onerror = reject;
-                    img.src = dataUrl;
-                });
-                editionPages.push({
-                    pageNum: editionPages.length + 1,
-                    blob: blobFinal,
-                    dataUrl: dataUrl,
-                    largeur: dims.width,
-                    hauteur: dims.height
-                });
+                editionPages.push(Object.assign({ pageNum: editionPages.length + 1 }, await travauxImport.pageDepuisImage(blobFinal)));
             } catch (e) {
                 console.error('[Editeur Pages] Erreur insertion page:', e);
             }
         }
         renderEditeurPages();
-    }
-
-    /**
-     * Rend une page PDF en image (utilitaire pour l'editeur)
-     * @param {PDFDocumentProxy} pdf - Document PDF
-     * @param {number} pageNum - Numero de page (1-based)
-     * @returns {Promise<Object>} {pageNum, blob, dataUrl, largeur, hauteur}
-     */
-    async function rendrePagePDF(pdf, pageNum) {
-        const page = await pdf.getPage(pageNum);
-        const scale = 800 / page.getViewport({ scale: 1 }).width;
-        const viewport = page.getViewport({ scale: scale });
-
-        const canvas = document.createElement('canvas');
-        canvas.width = viewport.width;
-        canvas.height = viewport.height;
-        const ctx = canvas.getContext('2d');
-        await page.render({ canvasContext: ctx, viewport: viewport }).promise;
-
-        const dataUrl = canvas.toDataURL('image/jpeg', 0.85);
-        const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/jpeg', 0.85));
-
-        return {
-            pageNum: pageNum,
-            blob: blob,
-            dataUrl: dataUrl,
-            largeur: viewport.width,
-            hauteur: viewport.height
-        };
     }
 
     /**
@@ -7490,25 +7420,7 @@
                     var blob = await travauxStockage.recupererBlob(fId);
                     if (!blob) continue;
 
-                    var dataUrl = await new Promise(function(resolve, reject) {
-                        var reader = new FileReader();
-                        reader.onload = function() { resolve(reader.result); };
-                        reader.onerror = reject;
-                        reader.readAsDataURL(blob);
-                    });
-                    var dims = await new Promise(function(resolve, reject) {
-                        var img = new Image();
-                        img.onload = function() { resolve({ width: img.width, height: img.height }); };
-                        img.onerror = reject;
-                        img.src = dataUrl;
-                    });
-                    editionPages.push({
-                        pageNum: editionPages.length + 1,
-                        blob: blob,
-                        dataUrl: dataUrl,
-                        largeur: dims.width,
-                        hauteur: dims.height
-                    });
+                    editionPages.push(Object.assign({ pageNum: editionPages.length + 1 }, await travauxImport.pageDepuisImage(blob)));
                 }
 
                 // Marquer le fichier pour suppression apres sauvegarde
@@ -7632,25 +7544,7 @@
                     // serait effacée à l'enregistrement. Le chargement s'arrête et le dit.
                     if (!blob) throw new Error(MOT_FUSION_SANS_FICHIER);
 
-                    const dataUrl = await new Promise(function(resolve, reject) {
-                        const reader = new FileReader();
-                        reader.onload = function() { resolve(reader.result); };
-                        reader.onerror = reject;
-                        reader.readAsDataURL(blob);
-                    });
-                    const dims = await new Promise(function(resolve, reject) {
-                        const img = new Image();
-                        img.onload = function() { resolve({ width: img.width, height: img.height }); };
-                        img.onerror = reject;
-                        img.src = dataUrl;
-                    });
-                    editionPages.push({
-                        pageNum: editionPages.length + 1,
-                        blob: blob,
-                        dataUrl: dataUrl,
-                        largeur: dims.width,
-                        hauteur: dims.height
-                    });
+                    editionPages.push(Object.assign({ pageNum: editionPages.length + 1 }, await travauxImport.pageDepuisImage(blob)));
                 }
                 _marquerOrigine(editionPages.slice(debut), f.id);
             }
@@ -8130,6 +8024,7 @@
         descendrePageEditeur: descendrePageEditeur,
         supprimerPageEditeur: supprimerPageEditeur,
         pivoterPageEditeur: pivoterPageEditeur,
+        dimensionsResMax: dimensionsResMax,   // 15 nov. 2026 : lue par son banc
         ajouterPagesEditeur: ajouterPagesEditeur,
         sauvegarderEdition: sauvegarderEdition,
         reparerImagePerdue: reparerImagePerdue,   // #1233
