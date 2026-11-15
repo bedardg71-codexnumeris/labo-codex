@@ -7,6 +7,16 @@
 
 ---
 
+## 15 NOV. 2026, 8 H 50 (Claude Code) : **LE TRAVAIL VIT SUR `lot/editeur-pages-definition`, NON FUSIONNÉ** — `main` inchangé (`41f68d315`, 1.247.0)
+
+Mandat : consigne de Cowork du 15 nov., 8 h 14, sur un défaut VÉCU par Grégoire (iPad, 1.247.0) : une copie de 2 728 x 1 748 px floue dans Annoter après avoir inversé ses pages dans l'éditeur de pages. **Ni verdict complet, ni fusion, ni release.** `origin/lot/editeur-pages-definition` = `d1495856e`, deux commits au-dessus de `main`. Rapport : `plans de travail/RAPPORT-2026-11-15-editeur-pages-definition.md`, SUR LA BRANCHE.
+
+- **Fait** : l'éditeur de pages garde la définition (les octets JPEG de chaque page repris tels quels dans le PDF de l'application ; pivot à pleine définition) ; les Propriétés disent les pixels de chaque page ; l'écran d'import dit la définition des PDF ; le gabarit de « Rés. max. » suit l'orientation de l'image.
+- **Jugé** : Vitest complet vert (926 fichiers, 11 807 essais) ; WebKit en un passage ciblé de 26 essais, vert ; les huit essais neufs rouges sur `41f68d315`. **Non jugé : le verdict complet.**
+- **Stock** : les copies déjà réduites le restent ; rien n'est réparé d'office, Grégoire réimporte les originaux.
+- **Encore dû** : verdict complet, relecture croisée, fusion ; les mots d'écran et la ligne de Nouvelles à approuver (au rapport) ; un constat à inscrire ou non (l'import groupé de PDF, #880, rend encore chaque page à 1 400 px au plus).
+- ⚠ **Arbres de travail** : ce lot vit dans `/Users/kuekatsheu/Documents/GitHub/labo-codex-editeur-pages`. La session a d'abord écrit dans l'arbre principal pendant que `lot/gel-etape-7` y travaillait (8 h 15 à 8 h 28) ; ses changements en ont été retirés, aucun fichier de l'autre session n'a été touché. Détail au rapport, § 8.
+
 ## 14 NOV. 2026, 20 H 35 (Claude Code) : **1.247.0 POUSSÉE ET EN LIGNE, VERDICT VERT** — l'essai novice du 14 nov. fusionné
 
 Mandat : deux relais de Cowork du 14 nov. (deux retouches avant le verdict ; puis, au vert, fusion, release mineure, mise en ligne). **`origin/main` = `3b16daa50`** (1.247.0, build `1114-1819`, « Des parcours plus légers ») ; Netlify `6af90b55`, `ready` à 20 h 31 sur ce SHA ; le `version.js` du permalien dit `1.247.0`, build `1114-1819`. **Le travail le plus récent vit sur `main`.**
