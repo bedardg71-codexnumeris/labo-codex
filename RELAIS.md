@@ -7,6 +7,14 @@
 
 ---
 
+## 15 NOV. 2026, 9 H 21 (Claude Code) : **`lot/editeur-pages-definition` AVANCE À `4863237dc`, TOUJOURS NON FUSIONNÉ** — trois ajouts du mandat de Cowork de 9 h 00
+
+Remplace l'état donné à l'entrée de 8 h 50 pour ce lot. Rapport à jour sur la branche : `plans de travail/RAPPORT-2026-11-15-editeur-pages-definition.md` (§ 10 à 15). Arbre de travail : `/Users/kuekatsheu/Documents/GitHub/labo-codex-editeur-pages`.
+
+- **Ajouté** : le PDF réuni à l'import garde sa définition (#880) ; « Effacer la page » demande une confirmation, aux mots de Grégoire ; le carrousel d'Annoter suit les copies après un remplacement (bug vécu, iPad, 1.247.0 : il n'était pas refait à l'arrivée par « Annoter » de la Liste).
+- **Jugé** : Vitest complet vert (926 fichiers, 11 805 essais) ; deux passages WebKit ciblés, verts (55 puis 40 essais). **Non jugé : le verdict complet.**
+- **Encore dû** avant une mise en ligne : le verdict complet ; un essai de Grégoire sur l'iPad avec une vraie copie (fichiers bien plus lourds qu'avant) ; la relecture croisée ; trois approbations (« (réuni en un seul PDF) », la règle « une seule question » avec le codex, la ligne de Nouvelles).
+
 ## 15 NOV. 2026, 9 H 05 (Claude Code) : **LE TRAVAIL VIT SUR `lot/gel-etape-7`, NON FUSIONNÉ** — `main` inchangé pour le code (1.247.0) ; en attente de la relecture de Cowork
 
 Mandats : deux relais de Cowork du 15 nov. (diagnostic du gel vécu par Grégoire sur l'iPad à 7 h 12 ; puis correctif des points 1, 2 et 4 pour la fenêtre du lundi 16 nov. vers midi). **Ni fusion, ni release, ni verdict complet avant la relecture de Cowork.** `origin/lot/gel-etape-7` = `856d72d99`, un commit au-dessus de `main` (`41f68d315`).
