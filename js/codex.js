@@ -3921,7 +3921,8 @@ var PROPOSITIONS_AVANT_SUPPRESSION = {
     // va à la corbeille, qui l'efface pour de bon après 30 jours. Mots proposés, à Grégoire avant la release.
     copieRemplacee:        { premiere: 'Remplacer ce fichier envoie l\'ancien à la corbeille, qui l\'efface pour de bon après 30 jours.', pronom: 'le', infinitif: 'remplacer' },
     seance:                { premiere: 'Réinitialiser cette séance efface pour de bon ses présences et ses notes.', pronom: 'les' },
-    annotationsPage:       { premiere: '« Effacer la page » efface pour de bon les annotations de cette page.', pronom: 'les' },
+    // 15 nov. 2026 : le retour arrière rétablit la page, donc pas « pour de bon » (seul geste du registre dans ce cas).
+    annotationsPage:       { premiere: '« Effacer la page » efface les annotations de cette page. Tu pourras les rétablir avec la flèche de retour arrière.', pronom: 'les' },
     registreLongitudinal:  { premiere: 'Retirer cet·te étudiant·e du registre efface pour de bon sa copie et ses résultats ultérieurs.', pronom: 'les' },
     resultatsBilan:        { premiere: 'Supprimer ces résultats les efface pour de bon.', pronom: 'les' },
     // Lot 2b (3 oct. 2026) : une ligne d'éditeur, seulement si une évaluation l'emploie

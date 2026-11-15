@@ -78,6 +78,9 @@ test.describe('15 nov. 2026 — « Effacer la page » demande avant d’effacer'
 
         await effacer(page);
         await expect(page.locator('#ui-dialogue-titre')).toHaveText('Écrire un codex avant de supprimer ?');
+        // Les mots de la fenêtre : rien n'y dit « pour de bon », le retour arrière rétablit la page.
+        const mots = (await fenetre(page).locator('.modal-section').innerText()).replace(/\s+/g, ' ').trim();
+        expect(mots).toBe('« Effacer la page » efface les annotations de cette page. Tu pourras les rétablir avec la flèche de retour arrière. Ton codex à jour pourra te les rendre, jusqu\'à ta mise à jour suivante.');
         await cliquer(page, 'Annuler');
         await attendre(page, 300);
         await expect(fenetre(page)).toHaveCount(0);

@@ -187,3 +187,18 @@ Ne s'y oppose pas, mais à savoir : la première erreur « sans toucher » du po
 ## 15. Ligne de Nouvelles révisée
 
 > **Tes copies restent nettes.** Réordonner, retirer ou pivoter une page dans l'éditeur de pages, ou réunir plusieurs fichiers d'un élève à l'import, ne réduit plus la définition. Les Propriétés d'un fichier et l'écran d'import indiquent les dimensions en pixels de chaque page, PDF compris. « Effacer la page » demande maintenant une confirmation. Et après avoir remplacé la copie d'un élève, la bande des copies d'Annoter montre la nouvelle sans qu'il faille recharger la page.
+
+## 16. Avant l'essai sur l'iPad (consigne de 9 h 31)
+
+Approuvés par Cowork : « (réuni en un seul PDF) » et la règle d'une seule question. Annotations orphelines de « Supprimer ce fichier importé » : rien d'inscrit, rien d'effacé (décision relayée). La ligne de Nouvelles attend Grégoire.
+
+**Les mots de la fenêtre du Codex avant « Effacer la page »** (`js/codex.js`, registre `PROPOSITIONS_AVANT_SUPPRESSION`, clé `annotationsPage`, la seule touchée) :
+
+- avant : « « Effacer la page » efface pour de bon les annotations de cette page. Ton codex à jour pourra te les rendre, jusqu'à ta mise à jour suivante. »
+- après : « « Effacer la page » efface les annotations de cette page. Tu pourras les rétablir avec la flèche de retour arrière. Ton codex à jour pourra te les rendre, jusqu'à ta mise à jour suivante. »
+
+La deuxième phrase reprend celle que Grégoire a approuvée pour la confirmation. Laissé, à savoir : le titre et les boutons de cette fenêtre disent toujours « supprimer » (« Écrire un codex avant de supprimer ? », « Supprimer sans codex »), comme pour tous les gestes du registre. L'essai « sans codex » de `effacer-la-page-confirmation-2026-11-15.spec.js` juge maintenant les mots entiers de la fenêtre.
+
+**Les gestes de l'iPad** : `plans de travail/GESTES-IPAD-2026-11-15-editeur-pages-definition.md`, six gestes. L'adresse de l'aperçu est dans la PR de la branche.
+
+**Le build du pied de page ne distingue pas l'aperçu** : il vient de `version.js`, écrit par la release ; l'aperçu affiche donc celui de la 1.247.0. C'est l'adresse qui dit qu'on est sur l'aperçu.
