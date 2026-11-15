@@ -140,7 +140,7 @@ test('#612 · cas 2 — sans groupe-cours actif, l\'import est REFUSÉ et rien n
     expect(r.boutonTrouve, 'la modale doit porter son bouton de confirmation').toBe(true);
     expect(r.libelle, 'et ce doit bien être celui qui importe').toMatch(/importer/i);
     expect(r.dits.join(' | '), 'le refus doit être DIT').toMatch(/aucun groupe-cours actif/i);
-    expect(r.dits.join(' | '), 'et dire quoi faire').toMatch(/Choisissez un groupe-cours/i);
+    expect(r.dits.join(' | '), 'et dire quoi faire').toMatch(/Choisis un groupe-cours/i);
     expect(r.apres, 'aucun fichier ne doit être écrit').toBe(r.avant);
     expect(erreurs, `Erreurs console : ${erreurs.join(' | ')}`).toEqual([]);
 });
