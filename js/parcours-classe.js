@@ -199,7 +199,7 @@
 
     /**
      * « Tout le monde est présent par défaut […] tu ne notes que les absences et les retards » : la colonne Présence (son
-     * en-tête et ses cases), pas le tableau entier. Ses cellules se touchent : une seule flèche, et la bulle peut se poser
+     * en-tête et ses cases), pas le tableau entier. Ses cellules se touchent : une seule flèche (le moteur fond les cibles qui se touchent), et la bulle peut se poser
      * sur les autres colonnes (11 nov. 2026, second essai : le tableau entier et le compteur, déclarés, ne laissaient
      * aucune place libre, et la bulle se posait sur le choix du cours et les premières rangées).
      */
@@ -236,7 +236,8 @@
 
     function majSecondContour() {
         if (!second) return;
-        if (!M().actif() || M().etapeCourante() !== 6 || avantPremierCours) { retirerSecondContour(); return; }
+        // En visite, rien n'est désigné qui écrit (js/parcours-moteur.js) : la date de la séance non plus.
+        if (!M().actif() || M().etapeCourante() !== 6 || avantPremierCours || M().enVisite()) { retirerSecondContour(); return; }
         var c = champDate();
         if (!M().visible(c)) { second.hidden = true; return; }
         var r = c.getBoundingClientRect();
@@ -271,6 +272,8 @@
 
     // Décidé à la préparation de l'étape 7, avant que sa bulle soit rendue.
     var avantPremierCours = false;
+    // Le parcours fait, rejoué (« Refaire ») : fixé au lancement.
+    var rejoue = false;
 
     // ---------- Les lignes des bulles ----------
 
@@ -504,7 +507,9 @@
                 await attendre(function () { var c = champDate(); return !!(c && c.value); }, 1500);
                 avantPremierCours = !premierCoursPasse();
                 verrousAvant = seancesVerrouillees();
-                if (avantPremierCours) {
+                // Rejoué, la séance déjà verrouillée : l'étape s'ouvrira en visite, sans contour (le moteur ne le sait
+                // qu'après cette préparation ; `majSecondContour` le relit ensuite).
+                if (avantPremierCours || (rejoue && seanceVerrouillee())) {
                     retirerSecondContour();
                 } else {
                     await attendre(function () { return M().visible(boutonVerrou()); }, 1500);
@@ -559,6 +564,9 @@
      * · Le parcours FAIT se rejoue depuis sa première bulle, EN VISITE (js/parcours-moteur.js) : chaque étape déjà
      *   réglée se montre, rien n'avance tout seul, rien ne s'écrit (l'état « fait » du parcours reste tel quel), et
      *   la bulle offre « Continuer ».
+     *   ⚠ « Rien ne s'écrit » vaut pour l'état du parcours. La page sous la bulle est la vraie page : y arriver écrit
+     *   ce qu'elle écrit d'elle-même (la séance, le groupe et le tri de la saisie ; un bloc du Cadre qu'on ouvre), et
+     *   un bouton touché fait son geste. D'où la règle du moteur : en visite, rien n'est désigné qui écrit (15 nov. 2026).
      * · Le parcours à faire ou en cours part toujours de la première étape non faite ; le compteur « n sur N » ouvre
      *   la liste des étapes, où l'on revoit celles d'avant.
      */
@@ -568,6 +576,7 @@
         // Un import en cours empêche la sortie de la démo : rien ne part.
         if (enDemo()) return;
         var refaire = window.Assistance.etatDe(ID).etat === 'fait';
+        rejoue = refaire;
         var acquis = premiereNonFaite();
         var depuis = refaire ? 0 : acquis;
         if (!refaire) window.Assistance.definirEtat(ID, 'en-cours', depuis);

@@ -74,6 +74,20 @@
    une étape FAITE (ou celle où l'on est rendu) pour la revoir, jamais une étape au-delà. Une étape revue dont l'état
    est déjà atteint se joue EN VISITE : rien n'avance tout seul, rien ne s'écrit, et la bulle offre « Continuer » à la
    place d'une attente. La visite cesse à la première étape qui reste à faire.
+   EN VISITE, RIEN N'EST DÉSIGNÉ QUI ÉCRIT (15 nov. 2026 ; vécu par Grégoire sur l'iPad : la bulle 7 de « Mettre ta
+   classe en place », rejouée, entourait « Déverrouiller la saisie » en disant « Touche « Verrouiller la saisie » », et
+   un toucher a déverrouillé une vraie séance). Une étape en visite ne pose ni contour ni flèche sur un contrôle qui
+   écrit dans les données, et sa consigne devient « Tu revois ce parcours : rien n'est à refaire. Lis, puis touche
+   « Continuer ». » ; ses autres lignes restent. « Un contrôle qui écrit » : tout élément qu'un toucher actionne (un
+   bouton, un champ, une liste, une case, un `data-action`), qu'il le soit, qu'il soit dedans ou qu'il en contienne
+   un — sauf dans le menu de navigation (la section, l'onglet), qui ne fait que changer de page. Le moteur ne sait pas
+   ce qu'un bouton écrit : dans le doute, il ne le désigne pas (`ecritDansLesDonnees`).
+   CE QUE LA BULLE ÉVITE EST RÉDUIT D'ABORD (15 nov. 2026 ; même essai : la page gelait à l'étape 7). La recherche d'une
+   place essayait (6 Z + 3)² places contre Z rectangles : le cube de Z, et l'étape 7 en déclare un par cellule de la
+   saisie (184 à 36 personnes : une trentaine de secondes par passage). `reduireEvites` retire les doublons, fond ce
+   qui forme un même bloc (les cellules d'une colonne), puis, au-delà de EVITES_MAX, fond de proche en proche ; les
+   abscisses et les ordonnées essayées sont dédoublonnées. Les cibles des flèches d'une étape en lignes qui se
+   touchent n'en font qu'une : une flèche vers la colonne, pas une par rangée.
    LA FIN (lot 2e) : la dernière bulle d'un parcours dit « Pour revoir une étape, touche « N sur N ». » ; quand elle
    n'offre que « Terminer », elle offre aussi « Parcours suivant », de même poids (aucun bouton mis en avant).
    Sa consigne suit ses boutons : « Touche « Terminer » » y devient « Touche « Parcours suivant », ou « Terminer » ».
@@ -159,6 +173,13 @@
     var LIGNES_PAR_PAGE = 10;  // au-delà, à la largeur de la bulle, le texte se coupe en pages
     // LA FIN : la consigne de la dernière bulle quand elle offre ses deux suites. Sa seule écriture (voir consigneDeLaFin).
     var CONSIGNE_DEUX_SUITES = 'Touche « Parcours suivant », ou « Terminer »';
+    // EN VISITE (15 nov. 2026 ; texte de Grégoire, relais de Cowork) : la consigne d'une étape revue dont le geste écrit.
+    var PHRASE_VISITE = 'Tu revois ce parcours : rien n\'est à refaire. Lis, puis touche « Continuer ».';
+    // Un contrôle : ce qu'un toucher actionne (voir « EN VISITE, RIEN N'EST DÉSIGNÉ QUI ÉCRIT »).
+    var CONTROLES_QUI_ECRIVENT = 'button, input, select, textarea, [contenteditable=""], [contenteditable="true"], [data-action], [data-on-change], [role="button"]';
+    var MENU_DE_NAVIGATION = '.navigation-principale, .sous-navigation';
+    var JOINT = 2;             // deux rectangles à moins de 2 px l'un de l'autre se touchent (les cellules d'un tableau)
+    var EVITES_MAX = 24;       // au-delà, ce que la bulle évite est fondu de proche en proche (voir `reduireEvites`)
     var PAGES_MAX = 3;
 
     // PROPOSÉ (10 nov. 2026, à valider par Grégoire) : le nom de la poignée pour le lecteur d'écran.
@@ -323,6 +344,33 @@
     function aUnLieu(etape) {
         var l = etape && etape.lieu;
         try { return typeof l === 'function' ? !!l() : !!l; } catch (e) { return false; }
+    }
+
+    /**
+     * Un contrôle qui écrit dans les données (voir « EN VISITE, RIEN N'EST DÉSIGNÉ QUI ÉCRIT ») : l'élément est un
+     * contrôle, est dans un contrôle, ou en contient un ; le menu de navigation n'en est pas.
+     */
+    function ecritDansLesDonnees(el) {
+        if (!el || typeof el.closest !== 'function') return false;
+        if (el.closest(MENU_DE_NAVIGATION)) return false;
+        return !!el.closest(CONTROLES_QUI_ECRIVENT) || !!el.querySelector(CONTROLES_QUI_ECRIVENT);
+    }
+
+    /**
+     * En visite, le geste de l'étape est retenu : ce qu'elle fait toucher écrit dans les données (ou n'est plus là :
+     * la consigne inviterait à toucher un bouton que rien ne désigne). Ni contour, ni consigne à toucher.
+     */
+    function gesteRetenu(etape) {
+        if (!etat || !etat.enVisite || !etape || !etape.contour) return false;
+        var c = null;
+        try { c = etape.contour(); } catch (e) { c = null; }
+        return !c || ecritDansLesDonnees(c);
+    }
+
+    /** Ce qu'il faut toucher, tel que le moteur le désigne : rien quand le geste est retenu. */
+    function contourDe(etape) {
+        if (!etape || !etape.contour || gesteRetenu(etape)) return null;
+        return etape.contour();
     }
 
     function union(rects) {
@@ -911,6 +959,7 @@
                 return Object.assign({}, l, { texte: consigneDeLaFin(etape, l.texte) });
             }));
         }
+        if (lignes.length && gesteRetenu(etape)) lignes = lignesEnVisite(lignes);
         if (lieu) {
             var ou = document.createElement('p');
             ou.className = 'parcours-bulle-lieu';
@@ -994,7 +1043,7 @@
             suivant = champsDe(l.def).filter(champVide)[0] || null;
             return !!suivant;
         });
-        if (!suivant && etape.contour) suivant = etape.contour();
+        if (!suivant) suivant = contourDe(etape);
         if (!visible(suivant) || aLAise(suivant)) return;
         try { suivant.scrollIntoView({ block: 'center', inline: 'nearest', behavior: 'auto' }); } catch (e) { suivant.scrollIntoView(); }
     }
@@ -1050,7 +1099,21 @@
     }
 
     /** La ligne du geste de l'étape, telle que la bulle la dit. */
-    function gesteDeLEtape(etape) { return consigneDeLaFin(etape, etape.geste); }
+    function gesteDeLEtape(etape) {
+        if (etape.geste && gesteRetenu(etape)) return PHRASE_VISITE;
+        return consigneDeLaFin(etape, etape.geste);
+    }
+
+    /**
+     * En visite, geste retenu : la phrase de la visite prend la place de la consigne (la première ; une autre part) ;
+     * les autres lignes restent. Une bulle sans consigne la reçoit en dernière ligne.
+     */
+    function lignesEnVisite(lignes) {
+        var k = lignes.findIndex(function (l) { return l.geste; });
+        var reste = lignes.filter(function (l) { return !l.geste; });
+        var ou = k === -1 ? reste.length : lignes.slice(0, k).filter(function (l) { return !l.geste; }).length;
+        return reste.slice(0, ou).concat([{ texte: PHRASE_VISITE, geste: true }], reste.slice(ou));
+    }
 
     /**
      * Les boutons de la bulle, tels qu'elle les montre.
@@ -1556,6 +1619,58 @@
      * bords et les places qui la touchent (à 0 ou à ECART px). Toutes ces places, plus les milieux des bords de l'écran
      * (pas son centre) ; toutes ramenées dans l'écran utile. Pure.
      */
+    /** Fond les rectangles que `ensemble(A, B)` réunit, jusqu'à ce que plus rien ne bouge ; l'ordre est gardé. Pure. */
+    function fondre(rects, ensemble) {
+        var liste = rects.slice();
+        var change = true;
+        while (change) {
+            change = false;
+            for (var a = 0; a < liste.length; a++) {
+                for (var b = liste.length - 1; b > a; b--) {
+                    var A = liste[a], B = liste[b];
+                    if (!ensemble(A, B)) continue;
+                    liste[a] = { left: Math.min(A.left, B.left), top: Math.min(A.top, B.top),
+                                 right: Math.max(A.right, B.right), bottom: Math.max(A.bottom, B.bottom), poids: A.poids };
+                    liste.splice(b, 1);
+                    change = true;
+                }
+            }
+        }
+        return liste;
+    }
+
+    /**
+     * Deux rectangles de même poids forment un même bloc : l'un contient l'autre, ou ils partagent tout un bord (deux
+     * cellules d'une colonne, d'une rangée) et se touchent, à JOINT px. Leur union est alors leur rectangle. Pure.
+     */
+    function memeBloc(A, B) {
+        if ((A.poids || 1) !== (B.poids || 1)) return false;
+        var pres = function (x, y) { return Math.abs(x - y) <= JOINT; };
+        var dans = function (I, E) { return I.left >= E.left - JOINT && I.right <= E.right + JOINT && I.top >= E.top - JOINT && I.bottom <= E.bottom + JOINT; };
+        if (dans(A, B) || dans(B, A)) return true;
+        var empiles = pres(A.left, B.left) && pres(A.right, B.right) && A.top <= B.bottom + JOINT && B.top <= A.bottom + JOINT;
+        var cote = pres(A.top, B.top) && pres(A.bottom, B.bottom) && A.left <= B.right + JOINT && B.left <= A.right + JOINT;
+        return empiles || cote;
+    }
+
+    /**
+     * Ce que la bulle évite, réduit avant de chercher sa place (voir « CE QUE LA BULLE ÉVITE EST RÉDUIT D'ABORD ») :
+     * les doublons et les blocs fondus (sans rien couvrir de plus, à JOINT px) ; puis, s'il en reste plus de
+     * EVITES_MAX, les rectangles de même poids fondus de proche en proche (à 4 px, 8, 16…) jusqu'à tenir dessous. Pure.
+     */
+    function reduireEvites(evites) {
+        var liste = fondre(evites.map(function (r) { return pese(r, r.poids || 1); }), memeBloc);
+        var poids = liste.map(function (r) { return r.poids; }).filter(function (p, k, tous) { return tous.indexOf(p) === k; }).length;
+        var proches = function (pad) {
+            return function (A, B) {
+                return A.poids === B.poids && !(A.right + pad <= B.left || B.right + pad <= A.left ||
+                                                A.bottom + pad <= B.top || B.bottom + pad <= A.top);
+            };
+        };
+        for (var pad = 4; liste.length > Math.max(EVITES_MAX, poids); pad *= 2) liste = fondre(liste, proches(pad));
+        return liste;
+    }
+
     function placesEssayees(evites, bw, bh, cadre) {
         var g = cadre.gauche, h = cadre.haut, d = cadre.droite - bw, b = cadre.bas - bh;
         var mx = (g + d) / 2, my = (h + b) / 2;
@@ -1570,9 +1685,20 @@
             xs.push(avant(r.left - bw), avant(r.left - ECART - bw), r.left, r.right - bw, apres(r.right), apres(r.right + ECART));
             ys.push(avant(r.top - bh), avant(r.top - ECART - bh), r.top, r.bottom - bh, apres(r.bottom), apres(r.bottom + ECART));
         });
+        // Ramenées dans l'écran utile, puis dédoublonnées, dans l'ordre (15 nov. 2026) : la plupart y tombent sur un
+        // bord, et chaque paire essayée deux fois coûtait le carré.
+        var uniques = function (vs, min, max, milieu) {
+            var vus = {}, res = [];
+            vs.forEach(function (v) {
+                var w = Math.round(borne(v, min, max)), cle = (v === milieu ? 'm' : '') + w;
+                if (!vus[cle]) { vus[cle] = true; res.push({ v: w, milieu: v === milieu }); }
+            });
+            return res;
+        };
         var places = [];
-        xs.forEach(function (x) {
-            ys.forEach(function (y) { if (x !== mx || y !== my) places.push({ x: Math.round(borne(x, g, d)), y: Math.round(borne(y, h, b)) }); });
+        var X = uniques(xs, g, d, mx), Y = uniques(ys, h, b, my);
+        X.forEach(function (x) {
+            Y.forEach(function (y) { if (!x.milieu || !y.milieu) places.push({ x: x.v, y: y.v }); });
         });
         return places;
     }
@@ -1585,6 +1711,7 @@
      */
     function placerLoin(evites, bw, bh, cadre) {
         var meilleure = null;
+        evites = reduireEvites(evites);
         placesEssayees(evites, bw, bh, cadre).forEach(function (p) {
             var r = { left: p.x, top: p.y, right: p.x + bw, bottom: p.y + bh };
             var cand = { x: p.x, y: p.y, aire: aireCouverte(r, evites), ecart: ecartA(r, evites) };
@@ -1697,7 +1824,9 @@
      */
     function sujets(zones, contourEl) {
         return (zones || []).filter(function (z) {
-            return visible(z) && z !== contourEl && !(contourEl && contourEl.contains(z)) && aLEcran(z) && seVoit(z);
+            return visible(z) && z !== contourEl && !(contourEl && contourEl.contains(z)) && aLEcran(z) && seVoit(z)
+                // En visite, aucune flèche vers un contrôle qui écrit.
+                && !(etat.enVisite && ecritDansLesDonnees(z));
         });
     }
 
@@ -1719,7 +1848,8 @@
 
     /**
      * Trace les flèches de la bulle vers ses cibles ; un tracé inchangé n'est pas réécrit. `vise.fleches` : où vont
-     * les flèches parmi les zones ; `vise.une` (une étape à formulaire) : une par champ, sans fusion ni plafond.
+     * les flèches parmi les zones ; `vise.une` (une étape à formulaire ou en lignes) : une par champ, sans plafond ; seules
+     * celles qui se touchent (à JOINT px) sont fondues.
      * LA RÈGLE DU CONTOUR (Grégoire, 11 nov. 2026, 11 h 45, quatrième aperçu) : ce qu'il faut toucher reçoit sa flèche
      * dès l'ouverture de l'étape, en plus de celles des sujets ; une étape qui a un contour n'est jamais sans flèche.
      * `nommeLeContour` : la sienne seule. Rien vers ce qui ne se voit pas (`seVoit`).
@@ -1736,7 +1866,8 @@
             var auContour = visible(contourEl) && seVoit(contourEl) ? rectsDe([contourEl]) : [];
             var cibles = vise && vise.auContour ? auContour
                 : (!fl ? ciblesDesFleches(zones, contourEl)
-                    : vise.une ? rectsDe(sujets(fl, contourEl)) : ciblesDesFleches(fl, contourEl)).concat(auContour);
+                    // Une par champ ; celles qui se touchent (les cellules d'une colonne) n'en font qu'une.
+                    : vise.une ? fondreCibles(rectsDe(sujets(fl, contourEl)), JOINT) : ciblesDesFleches(fl, contourEl)).concat(auContour);
             // Une flèche évite de passer sur une autre cible, et sur ce qu'il faut toucher.
             var rc = visible(contourEl) ? contourEl.getBoundingClientRect() : null;
             cibles.forEach(function (r) {
@@ -1925,7 +2056,7 @@
      * voit pas encore (dans un tableau qui défile de côté : « Actions »), `suivreContour` l'amènera.
      */
     function retenirContourDOuverture(etape) {
-        var c0 = etape.contour ? etape.contour() : null;
+        var c0 = contourDe(etape);
         etat.contourSuivi = visible(c0) && aLAise(c0) ? signatureDe(c0) : '';
     }
     /** Tout entier à l'écran, sous l'en-tête, et vu (rien ne le couvre). */
@@ -1987,7 +2118,7 @@
 
         var vise = designe(etape);
         var zones = vise.zones;
-        var contourEl = etape.contour ? etape.contour() : null;
+        var contourEl = contourDe(etape);
         if (!zoom) suivreContour(contourEl);
         etat.vus = { zones: zones, contourEl: contourEl, vise: vise };
         etat.passages = (etat.passages || 0) + 1;
@@ -2077,7 +2208,7 @@
      * si l'ensemble ne tient pas à l'écran, c'est ce qu'il faut toucher qui y est amené.
      */
     function elementsVises(etape) {
-        var vise = etape.contour ? [etape.contour()] : [];
+        var vise = [contourDe(etape)];
         return vise.concat(designe(etape).zones).filter(Boolean);
     }
 
@@ -2101,7 +2232,7 @@
     function ouvrirLaPage(etape) {
         if (aUnLieu(etape)) {
             window.scrollTo(0, 0);
-            var c0 = etape.contour ? etape.contour() : null;
+            var c0 = contourDe(etape);
             etat.contourSuivi = visible(c0) ? signatureDe(c0) : '';
             return;
         }
@@ -2135,8 +2266,8 @@
         if (!etat || etat.i !== i) return;
         suivreLaVisite(etape);
         // Sur téléphone, une étape qui désigne quoi toucher sur la page (un contour) ouvre la bulle
-        // repliée ; quand le geste est dans la bulle (« Continuer »), elle s'ouvre dépliée.
-        etat.replie = !!etape.contour;
+        // repliée ; quand le geste est dans la bulle (« Continuer », et toute étape en visite), elle s'ouvre dépliée.
+        etat.replie = !!etape.contour && !etat.enVisite;
         rendreBulle();
         // L'écran où l'étape s'ouvre (une reprise peut tomber sur le second) : sa page, sans défilement de plus.
         etat.pageDite = etape.pageQuiDit ? (etape.pageQuiDit() || null) : null;
@@ -2250,7 +2381,8 @@
         surTelephone: surTelephone,
         mouvementReduit: mouvementReduit,
         // La géométrie des flèches et du déplacement, en fonctions pures (tests/unit).
-        geometrie: { tracerFleche: tracerFleche, grouperCibles: grouperCibles, bornerDeplacement: bornerDeplacement, placerLoin: placerLoin },
+        geometrie: { tracerFleche: tracerFleche, grouperCibles: grouperCibles, bornerDeplacement: bornerDeplacement, placerLoin: placerLoin,
+                     reduireEvites: reduireEvites, placesEssayees: placesEssayees },
         // Pour le relevé des bancs (tests/integration/harness/releve-bulle.js) : ce que l'étape désigne, la bulle
         // déplacée ou non, l'écran utile. Lecture seule.
         placement: function () {
