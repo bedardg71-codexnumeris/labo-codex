@@ -7,6 +7,15 @@
 
 ---
 
+## 15 NOV. 2026, 18 H 49 (Claude Code) : **`lot/deux-temps-modeles` REMIS À JOUR AVEC LA 1.248.0, À `6a57e81bd`, NON FUSIONNÉ** — la règle de la Modélisation ; `main` inchangé pour le code
+
+Mandat : relais de Cowork du 15 nov., 17 h 45 (`plans de travail/CONSIGNE-2026-11-15-deux-temps-remise-a-jour.md`, sur la branche). **Le travail vit sur `lot/deux-temps-modeles`** (PR d'aperçu n° 23, build de l'aperçu `1115-1845`, version 1.248.0 inchangée) ; arbre de travail `../labo-codex-deux-temps`. Ni fusion, ni release, ni Nouvelles.
+
+- **Fait** : `origin/main` (`eeaf4005a`) fusionné dans la branche (`08e815e03`, cinq conflits mécaniques, main pris, jetons refaits) ; « Remplir avec l'exemple » en trois temps dans les deux modèles ; le panneau en quatre temps numérotés, deux états par parcours (le choix unique est retiré) ; la fin d'une Modélisation à trois boutons de même poids ; « Refaire » : la Pratique guidée reste en visite, la Modélisation remet la démo à neuf après confirmation, puis rejoue ses gestes depuis le premier modèle ; « Deux-Rives », l'horaire du mardi et du vendredi, l'échéance du 9 septembre 2025.
+- **Mesuré** : Vitest 929 fichiers, 11 859 essais, verts ; WebKit ciblé, 34 essais, 33 verts du premier coup, 1 vert au second (`gel-etape-7`, un pixel sur le halo, banc de main non touché). **Pas de verdict complet** (consigne : mercredi soir, une fois, sur tous les modèles). Break-tests au rapport.
+- **L'ancienne décision 3.1** : le détour des quatre menus « Type » reste (le choix « des points » / « des niveaux de performance » n'est offert qu'à une grille qui porte les deux ; mesuré).
+- **Reste** : la porte `PORTES-TERRAIN-2026-11-15-deux-temps-remise-a-jour.md` (douze gestes ; **Cowork publie l'artefact** ; elle remplace celle du 13 nov.) ; cinq décisions de Grégoire (§3 de la porte) ; la relecture des textes (§6 du rapport `RAPPORT-2026-11-15-deux-temps-remise-a-jour.md`) ; la fusion, par un relais à part.
+
 ## 15 NOV. 2026, 17 H 20 (Claude Code) : **1.248.0 POUSSÉE ET EN LIGNE, VERDICT VERT** — `lot/gel-etape-7` et `lot/editeur-pages-definition` fusionnés
 
 Mandat : relais de Cowork du 15 nov., 13 h 04 (fusion des deux lots, une release mineure, un seul verdict, mise en ligne décidée par Grégoire). **`origin/main` = `513609dd5`** (1.248.0, build `1115-1307`, « Des copies qui restent nettes ») ; Netlify `6afa2ef7`, `ready` à 17 h 15 sur ce SHA ; le `version.json` du permalien dit `1.248.0`, build `1115-1307`. **Le travail le plus récent vit sur `main`.** Remplace les entrées de 9 h 21, 9 h 05 et 8 h 50 (la première citait encore `4863237dc` ; le lot a été fusionné à `6aa4f2ca5`).
