@@ -14,3 +14,7 @@ Supposé, à corriger au besoin : un groupe d'essai et une production suffisent 
 | 6 | À l'import, dépose deux fichiers pour un même élève et une même production (deux photos, ou un PDF et une photo), puis importe. | Avant d'importer, le PDF dit « (réuni en un seul PDF) ». Après, la copie réunie a toutes ses pages, dans l'ordre, et les Propriétés donnent à chacune ses dimensions d'origine. |
 
 Si un geste gèle la page : note le geste, le nombre de pages et le poids du fichier (Propriétés), et arrête là. Aucun de ces gestes n'écrit hors de l'aperçu.
+
+## Résultat de l'essai (Grégoire, iPad, aperçu n° 26, 11 h 15 à 11 h 46)
+
+Gestes 1 à 5 réussis ; geste 6 non fait, admis par Grégoire. Quatre retouches en sont sorties (rapport, § 17). Depuis ces retouches, deux choses de ce tableau ont changé : à l'import, la définition d'un PDF s'écrit sur deux lignes (« PDF, 4 pages », puis « min. 1632 x 3042 px ») ; et « Effacer la page » affiche toujours sa confirmation simple, jamais la fenêtre du codex.

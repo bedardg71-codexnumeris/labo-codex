@@ -2392,40 +2392,37 @@
     }
 
     /**
-     * La définition d'un PDF, en mots d'écran (écran d'import, Propriétés).
+     * La définition d'un PDF, en mots d'écran (écran d'import) : DEUX lignes courtes.
      *
-     * « PDF, 2 pages · 2728 x 1748 px » ; « PDF, 1 page · Lettre » ; quand les pages
-     * diffèrent, la plus petite, et c'est dit : « PDF, 3 pages · la plus petite :
-     * 1700 x 2200 px ». Un PDF qui mêle pages numérisées et pages de texte dit les deux.
+     * [« PDF, 2 pages », « 2728 x 1748 px »] ; [« PDF, 1 page », « Lettre »] ; quand les
+     * pages diffèrent, la plus petite, et c'est dit : [« PDF, 4 pages », « min. 1632 x 3042 px »].
+     * Un PDF qui mêle pages numérisées et pages de texte dit ses pages numérisées : ce sont
+     * elles qu'une définition trop basse rend illisibles (les Propriétés disent chaque page).
+     *
+     * 15 nov. 2026 (Grégoire, iPad couché) : « PDF, 4 pages · la plus petite : 1632 x 3042 px »
+     * se cassait sur cinq lignes dans la colonne « Originaux ». Chaque ligne tient d'un seul tenant.
      *
      * @param {{nombrePages: number, pages: Array}|null} definition - de `definitionDuPDF`
      * @param {number} [nombrePages] - connu avant la définition (miniature)
-     * @returns {string}
+     * @returns {string[]} une ligne (définition inconnue) ou deux
      */
-    function direDefinitionPDF(definition, nombrePages) {
+    function lignesDefinitionPDF(definition, nombrePages) {
         const n = (definition && definition.nombrePages) || nombrePages || 0;
         const tete = n ? 'PDF, ' + n + (n > 1 ? ' pages' : ' page') : 'PDF';
-        if (!definition || !definition.pages || !definition.pages.length) return tete;
+        if (!definition || !definition.pages || !definition.pages.length) return [tete];
 
         const images = definition.pages.filter((p) => p.sorte === 'image');
         const textes = definition.pages.filter((p) => p.sorte === 'texte');
         const plusPetite = (liste, aire) => liste.reduce((a, b) => (aire(b) < aire(a) ? b : a));
         const toutesPareilles = (liste, trait) => liste.every((p) => trait(p) === trait(liste[0]));
 
-        const direImages = () => {
+        if (images.length) {
             const p = plusPetite(images, (x) => x.largeur * x.hauteur);
             const mots = p.largeur + ' x ' + p.hauteur + ' px';
-            return toutesPareilles(images, (x) => x.largeur + 'x' + x.hauteur) ? mots : 'la plus petite : ' + mots;
-        };
-        const direTextes = () => {
-            const p = plusPetite(textes, (x) => x.largeurPt * x.hauteurPt);
-            return toutesPareilles(textes, (x) => x.format) ? p.format : 'le plus petit format : ' + p.format;
-        };
-
-        if (!textes.length) return tete + ' · ' + direImages();
-        if (!images.length) return tete + ' · ' + direTextes();
-        return tete + ' · ' + images.length + (images.length > 1 ? ' numérisées' : ' numérisée') + ', ' + direImages()
-            + ' · ' + textes.length + ' en texte, ' + direTextes();
+            return [tete, toutesPareilles(images, (x) => x.largeur + 'x' + x.hauteur) ? mots : 'min. ' + mots];
+        }
+        const p = plusPetite(textes, (x) => x.largeurPt * x.hauteurPt);
+        return [tete, toutesPareilles(textes, (x) => x.format) ? p.format : 'min. ' + p.format];
     }
 
     /** Une image chargée depuis une adresse (blob: ou data:). */
@@ -2892,7 +2889,7 @@
         pageDepuisImage: pageDepuisImage,
         pivoterVignette: pivoterVignette,
         definitionDuPDF: definitionDuPDF,
-        direDefinitionPDF: direDefinitionPDF,
+        lignesDefinitionPDF: lignesDefinitionPDF,
         nomDuFormat: nomDuFormat,
         // Image droite pour le PDF (EXIF, 5 nov. 2026)
         lireOrientationExif: lireOrientationExif,

@@ -202,3 +202,37 @@ La deuxième phrase reprend celle que Grégoire a approuvée pour la confirmatio
 **Les gestes de l'iPad** : `plans de travail/GESTES-IPAD-2026-11-15-editeur-pages-definition.md`, six gestes. L'adresse de l'aperçu est dans la PR de la branche.
 
 **Le build du pied de page ne distingue pas l'aperçu** : il vient de `version.js`, écrit par la release ; l'aperçu affiche donc celui de la 1.247.0. C'est l'adresse qui dit qu'on est sur l'aperçu.
+
+## 17. Retouches après l'essai sur l'iPad (consigne de 11 h 52)
+
+Essai de Grégoire sur l'aperçu n° 26 : gestes 1 à 5 réussis, geste 6 non fait.
+
+**1. « Effacer la page » : toujours la confirmation simple** (décision de Grégoire, 11 h 44). `effacerPage` n'appelle plus la fenêtre du codex. Retiré : la clé `annotationsPage` du registre `PROPOSITIONS_AVANT_SUPPRESSION` (et donc les mots écrits au § 16), la variable `codexQuestionne`, la ligne P14 de la sentinelle 1007. La sentinelle verrouille maintenant l'inverse : `effacerPage` ne nomme plus `Codex`. L'essai « sans codex » juge la confirmation simple et compte zéro appel à la fenêtre du codex.
+
+**2. La colonne « Originaux »**. Mesuré à 1180 x 820 : il restait 66 px aux mots, « min. 1632 x 3042 px » en demande 108. Deux moyens ensemble : la colonne passe de 250 à 300 px (116 px pour les mots), et la définition d'un PDF s'écrit en deux lignes d'un seul tenant. Mots retenus :
+
+- « PDF, 4 pages » puis « min. 1632 x 3042 px » (pages de définitions différentes : la plus petite) ;
+- « PDF, 2 pages » puis « 2728 x 1748 px » (pages pareilles) ;
+- « PDF, 1 page » puis « Lettre » (page de texte) ;
+- dans « Aperçu », une troisième ligne : « (aucun traitement) » ou « (réuni en un seul PDF) », inchangées.
+
+« la plus petite : » devient « min. ». Changé aussi, à savoir : un PDF qui mêle pages numérisées et pages de texte ne dit plus que ses pages numérisées (avant : « 2 numérisées, … · 1 en texte, Lettre ») ; les Propriétés disent toujours chaque page. `direDefinitionPDF` est remplacée par `lignesDefinitionPDF`. L'essai de l'écran d'import se joue à 1180 x 820 et juge : deux lignes, aucune cassée, aucune plus large que sa place (rouge à 250 px, vert à 300).
+
+**3. « Import refusé »** tutoie : « Choisis un groupe-cours dans l'en-tête, puis relance l'import. »
+
+**4. L'écart de poids (9,8 Mo à l'import, 8,3 Mo aux Propriétés)**. Mesure : `tests/mesures/poids-apres-editeur.mjs`, copie fictive de quatre pages.
+
+| Geste | Avant (octets) | Après (octets) | Écart |
+|---|---|---|---|
+| Import d'un PDF seul | 8 746 172 | 8 746 172, mêmes octets | 0 |
+| Éditeur, PDF de l'application, pages réordonnées | 8 746 172 | 8 746 172 | 0 |
+| Éditeur, PDF de l'application, une page pivotée | 8 746 172 | 8 669 360 | −0,9 % |
+| Éditeur, PDF d'un autre producteur, pages réordonnées | 8 746 172 | 8 461 587 | −3,3 % |
+
+Fait : l'import ne réécrit pas un PDF seul, « (aucun traitement) » dit vrai, et les deux écrans disent le poids par la même fonction (`TailleFichier.dire`) sur la même valeur. Fait : l'éditeur de pages réencode en JPEG (qualité 0,92) la page qu'on pivote, et toutes les pages d'un PDF qu'il ne sait pas reprendre octet pour octet ; les pixels sont gardés, le poids change. Inférence : l'écart vu vient du pivot de la page de 4403 x 3809 (la plus lourde), fait avant la lecture des Propriétés ; l'ampleur dépend de la qualité du JPEG d'origine. Je n'ai pas le fichier de l'essai : à confirmer par l'ordre des gestes. Rien de corrigé : il n'y a ni réécriture à l'import ni désaccord de calcul. Un pivot sans réencodage (rotation écrite dans le PDF) est possible ; c'est un autre lot, non inscrit.
+
+**Inscrit** : #1283, le mode démonstration sans entrée visible (tel que dit par Grégoire, non mesuré au code).
+
+**Trouvé en chemin, hors lot, non inscrit** : l'essai « une copie réunie survit au rechargement » (`reunir-en-une-copie-1231.spec.js`) est instable, sur `main` aussi (1 rouge sur 28 passages sur `main`, 2 sur 24 sur la branche) : une coche touchée pendant un rafraîchissement de la liste se perd. Il peut rougir au verdict complet.
+
+**Jugé** : sentinelle 1007 verte ; passage ciblé de 40 essais (import, palette d'annotation, confirmation, carrousel) : 38 verts, 1 sauté, 1 instable (celui-là) ; `editeur-pages-definition` 9 sur 9.

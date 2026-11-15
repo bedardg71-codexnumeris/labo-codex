@@ -3475,8 +3475,8 @@
 
     /**
      * « Effacer la page » : les annotations de la page courante.
-     * #1007 (2a-2) — le codex est proposé seulement si la page en porte au moins une. Après
-     * l'attente, la page est relue (`_viderPageCourante`), et rien n'est effacé si le fichier
+     * Rien n'est demandé si la page n'en porte aucune. Après l'attente de la confirmation,
+     * la page est relue (`_viderPageCourante`), et rien n'est effacé si le fichier
      * ou la page affichés ont changé pendant ce temps.
      */
     async function effacerPage() {
@@ -3484,13 +3484,10 @@
         const nombre = _compterAnnotationsPage();
         const fichierAvant = fichierId;
         const pageAvant = travauxVisionneuse.getPageActuelle();
-        // 15 nov. 2026 (Grégoire, iPad, 8 h 54 : touché deux fois sans qu'on lui demande rien).
-        // UNE SEULE QUESTION : quand le codex n'est pas à jour, sa fenêtre est la question
-        // (« Annuler » y arrête tout) ; quand il est à jour, elle ne s'affiche pas, et c'est
-        // la confirmation qui se pose. Jamais les deux à la suite.
-        const codexQuestionne = typeof Codex !== 'undefined' && !(typeof Codex.estAJour === 'function' && Codex.estAJour());
-        if (typeof Codex !== 'undefined' && !(await Codex.proposerAvantSuppression('annotationsPage'))) return;
-        if (!codexQuestionne && !(await _confirmerEffacerPage(nombre))) return;
+        // 15 nov. 2026 (Grégoire, iPad, 8 h 54 : touché deux fois sans qu'on lui demande rien ;
+        // 11 h 44 : toujours la confirmation simple). Codex ouvert ou non, à jour ou non : la
+        // fenêtre du codex ne sert plus pour ce geste, que le retour arrière annule.
+        if (!(await _confirmerEffacerPage(nombre))) return;
         if (fichierId !== fichierAvant || travauxVisionneuse.getPageActuelle() !== pageAvant) return;
         _viderPageCourante();
     }

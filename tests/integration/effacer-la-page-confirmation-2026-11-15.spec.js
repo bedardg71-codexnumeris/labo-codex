@@ -9,10 +9,9 @@ import { ouvrirCopie, compteAnnotations, pointCanevas, attendre } from './harnes
 // qu'on lui demande rien. Son codex était à jour : `Codex.proposerAvantSuppression`, qui
 // précède l'effacement, ne s'affiche alors pas.
 //
-// Une seule question à l'écran :
-//  - codex à jour : la confirmation, aux mots approuvés par Grégoire ;
-//  - codex absent ou en retard : la fenêtre du codex est la question, sans seconde fenêtre.
-// Dans les deux cas, le retour arrière rétablit la page.
+// Décision de Grégoire (11 h 44) : TOUJOURS la confirmation simple, aux mots qu'il a approuvés,
+// codex ouvert ou non, à jour ou non. La fenêtre du codex ne sert plus pour ce geste : le
+// retour arrière l'annule. Le retour arrière rétablit la page.
 
 const fenetre = (page) => page.locator('#overlay-ui-dialogue');
 const cliquer = (page, texte) => page.locator('#overlay-ui-dialogue .modal-actions button', { hasText: texte }).click();
@@ -37,7 +36,7 @@ test.describe('15 nov. 2026 — « Effacer la page » demande avant d’effacer'
 
     test('codex à jour : la confirmation ; « Annuler » garde tout, « Effacer » efface, le retour arrière rétablit', async ({ page }) => {
         const suivi = await ouvrirCopie(page);
-        await page.evaluate(() => { window.Codex.estAJour = () => true; window.Codex.proposerAvantSuppression = async () => true; });
+        await page.evaluate(() => { window.Codex.estAJour = () => true; });
         await tracer(page, 3);
 
         await effacer(page);
@@ -64,7 +63,7 @@ test.describe('15 nov. 2026 — « Effacer la page » demande avant d’effacer'
 
     test('une seule annotation : la question au singulier', async ({ page }) => {
         await ouvrirCopie(page);
-        await page.evaluate(() => { window.Codex.estAJour = () => true; window.Codex.proposerAvantSuppression = async () => true; });
+        await page.evaluate(() => { window.Codex.estAJour = () => true; });
         await tracer(page, 1);
         await effacer(page);
         await expect(page.locator('#ui-dialogue-titre')).toHaveText("Effacer l'annotation de cette page ?");
@@ -72,25 +71,31 @@ test.describe('15 nov. 2026 — « Effacer la page » demande avant d’effacer'
         await cliquer(page, 'Annuler');
     });
 
-    test('sans codex : la fenêtre du codex est la seule question ; le retour arrière rétablit', async ({ page }) => {
+    test('sans codex, ou codex en retard : la même confirmation, jamais la fenêtre du codex ; le retour arrière rétablit', async ({ page }) => {
         const suivi = await ouvrirCopie(page);
+        // Le banc n'a pas de codex ouvert. La fenêtre du codex ne doit plus être appelée du tout.
+        await page.evaluate(() => {
+            window.__codexAppele = 0;
+            const propose = window.Codex.proposerAvantSuppression;
+            window.Codex.proposerAvantSuppression = function () { window.__codexAppele++; return propose.apply(this, arguments); };
+        });
+        expect(await page.evaluate(() => window.Codex.estAJour())).toBe(false);
         await tracer(page, 2);
 
         await effacer(page);
-        await expect(page.locator('#ui-dialogue-titre')).toHaveText('Écrire un codex avant de supprimer ?');
-        // Les mots de la fenêtre : rien n'y dit « pour de bon », le retour arrière rétablit la page.
-        const mots = (await fenetre(page).locator('.modal-section').innerText()).replace(/\s+/g, ' ').trim();
-        expect(mots).toBe('« Effacer la page » efface les annotations de cette page. Tu pourras les rétablir avec la flèche de retour arrière. Ton codex à jour pourra te les rendre, jusqu\'à ta mise à jour suivante.');
+        await expect(page.locator('#ui-dialogue-titre')).toHaveText('Effacer les 2 annotations de cette page ?');
+        await expect(fenetre(page).locator('.modal-section p')).toHaveText('Tu pourras les rétablir avec la flèche de retour arrière.');
         await cliquer(page, 'Annuler');
         await attendre(page, 300);
         await expect(fenetre(page)).toHaveCount(0);
         expect((await compteAnnotations(page)).shapes).toBe(2);
 
         await effacer(page);
-        await cliquer(page, 'Supprimer sans codex');
+        await cliquer(page, 'Effacer');
         await expect.poll(async () => (await compteAnnotations(page)).shapes).toBe(0);
         await attendre(page, 300);
         await expect(fenetre(page)).toHaveCount(0);   // aucune seconde question
+        expect(await page.evaluate(() => window.__codexAppele)).toBe(0);
 
         await page.evaluate(() => window.travauxAnnotation.annuler());
         expect((await compteAnnotations(page)).shapes).toBe(2);

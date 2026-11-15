@@ -1575,6 +1575,15 @@
     }
 
     /**
+     * Des lignes de mots d'écran, une par rangée, chacune d'un seul tenant (`.pipeline-meta-ligne`).
+     * @param {string[]} lignes
+     * @returns {string} HTML
+     */
+    function lignesMeta(lignes) {
+        return lignes.map((l) => '<span class="pipeline-meta-ligne">' + echapperHtml(l) + '</span>').join('');
+    }
+
+    /**
      * La définition d'un PDF dans la colonne « Aperçu », et ce qui lui arrive.
      *
      * Un PDF seul n'est pas traité : « (aucun traitement) ». Un PDF réuni à d'autres
@@ -1583,11 +1592,11 @@
      * ne le dit plus (15 nov. 2026).
      *
      * @param {Object} f - Fichier prepare (PDF)
-     * @returns {string}
+     * @returns {string[]} les lignes de la définition, puis ce qui lui arrive
      */
     function definitionPDFSansTraitement(f) {
-        const definition = travauxImport.direDefinitionPDF(f.definitionPDF, f.nombrePages);
-        return definition + (seraReuni(f) ? ' (réuni en un seul PDF)' : ' (aucun traitement)');
+        return travauxImport.lignesDefinitionPDF(f.definitionPDF, f.nombrePages)
+            .concat([seraReuni(f) ? '(réuni en un seul PDF)' : '(aucun traitement)']);
     }
 
     /** Ce fichier sera-t-il réuni à d'autres en un seul PDF (`assemblerGroupesPipeline`) ? */
@@ -1872,9 +1881,13 @@
             const tailleEl = document.getElementById('pipeline-taille-cible-' + index);
 
             if (resEl) {
-                resEl.textContent = f.estPDF
-                    ? definitionPDFSansTraitement(f)
-                    : `${dims.w} x ${dims.h}`;
+                // Une ligne de mots par rangée, posée en éléments (les mêmes que `lignesMeta`).
+                resEl.replaceChildren(...(f.estPDF ? definitionPDFSansTraitement(f) : [`${dims.w} x ${dims.h}`]).map((mots) => {
+                    const ligne = document.createElement('span');
+                    ligne.className = 'pipeline-meta-ligne';
+                    ligne.textContent = mots;
+                    return ligne;
+                }));
             }
             if (tailleEl) {
                 tailleEl.textContent = window.TailleFichier.dire(tailleEst, { decimales: 1 });
@@ -2155,14 +2168,14 @@
             // remplace l'ancien repli « PDF », qui affichait un HEIC comme un PDF.
             let resolution;
             if (f.largeurOriginale && f.hauteurOriginale) {
-                resolution = `${f.largeurOriginale} x ${f.hauteurOriginale}`;
+                resolution = [`${f.largeurOriginale} x ${f.hauteurOriginale}`];
             } else if (f.estPDF) {
-                // 15 nov. 2026 : la définition de TOUS les fichiers, PDF compris.
-                resolution = travauxImport.direDefinitionPDF(f.definitionPDF, f.nombrePages);
+                // 15 nov. 2026 : la définition de TOUS les fichiers, PDF compris, en deux lignes au plus.
+                resolution = travauxImport.lignesDefinitionPDF(f.definitionPDF, f.nombrePages);
             } else if (f.heicEchec) {
-                resolution = 'HEIC non décodé';
+                resolution = ['HEIC non décodé'];
             } else {
-                resolution = 'Dimensions inconnues';
+                resolution = ['Dimensions inconnues'];
             }
             const poids = window.TailleFichier.dire(f.tailleFichier, { decimales: 1 });
             const selectionne = (index === fichierSelectionneIndex);
@@ -2193,7 +2206,7 @@
                 </div>
                 <div class="pipeline-fichier-meta-col">
                     <span class="pipeline-meta-nom" title="${echapperHtml(nomFichierAff)}">${echapperHtml(nomCourt)}</span>
-                    <span class="pipeline-meta-resolution"${f.heicRaison ? ` title="${echapperHtml(f.heicRaison)}"` : ''}>${resolution}</span>
+                    <span class="pipeline-meta-resolution"${f.heicRaison ? ` title="${echapperHtml(f.heicRaison)}"` : ''}>${lignesMeta(resolution)}</span>
                     <span class="pipeline-meta-taille">${poids}</span>
                 </div>
                 <button class="pipeline-btn-retirer" data-stop data-action="travauxUI.retirerFichierPipeline" data-param="${index}" title="Retirer ce fichier"><img src="icons/icons8-trash.svg" alt="" class="btn-delete-icon"></button>
@@ -2290,7 +2303,7 @@
             const idx = fichierSelectionneIndex;
             const dims = calculerDimensionsCibles(f);
             const tailleEst = estimerTailleFichier(dims.w, dims.h, f);
-            const resCible = f.estPDF ? definitionPDFSansTraitement(f) : `${dims.w} x ${dims.h}`;
+            const resCible = lignesMeta(f.estPDF ? definitionPDFSansTraitement(f) : [`${dims.w} x ${dims.h}`]);
 
             colCentre += '<div class="pipeline-col-titre">Aper\u00e7u page par page</div>';
 
@@ -2391,7 +2404,7 @@
         queue.forEach((f, index) => {
             const dims = calculerDimensionsCibles(f);
             const tailleEst = estimerTailleFichier(dims.w, dims.h, f);
-            const resCible = f.estPDF ? definitionPDFSansTraitement(f) : `${dims.w} x ${dims.h}`;
+            const resCible = lignesMeta(f.estPDF ? definitionPDFSansTraitement(f) : [`${dims.w} x ${dims.h}`]);
             const thumb = f.thumbnailDataUrl || travauxStockage.obtenirThumbnailSync(f.id);
             const nomEtudiant = echapperHtml(nomDansLApercu(f, homonymes));
 
@@ -4620,7 +4633,7 @@
         const gcActifImport = (typeof db !== 'undefined') ? db.getSync('groupeCoursActif', null) : null;
         if (!gcActifImport || !gcActifImport.id) {
             if (typeof notifications !== 'undefined' && typeof notifications.erreur === 'function') {
-                notifications.erreur('Import refusé : aucun groupe-cours actif. Les fichiers seraient enregistrés sans groupe et n\'apparaîtraient dans aucune liste. Choisissez un groupe-cours dans l\'en-tête, puis relancez l\'import.');
+                notifications.erreur('Import refusé : aucun groupe-cours actif. Les fichiers seraient enregistrés sans groupe et n\'apparaîtraient dans aucune liste. Choisis un groupe-cours dans l\'en-tête, puis relance l\'import.');
             }
             return;
         }

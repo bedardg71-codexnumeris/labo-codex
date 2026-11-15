@@ -78,7 +78,7 @@ const PORTES = [
     { g: 'P13 (sur la reprise)', f: 'js/evaluation-jetons.js', sig: 'async function retirerJetonReprise(', cle: "'reprise'", question: "return retirerJetonReprise(evaluationId, { codexPropose: true });\n        }\n        const confirmer = confirm(\n            `Retirer le jeton de reprise", efface: 'evaluations.splice(indexReprise, 1)' },
     { g: 'P21', f: 'js/modal-doublon.js', sig: 'async function verifierEtGererDoublon(', cle: "'remplacement'", question: 'return resultat;', efface: 'return resultat;' },
     { g: 'P5', f: 'js/saisie-presences.js', sig: 'async function reinitialiserSaisie(', cle: "'seance'", question: 'const ok = await uiDialogues.confirmerAction({', efface: '_armerEnregistrementPresences(dateStr, touches)' },
-    { g: 'P14', f: 'js/travaux-annotation.js', sig: 'async function effacerPage(', cle: "'annotationsPage'", question: 'if (!codexQuestionne && !(await _confirmerEffacerPage(nombre))) return;', efface: '_viderPageCourante();' },   // 15 nov. 2026 : la confirmation, posée seulement quand le codex ne questionne pas
+    // P14 (« Effacer la page ») est sorti le 15 nov. 2026 : le retour arrière l'annule, une confirmation simple suffit (Grégoire, 11 h 44).
     { g: 'P6', f: 'js/registre-longitudinal.js', sig: 'async function retirerEleveLongitudinal(', cle: "'registreLongitudinal'", question: 'if (el && el.dataset && el.dataset.question && !confirm(el.dataset.question))', efface: 'await retirerDuRegistre(da)' },
     { g: 'P16', f: 'js/bilan-reflexif-rapport.js', sig: 'async function supprimerResultats(', cle: "'resultatsBilan'", question: "if (!confirm('Supprimer les r\\u00e9sultats import\\u00e9s ?')) return;", efface: 'db.removeSync(CLE_RESULTATS())' },
     // Lot 2b (3 oct. 2026) : une ligne d'éditeur, seulement si elle porte des notes
@@ -204,11 +204,14 @@ describe('#1007, second lot — aucune porte n\'efface sans le codex proposé', 
         expect(nonAttendus).toEqual([]);
     });
 
-    it('P5, P14, P13 : rien à effacer, aucune fenêtre', () => {
+    it('P5, P13 : rien à effacer, aucune fenêtre', () => {
         const p5 = corps(lire('js/saisie-presences.js'), 'async function reinitialiserSaisie(');
         expect(p5.lastIndexOf('if (seanceSaisie && typeof uiDialogues !== \'undefined\') {', position(p5, APPEL))).toBeGreaterThan(-1);
+        // « Effacer la page » n'appelle plus la fenêtre du codex (15 nov. 2026) : sa confirmation simple, toujours.
         const p14 = corps(lire('js/travaux-annotation.js'), 'async function effacerPage(');
-        expect(position(p14, 'if (_compterAnnotationsPage() === 0) return;')).toBeLessThan(position(p14, APPEL));
+        expect(p14).not.toContain('Codex.');
+        expect(position(p14, 'if (_compterAnnotationsPage() === 0) return;')).toBeLessThan(position(p14, 'if (!(await _confirmerEffacerPage(nombre))) return;'));
+        expect(position(p14, 'if (!(await _confirmerEffacerPage(nombre))) return;')).toBeLessThan(position(p14, '_viderPageCourante();'));
         const p13 = corps(lire('js/evaluation-jetons.js'), 'async function retirerJetonReprise(');
         expect(p13).toContain('if (indexRepriseLiee !== -1 && !codexPropose) {');
     });

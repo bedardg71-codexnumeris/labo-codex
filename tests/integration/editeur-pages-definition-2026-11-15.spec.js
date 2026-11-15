@@ -239,6 +239,7 @@ test.describe('15 nov. 2026 — l’éditeur de pages garde la définition', () 
     });
 
     test('l’écran d’import dit la définition d’un PDF numérisé et d’un PDF de texte, dans les deux colonnes', async ({ page }) => {
+        await page.setViewportSize({ width: 1180, height: 820 });   // l'iPad couché, où la colonne « Originaux » cassait ses mots
         const suivi = await monterLeBanc(page);
         const r = await page.evaluate(async () => {
             // Un troisième PDF : deux pages numérisées de même définition.
@@ -261,21 +262,45 @@ test.describe('15 nov. 2026 — l’éditeur de pages garde la définition', () 
             window.travauxUI.afficherImport();
             await new Promise((r) => setTimeout(r, 800));   // le rafraîchissement différé des aperçus
             const conteneur = document.getElementById('evaluations-contenu-import');
-            const lire = (sel) => Array.from(conteneur.querySelectorAll(sel)).map((e) => e.textContent.trim());
+            // Une ligne de mots par rangée (`.pipeline-meta-ligne`), dites ici séparées par « | ».
+            const lire = (sel) => Array.from(conteneur.querySelectorAll(sel)).map((e) => Array.from(e.querySelectorAll('.pipeline-meta-ligne')).map((l) => l.textContent.trim()).join(' | '));
             const originaux = lire('.pipeline-meta-resolution:not([id])');
             const apercu = lire('.pipeline-meta-resolution[id^="pipeline-res-cible-"]');
+            // La place : chaque ligne tient d'un seul tenant, sans dépasser sa rangée (iPad couché).
+            // Le banc n'affiche pas la section de l'import : l'écran est posé sur la page, à sa pleine largeur.
+            const place0 = conteneur.parentNode, suivant = conteneur.nextSibling;
+            document.body.appendChild(conteneur);
+            conteneur.style.cssText = 'position:fixed;inset:0;z-index:99999;overflow:auto;background:#fff;';
+            const place = Array.from(conteneur.querySelectorAll('.pipeline-col-originaux .pipeline-fichier-ligne')).map((rangee) => {
+                const meta = rangee.querySelector('.pipeline-fichier-meta-col').getBoundingClientRect();
+                const corbeille = rangee.querySelector('.pipeline-btn-retirer').getBoundingClientRect();
+                const lignes = Array.from(rangee.querySelectorAll('.pipeline-meta-resolution .pipeline-meta-ligne'));
+                const hauteurLigne = parseFloat(getComputedStyle(lignes[0]).lineHeight) || lignes[0].getBoundingClientRect().height;
+                return {
+                    visible: meta.width > 0 && corbeille.width > 0,
+                    lignes: lignes.length,
+                    cassee: lignes.some((l) => l.getBoundingClientRect().height > hauteurLigne * 1.5),
+                    deborde: lignes.some((l) => l.scrollWidth > l.clientWidth || l.getBoundingClientRect().right > corbeille.left + 0.5)
+                };
+            });
+            const largeur = conteneur.querySelector('.pipeline-col-originaux').getBoundingClientRect().width;
+            conteneur.style.cssText = '';
+            place0.insertBefore(conteneur, suivant);
             window.travauxImport.viderFileDAttente();
             proto.getOperatorList = lireListe;
-            return { originaux, apercu, listesLues };
+            return { originaux, apercu, listesLues, place, largeur };
         });
         expect(r.originaux).toEqual([
-            'PDF, 2 pages · la plus petite : 1700 x 2200 px',
-            'PDF, 1 page · Lettre',
-            'PDF, 2 pages · 2728 x 1748 px',
-            'PDF, 2 pages · la plus petite : 1700 x 2200 px'
+            'PDF, 2 pages | min. 1700 x 2200 px',
+            'PDF, 1 page | Lettre',
+            'PDF, 2 pages | 2728 x 1748 px',
+            'PDF, 2 pages | min. 1700 x 2200 px'
         ]);
         expect(r.listesLues).toBe(0);
-        expect(r.apercu).toEqual(r.originaux.map((mots) => mots + ' (aucun traitement)'));
+        expect(r.apercu).toEqual(r.originaux.map((mots) => mots + ' | (aucun traitement)'));
+        // Deux lignes au plus par fichier dans « Originaux », aucune cassée, aucune qui déborde.
+        expect(r.place).toEqual(r.originaux.map(() => ({ visible: true, lignes: 2, cassee: false, deborde: false })));
+        expect(r.largeur).toBe(300);
         expect(suivi.erreurs).toEqual([]);
     });
 
@@ -317,7 +342,8 @@ test.describe('15 nov. 2026 — l’éditeur de pages garde la définition', () 
             window.travauxUI.afficherImport();
             await new Promise((res) => setTimeout(res, 800));
             const conteneur = document.getElementById('evaluations-contenu-import');
-            const apercu = Array.from(conteneur.querySelectorAll('.pipeline-meta-resolution[id^="pipeline-res-cible-"]')).map((e) => e.textContent.trim());
+            const apercu = Array.from(conteneur.querySelectorAll('.pipeline-meta-resolution[id^="pipeline-res-cible-"]'))
+                .map((e) => Array.from(e.querySelectorAll('.pipeline-meta-ligne')).map((l) => l.textContent.trim()).join(' | '));
 
             const groupe = Array.from(window.travauxImport.regrouperParDocument().values()).find((g) => g.length === 3);
             const reuni = groupe ? await window.travauxImport.assemblerPDFGroupe(groupe, 250) : null;
@@ -329,9 +355,9 @@ test.describe('15 nov. 2026 — l’éditeur de pages garde la définition', () 
         }, [GRANDE]);
 
         // Les deux PDF réunis ne disent plus « aucun traitement » ; le PDF seul le dit encore.
-        expect.soft(r.apercu[0]).toBe('PDF, 2 pages · la plus petite : 1700 x 2200 px (réuni en un seul PDF)');
-        expect.soft(r.apercu[1]).toBe('PDF, 2 pages · la plus petite : 1700 x 2200 px (réuni en un seul PDF)');
-        expect.soft(r.apercu[3]).toBe('PDF, 1 page · Lettre (aucun traitement)');
+        expect.soft(r.apercu[0]).toBe('PDF, 2 pages | min. 1700 x 2200 px | (réuni en un seul PDF)');
+        expect.soft(r.apercu[1]).toBe('PDF, 2 pages | min. 1700 x 2200 px | (réuni en un seul PDF)');
+        expect.soft(r.apercu[3]).toBe('PDF, 1 page | Lettre | (aucun traitement)');
 
         // Le PDF réuni : cinq pages, dans l'ordre des fichiers, chacune à ses pixels.
         const reuni = await lireLePDF(page, 'FT_REUNI');

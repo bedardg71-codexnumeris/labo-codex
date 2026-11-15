@@ -128,6 +128,10 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
 
 ## A faire
 
+### Le mode démonstration n'a plus d'entrée visible, 15 novembre 2026 (vécu par Grégoire sur l'iPad, aperçu n° 26, 11 h 21 ; inscrit sur consigne de Cowork, 11 h 52, sans y toucher)
+
+- [ ] **#1283 – Plus aucun bouton ne donne accès au mode démonstration depuis le travail sur les parcours.** Vécu : Grégoire, 15 nov. 2026, 11 h 21, en mettant en place un espace vide pour l'essai du lot `lot/editeur-pages-definition` ; défaut majeur, dans ses mots. La seule entrée restante est la porte « Tu es conseiller·ère pédagogique ? › Explorer » de l'accueil, dans le bloc « À propos ». Inscrit tel que dit, non mesuré au code. Où remettre l'entrée, et sous quels mots, remonte à Grégoire.
+
 ### Release des quatre branches, 11 novembre 2026 (inscrits sur consigne de la conversation du Projet, 15 h 30 ; aucun n'empêche la release)
 
 - [ ] **#1273 – « Évaluer une première production », étape 1 : une grille créée avant « Commencer » ne fait pas avancer l'étape, et la bulle dit de toucher « Partir de zéro », caché tant qu'une grille collée est ouverte dans la dissection.** Vécu par Grégoire sur l'iPad au cinquième aperçu des flèches (11 nov., 15 h 21, capture 35, hors dépôt). L'étape avance sur `grilleCreee()`, qui ne compte que les grilles absentes de `grillesAvant` (`js/parcours-evaluer.js`, l'instantané pris à « Commencer ») ; et `TEXTE_1` nomme « Partir de zéro » sans savoir s'il se voit. **Ne pas corriger seul : ira avec la consigne de la dissection sur l'iPad.**
