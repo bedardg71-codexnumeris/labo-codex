@@ -119,7 +119,7 @@ const lireLePDF = (page, id) => page.evaluate(async (id) => {
             if (d[0] > 200 && d[1] > 200 && d[2] > 200) return 'blanc';
             return 'autre';
         };
-        pages.push({ pixels: images.length === 1 ? images[0] : images,
+        pages.push({ pixels: images.length === 1 ? images[0] : images, points: [Math.round(base.width), Math.round(base.height)],
             hautGauche: couleur(0.08, 0.08), hautDroite: couleur(0.92, 0.08), basDroite: couleur(0.92, 0.92), basGauche: couleur(0.08, 0.92), milieu: couleur(0.5, 0.5) });
     }
     return { pages, octetsA: texte.includes(window.__octets.a), octetsB: texte.includes(window.__octets.b) };
@@ -295,5 +295,52 @@ test.describe('15 nov. 2026 — l’éditeur de pages garde la définition', () 
         // Sous 2 500 px : Lettre, 1 700 x 2 200.
         expect(r.lettreCouchee).toEqual([2200, 1467]);
         expect(r.lettreDebout).toEqual([1467, 2200]);
+    });
+
+    test('réunir à l’import ne réduit pas la définition d’un PDF ; l’Aperçu ne dit « aucun traitement » que si c’est vrai', async ({ page }) => {
+        const suivi = await monterLeBanc(page);
+        const r = await page.evaluate(async ([grande]) => {
+            // Un élève fictif remet trois fichiers pour la même production : le PDF d'un numériseur
+            // (autre producteur), un PDF de l'application, une photo. Un autre élève remet un PDF seul.
+            const photo = await new Promise((res) => { const cv = document.createElement('canvas'); cv.width = 1500; cv.height = 1100;
+                const cx = cv.getContext('2d'); cx.fillStyle = '#ffffff'; cx.fillRect(0, 0, 1500, 1100); cv.toBlob(res, 'image/jpeg', 0.9); });
+            const nom = (i) => 'Fictivenom_Alma_9000001_Devoir_1__Remis_le_2026-11-02_10h00m0' + i + 's';
+            window.travauxImport.viderFileDAttente();
+            window.travauxImport.ajouterFichiersEnAttente([
+                new File([window.__pdfAutre], nom(1) + '.pdf', { type: 'application/pdf' }),
+                new File([window.__pdfNumerise], nom(2) + '.pdf', { type: 'application/pdf' }),
+                new File([photo], nom(3) + '.jpg', { type: 'image/jpeg' }),
+                new File([window.__pdfTexte], 'Fictivenom_Basile_9000002_Devoir_1__Remis_le_2026-11-02_10h00m05s.pdf', { type: 'application/pdf' })
+            ]);
+            const file = () => window.travauxImport.obtenirFileDAttente();
+            for (let i = 0; i < 200 && !file().every((f) => f.definitionPDF || !f.estPDF); i++) await new Promise((res) => setTimeout(res, 100));
+            window.travauxUI.afficherImport();
+            await new Promise((res) => setTimeout(res, 800));
+            const conteneur = document.getElementById('evaluations-contenu-import');
+            const apercu = Array.from(conteneur.querySelectorAll('.pipeline-meta-resolution[id^="pipeline-res-cible-"]')).map((e) => e.textContent.trim());
+
+            const groupe = Array.from(window.travauxImport.regrouperParDocument().values()).find((g) => g.length === 3);
+            const reuni = groupe ? await window.travauxImport.assemblerPDFGroupe(groupe, 250) : null;
+            window.travauxImport.viderFileDAttente();
+            if (!reuni) return { apercu, pixels: null };
+            window.__blobs.set('FT_REUNI', reuni);
+            const texte = await window.__binaire(reuni);
+            return { apercu, octetsA: texte.includes(window.__octets.a), octetsB: texte.includes(window.__octets.b) };
+        }, [GRANDE]);
+
+        // Les deux PDF réunis ne disent plus « aucun traitement » ; le PDF seul le dit encore.
+        expect.soft(r.apercu[0]).toBe('PDF, 2 pages · la plus petite : 1700 x 2200 px (réuni en un seul PDF)');
+        expect.soft(r.apercu[1]).toBe('PDF, 2 pages · la plus petite : 1700 x 2200 px (réuni en un seul PDF)');
+        expect.soft(r.apercu[3]).toBe('PDF, 1 page · Lettre (aucun traitement)');
+
+        // Le PDF réuni : cinq pages, dans l'ordre des fichiers, chacune à ses pixels.
+        const reuni = await lireLePDF(page, 'FT_REUNI');
+        expect(reuni.pages.map((p) => p.pixels)).toEqual([GRANDE, PETITE, GRANDE, PETITE, [1500, 1100]]);
+        expect(reuni.pages[0]).toMatchObject({ hautGauche: 'rouge', basDroite: 'bleu' });
+        // Une page de PDF garde sa taille physique (#880) : 2 728 px à 250 ppp font 786 points.
+        expect(reuni.pages.slice(0, 4).map((p) => p.points)).toEqual([[786, 503], [490, 634], [786, 503], [490, 634]]);
+        // Les pages du PDF de l'application y sont avec leurs octets.
+        expect([r.octetsA, r.octetsB]).toEqual([true, true]);
+        expect(suivi.erreurs).toEqual([]);
     });
 });

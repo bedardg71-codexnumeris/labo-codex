@@ -1683,24 +1683,15 @@
      */
     async function pagesImagesDuFichier(f, dpi) {
         if (f.estPDF) {
-            if (typeof pdfjsLib === 'undefined') throw new Error('PDF.js non disponible');
-            const pdf = await pdfjsLib.getDocument({ data: await f.fichier.arrayBuffer() }).promise;
+            // 15 nov. 2026 — réunir ne réduit plus la définition : chaque page était rendue à
+            // 1 400 px au plus. Même moyen que l'éditeur de pages (`imagesDuPDF`) : les octets
+            // de la page repris tels quels quand le PDF est de l'application, sinon un rendu à
+            // la définition de son image numérisée (250 ppp pour du texte). La page garde sa
+            // taille physique.
             const pages = [];
-            for (let n = 1; n <= pdf.numPages; n++) {
-                const page = await pdf.getPage(n);
-                // Viewport a l'echelle 1 : en points (1/72 po).
-                const base = page.getViewport({ scale: 1 });
-                const scale = Math.min((dpi || 250) / 72, MAX_IMAGE_DIMENSION / Math.max(base.width, base.height));
-                const viewport = page.getViewport({ scale: scale });
-                const canvas = document.createElement('canvas');
-                canvas.width = Math.round(viewport.width);
-                canvas.height = Math.round(viewport.height);
-                await page.render({ canvasContext: canvas.getContext('2d'), viewport: viewport }).promise;
-                pages.push({
-                    imgData: canvas.toDataURL('image/jpeg', JPEG_QUALITY_IMPORT),
-                    pageW: base.width * 25.4 / 72,
-                    pageH: base.height * 25.4 / 72
-                });
+            for (const p of await imagesDuPDF(f.fichier)) {
+                const { imgData } = await imagePourPDF(p.blob);
+                pages.push({ imgData: imgData, pageW: p.largeurPt * 25.4 / 72, pageH: p.hauteurPt * 25.4 / 72 });
             }
             return pages;
         }
@@ -2551,15 +2542,18 @@
     }
 
     /**
-     * Les pages d'un PDF, chacune en image à sa pleine définition, pour l'éditeur de pages.
-     * Une page d'un PDF de l'application garde ses octets (`sansPerte`) ; les autres sont
-     * rendues par pdf.js. Une page à la fois : jamais deux pleines définitions décodées.
+     * Les pages d'un PDF, chacune en image à sa pleine définition. Une page d'un PDF de
+     * l'application garde ses octets (`sansPerte`) ; les autres sont rendues par pdf.js.
+     * Une page à la fois : jamais deux pleines définitions décodées.
+     *
+     * Source commune de l'éditeur de pages (`pagesDuPDF`) et du PDF réuni à l'import
+     * (`pagesImagesDuFichier`).
      *
      * @param {Blob} blob - Le PDF
-     * @returns {Promise<Array<{pageNum: number, blob: Blob, dataUrl: string, largeur: number, hauteur: number, sansPerte: boolean}>>}
-     *   `dataUrl` est une vignette ; `largeur` et `hauteur` sont les pixels de `blob`
+     * @returns {Promise<Array<{blob: Blob, sansPerte: boolean, largeurPt: number, hauteurPt: number}>>}
+     *   `largeurPt`, `hauteurPt` : la taille de la page d'origine, en points (1/72 po)
      */
-    async function pagesDuPDF(blob) {
+    async function imagesDuPDF(blob) {
         if (typeof pdfjsLib === 'undefined') {
             throw new Error('PDF.js non disponible');
         }
@@ -2569,11 +2563,12 @@
             if (!p) return null;
             // Un PDF ignore la balise EXIF ; `imagePourPDF` la suivrait. Une telle page est rendue.
             const tete = octets.subarray(p.debut, p.debut + Math.min(p.longueur, 65536));
-            return lireOrientationExif(tete) === 1 ? blob.slice(p.debut, p.debut + p.longueur, 'image/jpeg') : null;
+            if (lireOrientationExif(tete) !== 1) return null;
+            return { blob: blob.slice(p.debut, p.debut + p.longueur, 'image/jpeg'), sansPerte: true, largeurPt: p.largeurPt, hauteurPt: p.hauteurPt };
         });
 
         let pdf = null;
-        const pages = [];
+        const images = [];
         try {
             if (!positions || reprises.some((r) => !r)) {
                 // pdf.js garde les octets qu'on lui donne : il reçoit les siens.
@@ -2581,12 +2576,28 @@
             }
             const nombre = pdf ? pdf.numPages : reprises.length;
             for (let i = 0; i < nombre; i++) {
-                const reprise = reprises[i] || null;
-                const image = reprise || await rendrePagePleineDefinition(await pdf.getPage(i + 1));
-                pages.push(Object.assign({ pageNum: i + 1, sansPerte: !!reprise }, await pageDepuisImage(image)));
+                if (reprises[i]) { images.push(reprises[i]); continue; }
+                const page = await pdf.getPage(i + 1);
+                const vue = page.getViewport({ scale: 1 });
+                images.push({ blob: await rendrePagePleineDefinition(page), sansPerte: false, largeurPt: vue.width, hauteurPt: vue.height });
             }
         } finally {
             if (pdf) pdf.destroy();
+        }
+        return images;
+    }
+
+    /**
+     * Les pages d'un PDF pour l'éditeur de pages : `imagesDuPDF`, plus une vignette par page.
+     *
+     * @param {Blob} blob - Le PDF
+     * @returns {Promise<Array<{pageNum: number, blob: Blob, dataUrl: string, largeur: number, hauteur: number, sansPerte: boolean}>>}
+     *   `dataUrl` est une vignette ; `largeur` et `hauteur` sont les pixels de `blob`
+     */
+    async function pagesDuPDF(blob) {
+        const pages = [];
+        for (const image of await imagesDuPDF(blob)) {
+            pages.push(Object.assign({ pageNum: pages.length + 1, sansPerte: image.sansPerte }, await pageDepuisImage(image.blob)));
         }
         return pages;
     }

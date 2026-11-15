@@ -108,24 +108,11 @@ describe('#880 — les PDF d\'un même élève pour une production se fusionnent
         expect([...groupes.values()][0]).toHaveLength(4);
     });
 
-    it('chaque page de chaque PDF entre dans le document, dans l\'ordre des fichiers', async () => {
-        const fichiers = [fauxPdf('a.pdf', 1), fauxPdf('b.pdf', 3), fauxPdf('c.pdf', 2)]
-            .map(b => ({ fichier: b, estPDF: true, estImage: false }));
-
-        const blob = await win.travauxImport.assemblerPDFGroupe(fichiers, 250);
-
-        expect(blob.type).toBe('application/pdf');
-        expect(ajouts.map(a => a.data.split(';')[1])).toEqual([
-            'a.pdf#1', 'b.pdf#1', 'b.pdf#2', 'b.pdf#3', 'c.pdf#1', 'c.pdf#2'
-        ]);
-        expect(pagesDoc).toHaveLength(6);
-    });
-
-    it('une page de PDF garde sa taille physique (lettre : 215,9 x 279,4 mm)', async () => {
-        await win.travauxImport.assemblerPDFGroupe([{ fichier: fauxPdf('a.pdf', 1), estPDF: true }], 250);
-        expect(ajouts[0].w).toBeCloseTo(215.9, 1);
-        expect(ajouts[0].h).toBeCloseTo(279.4, 1);
-    });
+    // 15 nov. 2026 — l'ordre des pages et leur taille physique étaient jugés ici sur des
+    // doublures de pdf.js et du canevas. `pagesImagesDuFichier` reprend maintenant les octets
+    // de la page ou la rend à sa pleine définition (`imagesDuPDF`) : ces deux essais vivent
+    // au navigateur, sur les vraies bibliothèques, dans
+    // tests/integration/editeur-pages-definition-2026-11-15.spec.js (« réunir à l'import »).
 
     it('l\'assemblage du pipeline admet les PDF, pas seulement les images', () => {
         const debut = sourceUI.indexOf('async function assemblerGroupesPipeline(');

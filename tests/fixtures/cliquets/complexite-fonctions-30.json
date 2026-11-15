@@ -140,7 +140,7 @@
   "migrerIdsActionsRLO": 32
  },
  "js/travaux-ui.js": {
-  "initialiserModuleTravaux": 37,
+  "initialiserModuleTravaux": 34,
   "genererEtape2Colonnes": 35,
   "(anonyme)": 38,
   "traiterDoublonsImport": 37,

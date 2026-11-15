@@ -670,6 +670,54 @@
        =============================== */
 
     /**
+     * Le carrousel d'Annoter refait à partir des copies d'aujourd'hui : les badges, le menu des
+     * productions (ses compteurs), le filtre. Le défilement est gardé.
+     * @param {HTMLElement} badgeStrip - `.annot-toolbar-fichiers`
+     * @param {Array} fichiersTravaux - Les copies à montrer
+     */
+    function _regenererCarrousel(badgeStrip, fichiersTravaux) {
+        const defilement = badgeStrip.scrollLeft;
+        _htmlBadgesGrille = genererGrilleFichiers(fichiersTravaux, 'ouvrirFichier');
+        badgeStrip.innerHTML = _htmlBadgesGrille;
+        badgeStrip.scrollLeft = defilement;
+        // Le dropdown production porte des compteurs : le remplacer, ou le restaurer si absent
+        const prodExistant = document.querySelector('.annot-toolbar-production');
+        if (prodExistant) {
+            prodExistant.innerHTML = _htmlDropdownProduction;
+        } else if (_htmlDropdownProduction) {
+            var prodDiv = document.createElement('div');
+            prodDiv.className = 'annot-toolbar-production';
+            prodDiv.innerHTML = _htmlDropdownProduction;
+            badgeStrip.parentNode.insertBefore(prodDiv, badgeStrip);
+        }
+        if (productionFiltreActive) filtrerBadgesParProduction();
+    }
+
+    /**
+     * LE CARROUSEL SUIT LES COPIES (15 nov. 2026, bug vécu par Grégoire sur l'iPad, 1.247.0).
+     *
+     * Il avait mis la copie d'un élève à la corbeille, puis réimporté la même production. Dans
+     * Annoter, toucher la copie de cet élève ne l'affichait pas : « Fichier introuvable », et la
+     * copie précédente restait à l'écran. Le carrousel n'était refait que par `afficherFichiers`
+     * et par le retour simple dans Annoter. Arriver par un geste qui ouvre une copie (« Annoter »
+     * d'une ligne de la Liste, le profil) saute ces deux chemins, pour ne pas reconstruire sous
+     * l'ouverture qui vient : le carrousel d'avant restait, avec le badge de la copie partie et
+     * sans celui de la copie arrivée. Un rechargement le refaisait.
+     *
+     * Appelée à chaque ouverture d'une copie : ne refait le carrousel que si ses badges ne sont
+     * plus ceux des copies d'aujourd'hui.
+     */
+    function _mettreLeCarrouselAJour() {
+        const badgeStrip = document.querySelector('.annot-toolbar-fichiers');
+        if (!badgeStrip) return;
+        const fichiersTravaux = travauxStockage.obtenirFichiersAffiches();
+        if (fichiersTravaux.length === 0) return;
+        const montres = Array.from(badgeStrip.querySelectorAll('.annot-badge')).map((b) => b.dataset.fichierId).sort().join('|');
+        const attendus = fichiersTravaux.map((f) => f.id).sort().join('|');
+        if (montres !== attendus) _regenererCarrousel(badgeStrip, fichiersTravaux);
+    }
+
+    /**
      * Initialise le module complet Travaux
      */
     async function initialiserModuleTravaux() {
@@ -726,25 +774,11 @@
                     // faite dans « Exporter les travaux » : les copies jetées restaient au carrousel.
                     const badgeStrip = document.querySelector('.annot-toolbar-fichiers');
                     if (badgeStrip && fichiersTravaux.length > 0) {
-                        const defilement = badgeStrip.scrollLeft;
-                        _htmlBadgesGrille = genererGrilleFichiers(fichiersTravaux, 'ouvrirFichier');
-                        badgeStrip.innerHTML = _htmlBadgesGrille;
-                        badgeStrip.scrollLeft = defilement;
+                        _regenererCarrousel(badgeStrip, fichiersTravaux);
                         // Marquer le badge actif. Sa pastille renaît à son état d'origine : elle redevient celle de la
                         // copie ouverte (mesuré le 1er nov. 2026 : une copie ouverte revenait « Importé » après un détour).
                         const badgeActif = badgeStrip.querySelector('[data-fichier-id="' + fichierOuvert.id + '"]');
                         if (badgeActif) _marquerBadgeOuvert(badgeActif);
-                        // Le dropdown production porte des compteurs : le remplacer, ou le restaurer si absent
-                        const prodExistant = document.querySelector('.annot-toolbar-production');
-                        if (prodExistant) {
-                            prodExistant.innerHTML = _htmlDropdownProduction;
-                        } else if (_htmlDropdownProduction) {
-                            var prodDiv = document.createElement('div');
-                            prodDiv.className = 'annot-toolbar-production';
-                            prodDiv.innerHTML = _htmlDropdownProduction;
-                            badgeStrip.parentNode.insertBefore(prodDiv, badgeStrip);
-                        }
-                        if (productionFiltreActive) filtrerBadgesParProduction();
                     }
                     if (typeof travauxAnnotation !== 'undefined' && travauxAnnotation.activerAnnotation) {
                         travauxAnnotation.activerAnnotation();
@@ -1541,12 +1575,28 @@
     }
 
     /**
-     * La définition d'un PDF sous le grand aperçu : un PDF n'est pas traité, et c'est dit.
+     * La définition d'un PDF dans la colonne « Aperçu », et ce qui lui arrive.
+     *
+     * Un PDF seul n'est pas traité : « (aucun traitement) ». Un PDF réuni à d'autres
+     * fichiers du même élève est réécrit dans le PDF commun (`assemblerPDFGroupe`) : ses
+     * pages gardent leur définition, mais ce n'est plus « aucun traitement », et l'écran
+     * ne le dit plus (15 nov. 2026).
+     *
      * @param {Object} f - Fichier prepare (PDF)
      * @returns {string}
      */
     function definitionPDFSansTraitement(f) {
-        return travauxImport.direDefinitionPDF(f.definitionPDF, f.nombrePages) + ' (aucun traitement)';
+        const definition = travauxImport.direDefinitionPDF(f.definitionPDF, f.nombrePages);
+        return definition + (seraReuni(f) ? ' (réuni en un seul PDF)' : ' (aucun traitement)');
+    }
+
+    /** Ce fichier sera-t-il réuni à d'autres en un seul PDF (`assemblerGroupesPipeline`) ? */
+    function seraReuni(f) {
+        for (const fichiers of travauxImport.regrouperParDocument().values()) {
+            const reunis = fichiers.filter((x) => x.estImage || x.estPDF);
+            if (reunis.length >= 2 && reunis.indexOf(f) !== -1) return true;
+        }
+        return false;
     }
 
     /**
@@ -3785,6 +3835,15 @@
         // Ne pas masquer si modifierEvaluation() est en cours de chargement
         const evalDiv = document.getElementById('evaluations-contenu-evaluation');
         if (evalDiv && !window._modifierEvaluationEnCours) evalDiv.classList.add('u-hide');
+
+        // 15 nov. 2026 : le carrousel d'avant un import ou une mise à la corbeille est refait ici.
+        _mettreLeCarrouselAJour();
+        // Une copie qui n'existe plus (badge d'un carrousel périmé) : rien à ouvrir, et la copie
+        // affichée garde son badge actif. Le carrousel vient d'être refait sans elle.
+        if (!travauxStockage.obtenirFichierParId(fichierId)) {
+            console.warn('[Travaux-UI] Copie introuvable, carrousel refait :', fichierId);
+            return;
+        }
 
         // Highlight du badge actif : pill → "EN COURS" orange
         document.querySelectorAll('.annot-badge').forEach(b => {

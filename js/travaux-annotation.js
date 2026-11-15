@@ -3481,11 +3481,35 @@
      */
     async function effacerPage() {
         if (_compterAnnotationsPage() === 0) return;
+        const nombre = _compterAnnotationsPage();
         const fichierAvant = fichierId;
         const pageAvant = travauxVisionneuse.getPageActuelle();
+        // 15 nov. 2026 (Grégoire, iPad, 8 h 54 : touché deux fois sans qu'on lui demande rien).
+        // UNE SEULE QUESTION : quand le codex n'est pas à jour, sa fenêtre est la question
+        // (« Annuler » y arrête tout) ; quand il est à jour, elle ne s'affiche pas, et c'est
+        // la confirmation qui se pose. Jamais les deux à la suite.
+        const codexQuestionne = typeof Codex !== 'undefined' && !(typeof Codex.estAJour === 'function' && Codex.estAJour());
         if (typeof Codex !== 'undefined' && !(await Codex.proposerAvantSuppression('annotationsPage'))) return;
+        if (!codexQuestionne && !(await _confirmerEffacerPage(nombre))) return;
         if (fichierId !== fichierAvant || travauxVisionneuse.getPageActuelle() !== pageAvant) return;
         _viderPageCourante();
+    }
+
+    /**
+     * La confirmation de « Effacer la page ». Mots approuvés par Grégoire le 15 nov. 2026.
+     * @param {number} nombre - Annotations de la page
+     * @returns {Promise<boolean>} true sur « Effacer » ; true aussi sans la fenêtre de l'application
+     */
+    async function _confirmerEffacerPage(nombre) {
+        if (typeof uiDialogues === 'undefined') return true;
+        const une = nombre === 1;
+        return (await uiDialogues.confirmerAction({
+            titre: une ? 'Effacer l\'annotation de cette page ?' : 'Effacer les ' + nombre + ' annotations de cette page ?',
+            message: une ? 'Tu pourras la rétablir avec la flèche de retour arrière.' : 'Tu pourras les rétablir avec la flèche de retour arrière.',
+            texteAnnuler: 'Annuler',
+            texteConfirmer: 'Effacer',
+            variante: 'danger'
+        })) === true;
     }
 
     /** Le nombre d'annotations de la page courante (0 sans annotation ouverte). */

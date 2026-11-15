@@ -1,10 +1,11 @@
 # Rapport — l'éditeur de pages garde la définition (15 nov. 2026)
 
-**Branche** : `lot/editeur-pages-definition`, partie de `main` à `41f68d315` (1.247.0). **Non fusionnée, sans release, sans verdict complet** (limites du mandat de Cowork, 8 h 14).
-**Arbre de travail** : `/Users/kuekatsheu/Documents/GitHub/labo-codex-editeur-pages` (voir « Incident » plus bas).
-**Fait** : les quatre points du mandat, leurs essais, la mesure.
-**Reste** : le verdict complet (Playwright entier), la relecture croisée, la fusion, la ligne de Nouvelles à approuver, les mots d'écran à approuver.
-**Stock** : les copies déjà réduites par l'ancien éditeur restent réduites. Rien n'est réparé d'office : leurs pixels sont perdus, Grégoire réimporte les originaux (mandat).
+**Branche** : `lot/editeur-pages-definition`, partie de `main` à `41f68d315` (1.247.0). **Non fusionnée, sans release, sans verdict complet** (limites des mandats de Cowork, 8 h 14 et 9 h 00).
+**Arbre de travail** : `/Users/kuekatsheu/Documents/GitHub/labo-codex-editeur-pages`, et lui seul.
+**Fait** : les quatre points du mandat de 8 h 14 (§ 1 à 9) et les trois ajouts du mandat de 9 h 00 (§ 10 à 15) : le PDF réuni à l'import, la confirmation avant « Effacer la page », le carrousel après un remplacement.
+**Approuvé par Cowork (9 h 00)** : les mots d'écran des Propriétés et de l'écran d'import (§ 4).
+**Reste** : le verdict complet (Playwright entier), la relecture croisée, la fusion ; à approuver : « (réuni en un seul PDF) » (§ 10), la façon dont la confirmation se combine au codex (§ 11), la ligne de Nouvelles (§ 15).
+**Stock** : les copies déjà réduites par l'ancien éditeur ou par un ancien import réuni restent réduites. Rien n'est réparé d'office.
 
 ## 1. La cause, mesurée
 
@@ -109,3 +110,80 @@ Cette session a démarré dans l'arbre principal (`/Users/kuekatsheu/Documents/G
 ## 9. Ligne de Nouvelles proposée
 
 > **Tes copies restent nettes.** Réordonner, retirer ou pivoter une page dans l'éditeur de pages ne réduit plus sa définition. Les Propriétés d'un fichier et l'écran d'import indiquent maintenant les dimensions en pixels de chaque page, PDF compris.
+
+---
+
+# Suite — mandat de Cowork de 9 h 00
+
+## 10. Le PDF réuni à l'import
+
+**Fait.** `pagesImagesDuFichier` (#880) rendait chaque page d'un PDF à 1 400 px au plus quand plusieurs fichiers d'un élève étaient réunis. Elle passe maintenant par le même moyen que l'éditeur, mis en commun (`imagesDuPDF`) : les octets de la page repris tels quels quand le PDF est de l'application, sinon un rendu à la définition de son image numérisée (250 ppp pour du texte). La page garde sa taille physique.
+
+**« (aucun traitement) » est vrai partout où il s'affiche.** Un PDF seul n'est pas touché : il le dit toujours. Un PDF qui sera réuni à d'autres fichiers est réécrit dans le PDF commun : il dit maintenant sa définition suivie de **« (réuni en un seul PDF) »**. Mots neufs, à approuver.
+
+**Essai** (dans `editeur-pages-definition-2026-11-15.spec.js`) : un élève fictif remet le PDF d'un numériseur, un PDF de l'application et une photo ; le PDF réuni a cinq pages, dans l'ordre, chacune à ses pixels (2 728 x 1 748, 1 700 x 2 200…) et à sa taille physique ; les pages du PDF de l'application y sont avec leurs octets. Rouge sur le code d'avant, vert après.
+
+**Laissé.** Le test unitaire `sentinelle-880` jugeait l'ordre et la taille des pages sur des doublures de pdf.js et du canevas, qui ne décrivent plus le code : ces deux essais sont retirés et repris au navigateur, sur les vraies bibliothèques. Les deux autres essais du fichier restent. Un PDF de texte réuni pèse plus lourd qu'avant (250 ppp au lieu de 1 400 px) : c'est le prix de l'invariant.
+
+## 11. La confirmation avant « Effacer la page »
+
+**Fait.** `travauxAnnotation.effacerPage` pose la fenêtre de confirmation de l'application (`uiDialogues.confirmerAction`), aux mots de Grégoire, mot pour mot : « Effacer les 12 annotations de cette page ? » / « Effacer l'annotation de cette page ? » ; « Tu pourras les rétablir avec la flèche de retour arrière. » / « la rétablir » ; boutons « Annuler » et « Effacer ».
+
+**Comment elle se combine avec le codex : une seule question, jamais deux.**
+
+| État du codex | Ce qui s'affiche |
+|---|---|
+| À jour (le cas de Grégoire ce matin) | La fenêtre du codex ne s'affiche pas. La confirmation se pose. |
+| En retard, ou aucun codex | La fenêtre du codex se pose (« Annuler » y arrête tout). Sur « Supprimer sans… » ou « Mettre à jour, puis supprimer », la page est effacée sans seconde question. |
+
+C'est une décision de ma part : la fenêtre du codex demande déjà si l'on veut effacer, la confirmation derrière elle aurait fait deux questions pour un geste. Si Grégoire préfère les deux à la suite, c'est une ligne à retirer (`codexQuestionne`).
+
+⚠ À lui signaler : la fenêtre du codex dit « "Effacer la page" efface pour de bon les annotations de cette page », alors que le retour arrière les rétablit. Ces mots existaient avant ce lot ; ils contredisent la ligne qu'il vient d'approuver. Je ne les ai pas touchés.
+
+**Le retour arrière rétablit toujours la page** : vérifié dans les deux cas.
+
+**Essais** (`effacer-la-page-confirmation-2026-11-15.spec.js`, trois) : codex à jour, les mots exacts, « Annuler » garde tout, « Effacer » efface, le retour arrière rétablit ; le singulier ; sans codex, la fenêtre du codex est la seule question. Les deux premiers sont rouges sur le code d'avant ; le troisième y est vert, c'est un essai de non-régression.
+
+## 12. Le carrousel après un remplacement
+
+**La cause, reproduite sur des copies fictives.** Le carrousel d'Annoter n'était refait que par deux chemins : la reconstruction générale (`afficherFichiers`) et le retour simple dans Annoter. Quand on arrive dans Annoter par un geste qui ouvre une copie (« Annoter » d'une ligne de la Liste, une vignette du profil), ces deux chemins sont sautés exprès, pour ne pas reconstruire la page sous l'ouverture qui vient. Le carrousel d'avant reste donc en place : il porte encore le badge de la copie partie à la corbeille, et pas celui de la copie réimportée. Toucher l'ancien badge demande un fichier qui n'existe plus : « [Travaux-Visionneuse] Fichier introuvable », toujours avec le même identifiant, et la copie précédente reste à l'écran. Un rechargement refait tout, ce qui concorde avec la précision de Grégoire (8 h 58).
+
+Les deux pistes de Cowork : `_htmlBadgesGrille` est bien en cause (c'est le carrousel gardé en mémoire, avec celui de la page). `travaux-dernier-fichier` ne l'est pas : il est vérifié avant chaque réouverture.
+
+**La correction.** À chaque ouverture d'une copie, `travauxUI.ouvrirFichier` compare les badges du carrousel aux copies d'aujourd'hui et le refait s'ils diffèrent (`_mettreLeCarrouselAJour`). Demander une copie qui n'existe plus ne change plus rien à l'écran : la copie affichée garde son badge actif.
+
+**Essais** (`carrousel-apres-remplacement-2026-11-15.spec.js`, deux) : le scénario de Grégoire (corbeille, réimport, retour par « Annoter » de la Liste), le carrousel montre la nouvelle copie, elle s'ouvre, aucun « Fichier introuvable » ; et l'ouverture d'une copie partie. Rouges sur le code d'avant, verts après.
+
+**Non reproduit.** La première erreur de son rapport, à 8 h 28 min 30 s, « sans toucher de sa part ». Ma reproduction n'en produit aucune sans toucher. Je ne sais pas quel geste l'a déclenchée.
+
+**Observé, laissé.** Après une suppression, la visionneuse garde en mémoire la copie supprimée comme « copie ouverte » jusqu'à l'ouverture d'une autre. Les chemins qui la relisent vérifient déjà qu'elle existe (#881). Sans symptôme : non touché.
+
+## 13. Ce que la suppression d'une copie fait de ses annotations et de son évaluation (constat, rien de changé)
+
+| Geste | Fichier | Annotations | Évaluation |
+|---|---|---|---|
+| « Déplacer à la corbeille » (Liste) | À la corbeille 30 jours, restaurable | Gardées tant que la copie est à la corbeille ; effacées avec elle à la suppression définitive ou à l'expiration | Non touchée |
+| « Supprimer ce fichier importé » (`supprimerFichierImporte`) | Effacé pour de bon, sans corbeille | **Non effacées : elles restent en base, sans fichier pour les lire** | Effacée avec le fichier si l'on confirme ; sinon rien n'est supprimé |
+
+Deux conséquences pour un remplacement comme celui de Grégoire. La copie réimportée reçoit un nouvel identifiant : les annotations de l'ancienne ne la suivent pas (elles restent attachées à l'ancienne, à la corbeille). L'évaluation, elle, se retrouve par l'élève et la production : la copie réimportée retrouve l'évaluation existante.
+
+Le second geste laisse des annotations orphelines, ce que #572 avait corrigé pour la corbeille seulement. Constat, sans symptôme vécu : je ne l'inscris pas, la décision revient à Cowork.
+
+## 14. Jugé, et ce qui s'oppose selon moi à une mise en ligne aujourd'hui
+
+**Jugé.** Vitest complet vert (926 fichiers, 11 805 essais : deux de moins, ceux retirés de `sentinelle-880`). Deux passages Playwright ciblés, verts : 55 essais (1 sauté, sur demande) puis 40 (1 sauté). Quatorze essais neufs au total sur la branche. **Non passé : la suite Playwright entière.**
+
+Deux sentinelles mises à jour, à relire : `sentinelle-1007` (la question de « Effacer la page » est maintenant la confirmation) et le cliquet de complexité (`initialiserModuleTravaux` 37 → 34, par extraction).
+
+**Ce qui s'oppose à une mise en ligne aujourd'hui**, par ordre de poids. C'est une lecture argumentée, pas un avis de pair.
+
+1. **Le verdict complet n'est pas passé.** Le lot touche `travaux-ui.js`, `travaux-import.js` et `travaux-annotation.js`, trois fichiers que beaucoup d'essais traversent. C'est le seul obstacle que je tiens pour bloquant.
+2. **Rien n'a été éprouvé sur l'iPad.** Les pages gardent maintenant leur pleine définition : l'enregistrement de l'éditeur et l'import réuni manipulent des fichiers bien plus lourds qu'avant (25,5 Mo au lieu de 1,5 dans ma mesure). Sur le Mac, c'est moins d'une seconde ; sur l'iPad, où une page a gelé ce matin, je n'ai aucun chiffre. Un essai de Grégoire sur une vraie copie de quatre pages, avant ou juste après la mise en ligne, lèverait ce doute.
+3. **Aucune relecture croisée** de ces trois ajouts ni du premier lot.
+4. **Trois textes ou décisions à approuver** : « (réuni en un seul PDF) », la règle « une seule question » avec le codex, la ligne de Nouvelles.
+
+Ne s'y oppose pas, mais à savoir : la première erreur « sans toucher » du point 3 reste inexpliquée, et les copies déjà réduites le restent.
+
+## 15. Ligne de Nouvelles révisée
+
+> **Tes copies restent nettes.** Réordonner, retirer ou pivoter une page dans l'éditeur de pages, ou réunir plusieurs fichiers d'un élève à l'import, ne réduit plus la définition. Les Propriétés d'un fichier et l'écran d'import indiquent les dimensions en pixels de chaque page, PDF compris. « Effacer la page » demande maintenant une confirmation. Et après avoir remplacé la copie d'un élève, la bande des copies d'Annoter montre la nouvelle sans qu'il faille recharger la page.

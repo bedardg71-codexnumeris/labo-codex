@@ -182,7 +182,7 @@
      *
      * @param {Uint8Array} octets
      * @returns {Array<{debut: number, longueur: number, largeur: number, hauteur: number}|null>|null} une entrée par page
-     *   (position des octets et pixels de l'image), `null`
+     *   (position des octets, pixels de l'image, et taille de la page en points : `largeurPt`, `hauteurPt`), `null`
      *   pour une page qui ne se lit pas ainsi (PNG, masque, image perdue, dessin) ; `null`
      *   tout court si le PDF n'est pas de l'application.
      */
@@ -202,7 +202,8 @@
             const largeur = /\/Width (\d+)\b/.exec(image.dict);
             const hauteur = /\/Height (\d+)\b/.exec(image.dict);
             if (!largeur || !hauteur) return null;
-            return { debut: image.debut, longueur: image.longueur, largeur: parseInt(largeur[1], 10), hauteur: parseInt(hauteur[1], 10) };
+            return { debut: image.debut, longueur: image.longueur, largeur: parseInt(largeur[1], 10), hauteur: parseInt(hauteur[1], 10),
+                largeurPt: trouvee.largeur, hauteurPt: trouvee.hauteur };
         });
     }
 
