@@ -2,17 +2,15 @@
 
 **Relais.** Branche `lot/deux-temps-modeles`, PR d'aperçu n° 23, non fusionnée. Consigne :
 `plans de travail/CONSIGNE-2026-11-16-parcours-je-regarde.md` (le relais de Cowork, recopié tel quel). Arbre de travail :
-`../labo-codex-deux-temps`. Build de l'aperçu : 1.248.2, `1116-1110`.
+`../labo-codex-deux-temps`. Build de l'aperçu : 1.248.2, `1116-1150`.
 **Fait** : main (1.248.2, `5735b41e3`) fusionné dans la branche ; les parcours rouverts sur cette branche seulement ; les
 seize bulles réécrites mot pour mot ; le panneau (quatre lignes, « Je regarde » / « Nous faisons ») ; « Remplir » ;
 « Suricate Loyal » ; les règles a à e du moteur, chacune avec son break-test ; la sentinelle des textes ; le banc WebKit
 à 820 × 1180.
-**Reste** : ⚠ **COMMITÉ, NON POUSSÉ : l'aperçu de la PR n° 23 montre encore le build `1115-1845`.** Le Mac s'est mis
-en surcharge pendant les passages de tests (§5) ; le crochet de push lance Vitest complet, que je n'ai pas voulu
-lancer sur une machine dans cet état. À faire, Mac redémarré, dans l'ordre : Vitest complet ; le banc neuf ; le banc de
-« Nous faisons » ; le push. Vitest complet n'a pas été rejoué sur l'état final, deux bancs n'ont pas été jugés
-jusqu'au bout, et le relevé en paysage n'a pas été pris. La porte
-(`PORTES-TERRAIN-2026-11-16-parcours-je-regarde.md`, neuf gestes, quatre décisions ; Cowork publie l'artefact). Ni
+**Poussé le 16 nov. après le redémarrage du Mac** (§6) : Vitest complet vert, le banc neuf vert en portrait et en
+paysage, le banc de « Nous faisons » vert, le relevé en paysage pris.
+**Reste** : la porte (`PORTES-TERRAIN-2026-11-16-parcours-je-regarde.md`, neuf gestes, cinq décisions ; Cowork publie
+l'artefact). La bulle 8 de « Découvrir » ne tient pas en paysage (§6, décision 3.5). #1284 inscrit, non touché. Ni
 fusion, ni release, ni verdict complet (par consigne).
 
 ---
@@ -124,3 +122,45 @@ passages, comme le veut la règle du 13 nov. (« arrêt si la mémoire baisse »
 **Trouvaille étrangère** (issue : inscrire et continuer) : `pied-de-page-et-assistance`, à 820 px, sombre et clair,
 échoue sur « version et « Nouveautés » sur la même ligne » (26 px d'écart) **sans mes changements aussi** (mesuré sur
 le commit de fusion, mes fichiers rangés). Elle vient de main ou de la branche d'avant, pas de ce lot.
+
+## 6. Après le redémarrage du Mac (16 nov., 11 h 37 à 11 h 55)
+
+Un passage à la fois, au premier plan, un seul navigateur (`--workers=1`). Le §5 dit l'état d'avant ; celui-ci le
+remplace pour les lignes qu'il nomme.
+
+| Heure | Charge (1 min) | Mémoire libre | Passage | Résultat |
+|---|---|---|---|---|
+| 11 h 37 | 187 (quatre minutes après le démarrage) | 85 % | aucun : attente | — |
+| 11 h 41 | 5,06 | 85 %, swap à zéro | Vitest complet | 11 869 verts, **1 rouge, de ce lot** (voir dessous) |
+| 11 h 45 | 4,57 | 85 % | banc neuf, 820 × 1180 | 3 sur 3 |
+| 11 h 46 | 3,87 | 86 % | `parcours-2-ma-classe` (« Nous faisons ») | 5 verts, 1 sauté (les captures de l'iPhone, hors variable) |
+| 11 h 47 | 3,97 | 86 % | banc neuf, 1180 × 820 | **1 rouge, de ce lot** (voir dessous) |
+| 11 h 48 | 3,44 | 86 % | banc neuf, 1180 × 820, rejoué | 3 sur 3, relevé pris |
+| 11 h 49 | 3,48 | 86 % | banc neuf, 820 × 1180, rejoué | 3 sur 3 |
+
+La charge est remontée à 36 pendant Vitest (ses processus), puis redescendue sous 5 avant le passage suivant.
+
+**Deux rouges, tous deux dans le banc neuf, corrigés (mon propre lot) :**
+- **Une pause fixe de trop** (`sentinelle-pauses-apres-ouverture` : 619 pour un plafond de 618). `suivreLOuverture`
+  attendait 300 ms ; il attend maintenant vingt images relevées, bulle montrée.
+- **Une course à la bulle 3**, vue en paysage seulement : le moteur retire le halo du nom de section au changement
+  d'étape et le repose au premier passage de la suivante ; le banc lisait entre les deux. L'assertion attend maintenant
+  le halo. Ce n'est pas un défaut de l'écran : pendant ce temps la bulle est cachée elle aussi.
+
+**Le break-test de la sentinelle des textes est fait** : « Sa pondération » → « La pondération », rouge (1 sur 37) ;
+« de 93 % ou plus » → « et plus », rouge (1 sur 37) ; rétablis, 37 verts.
+
+**Les hauteurs en paysage (1180 × 820)**, bulle large de 380 px, hauteur disponible 695 ou 779 px selon l'écran :
+
+| Parcours | Bulle | Hauteur | Tient |
+|---|---|---|---|
+| Découvrir | 1 · 2 · 3 · 4 | 472 · 340 · 484 · 573 | oui |
+| Découvrir | 5 · 6 · 7 | 330 · 450 · 534 | oui |
+| Découvrir | **8, « Poser ton cadre »** | **786 pour 695** | **non : son texte défile** (elle ne se tourne pas en pages) |
+| Je regarde | 1 à 8, avant et après « Remplir » | 306 à 593 pour 779 (695 à la 7, avant) | oui |
+
+La supposition du §4 est donc mesurée : une seule bulle dépasse, de 91 px. Rien n'est changé : raccourcir ses lignes,
+ce sont des mots que l'enseignant·e lit (décision 3.5 de la porte).
+
+**Non vérifié** : `parcours-8-commentaires`, `parcours-1-et-2` et `deux-temps-modelisation` n'ont pas été rejoués
+après le redémarrage (jugés avant, §5) ; aucune bulle relue à 390 px ; Safari sur l'iPad (la porte).

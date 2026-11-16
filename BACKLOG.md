@@ -128,6 +128,10 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
 
 ## A faire
 
+### Le pied de page à 820 px, 16 novembre 2026 (trouvé au banc par `lot/deux-temps-modeles` ; inscrit sur consigne de Cowork, 11 h 30, sans y toucher)
+
+- [ ] **#1284 – Le banc `pied-de-page-et-assistance` échoue à 820 px, en sombre et en clair : « version et « Nouveautés » sur la même ligne » (26 px d'écart).** Non vécu par Grégoire : mesuré au banc WebKit du Mac le 16 nov. 2026, **aussi sans les changements du lot** (sur le commit de fusion `81fa45238`, les fichiers du lot rangés). Il vient donc de `main` (1.248.2) ou de la branche d'avant, pas des parcours. Non cherché : lequel des deux, ni si l'écran est faux ou si c'est le banc qui l'est. Rapport : `plans de travail/RAPPORT-2026-11-16-parcours-je-regarde.md`, §5.
+
 ### Le mode démonstration n'a plus d'entrée visible, 15 novembre 2026 (vécu par Grégoire sur l'iPad, aperçu n° 26, 11 h 21 ; inscrit sur consigne de Cowork, 11 h 52, sans y toucher)
 
 - [ ] **#1283 – Plus aucun bouton ne donne accès au mode démonstration depuis le travail sur les parcours.** Vécu : Grégoire, 15 nov. 2026, 11 h 21, en mettant en place un espace vide pour l'essai du lot `lot/editeur-pages-definition` ; défaut majeur, dans ses mots. La seule entrée restante est la porte « Tu es conseiller·ère pédagogique ? › Explorer » de l'accueil, dans le bloc « À propos ». Inscrit tel que dit, non mesuré au code. Où remettre l'entrée, et sous quels mots, remonte à Grégoire.

@@ -4,10 +4,9 @@ Lot `lot/deux-temps-modeles`, 16 nov. 2026. Consigne : `plans de travail/CONSIGN
 PR d'aperçu n° 23 (non fusionnée). Rapport : `plans de travail/RAPPORT-2026-11-16-parcours-je-regarde.md`.
 Elle **remplace** `PORTES-TERRAIN-2026-11-15-deux-temps-remise-a-jour.md` pour ces deux parcours et pour le panneau.
 
-**État : EN ATTENTE DU PUSH — NE PAS PASSER ENCORE.** Le lot est commité mais pas poussé (voir le rapport, §5) :
-l'aperçu montre encore le build `1115-1845`, et la porte jugerait la version d'avant. Elle se passe quand le pied de
-l'accueil dit `1116-1110` ou plus récent. L'artefact jumeau (cases, champs de saisie, « Copier mes résultats ») est publié par Cowork.
-**Neuf gestes**, un par ligne, et **quatre décisions** (§3), chacune avec son champ de saisie.
+**État : poussée le 16 nov., à passer.** Le build se lit au pied de l'accueil : `1116-1150` (geste 0.1). L'artefact
+jumeau (cases, champs de saisie, « Copier mes résultats ») est publié par Cowork.
+**Neuf gestes**, un par ligne, et **cinq décisions** (§3), chacune avec son champ de saisie.
 
 Pourquoi une porte : le banc WebKit du Mac joue les deux parcours de bout en bout à 820 × 1180, lit chaque bulle, mesure
 sa hauteur, et juge les cinq règles du moteur (l'objectif, la section ouverte et encadrée, la bulle qui attend la fin du
@@ -25,7 +24,7 @@ deux parcours se jouent dans la démo. Ce qui échoue devient un item de backlog
 - [ ] **0.1** Sur l'iPad, dans Safari, ouvre `https://deploy-preview-23--codexnumeris-051225.netlify.app` et recharge
   la page (si un onglet de l'aperçu était déjà ouvert : ferme-le d'abord, puis rouvre l'adresse). Lis le numéro au
   pied de l'accueil.
-  ⮕ Attendu : 1.248.2, build 1116-1110 (ou plus récent, si un commit de documents a suivi). Un autre numéro : arrête-toi
+  ⮕ Attendu : 1.248.2, build 1116-1150 (ou plus récent, si un commit de documents a suivi). Un autre numéro : arrête-toi
   là, la suite jugerait l'ancienne version.
   `iPad`
 
@@ -104,6 +103,10 @@ Des choix posés faute de pouvoir les trancher à ta place. Écris ton verdict d
   ✎ Verdict : ______
 - **3.4** Ce que tu as vu au geste 2.8 : la bulle cachait-elle des listes ? Lesquelles ?
   ✎ Ce que j'ai vu : ______
+- **3.5** En paysage (1180 × 820), la dernière bulle de « Découvrir », « Poser ton cadre », est plus haute que l'écran
+  (786 px pour 695) : son texte défile dans la bulle. C'est la seule des seize ; mesuré au banc du Mac, rien n'est
+  changé. On la laisse défiler en paysage, ou on raccourcit ses lignes (ce sont tes mots) ?
+  ✎ Verdict : ______
 
 ---
 
@@ -111,10 +114,7 @@ Des choix posés faute de pouvoir les trancher à ta place. Écris ton verdict d
 
 - **Safari sur l'iPad.** Tout a été joué sous le WebKit de Playwright, sur le Mac, à 820 × 1180. Le défilement doux
   et le moment où la bulle reparaît (gestes 2.6 et 2.7) y sont mesurés image par image, mais pas sous le doigt.
-- **L'iPad en paysage (1180 × 820).** Les hauteurs des bulles n'y ont pas été relevées : la machine s'est mise en
-  surcharge avant ce passage (voir le rapport). Les bulles les plus hautes en portrait sont « Poser ton cadre »
-  (786 px) et « Un cours », remplie (593 px) : en paysage, la première ne tiendra probablement pas sans que son texte
-  défile. Supposition, non mesurée.
-- **« Nous faisons ».** Ses textes n'ont pas changé, mais son banc n'a pas pu être rejoué jusqu'au bout (même
-  surcharge). Voir le rapport pour ce qui a été jugé et ce qui ne l'a pas été.
+- **L'iPad en paysage (1180 × 820), sous le doigt.** Les hauteurs y sont maintenant relevées au banc (rapport, §6) :
+  quinze bulles sur seize tiennent ; « Poser ton cadre » défile (décision 3.5). Les gestes de cette porte, eux, sont
+  écrits pour le portrait.
 - **Le téléphone.** Aucune bulle n'a été relue à 390 px avec les textes neufs.

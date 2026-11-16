@@ -133,7 +133,8 @@ async function suivreLOuverture(page, geste, titre) {
     await geste();
     await expect(bulle(page).locator('.parcours-bulle-titre')).toHaveText(titre, { timeout: 10000 });
     await expect(bulle(page)).not.toHaveClass(/est-en-attente/, { timeout: 10000 });
-    await page.waitForTimeout(300);
+    // Vingt images de plus, bulle montrée : une page qui bougerait encore après l'apparition s'y verrait.
+    await page.waitForFunction((t) => window.__suivi.filter((s) => s.titre === t && !s.attente).length >= 20, titre, { timeout: 10000 });
     const suivi = await page.evaluate(() => { const s = window.__suivi; window.__suivi = null; return s; });
     const fin = suivi[suivi.length - 1].y;
     const montree = suivi.filter((s) => s.titre === titre && !s.attente);
@@ -356,7 +357,8 @@ test('« Mettre ta classe en place », Je regarde : la bonne section, son nom en
     v = await lire(page);
     expect(v.confirme).toBe("C'est fait : l'aperçu est ouvert. Rien n'est encore importé.");
     expect(v.lieu).toBeNull();
-    expect((await lireSection(page, 'accordeon-groupe-etudiants')).halo).toBe(true);
+    // Le moteur retire le halo au changement d'étape et le repose au premier passage de la suivante : on l'attend.
+    await expect(page.locator('#accordeon-groupe-etudiants .accordeon-header h3')).toHaveClass(/parcours-section-actuelle/);
     await deuxEtats(3, { consigne: 'Touche « Importer 10 étudiant·es »', bouton: '#v2-btnConfirmerImport' });
     await page.click('#v2-btnConfirmerImport');
 
