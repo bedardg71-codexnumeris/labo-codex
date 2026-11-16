@@ -87,15 +87,19 @@ describe('en-tête épuré · la bande du haut', () => {
         expect(iTheme).toBeLessThan(iMenu);
         expect(actions).toMatch(/id="entete-menu-bouton"[^>]*aria-label="Menu" aria-expanded="false" aria-controls="entete-menu-panneau"/);
     });
-    it('le menu : cinq lignes dans l\'ordre de la consigne (Réglages en dernier), chacune avec son icône actuelle', () => {
+    it('le menu : ses lignes dans l\'ordre de la consigne (Réglages en dernier), chacune avec son icône actuelle', () => {
         const menu = tranche(entete, '<div id="entete-menu-panneau"', '</div>');
         const lignes = [...menu.matchAll(/<span class="header-icon (ico-[a-z-]+)"[^>]*><\/span><span class="entete-menu-mot">([^<]+)<\/span>/g)]
             .map((m) => [m[2], m[1]]);
         // ↻ Correction de Grégoire du 7 nov. 2026 : Réglages en dernier.
         // ↻ Lot « Les deux parcours » (8 nov. 2026, esquisse 73) : « Visite guidée » et la ligne à interrupteur
         // deviennent une seule entrée « Assistance », qui ouvre le panneau et porte le rang du parcours.
-        expect(lignes).toEqual([['Assistance', 'ico-assistance'], ['Aide', 'ico-aide-cercle'],
-            ['Signaler', 'ico-bug'], ['Soutenir', 'ico-coeur'], ['R&eacute;glages', 'ico-tune']]);
+        // ↻ Lot « La démo dans le menu » (16 nov. 2026, #1283) : deux lignes après « Assistance », dont une seule se
+        // voit (styles.css, « mode-demo ») ; même icône, mêmes gestes que la porte de l'accueil et que le bandeau vert.
+        expect(lignes).toEqual([['Assistance', 'ico-assistance'], ['Explorer la démo', 'ico-demo'], ['Quitter la démo', 'ico-demo'],
+            ['Aide', 'ico-aide-cercle'], ['Signaler', 'ico-bug'], ['Soutenir', 'ico-coeur'], ['R&eacute;glages', 'ico-tune']]);
+        expect(menu).toMatch(/id="menu-demo-explorer" class="entete-menu-item" data-action="explorerDonneesDemo"/);
+        expect(menu).toMatch(/id="menu-demo-quitter" class="entete-menu-item" data-action="desactiverModeDemo"/);
         expect(menu).toMatch(/id="btn-assistance-menu"[^>]*data-action="ouvrirPanneauAssistance"[^>]*>.*<span id="assistance-menu-rang" class="entete-menu-rang"><\/span><\/button>/);
     });
     it('Aide et Réglages gardent .btn-action-header : navigation.js (zone protégée) s\'en sert pour les marquer « actif »', () => {
@@ -103,6 +107,13 @@ describe('en-tête épuré · la bande du haut', () => {
         expect((entete.match(/class="[^"]*\bbtn-action-header\b/g) || []).length).toBe(2);
         expect(entete).toMatch(/data-param="aide" class="entete-menu-item btn-action-header"/);
         expect(entete).toMatch(/data-param="reglages" class="entete-menu-item btn-action-header"/);
+    });
+    it('l\'aide dit où est la démo, dans les mots de Grégoire : « le menu en haut à droite » (16 nov. 2026, 12 h 23)', () => {
+        // ↻ Lot « La démo dans le menu » (#1283) : trois phrases de l'aide et la fenêtre « Données démo ».
+        expect(html).toContain("<li><strong>Données démo</strong>, la ligne « Explorer la démo » du menu en haut à droite, ou le bouton « Explorer », dans « À propos » de la page d'accueil : un cours fictif déjà configuré, à part de tes vraies données (voir « Explorer la démonstration »).</li>");
+        expect(html).toContain("<p>La ligne « Explorer la démo », dans le menu en haut à droite, ou le bouton « Explorer », dans « À propos » de la page d'accueil, ouvre un cours fictif, à part de tes vraies données, dans Suivi › Groupe ; le bandeau vert « Mode démonstration » reste au bas de l'écran.</p>");
+        expect(html).toContain('<p class="mt-10">Pour en sortir : « Quitter la démo », dans le bandeau ou dans le même menu. Tes vraies données reviennent telles quelles.</p>');
+        expect(html).not.toMatch(/Explorer la démo »,? (du|dans le) menu de l'en-tête/);
     });
 });
 

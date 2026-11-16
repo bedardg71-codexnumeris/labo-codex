@@ -1588,7 +1588,7 @@ test.describe('Vue simple · elle ne nomme rien qui n\'existe pas', () => {
         // En vue étendue, le menu habituel, puis sous un filet, « Vue simple » ; l'Assistance y est toujours.
         await basculer(page, 'etendue');
         await page.locator('#entete-menu-bouton').click();
-        await expect(page.locator('#entete-menu-panneau > button:visible .entete-menu-mot')).toHaveText([/Assistance/, /Aide/, /Signaler/, /Soutenir/, /Réglages/, /Vue simple\s*Ta notation seulement/]);
+        await expect(page.locator('#entete-menu-panneau > button:visible .entete-menu-mot')).toHaveText([/Assistance/, /Explorer la démo/, /Aide/, /Signaler/, /Soutenir/, /Réglages/, /Vue simple\s*Ta notation seulement/]);
         await expect(page.locator('#entete-menu-panneau .entete-menu-filet')).toBeVisible();
         expect(await page.evaluate(() => window.accompagnement.estActif())).toBe(true);
         expect(erreurs).toEqual([]);

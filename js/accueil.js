@@ -340,6 +340,7 @@ function commencerParLeTrimestre() {
  * Porte « Tu es conseiller·ère pédagogique ? » : entre dans la démo. `activerModeDemo` porte
  * la garde de l'import (T7) ; si la démo est déjà active, rien n'est réactivé. On en sort par
  * « Quitter la démo », dans le bandeau vert (la case « Données démo » est retirée le 7 nov.).
+ * La ligne « Explorer la démo » du menu de l'en-tête appelle cette même fonction (16 nov. 2026, #1283).
  */
 async function explorerDonneesDemo() {
     if (typeof estEnModeDemo === 'function' && estEnModeDemo()) return;
