@@ -7,6 +7,18 @@
 
 ---
 
+## 15 NOV. 2026, 21 H 45 (Claude Code) : **1.248.1 SUR `main` — LES TEXTES D'« À PROPOS », LES PARCOURS ASSISTÉS FERMÉS (« À VENIR »)** — sans verdict Playwright complet, par consigne
+
+Mandat : relais de Cowork du 15 nov. au soir (deux retouches, une livraison). Lot `lot/a-propos-parcours-a-venir`, parti de `origin/main` à `55df02354`, arbre `../labo-codex-a-propos` ; release `4dfd672e5`, build `1115-2128`, fusionné en avance rapide.
+
+- **A. « À propos »** (`js/accueil.js`) : quatre blocs et deux paragraphes du bas remplacés, mots arrêtés avec Grégoire recopiés tels quels ; « Tutoriels » part ; disposition et styles inchangés. Insécables posés devant « : », « ? », « ! » dans les textes neufs (le reste de la carte n'en portait que dans « 100 % »).
+- **B. Parcours fermés** : UN verrou, `PARCOURS_OUVERTS = false` (`js/assistance.js`). ⮕ **POUR ROUVRIR : le passer à `true`**, puis retirer `rouvrirLesParcours` du harnais `tests/integration/harness/attendre-application.js` (et ses deux appels directs : `parcours-8-commentaires`, `en-tete-epure`), `parcours-fermes-2026-11-15.spec.js` et `sentinelle-parcours-fermes-2026-11-15.test.js`, et resserrer `sentinelle-parcours-classe` (la porte de repli).
+- **Portes fermées** : le panneau (« À venir » à la place de la liste) ; « Parcours suivant » à la fin d'un parcours (`Assistance.lancerParcours`) ; la porte « Tu enseignes ? › Commencer » de l'accueil (elle mène maintenant à Cadre › Trimestre) ; « Commencer avec ma classe » à la fin de « Découvrir » ; le rang du menu (« 2 sur 9 ») ne s'écrit plus. **Laissée ouverte, nommée** : la carte d'aide d'« Apporter mon matériel » (`js/materiel-aide.js`), qui emprunte le moteur sans être un parcours.
+- **Supposé** : l'intitulé « Tes parcours » et la phrase de présentation du panneau restent, « À venir » dessous (sur `main`, aucun « choix » ne précède la liste et le panneau ne porte pas de guides : rien d'autre à retirer) ; version en correctif ; **aucune ligne aux Nouvelles** (leurs mots se valident avec Grégoire) ; l'Aide (`index.html`) parle encore des parcours au présent, non touchée.
+- **Stock** : la préférence `parcoursAssistance` (parcours « en cours » ou « fait ») reste chez les gens, intacte, non lue tant que c'est fermé.
+- **Tests** : aucun essai mis en attente — les bancs des parcours tournent rouverts par le harnais ; seul `parcours-fermes` charge l'application telle que livrée. Vitest 928/928 (11 816). Playwright ciblé : 33/33 (accueil, panneau, en-tête, fermeture) puis 34 verts et 1 capricieux rattrapé (`pages-sans-emboitement`, « Préparer (clair) », sans rapport) sur parcours 1-2, 2, 8, essai novice lot 2. **Les autres bancs de parcours (3 à 7, 9, flèches, bulles) n'ont pas été rejoués ; pas de verdict complet, pas de relecture croisée.** Test de rupture : verrou rouvert, 2 essais Vitest et 3 Playwright rougissent.
+- **Complexité** : aucun fichier de plus de 1 000 lignes touché ; cliquets verts dans Vitest.
+
 ## 15 NOV. 2026, 18 H 49 (Claude Code) : **`lot/deux-temps-modeles` REMIS À JOUR AVEC LA 1.248.0, À `6a57e81bd`, NON FUSIONNÉ** — la règle de la Modélisation ; `main` inchangé pour le code
 
 Mandat : relais de Cowork du 15 nov., 17 h 45 (`plans de travail/CONSIGNE-2026-11-15-deux-temps-remise-a-jour.md`, sur la branche). **Le travail vit sur `lot/deux-temps-modeles`** (PR d'aperçu n° 23, build de l'aperçu `1115-1845`, version 1.248.0 inchangée) ; arbre de travail `../labo-codex-deux-temps`. Ni fusion, ni release, ni Nouvelles.
