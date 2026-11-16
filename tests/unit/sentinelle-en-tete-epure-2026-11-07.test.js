@@ -108,6 +108,13 @@ describe('en-tête épuré · la bande du haut', () => {
         expect(entete).toMatch(/data-param="aide" class="entete-menu-item btn-action-header"/);
         expect(entete).toMatch(/data-param="reglages" class="entete-menu-item btn-action-header"/);
     });
+    it('l\'aide dit où est la démo, dans les mots de Grégoire : « le menu en haut à droite » (16 nov. 2026, 12 h 23)', () => {
+        // ↻ Lot « La démo dans le menu » (#1283) : trois phrases de l'aide et la fenêtre « Données démo ».
+        expect(html).toContain("<li><strong>Données démo</strong>, la ligne « Explorer la démo » du menu en haut à droite, ou le bouton « Explorer », dans « À propos » de la page d'accueil : un cours fictif déjà configuré, à part de tes vraies données (voir « Explorer la démonstration »).</li>");
+        expect(html).toContain("<p>La ligne « Explorer la démo », dans le menu en haut à droite, ou le bouton « Explorer », dans « À propos » de la page d'accueil, ouvre un cours fictif, à part de tes vraies données, dans Suivi › Groupe ; le bandeau vert « Mode démonstration » reste au bas de l'écran.</p>");
+        expect(html).toContain('<p class="mt-10">Pour en sortir : « Quitter la démo », dans le bandeau ou dans le même menu. Tes vraies données reviennent telles quelles.</p>');
+        expect(html).not.toMatch(/Explorer la démo »,? (du|dans le) menu de l'en-tête/);
+    });
 });
 
 describe('en-tête épuré · navigation secondaire et bande pâle', () => {

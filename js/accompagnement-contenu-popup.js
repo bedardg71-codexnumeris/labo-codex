@@ -1277,7 +1277,7 @@ const AIDE_CONTEXTUELLE = {
             {
                 type: 'alerte',
                 niveau: 'attention',
-                contenu: "Les données démo vivent dans un espace à part\u00a0: entrer dans la démo ou en sortir ne touche jamais à tes vrais trimestres. Pour en sortir, «\u00a0Quitter la démo\u00a0» dans le bandeau vert\u00a0; tes vraies données reviennent telles quelles."
+                contenu: "Les données démo vivent dans un espace à part\u00a0: entrer dans la démo ou en sortir ne touche jamais à tes vrais trimestres. Pour en sortir, «\u00a0Quitter la démo\u00a0» dans le bandeau vert ou dans le menu en haut à droite\u00a0; tes vraies données reviennent telles quelles."
             }
         ],
         voirAussi: ['bibliotheque-fonctionnement', 'construction-objectifs-reflexion']

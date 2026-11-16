@@ -104,10 +104,12 @@ describe('A · chaque texte validé paraît sous sa clé, mot pour mot', () => {
         expect(bloc6.endsWith(' ' + f.sections[5].contenu)).toBe(true);   // la seconde phrase, mot pour mot
         // ↻ Lot 3 (7 nov. 2026), phrase 10 approuvée par Grégoire : la case retirée, l'alerte dit « entrer dans la démo
         // ou en sortir » et n'offre plus que le bandeau.
+        // ↻ Lot « La démo dans le menu » (16 nov. 2026, #1283), validé par Grégoire à 12 h 23 : on en sort aussi par
+        // le menu en haut à droite.
         expect(f.sections[6].contenu).toBe(typo(v.blocs[7])
             .replace('cocher ou décocher la case ne touche', 'entrer dans la démo ou en sortir ne touche')
-            .replace('»\u00a0dans le bandeau vert, ou décoche «\u00a0Données démo\u00a0»\u00a0;', '»\u00a0dans le bandeau vert\u00a0;')
-            .replace('» dans le bandeau vert, ou décoche «\u00a0Données démo\u00a0»\u00a0;', '» dans le bandeau vert\u00a0;'));
+            .replace('»\u00a0dans le bandeau vert, ou décoche «\u00a0Données démo\u00a0»\u00a0;', '»\u00a0dans le bandeau vert ou dans le menu en haut à droite\u00a0;')
+            .replace('» dans le bandeau vert, ou décoche «\u00a0Données démo\u00a0»\u00a0;', '» dans le bandeau vert ou dans le menu en haut à droite\u00a0;'));
         expect(f.voirAussi).toEqual(['bibliotheque-fonctionnement', 'construction-objectifs-reflexion']);
     });
 
