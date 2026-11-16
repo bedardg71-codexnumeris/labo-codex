@@ -1205,8 +1205,6 @@
             if (b) b.focus();
             return;
         }
-        // La carte d'aide (13 nov. 2026) : une première grille créée par l'étiquetage ; l'interrupteur garde désormais son état.
-        if (window.MaterielAide) window.MaterielAide.noterGrilleCreee();
         window.materiel.montrerCreee(r.resume);
     }
 

@@ -391,12 +391,16 @@
             },
             sansSortie: true,
             avant: async function () { aller('calendrier', 'trimestre'); refermerLesSectionsDuCadre(); window.scrollTo(0, 0); },
-            // Trois suites de même poids, aucune mise en avant (Grégoire, 16 nov. 2026).
-            boutons: [
-                { libelle: 'Explorer la démo par moi-même', action: function () { continuerLaDemo(); } },
-                { libelle: 'Voir le parcours suivant', action: function () { voirLeParcoursSuivant(); } },
-                { libelle: 'Commencer avec ma classe', action: function () { commencerAvecMaClasse(); } }
-            ]
+            // Trois suites de même poids, aucune mise en avant (Grégoire, 16 nov. 2026). TANT QUE « Mettre ta classe
+            // en place » EST FERMÉ (le verrou de js/assistance.js ; demande de Grégoire du 16 nov., 15 h 48), la bulle
+            // n'offre que « Explorer la démo par moi-même » et « Terminer » : aucune suite ne mène à un parcours fermé.
+            get boutons() {
+                var explorer = { libelle: 'Explorer la démo par moi-même', action: function () { continuerLaDemo(); } };
+                if (!parcoursDeLaClasse()) return [explorer, { libelle: 'Terminer', action: function () { terminer(); } }];
+                return [explorer,
+                    { libelle: 'Voir le parcours suivant', action: function () { voirLeParcoursSuivant(); } },
+                    { libelle: 'Commencer avec ma classe', action: function () { commencerAvecMaClasse(); } }];
+            }
         }
     ];
 
@@ -505,6 +509,21 @@
         depart = null;
         window.Assistance.definirEtat(ID, 'fait', 0);
         M().fermer();
+    }
+
+    /**
+     * « Terminer » : le parcours est fait. Il rend l'application comme il l'a trouvée, comme « Quitter le parcours » :
+     * s'il a ouvert la démo, il la referme et ramène la personne où elle était ; ouverte avant lui, elle le reste.
+     */
+    async function terminer() {
+        var d = depart;
+        depart = null;
+        window.Assistance.definirEtat(ID, 'fait', 0);
+        M().fermer();
+        if (d && !d.demoDejaOuverte && enDemo() && typeof desactiverModeDemo === 'function') {
+            await desactiverModeDemo();
+            revenir(d.lieu);
+        }
     }
 
     function parcoursDeLaClasse() {

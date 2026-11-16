@@ -3,18 +3,24 @@
 // =======================================================================
 // Relais de la conversation du Projet, 12 nov., 19 h 15 (décision de Grégoire, 12 nov., 10 h 31 à 10 h 55) : les consignes
 // de la page entrent dans la carte ; hors du parcours, la même carte est offerte par un interrupteur.
-//   I1 · l'interrupteur : ouvert à la première arrivée ; fermé, ni carte ni consigne dans la page ; rouvert à l'arrivée
-//        suivante tant qu'aucune grille n'est créée ; le lien de sortie de la carte le ferme ; la carte n'est pas un
-//        parcours (absente de la liste, rien d'écrit dans la progression) ;
+//   I1 · l'interrupteur : ÉTEINT à la première arrivée, sans que rien soit écrit ; allumé par la personne, la carte ;
+//        éteint, ni carte ni consigne dans la page ; à l'arrivée suivante, l'état où elle l'a laissé ; le lien de sortie
+//        de la carte l'éteint ; la carte n'est pas un parcours (absente de la liste, rien d'écrit dans la progression) ;
 //   I2 · la carte de la page dans l'étiquetage : les trois étapes, la flèche et le halo sur l'étiquette à prendre, puis sur
-//        le morceau ; un outil en main, sa phrase ; une grille créée par l'étiquetage : l'interrupteur garde son état ;
+//        le morceau ; un outil en main, sa phrase ; une grille créée par l'étiquetage n'écrit rien : seul un geste de
+//        la personne compte ;
+//   I5 · le stock : ce que retrouve une personne dont l'appareil porte déjà la clé, selon ce qu'elle contient ;
 //   I3 · pendant un parcours : ni interrupteur ni carte de page ; « Ta grille » inchangée sauf le complément ; aucune
 //        phrase deux fois ; la carte tient dans l'écran ; Conception › Grilles a son texte ; la carte de la page revient ;
 //   I4 · les deux boutons de l'exemple : un brouillon posé avant survit à « Voir un exemple de grille étiquetée », à « Faire
 //        l'exercice soi-même » et à la sortie de l'exemple ; l'exemple complet : la carte évite la lecture.
-// Sous un banc, l'interrupteur arrive fermé (`navigator.webdriver`, js/materiel-aide.js) : ce banc éteint le drapeau
-// pour éprouver la vraie règle, et pose le choix de la vue étendue (sans lui, une application vide s'ouvre en vue simple).
-// Break-tests : `plans de travail/RAPPORT-2026-11-13-carte-aide-materiel.md`. Grilles FICTIVES ; noms fictifs.
+// LA RÈGLE DU 16 NOV. 2026 (demande de Grégoire, 15 h 48 ; plans de travail/CONSIGNE-2026-11-16-decouvrir-en-ligne.md)
+// remplace celle du 12 nov. (ouvert à chaque arrivée tant qu'aucune grille n'était créée ; le cas des bancs,
+// `navigator.webdriver`, est parti avec elle). Ce banc pose le choix de la vue étendue (sans lui, une application vide
+// s'ouvre en vue simple) ; `allume: true` : la personne a laissé l'interrupteur allumé (I4, qui juge la carte).
+// Break-tests : `plans de travail/RAPPORT-2026-11-13-carte-aide-materiel.md` ; celui de la règle du 16 nov. :
+// `return lirePref().ouvert === true;` → `!== false` dans `aLArrivee` (js/materiel-aide.js) → I1, I2 et I5 ROUGES.
+// Grilles FICTIVES ; noms fictifs.
 import { test, expect } from '@playwright/test';
 import { ouvrirEspaceVide, mettreLaClasseEnPlace, attendreEtape, contourSur, deuxSondes, bulle, bulleNeCouvrePas, capture } from './harness/classe-de-banc.js';
 import { flecheVers, flecheVersMorceau } from './harness/fleches-de-banc.js';
@@ -38,12 +44,18 @@ const CAPTURE = '<table><tr><td colspan="3">Grille fictive d’analyse</td></tr>
     + '<tr><td>Développement</td><td>Arguments et exemples</td><td>/ 30</td></tr>'
     + '<tr><td>Conclusion</td><td>Synthèse et ouverture</td><td>/ 10</td></tr></table>';
 
-async function ouvrir(page, L, H) {
-    await page.addInitScript(() => {
-        Object.defineProperty(Navigator.prototype, 'webdriver', { get: () => false });
+async function ouvrir(page, L, H, { allume = false } = {}) {
+    await page.addInitScript((oui) => {
         try { if (!localStorage.getItem('laboCodex.vue')) localStorage.setItem('laboCodex.vue', 'etendue'); } catch (e) { /* rien */ }
-    });
+        try { if (oui && !localStorage.getItem('laboCodex.aideMateriel')) localStorage.setItem('laboCodex.aideMateriel', JSON.stringify({ ouvert: true })); } catch (e) { /* rien */ }
+    }, allume);
     await ouvrirEspaceVide(page, L, { hauteur: H });
+}
+
+/** La personne allume l'interrupteur : la carte de la page s'ouvre. */
+async function allumer(page) {
+    await page.locator('.interrupteur-piste').click();
+    await expect(page.locator('#materiel-aide-bascule')).toBeChecked();
 }
 
 const allerAuMateriel = (page) => page.evaluate(() => naviguerVers('conception', 'materiel'));
@@ -190,17 +202,23 @@ async function pageSansConsignes(page, contexte) {
 // I1 — l'interrupteur
 // ---------------------------------------------------------------------------------------------------------------
 for (const [L, H] of TAILLES) {
-    test(`I1 · ${L} × ${H} : l’interrupteur, ouvert à l’arrivée ; fermé, ni carte ni consigne ; rouvert à l’arrivée suivante ; la sortie de la carte le ferme`, async ({ page }) => {
+    test(`I1 · ${L} × ${H} : l’interrupteur, éteint à la première arrivée ; allumé, la carte ; éteint, ni carte ni consigne ; l’état laissé à l’arrivée suivante ; la sortie de la carte l’éteint`, async ({ page }) => {
         const cap = `${L}x${H}`;
         await ouvrir(page, L, H);
         const avant = await progression(page);
         await allerAuMateriel(page);
 
-        // Ouvert à la première arrivée ; la carte de la page, qui n'est pas un parcours.
+        // ÉTEINT à la première arrivée : ni carte ni consigne, et arriver n'écrit rien.
         await expect(interrupteur(page)).toBeVisible();
         await expect(page.locator('.interrupteur-libelle')).toHaveText('M’accompagner pour étiqueter ma grille');
-        await expect(bascule(page)).toBeChecked();
+        await expect(bascule(page)).not.toBeChecked();
+        await aucuneCarte(page);
+        await pageSansConsignes(page, 'à la première arrivée');
+        expect(await preference(page), 'arriver dans la page n’écrit rien').toBeNull();
+        // Allumé par la personne : la carte de la page, qui n'est pas un parcours ; son geste est retenu.
+        await allumer(page);
         await carteDeLaPage(page);
+        expect(await preference(page)).toEqual({ ouvert: true });
         const cible = await page.locator('label.interrupteur').boundingBox();
         expect(cible.height, 'la cible tactile de l’interrupteur').toBeGreaterThanOrEqual(44);
         // Sa place (Grégoire, 13 nov., 10 h 00) : après le paragraphe, à droite ; la zone de collage reste à l'écran.
@@ -249,26 +267,39 @@ for (const [L, H] of TAILLES) {
         await capture(page, DOSSIER, `i1-etiquetage-ferme-${cap}`);
         await page.locator('#dissection-terminer').click();
 
-        // Rouvert à l'arrivée suivante (aucune grille créée), même fermé à la visite d'avant.
+        // À l'arrivée suivante : éteint, comme la personne l'a laissé (la règle du 12 nov. le rouvrait).
+        await allerAilleurs(page);
+        await aucuneCarte(page);
+        await allerAuMateriel(page);
+        await expect(bascule(page)).not.toBeChecked();
+        await aucuneCarte(page);
+        expect(await preference(page)).toEqual({ ouvert: false });
+        // Rallumé, puis une autre page et le retour : allumé, comme laissé ; la carte revient.
+        await allumer(page);
+        await carteDeLaPage(page);
         await allerAilleurs(page);
         await aucuneCarte(page);
         await allerAuMateriel(page);
         await expect(bascule(page)).toBeChecked();
         await carteDeLaPage(page);
 
-        // Le lien de sortie de la carte ferme l'interrupteur : les deux ne se contredisent jamais.
+        // Le lien de sortie de la carte éteint l'interrupteur : les deux ne se contredisent jamais, et ce geste est retenu.
         await bulle(page).locator('.parcours-bulle-sortie').click();
         await aucuneCarte(page);
         await expect(bascule(page)).not.toBeChecked();
         await expect(interrupteur(page)).toBeVisible();
-        // Rouvert par l'interrupteur : la carte revient.
-        await page.locator('.interrupteur-piste').click();
+        expect(await preference(page)).toEqual({ ouvert: false });
+        await allerAilleurs(page);
+        await allerAuMateriel(page);
+        await expect(bascule(page)).not.toBeChecked();
+        // Rallumé par l'interrupteur : la carte revient.
+        await allumer(page);
         await carteDeLaPage(page);
 
         // Pas un parcours : absente de la liste, rien d'écrit dans la progression ni la reprise.
         expect(await page.evaluate(() => Assistance.parcours().map((p) => p.id))).not.toContain('aide-materiel');
         expect(await progression(page)).toEqual(avant);
-        expect((await preference(page)).grilleCreee).toBeUndefined();
+        expect(await preference(page)).toEqual({ ouvert: true });
     });
 }
 
@@ -276,7 +307,7 @@ for (const [L, H] of TAILLES) {
 // I2 — la carte de la page dans l'étiquetage ; une grille créée par l'étiquetage
 // ---------------------------------------------------------------------------------------------------------------
 for (const [L, H] of TAILLES) {
-    test(`I2 · ${L} × ${H} : la carte dans l’étiquetage (étapes, flèche, halo, outil) ; après une grille créée, l’interrupteur garde son état`, async ({ page }) => {
+    test(`I2 · ${L} × ${H} : la carte dans l’étiquetage (étapes, flèche, halo, outil) ; une grille créée n’écrit rien, l’interrupteur garde l’état laissé`, async ({ page }) => {
         test.setTimeout(180000);
         const cap = `${L}x${H}`;
         await ouvrir(page, L, H);
@@ -286,6 +317,8 @@ for (const [L, H] of TAILLES) {
         await attendreApplication(page);
         const avant = await progression(page);
         await allerAuMateriel(page);
+        await aucuneCarte(page);   // éteint à la première arrivée
+        await allumer(page);
         await carteDeLaPage(page);
         await coller(page, CAPTURE);
 
@@ -334,16 +367,16 @@ for (const [L, H] of TAILLES) {
         await carteDeLaPage(page);
         await expect.poll(async () => norm(await pageLue(page).textContent())).toContain('1. Touche une étiquette dans la légende.');
 
-        // La grille prête ; l'interrupteur fermé, puis « Créer ma grille » : désormais il garde son état.
+        // La grille prête ; l'interrupteur éteint par la personne, puis « Créer ma grille » : créer n'écrit rien.
         await poser(page, 'critere', ['Développement', 'Conclusion']);
         await gesteEst(page, 'Ta grille est prête : touche « Créer ma grille ».');
         await contourSur(page, '[data-action="materielDissection.creer"]');
         await bascule(page).evaluate((b) => b.click());
         await aucuneCarte(page);
-        expect((await preference(page)).grilleCreee, 'aucune grille créée encore').toBeUndefined();
+        expect(await preference(page)).toEqual({ ouvert: false });
         await page.locator('[data-action="materielDissection.creer"]').click();
         await expect(page.locator('#materiel-titre-cree')).toBeVisible();
-        expect(await preference(page)).toEqual({ ouvert: false, grilleCreee: true });
+        expect(await preference(page), 'une grille créée n’écrit rien dans la préférence').toEqual({ ouvert: false });
         // Sur la confirmation : ni interrupteur ni carte.
         await expect(interrupteur(page)).toBeHidden();
         await aucuneCarte(page);
@@ -365,10 +398,35 @@ for (const [L, H] of TAILLES) {
         await allerAuMateriel(page);
         await expect(bascule(page)).toBeChecked();
         await carteDeLaPage(page);
-        expect(await preference(page)).toEqual({ ouvert: true, grilleCreee: true });
+        expect(await preference(page)).toEqual({ ouvert: true });
         expect(await progression(page)).toEqual(avant);
     });
 }
+
+// ---------------------------------------------------------------------------------------------------------------
+// I5 — le stock : la clé écrite sous la règle du 12 nov. ({ grilleCreee, ouvert }), telle qu'elle est chez quelqu'un
+// ---------------------------------------------------------------------------------------------------------------
+test('I5 · le stock : `ouvert: false` → éteint ; `ouvert: true` → allumé ; `grilleCreee` seul → éteint ; rien n’est écrit à l’arrivée, `grilleCreee` part au premier geste', async ({ page }) => {
+    await ouvrir(page, 1180, 820);
+    const arriverAvec = async (cle) => {
+        await allerAilleurs(page);
+        await page.evaluate((v) => { if (v === null) localStorage.removeItem('laboCodex.aideMateriel'); else localStorage.setItem('laboCodex.aideMateriel', JSON.stringify(v)); }, cle);
+        await allerAuMateriel(page);
+        await expect(interrupteur(page)).toBeVisible();
+        expect(await preference(page), 'arriver ne récrit pas la clé').toEqual(cle);
+    };
+    await allerAuMateriel(page);
+    for (const [cle, allume] of [[{ grilleCreee: true, ouvert: false }, false], [{ ouvert: false }, false], [{ grilleCreee: true }, false], [{}, false], [null, false],
+        [{ ouvert: true }, true], [{ grilleCreee: true, ouvert: true }, true]]) {
+        await arriverAvec(cle);
+        if (allume) { await expect(bascule(page), JSON.stringify(cle)).toBeChecked(); await carteDeLaPage(page); }
+        else { await expect(bascule(page), JSON.stringify(cle)).not.toBeChecked(); await aucuneCarte(page); }
+    }
+    // Le premier geste de la personne écrit son choix, et lui seul : `grilleCreee`, qui n'est plus lu, part alors.
+    await page.locator('.interrupteur-piste').click();
+    await expect(bascule(page)).not.toBeChecked();
+    expect(await preference(page)).toEqual({ ouvert: false });
+});
 
 // ---------------------------------------------------------------------------------------------------------------
 // I3 — pendant un parcours ; « Ta grille », inchangée sauf le complément
@@ -377,8 +435,8 @@ for (const [L, H] of TAILLES) {
     test(`I3 · ${L} × ${H} : pendant un parcours, ni interrupteur ni carte de page ; « Ta grille » et son complément ; Conception › Grilles a son texte`, async ({ page }) => {
         test.setTimeout(240000);
         const cap = `${L}x${H}`;
-        // Le drapeau de banc reste allumé ici (la mise en place de la classe est jugée ailleurs, sous lui) : la personne a
-        // déjà créé une grille par l'étiquetage et laissé l'interrupteur ouvert. La règle de l'arrivée est jugée en I1 et I2.
+        // La personne a laissé l'interrupteur allumé (ici, la clé telle que la règle du 12 nov. l'écrivait : le stock).
+        // La règle de l'arrivée est jugée en I1, I2 et I5.
         await ouvrirEspaceVide(page, L, { hauteur: H });
         await page.evaluate(() => localStorage.setItem('laboCodex.aideMateriel', JSON.stringify({ grilleCreee: true, ouvert: true })));
         await mettreLaClasseEnPlace(page);
@@ -448,7 +506,7 @@ for (const [L, H] of TAILLES) {
     test(`I4 · ${L} × ${H} : « Voir un exemple de grille étiquetée », « Étiqueter l’exemple moi-même », la sortie de l’exemple : le brouillon posé avant survit`, async ({ page }) => {
         test.setTimeout(180000);
         const cap = `${L}x${H}`;
-        await ouvrir(page, L, H);
+        await ouvrir(page, L, H, { allume: true });
         await allerAuMateriel(page);
         await carteDeLaPage(page);
 
@@ -521,7 +579,7 @@ for (const [L, H] of TAILLES) {
         await sortie.evaluate((b) => b.click());
         await expect(page.locator('#dissection-statut')).toHaveText('Dissection reprise telle que tu l’as laissée.');
         expect(await lireDonnees(page)).toEqual({ brouillon: B, grilles });
-        // L'exemple ne crée rien : l'interrupteur s'ouvrira encore ouvert.
-        expect((await preference(page)) || {}).not.toHaveProperty('grilleCreee');
+        // L'exemple n'écrit rien non plus dans la préférence de l'interrupteur : elle est telle que la personne l'a laissée.
+        expect(await preference(page)).toEqual({ ouvert: true });
     });
 }

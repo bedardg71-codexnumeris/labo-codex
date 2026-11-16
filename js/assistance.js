@@ -45,21 +45,35 @@
    9 nov. 2026) n'est pas proposé sur téléphone (ParcoursMoteur.surTelephone, 500 px) : sous son
    titre, le texte validé par Grégoire, et son bouton ne lance rien.
 
-   LE VERROU DES PARCOURS (`PARCOURS_OUVERTS`). Sur `main`, ils sont FERMÉS depuis le 15 nov. 2026 (1.248.1, consigne
-   relayée par Cowork) : le panneau dit « À venir » à la place de la liste, et aucun parcours ne part, ni d'ici, ni de
-   « Parcours suivant » (lancerParcours), ni de la porte « Tu enseignes ? » de l'accueil, ni de la fin de
-   « Découvrir » (ces deux-là lisent `Assistance.parcours()`, qui rend alors une liste vide).
-   ⚠ SUR `lot/deux-temps-modeles` SEULEMENT, ils sont ROUVERTS (16 nov. 2026, relais de Cowork : l'aperçu de la PR
-   n° 23 sert à Grégoire pour les relire). Rien de ce lot ne part vers `main` sans un relais à part : à la fusion,
-   la valeur du verrou se décide là, pas ici.
+   LE VERROU DES PARCOURS (`PARCOURS_OUVERTS`) : la liste des parcours OUVERTS dans l'application livrée, par leur
+   identifiant. Fermés en entier le 15 nov. 2026 (1.248.1) ; depuis le 16 nov. 2026 (demande de Grégoire, 15 h 48 ;
+   plans de travail/CONSIGNE-2026-11-16-decouvrir-en-ligne.md), « Découvrir » SEUL est ouvert. Un parcours fermé
+   reste inscrit, mais il n'est offert nulle part et rien ne le lance :
+   · le panneau ne liste que les parcours ouverts, puis dit « À venir » pour les autres, sans les nommer ;
+   · `Assistance.parcours()` ne rend que les ouverts : la porte « Tu enseignes ? » de l'accueil et la fin de
+     « Découvrir » y cherchent « Mettre ta classe en place » et ne l'y trouvent pas ;
+   · `suivantDe` ne rend qu'un parcours ouvert (« Parcours suivant », « Voir le parcours suivant », un modèle) ;
+   · `lancerParcours` refuse un parcours fermé ; le rang du menu et la remise à neuf de la démo (qui sert les
+     modèles) ne comptent que les ouverts.
+   Les bancs rouvrent tout en mémoire (`ouvrirLesParcours`, par le harnais) : le code des parcours fermés reste jugé.
    ================================================================= */
 (function () {
     'use strict';
 
     var CLE_PREF = 'parcoursAssistance';
-    var PARCOURS_OUVERTS = true;
-    // L'état en mémoire, que seul le banc du verrou change (ouvrirLesParcours) : rien ne le garde d'un chargement à l'autre.
-    var ouverts = PARCOURS_OUVERTS;
+    var PARCOURS_OUVERTS = ['decouvrir'];
+    // L'état en mémoire, que seuls les bancs changent (ouvrirLesParcours) : la liste des identifiants ouverts, ou `true`
+    // (tous). Rien ne le garde d'un chargement à l'autre.
+    var ouverts = PARCOURS_OUVERTS.slice();
+
+    function estOuvert(id) {
+        return ouverts === true || ouverts.indexOf(id) !== -1;
+    }
+
+    /** Les parcours offerts : ceux du registre que le verrou ouvre, dans l'ordre du panneau. */
+    function offerts() {
+        return registre.filter(function (p) { return estOuvert(p.id); });
+    }
     var TEXTE_A_VENIR = 'À venir';
     // Validé par Grégoire le 9 nov. 2026 (Cowork), mot pour mot.
     var TEXTE_GRAND_ECRAN = 'Ce parcours se fait sur un écran plus grand : une tablette ou un ordinateur.';
@@ -133,7 +147,7 @@
 
     /** Le premier parcours qui a sa Modélisation : celui d'où les modèles se rejouent. */
     function premierModele() {
-        return registre.find(function (p) { return typeof p.lancerModele === 'function'; }) || null;
+        return offerts().find(function (p) { return typeof p.lancerModele === 'function'; }) || null;
     }
 
     function lireTout() {
@@ -166,7 +180,8 @@
     }
 
     function totalParcours() {
-        return registre.reduce(function (n, def) { return Math.max(n, rangDe(def)); }, registre.length);
+        var liste = offerts();
+        return liste.reduce(function (n, def) { return Math.max(n, rangDe(def)); }, liste.length);
     }
 
     function enregistrer(def) {
@@ -179,17 +194,10 @@
 
     /** Le rang du parcours en cours (le premier), sinon du premier à faire ; rien si tout est fait. */
     function rangAAfficher() {
-        if (!ouverts || !registre.length) return '';
-        var idx = -1;
-        for (var k = 0; k < registre.length; k++) {
-            if (etatDe(registre[k].id).etat === 'en-cours') { idx = k; break; }
-        }
-        if (idx === -1) {
-            for (var j = 0; j < registre.length; j++) {
-                if (etatDe(registre[j].id).etat !== 'fait') { idx = j; break; }
-            }
-        }
-        return idx === -1 ? '' : rangDe(registre[idx]) + ' sur ' + totalParcours();
+        var liste = offerts();
+        var idx = liste.findIndex(function (p) { return etatDe(p.id).etat === 'en-cours'; });
+        if (idx === -1) idx = liste.findIndex(function (p) { return etatDe(p.id).etat !== 'fait'; });
+        return idx === -1 ? '' : rangDe(liste[idx]) + ' sur ' + totalParcours();
     }
 
     function majMenu() {
@@ -372,7 +380,7 @@
     function remplirListe(liste) {
         liste.textContent = '';
         listeTelephone = surTelephone();
-        registre.forEach(function (def) { liste.appendChild(creerParcoursItem(def)); });
+        offerts().forEach(function (def) { liste.appendChild(creerParcoursItem(def)); });
     }
 
     /** Panneau ouvert, la fenêtre franchit le seuil du téléphone : la liste suit (refus, bouton). */
@@ -614,9 +622,10 @@
         intitule.textContent = 'Tes parcours';
         panneau.appendChild(intitule);
 
-        if (ouverts) {
-            // La remise à neuf de la démo (12 nov. 2026), au-dessus de la liste.
-            panneau.appendChild(construireBoutonNeuf());
+        if (offerts().length) {
+            // La remise à neuf de la démo (12 nov. 2026), au-dessus de la liste : elle sert les modèles, et ne
+            // paraît que si un parcours ouvert en a un.
+            if (premierModele()) panneau.appendChild(construireBoutonNeuf());
 
             var liste = document.createElement('ol');
             liste.className = 'assistance-parcours';
@@ -624,8 +633,10 @@
             liste.setAttribute('aria-labelledby', 'assistance-intitule');
             remplirListe(liste);
             panneau.appendChild(liste);
-        } else {
-            // Fermés : la mention seule, à la place de la liste. Aucun bouton, donc rien à lancer.
+        }
+        if (offerts().length < registre.length || !registre.length) {
+            // Des parcours fermés : la mention seule, sous la liste des ouverts (à sa place quand tous le sont).
+            // Ils ne sont pas nommés, et aucun bouton ne les lance.
             var aVenir = document.createElement('p');
             aVenir.className = 'assistance-a-venir';
             aVenir.id = 'assistance-a-venir';
@@ -697,8 +708,9 @@
 
     /** Le parcours qui suit `id` dans la liste (rien : c'était le dernier). */
     function suivantDe(id) {
-        var k = registre.findIndex(function (p) { return p.id === id; });
-        return k !== -1 && registre[k + 1] ? registre[k + 1] : null;
+        var liste = offerts();
+        var k = liste.findIndex(function (p) { return p.id === id; });
+        return k !== -1 && liste[k + 1] ? liste[k + 1] : null;
     }
 
     /**
@@ -708,7 +720,7 @@
      * @returns {boolean} true s'il est parti
      */
     function lancerParcours(id) {
-        if (!ouverts) return false;
+        if (!estOuvert(id)) return false;
         var def = definitionDe(id);
         if (!def) return false;
         var petit = tropPetitPour(def);
@@ -737,12 +749,13 @@
         // Les deux temps (12 nov. 2026) : l'état des Modélisations (sur l'appareil).
         etatModeleDe: etatModeleDe,
         definirEtatModele: definirEtatModele,
-        // Fermés, la liste rendue est vide : l'accueil et la fin de « Découvrir » y cherchent le parcours à lancer.
-        parcours: function () { return ouverts ? registre.slice() : []; },
-        parcoursOuverts: function () { return ouverts; },
-        // Pour les bancs de la fermeture (sur `main` ; retirés de cette branche, où les parcours sont rouverts).
+        // La liste rendue ne porte que les parcours ouverts : l'accueil et la fin de « Découvrir » y cherchent le
+        // parcours à lancer.
+        parcours: offerts,
+        estOuvert: estOuvert,
+        // Pour les bancs : tout ouvrir (`true`, ou rien), tout fermer (`false`), ou la liste livrée (un tableau).
         ouvrirLesParcours: function (oui) {
-            ouverts = oui !== false;
+            ouverts = Array.isArray(oui) ? oui.slice() : oui === false ? [] : true;
             fermerPanneau({ sansRetourFocus: true });
             majMenu();
         }

@@ -17,9 +17,18 @@
  */
 const DERNIER_DRAPEAU = 'migration_pratiqueId_to_configurable_id_done';
 
-// Les parcours assistés sont rouverts sur `lot/deux-temps-modeles` (16 nov. 2026, `PARCOURS_OUVERTS`,
-// js/assistance.js) : le harnais ne les rouvre plus en mémoire, les bancs jugent l'application telle quelle.
-export async function attendreApplication(page, { timeout = 30000 } = {}) {
+/**
+ * Les parcours assistés sont fermés dans l'application (15 nov. 2026, `PARCOURS_OUVERTS`, js/assistance.js).
+ * Les bancs, eux, les rouvrent ici, en mémoire, après chaque chargement : le code des parcours reste en place
+ * et reste jugé. Un banc qui juge la FERMETURE passe `parcoursFermes: true`. À retirer quand ils rouvrent.
+ */
+export async function rouvrirLesParcours(page) {
+    await page.evaluate(() => {
+        if (window.Assistance && typeof window.Assistance.ouvrirLesParcours === 'function') window.Assistance.ouvrirLesParcours(true);
+    });
+}
+
+export async function attendreApplication(page, { timeout = 30000, parcoursFermes = false } = {}) {
     await page.waitForFunction(
         (drapeau) => window.dbReady === true && window.db?.getSync?.(drapeau, false) === true,
         DERNIER_DRAPEAU,
@@ -29,4 +38,5 @@ export async function attendreApplication(page, { timeout = 30000 } = {}) {
         await new Promise((fin) => setTimeout(() => requestAnimationFrame(() => requestAnimationFrame(fin)), 0));
         await window.db.flush();
     });
+    if (!parcoursFermes) await rouvrirLesParcours(page);
 }

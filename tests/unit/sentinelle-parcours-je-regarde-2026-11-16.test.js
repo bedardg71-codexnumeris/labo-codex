@@ -36,7 +36,8 @@ const MOTEUR = lire('js/parcours-moteur.js');
 const STYLES = lire('css/parcours.css');
 
 // Les deux fichiers, chargés hors du navigateur : ce qu'ils exposent aux bancs.
-const fenetre = { Assistance: { enregistrer: () => {}, parcours: () => [], suivantDe: () => ({ lancerModele: () => {} }) } };
+// (Tous les parcours ouverts, comme sous les bancs : le verrou est jugé par sentinelle-parcours-verrou-2026-11-16.test.js.)
+const fenetre = { Assistance: { enregistrer: () => {}, parcours: () => [{ id: 'classe', lancerModele: () => {} }], suivantDe: () => ({ lancerModele: () => {} }) } };
 new Function('window', DECOUVRIR)(fenetre);
 new Function('window', CLASSE)(fenetre);
 

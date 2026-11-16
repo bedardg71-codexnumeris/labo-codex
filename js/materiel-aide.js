@@ -13,21 +13,22 @@
  *     n'est pas un parcours : elle n'entre pas dans la liste des parcours (`Assistance.enregistrer` n'est pas appelé),
  *     n'écrit ni progression ni reprise, n'allume aucune pastille. Elle suit l'écran ; sur la confirmation d'une grille
  *     créée ou sur une autre page, elle se ferme, et revient au retour si l'interrupteur est ouvert.
- *   · L'INTERRUPTEUR, en haut de la page (« M'accompagner pour étiqueter ma grille », mots de Grégoire) : ouvert à chaque
- *     arrivée dans la page tant qu'aucune grille n'a été créée par « Créer ma grille » dans l'étiquetage (jamais par
- *     l'exemple, qui ne crée rien), même fermé à la visite d'avant ; après, il garde l'état où la personne l'a laissé.
- *     Motif (Grégoire, 10 h 54) : fermé, l'écran ne dit plus qu'une étiquette de la légende se touche pour être choisie.
+ *   · L'INTERRUPTEUR, en haut de la page (« M'accompagner pour étiqueter ma grille », mots de Grégoire) : ÉTEINT à la
+ *     première arrivée dans la page ; ensuite, il garde l'état où la personne l'a laissé (Grégoire, 16 nov. 2026,
+ *     15 h 48 ; plans de travail/CONSIGNE-2026-11-16-decouvrir-en-ligne.md). Seul un geste de la personne compte comme
+ *     un choix : l'interrupteur touché, ou le lien de sortie de la carte, qui l'éteint. Arriver dans la page, créer
+ *     une grille, lancer un parcours : rien de cela n'écrit. (La règle du 12 nov. — ouvert à chaque arrivée tant
+ *     qu'aucune grille n'était créée par l'étiquetage — est retirée, avec `grilleCreee` et le cas des bancs.)
  *     Pendant un parcours, quel qu'il soit, il ne se montre pas et la carte de la page ne s'ouvre pas (une carte ouverte
  *     se ferme quand un parcours se lance : le moteur n'en joue qu'une). Fermer la carte par son lien de sortie ferme
  *     l'interrupteur : les deux ne se contredisent jamais.
- *   · CE QU'IL RETIENT : `laboCodex.aideMateriel` ({ grilleCreee, ouvert }), dans `localStorage`, hors de `db` et hors
- *     trimestre (du genre de `laboCodex.vue`) : une préférence d'interface de l'appareil, qui n'entre ni dans le codex ni
- *     dans les données de la personne. Aucune grille ne porte sa provenance : le fait est retenu à la création réussie.
- *     STOCK, assumé : qui a déjà créé une grille par l'étiquetage avant ce lot retrouve l'interrupteur ouvert à chaque
- *     arrivée jusqu'à sa prochaine création ; rien ne s'écrit dans ses données pour l'éviter.
- *   · SOUS UN BANC (`navigator.webdriver`), l'interrupteur arrive fermé tant qu'aucune grille n'est créée : les bancs de
- *     la page ouvrent une application neuve, et la carte se poserait sur ce qu'ils touchent (le précédent : la vue au
- *     démarrage, `vue-simple-donnees.js`). Le banc de ce lot éteint le drapeau pour éprouver la vraie règle.
+ *   · CE QU'IL RETIENT : `laboCodex.aideMateriel` ({ ouvert }), dans `localStorage`, hors de `db` et hors trimestre (du
+ *     genre de `laboCodex.vue`) : une préférence d'interface de l'appareil, qui n'entre ni dans le codex ni dans les
+ *     données de la personne. Sans la clé, ou sans `ouvert`, l'interrupteur est éteint.
+ *     STOCK, assumé (la clé écrite sous la règle du 12 nov.) : `ouvert: false` → éteint, comme laissé ; `ouvert: true`
+ *     → allumé, y compris quand ce `true` a été noté à la création d'une grille sans que la personne ait touché
+ *     l'interrupteur (c'est l'état qu'elle voyait) ; `grilleCreee` seul, ou rien → éteint. Un `grilleCreee` resté dans
+ *     la clé n'est plus lu ; il part au prochain geste de la personne. Rien n'est écrit pour réparer.
  *   · VUE SIMPLE : sa navigation ne mène pas à cette page ; rien n'y est ajouté (ni interrupteur, ni carte).
  *
  * Les mots : ceux de l'accueil et de l'étiquetage sont ceux de la page, mot pour mot (les trois cartes de l'accueil ;
@@ -220,17 +221,17 @@
     }
 
     function ecrirePref(maj) {
-        // Dans la démo (13 nov. 2026), rien ne se retient : une grille créée par un modèle n'est pas une grille de la
-        // personne, et l'interrupteur de sa page doit encore l'accueillir ouvert. L'état vaut pour la visite.
+        // Dans la démo (13 nov. 2026), rien ne se retient : un geste fait dans la démo n'écrit pas hors d'elle (le
+        // confinement de la démo). L'état vaut pour la visite.
         if (typeof estEnModeDemo === 'function' && estEnModeDemo()) return;
-        try { window.localStorage.setItem(CLE, JSON.stringify(Object.assign(lirePref(), maj))); } catch (e) { /* stockage refusé : l'état vaut pour la visite */ }
+        try { window.localStorage.setItem(CLE, JSON.stringify(maj)); } catch (e) { /* stockage refusé : l'état vaut pour la visite */ }
     }
 
-    /** L'état de l'interrupteur à l'arrivée dans la page. */
+    /**
+     * L'état de l'interrupteur à l'arrivée dans la page : ÉTEINT, sauf si la personne l'a laissé allumé (16 nov. 2026).
+     */
     function aLArrivee() {
-        var p = lirePref();
-        if (p.grilleCreee === true) return p.ouvert !== false;
-        return navigator.webdriver !== true;   // sous un banc : fermé (voir l'en-tête)
+        return lirePref().ouvert === true;
     }
 
     var ouvert = false;       // l'interrupteur, pour la visite en cours
@@ -307,11 +308,6 @@
         regler();
     }
 
-    /** Une grille vient d'être créée par « Créer ma grille » dans l'étiquetage : l'interrupteur garde désormais son état. */
-    function noterGrilleCreee() {
-        ecrirePref({ grilleCreee: true, ouvert: ouvert });
-    }
-
     function initialiser() {
         window.addEventListener('sectionAffichee', planifier);
         document.addEventListener('parcoursMoteur', planifier);
@@ -334,7 +330,6 @@
         // L'interrupteur.
         basculer: basculer,
         regler: planifier,
-        noterGrilleCreee: noterGrilleCreee,
         // Pour les bancs (lecture seule) : la définition de la carte, la clé de la préférence, l'état.
         definition: function () { return DEF; },
         CLE: CLE,
