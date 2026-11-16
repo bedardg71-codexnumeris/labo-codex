@@ -7,6 +7,16 @@
 
 ---
 
+## 16 NOV. 2026, 6 H 05 (Claude Code) : **1.248.2 SUR `main` — « À PROPOS », TEXTE RÉVISÉ DU 16 NOV., LIEN « JOINDRE LA COMMUNAUTÉ »** — sans verdict Playwright complet, par consigne
+
+Mandat : relais de Cowork du 16 nov. (texte approuvé par Grégoire à 5 h 53 ; correctif de l'accueil seulement, même voie que la 1.248.1). Lot `lot/a-propos-texte-16-nov`, parti de `origin/main` à `4f1b83cfc`, arbre `../labo-codex-a-propos` ; release `835f8da85`, build `1116-0558`, fusionné en avance rapide.
+
+- **Texte** (`js/accueil.js`) : les quatre blocs et les deux paragraphes du bas remplacés en entier, mot pour mot ; « Un espace autonome » devient « Un outil indépendant » ; devise, portes et liens « Assistance » / « Guides pédagogiques » inchangés. Insécables devant « : » et « ? » et à l'intérieur des guillemets.
+- **Lien « Joindre la communauté »** → `https://www.aqpc.qc.ca/fr/cop-labocodex`, nouvel onglet, `noopener noreferrer`, mention pour lecteur d'écran comme le lien du blog. Il vit dans une colonne `.apropos-communaute`, HORS de la boîte `.banniere-bienvenue-acces` (ses liens y sont dorés), pour porter la classe `.apropos-lien` de ses voisins. Une règle CSS (`styles.css`) : même écart paragraphe → liens des deux côtés.
+- **Supposé** : aucune ligne aux Nouvelles (la consigne la disait facultative ; les correctifs se consolident dans l'entrée de la mineure). « Largeur de l'iPad » lue comme 1024 et 1180 (paysage), 820 et 768 (portrait).
+- **Tests** : sentinelle `accueil-porte-ortho-et-champ2-846` et `accueil-epure-2026-11-07.spec.js` ajustés (les six chaînes parties y sont interdites) ; un essai neuf mesure le lien à 1180, 1024, 820, 768 et 390 px (style identique aux voisins, cible de 44 px, rien ne déborde, colonnes alignées ou empilées). Vitest 928/928 (11 816). Playwright ciblé : 23/23 (accueil-epure avec captures, pied-de-page-et-assistance, parcours-fermes). Test de rupture : `target`/`rel` retirés, 1 Vitest et 1 Playwright rougissent. **Pas de verdict complet, pas de relecture croisée.** Captures regardées : 820 sombre, 1180 clair.
+- **Complexité** : aucun fichier de plus de 1 000 lignes touché hors `styles.css` ; cliquets verts dans Vitest.
+
 ## 15 NOV. 2026, 21 H 45 (Claude Code) : **1.248.1 SUR `main` — LES TEXTES D'« À PROPOS », LES PARCOURS ASSISTÉS FERMÉS (« À VENIR »)** — sans verdict Playwright complet, par consigne
 
 Mandat : relais de Cowork du 15 nov. au soir (deux retouches, une livraison). Lot `lot/a-propos-parcours-a-venir`, parti de `origin/main` à `55df02354`, arbre `../labo-codex-a-propos` ; release `4dfd672e5`, build `1115-2128`, fusionné en avance rapide.
