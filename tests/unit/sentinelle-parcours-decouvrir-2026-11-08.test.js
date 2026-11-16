@@ -2,74 +2,25 @@
 // LOT « LES DEUX PARCOURS » — 8 NOVEMBRE 2026, PARTIE 1 : LES MOTS ET LE RETRAIT
 // =======================================================================
 // plans de travail/CONSIGNE-LOT-2026-11-08-parcours-1-et-2.md.
-//   1. Les huit bulles de « Découvrir » sont celles que Grégoire a validées une à une :
-//      chaque titre, texte et geste se trouve TEL QUEL dans la consigne. Un mot changé
-//      dans le code, et ce banc rougit.
+//   1. ↻ 16 nov. 2026 : les huit bulles de « Découvrir » ont été réécrites avec Grégoire ; leurs mots sont jugés
+//      par sentinelle-parcours-je-regarde-2026-11-16.test.js, contre la consigne du 16. Il reste ici la sortie.
 //   2. Le panneau « Assistance » et l'aide de la visite disent les phrases de la consigne.
 //   3. La visite en sept étapes est partie, rien ne reste à côté (zéro dette) :
 //      ETAPES_TOUR, TOUR_NAV, TOUR_TITRE_COURT, panneau-tour-guide, tour-etape-*,
 //      tourGuide_* dans les défauts, « Bienvenue dans la visite guidée ».
-// Break-test (8 nov.) : « dix étudiant·es » changé en « 10 étudiant·es » dans
-// js/parcours-decouvrir.js → ROUGE (bloc 1), rétabli → vert.
 
 import { describe, it, expect } from 'vitest';
 import { tranche } from './_helpers/tranche.js';
 import { readFileSync, readdirSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { TOUS as GESTES_PROPOSES } from './_helpers/gestes-proposes-2026-11-11.js';
 
 const racine = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..');
 const lire = (f) => readFileSync(path.join(racine, f), 'utf8');
 const CONSIGNE = lire('plans de travail/CONSIGNE-LOT-2026-11-08-parcours-1-et-2.md');
 const DECOUVRIR = lire('js/parcours-decouvrir.js');
-// 14 nov. 2026 (essai novice, validé par Grégoire) : à la fin, « Continuer d'explorer la démo » faisait attendre
-// d'autres bulles ; le bouton devient « Explorer la démo par moi-même », et la consigne le nomme.
-const CONSIGNE_14 = lire('plans de travail/CONSIGNE-2026-11-14-essai-novice.md');
-const GESTE_DE_FIN = 'Touche « Commencer avec ma classe », ou « Explorer la démo par moi-même ».';
 
-/** Les chaînes d'un champ (titre, texte, geste, libelle) dans le bloc ETAPES, guillemets simples ou doubles. */
-function chaines(source, champ) {
-    const bloc = tranche(source, 'var ETAPES = [', 'var DEF = ');
-    const re = new RegExp(champ + ":\\s*(?:\"((?:[^\"\\\\]|\\\\.)*)\"|'((?:[^'\\\\]|\\\\.)*)')", 'g');
-    // L'insécable des pourcentages (« 84\u00a0% », règle #1137) est de la typographie : la
-    // consigne, recopiée de la page du tri, porte des espaces ordinaires.
-    return [...bloc.matchAll(re)].map((m) => (m[1] ?? m[2]).replace(/\\'/g, "'").replace(/\\u00a0/g, ' '));
-}
-
-describe('« Découvrir » : les huit bulles, mot pour mot', () => {
-    const titres = chaines(DECOUVRIR, 'titre');
-    const textes = chaines(DECOUVRIR, 'texte');
-    const gestes = chaines(DECOUVRIR, 'geste');
-
-    it('huit étapes, huit titres, huit textes, huit gestes (ceux des étapes 4 et 8 proposés le 11 nov. 2026)', () => {
-        expect(titres).toHaveLength(8);
-        expect(textes).toHaveLength(8);
-        expect(gestes).toHaveLength(8);
-    });
-
-    it.each(titres.map((t, i) => [i + 1, t]))('étape %i : le titre « %s » est celui de la consigne', (n, titre) => {
-        expect(CONSIGNE).toContain(`Étape ${n}, « ${titre} »`);
-    });
-
-    it.each(textes.map((t, i) => [i + 1, t]))('étape %i : le texte est celui de la consigne', (n, texte) => {
-        expect(CONSIGNE).toContain(`Texte : « ${texte} »`);
-    });
-
-    it.each(gestes.map((g) => [g]))('le geste « %s » est celui de la consigne, ou proposé le 11 nov. 2026', (geste) => {
-        if (GESTES_PROPOSES.includes(geste)) return;
-        if (geste === GESTE_DE_FIN) { expect(CONSIGNE_14).toContain(`la consigne : « ${geste} »`); return; }
-        expect(CONSIGNE).toContain(`Geste : « ${geste} »`);
-    });
-
-    it('les boutons : « Continuer » (étape 4), « Commencer avec ma classe » et « Explorer la démo par moi-même » (étape 8)', () => {
-        expect(chaines(DECOUVRIR, 'libelle')).toEqual(['Continuer', 'Commencer avec ma classe', 'Explorer la démo par moi-même']);
-        expect(CONSIGNE).toContain('Bouton « Continuer »');
-        expect(CONSIGNE).toContain('« Commencer avec ma classe »');
-        expect(CONSIGNE_14).toContain('Il devient « Explorer la démo par moi-même »');
-        expect(chaines(DECOUVRIR, 'geste')).toContain(GESTE_DE_FIN);
-    });
-
+describe('« Découvrir » : la sortie', () => {
     it('le lien de sortie et le message de reprise', () => {
         expect(DECOUVRIR).toContain("lienSortie: 'Quitter le parcours'");
         expect(CONSIGNE).toContain('« Quitter le parcours »');

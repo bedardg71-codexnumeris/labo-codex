@@ -40,13 +40,14 @@ const COURS = lire('js/trimestre-v2-cours.js');
 const PACK = lire('js/pack-demo-10.js');
 
 describe('le panneau « Assistance » : le texte en quatre temps, mot pour mot', () => {
-    // Le mandat, tel que Grégoire l'a validé.
+    // Le titre : Grégoire, 14 nov. 2026. Les quatre lignes : Grégoire, 16 nov. 2026 (8 h 47 à 9 h 46), mot pour mot
+    // (plans de travail/CONSIGNE-2026-11-16-parcours-je-regarde.md, décision 3) ; elles remplacent celles du 14.
     const VALIDE = [
         "Apprendre l'application, en quatre temps.",
-        '1. Découvrir par toi-même :', 'explore la démo et son groupe fictif.',
-        '2. Modélisation :', 'un parcours te guide, avec le matériel de la démo.',
-        '3. Pratique guidée :', 'refais le parcours avec ton matériel.',
-        '4. Continuer en autonomie :', "l'aide dans les pages reste là."
+        "1. J'explore", 'la démo et son groupe fictif, par moi-même.',
+        '2. Je regarde', 'un modèle, avec le matériel de la démo.',
+        '3. Nous faisons', 'le parcours ensemble, avec mon propre matériel.',
+        '4. Je fais,', "en autonomie, avec l'aide dans les pages au besoin."
     ];
     const bloc = tranche(ASSISTANCE, 'var QUATRE_TEMPS = {', 'function grasPuisTexte');
 
@@ -62,9 +63,18 @@ describe('le panneau « Assistance » : le texte en quatre temps, mot pour mot',
         expect(ASSISTANCE).not.toMatch(/assistance-materiel|definirMateriel|navigator\.webdriver|role', 'radio/);
     });
 
-    it('les libellés des deux temps, décidés le 12 nov. (14 h 46 à 15 h 08) : le nom du temps, et son matériel', () => {
-        expect(ASSISTANCE).toContain("modele: { nom: 'Modélisation', sous: 'avec le matériel de la démo' }");
-        expect(ASSISTANCE).toContain("pratique: { nom: 'Pratique guidée', sous: 'avec mon matériel' }");
+    it('les quatre lignes, bout à bout, sont celles de la consigne du 16 nov.', () => {
+        const consigne = lire('plans de travail/CONSIGNE-2026-11-16-parcours-je-regarde.md');
+        for (let k = 1; k < VALIDE.length; k += 2) expect(consigne).toContain('\n' + VALIDE[k] + ' ' + VALIDE[k + 1] + '\n');
+    });
+
+    it('les libellés des deux temps, décidés le 16 nov. : le bouton, et dessous, en petit, le nom du temps', () => {
+        expect(ASSISTANCE).toContain("modele: { bouton: 'Je regarde', nom: 'Modélisation' }");
+        expect(ASSISTANCE).toContain("pratique: { bouton: 'Nous faisons', nom: 'Pratique guidée' }");
+        // Ceux du 12 et du 15 nov. sont partis : ni le matériel sous le nom, ni « Commencer » sur une carte à deux temps.
+        expect(ASSISTANCE).not.toMatch(/avec le matériel de la démo'|avec mon matériel'|assistance-temps-sous/);
+        expect(tranche(ASSISTANCE, 'function creerBoutonModele(def, o) {', 'function creerTemps')).toContain('btn.textContent = MOTS_TEMPS.modele.bouton;');
+        expect(tranche(ASSISTANCE, 'function creerBoutonParcours(def, o) {', 'function creerBoutonModele')).toContain('btn.textContent = o.temps ? MOTS_TEMPS.pratique.bouton : libelleDuBouton(e);');
         // La fin à trois boutons (14 nov., 10 h 58) remplace « Refaire avec mon matériel ».
         expect(CLASSE).toContain("refaire: 'Le refaire avec ma classe'");
         expect(CLASSE).toContain("suivant: 'Voir le parcours suivant'");
@@ -260,7 +270,8 @@ describe('la règle de la Modélisation (14 nov. 2026)', () => {
         expect(suites.indexOf('MOTS_MODELE.refaire')).toBeLessThan(suites.indexOf('MOTS_MODELE.suivant'));
         expect(suites.indexOf('MOTS_MODELE.suivant')).toBeLessThan(suites.indexOf('MOTS_MODELE.terminer'));
         expect(suites).toContain('if (suivant) suites.push(');
-        expect(CLASSE).toContain('consigne(consigneDesSuites(suitesDuModele(ID, terminerModele)))');
+        // « Mettre ta classe en place » (16 nov. 2026) : sa dernière bulle rappelle l'objectif, sans ligne de consigne.
+        expect(CLASSE).toContain('get boutons() { return suitesDuModele(ID, terminerModele); }');
         expect(EVALUER).toContain('consigne(C().consigneDesSuites(C().suitesDuModele(ID, terminerModele)))');
     });
 });

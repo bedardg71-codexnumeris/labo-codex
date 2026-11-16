@@ -95,6 +95,16 @@ body.mode-clair {
     opacity: 1 !important;
 }
 
+/* Le nom d'une section de la page (16 nov. 2026, règle c) : le titre d'un accordéon prend toute la largeur de sa
+   tête ; encadré, il se resserre sur ses mots, comme une entrée du menu. Sa marge négative rend ce que son
+   remplissage prend : le chevron et le nom ne bougent pas. */
+.carte.accordeon .accordeon-header h3.parcours-section-actuelle {
+    width: fit-content;
+    flex: 0 0 auto;
+    padding: 2px 12px 2px 8px;
+    margin: -2px auto -2px -8px !important;
+}
+
 /* ---------- La bulle ---------- */
 
 .parcours-bulle {
@@ -188,6 +198,16 @@ body.mode-clair {
     text-underline-offset: 3px;
     cursor: pointer;
 }
+/* Le triangle du compteur (16 nov. 2026, règle d) : couché, la liste des étapes est fermée ; pointe en bas, elle est
+   ouverte. Posé par le style, sur `aria-expanded` : le texte du bouton reste « n sur N ». */
+.parcours-bulle-rang::after {
+    content: '\25B8';
+    display: inline-block;
+    margin-left: 4px;
+    font-size: 11px;
+    text-decoration: none;
+}
+.parcours-bulle-rang[aria-expanded="true"]::after { content: '\25BE'; }
 .parcours-bulle-rang:hover,
 .parcours-bulle-rang[aria-expanded="true"] { color: var(--texte-principal); }
 .parcours-bulle-rang:focus-visible { outline: 2px solid var(--focus-ring-color); outline-offset: -4px; }
@@ -238,10 +258,24 @@ body.mode-clair {
     overscroll-behavior: contain;
     -webkit-overflow-scrolling: touch;
 }
-/* La phrase du lieu (« Tu es dans « X », à l'onglet « Y ». ») et les notes : des phrases, hors de la liste. */
+/* La phrase du lieu (« Tu es dans « X », à l'onglet « Y ». ») et les notes : des phrases, hors de la liste.
+   16 nov. 2026 : l'objectif du parcours (sa première bulle), entre deux filets fins ; la ligne qui confirme le geste
+   précédent, avec le crochet des lignes faites (ce n'est pas un éloge : la même marque, le même vert). */
 .parcours-bulle-lieu,
-.parcours-bulle-note { margin: 0; }
+.parcours-bulle-note,
+.parcours-bulle-objectif,
+.parcours-bulle-confirme { margin: 0; }
 .parcours-bulle-lieu { color: var(--texte-secondaire); }
+.parcours-bulle-objectif {
+    padding: 6px 0;
+    border-top: 1px solid var(--bordure-moyenne);
+    border-bottom: 1px solid var(--bordure-moyenne);
+    font-weight: 600;
+}
+.parcours-bulle-confirme { position: relative; padding-left: 1.5em; color: var(--texte-secondaire); }
+.parcours-bulle-confirme::before { content: '\2713'; position: absolute; left: 0; top: 0; color: var(--vert-leger); }
+/* La bulle attend que la page ait fini de bouger (règle b) : cachée, sans quitter sa place ni perdre sa taille. */
+.parcours-bulle.est-en-attente { visibility: hidden; }
 .parcours-bulle-lignes ul { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 5px; }
 .parcours-bulle-ligne { position: relative; padding-left: 1.5em; }
 .parcours-bulle-ligne > ul { margin-top: 5px; }
@@ -521,23 +555,26 @@ body.parcours-actif .transition-bandeau { display: none; }
     line-height: 1.45;
 }
 
-/* Les deux temps d'un parcours (14 nov. 2026) : « Modélisation », puis « Pratique guidée ». Chacun son nom, son
-   matériel en plus petit, son état à droite, et son bouton dessous. Le choix unique du 12 nov. est retiré. */
-.assistance-temps {
+/* Les deux temps d'un parcours (16 nov. 2026 ; ils remplacent ceux du 14) : deux boutons côte à côte, « Je regarde »
+   et « Nous faisons » ; sous chacun, en petit, « Modélisation » et « Pratique guidée » ; sous cela, l'état. */
+.assistance-deux-temps {
     display: grid;
-    grid-template-columns: 1fr auto;
-    align-items: baseline;
-    column-gap: 8px;
-    row-gap: 6px;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
     padding-top: 8px;
     border-top: 1px solid var(--assistance-trait);
 }
 
-.assistance-temps-mots { margin: 0; font-size: 13px; line-height: 1.35; }
-.assistance-temps-nom { font-weight: 600; }
-.assistance-temps-sous { font-size: 11px; opacity: 0.8; }
+.assistance-temps {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+}
 
-.assistance-temps > button { grid-column: 1 / -1; justify-self: start; }
+.assistance-temps-mots { margin: 4px 0 0; font-size: 11px; line-height: 1.35; opacity: 0.8; }
+
+.assistance-temps > button { width: 100%; padding: 0 8px; }
 
 .assistance-modele-etat {
     font-size: 12px;

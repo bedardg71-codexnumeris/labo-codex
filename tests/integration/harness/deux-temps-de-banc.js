@@ -8,6 +8,8 @@
 // REMIS À JOUR LE 15 NOV. 2026 (`plans de travail/CONSIGNE-2026-11-15-deux-temps-remise-a-jour.md`) : le harnais suit
 // les mots de main (le nom du trimestre ne se tape plus, lot 1a de l'essai novice) ; le choix unique du matériel est
 // retiré (deux états par parcours) ; la modélisation se fait par « Remplir avec l'exemple », puis le bouton de la page.
+// REMIS À JOUR LE 16 NOV. 2026 (`plans de travail/CONSIGNE-2026-11-16-parcours-je-regarde.md`) : les quatre lignes du
+// panneau, « Je regarde » et « Nous faisons », le bouton « Remplir » et sa consigne, les textes du 16 nov.
 import { expect } from '@playwright/test';
 import fs from 'node:fs';
 import path from 'node:path';
@@ -20,14 +22,16 @@ export const indexHtml = 'file://' + path.join(path.resolve(__dirname, '..', '..
 export const HORLOGE = new Date('2026-11-10T14:00:00.000Z');
 export const CAPTURES = process.env.CAPTURES_PARCOURS || '';
 
-// Le texte du panneau (Grégoire, 14 nov. 2026, 9 h 21 et 10 h 58, validé) : quatre temps numérotés, chiffre visible.
+// Le texte du panneau : le titre du 14 nov. 2026, les quatre lignes du 16 (Grégoire, 8 h 47 à 9 h 46), mot pour mot.
 export const QUATRE_TEMPS = [
     "Apprendre l'application, en quatre temps.",
-    '1. Découvrir par toi-même : explore la démo et son groupe fictif.',
-    '2. Modélisation : un parcours te guide, avec le matériel de la démo.',
-    '3. Pratique guidée : refais le parcours avec ton matériel.',
-    "4. Continuer en autonomie : l'aide dans les pages reste là."
+    "1. J'explore la démo et son groupe fictif, par moi-même.",
+    '2. Je regarde un modèle, avec le matériel de la démo.',
+    '3. Nous faisons le parcours ensemble, avec mon propre matériel.',
+    "4. Je fais, en autonomie, avec l'aide dans les pages au besoin."
 ];
+// Les deux temps d'une carte (16 nov. 2026) : le bouton, et dessous, en petit, le nom du temps.
+export const DEUX_TEMPS = { modele: ['Je regarde', 'Modélisation'], pratique: ['Nous faisons', 'Pratique guidée'] };
 export const sansInsecable = (t) => t.replace(/ /g, ' ').replace(/\s+/g, ' ').trim();
 
 // Les dix totems du pack (js/pack-demo-10.js) : la liste fournie n'en reprend aucun.
@@ -193,7 +197,7 @@ export async function peuplerUnTrimestreReel(page) {
     await attendreApplication(page);
 }
 
-// ---------- Les gestes de la modélisation : « Remplir avec l'exemple », puis le bouton de la page ----------
+// ---------- Les gestes de la modélisation : « Remplir », puis le bouton de la page ----------
 
 export const materiel = (page) => page.evaluate(() => JSON.parse(JSON.stringify(window.ParcoursClasse.materiel)));
 export const optionDont = (page, select, texte) => page.evaluate(([s, t]) => {
@@ -201,7 +205,8 @@ export const optionDont = (page, select, texte) => page.evaluate(([s, t]) => {
     return o ? o.value : null;
 }, [select, texte]);
 
-export const REMPLIR = "Remplir avec l'exemple";
+export const REMPLIR = 'Remplir';
+export const CONSIGNE_REMPLIR = "Regarde l'exemple se remplir : touche « Remplir »";
 const aPlat = (t) => t.replace(/ /g, ' ').replace(/\s+/g, ' ').trim();
 /** Ce que dit la bulle : sa consigne (la ligne orange), ses lignes faites, ses boutons. */
 export const lireBulle = (page) => page.evaluate(() => {
@@ -219,12 +224,12 @@ export const lireBulle = (page) => page.evaluate(() => {
 });
 
 /**
- * Le premier temps d'une bulle en trois temps : la seule consigne « Touche « Remplir avec l'exemple » », son bouton
+ * Le premier temps d'une bulle en trois temps : la seule consigne « Regarde l'exemple se remplir : touche « Remplir » », son bouton
  * dans la bulle (44 px au moins : la cible tactile de l'iPad), et rien de désigné sur la page.
  */
 export async function attendreRemplir(page, contexte) {
-    await expect.poll(async () => (await lireBulle(page)).consignes, { message: contexte + ' : la consigne est « Remplir avec l’exemple »', timeout: 10000 })
-        .toEqual(["Touche « " + REMPLIR + " »"]);
+    await expect.poll(async () => (await lireBulle(page)).consignes, { message: contexte + ' : la consigne est celle de « Remplir »', timeout: 10000 })
+        .toEqual([CONSIGNE_REMPLIR]);
     const vu = await lireBulle(page);
     expect(vu.boutons, contexte).toEqual([REMPLIR]);
     expect(vu.contour, contexte + ' : rien n’est désigné sur la page avant « Remplir »').toBe(false);
@@ -241,7 +246,7 @@ export async function remplirPuisVoir(page, { consigne, bouton, contexte }) {
     await expect.poll(async () => (await lireBulle(page)).consignes, { message: contexte + ' : la consigne passe au bouton de la page', timeout: 10000 })
         .toEqual([consigne]);
     const vu = await lireBulle(page);
-    expect(vu.faites, contexte + ' : « Remplir » est fait').toContain("Touche « " + REMPLIR + " »");
+    expect(vu.faites, contexte + ' : « Remplir » est fait').toContain(CONSIGNE_REMPLIR);
     expect(vu.boutons, contexte + ' : le bouton a quitté la bulle').toEqual([]);
     expect(vu.derniere, contexte + ' : la consigne est la dernière ligne').toBe(consigne);
     if (bouton) await gesteDesigne(page, bouton, contexte);
@@ -269,7 +274,7 @@ export async function faireLaModelisation(page, { capturer = '', surRemplir = nu
     await apresRemplir('étape 1');
     await page.click('#v2-btnCreerCours');
 
-    // 2. La liste : « Remplir avec l'exemple » remplace le copier-coller.
+    // 2. La liste : « Remplir » remplace le copier-coller.
     await attendreEtape(page, 2, TOTAL, "Une liste d'étudiant·es");
     await attendreRemplir(page, 'étape 2');
     await remplirPuisVoir(page, { consigne: 'Touche « Prévisualiser »', bouton: '#accordeon-groupe-etudiants [data-action="previsualiserDonneesV2"]', contexte: 'étape 2' });
@@ -315,7 +320,7 @@ export async function faireLaModelisation(page, { capturer = '', surRemplir = nu
     // 5. Un groupe-cours.
     await attendreEtape(page, 5, TOTAL, 'Un groupe-cours');
     await attendreRemplir(page, 'étape 5');
-    await remplirPuisVoir(page, { consigne: 'Touche « Créer le groupe-cours » (le groupe apparaîtra dans l\'en-tête de l\'application)', bouton: '#v2-btnCreerGroupeCours', contexte: 'étape 5' });
+    await remplirPuisVoir(page, { consigne: 'Touche « Créer le groupe-cours » (il apparaîtra dans l\'en-tête de l\'application)', bouton: '#v2-btnCreerGroupeCours', contexte: 'étape 5' });
     for (const [id, texte] of [['v2-gc-cours', m.cours.code], ['v2-gc-groupe', m.groupe], ['v2-gc-horaire', m.horaire.nom], ['v2-gc-enseignant', 'Primo Primavera']]) {
         expect(await page.inputValue('#' + id), `${id} : « ${texte} »`).toBe(await optionDont(page, '#' + id, texte));
     }

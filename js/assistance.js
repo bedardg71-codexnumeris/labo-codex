@@ -25,10 +25,13 @@
 
    LES DEUX TEMPS (décisions de Grégoire, 11, 12 et 14 nov. 2026) : un parcours se fait d'abord dans la démo, avec le
    matériel de la démo (la Modélisation), puis sur ses vraies données (la Pratique guidée). Une définition déclare
-   `lancerModele()` et `totalModele` quand elle a sa Modélisation : sa carte porte alors DEUX états, un par temps
-   (à faire, en cours, fait), chacun avec son bouton (« Commencer », « Reprendre », « Refaire »). Sans Modélisation,
-   la carte est celle d'avant : un état, un bouton. Le choix unique « Modélisation / Pratique guidée » du 12 nov. est
-   retiré (14 nov., 9 h 21 : deux états par parcours).
+   `lancerModele()` et `totalModele` quand elle a sa Modélisation : sa carte porte alors ses DEUX TEMPS, côte à côte.
+   LE VOCABULAIRE DES DEUX TEMPS (Grégoire, 16 nov. 2026, 8 h 47 à 9 h 46 ; il remplace celui du 15 nov.) : deux
+   boutons, « Je regarde » et « Nous faisons » ; sous chacun, en petit, « Modélisation » et « Pratique guidée » ; sous
+   cela, l'état : « À faire », « Étape 3 sur 8 » ou « Fait ». Le bouton garde son nom quel que soit l'état : en cours,
+   il reprend ; fait, il refait (voir « REFAIRE »). Sans Modélisation, la carte est celle d'avant : un état, un
+   bouton (« Commencer », « Reprendre », « Refaire »). Le choix unique « Modélisation / Pratique guidée » du 12 nov.
+   est retiré (14 nov., 9 h 21 : deux états par parcours).
    L'état des Modélisations reste sur l'appareil (`localStorage`, clé `laboCodex.assistance`, HORS de `db`, comme
    `laboCodex.vue`) : ce qu'on fait dans la démo n'écrit rien dans les données.
    « REFAIRE » (15 nov. 2026) : celui d'une Pratique guidée rejoue le parcours EN VISITE (js/parcours-moteur.js : rien
@@ -42,20 +45,20 @@
    9 nov. 2026) n'est pas proposé sur téléphone (ParcoursMoteur.surTelephone, 500 px) : sous son
    titre, le texte validé par Grégoire, et son bouton ne lance rien.
 
-   ⛔ LES PARCOURS SONT FERMÉS (15 nov. 2026, consigne relayée par Cowork) : la liste est en développement.
-   Le panneau dit « À venir » à sa place, et aucun parcours ne part : ni d'ici, ni de « Parcours suivant »
-   (lancerParcours), ni de la porte « Tu enseignes ? » de l'accueil, ni de la fin de « Découvrir » (ces deux-là
-   lisent `Assistance.parcours()`, qui rend une liste vide). Rien n'est retiré : les parcours s'inscrivent toujours.
-   ⮕ POUR ROUVRIR : `PARCOURS_OUVERTS = true`, ci-dessous. Une seule ligne, puis retirer l'appel à
-   `ouvrirLesParcours` du harnais des bancs (tests/integration/harness/attendre-application.js) et les deux
-   bancs de la fermeture. Les bancs des parcours, eux, tournent déjà ouverts par ce harnais.
+   LE VERROU DES PARCOURS (`PARCOURS_OUVERTS`). Sur `main`, ils sont FERMÉS depuis le 15 nov. 2026 (1.248.1, consigne
+   relayée par Cowork) : le panneau dit « À venir » à la place de la liste, et aucun parcours ne part, ni d'ici, ni de
+   « Parcours suivant » (lancerParcours), ni de la porte « Tu enseignes ? » de l'accueil, ni de la fin de
+   « Découvrir » (ces deux-là lisent `Assistance.parcours()`, qui rend alors une liste vide).
+   ⚠ SUR `lot/deux-temps-modeles` SEULEMENT, ils sont ROUVERTS (16 nov. 2026, relais de Cowork : l'aperçu de la PR
+   n° 23 sert à Grégoire pour les relire). Rien de ce lot ne part vers `main` sans un relais à part : à la fusion,
+   la valeur du verrou se décide là, pas ici.
    ================================================================= */
 (function () {
     'use strict';
 
     var CLE_PREF = 'parcoursAssistance';
-    var PARCOURS_OUVERTS = false;
-    // L'état en mémoire, que seuls les bancs changent (ouvrirLesParcours) : rien ne le garde d'un chargement à l'autre.
+    var PARCOURS_OUVERTS = true;
+    // L'état en mémoire, que seul le banc du verrou change (ouvrirLesParcours) : rien ne le garde d'un chargement à l'autre.
     var ouverts = PARCOURS_OUVERTS;
     var TEXTE_A_VENIR = 'À venir';
     // Validé par Grégoire le 9 nov. 2026 (Cowork), mot pour mot.
@@ -70,10 +73,10 @@
     // ---------- L'état des Modélisations : sur l'appareil, hors des données ----------
 
     var CLE_APPAREIL = 'laboCodex.assistance';
-    // Décidés par Grégoire (12 nov. 2026, 14 h 46 à 15 h 08), mot pour mot : le nom, et dessous, en plus petit, le matériel.
+    // Décidés par Grégoire (16 nov. 2026, 8 h 47 à 9 h 46), mot pour mot : le bouton, et dessous, en petit, le temps.
     var MOTS_TEMPS = {
-        modele: { nom: 'Modélisation', sous: 'avec le matériel de la démo' },
-        pratique: { nom: 'Pratique guidée', sous: 'avec mon matériel' }
+        modele: { bouton: 'Je regarde', nom: 'Modélisation' },
+        pratique: { bouton: 'Nous faisons', nom: 'Pratique guidée' }
     };
     var MOTS_NEUF = {
         bouton: 'Remettre la démo à neuf',
@@ -210,15 +213,15 @@
     }
 
     /**
-     * Le bouton de la Pratique guidée (et d'un parcours sans Modélisation) : « Commencer », « Reprendre » ou
-     * « Refaire ». Le parcours fait se rejoue en visite : sa définition le décide (`lancer`).
+     * Le bouton de la Pratique guidée (« Nous faisons ») et celui d'un parcours sans Modélisation (« Commencer »,
+     * « Reprendre » ou « Refaire »). Le parcours fait se rejoue en visite : sa définition le décide (`lancer`).
      */
     function creerBoutonParcours(def, o) {
         var e = o.etat, refuse = o.refuse;
         var btn = document.createElement('button');
         btn.type = 'button';
         btn.className = 'assistance-parcours-bouton' + (e.etat === 'en-cours' ? ' assistance-parcours-bouton--plein' : '');
-        btn.textContent = libelleDuBouton(e);
+        btn.textContent = o.temps ? MOTS_TEMPS.pratique.bouton : libelleDuBouton(e);
         btn.setAttribute('aria-describedby', o.titre.id + (o.temps ? ' ' + o.temps.id : '') + (refuse ? ' assistance-parcours-grand-ecran-' + def.id : ''));
         // Sur téléphone, un parcours pour grand écran : le bouton reste lisible, il ne lance rien.
         if (refuse) btn.setAttribute('aria-disabled', 'true');
@@ -237,9 +240,9 @@
     }
 
     /**
-     * Le bouton de la Modélisation. Elle se joue dans la démo : les conditions d'entrée (`refus`) lisent les vraies
+     * Le bouton de la Modélisation (« Je regarde »). Elle se joue dans la démo : les conditions d'entrée (`refus`) lisent les vraies
      * données, elles ne la concernent pas. Elle a la sienne (`refusModele`, 13 nov. 2026) : le modèle d'« Évaluer » se
-     * joue sur le groupe que monte celui de « Mettre ta classe en place ». Faite, « Refaire » rejoue ses gestes : la
+     * joue sur le groupe que monte celui de « Mettre ta classe en place ». Faite, le bouton rejoue ses gestes : la
      * démo est d'abord remise à neuf (`refaireModele`).
      */
     function creerBoutonModele(def, o) {
@@ -247,7 +250,7 @@
         var btn = document.createElement('button');
         btn.type = 'button';
         btn.className = 'assistance-modele-bouton' + (e.etat === 'en-cours' ? ' assistance-parcours-bouton--plein' : '');
-        btn.textContent = libelleDuBouton(e);
+        btn.textContent = MOTS_TEMPS.modele.bouton;
         btn.setAttribute('aria-describedby', o.titre.id + ' ' + o.temps.id + (refuse ? ' assistance-parcours-grand-ecran-' + def.id : ''));
         if (refuse) btn.setAttribute('aria-disabled', 'true');
         btn.addEventListener('click', function () {
@@ -261,7 +264,7 @@
         return btn;
     }
 
-    /** Un temps d'une carte à deux temps : son nom, son matériel, son état, son bouton. */
+    /** Un temps d'une carte à deux temps, de haut en bas : son bouton, le nom du temps en petit, son état. */
     function creerTemps(def, quel, e, total, bouton) {
         var bloc = document.createElement('div');
         bloc.className = 'assistance-temps';
@@ -270,20 +273,14 @@
         var mots = document.createElement('p');
         mots.className = 'assistance-temps-mots';
         mots.id = 'assistance-temps-' + quel + '-' + def.id;
-        ['nom', 'sous'].forEach(function (partie) {
-            var sp = document.createElement('span');
-            sp.className = 'assistance-temps-' + partie;
-            sp.textContent = MOTS_TEMPS[quel][partie];
-            mots.appendChild(sp);
-            mots.appendChild(document.createTextNode(' '));
-        });
+        mots.textContent = MOTS_TEMPS[quel].nom;
         var etatTxt = document.createElement('span');
         // L'état de la Pratique guidée garde la classe de l'état d'une carte à un temps : c'est le même état.
         etatTxt.className = quel === 'pratique' ? 'assistance-parcours-etat' : 'assistance-modele-etat';
         etatTxt.textContent = etatDit(e, total);
+        bloc.appendChild(bouton(mots));
         bloc.appendChild(mots);
         bloc.appendChild(etatTxt);
-        bloc.appendChild(bouton(mots));
         return bloc;
     }
 
@@ -347,15 +344,18 @@
         if (!aModele) {
             corps.appendChild(creerBoutonParcours(def, { etat: e, refuse: refuse, titre: h, corps: corps }));
         } else {
-            // Deux temps, deux états, chacun son bouton (Grégoire, 14 nov. 2026, 9 h 21).
+            // Deux temps, côte à côte, chacun son bouton et son état (Grégoire, 14 nov. 2026, 9 h 21 ; 16 nov.).
             li.dataset.temps = 'deux';
             var em = etatModeleDe(def.id);
-            corps.appendChild(creerTemps(def, 'modele', em, def.totalModele, function (mots) {
+            var deux = document.createElement('div');
+            deux.className = 'assistance-deux-temps';
+            deux.appendChild(creerTemps(def, 'modele', em, def.totalModele, function (mots) {
                 return creerBoutonModele(def, { etat: em, refuse: refuse, titre: h, temps: mots, corps: corps });
             }));
-            corps.appendChild(creerTemps(def, 'pratique', e, def.total, function (mots) {
+            deux.appendChild(creerTemps(def, 'pratique', e, def.total, function (mots) {
                 return creerBoutonParcours(def, { etat: e, refuse: refuse, titre: h, temps: mots, corps: corps });
             }));
+            corps.appendChild(deux);
         }
 
         li.appendChild(corps);
@@ -441,15 +441,16 @@
     }
 
     // ---------- La présentation en quatre temps ----------
-    // Texte de Grégoire (14 nov. 2026, 9 h 21 et 10 h 58, validé) ; les chiffres visibles : décision de Cowork.
+    // Les quatre lignes : Grégoire, 16 nov. 2026 (8 h 47 à 9 h 46), mot pour mot ; elles remplacent celles du 14 nov.
+    // Le titre est celui du 14 nov. Le gras du début (le chiffre et le verbe, qui sont les noms des boutons) : supposé.
 
     var QUATRE_TEMPS = {
         titre: "Apprendre l'application, en quatre temps.",
         temps: [
-            ['1. Découvrir par toi-même :', 'explore la démo et son groupe fictif.'],
-            ['2. Modélisation :', 'un parcours te guide, avec le matériel de la démo.'],
-            ['3. Pratique guidée :', 'refais le parcours avec ton matériel.'],
-            ['4. Continuer en autonomie :', "l'aide dans les pages reste là."]
+            ["1. J'explore", 'la démo et son groupe fictif, par moi-même.'],
+            ['2. Je regarde', 'un modèle, avec le matériel de la démo.'],
+            ['3. Nous faisons', 'le parcours ensemble, avec mon propre matériel.'],
+            ['4. Je fais,', "en autonomie, avec l'aide dans les pages au besoin."]
         ]
     };
 
@@ -739,7 +740,7 @@
         // Fermés, la liste rendue est vide : l'accueil et la fin de « Découvrir » y cherchent le parcours à lancer.
         parcours: function () { return ouverts ? registre.slice() : []; },
         parcoursOuverts: function () { return ouverts; },
-        // Pour les bancs seulement (harnais attendre-application.js) : en mémoire, perdu au rechargement.
+        // Pour les bancs de la fermeture (sur `main` ; retirés de cette branche, où les parcours sont rouverts).
         ouvrirLesParcours: function (oui) {
             ouverts = oui !== false;
             fermerPanneau({ sansRetourFocus: true });

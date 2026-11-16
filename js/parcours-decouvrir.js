@@ -2,13 +2,17 @@
    LE PARCOURS « DÉCOUVRIR » — la visite à rebours (lot « Les deux parcours », 8 nov. 2026)
    plans de travail/CONSIGNE-LOT-2026-11-08-parcours-1-et-2.md, partie 1 ; esquisses 69 et 70.
 
-   Il part du résultat, sur la démo (la bande, Loyal Suricate, son profil, sa carte RàI),
+   Il part du résultat, sur la démo (la bande, Suricate Loyal, son profil, sa carte RàI),
    puis remonte vers Évaluation, Conception et Cadre. Il ne démarre jamais de lui-même :
    « Commencer » ou « Refaire », dans le panneau « Assistance ».
 
-   ⚠ Les huit textes sont ceux que Grégoire a validés un à un le 8 nov. au matin, posés
-   mot pour mot : tests/unit/sentinelle-parcours-decouvrir-2026-11-08.test.js les confronte
-   à la consigne. Les chiffres des étapes 2 à 4 viennent du pack démo actuel : le banc
+   ⚠ LES HUIT TEXTES SONT CEUX DU 16 NOV. 2026 (réécrits avec Grégoire, 8 h 47 à 9 h 46 ; relais de Cowork :
+   plans de travail/CONSIGNE-2026-11-16-parcours-je-regarde.md), posés mot pour mot, en lignes :
+   tests/unit/sentinelle-parcours-je-regarde-2026-11-16.test.js les confronte à la consigne. Ils remplacent ceux du
+   8 nov. La perspective : on part d'un geste que l'enseignant·e fait déjà, on dit ce que l'application en garde en
+   mémoire. La première bulle porte l'objectif du parcours, la dernière dit qu'il est atteint. Les noms du menu
+   (« Tu es dans « X », à l'onglet « Y » ») sont LUS à l'écran par le moteur, jamais recopiés ici.
+   Les chiffres des étapes 2 à 4 viennent du pack démo actuel : le banc
    tests/integration/parcours-1-et-2-2026-11-08.spec.js échoue s'il ne les donne plus.
 
    La démo : si elle n'est pas ouverte, le parcours l'ouvre (à part des vraies données,
@@ -64,13 +68,6 @@
             '#entete-sections-liste:not([hidden]) [data-param="' + onglet + '"]',
             '#entete-section-bouton'
         ]);
-    }
-
-    function zonesNav(onglet) {
-        var z = [boutonNav(onglet)];
-        var liste = document.getElementById('entete-sections-liste');
-        if (liste && !liste.hidden) z.push(liste);
-        return z.filter(Boolean);
     }
 
     function blocAssiduite() {
@@ -141,11 +138,6 @@
         return p ? [].slice.call(p.querySelectorAll('span')).find(function (s) { return /Suricate/.test(s.textContent); }) || p : null;
     }
 
-    function barreDuCadre() {
-        var e = document.querySelector('#section-calendrier .bc-etape');
-        return e ? e.parentElement : null;
-    }
-
     function carteRai() {
         return cartesProfil().find(function (c) {
             var h = c.querySelector('h2, h3');
@@ -166,11 +158,27 @@
 
     // ---------- Les huit étapes ----------
 
+    // L'objectif du parcours : dit par la première bulle (le moteur), rappelé par la dernière. Une seule écriture.
+    var EN_MESURE = "de repérer qui a besoin de toi sans attendre une main levée et de nommer précisément son défi";
+
+    function consigne(texte) { return { texte: texte, geste: true }; }
+
+    function montre(f) { return function () { return [f()]; }; }
+
     var ETAPES = [
         {
             titre: "Ta classe d'un coup d'œil",
-            texte: "Voici une classe de démonstration : dix étudiant·es, un trimestre complet. Chaque point blanc est une personne ; sa place dit son assiduité. L'assiduité est le premier signal dont tu disposes : elle existe dès le premier cours, bien avant la première note. Un point s'écarte des autres : voyons qui c'est.",
-            geste: "Touche « Détails » pour mettre un nom sur chaque point.",
+            lieu: true,
+            lieuSuite: "La classe est fictive : dix étudiant·es, un trimestre complet.",
+            lignes: function () {
+                return [
+                    // La bande des points (pas le bloc et son titre).
+                    { texte: "Chaque point blanc est un·e étudiant·e", montre: montre(function () { return dans(blocAssiduite(), '.barre-indicateur') || blocAssiduite(); }) },
+                    { texte: "Sa place dit son assiduité (tu prends déjà les présences ; ici, l'application les garde en mémoire, séance après séance)" },
+                    { texte: "Un point s'écarte des autres" },
+                    consigne("Touche « Détails » pour mettre un nom sur chaque point")
+                ];
+            },
             avant: async function () {
                 aller('suivi', 'groupe');
                 await attendre(blocAssiduite, 2000);
@@ -178,15 +186,21 @@
                 var p = panneauPastilles();
                 if (p && p.classList.contains('ouvert')) p.classList.remove('ouvert');
             },
-            // La bande des points (pas le bloc et son titre) : « chaque point blanc est une personne ».
-            zones: function () { return [dans(blocAssiduite(), '.barre-indicateur') || blocAssiduite()]; },
             contour: function () { return document.getElementById('btn-toggle-panneau-prioritaire'); },
             atteint: pastillesOuvertes
         },
         {
             titre: "Qui s'écarte ?",
-            texte: "Loyal Suricate a l'assiduité la plus basse du groupe : 84\u00a0%, quand tous les autres sont à 93\u00a0% ou plus. C'est lui, le point à l'écart. Un pourcentage ne dit pas pourquoi : son profil rassemble ce que l'application sait de lui.",
-            geste: "Touche son « A 84\u00a0% » pour ouvrir son profil.",
+            confirme: "Tu viens d'ouvrir « Détails » : chaque point a maintenant un nom.",
+            lignes: function () {
+                return [
+                    // Son nom : la ligne porte aussi « A 84 % », ce qu'il faut toucher (la pulsation le désigne).
+                    { texte: "Le point à l'écart, c'est Suricate Loyal", montre: montre(nomDeLoyal) },
+                    { texte: "Son assiduité est de 84 % ; celle des autres, de 93 % ou plus" },
+                    { texte: "Un pourcentage ne dit pas pourquoi" },
+                    consigne("Touche son « A 84 % » (A pour assiduité) : son profil rassemble ce que l'application a gardé de lui")
+                ];
+            },
             avant: async function () {
                 aller('suivi', 'groupe');
                 if (!pastillesOuvertes()) {
@@ -195,8 +209,6 @@
                 }
                 await attendre(pastilleDeLoyal, 2000);
             },
-            // Son nom : la ligne porte aussi « A 84 % », ce qu'il faut toucher (la pulsation le désigne).
-            zones: function () { return [nomDeLoyal()]; },
             contour: function () {
                 var p = pastilleDeLoyal();
                 return p ? p.querySelector('.prioritaire-indice') : null;
@@ -205,81 +217,127 @@
         },
         {
             titre: "Ce qui le met à l'écart",
-            texte: "Cinq absences ou retards, deux productions non remises. Les deux se lisent ensemble : une production qui n'est pas remise ne peut pas être évaluée, mais elle donne un signal. C'est ce que tu verrais d'un coup d'œil avant d'entrer en classe.",
-            geste: "Touche « Accompagnement » : on passe de ce qu'on observe à ce qu'on peut faire.",
+            confirme: "Tu viens d'ouvrir le profil de Suricate Loyal.",
+            // La page a changé (vu à l'écran le 16 nov. 2026 : l'onglet du menu passe de « Groupe » à « Profils ») : la
+            // bulle le dit, comme la consigne le demande. À la bulle 4, on reste dans le même onglet : rien à redire.
+            lieu: true,
+            lignes: function () {
+                return [
+                    // Les deux lignes que nomme la bulle (exemple validé par Grégoire, 11 nov. 2026).
+                    { texte: "Assiduité : cinq absences ou retards", montre: montre(function () { return titreDeCarte('Assiduité', /absences ou retards/); }) },
+                    { texte: "Complétion : deux productions non remises", montre: montre(function () { return titreDeCarte('Complétion', /non remise/); }) },
+                    { texte: "Une production, c'est tout ce que tu demandes de faire, que ce soit formatif ou certificatif : un plan de rédaction, un exposé oral, un laboratoire, une prise de sang, une mesure sur le terrain" },
+                    { texte: "Non remise, elle ne s'évalue pas, mais elle dit quelque chose" },
+                    { texte: "Ces deux signaux, tu les aurais avant d'entrer en classe, sans qu'il ait rien demandé" },
+                    consigne("Touche « Accompagnement » : on passe de ce qu'on observe à ce qu'on peut faire")
+                ];
+            },
             avant: async function () {
                 await ouvrirProfilDeLoyal('mobilisation');
                 await attendre(function () { return carteQuiCommencePar('Complétion'); }, 2000);
             },
-            // Les deux lignes que nomme la bulle (exemple validé par Grégoire, 11 nov. 2026).
-            zones: function () { return [titreDeCarte('Assiduité', /absences ou retards/), titreDeCarte('Complétion', /non remise/)]; },
             contour: function () { return ongletProfil('accompagnement'); },
             atteint: function () { return ongletActif('accompagnement'); }
         },
         {
             titre: 'De quoi il a besoin',
-            geste: "Touche « Continuer ».",
-            texte: "De quoi a-t-il besoin ? L'application le situe au niveau 2 (préventif) et nomme son défi principal : la nuance, l'un des critères de la grille. Ses absences et ses travaux non remis y sont peut-être pour quelque chose : moins de pratique, des modélisations manquées en classe. L'application ne peut pas l'affirmer, mais elle met les deux sous tes yeux. Avec tes présences, ton calendrier et ta carte d'alignement, elle te dira même quelle matière il a manquée. Le niveau dit l'intensité de l'aide, le défi dit où la porter ; l'intervention, c'est toi qui la décides.",
+            confirme: "Tu viens d'ouvrir « Accompagnement ».",
+            lignes: function () {
+                return [
+                    // Le niveau et le défi, que nomme la bulle.
+                    { texte: "Son niveau de besoin : 2 sur 3, « préventif » (une aide ciblée, avant que la difficulté s'installe)", montre: montre(function () { return dans(carteRai(), '.badge-sys'); }) },
+                    { texte: "Son défi principal : la nuance, l'un des critères sur lesquels ses productions ont été évaluées (l'application peut le nommer parce qu'elle garde ses résultats d'une production à l'autre)", montre: montre(function () { return ligneDuDefi(carteRai()); }) },
+                    { texte: "Ses absences y sont peut-être pour quelque chose : l'application ne l'affirme pas, elle met les deux sous tes yeux" },
+                    { texte: "Le niveau indique l'intensité de l'aide requise par ton étudiant·e ; le défi dit où porter cette aide, concrètement" },
+                    { texte: "Mais l'intervention, c'est toi qui la décides et c'est toi qui la prépares" },
+                    consigne("Touche « Continuer »")
+                ];
+            },
             avant: async function () {
                 await ouvrirProfilDeLoyal('accompagnement');
                 await attendre(carteRai, 2000);
             },
-            // Le niveau et le défi, que nomme la bulle.
-            zones: function () { var c = carteRai(); return [dans(c, '.badge-sys'), ligneDuDefi(c)]; },
             boutons: [{ libelle: 'Continuer', primaire: true, action: function (m) { m.allerA(4); } }]
         },
         {
             titre: "D'où viennent ces signaux",
-            texte: "Voilà le geste : savoir, avant d'entrer en classe, qui a besoin de toi et de quoi. Ces signaux ne viennent pas de nulle part, et ils ne valent que ce qui les nourrit. Remontons d'où ils viennent : tu sauras ce qu'il faudra faire pour les obtenir avec ta classe.",
-            geste: "Touche « Évaluation », en haut.",
-            // Ces signaux : le badge de « Contexte d'apprentissage » (11 nov. 2026). « Évaluation » a la pulsation.
+            lignes: function () {
+                return [
+                    { texte: "Tu viens de repérer qui a besoin de toi et de nommer son défi, sans qu'il ait levé la main" },
+                    { texte: "L'application n'a rien deviné : elle a gardé en mémoire des gestes que tu fais déjà (prendre les présences, évaluer les productions)" },
+                    { texte: "Remontons à ces gestes : tu verras ce qu'il te faudra faire pour obtenir la même chose avec ta classe" },
+                    consigne("Touche « Évaluation », en haut")
+                ];
+            },
             avant: async function () { await ouvrirProfilDeLoyal('accompagnement'); await attendre(carteContexte, 2000); },
-            zones: function () { return [dans(carteContexte(), '.badge-sys')]; },
             contour: function () { return boutonNav('evaluations'); },
             atteint: function () { return sectionCourante() === 'evaluations'; }
         },
         {
             titre: 'Évaluer',
-            texte: "Ici, tu reçois les productions de tes étudiant·es et tu les évalues, comme tu en as l'habitude. La différence : chaque geste laisse une trace. Chaque évaluation nourrit leur performance, chaque remise leur complétion. L'assiduité, elle, vient des présences que tu prends dans Suivi. Mais pour évaluer, il te faut tes outils.",
-            geste: "Touche « Conception » pour voir d'où viennent tes outils.",
+            lieu: true,
+            lignes: function () {
+                return [
+                    // « tu reçois les productions » : la zone de dépôt de Préparer.
+                    { texte: "Ici, tu reçois les productions de tes étudiant·es, puis tu les évalues, comme tu en as l'habitude", montre: montre(function () { return document.getElementById('travaux-drop-zone'); }) },
+                    { texte: "La différence : l'application garde chaque geste en mémoire" },
+                    { texte: "Chaque production reçue compte pour la complétion ; chaque évaluation, pour la performance (les résultats obtenus, critère par critère)" },
+                    { texte: "L'assiduité, elle, vient des présences que tu prends dans « Suivi »" },
+                    consigne("Pour évaluer, il te faut tes outils : touche « Conception »")
+                ];
+            },
             avant: async function () { aller('evaluations', 'importer'); window.scrollTo(0, 0); },
-            // 11 nov. 2026 : « tu reçois les productions » — la zone de dépôt de Préparer ; et la section présentée,
-            // « Évaluation », dans le menu. Pas « Conception » : la pulsation la désigne.
-            zones: function () { return [document.getElementById('travaux-drop-zone')].concat(zonesNav('evaluations')); },
             contour: function () { return boutonNav('conception'); },
             atteint: function () { return sectionCourante() === 'conception'; }
         },
         {
             titre: 'Concevoir',
-            texte: "Tes outils : les productions que tu demandes, tes grilles, tes échelles. Ce sont tes critères qui permettent à l'application de nommer un défi, comme la nuance tout à l'heure. Tu n'as pas à partir de zéro : commence par apporter ce que tu utilises déjà, puisque tes grilles disent déjà ce que tu juges important. Et tout cela s'inscrit dans un cadre.",
-            geste: 'Touche « Cadre ».',
-            avant: async function () { aller('conception', 'materiel'); window.scrollTo(0, 0); },
-            // Même règle qu'à l'étape 6 : « apporter ce que tu utilises déjà » — « Ton matériel existe déjà ? » ; et la
-            // section présentée, « Conception ».
-            zones: function () {
-                var intro = document.querySelector('#section-conception .materiel-intro p');
-                return [intro].concat(zonesNav('conception'));
+            lieu: true,
+            lignes: function () {
+                return [
+                    { texte: "Tes outils, ce sont d'abord les productions que tu demandes : pour chacune, les consignes que tu donnes, les tâches que l'étudiant·e doit effectuer et l'objectif qu'elle cherche à atteindre" },
+                    { texte: "Ce sont aussi tes grilles : la liste de tes critères (ce que tu regardes dans une production) et ce que vaut chacun" },
+                    { texte: "Ce sont tes critères qui permettent à l'application de nommer un défi, comme la nuance tout à l'heure" },
+                    // Sans flèche vers « Ton matériel existe déjà ? » (16 nov. 2026) : ce paragraphe prend la largeur de
+                    // la page ; à 1180 × 900, la bulle, plus haute en lignes, ne pouvait que le couvrir, et sa flèche
+                    // finissait dedans (banc parcours-1-et-2). La bulle se range dans son coin, la page reste lisible.
+                    { texte: "Tu ne pars pas de zéro : tu apportes la grille que tu utilises déjà, elle dit déjà ce que tu juges important" },
+                    consigne("Tout cela s'inscrit dans un cadre : touche « Cadre »")
+                ];
             },
+            avant: async function () { aller('conception', 'materiel'); window.scrollTo(0, 0); },
             contour: function () { return boutonNav('calendrier'); },
             atteint: function () { return sectionCourante() === 'calendrier'; }
         },
         {
             titre: 'Poser ton cadre',
-            // 14 nov. 2026 (validé par Grégoire) : « Continuer d'explorer la démo » faisait attendre d'autres bulles.
-            geste: "Touche « Commencer avec ma classe », ou « Explorer la démo par moi-même ».",
-            texte: "Tout repose ici : ton trimestre, tes cours, tes groupes. Les dates de ton trimestre et ton horaire donnent tes séances, et les présences s'y accrochent, comme la matière manquée. Tu viens de faire le chemin à rebours ; avec ta classe, tu le feras à l'endroit : Cadre, Conception, Évaluation. Pas besoin de tout configurer pour voir un premier résultat : dès ta première prise de présences, ta classe apparaît, un point par étudiant·e.",
+            lieu: true,
+            lignes: function () {
+                return [
+                    // Sans flèche vers la barre d'étapes du Cadre (16 nov. 2026) : cette bulle est la plus haute du
+                    // parcours ; à 1180 × 900 elle ne pouvait que couvrir la barre, et sa flèche finissait dedans.
+                    { texte: "Tout repose ici : ton trimestre, tes cours, tes groupes" },
+                    { texte: "Tu viens de faire le chemin à rebours. Avec ta classe, tu le feras à l'endroit : « Cadre », « Conception », « Évaluation »" },
+                    { texte: "Les champs marqués d'un astérisque rouge suffisent pour un premier résultat : dès ta première prise de présences, ta classe apparaît, un point par étudiant·e" },
+                    { texte: "Le reste, tu le remplis à ton rythme : plus tu précises tes consignes, tes critères et tes rétroactions, plus ce que l'application te rend est fin et utile" },
+                    { texte: "À force de t'en servir, ton acuité s'affine : cette mémoire rend visible et explicite ce qui, dans ta classe, reste parfois sous-entendu et silencieux" },
+                    { texte: "Objectif atteint : tu es en mesure " + EN_MESURE },
+                    { texte: "Chaque parcours a son objectif. C'est toi qui choisis la suite" }
+                ];
+            },
             sansSortie: true,
             avant: async function () { aller('calendrier', 'trimestre'); window.scrollTo(0, 0); },
-            // La barre d'étapes du cadre (« ton trimestre, tes cours, tes groupes ») et la section présentée, « Cadre ».
-            zones: function () { return [barreDuCadre()].concat(zonesNav('calendrier')); },
+            // Trois suites de même poids, aucune mise en avant (Grégoire, 16 nov. 2026).
             boutons: [
-                { libelle: 'Commencer avec ma classe', primaire: true, action: function () { commencerAvecMaClasse(); } },
-                { libelle: 'Explorer la démo par moi-même', action: function () { continuerLaDemo(); } }
+                { libelle: 'Explorer la démo par moi-même', action: function () { continuerLaDemo(); } },
+                { libelle: 'Voir le parcours suivant', action: function () { voirLeParcoursSuivant(); } },
+                { libelle: 'Commencer avec ma classe', action: function () { commencerAvecMaClasse(); } }
             ]
         }
     ];
 
-    var DEF = { id: ID, etapes: ETAPES, lienSortie: 'Quitter le parcours' };
+    var DEF = { id: ID, etapes: ETAPES, lienSortie: 'Quitter le parcours',
+                objectif: "À la fin de ce parcours, tu seras en mesure " + EN_MESURE + "." };
 
     // ---------- Le lancement, la sortie, la fin ----------
 
@@ -344,12 +402,26 @@
         M().fermer();
     }
 
+    function parcoursDeLaClasse() {
+        return window.Assistance.parcours().find(function (p) { return p.id === 'classe'; }) || null;
+    }
+
+    /** « Voir le parcours suivant » : le « Je regarde » de « Mettre ta classe en place », dans la démo, qui reste ouverte. */
+    function voirLeParcoursSuivant() {
+        depart = null;
+        window.Assistance.definirEtat(ID, 'fait', 0);
+        M().fermer();
+        var classe = parcoursDeLaClasse();
+        if (classe && typeof classe.lancerModele === 'function') classe.lancerModele();
+    }
+
+    /** « Commencer avec ma classe » : son « Nous faisons », sur les vraies données ; la démo se referme. */
     async function commencerAvecMaClasse() {
         depart = null;
         window.Assistance.definirEtat(ID, 'fait', 0);
         M().fermer();
         if (enDemo() && typeof desactiverModeDemo === 'function') await desactiverModeDemo();
-        var classe = window.Assistance.parcours().find(function (p) { return p.id === 'classe'; });
+        var classe = parcoursDeLaClasse();
         if (classe) {
             var e = window.Assistance.etatDe('classe');
             classe.lancer(e.etat === 'en-cours' ? e.etape : 0);
@@ -368,5 +440,5 @@
     });
 
     // Pour la sentinelle des textes (tests/unit) : les étapes telles qu'elles sont posées.
-    window.ParcoursDecouvrir = { etapes: ETAPES };
+    window.ParcoursDecouvrir = { etapes: ETAPES, definition: DEF };
 })();

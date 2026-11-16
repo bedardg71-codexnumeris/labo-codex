@@ -26,16 +26,16 @@
    · Il se joue sur les vraies données : si la démo est ouverte, il la referme d'abord ; si
      elle s'ouvre en route, il se ferme et attend.
 
-   LA MODÉLISATION (lot « deux temps », 12 nov. 2026 ; règle du 14 nov. 2026) : sous « Modélisation », le même
+   LA MODÉLISATION (lot « deux temps », 12 nov. 2026 ; règle du 14 nov. 2026) : sous « Je regarde », le même
    parcours se joue DANS LA DÉMO, avec le matériel de la démo : un deuxième groupe, à côté de celui du pack. Huit
    étapes (ETAPES_MODELE) : un cours, une liste, son rattachement au cours, un horaire, un groupe-cours, le passage
    d'un groupe à l'autre dans l'en-tête, une saisie de présences, la bande d'assiduité.
    · LA RÈGLE (Grégoire, 14 nov. 2026, 12 h 08 ; elle remplace « rien ne se remplit tout seul », du 12 nov.) : la
      Modélisation va plus vite parce que le matériel est déjà là. Une bulle qui porte un formulaire va en trois
-     temps : « Touche « Remplir avec l'exemple » » (le bouton est DANS la bulle : la seule exception à « la bulle
+     temps : « Regarde l'exemple se remplir : touche « Remplir » » (le bouton est DANS la bulle : la seule exception à « la bulle
      guide, la page agit », et seulement ici) ; puis les lignes qui expliquent ce qui vient d'apparaître, chacune avec
      sa flèche ; puis, en dernière ligne, le bouton de la PAGE, que la personne touche elle-même.
-   · « Remplir avec l'exemple » n'écrit que dans la démo (`remplir`) : hors de la démo, il ne fait rien.
+   · « Remplir » n'écrit que dans la démo (`remplir`) : hors de la démo, il ne fait rien.
    · Le trimestre et le profil n'y sont pas : la démo a son trimestre (en créer un en sortirait), et le profil est
      une donnée globale et personnelle (`enseignants`, `profilEnseignant`) : le créer dans la démo l'écrirait dans
      les vraies données. Le groupe-cours prend l'enseignant de la démo.
@@ -45,7 +45,7 @@
      compris : le panneau remet d'abord la démo à neuf (js/assistance.js, « REFAIRE »).
    · La dernière bulle offre trois suites de même poids : « Le refaire avec ma classe », « Voir le parcours suivant »
      (quand il a son modèle), « Terminer » (Grégoire, 14 nov., 10 h 58).
-   ⚠ Les textes de la Modélisation sont PROPOSÉS : Grégoire les relit sur l'aperçu.
+   ⚠ Les textes de la Modélisation sont ceux du 16 nov. 2026, réécrits avec Grégoire (voir ETAPES_MODELE).
    ================================================================= */
 (function () {
     'use strict';
@@ -181,7 +181,11 @@
     }
 
     function pageImmobile(e) {
-        return immobile(function () { return Math.round(window.scrollY) + ':' + (e ? Math.round(e.getBoundingClientRect().height) : 0); });
+        // Sa place aussi (16 nov. 2026) : un bloc qui se referme au-dessus de lui le fait monter sans changer sa hauteur.
+        return immobile(function () {
+            var r = e ? e.getBoundingClientRect() : null;
+            return Math.round(window.scrollY) + ':' + (r ? Math.round(r.height) + ':' + Math.round(r.top) : 0);
+        });
     }
 
     /**
@@ -623,7 +627,7 @@
         return MATERIEL.etudiants.map(function (e) { return [e[0], MATERIEL.groupe, e[1], e[2]].join('\t'); }).join('\n');
     }
 
-    // ---------- « Remplir avec l'exemple » : ce qui écrit dans les champs de la page ----------
+    // ---------- « Remplir » : ce qui écrit dans les champs de la page ----------
 
     /** Écrit une valeur dans un champ de la page, comme si on l'y avait tapée : ses écouteurs suivent. */
     function poser(champ, valeur) {
@@ -647,7 +651,7 @@
     }
 
     /**
-     * « Remplir avec l'exemple » : les gestes d'une étape, faits pour la personne. N'ÉCRIT QUE DANS LA DÉMO : hors de
+     * « Remplir » : les gestes d'une étape, faits pour la personne. N'ÉCRIT QUE DANS LA DÉMO : hors de
      * la démo (elle a pu se refermer sous la bulle), rien n'est touché. Commun aux modèles.
      * @returns {boolean} true si les gestes ont été faits
      */
@@ -665,10 +669,10 @@
     }
 
     /**
-     * Une bulle en trois temps (la règle du 14 nov. 2026). Avant : la seule consigne « Touche « Remplir avec
-     * l'exemple » », et son bouton, dans la bulle. Après : cette ligne, faite ; les lignes de `apres()`, qui
-     * expliquent ce qui vient d'apparaître ; puis la consigne de la page (`creer`). `avantTout` : des notes gardées
-     * en tête dans les deux temps. `dAbord()` : les lignes d'un geste de la PAGE qui vient avant tout (ouvrir le
+     * Une bulle en trois temps (la règle du 14 nov. 2026 ; les mots du 16). Avant : la seule consigne « Regarde
+     * l'exemple se remplir : touche « Remplir » », et son bouton, dans la bulle. Après : cette ligne, faite ; les
+     * lignes de `apres()`, qui expliquent ce qui vient d'apparaître ; puis la consigne de la page (`creer`).
+     * `avantTout` : des notes, ou des lignes d'explication, gardées en tête dans les deux temps. `dAbord()` : les lignes d'un geste de la PAGE qui vient avant tout (ouvrir le
      * formulaire : « Touche « + Nouvelle production » ») ; tant qu'elle en rend, la bulle ne dit que cela, sans bouton.
      * `ensuite()` : de même, pour ce qui suit le bouton de la page (la cartouche créée, à choisir dans la production).
      * @param {Object} o - { rempli: () => bool, gestes: () => void, apres: () => ligne[], creer: string,
@@ -679,13 +683,20 @@
         var horsDesTroisTemps = function () {
             return (o.ensuite && o.ensuite()) || (o.dAbord && o.dAbord()) || null;
         };
+        // Les deux états de la bulle, « avant » puis « après » : ce que disent ses lignes, sans rien lire de la page.
+        var etats = function () {
+            return {
+                avant: tete.concat([consigne(MOTS_MODELE.toucheRemplir)]),
+                apres: tete.concat([{ texte: MOTS_MODELE.toucheRemplir, fait: function () { return true; } }], o.apres(), [consigne(o.creer)])
+            };
+        };
         return {
             lignesVivantes: true,
+            etats: etats,
             lignes: function () {
                 var autres = horsDesTroisTemps();
                 if (autres) return autres;
-                if (!o.rempli()) return tete.concat([consigne(MOTS_MODELE.toucheRemplir)]);
-                return tete.concat([{ texte: MOTS_MODELE.toucheRemplir, fait: function () { return true; } }], o.apres(), [consigne(o.creer)]);
+                return o.rempli() ? etats().apres : etats().avant;
             },
             get boutons() {
                 if (horsDesTroisTemps() || o.rempli()) return null;
@@ -757,15 +768,33 @@
      * cours, l'horaire et le groupe-cours du pack) : le formulaire de création s'ouvre tant que l'étape
      * n'est pas faite, sauf s'il l'est déjà (une saisie en cours n'est pas effacée).
      */
+    /**
+     * Ouvre ou referme un bloc du Cadre SANS LE RETENIR. `toggleAccordeonV2` écrit l'état de tous les blocs dans
+     * `etatsAccordeonsV2`, une préférence de la personne, hors de la démo : le modèle n'y touche pas (mesuré le
+     * 16 nov. 2026 au banc du confinement : refermer les autres blocs par la bascule de la page récrivait cette clé).
+     * Seul l'écran change ; au prochain chargement, les blocs reviennent comme la personne les avait laissés.
+     */
+    function plier(acc, fermer) {
+        acc.classList.toggle('ferme', fermer);
+        var contenu = acc.querySelector('.accordeon-contenu');
+        if (contenu && !fermer) { contenu.style.display = ''; contenu.style.maxHeight = ''; contenu.style.opacity = ''; }
+        var chevron = acc.querySelector('.accordeon-chevron');
+        if (chevron) chevron.textContent = fermer ? '\u25B6' : '\u25BC';
+    }
+
     async function ouvrirBlocModele(idEtape, faite) {
         aller('calendrier', 'trimestre');
         await attendre(function () { return sousSectionVisible('calendrier-trimestre'); }, 2000);
         var acc = accordeon(idEtape);
         if (!acc) return;
-        if (acc.classList.contains('ferme')) {
-            var tete = acc.querySelector('.accordeon-header');
-            if (tete && typeof toggleAccordeonV2 === 'function') toggleAccordeonV2(tete);
-        }
+        // LA BONNE SECTION, ET ELLE SEULE (Grégoire, 15 nov. 2026 : la bulle « Une liste d'étudiant·es » s'est posée
+        // sur le formulaire du cours, resté ouvert en « Mode modification ») : les autres blocs du Cadre se referment.
+        // Rien ne s'y perd : un bloc refermé garde ce qu'on y a saisi. Le moteur fait ensuite défiler jusqu'au bloc.
+        ETAPES_DU_CADRE.forEach(function (autre) {
+            var a = accordeon(autre);
+            if (a && a !== acc && !a.classList.contains('ferme')) plier(a, true);
+        });
+        if (acc.classList.contains('ferme')) plier(acc, false);
         var bouton = BOUTON_CREER[idEtape] ? el(BOUTON_CREER[idEtape]) : null;
         var nouveau = NOUVEAU[idEtape] ? window[NOUVEAU[idEtape]] : null;
         if (bouton && !M().visible(bouton) && !faite() && typeof nouveau === 'function') await nouveau();
@@ -905,13 +934,6 @@
         if (dehors) cases[1].scrollIntoView({ block: 'center', inline: 'nearest', behavior: 'auto' });
     }
 
-    /** « le vendredi 22 août » : la date d'une séance, dite en clair. */
-    function dateDite(ymd) {
-        if (!ymd) return '';
-        var p = ymd.split('-').map(Number);
-        return 'le ' + new Date(p[0], p[1] - 1, p[2]).toLocaleDateString('fr-CA', { weekday: 'long', day: 'numeric', month: 'long' });
-    }
-
     function casesDeLExemple() {
         return presencesDeLExemple().map(function (x) { var c = casePresence(x[0]); return c ? c.closest('td') : null; }).filter(Boolean);
     }
@@ -936,17 +958,27 @@
         return g && n ? g : null;
     }
 
-    // ---------- Les huit étapes de la modélisation (textes PROPOSÉS, 15 nov. 2026, selon les dix règles) ----------
+    // ---------- Les huit étapes de « Je regarde » ----------
+    // TEXTES DU 16 NOV. 2026, réécrits avec Grégoire (8 h 47 à 9 h 46 ; relais de Cowork :
+    // plans de travail/CONSIGNE-2026-11-16-parcours-je-regarde.md), mot pour mot : la sentinelle
+    // tests/unit/sentinelle-parcours-je-regarde-2026-11-16.test.js les confronte à la consigne. Ils remplacent les
+    // textes proposés le 15 nov. Les valeurs de l'exemple que les lignes ne nomment plus (le code du cours, le numéro
+    // de groupe, la date de la séance) : la flèche les montre. Les noms du menu et des sections sont LUS à l'écran
+    // par le moteur (`lieu`, `nommeLaSection`), jamais recopiés ici.
 
     var MOTS_MODELE = {
-        remplir: "Remplir avec l'exemple",
-        toucheRemplir: "Touche « Remplir avec l'exemple »",
+        // Grégoire, 16 nov. 2026 : « Remplir » remplace « Remplir avec l'exemple ».
+        remplir: 'Remplir',
+        toucheRemplir: "Regarde l'exemple se remplir : touche « Remplir »",
         apercuFerme: "L'aperçu est refermé : touche « Prévisualiser » pour le rouvrir.",
         // La fin à trois boutons (Grégoire, 14 nov. 2026, 10 h 58, validé).
         refaire: 'Le refaire avec ma classe',
         suivant: 'Voir le parcours suivant',
         terminer: 'Terminer'
     };
+
+    // L'objectif du parcours : dit par la première bulle (le moteur), rappelé par la dernière. Une seule écriture.
+    var EN_MESURE = "d'expliquer ce que l'application te demande pour mettre une classe en place et ce qu'elle en tire";
 
     /** Le parcours qui suit `id` dans le panneau, s'il a son modèle et que rien ne l'empêche de partir. */
     function suivantQuiASonModele(id) {
@@ -967,15 +999,23 @@
         return suites;
     }
 
+    /** La section du Cadre dont parle l'étape : le moteur y fait défiler la page et encadre son nom. */
+    function sectionDuCadre(idEtape) {
+        return function () { return accordeon(idEtape); };
+    }
+
     var ETAPES_MODELE = [
         etapeEnTroisTemps({
             titre: 'Un cours',
             lieu: true,
+            section: sectionDuCadre('cours'),
+            nommeLaSection: true,
+            lieuSuite: ": c'est là que tu dis quel cours tu donnes.",
             avant: function () { return ouvrirBlocModele('cours', FAIT_MODELE[0]); },
             contour: function () { return coursRempli() ? el(BOUTON_CREER.cours) : null; },
             atteint: FAIT_MODELE[0]
         }, {
-            avantTout: [note("Dans la démo, tu montes un deuxième groupe, avec le matériel de l'exemple.")],
+            avantTout: [note("Dans la démo, tu montes un deuxième groupe avec le matériel de l'exemple. Rien ne touche à tes données.")],
             rempli: coursRempli,
             gestes: function () {
                 poser(el('v2-codeCours'), MATERIEL.cours.code);
@@ -985,15 +1025,19 @@
             },
             apres: function () {
                 return [
-                    { texte: "Le code du cours : " + MATERIEL.cours.code, montre: champs('v2-codeCours') },
-                    { texte: "Sa pondération : " + MATERIEL.cours.ponderation + " (elle sert à calculer les heures de cours)", montre: champs('v2-ponderation') },
-                    { texte: "Sa discipline (elle sert à identifier le matériel partagé)", montre: champs('v2-disciplineCours') }
+                    { texte: "Le code du cours, tel qu'il paraît à ton plan de cours", montre: champs('v2-codeCours') },
+                    { texte: "Sa pondération (elle sert à calculer les heures de cours)", montre: champs('v2-ponderation') },
+                    { texte: "Sa discipline (elle sert à identifier le matériel que tu partageras)", montre: champs('v2-disciplineCours') }
                 ];
             },
             creer: "Touche « Créer le cours »"
         }),
         etapeEnTroisTemps({
             titre: "Une liste d'étudiant·es",
+            confirme: "C'est fait : le cours est créé.",
+            section: sectionDuCadre('etudiants'),
+            nommeLaSection: true,
+            lieuSuite: ": c'est là que tu apportes la liste de ton groupe.",
             avant: function () { return ouvrirBlocModele('etudiants', FAIT_MODELE[1]); },
             contour: function () { return listeRemplie() ? boutonPrevisualiser() : null; },
             atteint: FAIT_MODELE[1]
@@ -1002,17 +1046,20 @@
             gestes: function () { poser(champListe(), listeFournie()); },
             apres: function () {
                 return [
-                    { texte: "Dix étudiant·es fictif·ves, une ligne par personne :", montre: function () { return [champListe()]; }, sous: [
-                        { texte: "son DA (il l'identifie partout dans l'application)" },
-                        { texte: "son numéro de groupe, " + MATERIEL.groupe + " (il servira à l'horaire et au groupe-cours)" },
-                        { texte: "son nom et son prénom" }
-                    ] }
+                    { texte: "Dix étudiant·es fictif·ves, une ligne par personne", montre: function () { return [champListe()]; } },
+                    { texte: "Son DA, le numéro de dossier (il l'identifie partout dans l'application)" },
+                    { texte: "Son numéro de groupe (il servira à l'horaire et au groupe-cours)" },
+                    { texte: "Son nom et son prénom" },
+                    { texte: "Avec ta classe, cette liste viendra du système de gestion scolaire de ton collège" }
                 ];
             },
             creer: "Touche « Prévisualiser »"
         }),
         etapeEnTroisTemps({
             titre: 'Le cours de la liste',
+            confirme: "C'est fait : l'aperçu est ouvert. Rien n'est encore importé.",
+            // La même section que l'étape d'avant : son nom garde le halo, la phrase du lieu n'est pas redite.
+            section: sectionDuCadre('etudiants'),
             avant: function () { return ouvrirBlocModele('etudiants', FAIT_MODELE[2]); },
             // L'aperçu refermé (« Annuler ») : la bulle le dit, et montre « Prévisualiser ».
             avis: function () { return apercuOuvert() ? '' : MOTS_MODELE.apercuFerme; },
@@ -1022,18 +1069,25 @@
             },
             atteint: FAIT_MODELE[2]
         }, {
+            avantTout: [
+                { texte: "L'aperçu montre les dix personnes telles qu'elles seront importées (c'est le moment de vérifier)", montre: champs('v2-previewTable') },
+                { texte: "Il reste à dire dans quel cours elles sont inscrites" }
+            ],
             rempli: rattachementFait,
             gestes: function () { var cours = coursCree(); if (cours) poser(menuRattachement(), cours.id); },
             apres: function () {
                 return [
-                    { texte: "L'aperçu montre les dix personnes, telles qu'elles seront importées", montre: champs('v2-previewTable') },
-                    { texte: "Leur cours : " + MATERIEL.cours.code + ", celui que tu viens de créer (l'application proposait le cours actif)", montre: function () { return [menuRattachement()]; } }
+                    { texte: "Leur cours : celui que tu viens de créer", montre: function () { return [menuRattachement()]; } }
                 ];
             },
             creer: "Touche « Importer 10 étudiant·es »"
         }),
         etapeEnTroisTemps({
             titre: 'Un horaire',
+            confirme: "C'est fait : les dix étudiant·es sont importé·es.",
+            section: sectionDuCadre('horaire'),
+            nommeLaSection: true,
+            lieuSuite: ": c'est là que tu dis quand ton groupe se rencontre.",
             avant: function () { return ouvrirBlocModele('horaire', FAIT_MODELE[3]); },
             contour: function () { return horaireRempli() ? el(BOUTON_CREER.horaire) : null; },
             atteint: FAIT_MODELE[3]
@@ -1042,16 +1096,21 @@
             gestes: remplirLHoraire,
             apres: function () {
                 return [
-                    { texte: "Le groupe : " + MATERIEL.groupe + " (l'horaire lui est lié)", montre: champs('v2-hor-groupeAssocie') },
-                    { texte: "Le nom de l'horaire : " + MATERIEL.horaire.nom, montre: champs('v2-hor-nom') },
+                    { texte: "Le groupe (l'horaire lui est lié)", montre: champs('v2-hor-groupeAssocie') },
+                    { texte: "Le nom de l'horaire : « " + MATERIEL.horaire.nom + " »", montre: champs('v2-hor-nom') },
                     { texte: "Deux séances par semaine : le mardi et le vendredi, de 8 h à 10 h", montre: champs('v2-hor-seance-0-jour', 'v2-hor-seance-1-jour') },
-                    { texte: "2 périodes par séance (le nombre s'écrit d'après les heures)", montre: champs('v2-hor-seance-0-periodes', 'v2-hor-seance-1-periodes') }
+                    { texte: "2 périodes par séance (le nombre s'écrit d'après les heures)", montre: champs('v2-hor-seance-0-periodes', 'v2-hor-seance-1-periodes') },
+                    { texte: "Avec les dates du trimestre, cet horaire donne le calendrier de tes séances : c'est là que s'inscriront tes présences" }
                 ];
             },
             creer: "Touche « Créer l'horaire »"
         }),
         etapeEnTroisTemps({
             titre: 'Un groupe-cours',
+            confirme: "C'est fait : l'horaire est créé.",
+            section: sectionDuCadre('groupe-cours'),
+            nommeLaSection: true,
+            lieuSuite: ": c'est là que tu réunis ce que tu viens de créer.",
             avant: function () { return ouvrirBlocModele('groupe-cours', FAIT_MODELE[4]); },
             contour: function () { return groupeCoursRempli() ? el(BOUTON_CREER['groupe-cours']) : null; },
             atteint: FAIT_MODELE[4]
@@ -1060,24 +1119,26 @@
             gestes: remplirLeGroupeCours,
             apres: function () {
                 return [
-                    { texte: "Le groupe-cours réunit ce que tu viens de créer :", sous: [
-                        { texte: "le cours " + MATERIEL.cours.code, montre: champs('v2-gc-cours') },
-                        { texte: "le groupe " + MATERIEL.groupe, montre: champs('v2-gc-groupe') },
-                        { texte: "l'horaire « " + MATERIEL.horaire.nom + " »", montre: champs('v2-gc-horaire') },
-                        { texte: "l'enseignant de la démo, " + ENSEIGNANT_DEMO, montre: champs('v2-gc-enseignant') }
-                    ] }
+                    { texte: "Un groupe-cours, c'est une classe : un cours, un groupe, un horaire, un·e enseignant·e" },
+                    { texte: "Le cours que tu viens de créer", montre: champs('v2-gc-cours') },
+                    { texte: "Le groupe de la liste", montre: champs('v2-gc-groupe') },
+                    { texte: "L'horaire « " + MATERIEL.horaire.nom + " »", montre: champs('v2-gc-horaire') },
+                    { texte: "L'enseignant de la démo, " + ENSEIGNANT_DEMO, montre: champs('v2-gc-enseignant') },
+                    { texte: "C'est à ce groupe-cours que se rattachera tout ce que l'application gardera : présences, productions, évaluations" }
                 ];
             },
-            creer: "Touche « Créer le groupe-cours » (le groupe apparaîtra dans l'en-tête de l'application)"
+            creer: "Touche « Créer le groupe-cours » (il apparaîtra dans l'en-tête de l'application)"
         }),
         {
             // Pas de formulaire : le geste est celui de la personne.
             titre: "D'un groupe à l'autre",
+            confirme: "C'est fait : le groupe-cours est créé. La mise en place est terminée.",
             lignes: function () {
                 return [
-                    { texte: "Ton deuxième groupe est dans l'en-tête, à côté de celui de la démo" },
-                    { texte: "Le Suivi et l'Évaluation montrent toujours le groupe choisi ici" },
-                    consigne("Choisis le groupe " + MATERIEL.cours.code + " dans l'en-tête")
+                    { texte: "Ton deuxième groupe est dans l'en-tête de l'application, à côté de celui de la démo" },
+                    { texte: "Tout ce que tu verras ensuite, dans « Suivi » ou dans « Évaluation », concerne le groupe choisi ici" },
+                    { texte: "Tu donnes plusieurs groupes ? C'est ici que tu passeras de l'un à l'autre" },
+                    consigne("Choisis dans l'en-tête le groupe que tu viens de créer")
                 ];
             },
             nommeLeContour: true,
@@ -1086,7 +1147,9 @@
         },
         etapeEnTroisTemps({
             titre: 'Prendre les présences',
+            confirme: "C'est fait : tu es dans ton deuxième groupe.",
             lieu: true,
+            lieuSuite: "Ce qui suit, tu le referas à chaque séance, tes étudiant·es devant toi.",
             avant: async function () {
                 avantPremierCours = false;
                 retirerSecondContour();
@@ -1101,13 +1164,13 @@
             contour: function () { return presencesRemplies() ? boutonVerrou() : null; },
             atteint: FAIT_MODELE[6]
         }, {
-            avantTout: [note("Ce qui suit, tu le referas à chaque séance.")],
             rempli: presencesRemplies,
             gestes: function () { remplirLesPresences(); },
             apres: function () {
                 return [
-                    { texte: "La séance : la première du groupe, " + dateDite(premiereSeance()), montre: function () { return [choixDuCours()]; } },
-                    { texte: "Deux absences et un retard sont notés (tout le monde est présent par défaut)", montre: casesDeLExemple }
+                    { texte: "La séance : la première du groupe", montre: function () { return [choixDuCours()]; } },
+                    { texte: "Deux absences et un retard sont notés (tout le monde est présent par défaut, tu ne notes que les exceptions)", montre: casesDeLExemple },
+                    { texte: "Tu prends déjà les présences ; ici, chaque séance s'ajoute à la mémoire de ta classe" }
                 ];
             },
             creer: "Touche « Verrouiller la saisie » (c'est ce qui dit à l'application que cette séance a eu lieu)"
@@ -1115,14 +1178,18 @@
         {
             // Des explications : rien ne se grise. La fin à trois boutons de même poids.
             titre: "Le groupe d'un coup d'œil",
+            confirme: "C'est fait : la séance est verrouillée.",
             lieu: true,
+            // La bulle, haute, tient sous la bande plutôt que dessus (voir `amener`, js/parcours-moteur.js).
+            amener: true,
+            lieuSuite: "Reviens-y avant chaque séance.",
             lignes: function () {
                 return [
-                    note("Reviens-y avant chaque séance."),
-                    { texte: "Chaque point blanc est un·e des dix étudiant·es" },
-                    { texte: "La bande « Assiduité » le place selon ses présences : à droite, il vient à ses cours" },
+                    { texte: "Chaque point blanc est un·e des dix étudiant·es ; la bande « Assiduité » le place selon ses présences" },
                     { texte: "Trois points sont à l'écart : les deux absences et le retard de la séance", montre: pointsALEcart },
-                    consigne(consigneDesSuites(suitesDuModele(ID, terminerModele)))
+                    { texte: "Une seule séance et la classe se dessine déjà. Séance après séance, tu verras qui s'éloigne, sans attendre une main levée" },
+                    { texte: "Objectif atteint : tu es en mesure " + EN_MESURE },
+                    { texte: "Chaque parcours a son objectif. C'est toi qui choisis la suite" }
                 ];
             },
             sansSortie: true,
@@ -1137,7 +1204,8 @@
         }
     ];
 
-    var DEF_MODELE = { id: ID + '-modele', etapes: ETAPES_MODELE, lienSortie: 'Plus tard' };
+    var DEF_MODELE = { id: ID + '-modele', etapes: ETAPES_MODELE, lienSortie: 'Plus tard',
+                       objectif: "À la fin de ce parcours, tu seras en mesure " + EN_MESURE + "." };
 
     /**
      * La Modélisation part de sa première étape non faite, gestes compris : JAMAIS en visite (Grégoire, 14 nov. 2026,
@@ -1239,9 +1307,10 @@
     window.ParcoursClasse = Object.freeze({
         materiel: MATERIEL,
         etapesModele: ETAPES_MODELE,
+        definitionModele: DEF_MODELE,
         deuxiemeGroupe: deuxiemeGroupe,
         mots: MOTS_MODELE,
-        // Communs aux modèles : « Remplir avec l'exemple » (il n'écrit que dans la démo), les trois temps, la fin.
+        // Communs aux modèles : « Remplir » (il n'écrit que dans la démo), les trois temps, la fin.
         remplir: remplir,
         poser: poser,
         choisir: choisir,

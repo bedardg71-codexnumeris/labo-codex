@@ -54,7 +54,7 @@ test('le panneau : le texte en quatre temps numérotés, deux états par parcour
     const lignes = await p.locator('.assistance-intro-titre, .assistance-intro-temps li').allTextContents();
     expect(lignes.map(sansInsecable)).toEqual(QUATRE_TEMPS);
     expect((await p.locator('.assistance-intro strong').allTextContents()).map(sansInsecable)).toEqual([
-        "Apprendre l'application, en quatre temps.", '1. Découvrir par toi-même :', '2. Modélisation :', '3. Pratique guidée :', '4. Continuer en autonomie :']);
+        "Apprendre l'application, en quatre temps.", "1. J'explore", '2. Je regarde', '3. Nous faisons', '4. Je fais,']);
 
     // (b) Plus de choix unique : rien entre « Tes parcours » et la liste que « Remettre la démo à neuf », toujours là.
     await expect(p.locator('[role="radio"], #assistance-materiel')).toHaveCount(0);
@@ -71,19 +71,28 @@ test('le panneau : le texte en quatre temps numérotés, deux états par parcour
     for (const id of avec) {
         const temps = carte(page, id).locator('.assistance-temps');
         await expect(temps).toHaveCount(2);
-        await expect(temps.locator('.assistance-temps-nom')).toHaveText(['Modélisation', 'Pratique guidée']);
-        await expect(temps.locator('.assistance-temps-sous')).toHaveText(['avec le matériel de la démo', 'avec mon matériel']);
+        // 16 nov. 2026 (Grégoire) : « Je regarde » et « Nous faisons » ; sous chacun, en petit, le nom du temps ; puis l'état.
+        await expect(temps.locator('.assistance-temps-mots')).toHaveText(['Modélisation', 'Pratique guidée']);
+        await expect(carte(page, id).locator('.assistance-temps-sous')).toHaveCount(0);
         await expect(temps.nth(0).locator('.assistance-modele-etat')).toHaveText('À faire');
         await expect(temps.nth(1).locator('.assistance-parcours-etat')).toHaveText('À faire');
-        await expect(boutonModele(page, id)).toHaveText('Commencer');
-        await expect(boutonPratique(page, id)).toHaveText('Commencer');
+        await expect(boutonModele(page, id)).toHaveText('Je regarde');
+        await expect(boutonPratique(page, id)).toHaveText('Nous faisons');
         for (const b of [boutonModele(page, id), boutonPratique(page, id)]) expect((await b.boundingBox()).height).toBeGreaterThanOrEqual(44);
-        // Le nom du temps au-dessus de son bouton ; le matériel en plus petit.
-        expect(await temps.nth(0).evaluate((t) => {
+        // Les deux boutons côte à côte ; sous chacun, le nom du temps, plus petit que le bouton ; sous le nom, l'état.
+        expect(await carte(page, id).evaluate((c) => {
             const px = (e) => parseFloat(getComputedStyle(e).fontSize);
-            return px(t.querySelector('.assistance-temps-sous')) < px(t.querySelector('.assistance-temps-nom'))
-                && t.querySelector('button').getBoundingClientRect().top >= t.querySelector('.assistance-temps-mots').getBoundingClientRect().bottom - 1;
-        })).toBe(true);
+            const r = (e) => e.getBoundingClientRect();
+            const [a, b] = [...c.querySelectorAll('.assistance-temps')];
+            const coteACote = Math.abs(r(a.querySelector('button')).top - r(b.querySelector('button')).top) < 1
+                && r(a.querySelector('button')).right <= r(b.querySelector('button')).left;
+            const empiles = [a, b].every((t) => {
+                const bouton = t.querySelector('button'), nom = t.querySelector('.assistance-temps-mots');
+                const etat = t.querySelector('.assistance-modele-etat, .assistance-parcours-etat');
+                return r(nom).top >= r(bouton).bottom - 1 && r(etat).top >= r(nom).bottom - 1 && px(nom) < px(bouton);
+            });
+            return { coteACote, empiles };
+        })).toEqual({ coteACote: true, empiles: true });
     }
     const sans = await page.evaluate(() => Assistance.parcours().filter((d) => typeof d.lancerModele !== 'function').map((d) => d.id));
     expect(sans.length).toBeGreaterThan(0);
@@ -100,12 +109,13 @@ test('le panneau : le texte en quatre temps numérotés, deux états par parcour
     await page.evaluate(() => Assistance.fermerPanneau());
     await ouvrirPanneau(page);
     await expect(carte(page, 'classe').locator('.assistance-modele-etat')).toHaveText('Fait');
-    await expect(boutonModele(page, 'classe')).toHaveText('Refaire');
+    // Le bouton garde son nom quel que soit l'état : c'est l'état, dessous, qui change.
+    await expect(boutonModele(page, 'classe')).toHaveText('Je regarde');
     await expect(carte(page, 'classe').locator('.assistance-parcours-etat')).toHaveText('À faire');
-    await expect(boutonPratique(page, 'classe')).toHaveText('Commencer');
+    await expect(boutonPratique(page, 'classe')).toHaveText('Nous faisons');
     await expect(carte(page, 'evaluer').locator('.assistance-modele-etat')).toHaveText('À faire');
     await expect(carte(page, 'evaluer').locator('.assistance-parcours-etat')).toHaveText('Étape 3 sur 9');
-    await expect(boutonPratique(page, 'evaluer')).toHaveText('Reprendre');
+    await expect(boutonPratique(page, 'evaluer')).toHaveText('Nous faisons');
     expect(await page.evaluate(() => JSON.parse(localStorage.getItem('laboCodex.assistance')).modeles.classe.etat)).toBe('fait');
     expect(await page.evaluate(async () => (await db.keys()).filter((k) => /assistance/i.test(k) && k !== 'laboCodex.assistance'))).toEqual([]);
     await capture(page, 'panneau-deux-etats-fait');
@@ -175,8 +185,9 @@ test('la modélisation de « Mettre ta classe en place », de bout en bout dans 
     for (const k of [0, 1, 2]) await expect(boutons.nth(k)).toHaveClass(/btn-secondaire/);
     const fin = await lireBulle(page);
     expect(fin.principal).toEqual([]);
-    expect(fin.consignes).toEqual(['Touche « Le refaire avec ma classe », « Voir le parcours suivant », ou « Terminer »']);
-    expect(fin.derniere).toBe(fin.consignes[0]);
+    // 16 nov. 2026 : la dernière bulle rappelle l'objectif ; elle n'a plus de ligne de consigne, ses boutons parlent.
+    expect(fin.consignes).toEqual([]);
+    await expect(bulle(page)).toContainText('Objectif atteint : tu es en mesure');
     await expect(bulle(page).locator('.parcours-bulle-note').last()).toHaveText(/Pour revoir une étape, touche «\s8 sur 8\s»\./);
     const hauteurs = await boutons.evaluateAll((bs) => bs.map((b) => Math.round(b.getBoundingClientRect().height)));
     hauteurs.forEach((h) => expect(h).toBeGreaterThanOrEqual(44));
@@ -208,7 +219,7 @@ test('la modélisation de « Mettre ta classe en place », de bout en bout dans 
     // « REFAIRE » UNE MODÉLISATION (Grégoire, 14 nov. 2026, 10 h 56 : elle se refait une seconde fois, gestes compris).
     await ouvrirPanneau(page);
     await expect(carte(page, 'classe').locator('.assistance-modele-etat')).toHaveText('Fait');
-    await expect(boutonModele(page, 'classe')).toHaveText('Refaire');
+    await expect(boutonModele(page, 'classe')).toHaveText('Je regarde');
     // La confirmation dit ce qui arrive ; « Annuler » ne change rien : ni la démo, ni l'état, ni un parcours lancé.
     await boutonModele(page, 'classe').click();
     const dialogue = page.getByRole('dialog').filter({ hasText: 'Refaire ce modèle' }).last();
@@ -256,7 +267,7 @@ test('« Refaire » une Pratique guidée : le parcours fait se rejoue en visite,
 
     await ouvrirPanneau(page);
     await expect(carte(page, 'classe').locator('.assistance-parcours-etat')).toHaveText('Fait');
-    await expect(boutonPratique(page, 'classe')).toHaveText('Refaire');
+    await expect(boutonPratique(page, 'classe')).toHaveText('Nous faisons');
     // La Modélisation, elle, reste à faire : les deux états ne se confondent pas.
     await expect(carte(page, 'classe').locator('.assistance-modele-etat')).toHaveText('À faire');
     await boutonPratique(page, 'classe').click();

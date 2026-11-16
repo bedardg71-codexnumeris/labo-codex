@@ -91,9 +91,27 @@
    CE QU'UNE LIGNE MONTRE (15 nov. 2026, la règle de la Modélisation) : une ligne d'explication peut désigner ce dont
    elle parle (`montre`) : une flèche y va, la bulle l'évite, et la ligne ne se grise pas pour autant.
    LES LIGNES QUI SUIVENT L'ÉCRAN (`lignesVivantes`, même date) : une étape dont la liste change pendant qu'elle est à
-   l'écran (la Modélisation, en trois temps : « Remplir avec l'exemple », ce qui vient d'apparaître, puis le bouton
+   l'écran (la Modélisation, en trois temps : « Remplir », ce qui vient d'apparaître, puis le bouton
    de la page) le déclare. Ses lignes et ses boutons sont relus à chaque passage de la sonde ; changés, la bulle est
    récrite sur place, sans changer d'étape ni rejouer `avant`, et sa consigne s'annonce.
+   L'OBJECTIF, LA CONFIRMATION, LA SECTION, LE TRIANGLE (16 nov. 2026 ; demandes de Grégoire du 15 nov., relais de Cowork ;
+   plans de travail/CONSIGNE-2026-11-16-parcours-je-regarde.md, règles a à e) :
+   a. La première bulle d'un parcours porte son OBJECTIF (`objectif`, sur la définition) : sous le titre, avant tout.
+   b. Une étape qui parle d'une SECTION de la page la déclare (`section`). À l'ouverture, la page y défile par une
+      transition visible (douce ; d'un coup sous « mouvement réduit »), son nom juste sous l'en-tête. La bulle reste
+      cachée tant que la page bouge (`est-en-attente`) et ne paraît qu'ensuite, à côté de la section : entre deux
+      places qui couvrent aussi peu ce que la bulle désigne (ses champs, son bouton), elle prend celle qui couvre le
+      moins la section (`placerLoin`, ses « secondaires ») ; et jamais le nom de la section, pesé comme le contour.
+      Une section plus haute que l'écran : la bulle en couvre une partie, hors de ses champs désignés.
+      Ouvrir la section (un accordéon) reste l'affaire de `avant`, qui connaît la page.
+   c. Le NOM de cette section reçoit le halo des entrées du menu (`parcours-section-actuelle`), tant que l'étape dure.
+      Avec `nommeLaSection`, la phrase du lieu la dit : « Tu es dans « X », à la section « S » » quand la page vient de
+      changer (`lieu`), « Tu es dans la section « S » » sinon. Le nom est LU dans la page, jamais recopié.
+      `lieuSuite` : ce qui suit la phrase du lieu, dans la même phrase (« : c'est là que… ») ou dans la suivante.
+   d. Le compteur « n sur N » porte un TRIANGLE : couché quand la liste des étapes est fermée, pointe en bas quand elle
+      est ouverte (css/parcours.css, sur `aria-expanded` ; le texte du bouton reste « n sur N »).
+   e. Une bulle peut s'ouvrir sur une ligne qui CONFIRME le geste précédent en le nommant (`confirme` : « C'est fait :
+      le cours est créé. »). Avant la phrase du lieu. Ce n'est pas un éloge : le moteur n'y ajoute rien.
    LA FIN (lot 2e) : la dernière bulle d'un parcours dit « Pour revoir une étape, touche « N sur N ». » ; quand elle
    n'offre que « Terminer », elle offre aussi « Parcours suivant », de même poids (aucun bouton mis en avant).
    Sa consigne suit ses boutons : « Touche « Terminer » » y devient « Touche « Parcours suivant », ou « Terminer » ».
@@ -104,6 +122,10 @@
                          note?: bool, geste?: bool }],
        lignesVivantes?: bool,      // la liste et les boutons changent dans l'étape : relus à chaque passage
        lieu?: bool | () => bool,   // la page change à cette étape : « Tu es dans… », le halo au menu, la page en haut
+       amener?: bool,              // avec `lieu` : ce que l'étape montre est amené sous l'en-tête si la bulle n'y tient pas
+       section?: () => Element,    // la section de la page dont parle la bulle : la page y défile, son nom a le halo
+       nommeLaSection?: bool,      // la phrase du lieu dit la section ; lieuSuite?: string, ce qui suit cette phrase
+       confirme?: string | () => string, // la première ligne : le geste précédent, nommé (« C'est fait : … »)
        avant?: async () => void,   // place la page (idempotent : sert aussi à la reprise)
        zones?: () => Element[],    // ce dont parle la bulle (la flèche y va)
        fleches?: () => Element[],  // parmi les zones, celles où vont les flèches (groupées) ; les autres, la bulle les
@@ -120,7 +142,7 @@
        boutons?: [{ libelle, primaire?, action, attend?: () => string }], // attend : ce qui manque (rien : actif)
        complement?: () => [{ titre?, texte }], // des consignes à la suite du texte, en pages (voir « LE COMPLÉMENT »)
        sansSortie?: bool }
-   Une définition : { id, etapes, lienSortie?, sansRang?: bool (pas de « n sur N » : une carte qui n'est pas un parcours),
+   Une définition : { id, etapes, objectif?: string (dit par la première bulle), lienSortie?, sansRang?: bool (pas de « n sur N » : une carte qui n'est pas un parcours),
        sansEchap?: bool (Échap reste à la page : la carte ne se ferme que par son lien de sortie) }.
    LE COMPLÉMENT (lot « La carte d'aide dans Apporter mon matériel », 13 nov. 2026) : les consignes d'une page entrent
    dans la bulle, à la suite du texte de l'étape, comme des pages de plus (« ← 2/3 → ») : une liste numérotée, un item
@@ -370,10 +392,51 @@
         return { section: nom(section), onglet: onglet ? nom(onglet) : '', entrees: [section, onglet].filter(Boolean) };
     }
 
-    /** « Tu es dans « X », à l'onglet « Y ». » — la première ligne d'une étape où la page change. */
-    function phraseDuLieu(lieu) {
-        if (!lieu) return '';
-        return 'Tu es dans « ' + lieu.section + ' »' + (lieu.onglet ? ", à l'onglet « " + lieu.onglet + ' »' : '') + '.';
+    /**
+     * « Tu es dans « X », à l'onglet « Y ». » — la première ligne d'une étape où la page change. Avec une section
+     * nommée (`nommeLaSection`) : « …, à la section « S » », ou « Tu es dans la section « S » » quand la page n'a pas
+     * changé. `suite` : ce qui suit, dans la même phrase si elle commence par un deux-points, sinon dans la suivante.
+     */
+    function phraseDuLieu(lieu, section, suite) {
+        var nom = section && section.nom ? section.nom : '';
+        var ou = '';
+        if (lieu && nom) ou = 'Tu es dans « ' + lieu.section + ' », à la section « ' + nom + ' »';
+        else if (nom) ou = 'Tu es dans la section « ' + nom + ' »';
+        else if (lieu) ou = 'Tu es dans « ' + lieu.section + ' »' + (lieu.onglet ? ", à l'onglet « " + lieu.onglet + ' »' : '');
+        if (!ou) return '';
+        if (!suite) return ou + '.';
+        return ou + (String(suite).charAt(0) === ':' ? ' ' : '. ') + suite;
+    }
+
+    // Le nom d'une section : son premier titre (celui d'un accordéon d'abord). Ce qui n'en est pas : le chevron, un
+    // bouton d'aide, un compteur.
+    var NOMS_DE_SECTION = ['.accordeon-header h2, .accordeon-header h3, .accordeon-header h4', '.accordeon-header', 'h2, h3, h4'];
+    var HORS_DU_NOM = '.accordeon-chevron, button, .badge-compteur';
+
+    /**
+     * LA SECTION dont parle la bulle (voir « L'OBJECTIF, LA CONFIRMATION, LA SECTION, LE TRIANGLE ») : son bloc, l'élément
+     * qui porte son nom, et ce nom tel que la page l'écrit.
+     * @returns {{bloc:Element, tete:Element|null, nom:string}|null}
+     */
+    function sectionDe(etape) {
+        if (!etape || !etape.section) return null;
+        var bloc = null;
+        try { bloc = etape.section(); } catch (e) { bloc = null; }
+        if (!bloc || !bloc.isConnected) return null;
+        var tete = null;
+        for (var k = 0; k < NOMS_DE_SECTION.length && !tete; k++) tete = bloc.querySelector(NOMS_DE_SECTION[k]);
+        var nom = '';
+        if (tete) {
+            var copie = tete.cloneNode(true);
+            [].forEach.call(copie.querySelectorAll(HORS_DU_NOM), function (x) { x.remove(); });
+            nom = String(copie.textContent || '').replace(/\s+/g, ' ').trim();
+        }
+        return { bloc: bloc, tete: tete, nom: nom };
+    }
+
+    /** Un texte qu'une étape donne tel quel ou par une fonction. */
+    function texteDe(v) {
+        try { return String((typeof v === 'function' ? v() : v) || ''); } catch (e) { return ''; }
     }
 
     function aUnLieu(etape) {
@@ -995,12 +1058,17 @@
             }));
         }
         if (lignes.length && gesteRetenu(etape)) lignes = lignesEnVisite(lignes);
-        if (lieu) {
-            var ou = document.createElement('p');
-            ou.className = 'parcours-bulle-lieu';
-            ou.textContent = typographier(phraseDuLieu(lieu));
-            boite.appendChild(ou);
-        }
+        // Dans l'ordre : l'objectif du parcours (sa première bulle), le geste précédent confirmé, puis où l'on est.
+        var phrase = function (classe, texte) {
+            if (!texte) return;
+            var ph = document.createElement('p');
+            ph.className = classe;
+            ph.textContent = typographier(texte);
+            boite.appendChild(ph);
+        };
+        if (etat.i === 0) phrase('parcours-bulle-objectif', texteDe(etat.def.objectif));
+        phrase('parcours-bulle-confirme', texteDe(etape.confirme));
+        phrase('parcours-bulle-lieu', phraseDuLieu(lieu, etape.nommeLaSection ? sectionDe(etape) : null, texteDe(etape.lieuSuite)));
         var ul = null;
         var poser = function (ligne, dans) {
             var li = document.createElement('li');
@@ -1096,6 +1164,9 @@
      */
     function marquerLieu(etape) {
         var entrees = aUnLieu(etape) ? ((lireLieu() || {}).entrees || []) : [];
+        // Le nom de la section dont parle la bulle : le même halo (règle c).
+        var s = sectionDe(etape);
+        if (s && s.tete && visible(s.tete)) entrees = entrees.concat([s.tete]);
         (etat.entreesDuLieu || []).forEach(function (e) {
             if (entrees.indexOf(e) === -1 && e !== etat.sectionActuelle) e.classList.remove('parcours-section-actuelle');
         });
@@ -1183,6 +1254,7 @@
         b.textContent = '';
         etat.telephone = surTelephone();
         b.className = 'parcours-bulle' + (etat.telephone ? ' parcours-bulle--telephone' : '');
+        b.classList.toggle('est-en-attente', etat.enAttente);   // la bulle attend encore la page (règle b)
         b.style.maxHeight = '';
         // Sur téléphone, la largeur est posée AVANT de mesurer le texte (son plancher de trois lignes).
         b.style.left = etat.telephone ? MARGE + 'px' : b.style.left;
@@ -1745,22 +1817,33 @@
      * recouvrement, chaque rectangle pesé de son `poids` (le contour : POIDS_CONTOUR), et la poignée sert. Pure et déterministe (la sonde la rappelle toutes les 120 ms).
      * @returns {{x:number, y:number, aire:number}}
      */
-    function placerLoin(evites, bw, bh, cadre) {
+    function placerLoin(evites, bw, bh, cadre, secondaires) {
         var meilleure = null;
         evites = reduireEvites(evites);
-        placesEssayees(evites, bw, bh, cadre).forEach(function (p) {
+        // LES SECONDAIRES (16 nov. 2026 : la section dont parle la bulle) ne départagent que des places qui couvrent
+        // aussi peu ce que la bulle évite : jamais un champ désigné n'est couvert pour dégager la section.
+        var seconds = secondaires || [];
+        placesEssayees(evites.concat(seconds), bw, bh, cadre).forEach(function (p) {
             var r = { left: p.x, top: p.y, right: p.x + bw, bottom: p.y + bh };
-            var cand = { x: p.x, y: p.y, aire: aireCouverte(r, evites), ecart: ecartA(r, evites) };
-            if (!meilleure || cand.aire < meilleure.aire - 1 || (cand.aire <= meilleure.aire + 1 && cand.ecart > meilleure.ecart + 0.5)) meilleure = cand;
+            var cand = { x: p.x, y: p.y, aire: aireCouverte(r, evites), second: aireCouverte(r, seconds), ecart: ecartA(r, evites) };
+            if (!meilleure || vautMieux(cand, meilleure)) meilleure = cand;
         });
         return { x: meilleure.x, y: meilleure.y, aire: meilleure.aire };
+    }
+
+    /** Une place vaut mieux : moins de recouvrement ; à égalité, moins de la section ; à égalité encore, plus loin. Pure. */
+    function vautMieux(cand, meilleure) {
+        if (cand.aire < meilleure.aire - 1) return true;
+        if (cand.aire > meilleure.aire + 1) return false;
+        if (cand.second < meilleure.second - 1) return true;
+        return cand.second <= meilleure.second + 1 && cand.ecart > meilleure.ecart + 0.5;
     }
 
     /**
      * La bulle, hors téléphone : au bord le plus éloigné de ce qu'elle évite (`evites` : ses zones et le contour,
      * visibles) ; sans rien de désigné, au centre. Déplacée par la personne, elle garde sa place pour l'étape.
      */
-    function placerBulle(evites) {
+    function placerBulle(evites, secondaires) {
         var b = etat.elements.bulle;
         poserReserveBas(0);
         var vw = largeurPage(), vh = basEcran();
@@ -1769,7 +1852,10 @@
         if (etat.deplacee) { poserDeplacee(); return; }
         var bw = b.offsetWidth, bh = b.offsetHeight;
         var place;
-        if (!evites.length && aUnLieu(etapeCourante())) {
+        if (secondaires && secondaires.length) {
+            // Une étape à section : loin de ce qu'elle désigne, puis hors de la section autant que possible.
+            place = placerLoin(evites, bw, bh, cadreUtile(), secondaires);
+        } else if (!evites.length && aUnLieu(etapeCourante())) {
             // La bulle guide, la page agit (règle 5) : une bulle qui présente une page, sans rien y désigner, se range
             // dans son coin, en bas à droite ; au centre, elle couvrait le texte de la page et son formulaire.
             var cadre = cadreUtile();
@@ -2225,13 +2311,17 @@
     /** Ce que la bulle évite : ses zones, pesées 1, et ce qu'elle ne couvre que faute de mieux, pesé POIDS_CONTOUR. */
     function placerBulleLoin(zones, prio) {
         var autres = zones.filter(function (z) { return prio.indexOf(z) === -1; });
-        placerBulle(rectsDe(autres).concat(rectsDe(prio).map(function (r) { return pese(r, POIDS_CONTOUR); })));
+        var s = sectionDe(etapeCourante());
+        placerBulle(rectsDe(autres).concat(rectsDe(prio).map(function (r) { return pese(r, POIDS_CONTOUR); })), s ? rectsDe([s.bloc]) : null);
     }
 
-    /** Ce que la bulle ne couvre que faute de mieux : le contour, et ce que l'étape déclare dans `aussiEviter`. */
+    /** Ce que la bulle ne couvre que faute de mieux : le contour, ce que l'étape déclare dans `aussiEviter`, le nom de sa section. */
     function prioritaires(c) {
         var etape = etapeCourante();
         var autres = etape && etape.aussiEviter ? (etape.aussiEviter() || []) : [];
+        // Le nom de la section dont parle la bulle (règle b : à côté de la section, jamais sur son nom).
+        var s = sectionDe(etape);
+        if (s && s.tete) autres = autres.concat([s.tete]);
         return (c ? [c] : []).concat(autres.filter(Boolean));
     }
 
@@ -2290,15 +2380,57 @@
      * rien n'y est amené dans la vue, et ce qu'il faut toucher n'est pas « neuf » pour `suivreContour` (il ferait
      * défiler la page au premier passage). Sinon, ce que l'étape désigne est amené dans la vue, comme avant.
      */
-    function ouvrirLaPage(etape) {
+    async function ouvrirLaPage(etape) {
+        var s = sectionDe(etape);
+        if (s && visible(s.bloc)) {
+            // LA SECTION : la page y défile, son nom sous l'en-tête ; la bulle attend la fin du mouvement.
+            await defilerVers(s.tete && visible(s.tete) ? s.tete : s.bloc);
+            if (!etat) return;
+            var c1 = contourDe(etape);
+            etat.contourSuivi = visible(c1) ? signatureDe(c1) : '';
+            return;
+        }
         if (aUnLieu(etape)) {
             window.scrollTo(0, 0);
+            // `amener` (16 nov. 2026) : une étape qui ne fait que MONTRER (la bande d'assiduité, à la fin d'un modèle)
+            // amène quand même ce qu'elle montre sous l'en-tête quand la bulle n'y tient pas à côté (mesuré à
+            // 820 × 1180 : haute de 585 px, elle couvrait sept des dix points dont elle parle). Sans cela, rien ne bouge.
+            if (etape.amener) amenerDansLaVue(elementsVises(etape), etat.elements.bulle.offsetHeight);
             var c0 = contourDe(etape);
             etat.contourSuivi = visible(c0) ? signatureDe(c0) : '';
             return;
         }
         if (!etape.centre || etat.telephone) amenerDansLaVue(elementsVises(etape), etat.elements.bulle.offsetHeight);
         retenirContourDOuverture(etape);
+    }
+
+    /**
+     * La page défile jusqu'à `el`, posé juste sous l'en-tête, par une transition visible (règle b), et rend la main
+     * quand elle ne bouge plus. Compte ses tours plutôt que l'heure : sous une horloge figée (les bancs), elle ne bouge pas.
+     */
+    function defilerVers(el) {
+        var cible = function () { return Math.max(0, Math.round(window.scrollY + el.getBoundingClientRect().top - hautEntete() - ECART)); };
+        if (Math.abs(cible() - window.scrollY) < 2) return Promise.resolve();
+        try { window.scrollTo({ top: cible(), behavior: mouvementReduit() ? 'auto' : 'smooth' }); } catch (e) { window.scrollTo(0, cible()); }
+        return new Promise(function (fin) {
+            var avant = null, immobile = 0, restants = 40;   // 2 s au plus
+            (function tour() {
+                var y = Math.round(window.scrollY);
+                immobile = y === avant ? immobile + 1 : 0;
+                avant = y;
+                if (immobile < 3 && restants-- > 0) { setTimeout(tour, 50); return; }
+                // La page a pu bouger sous le défilement (un bloc qui se referme au-dessus, un défilement de
+                // l'application elle-même) : la place est reprise, d'un coup, avant que la bulle paraisse.
+                if (Math.abs(cible() - window.scrollY) >= 2) window.scrollTo(0, cible());
+                fin();
+            })();
+        });
+    }
+
+    /** La bulle cachée tant que la page d'une étape à section se met en place ; montrée ensuite. */
+    function attendreLaPage(oui) {
+        etat.enAttente = !!oui;
+        etat.elements.bulle.classList.toggle('est-en-attente', !!oui);
     }
 
     async function allerA(i) {
@@ -2322,6 +2454,7 @@
         marquerSectionActuelle(null);
         marquerLieu(null);
         etat.enVisite = false;
+        attendreLaPage(!!etape.section);
         await preparer(etape, i);
         // Le parcours a pu être fermé, ou avancé ailleurs, pendant la préparation.
         if (!etat || etat.i !== i) return;
@@ -2333,7 +2466,9 @@
         // L'écran où l'étape s'ouvre (une reprise peut tomber sur le second) : sa page, sans défilement de plus.
         etat.pageDite = etape.pageQuiDit ? (etape.pageQuiDit() || null) : null;
         if (etat.pageDite && pageQuiPorte(etat.pageDite) > 0) montrerPage(pageQuiPorte(etat.pageDite));
-        ouvrirLaPage(etape);
+        await ouvrirLaPage(etape);
+        if (!etat || etat.i !== i) return;
+        attendreLaPage(false);
         etat.enTransition = false;
         etat.reglerJusqua = Date.now() + REGLAGE_MS;
         sonder();
@@ -2359,7 +2494,7 @@
                  telephone: surTelephone(), replie: false, reglerJusqua: 0, texte: '', pages: [], page: 0, largeurPages: 0,
                  deplacee: null, glisse: null, vus: null, sectionActuelle: null, doigts: 0, hauteurGardee: 0, pageDite: null,
                  contourSuivi: '', complement: [], signatureComplement: '[]', pageComplement: -1,
-                 lignes: [], signatureLignes: null, gesteAAmener: false, entreesDuLieu: [], boutons: [], visite: !!(opts && opts.visite), enVisite: false,
+                 lignes: [], signatureLignes: null, gesteAAmener: false, enAttente: false, entreesDuLieu: [], boutons: [], visite: !!(opts && opts.visite), enVisite: false,
                  plusLoin: 0, toutFait: false };
         document.body.classList.add('parcours-actif');
         signaler();
