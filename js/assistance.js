@@ -41,11 +41,23 @@
    Un parcours qui déclare `grandEcranSeulement: true` (lot « La bulle sur téléphone »,
    9 nov. 2026) n'est pas proposé sur téléphone (ParcoursMoteur.surTelephone, 500 px) : sous son
    titre, le texte validé par Grégoire, et son bouton ne lance rien.
+
+   ⛔ LES PARCOURS SONT FERMÉS (15 nov. 2026, consigne relayée par Cowork) : la liste est en développement.
+   Le panneau dit « À venir » à sa place, et aucun parcours ne part : ni d'ici, ni de « Parcours suivant »
+   (lancerParcours), ni de la porte « Tu enseignes ? » de l'accueil, ni de la fin de « Découvrir » (ces deux-là
+   lisent `Assistance.parcours()`, qui rend une liste vide). Rien n'est retiré : les parcours s'inscrivent toujours.
+   ⮕ POUR ROUVRIR : `PARCOURS_OUVERTS = true`, ci-dessous. Une seule ligne, puis retirer l'appel à
+   `ouvrirLesParcours` du harnais des bancs (tests/integration/harness/attendre-application.js) et les deux
+   bancs de la fermeture. Les bancs des parcours, eux, tournent déjà ouverts par ce harnais.
    ================================================================= */
 (function () {
     'use strict';
 
     var CLE_PREF = 'parcoursAssistance';
+    var PARCOURS_OUVERTS = false;
+    // L'état en mémoire, que seuls les bancs changent (ouvrirLesParcours) : rien ne le garde d'un chargement à l'autre.
+    var ouverts = PARCOURS_OUVERTS;
+    var TEXTE_A_VENIR = 'À venir';
     // Validé par Grégoire le 9 nov. 2026 (Cowork), mot pour mot.
     var TEXTE_GRAND_ECRAN = 'Ce parcours se fait sur un écran plus grand : une tablette ou un ordinateur.';
 
@@ -164,7 +176,7 @@
 
     /** Le rang du parcours en cours (le premier), sinon du premier à faire ; rien si tout est fait. */
     function rangAAfficher() {
-        if (!registre.length) return '';
+        if (!ouverts || !registre.length) return '';
         var idx = -1;
         for (var k = 0; k < registre.length; k++) {
             if (etatDe(registre[k].id).etat === 'en-cours') { idx = k; break; }
@@ -601,16 +613,24 @@
         intitule.textContent = 'Tes parcours';
         panneau.appendChild(intitule);
 
-        // La remise à neuf de la démo (12 nov. 2026), au-dessus de la liste.
-        panneau.appendChild(construireBoutonNeuf());
+        if (ouverts) {
+            // La remise à neuf de la démo (12 nov. 2026), au-dessus de la liste.
+            panneau.appendChild(construireBoutonNeuf());
 
-        var liste = document.createElement('ol');
-        liste.className = 'assistance-parcours';
-        liste.id = 'assistance-parcours-liste';
-        liste.setAttribute('aria-labelledby', 'assistance-intitule');
-        remplirListe(liste);
-        panneau.appendChild(liste);
-
+            var liste = document.createElement('ol');
+            liste.className = 'assistance-parcours';
+            liste.id = 'assistance-parcours-liste';
+            liste.setAttribute('aria-labelledby', 'assistance-intitule');
+            remplirListe(liste);
+            panneau.appendChild(liste);
+        } else {
+            // Fermés : la mention seule, à la place de la liste. Aucun bouton, donc rien à lancer.
+            var aVenir = document.createElement('p');
+            aVenir.className = 'assistance-a-venir';
+            aVenir.id = 'assistance-a-venir';
+            aVenir.textContent = TEXTE_A_VENIR;
+            panneau.appendChild(aVenir);
+        }
 
         panneau.addEventListener('keydown', pieger);
         return { voile: voile, panneau: panneau };
@@ -687,6 +707,7 @@
      * @returns {boolean} true s'il est parti
      */
     function lancerParcours(id) {
+        if (!ouverts) return false;
         var def = definitionDe(id);
         if (!def) return false;
         var petit = tropPetitPour(def);
@@ -715,7 +736,15 @@
         // Les deux temps (12 nov. 2026) : l'état des Modélisations (sur l'appareil).
         etatModeleDe: etatModeleDe,
         definirEtatModele: definirEtatModele,
-        parcours: function () { return registre.slice(); }
+        // Fermés, la liste rendue est vide : l'accueil et la fin de « Découvrir » y cherchent le parcours à lancer.
+        parcours: function () { return ouverts ? registre.slice() : []; },
+        parcoursOuverts: function () { return ouverts; },
+        // Pour les bancs seulement (harnais attendre-application.js) : en mémoire, perdu au rechargement.
+        ouvrirLesParcours: function (oui) {
+            ouverts = oui !== false;
+            fermerPanneau({ sansRetourFocus: true });
+            majMenu();
+        }
     };
     // Le dispatcher data-action de main.js : le menu, « À propos », l'aide de la visite.
     window.ouvrirPanneauAssistance = ouvrirPanneau;

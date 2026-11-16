@@ -607,6 +607,14 @@ body.parcours-actif .transition-bandeau { display: none; }
     opacity: 0.75;
 }
 
+/* Les parcours fermés (15 nov. 2026) : la mention « À venir », à la place de la liste. */
+.assistance-a-venir {
+    margin: 0;
+    font-size: 14px;
+    line-height: 1.5;
+    opacity: 0.85;
+}
+
 .assistance-parcours {
     list-style: none;
     margin: 0;

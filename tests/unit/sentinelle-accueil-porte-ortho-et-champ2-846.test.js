@@ -151,21 +151,29 @@ const DESCRIPTIONS_TACHES = [
 // « Labo Codex est une application » ; chaque paragraphe sous son intertitre ; les portes, sous
 // « Par où commencer ? », rentrent DANS « À propos ».
 const TITRE_BANDEAU = 'À propos';
+// 15 nov. 2026 : les quatre blocs et les deux paragraphes du bas remplacés (mots arrêtés avec Grégoire, relayés par
+// Cowork) ; l'insécable (\u00a0) devant « : », « ? » et « ! ». « Tutoriels » part : deux liens.
+// 16 nov. 2026 : texte révisé par Grégoire (approuvé à 5 h 53), remplacé en entier ; « Un espace autonome » devient
+// « Un outil indépendant » ; l'insécable aussi à l'intérieur des guillemets ; un lien « Joindre la communauté ».
 const MOTS_BANDEAU = [
     'Suivre l’apprentissage. Soutenir l’enseignement.',
     'Ce que fait l’application',
-    'Labo Codex est une application qui te propose de numériser ton travail et de rendre visibles et interprétables les micro-données que tu crées et recueilles dans ton environnement. Elle te permet ainsi de mieux voir les conditions de ton écosystème-classe et de mieux planifier tes interventions.',
-    'Ton jugement d’abord',
-    'Une de ses particularités est qu’il n’y a aucune intelligence artificielle dans l’application. Ton jugement professionnel est souverain et l’outil ne fait que l’éclairer. Labo Codex n’impose aucune pratique, est entièrement configurable et aucune décision n’est prise à ta place. L’application n’offre pas la possibilité de scroller très longtemps et elle ne provoque pas de grandes bouffées de dopamine. Par contre, elle permet de réfléchir à ta pratique et de te libérer un peu de ta charge mentale.',
-    'Un commun éducatif',
-    'Tu peux faire les mêmes gestes que d’habitude – planifier, concevoir, évaluer et suivre la progression de tes étudiant·es – mais dans un seul outil numérique intégré. Labo Codex t’offre un espace autonome, indépendant, confidentiel, gratuit, ouvert, portable et sobre en carbone ! L’objectif est d’inventer et d’organiser avec cette ressource un commun éducatif, pérenne et ouvert, en marge des grosses plateformes.',
-    'Tes données chez toi',
-    'Tu entres ton adresse de courriel, tu reçois un code de sécurité et c’est tout ! Une fois entré·e, tu restes connecté·e un mois sans avoir à renouveler ton accès. Tes données restent 100 % sur ton appareil. Il n’y a pas de commerce, pas de frais, pas d’abonnement, pas de publicité. Le seul échange souhaité est ton feedback et tes rapports de bugs (si tu en rencontres).',
-    'Certains concepts sont nouveaux ?',
-    'Trois guides t’expliquent le concept des micro-données, la taxonomie SOLO et le modèle RàI qui servent au dépistage des difficultés et à la planification des interventions. L’aide et les guides sont accessibles en tout temps.',
-    'Tu as besoin de support humain ?',
-    'L’Association québécoise de pédagogie collégiale (AQPC) héberge une Communauté de pratique (CoP) Labo Codex. C’est le lieu tout désigné pour obtenir du soutien et échanger entre pairs. Des enseignant·es comme toi y explorent d’autres pratiques pédagogiques et co-construisent des ressources libres.',
+    'Préparer ton cours, saisir les présences, évaluer les travaux, gérer les notes\u00a0: ces gestes professionnels te sont familiers. Labo Codex les réunit dans un seul outil et en garde une mémoire que tu peux consulter quand tu veux. Semaine après semaine, elle t’offre un recul sur ta classe\u00a0: tu vois non seulement comment ton groupe évolue et répond à ce que tu proposes, mais aussi où en est précisément chaque étudiant·e. Accompagner chacun·e avec bienveillance est exigeant\u00a0: l’outil t’aide à y parvenir sans y laisser ta peau.',
+    'Le jugement humain',
+    'Il n’y a aucune intelligence artificielle dans l’application et aucune décision n’est prise à ta place. L’outil éclaire ton jugement professionnel, il ne le remplace pas. Il n’impose aucune pratique\u00a0: tu le règles selon la tienne. Et si tu pratiques une notation alternative, il convertit tes résultats en note chiffrée finale, sans tableur.',
+    'Un outil indépendant',
+    'Labo Codex fonctionne sur ton ordinateur, ta tablette et même ton téléphone. Pour passer de l’un à l’autre, tu enregistres ton codex, un fichier que tu transportes sur une clé USB ou dans ton nuage personnel. Conçu pour rester indépendant des géants du numérique, Labo Codex te laisse libre de tes choix sans t’isoler\u00a0: tes notes finales s’exportent vers le système de gestion scolaire de ton collège.',
+    'Un accès gratuit et sécuritaire',
+    'Labo Codex est en bêta publique depuis le 3 juin 2026\u00a0: ton expérience influence sa construction. Pour entrer, tu donnes ton adresse de courriel et tu reçois un code. C’est la seule information que tu transmets. Tout le reste demeure dans le navigateur de ton appareil, protégé comme le reste de ton ordinateur par ton mot de passe de session et tes sauvegardes habituelles. Il n’y a ni frais, ni abonnement, ni publicité.',
+    'Besoin d’un coup de main\u00a0?',
+    'L’aide est accessible dans l’application, sous «\u00a0Assistance\u00a0». Des parcours assistés s’y ajouteront bientôt pour te montrer les gestes un à un. Les guides pédagogiques sont là si tu veux aller plus loin.',
+    'Envie d’en parler avec des collègues\u00a0?',
+    'L’Association québécoise de pédagogie collégiale (AQPC) héberge une communauté de pratique Labo Codex. Enseignant·es et conseiller·ères pédagogiques y réfléchissent ensemble à leur pratique et construisent du matériel pédagogique et disciplinaire à partager.',
 ];
+// Ce que la carte ne dit plus (consigne du 15 nov. 2026).
+const MOTS_PARTIS_DU_BANDEAU = ['micro-données', 'SOLO', 'RàI', 'CoP', 'Modélisation', 'Pratique guidée', 'Tutoriels', 'codexnumeris.org/tutoriels',
+    // 16 nov. 2026 : ce que le texte révisé ne dit plus.
+    'Un espace autonome', 'bouffées de dopamine', 'sobre en carbone', 'ressources libres', 'en préparation', 'Son code est ouvert'];
 // 28 oct. 2026 : les trois portes, dans l'ordre (mots donnés par Grégoire). 7 nov. 2026 : de vrais
 // boutons, « Commencer », « Commencer », « Explorer », et la nouvelle phrase de la porte du conseiller.
 // « Commencer » est écrit deux fois : vérifié dans l'ordre du rendu, pas par l'unicité de B3.
@@ -262,6 +270,14 @@ describe('B3 · les mots viennent du rendu, et un seul endroit les écrit', () =
         expect(html).not.toContain('C’est une application');
         expect(html).not.toContain('Certains concepts sont nouveaux pour toi');
         expect(html).not.toContain('L’identification est requise');
+        // 15 nov. 2026 : les anciens blocs, et les mots que la carte ne porte plus.
+        expect(html).not.toContain('Ton jugement d’abord');
+        expect(html).not.toContain('Un commun éducatif');
+        expect(html).not.toContain('Tes données chez toi');
+        expect(html).not.toContain('Certains concepts sont nouveaux');
+        expect(html).not.toContain('support humain');
+        const bandeau = tranche(html, 'id="banniere-bienvenue"', 'class="accueil-portes"');
+        for (const mot of MOTS_PARTIS_DU_BANDEAU) expect(bandeau, mot).not.toContain(mot);
     });
 
     it('la barre repliable s\'intitule « À propos », et l\'ancien texte du 27 sept. est parti (14 oct. 2026)', () => {
@@ -286,18 +302,19 @@ describe('B3 · les mots viennent du rendu, et un seul endroit les écrit', () =
         expect(bandeau).not.toContain('<br>');
     });
 
-    it('trois liens texte remplacent les trois boutons : mêmes actions ; les tutoriels dans un nouvel onglet, sûrement, dit aux lecteurs d\'écran', () => {
+    it('deux liens texte à gauche, mêmes actions ; « Tutoriels » est parti (15 nov. 2026) ; « Joindre la communauté » à droite (16 nov.)', () => {
         const { html } = rendreAccueil();
-        const liens = [...tranche(html, 'class="apropos-liens').matchAll(/<(button|a) [^>]*class="apropos-lien"[^>]*>[\s\S]*?<\/\1>/g)].map(m => m[0]);
+        const bas = tranche(html, 'class="apropos-deux', 'class="accueil-portes"');
+        const liens = [...bas.matchAll(/<(button|a) [^>]*class="apropos-lien"[^>]*>[\s\S]*?<\/\1>/g)].map(m => m[0]);
         expect(liens).toHaveLength(3);
         // Lot « Les deux parcours » (8 nov. 2026) : « Visite guidée » devient « Assistance » et ouvre le panneau.
         expect(liens[0]).toMatch(/data-action="ouvrirPanneauAssistance">Assistance</);
         expect(liens[1]).toMatch(/data-action="naviguerAccueilCarte" data-param="labo\|labo-accompagnement">Guides pédagogiques</);
-        expect(liens[2]).toContain('href="https://codexnumeris.org/tutoriels"');
-        expect(liens[2]).toContain('target="_blank"');
-        expect(liens[2]).toMatch(/rel="[^"]*\bnoopener\b[^"]*"/);
-        expect(liens[2]).toContain('Tutoriels <span aria-hidden="true">↗</span>');
-        expect(liens[2]).toMatch(/<span class="u-lecteur-ecran">[^<]*nouvel onglet[^<]*<\/span>/);
+        // 16 nov. 2026 : le lien de la communauté, après le paragraphe de droite, ouvert comme les liens externes
+        // de l'application (nouvel onglet, noopener noreferrer), et hors de la boîte dorée.
+        expect(liens[2]).toMatch(/^<a class="apropos-lien" href="https:\/\/www\.aqpc\.qc\.ca\/fr\/cop-labocodex" target="_blank" rel="noopener noreferrer">Joindre la communauté</);
+        expect(bas.indexOf(liens[2])).toBeGreaterThan(bas.indexOf('à partager.'));
+        expect(tranche(bas, 'class="banniere-bienvenue-acces"', '</div>')).not.toContain('apropos-lien');
         expect(html).not.toContain('btn btn-secondaire');
     });
 

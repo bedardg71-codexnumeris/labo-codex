@@ -72,6 +72,9 @@ function afficherAccueil() {
  * 28 octobre 2026 : texte remplacé en entier par Grégoire (mots recopiés tels quels ; « 100 % » prend l'insécable (#1137) et les
  * « — » d'incise deviennent « – »). « Par où commencer ? » et la ligne de l'orthopédagogue
  * partent : les trois portes de l'encadré qui suit portent désormais ces entrées.
+ *
+ * 15 novembre 2026 : les quatre blocs et les deux paragraphes du bas sont remplacés (mots arrêtés avec Grégoire,
+ * relayés par Cowork, recopiés tels quels ; insécables devant « : », « ? » et « ! »). Le lien « Tutoriels » part.
  */
 // La question de l'orthopédagogue, que dit la porte du milieu : écrite une fois (sentinelle #846, B3).
 const QUESTION_ORTHOPEDAGOGUE = 'Tu es orthopédagogue ?';
@@ -91,10 +94,16 @@ function aproposReplie() {
 function genererBanniereBienvenue() {
     const replie = aproposReplie();
 
-    // L'encadré de la CoP : inchangé (consigne du 7 nov.).
+    // La colonne de droite : texte du 16 nov. 2026. Le lien vit HORS de la boîte `.banniere-bienvenue-acces`
+    // (ses liens y sont dorés) : il se présente comme « Assistance » et « Guides pédagogiques ».
     const paragrapheCommunaute = `
-            <div class="banniere-bienvenue-acces">
-                <p><strong>Tu as besoin de support humain ?</strong> L’Association québécoise de pédagogie collégiale (AQPC) héberge une Communauté de pratique (CoP) Labo Codex. C’est le lieu tout désigné pour obtenir du soutien et échanger entre pairs. Des enseignant·es comme toi y explorent d’autres pratiques pédagogiques et co-construisent des ressources libres.</p>
+            <div class="apropos-communaute">
+                <div class="banniere-bienvenue-acces">
+                    <p><strong>Envie d’en parler avec des collègues ?</strong> L’Association québécoise de pédagogie collégiale (AQPC) héberge une communauté de pratique Labo Codex. Enseignant·es et conseiller·ères pédagogiques y réfléchissent ensemble à leur pratique et construisent du matériel pédagogique et disciplinaire à partager.</p>
+                </div>
+                <ul class="apropos-liens banniere-bienvenue-actions">
+                    <li><a class="apropos-lien" href="https://www.aqpc.qc.ca/fr/cop-labocodex" target="_blank" rel="noopener noreferrer">Joindre la communauté<span class="u-lecteur-ecran"> (s’ouvre dans un nouvel onglet)</span></a></li>
+                </ul>
             </div>`;
 
     return `
@@ -108,28 +117,27 @@ function genererBanniereBienvenue() {
             <div class="apropos-colonnes">
                 <section>
                     <h3 class="apropos-intertitre">Ce que fait l’application</h3>
-                    <p>Labo Codex est une application qui te propose de numériser ton travail et de rendre visibles et interprétables les micro-données que tu crées et recueilles dans ton environnement. Elle te permet ainsi de mieux voir les conditions de ton écosystème-classe et de mieux planifier tes interventions.</p>
+                    <p>Préparer ton cours, saisir les présences, évaluer les travaux, gérer les notes : ces gestes professionnels te sont familiers. Labo Codex les réunit dans un seul outil et en garde une mémoire que tu peux consulter quand tu veux. Semaine après semaine, elle t’offre un recul sur ta classe : tu vois non seulement comment ton groupe évolue et répond à ce que tu proposes, mais aussi où en est précisément chaque étudiant·e. Accompagner chacun·e avec bienveillance est exigeant : l’outil t’aide à y parvenir sans y laisser ta peau.</p>
                 </section>
                 <section>
-                    <h3 class="apropos-intertitre">Ton jugement d’abord</h3>
-                    <p>Une de ses particularités est qu’il n’y a aucune intelligence artificielle dans l’application. Ton jugement professionnel est souverain et l’outil ne fait que l’éclairer. Labo Codex n’impose aucune pratique, est entièrement configurable et aucune décision n’est prise à ta place. L’application n’offre pas la possibilité de scroller très longtemps et elle ne provoque pas de grandes bouffées de dopamine. Par contre, elle permet de réfléchir à ta pratique et de te libérer un peu de ta charge mentale.</p>
+                    <h3 class="apropos-intertitre">Le jugement humain</h3>
+                    <p>Il n’y a aucune intelligence artificielle dans l’application et aucune décision n’est prise à ta place. L’outil éclaire ton jugement professionnel, il ne le remplace pas. Il n’impose aucune pratique : tu le règles selon la tienne. Et si tu pratiques une notation alternative, il convertit tes résultats en note chiffrée finale, sans tableur.</p>
                 </section>
                 <section>
-                    <h3 class="apropos-intertitre">Un commun éducatif</h3>
-                    <p>Tu peux faire les mêmes gestes que d’habitude – planifier, concevoir, évaluer et suivre la progression de tes étudiant·es – mais dans un seul outil numérique intégré. Labo Codex t’offre un espace autonome, indépendant, confidentiel, gratuit, ouvert, portable et sobre en carbone ! L’objectif est d’inventer et d’organiser avec cette ressource un commun éducatif, pérenne et ouvert, en marge des grosses plateformes.</p>
+                    <h3 class="apropos-intertitre">Un outil indépendant</h3>
+                    <p>Labo Codex fonctionne sur ton ordinateur, ta tablette et même ton téléphone. Pour passer de l’un à l’autre, tu enregistres ton codex, un fichier que tu transportes sur une clé USB ou dans ton nuage personnel. Conçu pour rester indépendant des géants du numérique, Labo Codex te laisse libre de tes choix sans t’isoler : tes notes finales s’exportent vers le système de gestion scolaire de ton collège.</p>
                 </section>
                 <section>
-                    <h3 class="apropos-intertitre">Tes données chez toi</h3>
-                    <p>Tu entres ton adresse de courriel, tu reçois un code de sécurité et c’est tout ! Une fois entré·e, tu restes connecté·e un mois sans avoir à renouveler ton accès. Tes données restent 100 % sur ton appareil. Il n’y a pas de commerce, pas de frais, pas d’abonnement, pas de publicité. Le seul échange souhaité est ton feedback et tes rapports de bugs (si tu en rencontres).</p>
+                    <h3 class="apropos-intertitre">Un accès gratuit et sécuritaire</h3>
+                    <p>Labo Codex est en bêta publique depuis le 3 juin 2026 : ton expérience influence sa construction. Pour entrer, tu donnes ton adresse de courriel et tu reçois un code. C’est la seule information que tu transmets. Tout le reste demeure dans le navigateur de ton appareil, protégé comme le reste de ton ordinateur par ton mot de passe de session et tes sauvegardes habituelles. Il n’y a ni frais, ni abonnement, ni publicité.</p>
                 </section>
             </div>
             <div class="apropos-deux apropos-avec-filet">
                 <div class="apropos-concepts">
-                    <p><strong>Certains concepts sont nouveaux ?</strong> Trois guides t’expliquent le concept des micro-données, la taxonomie SOLO et le modèle RàI qui servent au dépistage des difficultés et à la planification des interventions. L’aide et les guides sont accessibles en tout temps.</p>
+                    <p><strong>Besoin d’un coup de main ?</strong> L’aide est accessible dans l’application, sous « Assistance ». Des parcours assistés s’y ajouteront bientôt pour te montrer les gestes un à un. Les guides pédagogiques sont là si tu veux aller plus loin.</p>
                     <ul class="apropos-liens banniere-bienvenue-actions">
                         <li><button type="button" class="apropos-lien" data-action="ouvrirPanneauAssistance">Assistance</button></li>
                         <li><button type="button" class="apropos-lien" data-action="naviguerAccueilCarte" data-param="labo|labo-accompagnement">Guides pédagogiques</button></li>
-                        <li><a class="apropos-lien" href="https://codexnumeris.org/tutoriels" target="_blank" rel="noopener noreferrer">Tutoriels <span aria-hidden="true">↗</span><span class="u-lecteur-ecran"> (s’ouvre dans un nouvel onglet)</span></a></li>
                     </ul>
                 </div>
                 ${paragrapheCommunaute}
@@ -322,7 +330,10 @@ function deplacerFocusVersSection(section) {
  */
 function commencerParLeTrimestre() {
     const classe = window.Assistance.parcours().find(function(p) { return p.id === 'classe'; });
-    if (classe) classe.lancer();
+    if (classe) { classe.lancer(); return; }
+    // Parcours fermés (15 nov. 2026, js/assistance.js) : la porte ne reste pas muette, elle mène à
+    // Cadre › Trimestre, là où le parcours commençait.
+    naviguerAccueilCarte('calendrier|calendrier-trimestre');
 }
 
 /**
