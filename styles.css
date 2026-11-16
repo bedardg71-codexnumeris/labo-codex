@@ -27376,6 +27376,7 @@ body.mode-clair {
 .travaux-compteur-pill.annote { background: var(--bleu-clair, #6aacb8); color: #fff; }
 .travaux-compteur-pill.importe { background: var(--turquoise-500, #2da89e); color: #fff; }
 .travaux-compteur-pill.incomplet { background: var(--pastille-attention-fond); color: var(--pastille-attention-texte); }   /* statut incomplet (25 oct. 2026) */
+.travaux-compteur-pill.non-enregistree { background: var(--pastille-attention-fond); color: var(--pastille-attention-texte); }   /* non verrouillée, vue Archivage (16 nov. 2026) */
 
 /* ===============================
    MODALE TRANSFERT FICHIERS

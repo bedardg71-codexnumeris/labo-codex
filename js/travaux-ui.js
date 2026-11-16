@@ -3106,11 +3106,37 @@
     }
 
     /**
+     * Vue Archivage (16 nov. 2026) — les élèves que l'Export Léa laisse de côté pour une production, faute de
+     * verrou. UNE source : `travauxArchivage.selectionnerEvaluationsLea(...).nonVerrouillees`, celle du compteur
+     * et de l'export ; la grille ne rejuge pas le verrou de son côté (reprise non verrouillée, doublon divergent).
+     * @param {string} productionId
+     * @returns {Set<string>} les DA laissés de côté
+     */
+    function _dasLaissesDeCoteLea(productionId) {
+        if (typeof travauxArchivage === 'undefined' || typeof travauxArchivage.selectionnerEvaluationsLea !== 'function') return new Set();
+        const selection = travauxArchivage.selectionnerEvaluationsLea(productionId, null, false);
+        return new Set((selection.nonVerrouillees || []).map(e => String(e.etudiantDA)));
+    }
+
+    /** La copie est-elle celle d'un élève laissé de côté ? `laissees` est nul hors de la vue Archivage. */
+    function _copieLaisseeDeCote(f, laissees) {
+        return !!(laissees && f.etudiantDA && laissees.has(String(f.etudiantDA)));
+    }
+
+    /** En vue Archivage, « Non verrouillée » remplace le statut d'une copie laissée de côté ; « Incomplet » prime. */
+    function _statutPastilleArchivage(statut, laisseeDeCote) {
+        if (!laisseeDeCote || statut.classe === 'incomplet') return statut;
+        return { texte: 'Non verrouillée', classe: 'non-enregistree' };
+    }
+
+    /**
      * Genere un badge compact pour un fichier importe
      * @param {Object} f - Le fichier
+     * @param {string} [action]
+     * @param {Set<string>|null} [laissees] - vue Archivage seulement : les DA que l'Export Léa laisse de côté
      * @returns {string} HTML
      */
-    function genererBadgeFichierImporte(f, action) {
+    function genererBadgeFichierImporte(f, action, laissees) {
         action = action || 'ouvrirPreviewInline';
         const etudiant = travauxImport.trouverEtudiantParDA(f.etudiantDA);
         const nomReel = etudiant
@@ -3119,7 +3145,8 @@
         const nomEtudiant = (typeof anonymiserNom === 'function' && anonymiserNom(f.etudiantDA)) || nomReel;
 
         const evaluation = travauxResolution.trouverEvaluationPourFichier(f);
-        const { texte: statutTexte, classe: statutClasse } = statutPastilleFichier(f, evaluation);
+        const laisseeDeCote = _copieLaisseeDeCote(f, laissees);
+        const { texte: statutTexte, classe: statutClasse } = _statutPastilleArchivage(statutPastilleFichier(f, evaluation), laisseeDeCote);
 
         // 🔧 FIX (29 mars 2026) : Indicateurs reprise/remplacée dans les badges
         // Étoile ★ pour les reprises (comme le profil Engagement)
@@ -3134,9 +3161,11 @@
             ? '<span class="profil-texte-petit" title="Reprise" style="margin-left:2px">★</span>'
             : '';
 
-        const verrou = (evaluation && evaluation.verrouillee)
-            ? '<span class="travaux-badge-verrou" title="Évaluation verrouillée"><img src="icons/icon-lock.svg" alt="" class="btn-inline-icon"></span>'
-            : '';
+        const verrou = laisseeDeCote
+            ? '<span class="travaux-badge-verrou" title="Évaluation non verrouillée\u00a0: laissée de côté par l\u2019export"><img src="icons/icon-open-lock.svg" alt="" class="btn-inline-icon"></span>'
+            : (evaluation && evaluation.verrouillee)
+                ? '<span class="travaux-badge-verrou" title="Évaluation verrouillée"><img src="icons/icon-lock.svg" alt="" class="btn-inline-icon"></span>'
+                : '';
 
         // Badge evalue/remis sur la page d'archivage → previsualisation PDF complete
         const actionName = (evaluation && action === 'ouvrirPreviewInline')
@@ -3219,11 +3248,13 @@
     /**
      * Genere un resume compact des statuts pour un groupe de fichiers
      */
-    function genererResumeStatuts(fichiers, evaluations) {
-        let nbEvalue = 0, nbAnnote = 0, nbImporte = 0, nbIncomplet = 0;
+    function genererResumeStatuts(fichiers, evaluations, laissees) {
+        let nbEvalue = 0, nbAnnote = 0, nbImporte = 0, nbIncomplet = 0, nbNonVerrouillee = 0;
         fichiers.forEach(f => {
             const s = determinerStatutFichier(f, evaluations);
-            if (s === 'evalue') nbEvalue++;
+            // Vue Archivage (16 nov. 2026) : la copie laissée de côté par l'export sort de son compte ; « Incomplet » prime.
+            if (s !== 'incomplet' && _copieLaisseeDeCote(f, laissees)) nbNonVerrouillee++;
+            else if (s === 'evalue') nbEvalue++;
             else if (s === 'incomplet') nbIncomplet++;
             else if (s === 'annote') nbAnnote++;
             else nbImporte++;
@@ -3233,6 +3264,7 @@
         if (nbAnnote > 0) parts.push(`<span class="travaux-compteur-pill annote">${nbAnnote} annoté${nbAnnote > 1 ? 's' : ''}</span>`);
         if (nbImporte > 0) parts.push(`<span class="travaux-compteur-pill importe">${nbImporte} importé${nbImporte > 1 ? 's' : ''}</span>`);
         if (nbIncomplet > 0) parts.push(`<span class="travaux-compteur-pill incomplet">${nbIncomplet} incomplet${nbIncomplet > 1 ? 's' : ''}</span>`);
+        if (nbNonVerrouillee > 0) parts.push(`<span class="travaux-compteur-pill non-enregistree">${nbNonVerrouillee} non verrouillée${nbNonVerrouillee > 1 ? 's' : ''}</span>`);
         return parts.join(' ');
     }
 
@@ -3322,11 +3354,13 @@
         productions.forEach(p => {
             const g = groupes[p.id];
             if (!g || g.length === 0) return;
-            const resume = genererResumeStatuts(g, evaluations);
+            // Vue Archivage seulement : le carrousel d'annotation (action « ouvrirFichier ») ne marque rien.
+            const laissees = (action === 'ouvrirPreviewInline') ? _dasLaissesDeCoteLea(p.id) : null;
+            const resume = genererResumeStatuts(g, evaluations, laissees);
             const compteur = compteurEtudiantsFichiers(g, p.id);
             html += `<h5 class="travaux-groupe-production-titre">${echapperHtml(p.titre || p.nom || p.id)} ${compteur} <span class="travaux-compteurs-groupe">${resume}</span></h5>`;
             html += `<div class="travaux-badges-groupe" data-production-id="${p.id}">`;
-            g.forEach(f => { html += genererBadgeFichierImporte(f, action); });
+            g.forEach(f => { html += genererBadgeFichierImporte(f, action, laissees); });
             html += '</div>';
             delete groupes[p.id];
         });
