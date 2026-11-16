@@ -33,7 +33,9 @@
                 'Réordonner, retirer ou pivoter une page dans l’éditeur de pages, ou réunir plusieurs fichiers à l’import, ne réduit plus la définition de la copie.',
                 'Les Propriétés d’un fichier et l’écran d’import donnent les dimensions en pixels de chaque page, PDF compris.',
                 '«&nbsp;Effacer la page&nbsp;» demande une confirmation.',
-                'Après le remplacement d’une copie, la bande des copies d’Annoter se met à jour sans recharger la page.'
+                'Après le remplacement d’une copie, la bande des copies d’Annoter se met à jour sans recharger la page.',
+                // 1.248.3 (16 nov. 2026, #1283) : ligne proposée par Cowork, que Grégoire peut corriger.
+                'La démo s’ouvre maintenant depuis le menu en haut à droite.'
             ]
         },
         {
