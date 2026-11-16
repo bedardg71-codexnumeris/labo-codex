@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import { rouvrirLesParcours } from './harness/attendre-application.js';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -16,6 +17,7 @@ async function ouvrirDemo(page, largeur, erreurs) {
     await page.setViewportSize({ width: largeur, height: 900 });
     await page.goto(indexHtml);
     await page.waitForFunction(() => window.dbReady === true && typeof window.activerModeDemo === 'function', null, { timeout: 20000 });
+    await rouvrirLesParcours(page); // fermés dans l'application depuis le 15 nov. 2026 : le rang du menu se juge ouverts
     await page.evaluate(async () => { await window.activerModeDemo(); });
 }
 

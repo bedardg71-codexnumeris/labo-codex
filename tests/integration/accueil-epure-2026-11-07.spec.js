@@ -63,7 +63,7 @@ const TACHES_ATTENDUES = [
     ['Organiser tes rencontres', 'Suivi › Rencontres']
 ];
 
-test('« À propos » : la devise, quatre intertitres, trois liens, « Par où commencer ? » et ses trois vrais boutons', async ({ page }) => {
+test('« À propos » : la devise, quatre intertitres, deux liens, « Par où commencer ? » et ses trois vrais boutons', async ({ page }) => {
     await ouvrirAccueilVide(page, 1180);
     const lu = await page.evaluate(() => {
         const b = document.getElementById('banniere-bienvenue');
@@ -83,12 +83,16 @@ test('« À propos » : la devise, quatre intertitres, trois liens, « Par où c
     });
     expect(lu.replie, 'aucun trimestre : ouvert').toBe(false);
     expect(lu.devise).toEqual(['Suivre l’apprentissage. Soutenir l’enseignement.']);
-    expect(lu.intertitres).toEqual(['Ce que fait l’application', 'Ton jugement d’abord', 'Un commun éducatif', 'Tes données chez toi']);
-    expect(lu.premier).toBe('Labo Codex est une application');
+    // ↻ 15 nov. 2026 : les quatre blocs et les deux paragraphes du bas changent de mots ; « Tutoriels » part.
+    expect(lu.intertitres).toEqual(['Ce que fait l’application', 'Le jugement humain', 'Un espace autonome', 'Un accès gratuit et sécuritaire']);
+    expect(lu.premier).toBe('Accompagner chacun·e avec bien');
+    for (const parti of ['micro-données', 'SOLO', 'RàI', 'CoP', 'Modélisation', 'Pratique guidée', 'Tutoriels']) {
+        expect(lu.corps.split('Par où commencer')[0], parti).not.toContain(parti);
+    }
     expect(lu.corps).not.toContain('Bienvenue dans Labo Codex');
     expect(lu.corps).not.toContain('Labo Codex est un outil de soutien');
     // ↻ Lot « Les deux parcours » (8 nov. 2026) : « Visite guidée » devient « Assistance ».
-    expect(lu.liens).toEqual(['Assistance', 'Guides pédagogiques', 'Tutoriels ↗ (s’ouvre dans un nouvel onglet)']);
+    expect(lu.liens).toEqual(['Assistance', 'Guides pédagogiques']);
     expect(lu.label).toEqual(['Par où commencer ?']);
     expect(lu.boutons).toEqual([['BUTTON', 'Commencer', true], ['BUTTON', 'Commencer', true], ['BUTTON', 'Explorer', true]]);
     expect(lu.cp).toBe('Explore un cours de démonstration déjà configuré, aux données fictives mais réalistes.');

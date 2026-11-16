@@ -143,7 +143,7 @@ const EMBOITEES = ['evaluations/evaluations-liste', 'evaluations/evaluations-exp
 // Pas de filet seul (Grégoire, 7 nov.) : un encadré garde son fond ET son filet (alertes, guidage de la démo) ou perd
 // les deux. Ces deux blocs perdent les deux ; leur amorce en gras reste, mot pour mot.
 const SANS_CADRE = {
-    'accueil/section-accueil': ['.banniere-bienvenue-acces', 'Tu as besoin de support humain ?'],
+    'accueil/section-accueil': ['.banniere-bienvenue-acces', 'Envie d’en parler avec des collègues\u00a0?'], // ↻ 15 nov. 2026 : nouvelle amorce
     'labo/labo-comparateur': ['.comparateur-note-dev', 'Outil en développement']
 };
 for (const clair of [false, true]) {

@@ -159,7 +159,9 @@ describe('le lancement provisoire de la partie 1 est parti', () => {
         const accueil = tranche(lire('js/accueil.js'), 'function commencerParLeTrimestre()', '\n}\n');
         expect(accueil).toContain("p.id === 'classe'");
         expect(accueil).toContain('classe.lancer()');
-        expect(accueil).not.toContain('naviguerAccueilCarte');
+        // 15 nov. 2026 : les parcours sont fermés (PARCOURS_OUVERTS, js/assistance.js). La porte ne reste pas muette :
+        // le parcours d'abord, et seulement s'il n'est pas offert, Cadre › Trimestre. À resserrer quand ils rouvrent.
+        expect(accueil).toMatch(/if \(classe\) \{ classe\.lancer\(\); return; \}\s*(\/\/[^\n]*\s*)*naviguerAccueilCarte\('calendrier\|calendrier-trimestre'\);/);
         expect(accueil).not.toContain('ouvrirAccordeonDeLEtape');
     });
 
