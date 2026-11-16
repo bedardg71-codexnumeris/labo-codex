@@ -7,6 +7,18 @@
 
 ---
 
+## 16 NOV. 2026, 17 H 45 (Claude Code) : **LE TRAVAIL LE PLUS RÉCENT VIT SUR `lot/deux-temps-modeles` (`448283ee8`) — « DÉCOUVRIR » SEUL EN LIGNE ET L'INTERRUPTEUR ÉTEINT SONT PRÊTS, LA 1.249.0 N'EST PAS PARTIE** — verdict complet arrêté au 5e morceau sur 40
+
+Mandats : deux relais de Cowork du 16 nov. (13 h 20, l'essai de Grégoire sur l'iPad ; 15 h 48, « Découvrir » seul en ligne et l'interrupteur). `main` n'a pas bougé : `baddec78f`, 1.248.3. PR d'aperçu n° 23, build `1116-1631`.
+
+- **Sur la branche, fait** : l'essai sur l'iPad (`9c6f06973` : « Découvrir » choisit le premier groupe de la démo, la bulle ne couvre ni le nom de la bande ni ses points, la fin, le triangle, l'insécable) ; `main` repris (`cfa9178a3`) ; le verrou par parcours, `PARCOURS_OUVERTS = ['decouvrir']`, et l'interrupteur d'« Apporter mon matériel » éteint à la première arrivée (`7fb4087b8`, `7f2cc67ce`, `b05dfc8c2`, `643ec6497`). Vitest complet vert (11 888). Rapports : `plans de travail/RAPPORT-2026-11-16-essai-ipad.md` et `RAPPORT-2026-11-16-decouvrir-en-ligne.md` (sur la branche).
+- **Pourquoi la release n'est pas partie** : onze rouges nouveaux dans quatre bancs de parcours. Dix précèdent la session (mesurés sur `bfd4789f8` : `parcours-fleches-2026-11-10` × 6, `bulle-sur-telephone-2026-11-09` × 3, `deux-temps-modeles-2026-11-13` × 1 ; la réécriture de « Découvrir » du matin, bancs non rejoués alors). Un vient de la ligne de la poignée : la première bulle de « Nous faisons » couvre le nom du trimestre à 1180 × 900 (`parcours-2-ma-classe-2026-11-09`) ; décision à prendre (§3 du rapport).
+- **Ce qui attend, en local seulement** : la fusion et la 1.249.0 préparées, avec les deux lignes des Nouvelles accordées par Grégoire, sous `attente/1.249.0-non-jugee` (`f4f8702f9`, arbre `../labo-codex-fusion`), non poussée, en retard d'un commit de documents sur la branche. À refaire plutôt qu'à reprendre : fusion `--no-ff`, `release.mjs minor`, verdict complet, push.
+- **À faire avant la mise en ligne** : lire puis réaligner (ou corriger) les dix rouges ; trancher la ligne de la poignée ; rejouer les trente bancs de parcours AVANT de préparer la release ; puis le verdict complet (40 morceaux d'environ trois minutes ; `parcours-8-commentaires` et `en-tete-epure` rouvrent de nouveau les parcours eux-mêmes).
+- **À savoir avant de fusionner** : la branche change aussi l'entrée et la sortie de la démo pour tout le monde (`js/demo-activation.js`, +141 lignes ; §4 du rapport). Non jugé par un verdict complet.
+- **Non vérifié** : 347 specs sur 397 (les morceaux 6 à 40) ; Safari et l'iPad (porte `PORTES-TERRAIN-2026-11-16-essai-ipad.md`, cinq gestes, artefact à publier par Cowork) ; pas de relecture croisée.
+- **Complexité** : non relevée (aucune release).
+
 ## 16 NOV. 2026, 14 H 55 (Claude Code) : **1.248.3 SUR `main` ET EN LIGNE — LA DÉMO DANS LE MENU EN HAUT À DROITE (#1283)** — verdict complet du Mac, vert par report après une inscription aux intermittentes
 
 Mandat : deux relais de Cowork du 16 nov. (mise en ligne de `lot/menu-demo`, PR n° 27 ; puis option 1 sur le rouge). Le travail vit sur `main` : fusion `d74874f70` (`--no-ff`), release `2a735b320` (build `1116-1227`), baseline `bfa3402d3`, poussé à 14 h 43. Netlify : déploiement `6afb5d0e`, prêt, commit `bfa3402d3`, publié à 14 h 44 min 47 s ; `version.json` servi = `1.248.3` / `1116-1227` ; `index.html`, `version.js`, `js/accompagnement-contenu-popup.js` et `js/changelog-data.js` servis identiques au commit (`cmp`). PR n° 27 : fusionnée par le push (GitHub, 14 h 44).
