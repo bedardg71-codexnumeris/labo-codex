@@ -476,7 +476,22 @@
         return el;
     }
 
+    // La phrase d'avant les quatre temps (celle de `main` jusqu'au 16 nov. 2026), mot pour mot : elle présente le
+    // panneau tant qu'aucun parcours ouvert n'a ses deux temps.
+    var INTRO_SANS_LES_TEMPS = 'Des parcours où tu fais les gestes toi-même, accompagné·e pas à pas : quoi faire, comment le faire, et pourquoi.';
+
+    /**
+     * La présentation du panneau. Les quatre temps nomment « Je regarde » et « Nous faisons » : ils ne paraissent que
+     * si un parcours OUVERT offre ces deux boutons (le verrou, en tête). Sinon, la phrase d'avant : le panneau
+     * n'annonce pas des boutons qu'il ne montre pas (16 nov. 2026, « Découvrir » seul en ligne).
+     */
     function construireIntro() {
+        if (!premierModele()) {
+            var phrase = document.createElement('p');
+            phrase.className = 'assistance-intro';
+            phrase.textContent = INTRO_SANS_LES_TEMPS;
+            return phrase;
+        }
         var intro = document.createElement('div');
         intro.className = 'assistance-intro';
         var tete = grasPuisTexte('p', QUATRE_TEMPS.titre, '');

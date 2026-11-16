@@ -97,6 +97,9 @@ describe('le verrou des parcours : « Découvrir » seul est ouvert (16 nov. 202
         expect(code).toContain("var TEXTE_A_VENIR = 'À venir';");
         expect(tranche(code, 'function remplirListe(liste) {', '\n    }\n')).toContain('offerts().forEach(');
         expect(tranche(code, 'if (offerts().length < registre.length || !registre.length) {', '\n        }\n')).toContain('aVenir.textContent = TEXTE_A_VENIR;');
+        // Les quatre temps nomment « Je regarde » et « Nous faisons » : sans parcours ouvert à deux temps, la phrase d'avant.
+        expect(tranche(code, 'function construireIntro() {', '\n    }\n')).toContain('if (!premierModele()) {');
+        expect(code).toContain("var INTRO_SANS_LES_TEMPS = 'Des parcours où tu fais les gestes toi-même, accompagné·e pas à pas : quoi faire, comment le faire, et pourquoi.';");
         // La remise à neuf de la démo sert les modèles : elle ne paraît que si un parcours ouvert en a un.
         expect(code).toContain('if (premierModele()) panneau.appendChild(construireBoutonNeuf());');
     });

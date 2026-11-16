@@ -55,8 +55,14 @@ describe('le panneau « Assistance » : le texte en quatre temps, mot pour mot',
         expect(bloc).toContain(phrase);
     });
 
-    it('l’ancienne phrase de présentation est partie', () => {
-        expect(ASSISTANCE).not.toContain('Des parcours où tu fais les gestes toi-même');
+    // 16 nov. 2026 (« Découvrir » seul en ligne) : l'ancienne phrase revient, mais seulement tant qu'aucun parcours
+    // ouvert n'a ses deux temps ; elle ne paraît jamais avec les quatre lignes (banc parcours-verrou-2026-11-16).
+    it('l’ancienne phrase de présentation ne paraît que sans parcours ouvert à deux temps, jamais avec les quatre lignes', () => {
+        expect(ASSISTANCE.match(/Des parcours où tu fais les gestes toi-même/g)).toHaveLength(1);
+        const intro = ASSISTANCE.slice(ASSISTANCE.indexOf('function construireIntro() {'));
+        expect(intro.indexOf('if (!premierModele()) {')).toBeGreaterThan(-1);
+        expect(intro.indexOf('phrase.textContent = INTRO_SANS_LES_TEMPS;')).toBeLessThan(intro.indexOf('return phrase;'));
+        expect(intro.indexOf('return phrase;')).toBeLessThan(intro.indexOf('QUATRE_TEMPS.titre'));
     });
 
     it('le choix unique du matériel est retiré (14 nov. 2026) : ni radio, ni défaut piloté par un banc', () => {

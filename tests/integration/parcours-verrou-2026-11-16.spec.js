@@ -63,6 +63,11 @@ test('le panneau « Assistance » : « Découvrir » seul, « À venir » dessou
     await expect(panneau.locator('#assistance-parcours-liste > li')).toHaveCount(1);
     await expect(panneau.locator('[data-parcours="decouvrir"] .assistance-parcours-bouton')).toHaveText('Commencer');
     for (const id of FERMES) await expect(panneau.locator(`[data-parcours="${id}"]`)).toHaveCount(0);
+    // La présentation : la phrase d'avant les quatre temps (ils nomment « Je regarde » et « Nous faisons », qui ne sont pas offerts).
+    await expect(panneau.locator('.assistance-intro')).toHaveText('Des parcours où tu fais les gestes toi-même, accompagné·e pas à pas : quoi faire, comment le faire, et pourquoi.');
+    await expect(panneau.locator('.assistance-intro-temps')).toHaveCount(0);
+    await expect(panneau).not.toContainText('Je regarde');
+    await expect(panneau).not.toContainText('Nous faisons');
     // « À venir », sous la liste ; les parcours fermés ne sont pas nommés.
     await expect(panneau.locator('#assistance-a-venir')).toHaveText('À venir');
     expect(await page.evaluate(() => {
