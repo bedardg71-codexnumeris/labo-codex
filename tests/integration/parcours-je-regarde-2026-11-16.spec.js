@@ -15,6 +15,20 @@
 //       f. une seule page par bulle : la hauteur de chacune est RELEVÉE (le rapport la cite), rien n'est coupé.
 // LE RELEVÉ : avec CAPTURES_PARCOURS=<dossier>, les captures de chaque bulle et `releve-bulles.json` (largeur,
 // hauteur, hauteur disponible, ce qui défile) y sont déposés.
+// REPRIS LE 16 NOV. APRÈS L'ESSAI DE GRÉGOIRE SUR L'IPAD (`plans de travail/CONSIGNE-2026-11-16-essai-ipad.md`) :
+//   A. « Découvrir » choisit lui-même le premier groupe de la démo, à l'ouverture et à la reprise (jugé avec le
+//      deuxième groupe présent et choisi dans l'en-tête, à la fin du troisième essai) ;
+//   B. le triangle des sections ; les deux lignes de la bulle 2 et son « A 84 % » ; la fin (l'objectif atteint dans la
+//      forme de l'objectif, la phrase de la suite) ; la bulle 8 sans « Tout repose ici », les sections refermées
+//      derrière ; UNE flèche vers le nom de la section avant « Remplir » ; le groupe nommé à la bulle 6 ; la poignée ;
+//   8. LA BULLE NE COUVRE PAS CE DONT ELLE PARLE, dans les deux orientations et à la hauteur que Safari laisse à la
+//      page sur l'iPad couché (`ECRANS_DE_LA_BANDE` : 1180 × 740, sous les barres du navigateur ; le défaut ne se
+//      voyait pas à 1180 × 820, où la bulle tient sous la bande).
+// Break-tests de l'essai (16 nov. 2026), chacun ROUGE puis rétabli :
+//   A. `await choisirLeGroupeDeLaDemo();` retiré de `lancer` (js/parcours-decouvrir.js) → la bulle 1 s'ouvre sur le
+//      deuxième groupe ;
+//   8. `aussiEviter` retiré de la bulle 8 de « Je regarde » (js/parcours-classe.js) → sept points couverts à 1180 × 740 ;
+//      `aussiEviter: bandeEtSesPoints` retiré de la bulle 1 de « Découvrir » → le nom de la bande couvert en paysage.
 // Break-tests (16 nov. 2026), un par règle, chacun ROUGE puis rétabli :
 //   a. `if (etat.i === 0)` retiré de l'objectif (js/parcours-moteur.js) → la bulle 2 porte l'objectif ;
 //   b. `attendreLaPage(!!etape.section)` → `attendreLaPage(false)` → la bulle se voit pendant que la page défile ;
@@ -53,7 +67,12 @@ const lire = (page) => page.evaluate(() => {
     return {
         titre: plat(b.querySelector('.parcours-bulle-titre')),
         rang: plat(b.querySelector('.parcours-bulle-rang')),
-        objectif: plat(b.querySelector('.parcours-bulle-objectif')),
+        objectif: plat(b.querySelector('.parcours-bulle-objectif:not(.parcours-bulle-atteint)')),
+        atteint: plat(b.querySelector('.parcours-bulle-atteint')),
+        suite: plat(b.querySelector('.parcours-bulle-suite')),
+        aide: plat(b.querySelector('.parcours-bulle-aide')),
+        petits: [...b.querySelectorAll('.parcours-bulle-aide, .parcours-bulle-revue')].map((e) => parseFloat(getComputedStyle(e).fontSize)),
+        fleches: [...document.querySelectorAll('.parcours-fleche')].map((g) => g.getAttribute('data-cible')),
         confirme: plat(b.querySelector('.parcours-bulle-confirme')),
         lieu: plat(b.querySelector('.parcours-bulle-lieu')),
         ordre: [...lignes.children].map((e) => e.className || e.tagName.toLowerCase()),
@@ -81,14 +100,65 @@ async function relever(page, parcours, n, etat) {
 async function triangle(page) {
     const lu = () => page.evaluate(() => {
         const r = document.getElementById('parcours-bulle-rang');
-        return { signe: getComputedStyle(r, '::after').content, ouvert: r.getAttribute('aria-expanded'), texte: r.textContent };
+        const s = getComputedStyle(r, '::after');
+        const section = getComputedStyle(document.querySelector('.carte.accordeon .accordeon-chevron'));
+        return { signe: s.content, tourne: s.transform, taille: parseFloat(s.fontSize), tailleDesSections: parseFloat(section.fontSize),
+            cible: Math.round(r.getBoundingClientRect().height), ouvert: r.getAttribute('aria-expanded'), texte: r.textContent };
     });
-    const ferme = await lu();
+    // La rotation est une transition : chaque état est lu une fois le triangle arrêté.
+    const pose = async (ouvert) => { await expect(page.locator('#parcours-bulle-rang')).toHaveAttribute('aria-expanded', ouvert);
+        await expect.poll(async () => { const a = (await lu()).tourne; await page.waitForFunction(() => new Promise((f) => requestAnimationFrame(() => requestAnimationFrame(() => f(true))))); return a === (await lu()).tourne; }, { timeout: 5000 }).toBe(true); return lu(); };
+    const ferme = await pose('false');
     await page.click('#parcours-bulle-rang');
-    const ouvert = await lu();
-    await page.click('#parcours-bulle-rang');
-    const referme = await lu();
+    const ouvert = await pose('true');
+    // Le triangle lui-même réagit au doigt : touché à son centre, il referme la liste.
+    const boite = await page.locator('#parcours-bulle-rang').boundingBox();
+    await page.mouse.click(boite.x + boite.width - 8, boite.y + boite.height / 2);
+    const referme = await pose('false');
     return { ferme, ouvert, referme };
+}
+
+/**
+ * RÈGLE 8 : la bulle et la bande d'assiduité. Le nom de la bande et chacun de ses points : à l'écran, et pas sous la
+ * bulle ; les flèches qui finissent sur un point.
+ */
+const lireBande = (page) => page.evaluate(() => {
+    const b = document.getElementById('parcours-bulle').getBoundingClientRect();
+    const h = document.querySelector('#section-suivi h4[data-tooltip="tdb-assiduite"]');
+    const croise = (r) => !(r.right <= b.left || b.right <= r.left || r.bottom <= b.top || b.bottom <= r.top);
+    const points = [...h.parentElement.querySelectorAll('.barre-indicateur .barre-etudiant[data-da]')].map((e) => e.getBoundingClientRect());
+    const cle = (r) => [r.left, r.top, r.right, r.bottom].map(Math.round).join(',');
+    const cibles = [...document.querySelectorAll('.parcours-fleche')].map((g) => g.getAttribute('data-cible'));
+    const barre = cle(h.parentElement.querySelector('.barre-indicateur').getBoundingClientRect());
+    return { points: points.length, pointsCouverts: points.filter(croise).length, nomCouvert: croise(h.getBoundingClientRect()),
+        aLEcran: points.every((r) => r.top >= 0 && r.bottom <= window.innerHeight),
+        // Une flèche finit sur un point : sa cible est un point, ou deux points qui se touchent (le moteur les fond).
+        flechesSurUnPoint: cibles.filter((c) => {
+            const [g, ht, d, bs] = c.split(',').map(Number);
+            return c !== barre && d - g < 60 && points.some((r) => { const x = (r.left + r.right) / 2, y = (r.top + r.bottom) / 2; return x >= g - 1 && x <= d + 1 && y >= ht - 1 && y <= bs + 1; });
+        }).length, flecheSurLaBandeEntiere: cibles.includes(barre) };
+});
+// L'iPad debout, couché, et couché sous les barres de Safari (la page n'a alors que 740 px de haut environ).
+const ECRANS_DE_LA_BANDE = [[820, 1180], [1180, 820], [1180, 740]];
+/** La même bulle, rouverte à chaque écran (le moteur replace la page à l'ouverture d'une étape). */
+async function aChaqueEcran(page, etape, titre, juger) {
+    for (const [l, h] of ECRANS_DE_LA_BANDE) {
+        await page.setViewportSize({ width: l, height: h });
+        await page.evaluate((i) => ParcoursMoteur.allerA(i), etape);
+        await expect(bulle(page).locator('.parcours-bulle-titre')).toHaveText(titre);
+        await expect(bulle(page)).not.toHaveClass(/est-en-attente/);
+        // Deux passages de la sonde au moins : la bulle et ses flèches sont à leur place.
+        const depart = await page.evaluate(() => ParcoursMoteur.placement().passages);
+        await page.waitForFunction((d) => { const p = ParcoursMoteur.placement(); return !!p && p.passages >= d + 2; }, depart);
+        // Les points sont redessinés avec le tableau de bord (leur place en hauteur change) ; la flèche les suit au
+        // passage suivant de la sonde : on attend l'état, on ne lit pas un instant.
+        await expect(async () => juger(await lireBande(page), `${l} × ${h}`)).toPass({ timeout: 5000 });
+        await capture(page, `j-bande-${etape + 1}-${l}x${h}`);
+    }
+    await page.setViewportSize({ width: LARGEUR, height: HAUTEUR });
+    await page.evaluate((i) => ParcoursMoteur.allerA(i), etape);
+    await expect(bulle(page).locator('.parcours-bulle-titre')).toHaveText(titre);
+    await expect(bulle(page)).not.toHaveClass(/est-en-attente/);
 }
 
 /** La section dont parle la bulle : sa place sous l'en-tête, son halo, les autres blocs du Cadre, la bulle à côté. */
@@ -211,13 +281,26 @@ test('« Découvrir » : l’objectif à la première bulle, la confirmation ens
     expect(v.confirme).toBeNull();
     expect(v.lieu).toBe('Tu es dans « Suivi », à l\'onglet « Groupe ». La classe est fictive : dix étudiant·es, un trimestre complet.');
     expect(v.liste[v.liste.length - 1]).toBe('Touche « Détails » pour mettre un nom sur chaque point');
-    // Le triangle du compteur (règle d).
+    // La poignée, dite à la première bulle, en petit, sous les lignes (essai, B.7).
+    expect(v.aide).toBe('Tu peux déplacer cette bulle par sa poignée et faire défiler la page pour mieux voir.');
+    expect(v.ordre[v.ordre.length - 1]).toBe('parcours-bulle-aide');
+    expect(v.petits.every((t) => t < 14)).toBe(true);
+    // Le triangle du compteur (règle d) : celui des sections, à leur taille, couché puis pointe en bas (essai, B.1).
     const t = await triangle(page);
     expect([t.ferme.ouvert, t.ouvert.ouvert, t.referme.ouvert]).toEqual(['false', 'true', 'false']);
-    expect(t.ferme.signe).not.toBe('none');
-    expect(t.ouvert.signe).not.toBe(t.ferme.signe);
-    expect(t.referme.signe).toBe(t.ferme.signe);
+    expect(t.ferme.signe).toBe('"▼"');
+    expect(t.ferme.tourne).not.toBe('none');
+    expect(t.ouvert.tourne).toBe('none');
+    expect(t.referme.tourne).toBe(t.ferme.tourne);
+    expect(Math.abs(t.ferme.taille - t.ferme.tailleDesSections), `le triangle (${t.ferme.taille} px) a la taille de celui des sections (${t.ferme.tailleDesSections} px)`).toBeLessThanOrEqual(1);
+    expect(t.ferme.cible).toBeGreaterThanOrEqual(44);
     expect([t.ferme.texte, t.ouvert.texte]).toEqual(['1 sur 8', '1 sur 8']);
+    // RÈGLE 8 : ni le nom de la bande ni un seul point sous la bulle ; la flèche montre un point, pas la bande.
+    await aChaqueEcran(page, 0, "Ta classe d'un coup d'œil", (bande, ecran) => {
+        expect({ points: bande.points, pointsCouverts: bande.pointsCouverts, nomCouvert: bande.nomCouvert }, 'bulle 1, ' + ecran).toEqual({ points: 10, pointsCouverts: 0, nomCouvert: false });
+        expect(bande.flechesSurUnPoint, `bulle 1, ${ecran} : une flèche finit sur un point`).toBe(1);
+        expect(bande.flecheSurLaBandeEntiere, `bulle 1, ${ecran} : aucune flèche vers le milieu de la bande`).toBe(false);
+    });
     await capture(page, 'j-decouvrir-1');
     await page.click('#btn-toggle-panneau-prioritaire');
 
@@ -227,10 +310,12 @@ test('« Découvrir » : l’objectif à la première bulle, la confirmation ens
     expect(v.objectif).toBeNull();
     expect(v.confirme).toBe("Tu viens d'ouvrir « Détails » : chaque point a maintenant un nom.");
     expect(v.ordre[0]).toBe('parcours-bulle-confirme');
-    expect(v.liste[0]).toBe("Le point à l'écart, c'est Suricate Loyal");
-    // Ce que dit la bulle est ce que montre l'écran : son nom, et 84 %.
+    expect(v.liste.slice(0, 2)).toEqual(["Pose le doigt sur le point à l'écart : son nom apparaît",
+        "C'est Suricate Loyal. Son assiduité est de 84 % ; celle des autres, de 93 % ou plus"]);
+    // Ce que dit la bulle est ce que montre l'écran : son nom, et son « A 84 % », que la consigne fait toucher.
     const loyal = page.locator('#panneau-suivi-etudiants .etudiant-suivi-item', { hasText: 'Suricate' });
-    await expect(loyal).toContainText('84');
+    await expect(loyal.locator('.prioritaire-indice').first()).toHaveText(/^A 84\s%$/);
+    await contourSur(page, '#panneau-suivi-etudiants .etudiant-suivi-item[data-da="' + await page.evaluate(() => db.getSync(cle('groupeEtudiants'), []).find((e) => e.nom === 'Loyal').da) + '"] .prioritaire-indice');
     await capture(page, 'j-decouvrir-2');
     await loyal.locator('.prioritaire-indice').first().click();
 
@@ -275,7 +360,21 @@ test('« Découvrir » : l’objectif à la première bulle, la confirmation ens
     await attendreEtape(page, 8, 8, 'Poser ton cadre');
     v = await relever(page, P, 8, '');
     expect(v.lieu).toBe(await lieuDuMenu());
-    expect(v.liste).toContain('Objectif atteint : tu es en mesure de repérer qui a besoin de toi sans attendre une main levée et de nommer précisément son défi');
+    // La fin (essai, B.3) : l'objectif atteint dans la forme de l'objectif, puis la phrase de la suite, la dernière
+    // avant les boutons ; « Pour revoir une étape », en petit ; plus rien de cela dans la liste.
+    expect(v.atteint).toBe('Objectif atteint : tu es en mesure de repérer qui a besoin de toi sans attendre une main levée et de nommer précisément son défi.');
+    expect(v.suite).toBe("Chaque parcours a son objectif. C'est toi qui choisis la suite.");
+    expect(v.ordre.slice(-3)).toEqual(['parcours-bulle-note parcours-bulle-revue', 'parcours-bulle-objectif parcours-bulle-atteint', 'parcours-bulle-suite']);
+    expect(v.liste.some((l) => /Objectif atteint|Chaque parcours|Tout repose ici/.test(l))).toBe(false);
+    expect(v.aide, 'la poignée n’est dite qu’à la première bulle').toBeNull();
+    expect(await page.evaluate(() => { const f = (s) => { const c = getComputedStyle(document.querySelector('#parcours-bulle ' + s)); return [c.fontWeight, c.borderTopWidth, c.borderBottomWidth].join(' '); };
+        return f('.parcours-bulle-atteint'); })).toBe('600 1px 1px');
+    // Elle tient sans défiler, l'iPad couché compris (essai, B.4) ; derrière elle, les sections du Cadre sont refermées.
+    // (Plus haute que l'écran utile à sa largeur ordinaire, elle s'élargit : le moteur, « AVANT LE FILET ».)
+    expect(v.defile, 'bulle 8 : rien n’y défile').toBe(false);
+    expect(v.hauteurEntiere, `bulle 8 : elle tient (${v.hauteurEntiere} px pour ${v.disponible}, large de ${v.largeur})`).toBeLessThanOrEqual(v.disponible);
+    expect(v.bas, 'bulle 8 : ses boutons sont au-dessus du bandeau de la démo').toBeLessThanOrEqual(await page.evaluate(() => document.getElementById('bandeau-demo').getBoundingClientRect().top));
+    expect(await page.evaluate(() => [...document.querySelectorAll('#calendrier-trimestre .carte.accordeon:not(.ferme)')].map((a) => a.id))).toEqual([]);
     const fin = await lireBulle(page);
     expect(fin.boutons).toEqual(['Explorer la démo par moi-même', 'Voir le parcours suivant', 'Commencer avec ma classe']);
     expect(fin.principal, 'aucun bouton mis en avant').toEqual([]);
@@ -309,11 +408,24 @@ test('« Mettre ta classe en place », Je regarde : la bonne section, son nom en
         if (phrase) expect((await lire(page)).lieu, `bulle ${n} : le nom dit est celui de la page`).toBe(phrase(s.nomLu));
         return s;
     };
-    const deuxEtats = async (n, { consigne, bouton, idBloc }) => {
+    /** Le nom de la section, comme une flèche le vise. */
+    const cibleDuNom = (idBloc) => page.evaluate((id) => {
+        const r = document.querySelector('#' + id + ' .accordeon-header h3').getBoundingClientRect();
+        return [r.left, r.top, r.right, r.bottom].map(Math.round).join(',');
+    }, idBloc);
+    const deuxEtats = async (n, { consigne, bouton, idBloc, nommee = !!idBloc }) => {
         await attendreRemplir(page, 'bulle ' + n);
+        // Avant « Remplir » (essai, B.5) : UNE flèche, de la bulle vers le nom encadré de la section.
+        if (nommee) await expect.poll(async () => (await lire(page)).fleches, { message: `bulle ${n}, avant : une seule flèche, vers le nom de la section` }).toEqual([await cibleDuNom(idBloc)]);
         await relever(page, P, n, 'avant');
         await capture(page, `j-classe-${n}-avant`);
         await remplirPuisVoir(page, { consigne, bouton, contexte: 'bulle ' + n });
+        // Après : elle s'efface et laisse la place aux flèches des champs.
+        if (nommee) {
+            const apres = (await lire(page)).fleches;
+            expect(apres.length, `bulle ${n}, après : les flèches des champs`).toBeGreaterThan(0);
+            expect(apres, `bulle ${n}, après : plus de flèche vers le nom de la section`).not.toContain(await cibleDuNom(idBloc));
+        }
         await relever(page, P, n, 'après');
         await capture(page, `j-classe-${n}-apres`);
         // Remplie, la bulle a grandi : le nom de la section garde son halo, et la bulle ne le couvre toujours pas.
@@ -333,6 +445,7 @@ test('« Mettre ta classe en place », Je regarde : la bonne section, son nom en
     await jugerSection(1, 'accordeon-cours', (nom) => `Tu es dans « Cadre », à la section « ${nom} » : c'est là que tu dis quel cours tu donnes.`);
     expect((await lireSection(page, 'accordeon-cours')).nomLu).toBe('Cours et services');
     expect(ouverture.montreeEnMouvement, 'bulle 1 : jamais montrée pendant que la page défile').toBe(0);
+    expect(v.aide).toBe('Tu peux déplacer cette bulle par sa poignée et faire défiler la page pour mieux voir.');
     await deuxEtats(1, { consigne: 'Touche « Créer le cours »', bouton: '#v2-btnCreerCours', idBloc: 'accordeon-cours' });
     await expect(page.locator('#v2-codeCours')).toHaveValue(m.cours.code);
 
@@ -359,6 +472,7 @@ test('« Mettre ta classe en place », Je regarde : la bonne section, son nom en
     expect(v.lieu).toBeNull();
     // Le moteur retire le halo au changement d'étape et le repose au premier passage de la suivante : on l'attend.
     await expect(page.locator('#accordeon-groupe-etudiants .accordeon-header h3')).toHaveClass(/parcours-section-actuelle/);
+    expect(v.aide, 'la poignée n’est dite qu’à la première bulle').toBeNull();
     await deuxEtats(3, { consigne: 'Touche « Importer 10 étudiant·es »', bouton: '#v2-btnConfirmerImport' });
     await page.click('#v2-btnConfirmerImport');
 
@@ -384,6 +498,10 @@ test('« Mettre ta classe en place », Je regarde : la bonne section, son nom en
     expect(v.confirme).toBe("C'est fait : le groupe-cours est créé. La mise en place est terminée.");
     expect(await page.locator('#calendrier-trimestre .parcours-section-actuelle').count()).toBe(0);
     await contourSur(page, '#selectGroupeCoursHeader');
+    // La consigne nomme le groupe, tel que la liste de l'en-tête l'affiche (essai, B.6).
+    const nomDuGroupe = await page.evaluate((code) => [...document.querySelectorAll('#selectGroupeCoursHeader option')].find((o) => o.textContent.includes(code)).getAttribute('data-principal'), m.cours.code);
+    expect(nomDuGroupe).toBe('601-999-DM · gr. 00002');
+    expect(v.liste[v.liste.length - 1]).toBe(`Choisis dans l'en-tête le groupe que tu viens de créer : « ${nomDuGroupe} »`);
     await capture(page, 'j-classe-6');
     await page.selectOption('#selectGroupeCoursHeader', await optionDont(page, '#selectGroupeCoursHeader', m.cours.code));
 
@@ -400,21 +518,56 @@ test('« Mettre ta classe en place », Je regarde : la bonne section, son nom en
     v = await relever(page, P, 8, '');
     expect(v.confirme).toBe("C'est fait : la séance est verrouillée.");
     expect(v.lieu).toBe("Tu es dans « Suivi », à l'onglet « Groupe ». Reviens-y avant chaque séance.");
-    expect(v.liste).toContain("Objectif atteint : tu es en mesure d'expliquer ce que l'application te demande pour mettre une classe en place et ce qu'elle en tire");
+    expect(v.atteint).toBe("Objectif atteint : tu es en mesure d'expliquer ce que l'application te demande pour mettre une classe en place et ce qu'elle en tire.");
+    expect(v.suite).toBe("Chaque parcours a son objectif. C'est toi qui choisis la suite.");
+    expect(v.ordre.slice(-3)).toEqual(['parcours-bulle-note parcours-bulle-revue', 'parcours-bulle-objectif parcours-bulle-atteint', 'parcours-bulle-suite']);
+    expect(v.liste.some((l) => /Objectif atteint|Chaque parcours/.test(l))).toBe(false);
     await expect(bulle(page)).toContainText('Pour revoir une étape, touche « 8 sur 8 ».');
-    // La bulle, haute, ne couvre aucun des dix points dont elle parle (mesuré le 16 nov. : posée sur la bande, elle
-    // en cachait sept ; l'étape amène la bande sous l'en-tête, la bulle tient dessous).
-    const couverts = await page.evaluate(() => {
-        const b = document.getElementById('parcours-bulle').getBoundingClientRect();
-        const bloc = document.querySelector('#section-suivi h4[data-tooltip="tdb-assiduite"]').parentElement;
-        const points = [...bloc.querySelectorAll('.barre-etudiant[data-da]')].map((e) => e.getBoundingClientRect());
-        return { points: points.length, couverts: points.filter((r) => !(r.right <= b.left || b.right <= r.left || r.bottom <= b.top || b.bottom <= r.top)).length,
-            aLEcran: points.every((r) => r.top >= 0 && r.bottom <= window.innerHeight) };
+    // L'espace insécable devant le point-virgule (essai, 9) : « …étudiant·es ; la bande… » ne se coupe plus devant lui.
+    expect(await bulle(page).locator('.parcours-bulle-ligne-texte').first().evaluate((e) => e.textContent)).toContain('étudiant·es\u00a0; la bande «\u00a0Assiduité\u00a0»');
+    // RÈGLE 8 : la bulle, haute, ne couvre ni le nom de la bande ni aucun des dix points dont elle parle, l'iPad debout,
+    // couché, et couché sous les barres de Safari (vu par Cowork sur la capture de Grégoire : sept points couverts).
+    await aChaqueEcran(page, 7, "Le groupe d'un coup d'œil", (bande, ecran) => {
+        expect({ points: bande.points, pointsCouverts: bande.pointsCouverts, nomCouvert: bande.nomCouvert, aLEcran: bande.aLEcran }, 'bulle 8, ' + ecran)
+            .toEqual({ points: 10, pointsCouverts: 0, nomCouvert: false, aLEcran: true });
+        expect(bande.flechesSurUnPoint, `bulle 8, ${ecran} : les trois points à l'écart sont montrés`).toBeGreaterThanOrEqual(1);
     });
-    expect(couverts).toEqual({ points: 10, couverts: 0, aLEcran: true });
     const fin = await lireBulle(page);
     expect(fin.boutons).toEqual(['Le refaire avec ma classe', 'Voir le parcours suivant', 'Terminer']);
     expect(fin.principal, 'aucun bouton mis en avant').toEqual([]);
     await capture(page, 'j-classe-8');
     expect(s2.nomLu.length).toBeGreaterThan(0);
+
+    // ------------------------------------------------------------------------------------------------------------
+    // LE DÉFAUT DE L'ESSAI (A) : le deuxième groupe est monté, et c'est lui qui est choisi dans l'en-tête. « Découvrir »
+    // choisit lui-même le premier groupe de la démo, celui de Suricate Loyal, à son ouverture et à chaque reprise.
+    // ------------------------------------------------------------------------------------------------------------
+    const groupeAffiche = () => page.locator('#groupe-affichage-principal').textContent();
+    const groupeActif = () => page.evaluate(() => (db.getSync('groupeCoursActif', {}) || {}).id);
+    await bulle(page).getByRole('button', { name: 'Terminer', exact: true }).click();
+    await expect(bulle(page)).toHaveCount(0);
+    expect(await groupeAffiche(), 'avant « Découvrir », le deuxième groupe est choisi').toBe('601-999-DM · gr. 00002');
+    await ouvrirPanneau(page);
+    await carte(page, 'decouvrir').locator('.assistance-parcours-bouton').click();
+    await attendreEtape(page, 1, 8, "Ta classe d'un coup d'œil");
+    expect(await groupeActif(), 'à l’ouverture, « Découvrir » a choisi le premier groupe de la démo').toBe('GC_DEMO');
+    expect(await groupeAffiche()).toBe('601-101 · gr. 0demo');
+    expect(await enDemo(page)).toBe(true);
+    await page.click('#btn-toggle-panneau-prioritaire');
+    await attendreEtape(page, 2, 8, "Qui s'écarte ?");
+    const loyal = page.locator('#panneau-suivi-etudiants .etudiant-suivi-item', { hasText: 'Suricate' });
+    await expect(loyal, 'la personne que nomme la bulle 2 est dans la liste').toHaveCount(1);
+    await expect(loyal.locator('.prioritaire-indice').first()).toHaveText(/^A 84\s%$/);
+    // La reprise : le parcours quitté à la bulle 2, le deuxième groupe choisi de nouveau, « Détails » resté allumé.
+    await bulle(page).locator('.parcours-bulle-sortie').click();
+    await expect(bulle(page)).toHaveCount(0);
+    await page.selectOption('#selectGroupeCoursHeader', await optionDont(page, '#selectGroupeCoursHeader', m.cours.code));
+    await expect(page.locator('#groupe-affichage-principal')).toHaveText('601-999-DM · gr. 00002');
+    await ouvrirPanneau(page);
+    await carte(page, 'decouvrir').locator('.assistance-parcours-bouton').click();
+    await attendreEtape(page, 2, 8, "Qui s'écarte ?");
+    expect(await groupeActif(), 'à la reprise aussi').toBe('GC_DEMO');
+    await expect(loyal).toHaveCount(1);
+    await expect(loyal.locator('.prioritaire-indice').first(), 'à la reprise, l’étiquette porte son « A 84 % »').toHaveText(/^A 84\s%$/);
+    await capture(page, 'j-decouvrir-2-reprise');
 });

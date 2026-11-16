@@ -75,6 +75,65 @@
         return h ? h.parentElement : null;
     }
 
+    /** Les points de la bande d'assiduité, un par étudiant·e. */
+    function pointsDeLaBande() {
+        var b = blocAssiduite();
+        return b ? [].slice.call(b.querySelectorAll('.barre-indicateur .barre-etudiant[data-da]')) : [];
+    }
+
+    /**
+     * « Chaque point blanc est un·e étudiant·e » : la flèche va à un point, au cœur du groupe (celui du milieu, de gauche
+     * à droite), pas au milieu de la bande, où il n'y en a pas (Grégoire sur l'iPad, 16 nov. 2026, règle 8).
+     */
+    function pointAuCoeur() {
+        var points = pointsDeLaBande().filter(function (p) { return M().visible(p); })
+            .sort(function (a, b) { return a.getBoundingClientRect().left - b.getBoundingClientRect().left; });
+        if (!points.length) return null;
+        // Des points se recouvrent (plusieurs personnes au même taux), et la bulle peut se poser tout contre le
+        // groupe : une flèche ne va qu'à ce qui se voit, et ne se trace pas à moins de quelques pixels (`seVoit`,
+        // FLECHE_MIN, js/parcours-moteur.js). Le point du milieu, sinon son plus proche voisin qui se voit à bonne
+        // distance de la bulle ; faute de mieux, le plus éloigné d'elle.
+        var bulle = document.getElementById('parcours-bulle');
+        var rb = bulle ? bulle.getBoundingClientRect() : null;
+        var loin = function (p) {
+            if (!rb) return Infinity;
+            var r = p.getBoundingClientRect();
+            var dx = Math.max(rb.left - r.right, r.left - rb.right, 0), dy = Math.max(rb.top - r.bottom, r.top - rb.bottom, 0);
+            return Math.sqrt(dx * dx + dy * dy);
+        };
+        var milieu = Math.floor(points.length / 2);
+        var vus = points.map(function (p, k) { return { p: p, rang: Math.abs(k - milieu), loin: loin(p) }; })
+            .filter(function (x) { return M().seVoit(x.p); });
+        if (!vus.length) return points[milieu];
+        var aDistance = vus.filter(function (x) { return x.loin >= 48; }).sort(function (x, y) { return x.rang - y.rang; })[0];
+        return (aDistance || vus.sort(function (x, y) { return y.loin - x.loin; })[0]).p;
+    }
+
+    /** Ce que la bulle ne couvre que faute de mieux, dans les deux orientations : le nom de la bande et tous ses points. */
+    function bandeEtSesPoints() {
+        var b = blocAssiduite();
+        return [b ? b.querySelector('h4') : null].concat(pointsDeLaBande());
+    }
+
+    function pointDeLoyal() {
+        var da = daDeLoyal(), b = blocAssiduite();
+        return da && b ? b.querySelector('.barre-etudiant[data-da="' + da + '"]') : null;
+    }
+
+    function boutonDetails() { return document.getElementById('btn-toggle-panneau-prioritaire'); }
+
+    /** « Détails » est allumé : c'est lui qui pose « A 84 % » sur chaque étiquette (js/tableau-bord-apercu.js). */
+    function detailsAllumes() {
+        var b = boutonDetails();
+        return !!(b && b.classList.contains('actif'));
+    }
+
+    /** L'étiquette de Suricate Loyal porte son « A 84 % » : ce que la consigne de la bulle 2 fait toucher. */
+    function indiceDeLoyal() {
+        var p = pastilleDeLoyal();
+        return p ? p.querySelector('.prioritaire-indice') : null;
+    }
+
     function panneauPastilles() {
         return document.getElementById('panneau-suivi-etudiants');
     }
@@ -173,7 +232,7 @@
             lignes: function () {
                 return [
                     // La bande des points (pas le bloc et son titre).
-                    { texte: "Chaque point blanc est un·e étudiant·e", montre: montre(function () { return dans(blocAssiduite(), '.barre-indicateur') || blocAssiduite(); }) },
+                    { texte: "Chaque point blanc est un·e étudiant·e", montre: montre(pointAuCoeur) },
                     { texte: "Sa place dit son assiduité (tu prends déjà les présences ; ici, l'application les garde en mémoire, séance après séance)" },
                     { texte: "Un point s'écarte des autres" },
                     consigne("Touche « Détails » pour mettre un nom sur chaque point")
@@ -182,11 +241,16 @@
             avant: async function () {
                 aller('suivi', 'groupe');
                 await attendre(blocAssiduite, 2000);
-                // Le geste à faire est d'ouvrir les pastilles : elles partent fermées.
+                // Le geste à faire est d'ouvrir les pastilles : elles partent fermées. Par le bouton quand il est
+                // allumé (16 nov. 2026) : refermer le panneau sans l'éteindre laissait « Détails » allumé, et le premier
+                // toucher de la personne l'éteignait au lieu d'ouvrir les étiquettes.
+                if (detailsAllumes()) boutonDetails().click();
                 var p = panneauPastilles();
                 if (p && p.classList.contains('ouvert')) p.classList.remove('ouvert');
             },
-            contour: function () { return document.getElementById('btn-toggle-panneau-prioritaire'); },
+            // LA BULLE NE COUVRE PAS CE DONT ELLE PARLE (règle 8) : ni le nom de la bande, ni aucun de ses points.
+            aussiEviter: bandeEtSesPoints,
+            contour: boutonDetails,
             atteint: pastillesOuvertes
         },
         {
@@ -194,25 +258,26 @@
             confirme: "Tu viens d'ouvrir « Détails » : chaque point a maintenant un nom.",
             lignes: function () {
                 return [
-                    // Son nom : la ligne porte aussi « A 84 % », ce qu'il faut toucher (la pulsation le désigne).
-                    { texte: "Le point à l'écart, c'est Suricate Loyal", montre: montre(nomDeLoyal) },
-                    { texte: "Son assiduité est de 84 % ; celle des autres, de 93 % ou plus" },
+                    // Deux lignes de Grégoire (16 nov. 2026, après l'essai sur l'iPad). Le point à l'écart, puis son
+                    // nom dans la liste : l'étiquette porte aussi « A 84 % », ce qu'il faut toucher (la pulsation).
+                    { texte: "Pose le doigt sur le point à l'écart : son nom apparaît", montre: montre(pointDeLoyal) },
+                    { texte: "C'est Suricate Loyal. Son assiduité est de 84 % ; celle des autres, de 93 % ou plus", montre: montre(nomDeLoyal) },
                     { texte: "Un pourcentage ne dit pas pourquoi" },
                     consigne("Touche son « A 84 % » (A pour assiduité) : son profil rassemble ce que l'application a gardé de lui")
                 ];
             },
             avant: async function () {
                 aller('suivi', 'groupe');
-                if (!pastillesOuvertes()) {
-                    var b = document.getElementById('btn-toggle-panneau-prioritaire');
-                    if (b) b.click();
+                // Les étiquettes ouvertes ET leurs indices (16 nov. 2026, capture de 12 h 42 : les noms seuls, sans
+                // « A 84 % », alors que la consigne le fait toucher). Les indices ne paraissent que « Détails » allumé,
+                // calculés pour le groupe choisi : éteint puis rallumé s'il le faut, par le bouton, comme la personne.
+                if (!(pastillesOuvertes() && detailsAllumes() && indiceDeLoyal())) {
+                    if (detailsAllumes()) boutonDetails().click();
+                    if (boutonDetails()) boutonDetails().click();
                 }
-                await attendre(pastilleDeLoyal, 2000);
+                await attendre(indiceDeLoyal, 2000);
             },
-            contour: function () {
-                var p = pastilleDeLoyal();
-                return p ? p.querySelector('.prioritaire-indice') : null;
-            },
+            contour: indiceDeLoyal,
             atteint: profilDeLoyalOuvert
         },
         {
@@ -316,17 +381,16 @@
                 return [
                     // Sans flèche vers la barre d'étapes du Cadre (16 nov. 2026) : cette bulle est la plus haute du
                     // parcours ; à 1180 × 900 elle ne pouvait que couvrir la barre, et sa flèche finissait dedans.
-                    { texte: "Tout repose ici : ton trimestre, tes cours, tes groupes" },
+                    // « Tout repose ici : … » retirée par Grégoire le 16 nov. (la bulle défilait à 1180 × 820).
                     { texte: "Tu viens de faire le chemin à rebours. Avec ta classe, tu le feras à l'endroit : « Cadre », « Conception », « Évaluation »" },
                     { texte: "Les champs marqués d'un astérisque rouge suffisent pour un premier résultat : dès ta première prise de présences, ta classe apparaît, un point par étudiant·e" },
                     { texte: "Le reste, tu le remplis à ton rythme : plus tu précises tes consignes, tes critères et tes rétroactions, plus ce que l'application te rend est fin et utile" },
-                    { texte: "À force de t'en servir, ton acuité s'affine : cette mémoire rend visible et explicite ce qui, dans ta classe, reste parfois sous-entendu et silencieux" },
-                    { texte: "Objectif atteint : tu es en mesure " + EN_MESURE },
-                    { texte: "Chaque parcours a son objectif. C'est toi qui choisis la suite" }
+                    { texte: "À force de t'en servir, ton acuité s'affine : cette mémoire rend visible et explicite ce qui, dans ta classe, reste parfois sous-entendu et silencieux" }
+                    // « Objectif atteint : … » et la phrase de la suite : posées par le moteur (`objectifAtteint`, sur la définition).
                 ];
             },
             sansSortie: true,
-            avant: async function () { aller('calendrier', 'trimestre'); window.scrollTo(0, 0); },
+            avant: async function () { aller('calendrier', 'trimestre'); refermerLesSectionsDuCadre(); window.scrollTo(0, 0); },
             // Trois suites de même poids, aucune mise en avant (Grégoire, 16 nov. 2026).
             boutons: [
                 { libelle: 'Explorer la démo par moi-même', action: function () { continuerLaDemo(); } },
@@ -337,7 +401,8 @@
     ];
 
     var DEF = { id: ID, etapes: ETAPES, lienSortie: 'Quitter le parcours',
-                objectif: "À la fin de ce parcours, tu seras en mesure " + EN_MESURE + "." };
+                objectif: "À la fin de ce parcours, tu seras en mesure " + EN_MESURE + ".",
+                objectifAtteint: "Objectif atteint : tu es en mesure " + EN_MESURE + "." };
 
     // ---------- Le lancement, la sortie, la fin ----------
 
@@ -365,6 +430,45 @@
         return typeof estEnModeDemo === 'function' && estEnModeDemo();
     }
 
+    // ---------- Le groupe de « Découvrir » : le premier de la démo ----------
+
+    var GROUPE_DE_LA_DEMO = 'GC_DEMO';
+
+    function groupeActif() {
+        var gc = typeof db !== 'undefined' ? db.getSync('groupeCoursActif', null) : null;
+        return gc && gc.id ? gc.id : null;
+    }
+
+    /**
+     * « Découvrir » se joue sur le PREMIER groupe de la démo (601-101 · gr. 0demo), celui de Suricate Loyal. Vécu par
+     * Grégoire sur l'iPad le 16 nov. 2026 : le deuxième groupe, monté la veille par « Je regarde », était resté choisi
+     * dans l'en-tête ; le parcours s'y est joué, et la bulle 2 nommait une personne absente de la liste. À son
+     * ouverture et à chaque reprise, le parcours choisit donc lui-même ce groupe, par le geste de la personne (la liste
+     * de l'en-tête et son `change`) : rien n'est écrit que ce geste n'écrit, et tout reste dans la démo.
+     */
+    async function choisirLeGroupeDeLaDemo() {
+        if (groupeActif() === GROUPE_DE_LA_DEMO && daDeLoyal()) return;
+        var liste = document.getElementById('selectGroupeCoursHeader');
+        var offert = liste && [].some.call(liste.options, function (o) { return o.value === GROUPE_DE_LA_DEMO; });
+        if (!offert) return;
+        liste.value = GROUPE_DE_LA_DEMO;
+        liste.dispatchEvent(new Event('change', { bubbles: true }));
+        await attendre(function () { return groupeActif() === GROUPE_DE_LA_DEMO && !!daDeLoyal(); }, 3000);
+    }
+
+    /**
+     * La bulle 8 présente le Cadre : ses sections se montrent refermées, par leur nom (vu sur la capture de Grégoire, le
+     * 16 nov. 2026 : « Cours et services » était resté ouvert en « Mode modification », laissé par « Je regarde »).
+     * À l'écran seulement : l'état des sections que la personne a retenu (`etatsAccordeonsV2`) n'est pas récrit.
+     */
+    function refermerLesSectionsDuCadre() {
+        [].forEach.call(document.querySelectorAll('#calendrier-trimestre .carte.accordeon:not(.ferme)'), function (a) {
+            a.classList.add('ferme');
+            var chevron = a.querySelector('.accordeon-chevron');
+            if (chevron) chevron.textContent = '\u25B6';
+        });
+    }
+
     async function lancer(depuis) {
         depart = { demoDejaOuverte: enDemo(), lieu: lieuCourant() };
         if (!depart.demoDejaOuverte) {
@@ -372,6 +476,7 @@
             // Un import en cours empêche l'entrée (activerModeDemo le dit lui-même) : rien ne part.
             if (!enDemo()) { depart = null; return; }
         }
+        await choisirLeGroupeDeLaDemo();
         window.Assistance.definirEtat(ID, 'en-cours', depuis || 0);
         return M().lancer(DEF, {
             depuis: depuis || 0,

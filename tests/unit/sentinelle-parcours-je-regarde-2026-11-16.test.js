@@ -13,6 +13,10 @@
 // CE QUE LA CONSIGNE ÉCRIT ET QUE LE CODE NE RECOPIE PAS, exprès : les noms du menu et des sections (« Tu es dans
 // « X », à l'onglet « Y » »), que le moteur LIT à l'écran ; et « Pour revoir une étape, touche « 8 sur 8 » », que le
 // moteur pose à la dernière bulle de tout parcours.
+// REPRIS LE 16 NOV. APRÈS L'ESSAI DE GRÉGOIRE SUR L'IPAD (`plans de travail/CONSIGNE-2026-11-16-essai-ipad.md`) : ce
+// relais change des mots de la consigne du matin. Ils sont déclarés ICI (`RETOUCHES`), un par un, chacun relu dans le
+// relais de l'essai ; tout le reste se lit toujours dans la consigne du matin. La fin (« Objectif atteint : … », puis
+// « Chaque parcours a son objectif… ») quitte les listes : le moteur la pose, d'après la définition.
 // Break-test (16 nov.) : « Sa pondération » changé en « La pondération » dans js/parcours-classe.js → ROUGE (1) ;
 // « de 93 % ou plus » changé en « de 93 % et plus » dans js/parcours-decouvrir.js → ROUGE (1) ; rétablis → vert.
 
@@ -25,6 +29,7 @@ import { tranche } from './_helpers/tranche.js';
 const RACINE = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..');
 const lire = (f) => readFileSync(path.join(RACINE, f), 'utf8');
 const CONSIGNE = lire('plans de travail/CONSIGNE-2026-11-16-parcours-je-regarde.md');
+const ESSAI = lire('plans de travail/CONSIGNE-2026-11-16-essai-ipad.md');
 const DECOUVRIR = lire('js/parcours-decouvrir.js');
 const CLASSE = lire('js/parcours-classe.js');
 const MOTEUR = lire('js/parcours-moteur.js');
@@ -81,6 +86,26 @@ function jugerOuverture(attendues, portees) {
 }
 
 const REVOIR = 'Pour revoir une étape, touche « 8 sur 8 »';
+// La fin, que le moteur pose depuis le relais de l'essai (B.3) : ces lignes ne sont plus dans les listes des parcours.
+const DE_LA_FIN = (l) => l === REVOIR || /^Objectif atteint : /.test(l) || /^Chaque parcours a son objectif\. /.test(l);
+
+// LES RETOUCHES DU RELAIS DE L'ESSAI (16 nov. 2026, parties B.2, B.4 et B.6) : pour une bulle, les lignes de la
+// consigne du matin qu'il remplace ou retire. Chaque ligne neuve est relue dans le relais de l'essai.
+const RETOUCHES = {
+    decouvrir: {
+        2: { "Le point à l'écart, c'est Suricate Loyal": "Pose le doigt sur le point à l'écart : son nom apparaît",
+             'Son assiduité est de 84 % ; celle des autres, de 93 % ou plus': "C'est Suricate Loyal. Son assiduité est de 84 % ; celle des autres, de 93 % ou plus" },
+        8: { 'Tout repose ici : ton trimestre, tes cours, tes groupes': null }
+    },
+    classe: {
+        6: { "Choisis dans l'en-tête le groupe que tu viens de créer": "Choisis dans l'en-tête le groupe que tu viens de créer : « 601-999-DM · gr. 00002 »" }
+    }
+};
+function retoucher(parcours, n, lignes) {
+    const r = RETOUCHES[parcours][n] || {};
+    Object.keys(r).forEach((avant) => expect(lignes, `la consigne du matin porte « ${avant} »`).toContain(avant));
+    return lignes.map((l) => (l in r ? r[l] : l)).filter((l) => l !== null);
+}
 
 // CORRIGÉ D'APRÈS L'ÉCRAN (16 nov. 2026), comme la consigne le demande (« Aux bulles 3 et 4 de « Découvrir », ajoute
 // cette ligne si la page a changé ») : à la bulle 3, l'onglet du menu passe de « Groupe » à « Profils » ; à la bulle
@@ -103,7 +128,7 @@ describe('« Découvrir » : les huit bulles du 16 nov., mot pour mot', () => {
         expect(etape.titre).toBe(titre);
         jugerOuverture(b.phrases.concat(LIEU_AJOUTE[n] ? [LIEU_AJOUTE[n]] : []), ouvertureDe(def, etape, n - 1, lignes));
         expect(!!etape.lieu).toBe([1, 3, 6, 7, 8].includes(n));
-        expect(textes(lignes)).toEqual(b.avant);
+        expect(textes(lignes)).toEqual(retoucher('decouvrir', n, b.avant).filter((l) => !DE_LA_FIN(l)));
         expect(b.apres).toEqual([]);
         // Une bulle en lignes : ni paragraphe, ni ligne du geste à part.
         expect(etape.texte).toBeUndefined();
@@ -130,14 +155,16 @@ describe('« Découvrir » : les huit bulles du 16 nov., mot pour mot', () => {
 
     it('l’objectif : dit par la première bulle, rappelé par la dernière, une seule écriture', () => {
         expect(def.objectif).toBe(consigne[0].phrases[0]);
-        const atteint = textes(etapes[7].lignes()).find((t) => t.indexOf('Objectif atteint : tu es en mesure ') === 0);
-        expect(def.objectif).toBe('À la fin de ce parcours, tu seras en mesure ' + atteint.slice('Objectif atteint : tu es en mesure '.length) + '.');
+        // La consigne du matin l'écrit en ligne de liste, sans point ; depuis l'essai, c'est une phrase, posée par le moteur.
+        expect(def.objectifAtteint).toBe(consigne[7].avant.find((l) => /^Objectif atteint : /.test(l)) + '.');
+        expect(def.objectif).toBe('À la fin de ce parcours, tu seras en mesure ' + def.objectifAtteint.slice('Objectif atteint : tu es en mesure '.length));
+        expect(textes(etapes[7].lignes()).some(DE_LA_FIN)).toBe(false);
         expect(DECOUVRIR.match(/de repérer qui a besoin de toi sans attendre une main levée/g)).toHaveLength(1);
     });
 
     it('« Suricate Loyal », comme dans le pack de la démo ; « Loyal Suricate » n’est plus écrit nulle part', () => {
         expect(DECOUVRIR).not.toContain('Loyal Suricate');
-        expect(DECOUVRIR).toContain("Le point à l'écart, c'est Suricate Loyal");
+        expect(DECOUVRIR).toContain("C'est Suricate Loyal. Son assiduité est de");
         expect(lire('js/pack-demo-10.js')).toContain('"etudiantNom": "Suricate Loyal"');
     });
 });
@@ -180,7 +207,7 @@ describe('« Mettre ta classe en place », « Je regarde » : les huit bulles du
             const lignes = etape.lignes();
             jugerOuverture(b.phrases, ouvertureDe(def, etape, n - 1, lignes));
             // La dernière bulle : « Pour revoir une étape… » est posée par le moteur, pas par le parcours.
-            expect(textes(lignes)).toEqual(b.avant.filter((l) => l !== REVOIR));
+            expect(textes(lignes)).toEqual(retoucher('classe', n, b.avant).filter((l) => !DE_LA_FIN(l)));
             expect(b.apres).toEqual([]);
         }
     });
@@ -199,8 +226,9 @@ describe('« Mettre ta classe en place », « Je regarde » : les huit bulles du
 
     it('l’objectif : dit par la première bulle, rappelé par la dernière, une seule écriture', () => {
         expect(def.objectif).toBe(consigne[0].phrases[0]);
-        const atteint = textes(etapes[7].lignes()).find((t) => t.indexOf('Objectif atteint : tu es en mesure ') === 0);
-        expect(def.objectif).toBe('À la fin de ce parcours, tu seras en mesure ' + atteint.slice('Objectif atteint : tu es en mesure '.length) + '.');
+        expect(def.objectifAtteint).toBe(consigne[7].avant.find((l) => /^Objectif atteint : /.test(l)) + '.');
+        expect(def.objectif).toBe('À la fin de ce parcours, tu seras en mesure ' + def.objectifAtteint.slice('Objectif atteint : tu es en mesure '.length));
+        expect(textes(etapes[7].lignes()).some(DE_LA_FIN)).toBe(false);
         expect(CLASSE.match(/d'expliquer ce que l'application te demande pour mettre une classe en place/g)).toHaveLength(1);
     });
 
@@ -284,7 +312,9 @@ describe('le moteur : les règles a à e, telles qu’il les écrit', () => {
         // lui, est pesé comme le contour. La section n'est jamais une zone : ses champs ne s'y fondent pas.
         expect(tranche(MOTEUR, 'function placerBulleLoin(zones, prio) {', '\n    }\n')).toContain('s ? rectsDe([s.bloc]) : null');
         expect(tranche(MOTEUR, 'function prioritaires(c) {', '\n    }\n')).toContain('if (s && s.tete) autres = autres.concat([s.tete]);');
+        // Dans ce que l'étape désigne, la section n'entre que par son NOM, pour la flèche d'avant « Remplir » (essai, B.5).
         expect(tranche(MOTEUR, 'function designe(etape) {', '\n    }\n')).not.toContain('sectionDe');
+        expect(tranche(MOTEUR, 'function nomDeSectionAMontrer(etape, dejaDesignes) {', '\n    }\n')).toContain('return s && s.tete && visible(s.tete) ? [s.tete] : [];');
     });
 
     it('c. le nom de la section reçoit le halo des entrées du menu, et il est lu dans la page', () => {
@@ -299,13 +329,61 @@ describe('le moteur : les règles a à e, telles qu’il les écrit', () => {
     });
 
     it('d. le triangle du compteur suit `aria-expanded` ; le texte du bouton reste « n sur N »', () => {
-        expect(STYLES).toMatch(/\.parcours-bulle-rang::after \{\s*content: '\\25B8';/);
-        expect(STYLES).toContain(".parcours-bulle-rang[aria-expanded=\"true\"]::after { content: '\\25BE'; }");
+        // Le triangle des sections de l'application (essai, B.1) : le même signe, couché puis pointe en bas.
+        expect(lire('index.html')).toMatch(/<span class="accordeon-chevron">▼<\/span>/);
+        expect(lire('styles.css')).toMatch(/\.carte\.accordeon\.ferme \.accordeon-chevron \{\s*transform: rotate\(-90deg\);/);
+        const triangle = tranche(STYLES, '.parcours-bulle-rang::after {', '}');
+        expect(triangle).toContain("content: '\\25BC';");
+        expect(triangle).toContain('transform: rotate(-90deg);');
+        expect(triangle).toContain('font-size: 0.8rem;');
+        expect(STYLES).toContain('.parcours-bulle-rang[aria-expanded="true"]::after { transform: none; }');
         expect(tranche(MOTEUR, 'function rangDeLEtape(total) {', '\n    }\n')).toContain("rang.textContent = (etat.i + 1) + ' sur ' + total;");
     });
 
     it('e. la ligne qui confirme : avant la phrase du lieu, telle que le parcours l’écrit (le moteur n’y ajoute rien)', () => {
         expect(ecrire).toContain("phrase('parcours-bulle-confirme', texteDe(etape.confirme));");
         expect(MOTEUR).not.toMatch(/Bravo|Bien joué|Félicitations/);
+    });
+});
+
+describe('les retouches de l’essai sur l’iPad (16 nov. 2026), telles que son relais les écrit', () => {
+    const fenetreMoteur = { matchMedia: () => ({ matches: false }) };
+    new Function('window', 'document', MOTEUR)(fenetreMoteur, {});
+    const ecrire = tranche(MOTEUR, 'function ecrireLignes(boite, etape) {', 'function majLignes(silence) {');
+    const dite = (nom) => new RegExp("var " + nom + " = '((?:[^'\\\\]|\\\\.)*)';").exec(MOTEUR)[1].replace(/\\'/g, "'");
+
+    it('B.2, B.4, B.6 : chaque ligne neuve est celle du relais, mot pour mot', () => {
+        Object.values(RETOUCHES).forEach((parcours) => Object.values(parcours).forEach((bulle) => {
+            Object.entries(bulle).forEach(([avant, apres]) => expect(ESSAI).toContain('« ' + (apres || avant) + ' »'));
+        }));
+    });
+
+    it('B.3 : la fin est posée par le moteur — l’objectif atteint dans la forme de l’objectif, puis la phrase de la suite', () => {
+        expect(dite('PHRASE_DE_LA_SUITE')).toBe("Chaque parcours a son objectif. C'est toi qui choisis la suite.");
+        expect(ESSAI).toContain('« ' + dite('PHRASE_DE_LA_SUITE') + ' »');
+        expect(ecrire).toContain("{ texte: atteint, classe: 'parcours-bulle-objectif parcours-bulle-atteint' }");
+        expect(ecrire).toContain("{ texte: PHRASE_DE_LA_SUITE, classe: 'parcours-bulle-suite' }");
+        // « Pour revoir une étape », en petit, puis la clôture, puis seulement les consignes de la fin.
+        expect(ecrire).toContain('lignes.slice(0, k).concat([revue], cloture, lignes.slice(k)');
+        expect(STYLES).toMatch(/\.parcours-bulle-aide,\s*\.parcours-bulle-revue \{[^}]*font-size: 12\.5px;/);
+    });
+
+    it('B.7 : la première bulle de chaque parcours dit la poignée, sauf sur téléphone (la bulle n’y en a pas)', () => {
+        expect(dite('PHRASE_DE_LA_POIGNEE')).toBe('Tu peux déplacer cette bulle par sa poignée et faire défiler la page pour mieux voir.');
+        expect(ESSAI).toContain('« ' + dite('PHRASE_DE_LA_POIGNEE') + ' »');
+        expect(ecrire).toContain("if (etat.i === 0 && !etat.def.sansRang && !etat.telephone) phrase('parcours-bulle-aide', PHRASE_DE_LA_POIGNEE);");
+    });
+
+    it('9 : l’espace insécable devant « ; : ? ! », pour toutes les bulles', () => {
+        const typographier = new Function(tranche(MOTEUR, 'function typographier(t) {', '\n    }\n') + '\n    }\n return typographier;')();
+        expect(typographier('dix étudiant·es ; la bande « Assiduité » : qui ? toi !')).toBe('dix étudiant·es\u00a0; la bande «\u00a0Assiduité\u00a0»\u00a0: qui\u00a0? toi\u00a0!');
+        expect(typographier('84\u00a0%\u00a0; rien')).toBe('84\u00a0%\u00a0; rien');
+    });
+
+    it('A : « Découvrir » choisit le premier groupe de la démo avant sa première bulle, à l’ouverture comme à la reprise', () => {
+        const lancer = tranche(DECOUVRIR, 'async function lancer(depuis) {', '\n    }\n');
+        expect(lancer.indexOf('await choisirLeGroupeDeLaDemo();')).toBeGreaterThan(-1);
+        expect(lancer.indexOf('await choisirLeGroupeDeLaDemo();')).toBeLessThan(lancer.indexOf('M().lancer(DEF'));
+        expect(DECOUVRIR).toContain("var GROUPE_DE_LA_DEMO = 'GC_DEMO';");
     });
 });

@@ -198,16 +198,24 @@ body.mode-clair {
     text-underline-offset: 3px;
     cursor: pointer;
 }
-/* Le triangle du compteur (16 nov. 2026, règle d) : couché, la liste des étapes est fermée ; pointe en bas, elle est
-   ouverte. Posé par le style, sur `aria-expanded` : le texte du bouton reste « n sur N ». */
+/* Le triangle du compteur (16 nov. 2026, règle d ; repris le même jour après l'essai sur l'iPad : « trop petit ») :
+   CELUI DES SECTIONS de l'application (`.carte.accordeon .accordeon-chevron`, styles.css) : le même signe, à la taille
+   qu'il a dans une tête de section (0,8 em, soit 12,8 px), couché quand la liste des étapes est fermée, pointe
+   en bas quand elle est ouverte, par la même rotation. Posé par le style, sur `aria-expanded` : le texte du bouton
+   reste « n sur N », et tout le bouton (le texte et le triangle) réagit au doigt. */
 .parcours-bulle-rang::after {
-    content: '\25B8';
+    content: '\25BC';
     display: inline-block;
-    margin-left: 4px;
-    font-size: 11px;
+    margin-left: 6px;
+    font-size: 0.8rem;
+    line-height: 1;
+    vertical-align: -1px;
     text-decoration: none;
+    transform: rotate(-90deg);
+    transition: transform 0.3s ease;
 }
-.parcours-bulle-rang[aria-expanded="true"]::after { content: '\25BE'; }
+.parcours-bulle-rang[aria-expanded="true"]::after { transform: none; }
+@media (prefers-reduced-motion: reduce) { .parcours-bulle-rang::after { transition: none; } }
 .parcours-bulle-rang:hover,
 .parcours-bulle-rang[aria-expanded="true"] { color: var(--texte-principal); }
 .parcours-bulle-rang:focus-visible { outline: 2px solid var(--focus-ring-color); outline-offset: -4px; }
@@ -274,6 +282,16 @@ body.mode-clair {
 }
 .parcours-bulle-confirme { position: relative; padding-left: 1.5em; color: var(--texte-secondaire); }
 .parcours-bulle-confirme::before { content: '\2713'; position: absolute; left: 0; top: 0; color: var(--vert-leger); }
+/* La fin (16 nov. 2026, essai sur l'iPad) : « Objectif atteint : … » a la forme de l'objectif ; la phrase de la suite
+   est une ligne simple. La première bulle : où est la poignée, en petit et en gris, comme « Pour revoir une étape ». */
+.parcours-bulle-suite { margin: 0; }
+/* Une bulle plus haute que l'écran utile s'élargit (posé par le moteur, hors téléphone) : moins de lignes, elle tient. */
+.parcours-bulle.parcours-bulle--elargie { width: min(520px, calc(100vw - 32px)); }
+.parcours-bulle-aide,
+.parcours-bulle-revue { margin: 0; font-size: 12.5px; color: var(--texte-secondaire); }
+/* Le nom d'une bande du tableau de bord se resserre sur ses mots tant qu'un parcours est ouvert : la bulle évite le
+   nom, pas toute la largeur de sa ligne (règle 8 du 16 nov. 2026). Rien ne bouge à l'écran. */
+.parcours-actif #section-suivi h4.tb-titre-simple { width: fit-content; }
 /* La bulle attend que la page ait fini de bouger (règle b) : cachée, sans quitter sa place ni perdre sa taille. */
 .parcours-bulle.est-en-attente { visibility: hidden; }
 .parcours-bulle-lignes ul { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 5px; }

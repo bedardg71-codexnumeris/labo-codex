@@ -980,6 +980,17 @@
     // L'objectif du parcours : dit par la première bulle (le moteur), rappelé par la dernière. Une seule écriture.
     var EN_MESURE = "d'expliquer ce que l'application te demande pour mettre une classe en place et ce qu'elle en tire";
 
+    /**
+     * Le nom du groupe créé, tel que la liste de l'en-tête l'affiche (« 601-999-DM · gr. 00002 ») : lu dans son option ;
+     * avant qu'elle soit peuplée, écrit de la même façon avec le matériel de l'exemple.
+     */
+    function nomDuGroupeCree() {
+        var cree = groupeCoursCree(), liste = cree ? el('selectGroupeCoursHeader') : null;
+        var option = cree && liste ? [].find.call(liste.options, function (o) { return o.value === cree.id; }) : null;
+        var lu = option ? String(option.getAttribute('data-principal') || '').trim() : '';
+        return lu || (MATERIEL.cours.code + ' · gr. ' + MATERIEL.groupe);
+    }
+
     /** Le parcours qui suit `id` dans le panneau, s'il a son modèle et que rien ne l'empêche de partir. */
     function suivantQuiASonModele(id) {
         var suivant = window.Assistance.suivantDe(id);
@@ -1138,7 +1149,8 @@
                     { texte: "Ton deuxième groupe est dans l'en-tête de l'application, à côté de celui de la démo" },
                     { texte: "Tout ce que tu verras ensuite, dans « Suivi » ou dans « Évaluation », concerne le groupe choisi ici" },
                     { texte: "Tu donnes plusieurs groupes ? C'est ici que tu passeras de l'un à l'autre" },
-                    consigne("Choisis dans l'en-tête le groupe que tu viens de créer")
+                    // Le groupe, nommé tel que la liste de l'en-tête l'affiche (Grégoire, 16 nov. 2026, essai sur l'iPad).
+                    consigne("Choisis dans l'en-tête le groupe que tu viens de créer : « " + nomDuGroupeCree() + " »")
                 ];
             },
             nommeLeContour: true,
@@ -1187,9 +1199,8 @@
                 return [
                     { texte: "Chaque point blanc est un·e des dix étudiant·es ; la bande « Assiduité » le place selon ses présences" },
                     { texte: "Trois points sont à l'écart : les deux absences et le retard de la séance", montre: pointsALEcart },
-                    { texte: "Une seule séance et la classe se dessine déjà. Séance après séance, tu verras qui s'éloigne, sans attendre une main levée" },
-                    { texte: "Objectif atteint : tu es en mesure " + EN_MESURE },
-                    { texte: "Chaque parcours a son objectif. C'est toi qui choisis la suite" }
+                    { texte: "Une seule séance et la classe se dessine déjà. Séance après séance, tu verras qui s'éloigne, sans attendre une main levée" }
+                    // « Objectif atteint : … » et la phrase de la suite : posées par le moteur (`objectifAtteint`, sur la définition).
                 ];
             },
             sansSortie: true,
@@ -1199,13 +1210,20 @@
                 await attendre(blocAssiduite, 2000);
             },
             zones: function () { var b = blocAssiduite(); return [(b && b.querySelector('.barre-indicateur')) || b]; },
+            // LA BULLE NE COUVRE PAS CE DONT ELLE PARLE (règle 8, 16 nov. 2026 : sur l'iPad couché, elle couvrait le bout
+            // droit de la bande, là où sont les sept personnes présentes) : ni le nom de la bande, ni aucun des dix points.
+            aussiEviter: function () {
+                var b = blocAssiduite();
+                return b ? [b.querySelector('h4')].concat([].slice.call(b.querySelectorAll('.barre-indicateur .barre-etudiant[data-da]'))) : [];
+            },
             fleches: function () { return []; },
             get boutons() { return suitesDuModele(ID, terminerModele); }
         }
     ];
 
     var DEF_MODELE = { id: ID + '-modele', etapes: ETAPES_MODELE, lienSortie: 'Plus tard',
-                       objectif: "À la fin de ce parcours, tu seras en mesure " + EN_MESURE + "." };
+                       objectif: "À la fin de ce parcours, tu seras en mesure " + EN_MESURE + ".",
+                       objectifAtteint: "Objectif atteint : tu es en mesure " + EN_MESURE + "." };
 
     /**
      * La Modélisation part de sa première étape non faite, gestes compris : JAMAIS en visite (Grégoire, 14 nov. 2026,

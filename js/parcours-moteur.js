@@ -116,6 +116,19 @@
    n'offre que « Terminer », elle offre aussi « Parcours suivant », de même poids (aucun bouton mis en avant).
    Sa consigne suit ses boutons : « Touche « Terminer » » y devient « Touche « Parcours suivant », ou « Terminer » ».
 
+   APRÈS L'ESSAI SUR L'IPAD (Grégoire, 16 nov. 2026 ; plans de travail/CONSIGNE-2026-11-16-essai-ipad.md) :
+   · LA FIN D'UN PARCOURS QUI A SON OBJECTIF (`objectifAtteint`, sur la définition) : « Pour revoir une étape… », en
+     petit ; « Objectif atteint : … » dans la forme de l'objectif (en gras, entre deux filets) ; puis « Chaque parcours
+     a son objectif. C'est toi qui choisis la suite. », en ligne simple, la dernière avant les boutons.
+   · LA PREMIÈRE BULLE d'un parcours dit, en petit, sous ses lignes, qu'elle se déplace par sa poignée (pas sur
+     téléphone : la bulle n'y a pas de poignée).
+   · LE NOM DE LA SECTION reçoit UNE flèche tant que la bulle qui le dit ne désigne rien d'autre (`nomDeSectionAMontrer`).
+   · LA BULLE NE COUVRE PAS CE DONT ELLE PARLE : une étape déclare dans `aussiEviter` ce qu'elle ne couvre que faute
+     de mieux (le nom d'une bande, chacun de ses points), pesé comme le contour.
+   · AVANT LE FILET : une bulle plus haute que l'écran utile s'élargit (`parcours-bulle--elargie`, 520 px).
+   · L'espace insécable devant « ; : ? ! » (`typographier`), pour toutes les bulles.
+   · Le triangle du compteur est celui des sections de l'application, à leur taille (css/parcours.css).
+
    Une étape :
      { titre, texte?, geste?, centre?: bool,
        lignes?: () => [{ texte, champs?: () => Element[], fait?: () => bool, montre?: () => Element[], sous?: [ligne],
@@ -204,6 +217,12 @@
     // LA FIN : la consigne de la dernière bulle quand elle offre ses deux suites. Sa seule écriture (voir consigneDeLaFin).
     var CONSIGNE_DEUX_SUITES = 'Touche « Parcours suivant », ou « Terminer »';
     // EN VISITE (15 nov. 2026 ; texte de Grégoire, relais de Cowork) : la consigne d'une étape revue dont le geste écrit.
+    // LA FIN D'UN PARCOURS QUI A SON OBJECTIF (Grégoire, 16 nov. 2026, essai sur l'iPad) : sous « Objectif atteint : … »,
+    // en ligne simple, juste au-dessus des boutons. Écrite ici seulement.
+    var PHRASE_DE_LA_SUITE = 'Chaque parcours a son objectif. C\'est toi qui choisis la suite.';
+    // LA PREMIÈRE BULLE de chaque parcours, en petit, sous ses lignes (Grégoire, 16 nov. 2026). Pas sur téléphone : la
+    // bulle n'y a pas de poignée.
+    var PHRASE_DE_LA_POIGNEE = 'Tu peux déplacer cette bulle par sa poignée et faire défiler la page pour mieux voir.';
     var PHRASE_VISITE = 'Tu revois ce parcours : rien n\'est à refaire. Lis, puis touche « Continuer ».';
     // Un contrôle : ce qu'un toucher actionne (voir « EN VISITE, RIEN N'EST DÉSIGNÉ QUI ÉCRIT »).
     var CONTROLES_QUI_ECRIVENT = 'button, input, select, textarea, [contenteditable=""], [contenteditable="true"], [data-action], [data-on-change], [role="button"]';
@@ -269,6 +288,19 @@
     }
 
     /**
+     * LE NOM DE LA SECTION (Grégoire, 16 nov. 2026, essai sur l'iPad) : tant que la bulle qui nomme sa section ne
+     * désigne rien d'autre (avant « Remplir » : ni champ, ni bouton de la page), UNE flèche va de la bulle au nom
+     * encadré. Dès qu'un champ ou le contour est désigné, elle leur laisse la place ; le cadre, lui, reste.
+     * @param {number} dejaDesignes - ce que les lignes et l'étape désignent déjà
+     * @returns {Element[]} le nom de la section, ou rien
+     */
+    function nomDeSectionAMontrer(etape, dejaDesignes) {
+        if (dejaDesignes || !etape.nommeLaSection || contourDe(etape)) return [];
+        var s = sectionDe(etape);
+        return s && s.tete && visible(s.tete) ? [s.tete] : [];
+    }
+
+    /**
      * Ce que l'étape désigne : `zones` (ce que la bulle évite) et `fleches` (où vont les flèches ; `null` : les zones).
      * `une` : une flèche par élément, sans fusion ni plafond (une étape à formulaire : ses champs obligatoires, et les
      * flèches à ceux qui sont encore vides) ; sinon les cibles sont groupées.
@@ -300,6 +332,7 @@
                 });
             })(sesLignes);
             var suite = etape.fleches ? (etape.fleches() || []).filter(Boolean) : [];
+            suite = suite.concat(nomDeSectionAMontrer(etape, aFaire.length + suite.length));
             return { zones: tous.concat(zones, suite), fleches: aFaire.concat(suite), une: true, auContour: auContour };
         }
         if (etape.formulaire) {
@@ -926,8 +959,12 @@
      * Cowork, 9 nov. 2026, 17 h 58 ; mesuré à 820 px : « Importer » se coupait avant son guillemet fermant). Pour toutes
      * les bulles, au rendu : les textes validés, et les sentinelles qui les lisent, gardent leurs espaces ordinaires.
      */
+    /**
+     * Les espaces insécables de la typographie française : dans les guillemets, et devant « ; : ? ! » (Grégoire sur
+     * l'iPad, 16 nov. 2026 : un « ; » rejeté seul en début de ligne). Pour toutes les bulles.
+     */
     function typographier(t) {
-        return String(t == null ? '' : t).replace(/« /g, '«\u00a0').replace(/ »/g, '\u00a0»');
+        return String(t == null ? '' : t).replace(/« /g, '«\u00a0').replace(/ »/g, '\u00a0»').replace(/ ([;:?!])/g, '\u00a0$1');
     }
 
     // PROPOSÉ (14 nov. 2026, à valider par Grégoire) : le titre de la liste des étapes, et le nom du compteur pour le
@@ -1050,10 +1087,15 @@
         // LA FIN : la dernière bulle d'un parcours dit où revoir une étape, juste avant sa consigne.
         if (!etat.def.sansRang && etat.i === etat.def.etapes.length - 1) {
             var n = etat.def.etapes.length;
-            var revue = { texte: 'Pour revoir une étape, touche « ' + n + ' sur ' + n + ' ».', note: true };
+            var revue = { texte: 'Pour revoir une étape, touche « ' + n + ' sur ' + n + ' ».', note: true, classe: 'parcours-bulle-note parcours-bulle-revue' };
+            // L'objectif atteint (`objectifAtteint`, sur la définition) : en gras, entre deux filets, comme l'objectif de la
+            // première bulle ; puis la phrase de la suite, en ligne simple, la dernière avant les boutons.
+            var atteint = texteDe(etat.def.objectifAtteint);
+            var cloture = atteint ? [{ texte: atteint, classe: 'parcours-bulle-objectif parcours-bulle-atteint' },
+                                     { texte: PHRASE_DE_LA_SUITE, classe: 'parcours-bulle-suite' }] : [];
             var k = lignes.length;
             while (k > 0 && lignes[k - 1].geste) k--;
-            lignes = lignes.slice(0, k).concat([revue], lignes.slice(k).map(function (l) {
+            lignes = lignes.slice(0, k).concat([revue], cloture, lignes.slice(k).map(function (l) {
                 return Object.assign({}, l, { texte: consigneDeLaFin(etape, l.texte) });
             }));
         }
@@ -1089,10 +1131,10 @@
             }
         };
         lignes.forEach(function (ligne) {
-            if (ligne.note) {
+            if (ligne.note || ligne.classe) {
                 ul = null;
                 var p = document.createElement('p');
-                p.className = 'parcours-bulle-note';
+                p.className = ligne.classe || 'parcours-bulle-note';
                 p.textContent = typographier(ligne.texte);
                 boite.appendChild(p);
                 return;
@@ -1100,6 +1142,7 @@
             if (!ul) { ul = document.createElement('ul'); boite.appendChild(ul); }
             poser(ligne, ul);
         });
+        if (etat.i === 0 && !etat.def.sansRang && !etat.telephone) phrase('parcours-bulle-aide', PHRASE_DE_LA_POIGNEE);
         boite.hidden = !boite.firstChild;
         majLignes(true);
     }
@@ -1849,6 +1892,11 @@
         var vw = largeurPage(), vh = basEcran();
         // Le filet : jamais plus haute que l'écran utile ; au-delà, son texte défile.
         b.style.maxHeight = Math.max(0, vh - 2 * MARGE) + 'px';
+        // AVANT LE FILET : une bulle plus haute que l'écran utile S'ÉLARGIT (16 nov. 2026, l'iPad couché : « Poser ton
+        // cadre », 761 px pour 695, passait sous le bandeau de la démo avec ses boutons). Plus large, elle a moins de
+        // lignes, et ses boutons tiennent côte à côte. Jusqu'à la bulle suivante (la classe part avec `rendreBulle`).
+        var utile = cadreUtile();
+        if (!b.classList.contains('parcours-bulle--elargie') && hauteurNaturelle() > utile.bas - utile.haut) b.classList.add('parcours-bulle--elargie');
         if (etat.deplacee) { poserDeplacee(); return; }
         var bw = b.offsetWidth, bh = b.offsetHeight;
         var place;
