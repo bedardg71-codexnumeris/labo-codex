@@ -84,15 +84,17 @@ test('« À propos » : la devise, quatre intertitres, deux liens, « Par où co
     expect(lu.replie, 'aucun trimestre : ouvert').toBe(false);
     expect(lu.devise).toEqual(['Suivre l’apprentissage. Soutenir l’enseignement.']);
     // ↻ 15 nov. 2026 : les quatre blocs et les deux paragraphes du bas changent de mots ; « Tutoriels » part.
-    expect(lu.intertitres).toEqual(['Ce que fait l’application', 'Le jugement humain', 'Un espace autonome', 'Un accès gratuit et sécuritaire']);
-    expect(lu.premier).toBe('Accompagner chacun·e avec bien');
-    for (const parti of ['micro-données', 'SOLO', 'RàI', 'CoP', 'Modélisation', 'Pratique guidée', 'Tutoriels']) {
+    // ↻ 16 nov. 2026 : texte révisé ; « Un espace autonome » devient « Un outil indépendant ».
+    expect(lu.intertitres).toEqual(['Ce que fait l’application', 'Le jugement humain', 'Un outil indépendant', 'Un accès gratuit et sécuritaire']);
+    expect(lu.premier).toBe('Préparer ton cours, saisir les');
+    for (const parti of ['micro-données', 'SOLO', 'RàI', 'CoP', 'Modélisation', 'Pratique guidée', 'Tutoriels', 'Un espace autonome', 'bouffées de dopamine', 'sobre en carbone', 'ressources libres', 'en préparation', 'Son code est ouvert']) {
         expect(lu.corps.split('Par où commencer')[0], parti).not.toContain(parti);
     }
     expect(lu.corps).not.toContain('Bienvenue dans Labo Codex');
     expect(lu.corps).not.toContain('Labo Codex est un outil de soutien');
     // ↻ Lot « Les deux parcours » (8 nov. 2026) : « Visite guidée » devient « Assistance ».
-    expect(lu.liens).toEqual(['Assistance', 'Guides pédagogiques']);
+    // ↻ 16 nov. 2026 : un troisième lien, « Joindre la communauté », sous le paragraphe de droite.
+    expect(lu.liens).toEqual(['Assistance', 'Guides pédagogiques', 'Joindre la communauté (s’ouvre dans un nouvel onglet)']);
     expect(lu.label).toEqual(['Par où commencer ?']);
     expect(lu.boutons).toEqual([['BUTTON', 'Commencer', true], ['BUTTON', 'Commencer', true], ['BUTTON', 'Explorer', true]]);
     expect(lu.cp).toBe('Explore un cours de démonstration déjà configuré, aux données fictives mais réalistes.');
@@ -245,6 +247,52 @@ test('le lien « Assistance » d’« À propos » ouvre le panneau des parcours
     await ouvrirAccueilVide(page, 1180);
     await page.locator('#banniere-bienvenue').getByRole('button', { name: 'Assistance', exact: true }).click();
     await expect(page.locator('#panneau-assistance')).toBeVisible();
+});
+
+// 16 nov. 2026 : « Joindre la communauté », sous le paragraphe de droite. Il se présente comme ses deux voisins,
+// s'ouvre dans un nouvel onglet, ne fait rien déborder, et les deux colonnes du bas partent de la même ligne.
+test('« Joindre la communauté » : même présentation que ses voisins, rien ne déborde, colonnes du bas alignées (1180, 1024, 820), empilées dessous', async ({ page }) => {
+    await ouvrirAccueilVide(page, 1180);
+    const mesurer = () => page.evaluate(() => {
+        const b = document.getElementById('banniere-bienvenue');
+        const r = (e) => e.getBoundingClientRect();
+        const style = (e) => { const c = getComputedStyle(e); return [c.color, c.fontWeight, c.fontSize, c.textDecorationLine, c.minHeight]; };
+        const [assistance, guides, communaute] = [...b.querySelectorAll('.apropos-deux .apropos-lien')];
+        const gauche = b.querySelector('.apropos-concepts');
+        const droite = b.querySelector('.apropos-communaute');
+        return {
+            href: communaute.getAttribute('href'), cible: communaute.target, rel: communaute.rel,
+            styles: [style(assistance), style(guides), style(communaute)],
+            hautGauche: Math.round(r(gauche).top), hautDroite: Math.round(r(droite).top),
+            gaucheDeDroite: Math.round(r(droite).left), gaucheDeGauche: Math.round(r(gauche).left),
+            lienDansSaColonne: r(communaute).left >= r(droite).left - 1 && r(communaute).right <= r(droite).right + 1,
+            hauteurLien: r(communaute).height,
+            ecartGauche: Math.round(r(assistance).top - r(gauche.querySelector('p')).bottom),
+            ecartDroite: Math.round(r(communaute).top - r(droite.querySelector('p')).bottom),
+            carteDeborde: b.scrollWidth > b.clientWidth + 1,
+            pageDeborde: document.documentElement.scrollWidth > document.documentElement.clientWidth + 1
+        };
+    });
+    for (const largeur of [1180, 1024, 820, 768, 390]) {
+        await page.setViewportSize({ width: largeur, height: 900 });
+        const m = await mesurer();
+        expect(m.href).toBe('https://www.aqpc.qc.ca/fr/cop-labocodex');
+        expect([m.cible, m.rel]).toEqual(['_blank', 'noopener noreferrer']);
+        expect(m.styles[2], `${largeur} : comme « Assistance »`).toEqual(m.styles[0]);
+        expect(m.styles[2], `${largeur} : comme « Guides pédagogiques »`).toEqual(m.styles[1]);
+        expect(m.hauteurLien, `${largeur} : cible tactile`).toBeGreaterThanOrEqual(44);
+        expect(m.lienDansSaColonne, `${largeur} : le lien tient dans sa colonne`).toBe(true);
+        expect(m.ecartDroite, `${largeur} : même écart paragraphe → liens des deux côtés`).toBe(m.ecartGauche);
+        expect(m.carteDeborde, `${largeur} : la carte ne déborde pas`).toBe(false);
+        expect(m.pageDeborde, `${largeur} : la page ne déborde pas`).toBe(false);
+        if (largeur >= 820) {
+            expect(m.hautDroite, `${largeur} : les deux colonnes partent de la même ligne`).toBe(m.hautGauche);
+            expect(m.gaucheDeDroite, `${largeur} : côte à côte`).toBeGreaterThan(m.gaucheDeGauche);
+        } else {
+            expect(m.hautDroite, `${largeur} : empilées`).toBeGreaterThan(m.hautGauche);
+            expect(m.gaucheDeDroite).toBe(m.gaucheDeGauche);
+        }
+    }
 });
 
 // ─── Captures pour Grégoire (CAPTURES_ACCUEIL=<dossier>) ─────────────────────────────────────

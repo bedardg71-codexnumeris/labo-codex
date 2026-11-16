@@ -94,10 +94,16 @@ function aproposReplie() {
 function genererBanniereBienvenue() {
     const replie = aproposReplie();
 
-    // Le paragraphe de droite : texte du 15 nov. 2026 (la boîte et ses styles ne changent pas).
+    // La colonne de droite : texte du 16 nov. 2026. Le lien vit HORS de la boîte `.banniere-bienvenue-acces`
+    // (ses liens y sont dorés) : il se présente comme « Assistance » et « Guides pédagogiques ».
     const paragrapheCommunaute = `
-            <div class="banniere-bienvenue-acces">
-                <p><strong>Envie d’en parler avec des collègues ?</strong> L’Association québécoise de pédagogie collégiale (AQPC) héberge une communauté de pratique Labo Codex. Des enseignant·es comme toi y échangent entre pairs et partagent des ressources libres.</p>
+            <div class="apropos-communaute">
+                <div class="banniere-bienvenue-acces">
+                    <p><strong>Envie d’en parler avec des collègues ?</strong> L’Association québécoise de pédagogie collégiale (AQPC) héberge une communauté de pratique Labo Codex. Enseignant·es et conseiller·ères pédagogiques y réfléchissent ensemble à leur pratique et construisent du matériel pédagogique et disciplinaire à partager.</p>
+                </div>
+                <ul class="apropos-liens banniere-bienvenue-actions">
+                    <li><a class="apropos-lien" href="https://www.aqpc.qc.ca/fr/cop-labocodex" target="_blank" rel="noopener noreferrer">Joindre la communauté<span class="u-lecteur-ecran"> (s’ouvre dans un nouvel onglet)</span></a></li>
+                </ul>
             </div>`;
 
     return `
@@ -111,24 +117,24 @@ function genererBanniereBienvenue() {
             <div class="apropos-colonnes">
                 <section>
                     <h3 class="apropos-intertitre">Ce que fait l’application</h3>
-                    <p>Accompagner chacun·e avec bienveillance est exigeant. C’est pourquoi Labo Codex retient pour toi qui a besoin de soutien, et sur quoi : tu vois où en est ton groupe et tu planifies tes interventions. L’application réunit dans un seul outil des gestes qui te sont familiers : préparer ton cours, prendre les présences, évaluer les travaux et gérer les notes. Et si tu pratiques une notation alternative, elle convertit tes résultats en note chiffrée finale, sans tableur.</p>
+                    <p>Préparer ton cours, saisir les présences, évaluer les travaux, gérer les notes : ces gestes professionnels te sont familiers. Labo Codex les réunit dans un seul outil et en garde une mémoire que tu peux consulter quand tu veux. Semaine après semaine, elle t’offre un recul sur ta classe : tu vois non seulement comment ton groupe évolue et répond à ce que tu proposes, mais aussi où en est précisément chaque étudiant·e. Accompagner chacun·e avec bienveillance est exigeant : l’outil t’aide à y parvenir sans y laisser ta peau.</p>
                 </section>
                 <section>
                     <h3 class="apropos-intertitre">Le jugement humain</h3>
-                    <p>Il n’y a aucune intelligence artificielle dans l’application et aucune décision n’est prise à ta place. L’outil éclaire ton jugement professionnel, il ne le remplace pas. Labo Codex n’impose aucune pratique et est entièrement configurable. Tu n’y trouveras ni défilement sans fin ni bouffées de dopamine, mais de quoi réfléchir à ta pratique et alléger un peu ta charge mentale.</p>
+                    <p>Il n’y a aucune intelligence artificielle dans l’application et aucune décision n’est prise à ta place. L’outil éclaire ton jugement professionnel, il ne le remplace pas. Il n’impose aucune pratique : tu le règles selon la tienne. Et si tu pratiques une notation alternative, il convertit tes résultats en note chiffrée finale, sans tableur.</p>
                 </section>
                 <section>
-                    <h3 class="apropos-intertitre">Un espace autonome</h3>
-                    <p>Labo Codex vit en marge des grosses plateformes. Son code est ouvert et l’application fonctionne sur ton ordinateur, ta tablette et même ton téléphone. Pour passer de l’un à l’autre, tu enregistres ton codex, un fichier que tu transportes sur une clé USB ou que tu déposes dans ton nuage personnel. Sans IA, l’application reste sobre en carbone.</p>
+                    <h3 class="apropos-intertitre">Un outil indépendant</h3>
+                    <p>Labo Codex fonctionne sur ton ordinateur, ta tablette et même ton téléphone. Pour passer de l’un à l’autre, tu enregistres ton codex, un fichier que tu transportes sur une clé USB ou dans ton nuage personnel. Conçu pour rester indépendant des géants du numérique, Labo Codex te laisse libre de tes choix sans t’isoler : tes notes finales s’exportent vers le système de gestion scolaire de ton collège.</p>
                 </section>
                 <section>
                     <h3 class="apropos-intertitre">Un accès gratuit et sécuritaire</h3>
-                    <p>Tes données restent entre tes mains. Aucune donnée d’élève ne transite par des serveurs. Pour entrer, tu donnes ton adresse de courriel, tu reçois un code et c’est tout ! Tu restes ensuite connecté·e un mois sans avoir à renouveler ton accès. Il n’y a pas de commerce, pas de frais, pas d’abonnement, pas de publicité. Le seul échange souhaité est ton feedback et tes rapports de bugs (si tu en rencontres).</p>
+                    <p>Labo Codex est en bêta publique depuis le 3 juin 2026 : ton expérience influence sa construction. Pour entrer, tu donnes ton adresse de courriel et tu reçois un code. C’est la seule information que tu transmets. Tout le reste demeure dans le navigateur de ton appareil, protégé comme le reste de ton ordinateur par ton mot de passe de session et tes sauvegardes habituelles. Il n’y a ni frais, ni abonnement, ni publicité.</p>
                 </section>
             </div>
             <div class="apropos-deux apropos-avec-filet">
                 <div class="apropos-concepts">
-                    <p><strong>Besoin d’un coup de main ?</strong> L’aide est accessible en tout temps dans l’application. Des parcours assistés, qui t’accompagneront pas à pas, sont en préparation. Des guides sont aussi là si tu veux aller plus loin.</p>
+                    <p><strong>Besoin d’un coup de main ?</strong> L’aide est accessible dans l’application, sous « Assistance ». Des parcours assistés s’y ajouteront bientôt pour te montrer les gestes un à un. Les guides pédagogiques sont là si tu veux aller plus loin.</p>
                     <ul class="apropos-liens banniere-bienvenue-actions">
                         <li><button type="button" class="apropos-lien" data-action="ouvrirPanneauAssistance">Assistance</button></li>
                         <li><button type="button" class="apropos-lien" data-action="naviguerAccueilCarte" data-param="labo|labo-accompagnement">Guides pédagogiques</button></li>

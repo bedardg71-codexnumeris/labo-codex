@@ -29169,6 +29169,11 @@ body.mode-clair {
 .banniere-bienvenue .apropos-concepts p {
     margin-bottom: 8px;
 }
+/* 16 nov. 2026 : la colonne de droite porte aussi un lien (« Joindre la communauté ») sous son
+   paragraphe ; même écart qu'à gauche entre le paragraphe et ses liens. */
+.banniere-bienvenue .apropos-deux .apropos-communaute .banniere-bienvenue-acces {
+    margin: 0 0 8px;
+}
 .banniere-bienvenue .apropos-liens {
     list-style: none;
     margin: 0 0 12px;
