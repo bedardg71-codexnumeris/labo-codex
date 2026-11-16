@@ -149,10 +149,11 @@ describe('B. La navigation de la vue étendue, identique avant et après', () =>
         entrees.forEach((e) => expect(html).toContain(`id="section-${e}"`));
     });
 
-    it('le menu : les cinq lignes d\'avant, dans l\'ordre, puis un filet, puis les deux lignes des vues', () => {
+    it('le menu : les lignes d\'avant, dans l\'ordre, puis un filet, puis les deux lignes des vues', () => {
         const menu = html.match(/<div id="entete-menu-panneau"[^>]*>([\s\S]*?)<\/div>\s*<\/div>\s*<\/div>/)[1];
         const lignes = [...menu.matchAll(/<button [^>]*data-action="([A-Za-z.]+)"(?: data-param="([a-z]+)")?/g)].map((m) => [m[1], m[2]].filter(Boolean).join(':'));
-        expect(lignes).toEqual(['ouvrirPanneauAssistance', 'afficherSection:aide', 'ouvrirModalRapportBug', 'ouvrirModalSoutien', 'afficherSection:reglages', 'VueSimple.basculer:simple', 'VueSimple.basculer:etendue']);
+        // ↻ 16 nov. 2026 (#1283) : les deux lignes de la démo, après « Assistance » ; la vue simple les masque comme les autres.
+        expect(lignes).toEqual(['ouvrirPanneauAssistance', 'explorerDonneesDemo', 'desactiverModeDemo', 'afficherSection:aide', 'ouvrirModalRapportBug', 'ouvrirModalSoutien', 'afficherSection:reglages', 'VueSimple.basculer:simple', 'VueSimple.basculer:etendue']);
         expect(menu.indexOf('entete-menu-filet')).toBeGreaterThan(menu.indexOf('data-param="reglages"'));
         expect(menu.indexOf('entete-menu-filet')).toBeLessThan(menu.indexOf('menu-vue-simple'));
     });

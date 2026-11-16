@@ -87,15 +87,19 @@ describe('en-tête épuré · la bande du haut', () => {
         expect(iTheme).toBeLessThan(iMenu);
         expect(actions).toMatch(/id="entete-menu-bouton"[^>]*aria-label="Menu" aria-expanded="false" aria-controls="entete-menu-panneau"/);
     });
-    it('le menu : cinq lignes dans l\'ordre de la consigne (Réglages en dernier), chacune avec son icône actuelle', () => {
+    it('le menu : ses lignes dans l\'ordre de la consigne (Réglages en dernier), chacune avec son icône actuelle', () => {
         const menu = tranche(entete, '<div id="entete-menu-panneau"', '</div>');
         const lignes = [...menu.matchAll(/<span class="header-icon (ico-[a-z-]+)"[^>]*><\/span><span class="entete-menu-mot">([^<]+)<\/span>/g)]
             .map((m) => [m[2], m[1]]);
         // ↻ Correction de Grégoire du 7 nov. 2026 : Réglages en dernier.
         // ↻ Lot « Les deux parcours » (8 nov. 2026, esquisse 73) : « Visite guidée » et la ligne à interrupteur
         // deviennent une seule entrée « Assistance », qui ouvre le panneau et porte le rang du parcours.
-        expect(lignes).toEqual([['Assistance', 'ico-assistance'], ['Aide', 'ico-aide-cercle'],
-            ['Signaler', 'ico-bug'], ['Soutenir', 'ico-coeur'], ['R&eacute;glages', 'ico-tune']]);
+        // ↻ Lot « La démo dans le menu » (16 nov. 2026, #1283) : deux lignes après « Assistance », dont une seule se
+        // voit (styles.css, « mode-demo ») ; même icône, mêmes gestes que la porte de l'accueil et que le bandeau vert.
+        expect(lignes).toEqual([['Assistance', 'ico-assistance'], ['Explorer la démo', 'ico-demo'], ['Quitter la démo', 'ico-demo'],
+            ['Aide', 'ico-aide-cercle'], ['Signaler', 'ico-bug'], ['Soutenir', 'ico-coeur'], ['R&eacute;glages', 'ico-tune']]);
+        expect(menu).toMatch(/id="menu-demo-explorer" class="entete-menu-item" data-action="explorerDonneesDemo"/);
+        expect(menu).toMatch(/id="menu-demo-quitter" class="entete-menu-item" data-action="desactiverModeDemo"/);
         expect(menu).toMatch(/id="btn-assistance-menu"[^>]*data-action="ouvrirPanneauAssistance"[^>]*>.*<span id="assistance-menu-rang" class="entete-menu-rang"><\/span><\/button>/);
     });
     it('Aide et Réglages gardent .btn-action-header : navigation.js (zone protégée) s\'en sert pour les marquer « actif »', () => {
