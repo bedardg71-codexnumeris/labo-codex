@@ -3,5 +3,9 @@
     "genereLe": "2026-11-08",
     "totalEchecsConnus": 0,
     "echecsConnus": [],
-    "_note20261108": "8 nov. 2026 : les quatre cas iPad de temoin-enregistrement-lot-b (#1181) sont verts au verdict du Mac depuis la 1.236.0 (jeton sur 4bf9cc3f : 1 413 verts, 0 rouge) ; retirés. #1181 reste dans la file des correctifs (entrée 14)."
+    "echecsIntermittents": [
+        "gel-etape-7-2026-11-15.spec.js › premier passage, 24 rangées : à l'étape 7, un placement et une réponse de la page sous 250 ms ; une seule flèche vers la colonne Présence"
+    ],
+    "_note20261108": "8 nov. 2026 : les quatre cas iPad de temoin-enregistrement-lot-b (#1181) sont verts au verdict du Mac depuis la 1.236.0 (jeton sur 4bf9cc3f : 1 413 verts, 0 rouge) ; retirés. #1181 reste dans la file des correctifs (entrée 14).",
+    "_note20261116": "16 nov. 2026 (décision relayée par Cowork, option 1) : « premier passage, 24 rangées » de gel-etape-7-2026-11-15.spec.js passe aux intermittentes. Son attente « le halo suit « Verrouiller la saisie » au défilement » rend 1 px d'écart au lieu de 0, un passage sur deux : mesuré 3 rouges sur 6 passages sans second essai sur origin/main 5735b41e3 (1.248.2), même écart de 1 px, sans le lot lot/menu-demo. À retirer quand la course entre le défilement et le replacement du halo sera corrigée (fiche à la file des correctifs)."
 }

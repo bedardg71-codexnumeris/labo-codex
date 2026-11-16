@@ -27,6 +27,37 @@ Neuf restent (voir la vérification). Code mort : le retirer, après la preuve q
 ### 31. Le skill `alignement` porte les réponses du 28 août (#589)
 `.claude/skills/alignement/SKILL.md` ~98, ~133-141, ~293. Documentation seulement.
 
+### 36. Le halo du parcours suit « Verrouiller la saisie » au pixel près (lot à part, décision relayée par Cowork le 16 nov. 2026)
+`tests/integration/gel-etape-7-2026-11-15.spec.js` ~70-76, essai « premier passage, 24 rangées » : après 240 px de défilement, le centre du halo (`#parcours-contour`) est à 1 px de celui de `#btnVerrouillerSaisiePresences`, un passage sur deux. Mesuré le 16 nov. : 3 rouges sur 6 passages sans second essai sur `origin/main` `5735b41e3` (1.248.2), même écart, sans le lot `lot/menu-demo` ; rouge aux deux essais dans le verdict de `2a735b320`. L'essai est inscrit aux intermittentes de `scripts/playwright-baseline.json` (`bfa3402d3`, `echecsIntermittents`, première entrée de cette liste sur le Mac).
+**D'abord** : établir si l'écart de 1 px se VOIT à l'écran (capture du halo et du bouton après défilement, à 24 et 36 rangées) ou s'il n'existe que dans la mesure de l'essai (arrondi de `getBoundingClientRect`, lecture avant le dernier replacement). **Ensuite** seulement : corriger la course entre le défilement et le replacement du halo (`js/parcours-moteur*.js`, le placement et ses `passages`), ou l'attente de l'essai si le rendu est juste. **Fin** : dix passages verts de suite sans second essai, puis retirer l'essai de `echecsIntermittents` et la note `_note20261116`. Rien n'a été corrigé le 16 nov.
+
+### 37. Le verdict de GitHub au navigateur est rouge en permanence : la baseline Linux est périmée dans les deux sens (lot à part, issue 2 retenue par Cowork le 16 nov. 2026)
+Job « Playwright — verdict », étape « Fusionner et juger contre la baseline » (`scripts/juger-rapport-playwright.mjs`, `scripts/playwright-baseline-linux.json`). Les 20 morceaux WebKit et Vitest sont verts ; seul le jugement échoue, sur des essais rouges absents de la baseline. Le Mac reste le juge du push, et il est vert : rien de livré n'en dépend.
+
+**Mesuré le 16 nov. (`gh run view <id> --log-failed`)** :
+- run 43942432518, `bfa3402d3` (1.248.3) : 1 690 essais joués, 1 650 verts, 7 au second essai, 33 rouges, 68 sautés ; 16 connus de la baseline, 3 intermittentes rouges sur 30 ; **14 nouvellement rouges** ; 17 specs de la baseline redevenues vertes (à retirer), 2 à passer aux intermittentes.
+- run 43853967604, `5735b41e3` (1.248.2) : 1 686 joués, 1 640 verts, 10 au second essai, 36 rouges, 68 sautés ; 19 connus, 1 intermittente rouge sur 30 ; **16 nouvellement rouges** ; 14 redevenues vertes, 2 à passer aux intermittentes.
+- D'un run à l'autre : **8 communs**, 6 propres à `bfa3402d3`, 8 propres à `5735b41e3`. Inféré, non démontré : la moitié qui tourne ressemble à des essais capricieux sous WebKit Linux (surtout les parcours), pas à la régression d'un commit.
+- Depuis quand : aucun commit de bascule nommé. Sur les 200 derniers runs « Tests » de `main` (depuis le 16 oct.), chaque run lu où le job a JUGÉ est en échec (les 12 du 10 au 16 nov., tous ceux du 29 oct. au 3 nov. ; le plus ancien lu : `24ca0dde7`, 29 oct.), et chacun des 15 runs « success » lus avait le job `skipped` (dont `358eb82a5`, 10 nov.). Non lus : les « success » du 16 au 22 oct., les runs du 4 au 9 nov. job par job, tout ce qui précède le 16 oct.
+
+**Les 8 essais nouvellement rouges communs aux deux runs** :
+- `evaluer-868-avec-ou-sans-copie.spec.js` › Porte #868 · avec copie : « Évaluer » ouvre la copie de l'élève, en mode Évaluer
+- `palette-evaluation-compacte.spec.js` › La palette Évaluation compacte › la bulle : toucher un nom ouvre sa description, toucher ailleurs ou un autre nom la ferme, jamais deux
+- `parcours-2-ma-classe-2026-11-09.spec.js` › de « Découvrir » à sa propre classe : « Commencer avec ma classe », le Cadre bloc par bloc, « Plus tard » puis « Reprendre », la première saisie, la bande (1180 px)
+- `parcours-2-ma-classe-2026-11-09.spec.js` › la porte de l’accueil commence à la première étape non faite ; avant le premier cours, l’étape 7 le dit, « D’accord » la ferme, « Reprendre » la rouvre
+- `parcours-2-ma-classe-2026-11-09.spec.js` › les formulaires du Cadre : une flèche par champ obligatoire vide, qui part quand il est rempli, et celle du bouton ; à la fin, le bouton seul
+- `parcours-7-lire-ta-classe-2026-11-09.spec.js` › les neuf étapes en faisant les gestes, sans grille de dépistage désignée (1180 px, sombre)
+- `parcours-9-notation-alternative-2026-11-09.spec.js` › étape 3, standards, 1180 × 820 : la bulle laisse le nombre à retenir, le mode et le minimum libres
+- `tableau-de-notation-1.spec.js` › Tableau de notation · le débordement à 820 px › standards : un bord estompé du côté où il reste des colonnes, qui disparaît au bout ; les flèches amènent la case dans la vue
+
+**Propres à `bfa3402d3`** : `annotation-formes-fermees-polygone` (dupliquer et déplacer une forme ondulée), `en-tete-epure-2026-11-07` (une rangée d'onglets qui déborde au bureau défile, avec un fondu au bord), `evaluer-868-avec-ou-sans-copie` (sans copie, puis avec, puis sans), `parcours-2-ma-classe` (une flèche didactique ouverte avant le parcours), `parcours-4-recevoir-et-rendre` (la voie sans fichier), `parcours-9-notation-alternative` (le parcours entier en spécifications). **Propres à `5735b41e3`** : `bulle-largeur-ipad-2026-11-12` (3 essais), `pages-sans-emboitement-2026-11-07` (Préparer, clair et sombre), `parcours-4-recevoir-et-rendre` (la voie des fichiers), `parcours-9-notation-alternative` (le parcours entier en standards), `vue-simple` (après le parcours, chaque section s'ouvre).
+
+**Ordre du lot** :
+1. Rejouer un MÊME commit deux fois sous Linux (`gh workflow run tests.yml --ref main`, à proposer à Grégoire) pour séparer les capricieux des rouges stables.
+2. Trancher d'abord `en-tete-epure-2026-11-07` (« une rangée d'onglets qui déborde ») : seul rouge propre à `bfa3402d3` sur une spec que le lot `lot/menu-demo` a modifiée. Établir si le lot y est pour quelque chose (sur le Mac, cette spec a eu un AUTRE essai vert au second essai, « bureau (1440) »).
+3. Seulement ensuite, retoucher `playwright-baseline-linux.json` (retirer les redevenues vertes, passer les capricieux aux intermittentes, à la main).
+Rien n'a été corrigé ni inscrit à la baseline le 16 nov.
+
 ## Mises de côté (attendent Grégoire)
 
 - **Le texte de l'aide « Date d'échéance et indices » (entrée 21, #1086)**, maintenant sur la case « Consignes transmises ». Grégoire, 8 nov. vers 16 h 44 : une production sans copie évaluée n'entre « pas encore » dans C. **Mesuré ensuite** : vrai en Sommative et en pratique configurable (`pratique-sommative.js` ~307-316 : dénominateur = productions ayant au moins une copie qui compte dans le groupe) ; **faux en PAN-Standards** (`pratique-pan-standards.js` ~308-315 : case cochée et date suffisent, échéance future comprise, sans copie évaluée). Grégoire : « Le comportement a été discuté avec Cowork tantôt et une décision a été prise. Elle est notée dans le chantier des parcours. » Cette note n'est pas dans le dépôt (cherchée : `plans de travail/`, `OU-EN-EST-ON.md`). **L'aide se réécrit selon cette décision, une fois qu'elle est au dépôt** ; d'ici là, elle reste telle quelle.

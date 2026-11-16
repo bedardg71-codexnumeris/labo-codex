@@ -176,7 +176,10 @@ test('le menu : cinq lignes dans l\'ordre, Réglages en dernier, puis « Vue sim
     await expect(panneau).toBeVisible();
     await expect(bouton).toHaveAttribute('aria-expanded', 'true');
     expect(await panneau.locator('.entete-menu-item:not(.entete-menu-vue) .entete-menu-mot').allTextContents())
-        .toEqual(['Assistance', 'Aide', 'Signaler', 'Soutenir', 'Réglages']); // ↻ lot « Les deux parcours », 8 nov.
+        .toEqual(['Assistance', 'Explorer la démo', 'Quitter la démo', 'Aide', 'Signaler', 'Soutenir', 'Réglages']); // ↻ lot « Les deux parcours », 8 nov. ; la démo dans le menu, 16 nov. (#1283)
+    // Ce banc est en démo : des deux lignes de la démo, seule « Quitter la démo » se voit.
+    await expect(panneau.locator('#menu-demo-quitter')).toBeVisible();
+    await expect(panneau.locator('#menu-demo-explorer')).toBeHidden();
     // ↻ La bascule des vues (arrêtée par Grégoire le 9 nov.) : en vue étendue, sous le filet, « Vue simple » seule.
     await expect(panneau.locator('#menu-vue-simple')).toBeVisible();
     await expect(panneau.locator('#menu-vue-etendue')).toBeHidden();
