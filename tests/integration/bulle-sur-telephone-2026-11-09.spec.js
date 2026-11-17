@@ -329,6 +329,9 @@ test('390 px : un parcours pour grand écran le dit sous son titre, et « Commen
     await expect(btn).toHaveAttribute('aria-disabled', 'true');
     await expect(btn).toHaveAccessibleDescription(new RegExp(TEXTE_GRAND_ECRAN.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
     // aria-disabled : Playwright attendrait qu'il s'active ; le toucher est forcé, il ne doit rien lancer.
+    // Un toucher forcé n'attend pas que le panneau ait fini de glisser à l'écran : touché en route, le bouton est « hors
+    // de la fenêtre » (17 nov. 2026 : rouge 2 fois sur 3 dès que le banc ne s'enregistre plus en trace et va plus vite).
+    await expect.poll(() => page.evaluate(() => new DOMMatrix(getComputedStyle(document.getElementById('panneau-assistance')).transform).m41)).toBe(0);
     await btn.click({ force: true });
     expect(await page.evaluate(() => window.__lance)).toBe(0);
     await expect(page.locator('#panneau-assistance')).toBeVisible();

@@ -370,6 +370,9 @@ export async function faireLaModelisation(page, { capturer = '', surRemplir = nu
     await expect(page.locator('#suivi-groupe')).toBeVisible();
     await expect(bulle(page).locator('.parcours-bulle-sortie')).toHaveCount(0);
     await expect(bulle(page)).toContainText('Trois points sont à l\'écart');
+    // La bande se peint APRÈS la bulle : sans cette attente, la lecture qui suit trouvait un bloc encore vide (17 nov. 2026 :
+    // rouge trois fois sur trois dès que le banc ne s'enregistre plus en trace et va deux fois plus vite).
+    await expect(page.locator('#section-suivi .barre-etudiant[data-da]')).toHaveCount(10);
     const points = await page.evaluate((p) => {
         const bloc = document.querySelector('#section-suivi h4[data-tooltip="tdb-assiduite"]').parentElement;
         const x = (da) => { const e = bloc.querySelector('.barre-etudiant[data-da="' + da + '"]'); return e ? Math.round(e.getBoundingClientRect().left) : null; };
