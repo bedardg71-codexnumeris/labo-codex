@@ -7,6 +7,19 @@
 
 ---
 
+## 17 NOV. 2026, 7 H 10 (Claude Code) : **ARRÊT AU VERDICT : UN ROUGE HORS DU LOT AU DEMI-MORCEAU 7b — LA 1.249.0 EST PRÊTE EN LOCAL, `main` N'A PAS BOUGÉ** — 18 demi-morceaux sur 40 jugés et gardés, la mémoire a tenu (78 %)
+
+Mandat : relais de Cowork du 17 nov. (« arrête-toi sans pousser main si un rouge hors du lot apparaît »). Rien n'est poussé sur `main` (`e5ad10f90`, 1.248.3) ; rien n'est en ligne.
+
+- **Le rouge** : `grilles-sous-criteres-condense.spec.js:52`, projet iPad, « sous-critères · créer le premier, nommer, recharger, réordonner, retirer ; aucun code d'annotation » : rouge aux deux essais du demi-morceau 7b (`toEqual`, un élément d'écart). **Hors du lot** : le lot ne touche aucun fichier de grille (`git diff --name-only main origin/lot/deux-temps-modeles | grep -ic grille` rend 0). **Pas un effet du changement de trace** : rejoué seul sur `ecdf87940`, 2 rouges sur 6 sans trace, 1 rouge sur 6 avec ; c'est le même essai qui était vert au second essai au verdict du 16 nov. sur `2a735b320`. Absent de la baseline. Rien corrigé, baseline non touchée.
+- **Dans le même demi-morceau, verts au second essai** : `copie-demo-bibliotheque-31-oct:51`, `lot-i-bis-la-case-ouvre-un-codex:252`. Les 17 autres demi-morceaux : code 0.
+- **Où est la release** : arbre `../labo-codex-fusion`, branche locale `attente/1.249.0-non-jugee`, `ecdf87940` = `main` + fusion `--no-ff` du lot (`a2ce7777c`) + release 1.249.0, build `1117-0611`, les deux lignes des Nouvelles accordées le 16 nov. mot pour mot. Vitest complet vert sur ce commit (931 fichiers, 11 888). Non poussée. L'arbre est LAISSÉ sur cette branche pour que le verdict reprenne ; l'ancienne préparation est sous `attente/1.249.0-du-16-nov` (`f4f8702f9`).
+- **Reprendre le verdict sans rejouer** : `scripts/verdict-en-morceaux.mjs` ne sait PAS reprendre (dossier temporaire effacé à la sortie, tout repart du morceau 1). L'outil de la session, lui, garde son état hors de `/tmp` : `~/Library/Caches/labo-codex-verdict/` (`etat.json`, `blobs/`, survit à un redémarrage). `~/Library/Caches/labo-codex-verdict/suite.sh` joue ce qui reste (à partir de **10a**), `node …/verdict-pas-a-pas.mjs ../labo-codex-fusion juger 20` fusionne, juge et écrit le jeton. Valable tant que HEAD reste `ecdf87940` ; un commit qui ne change que `scripts/playwright-baseline.json` peut se rejuger sur les mêmes rapports (comme le report du 16 nov.), tout autre commit rejoue tout.
+- **La mémoire pendant le verdict** : 78 % au départ, 78 % après 18 passages (47 minutes de bancs), compresseur 1 333 → 1 390 Mo, antivirus + 0 à + 3 s par passage, aucun processus restant, aucun passage tué (le plus long : 361 s). ⚠ Cowork était ouvert (machine virtuelle, 587 Mo) : la règle 4.6.2 du rituel de fin demande qu'il soit fermé ; la garde des 60 % a tenu lieu de garde, et n'a jamais refusé.
+- **À décider (Cowork, Grégoire)** : inscrire l'essai aux intermittentes de la baseline, comme `gel-etape-7` le 16 nov., puis reprendre à 10a et rejuger ; ou corriger d'abord sa course (lot à part). Les 22 demi-morceaux non joués peuvent porter d'autres rouges : non mesuré.
+
+---
+
 ## 17 NOV. 2026, 6 H 15 (Claude Code) : **POINT DE DÉCISION : LA MÉMOIRE TIENT (78 %), LES BANCS DU MOTEUR SONT JOUÉS, LA RELEASE PART EN PRÉPARATION** — les traces Playwright étaient la cause ; `lot/deux-temps-modeles` poussée
 
 Mandat : relais de Cowork du 17 nov. (la règle du passage unique levée). Grégoire est en classe de 8 h à 10 h : décidé dans les limites du relais, suppositions dites ici. `main` n'a pas bougé (`e5ad10f90`, 1.248.3).
