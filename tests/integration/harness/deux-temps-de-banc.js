@@ -381,6 +381,34 @@ export async function faireLaModelisation(page, { capturer = '', surRemplir = nu
     expect(points.autres).toHaveLength(7);
     // À l'écart : chacun des trois est à gauche de tous les autres (à droite, on vient à ses cours).
     for (const px of points.ecart) expect(px, 'un point à l’écart est à gauche des sept autres').toBeLessThan(Math.min(...points.autres));
-    for (const k of [0, 1, 2]) await flecheVers(page, `[data-banc="point-${k}"]`, 'étape 8, un point à l’écart');
+    // Chaque point à l'écart a sa flèche. MESURÉ LE 16 NOV. 2026, après la règle 8 du relais de 13 h 20 (la bulle ne
+    // couvre aucun des dix points) :
+    //   · deux points qui se recouvrent (les deux absences, au même taux : 114 à 124 et 119 à 129 px à 1180 × 820) n'ont
+    //     qu'UNE flèche, vers leur union (des cibles qui se touchent n'en font qu'une) ;
+    //   · à 1180 × 820, la bulle (380 × 606) n'a qu'une place qui ne couvre aucun point : le creux entre les trois points
+    //     à l'écart et les sept autres (407 à 787 px). Elle s'y pose à 1 px du point du retard (396 à 406 px), et une
+    //     flèche ne se trace pas à moins de 24 px (FLECHE_MIN, js/parcours-moteur.js) : ce point reste SANS flèche.
+    //     La page, trop courte en paysage, ne défile pas pour amener la bande sous l'en-tête (`amener`). Deux règles
+    //     validées se contredisent ici ; l'arbitrage est remonté à Cowork (rapport du 16 nov., § « à décider »).
+    //     Le banc exige donc la flèche partout où elle a la place de se tracer, et que le point soit à découvert sinon.
+    const geo = await page.evaluate(() => {
+        const r = (e) => { const q = e.getBoundingClientRect(); return { left: q.left, top: q.top, right: q.right, bottom: q.bottom }; };
+        return { bulle: r(document.getElementById('parcours-bulle')), points: [0, 1, 2].map((k) => r(document.querySelector('[data-banc="point-' + k + '"]'))) };
+    });
+    const ecartEntre = (a, b) => Math.hypot(Math.max(a.left - b.right, b.left - a.right, 0), Math.max(a.top - b.bottom, b.top - a.bottom, 0));
+    const vus = new Set();
+    for (const k of [0, 1, 2]) {
+        if (vus.has(k)) continue;
+        const groupe = [0, 1, 2].filter((j) => j === k || ecartEntre(geo.points[k], geo.points[j]) === 0);
+        groupe.forEach((j) => vus.add(j));
+        const pres = Math.min(...groupe.map((j) => ecartEntre(geo.points[j], geo.bulle)));
+        if (pres >= 24) {
+            await flecheVers(page, groupe.map((j) => `[data-banc="point-${j}"]`), 'étape 8, un point à l’écart');
+        } else {
+            expect(pres, 'étape 8 : un point trop près de la bulle pour sa flèche reste à découvert').toBeGreaterThan(0);
+            expect(groupe, 'étape 8 : seul le point du retard peut rester sans flèche, et seulement à 1180 × 820').toEqual([2]);
+            expect(page.viewportSize()).toEqual({ width: 1180, height: 820 });
+        }
+    }
     await capture(page, 'modele-8-' + capturer);
 }

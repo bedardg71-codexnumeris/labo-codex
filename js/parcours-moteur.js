@@ -126,6 +126,7 @@
    · LA BULLE NE COUVRE PAS CE DONT ELLE PARLE : une étape déclare dans `aussiEviter` ce qu'elle ne couvre que faute
      de mieux (le nom d'une bande, chacun de ses points), pesé comme le contour.
    · AVANT LE FILET : une bulle plus haute que l'écran utile s'élargit (`parcours-bulle--elargie`, 520 px).
+   · AVANT DE COUVRIR CE QU'ELLE ÉVITE : elle s'élargit aussi, si cette forme couvre moins (`placerBulle`).
    · L'espace insécable devant « ; : ? ! » (`typographier`), pour toutes les bulles.
    · Le triangle du compteur est celui des sections de l'application, à leur taille (css/parcours.css).
 
@@ -1913,6 +1914,18 @@
             if (place.y + bh > vh - MARGE) place.y = Math.max(MARGE, vh - bh - MARGE);
         } else {
             place = placerLoin(evites, bw, bh, cadreUtile());
+            // AVANT DE COUVRIR CE QU'ELLE ÉVITE, la bulle s'élargit aussi (16 nov. 2026 ; « Ton trimestre » à 1180 × 900 :
+            // au-dessus de la rangée « session, année, nom », il reste 477 px ; haute de 476 px, la bulle y tenait à
+            // 1 px près, et la ligne de la poignée, dite par la première bulle de chaque parcours, la faisait couvrir le
+            // nom du trimestre). Plus large, elle est moins haute : si cette forme couvre moins, elle la garde jusqu'à
+            // la bulle suivante ; sinon elle reprend sa largeur, et l'essai n'est pas refait à chaque passage de la sonde
+            // (`parcours-bulle--etroite` ; les deux classes partent avec `rendreBulle`).
+            if (place.aire > 0 && !b.classList.contains('parcours-bulle--elargie') && !b.classList.contains('parcours-bulle--etroite')) {
+                b.classList.add('parcours-bulle--elargie');
+                var large = placerLoin(evites, b.offsetWidth, b.offsetHeight, cadreUtile());
+                if (large.aire < place.aire) place = large;
+                else { b.classList.remove('parcours-bulle--elargie'); b.classList.add('parcours-bulle--etroite'); }
+            }
         }
         b.style.left = Math.round(place.x) + 'px';
         b.style.top = Math.round(place.y) + 'px';

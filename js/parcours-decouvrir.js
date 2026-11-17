@@ -286,6 +286,11 @@
             // La page a changé (vu à l'écran le 16 nov. 2026 : l'onglet du menu passe de « Groupe » à « Profils ») : la
             // bulle le dit, comme la consigne le demande. À la bulle 4, on reste dans le même onglet : rien à redire.
             lieu: true,
+            // … mais les deux lignes que nomme la bulle sont plus bas que l'écran : ouverte en haut (`lieu` seul), la
+            // page laissait « 5 absences ou retards » à demi sous le bandeau de la démo et « 2 productions non remises »
+            // hors de l'écran, sans flèche (mesuré le 16 nov. 2026 à 1180 × 820 ; à 1180 × 700, aucune des deux).
+            // Elles sont amenées dans la vue, avec « Accompagnement », comme avant la réécriture.
+            amener: true,
             lignes: function () {
                 return [
                     // Les deux lignes que nomme la bulle (exemple validé par Grégoire, 11 nov. 2026).

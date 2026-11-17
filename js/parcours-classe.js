@@ -415,6 +415,10 @@
                 ];
             },
             avant: function () { return ouvrirBloc('trimestre'); },
+            // LA BULLE NE COUVRE PAS CE DONT ELLE PARLE (règle 8 du relais du 16 nov. 2026, 13 h 20) : le nom du
+            // trimestre, que la session et l'année composent sous les yeux de la personne, n'est pas un champ à remplir ;
+            // la bulle ne l'évitait donc pas, et le couvrait à 1180 × 900 (banc parcours-2-ma-classe).
+            aussiEviter: function () { return [el('v2-nomTrimestre')]; },
             contour: function () { return el(BOUTON_CREER.trimestre); },
             atteint: function () { return reglee('trimestre'); }
         },
