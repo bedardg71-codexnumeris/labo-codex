@@ -7,6 +7,20 @@
 
 ---
 
+## 17 NOV. 2026, 6 H 15 (Claude Code) : **POINT DE DÉCISION : LA MÉMOIRE TIENT (78 %), LES BANCS DU MOTEUR SONT JOUÉS, LA RELEASE PART EN PRÉPARATION** — les traces Playwright étaient la cause ; `lot/deux-temps-modeles` poussée
+
+Mandat : relais de Cowork du 17 nov. (la règle du passage unique levée). Grégoire est en classe de 8 h à 10 h : décidé dans les limites du relais, suppositions dites ici. `main` n'a pas bougé (`e5ad10f90`, 1.248.3).
+
+- **La cause de la mémoire qui ne revient pas : les traces.** `trace: 'retain-on-failure'` écrivait une trace par essai, même vert. Avec `on-first-retry` (`dc5bc4f30`, gardé dans le lot), sur les quatre mêmes bancs : 337 Mo écrits → 0, processeur de l'antivirus + 52 s → + 1 s, 193 s → 136 s, mémoire libre 85 → 81 % → 82 → 82 %. Détail et tableau : fiche 38 de `plans de travail/FILE-DES-CORRECTIFS.md`.
+- **La pente** : 83 % à 5 h 18, 78 % à 6 h 07, en 21 passages (26 minutes de bancs). Zéro point pour un passage sans reprise ; 2 à 3 points pour un passage où un essai est repris et tracé. Aucun processus WebKit restant, à aucun passage. Aucun passage tué, aucun de plus de 4,4 min.
+- **Le coût** : plus rapides, les bancs laissent voir des courses que la trace masquait. Trois corrigées dans les bancs (`dc5bc4f30`, `84c1e7e8b`), sans assertion retirée. Neuf essais verts au second essai sur les bancs du moteur, non corrigés, listés à la fiche 38.
+- **Bancs du moteur, groupes 2 à 7, tête `84c1e7e8b`** : aucun rouge nouveau ; un rouge connu (`gel-etape-7:37`, 24 rangées, fiche 36, aux intermittentes de la baseline). `deux-temps-modelisation:140` et `:257` verts cinq passages de suite : le « 1 sur 8 » inscrit comme effet de la machine, non tranché. `carte-aide-materiel:506` n'a pas bloqué.
+- **Les deux inscriptions** : fiches 39 (zoom au pincement, « Remplir ») et 40 (« Voir le parcours suivant », le modèle déjà fait). Aucune des deux ne se produit dans « Découvrir » tel qu'il part en ligne (vérifié au code) : rien corrigé.
+- **Décision** : mémoire à 78 %, au-dessus des 70 % du relais ; aucun rouge nouveau. **Supposé** : un essai vert au second essai compte pour vert (c'est la règle du verdict, #534), et le rouge connu de la fiche 36 n'est pas « un rouge hors du lot » au sens du relais, puisque la baseline le porte. Sur ces deux suppositions, la suite part : release sous `attente/1.249.0-non-jugee`, fusion `--no-ff`, verdict complet en demi-morceaux avant tout push de `main`.
+- **Non fait** : le groupe 1 des bancs du moteur n'a pas été rejoué sur cette tête (le verdict complet le couvre) ; aucun break-test sur les trois attentes ajoutées aux bancs (ce sont des attentes, pas des assertions).
+
+---
+
 ## 16 NOV. 2026, 20 H 00 (Claude Code) : **`lot/deux-temps-modeles` À `5a0944508`, POUSSÉE SUR SON ORIGIN — LES DIX ROUGES ET LA BULLE « TON TRIMESTRE » SONT TRAITÉS, LES BANCS DU MOTEUR NE SONT PAS TOUS REJOUÉS, LA 1.249.0 N'EST PAS PARTIE** — entrée écrite après le redémarrage du Mac (19 h 56)
 
 Mandat : relais de Cowork du 16 nov., 18 h 20 (cinq points). `main` n'a pas bougé (`e5ad10f90`, 1.248.3). Cette entrée vit sur la branche : elle rejoint `main` avec la fusion.

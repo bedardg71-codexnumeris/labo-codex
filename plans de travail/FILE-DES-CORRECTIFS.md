@@ -99,6 +99,36 @@ Pendant le passage (échantillons aux 5 s) : 5 processus WebKit, 1,0 à 1,4 Go �
 - Au système, à Grégoire : exclure `tests/test-results` (et le cache `ms-playwright`) de l'analyse en temps réel de VirusBarrier. Ne se justifie qu'une fois l'hypothèse de lecture démontrée (`sudo fs_usage -w -f filesys virusbarriers` pendant un passage).
 - Prochaine mesure utile : trois passages de suite avec les mêmes relevés, pour voir si la baisse s'accélère ; puis les mêmes avec le diff.
 
+**Suite du 17 nov., 5 h 18 à 6 h 07 : la règle du passage unique levée, 21 passages gardés (charge 6 au plus, mémoire 60 % au moins).** Relevés : `Claude outputs/releves-memoire-2026-11-17/` (`passages.tsv`, un relevé complet par passage).
+
+*La comparaison propre.* Les quatre mêmes bancs (« ordre1 »), un worker, `--retries=0` :
+
+| | `retain-on-failure` (4 h 55) | `on-first-retry` (5 h 25) |
+|---|---|---|
+| Durée | 193 s | 136 s |
+| Écrit dans `test-results` | 337 Mo, 3 069 fichiers | 0 |
+| Processeur de `virusbarriers` | + 52 s | + 1 s |
+| Mémoire libre | 85 → 81 % | 82 → 82 % |
+| Compresseur | + 293 Mo | − 21 Mo |
+| `virusbarriers`, `WindowServer` (empreinte) | 649 Mo, 508 Mo | 269 Mo, 152 Mo |
+| Processus WebKit restants | 0 | 0 |
+
+**Établi : ce sont les traces.** Le changement est GARDÉ dans le lot (`dc5bc4f30`). Sur les 21 passages, ceux qui n'écrivent aucune trace ne coûtent rien (mémoire et compresseur plats, antivirus à + 0 ou + 1 s) ; ceux où un essai est repris, donc tracé, coûtent : `g4a` 81 → 78 % (compresseur + 251 Mo, antivirus + 17 s), `g5b` 80 → 78 % (+ 99 Mo, + 21 s, 107 Mo écrits). Pente : 83 → 78 % en 21 passages, soit 5 points, tous pris sur les passages à reprise. Reste une hypothèse : que l'antivirus LISE ces fichiers (jamais vu par `fs_usage`) ; la corrélation, elle, est mesurée.
+
+**Le coût, mesuré : sans trace, les bancs vont une fois et demie plus vite, et la lenteur masquait des courses dans les bancs.** Corrigées dans le lot, sans assertion retirée : le harnais des deux temps lisait la bande d'assiduité avant qu'elle soit peinte, puis la géométrie avant que la bulle soit posée (`dc5bc4f30`, `84c1e7e8b` ; 5 rouges sur 8, puis 12 verts sur 12) ; `bulle-sur-telephone:316` touchait le bouton pendant le glissement du panneau (2 rouges sur 3, puis 6 verts sur 6). **Non corrigées, vertes au second essai sur les bancs du moteur (groupes 2 à 7, tête `84c1e7e8b`)** : `deux-temps-modeles:123` à 820 × 1180 (« Créer le cours » ne crée rien, vu aussi une fois à 1180 × 820 au passage 4), `deux-temps-modelisation:352`, `en-tete-epure:31`, `gel-etape-7:37` à 36 rangées, `parcours-1-et-2:131`, `parcours-8-commentaires:603`, `parcours-5-monter-ton-cours:211` et `:413`, `parcours-fleches:425`. Neuf essais sur environ 190 : à attendre dans les mêmes proportions au verdict complet, où un essai vert au second essai ne bloque pas (#534). Chacun est une attente qui manque dans un banc, non démontré pour aucun : à reprendre un par un.
+
+*`deux-temps-modelisation:140` et `:257`.* Verts aux passages 4 et 5 de l'ordre du groupe 2, et à trois autres passages du même ordre (cinq de suite, sans second essai). Cowork tient le « 1 sur 8 » du 16 nov. pour un effet de la machine pendant l'indexation. **Inscrit comme tel, non tranché** : rien ne l'a reproduit, rien ne l'a expliqué.
+
+*`carte-aide-materiel:506`.* N'a bloqué à aucun des sept passages qui l'ont joué. Le suspect des 13 points du 17 nov. au matin n'est ni confirmé ni écarté.
+
+*Bancs du moteur, groupes 2 à 7 (bancs 6 à 31), tête `84c1e7e8b`* : aucun rouge nouveau ; un rouge connu (`gel-etape-7:37` à 24 rangées, fiche 36, inscrit aux intermittentes) ; les neuf verts au second essai ci-dessus.
+
+### 39. Sous le zoom au pincement, « Remplir » agit mais la bulle n'est pas récrite (essai de Grégoire sur l'iPad, 16 nov. 2026, capture de 12 h 59 ; issue 2 retenue par Cowork)
+Quand le moteur se croit sous le zoom au pincement (deux doigts comptés, ou la page un peu zoomée : `visualViewport.scale` ≠ 1), il ne replace rien, et ne récrit pas non plus la bulle : « Remplir » remplit les champs, les flèches suivent, mais la bulle garde son bouton « Remplir » jusqu'à ce que le zoom soit levé (mesuré le 16 nov. : elle passe alors à « Touche « Créer le cours » »). Fait : le mécanisme (`plans de travail/RAPPORT-2026-11-16-essai-ipad.md`, § 3). Inférence : c'est ce que montre la capture de 12 h 59. **Ne se produit pas dans « Découvrir » tel qu'il part en ligne** : il n'a aucun bouton « Remplir » (`grep -ci remplir js/parcours-decouvrir.js` rend 0). À corriger avant d'ouvrir les modèles : séparer « ne pas replacer » de « ne pas récrire ». Rien n'a été corrigé.
+
+### 40. « Voir le parcours suivant », le modèle déjà fait : deux bulles de la fin d'un parcours déjà fait (essai de Grégoire sur l'iPad, 16 nov. 2026 ; issue 2 retenue par Cowork)
+Le modèle repart de sa première étape non faite. « Découvrir » ayant choisi le premier groupe, c'est la bulle 6 (« D'un groupe à l'autre ») qui s'ouvre, avec « C'est fait : le groupe-cours est créé » ; le groupe choisi, la bulle 7 est sautée (sa séance est déjà verrouillée) et la bulle 8 s'ouvre : « Objectif atteint ». Un novice demande le parcours suivant et reçoit la fin d'un parcours qu'il a déjà fait (`RAPPORT-2026-11-16-essai-ipad.md`, § 3). **Ne se produit pas dans « Découvrir » tel qu'il part en ligne** : tant que « Mettre ta classe en place » est fermé, sa dernière bulle n'offre que « Explorer la démo par moi-même » et « Terminer » (`js/parcours-decouvrir.js`, `get boutons`). La réponse (offrir « Refaire », ou le modèle suivant) est à décider par Grégoire avant d'ouvrir les modèles. Rien n'a été corrigé.
+
 ## Mises de côté (attendent Grégoire)
 
 - **Le texte de l'aide « Date d'échéance et indices » (entrée 21, #1086)**, maintenant sur la case « Consignes transmises ». Grégoire, 8 nov. vers 16 h 44 : une production sans copie évaluée n'entre « pas encore » dans C. **Mesuré ensuite** : vrai en Sommative et en pratique configurable (`pratique-sommative.js` ~307-316 : dénominateur = productions ayant au moins une copie qui compte dans le groupe) ; **faux en PAN-Standards** (`pratique-pan-standards.js` ~308-315 : case cochée et date suffisent, échéance future comprise, sans copie évaluée). Grégoire : « Le comportement a été discuté avec Cowork tantôt et une décision a été prise. Elle est notée dans le chantier des parcours. » Cette note n'est pas dans le dépôt (cherchée : `plans de travail/`, `OU-EN-EST-ON.md`). **L'aide se réécrit selon cette décision, une fois qu'elle est au dépôt** ; d'ici là, elle reste telle quelle.
