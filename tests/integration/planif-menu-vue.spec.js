@@ -33,6 +33,13 @@ const patternsAttendus = [
 ];
 const estErreurAttendue = (msg) => patternsAttendus.some((re) => re.test(msg));
 
+// #1115 (17 nov. 2026) — les deux essais qui jugent ⌘ LISENT la plateforme, comme la carte
+// (claviersMac, js/planification-carte.js) : le WebKit de Linux répond « Linux », et la carte y
+// affiche « Ctrl », à raison. Le banc supposait un Mac ; il juge maintenant les deux côtés.
+async function clavierMac(page) {
+    return page.evaluate(() => /Mac|iPhone|iPad|iPod/i.test((navigator.userAgentData && navigator.userAgentData.platform) || navigator.platform || ''));
+}
+
 async function ouvrirCarte(page) {
     const erreurs = [];
     page.on('pageerror', (e) => {
@@ -447,10 +454,17 @@ test('chaque raccourci affiché a son essai, et chaque essai son raccourci affic
     expect(affiches).toEqual(source);
     expect(affiches.length).toBeGreaterThan(0);
     expect([...affiches].sort()).toEqual(Object.keys(ESSAIS_RACCOURCIS).sort());
-    // Sur Mac (la cible WebKit est « Desktop Safari ») : ⌘, et plus ⌘1.
+    // Sur un Mac : ⌘, et plus ⌘1. Ailleurs (WebKit sous Linux) : Ctrl, aucun ⌘, et plus Ctrl+1.
     const touches = await page.$$eval('#planif-raccourcis-table kbd', (ks) => ks.map((k) => k.textContent));
-    expect(touches).toContain('⌘A');
-    expect(touches.join(' ')).not.toContain('⌘1');
+    if (await clavierMac(page)) {
+        expect(touches).toContain('⌘A');
+        expect(touches.join(' ')).not.toContain('⌘1');
+        expect(touches.join(' ')).not.toContain('Ctrl');
+    } else {
+        expect(touches).toContain('Ctrl+A');
+        expect(touches.join(' ')).not.toContain('Ctrl+1');
+        expect(touches.join(' ')).not.toContain('⌘');
+    }
     expect(erreurs).toEqual([]);
 });
 
@@ -576,7 +590,7 @@ test('au clavier : Entrée ouvre et entre dans le menu, les flèches y circulent
 
 test('le bouton « Annuler » annonce ⌘Z sur un Mac, plus « Ctrl+Z »', async ({ page }) => {
     const erreurs = await ouvrirCarte(page);
-    await expect(page.locator('#planif-btn-annuler')).toHaveAttribute('title', 'Annuler (⌘Z)');
+    await expect(page.locator('#planif-btn-annuler')).toHaveAttribute('title', (await clavierMac(page)) ? 'Annuler (⌘Z)' : 'Annuler (Ctrl+Z)');
     expect(erreurs).toEqual([]);
 });
 
