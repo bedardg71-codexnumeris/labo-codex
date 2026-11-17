@@ -135,7 +135,7 @@ describe('« Apporter mon matériel » — aucun texte neuf ne dit « dissection
             JSON.stringify(cat['conception-materiel'].popup),
             ...TERMES.map((k) => JSON.stringify(cat['terme-' + k].terme)),
             CARTE.replace(/<!--[\s\S]*?-->/g, ''),
-            tranche(DECOUVRIR, "titre: 'Concevoir'", "geste:"),
+            tranche(DECOUVRIR, "titre: 'Concevoir'", "avant:"),   // ses lignes (16 nov. 2026 : la bulle est en lignes)
             tranche(DISSECTION, 'if (b.logique === \'deux\')', '\n')
         ];
         expect(textes.join(' ').length).toBeGreaterThan(3000);

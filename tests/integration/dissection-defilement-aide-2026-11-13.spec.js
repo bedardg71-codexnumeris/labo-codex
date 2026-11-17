@@ -34,9 +34,9 @@ const LONGUE = '<table><tr><td colspan="3">Grille fictive longue</td></tr>'
 const LONGUE_SOUS_TOTAL = LONGUE.replace('</table>', '<tr><td colspan="2">Sous-total fictif</td><td>/ 180</td></tr></table>');
 
 async function ouvrir(page, html = LONGUE) {
-    // Sous un banc, l'interrupteur arrive fermé (`navigator.webdriver`, js/materiel-aide.js) : ce banc éteint le drapeau.
+    // L'interrupteur arrive éteint (16 nov. 2026, js/materiel-aide.js) : ici, la personne l'a laissé allumé.
     await page.addInitScript(() => {
-        Object.defineProperty(Navigator.prototype, 'webdriver', { get: () => false });
+        try { if (!localStorage.getItem('laboCodex.aideMateriel')) localStorage.setItem('laboCodex.aideMateriel', JSON.stringify({ ouvert: true })); } catch (e) { /* rien */ }
         try { if (!localStorage.getItem('laboCodex.vue')) localStorage.setItem('laboCodex.vue', 'etendue'); } catch (e) { /* rien */ }
     });
     await ouvrirEspaceVide(page, L, { hauteur: H });

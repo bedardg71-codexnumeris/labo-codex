@@ -40,6 +40,27 @@ describe('la carte d’aide · pas un parcours', () => {
     });
 });
 
+describe('l’interrupteur · éteint à la première arrivée, seul un geste de la personne compte (16 nov. 2026)', () => {
+    const aide = sansCommentaires(lire('js/materiel-aide.js'));
+    it('à l’arrivée : allumé seulement si la personne l’a laissé allumé', () => {
+        expect(tranche(aide, 'function aLArrivee() {', '\n    }\n')).toContain('return lirePref().ouvert === true;');
+    });
+    it('la règle du 12 nov. est retirée, pas empilée : ni `grilleCreee`, ni le cas des bancs, ni l’appel de la dissection', () => {
+        for (const parti of ['grilleCreee', 'noterGrilleCreee', 'webdriver']) expect(aide, parti).not.toContain(parti);
+        expect(sansCommentaires(lire('js/materiel-dissection.js'))).not.toContain('noterGrilleCreee');
+    });
+    it('deux gestes écrivent, et eux seuls : l’interrupteur touché, le lien de sortie de la carte ; la clé ne porte que `ouvert`', () => {
+        expect(aide.match(/ecrirePref\(/g)).toHaveLength(3);   // sa définition et ses deux appels
+        expect(tranche(aide, 'function basculer(bascule) {', '\n    }\n')).toContain('ecrirePref({ ouvert: ouvert });');
+        expect(tranche(aide, 'function surSortie() {', '\n    }\n')).toContain('ecrirePref({ ouvert: false });');
+        expect(tranche(aide, 'function ecrirePref(maj) {', '\n    }\n')).toContain('JSON.stringify(maj)');
+        expect(tranche(aide, 'function regler() {', '\n    }\n')).not.toContain('ecrirePref');
+    });
+    it('pendant un parcours, rien ne change : l’interrupteur ne se montre pas', () => {
+        expect(tranche(aide, 'function regler() {', '\n    }\n')).toContain("zone.classList.toggle('u-hide', parcours || !ecranGuide());");
+    });
+});
+
 describe('la carte d’aide · la page n’a plus de consignes à elle', () => {
     const html = lire('index.html');
     const zone = tranche(html, '<div id="conception-materiel"', 'fin sous-section conception-materiel').replace(/<!--[\s\S]*?-->/g, '');   // les commentaires racontent ce qui est parti

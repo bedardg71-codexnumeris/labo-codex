@@ -24,11 +24,8 @@ export const GESTES_PROPOSES = {
         "Touche « Évaluation », donne-lui un titre, glisse-la dans ta leçon sous ton activité, touche deux fois sa poignée, coche son objectif, puis choisis ta production.",
         "Touche « Terminer ».",
     ],
-    'js/parcours-decouvrir.js': [
-        "Touche « Continuer ».",
-        // « Touche « Commencer avec ma classe », ou « Explorer la démo par moi-même ». » n'est plus proposée : validée
-        // par Grégoire le 14 nov. 2026, elle est dans sa consigne (sentinelle-parcours-decouvrir-2026-11-08.test.js).
-    ],
+    // js/parcours-decouvrir.js n'a plus de geste proposé : ses huit bulles sont celles du 16 nov. 2026, réécrites
+    // avec Grégoire (sentinelle-parcours-je-regarde-2026-11-16.test.js).
     'js/parcours-donnees.js': [
         "Touche « Codex », en haut de l'écran.",
         "Touche « Mettre à jour le codex ».",

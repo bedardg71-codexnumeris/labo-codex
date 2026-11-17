@@ -307,7 +307,7 @@ test('de « Découvrir » à sa propre classe : « Commencer avec ma classe », 
             await ouvrirPanneau(page);
             const item = page.locator('#panneau-assistance [data-parcours="classe"]');
             await expect(item.locator('.assistance-parcours-etat')).toHaveText('Étape 3 sur 8');
-            await expect(item.locator('.assistance-parcours-bouton')).toHaveText('Reprendre');
+            await expect(item.locator('.assistance-parcours-bouton')).toHaveText('Nous faisons');   // 16 nov. 2026 : le nom ne suit plus l'état, lu juste au-dessus
             await item.locator('.assistance-parcours-bouton').click();
             await attendreEtape(page, 3, 'Ton profil');
             await contourSur(page, '#v2-btnCreerEnseignant');
@@ -385,7 +385,7 @@ test('de « Découvrir » à sa propre classe : « Commencer avec ma classe », 
     await ouvrirPanneau(page);
     const item = page.locator('#panneau-assistance [data-parcours="classe"]');
     await expect(item.locator('.assistance-parcours-etat')).toHaveText('Fait');
-    await expect(item.locator('.assistance-parcours-bouton')).toHaveText('Refaire');
+    await expect(item.locator('.assistance-parcours-bouton')).toHaveText('Nous faisons');   // 16 nov. 2026 : le nom ne suit plus l'état, lu juste au-dessus
 
     // 14 nov. 2026 (essai novice, lot 2b) — vécu par Grégoire : « Refaire » menait droit à la bulle 8 sur 8 ; on ne
     // pouvait ni revoir le parcours, ni le montrer à quelqu'un. Il se rejoue maintenant depuis sa première bulle, EN

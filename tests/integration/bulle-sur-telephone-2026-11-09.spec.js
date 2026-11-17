@@ -59,20 +59,30 @@ async function ouvrirEspaceVide(page, largeur, hauteur) {
 }
 
 const bulle = (page) => page.locator('#parcours-bulle');
+// Le corps de la bulle : ses lignes (les bulles en lignes, 14 nov. 2026 : « Découvrir » depuis le 16 nov.), sinon son
+// texte. Celui des deux que la bulle ne porte pas est `hidden`. C'est lui qui défile sous le filet.
+const CORPS = '.parcours-bulle-lignes:not([hidden]), .parcours-bulle-texte:not([hidden])';
 
-/** La bulle a fini de bouger : sa place et le défilement sont les mêmes à deux sondes d'écart. */
+/**
+ * La bulle a fini de bouger : sa place et le défilement sont les mêmes, et la sonde du moteur est passée DEUX fois
+ * entre-temps sans la déplacer. (16 nov. 2026 : deux lectures égales à 150 ms d'écart ne suffisaient pas. Mesuré dans la
+ * trace : liste des sections ouverte, la bulle repliée monte sur le bouton de section et n'en redescend qu'au passage
+ * de la sonde qui suit l'ouverture de l'étape suivante ; le banc touchait ce bouton 390 ms après avoir choisi une
+ * section, la bulle encore en route, et le toucher se perdait une fois sur trois. Personne ne touche si vite.)
+ */
 async function bulleStable(page) {
-    let avant = null;
+    let ref = null;
     await expect.poll(async () => {
-        const maintenant = await page.evaluate(() => {
+        const m = await page.evaluate(() => {
             const b = document.getElementById('parcours-bulle');
-            if (!b) return 'aucune';
+            if (!b) return { ou: 'aucune', passages: 0 };
             const r = b.getBoundingClientRect();
-            return [r.top, r.height, window.scrollY].map(Math.round).join(',');
+            const pl = window.ParcoursMoteur.placement();
+            return { ou: [r.top, r.height, window.scrollY].map(Math.round).join(','), passages: pl ? pl.passages : -1 };
         });
-        const stable = maintenant === avant;
-        avant = maintenant;
-        return stable;
+        if (m.ou === 'aucune') { const pareil = !!ref && ref.ou === 'aucune'; ref = m; return pareil; }
+        if (!ref || ref.ou !== m.ou || m.passages < 0) { ref = m; return false; }
+        return m.passages >= ref.passages + 2;
     }, { message: 'la bulle a fini de bouger', intervals: [150], timeout: 5000 }).toBe(true);
 }
 const bascule = (page) => page.locator('#parcours-bulle .parcours-bulle-bascule');
@@ -102,10 +112,10 @@ async function zoneLibreEtTouchable(page, selecteur) {
 }
 
 async function etatBulle(page) {
-    return page.evaluate(() => {
+    return page.evaluate((corps) => {
         const b = document.getElementById('parcours-bulle');
         const r = b.getBoundingClientRect();
-        const texte = b.querySelector('.parcours-bulle-texte');
+        const texte = b.querySelector(corps);
         return {
             telephone: b.classList.contains('parcours-bulle--telephone'),
             repliee: b.classList.contains('est-repliee'),
@@ -113,7 +123,7 @@ async function etatBulle(page) {
             haut: Math.round(r.top), bas: Math.round(r.bottom), gauche: Math.round(r.left), droite: Math.round(r.right),
             hauteurFenetre: window.innerHeight
         };
-    });
+    }, CORPS);
 }
 
 test('390 px : « Découvrir », étapes 1, 5 et 8 — repliée, dépliée, la zone éclairée touchable dans les deux états', async ({ page }) => {
@@ -173,18 +183,25 @@ test('390 px : « Découvrir », étapes 1, 5 et 8 — repliée, dépliée, la z
     await page.click('#entete-section-bouton');
     await page.click('#entete-sections-liste [data-param="evaluations"]');
     await attendreEtape(page, 6);
+    // Le bouton de section, libre et touchable avant d'être touché (16 nov. 2026). Mesuré : liste ouverte, la bulle
+    // repliée monte sur ce bouton (64 à 114 px) et n'en redescend qu'au passage suivant de la sonde, l'étape déjà
+    // changée ; un toucher parti dans cet intervalle tombait sur la tête de la bulle, et la liste ne s'ouvrait pas.
+    await zoneLibreEtTouchable(page, '#entete-section-bouton');
     await page.click('#entete-section-bouton');
     await page.click('#entete-sections-liste [data-param="conception"]');
     await attendreEtape(page, 7);
+    await zoneLibreEtTouchable(page, '#entete-section-bouton');
     await page.click('#entete-section-bouton');
     await page.click('#entete-sections-liste [data-param="calendrier"]');
 
-    // Étape 8 : rien à toucher sur la page : la bulle s'ouvre dépliée, ses deux boutons à portée.
+    // Étape 8 : rien à toucher sur la page : la bulle s'ouvre dépliée, ses trois boutons à portée (trois suites de même
+    // poids, Grégoire, 16 nov. 2026 ; le harnais rouvre les parcours : fermés, la bulle n'offre qu'« Explorer la démo par
+    // moi-même » et « Terminer », ce que juge parcours-verrou-2026-11-16).
     await attendreEtape(page, 8);
     e = await etatBulle(page);
     expect(e).toMatchObject({ telephone: true, repliee: false, texteVisible: true });
     expect(e.bas).toBeLessThanOrEqual(e.hauteurFenetre);
-    await expect(bulle(page).locator('.parcours-bulle-boutons button')).toHaveText(['Commencer avec ma classe', 'Explorer la démo par moi-même']);
+    await expect(bulle(page).locator('.parcours-bulle-boutons button')).toHaveText(['Explorer la démo par moi-même', 'Voir le parcours suivant', 'Commencer avec ma classe']);
     for (const b of await bulle(page).locator('.parcours-bulle-boutons button').all()) await expect(b).toBeInViewport({ ratio: 1 });
     await capture(page, 'decouvrir-8-390-depliee');
     await bascule(page).click();
@@ -227,10 +244,10 @@ test('le filet : dans une fenêtre courte, la bulle s’y limite, seul le texte 
     await ouvrirEspaceVide(page, 1180, 400);
     await page.evaluate(() => Assistance.parcours()[0].lancer(3));
     await attendreEtape(page, 4);
-    const m = await page.evaluate(() => {
+    const m = await page.evaluate((corps) => {
         const b = document.getElementById('parcours-bulle');
         const r = b.getBoundingClientRect();
-        const t = b.querySelector('.parcours-bulle-texte');
+        const t = b.querySelector(corps);
         const dedans = (sel) => [...b.querySelectorAll(sel)].every((el) => {
             const q = el.getBoundingClientRect();
             return q.top >= r.top - 1 && q.bottom <= r.bottom + 1 && q.top >= 0 && q.bottom <= window.innerHeight;
@@ -242,7 +259,7 @@ test('le filet : dans une fenêtre courte, la bulle s’y limite, seul le texte 
                  bulleDefile: b.scrollHeight > b.clientHeight + 1,
                  teteVisible: dedans('.parcours-bulle-tete'), boutonsVisibles: dedans('.parcours-bulle-boutons button'),
                  sortieVisible: dedans('.parcours-bulle-sortie') };
-    });
+    }, CORPS);
     expect(m.haut).toBeGreaterThanOrEqual(0);
     expect(m.bas).toBeLessThanOrEqual(m.h);
     expect(m.texteDefile).toBe(true);
@@ -250,7 +267,7 @@ test('le filet : dans une fenêtre courte, la bulle s’y limite, seul le texte 
     expect(m).toMatchObject({ teteVisible: true, boutonsVisibles: true, sortieVisible: true });
 
     // L'essai du défilement : au bout du texte, la molette (le doigt) ne fait pas défiler la page.
-    const texte = bulle(page).locator('.parcours-bulle-texte');
+    const texte = bulle(page).locator(CORPS);
     const t = await texte.boundingBox();
     await page.mouse.move(t.x + t.width / 2, t.y + t.height / 2);
     const avant = await page.evaluate(() => {
@@ -276,7 +293,7 @@ test('1180 px : rien ne change — ni forme de téléphone, ni bouton sur la tê
         const e = await etatBulle(page);
         expect(e).toMatchObject({ telephone: false, repliee: false, texteVisible: true });
         await expect(bascule(page)).toHaveCount(0);
-        expect(await bulle(page).locator('.parcours-bulle-texte').evaluate((el) => el.scrollHeight <= el.clientHeight + 1)).toBe(true);
+        expect(await bulle(page).locator(CORPS).evaluate((el) => el.scrollHeight <= el.clientHeight + 1)).toBe(true);
         expect(await bulle(page).evaluate((el) => el.offsetWidth)).toBe(380);
     }
     await page.evaluate(() => window.temoinEnregistrement.enregistre());
@@ -312,6 +329,9 @@ test('390 px : un parcours pour grand écran le dit sous son titre, et « Commen
     await expect(btn).toHaveAttribute('aria-disabled', 'true');
     await expect(btn).toHaveAccessibleDescription(new RegExp(TEXTE_GRAND_ECRAN.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
     // aria-disabled : Playwright attendrait qu'il s'active ; le toucher est forcé, il ne doit rien lancer.
+    // Un toucher forcé n'attend pas que le panneau ait fini de glisser à l'écran : touché en route, le bouton est « hors
+    // de la fenêtre » (17 nov. 2026 : rouge 2 fois sur 3 dès que le banc ne s'enregistre plus en trace et va plus vite).
+    await expect.poll(() => page.evaluate(() => new DOMMatrix(getComputedStyle(document.getElementById('panneau-assistance')).transform).m41)).toBe(0);
     await btn.click({ force: true });
     expect(await page.evaluate(() => window.__lance)).toBe(0);
     await expect(page.locator('#panneau-assistance')).toBeVisible();

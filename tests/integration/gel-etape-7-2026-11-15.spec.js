@@ -83,7 +83,9 @@ test('en visite (« Refaire ») : ni contour ni flèche sur un contrôle qui éc
     await mettreLaClasseEnPlace(page);
     await ouvrirPanneau(page);
     const bouton = page.locator('#panneau-assistance [data-parcours="classe"] .assistance-parcours-bouton');
-    await expect(bouton).toHaveText('Refaire');
+    // 16 nov. 2026 : sur une carte à deux temps, le bouton s'appelle « Nous faisons » ; c'est l'état, dessous, qui dit « Fait ».
+    await expect(page.locator('#panneau-assistance [data-parcours="classe"] .assistance-parcours-etat')).toHaveText('Fait');
+    await expect(bouton).toHaveText('Nous faisons');
     await bouton.click();
 
     const verrous = () => page.evaluate(() => JSON.stringify(window.lireDatesVerrouilleesSansSemis()));

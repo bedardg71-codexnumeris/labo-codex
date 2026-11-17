@@ -95,6 +95,16 @@ body.mode-clair {
     opacity: 1 !important;
 }
 
+/* Le nom d'une section de la page (16 nov. 2026, règle c) : le titre d'un accordéon prend toute la largeur de sa
+   tête ; encadré, il se resserre sur ses mots, comme une entrée du menu. Sa marge négative rend ce que son
+   remplissage prend : le chevron et le nom ne bougent pas. */
+.carte.accordeon .accordeon-header h3.parcours-section-actuelle {
+    width: fit-content;
+    flex: 0 0 auto;
+    padding: 2px 12px 2px 8px;
+    margin: -2px auto -2px -8px !important;
+}
+
 /* ---------- La bulle ---------- */
 
 .parcours-bulle {
@@ -188,6 +198,24 @@ body.mode-clair {
     text-underline-offset: 3px;
     cursor: pointer;
 }
+/* Le triangle du compteur (16 nov. 2026, règle d ; repris le même jour après l'essai sur l'iPad : « trop petit ») :
+   CELUI DES SECTIONS de l'application (`.carte.accordeon .accordeon-chevron`, styles.css) : le même signe, à la taille
+   qu'il a dans une tête de section (0,8 em, soit 12,8 px), couché quand la liste des étapes est fermée, pointe
+   en bas quand elle est ouverte, par la même rotation. Posé par le style, sur `aria-expanded` : le texte du bouton
+   reste « n sur N », et tout le bouton (le texte et le triangle) réagit au doigt. */
+.parcours-bulle-rang::after {
+    content: '\25BC';
+    display: inline-block;
+    margin-left: 6px;
+    font-size: 0.8rem;
+    line-height: 1;
+    vertical-align: -1px;
+    text-decoration: none;
+    transform: rotate(-90deg);
+    transition: transform 0.3s ease;
+}
+.parcours-bulle-rang[aria-expanded="true"]::after { transform: none; }
+@media (prefers-reduced-motion: reduce) { .parcours-bulle-rang::after { transition: none; } }
 .parcours-bulle-rang:hover,
 .parcours-bulle-rang[aria-expanded="true"] { color: var(--texte-principal); }
 .parcours-bulle-rang:focus-visible { outline: 2px solid var(--focus-ring-color); outline-offset: -4px; }
@@ -238,10 +266,34 @@ body.mode-clair {
     overscroll-behavior: contain;
     -webkit-overflow-scrolling: touch;
 }
-/* La phrase du lieu (« Tu es dans « X », à l'onglet « Y ». ») et les notes : des phrases, hors de la liste. */
+/* La phrase du lieu (« Tu es dans « X », à l'onglet « Y ». ») et les notes : des phrases, hors de la liste.
+   16 nov. 2026 : l'objectif du parcours (sa première bulle), entre deux filets fins ; la ligne qui confirme le geste
+   précédent, avec le crochet des lignes faites (ce n'est pas un éloge : la même marque, le même vert). */
 .parcours-bulle-lieu,
-.parcours-bulle-note { margin: 0; }
+.parcours-bulle-note,
+.parcours-bulle-objectif,
+.parcours-bulle-confirme { margin: 0; }
 .parcours-bulle-lieu { color: var(--texte-secondaire); }
+.parcours-bulle-objectif {
+    padding: 6px 0;
+    border-top: 1px solid var(--bordure-moyenne);
+    border-bottom: 1px solid var(--bordure-moyenne);
+    font-weight: 600;
+}
+.parcours-bulle-confirme { position: relative; padding-left: 1.5em; color: var(--texte-secondaire); }
+.parcours-bulle-confirme::before { content: '\2713'; position: absolute; left: 0; top: 0; color: var(--vert-leger); }
+/* La fin (16 nov. 2026, essai sur l'iPad) : « Objectif atteint : … » a la forme de l'objectif ; la phrase de la suite
+   est une ligne simple. La première bulle : où est la poignée, en petit et en gris, comme « Pour revoir une étape ». */
+.parcours-bulle-suite { margin: 0; }
+/* Une bulle plus haute que l'écran utile s'élargit (posé par le moteur, hors téléphone) : moins de lignes, elle tient. */
+.parcours-bulle.parcours-bulle--elargie { width: min(520px, calc(100vw - 32px)); }
+.parcours-bulle-aide,
+.parcours-bulle-revue { margin: 0; font-size: 12.5px; color: var(--texte-secondaire); }
+/* Le nom d'une bande du tableau de bord se resserre sur ses mots tant qu'un parcours est ouvert : la bulle évite le
+   nom, pas toute la largeur de sa ligne (règle 8 du 16 nov. 2026). Rien ne bouge à l'écran. */
+.parcours-actif #section-suivi h4.tb-titre-simple { width: fit-content; }
+/* La bulle attend que la page ait fini de bouger (règle b) : cachée, sans quitter sa place ni perdre sa taille. */
+.parcours-bulle.est-en-attente { visibility: hidden; }
 .parcours-bulle-lignes ul { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 5px; }
 .parcours-bulle-ligne { position: relative; padding-left: 1.5em; }
 .parcours-bulle-ligne > ul { margin-top: 5px; }
@@ -502,6 +554,104 @@ body.parcours-actif .transition-bandeau { display: none; }
     line-height: 1.5;
     opacity: 0.85;
 }
+
+/* Le panneau est une colonne qui défile : ce qu'on y ajoute garde sa hauteur (sans cela, la colonne les écrase). */
+.assistance-intro,
+.assistance-demo-neuf { flex: none; }
+
+/* La présentation en quatre temps (12 nov. 2026 ; numérotée le 14) : un titre, puis quatre lignes, le début de chacune en gras. */
+.assistance-intro-titre { margin: 0; }
+
+.assistance-intro-temps {
+    margin: 8px 0 0;
+    padding: 0;
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    font-size: 13px;
+    line-height: 1.45;
+}
+
+/* Les deux temps d'un parcours (16 nov. 2026 ; ils remplacent ceux du 14) : deux boutons côte à côte, « Je regarde »
+   et « Nous faisons » ; sous chacun, en petit, « Modélisation » et « Pratique guidée » ; sous cela, l'état. */
+.assistance-deux-temps {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    padding-top: 8px;
+    border-top: 1px solid var(--assistance-trait);
+}
+
+.assistance-temps {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+}
+
+.assistance-temps-mots { margin: 4px 0 0; font-size: 11px; line-height: 1.35; opacity: 0.8; }
+
+.assistance-temps > button { width: 100%; padding: 0 8px; }
+
+.assistance-modele-etat {
+    font-size: 12px;
+    font-weight: 600;
+    white-space: nowrap;
+    opacity: 0.8;
+}
+
+.assistance-temps[data-etat="en-cours"] .assistance-modele-etat { color: var(--icone-aide-config); opacity: 1; }
+.assistance-temps[data-etat="fait"] .assistance-modele-etat { color: var(--vert-leger); opacity: 1; }
+
+/* Le bouton de la Modélisation : celui d'un parcours, sous son propre état. */
+.assistance-modele-bouton {
+    min-height: 44px;
+    padding: 0 16px;
+    border-radius: var(--radius-moyen, 6px);
+    font: inherit;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    background: transparent;
+    color: inherit;
+    border: 1px solid var(--assistance-trait);
+}
+
+.assistance-temps[data-etat="a-faire"] .assistance-modele-bouton {
+    border-color: var(--icone-aide-config);
+    color: var(--icone-aide-config);
+}
+
+.assistance-modele-bouton[aria-disabled="true"],
+.assistance-temps[data-etat] .assistance-modele-bouton[aria-disabled="true"] {
+    border-color: var(--assistance-trait);
+    color: inherit;
+    background: transparent;
+    opacity: 0.55;
+    cursor: not-allowed;
+}
+
+.assistance-modele-bouton:focus-visible { outline: 2px solid var(--focus-ring-color); outline-offset: 2px; }
+.assistance-modele-bouton:hover { background: rgba(106, 172, 184, 0.15); }
+.assistance-modele-bouton.assistance-parcours-bouton--plein:hover { background: var(--acc-surface); }
+
+/* « Remettre la démo à neuf » : un geste discret, au-dessus de la liste. */
+.assistance-demo-neuf {
+    align-self: flex-start;
+    min-height: 44px;
+    padding: 0 12px;
+    font: inherit;
+    font-size: 13px;
+    color: inherit;
+    background: transparent;
+    border: 1px solid var(--assistance-trait);
+    border-radius: var(--radius-moyen, 6px);
+    cursor: pointer;
+}
+
+.assistance-demo-neuf:hover { background: rgba(106, 172, 184, 0.15); }
+.assistance-demo-neuf:focus-visible { outline: 2px solid var(--focus-ring-color); outline-offset: 2px; }
 
 .assistance-intitule {
     margin: 4px 0 0;

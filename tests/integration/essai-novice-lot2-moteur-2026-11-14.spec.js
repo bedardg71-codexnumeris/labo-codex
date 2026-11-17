@@ -130,7 +130,8 @@ test('(a) les lignes : une par geste, grisées au crochet une fois faites, la bu
     const notes = await page.evaluate(() => [...document.querySelectorAll('#parcours-bulle .parcours-bulle-note')].map((p) => p.textContent));
     expect(notes).toEqual(['Aie sous la main ton document.', 'Le reste peut attendre.']);
     let l = await lignes(page);
-    expect(l.map((x) => x.texte)).toEqual(['Remplis le champ A (il servira)', 'Donne trois valeurs :', 'la B', 'la C', 'la D', 'Ceci est une explication', 'Touche « Créer »']);
+    // (L'espace insécable devant les deux-points : le moteur le pose depuis le 16 nov. 2026, pour toutes les bulles.)
+    expect(l.map((x) => x.texte)).toEqual(['Remplis le champ A (il servira)', 'Donne trois valeurs\u00a0:', 'la B', 'la C', 'la D', 'Ceci est une explication', 'Touche « Créer »']);
     expect(l.map((x) => x.niveau)).toEqual([1, 1, 2, 2, 2, 1, 1]);
     expect(l[l.length - 1].geste, 'la consigne est la dernière ligne').toBe(true);
     expect(l.filter((x) => x.geste).length).toBe(1);

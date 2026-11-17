@@ -162,7 +162,7 @@ export async function etape3(page, { cap, plusTard }) {
         await expect(rang(page)).toHaveText('3 sur ' + await nParcours(page));   // le parcours en cours d'abord
         await ouvrirPanneau(page);
         await expect(item(page).locator('.assistance-parcours-etat')).toHaveText('Étape 3 sur 9');
-        await expect(item(page).locator('.assistance-parcours-bouton')).toHaveText('Reprendre');
+        await expect(item(page).locator('.assistance-parcours-bouton')).toHaveText('Nous faisons');   // 16 nov. 2026 : le nom ne suit plus l'état
         await capture(page, DOSSIER, `panneau-${cap}-en-cours`);
         await item(page).locator('.assistance-parcours-bouton').click();
         await etape(page, 3, 'Tes consignes');
@@ -429,7 +429,7 @@ export async function leParcoursEntier(page, { niveaux, cap, echelleVide = false
 
     await ouvrirPanneau(page);
     await expect(item(page).locator('.assistance-parcours-etat')).toHaveText('À faire');
-    await expect(item(page).locator('.assistance-parcours-bouton')).toHaveText('Commencer');
+    await expect(item(page).locator('.assistance-parcours-bouton')).toHaveText('Nous faisons');   // 16 nov. 2026 : le nom ne suit plus l'état
     await capture(page, DOSSIER, `panneau-${cap}-a-faire`);
     await item(page).locator('.assistance-parcours-bouton').click();
 
@@ -450,6 +450,6 @@ export async function leParcoursEntier(page, { niveaux, cap, echelleVide = false
     await expect(rang(page)).toHaveText('1 sur ' + await nParcours(page));   // « Découvrir » reste à faire
     await ouvrirPanneau(page);
     await expect(item(page).locator('.assistance-parcours-etat')).toHaveText('Fait');
-    await expect(item(page).locator('.assistance-parcours-bouton')).toHaveText('Refaire');
+    await expect(item(page).locator('.assistance-parcours-bouton')).toHaveText('Nous faisons');   // 16 nov. 2026 : le nom ne suit plus l'état
     await capture(page, DOSSIER, `panneau-${cap}-fait`);
 }

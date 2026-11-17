@@ -70,7 +70,7 @@ export default defineConfig({
     use: {
         // Cible production : Safari WebKit. Les tests ouvrent index.html en file://
         // via page.goto(`file://${chemin}`) — pas de baseURL pour éviter les ambiguïtés.
-        trace: 'retain-on-failure'
+        trace: 'on-first-retry'
     },
     projects: [
         {
