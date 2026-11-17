@@ -58,6 +58,47 @@ Job « Playwright — verdict », étape « Fusionner et juger contre la baselin
 3. Seulement ensuite, retoucher `playwright-baseline-linux.json` (retirer les redevenues vertes, passer les capricieux aux intermittentes, à la main).
 Rien n'a été corrigé ni inscrit à la baseline le 16 nov.
 
+### 38. La mémoire libre du Mac baisse d'un passage Playwright à l'autre et ne revient pas (mesure du 17 nov. 2026, aucun correctif appliqué)
+Vécu les 16 et 17 nov. sur `lot/deux-temps-modeles` : 80 → 77 → 64 → 44 % en trois passages, 48 % dix minutes plus tard, sans processus de test. Mesure demandée par Cowork (option 1 : mesurer qui retient).
+
+**Mesuré le 17 nov., 4 h 55 à 5 h 09** (tête `24c4c0f29`, Mac de 16 Go redémarré cinq minutes plus tôt, indexation retombée, charge 3). UN passage : `npx playwright test` sur `bulle-sur-telephone-2026-11-09`, `carte-aide-materiel-2026-11-13`, `deux-temps-modeles-2026-11-13`, `deux-temps-modelisation-2026-11-12`, `--retries=0 --workers=1` (le « ordre1 » du matin) : 29 verts, 3,2 min. Relevés bruts, échantillons aux 5 s et script : `Claude outputs/releves-memoire-2026-11-17/` (hors dépôt, arbre principal).
+
+| Mesure | Départ | Fin du passage | + 5 min | + 10 min |
+|---|---|---|---|---|
+| Mémoire libre (`memory_pressure`) | 85 % | 81 % | 84 % | 82 % |
+| Compresseur, occupé | 633 Mo | 926 Mo | 914 Mo | 902 Mo |
+| Compresseur, stocké avant compression | 1 532 Mo | 2 382 Mo | 2 315 Mo | 2 272 Mo |
+| Swap | 0 | 0 | 0 | 0 |
+| Processus WebKit et Playwright | 0 | 0 | 0 | 0 |
+| Fenêtres (CGWindowList) | 44 | 49 | 50 | 45 |
+| `virusbarriers` (empreinte) | 645 Mo | 649 Mo | 649 Mo | 649 Mo |
+| `WindowServer` | 484 Mo | 508 Mo | 361 Mo | 525 Mo |
+| `loginwindow` | 16 Mo | 61 Mo | 63 Mo | 62 Mo |
+| Claude Code (CLI) | 248 Mo | 271 Mo | 269 Mo | 269 Mo |
+| Claude Helper (Renderer) | 477 Mo | 490 Mo | 487 Mo | 482 Mo |
+| Somme des 60 plus gros (empreinte) | 3 936 Mo | 4 349 Mo | 4 068 Mo | 4 094 Mo |
+| dont part compressée | 977 Mo | 1 266 Mo | 1 245 Mo | 1 235 Mo |
+
+Pendant le passage (échantillons aux 5 s) : 5 processus WebKit, 1,0 à 1,4 Go à eux cinq ; `tests/test-results` monte à **337 Mo en 3 069 fichiers**, puis retombe à 4 Ko à la fin ; `virusbarriers` consomme **52 s de processeur sur 193 s** (plus 12 s pour son service AVSDK), de façon régulière ; `WindowServer` 61 s.
+
+**Établi** :
+- Aucun processus orphelin : WebKit et Playwright sont tous sortis à la fin du passage.
+- Aucun processus ne retient la mémoire. Les 60 plus gros ont pris 158 Mo en tout à + 10 min (`loginwindow` + 46, `WindowServer` + 41 et il oscille, Claude Code + 21, `virusbarriers` + 4).
+- Ce qui ne revient pas est dans le compresseur : + 270 Mo occupés, + 740 Mo stockés, stables dix minutes. La part compressée monte dans des processus de longue durée (`WindowServer`, Dock, Claude, Siri, `virusbarriers`), pas dans ceux du banc.
+- Le banc écrit une trace par essai, même vert (`trace: 'retain-on-failure'` enregistre toujours et efface au succès) : 337 Mo écrits puis effacés en trois minutes.
+- L'antivirus travaille pendant tout le passage, et seulement pendant.
+- Le passage 1 du matin est reproduit (− 3 points). **Les chutes de 13 et de 20 points des passages 2 et 3 ne le sont pas** : un seul passage était permis.
+
+**Hypothèses, non démontrées** :
+- L'antivirus lit les traces que le banc écrit. `fs_usage` exige sudo, non disponible dans la session ; seul le temps de processeur a été pris (choix de Grégoire). Il peut aussi bien examiner le lancement des processus WebKit.
+- La baisse s'accélère d'un passage à l'autre parce que les pages compressées s'accumulent sans être relues ; ou parce que le passage 2 du matin portait un `page.reload` bloqué 180 s (`carte-aide-materiel:506`), pendant lequel la mémoire a perdu 13 points. Rien ne départage les deux.
+- Le matin, la machine tournait depuis longtemps (`WindowServer` à 856 Mo, `virusbarriers` à 700 Mo dont 614 compressés, compresseur à 6 Go) : le point de départ n'était pas le même.
+
+**Ce qui neutraliserait, rien d'appliqué** :
+- Au dépôt, proposé en diff, non fusionné : `trace: 'on-first-retry'` dans `tests/playwright.config.js`. Plus aucune trace écrite pour un essai vert au premier coup ; un rouge garde la trace de sa reprise (`retries: 1`). Coût : avec `--retries=0`, plus de trace du tout ; un essai capricieux garde la trace de la reprise verte, pas celle de l'échec. Effet sur la mémoire non mesuré.
+- Au système, à Grégoire : exclure `tests/test-results` (et le cache `ms-playwright`) de l'analyse en temps réel de VirusBarrier. Ne se justifie qu'une fois l'hypothèse de lecture démontrée (`sudo fs_usage -w -f filesys virusbarriers` pendant un passage).
+- Prochaine mesure utile : trois passages de suite avec les mêmes relevés, pour voir si la baisse s'accélère ; puis les mêmes avec le diff.
+
 ## Mises de côté (attendent Grégoire)
 
 - **Le texte de l'aide « Date d'échéance et indices » (entrée 21, #1086)**, maintenant sur la case « Consignes transmises ». Grégoire, 8 nov. vers 16 h 44 : une production sans copie évaluée n'entre « pas encore » dans C. **Mesuré ensuite** : vrai en Sommative et en pratique configurable (`pratique-sommative.js` ~307-316 : dénominateur = productions ayant au moins une copie qui compte dans le groupe) ; **faux en PAN-Standards** (`pratique-pan-standards.js` ~308-315 : case cochée et date suffisent, échéance future comprise, sans copie évaluée). Grégoire : « Le comportement a été discuté avec Cowork tantôt et une décision a été prise. Elle est notée dans le chantier des parcours. » Cette note n'est pas dans le dépôt (cherchée : `plans de travail/`, `OU-EN-EST-ON.md`). **L'aide se réécrit selon cette décision, une fois qu'elle est au dépôt** ; d'ici là, elle reste telle quelle.
