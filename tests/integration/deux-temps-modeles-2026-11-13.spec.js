@@ -211,11 +211,21 @@ for (const [L, H] of ORIENTATIONS) {
         await page.check('#productionEcheanceAssignee');
 
         // 4. L'étudiant·e de la ligne que la bulle pointe, nommé·e dans la bulle ; les niveaux imposés ; « Verrouiller ».
+        // TOUJOURS YACK AMICAL (Grégoire, 17 nov. 2026), quel que soit le tri de la Liste : la Liste est d'abord triée par
+        // prénom (le geste de la page), tri qui met Antilope Vaillante, l'une des trois copies du modèle de « Recevoir »,
+        // en première ligne (mesuré le 17 nov. 2026).
+        // Break-test (17 nov. 2026) : `daDeLaLigne` rendant `undefined` dans le modèle (l'ancienne première ligne) →
+        // ROUGE ici (« evaluer|9900006|… », Antilope Vaillante). Rétabli → vert.
         await etape(page, 4, 'Une première production');
         const pid = await page.evaluate((g) => (db.getSync(cle('productions'), []) || []).find((p) => p.grilleId === g).id, grilleId);
-        const evaluer = (await valeursActions(page, pid)).find((v) => v.startsWith('evaluer|'));
-        const da = evaluer.split('|')[1];
+        await page.click('#evaluations-liste th[data-param="prenom"]');
+        await expect(page.locator('#tri-eval-prenom')).toHaveText('↑');
+        expect((await valeursActions(page, pid)).find((v) => v.startsWith('evaluer|')), 'le tri par prénom met Antilope Vaillante en tête').toBe('evaluer|9900006|' + pid);
+        const evaluer = 'evaluer|' + m.etudiantEvalue.da + '|' + pid;
+        const da = m.etudiantEvalue.da;
+        expect(da).toBe('9900007');
         const qui = await page.evaluate((d) => { const e = obtenirEtudiantsCoursActif().find((x) => String(x.da) === d); return e.prenom + ' ' + e.nom; }, da);
+        expect(qui).toBe('Yack Amical');
         await expect(bulle(page)).toContainText(qui);
         await expect(bulle(page)).toContainText("choisis le niveau de l'exemple");
         await expect(bulle(page)).toContainText('Structure M, Rigueur D, Plausibilité D, Nuance D');
@@ -226,6 +236,7 @@ for (const [L, H] of ORIENTATIONS) {
         const criteres = await page.evaluate(() => [...document.querySelectorAll('#listeCriteresGrille1 select[id^="eval_"]')].map((c) => c.id));
         for (const [k, [, niveau]] of m.niveaux.entries()) await page.selectOption('#' + criteres[k], niveau);
         await page.click('#btnVerrouillerEvaluation');
+        await expect.poll(() => page.evaluate((p) => (db.getSync(cle('evaluationsSauvegardees'), []) || []).filter((e) => e.productionId === p).map((e) => e.etudiantDA), pid)).toEqual(['9900007']);
 
         // 5 et 6. La pratique : « Partir d'un modèle », le modèle par standards ; appliquée au cours du deuxième groupe.
         await etape(page, 5, 'Ta pratique');
