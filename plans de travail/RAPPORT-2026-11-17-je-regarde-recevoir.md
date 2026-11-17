@@ -11,7 +11,7 @@ Ni fusion, ni release, ni Nouvelles. Mandat : `plans de travail/CONSIGNE-LOT-202
 
 ## 0. Pour la conversation du Projet (quinze lignes)
 
-1. Branche `claude/ecstatic-brown-urn6v8`, commits sur `03dc7d2` ; PR en brouillon pour l'aperçu (adresse : §6).
+1. Branche `claude/ecstatic-brown-urn6v8` à `4c36db4`, sur `03dc7d2` ; PR en brouillon n° 28 ; aperçu au §6.
 2. 3.1 : le modèle d'« Évaluer » évalue toujours Yack Amical (9900007), quel que soit le tri ; banc et break-test.
 3. 3.2 : sept évaluations écrites dans la démo, en ajout ; note par `calculerPortee`, `valeurNumeriqueDuNiveau` et
    `niveauDuPourcentage`. Vérifiée : identique au formulaire pour Yack, et recalculée par lui pour Caribou.
@@ -85,10 +85,25 @@ rétroaction. Les champs sont ceux d'un premier enregistrement (`sauvegarderEval
 
 ### 2.3 Les bancs existants, rejoués
 
-Voir le §2.4 (rempli à la fin du lot). Vitest : 931 fichiers, verts, après deux retouches d'essais :
+| Banc (Chromium) | Branche | `main` | Verdict |
+|---|---|---|---|
+| `parcours-je-regarde-2026-11-16` | 3/3 | — | vert |
+| `parcours-4-recevoir-et-rendre-2026-11-09` | 4/4, après la mise au pas (« Nous faisons ») | — | vert |
+| `registre-des-parcours-2026-11-09` | 1/1 | — | vert |
+| `parcours-verrou-2026-11-16` | 4/4 avant la réouverture ; retiré ensuite (§5) | — | vert |
+| `parcours-3-evaluer-2026-11-09` | 5/5 | — | vert |
+| `parcours-3-quatrieme-essai-2026-11-11` | 3/3 | — | vert |
+| `deux-temps-modeles-2026-11-13` | 4/5 | B à 1180 × 820 rouge, même signature | rouge de `main` (#1285) |
+| `parcours-fleches-2026-11-10` | 7/9 | | deux rouges de `main` : |
+| · « sous le zoom au pincement » | rouge | rouge | rouge de `main` |
+| · « la poignée : 46 px » | 3 rouges sur 6 | 4 rouges sur 6 | capricieux sur `main` aussi |
+
+Vitest : 932 fichiers, 11 899 essais, verts (le hook de push l'a confirmé), après des retouches d'essais :
 `sentinelle-parcours-fleches` compte dix fichiers `parcours-*.js` au lieu de neuf, et le modèle est jugé avec eux ;
 `sentinelle-deux-temps-modeles` a un commentaire corrigé (l'assertion, dans son bac à sable, reste vraie).
-`deux-temps-modeles` attend maintenant trois boutons à la fin du modèle d'« Évaluer » (« Voir le parcours suivant »).
+`deux-temps-modeles` attend maintenant trois boutons à la fin du modèle d'« Évaluer » (« Voir le parcours suivant ») ;
+`parcours-4-recevoir-et-rendre` lit « Nous faisons » sur la carte de « Recevoir », qui porte ses deux temps ; la sentinelle
+du lot découpe par `tranche()` (cliquet #858).
 
 ## 3. Les neuf étapes, pour écrire les vraies bulles
 
@@ -203,10 +218,14 @@ Un commit isolé, « BRANCHE SEULEMENT », fait trois choses : `PARCOURS_OUVERTS
 
 ## 6. L'aperçu
 
-Voir le §6.1 (rempli à la fin du lot).
+PR en brouillon : https://github.com/bedardg71-codexnumeris/labo-codex/pull/28. Adresse de l'aperçu, **déduite** du
+motif des aperçus précédents (n° 21, 23) et **non vérifiée** (Netlify ne répond pas depuis le conteneur) :
+https://deploy-preview-28--codexnumeris-051225.netlify.app. Le build n'a pas été lu.
 
 ## 7. Trouvailles
 
+- **`parcours-fleches`, « la poignée »** : capricieux sous Chromium sur `main` aussi (4 rouges sur 6) ; *commenter et
+  continuer*, non inscrit.
 - **#1285** (inscrit) : sous Chromium, à 1180 × 820, la flèche de l'étape 1 de la Modélisation de « Mettre ta classe en
   place » manque sa cible, sur `main`. Départagé : même signature sur `main` et sur la branche.
 - **La fenêtre des tampons en démo** (§4.1) : *question à Grégoire*, non inscrite (non vécue).
