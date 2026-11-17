@@ -25,7 +25,7 @@ Ni fusion, ni release, ni Nouvelles. Mandat : `plans de travail/CONSIGNE-LOT-202
 11. Sentinelle Vitest : le tableau et les trois noms confrontés à la consigne, les copies octet pour octet ; deux break-tests.
 12. Bancs existants rejoués (§2.3) ; le seul rouge est celui de `main` (#1285, Chromium en paysage).
 13. Supposé : « Je regarde » de « Lire ta classe » posera l'évaluation de Tapir Doux avec la même construction (§4.3).
-14. Pas vérifié : Safari et WebKit, l'iPad ; l'aperçu Netlify n'a pas été ouvert depuis le nuage.
+14. Pas vérifié : Safari et WebKit, l'iPad ; l'aperçu est annoncé prêt par Netlify, mais pas ouvert depuis le nuage.
 15. Parcours rouverts sur la branche seulement, par un commit isolé à défaire (`git revert`) avant la fusion.
 
 ---
@@ -218,9 +218,9 @@ Un commit isolé, « BRANCHE SEULEMENT », fait trois choses : `PARCOURS_OUVERTS
 
 ## 6. L'aperçu
 
-PR en brouillon : https://github.com/bedardg71-codexnumeris/labo-codex/pull/28. Adresse de l'aperçu, **déduite** du
-motif des aperçus précédents (n° 21, 23) et **non vérifiée** (Netlify ne répond pas depuis le conteneur) :
-https://deploy-preview-28--codexnumeris-051225.netlify.app. Le build n'a pas été lu.
+PR en brouillon : https://github.com/bedardg71-codexnumeris/labo-codex/pull/28. Aperçu, annoncé prêt par Netlify (statut
+de la PR, 17 nov., 23 h 02 UTC, sur `ec99ac1`) : https://deploy-preview-28--codexnumeris-051225.netlify.app. Non ouvert
+depuis le conteneur (Netlify n'y répond pas). CI de la PR : Vitest vert ; Playwright sauté par la décision du workflow.
 
 ## 7. Trouvailles
 
