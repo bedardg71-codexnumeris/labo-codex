@@ -21,9 +21,6 @@ Neuf restent (voir la vérification). Code mort : le retirer, après la preuve q
 ### 29. « ← Utiliser » sur un tampon intégré n'écrit pas de doublon (#1167)
 `js/tampons-bibliotheque.js` ~155-160. La garde ; aucune donnée existante à reprendre.
 
-### 30. L'essai de la carte d'alignement ne suppose plus un Mac (#1115)
-`tests/integration/planif-menu-vue.spec.js` ~447 et ~574 attendent ⌘. Lire la plateforme ; retirer les deux essais de `playwright-baseline-linux.json` une fois verts. Aide la bascule de la vérification vers GitHub.
-
 ### 31. Le skill `alignement` porte les réponses du 28 août (#589)
 `.claude/skills/alignement/SKILL.md` ~98, ~133-141, ~293. Documentation seulement.
 
@@ -58,6 +55,13 @@ Job « Playwright — verdict », étape « Fusionner et juger contre la baselin
 3. Seulement ensuite, retoucher `playwright-baseline-linux.json` (retirer les redevenues vertes, passer les capricieux aux intermittentes, à la main).
 Rien n'a été corrigé ni inscrit à la baseline le 16 nov.
 
+**17 nov. 2026 — `lot/verdict-github-juge` (non fusionné) : étape atteinte, la preuve à moitié.** Rapport : `plans de travail/RAPPORT-2026-11-17-verdict-github-juge.md`.
+- Fait : `main` rejoué deux fois sur `e5ad10f90` (runs 43985499691 et 43989702254) ; classement sur quatre passages ; liste Linux retouchée à la main, chaque geste daté dans le fichier (connus 35 → 13, intermittentes 30 → 44) ; #1115 (fiche 30).
+- `en-tete-epure-2026-11-07` tranché : `lot/menu-demo` n'y est pour rien (il n'a touché ni cet essai ni `js/chrome-unifie.js` ; la même erreur était déjà rouge 2 fois sur 7 du 10 au 14 nov., avant lui). Inféré : l'essai lit `data-fondu` sans attendre, aussitôt la fenêtre rétrécie, alors que l'écran le pose par un `ResizeObserver`. Un défaut du banc, pas de l'écran ; classé aux intermittentes, non corrigé.
+- **La preuve (étape 7) : un vert, puis un rouge, sur le même commit `1a21eaed5`.** Run 43993803396 : vert, aucun rouge hors liste. Run 43997218400 : rouge, 5 essais hors liste, tous verts (ou verts au second essai) aux cinq passages d'avant. Ces 5 sont versés à la liste, mais cet état n'a été jugé par aucun passage.
+- **Reste ouvert, et c'est le fond** : sur six passages, 40 essais ont rougi au moins une fois sans rougir toujours, 23 autres n'ont passé qu'au second essai au moins une fois, et chaque passage en amène de nouveaux. Une liste ne tarit pas cette source : elle court après. `lot/verdict-nuage` (PR n° 25) a mesuré la même chose le 14 nov. et y répond par les délais de Playwright × 2,5 sous Linux (`tests/playwright.config.js`), hors de ce mandat. Les cinq bancs de parcours rouges à chaque passage sont mis de côté dans les intermittentes, pas expliqués.
+- Rapporté par Grégoire le 16 nov. (non mesuré par cette session) : à 18 h 58, WindowServer a planté sur le Mac (abort dans `WSIOSurfaceDebugTallyAndAbort`, pendant `captureWindowList`, triage noyau « vm_map_copyout_kernel_buffer failed ») ; le rapport de crash nomme Playwright comme origine de la demande de capture. Deuxième incident de charge du jour : sortir le verdict du Mac n'est plus seulement une question de durée.
+
 ## Mises de côté (attendent Grégoire)
 
 - **Le texte de l'aide « Date d'échéance et indices » (entrée 21, #1086)**, maintenant sur la case « Consignes transmises ». Grégoire, 8 nov. vers 16 h 44 : une production sans copie évaluée n'entre « pas encore » dans C. **Mesuré ensuite** : vrai en Sommative et en pratique configurable (`pratique-sommative.js` ~307-316 : dénominateur = productions ayant au moins une copie qui compte dans le groupe) ; **faux en PAN-Standards** (`pratique-pan-standards.js` ~308-315 : case cochée et date suffisent, échéance future comprise, sans copie évaluée). Grégoire : « Le comportement a été discuté avec Cowork tantôt et une décision a été prise. Elle est notée dans le chantier des parcours. » Cette note n'est pas dans le dépôt (cherchée : `plans de travail/`, `OU-EN-EST-ON.md`). **L'aide se réécrit selon cette décision, une fois qu'elle est au dépôt** ; d'ici là, elle reste telle quelle.
@@ -65,6 +69,10 @@ Rien n'a été corrigé ni inscrit à la baseline le 16 nov.
 - **Retirer « Impact des jetons sur la performance » (Suivi › Labo)** (versée par Cowork le 3 nov. à 17 h 49). Grégoire, le 3 nov. à 17 h 48 : « À terme le graphique « Impact des jetons sur la performance » dans le labo va disparaître. » Cowork a lu « à terme » comme : une fois la case « Sans jetons » de l'entrée 10 quater en ligne et vue par lui. Ne la pose donc qu'après ce moment. Question : « La case « Sans jetons » te sert ; on retire le graphique « Impact des jetons » du Labo ? » Hors boucle (§ 3, point 5). Au retrait, garder `genererPSansReprises` (profil) et `deltasReprisesParSeance` (`correlations-longitudinales.js`), qui vivent dans `js/impact-jetons.js`.
 
 ## Fait
+
+Passage du 17 nov. 2026 (Claude Code dans le nuage, `lot/verdict-github-juge`, non fusionné) :
+
+- **30. L'essai de la carte d'alignement ne suppose plus un Mac (#1115)** : les deux essais de `tests/integration/planif-menu-vue.spec.js` lisent la plateforme comme la carte (`claviersMac`) et jugent les deux côtés (⌘ sur un Mac, Ctrl ailleurs). Verts sous WebKit Linux aux deux verdicts de la branche (runs 43993803396 et 43997218400) ; retirés de `playwright-baseline-linux.json`. Non vérifié ici : le côté Mac (aucun WebKit de macOS dans le nuage). (`9bc947f`)
 
 Passage du 3 nov. 2026 (Claude Code, à partir de 11 h 23) :
 
