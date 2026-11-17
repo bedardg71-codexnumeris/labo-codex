@@ -24,8 +24,8 @@ import { actionDeLaListe, valeursActions } from './harness/parcours-3-de-banc.js
 //       puis le bouton de la page) : la grille de l'exemple entre dans l'étiquetage, que la personne fait elle-même ;
 //       la production, les consignes (échéance : le mardi 9 septembre 2025) et la cartouche (ses vingt commentaires)
 //       sont remplies par la bulle ; la rétroaction réécrite porte les quatre commentaires du profil (Structure M,
-//       Rigueur D, Plausibilité D, Nuance D) et « Bon départ ! » ; la fin à deux boutons (« Recevoir » n'a pas encore
-//       son modèle) ; le confinement : la grille, la production, la pratique, la cartouche et l'évaluation vivent dans
+//       Rigueur D, Plausibilité D, Nuance D) et « Bon départ ! » ; la fin à trois boutons (« Recevoir » a son modèle
+//       depuis le 17 nov. 2026) ; le confinement : la grille, la production, la pratique, la cartouche et l'évaluation vivent dans
 //       la démo, aucune clé hors d'elle ne change, et « Remettre la démo à neuf » les efface.
 // MESURE DU 15 NOV. 2026 (ancienne décision 3.1) : la grille de l'exemple, étiquetée, n'offre PAS le choix « des
 // points » / « des niveaux de performance » (il ne paraît que pour une grille qui porte les deux) : elle naît en
@@ -79,7 +79,8 @@ test('« Le refaire avec ma classe » passe par les gardes du panneau : sans cla
     test.setTimeout(180000);
     await ouvrirEspaceVide(page, 1180, 820);
     const refaire = () => page.evaluate(() => ParcoursClasse.suitesDuModele('evaluer', () => {})[0].action());
-    expect(await page.evaluate(() => ParcoursClasse.suitesDuModele('evaluer', () => {}).map((b) => b.libelle))).toEqual(['Le refaire avec ma classe', 'Terminer']);
+    // « Recevoir » a son modèle depuis le 17 nov. 2026 : la fin d'« Évaluer » offre « Voir le parcours suivant ».
+    expect(await page.evaluate(() => ParcoursClasse.suitesDuModele('evaluer', () => {}).map((b) => b.libelle))).toEqual(['Le refaire avec ma classe', 'Voir le parcours suivant', 'Terminer']);
     // Sans classe en place : rien ne part ; le panneau s'ouvre et nomme le préalable.
     await refaire();
     await expect(page.locator('#panneau-assistance')).toBeVisible();
@@ -300,15 +301,15 @@ for (const [L, H] of ORIENTATIONS) {
         await contourSur(page, '#productionCartouche');
         await page.selectOption('#productionCartouche', cartoucheId);
 
-        // 9. La rétroaction réécrite : les quatre commentaires du profil, et le mot. LA FIN : « Recevoir » n'a pas encore
-        // son modèle : « Voir le parcours suivant » n'y est pas, et la consigne suit les boutons présents.
+        // 9. La rétroaction réécrite : les quatre commentaires du profil, et le mot. LA FIN : depuis le 17 nov. 2026,
+        // « Recevoir » a son modèle : « Voir le parcours suivant » y est, et la consigne suit les boutons présents.
         await etape(page, 9, 'Ta rétroaction, avec tes mots');
         await expect(bulle(page)).toContainText(m.mot);
         await expect(bulle(page).locator('.parcours-bulle-sortie')).toHaveCount(0);
-        await expect(bulle(page).locator('.parcours-bulle-boutons button')).toHaveText(['Le refaire avec ma classe', 'Terminer']);
+        await expect(bulle(page).locator('.parcours-bulle-boutons button')).toHaveText(['Le refaire avec ma classe', 'Voir le parcours suivant', 'Terminer']);
         const fin = await lireBulle(page);
         expect(fin.principal, 'aucun bouton mis en avant').toEqual([]);
-        expect(fin.consignes).toEqual(['Touche « Le refaire avec ma classe », ou « Terminer »']);
+        expect(fin.consignes).toEqual(['Touche « Le refaire avec ma classe », « Voir le parcours suivant », ou « Terminer »']);
         expect(fin.derniere).toBe(fin.consignes[0]);
         await expect(bulle(page).locator('.parcours-bulle-note').last()).toHaveText(/Pour revoir une étape, touche «\s9 sur 9\s»\./);
         const evaluationId = await page.evaluate((p) => (db.getSync(cle('evaluationsSauvegardees'), []) || []).find((e) => e.productionId === p).id, pid);

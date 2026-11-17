@@ -77,7 +77,10 @@ for (const [L, H] of ORIENTATIONS) {
     test(`B · ${L} × ${H} : le modèle de « Recevoir », de bout en bout ; l’export ; le confinement des clés et des blobs ; la remise à neuf`, async ({ page }) => {
         test.setTimeout(360000);
         page.setDefaultTimeout(20000);
-        await ouvrirEspaceVide(page, L, H);
+        // Les deux modèles préalables se jouent en portrait : sous Chromium, en paysage, la Modélisation de « Mettre ta
+        // classe en place » rougit sur `main` (sa flèche de l'étape 1 ; inscrit au backlog le 17 nov. 2026, hors de ce
+        // lot). L'orientation de l'essai est posée avant d'entrer dans le modèle de « Recevoir ».
+        await ouvrirEspaceVide(page, 820, 1180);
         await peuplerUnTrimestreReel(page);
         await poserUnBlobReel(page);
         // Les raccourcis d'annotation d'une personne qui a déjà annoté, dont une touche à elle. (Sans eux, la première
@@ -94,6 +97,7 @@ for (const [L, H] of ORIENTATIONS) {
         // Les deux modèles qui le précèdent ; la fin d'« Évaluer » offre maintenant « Voir le parcours suivant ».
         const { pid, evaluationId: idDeYack } = await faireLesDeuxModeles(page);
         await expect(bulle(page).locator('.parcours-bulle-boutons button')).toHaveText(['Le refaire avec ma classe', 'Voir le parcours suivant', 'Terminer']);
+        await page.setViewportSize({ width: L, height: H });
         await boutonDeBulle(page, 'Voir le parcours suivant').click();
         const t = await T(page);
         const titre = await page.evaluate((p) => db.getSync(cle('productions'), []).find((x) => x.id === p).titre, pid);
@@ -219,8 +223,10 @@ for (const [L, H] of ORIENTATIONS) {
         // LE CONFINEMENT, clés et blobs. Break-tests (17 nov. 2026) :
         //  a. dans `poserLesEvaluationsDeLExemple`, la clé écrite privée de son préfixe (`evaluationsSauvegardees`, sans
         //     la garde `demo_`) → ROUGE ici, la clé nommée. Rétabli → vert.
-        //  b. dans `remettreDemoANeuf` (js/demo-activation.js), le retrait des copies sauté → ROUGE plus bas (« les blobs
-        //     du départ »), les trois blobs nommés. Rétabli → vert.
+        //  b. dans `remettreDemoANeuf` (js/demo-activation.js), le retrait des copies sauté → ROUGE plus bas (« les autres
+        //     clés identiques » : les vignettes restent). Rétabli → vert.
+        //  c. dans `retirerCopiesDuDemo`, la suppression des blobs seule sautée → ROUGE plus bas (« les blobs du
+        //     départ »), les trois blobs nommés, à la taille des trois PDF. Rétabli → vert.
         await page.evaluate(() => desactiverModeDemo());
         await expect.poll(() => enDemo(page)).toBe(false);
         const apres = await releve(page);
