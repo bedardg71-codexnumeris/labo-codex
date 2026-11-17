@@ -62,13 +62,20 @@
     }
 
     // ---------- Ce que le parcours retient (`parcoursRecevoir`) ----------
+    // Dans le modèle (« Je regarde », js/parcours-recevoir-modele.js), le repère vit EN MÉMOIRE : rien ne s'écrit
+    // hors de la démo, pas même la préférence (le patron du modèle d'« Évaluer »).
+
+    var enModele = false;
+    var ctxModele = {};
 
     function lireCtx() {
+        if (enModele) return ctxModele;
         var v = typeof obtenirPreference === 'function' ? obtenirPreference(CLE_CTX) : null;
         return v && typeof v === 'object' ? v : {};
     }
 
     function majCtx(maj) {
+        if (enModele) { ctxModele = Object.assign({}, ctxModele, maj); return ctxModele; }
         var ctx = Object.assign({}, lireCtx(), maj);
         if (typeof definirPreference === 'function') definirPreference(CLE_CTX, ctx);
         return ctx;
@@ -572,6 +579,7 @@
     }
 
     async function lancer(depuis) {
+        enModele = false;
         if (enDemo() && typeof desactiverModeDemo === 'function') await desactiverModeDemo();
         if (enDemo()) return;
         if (condition()) {
@@ -608,13 +616,33 @@
         get total() { return VOIES[voie()].length; },
         refus: condition,
         prealable: 'evaluer',
-        lancer: lancer
+        lancer: lancer,
+        // Les deux temps (17 nov. 2026) : le modèle, dans la démo, sur le deuxième groupe (js/parcours-recevoir-modele.js).
+        totalModele: 9,
+        lancerModele: function () { return modele() ? modele().lancer() : null; },
+        refusModele: function () { return modele() ? modele().refus() : REFUS; }
     });
+
+    function modele() { return window.ParcoursRecevoirModele || null; }
+
+    /** Ce que le modèle emprunte au parcours : ses étapes, son repère en mémoire, son ménage. Rien d'autre. */
+    var pourLeModele = {
+        etapes: function () { return VOIES.fichiers; },
+        entrer: function (ctx) { enModele = true; ctxModele = Object.assign({}, ctx); },
+        contexte: lireCtx,
+        majContexte: majCtx,
+        fichiersDuGroupe: fichiersDuGroupe,
+        fichierOuvert: fichierOuvert,
+        fileDAttente: fileDAttente,
+        bulleSousLesColonnes: bulleSousLesColonnes,
+        nettoyer: function () { retirerExtras(); surModale(false); bulleSousLesColonnes(false); }
+    };
 
     // Pour les bancs : la condition, le repère, les deux voies, lus sans lancer le parcours.
     window.ParcoursRecevoir = {
         refus: condition,
         contexte: lireCtx,
-        voies: function () { return VOIES; }
+        voies: function () { return VOIES; },
+        pourLeModele: pourLeModele
     };
 })();
