@@ -7,6 +7,18 @@
 
 ---
 
+## 16 NOV. 2026, 20 H 00 (Claude Code) : **`lot/deux-temps-modeles` À `5a0944508`, POUSSÉE SUR SON ORIGIN — LES DIX ROUGES ET LA BULLE « TON TRIMESTRE » SONT TRAITÉS, LES BANCS DU MOTEUR NE SONT PAS TOUS REJOUÉS, LA 1.249.0 N'EST PAS PARTIE** — entrée écrite après le redémarrage du Mac (19 h 56)
+
+Mandat : relais de Cowork du 16 nov., 18 h 20 (cinq points). `main` n'a pas bougé (`e5ad10f90`, 1.248.3). Cette entrée vit sur la branche : elle rejoint `main` avec la fusion.
+
+- **Fait, points 1 et 2** (`85ca6332f`) : les dix rouges d'avant la session départagés, trois bancs réalignés (`parcours-fleches-2026-11-10`, `bulle-sur-telephone-2026-11-09`, le harnais `deux-temps-de-banc`) ; avant de couvrir ce qu'elle évite, la bulle essaie sa forme large (« Ton trimestre » à 1180 × 900 ne couvre plus le nom du trimestre) ; la ligne de la poignée reste mot pour mot. Puis `5a0944508` : la forme large n'est gardée que si elle ne couvre plus rien (régression de `85ca6332f` : « Pourquoi étiqueter » à 1180 × 820 couvrait 23 % du texte de la page au lieu de 5 %).
+- **Point 3, état mesuré** : passages 1 et 2 des bancs du moteur verts (43 essais chacun) mais joués sur `85ca6332f`, AVANT le correctif ; passage 3 sur `5a0944508` : 32 verts, 6 sautés, 1 vert au second essai (`gel-etape-7`, 36 rangées, halo au défilement). Passages 4 et 5 (onze specs) non joués. Vitest complet vert (11 888) à 18 h 54, sur l'état d'avant les deux commits.
+- **Deux incidents de charge le 16 nov.** : le second à 18 h 58, WindowServer planté pendant un passage Playwright lancé juste après Vitest (charge de 11 à 13, 40 % de mémoire libre) ; coïncidence dans le temps, cause non établie. Règles de la séance qui suit : un passage à la fois, un worker, groupes de cinq fichiers au plus, rien si la charge dépasse 6 ou si la mémoire libre est sous 60 %, jamais Vitest et Playwright enchaînés sans pause.
+- **Reste** : Vitest et les cinq passages sur `5a0944508` ; les deux inscriptions du point 4 (zoom au pincement ; « Voir le parcours suivant » qui saute de la bulle 6 à la 8) ; la release (refaire la fusion `--no-ff` et `release.mjs minor` plutôt que reprendre `attente/1.249.0-non-jugee`, en retard sur la branche), verdict complet, push.
+- **Non vérifié** : Safari et l'iPad (porte `PORTES-TERRAIN-2026-11-16-essai-ipad.md`) ; pas de relecture croisée.
+
+---
+
 ## 16 NOV. 2026, 17 H 45 (Claude Code) : **LE TRAVAIL LE PLUS RÉCENT VIT SUR `lot/deux-temps-modeles` (`448283ee8`) — « DÉCOUVRIR » SEUL EN LIGNE ET L'INTERRUPTEUR ÉTEINT SONT PRÊTS, LA 1.249.0 N'EST PAS PARTIE** — verdict complet arrêté au 5e morceau sur 40
 
 Mandats : deux relais de Cowork du 16 nov. (13 h 20, l'essai de Grégoire sur l'iPad ; 15 h 48, « Découvrir » seul en ligne et l'interrupteur). `main` n'a pas bougé : `baddec78f`, 1.248.3. PR d'aperçu n° 23, build `1116-1631`.
