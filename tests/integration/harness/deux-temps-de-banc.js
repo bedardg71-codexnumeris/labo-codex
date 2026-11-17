@@ -398,10 +398,22 @@ export async function faireLaModelisation(page, { capturer = '', surRemplir = nu
     //     comparer à FLECHE_MIN (24 px) ; une flèche n'est donc due qu'à partir de 30 px d'écart, pas de 24. Les points
     //     reçoivent un décalage au hasard (±3 %, js/tableau-bord-apercu.js) : celui du retard tombe de 1 à 33 px de la
     //     bulle selon le passage (mesuré sur cinq passages), et le banc rougissait quand il tombait entre 24 et 30.
-    const geo = await page.evaluate(() => {
+    //   · LA GÉOMÉTRIE SE LIT UNE FOIS LA BULLE POSÉE (17 nov. 2026) : à l'arrivée de l'étape, la bulle est encore à sa
+    //     place d'avant. Lue trop tôt (bulle à 792 px, posée ensuite à 407 px, collée au point du retard), elle faisait
+    //     exiger une flèche qui n'est pas due : 5 rouges sur 8 dès que le banc ne s'enregistre plus en trace. Le banc
+    //     attend deux lectures à 400 ms d'écart où la bulle n'a pas bougé de plus de 2 px. Les points, eux, flottent
+    //     sans arrêt de haut en bas, et la bulle les suit à 1 px : une égalité stricte ne se produit jamais.
+    const lireGeo = () => page.evaluate(() => {
         const r = (e) => { const q = e.getBoundingClientRect(); return { left: q.left, top: q.top, right: q.right, bottom: q.bottom }; };
         return { bulle: r(document.getElementById('parcours-bulle')), points: [0, 1, 2].map((k) => r(document.querySelector('[data-banc="point-' + k + '"]'))) };
     });
+    let geo = null, avant = null;
+    await expect.poll(async () => {
+        geo = await lireGeo();
+        const posee = !!avant && Math.abs(geo.bulle.left - avant.left) <= 2 && Math.abs(geo.bulle.top - avant.top) <= 2;
+        avant = geo.bulle;
+        return posee;
+    }, { message: 'étape 8 : la bulle finit par se poser', intervals: [400], timeout: 10000 }).toBe(true);
     const ecartEntre = (a, b) => Math.hypot(Math.max(a.left - b.right, b.left - a.right, 0), Math.max(a.top - b.bottom, b.top - a.bottom, 0));
     const vus = new Set();
     for (const k of [0, 1, 2]) {
