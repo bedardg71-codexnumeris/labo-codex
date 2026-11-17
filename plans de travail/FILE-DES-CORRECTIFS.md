@@ -131,6 +131,25 @@ Quand le moteur se croit sous le zoom au pincement (deux doigts comptés, ou la 
 ### 40. « Voir le parcours suivant », le modèle déjà fait : deux bulles de la fin d'un parcours déjà fait (essai de Grégoire sur l'iPad, 16 nov. 2026 ; issue 2 retenue par Cowork)
 Le modèle repart de sa première étape non faite. « Découvrir » ayant choisi le premier groupe, c'est la bulle 6 (« D'un groupe à l'autre ») qui s'ouvre, avec « C'est fait : le groupe-cours est créé » ; le groupe choisi, la bulle 7 est sautée (sa séance est déjà verrouillée) et la bulle 8 s'ouvre : « Objectif atteint ». Un novice demande le parcours suivant et reçoit la fin d'un parcours qu'il a déjà fait (`RAPPORT-2026-11-16-essai-ipad.md`, § 3). **Ne se produit pas dans « Découvrir » tel qu'il part en ligne** : tant que « Mettre ta classe en place » est fermé, sa dernière bulle n'offre que « Explorer la démo par moi-même » et « Terminer » (`js/parcours-decouvrir.js`, `get boutons`). La réponse (offrir « Refaire », ou le modèle suivant) est à décider par Grégoire avant d'ouvrir les modèles. Rien n'a été corrigé.
 
+### 41. Les bancs qui ne tiennent que par la lenteur de la trace : corriger leurs courses, puis retirer `grilles-sous-criteres-condense` des intermittentes (17 nov. 2026, décision relayée par Cowork)
+Depuis la 1.249.0, la trace Playwright ne s'écrit plus qu'à la reprise d'un essai rouge (fiche 38 : c'était la cause de la mémoire qui ne revenait pas). Les bancs vont une fois et demie plus vite, et ceux qui lisaient l'écran sans attendre qu'il soit posé rougissent au premier essai.
+
+**D'abord, `grilles-sous-criteres-condense.spec.js:52`** (projet iPad, « sous-critères · créer le premier, nommer, recharger, réordonner, retirer ; aucun code d'annotation »). Mesuré le 17 nov. sur `origin/main` `e5ad10f90`, sans le lot, dans un arbre à part : 6 verts sur 6 avec la configuration de `main` (`retain-on-failure`), **4 rouges sur 6 avec `on-first-retry`** ; sur `ecdf87940` : 2 rouges sur 6 sans trace, 1 sur 6 avec. Une attente `toEqual` rend un élément d'écart, en 2 s. Rouge aux deux essais du verdict du 17 nov., seul rouge hors baseline sur 1 712 essais ; inscrit aux intermittentes de `scripts/playwright-baseline.json` (`8449f25cc`, `_note20261117`). **Fin** : la course trouvée et attendue dans le banc (ou corrigée dans l'écran si c'est lui qui est en retard), dix passages verts de suite sans second essai, puis l'essai retiré de `echecsIntermittents` et la note avec lui.
+
+**Ensuite, les essais verts au second essai seulement.** Neuf sur les bancs du moteur le 17 nov. (tête `84c1e7e8b`) :
+- `deux-temps-modeles-2026-11-13:123` à 820 × 1180 (« Créer le cours » ne crée rien ; vu aussi une fois à 1180 × 820)
+- `deux-temps-modelisation-2026-11-12:352`
+- `en-tete-epure-2026-11-07:31`
+- `gel-etape-7-2026-11-15:37` à 36 rangées
+- `parcours-1-et-2-2026-11-08:131`
+- `parcours-8-commentaires-2026-11-09:603`
+- `parcours-5-monter-ton-cours-2026-11-09:211` et `:413`
+- `parcours-fleches-2026-11-10:425`
+
+Et 22 au verdict complet du 17 nov. sur `ecdf87940` (2 au verdict du 16 nov., avec la trace) ; ceux qui ne sont pas déjà ci-dessus : `barre-outils-compacte` (la palette vide), `bulle-largeur-ipad-2026-11-12` (L2, 1180 × 820), `codex-1012-avertissement` (2), `comptes-erreurs-stock-1142` (trois essais), `copie-demo-bibliotheque-31-oct:51`, `evaluer-868-avec-ou-sans-copie` (sans, avec, sans), `lot-i-bis-la-case-ouvre-un-codex:252`, `palette-evaluation-compacte` (la bulle), `palette-evaluation-un-defilement-1214` (la molette), `palette-retroaction-compacte` (« Contexte »), `parcours-4-recevoir-et-rendre-2026-11-09` (la voie des fichiers), `presences-lot-d-enregistrement` ((b)(a)), `registre-longitudinal-915` (R5), `tampons-masques-bibliotheque-1216`, `texte-troue-reperes-enonces` (« Aucune annotation »). La liste exacte est dans le jeton (`scripts/.verdict-playwright.json`, `instables`).
+
+Non démontré pour aucun : que ce soit une attente qui manque dans le banc plutôt qu'un écran en retard. À reprendre un par un, par la mesure (rejouer seul, six fois, sans second essai). Un essai vert au second essai ne bloque pas le push (#534), mais il coûte une trace et le signal du verdict.
+
 ## Mises de côté (attendent Grégoire)
 
 - **Le texte de l'aide « Date d'échéance et indices » (entrée 21, #1086)**, maintenant sur la case « Consignes transmises ». Grégoire, 8 nov. vers 16 h 44 : une production sans copie évaluée n'entre « pas encore » dans C. **Mesuré ensuite** : vrai en Sommative et en pratique configurable (`pratique-sommative.js` ~307-316 : dénominateur = productions ayant au moins une copie qui compte dans le groupe) ; **faux en PAN-Standards** (`pratique-pan-standards.js` ~308-315 : case cochée et date suffisent, échéance future comprise, sans copie évaluée). Grégoire : « Le comportement a été discuté avec Cowork tantôt et une décision a été prise. Elle est notée dans le chantier des parcours. » Cette note n'est pas dans le dépôt (cherchée : `plans de travail/`, `OU-EN-EST-ON.md`). **L'aide se réécrit selon cette décision, une fois qu'elle est au dépôt** ; d'ici là, elle reste telle quelle.

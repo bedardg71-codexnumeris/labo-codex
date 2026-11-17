@@ -7,6 +7,22 @@
 
 ---
 
+## 17 NOV. 2026, 9 H 05 (Claude Code) : **1.249.0 SUR `main` ET EN LIGNE — « DÉCOUVRIR » EST DE RETOUR, SEUL OUVERT ; L'INTERRUPTEUR D'« APPORTER MON MATÉRIEL » ÉTEINT À L'ARRIVÉE** — verdict complet du Mac, vert par report sur le commit de baseline ; la mémoire a tenu
+
+Mandat : relais de Cowork du 17 nov. (le rouge de `grilles-sous-criteres-condense:52`, puis la fin du verdict). Grégoire en classe jusqu'à 10 h : décidé dans les limites du relais. **Le travail le plus récent vit sur `main`.** `lot/deux-temps-modeles` est fusionné ; PR d'aperçu n° 23 fermée par le push si GitHub l'a reconnue (non vérifié).
+
+- **Sur `main`** : fusion `a2ce7777c` (`--no-ff`), release `ecdf87940` (1.249.0, build `1117-0611`, les deux lignes des Nouvelles accordées le 16 nov., mot pour mot), baseline `8449f25cc`, poussé à 8 h 52. Netlify : déploiement `6afc5c23`, prêt, commit `8449f25cc`, publié à 8 h 53 ; `version.json` du permalien = `1.249.0` / `1117-0611` ; `index.html`, `version.js`, `js/changelog-data.js`, `js/parcours-decouvrir.js`, `js/assistance.js` et `js/parcours-moteur.js` servis identiques au commit (`cmp`). ⚠ `app.codexnumeris.org` répond par la connexion Cloudflare Access : la vérification passe par le permalien du déploiement, pas par l'adresse publique.
+- **La mesure du cas** (point 1 du relais) : sur `origin/main` `e5ad10f90`, arbre à part, sans le lot : `grilles-sous-criteres-condense:52` vert 6 fois sur 6 avec la configuration de `main`, rouge 4 fois sur 6 avec `trace: 'on-first-retry'`. Cas 3 : c'est le changement de traces qui le révèle. Arbre de mesure retiré.
+- **Verdict** : complet, sur `ecdf87940`, 40 demi-morceaux joués un par appel (18 avant l'arrêt de 7 h 10, 22 repris à 10a sans rien rejouer). 1 712 essais : 1 689 verts, **22 au second essai** (2 le 16 nov. : le coût du changement de traces), 1 rouge, 68 sautés. Le rouge est `grilles-sous-criteres-condense:52`, seul hors baseline ; `gel-etape-7` n'a pas rougi. Inscrit aux intermittentes (`8449f25cc`, diff strictement `scripts/playwright-baseline.json`, la mesure en motif). **Le jeton de `8449f25cc` est un REPORT à la main**, comme le 16 nov. : le rapport fusionné rejugé contre la nouvelle baseline (aucun rouge nouveau), la spec rejouée en entier sur la tête (3 verts), Vitest par le crochet (11 888).
+- **La mémoire** : 78 % au départ du verdict, entre 76 et 81 % sur les 40 passages (1 h 49 de bancs), 77 % à la fin ; aucun processus restant, aucun passage tué (le plus long : 361 s). Détail : fiche 38. Cowork était ouvert tout du long.
+- **Fiches** : 38 (la cause et les mesures), 39 et 40 (les deux inscriptions de l'essai sur l'iPad), **41** (corriger la course de l'essai inscrit puis le retirer des intermittentes ; la liste des essais verts au second essai seulement).
+- **Complexité** (par rapport à la 1.248.3) : fonctions au-dessus de 15 : 434 → 434 (Δ 0), somme 10 953 → 10 956 (Δ + 3) ; au-dessus de 30 : 77 → 77 (Δ 0) ; fichiers de plus de 1 000 lignes : 43 → 44 ; lignes de code 170 346 → 171 875.
+- **Supposé, à corriger au besoin** : un essai vert au second essai compte pour vert ; le port 22 de GitHub ne répondait plus à 8 h 50 (le HTTPS répondait) : le push est passé par `ssh.github.com:443`, même clé, sans rien changer à la configuration ; l'outil du verdict qui reprend vit hors dépôt (`~/Library/Caches/labo-codex-verdict/`, copie dans `Claude outputs/releves-memoire-2026-11-17/`) : `scripts/verdict-en-morceaux.mjs` ne sait toujours pas reprendre, ni jouer par demies.
+- **Non vérifié** : Safari et l'iPad (porte `PORTES-TERRAIN-2026-11-16-essai-ipad.md`) ; pas de relecture croisée de cette session ; aucun break-test sur les trois attentes ajoutées aux bancs.
+- **Reste local, à trancher** : la branche `attente/1.249.0-du-16-nov` (`f4f8702f9`, l'ancienne préparation, périmée) n'est pas supprimée.
+
+---
+
 ## 17 NOV. 2026, 7 H 10 (Claude Code) : **ARRÊT AU VERDICT : UN ROUGE HORS DU LOT AU DEMI-MORCEAU 7b — LA 1.249.0 EST PRÊTE EN LOCAL, `main` N'A PAS BOUGÉ** — 18 demi-morceaux sur 40 jugés et gardés, la mémoire a tenu (78 %)
 
 Mandat : relais de Cowork du 17 nov. (« arrête-toi sans pousser main si un rouge hors du lot apparaît »). Rien n'est poussé sur `main` (`e5ad10f90`, 1.248.3) ; rien n'est en ligne.
