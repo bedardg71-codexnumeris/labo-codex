@@ -403,7 +403,10 @@ export async function faireLaModelisation(page, { capturer = '', surRemplir = nu
     const vus = new Set();
     for (const k of [0, 1, 2]) {
         if (vus.has(k)) continue;
-        const groupe = [0, 1, 2].filter((j) => j === k || ecartEntre(geo.points[k], geo.points[j]) === 0);
+        // Le moteur fond deux cibles à MOINS de 2 px l'une de l'autre (JOINT, `fondreCibles`), pas seulement celles qui
+        // se recouvrent : avec le décalage au hasard, les deux absences tombent parfois à 1 px (mesuré le 17 nov. 2026 :
+        // une seule flèche vers leur union, pointe à 17 px du premier point), et le banc en exigeait deux.
+        const groupe = [0, 1, 2].filter((j) => j === k || ecartEntre(geo.points[k], geo.points[j]) < 2);
         groupe.forEach((j) => vus.add(j));
         const pres = Math.min(...groupe.map((j) => ecartEntre(geo.points[j], geo.bulle)));
         if (pres >= 30) {
