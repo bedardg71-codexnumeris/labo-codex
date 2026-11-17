@@ -391,6 +391,10 @@ export async function faireLaModelisation(page, { capturer = '', surRemplir = nu
     //     La page, trop courte en paysage, ne défile pas pour amener la bande sous l'en-tête (`amener`). Deux règles
     //     validées se contredisent ici ; l'arbitrage est remonté à Cowork (rapport du 16 nov., § « à décider »).
     //     Le banc exige donc la flèche partout où elle a la place de se tracer, et que le point soit à découvert sinon.
+    //   · LE SEUIL DU BANC EST CELUI DU MOTEUR (16 nov. 2026, soir) : `courbe` retranche FLECHE_RETRAIT (6 px) avant de
+    //     comparer à FLECHE_MIN (24 px) ; une flèche n'est donc due qu'à partir de 30 px d'écart, pas de 24. Les points
+    //     reçoivent un décalage au hasard (±3 %, js/tableau-bord-apercu.js) : celui du retard tombe de 1 à 33 px de la
+    //     bulle selon le passage (mesuré sur cinq passages), et le banc rougissait quand il tombait entre 24 et 30.
     const geo = await page.evaluate(() => {
         const r = (e) => { const q = e.getBoundingClientRect(); return { left: q.left, top: q.top, right: q.right, bottom: q.bottom }; };
         return { bulle: r(document.getElementById('parcours-bulle')), points: [0, 1, 2].map((k) => r(document.querySelector('[data-banc="point-' + k + '"]'))) };
@@ -402,7 +406,7 @@ export async function faireLaModelisation(page, { capturer = '', surRemplir = nu
         const groupe = [0, 1, 2].filter((j) => j === k || ecartEntre(geo.points[k], geo.points[j]) === 0);
         groupe.forEach((j) => vus.add(j));
         const pres = Math.min(...groupe.map((j) => ecartEntre(geo.points[j], geo.bulle)));
-        if (pres >= 24) {
+        if (pres >= 30) {
             await flecheVers(page, groupe.map((j) => `[data-banc="point-${j}"]`), 'étape 8, un point à l’écart');
         } else {
             expect(pres, 'étape 8 : un point trop près de la bulle pour sa flèche reste à découvert').toBeGreaterThan(0);
