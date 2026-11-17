@@ -3,6 +3,7 @@ import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import vm from 'node:vm';
 import { fileURLToPath } from 'node:url';
+import { tranche } from './_helpers/tranche.js';
 
 // =====================================================================
 // LE MODÈLE DE « RECEVOIR » (« JE REGARDE », 17 NOV. 2026) — LE MATÉRIEL CONFRONTÉ À LA CONSIGNE
@@ -84,7 +85,7 @@ describe('Le modèle de « Recevoir » : le matériel de la consigne', () => {
         expect(src).toMatch(/LES TEXTES — PROVISOIRES/);
         expect(src.match(/var TEXTES = \{/g)).toHaveLength(1);
         // Les lignes des étapes viennent de TEXTES : aucune chaîne « Touche … » écrite ailleurs dans la mécanique.
-        const mecanique = src.slice(src.indexOf('// LES OUTILS'));
+        const mecanique = tranche(src, '// LES OUTILS', 'window.ParcoursRecevoirModele = {', { longueurMin: 2000 });
         expect(mecanique).not.toMatch(/["']Touche « /);
         for (const k of ['etape1', 'etape2', 'etape3', 'etape4', 'etape5', 'etape6', 'etape7', 'etape8', 'etape9']) expect(modele.textes).toHaveProperty(k);
     });
