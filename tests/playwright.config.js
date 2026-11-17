@@ -42,10 +42,24 @@ export const MOTIFS_EXCLUS_WEBKIT_LINUX = EXCLUS_WEBKIT_LINUX.map(
     (e) => new RegExp(echapper(e.fichier) + '.*' + echapper(e.titre))
 );
 
+// LES DÉLAIS PAR DÉFAUT À L'ÉCHELLE DU RUNNER — ESSAI du 17 novembre 2026 (fiche 37).
+// Repris de lot/verdict-nuage (ab557ac0e, PR n° 25), et de lui seul ce morceau : le
+// runner Linux de GitHub joue la suite 2,64 fois plus lentement que le Mac (mesuré
+// là-bas, run 43543782094). Les délais par défaut de Playwright (30 s par essai, 5 s
+// par attente d'`expect`) sont multipliés par 2,5 SOUS LA VARIABLE DE LA CI SEULEMENT
+// (PW_EXCLURE_WEBKIT_LINUX=1). Sur le Mac, rien ne change : 30 s et 5 s.
+// ⚠ Ce n'est PAS `retries`. Un délai écrit dans une spec ou un harnais n'est pas touché.
+// ⚠ C'est une MESURE : trois passages disent si cette échelle tarit les essais qui
+//   varient (plans de travail/RAPPORT-2026-11-17-verdict-github-juge.md).
+export const ECHELLE_DELAIS_LINUX = 2.5;
+const echelle = process.env.PW_EXCLURE_WEBKIT_LINUX === '1' ? ECHELLE_DELAIS_LINUX : 1;
+
 export default defineConfig({
     testDir: './integration',
     testMatch: '**/*.spec.js',
     grepInvert: process.env.PW_EXCLURE_WEBKIT_LINUX === '1' ? MOTIFS_EXCLUS_WEBKIT_LINUX : undefined,
+    timeout: 30000 * echelle,
+    expect: { timeout: 5000 * echelle },
     fullyParallel: false,
     // Un seul worker : tous les specs ouvrent le MÊME index.html en file:// et
     // partagent donc le localStorage de l'origine file://. Plusieurs workers
