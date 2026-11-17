@@ -21,6 +21,18 @@
 
     var CHANGELOG = [
         {
+            // 1.249 (16 nov. 2026 : « Découvrir » seul rouvert, l'interrupteur d'« Apporter mon matériel » éteint à la
+            // première arrivée) — les deux lignes proposées par Cowork, accordées par Grégoire le 16 nov. 2026, mot pour
+            // mot. Le titre reprend le début de la première ligne : aucun mot n'est ajouté.
+            version: '1.249',
+            couleur: 'vert',
+            titre: 'Le parcours «&nbsp;Découvrir&nbsp;» est de retour',
+            items: [
+                'Le parcours «&nbsp;Découvrir&nbsp;» est de retour&nbsp;: huit bulles te font visiter la démo.',
+                'Dans «&nbsp;Apporter mon matériel&nbsp;», l’interrupteur «&nbsp;M’accompagner pour étiqueter ma grille&nbsp;» est maintenant éteint à ton arrivée. Allume-le quand tu veux être guidé·e.'
+            ]
+        },
+        {
             // 1.248 (15 nov. 2026 : le gel de l'étape des présences et « Refaire » ; la définition gardée, la définition
             // affichée, la confirmation d'« Effacer la page », la bande des copies) — titres et lignes validés par Grégoire,
             // mot pour mot (relais de Cowork du 15 nov., 13 h 04). Le relais donnait deux blocs titrés ; l'entrée n'admet
