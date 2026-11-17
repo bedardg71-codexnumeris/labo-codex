@@ -264,3 +264,71 @@ Signature : une lettre par passage, dans l'ordre 43853967604, 43942432518, 43985
 | `VRRV` | `statut-incomplet-travail-en-cours` › statut incomplet · remplacer la copie garde le statut ; décocher la rend ordinaire, et elle ent… | reste |
 
 **Intermittentes, vertes aux quatre (26)** : retirées. Par fichier : `annotation-deux-doigts-page` × 1, `bareme-1` × 3, `comptes-erreurs-stock-1142` × 1, `critere-algorithmique-calculs-4b` × 3, `critere-algorithmique-calculs-4c` × 7, `lot-i-bis-la-case-ouvre-un-codex` × 2, `materiel-dissection-11` × 1, `materiel-dissection-12` × 1, `materiel-dissection-2a` × 2, `materiel-dissection-2b` × 2, `temoin-enregistrement-lot-b` × 3.
+
+---
+
+## Suite du 17 nov. 2026 (relais de Cowork, 5 h 55 à Québec) — l'essai des délais × 2,5
+
+**Dernier relais (17 nov., vers 12 h 20 UTC).** Branche à jour, poussée, non fusionnée, sans PR. **L'essai n'est PAS réussi selon le critère fixé d'avance** : deux verdicts verts puis un rouge, et 11 essais qui varient pour un seuil de « moins de dix ». Je n'ai pas relancé. La liste Linux n'a pas été retouchée (état de `2e0ac92`).
+
+### Ce qui a été repris
+
+Commit à part `6e90320` : dans `tests/playwright.config.js`, la constante `ECHELLE_DELAIS_LINUX = 2.5` et les deux lignes `timeout: 30000 * echelle` et `expect: { timeout: 5000 * echelle }`, actives seulement sous `PW_EXCLURE_WEBKIT_LINUX=1`. Cette variable est déjà posée par `tests.yml` sur `main` : rien d'autre n'était requis pour tourner sous GitHub. Les délais se détachent proprement. Non repris de `lot/verdict-nuage` : le complément du Mac (`listeDuComplement`, `grep`), ses scripts, ses sentinelles, sa liste. Vérifié à la main : 75 000 et 12 500 ms avec la variable, 30 000 et 5 000 sans.
+
+### Mesuré
+
+Trois passages sur `6e90320`, l'un après l'autre. « Hors liste » est compté contre la liste de `2e0ac92`, pour les six lignes. La durée va du premier job démarré au dernier job fini.
+
+| | Run | Rouges au premier essai | Rattrapés au second | Rouges à la fin | Hors liste | Durée | Morceau le plus long | Verdict |
+|---|---|---|---|---|---|---|---|---|
+| Essai 1 | 44069207768 | 36 | 9 | 27 | 0 | 24,4 min | 23,1 min | **vert** |
+| Essai 2 | 44073180128 | 39 | 12 | 27 | 0 | 27,2 min | 25,6 min | **vert** |
+| Essai 3 | 44077350627 | 32 | 5 | 27 | 1 | 24,1 min | 22,7 min | **rouge** |
+| Hier 1 | 43985499691 (`main`) | 50 | 12 | 38 | 2 | 30,7 min | 29,1 min | |
+| Hier 2 | 43989702254 (`main`) | 40 | 8 | 32 | 2 | 24,4 min | 22,8 min | |
+| Hier 3 | 43993803396 (branche) | 40 | 10 | 30 | 0 | 25,4 min | 24,2 min | |
+
+| Sur trois passages | Avec les délais × 2,5 | Hier, sans |
+|---|---|---|
+| Essais qui ont rougi au moins une fois sans rougir toujours | **11** | **20** |
+| Le même compte, en y ajoutant les rattrapés au second essai | 29 | 42 |
+| Essais rouges aux trois | 22 | 23 |
+| Rouges à la fin, cumulés | 81 | 100 |
+
+- **La durée ne s'allonge pas** : 24 à 27 minutes, contre 24 à 31 hier. Les « 33 minutes » du relais comptent sans doute l'attente en file ; je ne l'ai pas mesurée.
+- **Le seul rouge hors liste** (essai 3) : `ajouter-pages-photo-droite` › « deux photos, « Balance des blancs » sur la première… ». Ce n'est pas un délai dépassé : l'essai lit la couleur des coins du PDF et reçoit du noir et du blanc là où il attend blanc, rouge et bleu. Sur les neuf passages lus, il est vert six fois, rattrapé au second essai deux fois, rouge une fois.
+- **Les 11 qui varient** : 10 sont dans la liste (dont `en-tete-epure`, `palette-evaluation-compacte` « la bulle », `materiel-aide-accompagnement`, deux `annotation-formes-fermees-polygone`, `parcours-5`, `parcours-9`), 1 ne l'est pas (ci-dessus).
+
+### Le critère
+
+Fixé par Cowork : trois verdicts verts ET moins de dix essais qui varient. **Mesuré : deux verts sur trois, 11 essais qui varient. Les deux conditions manquent, chacune d'une unité.** L'essai n'est pas réussi.
+
+### Inféré
+
+- Les délais réduisent la variation à peu près de moitié (20 → 11, 100 → 81 rouges cumulés), sans coût de durée. Trois passages contre trois : l'écart est net mais l'échantillon est petit, et les trois d'hier ne portent pas tous le même code (deux sur `main`, un sur la branche ; la différence est l'essai #1115).
+- Ils ne tarissent pas la source : il reste des essais qui varient pour une autre raison qu'un délai (lecture de pixels, géométrie). Le rouge de l'essai 3 est de cette sorte.
+- Avec ces délais et cette liste, un verdict rouge sur trois reste plausible. Je ne peux pas chiffrer mieux sur trois passages.
+
+### Non vérifié
+
+- Pourquoi `ajouter-pages-photo-droite` reçoit du noir (rendu pas prêt, ou autre) : non élucidé.
+- L'effet des délais sur le Mac : aucun par construction (la variable n'y est pas posée), non rejoué.
+
+### Recoupement avec la PR n° 25 (`lot/verdict-nuage`, `ab557ac0e`), fichier par fichier
+
+Mesuré par une fusion simulée (`git merge-tree`, rien d'écrit) : **trois fichiers se heurtent**, les autres passent. La PR n° 25 a 30 commits de retard sur `main` et s'y fusionne sans heurt.
+
+| Fichier | Ici | PR n° 25 | Heurt | Qui l'emporte, selon moi |
+|---|---|---|---|---|
+| `scripts/playwright-baseline-linux.json` | 13 connus, 44 intermittentes, `gestes` et `raisons` ; classée sur six passages des 16 et 17 nov. | 15 connus, 46 intermittentes, une `causes` par entrée ; classée sur sept passages du 10 au 14 nov. | Oui. 49 entrées communes ; 8 seulement ici, 12 seulement là-bas. | **Le contenu d'ici** (plus récent, mesuré après `lot/menu-demo` et les parcours du 16 nov.), **dans la forme de là-bas** : son juge refuse une entrée sans cause. Il faut donc écrire une cause pour chacune des 57 entrées, ce que `raisons` ne fait que pour 13. Travail à faire, non fait. |
+| `tests/integration/planif-menu-vue.spec.js` | L'essai lit la plateforme et juge les deux côtés. | `surUnMac` force « MacIntel ». | Oui, mêmes lignes. | **Ici** (décidé par Cowork). |
+| `tests/playwright.config.js` | L'échelle des délais seule. | L'échelle, plus le complément du Mac. | Oui, même endroit, même contenu pour l'échelle. | **PR n° 25** : elle contient ce qui est ici, et le reste. |
+| `scripts/juger-rapport-playwright.mjs`, `rapport-playwright.mjs` | Intacts. | Refuse une liste sans causes. | Non. | PR n° 25, avec la conséquence ci-dessus pour la liste. |
+| `.github/workflows/tests.yml` | Intact. | Champ `branche`, nom du run, concurrence par référence. | Non. | PR n° 25. |
+| `codex-1011`, `codex-1012` (specs) | Intacts ; les deux essais de `codex-1011` restent aux connus ici. | Réparés (ils posent leur prémisse). | Non. | PR n° 25 ; les deux entrées `codex-1011` sortent alors de la liste. |
+| `BACKLOG.md`, `FILE-DES-CORRECTIFS.md` | Annotés. | Non touchés. | Non. | Ici. |
+| `PROTOCOLE.md`, `CLAUDE.md`, skills, hook, `pousser.sh`, `lire-verdict.mjs`, `verdict-nuage.mjs`, `complement-mac.mjs`, sentinelles | Intacts. | Le régime du nuage. | Non. | PR n° 25 ; c'est une décision de régime, hors de ce lot. |
+
+**Laquelle porte l'autre : la PR n° 25 porte ce lot.** Elle est la plus large (le régime, le juge, le workflow, le complément du Mac) et ce lot n'en est qu'une mise à jour sur trois fichiers. L'ordre que je propose : mettre la PR n° 25 à jour sur `main`, puis y reporter d'ici la spec `planif-menu-vue`, le contenu de la liste réécrit avec ses causes, et les annotations des documents ; le commit `6e90320` devient sans objet. L'inverse obligerait à refaire ici tout le régime.
+
+Deux réserves. La sentinelle de la PR n° 25 lit la liste et ses causes : je ne l'ai pas lancée contre la liste d'ici. Et le dernier verdict de la PR n° 25 (run 43712516135, 15 nov.) est rouge ; je ne l'ai pas lu.
