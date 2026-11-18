@@ -128,6 +128,10 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
 
 ## A faire
 
+### La grille d'autoévaluation dans le PDF des consignes, 18 novembre 2026 (inscrit sur consigne de Cowork, lot « Je regarde » d'« Évaluer », sans y toucher)
+
+- [ ] **#1286 – La grille d'autoévaluation, bloc libre des consignes, sort dans le PDF en texte suivi : la mettre en forme, une rangée par critère, des cases à cocher.** Demandé par la consigne du lot (`plans de travail/CONSIGNE-LOT-2026-11-18-je-regarde-evaluer.md`, C.5) : « Sa mise en forme (une rangée par critère, des cases à cocher) n'est pas de ce lot : inscris-la. » Le bloc entre dans le PDF (#499, #500 ; mesuré au banc `je-regarde-evaluer-2026-11-18.spec.js`), tel qu'il est écrit : ses « ☐ » et ses lignes, sans tableau. Matériel : `plans de travail/materiel-evaluer/grille-autoevaluation-strategies-de-lecture.txt`. Rapport : `plans de travail/RAPPORT-2026-11-18-je-regarde-evaluer.md`.
+
 ### La Modélisation de « Mettre ta classe en place » sous Chromium, en paysage, 17 novembre 2026 (trouvé au banc par le lot « Je regarde » de « Recevoir » ; inscrit sur consigne de Cowork, 17 nov. au soir, sans y toucher)
 
 - [ ] **#1285 – Sous Chromium, à 1180 × 820, la flèche de l'étape 1 (« Un cours ») de la Modélisation de « Mettre ta classe en place » ne va pas à « Créer le cours » : « pointes à 527, 446, 411 px de la cible ».** Non vécu par Grégoire : mesuré au banc (`deux-temps-modeles-2026-11-13.spec.js`, B à 1180 × 820, et tout banc qui joue cette Modélisation en paysage) sur `main` à `03dc7d2`, Chromium du nuage, le 17 nov. 2026. Vert à 820 × 1180. **Non départagé avec WebKit** : le verdict du Mac dira si Safari le voit aussi. Le banc du lot `je-regarde-recevoir-2026-11-17.spec.js` joue donc les deux modèles préalables en portrait, puis passe en paysage. Rapport : `plans de travail/RAPPORT-2026-11-17-je-regarde-recevoir.md`.

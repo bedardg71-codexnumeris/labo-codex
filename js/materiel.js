@@ -52,7 +52,8 @@
             '<h2 id="materiel-titre-cree" tabindex="-1">Ta grille « ' + e(r.nom) + ' » est créée</h2></div>' +
             '<p>' + e(phrase) + '</p>' + aCompleterHtml(r) + '<div class="materiel-cartes-cree">' +
             carteCree('Ta grille', carteGrille, 'grille-criteres', 'La voir dans Grilles de critères') +
-            carteCree('Ses niveaux', r.niveaux.join(' · '), 'echelle-performance', 'Les voir dans Échelles de performance') +
+            // Sans échelle créée avec elle (le modèle d'« Évaluer », 18 nov. 2026) : pas de carte « Ses niveaux ».
+            (r.ids && r.ids.echelle ? carteCree('Ses niveaux', r.niveaux.join(' · '), 'echelle-performance', 'Les voir dans Échelles de performance') : '') +
             '</div>' + plusLoinHtml(r) + '<div class="materiel-suite"><span>Pour t’en servir, associe-la à une production, puis évalue une première copie avec elle.</span>' +
             '<button type="button" class="btn btn-principal" data-action="materiel.voir" data-param="productions">Aller aux productions</button></div>' +
             retoursHtml() + '</section>';

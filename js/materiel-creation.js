@@ -97,8 +97,8 @@
             // Lot 3b1 : les boutons « La voir dans … » de la confirmation ouvrent ces objets-ci.
             ids: { grille: o.grille.id, echelle: o.echelle ? o.echelle.id : null },
             // Étape 5 : une grille en points, et son total (« sur 64 »).
-            enPoints: !o.echelle,
-            totalPoints: o.echelle ? null : o.grille.criteres.reduce(function (t, c) { return t + (c.ponderation == null ? 0 : c.ponderation); }, 0),
+            enPoints: !o.echelle && !m.echelleExistante,
+            totalPoints: o.echelle || m.echelleExistante ? null : o.grille.criteres.reduce(function (t, c) { return t + (c.ponderation == null ? 0 : c.ponderation); }, 0),
             // La dissection, lot 9 : les critères créés sans pondération (`null`), à compléter dans Grilles de critères.
             aCompleter: o.grille.criteres.filter(function (c) { return c.ponderation == null; }).length,
             niveaux: m.niveaux.map(function (n) {
