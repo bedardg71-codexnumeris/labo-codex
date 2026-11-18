@@ -137,7 +137,8 @@ for (const [L, H] of ORIENTATIONS) {
         await page.click('[data-action="travauxUI.ouvrirPreparationFichier"]');
         await expect(page.locator('#travaux-preparation-modal')).toBeVisible();
         await expect(bulle(page)).toContainText('Retour');
-        await page.waitForTimeout(800);
+        // Plusieurs passages de la sonde avec le poste ouvert sur la photo de Loutre : l'étape 2 reste.
+        await page.waitForFunction(() => { window.__passages = (window.__passages || 0) + 1; return window.__passages > 6; }, null, { polling: 150 });
         expect(await page.evaluate(() => ParcoursMoteur.etapeCourante()), 'le poste sur la photo de Loutre : l’étape 2 reste').toBe(1);
         await page.click('#travaux-preparation-modal [data-action="travauxPreparation.fermer"]');
         await expect(page.locator('#travaux-preparation-modal')).toBeHidden();

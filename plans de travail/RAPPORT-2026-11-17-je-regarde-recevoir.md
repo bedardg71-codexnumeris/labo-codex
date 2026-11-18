@@ -103,7 +103,19 @@ PR n° 29 (le petit lot seul) : https://github.com/bedardg71-codexnumeris/labo-c
 
 ### S.7 Les essais de la branche, et le build
 
-(rempli au push)
+| Essai (Chromium) | Résultat |
+|---|---|
+| Vitest (depuis `tests/`) | vert après trois retouches de mes propres essais : le bac à sable de la sentinelle (`addEventListener`), le repère des poignées sans classe CSS (cliquet #679), une pause fixe remplacée par une attente de la sonde (cliquet des pauses) |
+| `je-regarde-recevoir-2026-11-17` | A, B (820 × 1180 et 1180 × 820), C : verts |
+| `perspective-coins-2026-11-17` | 2/2 |
+| `parcours-4-recevoir-et-rendre-2026-11-09` | 4/4 |
+| `parcours-je-regarde-2026-11-16` | 3/3 |
+| `registre-des-parcours-2026-11-09` | 1/1 |
+| `deux-temps-modeles-2026-11-13` | 4/5 ; B à 1180 × 820 rouge, même signature que sur `main` (#1285) |
+
+La sentinelle du modèle confronte maintenant **chaque texte de `TEXTES` à la partie C de la consigne, mot pour mot** (hors
+lignes PROPOSÉES) ; break-test : « Regarde-les venir » → rouge, le chemin nommé. Le build de l'aperçu n° 28 : celui que
+Netlify annonce sur le dernier commit poussé (voir la PR).
 
 ---
 

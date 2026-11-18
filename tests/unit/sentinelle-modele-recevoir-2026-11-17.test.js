@@ -13,6 +13,8 @@ import { tranche } from './_helpers/tranche.js';
 //   · les trois copies : leurs noms (la date ramenée en 2025, mesure 3.4), et leurs octets, ceux des PDF du matériel ;
 //   · la copie travaillée (Loutre Enjouée) ; la personne évaluée au modèle d'« Évaluer » (Yack Amical, décision du
 //     17 nov.) n'est pas une des trois copies.
+// Break-test des dix textes (17 nov., soir) : « Regarde-les arriver » changé en « Regarde-les venir » → ROUGE, le chemin
+// nommé (TEXTES.etape1.consignes[0]). Rétabli → vert.
 // Break-tests (17 nov. 2026) : le niveau Nuance de Caribou Attentionné passé de I à D dans
 // js/parcours-recevoir-modele.js → ROUGE (« le tableau ») ; un octet changé dans la base64 de la copie de Tapir Doux →
 // ROUGE (« octet pour octet »). Rétablis → vert. Refaits sur les nouvelles copies (17 nov., soir) : rouges, puis verts.
@@ -26,7 +28,7 @@ const CONSIGNE_B = lire('plans de travail/CONSIGNE-LOT-2026-11-17-recevoir-dix-b
 const TYPES = { jpg: 'image/jpeg', pdf: 'application/pdf' };
 
 function charger(fichier) {
-    const window = {};
+    const window = { addEventListener() {} };
     vm.runInNewContext(lire(fichier), { window, document: {}, Object, Promise });
     return window;
 }
@@ -83,13 +85,30 @@ describe('Le modèle de « Recevoir » : le matériel de la consigne', () => {
         expect(modele.materiel.copies).not.toContain('9900007');
     });
 
-    it('les textes des bulles sont marqués provisoires, et regroupés en un seul objet', () => {
+    it('les dix bulles : chaque texte est celui de la consigne, mot pour mot (sauf les lignes PROPOSÉES), dans un seul objet', () => {
         const src = lire('js/parcours-recevoir-modele.js');
-        expect(src).toMatch(/LES TEXTES — PROVISOIRES/);
+        expect(src).toMatch(/LES TEXTES — ÉCRITS PAR GRÉGOIRE AVEC COWORK/);
         expect(src.match(/var TEXTES = \{/g)).toHaveLength(1);
-        // Les lignes des étapes viennent de TEXTES : aucune chaîne « Touche … » écrite ailleurs dans la mécanique.
+        // Aucune consigne écrite ailleurs que dans TEXTES.
         const mecanique = tranche(src, '// LES OUTILS', 'window.ParcoursRecevoirModele = {', { longueurMin: 2000 });
         expect(mecanique).not.toMatch(/["']Touche « /);
-        for (const k of ['etape1', 'etape2', 'etape3', 'etape4', 'etape5', 'etape6', 'etape7', 'etape8', 'etape9']) expect(modele.textes).toHaveProperty(k);
+        // La partie C, sans le gras du markdown.
+        const partieC = tranche(CONSIGNE_B, '### Les textes, mot pour mot', '## D. Bancs et porte', { longueurMin: 2000 }).replace(/\*\*/g, '');
+        const TITRE = 'Appliquer des stratégies de lecture variées (Deux-Rives)';
+        const PROPOSES = ['refus', 'choisirLeGroupe', 'autreCopie', 'autrePhoto'];
+        const textes = [];
+        (function cueillir(o, chemin) {
+            for (const [k, v] of Object.entries(o)) {
+                if (PROPOSES.includes(k)) continue;
+                const ici = chemin + '.' + k;
+                if (typeof v === 'string') textes.push([ici, v]);
+                else if (typeof v === 'function') textes.push([ici, v(TITRE)]);
+                else if (Array.isArray(v)) v.forEach((x, n) => textes.push([ici + '[' + n + ']', x]));
+                else if (v && typeof v === 'object') cueillir(v, ici);
+            }
+        })(modele.textes, 'TEXTES');
+        expect(textes.length).toBeGreaterThan(50);
+        for (const [ou, texte] of textes) expect(partieC, ou).toContain(texte);
+        for (let k = 1; k <= 10; k++) expect(modele.textes).toHaveProperty('etape' + k);
     });
 });

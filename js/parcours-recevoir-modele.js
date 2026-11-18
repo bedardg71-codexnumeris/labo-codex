@@ -558,7 +558,7 @@
         var r = canevas.getBoundingClientRect(), cote = 40;
         while (reperes.length < coins.length) {
             var d = document.createElement('div');
-            d.className = 'parcours-repere-poignee';
+            d.setAttribute('data-parcours-repere', 'poignee');   // un repère, sans règle de style : tout est en ligne
             d.setAttribute('aria-hidden', 'true');
             d.style.cssText = 'position:fixed;width:' + cote + 'px;height:' + cote + 'px;pointer-events:none;opacity:0;';
             document.body.appendChild(d);
