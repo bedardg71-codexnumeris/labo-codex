@@ -9,6 +9,17 @@ Nouvelles. Chromium seulement.
 
 ---
 
+## Retouches de Cowork (18 nov. 2026, 7 h 40), appliquées
+
+1. Bulles 1, 5, 6 et 10 : « à l'onglet « X » », posé par le moteur avec le halo du menu (`lieu`, `lieuSuite`) ; la suite
+   de chaque phrase reste mot pour mot. Le moteur le permet : aucune phrase entière à garder. Effet de bord mesuré et
+   réglé : le lieu remonte la page en haut, la ligne de Loutre (étape 5) sortait de l'écran en paysage ; les étapes à
+   lieu déclarent `amener` (le moteur ramène ce qu'elles désignent), et le menu « Actions » est ramené de côté.
+2. Bulle 4 : « la mention « Spécifique », suivie de « Perspective » ».
+La sentinelle accepte ces deux retouches, nommées et datées, et refuse toute phrase « à la section ». Banc B : sept passes,
+six vertes ; une rouge, une fois, au relevé automatique de la bulle (portrait), non reproduite en trois passes suivantes.
+Le banc attend aussi que l'engrenage porte la copie de Tapir avant de le toucher (une course du banc, pas de l'application).
+
 ## Pour la conversation du Projet (quinze lignes, 18 nov., nuit)
 
 1. `claude/ecstatic-brown-urn6v8` (PR n° 28) porte les dix bulles ; `lot/perspective-coins` (PR n° 29, `dd4bf10`) y est fusionné. Aperçu : §S.6.

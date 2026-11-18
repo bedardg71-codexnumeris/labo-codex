@@ -60,6 +60,9 @@
 
     // =================================================================
     // LES TEXTES — ÉCRITS PAR GRÉGOIRE AVEC COWORK (17 nov. 2026, 18 h 20 à 19 h 19), MOT POUR MOT
+    // RETOUCHES DE COWORK (18 nov. 2026, 7 h 40, mots lus par l'enseignant·e) : « à la section » devient « à l'onglet », que
+    // le moteur pose lui-même avec le halo du menu (`lieu`, `lieuSuite` : la suite de chaque phrase, mot pour mot) ; la
+    // bulle 4 dit « la mention « Spécifique », suivie de « Perspective » ».
     // plans de travail/CONSIGNE-LOT-2026-11-17-recevoir-dix-bulles.md, partie C. Les lignes `lieu` disent où l'on est
     // telles que Grégoire les a écrites (« à la section », là où le moteur dirait « à l'onglet ») : elles sont posées comme
     // des phrases de la bulle. `consignes` : les lignes en gras (la ligne orange), toujours en dernier. `devient` : la
@@ -75,7 +78,7 @@
         // PROPOSÉ : inchangé depuis le 17 nov.
         choisirLeGroupe: "Choisis le deuxième groupe dans l'en-tête (ce modèle se joue sur lui)",
         etape1: {
-            lieu: "Tu es dans « Évaluation », à la section « Préparer » : c'est là que tu reçois les productions de tes étudiant·es.",
+            lieuSuite: ": c'est là que tu reçois les productions de tes étudiant·es.",
             phrase: "Dans la démo, trois étudiant·es du deuxième groupe t'ont remis leur production. Rien ne touche à tes données.",
             lignes: ["Avec ta classe, elles viennent de Léa : tu les télécharges, puis tu les déposes ici"],
             consignes: ["Regarde-les arriver : touche « Remplir »"]
@@ -114,7 +117,7 @@
         etape4: {
             confirme: "C'est fait : la photo de Tapir Doux est redressée.",
             lignes: [
-                "Sous « Aperçu », sa copie porte maintenant la mention « Spécifique : Perspective » : son réglage s'appliquera à l'import",
+                "Sous « Aperçu », sa copie porte maintenant la mention « Spécifique », suivie de « Perspective » : son réglage s'appliquera à l'import",
                 "Il reste à dire à quelle production les trois copies répondent : leur grille et leur cartouche viendront avec elle"
             ],
             choisir: function (titre) { return "Sous « Inspecteur », choisis la production " + PRODUCTION_DITE(titre); },
@@ -122,7 +125,7 @@
         },
         etape5: {
             confirme: "C'est fait : les trois copies sont importées.",
-            lieu: "Tu es dans « Évaluation », à la section « Liste » : c'est là que tu vois où en est chaque copie de ton groupe.",
+            lieuSuite: ": c'est là que tu vois où en est chaque copie de ton groupe.",
             lignes: [
                 "Loutre Enjouée, Tapir Doux et Antilope Vaillante : « Importé ». Leur copie attend d'être annotée et évaluée",
                 "Les sept autres étudiant·es ont déjà leur évaluation, posée par l'exemple, sans copie : l'export, à la fin, portera ainsi sur une classe entière"
@@ -132,7 +135,7 @@
         },
         etape6: {
             confirme: "C'est fait : la copie de Loutre Enjouée est ouverte.",
-            lieu: "Tu es dans « Évaluation », à la section « Annoter » : c'est là que tu lis la copie et que tu y écris, comme au stylo.",
+            lieuSuite: ": c'est là que tu lis la copie et que tu y écris, comme au stylo.",
             lignes: [
                 "La palette « Tampons » : un tampon est un signe que tu poses sur la copie ; chacun ajoute sa phrase à la rétroaction de l'étudiant·e",
                 "Ces phrases sont les tiennes : tu les écris une fois, elles servent d'une copie à l'autre et d'un trimestre à l'autre"
@@ -177,7 +180,7 @@
         },
         etape10: {
             confirme: "C'est fait : l'évaluation de Loutre Enjouée est verrouillée.",
-            lieu: "Tu es dans « Évaluation », à la section « Exporter » : c'est là que tu prépares ce que tu remets à tes étudiant·es.",
+            lieuSuite: ": c'est là que tu prépares ce que tu remets à tes étudiant·es.",
             lignes: [
                 "Huit évaluations verrouillées partent : celle de Loutre Enjouée et les sept de l'exemple",
                 "Tapir Doux et Antilope Vaillante n'ont pas encore d'évaluation : rien ne part pour eux",
@@ -440,6 +443,10 @@
         e.texte = '';
         e.geste = '';
         if (plus.titre) e.titre = plus.titre;
+        if (plus.lieu) e.lieu = function () { return surLeDeuxiemeGroupe() && (typeof plus.lieu === 'function' ? plus.lieu() : true); };
+        if (plus.lieuSuite) e.lieuSuite = plus.lieuSuite;
+        // Le lieu remonte la page en haut ; `amener` y ramène ce que l'étape désigne (le moteur, 16 nov. 2026).
+        if (plus.lieu) e.amener = true;
         if (plus.avant) e.avant = plus.avant;
         if (plus.nommeLeContour) e.nommeLeContour = true;
         if (plus.aussiEviter) e.aussiEviter = function () { return surLeDeuxiemeGroupe() ? plus.aussiEviter() : []; };
@@ -486,6 +493,7 @@
     function menuExport() { return el('travaux-archivage-lea-production'); }
     function productionAExporterChoisie() { var s = menuExport(), p = productionDuModele(); return !!(s && p && s.value === p.id); }
 
+    var ameneeDeCote = 0;
     function ameneDeCote(e) {
         if (!e) return;
         var r = e.getBoundingClientRect();
@@ -593,6 +601,8 @@
         var T = TEXTES;
         return [
             pourLeModele(B[0], {
+                lieu: true,
+                lieuSuite: T.etape1.lieuSuite,
                 lignes: function () { return forme(T.etape1); },
                 boutons: function () { return R().fileDAttente().length ? null : [{ libelle: C().mots.remplir, primaire: true, action: deposerLesCopies }]; },
                 // « Remplir » est dans la bulle : rien n'est désigné sur la page (la règle des modèles), la zone reste à voir.
@@ -659,20 +669,33 @@
                 atteint: function () { return B[1].atteint() && !(window.travauxImport && window.travauxImport.importEnCours); }
             }),
             pourLeModele(B[2], {
+                lieu: true,
+                lieuSuite: T.etape5.lieuSuite,
                 confirme: T.etape5.confirme,
                 lignes: function () { return forme(T.etape5); },
                 avant: async function () {
                     R().nettoyer();
+                    ameneeDeCote = 0;
                     aller('evaluations', 'liste');
                     await attendre(menuDeLaCopieTravaillee, 3000);
-                    ameneDeCote(menuDeLaCopieTravaillee());
                 },
-                zones: function () { var s = menuDeLaCopieTravaillee(); return s ? [s.closest('tr') || s.parentElement] : []; },
+                // Le lieu remonte la page en haut et à gauche (`scrollTo(0, 0)`, le moteur) : à 1180 px, la colonne
+                // « Actions » sort alors de l'écran. Le menu de Loutre Enjouée est ramené de côté, trois fois au plus.
+                zones: function () {
+                    var s = menuDeLaCopieTravaillee();
+                    if (s && ameneeDeCote < 3) {
+                        var r = s.getBoundingClientRect();
+                        if (r.right > window.innerWidth || r.left < 0) { ameneeDeCote++; ameneDeCote(s); }
+                    }
+                    return s ? [s.closest('tr') || s.parentElement] : [];
+                },
                 contour: menuDeLaCopieTravaillee,
                 avis: function () { return R().fichierOuvert() && !copieTravailleeOuverte() ? T.etape5.pasLaBonneCopie : ''; },
                 atteint: function () { return copieTravailleeOuverte() && B[2].atteint(); }
             }),
             pourLeModele(B[3], {
+                lieu: function () { return !fenetreTamponsOuverte(); },
+                lieuSuite: T.etape6.lieuSuite,
                 confirme: function () { return fenetreTamponsOuverte() ? '' : T.etape6.confirme; },
                 lignes: function () { return fenetreTamponsOuverte() ? forme(T.etape6.devient) : forme(T.etape6); },
                 avant: function () { tamponsVus = false; return B[3].avant(); },
@@ -709,6 +732,8 @@
                 lignes: function () { return forme(T.etape9); }
             }),
             pourLeModele(B[7], {
+                lieu: function () { return !exportFait; },
+                lieuSuite: T.etape10.lieuSuite,
                 confirme: function () { return exportFait ? '' : T.etape10.confirme; },
                 // Avant l'export : la production, puis « Exporter pour Léa ». Après : la seconde forme ; « Objectif
                 // atteint », la phrase de la suite et « Pour revoir une étape » sont posés par le moteur (la fin).

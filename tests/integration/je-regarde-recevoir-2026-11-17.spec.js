@@ -45,6 +45,9 @@ const CHAMPS_D_UN_PREMIER_ENREGISTREMENT = ['cartoucheId', 'coursId', 'criteres'
     'etudiantDA', 'etudiantNom', 'grilleId', 'grilleNom', 'groupe', 'groupeCoursId', 'heureEvaluation', 'id', 'journal', 'niveauFinal',
     'noteFinale', 'notesIntegrite', 'optionsAffichage', 'pointsAnalytiques', 'ponderationCouverte', 'productionId', 'productionNom',
     'retroactionFinale', 'retroactionReecrite', 'statutIntegrite', 'statutRemise', 'verrouillee'];
+/** La phrase du lieu telle que le moteur l'écrit (les insécables de `typographier`). */
+const lieuDit = (onglet, suite) => ('Tu es dans « Évaluation », à l\'onglet « ' + onglet + ' » ' + suite)
+    .replace(/« /g, '«\u00a0').replace(/ »/g, '\u00a0»').replace(/ ([;:?!])/g, '\u00a0$1');
 const sansInsecable = (t) => t.replace(/[  ]/g, ' ');
 
 /** Les évaluations de la production du modèle, lues dans la démo. */
@@ -108,7 +111,8 @@ for (const [L, H] of ORIENTATIONS) {
         await etape(page, 1, 'Leurs productions');
         expect(await enDemo(page)).toBe(true);
         await expect(bulle(page).locator('.parcours-bulle-objectif').first()).toContainText("de décrire le chemin d'une production dans l'application");
-        expect(sansInsecable(await bulle(page).innerText())).toContain(sansInsecable(t.etape1.lieu));
+        // Le lieu, posé par le moteur (retouche de Cowork, 18 nov. : « à l'onglet ») ; la suite de la phrase, mot pour mot.
+        await expect(bulle(page).locator('.parcours-bulle-lieu')).toHaveText(lieuDit('Préparer', t.etape1.lieuSuite));
         expect((await lireBulle(page)).consignes).toEqual([t.etape1.consignes[0]]);
         expect((await lireBulle(page)).boutons).toEqual([REMPLIR]);
         // Les sept évaluations sont posées dès le lancement (C les juge en détail).
@@ -143,6 +147,9 @@ for (const [L, H] of ORIENTATIONS) {
         await page.click('#travaux-preparation-modal [data-action="travauxPreparation.fermer"]');
         await expect(page.locator('#travaux-preparation-modal')).toBeHidden();
         await page.click(ligne(tapir));
+        // L'engrenage se redessine avec la copie choisie : attendre qu'il porte celle de Tapir (sinon, touché trop tôt, il
+        // ouvre encore la photo de Loutre, et l'étape 2 refuse d'avancer, comme elle le doit).
+        await expect(page.locator('[data-action="travauxUI.ouvrirPreparationFichier"]')).toHaveAttribute('data-param', String(tapir));
         await contourSur(page, '[data-action="travauxUI.ouvrirPreparationFichier"]');
         await page.click('[data-action="travauxUI.ouvrirPreparationFichier"]');
 
@@ -198,6 +205,7 @@ for (const [L, H] of ORIENTATIONS) {
         await etape(page, 5, 'La liste');
         test.info().annotations.push({ type: `import des trois copies, ${L} × ${H}`, description: Math.round((Date.now() - debutImport) / 100) / 10 + ' s (Chromium du nuage)' });
         await expect(bulle(page).locator('.parcours-bulle-confirme')).toHaveText(t.etape5.confirme);
+        await expect(bulle(page).locator('.parcours-bulle-lieu')).toHaveText(lieuDit('Liste', t.etape5.lieuSuite));
         for (const nom of ['Enjouée', 'Doux', 'Vaillante']) await expect(page.locator('#evaluations-liste tr', { hasText: nom })).toContainText('Importé');
         expect((await fichiersDe(page, pid)).map((f) => f.etudiantDA).sort()).toEqual(Object.keys(COPIES));
         expect((await evaluationsDe(page, pid)).map((e) => e.etudiantDA).sort()).toEqual(Object.keys(SEPT).sort());
@@ -210,6 +218,7 @@ for (const [L, H] of ORIENTATIONS) {
         // des tampons : « Enregistrer » écrit quatorze clés hors de la démo, mesuré le 17 nov. 2026).
         await etape(page, 6, 'Tes tampons');
         await expect(bulle(page).locator('.parcours-bulle-confirme')).toHaveText(t.etape6.confirme);
+        await expect(bulle(page).locator('.parcours-bulle-lieu')).toHaveText(lieuDit('Annoter', t.etape6.lieuSuite));
         expect(await page.evaluate(() => travauxVisionneuse.getFichierActuel().etudiantDA)).toBe('9900002');
         expect((await lireBulle(page)).consignes).toEqual(t.etape6.consignes);
         await contourSur(page, '#travaux-palette-tampons [title="Personnaliser"]');
@@ -254,6 +263,7 @@ for (const [L, H] of ORIENTATIONS) {
         // forme, la fin du parcours.
         await etape(page, 10, 'Rends tes rétroactions');
         await expect(bulle(page).locator('.parcours-bulle-confirme')).toHaveText(t.etape10.confirme);
+        await expect(bulle(page).locator('.parcours-bulle-lieu')).toHaveText(lieuDit('Exporter', t.etape10.lieuSuite));
         await expect(bulle(page)).not.toContainText('Objectif atteint');
         expect((await lireBulle(page)).consignes.map(sansInsecable)).toEqual([sansInsecable(t.etape10.choisir.replace('«TITRE»', titre)), t.etape10.exporter]);
         await contourSur(page, '#travaux-archivage-lea-production');

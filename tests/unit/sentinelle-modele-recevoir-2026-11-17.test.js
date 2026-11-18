@@ -108,7 +108,20 @@ describe('Le modèle de « Recevoir » : le matériel de la consigne', () => {
             }
         })(modele.textes, 'TEXTES');
         expect(textes.length).toBeGreaterThan(50);
-        for (const [ou, texte] of textes) expect(partieC, ou).toContain(texte);
+        // Les retouches de Cowork (18 nov. 2026, 7 h 40) : la bulle 4 ; et « à l'onglet », que le moteur pose (`lieuSuite`
+        // ne garde que la suite de la phrase, mot pour mot dans la consigne).
+        const RETOUCHES = {
+            'TEXTES.etape4.lignes[0]': "Sous « Aperçu », sa copie porte maintenant la mention « Spécifique », suivie de « Perspective » : son réglage s'appliquera à l'import"
+        };
+        for (const [ou, texte] of textes) {
+            if (RETOUCHES[ou]) expect(texte, ou).toBe(RETOUCHES[ou]);
+            else expect(partieC, ou).toContain(texte);
+        }
+        for (const k of ['etape1', 'etape5', 'etape6', 'etape10']) {
+            expect(modele.textes[k].lieuSuite, k).toMatch(/^: c'est là que /);
+            expect(modele.textes[k]).not.toHaveProperty('lieu');
+        }
+        expect(lire('js/parcours-recevoir-modele.js')).not.toMatch(/à la section «/);
         for (let k = 1; k <= 10; k++) expect(modele.textes).toHaveProperty('etape' + k);
     });
 });
