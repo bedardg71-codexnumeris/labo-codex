@@ -99,7 +99,7 @@ describe('1. le matériel de l’exemple', () => {
 
 /** Les bulles de la section D : { titre, lignes } ; une ligne par phrase dite, sans « – », sans « ** », sans les guillemets d'une confirmation. */
 function bullesDeLaConsigne() {
-    const d = CONSIGNE.slice(CONSIGNE.indexOf('D. LES TEXTES DES BULLES'), CONSIGNE.indexOf('E. LE MATÉRIEL DE GRÉGOIRE'));
+    const d = tranche(CONSIGNE, 'D. LES TEXTES DES BULLES', 'E. LE MATÉRIEL DE GRÉGOIRE');
     return d.split(/\n### Bulle \d+ · /).slice(1).map((bloc) => {
         const [tete, ...corps] = bloc.split('\n');
         const titre = /^« (.+) » · \d+ sur 10$/.exec(tete)[1];

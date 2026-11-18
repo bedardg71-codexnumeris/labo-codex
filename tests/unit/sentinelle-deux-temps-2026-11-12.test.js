@@ -230,7 +230,7 @@ describe('les mots de main valent dans les modèles (15 nov. 2026)', () => {
         const materiel = tranche(EVALUER, 'var MATERIEL = Object.freeze({', 'function tableauDeLaGrille');
         // La grille d'autoévaluation de Grégoire (18 nov. 2026) dit « le chapitre » : ce sont ses mots, tels quels (consigne
         // du lot, E) ; la décision du 15 nov. visait la tâche. Elle est retirée de la mesure, et signalée au rapport du lot.
-        const sansAutoevaluation = materiel.slice(0, materiel.indexOf('autoevaluation:')) + materiel.slice(materiel.indexOf('niveaux: Object.freeze'));
+        const sansAutoevaluation = materiel.replace(tranche(materiel, 'autoevaluation:', 'niveaux: Object.freeze'), '');
         expect(sansAutoevaluation.replace(/\/\/.*$/gm, '')).not.toMatch(/Madawigouche|Rivières-aux-Cartouches|refonte A26|le chapitre/);
         expect(materiel).toContain("echeance: '2025-09-09'");
         expect(new Date(2025, 8, 9).getDay()).toBe(2);
