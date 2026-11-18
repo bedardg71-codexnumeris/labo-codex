@@ -149,3 +149,8 @@ fusion, sur le Mac ; **défaire le commit « BRANCHE SEULEMENT » (`4c36db4`) av
    que le moindre recouvrement ; C : le menu « Consulter » de Caribou Attentionné pas encore là). Intermittents, dans des
    étapes que ce lot ne touche pas ; non mesuré sur la base. **Inscrire et continuer** n'est pas dû (non vécu) : dit ici.
    La porte : les attendus 1.1 à 1.3 suivent la forme du 18 nov. ; aucun geste ne change.
+4. **L'aperçu n° 30 est prêt** (Netlify, « Deploy Preview ready! », 21 h 29 UTC) sur `9b056dd`. Son bas de page doit dire
+   **1.249.0 · build 1117-0611** : lu dans `version.json`, que le build de Netlify copie tel quel ; pas vu à l'écran (le
+   réseau du conteneur refuse l'aperçu). ⚠ C'est **le même build que l'aperçu n° 28** : le bas de page ne distingue pas
+   les deux aperçus. Ce qui les distingue à l'écran : le compteur « 1 sur 10 » à la première bulle d'« Évaluer » (9 sur
+   l'aperçu n° 28).
