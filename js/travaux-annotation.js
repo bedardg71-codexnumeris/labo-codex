@@ -470,8 +470,13 @@
     }
 
     /** #1123 — les outils qui posent d'un seul toucher : un autocollant, un symbole ou un code. */
+    /**
+     * Les outils qui se posent d'un seul toucher du doigt (#1123) : le tampon, le code, et depuis le 18 nov. 2026
+     * (lot/perspective-coins, vécu par Grégoire sur l'iPad : la bulle du modèle de « Recevoir » recommande l'outil) le
+     * Texte. Les outils qui tracent gardent leur rejet de paume : le doigt y fait défiler la page.
+     */
     function estOutilDunToucher(outil) {
-        return !!_outils().getAutocollantActif() || outil.type === 'symbole';
+        return !!_outils().getAutocollantActif() || outil.type === 'symbole' || outil.id === 'texte';
     }
 
     /**
@@ -503,9 +508,10 @@
         if (!estOutilDunToucher(outil)) return;
         avantPremiereAnnotation();
         const rect = canvasAnnotation.getBoundingClientRect();
-        poserTamponAuPoint(outil,
-            (toucher.x - rect.left) / canvasAnnotation.width,
-            (toucher.y - rect.top) / canvasAnnotation.height);
+        const xNorm = (toucher.x - rect.left) / canvasAnnotation.width;
+        const yNorm = (toucher.y - rect.top) / canvasAnnotation.height;
+        // Le texte : la zone s'ouvre là où le doigt s'est posé (ou le texte touché s'ouvre en édition), comme au stylet.
+        if (!poserTamponAuPoint(outil, xNorm, yNorm)) poseDunGeste(outil, xNorm, yNorm);
     }
 
     /**
