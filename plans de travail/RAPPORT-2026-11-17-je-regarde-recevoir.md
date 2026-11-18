@@ -98,7 +98,8 @@ Tout cela est dans la porte terrain.
 ### S.6 L'aperçu
 
 PR n° 28 : https://github.com/bedardg71-codexnumeris/labo-codex/pull/28 ; aperçu :
-https://deploy-preview-28--codexnumeris-051225.netlify.app (build : voir §S.7).
+https://deploy-preview-28--codexnumeris-051225.netlify.app. Le bas de page dira `1.249.0`, build `1117-0611` : aucune
+release, le build ne change pas. L'aperçu de `06bf683` était en construction chez Netlify au push ; il n'a pas été ouvert depuis le conteneur.
 PR n° 29 (le petit lot seul) : https://github.com/bedardg71-codexnumeris/labo-codex/pull/29.
 
 ### S.7 Les essais de la branche, et le build
@@ -114,8 +115,7 @@ PR n° 29 (le petit lot seul) : https://github.com/bedardg71-codexnumeris/labo-c
 | `deux-temps-modeles-2026-11-13` | 4/5 ; B à 1180 × 820 rouge, même signature que sur `main` (#1285) |
 
 La sentinelle du modèle confronte maintenant **chaque texte de `TEXTES` à la partie C de la consigne, mot pour mot** (hors
-lignes PROPOSÉES) ; break-test : « Regarde-les venir » → rouge, le chemin nommé. Le build de l'aperçu n° 28 : celui que
-Netlify annonce sur le dernier commit poussé (voir la PR).
+lignes PROPOSÉES) ; break-test : « Regarde-les venir » → rouge, le chemin nommé. Le build : §S.6.
 
 ---
 
