@@ -469,7 +469,6 @@
         return typeof travauxUI !== 'undefined' && !!travauxUI.getModeCourant && travauxUI.getModeCourant() === 'evaluer';
     }
 
-    /** #1123 — les outils qui posent d'un seul toucher : un autocollant, un symbole ou un code. */
     /**
      * Les outils qui se posent d'un seul toucher du doigt (#1123) : le tampon, le code, et depuis le 18 nov. 2026
      * (lot/perspective-coins, vécu par Grégoire sur l'iPad : la bulle du modèle de « Recevoir » recommande l'outil) le
