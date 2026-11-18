@@ -1,6 +1,6 @@
 # Portes terrain — 18 novembre 2026 (le « Je regarde » d'« Évaluer une première production », dix bulles)
 
-> **Où** : l'aperçu de la PR du lot (`lot/je-regarde-evaluer`, son lien est dans le rapport du lot), sur l'iPad. Son build se
+> **Où** : l'aperçu n° 30, https://deploy-preview-30--codexnumeris-051225.netlify.app, sur l'iPad. Son build se
 > lit en bas de page. Rien ne touche tes données : tout se joue dans la démo.
 > **Cowork publie l'artefact** (bouton « Copier mes résultats ») à partir de ce fichier.
 > Couvre : les dix bulles sur l'iPad, debout et couché ; le menu « Type » ouvert au doigt ; l'étiquetage au doigt.

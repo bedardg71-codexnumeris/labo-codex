@@ -1,7 +1,7 @@
 # Rapport du lot — « Je regarde » d'« Évaluer une première production », dix bulles (18 nov. 2026)
 
 **Dernier relais (18 nov. 2026, soir)** : branche `lot/je-regarde-evaluer`, partie de `origin/claude/ecstatic-brown-urn6v8`
-(`76192ab`), PR en brouillon (aperçu Netlify). **Fait** : la consigne
+(`76192ab`), PR n° 30 en brouillon (base `main`, pour l'aperçu Netlify : https://deploy-preview-30--codexnumeris-051225.netlify.app). **Fait** : la consigne
 `plans de travail/CONSIGNE-LOT-2026-11-18-je-regarde-evaluer.md`, A à G. **Reste** : la porte terrain
 (`plans de travail/PORTES-TERRAIN-2026-11-18-je-regarde-evaluer.md`, Cowork publie l'artefact) ; le verdict WebKit à la
 fusion, sur le Mac ; **défaire le commit « BRANCHE SEULEMENT » (`4c36db4`) avant toute fusion** (il vient avec la base).
