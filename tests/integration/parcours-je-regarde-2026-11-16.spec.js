@@ -476,10 +476,11 @@ test('« Mettre ta classe en place », Je regarde : la bonne section, son nom en
     expect(v.ordre[0]).toBe('parcours-bulle-lieu');
     const s2 = await jugerSection(2, 'accordeon-groupe-etudiants', (nom) => `Tu es dans la section « ${nom} » : c'est là que tu apportes la liste de ton groupe.`);
     await deuxEtats(2, { consigne: 'Touche « Prévisualiser »', bouton: '#accordeon-groupe-etudiants [data-action="previsualiserDonneesV2"]', idBloc: 'accordeon-groupe-etudiants' });
-    // L'exemple voulu par Grégoire (18 nov. 2026, 14 h 11) : « ✓ Regarde l'exemple se remplir… » (gris), cinq lignes
-    // d'explication sans tiret, « → Touche « Prévisualiser » » (orange). Break-test : le tiret rendu aux lignes
+    // L'exemple voulu par Grégoire (18 nov. 2026, 14 h 11) : les lignes d'explication sans tiret, « → Touche
+    // « Prévisualiser » » (orange). Depuis la seconde forme (même jour, 16 h 20), la ligne « Remplir », faite (✓),
+    // a disparu avec ce qui précédait. Break-test : le tiret rendu aux lignes
     // (`.parcours-bulle-ligne::before { content: '\2013' }`) → ROUGE ici. Rétabli → vert.
-    expect((await lire(page)).marques).toEqual(['fait:✓', 'explication:', 'explication:', 'explication:', 'explication:', 'explication:', 'geste:→']);
+    expect((await lire(page)).marques).toEqual(['explication:', 'explication:', 'explication:', 'explication:', 'explication:', 'geste:→']);
     expect((await page.inputValue('#v2-donneesCollees')).split('\n')).toHaveLength(10);
     await page.click('#accordeon-groupe-etudiants [data-action="previsualiserDonneesV2"]');
 

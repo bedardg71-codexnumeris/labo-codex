@@ -674,8 +674,9 @@
 
     /**
      * Une bulle en trois temps (la règle du 14 nov. 2026 ; les mots du 16). Avant : la seule consigne « Regarde
-     * l'exemple se remplir : touche « Remplir » », et son bouton, dans la bulle. Après : cette ligne, faite ; les
-     * lignes de `apres()`, qui expliquent ce qui vient d'apparaître ; puis la consigne de la page (`creer`).
+     * l'exemple se remplir : touche « Remplir » », et son bouton, dans la bulle. Après, la SECONDE FORME (18 nov. 2026,
+     * essai de Grégoire sur l'iPad) : ce qui précédait disparaît (`secondeForme`, lu par le moteur) ; les lignes de
+     * `apres()`, qui expliquent ce qui vient d'apparaître, puis la consigne de la page (`creer`).
      * `avantTout` : des notes, ou des lignes d'explication, gardées en tête dans les deux temps. `dAbord()` : les lignes d'un geste de la PAGE qui vient avant tout (ouvrir le
      * formulaire : « Touche « + Nouvelle production » ») ; tant qu'elle en rend, la bulle ne dit que cela, sans bouton.
      * `ensuite()` : de même, pour ce qui suit le bouton de la page (la cartouche créée, à choisir dans la production).
@@ -691,12 +692,13 @@
         var etats = function () {
             return {
                 avant: tete.concat([consigne(MOTS_MODELE.toucheRemplir)]),
-                apres: tete.concat([{ texte: MOTS_MODELE.toucheRemplir, fait: function () { return true; } }], o.apres(), [consigne(o.creer)])
+                apres: o.apres().concat([consigne(o.creer)])
             };
         };
         return {
             lignesVivantes: true,
             etats: etats,
+            secondeForme: function () { return !horsDesTroisTemps() && o.rempli(); },
             lignes: function () {
                 var autres = horsDesTroisTemps();
                 if (autres) return autres;

@@ -1,11 +1,45 @@
 # Rapport du lot — « Je regarde » de « Recevoir les productions, rendre tes rétroactions » (17 nov. 2026)
 
-**Dernier relais (18 nov. 2026, nuit)** : branche `claude/ecstatic-brown-urn6v8` (PR n° 28), avec `materiel/recevoir-dix-bulles`
-(`16044f3`) et `lot/perspective-coins` (`dd4bf10`, PR n° 29) fusionnées. **Fait** : la consigne
-`plans de travail/CONSIGNE-LOT-2026-11-17-recevoir-dix-bulles.md` en entier (A à E). **Reste** : la porte terrain
-(`plans de travail/PORTES-TERRAIN-2026-11-17-recevoir-dix-bulles.md`, Cowork la mène) ; le verdict WebKit à la fusion,
-sur le Mac ; **défaire le commit « BRANCHE SEULEMENT » (`4c36db4`) avant toute fusion**. Ni fusion, ni release, ni
-Nouvelles. Chromium seulement.
+**Dernier relais (18 nov. 2026, soir)** : branche `claude/ecstatic-brown-urn6v8` (PR n° 28), avec `materiel/recevoir-dix-bulles`
+(`16044f3`) et `lot/perspective-coins` (`23528f3`, PR n° 29) fusionnées. **Fait** : la consigne des dix bulles (A à E), les
+retours de l'essai (14 h 35, porte passée à 16 h 14, 10 sur 10) et le relais de 16 h 20 (ci-dessous). **Reste** : Grégoire
+regarde (a) et (b) sur l'aperçu n° 28 ; le verdict WebKit à la fusion, sur le Mac ; **défaire le commit « BRANCHE
+SEULEMENT » (`4c36db4`) avant toute fusion**. Ni fusion, ni release, ni Nouvelles. Chromium seulement.
+
+---
+
+## Relais de Cowork, 18 nov. 2026, 16 h 20
+
+- **1, la porte** : `PORTES-TERRAIN-2026-11-18-retours-essai-ipad.md` porte « passée le 18 nov. à 16 h 14, 10 sur 10 » ;
+  le geste 6 (les présences) est barré, retiré par Cowork par la règle 1 (le banc et son break-test y répondent).
+- **2a, la seconde forme après « Remplir »** : le moteur lit `secondeForme()` sur l'étape ; vrai, la bulle ne garde que son
+  titre et son compteur (ni objectif, ni confirmation, ni phrase du lieu). `troisTemps` (js/parcours-classe.js) le pose
+  après « Remplir » et ne rend plus que les lignes nouvelles, puis le geste. **Où** : « Mettre ta classe en place », modèle,
+  bulles 1 à 5 et 7 ; « Évaluer une première production », modèle, bulles 2, 3 et 8 (le même `troisTemps`). **Pas
+  touchées** : la bulle 1 d'« Évaluer » (son « Remplir » passe à l'étiquetage de la grille, une autre forme, à titre
+  changeant ; l'objectif y reste), et « Recevoir » (son « Remplir » fait passer à la bulle 2).
+  **Ce que j'ai supposé, à dire** : ce qui disparaît comprend aussi les lignes d'explication posées avant « Remplir »
+  (bulle 3 de « Mettre ta classe en place » : « L'aperçu montre les dix personnes… », « Il reste à dire dans quel cours… »)
+  et la ligne « Regarde l'exemple se remplir… », faite : le « ✓ » de l'exemple de 14 h 11 (bulle 2) n'y paraît donc plus.
+  La phrase de la poignée (bulle 1, sous le geste) reste. Banc : `remplirPuisVoir` (harnais commun aux deux modèles) juge
+  chaque bulle après « Remplir » ; break-test (`enSecondeForme` rendu faux) rouge à la bulle 1, rétabli vert.
+- **2b, la zone et le geste** : mesuré sur les dix bulles de « Recevoir » (flèches relevées aux deux orientations).
+  Une ligne qui décrit une zone reçoit `montre` (une flèche), la flèche du geste reste au contour, deux au plus.
+  **Ajoutées** : bulle 1, la zone de dépôt (« tu les déposes ici » ; le geste est dans la bulle) ; 2, le titre
+  « Aperçu » ; 4, la mention « Spécifique » ; 7, le titre de la palette « Annotation » (« prends l'outil « Texte » ») ; 8,
+  le titre de la palette « Évaluation » ; 9, le titre de la palette « Rétroaction ». **La supposition de Cowork** : la 8,
+  oui ; la 6, non (sa seule flèche va à l'engrenage, dans la barre même de la palette « Tampons »). **Sans ajout** : 3 (la
+  photo remplit le poste), 5 (la ligne visée est dans la liste décrite), 10 (rien de l'écran n'y est décrit).
+  **Limite, mesurée** : en portrait, la mention « Spécifique » (bulle 4) est sous l'écran à l'ouverture, et le moteur ne
+  trace pas de flèche vers ce qui n'y est pas (11 nov.) ; la page défilée, la bulle s'y pose une fois sur deux, faute de
+  place à côté du menu de la production. En paysage (l'iPad de Grégoire), les deux flèches. Banc (`laZoneEtLeGeste`) ;
+  break-tests : `montrer` neutralisé, rouge à la bulle 1 ; `nommeLeContour: false` ignoré, rouge à la bulle 7.
+- **3** : la ligne de doc retirée (`lot/perspective-coins`, `23528f3`, refusionné).
+- **Trouvé en chemin, dans mon banc du 17 nov. (corrigé, c'est le lot)** : le banc B rougissait une fois sur trois à
+  l'étape 3 → 4, déjà sur 1d6f408. « Confirmer les réglages spécifiques » traite la photo en pleine définition : 8 à 12 s
+  dans ce Chromium, au-delà des 10 s du banc. Rien de perdu ; le banc attend la fermeture du poste (45 s) et note la durée.
+  La mention de l'Aperçu est lue en attente. Les 8 à 12 s de « Traitement... » pour une photo, mesurés dans le nuage :
+  **non inscrits** (Grégoire ne les a pas vécus sur l'iPad, règle du 24 août) ; notés ici.
 
 ---
 

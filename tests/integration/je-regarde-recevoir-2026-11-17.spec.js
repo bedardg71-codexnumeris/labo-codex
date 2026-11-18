@@ -8,7 +8,7 @@ import {
     ouvrirEspaceVide, ouvrirPanneau, boutonModele, bulle, carte, enDemo, attendreEtape, contourSur,
     releve, ecarts, horsDeLaDemo, DE_LA_DEMO, DE_L_APPAREIL, peuplerUnTrimestreReel, faireLaModelisation, lireBulle, REMPLIR
 } from './harness/deux-temps-de-banc.js';
-import { flecheVers } from './harness/fleches-de-banc.js';
+import { flecheVers, nombreDeFleches, etatFleches } from './harness/fleches-de-banc.js';
 import { actionDeLaListe, valeursActions } from './harness/parcours-3-de-banc.js';
 import { faireLesDeuxModeles, releveDesBlobs, poserUnBlobReel } from './harness/recevoir-modele-de-banc.js';
 
@@ -31,6 +31,25 @@ import { faireLesDeuxModeles, releveDesBlobs, poserUnBlobReel } from './harness/
 const ORIENTATIONS = [[820, 1180], [1180, 820]];
 const TOTAL = 10;
 const etape = (page, n, titre) => attendreEtape(page, n, TOTAL, titre);
+/**
+ * LA ZONE ET LE GESTE (Grégoire, 18 nov. 2026, essai sur l'iPad ; tranché par Cowork) : la bulle qui décrit une zone de
+ * l'écran la montre d'une flèche ; la flèche du geste reste au contour ; au plus deux. Break-test : `montrer` qui rend
+ * la ligne telle quelle (js/parcours-recevoir-modele.js) → ROUGE à la bulle 1 (aucune flèche). Rétabli → vert.
+ */
+const laZoneEtLeGeste = async (page, n, zone, geste, combien = geste ? 2 : 1) => {
+    // La pointe touche la zone, ou s'arrête à quelques px d'elle : une grande zone que la bulle couvre en partie, faute
+    // de place (la zone de dépôt en portrait, bulle 1), reçoit la flèche dans sa part visible.
+    await expect.poll(async () => {
+        const e = await etatFleches(page);
+        const r = await page.evaluate((z) => { const x = document.querySelector(z); if (!x) return null; const b = x.getBoundingClientRect(); return { left: b.left, top: b.top, right: b.right, bottom: b.bottom }; }, zone);
+        if (!r || !e) return 'absente';
+        const d = (p) => Math.hypot(Math.max(r.left - p.x, 0, p.x - r.right), Math.max(r.top - p.y, 0, p.y - r.bottom));
+        return e.fleches.some((f) => d(f.pointe) <= 9) ? 'posée' : e.fleches.map((f) => Math.round(d(f.pointe))).join(', ');
+    }, { message: `bulle ${n} : une flèche va de la bulle à la zone décrite, ${zone}`, timeout: 5000 }).toBe('posée');
+    if (geste) await flecheVers(page, geste, `bulle ${n}, le geste`);
+    await nombreDeFleches(page, combien, `bulle ${n}`);
+};
+const TITRE_DE_PALETTE = (id) => `#${id} > .palette-flottante-barre .palette-flottante-titre`;
 const boutonDeBulle = (page, nom) => bulle(page).getByRole('button', { name: nom, exact: true });
 const T = (page) => page.evaluate(() => {
     const t = window.ParcoursRecevoirModele.textes;
@@ -115,6 +134,8 @@ for (const [L, H] of ORIENTATIONS) {
         await expect(bulle(page).locator('.parcours-bulle-lieu')).toHaveText(lieuDit('Préparer', t.etape1.lieuSuite));
         expect((await lireBulle(page)).consignes).toEqual([t.etape1.consignes[0]]);
         expect((await lireBulle(page)).boutons).toEqual([REMPLIR]);
+        // « tu les déposes ici » : la zone de dépôt ; le geste est dans la bulle (« Remplir »).
+        await laZoneEtLeGeste(page, 1, '#travaux-drop-zone', null);
         // Les sept évaluations sont posées dès le lancement (C les juge en détail).
         expect((await evaluationsDe(page, pid)).length).toBe(7);
         await boutonDeBulle(page, REMPLIR).click();
@@ -135,6 +156,7 @@ for (const [L, H] of ORIENTATIONS) {
         const loutre = await page.evaluate(() => travauxImport.obtenirFileDAttente().findIndex((f) => String(f.etudiantDA) === '9900002'));
         const ligne = (k) => `.pipeline-col-originaux .pipeline-fichier-ligne[data-param="${k}"]`;
         await contourSur(page, ligne(tapir));
+        await laZoneEtLeGeste(page, 2, '.pipeline-col-confirmes .pipeline-col-titre', ligne(tapir));
         // Une autre photo d'abord : la bulle le dit, et l'étape ne bouge pas, même le poste ouvert.
         await page.click(ligne(loutre));
         await expect(bulle(page)).toContainText(sansInsecable(t.etape2.autreCopie).slice(0, 40));
@@ -164,6 +186,10 @@ for (const [L, H] of ORIENTATIONS) {
         await contourSur(page, '#travaux-preparation-modal [data-action="travauxPreparation.activerPerspective"]');
         await page.click('#travaux-preparation-modal [data-action="travauxPreparation.activerPerspective"]');
         await contourSur(page, '#prep-btn-appliquer-persp');
+        // Les marques (18 nov.) : la ligne faite porte « ✓ » (la ligne « Remplir », qui la portait dans « Mettre ta classe
+        // en place », disparaît avec la seconde forme).
+        expect(await bulle(page).locator('.parcours-bulle-ligne.est-faite').evaluateAll((ls) => ls.map((l) => getComputedStyle(l, '::before').content)))
+            .toEqual(['"✓" / ""']);   // le « ✓ », et son texte de remplacement vide (le lecteur d'écran dit « (fait) »)
         // Les poignées sur les coins de la feuille (lot/perspective-coins), et la bulle ne couvre aucune d'elles.
         const poignees = await page.evaluate(() => {
             const c = document.getElementById('prep-canvas-apercu').getBoundingClientRect();
@@ -180,19 +206,33 @@ for (const [L, H] of ORIENTATIONS) {
         await expect.poll(async () => (await lireBulle(page)).consignes).toEqual(t.etape3.devient.consignes);
         await expect(bulle(page)).toContainText(sansInsecable(t.etape3.devient.lignes[0]).slice(0, 30));
         await contourSur(page, '#prep-btn-confirmer');
+        // « Confirmer les réglages spécifiques » traite la photo en pleine définition (sa barre « Traitement... ») : dans
+        // le Chromium du nuage, plus de 10 s une fois sur trois (mesuré le 18 nov. 2026 : l'étape 3 restait, le poste
+        // ouvert, sans que rien soit perdu). Le banc attend la fin du traitement, et en note la durée.
+        const debutTraitement = Date.now();
         await page.click('#prep-btn-confirmer');
+        await expect(page.locator('#travaux-preparation-modal')).toBeHidden({ timeout: 45000 });
+        test.info().annotations.push({ type: `traitement de la photo redressée, ${L} × ${H}`, description: Math.round((Date.now() - debutTraitement) / 100) / 10 + ' s (Chromium du nuage)' });
 
         // 4. Importe-les : la mention de l'Aperçu ; la production ; « Importer », « Oui, importer » ; la fin du traitement.
         await etape(page, 4, 'Importe-les');
         await expect(bulle(page).locator('.parcours-bulle-confirme')).toHaveText(t.etape4.confirme);
         expect(await page.evaluate(() => document.body.classList.contains('parcours-sur-modale'))).toBe(false);
         // Ce que l'Aperçu montre de la copie de Tapir (la bulle dit « Spécifique : Perspective ») : relevé pour le rapport.
-        const mention = await page.evaluate((k) => [...document.querySelectorAll('.pipeline-col-confirmes .pipeline-fichier-colonne')][k].querySelector('.pipeline-fichier-meta-col').innerText.replace(/\s+/g, ' ').trim(), tapir);
-        test.info().annotations.push({ type: 'mention de l’Aperçu (Tapir)', description: mention });
-        expect(mention).toMatch(/^Spécifique Perspective/);
+        // Lue en attente : l'Aperçu se redessine après la fermeture du poste (une lecture immédiate a vu, une fois sur
+        // une douzaine, la colonne d'avant).
+        const lireMention = () => page.evaluate((k) => [...document.querySelectorAll('.pipeline-col-confirmes .pipeline-fichier-colonne')][k].querySelector('.pipeline-fichier-meta-col').innerText.replace(/\s+/g, ' ').trim(), tapir);
+        await expect.poll(lireMention, { message: 'la mention de l’Aperçu (Tapir)', timeout: 5000 }).toMatch(/^Spécifique Perspective/);
+        test.info().annotations.push({ type: 'mention de l’Aperçu (Tapir)', description: await lireMention() });
         expect((await lireBulle(page)).consignes.map(sansInsecable)).toEqual([sansInsecable(t.etape4.choisir.replace('«TITRE»', titre)), t.etape4.importer]);
         await contourSur(page, '.pipeline-production-selecteur');
         await flecheVers(page, '.pipeline-production-selecteur', 'étape 4, la production');
+        // En portrait, les colonnes s'empilent : la mention est sous l'écran, et le moteur ne trace aucune flèche vers ce
+        // qui n'y est pas (règle du 11 nov. 2026) ; la page défilée, la bulle s'y pose souvent, faute de place à côté
+        // du menu de la production, qu'elle laisse libre (mesuré le 18 nov. 2026, une fois sur deux). En paysage (l'iPad
+        // de Grégoire), les deux flèches : la mention, le geste.
+        if (L < H) await nombreDeFleches(page, 1, 'bulle 4, en portrait : le geste seul, la mention sous l’écran');
+        else await laZoneEtLeGeste(page, 4, '.pipeline-col-confirmes .pipeline-badge-specifique', '.pipeline-production-selecteur');
         await page.selectOption('.pipeline-production-selecteur select', pid);
         await expect.poll(async () => (await lireBulle(page)).consignes).toEqual([t.etape4.importer]);
         await contourSur(page, '[data-action="travauxUI.appliquerEtImporter"]');
@@ -231,6 +271,7 @@ for (const [L, H] of ORIENTATIONS) {
         await etape(page, 7, 'Annoter');
         expect((await lireBulle(page)).consignes).toEqual(t.etape7.consignes);
         await contourSur(page, '#travaux-btn-actions');
+        await laZoneEtLeGeste(page, 7, TITRE_DE_PALETTE('travaux-palette-flottante'), '#travaux-btn-actions');
         await page.click('#travaux-btn-actions');
         await contourSur(page, '#travaux-btn-evaluer');
         await page.locator('[data-action="travauxUI.basculerMode"]', { hasText: 'Évaluer' }).first().click();
@@ -251,12 +292,15 @@ for (const [L, H] of ORIENTATIONS) {
                 return b.width > 0 && s.value === '' && Math.abs((a.left + a.right) / 2 - (b.left + b.right) / 2) < 3 && Math.abs((a.top + a.bottom) / 2 - (b.top + b.bottom) / 2) < 3;
             }) ? 'posé' : 'ailleurs';
         }), { message: 'étape 8 : la pulsation sur un critère à attribuer', timeout: 5000 }).toBe('posé');
+        // Le geste, le critère à attribuer, vient d'être jugé par sa pulsation (il change à chaque niveau choisi).
+        await laZoneEtLeGeste(page, 8, TITRE_DE_PALETTE('travaux-palette-eval-droite'), null, 2);
         for (const [k, id] of champs.entries()) await page.locator('#listeCriteresGrille1 #' + id).selectOption(['M', 'D', 'D', 'D'][k]);
 
         // 9. La rétroaction, le cadenas.
         await etape(page, 9, 'Ta rétroaction');
         expect((await lireBulle(page)).consignes).toEqual(t.etape9.consignes);
         await contourSur(page, '#btnVerrouillerEvaluation');
+        await laZoneEtLeGeste(page, 9, TITRE_DE_PALETTE('travaux-palette-eval-retro'), '#btnVerrouillerEvaluation');
         await page.click('#btnVerrouillerEvaluation');
 
         // 10. Rends tes rétroactions : la production, « Exporter pour Léa » ; huit PDF (mesure 3.6) ; puis la seconde

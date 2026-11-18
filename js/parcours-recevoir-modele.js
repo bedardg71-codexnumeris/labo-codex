@@ -448,7 +448,8 @@
         // Le lieu remonte la page en haut ; `amener` y ramène ce que l'étape désigne (le moteur, 16 nov. 2026).
         if (plus.lieu) e.amener = true;
         if (plus.avant) e.avant = plus.avant;
-        if (plus.nommeLeContour) e.nommeLeContour = true;
+        // `nommeLeContour` déclaré (vrai ou faux) remplace celui du parcours : faux, la ligne qui décrit une zone a sa flèche.
+        if (Object.prototype.hasOwnProperty.call(plus, 'nommeLeContour')) e.nommeLeContour = !!plus.nommeLeContour;
         if (plus.aussiEviter) e.aussiEviter = function () { return surLeDeuxiemeGroupe() ? plus.aussiEviter() : []; };
         if (plus.sansSortie) Object.defineProperty(e, 'sansSortie', { get: plus.sansSortie });
         e.lignesVivantes = true;
@@ -511,6 +512,28 @@
             return faites && faites[k] ? { texte: c, fait: function () { return true; } } : consigne(c);
         }));
     }
+
+    /**
+     * LA ZONE ET LE GESTE (Grégoire, 18 nov. 2026, essai sur l'iPad ; tranché par Cowork) : une bulle qui décrit une zone
+     * de l'écran la montre. La ligne qui la décrit reçoit `montre` : une flèche va de la bulle à la zone, la flèche du
+     * geste reste au contour. Au plus deux flèches : la zone, le geste. (Le précédent : la flèche vers le nom de la
+     * section avant « Remplir », 16 nov.)
+     * @param {Object[]} liste - les lignes de la bulle (`forme`)
+     * @param {string} texte - le texte de la ligne qui décrit la zone, tel que TEXTES le porte
+     * @param {() => Element} zone - la zone : son titre, quand c'est une palette ou une colonne
+     */
+    function montrer(liste, texte, zone) {
+        return liste.map(function (l) {
+            if (l.texte !== texte) return l;
+            return Object.assign({}, l, { montre: function () { var z = zone(); return z ? [z] : []; } });
+        });
+    }
+
+    function qsVisible(sel) { var e = document.querySelector(sel); return vis(e) ? e : null; }
+    function zoneDeDepot() { return qsVisible('#travaux-drop-zone'); }
+    function titreDeLApercu() { return qsVisible('.pipeline-col-confirmes .pipeline-col-titre'); }
+    function mentionSpecifique() { return qsVisible('.pipeline-col-confirmes .pipeline-badge-specifique'); }
+    function titreDePalette(id) { return function () { return qsVisible('#' + id + ' > .palette-flottante-barre .palette-flottante-titre'); }; }
 
     // ---------- Étapes 2 et 3 : la photo de Tapir Doux, choisie puis redressée ----------
 
@@ -603,14 +626,14 @@
             pourLeModele(B[0], {
                 lieu: true,
                 lieuSuite: T.etape1.lieuSuite,
-                lignes: function () { return forme(T.etape1); },
+                lignes: function () { return montrer(forme(T.etape1), T.etape1.lignes[0], zoneDeDepot); },
                 boutons: function () { return R().fileDAttente().length ? null : [{ libelle: C().mots.remplir, primaire: true, action: deposerLesCopies }]; },
                 // « Remplir » est dans la bulle : rien n'est désigné sur la page (la règle des modèles), la zone reste à voir.
                 contour: function () { return null; }
             }),
             pourLeModele(B[1], {
                 confirme: T.etape2.confirme,
-                lignes: function () { return forme(T.etape2); },
+                lignes: function () { return montrer(forme(T.etape2), T.etape2.lignes[1], titreDeLApercu); },
                 contour: function () {
                     var tapir = ligneDeLaPhotoARedresser();
                     return tapir && indexChoisi() === indexDeLaPhotoARedresser() ? engrenage() : tapir;
@@ -661,7 +684,8 @@
                 confirme: T.etape4.confirme,
                 lignes: function () {
                     var choisie = productionAImporterChoisie();
-                    return forme(T.etape4, [T.etape4.choisir(titreDeLaProduction()), T.etape4.importer], [choisie, false]);
+                    return montrer(forme(T.etape4, [T.etape4.choisir(titreDeLaProduction()), T.etape4.importer], [choisie, false]),
+                        T.etape4.lignes[0], mentionSpecifique);
                 },
                 contour: function () { return productionAImporterChoisie() ? B[1].contour() : document.querySelector('.pipeline-production-selecteur'); },
                 // Le parcours avance au premier fichier importé ; le modèle attend la fin de l'import (mesuré le 17 nov.
@@ -710,11 +734,12 @@
             }),
             pourLeModele(B[4], {
                 confirme: T.etape7.confirme,
-                lignes: function () { return forme(T.etape7); }
+                lignes: function () { return montrer(forme(T.etape7), T.etape7.lignes[1], titreDePalette('travaux-palette-flottante')); },
+                nommeLeContour: false
             }),
             pourLeModele(B[5], {
                 confirme: T.etape8.confirme,
-                lignes: function () { return forme(T.etape8); },
+                lignes: function () { return montrer(forme(T.etape8), T.etape8.lignes[0], titreDePalette('travaux-palette-eval-droite')); },
                 avant: function () { passagesTenus = 0; return B[5].avant(); },
                 // Plus ferme que le parcours (trois passages, 360 ms) : au passage en mode Évaluer, l'évaluation de la
                 // copie ouverte garde un temps les niveaux de la dernière ouverte, celle de Yack Amical dans ce modèle
@@ -729,7 +754,8 @@
             }),
             pourLeModele(B[6], {
                 confirme: T.etape9.confirme,
-                lignes: function () { return forme(T.etape9); }
+                lignes: function () { return montrer(forme(T.etape9), T.etape9.lignes[0], titreDePalette('travaux-palette-eval-retro')); },
+                nommeLeContour: false
             }),
             pourLeModele(B[7], {
                 lieu: function () { return !exportFait; },
