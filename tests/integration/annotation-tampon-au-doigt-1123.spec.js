@@ -122,6 +122,22 @@ test.describe('#1123 · un code ou un tampon se pose au doigt', () => {
         expect(suivi.dialogues).toEqual([]);
     });
 
+    // 18 nov. 2026 (lot/perspective-coins, vécu par Grégoire sur l'iPad) : l'outil « Texte » au doigt. Un toucher bref ouvre
+    // la zone de texte ; un doigt qui glisse ne l'ouvre pas (il fait défiler la page, comme avant).
+    // Break-test (18 nov. 2026) : `estOutilDunToucher` sans « texte » → ROUGE ici (aucune zone ouverte). Rétabli → vert.
+    test('un toucher du doigt ouvre une zone de texte ; un doigt qui glisse ne l’ouvre pas', async ({ page }) => {
+        await ouvrir(page);
+        await page.evaluate(() => window.travauxOutils.setOutilActif('texte'));
+        await geste(page, glisse);
+        expect(await page.locator('#travaux-texte-inline').count(), 'un glissé n’ouvre rien').toBe(0);
+        await geste(page, tap('touch'));
+        await expect(page.locator('#travaux-texte-inline')).toHaveCount(1);
+        // Le tracé garde son rejet de paume : avec le stylo, le doigt ne trace rien.
+        await page.evaluate(() => { const t = document.getElementById('travaux-texte-inline'); if (t) t.remove(); window.travauxOutils.setOutilActif('stylo'); });
+        await geste(page, tap('touch'));
+        expect((await compte(page)).strokes).toBe(0);
+    });
+
     test('un toucher pose un tampon (autocollant)', async ({ page }) => {
         await ouvrir(page);
         await choisirAuto(page);
