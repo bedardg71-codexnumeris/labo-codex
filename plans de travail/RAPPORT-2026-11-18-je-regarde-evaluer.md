@@ -30,7 +30,7 @@ fusion, sur le Mac ; **défaire le commit « BRANCHE SEULEMENT » (`4c36db4`) av
   main) ; sentinelle `tests/unit/sentinelle-je-regarde-evaluer-2026-11-18.test.js`, qui remplace celle du 13 nov. ; le
   banc B de `deux-temps-modeles-2026-11-13.spec.js` (l'ancien ordre) retiré ; le harnais de « Recevoir » joue les dix
   étapes. Porte terrain en markdown.
-- **G.** Ce rapport. #1286 inscrit au backlog (la mise en forme de la grille d'autoévaluation dans le PDF).
+- **G.** Ce rapport. #1287 inscrit au backlog (la mise en forme de la grille d'autoévaluation dans le PDF).
 
 ## 2. Ce qui est mesuré (Chromium du nuage, 18 nov. 2026)
 
@@ -106,7 +106,7 @@ fusion, sur le Mac ; **défaire le commit « BRANCHE SEULEMENT » (`4c36db4`) av
    texte « Deux-Rives » » depuis le 15 nov. — **Inscrire et continuer**, sous forme de décision à Grégoire (porte,
    Décision 2) : ce sont ses mots, posés tels quels ; la sentinelle du 12 nov. qui l'interdisait dans le matériel l'exclut
    de sa mesure, et le dit.
-2. **La mise en forme de la grille d'autoévaluation dans le PDF** — **Inscrire et continuer** : #1286 (consigne, C.5).
+2. **La mise en forme de la grille d'autoévaluation dans le PDF** — **Inscrire et continuer** : #1287 (consigne, C.5 ; d'abord inscrit en #1286, déjà pris sur `claude/ecstatic-brown-urn6v8`).
 3. **À 1180 × 820, la bulle 3 couvrait « Adopter »** (le geste du banc ne passait plus) — **Corriger maintenant** (mon
    lot) : la bulle n'évite plus que la ligne de l'échelle et « Adopter » ; reste qu'elle mord sur le début des lignes
    d'échelle (porte 2.2).
@@ -130,3 +130,22 @@ fusion, sur le Mac ; **défaire le commit « BRANCHE SEULEMENT » (`4c36db4`) av
 - **Les 24 bancs de l'étiquetage** de « Mon matériel » : verts, sauf les deux rouges de la base (§6.5). (Une première
   passe, lancée pendant que je modifiais encore des fichiers, en avait rougi d'autres : rejoués sur l'arbre final, verts.)
 - **Vitest** : 11 896 essais, verts au hook du push (après la correction des deux découpes, #858).
+
+---
+
+## 8. Relais du 18 nov. 2026, soir : trois retouches avant la porte
+
+1. **Fusion** de `origin/claude/ecstatic-brown-urn6v8` (`1d6f408b`) dans `lot/je-regarde-evaluer` (commit `63b8527`). Deux
+   conflits, tranchés : `index.html` (les jetons : `parcours-classe.js?v=20261117r` de la base, `parcours-evaluer.js?v=20261117c`
+   du lot) ; `BACKLOG.md` (les deux entrées gardées). Les dix bulles d'« Évaluer » prennent la forme du moteur (la
+   confirmation au-dessus du titre, « → » et « ✓ ») sans un mot de changé : la sentinelle de la section D reste verte.
+   Une retouche au banc : la confirmation a maintenant sa place même vide (cachée) ; le banc lit ses textes non vides.
+2. **#1286 → #1287** : la grille d'autoévaluation dans le PDF des consignes (#1286 est l'Aperçu de l'import, sur la base).
+   « Dernier ID utilisé » à #1287 ; renvois corrigés dans ce rapport. Aucune issue GitHub ne portait le numéro (je n'en ai
+   pas créé).
+3. **Bancs rejoués après la fusion** (Chromium) : le banc du lot, 3 sur 3 ; le panneau et les deux temps
+   (`deux-temps-modelisation-2026-11-12`, `deux-temps-modeles-2026-11-13`), verts ; « Recevoir » : A vert, B et C **rouges
+   une fois chacun au premier passage, verts aux passages suivants** (B : la bulle 4, « Importe-les », couvrait un peu plus
+   que le moindre recouvrement ; C : le menu « Consulter » de Caribou Attentionné pas encore là). Intermittents, dans des
+   étapes que ce lot ne touche pas ; non mesuré sur la base. **Inscrire et continuer** n'est pas dû (non vécu) : dit ici.
+   La porte : les attendus 1.1 à 1.3 suivent la forme du 18 nov. ; aucun geste ne change.

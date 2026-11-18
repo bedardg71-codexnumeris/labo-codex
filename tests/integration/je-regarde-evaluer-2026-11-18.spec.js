@@ -31,7 +31,8 @@ async function consignes(page, attendues, contexte) {
         .toEqual(attendues.map(aPlat));
 }
 async function confirme(page, attendu, contexte) {
-    await expect.poll(() => texteDe(page, '.parcours-bulle-confirme'), { message: contexte + ' : la confirmation', timeout: 10000 })
+    // Depuis le 18 nov. 2026, la confirmation a sa place au-dessus du titre, vide et cachée quand l'étape n'en a pas.
+    await expect.poll(() => texteDe(page, '.parcours-bulle-confirme').then((l) => l.filter(Boolean)), { message: contexte + ' : la confirmation', timeout: 10000 })
         .toEqual(attendu ? [aPlat(attendu)] : []);
 }
 async function lieu(page, section, onglet, suite, contexte) {

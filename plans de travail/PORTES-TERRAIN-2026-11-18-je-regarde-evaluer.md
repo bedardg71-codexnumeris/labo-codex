@@ -25,9 +25,9 @@
 
 | | Geste | Attendu |
 |---|---|---|
-| **1.1** | iPad **debout**. Touche « Voir le parcours suivant », puis joue les dix bulles jusqu'au bout, en suivant chaque ligne orange. | Le compteur dit « N sur 10 ». Chaque bulle se lit en entier et ne cache pas ce qu'elle te fait toucher. Note le numéro de toute bulle qui gêne. |
-| **1.2** | Bulle 7, fiche ouverte : touche le menu « Type ». | Le menu s'ouvre ; la ligne « Ouvre le menu « Type » et parcours-le » se grise d'un crochet et « C'est ça : de l'examen au stage… » paraît ; « Remplir » arrive dans la bulle. |
-| **1.3** | Bulle 5 : étiquette « Structure » au doigt, une étiquette à la fois, comme la bulle le dit. | Chaque geste fait se grise d'un crochet, suivi de sa phrase « C'est ça : … ». |
+| **1.1** | iPad **debout**. Touche « Voir le parcours suivant », puis joue les dix bulles jusqu'au bout, en suivant chaque « → » orange. | Les bulles ont la forme du 18 nov. : « ✓ C'est fait : … » en petit, en vert, au-dessus du titre ; les explications sans tiret. Le compteur dit « N sur 10 ». Chaque bulle se lit en entier et ne cache pas ce qu'elle te fait toucher. Note le numéro de toute bulle qui gêne. |
+| **1.2** | Bulle 7, fiche ouverte : touche le menu « Type ». | Le menu s'ouvre ; la ligne « Ouvre le menu « Type » et parcours-le » passe de « → » orange à « ✓ », et « C'est ça : de l'examen au stage… » paraît ; « Remplir » arrive dans la bulle. |
+| **1.3** | Bulle 5 : étiquette « Structure » au doigt, une étiquette à la fois, comme la bulle le dit. | Chaque geste fait passe de « → » orange à « ✓ », suivi de sa phrase « C'est ça : … ». |
 
 ## §2 · Couché
 
