@@ -46,8 +46,8 @@ fusion, sur le Mac ; **défaire le commit « BRANCHE SEULEMENT » (`4c36db4`) av
   change ; « Remettre la démo à neuf » rend la démo du pack. Vert, trois essais sur trois.
 - **Break-tests** (chacun rouge, puis rétabli, vert) : écriture forcée de la grille sous la clé nue → rouge au
   confinement ; `tenuePourNiveaux` à false → rouge à « grille en niveaux » ; l'attente de « Créer ma grille » vidée →
-  rouge à l'essai C ; un mot changé dans la bulle 3 → la sentinelle rouge dans les deux sens. Celui du PDF est écrit au
-  banc : voir §4.
+  rouge à l'essai C ; un mot changé dans la bulle 3 → la sentinelle rouge dans les deux sens ; les blocs libres retirés de
+  `blocsInformationDocument` (js/export-pdf.js) → rouge au contrôle du PDF.
 - **Bancs rejoués** : « Recevoir » (A, B aux deux orientations, C), les deux temps (A, « Le refaire avec ma classe »),
   la Modélisation de la classe, et les 24 bancs qui touchent l'étiquetage de « Mon matériel ». Résultat : §6.
 - **Vitest** : la suite complète ; voir §6.
@@ -81,8 +81,7 @@ fusion, sur le Mac ; **défaire le commit « BRANCHE SEULEMENT » (`4c36db4`) av
 ## 4. Ce qui n'est pas vérifié
 
 - **Safari, l'iPad** : rien. Portes 1.1 à 2.2.
-- **Le PDF imprimé** : le banc juge les blocs que le PDF reçoit, pas la page. Le break-test annoncé au banc pour ce
-  contrôle (les blocs libres retirés de `blocsInformationDocument`) : voir §6.
+- **Le PDF imprimé** : le banc juge les blocs que le PDF reçoit, pas la page.
 - **Bulle 3 couché (1180 × 820)** : la bulle, l'assistant et la question de l'échelle ne tiennent pas ensemble ; sous
   Chromium, elle se pose à gauche et mord sur le début des lignes d'échelle (« IDME et niv 0 » reste touchable). Porte 2.2.
 
@@ -114,4 +113,20 @@ fusion, sur le Mac ; **défaire le commit « BRANCHE SEULEMENT » (`4c36db4`) av
 4. **#1285 (la Modélisation de la classe sous Chromium en paysage)** : toujours là ; les bancs jouent ce préalable en
    portrait, comme ceux de « Recevoir ». **Déjà inscrit.**
 
-**Résultat des bancs rejoués et de Vitest** : complété au commit de clôture (ci-dessous).
+5. **Trois bancs rouges SUR LA BASE du lot** (`76192ab`, rejoués dans un arbre à part sous Chromium, rouges de même) :
+   `bulle-largeur-ipad-2026-11-12` (L2 à 1180 × 820, « zoom » de null), `deux-temps-modelisation-2026-11-12` (le panneau :
+   la liste des parcours à deux temps compte maintenant « recevoir », que le banc ne connaît pas), `essai-novice-lot4-
+   etiquetage-2026-11-14` (la bulle couvre 29 % de la zone de collage, pour moins de 25 %). Hors du lot, non vécus, et ni
+   l'un ni l'autre ne bloque ce lot : **dits ici, sans inscription** (la règle du 24 août) ; le verdict WebKit du Mac dira
+   s'ils sont propres à Chromium.
+
+## 7. Résultats
+
+- **Banc du lot** (`je-regarde-evaluer-2026-11-18.spec.js`) : 3 sur 3, Chromium.
+- **« Recevoir »** (`je-regarde-recevoir-2026-11-17.spec.js`) : 4 sur 4 (A ; B debout et couché ; C).
+- **Les deux temps** (`deux-temps-modeles-2026-11-13.spec.js`, sans son ancien B) et la Modélisation de la classe
+  (`deux-temps-modelisation-2026-11-12.spec.js`, son attente passée à « 1 sur 10 ») : verts, sauf le rouge de la base
+  (§6.5).
+- **Les 24 bancs de l'étiquetage** de « Mon matériel » : verts, sauf les deux rouges de la base (§6.5). (Une première
+  passe, lancée pendant que je modifiais encore des fichiers, en avait rougi d'autres : rejoués sur l'arbre final, verts.)
+- **Vitest** : 11 896 essais, verts au hook du push (après la correction des deux découpes, #858).

@@ -195,7 +195,8 @@ test('la modélisation de « Mettre ta classe en place », de bout en bout dans 
 
     // « Voir le parcours suivant » : le modèle d'« Évaluer », dans la démo.
     await boutons.nth(1).click();
-    await expect(bulle(page).locator('.parcours-bulle-rang')).toHaveText('1 sur 9', { timeout: 10000 });
+    // Dix étapes depuis le 18 nov. 2026 (le « Je regarde » d'« Évaluer », refait dans l'ordre du 15 nov.).
+    await expect(bulle(page).locator('.parcours-bulle-rang')).toHaveText('1 sur 10', { timeout: 10000 });
     expect(await enDemo(page)).toBe(true);
     expect(await page.evaluate(() => Assistance.etatModeleDe('classe').etat)).toBe('fait');
     expect(await page.evaluate(() => Assistance.etatModeleDe('evaluer'))).toEqual({ etat: 'en-cours', etape: 0 });

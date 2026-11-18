@@ -39,8 +39,10 @@ async function lieu(page, section, onglet, suite, contexte) {
     await expect.poll(() => texteDe(page, '.parcours-bulle-lieu'), { message: contexte + ' : le lieu', timeout: 10000 }).toEqual([aPlat(dit)]);
 }
 async function lignesContiennent(page, textes, contexte) {
-    const lues = await texteDe(page, '.parcours-bulle-ligne-texte, .parcours-bulle-note');
-    for (const t of textes) expect(lues, contexte).toContain(aPlat(t));
+    // La bulle se récrit au passage suivant de la sonde : relue jusqu'à ce qu'elle dise tout.
+    for (const t of textes) {
+        await expect.poll(() => texteDe(page, '.parcours-bulle-ligne-texte, .parcours-bulle-note'), { message: contexte, timeout: 10000 }).toContain(aPlat(t));
+    }
 }
 /** Les lignes faites (grisées d'un crochet). */
 const faites = (page) => lireBulle(page).then((b) => b.faites.map(aPlat));
