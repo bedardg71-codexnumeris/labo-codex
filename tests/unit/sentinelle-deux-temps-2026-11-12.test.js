@@ -196,7 +196,7 @@ describe('les mots de main valent dans les modèles (15 nov. 2026)', () => {
     const EVALUER = lire('js/parcours-evaluer.js');
     const MODELES = [
         ['« Mettre ta classe en place »', tranche(CLASSE, 'var MOTS_MODELE = {', 'var DEF_MODELE')],
-        ['« Évaluer une première production »', tranche(EVALUER, 'var MOTS_M = {', 'function premiereNonFaiteModele')]
+        ['« Évaluer une première production »', tranche(EVALUER, 'var TEXTES = {', 'function premiereNonFaiteModele')]
     ];
     // Les chaînes du code, sans ses commentaires : ce que la bulle peut dire.
     const chaines = (bloc) => [...bloc.replace(/\/\/.*$/gm, '').matchAll(/"((?:[^"\\]|\\.)*)"/g)].map((m) => m[1]);
@@ -228,7 +228,10 @@ describe('les mots de main valent dans les modèles (15 nov. 2026)', () => {
         expect(EVALUER).toContain("description: 'Appliquer des stratégies de lecture variées (Deux-Rives)'");
         expect(EVALUER).toContain('tache: "Annoter le texte «\\u00a0Deux-Rives\\u00a0» en y appliquant');
         const materiel = tranche(EVALUER, 'var MATERIEL = Object.freeze({', 'function tableauDeLaGrille');
-        expect(materiel.replace(/\/\/.*$/gm, '')).not.toMatch(/Madawigouche|Rivières-aux-Cartouches|refonte A26|le chapitre/);
+        // La grille d'autoévaluation de Grégoire (18 nov. 2026) dit « le chapitre » : ce sont ses mots, tels quels (consigne
+        // du lot, E) ; la décision du 15 nov. visait la tâche. Elle est retirée de la mesure, et signalée au rapport du lot.
+        const sansAutoevaluation = materiel.replace(tranche(materiel, 'autoevaluation:', 'niveaux: Object.freeze'), '');
+        expect(sansAutoevaluation.replace(/\/\/.*$/gm, '')).not.toMatch(/Madawigouche|Rivières-aux-Cartouches|refonte A26|le chapitre/);
         expect(materiel).toContain("echeance: '2025-09-09'");
         expect(new Date(2025, 8, 9).getDay()).toBe(2);
     });
@@ -245,9 +248,11 @@ describe('la règle de la Modélisation (14 nov. 2026)', () => {
 
     it('le bouton de la bulle passe toujours par cette garde, dans les deux modèles', () => {
         expect(tranche(CLASSE, 'function troisTemps(o) {', 'function etapeEnTroisTemps')).toContain('action: function () { remplir(o.gestes); }');
-        expect(EVALUER).toContain('action: function () { C().remplir(ouvrirLaGrilleDeLExemple); }');
+        // Le modèle d'« Évaluer », refait le 18 nov. 2026 : ses « Remplir » passent tous par un seul outil, qui appelle la garde.
+        expect(EVALUER).toContain("var remplir = function (gestes) { return [{ libelle: C().mots.remplir, primaire: true, action: function () { C().remplir(gestes); } }]; };");
+        expect(EVALUER).toContain('return remplir(ouvrirLaGrilleDeLExemple);');
         // Aucun modèle n'écrit dans un champ sans passer par les outils communs.
-        expect(tranche(EVALUER, 'function remplirLaProduction() {', '// ---------- Les textes du modèle').match(/C\(\)\.(poser|choisir)\(/g).length).toBeGreaterThanOrEqual(12);
+        expect(tranche(EVALUER, 'async function remplirLaProduction() {', '// ---------- Étape 10').match(/C\(\)\.(poser|choisir)\(/g).length).toBeGreaterThanOrEqual(12);
     });
 
     it('un modèle ne se joue jamais en visite : ni `visite`, ni `acquis` à son lancement', () => {
@@ -279,6 +284,7 @@ describe('la règle de la Modélisation (14 nov. 2026)', () => {
         expect(suites).toContain('if (suivant) suites.push(');
         // « Mettre ta classe en place » (16 nov. 2026) : sa dernière bulle rappelle l'objectif, sans ligne de consigne.
         expect(CLASSE).toContain('get boutons() { return suitesDuModele(ID, terminerModele); }');
-        expect(EVALUER).toContain('consigne(C().consigneDesSuites(C().suitesDuModele(ID, terminerModele)))');
+        // « Évaluer » (18 nov. 2026) : de même, sa dernière bulle n'a pas de ligne de consigne.
+        expect(EVALUER).toContain('boutons: function () { return C().suitesDuModele(ID, terminerModele); },');
     });
 });

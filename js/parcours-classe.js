@@ -911,16 +911,27 @@
         });
     }
 
-    /** La séance choisie, la page redessine sa saisie ; les trois présences sont notées quand ses cases sont là. */
-    async function remplirLesPresences() {
+    /**
+     * La première séance du groupe, posée à l'ouverture de l'étape (Grégoire, essai du 18 nov. 2026 sur l'iPad) : avant
+     * « Remplir », la saisie montrait une date hors de l'horaire du groupe, « 0 pér. », et chaque ligne « 0 /0 » en rouge,
+     * qui se lit « tout le monde absent », alors que la bulle dit « tout le monde est présent par défaut ».
+     * @returns {Promise<string|null>} la date posée
+     */
+    async function choisirLaPremiereSeance() {
         var date = premiereSeance();
-        if (!date) return;
-        poser(champDate(), date);
+        if (!date || !enDemo()) return null;
+        if (!vaut('date-cours', date)) poser(champDate(), date);
         await attendre(function () {
             var c = casePresence(MATERIEL.presences.retard);
             return !!c && c.getAttribute('data-date-str') === date && !c.disabled;
         }, 2000);
-        if (!enDemo()) return;
+        return date;
+    }
+
+    /** La séance est déjà choisie (l'ouverture de l'étape) ; « Remplir » ne note que les deux absences et le retard. */
+    async function remplirLesPresences() {
+        var date = await choisirLaPremiereSeance();
+        if (!date || !enDemo()) return;
         presencesDeLExemple().forEach(function (x) { poser(casePresence(x[0]), String(x[1])); });
         amenerLesCasesDeLExemple();
     }
@@ -1172,6 +1183,8 @@
                 aller('suivi', 'saisie');
                 await attendre(function () { return sousSectionVisible('suivi-saisie'); }, 2000);
                 await attendre(function () { var c = champDate(); return !!(c && c.value); }, 1500);
+                // La première séance du groupe, tout le monde présent (18 nov. 2026) : « Remplir » ne note que les exceptions.
+                await choisirLaPremiereSeance();
                 await attendre(function () { return M().visible(boutonVerrou()); }, 1500);
             },
             // Les noms de la saisie : la bulle les évite, sans flèche (il faut les voir pour lire les présences).

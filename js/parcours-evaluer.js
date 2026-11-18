@@ -429,13 +429,23 @@
     function ecranEvaluationVisible() { return vis(el('evaluations-contenu-evaluation')); }
 
     function evaluationVerrouillee() {
-        var pid = lireCtx().productionId;
+        var pid = lireCtx().productionId, da = daDeLaLigne();
         var e = evaluations().find(function (x) {
-            return x && x.productionId === pid && x.verrouillee === true && !x.remplaceeParId;
+            return x && x.productionId === pid && x.verrouillee === true && !x.remplaceeParId && (!da || String(x.etudiantDA) === da);
         });
         if (e && !lireCtx().evaluationId) majCtx({ evaluationId: e.id, evaluationDA: e.etudiantDA });
         return !!e;
     }
+
+    /**
+     * L'étudiant·e que l'étape 4 désigne : dans le modèle, toujours celle du matériel (Grégoire, 17 nov. 2026 : la
+     * première ligne de la Liste suivait son tri, et un tri par prénom désignait Antilope Vaillante, l'une des trois
+     * copies du modèle de « Recevoir ») ; dans le parcours, la première ligne (rien de désigné : `undefined`).
+     */
+    function daDeLaLigne() { return enModele ? MATERIEL.etudiantEvalue.da : undefined; }
+
+    /** La ligne de l'étape 4 : celle de la production, et dans le modèle, celle de l'étudiant·e du matériel. */
+    function ligneAEvaluer() { return ligneDeLaListe(lireCtx().productionId, daDeLaLigne()); }
 
     /** La ligne de la Liste qui porte cette production (et cet·te étudiant·e, si donné·e). */
     function ligneDeLaListe(productionId, da) {
@@ -825,16 +835,16 @@
             avant: async function () {
                 if (ecranEvaluationVisible()) return;
                 aller('evaluations', 'liste');
-                await attendre(function () { return !!ligneDeLaListe(lireCtx().productionId); }, 3000);
-                amenerDeCote(ligneDeLaListe(lireCtx().productionId));
+                await attendre(function () { return !!ligneAEvaluer(); }, 3000);
+                amenerDeCote(ligneAEvaluer());
             },
             zones: function () {
                 if (ecranEvaluationVisible()) return surLaCible(ouToucherEnEvaluant());
-                return [rangeeDe(ligneDeLaListe(lireCtx().productionId))];
+                return [rangeeDe(ligneAEvaluer())];
             },
             contour: function () {
                 if (ecranEvaluationVisible()) return ouToucherEnEvaluant();
-                return ligneDeLaListe(lireCtx().productionId);
+                return ligneAEvaluer();
             },
             // « Actions › Évaluer », un niveau par critère, « Verrouiller » : la bulle nomme ce qu'il faut toucher, la
             // flèche y va (11 nov. 2026, 9 h 35, capture 17 : elle montait à la cellule « Niveau » de la rangée).
@@ -1036,32 +1046,37 @@
 
 
     // =================================================================
-    // LE MODÈLE (13 nov. 2026 ; règle du 14 nov.) : le même parcours, dans la démo, sur le deuxième groupe
+    // LE MODÈLE (« Je regarde ») : refait le 18 nov. 2026, dans l'ordre décidé par Grégoire le 15 nov.
     // =================================================================
-    // Consignes : `plans de travail/CONSIGNE-LOT-2026-11-13-deux-temps-modeles.md`, puis
-    // `plans de travail/CONSIGNE-2026-11-15-deux-temps-remise-a-jour.md`. Les étapes sont celles du parcours
-    // (`ETAPES`) : chacune est reprise telle quelle (ses zones, son halo, ce qui la fait avancer). LA RÈGLE (Grégoire,
-    // 14 nov. 2026, 12 h 08) : une bulle qui porte un formulaire va en trois temps — « Remplir avec l'exemple », dans la
-    // bulle ; ce qui vient d'apparaître, expliqué ; puis le bouton de la PAGE, que la personne touche elle-même
-    // (js/parcours-classe.js, `troisTemps`). L'étiquetage de la grille, l'évaluation, la pratique et le mot restent
-    // les gestes de la personne (Grégoire, 14 nov., 11 h 47 : « l'application ne devine rien »).
+    // Consigne : `plans de travail/CONSIGNE-LOT-2026-11-18-je-regarde-evaluer.md` (A à G). Dix étapes, une bulle par
+    // écran : la pratique de notation, son modèle, son échelle, son application au cours, la grille, la cartouche, la
+    // production, ses consignes, l'évaluation de Yack Amical, le point qui s'allume. Le modèle se joue dans la démo, sur
+    // le deuxième groupe ; la personne fait chaque geste dans les vrais écrans ; « Remplir » pose le matériel fourni.
+    // Les étapes sont PROPRES au modèle : elles ne reprennent plus celles de la Pratique guidée (`ETAPES`, inchangées),
+    // seulement ses outils (ce qui lit la démo, l'assistant, la Liste). Retirés avec l'ancien ordre : le détour par
+    // « Holistique », les bulles « Pourquoi étiqueter », « Tu apprends aussi », « Ta grille est créée », le retour en
+    // arrière pour choisir la cartouche.
+    // CE QUE LE MODÈLE PRODUIT NE CHANGE PAS (consigne, B) : le modèle de « Recevoir » le lit
+    // (js/parcours-recevoir-modele.js) : la grille par son nom, la production qui la porte avec son échelle et sa
+    // cartouche, l'évaluation de Yack Amical, la pratique appliquée au cours du deuxième groupe.
 
     /*
-     * LE MATÉRIEL DE L'EXEMPLE : celui de Grégoire, tiré de son cours 601-101. Sa grille « G4H Sans français », son
-     * Artefact 1, les niveaux qu'il impose (12 nov., 19 h 51), ses vingt commentaires, son mot. Retouches décidées :
-     * « Deux-Rives », le texte créé pour l'exercice, remplace « Madawigouche » (Grégoire, 15 nov. 2026, 10 h 02) ; la
-     * tâche ne dit donc plus « le chapitre … de Rivières-aux-Cartouches » ; l'échéance est le mardi 9 septembre 2025,
-     * en semaine 4 de la démo (tout le matériel se cale sur son automne 2025 : décision de Cowork).
+     * LE MATÉRIEL DE L'EXEMPLE : celui de Grégoire, tiré de son cours 601-101. La grille s'appelle « Grille générale à
+     * 4 critères » depuis le 18 nov. 2026 (« G4H Sans français » avant) ; sa description et ses quatre critères ne
+     * changent pas. Les vingt commentaires et la grille d'autoévaluation sont ses fichiers du 18 nov., tels quels
+     * (`plans de travail/materiel-evaluer/`) : tests/unit/sentinelle-je-regarde-evaluer-2026-11-18.test.js les confronte.
+     * « Deux-Rives », le texte créé pour l'exercice (15 nov.) ; l'échéance, le mardi 9 septembre 2025, une séance du
+     * deuxième groupe (la page la dit « 2e séance de la semaine 3 »).
      */
     var MATERIEL = Object.freeze({
         grille: Object.freeze({
-            nom: 'G4H Sans français',
+            nom: 'Grille générale à 4 critères',
             description: 'Grille à 4 critères | sans français écrit',
             criteres: Object.freeze([
-                ['Structure', "Établir et rendre lisibles les relations entre les éléments de son travail : pour chaque élément, on peut dire de quoi il dépend et ce qu'il sert.", '20 %'],
-                ['Rigueur', "Rendre compte avec exactitude de ce que dit le texte : relever les éléments importants sans en omettre, les nommer avec le terme juste, et expliquer ce qu'on avance sans laisser le lecteur deviner.", '30 %'],
-                ['Plausibilité', "Fonder son interprétation sur le texte : chaque idée avancée s'appuie sur des éléments précis du texte, et chaque élément retenu sert une idée.", '15 %'],
-                ['Nuance', "Interpréter au lieu de s'en tenir à la lecture évidente : dire ce qu'un élément révèle, ce que le rapprochement de deux éléments fait voir (une nuance, une tension, une contradiction qu'on explique), et ce que l'analyse permet de conclure.", '35 %']
+                ['Structure', "Établir et rendre lisibles les relations entre les éléments de son travail : pour chaque élément, on peut dire de quoi il dépend et ce qu'il sert.", '20\u00a0%'],
+                ['Rigueur', "Rendre compte avec exactitude de ce que dit le texte : relever les éléments importants sans en omettre, les nommer avec le terme juste, et expliquer ce qu'on avance sans laisser le lecteur deviner.", '30\u00a0%'],
+                ['Plausibilité', "Fonder son interprétation sur le texte : chaque idée avancée s'appuie sur des éléments précis du texte, et chaque élément retenu sert une idée.", '15\u00a0%'],
+                ['Nuance', "Interpréter au lieu de s'en tenir à la lecture évidente : dire ce qu'un élément révèle, ce que le rapprochement de deux éléments fait voir (une nuance, une tension, une contradiction qu'on explique), et ce que l'analyse permet de conclure.", '35\u00a0%']
             ])
         }),
         production: Object.freeze({
@@ -1072,39 +1087,79 @@
             objectif: "Développer ta capacité à choisir les stratégies de lecture qu'appelle un texte donné, plutôt que de les appliquer au hasard.",
             tache: "Annoter le texte «\u00a0Deux-Rives\u00a0» en y appliquant au moins trois stratégies de lecture, puis formuler une première hypothèse d'objectif de communication.",
             detailTache: "Une stratégie de lecture te fait regarder le texte sous un angle précis. En en appliquant plusieurs, tu vois des choses qu'une simple lecture ne montre pas.\n\n1. Lis et annote l'extrait \nApplique au moins trois stratégies de lecture différentes, choisies parmi les quinze du Manuel\nLaisse des traces visibles directement sur le texte imprimé\n\n2. Identifie chaque stratégie utilisée • Écris le nom de la stratégie en haut de la page • Utilise un système de couleurs et de symboles constant • Assure-toi que tes annotations restent lisibles\n\n3. Formule ton hypothèse d'objectif de communication \nÉcris ton HOC en bas de la page, en une phrase complète \nElle doit refléter ce que tu comprends du texte après avoir appliqué tes stratégies\n\nRappels importants \nTrois stratégies, c'est un minimum, pas un objectif. \nUne stratégie appliquée à moitié ne compte pas : va au bout de chacune.",
-            // Le mardi 9 septembre 2025 : une séance du deuxième groupe (mardi et vendredi), en semaine 4 de la démo.
+            // Le mardi 9 septembre 2025 : une séance du deuxième groupe (mardi et vendredi).
             echeance: '2025-09-09',
-            echeanceDite: 'le mardi 9 septembre 2025'
+            // Un bloc libre (« + Nouveau champ », #499) : le fichier de Grégoire sans sa première ligne (son titre).
+            autoevaluation: Object.freeze({ titre: "Grille d'autoévaluation", contenu: [
+                "Étape 1 sur 4 : les idées naissent. Chaque stratégie te fait regarder le texte sous un angle précis ; tu notes ce que tu vois, et une première hypothèse apparaît.",
+                "",
+                "Avant de remettre ton travail, coche ce que tu trouves dans ta copie. Le seuil de réussite correspond au niveau D de l'échelle ; le seuil de maîtrise, au niveau M. La question en italique t'aide à vérifier.",
+                "",
+                "Structure",
+                "",
+                "☐ Réussite : J'ai écrit le nom de chaque stratégie en haut de la page. Pour au moins trois annotations sur cinq, on peut dire de quelle stratégie elles relèvent.",
+                "",
+                "☐ Maîtrise : Pour au moins quatre annotations sur cinq, on peut dire de quelle stratégie elles relèvent et sur quel passage elles portent. Mon moyen de les distinguer (couleur, symbole) reste le même sur toutes les pages.",
+                "",
+                "Pour vérifier : pour chaque annotation, puis-je dire de quelle stratégie elle vient et sur quel passage elle porte ?",
+                "",
+                "Rigueur",
+                "",
+                "☐ Réussite : J'ai appliqué au moins trois stratégies. Au moins trois annotations sur cinq disent une idée, pas seulement un surlignement.",
+                "",
+                "☐ Maîtrise : Chacune de mes stratégies est menée jusqu'au bout, du début à la fin du chapitre. Au moins quatre annotations sur cinq nomment avec précision ce que j'ai repéré.",
+                "",
+                "Pour vérifier : chaque passage surligné porte-t-il quelques mots dans la marge ? Chaque stratégie couvre-t-elle tout le chapitre ?",
+                "",
+                "Plausibilité",
+                "",
+                "☐ Réussite : Ma HOC est écrite en une phrase complète et se rattache à un thème que mes annotations font ressortir.",
+                "",
+                "☐ Maîtrise : Ma HOC est une intention d'écriture, et on peut suivre le chemin qui y mène : des passages annotés aux thèmes, des thèmes au propos, du propos à la HOC. Au moins quatre annotations sur cinq se rattachent à ce chemin.",
+                "",
+                "Pour vérifier : ma HOC dit-elle ce que l'autrice cherche à faire, et pas seulement ce qu'elle dit ? Suit-elle la structure du manuel (l'autrice, un verbe d'action, un objet, un angle) ?",
+                "",
+                "Nuance",
+                "",
+                "☐ Réussite : Au moins une de mes annotations dit ce qu'un élément révèle d'un thème ou du propos, au lieu de seulement le relever.",
+                "",
+                "☐ Maîtrise : Au moins deux de mes annotations rapprochent deux éléments (deux passages, ou ce que deux stratégies ont fait ressortir) et disent ce que ce rapprochement révèle : une distinction, un point commun, une tension ou une contradiction.",
+                "",
+                "Pour vérifier : ai-je écrit ce que révèle chacun des liens que j'ai tracés ?"
+            ].join('\n') })
         }),
         niveaux: Object.freeze([['Structure', 'M'], ['Rigueur', 'D'], ['Plausibilité', 'D'], ['Nuance', 'D']]),
+        // La personne évaluée (Grégoire, 17 nov. 2026) : Yack Amical, du deuxième groupe, quel que soit le tri de la
+        // Liste. Elle n'a pas de copie dans le modèle de « Recevoir » (Loutre Enjouée, Tapir Doux, Antilope Vaillante).
+        etudiantEvalue: Object.freeze({ da: '9900007', nom: 'Yack Amical' }),
         echelle: 'IDME et niv 0',
-        // Le modèle par standards de l'assistant (`STD-n-meilleurs`, celui que la vue simple appelle « Par standards »).
+        // Le modèle par standards de l'assistant (`STD-n-meilleurs`).
         pratique: Object.freeze({ id: 'STD-n-meilleurs', nom: 'N meilleures évaluations' }),
-        // SUPPOSITION (15 nov. 2026) : le matériel ne nomme pas la cartouche ; elle prend le titre de la production.
-        cartouche: 'Artefact 1',
+        // Son nom est celui de la production (consigne, C.4).
+        cartouche: 'Appliquer des stratégies de lecture variées (Deux-Rives)',
         commentaires: [
             "## STRUCTURE",
-            "**STRUCTURE (0)** : Le travail n'est pas recevable.",
+            "**STRUCTURE (0)** : L'évaluation n'est pas possible.",
             "**STRUCTURE (I)** : Il est possible que les stratégies appliquées ne soient pas nommées, ou que l'on ne puisse pas dire de quelle stratégie relèvent la plupart des annotations. Sans ce rattachement, les traces seront difficiles à réutiliser pour la carte mentale. Pour atteindre le seuil, écris le nom de chaque stratégie en haut de la page et choisis un moyen de distinguer ses annotations des autres (une couleur, un symbole, une marge). L'important est qu'on sache d'où vient chaque annotation.",
             "**STRUCTURE (D)** : Les stratégies appliquées sont nommées, et pour la majorité des annotations, on peut dire de quelle stratégie elles relèvent. Le rattachement reste toutefois incomplet : certaines annotations ne renvoient à aucune stratégie ou à aucun passage précis, ou le moyen de les distinguer change d'une page à l'autre. Pour atteindre la maîtrise, reprends chaque annotation : de quelle stratégie vient-elle, sur quel passage porte-t-elle ? Garde le même moyen de les distinguer sur toutes les pages.",
             "**STRUCTURE (M)** : Pour au moins quatre annotations sur cinq, on peut dire de quelle stratégie elles relèvent et sur quel passage elles portent. Le même moyen de les distinguer sert sur toutes les pages : on retrouve en quelques secondes ce qu'une stratégie a fait ressortir. Ces traces seront directement utilisables pour la carte mentale. Pour aller plus loin, regroupe tes annotations selon un principe qui t'appartient : par thème, par personnage, par question.",
-            "**STRUCTURE (E)** : Chaque annotation est rattachée à sa stratégie et à son passage, et les pages vont au-delà de ce qui était demandé. Elles proposent un principe d'organisation qui leur est propre : un index, une légende, un regroupement par thème ou par question que la consigne ne prévoyait pas et qui fait voir le texte autrement. Ce choix personnel fait des pages annotées un outil de travail réutilisable pour l'analyse d'un autre texte.",
+            "**STRUCTURE (E)** : Chaque annotation est rattachée à sa stratégie et à son passage, et les pages vont au-delà de ce qui était demandé. Elles proposent un principe d'organisation qui leur est propre : un index, une légende, un regroupement par thème ou par question que la consigne du travail ne prévoyait pas et qui fait voir le texte autrement. Ce choix personnel fait des pages annotées un outil de travail réutilisable pour l'analyse d'un autre texte.",
             "## RIGUEUR",
-            "**RIGUEUR (0)** : Le travail n'est pas recevable.",
+            "**RIGUEUR (0)** : L'évaluation n'est pas possible.",
             "**RIGUEUR (I)** : Il est possible que moins de trois stratégies soient appliquées, ou que la plupart des annotations se limitent à un surlignement sans dire ce qui est repéré. Le matériau recueilli sera alors trop mince pour construire la carte mentale. Pour atteindre le seuil, applique au moins trois stratégies et, pour chaque élément relevé, écris quelques mots qui disent ce que tu as repéré. Un passage surligné sans annotation ne garde aucune trace de ta lecture.",
             "**RIGUEUR (D)** : Au moins trois stratégies sont appliquées, et la majorité des annotations expriment une idée plutôt qu'un simple surlignement. L'application reste toutefois inégale : certaines parties du texte ne sont pas couvertes, ou certaines annotations restent vagues. Pour atteindre la maîtrise, mène chaque stratégie jusqu'au bout, du début à la fin du texte, et reprends les annotations vagues pour nommer avec précision ce qui est repéré. Une stratégie appliquée à moitié laissera des trous dans ta carte mentale.",
             "**RIGUEUR (M)** : Chacune des stratégies est menée jusqu'au bout, sur l'ensemble du texte, et au moins quatre annotations sur cinq nomment avec précision ce qui est repéré. Le repérage est complet : il fournit une base solide pour la carte mentale. Pour aller plus loin, ne t'arrête pas à ce que la stratégie te fait chercher : note aussi ce qu'elle ne permet pas de saisir dans ce texte, ou essaie une stratégie que tu n'as pas encore pratiquée.",
             "**RIGUEUR (E)** : Le repérage est complet et précis, et il dépasse l'application des stratégies telles qu'elles sont enseignées. Les pages montrent une stratégie adaptée au texte, combinée à une autre ou inventée pour saisir ce que les stratégies du manuel ne faisaient pas ressortir. Cet apport personnel montre que les stratégies sont assez maîtrisées pour être transformées, et qu'elles pourront servir devant un texte très différent.",
             "## PLAUSIBILITÉ",
-            "**PLAUSIBILITÉ (0)** : Le travail n'est pas recevable.",
+            "**PLAUSIBILITÉ (0)** : L'évaluation n'est pas possible.",
             "**PLAUSIBILITÉ (I)** : Il est possible que la HOC soit absente, qu'elle ne soit pas rédigée en une phrase complète, ou qu'elle ne se rattache à aucun thème que tes annotations font ressortir. L'interprétation ne repose alors pas encore sur ta lecture. Pour atteindre le seuil, relis tes annotations, dégage un thème qui revient, puis écris au bas de la page une HOC en une phrase complète qui s'appuie sur ce thème. À ce stade exploratoire, ajuster son hypothèse est normal.",
             "**PLAUSIBILITÉ (D)** : Une HOC est écrite en une phrase complète et elle se rattache à un thème que les annotations font ressortir. Elle énonce toutefois un propos (ce que l'auteur ou l'autrice dit) plutôt qu'une intention d'écriture (ce qu'il ou elle cherche à faire), ou plusieurs annotations restent sans rapport avec elle. Pour atteindre la maîtrise, transforme ton propos en intention selon la structure du manuel (auteur ou autrice, verbe d'action, objet, angle) et vérifie que tes annotations mènent des passages aux thèmes, puis au propos, puis à la HOC.",
-            "**PLAUSIBILITÉ (M)** : La HOC est formulée comme une intention d'écriture, et l'on peut suivre dans les annotations le chemin qui y mène : des passages annotés aux thèmes, des thèmes au propos, du propos à la HOC. Les annotations sans rapport avec ce chemin restent l'exception. Cette hypothèse tient à ta lecture et servira de point de départ à la carte mentale. Pour aller plus loin, cherche un passage qui semble la contredire et demande-toi si elle lui résiste.",
-            "**PLAUSIBILITÉ (E)** : La HOC tient à la lecture, et les pages la mettent elles-mêmes à l'épreuve. Elles relèvent un passage qui semble la contredire, ou envisagent une autre hypothèse possible, et montrent pourquoi la piste retenue résiste ou comment elle a été ajustée. Cette démarche dépasse ce qui était demandé : elle traite l'hypothèse comme une idée à tester, ce qui se transfère à la lecture d'autres textes.",
+            "**PLAUSIBILITÉ (M)** : La HOC est formulée comme une intention d'écriture, et l'on peut suivre dans les annotations le chemin qui y mène : des passages annotés aux thèmes, des thèmes au propos, du propos à la HOC. Les annotations sans rapport avec ce chemin restent l'exception. Cette hypothèse tient à ta lecture et servira de point de départ à la carte mentale. Pour aller plus loin, demande-toi jusqu'où ton hypothèse tient : y a-t-il un passage où elle cesse de tenir, ou d'autres passages de l'œuvre où elle vaudrait aussi ?",
+            "**PLAUSIBILITÉ (E)** : La HOC tient à la lecture. Les pages énoncent en outre la portée de l'hypothèse : elles nomment un passage où elle cesse de tenir, ou d'autres passages de l'œuvre où elle vaudrait aussi, et s'appuient sur le texte pour le montrer. Cette démarche dépasse ce que la consigne du travail demandait : elle traite l'hypothèse comme une idée dont on connaît les limites, ce qui se transfère à la lecture d'autres textes.",
             "## NUANCE",
-            "**NUANCE (0)** : Le travail n'est pas recevable.",
+            "**NUANCE (0)** : L'évaluation n'est pas possible.",
             "**NUANCE (I)** : Il est possible que les annotations relèvent des éléments sans dire ce qu'ils révèlent : réactions spontanées, éléments évidents, repérages sans interprétation. La lecture reste alors à la surface du texte. Pour atteindre le seuil, choisis un élément que tu as repéré et écris ce qu'il révèle d'un thème ou du propos de l'auteur ou de l'autrice. Interpréter, c'est faire ce lien : un élément relevé ne dit rien tant qu'on n'a pas écrit ce qu'il laisse entendre.",
-            "**NUANCE (D)** : Au moins une annotation est interprétative : elle dit ce que l'élément repéré révèle d'un thème ou du propos, au lieu de seulement le relever. La lecture reste toutefois dans l'évidence, parce que les éléments repérés ne sont pas encore rapprochés les uns des autres. Pour atteindre la maîtrise, rapproche au moins deux fois deux éléments (deux passages, ou ce que deux stratégies ont fait ressortir) et écris ce que ce rapprochement révèle : une distinction, un point commun, une tension, une contradiction que tu expliques.",
+            "**NUANCE (D)** : Au moins une annotation est interprétative : elle dit ce que l'élément repéré révèle d'un thème ou du propos, au lieu de seulement le relever. La lecture reste toutefois dans l'évidence, parce que les éléments repérés ne sont pas encore rapprochés les uns des autres. Pour atteindre la maîtrise, rapproche au moins deux fois deux éléments (deux passages, ou ce que deux stratégies ont fait ressortir) et écris dans la marge, au bout de ta flèche, ce que ce rapprochement révèle : une distinction, un point commun, une tension, une contradiction que tu expliques.",
             "**NUANCE (M)** : Au moins deux annotations rapprochent deux éléments et disent ce que ce rapprochement révèle : une distinction entre deux éléments semblables, un point commun entre deux éléments différents, une tension ou une contradiction expliquée. La lecture dépasse l'évidence et fournit un matériau riche pour la carte mentale. Pour aller plus loin, demande-toi ce que cette lecture éclaire en dehors du texte : un autre texte, une autre situation.",
             "**NUANCE (E)** : Les rapprochements entre les éléments repérés font voir les subtilités du texte, et les pages portent cette lecture au-delà de lui. Elles rapprochent ce qui a été dégagé d'un autre texte, d'une autre situation ou d'un autre contexte, et disent ce que ce rapprochement apporte à la compréhension de l'un et de l'autre. Cet apport original montre une lecture qui ne s'arrête pas au texte étudié et qui pourra nourrir d'autres analyses."
         ].join('\n'),
@@ -1127,15 +1182,230 @@
         return cases;
     }
 
-    // Les outils communs aux modèles (js/parcours-classe.js) : « Remplir avec l'exemple », les trois temps, la fin.
-    function C() { return window.ParcoursClasse; }
+    // =================================================================
+    // LES TEXTES DES BULLES — ÉCRITS PAR GRÉGOIRE, VALIDÉS LE 18 NOV. 2026 (7 H 39 À 12 H 32), MOT POUR MOT
+    // =================================================================
+    // Consigne, section D. `lieuSuite` : la suite de la phrase du lieu, que le moteur écrit d'après le menu (« Tu es dans
+    // « Conception », à l'onglet « Pratiques » ») ; `confirme` : la première ligne (« C'est fait : … ») ; `phrase` : une
+    // phrase hors de la liste ; `lignes` : la liste ; `consignes` : les gestes (en gras dans la consigne, dans la couleur
+    // du geste ici) ; `devient` : la forme suivante de la bulle, après un geste qui change l'écran. Une ligne mêlant
+    // explication et geste (« Ici, termine… ou touche… ») est tout entière une consigne : la bulle n'a pas de gras dans
+    // une ligne. L'objectif, « Objectif atteint », la phrase de la suite, « Pour revoir une étape » et la phrase de la
+    // poignée sont posés par le moteur. Seules les lignes marquées PROPOSÉ sont de la session.
+    var EN_MESURE = "d'expliquer comment une production s'évalue dans l'application, de la pratique de notation à la rétroaction";
 
-    // Mots PROPOSÉS (15 nov. 2026), lus par l'enseignant·e : ils partent tels quels et restent corrigeables.
-    var MOTS_M = {
+    var TEXTES = {
+        objectif: 'À la fin de ce parcours, tu seras en mesure ' + EN_MESURE + '.',
+        objectifAtteint: 'Objectif atteint : tu es en mesure ' + EN_MESURE + '.',
+        // PROPOSÉS (15 nov. 2026), inchangés : le panneau sans le deuxième groupe ; la bulle sur un autre groupe.
         refus: "Commence par la Modélisation de « Mettre ta classe en place » : ce modèle se joue sur le groupe que tu y montes.",
-        groupe: "Ce modèle se joue sur le deuxième groupe de la démo : choisis-le dans l'en-tête.",
-        choisirLeGroupe: "Choisis le deuxième groupe dans l'en-tête (ce modèle se joue sur lui)"
+        choisirLeGroupe: "Choisis le deuxième groupe dans l'en-tête (ce modèle se joue sur lui)",
+        // PROPOSÉ (18 nov. 2026) : sous « Créer ma grille », tant que des rangées restent sans étiquettes.
+        rangeesAEtiqueter: 'toutes les rangées de la grille étiquetées',
+        etape1: {
+            titre: 'Ta pratique de notation',
+            lieuSuite: ": c'est là que tu dis comment se construit la note de ton cours.",
+            phrase: "Dans la démo, tu évalues une première production de ton deuxième groupe, avec le matériel de l'exemple. Rien ne touche à tes données.",
+            lignes: [
+                "Tu additionnes des points d'un travail à l'autre, selon leur pondération ? C'est une pratique de notation, la plus répandue : la notation sommative, qu'on appelle aussi cumulative",
+                "Ici, le mot ne parle pas du moment de l'évaluation (en fin d'apprentissage, par opposition à formative) mais de la façon dont la note se construit : en faisant la « somme » des résultats aux productions antérieures, ou le « cumul » de leurs points",
+                "Il en existe d'autres, dites alternatives. L'exemple en prend une : la note s'y construit à partir de niveaux de maîtrise plutôt que de points",
+                "Ta pratique, c'est l'ensemble des règles que l'application suivra pour établir la note de l'étudiant·e"
+            ],
+            consignes: ["Touche « + Nouvelle pratique »"],
+            devient: {
+                confirme: "C'est fait : l'assistant de configuration est ouvert.",
+                lignes: [
+                    "Un assistant te pose quelques questions (un écran à la fois) et construit ta pratique avec tes réponses",
+                    "« Partir d'un modèle » : tu adoptes une pratique toute prête, que tu pourras ajuster ensuite",
+                    "« Décrire ma pratique » : tu réponds à des questions sur ta façon de noter et l'assistant trouve la pratique qui te correspond"
+                ],
+                consignes: ["Touche « Partir d'un modèle », puis « Suivant → »"]
+            }
+        },
+        etape2: {
+            titre: 'Un modèle',
+            confirme: "C'est fait : tu es à l'écran « Choisis un modèle ».",
+            lignes: [
+                "Chaque carte est une pratique toute prête, décrite en une ligne",
+                "Le code à côté du nom dit sa famille : SOM pour la sommative, STD pour les standards ; les autres codes désignent d'autres pratiques alternatives",
+                "L'exemple prend « N meilleures évaluations », par standards : chaque production reçoit un niveau de maîtrise et la note retient les 7 meilleures évaluations sur 10",
+                "Avec ta classe, tu choisiras la tienne, qu'elle soit traditionnelle ou alternative"
+            ],
+            consignes: ["Touche « N meilleures évaluations », puis « Suivant → »"],
+            devient: {
+                lignes: [
+                    "Le récapitulatif dit sa famille et ce qu'elle fait : « PAN – Standards » (PAN : pratique alternative de notation)",
+                    "Son nom reste modifiable ; l'exemple le garde tel quel"
+                ],
+                consignes: ["Touche « Créer la pratique »"]
+            }
+        },
+        etape3: {
+            titre: 'Une échelle de performance',
+            confirme: "C'est fait : l'assistant te demande une échelle.",
+            lignes: [
+                "Par standards, tu ne comptes pas de points : tu situes ce que l'étudiant·e a réussi à un niveau",
+                "L'échelle de performance nomme ces niveaux. Celle de l'exemple, « IDME et niv 0 », en a cinq : 0 « Aucun », I « Incomplet ou insuffisant », D « En développement », M « Maîtrisé », E « Étendu »",
+                "Pour établir la note, l'application convertit ensuite chaque niveau en pourcentage (un M vaut 75\u00a0%)",
+                "Tu retrouveras ces niveaux à chaque étape de ce parcours, jusqu'à l'évaluation"
+            ],
+            consignes: ["Choisis « IDME et niv 0 », puis touche « Adopter »"]
+        },
+        etape4: {
+            titre: "L'appliquer à ton cours",
+            confirme: "C'est fait : la pratique « N meilleures évaluations » est créée.",
+            phrase: "Tu es en haut de l'onglet « Pratiques ». Le cours actif est celui de l'en-tête : celui de ton deuxième groupe.",
+            lignes: [
+                "Une pratique créée ne s'applique encore à aucun cours. Tu la prépares une fois ; elle peut resservir et se partager avec tes collègues",
+                "Sans pratique appliquée, l'application ne calcule aucune note"
+            ],
+            consignes: [
+                "Choisis « N meilleures évaluations » dans le menu en haut de la page, puis fais défiler jusqu'au bas de sa fiche",
+                "Touche « Appliquer au cours actif »"
+            ]
+        },
+        etape5: {
+            titre: 'Ta grille',
+            confirme: "C'est fait : la pratique s'applique au cours de ton deuxième groupe.",
+            lieuSuite: ": c'est là que tu apportes la grille que tu utilises déjà.",
+            lignes: [
+                "Une grille réunit tes critères (ce que tu regardes dans une production) et ce que vaut chacun. Celle de l'exemple se juge par niveaux : ceux de l'échelle que tu viens de choisir",
+                "Ici, tu numérises une grille que tu as déjà, faite dans un traitement de texte. Une photo n'en garderait que l'apparence : l'application doit savoir ce que chaque partie veut dire. C'est toi qui le lui dis, en posant une étiquette sur chaque partie",
+                "Ce passage du document à l'application ne se fait qu'une fois. Ensuite, tu crées et modifies tes grilles directement dans l'application"
+            ],
+            consignes: ["Regarde la grille de l'exemple arriver : touche « Remplir »"],
+            // Une fois la grille collée : une étiquette à la fois, chacune confirmée par sa phrase.
+            etiqueter: {
+                lignes: ["La grille de l'exemple est là, telle qu'elle était écrite dans un traitement de texte. La palette compte plusieurs étiquettes ; quatre suffisent pour celle-ci"],
+                gestes: [
+                    ['Prends « Titre », puis touche le nom de la grille', "C'est ça : « Grille générale à 4 critères » est son titre, le nom sous lequel tu la retrouveras. Tu le choisis librement."],
+                    ['Prends « Critère », puis touche « Structure »', "C'est ça : « Structure » est un critère, un aspect de la production que tu regardes pour la juger."],
+                    ['Prends « Description », puis touche la phrase à côté de « Structure »', "C'est ça : la description définit le critère. Elle dit ce que tu attends, quelle que soit la production."],
+                    ['Prends « Pondération », puis touche « 20\u00a0% »', "C'est ça : la pondération dit ce que pèse le critère dans le résultat de la production."]
+                ]
+            },
+            rigueur: {
+                lignes: ["La rangée de « Structure » est faite"],
+                // Les mêmes confirmations, adaptées (consigne, C.3), à mesure que la personne étiquette la rangée.
+                confirmations: [
+                    "C'est ça : « Rigueur » est un critère, un aspect de la production que tu regardes pour la juger.",
+                    "C'est ça : la description définit le critère. Elle dit ce que tu attends, quelle que soit la production.",
+                    "C'est ça : la pondération dit ce que pèse le critère dans le résultat de la production."
+                ],
+                consignes: ["À toi : étiquette seul·e la rangée de « Rigueur » (critère, description, pondération)"]
+            },
+            suite: {
+                lignes: ["Avec ta propre grille, tu étiquetteras tout : l'application ne devine rien"],
+                consignes: ["Ici, termine « Plausibilité » et « Nuance » si tu veux t'exercer encore, ou touche « Voir la suite de l'exemple » : elle est déjà préparée"],
+                bouton: "Voir la suite de l'exemple"
+            },
+            lecture: {
+                lignes: [
+                    "C'est la grille de l'exemple, refaite d'après ses étiquettes : compare-la à l'originale, plus haut",
+                    "Ce résumé dit ce que l'application y a trouvé : 4 critères, des pondérations qui font 100\u00a0%",
+                    "Elle ne porte pas de niveaux : chaque critère se jugera avec ceux de ton échelle, de 0 à E"
+                ],
+                consignes: ["Touche « Créer ma grille »"]
+            }
+        },
+        etape6: {
+            titre: 'Ta cartouche',
+            confirme: "C'est fait : la « Grille générale à 4 critères » est créée.",
+            lieuSuite: ": c'est là que tu prépares tes rétroactions.",
+            lignes: [
+                "Une cartouche, ce sont les commentaires que tu écrirais dans la marge, préparés d'avance : un par critère et par niveau",
+                "Ta grille vaut pour toutes tes productions ; une cartouche est propre à une production : elle dit ce qu'on observe à chaque niveau dans cette tâche",
+                "Tu l'écris une fois. Ensuite, elle t'aide à juger, et chaque évaluation compose la rétroaction de l'étudiant·e avec tes phrases"
+            ],
+            consignes: ["Touche « + Nouvelle cartouche »"],
+            fiche: { consignes: ["Regarde l'exemple se remplir : touche « Remplir »"] },
+            remplie: {
+                lignes: [
+                    "Son nom : celui de la production qu'elle servira à évaluer (tu la décriras tout à l'heure)",
+                    "Sa grille (« Grille générale à 4 critères ») et son échelle (« IDME et niv 0 ») : chaque commentaire a sa case, à la rencontre d'un critère et d'un niveau",
+                    "Vingt commentaires : quatre critères, cinq niveaux. Lis celui de « Structure » au niveau M : sa première phrase décrit ce que tu observes, la suite dit à l'étudiant·e comment aller plus loin"
+                ],
+                consignes: ["Touche « Créer la cartouche »"]
+            }
+        },
+        etape7: {
+            titre: 'Ta production',
+            confirme: "C'est fait : la cartouche est créée.",
+            lieuSuite: ": c'est là que tu décris ce que tu demandes à tes étudiant·es.",
+            lignes: [
+                "Une production, c'est tout ce que tu demandes de faire, formatif ou certificatif : un plan de rédaction, un exposé oral, un laboratoire, une mesure sur le terrain",
+                "De ton côté, ce sont les consignes que tu donnes, la tâche que tu demandes d'effectuer et l'objectif qu'elle cherche à atteindre"
+            ],
+            consignes: ["Touche « + Nouvelle production »"],
+            fiche: {
+                type: ['Ouvre le menu « Type » et parcours-le', "C'est ça : de l'examen au stage, chaque type est une production."],
+                consignes: ["Puis regarde l'exemple se remplir : touche « Remplir »"]
+            },
+            remplie: {
+                lignes: [
+                    "Son nom dit ce qu'elle fait faire. Il est repris dans « Activité d'apprentissage », que tes étudiant·es liront en tête de leur rétroaction",
+                    "Son type, « Artefact » : une pièce d'un portfolio, une pratique courante en littérature. Dans d'autres disciplines, tu nommeras tes productions autrement (laboratoire, examen, entrevue) ; ta pratique retiendra alors ses évaluations parmi elles",
+                    "Plus bas, ce que tu viens de préparer s'y rattache d'un coup : sa grille, son échelle et sa cartouche",
+                    "Les champs à astérisque rouge suffisent pour la créer ; plus tu en remplis, plus ce que l'application te rend est précis"
+                ],
+                consignes: ["Touche « Créer la production »"]
+            }
+        },
+        etape8: {
+            titre: 'Tes consignes',
+            confirme: "C'est fait : la production est créée.",
+            phrase: "Tu es plus bas dans sa fiche, aux consignes : ce que tes étudiant·es doivent savoir pour réussir.",
+            consignes: ["Regarde l'exemple se remplir : touche « Remplir »"],
+            remplie: {
+                lignes: [
+                    "L'objectif : ce que la production cherche à développer",
+                    "La tâche, en une phrase : c'est la consigne du travail. Puis son détail, pas à pas",
+                    "Ta grille d'autoévaluation, dans un bloc à part : pour chaque critère, les deux seuils de cette tâche, la réussite (D) et la maîtrise (M). Ta grille dit ce que tu attends en général ; les seuils le précisent pour cette tâche",
+                    "Avec ta classe, « Préparer le PDF » en tire une feuille à remettre : tes étudiant·es savent d'avance ce que tu attends et peuvent vérifier leur travail avant de le remettre",
+                    "La date d'échéance : le mardi 9 septembre 2025, une séance du groupe"
+                ],
+                consignes: ["Coche « Consignes transmises » (la production entre alors au calendrier du groupe)"]
+            }
+        },
+        etape9: {
+            titre: 'Évaluer',
+            confirme: "C'est fait : les consignes sont transmises.",
+            lieuSuite: ": c'est là que tu vois chaque production de ton groupe, une ligne par étudiant·e.",
+            lignes: ["La production de Yack Amical est sur papier : rien à importer. Pour un exposé ou une entrevue, c'est pareil : tu évalues depuis sa ligne"],
+            consignes: ["Sur la ligne de Yack Amical, touche « Actions › Évaluer »"],
+            criteres: {
+                lignes: [
+                    "La grille, l'échelle et la cartouche sont déjà là : elles viennent de la production",
+                    "Pour chaque critère, choisis un niveau : son commentaire de la cartouche paraît aussitôt dans la rétroaction",
+                    "Compare-le à la copie. S'il ne lui ressemble pas, essaie le niveau voisin : c'est la cartouche qui t'aide à juger"
+                ],
+                consignes: ["Choisis un niveau pour chacun des quatre critères (suggestion pour suivre l'exemple : M, D, D, D)"]
+            },
+            verrou: {
+                lignes: [
+                    "La note de la copie se calcule à mesure, d'après les niveaux et les pondérations",
+                    "La rétroaction réunit tes quatre commentaires : c'est ce que Yack Amical lira"
+                ],
+                consignes: [
+                    "Dans « Un mot pour ton étudiant·e », écris « Bon départ ! » (il s'imprime sur son PDF, après son niveau)",
+                    "Touche le cadenas « Verrouiller » : l'évaluation est terminée et ne bougera plus par mégarde ; tu pourras la rouvrir au besoin"
+                ]
+            }
+        },
+        etape10: {
+            titre: "Le point qui s'allume",
+            confirme: "C'est fait : l'évaluation de Yack Amical est verrouillée.",
+            lieuSuite: ": c'est là que tu vois ta classe d'un coup d'œil.",
+            lignes: [
+                "Dans la bande « Performance (P) », Yack Amical a maintenant son point. Les autres apparaîtront à mesure que tu évalueras leur production",
+                "Évaluation après évaluation, l'application garde ses niveaux, critère par critère : c'est ainsi qu'elle pourra nommer son défi"
+            ]
+        }
     };
+
+    // Les outils communs aux modèles (js/parcours-classe.js) : « Remplir », les trois suites de la fin.
+    function C() { return window.ParcoursClasse; }
 
     // ---------- Le deuxième groupe, et ce que la démo contient déjà du modèle ----------
 
@@ -1143,7 +1413,7 @@
         return C() && typeof C().deuxiemeGroupe === 'function' ? C().deuxiemeGroupe() : null;
     }
 
-    function refusModele() { return deuxiemeGroupe() ? null : MOTS_M.refus; }
+    function refusModele() { return deuxiemeGroupe() ? null : TEXTES.refus; }
 
     function surLeDeuxiemeGroupe() {
         var g = deuxiemeGroupe();
@@ -1156,11 +1426,9 @@
     }
 
     /**
-     * Le repère du modèle, refait à chaque lancement : tout ce que la démo contient, sauf ce qui vient du modèle (sa
-     * grille par son nom, la production qui la porte, une pratique qui n'est pas du pack, les cartouches de sa grille).
-     * Les étapes avancent alors sur ce qui a déjà été fait, comme à une reprise, sans rien écrire hors de la démo.
-     * Les deux bulles d'ouverture (« Pourquoi étiqueter », « Tu apprends aussi ») ne se montrent que si la grille
-     * reste à créer : c'est dans la Modélisation qu'on étiquette pour la première fois.
+     * Le repère du modèle, refait à chaque lancement, en mémoire : tout ce que la démo contient, sauf ce qui vient du
+     * modèle (sa grille par son nom, la production qui la porte, une pratique qui n'est pas du pack, les cartouches de sa
+     * grille). Les étapes avancent alors sur ce qui a déjà été fait, comme à une reprise, sans rien écrire hors de la démo.
      */
     function poserLeRepereModele() {
         var miennes = ids(grillesDuModele());
@@ -1175,143 +1443,262 @@
                 return g && miennes.indexOf(g.id) === -1 ? acc.concat(ids(cartouchesDe(g.id))) : acc;
             }, []),
             grilleId: null, productionId: null, evaluationId: null, evaluationDA: null, pratiqueId: null, cartoucheId: null,
-            exemple: 'passe', grillePrise: false,
-            ouverture: miennes.length ? 2 : 0
+            grillePrise: false
         };
     }
 
-    // ---------- Étape 1 du modèle : la grille de l'exemple dans l'étiquetage ; puis ses critères, jugés par niveaux ----------
-
     function grilleDuModele() {
         grilleCreee();
-        return parId(grilles(), lireCtx().grilleId);
+        var g = parId(grilles(), lireCtx().grilleId);
+        return g && g.nom === MATERIEL.grille.nom ? g : null;
     }
 
-    /**
-     * « Remplir avec l'exemple », à l'accueil de « Mon matériel » : la grille de l'exemple entre dans l'étiquetage,
-     * comme un collage (la même lecture que le presse-papiers). L'étiquetage reste le geste de la personne.
-     */
-    function ouvrirLaGrilleDeLExemple() {
-        var lecture = window.materielDissectionLecture, dissection = window.materielDissection;
-        if (!lecture || !dissection) return;
-        var doc = lecture.docDepuisPressePapiers({ texte: tableauDeLaGrille() });
-        if (doc) dissection.ouvrir(doc);
+    // ---------- Les lignes d'une bulle ----------
+
+    /** Une ligne d'explication (avec ce qu'elle montre, si donné). */
+    function ligne(texte, montre) { return montre ? { texte: texte, montre: montre } : { texte: texte }; }
+
+    /** Une consigne : dans la couleur du geste ; faite (`fait`), elle se grise d'un crochet. */
+    function geste(texte, fait) { return fait ? { texte: texte, geste: true, fait: fait } : consigne(texte); }
+
+    /** Une forme de bulle : sa phrase hors de la liste, ses lignes, puis ses consignes (en dernier). */
+    function forme(t, plus) {
+        var l = t.phrase ? [note(t.phrase)] : [];
+        return l.concat((t.lignes || []).map(function (x) { return ligne(x); }), plus || [], (t.consignes || []).map(function (c) { return geste(c); }));
     }
-
-    /**
-     * REMESURÉ le 15 nov. 2026 (ancienne décision 3.1). Depuis la 1.247.0, la page offre « des points » ou « des
-     * niveaux de performance », mais seulement à une grille qui porte LES DEUX (js/materiel-dissection.js). Celle de
-     * l'exemple ne porte ni points ni niveaux nommés (un nom, une description, une pondération par critère) : le choix
-     * ne paraît pas, et elle naît EN POINTS, ses critères analytiques. Le détour reste donc : tant qu'un de ses critères
-     * n'est pas jugé par niveaux, l'étape montre où le passer à « Holistique ».
-     */
-    function grilleEnPoints() {
-        var g = grilleDuModele();
-        // Chaque critère, un à un : un seul passé à « Holistique » en fait déjà une grille mixte, qui n'est plus « en points ».
-        return !!g && (g.criteres || []).some(function (c) { return c && c.type !== 'holistique'; });
-    }
-
-    function modeModele1() { return grilleEnPoints() ? 'types' : modeEtape1(); }
-
-    /**
-     * Le premier menu « Type » qui n'est pas à « Holistique ». Les quatre menus ont la même signature pour le moteur
-     * (ni identifiant ni nom) : il ne ramène donc pas le suivant dans la vue. Mesuré le 13 nov. 2026 (trois passages sur
-     * six) : après un menu, la liste redessinée, le suivant restait sous le bandeau de la démo, au bas de l'écran, et la
-     * pulsation, cachée. Le menu désigné est donc amené entre l'en-tête et le bandeau, trois fois au plus par menu (la
-     * liste se redessine en plusieurs temps), puis la personne garde la main.
-     */
-    var typeAmene = { menu: null, fois: 0 };
-    function typeAChanger() {
-        var menus = document.querySelectorAll('#listeCriteres select[data-on-change="modifierTypeCritereGrilleHandler"]');
-        for (var k = 0; k < menus.length; k++) {
-            if (!vis(menus[k]) || menus[k].value === 'holistique') continue;
-            if (typeAmene.menu !== menus[k]) typeAmene = { menu: menus[k], fois: 0 };
-            var r = menus[k].getBoundingClientRect(), entete = qs('header.entete'), bandeau = el('bandeau-demo');
-            var haut = entete ? Math.max(0, entete.getBoundingClientRect().bottom) : 0;
-            var bas = vis(bandeau) ? Math.min(window.innerHeight, bandeau.getBoundingClientRect().top) : window.innerHeight;
-            if (typeAmene.fois < 3 && (r.top < haut + 4 || r.bottom > bas - 4)) {
-                typeAmene.fois++;
-                menus[k].scrollIntoView({ block: 'center' });
-            }
-            return menus[k];
-        }
-        return null;
-    }
-
-    function ouPasserAuxNiveaux() {
-        var g = grilleDuModele(), ouverte = grilleOuverteDansLEditeur();
-        if (editeurGrilleVisible()) return ouverte && g && ouverte.id === g.id ? typeAChanger() : el('menuGrilles');
-        var voir = qs('#conception-materiel [data-action="materiel.voir"][data-param="grille-criteres"]');
-        return vis(voir) ? voir : qs('#sous-navigation [data-sous-onglet="conception-grille-criteres"]');
-    }
-
-    function gesteDesTypes() {
-        var g = grilleDuModele(), ouverte = grilleOuverteDansLEditeur();
-        if (editeurGrilleVisible() && ouverte && g && ouverte.id === g.id) return "Dans le menu « Type » de chaque critère, choisis « Holistique ».";
-        if (editeurGrilleVisible()) return "Dans le menu des grilles, ouvre « " + MATERIEL.grille.nom + " ».";
-        return "Touche « La voir dans Grilles de critères ».";
-    }
-
-    // ---------- Étape 2 du modèle : la fiche de la production, remplie avec l'exemple ----------
 
     function fait() { return true; }
 
-    function texteChoisi(id) {
-        var s = el(id);
-        return s && s.selectedOptions && s.selectedOptions[0] ? s.selectedOptions[0].textContent : '';
+    /**
+     * Une étape du modèle. Tant que le deuxième groupe n'est pas le groupe actif, elle n'avance pas : elle montre le
+     * menu de l'en-tête et le dit ; ses boutons ne paraissent pas (« Remplir » ne remplit jamais la fiche d'un autre groupe).
+     */
+    function etapeDuModele(o) {
+        var e = {
+            titre: o.titre,
+            texte: '',
+            geste: '',
+            lignesVivantes: true,
+            lignes: function () { return surLeDeuxiemeGroupe() ? o.lignes() : [consigne(TEXTES.choisirLeGroupe)]; },
+            zones: function () { return surLeDeuxiemeGroupe() && o.zones ? (o.zones() || []).filter(Boolean) : []; },
+            contour: function () { return surLeDeuxiemeGroupe() ? (o.contour ? o.contour() : null) : el('selectGroupeCoursHeader'); },
+            atteint: function () { return surLeDeuxiemeGroupe() && !!o.atteint(); }
+        };
+        if (o.lieu) e.lieu = function () { return surLeDeuxiemeGroupe() && (typeof o.lieu === 'function' ? o.lieu() : true); };
+        if (o.lieuSuite) e.lieuSuite = o.lieuSuite;
+        if (o.lieu) e.amener = true;   // le lieu ouvre la page en haut ; ce que l'étape montre y est ramené au besoin
+        if (o.confirme) e.confirme = o.confirme;
+        if (o.avant) e.avant = o.avant;
+        if (o.fleches) e.fleches = function () { return surLeDeuxiemeGroupe() ? (o.fleches() || []).filter(Boolean) : []; };
+        if (o.aussiEviter) e.aussiEviter = function () { return surLeDeuxiemeGroupe() ? (o.aussiEviter() || []).filter(Boolean) : []; };
+        if (o.avis) e.avis = function () { return surLeDeuxiemeGroupe() ? o.avis() : ''; };
+        if (o.nommeLeContour) e.nommeLeContour = o.nommeLeContour;
+        if (o.sansSortie) e.sansSortie = true;
+        Object.defineProperty(e, 'boutons', { get: function () { return surLeDeuxiemeGroupe() && o.boutons ? o.boutons() : null; } });
+        return e;
     }
 
-    function productionRemplie() {
-        var g = grilleDuModele();
-        return !!g && String((el('productionTitre') || {}).value) === MATERIEL.production.description
-            && String((el('productionGrille') || {}).value) === String(g.id)
-            && texteChoisi('productionEchelle').indexOf(MATERIEL.echelle) !== -1;
+    // ---------- Étapes 1 à 3 : l'assistant de la pratique, puis la question de l'échelle ----------
+
+    function titreDeLAssistant() {
+        var t = el('wizard-v2-titre');
+        return wizardOuvert() && t ? String(t.textContent || '').trim() : '';
+    }
+    function aLEcranChoixModele() { return titreDeLAssistant() === 'Choisis un modèle'; }
+    function auRecapitulatif() { return vis(el('wizard-v2-btn-creer')); }
+    function questionDeLEchelle() { return vis(el('ui-dialogue-question')); }
+
+    function carteDe(nom, valeur) {
+        var r = qs('#modalWizardPratiqueV2 input[name="' + nom + '"][value="' + valeur + '"]');
+        return r ? { radio: r, carte: r.closest('.wizard-v2-radio-card') || r } : null;
     }
 
-    /** Le nom de la production est ce qu'elle fait faire (décision 3.2 : la démo a déjà un « Artefact 1 »), repris en « Activité d'apprentissage ». */
-    function remplirLaProduction() {
-        var g = grilleDuModele(), p = MATERIEL.production;
-        if (!g) return;
-        C().poser(el('productionTitre'), p.description);
-        C().poser(el('productionActivite'), p.description);
-        C().poser(el('productionType'), p.type);
-        C().poser(el('productionGrille'), g.id);
-        C().choisir(el('productionEchelle'), MATERIEL.echelle);
+    /** Dans l'assistant, un geste à la fois : la carte de l'écran, puis « Suivant → » ; au récapitulatif, « Créer la pratique ». */
+    function ouToucherDansLAssistant() {
+        if (!wizardOuvert()) return qs('#conception-pratiques-notation [data-action="creerNouvellePratique"]');
+        if (auRecapitulatif()) return el('wizard-v2-btn-creer');
+        var c = aLEcranChoixModele() ? carteDe('modeleChoisi', MATERIEL.pratique.id) : carteDe('porteEntree', 'modele');
+        if (c && vis(c.carte) && !c.radio.checked) return c.carte;
+        var suivant = el('wizard-v2-btn-suivant');
+        return vis(suivant) ? suivant : null;
     }
 
-    // ---------- Étape 3 du modèle : les consignes et l'échéance ----------
-
-    function champEcheance() {
-        var s = el('sectionPlanification');
-        return s ? s.querySelector('input[type="date"]') : null;
+    /** La fenêtre de l'assistant, ou celle de la question de l'échelle : la bulle passe au-dessus d'elles (`surModale`). */
+    function zonesDeLAssistant() {
+        var q = el('ui-dialogue-question');
+        surModale(wizardOuvert() || questionDeLEchelle());
+        if (questionDeLEchelle()) return [q.closest('.modal-contenu') || q.parentElement];
+        return wizardOuvert() ? [qs('#modalWizardPratiqueV2 .modal-contenu')] : [];
     }
 
-    function consignesRemplies() {
-        var d = champEcheance();
-        return String((el('productionObjectif') || {}).value) === MATERIEL.production.objectif && !!d && d.value === MATERIEL.production.echeance;
+    /** Les boutons et les cartes de l'assistant, les choix et les boutons de la question : jamais sous la bulle. */
+    function aussiEviterDansLAssistant() {
+        // La question de l'échelle : ce qu'elle fait toucher, la ligne de l'échelle et « Adopter », seulement (mesuré le
+        // 18 nov. 2026 à 1180 × 820 : à éviter toute la rangée des boutons et toutes les lignes, la bulle couvrait « Adopter »).
+        if (questionDeLEchelle()) return [ligneDeLEchelle(), boutonAdopter()];
+        return ETAPES[4].aussiEviter() || [];
     }
 
-    function remplirLesConsignes() {
-        var p = MATERIEL.production;
-        C().poser(el('productionObjectif'), p.objectif);
-        C().poser(el('productionTache'), p.tache);
-        C().poser(el('productionDetailTache'), p.detailTache);
-        C().poser(champEcheance(), p.echeance);
+    function ligneDeLEchelle() {
+        return [].slice.call(document.querySelectorAll('#overlay-ui-dialogue .ui-dialogue-choix-ligne')).filter(function (l) {
+            return String(l.textContent || '').indexOf(MATERIEL.echelle) !== -1;
+        })[0] || null;
     }
 
-    // ---------- Étape 4 du modèle : l'étudiant·e de la ligne que la bulle pointe ----------
-
-    function etudiantDeLaLigne() {
-        var s = ligneDeLaListe(lireCtx().productionId);
-        if (!s) return '';
-        var v = [].map.call(s.options, function (o) { return o.value; }).filter(function (x) { return x.indexOf('evaluer|') === 0; })[0];
-        var da = v ? v.split('|')[1] : '';
-        var liste = typeof obtenirEtudiantsCoursActif === 'function' ? (obtenirEtudiantsCoursActif() || []) : [];
-        var e = liste.find(function (x) { return x && String(x.da) === String(da); });
-        return e ? [e.prenom, e.nom].filter(Boolean).join(' ') : '';
+    function boutonAdopter() {
+        return [].slice.call(document.querySelectorAll('#overlay-ui-dialogue .modal-actions button')).filter(function (b) {
+            return String(b.textContent || '').trim() === 'Adopter';
+        })[0] || null;
     }
 
-    // ---------- Étape 8 du modèle : la cartouche, remplie avec l'exemple (décision 3.3 : plus de fichier à télécharger) ----------
+    function echelleChoisie() {
+        var l = ligneDeLEchelle(), r = l ? l.querySelector('input') : null;
+        return !!(r && r.checked);
+    }
+
+    // ---------- Étape 4 : la pratique appliquée au cours du deuxième groupe ----------
+
+    function laPratiqueEstChoisie() {
+        var s = el('menuPratiques');
+        return fichePratiqueOuverte() && !!s && !!lireCtx().pratiqueId && s.value === lireCtx().pratiqueId;
+    }
+
+    /** C'est la pratique du modèle qui est appliquée au cours actif (pas une autre, ni celle d'avant). */
+    function laPratiqueDuModeleEstAppliquee() {
+        pratiqueCreee();
+        var id = lireCtx().pratiqueId;
+        return !!id && pratiqueAppliquee() === id;
+    }
+
+    // ---------- Étape 5 : la grille, étiquetée une rangée à la fois ----------
+
+    function dissectionDuModele() {
+        var d = dissection(), e = d && dissectionOuverte() ? d.etatCourant() : null;
+        return e && e.doc && e.echelleExistante ? e : null;
+    }
+
+    /**
+     * Les morceaux de la grille de l'exemple, par leur place dans le tableau collé : la rangée du titre (nom,
+     * description), puis une rangée par critère (nom, description, pondération). Les étiquettes qu'ils attendent.
+     */
+    function rangeesDeLExemple(e) {
+        var rows = e && e.doc && e.doc.mode === 'table' ? e.doc.rows : [];
+        var id = function (r, c) { return rows[r] && rows[r][c] && rows[r][c].lines[0] ? rows[r][c].lines[0].id : null; };
+        return {
+            titre: [id(0, 0), 'titre'],
+            description: [id(0, 1), 'description'],
+            criteres: MATERIEL.grille.criteres.map(function (x, k) {
+                return [[id(k + 1, 0), 'critere'], [id(k + 1, 1), 'description'], [id(k + 1, 2), 'ponderation']];
+            })
+        };
+    }
+
+    function posee(e, paire) { return !!(e && paire[0] && e.liens[paire[0]] === paire[1]); }
+    function rangeeFaite(e, k) { return rangeesDeLExemple(e).criteres[k].every(function (p) { return posee(e, p); }); }
+
+    /** Les rangées que « Créer ma grille » attend : le titre et les quatre critères. */
+    function rangeesFaites(e) {
+        var r = rangeesDeLExemple(e);
+        return posee(e, r.titre) && r.criteres.every(function (x, k) { return rangeeFaite(e, k); });
+    }
+
+    /** Les quatre gestes de « Structure », dans l'ordre de la bulle : titre, critère, description, pondération. */
+    function gestesDeStructure(e) {
+        var r = rangeesDeLExemple(e);
+        return [r.titre].concat(r.criteres[0]);
+    }
+
+    /** La façon dont l'étape 5 se montre : l'accueil, « Structure » guidée, « Rigueur », la suite, la lecture. */
+    function formeDeLaGrille() {
+        var e = dissectionDuModele();
+        if (!e) return 'accueil';
+        if (!gestesDeStructure(e).every(function (p) { return posee(e, p); })) return 'structure';
+        if (!rangeeFaite(e, 1)) return 'rigueur';
+        return rangeesFaites(e) ? 'lecture' : 'suite';
+    }
+
+    function morceau(id) { return id ? qs('#dissection-contenu .dissection-morceau[data-id="' + id + '"]') : null; }
+    function etiquetteDeLaPalette(type) { return qs('#dissection-palette .dissection-etiquette[data-type="' + type + '"]'); }
+
+    /** Le premier geste de « Structure » qui reste : l'étiquette à prendre, puis le morceau à toucher. */
+    function prochainGesteDeStructure() {
+        var e = dissectionDuModele();
+        var p = e ? gestesDeStructure(e).filter(function (x) { return !posee(e, x); })[0] : null;
+        if (!p) return null;
+        return e.actif === p[1] ? morceau(p[0]) : etiquetteDeLaPalette(p[1]);
+    }
+
+    /** « Remplir » : la grille de l'exemple entre dans l'étiquetage, comme un collage, tenue pour jugée par niveaux. */
+    function ouvrirLaGrilleDeLExemple() {
+        var lecture = window.materielDissectionLecture, d = dissection();
+        if (!lecture || !d) return;
+        var doc = lecture.docDepuisPressePapiers({ texte: tableauDeLaGrille() });
+        if (!doc || !d.ouvrir(doc)) return;
+        d.tenirPourNiveaux({ attendre: function () {
+            var e = dissectionDuModele();
+            return e && !rangeesFaites(e) ? TEXTES.rangeesAEtiqueter : '';
+        } });
+    }
+
+    /** « Voir la suite de l'exemple » : les étiquettes qui restent, posées par le modèle (la description de la grille comprise). */
+    function voirLaSuiteDeLExemple() {
+        var e = dissectionDuModele(), d = dissection();
+        if (!e || !d) return;
+        var r = rangeesDeLExemple(e), liens = {};
+        [r.titre, r.description].concat(r.criteres.reduce(function (a, x) { return a.concat(x); }, [])).forEach(function (p) { if (p[0]) liens[p[0]] = p[1]; });
+        d.poserEtiquettes(liens);
+    }
+
+    function lignesDeLaGrille(f) {
+        var t = TEXTES.etape5, e = dissectionDuModele();
+        if (f === 'accueil') return forme(t);
+        if (f === 'structure') {
+            var l = forme(t.etiqueter), suivant = true;
+            gestesDeStructure(e).forEach(function (p, k) {
+                if (!suivant) return;
+                if (posee(e, p)) { l.push(geste(t.etiqueter.gestes[k][0], fait), ligne(t.etiqueter.gestes[k][1])); return; }
+                l.push(geste(t.etiqueter.gestes[k][0]));
+                suivant = false;
+            });
+            return l;
+        }
+        if (f === 'rigueur') {
+            var confirmees = rangeesDeLExemple(e).criteres[1].map(function (p, k) { return posee(e, p) ? ligne(t.rigueur.confirmations[k]) : null; }).filter(Boolean);
+            // Le dernier geste de « Structure » (la pondération) fait changer la bulle : sa confirmation l'ouvre, jusqu'au
+            // premier geste sur « Rigueur ».
+            var derniere = confirmees.length ? [] : [ligne(t.etiqueter.gestes[3][1])];
+            return derniere.concat(forme(t.rigueur, confirmees));
+        }
+        if (f === 'suite') return forme(t.suite);
+        return [
+            ligne(t.lecture.lignes[0], function () { return [el('dissection-comprise')]; }),
+            ligne(t.lecture.lignes[1], function () { return [el('dissection-constats')]; }),
+            ligne(t.lecture.lignes[2], function () { return [el('dissection-logique')]; }),
+            geste(t.lecture.consignes[0])
+        ];
+    }
+
+    // La lecture amenée une fois dans la vue, quand toute la grille est étiquetée (« la page défile jusqu'à la lecture »).
+    var lectureAmenee = false;
+    function amenerLaLecture() {
+        var r = qs('#materiel-dissection .dissection-resultat');
+        if (lectureAmenee || !vis(r)) return;
+        lectureAmenee = true;
+        r.scrollIntoView({ block: 'start' });
+    }
+
+    function boutonCreerMaGrille() { return qs('#materiel-dissection [data-action="materielDissection.creer"]'); }
+
+    function zonesDeLaGrille(f) {
+        var e = dissectionDuModele();
+        if (f === 'lecture') { amenerLaLecture(); return []; }
+        lectureAmenee = false;
+        if (f === 'rigueur') return rangeesDeLExemple(e).criteres[1].map(function (p) { return morceau(p[0]); });
+        if (f === 'suite') return rangeesDeLExemple(e).criteres.slice(2).reduce(function (a, r) { return a.concat(r.map(function (p) { return morceau(p[0]); })); }, []);
+        return [];
+    }
+
+    // ---------- Étape 6 : la cartouche, remplie avec l'exemple ----------
 
     function casesDeCommentaires() {
         return [].slice.call(document.querySelectorAll('#cartoucheZonePrincipale textarea[id^="comm_"]'));
@@ -1322,7 +1709,7 @@
 
     function cartoucheRemplie() {
         var cases = casesDeCommentaires();
-        return cases.length > 0 && cases.every(function (t) { return String(t.value || '').trim() !== ''; });
+        return cartoucheEnCreation() && cases.length > 0 && cases.every(function (t) { return String(t.value || '').trim() !== ''; });
     }
 
     /**
@@ -1337,8 +1724,7 @@
         await attendre(function () { return C().choisir(el('selectEchelleCartouche'), MATERIEL.echelle); }, 3000);
         await attendre(function () { return casesDeCommentaires().length > 0; }, 3000);
         if (!enDemo() || !cartoucheEnCreation()) return;
-        var textes = commentairesParCase();
-        var noms = {};
+        var textes = commentairesParCase(), noms = {};
         (g.criteres || []).forEach(function (c) { noms[String(c.id)] = String(c.nom || '').toUpperCase(); });
         casesDeCommentaires().forEach(function (t) {
             var reste = t.id.slice('comm_'.length), coupe = reste.lastIndexOf('_');
@@ -1347,67 +1733,137 @@
         });
     }
 
-    // ---------- Les textes du modèle (PROPOSÉS, 15 nov. 2026) ----------
-
-    var NIVEAUX_DITS = MATERIEL.niveaux.map(function (n) { return n[0] + ' ' + n[1]; }).join(', ');
-
-    var TEXTES_M = {
-        types: "Ta grille est créée. Elle n'a pas de niveaux : l'application l'a donc lue comme une grille en points. Celle-ci se juge par niveaux de performance, avec une échelle que tu choisiras ensuite. Ouvre-la dans « Grilles de critères » et passe chacun de ses quatre critères à « Holistique » : ses pondérations ne changent pas.",
-        pratique: "La première évaluation est faite. Reste à dire comment se construit la note du cours : c'est la pratique de notation. Touche « + Nouvelle pratique », puis « Partir d'un modèle », et choisis « " + MATERIEL.pratique.nom + " » : le modèle par standards, où la note vient des niveaux de maîtrise. Suis l'assistant jusqu'à « Créer la pratique » : il te demande alors l'échelle. Choisis « " + MATERIEL.echelle + " », puis touche « Adopter ». La note que tu viens d'attribuer ne changera pas.",
-        appliquer: "La pratique est créée, mais elle ne s'applique encore à aucun cours. Choisis-la dans le menu en haut de la page, puis touche « Appliquer au cours actif » : c'est le cours du deuxième groupe. Sans pratique appliquée, l'application ne calcule aucune note."
-    };
-
-    function texteEvaluation() {
-        var qui = etudiantDeLaLigne();
-        return "Évalue une première production : celle " + (qui ? "de " + qui + ", sur la ligne que la bulle pointe" : "de la ligne que la bulle pointe") +
-            ". Rien à importer : touche « Actions › Évaluer ». Pour chaque critère, choisis le niveau de l'exemple : " + NIVEAUX_DITS +
-            ". La note se calcule à mesure, et une rétroaction s'écrit sous tes yeux. Puis touche « Verrouiller » : l'évaluation ne bougera plus par mégarde.";
+    /** La case de « Structure » au niveau M (« Lis celui de « Structure » au niveau M »). */
+    function caseStructureM() {
+        var g = grilleDuModele(), c = g ? (g.criteres || []).find(function (x) { return x && x.nom === 'Structure'; }) : null;
+        return c ? el('comm_' + c.id + '_M') : null;
     }
 
-    // ---------- Les étapes du modèle : celles du parcours, avec le matériel ----------
+    function formeDeLaCartouche() {
+        if (!ficheCartoucheOuverte()) return 'liste';
+        return cartoucheRemplie() ? 'remplie' : 'fiche';
+    }
+
+    // ---------- Étape 7 : la production ----------
+
+    function texteChoisi(id) {
+        var s = el(id);
+        return s && s.selectedOptions && s.selectedOptions[0] ? s.selectedOptions[0].textContent : '';
+    }
+
+    // Le menu « Type », ouvert par la personne : il n'a pas d'événement d'ouverture ; son focus (au doigt, à la souris,
+    // au clavier) en tient lieu.
+    var typeOuvert = false, typeEcoute = false;
+    function ecouterLeType() {
+        if (typeEcoute) return;
+        typeEcoute = true;
+        var vu = function (ev) { if (ev.target && ev.target.id === 'productionType') typeOuvert = true; };
+        document.addEventListener('focusin', vu);
+        document.addEventListener('pointerdown', vu, true);
+    }
+
+    function productionRemplie() {
+        var g = grilleDuModele();
+        return !!g && ficheProductionOuverte() && String((el('productionTitre') || {}).value) === MATERIEL.production.description
+            && String((el('productionGrille') || {}).value) === String(g.id)
+            && texteChoisi('productionEchelle').indexOf(MATERIEL.echelle) !== -1
+            && !!lireCtx().cartoucheId && String((el('productionCartouche') || {}).value) === String(lireCtx().cartoucheId);
+    }
 
     /**
-     * Une étape du parcours, reprise pour le modèle : ce qu'elle désigne et ce qui la fait avancer ne changent pas ; `plus`
-     * la surcharge (des lignes, un texte, un geste, des boutons). Tant que le deuxième groupe n'est pas le groupe
-     * actif, l'étape n'avance pas : elle montre le menu de l'en-tête et le dit (une bulle en lignes, par sa seule
-     * consigne, sans bouton : « Remplir avec l'exemple » ne remplit jamais la fiche d'un autre groupe).
+     * Le nom de la production est ce qu'elle fait faire (la démo a déjà un « Artefact 1 »), repris en « Activité
+     * d'apprentissage ». La grille choisie, la page peuple le menu de ses cartouches : la cartouche est choisie ensuite.
      */
-    function pourLeModele(etape, plus) {
-        var e = Object.create(etape);
-        Object.keys(plus).forEach(function (k) { Object.defineProperty(e, k, Object.getOwnPropertyDescriptor(plus, k)); });
-        var d = {};
-        ['zones', 'fleches', 'contour', 'aussiEviter', 'formulaire', 'complement', 'avis', 'atteint', 'lignes'].forEach(function (k) { d[k] = e[k]; });
-        var sesBoutons = Object.getOwnPropertyDescriptor(plus, 'boutons');
-        var sinon = function (k, repli) {
-            return function () { return surLeDeuxiemeGroupe() ? (typeof d[k] === 'function' ? d[k].apply(e, arguments) : repli) : null; };
-        };
-        var enLignes = Object.prototype.hasOwnProperty.call(plus, 'lignes');
-        e.zones = function () { return surLeDeuxiemeGroupe() ? (d.zones ? d.zones.call(e) : []) : []; };
-        e.contour = function () { return surLeDeuxiemeGroupe() ? (d.contour ? d.contour.call(e) : null) : el('selectGroupeCoursHeader'); };
-        e.avis = function () { return surLeDeuxiemeGroupe() ? (d.avis ? d.avis.call(e) : '') : (enLignes ? '' : MOTS_M.groupe); };
-        ['fleches', 'aussiEviter', 'formulaire', 'complement'].forEach(function (k) { if (d[k]) e[k] = sinon(k, null); });
-        if (d.atteint) e.atteint = function () { return surLeDeuxiemeGroupe() && d.atteint.call(e); };
-        if (enLignes) {
-            e.lignes = function () { return surLeDeuxiemeGroupe() ? d.lignes.call(e) : [consigne(MOTS_M.choisirLeGroupe)]; };
-            if (sesBoutons) {
-                Object.defineProperty(e, 'boutons', { get: function () {
-                    if (!surLeDeuxiemeGroupe()) return null;
-                    return sesBoutons.get ? sesBoutons.get.call(e) : sesBoutons.value;
-                } });
-            }
-        }
-        return e;
+    async function remplirLaProduction() {
+        var g = grilleDuModele(), p = MATERIEL.production, cid = lireCtx().cartoucheId;
+        if (!g) return;
+        C().poser(el('productionTitre'), p.description);
+        C().poser(el('productionActivite'), p.description);
+        C().poser(el('productionType'), p.type);
+        C().poser(el('productionGrille'), g.id);
+        C().choisir(el('productionEchelle'), MATERIEL.echelle);
+        var offerte = function () { var s = el('productionCartouche'); return !!s && [].some.call(s.options, function (o) { return o.value === cid; }); };
+        if (cid && await attendre(offerte, 3000) && enDemo()) C().poser(el('productionCartouche'), cid);
     }
 
-    /** Les surcharges d'une étape en trois temps : ses lignes et son bouton ; ni paragraphe, ni ligne du geste, ni flèches du formulaire. */
-    function enTroisTemps(o, plus) {
-        var t = C().troisTemps(o);
-        var e = { texte: '', geste: '', fleches: function () { return []; } };
-        [t, plus || {}].forEach(function (src) {
-            Object.keys(src).forEach(function (k) { Object.defineProperty(e, k, Object.getOwnPropertyDescriptor(src, k)); });
-        });
-        return e;
+    function formeDeLaProduction() {
+        if (!ficheProductionOuverte()) return 'liste';
+        return productionRemplie() ? 'remplie' : 'fiche';
     }
+
+    // ---------- Étape 8 : les consignes, un bloc libre et l'échéance ----------
+
+    function champEcheance() {
+        var s = el('sectionPlanification');
+        return s ? s.querySelector('input[type="date"]') : null;
+    }
+
+    /** Le bloc libre « Grille d'autoévaluation » de la fiche ouverte, s'il y est. */
+    function blocDAutoevaluation() {
+        return [].slice.call(document.querySelectorAll('#champsPersonnalisesListe .champ-perso:not([data-ancre])')).filter(function (b) {
+            var t = b.querySelector('.champ-perso-titre');
+            return t && String(t.value || '').trim() === MATERIEL.production.autoevaluation.titre;
+        })[0] || null;
+    }
+
+    function consignesRemplies() {
+        var d = champEcheance(), b = blocDAutoevaluation(), c = b ? b.querySelector('.champ-perso-contenu') : null;
+        return String((el('productionObjectif') || {}).value) === MATERIEL.production.objectif && !!d && d.value === MATERIEL.production.echeance
+            && !!c && c.value === MATERIEL.production.autoevaluation.contenu;
+    }
+
+    /** L'objectif, la tâche, son détail ; un bloc libre (« + Nouveau champ ») pour la grille d'autoévaluation ; l'échéance. */
+    function remplirLesConsignes() {
+        var p = MATERIEL.production;
+        C().poser(el('productionObjectif'), p.objectif);
+        C().poser(el('productionTache'), p.tache);
+        C().poser(el('productionDetailTache'), p.detailTache);
+        if (!blocDAutoevaluation() && typeof window.ajouterChampPersonnalise === 'function') {
+            window.ajouterChampPersonnalise();
+            var blocs = document.querySelectorAll('#champsPersonnalisesListe .champ-perso:not([data-ancre])');
+            var b = blocs[blocs.length - 1];
+            if (b) C().poser(b.querySelector('.champ-perso-titre'), p.autoevaluation.titre);
+        }
+        var bloc = blocDAutoevaluation();
+        if (bloc) C().poser(bloc.querySelector('.champ-perso-contenu'), p.autoevaluation.contenu);
+        C().poser(champEcheance(), p.echeance);
+    }
+
+    /** La fiche de la production du modèle ouverte, puis amenée à ses consignes. */
+    async function ouvrirLesConsignes() {
+        await ouvrirLaProduction();
+        var l = el('champsPersonnalisesListe');
+        if (l && vis(l)) l.scrollIntoView({ block: 'start' });
+    }
+
+    // ---------- Étape 9 : l'évaluation de Yack Amical ----------
+
+    function formeDeLEvaluation() {
+        if (!ecranEvaluationVisible()) return 'liste';
+        return critereAAttribuer() ? 'criteres' : 'verrou';
+    }
+
+    function motEcrit() { return String((el('motPourEtudiant1') || {}).value || '').trim() !== ''; }
+
+    function ouToucherPourLeVerrou() {
+        var mot = el('motPourEtudiant1');
+        return vis(mot) && !motEcrit() ? mot : boutonVerrou();
+    }
+
+    // ---------- Étape 10 : le point qui s'allume ----------
+
+    async function montrerLaBande() {
+        aller('suivi', 'groupe');
+        await attendre(blocPerformance, 3000);
+    }
+
+    function bandeDePerformance() { var b = blocPerformance(); return (b && b.querySelector('.barre-indicateur')) || b; }
+
+    // =================================================================
+    // LES DIX ÉTAPES
+    // =================================================================
+
+    var NOMBRE_D_ETAPES_DU_MODELE = 10;
 
     // Construites au premier besoin : elles s'appuient sur les outils communs de js/parcours-classe.js (`C()`), que
     // ce fichier ne suppose pas chargés à sa lecture.
@@ -1417,180 +1873,265 @@
         return etapesDuModele;
     }
 
-    function construireLesEtapesDuModele() { return [
-        pourLeModele(ETAPES[0], {
-            get texte() { return modeRendu === 'types' ? TEXTES_M.types : texteEtape1(); },
-            // À l'accueil : la seule consigne « Remplir avec l'exemple » ; la grille entre alors dans l'étiquetage, où
-            // la bulle du parcours prend le relais (« une étiquette à la fois »).
-            lignes: function () {
-                if (modeRendu === 'types') return [];
-                if (modeRendu === 'accueil') {
-                    return [
-                        note("Dans la démo, tu évalues une première production du deuxième groupe, avec le matériel de l'exemple. D'abord, sa grille."),
-                        consigne(C().mots.toucheRemplir)
-                    ];
+    function construireLesEtapesDuModele() {
+        var T = TEXTES;
+        var remplir = function (gestes) { return [{ libelle: C().mots.remplir, primaire: true, action: function () { C().remplir(gestes); } }]; };
+        return [
+            // 1. Ta pratique de notation : Conception › Pratiques, puis le premier écran de l'assistant.
+            etapeDuModele({
+                titre: T.etape1.titre,
+                lieu: function () { return !wizardOuvert(); },
+                lieuSuite: T.etape1.lieuSuite,
+                confirme: function () { return wizardOuvert() ? T.etape1.devient.confirme : ''; },
+                lignes: function () { return wizardOuvert() ? forme(T.etape1.devient) : forme(T.etape1); },
+                avant: async function () {
+                    surModale(false);
+                    aller('conception', 'pratiques-notation');
+                    await attendre(function () { return sousSectionVisible('conception-pratiques-notation'); }, 2000);
+                },
+                zones: zonesDeLAssistant,
+                aussiEviter: aussiEviterDansLAssistant,
+                contour: ouToucherDansLAssistant,
+                nommeLeContour: true,
+                atteint: aLEcranChoixModele
+            }),
+            // 2. Un modèle : « Choisis un modèle », puis le récapitulatif.
+            etapeDuModele({
+                titre: T.etape2.titre,
+                confirme: function () { return auRecapitulatif() ? '' : T.etape2.confirme; },
+                lignes: function () { return auRecapitulatif() ? forme(T.etape2.devient) : forme(T.etape2); },
+                zones: zonesDeLAssistant,
+                aussiEviter: aussiEviterDansLAssistant,
+                contour: ouToucherDansLAssistant,
+                nommeLeContour: true,
+                atteint: function () { return questionDeLEchelle() || pratiqueCreee(); }
+            }),
+            // 3. Une échelle de performance : la question de l'échelle à l'adoption.
+            etapeDuModele({
+                titre: T.etape3.titre,
+                confirme: T.etape3.confirme,
+                lignes: function () { return forme(T.etape3); },
+                zones: zonesDeLAssistant,
+                aussiEviter: aussiEviterDansLAssistant,
+                contour: function () {
+                    if (!questionDeLEchelle()) return ouToucherDansLAssistant();
+                    return echelleChoisie() ? boutonAdopter() : ligneDeLEchelle();
+                },
+                nommeLeContour: true,
+                atteint: function () {
+                    var ok = pratiqueCreee();
+                    if (ok) surModale(false);
+                    return ok;
                 }
-                return LIGNES_1[modeRendu] || [];
-            },
-            get geste() { return modeRendu === 'types' ? gesteDesTypes() : gesteEtape1(); },
-            get boutons() {
-                if (modeRendu === 'types') return null;
-                if (modeRendu === 'accueil') return [{ libelle: C().mots.remplir, primaire: true, action: function () { C().remplir(ouvrirLaGrilleDeLExemple); } }];
-                return boutonsEtape1();
-            },
-            avant: async function () {
-                modeRendu = modeModele1();
-                if (modeRendu === 'types' || sousSectionVisible('conception-materiel')) return;
-                aller('conception', 'materiel');
-                await attendre(function () { return sousSectionVisible('conception-materiel'); }, 2000);
-            },
-            zones: function () { return modeRendu === 'types' ? surLaCible(ouPasserAuxNiveaux()) : zonesEtape1(); },
-            fleches: function () {
-                if (modeRendu === 'types') return null;
-                if (modeRendu === 'accueil' || modeRendu === 'pourquoi' || modeRendu === 'apprends') return [];
-                if (LIGNES_1[modeRendu]) return zonesEtape1();
-                return dissectionOuverte() ? A().fleches() : null;
-            },
-            complement: function () { return modeRendu === 'types' ? null : complementEtape1(); },
-            aussiEviter: function () { return modeRendu === 'types' ? [] : aussiEviterEtape1(); },
-            // À l'accueil, le geste est dans la bulle : rien n'est désigné sur la page.
-            contour: function () { return modeRendu === 'types' ? ouPasserAuxNiveaux() : modeRendu === 'accueil' ? null : contourEtape1(); },
-            nommeLeContour: true,
-            atteint: function () {
-                if (grilleDuModele() && !grilleEnPoints()) return true;
-                if (modeModele1() !== modeRendu) M().allerA(0);
-                return false;
-            }
-        }),
-        pourLeModele(ETAPES[1], enTroisTemps({
-            dAbord: function () {
-                if (ficheProductionOuverte()) return null;
-                return [note("La grille est prête. Décris la production qu'elle servira à évaluer."), consigne("Touche « + Nouvelle production »")];
-            },
-            rempli: productionRemplie,
-            gestes: remplirLaProduction,
-            apres: function () {
-                return [
-                    { texte: "Son nom dit ce qu'elle fait faire ; il est repris dans « Activité d'apprentissage » (c'est ce que les étudiant·es lisent en tête de leur synthèse de rétroaction)", montre: function () { return [el('productionTitre'), el('productionActivite')]; } },
-                    { texte: "Son type : « " + MATERIEL.production.nomDuType + " »", montre: function () { return [el('productionType')]; } },
-                    { texte: "Sa grille, « " + MATERIEL.grille.nom + " », et son échelle, « " + MATERIEL.echelle + " »", montre: function () { return [el('productionGrille'), el('productionEchelle')]; } }
-                ];
-            },
-            creer: "Touche « Créer la production »"
-        }, {
-            contour: function () {
-                if (!ficheProductionOuverte()) return qs('#conception-productions [data-action="creerNouvelleProduction"]');
-                return productionRemplie() && vis(el('btnCreerProduction')) ? el('btnCreerProduction') : null;
-            }
-        })),
-        pourLeModele(ETAPES[2], enTroisTemps({
-            rempli: consignesRemplies,
-            gestes: remplirLesConsignes,
-            apres: function () {
-                return [
-                    // Une flèche, vers le premier des trois champs : à trois grands champs évités, la bulle n'avait
-                    // plus de place libre (mesuré le 15 nov. 2026, 1180 × 820).
-                    { texte: "L'objectif, la tâche et les consignes : ce que les étudiant·es doivent savoir pour réussir", montre: function () { return [el('productionObjectif')]; } },
-                    { texte: "La date de remise : " + MATERIEL.production.echeanceDite + ", une séance du groupe", montre: function () { return [champEcheance()]; } }
-                ];
-            },
-            creer: "Coche « Consignes transmises » (la production entre alors au calendrier du groupe)"
-        }, {
-            contour: function () { return consignesRemplies() ? caseConsignes() : null; },
-            nommeLeContour: false
-        })),
-        pourLeModele(ETAPES[3], {
-            get texte() { return texteEvaluation(); },
-            geste: "Touche « Actions › Évaluer » sur sa ligne, choisis les niveaux de l'exemple, puis touche « Verrouiller »."
-        }),
-        pourLeModele(ETAPES[4], {
-            texte: TEXTES_M.pratique,
-            geste: "Touche « + Nouvelle pratique », choisis « Partir d'un modèle », puis « " + MATERIEL.pratique.nom + " », jusqu'à « Créer la pratique » ; choisis l'échelle, puis « Adopter ».",
-            // La question de l'échelle (un modèle par standards, `demanderEchelleAdoption`) s'ouvre par-dessus l'assistant :
-            // la bulle ne la couvre pas non plus.
-            zones: function () {
-                var z = ETAPES[4].zones(), q = el('ui-dialogue-question');
-                if (q) z = z.concat([q.closest('.modal-contenu') || q.parentElement]);
-                return z.filter(Boolean);
-            },
-            // Ses choix et ses boutons (« Adopter ») : jamais sous la bulle, qui couvre forcément une partie de la
-            // fenêtre (mesuré le 15 nov. 2026, 1180 × 820 : la ligne du geste couvrait « Adopter »).
-            aussiEviter: function () {
-                var base = ETAPES[4].aussiEviter() || [], o = el('overlay-ui-dialogue');
-                if (!vis(o)) return base;
-                return base.concat([o.querySelector('.modal-actions')], [].slice.call(o.querySelectorAll('.ui-dialogue-choix-ligne'))).filter(Boolean);
-            }
-        }),
-        pourLeModele(ETAPES[5], { texte: TEXTES_M.appliquer }),
-        pourLeModele(ETAPES[6], {}),
-        pourLeModele(ETAPES[7], enTroisTemps({
-            dAbord: function () {
-                if (cartoucheCreee() || ficheCartoucheOuverte()) return null;
-                return [note("La rétroaction vient de la grille. Pour qu'elle parle avec des mots d'enseignant·e, il lui faut une cartouche."), consigne("Touche « + Nouvelle cartouche »")];
-            },
-            ensuite: function () {
-                if (!cartoucheCreee()) return null;
-                return [
-                    { texte: "La cartouche est créée", fait: fait },
-                    consigne("Dans la fiche de la production, choisis cette cartouche (elle s'appliquera à chaque évaluation)")
-                ];
-            },
-            rempli: cartoucheRemplie,
-            gestes: function () { remplirLaCartouche(); },
-            apres: function () {
-                return [
-                    { texte: "Son nom, sa grille, « " + MATERIEL.grille.nom + " », et son échelle, « " + MATERIEL.echelle + " »", montre: function () { return [el('nomCartouche'), el('selectGrilleCartouche'), el('selectEchelleCartouche')]; } },
-                    { texte: "Vingt commentaires : un par critère et par niveau de performance, tels qu'on les écrirait dans la marge", montre: function () { return [el('cartoucheZonePrincipale')]; } }
-                ];
-            },
-            creer: "Touche « Créer la cartouche »"
-        }, {
-            contour: function () {
-                if (cartoucheCreee()) return ouNommerLaCartouche();
-                if (!ficheCartoucheOuverte()) return qs('#conception-retroactions [data-action="creerNouvelleCartouche"]');
-                return cartoucheRemplie() ? el('btnCreerCartouche') : null;
-            },
-            zones: function () {
-                if (cartoucheCreee()) return zonesPourNommer();
-                return [];
-            },
-            avis: function () { return ''; }
-        })),
-        pourLeModele(ETAPES[8], {
-            texte: '',
-            geste: '',
-            // La fin (Grégoire, 14 nov. 2026, 10 h 58) : trois suites de même poids ; « Voir le parcours suivant »
-            // n'y est que lorsque le parcours suivant a son modèle (« Recevoir » ne l'a pas encore), et la consigne
-            // suit les boutons présents. Le moteur pose, au-dessus, « Pour revoir une étape, touche « 9 sur 9 ». ».
-            lignes: function () {
-                return [
-                    { texte: "Reviens à la première évaluation : touche « Actions › Consulter », puis « Déverrouiller »" },
-                    { texte: "Choisis la cartouche : la rétroaction se réécrit avec ses commentaires, un par critère, selon le niveau attribué" },
-                    { texte: "Dans « Un mot pour ton étudiant·e », écris « " + MATERIEL.mot + " », puis verrouille" },
-                    consigne(C().consigneDesSuites(C().suitesDuModele(ID, terminerModele)))
-                ];
-            },
-            get boutons() { return C().suitesDuModele(ID, terminerModele); }
-        })
-    ]; }
+            }),
+            // 4. L'appliquer à ton cours : l'étape s'ouvre en haut de l'onglet « Pratiques ».
+            etapeDuModele({
+                titre: T.etape4.titre,
+                confirme: T.etape4.confirme,
+                lignes: function () {
+                    return forme({ phrase: T.etape4.phrase, lignes: T.etape4.lignes }).concat([
+                        geste(T.etape4.consignes[0], laPratiqueEstChoisie), geste(T.etape4.consignes[1])
+                    ]);
+                },
+                avant: async function () {
+                    surModale(false);
+                    aller('conception', 'pratiques-notation');
+                    await attendre(function () { return sousSectionVisible('conception-pratiques-notation'); }, 2000);
+                    window.scrollTo(0, 0);
+                },
+                zones: function () { return laPratiqueEstChoisie() ? [boutonAppliquer()] : []; },
+                contour: function () { return laPratiqueEstChoisie() ? boutonAppliquer() : el('menuPratiques'); },
+                nommeLeContour: true,
+                atteint: laPratiqueDuModeleEstAppliquee
+            }),
+            // 5. Ta grille : Mon matériel ; étiqueter, lire, créer.
+            etapeDuModele({
+                titre: T.etape5.titre,
+                lieu: function () { return formeDeLaGrille() === 'accueil'; },
+                lieuSuite: T.etape5.lieuSuite,
+                confirme: function () { return formeDeLaGrille() === 'accueil' ? T.etape5.confirme : ''; },
+                lignes: function () { return lignesDeLaGrille(formeDeLaGrille()); },
+                boutons: function () {
+                    var f = formeDeLaGrille();
+                    if (f === 'accueil') return remplir(ouvrirLaGrilleDeLExemple);
+                    if (f === 'suite') return [{ libelle: T.etape5.suite.bouton, primaire: true, action: voirLaSuiteDeLExemple }];
+                    return null;
+                },
+                avant: async function () {
+                    lectureAmenee = false;
+                    if (sousSectionVisible('conception-materiel')) return;
+                    aller('conception', 'materiel');
+                    await attendre(function () { return sousSectionVisible('conception-materiel'); }, 2000);
+                },
+                zones: function () { return zonesDeLaGrille(formeDeLaGrille()); },
+                fleches: function () { var f = formeDeLaGrille(); return f === 'rigueur' || f === 'suite' ? zonesDeLaGrille(f) : []; },
+                contour: function () {
+                    var f = formeDeLaGrille();
+                    if (f === 'structure') return prochainGesteDeStructure();
+                    return f === 'lecture' ? boutonCreerMaGrille() : null;
+                },
+                atteint: function () { return !!grilleDuModele(); }
+            }),
+            // 6. Ta cartouche : Conception › Cartouches.
+            etapeDuModele({
+                titre: T.etape6.titre,
+                lieu: function () { return formeDeLaCartouche() === 'liste'; },
+                lieuSuite: T.etape6.lieuSuite,
+                confirme: function () { return formeDeLaCartouche() === 'liste' ? T.etape6.confirme : ''; },
+                lignes: function () {
+                    var f = formeDeLaCartouche();
+                    if (f === 'liste') return forme(T.etape6);
+                    if (f === 'fiche') return forme(T.etape6.fiche);
+                    var r = T.etape6.remplie;
+                    return [
+                        ligne(r.lignes[0], function () { return [el('nomCartouche')]; }),
+                        ligne(r.lignes[1], function () { return [el('selectGrilleCartouche'), el('selectEchelleCartouche')]; }),
+                        ligne(r.lignes[2], function () { return [caseStructureM()]; }),
+                        geste(r.consignes[0])
+                    ];
+                },
+                boutons: function () { return formeDeLaCartouche() === 'fiche' ? remplir(remplirLaCartouche) : null; },
+                avant: async function () {
+                    grilleCreee();
+                    aller('conception', 'retroactions');
+                    await attendre(function () { return sousSectionVisible('conception-retroactions'); }, 2000);
+                },
+                contour: function () {
+                    var f = formeDeLaCartouche();
+                    if (f === 'liste') return qs('#conception-retroactions [data-action="creerNouvelleCartouche"]');
+                    return f === 'remplie' ? el('btnCreerCartouche') : null;
+                },
+                atteint: cartoucheCreee
+            }),
+            // 7. Ta production : Conception › Productions.
+            etapeDuModele({
+                titre: T.etape7.titre,
+                lieu: function () { return formeDeLaProduction() === 'liste'; },
+                lieuSuite: T.etape7.lieuSuite,
+                confirme: function () { return formeDeLaProduction() === 'liste' ? T.etape7.confirme : ''; },
+                lignes: function () {
+                    var f = formeDeLaProduction(), t = T.etape7;
+                    if (f === 'liste') return forme(t);
+                    if (f === 'remplie') {
+                        return [
+                            ligne(t.remplie.lignes[0], function () { return [el('productionTitre'), el('productionActivite')]; }),
+                            ligne(t.remplie.lignes[1], function () { return [el('productionType')]; }),
+                            ligne(t.remplie.lignes[2], function () { return [el('productionGrille'), el('productionEchelle'), el('productionCartouche')]; }),
+                            ligne(t.remplie.lignes[3]),
+                            geste(t.remplie.consignes[0])
+                        ];
+                    }
+                    if (!typeOuvert) return [geste(t.fiche.type[0])];
+                    return [geste(t.fiche.type[0], fait), ligne(t.fiche.type[1]), geste(t.fiche.consignes[0])];
+                },
+                boutons: function () { return formeDeLaProduction() === 'fiche' && typeOuvert ? remplir(remplirLaProduction) : null; },
+                avant: async function () {
+                    ecouterLeType();
+                    typeOuvert = false;
+                    cartoucheCreee();
+                    aller('conception', 'productions');
+                    await attendre(function () { return sousSectionVisible('conception-productions'); }, 2000);
+                },
+                contour: function () {
+                    var f = formeDeLaProduction();
+                    if (f === 'liste') return qs('#conception-productions [data-action="creerNouvelleProduction"]');
+                    if (f === 'remplie') return el('btnCreerProduction');
+                    return typeOuvert ? null : el('productionType');
+                },
+                atteint: productionCreee
+            }),
+            // 8. Tes consignes : les blocs de consignes de la même fiche.
+            etapeDuModele({
+                titre: T.etape8.titre,
+                confirme: function () { return consignesRemplies() ? '' : T.etape8.confirme; },
+                lignes: function () {
+                    if (!consignesRemplies()) return forme({ phrase: T.etape8.phrase, consignes: T.etape8.consignes });
+                    var r = T.etape8.remplie;
+                    return [
+                        ligne(r.lignes[0], function () { return [el('productionObjectif')]; }),
+                        ligne(r.lignes[1], function () { return [el('productionTache')]; }),
+                        ligne(r.lignes[2], function () { return [blocDAutoevaluation()]; }),
+                        // « Préparer le PDF » est en haut de la fiche : la flèche ferait remonter la page (rien à toucher ici).
+                        ligne(r.lignes[3]),
+                        ligne(r.lignes[4], function () { return [champEcheance()]; }),
+                        geste(r.consignes[0])
+                    ];
+                },
+                boutons: function () { return consignesRemplies() ? null : remplir(remplirLesConsignes); },
+                avant: ouvrirLesConsignes,
+                contour: function () { return consignesRemplies() ? caseConsignes() : null; },
+                atteint: consignesTransmises
+            }),
+            // 9. Évaluer : Évaluation › Liste, la ligne de Yack Amical, puis l'écran d'évaluation.
+            etapeDuModele({
+                titre: T.etape9.titre,
+                lieu: function () { return !ecranEvaluationVisible(); },
+                lieuSuite: T.etape9.lieuSuite,
+                confirme: function () { return ecranEvaluationVisible() ? '' : T.etape9.confirme; },
+                lignes: function () {
+                    var f = formeDeLEvaluation(), t = T.etape9;
+                    if (f === 'liste') return forme(t);
+                    if (f === 'criteres') return forme(t.criteres);
+                    return forme({ lignes: t.verrou.lignes }).concat([geste(t.verrou.consignes[0], motEcrit), geste(t.verrou.consignes[1])]);
+                },
+                avant: async function () {
+                    if (ecranEvaluationVisible()) return;
+                    aller('evaluations', 'liste');
+                    await attendre(function () { return !!ligneAEvaluer(); }, 3000);
+                    amenerDeCote(ligneAEvaluer());
+                },
+                zones: function () {
+                    var f = formeDeLEvaluation();
+                    if (f === 'liste') { amenerDeCote(ligneAEvaluer()); return [rangeeDe(ligneAEvaluer())]; }
+                    return surLaCible(f === 'criteres' ? critereAAttribuer() : ouToucherPourLeVerrou());
+                },
+                contour: function () {
+                    var f = formeDeLEvaluation();
+                    if (f === 'liste') return ligneAEvaluer();
+                    return f === 'criteres' ? critereAAttribuer() : ouToucherPourLeVerrou();
+                },
+                nommeLeContour: true,
+                atteint: evaluationVerrouillee
+            }),
+            // 10. Le point qui s'allume : Suivi › Groupe ; la fin, trois boutons de même poids.
+            etapeDuModele({
+                titre: T.etape10.titre,
+                lieu: true,
+                lieuSuite: T.etape10.lieuSuite,
+                confirme: T.etape10.confirme,
+                lignes: function () { return forme(T.etape10); },
+                boutons: function () { return C().suitesDuModele(ID, terminerModele); },
+                avant: montrerLaBande,
+                zones: function () { return [bandeDePerformance()]; },
+                sansSortie: true,
+                atteint: function () { return false; }
+            })
+        ];
+    }
 
     var defDuModele = null;
     function definitionDuModele() {
-        if (!defDuModele) defDuModele = { id: ID + '-modele', etapes: etapesModele(), lienSortie: 'Plus tard' };
+        if (!defDuModele) {
+            defDuModele = {
+                id: ID + '-modele', etapes: etapesModele(), lienSortie: 'Plus tard',
+                // L'objectif, à la première forme de la première bulle seulement : la seconde (l'assistant ouvert) ne le redit pas.
+                objectif: function () { return wizardOuvert() ? '' : TEXTES.objectif; },
+                objectifAtteint: TEXTES.objectifAtteint
+            };
+        }
         return defDuModele;
     }
 
     /** La première étape du modèle que la démo n'a pas encore : une reprise y revient, sans rien retenir hors de la démo. */
     function premiereNonFaiteModele() {
         var faits = [
-            function () { return !!grilleDuModele() && !grilleEnPoints(); },
-            productionCreee, consignesTransmises, evaluationVerrouillee, pratiqueCreee, pratiqueEstAppliquee
+            [0, pratiqueCreee], [3, laPratiqueDuModeleEstAppliquee], [4, function () { return !!grilleDuModele(); }],
+            [5, cartoucheCreee], [6, productionCreee], [7, consignesTransmises], [8, evaluationVerrouillee]
         ];
         for (var k = 0; k < faits.length; k++) {
-            if (!faits[k]()) return k;
+            if (!faits[k][1]()) return faits[k][0];
         }
-        // « Le point qui s'allume » n'a rien à faire : la reprise y repasse, sauf si la cartouche est déjà nommée.
-        return cartoucheCreee() && productionNommeLaCartouche() ? 8 : 6;
+        return 9;
     }
 
     /**
@@ -1617,7 +2158,10 @@
         window.Assistance.definirEtatModele(ID, 'en-cours', depuis);
         return M().lancer(definitionDuModele(), {
             depuis: depuis,
-            surEtape: function (i) { window.Assistance.definirEtatModele(ID, 'en-cours', i); },
+            surEtape: function (i) {
+                if (i > 2) surModale(false);
+                window.Assistance.definirEtatModele(ID, 'en-cours', i);
+            },
             surQuitter: function () { surModale(false); },
             // La dernière bulle n'a pas de « Plus tard » : Échap vaut « Terminer ».
             surEchap: function () { terminerModele(); },
@@ -1642,7 +2186,7 @@
         prealable: 'classe',
         lancer: lancer,
         // Les deux temps (13 nov. 2026) : le modèle, dans la démo, sur le deuxième groupe.
-        totalModele: ETAPES.length,   // le modèle reprend les étapes du parcours, une pour une
+        totalModele: NOMBRE_D_ETAPES_DU_MODELE,   // dix étapes, propres au modèle depuis le 18 nov. 2026
         lancerModele: lancerModele,
         refusModele: refusModele
     });
@@ -1653,8 +2197,9 @@
         contexte: lireCtx,
         etapes: function () { return ETAPES; },
         texteDuChoix: TEXTE_1_CHOIX,
-        // Le modèle : son matériel, ses étapes, le tableau de sa grille, ce qu'il retient (en mémoire).
+        // Le modèle : son matériel, ses textes, ses étapes, le tableau de sa grille.
         materiel: MATERIEL,
+        textes: TEXTES,
         etapesModele: etapesModele,
         tableauDeLaGrille: tableauDeLaGrille,
         refusModele: refusModele

@@ -67,7 +67,8 @@ test('le panneau : le texte en quatre temps numérotés, deux états par parcour
 
     // (c) Un parcours qui a son modèle porte DEUX états, un par temps, chacun son bouton ; les autres, un seul.
     const avec = await page.evaluate(() => Assistance.parcours().filter((d) => typeof d.lancerModele === 'function').map((d) => d.id));
-    expect(avec).toEqual(['classe', 'evaluer']);
+    // 17 nov. 2026 : « Recevoir » a son modèle (js/parcours-recevoir-modele.js).
+    expect(avec).toEqual(['classe', 'evaluer', 'recevoir']);
     for (const id of avec) {
         const temps = carte(page, id).locator('.assistance-temps');
         await expect(temps).toHaveCount(2);
@@ -195,7 +196,8 @@ test('la modélisation de « Mettre ta classe en place », de bout en bout dans 
 
     // « Voir le parcours suivant » : le modèle d'« Évaluer », dans la démo.
     await boutons.nth(1).click();
-    await expect(bulle(page).locator('.parcours-bulle-rang')).toHaveText('1 sur 9', { timeout: 10000 });
+    // Dix étapes depuis le 18 nov. 2026 (le « Je regarde » d'« Évaluer », refait dans l'ordre du 15 nov.).
+    await expect(bulle(page).locator('.parcours-bulle-rang')).toHaveText('1 sur 10', { timeout: 10000 });
     expect(await enDemo(page)).toBe(true);
     expect(await page.evaluate(() => Assistance.etatModeleDe('classe').etat)).toBe('fait');
     expect(await page.evaluate(() => Assistance.etatModeleDe('evaluer'))).toEqual({ etat: 'en-cours', etape: 0 });
