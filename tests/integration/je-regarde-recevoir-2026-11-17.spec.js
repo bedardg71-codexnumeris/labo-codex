@@ -24,10 +24,12 @@ import { faireLesDeuxModeles, releveDesBlobs, poserUnBlobReel } from './harness/
 //   C · les sept évaluations de l'exemple : présentes, verrouillées, sans fichier, aux niveaux du tableau ; celle de Yack
 //       Amical (faite au modèle d'« Évaluer ») n'est pas remplacée ; aucune sur les trois copies ; leur note est celle
 //       que le formulaire calcule.
-// Les textes des bulles sont PROVISOIRES : le banc les lit dans `ParcoursRecevoirModele.textes`, pas en dur.
+// REMIS À DIX ÉTAPES le 17 nov. 2026, au soir (CONSIGNE-LOT-2026-11-17-recevoir-dix-bulles.md) : les copies refaites
+// (deux photos, un PDF), le redressement de la photo de Tapir Doux, l'import séparé, l'export et la fin réunis. Les
+// textes sont ceux de Grégoire ; le banc les lit dans `ParcoursRecevoirModele.textes`, pas en dur.
 
 const ORIENTATIONS = [[820, 1180], [1180, 820]];
-const TOTAL = 9;
+const TOTAL = 10;
 const etape = (page, n, titre) => attendreEtape(page, n, TOTAL, titre);
 const boutonDeBulle = (page, nom) => bulle(page).getByRole('button', { name: nom, exact: true });
 const T = (page) => page.evaluate(() => {
@@ -102,69 +104,130 @@ for (const [L, H] of ORIENTATIONS) {
         const t = await T(page);
         const titre = await page.evaluate((p) => db.getSync(cle('productions'), []).find((x) => x.id === p).titre, pid);
 
-        // 1. Leurs productions : « Remplir » dépose les trois copies.
+        // 1. Leurs productions : « Remplir » dépose les trois copies (deux photos, un PDF).
         await etape(page, 1, 'Leurs productions');
         expect(await enDemo(page)).toBe(true);
-        await expect(bulle(page)).toContainText('À la fin de ce parcours, tu seras en mesure');
-        expect((await lireBulle(page)).consignes).toEqual([t.etape1.consigne]);
+        await expect(bulle(page).locator('.parcours-bulle-objectif').first()).toContainText("de décrire le chemin d'une production dans l'application");
+        expect(sansInsecable(await bulle(page).innerText())).toContain(sansInsecable(t.etape1.lieu));
+        expect((await lireBulle(page)).consignes).toEqual([t.etape1.consignes[0]]);
         expect((await lireBulle(page)).boutons).toEqual([REMPLIR]);
         // Les sept évaluations sont posées dès le lancement (C les juge en détail).
         expect((await evaluationsDe(page, pid)).length).toBe(7);
         await boutonDeBulle(page, REMPLIR).click();
         await expect.poll(() => page.evaluate(() => travauxImport.obtenirFileDAttente().map((f) => f.nomFichier || (f.fichier && f.fichier.name)).sort()))
             .toEqual([
-                'Doux_9900005_Artefact-1_Remis_le_2025-09-09_07h58m03s.pdf',
-                'Enjouee_9900002_Artefact-1_Remis_le_2025-09-08_23h41m12s.pdf',
+                'Doux_9900005_Artefact-1_Remis_le_2025-09-09_07h58m03s.jpg',
+                'Enjouee_9900002_Artefact-1_Remis_le_2025-09-08_23h41m12s.jpg',
                 'Vaillante_9900006_Artefact-1_Remis_le_2025-09-08_19h22m47s.pdf'
             ]);
 
-        // 2. Vérifie avant d'importer : la production du modèle, puis « Importer » et « Oui, importer ».
+        // 2. Vérifie avant d'importer : la copie de Tapir Doux, puis l'engrenage « Réglages spécifiques ».
+        // Break-test (17 nov. 2026, soir) : l'étape 2 avançant sur le poste ouvert, sans `posteSurLaPhotoARedresser` →
+        // ROUGE ici (le poste ouvert sur la photo de Loutre fait avancer l'étape). Rétabli → vert.
         await etape(page, 2, "Vérifie avant d'importer");
         await expect(bulle(page).locator('.parcours-bulle-confirme')).toHaveText(t.etape2.confirme);
-        expect((await lireBulle(page)).consignes.map(sansInsecable)).toEqual([sansInsecable(t.etape2.choisir.replace('«TITRE»', titre))]);
+        expect((await lireBulle(page)).consignes).toEqual([t.etape2.consignes[0]]);
+        const tapir = await page.evaluate(() => travauxImport.obtenirFileDAttente().findIndex((f) => String(f.etudiantDA) === '9900005'));
+        const loutre = await page.evaluate(() => travauxImport.obtenirFileDAttente().findIndex((f) => String(f.etudiantDA) === '9900002'));
+        const ligne = (k) => `.pipeline-col-originaux .pipeline-fichier-ligne[data-param="${k}"]`;
+        await contourSur(page, ligne(tapir));
+        // Une autre photo d'abord : la bulle le dit, et l'étape ne bouge pas, même le poste ouvert.
+        await page.click(ligne(loutre));
+        await expect(bulle(page)).toContainText(sansInsecable(t.etape2.autreCopie).slice(0, 40));
+        await page.click('[data-action="travauxUI.ouvrirPreparationFichier"]');
+        await expect(page.locator('#travaux-preparation-modal')).toBeVisible();
+        await expect(bulle(page)).toContainText('Retour');
+        await page.waitForTimeout(800);
+        expect(await page.evaluate(() => ParcoursMoteur.etapeCourante()), 'le poste sur la photo de Loutre : l’étape 2 reste').toBe(1);
+        await page.click('#travaux-preparation-modal [data-action="travauxPreparation.fermer"]');
+        await expect(page.locator('#travaux-preparation-modal')).toBeHidden();
+        await page.click(ligne(tapir));
+        await contourSur(page, '[data-action="travauxUI.ouvrirPreparationFichier"]');
+        await page.click('[data-action="travauxUI.ouvrirPreparationFichier"]');
+
+        // 3. Redresse une photo : « Perspective » pose les poignées sur les coins de la feuille ; « Confirmer
+        // perspective » ; la bulle devient sa seconde forme ; « Confirmer les réglages spécifiques ».
+        // Break-test (17 nov. 2026, soir) : la seconde forme sans `perspectiveAppliquee` (toujours la première) → ROUGE
+        // ici (la consigne reste « Touche « Perspective »… »). Rétabli → vert.
+        await etape(page, 3, 'Redresse une photo');
+        await expect(bulle(page).locator('.parcours-bulle-confirme')).toHaveText(t.etape3.confirme);
+        expect(await page.evaluate(() => document.body.classList.contains('parcours-sur-modale')), 'la bulle au-dessus du poste').toBe(true);
+        expect((await lireBulle(page)).consignes).toEqual(t.etape3.consignes);
+        await contourSur(page, '#travaux-preparation-modal [data-action="travauxPreparation.activerPerspective"]');
+        await page.click('#travaux-preparation-modal [data-action="travauxPreparation.activerPerspective"]');
+        await contourSur(page, '#prep-btn-appliquer-persp');
+        // Les poignées sur les coins de la feuille (lot/perspective-coins), et la bulle ne couvre aucune d'elles.
+        const poignees = await page.evaluate(() => {
+            const c = document.getElementById('prep-canvas-apercu').getBoundingClientRect();
+            const b = document.getElementById('parcours-bulle').getBoundingClientRect();
+            return travauxPreparation.coinsDePerspective().map((p) => {
+                const x = c.left + p.x * c.width, y = c.top + p.y * c.height;
+                return { p, couverte: x >= b.left && x <= b.right && y >= b.top && y <= b.bottom };
+            });
+        });
+        test.info().annotations.push({ type: `poignées, ${L} × ${H}`, description: JSON.stringify(poignees.map((q) => [+q.p.x.toFixed(3), +q.p.y.toFixed(3), q.couverte])) });
+        expect(poignees.some((q) => q.couverte), 'la bulle ne couvre aucune poignée').toBe(false);
+        expect(Math.abs(poignees[0].p.x - 0.05) + Math.abs(poignees[0].p.y - 0.106)).toBeLessThan(0.04);
+        await page.click('#prep-btn-appliquer-persp');
+        await expect.poll(async () => (await lireBulle(page)).consignes).toEqual(t.etape3.devient.consignes);
+        await expect(bulle(page)).toContainText(sansInsecable(t.etape3.devient.lignes[0]).slice(0, 30));
+        await contourSur(page, '#prep-btn-confirmer');
+        await page.click('#prep-btn-confirmer');
+
+        // 4. Importe-les : la mention de l'Aperçu ; la production ; « Importer », « Oui, importer » ; la fin du traitement.
+        await etape(page, 4, 'Importe-les');
+        await expect(bulle(page).locator('.parcours-bulle-confirme')).toHaveText(t.etape4.confirme);
+        expect(await page.evaluate(() => document.body.classList.contains('parcours-sur-modale'))).toBe(false);
+        // Ce que l'Aperçu montre de la copie de Tapir (la bulle dit « Spécifique : Perspective ») : relevé pour le rapport.
+        const mention = await page.evaluate((k) => [...document.querySelectorAll('.pipeline-col-confirmes .pipeline-fichier-colonne')][k].querySelector('.pipeline-fichier-meta-col').innerText.replace(/\s+/g, ' ').trim(), tapir);
+        test.info().annotations.push({ type: 'mention de l’Aperçu (Tapir)', description: mention });
+        expect(mention).toMatch(/^Spécifique Perspective/);
+        expect((await lireBulle(page)).consignes.map(sansInsecable)).toEqual([sansInsecable(t.etape4.choisir.replace('«TITRE»', titre)), t.etape4.importer]);
         await contourSur(page, '.pipeline-production-selecteur');
-        await flecheVers(page, '.pipeline-production-selecteur', 'étape 2, la production');
+        await flecheVers(page, '.pipeline-production-selecteur', 'étape 4, la production');
         await page.selectOption('.pipeline-production-selecteur select', pid);
-        await expect.poll(async () => (await lireBulle(page)).consignes).toEqual([t.etape2.importer]);
+        await expect.poll(async () => (await lireBulle(page)).consignes).toEqual([t.etape4.importer]);
         await contourSur(page, '[data-action="travauxUI.appliquerEtImporter"]');
+        const debutImport = Date.now();
         await page.click('[data-action="travauxUI.appliquerEtImporter"]');
         await expect(page.locator('.modal-overlay.actif')).toContainText('3 fichier(s) seront importés');
         await page.locator('.modal-overlay.actif button', { hasText: 'Oui, importer' }).click();
 
-        // 3. La liste : trois « Importé », sept évaluées ; « Actions › Annoter » sur la ligne de Loutre Enjouée.
-        await etape(page, 3, 'La liste');
-        await expect(bulle(page).locator('.parcours-bulle-confirme')).toHaveText(t.etape3.confirme);
+        // 5. La liste : trois « Importé », sept évaluées ; « Actions › Annoter » sur la ligne de Loutre Enjouée.
+        await etape(page, 5, 'La liste');
+        test.info().annotations.push({ type: `import des trois copies, ${L} × ${H}`, description: Math.round((Date.now() - debutImport) / 100) / 10 + ' s (Chromium du nuage)' });
+        await expect(bulle(page).locator('.parcours-bulle-confirme')).toHaveText(t.etape5.confirme);
         for (const nom of ['Enjouée', 'Doux', 'Vaillante']) await expect(page.locator('#evaluations-liste tr', { hasText: nom })).toContainText('Importé');
         expect((await fichiersDe(page, pid)).map((f) => f.etudiantDA).sort()).toEqual(Object.keys(COPIES));
         expect((await evaluationsDe(page, pid)).map((e) => e.etudiantDA).sort()).toEqual(Object.keys(SEPT).sort());
-        // Tapir Doux et Antilope Vaillante viennent AVANT Loutre Enjouée dans la Liste : la pulsation va quand même à elle.
         await contourSur(page, menuDeLoutre);
-        await flecheVers(page, menuDeLoutre, 'étape 3, la ligne de Loutre Enjouée');
+        await flecheVers(page, menuDeLoutre, 'étape 5, la ligne de Loutre Enjouée');
         const annoter = (await page.locator(menuDeLoutre).evaluate((s) => [...s.options].map((o) => o.value))).find((v) => v.startsWith('annoter|'));
         await page.locator(menuDeLoutre).selectOption(annoter);
 
-        // 4. Les tampons : l'engrenage, puis « Annuler » (le modèle ne fait pas écrire les réglages réels des tampons :
-        // « Enregistrer » écrit quatorze clés hors de la démo, mesuré le 17 nov. 2026).
-        await etape(page, 4, 'Tes tampons');
-        await expect(bulle(page).locator('.parcours-bulle-confirme')).toHaveText(t.etape4.confirme);
+        // 6. Les tampons : l'engrenage, la seconde forme, puis « Annuler » (le modèle ne fait pas écrire les réglages réels
+        // des tampons : « Enregistrer » écrit quatorze clés hors de la démo, mesuré le 17 nov. 2026).
+        await etape(page, 6, 'Tes tampons');
+        await expect(bulle(page).locator('.parcours-bulle-confirme')).toHaveText(t.etape6.confirme);
         expect(await page.evaluate(() => travauxVisionneuse.getFichierActuel().etudiantDA)).toBe('9900002');
-        expect((await lireBulle(page)).consignes).toEqual([t.etape4.ouvrir]);
+        expect((await lireBulle(page)).consignes).toEqual(t.etape6.consignes);
         await contourSur(page, '#travaux-palette-tampons [title="Personnaliser"]');
         await page.locator('#travaux-palette-tampons [title="Personnaliser"]').click();
-        await expect.poll(async () => (await lireBulle(page)).consignes).toEqual([t.etape4.fermer]);
+        await expect.poll(async () => (await lireBulle(page)).consignes).toEqual(t.etape6.devient.consignes);
         await contourSur(page, '#modal-retro-observations [data-action="travauxOutils.fermerModalRetroObservations"]');
         await page.click('#modal-retro-observations [data-action="travauxOutils.fermerModalRetroObservations"]');
 
-        // 5. Annoter, puis « Annoter ▾ » › « Évaluer ».
-        await etape(page, 5, 'Annoter');
+        // 7. Annoter, puis « Annoter ▾ » › « Évaluer ».
+        await etape(page, 7, 'Annoter');
+        expect((await lireBulle(page)).consignes).toEqual(t.etape7.consignes);
         await contourSur(page, '#travaux-btn-actions');
         await page.click('#travaux-btn-actions');
-        await expect.poll(async () => (await lireBulle(page)).consignes).toEqual([t.etape5.evaluer]);
         await contourSur(page, '#travaux-btn-evaluer');
         await page.locator('[data-action="travauxUI.basculerMode"]', { hasText: 'Évaluer' }).first().click();
 
-        // 6. Évaluer : un niveau par critère, au choix (le modèle n'impose rien).
-        await etape(page, 6, 'Évaluer');
+        // 8. Évaluer : un niveau par critère, au choix (le modèle n'impose rien).
+        await etape(page, 8, 'Évaluer');
+        expect((await lireBulle(page)).consignes).toEqual(t.etape8.consignes);
         await expect(page.locator('#selectGrille1')).not.toHaveValue('');
         const champs = await page.evaluate(() => [...document.querySelectorAll('#listeCriteresGrille1 select[id^="eval_"]')].map((x) => x.id));
         expect(champs.length).toBe(4);
@@ -176,44 +239,57 @@ for (const [L, H] of ORIENTATIONS) {
             return [...document.querySelectorAll('#listeCriteresGrille1 select[id^="eval_"]')].some((s) => {
                 const b = s.getBoundingClientRect();
                 return b.width > 0 && s.value === '' && Math.abs((a.left + a.right) / 2 - (b.left + b.right) / 2) < 3 && Math.abs((a.top + a.bottom) / 2 - (b.top + b.bottom) / 2) < 3;
-            }) ? 'posé' : 'ailleurs : ' + (() => { const x = document.elementFromPoint((a.left + a.right) / 2, (a.top + a.bottom) / 2); return x ? x.tagName + '#' + x.id + '.' + x.className + ' [' + Math.round(a.left) + ',' + Math.round(a.top) + ' ' + Math.round(a.width) + 'x' + Math.round(a.height) + ']' : '?'; })();
-        }), { message: 'étape 6 : la pulsation sur un critère à attribuer', timeout: 5000 }).toBe('posé');
-        for (const [k, id] of champs.entries()) await page.locator('#listeCriteresGrille1 #' + id).selectOption(['M', 'M', 'D', 'E'][k]);
+            }) ? 'posé' : 'ailleurs';
+        }), { message: 'étape 8 : la pulsation sur un critère à attribuer', timeout: 5000 }).toBe('posé');
+        for (const [k, id] of champs.entries()) await page.locator('#listeCriteresGrille1 #' + id).selectOption(['M', 'D', 'D', 'D'][k]);
 
-        // 7. La rétroaction, le cadenas.
-        await etape(page, 7, 'Ta rétroaction');
+        // 9. La rétroaction, le cadenas.
+        await etape(page, 9, 'Ta rétroaction');
+        expect((await lireBulle(page)).consignes).toEqual(t.etape9.consignes);
         await contourSur(page, '#btnVerrouillerEvaluation');
         await page.click('#btnVerrouillerEvaluation');
 
-        // 8. Rendre : la production, puis « Exporter pour Léa ». Huit PDF (mesure 3.6) : la copie annotée de Loutre
-        // Enjouée avec sa synthèse, et sept synthèses seules ; aucun pour Tapir Doux ni Antilope Vaillante.
-        await etape(page, 8, 'Rends tes rétroactions');
-        await expect(bulle(page).locator('.parcours-bulle-confirme')).toHaveText(t.etape8.confirme);
+        // 10. Rends tes rétroactions : la production, « Exporter pour Léa » ; huit PDF (mesure 3.6) ; puis la seconde
+        // forme, la fin du parcours.
+        await etape(page, 10, 'Rends tes rétroactions');
+        await expect(bulle(page).locator('.parcours-bulle-confirme')).toHaveText(t.etape10.confirme);
+        await expect(bulle(page)).not.toContainText('Objectif atteint');
+        expect((await lireBulle(page)).consignes.map(sansInsecable)).toEqual([sansInsecable(t.etape10.choisir.replace('«TITRE»', titre)), t.etape10.exporter]);
         await contourSur(page, '#travaux-archivage-lea-production');
         await page.selectOption('#travaux-archivage-lea-production', pid);
-        await expect.poll(async () => (await lireBulle(page)).consignes).toEqual([t.etape8.exporter]);
+        await expect.poll(async () => (await lireBulle(page)).consignes).toEqual([t.etape10.exporter]);
         await contourSur(page, '[data-action="travauxUI.lancerExportLea"]');
         const avantExport = await releve(page);
+        // Le nom que l'application donne au ZIP (l'attribut `download` du lien) : la bulle 10 en parle.
+        await page.evaluate(() => {
+            const cliquer = HTMLAnchorElement.prototype.click;
+            HTMLAnchorElement.prototype.click = function () { if (this.download) window.__nomDuZip = this.download; return cliquer.apply(this, arguments); };
+        });
         const telechargement = page.waitForEvent('download');
         await page.click('[data-action="travauxUI.lancerExportLea"]');
-        const zip = await JSZip.loadAsync(fs.readFileSync(await (await telechargement).path()));
+        const dl = await telechargement;
+        const zip = await JSZip.loadAsync(fs.readFileSync(await dl.path()));
         const pdfs = Object.keys(zip.files).filter((n) => n.endsWith('.pdf')).sort();
-        test.info().annotations.push({ type: 'export Léa (mesure 3.6)', description: pdfs.join(' · ') });
+        const nomDuZip = await page.evaluate(() => window.__nomDuZip || '');
+        test.info().annotations.push({ type: 'export Léa (mesure 3.6)', description: nomDuZip + ' (Chromium : ' + dl.suggestedFilename() + ') : ' + pdfs.join(' · ') });
+        expect(nomDuZip).toMatch(/^Lea_.+_\d{4}-\d{2}-\d{2}\.zip$/);
         expect(pdfs).toHaveLength(8);
         for (const da of Object.keys(SEPT).concat(['9900002'])) expect(pdfs.some((n) => n.includes(da)), da).toBe(true);
         for (const da of ['9900005', '9900006']) expect(pdfs.some((n) => n.includes(da)), da).toBe(false);
-        // L'export n'écrit rien en base, ni dans la démo ni ailleurs (mesure 3.6).
-        await etape(page, 9, 'Remets-les');
-        // (Seul l'état du modèle lui-même change, sur l'appareil : `laboCodex.assistance`, de l'étape 8 à la 9.)
-        expect(ecarts(avantExport, await releve(page), (k) => !DE_L_APPAREIL.test(k)), 'l’export n’écrit rien').toEqual([]);
-
-        // 9. La fin : l'objectif atteint, les suites de même poids.
+        // La seconde forme : ses deux lignes, « Objectif atteint », la phrase de la suite, les boutons ; sans « Plus tard ».
         await expect(bulle(page)).toContainText('Objectif atteint : tu es en mesure');
+        await expect(bulle(page)).toContainText(sansInsecable(t.etape10.devient.lignes[0]).slice(0, 30));
+        await expect(bulle(page).locator('.parcours-bulle-confirme')).toHaveCount(0);
         await expect(bulle(page).locator('.parcours-bulle-sortie')).toHaveCount(0);
+        // « Voir le parcours suivant » n'y est que si le parcours suivant a son modèle : aucun ne l'a (écart nommé au rapport).
         await expect(bulle(page).locator('.parcours-bulle-boutons button')).toHaveText(['Le refaire avec ma classe', 'Terminer']);
+        // L'export n'écrit rien en base, ni dans la démo ni ailleurs (mesure 3.6) ; seul l'état du modèle change, sur l'appareil.
+        expect(ecarts(avantExport, await releve(page), (k) => !DE_L_APPAREIL.test(k)), 'l’export n’écrit rien').toEqual([]);
         await boutonDeBulle(page, 'Terminer').click();
         await expect(bulle(page)).toHaveCount(0);
         expect(await page.evaluate(() => Assistance.etatModeleDe('recevoir').etat)).toBe('fait');
+        // La photo de Tapir importée porte son redressement (la feuille droite) : sa copie en stock n'a plus le bois autour.
+        expect((await fichiersDe(page, pid)).find((f) => f.etudiantDA === '9900005')).toBeTruthy();
 
         // Dans la démo : huit évaluations verrouillées, celle de Yack Amical inchangée, trois copies.
         const huit = await evaluationsDe(page, pid);

@@ -439,8 +439,10 @@
         var de = function (k) { return plus[k] || base[k]; };
         e.texte = '';
         e.geste = '';
+        if (plus.titre) e.titre = plus.titre;
         if (plus.avant) e.avant = plus.avant;
         if (plus.nommeLeContour) e.nommeLeContour = true;
+        if (plus.aussiEviter) e.aussiEviter = function () { return surLeDeuxiemeGroupe() ? plus.aussiEviter() : []; };
         if (plus.sansSortie) Object.defineProperty(e, 'sansSortie', { get: plus.sansSortie });
         e.lignesVivantes = true;
         e.confirme = plus.confirme || null;   // un texte, ou une fonction (une bulle à deux formes)
@@ -543,6 +545,36 @@
         return ops.some(function (o) { return o && o.type === 'perspective'; });
     }
 
+    /**
+     * Les poignées de « Perspective » sont dessinées sur un canevas : rien, dans la page, que la bulle puisse éviter. Le
+     * modèle pose sur chacune un repère invisible (`pointer-events: none`), que la bulle évite comme son contour. Mesuré
+     * le 17 nov. 2026 à 820 × 1180 : aucune place hors de l'image n'accueille la bulle ; elle couvre l'image, jamais une poignée.
+     */
+    var reperes = [];
+    function reperesDesPoignees() {
+        var p = window.travauxPreparation, canevas = el('prep-canvas-apercu');
+        var coins = perspectiveEnCours() && p && typeof p.coinsDePerspective === 'function' ? p.coinsDePerspective() : null;
+        if (!coins || !vis(canevas)) { retirerLesReperes(); return []; }
+        var r = canevas.getBoundingClientRect(), cote = 40;
+        while (reperes.length < coins.length) {
+            var d = document.createElement('div');
+            d.className = 'parcours-repere-poignee';
+            d.setAttribute('aria-hidden', 'true');
+            d.style.cssText = 'position:fixed;width:' + cote + 'px;height:' + cote + 'px;pointer-events:none;opacity:0;';
+            document.body.appendChild(d);
+            reperes.push(d);
+        }
+        coins.forEach(function (c, k) {
+            reperes[k].style.left = Math.round(r.left + c.x * r.width - cote / 2) + 'px';
+            reperes[k].style.top = Math.round(r.top + c.y * r.height - cote / 2) + 'px';
+        });
+        return reperes.slice(0, coins.length);
+    }
+    function retirerLesReperes() {
+        reperes.forEach(function (d) { if (d.parentNode) d.parentNode.removeChild(d); });
+        reperes = [];
+    }
+
     /** La copie de Tapir Doux porte l'opération dans la file : le poste l'a rendue. */
     function photoRedressee() {
         var f = R().fileDAttente()[indexDeLaPhotoARedresser()];
@@ -580,6 +612,7 @@
                 atteint: posteSurLaPhotoARedresser
             }),
             pourLeModele(B[1], {
+                titre: 'Redresse une photo',
                 confirme: function () { return perspectiveAppliquee() ? '' : T.etape3.confirme; },
                 lignes: function () {
                     if (perspectiveAppliquee()) return forme(T.etape3.devient);
@@ -592,9 +625,15 @@
                     R().surModale(true);
                     await attendre(function () { return vis(boutonPerspective()); }, 3000);
                 },
+                // Aucune zone : l'image remplit le poste et aucune place ne la laisse libre (mesuré à 820 × 1180) ; comptée,
+                // elle pesait plus que les poignées. La bulle évite les poignées et les boutons à toucher (`aussiEviter`).
                 zones: function () {
                     R().surModale(posteOuvert());
-                    return [el('prep-espace'), perspectiveAppliquee() ? boutonConfirmerLesReglages() : (perspectiveEnCours() ? boutonConfirmerPerspective() : boutonPerspective())].filter(Boolean);
+                    return [];
+                },
+                aussiEviter: function () {
+                    var boutons = [boutonPerspective(), boutonConfirmerPerspective(), boutonConfirmerLesReglages()].filter(vis);
+                    return reperesDesPoignees().concat(boutons);
                 },
                 contour: function () {
                     if (perspectiveAppliquee()) return boutonConfirmerLesReglages();
@@ -603,11 +642,12 @@
                 nommeLeContour: true,
                 atteint: function () {
                     var ok = !posteOuvert() && photoRedressee();
-                    if (ok) R().surModale(false);
+                    if (ok) { R().surModale(false); retirerLesReperes(); }
                     return ok;
                 }
             }),
             pourLeModele(B[1], {
+                titre: 'Importe-les',
                 confirme: T.etape4.confirme,
                 lignes: function () {
                     var choisie = productionAImporterChoisie();
@@ -766,7 +806,7 @@
                 if (i !== 2) R().surModale(false);
                 window.Assistance.definirEtatModele(ID, 'en-cours', i);
             },
-            surQuitter: function () { R().nettoyer(); },
+            surQuitter: function () { R().nettoyer(); retirerLesReperes(); },
             // La dernière bulle n'a pas de « Plus tard » : Échap vaut « Terminer ».
             surEchap: function () { terminerModele(); },
             // Sortie de la démo en cours de route : le modèle se ferme et attend.
@@ -776,6 +816,7 @@
 
     function terminerModele() {
         R().nettoyer();
+        retirerLesReperes();
         window.Assistance.definirEtatModele(ID, 'fait', 0);
         M().fermer();
     }

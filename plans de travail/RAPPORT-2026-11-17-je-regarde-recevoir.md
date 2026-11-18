@@ -1,13 +1,113 @@
 # Rapport du lot — « Je regarde » de « Recevoir les productions, rendre tes rétroactions » (17 nov. 2026)
 
-**Dernier relais (17 nov. 2026, nuit)** : branche `claude/ecstatic-brown-urn6v8`, partie de `origin/main` à `03dc7d2`
-(1.249.0). **Fait** : le lot entier, sur la décision 3.1 de Grégoire (Yack Amical fixé) et le relais de Cowork du soir.
-Le modèle de « Recevoir » se joue de bout en bout dans la démo ; ses textes sont **provisoires**. Bancs sous **Chromium
-seulement**. **Reste** : les vrais textes des neuf bulles (Grégoire avec Cowork) ; la porte terrain, qui viendra avec eux ;
-le verdict WebKit à la fusion, sur le Mac ; **défaire le commit « BRANCHE SEULEMENT » avant toute fusion** (§5).
-Ni fusion, ni release, ni Nouvelles. Mandat : `plans de travail/CONSIGNE-LOT-2026-11-17-je-regarde-recevoir.md`.
+**Dernier relais (18 nov. 2026, nuit)** : branche `claude/ecstatic-brown-urn6v8` (PR n° 28), avec `materiel/recevoir-dix-bulles`
+(`16044f3`) et `lot/perspective-coins` (`dd4bf10`, PR n° 29) fusionnées. **Fait** : la consigne
+`plans de travail/CONSIGNE-LOT-2026-11-17-recevoir-dix-bulles.md` en entier (A à E). **Reste** : la porte terrain
+(`plans de travail/PORTES-TERRAIN-2026-11-17-recevoir-dix-bulles.md`, Cowork la mène) ; le verdict WebKit à la fusion,
+sur le Mac ; **défaire le commit « BRANCHE SEULEMENT » (`4c36db4`) avant toute fusion**. Ni fusion, ni release, ni
+Nouvelles. Chromium seulement.
 
 ---
+
+## Pour la conversation du Projet (quinze lignes, 18 nov., nuit)
+
+1. `claude/ecstatic-brown-urn6v8` (PR n° 28) porte les dix bulles ; `lot/perspective-coins` (PR n° 29, `dd4bf10`) y est fusionné. Aperçu : §S.6.
+2. A1 : « Perspective » pose les poignées sur les coins trouvés ; photo de Tapir à 1 % au plus des vrais coins (seuil du banc : 2 %), celle de Loutre au repli de 5 %.
+3. A1, écart : sur Loutre la détection ne rend pas `null`, elle rend le cadre de l'image (un coin hors d'elle) ; ce cas compte comme « rien trouvé ».
+4. A2 : un réglage de couleur ou de lumière remplace la balance automatique ; jugé à l'import et à l'aperçu. Source seulement : la file d'attente.
+5. Le badge « Spécifique » dit « Luminosité +20 », « Perspective »… ; il disait le nom anglais.
+6. B : `js/materiel-copies-deux-rives.js` refait (deux photos, un PDF, 4,9 Mo) ; sentinelle octet pour octet ; les photos passent `validerMagicBytes` (import au banc).
+7. C : dix étapes, les dix textes mot pour mot dans `TEXTES` ; les lignes PROPOSÉES sont marquées (deux, à l'étape 2).
+8. Écart : les bulles disent « à la section », le moteur « à l'onglet » ; posées telles quelles, sans le halo du menu (§S.3).
+9. Écart : la bulle 4 dit « Spécifique : Perspective » ; l'Aperçu montre « Spécifique », puis « Perspective », sans deux-points.
+10. Écart : la fin n'a que deux boutons ; « Voir le parcours suivant » attend un parcours suivant qui ait son « Je regarde ».
+11. Étape 3 : à 820 × 1180, aucune place hors de l'image ; la bulle évite les poignées (repères invisibles) et couvre le milieu de l'image.
+12. Bancs : A, B (deux orientations, dix étapes, clés et fichiers), C verts ; break-tests rouges, dont les deux gardes neuves.
+13. Export : huit PDF, rien d'écrit en base ; le ZIP est nommé `Lea_<production>_<date>.zip` (Chromium le reçoit « download »).
+14. Import des trois copies : 4,5 s sous Chromium dans le nuage ; l'étape attend la fin du traitement.
+15. Pas vérifié : Safari, l'iPad, le doigt sur les poignées, le nom du ZIP sous Safari : la porte terrain les porte.
+
+---
+
+## S. Le lot du soir (consigne des dix bulles)
+
+### S.1 Ce qui est fait
+
+| Partie | Où | Jugé par |
+|---|---|---|
+| A1, les coins | `js/travaux-preparation.js` : `activerPerspective` lance `detecterCoinsDocument` sur l'image telle que les poignées la voient (la géométrie appliquée) ; `coinsUtilisables` refuse un coin hors de l'image ou le cadre lui-même ; `detecterCoinsAuto`, sans appelant, retiré ; `coinsDePerspective`, `operationsEnCours` pour les bancs et le modèle | `perspective-coins-2026-11-17.spec.js` A1 ; deux break-tests (détection débranchée ; refus du cadre retiré) |
+| A2, la balance | `js/travaux-ui.js` : `balanceActiveePour` rend `false` devant `whiteBalance`, `brightness`, `contrast`, `exposure`, `grayscale` ; la géométrie seule la laisse | A2 (aperçu du centre : son rendu « bal » ou « raw » ; import : un seul appel d'`autoBalanceBlancs`) ; break-test |
+| Le badge | `decrireOperation` sur les types écrits ; la virgule par `formaterNombre` (#1137) | A2 (« Perspective », « Luminosité +20 ») |
+| B, les copies | `js/materiel-copies-deux-rives.js` refait ; jeton du chargeur `20261117b` | sentinelle (noms de la partie B, deux `image/jpeg` et un `application/pdf`, octet pour octet) ; deux break-tests |
+| C, les dix étapes | `js/parcours-recevoir-modele.js` ; `totalModele: 10`, `surModale` exposé (`js/parcours-recevoir.js`) | `je-regarde-recevoir-2026-11-17.spec.js` A, B, C |
+| D, la porte | `plans de travail/PORTES-TERRAIN-2026-11-17-recevoir-dix-bulles.md` | — |
+
+**A2, source ou stock** : la source seulement. La décision se lit à l'import et dans les aperçus ; ce qui est déjà importé ne
+change pas, et rien d'une évaluation n'est touché. La file d'attente (persistée depuis #884) relit la règle au prochain aperçu.
+
+### S.2 Les bancs (Chromium du nuage)
+
+| Banc | Résultat | Break-test (rouge, puis rétabli) |
+|---|---|---|
+| A1 · Tapir, les coins ; Loutre, le repli | vert ; coins trouvés (0,049 ; 0,096) (0,852 ; 0,075) (0,946 ; 0,879) (0,068 ; 0,914) | détection débranchée → rouge ; refus du cadre retiré → rouge |
+| A2 · balance, aperçu et import ; badge | vert | `balanceActiveePour` sans la garde → rouge |
+| Modèle A · le refus | vert | (inchangé) |
+| Modèle B · dix étapes, 820 × 1180 et 1180 × 820 | verts | étape 2 sans `posteSurLaPhotoARedresser` → rouge ; étape 3 sans `perspectiveAppliquee` → rouge ; les break-tests du confinement d'hier restent écrits au banc |
+| Modèle C · les sept évaluations | vert | (inchangé) |
+| Sentinelle du modèle (Vitest) | verte | un octet changé dans la photo de Tapir → rouge ; le type d'une photo changé → rouge |
+
+Les bancs voisins et Vitest sur la branche : §S.7. Sur `lot/perspective-coins` : Vitest vert au push ;
+`etats-vides-preparer-copies` vert ; `lot-j0-bis-partage-apres-preparation` : un rouge, **le même sur `main`**
+(`navigator.share` absent sous Chromium).
+
+### S.3 Les écarts avec la consigne, et pourquoi
+
+1. **A1, Loutre** : la consigne mesurait `null` ; la détection, sur l'image que voient les poignées, rend le **cadre de
+   l'image**, un coin à x = −0,006, impossible à saisir. Refusé : les poignées reviennent à 5 % des bords.
+2. **« à la section »** (bulles 1, 5, 6 et 10) : le moteur dirait « à l'onglet » pour ces sous-sections (sa règle, validée
+   pour « Découvrir »). Les phrases sont posées mot pour mot, comme des phrases de la bulle ; elles perdent le halo du menu.
+3. **Bulle 4, « Spécifique : Perspective »** : l'Aperçu montre « Spécifique », puis « Perspective » à part, sans
+   deux-points (relevé au banc : « Spécifique Perspective Doux 2750 x 3667 2,9 Mo »). Texte non changé.
+4. **Bulle 10, trois boutons** : « Voir le parcours suivant » n'est offert que si le parcours suivant a son « Je regarde » ;
+   aucun ne l'a. La fin offre « Le refaire avec ma classe » et « Terminer ». Non contourné : faire paraître le bouton
+   lancerait un modèle qui n'existe pas.
+5. **Bulle 10, l'ordre de la fin** : le moteur pose « Pour revoir une étape… » avant « Objectif atteint » (comme dans
+   tous les parcours), et l'écrit aussi à la première forme (c'est la dernière bulle).
+6. **Les consignes à parenthèse** (bulles 6 et 8) : la parenthèse fait partie de la ligne orange.
+7. **Étape 3, la bulle sur l'image** : à 820 × 1180, l'image occupe 579 × 771 px sur 810 × 1180 ; aucune place ne la laisse
+   libre. La bulle évite les quatre poignées (des repères invisibles posés dessus) et les boutons à toucher ; elle couvre le
+   milieu de l'image. Mesuré aux deux orientations : aucune poignée couverte.
+
+### S.4 Ce que j'ai supposé ou tranché
+
+- Les deux photos du petit lot posées en fixtures (`tests/fixtures/perspective-coins/`), pour que `lot/perspective-coins`
+  se juge seul : 2,5 Mo de plus.
+- L'étape 2 sait quelle photo le poste a ouverte par le nom qu'il affiche (`.prep-mini-nom`) ; sous l'anonymisation, ce nom
+  change : à revoir si le modèle doit tourner anonymisé.
+- Les lignes PROPOSÉES (étape 2) : « Ce modèle redresse la photo de Tapir Doux : sous « Originaux », touche la sienne. »
+  et « Ce n'est pas la photo de Tapir Doux : touche « ← Retour », puis choisis la sienne. » Le refus du panneau inchangé.
+- Les secondes formes (étapes 3, 6 et 10) n'ont ni confirmation ni phrase du lieu : « devient » remplace la bulle.
+- La garde de l'étape 8 (neuf passages) et « Annuler » à l'étape 6 : maintenues.
+
+### S.5 Ce qui n'est pas vérifié
+
+Safari et l'iPad ; le doigt sur les poignées ; le temps de l'import des deux photos sur l'iPad ; le nom du ZIP sous Safari
+(Chromium le reçoit nommé « download », l'application le nomme `Lea_Appliquer-des-stratégies-de-lecture-variées-Deux-Rives_<date>.zip`).
+Tout cela est dans la porte terrain.
+
+### S.6 L'aperçu
+
+PR n° 28 : https://github.com/bedardg71-codexnumeris/labo-codex/pull/28 ; aperçu :
+https://deploy-preview-28--codexnumeris-051225.netlify.app (build : voir §S.7).
+PR n° 29 (le petit lot seul) : https://github.com/bedardg71-codexnumeris/labo-codex/pull/29.
+
+### S.7 Les essais de la branche, et le build
+
+(rempli au push)
+
+---
+
+# Le lot de la nuit (17 nov. 2026, avant la consigne des dix bulles)
 
 ## 0. Pour la conversation du Projet (quinze lignes)
 
