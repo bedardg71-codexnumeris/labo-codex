@@ -93,8 +93,27 @@ test('A2 · « Perspective » seule laisse la balance automatique ; « Luminosit
 
     // La première : « Perspective » seule.
     await ouvrirLePoste(page, 0);
+    // 18 nov. 2026 (vécu par Grégoire sur l'iPad) : la couche des poignées laisse le doigt faire défiler le poste, sauf
+    // pendant la perspective (ses poignées à glisser). Break-test : la couche à `touch-action: none` en tout temps (le CSS
+    // d'avant, sans la bascule) → ROUGE ici. Rétabli → vert.
+    const toucherDeLaCouche = () => page.evaluate(() => getComputedStyle(document.getElementById('prep-canvas-overlay')).touchAction);
+    expect(await toucherDeLaCouche(), 'sans outil, le doigt défile').toBe('pan-x pan-y');
     await page.locator('#travaux-preparation-modal [data-action="travauxPreparation.activerPerspective"]').click();
+    expect(await toucherDeLaCouche(), 'pendant la perspective, le doigt glisse les poignées').toBe('none');
+    // Les poignées, peintes sur la couche ; après « Confirmer perspective », plus aucune (elles restaient, à leur place
+    // de détection). Break-test : `appliquerPerspective` qui quitte l'outil APRÈS l'opération (l'ordre d'avant) → ROUGE
+    // ici. Rétabli → vert.
+    const peintAuxCoins = (coinsVus) => page.evaluate((cs) => {
+        const o = document.getElementById('prep-canvas-overlay'), a = document.getElementById('prep-canvas-apercu');
+        const W = a.width, H = a.height, ctx = o.getContext('2d');
+        return cs.map((c) => { const d = ctx.getImageData(Math.round(W + c.x * W) - 6, Math.round(H + c.y * H) - 6, 12, 12).data;
+            let alpha = 0; for (let k = 3; k < d.length; k += 4) alpha += d[k]; return alpha > 0; });
+    }, coinsVus);
+    const coinsVus = await page.evaluate(() => travauxPreparation.coinsDePerspective());
+    expect(await peintAuxCoins(coinsVus), 'les poignées sont peintes').toEqual([true, true, true, true]);
     await page.click('#prep-btn-appliquer-persp');
+    await expect.poll(() => peintAuxCoins(coinsVus), { message: 'après « Confirmer perspective », plus aucune poignée' }).toEqual([false, false, false, false]);
+    expect(await toucherDeLaCouche(), 'l’opération faite, le doigt défile de nouveau').toBe('pan-x pan-y');
     await expect.poll(() => page.evaluate(() => travauxPreparation.operationsEnCours().map((o) => o.type))).toEqual(['perspective']);
     await page.click('#prep-btn-confirmer');
     await expect(page.locator('#travaux-preparation-modal')).toBeHidden({ timeout: 45000 });

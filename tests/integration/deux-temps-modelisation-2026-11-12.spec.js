@@ -67,7 +67,8 @@ test('le panneau : le texte en quatre temps numérotés, deux états par parcour
 
     // (c) Un parcours qui a son modèle porte DEUX états, un par temps, chacun son bouton ; les autres, un seul.
     const avec = await page.evaluate(() => Assistance.parcours().filter((d) => typeof d.lancerModele === 'function').map((d) => d.id));
-    expect(avec).toEqual(['classe', 'evaluer']);
+    // 17 nov. 2026 : « Recevoir » a son modèle (js/parcours-recevoir-modele.js).
+    expect(avec).toEqual(['classe', 'evaluer', 'recevoir']);
     for (const id of avec) {
         const temps = carte(page, id).locator('.assistance-temps');
         await expect(temps).toHaveCount(2);

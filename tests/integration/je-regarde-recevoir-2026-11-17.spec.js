@@ -290,7 +290,7 @@ for (const [L, H] of ORIENTATIONS) {
         // La seconde forme : ses deux lignes, « Objectif atteint », la phrase de la suite, les boutons ; sans « Plus tard ».
         await expect(bulle(page)).toContainText('Objectif atteint : tu es en mesure');
         await expect(bulle(page)).toContainText(sansInsecable(t.etape10.devient.lignes[0]).slice(0, 30));
-        await expect(bulle(page).locator('.parcours-bulle-confirme')).toHaveCount(0);
+        await expect(bulle(page).locator('.parcours-bulle-confirme')).toBeHidden();
         await expect(bulle(page).locator('.parcours-bulle-sortie')).toHaveCount(0);
         // « Voir le parcours suivant » n'y est que si le parcours suivant a son modèle : aucun ne l'a (écart nommé au rapport).
         await expect(bulle(page).locator('.parcours-bulle-boutons button')).toHaveText(['Le refaire avec ma classe', 'Terminer']);

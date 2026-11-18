@@ -619,6 +619,9 @@
      */
     function mettreAJourOverlay() {
         if (!ctxOverlay) return;
+        // Le doigt fait défiler le poste, sauf quand un outil a des poignées à glisser (lot/perspective-coins, 18 nov.
+        // 2026 : la couche, qui couvre tout l'espace, bloquait le défilement au doigt en permanence, `touch-action: none`).
+        canvasOverlay.style.touchAction = (outilActif === 'perspective' || outilActif === 'crop') ? 'none' : 'pan-x pan-y';
         ctxOverlay.clearRect(0, 0, canvasOverlay.width, canvasOverlay.height);
         const source = canvasGeometrique || imageTravail;
         if (!source) return;
@@ -1429,17 +1432,13 @@
         mettreAJourApercu();
     }
 
+    /** « Confirmer le recadrage » : l'outil quitté avant l'opération, comme pour la perspective (son cadre restait dessiné). */
     function appliquerCrop() {
         if (!cropRect || cropRect.width <= 0 || cropRect.height <= 0) return;
-        ajouterOperation({
-            type: 'crop',
-            x: cropRect.x,
-            y: cropRect.y,
-            width: cropRect.width,
-            height: cropRect.height
-        });
+        var cadre = { type: 'crop', x: cropRect.x, y: cropRect.y, width: cropRect.width, height: cropRect.height };
         outilActif = null;
         cropRect = null;
+        ajouterOperation(cadre);
     }
 
     /** Les poignées à 5 % des bords : le repli quand la détection ne trouve pas la feuille. */
@@ -2201,15 +2200,16 @@
         return Math.abs(area) / 2;
     }
 
+    /**
+     * « Confirmer perspective ». L'outil est quitté AVANT l'opération (lot/perspective-coins, 18 nov. 2026, vécu par
+     * Grégoire sur l'iPad) : `ajouterOperation` redessine, et les poignées l'étaient encore, sur l'image redressée.
+     */
     function appliquerPerspective() {
         if (!perspectiveCorners) return;
-        ajouterOperation({
-            type: 'perspective',
-            corners: perspectiveCorners.map(p => ({ ...p })),
-            fill: perspectiveFill
-        });
+        var coins = perspectiveCorners.map(p => ({ ...p }));
         outilActif = null;
         perspectiveCorners = null;
+        ajouterOperation({ type: 'perspective', corners: coins, fill: perspectiveFill });
     }
 
     function changerRemplissagePerspective(value) {

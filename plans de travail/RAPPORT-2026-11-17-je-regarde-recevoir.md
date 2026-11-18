@@ -9,6 +9,35 @@ Nouvelles. Chromium seulement.
 
 ---
 
+## Les retours de l'essai sur l'iPad (18 nov. 2026 ; relais de Cowork, 14 h 35)
+
+Sur `lot/perspective-coins` (`632f395`, PR n° 29), fusionné de nouveau dans `claude/ecstatic-brown-urn6v8` :
+- **A1, les poignées restaient** : `appliquerPerspective` (et `appliquerCrop`) quittaient l'outil APRÈS l'opération,
+  qui redessine : les poignées étaient repeintes. L'outil est quitté avant. Déjà le cas sur `main`.
+- **A2, le haut de l'image ne revenait pas** : la couche des poignées (`#prep-canvas-overlay`, tout l'espace du poste)
+  portait `touch-action: none` en permanence : le doigt ne pouvait faire défiler le poste nulle part. Elle laisse défiler
+  (`pan-x pan-y`), sauf pendant la perspective et le recadrage. Déjà le cas sur `main`. **Inférence, non vérifiée** :
+  sur l'iPad, le poste avait défilé (pour montrer « Confirmer perspective »), et le doigt ne pouvait le ramener. Le doigt
+  lui-même ne se simule pas ici (Chromium ne défile pas au toucher synthétique, avec ou sans le correctif) : le banc juge
+  le `touch-action` de la couche ; la porte juge le doigt.
+- **A3, « Texte » au doigt** : les outils qui tracent ignorent le doigt (rejet de la paume du Pencil) ; tampons et codes se
+  posent d'un toucher bref et immobile (#1123). « Texte » les rejoint ; un glissé défile toujours. Les autres outils
+  gardent leur raison (la paume), inchangés.
+
+Sur la branche :
+- **B4, la disposition des bulles (tous les parcours)** : la confirmation au-dessus du titre, en petit et en vert
+  (`poserConfirmation`, son élément créé avec la tête de la bulle) ; plus de tiret devant les explications ; « → » orange
+  devant le geste à faire, « ✓ » quand il est fait. Banc du 16 nov. : l'exemple de la bulle 2 de « Mettre ta classe en
+  place » (`fait:✓`, cinq explications sans marque, `geste:→`) et « Découvrir » jugés ; break-test (le tiret rendu) rouge.
+- **B5, les présences** : l'étape s'ouvre sur la première séance du groupe (`choisirLaPremiereSeance`), tout le monde
+  présent (2/2) ; « Remplir » ne note que les deux absences et le retard. La supposition de Cowork était juste : la saisie
+  s'ouvrait sur une date hors de l'horaire du groupe (« durée inconnue », « 0 pér. »). Banc et break-test.
+- **C, le poids des copies (#1286, inscrit)** : l'Aperçu n'affiche pas un poids mesuré mais une estimation (largeur ×
+  hauteur × 0,3 octet), sur les dimensions que vise « Rés. max. ». En stock : 1082 × 1400 (226 Ko) et 1050 × 1400
+  (214 Ko), plus légers que les originaux ; l'import plafonne toute photo à 1400 px (qualité 0,80). Trente photos :
+  environ 6,5 Mo, mais environ 127 ppp réels sur 11 po, la moitié des 250 annoncés.
+- **La porte** : `plans de travail/PORTES-TERRAIN-2026-11-18-retours-essai-ipad.md` (six gestes, Cowork la mène).
+
 ## Retouches de Cowork (18 nov. 2026, 7 h 40), appliquées
 
 1. Bulles 1, 5, 6 et 10 : « à l'onglet « X » », posé par le moteur avec le halo du menu (`lieu`, `lieuSuite`) ; la suite

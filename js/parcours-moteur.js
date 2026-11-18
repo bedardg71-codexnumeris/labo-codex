@@ -1110,7 +1110,7 @@
             boite.appendChild(ph);
         };
         if (etat.i === 0) phrase('parcours-bulle-objectif', texteDe(etat.def.objectif));
-        phrase('parcours-bulle-confirme', texteDe(etape.confirme));
+        poserConfirmation(etape);
         phrase('parcours-bulle-lieu', phraseDuLieu(lieu, etape.nommeLaSection ? sectionDe(etape) : null, texteDe(etape.lieuSuite)));
         var ul = null;
         var poser = function (ligne, dans) {
@@ -1146,6 +1146,19 @@
         if (etat.i === 0 && !etat.def.sansRang && !etat.telephone) phrase('parcours-bulle-aide', PHRASE_DE_LA_POIGNEE);
         boite.hidden = !boite.firstChild;
         majLignes(true);
+    }
+
+    /**
+     * LA CONFIRMATION AU-DESSUS DU TITRE (Grégoire, 18 nov. 2026, 14 h 11) : « C'est fait : … », le geste de l'étape
+     * d'avant, en petit et en vert, comme un fait accompli, au-dessus du titre et du compteur. Posée dans son élément
+     * (`etat.elements.confirme`, créé avec la tête de la bulle) ; récrite avec les lignes (une bulle à deux formes).
+     */
+    function poserConfirmation(etape) {
+        var c = etat.elements.confirme;
+        if (!c) return;
+        var texte = texteDe(etape.confirme);
+        c.textContent = texte ? typographier(texte) : '';
+        c.hidden = !texte;
     }
 
     /** À chaque passage de la sonde : une ligne dont le geste est fait se grise (et le dit) ; défait, elle revient. */
@@ -1337,6 +1350,12 @@
         }
         etat.glisse = null;
         if (etat.telephone) etat.deplacee = null;
+        // La confirmation de l'étape d'avant, au-dessus du titre (18 nov. 2026) ; son texte : `poserConfirmation`.
+        var confirme = document.createElement('p');
+        confirme.className = 'parcours-bulle-confirme';
+        confirme.hidden = true;
+        b.appendChild(confirme);
+        etat.elements.confirme = confirme;
         b.appendChild(tete);
         if (!etat.def.sansRang) b.appendChild(listeDesEtapes());
 
