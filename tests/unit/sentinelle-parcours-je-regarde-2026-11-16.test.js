@@ -292,8 +292,9 @@ describe('le moteur : les règles a à e, telles qu’il les écrit', () => {
     it('a. l’objectif du parcours : sur la première bulle seulement, avant la confirmation, le lieu et les lignes', () => {
         const objectif = ecrire.indexOf("if (etat.i === 0) phrase('parcours-bulle-objectif', texteDe(etat.def.objectif));");
         expect(objectif).toBeGreaterThan(-1);
-        expect(objectif).toBeLessThan(ecrire.indexOf("phrase('parcours-bulle-confirme'"));
-        expect(ecrire.indexOf("phrase('parcours-bulle-confirme'")).toBeLessThan(ecrire.indexOf("phrase('parcours-bulle-lieu'"));
+        // 18 nov. 2026 : la confirmation est posée au-dessus du titre (`poserConfirmation`), avant la phrase du lieu.
+        expect(objectif).toBeLessThan(ecrire.indexOf('poserConfirmation(etape);'));
+        expect(ecrire.indexOf('poserConfirmation(etape);')).toBeLessThan(ecrire.indexOf("phrase('parcours-bulle-lieu'"));
         expect(ecrire.indexOf("phrase('parcours-bulle-lieu'")).toBeLessThan(ecrire.indexOf('lignes.forEach(function (ligne) {'));
     });
 
@@ -342,7 +343,12 @@ describe('le moteur : les règles a à e, telles qu’il les écrit', () => {
     });
 
     it('e. la ligne qui confirme : avant la phrase du lieu, telle que le parcours l’écrit (le moteur n’y ajoute rien)', () => {
-        expect(ecrire).toContain("phrase('parcours-bulle-confirme', texteDe(etape.confirme));");
+        // 18 nov. 2026 (Grégoire, 14 h 11) : au-dessus du titre, dans son élément, posé avant la tête de la bulle.
+        expect(ecrire).toContain('poserConfirmation(etape);');
+        const poser = tranche(MOTEUR, 'function poserConfirmation(etape) {', '\n    }\n');
+        expect(poser).toContain('var texte = texteDe(etape.confirme);');
+        const rendre = tranche(MOTEUR, "confirme.className = 'parcours-bulle-confirme';", 'b.appendChild(tete);');
+        expect(rendre).toContain('b.appendChild(confirme);');
         expect(MOTEUR).not.toMatch(/Bravo|Bien joué|Félicitations/);
     });
 });
