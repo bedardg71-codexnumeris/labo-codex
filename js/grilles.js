@@ -3582,7 +3582,7 @@ function afficherCriteresTemp() {
                            data-on-change="modifierCritereTempHandler" data-critere-index="${index}" data-champ="description">
                 </div>
             </div>
-            ${rendreCartesGabaritAlgo(critere, { mode: "temp", index: index, criteres: window.tempCriteres })}${rendreAttenduCritere(critere, { grilleId: 'temp', index: index })}
+            ${rendreCartesGabaritAlgo(critere, { mode: "temp", index: index, criteres: window.tempCriteres })}${rendreAttenduCritere(critere, { grilleId: 'temp', index: index, criteres: window.tempCriteres })}
         </div>
     `).join('');
 
@@ -5073,51 +5073,220 @@ function rendreZoneAucuneAnnotation(critere, ctx) {
  * CRITÈRE » plus bas) ; les sous-critères restent en lecture. Une réponse au texte vide se montre :
  * c'est celle qu'on vient d'ajouter. `ctx` : { grilleId, index }, ceux des handlers du critère ; #1120 (21 oct.) :
  * `grilleId` vaut `temp` pour une grille en création (`afficherCriteresTemp`), où les mêmes sections se montrent.
+ * ↻ 18 nov. 2026 (lot `descripteurs-grille`) : un critère par niveaux montre TOUJOURS sa section « Ce qui est
+ * attendu à chaque niveau », une case par niveau, vide par défaut — qu'il soit né de l'assistant, à la main ou
+ * d'un import. `ctx.criteres` : les critères de la même grille (l'échelle d'un voisin, règle 2).
  */
 function rendreAttenduCritere(critere, ctx) {
-    const d = critere && critere.descripteurs;
     const analytique = !!critere && critere.type === 'analytique';
-    // Les textes par niveau d'une échelle : ceux d'un critère holistique, ou d'un analytique encore lié à
-    // une échelle (#1120 : rien n'est caché). Ceux d'un analytique SANS échelle sont son barème, lu plus bas.
-    const par = (d && d.parNiveau && (!analytique || d.echelleId)) ? d.parNiveau : {};
-    const codes = Object.keys(par);
+    // 18 nov. 2026 (lot `descripteurs-grille`) : les descripteurs de niveau se rendent par UN chemin
+    // (`rendreDescripteursNiveaux`, plus bas). Sans contexte de handlers, rien à modifier : rien.
+    const niveaux = critere && ctx ? rendreDescripteursNiveaux(critere, ctx) : '';
     const bareme = analytique && ctx ? rendreBaremeCritere(critere, ctx) : '';
     // 20 oct. (Grégoire, 13 h 56) : les sous-critères d'un critère non algorithmique se modifient, et leur
     // section se montre même vide, pour créer le premier. Sans contexte de handlers, rien à modifier : rien.
     const sous = critere && critere.type !== 'algorithmique' && ctx ? rendreSousCriteresCritere(critere, ctx) : '';
-    if (!bareme && !codes.length && !sous) return '';
+    if (!bareme && !niveaux && !sous) return '';
     // 21 oct. (Grégoire) : le barème SOUS les sous-critères — critère, ce qu'on observe, ce que ça vaut ; l'ordre du PDF.
     return `
-            <div class="grille-attendu">${rendreAttenduNiveaux(d, codes, ctx)}${sous}${bareme}
+            <div class="grille-attendu">${niveaux}${sous}${bareme}
             </div>`;
 }
 
-/**
- * Le texte de chaque niveau, dans l'ordre de l'échelle ; un code qu'elle ne connaît pas suit, dans l'ordre écrit.
- * Seul le texte se modifie, et l'écran le dit quand une échelle les nomme. Textes de Claude Code (lot 13),
- * validé G. 19 oct. 19 h 29. #1120 : les points, l'ajout et le retrait des réponses sont partis avec elles
- * (le barème les remplace) ; un critère holistique sans échelle garde ses textes, sous leur clé.
+/*
+ * LES DESCRIPTEURS DE NIVEAU D'UN CRITÈRE — 18 nov. 2026, lot `descripteurs-grille` (décision de Grégoire
+ * du 18 nov.) : dans la grille elle-même, l'enseignant·e décrit, critère par critère, ce qui est attendu à
+ * certains niveaux. Rien n'est fixé ici : chaque niveau de l'échelle a sa case, toutes facultatives.
+ *
+ * LA FORME, inchangée (celle de l'assistant, lot 3b1, et du partage, `partage-schemas.js`) :
+ *   critere.descripteurs = { echelleId, parNiveau: { <code du niveau>: <texte ≤ 5 000> } }
+ * Un second lot en tirera une grille d'autoévaluation dans les consignes de l'étudiant·e : il lira les
+ * MÊMES champs — les codes de `parNiveau`, nommés par les niveaux de l'échelle `echelleId`.
+ *
+ * QUELS CRITÈRES : ceux qui se notent par NIVEAUX — holistique et algorithmique (le second rend un niveau
+ * de l'échelle par son pourcentage, `niveauDuPourcentage`). Un critère en points (analytique) garde son
+ * barème tel quel : seuls les textes qu'il porte déjà, liés à une échelle (assistant d'avant #1125), se
+ * montrent et se modifient, comme avant ; aucune case vide, aucun menu.
+ *
+ * D'OÙ VIENNENT LES NIVEAUX — la grille n'a pas d'échelle à elle. Dans l'ordre :
+ *   1. `descripteurs.echelleId` du critère ;
+ *   2. sinon, celle d'un autre critère de la même grille (par niveaux) qui en porte une, encore dans le
+ *      trimestre : on choisit une fois par grille, les critères suivants la reprennent ;
+ *   3. sinon, la première échelle du trimestre (`echellesTemplates`).
+ * Ce qui s'affiche est ce qui s'écrit : le premier texte posé, ou le menu changé, inscrit l'échelle
+ * montrée dans `descripteurs.echelleId`. Aucune écriture sans geste. Un descripteur écrit ici porte donc
+ * TOUJOURS son échelle : il ne peut pas être relu comme un barème (`bareme.estAncien`) si le critère
+ * devient analytique.
+ *
+ * AUCUNE DONNÉE EFFACÉE : une case vidée retire SON texte, jamais les autres ; changer d'échelle ne
+ * touche aucun texte. Ceux dont le niveau n'existe pas dans l'échelle montrée restent écrits et se
+ * montrent sous « Textes gardés d’une autre échelle », par leur code (le nom vit dans leur échelle),
+ * modifiables : revenir à leur échelle les remet à leur place. ⚠ Le partage borne `parNiveau` à
+ * 20 clés (`partage-schemas.js`) : il faudrait décrire plus de vingt niveaux distincts, d'échelle en
+ * échelle, pour l'atteindre.
+ *
+ * Textes : proposés par Claude Code le 18 nov., partis tels quels (consigne du lot), corrigeables ici.
  */
-function rendreAttenduNiveaux(descripteurs, codes, ctx) {
-    if (!codes.length) return '';
-    const echelle = descripteurs.echelleId ? (db.getSync(cle('echellesTemplates'), []) || []).find(e => e && e.id === descripteurs.echelleId) : null;
-    const niveaux = (echelle && Array.isArray(echelle.niveaux)) ? echelle.niveaux : [];
-    const ordre = niveaux.map(n => n.code).filter(c => codes.includes(c)).concat(codes.filter(c => !niveaux.some(n => n.code === c)));
-    const nomDe = (c) => { const n = niveaux.find(x => x.code === c); return n && String(n.nom || '').trim() ? n.nom : c; };
-    const attrs = (c) => `data-grille-id="${echapperHtml(ctx.grilleId)}" data-critere-index="${ctx.index}" data-reponse-index="${codes.indexOf(c)}" data-reponse-cle="${echapperHtml(c)}"`;
+const MAX_TEXTE_NIVEAU = 5000;
+const TEXTES_DESCRIPTEURS = {
+    titre: 'Ce qui est attendu à chaque niveau',
+    echelle: 'Niveaux de l’échelle',
+    echelleSeule: (nom) => `Niveaux de l’échelle « ${nom} ».`,
+    facultatif: 'Facultatif',
+    caseAria: (nom) => `Ce qui est attendu au niveau ${nom}`,
+    aucuneEchelle: 'Aucune échelle dans ce trimestre : crée-en une dans Conception → Échelles de performance pour décrire ses niveaux.',
+    introuvable: 'Échelle introuvable',
+    horsTitre: 'Textes gardés d’une autre échelle',
+    hors: (nom) => `Leur niveau n’existe pas dans l’échelle « ${nom} ». Ils restent gardés et reprennent leur place si tu reviens à leur échelle ; vide une case pour retirer son texte.`,
+    horsIntrouvable: 'L’échelle de ces textes n’est plus dans ce trimestre. Choisis-en une : les textes dont le niveau y existe reprendront leur place.',
+    // Le critère en points : la mention d'avant (lot 13, validée G. 19 oct. 19 h 29), inchangée.
+    analytique: (nom) => `Les niveaux viennent de ${nom ? `l’échelle « ${nom} »` : 'l’échelle de la grille'} : ici, seul leur texte se modifie.`
+};
+const REFUS_DESCRIPTEURS = {
+    texteLong: 'Un texte de niveau fait 5 000 caractères au plus'
+};
+
+const _nomEchelle = (e) => String((e && e.nom) || '').trim() || String((e && e.id) || '');
+const _parNiveauDe = (d) => (d && d.parNiveau && typeof d.parNiveau === 'object' && !Array.isArray(d.parNiveau)) ? d.parNiveau : {};
+const _codeNiveauValide = (c) => typeof c === 'string' && c !== '' && c !== '__proto__' && c !== 'constructor' && c !== 'prototype';
+
+/** Les niveaux d'une échelle, dans son ordre, un par code (le premier gagne). */
+function _niveauxDeLEchelle(echelle) {
+    const vus = new Set();
+    return ((echelle && Array.isArray(echelle.niveaux)) ? echelle.niveaux : [])
+        .filter(n => n && _codeNiveauValide(String(n.code == null ? '' : n.code)) && !vus.has(String(n.code)) && vus.add(String(n.code)));
+}
+
+/**
+ * L'échelle dont les niveaux s'affichent pour un critère par niveaux (règle 1, 2, 3 ci-dessus). Pure.
+ * Rend `{ id, echelle }` : `echelle` vaut `null` quand l'id posé n'est plus dans le trimestre ; `id` vaut
+ * `null` quand il n'y a ni id posé, ni échelle dans le trimestre.
+ */
+function echelleAfficheeDescripteurs(critere, criteres, echelles) {
+    const liste = (echelles || []).filter(e => e && e.id);
+    const parId = (id) => liste.find(e => e.id === id) || null;
+    const posee = critere && critere.descripteurs && critere.descripteurs.echelleId;
+    if (posee) return { id: posee, echelle: parId(posee) };
+    const voisin = (criteres || []).find(c => c && c !== critere && c.type !== 'analytique'
+        && c.descripteurs && c.descripteurs.echelleId && parId(c.descripteurs.echelleId));
+    if (voisin) return { id: voisin.descripteurs.echelleId, echelle: parId(voisin.descripteurs.echelleId) };
+    return liste.length ? { id: liste[0].id, echelle: liste[0] } : { id: null, echelle: null };
+}
+
+/**
+ * Le texte d'UN niveau, écrit ou retiré. Pure : rend `{ descripteurs }` (un objet NEUF), `{ inchange: true }`
+ * quand rien ne change, ou `{ refuse }` (`null` : rien à dire). Un texte vide retire SA clé, jamais les
+ * autres ; l'échelle déjà posée reste, sinon l'échelle montrée (`echelleAffichee`) est inscrite.
+ */
+function descripteursAvecTexte(descripteurs, echelleAffichee, code, texte) {
+    if (!_codeNiveauValide(code)) return { refuse: null };
+    const t = String(texte == null ? '' : texte).trim();
+    if (t.length > MAX_TEXTE_NIVEAU) return { refuse: REFUS_DESCRIPTEURS.texteLong };
+    const d = _descripteursLus(descripteurs);
+    const par = Object.assign({}, _parNiveauDe(d));
+    if (_texteDeNiveauInchange(par, code, t)) return { inchange: true };
+    const echelleId = (d && d.echelleId) || echelleAffichee || null;
+    if (!d && !echelleId) return { refuse: null };   // un descripteur neuf naît toujours avec son échelle
+    if (t) par[code] = t; else delete par[code];
+    return { descripteurs: Object.assign({}, d, echelleId ? { echelleId } : {}, { parNiveau: par }) };
+}
+
+const _descripteursLus = (d) => ((d && typeof d === 'object') ? d : null);
+
+/** Vrai quand le geste ne change rien : le même texte, ou une case vide qui l'était déjà. */
+function _texteDeNiveauInchange(par, code, t) {
+    const present = Object.prototype.hasOwnProperty.call(par, code);
+    return t ? (present && par[code] === t) : !present;
+}
+
+/** L'échelle des descripteurs, changée. Pure : aucun texte ne part. `{ descripteurs }`, `{ inchange }` ou `{ refuse }`. */
+function descripteursAvecEchelle(descripteurs, echelleId) {
+    if (typeof echelleId !== 'string' || !echelleId) return { refuse: null };
+    const d = _descripteursLus(descripteurs);
+    if (d && d.echelleId === echelleId) return { inchange: true };
+    return { descripteurs: Object.assign({}, d, { echelleId, parNiveau: Object.assign({}, _parNiveauDe(d)) }) };
+}
+
+/** Le nom d'un niveau tel qu'il se montre : son nom, sinon son code. */
+const _nomDuNiveau = (n) => String(n.nom || '').trim() || String(n.code);
+
+/** Une case de niveau : son nom, puis le champ de son texte (échappé), avec les attributs de son geste. */
+function _caseDescripteurHtml(par, ctx, code, nom, echelleId) {
+    const T = TEXTES_DESCRIPTEURS;
     return `
-                <h4 class="grille-attendu-titre">Ce qui est attendu à chaque niveau</h4>${descripteurs.echelleId ? mentionEchelleReponses(echelle) : ''}
-                <div class="grille-attendu-niveaux">${ordre.map(c => `
-                    <div class="grille-attendu-niveau"><strong>${echapperHtml(nomDe(c))}</strong>
-                        <textarea class="controle-form" rows="3" aria-label="Texte du niveau ${echapperHtml(nomDe(c))}" data-on-change="modifierTexteReponseGrilleHandler" ${attrs(c)}>${echapperHtml(String(descripteurs.parNiveau[c] == null ? '' : descripteurs.parNiveau[c]))}</textarea>
-                    </div>`).join('')}
+                    <div class="grille-attendu-niveau"><strong>${echapperHtml(nom)}</strong>
+                        <textarea class="controle-form" rows="3" data-hauteur-auto placeholder="${echapperHtml(T.facultatif)}" aria-label="${echapperHtml(T.caseAria(nom))}"
+                                  data-on-change="modifierDescripteurNiveauHandler" ${_attrsCritereDescripteurs(ctx)} data-niveau="${echapperHtml(code)}"${echelleId ? ` data-echelle-id="${echapperHtml(echelleId)}"` : ''}>${echapperHtml(String(par[code] == null ? '' : par[code]))}</textarea>
+                    </div>`;
+}
+
+const _attrsCritereDescripteurs = (ctx) => `data-grille-id="${echapperHtml(ctx.grilleId)}" data-critere-index="${echapperHtml(String(ctx.index))}"`;
+
+function rendreDescripteursNiveaux(critere, ctx) {
+    const echelles = (db.getSync(cle('echellesTemplates'), []) || []).filter(e => e && e.id);
+    const par = _parNiveauDe(critere.descripteurs);
+    if (critere.type === 'analytique') return _descripteursDuCritereEnPoints(critere.descripteurs, par, echelles, ctx);
+    const { id, echelle } = echelleAfficheeDescripteurs(critere, ctx.criteres, echelles);
+    const niveaux = _niveauxDeLEchelle(echelle);
+    const connus = new Set(niveaux.map(n => String(n.code)));
+    const hors = Object.keys(par).filter(c => _codeNiveauValide(c) && !connus.has(c));
+    const casesHtml = niveaux.map(n => _caseDescripteurHtml(par, ctx, String(n.code), _nomDuNiveau(n), id)).join('');
+    return `
+                <h4 class="grille-attendu-titre">${echapperHtml(TEXTES_DESCRIPTEURS.titre)}</h4>${_choixEchelleDescripteurs(echelles, id, echelle, ctx)}${niveaux.length ? `
+                <div class="grille-attendu-niveaux">${casesHtml}
+                </div>` : ''}${_textesGardesHtml(hors, par, echelles, { id, echelle }, ctx)}`;
+}
+
+/**
+ * Le critère en points : sans échelle, ses textes sont son barème (plus bas) ; liés à une échelle, ils se
+ * montrent tels qu'écrits, dans l'ordre de l'échelle puis l'ordre écrit — rien de neuf ici.
+ */
+function _descripteursDuCritereEnPoints(d, par, echelles, ctx) {
+    const codes = (d && d.echelleId) ? Object.keys(par).filter(_codeNiveauValide) : [];
+    if (!codes.length) return '';
+    const echelle = echelles.find(e => e.id === d.echelleId) || null;
+    const niveaux = _niveauxDeLEchelle(echelle);
+    const ordre = niveaux.map(n => String(n.code)).filter(c => codes.includes(c)).concat(codes.filter(c => !niveaux.some(n => String(n.code) === c)));
+    const nomDe = (c) => { const n = niveaux.find(x => String(x.code) === c); return n ? _nomDuNiveau(n) : c; };
+    return `
+                <h4 class="grille-attendu-titre">${echapperHtml(TEXTES_DESCRIPTEURS.titre)}</h4>
+                <p class="grille-attendu-mention">${echapperHtml(TEXTES_DESCRIPTEURS.analytique(echelle && String(echelle.nom || '').trim()))}</p>
+                <div class="grille-attendu-niveaux">${ordre.map(c => _caseDescripteurHtml(par, ctx, c, nomDe(c), null)).join('')}
                 </div>`;
 }
 
-function mentionEchelleReponses(echelle) {
-    const nomme = echelle && String(echelle.nom || '').trim();
+/** L'échelle montrée : un menu quand il y a à choisir (plusieurs échelles, ou la posée disparue), sinon une ligne. */
+function _choixEchelleDescripteurs(echelles, id, echelle, ctx) {
+    const T = TEXTES_DESCRIPTEURS;
+    const introuvable = !!id && !echelle;
+    if (echelles.length > 1 || (introuvable && echelles.length)) {
+        const idMenu = `descripteurs-echelle-${String(ctx.grilleId)}-${ctx.index}`;
+        const options = (introuvable ? `<option value="" selected disabled>${echapperHtml(T.introuvable)}</option>` : '')
+            + echelles.map(e => `<option value="${echapperHtml(e.id)}"${e.id === id ? ' selected' : ''}>${echapperHtml(_nomEchelle(e))}</option>`).join('');
+        return `
+                <div class="grille-attendu-echelle">
+                    <label for="${echapperHtml(idMenu)}">${echapperHtml(T.echelle)}</label>
+                    <select class="controle-form" id="${echapperHtml(idMenu)}" data-on-change="changerEchelleDescripteursHandler" ${_attrsCritereDescripteurs(ctx)}>${options}
+                    </select>
+                </div>`;
+    }
     return `
-                <p class="grille-attendu-mention">Les niveaux viennent de ${nomme ? `l’échelle « ${echapperHtml(echelle.nom)} »` : 'l’échelle de la grille'} : ici, seul leur texte se modifie.</p>`;
+                <p class="grille-attendu-mention">${echapperHtml(echelle ? T.echelleSeule(_nomEchelle(echelle)) : T.aucuneEchelle)}</p>`;
+}
+
+/** Les textes dont le niveau n'existe pas dans l'échelle montrée : gardés, par leur code, modifiables. */
+function _textesGardesHtml(hors, par, echelles, montree, ctx) {
+    if (!hors.length) return '';
+    const T = TEXTES_DESCRIPTEURS;
+    // Sans aucune échelle dans le trimestre, la ligne du haut le dit déjà : rien à choisir, pas de seconde phrase.
+    const mention = montree.echelle ? T.hors(_nomEchelle(montree.echelle)) : (echelles.length ? T.horsIntrouvable : '');
+    return `
+                <div class="grille-attendu-hors">
+                    <h5 class="grille-attendu-hors-titre">${echapperHtml(T.horsTitre)}</h5>${mention ? `
+                    <p class="grille-attendu-mention">${echapperHtml(mention)}</p>` : ''}
+                    <div class="grille-attendu-niveaux">${hors.map(c => _caseDescripteurHtml(par, ctx, c, c, montree.id)).join('')}
+                    </div>
+                </div>`;
 }
 
 /*
@@ -5200,58 +5369,46 @@ function rendreSousCriteresCritere(critere, ctx) {
 }
 
 /*
- * LES TEXTES PAR NIVEAU D'UN CRITÈRE — la dissection, lot 13 (19 oct. 2026), réduit au lot 1 du barème.
- * Une entrée de `descripteurs.parNiveau` : sa CLÉ est le code d'un niveau, sa valeur son texte ; seul
- * le texte se modifie. ⚠ Aucune évaluation ne lit ces textes : une copie notée garde son niveau.
- * La fonction pure rend `{ parNiveau }` (un objet NEUF, dans l'ordre) ou `{ refuse }` — `null` quand
- * le niveau visé n'est plus à sa place : rien n'est écrit, rien n'est dit.
+ * LES GESTES DES DESCRIPTEURS DE NIVEAU — 18 nov. 2026 (voir « LES DESCRIPTEURS DE NIVEAU D'UN CRITÈRE »
+ * plus haut). Ils REMPLACENT ceux du lot 13 (`_modifierReponsesCritere`, `modifierTexteReponseGrilleHandler`),
+ * qui ne savaient que modifier un texte déjà écrit, et seulement dans une grille enregistrée. Par la file
+ * commune (`_modifierCritereCible`) : en création (`temp`) comme dans une grille enregistrée.
+ * ⚠ Aucune évaluation ne lit ces textes : une copie notée garde son niveau.
+ * ⚠ Un critère analytique SANS échelle n'est jamais touché ici : ses anciens textes sont son barème
+ * (`_modifierBaremeCritere`). Lié à une échelle, son texte se modifie ; son échelle ne change pas (aucun menu).
  */
-const MAX_TEXTE_REPONSE = 5000;
-// Texte du lot 13, validé G. 19 oct. 19 h 29.
-const REFUS_REPONSES = {
-    texteLong: 'Une réponse fait 5 000 caractères au plus'
-};
-
-function _reponseVisee(par, index, cleLue) {
-    return Object.keys(par || {})[index] === cleLue;
+function _critereAccepteDescripteurs(c, geste) {
+    if (!c) return false;
+    if (c.type !== 'analytique') return true;
+    return geste === 'texte' && !!(c.descripteurs && c.descripteurs.echelleId);
 }
 
-function reponseTexteModifie(par, index, cleLue, texte) {
-    if (!_reponseVisee(par, index, cleLue)) return { refuse: null };
-    const t = String(texte == null ? '' : texte).trim();
-    if (t.length > MAX_TEXTE_REPONSE) return { refuse: REFUS_REPONSES.texteLong };
-    return { parNiveau: Object.assign({}, par, { [cleLue]: t }) };
+async function _modifierDescripteursCritere(cible, index, geste, operation) {
+    let resultat = { refuse: null };
+    await _modifierCritereCible(cible, index, (c) => {
+        if (!_critereAccepteDescripteurs(c, geste)) { resultat = { refuse: null }; return false; }
+        resultat = operation(c.descripteurs);
+        if (!resultat.descripteurs) return false;
+        c.descripteurs = resultat.descripteurs;
+        return true;
+    });
+    return resultat;
 }
 
-/**
- * Une écriture des textes par niveau du critère, sérialisée (#510). Un critère analytique sans échelle
- * n'est pas touché ici : ses anciennes réponses sont son barème (`_modifierBaremeCritere`).
- */
-async function _modifierReponsesCritere(grilleId, critereIndex, operation) {
-    let resultat = { refuse: null }, grille = null;
-    await modifierEtAnnoncer(cle('grillesTemplates'), (lues) => {
-        const grilles = lues || [];
-        const g = grilles.find(x => x.id === grilleId);
-        const c = g && g.criteres && g.criteres[critereIndex];
-        if (!c || !c.descripteurs || !c.descripteurs.parNiveau) return undefined;
-        if (c.type === 'analytique' && !c.descripteurs.echelleId) return undefined;
-        resultat = operation(c);
-        if (!resultat.parNiveau) return undefined;
-        c.descripteurs.parNiveau = resultat.parNiveau;
-        g.dateModification = new Date().toISOString();
-        grille = g;
-        return grilles;
-    }, [], { geste: 'Modifier la grille' });
-    if (grille && grilleTemplateActuelle && grilleTemplateActuelle.id === grilleId) grilleTemplateActuelle = grille;
-    return { resultat, grille };
+function modifierDescripteurNiveauHandler(el) {
+    const cible = el.dataset.grilleId, index = parseInt(el.dataset.critereIndex, 10);
+    return _modifierDescripteursCritere(cible, index, 'texte',
+        d => descripteursAvecTexte(d, el.dataset.echelleId || null, el.dataset.niveau, el.value))
+        .then(r => marquerChampRefuse(el, r.refuse));
 }
 
-function modifierTexteReponseGrilleHandler(el) {
-    const d = { grilleId: el.dataset.grilleId, critereIndex: parseInt(el.dataset.critereIndex),
-        index: parseInt(el.dataset.reponseIndex), cle: el.dataset.reponseCle };
-    return _modifierReponsesCritere(d.grilleId, d.critereIndex,
-        c => reponseTexteModifie(c.descripteurs.parNiveau, d.index, d.cle, el.value))
-        .then(({ resultat }) => marquerChampRefuse(el, resultat.refuse));
+async function changerEchelleDescripteursHandler(el) {
+    const cible = el.dataset.grilleId, index = parseInt(el.dataset.critereIndex, 10);
+    const id = String(el.value || '');
+    // Seule une échelle du trimestre se choisit (le menu n'offre qu'elles ; un DOM périmé ne pose rien d'autre).
+    if (!(db.getSync(cle('echellesTemplates'), []) || []).some(e => e && e.id === id)) return;
+    const r = await _modifierDescripteursCritere(cible, index, 'echelle', d => descripteursAvecEchelle(d, id));
+    if (r.descripteurs) await _redessinerEnGardantLeFocus(cible);
 }
 
 /*
@@ -5782,7 +5939,7 @@ function afficherCriteresGrille(grille) {
                            data-on-change="modifierCritereGrilleHandler" data-grille-id="${grille.id}" data-critere-index="${index}" data-champ="description">
                 </div>
             </div>
-            ${rendreCartesGabaritAlgo(critere, { mode: "grille", index: index, grilleId: grille.id, criteres: grille.criteres })}${rendreAttenduCritere(critere, { grilleId: grille.id, index: index })}
+            ${rendreCartesGabaritAlgo(critere, { mode: "grille", index: index, grilleId: grille.id, criteres: grille.criteres })}${rendreAttenduCritere(critere, { grilleId: grille.id, index: index, criteres: grille.criteres })}
         </div>
     `).join('');
 
@@ -6339,9 +6496,13 @@ window.annulerFormGrille = annulerFormGrille;
 window.fermerFicheGrille = fermerFicheGrille;
 window.ouvrirGrilleDepuisListe = ouvrirGrilleDepuisListe;
 window.rendreAttenduCritere = rendreAttenduCritere;   // lot 3b1 (17 oct.) : exposé pour les bancs
-// La dissection, lot 13 (19 oct.) : le texte par niveau d'un critère — le geste, puis la fonction pure (bancs)
-window.modifierTexteReponseGrilleHandler = modifierTexteReponseGrilleHandler;
-window.reponsesCritere = { texteModifie: reponseTexteModifie, REFUS: REFUS_REPONSES };
+// 18 nov. 2026 (lot `descripteurs-grille`) : les descripteurs de niveau — les deux gestes, puis les fonctions pures (bancs)
+window.modifierDescripteurNiveauHandler = modifierDescripteurNiveauHandler;
+window.changerEchelleDescripteursHandler = changerEchelleDescripteursHandler;
+window.descripteursNiveaux = {
+    avecTexte: descripteursAvecTexte, avecEchelle: descripteursAvecEchelle, echelleAffichee: echelleAfficheeDescripteurs,
+    TEXTES: TEXTES_DESCRIPTEURS, REFUS: REFUS_DESCRIPTEURS
+};
 // #1120, lot 1 (20 oct.) : le barème d'un critère analytique — ses gestes (data-action, data-on-change)
 window.modifierTrancheBaremeHandler = modifierTrancheBaremeHandler;
 // Le critère algorithmique, étape 2a (22 oct.) : les deux noms — le geste, et la fonction (bancs)

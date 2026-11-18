@@ -7,6 +7,8 @@
  *   L — LE BLOC EN LECTURE (`grilles.js`, rendreAttenduCritere) : présent seulement s'il y a des
  *       données ; niveau nommé par l'échelle, dans son ordre ; échelle disparue → le code ;
  *       retours à la ligne gardés ; tout texte échappé ; pas de doublon pour un critère algorithmique.
+ *   ↻ 18 nov. 2026 (lot descripteurs-grille) : chaque niveau de l'échelle a sa case, vide par défaut, et le bloc se
+ *       modifie (descripteurs-niveaux-grille.test.js) ; « en lecture » ne vaut plus que pour le titre de ce banc.
  *   H — UN CRITÈRE SANS DONNÉES : ↻ 20 oct. (Grégoire, 13 h 56) — il montre sa section « Sous-critères », vide,
  *       avec son bouton d'ajout ; un critère algorithmique, rien (son gabarit a la liste). Les sous-critères se
  *       modifient : voir sentinelle-sous-criteres-editables.test.js.
@@ -74,14 +76,15 @@ describe('lot 3b1 · L — le bloc « Ce qui est attendu à chaque niveau », en
         const { win, dom } = monter();
         const div = bloc(win, AVEC, dom);
         expect([...div.querySelectorAll('.grille-attendu-titre')].map(h => h.textContent)).toEqual(['Ce qui est attendu à chaque niveau', 'Sous-critères']);
-        expect([...div.querySelectorAll('.grille-attendu-niveau strong')].map(s => s.textContent)).toEqual(['Incomplet', 'Maîtrisé', 'Étendu']);
-        expect([...div.querySelectorAll('.grille-attendu-niveau textarea')].map(t => t.value)).toEqual(['Ligne un.\nLigne deux.', 'Texte maîtrisé.', 'Texte étendu.']);
+        // ↻ 18 nov. 2026 (lot descripteurs-grille) : CHAQUE niveau de l'échelle a sa case, vide quand rien n'y est
+        // écrit (D) ; l'échelle se dit en une ligne quand le trimestre n'en a qu'une.
+        expect([...div.querySelectorAll('.grille-attendu-niveau strong')].map(s => s.textContent)).toEqual(['Incomplet', 'En développement', 'Maîtrisé', 'Étendu']);
+        expect([...div.querySelectorAll('.grille-attendu-niveau textarea')].map(t => t.value)).toEqual(['Ligne un.\nLigne deux.', '', 'Texte maîtrisé.', 'Texte étendu.']);
         // 20 oct. : les sous-critères se modifient (le nom seul), dans l'ordre.
         expect([...div.querySelectorAll('.grille-sous-critere input')].map(x => x.value)).toEqual(['Annoncer le plan', 'Conclure']);
-        // Lot 13 (19 oct.) : lié à une échelle, le texte seul se modifie — ni points, ni corbeille, ni ajout ; l'écran le dit.
-        expect(div.querySelectorAll('.grille-attendu-niveau textarea')).toHaveLength(3);
+        // Lot 13 (19 oct.) : le texte seul se modifie — ni points, ni corbeille, ni ajout.
         expect(div.querySelectorAll('.grille-attendu-niveaux input, .grille-attendu-niveaux select, .grille-attendu-niveaux button')).toHaveLength(0);
-        expect(div.querySelector('.grille-attendu-mention').textContent).toBe('Les niveaux viennent de l’échelle « Échelle du banc » : ici, seul leur texte se modifie.');
+        expect(div.querySelector('.grille-attendu-mention').textContent).toBe('Niveaux de l’échelle « Échelle du banc ».');
         expect(div.textContent.toLowerCase()).not.toContain('descripteur');
     });
 
@@ -109,21 +112,26 @@ describe('lot 3b1 · L — le bloc « Ce qui est attendu à chaque niveau », en
 describe('lot 3b1 · H — un critère sans données (↻ 20 oct. : sa section « Sous-critères », vide)', () => {
     it('H.a la liste des critères : l’appel au bloc est collé au gabarit ; un critère sans données montre la section vide et son bouton ; un algorithmique, rien', () => {
         const src = readFileSync(path.join(racine, 'js', 'grilles.js'), 'utf8');
-        expect(src).toContain('            ${rendreCartesGabaritAlgo(critere, { mode: "grille", index: index, grilleId: grille.id, criteres: grille.criteres })}${rendreAttenduCritere(critere, { grilleId: grille.id, index: index })}\n        </div>\n    `).join(\'\');');
+        // ↻ 18 nov. 2026 : le contexte porte aussi les critères de la grille (l'échelle d'un voisin, `echelleAfficheeDescripteurs`).
+        expect(src).toContain('            ${rendreCartesGabaritAlgo(critere, { mode: "grille", index: index, grilleId: grille.id, criteres: grille.criteres })}${rendreAttenduCritere(critere, { grilleId: grille.id, index: index, criteres: grille.criteres })}\n        </div>\n    `).join(\'\');');
         const { win, dom } = monter();
         win.afficherCriteresGrille({ id: 'GR_BANC', criteres: [critere(), critere({ id: 'CR_2', nom: 'Structure', type: 'algorithmique' })] });
         const cartes = dom.window.document.querySelectorAll('#listeCriteres .item-liste');
-        expect([...cartes[0].querySelectorAll('.grille-attendu-titre')].map(h => h.textContent)).toEqual(['Sous-critères']);
+        // ↻ 18 nov. 2026 (lot descripteurs-grille) : un critère par niveaux, holistique ou algorithmique, montre ses
+        // cases de niveau, vides ; l'algorithmique, toujours pas de sous-critères ici.
+        expect([...cartes[0].querySelectorAll('.grille-attendu-titre')].map(h => h.textContent)).toEqual(['Ce qui est attendu à chaque niveau', 'Sous-critères']);
         expect(cartes[0].querySelectorAll('.grille-sous-critere')).toHaveLength(0);
         expect(cartes[0].querySelector('.grille-attendu [data-action="ajouterSousCritere"]')).not.toBeNull();
-        expect(cartes[1].querySelector('.grille-attendu')).toBeNull();
+        expect([...cartes[1].querySelectorAll('.grille-attendu-titre')].map(h => h.textContent)).toEqual(['Ce qui est attendu à chaque niveau']);
+        expect([...cartes[1].querySelectorAll('.grille-attendu-niveau textarea')].map(t => t.value)).toEqual(['', '', '', '']);
     });
 
     it('H.b un critère qui porte des données : le bloc paraît sur SA carte, après sa rangée', () => {
         const { win, dom } = monter();
         win.afficherCriteresGrille({ id: 'GR_BANC', criteres: [critere(), AVEC] });
         const cartes = dom.window.document.querySelectorAll('#listeCriteres .item-liste');
-        expect(cartes[0].querySelectorAll('.grille-attendu-niveau')).toHaveLength(0);
+        // ↻ 18 nov. 2026 : le critère sans données a ses quatre cases, vides.
+        expect([...cartes[0].querySelectorAll('.grille-attendu-niveau textarea')].map(t => t.value)).toEqual(['', '', '', '']);
         expect(cartes[1].querySelector('.critere-rangee + .grille-attendu')).not.toBeNull();
         expect(cartes[1].querySelectorAll('.grille-sous-critere')).toHaveLength(2);
     });
