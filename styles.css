@@ -16971,7 +16971,8 @@ tr.ligne-import-ecartee td {
 #prep-canvas-overlay {
     position: absolute;
     top: 0; left: 0;
-    touch-action: none;
+    /* Le doigt défile ; js/travaux-preparation.js passe à `none` pendant la perspective et le recadrage (leurs poignées). */
+    touch-action: pan-x pan-y;
 }
 
 /* Barre de zoom — flottante en bas a droite */
