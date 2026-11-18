@@ -15,12 +15,15 @@ import { tranche } from './_helpers/tranche.js';
 //     17 nov.) n'est pas une des trois copies.
 // Break-tests (17 nov. 2026) : le niveau Nuance de Caribou Attentionné passé de I à D dans
 // js/parcours-recevoir-modele.js → ROUGE (« le tableau ») ; un octet changé dans la base64 de la copie de Tapir Doux →
-// ROUGE (« octet pour octet »). Rétablis → vert.
+// ROUGE (« octet pour octet »). Rétablis → vert. Refaits sur les nouvelles copies (17 nov., soir) : rouges, puis verts.
 
 const RACINE = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..');
 const lire = (f) => readFileSync(path.join(RACINE, f), 'utf8');
 const CONSIGNE = lire('plans de travail/CONSIGNE-LOT-2026-11-17-je-regarde-recevoir.md');
 const DOSSIER = 'plans de travail/materiel-2026-11-17-copies-deux-rives/';
+// Les copies refaites le 17 nov. au soir (deux photos, un PDF, en-tête A2025) : leurs noms sont ceux de la partie B.
+const CONSIGNE_B = lire('plans de travail/CONSIGNE-LOT-2026-11-17-recevoir-dix-bulles.md');
+const TYPES = { jpg: 'image/jpeg', pdf: 'application/pdf' };
 
 function charger(fichier) {
     const window = {};
@@ -37,9 +40,9 @@ function tableauDeLaConsigne() {
         .map((m) => [m[2], m[1].trim(), [m[3], m[4], m[5], m[6]]]);
 }
 
-/** Les trois noms de fichiers de la décision 3. */
+/** Les trois noms de fichiers de la partie B de la consigne des dix bulles (sans doublon). */
 function nomsDeLaConsigne() {
-    return [...CONSIGNE.matchAll(/`(\w+_\d{7}_Artefact-1_Remis_le_\d{4}-\d{2}-\d{2}_\d{2}h\d{2}m\d{2}s\.pdf)`/g)].map((m) => m[1]);
+    return [...new Set([...CONSIGNE_B.matchAll(/`(\w+_\d{7}_Artefact-1_Remis_le_2025-\d{2}-\d{2}_\d{2}h\d{2}m\d{2}s\.(?:jpg|pdf))`/g)].map((m) => m[1]))];
 }
 
 describe('Le modèle de « Recevoir » : le matériel de la consigne', () => {
@@ -56,18 +59,18 @@ describe('Le modèle de « Recevoir » : le matériel de la consigne', () => {
         for (const da of modele.materiel.copies) expect(das).not.toContain(da);
     });
 
-    it('les trois copies : les noms de la consigne, la date ramenée en 2025, dans le même ordre de DA', () => {
+    it('les trois copies : les noms de la consigne (en 2025), deux photos et un PDF, les DA du matériel', () => {
         const consigne = nomsDeLaConsigne();
         expect(consigne).toHaveLength(3);
-        const attendus = consigne.map((n) => n.replace('_Remis_le_2026-', '_Remis_le_2025-')).sort();
-        expect(copies.map((c) => c.nom).sort()).toEqual(attendus);
+        expect(copies.map((c) => c.nom).sort()).toEqual([...consigne].sort());
         expect(copies.map((c) => c.nom.split('_')[1]).sort()).toEqual([...modele.materiel.copies].sort());
-        for (const c of copies) expect(c.type).toBe('application/pdf');
+        for (const c of copies) expect(c.type, c.nom).toBe(TYPES[c.nom.split('.').pop()]);
+        expect(copies.map((c) => c.type).sort()).toEqual(['application/pdf', 'image/jpeg', 'image/jpeg']);
     });
 
     it('les trois copies, octet pour octet, celles du matériel', () => {
         for (const n of nomsDeLaConsigne()) {
-            const livree = copies.find((c) => c.nom === n.replace('_Remis_le_2026-', '_Remis_le_2025-'));
+            const livree = copies.find((c) => c.nom === n);
             expect(Buffer.from(livree.base64, 'base64').equals(readFileSync(path.join(RACINE, DOSSIER, n))), n).toBe(true);
         }
     });

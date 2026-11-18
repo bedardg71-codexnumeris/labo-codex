@@ -59,79 +59,138 @@
     });
 
     // =================================================================
-    // LES TEXTES — PROVISOIRES (17 nov. 2026). Courts et fonctionnels : le geste, et ce qu'il faut toucher.
-    // La forme du 16 nov. : une liste, la consigne (la ligne orange) en dernier, une ligne qui confirme le geste
-    // précédent (`confirme`). Les noms entre « » sont ceux des écrans.
+    // LES TEXTES — ÉCRITS PAR GRÉGOIRE AVEC COWORK (17 nov. 2026, 18 h 20 à 19 h 19), MOT POUR MOT
+    // plans de travail/CONSIGNE-LOT-2026-11-17-recevoir-dix-bulles.md, partie C. Les lignes `lieu` disent où l'on est
+    // telles que Grégoire les a écrites (« à la section », là où le moteur dirait « à l'onglet ») : elles sont posées comme
+    // des phrases de la bulle. `consignes` : les lignes en gras (la ligne orange), toujours en dernier. `devient` : la
+    // seconde forme de la bulle, après le geste. Seules les lignes marquées PROPOSÉ sont de la session.
     // =================================================================
 
+    var PRODUCTION_DITE = function (titre) { return '« ' + titre + ' »'; };
+
     var TEXTES = {
-        objectif: "de recevoir les productions de tes étudiant·es, de les annoter, de les évaluer et de leur rendre leur rétroaction",
+        objectif: "de décrire le chemin d'une production dans l'application, de sa remise à la rétroaction que tu rends",
+        // PROPOSÉ (le panneau, le préalable manquant) : inchangé depuis le 17 nov.
         refus: "Commence par la Modélisation d'« Évaluer une première production » : ce modèle reçoit les copies de la production qu'on y crée.",
+        // PROPOSÉ : inchangé depuis le 17 nov.
         choisirLeGroupe: "Choisis le deuxième groupe dans l'en-tête (ce modèle se joue sur lui)",
         etape1: {
-            lignes: [
-                "Dans la démo, tu reçois trois copies du deuxième groupe. Rien ne touche à tes données.",
-                "Avec ta classe, elles viennent de Léa : tu les télécharges, puis tu les déposes ici"
-            ],
-            consigne: "Regarde les copies arriver : touche « Remplir »"
+            lieu: "Tu es dans « Évaluation », à la section « Préparer » : c'est là que tu reçois les productions de tes étudiant·es.",
+            phrase: "Dans la démo, trois étudiant·es du deuxième groupe t'ont remis leur production. Rien ne touche à tes données.",
+            lignes: ["Avec ta classe, elles viennent de Léa : tu les télécharges, puis tu les déposes ici"],
+            consignes: ["Regarde-les arriver : touche « Remplir »"]
         },
         etape2: {
             confirme: "C'est fait : les trois copies sont dans la zone. Rien n'est encore importé.",
             lignes: [
-                "Sous « Originaux », les trois copies, une page chacune",
-                "Sous « Aperçu », chaque copie a trouvé son étudiant·e par le DA de son nom"
+                "Sous « Originaux », les trois fichiers déposés : deux photos et un PDF",
+                "Sous « Aperçu », chaque copie a trouvé son étudiant·e : Léa a mis son DA dans le nom du fichier, et l'application l'a lu",
+                "C'est le moment de vérifier qu'aucune copie ne s'est trompée de nom",
+                "Les deux photos ont déjà été ajustées : l'application a corrigé leurs couleurs (la balance des blancs). Le PDF passe tel quel",
+                "La photo de Tapir Doux a été prise de travers : on la redresse avant d'importer"
             ],
-            choisir: function (titre) { return "Sous « Inspecteur », choisis la production « " + titre + " »"; },
-            importer: "Touche « Importer », puis « Oui, importer »"
+            consignes: ["Touche la copie de Tapir Doux, puis l'engrenage « Réglages spécifiques »"],
+            // PROPOSÉ : une autre copie choisie, ou le poste ouvert sur une autre photo.
+            autreCopie: "Ce modèle redresse la photo de Tapir Doux : sous « Originaux », touche la sienne.",
+            autrePhoto: "Ce n'est pas la photo de Tapir Doux : touche « ← Retour », puis choisis la sienne."
         },
         etape3: {
-            confirme: "C'est fait : les trois copies sont importées.",
+            confirme: "C'est fait : les réglages de la photo de Tapir Doux sont ouverts.",
+            lieu: "Tu es dans les réglages spécifiques : ce que tu y fais ne touche que cette photo.",
             lignes: [
-                "Loutre Enjouée, Tapir Doux et Antilope Vaillante : « Importé »",
-                "Les sept autres sont déjà évalué·es par l'exemple, sans copie"
+                "Dans « Découpe », l'outil « Perspective » remet droite une feuille photographiée de biais",
+                "Il cherche les coins de la feuille et y pose une poignée ; s'il en rate un, tu le glisses à sa place"
             ],
-            consigne: "Sur la ligne de Loutre Enjouée, touche « Actions › Annoter »",
-            pasLaBonneCopie: "Ce modèle travaille la copie de Loutre Enjouée : reviens à la Liste et ouvre la sienne."
+            consignes: ["Touche « Perspective », puis ajuste les poignées au besoin", "Touche « Confirmer perspective »"],
+            devient: {
+                lignes: [
+                    "La feuille remplit maintenant l'image, droite, comme vue d'en haut",
+                    "Tu n'as rien d'autre à régler : à l'import, l'application ajuste d'office les couleurs de chaque photo",
+                    "Les réglages spécifiques, c'est pour une photo d'exception : prise de travers, trop sombre, mal cadrée"
+                ],
+                consignes: ["Touche « Confirmer les réglages spécifiques »"]
+            }
         },
         etape4: {
-            confirme: "C'est fait : la copie de Loutre Enjouée est ouverte.",
-            lignes: ["La palette « Tampons » : chaque tampon posé ajoute sa phrase à la rétroaction"],
-            ouvrir: "Touche l'engrenage de la palette « Tampons »",
-            // « Annuler », pas « Enregistrer » (17 nov. 2026) : les réglages des tampons sont ceux de la personne, hors de
-            // la démo ; « Enregistrer » les écrirait (mesuré : quatorze clés globales).
-            fermer: "Lis les phrases, puis touche « Annuler » (avec ta classe, tu les réécris et tu touches « Enregistrer »)"
+            confirme: "C'est fait : la photo de Tapir Doux est redressée.",
+            lignes: [
+                "Sous « Aperçu », sa copie porte maintenant la mention « Spécifique : Perspective » : son réglage s'appliquera à l'import",
+                "Il reste à dire à quelle production les trois copies répondent : leur grille et leur cartouche viendront avec elle"
+            ],
+            choisir: function (titre) { return "Sous « Inspecteur », choisis la production " + PRODUCTION_DITE(titre); },
+            importer: "Touche « Importer », puis « Oui, importer »"
         },
         etape5: {
-            confirme: "C'est fait : tu as vu tes tampons.",
-            lignes: ["Annote comme tu veux : souligne, écris dans la marge, pose des tampons"],
-            ouvrir: "Quand tu as fini, touche « Annoter ▾ »",
-            evaluer: "Choisis « Évaluer »"
+            confirme: "C'est fait : les trois copies sont importées.",
+            lieu: "Tu es dans « Évaluation », à la section « Liste » : c'est là que tu vois où en est chaque copie de ton groupe.",
+            lignes: [
+                "Loutre Enjouée, Tapir Doux et Antilope Vaillante : « Importé ». Leur copie attend d'être annotée et évaluée",
+                "Les sept autres étudiant·es ont déjà leur évaluation, posée par l'exemple, sans copie : l'export, à la fin, portera ainsi sur une classe entière"
+            ],
+            consignes: ["Sur la ligne de Loutre Enjouée, touche « Actions › Annoter »"],
+            pasLaBonneCopie: "Ce modèle travaille la copie de Loutre Enjouée : reviens à la Liste et ouvre la sienne."
         },
         etape6: {
-            confirme: "C'est fait : tu es en mode Évaluer.",
-            lignes: ["La grille, l'échelle et la cartouche sont celles de la production"],
-            consigne: "Choisis un niveau pour chaque critère, celui que tu veux"
+            confirme: "C'est fait : la copie de Loutre Enjouée est ouverte.",
+            lieu: "Tu es dans « Évaluation », à la section « Annoter » : c'est là que tu lis la copie et que tu y écris, comme au stylo.",
+            lignes: [
+                "La palette « Tampons » : un tampon est un signe que tu poses sur la copie ; chacun ajoute sa phrase à la rétroaction de l'étudiant·e",
+                "Ces phrases sont les tiennes : tu les écris une fois, elles servent d'une copie à l'autre et d'un trimestre à l'autre"
+            ],
+            consignes: ["Touche l'engrenage de la palette « Tampons »"],
+            devient: {
+                lignes: [
+                    "Chaque tampon, avec la phrase qu'il ajoute",
+                    "Dans la démo, on regarde sans enregistrer : ces réglages sont les tiens, hors de la démo"
+                ],
+                consignes: ["Lis les phrases, puis touche « Annuler » (avec ta classe, tu les réécris à ta façon et tu touches « Enregistrer »)"]
+            }
         },
         etape7: {
-            confirme: "C'est fait : chaque critère a son niveau.",
+            confirme: "C'est fait : tu as vu tes tampons.",
             lignes: [
-                "La palette « Rétroaction » : ce que Loutre Enjouée lira",
-                "« Générale » : les phrases de la cartouche ; « Spécifique » : celles de tes tampons"
+                "Les couleurs et les notes déjà sur la copie sont celles de Loutre Enjouée : sa tâche était d'annoter le texte avec trois stratégies de lecture",
+                "Pour un commentaire, prends l'outil « Texte » : tu tapes un paragraphe lisible, qui reste d'un seul tenant",
+                "Garde le « Stylo » pour encercler, souligner ou tracer une flèche : écrit à la main, chaque trait devient un élément à part sur la page",
+                "Ici, on essaie les outils (texte, stylo, tampons), l'endroit importe peu. Loutre retrouvera tes marques dans le PDF que tu lui rendras"
             ],
-            consigne: "Relis, puis touche le cadenas « Verrouiller »"
+            consignes: ["Quand tu as fini, touche « Annoter ▾ », puis choisis « Évaluer »"]
         },
         etape8: {
-            confirme: "C'est fait : l'évaluation est verrouillée.",
+            confirme: "C'est fait : tu es en mode Évaluer.",
             lignes: [
-                "Huit évaluations verrouillées : celle de Loutre Enjouée et les sept de l'exemple",
-                "Chacun·e reçoit un PDF : sa copie annotée et sa synthèse, ou sa synthèse seule"
+                "La palette « Évaluation » reprend ce que porte la production : sa grille (les critères), son échelle (les niveaux) et sa cartouche (une phrase de rétroaction prévue pour chaque critère et chaque niveau)",
+                "Tout ça est déjà en place : tu n'as rien à choisir"
             ],
-            choisir: function (titre) { return "Choisis la production « " + titre + " », et laisse « — Tous — »"; },
-            exporter: "Touche « Exporter pour Léa »"
+            consignes: ["Choisis un niveau pour chaque critère, celui que tu veux (suggestion pour suivre l'exemple : M, D, D, D)"]
         },
         etape9: {
-            confirme: "C'est fait : le ZIP est téléchargé.",
-            lignes: ["Avec ta classe, tu déposes ce ZIP dans Léa : chaque PDF rejoint l'étudiant·e dont il porte le DA"]
+            confirme: "C'est fait : chaque critère a son niveau.",
+            lignes: [
+                "La palette « Rétroaction » montre ce que Loutre Enjouée lira",
+                "« Générale » : les phrases de la cartouche, choisies d'après les niveaux que tu viens de donner",
+                "« Spécifique » : les phrases des tampons que tu as posés sur sa copie",
+                "« Bilan » : ses défis et sa force du moment ; plus tard, son progrès d'une production à l'autre",
+                "Verrouiller dit que l'évaluation est terminée : seules les évaluations verrouillées partent à l'export"
+            ],
+            consignes: ["Relis, puis touche le cadenas « Verrouiller »"]
+        },
+        etape10: {
+            confirme: "C'est fait : l'évaluation de Loutre Enjouée est verrouillée.",
+            lieu: "Tu es dans « Évaluation », à la section « Exporter » : c'est là que tu prépares ce que tu remets à tes étudiant·es.",
+            lignes: [
+                "Huit évaluations verrouillées partent : celle de Loutre Enjouée et les sept de l'exemple",
+                "Tapir Doux et Antilope Vaillante n'ont pas encore d'évaluation : rien ne part pour eux",
+                "Chacun·e reçoit un PDF : sa copie annotée et sa synthèse, ou sa synthèse seule s'il n'y a pas de copie"
+            ],
+            choisir: function (titre) { return "Dans la carte « Export Léa », choisis la production " + PRODUCTION_DITE(titre) + " et laisse « Étudiant·e » à « — Tous — »"; },
+            exporter: "Touche « Exporter pour Léa »",
+            devient: {
+                lignes: [
+                    "Garde ce fichier tel quel : son nom, avec la production et la date, en fait une archive facile à retrouver",
+                    "Pour Léa, fais-en une copie renommée « travaux.zip » : c'est le nom qu'elle attend pour remettre chaque PDF à l'étudiant·e dont il porte le nom et le DA"
+                ]
+            }
         }
     };
 
@@ -343,7 +402,7 @@
             if (window.MaterielCopiesDeuxRives) { ok(window.MaterielCopiesDeuxRives); return; }
             var s = document.createElement('script');
             // Jeton écrit en dur : le fichier change, ce jeton change (#825, garde pre-commit #547).
-            s.src = 'js/materiel-copies-deux-rives.js?v=20261117a';
+            s.src = 'js/materiel-copies-deux-rives.js?v=20261117b';
             s.onload = function () { ok(window.MaterielCopiesDeuxRives || null); };
             s.onerror = function () { ok(null); };
             document.head.appendChild(s);
@@ -381,8 +440,10 @@
         e.texte = '';
         e.geste = '';
         if (plus.avant) e.avant = plus.avant;
+        if (plus.nommeLeContour) e.nommeLeContour = true;
+        if (plus.sansSortie) Object.defineProperty(e, 'sansSortie', { get: plus.sansSortie });
         e.lignesVivantes = true;
-        e.confirme = plus.confirme || null;
+        e.confirme = plus.confirme || null;   // un texte, ou une fonction (une bulle à deux formes)
         e.lignes = function () { return surLeDeuxiemeGroupe() ? plus.lignes() : [consigne(TEXTES.choisirLeGroupe)]; };
         e.zones = function () { return surLeDeuxiemeGroupe() && de('zones') ? de('zones').call(e) : []; };
         e.contour = function () { return surLeDeuxiemeGroupe() ? (de('contour') ? de('contour').call(e) : null) : el('selectGroupeCoursHeader'); };
@@ -429,21 +490,128 @@
         if (r.right > window.innerWidth || r.left < 0) e.scrollIntoView({ block: 'nearest', inline: 'center' });
     }
 
+    // ---------- Les lignes : la phrase du lieu, les explications, les consignes (en dernier) ----------
+
+    /** Une forme de bulle : ses phrases (`lieu`, `phrase`), sa liste, ses consignes ; `faites` : les consignes déjà faites. */
+    function forme(t, consignes, faites) {
+        var l = [];
+        if (t.lieu) l.push(note(t.lieu));
+        if (t.phrase) l.push(note(t.phrase));
+        return l.concat(lignes(t.lignes || []), (consignes || t.consignes || []).map(function (c, k) {
+            return faites && faites[k] ? { texte: c, fait: function () { return true; } } : consigne(c);
+        }));
+    }
+
+    // ---------- Étapes 2 et 3 : la photo de Tapir Doux, choisie puis redressée ----------
+
+    var DA_A_REDRESSER = '9900005';
+
+    function indexDeLaPhotoARedresser() {
+        var file = R().fileDAttente();
+        for (var k = 0; k < file.length; k++) {
+            if (file[k] && String(file[k].etudiantDA || (file[k].parseLea && file[k].parseLea.da) || file[k].daDetecte) === DA_A_REDRESSER) return k;
+        }
+        return -1;
+    }
+
+    function ligneChoisie() { return document.querySelector('.pipeline-col-originaux .pipeline-fichier-ligne.pipeline-fichier-selectionne'); }
+    function indexChoisi() { var l = ligneChoisie(); return l ? parseInt(l.getAttribute('data-param'), 10) : -1; }
+    function ligneDeLaPhotoARedresser() {
+        var k = indexDeLaPhotoARedresser();
+        return k < 0 ? null : document.querySelector('.pipeline-col-originaux .pipeline-fichier-ligne[data-param="' + k + '"]');
+    }
+    function engrenage() { return document.querySelector('[data-action="travauxUI.ouvrirPreparationFichier"]'); }
+    function posteOuvert() { return vis(el('travaux-preparation-modal')); }
+
+    /** Le poste est ouvert sur la photo de Tapir Doux : son nom est celui que le poste affiche. */
+    function posteSurLaPhotoARedresser() {
+        if (!posteOuvert()) return false;
+        var f = R().fileDAttente()[indexDeLaPhotoARedresser()];
+        var nom = document.querySelector('#travaux-preparation-modal .prep-mini-nom');
+        return !!(f && nom && String(nom.textContent || '').indexOf(String(f.nomFichier || '').replace(/\.[^.]+$/, '')) !== -1);
+    }
+
+    function boutonPerspective() { return document.querySelector('#travaux-preparation-modal [data-action="travauxPreparation.activerPerspective"]'); }
+    function boutonConfirmerPerspective() { return el('prep-btn-appliquer-persp'); }
+    function boutonConfirmerLesReglages() { return el('prep-btn-confirmer'); }
+    function perspectiveEnCours() { return vis(boutonConfirmerPerspective()); }
+
+    /** La perspective est appliquée dans le poste (une opération `perspective` dans sa pile). */
+    function perspectiveAppliquee() {
+        var p = window.travauxPreparation;
+        var ops = p && typeof p.operationsEnCours === 'function' ? p.operationsEnCours() : [];
+        return ops.some(function (o) { return o && o.type === 'perspective'; });
+    }
+
+    /** La copie de Tapir Doux porte l'opération dans la file : le poste l'a rendue. */
+    function photoRedressee() {
+        var f = R().fileDAttente()[indexDeLaPhotoARedresser()];
+        return !!(f && Array.isArray(f.operations) && f.operations.some(function (o) { return o && o.type === 'perspective'; }));
+    }
+
+    // ---------- Étape 10 : l'export, puis la fin ----------
+
+    var exportFait = false;
+    window.addEventListener('travaux-export-lea-telecharge', function (ev) {
+        if (ev && ev.detail && ev.detail.fichiers > 0) exportFait = true;
+    });
+
     function construireLesEtapes() {
         var B = R().etapes();
         var T = TEXTES;
         return [
             pourLeModele(B[0], {
-                lignes: function () { return [note(T.etape1.lignes[0]), { texte: T.etape1.lignes[1] }, consigne(T.etape1.consigne)]; },
+                lignes: function () { return forme(T.etape1); },
                 boutons: function () { return R().fileDAttente().length ? null : [{ libelle: C().mots.remplir, primaire: true, action: deposerLesCopies }]; },
                 // « Remplir » est dans la bulle : rien n'est désigné sur la page (la règle des modèles), la zone reste à voir.
                 contour: function () { return null; }
             }),
             pourLeModele(B[1], {
                 confirme: T.etape2.confirme,
+                lignes: function () { return forme(T.etape2); },
+                contour: function () {
+                    var tapir = ligneDeLaPhotoARedresser();
+                    return tapir && indexChoisi() === indexDeLaPhotoARedresser() ? engrenage() : tapir;
+                },
+                avis: function () {
+                    if (posteOuvert() && !posteSurLaPhotoARedresser()) return T.etape2.autrePhoto;
+                    return indexChoisi() >= 0 && indexChoisi() !== indexDeLaPhotoARedresser() ? T.etape2.autreCopie : '';
+                },
+                atteint: posteSurLaPhotoARedresser
+            }),
+            pourLeModele(B[1], {
+                confirme: function () { return perspectiveAppliquee() ? '' : T.etape3.confirme; },
                 lignes: function () {
-                    var fin = productionAImporterChoisie() ? T.etape2.importer : T.etape2.choisir(titreDeLaProduction());
-                    return lignes(T.etape2.lignes).concat([consigne(fin)]);
+                    if (perspectiveAppliquee()) return forme(T.etape3.devient);
+                    return forme(T.etape3, null, [perspectiveEnCours(), false]);
+                },
+                // Le poste couvre tout l'écran : la bulle passe au-dessus (la règle du parcours 9), et n'en couvre ni l'image
+                // ni ses poignées.
+                avant: async function () {
+                    R().nettoyer();
+                    R().surModale(true);
+                    await attendre(function () { return vis(boutonPerspective()); }, 3000);
+                },
+                zones: function () {
+                    R().surModale(posteOuvert());
+                    return [el('prep-espace'), perspectiveAppliquee() ? boutonConfirmerLesReglages() : (perspectiveEnCours() ? boutonConfirmerPerspective() : boutonPerspective())].filter(Boolean);
+                },
+                contour: function () {
+                    if (perspectiveAppliquee()) return boutonConfirmerLesReglages();
+                    return perspectiveEnCours() ? boutonConfirmerPerspective() : boutonPerspective();
+                },
+                nommeLeContour: true,
+                atteint: function () {
+                    var ok = !posteOuvert() && photoRedressee();
+                    if (ok) R().surModale(false);
+                    return ok;
+                }
+            }),
+            pourLeModele(B[1], {
+                confirme: T.etape4.confirme,
+                lignes: function () {
+                    var choisie = productionAImporterChoisie();
+                    return forme(T.etape4, [T.etape4.choisir(titreDeLaProduction()), T.etape4.importer], [choisie, false]);
                 },
                 contour: function () { return productionAImporterChoisie() ? B[1].contour() : document.querySelector('.pipeline-production-selecteur'); },
                 // Le parcours avance au premier fichier importé ; le modèle attend la fin de l'import (mesuré le 17 nov.
@@ -451,8 +619,8 @@
                 atteint: function () { return B[1].atteint() && !(window.travauxImport && window.travauxImport.importEnCours); }
             }),
             pourLeModele(B[2], {
-                confirme: T.etape3.confirme,
-                lignes: function () { return lignes(T.etape3.lignes).concat([consigne(T.etape3.consigne)]); },
+                confirme: T.etape5.confirme,
+                lignes: function () { return forme(T.etape5); },
                 avant: async function () {
                     R().nettoyer();
                     aller('evaluations', 'liste');
@@ -461,16 +629,16 @@
                 },
                 zones: function () { var s = menuDeLaCopieTravaillee(); return s ? [s.closest('tr') || s.parentElement] : []; },
                 contour: menuDeLaCopieTravaillee,
-                avis: function () { return R().fichierOuvert() && !copieTravailleeOuverte() ? T.etape3.pasLaBonneCopie : ''; },
+                avis: function () { return R().fichierOuvert() && !copieTravailleeOuverte() ? T.etape5.pasLaBonneCopie : ''; },
                 atteint: function () { return copieTravailleeOuverte() && B[2].atteint(); }
             }),
             pourLeModele(B[3], {
-                confirme: T.etape4.confirme,
-                lignes: function () { return lignes(T.etape4.lignes).concat([consigne(fenetreTamponsOuverte() ? T.etape4.fermer : T.etape4.ouvrir)]); },
+                confirme: function () { return fenetreTamponsOuverte() ? '' : T.etape6.confirme; },
+                lignes: function () { return fenetreTamponsOuverte() ? forme(T.etape6.devient) : forme(T.etape6); },
                 avant: function () { tamponsVus = false; return B[3].avant(); },
                 contour: function () { return fenetreTamponsOuverte() ? boutonAnnulerDesTampons() : B[3].contour(); },
                 // La fenêtre ouverte, puis refermée sans rien écrire (« Annuler ») : le modèle ne fait pas toucher
-                // « Enregistrer », qui écrirait les réglages réels des tampons.
+                // « Enregistrer », qui écrirait les réglages réels des tampons (décision maintenue le 17 nov., soir).
                 atteint: function () {
                     if (fenetreTamponsOuverte()) { tamponsVus = true; return false; }
                     if (tamponsVus) R().nettoyer();
@@ -478,12 +646,12 @@
                 }
             }),
             pourLeModele(B[4], {
-                confirme: T.etape5.confirme,
-                lignes: function () { return lignes(T.etape5.lignes).concat([consigne(menuAnnoterOuvert() ? T.etape5.evaluer : T.etape5.ouvrir)]); }
+                confirme: T.etape7.confirme,
+                lignes: function () { return forme(T.etape7); }
             }),
             pourLeModele(B[5], {
-                confirme: T.etape6.confirme,
-                lignes: function () { return lignes(T.etape6.lignes).concat([consigne(T.etape6.consigne)]); },
+                confirme: T.etape8.confirme,
+                lignes: function () { return forme(T.etape8); },
                 avant: function () { passagesTenus = 0; return B[5].avant(); },
                 // Plus ferme que le parcours (trois passages, 360 ms) : au passage en mode Évaluer, l'évaluation de la
                 // copie ouverte garde un temps les niveaux de la dernière ouverte, celle de Yack Amical dans ce modèle
@@ -497,22 +665,26 @@
                 }
             }),
             pourLeModele(B[6], {
-                confirme: T.etape7.confirme,
-                lignes: function () { return lignes(T.etape7.lignes).concat([consigne(T.etape7.consigne)]); }
+                confirme: T.etape9.confirme,
+                lignes: function () { return forme(T.etape9); }
             }),
             pourLeModele(B[7], {
-                confirme: T.etape8.confirme,
+                confirme: function () { return exportFait ? '' : T.etape10.confirme; },
+                // Avant l'export : la production, puis « Exporter pour Léa ». Après : la seconde forme ; « Objectif
+                // atteint », la phrase de la suite et « Pour revoir une étape » sont posés par le moteur (la fin).
                 lignes: function () {
-                    var fin = productionAExporterChoisie() ? T.etape8.exporter : T.etape8.choisir(titreDeLaProduction());
-                    return lignes(T.etape8.lignes).concat([consigne(fin)]);
+                    if (exportFait) return forme(T.etape10.devient);
+                    var choisie = productionAExporterChoisie();
+                    return forme(T.etape10, [T.etape10.choisir(titreDeLaProduction()), T.etape10.exporter], [choisie, false]);
                 },
-                contour: function () { return productionAExporterChoisie() ? B[7].contour() : menuExport(); }
-            }),
-            pourLeModele(B[8], {
-                confirme: T.etape9.confirme,
-                // « Objectif atteint » et la phrase de la suite : posés par le moteur (`objectifAtteint`, sur la définition).
-                lignes: function () { return lignes(T.etape9.lignes).concat([consigne(C().consigneDesSuites(suites()))]); },
-                boutons: suites,
+                avant: function () { exportFait = false; return B[7].avant(); },
+                contour: function () {
+                    if (exportFait) return null;
+                    return productionAExporterChoisie() ? B[7].contour() : menuExport();
+                },
+                boutons: function () { return exportFait ? suites() : null; },
+                // La seconde forme est la fin : sans « Plus tard », comme la dernière bulle de « Mettre ta classe en place ».
+                sansSortie: function () { return exportFait; },
                 atteint: function () { return false; }
             })
         ];
@@ -526,7 +698,8 @@
             definition = {
                 id: ID + '-modele', etapes: construireLesEtapes(), lienSortie: 'Plus tard',
                 objectif: 'À la fin de ce parcours, tu seras en mesure ' + TEXTES.objectif + '.',
-                objectifAtteint: 'Objectif atteint : tu es en mesure ' + TEXTES.objectif + '.'
+                // La dernière bulle a deux formes : « Objectif atteint » ne paraît qu'à la seconde, le ZIP téléchargé.
+                objectifAtteint: function () { return exportFait ? 'Objectif atteint : tu es en mesure ' + TEXTES.objectif + '.' : ''; }
             };
         }
         return definition;
@@ -552,8 +725,8 @@
     /**
      * Le repère, refait à chaque lancement, en mémoire : tout ce que la démo contient, sauf ce que le modèle produit
      * (les trois copies de sa production ; l'évaluation verrouillée de Loutre Enjouée). Les étapes avancent ainsi sur
-     * ce qui a déjà été fait, comme à une reprise. La première étape non faite : l'export si Loutre Enjouée est évaluée,
-     * la Liste si sa copie est importée, sinon le dépôt.
+     * ce qui a déjà été fait, comme à une reprise. La première étape non faite : l'export (10) si Loutre Enjouée est
+     * évaluée, la Liste (5) si sa copie est importée, sinon le dépôt (1).
      */
     function poserLeRepere() {
         var p = productionDuModele(), copie = copieTravailleeImportee(p);
@@ -565,8 +738,8 @@
             voie: 'fichiers', fichiersAvant: avant.map(function (f) { return f.id; }), verrousAvant: verrous.map(function (e) { return e.id; }),
             fichierId: copie ? copie.id : null, productionId: copie ? p.id : null
         });
-        if (evaluationsVerrouillees().some(function (e) { return estLaCopieTravaillee(e, p); })) return 7;
-        return copie ? 2 : 0;
+        if (evaluationsVerrouillees().some(function (e) { return estLaCopieTravaillee(e, p); })) return 9;
+        return copie ? 4 : 0;
     }
 
     async function lancerModele() {
@@ -588,7 +761,9 @@
         return M().lancer(def, {
             depuis: depuis,
             surEtape: function (i) {
-                if (i !== 1) R().bulleSousLesColonnes(false);
+                // La bulle sous les colonnes de « Préparer » : aux étapes 2 et 4 (index 1 et 3), comme le parcours.
+                if (i !== 1 && i !== 3) R().bulleSousLesColonnes(false);
+                if (i !== 2) R().surModale(false);
                 window.Assistance.definirEtatModele(ID, 'en-cours', i);
             },
             surQuitter: function () { R().nettoyer(); },

@@ -618,7 +618,7 @@
         prealable: 'evaluer',
         lancer: lancer,
         // Les deux temps (17 nov. 2026) : le modèle, dans la démo, sur le deuxième groupe (js/parcours-recevoir-modele.js).
-        totalModele: 9,
+        totalModele: 10,   // dix étapes depuis le 17 nov. 2026, soir (la vérification, le redressement, l'import séparés)
         lancerModele: function () { return modele() ? modele().lancer() : null; },
         refusModele: function () { return modele() ? modele().refus() : REFUS; }
     });
@@ -635,6 +635,7 @@
         fichierOuvert: fichierOuvert,
         fileDAttente: fileDAttente,
         bulleSousLesColonnes: bulleSousLesColonnes,
+        surModale: surModale,
         nettoyer: function () { retirerExtras(); surModale(false); bulleSousLesColonnes(false); }
     };
 
