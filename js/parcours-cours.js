@@ -8,9 +8,10 @@
    Il ne démarre jamais de lui-même ; il ne crée ni ne renomme aucune carte, et n'écrit rien dans la
    carte que la personne ne fasse elle-même.
 
-   ⚠ Les textes sont ceux que Grégoire a validés le 8 nov. (10 h 25 à 10 h 49), avec les corrections du
-   9 nov. (10 h 01 à 10 h 04 : étapes 2, 3, 5 et 6), posés mot pour mot :
-   tests/unit/sentinelle-parcours-cours-2026-11-09.test.js les confronte à la consigne.
+   ⚠ Les bulles sont celles que Grégoire a réécrites le 19 nov. 2026 (13 h 49 à 14 h 10, retouches de 15 h 34 et
+   15 h 53) dans la forme des « Nous faisons », posées mot pour mot : plans de travail/CONSIGNE-2026-11-19-nous-faisons-
+   cours.md ; tests/unit/sentinelle-parcours-cours-2026-11-09.test.js les y confronte. La ligne du panneau et le refus
+   restent ceux du 8 nov.
 
    · Une étape avance sur l'état de la CARTE (`planificationCarte.etat`), jamais au toucher d'un bouton :
      un énoncé de compétence, une idée maîtresse reliée (« se décline en »), une leçon datée et reliée
@@ -360,19 +361,65 @@
     }
 
     // ---------- Les étapes ----------
+    //
+    // « NOUS FAISONS » (la Pratique guidée), réécrit avec Grégoire le 19 nov. 2026 (13 h 49 à 14 h 10 ; retouches de
+    // 15 h 34, bulle 4, et de 15 h 53, bulle 6) : plans de travail/CONSIGNE-2026-11-19-nous-faisons-cours.md, mot pour mot ;
+    // tests/unit/sentinelle-parcours-cours-2026-11-09.test.js confronte les lignes à cette consigne. La forme des
+    // « Nous faisons » (parcours 2, 4 et 6) : la confirmation au-dessus du titre (`confirme`), l'objectif et l'objectif
+    // atteint posés par le moteur, la phrase du lieu à la bulle 1, les explications sans marque (`note`), les gestes en
+    // lignes qui se grisent quand la carte dit qu'ils sont faits, la consigne en dernier (`geste`).
+    // ⚠ Deux traits de la forme n'ont pas de mécanisme dans le moteur de cette base (dit au rapport du lot) : la flèche
+    // devant un geste qui n'est pas la consigne (elle n'a que son crochet, une fois fait), et la parenthèse hors du gras
+    // d'une consigne (elle reste dans le texte de la consigne, en gras).
 
-    var TEXTE_6 = "L'évaluation ferme la boucle : elle vérifie ce que tu as enseigné, au niveau que tu as visé, ni plus, ni moins. Touche « Évaluation » dans la palette, donne-lui un titre, puis glisse le bloc par sa poignée ⠿ dans ta leçon, sous ton activité : dans une leçon, l'ordre des blocs dit ce qui vient avant. Touche deux fois cette poignée. Dans l'Inspecteur, coche l'objectif qu'il vérifie, puis choisis dans « Production » celle que tu as décrite : ta carte sait maintenant quelle production vérifie cet objectif, et ce qu'elle pèse dans ta note. Regarde les pastilles : celle de ton évaluation passe à « ✓ », parce que l'objectif qu'elle vérifie a été enseigné avant ; celle de ton objectif aussi, puisqu'il est servi et vérifié. Le « ⚠ » de ta compétence disparaît. Ta carte est alignée quand chaque objectif est servi et vérifié, et que chaque évaluation ne vérifie que des objectifs déjà enseignés. Pour aller plus loin, touche « Évaluations » dans la frise : le guide s'ouvre à la page qui en parle.";
-    var TEXTE_6_APRES = "Ta pastille affiche « ⚠ » : dans ta leçon, l'évaluation vient avant l'activité qui enseigne son objectif. Glisse-la sous l'activité.";
+    function note(t) { return { texte: t, note: true }; }
+    function geste(t, fait) { return { texte: t, fait: fait }; }
+    function consigne(t, fait) { return { texte: t, geste: true, fait: fait }; }
 
-    // La variante de l'étape 6 a son propre texte : le moteur rend la bulle une fois par étape ; quand l'état de la
+    // L'étape où ce passage a commencé : 0 pour « Commencer » ou « Refaire », celle de la reprise pour « Reprendre ». Une
+    // bulle ne confirme l'étape d'avant que si elle a été faite pendant ce passage (décision de Cowork, la même qu'aux
+    // autres parcours) : après « Reprendre », la première bulle ne dit rien de ce qui précède.
+    var debutDuPassage = 0;
+    function confirmation(rang, texteConfirme) {
+        return function () { return rang > debutDuPassage ? texteConfirme : ''; };
+    }
+
+    /** La zone des objectifs de la leçon est à l'écran (le badge 🎯 l'a dépliée). */
+    function objectifsDeplies() { return vis(partiesDe(laLecon(), ['objectifs'])[0]); }
+
+    function activiteNeuve() { return duType('activite').pop() || null; }
+    function evaluationNeuve() { return duType('evaluation').pop() || null; }
+    function dansLaLecon(n) { var l = laLecon(); return !!(n && l && n.parent === l.id); }
+
+    var OBJECTIF = "À la fin de ce parcours, tu seras en mesure d'aligner une première chaîne de ton cours, de sa compétence jusqu'à ta production.";
+    var OBJECTIF_ATTEINT = "Objectif atteint : tu es en mesure d'aligner une première chaîne de ton cours, de sa compétence jusqu'à ta production.";
+
+    // La seconde forme de la bulle 6 (la variante d'avant ce lot, mots inchangés, coupés en explication et geste).
+    var TEXTE_6_APRES = "Ta pastille affiche « ⚠ » : dans ta leçon, l'évaluation vient avant l'activité qui enseigne son objectif.";
+    var GESTE_6_APRES = "Glisse ton évaluation sous ton activité, par sa poignée ⠿";
+
+    // La variante de l'étape 6 (sa seconde forme) : le moteur rend la bulle une fois par étape ; quand l'état de la
     // pastille change, la même étape est rendue de nouveau (`allerA`, comme la bulle du choix du troisième parcours).
+    // `secondeForme` dit au moteur de retirer la confirmation de cette forme-là.
     var varianteRendue = false;
 
     var ETAPES = [
         {
             titre: 'Ta compétence',
-            geste: "Touche « Compétence » dans la palette, puis écris son énoncé.",
-            texte: "La carte d'alignement n'est pas une tâche de plus : c'est un outil pour monter ton cours, et tu peux utiliser l'application sans elle. Elle montre comment tes leçons et tes productions mènent à la compétence de ton cours, et donc sur quoi repose la note que tu construis. Elle garde ces liens pour toi et signale ceux qui manquent : tu n'as plus à tout tenir en tête. Son principe : tu évalues ce que tu enseignes, et tu enseignes ce que tu évalues, au même niveau d'exigence. Commence par la compétence que ton cours doit développer : touche « Compétence » dans la palette « Nœuds », puis écris son énoncé, tel que le devis ministériel décrit la compétence et ses éléments. Tout le reste de ta carte s'y rattachera.",
+            lieu: true,
+            lieuSuite: ": c'est là que tu construis ta carte d'alignement.",
+            lignes: function () {
+                return [
+                    note("La carte d'alignement n'est pas une tâche de plus : c'est un outil pour monter ton cours, et tu peux utiliser l'application sans elle."),
+                    note("Elle montre comment tes leçons et tes productions mènent à la compétence de ton cours, et donc sur quoi repose la note que tu construis."),
+                    note("Elle garde ces liens pour toi et signale ceux qui manquent : tu n'as plus à tout tenir en tête."),
+                    note("Son principe : tu évalues ce que tu enseignes, et tu enseignes ce que tu évalues, au même niveau d'exigence."),
+                    note("Tout part de la compétence que ton cours doit développer : le reste de ta carte s'y rattachera."),
+                    note("Aie sous la main le devis ministériel de ton cours."),
+                    geste("Touche « Compétence » dans la palette « Nœuds »", function () { return duType('competence').length > 0; }),
+                    consigne("Écris son énoncé, tel que le devis décrit la compétence et ses éléments", function () { return !!competence(); })
+                ];
+            },
             avant: allerALaCarte,
             // Le bloc créé, la flèche va à lui (le contour), plus au bouton de la palette (11 nov. 2026, capture 23).
             zones: function () { return duType('competence').length ? [] : [boutonPalette('competence')]; },
@@ -381,8 +428,18 @@
         },
         {
             titre: 'Ton idée maîtresse',
-            geste: "Touche « Idée maîtresse », écris-la, puis tire un trait de ta compétence jusqu'à elle.",
-            texte: "Une idée maîtresse, c'est l'essentiel : ce qui restera quand l'étudiant·e aura oublié les détails, et autour de quoi tu organises ton contenu. Chaque compétence se décline en une ou plusieurs idées maîtresses. Touche « Idée maîtresse » dans la palette, puis écris-la. Relie-la ensuite à ta compétence : depuis l'un des petits cercles au bord de la compétence, tire un trait jusqu'à l'idée maîtresse. Le lien « se décline en » s'affiche. C'est par tes idées maîtresses que tes leçons se rattacheront à ta compétence. Une seule suffit pour l'instant. Pour aller plus loin, touche « Idées maîtresses » dans la frise, au-dessus de la carte : le guide s'ouvre à la page qui en parle.",
+            confirme: confirmation(1, "C'est fait : ta compétence est écrite."),
+            lignes: function () {
+                return [
+                    note("Une idée maîtresse, c'est l'essentiel : ce qui restera quand l'étudiant·e aura oublié les détails, et autour de quoi tu organises ton contenu."),
+                    note("Chaque compétence se décline en une ou plusieurs idées maîtresses : une seule suffit pour l'instant."),
+                    note("C'est par tes idées maîtresses que tes leçons se rattacheront à ta compétence."),
+                    geste("Touche « Idée maîtresse » dans la palette « Nœuds »", function () { return duType('idee-maitresse').length > 0; }),
+                    geste("Écris ton idée maîtresse", function () { return !!duType('idee-maitresse').find(texte); }),
+                    consigne("Depuis l'un des petits cercles au bord de ta compétence, tire un trait jusqu'à ton idée maîtresse (le lien « se décline en » s'affiche)", function () { return !!ideeReliee(); }),
+                    note("Pour aller plus loin, « Idées maîtresses », dans la frise au-dessus de la carte, ouvre le guide à la page qui en parle.")
+                ];
+            },
             avant: async function () {
                 await allerALaCarte();
                 await amenerLeBloc(competence);
@@ -400,8 +457,20 @@
         },
         {
             titre: 'Ta leçon',
-            geste: "Touche « Leçon », donne-lui un titre, choisis sa semaine et sa séance, puis tire un trait de ton idée maîtresse jusqu'à elle.",
-            texte: "Tes leçons structurent ton cours dans le temps : chacune porte sa semaine et sa séance. Touche « Leçon » dans la palette et donne-lui un titre. Dans son en-tête, choisis sa semaine (S1, S2…), puis sa séance dans la semaine (A pour la première rencontre, B pour la deuxième). Relie-la ensuite à ton idée maîtresse : tire un trait de l'idée maîtresse jusqu'à la leçon. Le lien « se concrétise dans » apparaît : c'est ce lien qui fait remonter tes objectifs et tes évaluations jusqu'à la compétence. Touche deux fois la leçon : l'Inspecteur affiche sa date. Si tu n'as pas encore ajouté tes journées sans cours et tes semaines spéciales dans Cadre › Trimestre, fais-le : sans elles, la date peut tomber à côté. Avec sa date, ta leçon apparaîtra aussi dans le profil d'un·e étudiant·e absent·e ce jour-là : tu sauras quelle matière il ou elle a manquée. Pour aller plus loin, touche « Leçons » dans la frise : le guide s'ouvre à la page qui en parle.",
+            confirme: confirmation(2, "C'est fait : ton idée maîtresse est reliée à ta compétence."),
+            lignes: function () {
+                return [
+                    note("Tes leçons structurent ton cours dans le temps : chacune porte sa semaine et sa séance."),
+                    note("Une leçon datée apparaît dans le profil d'un·e étudiant·e absent·e ce jour-là : tu sais quelle matière il ou elle a manquée. Pour cela, des leçons datées suffisent, même sans le reste de ta carte."),
+                    note("Touchée deux fois, ta leçon montre dans l'Inspecteur sa date pour chacun de tes groupes, calculée d'après son horaire. Sans tes journées sans cours et tes semaines spéciales (Cadre › Trimestre), ces dates peuvent tomber à côté."),
+                    geste("Touche « Leçon » dans la palette « Nœuds »", function () { return duType('lecon').length > 0; }),
+                    geste("Donne-lui un titre", function () { return !!leconNeuve(); }),
+                    geste("Dans son en-tête, choisis sa semaine (S1, S2…), puis sa séance dans la semaine (A pour la première rencontre, B pour la deuxième)", function () { return leconDatee(leconNeuve()); }),
+                    consigne("Tire un trait de ton idée maîtresse jusqu'à ta leçon (le lien « se concrétise dans » s'affiche)", function () { return !!leconReliee(); }),
+                    note("C'est ce lien qui fait remonter tes objectifs et tes évaluations jusqu'à la compétence."),
+                    note("Pour aller plus loin, « Leçons », dans la frise, ouvre le guide à la page qui en parle.")
+                ];
+            },
             avant: async function () {
                 await allerALaCarte();
                 await amenerLeBloc(ideeReliee);
@@ -424,8 +493,17 @@
         },
         {
             titre: 'Ton objectif',
-            geste: "Touche le badge 🎯 de ta leçon, puis écris ton objectif.",
-            texte: "L'objectif de leçon est la boussole : c'est lui qui dit ce que l'étudiant·e saura faire à la fin, et c'est par rapport à lui que se choisissent les connaissances, les activités et l'évaluation. Touche le badge 🎯 dans l'en-tête de ta leçon : la zone des objectifs se déplie. Écris ton objectif en commençant par un verbe ; l'invite « Sera en mesure de… » t'y aide. Ta production porte déjà un objectif d'apprentissage : si c'est celui que vise cette leçon, reprends-le ici. Le verbe que tu choisis, tes activités devront le faire exercer et tes évaluations devront l'exiger. Une pastille « ! » apparaît à côté : aucun bloc ne sert encore cet objectif. Elle changera à mesure que tu le relieras. Pour aller plus loin, touche « Objectifs » dans la frise : le guide s'ouvre à la page qui en parle.",
+            confirme: confirmation(3, "C'est fait : ta leçon est datée et reliée à ton idée maîtresse."),
+            lignes: function () {
+                return [
+                    note("L'objectif de leçon est la boussole : c'est lui qui dit ce que l'étudiant·e saura faire à la fin, et c'est par rapport à lui que se choisissent les connaissances, les activités et l'évaluation."),
+                    note("Le verbe que tu choisis, tes activités devront le faire exercer et tes évaluations devront le vérifier."),
+                    note("Ta production porte déjà un objectif d'apprentissage : si c'est celui que vise cette leçon, tu peux le reprendre ici."),
+                    geste("Touche le badge 🎯 dans l'en-tête de ta leçon (la zone des objectifs se déplie)", objectifsDeplies),
+                    consigne("Écris ton objectif en commençant par un verbe (l'invite « Sera en mesure de… » t'y aide)", function () { return objectifs(laLecon()).length > 0; }),
+                    note("Pour aller plus loin, « Objectifs », dans la frise, ouvre le guide à la page qui en parle.")
+                ];
+            },
             avant: async function () { retirerExtras(); await allerALaCarte(); await amenerLeBloc(laLecon); },
             zones: function () { return partiesDe(laLecon(), ['entete', 'objectifs', 'titre']); },
             contour: function () { var b = bloc(laLecon()); return b ? b.querySelector('.planif-badge-objectif') : null; },
@@ -433,8 +511,20 @@
         },
         {
             titre: 'Ton activité',
-            geste: "Touche « Activité », donne-lui un titre, glisse-la dans ta leçon, touche deux fois sa poignée, puis coche son objectif.",
-            texte: "Le type d'activité dépend de ce que tu vises : un exercice de mémorisation ne développe pas la même chose qu'une analyse de cas. Touche « Activité » dans la palette, donne-lui un titre, puis glisse le bloc dans ta leçon par sa poignée ⠿. Touche deux fois cette poignée : dans l'Inspecteur, coche l'objectif qu'il sert. C'est ainsi que tu vérifies qu'aucun objectif ne reste sans moyen. La pastille de ton objectif passe à « ⚠ » : il est servi, mais aucune évaluation ne le vérifie encore. Pour aller plus loin, touche « Activités » dans la frise : le guide s'ouvre à la page qui en parle.",
+            confirme: confirmation(4, "C'est fait : ton objectif est écrit."),
+            lignes: function () {
+                return [
+                    note("La pastille « ! » à côté de ton objectif dit qu'aucun bloc ne le sert encore : elle changera à mesure que tu le relieras."),
+                    note("Le type d'activité dépend de ce que tu vises : un exercice de mémorisation ne développe pas la même chose qu'une analyse de cas."),
+                    note("Cocher l'objectif qu'une activité sert, c'est vérifier qu'aucun objectif ne reste sans moyen."),
+                    geste("Touche « Activité » dans la palette « Nœuds »", function () { return duType('activite').length > 0; }),
+                    geste("Donne-lui un titre", function () { return !!duType('activite').find(texte); }),
+                    geste("Glisse le bloc dans ta leçon par sa poignée ⠿", function () { return dansLaLecon(activiteNeuve()); }),
+                    geste("Touche deux fois cette poignée (l'Inspecteur s'ouvre)", function () { return inspecteurOuvertSur(activiteNeuve()); }),
+                    consigne("Dans l'Inspecteur, coche l'objectif que ton activité sert", function () { return !!blocQuiSert(); }),
+                    note("Pour aller plus loin, « Activités », dans la frise, ouvre le guide à la page qui en parle.")
+                ];
+            },
             avant: async function () {
                 await allerALaCarte();
                 await amenerLeBloc(laLecon);
@@ -459,10 +549,24 @@
         },
         {
             titre: 'Ton évaluation',
-            get texte() { return varianteRendue ? TEXTE_6_APRES : TEXTE_6; },
-            get geste() {
-                return varianteRendue ? "Glisse ton évaluation sous ton activité, par sa poignée ⠿."
-                    : "Touche « Évaluation », donne-lui un titre, glisse-la dans ta leçon sous ton activité, touche deux fois sa poignée, coche son objectif, puis choisis ta production.";
+            confirme: confirmation(5, "C'est fait : ton activité sert ton objectif."),
+            secondeForme: function () { return varianteRendue; },
+            lignes: function () {
+                if (varianteRendue) return [note(TEXTE_6_APRES), consigne(GESTE_6_APRES, function () { var ev = evaluationNeuve(); return !!ev && pastille(ev) === 'avant'; })];
+                return [
+                    note("La pastille « ⚠ » de ton objectif dit qu'il est servi, mais qu'aucune évaluation ne le vérifie encore."),
+                    note("Formative ou certificative, l'évaluation ferme la boucle : elle vérifie ce que tu as enseigné, au niveau que tu as visé, ni plus, ni moins."),
+                    note("Elle vient après l'activité : sous elle dans la même leçon, ou dans une leçon plus tard, la carte comparant alors les semaines et les séances. Ici, elle se place sous ton activité."),
+                    note("Une fois ta production choisie, ta carte sait quelle production vérifie cet objectif, et ce qu'elle pèse dans ta note."),
+                    geste("Touche « Évaluation » dans la palette « Nœuds »", function () { return duType('evaluation').length > 0; }),
+                    geste("Donne-lui un titre", function () { return !!duType('evaluation').find(texte); }),
+                    geste("Glisse le bloc dans ta leçon par sa poignée ⠿, sous ton activité", function () { return dansLaLecon(evaluationNeuve()); }),
+                    geste("Touche deux fois cette poignée (l'Inspecteur s'ouvre)", function () { return inspecteurOuvertSur(evaluationNeuve()); }),
+                    geste("Dans l'Inspecteur, coche l'objectif que ton évaluation vérifie", function () { var ev = evaluationNeuve(); return !!ev && C().objectifsVerifiesPar(ev).length > 0; }),
+                    consigne("Choisis dans « Production » celle que tu as décrite", function () { return !!evaluationAlignee(); }),
+                    note("Dans son en-tête, « Formative » ou « Certificative » dit sa visée : ton plan de cours le précisera."),
+                    note("Pour aller plus loin, « Évaluations », dans la frise, ouvre le guide à la page qui en parle.")
+                ];
             },
             avant: async function () {
                 varianteRendue = !!evaluationApres() && !evaluationAlignee();
@@ -491,14 +595,31 @@
             atteint: function () {
                 if (evaluationAlignee()) return true;
                 var variante = !!evaluationApres();
-                if (variante !== varianteRendue) M().allerA(5);   // la variante, ou le retour au texte de l'étape
+                if (variante !== varianteRendue) M().allerA(5);   // la seconde forme, ou le retour à la première
                 return false;
             }
         },
         {
             titre: 'Raffiner, si tu veux',
-            geste: "Touche « Terminer ».",
-            texte: "Te voilà avec une première chaîne alignée, de la compétence à ta production. Tu peux t'arrêter là : ta carte dit déjà ce que ta production vérifie, et quand tu l'enseignes. Tu peux aussi la raffiner autant que tu le veux. Quelques pistes, à ton rythme : tes autres leçons, chacune avec ses objectifs ; les connaissances que tes activités font acquérir ; le niveau cognitif de chaque bloc, dans l'Inspecteur, pour que tes activités et tes évaluations visent le même niveau d'exigence ; ta démarche, comme l'enseignement explicite, si c'est la tienne ; le « Planificateur », qui place tes leçons sur les semaines du trimestre. Dans « Actions », « Exporter le plan… » en tire ton plan de cours, et « Télécharger un modèle… » te permet de faire relire ta carte par l'IA de ton choix, sans qu'elle soit modifiée. Dans « Consulter la bibliothèque », « Garder dans ma bibliothèque » la reprend d'un trimestre à l'autre, et « Exporter » en fait un fichier que tes collègues peuvent importer. Le guide t'accompagne à chaque pas.",
+            confirme: confirmation(6, "C'est fait : ton évaluation vérifie ton objectif."),
+            lignes: function () {
+                return [
+                    note("Les pastilles ont changé : celle de ton évaluation affiche « ✓ », parce que l'objectif qu'elle vérifie a été enseigné avant ; celle de ton objectif aussi, puisqu'il est servi et vérifié. Le « ⚠ » de ta compétence a disparu."),
+                    note("Ta carte est alignée quand chaque objectif est servi et vérifié, et que chaque évaluation ne vérifie que des objectifs déjà enseignés."),
+                    note("Tu peux t'arrêter là : ta carte dit déjà ce que ta production vérifie, et quand tu l'enseignes."),
+                    note("Tu peux aussi la raffiner, à ton rythme :"),
+                    note("tes autres leçons, chacune avec ses objectifs"),
+                    note("les connaissances que tes activités font acquérir"),
+                    note("le niveau cognitif de chaque bloc, dans l'Inspecteur, pour que tes activités et tes évaluations visent le même niveau d'exigence"),
+                    note("ta démarche, comme l'enseignement explicite, si c'est la tienne"),
+                    note("le « Planificateur », qui montre toutes tes leçons semaine par semaine ; y glisser une leçon change sa semaine, et donc ses dates"),
+                    note("Dans « Actions », « Exporter le plan… » en tire ton plan de cours, et « Télécharger un modèle… » te permet de faire relire ta carte par l'IA de ton choix, sans qu'elle soit modifiée."),
+                    note("Dans « Consulter la bibliothèque », « Garder dans ma bibliothèque » la reprend d'un trimestre à l'autre, et « Exporter » en fait un fichier que tes collègues peuvent importer."),
+                    // « Objectif atteint : … », « Pour revoir une étape… » et la phrase de la suite : posés par le moteur.
+                    // Quand la bulle offre aussi « Parcours suivant », le moteur dit les deux suites (sa consigne de la fin).
+                    consigne("Touche « Terminer »")
+                ];
+            },
             centre: true,
             sansSortie: true,
             avant: async function () { retirerExtras(); },
@@ -513,7 +634,7 @@
         e.atteint = function () { return !enSaisie() && atteint(); };
     });
 
-    var DEF = { id: ID, etapes: ETAPES, lienSortie: 'Plus tard' };
+    var DEF = { id: ID, etapes: ETAPES, lienSortie: 'Plus tard', objectif: OBJECTIF, objectifAtteint: OBJECTIF_ATTEINT };
 
     // ---------- La condition, le lancement, la fin ----------
 
@@ -539,6 +660,7 @@
         // « Reprendre » relit la leçon retenue ; « Commencer » et « Refaire » repartent de la première étape.
         var reprise = window.Assistance.etatDe(ID).etat === 'en-cours';
         if (!reprise) { depuis = 0; majCtx({ leconId: null, noeudsAvant: idsDeLaCarteActive() }); }
+        debutDuPassage = depuis || 0;   // la confirmation ne dit que ce qui a été fait pendant ce passage
         window.Assistance.definirEtat(ID, 'en-cours', depuis);
         var lance = M().lancer(DEF, {
             depuis: depuis,
@@ -575,6 +697,8 @@
         refus: condition,
         contexte: lireCtx,
         etapes: function () { return ETAPES; },
-        texteVariante: TEXTE_6_APRES
+        definition: function () { return DEF; },
+        texteVariante: TEXTE_6_APRES,
+        gesteVariante: GESTE_6_APRES
     };
 })();
