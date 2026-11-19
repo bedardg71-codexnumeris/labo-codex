@@ -9,11 +9,11 @@
 
 ## 19 NOV. 2026, 9 H 00 (Claude Code, session dans le nuage) : **`lot/journees-reprise` POUSSÉE, NON FUSIONNÉE — LA REPRISE DÉCIDE DU CALCUL DES SEMAINES, PLUS LA NATURE** — Grégoire fusionnera ; `main` n'a pas bougé (sauf ce relais)
 
-Mandat : Grégoire, 19 nov. (bogue vécu le 18 : grève des 10 et 13 nov. sans reprise qui décalait les semaines), puis sa suite (textes d'aide), même session. **Le travail le plus récent de ce chantier vit sur `lot/journees-reprise`** (`e0333f0e`, partie d'`origin/main` `03dc7d2f`, 1.249.0). Une autre session travaille en parallèle sur `lot/gel-etape-7` (Mac) : ce relais ne dit rien d'elle.
+Mandat : Grégoire, 19 nov. (bogue vécu le 18 : grève des 10 et 13 nov. sans reprise qui décalait les semaines), puis sa suite (textes d'aide), même session. **Le travail le plus récent de ce chantier vit sur `lot/journees-reprise`** (`085ac0cd`, partie d'`origin/main` `03dc7d2f`, 1.249.0 ; retouches de Cowork du 19 nov. comprises : libellé du calendrier échappé, « Journées reprises », avertissement d'une reprise hors du calendrier, cas des Élections). Une autre session travaille en parallèle sur `lot/gel-etape-7` (Mac) : ce relais ne dit rien d'elle.
 
 - **Porte** : une journée sans cours sort du compte « paquet de 5 » si et seulement si elle porte une `dateReprise` ; la question « Cette journée sera-t-elle reprise ? » remplace le menu « Nature » ; badge « Non reprise » ; légende et textes d'aide alignés. Rien n'est écrit dans les données (`categorie` reste inerte).
 - **Jugé** : Vitest complet (932 fichiers, 11 896 tests) ; Playwright **Chromium seul** sur quatre specs (60/60) ; break-tests faits. WebKit absent du conteneur ; verdict Playwright complet non pris : la CI GitHub juge le push de la branche.
-- **Reste** : la fusion ; la porte `plans de travail/PORTES-TERRAIN-2026-11-19-journees-reprise.md` (Cowork publie l'artefact) ; à la release, la phrase du changelog sur les journées « Institutionnel » ou « Férié » sans reprise qui cessent de décaler. ⚠ Jetons `?v=` du lot : `20261117r` sur huit fichiers ; si `lot/gel-etape-7` touche les mêmes, la fusion conflictuera sur ces lignes (choisir alors une lettre neuve).
+- **Reste** : la fusion ; la porte `plans de travail/PORTES-TERRAIN-2026-11-19-journees-reprise.md` (Cowork publie l'artefact) ; à la release, la phrase du changelog sur les journées « Institutionnel » ou « Férié » sans reprise qui cessent de décaler. ⚠ Jetons `?v=` du lot : `20261117r` sur six fichiers, `20261117s` sur `calendrier-vue.js` et `trimestre-v2-init.js` ; si `lot/gel-etape-7` touche les mêmes, la fusion conflictuera sur ces lignes (choisir alors une lettre neuve).
 - **Rapport** : `plans de travail/RAPPORT-2026-11-19-journees-reprise.md` (sur la branche).
 
 ---
