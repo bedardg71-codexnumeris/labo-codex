@@ -1,7 +1,7 @@
 # Porte terrain iPad : dessiner au doigt
 
 Lot `lot/dessiner-au-doigt`, 19 nov. 2026 (#1288). Relais du Projet, 18 nov., 18 h 50.
-PR d'aperçu n° __PR__ (non fusionnée).
+PR d'aperçu n° 32 (non fusionnée).
 
 **État : poussée le 19 nov., à passer.** L'artefact jumeau (cases, « Copier mes résultats ») est publié par Cowork.
 **Quatre gestes**, l'iPad couché, le crayon à portée, cinq minutes. Aucune décision à prendre ici.
@@ -15,7 +15,7 @@ Rien n'écrit dans tes trimestres : l'aperçu a son propre espace. Ouvre une cop
 
 ## §0 · Préalable
 
-- [ ] **0.1** Dans Safari, ouvre `https://deploy-preview-__PR__--codexnumeris-051225.netlify.app`, recharge, et lis le
+- [ ] **0.1** Dans Safari, ouvre `https://deploy-preview-32--codexnumeris-051225.netlify.app`, recharge, et lis le
   numéro au pied de l'accueil.
   ⮕ Attendu : 1.249.0, build 1117-0611 ou plus récent. Un autre numéro : arrête-toi là.
   `iPad`
