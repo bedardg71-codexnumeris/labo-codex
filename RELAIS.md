@@ -7,6 +7,21 @@
 
 ---
 
+## 19 NOV. 2026, 16 H 05 (Claude Code) : **1.250.0 SUR `main` ET EN LIGNE — LES DESCRIPTEURS DANS L'ÉDITEUR DE GRILLES, LES COPIES NON VERROUILLÉES AVANT L'EXPORT LÉA, LA BULLE DE « DÉCOUVRIR » FIXE** — verdict complet du Mac, vert, sur secteur
+
+Mandat : go de Grégoire relayé par Cowork (19 nov., après-midi), Mac sur secteur. **Le travail le plus récent vit sur `main`** (`origin/main` = `164517011`). Fait dans l'arbre `../labo-codex-fusion` ; `lot/descripteurs-grille` fusionné (PR n° 31), release `8c4351a8a` (1.250.0, build `1119-0906`).
+
+- **Netlify** : déploiement `6aff63eb`, prêt, commit `164517011`, publié à 16 h 02 ; `version.json` du permalien = `1.250.0` / `1119-0906` ; `index.html`, `styles.css`, `js/grilles.js`, `version.js` servis identiques au commit (`cmp`).
+- **Encadré « Textes gardés d'une autre échelle »** (`060e98fbb`) : plus de cadre en tirets, un filet de 2 px à gauche, en tirets (même traitement que la case de niveau ; le tiret garde « hors des niveaux montrés »). `pages-sans-emboitement` fait paraître l'encadré (un texte fictif au code absent de l'échelle, dans chaque grille de la démo) et exige qu'il paraisse ; break-test : rouge sans la retouche, clair et sombre. Captures : `Claude outputs/captures-2026-11-19-textes-gardes/` (arbre principal), `autre-echelle-*`.
+- **parcours-5 sur `8449f25cc`** : 5 rouges sur 5, seul, même ligne 334 — **déjà en ligne**. Cause mesurée : le geste d'Alignement lui-même, pas le pilote (`throttleRAF` garde le premier `pointermove` d'une image ; le relâchement ne relit pas sa position). **#1295** inscrit ; note de la baseline mise à jour (`ee414b70f`).
+- **Les rouges du module Grilles** (palette-evaluation-compacte 308 et 371, texte-troue:173, un-defilement-1214:196) : 11 sur 21 avec `1129198ef` comme sans lui, et rouges sur `8449f25cc` (6 sur 8) : pas à ce lot, déjà en ligne. Au verdict, tous verts au second essai. **parcours-4:151** : 2 rouges sur 10 avec, 0 sur 9 sans, à deux endroits différents, aucun dans les 4 derniers passages « avec », aucun mécanisme dans le code : classé intermittent, non attribué (à corriger si la mesure le contredit).
+- **Verdict** : deux passes complètes. Sur `ee414b70f` : 1 rouge nouveau, `en-tete-epure` « bureau (1440) », rouge aussi sur `8449f25cc` — le banc lisait la couleur de l'onglet actif pendant sa transition de 0,15 s. Banc corrigé (`164517011`, attend la couleur finale ; break-test fait). Sur `164517011` : **jeton code 0, 1 720 essais, 1 694 verts, 24 au second essai, 2 rouges connus (#1284), 68 sautés.** Mémoire 80 à 83 % du début à la fin.
+- **BACKLOG** : #1294 (à 1 180 px, la rangée des cases de niveau dépasse la colonne des champs ; remarque de Cowork), #1295 (le glisser d'Alignement).
+- **Supposé, à corriger au besoin** : le filet de l'encadré en tirets (et non plein) ; corriger le banc d'en-tête plutôt que l'ajouter à la baseline.
+- **Non vérifié** : Safari et l'iPad ; pas de relecture croisée de cette session.
+
+---
+
 ## 19 NOV. 2026, 9 H 00 (Claude Code, session dans le nuage) : **`lot/journees-reprise` POUSSÉE, NON FUSIONNÉE — LA REPRISE DÉCIDE DU CALCUL DES SEMAINES, PLUS LA NATURE** — Grégoire fusionnera ; `main` n'a pas bougé (sauf ce relais)
 
 Mandat : Grégoire, 19 nov. (bogue vécu le 18 : grève des 10 et 13 nov. sans reprise qui décalait les semaines), puis sa suite (textes d'aide), même session. **Le travail le plus récent de ce chantier vit sur `lot/journees-reprise`** (`085ac0cd`, partie d'`origin/main` `03dc7d2f`, 1.249.0 ; retouches de Cowork du 19 nov. comprises : libellé du calendrier échappé, « Journées reprises », avertissement d'une reprise hors du calendrier, cas des Élections). Une autre session travaille en parallèle sur `lot/gel-etape-7` (Mac) : ce relais ne dit rien d'elle.
