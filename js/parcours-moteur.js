@@ -94,6 +94,10 @@
    l'écran (la Modélisation, en trois temps : « Remplir », ce qui vient d'apparaître, puis le bouton
    de la page) le déclare. Ses lignes et ses boutons sont relus à chaque passage de la sonde ; changés, la bulle est
    récrite sur place, sans changer d'étape ni rejouer `avant`, et sa consigne s'annonce.
+   LA SECONDE FORME (Grégoire, 18 nov. 2026, essai sur l'iPad : « ça nous incite à ne pas lire le contenu qui suit » ;
+   tranché par Cowork) : une étape dont la bulle change de forme en cours de route (`secondeForme()` vrai : après
+   « Remplir ») ne garde que son titre et son compteur. L'objectif, la confirmation et la phrase du lieu, qui
+   ouvraient la première forme, disparaissent ; la bulle s'ouvre sur ses lignes nouvelles, puis le geste à faire.
    L'OBJECTIF, LA CONFIRMATION, LA SECTION, LE TRIANGLE (16 nov. 2026 ; demandes de Grégoire du 15 nov., relais de Cowork ;
    plans de travail/CONSIGNE-2026-11-16-parcours-je-regarde.md, règles a à e) :
    a. La première bulle d'un parcours porte son OBJECTIF (`objectif`, sur la définition) : sous le titre, avant tout.
@@ -142,6 +146,7 @@
        section?: () => Element,    // la section de la page dont parle la bulle : la page y défile, son nom a le halo
        nommeLaSection?: bool,      // la phrase du lieu dit la section ; lieuSuite?: string, ce qui suit cette phrase
        confirme?: string | () => string, // la première ligne : le geste précédent, nommé (« C'est fait : … »)
+       secondeForme?: () => bool,  // la bulle a changé de forme dans l'étape (après « Remplir ») : voir « LA SECONDE FORME »
        avant?: async () => void,   // place la page (idempotent : sert aussi à la reprise)
        zones?: () => Element[],    // ce dont parle la bulle (la flèche y va)
        fleches?: () => Element[],  // parmi les zones, celles où vont les flèches (groupées) ; les autres, la bulle les
@@ -512,6 +517,11 @@
     /** Un texte qu'une étape donne tel quel ou par une fonction. */
     function texteDe(v) {
         try { return String((typeof v === 'function' ? v() : v) || ''); } catch (e) { return ''; }
+    }
+
+    /** La bulle est dans sa seconde forme (voir « LA SECONDE FORME ») : ce qui ouvrait la première a disparu. */
+    function enSecondeForme(etape) {
+        try { return typeof etape.secondeForme === 'function' && !!etape.secondeForme(); } catch (e) { return false; }
     }
 
     function aUnLieu(etape) {
@@ -1125,22 +1135,7 @@
         boite.textContent = '';
         etat.lignes = [];
         var lieu = aUnLieu(etape) ? lireLieu() : null;
-        var lignes = etape.lignes ? lignesDeLEtape(etape) : [];
-        // LA FIN : la dernière bulle d'un parcours dit où revoir une étape, juste avant sa consigne.
-        if (!etat.def.sansRang && etat.i === etat.def.etapes.length - 1) {
-            var n = etat.def.etapes.length;
-            var revue = { texte: 'Pour revoir une étape, touche « ' + n + ' sur ' + n + ' ».', note: true, classe: 'parcours-bulle-note parcours-bulle-revue' };
-            // L'objectif atteint (`objectifAtteint`, sur la définition) : en gras, entre deux filets, comme l'objectif de la
-            // première bulle ; puis la phrase de la suite, en ligne simple, la dernière avant les boutons.
-            var atteint = texteDe(etat.def.objectifAtteint);
-            var cloture = atteint ? [{ texte: atteint, classe: 'parcours-bulle-objectif parcours-bulle-atteint' },
-                                     { texte: PHRASE_DE_LA_SUITE, classe: 'parcours-bulle-suite' }] : [];
-            var k = lignes.length;
-            while (k > 0 && lignes[k - 1].geste) k--;
-            lignes = lignes.slice(0, k).concat([revue], cloture, lignes.slice(k).map(function (l) {
-                return Object.assign({}, l, { texte: consigneDeLaFin(etape, l.texte) });
-            }));
-        }
+        var lignes = avecLaFin(etape, etape.lignes ? lignesDeLEtape(etape) : []);
         if (lignes.length && gesteRetenu(etape)) lignes = lignesEnVisite(lignes);
         // Dans l'ordre : l'objectif du parcours (sa première bulle), le geste précédent confirmé, puis où l'on est.
         var phrase = function (classe, texte) {
@@ -1150,9 +1145,10 @@
             ph.textContent = typographier(texte);
             boite.appendChild(ph);
         };
-        if (etat.i === 0) phrase('parcours-bulle-objectif', texteDe(etat.def.objectif));
-        phrase('parcours-bulle-confirme', texteDe(etape.confirme));
-        phrase('parcours-bulle-lieu', phraseDuLieu(lieu, etape.nommeLaSection ? sectionDe(etape) : null, texteDe(etape.lieuSuite)));
+        var seconde = enSecondeForme(etape);
+        if (etat.i === 0 && !seconde) phrase('parcours-bulle-objectif', texteDe(etat.def.objectif));
+        poserConfirmation(seconde ? {} : etape);
+        if (!seconde) phrase('parcours-bulle-lieu', phraseDuLieu(lieu, etape.nommeLaSection ? sectionDe(etape) : null, texteDe(etape.lieuSuite)));
         var ul = null;
         var poser = function (ligne, dans) {
             var li = document.createElement('li');
@@ -1187,6 +1183,39 @@
         if (etat.i === 0 && !etat.def.sansRang && !etat.telephone) phrase('parcours-bulle-aide', PHRASE_DE_LA_POIGNEE);
         boite.hidden = !boite.firstChild;
         majLignes(true);
+    }
+
+    /**
+     * LA FIN : la dernière bulle d'un parcours dit où revoir une étape, juste avant sa consigne. Les autres bulles :
+     * leurs lignes telles quelles.
+     */
+    function avecLaFin(etape, lignes) {
+        if (etat.def.sansRang || etat.i !== etat.def.etapes.length - 1) return lignes;
+        var n = etat.def.etapes.length;
+        var revue = { texte: 'Pour revoir une étape, touche « ' + n + ' sur ' + n + ' ».', note: true, classe: 'parcours-bulle-note parcours-bulle-revue' };
+        // L'objectif atteint (`objectifAtteint`, sur la définition) : en gras, entre deux filets, comme l'objectif de la
+        // première bulle ; puis la phrase de la suite, en ligne simple, la dernière avant les boutons.
+        var atteint = texteDe(etat.def.objectifAtteint);
+        var cloture = atteint ? [{ texte: atteint, classe: 'parcours-bulle-objectif parcours-bulle-atteint' },
+                                 { texte: PHRASE_DE_LA_SUITE, classe: 'parcours-bulle-suite' }] : [];
+        var k = lignes.length;
+        while (k > 0 && lignes[k - 1].geste) k--;
+        return lignes.slice(0, k).concat([revue], cloture, lignes.slice(k).map(function (l) {
+            return Object.assign({}, l, { texte: consigneDeLaFin(etape, l.texte) });
+        }));
+    }
+
+    /**
+     * LA CONFIRMATION AU-DESSUS DU TITRE (Grégoire, 18 nov. 2026, 14 h 11) : « C'est fait : … », le geste de l'étape
+     * d'avant, en petit et en vert, comme un fait accompli, au-dessus du titre et du compteur. Posée dans son élément
+     * (`etat.elements.confirme`, créé avec la tête de la bulle) ; récrite avec les lignes (une bulle à deux formes).
+     */
+    function poserConfirmation(etape) {
+        var c = etat.elements.confirme;
+        if (!c) return;
+        var texte = texteDe(etape.confirme);
+        c.textContent = texte ? typographier(texte) : '';
+        c.hidden = !texte;
     }
 
     /** À chaque passage de la sonde : une ligne dont le geste est fait se grise (et le dit) ; défait, elle revient. */
@@ -1378,6 +1407,12 @@
         }
         etat.glisse = null;
         if (etat.telephone) etat.deplacee = null;
+        // La confirmation de l'étape d'avant, au-dessus du titre (18 nov. 2026) ; son texte : `poserConfirmation`.
+        var confirme = document.createElement('p');
+        confirme.className = 'parcours-bulle-confirme';
+        confirme.hidden = true;
+        b.appendChild(confirme);
+        etat.elements.confirme = confirme;
         b.appendChild(tete);
         if (!etat.def.sansRang) b.appendChild(listeDesEtapes());
 

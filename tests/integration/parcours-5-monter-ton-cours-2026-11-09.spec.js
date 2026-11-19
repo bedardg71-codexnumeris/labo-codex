@@ -198,7 +198,9 @@ async function choisirDansEntete(page, sel, valeur) {
 }
 
 const pastilleEvaluation = (page, id) => page.evaluate((i) => planificationCarte.evaluerPastilleEvaluation(planificationCarte.etat.noeuds.get(i)).etat, id);
-const texteBulle = (page) => bulle(page).locator('.parcours-bulle-texte');
+// 19-20 nov. 2026 (« Nous faisons ») : la bulle est en lignes ; ses phrases sont des notes, ses gestes une liste.
+const notesBulle = (page) => bulle(page).locator('.parcours-bulle-note');
+const gestesBulle = (page) => bulle(page).locator('.parcours-bulle-ligne .parcours-bulle-ligne-texte');
 
 /** Un espace où le troisième parcours est fait ; sa production sera placée dans la carte. */
 async function espaceDuTroisiemeParcours(page) {
@@ -360,7 +362,10 @@ test('« Monter ton cours » : les sept étapes, la variante ⚠, « Plus tard �
     await capture(page, DOSSIER, `p5-6-inspecteur-${cap}`);
     await toucher(page, caseVerifiee);
     // La variante : l'objectif vérifié, mais enseigné APRÈS (l'évaluation vient avant l'activité).
-    await expect(texteBulle(page)).toHaveText(await page.evaluate(() => ParcoursCours.texteVariante));
+    // La seconde forme : sa phrase et son geste, sans la confirmation de la première.
+    await expect(notesBulle(page)).toHaveText([await page.evaluate(() => ParcoursCours.texteVariante)]);
+    await expect(gestesBulle(page)).toHaveText([await page.evaluate(() => ParcoursCours.gesteVariante)]);
+    await expect(bulle(page).locator('.parcours-bulle-confirme')).toBeHidden();
     await expect(bulle(page).locator('.parcours-bulle-rang')).toHaveText('6 sur 7');
     expect(await pastilleEvaluation(page, ev)).toBe('apres');
     await degage(page, noeud(ev));   // la variante : la bulle quitte l'Inspecteur pour laisser libre l'évaluation à glisser
@@ -372,7 +377,8 @@ test('« Monter ton cours » : les sept étapes, la variante ⚠, « Plus tard �
     expect(await page.evaluate(() => window.__sautsDeLaCarte), 'la carte n’a pas sauté pendant les glisser des étapes 5 et 6').toEqual([]);
     await deuxSondes(page);
     expect(await rangActuel(page)).toBe(5);
-    await expect(texteBulle(page)).not.toHaveText(await page.evaluate(() => ParcoursCours.texteVariante));
+    await expect(notesBulle(page).first()).not.toHaveText(await page.evaluate(() => ParcoursCours.texteVariante));
+    await expect(gestesBulle(page)).toHaveCount(6);   // la première forme, ses six gestes
     await page.selectOption('#planif-panneau-production', pid);
 
     // 7. Raffiner : la bulle au centre, sans « Plus tard », « Terminer ».

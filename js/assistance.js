@@ -61,7 +61,10 @@
     'use strict';
 
     var CLE_PREF = 'parcoursAssistance';
-    var PARCOURS_OUVERTS = ['decouvrir'];
+    // ⚠ BRANCHE SEULEMENT (lot « Je regarde » de « Recevoir », 17 nov. 2026) : rouverts pour l'aperçu de Grégoire.
+    // À DÉFAIRE AVANT TOUTE FUSION : `git revert` du commit « BRANCHE SEULEMENT », qui rend ['decouvrir'] et les deux
+    // essais du verrou (plans de travail/RAPPORT-2026-11-17-je-regarde-recevoir.md, §5).
+    var PARCOURS_OUVERTS = ['decouvrir', 'classe', 'evaluer', 'recevoir', 'monter'];   // ⚠ APERÇU : « monter » ouvert sur lot/nous-faisons-cours seulement (nuit du 19 nov.) ; ce commit s'annule avant toute fusion
     // L'état en mémoire, que seuls les bancs changent (ouvrirLesParcours) : la liste des identifiants ouverts, ou `true`
     // (tous). Rien ne le garde d'un chargement à l'autre.
     var ouverts = PARCOURS_OUVERTS.slice();

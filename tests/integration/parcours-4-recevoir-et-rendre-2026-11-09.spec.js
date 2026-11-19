@@ -142,7 +142,9 @@ async function espaceDuTroisiemeParcours(page, cap) {
     const p3 = await page.evaluate(() => ParcoursEvaluer.contexte());
     expect(await page.evaluate((id) => { const p = (db.getSync(cle('productions'), []) || []).find((x) => x.id === id); return [!!p.grilleId, !!p.echelleId, p.cartoucheId]; }, p3.productionId)).toEqual([true, true, p3.cartoucheId]);
     await expect(item(page).locator('.assistance-parcours-etat')).toHaveText('À faire');
-    await expect(item(page).locator('.assistance-parcours-bouton')).toHaveText('Commencer');
+    // 17 nov. 2026 : « Recevoir » a son modèle ; sur une carte à deux temps, le bouton de la Pratique guidée s'appelle
+    // « Nous faisons », quel que soit l'état ; c'est l'état, dessous, qui dit où en est le parcours.
+    await expect(item(page).locator('.assistance-parcours-bouton')).toHaveText('Nous faisons');
     await capture(page, DOSSIER, `panneau-${cap}-a-faire`);
     await item(page).locator('.assistance-parcours-bouton').click();
     return p3.productionId;
@@ -273,7 +275,9 @@ test('« Recevoir les productions, rendre tes rétroactions », la voie des fich
     await fermerLeRappel(page);
     await ouvrirPanneau(page);
     await expect(item(page).locator('.assistance-parcours-etat')).toHaveText('Étape 8 sur 9');
-    await expect(item(page).locator('.assistance-parcours-bouton')).toHaveText('Reprendre');
+    // 17 nov. 2026 : « Recevoir » a son modèle ; sur une carte à deux temps, le bouton de la Pratique guidée s'appelle
+    // « Nous faisons », quel que soit l'état ; c'est l'état, dessous, qui dit où en est le parcours.
+    await expect(item(page).locator('.assistance-parcours-bouton')).toHaveText('Nous faisons');
     await capture(page, DOSSIER, `panneau-${cap}-en-cours`);
     await item(page).locator('.assistance-parcours-bouton').click();
     await n(page, 8, 9, 'Rends tes rétroactions');
@@ -318,7 +322,9 @@ test('« Recevoir les productions, rendre tes rétroactions », la voie des fich
     expect(await page.evaluate(() => Assistance.etatDe('recevoir').etat)).toBe('fait');
     await ouvrirPanneau(page);
     await expect(item(page).locator('.assistance-parcours-etat')).toHaveText('Fait');
-    await expect(item(page).locator('.assistance-parcours-bouton')).toHaveText('Refaire');
+    // 17 nov. 2026 : « Recevoir » a son modèle ; sur une carte à deux temps, le bouton de la Pratique guidée s'appelle
+    // « Nous faisons », quel que soit l'état ; c'est l'état, dessous, qui dit où en est le parcours.
+    await expect(item(page).locator('.assistance-parcours-bouton')).toHaveText('Nous faisons');
     await capture(page, DOSSIER, `panneau-${cap}-fait`);
 });
 

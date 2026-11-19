@@ -674,8 +674,9 @@
 
     /**
      * Une bulle en trois temps (la règle du 14 nov. 2026 ; les mots du 16). Avant : la seule consigne « Regarde
-     * l'exemple se remplir : touche « Remplir » », et son bouton, dans la bulle. Après : cette ligne, faite ; les
-     * lignes de `apres()`, qui expliquent ce qui vient d'apparaître ; puis la consigne de la page (`creer`).
+     * l'exemple se remplir : touche « Remplir » », et son bouton, dans la bulle. Après, la SECONDE FORME (18 nov. 2026,
+     * essai de Grégoire sur l'iPad) : ce qui précédait disparaît (`secondeForme`, lu par le moteur) ; les lignes de
+     * `apres()`, qui expliquent ce qui vient d'apparaître, puis la consigne de la page (`creer`).
      * `avantTout` : des notes, ou des lignes d'explication, gardées en tête dans les deux temps. `dAbord()` : les lignes d'un geste de la PAGE qui vient avant tout (ouvrir le
      * formulaire : « Touche « + Nouvelle production » ») ; tant qu'elle en rend, la bulle ne dit que cela, sans bouton.
      * `ensuite()` : de même, pour ce qui suit le bouton de la page (la cartouche créée, à choisir dans la production).
@@ -691,12 +692,13 @@
         var etats = function () {
             return {
                 avant: tete.concat([consigne(MOTS_MODELE.toucheRemplir)]),
-                apres: tete.concat([{ texte: MOTS_MODELE.toucheRemplir, fait: function () { return true; } }], o.apres(), [consigne(o.creer)])
+                apres: o.apres().concat([consigne(o.creer)])
             };
         };
         return {
             lignesVivantes: true,
             etats: etats,
+            secondeForme: function () { return !horsDesTroisTemps() && o.rempli(); },
             lignes: function () {
                 var autres = horsDesTroisTemps();
                 if (autres) return autres;
@@ -911,16 +913,27 @@
         });
     }
 
-    /** La séance choisie, la page redessine sa saisie ; les trois présences sont notées quand ses cases sont là. */
-    async function remplirLesPresences() {
+    /**
+     * La première séance du groupe, posée à l'ouverture de l'étape (Grégoire, essai du 18 nov. 2026 sur l'iPad) : avant
+     * « Remplir », la saisie montrait une date hors de l'horaire du groupe, « 0 pér. », et chaque ligne « 0 /0 » en rouge,
+     * qui se lit « tout le monde absent », alors que la bulle dit « tout le monde est présent par défaut ».
+     * @returns {Promise<string|null>} la date posée
+     */
+    async function choisirLaPremiereSeance() {
         var date = premiereSeance();
-        if (!date) return;
-        poser(champDate(), date);
+        if (!date || !enDemo()) return null;
+        if (!vaut('date-cours', date)) poser(champDate(), date);
         await attendre(function () {
             var c = casePresence(MATERIEL.presences.retard);
             return !!c && c.getAttribute('data-date-str') === date && !c.disabled;
         }, 2000);
-        if (!enDemo()) return;
+        return date;
+    }
+
+    /** La séance est déjà choisie (l'ouverture de l'étape) ; « Remplir » ne note que les deux absences et le retard. */
+    async function remplirLesPresences() {
+        var date = await choisirLaPremiereSeance();
+        if (!date || !enDemo()) return;
         presencesDeLExemple().forEach(function (x) { poser(casePresence(x[0]), String(x[1])); });
         amenerLesCasesDeLExemple();
     }
@@ -1172,6 +1185,8 @@
                 aller('suivi', 'saisie');
                 await attendre(function () { return sousSectionVisible('suivi-saisie'); }, 2000);
                 await attendre(function () { var c = champDate(); return !!(c && c.value); }, 1500);
+                // La première séance du groupe, tout le monde présent (18 nov. 2026) : « Remplir » ne note que les exceptions.
+                await choisirLaPremiereSeance();
                 await attendre(function () { return M().visible(boutonVerrou()); }, 1500);
             },
             // Les noms de la saisie : la bulle les évite, sans flèche (il faut les voir pour lire les présences).

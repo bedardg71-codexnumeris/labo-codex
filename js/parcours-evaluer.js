@@ -429,13 +429,23 @@
     function ecranEvaluationVisible() { return vis(el('evaluations-contenu-evaluation')); }
 
     function evaluationVerrouillee() {
-        var pid = lireCtx().productionId;
+        var pid = lireCtx().productionId, da = daDeLaLigne();
         var e = evaluations().find(function (x) {
-            return x && x.productionId === pid && x.verrouillee === true && !x.remplaceeParId;
+            return x && x.productionId === pid && x.verrouillee === true && !x.remplaceeParId && (!da || String(x.etudiantDA) === da);
         });
         if (e && !lireCtx().evaluationId) majCtx({ evaluationId: e.id, evaluationDA: e.etudiantDA });
         return !!e;
     }
+
+    /**
+     * L'étudiant·e que l'étape 4 désigne : dans le modèle, toujours celle du matériel (Grégoire, 17 nov. 2026 : la
+     * première ligne de la Liste suivait son tri, et un tri par prénom désignait Antilope Vaillante, l'une des trois
+     * copies du modèle de « Recevoir ») ; dans le parcours, la première ligne (rien de désigné : `undefined`).
+     */
+    function daDeLaLigne() { return enModele ? MATERIEL.etudiantEvalue.da : undefined; }
+
+    /** La ligne de l'étape 4 : celle de la production, et dans le modèle, celle de l'étudiant·e du matériel. */
+    function ligneAEvaluer() { return ligneDeLaListe(lireCtx().productionId, daDeLaLigne()); }
 
     /** La ligne de la Liste qui porte cette production (et cet·te étudiant·e, si donné·e). */
     function ligneDeLaListe(productionId, da) {
@@ -825,16 +835,16 @@
             avant: async function () {
                 if (ecranEvaluationVisible()) return;
                 aller('evaluations', 'liste');
-                await attendre(function () { return !!ligneDeLaListe(lireCtx().productionId); }, 3000);
-                amenerDeCote(ligneDeLaListe(lireCtx().productionId));
+                await attendre(function () { return !!ligneAEvaluer(); }, 3000);
+                amenerDeCote(ligneAEvaluer());
             },
             zones: function () {
                 if (ecranEvaluationVisible()) return surLaCible(ouToucherEnEvaluant());
-                return [rangeeDe(ligneDeLaListe(lireCtx().productionId))];
+                return [rangeeDe(ligneAEvaluer())];
             },
             contour: function () {
                 if (ecranEvaluationVisible()) return ouToucherEnEvaluant();
-                return ligneDeLaListe(lireCtx().productionId);
+                return ligneAEvaluer();
             },
             // « Actions › Évaluer », un niveau par critère, « Verrouiller » : la bulle nomme ce qu'il faut toucher, la
             // flèche y va (11 nov. 2026, 9 h 35, capture 17 : elle montait à la cellule « Niveau » de la rangée).
@@ -1077,6 +1087,9 @@
             echeanceDite: 'le mardi 9 septembre 2025'
         }),
         niveaux: Object.freeze([['Structure', 'M'], ['Rigueur', 'D'], ['Plausibilité', 'D'], ['Nuance', 'D']]),
+        // La personne évaluée (Grégoire, 17 nov. 2026) : Yack Amical, du deuxième groupe, quel que soit le tri de la
+        // Liste. Elle n'a pas de copie dans le modèle de « Recevoir » (Loutre Enjouée, Tapir Doux, Antilope Vaillante).
+        etudiantEvalue: Object.freeze({ da: '9900007', nom: 'Yack Amical' }),
         echelle: 'IDME et niv 0',
         // Le modèle par standards de l'assistant (`STD-n-meilleurs`, celui que la vue simple appelle « Par standards »).
         pratique: Object.freeze({ id: 'STD-n-meilleurs', nom: 'N meilleures évaluations' }),
@@ -1302,7 +1315,7 @@
     // ---------- Étape 4 du modèle : l'étudiant·e de la ligne que la bulle pointe ----------
 
     function etudiantDeLaLigne() {
-        var s = ligneDeLaListe(lireCtx().productionId);
+        var s = ligneAEvaluer();
         if (!s) return '';
         var v = [].map.call(s.options, function (o) { return o.value; }).filter(function (x) { return x.indexOf('evaluer|') === 0; })[0];
         var da = v ? v.split('|')[1] : '';

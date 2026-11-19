@@ -112,7 +112,9 @@ describe('le modèle : les neuf étapes du parcours, dans la démo', () => {
         // Plus rien à copier ni à télécharger : « Remplir avec l'exemple », par les trois temps.
         expect(EVALUER).not.toMatch(/Copier (la grille|le nom|l'objectif|la tâche|les consignes)|Télécharger les commentaires/);
         expect(bloc.match(/enTroisTemps\(\{/g)).toHaveLength(3);
-        // La fin : « Recevoir » n'a pas encore son modèle, « Voir le parcours suivant » n'y est donc pas.
+        // La fin, dans ce bac à sable où « Recevoir » n'est pas chargé : « Voir le parcours suivant » n'y est pas. (Dans
+        // l'application, depuis le 17 nov. 2026, « Recevoir » a son modèle et le bouton y est : banc B de
+        // deux-temps-modeles-2026-11-13.spec.js.)
         // (Lues aux outils communs : hors du navigateur, l'étape ne se sait pas sur le deuxième groupe et n'offre rien.)
         const suites = fenetre.ParcoursClasse.suitesDuModele('evaluer', () => {});
         expect(suites.map((b) => b.libelle)).toEqual(['Le refaire avec ma classe', 'Terminer']);
