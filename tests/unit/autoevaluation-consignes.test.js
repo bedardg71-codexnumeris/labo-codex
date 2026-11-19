@@ -15,6 +15,11 @@
  *   H — L'APERÇU : la feuille montre ce que la page contient, échappé.
  *   D — LE PDF DESSINÉ (faux jsPDF qui note ce qui est posé) : une case tracée par ligne, l'italique de la
  *       question, un texte long qui passe à la page suivante sans rien perdre.
+ *   ↻ 20 nov. 2026, retouches de Cowork :
+ *   C — LE CHOIX GARDÉ (retouche 1) : la case garde le dernier choix dans `exportPDF_derniersReglages` ; un seul
+ *       écrivain, son geste ; cochée sans réglage gardé (premier usage, réglages d'avant ce lot).
+ *   R — LES REPÈRES MANQUANTS (retouche 2) : grille décrite et échelle sans ses deux repères, l'aperçu le dit.
+ *   L — DEUX COLONNES (retouche 3) : l'ordre des feuilles, les consignes en deux colonnes, la grille pleine largeur.
  *
  * Break-tests : voir le rapport du lot (plans de travail/RAPPORT-2026-11-19-autoevaluation-consignes.md).
  * Grilles, échelles, productions et textes FICTIFS (textes inventés sur les stratégies de lecture).
@@ -459,5 +464,159 @@ describe('autoévaluation · D — le PDF dessiné', () => {
         const nom = textes.find(t => t.texte === 'Repérage des stratégies');
         const suivant = textes[textes.indexOf(nom) + 1];
         expect(suivant.page).toBe(nom.page);
+    });
+});
+
+/* ============================================================ C — le choix gardé (↻ 20 nov., retouche 1) */
+
+const CLE_REGLAGES = 'exportPDF_derniersReglages';
+
+/** L'aperçu monté sur un vrai DOM : ses cases, et un stockage de banc. `reglages` : ce qui est déjà gardé. */
+function monterApercu(reglages) {
+    const dom = new JSDOM(`<!doctype html><html><body>
+        <select id="apercuPDF-disposition"><option value="continu">Continu</option><option value="deux-colonnes" selected>Deux colonnes</option></select>
+        <input type="checkbox" id="apercuPDF-pied-enseignant" checked>
+        <input type="checkbox" id="apercuPDF-pied-licence">
+        <input type="checkbox" id="apercuPDF-autoevaluation" checked>
+    </body></html>`);
+    const document = dom.window.document;
+    const store = reglages === undefined ? {} : { [CLE_REGLAGES]: reglages };
+    const win = chargerScript('js/export-pdf.js', {
+        db: { get: async (k) => store[k] ?? null, getSync: (k, d) => (k in store ? JSON.parse(JSON.stringify(store[k])) : (d !== undefined ? d : null)),
+              set: async (k, v) => { store[k] = v; }, setSync: (k, v) => { store[k] = JSON.parse(JSON.stringify(v)); } },
+        cle, echapperHtml: (t) => String(t == null ? '' : t), toggleDisplay: () => {}, alert: () => {}, document
+    });
+    return { win, document, store, coche: () => document.getElementById('apercuPDF-autoevaluation') };
+}
+
+describe('autoévaluation · C — la case garde le dernier choix', () => {
+    it('C.a son geste garde le choix aussitôt, avec ses voisines, sans les toucher', () => {
+        const m = monterApercu({ piedEnseignant: false, disposition: 'continu' });
+        m.coche().checked = false;
+        m.win.changerAutoevaluationPDF(m.coche());
+        expect(m.store[CLE_REGLAGES]).toEqual({ piedEnseignant: false, disposition: 'continu', autoevaluation: false });
+        m.coche().checked = true;
+        m.win.changerAutoevaluationPDF(m.coche());
+        expect(m.store[CLE_REGLAGES].autoevaluation).toBe(true);
+    });
+
+    it('C.b l’ouverture pose le choix gardé ; cochée sans réglage, ou avec des réglages d’avant ce lot', () => {
+        const pose = (reglages) => { const m = monterApercu(reglages); m.coche().checked = !m.coche().checked; m.win.poserCaseAutoevaluation(m.win.restaurerReglagesPDF()); return m.coche().checked; };
+        expect(pose({ autoevaluation: false })).toBe(false);
+        expect(pose({ autoevaluation: true })).toBe(true);
+        expect(pose(undefined), 'premier usage').toBe(true);
+        expect(pose({ piedEnseignant: true, disposition: 'continu' }), 'réglages d’avant ce lot').toBe(true);
+    });
+
+    it('C.c sauvegarder les réglages ne relit pas la case : après un rechargement, elle est cochée par le HTML', () => {
+        // Le piège : la case revenue cochée (HTML) avant que l'aperçu ne la pose ; le chemin du formulaire sauvegarde avant d'ouvrir.
+        const m = monterApercu({ autoevaluation: false });
+        expect(m.coche().checked).toBe(true);
+        m.win.sauvegarderReglagesPDF();
+        expect(m.store[CLE_REGLAGES].autoevaluation).toBe(false);
+        expect(m.store[CLE_REGLAGES].disposition, 'les voisines, elles, sont relues comme avant').toBe('deux-colonnes');
+        // Sans choix gardé, la sauvegarde n'en invente pas : l'ouverture la cochera.
+        const neuf = monterApercu(undefined);
+        neuf.win.sauvegarderReglagesPDF();
+        expect(neuf.store[CLE_REGLAGES]).not.toHaveProperty('autoevaluation');
+    });
+
+    it('C.d `recocherAutoevaluation` est retiré ; la case de l’aperçu porte le geste qui garde', () => {
+        const src = readFileSync(path.join(racine, 'js', 'export-pdf.js'), 'utf8');
+        expect(src).not.toMatch(/function recocherAutoevaluation|recocherAutoevaluation\(\)/);
+        const html = readFileSync(path.join(racine, 'index.html'), 'utf8');
+        expect(html).toContain('<input type="checkbox" id="apercuPDF-autoevaluation" checked data-on-change="changerAutoevaluationPDF">');
+    });
+});
+
+/* ============================================================ R — les repères manquants (↻ 20 nov., retouche 2) */
+
+describe('autoévaluation · R — l’aperçu dit pourquoi la page manque', () => {
+    const modele = (g, e, prod = PRODUCTION) => P.construireModeleDocument(g, null, { production: prod, inclureObjectif: true }, e);
+    const sans = (modif) => Object.assign({}, IDME, modif);
+
+    it('R.a grille décrite, échelle sans ses deux repères (ou sans l’un) : le texte, ni case ni page', () => {
+        for (const e of [sans({ seuilSuffisance: undefined, seuilMaitrise: undefined }), sans({ seuilMaitrise: undefined }), sans({ seuilSuffisance: '' })]) {
+            const m = modele(grille(), e);
+            expect(m.autoevaluationSansReperes).toBe(true);
+            expect(m.autoevaluationDisponible).toBe(false);
+            expect(P.feuillesDuDocument(m)).toEqual(['consignes', 'evaluation']);
+        }
+    });
+
+    it('R.b repères posés : la case, pas le texte', () => {
+        const m = modele(grille(), IDME);
+        expect(m.autoevaluationSansReperes).toBe(false);
+        expect(m.autoevaluationDisponible).toBe(true);
+    });
+
+    it('R.c sans aucun descripteur de niveau, rien ne s’affiche (une question seule, un critère en points, des textes vides)', () => {
+        const g = grille();
+        g.criteres = [
+            { id: 'X1', nom: 'Sans descripteurs', type: 'holistique' },
+            { id: 'X2', nom: 'Question seule', type: 'holistique', descripteurs: { pourVerifier: 'Question.' } },
+            { id: 'X3', nom: 'En points', type: 'analytique', descripteurs: { parNiveau: { 'Juste': 'Tout est juste.' } } },
+            { id: 'X4', nom: 'Vides', type: 'holistique', descripteurs: { echelleId: 'E', parNiveau: { D: '  ' } } }];
+        expect(modele(g, sans({ seuilSuffisance: undefined })).autoevaluationSansReperes).toBe(false);
+        // Un texte à un niveau QUELCONQUE suffit (seul E décrit) : la page manquerait, alors le texte paraît.
+        g.criteres.push({ id: 'X5', nom: 'E seul', type: 'holistique', descripteurs: { parNiveau: { E: 'Texte E.' } } });
+        expect(modele(g, sans({ seuilSuffisance: undefined })).autoevaluationSansReperes).toBe(true);
+    });
+
+    it('R.d sans échelle, le texte paraît ; sans production, rien (pas de bande Production, pas de page)', () => {
+        expect(modele(grille(), null).autoevaluationSansReperes).toBe(true);
+        expect(modele(grille(), sans({ seuilMaitrise: undefined }), null).autoevaluationSansReperes).toBe(false);
+    });
+
+    it('R.e le texte de Cowork, mot pour mot, à la place de la case', () => {
+        const html = readFileSync(path.join(racine, 'index.html'), 'utf8');
+        const m = html.match(/<span id="apercuPDF-autoevaluation-reperes" class="u-hide">([^<]*)<\/span>/);
+        expect(m, 'le texte vit à côté de la case, caché d’abord').not.toBeNull();
+        const texte = new JSDOM(`<p>${m[1]}</p>`).window.document.querySelector('p').textContent.replace(/ /g, ' ');
+        expect(texte).toBe('Grille d\'autoévaluation : dans Conception › Échelles de performance, indique pour cette échelle « Suffisant à partir de » et « Maîtrisé à partir de ».');
+        const i = html.indexOf('id="apercuPDF-case-autoevaluation"');
+        expect(html.indexOf('id="apercuPDF-autoevaluation-reperes"')).toBeGreaterThan(i);
+    });
+});
+
+/* ============================================================ L — deux colonnes (↻ 20 nov., retouche 3) */
+
+describe('autoévaluation · L — la disposition « Deux colonnes » avec la grille d’autoévaluation', () => {
+    const PROD = Object.assign({}, PRODUCTION, { detailTache: '1. Lis l’extrait fictif.\n2. Annote-le.' });
+    const opts = (partie) => ({ production: PROD, inclureNomProduction: true, inclureObjectif: true, inclureDescription: true,
+        inclureDetailTache: true, disposition: 'deux-colonnes', cran: 'evaluation', partie });
+    const rendu = (partie) => P.genererApercuCombine(grille(), IDME, null, opts(partie));
+
+    it('L.a l’ordre des feuilles : consignes, autoévaluation, évaluation', () => {
+        const m = P.construireModeleDocument(grille(), null, opts(), IDME);
+        expect(m.disposition).toBe('deux-colonnes');
+        expect(P.feuillesDuDocument(m)).toEqual(['consignes', 'autoevaluation', 'evaluation']);
+    });
+
+    it('L.b les consignes en deux colonnes, sous leurs bandeaux ; la grille d’autoévaluation pleine largeur, sans colonnes', () => {
+        const consignes = rendu('consignes');
+        expect(consignes.match(/<div style="flex: 1; min-width: 0;">/g), 'deux colonnes').toHaveLength(2);
+        expect(consignes).toContain('text-transform: uppercase');
+        const autoeval = rendu('autoevaluation');
+        expect(autoeval).toContain('data-autoevaluation');
+        expect(autoeval).not.toContain('flex: 1; min-width: 0;');
+        expect(autoeval, 'aucun bandeau de consigne').not.toContain('text-transform: uppercase');
+        // La grille est la même qu'en continu : la disposition règle les consignes, pas elle.
+        const continu = P.genererApercuCombine(grille(), IDME, null, Object.assign(opts('autoevaluation'), { disposition: 'continu' }));
+        expect(autoeval).toBe(continu);
+    });
+
+    it('L.c dans le PDF, la feuille d’autoévaluation se pose pleine largeur quelle que soit la disposition', () => {
+        const largeur = LARGEUR - 26;
+        const pose = (disposition) => {
+            const doc = fauxDoc();
+            const m = P.construireModeleDocument(grille(), null, Object.assign(opts(), { disposition }), IDME);
+            P.poserAutoevaluationPDF(doc, m.autoevaluation, 40, largeur, 0.85);
+            return doc.journal;
+        };
+        const deux = pose('deux-colonnes');
+        expect(deux).toEqual(pose('continu'));
+        // Rien ne part dans une colonne de droite : chaque ligne commence à la marge ou à son retrait.
+        expect([...new Set(deux.filter(e => e.type === 'text').map(e => e.x))].sort((a, b) => a - b)).toEqual([13, 18]);
     });
 });

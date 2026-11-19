@@ -3,8 +3,14 @@
 Lot `lot/autoevaluation-consignes`, 19 nov. 2026 (fiche #1287). Rapport :
 `plans de travail/RAPPORT-2026-11-19-autoevaluation-consignes.md`.
 
-**État : À FAIRE, sur l'aperçu de la PR** (le lot n'est pas fusionné ; `https://app.codexnumeris.org` ne le montre
-pas). Claude Code écrit ce markdown ; Cowork publie l'artefact jumeau, avec son bouton « Copier mes résultats ».
+**État : CLOSE PAR COWORK LE 20 NOV. 2026, non publiée.** Grégoire a approuvé la page d'autoévaluation sur la capture
+le 19 nov. à 9 h 11. Le §0.2 lui demandait de créer des données fictives sur l'aperçu, ce qu'il ne fait pas (règle
+du 6 sept.) : la vérification réelle se fera **sur sa propre grille, une fois les deux lots en ligne**. Le reste du
+document est gardé comme trace de ce qu'il faudra regarder ce jour-là (§2.1 à §2.3) ; les deux décisions du §3 sont
+tranchées : les mots d'enseignant partent tels quels (3.1), et l'aperçu dit désormais où poser les repères (3.2,
+retouche 2 du 20 nov.).
+*Avant le 20 nov. :* À FAIRE, sur l'aperçu de la PR (le lot n'est pas fusionné ; `https://app.codexnumeris.org` ne le
+montre pas). Claude Code écrit ce markdown ; Cowork publie l'artefact jumeau, avec son bouton « Copier mes résultats ».
 
 Pourquoi une porte : le PDF s'ouvre sur l'iPad dans un lecteur qu'aucune machine d'ici n'a. Les bancs (Chromium)
 prouvent que la page est dans le fichier, au bon rang, avec ses textes, ses cases tracées et sa pagination ; ils ne

@@ -15,6 +15,13 @@ const indexHtml = 'file://' + path.join(racine, 'index.html');
 //     trois feuilles, la deuxième est la grille d'autoévaluation, et sa case est cochée ;
 //   · « Exporter en PDF » : le fichier (relu par PDF.js) porte la même page, au même rang ;
 //   · la case décochée retire la feuille de l'aperçu ET la page du fichier ; aucune erreur de page.
+// ↻ 20 nov. 2026, retouches de Cowork :
+//   · (2) l'échelle de départ SANS repères d'abord : l'aperçu dit où les poser, ni case ni page ; repères posés, la case,
+//     pas le texte ;
+//   · (1) la case garde le dernier choix : décochée, fermée, rouverte, puis la page RECHARGÉE : toujours décochée, et le
+//     fichier n'a pas la page ; sans réglage gardé, cochée ;
+//   · (3) « Deux colonnes » avec la grille : l'ordre des feuilles, les consignes en deux colonnes, la grille pleine
+//     largeur, dans l'aperçu et dans le fichier (positions lues par PDF.js).
 // Grilles, production et textes FICTIFS (textes inventés sur les stratégies de lecture). Captures, clair et
 // sombre : CAPTURES_AUTOEVAL=<dossier> pour les écrire.
 // ⚠ Chromium (`playwright.chromium.config.js`) n'est pas Safari : un vert ici est un indice, pas un verdict iPad.
@@ -52,15 +59,27 @@ async function ouvrirApp(page) {
     });
     await page.reload();
     await attendreApp(page);
-    // L'échelle de départ, puis ses deux repères par le geste de l'éditeur d'échelles.
+    // L'échelle de départ, telle que l'application la sème : SANS repères (↻ 20 nov., retouche 2).
+    await page.evaluate(async () => { await assurerEchelleIdmeDeDepart(); await db.flush(); });
+}
+
+/** Les deux repères de l'échelle de départ, par le geste de l'éditeur d'échelles. */
+async function poserReperes(page) {
     const refus = await page.evaluate(async (id) => {
-        await assurerEchelleIdmeDeDepart();
         const r1 = await ecrireRepereEchelle(id, 'seuilSuffisance', 'D');
         const r2 = await ecrireRepereEchelle(id, 'seuilMaitrise', 'M');
         await db.flush();
         return [r1 && r1.refuse, r2 && r2.refuse].filter(Boolean);
     }, ID_DEPART);
     expect(refus).toEqual([]);
+}
+
+const TEXTE_REPERES = 'Grille d\'autoévaluation : dans Conception › Échelles de performance, indique pour cette échelle '
+    + '« Suffisant à partir de » et « Maîtrisé à partir de ».';
+
+async function fermerApercu(page) {
+    await page.locator('#modalApercuPDF .modal-fermer').tap();
+    await expect.poll(() => page.evaluate(() => document.getElementById('modalApercuPDF').classList.contains('actif'))).toBe(false);
 }
 
 const lesGrilles = (page) => page.evaluate(() => db.getSync(cle('grillesTemplates'), []));
@@ -200,12 +219,30 @@ async function scenario(page) {
     await capturerEditeur(page, 'editeur-rechargee');
     expect(await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth)).toBeLessThanOrEqual(1);
 
-    // « PRÉPARER LE PDF » depuis la fiche de la production : trois feuilles, la deuxième est la grille d'autoévaluation.
+    // « PRÉPARER LE PDF » depuis la fiche de la production.
     await lierProduction(page, grilleId);
     // PDF.js sans worker séparé (Chromium refuse un worker en file://) : le script du worker, par son URL (CSP 'self').
     await page.addScriptTag({ url: 'libs/pdf.worker.min.js?v=3.11.174' });
-    await preparerLePDF(page);
     const caseAutoeval = page.locator('#apercuPDF-autoevaluation');
+    const texteReperes = page.locator('#apercuPDF-autoevaluation-reperes');
+
+    // (2) L'ÉCHELLE N'A PAS SES REPÈRES : l'aperçu dit où les poser ; ni case, ni page.
+    await preparerLePDF(page);
+    await expect(texteReperes).toBeVisible();
+    expect((await texteReperes.textContent()).replace(/\u00a0/g, ' ')).toBe(TEXTE_REPERES);
+    await expect(page.locator('#apercuPDF-case-autoevaluation')).toBeHidden();
+    await expect(feuilles(page)).toHaveCount(2);
+    await expect(page.locator('#apercuPDF-zone [data-autoevaluation]')).toHaveCount(0);
+    if (CAPTURES) {
+        const v = page.viewportSize();
+        await page.locator('#apercuPDF-options-production').screenshot({ path: path.join(CAPTURES, `apercu-reperes-manquants-${v.width}x${v.height}.png`) });
+    }
+    await fermerApercu(page);
+
+    // Repères posés : la case paraît, pas le texte ; trois feuilles, la deuxième est la grille d'autoévaluation.
+    await poserReperes(page);
+    await preparerLePDF(page);
+    await expect(texteReperes).toBeHidden();
     await expect(page.locator('#apercuPDF-case-autoevaluation')).toBeVisible();
     await expect(caseAutoeval).toBeChecked();
     await expect(feuilles(page)).toHaveCount(3);
@@ -248,23 +285,42 @@ async function scenario(page) {
     expect(pages[2]).not.toContain('autoévaluation');
     await capturerPagePDF(page, 2, 'pdf-page-autoevaluation');
 
-    // L'export ferme l'aperçu (comportement d'avant le lot) : « Préparer le PDF » de nouveau, la case revient cochée.
+    // L'export ferme l'aperçu (comportement d'avant le lot) : « Préparer le PDF » de nouveau ; aucun choix gardé
+    // encore (l'export garde ses voisines, pas elle) : cochée.
     await expect.poll(() => page.evaluate(() => document.getElementById('modalApercuPDF').classList.contains('actif'))).toBe(false);
     await preparerLePDF(page);
     await expect(caseAutoeval).toBeChecked();
     await expect(feuilles(page)).toHaveCount(3);
 
-    // LA CASE DÉCOCHÉE retire la feuille de l'aperçu, et la page du fichier.
+    // (1) LA CASE DÉCOCHÉE retire la feuille de l'aperçu ; fermée sans exporter, puis rouverte : toujours décochée.
     await caseAutoeval.tap();
     await expect(caseAutoeval).not.toBeChecked();
     await expect(feuilles(page)).toHaveCount(2);
     await expect(page.locator('#apercuPDF-zone [data-autoevaluation]')).toHaveCount(0);
     await expect(page.locator('#apercuPDF-case-autoevaluation'), 'la case reste là pour la remettre').toBeVisible();
+    await fermerApercu(page);
+    await preparerLePDF(page);
+    await expect(caseAutoeval).not.toBeChecked();
+    await expect(feuilles(page)).toHaveCount(2);
+
+    // La page RECHARGÉE : toujours décochée, et le fichier n'a pas la page.
+    await page.reload();
+    await attendreApp(page);
+    await lierProduction(page, grilleId);
+    await page.addScriptTag({ url: 'libs/pdf.worker.min.js?v=3.11.174' });
+    await preparerLePDF(page);
+    await expect(caseAutoeval).not.toBeChecked();
+    await expect(feuilles(page)).toHaveCount(2);
     const sans = await exporterEtLire(page);
     expect(sans).toHaveLength(2);
     expect(sans.join(' ')).not.toContain('autoévaluation');
+    expect(await page.evaluate(() => db.getSync('exportPDF_derniersReglages', null).autoevaluation)).toBe(false);
 
-    // Rouvert : cochée par défaut, la page revient.
+    // Recochée, rouverte : cochée, la page revient.
+    await preparerLePDF(page);
+    await caseAutoeval.tap();
+    await expect(caseAutoeval).toBeChecked();
+    await fermerApercu(page);
     await preparerLePDF(page);
     await expect(caseAutoeval).toBeChecked();
     await expect(feuilles(page)).toHaveCount(3);
@@ -272,9 +328,92 @@ async function scenario(page) {
     expect(erreurs).toEqual([]);
 }
 
+/** Le PDF exporté, page par page : chaque texte avec son abscisse et sa largeur (points PDF), et la largeur de la page. */
+async function exporterEtMesurer(page) {
+    await page.evaluate(() => { window.__pdfBanc = null; window.jspdf.jsPDF.API.save = function () { window.__pdfBanc = this.output('arraybuffer'); }; });
+    await page.locator('#modalApercuPDF [data-action="exporterPDFDepuisApercu"]').tap();
+    await page.waitForFunction(() => !!window.__pdfBanc);
+    return page.evaluate(async () => {
+        const doc = await pdfjsLib.getDocument({ data: new Uint8Array(window.__pdfBanc.slice(0)), isEvalSupported: false }).promise;
+        const pages = [];
+        for (let i = 1; i <= doc.numPages; i++) {
+            const pg = await doc.getPage(i);
+            const largeur = pg.getViewport({ scale: 1 }).width;
+            const items = (await pg.getTextContent()).items.filter((t) => t.str.trim())
+                .map((t) => ({ str: t.str, x: t.transform[4], w: t.width }));
+            pages.push({ largeur, items, texte: items.map((t) => t.str).join(' ') });
+        }
+        return pages;
+    });
+}
+
+/** (3) « Deux colonnes » et la grille d'autoévaluation : matériel fictif posé dans le stockage, fiche ouverte. */
+async function scenarioDeuxColonnes(page) {
+    const erreurs = [];
+    page.on('pageerror', (e) => erreurs.push(e.message));
+    await ouvrirApp(page);
+    await poserReperes(page);
+    await page.evaluate(async ({ criteres, echelleId }) => {
+        const grille = { id: 'GR_BANC_DEUX_COLONNES', nom: 'Grille fictive en deux colonnes', criteres: criteres.map((c, i) => ({
+            id: 'CR_BANC_2C_' + i, nom: c.nom, type: 'holistique', ponderation: Number(c.ponderation),
+            descripteurs: Object.assign({ echelleId, parNiveau: { D: c.D, M: c.M } }, c.question ? { pourVerifier: c.question } : {}) })) };
+        await db.modifier(cle('grillesTemplates'), (lues) => (lues || []).filter((g) => g.id !== grille.id).concat([grille]), []);   // security-ok: banc, grille fictive dans un contexte neuf
+        await db.flush();
+    }, { criteres: CRITERES, echelleId: ID_DEPART });
+    await lierProduction(page, 'GR_BANC_DEUX_COLONNES');
+    await page.evaluate(async () => {
+        // Des consignes en trois blocs et un détail en étapes : de quoi remplir deux colonnes.
+        await db.modifier(cle('productions'), (lues) => (lues || []).map((p) => p.id !== 'PROD_BANC_AUTOEVAL' ? p : Object.assign({}, p, {
+            detailTache: '1. Lis l’extrait fictif une première fois, sans annoter.\n2. Relis-le en appliquant trois stratégies de lecture.\n3. Note une hypothèse.' })), []);   // security-ok: banc
+        await db.flush();
+        await chargerProductionPourModif('PROD_BANC_AUTOEVAL');
+    });
+    await page.addScriptTag({ url: 'libs/pdf.worker.min.js?v=3.11.174' });
+    await preparerLePDF(page);
+    await page.locator('#apercuPDF-disposition').selectOption('deux-colonnes');
+    await expect(page.locator('#apercuPDF-autoevaluation')).toBeChecked();
+
+    // L'APERÇU : consignes, autoévaluation, évaluation ; les consignes en deux colonnes, la grille pleine largeur.
+    await expect(feuilles(page)).toHaveCount(3);
+    // La largeur utile d'une feuille : son conteneur de document, marges intérieures déduites.
+    const contenu = (i) => feuilles(page).nth(i).locator('.apercu-pdf').first();
+    const largeurContenu = async (i) => (await contenu(i).boundingBox()).width;
+    const colonnes = feuilles(page).nth(0).locator('div[style*="flex: 1; min-width: 0"]');
+    await expect(colonnes).toHaveCount(2);
+    for (let k = 0; k < 2; k++) expect((await colonnes.nth(k).boundingBox()).width).toBeLessThan(0.55 * await largeurContenu(0));
+    await expect(feuilles(page).nth(0).locator('[data-autoevaluation]')).toHaveCount(0);
+    const grilleAutoeval = feuilles(page).nth(1).locator('[data-autoevaluation]');
+    await expect(grilleAutoeval).toHaveCount(1);
+    expect((await grilleAutoeval.boundingBox()).width).toBeGreaterThan(0.98 * await largeurContenu(1));
+    await expect(feuilles(page).nth(1).locator('div[style*="flex: 1; min-width: 0"]')).toHaveCount(0);
+    await expect(feuilles(page).nth(2).locator('table')).toHaveCount(1);
+    if (CAPTURES) {
+        const v = page.viewportSize();
+        await page.locator('#apercuPDF-zone').screenshot({ path: path.join(CAPTURES, `deux-colonnes-apercu-${v.width}x${v.height}.png`) });
+    }
+
+    // LE FICHIER : trois pages dans le même ordre ; la page 1 en deux colonnes, la page 2 pleine largeur.
+    const pages = await exporterEtMesurer(page);
+    // (Les titres des blocs sont en bandeau, en capitales : la page 1 se reconnaît au texte de l'objectif.)
+    expect(pages.map((p) => [p.texte.includes('Développer ta capacité'), p.texte.includes('grille d\'autoévaluation'), p.texte.includes('Critère')]))
+        .toEqual([[true, false, false], [false, true, false], [false, false, true]]);
+    const [p1, p2] = pages;
+    const milieu = p1.largeur / 2;
+    const corps1 = p1.items.filter((t) => !/Automne|601|Écriture|Page \d/.test(t.str) && !t.str.includes('Artefact'));
+    expect(corps1.some((t) => t.x > milieu), 'une colonne de droite').toBe(true);
+    expect(corps1.some((t) => t.x < milieu), 'une colonne de gauche').toBe(true);
+    expect(Math.max(...corps1.map((t) => t.x < milieu ? t.x + t.w : 0)), 'la gauche ne passe pas le milieu').toBeLessThan(milieu);
+    const intro = p2.items.find((t) => t.str.startsWith('Avant de remettre ton travail'));
+    expect(intro, 'l’introduction sur la page 2').toBeTruthy();
+    expect(intro.w, 'pleine largeur : la ligne passe le milieu de la page').toBeGreaterThan(milieu);
+    expect(p2.items.filter((t) => t.str.startsWith('Réussite')).every((t) => t.x < milieu)).toBe(true);
+
+    expect(erreurs).toEqual([]);
+}
+
 test.describe('iPad en long', () => {
     test.use({ hasTouch: true, viewport: { width: 1180, height: 820 } });
-    test('autoévaluation · une grille composée à la main, rechargée ; « Préparer le PDF » : la page dans l’aperçu et dans le fichier ; la case la retire', async ({ page }) => {
+    test('autoévaluation · une grille composée à la main, rechargée ; sans repères, l’aperçu le dit ; « Préparer le PDF » : la page dans l’aperçu et dans le fichier ; la case la retire et garde son choix', async ({ page }) => {
         test.setTimeout(120000);
         await scenario(page);
     });
@@ -282,8 +421,19 @@ test.describe('iPad en long', () => {
 
 test.describe('iPad en haut', () => {
     test.use({ hasTouch: true, viewport: { width: 820, height: 1180 } });
-    test('autoévaluation · une grille composée à la main, rechargée ; « Préparer le PDF » : la page dans l’aperçu et dans le fichier ; la case la retire', async ({ page }) => {
+    test('autoévaluation · une grille composée à la main, rechargée ; sans repères, l’aperçu le dit ; « Préparer le PDF » : la page dans l’aperçu et dans le fichier ; la case la retire et garde son choix', async ({ page }) => {
         test.setTimeout(120000);
         await scenario(page);
     });
 });
+
+// ↻ 20 nov. 2026 (retouche 3) — la disposition « Deux colonnes » avec la grille d'autoévaluation.
+for (const [nom, viewport] of [['iPad en long', { width: 1180, height: 820 }], ['iPad en haut', { width: 820, height: 1180 }]]) {
+    test.describe(nom, () => {
+        test.use({ hasTouch: true, viewport });
+        test('autoévaluation · « Deux colonnes » : consignes, autoévaluation, évaluation ; les consignes en deux colonnes, la grille pleine largeur, à l’aperçu et dans le fichier', async ({ page }) => {
+            test.setTimeout(120000);
+            await scenarioDeuxColonnes(page);
+        });
+    });
+}

@@ -1,6 +1,11 @@
 # Rapport — lot `autoevaluation-consignes` (19 nov. 2026)
 
-**Dernier relais.** Branche `lot/autoevaluation-consignes`, partie de `origin/lot/descripteurs-grille` à `39fe4e67`
+**Dernier relais (20 nov.).** Les quatre retouches de Cowork sont faites, sur la même branche (PR n° 33) : la case
+garde le dernier choix ; l'aperçu dit où poser les repères manquants ; un banc « Deux colonnes » ; #1289 inscrit. Porte
+terrain close par Cowork. `main` n'est pas repris (la mise en ligne de midi y fusionne le lot 1 : on rapprochera
+après). Ni fusion, ni release. Détail : « Suite du 20 nov. », en fin de rapport.
+
+**Relais du 19 nov.** Branche `lot/autoevaluation-consignes`, partie de `origin/lot/descripteurs-grille` à `39fe4e67`
 (le lot 1). Fait : la case « Pour vérifier » dans l'éditeur de grilles, et la grille d'autoévaluation, une feuille à
 part dans le PDF des consignes. Réalise la fiche #1287 (inscrite sur `lot/je-regarde-evaluer`, non renumérotée).
 APERÇU seulement (PR « APERÇU, ne pas fusionner ») : ni fusion, ni release, ni Nouvelles. `origin/main` ne contenait
@@ -101,3 +106,48 @@ PR n° 33 (« APERÇU, ne pas fusionner : la grille d'autoévaluation dans le PD
 Aperçu Netlify : <https://deploy-preview-33--codexnumeris-051225.netlify.app> — « Deploy Preview ready! » sur
 `c61e87fb`, lu au statut GitHub de la PR (le réseau du conteneur n'atteint pas `*.netlify.app` : non ouvert d'ici).
 Tant que le lot 1 n'est pas dans `main`, la PR le contient aussi.
+
+## Suite du 20 nov. — les retouches de Cowork (relais du 20 nov. sur `80d561d`)
+
+Grégoire a approuvé la page sur la capture (19 nov., 9 h 11) ; les choix et les mots d'enseignant du lot sont acceptés
+tels quels. Quatre retouches, rien d'autre.
+
+1. **La case garde le dernier choix** (décision de Grégoire, 9 h 14). Rangée dans `exportPDF_derniersReglages`
+   (`autoevaluation`), relue à l'ouverture par les deux chemins de l'aperçu (`poserCaseAutoevaluation`) ; cochée sans
+   réglage gardé (premier usage, réglages d'avant ce lot). `recocherAutoevaluation` retiré. **Un seul écrivain** : le
+   geste de la case (`changerAutoevaluationPDF`), qui garde le choix aussitôt ; fermer l'aperçu sans exporter ne le
+   perd pas. `sauvegarderReglagesPDF` ne relit PAS la case du DOM : après un rechargement, elle est cochée par le HTML,
+   et le chemin du formulaire sauvegarde avant d'ouvrir l'aperçu ; la relire écraserait le choix (essai C.c).
+2. **L'aperçu dit pourquoi la page manque.** Grille portant au moins un descripteur de niveau (critère par niveaux,
+   un texte écrit à n'importe quel niveau) et échelle sans `seuilSuffisance` ou sans `seuilMaitrise` : à la place de la
+   case, le texte de Cowork, tel quel (espaces insécables dans les guillemets et avant « : »). Sans aucun descripteur,
+   rien. Supposition nommée : une échelle dont un repère désigne un niveau disparu n'a pas de page et ne reçoit pas le
+   texte (le mandat dit « n'a pas » ; l'éditeur d'échelles refuse ce cas).
+3. **Banc « Deux colonnes »** : ordre des feuilles (consignes, autoévaluation, évaluation), consignes en deux colonnes,
+   grille pleine largeur, à l'aperçu (largeurs mesurées) et dans le fichier (positions lues par PDF.js : une colonne de
+   droite en page 1, une ligne d'introduction qui passe le milieu en page 2). La grille est la même en continu et en
+   deux colonnes (aperçu et PDF identiques, essais L.b et L.c).
+4. **#1289 inscrit** (sans correction) : les neuf rouges d'import sous Chromium. Premier numéro libre mesuré sur toutes
+   les branches distantes ; #1279, libre aussi, est laissé aux lots du Mac (en-tête du BACKLOG).
+
+**Trouvaille, non inscrite** (aucun symptôme vécu, règle du 24 août) : les voisines de la case (« Enseignant »,
+« Licence CC », le trimestre) ont le piège que la retouche 1 évite. Par le chemin du formulaire, `sauvegarderReglagesPDF`
+les relit du DOM avant d'ouvrir l'aperçu ; après un rechargement, le HTML les a recochées, et un « Enseignant » décoché
+reviendrait coché. Lu au code, non reproduit. À Cowork de dire s'il entre.
+
+**Bancs, en nombres**
+- Vitest `autoevaluation-consignes` : 37 essais (25 + 12 : C, R, L). Break-tests neufs, code restauré à l'octet après
+  chacun : l'ouverture recoche toujours → C.b ; sauvegarder relit la case → C.c ; le geste ne garde rien → C.a ; le
+  texte sans regarder les descripteurs → R.c ; le texte seulement si les deux repères manquent → R.a, R.c ; la grille
+  après l'évaluation → L.a, M.b ; la grille en deux colonnes → L.b.
+- Playwright Chromium `autoevaluation-consignes.spec.js` : 4/4 (le scénario complet et « Deux colonnes », 1 180 × 820
+  et 820 × 1 180). Break-tests : l'ouverture recoche toujours → rouge (fermée puis rouverte, l. 303) ; le texte des
+  repères jamais dit → rouge (l. 231) ; la grille après l'évaluation → rouge (l. 386) ; « Deux colonnes » ignorée →
+  rouge (l. 382).
+- Suite Vitest complète : 933 fichiers, 11 948 essais ; un rouge au premier passage, le cliquet `sentinelle-555-d`
+  (`export-pdf.js` lit désormais `seuilMaitrise` deux fois : compte porté à 2, ↻ 20 nov.), vert relancé ; le hook de
+  push a rejoué la suite entière.
+- Specs liées (Chromium : PDF, fiche de production, éditeur du lot 1, barème, dissection) : 13/13.
+- Anti-cache : `export-pdf.js` à `?v=20261117c` (jeton du build, `version.json` intact).
+- Captures neuves : `apercu-reperes-manquants-*` (le texte à la place de la case), `deux-colonnes-apercu-*`.
+

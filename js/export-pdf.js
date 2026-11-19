@@ -87,6 +87,12 @@ function sauvegarderReglagesPDF() {
         piedEnseignant: document.getElementById('apercuPDF-pied-enseignant')?.checked ?? true,
         piedLicence: document.getElementById('apercuPDF-pied-licence')?.checked ?? true
     };
+    // 20 nov. 2026 (lot `autoevaluation-consignes`, retouche 1) — LA CASE « GRILLE D'AUTOÉVALUATION » N'A QU'UN
+    // ÉCRIVAIN : son geste (`changerAutoevaluationPDF`). Elle n'est PAS relue du DOM ici : après un rechargement, la
+    // case de l'aperçu est revenue cochée (HTML) avant que l'aperçu ne la pose, et le chemin du formulaire appelle
+    // cette fonction AVANT d'ouvrir l'aperçu ; la relire écraserait le dernier choix. On garde la valeur gardée.
+    const precedents = restaurerReglagesPDF();
+    if (precedents && typeof precedents.autoevaluation === 'boolean') reglages.autoevaluation = precedents.autoevaluation;
     db.setSync(CLE_REGLAGES_PDF, reglages);
 }
 
@@ -1718,8 +1724,25 @@ function construireModeleDocument(grille, cartouche, options, echelle) {
         afficheEvaluation: cran === CRAN_EVALUATION || cran === CRAN_RETROACTION,
         afficheRetroaction: cran === CRAN_RETROACTION,
         autoevaluationDisponible: !!autoevaluation,
-        autoevaluation: (autoevaluation && options.inclureAutoevaluation !== false) ? autoevaluation : null
+        autoevaluation: (autoevaluation && options.inclureAutoevaluation !== false) ? autoevaluation : null,
+        // ↻ 20 nov. 2026 (retouche 2) — la page manque PARCE QUE l'échelle n'a pas ses deux repères : l'aperçu le dit.
+        autoevaluationSansReperes: autoevaluationSansReperes(grille, echelle, options && options.production)
     };
+}
+
+/**
+ * ↻ 20 nov. 2026 (retouche 2, décision de Cowork ; règle du 14 nov. : un·e novice ne reste pas bloqué·e sans savoir
+ * pourquoi) — vrai quand la grille porte au moins un descripteur de niveau (un critère par niveaux, un texte écrit à
+ * un niveau, n'importe lequel) et que l'échelle choisie n'a pas `seuilSuffisance` ou pas `seuilMaitrise`. Sans aucun
+ * descripteur, rien à dire. L'échelle de départ (IDME) n'a pas de repères d'origine. Pure.
+ */
+function autoevaluationSansReperes(grille, echelle, production) {
+    if (!production) return false;
+    if (echelle && _texteEcrit(echelle.seuilSuffisance) && _texteEcrit(echelle.seuilMaitrise)) return false;
+    return ((grille && Array.isArray(grille.criteres)) ? grille.criteres : []).some(c => {
+        const par = c && c.type !== 'analytique' && c.descripteurs && c.descripteurs.parNiveau;
+        return !!par && typeof par === 'object' && !Array.isArray(par) && Object.keys(par).some(k => _texteEcrit(par[k]));
+    });
 }
 
 /*
@@ -3501,9 +3524,10 @@ async function ouvrirApercuPDF() {
         if (checkPiedLicence) checkPiedLicence.checked = reglages?.piedLicence ?? true;
         if (checkAfficherTrimestre) checkAfficherTrimestre.checked = reglages?.afficherTrimestre ?? true;
 
+        poserCaseAutoevaluation(reglages);   // ↻ 20 nov. 2026 : le dernier choix
+
         // Sauvegarder les réglages actuels
         sauvegarderReglagesPDF();
-        recocherAutoevaluation();   // 19 nov. 2026
 
         // Afficher le modal (.modal-overlay utilise .actif)
         modal.classList.add('actif');
@@ -3617,10 +3641,23 @@ function autoevaluationCochee() {
     return document.getElementById('apercuPDF-autoevaluation')?.checked !== false;
 }
 
-/** À chaque ouverture de l'aperçu, la case revient cochée : la page est incluse par défaut quand elle existe. */
-function recocherAutoevaluation() {
+/**
+ * ↻ 20 nov. 2026 (retouche 1, décision de Grégoire, 9 h 14 : pour certain·es, la grille sera facultative) — LA CASE
+ * GARDE LE DERNIER CHOIX, rangée avec ses voisines dans `exportPDF_derniersReglages` (`autoevaluation`). À l'ouverture
+ * de l'aperçu : le choix gardé ; cochée quand il n'y en a pas (premier usage, réglages d'avant ce lot).
+ * Remplace `recocherAutoevaluation`, qui la recochait à chaque ouverture.
+ */
+function poserCaseAutoevaluation(reglages) {
     const coche = document.getElementById('apercuPDF-autoevaluation');
-    if (coche) coche.checked = true;
+    if (coche) coche.checked = (reglages && typeof reglages.autoevaluation === 'boolean') ? reglages.autoevaluation : true;
+}
+
+/** Le geste de la case : le choix est gardé aussitôt (fermer l'aperçu sans exporter ne le perd pas), puis l'aperçu suit. */
+function changerAutoevaluationPDF(el) {
+    const reglages = restaurerReglagesPDF() || {};
+    reglages.autoevaluation = !!(el && el.checked);
+    db.setSync(CLE_REGLAGES_PDF, reglages);
+    rafraichirApercuPDF();
 }
 
 function rafraichirApercuPDF() {
@@ -3694,9 +3731,10 @@ function rafraichirApercuPDF() {
     // qui garde ses identifiants (le reste du module s'y réfère).
     const modele = construireModeleDocument(_apercuPDFData.grille, _apercuPDFData.cartouche, options, _apercuPDFData.echelle);
     const parties = feuillesDuDocument(modele);
-    // 19 nov. 2026 — la case de la grille d'autoévaluation ne se montre que si la page existe.
-    const caseAutoeval = document.getElementById('apercuPDF-case-autoevaluation');
-    if (caseAutoeval) toggleDisplay(caseAutoeval, modele.autoevaluationDisponible);
+    // 19 nov. 2026 — la case de la grille d'autoévaluation ne se montre que si la page existe ; ↻ 20 nov. : à sa
+    // place, quand l'échelle n'a pas ses deux repères, le texte qui dit où les poser.
+    toggleDisplay(document.getElementById('apercuPDF-case-autoevaluation'), modele.autoevaluationDisponible);
+    toggleDisplay(document.getElementById('apercuPDF-autoevaluation-reperes'), modele.autoevaluationSansReperes);
 
     const conteneurFeuilles = pagePDF.parentElement;
     Array.from(conteneurFeuilles.querySelectorAll('.apercu-pdf-page'))
@@ -4241,7 +4279,7 @@ async function ouvrirApercuPDFPour(ids) {
     if (selectCran) selectCran.value = reglages?.cran || '';
     const selectDispo = document.getElementById('apercuPDF-disposition');
     if (selectDispo && reglages?.disposition) selectDispo.value = reglages.disposition;
-    recocherAutoevaluation();   // 19 nov. 2026
+    poserCaseAutoevaluation(reglages);   // ↻ 20 nov. 2026 : le dernier choix
 
     const modalApercu = document.getElementById('modalApercuPDF');
     if (modalApercu) {
@@ -4315,7 +4353,11 @@ window.poserBlocsInfoPDF = poserBlocsInfoPDF;                               // #
 window.accorderSelecteurCran = accorderSelecteurCran;                       // #497 étape 3 — le menu ne peut pas mentir sur ce que la page montre
 window.feuillesDuDocument = feuillesDuDocument;
 window.pageAutoevaluation = pageAutoevaluation;                             // 19 nov. 2026 — la grille d'autoévaluation (bancs)
+window.changerAutoevaluationPDF = changerAutoevaluationPDF;                 // ↻ 20 nov. — le geste de la case (data-on-change)
+window.poserCaseAutoevaluation = poserCaseAutoevaluation;
+window.sauvegarderReglagesPDF = sauvegarderReglagesPDF;
 window.reperesAutoevaluation = reperesAutoevaluation;
+window.autoevaluationSansReperes = autoevaluationSansReperes;
 window.autoevaluationHTML = autoevaluationHTML;
 window.poserAutoevaluationPDF = poserAutoevaluationPDF;
 window.TEXTES_AUTOEVALUATION = TEXTES_AUTOEVALUATION;
