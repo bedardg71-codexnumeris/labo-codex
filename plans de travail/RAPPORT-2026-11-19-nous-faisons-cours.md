@@ -1,6 +1,6 @@
 # Rapport, 19 au 20 nov. 2026 (session de nuit B), lot 2 : « Nous faisons » de « Monter ton cours »
 
-**Dernier relais.** Branche `lot/nous-faisons-cours`. Consigne : `plans de travail/CONSIGNE-2026-11-19-nous-faisons-cours.md` (le relais du 19 nov., mot pour mot, avec les deux changements du mandat de la nuit). EN COURS : les mesures préalables sont ci-dessous ; le code suit.
+**Dernier relais.** Branche `lot/nous-faisons-cours`. Consigne : `plans de travail/CONSIGNE-2026-11-19-nous-faisons-cours.md` (le relais du 19 nov., mot pour mot, avec les deux changements du mandat de la nuit). **Livré en APERÇU, non fusionné** : PR [bedardg71-codexnumeris/labo-codex#36](https://github.com/bedardg71-codexnumeris/labo-codex/pull/36) (brouillon), aperçu `https://deploy-preview-36--codexnumeris-051225.netlify.app` (adresse au gabarit des aperçus Netlify du dépôt, à confirmer à l'ouverture). Les sept bulles de « Nous faisons » sont en place ; ⚠ `52a12f6d` ouvre `monter` pour l'aperçu, **à annuler avant toute fusion**. **Attend une décision** : la mesure (a) (le « Planificateur » au doigt, Cowork tranchera) ; deux traits de la forme sans mécanisme dans la base (§ 4). Rien n'est publié, rien au changelog.
 
 ## 0. La base de l'aperçu (changement 1 du mandat)
 
@@ -80,6 +80,8 @@ Le relais demande de n'employer que les mécanismes qui existent (le moteur, et 
 | `026078ed` | le code et les bancs |
 | **`52a12f6d`** | **APERÇU SEULEMENT : `monter` dans `PARCOURS_OUVERTS`. À ANNULER AVANT TOUTE FUSION** (`git revert 52a12f6d`) |
 | `27bb4b20` | le registre des gestes proposés le 11 nov. : l'entrée de ce parcours retirée |
+| `a775f67a` | le banc neuf attend la carte chargée, puis ses blocs |
+| `2b80f2cc`, `de4751bd` | ce rapport et la porte terrain |
 
 ## 7. Les bancs et leurs break-tests
 
@@ -92,7 +94,7 @@ Le relais demande de n'employer que les mécanismes qui existent (le moteur, et 
 
 - **Vitest complet, depuis `tests/`** : un seul fichier rouge au premier passage, `sentinelle-gestes-proposes-2026-11-11` (8 essais : il gardait les lignes de ce parcours proposées le 11 nov.) ; l'entrée retirée (`27bb4b20`), 34 sur 34. Sur la base fusionnée, avant le code, deux rouges de la résolution de la fusion (trois jetons, une ligne d'`index.html`), corrigés (`f43febe5`). Le crochet de poussée rejoue Vitest à chaque push.
 - **Playwright Chromium, fichiers liés, aux deux tailles** (`parcours-5-monter-ton-cours`, `parcours-5-nous-faisons`, `essai-novice-lot2-moteur`, `vue-simple`, `registre-des-parcours`, `parcours-je-regarde-2026-11-16`, `parcours-fleches-2026-11-10`, `planif-glisser-relachement-1295`) : 1180 × 820, 75 verts et 3 rouges ; 820 × 1180, 76 verts et 2 rouges.
-  - Le rouge de mon banc neuf (1180 × 820, essai à 820 × 1180) : un bloc posé avant que la carte ait fini de se charger. Le banc attend maintenant la carte, puis le bloc (`9a8b…` ci-dessous) : **6 verts sur 6** ensuite (trois passages, deux tailles).
+  - Le rouge de mon banc neuf (1180 × 820, essai à 820 × 1180) : un bloc posé avant que la carte ait fini de se charger. Le banc attend maintenant la carte, puis le bloc (`a775f67a`) : **6 verts sur 6** ensuite (trois passages, deux tailles).
   - Les autres, **rejoués sur la base sans ce lot** (`f43febe5`, arbre à part) : `parcours-fleches-2026-11-10` « la poignée : 46 px… » rouge aux deux tailles sur la base aussi ; « sous le zoom au pincement… » rouge à 820 × 1180 sur la base aussi ; `parcours-je-regarde-2026-11-16` « « Découvrir » : l'objectif à la première bulle… » rouge à 820 × 1180 sur la base aussi (une rotation lue pendant sa transition), et une fois à 1180 × 820 avec ce lot, vert sur la base : intermittent. **Aucun n'est attribuable à ce lot.** Non inscrits (ni vécus, ni bloquants : issue 2 de CLAUDE.md, à la décision de Cowork).
 - **WebKit** : par GitHub, au push.
 

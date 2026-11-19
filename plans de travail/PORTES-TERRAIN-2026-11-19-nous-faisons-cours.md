@@ -6,7 +6,7 @@ Lot `lot/nous-faisons-cours`, APERÇU non fusionné. Rapport : `plans de travail
 
 ## §0 · Préalable
 
-- Ouvre l'adresse de l'aperçu (PR du lot, adresse au rapport) sur l'iPad, recharge, et lis le numéro en bas de page.
+- Ouvre l'aperçu sur l'iPad (`https://deploy-preview-36--codexnumeris-051225.netlify.app`, PR n° 36), recharge, et lis le numéro en bas de page.
   ⮕ Attendu : celui de la 1.250.0 (rien n'est publié par ce lot ; l'aperçu porte en plus le correctif du glisser de la PR n° 34).
 - Dans l'aperçu, ouvre la démo seulement si tu veux : ce parcours se fait sur tes vraies données (il referme la démo), mais dans l'aperçu, rien de ce que tu fais n'atteint ton application en ligne.
 
