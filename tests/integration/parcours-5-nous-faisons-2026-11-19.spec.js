@@ -55,7 +55,12 @@ async function ligneFaite(page, debut, faite = true) {
 
 const carte = (page, fn, arg) => page.evaluate(fn, arg);
 // Des identifiants que la carte garde tels quels au rechargement (elle préfixe les autres de « planif- »).
-const poser = (page, noeuds) => carte(page, (n) => window.planificationCarte.injecterNoeuds(n), noeuds);
+async function poser(page, noeuds) {
+    // La carte d'abord chargée (sinon son chargement, s'il arrive après, efface le bloc posé), puis le bloc dans son état.
+    await page.waitForFunction(() => window.planificationCarte?.etat?.initialise === true && !!document.getElementById('planif-palette')?.offsetParent);
+    await carte(page, (n) => window.planificationCarte.injecterNoeuds(n), noeuds);
+    await page.waitForFunction((ids) => ids.every((i) => window.planificationCarte.etat.noeuds.has(i) && document.getElementById(i)), noeuds.map((n) => n.id));
+}
 const titrer = (page, id, titre) => carte(page, ([i, t]) => { window.planificationCarte.etat.noeuds.get(i).titre = t; }, [id, titre]);
 const lier = (page, source, cible, type) => carte(page, ([s, c, t]) => {
     window.planificationCarte.etat.liens.set('banc-' + s + '-' + c, { id: 'banc-' + s + '-' + c, source: s, cible: c, type: t });
