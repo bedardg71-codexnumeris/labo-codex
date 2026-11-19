@@ -90,7 +90,7 @@ describe('#344 · carte Légende fusionnée en tête du Calendrier scolaire', ()
         expect(htmlInjecte).toContain('Jours de cours');
         expect(htmlInjecte).toContain('>28<');
         // 2 congés avec dateReprise non vide (prévus + imprévus), le 3e exclu
-        expect(htmlInjecte).toContain('Congés avec reprise');
+        expect(htmlInjecte).toContain('Journées reprises');   // 19 nov. 2026 : ex « Congés avec reprise »
         expect(htmlInjecte).toContain('>2<');
     });
 

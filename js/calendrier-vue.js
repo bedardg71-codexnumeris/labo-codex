@@ -142,21 +142,24 @@ function obtenirStatutJour(dateStr, calendrierComplet) {
         return { type: 'vide', classe: '', label: '', numeroSemaine: null };
     }
 
-    // Déterminer le label selon le type de jour
+    // Déterminer le label selon le type de jour. Le label est du HTML (la cellule
+    // l'injecte tel quel) : motif et jour remplacé viennent de la saisie ou d'un
+    // import (journeesSansCours voyage) → échappés ICI, à la construction (19 nov. 2026).
     let label = '';
 
     // 🆕 BETA 95 : Afficher le nom de l'événement pour les congés/reprises
     if (infosJour.statut === 'conge' && infosJour.motif) {
         // Journée non reprise : motif + numéro de semaine (le jour reste compté).
         // Journée reprise : motif seul (elle sort du compte, pas de numéro).
+        const motif = echapperHtml(infosJour.motif);
         if (infosJour.nonReprise && infosJour.numeroSemaine) {
-            label = 'S' + infosJour.numeroSemaine + ' · ' + infosJour.motif;
+            label = 'S' + infosJour.numeroSemaine + ' · ' + motif;
         } else {
-            label = infosJour.motif;
+            label = motif;
         }
     } else if (infosJour.statut === 'reprise' && infosJour.jourRemplace) {
         // Afficher "Reprise" ou le jour remplacé
-        label = 'Reprise ' + infosJour.jourRemplace;
+        label = 'Reprise ' + echapperHtml(infosJour.jourRemplace);
     } else if (infosJour.numeroSemaine) {
         label = 'Sem. ' + infosJour.numeroSemaine;
     }
@@ -595,7 +598,7 @@ function dessinerCalendrierScolaire(cadreCalendrier) {
 
     htmlLegende += '<div>';
     htmlLegende += '<div class="u-flex-between">';
-    htmlLegende += '<span class="cal-texte-gris">Congés avec reprise</span>';
+    htmlLegende += '<span class="cal-texte-gris">Journées reprises</span>';
     htmlLegende += '<strong class="cal-valeur-grande-bleu">' + congesAvecReprise + '</strong>';
     htmlLegende += '</div>';
     htmlLegende += '</div>';

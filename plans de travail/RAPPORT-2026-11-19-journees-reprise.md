@@ -6,6 +6,8 @@ et infobulles), même session.
 **Fait** : le calcul (une journée sort du compte si et seulement si elle porte une `dateReprise`), la question « Cette
 journée sera-t-elle reprise ? » à la place du menu « Nature », le badge « Non reprise », la légende du calendrier, les
 textes d'aide des deux mandats, une sentinelle du cas vécu et un banc du formulaire (break-tests faits), Vitest complet.
+**Retouches du 19 nov.** (tranchées par Cowork, sur `e0333f0e`) : le libellé de la case du calendrier échappé, le
+compteur « Journées reprises », l'avertissement d'une reprise hors du calendrier, le cas des Élections à la sentinelle.
 **Reste** : la fusion (Grégoire), puis la porte terrain `PORTES-TERRAIN-2026-11-19-journees-reprise.md` (Cowork publie
 l'artefact). Ni fusion, ni release, ni changelog, par consigne. Verdict Playwright complet non pris (voir « Non vérifié »).
 
@@ -24,15 +26,22 @@ Jetons `?v=` des huit fichiers servis : `20261117r` (lettre choisie loin de `a`/
 
 ## Mesures
 
-- **Le bogue, sur `origin/main`** (cadre A2026 des bancs) : grève des 10 et 13 nov. « Institutionnel » sans reprise → la
-  semaine 12 démarrait le **mercredi** 18 nov. Le mandat dit jeudi ; inférence : un jour d'écart entre tes données réelles
-  et le banc, sans effet sur le diagnostic.
-- **Après** : la même saisie rend, jour par jour, les numéros du calendrier sans grève ; les 10 et 13 nov. sont des congés
-  non repris en semaine 11. « Personnel », « Institutionnel », « Férié », « conge » ou rien : calendrier identique.
-- **Reprise après la fin du trimestre (24 déc.) : ignorée en silence.** La journée sort du compte (le 16 nov. passe en
-  semaine 11), le 24 déc. n'existe pas dans le calendrier (la passe 2 s'arrête au 21 déc.), `validerCadreTrimestre` ne dit
-  rien. Même silence pour une reprise en semaine d'examens (le 15 déc. reste « examens »). Antérieur au lot. Non corrigé,
-  par consigne : proposé en décision à la porte (§ 3.2).
+- **Le bogue, sur `origin/main`** : grève des 10 et 13 nov. « Institutionnel » sans reprise. Sur le cadre des bancs (sans
+  les Élections), la semaine 12 démarrait le mercredi 18 nov. ; sur **ton cadre réel**, qui porte aussi les Élections
+  (lun. 5 oct., reprise ven. 2 oct.), elle démarrait le **jeudi** 19 nov., comme le disait le mandat (mesuré ici sur
+  l'ancien `trimestre.js`).
+- **Après, sur ton cadre réel** (mesure de Cowork, harnais Node sur la branche et sur `main`, refaite ici) : lun. 16 nov.
+  en semaine 11, mar. 17 et mer. 18 en semaine 12, ven. 11 déc. en semaine 15, avec la grève « Personnel » (iPad) comme
+  « Institutionnel » (Mac) : exactement ce que l'iPad affiche aujourd'hui. ⚠ Le « 16 nov. en semaine 12 » de mon premier
+  rapport venait du cadre de la sentinelle, qui n'a pas les Élections : faux pour toi.
+- La sentinelle reste juste sur son cadre (elle se compare à son propre calendrier sans grève). « Personnel »,
+  « Institutionnel », « Férié », « conge » ou rien : calendrier identique.
+- **Reprise après la fin du trimestre (24 déc.) : ignorée en silence** avant les retouches. La journée sortait du compte,
+  le 24 déc. n'existe pas dans le calendrier (la passe 2 s'arrête au 21 déc.), `validerCadreTrimestre` ne disait rien.
+  Même silence pour une reprise en semaine d'examens. **Retouche** : l'enregistrement se fait, puis un avertissement non
+  bloquant (« Cette date de reprise tombe hors des jours de cours de ton trimestre : elle n'apparaîtra pas dans ton
+  calendrier. ») si le jour de la reprise n'a pas le statut « reprise » dans le calendrier que `genererCalendrierComplet`
+  vient d'écrire (`avertirSiRepriseHorsCalendrierV2`, aucune règle en double).
 - **Complexité** : `genererCalendrierComplet` 39 → 37 (cliquet abaissé).
 
 ## Le stock (tarir n'est pas réparer)
@@ -50,6 +59,13 @@ Rien n'est écrit dans les données. `categorie` reste inerte dans les journées
 
 ## Tests
 
+**Retouches** : `sentinelle-calendrier-libelle-echappe-2026-11-19` (4 tests ; sans l'échappement → 3 rouges) ; sentinelle
+de la reprise + 2 tests sur ton cadre avec les Élections (étiquette rendue au calcul → le cas du Mac rougit ; reprise ignorée
+par le compte → les deux rougissent) ; banc du formulaire + l'étape du 24 déc. (sans l'appel → rouge) ; légende
+« Journées reprises ». Jetons `20261117s` sur `calendrier-vue.js` et `trimestre-v2-init.js`.
+
+**Premier passage** :
+
 - **Vitest complet** : 932 fichiers, 11 896 tests verts (avant la pose des jetons ; les 4 sentinelles anti-cache, relancées
   après : 69 verts).
 - **Sentinelle neuve** `sentinelle-reprise-decide-du-calcul-2026-11-19` (10 tests). Break-test : passe 1 rendue à
@@ -63,17 +79,16 @@ Rien n'est écrit dans les données. `categorie` reste inerte dans les journées
 
 ## Trouvailles (trois issues)
 
-1. **La description d'une journée entre non échappée dans le calendrier** (`calendrier-vue.js:373`, `innerHTML` l. 620).
-   Antérieur, ligne non écrite ici. **Inscrire et continuer, à arbitrer** : la règle du BACKLOG l'écarte (pas vécu), la
-   règle de sécurité n° 1 pèse pour ; une ligne (`echapperHtml(statut.label)`) et un test.
-2. **La métrique « Congés avec reprise »** de la légende garde l'ancien vocabulaire à côté de « Sans cours, reprise ».
-   Mots que tu lis : proposé, pas changé.
+1. **La description d'une journée entrait non échappée dans le calendrier.** Cowork a tranché : **corrigée dans ce lot**
+   (le libellé « S11 · motif » est construit ici). Échappée à la construction (motif et jour remplacé, qui voyagent par
+   les imports) ; `titleAttr` de la même cellule l'était déjà (`echapperHtml(tooltip)`).
+2. **« Congés avec reprise »** devient « Journées reprises » (tranché par Cowork, livré).
 3. `docs/modules/trimestres.md` se déclare déjà périmé (l. 8) : **commenter et oublier**, rien fait.
 4. `trimestre.js:22` garde « fériés » : note historique du 22 mai (Fête des Patriotes), au sens courant. Gardée.
 
 ## Supposé (à corriger au besoin)
 
-- Formulaire d'ajout sans réponse pré-cochée ; sans réponse, il refuse : « Indique si cette journée sera reprise. » (porte § 3.1).
+- ~~Formulaire d'ajout sans réponse pré-cochée~~ : accepté par Cowork le 19 nov., le message part tel quel.
 - Messages neufs, mes mots : « Indique la date et l'horaire de la reprise. » ; option vide de l'horaire « — Sélectionner — »
   (reprise du libellé le plus courant d'`index.html`, l'ancien disait « — Aucune — »).
 - Les apostrophes des textes du mandat suivent chaque fichier (’ dans `accompagnement-contenu-terme.js` et le popup, ' ailleurs).

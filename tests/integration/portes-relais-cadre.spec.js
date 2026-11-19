@@ -330,6 +330,23 @@ test('Journées sans cours · la question de reprise décide, et se relit de dat
     expect(reprise.jour.nonReprise).toBeUndefined();
     expect(reprise.jour.numeroSemaine).toBeUndefined();
     expect(reprise.jourReprise.statut).toBe('reprise');
+    // Une reprise qui apparaît au calendrier ne déclenche pas l'avertissement.
+    const avertissementsHors = () => page.locator('.notification-warning', { hasText: 'hors des jours de cours' }).count();
+    expect(await avertissementsHors()).toBe(0);
+
+    // 5 bis. Une reprise APRÈS la fin du trimestre (21 déc.) : enregistrée quand même,
+    //        et un avertissement non bloquant le dit (avant le 19 nov. : silence).
+    await geste('[data-action="afficherFormEvenementV2"]');
+    await page.fill('#v2-dateEvenement', '2026-10-05');
+    await page.fill('#v2-descriptionEvenement', 'Élections');
+    await geste('#v2-repriseOui');
+    await page.selectOption('#v2-horaireReprise', 'Lundi');
+    await page.fill('#v2-dateReprise', '2026-12-24');
+    await geste('#v2-btnConfirmerEvenement');
+    expect(await nb()).toBe(3);
+    await expect(page.locator('.notification-warning', { hasText: 'hors des jours de cours' })).toHaveCount(1);
+    expect(await page.locator('.notification-warning', { hasText: 'hors des jours de cours' }).textContent())
+        .toContain('Cette date de reprise tombe hors des jours de cours de ton trimestre : elle n\'apparaîtra pas dans ton calendrier.');
 
     // 6. « Modifier » relit dateReprise : la journée reprise montre Oui (et sa date), l'autre Non.
     const idDe = (desc) => page.evaluate((d) => db.getSync(window.cle('journeesSansCours'), []).find((e) => e.description === d).id, desc);

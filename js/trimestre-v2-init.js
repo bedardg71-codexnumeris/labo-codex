@@ -842,7 +842,22 @@ function confirmerEvenementV2() {
     // Lot E2 (D3) : par le témoin commun ; le message du geste ne part qu'après une écriture.
     if (!sauvegarderDonneesSelonMode('journeesSansCours', evenements, { geste: evenementEnEditionV2 ? 'Modifier la journée' : 'Ajouter la journée' })) return;
     rafraichirApresChangementEvenementV2(evenementEnEditionV2 ? 'Journée modifiée' : 'Journée ajoutée');
+    avertirSiRepriseHorsCalendrierV2(dateReprise);
     annulerFormEvenementV2();
+}
+
+/**
+ * 19 nov. 2026 (tranché par Cowork) : une reprise que le calendrier n'affichera pas
+ * (après la fin du trimestre, en semaine d'examens, sur une autre journée sans cours)
+ * était ignorée en silence, alors que la journée sortait quand même du compte.
+ * Avertissement NON bloquant : l'enregistrement est déjà fait. Pas de règle en double :
+ * on lit le calendrier que genererCalendrierComplet vient d'écrire.
+ */
+function avertirSiRepriseHorsCalendrierV2(dateReprise) {
+    if (!dateReprise) return;
+    const jour = db.getSync(cle('calendrierComplet'), {})[dateReprise];
+    if (jour && jour.statut === 'reprise') return;
+    notifications.warning('Cette date de reprise tombe hors des jours de cours de ton trimestre : elle n\'apparaîtra pas dans ton calendrier.');
 }
 
 /**

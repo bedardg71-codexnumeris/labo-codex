@@ -145,3 +145,25 @@ describe('la même journée AVEC reprise décale les semaines suivantes', () => 
         expect(cal['2026-11-13'].numeroSemaine).toBe(11);
     });
 });
+
+describe('le cadre réel de Grégoire, AVEC les Élections (mesure de Cowork, 19 nov. 2026)', () => {
+    // Le cadre des blocs précédents n'a pas les Élections (lun. 5 oct., reprise ven. 2 oct.,
+    // horaire du lundi). Avec elles, le 5 oct. sort du compte : tout ce qui suit recule d'un
+    // jour. C'est ce qu'affiche l'iPad de Grégoire (capture du 19 nov., 8 h 17 : 16 nov. en
+    // semaine 11, 18 nov. en semaine 12). L'ancien calcul, sur le Mac (grève « Institutionnel »),
+    // laissait les 17 et 18 nov. en semaine 11 : la semaine 12 démarrait le jeudi 19.
+    const ELECTIONS = { id: 'EL', dateEvenement: '2026-10-05', description: 'Élections', categorie: 'institutionnel', horaireReprise: 'Lundi', dateReprise: '2026-10-02' };
+
+    for (const [appareil, categorie] of [['l\'iPad', 'personnel'], ['le Mac', 'institutionnel']]) {
+        it(`grève « ${categorie} » (${appareil}) : 16 nov. en semaine 11, 17 et 18 nov. en 12, 11 déc. en 15`, () => {
+            const cal = generer([...OFFICIELLES, ELECTIONS, ...greve(categorie)]);
+            expect(cal['2026-10-05'].numeroSemaine).toBeUndefined();   // les Élections, reprises : hors compte
+            expect(cal['2026-11-10'].numeroSemaine).toBe(11);
+            expect(cal['2026-11-13'].numeroSemaine).toBe(11);
+            expect(cal['2026-11-16'].numeroSemaine).toBe(11);
+            expect(cal['2026-11-17'].numeroSemaine).toBe(12);
+            expect(cal['2026-11-18'].numeroSemaine).toBe(12);
+            expect(cal['2026-12-11'].numeroSemaine).toBe(15);
+        });
+    }
+});
