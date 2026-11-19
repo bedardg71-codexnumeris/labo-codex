@@ -42,16 +42,62 @@ let pileUndo = [];
 let pileRedo = [];
 let _undoBatch = false;
 
-// === THROTTLE rAF POUR HANDLERS MOUSEMOVE ===
+// === THROTTLE rAF POUR HANDLERS POINTERMOVE ===
+//
+// #1295 (19 nov. 2026) — une image, UN traitement, et c'est le DERNIER
+// événement de l'image qui le reçoit. L'ancienne version gardait le PREMIER et
+// jetait les suivants : quand plusieurs `pointermove` tombent dans la même image
+// (WebKit les livre un à un, sans les fusionner ; une image lente en accumule),
+// le bloc restait en retard sur le pointeur. Et le relâchement ne relisait pas
+// sa propre position : le dépôt se jugeait sur ce point en retard (l'activité
+// s'arrêtait 34 px sous la leçon, banc parcours-5 sur le Mac), puis l'image en
+// attente s'appliquait APRÈS le dépôt et redéplaçait le bloc.
+// ⮕ `vider()` applique tout de suite le mouvement en attente ; `annuler()` le
+//   retire. Les relâchements passent par `appliquerPositionDuRelachement`.
 function throttleRAF(fn) {
     var rafId = null;
-    return function(e) {
-        if (rafId) return;
-        rafId = requestAnimationFrame(function() {
-            fn(e);
-            rafId = null;
-        });
+    var enAttente = null;
+    function executer() {
+        rafId = null;
+        var e = enAttente;
+        enAttente = null;
+        fn(e);
+    }
+    function limite(e) {
+        enAttente = e;
+        if (rafId === null) rafId = requestAnimationFrame(executer);
+    }
+    limite.vider = function() {
+        if (rafId === null) return;
+        cancelAnimationFrame(rafId);
+        executer();
     };
+    limite.annuler = function() {
+        if (rafId !== null) cancelAnimationFrame(rafId);
+        rafId = null;
+        enAttente = null;
+    };
+    return limite;
+}
+
+/**
+ * #1295 — Au relâchement, le geste prend la position RÉELLE du pointeur : le
+ * mouvement encore en attente d'image est retiré (il s'appliquerait après le
+ * dépôt) et la position du `pointerup` est appliquée tout de suite, avant que
+ * le dépôt ne cherche sa cible. Un `pointercancel` (l'iPad reprend le geste)
+ * ne porte pas de position fiable : on applique seulement le dernier
+ * mouvement reçu.
+ * @param {Function} limite  la fonction rendue par throttleRAF
+ * @param {Function} fn      le traitement d'un mouvement (non limité)
+ * @param {PointerEvent} [e] l'événement de fin
+ */
+function appliquerPositionDuRelachement(limite, fn, e) {
+    if (e && e.type === 'pointerup') {
+        limite.annuler();
+        fn(e);
+    } else {
+        limite.vider();
+    }
 }
 
 // === CLÉ DE STOCKAGE SÉANCES ===
@@ -7339,6 +7385,7 @@ function attacherEvenements(el, donnees) {
 
             function onUpGroupe(e2) {
                 if (e2 && e2.pointerId !== pid) return;
+                appliquerPositionDuRelachement(onMoveGroupeThrottled, onMoveGroupe, e2);   // #1295
                 el.classList.remove('planif-dragging', 'planif-dragging-groupe');
                 effacerGuides();
                 majBarreAlignement();
@@ -7427,6 +7474,7 @@ function attacherEvenements(el, donnees) {
 
             function onUpB(e2) {
                 if (e2 && e2.pointerId !== pid) return;
+                appliquerPositionDuRelachement(onMoveBThrottled, onMoveB, e2);   // #1295
                 el.classList.remove('planif-dragging');
                 effacerGuides();
                 document.removeEventListener('pointermove', onMoveBThrottled);
@@ -7558,6 +7606,7 @@ function attacherEvenements(el, donnees) {
 
             function onUpC(e2) {
                 if (e2 && e2.pointerId !== pid) return;
+                appliquerPositionDuRelachement(onMoveCThrottled, onMoveC, e2);   // #1295
                 el.classList.remove('planif-dragging');
                 effacerGuides();
                 document.removeEventListener('pointermove', onMoveCThrottled);
@@ -7635,6 +7684,7 @@ function attacherEvenements(el, donnees) {
 
         function onUpD(e2) {
             if (e2 && e2.pointerId !== pid) return;
+            appliquerPositionDuRelachement(onMoveDThrottled, onMoveD, e2);   // #1295
             el.classList.remove('planif-dragging');
             effacerGuides();
             document.removeEventListener('pointermove', onMoveDThrottled);
@@ -8084,7 +8134,7 @@ function attacherEvenements(el, donnees) {
             var largeurDepart = el.offsetWidth;
             var hauteurDepart = el.offsetHeight;
 
-            var surDeplacement = throttleRAF(function(ev) {
+            function redimensionner(ev) {
                 if (ev.pointerId !== pointerId) return;
                 // Les deltas sont en pixels ÉCRAN ; les tailles du nœud sont en
                 // coordonnées de carte. Diviser par le zoom, comme le fait la
@@ -8107,10 +8157,14 @@ function attacherEvenements(el, donnees) {
                 el.style.width = w + 'px';
                 el.style.height = h + 'px';
                 mettreAJourLiens(id);
-            });
+            }
+            var surDeplacement = throttleRAF(redimensionner);
 
             var surRelachement = function(ev) {
                 if (ev && ev.pointerId !== undefined && ev.pointerId !== pointerId) return;
+                // #1295 : la taille enregistrée ci-dessous se lit sur le bloc ; elle doit être
+                // celle du relâchement, et aucune image en attente ne doit la changer après.
+                appliquerPositionDuRelachement(surDeplacement, redimensionner, ev);
                 poignee.removeEventListener('pointermove', surDeplacement);
                 poignee.removeEventListener('pointerup', surRelachement);
                 poignee.removeEventListener('pointercancel', surRelachement);
@@ -9353,6 +9407,10 @@ function initialiser() {
         }
 
         function onUp(e2) {
+            // #1295 : le dernier mouvement en attente s'applique maintenant (il dit si le geste
+            // a bougé), et non après le relâchement, où il ferait reparaître le rectangle.
+            // La sélection se calcule ensuite sur la position du relâchement, comme avant.
+            onMoveThrottled.vider();
             document.removeEventListener('pointermove', onMoveThrottled);
             document.removeEventListener('pointerup', onUp);
             document.removeEventListener('pointercancel', onUp);
