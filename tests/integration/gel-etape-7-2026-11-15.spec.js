@@ -98,7 +98,9 @@ test('en visite (« Refaire ») : ni contour ni flèche sur un contrôle qui éc
         await expect(bulle(page).locator('.parcours-bulle-titre')).toHaveText(TITRES[k]);
         const ou = 'étape ' + (k + 1);
         expect(await page.evaluate(() => window.ParcoursMoteur.enVisite()), ou + ' : en visite').toBe(true);
-        // Deux passages de la sonde : ce qu'elle pose est posé.
+        // 19 nov. 2026 : une étape qui nomme sa section fait d'abord défiler la page jusqu'à elle, la bulle cachée ; le
+        // placement n'existe qu'ensuite. Puis deux passages de la sonde : ce qu'elle pose est posé.
+        await page.waitForFunction(() => window.ParcoursMoteur.placement() !== null && !document.getElementById('parcours-bulle').classList.contains('est-en-attente'));
         await page.waitForFunction((p) => window.ParcoursMoteur.placement().passages > p + 1, await page.evaluate(() => window.ParcoursMoteur.placement().passages));
         const vu = await page.evaluate(() => {
             const b = document.getElementById('parcours-bulle');
@@ -106,6 +108,20 @@ test('en visite (« Refaire ») : ni contour ni flèche sur un contrôle qui éc
             return {
                 contour: !!(c && !c.hidden), second: !!(c2 && !c2.hidden),
                 fleches: document.querySelectorAll('#parcours-fleches g').length,
+                // 19 nov. 2026 (« Nous faisons » réécrit) : les étapes 1 à 6 nomment leur SECTION du Cadre ; en visite, la
+                // bulle ne désigne rien d'autre, et le moteur donne au NOM de la section sa flèche (règle c). Ce nom n'est
+                // pas un contrôle qui écrit : il est compté à part, et vérifié tel.
+                versLaSection: (() => {
+                    const nom = document.querySelector('.accordeon-header .parcours-section-actuelle');
+                    if (!nom) return { n: 0, controle: false };
+                    const r = nom.getBoundingClientRect();
+                    const d = (x, y) => Math.hypot(Math.max(r.left - x, 0, x - r.right), Math.max(r.top - y, 0, y - r.bottom));
+                    const n = [...document.querySelectorAll('#parcours-fleches g.parcours-fleche')].filter((g) => {
+                        const v = g.getAttribute('data-trace').match(/-?\d+(\.\d+)?/g).map(Number);
+                        return d(v[4], v[5]) <= 9;
+                    }).length;
+                    return { n, controle: !!nom.closest('button, input, select, textarea, [data-action], [data-on-change], [role="button"]') };
+                })(),
                 consignes: [...b.querySelectorAll('.parcours-bulle-ligne--geste')].map((x) => x.textContent),
                 lignes: b.querySelector('.parcours-bulle-lignes').textContent,
                 boutons: [...b.querySelectorAll('.parcours-bulle-boutons button')].map((x) => x.textContent)
@@ -113,7 +129,9 @@ test('en visite (« Refaire ») : ni contour ni flèche sur un contrôle qui éc
         });
         expect(vu.contour, ou + ' : aucun contour').toBe(false);
         expect(vu.second, ou + ' : aucun second contour').toBe(false);
-        expect(vu.fleches, ou + ' : aucune flèche').toBe(0);
+        expect(vu.fleches - vu.versLaSection.n, ou + ' : aucune flèche, hors du nom de la section').toBe(0);
+        expect(vu.versLaSection.n, ou + ' : au plus une flèche, vers le nom de la section').toBeLessThanOrEqual(k < 6 ? 1 : 0);
+        expect(vu.versLaSection.controle, ou + ' : le nom de la section n\'est pas un contrôle').toBe(false);
         expect(vu.consignes.map(aPlat), ou + ' : la consigne est la phrase de la visite, seule').toEqual([PHRASE_VISITE]);
         expect(aPlat(vu.lignes), ou + ' : les autres lignes restent').toContain(RESTE[k]);
         expect(aPlat(vu.lignes), ou + ' : plus d\'invitation à toucher le contrôle').not.toMatch(/Touche « (Créer|Importer|Verrouiller)/);

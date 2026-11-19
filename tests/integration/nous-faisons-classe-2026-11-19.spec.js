@@ -220,6 +220,12 @@ for (const taille of TAILLES) {
             "C Touche « Créer le groupe-cours » (il apparaîtra dans l'en-tête de l'application)",
             'E La pratique de notation peut attendre.'
         ]);
+        // La parenthèse de la consigne sort du gras (la consigne l'écrit hors des astérisques) ; la consigne, elle, y reste.
+        expect(await page.evaluate(() => {
+            const c = document.querySelector('#parcours-bulle .parcours-bulle-ligne--geste .parcours-bulle-ligne-texte');
+            const p = c.querySelector('.parcours-bulle-ligne-precision');
+            return { gras: getComputedStyle(c).fontWeight, precision: p ? p.textContent.replace(/\u00a0/g, ' ') : null, poids: p ? getComputedStyle(p).fontWeight : null };
+        })).toEqual({ gras: '600', precision: " (il apparaîtra dans l'en-tête de l'application)", poids: '400' });
         expect(await page.evaluate(() => (db.getSync(cle('groupesCours'), []) || []).length), 'aucun groupe-cours avant ce geste').toBe(0);
         await remplirGroupeCours(page);
 

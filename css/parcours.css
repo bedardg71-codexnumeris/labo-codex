@@ -315,6 +315,8 @@ body.mode-clair {
 @supports (content: 'x' / '') { .parcours-bulle-ligne.est-faite::before { content: '\2713' / ''; } .parcours-bulle-ligne--geste::before, .parcours-bulle-ligne--a-faire::before { content: '\2192' / ''; } }
 .parcours-bulle-ligne--geste > .parcours-bulle-ligne-texte { font-weight: 600; color: var(--parcours-geste); }
 .parcours-bulle-ligne--geste.est-faite > .parcours-bulle-ligne-texte { font-weight: 400; color: var(--texte-secondaire); }
+/* 19 nov. 2026 : la parenthèse qui termine une consigne, hors du gras (posée par le moteur). */
+.parcours-bulle-ligne-precision { font-weight: 400; }
 
 .parcours-bulle-texte {
     margin: 0;

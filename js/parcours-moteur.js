@@ -72,6 +72,8 @@
    premier niveau qui se fait (`champs`, `fait`, ou des sous-lignes qui se font) porte la flèche, sans le gras de la
    consigne (`parcours-bulle-ligne--a-faire`) ; faite, le crochet. Ses sous-lignes n'en portent pas. Avant ce lot, seule
    la consigne avait sa flèche : la règle du 18 nov. avait été posée sur « Je regarde », où la consigne est le seul geste.
+   La parenthèse qui termine une consigne (« Touche « Créer le groupe-cours » (il apparaîtra dans l'en-tête de
+   l'application) ») sort du gras (`parcours-bulle-ligne-precision`) : les bulles validées le 19 nov. l'écrivent ainsi.
    OÙ SUIS-JE (règle 4) : une étape où la page change le déclare (`lieu`). Sa première ligne dit « Tu es dans « X », à
    l'onglet « Y ». » (les noms sont LUS dans le menu, jamais recopiés), les deux entrées du menu reçoivent le halo de la
    section actuelle, et la page s'ouvre EN HAUT, navigation visible : rien n'y est amené dans la vue à l'ouverture.
@@ -1164,7 +1166,19 @@
                 + (aFaire ? ' parcours-bulle-ligne--a-faire' : '');
             var t = document.createElement('span');
             t.className = 'parcours-bulle-ligne-texte';
-            t.textContent = typographier(ligne.texte);
+            var texte = typographier(ligne.texte);
+            // LA PRÉCISION D'UNE CONSIGNE (les bulles de « Nous faisons », 19 nov. 2026 : « **Touche « Créer le groupe-cours »**
+            // (il apparaîtra dans l'en-tête de l'application) ») : la parenthèse qui la termine sort du gras.
+            var precision = ligne.geste ? /^(.*\S)( \([^()]*\))$/.exec(texte) : null;
+            if (precision) {
+                t.textContent = precision[1];
+                var p = document.createElement('span');
+                p.className = 'parcours-bulle-ligne-precision';
+                p.textContent = precision[2];
+                t.appendChild(p);
+            } else {
+                t.textContent = texte;
+            }
             li.appendChild(t);
             var dit = document.createElement('span');
             dit.className = 'u-lecteur-ecran';
