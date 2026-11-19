@@ -30061,7 +30061,9 @@ body.mode-clair {
 #listeCriteres .grille-attendu { margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--bordure-claire); display: flex; flex-direction: column; gap: 8px; }
 #listeCriteres .grille-attendu-titre { margin: 0; font-size: 0.85rem; font-weight: 600; color: var(--texte-secondaire); }
 #listeCriteres .grille-attendu-niveaux { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 8px; }
-#listeCriteres .grille-attendu-niveau { padding: 8px 10px; border: 1px solid var(--bordure-claire); border-radius: var(--radius-moyen); min-width: 0; }
+/* ↻ 19 nov. 2026 (décision de Cowork) : plus de cadre, un filet à gauche — la case vit dans la carte du critère,
+   et un cadre y faisait une carte dans une carte (pages-sans-emboitement). */
+#listeCriteres .grille-attendu-niveau { padding: 4px 0 4px 10px; border-left: 2px solid var(--bordure-claire); min-width: 0; }
 #listeCriteres .grille-attendu-niveau strong { display: block; font-size: 0.85rem; margin-bottom: 4px; }
 #listeCriteres .grille-attendu-niveau p { margin: 0; font-size: 0.85rem; line-height: 1.45; color: var(--texte-secondaire); white-space: pre-line; overflow-wrap: anywhere; }
 /* La dissection, lot 13 (19 oct.) : le texte d'un niveau se modifie à sa place. */
