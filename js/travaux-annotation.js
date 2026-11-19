@@ -88,6 +88,9 @@
     const TOLERANCE_FERMETURE_PX = 14; // toucher le premier sommet à moins de ceci, à l'écran, ferme la forme
     const SOMMETS_CONFONDUS_PX = 3;    // un second toucher sur le même sommet n'en pose pas un autre
     let gesteAuDoigt = false;    // le geste en cours (outil Sélection) vient d'un doigt : un second doigt l'abandonne
+    // « Dessiner au doigt » (18 nov. 2026, js/annotation-doigt.js) : le doigt qui trace, et le crayon posé (sa priorité)
+    let doigtQuiTrace = null;    // pointerId du doigt qui trace, choix allumé ; null sinon
+    let styletPose = false;
 
     // Presse-papiers annotations : sur window pour persister entre fichiers/étudiants
     // même si le module est désactivé/réactivé
@@ -469,9 +472,39 @@
         return typeof travauxUI !== 'undefined' && !!travauxUI.getModeCourant && travauxUI.getModeCourant() === 'evaluer';
     }
 
-    /** #1123 — les outils qui posent d'un seul toucher : un autocollant, un symbole ou un code. */
+    /**
+     * Les outils qui se posent d'un seul toucher du doigt (#1123) : le tampon, le code, et depuis le 18 nov. 2026
+     * (lot/perspective-coins, vécu par Grégoire sur l'iPad : la bulle du modèle de « Recevoir » recommande l'outil) le
+     * Texte. Les outils qui tracent gardent leur rejet de paume : le doigt y fait défiler la page.
+     */
     function estOutilDunToucher(outil) {
-        return !!_outils().getAutocollantActif() || outil.type === 'symbole';
+        return _gesteDuDoigt(outil, Infinity) === 'toucher';
+    }
+
+    /**
+     * Ce que fait un doigt posé sous l'outil (js/annotation-doigt.js) : 'rien', 'toucher' ou 'tracer'. Le choix
+     * « Dessiner au doigt » ajoute aux outils d'un toucher le sommet du polygone, et fait tracer les autres.
+     * @param {number} depuisStyletMs - le temps écoulé depuis le dernier geste du crayon
+     */
+    function _gesteDuDoigt(outil, depuisStyletMs) {
+        return annotationDoigt.gesteDuDoigt({
+            outil: outil, autocollantActif: !!_outils().getAutocollantActif(), allume: annotationDoigt.estAllume(),
+            enEvaluer: _enEvaluer(), styletEnCours: styletPose, depuisStyletMs: depuisStyletMs, delaiPaumeMs: DELAI_PAUME_MS
+        });
+    }
+
+    /** Un second doigt, ou le crayon, rejoint un trait du doigt : le trait s'abandonne, rien ne s'écrit. */
+    function abandonnerTraceDuDoigt() {
+        if (doigtQuiTrace === null) return;
+        doigtQuiTrace = null;
+        abandonnerGesteDuDoigt();   // la poignée d'une ligne tout juste tracée, tirée au doigt (#943), revient en place
+        dragPoigneeApresTrace = false;
+        gesteAuDoigt = false;
+        enDessin = false;
+        traitEnCours = null;
+        formeEnCours = null;
+        formeOrigine = null;
+        reRendreAnnotations();
     }
 
     /**
@@ -503,9 +536,10 @@
         if (!estOutilDunToucher(outil)) return;
         avantPremiereAnnotation();
         const rect = canvasAnnotation.getBoundingClientRect();
-        poserTamponAuPoint(outil,
-            (toucher.x - rect.left) / canvasAnnotation.width,
-            (toucher.y - rect.top) / canvasAnnotation.height);
+        const xNorm = (toucher.x - rect.left) / canvasAnnotation.width;
+        const yNorm = (toucher.y - rect.top) / canvasAnnotation.height;
+        // Le texte : la zone s'ouvre là où le doigt s'est posé (ou le texte touché s'ouvre en édition), comme au stylet.
+        if (!poserTamponAuPoint(outil, xNorm, yNorm)) poseDunGeste(outil, xNorm, yNorm);
     }
 
     /**
@@ -681,9 +715,12 @@
         if (e.pointerType === 'pen') {
             toucherEnAttente = null;
             dernierStyletMs = Date.now();
+            styletPose = true;
+            abandonnerTraceDuDoigt();   // le crayon garde la priorité : la paume avait commencé un trait
             return false;
         }
         if (e.pointerType === 'touch' && !e.isPrimary) {
+            // Un trait du doigt (choix « Dessiner au doigt ») tombe avec lui : `enDessin` défait, rien ne s'écrit au relâcher.
             abandonnerGesteDuDoigt();
             return true;
         }
@@ -712,10 +749,13 @@
                 // #1123 (rapport de Grégoire, 20 oct., iPad) — sauf pour un code ou un tampon, qui
                 // se pose d'un seul toucher : on attend le relâcher (onPointerUp). Un second doigt
                 // (pincement) ou un glissé annule ; le tracé garde son rejet de paume.
-                if (estOutilDunToucher(outil) && Date.now() - dernierStyletMs > DELAI_PAUME_MS) {
+                // 18 nov. 2026 : choix « Dessiner au doigt » allumé, le doigt trace comme le crayon (js/annotation-doigt.js).
+                const geste = _gesteDuDoigt(outil, Date.now() - dernierStyletMs);
+                if (geste === 'toucher') {
                     toucherEnAttente = { pointerId: e.pointerId, x: e.clientX, y: e.clientY };
                 }
-                return;
+                if (geste !== 'tracer') return;
+                doigtQuiTrace = e.pointerId;
             }
         }
 
@@ -888,8 +928,23 @@
     /**
      * Mouvement du stylet
      */
+    /**
+     * Ce que le mouvement suit avant le tracé : le crayon qui glisse (ou survole) est un geste du crayon — la paume posée
+     * pendant ce temps ne trace pas —, puis le toucher en attente et l'aperçu du polygone.
+     * @returns {boolean} true si l'événement s'arrête ici
+     */
+    function suivreAvantLeTrace(e) {
+        if (e.pointerType === 'pen') dernierStyletMs = Date.now();
+        return suivreToucherEnAttente(e) || suivreApercuPolygone(e);
+    }
+
+    /** Un doigt qui n'est pas celui qui trace (choix « Dessiner au doigt ») : il ne touche pas au tracé. */
+    function estUnDoigtEtranger(e) {
+        return e.pointerType === 'touch' && e.pointerId !== doigtQuiTrace;
+    }
+
     function onPointerMove(e) {
-        if (suivreToucherEnAttente(e) || suivreApercuPolygone(e)) return;
+        if (suivreAvantLeTrace(e)) return;
         const outil = _outils().getOutilActif();
 
         const rect = canvasAnnotation.getBoundingClientRect();
@@ -944,7 +999,7 @@
             return;
         }
 
-        if (e.pointerType === 'touch') return;
+        if (estUnDoigtEtranger(e)) return;
 
         e.preventDefault();
 
@@ -996,8 +1051,23 @@
     /**
      * Fin du trait
      */
+    /**
+     * Le crayon levé ; le doigt qui traçait (choix « Dessiner au doigt ») : repris par Safari (pointercancel), son trait
+     * s'abandonne ; levé, il s'écrit.
+     * @returns {''|'arret'|'doigt'|'etranger'} 'arret' : rien d'autre à faire ; 'doigt' : le doigt qui traçait est levé ;
+     *   'etranger' : un autre doigt, qui ne touche pas au tracé
+     */
+    function leverDuPointeur(e) {
+        if (e.pointerType === 'pen') { dernierStyletMs = Date.now(); styletPose = false; }
+        const finDuDoigt = doigtQuiTrace !== null && e.pointerId === doigtQuiTrace;
+        if (finDuDoigt && e.type !== 'pointerup') { abandonnerTraceDuDoigt(); return 'arret'; }
+        if (finDuDoigt) { doigtQuiTrace = null; return 'doigt'; }
+        return e.pointerType === 'touch' ? 'etranger' : '';
+    }
+
     function onPointerUp(e) {
-        if (e.pointerType === 'pen') dernierStyletMs = Date.now();
+        const leve = leverDuPointeur(e);
+        if (leve === 'arret') return;
         if (toucherEnAttente && e.pointerId === toucherEnAttente.pointerId) {
             terminerToucherEnAttente(e);
             return;
@@ -1058,9 +1128,10 @@
             return;
         }
 
-        if (e.pointerType === 'touch') return;
+        if (leve === 'etranger') return;
 
         enDessin = false;
+        gesteAuDoigt = false;
 
         // Forme terminee (y compris surligneur en click-drag-release)
         if (formeEnCours) {

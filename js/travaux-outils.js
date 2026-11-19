@@ -2187,6 +2187,24 @@
         return html + '</div>';
     }
 
+    /**
+     * « Dessiner au doigt » (lot/dessiner-au-doigt, 18 nov. 2026) : l'interrupteur, sur un écran tactile seulement ; le Mac
+     * ne le voit pas. Un seul état pour les deux versions (js/annotation-doigt.js, `basculer`). L'étendue dit, sous lui,
+     * ce que deux doigts font toujours ; la compacte n'a pas la place.
+     */
+    function _htmlDessinerAuDoigt(avecAide) {
+        if (typeof annotationDoigt === 'undefined' || !annotationDoigt.estEcranTactile(navigator, window.matchMedia)) return '';
+        const coche = annotationDoigt.estAllume() ? ' checked' : '';
+        return '<div class="annot-doigt">'
+            + '<label class="interrupteur annot-doigt-interrupteur">'
+            + '<input type="checkbox" role="switch" class="interrupteur-case" data-on-change="annotationDoigt.basculer"' + coche
+            + (avecAide ? ' aria-describedby="annot-doigt-aide"' : '') + '>'
+            + '<span class="interrupteur-piste" aria-hidden="true"></span>'
+            + '<span class="interrupteur-libelle">' + echapperHtml('Dessiner au doigt') + '</span></label>'
+            + (avecAide ? '<p class="annot-doigt-aide" id="annot-doigt-aide">' + echapperHtml('Deux doigts déplacent toujours la page.') + '</p>' : '')
+            + '</div>';
+    }
+
     const MODES_POINTES = [
         { val: 'debut', label: '\u2190', nom: 'D\u00e9but', titre: 'Pointe au d\u00e9but (\u2190)' },
         { val: 'double', label: '\u2194\uFE0E', nom: 'Double', titre: 'Double pointe (\u2194\uFE0E)' },
@@ -2226,6 +2244,7 @@
         html += '<hr class="separateur-horizontal">';
         html += _htmlCouleursAnnotation('');   // sans intertitre : les pastilles sont explicites
         html += _htmlEpaisseurAnnotation();
+        html += _htmlDessinerAuDoigt(false);
 
         // En bas, comme dans l'étendue (Grégoire, 3 nov. 2026 : en haut, ces boutons s'accrochent au passage) : Annuler,
         // Supprimer, Rétablir, puis « Effacer la page ». Collés au bas de la palette quand elle défile.
@@ -2291,6 +2310,7 @@
 
         html += '<div class="annot-groupe"><div class="travaux-palette-label">Couleurs</div>' + _htmlCouleursAnnotation('annot-couleurs-2-rangees') + '</div>';
         html += '<div class="annot-groupe"><div class="travaux-palette-label">Épaisseur</div>' + _htmlEpaisseurAnnotation() + '</div>';
+        html += _htmlDessinerAuDoigt(true);
 
         // En bas, une seule rangée (Grégoire : en haut, ces boutons s'accrochent au passage). Collée au bas de la palette
         // quand elle défile : Annuler reste visible, quelle que soit la hauteur de la zone. « Effacer la page » en couleur

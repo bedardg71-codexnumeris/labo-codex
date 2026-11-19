@@ -16971,7 +16971,8 @@ tr.ligne-import-ecartee td {
 #prep-canvas-overlay {
     position: absolute;
     top: 0; left: 0;
-    touch-action: none;
+    /* Le doigt défile ; js/travaux-preparation.js passe à `none` pendant la perspective et le recadrage (leurs poignées). */
+    touch-action: pan-x pan-y;
 }
 
 /* Barre de zoom — flottante en bas a droite */
@@ -28185,6 +28186,14 @@ body.mode-clair {
 .annot-groupe .travaux-palette-label {
     margin: 0;
 }
+/* « Dessiner au doigt » (lot/dessiner-au-doigt, 18 nov. 2026) : l'interrupteur de .interrupteur (44 px de haut, la rangée
+   entière se touche), sur un écran tactile seulement (js/travaux-outils.js). La compacte, plus étroite : un libellé plus
+   petit, qui passe à la ligne au besoin. Couleurs : variables seulement, clair comme sombre. */
+.annot-doigt { display: flex; flex-direction: column; gap: 2px; }
+.annot-doigt-interrupteur { width: 100%; gap: 10px; }
+.annot-doigt-interrupteur .interrupteur-libelle { font-size: 0.9rem; }
+#travaux-palette-flottante.annotation-compacte .annot-doigt-interrupteur .interrupteur-libelle { font-size: 0.8rem; }
+.annot-doigt-aide { margin: 0; font-size: 0.8rem; line-height: 1.35; color: var(--texte-secondaire); }
 .annot-bande .btn,
 .annot-bande .travaux-btn-outil,
 .annot-bloc .travaux-btn-outil {
