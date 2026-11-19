@@ -32,7 +32,7 @@ describe('#399 · L8 — la reprise du samedi est honorée (décision D4)', () =
             cadreCalendrier: { dateDebut: '2026-09-01', finCours: '2026-09-30', finTrimestre: '2026-10-02' },
             journeesSansCours: [{
                 id: 'E1', dateEvenement: '2026-09-07', description: 'Congé',
-                categorie: 'institutionnel', horaireReprise: 'Horaire du lundi',
+                horaireReprise: 'Horaire du lundi',
                 dateReprise: '2026-09-12' // un SAMEDI
             }],
             horaires: [], horaireHebdo: null
@@ -66,7 +66,7 @@ describe('#399 · L8 — la reprise du samedi est honorée (décision D4)', () =
             cadreCalendrier: { dateDebut: '2026-09-01', finCours: '2026-09-30', finTrimestre: '2026-10-02' },
             journeesSansCours: [{
                 id: 'E1', dateEvenement: '2026-09-07', description: 'Congé',
-                categorie: 'institutionnel', horaireReprise: 'Horaire du lundi',
+                horaireReprise: 'Horaire du lundi',
                 dateReprise: '2026-09-10' // un JEUDI
             }],
             horaires: [], horaireHebdo: null

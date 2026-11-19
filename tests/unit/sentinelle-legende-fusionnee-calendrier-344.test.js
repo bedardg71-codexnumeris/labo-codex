@@ -104,10 +104,18 @@ describe('#344 · carte Légende fusionnée en tête du Calendrier scolaire', ()
         expect(apresGrille).not.toContain('calendrier-legende');
     });
 
-    it('la légende des couleurs (8 items) est complète dans la colonne gauche', () => {
+    // 19 nov. 2026 (lot « journées reprise ») : 9 items — le pointillé des journées
+    // non reprises reçoit sa légende ; « Congé prévu » et « Reprise » sont renommés.
+    it('la légende des couleurs (9 items) est complète dans la colonne gauche', () => {
         const items = htmlInjecte.match(/calendrier-legende-item/g) || [];
-        expect(items.length).toBe(8);
+        expect(items.length).toBe(9);
         expect(htmlInjecte).toContain('Jour de cours régulier');
         expect(htmlInjecte).toContain('Échéance de production');
+        expect(htmlInjecte).toContain('Sans cours, reprise');
+        expect(htmlInjecte).toContain('Sans cours, non reprise');
+        expect(htmlInjecte).toContain('Jour de reprise');
+        expect(htmlInjecte).not.toContain('Congé prévu');
+        // La pastille du non repris porte les classes du jour lui-même (une seule source).
+        expect(htmlInjecte).toContain('calendrier-legende-badge calendrier-jour-conge calendrier-jour-conge-non-reprise');
     });
 });

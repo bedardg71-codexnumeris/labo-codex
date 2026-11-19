@@ -11,7 +11,7 @@
 
 | Clé | Texte réécrit |
 |-----|---------------|
-| `reglages-gestion-trimestres` | Ton calendrier du trimestre. Les dates que tu entres ici (début, fin, congés, imprévus) génèrent automatiquement la grille de toutes tes séances. |
+| `reglages-gestion-trimestres` | Ton calendrier du trimestre. Les dates que tu entres ici (début, fin, journées sans cours et leurs reprises) génèrent automatiquement la grille de toutes tes séances. |
 | `reglages-cours` | Ton cours : code, compétence et éléments de compétence — les mêmes informations que sur le devis ministériel ou le plan-cadre. |
 | `reglages-enseignant` | Ton profil. Ton nom apparaîtra dans le sélecteur de groupe-cours et sur les ressources que tu partages. |
 | `reglages-groupe-etudiants` | Ta liste d'étudiant·es. Tu peux les ajouter séparément ou les importer depuis un tableur ou Omnivox. Le marqueur SA identifie ceux et celles qui sont inscrit·es aux Services adaptés. |
@@ -25,8 +25,7 @@
 | `reglages-trim-identification` | Le nom et la période de ton trimestre (ex. : Hiver 2026). Sert de repère dans toute l'application. |
 | `reglages-trim-bornes` | Les dates clés de ton trimestre : début, fin des cours, remise des notes. Le calendrier des séances se calcule à partir de ces dates. |
 | `reglages-trim-semaines-speciales` | Semaines de planification et d'examens. Ces semaines sont exclues du décompte des séances régulières. |
-| `reglages-trim-conges` | Tes congés fériés et leurs reprises. Le calendrier des séances s'ajuste automatiquement. |
-| `reglages-trim-imprevus` | Annulations, fermetures, maladie, météo — tout ce qui n'était pas prévu. Le calendrier des séances s'ajuste. |
+| `reglages-trim-conges` | Les jours où ton cours n'a pas lieu. Repris, ils décalent les semaines suivantes et rien n'est perdu ; non repris, la semaine garde son numéro et le cours de ce jour est perdu. |
 
 ## Champs Cours
 

@@ -852,7 +852,7 @@ const AIDE_CONTEXTUELLE = {
             {
                 type: 'exemple',
                 titre: 'Format des heures',
-                contenu: 'Les heures utilisent le format 24h (ex.\u00a0: 13:00, pas 1:00\u00a0PM). Les séances de reprise sont ajoutées automatiquement quand tu configures les congés dans la section Trimestre.'
+                contenu: 'Les heures utilisent le format 24h (ex.\u00a0: 13:00, pas 1:00\u00a0PM). Les séances de reprise s’ajoutent automatiquement quand tu déclares une journée sans cours reprise, dans la section Trimestre.'
             },
             {
                 type: 'alerte',

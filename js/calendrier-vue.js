@@ -33,7 +33,7 @@
    
    LocalStorage utilisé:
    - 'cadreCalendrier' : Object avec dates clés du trimestre
-   - 'journeesSansCours' : Array des congés/fériés/journées personnelles (fusion #374)
+   - 'journeesSansCours' : Array des journées sans cours, reprises ou non (fusion #374)
    - 'seancesHoraire' : Array des séances (pour déterminer jours de cours)
    
    MODULES DÉPENDANTS:
@@ -147,9 +147,9 @@ function obtenirStatutJour(dateStr, calendrierComplet) {
 
     // 🆕 BETA 95 : Afficher le nom de l'événement pour les congés/reprises
     if (infosJour.statut === 'conge' && infosJour.motif) {
-        // Congé personnel : afficher motif + numéro de sem (le rôle compte normalement)
-        // Congé institutionnel : afficher motif seul (pas d'indice de sem par définition)
-        if (infosJour.categorieEvenement === 'personnel' && infosJour.numeroSemaine) {
+        // Journée non reprise : motif + numéro de semaine (le jour reste compté).
+        // Journée reprise : motif seul (elle sort du compte, pas de numéro).
+        if (infosJour.nonReprise && infosJour.numeroSemaine) {
             label = 'S' + infosJour.numeroSemaine + ' · ' + infosJour.motif;
         } else {
             label = infosJour.motif;
@@ -206,7 +206,7 @@ function obtenirStatutJour(dateStr, calendrierComplet) {
         classe: 'cal-' + typeFinal,
         label: label,
         numeroSemaine: infosJour.numeroSemaine || null,
-        categorieEvenement: infosJour.categorieEvenement || null
+        nonReprise: !!infosJour.nonReprise
     };
 }
 
@@ -317,8 +317,8 @@ function genererHtmlMois(annee, mois, calendrierComplet, mapEcheances) {
             classeJour += ' calendrier-jour-planification';
         } else if (statut.type === 'conge') {
             classeJour += ' calendrier-jour-conge';
-            if (statut.categorieEvenement === 'personnel') {
-                classeJour += ' calendrier-jour-conge-personnel';
+            if (statut.nonReprise) {
+                classeJour += ' calendrier-jour-conge-non-reprise';
             }
         } else if (statut.type === 'reprise') {
             classeJour += ' calendrier-jour-reprise';
@@ -543,12 +543,19 @@ function dessinerCalendrierScolaire(cadreCalendrier) {
 
     htmlLegende += '<div class="calendrier-legende-item">';
     htmlLegende += '<div class="calendrier-legende-badge" style="background: var(--conge-bg); border: 2px solid #ef5350;"></div>';
-    htmlLegende += '<span class="calendrier-legende-label">Congé prévu</span>';
+    htmlLegende += '<span class="calendrier-legende-label">Sans cours, reprise</span>';
+    htmlLegende += '</div>';
+
+    // 19 nov. 2026 : le style pointillé des journées non reprises n'avait pas de légende.
+    // Mêmes classes que le jour lui-même (une seule source pour son apparence).
+    htmlLegende += '<div class="calendrier-legende-item">';
+    htmlLegende += '<div class="calendrier-legende-badge calendrier-jour-conge calendrier-jour-conge-non-reprise"></div>';
+    htmlLegende += '<span class="calendrier-legende-label">Sans cours, non reprise</span>';
     htmlLegende += '</div>';
 
     htmlLegende += '<div class="calendrier-legende-item">';
     htmlLegende += '<div class="calendrier-legende-badge" style="background: var(--reprise-bg); border: 2px solid #ff9800;"></div>';
-    htmlLegende += '<span class="calendrier-legende-label">Reprise</span>';
+    htmlLegende += '<span class="calendrier-legende-label">Jour de reprise</span>';
     htmlLegende += '</div>';
 
     htmlLegende += '<div class="calendrier-legende-item">';
@@ -645,7 +652,7 @@ function dessinerCalendrierScolaire(cadreCalendrier) {
  * 
  * LOCALSTORAGE:
  * - 'cadreCalendrier' : Object avec dates clés
- * - 'journeesSansCours' : Array des congés/fériés/journées personnelles (fusion #374)
+ * - 'journeesSansCours' : Array des journées sans cours, reprises ou non (fusion #374)
  * - 'seancesHoraire' : Array des séances (jours de cours)
  * 
  * MODULES DÉPENDANTS:

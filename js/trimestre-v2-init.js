@@ -35,7 +35,7 @@ function initialiserTrimestreV2() {
     // Charger le cadre calendrier dans les nouveaux champs
     chargerCadreCalendrierV2();
 
-    // Charger les événements (prévus et imprévus)
+    // Charger les journées sans cours
     chargerJourneesSansCoursV2();
 
     // Charger la liste des cours dans le dropdown
@@ -615,9 +615,10 @@ function reinitialiserSemainesSpecialesV2() {
    JOURNÉES SANS COURS — fusion #374+#373 (relais 4 août 2026)
    Une carte, un formulaire, UNE clé `journeesSansCours` (les anciennes
    clés evenementsPrevus/evenementsImprevus sont fusionnées au boot par
-   migrerJourneesSansCours, js/migrations.js). Natures : institutionnel /
-   ferie / personnel. Reprise optionnelle, interdite sur personnel
-   (convention §3.0).
+   migrerJourneesSansCours, js/migrations.js). Une seule question :
+   « Cette journée sera-t-elle reprise ? » (lot « journées reprise »,
+   19 nov. 2026). La réponse se déduit de dateReprise, et c'est elle qui
+   décide du calcul des semaines (trimestre.js) ; la nature n'existe plus.
    =============================== */
 
 function chargerJourneesSansCoursV2() {
@@ -643,11 +644,10 @@ function chargerJourneesSansCoursV2() {
     conteneur.innerHTML = html;
 }
 
-const BADGES_NATURE_V2 = {
-    institutionnel: '<span class="badge-categorie-evenement badge-institutionnel">Institutionnel</span>',
-    ferie: '<span class="badge-categorie-evenement badge-ferie">Férié</span>',
-    personnel: '<span class="badge-categorie-evenement badge-personnel">Personnel</span>'
-};
+// Lot « journées reprise » (19 nov. 2026) : un seul badge, sur la journée non
+// reprise ; une journée reprise n'en porte pas (la ligne « → Reprise le … » suffit).
+// Les trois badges de nature sont retirés : la nature ne gouverne plus rien.
+const BADGE_NON_REPRISE_V2 = '<span class="badge-non-reprise">Non reprise</span>';
 
 /**
  * Génère le HTML d'une carte journée sans cours (mode compact)
@@ -662,7 +662,7 @@ function genererCarteEvenementV2(evt) {
             → Reprise le <strong>${echapperHtml(evt.dateReprise)}</strong>${horaireRepris ? ` (horaire du <strong>${echapperHtml(horaireRepris.toLowerCase())}</strong>)` : ''}
         </div>` : '';
 
-    const badgeCat = BADGES_NATURE_V2[evt.categorie] || BADGES_NATURE_V2.institutionnel;
+    const badge = evt.dateReprise ? '' : BADGE_NON_REPRISE_V2;
 
     return `
     <div class="item-carte-compact" style="margin-bottom: 12px; padding: 12px 15px; background: var(--bleu-tres-pale); border-radius: 8px; border-left: 4px solid var(--accent-primaire);">
@@ -670,7 +670,7 @@ function genererCarteEvenementV2(evt) {
             <div style="flex: 1; min-width: 0;">
                 <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
                     <strong style="font-size: 1rem;">${echapperHtml(evt.description || '')}</strong>
-                    ${badgeCat}
+                    ${badge}
                     <span style="color: var(--accent-primaire); font-weight: 500;">${echapperHtml(evt.dateEvenement || '')}</span>
                 </div>
                 ${repriseInfo}
@@ -696,7 +696,9 @@ function afficherFormEvenementV2() {
 
     setValue('v2-dateEvenement', '');
     setValue('v2-descriptionEvenement', '');
-    setValue('v2-categorieEvenement', 'institutionnel');
+    // Aucune réponse pré-cochée : un défaut déciderait du calcul à la place de
+    // l'enseignant·e (c'est ce que faisait l'ancienne nature choisie par défaut).
+    cocherRepriseV2(null);
     setValue('v2-horaireReprise', '');
     setValue('v2-dateReprise', '');
     majAffichageRepriseV2();
@@ -707,19 +709,35 @@ function afficherFormEvenementV2() {
     form.classList.remove('u-hide');
 }
 
+/**
+ * Réponse à « Cette journée sera-t-elle reprise ? » : 'oui', 'non' ou null
+ * (aucune case cochée). Le choix n'est pas stocké : il se déduit de dateReprise.
+ */
+function lireRepriseV2() {
+    if (document.getElementById('v2-repriseOui')?.checked) return 'oui';
+    if (document.getElementById('v2-repriseNon')?.checked) return 'non';
+    return null;
+}
+
+function cocherRepriseV2(reponse) {
+    const oui = document.getElementById('v2-repriseOui');
+    const non = document.getElementById('v2-repriseNon');
+    if (oui) oui.checked = reponse === 'oui';
+    if (non) non.checked = reponse === 'non';
+}
+
+/**
+ * « Oui » montre l'horaire et la date de reprise (alors obligatoires) ;
+ * « Non » les masque ET les vide ; sans réponse, ils restent masqués.
+ */
 function majAffichageRepriseV2() {
-    const cat = document.getElementById('v2-categorieEvenement')?.value || 'institutionnel';
     const bloc = document.getElementById('v2-blocReprise');
     if (!bloc) return;
-    // Convention §3.0 : pas de reprise sur événement personnel.
-    // Férié et institutionnel : reprise optionnelle (grève = institutionnel
-    // SANS reprise, ça doit rester exprimable — on n'exige jamais la reprise).
-    if (cat === 'personnel') {
-        bloc.style.display = 'none';
+    const reponse = lireRepriseV2();
+    bloc.classList.toggle('u-hide', reponse !== 'oui');
+    if (reponse === 'non') {
         setValue('v2-horaireReprise', '');
         setValue('v2-dateReprise', '');
-    } else {
-        bloc.style.display = 'grid';
     }
 }
 
@@ -741,7 +759,8 @@ function modifierEvenementV2(id) {
 
     setValue('v2-dateEvenement', evt.dateEvenement || '');
     setValue('v2-descriptionEvenement', evt.description || '');
-    setValue('v2-categorieEvenement', evt.categorie || 'institutionnel');
+    // Source unique : dateReprise présente → Oui ; sinon → Non.
+    cocherRepriseV2(evt.dateReprise ? 'oui' : 'non');
     setValue('v2-horaireReprise', evt.horaireReprise || '');
     setValue('v2-dateReprise', evt.dateReprise || '');
     majAffichageRepriseV2();
@@ -758,12 +777,12 @@ function modifierEvenementV2(id) {
 function confirmerEvenementV2() {
     const dateEvenement = document.getElementById('v2-dateEvenement')?.value;
     const description = document.getElementById('v2-descriptionEvenement')?.value?.trim();
-    const categorie = document.getElementById('v2-categorieEvenement')?.value || 'institutionnel';
+    const reponse = lireRepriseV2();
     let horaireReprise = document.getElementById('v2-horaireReprise')?.value || '';
     let dateReprise = document.getElementById('v2-dateReprise')?.value || '';
 
-    // Convention §3.0 : pas de reprise sur événement personnel
-    if (categorie === 'personnel') {
+    // « Non » : aucune reprise, quoi que les champs masqués contiennent.
+    if (reponse !== 'oui') {
         horaireReprise = '';
         dateReprise = '';
     }
@@ -773,8 +792,13 @@ function confirmerEvenementV2() {
         return;
     }
 
-    if (dateReprise && !horaireReprise) {
-        notifications.warning('Indique quel jour de cours est remplacé.');
+    if (!reponse) {
+        notifications.warning('Indique si cette journée sera reprise.');
+        return;
+    }
+
+    if (reponse === 'oui' && (!dateReprise || !horaireReprise)) {
+        notifications.warning('Indique la date et l\'horaire de la reprise.');
         return;
     }
 
@@ -796,11 +820,12 @@ function confirmerEvenementV2() {
             annulerFormEvenementV2();
             return;
         }
+        // La fiche est reconstruite champ par champ : l'ancien champ `categorie`
+        // (inerte depuis le 19 nov. 2026) n'y est plus réécrit.
         evenements[index] = {
             id: evenementEnEditionV2,
             dateEvenement,
             description,
-            categorie,
             horaireReprise,
             dateReprise
         };
@@ -809,7 +834,6 @@ function confirmerEvenementV2() {
             id: genererIdUnique('EVT_'),
             dateEvenement,
             description,
-            categorie,
             horaireReprise,
             dateReprise
         });

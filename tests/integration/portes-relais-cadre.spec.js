@@ -189,7 +189,7 @@ test('#369 · Avertissements de cohérence : visibles sur saisie fautive, SILENC
     expect(erreurs).toEqual([]);
 });
 
-test('#374 · Fusion « Journées sans cours » : migration des 2 anciennes clés + carte unique + nature Férié', async ({ page }) => {
+test('#374 · Fusion « Journées sans cours » : migration des 2 anciennes clés + carte unique', async ({ page }) => {
     const erreurs = [];
     attacherCaptureErreurs(page, erreurs);
     await page.setViewportSize({ width: 1470, height: 956 });
@@ -231,31 +231,115 @@ test('#374 · Fusion « Journées sans cours » : migration des 2 anciennes clé
     expect(affichage.compteur).toBe('2');
     expect(affichage.anciensConteneurs).toBe(false);
 
-    // 3. NATURE FÉRIÉ : ajout par le vrai formulaire → badge « Férié » rendu,
-    //    et le générateur traite le férié comme un congé avec reprise.
-    const ferie = await page.evaluate(() => {
+    // 3. (19 nov. 2026) La partie « nature Férié » est retirée avec la nature : la
+    //    question de reprise qui la remplace a son propre test, juste en dessous.
+
+    expect(erreurs).toEqual([]);
+});
+
+// Lot « journées reprise » (19 nov. 2026, décision de Grégoire) : le menu « Nature »
+// cède la place à « Cette journée sera-t-elle reprise ? ». Par les VRAIS gestes (clics
+// sur les radios : le dispatcher data-on-change est dans le chemin). Le choix n'est pas
+// stocké : il se déduit de dateReprise. Oui → la journée sort du compte des semaines ;
+// Non → elle reste comptée, badge « Non reprise », le jour porte son numéro de semaine.
+test('Journées sans cours · la question de reprise décide, et se relit de dateReprise', async ({ page }) => {
+    const erreurs = [];
+    attacherCaptureErreurs(page, erreurs);
+    await page.setViewportSize({ width: 1470, height: 956 });
+    await ouvrirAppEnDemo(page);
+    await montrerTrimestre(page);
+    await page.evaluate(() => {
         db.setSync(window.cle('cadreCalendrier'), { // security-ok: fixture de test locale
             dateDebut: '2026-08-20', finCours: '2026-12-11', finTrimestre: '2026-12-21'
         });
-        window.afficherFormEvenementV2();
-        document.getElementById('v2-dateEvenement').value = '2026-09-08';
-        document.getElementById('v2-descriptionEvenement').value = 'Férié test';
-        document.getElementById('v2-categorieEvenement').value = 'ferie';
-        document.getElementById('v2-horaireReprise').value = 'Mardi';
-        document.getElementById('v2-dateReprise').value = '2026-09-11';
-        window.confirmerEvenementV2();
-        const calendrier = db.getSync(window.cle('calendrierComplet'), {});
-        return {
-            badge: !!document.querySelector('#v2-journeesSansCoursContainer .badge-ferie'),
-            statutJour: calendrier['2026-09-08']?.statut,
-            categorieJour: calendrier['2026-09-08']?.categorieEvenement,
-            statutReprise: calendrier['2026-09-11']?.statut
-        };
+        db.setSync(window.cle('journeesSansCours'), []); // security-ok: fixture de test locale
+        window.chargerJourneesSansCoursV2();
     });
-    expect(ferie.badge).toBe(true);
-    expect(ferie.statutJour).toBe('conge');
-    expect(ferie.categorieJour).toBe('ferie');
-    expect(ferie.statutReprise).toBe('reprise');
+    const nb = () => page.evaluate(() => db.getSync(window.cle('journeesSansCours'), []).length);
+    const blocVisible = () => page.locator('#v2-blocReprise').isVisible();
+    // Gestes par l'événement DOM (TESTS-AUTOMATISES.md §4) : el.click() coche le radio et
+    // émet « change », qui traverse le dispatcher data-on-change de main.js comme la souris.
+    const geste = (sel) => page.locator(sel).evaluate((el) => el.click());
+
+    // 1. Ajout : le menu Nature n'existe plus ; aucune réponse pré-cochée, bloc masqué.
+    //    Le seul clic à la souris du spec : il prouve le pointeur sur « + Ajouter ».
+    await page.locator('[data-action="afficherFormEvenementV2"]').click();
+    expect(await page.locator('#v2-categorieEvenement').count()).toBe(0);
+    expect(await page.locator('#v2-repriseOui').isChecked()).toBe(false);
+    expect(await page.locator('#v2-repriseNon').isChecked()).toBe(false);
+    expect(await blocVisible()).toBe(false);
+
+    // 2. Sans réponse, rien n'est écrit.
+    await page.fill('#v2-dateEvenement', '2026-11-10');
+    await page.fill('#v2-descriptionEvenement', 'Grève');
+    await geste('#v2-btnConfirmerEvenement');
+    expect(await nb()).toBe(0);
+
+    // 3. « Oui » montre horaire et date, alors obligatoires (date seule : refus).
+    await geste('#v2-repriseOui');
+    expect(await blocVisible()).toBe(true);
+    await page.fill('#v2-dateReprise', '2026-11-21');
+    await geste('#v2-btnConfirmerEvenement');
+    expect(await nb()).toBe(0);
+
+    // 4. « Non » masque ET vide les champs de reprise ; la journée s'enregistre sans reprise.
+    await geste('#v2-repriseNon');
+    expect(await blocVisible()).toBe(false);
+    expect(await page.inputValue('#v2-dateReprise')).toBe('');
+    await geste('#v2-btnConfirmerEvenement');
+    const nonReprise = await page.evaluate(() => {
+        const j = db.getSync(window.cle('journeesSansCours'), [])[0];
+        const cal = db.getSync(window.cle('calendrierComplet'), {});
+        const carte = document.querySelector('#v2-journeesSansCoursContainer .item-carte-compact');
+        return { j, jour: cal['2026-11-10'], badge: carte?.querySelector('.badge-non-reprise')?.textContent, texte: carte?.textContent };
+    });
+    expect(nonReprise.j.dateReprise).toBe('');
+    expect('categorie' in nonReprise.j).toBe(false);          // la nature n'est plus écrite
+    expect(nonReprise.badge).toBe('Non reprise');
+    expect(nonReprise.texte).not.toContain('Reprise le');
+    expect(nonReprise.jour.statut).toBe('conge');
+    expect(nonReprise.jour.nonReprise).toBe(true);
+    expect(nonReprise.jour.numeroSemaine).toBeGreaterThan(0);
+    // La vue calendaire : pointillé « non reprise », motif précédé du numéro de semaine.
+    const caseJour = await page.evaluate(() => {
+        window.afficherCalendrierScolaire();
+        const td = document.querySelector('td[data-date="2026-11-10"]');
+        return { classe: td?.className, texte: td?.textContent };
+    });
+    expect(caseJour.classe).toContain('calendrier-jour-conge-non-reprise');
+    expect(caseJour.texte).toContain('S' + nonReprise.jour.numeroSemaine + ' · Grève');
+
+    // 5. Une journée REPRISE : pas de badge, la ligne « → Reprise le … » suffit ; hors compte.
+    await geste('[data-action="afficherFormEvenementV2"]');
+    expect(await page.locator('#v2-repriseNon').isChecked()).toBe(false);   // le formulaire repart vierge
+    await page.fill('#v2-dateEvenement', '2026-09-07');
+    await page.fill('#v2-descriptionEvenement', 'Fête du travail');
+    await geste('#v2-repriseOui');
+    await page.selectOption('#v2-horaireReprise', 'Lundi');
+    await page.fill('#v2-dateReprise', '2026-09-10');
+    await geste('#v2-btnConfirmerEvenement');
+    const reprise = await page.evaluate(() => {
+        const cal = db.getSync(window.cle('calendrierComplet'), {});
+        const cartes = [...document.querySelectorAll('#v2-journeesSansCoursContainer .item-carte-compact')];
+        const carte = cartes.find((c) => c.textContent.includes('Fête du travail'));
+        return { jour: cal['2026-09-07'], jourReprise: cal['2026-09-10'], badges: carte?.querySelectorAll('.badge-non-reprise').length, texte: carte?.textContent };
+    });
+    expect(reprise.badges).toBe(0);
+    expect(reprise.texte).toContain('Reprise le');
+    expect(reprise.jour.statut).toBe('conge');
+    expect(reprise.jour.nonReprise).toBeUndefined();
+    expect(reprise.jour.numeroSemaine).toBeUndefined();
+    expect(reprise.jourReprise.statut).toBe('reprise');
+
+    // 6. « Modifier » relit dateReprise : la journée reprise montre Oui (et sa date), l'autre Non.
+    const idDe = (desc) => page.evaluate((d) => db.getSync(window.cle('journeesSansCours'), []).find((e) => e.description === d).id, desc);
+    await geste(`[data-action="modifierEvenementV2"][data-param="${await idDe('Fête du travail')}"]`);
+    expect(await page.locator('#v2-repriseOui').isChecked()).toBe(true);
+    expect(await blocVisible()).toBe(true);
+    expect(await page.inputValue('#v2-dateReprise')).toBe('2026-09-10');
+    await geste(`[data-action="modifierEvenementV2"][data-param="${await idDe('Grève')}"]`);
+    expect(await page.locator('#v2-repriseNon').isChecked()).toBe(true);
+    expect(await blocVisible()).toBe(false);
 
     expect(erreurs).toEqual([]);
 });

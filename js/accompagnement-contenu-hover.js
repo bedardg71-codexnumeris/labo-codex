@@ -54,7 +54,7 @@ const TOOLTIPS = {
     // --- Panneaux ---
 
     'reglages-gestion-trimestres':
-        'Ton calendrier du trimestre. Les dates que tu entres ici (début, fin, congés, imprévus) génèrent automatiquement la grille de toutes tes séances.',
+        'Ton calendrier du trimestre. Les dates que tu entres ici (début, fin, journées sans cours et leurs reprises) génèrent automatiquement la grille de toutes tes séances.',
     // Consigne du 12 sept. 2026 (les étiquettes) : deux natures, nommées par le point unique js/mots-nature.js.
     'reglages-cours':
         'Ton cours ou ton ' + motsNature('service').objetLong + ' — ce que l’application affiche partout. Un cours d’' +
@@ -85,9 +85,7 @@ const TOOLTIPS = {
     'reglages-trim-semaines-speciales':
         'Semaines de planification et d\'examens. Ces semaines sont exclues du décompte des séances régulières.',
     'reglages-trim-conges':
-        'Tes congés fériés et leurs reprises. Le calendrier des séances s\'ajuste automatiquement.',
-    'reglages-trim-imprevus':
-        'Annulations, fermetures, maladie, météo — tout ce qui n\'était pas prévu. Le calendrier des séances s\'ajuste.',
+        'Les jours où ton cours n\'a pas lieu. Repris, ils décalent les semaines suivantes et rien n\'est perdu ; non repris, la semaine garde son numéro et le cours de ce jour est perdu.',
 
     // --- Champs Cours ---
 

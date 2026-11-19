@@ -45,7 +45,7 @@ Un seul cours peut être actif à la fois — c'est celui qui sert de référenc
 ## `conseil-horaire`
 **Section** : Réglages — Horaire
 
-Choisis le format qui correspond à ton horaire réel : 2×2h (deux périodes séparées dans la semaine, ex. : lundi et jeudi), 1×4h (cours intensif en une seule période continue) ou 1×3h (une seule période continue). Les heures utilisent le format 24h (ex. : 13:00, pas 1:00 PM). Les séances de reprise sont ajoutées automatiquement quand tu configures les congés dans la section Trimestre. Si tu modifies le format horaire, les séances existantes seront recréées.
+Choisis le format qui correspond à ton horaire réel : 2×2h (deux périodes séparées dans la semaine, ex. : lundi et jeudi), 1×4h (cours intensif en une seule période continue) ou 1×3h (une seule période continue). Les heures utilisent le format 24h (ex. : 13:00, pas 1:00 PM). Les séances de reprise s'ajoutent automatiquement quand tu déclares une journée sans cours reprise, dans la section Trimestre. Si tu modifies le format horaire, les séances existantes seront recréées.
 
 ---
 

@@ -113,72 +113,23 @@ describe('#368 — golden master : le calendrier A2026 officiel, jour par jour',
         expect(calendrier['2026-11-16'].numeroSemaine).toBe(12);
     });
 
-    it('statuts préservés : férié du 7 sept = conge/ferie, reprise du 10 sept comptée à sa date', () => {
+    it('statuts préservés : férié du 7 sept = congé repris, reprise du 10 sept comptée à sa date', () => {
         expect(calendrier['2026-09-07'].statut).toBe('conge');
-        expect(calendrier['2026-09-07'].categorieEvenement).toBe('ferie');
+        // 19 nov. 2026 : la nature ne gouverne plus rien — plus de champ dérivé ;
+        // une journée REPRISE ne porte ni nonReprise ni numéro de semaine.
+        expect(calendrier['2026-09-07'].categorieEvenement).toBeUndefined();
+        expect(calendrier['2026-09-07'].nonReprise).toBeUndefined();
         expect(calendrier['2026-09-07'].numeroSemaine).toBeUndefined();
         expect(calendrier['2026-09-10'].statut).toBe('reprise');
         expect(calendrier['2026-10-14'].statut).toBe('semaine-planification');
     });
 });
 
-describe('#368 — grève : congé institutionnel SANS reprise (le cas qui séparait les deux algorithmes)', () => {
-    // La numérotation du collège ne dépend PAS des reprises : une reprise
-    // réutilise un jour ouvrable déjà compté. Retirer la reprise du 9 nov ne
-    // change donc AUCUN numéro. L'ancien comptage par rôle, lui, perdait un
-    // lundi pour toujours : lun 16 nov retombait en semaine 11 après le
-    // ven 13 nov en semaine 12 — le recul observé sur les données A2026.
-    it('les numéros restent ceux du golden master, et la monotonie tient', () => {
-        const store = {
-            h2026_cadreCalendrier: CADRE_A2026,
-            h2026_journeesSansCours: [
-                JOURNEES_A2026[0],
-                { id: 'E2G', dateEvenement: '2026-11-09', description: 'Grève', categorie: 'institutionnel', horaireReprise: '', dateReprise: '' }
-            ],
-            h2026_horaires: []
-        };
-        const db = {
-            getSync: (k, d) => (k in store ? store[k] : d),
-            setSync: (k, v) => { store[k] = v; },
-            removeSync: (k) => { delete store[k]; }
-        };
-        const win = chargerScript('js/trimestre.js', { db, cle: (k) => 'h2026_' + k });
-        const calendrier = win.genererCalendrierComplet();
-
-        expect(calendrier['2026-11-13'].numeroSemaine).toBe(11);
-        expect(calendrier['2026-11-16'].numeroSemaine).toBe(12); // l'ancien algo : 11 (recul)
-        expect(calendrier['2026-12-11'].numeroSemaine).toBe(15);
-
-        const dates = Object.keys(calendrier).sort();
-        let dernier = 0;
-        for (const date of dates) {
-            const n = calendrier[date].numeroSemaine;
-            if (!n) continue;
-            expect(n, `recul en ${date}`).toBeGreaterThanOrEqual(dernier);
-            dernier = n;
-        }
-    });
-});
-
-describe('#368 — le congé personnel compte dans la numérotation du collège', () => {
-    it('une maladie ne décale pas les semaines (le collège n\'a rien annulé)', () => {
-        const store = {
-            h2026_cadreCalendrier: CADRE_A2026,
-            h2026_journeesSansCours: [
-                ...JOURNEES_A2026,
-                { id: 'E3', dateEvenement: '2026-10-20', description: 'Maladie', categorie: 'personnel', horaireReprise: '', dateReprise: '' }
-            ],
-            h2026_horaires: []
-        };
-        const db = {
-            getSync: (k, d) => (k in store ? store[k] : d),
-            setSync: (k, v) => { store[k] = v; },
-            removeSync: (k) => { delete store[k]; }
-        };
-        const win = chargerScript('js/trimestre.js', { db, cle: (k) => 'h2026_' + k });
-        const calendrier = win.genererCalendrierComplet();
-        expect(calendrier['2026-10-20'].statut).toBe('conge');
-        expect(calendrier['2026-10-20'].numeroSemaine).toBe(8);   // compte quand même
-        expect(calendrier['2026-12-11'].numeroSemaine).toBe(15);  // la fin ne bouge pas
-    });
-});
+// 19 nov. 2026 (lot « journées reprise », décision de Grégoire) : les deux blocs qui
+// suivaient ici sont RETIRÉS. Le premier (« grève : congé institutionnel SANS
+// reprise ») posait que la numérotation ne dépend pas des reprises ; la règle dit
+// désormais l'inverse : une journée sort du compte si et seulement si elle est
+// reprise. Le second (« le congé personnel compte ») tenait à l'étiquette, qui ne
+// gouverne plus rien. Les deux cas vivent dans
+// sentinelle-reprise-decide-du-calcul-2026-11-19.test.js, avec le cas vécu (grève
+// des 10 et 13 nov.) jugé contre le même cadre A2026.

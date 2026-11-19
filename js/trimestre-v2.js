@@ -68,7 +68,7 @@ function calculerStatistiquesCalendrier(calendrier) {
  * une erreur de mois invisible se découvre en décembre (cas réel : remise
  * des notes saisie au 29/08 au lieu du 29/12).
  * @param {Object|null} cadre - cadreCalendrier ({dateDebut, finCours, ...})
- * @param {Array} evenements - événements prévus + imprévus fusionnés
+ * @param {Array} evenements - journées sans cours (journeesSansCours)
  * @returns {string[]} messages (quoi + pourquoi/quoi faire, une phrase)
  */
 function validerCadreTrimestre(cadre, evenements) {

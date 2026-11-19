@@ -33,8 +33,9 @@
  *   "cours" | "reprise" | "conge" (avec motif) | "weekend" |
  *   "semaine-planification" | "semaine-examens" | "jour-ouvrable" | "hors-cours"
  * Une entrée "cours" / "reprise" porte numeroSemaine, numeroJour,
- * jourSemaine. Une entrée "conge" porte motif. "weekend" et
- * "semaine-*" portent uniquement jourSemaine.
+ * jourSemaine. Une entrée "conge" porte motif ; si la journée n'est pas
+ * reprise, elle porte aussi nonReprise: true et son numeroSemaine.
+ * "weekend" et "semaine-*" portent uniquement jourSemaine.
  */
 
 function obtenirCalendrierComplet() {
@@ -48,7 +49,7 @@ function obtenirInfosJour(date) {
 
 /**
  * Génère le calendrier complet du trimestre actif depuis le cadre,
- * les événements (prévus + imprévus) et l'horaire hebdomadaire.
+ * les journées sans cours et l'horaire hebdomadaire.
  * Écrit dans la clé `calendrierComplet` (localStorage trimestre-scoped).
  * Appelée par tous les handlers qui modifient une entrée de calendrier.
  */
@@ -94,22 +95,21 @@ function genererCalendrierComplet() {
         return {};
     }
 
-    // Construction des maps. Convention §3.0 : un événement personnel n'a pas de reprise.
-    // Si une dateReprise est saisie sur un événement personnel, on l'ignore et on warn.
-    // Natures : institutionnel | ferie | personnel — seul « personnel » a un
-    // traitement propre ; « ferie » se comporte comme institutionnel (l'étiquette
-    // ne change RIEN au calcul, vérifié avec Grégoire, relais #373).
+    // Construction des maps. Lot « journées reprise » (19 nov. 2026, décision de
+    // Grégoire) : c'est la REPRISE qui gouverne le calcul, plus l'étiquette.
+    // Une journée sans cours AVEC dateReprise sort du compte (les semaines
+    // suivantes se décalent) ; SANS reprise, elle reste comptée (la semaine garde
+    // son numéro, le cours de ce jour est perdu). Le champ `categorie`
+    // (institutionnel/ferie/personnel) des journées saisies avant reste inerte
+    // dans le stock : plus rien ne le lit. Cas vécu : grève des 10 et 13 nov.
+    // sans reprise, sortie du compte par son étiquette → la semaine 12
+    // démarrait un mercredi.
     const mapConges = {};
     const mapReprises = {};
     tousEvenements.forEach(evt => {
         mapConges[evt.dateEvenement] = evt;
-        const cat = evt.categorie || 'institutionnel';
         if (evt.dateReprise) {
-            if (cat === 'personnel') {
-                console.warn('Événement personnel "' + evt.description + '" (' + evt.dateEvenement + ') a une dateReprise — ignorée par convention §3.0');
-            } else {
-                mapReprises[evt.dateReprise] = evt;
-            }
+            mapReprises[evt.dateReprise] = evt;
         }
     });
 
@@ -119,16 +119,19 @@ function genererCalendrierComplet() {
     // Règle validée par Grégoire et vérifiée contre le calendrier officiel
     // du cégep 2026-2027 : numeroSemaine = ⌈rang du jour de cours effectif ÷ 5⌉.
     // Une semaine scolaire est un paquet de 5 jours de cours effectifs du
-    // COLLÈGE, pas une semaine calendaire : elle s'étire autour des fériés
+    // COLLÈGE, pas une semaine calendaire : elle s'étire autour des journées reprises
     // (A2026 : la semaine 3 absorbe le lundi 7 sept et finit le jeudi 10)
     // et enjambe les pauses. Aucun jour de bascule présupposé — contrainte
     // Grégoire : « il ne faut pas coder en dur ma pratique ».
     //
     // Compte comme jour effectif : tout jour entre dateDebut et finCours qui
-    // n'est ni weekend, ni semaine planification/examens, ni congé
-    // institutionnel ou férié (jour pédagogique perdu pour le collège).
-    // Un congé PERSONNEL compte (le collège n'a rien annulé) ; un jour de
-    // reprise est un jour ouvrable ordinaire, compté à sa propre date.
+    // n'est ni weekend, ni semaine planification/examens, ni journée sans cours
+    // REPRISE (elle sera rattrapée ailleurs : le paquet s'étire). Une journée
+    // NON reprise compte (le cours de ce jour est perdu, la numérotation ne
+    // bouge pas) ; un jour de reprise est un jour ouvrable ordinaire, compté à
+    // sa propre date. Préséance congé > reprise : un jour qui est à la fois
+    // reprise d'une journée et journée non reprise (13 nov. A2026 : reprise de
+    // la Journée Carrière ET grève) est un congé, compté parce que non repris.
     //
     // L'ancien comptage PAR RÔLE (n-ième lundi = semaine n) reculait dès
     // qu'un congé décalait un rôle (constat A2026 : ven 13 nov = sem 13 puis
@@ -154,7 +157,7 @@ function genererCalendrierComplet() {
         } else if (estDansPlage(dateStr, cadre.semainePlanificationDebut, cadre.semainePlanificationFin)
                 || estDansPlage(dateStr, cadre.semaineExamensDebut, cadre.semaineExamensFin)) {
             compte = false;
-        } else if (mapConges[dateStr] && (mapConges[dateStr].categorie || 'institutionnel') !== 'personnel') {
+        } else if (mapConges[dateStr] && mapConges[dateStr].dateReprise) {
             compte = false;
         }
 
@@ -198,13 +201,15 @@ function genererCalendrierComplet() {
             infosJour.statut = 'semaine-examens';
         } else if (mapConges[dateStr]) {
             const evt = mapConges[dateStr];
-            const cat = evt.categorie || 'institutionnel';
             infosJour.statut = 'conge';
             infosJour.motif = evt.description;
-            infosJour.categorieEvenement = cat;
-            // Personnel : afficher le numéro de semaine (le rôle compte normalement)
-            if (cat === 'personnel' && numSemParDate[dateStr]) {
-                infosJour.numeroSemaine = numSemParDate[dateStr];
+            // Non reprise : le jour reste compté (passe 1), il porte donc son
+            // numéro de semaine ; la vue l'affiche « S11 · motif ».
+            if (!evt.dateReprise) {
+                infosJour.nonReprise = true;
+                if (numSemParDate[dateStr]) {
+                    infosJour.numeroSemaine = numSemParDate[dateStr];
+                }
             }
         } else if (mapReprises[dateStr]) {
             infosJour.statut = 'reprise';

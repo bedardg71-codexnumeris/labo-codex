@@ -3348,8 +3348,10 @@ input[type="number"].controle-form {
     font-weight: 500;
 }
 
-/* === BADGES CATÉGORIE D'ÉVÉNEMENT (institutionnel/personnel) === */
-.badge-categorie-evenement {
+/* === BADGE « Non reprise » des journées sans cours (19 nov. 2026) ===
+   Remplace les trois badges de nature (Institutionnel/Férié/Personnel) : c'est la
+   reprise qui décide du calcul. Variables d'alerte « attention » : 4.62:1 en clair. */
+.badge-non-reprise {
     display: inline-block;
     padding: 2px 8px;
     border-radius: var(--radius-petit);
@@ -3358,19 +3360,8 @@ input[type="number"].controle-form {
     margin-left: 6px;
     vertical-align: middle;
     letter-spacing: 0.02em;
-}
-.badge-categorie-evenement.badge-institutionnel {
-    background: rgba(106, 172, 184, 0.15);
-    color: var(--bleu-clair);
-}
-.badge-categorie-evenement.badge-personnel {
-    background: rgba(255, 193, 7, 0.15);
-    color: var(--niveau-attention-modere);
-}
-/* #373 (relais 4 août) : nature « Férié (collège fermé) » */
-.badge-categorie-evenement.badge-ferie {
-    background: rgba(58, 170, 138, 0.15);
-    color: var(--vert-leger);
+    background: var(--alerte-fond-attention);
+    color: var(--alerte-texte-attention);
 }
 
 /* === BADGES D'ENGAGEMENT === */
@@ -8540,9 +8531,9 @@ body[data-mode="anonymisation"] .etudiant-evaluation-carte h3 {
     font-weight: 600;
 }
 
-/* Congé personnel — visuellement distinct du congé institutionnel.
-   Le numéro de semaine reste affiché (le rôle pédagogique compte normalement). */
-.calendrier-jour-conge.calendrier-jour-conge-personnel {
+/* Journée non reprise — visuellement distincte de la journée reprise.
+   Le numéro de semaine reste affiché (le jour compte, le cours est perdu). */
+.calendrier-jour-conge.calendrier-jour-conge-non-reprise {
     background: rgba(255, 193, 7, 0.10);
     border: 2px dashed var(--niveau-attention-modere);
     color: var(--texte-principal);

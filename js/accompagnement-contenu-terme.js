@@ -632,7 +632,7 @@ const GLOSSAIRE = {
         terme: 'Journée sans cours',
         categorie: 'Réglages',
         etape: 'numerisation',
-        definition: 'Un jour où le cours n’a pas lieu, déclaré dans « Journées sans cours » avec sa nature : Institutionnel, Férié ou Personnel. Un jour institutionnel ou férié ne compte pas dans la numérotation des semaines ; un jour personnel, si. Sauf pour un jour personnel, tu peux y déclarer la reprise, par « Horaire de reprise » et « Date de reprise » : une reprise ne se fait pas toute seule.',
+        definition: 'Un jour où le cours n’a pas lieu, déclaré dans « Journées sans cours ». S’il est repris, indique la date et l’horaire de la reprise : les semaines suivantes se décalent et rien n’est perdu. S’il n’est pas repris, la semaine garde son numéro et le cours de ce jour est perdu. Quand la direction publie un nouveau calendrier, mets tes journées à jour.',
         voir: 'Cadre › Trimestre'
     },
 
