@@ -2,8 +2,10 @@
 
 **Dernier relais.** Branche `lot/glisser-alignement`, partie de `origin/main` `ade09e939` (relais de la 1.250.0).
 APERÇU, à ne pas fusionner : ni fusion ni release avant la fenêtre du lundi 23 novembre. **Fait** : les sept points
-de la consigne (`CONSIGNE-2026-11-19-glisser-alignement.md`). **Reste** : la relecture croisée, puis, à la fenêtre de
-release, le verdict WebKit complet ; la ligne de Nouvelles est à valider (§6) ; la question du stock est à trancher (§4).
+de la consigne (`CONSIGNE-2026-11-19-glisser-alignement.md`). **Ajouté le soir** (session cloud, à la demande de
+Grégoire) : deux essais du clic au banc, après comparaison avec le lot en double de la nuit B (§8). **Reste** : la
+relecture croisée, puis, à la fenêtre de release, le verdict WebKit complet ; la ligne de Nouvelles est à valider (§6) ;
+la question du stock est à trancher (§4).
 
 ## 1. En bref
 
@@ -115,7 +117,10 @@ glisser. C'est un intermittent de séquence : commenté ici, pas inscrit (aucun 
 **Vitest complet** : 932 fichiers, 11 911 essais verts (après le retrait des pauses fixes du banc neuf ; le premier
 passage avait rougi la sentinelle des pauses, 625 pour 618).
 
-**WebKit au verdict de la release** : dû à la fenêtre du 23 novembre.
+**Essais du clic** (ajoutés le soir, §8) : le banc compte désormais cinq essais × deux fenêtres, soit dix.
+
+**WebKit au verdict de la release** : dû à la fenêtre du 23 novembre. Il jugera aussi les deux essais du clic, qui
+n'ont tourné qu'en Chromium.
 
 ## 6. Ligne de Nouvelles proposée
 
@@ -132,3 +137,45 @@ Non écrite dans `js/changelog-data.js` : à valider.
 - Les échecs « ailleurs » de parcours-5 sur `lot/deux-temps-modeles` (2 verts sur 3 sur trois commits) :
   **commentés ici et oubliés** ; ils précèdent la plage et sont absents de `main` aujourd'hui (3/3 avec le
   correctif).
+
+## 8. Le clic, et le lot en double de la nuit B (ajout du 19 nov. au soir, session cloud)
+
+**Le doublon.** La session de nuit B a reçu le même lot sans voir celui-ci : `lot/glisser-alignement-nuit-b`
+(`99376782`, commité une minute avant `465c2970` et poussé deux minutes après), sans PR. Son rapport (`65282df6`) recommande de garder cette PR-ci.
+Son lot 2 (`lot/nous-faisons-cours`) embarque `465c2970` tel quel : si le **code** de cette PR change, cette branche
+devra être resynchronisée. Un ajout d'essais ne la touche pas.
+
+**Ce qui concorde** (lu dans les deux diffs) : même diagnostic, mêmes six relâchements, même traitement du
+`pointercancel`.
+
+**La seule divergence qui compte : un clic sans mouvement.** Cette PR ne fait rien (garde
+`if (!enAttente && !applique) return` de `vider`). La nuit B rejoue toujours le gestionnaire de mouvement avec le
+`pointerup`. Aucun seuil ne filtre les clics en amont (`pointerdown`). Mesuré en Chromium, souris et doigt, paysage :
+
+| Version | Clic sur une activité libre qui recouvre 3,9 % d'une leçon | Clic à 3 px d'un alignement |
+|---|---|---|
+| `main` `ade09e93` (témoin) | reste libre, immobile | immobile |
+| cette PR `465c2970` | reste libre, immobile | immobile |
+| nuit B `99376782` | **rangée dans la leçon** | **décalée de 3 px** |
+| cette PR, garde retirée | **rangée dans la leçon** | **décalée de 3 px** |
+
+La garde est donc nécessaire, et aucun essai ne la couvrait : les trois essais du banc sont des glissers.
+
+**Ajouté** : deux essais au banc, « un clic sur une activité libre qui recouvre un coin de leçon ne l'y range pas » et
+« un clic sur une activité libre près d'un alignement ne l'aimante pas ». Chacun clique à la souris puis touche au
+doigt, et vérifie parent et position. Ils vérifient d'abord leurs prémisses : le recouvrement est inférieur à 50 % (le
+filet ne joue pas), le point cliqué tombe sur l'activité, l'écart à l'alignement est de 3 px.
+
+| Passage (Chromium du conteneur, `playwright.chromium.config.js`) | Résultat |
+|---|---|
+| banc entier, avec la garde | **10/10 verts** |
+| essais du clic, garde retirée (break-test) | **4/4 rouges** (parent `g1295L` ; position décalée) |
+
+Vitest complet : 932 fichiers, 11 911 essais verts. Aucun `page.click` ni `waitForTimeout` dans le banc. **WebKit non
+lancé** : le conteneur n'en a pas ; le verdict de la release les jugera.
+
+**Ce que la nuit B a en plus**, selon son rapport, et qu'elle propose de reprendre ici « si Cowork le juge utile » : une
+sentinelle Vitest avec un cliquet (tout mouvement limité est vidé au relâchement), des essais CAS C, groupe, poignée,
+lasso et geste annulé, et une intermittence de `planif-corbeille-fixe-1070` sous Chromium. **Non repris ici** : à la
+relecture croisée de trancher. La sentinelle ne se copie pas telle quelle, elle éprouve `appliquerPositionDuRelachement`
+et `annuler()`, qui n'existent pas dans cette PR.
