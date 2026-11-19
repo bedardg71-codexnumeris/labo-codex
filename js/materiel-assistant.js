@@ -380,6 +380,9 @@
      */
     A.construire = function (m, ctx) {
         var nomGrille = texte(m.nom);
+        // Le modèle d'« Évaluer » (18 nov. 2026, js/materiel-dissection.js, `tenirPourNiveaux`) : une grille jugée par
+        // niveaux avec une échelle qui existe déjà. Ses critères, comme ceux d'une grille composée à la main ; aucune échelle.
+        if (m.echelleExistante) return { echelle: null, grille: construireGrille(m, ctx, nomGrille, null) };
         if (A.estEnPoints(m)) return { echelle: null, grille: construireGrilleEnPoints(m, ctx, nomGrille) };
         var echelle = construireEchelle(m, ctx, nomGrille);
         return { echelle: echelle, grille: construireGrille(m, ctx, nomGrille, echelle.id) };

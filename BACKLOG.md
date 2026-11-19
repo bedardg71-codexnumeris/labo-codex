@@ -6,6 +6,8 @@
 >
 > ↻ Fusion de `lot/nous-faisons-cours` (19-20 nov., nuit) : les deux côtés gardés ; #1286 avait été pris sur `claude/ecstatic-brown-urn6v8` (18 nov.), sa section est plus bas.
 >
+> ↻ Fusion de `lot/je-regarde-cours` (20 nov., nuit) : les deux côtés gardés ; #1287 avait été pris sur `lot/je-regarde-evaluer` (18 nov.).
+>
 > **Dernière bascule** : 19 juin 2026 (clôture session 1.20.0) — 14 items [x] déplacés vers BACKLOG-ARCHIVE.md (#341, #321, #343, #284, #314, #315, #316, #302, #325, #338, #298, #335, #296, #337). Bascule précédente : 10 juin 2026 (passe de triage Cowork) — 16 items, dont #303 et #295 (absorbé par #334).
 > **État courant (12 septembre 2026, soir — 1.139.0 POUSSÉE, TRI DES FICHES D'AUDIT)** : `1.139.0` poussée (`e29f734c`), porte des Interventions relevée 6/6 (2.4 et 2.5 sautées faute de cas). Ce soir, documents seulement : les 37 fiches ouvertes des audits Cadre, Conception, Évaluation et pratique de notation triées contre les huit énoncés (`plans de travail/TRI-2026-09-12-fiches-ouvertes-audits.md`) — #473 périmée et cochée, #467 gardée avant les partages de la cohorte (CO-14 et CO-39 mesurés vivants), 35 après la cohorte ; texte de #624 corrigé (#648, #649 livrés). Cases : 242 ouvertes, 287 cochées. Lot suivant : 6 du cadrage 11, l'Animation.
 > **État courant (12 septembre 2026, 11 h 20 — LOT E LIVRÉ ET 1.138.0 RELEASÉE, NON POUSSÉE)** : lot E `e239787f` (sur un service, Suivi n'affiche pas « Interventions » ; `_configurationVisible` filtre une copie, `rafraichirSousNavigationSelonContexte` appelé par `mettreAJourContexteEntete` — la bascule de contexte ne reconstruisait pas la barre, mesuré ; `suivi-interventions` reste un identifiant valide ; redirection dans afficherSousSection ÉCARTÉE : elle aurait bloqué les deux boutons du profil) ; sentinelle 11 essais, 8 mutations / 8 rouges ; chaîne réelle vérifiée dans WebKit. Release `a0ed0929` (1.138.0, build 0912-1116, 11 jetons ?v=) ; Vitest 550 / 6 020 après le bump. **Reste** : relecture du lot E par Cowork, verdict Playwright Cowork fermé, `scripts/pousser.sh`, porte (sept rangées). **Dernier ID : #848** (inchangé).
@@ -129,6 +131,10 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
 ---
 
 ## A faire
+
+### La grille d'autoévaluation dans le PDF des consignes, 18 novembre 2026 (inscrit sur consigne de Cowork, lot « Je regarde » d'« Évaluer », sans y toucher)
+
+- [ ] **#1287 – La grille d'autoévaluation, bloc libre des consignes, sort dans le PDF en texte suivi : la mettre en forme, une rangée par critère, des cases à cocher.** Demandé par la consigne du lot (`plans de travail/CONSIGNE-LOT-2026-11-18-je-regarde-evaluer.md`, C.5) : « Sa mise en forme (une rangée par critère, des cases à cocher) n'est pas de ce lot : inscris-la. » Le bloc entre dans le PDF (#499, #500 ; mesuré au banc `je-regarde-evaluer-2026-11-18.spec.js`), tel qu'il est écrit : ses « ☐ » et ses lignes, sans tableau. Matériel : `plans de travail/materiel-evaluer/grille-autoevaluation-strategies-de-lecture.txt`. Rapport : `plans de travail/RAPPORT-2026-11-18-je-regarde-evaluer.md`.
 
 ### L'Aperçu de l'import annonce ce que l'import ne garde pas, 18 novembre 2026 (vu par Grégoire sur l'iPad, aperçu n° 28 ; mesuré par le lot « Je regarde » de « Recevoir », sur consigne de Cowork, 14 h 35, sans y toucher)
 
