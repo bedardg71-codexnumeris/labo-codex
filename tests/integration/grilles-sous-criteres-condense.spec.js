@@ -58,7 +58,8 @@ test.describe('iPad', () => {
 
         // Le critère holistique, sans sous-critère : la section se montre, vide, avec son bouton.
         const holi = carte(page, 1);
-        await expect(holi.locator('.grille-attendu-titre')).toHaveText(['Sous-critères']);
+        // ↻ 18 nov. 2026 (lot descripteurs-grille) : « Ce qui est attendu à chaque niveau » la précède, toujours.
+        await expect(holi.locator('.grille-attendu-titre')).toHaveText(['Ce qui est attendu à chaque niveau', 'Sous-critères']);
         await expect(holi.locator('.grille-sous-critere')).toHaveCount(0);
         await holi.locator('[data-action="ajouterSousCritere"]').tap();
         const premier = holi.locator('.grille-sous-critere input').first();

@@ -3797,9 +3797,11 @@ button.apercu-algo-segment:hover, button.apercu-algo-segment:focus-visible {
 /* Le menu « Selon » (et « Reprendre une de tes collections… », même étiquette) : WebKit ignore la hauteur d'un menu
    natif (mesuré : 23 px) — l'apparence du système retirée, le chevron dessiné, comme les menus de la bibliothèque.
    L'id du conteneur : `.mode-clair .contenu select { background: white }` (0,2,1) emporterait le chevron (vu en capture).
-   ↻ Étape 4a (27 oct.) : les menus « Si [donnée] vaut 0 » de « Note calculée », même règle (mesuré : 23 px aussi). */
+   ↻ Étape 4a (27 oct.) : les menus « Si [donnée] vaut 0 » de « Note calculée », même règle (mesuré : 23 px aussi).
+   ↻ 18 nov. 2026 (lot descripteurs-grille) : le menu « Niveaux de l’échelle » des descripteurs, même règle. */
 #listeCriteres .table-cas-selon select.controle-form,
-#listeCriteres .calc-cas-rangee select.controle-form {
+#listeCriteres .calc-cas-rangee select.controle-form,
+#listeCriteres .grille-attendu-echelle select.controle-form {
     width: auto; max-width: 100%; height: 40px; min-height: 40px; padding: 0 32px 0 12px;
     color: var(--texte-principal); background-color: var(--surface-carte);
     appearance: none; -webkit-appearance: none; -moz-appearance: none;
@@ -27377,6 +27379,7 @@ body.mode-clair {
 .travaux-compteur-pill.annote { background: var(--bleu-clair, #6aacb8); color: #fff; }
 .travaux-compteur-pill.importe { background: var(--turquoise-500, #2da89e); color: #fff; }
 .travaux-compteur-pill.incomplet { background: var(--pastille-attention-fond); color: var(--pastille-attention-texte); }   /* statut incomplet (25 oct. 2026) */
+.travaux-compteur-pill.non-enregistree { background: var(--pastille-attention-fond); color: var(--pastille-attention-texte); }   /* non verrouillée, vue Archivage (16 nov. 2026) */
 
 /* ===============================
    MODALE TRANSFERT FICHIERS
@@ -30059,12 +30062,24 @@ body.mode-clair {
 #listeCriteres .grille-attendu { margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--bordure-claire); display: flex; flex-direction: column; gap: 8px; }
 #listeCriteres .grille-attendu-titre { margin: 0; font-size: 0.85rem; font-weight: 600; color: var(--texte-secondaire); }
 #listeCriteres .grille-attendu-niveaux { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 8px; }
-#listeCriteres .grille-attendu-niveau { padding: 8px 10px; border: 1px solid var(--bordure-claire); border-radius: var(--radius-moyen); min-width: 0; }
+/* ↻ 19 nov. 2026 (décision de Cowork) : plus de cadre, un filet à gauche — la case vit dans la carte du critère,
+   et un cadre y faisait une carte dans une carte (pages-sans-emboitement). */
+#listeCriteres .grille-attendu-niveau { padding: 4px 0 4px 10px; border-left: 2px solid var(--bordure-claire); min-width: 0; }
 #listeCriteres .grille-attendu-niveau strong { display: block; font-size: 0.85rem; margin-bottom: 4px; }
 #listeCriteres .grille-attendu-niveau p { margin: 0; font-size: 0.85rem; line-height: 1.45; color: var(--texte-secondaire); white-space: pre-line; overflow-wrap: anywhere; }
 /* La dissection, lot 13 (19 oct.) : le texte d'un niveau se modifie à sa place. */
 #listeCriteres .grille-attendu-mention { margin: 0; font-size: 0.85rem; color: var(--texte-secondaire); }
-#listeCriteres .grille-attendu-niveau textarea { width: 100%; box-sizing: border-box; resize: vertical; font-size: 0.85rem; line-height: 1.45; }
+/* ↻ 18 nov. 2026 (lot descripteurs-grille) : la case s'agrandit avec son texte (`data-hauteur-auto`, comme le barème) :
+   cinq niveaux côte à côte, en long sur l'iPad, coupaient le texte à trois lignes (vu en capture). */
+#listeCriteres .grille-attendu-niveau textarea { width: 100%; box-sizing: border-box; resize: none; overflow-y: auto; font-size: 0.85rem; line-height: 1.45; }
+/* 18 nov. 2026 (lot descripteurs-grille, grilles.js `rendreDescripteursNiveaux`) : l'échelle dont les niveaux ont
+   leur case — un menu quand le trimestre en a plusieurs —, puis les textes gardés d'une autre échelle : ils sont là,
+   mais hors des niveaux montrés. Variables seulement, mêmes en clair et en sombre.
+   ↻ 19 nov. 2026 (Cowork, même traitement que la case de niveau) : plus de cadre en tirets, une carte dans la carte
+   du critère (pages-sans-emboitement) ; un filet à gauche, en tirets, qui garde le signe « hors des niveaux montrés ». */
+#listeCriteres .grille-attendu-echelle { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; font-size: 0.85rem; color: var(--texte-secondaire); }
+#listeCriteres .grille-attendu-hors { display: flex; flex-direction: column; gap: 6px; padding: 4px 0 4px 10px; border-left: 2px dashed var(--bordure-claire); min-width: 0; }
+#listeCriteres .grille-attendu-hors-titre { margin: 0; font-size: 0.85rem; font-weight: 600; color: var(--texte-secondaire); }
 /* #1120, lot 1 (20 oct.) : le barème d'un critère analytique. ↻ 20 oct. (Grégoire, 13 h 56) : une tranche tient
    sur UNE ligne, comme la rangée du critère — nom, points, texte, marque, corbeille ; le texte, un champ d'une ligne
    qui s'agrandit avec son contenu (`ajusterHauteursAuto`, grilles.js). Colonnes fixes pour les points et la marque :
@@ -30105,6 +30120,8 @@ body.mode-clair {
 @media (pointer: coarse) {
     #listeCriteres .grille-attendu-niveau .controle-form, #listeCriteres .grille-bareme .controle-form, #listeCriteres .grille-sous-critere .controle-form { min-height: 44px; }
     #listeCriteres .grille-bareme .controle-form, #listeCriteres .grille-sous-critere .controle-form { font-size: 16px; }
+    /* 18 nov. 2026 : sous 16 px, Safari de l'iPad agrandit la page au toucher d'une case de niveau. */
+    #listeCriteres .grille-attendu-niveau .controle-form, #listeCriteres .grille-attendu-echelle select.controle-form { font-size: 16px; min-height: 44px; }
 }
 .materiel-lecture { display: flex; flex-direction: column; gap: 14px; min-width: 0; }
 .materiel-lecture h2, .materiel-lecture p { margin: 0; }

@@ -8,6 +8,7 @@
  * Ce que ce banc verrouille :
  *   A — EN CRÉATION, LES MÊMES SECTIONS qu'en modification : « Sous-critères » pour un critère holistique ou
  *       analytique, puis « Barème » pour un analytique ; rien de neuf pour un algorithmique (hors du lot).
+ *       ↻ 18 nov. 2026 : « Ce qui est attendu à chaque niveau » en tête, pour un holistique et un algorithmique.
  *   O — L'ORDRE : le barème SOUS les sous-critères, en création comme en modification.
  *   E — LES GESTES EN CRÉATION n'écrivent RIEN en base (décision E1) ; à « Créer la grille », la grille porte les
  *       sous-critères et les tranches, dans l'ordre ; un critère holistique n'y porte pas de barème.
@@ -152,15 +153,18 @@ describe('#1120 grille neuve · A — en création, les sections de la modificat
         expect(m.carte(0).querySelector('.grille-attendu-titre .primo-aide[data-target="grille-bareme"]')).not.toBeNull();
     });
 
-    it('A.b un critère holistique : « Sous-critères » seul, aucun barème', async () => {
+    // ↻ 18 nov. 2026 (lot descripteurs-grille) : un critère par niveaux montre aussi « Ce qui est attendu à chaque
+    // niveau », en création comme en modification (sa propre preuve : descripteurs-niveaux-grille.test.js).
+    it('A.b un critère holistique : ses descripteurs, puis « Sous-critères », aucun barème', async () => {
         const m = await enCreation('holistique');
-        expect(m.titres(0)).toEqual(['Sous-critères']);
+        expect(m.titres(0)).toEqual(['Ce qui est attendu à chaque niveau', 'Sous-critères']);
         expect(m.carte(0).querySelector('[data-action="ajouterTrancheBareme"]')).toBeNull();
     });
 
-    it('A.c un critère algorithmique : pas la section des autres types ; ses sous-critères, ceux du gabarit, par la cible `temp` (↻ #1131)', async () => {
+    it('A.c un critère algorithmique : ses descripteurs seuls, pas les sous-critères des autres types ; les siens, ceux du gabarit, par la cible `temp` (↻ #1131)', async () => {
         const m = await enCreation('algorithmique');
-        expect(m.carte(0).querySelector('.grille-attendu')).toBeNull();
+        expect(m.titres(0)).toEqual(['Ce qui est attendu à chaque niveau']);
+        expect(m.carte(0).querySelector('.grille-attendu .grille-sous-criteres')).toBeNull();
         expect(m.carte(0).textContent).not.toContain('Les sous-critères se définissent une fois la grille enregistrée.');
         expect(m.carte(0).querySelector('.sous-criteres-conteneur [data-action="ajouterSousCritere"]').dataset.param).toBe('temp');
     });

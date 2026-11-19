@@ -21,6 +21,19 @@
 
     var CHANGELOG = [
         {
+            // 1.250 (19 nov. 2026 : les descripteurs de niveau dans l'éditeur de grilles, les copies non verrouillées
+            // marquées avant l'Export Léa, la bulle 1 de « Découvrir » qui ne bouge plus) — titre et lignes accordés par
+            // Grégoire le 19 nov. 2026 ; la deuxième ligne est la sienne, mot pour mot.
+            version: '1.250',
+            couleur: 'vert',
+            titre: 'Les descripteurs dans l’éditeur de grilles',
+            items: [
+                'Dans Conception › Grilles, tu peux écrire le descripteur de chaque niveau, pour tout critère évalué par niveaux.',
+                'Dans Évaluation › Exporter, une pastille «&nbsp;Non verrouillée&nbsp;» et un cadenas ouvert marquent les copies que l’Export Léa laissera de côté, parce que leur évaluation n’est pas verrouillée.',
+                'Dans le parcours «&nbsp;Découvrir&nbsp;», la première bulle ne bouge plus pendant que les points de la bande s’animent.'
+            ]
+        },
+        {
             // 1.249 (16 nov. 2026 : « Découvrir » seul rouvert, l'interrupteur d'« Apporter mon matériel » éteint à la
             // première arrivée) — les deux lignes proposées par Cowork, accordées par Grégoire le 16 nov. 2026, mot pour
             // mot. Le titre reprend le début de la première ligne : aucun mot n'est ajouté.

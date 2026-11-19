@@ -132,6 +132,8 @@
    · AVANT LE FILET : une bulle plus haute que l'écran utile s'élargit (`parcours-bulle--elargie`, 520 px).
    · AVANT DE COUVRIR CE QU'ELLE ÉVITE : elle s'élargit aussi, si cette forme n'en couvre plus rien (`placerBulle`).
    · L'espace insécable devant « ; : ? ! » (`typographier`), pour toutes les bulles.
+   · UNE CIBLE ANIMÉE (les points de la bande) compte, pour la place de la bulle, par tout son trajet (`trajetDe`, 19 nov.
+     2026) : la bulle ne bouge plus au rythme de l'oscillation ; seules ses flèches suivent la cible.
    · Le triangle du compteur est celui des sections de l'application, à leur taille (css/parcours.css).
 
    Une étape :
@@ -264,6 +266,45 @@
 
     function rectsDe(els) {
         return (els || []).filter(visible).map(function (el) { return el.getBoundingClientRect(); });
+    }
+
+    var ECHANTILLONS_DU_TRAJET = 8;   // un multiple de 4 : les quarts d'un cycle, où `float-vertical` a ses extrêmes
+
+    /**
+     * LA PLACE D'UNE CIBLE ANIMÉE EST TOUT SON TRAJET (19 nov. 2026, la bulle 1 de « Découvrir » sur l'iPad couché).
+     * Les points de la bande oscillent sans arrêt (`float-vertical`). Placée à chaque passage de la sonde d'après leur
+     * rectangle du moment, la bulle sautait d'une place libre à l'autre au rythme des points : deux places qui ne
+     * couvrent rien se départagent par la distance (`vautMieux`), et cette distance oscillait avec eux (mesuré à
+     * 1180 × 656 : x = 217 puis 322, toutes les trois secondes). Pour la PLACE de la bulle, une cible animée vaut
+     * l'union de ses rectangles sur un cycle : l'animation est avancée à chaque huitième de son cycle, lue, puis
+     * rendue à son temps, dans la même tâche (rien ne se peint entre deux). Les FLÈCHES, elles, suivent la cible où
+     * elle est (`rectsDe`). Hors téléphone seulement (voir `placerSelonEtape`). Banc : tests/integration/bulle-fixe-2026-11-19.spec.js.
+     */
+    function trajetDe(el) {
+        var vive = el.getBoundingClientRect();
+        var anims = el.getAnimations ? el.getAnimations().filter(function (a) {
+            if (a.playState !== 'running' || !a.effect || (window.CSSTransition && a instanceof window.CSSTransition)) return false;
+            var d = a.effect.getComputedTiming().duration;
+            return typeof d === 'number' && isFinite(d) && d > 0;
+        }) : [];
+        if (!anims.length) return vive;
+        var t = { left: vive.left, top: vive.top, right: vive.right, bottom: vive.bottom };
+        anims.forEach(function (a) {
+            var temps = a.currentTime, delai = a.effect.getTiming().delay || 0, duree = a.effect.getComputedTiming().duration;
+            for (var k = 0; k < ECHANTILLONS_DU_TRAJET; k++) {
+                a.currentTime = delai + k * duree / ECHANTILLONS_DU_TRAJET;
+                var r = el.getBoundingClientRect();
+                t.left = Math.min(t.left, r.left); t.top = Math.min(t.top, r.top);
+                t.right = Math.max(t.right, r.right); t.bottom = Math.max(t.bottom, r.bottom);
+            }
+            a.currentTime = temps;
+        });
+        return t;
+    }
+
+    /** Ce que la bulle évite, pour choisir sa place : chaque cible animée y vaut tout son trajet (`trajetDe`). */
+    function rectsDePlace(els) {
+        return (els || []).filter(visible).map(trajetDe);
     }
 
     var CONTROLES = 'input, select, textarea';
@@ -2400,6 +2441,9 @@
      */
     function placerSelonEtape(zones, contourEl, vise) {
         var c = visible(contourEl) ? contourEl : null;
+        // ⚠ Sur téléphone, les rectangles DU MOMENT, pas le trajet (19 nov. 2026) : leur union y règle aussi le
+        // défilement de la page (`reglerDefilement`), et le trajet y rendait instable le banc du témoin « Enregistré »
+        // (bulle-sur-telephone, 390 px : 2 rouges sur 5, 6 verts sur 6 sans). Le saut vécu était sur l'iPad.
         var evites = rectsDe(zones.concat(c ? [c] : []));
         if (etat.telephone) placerBulleTelephone(union(evites), c);
         else placerBulleLoin(zones, prioritaires(c));
@@ -2410,7 +2454,7 @@
     function placerBulleLoin(zones, prio) {
         var autres = zones.filter(function (z) { return prio.indexOf(z) === -1; });
         var s = sectionDe(etapeCourante());
-        placerBulle(rectsDe(autres).concat(rectsDe(prio).map(function (r) { return pese(r, POIDS_CONTOUR); })), s ? rectsDe([s.bloc]) : null);
+        placerBulle(rectsDePlace(autres).concat(rectsDePlace(prio).map(function (r) { return pese(r, POIDS_CONTOUR); })), s ? rectsDe([s.bloc]) : null);
     }
 
     /** Ce que la bulle ne couvre que faute de mieux : le contour, ce que l'étape déclare dans `aussiEviter`, le nom de sa section. */
