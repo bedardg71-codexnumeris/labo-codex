@@ -51,7 +51,11 @@ test('bureau (1440) : bande du haut de 84 px, logo de 60, mots centrés sur la p
         expect(m.graisse).toBe('600');
         expect(m.icones).toBe(0);
     }
-    // L'actif : blanc, souligné de 2 px dans l'orange de l'aide
+    // L'actif : blanc, souligné de 2 px dans l'orange de l'aide.
+    // ↻ 19 nov. 2026 : la couleur d'un onglet a une transition de 0,15 s (styles.css) ; lue aussitôt après
+    // `afficherSection`, elle tombait entre le gris des inactifs et le blanc (rouge 5 sur 5 seul, aussi sur
+    // 8449f25cc). On attend la couleur finale ; elle reste exigée blanche.
+    await expect.poll(() => page.evaluate(() => getComputedStyle(document.querySelector('.navigation-principale button.actif')).color), { timeout: 2000 }).toBe('rgb(255, 255, 255)');
     const actif = await page.evaluate(() => {
         const b = document.querySelector('.navigation-principale button.actif');
         const a = getComputedStyle(b, '::after');
