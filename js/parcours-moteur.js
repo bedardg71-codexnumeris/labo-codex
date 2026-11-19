@@ -273,7 +273,7 @@
      * 1180 × 656 : x = 217 puis 322, toutes les trois secondes). Pour la PLACE de la bulle, une cible animée vaut
      * l'union de ses rectangles sur un cycle : l'animation est avancée à chaque huitième de son cycle, lue, puis
      * rendue à son temps, dans la même tâche (rien ne se peint entre deux). Les FLÈCHES, elles, suivent la cible où
-     * elle est (`rectsDe`). Banc : tests/integration/bulle-fixe-2026-11-19.spec.js.
+     * elle est (`rectsDe`). Hors téléphone seulement (voir `placerSelonEtape`). Banc : tests/integration/bulle-fixe-2026-11-19.spec.js.
      */
     function trajetDe(el) {
         var vive = el.getBoundingClientRect();
@@ -2406,7 +2406,10 @@
      */
     function placerSelonEtape(zones, contourEl, vise) {
         var c = visible(contourEl) ? contourEl : null;
-        var evites = rectsDePlace(zones.concat(c ? [c] : []));
+        // ⚠ Sur téléphone, les rectangles DU MOMENT, pas le trajet (19 nov. 2026) : leur union y règle aussi le
+        // défilement de la page (`reglerDefilement`), et le trajet y rendait instable le banc du témoin « Enregistré »
+        // (bulle-sur-telephone, 390 px : 2 rouges sur 5, 6 verts sur 6 sans). Le saut vécu était sur l'iPad.
+        var evites = rectsDe(zones.concat(c ? [c] : []));
         if (etat.telephone) placerBulleTelephone(union(evites), c);
         else placerBulleLoin(zones, prioritaires(c));
         dessinerFleches(zones, contourEl, vise);
