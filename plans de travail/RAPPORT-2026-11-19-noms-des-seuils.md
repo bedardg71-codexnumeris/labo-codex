@@ -124,6 +124,52 @@ maîtrise », et la case du niveau qui porte un seuil le dit dans l'éditeur de 
 Décision de Grégoire (17 h 38) : les descripteurs restent dans la grille ; il aura peut-être une grille par
 production (mêmes critères, descripteurs propres à la tâche). Deux mesures demandées par Cowork, sans correction.
 
+### (a) Deux grilles aux mêmes critères : une série, ou deux ? — LU AU CODE
+
+Inventaire fait par un agent de lecture, points porteurs revérifiés au code (les lignes citées). Ce qui suit est LU,
+sauf ce qui est marqué inférence.
+
+**Le rapprochement se fait par le NOM du critère, jamais par son identifiant.** Chaque évaluation garde, par critère
+noté, un instantané `{ critereId, critereNom, niveauSelectionne, … }` pris dans la grille au moment d'enregistrer
+(`evaluation-sauvegarde.js`, `_collecterCriteresSauv`) ; tout ce qui cumule lit `critereNom`. Aucun lecteur vivant
+ne regroupe par `critereId` ; aucun par position, code ou palier SOLO. Deux manières de comparer les noms :
+
+1. **Nom normalisé, rapporté à LA grille de référence du dépistage** (une préférence unique,
+   `grilleReferenceDepistage`) : minuscules, sans accents, sans espaces (`_normaliserNomCritere`,
+   `profil-etudiant-calculs.js`), puis égalité **ou préfixe** (`trouverCritereDepistage` : « Structure » rejoindrait
+   « Structure du texte »). Lecteurs : les moyennes par critère du profil, forces et défis, défi principal, pattern,
+   IPB (suivi des fondations), carte RàI et « critère de fondation », les directions et « progrès » du profil (égalité
+   normalisée, sans préfixe), les « défis communs du sous-groupe » et l'avant/après des interventions, l'aperçu du
+   tableau de bord, l'export de recherche (`trimestres.js`, avec sa propre normalisation, espaces → `_`).
+   ⮕ **Une seule série** pour deux grilles dont les critères portent le même nom, **à condition que ce nom existe dans
+   la grille de référence du dépistage** : un critère qui n'y est pas est ignoré (avertissement en console seulement).
+2. **Nom brut, à l'octet près** : le bilan de la rétroaction, « Points récurrents… depuis N productions »
+   (`synthese-retroaction-data.js`, `lignesRecurrentes`, et son jumeau à l'écran `evaluation-retroaction.js`), « Tu as
+   progressé en… » / « à consolider » (copie précédente seulement) ; le graphique « Critères » du profil
+   (`graphiques-progression.js`, `obtenirDonneesCriteres`) et celui des trajectoires du groupe.
+   ⮕ **Une seule série si les deux noms sont identiques à l'octet** ; **deux séries** dès qu'ils diffèrent d'une
+   majuscule, d'un accent ou d'une espace. Le bilan lit toutes les copies antérieures du trimestre et du cours, quelle
+   que soit leur grille.
+
+**Ne cumulent pas par critère** : le tableau de notation (ses copies n'ont pas de critères), les indices A, C et P (P
+vient de la note de chaque copie), « Présentement » et « Ta force » (copie courante seulement), le signalement de
+dépistage (par critère dans la grille de la copie, sans série). **D'un trimestre à l'autre : rien ne compare des
+critères** ; tout se lit dans le trimestre actif, et le registre longitudinal garde une tuile par copie.
+
+**Où deux grilles feraient deux séries** : (i) le bilan de la rétroaction (« Points récurrents », « Tu as progressé
+en ») et les deux graphiques, si les noms ne sont pas identiques à l'octet ; (ii) `identifierDefiSpecifique`, seule
+clé par identifiant (`critereId || critereNom`), mais elle n'a plus d'appelant (retirée le 11 sept., #824). Et une
+absence plutôt qu'une série : tout critère dont le nom manque à la grille de référence du dépistage disparaît du
+profil, du dépistage et des interventions.
+
+**Ce qu'il faudrait pour « une grille par production »** (non fait, consigne) : en l'état, rien d'obligatoire, si
+Grégoire garde **les mêmes noms, au caractère près**, dans toutes ses grilles, et si **sa grille de référence du
+dépistage porte ces noms**. Pour que ce ne soit plus une discipline à tenir : une seule règle de rapprochement pour tous
+les lecteurs (le nom normalisé du profil, appliqué aussi au bilan et aux graphiques) ; et, s'il veut que le lien
+survive à un renommage, une identité de critère stable entre grilles (la duplication garde déjà les identifiants,
+mais rien ne les lit). Deux nuances à trancher alors : le rapprochement par préfixe peut fondre deux critères voisins ;
+et un critère renommé dans la grille ne renomme pas les copies déjà notées (`critereNom` est un instantané).
+
 ### (b) Dupliquer une grille — MESURÉ, et un défaut de données
 
 **Le geste existe**, à deux endroits atteignables : le bouton « Dupliquer » de l'éditeur d'une grille
