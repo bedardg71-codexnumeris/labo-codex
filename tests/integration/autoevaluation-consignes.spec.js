@@ -75,7 +75,7 @@ async function poserReperes(page) {
 }
 
 const TEXTE_REPERES = 'Grille d\'autoévaluation : dans Conception › Échelles de performance, indique pour cette échelle '
-    + '« Suffisant à partir de » et « Maîtrisé à partir de ».';
+    + 'le « Seuil minimal de réussite » et le « Seuil de maîtrise ».';   // ↻ 19 nov., soir : noms des seuils
 
 async function fermerApercu(page) {
     await page.locator('#modalApercuPDF .modal-fermer').tap();
@@ -250,7 +250,7 @@ async function scenario(page) {
     await expect(feuille.locator('[data-autoevaluation]')).toHaveCount(1);
     await expect(feuille.locator('h3')).toHaveText(TITRE_PAGE);
     await expect(feuille.locator('[data-introduction-autoeval]')).toHaveText('Avant de remettre ton travail, coche ce que tu trouves dans ta copie. '
-        + `Le seuil de réussite correspond au niveau D de l'échelle${NBSP}; le seuil de maîtrise, au niveau M.`);
+        + `Le seuil minimal de réussite correspond au niveau D de l'échelle${NBSP}; le seuil de maîtrise, au niveau M.`);   // ↻ 19 nov., soir
     const criteres = feuille.locator('[data-critere-autoeval]');
     await expect(criteres).toHaveCount(2);
     for (let i = 0; i < CRITERES.length; i++) {

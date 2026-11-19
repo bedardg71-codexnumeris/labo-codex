@@ -251,7 +251,7 @@ describe('autoévaluation · P — la page, aux deux repères de l’échelle', 
         const page = P.pageAutoevaluation(grille(), IDME, PRODUCTION);
         expect(page.titre).toBe(`Appliquer des stratégies de lecture variées${NBSP}: grille d'autoévaluation`);
         expect(page.introduction).toBe('Avant de remettre ton travail, coche ce que tu trouves dans ta copie. '
-            + `Le seuil de réussite correspond au niveau D de l'échelle${NBSP}; le seuil de maîtrise, au niveau M.`);
+            + `Le seuil minimal de réussite correspond au niveau D de l'échelle${NBSP}; le seuil de maîtrise, au niveau M.`);   // ↻ 19 nov., soir : noms des seuils
         expect(page.criteres).toEqual([
             { nom: 'Repérage des stratégies', question: Q_1, lignes: [
                 { repere: 'reussite', etiquette: `Réussite${NBSP}:`, texte: T_D1 },
@@ -573,7 +573,8 @@ describe('autoévaluation · R — l’aperçu dit pourquoi la page manque', () 
         const m = html.match(/<span id="apercuPDF-autoevaluation-reperes" class="u-hide">([^<]*)<\/span>/);
         expect(m, 'le texte vit à côté de la case, caché d’abord').not.toBeNull();
         const texte = new JSDOM(`<p>${m[1]}</p>`).window.document.querySelector('p').textContent.replace(/ /g, ' ');
-        expect(texte).toBe('Grille d\'autoévaluation : dans Conception › Échelles de performance, indique pour cette échelle « Suffisant à partir de » et « Maîtrisé à partir de ».');
+        // ↻ 19 nov., soir (noms des seuils, point 4).
+        expect(texte).toBe('Grille d\'autoévaluation : dans Conception › Échelles de performance, indique pour cette échelle le « Seuil minimal de réussite » et le « Seuil de maîtrise ».');
         const i = html.indexOf('id="apercuPDF-case-autoevaluation"');
         expect(html.indexOf('id="apercuPDF-autoevaluation-reperes"')).toBeGreaterThan(i);
     });

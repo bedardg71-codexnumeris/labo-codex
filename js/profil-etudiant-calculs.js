@@ -2053,9 +2053,11 @@ const ORIGINE_SANS_ECHELLE_LUE = {
  */
 function phraseDuSeuilDuGroupe(r) {
     const groupe = `${r.effectif} ${window.pluriel(r.effectif, 'étudiant·e', 'étudiant·es')} dans ce groupe.`;
+    // ↻ 19 nov. 2026 (noms des seuils, décision de Grégoire) : le « repère « Suffisant à partir de » » s'appelle désormais
+    // le seuil minimal de réussite, le mot même de la phrase ; il suffit de dire d'où il vient.
     const origine = r.ligneVientDuRepere
-        ? 'le repère «\u00a0Suffisant à partir de\u00a0» de ton échelle'
-        : (ORIGINE_SANS_ECHELLE_LUE[r.raisonSansEchelle] || 'la note de passage (ton échelle n\'a pas de repère «\u00a0Suffisant à partir de\u00a0»)');
+        ? 'celui de ton échelle'
+        : (ORIGINE_SANS_ECHELLE_LUE[r.raisonSansEchelle] || 'la note de passage (ton échelle n\'a pas de seuil minimal de réussite)');
     return `${groupe} Seuil minimal de réussite\u00a0: ${formaterPourcentage(r.ligne)}, ${origine}.`;
 }
 

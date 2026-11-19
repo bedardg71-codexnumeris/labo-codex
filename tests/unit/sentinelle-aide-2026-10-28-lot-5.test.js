@@ -123,7 +123,7 @@ describe('#1152, lot 5 — chaque texte validé paraît mot pour mot à sa place
         // des repères de l'échelle. La nouvelle phrase est soumise à Grégoire avec le lot.
         const seuilDAvant = /le prochain seuil \(64\s*%\s*ou\s*75\s*%\)/;
         expect(citations(16)[0]).toMatch(seuilDAvant);
-        contient('js/accompagnement-contenu-popup.js', citations(16)[0].replace(seuilDAvant, 'le prochain repère de ton échelle'));
+        contient('js/accompagnement-contenu-popup.js', citations(16)[0].replace(seuilDAvant, 'le prochain seuil de ton échelle'));   // ↻ 19 nov. 2026 : noms des seuils (décision de Grégoire)
         contient('js/accompagnement-contenu-popup.js', 'Coche les étudiant·es concerné·es');
     });
 

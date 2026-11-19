@@ -218,7 +218,7 @@ test('#583 · à l\'écran : un repère orphelin est dit dans la prévisualisati
     console.log('ÉCRAN →', JSON.stringify(r));
 
     expect(r.statut1).toBe('importe');
-    expect(r.texteAvert).toBe('Échelle « IDME orpheline » : le repère « Maîtrisé à partir de » désigne le niveau « X », qui n\'existe pas dans cette échelle. Ce repère n\'est pas importé ; tu pourras le poser dans l\'éditeur d\'échelle.');
+    expect(r.texteAvert).toBe('Échelle « IDME orpheline » : le « Seuil de maîtrise » désigne le niveau « X », qui n\'existe pas dans cette échelle. Ce seuil n\'est pas importé ; tu pourras le poser dans l\'éditeur d\'échelle.');   // ↻ 19 nov. 2026 : noms des seuils
     expect(r.classeAvert).toBe('alerte alerte-attention');
     expect(r.recue).toEqual({ s: 'I', m: undefined, a: false });
 

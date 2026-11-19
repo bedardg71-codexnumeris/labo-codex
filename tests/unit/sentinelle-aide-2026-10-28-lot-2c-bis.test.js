@@ -194,7 +194,7 @@ describe('#1152 lot 2c bis · ce que les entrées affirment, lu dans le code', (
         // Aucun champ de l'écran ni des préférences n'écrit de seuil de performance : les repères se posent sur l'échelle.
         expect(html + lire('js', 'preferences-v2.js')).not.toMatch(/idme\.(insuffisant|developpement)|seuil-idme/);
         // Lot 3 des seuils : les textes validés le 30 oct. ; la garde du modèle lui-même vit dans sentinelle-niveau-au-critere-2026-10-30.test.js.
-        expect(texteDe('rai')).toContain('Ce seuil est le repère « Suffisant à partir de » de l\'échelle de tes copies');
+        expect(texteDe('rai')).toContain('Ce seuil est le « Seuil minimal de réussite » de l\'échelle de tes copies');   // ↻ 19 nov. 2026 : noms des seuils (décision de Grégoire)
         expect(texteDe('rai')).not.toMatch(/\b(64|75) %/);
         // Retouche 2 du lot 2 (constat 1) : la moitié « texte » de cette sentinelle gardait la règle retirée.
         expect(texteDe('patterns')).toContain('Les autres nomment le besoin sans fixer le niveau (voir la carte juste au-dessus).');
@@ -223,10 +223,10 @@ describe('#1152 lot 2c bis · ce que les entrées affirment, lu dans le code', (
         expect(fn).toMatch(/bornes\.maitrise !== null && performancePAN3 < bornes\.maitrise && aUnDefi\) \{\s*return 'Difficulté émergente';/);
         expect(fn).toMatch(/if \(aUnDefi\) \{\s*return 'Défi spécifique';/);
         const t = texteDe('patterns');
-        expect(t).toContain('Difficulté persistante : une performance sous le repère de suffisance (sans ce repère, sous la note de passage)');
-        expect(t).toContain('Difficulté émergente : sous le repère de maîtrise, avec au moins un défi');
-        expect(t).toContain('Défi spécifique : au repère de maîtrise ou au-dessus, avec au moins un défi');
-        expect(t).toContain('Stable : aucun défi, et une performance au repère de suffisance ou au-dessus');
+        expect(t).toContain('Difficulté persistante : une performance sous le seuil minimal de réussite (sans ce seuil, sous la note de passage)');   // ↻ 19 nov. 2026 : noms des seuils (décision de Grégoire)
+        expect(t).toContain('Difficulté émergente : sous le seuil de maîtrise, avec au moins un défi');   // ↻ 19 nov. 2026 : noms des seuils (décision de Grégoire)
+        expect(t).toContain('Défi spécifique : au seuil de maîtrise ou au-dessus, avec au moins un défi');   // ↻ 19 nov. 2026 : noms des seuils (décision de Grégoire)
+        expect(t).toContain('Stable : aucun défi, et une performance au seuil minimal de réussite ou au-dessus');   // ↻ 19 nov. 2026 : noms des seuils (décision de Grégoire)
         expect(t).not.toMatch(/Action :|RàI et mobilisation/);
     });
 
@@ -291,7 +291,7 @@ describe('#1152 lot 2c bis · ce que les entrées affirment, lu dans le code', (
         expect(tdb).toContain('label: \'A ou C < \' + formaterPourcentage(window.borneBasseAssiduiteCompletion())');
         const t = texteDe('tableau-bord');
         expect(t).toContain('Les filtres sur P, sur A ou C, « Suivi » et « RàI 2-3 » se combinent');
-        expect(t).toContain('Le filtre sur P part du repère « Suffisant à partir de » de ton échelle, ou de la note de passage sans repère ; celui sur A ou C, du palier le plus bas réglé dans Labo → Observation.');   // ↻ Lot 3 « Les pages sans doublons » (7 nov. 2026) : l'Aide nomme les onglets par leur libellé court.
+        expect(t).toContain('Le filtre sur P part du « Seuil minimal de réussite » de ton échelle, ou de la note de passage sans ce seuil ; celui sur A ou C, du palier le plus bas réglé dans Labo → Observation.');   // ↻ Lot 3 « Les pages sans doublons » (7 nov. 2026) : l'Aide nomme les onglets par leur libellé court.
         expect(t).toContain('Navigation : Suivi → Groupe');
         // Les mots de Grégoire (28 oct., 12 h 07) ⟷ le tri de `appliquerFiltres` : sans filtre, l'ordre alphabétique ; avec
         // filtres, un score qui s'ADDITIONNE d'un filtre à l'autre (« cumulent ») et range le plus grand en tête.

@@ -30065,6 +30065,13 @@ body.mode-clair {
    et un cadre y faisait une carte dans une carte (pages-sans-emboitement). */
 #listeCriteres .grille-attendu-niveau { padding: 4px 0 4px 10px; border-left: 2px solid var(--bordure-claire); min-width: 0; }
 #listeCriteres .grille-attendu-niveau strong { display: block; font-size: 0.85rem; margin-bottom: 4px; }
+/* 19 nov. 2026 (noms des seuils, point 2) : le nom d'un niveau qui porte un seuil de l'échelle, et son étiquette à
+   côté (« Seuil minimal de réussite », « Seuil de maîtrise »). Sobre, dans le ton du filet de la case : un filet de
+   2 px, du texte secondaire. Elle se lit, ne se règle pas. Elle passe sous le nom quand la case est étroite, sans
+   élargir la rangée (#1294). Variables seulement, mêmes en clair et en sombre. */
+#listeCriteres .grille-attendu-niveau-entete { display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px 8px; margin-bottom: 4px; min-width: 0; }
+#listeCriteres .grille-attendu-niveau-entete strong { margin-bottom: 0; }
+#listeCriteres .grille-attendu-seuil { font-size: 0.75rem; font-weight: 600; line-height: 1.3; color: var(--texte-secondaire); padding-left: 6px; border-left: 2px solid var(--bordure-moyenne); overflow-wrap: anywhere; }
 #listeCriteres .grille-attendu-niveau p { margin: 0; font-size: 0.85rem; line-height: 1.45; color: var(--texte-secondaire); white-space: pre-line; overflow-wrap: anywhere; }
 /* La dissection, lot 13 (19 oct.) : le texte d'un niveau se modifie à sa place. */
 #listeCriteres .grille-attendu-mention { margin: 0; font-size: 0.85rem; color: var(--texte-secondaire); }

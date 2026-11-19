@@ -1976,7 +1976,7 @@ function echelleNouvelleTampon() {
  * transporte les repères, après les avoir revérifiés contre les niveaux finaux.
  */
 function modifierRepereTemp(champ, valeur) {
-    if (!REPERES_ECHELLE[champ]) return { refuse: 'Repère inconnu.' };
+    if (!REPERES_ECHELLE[champ]) return { refuse: 'Seuil inconnu.' };
     if (!window._reperesNouvelleEchelle) window._reperesNouvelleEchelle = {};
 
     const code = (valeur == null) ? '' : String(valeur).trim().toUpperCase();
@@ -2402,7 +2402,8 @@ function etapesChaineEchelle(echelle, productions) {
               : couverture.etat === 'vide' ? 'à poser'
               : couverture.etat + ' à ' + formaterPourcentage(couverture.a),
           ton: (couverture.etat === 'trou' || couverture.etat === 'chevauchement') ? 'attention' : '' },
-        { id: 'reperes', libelle: 'Repères', reglee: reperes,
+        // ↻ 19 nov. 2026 (noms des seuils) : l'étape s'appelait « Repères ».
+        { id: 'reperes', libelle: 'Seuils', reglee: reperes,
           info: reperes ? e.seuilSuffisance + ' · ' + e.seuilMaitrise : 'à poser' },
         { id: 'production', libelle: 'Production', arrivee: true, reglee: nbProd > 0,
           info: nbProd === 0 ? 'aucune' : nbProd + ' prod.' }
@@ -2475,7 +2476,7 @@ function apercuNiveauxEchelleHtml(echelle) {
 }
 
 /**
- * Le bloc « Repères de maîtrise » — deux listes, sous les niveaux.
+ * Le bloc « Seuils de réussite et de maîtrise » (« Repères de maîtrise » avant le 19 nov. 2026) — deux listes, sous les niveaux.
  *
  * ⮕ #555. Il vit SOUS le tableau parce qu'il désigne des niveaux qui doivent
  * déjà exister : le proposer au-dessus reviendrait à demander un choix dans une
@@ -2503,9 +2504,9 @@ function blocReperesEchelle(echelle, options) {
 
     return `
         <div class="carte-white-border" style="margin-top: 15px; padding: 15px;">
-            <h4 class="titre-bleu-mb-15">Repères de maîtrise</h4>
+            <h4 class="titre-bleu-mb-15">${echapperHtml(TITRE_SEUILS_ECHELLE)}</h4>
             <p class="echelle-texte-detail" style="margin-bottom: 12px;">
-                Ces deux repères disent à l'application où commence l'apprentissage
+                Ces deux seuils disent à l'application où commence l'apprentissage
                 suffisant, et où il est acquis. Sans eux, elle ne peut pas savoir
                 quels critères présenter à l'élève comme des priorités.
                 Les poser sur le même niveau revient à n'en avoir qu'un.
@@ -2740,11 +2741,18 @@ function refusChampNiveau(champ, valeur) {
    lecteurs devront le DIRE plutôt que de trancher (`feedback-zero-fallback-arbitraire`).
    ===================================================================== */
 
-/** Les deux champs de repère, et leur libellé à l'écran. */
+/**
+ * Les deux champs de repère, et leur libellé à l'écran.
+ * ↻ 19 nov. 2026 (décision de Grégoire, 17 h 20 à 17 h 24 ; consigne `CONSIGNE-LOT-2026-11-19-noms-des-seuils.md`) :
+ * « Suffisant à partir de » devient « Seuil minimal de réussite », « Maîtrisé à partir de » devient « Seuil de
+ * maîtrise ». Les clés ne changent pas (aucune migration) ; seuls les mots qu'une personne lit.
+ */
 const REPERES_ECHELLE = {
-    seuilSuffisance: 'Suffisant à partir de',
-    seuilMaitrise:   'Maîtrisé à partir de'
+    seuilSuffisance: 'Seuil minimal de réussite',
+    seuilMaitrise:   'Seuil de maîtrise'
 };
+/** Le titre du bloc des deux seuils (« Repères de maîtrise » avant le 19 nov. 2026), une seule source : le bloc, le refus. */
+const TITRE_SEUILS_ECHELLE = 'Seuils de réussite et de maîtrise';
 
 /**
  * Les niveaux d'une échelle, rangés du plus faible au plus fort.
@@ -2770,7 +2778,7 @@ function niveauxRangesDeLEchelle(echelle) {
  * ⚠ Le vide N'EST PAS un refus : retirer un repère est un geste légitime.
  */
 function refusRepereEchelle(echelle, champ, code) {
-    if (!REPERES_ECHELLE[champ]) return 'Repère inconnu.';
+    if (!REPERES_ECHELLE[champ]) return 'Seuil inconnu.';
     if (code == null || String(code).trim() === '') return null;
 
     const cible = String(code).trim().toUpperCase();
@@ -2792,7 +2800,8 @@ function refusRepereEchelle(echelle, champ, code) {
     const rangSuffisance = (champ === 'seuilSuffisance') ? vise.rang : autre.rang;
     const rangMaitrise   = (champ === 'seuilSuffisance') ? autre.rang : vise.rang;
     if (rangSuffisance > rangMaitrise) {
-        return 'Le seuil de suffisance ne peut pas être plus haut que le seuil de maîtrise.';
+        // ↻ 19 nov. 2026 : « seuil de suffisance » devient le nom affiché, « seuil minimal de réussite ».
+        return 'Le seuil minimal de réussite ne peut pas être plus haut que le seuil de maîtrise.';
     }
     return null;
 }
@@ -2826,7 +2835,7 @@ async function modifierRepereEchelle(echelleId, champ, valeur) {
  * @returns {Promise<{ok: true, echelle: Object} | {refuse: string|null}>}
  */
 async function ecrireRepereEchelle(echelleId, champ, valeur) {
-    if (!REPERES_ECHELLE[champ]) return { refuse: 'Repère inconnu.' };
+    if (!REPERES_ECHELLE[champ]) return { refuse: 'Seuil inconnu.' };
 
     const code = (valeur == null) ? '' : String(valeur).trim().toUpperCase();
     let refus = null;
@@ -3616,7 +3625,7 @@ async function sauvegarderEchelleComplete() {
         // pas en base en silence. Le refus se dit, et l'enregistrement attend.
         const transport = reperesNouvelleEchellePourEnregistrement();
         if (transport.refuse) {
-            alert('Repères de maîtrise — ' + transport.refuse);
+            alert(TITRE_SEUILS_ECHELLE + ' — ' + transport.refuse);   // ↻ 19 nov. 2026 : le titre du bloc
             return;
         }
 
@@ -3864,6 +3873,7 @@ window.modifierRepereTemp = modifierRepereTemp;                              // 
 window.reperesNouvelleEchellePourEnregistrement = reperesNouvelleEchellePourEnregistrement; // #555 lot 2 (e) — testabilité
 window.apercuNiveauxEchelleHtml = apercuNiveauxEchelleHtml;                  // #555 lot 2 (e) — testabilité
 window.modifierRepereEchelle = modifierRepereEchelle;                        // #555
+window.REPERES_ECHELLE = REPERES_ECHELLE;                                    // 19 nov. 2026 : les noms des seuils, une source (étiquettes de l'éditeur de grilles)
 window.ecrireRepereEchelle = ecrireRepereEchelle;                            // #577 — l'assistant écrit sans redessiner l'éditeur
 // 🔧 #625 / M11 (31 août 2026) : le second `window.marquerChampRefuseEchelle` vivait
 // ici (doublon exact de l'export #524, ~230 lignes plus haut). Retiré. Son commentaire

@@ -1647,14 +1647,14 @@ function genererReperesEchelle(champ) {
 
     const renvoi = 'Conception → Échelles de performance';
     if (typeof window.blocReperesEchelle !== 'function') {
-        return genererInfo({ texte: `Les repères de maîtrise de cette échelle se posent dans ${renvoi}.` });
+        return genererInfo({ texte: `Les seuils de réussite et de maîtrise de cette échelle se posent dans ${renvoi}.` });
     }
 
     const bloc = window.blocReperesEchelle(echelle, { handler: 'wizardV2ModifierRepereEchelle' });
     if (!bloc) {
         return genererInfo({
             variante: 'attention',
-            texte: `L'ordre des niveaux de cette échelle n'est pas lisible : ses repères de maîtrise se posent dans ${renvoi}, une fois chaque niveau doté d'un code et d'une borne « Min ».`
+            texte: `L'ordre des niveaux de cette échelle n'est pas lisible : ses seuils de réussite et de maîtrise se posent dans ${renvoi}, une fois chaque niveau doté d'un code et d'une borne « Min ».`
         });
     }
 
@@ -1662,7 +1662,7 @@ function genererReperesEchelle(champ) {
     const avertissement = manque
         ? genererInfo({
             variante: 'attention',
-            texte: 'Sans ces deux repères, la rétroaction remise à l\'étudiant·e ne peut ni nommer ses priorités ni dire ce qui est acquis. Tu peux les poser ici, ou plus tard dans ' + renvoi + '.'
+            texte: 'Sans ces deux seuils, la rétroaction remise à l\'étudiant·e ne peut ni nommer ses priorités ni dire ce qui est acquis. Tu peux les poser ici, ou plus tard dans ' + renvoi + '.'
         })
         : '';
     const apercu = (typeof window.apercuNiveauxEchelleHtml === 'function')
@@ -2005,8 +2005,9 @@ function genererRecapitulatif() {
             if (echelle) {
                 const posees = echelle.seuilSuffisance && echelle.seuilMaitrise;
                 html += posees
-                    ? `<p><strong>Repères de maîtrise\u00a0:</strong> suffisant à partir de ${echapperHtml(echelle.seuilSuffisance)}, maîtrisé à partir de ${echapperHtml(echelle.seuilMaitrise)}</p>`
-                    : '<p><strong>Repères de maîtrise\u00a0:</strong> non posés — la rétroaction ne pourra ni nommer les priorités ni dire ce qui est acquis.</p>';
+                    // ↻ 19 nov. 2026 (noms des seuils) : le titre et les deux noms de l'écran de l'échelle.
+                    ? `<p><strong>Seuils de réussite et de maîtrise\u00a0:</strong> seuil minimal de réussite ${echapperHtml(echelle.seuilSuffisance)}, seuil de maîtrise ${echapperHtml(echelle.seuilMaitrise)}</p>`
+                    : '<p><strong>Seuils de réussite et de maîtrise\u00a0:</strong> non posés — la rétroaction ne pourra ni nommer les priorités ni dire ce qui est acquis.</p>';
             }
         }
         if (r.grilleId) {

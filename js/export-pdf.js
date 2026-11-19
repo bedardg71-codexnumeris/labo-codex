@@ -1771,8 +1771,9 @@ function autoevaluationSansReperes(grille, echelle, production) {
  */
 const TEXTES_AUTOEVALUATION = {
     titre: (nom) => `${nom} : grille d'autoévaluation`,
+    // ↻ 19 nov. 2026, soir (noms des seuils, point 3) : « Le seuil de réussite » devient « Le seuil minimal de réussite ».
     introduction: (codeReussite, codeMaitrise) => 'Avant de remettre ton travail, coche ce que tu trouves dans ta copie. '
-        + `Le seuil de réussite correspond au niveau ${codeReussite} de l'échelle ; le seuil de maîtrise, au niveau ${codeMaitrise}.`,
+        + `Le seuil minimal de réussite correspond au niveau ${codeReussite} de l'échelle ; le seuil de maîtrise, au niveau ${codeMaitrise}.`,
     reussite: 'Réussite :',
     maitrise: 'Maîtrise :',
     pourVerifier: 'Pour vérifier :'

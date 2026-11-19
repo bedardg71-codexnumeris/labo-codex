@@ -315,14 +315,14 @@ describe('la ligne d\'en-tête du réglage : d\'où vient le seuil', () => {
 
     it('avec le repère de l\'échelle : 65 %, et le repère nommé', () => {
         expect(ligne(banc([{ P: 90, copies: [90] }, { P: 80, copies: [80] }])))
-            .toBe('2 étudiant·es dans ce groupe. Seuil minimal de réussite : 65 %, le repère « Suffisant à partir de » de ton échelle.');
+            .toBe('2 étudiant·es dans ce groupe. Seuil minimal de réussite : 65 %, celui de ton échelle.');   // ↻ 19 nov. 2026 : noms des seuils (décision de Grégoire)
     });
 
     it('sans repère : 60 %, la note de passage', () => {
         const b = banc([{ P: 90, copies: [90] }, { P: 80, copies: [80] }], { echelle: SANS_REPERE });
         expect(b.win.ceQueTesSeuilsDonnent().ligne).toBe(60);
         expect(b.win.ceQueTesSeuilsDonnent().ligneVientDuRepere).toBe(false);
-        expect(ligne(b)).toBe('2 étudiant·es dans ce groupe. Seuil minimal de réussite : 60 %, la note de passage (ton échelle n\'a pas de repère « Suffisant à partir de »).');
+        expect(ligne(b)).toBe('2 étudiant·es dans ce groupe. Seuil minimal de réussite : 60 %, la note de passage (ton échelle n\'a pas de seuil minimal de réussite).');   // ↻ 19 nov. 2026 : noms des seuils (décision de Grégoire)
     });
 
     it('sans repère, au singulier', () => {
