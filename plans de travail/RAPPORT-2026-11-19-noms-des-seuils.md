@@ -118,3 +118,49 @@ maîtrise », et la case du niveau qui porte un seuil le dit dans l'éditeur de 
 
 `plans de travail/captures-2026-11-19-noms-des-seuils/` : `etiquettes-*` (D et M) et `deux-seuils-meme-niveau-*`, à
 1 180 × 820, 820 × 1 180 et 390 × 844 (téléphone), sombre et clair (Chromium).
+
+## Complément du 19 nov., 17 h 40 — deux mesures (rien codé)
+
+Décision de Grégoire (17 h 38) : les descripteurs restent dans la grille ; il aura peut-être une grille par
+production (mêmes critères, descripteurs propres à la tâche). Deux mesures demandées par Cowork, sans correction.
+
+### (b) Dupliquer une grille — MESURÉ, et un défaut de données
+
+**Le geste existe**, à deux endroits atteignables : le bouton « Dupliquer » de l'éditeur d'une grille
+(`#btnDupliquerGrille` → `dupliquerGrilleActive` → `dupliquerGrilleDepuisSidebar`, `js/grilles.js`) et « Dupliquer »
+dans la bibliothèque des grilles (`dupliquerGrilleBibliotheque` → `BibliothequeUI.dupliquerVersBibliotheque`). Un
+troisième, « Dupliquer pour créer ma grille » sur une grille de démonstration (`dupliquerEtEditerGrille` →
+`forkerItem`), fait un clone profond. Un quatrième, `dupliquerGrille` (identifiants de critères neufs), n'est rendu que
+dans des conteneurs cachés (`vueGrillesCriteres`, « Conteneurs cachés pour compatibilité », et un `#listeGrilles` qui
+n'existe plus) : il n'est pas atteignable à l'écran.
+
+**Ce que la copie garde** (mesuré au navigateur, Chromium, les deux chemins atteignables) : une grille neuve
+(`GRILLE_…`, nom « … (copie) »), ses critères **avec leurs identifiants d'origine** (`CR_…` identiques à la source),
+leur type, leur pondération, leurs descripteurs (`echelleId` et `parNiveau`) et leur « Pour vérifier ». La grille n'a
+pas d'échelle à elle : chaque critère garde l'échelle de ses descripteurs. **Ce qu'elle perd** : ses cartouches (elles
+vivent sous `cartouches_<id de la source>` ; aucun des deux gestes ne les copie, lu au code), `metadata_cc`,
+`auteurOriginal`, `idOriginal` ; elle prend l'auteur actif et `inspireDe`.
+
+**⚠ LE DÉFAUT, mesuré.** Les deux chemins atteignables copient la grille par étalement (`{ ...grille }`,
+`Object.assign`) : la copie ne reçoit pas SES critères, elle reçoit LE MÊME tableau `criteres` que la source.
+IndexedDB, qui enregistre par clonage structuré, garde ce partage tel quel : relus par `db.get`, les deux grilles
+pointent vers les mêmes objets critères (`source.criteres === copie.criteres`, mesuré dans IndexedDB même, petite et
+grande collection). Conséquence mesurée : **modifier le texte du niveau D dans la copie l'a modifié dans la source**, en
+une seule écriture, et c'est encore vrai après rechargement. Tout ce qui s'écrit sur un critère par la file commune
+(descripteurs, « Pour vérifier », nom, pondération, sous-critères…) suit le même chemin (inférence : même
+`_modifierCritereCible`, non mesuré geste par geste). Le JSON de `localStorage` (lu par `getSync` sur une petite
+collection) montre, lui, deux tableaux distincts : un écran peut afficher des grilles séparées pendant que l'écriture
+les modifie ensemble.
+- **Le stock** : toute grille déjà dupliquée par ces deux gestes, chez Grégoire, est peut-être liée à sa source de la
+  même façon (inférence : dépend de l'ancienneté du stockage IndexedDB chez lui ; non mesuré sur ses données). Un export
+  puis import (JSON) défait le lien.
+- **Même forme de code ailleurs** (non mesuré) : la duplication d'une échelle (`{ ...echelle }`, `niveaux` partagé),
+  et celles des cartouches et des productions par la même séquence de la bibliothèque. Seules les pratiques font un
+  clone profond (`cloneProfond: true`).
+- **Ce qu'il faudrait** (non fait, consigne) : copier en profondeur (clone JSON, comme `forkerItem`) dans
+  `dupliquerGrilleDepuisSidebar` et `dupliquerVersBibliotheque` ; puis, pour le stock, un diagnostic en lecture seule
+  des grilles qui partagent leurs critères, et une réparation proposée à Grégoire (écrire dans ses données lui revient).
+  Un banc : dupliquer, modifier la copie, la source ne bouge pas, après rechargement. Disposition proposée : **à
+  inscrire, en priorité** (le plan « une grille par production » passe par ce geste) ; non inscrit ici (consigne :
+  mesures seulement), à Cowork.
+- **Pour (a)** : la copie garde les identifiants des critères de sa source.
