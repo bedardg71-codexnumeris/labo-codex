@@ -369,11 +369,16 @@
                         // Même classe que #667/#668/#581 : non déclaré ici, il
                         // disparaîtrait au partage sans un mot. `maxCles` borne le
                         // nombre de niveaux (une échelle en compte rarement plus de 6).
+                        // ↻ 19 nov. 2026 (lot `autoevaluation-consignes`) : `pourVerifier`, la question que
+                        // l'élève se pose devant sa copie (« Pour vérifier », imprimée dans la grille
+                        // d'autoévaluation du PDF des consignes). Même borne qu'un descripteur. Même classe :
+                        // non déclarée ici, elle disparaîtrait au partage sans un mot.
                         descripteurs: {
                             type: 'objet',
                             schema: {
                                 echelleId: { type: 'chaine', max: 200 },
-                                parNiveau: { type: 'dictionnaire-chaines', maxLongueurElement: 5000, maxCles: 20 }
+                                parNiveau: { type: 'dictionnaire-chaines', maxLongueurElement: 5000, maxCles: 20 },
+                                pourVerifier: { type: 'chaine', max: 5000 }
                             }
                         },
                         // #1120, lot 1 (20 oct. 2026) — LE BARÈME D'UN CRITÈRE ANALYTIQUE VOYAGE.

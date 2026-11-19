@@ -1042,11 +1042,14 @@ const SCHEMAS_IMPORT = {
                 // DU CRITÈRE se perdraient de même : un texte par niveau, lié à
                 // l'échelle pour laquelle il a été écrit (clés = codes de ses
                 // niveaux). Absent = aucun descripteur. Schéma FERMÉ (cf. `enonces`).
+                // ↻ 19 nov. 2026 (lot `autoevaluation-consignes`) : `pourVerifier`, la question
+                // « Pour vérifier » du critère, se perdrait de même à l'import.
                 descripteurs: {
                     type: 'object',
                     schema: {
                         echelleId: { type: 'string', maxLen: 100 },
-                        parNiveau: { type: 'mapStrings', maxLen: 5000 }
+                        parNiveau: { type: 'mapStrings', maxLen: 5000 },
+                        pourVerifier: { type: 'string', maxLen: 5000 }
                     }
                 },
 

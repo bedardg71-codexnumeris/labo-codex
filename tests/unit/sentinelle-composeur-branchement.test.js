@@ -143,7 +143,8 @@ describe('branchement · A — après chaque rendu, la vue se pose sur chaque zo
         delete m.win.composeurBadges;
         m.win.afficherCriteresGrille(clone(GRILLE));
         const html = m.liste().innerHTML;
-        expect((html.match(/<textarea/g) || []).length).toBe(12 + 4);   // six paliers × deux zones + quatre énoncés
+        // ↻ 19 nov. 2026 (lot autoevaluation-consignes) : + la case « Pour vérifier » d'un critère par niveaux.
+        expect((html.match(/<textarea/g) || []).length).toBe(12 + 4 + 1);   // six paliers × deux zones + quatre énoncés + « Pour vérifier »
         expect(html).not.toContain('composeur-badges');
     });
 });

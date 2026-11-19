@@ -182,7 +182,8 @@ test('dissection 2b · l’exemple, « des niveaux » choisi, le tableau rempli,
     const rangees = await liste.locator('.critere-rangee').evaluateAll((rs) => rs.map((r) => [
         r.querySelector('input[data-champ="nom"]').value, r.querySelector('input[data-champ="ponderation"]')?.value]));
     expect(rangees).toEqual(g.criteres.map((c) => [c.nom, String(c.ponderation)]));
-    await expect(liste.locator('.grille-attendu').first().locator('.grille-attendu-niveau strong')).toHaveText(NIVEAUX);
+    // ↻ 19 nov. 2026 (lot autoevaluation-consignes) : la case « Pour vérifier » suit les niveaux ; on compte les niveaux seuls.
+    await expect(liste.locator('.grille-attendu').first().locator('.grille-attendu-niveaux .grille-attendu-niveau strong')).toHaveText(NIVEAUX);
     expect(erreurs).toEqual([]);
 });
 

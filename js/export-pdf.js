@@ -1701,8 +1701,12 @@ async function mettreAJourApercuPDF() {
  * modèle qui contiendrait déjà `&amp;` enverrait cette esperluette telle quelle
  * dans le PDF.
  */
-function construireModeleDocument(grille, cartouche, options) {
+function construireModeleDocument(grille, cartouche, options, echelle) {
     const cran = cranDocument(options, grille, cartouche);
+    // 19 nov. 2026 (lot `autoevaluation-consignes`) — la grille d'autoévaluation, une feuille à part après les
+    // consignes. `autoevaluationDisponible` dit si elle EXISTE (la case de l'aperçu ne se montre qu'alors) ;
+    // `autoevaluation` porte la page, ou `null` quand elle n'existe pas ou que la case l'a retirée.
+    const autoevaluation = pageAutoevaluation(grille, echelle, options && options.production);
     return {
         cran: cran,
         disposition: dispositionDocument(options),
@@ -1712,7 +1716,98 @@ function construireModeleDocument(grille, cartouche, options) {
         // dans les blocs qu'au cran où la cartouche entre elle-même.
         blocsInfo: blocsInformationDocument(cran === CRAN_RETROACTION ? cartouche : null, options),
         afficheEvaluation: cran === CRAN_EVALUATION || cran === CRAN_RETROACTION,
-        afficheRetroaction: cran === CRAN_RETROACTION
+        afficheRetroaction: cran === CRAN_RETROACTION,
+        autoevaluationDisponible: !!autoevaluation,
+        autoevaluation: (autoevaluation && options.inclureAutoevaluation !== false) ? autoevaluation : null
+    };
+}
+
+/*
+ * LA GRILLE D'AUTOÉVALUATION — 19 nov. 2026, lot `autoevaluation-consignes` (fiche #1287 ; ébauche validée par
+ * Grégoire de 7 h 52 à 8 h 03). Une feuille à part, après celle des consignes : ce que l'élève coche dans sa copie
+ * avant de la remettre, critère par critère, aux deux repères de l'échelle choisie pour le PDF.
+ *
+ * ⚠ RIEN DE CODÉ EN DUR. Les deux niveaux sont les repères de l'échelle : `seuilSuffisance` (la réussite) et
+ *   `seuilMaitrise` (la maîtrise), retrouvés parmi ses niveaux par leur code. Une échelle sans ses deux repères,
+ *   ou dont un repère ne désigne plus aucun de ses niveaux : pas de page. Seuls ces deux niveaux s'impriment,
+ *   même si d'autres sont décrits (décision de Grégoire).
+ * ⚠ LES TEXTES SONT CEUX DE L'ENSEIGNANT·E, tels qu'écrits dans l'éditeur de grilles (lot `descripteurs-grille`) :
+ *   `critere.descripteurs.parNiveau[<code du niveau>]` et `critere.descripteurs.pourVerifier`. Rien n'y est
+ *   retouché ; un texte vide ou fait d'espaces compte pour absent. Ils se lisent par le CODE, comme dans l'éditeur :
+ *   une échelle qui partage les codes de celle des descripteurs les retrouve.
+ * QUELS CRITÈRES : ceux qui se notent par niveaux (tout sauf `analytique`, la règle de l'éditeur), dans l'ordre de
+ *   la grille, et seulement ceux qui ont un texte à l'un des deux repères ; la page n'existe que s'il y en a un.
+ *   Une ligne sans texte ne s'imprime pas ; la question « Pour vérifier », seulement si elle existe.
+ * LE TITRE nomme la production : son activité d'apprentissage (`activiteApprentissage`, ou l'ancien
+ *   `description` qui en tient lieu, comme partout dans le module), sinon son nom. Sans production, pas de page :
+ *   c'est le PDF des consignes.
+ *
+ * Le modèle porte du TEXTE BRUT (règle de `construireModeleDocument`) : chaque rendeur échappe ou dessine.
+ * Mots de l'élève : validés par Grégoire, mot pour mot ; seules les espaces avant « : » et « ; » sont
+ * insécables, pour qu'un signe ne commence jamais une ligne.
+ */
+const TEXTES_AUTOEVALUATION = {
+    titre: (nom) => `${nom} : grille d'autoévaluation`,
+    introduction: (codeReussite, codeMaitrise) => 'Avant de remettre ton travail, coche ce que tu trouves dans ta copie. '
+        + `Le seuil de réussite correspond au niveau ${codeReussite} de l'échelle ; le seuil de maîtrise, au niveau ${codeMaitrise}.`,
+    reussite: 'Réussite :',
+    maitrise: 'Maîtrise :',
+    pourVerifier: 'Pour vérifier :'
+};
+
+/** Un texte écrit : une chaîne qui n'est pas faite que d'espaces. */
+const _texteEcrit = (t) => typeof t === 'string' && t.trim() !== '';
+const _codeNormalise = (c) => String(c == null ? '' : c).trim().toUpperCase();
+
+/**
+ * Les deux repères de l'échelle, retrouvés parmi ses niveaux : `{ reussite, maitrise }` (le code de chaque niveau,
+ * tel qu'écrit dans l'échelle), ou `null` s'il en manque un. Pure.
+ */
+function reperesAutoevaluation(echelle) {
+    const niveaux = (echelle && Array.isArray(echelle.niveaux)) ? echelle.niveaux : [];
+    const niveauDuRepere = (repere) => {
+        if (!_texteEcrit(repere)) return null;
+        return niveaux.find(n => n && n.code != null && _codeNormalise(n.code) === _codeNormalise(repere)) || null;
+    };
+    const reussite = niveauDuRepere(echelle && echelle.seuilSuffisance);
+    const maitrise = niveauDuRepere(echelle && echelle.seuilMaitrise);
+    if (!reussite || !maitrise) return null;
+    return { reussite: String(reussite.code), maitrise: String(maitrise.code) };
+}
+
+/**
+ * La page d'autoévaluation d'un document, ou `null` quand elle n'existe pas. Pure.
+ * @returns {null|{titre: string, introduction: string, criteres: Array<{nom: string,
+ *     lignes: Array<{repere: string, etiquette: string, texte: string}>, question: string|null}>}}
+ */
+function pageAutoevaluation(grille, echelle, production) {
+    if (!production) return null;
+    const reperes = reperesAutoevaluation(echelle);
+    if (!reperes) return null;
+    const activite = [production.activiteApprentissage, production.description, production.titre].find(_texteEcrit);
+    if (!activite) return null;
+
+    const T = TEXTES_AUTOEVALUATION;
+    const criteres = ((grille && Array.isArray(grille.criteres)) ? grille.criteres : [])
+        .filter(c => c && c.type !== 'analytique')
+        .map(c => {
+            const d = (c.descripteurs && typeof c.descripteurs === 'object') ? c.descripteurs : {};
+            const par = (d.parNiveau && typeof d.parNiveau === 'object' && !Array.isArray(d.parNiveau)) ? d.parNiveau : {};
+            const texteAu = (code) => Object.prototype.hasOwnProperty.call(par, code) && _texteEcrit(par[code]) ? par[code] : null;
+            const lignes = [
+                { repere: 'reussite', etiquette: T.reussite, texte: texteAu(reperes.reussite) },
+                { repere: 'maitrise', etiquette: T.maitrise, texte: texteAu(reperes.maitrise) }
+            ].filter(l => l.texte !== null);
+            if (!lignes.length) return null;
+            return { nom: String(c.nom || '—'), lignes, question: _texteEcrit(d.pourVerifier) ? d.pourVerifier : null };
+        })
+        .filter(Boolean);
+    if (!criteres.length) return null;
+
+    return {
+        titre: T.titre(activite.trim()),
+        introduction: T.introduction(reperes.reussite, reperes.maitrise),
+        criteres
     };
 }
 
@@ -2275,6 +2370,111 @@ function blocsInfoHTML(modele, styles) {
 }
 
 /**
+ * LA GRILLE D'AUTOÉVALUATION, EN HTML (19 nov. 2026) — le même contenu que `poserAutoevaluationPDF`, venu du même
+ * modèle (`pageAutoevaluation`) : l'introduction ; par critère, son nom en gras, une case à cocher dessinée suivie
+ * de « Réussite : » et du texte, de même pour « Maîtrise : », puis la question en italique. Les tailles sont celles
+ * des blocs de consignes. Chaque donnée passe par `escapeHtml`.
+ */
+function autoevaluationHTML(page, styles) {
+    const { styleTexteNormal, couleurTexte, couleurTitre, facteurTaille } = styles;
+    const caseACocher = `<span data-case-a-cocher aria-hidden="true" style="flex: 0 0 auto; display: inline-block; width: 0.95em; height: 0.95em;`
+        + ` margin-top: 0.15em; border: 1px solid ${couleurTexte}; border-radius: 1px;"></span>`;
+    const ligne = (l) => `<div data-ligne-autoeval="${escapeHtml(l.repere)}" style="${styleTexteNormal} display: flex; gap: 6px; align-items: flex-start; margin: 0 0 4px; color: ${couleurTexte};">`
+        + `${caseACocher}<span style="white-space: pre-line; min-width: 0; overflow-wrap: anywhere;">${escapeHtml(l.etiquette + ' ' + l.texte)}</span></div>`;
+    const question = (q) => `<p data-question-autoeval style="${styleTexteNormal} margin: 2px 0 0; color: ${couleurTexte}; font-style: italic; white-space: pre-line; overflow-wrap: anywhere;">`
+        + `${escapeHtml(TEXTES_AUTOEVALUATION.pourVerifier + ' ' + q)}</p>`;
+    const critere = (c) => `<div data-critere-autoeval style="margin-bottom: 10px;">`
+        + `<div style="font-size: ${10 * facteurTaille}pt; font-weight: bold; color: ${couleurTitre}; margin-bottom: 4px;">${escapeHtml(c.nom)}</div>`
+        + c.lignes.map(ligne).join('') + (c.question ? question(c.question) : '') + `</div>`;
+    return `<div data-autoevaluation style="margin-bottom: 8px;">`
+        + `<p data-introduction-autoeval style="${styleTexteNormal} margin: 0 0 12px; color: ${couleurTexte};">${escapeHtml(page.introduction)}</p>`
+        + page.criteres.map(critere).join('') + `</div>`;
+}
+
+/**
+ * La feuille de la grille d'autoévaluation dans le PDF (19 nov. 2026), quand le modèle la porte : une page neuve,
+ * sous son propre titre, puis la page. Rend l'ordonnée suivante (inchangée sans la page).
+ * ⚠ Elle n'existe qu'avec une production, et une production a toujours sa feuille de consignes (la date de remise,
+ * #498) : la page neuve vient toujours après une feuille écrite, jamais sur une page 1 vide.
+ */
+function poserFeuilleAutoevaluationPDF(doc, modele, posY, optionsEntete, largeurContenu, facteurTaille) {
+    if (!modele.autoevaluation) return posY;
+    doc.addPage();
+    const y = ajouterEntetePage(doc, modele.autoevaluation.titre, optionsEntete);
+    return poserAutoevaluationPDF(doc, modele.autoevaluation, y, largeurContenu, facteurTaille);
+}
+
+/**
+ * LA GRILLE D'AUTOÉVALUATION, DANS LE PDF (19 nov. 2026). Rend l'ordonnée sous la page.
+ *
+ * ⚠ LES CASES SONT TRACÉES, PAS ÉCRITES. Mesuré le 19 nov. (jsPDF 2.5.1, rendu relu par PDF.js) : avec les polices
+ *   intégrées, « ☐ » (U+2610) s'imprime « & » et toute la ligne passe en octets doubles, illisible à la copie ;
+ *   « □ » (U+25A1) de même. Un carré `doc.rect` à la première ligne de chaque repère.
+ * ⚠ UN TEXTE LONG SE POURSUIT À LA PAGE SUIVANTE, ligne à ligne (la règle de `poserBlocsInfoPDF`, #514) ; le nom
+ *   d'un critère ne reste jamais seul au bas d'une page, ni une case sans sa première ligne.
+ */
+function poserAutoevaluationPDF(doc, page, posY, largeurContenu, facteurTaille) {
+    const INTERLIGNE = 4.5;              // mm, à 8,5 pt
+    const COTE_CASE = 2.8;               // mm
+    const RETRAIT = 5;                   // mm : la case, puis le texte, en retrait suspendu
+    const gauche = PDF_CONFIG.marges.gauche;
+    const limiteBas = doc.internal.pageSize.getHeight() - PDF_CONFIG.marges.bas;
+    const taille = PDF_CONFIG.polices.texteNormal * facteurTaille;
+
+    const style = (graisse) => {
+        doc.setFontSize(taille);
+        doc.setTextColor(...PDF_CONFIG.couleurs.textePrincipal);
+        doc.setFont('helvetica', graisse);
+    };
+    let y = posY;
+    const replier = () => { doc.addPage(); y = PDF_CONFIG.marges.haut + 4; };
+    // Des lignes déjà coupées, posées une à une ; `avant(i)` dessine ce qui accompagne la ligne i (la case).
+    const poserLignes = (lignes, x, graisse, avant) => {
+        lignes.forEach((l, i) => {
+            if (y > limiteBas) replier();
+            style(graisse);   // ⚠ une page neuve ne garde pas l'état de police
+            if (avant) avant(i);
+            doc.text(l, x, y);
+            y += INTERLIGNE;
+        });
+    };
+
+    style('normal');
+    poserLignes(doc.splitTextToSize(page.introduction, largeurContenu), gauche, 'normal');
+    y += 3;
+
+    page.criteres.forEach(c => {
+        style('bold');
+        const lignesNom = doc.splitTextToSize(c.nom, largeurContenu);
+        // Le nom et la première ligne de son premier repère tiennent ensemble.
+        if (y + INTERLIGNE * lignesNom.length + 0.5 > limiteBas) replier();
+        doc.setTextColor(...PDF_CONFIG.couleurs.titreSection);
+        lignesNom.forEach(l => { doc.text(l, gauche, y); y += INTERLIGNE; });
+        y += 0.5;
+
+        c.lignes.forEach(ligne => {
+            style('normal');
+            const lignes = doc.splitTextToSize(ligne.etiquette + ' ' + ligne.texte, largeurContenu - RETRAIT);
+            poserLignes(lignes, gauche + RETRAIT, 'normal', (i) => {
+                if (i !== 0) return;
+                doc.setDrawColor(...PDF_CONFIG.couleurs.textePrincipal);
+                doc.setLineWidth(0.3);
+                doc.rect(gauche + 0.3, y - COTE_CASE + 0.3, COTE_CASE, COTE_CASE, 'S');
+            });
+            y += 1;
+        });
+
+        if (c.question) {
+            style('italic');
+            poserLignes(doc.splitTextToSize(TEXTES_AUTOEVALUATION.pourVerifier + ' ' + c.question, largeurContenu), gauche, 'italic');
+        }
+        y += 4;
+    });
+    style('normal');
+    return y;
+}
+
+/**
  * L'ÉCHELLE N'EST EXIGÉE QUE SI UN CRITÈRE EN LIT UNE (#1120, 20 oct. 2026).
  *
  * ⚠⚠ Retour de Grégoire, 20 oct. : sa grille « Journal de lecture A26 », quatre critères à
@@ -2513,6 +2713,24 @@ function tableauHTML(tableau, ctx) {
     return html;
 }
 
+/**
+ * Ce que montre une FEUILLE de l'aperçu (19 nov. 2026) : la sienne seule ; 'tout' (ou rien) montre tout, dans l'ordre
+ * des feuilles — consignes, grille d'autoévaluation, évaluation.
+ */
+function contenuDeLaFeuille(partie) {
+    const tout = !partie || partie === 'tout';
+    return {
+        consignes: tout || partie === 'consignes',
+        autoevaluation: tout || partie === 'autoevaluation',
+        evaluation: tout || partie === 'evaluation'
+    };
+}
+
+/** Le titre d'une feuille : celui de la grille d'autoévaluation sur SA feuille, celui du document ailleurs. */
+function titreDeLaFeuille(modele, partie) {
+    return (partie === 'autoevaluation' && modele.autoevaluation) ? modele.autoevaluation.titre : modele.titre;
+}
+
 function genererApercuCombine(grille, echelle, cartouche = null, options = {}) {
 
     // Facteur de taille pour les elements configurables (pas titre, pas retroactions)
@@ -2561,7 +2779,10 @@ function genererApercuCombine(grille, echelle, cartouche = null, options = {}) {
     let html = `<div class="apercu-pdf" style="min-height: 100%; display: flex; flex-direction: column;">`;
 
     // #497 — titre, en-tête et PROFONDEUR viennent du MODÈLE, partagé avec le PDF.
-    const modele = construireModeleDocument(grille, cartouche, options);
+    const modele = construireModeleDocument(grille, cartouche, options, echelle);
+    // `partie` restreint le rendu à une FEUILLE : 'consignes' pour la page 1, 'autoevaluation' pour la grille
+    // d'autoévaluation (19 nov.), 'evaluation' pour les suivantes. Absent = tout, dans l'ordre des feuilles.
+    const montre = contenuDeLaFeuille(options.partie);
 
     // ⚠ #513 — la garde vient APRÈS le modèle, et porte sur ce que le document
     // peut MONTRER. Elle exigeait grille et échelle : au cran « Consignes »,
@@ -2573,7 +2794,8 @@ function genererApercuCombine(grille, echelle, cartouche = null, options = {}) {
         return '<p class="text-muted">Données manquantes</p>';
     }
 
-    const titre = modele.titre;
+    // La feuille d'autoévaluation porte son propre titre, comme dans le PDF (`poserFeuilleAutoevaluationPDF`).
+    const titre = titreDeLaFeuille(modele, options.partie);
     // ⚠ La cartouche n'est pas une section à part : ses commentaires REMPLACENT
     // les descriptions de niveaux dans les cellules du tableau. Le cran se
     // traduit donc par la cartouche qu'on laisse passer — pas par un bloc
@@ -2602,18 +2824,21 @@ function genererApercuCombine(grille, echelle, cartouche = null, options = {}) {
     // #497 — les blocs viennent du modèle ; leur DISPOSITION reste ici, parce
     // qu'elle est une décision de présentation (et bientôt un choix de
     // l'utilisateur, étape 4 du plan).
-    // `partie` restreint le rendu à une FEUILLE : 'consignes' pour la page 1,
-    // 'evaluation' pour les suivantes. Absent = tout, comme avant.
-    const partie = options.partie || 'tout';
-    if (partie !== 'evaluation' && modele.blocsInfo.length > 0) {
+    // (`montre` est décidé plus haut, avec le modèle.)
+    if (montre.consignes && modele.blocsInfo.length > 0) {
         html += blocsInfoHTML(modele, { styleTexteNormal, couleurTexte, couleurTitre, facteurTaille });
+    }
+
+    // 19 nov. 2026 — la grille d'autoévaluation : sa feuille, ou sa place entre consignes et évaluation dans « tout ».
+    if (montre.autoevaluation && modele.autoevaluation) {
+        html += autoevaluationHTML(modele.autoevaluation, { styleTexteNormal, couleurTexte, couleurTitre, facteurTaille });
     }
 
     // Légende supprimée - le nom du niveau est dans l'entête du tableau
 
     // Tableau des criteres - largeurs adaptees comme le PDF
     // #1120 — son contenu vient de `tableauDesCriteres`, partagé avec le PDF.
-    const tableau = (partie !== 'consignes' && modele.afficheEvaluation) ? tableauDesCriteres(grille, echelle, cartouche) : null;
+    const tableau = (montre.evaluation && modele.afficheEvaluation) ? tableauDesCriteres(grille, echelle, cartouche) : null;
     if (tableau) {
         html += tableauHTML(tableau, {
             aCartoucheLongue, styleTableEntete, styleTableCritere, styleRetroaction, styleTexteTranche, styleTexteNormal,
@@ -2792,18 +3017,19 @@ async function genererPDFCombine(grille, echelle, cartouche = null, options = {}
     const doc = creerDocumentPDF(orientationPDF);
 
     // #497 — le document est décidé UNE fois ; ce rendeur ne fait que le poser.
-    const modele = construireModeleDocument(grille, cartouche, options);
+    const modele = construireModeleDocument(grille, cartouche, options, echelle);
     const titre = modele.titre;
     // Même règle que l'aperçu : le cran se traduit par la cartouche qu'on laisse
     // passer, puisque ses commentaires remplissent les cellules du tableau.
     cartouche = modele.afficheRetroaction ? cartouche : null;
 
-    let posY = ajouterEntetePage(doc, titre, {
+    const optionsEntete = {
         enteteCode: options.enteteCode,
         enteteNom: options.enteteNom,
         enteteTrimestre: options.enteteTrimestre,
         infosCours: options.infosCours
-    });
+    };
+    let posY = ajouterEntetePage(doc, titre, optionsEntete);
 
     const largeurPage = doc.internal.pageSize.getWidth();
     const largeurContenu = largeurPage - PDF_CONFIG.marges.gauche - PDF_CONFIG.marges.droite;
@@ -2813,6 +3039,9 @@ async function genererPDFCombine(grille, echelle, cartouche = null, options = {}
     // #497 étape 4 — la disposition des consignes, choisie par l'utilisateur.
     posY = poserBlocsInfoPDF(doc, modele, posY, largeurContenu, facteurTaille);
 
+    // 19 nov. 2026 (lot `autoevaluation-consignes`) — la grille d'autoévaluation, sa feuille à part.
+    posY = poserFeuilleAutoevaluationPDF(doc, modele, posY, optionsEntete, largeurContenu, facteurTaille);
+
     // Légende supprimée - le nom du niveau est dans l'entête du tableau
 
     // Tableau des criteres
@@ -2821,14 +3050,11 @@ async function genererPDFCombine(grille, echelle, cartouche = null, options = {}
     // tout, et la grille commençait au BAS de la page 1 pour se poursuivre au
     // verso. L'écran et le fichier se contredisaient sur la seule chose que le
     // lecteur regarde — où commence ce sur quoi on l'évalue.
-    if (modele.blocsInfo.length > 0 && modele.afficheEvaluation) {
+    // ↻ 19 nov. 2026 : la règle est celle des FEUILLES DU DOCUMENT, la même que l'aperçu (`feuillesDuDocument`) :
+    // l'évaluation ouvre sa page dès qu'une feuille la précède — les consignes, ou la grille d'autoévaluation.
+    if (feuillesDuDocument(modele).indexOf('evaluation') > 0) {
         doc.addPage();
-        posY = ajouterEntetePage(doc, titre, {
-            enteteCode: options.enteteCode,
-            enteteNom: options.enteteNom,
-            enteteTrimestre: options.enteteTrimestre,
-            infosCours: options.infosCours
-        });
+        posY = ajouterEntetePage(doc, titre, optionsEntete);
     }
 
     // #1120 — le contenu du tableau vient de `tableauDesCriteres`, partagé avec l'aperçu.
@@ -3277,6 +3503,7 @@ async function ouvrirApercuPDF() {
 
         // Sauvegarder les réglages actuels
         sauvegarderReglagesPDF();
+        recocherAutoevaluation();   // 19 nov. 2026
 
         // Afficher le modal (.modal-overlay utilise .actif)
         modal.classList.add('actif');
@@ -3330,6 +3557,8 @@ async function ouvrirApercuPDF() {
 function feuillesDuDocument(modele) {
     const feuilles = [];
     if (modele.blocsInfo.length > 0) feuilles.push('consignes');
+    // 19 nov. 2026 — la grille d'autoévaluation, une feuille à part, APRÈS celle des consignes (avant l'évaluation).
+    if (modele.autoevaluation) feuilles.push('autoevaluation');
     if (modele.afficheEvaluation) feuilles.push('evaluation');
     return feuilles.length > 0 ? feuilles : ['tout'];
 }
@@ -3380,6 +3609,20 @@ function accorderSelecteurCran() {
     return retenu;
 }
 
+/**
+ * 19 nov. 2026 — la case « Grille d'autoévaluation » de l'aperçu : lue au même endroit par l'aperçu et par
+ * l'export (ce que voit l'aperçu est ce que contient le PDF). Sans la case, la page reste incluse.
+ */
+function autoevaluationCochee() {
+    return document.getElementById('apercuPDF-autoevaluation')?.checked !== false;
+}
+
+/** À chaque ouverture de l'aperçu, la case revient cochée : la page est incluse par défaut quand elle existe. */
+function recocherAutoevaluation() {
+    const coche = document.getElementById('apercuPDF-autoevaluation');
+    if (coche) coche.checked = true;
+}
+
 function rafraichirApercuPDF() {
     if (!_apercuPDFData) return;
 
@@ -3406,6 +3649,7 @@ function rafraichirApercuPDF() {
     const inclureDescription = document.getElementById('apercuPDF-prod-description')?.checked !== false;
     const inclureDetailTache = document.getElementById('apercuPDF-prod-detailTache')?.checked !== false;
     const inclureDescCriteres = document.getElementById('apercuPDF-prod-criteres')?.checked === true;
+    const inclureAutoevaluation = autoevaluationCochee();
 
     // #497 étape 3 — la profondeur du document, et l'état du sélecteur qui la
     // règle. Les deux sont posés AVANT le rendu : un cran devenu indisponible
@@ -3423,6 +3667,7 @@ function rafraichirApercuPDF() {
         inclureDescription: inclureDescription,
         inclureDetailTache: inclureDetailTache,
         inclureDescCriteres: inclureDescCriteres,
+        inclureAutoevaluation: inclureAutoevaluation,
         taillePolice: 'petit',
         orientation: orientation,
         // Options entête
@@ -3447,8 +3692,11 @@ function rafraichirApercuPDF() {
     // s'étirait sans fin : Grégoire voyait un document au format d'aucune
     // imprimante. Les feuilles suivantes sont posées à côté de la première,
     // qui garde ses identifiants (le reste du module s'y réfère).
-    const modele = construireModeleDocument(_apercuPDFData.grille, _apercuPDFData.cartouche, options);
+    const modele = construireModeleDocument(_apercuPDFData.grille, _apercuPDFData.cartouche, options, _apercuPDFData.echelle);
     const parties = feuillesDuDocument(modele);
+    // 19 nov. 2026 — la case de la grille d'autoévaluation ne se montre que si la page existe.
+    const caseAutoeval = document.getElementById('apercuPDF-case-autoevaluation');
+    if (caseAutoeval) toggleDisplay(caseAutoeval, modele.autoevaluationDisponible);
 
     const conteneurFeuilles = pagePDF.parentElement;
     Array.from(conteneurFeuilles.querySelectorAll('.apercu-pdf-page'))
@@ -3533,6 +3781,8 @@ async function exporterPDFDepuisApercu() {
             inclureDescription: inclureDescription,
             inclureDetailTache: inclureDetailTache,
             inclureDescCriteres: inclureDescCriteres,
+            // 19 nov. 2026 — la case de l'aperçu, lue au même endroit que l'aperçu la lit.
+            inclureAutoevaluation: autoevaluationCochee(),
             taillePolice: 'petit',
             orientation: orientation,
             // Options entête
@@ -3991,6 +4241,7 @@ async function ouvrirApercuPDFPour(ids) {
     if (selectCran) selectCran.value = reglages?.cran || '';
     const selectDispo = document.getElementById('apercuPDF-disposition');
     if (selectDispo && reglages?.disposition) selectDispo.value = reglages.disposition;
+    recocherAutoevaluation();   // 19 nov. 2026
 
     const modalApercu = document.getElementById('modalApercuPDF');
     if (modalApercu) {
@@ -4063,6 +4314,11 @@ window.productionAConsignes = productionAConsignes;                         // #
 window.poserBlocsInfoPDF = poserBlocsInfoPDF;                               // #514 — sentinelle de pagination : elle mesure ce qui est DESSINÉ
 window.accorderSelecteurCran = accorderSelecteurCran;                       // #497 étape 3 — le menu ne peut pas mentir sur ce que la page montre
 window.feuillesDuDocument = feuillesDuDocument;
+window.pageAutoevaluation = pageAutoevaluation;                             // 19 nov. 2026 — la grille d'autoévaluation (bancs)
+window.reperesAutoevaluation = reperesAutoevaluation;
+window.autoevaluationHTML = autoevaluationHTML;
+window.poserAutoevaluationPDF = poserAutoevaluationPDF;
+window.TEXTES_AUTOEVALUATION = TEXTES_AUTOEVALUATION;
 window.dispositionDocument = dispositionDocument;                           // #497 étape 4 — la mise en page est un choix
 window.repartirEnDeuxColonnes = repartirEnDeuxColonnes;                     // #497 étape 4 — une seule répartition pour les deux rendeurs
 window.echelleExigee = echelleExigee;                                       // #1120 — l'échelle, seulement si un critère en lit une
