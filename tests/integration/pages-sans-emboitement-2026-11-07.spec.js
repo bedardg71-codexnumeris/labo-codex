@@ -146,10 +146,25 @@ const SANS_CADRE = {
     'accueil/section-accueil': ['.banniere-bienvenue-acces', 'Envie d’en parler avec des collègues\u00a0?'], // ↻ 15 nov. 2026 : nouvelle amorce
     'labo/labo-comparateur': ['.comparateur-note-dev', 'Outil en développement']
 };
+// ↻ 19 nov. 2026 (lot descripteurs-grille) : dans l'éditeur de grilles, un texte de niveau dont le code n'existe pas
+// dans l'échelle montrée fait paraître l'encadré « Textes gardés d’une autre échelle » — à mesurer comme le reste.
+// La démo n'en porte aucun : chaque grille en reçoit un, FICTIF, sur son premier critère par niveaux.
+const TEXTE_GARDE = { code: 'ZZ', texte: 'Texte fictif gardé d’une autre échelle (banc pages-sans-emboitement).' };
+const PARAITRE = { 'conception/conception-grille-criteres': '.grille-attendu-hors' };
 for (const clair of [false, true]) {
     test(`les ${EMBOITEES.length} pages de l'inventaire (${clair ? 'clair' : 'sombre'}) : jamais de carte dans une carte`, async ({ page }) => {
         test.setTimeout(300000);
         await ouvrir(page, 1180, 900);
+        await page.evaluate(async ({ code, texte }) => {
+            await db.modifier(cle('grillesTemplates'), (lues) => (lues || []).map((g) => {   // security-ok: banc, démo dans un contexte neuf
+                const i = (g.criteres || []).findIndex((c) => c && c.type !== 'analytique');
+                if (i < 0) return g;
+                const criteres = g.criteres.slice();
+                criteres[i] = Object.assign({}, criteres[i], { descripteurs: { parNiveau: { [code]: texte } } });
+                return Object.assign({}, g, { criteres });
+            }), []);
+            await db.flush();
+        }, TEXTE_GARDE);
         const echecs = [];
         for (const cible of EMBOITEES) {
             const [s, ss] = cible.split('/');
@@ -187,6 +202,9 @@ for (const clair of [false, true]) {
       return out;
     }, [ss, FONCTION]);
             for (const l of r) if (!RESTENT.test(l)) echecs.push(`${cible} · ${l}`);
+            if (PARAITRE[cible] && !(await page.evaluate((sel) => [...document.querySelectorAll(sel)].some((e) => e.getClientRects().length), `#${ss} ${PARAITRE[cible]}`))) {
+                echecs.push(`${cible} · ${PARAITRE[cible]} ne paraît pas : la mesure ne le voit pas`);
+            }
             if (SANS_CADRE[cible]) {
                 const [sel, amorce] = SANS_CADRE[cible];
                 const b = await page.evaluate(([ss, sel]) => {
