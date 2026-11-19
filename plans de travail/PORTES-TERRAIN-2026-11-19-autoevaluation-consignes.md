@@ -15,8 +15,8 @@ numéro de porte.
 
 ## §0 · Préalable
 
-- [ ] **0.1** Sur l'iPad, dans Safari, ouvre l'adresse de l'aperçu (section « Adresse de l'aperçu » du rapport du
-  lot), recharge, et lis le numéro en bas de page.
+- [ ] **0.1** Sur l'iPad, dans Safari, ouvre `https://deploy-preview-33--codexnumeris-051225.netlify.app`
+  (l'aperçu de la PR n° 33), recharge, et lis le numéro en bas de page.
   ⮕ Attendu : un numéro en `1.249.0` (le lot ne change pas la version). Si la page est vide ou ancienne, attends une
   minute que Netlify finisse de publier, puis recharge.
   `iPad`

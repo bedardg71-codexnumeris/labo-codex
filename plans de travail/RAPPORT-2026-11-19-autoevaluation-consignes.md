@@ -6,7 +6,7 @@ part dans le PDF des consignes. Réalise la fiche #1287 (inscrite sur `lot/je-re
 APERÇU seulement (PR « APERÇU, ne pas fusionner ») : ni fusion, ni release, ni Nouvelles. `origin/main` ne contenait
 pas encore le lot 1 au moment du push (`03dc7d2f`) : rien à fusionner. Reste : le regard de Grégoire sur l'aperçu et
 sur les mots ; la porte terrain iPad (`PORTES-TERRAIN-2026-11-19-autoevaluation-consignes.md`). Aperçu :
-voir « Adresse de l'aperçu » plus bas.
+<https://deploy-preview-33--codexnumeris-051225.netlify.app> (PR n° 33).
 
 ## Ce qui est fait
 
@@ -97,4 +97,7 @@ Aucune inscrite (aucun numéro pris). La démo d'« Évaluer » (`lot/je-regarde
 
 ## Adresse de l'aperçu
 
-À venir avec la PR.
+PR n° 33 (« APERÇU, ne pas fusionner : la grille d'autoévaluation dans le PDF des consignes »), base `main`.
+Aperçu Netlify : <https://deploy-preview-33--codexnumeris-051225.netlify.app> — « Deploy Preview ready! » sur
+`c61e87fb`, lu au statut GitHub de la PR (le réseau du conteneur n'atteint pas `*.netlify.app` : non ouvert d'ici).
+Tant que le lot 1 n'est pas dans `main`, la PR le contient aussi.
