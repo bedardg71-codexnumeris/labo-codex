@@ -2419,7 +2419,7 @@
     function placerBulleLoin(zones, prio) {
         var autres = zones.filter(function (z) { return prio.indexOf(z) === -1; });
         var s = sectionDe(etapeCourante());
-        placerBulle(rectsDePlace(autres).concat(rectsDePlace(prio).map(function (r) { return pese(r, POIDS_CONTOUR); })), s ? rectsDePlace([s.bloc]) : null);
+        placerBulle(rectsDePlace(autres).concat(rectsDePlace(prio).map(function (r) { return pese(r, POIDS_CONTOUR); })), s ? rectsDe([s.bloc]) : null);
     }
 
     /** Ce que la bulle ne couvre que faute de mieux : le contour, ce que l'étape déclare dans `aussiEviter`, le nom de sa section. */
