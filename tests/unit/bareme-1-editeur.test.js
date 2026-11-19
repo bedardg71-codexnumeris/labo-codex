@@ -447,17 +447,22 @@ describe('barème 1 · H — un critère holistique ne change pas', () => {
         expect([...carte.querySelectorAll('.grille-attendu-niveaux input, .grille-attendu-niveaux button')]).toHaveLength(0);
         const t = carte.querySelectorAll('.grille-attendu-niveau textarea')[1];
         t.value = 'Un texte maîtrisé, revu.';
-        await m.win.modifierTexteReponseGrilleHandler(t);
+        // ↻ 18 nov. 2026 (lot descripteurs-grille) : le geste du lot 13 est remplacé par celui des descripteurs.
+        await m.win.modifierDescripteurNiveauHandler(t);
         expect(m.critere(1).descripteurs).toEqual({ echelleId: 'ECH_BANC', parNiveau: { I: 'Texte incomplet.', M: 'Un texte maîtrisé, revu.' } });
     });
 
     it('H.b le geste du texte par niveau ne touche pas les réponses d’un critère analytique (elles sont son barème)', async () => {
         const m = monter();
         const leurre = m.document.createElement('textarea');
-        Object.assign(leurre.dataset, { grilleId: 'GRILLE_BANC', critereIndex: '0', reponseIndex: '0', reponseCle: '0 point' });
+        Object.assign(leurre.dataset, { grilleId: 'GRILLE_BANC', critereIndex: '0', niveau: '0 point', echelleId: 'ECH_BANC' });
         leurre.value = 'x';
         const avant = JSON.stringify(m.store[K]);
-        await m.win.modifierTexteReponseGrilleHandler(leurre);
+        await m.win.modifierDescripteurNiveauHandler(leurre);
+        const menu = m.document.createElement('select');
+        Object.assign(menu.dataset, { grilleId: 'GRILLE_BANC', critereIndex: '0' });
+        menu.innerHTML = '<option value="ECH_BANC" selected>x</option>';
+        await m.win.changerEchelleDescripteursHandler(menu);
         expect(JSON.stringify(m.store[K])).toBe(avant);
     });
 });

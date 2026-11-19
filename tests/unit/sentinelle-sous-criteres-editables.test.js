@@ -9,7 +9,7 @@
  *
  * Ce que ce banc verrouille :
  *   R — LE RENDU : rangées, handlers et index ; section vide avec son bouton ; texte échappé ; rien pour un
- *       critère algorithmique (son gabarit a déjà la liste) ;
+ *       critère algorithmique (son gabarit a déjà la liste) ; ↻ 18 nov. 2026 : les descripteurs de niveau en tête ;
  *   G — LES GESTES : ajouter écrit la forme de la dissection, sous un code neuf (F1 : jamais un code déjà porté) ;
  *       la 31ᵉ est refusée sans écriture ; un nom de
  *       201 caractères est refusé sans écriture ; un nom de 200 passe ;
@@ -101,7 +101,8 @@ describe('R — le rendu des sous-critères d’un critère non algorithmique', 
         const { win, dom } = monter();
         for (const c of [critere(), critere({ sousCriteres: [] })]) {
             const div = rendu(win, dom, c);
-            expect([...div.querySelectorAll('.grille-attendu-titre')].map(h => h.textContent)).toEqual(['Sous-critères']);
+            // ↻ 18 nov. 2026 (lot descripteurs-grille) : les descripteurs de niveau la précèdent, toujours.
+            expect([...div.querySelectorAll('.grille-attendu-titre')].map(h => h.textContent)).toEqual(['Ce qui est attendu à chaque niveau', 'Sous-critères']);
             expect(div.querySelectorAll('.grille-sous-critere')).toHaveLength(0);
             const b = div.querySelector('[data-action="ajouterSousCritere"]');
             expect([b.dataset.param, b.dataset.param2]).toEqual(['GR_BANC', '2']);
@@ -116,9 +117,14 @@ describe('R — le rendu des sous-critères d’un critère non algorithmique', 
         expect(div.querySelector('.grille-sous-critere input').value).toBe(piege);
     });
 
-    it('R.d critère algorithmique : rien ici (son gabarit porte la liste) ; sans contexte de handlers : rien', () => {
-        const { win } = monter();
-        expect(win.rendreAttenduCritere(critere({ type: 'algorithmique', sousCriteres: SOUS }), { grilleId: 'GR_BANC', index: 0 })).toBe('');
+    // ↻ 18 nov. 2026 (lot descripteurs-grille) : un critère algorithmique montre ses descripteurs de niveau ici, et
+    // toujours pas ses sous-critères (son gabarit porte la liste).
+    it('R.d critère algorithmique : pas ses sous-critères ici (son gabarit porte la liste) ; sans contexte de handlers : rien', () => {
+        const { win, dom } = monter();
+        const div = dom.window.document.createElement('div');
+        div.innerHTML = win.rendreAttenduCritere(critere({ type: 'algorithmique', sousCriteres: SOUS }), { grilleId: 'GR_BANC', index: 0 });
+        expect([...div.querySelectorAll('.grille-attendu-titre')].map(h => h.textContent)).toEqual(['Ce qui est attendu à chaque niveau']);
+        expect(div.querySelector('.grille-sous-critere, [data-action="ajouterSousCritere"]')).toBeNull();
         expect(win.rendreAttenduCritere(critere({ sousCriteres: SOUS }))).toBe('');
     });
 });
