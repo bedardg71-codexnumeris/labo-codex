@@ -102,6 +102,24 @@ const RETOUCHES = {
         6: { "Choisis dans l'en-tête le groupe que tu viens de créer": "Choisis dans l'en-tête le groupe que tu viens de créer : « 601-999-DM · gr. 00002 »" }
     }
 };
+// LA RETOUCHE DU 19 NOV. 2026 (« Nous faisons » de « Mettre ta classe en place », relais, point 3 ; Grégoire, 10 h 36 :
+// le verbe de la page, « Assemble un groupe-cours ») : une phrase d'ouverture de la bulle 5 de « Je regarde ». La
+// phrase neuve est relue dans la consigne du 19 nov.
+const NOUS_FAISONS_CLASSE = lire('plans de travail/CONSIGNE-2026-11-19-nous-faisons-classe.md');
+const RETOUCHES_PHRASES = {
+    classe: {
+        5: { "Tu es dans la section « Groupe-cours » : c'est là que tu réunis ce que tu viens de créer.":
+             "Tu es dans la section « Groupe-cours » : c'est là que tu assembles ce que tu viens de créer." }
+    }
+};
+function retoucherPhrases(parcours, n, phrases) {
+    const r = (RETOUCHES_PHRASES[parcours] || {})[n] || {};
+    Object.keys(r).forEach((avant) => {
+        expect(phrases, `la consigne du 16 nov. porte « ${avant} »`).toContain(avant);
+        expect(NOUS_FAISONS_CLASSE, 'la retouche est dans la consigne du 19 nov.').toContain('« ' + r[avant].replace(/^Tu es dans la section « [^»]+ » /, '') + ' »');
+    });
+    return phrases.map((p) => (p in r ? r[p] : p));
+}
 function retoucher(parcours, n, lignes) {
     const r = RETOUCHES[parcours][n] || {};
     Object.keys(r).forEach((avant) => expect(lignes, `la consigne du matin porte « ${avant} »`).toContain(avant));
@@ -197,7 +215,7 @@ describe('« Mettre ta classe en place », « Je regarde » : les huit bulles du
             // Une bulle à bouton « Remplir » : deux états. Après, la SECONDE FORME (18 nov. 2026, essai de Grégoire
             // sur l'iPad) : ce qui précédait disparaît ; ce qui vient d'apparaître, puis le bouton de la page.
             const { avant, apres } = etape.etats();
-            jugerOuverture(b.phrases, ouvertureDe(def, etape, n - 1, avant));
+            jugerOuverture(retoucherPhrases('classe', n, b.phrases), ouvertureDe(def, etape, n - 1, avant));
             expect(textes(avant)).toEqual(b.avant);
             expect(b.avant[b.avant.length - 1]).toBe(mots.toucheRemplir);
             expect(avant[avant.length - 1].geste).toBe(true);
@@ -207,7 +225,7 @@ describe('« Mettre ta classe en place », « Je regarde » : les huit bulles du
             expect(typeof etape.secondeForme).toBe('function');
         } else {
             const lignes = etape.lignes();
-            jugerOuverture(b.phrases, ouvertureDe(def, etape, n - 1, lignes));
+            jugerOuverture(retoucherPhrases('classe', n, b.phrases), ouvertureDe(def, etape, n - 1, lignes));
             // La dernière bulle : « Pour revoir une étape… » est posée par le moteur, pas par le parcours.
             expect(textes(lignes)).toEqual(retoucher('classe', n, b.avant).filter((l) => !DE_LA_FIN(l)));
             expect(b.apres).toEqual([]);

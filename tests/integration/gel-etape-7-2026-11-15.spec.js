@@ -92,7 +92,7 @@ test('en visite (« Refaire ») : ni contour ni flèche sur un contrôle qui éc
     const avant = await verrous();
     const TITRES = ['Ton trimestre', 'Ton cours', 'Ton profil', 'Ta classe', 'Ton horaire', 'Ton groupe-cours', 'Prendre les présences'];
     // Une ligne d'explication de chaque étape, qui doit rester.
-    const RESTE = ['calendrier scolaire', 'plan de cours', 'Ton prénom et ton nom', 'la liste de ton groupe', 'ton horaire', 'Réunis ce que tu viens de créer', 'Note seulement les absences et les retards'];
+    const RESTE = ['calendrier scolaire', 'plan de cours', 'Ton prénom et ton nom', 'la liste de ton groupe', 'ton horaire', 'Un groupe-cours, c\'est une classe', 'Note seulement les absences et les retards'];
     for (let k = 0; k < TITRES.length; k++) {
         await expect(rang(page)).toHaveText((k + 1) + ' sur 8', { timeout: 15000 });
         await expect(bulle(page).locator('.parcours-bulle-titre')).toHaveText(TITRES[k]);

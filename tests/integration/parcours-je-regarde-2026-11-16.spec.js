@@ -507,7 +507,7 @@ test('« Mettre ta classe en place », Je regarde : la bonne section, son nom en
     await attendreEtape(page, 5, 8, 'Un groupe-cours');
     await expect(bulle(page)).not.toHaveClass(/est-en-attente/);
     expect((await lire(page)).confirme).toBe("C'est fait : l'horaire est créé.");
-    await jugerSection(5, 'accordeon-groupe-cours', (nom) => `Tu es dans la section « ${nom} » : c'est là que tu réunis ce que tu viens de créer.`);
+    await jugerSection(5, 'accordeon-groupe-cours', (nom) => `Tu es dans la section « ${nom} » : c'est là que tu assembles ce que tu viens de créer.`);
     await deuxEtats(5, { consigne: "Touche « Créer le groupe-cours » (il apparaîtra dans l'en-tête de l'application)", bouton: '#v2-btnCreerGroupeCours', idBloc: 'accordeon-groupe-cours' });
     await page.click('#v2-btnCreerGroupeCours');
 

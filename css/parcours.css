@@ -303,12 +303,16 @@ body.mode-clair {
 .parcours-bulle-ligne { position: relative; padding-left: 0; }
 .parcours-bulle-ligne > ul { margin-top: 5px; }
 .parcours-bulle-ligne--geste,
+.parcours-bulle-ligne--a-faire,
 .parcours-bulle-ligne.est-faite { padding-left: 1.5em; }
-.parcours-bulle-ligne--geste::before { content: '\2192'; position: absolute; left: 0.1em; top: 0; color: var(--parcours-geste); }
+/* 19 nov. 2026 (« Nous faisons » de « Mettre ta classe en place ») : les autres gestes à faire ont la même flèche, sans
+   le gras ni la couleur de la consigne ; faits, le crochet (la règle `.est-faite::before`, plus précise, l'emporte). */
+.parcours-bulle-ligne--geste::before,
+.parcours-bulle-ligne--a-faire::before { content: '\2192'; position: absolute; left: 0.1em; top: 0; color: var(--parcours-geste); }
 .parcours-bulle-ligne.est-faite > .parcours-bulle-ligne-texte { color: var(--texte-secondaire); }
 .parcours-bulle-ligne.est-faite::before { content: '\2713'; position: absolute; left: 0; top: 0; color: var(--vert-leger); }
 /* Les marques sont pour l'œil : le lecteur d'écran entend « (fait) », une seule fois. */
-@supports (content: 'x' / '') { .parcours-bulle-ligne.est-faite::before { content: '\2713' / ''; } .parcours-bulle-ligne--geste::before { content: '\2192' / ''; } }
+@supports (content: 'x' / '') { .parcours-bulle-ligne.est-faite::before { content: '\2713' / ''; } .parcours-bulle-ligne--geste::before, .parcours-bulle-ligne--a-faire::before { content: '\2192' / ''; } }
 .parcours-bulle-ligne--geste > .parcours-bulle-ligne-texte { font-weight: 600; color: var(--parcours-geste); }
 .parcours-bulle-ligne--geste.est-faite > .parcours-bulle-ligne-texte { font-weight: 400; color: var(--texte-secondaire); }
 

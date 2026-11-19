@@ -67,6 +67,11 @@
    se grise pas. Une `note` est une phrase hors de la liste (le document à avoir sous la main, ce qui peut attendre).
    La consigne (`geste: true`) est la DERNIÈRE ligne de la liste, dans la couleur du geste. La flèche vers un champ part
    quand sa ligne est faite. Une bulle à lignes tient en une page : ni découpe, ni « ← 1/2 → ».
+   LA FLÈCHE DES GESTES (« Nous faisons » de « Mettre ta classe en place », 19 nov. 2026 ; règle de Grégoire du 18 nov. :
+   « seuls les gestes sont marqués : une flèche pour un geste à faire, un crochet quand il est fait ») : une ligne de
+   premier niveau qui se fait (`champs`, `fait`, ou des sous-lignes qui se font) porte la flèche, sans le gras de la
+   consigne (`parcours-bulle-ligne--a-faire`) ; faite, le crochet. Ses sous-lignes n'en portent pas. Avant ce lot, seule
+   la consigne avait sa flèche : la règle du 18 nov. avait été posée sur « Je regarde », où la consigne est le seul geste.
    OÙ SUIS-JE (règle 4) : une étape où la page change le déclare (`lieu`). Sa première ligne dit « Tu es dans « X », à
    l'onglet « Y ». » (les noms sont LUS dans le menu, jamais recopiés), les deux entrées du menu reçoivent le halo de la
    section actuelle, et la page s'ouvre EN HAUT, navigation visible : rien n'y est amené dans la vue à l'ouverture.
@@ -1150,9 +1155,13 @@
         poserConfirmation(seconde ? {} : etape);
         if (!seconde) phrase('parcours-bulle-lieu', phraseDuLieu(lieu, etape.nommeLaSection ? sectionDe(etape) : null, texteDe(etape.lieuSuite)));
         var ul = null;
-        var poser = function (ligne, dans) {
+        var poser = function (ligne, dans, sousLigne) {
             var li = document.createElement('li');
-            li.className = 'parcours-bulle-ligne' + (ligne.geste ? ' parcours-bulle-ligne--geste' : '');
+            // LES GESTES À FAIRE (voir « LES LIGNES D'UNE BULLE ») : la flèche, sans le gras de la consigne. Pas sur une
+            // sous-ligne : c'est une part du geste de sa ligne mère, qui porte la flèche ; elle reçoit son crochet, faite.
+            var aFaire = !ligne.geste && !sousLigne && ligneSeFait(ligne);
+            li.className = 'parcours-bulle-ligne' + (ligne.geste ? ' parcours-bulle-ligne--geste' : '')
+                + (aFaire ? ' parcours-bulle-ligne--a-faire' : '');
             var t = document.createElement('span');
             t.className = 'parcours-bulle-ligne-texte';
             t.textContent = typographier(ligne.texte);
@@ -1164,7 +1173,7 @@
             etat.lignes.push({ def: ligne, el: li, dit: dit, faite: null });
             if (ligne.sous && ligne.sous.length) {
                 var sous = document.createElement('ul');
-                ligne.sous.forEach(function (x) { if (x && x.texte) poser(x, sous); });
+                ligne.sous.forEach(function (x) { if (x && x.texte) poser(x, sous, true); });
                 li.appendChild(sous);
             }
         };
