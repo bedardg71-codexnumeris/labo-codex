@@ -212,8 +212,10 @@ juge l'état (le groupe actif est celui qu'on vient de créer), pas l'un des deu
 
 ## 7. L'aperçu
 
-PR d'aperçu, titrée « APERÇU, ne pas fusionner » : voir le relais dans `RELAIS.md` (`main`) et la PR elle-même ; l'adresse
-de l'aperçu Netlify y est donnée dès que le déploiement de la PR la publie.
+PR d'aperçu n° 35 (brouillon), « APERÇU, ne pas fusionner — « Mettre ta classe en place », Nous faisons : les huit
+bulles du 19 nov. » : https://github.com/bedardg71-codexnumeris/labo-codex/pull/35. Aperçu Netlify :
+https://deploy-preview-35--codexnumeris-051225.netlify.app (l'adresse que Netlify donne aux PR de ce dépôt ; confirmée par
+son commentaire sur la PR).
 
 ## 8. Ce qui attend une décision
 
