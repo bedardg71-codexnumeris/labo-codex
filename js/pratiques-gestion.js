@@ -809,8 +809,11 @@ async function ajouterPratiqueALaSelection(pratiqueId) {
         }
 
         // Ajouter avec le flag dansBibliotheque
+        // #1298 (19 nov. 2026) — copie PROFONDE : l'étalement partageait `calcul_note`,
+        // `configuration` et `config` avec la bibliothèque (ou avec le modèle prédéfini, une
+        // constante en mémoire) quand `db` sert les clés par son cache mémoire (mesuré).
         const nouvelleConfig = poserEchelleAdoption({
-            ...configSource,
+            ...JSON.parse(JSON.stringify(configSource)),
             dansBibliotheque: true,
             dateAjout: new Date().toISOString()
         }, echelleAdoption);
@@ -998,16 +1001,12 @@ async function supprimerPratiqueDeBibliothequePartagee(pratiqueId) {
  */
 async function dupliquerPratiqueBibliotheque(pratiqueId) {
     // #476 volet 2 — séquence partagée. Les pratiques sont la seule famille à
-    // lire/écrire en SYNCHRONE, à exiger un clone PROFOND, et à RENDRE la copie.
+    // lire/écrire en SYNCHRONE et à RENDRE la copie. La copie PROFONDE (aucune
+    // référence partagée avec la source : configuration / jetons / objectifs) est
+    // désormais celle de toutes les familles (#1298, 19 nov. 2026 : `cloneProfond` retiré).
     return await BibliothequeUI.dupliquerVersBibliotheque({
         id: pratiqueId,
         prefixeId: 'pratique_',
-        // Copie PROFONDE (et non un étalement) : aucune référence partagée avec
-        // la source (sous-objets configuration / jetons / objectifs). Garantit
-        // STRUCTURELLEMENT l'invariant « source immuable » (zéro-dette), pas
-        // seulement par la sérialisation de la persistance. Aligné sur
-        // copierPratiqueDepuisTrimestre (Brique C pas 5).
-        cloneProfond: true,
         modifierListe: (mutateur) => db.modifier(cle('pratiquesConfigurables'), mutateur, []), // security-ok: la liste écrite est la collection lue en stockage, augmentée d'une copie forgée localement — aucune source externe
         // ✅ D3 (arbitrage du 24 août) — `nommerCopie` remplace la concaténation
         // nue, qui empilait « X (copie) (copie) ».

@@ -671,7 +671,9 @@ async function dupliquerPratique(id, options = {}) {
             inspireDe: BibliothequeUI.forgerInspireDe(original),
             type: configResolue.type,
             variante: configResolue.variante || null,
-            calcul_note: configResolue.calcul_note,
+            // #1298 (19 nov. 2026) : cloné comme ses voisins — la référence nue partageait
+            // `calcul_note` avec la source quand `db` sert la collection par son cache mémoire.
+            calcul_note: configResolue.calcul_note === undefined ? undefined : clone(configResolue.calcul_note),
             configuration: clone(configResolue.configuration || {}),
             config: clone(configResolue) // Deep copy de la config résolue (exécutable)
         };

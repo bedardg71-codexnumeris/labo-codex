@@ -1245,8 +1245,9 @@ async function ajouterEchelleIndividuelle(id) {
                 }
                 // Générer un nouvel ID pour éviter les conflits (pattern Productions)
                 const nouvelId = genererIdUnique('ECH_');
+                // #1298 (19 nov. 2026) — copie PROFONDE (`niveaux`, `config`) : voir `ajouterGrilleIndividuelle`.
                 trouvee = {
-                    ...echelleSource,
+                    ...JSON.parse(JSON.stringify(echelleSource)),
                     id: nouvelId,
                     idOriginal: echelleSource.id,
                     dansBibliotheque: true,
@@ -3185,8 +3186,10 @@ async function dupliquerEchelleDepuisSidebar(id) {
         // ✅ D1 + D4 + D5 (arbitrage du 24 août) — même correctif que côté grilles :
         // c'était le même angle mort, sur la même voie « barre latérale ». Voir le
         // commentaire de `dupliquerGrilleDepuisSidebar` pour le détail du défaut.
+        // ⚠⚠ #1298 (19 nov. 2026) — copie PROFONDE : `{ ...echelle }` partageait `niveaux`
+        // et `config` avec la source, et IndexedDB gardait ce partage (mesuré au navigateur).
         const copie = {
-            ...echelle,
+            ...JSON.parse(JSON.stringify(echelle)),
             id: genererIdUnique('ECH_'),
             nom: nommerCopie(echelle.nom, echelles),
             auteur: BibliothequeUI.obtenirAuteurActif(),
