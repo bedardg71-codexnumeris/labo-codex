@@ -61,7 +61,7 @@
   « Choisis le nombre de séances par semaine », « Pour chaque séance : le jour, le début et la fin » (bulle 5),
   « Choisis une séance déjà donnée… », « Note seulement les absences et les retards » (bulle 7). À garder ?
   Réponse : ______________________
-- **3.3** #1296 : la zone de collage de la liste dit « Depuis Excel ou Omnivox... ». Par quoi la remplacer ?
+- **3.3** #1297 : la zone de collage de la liste dit « Depuis Excel ou Omnivox... ». Par quoi la remplacer ?
   Réponse : ______________________
 
 ## §4 · Ce que je n'ai pas pu vérifier

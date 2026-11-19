@@ -4,7 +4,7 @@
 > (elle porte `poserConfirmation`, `secondeForme` et le commit d'aperçu `4c36db45`), puis `git merge --no-ff
 > origin/main` à `ade09e93` (la 1.250.0 en ligne) : commit de fusion `b1b6f3dd`. **LIVRÉ** : les huit bulles et la
 > variante de la septième, mot pour mot ; la flèche des gestes et la parenthèse des consignes hors du gras, au moteur ;
-> « tu assembles » dans « Je regarde » ; #1296 inscrit. **UNE DÉCISION ATTEND** (§ 8, 1) : à 1180 × 820, la bulle 1,
+> « tu assembles » dans « Je regarde » ; #1297 inscrit. **UNE DÉCISION ATTEND** (§ 8, 1) : à 1180 × 820, la bulle 1,
 > plus haute, couvre deux des champs qu'elle demande de remplir ; le banc qui le mesure reste rouge. Ni fusion, ni release, ni bump, ni changelog. **À annuler avant toute fusion** : `4c36db45` (« BRANCHE
 > SEULEMENT », hérité de la base : il rouvre « Mettre ta classe en place », « Évaluer » et « Recevoir » ; ce lot n'en
 > ajoute aucun). Consigne : `plans de travail/CONSIGNE-2026-11-19-nous-faisons-classe.md` (copie mot pour mot de
@@ -76,7 +76,7 @@ toujours faites quand elles paraissent : le crochet, comme avant.
 
 **« Je regarde », bulle 5** : `lieuSuite` « … tu réunis … » → « … tu assembles ce que tu viens de créer. » Rien d'autre.
 
-**#1296 inscrit** (issue 2, sans y toucher) : la zone de collage de la liste a pour exemple « Depuis Excel ou
+**#1297 inscrit** (issue 2, sans y toucher) : la zone de collage de la liste a pour exemple « Depuis Excel ou
 Omnivox... » (`index.html`, `#v2-donneesCollees`).
 
 **La parenthèse d'une consigne, hors du gras** (`js/parcours-moteur.js`, `css/parcours.css`). Trouvé en lisant le relais
@@ -230,8 +230,10 @@ de l'aperçu Netlify y est donnée dès que le déploiement de la PR la publie.
    « Cadre » » (supposition 4) : à garder, ou faut-il que la première bulle d'un passage, quelle qu'elle soit, dise
    l'objectif et le lieu complet ? C'est une règle du moteur, pour tous les parcours.
 3. **Les quatre gestes sans témoin** (supposition 1) : flèche sans crochet, ou une autre forme ?
-4. **#1296** : le mot qui remplace « Depuis Excel ou Omnivox... ».
+4. **#1297** : le mot qui remplace « Depuis Excel ou Omnivox... ».
 
 ## 9. Trouvailles
 
-- #1296 (issue 2, ci-dessus).
+- #1297 (issue 2, ci-dessus). D'abord inscrit #1296 ; mesuré avant le push : #1296 est déjà pris, et deux fois, par
+  `lot/autoevaluation-consignes` et `lot/glisser-alignement` (deux sens différents, aucune n'est fusionnée). Pris #1297 ;
+  à revérifier à la fusion.
