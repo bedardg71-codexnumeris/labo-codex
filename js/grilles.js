@@ -5577,11 +5577,19 @@ function ajusterHauteursAuto(container) {
         if (e.target && e.target.matches && e.target.matches('textarea[data-hauteur-auto]')) ajusterHauteurAuto(e.target);
     });
     if (typeof ResizeObserver === 'function') {
+        // ↻ 19 nov. 2026 : l'ajustement attend l'image suivante. Fait dans le rappel, il changeait la hauteur de
+        // la liste observée pendant la passe de mesure, et WebKit levait « ResizeObserver loop completed with
+        // undelivered notifications » (six rouges de copie-demo-bibliotheque, verdict de la 1.250.0).
         let largeur = container.clientWidth;
+        let enAttente = false;
         new ResizeObserver(() => {
-            if (container.clientWidth === largeur) return;
-            largeur = container.clientWidth;
-            container.querySelectorAll('textarea[data-hauteur-auto]').forEach(ajusterHauteurAuto);
+            if (enAttente || container.clientWidth === largeur) return;
+            enAttente = true;
+            requestAnimationFrame(() => {
+                enAttente = false;
+                largeur = container.clientWidth;
+                container.querySelectorAll('textarea[data-hauteur-auto]').forEach(ajusterHauteurAuto);
+            });
         }).observe(container);
     }
 }
