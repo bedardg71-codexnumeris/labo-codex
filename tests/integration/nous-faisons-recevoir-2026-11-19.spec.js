@@ -26,6 +26,8 @@ import { pointCanevas, compteAnnotations } from './harness/banc-copie-annotation
 // Break-test (19 nov.) : voir le rapport du lot (plans de travail/RAPPORT-2026-11-19-nous-faisons-recevoir.md).
 
 const TAILLES = [[1180, 820], [820, 1180]];
+// Les codes de l'« Échelle de départ (IDME) », celle de la production du troisième parcours (20 nov. 2026).
+const NIVEAUX = ['PS', 'I', 'D', 'M', 'E'];
 const PDF_LEA = 'Baobab_Basile_2390002_Journal de lecture 1__Remis_le_2026-11-03_10h00m00s.png';
 const item = (page) => page.locator('#panneau-assistance [data-parcours="recevoir"]');
 const n = (page, k, total, titre, opts = { focus: false }) => attendreEtape(page, k, total, titre, opts);
@@ -60,8 +62,9 @@ async function fermerLeRappel(page) {
 async function lancerLeQuatrieme(page, taille) {
     dossierDesCaptures('');
     await leTroisiemeParcoursFait(page, { cap: 'p3' });
-    test.setTimeout(480000);   // l'aide du troisième parcours pose 240 s ; les deux parcours en demandent plus
-    await page.keyboard.press('Escape');
+    test.setTimeout(480000);   // l'aide du troisième parcours pose 300 s ; les deux parcours en demandent plus
+    // 20 nov. 2026 (plans de travail/CONSIGNE-2026-11-20-essai-parcours.md, D) : à la sortie du troisième parcours neuf,
+    // ni bulle ni panneau ne reste ouvert (`leTroisiemeParcoursFait` le juge) ; l'« Échap » qui fermait le panneau est parti.
     // Un rechargement entre les deux parcours (comme le banc du quatrième parcours, qui recharge à son étape 4). Sans lui,
     // mesuré 1 fois sur 3 : à l'entrée de l'étape 6, le formulaire d'évaluation garde un instant les niveaux de la copie
     // évaluée au troisième parcours, sous le DA du fichier ouvert, et l'étape avance sans qu'aucun niveau soit choisi.
@@ -107,11 +110,17 @@ async function lireBulle(page) {
             [...x.children].forEach((li) => lignes.push(marque(li) + ' ' + plat(li.querySelector('.parcours-bulle-ligne-texte').textContent)));
         });
         const c = b.querySelector('.parcours-bulle-confirme');
-        return { confirme: c && !c.hidden && getComputedStyle(c).display !== 'none' ? plat(c.textContent) : null, lignes };
+        // 20 nov. 2026 (consigne du 20 nov., A1 et A2) : l'entrée de la première bulle, au-dessus du titre.
+        const dit = (sel) => { const e = b.querySelector(sel); return e && !e.hidden && getComputedStyle(e).display !== 'none' ? plat(e.textContent) : null; };
+        return { confirme: c && !c.hidden && getComputedStyle(c).display !== 'none' ? plat(c.textContent) : null, lignes, identite: dit('.parcours-bulle-identite'), aide: dit('.parcours-bulle-aide') };
     });
 }
 
-const POIGNEE = 'E Tu peux déplacer cette bulle par sa poignée et faire défiler la page pour mieux voir.';
+// 20 nov. 2026 (CONSIGNE-2026-11-20-essai-parcours.md, A1 et A2) : la phrase de la poignée n'est plus la dernière des
+// lignes de la première bulle ; elle est au-dessus du titre (`.parcours-bulle-aide`), sous la ligne qui nomme le parcours
+// et son temps (`.parcours-bulle-identite`). Les bulles suivantes ne portent ni l'une ni l'autre.
+const IDENTITE = 'Parcours 4 · Recevoir les productions, rendre tes rétroactions · Nous faisons';
+const POIGNEE = 'Tu peux déplacer cette bulle par sa poignée et faire défiler la page pour mieux voir.';
 const genres = async (page) => (await lireBulle(page)).lignes.map((l) => l.slice(0, 1)).join('');
 
 for (const taille of TAILLES) {
@@ -132,14 +141,15 @@ for (const taille of TAILLES) {
             "G Télécharge dans un dossier les fichiers que tes étudiant·es t'ont remis en ligne, sans les renommer (leur nom porte le DA de l'étudiant·e : l'application s'en sert pour trouver à qui est chaque production)",
             "G S'ils arrivent dans un fichier ZIP, décompresse-le (la zone ne prend que des PDF et des images)",
             "E Ta production est sur papier, ou c'est un exposé, une performance, une entrevue ? « Rien à importer » te mène directement à l'évaluation.",
-            'C Dépose les fichiers dans la zone, ou touche « Rien à importer »',
-            POIGNEE
+            'C Dépose les fichiers dans la zone, ou touche « Rien à importer »'
         ]);
+        expect([vu.identite, vu.aide], 'la première bulle : le parcours et son temps, puis la phrase de la poignée, au-dessus du titre').toEqual([IDENTITE, POIGNEE]);
         await deposer(page, [PDF_LEA]);
 
         // 2. Vérifier avant d'importer.
         await n(page, 2, 9, "Vérifie avant d'importer");
         vu = await lireBulle(page);
+        expect([vu.identite, vu.aide], 'la deuxième bulle ne porte plus l’entrée').toEqual([null, null]);
         expect(vu.confirme).toBe("C'est fait : tes fichiers sont dans la zone. Rien n'est encore importé.");
         expect(vu.lignes.map((l) => l.slice(0, 1)).join('')).toBe('EEGGCE');
         await page.selectOption('.pipeline-production-selecteur select', pid);
@@ -189,8 +199,13 @@ for (const taille of TAILLES) {
         await n(page, 5, 9, 'Annoter');
         vu = await lireBulle(page);
         expect(vu.confirme).toBe("C'est fait : tes tampons sont enregistrés.");
-        expect(vu.lignes.map((l) => l.slice(0, 1)).join('')).toBe('EEEEGGC');
-        expect(vu.lignes.slice(4)).toEqual(['G Annote la production', 'G Pose tes tampons là où tu observes quelque chose',
+        // 20 nov. 2026 (consigne du 20 nov., E3) : une explication de plus, après la ligne du « Stylo » (cinq, avant quatre).
+        expect(vu.lignes.map((l) => l.slice(0, 1)).join('')).toBe('EEEEEGGC');
+        expect(vu.lignes.slice(2, 4)).toEqual([
+            'E Garde le « Stylo » pour encercler, souligner ou tracer une flèche : chaque trait y devient un élément à part.',
+            "E L'outil « Stylo » sera raffiné dans une mise à jour ultérieure."
+        ]);
+        expect(vu.lignes.slice(5)).toEqual(['G Annote la production', 'G Pose tes tampons là où tu observes quelque chose',
             'C Quand tu as fini, touche « Annoter ▾ », puis choisis « Évaluer »']);
         await page.evaluate(() => window.travauxOutils.setOutilActif('stylo'));
         const a = await pointCanevas(page, 0.3, 0.3), b = await pointCanevas(page, 0.5, 0.35);
@@ -200,12 +215,12 @@ for (const taille of TAILLES) {
         await page.mouse.move(b.x, b.y, { steps: 4 });
         await page.mouse.up();
         await expect.poll(() => compteAnnotations(page)).toMatchObject({ strokes: 1, stickers: 0 });
-        await expect.poll(() => genres(page), { message: 'une marque posée : « Annote la production » se grise' }).toBe('EEEEFGC');
+        await expect.poll(() => genres(page), { message: 'une marque posée : « Annote la production » se grise' }).toBe('EEEEEFGC');
         await page.evaluate(() => document.querySelector('#travaux-palette-tampons .travaux-autocollant-item[data-action="travauxOutils.setAutocollantActif"]').click());
         const t = await pointCanevas(page, 0.4, 0.6);
         await page.mouse.click(t.x, t.y);
         await expect.poll(() => compteAnnotations(page)).toMatchObject({ stickers: 1 });
-        await expect.poll(() => genres(page), { message: 'un tampon posé : son geste se grise' }).toBe('EEEEFFC');
+        await expect.poll(() => genres(page), { message: 'un tampon posé : son geste se grise' }).toBe('EEEEEFFC');
         await page.evaluate(() => window.travauxOutils.setOutilActif('position'));
         await page.click('#travaux-btn-actions');
         await page.locator('[data-action="travauxUI.basculerMode"]', { hasText: 'Évaluer' }).first().click();
@@ -225,11 +240,15 @@ for (const taille of TAILLES) {
         ]);
         expect(await page.evaluate(() => getComputedStyle(document.querySelector('#parcours-bulle .parcours-bulle-ligne-precision')).fontWeight)).toBe('400');
         // Les critères paraissent un moment après l'entrée (mesuré : environ une seconde après un rechargement).
-        await expect.poll(() => page.locator('#listeCriteresGrille1 select[id^="eval_"]').count(), { timeout: 15000 }).toBe(4);
+        // 20 nov. 2026 (consigne du 20 nov., D) : la production du troisième parcours neuf porte la « Grille du banc », DEUX
+        // critères par niveaux (avant : quatre), et l'« Échelle de départ (IDME) » (avant : une échelle à quatre niveaux,
+        // codes I, P, S, R).
+        await expect.poll(() => page.locator('#listeCriteresGrille1 select[id^="eval_"]').count(), { timeout: 15000 }).toBe(2);
         const champs = await page.evaluate(() => [...document.querySelectorAll('#listeCriteresGrille1 select[id^="eval_"]')].map((x) => x.id));
-        for (const id of champs.slice(0, 3)) await page.selectOption('#' + id, 'S');
+        expect(await page.locator('#' + champs[0]).evaluate((x) => [...x.options].map((o) => o.value).filter(Boolean))).toEqual(NIVEAUX);
+        await page.selectOption('#' + champs[0], 'M');
         expect(await genres(page), 'un critère reste : la consigne n’est pas faite').toBe('EGC');
-        await page.selectOption('#' + champs[3], 'S');
+        await page.selectOption('#' + champs[1], 'M');
 
         // 7. La rétroaction, deux flèches (son titre, « Verrouiller »). Mesuré : repliée à l'étape 6, la palette « Rétroaction »
         // est reconstruite par l'application avant l'étape 7. Repliée PENDANT l'étape 7, puis « Plus tard » et « Reprendre »,
@@ -271,7 +290,7 @@ for (const taille of TAILLES) {
         await page.click('[data-action="travauxUI.lancerExportLea"]');
         await telechargement;
 
-        // 9. Remets-les : des explications, la fin du moteur. Tous les parcours ouverts (les bancs) : « Parcours suivant ».
+        // 9. Remets-les : des explications, la fin du moteur. Tous les parcours ouverts (les bancs) : « Voir le parcours 5 ».
         await n(page, 9, 9, 'Remets-les');
         vu = await lireBulle(page);
         expect(vu.confirme).toBe("C'est fait : tes rétroactions sont exportées.");
@@ -283,9 +302,12 @@ for (const taille of TAILLES) {
             'E Pour revoir une étape, touche « 9 sur 9 ».',
             "O Objectif atteint : tu es en mesure de recevoir les productions de ton groupe et de rendre à chacun·e sa rétroaction en PDF.",
             "E Chaque parcours a son objectif. C'est toi qui choisis la suite.",
-            'C Touche « Parcours suivant », ou « Terminer »'
+            'E Suite suggérée : le parcours 5, « Monter ton cours ».',
+            'C Touche « Voir le parcours 5 », ou « Terminer »'
         ]);
-        await expect(bulle(page).locator('.parcours-bulle-boutons button')).toHaveText(['Parcours suivant', 'Terminer']);
+        // 20 nov. 2026 (consigne du 20 nov., A3) : « Voir le parcours 5 » remplace « Parcours suivant » ; la bulle nomme la
+        // suite, et le bouton ne lance rien (jugé plus bas, à la voie sans fichier).
+        await expect(bulle(page).locator('.parcours-bulle-boutons button')).toHaveText(['Voir le parcours 5', 'Terminer']);
         // Mesure 1 du relais : les parcours ouverts de l'aperçu (le cinquième fermé). Le moteur n'offre que « Terminer », et
         // sa consigne le dit.
         await page.evaluate(() => Assistance.ouvrirLesParcours(['decouvrir', 'classe', 'evaluer', 'recevoir']));
@@ -309,8 +331,7 @@ for (const taille of TAILLES) {
         expect(vu.confirme).toBe("C'est fait : pas de fichier à importer.");
         expect(vu.lignes).toEqual([
             "L Tu es dans « Évaluation », à l'onglet « Liste » : c'est là que tu vois où en est chaque production de ton groupe.",
-            "C Sur la ligne d'un·e étudiant·e, touche « Actions › Évaluer »",
-            POIGNEE
+            "C Sur la ligne d'un·e étudiant·e, touche « Actions › Évaluer »"
         ]);
         const evaluer = await page.evaluate(() => [...document.querySelectorAll('#evaluations-liste select.eval-actions-select option')].map((o) => o.value).find((v) => v.startsWith('evaluer|2390002|')));
         await page.locator('#evaluations-liste select.eval-actions-select', { has: page.locator(`option[value="${evaluer}"]`) }).selectOption(evaluer);
@@ -321,13 +342,13 @@ for (const taille of TAILLES) {
             "E Tu es dans l'onglet « Annoter » : sans fichier, il n'y a rien à annoter, tu évalues directement.",
             "E Dans le panneau « Paramètres », ce que porte la production que tu leur as demandée : sa grille (les critères), son échelle (les niveaux) et sa cartouche (une phrase de rétroaction prévue pour chaque critère et chaque niveau). L'application les a choisies pour toi.",
             'G Vérifie que ce sont les bonnes, au moins à ta première évaluation (ce sont elles qui feront la note et la rétroaction)',
-            'C Dans le panneau « Critères », choisis le niveau ou les points de chaque critère (la note se calcule à mesure)',
-            POIGNEE
+            'C Dans le panneau « Critères », choisis le niveau ou les points de chaque critère (la note se calcule à mesure)'
         ]);
         expect((await lireBulle(page)).confirme).toBeNull();
-        await expect.poll(() => page.locator('#listeCriteresGrille1 select[id^="eval_"]').count()).toBe(4);
+        // 20 nov. 2026 (consigne du 20 nov., D) : deux critères, aux niveaux de l'Échelle de départ (avant : quatre, « P »).
+        await expect.poll(() => page.locator('#listeCriteresGrille1 select[id^="eval_"]').count()).toBe(2);
         for (const id of await page.evaluate(() => [...document.querySelectorAll('#listeCriteresGrille1 select[id^="eval_"]')].map((x) => x.id))) {
-            await page.selectOption('#' + id, 'P');
+            await page.selectOption('#' + id, 'D');
         }
 
         // 2 sur 4 : « La section », sans « Spécifique » ; deux flèches (le titre de la section, « Verrouiller »).
@@ -375,12 +396,22 @@ for (const taille of TAILLES) {
         await n(page, 4, 4, 'Remets-les');
         vu = await lireBulle(page);
         expect(vu.confirme).toBe("C'est fait : tes rétroactions sont exportées.");
-        expect(vu.lignes.slice(-4)).toEqual([
+        expect(vu.lignes.slice(-5)).toEqual([
             'E Pour revoir une étape, touche « 4 sur 4 ».',
             "O Objectif atteint : tu es en mesure de recevoir les productions de ton groupe et de rendre à chacun·e sa rétroaction en PDF.",
             "E Chaque parcours a son objectif. C'est toi qui choisis la suite.",
-            'C Touche « Parcours suivant », ou « Terminer »'
+            'E Suite suggérée : le parcours 5, « Monter ton cours ».',
+            'C Touche « Voir le parcours 5 », ou « Terminer »'
         ]);
-        await bulle(page).getByRole('button', { name: 'Terminer' }).click();
+        // 20 nov. 2026 (consigne du 20 nov., A3) : « Voir le parcours 5 » NE LANCE RIEN. Il termine ce parcours, ferme la
+        // bulle et ouvre le panneau devant la carte de « Monter ton cours », suggérée, le focus sur son premier bouton.
+        await bulle(page).getByRole('button', { name: 'Voir le parcours 5', exact: true }).click();
+        await expect(bulle(page)).toHaveCount(0);
+        await expect(page.locator('#panneau-assistance')).toBeVisible();
+        expect(await page.evaluate(() => ({ actif: ParcoursMoteur.actif(), fait: Assistance.etatDe('recevoir').etat, suivant: Assistance.etatDe('monter').etat })))
+            .toEqual({ actif: false, fait: 'fait', suivant: 'a-faire' });
+        const suivante = page.locator('#panneau-assistance [data-parcours="monter"]');
+        await expect(suivante).toHaveClass(/assistance-parcours-item--suggere/);
+        await expect(suivante.locator('.assistance-modele-bouton')).toBeFocused();
     });
 }

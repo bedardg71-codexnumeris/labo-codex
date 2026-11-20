@@ -1,6 +1,4 @@
 import { test, expect } from '@playwright/test';
-import fs from 'node:fs';
-import JSZip from 'jszip';
 import { releverLaBulle } from './harness/releve-bulle.js';
 // La bulle ne couvre jamais ses zones quand une place les laisse libres (Grégoire, 11 nov. 2026) : relevé à chaque essai.
 releverLaBulle(test);
@@ -10,7 +8,7 @@ import {
 } from './harness/deux-temps-de-banc.js';
 import { flecheVers, nombreDeFleches, etatFleches } from './harness/fleches-de-banc.js';
 import { actionDeLaListe, valeursActions } from './harness/nous-faisons-evaluer-de-banc.js';
-import { faireLesDeuxModeles, releveDesBlobs, poserUnBlobReel } from './harness/recevoir-modele-de-banc.js';
+import { faireLesDeuxModeles, voirLeParcoursPuisJeRegarde, releveDesBlobs, poserUnBlobReel } from './harness/recevoir-modele-de-banc.js';
 
 // =======================================================================
 // LOT « JE REGARDE » DE « RECEVOIR LES PRODUCTIONS, RENDRE TES RÉTROACTIONS » (17 NOVEMBRE 2026)
@@ -20,7 +18,7 @@ import { faireLesDeuxModeles, releveDesBlobs, poserUnBlobReel } from './harness/
 //   A · le refus sans le préalable (le modèle d'« Évaluer » pas fait) ; la pulsation sur SA Modélisation.
 //   B · le modèle de bout en bout, après les deux modèles précédents, aux deux orientations de l'iPad : la pulsation et
 //       une flèche avant chaque geste ; les trois copies dans la zone après « Remplir » ; trois « Importé » et sept
-//       évaluées à l'étape 3 ; l'export Léa (huit PDF, mesure 3.6) ; le confinement, clés ET blobs ; la remise à neuf.
+//       évaluées à l'étape 3 ; l'export Léa (un PDF dans un nouvel onglet, 20 nov. 2026) ; le confinement, clés ET blobs ; la remise à neuf.
 //   C · les sept évaluations de l'exemple : présentes, verrouillées, sans fichier, aux niveaux du tableau ; celle de Yack
 //       Amical (faite au modèle d'« Évaluer ») n'est pas remplacée ; aucune sur les trois copies ; leur note est celle
 //       que le formulaire calcule.
@@ -118,11 +116,14 @@ for (const [L, H] of ORIENTATIONS) {
         expect(blobsAvant).toHaveProperty('TEMOIN_COPIE_REELLE');
         const duPack = Object.fromEntries(Object.entries(avant).filter(([k]) => DE_LA_DEMO.test(k)));
 
-        // Les deux modèles qui le précèdent ; la fin d'« Évaluer » offre maintenant « Voir le parcours suivant ».
+        // Les deux modèles qui le précèdent. 20 nov. 2026 (plans de travail/CONSIGNE-2026-11-20-essai-parcours.md, A3) :
+        // la fin d'« Évaluer » n'offre plus « Voir le parcours suivant », qui lançait ce modèle d'office, mais « Voir le
+        // parcours 4 », qui ne lance rien : il ouvre le panneau devant la carte de « Recevoir », où la personne touche
+        // « Je regarde » (jugé pas à pas par `voirLeParcoursPuisJeRegarde`).
         const { pid, evaluationId: idDeYack } = await faireLesDeuxModeles(page);
-        await expect(bulle(page).locator('.parcours-bulle-boutons button')).toHaveText(['Le refaire avec ma classe', 'Voir le parcours suivant', 'Terminer']);
+        await expect(bulle(page).locator('.parcours-bulle-boutons button')).toHaveText(['Le refaire avec ma classe', 'Voir le parcours 4', 'Terminer']);
         await page.setViewportSize({ width: L, height: H });
-        await boutonDeBulle(page, 'Voir le parcours suivant').click();
+        await voirLeParcoursPuisJeRegarde(page, 4, 'recevoir');
         const t = await T(page);
         const titre = await page.evaluate((p) => db.getSync(cle('productions'), []).find((x) => x.id === p).titre, pid);
 
@@ -303,42 +304,69 @@ for (const [L, H] of ORIENTATIONS) {
         await laZoneEtLeGeste(page, 9, TITRE_DE_PALETTE('travaux-palette-eval-retro'), '#btnVerrouillerEvaluation');
         await page.click('#btnVerrouillerEvaluation');
 
-        // 10. Rends tes rétroactions : la production, « Exporter pour Léa » ; huit PDF (mesure 3.6) ; puis la seconde
-        // forme, la fin du parcours.
+        // 10. Rends tes rétroactions. 20 nov. 2026 (CONSIGNE-2026-11-20-essai-parcours.md, E1 et G5) : UNE SEULE
+        // rétroaction part, celle de Loutre Enjouée. Trois gestes, un à la fois (la production, l'étudiant·e, « Exporter
+        // pour Léa ») ; le PDF s'ouvre dans un NOUVEL ONGLET, l'application reste dans le sien ; puis la seconde forme, la
+        // fin du parcours. (Avant : deux gestes, et les huit évaluations verrouillées partaient dans un ZIP téléchargé.)
         await etape(page, 10, 'Rends tes rétroactions');
         await expect(bulle(page).locator('.parcours-bulle-confirme')).toHaveText(t.etape10.confirme);
         await expect(bulle(page).locator('.parcours-bulle-lieu')).toHaveText(lieuDit('Exporter', t.etape10.lieuSuite));
         await expect(bulle(page)).not.toContainText('Objectif atteint');
-        expect((await lireBulle(page)).consignes.map(sansInsecable)).toEqual([sansInsecable(t.etape10.choisir.replace('«TITRE»', titre)), t.etape10.exporter]);
+        for (const l of t.etape10.lignes) await expect(bulle(page)).toContainText(sansInsecable(l));
+        expect(sansInsecable(t.etape10.etudiant)).toBe('Sous « Étudiant·e », choisis « Loutre Enjouée »');
+        const gestes10 = [t.etape10.choisir.replace('«TITRE»', titre), t.etape10.etudiant, t.etape10.exporter].map(sansInsecable);
+        expect((await lireBulle(page)).consignes.map(sansInsecable)).toEqual(gestes10);
         await contourSur(page, '#travaux-archivage-lea-production');
         await page.selectOption('#travaux-archivage-lea-production', pid);
-        await expect.poll(async () => (await lireBulle(page)).consignes).toEqual([t.etape10.exporter]);
+        // La production choisie : le halo passe au menu « Étudiant·e ».
+        await expect.poll(async () => (await lireBulle(page)).consignes.map(sansInsecable)).toEqual(gestes10.slice(1));
+        await contourSur(page, '#travaux-archivage-lea-etudiant');
+        await page.selectOption('#travaux-archivage-lea-etudiant', '9900002');
+        await expect.poll(async () => (await lireBulle(page)).consignes.map(sansInsecable)).toEqual(gestes10.slice(2));
         await contourSur(page, '[data-action="travauxUI.lancerExportLea"]');
         const avantExport = await releve(page);
-        // Le nom que l'application donne au ZIP (l'attribut `download` du lien) : la bulle 10 en parle.
+        // Ce que l'application remet à l'onglet (le `File` dont elle fait l'adresse du PDF), et ce qu'elle téléchargerait :
+        // relevés pour juger qu'UN PDF part, celui de Loutre Enjouée, et qu'aucun ZIP n'est téléchargé.
         await page.evaluate(() => {
+            window.__remis = []; window.__telecharges = [];
+            const creer = URL.createObjectURL;
+            URL.createObjectURL = function (b) {
+                const r = { nom: b && b.name || '', type: b && b.type || '', taille: b && b.size || 0, entete: '' };
+                window.__remis.push(r);
+                if (b && b.slice) b.slice(0, 5).text().then((x) => { r.entete = x; });
+                return creer.apply(this, arguments);
+            };
             const cliquer = HTMLAnchorElement.prototype.click;
-            HTMLAnchorElement.prototype.click = function () { if (this.download) window.__nomDuZip = this.download; return cliquer.apply(this, arguments); };
+            HTMLAnchorElement.prototype.click = function () { if (this.download) window.__telecharges.push(this.download); return cliquer.apply(this, arguments); };
         });
-        const telechargement = page.waitForEvent('download');
+        const adresseAvant = page.url();
+        const ongletAttendu = page.waitForEvent('popup');
         await page.click('[data-action="travauxUI.lancerExportLea"]');
-        const dl = await telechargement;
-        const zip = await JSZip.loadAsync(fs.readFileSync(await dl.path()));
-        const pdfs = Object.keys(zip.files).filter((n) => n.endsWith('.pdf')).sort();
-        const nomDuZip = await page.evaluate(() => window.__nomDuZip || '');
-        test.info().annotations.push({ type: 'export Léa (mesure 3.6)', description: nomDuZip + ' (Chromium : ' + dl.suggestedFilename() + ') : ' + pdfs.join(' · ') });
-        expect(nomDuZip).toMatch(/^Lea_.+_\d{4}-\d{2}-\d{2}\.zip$/);
-        expect(pdfs).toHaveLength(8);
-        for (const da of Object.keys(SEPT).concat(['9900002'])) expect(pdfs.some((n) => n.includes(da)), da).toBe(true);
-        for (const da of ['9900005', '9900006']) expect(pdfs.some((n) => n.includes(da)), da).toBe(false);
-        // La seconde forme : ses deux lignes, « Objectif atteint », la phrase de la suite, les boutons ; sans « Plus tard ».
+        const onglet = await ongletAttendu;
+        // La seconde forme : ses trois lignes, « Objectif atteint », la phrase de la suite, les boutons ; sans « Plus tard ».
         await expect(bulle(page)).toContainText('Objectif atteint : tu es en mesure');
-        await expect(bulle(page)).toContainText(sansInsecable(t.etape10.devient.lignes[0]).slice(0, 30));
+        for (const l of t.etape10.devient.lignes) await expect(bulle(page)).toContainText(sansInsecable(l));
+        expect(t.etape10.devient.lignes).toHaveLength(3);
+        // UN PDF, celui de Loutre Enjouée ; rien de téléchargé (ni PDF ni ZIP).
+        await expect.poll(() => page.evaluate(() => window.__remis.filter((r) => r.type === 'application/pdf').map((r) => r.entete))).toEqual(['%PDF-']);
+        const remis = (await page.evaluate(() => window.__remis)).filter((r) => r.type === 'application/pdf');
+        expect(remis[0].nom).toMatch(/9900002.*\.pdf$/);
+        expect(remis[0].taille).toBeGreaterThan(10000);
+        expect(await page.evaluate(() => window.__telecharges), 'rien n’est téléchargé').toEqual([]);
+        // L'application reste dans son onglet (le défaut vécu le 20 nov. : le PDF prenait sa place) ; l'onglet du PDF est
+        // un autre, ouvert par elle. Ce qu'il charge sous `file://` est relevé pour le rapport, sans être jugé.
+        expect(page.url(), 'l’application reste dans son onglet').toBe(adresseAvant);
+        expect(page.context().pages().length, 'un onglet de plus, un seul').toBe(2);
+        expect(await onglet.opener(), 'l’onglet du PDF est ouvert par l’application').toBe(page);
+        expect(onglet.isClosed(), 'l’onglet du PDF reste ouvert').toBe(false);
+        test.info().annotations.push({ type: `export Léa, un PDF dans un onglet (G5), ${L} × ${H}`, description: remis[0].nom + ' (' + remis[0].taille + ' o) ; adresse de l’onglet : ' + onglet.url() });
+        await onglet.close();
         await expect(bulle(page).locator('.parcours-bulle-confirme')).toBeHidden();
         await expect(bulle(page).locator('.parcours-bulle-sortie')).toHaveCount(0);
-        // « Voir le parcours suivant » n'y est que si le parcours suivant a son modèle : depuis le 20 nov. 2026, « Monter ton
-        // cours » a le sien (lot/je-regarde-cours) ; les trois suites, de même poids.
-        await expect(bulle(page).locator('.parcours-bulle-boutons button')).toHaveText(['Le refaire avec ma classe', 'Voir le parcours suivant', 'Terminer']);
+        // 20 nov. 2026 (A3) : « Voir le parcours 5 » remplace « Voir le parcours suivant », et la bulle nomme la suite.
+        await expect(bulle(page).locator('.parcours-bulle-boutons button')).toHaveText(['Le refaire avec ma classe', 'Voir le parcours 5', 'Terminer']);
+        await expect(bulle(page).locator('.parcours-bulle-suite')).toHaveCount(2);
+        expect(sansInsecable(await bulle(page).locator('.parcours-bulle-suite').nth(1).innerText())).toBe('Suite suggérée : le parcours 5, « Monter ton cours ».');
         // L'export n'écrit rien en base, ni dans la démo ni ailleurs (mesure 3.6) ; seul l'état du modèle change, sur l'appareil.
         expect(ecarts(avantExport, await releve(page), (k) => !DE_L_APPAREIL.test(k)), 'l’export n’écrit rien').toEqual([]);
         await boutonDeBulle(page, 'Terminer').click();
@@ -393,7 +421,8 @@ test('C · les sept évaluations de l’exemple : présentes, verrouillées, san
     await ouvrirEspaceVide(page, 820, 1180);
     const { pid, evaluationId: idDeYack } = await faireLesDeuxModeles(page);
     const deYack = (await evaluationsDe(page, pid)).find((e) => e.id === idDeYack);
-    await boutonDeBulle(page, 'Voir le parcours suivant').click();
+    // 20 nov. 2026 (CONSIGNE-2026-11-20-essai-parcours.md, A3) : « Voir le parcours 4 », puis « Je regarde » dans le panneau.
+    await voirLeParcoursPuisJeRegarde(page, 4, 'recevoir');
     await etape(page, 1, 'Leurs productions');
 
     // Break-test (17 nov. 2026) : le filtre « déjà évalué·e » retiré de `poserLesEvaluationsDeLExemple` → ROUGE ici
@@ -430,8 +459,14 @@ test('C · les sept évaluations de l’exemple : présentes, verrouillées, san
     //    la même rétroaction.
     await page.evaluate(() => ParcoursMoteur.fermer());
     const caribou = sept.find((e) => e.etudiantDA === '9900009');
-    const consulter = (await valeursActions(page, caribou.id)).find((v) => v.startsWith('consulter|'));
+    // 20 nov. 2026 (CONSIGNE-2026-11-20-essai-parcours.md, A3) : le menu de Caribou se lit une fois la Liste affichée. Le
+    // banc le lisait AVANT d'y aller, dans la Liste cachée ; mesuré le 20 nov. : cachée, elle date du modèle d'« Évaluer »
+    // (23 options, aucune de Caribou, dont l'évaluation est posée au lancement de ce modèle-ci) ; affichée, elle porte
+    // ses trois actions. La personne ne voit que la Liste affichée.
     await page.evaluate(() => naviguerVers('evaluations', 'liste'));
+    await expect.poll(async () => (await valeursActions(page, caribou.id)).filter((v) => v.startsWith('consulter|')).length,
+        { message: 'la Liste affichée offre « Consulter » sur l’évaluation de Caribou Attentionné' }).toBe(1);
+    const consulter = (await valeursActions(page, caribou.id)).find((v) => v.startsWith('consulter|'));
     await actionDeLaListe(page, consulter);
     await page.waitForFunction((id) => {
         const ec = window.evaluationEnCours, b = document.getElementById('btnVerrouillerEvaluation');

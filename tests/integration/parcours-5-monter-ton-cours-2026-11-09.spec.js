@@ -205,8 +205,11 @@ const gestesBulle = (page) => bulle(page).locator('.parcours-bulle-ligne .parcou
 /** Un espace où le troisième parcours est fait ; sa production sera placée dans la carte. */
 async function espaceDuTroisiemeParcours(page) {
     dossierDesCaptures('');
+    // 20 nov. 2026 (plans de travail/CONSIGNE-2026-11-20-essai-parcours.md, D) : le « Nous faisons » neuf d'« Évaluer »
+    // sort sans bulle ni panneau (avant, le panneau restait ouvert et le banc le fermait par Échap). Sa production
+    // s'appelle toujours « Journal de lecture 1 » ; sa grille (« Grille du banc », deux critères) n'est pas citée ici.
     await leTroisiemeParcoursFait(page, { cap: 'p3' });
-    await page.keyboard.press('Escape');
+    await expect(page.locator('#panneau-assistance'), 'le troisième parcours fait : aucun panneau ouvert').toHaveCount(0);
     return page.evaluate(() => ParcoursEvaluer.contexte().productionId);
 }
 

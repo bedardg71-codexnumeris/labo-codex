@@ -11,16 +11,19 @@
 //   L7 · aucune pastille ne couvre un nom d'étiquette, à aucune position de la liste ; l'étiquette que l'aide désigne
 //        est amenée entièrement visible, sous la pastille.
 // Break-tests : voir le rapport du lot (`plans de travail/RAPPORT-2026-11-12-dissection-ipad.md`, second relais).
-// Grilles FICTIVES ; noms d'étudiant·es fictifs (classe-de-banc.js).
+// Grilles FICTIVES ; aucun nom d'étudiant·e.
+// 20 nov. 2026 (plans de travail/CONSIGNE-2026-11-20-essai-parcours.md, section D) : L6 et L7 entraient dans
+// l'étiquetage par l'ancienne étape 1 d'« Évaluer une première production » (deux bulles d'ouverture, puis « Ta
+// grille »), retirée. Ils jugent la page (la ligne du geste, la flèche et le halo de `js/materiel-aide.js`, la légende) :
+// ils entrent maintenant par la carte de la page, « Ta grille, pas à pas », qui porte ces mêmes éléments sans parcours.
 import { test, expect } from '@playwright/test';
-import { ouvrirEspaceVide, mettreLaClasseEnPlace, attendreEtape, contourSur, bulle, bulleNeCouvrePas, capture } from './harness/classe-de-banc.js';
+import { ouvrirEspaceVide, contourSur, capture } from './harness/classe-de-banc.js';
 import { flecheVers } from './harness/fleches-de-banc.js';
 import { collerLExemple } from './harness/exemple-colle.js';
-import { passerLOuverture, boutonExemple } from './harness/ouverture-evaluer.js';
+import { boutonExemple, ouvrirLaCarteDeLaPage } from './harness/ouverture-evaluer.js';
 
 const DOSSIER = process.env.CAPTURES_PARCOURS || '';
 const TAILLES = [[1180, 820], [820, 1180]];
-const etape = (page, n, titre, opts) => attendreEtape(page, n, 9, titre, opts);
 const norm = (t) => String(t).replace(/[  ]/g, ' ');
 const geste = (page) => page.locator('#parcours-bulle .parcours-bulle-geste');
 const etiquette = (type) => `#dissection-palette .dissection-etiquette[data-type="${type}"]`;
@@ -81,12 +84,6 @@ const CAPTURE = '<table><tr><td colspan="3">Grille fictive d’analyse</td></tr>
     + '<tr><td>Introduction</td><td>Sujet amené, posé, divisé</td><td>/ 5</td></tr>'
     + '<tr><td>Développement</td><td>Arguments et exemples</td><td>/ 30</td></tr>'
     + '<tr><td>Conclusion</td><td>Synthèse et ouverture</td><td>/ 10</td></tr></table>';
-
-/** Le parcours lancé, à l'étape 1 (l'exemple offert). */
-async function lancerEvaluer(page) {
-    await page.evaluate(() => Assistance.parcours().find((p) => p.id === 'evaluer').lancer(0));
-    await passerLOuverture(page);   // 14 nov. 2026 : deux bulles d'ouverture avant « Ta grille »
-}
 
 
 const INTERDITS = /surligne|surligné|palette/i;
@@ -188,9 +185,7 @@ test('L5 · 1180 × 820 : les flèches d’étiquetage suivent le défilement de
 for (const [L, H] of TAILLES) {
     test(`L6 · ${L} × ${H} : la flèche de la carte ne vise jamais une étiquette cachée ; un geste d’étiquetage ne la ramène pas`, async ({ page }) => {
         test.setTimeout(180000);
-        await ouvrirEspaceVide(page, L, { hauteur: H });
-        await mettreLaClasseEnPlace(page);
-        await lancerEvaluer(page);
+        await ouvrirLaCarteDeLaPage(page, L, H);   // 20 nov. 2026 : par la page, plus par l'ancienne étape 1 du parcours
         await coller(page, CAPTURE);
         await poser(page, 'titre', ['Grille fictive d’analyse']);
         await poser(page, 'critere', ['Introduction', 'Développement', 'Conclusion']);
@@ -241,9 +236,7 @@ for (const [L, H] of TAILLES) {
 for (const [L, H] of TAILLES) {
     test(`L7 · ${L} × ${H} : aucune pastille ne couvre un nom d’étiquette, à aucune position ; la désignée est entière`, async ({ page }) => {
         test.setTimeout(180000);
-        await ouvrirEspaceVide(page, L, { hauteur: H });
-        await mettreLaClasseEnPlace(page);
-        await lancerEvaluer(page);
+        await ouvrirLaCarteDeLaPage(page, L, H);   // 20 nov. 2026 : par la page, plus par l'ancienne étape 1 du parcours
         await boutonExemple(page, 'exercice').click();   // 14 nov. 2026 : le bouton est sur la page, plus dans la bulle
         await gesteEst(page, 'Ta grille n’a pas encore de nom : prends « Titre », puis touche son nom dans ta grille.');
         // À chaque position de la liste, la partie visible de chaque nom ne touche aucune pastille visible.

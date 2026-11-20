@@ -70,8 +70,16 @@ const lire = (page) => page.evaluate(() => {
         objectif: plat(b.querySelector('.parcours-bulle-objectif:not(.parcours-bulle-atteint)')),
         atteint: plat(b.querySelector('.parcours-bulle-atteint')),
         suite: plat(b.querySelector('.parcours-bulle-suite')),
-        aide: plat(b.querySelector('.parcours-bulle-aide')),
-        petits: [...b.querySelectorAll('.parcours-bulle-aide, .parcours-bulle-revue')].map((e) => parseFloat(getComputedStyle(e).fontSize)),
+        // 20 nov. 2026 (plans de travail/CONSIGNE-2026-11-20-essai-parcours.md, A3) : la suite suggérée, nommée après.
+        suggeree: plat(b.querySelector('.parcours-bulle-suite-suggeree')),
+        // 20 nov. 2026 (même consigne, A1 et A2) : la ligne qui nomme le parcours et la phrase de la poignée ont leurs
+        // éléments à elles, au-dessus du titre ; ils restent dans la bulle, cachés, hors de la première.
+        identite: plat(b.querySelector('.parcours-bulle-identite:not([hidden])')),
+        aide: plat(b.querySelector('.parcours-bulle-aide:not([hidden])')),
+        entreeAuDessus: (() => { const i = b.querySelector('.parcours-bulle-identite:not([hidden])'), a = b.querySelector('.parcours-bulle-aide:not([hidden])'), t = b.querySelector('.parcours-bulle-titre');
+            const suit = (x, y) => !!(x.compareDocumentPosition(y) & Node.DOCUMENT_POSITION_FOLLOWING) && x.getBoundingClientRect().bottom <= y.getBoundingClientRect().top + 1;
+            return !!i && !!a && !!t && suit(i, a) && suit(a, t); })(),
+        petits: [...b.querySelectorAll('.parcours-bulle-identite:not([hidden]), .parcours-bulle-aide:not([hidden]), .parcours-bulle-revue')].map((e) => parseFloat(getComputedStyle(e).fontSize)),
         fleches: [...document.querySelectorAll('.parcours-fleche')].map((g) => g.getAttribute('data-cible')),
         confirme: plat(b.querySelector('.parcours-bulle-confirme:not([hidden])')),
         // 18 nov. 2026 (Grégoire, 14 h 11) : la confirmation au-dessus du titre et du compteur.
@@ -94,6 +102,25 @@ const lire = (page) => page.evaluate(() => {
         attente: b.classList.contains('est-en-attente')
     };
 });
+
+/**
+ * « Voir le parcours N » (20 nov. 2026, plans de travail/CONSIGNE-2026-11-20-essai-parcours.md, A3) : le bouton de la
+ * dernière bulle ne lance rien. La bulle se ferme, aucun parcours n'est en cours, et le panneau « Assistance » s'ouvre
+ * devant la carte du parcours N : elle seule est marquée, elle est à l'écran, le focus est à son premier bouton.
+ */
+async function voirLeParcours(page, n, id) {
+    await bulle(page).getByRole('button', { name: 'Voir le parcours ' + n, exact: true }).click();
+    await expect(bulle(page)).toHaveCount(0);
+    expect(await page.evaluate(() => ParcoursMoteur.actif()), 'rien n’est lancé').toBe(false);
+    await expect(page.locator('#panneau-assistance')).toBeVisible();
+    await expect(page.locator('#panneau-assistance .assistance-parcours-item--suggere')).toHaveCount(1);
+    await expect(carte(page, id)).toHaveClass(/assistance-parcours-item--suggere/);
+    await expect(carte(page, id)).toBeInViewport();
+    expect(await page.evaluate((id) => {
+        const c = document.querySelector('#panneau-assistance [data-parcours="' + id + '"]');
+        return document.activeElement === c.querySelector('.assistance-modele-bouton, .assistance-parcours-bouton');
+    }, id), 'le focus est au premier bouton de la carte du parcours ' + n).toBe(true);
+}
 
 /** Règle f : une seule page, et la hauteur relevée pour le rapport. */
 async function relever(page, parcours, n, etat) {
@@ -290,9 +317,14 @@ test('« Découvrir » : l’objectif à la première bulle, la confirmation ens
     expect(v.confirme).toBeNull();
     expect(v.lieu).toBe('Tu es dans « Suivi », à l\'onglet « Groupe ». La classe est fictive : dix étudiant·es, un trimestre complet.');
     expect(v.liste[v.liste.length - 1]).toBe('Touche « Détails » pour mettre un nom sur chaque point');
-    // La poignée, dite à la première bulle, en petit, sous les lignes (essai, B.7).
+    // La poignée, dite à la première bulle, en petit (essai, B.7). 20 nov. 2026 (consigne du 20 nov., A1 et A2) : elle
+    // n'est plus sous les lignes ; elle est au-dessus du titre, sous la ligne qui nomme le parcours (« Découvrir » n'a
+    // qu'un temps : la ligne n'en nomme aucun).
+    expect(v.identite).toBe('Parcours 1 · Découvrir');
     expect(v.aide).toBe('Tu peux déplacer cette bulle par sa poignée et faire défiler la page pour mieux voir.');
-    expect(v.ordre[v.ordre.length - 1]).toBe('parcours-bulle-aide');
+    expect(v.entreeAuDessus, 'le parcours nommé, puis la poignée, puis le titre').toBe(true);
+    expect(v.ordre).not.toContain('parcours-bulle-aide');
+    expect(v.petits).toHaveLength(2);
     expect(v.petits.every((t) => t < 14)).toBe(true);
     // Le triangle du compteur (règle d) : celui des sections, à leur taille, couché puis pointe en bas (essai, B.1).
     const t = await triangle(page);
@@ -377,9 +409,12 @@ test('« Découvrir » : l’objectif à la première bulle, la confirmation ens
     // avant les boutons ; « Pour revoir une étape », en petit ; plus rien de cela dans la liste.
     expect(v.atteint).toBe('Objectif atteint : tu es en mesure de repérer qui a besoin de toi sans attendre une main levée et de nommer précisément son défi.');
     expect(v.suite).toBe("Chaque parcours a son objectif. C'est toi qui choisis la suite.");
-    expect(v.ordre.slice(-3)).toEqual(['parcours-bulle-note parcours-bulle-revue', 'parcours-bulle-objectif parcours-bulle-atteint', 'parcours-bulle-suite']);
-    expect(v.liste.some((l) => /Objectif atteint|Chaque parcours|Tout repose ici/.test(l))).toBe(false);
+    // 20 nov. 2026 (consigne du 20 nov., A3) : la suite suggérée est nommée, la dernière avant les boutons.
+    expect(v.suggeree).toBe('Suite suggérée : le parcours 2, « Mettre ta classe en place ».');
+    expect(v.ordre.slice(-4)).toEqual(['parcours-bulle-note parcours-bulle-revue', 'parcours-bulle-objectif parcours-bulle-atteint', 'parcours-bulle-suite', 'parcours-bulle-suite parcours-bulle-suite-suggeree']);
+    expect(v.liste.some((l) => /Objectif atteint|Chaque parcours|Suite suggérée|Tout repose ici/.test(l))).toBe(false);
     expect(v.aide, 'la poignée n’est dite qu’à la première bulle').toBeNull();
+    expect(v.identite, 'le parcours n’est nommé qu’à la première bulle').toBeNull();
     expect(await page.evaluate(() => { const f = (s) => { const c = getComputedStyle(document.querySelector('#parcours-bulle ' + s)); return [c.fontWeight, c.borderTopWidth, c.borderBottomWidth].join(' '); };
         return f('.parcours-bulle-atteint'); })).toBe('600 1px 1px');
     // Elle tient sans défiler, l'iPad couché compris (essai, B.4) ; derrière elle, les sections du Cadre sont refermées.
@@ -389,16 +424,25 @@ test('« Découvrir » : l’objectif à la première bulle, la confirmation ens
     expect(v.bas, 'bulle 8 : ses boutons sont au-dessus du bandeau de la démo').toBeLessThanOrEqual(await page.evaluate(() => document.getElementById('bandeau-demo').getBoundingClientRect().top));
     expect(await page.evaluate(() => [...document.querySelectorAll('#calendrier-trimestre .carte.accordeon:not(.ferme)')].map((a) => a.id))).toEqual([]);
     const fin = await lireBulle(page);
-    expect(fin.boutons).toEqual(['Explorer la démo par moi-même', 'Voir le parcours suivant', 'Commencer avec ma classe']);
+    expect(fin.boutons).toEqual(['Explorer la démo par moi-même', 'Voir le parcours 2', 'Commencer avec ma classe']);
     expect(fin.principal, 'aucun bouton mis en avant').toEqual([]);
     await capture(page, 'j-decouvrir-8');
 
-    // « Voir le parcours suivant » : le « Je regarde » de « Mettre ta classe en place », dans la démo, qui reste ouverte.
-    await bulle(page).getByRole('button', { name: 'Voir le parcours suivant', exact: true }).click();
-    await attendreEtape(page, 1, 8, 'Un cours');
+    // 20 nov. 2026 (consigne du 20 nov., A3) : « Voir le parcours suivant » lançait d'office le « Je regarde » de
+    // « Mettre ta classe en place ». « Voir le parcours 2 » ne lance RIEN : « Découvrir » est fait, la bulle se ferme,
+    // le panneau s'ouvre devant la carte du parcours 2, la démo reste ouverte.
+    await voirLeParcours(page, 2, 'classe');
     expect(await enDemo(page)).toBe(true);
     expect(await page.evaluate(() => Assistance.etatDe('decouvrir').etat)).toBe('fait');
-    expect((await lire(page)).objectif).toBe(OBJECTIF_CLASSE);
+    expect(await page.evaluate(() => [Assistance.etatDe('classe').etat, Assistance.etatModeleDe('classe').etat]), 'ni l’un ni l’autre temps n’est entamé').toEqual(['a-faire', 'a-faire']);
+    await capture(page, 'j-decouvrir-8-panneau-devant-le-2');
+    // La personne choisit : « Je regarde », dans la démo, qui reste ouverte.
+    await boutonModele(page, 'classe').click();
+    await attendreEtape(page, 1, 8, 'Un cours');
+    expect(await enDemo(page)).toBe(true);
+    const v1 = await lire(page);
+    expect(v1.objectif).toBe(OBJECTIF_CLASSE);
+    expect(v1.identite).toBe('Parcours 2 · Mettre ta classe en place · Je regarde');
 });
 
 test('« Mettre ta classe en place », Je regarde : la bonne section, son nom encadré, la bulle après le défilement, les deux états de « Remplir »', async ({ page }) => {
@@ -458,7 +502,11 @@ test('« Mettre ta classe en place », Je regarde : la bonne section, son nom en
     await jugerSection(1, 'accordeon-cours', (nom) => `Tu es dans « Cadre », à la section « ${nom} » : c'est là que tu dis quel cours tu donnes.`);
     expect((await lireSection(page, 'accordeon-cours')).nomLu).toBe('Cours et services');
     expect(ouverture.montreeEnMouvement, 'bulle 1 : jamais montrée pendant que la page défile').toBe(0);
+    // 20 nov. 2026 (consigne du 20 nov., A1 et A2) : le parcours et son temps nommés, la poignée, au-dessus du titre.
+    expect(v.identite).toBe('Parcours 2 · Mettre ta classe en place · Je regarde');
     expect(v.aide).toBe('Tu peux déplacer cette bulle par sa poignée et faire défiler la page pour mieux voir.');
+    expect(v.entreeAuDessus, 'le parcours nommé, puis la poignée, puis le titre').toBe(true);
+    expect(v.ordre).not.toContain('parcours-bulle-aide');
     await deuxEtats(1, { consigne: 'Touche « Créer le cours »', bouton: '#v2-btnCreerCours', idBloc: 'accordeon-cours' });
     await expect(page.locator('#v2-codeCours')).toHaveValue(m.cours.code);
 
@@ -492,6 +540,7 @@ test('« Mettre ta classe en place », Je regarde : la bonne section, son nom en
     // Le moteur retire le halo au changement d'étape et le repose au premier passage de la suivante : on l'attend.
     await expect(page.locator('#accordeon-groupe-etudiants .accordeon-header h3')).toHaveClass(/parcours-section-actuelle/);
     expect(v.aide, 'la poignée n’est dite qu’à la première bulle').toBeNull();
+    expect(v.identite, 'le parcours n’est nommé qu’à la première bulle').toBeNull();
     await deuxEtats(3, { consigne: 'Touche « Importer 10 étudiant·es »', bouton: '#v2-btnConfirmerImport' });
     await page.click('#v2-btnConfirmerImport');
 
@@ -550,8 +599,10 @@ test('« Mettre ta classe en place », Je regarde : la bonne section, son nom en
     expect(v.lieu).toBe("Tu es dans « Suivi », à l'onglet « Groupe ». Reviens-y avant chaque séance.");
     expect(v.atteint).toBe("Objectif atteint : tu es en mesure d'expliquer ce que l'application te demande pour mettre une classe en place et ce qu'elle en tire.");
     expect(v.suite).toBe("Chaque parcours a son objectif. C'est toi qui choisis la suite.");
-    expect(v.ordre.slice(-3)).toEqual(['parcours-bulle-note parcours-bulle-revue', 'parcours-bulle-objectif parcours-bulle-atteint', 'parcours-bulle-suite']);
-    expect(v.liste.some((l) => /Objectif atteint|Chaque parcours/.test(l))).toBe(false);
+    // 20 nov. 2026 (consigne du 20 nov., A3) : la suite suggérée est nommée, la dernière avant les boutons.
+    expect(v.suggeree).toBe('Suite suggérée : le parcours 3, « Évaluer une première production ».');
+    expect(v.ordre.slice(-4)).toEqual(['parcours-bulle-note parcours-bulle-revue', 'parcours-bulle-objectif parcours-bulle-atteint', 'parcours-bulle-suite', 'parcours-bulle-suite parcours-bulle-suite-suggeree']);
+    expect(v.liste.some((l) => /Objectif atteint|Chaque parcours|Suite suggérée/.test(l))).toBe(false);
     await expect(bulle(page)).toContainText('Pour revoir une étape, touche « 8 sur 8 ».');
     // L'espace insécable devant le point-virgule (essai, 9) : « …étudiant·es ; la bande… » ne se coupe plus devant lui.
     expect(await bulle(page).locator('.parcours-bulle-ligne-texte').first().evaluate((e) => e.textContent)).toContain('étudiant·es\u00a0; la bande «\u00a0Assiduité\u00a0»');
@@ -563,7 +614,7 @@ test('« Mettre ta classe en place », Je regarde : la bonne section, son nom en
         expect(bande.flechesSurUnPoint, `bulle 8, ${ecran} : les trois points à l'écart sont montrés`).toBeGreaterThanOrEqual(1);
     });
     const fin = await lireBulle(page);
-    expect(fin.boutons).toEqual(['Le refaire avec ma classe', 'Voir le parcours suivant', 'Terminer']);
+    expect(fin.boutons).toEqual(['Le refaire avec ma classe', 'Voir le parcours 3', 'Terminer']);   // 20 nov. 2026 (A3)
     expect(fin.principal, 'aucun bouton mis en avant').toEqual([]);
     await capture(page, 'j-classe-8');
     expect(s2.nomLu.length).toBeGreaterThan(0);

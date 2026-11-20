@@ -84,8 +84,10 @@ for (const [largeur, hauteur] of [[1180, 820], [820, 1180]]) {
     test(`« Nous faisons » : la bulle de chaque étape, sa confirmation, ses gestes qui se grisent, ses deux formes et sa fin (${largeur} × ${hauteur})`, async ({ page }) => {
         test.setTimeout(360000);
         dossierDesCaptures('');
+        // 20 nov. 2026 (plans de travail/CONSIGNE-2026-11-20-essai-parcours.md, D) : `leTroisiemeParcoursFait` rend un
+        // espace sans bulle ni panneau ouvert (avant, le panneau restait ouvert et le banc le fermait par Échap).
         await leTroisiemeParcoursFait(page, { cap: 'p3' });
-        await page.keyboard.press('Escape');
+        await expect(page.locator('#panneau-assistance'), 'le troisième parcours fait : aucun panneau ouvert').toHaveCount(0);
         const pid = await page.evaluate(() => ParcoursEvaluer.contexte().productionId);
         await page.setViewportSize({ width: largeur, height: hauteur });
         await fermerLeRappel(page);
@@ -191,12 +193,25 @@ for (const [largeur, hauteur] of [[1180, 820], [820, 1180]]) {
         expect(tout).toContain(ATTEINT);
         expect(tout).toContain('Chaque parcours a son objectif. C\'est toi qui choisis la suite.');
         expect(tout).toContain('Pour revoir une étape, touche « 7 sur 7 ».');
-        const suite = await carte(page, () => !!(window.Assistance && window.Assistance.suivantDe && window.Assistance.suivantDe('monter')));
-        expect(b.gestes.map((g) => g.texte)).toEqual([suite ? 'Touche « Parcours suivant », ou « Terminer »' : 'Touche « Terminer »']);
-        expect(b.boutons).toEqual(suite ? ['Parcours suivant', 'Terminer'] : ['Terminer']);
+        // 20 nov. 2026 (plans de travail/CONSIGNE-2026-11-20-essai-parcours.md, A3) : « Parcours suivant » n'existe plus.
+        // La bulle NOMME la suite (« Suite suggérée : le parcours 6… », après « Chaque parcours a son objectif… ») et
+        // offre « Voir le parcours 6 », qui ne lance rien, à côté de « Terminer » ; la consigne suit ses boutons.
+        const suites = await carte(page, () => [...document.querySelectorAll('#parcours-bulle .parcours-bulle-suite')].map((p) => p.textContent.replace(/[\u00a0\u202f]/g, ' ').replace(/\s+/g, ' ').trim()));
+        expect(suites).toEqual(["Chaque parcours a son objectif. C'est toi qui choisis la suite.", "Suite suggérée : le parcours 6, « Mettre tes données à l'abri »."]);
+        expect(b.gestes.map((g) => g.texte)).toEqual(['Touche « Voir le parcours 6 », ou « Terminer »']);
+        expect(b.boutons).toEqual(['Voir le parcours 6', 'Terminer']);
         // La bulle 7, au centre, tient dans la fenêtre.
         const r = await carte(page, () => { const x = document.getElementById('parcours-bulle').getBoundingClientRect(); return { haut: x.top, bas: x.bottom, h: innerHeight }; });
         expect(r.haut).toBeGreaterThanOrEqual(0);
         expect(r.bas).toBeLessThanOrEqual(r.h);
+        // « Voir le parcours 6 » : ce parcours est fait, la bulle se ferme, rien n'est lancé, et le panneau s'ouvre
+        // devant la carte du parcours 6, suggérée, le focus sur son premier bouton.
+        await bulle(page).getByRole('button', { name: 'Voir le parcours 6', exact: true }).click();
+        await expect(bulle(page)).toHaveCount(0);
+        await expect(page.locator('#panneau-assistance')).toBeVisible();
+        expect(await carte(page, () => ({ lance: ParcoursMoteur.actif(), etat: Assistance.etatDe('monter').etat }))).toEqual({ lance: false, etat: 'fait' });
+        const sixieme = page.locator('#panneau-assistance [data-parcours="donnees"]');
+        await expect(sixieme).toHaveClass(/assistance-parcours-item--suggere/);
+        await expect(sixieme.locator('button').first()).toBeFocused();
     });
 }

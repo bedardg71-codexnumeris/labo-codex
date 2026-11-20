@@ -140,7 +140,10 @@ test('en visite (« Refaire ») : ni contour ni flèche sur un contrôle qui éc
     }
     // La dernière bulle n'est pas une visite d'un geste fait : sa consigne (un bouton de la bulle) reste.
     await expect(rang(page)).toHaveText('8 sur 8');
-    expect(aPlat(await bulle(page).locator('.parcours-bulle-ligne--geste').textContent())).toMatch(/^Touche « (Terminer|Parcours suivant)/);
+    // 20 nov. 2026 (plans de travail/CONSIGNE-2026-11-20-essai-parcours.md, A3) : le bouton de la suite s'appelle
+    // « Voir le parcours 3 » (plus « Parcours suivant ») ; la consigne suit ses boutons.
+    expect(aPlat(await bulle(page).locator('.parcours-bulle-ligne--geste').textContent())).toBe('Touche « Voir le parcours 3 », ou « Terminer »');
+    expect(await bulle(page).locator('.parcours-bulle-boutons button').allTextContents()).toEqual(['Voir le parcours 3', 'Terminer']);
     expect(await verrous(), 'la visite n\'a rien déverrouillé').toBe(avant);
     await bulle(page).getByRole('button', { name: 'Terminer' }).click();
 });

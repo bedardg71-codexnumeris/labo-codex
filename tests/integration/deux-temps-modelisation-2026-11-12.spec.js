@@ -116,7 +116,8 @@ test('le panneau : le texte en quatre temps numérotés, deux états par parcour
     await expect(carte(page, 'classe').locator('.assistance-parcours-etat')).toHaveText('À faire');
     await expect(boutonPratique(page, 'classe')).toHaveText('Nous faisons');
     await expect(carte(page, 'evaluer').locator('.assistance-modele-etat')).toHaveText('À faire');
-    await expect(carte(page, 'evaluer').locator('.assistance-parcours-etat')).toHaveText('Étape 3 sur 9');
+    // 20 nov. 2026 (plans de travail/CONSIGNE-2026-11-20-essai-parcours.md, D) : le « Nous faisons » d'« Évaluer » a dix bulles.
+    await expect(carte(page, 'evaluer').locator('.assistance-parcours-etat')).toHaveText('Étape 3 sur 10');
     await expect(boutonPratique(page, 'evaluer')).toHaveText('Nous faisons');
     expect(await page.evaluate(() => JSON.parse(localStorage.getItem('laboCodex.assistance')).modeles.classe.etat)).toBe('fait');
     expect(await page.evaluate(async () => (await db.keys()).filter((k) => /assistance/i.test(k) && k !== 'laboCodex.assistance'))).toEqual([]);
@@ -183,7 +184,10 @@ test('la modélisation de « Mettre ta classe en place », de bout en bout dans 
 
     // LA FIN : trois boutons de même poids, aucun mis en avant ; la consigne les nomme ; au-dessus, « Pour revoir… ».
     const boutons = bulle(page).locator('.parcours-bulle-boutons button');
-    await expect(boutons).toHaveText(['Le refaire avec ma classe', 'Voir le parcours suivant', 'Terminer']);
+    // 20 nov. 2026 (plans de travail/CONSIGNE-2026-11-20-essai-parcours.md, A3) : « Voir le parcours 3 » (plus « Voir
+    // le parcours suivant »), et la suite suggérée nommée au-dessus des boutons.
+    await expect(boutons).toHaveText(['Le refaire avec ma classe', 'Voir le parcours 3', 'Terminer']);
+    await expect(bulle(page).locator('.parcours-bulle-suite-suggeree')).toHaveText('Suite suggérée : le parcours 3, « Évaluer une première production ».');
     for (const k of [0, 1, 2]) await expect(boutons.nth(k)).toHaveClass(/btn-secondaire/);
     const fin = await lireBulle(page);
     expect(fin.principal).toEqual([]);
@@ -195,8 +199,22 @@ test('la modélisation de « Mettre ta classe en place », de bout en bout dans 
     hauteurs.forEach((h) => expect(h).toBeGreaterThanOrEqual(44));
     await capture(page, 'modele-fin-trois-boutons');
 
-    // « Voir le parcours suivant » : le modèle d'« Évaluer », dans la démo.
+    // 20 nov. 2026 (même consigne, A3) : « Voir le parcours suivant » lançait d'office le modèle d'« Évaluer ».
+    // « Voir le parcours 3 » ne lance RIEN : le modèle est fait, la bulle se ferme, le panneau s'ouvre devant la carte
+    // du parcours 3 (elle seule marquée, à l'écran, le focus à son « Je regarde »), la démo reste ouverte.
     await boutons.nth(1).click();
+    await expect(bulle(page)).toHaveCount(0);
+    expect(await page.evaluate(() => ParcoursMoteur.actif()), 'rien n’est lancé').toBe(false);
+    await expect(page.locator('#panneau-assistance')).toBeVisible();
+    await expect(page.locator('#panneau-assistance .assistance-parcours-item--suggere')).toHaveCount(1);
+    await expect(carte(page, 'evaluer')).toHaveClass(/assistance-parcours-item--suggere/);
+    await expect(carte(page, 'evaluer')).toBeInViewport();
+    await expect(boutonModele(page, 'evaluer')).toBeFocused();
+    expect(await enDemo(page)).toBe(true);
+    expect(await page.evaluate(() => [Assistance.etatModeleDe('classe').etat, Assistance.etatModeleDe('evaluer').etat])).toEqual(['fait', 'a-faire']);
+    await capture(page, 'modele-fin-panneau-devant-le-3');
+    // La personne choisit : « Je regarde », le modèle d'« Évaluer », dans la démo.
+    await boutonModele(page, 'evaluer').click();
     // Dix étapes depuis le 18 nov. 2026 (le « Je regarde » d'« Évaluer », refait dans l'ordre du 15 nov.).
     await expect(bulle(page).locator('.parcours-bulle-rang')).toHaveText('1 sur 10', { timeout: 10000 });
     expect(await enDemo(page)).toBe(true);

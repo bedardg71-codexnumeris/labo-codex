@@ -25,8 +25,9 @@ test('« Le refaire avec ma classe » passe par les gardes du panneau : sans cla
     test.setTimeout(180000);
     await ouvrirEspaceVide(page, 1180, 820);
     const refaire = () => page.evaluate(() => ParcoursClasse.suitesDuModele('evaluer', () => {})[0].action());
-    // « Recevoir » a son modèle depuis le 17 nov. 2026 : la fin d'« Évaluer » offre « Voir le parcours suivant ».
-    expect(await page.evaluate(() => ParcoursClasse.suitesDuModele('evaluer', () => {}).map((b) => b.libelle))).toEqual(['Le refaire avec ma classe', 'Voir le parcours suivant', 'Terminer']);
+    // 20 nov. 2026 (plans de travail/CONSIGNE-2026-11-20-essai-parcours.md, A3) : la fin d'« Évaluer » offre « Voir le
+    // parcours 4 » (plus « Voir le parcours suivant »), le rang de « Recevoir » dans le panneau.
+    expect(await page.evaluate(() => ParcoursClasse.suitesDuModele('evaluer', () => {}).map((b) => b.libelle))).toEqual(['Le refaire avec ma classe', 'Voir le parcours 4', 'Terminer']);
     // Sans classe en place : rien ne part ; le panneau s'ouvre et nomme le préalable.
     await refaire();
     await expect(page.locator('#panneau-assistance')).toBeVisible();
@@ -36,7 +37,8 @@ test('« Le refaire avec ma classe » passe par les gardes du panneau : sans cla
     // Avec une classe : la Pratique guidée part, sur les vraies données.
     await peuplerUnTrimestreReel(page);
     await refaire();
-    await expect(bulle(page).locator('.parcours-bulle-rang')).toHaveText('1 sur 9', { timeout: 10000 });
+    // 20 nov. 2026 (même consigne, D) : le « Nous faisons » d'« Évaluer », réécrit, a dix bulles (avant : neuf étapes).
+    await expect(bulle(page).locator('.parcours-bulle-rang')).toHaveText('1 sur 10', { timeout: 10000 });
     expect(await enDemo(page)).toBe(false);
     expect(await page.evaluate(() => Assistance.etatDe('evaluer').etat)).toBe('en-cours');
     expect((await lireBulle(page)).boutons, 'en Pratique guidée, la bulle ne remplit rien').not.toContain(REMPLIR);

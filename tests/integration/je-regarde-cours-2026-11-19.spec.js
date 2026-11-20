@@ -3,7 +3,7 @@ import { releverLaBulle } from './harness/releve-bulle.js';
 // La bulle ne couvre jamais ses zones quand une place les laisse libres (Grégoire, 11 nov. 2026) : relevé à chaque essai.
 releverLaBulle(test);
 import { ouvrirEspaceVide, ouvrirPanneau, boutonModele, bulle, releve, ecarts, horsDeLaDemo, faireLaModelisation, lireBulle as lireBulleDT } from './harness/deux-temps-de-banc.js';
-import { faireLeModeleDEvaluer } from './harness/recevoir-modele-de-banc.js';
+import { faireLeModeleDEvaluer, voirLeParcoursPuisJeRegarde } from './harness/recevoir-modele-de-banc.js';
 import { bulleNeCouvrePas } from './harness/classe-de-banc.js';
 
 // =======================================================================
@@ -112,7 +112,8 @@ async function libre(page, sel) {
         if (!e) return 'absent';
         const r = e.getBoundingClientRect();
         const dessus = document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2);
-        return !!dessus && (e === dessus || e.contains(dessus)) ? 'libre' : 'couvert par ' + (dessus && (dessus.closest('#parcours-bulle') ? 'la bulle' : dessus.className));
+        return !!dessus && (e === dessus || e.contains(dessus)) ? 'libre' : 'couvert par ' + (dessus && (dessus.closest('#parcours-bulle') ? 'la bulle'
+            : dessus.closest('#planif-panneau') ? 'l’Inspecteur' : (dessus.id ? '#' + dessus.id : dessus.tagName + '.' + dessus.className)));
     }, sel), { message: 'libre : ' + sel, timeout: 6000 }).toBe('libre');
 }
 /** L'Inspecteur entre en glissant (0,2 s) : il est en place quand son bord gauche ne bouge plus. */
@@ -134,6 +135,19 @@ async function poserUnBloc(page, type) {
     await page.evaluate(() => document.activeElement && document.activeElement.blur());
     return (await neufs(page, type)).find((i) => !avant.includes(i));
 }
+/**
+ * LE « PLANIFICATEUR » PENDANT CE MODÈLE (20 nov. 2026, plans de travail/CONSIGNE-2026-11-20-essai-parcours.md, F1) :
+ * fermé des bulles 1 à 6 (la marque `parcours-planificateur-ferme` sur `body`, et la palette `#planif-palette-nav`
+ * cachée), il reparaît à la septième. La préférence de la personne (menu « Vue ») n'est pas touchée.
+ */
+async function planificateur(page, etat, contexte) {
+    const ferme = etat === 'fermé';
+    await expect.poll(() => page.evaluate(() => document.body.classList.contains('parcours-planificateur-ferme')),
+        { message: `${contexte} : la marque du « Planificateur » fermé` }).toBe(ferme);
+    if (ferme) await expect(page.locator('#planif-palette-nav'), `${contexte} : la palette « Planificateur » est cachée`).toBeHidden();
+    else await expect(page.locator('#planif-palette-nav'), `${contexte} : la palette « Planificateur » est visible`).toBeVisible();
+    expect(await page.evaluate(() => obtenirPreference('planifPalettePlanificateurVisible', true)), `${contexte} : la préférence n'est pas touchée`).not.toBe(false);
+}
 async function remplir(page) {
     await expect(bulle(page).getByRole('button', { name: 'Remplir', exact: true })).toBeVisible();
     expect(await consignes(page)).toEqual(["Regarde l'exemple se remplir : touche « Remplir »"]);
@@ -148,13 +162,15 @@ for (const [largeur, hauteur] of [[1180, 820], [820, 1180]]) {
         await ouvrirPanneau(page);
         await boutonModele(page, 'classe').click();
         await faireLaModelisation(page);
-        await bulle(page).getByRole('button', { name: 'Voir le parcours suivant', exact: true }).click();
+        // 20 nov. 2026 (plans de travail/CONSIGNE-2026-11-20-essai-parcours.md, A3) : « Voir le parcours suivant »
+        // n'existe plus. « Voir le parcours 3 » ne lance rien : il ouvre le panneau devant « Évaluer », et la personne
+        // y touche « Je regarde » (l'aide juge chaque pas : la bulle fermée, rien de lancé, la carte suggérée, le focus).
+        await voirLeParcoursPuisJeRegarde(page, 3, 'evaluer');
         await faireLeModeleDEvaluer(page);
         await bulle(page).getByRole('button', { name: 'Terminer', exact: true }).click();
-        // ⚠ À 820 × 1180, le « Planificateur » ouvert couvre la part de la carte où se font les gestes (mesuré : le cercle
-        // de l'idée maîtresse, le badge 🎯) : la personne le ferme (menu « Vue »), le banc aussi. Inscrit au rapport du lot.
-        // Avant le relevé : c'est une préférence de l'appareil, pas une écriture du modèle.
-        if (largeur < hauteur) await page.evaluate(() => definirPreference('planifPalettePlanificateurVisible', false));
+        // 20 nov. 2026 (consigne du 20 nov., F1) : à 820 × 1180, le « Planificateur » ouvert couvrait la part de la carte
+        // où se font les gestes (le cercle de l'idée maîtresse, le badge 🎯) et le banc le fermait par la préférence du
+        // menu « Vue ». Le modèle le garde maintenant fermé lui-même des bulles 1 à 6 : le banc ne touche plus à la préférence.
         const avant = await releve(page);
         const carte1 = await page.evaluate(() => JSON.stringify(db.getSync(cle('planification_mindmap'), {}).cartes?.carte_1 || null));
 
@@ -169,6 +185,10 @@ for (const [largeur, hauteur] of [[1180, 820], [820, 1180]]) {
         expect(b.notes).toHaveLength(5);
         expect(b.notes[0]).toBe("Dans la démo, tu commences celle du cours de ton deuxième groupe, avec le matériel de l'exemple. Rien ne touche à tes données.");
         expect(b.gestes.map((g) => g.texte)).toEqual(['Touche « Compétence » dans la palette « Nœuds »']);
+        // 20 nov. 2026 (consigne du 20 nov., A1) : la première bulle dit qui elle est, au-dessus de son titre.
+        await expect(bulle(page).locator('.parcours-bulle-identite')).toHaveText('Parcours 5 · Monter ton cours · Je regarde');
+        // 20 nov. 2026 (consigne du 20 nov., F1) : la palette « Planificateur » est fermée des bulles 1 à 6 de ce modèle.
+        await planificateur(page, 'fermé', 'bulle 1');
         // La carte du modèle : neuve, au nom du cours du deuxième groupe, rattachée à son cours, ouverte.
         const carte = await page.evaluate(() => {
             const idx = window.planificationDonnees.getIndex();
@@ -198,7 +218,11 @@ for (const [largeur, hauteur] of [[1180, 820], [820, 1180]]) {
         // 3. La leçon : « Remplir » écrit son titre, sa semaine (S2) et sa séance (A) ; le trait.
         await etape(page, 3, 'Ta leçon');
         const lecon = await poserUnBloc(page, 'lecon');
+        // F1 : à l'étape de la leçon, le « Planificateur » reste fermé (il se confondait avec l'Inspecteur), avant
+        // « Remplir » comme après.
+        await planificateur(page, 'fermé', 'bulle 3, la leçon posée');
         await remplir(page);
+        await planificateur(page, 'fermé', 'bulle 3, la leçon remplie');
         await expect.poll(() => page.evaluate((i) => { const n = planificationCarte.etat.noeuds.get(i); return [n.titre, n.metadata.semaine, n.metadata.rangSeance]; }, lecon))
             .toEqual([M.lecon, 2, 1]);
         await relier(page, idee, lecon);
@@ -226,9 +250,25 @@ for (const [largeur, hauteur] of [[1180, 820], [820, 1180]]) {
 
         // 6. L'évaluation : « Remplir » écrit son titre et pose deux leçons ; la personne la glisse sous l'autoévaluation.
         await etape(page, 6, 'Ton évaluation');
+        await planificateur(page, 'fermé', 'bulle 6');
 
         const ev = await poserUnBloc(page, 'evaluation');
         await remplir(page);
+        // 20 nov. 2026 (consigne du 20 nov., F2) : la bulle 6, une fois « Remplir » touché : une explication, quatre
+        // gestes (le dernier est la consigne), une explication. Les lignes des deux leçons ajoutées, « Ces activités
+        // servent toutes le même objectif. », la ligne « Formative » ou « Certificative » et celle du guide sont parties.
+        await expect.poll(async () => (await lireBulle(page)).notes, { message: 'la seconde forme de la bulle 6' }).toEqual([
+            "L'évaluation de l'exemple s'appelle « Artefact 1 : Appliquer des stratégies de lecture variées (Deux-Rives) ». Elle vérifie ce que les leçons ont enseigné : sa place est donc après elles, dans la dernière leçon.",
+            'Une fois la production choisie, la carte sait quelle production vérifie cet objectif et ce qu\'elle pèse dans la note.'
+        ]);
+        b = await lireBulle(page);
+        expect(b.gestes.map((g) => [g.texte, g.consigne, g.faite])).toEqual([
+            ["Glisse le bloc de l'évaluation, par sa poignée ⠿, de la leçon où il se trouve jusqu'à la dernière leçon, sous l'autoévaluation", false, false],
+            ["Touche deux fois cette poignée (l'Inspecteur s'ouvre)", false, false],
+            ["Dans l'Inspecteur, coche l'objectif que l'évaluation vérifie", false, false],
+            ['Choisis dans « Production » « Appliquer des stratégies de lecture variées (Deux-Rives) »', true, false]
+        ]);
+        expect(await page.evaluate(() => document.getElementById('parcours-bulle').textContent), 'bulle 6 : les lignes parties').not.toMatch(/Ces activités servent toutes le même objectif|Formative|Certificative/);
         const ajout = await page.evaluate(() => {
             const N = [...planificationCarte.etat.noeuds.values()];
             const t = (x) => x.titre;
@@ -280,14 +320,21 @@ for (const [largeur, hauteur] of [[1180, 820], [820, 1180]]) {
 
         // 7. La fin : les pastilles, l'objectif atteint, les deux suites du modèle.
         await etape(page, 7, 'Une chaîne alignée');
+        // F1 : le « Planificateur » reparaît à la bulle qui en parle (« Le « Planificateur » montre ses trois leçons »).
+        await planificateur(page, 'ouvert', 'bulle 7');
         b = await lireBulle(page);
+        expect(b.notes).toContain('Le « Planificateur » montre ses trois leçons, semaine par semaine.');
         expect(b.confirme).toBe("C'est fait : l'évaluation vérifie l'objectif.");
         const pastilles = await page.evaluate((i) => planificationCarte.evaluerPastilleEvaluation(planificationCarte.etat.noeuds.get(i)).etat, ev);
         expect(pastilles, 'la pastille de l’évaluation').toBe('avant');
         const tout = await page.evaluate(() => document.getElementById('parcours-bulle').textContent.replace(/[  ]/g, ' '));
         expect(tout).toContain(ATTEINT);
-        expect(b.boutons).toEqual(['Le refaire avec ma classe', 'Terminer']);
-        expect(await consignes(page)).toEqual(['Touche « Le refaire avec ma classe », ou « Terminer »']);
+        // 20 nov. 2026 (consigne du 20 nov., A3) : un parcours suit dans le panneau (le sixième, « Mettre tes données à
+        // l'abri ») : la bulle le nomme et offre « Voir le parcours 6 », de même poids, entre les deux autres suites.
+        expect(b.boutons).toEqual(['Le refaire avec ma classe', 'Voir le parcours 6', 'Terminer']);
+        expect(await consignes(page)).toEqual(['Touche « Le refaire avec ma classe », « Voir le parcours 6 », ou « Terminer »']);
+        expect(await page.evaluate(() => [...document.querySelectorAll('#parcours-bulle .parcours-bulle-suite')].map((p) => p.textContent.replace(/[\u00a0\u202f]/g, ' ').replace(/\s+/g, ' ').trim())))
+            .toEqual(["Chaque parcours a son objectif. C'est toi qui choisis la suite.", "Suite suggérée : le parcours 6, « Mettre tes données à l'abri »."]);
         const r = await page.evaluate(() => { const x = document.getElementById('parcours-bulle').getBoundingClientRect(); return { haut: x.top, bas: x.bottom, h: innerHeight }; });
         expect(r.haut).toBeGreaterThanOrEqual(0);
         expect(r.bas).toBeLessThanOrEqual(r.h);

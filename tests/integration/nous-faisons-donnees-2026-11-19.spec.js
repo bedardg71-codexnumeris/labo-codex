@@ -83,12 +83,18 @@ async function lireBulle(page) {
             [...x.children].forEach((li) => lignes.push(marque(li) + ' ' + plat(li.querySelector('.parcours-bulle-ligne-texte').textContent)));
         });
         const c = b.querySelector('.parcours-bulle-confirme');
-        return { confirme: c && !c.hidden && getComputedStyle(c).display !== 'none' ? plat(c.textContent) : null, lignes };
+        // 20 nov. 2026 (consigne du 20 nov., A1 et A2) : l'entrée de la première bulle, au-dessus du titre.
+        const dit = (sel) => { const e = b.querySelector(sel); return e && !e.hidden && getComputedStyle(e).display !== 'none' ? plat(e.textContent) : null; };
+        return { confirme: c && !c.hidden && getComputedStyle(c).display !== 'none' ? plat(c.textContent) : null, lignes, identite: dit('.parcours-bulle-identite'), aide: dit('.parcours-bulle-aide') };
     });
 }
 const genres = async (page) => (await lireBulle(page)).lignes.map((l) => l.slice(0, 1)).join('');
 
-const POIGNEE = 'E Tu peux déplacer cette bulle par sa poignée et faire défiler la page pour mieux voir.';
+// 20 nov. 2026 (plans de travail/CONSIGNE-2026-11-20-essai-parcours.md, A1 et A2) : la phrase de la poignée n'est plus la
+// dernière des lignes de la première bulle ; elle est au-dessus du titre (`.parcours-bulle-aide`), sous la ligne qui
+// nomme le parcours (`.parcours-bulle-identite` ; ce parcours n'a pas de « Je regarde » : pas de troisième partie).
+const IDENTITE = "Parcours 6 · Mettre tes données à l'abri";
+const POIGNEE = 'Tu peux déplacer cette bulle par sa poignée et faire défiler la page pour mieux voir.';
 const DEBUT_3 = [
     "E Le « i » de l'aperçu te dit ce que contient le fichier.",
     "E Ton codex contient les noms, les DA et les productions de tes étudiant·es, et il n'est pas chiffré : quiconque a le fichier peut le lire.",
@@ -124,14 +130,15 @@ for (const taille of TAILLES) {
             "E Elles peuvent donc se perdre si tu effaces les données de sites, ou si tu changes de navigateur ou d'ordinateur.",
             "E Ton codex en est une copie complète, productions de tes étudiant·es comprises, dans un seul fichier que tu rouvres sur n'importe quel appareil.",
             "E Ce fichier ne change que quand tu le mets à jour : l'application ne le fait jamais à ta place.",
-            "C Touche « Codex », en haut de l'écran",
-            POIGNEE
+            "C Touche « Codex », en haut de l'écran"
         ]);
+        expect([vu.identite, vu.aide], 'la première bulle : le parcours, puis la phrase de la poignée, au-dessus du titre').toEqual([IDENTITE, POIGNEE]);
         await page.click('#btn-codex');
 
         // 2. Mettre à jour : le menu vient d'être ouvert.
         await attendreEtape(page, 2);
         vu = await lireBulle(page);
+        expect([vu.identite, vu.aide], 'la deuxième bulle ne porte plus l’entrée').toEqual([null, null]);
         expect(vu.confirme).toBe("C'est fait : le menu Codex est ouvert.");
         expect(vu.lignes).toEqual([
             "E Mettre ton codex à jour, c'est rassembler tes données et les fichiers des productions de tes étudiant·es en un seul fichier.",
@@ -160,7 +167,7 @@ for (const taille of TAILLES) {
             REECRITURE]);
         await page.click('.export-preview-modal .btn-confirmer');
 
-        // 4. Quand le rouvrir : des explications, la fin du moteur. Tous les parcours ouverts (les bancs) : « Parcours suivant ».
+        // 4. Quand le rouvrir : des explications, la fin du moteur. Tous les parcours ouverts (les bancs) : « Voir le parcours 7 ».
         await attendreEtape(page, 4);
         vu = await lireBulle(page);
         expect(vu.confirme).toBe("C'est fait : ton codex est à jour.");
@@ -173,9 +180,12 @@ for (const taille of TAILLES) {
             'E Pour revoir une étape, touche « 4 sur 4 ».',
             "O Objectif atteint : tu es en mesure de mettre tes données à l'abri (ton codex à jour, rangé dans un lieu protégé).",
             "E Chaque parcours a son objectif. C'est toi qui choisis la suite.",
-            'C Touche « Parcours suivant », ou « Terminer »'
+            'E Suite suggérée : le parcours 7, « Lire ta classe et intervenir ».',
+            'C Touche « Voir le parcours 7 », ou « Terminer »'
         ]);
-        await expect(bulle(page).locator('.parcours-bulle-boutons button')).toHaveText(['Parcours suivant', 'Terminer']);
+        // 20 nov. 2026 (consigne du 20 nov., A3) : « Voir le parcours 7 » remplace « Parcours suivant », et la bulle nomme
+        // la suite. Le bouton ne lance rien : jugé à la fin de cet essai.
+        await expect(bulle(page).locator('.parcours-bulle-boutons button')).toHaveText(['Voir le parcours 7', 'Terminer']);
         // Mesure (c) : les parcours de l'aperçu (« Lire ta classe et intervenir » fermé) : « Terminer » seul, et sa consigne.
         await page.evaluate(() => Assistance.ouvrirLesParcours(['decouvrir', 'classe', 'evaluer', 'recevoir', 'donnees']));
         await page.evaluate(() => ParcoursMoteur.allerA(3));
@@ -191,6 +201,20 @@ for (const taille of TAILLES) {
         expect((await lireBulle(page)).lignes).toEqual([...DEBUT_3, 'C Touche « Mettre à jour »', REECRITURE]);
         await page.click('.export-preview-modal .btn-confirmer');
         await attendreEtape(page, 4);
+        // 20 nov. 2026 (consigne du 20 nov., A3) : tous les parcours rouverts, « Voir le parcours 7 » NE LANCE RIEN. Il
+        // termine ce parcours, ferme la bulle et ouvre le panneau devant la carte de « Lire ta classe et intervenir »,
+        // suggérée, le focus sur son premier bouton (ce parcours n'a pas de « Je regarde »).
+        await page.evaluate(() => Assistance.ouvrirLesParcours(true));
+        await page.evaluate(() => ParcoursMoteur.allerA(3));
+        await attendreEtape(page, 4);
+        await bulle(page).getByRole('button', { name: 'Voir le parcours 7', exact: true }).click();
+        await expect(bulle(page)).toHaveCount(0);
+        await expect(page.locator('#panneau-assistance')).toBeVisible();
+        expect(await page.evaluate(() => ({ actif: ParcoursMoteur.actif(), fait: Assistance.etatDe('donnees').etat, suivant: Assistance.etatDe('lire-ta-classe').etat })))
+            .toEqual({ actif: false, fait: 'fait', suivant: 'a-faire' });
+        const suivante = page.locator('#panneau-assistance [data-parcours="lire-ta-classe"]');
+        await expect(suivante).toHaveClass(/assistance-parcours-item--suggere/);
+        await expect(suivante.locator('button').first()).toBeFocused();
     });
 
     test(`la bulle 3, chemin par chemin : partage, téléchargement (le geste se grise), copies manquantes (${nom})`, async ({ page }) => {

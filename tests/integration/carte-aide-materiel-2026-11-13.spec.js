@@ -10,8 +10,10 @@
 //        le morceau ; un outil en main, sa phrase ; une grille créée par l'étiquetage n'écrit rien : seul un geste de
 //        la personne compte ;
 //   I5 · le stock : ce que retrouve une personne dont l'appareil porte déjà la clé, selon ce qu'elle contient ;
-//   I3 · pendant un parcours : ni interrupteur ni carte de page ; « Ta grille » inchangée sauf le complément ; aucune
-//        phrase deux fois ; la carte tient dans l'écran ; Conception › Grilles a son texte ; la carte de la page revient ;
+//   I3 · pendant un parcours : ni interrupteur ni carte de page ; la bulle 5, « Ta grille », du « Nous faisons »
+//        d'« Évaluer une première production » a ses propres lignes et reprend de la page les zones, les flèches et le
+//        halo, sans la ligne du geste ni le complément ; aucune phrase deux fois ; la bulle tient dans l'écran ;
+//        Conception › Grilles a son texte ; « Plus tard » : la carte de la page revient ;
 //   I4 · les deux boutons de l'exemple : un brouillon posé avant survit à « Voir un exemple de grille étiquetée », à « Faire
 //        l'exercice soi-même » et à la sortie de l'exemple ; l'exemple complet : la carte évite la lecture.
 // LA RÈGLE DU 16 NOV. 2026 (demande de Grégoire, 15 h 48 ; plans de travail/CONSIGNE-2026-11-16-decouvrir-en-ligne.md)
@@ -21,11 +23,15 @@
 // Break-tests : `plans de travail/RAPPORT-2026-11-13-carte-aide-materiel.md` ; celui de la règle du 16 nov. :
 // `return lirePref().ouvert === true;` → `!== false` dans `aLArrivee` (js/materiel-aide.js) → I1, I2 et I5 ROUGES.
 // Grilles FICTIVES ; noms fictifs.
+// 20 nov. 2026 (plans de travail/CONSIGNE-2026-11-20-essai-parcours.md, section D) : I3 entrait dans « Ta grille » par
+// l'ancienne étape 1 du parcours (deux bulles d'ouverture, « 1 sur 9 », le complément en pages, la ligne du geste),
+// retirée. Il y entre maintenant par la bulle 5 du « Nous faisons » neuf, après les bulles 1 à 4 (la pratique, son
+// application, l'échelle), jouées par `harness/nous-faisons-evaluer-de-banc.js`.
 import { test, expect } from '@playwright/test';
-import { ouvrirEspaceVide, mettreLaClasseEnPlace, attendreEtape, contourSur, deuxSondes, bulle, bulleNeCouvrePas, capture } from './harness/classe-de-banc.js';
+import { ouvrirEspaceVide, ouvrirPanneau, mettreLaClasseEnPlace, attendreEtape, contourSur, deuxSondes, bulle, bulleNeCouvrePas, capture } from './harness/classe-de-banc.js';
 import { flecheVers, flecheVersMorceau } from './harness/fleches-de-banc.js';
 import { attendreApplication } from './harness/attendre-application.js';
-import { passerLOuverture, boutonExemple } from './harness/ouverture-evaluer.js';
+import { bulle1, bulle2Modele, bulle3, bulle4, bulleDit, item, MOTS } from './harness/nous-faisons-evaluer-de-banc.js';
 
 const DOSSIER = process.env.CAPTURES_PARCOURS || '';
 const TAILLES = [[1180, 820], [820, 1180]];
@@ -133,6 +139,13 @@ async function aucunePhraseDeuxFois(page, contexte) {
     const phrases = texte.split(/(?<=[.!?…])\s+/).map((p) => p.trim()).filter((p) => p.length > 12);
     const doubles = phrases.filter((p, k) => phrases.indexOf(p) !== k);
     expect(doubles, contexte + ' : aucune phrase deux fois').toEqual([]);
+}
+
+/** Aucune ligne ne se lit deux fois dans une bulle faite de lignes (la bulle 5 du parcours : ni texte, ni ligne du geste). */
+async function aucuneLigneDeuxFois(page, contexte) {
+    const lignes = (await bulle(page).locator('.parcours-bulle-lignes > *').allTextContents()).map(norm).filter((p) => p.length > 12);
+    expect(lignes.length, contexte + ' : la bulle a des lignes').toBeGreaterThan(0);
+    expect(lignes.filter((p, k) => lignes.indexOf(p) !== k), contexte + ' : aucune ligne deux fois').toEqual([]);
 }
 
 async function coller(page, html) {
@@ -429,11 +442,11 @@ test('I5 · le stock : `ouvert: false` → éteint ; `ouvert: true` → allumé 
 });
 
 // ---------------------------------------------------------------------------------------------------------------
-// I3 — pendant un parcours ; « Ta grille », inchangée sauf le complément
+// I3 — pendant un parcours ; la bulle 5, « Ta grille », du « Nous faisons » d'« Évaluer une première production »
 // ---------------------------------------------------------------------------------------------------------------
 for (const [L, H] of TAILLES) {
-    test(`I3 · ${L} × ${H} : pendant un parcours, ni interrupteur ni carte de page ; « Ta grille » et son complément ; Conception › Grilles a son texte`, async ({ page }) => {
-        test.setTimeout(240000);
+    test(`I3 · ${L} × ${H} : pendant un parcours, ni interrupteur ni carte de page ; la bulle 5, « Ta grille », sans ligne du geste ni complément ; Conception › Grilles a son texte`, async ({ page }) => {
+        test.setTimeout(300000);
         const cap = `${L}x${H}`;
         // La personne a laissé l'interrupteur allumé (ici, la clé telle que la règle du 12 nov. l'écrivait : le stock).
         // La règle de l'arrivée est jugée en I1, I2 et I5.
@@ -444,58 +457,111 @@ for (const [L, H] of TAILLES) {
         await expect(bascule(page)).toBeChecked();
         await carteDeLaPage(page);
 
-        // Un parcours se lance : la carte de la page se ferme, l'interrupteur ne se montre pas.
-        await page.evaluate(() => Assistance.parcours().find((p) => p.id === 'evaluer').lancer(0));
-        await passerLOuverture(page);   // 14 nov. 2026 : deux bulles d'ouverture avant « Ta grille »
+        // Un parcours se lance (« Nous faisons », dans le panneau) : la carte de la page se ferme.
+        await ouvrirPanneau(page);
+        await item(page).locator('.assistance-parcours-bouton').click();
+        await expect(page.locator('#panneau-assistance')).toHaveCount(0);
+        await attendreEtape(page, 1, 10, 'Ta pratique de notation', { focus: false });
+        expect(await page.evaluate(() => ParcoursMoteur.joue(MaterielAide.definition()))).toBe(false);
+        // 20 nov. 2026 : l'étiquetage est la bulle 5 ; les bulles 1 à 4 d'abord (la pratique, son application, l'échelle).
+        await bulle1(page, { voie: 'modele', cap: 'i3-' + cap });
+        await bulle2Modele(page, { cap: 'i3-' + cap });
+        await bulle3(page, { cap: 'i3-' + cap });
+        await bulle4(page, { cap: 'i3-' + cap });
+
+        // « Ta grille », devant l'accueil de « Mon matériel » : l'interrupteur ne se montre pas, la carte de la page non
+        // plus. La bulle est une liste de lignes (les siennes), sans texte en pages ni ligne du geste ; elle montre la
+        // zone où coller et porte un seul bouton, « Je la compose ici ».
+        await attendreEtape(page, 5, 10, 'Ta grille', { focus: false });
+        await expect(page.locator('#materiel-accueil')).toBeVisible();
         await expect(interrupteur(page)).toBeHidden();
         expect(await page.evaluate(() => ParcoursMoteur.joue(MaterielAide.definition()))).toBe(false);
-
-        // « Ta grille », devant l'accueil. 14 nov. 2026 (essai novice, lot 4c) : la bulle est une liste de lignes, en une
-        // page ; elle ne réexplique plus ce que la page dit (ni le texte long, ni les trois cartes de l'accueil), ne porte
-        // plus de bouton, et montre la zone où coller.
         await contourSur(page, '#materiel-zone-collage');
-        await expect(interrupteur(page)).toBeHidden();
         await expect(bulle(page).locator('.parcours-bulle-texte')).toBeHidden();
         await expect(bulle(page).locator('.parcours-bulle-nav')).toBeHidden();
-        await expect(bulle(page).locator('.parcours-bulle-boutons')).toHaveCount(0);
-        await expect(bulle(page).locator('.parcours-bulle-ligne')).toHaveText([
-            'Colle ici la grille que tu utilises déjà (copie le tableau entier, depuis Word ou Pages)',
-            'Pas de grille sous la main ? Ces deux boutons ouvrent un exemple',
-            'Colle ta grille, ou touche un des deux boutons']);
+        await expect(bulle(page).locator('.parcours-bulle-geste')).toHaveCount(0);
+        await bulleDit(page, {
+            confirme: "C'est fait : ton échelle est choisie.", lieu: MOTS.lieu['5m'],
+            notes: ['Une grille réunit tes critères (ce que tu regardes dans une production) et ce que pèse chacun.',
+                "Ici, tu numérises une grille que tu as déjà, faite dans un traitement de texte. Une photo n'en garderait que l'apparence : l'application doit savoir ce que chaque partie signifie et à quoi elle sert. C'est toi qui le lui dis, en posant une étiquette sur chaque partie.",
+                "Ce passage du document à l'application ne se fait qu'une fois. Ensuite, tu crées et modifies tes grilles directement dans l'application.",
+                "Tu n'as pas de grille dans un document ? « Je la compose ici » te mène à l'onglet « Grilles »."],
+            gestes: ['Ouvre ta grille dans ton traitement de texte, sélectionne-la et copie-la'], faites: [],
+            consignes: ['Colle-la dans la zone'], boutons: ['Je la compose ici']
+        }, '« Ta grille », l’accueil');
+        // Les trois cartes de l'accueil (le complément de la carte de la page) ne sont pas dans la bulle du parcours.
+        const accueil = norm(await bulle(page).innerText());
+        for (const mots of ['Copie ton tableau', 'Colle-le ici', 'Étiquette, puis crée', GESTE_ACCUEIL]) expect(accueil, '« Ta grille », l’accueil : pas « ' + mots + ' »').not.toContain(mots);
+        await pageSansConsignes(page, 'pendant le parcours, à l’accueil');
+        await aucuneLigneDeuxFois(page, '« Ta grille », l’accueil');
         await carteTient(page, '« Ta grille », l’accueil');
         await capture(page, DOSSIER, `i3-ta-grille-accueil-${cap}`);
 
-        // Conception › Grilles (« Composer ma grille ») : son texte, pas « colle-la ici » ; de retour, le texte validé.
-        await page.locator('#materiel-accueil [data-action="materiel.taperMain"]').evaluate((b) => b.click());
+        // Conception › Grilles (« Je la compose ici », dans la bulle) : son texte, pas « Colle-la dans la zone » ; de
+        // retour dans « Mon matériel », les lignes de l'accueil.
+        await bulle(page).getByRole('button', { name: 'Je la compose ici' }).click();
         await expect(page.locator('#conception-grille-criteres')).toBeVisible();
-        await expect.poll(() => texteDeLaCarte(page)).toContain('Ici, tu la composes à la main');
-        const composer = await texteDeLaCarte(page);
-        expect(composer).not.toContain('colle-la ici');
+        await bulleDit(page, {
+            lieu: MOTS.lieu['5g'], boutons: [], gestes: [],
+            notes: ['Une grille réunit tes critères (ce que tu regardes dans une production) et ce que pèse chacun.'],
+            consignes: ['Touche « + Nouvelle grille »']
+        }, '« Ta grille », Conception › Grilles');
+        const composer = norm(await bulle(page).innerText());
+        expect(composer).not.toContain('Colle-la dans la zone');
         expect(composer).not.toContain('Copie ton tableau');
+        await contourSur(page, '#conception-grille-criteres [data-action="creerNouvelleGrille"]');
         await carteTient(page, '« Ta grille », Conception › Grilles');
         await capture(page, DOSSIER, `i3-ta-grille-composer-${cap}`);
         await allerAuMateriel(page);
-        await expect(bulle(page).locator('.parcours-bulle-ligne').first()).toContainText('Colle ici la grille');
+        await bulleDit(page, { lieu: MOTS.lieu['5m'], consignes: ['Colle-la dans la zone'], boutons: ['Je la compose ici'] }, '« Ta grille », de retour à l’accueil');
+        await expect(interrupteur(page)).toBeHidden();
 
-        // Dans l'étiquetage : la carte passe aux trois étapes ; la ligne du geste suit le premier manque, comme avant.
+        // Dans l'étiquetage : la bulle a ses deux gestes et sa consigne ; elle ne porte ni les trois étapes de la page
+        // (le complément) ni la ligne du geste, mais désigne ce que désigne la carte de la page : l'étiquette à prendre
+        // pour le premier manque (`MaterielAide.contour()`, `MaterielAide.fleches()`).
         await coller(page, CAPTURE);
-        await expect.poll(async () => norm(await pageLue(page).textContent())).toContain('1. Touche une étiquette dans la légende.');
-        await gesteEst(page, 'Ta grille n’a pas encore de nom : prends « Titre », puis touche son nom dans ta grille.');
+        const G1 = 'Prends « Titre », puis touche le nom de ta grille';
+        const G2 = 'Pour chaque critère, prends « Critère » et touche son nom, « Description » et touche sa définition, « Pondération » et touche ce qu\'il pèse';
+        await bulleDit(page, {
+            confirme: '', lieu: '', boutons: [], gestes: [G1, G2], faites: [],
+            notes: ["Ta grille est là, telle qu'elle était écrite. À toi de dire ce qu'est chaque partie."],
+            consignes: ['Quand tout est étiqueté, touche « Créer ma grille »']
+        }, '« Ta grille », l’étiquetage');
+        await expect(bulle(page).locator('.parcours-bulle-geste')).toHaveCount(0);
+        await expect(bulle(page).locator('.parcours-bulle-texte')).toBeHidden();
+        const etiquetage = norm(await bulle(page).innerText());
+        for (const mots of ['1. Touche une étiquette dans la légende.', 'Touche les parties de ta grille', 'Ta grille n’a pas encore de nom']) {
+            expect(etiquetage, '« Ta grille », l’étiquetage : pas « ' + mots + ' »').not.toContain(mots);
+        }
         await contourSur(page, etiquette('titre'));
         await flecheVers(page, etiquette('titre'), '« Ta grille », le nom');
-        await expect(bulle(page).locator('.parcours-bulle-rang')).toHaveText('1 sur 9');
+        await bulleNeCouvrePas(page, etiquette('titre'), '« Ta grille », le nom');
+        await expect(bulle(page).locator('.parcours-bulle-rang')).toHaveText('5 sur 10');
+        await expect(interrupteur(page)).toBeHidden();
         await pageSansConsignes(page, 'pendant le parcours');
-        await aucunePhraseDeuxFois(page, '« Ta grille », l’étiquetage');
+        await aucuneLigneDeuxFois(page, '« Ta grille », l’étiquetage');
         await carteTient(page, '« Ta grille », l’étiquetage');
         await capture(page, DOSSIER, `i3-ta-grille-etiquetage-${cap}`);
+        // Le titre étiqueté : le premier geste se grise, et le halo suit le manque suivant, comme sur la page.
+        await poser(page, 'titre', ['Grille fictive d’analyse']);
+        await bulleDit(page, { faites: [G1] }, '« Ta grille », le titre étiqueté');
+        const designe = await page.evaluate(() => { const e = MaterielAide.contour(); return e ? (e.getAttribute('data-type') || e.id || e.className) : null; });
+        expect(designe, 'la page désigne un geste suivant').toBeTruthy();
+        await expect.poll(() => page.evaluate(() => {
+            const c = document.getElementById('parcours-contour'), e = MaterielAide.contour();
+            if (!c || c.hidden || !e) return 'absent';
+            const a = c.getBoundingClientRect(), b = e.getBoundingClientRect();
+            return Math.abs((a.left + a.right) / 2 - (b.left + b.right) / 2) < 3 && Math.abs((a.top + a.bottom) / 2 - (b.top + b.bottom) / 2) < 3 ? 'posé' : 'décalé';
+        }), { message: 'le halo de la bulle 5 est celui de `MaterielAide.contour()` (' + designe + ')' }).toBe('posé');
 
         // « Plus tard » : le parcours attend ; l'interrupteur revient, et la carte de la page avec lui.
         await bulle(page).locator('.parcours-bulle-sortie').click();
         await expect(interrupteur(page)).toBeVisible();
         await expect(bascule(page)).toBeChecked();
         await carteDeLaPage(page);
-        // La carte de la page n'a rien écrit dans la progression : « Évaluer » est en cours à l'étape 1, rien d'autre.
+        // La carte de la page n'a rien écrit dans la progression : « Évaluer » est en cours à la bulle 5, rien d'autre.
         expect(await page.evaluate(() => Object.keys(obtenirPreference('parcoursAssistance') || {}))).not.toContain('aide-materiel');
+        expect(await page.evaluate(() => Assistance.etatDe('evaluer'))).toEqual({ etat: 'en-cours', etape: 4 });
     });
 }
 

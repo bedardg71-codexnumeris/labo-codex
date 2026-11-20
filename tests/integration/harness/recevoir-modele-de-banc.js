@@ -7,7 +7,7 @@
 // Le modèle d'« Évaluer » (dix étapes, 18 nov. 2026) : ses vérifications sont au banc
 // `je-regarde-evaluer-2026-11-18.spec.js`, qui appelle le même parcours avec `surEtape`.
 import { expect } from '@playwright/test';
-import { ouvrirPanneau, boutonModele, bulle, attendreEtape, faireLaModelisation, attendreRemplir, REMPLIR } from './deux-temps-de-banc.js';
+import { ouvrirPanneau, boutonModele, bulle, carte, attendreEtape, faireLaModelisation, attendreRemplir, REMPLIR } from './deux-temps-de-banc.js';
 import { etiqueter } from './classe-de-banc.js';
 import { actionDeLaListe, valeursActions } from './nous-faisons-evaluer-de-banc.js';
 
@@ -24,12 +24,29 @@ async function etiqueterTous(page, type, textes) {
     }).toPass({ timeout: 15000 });
 }
 
+/**
+ * LA FIN D'UN PARCOURS NE LANCE PLUS RIEN (20 nov. 2026, `plans de travail/CONSIGNE-2026-11-20-essai-parcours.md`, A3) :
+ * « Voir le parcours N » termine le modèle en cours, ferme la bulle et ouvre le panneau « Assistance » devant la carte
+ * du parcours N, suggérée, le focus sur son « Je regarde ». Pour enchaîner comme le faisait « Voir le parcours
+ * suivant », la personne touche ce « Je regarde » : c'est ce que fait cette aide, en jugeant chaque pas.
+ */
+export async function voirLeParcoursPuisJeRegarde(page, n, id) {
+    await boutonDeBulle(page, 'Voir le parcours ' + n).click();
+    await expect(bulle(page), `« Voir le parcours ${n} » ferme la bulle`).toHaveCount(0);
+    await expect(page.locator('#panneau-assistance')).toBeVisible();
+    expect(await page.evaluate(() => ParcoursMoteur.actif()), `« Voir le parcours ${n} » ne lance rien`).toBe(false);
+    await expect(carte(page, id)).toHaveClass(/assistance-parcours-item--suggere/);
+    await expect(boutonModele(page, id)).toBeFocused();
+    await expect(boutonModele(page, id)).toHaveText('Je regarde');
+    await boutonModele(page, id).click();
+}
+
 /** Les Modélisations de « Mettre ta classe en place » puis d'« Évaluer une première production », jusqu'à leur dernière bulle. */
 export async function faireLesDeuxModeles(page, options = {}) {
     await ouvrirPanneau(page);
     await boutonModele(page, 'classe').click();
     await faireLaModelisation(page);
-    await boutonDeBulle(page, 'Voir le parcours suivant').click();
+    await voirLeParcoursPuisJeRegarde(page, 3, 'evaluer');
     return faireLeModeleDEvaluer(page, options);
 }
 

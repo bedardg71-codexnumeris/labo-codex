@@ -12,9 +12,15 @@
 //        DOM avant son `touchend` : la bulle se pose encore, et se glisse jusqu'au bord droit.
 // Break-tests : voir le rapport du lot (`plans de travail/RAPPORT-2026-11-12-dissection-ipad.md`).
 // Grille FICTIVE ; noms d'étudiant·es fictifs (classe-de-banc.js).
+// 20 nov. 2026 (plans de travail/CONSIGNE-2026-11-20-essai-parcours.md, section D) : ce banc entrait dans l'étiquetage
+// par l'ancienne étape 1 d'« Évaluer une première production » (deux bulles d'ouverture, puis « Ta grille »), retirée.
+// Il y entre maintenant par la bulle 5, « Ta grille », du « Nous faisons » neuf, après les bulles 1 à 4 (jouées par
+// `harness/nous-faisons-evaluer-de-banc.js`). Ce qu'il juge (le cadre de la bulle, sa place à droite de la grille, le
+// glisser jusqu'au bord droit) n'a pas changé. (La carte de la page, « Ta grille, pas à pas », n'y convient pas : elle
+// évite aussi l'interrupteur de la page, à droite, et se pose à gauche à 1180 × 820 ; mesuré le 20 nov.)
 import { test, expect } from '@playwright/test';
-import { ouvrirEspaceVide, mettreLaClasseEnPlace, attendreEtape, bulle, capture } from './harness/classe-de-banc.js';
-import { passerLOuverture } from './harness/ouverture-evaluer.js';
+import { ouvrirEspaceVide, ouvrirPanneau, mettreLaClasseEnPlace, attendreEtape, capture } from './harness/classe-de-banc.js';
+import { bulle1, bulle2Modele, bulle3, bulle4, item } from './harness/nous-faisons-evaluer-de-banc.js';
 
 const DOSSIER = process.env.CAPTURES_PARCOURS || '';
 const TAILLES = [[1180, 820], [820, 1180]];
@@ -25,12 +31,20 @@ const GRILLE = '<table><tr><td colspan="3">Grille fictive de lecture</td></tr>'
     + '<tr><td>Développement</td><td>Arguments et exemples</td><td>/ 30</td></tr>'
     + '<tr><td>Conclusion</td><td>Synthèse et ouverture</td><td>/ 10</td></tr></table>';
 
-/** « Évaluer une première production », étape « Ta grille », la grille fictive collée. */
+/** « Évaluer une première production », « Nous faisons », bulle 5 « Ta grille », la grille fictive collée. */
 async function aTaGrille(page, L, H) {
+    test.setTimeout(240000);
+    const cap = `l-${L}x${H}`;
     await ouvrirEspaceVide(page, L, { hauteur: H });
     await mettreLaClasseEnPlace(page);
-    await page.evaluate(() => Assistance.parcours().find((p) => p.id === 'evaluer').lancer(0));
-    await passerLOuverture(page);   // 14 nov. 2026 : deux bulles d'ouverture avant « Ta grille »
+    await ouvrirPanneau(page);
+    await item(page).locator('.assistance-parcours-bouton').click();
+    await expect(page.locator('#panneau-assistance')).toHaveCount(0);
+    await bulle1(page, { voie: 'modele', cap });
+    await bulle2Modele(page, { cap });
+    await bulle3(page, { cap });
+    await bulle4(page, { cap });
+    await attendreEtape(page, 5, 10, 'Ta grille', { focus: false });
     await expect(page.locator('#materiel-accueil')).toBeVisible();
     await page.evaluate((h) => {
         const zone = document.getElementById('materiel-zone-collage');
@@ -70,10 +84,13 @@ for (const [L, H] of TAILLES) {
     for (const type of ['mouse', 'touch']) {
         test(`L1 · ${L} × ${H} · ${type} : la bulle se pose à droite de la grille quand elle y a la place, et va au bord droit`, async ({ page }) => {
             await aTaGrille(page, L, H);
-            // 14 nov. 2026 : la grille collée, la bulle passe de l'accueil à l'étiquetage et se redessine ; le placement
-            // se lit quand elle est posée de nouveau.
-            // (La bulle de l'accueil porte des lignes ; celle de l'étiquetage, non : lue d'un trait, quand elle est posée.)
-            const lirePlacement = () => page.evaluate(() => (document.querySelector('#parcours-bulle .parcours-bulle-ligne') ? null : ParcoursMoteur.placement()));
+            // La grille collée, la bulle passe de l'accueil à l'étiquetage et se redessine ; le placement se lit quand
+            // elle est posée de nouveau. (20 nov. 2026 : la bulle 5 de l'étiquetage se reconnaît à sa consigne, qui
+            // nomme « Créer ma grille » ; celle de l'accueil dit « Colle-la dans la zone ».)
+            const lirePlacement = () => page.evaluate(() => {
+                const c = document.querySelector('#parcours-bulle .parcours-bulle-ligne--geste');
+                return c && /Créer ma grille/.test(c.textContent) ? ParcoursMoteur.placement() : null;
+            });
             await expect.poll(async () => !!(await lirePlacement())).toBe(true);
             const pl = await lirePlacement();
             expect(pl, 'la bulle de l’étiquetage est posée').toBeTruthy();

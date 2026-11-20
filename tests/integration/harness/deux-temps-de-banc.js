@@ -458,7 +458,7 @@ export async function faireLaModelisation(page, { capturer = '', surRemplir = nu
         } else {
             expect(pres, 'étape 8 : un point trop près de la bulle pour sa flèche reste à découvert').toBeGreaterThan(0);
             expect(groupe, 'étape 8 : seul le point du retard peut rester sans flèche, et seulement à 1180 × 820').toEqual([2]);
-            expect(page.viewportSize()).toEqual({ width: 1180, height: 820 });
+            expect(page.viewportSize(), 'étape 8 : le point du retard est à ' + Math.round(pres) + ' px de la bulle (haute de ' + Math.round(geo.bulle.bottom - geo.bulle.top) + ' px, de ' + Math.round(geo.bulle.top) + ' à ' + Math.round(geo.bulle.bottom) + ')').toEqual({ width: 1180, height: 820 });
         }
     }
     await capture(page, 'modele-8-' + capturer);

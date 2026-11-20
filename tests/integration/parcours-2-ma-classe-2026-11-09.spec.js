@@ -368,14 +368,20 @@ test('de « Découvrir » à sa propre classe : « Commencer avec ma classe », 
         "Chaque point blanc est un·e de tes étudiant·es. La bande « Assiduité » le place selon ses présences : plus il glisse vers la gauche, plus les absences s'accumulent.",
         "Tout le monde était là : un point s'écartera à la première absence.",
         "Les bandes « Complétion » et « Performance » sont vides : elles s'allumeront à tes premières évaluations.",
-        "Séance après séance, tu verras qui s'éloigne, sans attendre une main levée.",
+        // 20 nov. 2026 (plans de travail/CONSIGNE-2026-11-20-essai-parcours.md, B1) : la phrase de Grégoire.
+        "Séance après séance, tu verras qui s'éloigne. C'est un premier signe : cette personne a peut-être besoin que tu ailles vers elle, même si elle n'a rien demandé.",
         'Pour revoir une étape, touche « 8 sur 8 ».']);
     expect(await bulle(page).locator('.parcours-bulle-ligne.est-faite').count()).toBe(0);
-    await expect(bulle(page).locator('.parcours-bulle-ligne--geste')).toHaveText('Touche «\u00a0Parcours suivant\u00a0», ou «\u00a0Terminer\u00a0»');
+    // 20 nov. 2026 (même consigne, A3) : la suite suggérée est nommée ; son bouton est « Voir le parcours 3 ».
+    expect(await plats(bulle(page).locator('.parcours-bulle-suite'))).toEqual([
+        "Chaque parcours a son objectif. C'est toi qui choisis la suite.",
+        'Suite suggérée : le parcours 3, « Évaluer une première production ».']);
+    await expect(bulle(page).locator('.parcours-bulle-ligne--geste')).toHaveText('Touche «\u00a0Voir le parcours 3\u00a0», ou «\u00a0Terminer\u00a0»');
     await expect(bulle(page).locator('.parcours-bulle-nav')).toBeHidden();
     await expect(bulle(page).locator('.parcours-bulle-sortie')).toHaveCount(0);
-    // 14 nov. 2026 (lot 2e) : la dernière bulle offre « Parcours suivant » et « Terminer », de même poids.
-    await expect(bulle(page).locator('.parcours-bulle-boutons button')).toHaveText(['Parcours suivant', 'Terminer']);
+    // 14 nov. 2026 (lot 2e) : la dernière bulle offre sa suite et « Terminer », de même poids. 20 nov. 2026 (A3) : la
+    // suite s'appelle « Voir le parcours 3 » (plus « Parcours suivant »).
+    await expect(bulle(page).locator('.parcours-bulle-boutons button')).toHaveText(['Voir le parcours 3', 'Terminer']);
     await capture(page, 'classe-8-1180-sombre');
     await bulle(page).getByRole('button', { name: 'Terminer' }).click();
 

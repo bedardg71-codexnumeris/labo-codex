@@ -128,7 +128,8 @@ async function espaceDuTroisiemeParcours(page, cap) {
     await magasinDeCopiesDuBanc(page);
     dossierDesCaptures('');
     await leTroisiemeParcoursFait(page, { cap: 'p3' });
-    await page.keyboard.press('Escape');
+    // 20 nov. 2026 (plans de travail/CONSIGNE-2026-11-20-essai-parcours.md, D) : à la sortie du troisième parcours neuf,
+    // ni bulle ni panneau ne reste ouvert (`leTroisiemeParcoursFait` le juge) ; l'« Échap » qui fermait le panneau est parti.
     dossierDesCaptures(DOSSIER);
     // De bout en bout (décision du 9 nov., 15 h 55) : à la sortie du troisième parcours, la production nomme sa grille, son
     // échelle et sa cartouche ; le quatrième démarre sans rien préparer à la main.
@@ -249,17 +250,23 @@ test('« Recevoir les productions, rendre tes rétroactions », la voie des fich
     await expect(page.locator('#selectCartoucheEval')).toHaveValue(c.cartoucheId);
     await expect(page.locator('#selectEchelle1')).not.toHaveValue('');
     const champs = await page.evaluate(() => [...document.querySelectorAll('#listeCriteresGrille1 select[id^="eval_"]')].map((x) => x.id));
-    expect(champs.length).toBe(4);
+    // 20 nov. 2026 (consigne du 20 nov., D) : la production du troisième parcours neuf porte la « Grille du banc », DEUX
+    // critères par niveaux (avant : quatre), et l'« Échelle de départ (IDME) », codes PS, I, D, M, E (avant : une échelle
+    // à quatre niveaux, codes I, P, S, R).
+    expect(champs.length).toBe(2);
+    expect(await page.locator('#' + champs[0]).evaluate((x) => [...x.options].map((o) => o.value).filter(Boolean))).toEqual(['PS', 'I', 'D', 'M', 'E']);
     await contourSur(page, '#' + champs[0]);
     await capture(page, DOSSIER, `p4-6-${cap}`);
-    for (const id of champs.slice(0, 3)) await page.selectOption('#' + id, 'S');
+    await page.selectOption('#' + champs[0], 'M');
     expect(await page.evaluate(() => ParcoursMoteur.etapeCourante())).toBe(5);   // un critère reste
-    await page.selectOption('#' + champs[3], 'S');
+    await page.selectOption('#' + champs[1], 'M');
 
     // 7. La rétroaction, le cadenas.
     await n(page, 7, 9, 'Ta rétroaction', { focus: false });
     await contourSur(page, '#btnVerrouillerEvaluation');
-    await expect(page.locator('#retroactionFinale1')).toHaveValue(/MOT-DE-CARTOUCHE/);
+    // 20 nov. 2026 (consigne du 20 nov., D) : la cartouche du troisième parcours neuf n'a de commentaires que pour son
+    // premier critère, « Commentaire du niveau N. » ; au niveau M (le quatrième), la rétroaction porte celui du niveau 4.
+    await expect(page.locator('#retroactionFinale1')).toHaveValue(/Commentaire du niveau 4\./);
     await capture(page, DOSSIER, `p4-7-${cap}`);
     await page.click('#btnVerrouillerEvaluation');
 
@@ -347,9 +354,10 @@ test('« Recevoir les productions, rendre tes rétroactions », la voie sans fic
     await expect(page.locator('#evaluations-contenu-evaluation')).toBeVisible();
     const c = await page.evaluate(() => ParcoursEvaluer.contexte());
     await expect(page.locator('#selectCartoucheEval')).toHaveValue(c.cartoucheId);
-    await expect.poll(() => page.locator('#listeCriteresGrille1 select[id^="eval_"]').count()).toBe(4);
+    // 20 nov. 2026 (consigne du 20 nov., D) : deux critères, aux niveaux de l'Échelle de départ (avant : quatre, « P »).
+    await expect.poll(() => page.locator('#listeCriteresGrille1 select[id^="eval_"]').count()).toBe(2);
     for (const id of await page.evaluate(() => [...document.querySelectorAll('#listeCriteresGrille1 select[id^="eval_"]')].map((x) => x.id))) {
-        await page.selectOption('#' + id, 'P');
+        await page.selectOption('#' + id, 'D');
     }
 
     // 2 sur 4 : la rétroaction (la deuxième phrase sans « Spécifique »), le cadenas.

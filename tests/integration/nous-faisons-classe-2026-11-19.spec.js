@@ -262,12 +262,17 @@ for (const taille of TAILLES) {
             "E Chaque point blanc est un·e de tes étudiant·es. La bande « Assiduité » le place selon ses présences : plus il glisse vers la gauche, plus les absences s'accumulent.",
             "E Tout le monde était là : un point s'écartera à la première absence.",
             "E Les bandes « Complétion » et « Performance » sont vides : elles s'allumeront à tes premières évaluations.",
-            "E Séance après séance, tu verras qui s'éloigne, sans attendre une main levée.",
+            // 20 nov. 2026 (plans de travail/CONSIGNE-2026-11-20-essai-parcours.md, B1) : la phrase de Grégoire.
+            "E Séance après séance, tu verras qui s'éloigne. C'est un premier signe : cette personne a peut-être besoin que tu ailles vers elle, même si elle n'a rien demandé.",
             'E Pour revoir une étape, touche « 8 sur 8 ».',
             "O Objectif atteint : tu es en mesure de mettre ta propre classe en place, du trimestre jusqu'aux présences d'une séance.",
             "E Chaque parcours a son objectif. C'est toi qui choisis la suite.",
-            expect.stringMatching(/^C Touche « (Parcours suivant », ou « )?Terminer »$/)
+            // 20 nov. 2026 (même consigne, A3) : la suite suggérée est nommée, et son bouton est « Voir le parcours 3 »
+            // (plus « Parcours suivant »). Ce banc rouvre tous les parcours : le troisième suit toujours.
+            'E Suite suggérée : le parcours 3, « Évaluer une première production ».',
+            'C Touche « Voir le parcours 3 », ou « Terminer »'
         ]);
+        expect(await bulle(page).locator('.parcours-bulle-boutons button').allTextContents()).toEqual(['Voir le parcours 3', 'Terminer']);
 
         // Revue par le compteur (la bulle 5, déjà faite) : l'étape d'avant a été faite dans ce passage, la confirmation reste.
         await bulle(page).locator('.parcours-bulle-rang').click();
@@ -292,9 +297,24 @@ for (const taille of TAILLES) {
             "G Choisis la session et l'année (elles serviront à identifier ton trimestre)",
             'G Donne trois dates (elles serviront à bâtir ton calendrier de séances) : [- le début du trimestre | - la fin des cours réguliers | - la fin du trimestre]',
             'C Touche « Créer le trimestre »',
-            'E Le reste du formulaire peut attendre.',
-            'E Tu peux déplacer cette bulle par sa poignée et faire défiler la page pour mieux voir.'
+            'E Le reste du formulaire peut attendre.'
         ]);
+        // 20 nov. 2026 (plans de travail/CONSIGNE-2026-11-20-essai-parcours.md, A1 et A2) : la phrase de la poignée
+        // n'est plus sous les lignes. Elle est au-dessus du titre, sous la ligne qui nomme le parcours et son temps.
+        const entree = await page.evaluate(() => {
+            const b = document.getElementById('parcours-bulle');
+            const plat = (x) => (x && !x.hidden ? x.textContent.replace(/\u00a0/g, ' ').replace(/\s+/g, ' ').trim() : null);
+            const identite = b.querySelector('.parcours-bulle-identite'), aide = b.querySelector('.parcours-bulle-aide');
+            const titre = b.querySelector('.parcours-bulle-titre');
+            const avant = (x, y) => !!(x.compareDocumentPosition(y) & Node.DOCUMENT_POSITION_FOLLOWING);
+            return { identite: plat(identite), aide: plat(aide), nAide: b.querySelectorAll('.parcours-bulle-aide').length,
+                ordre: avant(identite, aide) && avant(aide, titre),
+                auDessus: identite.getBoundingClientRect().bottom <= aide.getBoundingClientRect().top + 1 && aide.getBoundingClientRect().bottom <= titre.getBoundingClientRect().top + 1,
+                dansLesLignes: !!b.querySelector('.parcours-bulle-lignes .parcours-bulle-aide') };
+        });
+        expect(entree).toEqual({ identite: 'Parcours 2 · Mettre ta classe en place · Nous faisons',
+            aide: 'Tu peux déplacer cette bulle par sa poignée et faire défiler la page pour mieux voir.', nAide: 1,
+            ordre: true, auDessus: true, dansLesLignes: false });
         // Une sous-ligne faite reçoit son crochet ; la ligne mère garde sa flèche jusqu'à la dernière.
         await page.fill('#v2-debutTrimestre', '2026-08-24');
         await expect.poll(async () => (await lireBulle(page)).lignes[5]).toBe(

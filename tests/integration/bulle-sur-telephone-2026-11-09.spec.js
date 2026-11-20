@@ -201,7 +201,9 @@ test('390 px : « Découvrir », étapes 1, 5 et 8 — repliée, dépliée, la z
     e = await etatBulle(page);
     expect(e).toMatchObject({ telephone: true, repliee: false, texteVisible: true });
     expect(e.bas).toBeLessThanOrEqual(e.hauteurFenetre);
-    await expect(bulle(page).locator('.parcours-bulle-boutons button')).toHaveText(['Explorer la démo par moi-même', 'Voir le parcours suivant', 'Commencer avec ma classe']);
+    // 20 nov. 2026 (plans de travail/CONSIGNE-2026-11-20-essai-parcours.md, A3) : « Voir le parcours 2 » (plus « Voir le
+    // parcours suivant »).
+    await expect(bulle(page).locator('.parcours-bulle-boutons button')).toHaveText(['Explorer la démo par moi-même', 'Voir le parcours 2', 'Commencer avec ma classe']);
     for (const b of await bulle(page).locator('.parcours-bulle-boutons button').all()) await expect(b).toBeInViewport({ ratio: 1 });
     await capture(page, 'decouvrir-8-390-depliee');
     await bascule(page).click();
