@@ -170,7 +170,70 @@ que l'autoévaluation a retouchées aussi : `bareme-1` (3, à 1 440 et 820), `ec
 
 ### WebKit Linux, sur GitHub (run 44649923269, `0c0bb47c`)
 
-(En cours : la relance des neuf morceaux non joués tourne.)
+Le workflow `tests.yml`, lancé à la demande sur la branche (`workflow_dispatch`), juge en 20 morceaux sous WebKit
+Linux, puis un job « verdict » compare à `scripts/playwright-baseline-linux.json`. **Verdict : NON JUGÉ**, deux fois.
+Ce n'est pas un rouge d'essai : des morceaux n'ont pas pu poser les dépendances apt de WebKit (« non posées en trois
+essais — ce morceau ne jouera rien »), comme sur `main` le 19 nov. au soir (run 44614746624, 12 rapports sur 20,
+même cause). Première tentative : 11 morceaux joués sur 20 ; relance des seuls morceaux échoués : 5 de plus. **16
+morceaux sur 20 joués** ; les morceaux 9, 11, 12 et 19 ne l'ont jamais été. J'ai lu le bilan de chacun des seize dans
+son journal et l'ai comparé à la baseline Linux et à la liste des 17 de #1293.
+
+**Les bancs des lots sous WebKit Linux.** Verts : `dupliquer-copie-profonde-1298` (morceau 8),
+`dupliquer-copie-profonde-1298-cache` et `planif-glisser-relachement-1295` (7), `autoevaluation-consignes` (18),
+`noms-des-seuils` (4), le banc croisé, `descripteurs-niveaux-grille` et `echelle-reperes-maitrise-rendu` (13),
+`bareme-1` (1), `materiel-dissection-2b` (10), `wizard-577-reperes-echelle-rendu` (6), `partage-echelle-reperes-583`
+(17). `descripteurs-niveaux-grille` (« iPad en haut ») et les deux essais de parcours-5 sont passés au second essai.
+**Rouge : `diagnostic-copies-liees-1298`, les six essais** (morceau 17), jamais joués sous WebKit par son lot : le
+toucher du bouton « Vérifier les copies liées » est intercepté par l'en-tête de l'accordéon « Maintenance », resté
+fermé. Le banc était le seul de la suite à ouvrir un accordéon par `.tap()` sur l'en-tête (une `div`) ; tous les
+autres le font par `.click()`, et le code de l'application note qu'à l'iPad, le toucher d'un élément non cliquable
+n'émet pas de `click`. **Corrigé dans le banc** (`85e35267`) : l'en-tête s'ouvre par un clic, une attente nomme
+l'accordéon ouvert ; le geste jugé, le toucher du bouton, reste un toucher. Six verts sous Chromium. (Jugé de nouveau par le run 44659003950, en cours.)
+
+**Les autres rouges francs (rouges aux deux essais) :**
+
+| Essai | Morceau | Classement |
+|---|---|---|
+| `1007-codex-a-part-avant-suppression` X1 | 1 | baseline Linux |
+| `1007-propose-codex-avant-suppression` P8 (évaluation) | 4 | baseline Linux |
+| `codex-1011-ouvert-sans-espace` (5), deux essais | 10 | baseline Linux |
+| `codex-1012-fichier-d-origine` (1) | 13 | baseline Linux |
+| `exporter-des-travaux-une-carte-895` « Par étudiant·e » | 7 | baseline Linux |
+| `lot-j0-bis-partage-apres-preparation` « réel » | 17 | baseline Linux |
+| `nettoyage-sans-perte-892`, deux essais | 20 | baseline Linux |
+| `notifications-pile-1224` | 6 | baseline Linux |
+| `palette-evaluation-compacte` « la bulle d'aide générale » | 13 | baseline Linux |
+| `planif-zone-non-planifie-929` | 16 | baseline Linux |
+| `standards-sans-portfolio-lot-4` CHIM-1 | 17 | baseline Linux |
+| `parcours-2-ma-classe`, quatre essais | 3 | liste des 17 de #1293 |
+| `parcours-je-regarde` « Mettre ta classe en place » | 13 | liste des 17 de #1293 |
+| `tableau-de-notation-1`, 820 px, standards | 4 | liste des 17 de #1293 |
+| `vue-simple`, novice | 5 | liste des 17 de #1293 |
+| `dissection-legende` L6, 820 × 1 180 | 2 | **hors des listes** |
+| `temoin-enregistrement-lot-b`, 768 px, clair | 8 | **hors des listes** (même famille que trois entrées de la baseline Linux, à 1 024 et 1 180 px) |
+| `tampons-masques-bibliotheque-1216` « catégorie masquée ou inconnue » | 5 | **hors des listes** (la baseline Linux en a un autre essai) |
+
+Les trois hors des listes, examinés : aucun lot ne touche leur code (ni la dissection, ni le témoin d'enregistrement,
+ni les tampons ; lu au diff). Sous Chromium, `dissection-legende` L6 et `temoin-enregistrement-lot-b` à 768 px sont
+**verts sur l'assemblage comme sur `main`** (aux deux tailles pour le premier, en sombre et en clair pour le second) :
+propres à WebKit Linux. Je ne peux pas dire d'ici s'ils sont neufs : dans le run de `main` du 19 nov. au soir, leurs
+fichiers tombaient dans les morceaux 19 et 1 (la répartition change quand des fichiers s'ajoutent), deux morceaux que
+l'apt a empêchés de jouer. `tampons-masques-bibliotheque-1216` est **intermittent, préexistant** : sous Chromium,
+rejoué trois fois, 3 rouges sur 3 sur `main` et 2 sur 3 sur l'assemblage ; et sous WebKit Linux, dans le run de
+`main` (morceau 18, joué), le même essai a rougi puis passé au second essai.
+
+**Passés au second essai** (hors des intermittents de la baseline Linux, pour mémoire) : `parcours-1-et-2` « panneau »,
+`critere-algorithmique-tables-de-cas-3b`, `presences-lot-d-enregistrement`, `temoin-enregistrement-lot-b` (360 px
+sombre et clair, 768 px sombre), `registre-longitudinal-915` R5, `critere-algorithmique-dit-vrai`,
+`bibliotheque-deux-colonnes-1156` (productions), `parcours-je-regarde` « Découvrir », `bulle-largeur-ipad` L2,
+`bareme-grille-neuve-1120` « Fermer » (fiche #1291, intermittent connu) ; et ceux des lots nommés plus haut. Les
+autres passés au second essai sont déjà classés : `comptes-erreurs-stock-1142` (l'un intermittent de la baseline Linux,
+l'autre dans la liste de #1293), et trois échecs connus de la baseline Linux (`palette-retroaction-compacte` sombre,
+`planif-corbeille-fixe-1070`, `lot-a-anonymisation-enregistre`).
+
+Ce qui varie entre les navigateurs : WebKit Linux n'est pas Safari macOS (le workflow le dit lui-même, six essais y
+sont exclus d'office) ; Chromium rougit en masse sur le codex et l'import, où WebKit Linux passe ; WebKit Linux rougit
+sur des gestes au doigt et des parcours que Chromium passe. Le verdict qui garde le push reste celui du Mac.
 
 ## 5. Les Nouvelles proposées (rien d'écrit dans `js/changelog-data.js`)
 
