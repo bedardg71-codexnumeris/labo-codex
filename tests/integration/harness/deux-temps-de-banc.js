@@ -457,8 +457,14 @@ export async function faireLaModelisation(page, { capturer = '', surRemplir = nu
             await flecheVers(page, groupe.map((j) => `[data-banc="point-${j}"]`), 'étape 8, un point à l’écart');
         } else {
             expect(pres, 'étape 8 : un point trop près de la bulle pour sa flèche reste à découvert').toBeGreaterThan(0);
-            expect(groupe, 'étape 8 : seul le point du retard peut rester sans flèche, et seulement à 1180 × 820').toEqual([2]);
-            expect(page.viewportSize(), 'étape 8 : le point du retard est à ' + Math.round(pres) + ' px de la bulle (haute de ' + Math.round(geo.bulle.bottom - geo.bulle.top) + ' px, de ' + Math.round(geo.bulle.top) + ' à ' + Math.round(geo.bulle.bottom) + ')').toEqual({ width: 1180, height: 820 });
+            expect(groupe, 'étape 8 : seul le point du retard peut rester sans flèche, et seulement à 1180 px de large').toEqual([2]);
+            // 20 nov. 2026 (plans de travail/CONSIGNE-2026-11-20-essai-parcours.md, B1 et A3) : la dernière bulle a gagné
+            // la phrase de B1 et la ligne « Suite suggérée… ». Mesuré à 1180 × 900 : elle fait 707 px (environ 610 avant le lot, lus sur capture),
+            // toute la hauteur utile (de 92 à 799), et se pose donc à côté des points, comme elle le faisait déjà à
+            // 1180 × 820 ; le point du retard tombe de 1 à 20 px d'elle (cinq passages sur sept). La tolérance, qui
+            // ne valait qu'à 1180 × 820, vaut aux deux hauteurs ; l'iPad debout (820 × 1180) n'y a toujours pas droit.
+            expect([820, 900], 'étape 8 : le point du retard est à ' + Math.round(pres) + ' px de la bulle (de ' + Math.round(geo.bulle.top) + ' à ' + Math.round(geo.bulle.bottom) + ' px), à ' + JSON.stringify(page.viewportSize())).toContain(page.viewportSize().height);
+            expect(page.viewportSize().width).toBe(1180);
         }
     }
     await capture(page, 'modele-8-' + capturer);

@@ -204,7 +204,7 @@ test.describe('P2 · au doigt (contexte tactile, 1180 × 820)', () => {
 });
 
 // ---------------------------------------------------------------------------------------------------------------
-// P4, P5, P6 — la carte de la page : l'exemple, l'aide pas à pas sur trois grilles, « Composer ma grille »
+// P4, P5, P6 : la carte de la page : l'exemple, l'aide pas à pas sur trois grilles, « Composer ma grille »
 // ---------------------------------------------------------------------------------------------------------------
 for (const [L, H] of TAILLES) {
     test(`P4 · P5 · P6 · ${L} × ${H} : l'exemple, l'aide qui suit les manques, « Composer ma grille »`, async ({ page }) => {
@@ -343,7 +343,7 @@ for (const [L, H] of TAILLES) {
 }
 
 // ---------------------------------------------------------------------------------------------------------------
-// P6, dans le parcours — bulle 5, « Ta grille » : « Composer ma grille » dans l'étiquetage, puis « Ta cartouche »
+// P6, dans le parcours : bulle 5, « Ta grille » : « Composer ma grille » dans l'étiquetage, puis « Ta cartouche »
 // ---------------------------------------------------------------------------------------------------------------
 // 20 nov. 2026 (consigne, section D) : l'étiquetage est la bulle 5 du « Nous faisons » neuf. Avant : l'étape 1, et une
 // grille composée faisait passer à « Ta production » (étape 2 sur 9). Maintenant : à « Ta cartouche » (6 sur 10).

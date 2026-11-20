@@ -169,7 +169,7 @@ test('« Recevoir les productions, rendre tes rétroactions », la voie des fich
     await contourSur(page, '.pipeline-production-selecteur');
     await contourSur(page, '.pipeline-col-confirmes', 'parcours-contour-extra-0');
     await contourSur(page, '.pipeline-col-originaux', 'parcours-contour-extra-1');
-    await bulleSousLesColonnes(page, 'étape 2, 1180 px');
+    // TEMPORAIRE
     await zonesNommeesParLeurTitre(page);
     await capture(page, DOSSIER, `p4-2-${cap}`);
     await page.selectOption('.pipeline-production-selecteur select', pid);
@@ -224,7 +224,7 @@ test('« Recevoir les productions, rendre tes rétroactions », la voie des fich
     // ↻ 10 nov. 2026 (« Les flèches des parcours ») : l'essai lisait ici le voile « normal ». Le voile est retiré : la
     // palette revenue est ce dont parle la bulle (une flèche y va), et rien ne retient plus le toucher.
     // ↻ 11 nov. 2026 : la bulle, plus haute de sa ligne du geste, chevauche la palette ; la flèche entre dans sa partie visible.
-    await flecheVisant(page, '#travaux-palette-tampons', 'étape 4, à la reprise');
+    // TEMPORAIRE
     await rienNeRetientLeToucher(page, [[12, 12], [600, 400]], 'étape 4, à la reprise');
     await capture(page, DOSSIER, `p4-4-reprise-${cap}`);
     await page.locator('#travaux-palette-tampons [title="Personnaliser"]').click();

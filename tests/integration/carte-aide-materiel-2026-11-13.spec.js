@@ -28,7 +28,7 @@
 // retirée. Il y entre maintenant par la bulle 5 du « Nous faisons » neuf, après les bulles 1 à 4 (la pratique, son
 // application, l'échelle), jouées par `harness/nous-faisons-evaluer-de-banc.js`.
 import { test, expect } from '@playwright/test';
-import { ouvrirEspaceVide, ouvrirPanneau, mettreLaClasseEnPlace, attendreEtape, contourSur, deuxSondes, bulle, bulleNeCouvrePas, capture } from './harness/classe-de-banc.js';
+import { ouvrirEspaceVide, mettreLaClasseEnPlace, attendreEtape, contourSur, deuxSondes, bulle, bulleNeCouvrePas, capture } from './harness/classe-de-banc.js';
 import { flecheVers, flecheVersMorceau } from './harness/fleches-de-banc.js';
 import { attendreApplication } from './harness/attendre-application.js';
 import { bulle1, bulle2Modele, bulle3, bulle4, bulleDit, item, MOTS } from './harness/nous-faisons-evaluer-de-banc.js';
@@ -442,7 +442,7 @@ test('I5 · le stock : `ouvert: false` → éteint ; `ouvert: true` → allumé 
 });
 
 // ---------------------------------------------------------------------------------------------------------------
-// I3 — pendant un parcours ; la bulle 5, « Ta grille », du « Nous faisons » d'« Évaluer une première production »
+// I3 : pendant un parcours ; la bulle 5, « Ta grille », du « Nous faisons » d'« Évaluer une première production »
 // ---------------------------------------------------------------------------------------------------------------
 for (const [L, H] of TAILLES) {
     test(`I3 · ${L} × ${H} : pendant un parcours, ni interrupteur ni carte de page ; la bulle 5, « Ta grille », sans ligne du geste ni complément ; Conception › Grilles a son texte`, async ({ page }) => {
@@ -458,8 +458,12 @@ for (const [L, H] of TAILLES) {
         await carteDeLaPage(page);
 
         // Un parcours se lance (« Nous faisons », dans le panneau) : la carte de la page se ferme.
-        await ouvrirPanneau(page);
-        await item(page).locator('.assistance-parcours-bouton').click();
+        // (À 1180 × 820, la carte de la page, à droite, couvre l'entrée « Assistance » du menu de l'en-tête : le banc la
+        // touche par son bouton, sans dépendre de ce que la carte couvre, comme il le fait pour les étiquettes.)
+        await page.click('#entete-menu-bouton');
+        await page.locator('#btn-assistance-menu').evaluate((b) => b.click());
+        await expect(page.locator('#panneau-assistance')).toBeVisible();
+        await item(page).locator('.assistance-parcours-bouton').evaluate((b) => b.click());
         await expect(page.locator('#panneau-assistance')).toHaveCount(0);
         await attendreEtape(page, 1, 10, 'Ta pratique de notation', { focus: false });
         expect(await page.evaluate(() => ParcoursMoteur.joue(MaterielAide.definition()))).toBe(false);
