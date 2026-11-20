@@ -7,6 +7,18 @@
 
 ---
 
+## 20 NOV. 2026, NUIT (Claude Code, dans le nuage) : **L'APERÇU D'ESSAI DES CINQ PARCOURS ET LEURS CODEX DE DÉPART** ; branche `apercu/essai-parcours`, **ESSAI, NE JAMAIS FUSIONNER** ; `main` n'a pas bougé (sauf ce relais)
+
+Mandat : Cowork, 19 nov., 20 h 30 (« Codex de départ pour l'essai des cinq parcours »). Consigne et rapport sur la branche : `plans de travail/CONSIGNE-2026-11-19-codex-de-depart.md`, `plans de travail/RAPPORT-2026-11-19-codex-de-depart.md`.
+
+- **Branche `apercu/essai-parcours`**, tête `90cb3c2a`, PR n° 42 (brouillon, « ESSAI, ne jamais fusionner »), aperçu https://deploy-preview-42--codexnumeris-051225.netlify.app (prêt, d'après Netlify), page des fichiers `/departs.html`. Partie de `lot/nous-faisons-donnees` (`e259204e`), avec `lot/je-regarde-cours` (`a28b133e`) fusionnée dedans : fusion triviale (BACKLOG, jetons, `PARCOURS_OUVERTS` à six parcours). Aucun commit sur les branches de lot.
+- **Livré** : trois fichiers de départ (Recevoir, Monter ton cours, Mettre tes données à l'abri ; même état : « Mettre ta classe en place » et « Évaluer » faits par leurs gestes, rappel de sauvegarde répondu) ; `departs.html` ; leur banc (3 sur 3, break-tests rouges) ; la mesure des touchers.
+- **Durable, à reprendre un jour sur `main`** : la fabrique, commit `30a907a9` seul (`tests/departs-de-parcours/`, `tests/playwright.departs.config.js`, `npm run departs`) ; elle resservira pour les parcours 7, 8 et 9.
+- **Mesuré** : les bulles de « Monter ton cours » ont la flèche devant chaque geste et la parenthèse finale hors du gras (moteur A + parcours 5 de B) ; « Je regarde » de « Monter ton cours » ne peut venir d'aucun codex (la démo n'y entre pas) : environ 70 touchers de modèles préalables ; ouvrir un fichier coûte 11 touchers (plus que 5 ou 6 : propositions au rapport, non codées).
+- **Jugé** : Vitest complet vert (un rouge de mon fait, le jeton de cache, réparé) ; Chromium : les bancs des cinq parcours sur la branche fusionnée, 18 sur 18. **Non jugé** : WebKit, Safari, l'iPad.
+
+---
+
 ## 20 NOV. 2026, NUIT (Claude Code, session de nuit B, dans le nuage) : **TROIS LOTS, RIEN SUR `main` : LE GLISSER D'ALIGNEMENT (FAIT EN DOUBLE DE LA PR N° 34), « NOUS FAISONS » ET « JE REGARDE » DE « MONTER TON COURS » EN APERÇU** ; `main` n'a pas bougé (sauf ce relais)
 
 Mandat : session de nuit B, 19 au 20 nov. (Grégoire, relayé de Cowork) ; textes sur `origin/lot/textes-parcours-nuit` (`afb106679`). **Le travail vit sur ses branches, aucune n'est fusionnée** ; aucune release, aucun bump, rien au changelog.
