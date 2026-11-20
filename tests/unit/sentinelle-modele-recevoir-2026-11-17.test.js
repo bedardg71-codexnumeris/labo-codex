@@ -4,6 +4,7 @@ import path from 'node:path';
 import vm from 'node:vm';
 import { fileURLToPath } from 'node:url';
 import { tranche } from './_helpers/tranche.js';
+import { sectionDeLaConsigne } from './_helpers/fin-des-parcours-2026-11-20.js';
 
 // =====================================================================
 // LE MODÈLE DE « RECEVOIR » (« JE REGARDE », 17 NOV. 2026) — LE MATÉRIEL CONFRONTÉ À LA CONSIGNE
@@ -118,10 +119,38 @@ describe('Le modèle de « Recevoir » : le matériel de la consigne', () => {
         };
         expect(lire('plans de travail/CONSIGNE-2026-11-19-nous-faisons-recevoir.md'))
             .toContain('devient « ' + RETOUCHES['TEXTES.etape6.lieuSuite'] + ' »');
+        // LES RETOUCHES DU 20 NOV. 2026 (essai de Grégoire sur l'iPad ; plans de travail/CONSIGNE-2026-11-20-essai-parcours.md,
+        // section E) : la bulle 10 n'envoie plus qu'une rétroaction (E1), trois explications s'ajoutent (E2, E3, E4).
+        // Chaque texte est relu dans la consigne du 20 nov. ; une ligne de liste n'y porte pas son point final.
+        const E = ['E1.', 'E2.', 'E3.', 'E4.'].map(sectionDeLaConsigne).join('\n').replace(/\u00a0/g, ' ');
+        const DU_20_NOV = {
+            'TEXTES.etape6.devient.lignes[1]': 'Fais défiler la fenêtre pour parcourir tous les tampons et leur classement',
+            'TEXTES.etape7.lignes[3]': "L'outil « Stylo » sera raffiné dans une mise à jour ultérieure",
+            'TEXTES.etape9.lignes[4]': 'Fais défiler chaque vue pour lire tout son contenu',
+            'TEXTES.etape10.lignes[0]': 'Ici, une seule rétroaction part, celle de Loutre Enjouée, pour que tu voies le résultat tout de suite',
+            'TEXTES.etape10.lignes[1]': 'Elle reçoit un PDF : sa copie annotée, suivie de sa synthèse',
+            'TEXTES.etape10.choisir': 'Dans la carte « Export Léa », choisis la production « ' + TITRE + ' »',
+            'TEXTES.etape10.etudiant': 'Sous « Étudiant·e », choisis « Loutre Enjouée »',
+            'TEXTES.etape10.exporter': "Touche « Exporter pour Léa » (le PDF s'ouvre dans un nouvel onglet ; reviens ensuite à celui de l'application)",
+            'TEXTES.etape10.devient.lignes[0]': "C'est ce que Loutre Enjouée lira : sa copie avec tes marques, puis ta rétroaction",
+            'TEXTES.etape10.devient.lignes[1]': "Avec ta classe, tu laisseras « Étudiant·e » à « — Tous — » : toutes les évaluations verrouillées partent d'un coup, réunies dans un fichier ZIP",
+            'TEXTES.etape10.devient.lignes[2]': "Pour Léa, fais une copie de ce ZIP renommée « travaux.zip » : c'est le nom qu'elle attend pour remettre chaque PDF à l'étudiant·e dont il porte le nom et le DA"
+        };
+        const vus = new Set();
         for (const [ou, texte] of textes) {
             if (RETOUCHES[ou]) expect(texte, ou).toBe(RETOUCHES[ou]);
-            else expect(partieC, ou).toContain(texte);
+            else if (DU_20_NOV[ou]) {
+                vus.add(ou);
+                expect(texte, ou).toBe(DU_20_NOV[ou]);
+                // La consigne du 20 nov. écrit la parenthèse de la consigne à part (« suivi hors du gras de « (…) » »).
+                const m = /^(.*\S) (\([^()]*\))$/.exec(texte);
+                if (ou === 'TEXTES.etape10.exporter') { expect(E).toContain('« ' + m[1] + ' »'); expect(E).toContain('« ' + m[2] + ' »'); }
+                else expect(E, ou).toContain('« ' + texte);
+            } else expect(partieC, ou).toContain(texte);
         }
+        expect([...vus].sort(), 'chaque retouche du 20 nov. est dans TEXTES').toEqual(Object.keys(DU_20_NOV).sort());
+        // Ce que la bulle 10 disait avant (huit évaluations, « — Tous — » dans la consigne) est parti.
+        expect(src).not.toMatch(/Huit évaluations verrouillées partent|et laisse « Étudiant·e » à « — Tous — »/);
         for (const k of ['etape1', 'etape5', 'etape6', 'etape10']) {
             expect(modele.textes[k].lieuSuite, k).toMatch(/^: c'est là que /);
             expect(modele.textes[k]).not.toHaveProperty('lieu');

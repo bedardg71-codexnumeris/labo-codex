@@ -146,6 +146,8 @@
             devient: {
                 lignes: [
                     "Chaque tampon, avec la phrase qu'il ajoute",
+                    // Grégoire, 20 nov. 2026 (essai sur l'iPad) : la fenêtre est plus courte que la liste des tampons.
+                    "Fais défiler la fenêtre pour parcourir tous les tampons et leur classement",
                     "Dans la démo, on regarde sans enregistrer : ces réglages sont les tiens, hors de la démo"
                 ],
                 consignes: ["Lis les phrases, puis touche « Annuler » (avec ta classe, tu les réécris à ta façon et tu touches « Enregistrer »)"]
@@ -157,6 +159,8 @@
                 "Les couleurs et les notes déjà sur la copie sont celles de Loutre Enjouée : sa tâche était d'annoter le texte avec trois stratégies de lecture",
                 "Pour un commentaire, prends l'outil « Texte » : tu tapes un paragraphe lisible, qui reste d'un seul tenant",
                 "Garde le « Stylo » pour encercler, souligner ou tracer une flèche : écrit à la main, chaque trait devient un élément à part sur la page",
+                // Grégoire, 20 nov. 2026 (essai sur l'iPad), dans les deux temps.
+                "L'outil « Stylo » sera raffiné dans une mise à jour ultérieure",
                 "Ici, on essaie les outils (texte, stylo, tampons), l'endroit importe peu. Loutre retrouvera tes marques dans le PDF que tu lui rendras"
             ],
             consignes: ["Quand tu as fini, touche « Annoter ▾ », puis choisis « Évaluer »"]
@@ -176,6 +180,8 @@
                 "« Générale » : les phrases de la cartouche, choisies d'après les niveaux que tu viens de donner",
                 "« Spécifique » : les phrases des tampons que tu as posés sur sa copie",
                 "« Bilan » : ses défis et sa force du moment ; plus tard, son progrès d'une production à l'autre",
+                // Grégoire, 20 nov. 2026 (essai sur l'iPad) : chaque vue est plus longue que la palette.
+                "Fais défiler chaque vue pour lire tout son contenu",
                 "Verrouiller dit que l'évaluation est terminée : seules les évaluations verrouillées partent à l'export"
             ],
             consignes: ["Relis, puis touche le cadenas « Verrouiller »"]
@@ -183,17 +189,21 @@
         etape10: {
             confirme: "C'est fait : l'évaluation de Loutre Enjouée est verrouillée.",
             lieuSuite: ": c'est là que tu prépares ce que tu remets à tes étudiant·es.",
+            // UNE SEULE RÉTROACTION PART (Grégoire, 20 nov. 2026, essai sur l'iPad ; consigne du 20 nov., E1) : celle de
+            // Loutre Enjouée, dont le PDF s'ouvre dans un nouvel onglet (js/travaux-archivage.js). Avant, les huit
+            // évaluations verrouillées partaient dans un ZIP, que rien ne montrait.
             lignes: [
-                "Huit évaluations verrouillées partent : celle de Loutre Enjouée et les sept de l'exemple",
-                "Tapir Doux et Antilope Vaillante n'ont pas encore d'évaluation : rien ne part pour eux",
-                "Chacun·e reçoit un PDF : sa copie annotée et sa synthèse, ou sa synthèse seule s'il n'y a pas de copie"
+                "Ici, une seule rétroaction part, celle de Loutre Enjouée, pour que tu voies le résultat tout de suite",
+                "Elle reçoit un PDF : sa copie annotée, suivie de sa synthèse"
             ],
-            choisir: function (titre) { return "Dans la carte « Export Léa », choisis la production " + PRODUCTION_DITE(titre) + " et laisse « Étudiant·e » à « — Tous — »"; },
-            exporter: "Touche « Exporter pour Léa »",
+            choisir: function (titre) { return "Dans la carte « Export Léa », choisis la production " + PRODUCTION_DITE(titre); },
+            etudiant: "Sous « Étudiant·e », choisis « " + MATERIEL.copieTravaillee.nom + " »",
+            exporter: "Touche « Exporter pour Léa » (le PDF s'ouvre dans un nouvel onglet ; reviens ensuite à celui de l'application)",
             devient: {
                 lignes: [
-                    "Garde ce fichier tel quel : son nom, avec la production et la date, en fait une archive facile à retrouver",
-                    "Pour Léa, fais-en une copie renommée « travaux.zip » : c'est le nom qu'elle attend pour remettre chaque PDF à l'étudiant·e dont il porte le nom et le DA"
+                    "C'est ce que Loutre Enjouée lira : sa copie avec tes marques, puis ta rétroaction",
+                    "Avec ta classe, tu laisseras « Étudiant·e » à « — Tous — » : toutes les évaluations verrouillées partent d'un coup, réunies dans un fichier ZIP",
+                    "Pour Léa, fais une copie de ce ZIP renommée « travaux.zip » : c'est le nom qu'elle attend pour remettre chaque PDF à l'étudiant·e dont il porte le nom et le DA"
                 ]
             }
         }
@@ -498,6 +508,8 @@
     function menuAnnoterOuvert() { var m = el('travaux-actions-dropdown'); return !!(m && m.classList.contains('ouvert') && vis(m)); }
     function menuExport() { return el('travaux-archivage-lea-production'); }
     function productionAExporterChoisie() { var s = menuExport(), p = productionDuModele(); return !!(s && p && s.value === p.id); }
+    function menuEtudiantDeLExport() { return el('travaux-archivage-lea-etudiant'); }
+    function etudiantAExporterChoisi() { var s = menuEtudiantDeLExport(); return !!s && s.value === MATERIEL.copieTravaillee.da; }
 
     var ameneeDeCote = 0;
     function ameneDeCote(e) {
@@ -770,13 +782,15 @@
                 // atteint », la phrase de la suite et « Pour revoir une étape » sont posés par le moteur (la fin).
                 lignes: function () {
                     if (exportFait) return forme(T.etape10.devient);
-                    var choisie = productionAExporterChoisie();
-                    return forme(T.etape10, [T.etape10.choisir(titreDeLaProduction()), T.etape10.exporter], [choisie, false]);
+                    return forme(T.etape10, [T.etape10.choisir(titreDeLaProduction()), T.etape10.etudiant, T.etape10.exporter],
+                        [productionAExporterChoisie(), etudiantAExporterChoisi(), false]);
                 },
                 avant: function () { exportFait = false; return B[7].avant(); },
                 contour: function () {
                     if (exportFait) return null;
-                    return productionAExporterChoisie() ? B[7].contour() : menuExport();
+                    // Un geste à la fois : la production, puis l'étudiant·e, puis « Exporter pour Léa ».
+                    if (!productionAExporterChoisie()) return menuExport();
+                    return etudiantAExporterChoisi() ? B[7].contour() : menuEtudiantDeLExport();
                 },
                 boutons: function () { return exportFait ? suites() : null; },
                 // La seconde forme est la fin : sans « Plus tard », comme la dernière bulle de « Mettre ta classe en place ».

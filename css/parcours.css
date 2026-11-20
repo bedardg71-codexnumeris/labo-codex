@@ -307,6 +307,10 @@ input.parcours-rempli { color: var(--accent-primaire) !important; -webkit-text-f
    flèches que la page trace de la légende vers les parties étiquetées sont masquées, pour ne garder que la flèche du
    geste en cours (celle de la bulle). La marque n'est posée que par ce modèle (js/parcours-evaluer.js). */
 body.parcours-actif.parcours-etiquetage-du-modele #dissection-fleches { display: none; }
+/* « JE REGARDE » DE « MONTER TON COURS » (Grégoire, 20 nov. 2026 ; consigne du 20 nov., F1) : la palette « Planificateur »
+   reste fermée jusqu'à la bulle qui en parle (elle se confondait avec l'Inspecteur). La marque n'est posée que par ce
+   modèle (js/parcours-cours.js) ; la préférence de la personne n'est pas touchée. */
+body.parcours-actif.parcours-planificateur-ferme #planif-palette-nav { display: none; }
 /* PENDANT UN PARCOURS, la liste « À vérifier » de la page « Productions » est repliée (même consigne, C3) : son
    titre reste, ses lignes attendent la fin du parcours. */
 body.parcours-actif #zone-avertissements-productions ul { display: none; }

@@ -580,6 +580,8 @@
                 note("Tu annotes déjà les productions ; ici, ton étudiant·e retrouvera tes marques dans le PDF que tu lui rendras."),
                 note("Pour un commentaire, prends l'outil « Texte » : tu tapes un paragraphe lisible, qui reste d'un seul tenant."),
                 note("Garde le « Stylo » pour encercler, souligner ou tracer une flèche : chaque trait y devient un élément à part."),
+                // Grégoire, 20 nov. 2026 (essai sur l'iPad), dans les deux temps.
+                note("L'outil « Stylo » sera raffiné dans une mise à jour ultérieure."),
                 note("Un tampon montre l'endroit sur la production ; dans la rétroaction, sa phrase dit ce que tu as observé, et combien de fois."),
                 { texte: "Annote la production", fait: marquePosee },
                 { texte: "Pose tes tampons là où tu observes quelque chose", fait: tamponPose },

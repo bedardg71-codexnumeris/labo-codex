@@ -300,6 +300,16 @@
     function inspecteurDevant(oui) { document.body.classList.toggle('parcours-inspecteur-devant', !!oui); }
 
     /**
+     * « JE REGARDE » : LE « PLANIFICATEUR » RESTE FERMÉ jusqu'à la bulle qui en parle (Grégoire, 20 nov. 2026, essai sur
+     * l'iPad ; consigne du 20 nov., F1 : à l'étape de la leçon, il se confondait avec l'Inspecteur). Fermé des bulles
+     * 1 à 6, il s'ouvre à la septième, « Une chaîne alignée », qui dit « Le « Planificateur » montre ses trois
+     * leçons ». Le temps du modèle seulement, par une marque sur la page (css/parcours.css) : la préférence de la
+     * personne (afficher ou masquer la palette) n'est pas touchée ; si elle l'a masquée, elle le reste.
+     */
+    var BULLE_DU_PLANIFICATEUR = 6;
+    function planificateurFerme(oui) { document.body.classList.toggle('parcours-planificateur-ferme', !!oui); }
+
+    /**
      * Le parcours est-il toujours le nôtre ? Le moteur peut le fermer sans `surQuitter` : un autre parcours lancé, la démo
      * ouverte (relecture neuve du 9 nov. : la classe restait sur `body` jusqu'au rechargement). Lu au titre de la bulle,
      * que le moteur n'expose pas autrement ; pendant un passage d'étape, un de nos titres suffit.
@@ -360,6 +370,7 @@
         enModele = false;
         retirerExtras();
         inspecteurDevant(false);
+        planificateurFerme(false);
         if (veilleTimer) clearInterval(veilleTimer);
         veilleTimer = null;
         blocsConnus = null;
@@ -1036,18 +1047,16 @@
                 },
                 apres: function () {
                     return [
-                        note("L'exemple a ajouté deux leçons, plus tard :"),
-                        note("« Les stratégies de lecture à l'essai » : la pratique guidée sur « Marine », puis « Fendant Rioux », commencé en équipe et terminé seul·e à la maison"),
-                        note("« Retour sur « Fendant Rioux » » : son autoévaluation en classe"),
-                        note("Ces activités servent toutes le même objectif."),
-                        note("L'évaluation s'appelle « Artefact 1 : Appliquer des stratégies de lecture variées (Deux-Rives) ». Elle se place dans la dernière leçon, sous l'autoévaluation."),
-                        geste("Glisse le bloc dans la dernière leçon par sa poignée ⠿, sous l'autoévaluation", evaluationSousLAutoevaluation),
+                        // Réécrite par Grégoire le 20 nov. 2026 (essai sur l'iPad ; consigne du 20 nov., F2) : une explication,
+                        // quatre gestes, une explication après la consigne. Les deux lignes d'activités, « Ces activités
+                        // servent toutes le même objectif. », la ligne « Formative » ou « Certificative » et la ligne du
+                        // guide sont parties.
+                        note("L'évaluation de l'exemple s'appelle « Artefact 1 : Appliquer des stratégies de lecture variées (Deux-Rives) ». Elle vérifie ce que les leçons ont enseigné : sa place est donc après elles, dans la dernière leçon."),
+                        geste("Glisse le bloc de l'évaluation, par sa poignée ⠿, de la leçon où il se trouve jusqu'à la dernière leçon, sous l'autoévaluation", evaluationSousLAutoevaluation),
                         geste("Touche deux fois cette poignée (l'Inspecteur s'ouvre)", function () { return inspecteurOuvertSur(evaluationNeuve()); }),
                         geste("Dans l'Inspecteur, coche l'objectif que l'évaluation vérifie", function () { var ev = evaluationNeuve(); return !!ev && C().objectifsVerifiesPar(ev).length > 0; }),
                         consigne("Choisis dans « Production » « Appliquer des stratégies de lecture variées (Deux-Rives) »", function () { return !!evaluationAlignee(); }),
-                        note("Une fois la production choisie, la carte sait quelle production vérifie cet objectif, et ce qu'elle pèse dans la note."),
-                        note("Dans son en-tête, « Formative » ou « Certificative » dit sa visée : ton plan de cours le précisera."),
-                        note("Pour aller plus loin, « Évaluations », dans la frise, ouvre le guide à la page qui en parle.")
+                        note("Une fois la production choisie, la carte sait quelle production vérifie cet objectif et ce qu'elle pèse dans la note.")
                     ];
                 },
                 // La bulle laisse libres l'évaluation et la leçon où elle va ; l'Inspecteur ouvert, lui seul.
@@ -1122,7 +1131,7 @@
         window.Assistance.definirEtatModele(ID, 'en-cours', depuis);
         var lance = M().lancer(definitionDuModele(), {
             depuis: depuis,
-            surEtape: function (i) { retirerExtras(); window.Assistance.definirEtatModele(ID, 'en-cours', i); },
+            surEtape: function (i) { retirerExtras(); planificateurFerme(i < BULLE_DU_PLANIFICATEUR); window.Assistance.definirEtatModele(ID, 'en-cours', i); },
             surQuitter: function () { nettoyer(); },
             // La dernière bulle n'a pas de « Plus tard » : Échap vaut « Terminer ».
             surEchap: function () { terminerModele(); },

@@ -15,7 +15,7 @@
 // Break-test (19 nov.) : voir le rapport du lot (plans de travail/RAPPORT-2026-11-19-nous-faisons-recevoir.md).
 
 import { describe, it, expect } from 'vitest';
-import { suiteEcrite } from './_helpers/fin-des-parcours-2026-11-20.js';
+import { suiteEcrite, sectionDeLaConsigne } from './_helpers/fin-des-parcours-2026-11-20.js';
 import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -138,6 +138,14 @@ describe('« Recevoir les productions, rendre tes rétroactions », « Nous fais
     ];
     it.each(CAS)('voie %s, bulle %i (n° %i) : la confirmation, le lieu, chaque forme ligne par ligne', (voie, i, n, formes) => {
         const b = bulle(n, voie);
+        // E3 (20 nov. 2026, essai de Grégoire sur l'iPad ; consigne du 20 nov.) : là où la bulle parle du « Stylo », dans les
+        // deux temps, une explication de plus. Elle suit la ligne du « Stylo » du relais du 19 nov.
+        const STYLO = "L'outil « Stylo » sera raffiné dans une mise à jour ultérieure.";
+        const k = b.formes[0].findIndex((l) => l.texte.startsWith('Garde le « Stylo »'));
+        if (k !== -1 && !b.formes[0].some((l) => l.texte === STYLO)) {
+            expect(sectionDeLaConsigne('E3.')).toContain('dans les deux temps : ajoute l\'explication « ' + STYLO + ' »');
+            b.formes[0].splice(k + 1, 0, Object.assign({}, b.formes[0][k], { texte: STYLO }));
+        }
         const etapeDe = (ouvert) => charger(null, ouvert).api.voies()[voie][i];
         const etape = etapeDe([]);
         expect(etape.confirme ? etape.confirme.texte : '', 'confirmation').toBe(b.confirme);

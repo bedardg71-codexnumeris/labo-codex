@@ -13,6 +13,7 @@
 // Break-tests (20 nov.) : au rapport du lot.
 
 import { describe, it, expect } from 'vitest';
+import { sectionDeLaConsigne } from './_helpers/fin-des-parcours-2026-11-20.js';
 import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -168,10 +169,51 @@ describe('« Je regarde » de « Monter ton cours » : les bulles, mot pour mot 
         const { api: a } = charger(etats(m)[n - 1].apres);
         const e = a.etapesModele()[n - 1];
         expect(e.secondeForme(), 'la seconde forme : sans objectif, confirmation ni lieu').toBe(true);
-        const attendu = r.rempli.filter((x) => x.genre === 'E' || x.genre === 'G');
+        let attendu = r.rempli.filter((x) => x.genre === 'E' || x.genre === 'G');
+        if (n === 6) {
+            // F2 (20 nov. 2026, essai de Grégoire sur l'iPad ; plans de travail/CONSIGNE-2026-11-20-essai-parcours.md) : la
+            // bulle 6 est réécrite : une explication, quatre gestes, une explication après la consigne. Le relais du
+            // 19 nov. porte encore les lignes qui partent : chacune y est, et aucune n'est plus dans le code.
+            const F2 = sectionDeLaConsigne('F2.');
+            const PARTIES = ["L'exemple a ajouté deux leçons, plus tard :", 'Ces activités servent toutes le même objectif.',
+                "Dans son en-tête, « Formative » ou « Certificative » dit sa visée : ton plan de cours le précisera.",
+                'Pour aller plus loin, « Évaluations », dans la frise, ouvre le guide à la page qui en parle.'];
+            PARTIES.forEach((t) => expect(attendu.map((x) => x.texte), 'le relais du 19 nov. porte « ' + t + ' »').toContain(t));
+            const NEUVES = [
+                ['E', "L'évaluation de l'exemple s'appelle « Artefact 1 : Appliquer des stratégies de lecture variées (Deux-Rives) ». Elle vérifie ce que les leçons ont enseigné : sa place est donc après elles, dans la dernière leçon."],
+                ['G', "Glisse le bloc de l'évaluation, par sa poignée ⠿, de la leçon où il se trouve jusqu'à la dernière leçon, sous l'autoévaluation"],
+                ['G', "Touche deux fois cette poignée (l'Inspecteur s'ouvre)"],
+                ['G', "Dans l'Inspecteur, coche l'objectif que l'évaluation vérifie"],
+                ['G', 'Choisis dans « Production » « Appliquer des stratégies de lecture variées (Deux-Rives) »'],
+                ['E', "Une fois la production choisie, la carte sait quelle production vérifie cet objectif et ce qu'elle pèse dans la note."]
+            ];
+            NEUVES.forEach(([genre, texte]) => expect(F2, 'F2 porte « ' + texte.slice(0, 50) + '… »').toContain('[' + genre + ']' + (texte.startsWith('Une fois') ? ', après la consigne :' : '') + ' « ' + texte + ' »'));
+            expect(F2).toContain('Les autres lignes de cette bulle partent');
+            attendu = NEUVES.map(([genre, texte]) => ({ genre, texte }));
+            const code = plats(e.lignes()).map((x) => x.texte);
+            PARTIES.forEach((t) => expect(code, '« ' + t + ' » est partie').not.toContain(t));
+        }
         expect(plats(e.lignes()).map(({ genre, texte }) => ({ genre, texte }))).toEqual(attendu);
         const boutons = r.rempli.filter((x) => x.genre === 'B').map((x) => x.texte);
         expect((e.boutons || []).map((b) => b.libelle)).toEqual(boutons);
+    });
+
+    it('F1 (20 nov. 2026) : le « Planificateur » reste fermé des bulles 1 à 6 de « Je regarde », et s’ouvre à la septième, qui en parle', () => {
+        const SRC = readFileSync(new URL('../../js/parcours-cours.js', import.meta.url), 'utf8');
+        const CSS = readFileSync(new URL('../../css/parcours.css', import.meta.url), 'utf8');
+        expect(sectionDeLaConsigne('F1.')).toContain("le Planificateur reste fermé : il se confond avec l'Inspecteur. Il s'ouvre à l'étape qui en parle.");
+        expect(SRC).toContain('var BULLE_DU_PLANIFICATEUR = 6;');
+        expect(SRC).toContain('planificateurFerme(i < BULLE_DU_PLANIFICATEUR);');
+        // La septième bulle (rang 6) est celle qui en parle ; aucune avant elle ne le nomme comme une chose à regarder.
+        const { api: a } = charger(etats(m)[5].apres);
+        const titres = a.etapesModele().map((e) => e.titre);
+        expect(titres[6]).toBe('Une chaîne alignée');
+        expect(SRC).toContain('note("Le « Planificateur » montre ses trois leçons, semaine par semaine."),');
+        // La marque n'agit que pendant un parcours, et ne touche pas à la préférence de la personne.
+        expect(CSS).toContain('body.parcours-actif.parcours-planificateur-ferme #planif-palette-nav { display: none; }');
+        expect(SRC).toContain("function planificateurFerme(oui) { document.body.classList.toggle('parcours-planificateur-ferme', !!oui); }");
+        // Le modèle refermé (« Plus tard », « Terminer », un autre parcours) : la marque part.
+        expect(SRC).toMatch(/function nettoyer\(\) \{[^}]*planificateurFerme\(false\);/);
     });
 
     it('bulle 1 : l’objectif (sur la définition), la suite de la phrase du lieu', () => {
