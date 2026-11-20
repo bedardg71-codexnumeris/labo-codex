@@ -17,15 +17,13 @@ import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { chargerScript } from './_helpers/charger-script.js';
+import { tranche } from './_helpers/tranche.js';
 
 const racine = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..');
-const RELAIS = (() => {
-    const t = readFileSync(path.join(racine, 'plans de travail/CONSIGNE-2026-11-19-je-regarde-cours.md'), 'utf8');
-    const i = t.indexOf('Pour Claude Code, à relayer');
-    const j = t.indexOf('```', i);
-    if (i === -1 || j === -1) throw new Error('le relais du lot 3 est introuvable dans sa consigne');
-    return t.slice(i, j);
-})();
+// Comme les sentinelles des parcours 1 à 5 : la consigne est lue par un lecteur. ⚠ `plans de travail/` est ignoré par la
+// CI (paths-ignore) : un commit qui ne changerait QUE la consigne ne relancerait pas ce banc ; tout changement du code, si.
+const lire = (f) => readFileSync(path.join(racine, f), 'utf8');
+const RELAIS = tranche(lire('plans de travail/CONSIGNE-2026-11-19-je-regarde-cours.md'), 'Pour Claude Code, à relayer', '```', { longueurMin: 2000 });
 
 /** Le texte entre le premier « à partir de `depuis` et son » apparié. */
 function citation(s, depuis = 0) {
@@ -64,10 +62,7 @@ function elements(ligne) {
 
 /** Une bulle du relais : son titre, ses trois temps (ouverture, posé, rempli), et son bloc brut. */
 function bulleDuRelais(n) {
-    const debut = RELAIS.indexOf(`Bulle ${n}, «`);
-    const fin = n < 7 ? RELAIS.indexOf(`Bulle ${n + 1}, «`) : RELAIS.indexOf('\n4. Tests.');
-    if (debut === -1 || fin === -1) throw new Error(`bulle ${n} introuvable dans le relais`);
-    const bloc = RELAIS.slice(debut, fin);
+    const bloc = tranche(RELAIS, `Bulle ${n}, «`, n < 7 ? `Bulle ${n + 1}, «` : '\n4. Tests.', { longueurMin: 100 });
     const lignes = bloc.split('\n').filter((l) => l.trim());
     const titre = citation(lignes[0]).texte;
     const ouverture = lignes.find((l) => l.startsWith("À l'ouverture"));
@@ -213,7 +208,7 @@ describe('« Je regarde » de « Monter ton cours » : les bulles, mot pour mot 
     });
 
     it('ce que « Remplir » écrit : le matériel du relais (point 2), étape par étape', () => {
-        const d = RELAIS.slice(RELAIS.indexOf('Ce que « Remplir » écrit'), RELAIS.indexOf('Ce qui fait avancer'));
+        const d = tranche(RELAIS, 'Ce que « Remplir » écrit', 'Ce qui fait avancer', { longueurMin: 200 });
         const apres = (repere) => citation(d, d.indexOf(repere)).texte;
         expect(m.competence).toBe(apres('Étape 1'));
         expect(m.idee).toBe(apres('Étape 2'));
