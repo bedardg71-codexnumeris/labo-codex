@@ -22897,6 +22897,33 @@ body.planif-plein-ecran-actif #planif-guide-panel {
     max-height: 46vh;
     min-height: 140px;
 }
+/* #1298 (19 nov. 2026) — Réglages › Données › Maintenance, « Copies liées à leur source ». Le résultat
+   se lit et se copie tel quel : texte préformaté, mais qui revient à la ligne sur l'iPad. */
+.diagnostic-copies-liees-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+.diagnostic-copies-liees-actions .btn {
+    min-height: 44px;
+}
+.diagnostic-copies-liees-resultat {
+    margin-top: 12px;
+    padding: 10px 12px;
+    border: 1px solid var(--gris-separateur);
+    border-radius: 8px;
+    background: var(--surface-page);
+    color: var(--texte-principal);
+    font-size: 13px;
+    line-height: 1.5;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+    max-height: 50vh;
+    overflow: auto;
+    user-select: text;
+    -webkit-user-select: text;
+}
+
 .mode-clair .export-perso-apercu {
     background: var(--surface-page, #f6f8fa);
     color: var(--texte, #22303a);
