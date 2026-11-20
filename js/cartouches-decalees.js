@@ -21,7 +21,9 @@
      QUELLE (contenu inchangé, `grilleId` mis à jour), ajoutée sous X puis retirée de sa clé
      d'origine, dans cet ordre (celui de `deplacerCartouchesVersAutreGrille`) : si la seconde
      écriture échoue, elle existe en double, jamais perdue. Pas de proposition si X porte déjà une
-     cartouche du même identifiant, ou si ses critères sont ceux de plusieurs grilles.
+     cartouche du même identifiant, si ses critères sont ceux de plusieurs grilles, ou (19 nov. 2026)
+     si X est parente par la copie de la grille de la cartouche : une copie garde les identifiants
+     de ses critères depuis #1298, ils ne disent plus à laquelle elle appartient (`_parente`).
    · RATTACHER à sa grille, par le nom : seulement si ses critères ne sont ceux d'AUCUNE grille
      existante. La correspondance est celle du déplacement de cartouches
      (`cartoucheCorrespondance.remapper` : id, puis nom). Un critère qui ne trouve aucun critère
@@ -63,7 +65,7 @@ function examiner(cartouche, grille, grilles) {
     var horsGrille = C.criteresHorsGrille(cartouche, grille);
     if (horsGrille.length === 0) return null;
     var siennes = _grillesDeSesCriteres(cartouche, grille, grilles);
-    if (siennes.length > 0) return _ligneRanger(cartouche, grille, siennes);
+    if (siennes.length > 0) return _ligneRanger(cartouche, grille, siennes, grilles);
     var t = C.rattacher(cartouche, grille.criteres || []);
     var r = t.r;
     var reparee = t.cartouche;
@@ -93,8 +95,50 @@ function examiner(cartouche, grille, grilles) {
     return ligne;
 }
 
+/**
+ * LES COPIES PORTENT LES IDENTIFIANTS DE LEUR SOURCE — 19 nov. 2026 (assemblage de la release, retouche
+ * tranchée par Cowork). Depuis #1298, « Dupliquer » une grille GARDE les identifiants de ses critères (le report
+ * d'une évaluation qui change de grille et le rattachement des cartouches passent par eux). Une grille et sa
+ * copie portent donc les mêmes : les trouver tous dans l'autre ne dit plus à laquelle la cartouche appartient.
+ * La parenté se lit par `inspireDe.sourceId` (et `idOriginal`, la trace d'un ajout depuis la bibliothèque),
+ * en remontant la chaîne dans les grilles du trimestre.
+ * Supposé ici, au-delà de la lettre de la retouche (« dans un sens ou dans l'autre ») : deux copies d'une même
+ * source, et une copie de copie, sont parentes aussi. Ce choix ne fait que RETIRER des propositions.
+ * @returns {Object} les identifiants des ancêtres de `g`, en clés
+ */
+function _ancetres(g, grilles) {
+    var vus = {};
+    var file = [g];
+    for (var garde = 0; file.length && garde < 50; garde++) {
+        var x = file.shift();
+        [x && x.inspireDe && x.inspireDe.sourceId, x && x.idOriginal].forEach(function(id) {
+            if (!id || vus[id] || id === g.id) return;
+            vus[id] = true;
+            var suivante = (grilles || []).find(function(y) { return y && y.id === id; });
+            if (suivante) file.push(suivante);
+        });
+    }
+    return vus;
+}
+
+/** La parenté de deux grilles par la copie : 'copie' (b vient de a), 'source' (a vient de b), 'soeurs', ou null. */
+function _parente(a, b, grilles) {
+    var deA = _ancetres(a, grilles), deB = _ancetres(b, grilles);
+    if (deB[a.id]) return 'copie';
+    if (deA[b.id]) return 'source';
+    return Object.keys(deA).some(function(id) { return deB[id]; }) ? 'soeurs' : null;
+}
+
+function _pourquoiParente(grille, autre, lien) {
+    var n = function(g) { return '« ' + (g.nom || g.id) + ' »'; };
+    var phrase = lien === 'copie' ? n(autre) + ' est une copie de ' + n(grille)
+        : lien === 'source' ? n(grille) + ' est une copie de ' + n(autre)
+        : n(grille) + ' et ' + n(autre) + ' sont des copies d\'une même grille';
+    return 'ambiguë : ' + phrase + ' ; leurs critères portent les mêmes identifiants, qui ne disent pas à laquelle la cartouche appartient';
+}
+
 /** #1145 — Ranger sous la grille de ses critères : la cartouche telle quelle, `grilleId` compris. */
-function _ligneRanger(cartouche, grille, siennes) {
+function _ligneRanger(cartouche, grille, siennes, grilles) {
     var C = window.cartoucheCorrespondance;
     var sienne = siennes[0];
     var ligne = {
@@ -114,6 +158,15 @@ function _ligneRanger(cartouche, grille, siennes) {
     if (siennes.length > 1) {
         ligne.pourquoi = 'ses critères sont ceux de plusieurs grilles : '
             + siennes.map(function(g) { return g.nom || g.id; }).join(', ');
+    }
+    // 19 nov. 2026 : une grille trouvée qui est parente par la copie de celle de la cartouche — listée, rien de proposé.
+    for (var i = 0; i < siennes.length; i++) {
+        var lien = _parente(grille, siennes[i], grilles);
+        if (!lien) continue;
+        ligne.proposition = false;
+        ligne.ambigue = true;
+        ligne.pourquoi = _pourquoiParente(grille, siennes[i], lien);
+        break;
     }
     ligne._rangee = Object.assign({}, cartouche, { grilleId: sienne.id });
     return ligne;

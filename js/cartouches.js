@@ -4198,9 +4198,14 @@ async function copierCartoucheDepuisTrimestre(srcId, grilleSource, cartoucheSour
     const cleDest = cle(`cartouches_${grilleAccueil.id}`);
 
     // #1144 (23 oct. 2026) — la grille d'accueil est de même LIGNÉE (`memeIdentite`, qui compte
-    // `inspireDe.sourceId`), pas forcément aux mêmes ids de critères : une grille dupliquée en
-    // reçoit de neufs. Rangée telle quelle, la copie gardait les ids de la source, et l'évaluation
-    // affichait ses critères à la place de ceux de la grille. Rattachée ici, par id puis par nom.
+    // `inspireDe.sourceId`), pas forcément aux mêmes ids de critères. ⚠ Corrigé le 19 nov. 2026 : ce
+    // commentaire disait qu'une grille dupliquée en reçoit de neufs. C'est faux depuis #1298 et la
+    // décision du 19 nov. : « Dupliquer » (éditeur, barre latérale, bibliothèque) et `copiePropre`
+    // (partage, copie d'un autre trimestre) GARDENT les ids des critères, et le rattachement les
+    // retrouve par id. Les ids peuvent différer quand même : une copie faite par `dupliquerGrille`
+    // (grilles.js), qui les régénère mais qu'aucun écran n'atteint plus (mesuré le 19 nov.), ou des
+    // critères refaits depuis. Rangée telle quelle, la copie gardait alors les ids de la source, et
+    // l'évaluation affichait ses critères à la place de ceux de la grille. Rattachée ici, par id puis par nom.
     const copie = {
         ...window.cartoucheCorrespondance.rattacher(marquerProvenanceCartouche(cartoucheSource, srcId), grilleAccueil.criteres).cartouche,
         id: genererIdUnique('CART_'),

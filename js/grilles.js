@@ -1094,7 +1094,13 @@ async function supprimerGrille(grilleId) {
  * 
  * UTILISÉ PAR:
  * - Bouton "Dupliquer" dans le modal
- * 
+ *   ⚠ 19 nov. 2026 (assemblage de la release), mesuré au navigateur : AUCUN ÉCRAN n'atteint ce geste.
+ *   Ses deux boutons s'écrivent dans `#listeGrilles`, absent d'index.html, et dans `#vueGrillesCriteres`,
+ *   rangé sous un `div.u-hide` (« Conteneurs cachés pour compatibilité »). Seule la console y mène.
+ *   Il RÉGÉNÈRE les ids des critères, à l'inverse de la règle du 19 nov. (« Dupliquer » les garde : le
+ *   report d'une évaluation qui change de grille et le rattachement des cartouches passent par eux).
+ *   Ne pas le rebrancher sans l'aligner sur `dupliquerGrilleDepuisSidebar`.
+ *
  * FONCTIONNEMENT:
  * 1. Trouve la grille originale
  * 2. Demande un nouveau nom
