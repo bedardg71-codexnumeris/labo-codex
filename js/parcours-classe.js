@@ -626,7 +626,8 @@
                     note(absenceNotee() ? "Ce point à l'écart, c'est l'absence que tu viens de noter."
                         : "Tout le monde était là : un point s'écartera à la première absence."),
                     note("Les bandes « Complétion » et « Performance » sont vides : elles s'allumeront à tes premières évaluations."),
-                    note("Séance après séance, tu verras qui s'éloigne, sans attendre une main levée."),
+                    // Grégoire, 20 nov. 2026 (essai sur l'iPad) : la fin de la phrase, réécrite, dans les deux temps.
+                    note("Séance après séance, tu verras qui s'éloigne. C'est un premier signe : cette personne a peut-être besoin que tu ailles vers elle, même si elle n'a rien demandé."),
                     // Quand la bulle offre aussi « Parcours suivant », le moteur dit les deux suites (sa consigne de la fin).
                     consigne("Touche « Terminer »")
                 ];
@@ -1094,6 +1095,18 @@
         return suites;
     }
 
+    /**
+     * Le bloc des quatre menus qu'assemble le groupe-cours de l'exemple (le cours, le groupe, l'horaire,
+     * l'enseignant·e) : le plus petit élément de la page qui les contient tous. Une seule cible, une seule flèche.
+     */
+    function menusDuGroupeCours() {
+        var menus = ['v2-gc-cours', 'v2-gc-groupe', 'v2-gc-horaire', 'v2-gc-enseignant'].map(el).filter(Boolean);
+        if (menus.length < 2) return menus;
+        var bloc = menus[0].parentElement;
+        while (bloc && !menus.every(function (m) { return bloc.contains(m); })) bloc = bloc.parentElement;
+        return bloc ? [bloc] : menus;
+    }
+
     /** La section du Cadre dont parle l'étape : le moteur y fait défiler la page et encadre son nom. */
     function sectionDuCadre(idEtape) {
         return function () { return accordeon(idEtape); };
@@ -1166,6 +1179,8 @@
         }, {
             avantTout: [
                 { texte: "L'aperçu montre les dix personnes telles qu'elles seront importées (c'est le moment de vérifier)", montre: champs('v2-previewTable') },
+                // Grégoire, 20 nov. 2026 (essai sur l'iPad) : l'aperçu est plus court que la liste.
+                { texte: "Fais défiler l'aperçu pour voir la liste complète" },
                 { texte: "Il reste à dire dans quel cours elles sont inscrites" }
             ],
             rempli: rattachementFait,
@@ -1214,11 +1229,15 @@
             gestes: remplirLeGroupeCours,
             apres: function () {
                 return [
-                    { texte: "Un groupe-cours, c'est une classe : un cours, un groupe, un horaire, un·e enseignant·e" },
-                    { texte: "Le cours que tu viens de créer", montre: champs('v2-gc-cours') },
-                    { texte: "Le groupe de la liste", montre: champs('v2-gc-groupe') },
-                    { texte: "L'horaire « " + MATERIEL.horaire.nom + " »", montre: champs('v2-gc-horaire') },
-                    { texte: "L'enseignant de la démo, " + ENSEIGNANT_DEMO, montre: champs('v2-gc-enseignant') },
+                    // Grégoire, 20 nov. 2026 (essai sur l'iPad, capture 4) : les explications réécrites ; les quatre
+                    // flèches, une par menu, se croisaient au-dessus du formulaire (les menus sont en quinconce sur deux
+                    // colonnes). UNE flèche, vers le bloc des quatre menus, que la première ligne annonce ; chaque
+                    // ligne nomme ensuite son menu, dans l'ordre où la page les numérote.
+                    { texte: "Un groupe-cours, c'est une classe. Celui de l'exemple assemble ce que tu viens de voir se créer :", montre: menusDuGroupeCours },
+                    { texte: "Le cours" },
+                    { texte: "Le groupe de la liste" },
+                    { texte: "L'horaire « " + MATERIEL.horaire.nom + " »" },
+                    { texte: "L'enseignant de la démo, " + ENSEIGNANT_DEMO },
                     { texte: "C'est à ce groupe-cours que se rattachera tout ce que l'application gardera : présences, productions, évaluations" }
                 ];
             },
@@ -1285,7 +1304,8 @@
                 return [
                     { texte: "Chaque point blanc est un·e des dix étudiant·es ; la bande « Assiduité » le place selon ses présences" },
                     { texte: "Trois points sont à l'écart : les deux absences et le retard de la séance", montre: pointsALEcart },
-                    { texte: "Une seule séance et la classe se dessine déjà. Séance après séance, tu verras qui s'éloigne, sans attendre une main levée" }
+                    // Grégoire, 20 nov. 2026 (essai sur l'iPad) : la fin de la phrase, réécrite, dans les deux temps.
+                    { texte: "Une seule séance et la classe se dessine déjà. Séance après séance, tu verras qui s'éloigne. C'est un premier signe : cette personne a peut-être besoin que tu ailles vers elle, même si elle n'a rien demandé" }
                     // « Objectif atteint : … » et la phrase de la suite : posées par le moteur (`objectifAtteint`, sur la définition).
                 ];
             },

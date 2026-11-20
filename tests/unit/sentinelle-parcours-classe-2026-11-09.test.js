@@ -16,7 +16,7 @@
 // Break-test (19 nov.) : voir le rapport du lot (plans de travail/RAPPORT-2026-11-19-nous-faisons-classe.md).
 
 import { describe, it, expect } from 'vitest';
-import { suiteEcrite } from './_helpers/fin-des-parcours-2026-11-20.js';
+import { suiteEcrite, sectionDeLaConsigne } from './_helpers/fin-des-parcours-2026-11-20.js';
 import { tranche } from './_helpers/tranche.js';
 import { readFileSync } from 'node:fs';
 import path from 'node:path';
@@ -139,6 +139,12 @@ describe('« Mettre ta classe en place », « Nous faisons » : les huit bulles 
             attendues = attendues.map((l) => (l.texte === "Ce point à l'écart, c'est l'absence que tu viens de noter."
                 ? Object.assign({}, l, { texte: "Tout le monde était là : un point s'écartera à la première absence." }) : l));
             attendues = attendues.map((l) => (l.genre === 'consigne' ? Object.assign({}, l, { texte: 'Touche « Terminer »' }) : l));
+            // 20 nov. 2026 (essai de Grégoire sur l'iPad ; consigne du 20 nov., B1) : la fin de la phrase, réécrite.
+            const AVANT = "Séance après séance, tu verras qui s'éloigne, sans attendre une main levée.";
+            const APRES = "Séance après séance, tu verras qui s'éloigne. C'est un premier signe : cette personne a peut-être besoin que tu ailles vers elle, même si elle n'a rien demandé.";
+            expect(attendues.map((l) => l.texte), 'la consigne du 19 nov. porte la phrase d’avant').toContain(AVANT);
+            expect(sectionDeLaConsigne('B1.')).toContain('« ' + AVANT + ' » devient : « ' + APRES + ' »');
+            attendues = attendues.map((l) => (l.texte === AVANT ? Object.assign({}, l, { texte: APRES }) : l));
         }
         expect(classer(etape.lignes())).toEqual(attendues);
     });

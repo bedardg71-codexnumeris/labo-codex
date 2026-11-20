@@ -303,6 +303,13 @@ body.mode-clair {
 select.parcours-rempli,
 textarea.parcours-rempli,
 input.parcours-rempli { color: var(--accent-primaire) !important; -webkit-text-fill-color: var(--accent-primaire); }
+/* PENDANT L'ÉTIQUETAGE DU MODÈLE D'« ÉVALUER » SEULEMENT (Grégoire, 20 nov. 2026 ; consigne du 20 nov., C1) : les
+   flèches que la page trace de la légende vers les parties étiquetées sont masquées, pour ne garder que la flèche du
+   geste en cours (celle de la bulle). La marque n'est posée que par ce modèle (js/parcours-evaluer.js). */
+body.parcours-actif.parcours-etiquetage-du-modele #dissection-fleches { display: none; }
+/* PENDANT UN PARCOURS, la liste « À vérifier » de la page « Productions » est repliée (même consigne, C3) : son
+   titre reste, ses lignes attendent la fin du parcours. */
+body.parcours-actif #zone-avertissements-productions ul { display: none; }
 /* La carte du panneau « Assistance » devant laquelle il s'ouvre à la fin d'un parcours (« Voir le parcours N ») :
    un filet à gauche, dans la couleur des liens. Rien n'y est lancé. */
 .assistance-parcours-item--suggere { box-shadow: inset 3px 0 0 var(--accent-primaire); }

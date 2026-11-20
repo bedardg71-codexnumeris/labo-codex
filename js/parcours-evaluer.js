@@ -1381,8 +1381,10 @@
             confirme: "C'est fait : la pratique s'applique au cours de ton deuxième groupe.",
             lieuSuite: ": c'est là que tu apportes la grille que tu utilises déjà.",
             lignes: [
-                "Une grille réunit tes critères (ce que tu regardes dans une production) et ce que vaut chacun. Celle de l'exemple se juge par niveaux : ceux de l'échelle que tu viens de choisir",
-                "Ici, tu numérises une grille que tu as déjà, faite dans un traitement de texte. Une photo n'en garderait que l'apparence : l'application doit savoir ce que chaque partie veut dire. C'est toi qui le lui dis, en posant une étiquette sur chaque partie",
+                // 20 nov. 2026 (essai de Grégoire sur l'iPad) : « s'évalue » (A4 : « juger » devient « évaluer ») ; « signifie
+                // et à quoi elle sert » (C1).
+                "Une grille réunit tes critères (ce que tu regardes dans une production) et ce que vaut chacun. Celle de l'exemple s'évalue par niveaux : ceux de l'échelle que tu viens de choisir",
+                "Ici, tu numérises une grille que tu as déjà, faite dans un traitement de texte. Une photo n'en garderait que l'apparence : l'application doit savoir ce que chaque partie signifie et à quoi elle sert. C'est toi qui le lui dis, en posant une étiquette sur chaque partie",
                 "Ce passage du document à l'application ne se fait qu'une fois. Ensuite, tu crées et modifies tes grilles directement dans l'application"
             ],
             consignes: ["Regarde la grille de l'exemple arriver : touche « Remplir »"],
@@ -1391,7 +1393,7 @@
                 lignes: ["La grille de l'exemple est là, telle qu'elle était écrite dans un traitement de texte. La palette compte plusieurs étiquettes ; quatre suffisent pour celle-ci"],
                 gestes: [
                     ['Prends « Titre », puis touche le nom de la grille', "C'est ça : « Grille générale à 4 critères » est son titre, le nom sous lequel tu la retrouveras. Tu le choisis librement."],
-                    ['Prends « Critère », puis touche « Structure »', "C'est ça : « Structure » est un critère, un aspect de la production que tu regardes pour la juger."],
+                    ['Prends « Critère », puis touche « Structure »', "C'est ça : « Structure » est un critère, un aspect de la production que tu regardes pour l'évaluer."],
                     ['Prends « Description », puis touche la phrase à côté de « Structure »', "C'est ça : la description définit le critère. Elle dit ce que tu attends, quelle que soit la production."],
                     ['Prends « Pondération », puis touche « 20\u00a0% »', "C'est ça : la pondération dit ce que pèse le critère dans le résultat de la production."]
                 ]
@@ -1400,7 +1402,7 @@
                 lignes: ["La rangée de « Structure » est faite"],
                 // Les mêmes confirmations, adaptées (consigne, C.3), à mesure que la personne étiquette la rangée.
                 confirmations: [
-                    "C'est ça : « Rigueur » est un critère, un aspect de la production que tu regardes pour la juger.",
+                    "C'est ça : « Rigueur » est un critère, un aspect de la production que tu regardes pour l'évaluer.",
                     "C'est ça : la description définit le critère. Elle dit ce que tu attends, quelle que soit la production.",
                     "C'est ça : la pondération dit ce que pèse le critère dans le résultat de la production."
                 ],
@@ -1415,7 +1417,7 @@
                 lignes: [
                     "C'est la grille de l'exemple, refaite d'après ses étiquettes : compare-la à l'originale, plus haut",
                     "Ce résumé dit ce que l'application y a trouvé : 4 critères, des pondérations qui font 100\u00a0%",
-                    "Elle ne porte pas de niveaux : chaque critère se jugera avec ceux de ton échelle, de 0 à E"
+                    "Elle ne porte pas de niveaux : chaque critère s'évaluera avec ceux de ton échelle, de 0 à E"
                 ],
                 consignes: ["Touche « Créer ma grille »"]
             }
@@ -1425,9 +1427,11 @@
             confirme: "C'est fait : la « Grille générale à 4 critères » est créée.",
             lieuSuite: ": c'est là que tu prépares tes rétroactions.",
             lignes: [
-                "Une cartouche, ce sont les commentaires que tu écrirais dans la marge, préparés d'avance : un par critère et par niveau",
+                // Réécrites par Grégoire le 20 nov. 2026 (essai sur l'iPad ; consigne du 20 nov., C2).
+                "Une cartouche, ce sont les commentaires que tu écrirais dans la marge, préparés d'avance",
+                "Elle croise deux choses que tu as déjà : ta grille, qui lui donne ses rangées (un critère par rangée), et l'échelle « IDME et niv 0 », choisie avec ta pratique, qui lui donne ses colonnes (un niveau par colonne). À chaque rencontre, une case : le commentaire que lira l'étudiant·e dont la production atteint ce niveau pour ce critère",
                 "Ta grille vaut pour toutes tes productions ; une cartouche est propre à une production : elle dit ce qu'on observe à chaque niveau dans cette tâche",
-                "Tu l'écris une fois. Ensuite, elle t'aide à juger, et chaque évaluation compose la rétroaction de l'étudiant·e avec tes phrases"
+                "Tu l'écris une fois. Ensuite, elle t'aide à évaluer et chaque évaluation compose la rétroaction de l'étudiant·e avec tes phrases"
             ],
             consignes: ["Touche « + Nouvelle cartouche »"],
             fiche: { consignes: ["Regarde l'exemple se remplir : touche « Remplir »"] },
@@ -1445,12 +1449,13 @@
             confirme: "C'est fait : la cartouche est créée.",
             lieuSuite: ": c'est là que tu décris ce que tu demandes à tes étudiant·es.",
             lignes: [
-                "Une production, c'est tout ce que tu demandes de faire, formatif ou certificatif : un plan de rédaction, un exposé oral, un laboratoire, une mesure sur le terrain",
+                // Réécrite par Grégoire le 20 nov. 2026 (consigne du 20 nov., C3), comme la confirmation du menu « Type ».
+                "Une production, c'est ce que fait un·e étudiant·e lors d'une activité d'apprentissage. Ce peut être un ensemble de tâches (écrire un texte, faire une prise de sang) ou une performance (une entrevue, un geste, une chorégraphie). Elle peut être formative ou certificative",
                 "De ton côté, ce sont les consignes que tu donnes, la tâche que tu demandes d'effectuer et l'objectif qu'elle cherche à atteindre"
             ],
             consignes: ["Touche « + Nouvelle production »"],
             fiche: {
-                type: ['Ouvre le menu « Type » et parcours-le', "C'est ça : de l'examen au stage, chaque type est une production."],
+                type: ['Ouvre le menu « Type » et parcours-le', "C'est ça : chaque type nomme une sorte de production, de l'examen au stage."],
                 consignes: ["Puis regarde l'exemple se remplir : touche « Remplir »"]
             },
             remplie: {
@@ -1466,7 +1471,8 @@
         etape8: {
             titre: 'Tes consignes',
             confirme: "C'est fait : la production est créée.",
-            phrase: "Tu es plus bas dans sa fiche, aux consignes : ce que tes étudiant·es doivent savoir pour réussir.",
+            // Réécrite par Grégoire le 20 nov. 2026 (consigne du 20 nov., C4).
+            phrase: "Tu es plus bas dans la fiche de la production, dans la section réservée à la description des consignes. C'est ici que tu décris les tâches à travers lesquelles tes étudiant·es vont faire leur apprentissage.",
             consignes: ["Regarde l'exemple se remplir : touche « Remplir »"],
             remplie: {
                 lignes: [
@@ -1489,7 +1495,7 @@
                 lignes: [
                     "La grille, l'échelle et la cartouche sont déjà là : elles viennent de la production",
                     "Pour chaque critère, choisis un niveau : son commentaire de la cartouche paraît aussitôt dans la rétroaction",
-                    "Compare-le à la copie. S'il ne lui ressemble pas, essaie le niveau voisin : c'est la cartouche qui t'aide à juger"
+                    "Compare-le à la copie. S'il ne lui ressemble pas, essaie le niveau voisin : c'est la cartouche qui t'aide à évaluer"
                 ],
                 consignes: ["Choisis un niveau pour chacun des quatre critères (suggestion pour suivre l'exemple : M, D, D, D)"]
             },
@@ -1787,7 +1793,19 @@
         r.scrollIntoView({ block: 'start' });
     }
 
+    /**
+     * PENDANT L'ÉTIQUETAGE DU MODÈLE SEULEMENT (Grégoire, 20 nov. 2026, essai sur l'iPad ; consigne du 20 nov., C1) : les
+     * flèches que la page trace de la légende vers les parties étiquetées sont masquées (css/parcours.css), pour ne
+     * garder que la flèche du geste en cours, celle de la bulle. Pas dans l'application : la marque n'est posée que
+     * par le modèle, tant que la grille de l'exemple s'étiquette, et retirée dès la lecture, à l'étape suivante, à
+     * « Plus tard » et à la fin.
+     */
+    function masquerLesFlechesDeLaPage(oui) {
+        document.body.classList.toggle('parcours-etiquetage-du-modele', !!oui);
+    }
+
     function zonesDeLaGrille(f) {
+        masquerLesFlechesDeLaPage(f === 'structure' || f === 'rigueur' || f === 'suite');
         var e = dissectionDuModele();
         if (f === 'lecture') { amenerLaLecture(); return []; }
         lectureAmenee = false;
@@ -1919,8 +1937,15 @@
             var b = blocs[blocs.length - 1];
             if (b) C().poser(b.querySelector('.champ-perso-titre'), p.autoevaluation.titre);
         }
-        var bloc = blocDAutoevaluation();
-        if (bloc) C().poser(bloc.querySelector('.champ-perso-contenu'), p.autoevaluation.contenu);
+        var bloc = blocDAutoevaluation(), zone = bloc ? bloc.querySelector('.champ-perso-contenu') : null;
+        if (zone) {
+            C().poser(zone, p.autoevaluation.contenu);
+            // LA ZONE S'OUVRE À LA HAUTEUR DE SON CONTENU (Grégoire, 20 nov. 2026, capture 15 : le bloc n'affichait que
+            // ses premières lignes, les seuils de réussite et de maîtrise sous le bord). Mesuré : la zone naît à trois
+            // rangées, et « Remplir » y pose le texte sans que rien ne la fasse grandir.
+            zone.style.height = 'auto';
+            zone.style.height = (zone.scrollHeight + zone.offsetHeight - zone.clientHeight) + 'px';
+        }
         C().poser(champEcheance(), p.echeance);
     }
 
@@ -1953,6 +1978,12 @@
     }
 
     function bandeDePerformance() { var b = blocPerformance(); return (b && b.querySelector('.barre-indicateur')) || b; }
+
+    /** Le point d'un·e étudiant·e dans la bande « Performance (P) » (par son DA). */
+    function pointDansLaBande(da) {
+        var b = blocPerformance();
+        return b ? b.querySelector('.barre-indicateur .barre-etudiant[data-da="' + da + '"]') : null;
+    }
 
     // =================================================================
     // LES DIX ÉTAPES
@@ -2194,7 +2225,10 @@
                 lieu: true,
                 lieuSuite: T.etape10.lieuSuite,
                 confirme: T.etape10.confirme,
-                lignes: function () { return forme(T.etape10); },
+                // Une flèche vers le point blanc de Yack Amical dans la bande « Performance (P) » (Grégoire, 20 nov. 2026).
+                lignes: function () {
+                    return [ligne(T.etape10.lignes[0], function () { return [pointDansLaBande(MATERIEL.etudiantEvalue.da)]; }), ligne(T.etape10.lignes[1])];
+                },
                 boutons: function () { return C().suitesDuModele(ID, terminerModele); },
                 avant: montrerLaBande,
                 zones: function () { return [bandeDePerformance()]; },
@@ -2255,9 +2289,10 @@
             depuis: depuis,
             surEtape: function (i) {
                 if (i > 2) surModale(false);
+                if (i !== 4) masquerLesFlechesDeLaPage(false);
                 window.Assistance.definirEtatModele(ID, 'en-cours', i);
             },
-            surQuitter: function () { surModale(false); },
+            surQuitter: function () { surModale(false); masquerLesFlechesDeLaPage(false); },
             // La dernière bulle n'a pas de « Plus tard » : Échap vaut « Terminer ».
             surEchap: function () { terminerModele(); },
             // Sortie de la démo en cours de route (le bandeau vert) : le modèle se ferme et attend.
@@ -2267,6 +2302,7 @@
 
     function terminerModele() {
         surModale(false);
+        masquerLesFlechesDeLaPage(false);
         window.Assistance.definirEtatModele(ID, 'fait', 0);
         M().fermer();
     }

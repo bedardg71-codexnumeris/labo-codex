@@ -3,6 +3,7 @@ import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { tranche } from './_helpers/tranche.js';
+import { sectionDeLaConsigne } from './_helpers/fin-des-parcours-2026-11-20.js';
 
 // =======================================================================
 // SENTINELLE DU LOT « JE REGARDE » D'« ÉVALUER UNE PREMIÈRE PRODUCTION » (18 NOVEMBRE 2026)
@@ -115,6 +116,56 @@ function bullesDeLaConsigne() {
     });
 }
 
+// LES RETOUCHES DU 20 NOV. 2026 (essai de Grégoire sur l'iPad ; plans de travail/CONSIGNE-2026-11-20-essai-parcours.md,
+// sections C et A4) : les lignes de la consigne du 18 nov. qu'elles changent, une à une. `dans` : où la consigne du
+// 20 nov. porte le mot neuf (la section, et le passage qu'on y relit).
+const RETOUCHES_20_NOV = [
+    // A4 : « juger » devient « évaluer ».
+    { avant: "Celle de l'exemple se juge par niveaux", apres: "Celle de l'exemple s'évalue par niveaux", dans: ['A4.', '« juger » devient « évaluer »'] },
+    { avant: "un aspect de la production que tu regardes pour la juger.", apres: "un aspect de la production que tu regardes pour l'évaluer.", dans: ['A4.', '« juger » devient « évaluer »'] },
+    { avant: 'chaque critère se jugera avec ceux de ton échelle', apres: "chaque critère s'évaluera avec ceux de ton échelle", dans: ['A4.', '« juger » devient « évaluer »'] },
+    { avant: "c'est la cartouche qui t'aide à juger", apres: "c'est la cartouche qui t'aide à évaluer", dans: ['A4.', '« elle t\'aide à évaluer »'] },
+    // C1.
+    { avant: "l'application doit savoir ce que chaque partie veut dire.", apres: "l'application doit savoir ce que chaque partie signifie et à quoi elle sert.",
+      dans: ['C1.', '« ce que chaque partie veut dire » devient « ce que chaque partie signifie et à quoi elle sert »'] },
+    // C2 : les explications de la première forme de la bulle 6, réécrites (trois lignes en deviennent quatre).
+    { avant: "Une cartouche, ce sont les commentaires que tu écrirais dans la marge, préparés d'avance : un par critère et par niveau",
+      apres: ["Une cartouche, ce sont les commentaires que tu écrirais dans la marge, préparés d'avance",
+          "Elle croise deux choses que tu as déjà : ta grille, qui lui donne ses rangées (un critère par rangée), et l'échelle « IDME et niv 0 », choisie avec ta pratique, qui lui donne ses colonnes (un niveau par colonne). À chaque rencontre, une case : le commentaire que lira l'étudiant·e dont la production atteint ce niveau pour ce critère"],
+      dans: ['C2.', null] },
+    { avant: "Tu l'écris une fois. Ensuite, elle t'aide à juger, et chaque évaluation compose la rétroaction de l'étudiant·e avec tes phrases",
+      apres: "Tu l'écris une fois. Ensuite, elle t'aide à évaluer et chaque évaluation compose la rétroaction de l'étudiant·e avec tes phrases", dans: ['C2.', null] },
+    // C3.
+    { avant: "Une production, c'est tout ce que tu demandes de faire, formatif ou certificatif : un plan de rédaction, un exposé oral, un laboratoire, une mesure sur le terrain",
+      apres: "Une production, c'est ce que fait un·e étudiant·e lors d'une activité d'apprentissage. Ce peut être un ensemble de tâches (écrire un texte, faire une prise de sang) ou une performance (une entrevue, un geste, une chorégraphie). Elle peut être formative ou certificative",
+      dans: ['C3.', null] },
+    { avant: "C'est ça : de l'examen au stage, chaque type est une production.", apres: "C'est ça : chaque type nomme une sorte de production, de l'examen au stage.", dans: ['C3.', null] },
+    // C4.
+    { avant: "Tu es plus bas dans sa fiche, aux consignes : ce que tes étudiant·es doivent savoir pour réussir.",
+      apres: "Tu es plus bas dans la fiche de la production, dans la section réservée à la description des consignes. C'est ici que tu décris les tâches à travers lesquelles tes étudiant·es vont faire leur apprentissage.",
+      dans: ['C4.', null] }
+];
+
+/** Les lignes de la consigne du 18 nov., telles que celle du 20 nov. les laisse ; chaque retouche doit trouver sa ligne. */
+function retoucher20(lignes) {
+    let sortie = lignes.slice();
+    const servies = new Set();
+    RETOUCHES_20_NOV.forEach((r, k) => {
+        const neuves = [].concat(r.apres).map(aPlat);
+        sortie = sortie.reduce((acc, l) => {
+            if (!l.includes(aPlat(r.avant))) return acc.concat([l]);
+            servies.add(k);
+            return acc.concat(l === aPlat(r.avant) ? neuves : [l.replace(aPlat(r.avant), neuves[0])]);
+        }, []);
+        // Le mot neuf est dans la consigne du 20 nov. (sans le point final d'une ligne de liste).
+        const section = aPlat(sectionDeLaConsigne(r.dans[0]));
+        if (r.dans[1]) expect(section, r.dans[0]).toContain(aPlat(r.dans[1]));
+        else neuves.forEach((n) => expect(section, r.dans[0] + ' : ' + n.slice(0, 40)).toContain(n.replace(/\.$/, '')));
+    });
+    expect([...servies].sort((a, b) => a - b), 'chaque retouche du 20 nov. trouve sa ligne dans la consigne du 18').toEqual(RETOUCHES_20_NOV.map((r, k) => k));
+    return sortie;
+}
+
 /** Toutes les chaînes de `TEXTES` (sauf les PROPOSÉES), à plat. */
 function textesDuCode() {
     const proposes = [T.refus, T.choisirLeGroupe, T.rangeesAEtiqueter].map(aPlat);
@@ -137,6 +188,15 @@ const MENU = { 1: ['Conception', 'Pratiques'], 5: ['Conception', 'Mon matériel'
 
 describe('2. les textes des dix bulles : ceux de la section D, mot pour mot', () => {
     const bulles = bullesDeLaConsigne();
+    // Les lignes de la consigne du 18 nov., retouchées par celle du 20 (une seule passe, pour toutes les bulles).
+    (() => {
+        const marques = bulles.map((b) => b.lignes.length);
+        const toutes = retoucher20(bulles.reduce((a, b) => a.concat(b.lignes.map((l, k) => ({ l, b })).map((x) => x.l)), []));
+        // (C2 ajoute une ligne à la bulle 6 : on redécoupe d'après ce compte.)
+        let i = 0;
+        bulles.forEach((b, k) => { const n = marques[k] + (k === 5 ? 1 : 0); b.lignes = toutes.slice(i, i + n); i += n; });
+        expect(i).toBe(toutes.length);
+    })();
     const code = textesDuCode();
 
     it('dix bulles dans la consigne', () => {
@@ -170,6 +230,8 @@ describe('2. les textes des dix bulles : ceux de la section D, mot pour mot', ()
             if (toutes.includes(t)) return false;
             // Ailleurs dans la consigne : les confirmations de « Rigueur » (C.3), le nom du bouton (dans sa ligne).
             if (consigneAPlat.includes(t)) return false;
+            // La confirmation de « Rigueur » (C.3 de la consigne du 18), avec le mot de A4 (20 nov.).
+            if (consigneAPlat.includes(t.replace("pour l'évaluer.", 'pour la juger.'))) return false;
             if (t.startsWith(':')) return !toutes.some((l) => l.endsWith(t));   // une suite de lieu
             return true;
         });

@@ -129,6 +129,40 @@ function retoucher(parcours, n, lignes) {
     return lignes.map((l) => (l in r ? r[l] : l)).filter((l) => l !== null);
 }
 
+// LES RETOUCHES DU 20 NOV. 2026 (essai de Grégoire sur l'iPad ; plans de travail/CONSIGNE-2026-11-20-essai-parcours.md,
+// section B) : pour une bulle de « Mettre ta classe en place », les lignes des consignes d'avant qu'elle remplace, et
+// celles qu'elle ajoute (`apres` : la ligne qu'elles suivent). Chaque ligne neuve est relue dans la consigne du 20 nov.
+const B_20_NOV = sectionDeLaConsigne('B.') + sectionDeLaConsigne('B1.') + sectionDeLaConsigne('B2.') + sectionDeLaConsigne('B3.');
+const RETOUCHES_20_NOV = {
+    3: { ajoute: { apres: "L'aperçu montre les dix personnes telles qu'elles seront importées (c'est le moment de vérifier)", lignes: ["Fais défiler l'aperçu pour voir la liste complète"] } },
+    5: { remplace: {
+        "Un groupe-cours, c'est une classe : un cours, un groupe, un horaire, un·e enseignant·e": "Un groupe-cours, c'est une classe. Celui de l'exemple assemble ce que tu viens de voir se créer :",
+        'Le cours que tu viens de créer': 'Le cours'
+    } },
+    8: { remplace: {
+        "Une seule séance et la classe se dessine déjà. Séance après séance, tu verras qui s'éloigne, sans attendre une main levée":
+            "Une seule séance et la classe se dessine déjà. Séance après séance, tu verras qui s'éloigne. C'est un premier signe : cette personne a peut-être besoin que tu ailles vers elle, même si elle n'a rien demandé"
+    } }
+};
+/** Une liste de lignes d'une bulle de « Je regarde », telle que la consigne du 20 nov. la laisse. */
+function retoucher20(n, lignes) {
+    const r = RETOUCHES_20_NOV[n];
+    if (!r) return lignes;
+    const dansLaConsigne = (l) => l.split('. ').forEach((phrase) => expect(B_20_NOV, 'la consigne du 20 nov. porte « ' + phrase + ' »').toContain(phrase.replace(/\.$/, '')));
+    let sortie = lignes.slice();
+    Object.keys(r.remplace || {}).forEach((avant) => {
+        if (sortie.indexOf(avant) === -1) return;   // l'autre liste de la bulle (avant ou après « Remplir »)
+        dansLaConsigne(r.remplace[avant]);
+        sortie = sortie.map((l) => (l === avant ? r.remplace[avant] : l));
+    });
+    if (r.ajoute && sortie.indexOf(r.ajoute.apres) !== -1) {
+        r.ajoute.lignes.forEach(dansLaConsigne);
+        const k = sortie.indexOf(r.ajoute.apres);
+        sortie = sortie.slice(0, k + 1).concat(r.ajoute.lignes, sortie.slice(k + 1));
+    }
+    return sortie;
+}
+
 // CORRIGÉ D'APRÈS L'ÉCRAN (16 nov. 2026), comme la consigne le demande (« Aux bulles 3 et 4 de « Découvrir », ajoute
 // cette ligne si la page a changé ») : à la bulle 3, l'onglet du menu passe de « Groupe » à « Profils » ; à la bulle
 // 4, on reste dans cet onglet. La phrase est celle que le moteur lit à l'écran (jugée au navigateur).
@@ -223,10 +257,10 @@ describe('« Mettre ta classe en place », « Je regarde » : les huit bulles du
             // sur l'iPad) : ce qui précédait disparaît ; ce qui vient d'apparaître, puis le bouton de la page.
             const { avant, apres } = etape.etats();
             jugerOuverture(retoucherPhrases('classe', n, b.phrases), ouvertureDe(def, etape, n - 1, avant));
-            expect(textes(avant)).toEqual(b.avant);
+            expect(textes(avant)).toEqual(retoucher20(n, b.avant));
             expect(b.avant[b.avant.length - 1]).toBe(mots.toucheRemplir);
             expect(avant[avant.length - 1].geste).toBe(true);
-            expect(textes(apres)).toEqual(b.apres);
+            expect(textes(apres)).toEqual(retoucher20(n, b.apres));
             expect(apres[apres.length - 1].geste).toBe(true);
             expect(notes(apres)).toEqual([]);
             expect(typeof etape.secondeForme).toBe('function');
@@ -234,9 +268,17 @@ describe('« Mettre ta classe en place », « Je regarde » : les huit bulles du
             const lignes = etape.lignes();
             jugerOuverture(retoucherPhrases('classe', n, b.phrases), ouvertureDe(def, etape, n - 1, lignes));
             // La dernière bulle : « Pour revoir une étape… » est posée par le moteur, pas par le parcours.
-            expect(textes(lignes)).toEqual(retoucher('classe', n, b.avant).filter((l) => !DE_LA_FIN(l)));
+            expect(textes(lignes)).toEqual(retoucher20(n, retoucher('classe', n, b.avant)).filter((l) => !DE_LA_FIN(l)));
             expect(b.apres).toEqual([]);
         }
+    });
+
+    it('B2 (20 nov. 2026) : une seule flèche vers le bloc des quatre menus du groupe-cours ; les quatre flèches qui se croisaient sont parties', () => {
+        const bulle = tranche(CLASSE, "titre: 'Un groupe-cours',", "creer: \"Touche « Créer le groupe-cours »");
+        expect(bulle.match(/montre: /g)).toHaveLength(1);
+        expect(bulle).toContain('tu viens de voir se créer :", montre: menusDuGroupeCours }');
+        expect(bulle).not.toMatch(/champs\('v2-gc-/);
+        expect(sectionDeLaConsigne('B2.')).toContain("range-les pour qu'elles ne se croisent plus, ou n'en garde qu'une à la fois");
     });
 
     it('cinq bulles à bouton « Remplir » (1 à 5, 7) ; « D’un groupe à l’autre » et la dernière n’en ont pas', () => {
