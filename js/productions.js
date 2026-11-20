@@ -880,9 +880,37 @@ function peuplerChampsPersonnalises(production) { peuplerBlocsConsignes(producti
  * ⚠ Sans groupe-cours identifié, pas de case : il n'y a rien à assigner, et
  * le repli legacy d'`obtenirEcheanceEffective` reste seul en piste.
  */
+/**
+ * L'INDICATION D'UNE DATE VIDE (décision de Grégoire, 20 nov. 2026 ; vécu sur l'iPad : vide, le champ de la date
+ * d'échéance était une bande blanche sans rien). « à planifier », à côté du champ, tant qu'il est vide ; elle part
+ * dès qu'une date y est. Relue à l'ouverture de la fiche et à chaque saisie.
+ */
+/** La rangée qui porte l'étiquette et le champ de la date (index.html, `.echeance-rangee`) ; null hors de la fiche. */
+function rangeeDeLEcheance(champ) {
+    return champ && typeof champ.closest === 'function' ? champ.closest('.echeance-rangee') : null;
+}
+
+function majIndicationEcheance(champ) {
+    const c = champ || document.getElementById('productionDateEcheance');
+    const indication = document.getElementById('productionDateEcheanceVide');
+    if (!c || !indication) return;
+    indication.hidden = !!c.value;
+}
+if (typeof document !== 'undefined' && typeof document.addEventListener === 'function') {
+    ['input', 'change'].forEach(function (type) {
+        document.addEventListener(type, function (ev) {
+            if (ev.target && ev.target.id === 'productionDateEcheance') majIndicationEcheance(ev.target);
+        });
+    });
+}
+
 function poserCaseAssignationSimple(inputSimple, production, groupeCoursId) {
-    const parent = inputSimple && inputSimple.parentElement;
+    // 20 nov. 2026 : le champ de la date est à côté de son étiquette (`.echeance-rangee`, index.html) ; la case
+    // « Consignes transmises » se pose SOUS cette rangée, plus au-dessus du champ.
+    const rangee = rangeeDeLEcheance(inputSimple);
+    const parent = (rangee || inputSimple || {}).parentElement;
     if (!parent) return;
+    majIndicationEcheance(inputSimple);
 
     const existante = parent.querySelector('.echeance-simple-assignee');
     if (existante) existante.remove();
@@ -908,11 +936,13 @@ function poserCaseAssignationSimple(inputSimple, production, groupeCoursId) {
     // seulement évité.
     const zone = document.createElement('div');
     zone.className = 'echeance-simple-assignee';
-    zone.style.cssText = 'margin-bottom: 6px;';
+    zone.style.cssText = 'margin: 10px 0 6px 0;';
 
     const ligne = document.createElement('div');
     ligne.className = 'echeance-simple-ligne';
-    ligne.style.cssText = 'display: flex; align-items: center; gap: 6px;';
+    // `inline-flex` : la rangée a la largeur de la case et de son étiquette, pas celle de la page (20 nov. 2026 :
+    // le halo d'un parcours prenait toute la largeur).
+    ligne.style.cssText = 'display: inline-flex; align-items: center; gap: 6px;';
 
     const case_ = document.createElement('input');
     case_.type = 'checkbox';
@@ -947,7 +977,7 @@ function poserCaseAssignationSimple(inputSimple, production, groupeCoursId) {
     note.textContent = 'Décoché = les étudiant·es n\'ont pas encore reçu le travail. La date peut être posée d\'avance : elle ne compte qu\'une fois la case cochée.';
     zone.appendChild(note);
 
-    parent.insertBefore(zone, inputSimple);
+    parent.insertBefore(zone, rangee ? rangee.nextSibling : inputSimple);
 
     // #930 (22 sept. 2026) — LE CHAMP DATE NE SUIT PLUS LA CASE. Jusqu'ici, décocher
     // grisait le champ (« sans transmission, le champ ne se saisit pas »), et
@@ -1592,6 +1622,7 @@ async function prerenseignerFormulaireProduction(prod) {
 
     // ✨ NOUVEAU (Beta 94 - 10 déc 2025): Charger date d'échéance
     document.getElementById('productionDateEcheance').value = prod.dateEcheance || '';
+    majIndicationEcheance();
 
     // #790 — l'état du marqueur diagnostique. Sans cette ligne, rouvrir une
     // production cochée montrerait une case VIDE, et le simple fait d'enregistrer
@@ -1649,6 +1680,7 @@ function reinitialiserFormulaireProduction() {
 
     // ✨ NOUVEAU (Beta 94 - 10 déc 2025): Réinitialiser date d'échéance
     document.getElementById('productionDateEcheance').value = '';
+    majIndicationEcheance();
 
     // #1055 — repris de creerNouvelleProduction, qui seul les vidait : le contexte facultatif,
     // le panneau des métadonnées (mode création) et la zone portfolio.

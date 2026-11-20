@@ -9,8 +9,11 @@ const indexHtml = 'file://' + path.join(racineProjet, 'index.html');
 
 // #963 — « JE FAIS RELIRE MA CARTE PAR UNE IA » (27 sept. 2026).
 //
-// Le geste que Grégoire fera : Actions ▸ « Télécharger un modèle… », choisir
+// Le geste que Grégoire fera : Actions ▸ « Télécharger le prompt… », choisir
 // son étape et sa semaine, « Télécharger ». Ce que l'essai garde :
+// (20 nov. 2026, plans de travail/CONSIGNE-2026-11-20-essai-parcours.md, G2 : la
+// commande s'appelait « Télécharger un modèle… » ; son identifiant, son panneau
+// et le fichier qu'elle rend n'ont pas changé.)
 //   1. le principe est affiché sous le titre de la carte ;
 //   2. le fichier téléchargé porte les consignes remplies avec CES choix ;
 //   3. le téléchargement n'a rien écrit : la carte en mémoire ET sa copie dans
@@ -62,7 +65,7 @@ test.describe('#963 · faire relire sa carte par une IA', () => {
 
     // #973 — la semaine présélectionnée est la dernière qui contient une leçon,
     // à l'écran (Vitest ne garde que `semaineParDefautModele`).
-    test('« Télécharger un modèle » présélectionne la dernière semaine qui contient une leçon', async ({ page }) => {
+    test('« Télécharger le prompt » présélectionne la dernière semaine qui contient une leçon', async ({ page }) => {
         await ouvrirCarte(page);
         await page.evaluate(() => {
             const api = window.planificationCarte;
@@ -80,7 +83,7 @@ test.describe('#963 · faire relire sa carte par une IA', () => {
         expect(await choix.locator('option').count()).toBeGreaterThan(4);
     });
 
-    test('Actions ▸ Télécharger un modèle : le fichier porte les choix, et rien n\'est écrit', async ({ page }) => {
+    test('Actions ▸ Télécharger le prompt : le fichier porte les choix, et rien n\'est écrit', async ({ page }) => {
         await ouvrirCarte(page);
         const avant = await instantane(page);
         const nomCarte = await page.evaluate(() => {
@@ -89,6 +92,8 @@ test.describe('#963 · faire relire sa carte par une IA', () => {
         });
 
         await page.click('#planif-btn-actions');
+        // G2 (20 nov. 2026) : le nom que la commande porte dans « Actions ▾ ».
+        await expect(page.locator('#planif-btn-modele-ia')).toHaveText('Télécharger le prompt…');
         await page.click('#planif-btn-modele-ia');
         const panneau = page.locator('#planif-modele-ia-panel');
         await expect(panneau).toBeVisible();

@@ -25,6 +25,7 @@ import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { tranche } from './_helpers/tranche.js';
+import { suiteFactice, sectionDeLaConsigne } from './_helpers/fin-des-parcours-2026-11-20.js';
 
 const RACINE = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..');
 const lire = (f) => readFileSync(path.join(RACINE, f), 'utf8');
@@ -37,7 +38,9 @@ const STYLES = lire('css/parcours.css');
 
 // Les deux fichiers, chargés hors du navigateur : ce qu'ils exposent aux bancs.
 // (Tous les parcours ouverts, comme sous les bancs : le verrou est jugé par sentinelle-parcours-verrou-2026-11-16.test.js.)
-const fenetre = { Assistance: { enregistrer: () => {}, parcours: () => [{ id: 'classe', lancerModele: () => {} }], suivantDe: () => ({ lancerModele: () => {} }) } };
+// (20 nov. 2026 : la suite d'un parcours vient du panneau, `suiteDe` : « Voir le parcours N ».)
+const fenetre = { Assistance: { enregistrer: () => {}, parcours: () => [{ id: 'classe', lancerModele: () => {} }], suivantDe: () => ({ lancerModele: () => {} }),
+    suiteDe: (id) => suiteFactice(id === 'decouvrir' ? 2 : 3)() } };
 new Function('window', DECOUVRIR)(fenetre);
 new Function('window', CLASSE)(fenetre);
 
@@ -102,10 +105,62 @@ const RETOUCHES = {
         6: { "Choisis dans l'en-tête le groupe que tu viens de créer": "Choisis dans l'en-tête le groupe que tu viens de créer : « 601-999-DM · gr. 00002 »" }
     }
 };
+// LA RETOUCHE DU 19 NOV. 2026 (« Nous faisons » de « Mettre ta classe en place », relais, point 3 ; Grégoire, 10 h 36 :
+// le verbe de la page, « Assemble un groupe-cours ») : une phrase d'ouverture de la bulle 5 de « Je regarde ». La
+// phrase neuve est relue dans la consigne du 19 nov.
+const NOUS_FAISONS_CLASSE = lire('plans de travail/CONSIGNE-2026-11-19-nous-faisons-classe.md');
+const RETOUCHES_PHRASES = {
+    classe: {
+        5: { "Tu es dans la section « Groupe-cours » : c'est là que tu réunis ce que tu viens de créer.":
+             "Tu es dans la section « Groupe-cours » : c'est là que tu assembles ce que tu viens de créer." }
+    }
+};
+function retoucherPhrases(parcours, n, phrases) {
+    const r = (RETOUCHES_PHRASES[parcours] || {})[n] || {};
+    Object.keys(r).forEach((avant) => {
+        expect(phrases, `la consigne du 16 nov. porte « ${avant} »`).toContain(avant);
+        expect(NOUS_FAISONS_CLASSE, 'la retouche est dans la consigne du 19 nov.').toContain('« ' + r[avant].replace(/^Tu es dans la section « [^»]+ » /, '') + ' »');
+    });
+    return phrases.map((p) => (p in r ? r[p] : p));
+}
 function retoucher(parcours, n, lignes) {
     const r = RETOUCHES[parcours][n] || {};
     Object.keys(r).forEach((avant) => expect(lignes, `la consigne du matin porte « ${avant} »`).toContain(avant));
     return lignes.map((l) => (l in r ? r[l] : l)).filter((l) => l !== null);
+}
+
+// LES RETOUCHES DU 20 NOV. 2026 (essai de Grégoire sur l'iPad ; plans de travail/CONSIGNE-2026-11-20-essai-parcours.md,
+// section B) : pour une bulle de « Mettre ta classe en place », les lignes des consignes d'avant qu'elle remplace, et
+// celles qu'elle ajoute (`apres` : la ligne qu'elles suivent). Chaque ligne neuve est relue dans la consigne du 20 nov.
+const B_20_NOV = sectionDeLaConsigne('B.') + sectionDeLaConsigne('B1.') + sectionDeLaConsigne('B2.') + sectionDeLaConsigne('B3.');
+const RETOUCHES_20_NOV = {
+    3: { ajoute: { apres: "L'aperçu montre les dix personnes telles qu'elles seront importées (c'est le moment de vérifier)", lignes: ["Fais défiler l'aperçu pour voir la liste complète"] } },
+    5: { remplace: {
+        "Un groupe-cours, c'est une classe : un cours, un groupe, un horaire, un·e enseignant·e": "Un groupe-cours, c'est une classe. Celui de l'exemple assemble ce que tu viens de voir se créer :",
+        'Le cours que tu viens de créer': 'Le cours'
+    } },
+    8: { remplace: {
+        "Une seule séance et la classe se dessine déjà. Séance après séance, tu verras qui s'éloigne, sans attendre une main levée":
+            "Une seule séance et la classe se dessine déjà. Séance après séance, tu verras qui s'éloigne. C'est un premier signe : cette personne a peut-être besoin que tu ailles vers elle, même si elle n'a rien demandé"
+    } }
+};
+/** Une liste de lignes d'une bulle de « Je regarde », telle que la consigne du 20 nov. la laisse. */
+function retoucher20(n, lignes) {
+    const r = RETOUCHES_20_NOV[n];
+    if (!r) return lignes;
+    const dansLaConsigne = (l) => l.split('. ').forEach((phrase) => expect(B_20_NOV, 'la consigne du 20 nov. porte « ' + phrase + ' »').toContain(phrase.replace(/\.$/, '')));
+    let sortie = lignes.slice();
+    Object.keys(r.remplace || {}).forEach((avant) => {
+        if (sortie.indexOf(avant) === -1) return;   // l'autre liste de la bulle (avant ou après « Remplir »)
+        dansLaConsigne(r.remplace[avant]);
+        sortie = sortie.map((l) => (l === avant ? r.remplace[avant] : l));
+    });
+    if (r.ajoute && sortie.indexOf(r.ajoute.apres) !== -1) {
+        r.ajoute.lignes.forEach(dansLaConsigne);
+        const k = sortie.indexOf(r.ajoute.apres);
+        sortie = sortie.slice(0, k + 1).concat(r.ajoute.lignes, sortie.slice(k + 1));
+    }
+    return sortie;
 }
 
 // CORRIGÉ D'APRÈS L'ÉCRAN (16 nov. 2026), comme la consigne le demande (« Aux bulles 3 et 4 de « Découvrir », ajoute
@@ -147,10 +202,14 @@ describe('« Découvrir » : les huit bulles du 16 nov., mot pour mot', () => {
 
     it('la fin : trois boutons de même poids, dans l’ordre de la consigne, aucun mis en avant', () => {
         const boutons = etapes[7].boutons;
-        expect(boutons.map((x) => x.libelle)).toEqual(['Explorer la démo par moi-même', 'Voir le parcours suivant', 'Commencer avec ma classe']);
-        boutons.forEach((x) => { expect(x.primaire).toBeUndefined(); expect(consigne[7].boutons).toContain('« ' + x.libelle + ' »'); });
-        // « Voir le parcours suivant » lance le « Je regarde » de « Mettre ta classe en place » ; l'autre, son « Nous faisons ».
-        expect(tranche(DECOUVRIR, 'function voirLeParcoursSuivant() {', '\n    }\n')).toContain('classe.lancerModele()');
+        // 20 nov. 2026 (A3) : le bouton du milieu, « Voir le parcours suivant » dans la consigne du 16, s'appelle « Voir le
+        // parcours 2 » et ne lance plus rien : il termine « Découvrir » et ouvre le panneau devant le parcours.
+        expect(boutons.map((x) => x.libelle)).toEqual(['Explorer la démo par moi-même', 'Voir le parcours 2', 'Commencer avec ma classe']);
+        boutons.forEach((x) => { expect(x.primaire).toBeUndefined(); expect(consigne[7].boutons).toContain('« ' + x.libelle.replace(/^Voir le parcours \d+$/, 'Voir le parcours suivant') + ' »'); });
+        const voir = tranche(DECOUVRIR, 'function voirLaSuite(suite) {', '\n    }\n');
+        expect(voir).toContain('suite.voir();');
+        expect(voir).not.toMatch(/lancerModele|\.lancer\(/);
+        expect(DECOUVRIR).not.toContain('voirLeParcoursSuivant');
         expect(tranche(DECOUVRIR, 'async function commencerAvecMaClasse() {', '\n    }\n')).toMatch(/classe\.lancer\(/);
     });
 
@@ -194,23 +253,32 @@ describe('« Mettre ta classe en place », « Je regarde » : les huit bulles du
         const etape = etapes[n - 1];
         expect(etape.titre).toBe(titre);
         if (typeof etape.etats === 'function') {
-            // Une bulle à bouton « Remplir » : deux états. Après, la consigne « Remplir » reste, faite ; puis ce
-            // qui vient d'apparaître, et le bouton de la page.
+            // Une bulle à bouton « Remplir » : deux états. Après, la SECONDE FORME (18 nov. 2026, essai de Grégoire
+            // sur l'iPad) : ce qui précédait disparaît ; ce qui vient d'apparaître, puis le bouton de la page.
             const { avant, apres } = etape.etats();
-            jugerOuverture(b.phrases, ouvertureDe(def, etape, n - 1, avant));
-            expect(textes(avant)).toEqual(b.avant);
+            jugerOuverture(retoucherPhrases('classe', n, b.phrases), ouvertureDe(def, etape, n - 1, avant));
+            expect(textes(avant)).toEqual(retoucher20(n, b.avant));
             expect(b.avant[b.avant.length - 1]).toBe(mots.toucheRemplir);
             expect(avant[avant.length - 1].geste).toBe(true);
-            expect(textes(apres)).toEqual(b.avant.concat(b.apres));
+            expect(textes(apres)).toEqual(retoucher20(n, b.apres));
             expect(apres[apres.length - 1].geste).toBe(true);
-            expect(notes(apres)).toEqual(notes(avant));
+            expect(notes(apres)).toEqual([]);
+            expect(typeof etape.secondeForme).toBe('function');
         } else {
             const lignes = etape.lignes();
-            jugerOuverture(b.phrases, ouvertureDe(def, etape, n - 1, lignes));
+            jugerOuverture(retoucherPhrases('classe', n, b.phrases), ouvertureDe(def, etape, n - 1, lignes));
             // La dernière bulle : « Pour revoir une étape… » est posée par le moteur, pas par le parcours.
-            expect(textes(lignes)).toEqual(retoucher('classe', n, b.avant).filter((l) => !DE_LA_FIN(l)));
+            expect(textes(lignes)).toEqual(retoucher20(n, retoucher('classe', n, b.avant)).filter((l) => !DE_LA_FIN(l)));
             expect(b.apres).toEqual([]);
         }
+    });
+
+    it('B2 (20 nov. 2026) : une seule flèche vers le bloc des quatre menus du groupe-cours ; les quatre flèches qui se croisaient sont parties', () => {
+        const bulle = tranche(CLASSE, "titre: 'Un groupe-cours',", "creer: \"Touche « Créer le groupe-cours »");
+        expect(bulle.match(/montre: /g)).toHaveLength(1);
+        expect(bulle).toContain('tu viens de voir se créer :", montre: menusDuGroupeCours }');
+        expect(bulle).not.toMatch(/champs\('v2-gc-/);
+        expect(sectionDeLaConsigne('B2.')).toContain("range-les pour qu'elles ne se croisent plus, ou n'en garde qu'une à la fois");
     });
 
     it('cinq bulles à bouton « Remplir » (1 à 5, 7) ; « D’un groupe à l’autre » et la dernière n’en ont pas', () => {
@@ -219,8 +287,12 @@ describe('« Mettre ta classe en place », « Je regarde » : les huit bulles du
 
     it('la fin : trois boutons de même poids, dans l’ordre de la consigne ; « Pour revoir une étape » vient du moteur', () => {
         const boutons = etapes[7].boutons;
-        expect(boutons.map((x) => x.libelle)).toEqual(['Le refaire avec ma classe', 'Voir le parcours suivant', 'Terminer']);
-        boutons.forEach((x) => { expect(x.primaire).toBeUndefined(); expect(consigne[7].boutons).toContain('« ' + x.libelle + ' »'); });
+        // 20 nov. 2026 (A3) : « Voir le parcours suivant » (la consigne du 16) s'appelle « Voir le parcours 3 » et ne lance rien.
+        expect(boutons.map((x) => x.libelle)).toEqual(['Le refaire avec ma classe', 'Voir le parcours 3', 'Terminer']);
+        boutons.forEach((x) => { expect(x.primaire).toBeUndefined(); expect(consigne[7].boutons).toContain('« ' + x.libelle.replace(/^Voir le parcours \d+$/, 'Voir le parcours suivant') + ' »'); });
+        const suites = tranche(CLASSE, 'function suitesDuModele(id, terminerLeModele) {', 'return suites;');
+        expect(suites).toContain('terminerLeModele(); suite.voir();');
+        expect(suites).not.toContain('lancerModele');
         expect(consigne[7].avant[consigne[7].avant.length - 1]).toBe(REVOIR);
         expect(MOTEUR).toContain("'Pour revoir une étape, touche « ' + n + ' sur ' + n + ' ».'");
     });
@@ -290,10 +362,11 @@ describe('le moteur : les règles a à e, telles qu’il les écrit', () => {
     const ecrire = tranche(MOTEUR, 'function ecrireLignes(boite, etape) {', 'function majLignes(silence) {');
 
     it('a. l’objectif du parcours : sur la première bulle seulement, avant la confirmation, le lieu et les lignes', () => {
-        const objectif = ecrire.indexOf("if (etat.i === 0) phrase('parcours-bulle-objectif', texteDe(etat.def.objectif));");
+        const objectif = ecrire.indexOf("if (etat.i === 0 && !seconde) phrase('parcours-bulle-objectif', texteDe(etat.def.objectif));");
         expect(objectif).toBeGreaterThan(-1);
-        expect(objectif).toBeLessThan(ecrire.indexOf("phrase('parcours-bulle-confirme'"));
-        expect(ecrire.indexOf("phrase('parcours-bulle-confirme'")).toBeLessThan(ecrire.indexOf("phrase('parcours-bulle-lieu'"));
+        // 18 nov. 2026 : la confirmation est posée au-dessus du titre (`poserConfirmation`), avant la phrase du lieu.
+        expect(objectif).toBeLessThan(ecrire.indexOf('poserConfirmation(seconde ? {} : etape);'));
+        expect(ecrire.indexOf('poserConfirmation(seconde ? {} : etape);')).toBeLessThan(ecrire.indexOf("phrase('parcours-bulle-lieu'"));
         expect(ecrire.indexOf("phrase('parcours-bulle-lieu'")).toBeLessThan(ecrire.indexOf('lignes.forEach(function (ligne) {'));
     });
 
@@ -342,8 +415,20 @@ describe('le moteur : les règles a à e, telles qu’il les écrit', () => {
     });
 
     it('e. la ligne qui confirme : avant la phrase du lieu, telle que le parcours l’écrit (le moteur n’y ajoute rien)', () => {
-        expect(ecrire).toContain("phrase('parcours-bulle-confirme', texteDe(etape.confirme));");
+        // 18 nov. 2026 (Grégoire, 14 h 11) : au-dessus du titre, dans son élément, posé avant la tête de la bulle.
+        expect(ecrire).toContain('poserConfirmation(seconde ? {} : etape);');
+        const poser = tranche(MOTEUR, 'function poserConfirmation(etape) {', '\n    }\n');
+        expect(poser).toContain('var texte = texteDe(etape.confirme);');
+        const rendre = tranche(MOTEUR, "confirme.className = 'parcours-bulle-confirme';", 'b.appendChild(tete);');
+        expect(rendre).toContain('b.appendChild(confirme);');
         expect(MOTEUR).not.toMatch(/Bravo|Bien joué|Félicitations/);
+    });
+
+    it('la seconde forme (18 nov. 2026) : ni objectif, ni confirmation, ni lieu ; le titre et le compteur restent', () => {
+        expect(ecrire).toContain('var seconde = enSecondeForme(etape);');
+        expect(ecrire).toContain("if (!seconde) phrase('parcours-bulle-lieu'");
+        const f = tranche(MOTEUR, 'function enSecondeForme(etape) {', '\n    }\n');
+        expect(f).toContain("typeof etape.secondeForme === 'function' && !!etape.secondeForme()");
     });
 });
 
@@ -372,7 +457,18 @@ describe('les retouches de l’essai sur l’iPad (16 nov. 2026), telles que son
     it('B.7 : la première bulle de chaque parcours dit la poignée, sauf sur téléphone (la bulle n’y en a pas)', () => {
         expect(dite('PHRASE_DE_LA_POIGNEE')).toBe('Tu peux déplacer cette bulle par sa poignée et faire défiler la page pour mieux voir.');
         expect(ESSAI).toContain('« ' + dite('PHRASE_DE_LA_POIGNEE') + ' »');
-        expect(ecrire).toContain("if (etat.i === 0 && !etat.def.sansRang && !etat.telephone) phrase('parcours-bulle-aide', PHRASE_DE_LA_POIGNEE);");
+        // 20 nov. 2026 (A2) : elle monte au-dessus du titre, sous la ligne qui nomme le parcours (A1) ; toujours en
+        // gris (le vert reste à ce qui est fait), toujours absente sur téléphone.
+        const entree = tranche(MOTEUR, 'function poserEntree(seconde) {', '\n    }\n');
+        expect(entree).toContain("e.aide.textContent = premiere && !etat.telephone ? typographier(PHRASE_DE_LA_POIGNEE) : '';");
+        // Dans la première forme seulement : ni dans la seconde, ni dans une forme qui ne redit pas l'objectif.
+        expect(entree).toContain('var premiere = etat.i === 0 && !etat.def.sansRang && !seconde && (objectif === undefined || !!texteDe(objectif));');
+        const rendre = tranche(MOTEUR, 'function rendreBulle(opts) {', 'b.appendChild(tete);');
+        expect(rendre.indexOf("rang.className = 'parcours-bulle-identite';")).toBeLessThan(rendre.indexOf("aide.className = 'parcours-bulle-aide';"));
+        expect(rendre.indexOf("aide.className = 'parcours-bulle-aide';")).toBeLessThan(rendre.indexOf("confirme.className = 'parcours-bulle-confirme';"));
+        expect(sectionDeLaConsigne('A2.')).toContain('« ' + dite('PHRASE_DE_LA_POIGNEE') + ' »');
+        expect(STYLES).toMatch(/\.parcours-bulle-identite \{[^}]*color: var\(--texte-secondaire\);/);
+        expect(STYLES).not.toMatch(/\.parcours-bulle-(identite|aide)[^{]*\{[^}]*vert/);
     });
 
     it('9 : l’espace insécable devant « ; : ? ! », pour toutes les bulles', () => {

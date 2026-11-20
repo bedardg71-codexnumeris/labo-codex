@@ -21,7 +21,9 @@ const indexHtml = 'file://' + path.join(path.resolve(__dirname, '..', '..'), 'in
 //       au-delà ne se touche pas ;
 //   (c) « Tu es dans « X », à l'onglet « Y ». », le halo sur les deux entrées du menu, la page en haut ;
 //   (d) une bulle qui présente une page sans rien y désigner se range dans son coin, pas au centre ;
-//   (e) la dernière bulle : « Parcours suivant » et « Terminer » de même poids, et la phrase du compteur.
+//   (e) la dernière bulle : « Voir le parcours N » et « Terminer » de même poids, et la phrase du compteur.
+//       (20 nov. 2026, plans de travail/CONSIGNE-2026-11-20-essai-parcours.md, A3 : « Parcours suivant », qui
+//       lançait le parcours suivant d'office, devient « Voir le parcours N », qui ouvre le panneau devant lui.)
 // ═══════════════════════════════════════════════════════════════════════════════════════════
 
 async function ouvrir(page, largeur = 1180, hauteur = 820) {
@@ -264,7 +266,10 @@ test('(c) et (d) « Tu es dans… », le halo au menu, la page en haut, la bulle
     await expect(page.locator('#parcours-bulle .parcours-bulle-lieu')).toHaveCount(0);
 });
 
-test('(e) la fin : « Parcours suivant » et « Terminer » de même poids, et la phrase du compteur', async ({ page }) => {
+// 20 nov. 2026 (plans de travail/CONSIGNE-2026-11-20-essai-parcours.md, A3) : le bouton de la suite ne lance plus rien.
+// « Voir le parcours N » termine le parcours, ferme la bulle et ouvre le panneau « Assistance » devant la carte du
+// parcours N ; la bulle le nomme d'abord (« Suite suggérée : le parcours N, « Nom ». »).
+test('(e) la fin : « Voir le parcours N » et « Terminer » de même poids, et la phrase du compteur', async ({ page }) => {
     test.setTimeout(120000);
     await ouvrir(page);
     // Le fictif prend l'identité du premier parcours du panneau : il a donc un suivant.
@@ -275,10 +280,14 @@ test('(e) la fin : « Parcours suivant » et « Terminer » de même poids, et l
     await expect(titre(page)).toHaveText('Dernière étape');
     await expect(page.locator('#parcours-bulle .parcours-bulle-note')).toHaveText('Pour revoir une étape, touche « 3 sur 3 ».');
     const boutons = page.locator('#parcours-bulle .parcours-bulle-boutons .btn');
-    await expect(boutons).toHaveText(['Parcours suivant', 'Terminer']);
+    // Le rang et le nom du parcours qui suit, lus dans le panneau : le deuxième de la liste.
+    const suivant = await page.evaluate(() => { const p = window.Assistance.parcours()[1]; return { id: p.id, titre: p.titre }; });
+    expect(suivant.id).toBe(ids[1]);
+    await expect(boutons).toHaveText(['Voir le parcours 2', 'Terminer']);
+    await expect(page.locator('#parcours-bulle .parcours-bulle-suite-suggeree')).toHaveText('Suite suggérée : le parcours 2, «\u00a0' + suivant.titre + '\u00a0».');
     expect(await boutons.evaluateAll((bs) => bs.map((b) => b.className)), 'aucun bouton mis en avant').toEqual(['btn btn-secondaire', 'btn btn-secondaire']);
     // La consigne suit les boutons : le parcours écrit « Touche « Terminer ». », la bulle dit les deux suites.
-    await expect(page.locator('#parcours-bulle .parcours-bulle-geste')).toHaveText('Touche «\u00a0Parcours suivant\u00a0», ou «\u00a0Terminer\u00a0».');
+    await expect(page.locator('#parcours-bulle .parcours-bulle-geste')).toHaveText('Touche «\u00a0Voir le parcours 2\u00a0», ou «\u00a0Terminer\u00a0».');
     // La phrase est avant la consigne, qui reste la dernière ligne de texte.
     expect(await page.evaluate(() => {
         const n = document.querySelector('#parcours-bulle .parcours-bulle-note'), g = document.querySelector('#parcours-bulle .parcours-bulle-geste');
@@ -286,9 +295,21 @@ test('(e) la fin : « Parcours suivant » et « Terminer » de même poids, et l
     })).toBe(true);
 
     await boutons.nth(0).click();
-    expect(await page.evaluate(() => window.__banc.termine), '« Parcours suivant » termine d\'abord celui-ci').toBe(1);
-    expect(await page.evaluate(() => window.__lances)).toEqual([ids[1]]);
+    expect(await page.evaluate(() => window.__banc.termine), '« Voir le parcours 2 » termine d\'abord celui-ci').toBe(1);
+    // RIEN N'EST LANCÉ : ni bulle, ni moteur, ni appel à `lancerParcours` (remplacé plus haut par un témoin).
     await expect(page.locator('#parcours-bulle')).toHaveCount(0);
+    expect(await page.evaluate(() => window.ParcoursMoteur.actif()), 'aucun parcours en cours').toBe(false);
+    expect(await page.evaluate(() => window.__lances), 'aucun parcours lancé d\'office').toEqual([]);
+    // Le panneau « Assistance » est ouvert devant la carte du parcours 2 : elle seule est marquée, et le focus est à
+    // son premier bouton.
+    await expect(page.locator('#panneau-assistance')).toBeVisible();
+    await expect(page.locator('#panneau-assistance .assistance-parcours-item--suggere')).toHaveCount(1);
+    await expect(page.locator('#panneau-assistance [data-parcours="' + ids[1] + '"]')).toHaveClass(/assistance-parcours-item--suggere/);
+    await expect(page.locator('#panneau-assistance [data-parcours="' + ids[1] + '"]')).toBeInViewport();
+    expect(await page.evaluate((id) => {
+        const carte = document.querySelector('#panneau-assistance [data-parcours="' + id + '"]');
+        return document.activeElement === carte.querySelector('.assistance-modele-bouton, .assistance-parcours-bouton');
+    }, ids[1]), 'le focus au premier bouton de la carte suggérée').toBe(true);
 });
 
 test('(e) le dernier parcours du panneau n\'offre que « Terminer » ; une carte sans rang n\'a ni compteur ni phrase', async ({ page }) => {
@@ -378,8 +399,10 @@ test('(e) dans chaque parcours du panneau, la consigne de la dernière bulle cor
     for (const f of simples) {
         const point = f.propre.endsWith('.') ? '.' : '';
         if (f.aUnSuivant) {
-            expect(f.boutons, f.id).toEqual(['Parcours suivant', 'Terminer']);
-            expect(f.dite, f.id).toBe('Touche « Parcours suivant », ou « Terminer »' + point);
+            // 20 nov. 2026 (consigne du 20 nov., A3) : N est le rang du parcours qui suit dans le panneau.
+            const n = fins.indexOf(f) + 2;
+            expect(f.boutons, f.id).toEqual(['Voir le parcours ' + n, 'Terminer']);
+            expect(f.dite, f.id).toBe('Touche « Voir le parcours ' + n + ' », ou « Terminer »' + point);
         } else {
             expect(f.boutons, f.id).toEqual(['Terminer']);
             expect(f.dite, f.id).toBe('Touche « Terminer »' + point);

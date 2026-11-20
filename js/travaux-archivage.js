@@ -897,14 +897,57 @@
     // PROPOSÉ (11 nov. 2026, à valider par Grégoire) : ce que lit l'enseignant·e avant le premier PDF, puis au ZIP.
     const TEXTES_LEA = {
         preparation: 'Préparation des PDF : ça peut prendre un moment.',
+        // PROPOSÉ (20 nov. 2026) : le titre de l'onglet ouvert pour le PDF d'un·e étudiant·e, le temps qu'il se prépare.
+        onglet: 'Rétroaction en PDF',
         zip: 'Réunion des PDF dans un ZIP…'
     };
+
+    /**
+     * UN SEUL PDF S'OUVRE DANS UN NOUVEL ONGLET (décision de Grégoire, 20 nov. 2026 ; vécu sur l'iPad : le PDF d'un·e
+     * étudiant·e prenait la place de l'application dans son onglet, qui n'était plus disponible, et le parcours
+     * semblait ne pas aboutir). Sous WebKit, un onglet ouvert HORS du geste est bloqué, et le PDF se prépare en
+     * plusieurs temps : l'onglet est donc ouvert VIDE, tout de suite, dans le geste (`ouvrirOngletDuPdf`, appelé avant
+     * toute attente), puis il reçoit le PDF quand il est prêt (`montrerDansLOnglet`). S'il n'y a finalement pas
+     * exactement un PDF (rien de verrouillé, un échec, plusieurs fichiers), l'onglet se referme. Si le navigateur
+     * refuse l'onglet (les fenêtres surgissantes bloquées), le PDF est téléchargé comme avant : rien n'est perdu.
+     * Seulement quand un·e étudiant·e est choisi·e : « — Tous — » donne un ZIP, téléchargé.
+     */
+    function ouvrirOngletDuPdf() {
+        let onglet = null;
+        try { onglet = window.open('', '_blank'); } catch (e) { onglet = null; }
+        if (!onglet) return null;
+        // Ce que l'onglet dit en attendant (un texte, jamais de HTML) : la phrase de la préparation.
+        try { onglet.document.title = TEXTES_LEA.onglet; onglet.document.body.textContent = TEXTES_LEA.preparation; } catch (e) { /* l'onglet reste vide */ }
+        return onglet;
+    }
+
+    /** Le PDF, dans l'onglet ouvert pour lui. @returns {boolean} false si l'onglet n'est plus là (fermé entre-temps) */
+    function montrerDansLOnglet(onglet, blob, nomFichier) {
+        if (!onglet || onglet.closed) return false;
+        try {
+            // Un `File` porte le nom du PDF (le DA et le nom de l'étudiant·e), là où le navigateur le reprend.
+            const fichier = typeof File === 'function' ? new File([blob], nomFichier, { type: 'application/pdf' }) : blob;
+            const url = URL.createObjectURL(fichier);
+            onglet.location.href = url;
+            // L'adresse reste valide le temps que l'onglet charge le PDF, puis elle est rendue.
+            setTimeout(function() { URL.revokeObjectURL(url); }, 60000);
+            return true;
+        } catch (e) {
+            return false;
+        }
+    }
+
+    function fermerOnglet(onglet) {
+        try { if (onglet && !onglet.closed) onglet.close(); } catch (e) { /* déjà fermé */ }
+    }
 
     async function lancerExportLea(productionId, da, reprisesSeulement) {
         if (!productionId) {
             alert('Sélectionne une production.');
             return;
         }
+        // Dans le geste, avant toute attente : l'onglet du PDF d'un·e seul·e étudiant·e (voir plus haut).
+        const onglet = da ? ouvrirOngletDuPdf() : null;
 
         try {
             const date = new Date().toISOString().split('T')[0];
@@ -929,15 +972,17 @@
             // #565 — tout a échoué : ne pas télécharger un ZIP vide en laissant
             // croire que l'export a réussi.
             if (blobs.length === 0) {
+                fermerOnglet(onglet);
                 _afficherBilanExport(0, echecs.length, echecs, sansSynthese);
                 if (echecs.length === 0) alert('Aucun PDF n\'a pu être produit.');
                 return;
             }
 
             if (blobs.length === 1) {
-                // Un seul fichier → PDF direct
-                telechargerBlob(blobs[0].blob, blobs[0].nom);
+                // Un seul fichier → le PDF, dans son onglet (un·e étudiant·e choisi·e) ; sinon téléchargé.
+                if (!montrerDansLOnglet(onglet, blobs[0].blob, blobs[0].nom)) telechargerBlob(blobs[0].blob, blobs[0].nom);
             } else {
+                fermerOnglet(onglet);
                 // Plusieurs fichiers → ZIP
                 if (typeof JSZip === 'undefined') throw new Error('JSZip non disponible');
                 const zip = new JSZip();
@@ -957,6 +1002,7 @@
             // et l'enseignant sait ce qui manque avant de téléverser sur Léa.
             _afficherBilanExport(blobs.length, blobs.length + echecs.length, echecs, sansSynthese);
         } catch (e) {
+            fermerOnglet(onglet);
             if (e && e.texteEntier) { alert(e.message); return; }   // rien de verrouillé : pas une erreur
             console.error('[Travaux-Archivage] Erreur export Lea:', e);
             alert('L\'export Léa a échoué : ' + e.message);

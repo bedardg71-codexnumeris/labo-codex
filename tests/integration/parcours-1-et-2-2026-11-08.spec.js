@@ -279,7 +279,11 @@ test('« Découvrir » de bout en bout sur la démo, en faisant les gestes (1180
     await attendreEtape(page, 8);
     await expect(page.locator('#calendrier-trimestre')).toBeVisible();
     await expect(bulle(page).locator('.parcours-bulle-sortie')).toHaveCount(0);
-    await expect(bulle(page).locator('.parcours-bulle-boutons button')).toHaveText(['Explorer la démo par moi-même', 'Voir le parcours suivant', 'Commencer avec ma classe']);
+    // 20 nov. 2026 (plans de travail/CONSIGNE-2026-11-20-essai-parcours.md, A3) : « Voir le parcours suivant » devient
+    // « Voir le parcours 2 » (il ouvre le panneau devant ce parcours, sans rien lancer : jugé par
+    // parcours-je-regarde-2026-11-16), et la bulle nomme la suite suggérée.
+    await expect(bulle(page).locator('.parcours-bulle-boutons button')).toHaveText(['Explorer la démo par moi-même', 'Voir le parcours 2', 'Commencer avec ma classe']);
+    await expect(bulle(page).locator('.parcours-bulle-suite-suggeree')).toHaveText('Suite suggérée : le parcours 2, «\u00a0Mettre ta classe en place\u00a0».');
     // Rien à toucher dans la page : pas de pulsation ; le halo est celui du lieu, sur les deux entrées du menu.
     // ↻ 16 nov. 2026 : plus de flèche vers la barre d'étapes (la bulle, la plus haute du parcours, ne pouvait que la couvrir).
     await expect(page.locator('#parcours-contour')).toBeHidden();

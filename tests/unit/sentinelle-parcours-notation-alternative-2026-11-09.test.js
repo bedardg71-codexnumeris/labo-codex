@@ -79,7 +79,16 @@ describe('le neuvième parcours : les onze bulles et le panneau, mot pour mot', 
     });
 
     it.each(ORDRE)('%s : le texte est celui de la consigne', (id) => {
-        expect(CONSIGNE).toContain(`Texte : « ${P.TEXTES[id].texte} »`);
+        // A4 (20 nov. 2026, essai de Grégoire sur l'iPad ; plans de travail/CONSIGNE-2026-11-20-essai-parcours.md) : dans
+        // toutes les bulles, « juger » devient « évaluer ». Trois bulles de ce parcours le portaient ; chacune est relue
+        // dans sa consigne avec le mot d'avant.
+        const A4 = { "Tu l'évalues selon ce que tu exiges d'un travail réussi": "Tu la juges selon ce que tu exiges d'un travail réussi",
+            "quand tu évalues si l'étudiant·e a atteint": "quand tu juges si l'étudiant·e a atteint",
+            "on évalue d'abord sa compétence, puis on attribue la note": "on juge d'abord sa compétence, puis on attribue la note" };
+        let texte = P.TEXTES[id].texte;
+        Object.keys(A4).forEach((apres) => { texte = texte.replace(apres, A4[apres]); });
+        expect(P.TEXTES[id].texte).not.toMatch(/\bjuges?\b|\bjuger\b/);
+        expect(CONSIGNE).toContain(`Texte : « ${texte} »`);
     });
 
     it.each(ORDRE.filter((id) => P.TEXTES[id].geste))('%s : le geste est celui de la consigne, ou proposé le 11 nov. 2026', (id) => {

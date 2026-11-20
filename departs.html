@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="fr-CA">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Essai des parcours : les fichiers de départ</title>
+    <!-- ESSAI SEULEMENT (branche `apercu/essai-parcours`, 20 nov. 2026) : cette page ne vit que dans l'aperçu d'essai.
+         plans de travail/CONSIGNE-2026-11-19-codex-de-depart.md, point 6. Les fichiers : tests/departs-de-parcours/. -->
+    <style>
+        :root { --fond: #f4f7fb; --carte: #ffffff; --texte: #14213d; --doux: #4a5872; --lien: #0b5cad; --filet: #d6deea; }
+        @media (prefers-color-scheme: dark) {
+            :root { --fond: #0f1726; --carte: #182235; --texte: #e8eef8; --doux: #aab6cc; --lien: #8cc4ff; --filet: #2a3850; }
+        }
+        * { box-sizing: border-box; }
+        body { margin: 0; background: var(--fond); color: var(--texte); font: 18px/1.5 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+        main { max-width: 760px; margin: 0 auto; padding: 16px 16px 48px; }
+        h1 { font-size: 1.5rem; margin: 0 0 8px; }
+        p { margin: 0 0 12px; }
+        .doux { color: var(--doux); }
+        ol.gestes { margin: 0 0 24px; padding-left: 1.4em; }
+        ol.gestes li { margin-bottom: 4px; }
+        .depart { background: var(--carte); border: 1px solid var(--filet); border-radius: 12px; padding: 12px 16px; margin-bottom: 12px; }
+        .depart h2 { font-size: 1.15rem; margin: 0 0 6px; }
+        .depart p { margin-bottom: 8px; }
+        a.bouton { display: inline-flex; align-items: center; min-height: 48px; padding: 0 20px; border-radius: 10px; background: var(--lien); color: #fff; text-decoration: none; font-weight: 600; }
+        @media (prefers-color-scheme: dark) { a.bouton { color: #0f1726; } }
+        a.app { display: inline-flex; align-items: center; min-height: 48px; padding: 0 20px; border-radius: 10px; border: 2px solid var(--lien); color: var(--lien); text-decoration: none; font-weight: 600; }
+        .boutons { display: flex; flex-wrap: wrap; gap: 10px; }
+        h2.sous-titre { font-size: 1.1rem; margin: 24px 0 8px; }
+        .sans-fichier { border-style: dashed; }
+    </style>
+</head>
+<body>
+<main>
+    <h1>Essai des parcours : les fichiers de départ</h1>
+    <p class="doux">Chaque fichier ouvre l'application là où un parcours commence, avec ce que les parcours d'avant auraient laissé. Ouvre-le dans un espace vide.</p>
+
+    <section class="depart" data-parcours="recevoir">
+        <h2>Départ : Recevoir les productions</h2>
+        <p>Ta classe en place, et une production prête à recevoir : sa grille, son échelle, sa cartouche.</p>
+        <div class="boutons">
+            <a class="bouton" href="departs/depart-recevoir-les-productions.zip" download>Télécharger le fichier</a>
+            <a class="app" href="./">Ouvrir l'application</a>
+        </div>
+    </section>
+
+    <section class="depart" data-parcours="monter">
+        <h2>Départ : Monter ton cours</h2>
+        <p>Ta classe en place, et ta production dans ta bibliothèque.</p>
+        <div class="boutons">
+            <a class="bouton" href="departs/depart-monter-ton-cours.zip" download>Télécharger le fichier</a>
+            <a class="app" href="./">Ouvrir l'application</a>
+        </div>
+    </section>
+
+    <section class="depart" data-parcours="donnees">
+        <h2>Départ : Mettre tes données à l'abri</h2>
+        <p>Ta classe, ta production, sa grille et une première évaluation : de quoi mettre à l'abri.</p>
+        <div class="boutons">
+            <a class="bouton" href="departs/depart-mettre-tes-donnees-a-l-abri.zip" download>Télécharger le fichier</a>
+            <a class="app" href="./">Ouvrir l'application</a>
+        </div>
+    </section>
+
+    <p class="doux">Dans les trois, « Mettre ta classe en place » et « Évaluer une première production » sont faits.</p>
+
+    <h2 class="sous-titre">Ouvrir un fichier</h2>
+    <ol class="gestes">
+        <li>Touche « Télécharger le fichier » : il va dans tes téléchargements.</li>
+        <li>Touche « Ouvrir l'application ».</li>
+        <li>Dans l'application, touche « Codex », puis « Ouvrir un codex », et choisis le fichier.</li>
+        <li>Touche « Recharger ».</li>
+        <li>Dans le menu ☰, touche « Assistance », puis « Nous faisons » sous le parcours.</li>
+    </ol>
+
+    <h2 class="sous-titre">Sans fichier</h2>
+    <section class="depart sans-fichier" data-parcours="classe">
+        <h2>Mettre ta classe en place</h2>
+        <p>Ce parcours part d'un espace vide.</p>
+    </section>
+    <section class="depart sans-fichier" data-parcours="monter-je-regarde">
+        <h2>« Je regarde » de « Monter ton cours »</h2>
+        <p>Ce modèle se joue dans la démo, et aucun codex ne transporte la démo. Dans un espace vide, fais d'abord « Je regarde » de « Mettre ta classe en place », puis touche « Voir le parcours suivant » pour celui d'« Évaluer une première production ». Ensuite, « Je regarde » de « Monter ton cours » s'ouvre.</p>
+    </section>
+</main>
+</body>
+</html>

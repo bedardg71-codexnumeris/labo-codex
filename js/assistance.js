@@ -52,7 +52,7 @@
    · le panneau ne liste que les parcours ouverts, puis dit « À venir » pour les autres, sans les nommer ;
    · `Assistance.parcours()` ne rend que les ouverts : la porte « Tu enseignes ? » de l'accueil et la fin de
      « Découvrir » y cherchent « Mettre ta classe en place » et ne l'y trouvent pas ;
-   · `suivantDe` ne rend qu'un parcours ouvert (« Parcours suivant », « Voir le parcours suivant », un modèle) ;
+   · `suivantDe` ne rend qu'un parcours ouvert (la suite suggérée à la fin d'un parcours, « Voir le parcours N ») ;
    · `lancerParcours` refuse un parcours fermé ; le rang du menu et la remise à neuf de la démo (qui sert les
      modèles) ne comptent que les ouverts.
    Les bancs rouvrent tout en mémoire (`ouvrirLesParcours`, par le harnais) : le code des parcours fermés reste jugé.
@@ -61,7 +61,15 @@
     'use strict';
 
     var CLE_PREF = 'parcoursAssistance';
-    var PARCOURS_OUVERTS = ['decouvrir'];
+    // ⚠ BRANCHE SEULEMENT (lot « Je regarde » de « Recevoir », 17 nov. 2026) : rouverts pour l'aperçu de Grégoire.
+    // À DÉFAIRE AVANT TOUTE FUSION : `git revert` du commit « BRANCHE SEULEMENT », qui rend ['decouvrir'] et les deux
+    // essais du verrou (plans de travail/RAPPORT-2026-11-17-je-regarde-recevoir.md, §5).
+    // ⚠ BRANCHE SEULEMENT (session de nuit A, `lot/nous-faisons-donnees`, 20 nov. 2026) : « Mettre tes données à l'abri »
+    // ouvert pour l'aperçu de son « Nous faisons ». À DÉFAIRE AVANT TOUTE FUSION : `git revert` de ce commit
+    // (plans de travail/RAPPORT-2026-11-19-nous-faisons-donnees.md).
+    // ⚠ ESSAI SEULEMENT (`apercu/essai-parcours`, 20 nov. 2026) : fusion de `lot/nous-faisons-donnees` et de
+    // `lot/je-regarde-cours`, « monter » et « donnees » ouverts ensemble. Cette branche ne se fusionne jamais.
+    var PARCOURS_OUVERTS = ['decouvrir', 'classe', 'evaluer', 'recevoir', 'monter', 'donnees'];
     // L'état en mémoire, que seuls les bancs changent (ouvrirLesParcours) : la liste des identifiants ouverts, ou `true`
     // (tous). Rien ne le garde d'un chargement à l'autre.
     var ouverts = PARCOURS_OUVERTS.slice();
@@ -682,7 +690,13 @@
         }
     }
 
-    function ouvrirPanneau() {
+    /**
+     * @param {Object} [opts] - { sur?: string } : l'identifiant du parcours DEVANT lequel le panneau s'ouvre (la fin d'un
+     *   parcours, 20 nov. 2026 : « Voir le parcours N »). Sa carte est amenée dans la vue du panneau et son premier
+     *   bouton (« Je regarde », ou le bouton d'un parcours à un temps) prend le focus. Rien n'est lancé.
+     */
+    function ouvrirPanneau(opts) {
+        var sur = (opts || {}).sur;
         fermerPanneau({ sansRetourFocus: true });
         // Le menu à trois traits se referme : le panneau prend sa place.
         var menu = document.getElementById('entete-menu-panneau');
@@ -704,7 +718,21 @@
         window.addEventListener('resize', rafraichirListe);
         requestAnimationFrame(function () { els.panneau.classList.remove('est-entrant'); });
         var titre = els.panneau.querySelector('.assistance-fermer');
-        if (titre) titre.focus();
+        if (!montrerLeParcours(els.panneau, sur) && titre) titre.focus();
+    }
+
+    /**
+     * Le panneau ouvert DEVANT un parcours (`sur`) : sa carte marquée, amenée au milieu du panneau, et son premier
+     * bouton au focus. @returns {boolean} true si le parcours y est (sinon le panneau s'ouvre en haut de la liste)
+     */
+    function montrerLeParcours(panneau, sur) {
+        var carte = sur ? panneau.querySelector('[data-parcours="' + sur + '"]') : null;
+        var bouton = carte ? carte.querySelector('.assistance-modele-bouton, .assistance-parcours-bouton') : null;
+        if (!carte || !bouton) return false;
+        carte.classList.add('assistance-parcours-item--suggere');
+        if (typeof carte.scrollIntoView === 'function') carte.scrollIntoView({ block: 'center' });
+        try { bouton.focus({ preventScroll: true }); } catch (e) { bouton.focus(); }
+        return true;
     }
 
     function fermerPanneau(opts) {
@@ -729,8 +757,39 @@
     }
 
     /**
-     * Lance un parcours comme le fait son bouton dans le panneau (« Parcours suivant », à la fin d'un parcours,
-     * 14 nov. 2026) : mêmes gardes. Refusé (l'écran trop petit, la condition d'entrée), il ne part pas : le panneau
+     * L'IDENTITÉ D'UN PARCOURS, pour la première bulle (Grégoire, 20 nov. 2026 : « Parcours 3 · Évaluer une première
+     * production · Nous faisons ») : son rang dans ce panneau, son nom, et le nom du temps joué. Un parcours à un seul
+     * temps (sans Modélisation) n'en nomme aucun.
+     * @param {string} id ; @param {boolean} modele - la Modélisation (« Je regarde ») est jouée
+     */
+    function identiteDe(id, modele) {
+        var def = definitionDe(id);
+        if (!def) return null;
+        var deux = typeof def.lancerModele === 'function';
+        return { rang: rangDe(def), titre: def.titre, temps: deux ? MOTS_TEMPS[modele ? 'modele' : 'pratique'].bouton : '' };
+    }
+
+    /**
+     * LA SUITE SUGGÉRÉE à la fin d'un parcours (Grégoire, 20 nov. 2026) : le parcours qui suit `id` dans ce panneau,
+     * la phrase qui le nomme, le libellé de son bouton, et ce que fait ce bouton : ouvrir le panneau devant ce
+     * parcours. RIEN N'EST LANCÉ D'OFFICE : la personne choisit « Je regarde » ou « Nous faisons ». Les mots ne sont
+     * écrits qu'ici. Rien après le dernier parcours.
+     */
+    function suiteDe(id) {
+        var s = suivantDe(id);
+        if (!s) return null;
+        var n = rangDe(s);
+        return {
+            id: s.id, rang: n, titre: s.titre,
+            libelle: 'Voir le parcours ' + n,
+            phrase: 'Suite suggérée : le parcours ' + n + ', « ' + s.titre + ' ».',
+            voir: function () { ouvrirPanneau({ sur: s.id }); }
+        };
+    }
+
+    /**
+     * Lance un parcours comme le fait son bouton dans le panneau (« Le refaire avec ma classe », à la fin d'un
+     * « Je regarde ») : mêmes gardes. Refusé (l'écran trop petit, la condition d'entrée), il ne part pas : le panneau
      * s'ouvre et dit pourquoi, sous son bouton.
      * @returns {boolean} true s'il est parti
      */
@@ -754,6 +813,8 @@
 
     window.Assistance = {
         suivantDe: suivantDe,
+        suiteDe: suiteDe,
+        identiteDe: identiteDe,
         lancerParcours: lancerParcours,
         enregistrer: enregistrer,
         etatDe: etatDe,

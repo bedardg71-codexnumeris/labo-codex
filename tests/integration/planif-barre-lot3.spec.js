@@ -126,10 +126,13 @@ test('« Actions ▾ » garde ses huit commandes ; les cinq de gestion des carte
     const erreurs = await ouvrirCarte(page);
     await page.click('#planif-btn-actions');
     const items = await page.$$eval('#planif-actions-dropdown .planif-action-item', (els) => els.map((e) => e.textContent.trim()));
+    // 20 nov. 2026 (plans de travail/CONSIGNE-2026-11-20-essai-parcours.md, G2) : « Télécharger un modèle… » s'appelle
+    // « Télécharger le prompt… » (`#planif-btn-modele-ia`).
     expect(items).toEqual([
         'Nouvelle carte', 'Renommer cette carte', 'Cours rattaché…', 'Nettoyer les repères de semaine…',
-        expect.stringMatching(/Liens : contourner les blocs$/), 'Décloner la sélection', 'Exporter le plan…', 'Télécharger un modèle…'
+        expect.stringMatching(/Liens : contourner les blocs$/), 'Décloner la sélection', 'Exporter le plan…', 'Télécharger le prompt…'
     ]);
+    await expect(page.locator('#planif-btn-modele-ia')).toHaveText('Télécharger le prompt…');
     for (const ancien of ['#planif-btn-dupliquer-carte', '#planif-btn-importer-carte', '#planif-btn-import-trimestre',
         '#planif-btn-exporter-carte', '#planif-btn-supprimer-carte']) {
         await expect(page.locator(ancien), ancien).toHaveCount(0);

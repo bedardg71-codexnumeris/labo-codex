@@ -18,8 +18,10 @@ import { cpSync, existsSync, mkdirSync, rmSync, readdirSync, statSync } from 'no
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-export const FICHIERS_RACINE = ['index.html', 'styles.css', 'version.js', 'version.json'];
-export const DOSSIERS = ['js', 'css', 'icons', 'libs', 'img', 'autocollants'];
+// ⚠ ESSAI SEULEMENT (`apercu/essai-parcours`, 20 nov. 2026) : `departs.html` et `departs/`, les codex de départ des
+// parcours (plans de travail/CONSIGNE-2026-11-19-codex-de-depart.md, point 6). Cette branche ne se fusionne jamais.
+export const FICHIERS_RACINE = ['index.html', 'styles.css', 'version.js', 'version.json', 'departs.html'];
+export const DOSSIERS = ['js', 'css', 'icons', 'libs', 'img', 'autocollants', 'departs'];
 
 // Jamais publiés, même à l'intérieur d'un dossier de la liste blanche.
 const EXCLUS = /(^|\/)(\.DS_Store|[^/]*\.md)$/i;

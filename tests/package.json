@@ -9,7 +9,8 @@
         "test:int": "playwright test",
         "test": "npm run test:unit && npm run test:int",
         "test:watch": "vitest",
-        "test:debug": "playwright test --debug"
+        "test:debug": "playwright test --debug",
+        "departs": "playwright test -c playwright.departs.config.js"
     },
     "devDependencies": {
         "@playwright/test": "^1.60.0",

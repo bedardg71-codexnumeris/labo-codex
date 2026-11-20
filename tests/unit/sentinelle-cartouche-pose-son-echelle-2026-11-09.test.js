@@ -12,7 +12,7 @@
 //   4. jamais une échelle que le menu n'offre pas.
 // Break-tests (9 nov.) : la garde `_echelleAuGeste` retirée → ROUGE (1) ; la garde « une échelle déjà choisie »
 // retirée → ROUGE (3) ; l'appel retiré de `cartoucheSelectionnee` → ROUGE (2). Rétablis.
-// Le bout en bout (le commentaire du palier dans la rétroaction) : tests/integration/parcours-3-evaluer-2026-11-09.spec.js.
+// Le bout en bout (le commentaire du palier dans la rétroaction) : ce banc a été retiré le 20 nov. 2026 avec l'ancienne Pratique guidée d'« Évaluer » (voir le rapport du lot du 20 nov.) ; le bout en bout n'a plus de banc.
 // Noms et ids fictifs.
 
 import { describe, it, expect } from 'vitest';

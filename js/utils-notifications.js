@@ -48,6 +48,8 @@
 //   temps de lire ;
 // - les messages s'EMPILENT dans .notifications-pile (en haut à droite), au
 //   lieu de se recouvrir au même endroit ;
+// - options.passager : l'avis part aussi au changement de page et sur
+//   notifications.retirerPassagers() (voir plus bas) ;
 // - un message identique déjà affiché n'est pas répété : un rouge resté là
 //   n'en appelle pas un second à fermer (une validation qui se redéclenche à
 //   chaque frappe empilerait sinon autant de « OK ») ; un vert identique
@@ -152,6 +154,7 @@
 
         const notif = _construireNotif(type, message, details, options);
         notif.setAttribute('data-signature', signature);
+        if (options && options.passager) notif.setAttribute('data-passager', '');
         if (conf.duree === null) _ajouterBoutonOk(notif);
         pile.appendChild(notif);
         if (conf.duree !== null) setTimeout(() => _retirer(notif), conf.duree);
@@ -254,5 +257,16 @@
     function warning(message, details = '', options = {}) { _emettre('warning', message, details, options); }
     function info(message,   details = '', options = {})  { _emettre('info',    message, details, options); }
 
-    window.notifications = { succes, erreur, warning, info };
+    // UN AVIS PASSAGER (`options.passager`, 20 nov. 2026 ; vécu par Grégoire sur l'iPad : « Cette cartouche n'est pas
+    // encore créée » restait après la création et suivait dans « Productions ») : un avis qui ne parle que de la
+    // fiche ouverte part quand ce qu'il dit n'est plus vrai (`retirerPassagers`, appelé par la fiche à la création)
+    // et au changement de page, sans attendre « OK ».
+    function retirerPassagers() {
+        const pile = document.getElementById(ID_PILE);
+        if (!pile) return;
+        Array.from(pile.querySelectorAll('[data-passager]')).forEach(_retirer);
+    }
+    if (typeof window.addEventListener === 'function') window.addEventListener('sectionAffichee', retirerPassagers);
+
+    window.notifications = { succes, erreur, warning, info, retirerPassagers };
 })();

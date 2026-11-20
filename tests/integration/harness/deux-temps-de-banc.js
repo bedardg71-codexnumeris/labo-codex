@@ -237,16 +237,45 @@ export async function attendreRemplir(page, contexte) {
     expect(boite.height, contexte + ' : la cible tactile').toBeGreaterThanOrEqual(44);
 }
 
+/** La bulle dans sa seconde forme : ce qui l'ouvre (le titre, le compteur, puis la première chose écrite). */
+export const lireLaSecondeForme = (page) => page.evaluate(() => {
+    const b = document.getElementById('parcours-bulle');
+    const vis = (e) => !!e && !e.hidden && e.getClientRects().length > 0;
+    const boite = b.querySelector('.parcours-bulle-lignes');
+    const premier = boite && boite.firstElementChild;
+    const texte = (e) => (e ? e.textContent.replace(/\u00a0/g, ' ').replace(/\s+/g, ' ').trim() : '');
+    return {
+        titre: vis(b.querySelector('.parcours-bulle-titre')),
+        compteur: vis(b.querySelector('.parcours-bulle-rang')),
+        confirme: vis(b.querySelector('.parcours-bulle-confirme')),
+        // Ce qui est écrit avant la première liste : rien, dans la seconde forme.
+        avantLesLignes: (() => {
+            const avant = [];
+            for (const e of boite.children) { if (e.tagName === 'UL') break; if (vis(e)) avant.push(e.className); }
+            return avant;
+        })(),
+        ouvertureSur: premier ? premier.tagName + ':' + texte(premier.querySelector('.parcours-bulle-ligne-texte') || premier) : '',
+        remplirDit: texte(boite).includes("Regarde l'exemple se remplir")
+    };
+});
+
 /**
- * Les deuxième et troisième temps : « Remplir » touché, sa ligne est faite, le bouton a quitté la bulle, la dernière
- * ligne (orange) nomme le bouton de la page, qui porte la pulsation et une flèche.
+ * Les deuxième et troisième temps, la SECONDE FORME (18 nov. 2026, essai de Grégoire sur l'iPad) : « Remplir » touché,
+ * ce qui précédait disparaît (l'objectif, la confirmation, le lieu, les notes, la ligne « Remplir ») ; la bulle garde
+ * son titre et son compteur, s'ouvre sur ce qui vient d'apparaître, et la dernière ligne (orange) nomme le bouton de
+ * la page, qui porte la pulsation et une flèche.
  */
 export async function remplirPuisVoir(page, { consigne, bouton, contexte }) {
     await bulle(page).getByRole('button', { name: REMPLIR, exact: true }).click();
     await expect.poll(async () => (await lireBulle(page)).consignes, { message: contexte + ' : la consigne passe au bouton de la page', timeout: 10000 })
         .toEqual([consigne]);
     const vu = await lireBulle(page);
-    expect(vu.faites, contexte + ' : « Remplir » est fait').toContain(CONSIGNE_REMPLIR);
+    const seconde = await lireLaSecondeForme(page);
+    expect(seconde.remplirDit, contexte + ' : la ligne « Remplir » a disparu').toBe(false);
+    expect(seconde.confirme, contexte + ' : la confirmation a disparu').toBe(false);
+    expect(seconde.avantLesLignes, contexte + ' : ni objectif, ni lieu, ni note avant les lignes').toEqual([]);
+    expect(seconde.ouvertureSur.startsWith('UL:'), contexte + ' : la bulle s’ouvre sur les lignes nouvelles (' + seconde.ouvertureSur + ')').toBe(true);
+    expect(seconde.titre && seconde.compteur, contexte + ' : le titre et le compteur restent').toBe(true);
     expect(vu.boutons, contexte + ' : le bouton a quitté la bulle').toEqual([]);
     expect(vu.derniere, contexte + ' : la consigne est la dernière ligne').toBe(consigne);
     if (bouton) await gesteDesigne(page, bouton, contexte);
@@ -428,8 +457,14 @@ export async function faireLaModelisation(page, { capturer = '', surRemplir = nu
             await flecheVers(page, groupe.map((j) => `[data-banc="point-${j}"]`), 'étape 8, un point à l’écart');
         } else {
             expect(pres, 'étape 8 : un point trop près de la bulle pour sa flèche reste à découvert').toBeGreaterThan(0);
-            expect(groupe, 'étape 8 : seul le point du retard peut rester sans flèche, et seulement à 1180 × 820').toEqual([2]);
-            expect(page.viewportSize()).toEqual({ width: 1180, height: 820 });
+            expect(groupe, 'étape 8 : seul le point du retard peut rester sans flèche, et seulement à 1180 px de large').toEqual([2]);
+            // 20 nov. 2026 (plans de travail/CONSIGNE-2026-11-20-essai-parcours.md, B1 et A3) : la dernière bulle a gagné
+            // la phrase de B1 et la ligne « Suite suggérée… ». Mesuré à 1180 × 900 : elle fait 707 px (environ 610 avant le lot, lus sur capture),
+            // toute la hauteur utile (de 92 à 799), et se pose donc à côté des points, comme elle le faisait déjà à
+            // 1180 × 820 (voir plus haut, « MESURÉ LE 16 NOV. 2026 ») ; le point du retard tombe de 1 à 20 px d'elle (cinq passages sur sept). La tolérance, qui
+            // ne valait qu'à 1180 × 820, vaut aux deux hauteurs ; l'iPad debout (820 × 1180) n'y a toujours pas droit.
+            expect([820, 900], 'étape 8 : le point du retard est à ' + Math.round(pres) + ' px de la bulle (de ' + Math.round(geo.bulle.top) + ' à ' + Math.round(geo.bulle.bottom) + ' px), à ' + JSON.stringify(page.viewportSize())).toContain(page.viewportSize().height);
+            expect(page.viewportSize().width).toBe(1180);
         }
     }
     await capture(page, 'modele-8-' + capturer);

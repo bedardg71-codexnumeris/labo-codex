@@ -3,14 +3,14 @@ import { releverLaBulle } from './harness/releve-bulle.js';
 // La bulle ne couvre jamais ses zones quand une place les laisse libres (Grégoire, 11 nov. 2026) : relevé à chaque essai.
 releverLaBulle(test);
 import { ouvrirEspaceVide, ouvrirPanneau, attendreEtape, contourSur, bulleNeCouvrePas, capture, bulle, mettreLaClasseEnPlace } from './harness/classe-de-banc.js';
-import { leParcoursEntier, dossierDesCaptures } from './harness/parcours-3-de-banc.js';
+import { leTroisiemeParcoursFait, dossierDesCaptures } from './harness/nous-faisons-evaluer-de-banc.js';
 import { attendreApplication } from './harness/attendre-application.js';
 
 // =======================================================================
 // LE CINQUIÈME PARCOURS, « MONTER TON COURS » (9 NOVEMBRE 2026)
 // =======================================================================
 // plans de travail/CONSIGNE-LOT-2026-11-08-parcours-5-monter-ton-cours.md. Ce banc juge, en faisant les gestes, depuis
-// un espace où le troisième parcours est fait (harness/parcours-3-de-banc.js) :
+// un espace où le troisième parcours est fait (harness/nous-faisons-evaluer-de-banc.js, `leTroisiemeParcoursFait`) :
 //   · le panneau : cinquième entrée, après « Recevoir… » ; sans production, le bouton ne lance rien et la phrase validée
 //     le dit ; à faire, en cours (« Étape 4 sur 7 »), fait ;
 //   · les sept étapes sur la carte d'alignement : la compétence, l'idée maîtresse reliée (« se décline en »), la leçon
@@ -198,13 +198,18 @@ async function choisirDansEntete(page, sel, valeur) {
 }
 
 const pastilleEvaluation = (page, id) => page.evaluate((i) => planificationCarte.evaluerPastilleEvaluation(planificationCarte.etat.noeuds.get(i)).etat, id);
-const texteBulle = (page) => bulle(page).locator('.parcours-bulle-texte');
+// 19-20 nov. 2026 (« Nous faisons ») : la bulle est en lignes ; ses phrases sont des notes, ses gestes une liste.
+const notesBulle = (page) => bulle(page).locator('.parcours-bulle-note');
+const gestesBulle = (page) => bulle(page).locator('.parcours-bulle-ligne .parcours-bulle-ligne-texte');
 
 /** Un espace où le troisième parcours est fait ; sa production sera placée dans la carte. */
 async function espaceDuTroisiemeParcours(page) {
     dossierDesCaptures('');
-    await leParcoursEntier(page, { niveaux: true, cap: 'p3' });
-    await page.keyboard.press('Escape');
+    // 20 nov. 2026 (plans de travail/CONSIGNE-2026-11-20-essai-parcours.md, D) : le « Nous faisons » neuf d'« Évaluer »
+    // sort sans bulle ni panneau (avant, le panneau restait ouvert et le banc le fermait par Échap). Sa production
+    // s'appelle toujours « Journal de lecture 1 » ; sa grille (« Grille du banc », deux critères) n'est pas citée ici.
+    await leTroisiemeParcoursFait(page, { cap: 'p3' });
+    await expect(page.locator('#panneau-assistance'), 'le troisième parcours fait : aucun panneau ouvert').toHaveCount(0);
     return page.evaluate(() => ParcoursEvaluer.contexte().productionId);
 }
 
@@ -222,7 +227,10 @@ test('« Monter ton cours » : les sept étapes, la variante ⚠, « Plus tard �
     await expect(item(page).locator('.assistance-parcours-titre')).toHaveText('Monter ton cours');
     await expect(item(page).locator('.assistance-parcours-ligne')).toHaveText(LIGNE);
     await expect(item(page).locator('.assistance-parcours-etat')).toHaveText('À faire');
-    await expect(item(page).locator('.assistance-parcours-bouton')).toHaveText('Commencer');
+    // 20 nov. 2026 (« Je regarde ») : le parcours a ses deux temps ; ses boutons portent leur nom, pas l'état
+    // (16 nov. 2026, le nom ne suit plus l'état) : « Je regarde », « Nous faisons ».
+    await expect(item(page).locator('.assistance-modele-bouton')).toHaveText('Je regarde');
+    await expect(item(page).locator('.assistance-parcours-bouton')).toHaveText('Nous faisons');
     await capture(page, DOSSIER, `panneau-${cap}-a-faire`);
     await item(page).locator('.assistance-parcours-bouton').click();
 
@@ -288,7 +296,7 @@ test('« Monter ton cours » : les sept étapes, la variante ⚠, « Plus tard �
     await fermerLeRappel(page);
     await ouvrirPanneau(page);
     await expect(item(page).locator('.assistance-parcours-etat')).toHaveText('Étape 4 sur 7');
-    await expect(item(page).locator('.assistance-parcours-bouton')).toHaveText('Reprendre');
+    await expect(item(page).locator('.assistance-parcours-bouton')).toHaveText('Nous faisons');
     await capture(page, DOSSIER, `panneau-${cap}-en-cours`);
     await item(page).locator('.assistance-parcours-bouton').click();
     await n(page, 4, 'Ton objectif');
@@ -360,7 +368,10 @@ test('« Monter ton cours » : les sept étapes, la variante ⚠, « Plus tard �
     await capture(page, DOSSIER, `p5-6-inspecteur-${cap}`);
     await toucher(page, caseVerifiee);
     // La variante : l'objectif vérifié, mais enseigné APRÈS (l'évaluation vient avant l'activité).
-    await expect(texteBulle(page)).toHaveText(await page.evaluate(() => ParcoursCours.texteVariante));
+    // La seconde forme : sa phrase et son geste, sans la confirmation de la première.
+    await expect(notesBulle(page)).toHaveText([await page.evaluate(() => ParcoursCours.texteVariante)]);
+    await expect(gestesBulle(page)).toHaveText([await page.evaluate(() => ParcoursCours.gesteVariante)]);
+    await expect(bulle(page).locator('.parcours-bulle-confirme')).toBeHidden();
     await expect(bulle(page).locator('.parcours-bulle-rang')).toHaveText('6 sur 7');
     expect(await pastilleEvaluation(page, ev)).toBe('apres');
     await degage(page, noeud(ev));   // la variante : la bulle quitte l'Inspecteur pour laisser libre l'évaluation à glisser
@@ -372,7 +383,8 @@ test('« Monter ton cours » : les sept étapes, la variante ⚠, « Plus tard �
     expect(await page.evaluate(() => window.__sautsDeLaCarte), 'la carte n’a pas sauté pendant les glisser des étapes 5 et 6').toEqual([]);
     await deuxSondes(page);
     expect(await rangActuel(page)).toBe(5);
-    await expect(texteBulle(page)).not.toHaveText(await page.evaluate(() => ParcoursCours.texteVariante));
+    await expect(notesBulle(page).first()).not.toHaveText(await page.evaluate(() => ParcoursCours.texteVariante));
+    await expect(gestesBulle(page)).toHaveCount(6);   // la première forme, ses six gestes
     await page.selectOption('#planif-panneau-production', pid);
 
     // 7. Raffiner : la bulle au centre, sans « Plus tard », « Terminer ».
@@ -388,7 +400,7 @@ test('« Monter ton cours » : les sept étapes, la variante ⚠, « Plus tard �
     expect(await page.evaluate(() => document.body.classList.contains('parcours-inspecteur-devant'))).toBe(false);
     await ouvrirPanneau(page);
     await expect(item(page).locator('.assistance-parcours-etat')).toHaveText('Fait');
-    await expect(item(page).locator('.assistance-parcours-bouton')).toHaveText('Refaire');
+    await expect(item(page).locator('.assistance-parcours-bouton')).toHaveText('Nous faisons');   // le nom, pas l'état (deux temps)
     await capture(page, DOSSIER, `panneau-${cap}-fait`);
 
     // « Refaire » sur la carte remplie : seul ce qui est créé après compte (décision du 9 nov., 16 h 03) ; la compétence

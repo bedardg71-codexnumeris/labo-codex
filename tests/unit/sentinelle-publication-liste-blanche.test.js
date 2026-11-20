@@ -73,7 +73,8 @@ describe('rien ne déborde : la publication ne contient que la liste blanche', (
         // Liste écrite ICI, pas lue dans le script : élargir la publication
         // demande de changer ce banc, délibérément.
         const racinePubliee = [...new Set([...fichiers].map((f) => f.split('/')[0]))].sort();
-        expect(racinePubliee).toEqual(['autocollants', 'css', 'icons', 'img', 'index.html', 'js', 'libs',
+        // ⚠ ESSAI SEULEMENT (`apercu/essai-parcours`, 20 nov. 2026) : `departs.html` et `departs/`, les codex de départ.
+        expect(racinePubliee).toEqual(['autocollants', 'css', 'departs', 'departs.html', 'icons', 'img', 'index.html', 'js', 'libs',
             'styles.css', 'version.js', 'version.json']);
     });
 
