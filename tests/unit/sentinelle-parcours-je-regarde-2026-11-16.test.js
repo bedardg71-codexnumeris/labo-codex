@@ -102,6 +102,24 @@ const RETOUCHES = {
         6: { "Choisis dans l'en-tête le groupe que tu viens de créer": "Choisis dans l'en-tête le groupe que tu viens de créer : « 601-999-DM · gr. 00002 »" }
     }
 };
+// LA RETOUCHE DU 19 NOV. 2026 (« Nous faisons » de « Mettre ta classe en place », relais, point 3 ; Grégoire, 10 h 36 :
+// le verbe de la page, « Assemble un groupe-cours ») : une phrase d'ouverture de la bulle 5 de « Je regarde ». La
+// phrase neuve est relue dans la consigne du 19 nov.
+const NOUS_FAISONS_CLASSE = lire('plans de travail/CONSIGNE-2026-11-19-nous-faisons-classe.md');
+const RETOUCHES_PHRASES = {
+    classe: {
+        5: { "Tu es dans la section « Groupe-cours » : c'est là que tu réunis ce que tu viens de créer.":
+             "Tu es dans la section « Groupe-cours » : c'est là que tu assembles ce que tu viens de créer." }
+    }
+};
+function retoucherPhrases(parcours, n, phrases) {
+    const r = (RETOUCHES_PHRASES[parcours] || {})[n] || {};
+    Object.keys(r).forEach((avant) => {
+        expect(phrases, `la consigne du 16 nov. porte « ${avant} »`).toContain(avant);
+        expect(NOUS_FAISONS_CLASSE, 'la retouche est dans la consigne du 19 nov.').toContain('« ' + r[avant].replace(/^Tu es dans la section « [^»]+ » /, '') + ' »');
+    });
+    return phrases.map((p) => (p in r ? r[p] : p));
+}
 function retoucher(parcours, n, lignes) {
     const r = RETOUCHES[parcours][n] || {};
     Object.keys(r).forEach((avant) => expect(lignes, `la consigne du matin porte « ${avant} »`).toContain(avant));
@@ -194,19 +212,20 @@ describe('« Mettre ta classe en place », « Je regarde » : les huit bulles du
         const etape = etapes[n - 1];
         expect(etape.titre).toBe(titre);
         if (typeof etape.etats === 'function') {
-            // Une bulle à bouton « Remplir » : deux états. Après, la consigne « Remplir » reste, faite ; puis ce
-            // qui vient d'apparaître, et le bouton de la page.
+            // Une bulle à bouton « Remplir » : deux états. Après, la SECONDE FORME (18 nov. 2026, essai de Grégoire
+            // sur l'iPad) : ce qui précédait disparaît ; ce qui vient d'apparaître, puis le bouton de la page.
             const { avant, apres } = etape.etats();
-            jugerOuverture(b.phrases, ouvertureDe(def, etape, n - 1, avant));
+            jugerOuverture(retoucherPhrases('classe', n, b.phrases), ouvertureDe(def, etape, n - 1, avant));
             expect(textes(avant)).toEqual(b.avant);
             expect(b.avant[b.avant.length - 1]).toBe(mots.toucheRemplir);
             expect(avant[avant.length - 1].geste).toBe(true);
-            expect(textes(apres)).toEqual(b.avant.concat(b.apres));
+            expect(textes(apres)).toEqual(b.apres);
             expect(apres[apres.length - 1].geste).toBe(true);
-            expect(notes(apres)).toEqual(notes(avant));
+            expect(notes(apres)).toEqual([]);
+            expect(typeof etape.secondeForme).toBe('function');
         } else {
             const lignes = etape.lignes();
-            jugerOuverture(b.phrases, ouvertureDe(def, etape, n - 1, lignes));
+            jugerOuverture(retoucherPhrases('classe', n, b.phrases), ouvertureDe(def, etape, n - 1, lignes));
             // La dernière bulle : « Pour revoir une étape… » est posée par le moteur, pas par le parcours.
             expect(textes(lignes)).toEqual(retoucher('classe', n, b.avant).filter((l) => !DE_LA_FIN(l)));
             expect(b.apres).toEqual([]);
@@ -290,10 +309,11 @@ describe('le moteur : les règles a à e, telles qu’il les écrit', () => {
     const ecrire = tranche(MOTEUR, 'function ecrireLignes(boite, etape) {', 'function majLignes(silence) {');
 
     it('a. l’objectif du parcours : sur la première bulle seulement, avant la confirmation, le lieu et les lignes', () => {
-        const objectif = ecrire.indexOf("if (etat.i === 0) phrase('parcours-bulle-objectif', texteDe(etat.def.objectif));");
+        const objectif = ecrire.indexOf("if (etat.i === 0 && !seconde) phrase('parcours-bulle-objectif', texteDe(etat.def.objectif));");
         expect(objectif).toBeGreaterThan(-1);
-        expect(objectif).toBeLessThan(ecrire.indexOf("phrase('parcours-bulle-confirme'"));
-        expect(ecrire.indexOf("phrase('parcours-bulle-confirme'")).toBeLessThan(ecrire.indexOf("phrase('parcours-bulle-lieu'"));
+        // 18 nov. 2026 : la confirmation est posée au-dessus du titre (`poserConfirmation`), avant la phrase du lieu.
+        expect(objectif).toBeLessThan(ecrire.indexOf('poserConfirmation(seconde ? {} : etape);'));
+        expect(ecrire.indexOf('poserConfirmation(seconde ? {} : etape);')).toBeLessThan(ecrire.indexOf("phrase('parcours-bulle-lieu'"));
         expect(ecrire.indexOf("phrase('parcours-bulle-lieu'")).toBeLessThan(ecrire.indexOf('lignes.forEach(function (ligne) {'));
     });
 
@@ -342,8 +362,20 @@ describe('le moteur : les règles a à e, telles qu’il les écrit', () => {
     });
 
     it('e. la ligne qui confirme : avant la phrase du lieu, telle que le parcours l’écrit (le moteur n’y ajoute rien)', () => {
-        expect(ecrire).toContain("phrase('parcours-bulle-confirme', texteDe(etape.confirme));");
+        // 18 nov. 2026 (Grégoire, 14 h 11) : au-dessus du titre, dans son élément, posé avant la tête de la bulle.
+        expect(ecrire).toContain('poserConfirmation(seconde ? {} : etape);');
+        const poser = tranche(MOTEUR, 'function poserConfirmation(etape) {', '\n    }\n');
+        expect(poser).toContain('var texte = texteDe(etape.confirme);');
+        const rendre = tranche(MOTEUR, "confirme.className = 'parcours-bulle-confirme';", 'b.appendChild(tete);');
+        expect(rendre).toContain('b.appendChild(confirme);');
         expect(MOTEUR).not.toMatch(/Bravo|Bien joué|Félicitations/);
+    });
+
+    it('la seconde forme (18 nov. 2026) : ni objectif, ni confirmation, ni lieu ; le titre et le compteur restent', () => {
+        expect(ecrire).toContain('var seconde = enSecondeForme(etape);');
+        expect(ecrire).toContain("if (!seconde) phrase('parcours-bulle-lieu'");
+        const f = tranche(MOTEUR, 'function enSecondeForme(etape) {', '\n    }\n');
+        expect(f).toContain("typeof etape.secondeForme === 'function' && !!etape.secondeForme()");
     });
 });
 

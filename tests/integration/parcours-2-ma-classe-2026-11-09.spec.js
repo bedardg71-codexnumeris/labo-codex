@@ -83,6 +83,9 @@ async function ouvrirPanneau(page) {
 }
 
 const bulle = (page) => page.locator('#parcours-bulle');
+// Les textes de la bulle, sans les insécables que pose le moteur (« typographier ») : la consigne porte des espaces.
+const plats = (loc) => loc.evaluateAll((els) => els.map((e) => e.textContent.replace(/\u00a0/g, ' ')));
+const plat = async (loc) => (await plats(loc)).join('\n');
 
 async function attendreEtape(page, n, titre, { focus = true } = {}) {
     await expect(bulle(page).locator('.parcours-bulle-rang')).toHaveText(n + ' sur 8', { timeout: 10000 });
@@ -268,16 +271,19 @@ test('de « Découvrir » à sa propre classe : « Commencer avec ma classe », 
     // 14 nov. 2026 (essai novice, règle 4) : la page change, donc la bulle dit où l'on est, les deux entrées du menu
     // ont leur halo, et la page s'ouvre EN HAUT, navigation visible. Le haut du formulaire (session, année, nom) est à
     // l'écran, la bulle à côté ; « Créer le trimestre », plus bas, viendra dans la vue quand les lignes seront faites.
-    await expect(bulle(page).locator('.parcours-bulle-lieu')).toHaveText('Tu es dans «\u00a0Cadre\u00a0», à l\'onglet «\u00a0Trimestre\u00a0».');
-    expect(await page.evaluate(() => [...document.querySelectorAll('.parcours-section-actuelle')].map((e) => e.textContent.trim()).sort())).toEqual(['Cadre', 'Trimestre']);
-    expect(await page.evaluate(() => Math.round(window.scrollY))).toBe(0);
-    await expect(page.locator('.navigation-principale button.actif').first()).toBeInViewport();
+    // 19 nov. 2026 (« Nous faisons » réécrit avec Grégoire) : la phrase du lieu nomme aussi la SECTION ; la page y
+    // défile (règle b du moteur), son nom juste sous l'en-tête, avec le halo des deux entrées du menu.
+    await expect.poll(() => plat(bulle(page).locator('.parcours-bulle-lieu'))).toBe("Tu es dans « Cadre », à la section « Trimestre » : c'est là que tu donnes les dates de ton trimestre.");
+    expect(await page.evaluate(() => [...document.querySelectorAll('.navigation-principale .parcours-section-actuelle, .sous-navigation .parcours-section-actuelle')].map((e) => e.textContent.trim()).sort())).toEqual(['Cadre', 'Trimestre']);
+    await expect(page.locator('#accordeon-gestion-trimestres .accordeon-header h3')).toHaveClass(/parcours-section-actuelle/);
+    await expect(page.locator('#accordeon-gestion-trimestres .accordeon-header h3')).toBeInViewport();
     for (const sel of ['#v2-nomTrimestre', '#v2-sessionTrimestre', '#v2-anneeTrimestre']) {
         await expect(page.locator(sel)).toBeInViewport();
         await bulleNeCouvrePas(page, sel);
     }
     // La forme de la bulle (règles 2 et 3) : le document d'abord, une ligne par geste, la consigne en dernier.
-    await expect(bulle(page).locator('.parcours-bulle-note').first()).toHaveText('Aie sous la main le calendrier scolaire de ton collège.');
+    expect(await plats(bulle(page).locator('.parcours-bulle-note'))).toEqual(["Cette fois, c'est ta propre classe : ce que tu crées ici reste dans ton application.",
+        'Aie sous la main le calendrier scolaire de ton collège.', 'Le reste du formulaire peut attendre.']);
     await expect(bulle(page).locator('.parcours-bulle-ligne--geste')).toHaveText('Touche «\u00a0Créer le trimestre\u00a0»');
     await expect(bulle(page).locator('.parcours-bulle-nav')).toBeHidden();
     await contourSur(page, '#v2-btnCreerTrimestre');
@@ -325,7 +331,7 @@ test('de « Découvrir » à sa propre classe : « Commencer avec ma classe », 
     // Break-test (9 nov.) : la correction retirée de js/saisie-presences.js → ROUGE ici (date vide).
     await attendreEtape(page, 7, 'Prendre les présences');
     await expect(page.locator('#suivi-saisie')).toBeVisible();
-    await expect(bulle(page).locator('.parcours-bulle-lieu')).toHaveText(/^Tu es dans «\u00a0Suivi\u00a0», à l'onglet «\u00a0.+\u00a0»\.$/);
+    expect(await plat(bulle(page).locator('.parcours-bulle-lieu'))).toBe("Tu es dans « Suivi », à l'onglet « Présences ». Ce qui suit, tu le referas à chaque séance, tes étudiant·es devant toi.");
     expect(await page.evaluate(() => Math.round(window.scrollY)), 'étape 7 : la page s\'ouvre en haut').toBe(0);
     await expect(page.locator('.navigation-principale button.actif').first()).toBeInViewport();
     await expect(page.locator('#date-cours')).toHaveValue('2026-11-10');
@@ -354,12 +360,16 @@ test('de « Découvrir » à sa propre classe : « Commencer avec ma classe », 
     // 14 nov. 2026 (règle 4, vécu aux étapes 7 et 8 : l'en-tête était hors de l'écran) : la bulle dit où l'on est, le
     // menu a son halo, la page est en haut. Des explications : rien ne se grise. Personne n'était absent : la bulle
     // le dit, elle ne fait pas inventer une absence.
-    await expect(bulle(page).locator('.parcours-bulle-lieu')).toHaveText('Tu es dans «\u00a0Suivi\u00a0», à l\'onglet «\u00a0Groupe\u00a0».');
+    expect(await plat(bulle(page).locator('.parcours-bulle-lieu'))).toBe("Tu es dans « Suivi », à l'onglet « Groupe ». Reviens-y avant chaque séance.");
     expect(await page.evaluate(() => [...document.querySelectorAll('.parcours-section-actuelle')].map((e) => e.textContent.trim()).sort())).toEqual(['Groupe', 'Suivi']);
     expect(await page.evaluate(() => Math.round(window.scrollY))).toBe(0);
     await expect(page.locator('.sous-navigation button.actif')).toBeInViewport();
-    await expect(bulle(page).locator('.parcours-bulle-note')).toHaveText(['Reviens-y avant chaque séance.',
-        'Tout le monde était là : un point s\'écartera à la première absence.', 'Pour revoir une étape, touche «\u00a08 sur 8\u00a0».']);
+    expect(await plats(bulle(page).locator('.parcours-bulle-note'))).toEqual([
+        "Chaque point blanc est un·e de tes étudiant·es. La bande « Assiduité » le place selon ses présences : plus il glisse vers la gauche, plus les absences s'accumulent.",
+        "Tout le monde était là : un point s'écartera à la première absence.",
+        "Les bandes « Complétion » et « Performance » sont vides : elles s'allumeront à tes premières évaluations.",
+        "Séance après séance, tu verras qui s'éloigne, sans attendre une main levée.",
+        'Pour revoir une étape, touche « 8 sur 8 ».']);
     expect(await bulle(page).locator('.parcours-bulle-ligne.est-faite').count()).toBe(0);
     await expect(bulle(page).locator('.parcours-bulle-ligne--geste')).toHaveText('Touche «\u00a0Parcours suivant\u00a0», ou «\u00a0Terminer\u00a0»');
     await expect(bulle(page).locator('.parcours-bulle-nav')).toBeHidden();
@@ -439,14 +449,17 @@ test('la porte de l’accueil commence à la première étape non faite ; avant 
 
     await attendreEtape(page, 7, 'Prendre les présences');
     // 14 nov. 2026 : la variante d'avant la première séance, gardée, en lignes (« cours » y est devenu « séance », règle 6).
+    // 19 nov. 2026 : la variante réécrite avec Grégoire, deux explications et un geste ; la phrase du lieu seule.
     const variante = async () => {
-        await expect(bulle(page).locator('.parcours-bulle-note')).toHaveText("Ta première séance n'a pas encore eu lieu.");
-        await expect(bulle(page).locator('.parcours-bulle-ligne')).toHaveText([
-            "Reviens après l'avoir donnée : le parcours reprendra ici, avec ta première saisie de présences",
-            'En attendant, tu peux préparer tes outils dans «\u00a0Conception\u00a0»',
-            'Touche «\u00a0D\'accord\u00a0»']);
+        await expect.poll(() => plat(bulle(page).locator('.parcours-bulle-lieu'))).toBe("Tu es dans « Suivi », à l'onglet « Présences ».");
+        expect(await plats(bulle(page).locator('.parcours-bulle-note'))).toEqual([
+            "Ta première séance n'a pas encore eu lieu. Reviens après l'avoir donnée : le parcours reprendra ici, avec ta première saisie de présences.",
+            "En attendant, tu peux préparer tes grilles d'évaluation dans « Conception »."]);
+        expect(await plats(bulle(page).locator('.parcours-bulle-ligne'))).toEqual(["Touche « D'accord »"]);
     };
     await variante();
+    // Le groupe-cours vient d'être créé dans ce passage : la confirmation le dit, au-dessus du titre.
+    expect(await plat(bulle(page).locator('.parcours-bulle-confirme'))).toBe("C'est fait : ton groupe-cours est créé. La mise en place est terminée.");
     await expect(bulle(page).locator('.parcours-bulle-sortie')).toHaveCount(0);
     await expect(bulle(page).locator('.parcours-bulle-boutons button')).toHaveText(["D'accord"]);
     await expect(page.locator('#parcours-contour')).toBeHidden();
@@ -462,6 +475,8 @@ test('la porte de l’accueil commence à la première étape non faite ; avant 
     await item.locator('.assistance-parcours-bouton').click();
     await attendreEtape(page, 7, 'Prendre les présences');
     await variante();
+    // Repris dans un autre passage : le groupe-cours était déjà là, rien n'est confirmé.
+    await expect(bulle(page).locator('.parcours-bulle-confirme')).toBeHidden();
     // Échap équivaut à « D'accord ».
     await page.keyboard.press('Escape');
     await expect(bulle(page)).toHaveCount(0);

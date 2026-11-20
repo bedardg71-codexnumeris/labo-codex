@@ -280,7 +280,9 @@ body.mode-clair {
     border-bottom: 1px solid var(--bordure-moyenne);
     font-weight: 600;
 }
-.parcours-bulle-confirme { position: relative; padding-left: 1.5em; color: var(--texte-secondaire); }
+/* 18 nov. 2026 (Grégoire, 14 h 11) : la confirmation passe AU-DESSUS du titre, en petit et en vert, comme un fait accompli. */
+.parcours-bulle-confirme { position: relative; padding-left: 1.4em; margin: 0 0 4px; font-size: 12.5px; color: var(--vert-leger); }
+.parcours-bulle-confirme[hidden] { display: none; }
 .parcours-bulle-confirme::before { content: '\2713'; position: absolute; left: 0; top: 0; color: var(--vert-leger); }
 /* La fin (16 nov. 2026, essai sur l'iPad) : « Objectif atteint : … » a la forme de l'objectif ; la phrase de la suite
    est une ligne simple. La première bulle : où est la poignée, en petit et en gris, comme « Pour revoir une étape ». */
@@ -295,15 +297,26 @@ body.mode-clair {
 /* La bulle attend que la page ait fini de bouger (règle b) : cachée, sans quitter sa place ni perdre sa taille. */
 .parcours-bulle.est-en-attente { visibility: hidden; }
 .parcours-bulle-lignes ul { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 5px; }
-.parcours-bulle-ligne { position: relative; padding-left: 1.5em; }
+/* 18 nov. 2026 (Grégoire, 14 h 11) : les lignes d'explication n'ont plus de tiret ; seuls les gestes gardent une marque,
+   la flèche « → » (orange) devant le geste à faire, le crochet quand il est fait (texte gris). Le même tiret sur les
+   explications et sur l'action faisait lire les explications comme des tâches à venir. */
+.parcours-bulle-ligne { position: relative; padding-left: 0; }
 .parcours-bulle-ligne > ul { margin-top: 5px; }
-.parcours-bulle-ligne::before { content: '\2013'; position: absolute; left: 0.15em; top: 0; color: var(--texte-secondaire); }
+.parcours-bulle-ligne--geste,
+.parcours-bulle-ligne--a-faire,
+.parcours-bulle-ligne.est-faite { padding-left: 1.5em; }
+/* 19 nov. 2026 (« Nous faisons » de « Mettre ta classe en place ») : les autres gestes à faire ont la même flèche, sans
+   le gras ni la couleur de la consigne ; faits, le crochet (la règle `.est-faite::before`, plus précise, l'emporte). */
+.parcours-bulle-ligne--geste::before,
+.parcours-bulle-ligne--a-faire::before { content: '\2192'; position: absolute; left: 0.1em; top: 0; color: var(--parcours-geste); }
 .parcours-bulle-ligne.est-faite > .parcours-bulle-ligne-texte { color: var(--texte-secondaire); }
-.parcours-bulle-ligne.est-faite::before { content: '\2713'; left: 0; color: var(--vert-leger); }
-/* Le crochet est pour l'œil : le lecteur d'écran entend « (fait) », une seule fois. */
-@supports (content: 'x' / '') { .parcours-bulle-ligne.est-faite::before { content: '\2713' / ''; } .parcours-bulle-ligne::before { content: '\2013' / ''; } }
+.parcours-bulle-ligne.est-faite::before { content: '\2713'; position: absolute; left: 0; top: 0; color: var(--vert-leger); }
+/* Les marques sont pour l'œil : le lecteur d'écran entend « (fait) », une seule fois. */
+@supports (content: 'x' / '') { .parcours-bulle-ligne.est-faite::before { content: '\2713' / ''; } .parcours-bulle-ligne--geste::before, .parcours-bulle-ligne--a-faire::before { content: '\2192' / ''; } }
 .parcours-bulle-ligne--geste > .parcours-bulle-ligne-texte { font-weight: 600; color: var(--parcours-geste); }
-.parcours-bulle-ligne--geste::before { color: var(--parcours-geste); }
+.parcours-bulle-ligne--geste.est-faite > .parcours-bulle-ligne-texte { font-weight: 400; color: var(--texte-secondaire); }
+/* 19 nov. 2026 : la parenthèse qui termine une consigne, hors du gras (posée par le moteur). */
+.parcours-bulle-ligne-precision { font-weight: 400; }
 
 .parcours-bulle-texte {
     margin: 0;
