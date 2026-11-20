@@ -5133,7 +5133,16 @@ function rendreAttenduCritere(critere, ctx) {
  * 20 clés (`partage-schemas.js`) : il faudrait décrire plus de vingt niveaux distincts, d'échelle en
  * échelle, pour l'atteindre.
  *
- * Textes : proposés par Claude Code le 18 nov., partis tels quels (consigne du lot), corrigeables ici.
+ * « POUR VÉRIFIER » — 19 nov. 2026, lot `autoevaluation-consignes` (ébauche validée par Grégoire, 7 h 52 à
+ * 8 h 03) : sous les cases de niveaux d'un critère par niveaux, une case facultative, une question que l'élève
+ * se pose devant sa copie. Elle vit dans le MÊME objet, déclarée au partage et à l'import :
+ *   critere.descripteurs.pourVerifier = <texte ≤ 5 000>
+ * Elle ne dépend d'aucune échelle : l'écrire ne pose pas `echelleId` (rien ne s'affiche qu'elle fixerait), et
+ * sans `parNiveau` le critère ne peut pas être relu comme un barème. Une case vidée retire sa clé, rien
+ * d'autre. Le PDF des consignes l'imprime sous les deux repères (`pageAutoevaluation`, `export-pdf.js`).
+ *
+ * Textes : proposés par Claude Code le 18 nov. (19 nov. pour « Pour vérifier »), partis tels quels (consigne
+ * du lot), corrigeables ici.
  */
 const MAX_TEXTE_NIVEAU = 5000;
 const TEXTES_DESCRIPTEURS = {
@@ -5148,10 +5157,15 @@ const TEXTES_DESCRIPTEURS = {
     hors: (nom) => `Leur niveau n’existe pas dans l’échelle « ${nom} ». Ils restent gardés et reprennent leur place si tu reviens à leur échelle ; vide une case pour retirer son texte.`,
     horsIntrouvable: 'L’échelle de ces textes n’est plus dans ce trimestre. Choisis-en une : les textes dont le niveau y existe reprendront leur place.',
     // Le critère en points : la mention d'avant (lot 13, validée G. 19 oct. 19 h 29), inchangée.
-    analytique: (nom) => `Les niveaux viennent de ${nom ? `l’échelle « ${nom} »` : 'l’échelle de la grille'} : ici, seul leur texte se modifie.`
+    analytique: (nom) => `Les niveaux viennent de ${nom ? `l’échelle « ${nom} »` : 'l’échelle de la grille'} : ici, seul leur texte se modifie.`,
+    // « Pour vérifier » (19 nov.) : le nom de la case vient du mandat ; l'aide et l'étiquette, de Claude Code.
+    question: 'Pour vérifier',
+    questionAide: 'Facultatif : une question que l’élève se pose devant sa copie',
+    questionAria: 'Pour vérifier : la question que l’élève se pose devant sa copie'
 };
 const REFUS_DESCRIPTEURS = {
-    texteLong: 'Un texte de niveau fait 5 000 caractères au plus'
+    texteLong: 'Un texte de niveau fait 5 000 caractères au plus',
+    questionLongue: 'Une question fait 5 000 caractères au plus'
 };
 
 const _nomEchelle = (e) => String((e && e.nom) || '').trim() || String((e && e.id) || '');
@@ -5215,14 +5229,67 @@ function descripteursAvecEchelle(descripteurs, echelleId) {
     return { descripteurs: Object.assign({}, d, { echelleId, parNiveau: Object.assign({}, _parNiveauDe(d)) }) };
 }
 
+/**
+ * La question « Pour vérifier », écrite ou retirée. Pure : `{ descripteurs }` (un objet NEUF), `{ inchange: true }`
+ * ou `{ refuse }`. Vide : SA clé part, rien d'autre (ni `parNiveau`, ni `echelleId`, ni l'objet). Aucune échelle
+ * posée par ce geste.
+ */
+function descripteursAvecQuestion(descripteurs, texte) {
+    const t = String(texte == null ? '' : texte).trim();
+    if (t.length > MAX_TEXTE_NIVEAU) return { refuse: REFUS_DESCRIPTEURS.questionLongue };
+    const d = _descripteursLus(descripteurs);
+    const present = !!d && Object.prototype.hasOwnProperty.call(d, 'pourVerifier');
+    if (t ? (present && d.pourVerifier === t) : !present) return { inchange: true };
+    const neuf = Object.assign({}, d);
+    if (t) neuf.pourVerifier = t; else delete neuf.pourVerifier;
+    return { descripteurs: neuf };
+}
+
+/** La case « Pour vérifier », sous les niveaux : son nom, puis le champ de sa question (échappée). */
+function _caseQuestionHtml(d, ctx) {
+    const T = TEXTES_DESCRIPTEURS;
+    const q = (d && typeof d.pourVerifier === 'string') ? d.pourVerifier : '';
+    return `
+                <div class="grille-attendu-niveau"><strong>${echapperHtml(T.question)}</strong>
+                    <textarea class="controle-form" rows="2" data-hauteur-auto placeholder="${echapperHtml(T.questionAide)}" aria-label="${echapperHtml(T.questionAria)}"
+                              data-on-change="modifierQuestionVerificationHandler" ${_attrsCritereDescripteurs(ctx)}>${echapperHtml(q)}</textarea>
+                </div>`;
+}
+
 /** Le nom d'un niveau tel qu'il se montre : son nom, sinon son code. */
 const _nomDuNiveau = (n) => String(n.nom || '').trim() || String(n.code);
 
-/** Une case de niveau : son nom, puis le champ de son texte (échappé), avec les attributs de son geste. */
-function _caseDescripteurHtml(par, ctx, code, nom, echelleId) {
+/**
+ * LES SEUILS DE L'ÉCHELLE SUR LEUR NIVEAU — 19 nov. 2026 (décision de Grégoire, 17 h 20 à 17 h 24 ; consigne
+ * `CONSIGNE-LOT-2026-11-19-noms-des-seuils.md`, point 2). La case du niveau qui porte le `seuilSuffisance` de l'échelle
+ * montrée dit « Seuil minimal de réussite » à côté du nom ; celle du `seuilMaitrise`, « Seuil de maîtrise ». Les deux
+ * sur le même niveau : les deux étiquettes. L'étiquette se LIT : elle ne se règle pas ici (Conception › Échelles).
+ * Une échelle sans seuils : aucune étiquette, et la case est celle d'avant, au caractère près.
+ * Les mots viennent de l'écran de l'échelle (`REPERES_ECHELLE`, `echelles.js`), une seule source ; sans lui, rien.
+ * Les codes se comparent comme l'éditeur d'échelles les écrit (sans casse ni espaces). Pure.
+ * @returns {string[]} les étiquettes du niveau, dans l'ordre réussite, maîtrise
+ */
+function etiquettesSeuilsDuNiveau(echelle, code) {
+    const noms = window.REPERES_ECHELLE;
+    if (!echelle || !noms) return [];
+    const norme = (c) => String(c == null ? '' : c).trim().toUpperCase();
+    const cible = norme(code);
+    if (!cible) return [];
+    return ['seuilSuffisance', 'seuilMaitrise'].filter(champ => norme(echelle[champ]) === cible).map(champ => noms[champ]);
+}
+
+/** Le nom d'une case de niveau ; ses étiquettes de seuil à côté, quand le niveau en porte. */
+function _nomDeCaseHtml(nom, etiquettes) {
+    if (!etiquettes || !etiquettes.length) return `<strong>${echapperHtml(nom)}</strong>`;
+    return `<div class="grille-attendu-niveau-entete"><strong>${echapperHtml(nom)}</strong>${etiquettes
+        .map(e => `<span class="grille-attendu-seuil">${echapperHtml(e)}</span>`).join('')}</div>`;
+}
+
+/** Une case de niveau : son nom (et ses seuils), puis le champ de son texte (échappé), avec les attributs de son geste. */
+function _caseDescripteurHtml(par, ctx, code, nom, echelleId, etiquettes) {
     const T = TEXTES_DESCRIPTEURS;
     return `
-                    <div class="grille-attendu-niveau"><strong>${echapperHtml(nom)}</strong>
+                    <div class="grille-attendu-niveau">${_nomDeCaseHtml(nom, etiquettes)}
                         <textarea class="controle-form" rows="3" data-hauteur-auto placeholder="${echapperHtml(T.facultatif)}" aria-label="${echapperHtml(T.caseAria(nom))}"
                                   data-on-change="modifierDescripteurNiveauHandler" ${_attrsCritereDescripteurs(ctx)} data-niveau="${echapperHtml(code)}"${echelleId ? ` data-echelle-id="${echapperHtml(echelleId)}"` : ''}>${echapperHtml(String(par[code] == null ? '' : par[code]))}</textarea>
                     </div>`;
@@ -5238,11 +5305,11 @@ function rendreDescripteursNiveaux(critere, ctx) {
     const niveaux = _niveauxDeLEchelle(echelle);
     const connus = new Set(niveaux.map(n => String(n.code)));
     const hors = Object.keys(par).filter(c => _codeNiveauValide(c) && !connus.has(c));
-    const casesHtml = niveaux.map(n => _caseDescripteurHtml(par, ctx, String(n.code), _nomDuNiveau(n), id)).join('');
+    const casesHtml = niveaux.map(n => _caseDescripteurHtml(par, ctx, String(n.code), _nomDuNiveau(n), id, etiquettesSeuilsDuNiveau(echelle, n.code))).join('');
     return `
                 <h4 class="grille-attendu-titre">${echapperHtml(TEXTES_DESCRIPTEURS.titre)}</h4>${_choixEchelleDescripteurs(echelles, id, echelle, ctx)}${niveaux.length ? `
                 <div class="grille-attendu-niveaux">${casesHtml}
-                </div>` : ''}${_textesGardesHtml(hors, par, echelles, { id, echelle }, ctx)}`;
+                </div>` : ''}${_caseQuestionHtml(critere.descripteurs, ctx)}${_textesGardesHtml(hors, par, echelles, { id, echelle }, ctx)}`;
 }
 
 /**
@@ -5407,6 +5474,13 @@ function modifierDescripteurNiveauHandler(el) {
     const cible = el.dataset.grilleId, index = parseInt(el.dataset.critereIndex, 10);
     return _modifierDescripteursCritere(cible, index, 'texte',
         d => descripteursAvecTexte(d, el.dataset.echelleId || null, el.dataset.niveau, el.value))
+        .then(r => marquerChampRefuse(el, r.refuse));
+}
+
+/** « Pour vérifier » (19 nov.) : par la même file ; un critère en points n'a pas cette case et n'est jamais touché. */
+function modifierQuestionVerificationHandler(el) {
+    const cible = el.dataset.grilleId, index = parseInt(el.dataset.critereIndex, 10);
+    return _modifierDescripteursCritere(cible, index, 'question', d => descripteursAvecQuestion(d, el.value))
         .then(r => marquerChampRefuse(el, r.refuse));
 }
 
@@ -6522,8 +6596,10 @@ window.rendreAttenduCritere = rendreAttenduCritere;   // lot 3b1 (17 oct.) : exp
 // 18 nov. 2026 (lot `descripteurs-grille`) : les descripteurs de niveau — les deux gestes, puis les fonctions pures (bancs)
 window.modifierDescripteurNiveauHandler = modifierDescripteurNiveauHandler;
 window.changerEchelleDescripteursHandler = changerEchelleDescripteursHandler;
+window.modifierQuestionVerificationHandler = modifierQuestionVerificationHandler;   // 19 nov. (lot `autoevaluation-consignes`)
 window.descripteursNiveaux = {
     avecTexte: descripteursAvecTexte, avecEchelle: descripteursAvecEchelle, echelleAffichee: echelleAfficheeDescripteurs,
+    avecQuestion: descripteursAvecQuestion, etiquettesSeuils: etiquettesSeuilsDuNiveau,
     TEXTES: TEXTES_DESCRIPTEURS, REFUS: REFUS_DESCRIPTEURS
 };
 // #1120, lot 1 (20 oct.) : le barème d'un critère analytique — ses gestes (data-action, data-on-change)

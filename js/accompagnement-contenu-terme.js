@@ -314,7 +314,7 @@ const GLOSSAIRE = {
         terme: 'Zone de couleur',
         categorie: 'Tableau de bord',
         etape: 'observation',
-        definition: 'Les paliers qui traduisent A et C en mots et en couleurs : la liste des étudiant·es, les pastilles de « Détails », le contexte du profil et les barres de l’Aperçu. Trois seuils découpent quatre paliers. Ils se règlent dans Labo > Observation > Micro-données ACP > Seuils d’interprétation. P, lui, se lit dans les repères de l’échelle.',
+        definition: 'Les paliers qui traduisent A et C en mots et en couleurs : la liste des étudiant·es, les pastilles de « Détails », le contexte du profil et les barres de l’Aperçu. Trois seuils découpent quatre paliers. Ils se règlent dans Labo > Observation > Micro-données ACP > Seuils d’interprétation. P, lui, se lit dans les seuils de l’échelle.',
         voir: 'Suivi › Étudiant·es · Labo › Observation'
     },
 
@@ -334,7 +334,7 @@ const GLOSSAIRE = {
         terme: 'Niveau RàI',
         categorie: 'Tableau de bord',
         etape: 'observation',
-        definition: 'Le niveau de soutien attribué à un·e étudiant·e selon les signaux du tableau de bord. Niveau 1 : aucune intervention spécifique nécessaire. Niveau 2 : note du cours à ce jour sous le seuil minimal de réussite (le repère « Suffisant à partir de » de l’échelle, la note de passage sans ce repère), ou « Difficulté persistante » — intervention préventive recommandée. Niveau 3 : sous ce seuil avec une difficulté sur un critère de fondation, ou « Non-participation » — accompagnement intensif recommandé. Tant que la note du cours ne s’affiche pas, un signalement diagnostique fixe le niveau que son palier porte. Quand la moyenne du groupe, pour la note du cours à ce jour, est sous ce seuil, une phrase vise l’enseignement universel. Le pattern des derniers artefacts (3 par défaut) nomme le besoin. Quand l’observation SOLO est activée, le pattern lit tous les critères de la grille du dépistage, sauf ceux marqués « Aucun » ; sinon, tous. L’indice de persistance (IPB) nomme la cible de l’intervention ; il ne fixe pas le niveau.',
+        definition: 'Le niveau de soutien attribué à un·e étudiant·e selon les signaux du tableau de bord. Niveau 1 : aucune intervention spécifique nécessaire. Niveau 2 : note du cours à ce jour sous le seuil minimal de réussite (celui de l’échelle, la note de passage sans ce seuil), ou « Difficulté persistante » — intervention préventive recommandée. Niveau 3 : sous ce seuil avec une difficulté sur un critère de fondation, ou « Non-participation » — accompagnement intensif recommandé. Tant que la note du cours ne s’affiche pas, un signalement diagnostique fixe le niveau que son palier porte. Quand la moyenne du groupe, pour la note du cours à ce jour, est sous ce seuil, une phrase vise l’enseignement universel. Le pattern des derniers artefacts (3 par défaut) nomme le besoin. Quand l’observation SOLO est activée, le pattern lit tous les critères de la grille du dépistage, sauf ceux marqués « Aucun » ; sinon, tous. L’indice de persistance (IPB) nomme la cible de l’intervention ; il ne fixe pas le niveau.',
         voir: 'Suivi › Interventions'
     },
 

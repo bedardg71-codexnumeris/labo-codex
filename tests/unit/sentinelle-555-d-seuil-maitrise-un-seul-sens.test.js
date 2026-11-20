@@ -73,6 +73,13 @@ const EMPLOIS_CONNUS = {
     // l'échelle (`echelle.seuilMaitrise`, deux fois : garde + résolution du
     // niveau) pour nommer le niveau « Maîtrisé à partir de » — sur l'échelle.
     'js/cartouches.js': 2,
+    // 19 nov. 2026 (lot autoevaluation-consignes) : la grille d'autoévaluation du PDF des consignes LIT le repère
+    // de l'échelle choisie (`reperesAutoevaluation`) pour retrouver le niveau de la maîtrise — sur l'échelle.
+    // ↻ 20 nov. (retouche 2) : et `autoevaluationSansReperes`, qui dit dans l'aperçu que le repère manque.
+    'js/export-pdf.js': 2,
+    // 19 nov. 2026 (noms des seuils, point 2) : l'éditeur de grilles LIT le code du seuil de maîtrise de l'échelle
+    // montrée pour poser l'étiquette « Seuil de maîtrise » sur sa case de niveau (`etiquettesSeuilsDuNiveau`).
+    'js/grilles.js': 1,
     // (L'exception `js/pratique-notation-v2.js`, code mort, est tombée avec lui : #469, 11 oct. 2026.)
 };
 

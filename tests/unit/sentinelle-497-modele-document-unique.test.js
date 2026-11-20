@@ -192,8 +192,11 @@ describe('#497 · W2 — la duplication ne peut pas repousser', () => {
         // lecteur regarde — où commence ce sur quoi on l'évalue.
         const c = corps('genererPDFCombine');
         expect(c, 'le PDF doit ouvrir une page pour l\'évaluation').toContain('doc.addPage()');
-        expect(c, 'et la conditionner à la présence de consignes')
-            .toContain('modele.blocsInfo.length > 0 && modele.afficheEvaluation');
+        // ↻ 19 nov. 2026 (lot autoevaluation-consignes) : la condition est désormais celle des FEUILLES DU DOCUMENT,
+        // la fonction même de l'aperçu — l'évaluation ouvre sa page dès qu'une feuille la précède (les consignes, ou
+        // la grille d'autoévaluation). Avant : `modele.blocsInfo.length > 0 && modele.afficheEvaluation`.
+        expect(c, 'et la conditionner à une feuille qui la précède, selon la règle de l\'aperçu')
+            .toContain("feuillesDuDocument(modele).indexOf('evaluation') > 0");
     });
 
     it('W2.h Le titre ne peut pas recouvrir les infos du cours', () => {
