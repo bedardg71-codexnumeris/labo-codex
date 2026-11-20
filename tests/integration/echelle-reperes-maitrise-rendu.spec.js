@@ -92,7 +92,7 @@ test('#555 · l\'éditeur d\'échelle rend les deux repères, et l\'aperçu dit 
         const selects = [...editeur.querySelectorAll('select[data-champ^="seuil"]')];
 
         return {
-            titrePresent: editeur.textContent.includes('Repères de maîtrise'),
+            titrePresent: editeur.textContent.includes('Seuils de réussite et de maîtrise'),   // ↻ 19 nov. 2026 : noms des seuils
             champs: selects.map((s) => s.dataset.champ),
             // Les options de chaque liste, dans l'ordre où WebKit les rend.
             options: selects.map((s) => [...s.options].map((o) => o.value)),
@@ -100,7 +100,7 @@ test('#555 · l\'éditeur d\'échelle rend les deux repères, et l\'aperçu dit 
             selection: selects.map((s) => s.value),
             // Le bloc vient APRÈS les niveaux, jamais avant : on désigne des
             // niveaux qui doivent déjà exister.
-            reperesApresNiveaux: editeur.innerHTML.indexOf('Repères de maîtrise')
+            reperesApresNiveaux: editeur.innerHTML.indexOf('Seuils de réussite et de maîtrise')
                 > editeur.innerHTML.indexOf('data-champ="valeurCalcul"'),
             apercu: apercu ? apercu.textContent.replace(/\s+/g, ' ').trim() : '',
 
@@ -207,12 +207,12 @@ test('#555 (e) · l\'éditeur d\'échelle NEUVE rend les deux repères, et un ch
         const editeur = document.getElementById('tableauNiveauxEchelle');
         const selects = () => [...editeur.querySelectorAll('select[data-champ^="seuil"]')];
         const avant = {
-            titrePresent: editeur.textContent.includes('Repères de maîtrise'),
+            titrePresent: editeur.textContent.includes('Seuils de réussite et de maîtrise'),   // ↻ 19 nov. 2026 : noms des seuils
             champs: selects().map((s) => s.dataset.champ),
             handlers: selects().map((s) => s.dataset.onChange),
             avecEchelleId: selects().some((s) => 'echelleId' in s.dataset),
             options: selects().map((s) => [...s.options].map((o) => o.value)),
-            reperesApresNiveaux: editeur.innerHTML.indexOf('Repères de maîtrise')
+            reperesApresNiveaux: editeur.innerHTML.indexOf('Seuils de réussite et de maîtrise')
                 > editeur.innerHTML.indexOf('data-champ="valeurCalcul"'),
             apercu: document.getElementById('apercuEchelleNiveaux').textContent.replace(/\s+/g, ' ').trim()
         };

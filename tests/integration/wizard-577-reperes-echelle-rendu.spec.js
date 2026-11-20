@@ -73,13 +73,13 @@ test('#577 · l\'assistant rend les repères de l\'échelle choisie, et un chang
             const enBase = () => (db.getSync(cleEchelles, []) || []).find((e) => e.id === 'ECH_SPEC_577');
 
             const rendu = {
-                titrePresent: texte().includes('Repères de maîtrise'),
+                titrePresent: texte().includes('Seuils de réussite et de maîtrise'),   // ↻ 19 nov. 2026 : noms des seuils
                 champs: selects().map((s) => s.dataset.champ),
                 handlers: selects().map((s) => s.dataset.onChange),
                 echelleIds: selects().map((s) => s.dataset.echelleId),
                 options: selects().map((s) => [...s.options].map((o) => o.value)),
-                avertissement: texte().includes('Sans ces deux repères'),
-                ditSeuil: /seuil/i.test(texte()),
+                avertissement: texte().includes('Sans ces deux seuils'),
+                ditRepere: /repère/i.test(texte()),   // ↻ 19 nov. 2026 : la règle « jamais « seuil » » est levée ; l'étape ne dit plus « repère »
                 listeRafraichit: contenu.querySelector('select[name="echelleId"]')?.dataset.onChange || null
             };
 
@@ -96,7 +96,7 @@ test('#577 · l\'assistant rend les repères de l\'échelle choisie, et un chang
             const apresMaitrise = {
                 enBase: { s: enBase().seuilSuffisance, m: enBase().seuilMaitrise },
                 selection: selects().map((s) => s.value),
-                avertissement: texte().includes('Sans ces deux repères'),
+                avertissement: texte().includes('Sans ces deux seuils'),
                 apercuZones: ['à travailler', 'suffisant', 'maîtrisé'].every((z) => texte().includes(z))
             };
             // Un refus : la suffisance au-dessus de la maîtrise.
@@ -123,7 +123,7 @@ test('#577 · l\'assistant rend les repères de l\'échelle choisie, et un chang
     expect(resultat.rendu.echelleIds).toEqual(['ECH_SPEC_577', 'ECH_SPEC_577']);
     expect(resultat.rendu.options[0]).toEqual(['', 'W', 'X', 'Y', 'Z']);
     expect(resultat.rendu.avertissement).toBe(true);
-    expect(resultat.rendu.ditSeuil).toBe(false);
+    expect(resultat.rendu.ditRepere).toBe(false);
     expect(resultat.rendu.listeRafraichit).toBe('wizardV2RafraichirEtapeCourante');
 
     // Chaque `change` a écrit en base par le dispatcher, et l'étape re-rendue

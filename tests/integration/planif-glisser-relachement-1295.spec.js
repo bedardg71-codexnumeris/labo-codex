@@ -16,6 +16,14 @@
 //
 // Break-test (19 nov. 2026) : `throttleRAF` remis à sa version d'avant et les
 // appels à `vider()` retirés → ROUGE (voir le rapport du lot).
+//
+// Un CLIC (appui et relâchement, aucun mouvement entre les deux) ne fait rien :
+// ni rangement dans la leçon sous le point cliqué, ni aimantation. C'est la garde
+// `if (!enAttente && !applique) return` de `vider()`. Sans elle, le relâchement
+// rejoue le gestionnaire de mouvement : mesuré le 19 nov. en Chromium, une
+// activité qui recouvre 3,9 % d'une leçon y est rangée par un simple clic, et une
+// activité à 3 px d'un alignement se décale de 3 px. Break-test : garde retirée
+// → les deux essais « un clic » ROUGES.
 import { test, expect } from '@playwright/test';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -209,6 +217,66 @@ for (const f of FENETRES) {
             await page.mouse.move(vers.x, vers.y, { steps: 12 });
             await page.mouse.up();
             await expect.poll(() => parentDe(page, 'g1295E')).toBe('g1295L2');
+        });
+
+        // Le clic qu'on éprouve : appui et relâchement au même point, sans mouvement entre
+        // les deux, à la souris puis au doigt. Rien ne doit changer, ni parent ni position.
+        async function cliquerPuisToucher(page, p) {
+            await page.mouse.move(p.x, p.y);   // avant l'appui : le geste n'écoute pas encore
+            await page.mouse.down();
+            await page.mouse.up();
+            await deuxImages(page);
+            await deuxImages(page);
+            await page.evaluate((p) => {
+                const o = (b) => ({ bubbles: true, cancelable: true, composed: true, clientX: p.x, clientY: p.y,
+                    pointerId: 8, pointerType: 'touch', isPrimary: true, button: 0, buttons: b });
+                const c = document.elementFromPoint(p.x, p.y);
+                c.dispatchEvent(new PointerEvent('pointerdown', o(1)));
+                c.dispatchEvent(new PointerEvent('pointerup', o(0)));
+            }, p);
+            await deuxImages(page);
+            await deuxImages(page);
+        }
+        const boiteDe = (page, id) => page.evaluate((i) => {
+            const b = document.getElementById(i).getBoundingClientRect();
+            return { l: b.left, t: b.top, r: b.right, b: b.bottom, w: b.width, h: b.height };
+        }, id);
+
+        test('un clic sur une activité libre qui recouvre un coin de leçon ne l’y range pas', async ({ page }) => {
+            await poserLeconEtActivite(page);
+            const L = await boiteDe(page, 'g1295L');
+            // Le coin haut-gauche de l'activité sur le coin bas-droit de la leçon : elles ne
+            // se recouvrent que sur 30 × 20 px.
+            await teleporter(page, 'g1295A', L.w - 30, L.h - 20);
+            await immobile(page, 'g1295A');
+            const A = await boiteDe(page, 'g1295A');
+            const recouvre = Math.max(0, Math.min(A.r, L.r) - Math.max(A.l, L.l)) * Math.max(0, Math.min(A.b, L.b) - Math.max(A.t, L.t));
+            expect(recouvre).toBeGreaterThan(0);
+            expect(recouvre / (A.w * A.h)).toBeLessThan(0.5);   // le filet de recouvrement ne la prend pas
+            const p = { x: L.r - 12, y: L.b - 8 };               // dans la leçon, sur l'activité
+            expect(await sous(page, p)).toBe('g1295A');
+            expect(await parentDe(page, 'g1295A')).toBeNull();
+            const avant = await positionDe(page, 'g1295A');
+            await cliquerPuisToucher(page, p);
+            expect(await parentDe(page, 'g1295A')).toBeNull();
+            expect(await positionDe(page, 'g1295A')).toEqual(avant);
+        });
+
+        test('un clic sur une activité libre près d’un alignement ne l’aimante pas', async ({ page }) => {
+            await poserLeconEtActivite(page);
+            const L = await boiteDe(page, 'g1295L');
+            // Bord gauche à 3 px de celui de la leçon (seuil d'aimant : 6 px), sous elle, sans la toucher.
+            await teleporter(page, 'g1295A', 3, L.h + 80);
+            await immobile(page, 'g1295A');
+            const A = await boiteDe(page, 'g1295A');
+            expect(Math.abs(A.l - L.l - 3)).toBeLessThan(0.5);
+            expect(A.t).toBeGreaterThan(L.b);
+            const p = { x: A.l + A.w / 2, y: A.t + A.h / 2 };
+            expect(await sous(page, p)).toBe('g1295A');
+            const avant = await positionDe(page, 'g1295A');
+            await cliquerPuisToucher(page, p);
+            expect(await parentDe(page, 'g1295A')).toBeNull();
+            expect(await positionDe(page, 'g1295A')).toEqual(avant);
         });
     });
 }

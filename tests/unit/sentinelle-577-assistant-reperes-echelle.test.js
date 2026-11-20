@@ -18,6 +18,9 @@ import { chargerScript } from './_helpers/charger-script.js';
 //
 // ⚠ VOCABULAIRE : cette étape ne dit jamais « seuil » — le mot est pris par le
 // dépistage (`seuils-personnels`). Une assertion le garde.
+// ↻ 19 nov. 2026 (décision de Grégoire, 17 h 20 à 17 h 24) : RÈGLE LEVÉE. Les deux repères s'appellent désormais
+// « Seuil minimal de réussite » et « Seuil de maîtrise » partout où une personne les lit ; l'assertion garde
+// l'inverse : l'étape nomme les deux seuils, et ne dit plus « repère ».
 
 function vraisLecteurs() {
     const w = chargerScript('js/profil-etudiant-calculs.js', {
@@ -124,14 +127,14 @@ describe('#577 · l\'assistant pose les repères de maîtrise de l\'échelle cho
 
     it('sans échelle choisie, aucun bloc : les repères désignent des niveaux d\'une échelle', () => {
         const { win } = monter();
-        expect(etape(win)).not.toContain('Repères de maîtrise');
+        expect(etape(win)).not.toContain('Seuils de réussite et de maîtrise');   // ↻ 19 nov. 2026 : noms des seuils (décision de Grégoire)
     });
 
     it('échelle choisie SANS repères : le bloc de l\'éditeur, son handler, et l\'avertissement', () => {
         const { win } = monter();
         win.wizardState.reponses.echelleId = 'ECH_577';
         const html = etape(win);
-        expect(html).toContain('Repères de maîtrise');
+        expect(html).toContain('Seuils de réussite et de maîtrise');   // ↻ 19 nov. 2026 : noms des seuils (décision de Grégoire)
         expect(html).toContain('data-on-change="wizardV2ModifierRepereEchelle"');
         expect(html).toContain('data-echelle-id="ECH_577"');
         expect(html).not.toContain('modifierRepereEchelleHandler');
@@ -141,16 +144,20 @@ describe('#577 · l\'assistant pose les repères de maîtrise de l\'échelle cho
         expect(html.indexOf('value="W"')).toBeLessThan(html.indexOf('value="X"'));
         // L'avertissement dit ce que l'absence coûte, et où poser plus tard.
         const texte = texteVisible(html);
-        expect(texte).toContain('Sans ces deux repères');
+        expect(texte).toContain('Sans ces deux seuils');   // ↻ 19 nov. 2026 : noms des seuils (décision de Grégoire)
         expect(texte).toContain('Conception → Échelles de performance');
         // Le bloc vient après la liste des échelles.
-        expect(html.indexOf('Repères de maîtrise')).toBeGreaterThan(html.indexOf('name="echelleId"'));
+        expect(html.indexOf('Seuils de réussite et de maîtrise')).toBeGreaterThan(html.indexOf('name="echelleId"'));
     });
 
-    it('ne dit jamais « seuil » à l\'écran — le mot appartient au dépistage', () => {
+    // ↻ 19 nov. 2026 : la règle « jamais « seuil » » est levée par la décision des noms des seuils ; l'étape les nomme.
+    it('nomme les deux seuils de l\'échelle, et ne dit plus « repère »', () => {
         const { win } = monter();
         win.wizardState.reponses.echelleId = 'ECH_577';
-        expect(texteVisible(etape(win))).not.toMatch(/seuil/i);
+        const texte = texteVisible(etape(win));
+        expect(texte).toContain('Seuil minimal de réussite');
+        expect(texte).toContain('Seuil de maîtrise');
+        expect(texte).not.toMatch(/repère/i);
     });
 
     it('échelle choisie AVEC repères : les listes les montrent, pas d\'avertissement, l\'aperçu dit les zones', () => {
@@ -160,7 +167,7 @@ describe('#577 · l\'assistant pose les repères de maîtrise de l\'échelle cho
         expect(html).toMatch(/value="X" selected/);
         expect(html).toMatch(/value="Y" selected/);
         const texte = texteVisible(html);
-        expect(texte).not.toContain('Sans ces deux repères');
+        expect(texte).not.toContain('Sans ces deux seuils');   // ↻ 19 nov. 2026 : noms des seuils (décision de Grégoire)
         expect(texte).toContain('à travailler');
         expect(texte).toContain('suffisant');
         expect(texte).toContain('maîtrisé');
@@ -215,13 +222,13 @@ describe('#577 · l\'assistant pose les repères de maîtrise de l\'échelle cho
         const sans = monter();
         sans.win.wizardState.reponses.echelleId = 'ECH_577';
         const recapSans = texteVisible(sans.win.genererRecapitulatif());
-        expect(recapSans).toContain('Repères de maîtrise : non posés');
+        expect(recapSans).toContain('Seuils de réussite et de maîtrise : non posés');   // ↻ 19 nov. 2026 : noms des seuils (décision de Grégoire)
         expect(recapSans).toContain('ni nommer les priorités');
 
         const avec = monter({ echelles: [ECHELLE({ seuilSuffisance: 'X', seuilMaitrise: 'Y' })] });
         avec.win.wizardState.reponses.echelleId = 'ECH_577';
         const recapAvec = texteVisible(avec.win.genererRecapitulatif());
-        expect(recapAvec).toContain('suffisant à partir de X, maîtrisé à partir de Y');
+        expect(recapAvec).toContain('seuil minimal de réussite X, seuil de maîtrise Y');   // ↻ 19 nov. 2026 : noms des seuils (décision de Grégoire)
         expect(recapAvec).not.toContain('non posés');
     });
 

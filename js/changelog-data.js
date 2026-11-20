@@ -21,6 +21,21 @@
 
     var CHANGELOG = [
         {
+            // 1.251 (19 nov. 2026 : la grille d'autoévaluation dans le PDF des consignes, les noms des deux seuils,
+            // « Dupliquer » en copie profonde (#1298), le glisser d'Alignement (#1295)) — titre et quatre lignes
+            // approuvés par Grégoire le 19 nov. 2026 à 22 h 09, mot pour mot ; seule la typographie du fichier
+            // (apostrophe courbe, espaces insécables dans les guillemets) est appliquée.
+            version: '1.251',
+            couleur: 'vert',
+            titre: 'La grille d’autoévaluation dans les consignes',
+            items: [
+                'Le PDF des consignes d’une production peut joindre une grille d’autoévaluation, que l’étudiant·e coche avant de remettre son travail. Pour chaque critère, elle reprend tes descripteurs aux deux seuils de l’échelle et ta question «&nbsp;Pour vérifier&nbsp;», une nouvelle case de l’éditeur de grilles. Elle paraît quand l’échelle a ses deux seuils.',
+                'Les deux seuils de tes échelles s’appellent maintenant «&nbsp;Seuil minimal de réussite&nbsp;» et «&nbsp;Seuil de maîtrise&nbsp;», et l’éditeur de grilles montre ce nom sur la case du niveau qui le porte.',
+                'Dans Conception, «&nbsp;Dupliquer&nbsp;» donne maintenant à la copie ses propres critères, niveaux et commentaires&nbsp;: modifier la copie ne modifie plus l’original.',
+                'Dans Alignement pédagogique, une activité glissée vite dans une leçon s’y range bien, à la souris comme au doigt&nbsp;; elle ne reste plus à côté, ni dans une autre leçon.'
+            ]
+        },
+        {
             // 1.250 (19 nov. 2026 : les descripteurs de niveau dans l'éditeur de grilles, les copies non verrouillées
             // marquées avant l'Export Léa, la bulle 1 de « Découvrir » qui ne bouge plus) — titre et lignes accordés par
             // Grégoire le 19 nov. 2026 ; la deuxième ligne est la sienne, mot pour mot.

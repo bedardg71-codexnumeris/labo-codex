@@ -293,8 +293,11 @@ async function dupliquerProduction(id) {
         // avertissement. Désormais : le titre passe par `nommerCopie`, les deux autres
         // champs sont laissés intacts, la provenance est complète et les métadonnées
         // de partage de la source sont retirées.
+        // ⚠⚠ #1298 (19 nov. 2026) — copie PROFONDE : l'étalement partageait les sous-objets
+        // (`echeancesParGroupe`, `titresBlocs`, `champsPersonnalises`…) avec la source, et
+        // IndexedDB gardait ce partage (mesuré au navigateur). Voir `dupliquerGrilleDepuisSidebar`.
         const copie = {
-            ...production,
+            ...JSON.parse(JSON.stringify(production)),
             id: genererIdUnique('PROD_'),
             titre: nommerCopie(production.titre, productions),
             auteur: BibliothequeUI.obtenirAuteurActif(),

@@ -364,9 +364,10 @@
     // suffisance » n'existe nulle part dans l'éditeur. Recopiés et non lus, parce
     // que ce module se charge sans echelles.js (bancs, auto-contrôle) ; un essai
     // de `partage-echelle-reperes-583.test.js` exige qu'ils restent identiques.
+    // ↻ 19 nov. 2026 (noms des seuils, décision de Grégoire) : les nouveaux noms de l'écran.
     var LIBELLES_REPERES = {
-        seuilSuffisance: 'Suffisant à partir de',
-        seuilMaitrise: 'Maîtrisé à partir de'
+        seuilSuffisance: 'Seuil minimal de réussite',
+        seuilMaitrise: 'Seuil de maîtrise'
     };
 
     function retirerReperesOrphelins(echelles) {
@@ -383,10 +384,11 @@
                     id: echelle.id,
                     champ: champ,
                     code: code,
-                    // Texte validé par Grégoire le 25 sept. 2026.
-                    message: 'Échelle « ' + echelle.nom + ' » : le repère « ' + LIBELLES_REPERES[champ]
+                    // Texte validé par Grégoire le 25 sept. 2026 ; ↻ 19 nov. 2026 (noms des seuils) : « le repère « … » »
+                    // devient « le « … » », « Ce repère » devient « Ce seuil ».
+                    message: 'Échelle « ' + echelle.nom + ' » : le « ' + LIBELLES_REPERES[champ]
                         + ' » désigne le niveau « ' + code + ' », qui n\'existe pas dans cette échelle. '
-                        + 'Ce repère n\'est pas importé ; tu pourras le poser dans l\'éditeur d\'échelle.'
+                        + 'Ce seuil n\'est pas importé ; tu pourras le poser dans l\'éditeur d\'échelle.'
                 });
             });
         });
