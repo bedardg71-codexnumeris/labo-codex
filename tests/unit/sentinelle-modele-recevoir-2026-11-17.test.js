@@ -111,8 +111,13 @@ describe('Le modèle de « Recevoir » : le matériel de la consigne', () => {
         // Les retouches de Cowork (18 nov. 2026, 7 h 40) : la bulle 4 ; et « à l'onglet », que le moteur pose (`lieuSuite`
         // ne garde que la suite de la phrase, mot pour mot dans la consigne).
         const RETOUCHES = {
-            'TEXTES.etape4.lignes[0]': "Sous « Aperçu », sa copie porte maintenant la mention « Spécifique », suivie de « Perspective » : son réglage s'appliquera à l'import"
+            'TEXTES.etape4.lignes[0]': "Sous « Aperçu », sa copie porte maintenant la mention « Spécifique », suivie de « Perspective » : son réglage s'appliquera à l'import",
+            // 19 nov. 2026 (Grégoire, relais du « Nous faisons » de « Recevoir », point 3 : le stylet n'écrit pas) ; relue
+            // ci-dessous dans la consigne du 19 nov.
+            'TEXTES.etape6.lieuSuite': ": c'est là que tu lis la copie et que tu y poses tes marques."
         };
+        expect(lire('plans de travail/CONSIGNE-2026-11-19-nous-faisons-recevoir.md'))
+            .toContain('devient « ' + RETOUCHES['TEXTES.etape6.lieuSuite'] + ' »');
         for (const [ou, texte] of textes) {
             if (RETOUCHES[ou]) expect(texte, ou).toBe(RETOUCHES[ou]);
             else expect(partieC, ou).toContain(texte);

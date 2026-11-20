@@ -135,7 +135,9 @@
         },
         etape6: {
             confirme: "C'est fait : la copie de Loutre Enjouée est ouverte.",
-            lieuSuite: ": c'est là que tu lis la copie et que tu y écris, comme au stylo.",
+            // 19 nov. 2026 (Grégoire, relais du « Nous faisons » de « Recevoir », point 3) : le stylet n'écrit pas, chaque trait
+            // y est un élément à part ; « tu y écris, comme au stylo » devient « tu y poses tes marques ».
+            lieuSuite: ": c'est là que tu lis la copie et que tu y poses tes marques.",
             lignes: [
                 "La palette « Tampons » : un tampon est un signe que tu poses sur la copie ; chacun ajoute sa phrase à la rétroaction de l'étudiant·e",
                 "Ces phrases sont les tiennes : tu les écris une fois, elles servent d'une copie à l'autre et d'un trimestre à l'autre"
@@ -443,10 +445,13 @@
         e.texte = '';
         e.geste = '';
         if (plus.titre) e.titre = plus.titre;
-        if (plus.lieu) e.lieu = function () { return surLeDeuxiemeGroupe() && (typeof plus.lieu === 'function' ? plus.lieu() : true); };
-        if (plus.lieuSuite) e.lieuSuite = plus.lieuSuite;
+        // Le lieu, sa suite et la seconde forme sont ceux du MODÈLE, jamais ceux du parcours (« Nous faisons », 19 nov. 2026,
+        // les déclare sur ses étapes : hérités, ils auraient changé les bulles de « Je regarde »).
+        e.lieu = plus.lieu ? function () { return surLeDeuxiemeGroupe() && (typeof plus.lieu === 'function' ? plus.lieu() : true); } : false;
+        e.lieuSuite = plus.lieuSuite || '';
+        e.secondeForme = null;
         // Le lieu remonte la page en haut ; `amener` y ramène ce que l'étape désigne (le moteur, 16 nov. 2026).
-        if (plus.lieu) e.amener = true;
+        e.amener = !!plus.lieu;
         if (plus.avant) e.avant = plus.avant;
         // `nommeLeContour` déclaré (vrai ou faux) remplace celui du parcours : faux, la ligne qui décrit une zone a sa flèche.
         if (Object.prototype.hasOwnProperty.call(plus, 'nommeLeContour')) e.nommeLeContour = !!plus.nommeLeContour;
