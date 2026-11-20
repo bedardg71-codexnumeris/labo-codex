@@ -1243,7 +1243,8 @@
      * qui nomme le parcours (« Parcours 3 · Évaluer une première production · Nous faisons » : le rang et le nom sont
      * LUS dans le panneau « Assistance »), puis la phrase de la poignée. Ni l'une ni l'autre en vert : le vert reste à
      * ce qui est fait. Une carte qui n'est pas un parcours (`sansRang`) n'en a pas ; la seconde forme non plus (elle
-     * ne garde que son titre et son compteur) ; sur téléphone, pas de phrase de la poignée.
+     * ne garde que son titre et son compteur, et une forme qui ne redit pas l'objectif ne redit pas l'entrée) ; sur
+     * téléphone, pas de phrase de la poignée.
      */
     function ligneDuParcours() {
         var a = window.Assistance, id = String(etat.def.id || '');
@@ -1257,7 +1258,12 @@
     function poserEntree(seconde) {
         var e = etat.elements.entree;
         if (!e) return;
-        var premiere = etat.i === 0 && !etat.def.sansRang && !seconde;
+        // Dans la PREMIÈRE FORME seulement. Une première bulle qui change de forme sans `secondeForme` le dit par son
+        // objectif, qu'elle ne redit pas (le modèle d'« Évaluer », l'assistant ouvert) : l'entrée part avec lui.
+        // Mesuré le 20 nov. 2026 à 1180 × 820 : restée dans cette forme, elle grandissait la bulle, qui couvrait le
+        // choix « Partir d'un modèle » de l'assistant.
+        var objectif = etat.def.objectif;
+        var premiere = etat.i === 0 && !etat.def.sansRang && !seconde && (objectif === undefined || !!texteDe(objectif));
         e.rang.textContent = premiere ? typographier(ligneDuParcours()) : '';
         e.rang.hidden = !e.rang.textContent;
         e.aide.textContent = premiere && !etat.telephone ? typographier(PHRASE_DE_LA_POIGNEE) : '';

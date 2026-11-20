@@ -7,7 +7,8 @@ import {
     releve, ecarts, horsDeLaDemo, DE_LA_DEMO, peuplerUnTrimestreReel, faireLaModelisation, lireBulle
 } from './harness/deux-temps-de-banc.js';
 import { etiqueter } from './harness/classe-de-banc.js';
-import { faireLeModeleDEvaluer } from './harness/recevoir-modele-de-banc.js';
+import { flecheVers, flecheVisant } from './harness/fleches-de-banc.js';
+import { faireLeModeleDEvaluer, voirLeParcoursPuisJeRegarde } from './harness/recevoir-modele-de-banc.js';
 
 // =======================================================================
 // LOT « JE REGARDE » D'« ÉVALUER UNE PREMIÈRE PRODUCTION » (18 NOVEMBRE 2026)
@@ -73,6 +74,10 @@ function juge(page, t, m, { rangeesAMain }) {
             await lignesContiennent(page, [t.etape1.phrase].concat(t.etape1.lignes), ctx);
             await consignes(page, t.etape1.consignes, ctx);
             await expect(bulle(page).locator('.parcours-bulle-aide')).toHaveText(/déplacer cette bulle par sa poignée/);
+            // 20 nov. 2026 (A1, A2) : au-dessus du titre, la ligne du parcours, puis la phrase de la poignée.
+            await expect(bulle(page).locator('.parcours-bulle-identite')).toHaveText(/^Parcours 3 · Évaluer une première production · Je regarde$/);
+            expect(await bulle(page).evaluate((b) => [...b.children].filter((e) => !e.hidden).slice(0, 3).map((e) => e.className.split(' ')[0])),
+                'la ligne du parcours, la poignée, puis le titre').toEqual(['parcours-bulle-identite', 'parcours-bulle-aide', 'parcours-bulle-tete']);
             await gesteDesigne(page, '#conception-pratiques-notation [data-action="creerNouvellePratique"]', ctx);
             break;
         case 1.5:
@@ -81,6 +86,16 @@ function juge(page, t, m, { rangeesAMain }) {
             await consignes(page, t.etape1.devient.consignes, ctx);
             await expect(bulle(page).locator('.parcours-bulle-objectif')).toHaveCount(0);
             await expect(bulle(page).locator('.parcours-bulle-lieu')).toHaveCount(0);
+            // 20 nov. 2026 : l'entrée (la ligne du parcours, la poignée) part avec l'objectif. Restée dans cette forme, elle
+            // grandissait la bulle, qui couvrait « Partir d'un modèle » à 1180 × 820 (mesuré : la bulle de 276 à 771 px
+            // de haut, le bouton radio à 278 px ; le geste du banc tombait sur la bulle).
+            await expect(bulle(page).locator('.parcours-bulle-identite')).toBeHidden();
+            await expect(bulle(page).locator('.parcours-bulle-aide')).toBeHidden();
+            expect(await page.evaluate(() => {
+                const b = document.getElementById('parcours-bulle').getBoundingClientRect();
+                const r = document.querySelector('#modalWizardPratiqueV2 input[name="porteEntree"][value="modele"]').getBoundingClientRect();
+                return !(r.right <= b.left || b.right <= r.left || r.bottom <= b.top || b.bottom <= r.top);
+            }), 'la bulle ne couvre pas le choix « Partir d’un modèle »').toBe(false);
             await contourSur(page, '#modalWizardPratiqueV2 .wizard-v2-radio-card:has(input[name="porteEntree"][value="modele"])');
             break;
         case 2:
@@ -141,6 +156,15 @@ function juge(page, t, m, { rangeesAMain }) {
                 const creer = page.locator('#materiel-dissection [data-action="materielDissection.creer"]');
                 if (await creer.count()) await expect(creer).toBeDisabled();
             }
+            // C1 (20 nov. 2026) : pendant l'étiquetage du modèle, les flèches que la page trace de la légende vers les
+            // parties étiquetées sont masquées ; il ne reste que la flèche du geste en cours, celle de la bulle. La
+            // légende, elle, reste : c'est là qu'on prend l'étiquette.
+            expect(await page.evaluate(() => ({
+                marque: document.body.classList.contains('parcours-etiquetage-du-modele'),
+                flechesDeLaPage: getComputedStyle(document.getElementById('dissection-fleches')).display,
+                legende: getComputedStyle(document.getElementById('dissection-legende')).display !== 'none',
+                traits: document.querySelectorAll('#dissection-traits > *').length
+            })), ctx + ' : les flèches de la page sont masquées pendant l’étiquetage du modèle').toMatchObject({ marque: true, flechesDeLaPage: 'none', legende: true });
             // « Rigueur », seule : la bulle devient la suivante ; ses confirmations, à mesure.
             await consignes(page, t.etape5.rigueur.consignes, ctx + ', Rigueur');
             await lignesContiennent(page, t.etape5.rigueur.lignes, ctx);
@@ -158,6 +182,11 @@ function juge(page, t, m, { rangeesAMain }) {
             await consignes(page, t.etape5.lecture.consignes, ctx);
             await lignesContiennent(page, t.etape5.lecture.lignes, ctx);
             await gesteDesigne(page, '#materiel-dissection [data-action="materielDissection.creer"]', ctx);
+            // C1 (20 nov. 2026) : avant « Créer ma grille », l'étiquetage du modèle est fini ; les flèches de la page
+            // reviennent, et la bulle a une flèche vers chaque chose qu'elle nomme (la grille refaite, son résumé, ce
+            // qu'elle dit des niveaux).
+            expect(await page.evaluate(() => document.body.classList.contains('parcours-etiquetage-du-modele')), ctx + ' : la marque de l’étiquetage est retirée').toBe(false);
+            for (const cible of ['#dissection-comprise', '#dissection-constats', '#dissection-logique']) await flecheVisant(page, cible, ctx + ', ce que la bulle nomme');
             // La lecture tient la grille pour jugée par niveaux : ni « Ce que vaut chaque niveau », ni choix des points.
             // Break-test (18 nov. 2026) : `tenuePourNiveaux` rendant false (js/materiel-dissection.js) → ROUGE ici (« une
             // grille en points »). Rétabli → vert.
@@ -189,6 +218,12 @@ function juge(page, t, m, { rangeesAMain }) {
             await lieu(page, 'Conception', 'Productions', t.etape7.lieuSuite, ctx);
             await consignes(page, t.etape7.consignes, ctx);
             await gesteDesigne(page, '#conception-productions [data-action="creerNouvelleProduction"]', ctx);
+            // C3 (20 nov. 2026) : pendant un parcours, la liste « À vérifier » de la page « Productions » est repliée
+            // (son titre reste, ses lignes attendent). La pratique du modèle est par standards : la zone y est.
+            expect(await page.evaluate(() => {
+                const z = document.getElementById('zone-avertissements-productions'), ul = z && z.querySelector('ul');
+                return !z || z.classList.contains('u-hide') ? 'absente' : (ul && getComputedStyle(ul).display === 'none' ? 'repliée' : 'dépliée');
+            }), ctx + ' : « À vérifier »').not.toBe('dépliée');
             break;
         case 7.1:
             // Le menu « Type », ouvert par la personne : pas de « Remplir » avant.
@@ -221,6 +256,21 @@ function juge(page, t, m, { rangeesAMain }) {
             // Cinq lignes montrent ce dont elles parlent : au-delà de trois cibles, le moteur n'en trace qu'une flèche, vers leur
             // union ; la pulsation reste sur la case.
             await contourSur(page, '.echeance-simple-ligne');
+            // C4 (20 nov. 2026) : le halo de la case des consignes prend la largeur de la case, pas celle de la page.
+            expect(await page.evaluate(() => document.getElementById('parcours-contour').getBoundingClientRect().width / document.documentElement.clientWidth),
+                ctx + ' : le halo de « Consignes transmises » n’a pas la largeur de la page').toBeLessThan(0.5);
+            // C4 : le bloc « Grille d'autoévaluation » s'ouvre à la hauteur de son contenu (les seuils de réussite et de
+            // maîtrise ne sont plus sous le bord : rien ne défile dans la zone).
+            expect(await page.evaluate((titre) => {
+                const bloc = [...document.querySelectorAll('#champsPersonnalisesListe .champ-perso:not([data-ancre])')].find((b) => (b.querySelector('.champ-perso-titre') || {}).value === titre);
+                const z = bloc && bloc.querySelector('.champ-perso-contenu');
+                return z ? { cache: z.scrollHeight - z.clientHeight, lignes: z.value.split('\n').length } : null;
+            }, m.production.autoevaluation.titre), ctx + ' : la zone de l’autoévaluation montre tout son contenu').toMatchObject({ cache: expect.any(Number) });
+            expect(await page.evaluate((titre) => {
+                const bloc = [...document.querySelectorAll('#champsPersonnalisesListe .champ-perso:not([data-ancre])')].find((b) => (b.querySelector('.champ-perso-titre') || {}).value === titre);
+                const z = bloc.querySelector('.champ-perso-contenu');
+                return z.scrollHeight - z.clientHeight;
+            }, m.production.autoevaluation.titre), ctx + ' : rien de l’autoévaluation n’est sous le bord').toBeLessThanOrEqual(2);
             await expect(page.locator('#productionObjectif')).toHaveValue(m.production.objectif);
             await expect(page.locator('#productionTache')).toHaveValue(m.production.tache);
             await expect(page.locator('#productionDetailTache')).toHaveValue(m.production.detailTache);
@@ -246,7 +296,11 @@ function juge(page, t, m, { rangeesAMain }) {
             await lieu(page, 'Suivi', 'Groupe', t.etape10.lieuSuite, ctx);
             await lignesContiennent(page, t.etape10.lignes, ctx);
             expect(await texteDe(page, '.parcours-bulle-atteint')).toEqual([aPlat(t.objectifAtteint)]);
-            await expect(bulle(page).locator('.parcours-bulle-boutons button')).toHaveText(['Le refaire avec ma classe', 'Voir le parcours suivant', 'Terminer']);
+            // 20 nov. 2026 (A3) : « Voir le parcours 4 » remplace « Voir le parcours suivant », et la bulle nomme la suite.
+            await expect(bulle(page).locator('.parcours-bulle-boutons button')).toHaveText(['Le refaire avec ma classe', 'Voir le parcours 4', 'Terminer']);
+            await expect(bulle(page).locator('.parcours-bulle-suite-suggeree')).toHaveText(/^Suite suggérée\s: le parcours 4, «\sRecevoir les productions, rendre tes rétroactions\s»\.$/);
+            // C5 (20 nov. 2026) : une flèche vers le point blanc de Yack Amical dans la bande « Performance (P) ».
+            await flecheVers(page, '#section-suivi .barre-indicateur .barre-etudiant[data-da="' + m.etudiantEvalue.da + '"]', 'étape 10, le point de Yack Amical');
             expect((await lireBulle(page)).principal, 'trois boutons de même poids').toEqual([]);
             await expect(bulle(page).locator('.parcours-bulle-sortie')).toHaveCount(0);
             await expect(bulle(page).locator('.parcours-bulle-revue')).toHaveText(/Pour revoir une étape, touche «\s10 sur 10\s»\./);
@@ -270,7 +324,8 @@ for (const [L, H] of ORIENTATIONS) {
         await boutonModele(page, 'classe').click();
         await faireLaModelisation(page);
         await page.setViewportSize({ width: L, height: H });
-        await bulle(page).getByRole('button', { name: 'Voir le parcours suivant', exact: true }).click();
+        // 20 nov. 2026 (A3) : la fin ne lance plus rien ; « Voir le parcours 3 », puis « Je regarde » dans le panneau.
+        await voirLeParcoursPuisJeRegarde(page, 3, 'evaluer');
         const m = await page.evaluate(() => JSON.parse(JSON.stringify(window.ParcoursEvaluer.materiel)));
         const t = await page.evaluate(() => JSON.parse(JSON.stringify(window.ParcoursEvaluer.textes)));
         expect(m.grille.nom).toBe('Grille générale à 4 critères');
@@ -351,7 +406,7 @@ test('C · 820 × 1180 : « Plausibilité » et « Nuance » finies à la main ;
     await ouvrirPanneau(page);
     await boutonModele(page, 'classe').click();
     await faireLaModelisation(page);
-    await bulle(page).getByRole('button', { name: 'Voir le parcours suivant', exact: true }).click();
+    await voirLeParcoursPuisJeRegarde(page, 3, 'evaluer');
     const m = await page.evaluate(() => JSON.parse(JSON.stringify(window.ParcoursEvaluer.materiel)));
     const r = await faireLeModeleDEvaluer(page, { rangeesAMain: true, surEtape: async (n) => {
         if (n !== 5.5) return;

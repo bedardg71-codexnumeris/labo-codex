@@ -461,7 +461,8 @@ describe('les retouches de l’essai sur l’iPad (16 nov. 2026), telles que son
         // gris (le vert reste à ce qui est fait), toujours absente sur téléphone.
         const entree = tranche(MOTEUR, 'function poserEntree(seconde) {', '\n    }\n');
         expect(entree).toContain("e.aide.textContent = premiere && !etat.telephone ? typographier(PHRASE_DE_LA_POIGNEE) : '';");
-        expect(entree).toContain('var premiere = etat.i === 0 && !etat.def.sansRang && !seconde;');
+        // Dans la première forme seulement : ni dans la seconde, ni dans une forme qui ne redit pas l'objectif.
+        expect(entree).toContain('var premiere = etat.i === 0 && !etat.def.sansRang && !seconde && (objectif === undefined || !!texteDe(objectif));');
         const rendre = tranche(MOTEUR, 'function rendreBulle(opts) {', 'b.appendChild(tete);');
         expect(rendre.indexOf("rang.className = 'parcours-bulle-identite';")).toBeLessThan(rendre.indexOf("aide.className = 'parcours-bulle-aide';"));
         expect(rendre.indexOf("aide.className = 'parcours-bulle-aide';")).toBeLessThan(rendre.indexOf("confirme.className = 'parcours-bulle-confirme';"));
