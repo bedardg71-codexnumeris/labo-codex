@@ -17,6 +17,7 @@
 // consigne reste dans son texte (le banc la recolle par une espace), et un geste qui n'est pas la consigne n'a pas de flèche.
 
 import { describe, it, expect } from 'vitest';
+import { sectionDeLaConsigne } from './_helpers/fin-des-parcours-2026-11-20.js';
 import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -175,7 +176,15 @@ describe('« Monter ton cours », « Nous faisons » : les bulles, mot pour mot 
         expect(e.titre).toBe(r.titre);
         const conf = r.premiere.filter((l) => l.genre === 'C').map((l) => l.texte);
         expect(typeof e.confirme === 'function' ? e.confirme() : (e.confirme || ''), 'la confirmation').toBe(conf[0] || '');
-        const attendues = r.premiere.filter((l) => l.genre === 'E' || l.genre === 'G');
+        let attendues = r.premiere.filter((l) => l.genre === 'E' || l.genre === 'G');
+        if (n === 7) {
+            // G2 (20 nov. 2026, décision de Grégoire ; plans de travail/CONSIGNE-2026-11-20-essai-parcours.md) : le bouton
+            // d'« Alignement » s'appelle « Télécharger le prompt… ». La bulle cite le bouton : elle suit son nom.
+            expect(sectionDeLaConsigne('G2.')).toContain('de même celui d\'« Alignement » (`#planif-btn-modele-ia`, « Télécharger un modèle… »)');
+            expect(attendues.some((l) => l.texte.includes('« Télécharger un modèle… »')), 'le relais du 19 nov. porte l’ancien nom').toBe(true);
+            attendues = attendues.map((l) => Object.assign({}, l, { texte: l.texte.replace('« Télécharger un modèle… »', '« Télécharger le prompt… »') }));
+            expect(readFileSync(new URL('../../index.html', import.meta.url), 'utf8')).toContain('id="planif-btn-modele-ia">Télécharger le prompt&hellip;</button>');
+        }
         let code = lignesDuCode(e);
         // La dernière bulle : sa consigne est celle du moteur (« Touche « Terminer » », que le moteur récrit en deux suites).
         if (n === 7) {

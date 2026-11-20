@@ -29876,6 +29876,19 @@ body.mode-clair {
     font-size: 0.9rem;
 }
 
+/* LA DATE D'ÉCHÉANCE (décision de Grégoire, 20 nov. 2026) : le champ à côté de son étiquette, plus étroit ; « à
+   planifier » tant qu'il est vide ; la case « Consignes transmises » dessous ; la note du portfolio à droite. */
+.echeance-simple { display: grid; grid-template-columns: minmax(0, auto) 1fr; gap: 20px; align-items: start; }
+.echeance-rangee { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; }
+.echeance-rangee > label { margin: 0; }
+.echeance-rangee > .echeance-date { width: 11.5rem; max-width: 100%; flex: 0 0 auto; }
+.echeance-vide { color: var(--gris-moyen); font-size: 0.85rem; font-style: italic; }
+.echeance-vide[hidden] { display: none; }
+/* L'indicateur de séance (« 2e séance de la semaine 3 ») et l'avis d'un jour sans cours : sous la rangée. */
+.echeance-rangee > .info-seance-echeance { flex: 1 0 100%; }
+/* « Préparer le PDF », au pied des consignes (même décision). */
+.prod-preparer-pdf { display: flex; justify-content: flex-start; }
+
 .prod-marqueur-diagnostique-aide {
     display: block;
     margin-top: 4px;

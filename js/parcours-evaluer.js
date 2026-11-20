@@ -234,7 +234,8 @@
     function caseConsignes() {
         var c = el('productionEcheanceAssignee');
         if (!c) return qs('#listeEcheancesGroupes .echeance-gc-checkbox');
-        return c.closest('label') || c;
+        // La rangée de la case est à sa largeur (`inline-flex`, js/productions.js) : la case, son étiquette, son aide.
+        return c.closest('.echeance-simple-ligne') || c;
     }
 
     // ---------- L'évaluation ----------

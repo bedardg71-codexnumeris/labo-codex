@@ -644,7 +644,7 @@
                     note("le niveau cognitif de chaque bloc, dans l'Inspecteur, pour que tes activités et tes évaluations visent le même niveau d'exigence"),
                     note("ta démarche, comme l'enseignement explicite, si c'est la tienne"),
                     note("le « Planificateur », qui montre toutes tes leçons semaine par semaine ; y glisser une leçon change sa semaine, et donc ses dates"),
-                    note("Dans « Actions », « Exporter le plan… » en tire ton plan de cours, et « Télécharger un modèle… » te permet de faire relire ta carte par l'IA de ton choix, sans qu'elle soit modifiée."),
+                    note("Dans « Actions », « Exporter le plan… » en tire ton plan de cours, et « Télécharger le prompt… » te permet de faire relire ta carte par l'IA de ton choix, sans qu'elle soit modifiée."),
                     note("Dans « Consulter la bibliothèque », « Garder dans ma bibliothèque » la reprend d'un trimestre à l'autre, et « Exporter » en fait un fichier que tes collègues peuvent importer."),
                     // « Objectif atteint : … », « Pour revoir une étape… » et la phrase de la suite : posés par le moteur.
                     // Quand la bulle offre aussi « Parcours suivant », le moteur dit les deux suites (sa consigne de la fin).
