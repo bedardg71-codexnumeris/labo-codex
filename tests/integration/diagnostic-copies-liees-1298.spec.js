@@ -53,7 +53,12 @@ const photoBase = (page) => page.evaluate(async () => JSON.stringify((await db._
 async function verifier(page) {
     await page.evaluate(() => naviguerVers('reglages', 'donnees'));
     const accordeon = page.locator('#accordeon-maintenance');
-    if (await accordeon.evaluate((el) => el.classList.contains('ferme'))) await accordeon.locator('.accordeon-header').tap();
+    // Assemblage de la release (20 nov. 2026) : l'en-tête s'ouvre par un CLIC, comme dans les autres bancs. Touché
+    // (`.tap()`), il laissait l'accordéon fermé sous WebKit Linux (GitHub, run 44649923269 : les six essais rouges, le
+    // bouton rogné, « l'en-tête intercepte ») : un toucher sur une `div` n'y émet pas toujours de `click`. Non vérifié
+    // sous WebKit dans le conteneur. Le geste jugé, le toucher du bouton, reste un toucher.
+    if (await accordeon.evaluate((el) => el.classList.contains('ferme'))) await accordeon.locator('.accordeon-header').click();
+    await expect(accordeon, 'l’accordéon « Maintenance » est ouvert').not.toHaveClass(/\bferme\b/);
     const bouton = page.locator('#section-copies-liees [data-action="verifierCopiesLiees"]');
     await bouton.scrollIntoViewIfNeeded();
     await expect(bouton).toBeVisible();
