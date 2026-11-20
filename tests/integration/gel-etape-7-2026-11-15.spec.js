@@ -66,14 +66,18 @@ for (const N of [24, 36]) {
         const defilee = await fleches(page);
         expect(defilee.versLaColonne, 'flèches vers la colonne Présence, après 240 px de défilement').toBe(1);
         expect(defilee.total, 'les flèches ne se multiplient pas au défilement').toBeLessThanOrEqual(ouverture.total);
-        // Le halo a suivi le bouton.
-        const ecart = await page.evaluate(() => {
+        // Le halo a suivi le bouton. 20 nov. 2026 : lu une seule fois, l'écart valait parfois 1 ou 2 px (sept passages
+        // rouges sur quatorze sur le lot « essai des parcours », un sur dix sur l'arbre d'avant). Mesuré : après le
+        // défilement, le bouton glisse encore de 1,7 px pendant quelques images (267,3 → 269 px, la page à 240 px) et le
+        // halo le rejoint au passage suivant de la sonde. Le banc attend donc que le halo soit SUR le bouton, toujours
+        // à 0 px ; un halo resté en arrière rougit comme avant.
+        const lireEcart = () => page.evaluate(() => {
             const c = document.getElementById('parcours-contour'), b = document.getElementById('btnVerrouillerSaisiePresences');
             if (!c || c.hidden) return 'absent';
             const a = c.getBoundingClientRect(), d = b.getBoundingClientRect();
             return Math.round(Math.abs((a.top + a.bottom) / 2 - (d.top + d.bottom) / 2));
         });
-        expect(ecart, 'le halo suit « Verrouiller la saisie » au défilement').toBe(0);
+        await expect.poll(lireEcart, { message: 'le halo suit « Verrouiller la saisie » au défilement', timeout: 2000 }).toBe(0);
     });
 }
 

@@ -345,4 +345,6 @@ pas Safari sur l'iPad. G5 est la porte due. Le reste est listé dans la porte te
 
 ## L'aperçu
 
-<!-- APERCU -->
+PR n° 43, en brouillon, « APERÇU, ne pas fusionner » : https://github.com/bedardg71-codexnumeris/labo-codex/pull/43
+L'adresse de l'aperçu est celle que Netlify pose dans cette PR (« Deploy Preview ») : je ne l'ai pas lue dans cette
+session, je ne l'écris donc pas ici.
