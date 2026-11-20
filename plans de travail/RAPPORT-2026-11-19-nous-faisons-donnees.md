@@ -131,7 +131,10 @@ simple, les flèches, le moteur) : 88 essais, **77 verts, 7 rouges, 4 sautés** 
 
 ## 7. L'aperçu
 
-À COMPLÉTER.
+PR d'aperçu n° 39 (brouillon), « APERÇU, ne pas fusionner — « Mettre tes données à l'abri », Nous faisons : les quatre
+bulles du 19 nov. » : https://github.com/bedardg71-codexnumeris/labo-codex/pull/39. Aperçu Netlify :
+https://deploy-preview-39--codexnumeris-051225.netlify.app (l'adresse que Netlify donne aux PR de ce dépôt). Commit de tête
+du lot : `1e1785c6`, puis ce rapport.
 
 ## 8. Ce qui attend une décision
 
