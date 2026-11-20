@@ -7,6 +7,35 @@
 
 ---
 
+## 20 NOV. 2026, NUIT (Claude Code, session de nuit B, dans le nuage) : **TROIS LOTS, RIEN SUR `main` : LE GLISSER D'ALIGNEMENT (FAIT EN DOUBLE DE LA PR N° 34), « NOUS FAISONS » ET « JE REGARDE » DE « MONTER TON COURS » EN APERÇU** ; `main` n'a pas bougé (sauf ce relais)
+
+Mandat : session de nuit B, 19 au 20 nov. (Grégoire, relayé de Cowork) ; textes sur `origin/lot/textes-parcours-nuit` (`afb106679`). **Le travail vit sur ses branches, aucune n'est fusionnée** ; aucune release, aucun bump, rien au changelog.
+
+- **Lot 1, le glisser d'Alignement (#1295) : FAIT AILLEURS, ARRÊTÉ AU PUSH.** Une session du Mac (mandat d'un seul lot) l'a livré pendant la nuit : `lot/glisser-alignement`, tête `29e30e49` (code à `465c2970`), PR n° 34, aperçu https://deploy-preview-34--codexnumeris-051225.netlify.app, mesuré sous WebKit. Le travail de cette session-ci, de même forme, est gardé sans PR pour comparaison : `lot/glisser-alignement-nuit-b`, tête `65282df6` (rapport `RAPPORT-2026-11-19-glisser-alignement-nuit-b.md` : recommandé, garder la PR n° 34 ; à y reprendre au besoin, une sentinelle Vitest et cinq essais de plus).
+- **Lot 2, « Nous faisons » de « Monter ton cours » : LIVRÉ EN APERÇU.** `lot/nous-faisons-cours`, tête `edba41b3`, PR n° 36 (brouillon), aperçu https://deploy-preview-36--codexnumeris-051225.netlify.app (prêt, vérifié chez Netlify). Base : `claude/ecstatic-brown-urn6v8` (`ebc9a9ad`), puis `main` (1.250.0), puis la PR n° 34 (`465c2970`). Attend : le « Planificateur » au doigt ne change pas la semaine d'une leçon (mesure a, sous Chromium ; Cowork tranchera). Rapport : `RAPPORT-2026-11-19-nous-faisons-cours.md`.
+- **Lot 3, « Je regarde » de « Monter ton cours » : LIVRÉ EN APERÇU, EN PARTIE BLOQUÉ.** `lot/je-regarde-cours`, tête `a28b133e`, PR n° 40 (brouillon), aperçu https://deploy-preview-40--codexnumeris-051225.netlify.app. Base : la tête du lot 2, puis `lot/je-regarde-evaluer` (PR n° 30). Bloqué par la mesure (c) : une activité d'une autre leçon ne sert pas l'objectif de la première ; « Ces activités servent toutes le même objectif. » ne tient pas (gardée, signalée) ; la seconde forme de la bulle 6 n'est pas codée. Refus du modèle provisoire, à soumettre à Grégoire. Rapport : `RAPPORT-2026-11-19-je-regarde-cours.md`.
+- **À annuler avant toute fusion** : `4c36db45` (hérité de `claude/ecstatic-brown-urn6v8`) et `52a12f6d` (ouvre « Monter ton cours »), « BRANCHE SEULEMENT ».
+- **Avec la session A** : ses lots ajoutent au moteur la flèche devant chaque geste de premier niveau et la parenthèse finale hors du gras, deux traits qui manquent aux lots 2 et 3 (signalés à leurs rapports) ; ils leur viendront à la fusion (inférence, à vérifier alors). Les deux sessions touchent `js/assistance.js` (`PARCOURS_OUVERTS`) et les jetons d'`index.html` : conflits attendus à la fusion.
+- **Jugé** : Vitest complet vert à chaque push (crochet) ; Playwright Chromium sur les fichiers liés, aux deux tailles, rouges départagés sur la base (aucun attribuable aux lots) ; break-tests faits. **WebKit** : le workflow ne juge Playwright qu'au push sur `main` ou à la demande ; lancé à la demande, run 44647609402 (lot 2) et le run du 20 nov. ~01 h UTC sur `lot/je-regarde-cours` (lot 3), **verdicts non rendus au moment de ce relais**.
+- **Non vérifié** : Safari et l'iPad (l'iPad en portrait : la part visible de la carte est étroite, au rapport du lot 3) ; pas de relecture croisée.
+
+---
+
+## 20 NOV. 2026, NUIT (Claude Code, session de nuit A, dans le nuage) : **TROIS « NOUS FAISONS » POUSSÉS, NON FUSIONNÉS — « METTRE TA CLASSE EN PLACE », « RECEVOIR LES PRODUCTIONS », « METTRE TES DONNÉES À L'ABRI »** — trois PR d'aperçu ; `main` n'a pas bougé (sauf ce relais)
+
+Mandat : session de nuit A (19 au 20 nov.), relayé par Grégoire ; textes sur `origin/lot/textes-parcours-nuit` (`afb106679`). **Le travail vit sur trois branches empilées** (chacune part de la précédente : la dernière porte les trois) ; aucune fusion, aucune release, aucun bump, aucun changelog.
+
+- **Parcours 2** : `lot/nous-faisons-classe`, tête `76aa59b1`, PR n° 35 (brouillon), aperçu https://deploy-preview-35--codexnumeris-051225.netlify.app — **livré** ; une décision attend (à 1180 × 820, la bulle 1 couvre « Année » et « La fin des cours réguliers » ; un banc reste rouge). Rapport : `plans de travail/RAPPORT-2026-11-19-nous-faisons-classe.md`.
+- **Parcours 4** : `lot/nous-faisons-recevoir` (part de la précédente), tête `60dd7b1d`, PR n° 38 (brouillon), aperçu https://deploy-preview-38--codexnumeris-051225.netlify.app — **livré** ; une décision attend (la bulle 2 ne tient plus sous les colonnes et couvre « Importer » ; deux essais rouges). Rapport : `plans de travail/RAPPORT-2026-11-19-nous-faisons-recevoir.md`.
+- **Parcours 6** : `lot/nous-faisons-donnees` (part de la précédente), tête `e259204e`, PR n° 39 (brouillon), aperçu https://deploy-preview-39--codexnumeris-051225.netlify.app — **livré** ; une décision attend (la bulle 3 dépasse le bas de l'écran ; cinq essais rouges). Rapport : `plans de travail/RAPPORT-2026-11-19-nous-faisons-donnees.md`.
+- **À annuler avant toute fusion** : `4c36db45` (hérité de `claude/ecstatic-brown-urn6v8`) et `b6eac399` (ouvre « Mettre tes données à l'abri »), tous deux « BRANCHE SEULEMENT ».
+- **Moteur** (dans les trois) : les gestes de premier niveau fléchés (pas seulement la consigne) ; la parenthèse qui termine une consigne hors du gras (« Je regarde » compris).
+- **BACKLOG** (sur les branches, pas sur `main`) : #1297 (la zone de collage nomme des produits), #1299 (l'étape « Évaluer » de « Recevoir » peut avancer seule), #1300 (un codex mis à jour pendant la démo porte la démo). #1296 et #1298 étaient déjà pris ailleurs (`lot/autoevaluation-consignes`, `lot/glisser-alignement`, `lot/dupliquer-copie-profonde`) : à revérifier à chaque fusion.
+- **Jugé** : Vitest complet vert à chaque push (hook) ; Playwright **Chromium seul** sur les fichiers liés, 1180 × 820 et 820 × 1180 pour les bancs neufs ; break-tests faits. WebKit absent du conteneur. Les trois rouges connus de `main` (`parcours-1-et-2` test 2, `parcours-2-ma-classe` tests 1 et 5) le sont encore sur `main`.
+- **Non vérifié** : Safari et l'iPad ; les vraies fenêtres du système (partage, choix d'emplacement) ; pas de relecture croisée.
+
+---
+
 ## 19 NOV. 2026, 16 H 05 (Claude Code) : **1.250.0 SUR `main` ET EN LIGNE — LES DESCRIPTEURS DANS L'ÉDITEUR DE GRILLES, LES COPIES NON VERROUILLÉES AVANT L'EXPORT LÉA, LA BULLE DE « DÉCOUVRIR » FIXE** — verdict complet du Mac, vert, sur secteur
 
 Mandat : go de Grégoire relayé par Cowork (19 nov., après-midi), Mac sur secteur. **Le travail le plus récent vit sur `main`** (`origin/main` = `164517011`). Fait dans l'arbre `../labo-codex-fusion` ; `lot/descripteurs-grille` fusionné (PR n° 31), release `8c4351a8a` (1.250.0, build `1119-0906`).
