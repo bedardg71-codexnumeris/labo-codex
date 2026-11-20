@@ -212,8 +212,24 @@ function juge(page, t, m, { rangeesAMain }) {
             await lignesContiennent(page, t.etape6.remplie.lignes, ctx);
             await gesteDesigne(page, '#btnCreerCartouche', ctx);
             await expect(page.locator('#nomCartouche')).toHaveValue(m.cartouche);
+            // A5 (20 nov. 2026) : ce que « Remplir » a posé est en bleu (la couleur des liens) jusqu'à la création ; un champ
+            // que « Remplir » n'a pas touché garde sa couleur.
+            expect(await page.evaluate(() => {
+                const couleur = (e) => getComputedStyle(e).color;
+                const lien = document.createElement('span');
+                lien.style.color = 'var(--accent-primaire)';
+                document.body.appendChild(lien);
+                const bleu = couleur(lien);
+                lien.remove();
+                const nom = document.getElementById('nomCartouche'), cases = [...document.querySelectorAll('#cartoucheZonePrincipale textarea[id^="comm_"]')];
+                const autre = document.getElementById('contexteCartouche');
+                return { nom: couleur(nom) === bleu, cases: cases.length > 0 && cases.every((c) => c.classList.contains('parcours-rempli') && couleur(c) === bleu),
+                    autre: !autre || (couleur(autre) !== bleu && !autre.classList.contains('parcours-rempli')) };
+            }), ctx + ' : le bleu de « Remplir »').toEqual({ nom: true, cases: true, autre: true });
             break;
         case 7:
+            // A5 : la cartouche créée, plus rien n'est en bleu (la marque part quand l'étape change).
+            expect(await page.evaluate(() => document.querySelectorAll('.parcours-rempli').length), ctx + ' : le bleu est parti à la création').toBe(0);
             await confirme(page, t.etape7.confirme, ctx);
             await lieu(page, 'Conception', 'Productions', t.etape7.lieuSuite, ctx);
             await consignes(page, t.etape7.consignes, ctx);
