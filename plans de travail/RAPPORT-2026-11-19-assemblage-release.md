@@ -1,4 +1,4 @@
-# Rapport — assembler la release d'avant lundi (19 nov. 2026)
+# Rapport : assembler la release d'avant lundi (19 nov. 2026)
 
 **Dernier relais.** Branche `lot/assemblage-release`, partie de `origin/main` à `ade09e93` (la 1.250.0), puis
 `origin/main` à `c857b794` fusionné (deux relais de nuit, `RELAIS.md` seul) : `main` en est l'ancêtre, la fusion se
@@ -19,7 +19,10 @@ WebKit sur GitHub. PR n° 41, « APERÇU, ne pas fusionner » (brouillon) : ni p
 - Un numéro de fiche servait deux fois : #1296. La fiche des neuf rouges d'import sous Chromium devient **#1301**
   (#1300 a été pris pendant l'assemblage par la session de nuit A).
 - `dupliquerGrille` n'est atteignable depuis aucun écran (mesuré au navigateur).
-- Chromium : aucun rouge neuf (les 44 rouges le sont aussi sur `main`). WebKit Linux : en cours.
+- Chromium : aucun rouge neuf (les 44 rouges le sont aussi sur `main`). WebKit Linux (GitHub, 17 morceaux sur 20,
+  verdict NON JUGÉ faute d'apt) : tous les bancs des lots verts, après un correctif du banc du diagnostic de #1298
+  (il ouvrait l'accordéon par un toucher que WebKit Linux ne changeait pas en clic) ; deux rouges hors des listes connues,
+  sans lien de code avec les lots, à surveiller au verdict du Mac (§4).
 
 ## 1. Les fusions
 
@@ -121,7 +124,7 @@ coupée, les quatre rougissent. Fichiers restaurés après chaque mutation.
 ### Vitest
 
 Complet, depuis `tests/`, sur l'assemblage avec la retouche : **935 fichiers, 11 976 essais, tous verts**. Rejoué par
-le hook pre-push à chaque push (vert), et par GitHub sur `0c0bb47c` (job Vitest vert). Les sentinelles anti-cache
+le hook pre-push à chaque push réussi (vert ; un premier essai refusé, §8), et par GitHub sur `0c0bb47c` (job Vitest vert). Les sentinelles anti-cache
 (`anticache-fichiers-modifies`, `cache-busting-main`, `release-bump-cache-417`) rejouées après le dernier jeton : vertes.
 
 ### Chromium, paysage et portrait
@@ -151,7 +154,7 @@ essai, même fenêtre. **Aucun rouge neuf.** À l'inverse, un essai rouge sur `m
 | `bareme-3-evaluer` | 2 | sa fenêtre | rouge sur `main` |
 | `grilles-sous-criteres-condense` | 1 | sa fenêtre (iPad) | rouge sur `main` ; intermittent de la baseline du Mac |
 | `planif-menu-vue` | 2 | paysage | rouge sur `main` ; dans la baseline Linux |
-| `planif-corbeille-fixe-1070` | 1 | portrait | rouge sur `main` (paysage) ; dans la baseline Linux |
+| `planif-corbeille-fixe-1070` | 1 | portrait | rouge sur `main` aussi (et en paysage) ; dans la baseline Linux |
 
 Ce qui varie : la configuration Chromium le dit en tête, « ~la moitié des specs rougissent en Chromium », surtout
 celles du codex et de l'import, dont les motifs d'erreurs attendues sont écrits pour WebKit. Douze des quatorze
@@ -168,15 +171,17 @@ que l'autoévaluation a retouchées aussi : `bareme-1` (3, à 1 440 et 820), `ec
 `wizard-577-reperes-echelle-rendu` (aux deux tailles de la configuration). Le seul essai sauté l'est par son banc
 (`bareme-3-evaluer`, les captures, sans dossier de captures).
 
-### WebKit Linux, sur GitHub (run 44649923269, `0c0bb47c`)
+### WebKit Linux, sur GitHub (runs 44649923269 sur `0c0bb47c` et 44659003950 sur `85e35267`)
 
 Le workflow `tests.yml`, lancé à la demande sur la branche (`workflow_dispatch`), juge en 20 morceaux sous WebKit
-Linux, puis un job « verdict » compare à `scripts/playwright-baseline-linux.json`. **Verdict : NON JUGÉ**, deux fois.
+Linux, puis un job « verdict » compare à `scripts/playwright-baseline-linux.json`. **Verdict : NON JUGÉ**, à chaque tentative.
 Ce n'est pas un rouge d'essai : des morceaux n'ont pas pu poser les dépendances apt de WebKit (« non posées en trois
 essais — ce morceau ne jouera rien »), comme sur `main` le 19 nov. au soir (run 44614746624, 12 rapports sur 20,
-même cause). Première tentative : 11 morceaux joués sur 20 ; relance des seuls morceaux échoués : 5 de plus. **16
-morceaux sur 20 joués** ; les morceaux 9, 11, 12 et 19 ne l'ont jamais été. J'ai lu le bilan de chacun des seize dans
-son journal et l'ai comparé à la baseline Linux et à la liste des 17 de #1293.
+même cause). Run 44649923269 sur `0c0bb47c` : 11 morceaux joués sur 20, puis 5 de plus à la relance des seuls morceaux échoués.
+Run 44659003950 sur `85e35267` (après le correctif du banc du diagnostic) : le morceau 9 joue pour la première fois,
+le 17 rejoue. **17 morceaux sur 20 joués** ; les morceaux 11, 12 et 19 ne l'ont jamais été, en trois tentatives, et
+**aucun banc des lots n'y tombe**. J'ai lu le bilan de chacun dans son journal et l'ai comparé à la baseline Linux et à
+la liste des 17 de #1293. Le job « verdict » n'a donc jamais conclu : ce classement est le mien.
 
 **Les bancs des lots sous WebKit Linux.** Verts : `dupliquer-copie-profonde-1298` (morceau 8),
 `dupliquer-copie-profonde-1298-cache` et `planif-glisser-relachement-1295` (7), `autoevaluation-consignes` (18),
@@ -188,7 +193,8 @@ toucher du bouton « Vérifier les copies liées » est intercepté par l'en-tê
 fermé. Le banc était le seul de la suite à ouvrir un accordéon par `.tap()` sur l'en-tête (une `div`) ; tous les
 autres le font par `.click()`, et le code de l'application note qu'à l'iPad, le toucher d'un élément non cliquable
 n'émet pas de `click`. **Corrigé dans le banc** (`85e35267`) : l'en-tête s'ouvre par un clic, une attente nomme
-l'accordéon ouvert ; le geste jugé, le toucher du bouton, reste un toucher. Six verts sous Chromium. (Jugé de nouveau par le run 44659003950, en cours.)
+l'accordéon ouvert ; le geste jugé, le toucher du bouton, reste un toucher. Six verts sous Chromium. **Vérifié** : dans le run 44659003950, relancé sur
+`85e35267`, les six essais sont verts sous WebKit Linux (morceau 17). L'hypothèse tient.
 
 **Les autres rouges francs (rouges aux deux essais) :**
 
@@ -204,6 +210,7 @@ l'accordéon ouvert ; le geste jugé, le toucher du bouton, reste un toucher. Si
 | `notifications-pile-1224` | 6 | baseline Linux |
 | `palette-evaluation-compacte` « la bulle d'aide générale » | 13 | baseline Linux |
 | `planif-zone-non-planifie-929` | 16 | baseline Linux |
+| `planif-menu-vue`, deux essais | 9 | baseline Linux |
 | `standards-sans-portfolio-lot-4` CHIM-1 | 17 | baseline Linux |
 | `parcours-2-ma-classe`, quatre essais | 3 | liste des 17 de #1293 |
 | `parcours-je-regarde` « Mettre ta classe en place » | 13 | liste des 17 de #1293 |
@@ -226,7 +233,8 @@ rejoué trois fois, 3 rouges sur 3 sur `main` et 2 sur 3 sur l'assemblage ; et s
 `critere-algorithmique-tables-de-cas-3b`, `presences-lot-d-enregistrement`, `temoin-enregistrement-lot-b` (360 px
 sombre et clair, 768 px sombre), `registre-longitudinal-915` R5, `critere-algorithmique-dit-vrai`,
 `bibliotheque-deux-colonnes-1156` (productions), `parcours-je-regarde` « Découvrir », `bulle-largeur-ipad` L2,
-`bareme-grille-neuve-1120` « Fermer » (fiche #1291, intermittent connu) ; et ceux des lots nommés plus haut. Les
+`bareme-grille-neuve-1120` « Fermer » (fiche #1291, intermittent connu), `aide-cp-suit-la-case-1086`,
+`texte-troue-badges-dans-la-phrase` (3) ; et ceux des lots nommés plus haut. Les
 autres passés au second essai sont déjà classés : `comptes-erreurs-stock-1142` (l'un intermittent de la baseline Linux,
 l'autre dans la liste de #1293), et trois échecs connus de la baseline Linux (`palette-retroaction-compacte` sombre,
 `planif-corbeille-fixe-1070`, `lot-a-anonymisation-enregistre`).
@@ -279,6 +287,11 @@ dans l'entrée.
    lot touche, le jeton de ce lot, déjà plus récent que celui de `main`.
 5. **Les bancs Chromium** : un fichier qui fixe lui-même sa fenêtre tourne une fois (il choisit ses fenêtres) ; les
    autres tournent en paysage (1 180 × 820) ET en portrait (820 × 1 180), par une configuration temporaire non suivie.
+6. **Le banc du diagnostic de #1298, corrigé dans l'assemblage** alors qu'il appartient à un lot : il aurait rougi le
+   verdict de cette release, et la correction tient en un geste de mise en place (le clic sur l'en-tête, comme dans
+   les autres bancs). Supposé d'abord, puis vérifié sous WebKit Linux ; Safari ne l'a pas vu.
+7. **`origin/main` fusionné dans la branche** (`e3ad7e9d`) : deux relais de nuit, `RELAIS.md` seul. Pour que la
+   fusion du Mac se fasse en avance rapide ; aucun code.
 
 ## 7. Ce que la session du Mac doit savoir avant le verdict
 
@@ -307,6 +320,25 @@ dans l'entrée.
 5. **Les bancs neufs ou retouchés à voir passer au verdict** : `assemblage-dupliquer-descripteurs-seuils` (neuf, ce
    lot), et ceux des quatre lots (§4). Aucun n'a été joué sous Safari ; ceux qui sont tombés dans les morceaux joués
    de GitHub l'ont été sous WebKit Linux (§4).
-6. **Fichiers non suivis à ne pas chercher** : la configuration Chromium temporaire
-   (`tests/playwright.assemblage-tmp.config.js`) est exclue par `.git/info/exclude` du conteneur ; elle n'existe pas
-   ailleurs.
+6. **Deux rouges WebKit Linux hors des listes**, `dissection-legende` L6 (820 × 1 180) et `temoin-enregistrement-lot-b`
+   à 768 px clair (§4) : verts sous Chromium des deux côtés, aucun lot ne touche leur code. S'ils rougissent au verdict
+   du Mac, les rejouer sur `main` dira s'ils sont antérieurs.
+7. **Le banc du diagnostic de #1298 a changé** dans cette branche (`85e35267`) : l'en-tête de l'accordéon s'ouvre par
+   un clic. Vert sous WebKit Linux ; Safari ne l'a pas encore vu.
+8. **Ce qui n'est pas dans le dépôt** : la configuration Chromium à deux projets qui a servi au §4 était temporaire,
+   non suivie, et supprimée en fin de session ; le worktree de `main` aussi.
+
+## 8. Les trouvailles et leurs issues
+
+| Trouvaille | Issue |
+|---|---|
+| #1296 pris deux fois (glisser, autoévaluation) | corrigé : la fiche de l'autoévaluation devient #1301 (le lot de l'assemblage) |
+| #1300 pris pendant l'assemblage par la session de nuit A | corrigé : #1301 ; à revérifier à la fusion |
+| La liste des 17 de #1293 décollée de sa fiche (antérieur, sur `main`) | corrigé : une ligne remise en place, j'en avais besoin pour classer WebKit |
+| `dupliquerGrille` régénère les ids, hors d'atteinte de tout écran | commenté dans le code et laissé (la retouche (2) demandait de le dire) |
+| Le banc du diagnostic de #1298 rouge sous WebKit (le toucher de l'en-tête) | corrigé maintenant : il aurait rougi le verdict de cette release ; vérifié sous WebKit Linux |
+| `dissection-legende` L6 et `temoin-enregistrement-lot-b` 768 px, rouges WebKit Linux hors des listes | laissés au verdict du Mac, nommés ici (§7, point 6) ; non inscrits : non vécus, ne bloquent rien d'ici |
+| `tampons-masques-bibliotheque-1216` « catégorie masquée » | intermittent préexistant (mesuré sur `main`, sous Chromium et sous WebKit Linux) ; non inscrit |
+| Passés au second essai hors des intermittents connus (§4) | nommés ici ; non inscrits |
+| Le hook pre-push a refusé un premier push pendant que les bancs Chromium chargeaient la machine | non cherché ; le second push, identique, est passé (Vitest vert) |
+
