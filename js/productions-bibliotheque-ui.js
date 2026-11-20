@@ -380,8 +380,10 @@ async function ajouterProductionIndividuelle(id) {
             // Copier la production de la bibliothèque vers le cours actuel
             // Générer un nouvel ID pour éviter les conflits
             const nouvelId = genererIdUnique('PROD_');
+            // #1298 (19 nov. 2026) — copie PROFONDE (`titresBlocs`, `champsPersonnalises`…) : voir
+            // `ajouterGrilleIndividuelle` (js/grilles.js).
             prod = {
-                ...prodBiblio,
+                ...JSON.parse(JSON.stringify(prodBiblio)),
                 id: nouvelId,
                 idOriginal: prodBiblio.id, // Garder trace de l'original
                 dansBibliotheque: true,

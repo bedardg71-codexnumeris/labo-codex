@@ -1495,16 +1495,18 @@ async function dupliquerCartouche(cartoucheId, grilleId) {
         const cartoucheOriginal = cartouches.find(c => c.id === cartoucheId);
 
         if (cartoucheOriginal) {
+            // ⚠⚠ #1298 (19 nov. 2026) — copie PROFONDE : l'étalement partageait `criteres` et
+            // `niveaux` avec la source (`commentaires` seul était recopié, à un niveau), et
+            // IndexedDB gardait ce partage (mesuré au navigateur). Voir `dupliquerGrilleDepuisSidebar`.
             const nouveauCartouche = {
-                ...cartoucheOriginal,
+                ...JSON.parse(JSON.stringify(cartoucheOriginal)),
                 id: genererIdUnique('CART_'),
                 nom: nommerCopie(cartoucheOriginal.nom, cartouches),
                 auteur: BibliothequeUI.obtenirAuteurActif(),
                 isDemo: false,
                 inspireDe: BibliothequeUI.forgerInspireDe(cartoucheOriginal),
                 verrouille: false,
-                dansBibliotheque: true,  // ✅ AJOUT (8 décembre 2025) : Copie visible par défaut
-                commentaires: { ...cartoucheOriginal.commentaires }
+                dansBibliotheque: true  // ✅ AJOUT (8 décembre 2025) : Copie visible par défaut
             };
 
             // ✅ D4 (arbitrage du 24 août) — les métadonnées de partage de la source
@@ -4148,8 +4150,11 @@ async function listerTrimestresAvecCartouches() {
  * @returns {Object} copie tracée (la source n'est pas touchée)
  */
 function marquerProvenanceCartouche(cartoucheSource, srcId) {
+    // #1298 (19 nov. 2026) — copie PROFONDE : l'étalement partageait `niveaux` (et `criteres`,
+    // `commentaires` quand le rattachement rend la cartouche telle quelle) avec le trimestre source,
+    // quand `db` sert les deux clés par son cache mémoire. Voir `ajouterGrilleIndividuelle`.
     return {
-        ...cartoucheSource,
+        ...JSON.parse(JSON.stringify(cartoucheSource)),
         idOriginal: cartoucheSource.id,
         inspireDe: BibliothequeUI.forgerInspireDe(cartoucheSource),
         inspireDeTrimestre: srcId,
@@ -4427,8 +4432,12 @@ async function ajouterCartoucheIndividuelle(id, grilleId) {
                 const nouvelId = genererIdUnique('CART_');
                 // #1144 — rangée sous la grille LOCALE (trouvée aussi par `idOriginal`, donc pas
                 // forcément aux mêmes ids de critères) : rattachée à ses critères, et elle la pointe.
+                // #1298 (19 nov. 2026) — la source copiée EN PROFONDEUR avant le rattachement : celui-ci
+                // rend la cartouche telle quelle quand la correspondance n'est pas sûre, et l'étalement
+                // partageait `niveaux` (et alors `criteres`, `commentaires`) avec la bibliothèque, quand
+                // `db` sert les deux clés par son cache mémoire. Voir `ajouterGrilleIndividuelle`.
                 cartouche = {
-                    ...window.cartoucheCorrespondance.rattacher(cartoucheSource, grilleLocale.criteres).cartouche,
+                    ...window.cartoucheCorrespondance.rattacher(JSON.parse(JSON.stringify(cartoucheSource)), grilleLocale.criteres).cartouche,
                     id: nouvelId,
                     idOriginal: cartoucheSource.id,
                     grilleId: grilleIdLocal,

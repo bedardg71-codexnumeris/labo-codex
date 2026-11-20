@@ -1137,8 +1137,11 @@ async function dupliquerGrille(grilleId) {
         nom: nouveauNom.trim(),
         // Lot 1 (3 sept. 2026) : le type déclaré suit la copie, comme ceux de ses critères.
         ...(TYPES_GRILLE.includes(grilleOriginale.type) ? { type: grilleOriginale.type } : {}),
+        // #1298 (19 nov. 2026) : chaque critère copié EN PROFONDEUR — l'étalement `{ ...c }`
+        // partageait ses sous-objets (`descripteurs`…) avec la source, mesuré quand la
+        // collection est servie par le cache mémoire de `db` (au-delà de 25 Ki caractères).
         criteres: grilleOriginale.criteres.map(c => ({
-            ...c,
+            ...JSON.parse(JSON.stringify(c)),
             id: genererIdUnique('CR_')
         })),
         dateCreation: new Date().toISOString(),
@@ -2655,8 +2658,13 @@ async function ajouterGrilleIndividuelle(id) {
 
                 // Générer un nouvel ID pour éviter les conflits (pattern Productions)
                 const nouvelId = genererIdUnique('GRILLE_');
+                // #1298 (19 nov. 2026) — copie PROFONDE : la bibliothèque et le trimestre sont deux
+                // clés, mais quand `db` les sert par son cache mémoire (au-delà de 25 Ki caractères),
+                // l'étalement laissait la copie du trimestre et la grille de la bibliothèque partager
+                // `criteres` : modifier l'une modifiait l'autre en mémoire, et la prochaine écriture
+                // de la bibliothèque l'enregistrait (mesuré au navigateur).
                 trouvee = {
-                    ...grilleSource,
+                    ...JSON.parse(JSON.stringify(grilleSource)),
                     id: nouvelId,
                     idOriginal: grilleSource.id,
                     dansBibliotheque: true,
@@ -6309,8 +6317,15 @@ async function dupliquerGrilleDepuisSidebar(id) {
         // `appliquerModeLectureSeuleDemo` désactivait alors tous ses champs :
         // dupliquer un exemple depuis la barre latérale rendait une copie qu'on ne
         // pouvait toujours pas modifier, soit exactement ce que le geste doit débloquer.
+        //
+        // ⚠⚠ #1298 (19 nov. 2026) — UNE COPIE PROFONDE, PAS UN ÉTALEMENT. `{ ...grille }`
+        // donnait à la copie LE MÊME tableau `criteres` que sa source ; IndexedDB, qui
+        // enregistre par clonage structuré, gardait ce partage : réécrire un texte de
+        // niveau dans la copie le réécrivait dans la source, encore après rechargement.
+        // Les identifiants de critères restent ceux de la source (rien ne les régénère :
+        // le suivi rapproche par le nom). Banc : `dupliquer-copie-profonde-1298.spec.js`.
         const copie = {
-            ...grille,
+            ...JSON.parse(JSON.stringify(grille)),
             id: genererIdUnique('GRILLE_'),
             nom: nommerCopie(grille.nom, grilles),
             auteur: BibliothequeUI.obtenirAuteurActif(),
