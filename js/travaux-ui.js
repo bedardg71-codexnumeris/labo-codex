@@ -1651,7 +1651,19 @@
     function balanceActiveePour(f) {
         // `skipBalance` est une EXCEPTION par fichier, posée dans « Modifier ».
         // Elle ne peut qu'enlever le traitement, jamais l'ajouter.
-        return BALANCE_GLOBALE_ACTIVE && !(f && f.skipBalance);
+        // lot/perspective-coins (17 nov. 2026, décision de Grégoire, 19 h 04) : un réglage de couleur ou de lumière
+        // posé dans les réglages spécifiques REMPLACE la balance automatique au lieu de s'y ajouter ; la géométrie seule
+        // (rotation, rognage, perspective) la laisse s'appliquer. L'import et les deux aperçus lisent cette seule source.
+        return BALANCE_GLOBALE_ACTIVE && !(f && f.skipBalance) && !aUnReglageDeCouleurOuDeLumiere(f);
+    }
+
+    /** Les réglages spécifiques qui touchent la couleur ou la lumière (les types que le poste de préparation écrit). */
+    const OPERATIONS_DE_COULEUR_OU_DE_LUMIERE = ['whiteBalance', 'brightness', 'contrast', 'exposure', 'grayscale'];
+
+    function aUnReglageDeCouleurOuDeLumiere(f) {
+        return !!(f && Array.isArray(f.operations) && f.operations.some(function(op) {
+            return op && OPERATIONS_DE_COULEUR_OU_DE_LUMIERE.indexOf(op.type) !== -1;
+        }));
     }
 
     /**
@@ -1988,18 +2000,31 @@
     /**
      * Decode une operation de preparation en texte lisible
      */
+    /**
+     * Le badge « Spécifique » de l'Aperçu, en mots d'enseignant. lot/perspective-coins (17 nov. 2026) : il attendait
+     * des types que le poste de préparation n'écrit pas (`contraste`, `luminosite`…) et affichait le nom anglais
+     * brut ; il parle maintenant des types réellement écrits (js/travaux-preparation.js, `ajouterOperation`).
+     */
+    function avecSigne(n, unite) {
+        var v = Number(n);
+        if (isNaN(v)) return '';
+        var dit = typeof window.formaterNombre === 'function' ? window.formaterNombre(v) : String(v);
+        return (v > 0 ? '+' : '') + dit + (unite || '');
+    }
+
     function decrireOperation(op) {
         if (!op || !op.type) return '';
         switch (op.type) {
-            case 'rotation': return 'Rotation ' + (op.angle > 0 ? '+' : '') + op.angle + '\u00b0';
-            case 'perspective': return 'Perspective';
+            case 'brightness': return 'Luminosit\u00e9 ' + avecSigne(op.value);
+            case 'contrast': return 'Contraste ' + avecSigne(op.value);
+            case 'exposure': return 'Exposition ' + avecSigne(op.value);
+            case 'grayscale': return 'Niveaux de gris';
+            case 'whiteBalance': return 'Balance des blancs';
+            case 'fineRotation': return 'Rotation ' + avecSigne(op.degrees, '\u00b0');
+            case 'rotation90': return 'Rotation ' + (op.direction === 'ccw' ? '-90' : '+90') + '\u00b0';
             case 'crop': return 'Rognage';
-            case 'contraste': return 'Contraste ' + (op.valeur > 0 ? '+' : '') + op.valeur;
-            case 'luminosite': return 'Luminosit\u00e9 ' + (op.valeur > 0 ? '+' : '') + op.valeur;
-            case 'niveaux-gris': return 'Niveaux de gris';
-            case 'inverser': return 'Inversion';
-            case 'balance-blancs': return 'Balance des blancs';
-            default: return op.type;
+            case 'perspective': return 'Perspective';
+            default: return '';
         }
     }
 

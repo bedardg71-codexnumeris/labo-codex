@@ -63,7 +63,7 @@
         // Lot de la dissection sur l'iPad (12 nov. 2026) : `exemple`, l'exemple du parcours (« complet » ou « exercice ») ;
         // il n'écrit rien (ni brouillon, ni grille) et n'efface pas le brouillon de l'enseignant·e.
         return { doc: doc, liens: {}, actif: null, morceaux: doc ? D().morceaux(doc) : null, erreur: '', enCours: false, nomSaisi: null, compte: 'points', valeurs: {}, coupes: [], rattachements: {}, choix: null,
-            destination: null, codesAjoutes: null, exemple: null };
+            destination: null, codesAjoutes: null, exemple: null, echelleExistante: false, attendre: null };
     }
     var etat = etatNeuf(null);
     var blocs = {};
@@ -821,11 +821,67 @@
         }).join(', ');
     }
 
-    function phraseLogique(b) {
+    /**
+     * LOT « JE REGARDE » D'« ÉVALUER » (18 nov. 2026, point C.2 de la consigne), BORNÉ AU MODÈLE. Une grille qui ne porte
+     * ni points ni niveaux nommés (un nom, une description, une pondération par critère) est lue « en points » et naît
+     * en critères analytiques (mesuré le 18 nov. 2026). Le modèle d'« Évaluer une première production » la tient pour
+     * jugée par niveaux, avec une échelle qui existe déjà (`tenirPourNiveaux`) : ses critères naissent comme ceux d'une
+     * grille composée à la main (`holistique`), sans échelle neuve, sans « Ce que vaut chaque niveau ». Rien ne change
+     * pour une grille collée par l'enseignant·e : seul le modèle pose ce drapeau, qui n'entre pas au brouillon.
+     */
+    function tenuePourNiveaux(R) { return !!etat.echelleExistante && !R.avecNiveaux; }
+
+    /**
+     * @param {{attendre?: function(): string}} [o] - `attendre` : ce qui manque encore avant « Créer ma grille » (rien :
+     *   la grille peut naître). Le 15 nov. 2026, la grille du modèle se créait après un seul critère étiqueté.
+     */
+    function tenirPourNiveaux(o) {
+        if (!etat.doc || etat.exemple || etat.echelleExistante) return;
+        etat.echelleExistante = true;
+        etat.attendre = o && typeof o.attendre === 'function' ? o.attendre : null;
+        rendreLecture();
+    }
+
+    /**
+     * « Voir la suite de l'exemple » (décidé le 14 nov. 2026, codé le 18) : le modèle pose lui-même les étiquettes qui
+     * restent. Seulement sur une grille que le modèle a ouverte (`tenirPourNiveaux`) ; une étiquette déjà posée reste.
+     * @param {Object<string, string>} liens - { idDuMorceau: étiquette }
+     */
+    function poserEtiquettes(liens) {
+        if (!etat.doc || !etat.echelleExistante) return false;
+        Object.keys(liens || {}).forEach(function (id) {
+            if (blocs[id] && D().TYPE[liens[id]] && !etat.liens[id] && etat.rattachements[id] == null) etat.liens[id] = liens[id];
+        });
+        marquerTout();
+        finSurlignage();
+        planifierDessin();
+        return true;
+    }
+
+    function phraseLogique(b, R) {
+        // La phrase d'une grille en niveaux, telle quelle : aucun mot neuf.
+        if (R && tenuePourNiveaux(R) && b.logique === 'points') b = { logique: 'niveaux' };
         if (b.logique === 'deux') return 'L’application y lirait les deux logiques : des niveaux nommés, et des points qui s’additionnent' + (b.jusqua != null ? ' jusqu’à ' + formaterNombre(b.jusqua) : '') + '. Ce serait à toi de dire laquelle donne le résultat d’une copie.';   // L2, validé G. 19 oct. 19 h 01
         if (b.logique === 'points') return 'L’application y lirait une grille en points : les points de chaque critère s’additionnent' + (b.jusqua != null ? ' jusqu’à un total de ' + formaterNombre(b.jusqua) : '') + '. Aucun niveau n’y est nommé (et l’application n’en inventerait pas).';
         if (b.logique === 'niveaux') return 'L’application y lirait une grille en niveaux : chaque critère se juge par niveau, sans points à additionner.';
         return '';
+    }
+
+    /** La case « Réponses possibles et leurs points » d'un critère ; aucune pour une grille tenue pour jugée par niveaux. */
+    function ajouterReponses(tr, c, R) {
+        if (tenuePourNiveaux(R)) return;
+        var tdr = noeud('td');
+        if (c.reponses.length) {
+            var ulr = noeud('ul', 'dissection-reponses');
+            c.reponses.forEach(function (r) {
+                var li = noeud('li');
+                li.appendChild(noeud('span', 'dissection-pts' + (r.pts.length ? '' : ' dissection-pts-sans'), r.pts.length ? pts(r.pts) : 'sans points'));
+                li.appendChild(noeud('span', null, r.desc));
+                ulr.appendChild(li);
+            });
+            tdr.appendChild(ulr);
+        } else tdr.appendChild(noeud('span', 'dissection-vide', '—'));
+        tr.appendChild(tdr);
     }
 
     function tableComprise(R) {
@@ -834,7 +890,7 @@
         var thead = noeud('thead'), th = noeud('tr');
         [ 'Critère', 'Pondération' ].forEach(function (x) { var c = noeud('th', null, x); c.scope = 'col'; th.appendChild(c); });
         if (R.avecNiveaux) R.niveaux.forEach(function (n) { var c = noeud('th', null, n); c.scope = 'col'; th.appendChild(c); });
-        else { var c0 = noeud('th', null, 'Réponses possibles et leurs points'); c0.scope = 'col'; th.appendChild(c0); }
+        else if (!tenuePourNiveaux(R)) { var c0 = noeud('th', null, 'Réponses possibles et leurs points'); c0.scope = 'col'; th.appendChild(c0); }
         thead.appendChild(th);
         t.appendChild(thead);
         var tbody = noeud('tbody'), sec = null;
@@ -872,20 +928,7 @@
                     } else td.appendChild(noeud('span', 'dissection-vide', '—'));
                     tr.appendChild(td);
                 }
-            } else {
-                var tdr = noeud('td');
-                if (c.reponses.length) {
-                    var ulr = noeud('ul', 'dissection-reponses');
-                    c.reponses.forEach(function (r) {
-                        var li = noeud('li');
-                        li.appendChild(noeud('span', 'dissection-pts' + (r.pts.length ? '' : ' dissection-pts-sans'), r.pts.length ? pts(r.pts) : 'sans points'));
-                        li.appendChild(noeud('span', null, r.desc));
-                        ulr.appendChild(li);
-                    });
-                    tdr.appendChild(ulr);
-                } else tdr.appendChild(noeud('span', 'dissection-vide', '—'));
-                tr.appendChild(tdr);
-            }
+            } else ajouterReponses(tr, c, R);
             tbody.appendChild(tr);
         });
         t.appendChild(tbody);
@@ -935,7 +978,7 @@
             if (R.codes.length) cp.appendChild(tableCodes(R));
             return;
         }
-        var phrase = phraseLogique(b);
+        var phrase = phraseLogique(b, R);
         if (phrase) { lg.textContent = phrase; lg.classList.remove('u-hide'); }
         rendreConstats(cs, R, b);
         if (R.description.length) cp.appendChild(noeud('p', 'dissection-crit-desc', R.description.join(' ')));
@@ -988,7 +1031,14 @@
     /** Le nom tapé (C3), ou `undefined` tant que l'enseignant n'a pas touché au champ : le Titre étiqueté vaut. */
     function nomTape() { return etat.nomSaisi == null ? undefined : etat.nomSaisi; }
 
-    function creation(R) { return D().creation(R, { nomsGrilles: nomsGrilles() }, nomTape(), { compte: etat.compte, valeurs: etat.valeurs }); }
+    function creation(R) {
+        var c = D().creation(R, { nomsGrilles: nomsGrilles() }, nomTape(), { compte: etat.compte, valeurs: etat.valeurs });
+        // Le modèle d'« Évaluer » (`tenirPourNiveaux`) : ce qu'il attend encore s'ajoute aux raisons, et retient le bouton.
+        var attendu = '';
+        try { attendu = etat.echelleExistante && etat.attendre ? etat.attendre() : ''; } catch (e) { attendu = ''; }
+        if (attendu) c.raisons = c.raisons.concat([attendu]);
+        return c;
+    }
 
     /**
      * Lot 2b : « Le résultat d'une copie viendrait : des points / des niveaux », pour une grille qui a
@@ -1196,7 +1246,9 @@
         etat.erreur = '';
         rendreLecture();
         var r;
-        try { r = await window.materielCreation.creer(c.modele); } finally { if (etat.doc === doc) etat.enCours = false; }
+        // Le modèle d'« Évaluer » (`tenirPourNiveaux`) : la grille naît jugée par niveaux, sans échelle neuve.
+        var modele = tenuePourNiveaux(lire()) ? Object.assign({}, c.modele, { echelleExistante: true }) : c.modele;
+        try { r = await window.materielCreation.creer(modele); } finally { if (etat.doc === doc) etat.enCours = false; }
         if (etat.doc !== doc) return;   // la page a changé de grille pendant l'écriture
         if (r.erreur) {
             etat.erreur = r.erreur;
@@ -1753,6 +1805,8 @@
         ajouterCodes: ajouterCodes,
         construireFeuille: construireFeuille,
         /** L'état de la dissection (lecture) — pour les bancs. */
+        tenirPourNiveaux: tenirPourNiveaux,
+        poserEtiquettes: poserEtiquettes,
         etatCourant: function () { return etat; },
         comprise: function () { return etat.doc ? lire() : null; }
     };

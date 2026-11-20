@@ -314,9 +314,11 @@ describe('Le voile est retiré', () => {
         expect(sansCommentaires(css)).not.toMatch(/parcours-voile/);
     });
 
-    it('aucune des neuf définitions ne garde sa propriété `voile`, ni ne cherche le voile dans la page', () => {
+    // 17 nov. 2026 : dix fichiers, les neuf définitions et le modèle de « Recevoir » (js/parcours-recevoir-modele.js), jugé avec elles.
+    it('aucune des neuf définitions (ni le modèle de « Recevoir ») ne garde sa propriété `voile`, ni ne cherche le voile dans la page', () => {
         const definitions = readdirSync(path.join(RACINE, 'js')).filter((f) => /^parcours-.+\.js$/.test(f) && f !== 'parcours-moteur.js');
-        expect(definitions).toHaveLength(9);
+        expect(definitions).toHaveLength(10);
+        expect(definitions).toContain('parcours-recevoir-modele.js');
         for (const f of definitions) {
             const src = sansCommentaires(lire('js/' + f));
             expect(src, f).not.toMatch(/\bvoile\s*:/);
