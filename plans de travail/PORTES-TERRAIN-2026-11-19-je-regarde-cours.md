@@ -6,7 +6,7 @@ Lot `lot/je-regarde-cours`, APERÇU non fusionné. Rapport : `plans de travail/R
 
 ## §0 · Préalable
 
-Sans objet. Si tu essaies l'aperçu (PR du lot, adresse au rapport) : lis le numéro en bas de page, celui de la 1.250.0 ; le modèle demande d'avoir fait, avant lui, la Modélisation de « Mettre ta classe en place » puis celle d'« Évaluer une première production ».
+Sans objet. Si tu essaies l'aperçu (`https://deploy-preview-40--codexnumeris-051225.netlify.app`, PR n° 40) : lis le numéro en bas de page, celui de la 1.250.0 ; le modèle demande d'avoir fait, avant lui, la Modélisation de « Mettre ta classe en place » puis celle d'« Évaluer une première production ».
 
 ## §1 · Données
 
