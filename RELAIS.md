@@ -7,6 +7,24 @@
 
 ---
 
+## 20 NOV. 2026, 0 H 20 (Claude Code) : **1.251.0 SUR `main` ET EN LIGNE — LA GRILLE D'AUTOÉVALUATION DANS LES CONSIGNES, LES NOMS DES DEUX SEUILS, « DUPLIQUER » EN COPIE PROFONDE, LE GLISSER D'ALIGNEMENT** — verdict complet du Mac, vert, sur secteur
+
+Mandat : relais de Cowork du 19 nov., 22 h 15 (les Nouvelles approuvées par Grégoire à 22 h 09). **Le travail le plus récent vit sur `main`** (`origin/main` = `8a3c73d71` avant ce relais). Fait dans l'arbre `../labo-codex-fusion` ; `lot/assemblage-release` (`12baa084`, PR n° 41) fusionné sans conflit (`a099442f6`, `--no-ff`), release `8a3c73d71` (1.251.0, build `1119-2216`). Rapport : `plans de travail/RAPPORT-2026-11-20-release-1.251.0.md`.
+
+- **Rien d'autre n'est parti** : ni `lot/journees-reprise`, ni les branches de parcours, ni `apercu/essai-parcours`, ni `lot/glisser-alignement-nuit-b` (aucune n'est ancêtre de `main`) ; `PARCOURS_OUVERTS` = `['decouvrir']`. Les 490 entrées de ce fichier gardées.
+- **Fiches** : aucun doublon de #1294 à #1301 ; #1297, #1299, #1300 restent sur leurs branches. Dernier ID : #1301.
+- **Rituel** : audit statique sans motif ; Vitest 935 fichiers, 11 976 tests ; break-tests rouges comme attendu (copies liées : 7 ; garde des deux seuils : 2 ; copie profonde de « Dupliquer » sous Safari : 2).
+- **Verdict** : complet, sur `8a3c73d71`, 40 demi-morceaux un par un, de 22 h 17 à 0 h 06. **Jeton code 0, 1 781 essais, 1 761 verts, 20 au second essai, 0 rouge, 68 sautés** ; `pied-de-page-et-assistance` 820 px (#1284) vert au premier essai. Mémoire 79 à 81 %, passage le plus long 283 s. Verts au premier essai sous Safari : parcours-5 « les sept étapes (1180 px) », `dissection-legende` L6, `temoin-enregistrement-lot-b` 768 px, `descripteurs-niveaux-grille` « iPad en haut », le banc du diagnostic « Copies liées » (6 sur 6) et les deux essais du clic de `planif-glisser-relachement-1295` (jamais vus sous Safari avant).
+- **⚠ parcours-5 « capture 25 » (#1296)** : au second essai dans la suite ; seul, `--retries=0`, **6 rouges sur 6** à la ligne 421, **et 6 sur 6 aussi sur `main` d'avant la fusion** (`f343e3bd5`, arbre témoin retiré). Antérieur aux lots, non corrigé ; « intermittent » ne le décrit plus : seul, il est franc.
+- **Push** : 0 h 12, hook passé (verdict vert à jour, Vitest). **Netlify** : déploiement `6affd6be`, prêt, commit `8a3c73d71`, publié à 0 h 12 ; `version.json` du permalien = `1.251.0` / `1119-2216` ; `index.html`, `js/changelog-data.js`, `js/grilles.js`, `js/export-pdf.js`, `js/planification-carte.js` servis identiques au commit (`cmp`). GitHub : run `44679475461` en cours à l'écriture, non lu.
+- **Arbres retirés** (propres, fusionnés) : `labo-codex-deux-temps`, `labo-codex-menu-demo`, `labo-codex-bulle-fixe`, `labo-codex-non-verrouillees` ; les branches restent.
+- **Complexité** (par rapport au dernier relevé, celui de la 1.249.0 ; la 1.250.0 n'en porte pas) : fonctions au-dessus de 15 : 434 → 434 (Δ 0), somme 10 956 → 10 958 (Δ + 2) ; au-dessus de 30 : 77 → 77 (Δ 0) ; fichiers de plus de 1 000 lignes : 44 → 44 ; lignes de code 171 875 → 172 503.
+- **Supposé, à corriger au besoin** : la typographie du fichier (apostrophe courbe, insécables) appliquée aux Nouvelles, aucun mot changé ; « capture 25 » ne retient pas le push (verdict vert, antérieur aux lots) ; seul cet essai a été rejoué six fois, les 19 autres verts au second essai ne sont pas des essais des lots (nommés au rapport).
+- **Reste** : le stock de #1298 (« Vérifier les copies liées », Réglages › Données › Maintenance, sur le Mac et l'iPad ; la réparation est à proposer à Grégoire) ; le stock du glisser (#1295) ; « capture 25 ».
+- **Non vérifié** : Safari à la main et l'iPad ; pas de relecture croisée de cette session.
+
+---
+
 ## 20 NOV. 2026, NUIT (Claude Code, dans le nuage) : **L'APERÇU D'ESSAI DES CINQ PARCOURS ET LEURS CODEX DE DÉPART** ; branche `apercu/essai-parcours`, **ESSAI, NE JAMAIS FUSIONNER** ; `main` n'a pas bougé (sauf ce relais)
 
 Mandat : Cowork, 19 nov., 20 h 30 (« Codex de départ pour l'essai des cinq parcours »). Consigne et rapport sur la branche : `plans de travail/CONSIGNE-2026-11-19-codex-de-depart.md`, `plans de travail/RAPPORT-2026-11-19-codex-de-depart.md`.
