@@ -124,15 +124,21 @@
    e. Une bulle peut s'ouvrir sur une ligne qui CONFIRME le geste précédent en le nommant (`confirme` : « C'est fait :
       le cours est créé. »). Avant la phrase du lieu. Ce n'est pas un éloge : le moteur n'y ajoute rien.
    LA FIN (lot 2e) : la dernière bulle d'un parcours dit « Pour revoir une étape, touche « N sur N ». » ; quand elle
-   n'offre que « Terminer », elle offre aussi « Parcours suivant », de même poids (aucun bouton mis en avant).
-   Sa consigne suit ses boutons : « Touche « Terminer » » y devient « Touche « Parcours suivant », ou « Terminer » ».
+   n'offre que « Terminer », elle offre aussi « Voir le parcours N », de même poids (aucun bouton mis en avant).
+   Sa consigne suit ses boutons : « Touche « Terminer » » y devient « Touche « Voir le parcours N », ou « Terminer » ».
+   RIEN N'EST LANCÉ D'OFFICE (Grégoire, 20 nov. 2026 ; plans de travail/CONSIGNE-2026-11-20-essai-parcours.md, A3) :
+   « Voir le parcours N » ferme la bulle et ouvre le panneau « Assistance » devant ce parcours, ses boutons
+   « Je regarde » et « Nous faisons » ; la bulle le nomme d'abord : « Suite suggérée : le parcours N, « Nom ». »,
+   après la phrase de la suite. Dernier parcours : ni ligne ni bouton.
+   L'ENTRÉE (même consigne, A1 et A2) : la première bulle porte, en petit, au-dessus du titre, « Parcours N · Nom ·
+   Je regarde » (ou « Nous faisons »), puis la phrase de la poignée.
 
    APRÈS L'ESSAI SUR L'IPAD (Grégoire, 16 nov. 2026 ; plans de travail/CONSIGNE-2026-11-16-essai-ipad.md) :
    · LA FIN D'UN PARCOURS QUI A SON OBJECTIF (`objectifAtteint`, sur la définition) : « Pour revoir une étape… », en
      petit ; « Objectif atteint : … » dans la forme de l'objectif (en gras, entre deux filets) ; puis « Chaque parcours
      a son objectif. C'est toi qui choisis la suite. », en ligne simple, la dernière avant les boutons.
-   · LA PREMIÈRE BULLE d'un parcours dit, en petit, sous ses lignes, qu'elle se déplace par sa poignée (pas sur
-     téléphone : la bulle n'y a pas de poignée).
+   · LA PREMIÈRE BULLE d'un parcours dit, en petit, qu'elle se déplace par sa poignée (pas sur téléphone : la bulle
+     n'y a pas de poignée) ; au-dessus du titre depuis le 20 nov. 2026 (voir « L'ENTRÉE »).
    · LE NOM DE LA SECTION reçoit UNE flèche tant que la bulle qui le dit ne désigne rien d'autre (`nomDeSectionAMontrer`).
    · LA BULLE NE COUVRE PAS CE DONT ELLE PARLE : une étape déclare dans `aussiEviter` ce qu'elle ne couvre que faute
      de mieux (le nom d'une bande, chacun de ses points), pesé comme le contour.
@@ -230,13 +236,14 @@
     var REGLAGE_MS = 1200;     // sur téléphone, le temps où le moteur peut faire défiler pour ranger la bulle en bas
     var LIGNES_PAR_PAGE = 10;  // au-delà, à la largeur de la bulle, le texte se coupe en pages
     // LA FIN : la consigne de la dernière bulle quand elle offre ses deux suites. Sa seule écriture (voir consigneDeLaFin).
-    var CONSIGNE_DEUX_SUITES = 'Touche « Parcours suivant », ou « Terminer »';
+    // (20 nov. 2026 : le bouton s'appelle « Voir le parcours N » ; son libellé vient du panneau, `Assistance.suiteDe`.)
+    function consigneDesDeuxSuites(suite) { return 'Touche « ' + suite.libelle + ' », ou « Terminer »'; }
     // EN VISITE (15 nov. 2026 ; texte de Grégoire, relais de Cowork) : la consigne d'une étape revue dont le geste écrit.
     // LA FIN D'UN PARCOURS QUI A SON OBJECTIF (Grégoire, 16 nov. 2026, essai sur l'iPad) : sous « Objectif atteint : … »,
     // en ligne simple, juste au-dessus des boutons. Écrite ici seulement.
     var PHRASE_DE_LA_SUITE = 'Chaque parcours a son objectif. C\'est toi qui choisis la suite.';
-    // LA PREMIÈRE BULLE de chaque parcours, en petit, sous ses lignes (Grégoire, 16 nov. 2026). Pas sur téléphone : la
-    // bulle n'y a pas de poignée.
+    // LA PREMIÈRE BULLE de chaque parcours, en petit (Grégoire, 16 nov. 2026) ; AU-DESSUS DU TITRE depuis le 20 nov. 2026,
+    // sous la ligne qui nomme le parcours (`ligneDuParcours`). Pas sur téléphone : la bulle n'y a pas de poignée.
     var PHRASE_DE_LA_POIGNEE = 'Tu peux déplacer cette bulle par sa poignée et faire défiler la page pour mieux voir.';
     var PHRASE_VISITE = 'Tu revois ce parcours : rien n\'est à refaire. Lis, puis touche « Continuer ».';
     // Un contrôle : ce qu'un toucher actionne (voir « EN VISITE, RIEN N'EST DÉSIGNÉ QUI ÉCRIT »).
@@ -1154,6 +1161,7 @@
         };
         var seconde = enSecondeForme(etape);
         if (etat.i === 0 && !seconde) phrase('parcours-bulle-objectif', texteDe(etat.def.objectif));
+        poserEntree(seconde);
         poserConfirmation(seconde ? {} : etape);
         if (!seconde) phrase('parcours-bulle-lieu', phraseDuLieu(lieu, etape.nommeLaSection ? sectionDe(etape) : null, texteDe(etape.lieuSuite)));
         var ul = null;
@@ -1203,7 +1211,6 @@
             if (!ul) { ul = document.createElement('ul'); boite.appendChild(ul); }
             poser(ligne, ul);
         });
-        if (etat.i === 0 && !etat.def.sansRang && !etat.telephone) phrase('parcours-bulle-aide', PHRASE_DE_LA_POIGNEE);
         boite.hidden = !boite.firstChild;
         majLignes(true);
     }
@@ -1221,11 +1228,40 @@
         var atteint = texteDe(etat.def.objectifAtteint);
         var cloture = atteint ? [{ texte: atteint, classe: 'parcours-bulle-objectif parcours-bulle-atteint' },
                                  { texte: PHRASE_DE_LA_SUITE, classe: 'parcours-bulle-suite' }] : [];
+        // LA SUITE SUGGÉRÉE (20 nov. 2026) : nommée après la phrase de la suite, quand la bulle offre son bouton.
+        var suite = suiteNommee(etape);
+        if (suite) cloture.push({ texte: suite.phrase, classe: 'parcours-bulle-suite parcours-bulle-suite-suggeree' });
         var k = lignes.length;
         while (k > 0 && lignes[k - 1].geste) k--;
         return lignes.slice(0, k).concat([revue], cloture, lignes.slice(k).map(function (l) {
             return Object.assign({}, l, { texte: consigneDeLaFin(etape, l.texte) });
         }));
+    }
+
+    /**
+     * L'ENTRÉE DE LA PREMIÈRE BULLE (Grégoire, 20 nov. 2026, essai sur l'iPad) : au-dessus du titre, en petit, la ligne
+     * qui nomme le parcours (« Parcours 3 · Évaluer une première production · Nous faisons » : le rang et le nom sont
+     * LUS dans le panneau « Assistance »), puis la phrase de la poignée. Ni l'une ni l'autre en vert : le vert reste à
+     * ce qui est fait. Une carte qui n'est pas un parcours (`sansRang`) n'en a pas ; la seconde forme non plus (elle
+     * ne garde que son titre et son compteur) ; sur téléphone, pas de phrase de la poignée.
+     */
+    function ligneDuParcours() {
+        var a = window.Assistance, id = String(etat.def.id || '');
+        if (etat.def.sansRang || !a || typeof a.identiteDe !== 'function') return '';
+        var modele = /-modele$/.test(id);
+        var f = a.identiteDe(modele ? id.slice(0, -'-modele'.length) : id, modele);
+        if (!f || !f.rang) return '';
+        return ['Parcours ' + f.rang, f.titre].concat(f.temps ? [f.temps] : []).join(' · ');
+    }
+
+    function poserEntree(seconde) {
+        var e = etat.elements.entree;
+        if (!e) return;
+        var premiere = etat.i === 0 && !etat.def.sansRang && !seconde;
+        e.rang.textContent = premiere ? typographier(ligneDuParcours()) : '';
+        e.rang.hidden = !e.rang.textContent;
+        e.aide.textContent = premiere && !etat.telephone ? typographier(PHRASE_DE_LA_POIGNEE) : '';
+        e.aide.hidden = !e.aide.textContent;
     }
 
     /**
@@ -1311,34 +1347,51 @@
         etat.entreesDuLieu = entrees;
     }
 
-    /** LA FIN : le parcours qui suit celui-ci dans le panneau « Assistance » (rien : c'était le dernier). */
-    function parcoursSuivant() {
-        var a = window.Assistance;
-        if (!a || typeof a.suivantDe !== 'function' || !etat.def.id) return null;
-        return a.suivantDe(etat.def.id);
+    /**
+     * LA FIN : la suite suggérée (`Assistance.suiteDe` : le parcours qui suit celui-ci dans le panneau, ses mots, son
+     * bouton), ou rien : c'était le dernier. Une Modélisation (« x-modele ») suit le rang de son parcours.
+     */
+    function suiteSuggeree() {
+        var a = window.Assistance, id = String(etat.def.id || '');
+        if (!a || typeof a.suiteDe !== 'function' || !id || etat.def.sansRang) return null;
+        return a.suiteDe(id.replace(/-modele$/, ''));
     }
 
     /**
-     * LA FIN : le parcours que la dernière bulle offre de lancer (« Parcours suivant »), ou rien. Elle l'offre quand
-     * son seul bouton est « Terminer », dans un parcours qui a un rang, et qu'un parcours le suit dans le panneau.
+     * LA FIN (20 nov. 2026, Grégoire : « Parcours suivant » lançait un parcours d'office) : la suite que la dernière
+     * bulle offre d'ALLER VOIR (« Voir le parcours N »), ou rien. Le moteur l'offre quand le seul bouton de l'étape est
+     * « Terminer », dans un parcours qui a un rang, et qu'un parcours le suit dans le panneau.
      */
     function suiteOfferte(etape) {
         var boutons = etape.boutons || [];
         if (etat.i !== etat.def.etapes.length - 1 || etat.def.sansRang) return null;
         if (boutons.length !== 1 || boutons[0].libelle !== 'Terminer') return null;
-        return parcoursSuivant();
+        return suiteSuggeree();
+    }
+
+    /**
+     * LA FIN : la suite que la bulle NOMME (« Suite suggérée : le parcours N, « Nom ». ») : celle dont elle porte le
+     * bouton, que le moteur l'ait ajouté (`suiteOfferte`) ou que l'étape l'offre elle-même (les Modélisations,
+     * « Découvrir »). Pas de bouton, pas de ligne.
+     */
+    function suiteNommee(etape) {
+        if (etat.i !== etat.def.etapes.length - 1) return null;
+        var suite = suiteSuggeree();
+        if (!suite) return null;
+        return boutonsDeLEtape(etape).some(function (b) { return b.libelle === suite.libelle; }) ? suite : null;
     }
 
     /**
      * LA FIN : la consigne suit les boutons (14 nov. 2026, décision de Cowork). Un parcours écrit « Touche
-     * « Terminer » » ; quand la bulle offre aussi « Parcours suivant », cette consigne devient celle des deux suites.
+     * « Terminer » » ; quand la bulle offre aussi « Voir le parcours N », cette consigne devient celle des deux suites.
      * La phrase n'est écrite qu'ICI : aucun parcours ne la recopie. Le point final suit celui de la consigne
      * d'origine (une ligne de liste n'en porte pas, la ligne du geste en porte un).
      */
     function consigneDeLaFin(etape, texte) {
         if (typeof texte !== 'string') return texte;
         var m = /^Touche « Terminer »(\.?)$/.exec(texte.trim());
-        return m && suiteOfferte(etape) ? CONSIGNE_DEUX_SUITES + m[1] : texte;
+        var suite = m ? suiteOfferte(etape) : null;
+        return suite ? consigneDesDeuxSuites(suite) + m[1] : texte;
     }
 
     /** La ligne du geste de l'étape, telle que la bulle la dit. */
@@ -1361,8 +1414,10 @@
     /**
      * Les boutons de la bulle, tels qu'elle les montre.
      * · En visite, une étape déjà réglée offre « Continuer » à la place de son attente.
-     * · LA FIN : la dernière bulle qui n'offre que « Terminer » offre aussi « Parcours suivant » ; les deux de même
-     *   poids (règle 7 : aucun bouton mis en avant quand la personne choisit son rythme).
+     * · LA FIN : la dernière bulle qui n'offre que « Terminer » offre aussi « Voir le parcours N » ; les deux de même
+     *   poids (règle 7 : aucun bouton mis en avant quand la personne choisit son rythme). « Voir le parcours N »
+     *   termine ce parcours, ferme la bulle et ouvre le panneau « Assistance » devant le parcours suggéré : il ne
+     *   lance rien (20 nov. 2026).
      */
     function boutonsDeLEtape(etape) {
         var boutons = (etape.boutons || []).slice();
@@ -1374,9 +1429,9 @@
         if (suivant) {
             var terminer = boutons[0];
             boutons = [
-                { libelle: 'Parcours suivant', action: function (m) {
+                { libelle: suivant.libelle, action: function (m) {
                     terminer.action(m);
-                    window.Assistance.lancerParcours(suivant.id);
+                    suivant.voir();
                 } },
                 { libelle: 'Terminer', action: terminer.action, attend: terminer.attend }
             ];
@@ -1430,6 +1485,16 @@
         }
         etat.glisse = null;
         if (etat.telephone) etat.deplacee = null;
+        // L'entrée de la première bulle, au-dessus du titre (20 nov. 2026) ; ses textes : `poserEntree`.
+        var rang = document.createElement('p');
+        rang.className = 'parcours-bulle-identite';
+        rang.hidden = true;
+        b.appendChild(rang);
+        var aide = document.createElement('p');
+        aide.className = 'parcours-bulle-aide';
+        aide.hidden = true;
+        b.appendChild(aide);
+        etat.elements.entree = { rang: rang, aide: aide };
         // La confirmation de l'étape d'avant, au-dessus du titre (18 nov. 2026) ; son texte : `poserConfirmation`.
         var confirme = document.createElement('p');
         confirme.className = 'parcours-bulle-confirme';
@@ -2609,6 +2674,7 @@
         // noté suit donc l'étape montrée, comme avant ce lot ; une définition rejouée en visite garde le sien elle-même
         // (« Mettre ta classe en place »).
         if (etat.opts.surEtape) etat.opts.surEtape(i);
+        oublierLeRempli();
         var etape = etapeCourante();
         etat.elements.contour.hidden = true;
         // L'étape suivante reprend le placement automatique ; ses flèches et sa section actuelle seront les siennes.
@@ -2699,11 +2765,21 @@
         ['touchstart', 'touchend', 'touchcancel'].forEach(function (t) { window.removeEventListener(t, compterDoigts, { passive: true, capture: true }); });
         marquerSectionActuelle(null);
         marquerLieu(null);
+        oublierLeRempli();
         etat = null;
         retirerElements();
         document.documentElement.style.removeProperty('--parcours-reserve-bas');
         document.body.classList.remove('parcours-actif');
         signaler();
+    }
+
+    /**
+     * CE QUE « REMPLIR » A POSÉ (Grégoire, 20 nov. 2026) : en bleu dans son champ jusqu'à la création, pour se
+     * distinguer du texte par défaut des autres champs. La marque (`parcours-rempli`, posée par « Remplir »,
+     * js/parcours-classe.js) part quand l'étape change (la création fait avancer) et quand le parcours se ferme.
+     */
+    function oublierLeRempli() {
+        [].forEach.call(document.querySelectorAll('.parcours-rempli'), function (c) { c.classList.remove('parcours-rempli'); });
     }
 
     /** Le signal du moteur (voir « LE SIGNAL ») : lancé ou fermé. */

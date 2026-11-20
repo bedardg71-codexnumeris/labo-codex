@@ -1072,6 +1072,9 @@ async function ouvrirCartoucheDepuisListe(cartoucheId, grilleId) {
  */
 function signalerAutosaveCartoucheMuette(ecrit) {
     if (ecrit) return;
+    // Pendant un parcours, la bulle le dit déjà (« Touche « Créer la cartouche » ») : l'avis ne paraît pas
+    // (Grégoire, 20 nov. 2026). Le drapeau n'est pas levé : hors parcours, l'avis reste possible.
+    if (window.ParcoursMoteur && typeof window.ParcoursMoteur.actif === 'function' && window.ParcoursMoteur.actif()) return;
     const id = cartoucheActuel && cartoucheActuel.id;
     if (!id || _autosaveCartoucheDejaSignalee === id) return;
     _autosaveCartoucheDejaSignalee = id;
@@ -1079,8 +1082,10 @@ function signalerAutosaveCartoucheMuette(ecrit) {
         // Lot E1 (D3) : relu contre la nouvelle règle — le bouton s'appelle « Créer la cartouche ».
         notifications.warning(
             'Cette cartouche n\'est pas encore créée',
-            'Ce que tu tapes n\'est gardé qu\'à l\'écran. Clique sur « Créer la cartouche » ; '
-            + 'ensuite, chaque champ s\'enregistrera tout seul.'
+            // 20 nov. 2026 (Grégoire) : « écris », « Touche » ; l'avis part à la création et au changement de page.
+            'Ce que tu écris n\'est gardé qu\'à l\'écran. Touche « Créer la cartouche » ; '
+            + 'ensuite, chaque champ s\'enregistrera tout seul.',
+            { passager: true }
         );
     }
 }
@@ -1209,6 +1214,9 @@ async function sauvegarderCartouche() {
         }
         return liste;
     }, [], { geste: isCreation ? 'Créer la cartouche' : 'Modifier la cartouche' });
+
+    // La cartouche est écrite : l'avis « n'est pas encore créée » n'est plus vrai (20 nov. 2026).
+    if (typeof notifications !== 'undefined' && typeof notifications.retirerPassagers === 'function') notifications.retirerPassagers();
 
     // NOUVELLE INTERFACE (Beta 80.2): Rafraîchir la banque
     await afficherBanqueCartouches();

@@ -402,9 +402,10 @@
             get boutons() {
                 var explorer = { libelle: 'Explorer la démo par moi-même', action: function () { continuerLaDemo(); } };
                 if (!parcoursDeLaClasse()) return [explorer, { libelle: 'Terminer', action: function () { terminer(); } }];
-                return [explorer,
-                    { libelle: 'Voir le parcours suivant', action: function () { voirLeParcoursSuivant(); } },
-                    { libelle: 'Commencer avec ma classe', action: function () { commencerAvecMaClasse(); } }];
+                // 20 nov. 2026 : « Voir le parcours 2 » (le libellé vient du panneau) ne lance plus rien d'office.
+                var suite = window.Assistance.suiteDe(ID);
+                return [explorer].concat(suite ? [{ libelle: suite.libelle, action: function () { voirLaSuite(suite); } }] : [],
+                    [{ libelle: 'Commencer avec ma classe', action: function () { commencerAvecMaClasse(); } }]);
             }
         }
     ];
@@ -535,13 +536,15 @@
         return window.Assistance.parcours().find(function (p) { return p.id === 'classe'; }) || null;
     }
 
-    /** « Voir le parcours suivant » : le « Je regarde » de « Mettre ta classe en place », dans la démo, qui reste ouverte. */
-    function voirLeParcoursSuivant() {
+    /**
+     * « Voir le parcours 2 » (20 nov. 2026) : le parcours est fait, la bulle se ferme et le panneau « Assistance »
+     * s'ouvre devant le parcours suggéré ; rien n'est lancé. La démo reste ouverte.
+     */
+    function voirLaSuite(suite) {
         depart = null;
         window.Assistance.definirEtat(ID, 'fait', 0);
         M().fermer();
-        var classe = parcoursDeLaClasse();
-        if (classe && typeof classe.lancerModele === 'function') classe.lancerModele();
+        suite.voir();
     }
 
     /** « Commencer avec ma classe » : son « Nous faisons », sur les vraies données ; la démo se referme. */

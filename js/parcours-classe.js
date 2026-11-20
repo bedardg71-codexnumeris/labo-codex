@@ -704,6 +704,9 @@
     function poser(champ, valeur) {
         if (!champ) return false;
         champ.value = valeur;
+        // Ce que « Remplir » pose s'affiche en bleu jusqu'à l'étape suivante (Grégoire, 20 nov. 2026) : le moteur
+        // retire la marque (`parcours-rempli`, css/parcours.css) quand l'étape change ou que le parcours se ferme.
+        if (champ.classList) champ.classList.add('parcours-rempli');
         champ.dispatchEvent(new Event('input', { bubbles: true }));
         champ.dispatchEvent(new Event('change', { bubbles: true }));
         return true;
@@ -1055,9 +1058,9 @@
         remplir: 'Remplir',
         toucheRemplir: "Regarde l'exemple se remplir : touche « Remplir »",
         apercuFerme: "L'aperçu est refermé : touche « Prévisualiser » pour le rouvrir.",
-        // La fin à trois boutons (Grégoire, 14 nov. 2026, 10 h 58, validé).
+        // La fin à trois boutons (Grégoire, 14 nov. 2026, 10 h 58, validé). Depuis le 20 nov. 2026, celui du milieu
+        // s'appelle « Voir le parcours N » : son libellé vient du panneau (`Assistance.suiteDe`).
         refaire: 'Le refaire avec ma classe',
-        suivant: 'Voir le parcours suivant',
         terminer: 'Terminer'
     };
 
@@ -1075,21 +1078,18 @@
         return lu || (MATERIEL.cours.code + ' · gr. ' + MATERIEL.groupe);
     }
 
-    /** Le parcours qui suit `id` dans le panneau, s'il a son modèle et que rien ne l'empêche de partir. */
-    function suivantQuiASonModele(id) {
-        var suivant = window.Assistance.suivantDe(id);
-        return suivant && typeof suivant.lancerModele === 'function' ? suivant : null;
-    }
-
     /**
      * Les trois suites d'une Modélisation, de même poids (aucune mise en avant) : le même parcours sur les vraies
-     * données, le parcours suivant quand il a son modèle, « Terminer ». Commun aux modèles.
+     * données (« Le refaire avec ma classe » nomme sa destination : il la lance), la suite suggérée quand un parcours
+     * suit celui-ci dans le panneau, « Terminer ». Commun aux modèles.
+     * LA SUITE NE LANCE RIEN (Grégoire, 20 nov. 2026) : « Voir le parcours N » ferme la bulle et ouvre le panneau
+     * « Assistance » devant ce parcours ; avant, « Voir le parcours suivant » lançait son modèle d'office.
      * @param {string} id - le parcours ; @param {Function} terminerLeModele - ferme le modèle et le note fait
      */
     function suitesDuModele(id, terminerLeModele) {
         var suites = [{ libelle: MOTS_MODELE.refaire, action: function () { terminerLeModele(); window.Assistance.lancerParcours(id); } }];
-        var suivant = suivantQuiASonModele(id);
-        if (suivant) suites.push({ libelle: MOTS_MODELE.suivant, action: function () { terminerLeModele(); suivant.lancerModele(); } });
+        var suite = window.Assistance.suiteDe(id);
+        if (suite) suites.push({ libelle: suite.libelle, action: function () { terminerLeModele(); suite.voir(); } });
         suites.push({ libelle: MOTS_MODELE.terminer, action: function () { terminerLeModele(); } });
         return suites;
     }
