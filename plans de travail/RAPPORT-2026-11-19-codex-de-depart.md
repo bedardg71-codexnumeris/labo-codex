@@ -6,7 +6,7 @@
 
 ## Pour toi, Grégoire : quoi ouvrir, quoi lancer
 
-**L'aperçu d'essai** : `https://deploy-preview-42--codexnumeris-051225.netlify.app` (adresse au gabarit des aperçus du dépôt ; je n'ai pas pu l'ouvrir d'ici, le réseau de la session le refuse). **La page des fichiers** : la même adresse, suivie de `/departs.html`.
+**L'aperçu d'essai** : https://deploy-preview-42--codexnumeris-051225.netlify.app (prêt, d'après Netlify ; je n'ai pas pu l'ouvrir d'ici, le réseau de la session le refuse). **La page des fichiers** : https://deploy-preview-42--codexnumeris-051225.netlify.app/departs.html
 
 Chaque essai part d'**un espace vide** (voir plus bas comment le vider).
 
@@ -102,7 +102,19 @@ Chromium, écran tactile, publication construite servie en http, iPad Air en por
 
 ### 3.6 Les bancs des parcours sur la branche fusionnée (Chromium)
 
-_(rempli en fin de session, ci-dessous)_
+Les bancs des cinq parcours à l'essai, sur la branche fusionnée, aux deux tailles de l'iPad : **18 verts sur 18**.
+
+- `nous-faisons-classe-2026-11-19` : 5 sur 5 ;
+- `nous-faisons-recevoir-2026-11-19` : 4 sur 4 ;
+- `parcours-5-nous-faisons-2026-11-19` : 2 sur 2 (le moteur de la session A avec le parcours 5 de la session B) ;
+- `nous-faisons-donnees-2026-11-19` : 5 sur 5 ;
+- `je-regarde-cours-2026-11-19` : 2 sur 2.
+
+Le banc du verrou (`parcours-verrou-2026-11-16`) n'existe plus sur cette branche (retiré côté `lot/je-regarde-cours`) ; le verrou est jugé par sa sentinelle Vitest, verte avec les six parcours ouverts.
+
+**Les rouges laissés par les sessions A et B** (non rejoués ici, nommés par leurs rapports) : la bulle 3 de « Mettre tes données à l'abri », à droite de l'aperçu à partir de 1180 px (cinq essais du banc d'origine du parcours 6) ; la bulle 2 de « Recevoir » qui couvre « Importer » à 820 × 1180 (deux essais) ; la bulle de « Mettre ta classe en place » qui couvre deux champs. **Aucun ne gêne un codex de départ** : ils portent sur des bulles en cours de parcours, pas sur son départ, et le banc des départs est vert.
+
+**Non jugé** : WebKit et Safari (aucun WebKit dans la session) ; l'iPad lui-même.
 
 ## 4. Trouvailles en chemin
 
