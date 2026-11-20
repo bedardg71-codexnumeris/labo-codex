@@ -26,12 +26,8 @@ export const GESTES_PROPOSES = {
     ],
     // js/parcours-decouvrir.js n'a plus de geste proposé : ses huit bulles sont celles du 16 nov. 2026, réécrites
     // avec Grégoire (sentinelle-parcours-je-regarde-2026-11-16.test.js).
-    'js/parcours-donnees.js': [
-        "Touche « Codex », en haut de l'écran.",
-        "Touche « Mettre à jour le codex ».",
-        "Touche « Mettre à jour », puis range ton fichier dans un lieu protégé.",
-        "Touche « Terminer ».",
-    ],
+    // js/parcours-donnees.js n'a plus de geste proposé : ses bulles sont celles du 19 nov. 2026, réécrites avec Grégoire
+    // (« Nous faisons », sentinelle-parcours-donnees-2026-11-09.test.js, confrontée à CONSIGNE-2026-11-19-nous-faisons-donnees.md).
     // Lot « La carte d'aide dans Apporter mon matériel » (13 nov. 2026) : les lignes de l'accueil et de l'exemple ouvert
     // vivent dans le module que « Ta grille » et la carte de la page appellent toutes deux ; les deux dernières, la sortie
     // de l'exemple dans la page, sont PROPOSÉES ce jour-là.

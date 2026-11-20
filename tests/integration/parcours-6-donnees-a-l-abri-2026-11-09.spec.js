@@ -120,11 +120,22 @@ async function poserChemin(page, chemin) {
 }
 
 const bulle = (page) => page.locator('#parcours-bulle');
-const texteBulle = (page) => page.locator('#parcours-bulle .parcours-bulle-texte');
-const P = (page) => page.evaluate(() => ({
-    phrases: window.ParcoursDonnees.phrases,
-    textes: window.ParcoursDonnees.etapes.map((e) => e.texte)
-}));
+// 19 nov. 2026 (« Nous faisons » réécrit avec Grégoire) : les bulles sont en lignes. Ce que la bulle dit, à plat (sans les
+// insécables que pose le moteur) ; et, lus dans le code, les lignes de chaque bulle et les consignes de chaque chemin de
+// l'étape 3 (les mots, eux, sont jugés par la sentinelle contre la consigne).
+const dit = (page) => page.evaluate(() => (document.querySelector('#parcours-bulle .parcours-bulle-lignes') || {}).textContent.replace(/\u00a0/g, ' ').replace(/\s+/g, ' '));
+async function bulleDit(page, lignes) {
+    await expect.poll(async () => { const t = await dit(page); return lignes.filter((l) => !t.includes(l)); }, { timeout: 5000 }).toEqual([]);
+}
+const P = (page) => page.evaluate(() => {
+    const D = window.ParcoursDonnees;
+    const consigneDe = (chemin, manquent) => D.lignesEtape3(chemin, manquent).filter((l) => l.geste).map((l) => l.texte)[0];
+    return {
+        textes: D.etapes.map((e, i) => (i === 2 ? D.lignesEtape3('fenetre', false) : e.lignes()).map((l) => l.texte)),
+        fenetre: consigneDe('fenetre', false), partage: consigneDe('partage', false), telechargement: consigneDe('telechargement', false),
+        reecriture: D.lignesEtape3('tenu', false).slice(-1)[0].texte
+    };
+});
 
 async function attendreEtape(page, n) {
     await expect(bulle(page).locator('.parcours-bulle-rang')).toHaveText(n + ' sur 4', { timeout: 10000 });
@@ -331,12 +342,12 @@ for (const clair of [false, true]) {
     const theme = clair ? 'clair' : 'sombre';
     test(`de bout en bout, fenêtre de choix (1180, ${theme}) : chaque étape sur l'état atteint ; « Ouvrir un codex… » sans effet ; le rappel attend ; « Refaire » dit le fichier tenu`, async ({ page }) => {
         const erreurs = await ouvrirEspace(page, 1180, { clair });
-        const { phrases, textes } = await P(page);
+        const textes = await P(page);
         // Des évaluations réelles : le rappel aurait de quoi s'ouvrir.
         await page.evaluate(() => db.setSync(cle('evaluationsSauvegardees'), [{ id: 'eval-fictive-1' }]));   // security-ok: banc, donnée fictive créée ici
         await lancerLeParcours(page);
         await attendreEtape(page, 1);
-        await expect(texteBulle(page)).toHaveText(textes[0]);
+        await bulleDit(page, textes.textes[0]);
 
         // Le rappel devient dû en plein parcours : il ne s'ouvre pas.
         await page.evaluate(() => {
@@ -346,9 +357,10 @@ for (const clair of [false, true]) {
 
         await jusquALApercu(page, { capturer: `1180-${theme}` });
         await expect(page.locator('#overlay-backup-reminder')).toHaveCount(0);
-        await expect(texteBulle(page)).toHaveText(
-            textes[2].split(phrases.fenetre1)[0] + phrases.fenetre1 + ' ' + phrases.fenetre2 + ' ' +
-            'Quand le menu affiche « Ton codex est à jour », ta copie est faite.');
+        await bulleDit(page, textes.textes[2]);
+        // 19 nov. 2026 : « Quand le menu affiche « Ton codex est à jour », ta copie est faite. » est devenue la confirmation
+        // de la bulle 4.
+        expect(await dit(page)).not.toContain('ta copie est faite');
         await bulleSurLApercuSansCouvrirSesBoutons(page);
         // Le « i » de l'aperçu (bulle 2) : présent, l'aide dans les pages allumée (son défaut),
         // et pas couvert par la bulle 3 à cette largeur. À 390 px, la bulle le couvre (rapport).
@@ -367,7 +379,7 @@ for (const clair of [false, true]) {
 
         await ecrireEtAttendreEtape4(page);
         expect(await page.evaluate(() => window.__ecritures)).toBe(1);
-        await expect(texteBulle(page)).toHaveText(textes[3]);
+        await bulleDit(page, textes.textes[3]);
         await expect(bulle(page).locator('.parcours-bulle-sortie')).toHaveCount(0);
         await capture(page, `1180-${theme}-etape-4`);
 
@@ -398,8 +410,8 @@ for (const clair of [false, true]) {
         // « Refaire » : le fichier est tenu, il sera réécrit sans question.
         await lancerLeParcours(page);
         await jusquALApercu(page);
-        await expect(texteBulle(page)).toContainText(phrases.fenetre2);
-        await expect(texteBulle(page)).not.toContainText(phrases.fenetre1);
+        await bulleDit(page, ['Touche « Mettre à jour »', textes.reecriture]);
+        expect(await dit(page)).not.toContain(textes.fenetre);
         await capture(page, '1180-sombre-etape-3-fichier-tenu');
         await ecrireEtAttendreEtape4(page);
         expect(await page.evaluate(() => window.__ecritures)).toBe(2);
@@ -409,10 +421,10 @@ for (const clair of [false, true]) {
 
 test('feuille de partage, puis téléchargement et « Il y est » (1180, sombre) : la phrase du chemin ; la bulle cède la place à « Il y est »', async ({ page }) => {
     const erreurs = await ouvrirEspace(page, 1180, { chemin: 'partage' });
-    const { phrases } = await P(page);
+    const phrases = await P(page);
     await lancerLeParcours(page);
     await jusquALApercu(page);
-    await expect(texteBulle(page)).toContainText(phrases.partage);
+    await bulleDit(page, [phrases.partage]);
     await bulleSurLApercuSansCouvrirSesBoutons(page);
     await capture(page, '1180-sombre-etape-3-partage');
     await ecrireEtAttendreEtape4(page);
@@ -422,7 +434,7 @@ test('feuille de partage, puis téléchargement et « Il y est » (1180, sombre)
     await poserChemin(page, 'telechargement');
     await lancerLeParcours(page);
     await jusquALApercu(page);
-    await expect(texteBulle(page)).toContainText(phrases.telechargement);
+    await bulleDit(page, [phrases.telechargement]);
     await bulleSurLApercuSansCouvrirSesBoutons(page);
     await capture(page, '1180-sombre-etape-3-telechargement');
     await ecrireEtAttendreEtape4(page, { ilYEst: true, capturer: '1180-sombre-etape-3-il-y-est' });
@@ -431,7 +443,7 @@ test('feuille de partage, puis téléchargement et « Il y est » (1180, sombre)
 
 test('des copies manquent (1180, sombre) : l’avertissement passe pendant l’étape 2, la phrase de la fenêtre perd celle de la réécriture', async ({ page }) => {
     const erreurs = await ouvrirEspace(page, 1180);
-    const { phrases } = await P(page);
+    const phrases = await P(page);
     // Une production dont le fichier n'est pas dans l'application (nom fictif).
     await page.evaluate(() => db.setSync(cle('fichiersTravaux'), [{ id: 'ft-fictif-1', nomFichier: 'production-fictive.pdf' }]));   // security-ok: banc, donnée fictive créée ici
     await lancerLeParcours(page);
@@ -442,8 +454,8 @@ test('des copies manquent (1180, sombre) : l’avertissement passe pendant l’�
             await avertissement.locator('.btn-supprimer').click();
         }
     });
-    await expect(texteBulle(page)).toContainText(phrases.fenetre1);
-    await expect(texteBulle(page)).not.toContainText(phrases.fenetre2);
+    await bulleDit(page, [phrases.fenetre]);
+    expect(await dit(page)).not.toContain(phrases.reecriture);
     await bulleSurLApercuSansCouvrirSesBoutons(page);
     await capture(page, '1180-sombre-etape-3-copies-manquantes');
     await ecrireEtAttendreEtape4(page);
@@ -454,10 +466,10 @@ test('des copies manquent (1180, sombre) : l’avertissement passe pendant l’�
 for (const chemin of ['partage', 'telechargement']) {
     test(`390 px, ${chemin} : l'étape 1 et l'étape 3 ; la bulle tient au-dessus de « Mettre à jour » sans le couvrir`, async ({ page }) => {
         const erreurs = await ouvrirEspace(page, 390, { hauteur: 844, chemin });
-        const { phrases } = await P(page);
+        const phrases = await P(page);
         await lancerLeParcours(page);
         await jusquALApercu(page, { capturer: chemin === 'partage' ? '390-sombre' : '' });
-        await expect(texteBulle(page)).toContainText(phrases[chemin]);
+        await bulleDit(page, [phrases[chemin]]);
         await bulleSurLApercuSansCouvrirSesBoutons(page);
         await capture(page, `390-sombre-etape-3-${chemin}`);
         await ecrireEtAttendreEtape4(page, { ilYEst: chemin === 'telechargement', capturer: chemin === 'telechargement' ? '390-sombre-etape-3-il-y-est' : '' });
@@ -473,7 +485,7 @@ for (const chemin of ['partage', 'telechargement']) {
 for (const chemin of ['fenetre', 'partage', 'copies-manquantes']) {
     test(`1440 px, ${chemin} : la bulle 3 à droite de l'aperçu ne couvre ni la mise en garde, ni la liste, ni « Mettre à jour », ni « Annuler »`, async ({ page }) => {
         const erreurs = await ouvrirEspace(page, 1440, { chemin: chemin === 'partage' ? 'partage' : 'fenetre' });
-        const { phrases } = await P(page);
+        const phrases = await P(page);
         if (chemin === 'copies-manquantes') {
             await page.evaluate(() => db.setSync(cle('fichiersTravaux'), [{ id: 'ft-fictif-1', nomFichier: 'production-fictive.pdf' }]));   // security-ok: banc, donnée fictive créée ici
         }
@@ -485,7 +497,7 @@ for (const chemin of ['fenetre', 'partage', 'copies-manquantes']) {
                 await avertissement.locator('.btn-supprimer').click();
             }
         });
-        await expect(texteBulle(page)).toContainText(chemin === 'partage' ? phrases.partage : phrases.fenetre1);
+        await bulleDit(page, [chemin === 'partage' ? phrases.partage : phrases.fenetre]);
         await bulleSurLApercuSansCouvrirSesBoutons(page);
         const nom = chemin === 'fenetre' ? 'fenetre-de-choix' : chemin;
         await capture(page, `1440-sombre-etape-3-${nom}`);
