@@ -149,7 +149,10 @@ la bulle 7. Le banc a été changé pour juger le cas où l'étape agit (replié
 
 ## 7. L'aperçu
 
-À COMPLÉTER.
+PR d'aperçu n° 38 (brouillon), « APERÇU, ne pas fusionner — « Recevoir les productions », Nous faisons : les bulles du
+19 nov., deux voies » : https://github.com/bedardg71-codexnumeris/labo-codex/pull/38. Aperçu Netlify :
+https://deploy-preview-38--codexnumeris-051225.netlify.app (l'adresse que Netlify donne aux PR de ce dépôt). Commit de tête
+du lot : `8e261d3c`, puis ce rapport.
 
 ## 8. Ce qui attend une décision
 
