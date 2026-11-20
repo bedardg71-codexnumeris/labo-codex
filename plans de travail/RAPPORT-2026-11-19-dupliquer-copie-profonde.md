@@ -164,8 +164,8 @@ grille choisie… ») ; comme la copie de grille garde les identifiants de crit�
 
 - Vitest complet : 933 fichiers, 11 926 tests verts (après le renommage de quatre variables `cle` qui masquaient
   `cle()`, cliquet #642, dans mon module).
-- Chromium, portrait (820 × 1180) et paysage (1180 × 820) : les trois bancs du lot et le banc de caractérisation des
-  duplications (#476), relancés sur l'état final (résultat au relais de la PR).
+- Chromium, portrait (820 × 1180) et paysage (1180 × 820), sur l'état final (`b7451bd9`) : 73 essais verts, soit les
+  trois bancs du lot (16 + 18 + 6) et le banc de caractérisation des duplications #476 (33).
 - Pas fait : Safari ni l'iPad. La copie profonde est du JSON, indépendante du moteur ; le diagnostic, lui, sera éprouvé
   par son premier passage chez Grégoire. Je ne pose donc pas de porte terrain à part.
 
