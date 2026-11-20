@@ -5,6 +5,8 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { JSDOM } from 'jsdom';
 import { chargerScript } from './_helpers/charger-script.js';
+import { readFileSync } from 'node:fs';
+import { tranche } from './_helpers/tranche.js';
 
 let document, notifications;
 
@@ -36,6 +38,47 @@ describe('#1224 · rouge et orange restent jusqu\'à « OK »', () => {
         expect(affichees()).toHaveLength(1);
         vi.advanceTimersByTime(301);
         expect(affichees()).toHaveLength(0);
+    });
+});
+
+// 20 nov. 2026 (essai de Grégoire sur l'iPad ; consigne, A6) : « Cette cartouche n'est pas encore créée » restait après
+// la création et suivait dans « Productions ». Un avis PASSAGER part sans « OK » quand la fiche le retire, et au
+// changement de page ; un orange ordinaire, lui, reste (#1224).
+describe('A6 (20 nov. 2026) · un avis passager part quand il n\'est plus vrai', () => {
+    it('`retirerPassagers` retire l\'avis passager, pas le rouge ni l\'orange ordinaires', () => {
+        notifications.warning('Cette cartouche n\'est pas encore créée', 'détail', { passager: true });
+        notifications.warning('Grille enregistrée');
+        notifications.erreur('Jetons non appliqués');
+        expect(affichees()).toHaveLength(3);
+        notifications.retirerPassagers();
+        vi.advanceTimersByTime(300);
+        expect(affichees().map(n => n.querySelector('.notification-texte').textContent))
+            .toEqual(['Grille enregistrée', 'Jetons non appliqués']);
+    });
+
+    it('au changement de page (`sectionAffichee`), l\'avis passager part aussi', () => {
+        // Le module s'abonne à l'événement que js/navigation.js émet à chaque changement de sous-section.
+        const dom = new JSDOM('<!doctype html><html><body></body></html>');
+        const fenetre = { addEventListener: (t, f) => dom.window.addEventListener(t, f) };
+        const n = chargerScript('js/utils-notifications.js', { document: dom.window.document }, fenetre).notifications;
+        n.warning('Cette cartouche n\'est pas encore créée', '', { passager: true });
+        n.warning('Reste là');
+        dom.window.dispatchEvent(new dom.window.CustomEvent('sectionAffichee', { detail: { idSousSection: 'conception-productions' } }));
+        vi.advanceTimersByTime(300);
+        expect([...dom.window.document.querySelectorAll('.notification-succes .notification-texte')].map(e => e.textContent)).toEqual(['Reste là']);
+    });
+
+    it('l\'avis de la cartouche neuve est passager, dit « écris » et « Touche », et se tait pendant un parcours', () => {
+        const src = readFileSync(new URL('../../js/cartouches.js', import.meta.url), 'utf8');
+        expect(src).toContain("'Ce que tu écris n\\'est gardé qu\\'à l\\'écran. Touche « Créer la cartouche » ; '");
+        expect(src).toContain('{ passager: true }');
+        expect(src).not.toMatch(/Ce que tu tapes|Clique sur « Créer la cartouche »/);
+        const avis = tranche(src, 'function signalerAutosaveCartoucheMuette(ecrit) {', 'function retirerLAvisDeFicheNeuve');
+        // Pendant un parcours : rien ne paraît, et le drapeau « déjà signalé » n'est pas levé.
+        expect(avis.indexOf('window.ParcoursMoteur.actif()) return;')).toBeGreaterThan(-1);
+        expect(avis.indexOf('window.ParcoursMoteur.actif()) return;')).toBeLessThan(avis.indexOf('_autosaveCartoucheDejaSignalee = id;'));
+        // À la création : l'avis part.
+        expect(tranche(src, 'async function sauvegarderCartouche', 'await afficherBanqueCartouches();')).toContain('retirerLAvisDeFicheNeuve();');
     });
 });
 

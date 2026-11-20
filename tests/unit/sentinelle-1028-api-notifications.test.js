@@ -47,7 +47,8 @@ function appelsInconnus(remplacer) {
 
 describe('#1028 · chaque appel à notifications.* existe dans l\'API', () => {
     it('l\'API lue est celle attendue', () => {
-        expect(apiExposee().sort()).toEqual(['erreur', 'info', 'succes', 'warning']);
+        // `retirerPassagers` (20 nov. 2026) : un avis qui ne parle que de la fiche ouverte part quand il n'est plus vrai.
+        expect(apiExposee().sort()).toEqual(['erreur', 'info', 'retirerPassagers', 'succes', 'warning']);
     });
 
     it('aucun appel à une fonction absente', () => {

@@ -32,7 +32,7 @@ const AUTOEVALUATION = lire('plans de travail/materiel-evaluer/grille-autoevalua
 // Le fichier, chargé hors du navigateur : ce qu'il enregistre au panneau et ce qu'il expose aux bancs.
 const definitions = {};
 const fenetre = {
-    Assistance: { enregistrer: (def) => { definitions[def.id] = def; }, parcours: () => [], suivantDe: () => null }
+    Assistance: { enregistrer: (def) => { definitions[def.id] = def; }, parcours: () => [], suivantDe: () => null, suiteDe: () => null }
 };
 new Function('window', lire('js/parcours-classe.js'))(fenetre);
 new Function('window', EVALUER)(fenetre);
@@ -181,7 +181,10 @@ describe('2. les textes des dix bulles : ceux de la section D, mot pour mot', ()
     it('l’objectif : dit par la première bulle, atteint à la dernière, une seule écriture', () => {
         expect(bulles[0].lignes[0]).toBe(aPlat(T.objectif));
         expect(bulles[9].lignes).toContain(aPlat(T.objectifAtteint));
-        expect(EVALUER.match(/de la pratique de notation à la rétroaction/g)).toHaveLength(1);
+        // Une écriture par temps (« Je regarde » : expliquer ; « Nous faisons », 20 nov. 2026 : évaluer), hors commentaires.
+        const code = EVALUER.replace(/\/\*[\s\S]*?\*\//g, '').replace(/^\s*\/\/.*$/gm, '');
+        expect(code.match(/de la pratique de notation à la rétroaction/g)).toHaveLength(2);
+        expect(code.match(/d'expliquer comment une production s'évalue dans l'application, de la pratique de notation à la rétroaction/g)).toHaveLength(1);
     });
 });
 
@@ -206,10 +209,11 @@ describe('3. dix étapes, dans l’ordre de la consigne', () => {
         expect(etapes[9].sansSortie).toBe(true);
     });
 
-    it('« Nous faisons » (la Pratique guidée) ne bouge pas : neuf étapes, ses textes validés', () => {
-        expect(fenetre.ParcoursEvaluer.etapes()).toHaveLength(9);
-        expect(DEF.total).toBe(9);
-        expect(EVALUER).toContain('var TEXTE_1 = "Pour évaluer une première production, il te faut ta grille. Apporte celle que tu utilises déjà');
+    it('« Nous faisons » (la Pratique guidée) a ses dix bulles à elle depuis le 20 nov. 2026 : elle ne lit ni le matériel ni les textes du modèle', () => {
+        // Ses mots sont jugés par tests/unit/sentinelle-parcours-evaluer-2026-11-09.test.js, contre la consigne du 20 nov.
+        expect(fenetre.ParcoursEvaluer.etapes()).toHaveLength(10);
+        expect(DEF.total).toBe(10);
+        expect(EVALUER).not.toContain('var TEXTE_1 = ');
         expect(tranche(EVALUER, 'var ETAPES = [', 'var DEF = ')).not.toMatch(/MATERIEL|TEXTES\./);
     });
 });

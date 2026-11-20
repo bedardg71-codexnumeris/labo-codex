@@ -16,6 +16,7 @@
 // Break-test (19 nov.) : voir le rapport du lot (plans de travail/RAPPORT-2026-11-19-nous-faisons-classe.md).
 
 import { describe, it, expect } from 'vitest';
+import { suiteEcrite } from './_helpers/fin-des-parcours-2026-11-20.js';
 import { tranche } from './_helpers/tranche.js';
 import { readFileSync } from 'node:fs';
 import path from 'node:path';
@@ -148,7 +149,10 @@ describe('« Mettre ta classe en place », « Nous faisons » : les huit bulles 
         expect(DEF.objectifAtteint).toBe(consigne[7].atteint);
         expect(consigne[7].lignes.map((l) => l.texte)).toEqual(expect.arrayContaining([REVOIR, dite('PHRASE_DE_LA_SUITE')]));
         // La consigne de la fin : « Touche « Terminer » » dans le code ; le moteur dit les deux suites quand il les offre.
-        expect(consigne[7].lignes.filter((l) => l.genre === 'consigne').map((l) => l.texte)).toEqual([dite('CONSIGNE_DEUX_SUITES') + '.']);
+        // (Le relais du 19 nov. l'écrit avec « Parcours suivant » ; depuis le 20 nov., le bouton s'appelle « Voir le
+        // parcours 3 » et ne lance rien : la consigne du 20 nov., A3, que lit `suiteEcrite`.)
+        expect(consigne[7].lignes.filter((l) => l.genre === 'consigne').map((l) => l.texte)).toEqual(['Touche « Parcours suivant », ou « Terminer ».']);
+        expect(suiteEcrite(3, 'Évaluer une première production').consigne).toBe('Touche « Voir le parcours 3 », ou « Terminer »');
     });
 
     it('bulle 8 : la phrase de l’absence, ses deux formes, dans l’ordre (une absence notée d’abord)', () => {

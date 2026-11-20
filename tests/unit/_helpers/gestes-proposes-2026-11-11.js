@@ -30,21 +30,10 @@ export const GESTES_PROPOSES = {
         "Regarde chaque étiquette, puis la grille lue en dessous ; touche ensuite « Quitter l'exemple ».",
         "L'exemple est étiqueté : touche « Quitter l'exemple ».",
     ],
-    'js/parcours-evaluer.js': [
-        "Choisis les points ou les niveaux.",
-        // Lot de la dissection sur l'iPad (12 nov. 2026, point 7) : les boutons nommés tels qu'ils sont écrits ; l'exemple,
-        // une grille déjà là, Conception › Grilles. PROPOSÉES.
-        "Touche « + Nouvelle grille », compose-la, puis touche « Créer la grille » ; ou ouvre une de tes grilles.",
-        "Touche « Prendre cette grille » pour évaluer avec la grille ouverte ; ou ouvre-en une autre.",
-        "Touche « + Nouvelle production », remplis les champs obligatoires, choisis ta grille, puis touche « Créer la production ».",
-        "Écris la date de remise, puis coche « Consignes transmises ».",
-        "Touche « Actions › Évaluer » sur sa ligne, choisis un niveau par critère, puis touche « Verrouiller ».",
-        "Touche « + Nouvelle pratique », choisis « Partir d'un modèle », puis suis l'assistant jusqu'à « Créer la pratique ».",
-        "Choisis ta pratique dans le menu en haut de la page, puis touche « Appliquer au cours actif ».",
-        "Touche « Continuer ».",
-        "Touche « + Nouvelle cartouche », remplis-la, enregistre-la, puis choisis-la dans la fiche de ta production.",
-        "Touche « Actions › Consulter », puis « Déverrouiller » ; écris ton mot, verrouille, puis touche « Terminer ».",
-    ],
+    // js/parcours-evaluer.js n'a plus de geste proposé : son « Nous faisons » est celui du 20 nov. 2026, réécrit avec
+    // Grégoire (dix bulles en lignes, sentinelle-parcours-evaluer-2026-11-09.test.js, confrontée à
+    // CONSIGNE-2026-11-20-essai-parcours.md) ; les onze lignes proposées les 11 et 12 nov. sont parties avec l'ancienne
+    // Pratique guidée.
     'js/parcours-lire-ta-classe.js': [
         "Touche « Continuer ».",
         "Touche « Régler les outils d'observation », puis choisis ta grille dans « Grille de critères pour le dépistage ».",

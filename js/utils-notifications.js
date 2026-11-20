@@ -266,7 +266,7 @@
         if (!pile) return;
         Array.from(pile.querySelectorAll('[data-passager]')).forEach(_retirer);
     }
-    window.addEventListener('sectionAffichee', retirerPassagers);
+    if (typeof window.addEventListener === 'function') window.addEventListener('sectionAffichee', retirerPassagers);
 
     window.notifications = { succes, erreur, warning, info, retirerPassagers };
 })();

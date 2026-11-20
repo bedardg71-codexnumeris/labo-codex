@@ -872,7 +872,7 @@
                     note("« Complexité SOLO » peut rester tel quel pour l'instant."),
                     { texte: "Donne un nom à ta grille", champs: function () { return [el('nomGrilleTemplate')]; } },
                     { texte: "Nomme ton premier critère, décris-le en une phrase et donne sa pondération", fait: premierCritereDecrit },
-                    { texte: "Touche « + Ajouter un critère » pour chacun des suivants (la pondération totale doit atteindre 100 %)", fait: ponderationComplete },
+                    { texte: "Touche « + Ajouter un critère » pour chacun des suivants (la pondération totale doit atteindre 100\u00a0%)", fait: ponderationComplete },
                     consigne("Touche « Créer la grille »")
                 ];
             },

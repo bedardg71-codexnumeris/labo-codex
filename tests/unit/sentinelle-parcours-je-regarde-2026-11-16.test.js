@@ -25,6 +25,7 @@ import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { tranche } from './_helpers/tranche.js';
+import { suiteFactice, sectionDeLaConsigne } from './_helpers/fin-des-parcours-2026-11-20.js';
 
 const RACINE = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..');
 const lire = (f) => readFileSync(path.join(RACINE, f), 'utf8');
@@ -37,7 +38,9 @@ const STYLES = lire('css/parcours.css');
 
 // Les deux fichiers, chargés hors du navigateur : ce qu'ils exposent aux bancs.
 // (Tous les parcours ouverts, comme sous les bancs : le verrou est jugé par sentinelle-parcours-verrou-2026-11-16.test.js.)
-const fenetre = { Assistance: { enregistrer: () => {}, parcours: () => [{ id: 'classe', lancerModele: () => {} }], suivantDe: () => ({ lancerModele: () => {} }) } };
+// (20 nov. 2026 : la suite d'un parcours vient du panneau, `suiteDe` : « Voir le parcours N ».)
+const fenetre = { Assistance: { enregistrer: () => {}, parcours: () => [{ id: 'classe', lancerModele: () => {} }], suivantDe: () => ({ lancerModele: () => {} }),
+    suiteDe: (id) => suiteFactice(id === 'decouvrir' ? 2 : 3)() } };
 new Function('window', DECOUVRIR)(fenetre);
 new Function('window', CLASSE)(fenetre);
 
@@ -165,10 +168,14 @@ describe('« Découvrir » : les huit bulles du 16 nov., mot pour mot', () => {
 
     it('la fin : trois boutons de même poids, dans l’ordre de la consigne, aucun mis en avant', () => {
         const boutons = etapes[7].boutons;
-        expect(boutons.map((x) => x.libelle)).toEqual(['Explorer la démo par moi-même', 'Voir le parcours suivant', 'Commencer avec ma classe']);
-        boutons.forEach((x) => { expect(x.primaire).toBeUndefined(); expect(consigne[7].boutons).toContain('« ' + x.libelle + ' »'); });
-        // « Voir le parcours suivant » lance le « Je regarde » de « Mettre ta classe en place » ; l'autre, son « Nous faisons ».
-        expect(tranche(DECOUVRIR, 'function voirLeParcoursSuivant() {', '\n    }\n')).toContain('classe.lancerModele()');
+        // 20 nov. 2026 (A3) : le bouton du milieu, « Voir le parcours suivant » dans la consigne du 16, s'appelle « Voir le
+        // parcours 2 » et ne lance plus rien : il termine « Découvrir » et ouvre le panneau devant le parcours.
+        expect(boutons.map((x) => x.libelle)).toEqual(['Explorer la démo par moi-même', 'Voir le parcours 2', 'Commencer avec ma classe']);
+        boutons.forEach((x) => { expect(x.primaire).toBeUndefined(); expect(consigne[7].boutons).toContain('« ' + x.libelle.replace(/^Voir le parcours \d+$/, 'Voir le parcours suivant') + ' »'); });
+        const voir = tranche(DECOUVRIR, 'function voirLaSuite(suite) {', '\n    }\n');
+        expect(voir).toContain('suite.voir();');
+        expect(voir).not.toMatch(/lancerModele|\.lancer\(/);
+        expect(DECOUVRIR).not.toContain('voirLeParcoursSuivant');
         expect(tranche(DECOUVRIR, 'async function commencerAvecMaClasse() {', '\n    }\n')).toMatch(/classe\.lancer\(/);
     });
 
@@ -238,8 +245,12 @@ describe('« Mettre ta classe en place », « Je regarde » : les huit bulles du
 
     it('la fin : trois boutons de même poids, dans l’ordre de la consigne ; « Pour revoir une étape » vient du moteur', () => {
         const boutons = etapes[7].boutons;
-        expect(boutons.map((x) => x.libelle)).toEqual(['Le refaire avec ma classe', 'Voir le parcours suivant', 'Terminer']);
-        boutons.forEach((x) => { expect(x.primaire).toBeUndefined(); expect(consigne[7].boutons).toContain('« ' + x.libelle + ' »'); });
+        // 20 nov. 2026 (A3) : « Voir le parcours suivant » (la consigne du 16) s'appelle « Voir le parcours 3 » et ne lance rien.
+        expect(boutons.map((x) => x.libelle)).toEqual(['Le refaire avec ma classe', 'Voir le parcours 3', 'Terminer']);
+        boutons.forEach((x) => { expect(x.primaire).toBeUndefined(); expect(consigne[7].boutons).toContain('« ' + x.libelle.replace(/^Voir le parcours \d+$/, 'Voir le parcours suivant') + ' »'); });
+        const suites = tranche(CLASSE, 'function suitesDuModele(id, terminerLeModele) {', 'return suites;');
+        expect(suites).toContain('terminerLeModele(); suite.voir();');
+        expect(suites).not.toContain('lancerModele');
         expect(consigne[7].avant[consigne[7].avant.length - 1]).toBe(REVOIR);
         expect(MOTEUR).toContain("'Pour revoir une étape, touche « ' + n + ' sur ' + n + ' ».'");
     });
@@ -404,7 +415,17 @@ describe('les retouches de l’essai sur l’iPad (16 nov. 2026), telles que son
     it('B.7 : la première bulle de chaque parcours dit la poignée, sauf sur téléphone (la bulle n’y en a pas)', () => {
         expect(dite('PHRASE_DE_LA_POIGNEE')).toBe('Tu peux déplacer cette bulle par sa poignée et faire défiler la page pour mieux voir.');
         expect(ESSAI).toContain('« ' + dite('PHRASE_DE_LA_POIGNEE') + ' »');
-        expect(ecrire).toContain("if (etat.i === 0 && !etat.def.sansRang && !etat.telephone) phrase('parcours-bulle-aide', PHRASE_DE_LA_POIGNEE);");
+        // 20 nov. 2026 (A2) : elle monte au-dessus du titre, sous la ligne qui nomme le parcours (A1) ; toujours en
+        // gris (le vert reste à ce qui est fait), toujours absente sur téléphone.
+        const entree = tranche(MOTEUR, 'function poserEntree(seconde) {', '\n    }\n');
+        expect(entree).toContain("e.aide.textContent = premiere && !etat.telephone ? typographier(PHRASE_DE_LA_POIGNEE) : '';");
+        expect(entree).toContain('var premiere = etat.i === 0 && !etat.def.sansRang && !seconde;');
+        const rendre = tranche(MOTEUR, 'function rendreBulle(opts) {', 'b.appendChild(tete);');
+        expect(rendre.indexOf("rang.className = 'parcours-bulle-identite';")).toBeLessThan(rendre.indexOf("aide.className = 'parcours-bulle-aide';"));
+        expect(rendre.indexOf("aide.className = 'parcours-bulle-aide';")).toBeLessThan(rendre.indexOf("confirme.className = 'parcours-bulle-confirme';"));
+        expect(sectionDeLaConsigne('A2.')).toContain('« ' + dite('PHRASE_DE_LA_POIGNEE') + ' »');
+        expect(STYLES).toMatch(/\.parcours-bulle-identite \{[^}]*color: var\(--texte-secondaire\);/);
+        expect(STYLES).not.toMatch(/\.parcours-bulle-(identite|aide)[^{]*\{[^}]*vert/);
     });
 
     it('9 : l’espace insécable devant « ; : ? ! », pour toutes les bulles', () => {

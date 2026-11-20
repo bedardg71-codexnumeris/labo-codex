@@ -16,6 +16,7 @@
 //     ROUGE (étape 2) ; rétabli → vert.
 
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
+import { suiteEcrite } from './_helpers/fin-des-parcours-2026-11-20.js';
 import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -159,7 +160,10 @@ describe('« Mettre tes données à l’abri », « Nous faisons » : les quatre
         expect(E[3].sansSortie).toBe(true);
         expect(E.slice(0, 3).every((e) => !e.sansSortie)).toBe(true);
         expect(E[3].lignes().filter((l) => l.geste).map((l) => l.texte)).toEqual(['Touche « Terminer »']);
-        expect(RELAIS).toContain('la consigne « ' + dite('CONSIGNE_DEUX_SUITES') + '. »');
+        // Le relais du 19 nov. écrit la consigne avec « Parcours suivant » ; depuis le 20 nov. (A3), le moteur dit
+        // « Voir le parcours N » d'après le panneau (`suiteEcrite`), et rien après le dernier parcours.
+        expect(RELAIS).toContain('la consigne « Touche « Parcours suivant », ou « Terminer ». »');
+        expect(suiteEcrite(7, 'Lire ta classe').consigne).toBe('Touche « Voir le parcours 7 », ou « Terminer »');
         expect(RELAIS).toContain('« Pour revoir une étape, touche « 4 sur 4 ». »');
     });
 

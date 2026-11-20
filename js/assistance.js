@@ -696,7 +696,7 @@
      *   bouton (« Je regarde », ou le bouton d'un parcours à un temps) prend le focus. Rien n'est lancé.
      */
     function ouvrirPanneau(opts) {
-        var sur = opts && typeof opts.sur === 'string' ? opts.sur : null;
+        var sur = (opts || {}).sur;
         fermerPanneau({ sansRetourFocus: true });
         // Le menu à trois traits se referme : le panneau prend sa place.
         var menu = document.getElementById('entete-menu-panneau');
@@ -718,14 +718,21 @@
         window.addEventListener('resize', rafraichirListe);
         requestAnimationFrame(function () { els.panneau.classList.remove('est-entrant'); });
         var titre = els.panneau.querySelector('.assistance-fermer');
-        var carte = sur ? els.panneau.querySelector('[data-parcours="' + sur + '"]') : null;
+        if (!montrerLeParcours(els.panneau, sur) && titre) titre.focus();
+    }
+
+    /**
+     * Le panneau ouvert DEVANT un parcours (`sur`) : sa carte marquée, amenée au milieu du panneau, et son premier
+     * bouton au focus. @returns {boolean} true si le parcours y est (sinon le panneau s'ouvre en haut de la liste)
+     */
+    function montrerLeParcours(panneau, sur) {
+        var carte = sur ? panneau.querySelector('[data-parcours="' + sur + '"]') : null;
         var bouton = carte ? carte.querySelector('.assistance-modele-bouton, .assistance-parcours-bouton') : null;
-        if (carte) {
-            carte.classList.add('assistance-parcours-item--suggere');
-            if (typeof carte.scrollIntoView === 'function') carte.scrollIntoView({ block: 'center' });
-        }
-        if (bouton) { try { bouton.focus({ preventScroll: true }); } catch (e) { bouton.focus(); } }
-        else if (titre) titre.focus();
+        if (!carte || !bouton) return false;
+        carte.classList.add('assistance-parcours-item--suggere');
+        if (typeof carte.scrollIntoView === 'function') carte.scrollIntoView({ block: 'center' });
+        try { bouton.focus({ preventScroll: true }); } catch (e) { bouton.focus(); }
+        return true;
     }
 
     function fermerPanneau(opts) {

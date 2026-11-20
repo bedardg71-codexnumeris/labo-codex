@@ -554,7 +554,8 @@ export async function bulle9(page, { cap }) {
         for (const [id, balise] of champs) {
             if (!(await page.inputValue('#' + id))) await attribuer(id, balise);
         }
-        await page.waitForTimeout(400);
+        await deuxSondes(page);
+        await deuxSondes(page);
         if ((await page.evaluate((ids) => ids.every((id) => document.getElementById(id).value), champs.map((c) => c[0])))) break;
     }
     await bulleDit(page, {

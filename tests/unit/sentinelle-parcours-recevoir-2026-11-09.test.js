@@ -15,6 +15,7 @@
 // Break-test (19 nov.) : voir le rapport du lot (plans de travail/RAPPORT-2026-11-19-nous-faisons-recevoir.md).
 
 import { describe, it, expect } from 'vitest';
+import { suiteEcrite } from './_helpers/fin-des-parcours-2026-11-20.js';
 import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -184,7 +185,10 @@ describe('« Recevoir les productions, rendre tes rétroactions », « Nous fais
 
     it('la fin : « Terminer », que le moteur change en « Parcours suivant », ou « Terminer » quand il offre les deux', () => {
         expect(F[8].lignes().filter((l) => l.geste).map((l) => l.texte)).toEqual(['Touche « Terminer »']);
-        expect(NOUVELLE).toContain('la consigne « ' + dite('CONSIGNE_DEUX_SUITES') + '. »');
+        // Le relais du 19 nov. écrit la consigne avec « Parcours suivant » ; depuis le 20 nov. (A3), le moteur dit
+        // « Voir le parcours N » d'après le panneau (`suiteEcrite`).
+        expect(NOUVELLE).toContain('la consigne « Touche « Parcours suivant », ou « Terminer ». »');
+        expect(suiteEcrite(5, 'Monter ton cours').consigne).toBe('Touche « Voir le parcours 5 », ou « Terminer »');
     });
 
     it('« Rien à importer » à la bulle 1 ; « Terminer » à la dernière, sans « Plus tard » ; la 9 au centre', () => {

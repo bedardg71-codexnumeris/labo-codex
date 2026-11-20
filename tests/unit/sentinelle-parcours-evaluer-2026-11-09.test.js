@@ -1,202 +1,260 @@
 // =======================================================================
-// LE TROISIÈME PARCOURS (9 NOV. 2026) : LES MOTS D'« ÉVALUER UNE PREMIÈRE PRODUCTION »
+// LE TROISIÈME PARCOURS : LES MOTS D'« ÉVALUER UNE PREMIÈRE PRODUCTION », DANS SES DEUX TEMPS
 // =======================================================================
-// plans de travail/CONSIGNE-LOT-2026-11-08-parcours-3-evaluer.md.
-//   1. Les neuf bulles sont celles que Grégoire a validées le 8 nov. (7 h 37 à 8 h 08, revues de 13 h 51 à
-//      14 h 20), avec les SIX CORRECTIONS du 9 nov. (9 h 27 à 9 h 30, relayées par Cowork) : chaque texte du
-//      parcours, LU À L'EXÉCUTION, est égal au texte de la consigne auquel on applique ces corrections. Chaque
-//      correction doit trouver dans la consigne la phrase qu'elle remplace : la consigne et le code sont tous
-//      deux confrontés.
-//   2. La bulle du choix, la phrase du panneau sans classe, les titres « n sur 9 », « Plus tard » partout sauf
-//      la dernière, « Continuer » (7) et « Terminer » (9).
-//   3. La ligne du panneau et la phrase de l'étape 2 validées par Grégoire le 9 nov. (13 h 37 à 13 h 42, en Cowork,
-//      sur les questions du rapport) ; « Partir de zéro » remplace « Taper ma grille à la main ».
-// Break-test (9 nov.) : « la moyenne de tes travaux » changé en « la somme de tes travaux » dans
-// js/parcours-evaluer.js → ROUGE (étape 5), rétabli → vert.
+// Depuis le 20 nov. 2026 (essai de Grégoire sur l'iPad), cette sentinelle confronte LES DEUX TEMPS à
+// `plans de travail/CONSIGNE-2026-11-20-essai-parcours.md`, dont les textes ont été validés par lui un à un
+// (15 h 24 à 16 h 12) :
+//   · « NOUS FAISONS » (section D) : dix bulles neuves. Chaque titre, chaque confirmation, chaque phrase du lieu,
+//     chaque explication, chaque geste et chaque consigne de la consigne est dans le code, DANS SON GENRE, et le code
+//     ne porte rien d'autre (les deux sens). L'ancienne Pratique guidée (neuf étapes, la grille d'abord ; consigne du
+//     8 nov.) est retirée : ses textes ne sont plus dans le code.
+//   · « JE REGARDE » (section C) : les retouches de l'essai, mot pour mot ; le reste du modèle est jugé par
+//     tests/unit/sentinelle-je-regarde-evaluer-2026-11-18.test.js contre sa propre consigne.
+// Le rendu (l'ordre à l'écran, les secondes formes, ce qui fait avancer) est jugé au navigateur :
+// tests/integration/nous-faisons-evaluer-2026-11-20.spec.js.
+// Break-test (20 nov. 2026) : voir le rapport du lot (plans de travail/RAPPORT-2026-11-20-essai-parcours.md).
 
 import { describe, it, expect } from 'vitest';
-import { tranche } from './_helpers/tranche.js';
 import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { chargerScript } from './_helpers/charger-script.js';
+import { tranche } from './_helpers/tranche.js';
+import { CONSIGNE_20_NOV, suiteFactice } from './_helpers/fin-des-parcours-2026-11-20.js';
 
 const racine = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..');
 const lire = (f) => readFileSync(path.join(racine, f), 'utf8');
-const CONSIGNE = lire('plans de travail/CONSIGNE-LOT-2026-11-08-parcours-3-evaluer.md');
+const EVALUER = lire('js/parcours-evaluer.js');
+const aPlat = (x) => String(x).replace(/ /g, ' ').replace(/\s+/g, ' ').trim();
 
-/** Le texte d'une étape dans la consigne : de « Texte : « » à « » Avance », « » Bouton » ou « » Pas de bulle ». */
-function texteDeLaConsigne(n) {
-    const ligne = CONSIGNE.split('\n').find((l) => l.startsWith(`Étape ${n}, «`));
-    const m = ligne && ligne.match(/Texte : « (.*?) » (?:Avance|Bouton|Pas de bulle)/);
-    return m ? m[1] : null;
-}
+// ---------- Le fichier, chargé hors du navigateur (aucune page : rien n'est ouvert, rien n'est visible) ----------
 
-function titreDeLaConsigne(n) {
-    const ligne = CONSIGNE.split('\n').find((l) => l.startsWith(`Étape ${n}, «`));
-    const m = ligne && ligne.match(/^Étape \d, « (.*?) »\./);
-    return m ? m[1] : null;
-}
+const definitions = {};
+const fenetre = {
+    Assistance: { enregistrer: (def) => { definitions[def.id] = def; }, parcours: () => [], suivantDe: () => null, suiteDe: suiteFactice(4) },
+    ParcoursMoteur: { visible: () => false }
+};
+const pageVide = { getElementById: () => null, querySelector: () => null, querySelectorAll: () => [], body: { classList: { toggle() {} } } };
+new Function('window', 'document', lire('js/parcours-classe.js'))(fenetre, pageVide);
+new Function('window', 'document', EVALUER)(fenetre, pageVide);
+const P = fenetre.ParcoursEvaluer;
+const ETAPES = P.etapes();
+const DEF = definitions.evaluer;
 
-// LES SIX CORRECTIONS DU 9 NOV., telles que relayées : [étape, phrase de la consigne, phrase validée].
-// `null` : le texte entier est remplacé (étape 9).
-const CORRECTIONS = [
-    // Le 11 nov., 8 h 38 (second essai sur l'iPad) : la longueur de la dissection, dite d'avance.
-    [1, "C'est ainsi qu'elle pourra lire tes évaluations, puis nommer le critère où un·e étudiant·e bute.",
-        "C'est ainsi qu'elle pourra lire tes évaluations, puis nommer le critère où un·e étudiant·e bute. C'est souvent long, parce que chaque grille est construite à sa façon et que l'application ne peut pas deviner le rôle de chaque partie. Mais tu ne le fais qu'une fois : ta grille servira ensuite à chaque copie que tu évalueras avec elle."],
-    // Le 14 nov. (essai novice, lot 4a) : « partie » remplace « morceau » dans tous les textes de l'étiquetage.
-    [1, 'ce que veut dire chaque morceau (un critère, un niveau, des points)', 'ce que veut dire chaque partie (un critère, un niveau, des points)'],
-    // (La phrase « … le rôle de chaque partie. » vient de la correction du 11 nov., plus bas : elle y est écrite ainsi.)
-    // Le 11 nov., 8 h 58 (relais du 12 nov., point 6) : « Composer ma grille » remplace « Partir de zéro ».
-    [1, 'Pas de grille sous la main ? Touche « Partir de zéro ».', 'Pas de grille sous la main ? Touche « Composer ma grille ».'],
-    // Le 9 nov., 13 h 37 (question 2 du rapport) : l'échelle associée avec la grille.
-    [2, 'Puis associe-lui la grille que tu viens de créer.',
-        'Puis associe-lui la grille que tu viens de créer, et son échelle si elle en a une.'],
-    [3, 'À son échéance, ce que tes étudiant·es ont remis compte dans leur complétion, et tes évaluations, dans leur performance.',
-        'Dès ta première évaluation, ce que tes étudiant·es ont remis compte dans leur complétion, et tes évaluations, dans leur performance.'],
-    [4, "la note se calcule à mesure, et une rétroaction s'écrit sous tes yeux, tirée de ta grille. Tu y mettras bientôt tes propres mots.",
-        "la note se calcule à mesure, et une rétroaction s'écrit sous tes yeux : chaque critère de ta grille, avec ce que tu lui attribues. Tu y mettras bientôt tes propres mots."],
-    [5, "Touche « Partir d'un modèle » et choisis le tien : « Modèle sommatif » si la note du cours est la somme de tes travaux selon leur pondération.",
-        "Touche « + Nouvelle pratique », puis « Partir d'un modèle », et choisis le tien : « Modèle sommatif » si la note du cours est la moyenne de tes travaux selon leur pondération."],
-    [6, "Sans pratique appliquée, l'application ne sait pas comment tu construis ta note : elle attend trois productions évaluées, le minimum pour dire si un·e étudiant·e progresse.",
-        "Sans pratique appliquée, l'application ne sait pas comment tu construis ta note : elle n'en calcule aucune."],
-    [7, "La complétion, elle, suit la remise : une production importée compte comme remise à son échéance ; sans fichier, c'est ton évaluation qui confirme la remise.",
-        "La complétion, elle, suit la remise : dès ta première évaluation, chaque production importée pour ce travail compte comme remise ; sans fichier, c'est ton évaluation qui confirme la remise."],
-    // Le 9 nov., 15 h 55 (question 1 du rapport du quatrième parcours) : la cartouche nommée dans la fiche de la production.
-    [8, "Tes étudiant·es reçoivent un commentaire cohérent d'une évaluation à l'autre, et tu n'as plus à le réécrire chaque fois.",
-        "Tes étudiant·es reçoivent un commentaire cohérent d'une évaluation à l'autre, et tu n'as plus à le réécrire chaque fois. Puis, dans la fiche de ta production, choisis cette cartouche : elle s'y appliquera à chaque évaluation."],
-    [9, null,
-        "Reviens à ta première évaluation : touche « Actions › Consulter », puis « Déverrouiller ». Choisis ta cartouche : la rétroaction se réécrit avec tes phrases. Relis-la comme ton étudiant·e la lira, dans sa synthèse de rétroaction. Un mot personnel ? Écris-le dans « Un mot pour ton étudiant·e ». Puis verrouille. Désormais, chaque production que tu évalueras recevra sa rétroaction de la même façon."]
-];
+// ---------- La consigne, section D, lue ----------
 
-function texteValide(n) {
-    let t = texteDeLaConsigne(n);
-    for (const [k, avant, apres] of CORRECTIONS.filter((c) => c[0] === n)) {
-        if (avant === null) { t = apres; continue; }
-        if (!t.includes(avant)) throw new Error(`étape ${k} : la consigne ne porte pas « ${avant} »`);
-        t = t.replace(avant, apres);
+const D = tranche(CONSIGNE_20_NOV, 'D. PARCOURS 3, « NOUS FAISONS » : DIX BULLES NEUVES', '\nE. PARCOURS 4, « RECEVOIR LES PRODUCTIONS », « JE REGARDE »');
+
+/** Le texte entre guillemets qui s'ouvre à `i` (sur « ), guillemets emboîtés compris ; rend [texte, fin]. */
+function citation(texte, i) {
+    let n = 0;
+    for (let k = i; k < texte.length; k++) {
+        if (texte[k] === '«') n++;
+        if (texte[k] === '»') { n--; if (n === 0) return [texte.slice(i + 1, k).trim(), k + 1]; }
     }
-    return t;
+    throw new Error('citation non refermée : ' + texte.slice(i, i + 60));
 }
 
-/** Le parcours chargé tel quel, avec un panneau et un moteur de banc : ce qu'il enregistre, ses étapes. */
-function charger() {
-    const enregistres = [];
-    const win = {
-        Assistance: { enregistrer: (d) => enregistres.push(d), definirEtat() {}, etatDe: () => ({ etat: 'a-faire', etape: 0 }) },
-        ParcoursMoteur: { visible: () => false, premierVisible: () => null, actif: () => false, etapeCourante: () => null }
+/** Les items d'un bloc de la consigne, dans l'ordre : { genre: C|L|E|G, texte, sansCrochet?: bool }. */
+function itemsDe(bloc) {
+    const items = [];
+    const re = /\[(C|L|E|G)\]/g;
+    let m;
+    while ((m = re.exec(bloc))) {
+        const suite = bloc.slice(m.index + m[0].length);
+        // « [C] comme ci-dessus. » : la confirmation de la voie d'avant.
+        if (/^ comme ci-dessus/.test(suite)) { items.push(Object.assign({}, items.filter((x) => x.genre === 'C').pop())); continue; }
+        const ouvre = suite.indexOf('«');
+        const [texte, fin] = citation(suite, ouvre);
+        const apres = suite.slice(fin);
+        const item = { genre: m[1], texte };
+        if (/^ \(ne se grise pas\)/.test(apres)) item.sansCrochet = true;
+        // La parenthèse hors du gras : elle termine la consigne, dans le code.
+        const hors = /^, suivi hors du gras de «/.exec(apres);
+        if (hors) item.texte += ' ' + citation(apres, apres.indexOf('«'))[0];
+        items.push(item);
+        re.lastIndex = m.index + m[0].length + fin;
+    }
+    return items;
+}
+
+/** Les formes d'une bulle (« Puis » et « Voie » en ouvrent une) : le dernier [G] de chacune est la consigne. */
+function formesDe(bloc) {
+    return bloc.split(/(?=Puis, |Voie (?:modèle|décrire|« ))/).map(itemsDe).filter((f) => f.length);
+}
+
+function blocDeLaBulle(k) {
+    const fin = k < 10 ? `\nBulle ${k + 1}, ` : '\nPuis la fin du moteur selon A3';
+    return tranche(D, `\nBulle ${k}, `, fin);
+}
+
+const BULLES = Array.from({ length: 10 }, (x, i) => {
+    const bloc = blocDeLaBulle(i + 1);
+    const formes = formesDe(bloc);
+    const tous = formes.reduce((a, f) => a.concat(f), []);
+    const consignes = formes.map((f) => f.filter((x) => x.genre === 'G').pop()).filter(Boolean);
+    return {
+        bloc,
+        confirmations: [...new Set(tous.filter((x) => x.genre === 'C').map((x) => x.texte))],
+        lieux: [...new Set(tous.filter((x) => x.genre === 'L').map((x) => x.texte))],
+        explications: [...new Set(tous.filter((x) => x.genre === 'E').map((x) => x.texte))],
+        consignes: consignes.map((x) => x.texte),
+        gestes: tous.filter((x) => x.genre === 'G' && consignes.indexOf(x) === -1),
+        nombreDeFormes: formes.length
     };
-    chargerScript('js/parcours-evaluer.js', { document: { getElementById: () => null, querySelector: () => null, querySelectorAll: () => [], body: { classList: { toggle() {} } } } }, win);
-    return { def: enregistres[0], api: win.ParcoursEvaluer };
+});
+
+// ---------- Le code, lu ----------
+
+/** Les chaînes d'un genre dans le source d'une fonction : `note("…")`, `consigne("…")`, `sansTemoin("…"`, `texte: "…"`. */
+function chaines(source, motif) {
+    const re = new RegExp(motif + '"((?:[^"\\\\]|\\\\.)*)"', 'g');
+    return [...source.matchAll(re)].map((m) => JSON.parse('"' + m[1] + '"'));
 }
 
-describe('« Évaluer une première production » : les neuf bulles, mot pour mot (consigne + corrections du 9 nov.)', () => {
-    const { def, api } = charger();
-    const etapes = api.etapes();
+/** Le source de ce qui écrit les lignes de la bulle k : sa fonction `lignes`, et les formes de `NOUS` qu'elle appelle. */
+function sourceDesLignes(k) {
+    const e = ETAPES[k - 1];
+    let s = e.lignes.toString();
+    if (k === 1) s += P.nous.bulle1.page.toString() + P.nous.bulle1.assistant.toString();
+    if (k === 2) s += P.nous.bulle2.modele.choix.toString() + P.nous.bulle2.modele.recapitulatif.toString() + P.nous.bulle2.decrire.lignes.toString();
+    return s;
+}
 
-    it('le panneau : le titre, la ligne validée le 9 nov. (13 h 37), neuf étapes, troisième et dernier', () => {
-        expect(def.id).toBe('evaluer');
-        expect(def.titre).toBe('Évaluer une première production');
-        expect(CONSIGNE).toContain('« Évaluer une première production » s\'ajoute au panneau « Assistance », troisième et dernier');
-        expect(def.total).toBe(9);
-        expect(etapes).toHaveLength(9);
-        expect(def.ligne).toBe('De ta grille à ta première rétroaction, réécrite avec tes mots.');
+function codeDeLaBulle(k) {
+    const e = ETAPES[k - 1], s = sourceDesLignes(k);
+    const confirmations = k === 2 ? [P.nous.bulle2.modele.confirme, P.nous.bulle2.decrire.confirme]
+        : (e.confirme ? [typeof e.confirme.texte === 'function' ? e.confirme.texte() : e.confirme.texte] : []);
+    const suites = !e.lieuSuite ? [] : (typeof e.lieuSuite === 'function' ? chaines(e.lieuSuite.toString(), '') : [e.lieuSuite]);
+    return {
+        confirmations,
+        suitesDuLieu: suites,
+        notes: [...new Set(chaines(s, 'note\\('))],
+        consignes: chaines(s, 'consigne\\('),
+        sansTemoin: chaines(s, 'sansTemoin\\('),
+        gestes: chaines(s, '\\{ texte: ')
+    };
+}
+
+const TITRES = ['Ta pratique de notation', null, "L'appliquer à ton cours", 'Ton échelle de performance', 'Ta grille', 'Ta cartouche',
+    'Ta production', 'Tes consignes', 'Évaluer', "Le point qui s'allume"];
+
+describe('« Nous faisons » : dix bulles, dans l’ordre et sous les titres de la consigne du 20 nov.', () => {
+    it('dix étapes ; le panneau en annonce dix', () => {
+        expect(ETAPES).toHaveLength(10);
+        expect(DEF.total).toBe(10);
+        expect(P.definition.etapes).toBe(ETAPES);
     });
 
-    it('chaque correction trouve, dans la consigne, la phrase qu’elle remplace', () => {
-        for (const [n, avant] of CORRECTIONS) {
-            if (avant !== null) expect(texteDeLaConsigne(n), `étape ${n}`).toContain(avant);
-        }
+    it.each(TITRES.map((t, i) => [i + 1, t]).filter((x) => x[1]))('bulle %i : « %s »', (k, titre) => {
+        expect(ETAPES[k - 1].titre).toBe(titre);
+        expect(D).toContain(`\nBulle ${k}, « ${titre} »`);
     });
 
-    it.each([1, 2, 3, 4, 5, 6, 7, 8, 9])('étape %i : le titre et le texte validés', (n) => {
-        expect(etapes[n - 1].titre).toBe(titreDeLaConsigne(n));
-        expect(etapes[n - 1].texte).toBe(texteValide(n));
+    it('bulle 2 : deux voies, deux titres (« Un modèle », « Tes réponses ») ; la voie « Partir d’un modèle » par défaut', () => {
+        expect(blocDeLaBulle(2)).toContain('Voie modèle, titre « Un modèle ».');
+        expect(blocDeLaBulle(2)).toContain('Voie décrire, titre « Tes réponses ».');
+        expect(P.nous.bulle2.modele.titre).toBe('Un modèle');
+        expect(P.nous.bulle2.decrire.titre).toBe('Tes réponses');
+        expect(ETAPES[1].titre).toBe('Un modèle');
     });
 
-    it('la bulle du choix est celle de la consigne', () => {
-        const m = CONSIGNE.match(/^Bulle du choix[^\n]*?: « (Ta grille porte.*) »$/m);
-        expect(api.texteDuChoix).toBe(m[1]);
+    it('l’objectif (bulle 1) et l’objectif atteint (bulle 10), posés par le moteur d’après la définition', () => {
+        expect(D).toContain('Objectif : « ' + P.nous.objectif + ' »');
+        expect(D).toContain('Objectif atteint : « ' + P.nous.objectifAtteint + ' »');
+        expect(P.definition.objectif()).toBe(P.nous.objectif);
+        expect(P.definition.objectifAtteint).toBe(P.nous.objectifAtteint);
     });
 
-    it('la phrase du panneau, sans classe, est celle que Grégoire a validée (8 nov., 14 h 20)', () => {
-        const m = CONSIGNE.match(/Texte validé par Grégoire \(8 nov\., 14 h 20\) : « (.*) »$/m);
-        expect(api.refus()).toBe(m[1]);
-        expect(api.refus()).toBe('Commence par « Mettre ta classe en place » : il faut une classe pour évaluer une production.');
+    it('la forme : pas de « Remplir » ; la dernière bulle sans « Plus tard », son seul bouton « Terminer » (le moteur y joint la suite)', () => {
+        const bloc = tranche(EVALUER, 'var ETAPES = [', 'var DEF = ');
+        expect(bloc).not.toMatch(/remplir\(|mots\.remplir|MATERIEL|TEXTES\./);
+        expect(ETAPES[9].boutons.map((b) => b.libelle)).toEqual(['Terminer']);
+        expect(ETAPES[9].sansSortie).toBe(true);
+        expect(ETAPES.slice(0, 9).every((e) => !e.sansSortie)).toBe(true);
+        // La dernière bulle n'a pas de ligne de consigne : la fin est celle du moteur (A3).
+        expect(chaines(ETAPES[9].lignes.toString(), 'consigne\\(')).toEqual([]);
     });
 
-    it('« Plus tard » sur chaque bulle sauf la dernière ; « Continuer » à la 7, « Terminer » à la 9', () => {
-        expect(def.lancer).toBeTypeOf('function');
-        expect(etapes.slice(0, 8).every((e) => !e.sansSortie)).toBe(true);
-        expect(etapes[8].sansSortie).toBe(true);
-        expect(etapes[6].boutons.map((b) => b.libelle)).toEqual(['Continuer']);
-        expect(etapes[8].boutons.map((b) => b.libelle)).toEqual(['Terminer']);
-        // 14 nov. 2026 (essai novice, règle 5 : « la bulle guide, la page agit ») : devant sa grille, l'étape 1 ne porte
-        // plus aucun bouton (« Prendre une grille déjà créée » et les trois de l'exemple sont partis).
-        expect(etapes.filter((e) => e.boutons).length).toBe(2);
-        expect(etapes[0].boutons).toBeFalsy();
-        const source = lire('js/parcours-evaluer.js');
-        expect(source).not.toMatch(/libelle:\s*["'](?:Prendre une grille déjà créée|Voir le travail complet|Faire l'exercice soi-même|Passer à ma grille)/);
-        expect(lire('js/parcours-evaluer.js')).toContain("lienSortie: 'Plus tard'");
+    it('les boutons de bulle que nomme la consigne : « Je garde celle-ci » (4), « Je la compose ici » (5)', () => {
+        expect(blocDeLaBulle(4)).toContain('(« Je garde celle-ci » : bouton de la bulle)');
+        expect(blocDeLaBulle(5)).toContain('(« Je la compose ici » : bouton de la bulle)');
+        expect(ETAPES[3].boutons.map((b) => b.libelle)).toEqual(['Je garde celle-ci']);
+        expect(ETAPES[4].boutons.map((b) => b.libelle)).toEqual(['Je la compose ici']);
+        ETAPES.slice(0, 3).concat(ETAPES.slice(5, 9)).forEach((e) => expect(e.boutons || null).toBeNull());
+    });
+});
+
+describe('« Nous faisons » : chaque ligne de la consigne est dans le code, dans son genre, et le code ne porte rien d’autre', () => {
+    const cas = BULLES.map((b, i) => [i + 1, b, codeDeLaBulle(i + 1)]);
+
+    it.each(cas)('bulle %i : les confirmations', (k, b, c) => {
+        expect(c.confirmations.map(aPlat).sort()).toEqual(b.confirmations.map(aPlat).sort());
+        if (k > 1) expect(c.confirmations.length).toBeGreaterThan(0);
+        c.confirmations.forEach((t) => expect(t).toMatch(/^C'est fait : /));
     });
 
-    // ESSAI NOVICE DU 14 NOV. 2026, LOT 4 (b à e) — les bulles en lignes de l'étape 1, contre
-    // plans de travail/CONSIGNE-2026-11-14-essai-novice.md : la ligne ENTIÈRE, pas un morceau d'elle.
-    describe('étape 1 · les bulles en lignes du 14 nov. 2026 (ouverture, accueil, devant l’exemple)', () => {
-        const source = lire('js/parcours-evaluer.js');
-        const LOT_4 = tranche(lire('plans de travail/CONSIGNE-2026-11-14-essai-novice.md'), '## Lot 4 :', '## Lot 5 :');
-        const lignesDeLaConsigne = LOT_4.split('\n').map((l) => l.replace(/^\s*-\s+/, '').trim());
-        const bloc = tranche(source, 'var LIGNES_1 = {', 'function texteEtape1()');
-        const facons = Object.fromEntries([...bloc.matchAll(/\n {8}(?:'([\w-]+)'|(\w+)): \[\n([\s\S]*?)\n {8}\]/g)]
-            .map((m) => [m[1] || m[2], [...m[3].matchAll(/(?:texte:\s*|note\(|consigne\()"((?:[^"\\]|\\.)*)"/g)].map((x) => x[1])]));
-        // Ce que la session a écrit, faute de mots dans la consigne (à valider par Grégoire).
-        const ECRITS = ['Colle ici la grille que tu utilises déjà (copie le tableau entier, depuis Word ou Pages)',
-            'Pas de grille sous la main ? Ces deux boutons ouvrent un exemple', 'Colle ta grille, ou touche un des deux boutons'];
-
-        it('cinq façons en lignes : pourquoi, apprends, accueil, exemple-haut, exemple-bas', () => {
-            expect(Object.keys(facons)).toEqual(['pourquoi', 'apprends', 'accueil', 'exemple-haut', 'exemple-bas']);
-            expect(Object.values(facons).map((l) => l.length)).toEqual([2, 2, 3, 3, 3]);
-        });
-
-        it.each(['pourquoi', 'apprends', 'exemple-haut', 'exemple-bas'])('« %s » : chaque ligne est une ligne de la consigne', (facon) => {
-            for (const t of facons[facon]) expect(lignesDeLaConsigne, t).toContain(t);
-        });
-
-        it('l’accueil : trois lignes écrites par la session, nommées ici, absentes de la consigne', () => {
-            expect(facons.accueil).toEqual(ECRITS);
-            for (const t of ECRITS) expect(lignesDeLaConsigne).not.toContain(t);
-        });
-
-        it('les titres : « Pourquoi étiqueter », « Tu apprends aussi », « L’exemple étiqueté », « La grille, comprise par l’application »', () => {
-            for (const t of ['Pourquoi étiqueter', 'Tu apprends aussi', "L'exemple étiqueté", "La grille, comprise par l'application"]) {
-                expect(tranche(source, 'var TITRES_1 = {', 'var LIGNES_1 = {'), t).toContain(t);
-                expect(LOT_4, t).toContain(t);
-            }
-        });
-
-        it('les deux boutons de la page portent les noms validés ; « partie », « section », « groupe de critères »', () => {
-            const index = lire('index.html');
-            expect(index).toContain('data-param="complet">Voir un exemple de grille étiquetée</button>');
-            expect(index).toContain('data-param="exercice">Étiqueter l’exemple moi-même</button>');
-            const lecture = lire('js/materiel-dissection-lecture.js');
-            expect(lecture).toContain("nom: 'Sous-total', aide: 'Le total d’un groupe de critères'");
-            expect(lecture).toContain("rangeeSection('SECTION A : COMPRÉHENSION')");
-            expect(lecture).toContain('/^SECTION /.test(');
-            expect(lire('js/materiel-dissection.js')).toContain("choixNiveaux: 'des niveaux de performance'");
-        });
-
-        it('la page ne dit qu’une fois que l’exemple ne s’enregistre pas', () => {
-            const textes = tranche(lire('js/materiel-dissection.js'), 'var TEXTES_EXEMPLE = {', '};');
-            expect(textes).not.toContain('Il ne s’enregistre pas');
-            expect((textes.match(/il ne devient pas une de tes grilles/g) || []).length).toBe(1);
-        });
+    it.each(cas)('bulle %i : la phrase du lieu (le moteur lit le menu ; le code porte ce qui suit, ou la phrase entière)', (k, b, c) => {
+        // Une phrase du lieu qui nomme le menu (« Tu es dans « X », à l'onglet « Y » : … ») : le code n'en porte que la suite.
+        const duMenu = b.lieux.filter((l) => /^Tu es dans « [^»]+ », à l'onglet « [^»]+ » : /.test(l));
+        expect(c.suitesDuLieu.map(aPlat).sort()).toEqual(duMenu.map((l) => aPlat(l.replace(/^Tu es dans « [^»]+ », à l'onglet « [^»]+ » /, ''))).sort());
+        // Les autres (bulles 3 et 8 : la page ne change pas d'onglet) sont écrites entières, en explication.
+        b.lieux.filter((l) => duMenu.indexOf(l) === -1).forEach((l) => expect(c.notes.map(aPlat)).toContain(aPlat(l)));
     });
 
-    it('« Composer ma grille » remplace « Partir de zéro » (11 nov., 8 h 58), qui remplaçait « Taper ma grille à la main » (8 nov.)', () => {
-        const index = lire('index.html');
-        expect(index).toContain('data-tooltip="materiel-taper-main">Composer ma grille</button>');
-        expect(index).not.toContain('Partir de zéro');
-        expect(index).not.toContain('Taper ma grille à la main');
-        expect(lire('js/accompagnement-contenu-hover.js')).not.toContain('Taper ma grille');
+    it.each(cas)('bulle %i : les explications (sans marque)', (k, b, c) => {
+        const litterales = b.lieux.filter((l) => !/^Tu es dans « [^»]+ », à l'onglet « [^»]+ » : /.test(l));
+        expect(c.notes.map(aPlat).sort()).toEqual(b.explications.concat(litterales).map(aPlat).sort());
+    });
+
+    it.each(cas)('bulle %i : les gestes (une flèche à faire, un crochet fait) ; ceux qui ne se grisent pas', (k, b, c) => {
+        expect(c.gestes.concat(c.sansTemoin).map(aPlat).sort()).toEqual(b.gestes.map((g) => aPlat(g.texte)).sort());
+        expect(c.sansTemoin.map(aPlat).sort()).toEqual(b.gestes.filter((g) => g.sansCrochet).map((g) => aPlat(g.texte)).sort());
+    });
+
+    it.each(cas)('bulle %i : la consigne de chaque forme (le dernier geste, en gras)', (k, b, c) => {
+        expect(c.consignes.map(aPlat).sort()).toEqual(b.consignes.map(aPlat).sort());
+    });
+
+    it('le compte : la consigne porte 10 bulles et leurs formes (2, 3, 1, 2, 4, 2, 2, 1, 3, 1)', () => {
+        expect(BULLES.map((b) => b.nombreDeFormes)).toEqual([2, 3, 1, 2, 4, 2, 2, 1, 3, 1]);
+        expect(BULLES.reduce((n, b) => n + b.explications.length + b.gestes.length + b.consignes.length, 0)).toBeGreaterThan(90);
+    });
+});
+
+describe('« Nous faisons » : l’ordre et ce qui fait avancer', () => {
+    it('l’ordre diffère de « Je regarde » aux étapes 3 et 4, exprès : l’application au cours, puis l’échelle', () => {
+        expect(D).toContain("L'ordre diffère de « Je regarde » aux étapes 3 et 4, exprès.");
+        expect(P.etapesModele().map((e) => e.titre).slice(2, 4)).toEqual(['Une échelle de performance', "L'appliquer à ton cours"]);
+        expect(ETAPES.map((e) => e.titre).slice(2, 4)).toEqual(["L'appliquer à ton cours", 'Ton échelle de performance']);
+    });
+
+    it('chaque bulle avance sur ce qui naît (une donnée), jamais sur un bouton « Continuer »', () => {
+        ETAPES.slice(0, 9).forEach((e, i) => expect(typeof e.atteint, 'bulle ' + (i + 1)).toBe('function'));
+        expect(tranche(EVALUER, 'var ETAPES = [', 'var DEF = ')).not.toContain("'Continuer'");
+        // Hors d'une page, rien n'est né : aucune bulle n'est atteinte.
+        ETAPES.slice(2, 9).forEach((e, i) => expect(e.atteint(), 'bulle ' + (i + 3)).toBe(false));
+    });
+
+    it('la confirmation ne se dit que si l’étape d’avant a été faite pendant ce passage (hors d’un passage : rien)', () => {
+        ETAPES.slice(1).forEach((e, i) => expect(e.confirme(), 'bulle ' + (i + 2)).toBe(''));
+        const conf = tranche(EVALUER, 'function confirmation(k, texte) {', '\n    }\n');
+        expect(conf).toContain('faitesAuLancement && !faitesAuLancement[k] && etapeFaite(k)');
+    });
+
+    it('ce que l’ancienne Pratique guidée posait et que la nouvelle ne nomme plus est retiré (zéro dette)', () => {
+        const code = EVALUER.replace(/\/\*[\s\S]*?\*\//g, '').replace(/^\s*\/\/.*$/gm, '');
+        ['TEXTE_1', 'LIGNES_1', 'TITRES_1', 'modeRendu', 'modeEtape1', 'grillePrise', 'prendreCetteGrille', 'continuerLOuverture', 'avisCartouche',
+            'cartoucheHorsDeLaGrille', 'ouNommerLaCartouche', 'productionNommeLaCartouche', 'ouToucherEnReecrivant', 'GESTE_GRILLES', 'GESTE_EXISTANTE',
+            'complementEtape1', 'texteDuChoix', 'Pourquoi étiqueter', 'Tu apprends aussi', 'Ta rétroaction, avec tes mots', 'Prendre cette grille']
+            .forEach((nom) => expect(code, nom).not.toContain(nom));
+        expect(P.texteDuChoix).toBeUndefined();
+    });
+
+    it('le repère : ce qui existait à « Commencer », des identifiants seulement ; un repère d’avant le 20 nov. est refait', () => {
+        const repere = tranche(EVALUER, 'function poserLeRepere() {', '\n    }\n');
+        ['grillesAvant', 'productionsAvant', 'pratiquesAvant', 'echellesAvant', 'cartouchesAvant'].forEach((c) => expect(repere).toContain(c + ': '));
+        // Chaque valeur est une liste d'identifiants (`ids(…)`, `toutesLesCartouches()`) ou rien : aucun nom, aucun DA.
+        expect(repere).not.toMatch(/\.nom\b|etudiantDA|obtenirEtudiants/);
+        expect(tranche(EVALUER, 'async function lancer() {', 'return M().lancer(DEF, {')).toContain("Array.isArray(lireCtx().echellesAvant)");
     });
 });

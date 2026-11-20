@@ -84,7 +84,9 @@ describe('le panneau « Assistance » : le texte en quatre temps, mot pour mot',
         expect(tranche(ASSISTANCE, 'function creerBoutonParcours(def, o) {', 'function creerBoutonModele')).toContain('btn.textContent = o.temps ? MOTS_TEMPS.pratique.bouton : libelleDuBouton(e);');
         // La fin à trois boutons (14 nov., 10 h 58) remplace « Refaire avec mon matériel ».
         expect(CLASSE).toContain("refaire: 'Le refaire avec ma classe'");
-        expect(CLASSE).toContain("suivant: 'Voir le parcours suivant'");
+        // 20 nov. 2026 (A3) : le bouton du milieu s'appelle « Voir le parcours N » ; son libellé vient du panneau.
+        expect(CLASSE).not.toContain("suivant: 'Voir le parcours suivant'");
+        expect(ASSISTANCE).toContain("libelle: 'Voir le parcours ' + n,");
         expect(CLASSE).toContain("terminer: 'Terminer'");
         expect(CLASSE).not.toContain('Refaire avec mon matériel');
     });
@@ -279,9 +281,12 @@ describe('la règle de la Modélisation (14 nov. 2026)', () => {
     it('la fin d’une Modélisation : trois suites de même poids, aucune mise en avant, la consigne suit les boutons', () => {
         const suites = tranche(CLASSE, 'function suitesDuModele(id, terminerLeModele) {', 'return suites;');
         expect(suites).not.toContain('primaire');
-        expect(suites.indexOf('MOTS_MODELE.refaire')).toBeLessThan(suites.indexOf('MOTS_MODELE.suivant'));
-        expect(suites.indexOf('MOTS_MODELE.suivant')).toBeLessThan(suites.indexOf('MOTS_MODELE.terminer'));
-        expect(suites).toContain('if (suivant) suites.push(');
+        // 20 nov. 2026 (A3) : la suite du milieu ne lance plus le modèle suivant ; elle ouvre le panneau devant lui.
+        expect(suites.indexOf('MOTS_MODELE.refaire')).toBeLessThan(suites.indexOf('suite.libelle'));
+        expect(suites.indexOf('suite.libelle')).toBeLessThan(suites.indexOf('MOTS_MODELE.terminer'));
+        expect(suites).toContain('if (suite) suites.push(');
+        expect(suites).toContain('terminerLeModele(); suite.voir();');
+        expect(suites).not.toContain('lancerModele');
         // « Mettre ta classe en place » (16 nov. 2026) : sa dernière bulle rappelle l'objectif, sans ligne de consigne.
         expect(CLASSE).toContain('get boutons() { return suitesDuModele(ID, terminerModele); }');
         // « Évaluer » (18 nov. 2026) : de même, sa dernière bulle n'a pas de ligne de consigne.

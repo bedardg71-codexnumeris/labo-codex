@@ -20,7 +20,10 @@ describe('la carte d’aide · une seule définition de ce qui guide la page', (
             expect(evaluer, nom + ' dans parcours-evaluer.js').not.toContain(nom);
             expect(aide, nom + ' dans materiel-aide.js').toContain(nom);
         }
-        for (const appel of ['A().zones()', 'A().fleches()', 'A().aussiEviter()', 'A().contour()', 'A().geste(', 'A().complement()']) expect(evaluer).toContain(appel);
+        // 20 nov. 2026 : la bulle 5 du « Nous faisons » d'« Évaluer » dit ses propres gestes (les mots de Grégoire) ; elle
+        // ne lit plus la ligne du geste ni le complément de l'aide, que la carte de la page garde. Ce qui DÉSIGNE reste commun.
+        for (const appel of ['A().zones()', 'A().fleches()', 'A().aussiEviter()', 'A().contour()']) expect(evaluer).toContain(appel);
+        for (const appel of ['A().geste(', 'A().complement()']) expect(evaluer).not.toContain(appel);
     });
     it('la carte de la page passe par le moteur, avec les mêmes fonctions que « Ta grille »', () => {
         expect(aide).toContain('M().lancer(DEF,');

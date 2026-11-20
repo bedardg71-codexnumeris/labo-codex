@@ -1090,6 +1090,11 @@ function signalerAutosaveCartoucheMuette(ecrit) {
     }
 }
 
+/** La cartouche est écrite : l'avis « n'est pas encore créée » n'est plus vrai, il part sans attendre « OK » (20 nov. 2026). */
+function retirerLAvisDeFicheNeuve() {
+    if (typeof notifications !== 'undefined' && typeof notifications.retirerPassagers === 'function') notifications.retirerPassagers();
+}
+
 /* ===============================
    SAUVEGARDE DE LA CARTOUCHE
    =============================== */
@@ -1215,8 +1220,7 @@ async function sauvegarderCartouche() {
         return liste;
     }, [], { geste: isCreation ? 'Créer la cartouche' : 'Modifier la cartouche' });
 
-    // La cartouche est écrite : l'avis « n'est pas encore créée » n'est plus vrai (20 nov. 2026).
-    if (typeof notifications !== 'undefined' && typeof notifications.retirerPassagers === 'function') notifications.retirerPassagers();
+    retirerLAvisDeFicheNeuve();
 
     // NOUVELLE INTERFACE (Beta 80.2): Rafraîchir la banque
     await afficherBanqueCartouches();
