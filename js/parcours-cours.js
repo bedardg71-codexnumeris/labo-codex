@@ -66,12 +66,19 @@
         return !!(a.isContentEditable || a.tagName === 'TEXTAREA' || (a.tagName === 'INPUT' && (a.type || 'text') === 'text'));
     }
 
+    // LA MODÉLISATION (« Je regarde ») garde son contexte EN MÉMOIRE (`ctxModele`), comme le modèle d'« Évaluer » : le
+    // contexte de la Pratique guidée (une préférence de l'appareil) n'est jamais touché par le modèle.
+    var enModele = false;
+    var ctxModele = null;
+
     function lireCtx() {
+        if (enModele) return ctxModele || {};
         var v = typeof obtenirPreference === 'function' ? obtenirPreference(CLE_CTX) : null;
         return v && typeof v === 'object' ? v : {};
     }
 
     function majCtx(maj) {
+        if (enModele) { ctxModele = Object.assign({}, ctxModele || {}, maj); return ctxModele; }
         var ctx = Object.assign({}, lireCtx(), maj);
         if (typeof definirPreference === 'function') definirPreference(CLE_CTX, ctx);
         return ctx;
@@ -220,15 +227,25 @@
      * recentre sur la moyenne de ses blocs, et la leçon de l'étape 4 tombait au bas de l'écran, son 🎯 sous le
      * « Planificateur ». « Recentrer la carte » (`centrerVueSurContenu`) fait la même moyenne : il ne suffit pas.
      */
-    async function amenerLeBloc(quel) {
+    function amenerLeBloc(quel) { return amenerEnsemble(function () { return [quel()]; }); }
+
+    /** Plusieurs blocs, amenés ensemble au milieu du canevas libre (leur rectangle commun), comme `amenerLeBloc`. */
+    async function amenerEnsemble(quels) {
+        var tous = function () { var l = quels(); return l.length && l.every(function (n) { var b = bloc(n); return !!b && b.getBoundingClientRect().width > 0; }); };
         // Lu à mesure : à la reprise après un rechargement, la carte n'est pas encore chargée quand l'étape commence.
-        await attendre(function () { var b = bloc(quel()); return !!b && b.getBoundingClientRect().width > 0; }, 4000);
-        var n = quel();
+        await attendre(tous, 4000);
+        var ns = quels();
         // La carte chargée se recentre à l'image suivante (`requestAnimationFrame`) : on passe après elle.
         await new Promise(function (fin) { requestAnimationFrame(function () { requestAnimationFrame(fin); }); });
-        var b = bloc(n), z = el('planif-zone-travail'), L = canevasLibre();
-        if (!n || !b || !z || !L) return;
-        var r = b.getBoundingClientRect();
+        var bs = ns.map(bloc), z = el('planif-zone-travail'), L = canevasLibre();
+        if (!bs.length || bs.some(function (b) { return !b; }) || !z || !L) return;
+        var rs = bs.map(function (b) { return b.getBoundingClientRect(); });
+        var r = {
+            left: Math.min.apply(null, rs.map(function (x) { return x.left; })), right: Math.max.apply(null, rs.map(function (x) { return x.right; })),
+            top: Math.min.apply(null, rs.map(function (x) { return x.top; })), bottom: Math.max.apply(null, rs.map(function (x) { return x.bottom; }))
+        };
+        r.width = r.right - r.left;
+        r.height = r.bottom - r.top;
         if (r.left >= L.left && r.right <= L.right && r.top >= L.top && r.bottom <= L.bottom) return;
         var haut = L.bottom - L.top;
         var cibleHaut = r.height > haut - 40 ? L.top + 20 : L.top + (haut - r.height) / 2;
@@ -290,7 +307,7 @@
     function estLeNotre() {
         if (!M().actif()) return false;
         var t = qs('#parcours-bulle .parcours-bulle-titre');
-        return !t || ETAPES.some(function (e) { return e.titre === t.textContent; });
+        return !t || ETAPES.concat(etapesModele()).some(function (e) { return e.titre === t.textContent; });
     }
 
     /**
@@ -340,6 +357,7 @@
 
     var veilleTimer = null;
     function nettoyer() {
+        enModele = false;
         retirerExtras();
         inspecteurDevant(false);
         if (veilleTimer) clearInterval(veilleTimer);
@@ -351,6 +369,8 @@
         blocsConnus = null;
         veilleTimer = setInterval(function () {
             if (!estLeNotre()) { nettoyer(); return; }
+            // Le modèle : sa carte s'ouvre dès que le deuxième groupe est le groupe actif.
+            if (enModele && surLeDeuxiemeGroupe() && !carteDuModeleActive()) ouvrirLaCarteDuModele();
             amenerLesBlocsNeufs();
         }, 200);
     }
@@ -636,6 +656,490 @@
 
     var DEF = { id: ID, etapes: ETAPES, lienSortie: 'Plus tard', objectif: OBJECTIF, objectifAtteint: OBJECTIF_ATTEINT };
 
+    // =================================================================
+    // LA MODÉLISATION (« Je regarde »), 19-20 nov. 2026 : sept bulles, dans la démo, sur le deuxième groupe
+    // =================================================================
+    // plans de travail/CONSIGNE-2026-11-19-je-regarde-cours.md, mot pour mot (bulles écrites avec Grégoire le 19 nov., de
+    // 15 h 23 à 15 h 55) ; tests/unit/sentinelle-parcours-cours-modele-2026-11-19.test.js les y confronte. Mesures avant le
+    // code : plans de travail/RAPPORT-2026-11-19-je-regarde-cours.md, § 1.
+    // · Les outils communs des modèles viennent de js/parcours-classe.js (`window.ParcoursClasse` : « Remplir », qui
+    //   n'écrit que dans la démo ; `poser` ; les suites de la fin et leur consigne) ; le choix du deuxième groupe, comme
+    //   le modèle d'« Évaluer » (sa ligne, `window.ParcoursEvaluer.textes.choisirLeGroupe`).
+    // · Chaque bulle en trois temps : le geste de la page qui pose le bloc ; « Remplir », dans la bulle ; puis la seconde
+    //   forme (le moteur retire l'objectif, la confirmation et le lieu), qui dit ce qui vient d'apparaître et le geste suivant.
+    // · Le modèle se joue sur une carte à lui : celle du cours du deuxième groupe, créée vide dans la démo s'il n'en a pas
+    //   (mesure a) ; `carte_1`, la carte de la démo, n'est pas touchée. Tout ce qu'elle porte compte (`noeudsAvant` vide).
+    // ⚠ Bloqué par la mesure (c), dit au rapport : une activité d'une autre leçon ne sert pas l'objectif de la première
+    //   (l'application ne compte que les objectifs de la leçon du bloc). « Remplir » ne coche donc pas les activités des
+    //   deux leçons ajoutées ; la seconde forme de la bulle 6 n'est pas codée (son cas garde la pastille « ✓ »).
+
+    function K() { return window.ParcoursClasse; }
+
+    var MATERIEL_MODELE = Object.freeze({
+        competence: 'Analyser des textes littéraires',
+        idee: 'Une stratégie de lecture fait regarder le texte sous un angle précis.',
+        lecon: Object.freeze({ titre: 'La méthode : manuel, postures, stratégies', semaine: 2, seance: 1 }),
+        objectif: 'Choisir les stratégies de lecture.',
+        activite: 'Modélisation : choix des stratégies dans « Pour que nous puissions vivre »',
+        evaluation: 'Artefact 1 : Appliquer des stratégies de lecture variées (Deux-Rives)',
+        production: 'Appliquer des stratégies de lecture variées (Deux-Rives)',
+        // Les deux leçons de plus (mesure e : S2 séance B, puis S3 séance A, avant l'échéance de l'Artefact 1).
+        lecon2: Object.freeze({ titre: "Les stratégies de lecture à l'essai", semaine: 2, seance: 2, activites: Object.freeze([
+            'Pratique guidée : appliquer des stratégies de lecture dans « Marine »',
+            'Pratique en équipe : appliquer des stratégies de lecture dans « Fendant Rioux » (à terminer seul·e à la maison)'
+        ]) }),
+        lecon3: Object.freeze({ titre: 'Retour sur « Fendant Rioux »', semaine: 3, seance: 1, activites: Object.freeze([
+            'Autoévaluation de « Fendant Rioux », avec la grille d\'autoévaluation'
+        ]) })
+    });
+
+    var OBJECTIF_MODELE = "À la fin de ce parcours, tu seras en mesure d'expliquer comment une carte d'alignement relie ce que tu enseignes à ce que tu évalues, de la compétence jusqu'à la production.";
+    var OBJECTIF_ATTEINT_MODELE = "Objectif atteint : tu es en mesure d'expliquer comment une carte d'alignement relie ce que tu enseignes à ce que tu évalues, de la compétence jusqu'à la production.";
+    // ⚠ PROVISOIRE (relais du 19 nov., point 2) : à soumettre par Cowork à Grégoire.
+    var REFUS_MODELE = "Commence par la Modélisation d'« Évaluer une première production » : ce modèle place sa production dans ta carte.";
+
+    function enDemoModele() { return enDemo(); }
+    function groupeCoursActifId() {
+        var gc = typeof db !== 'undefined' ? db.getSync('groupeCoursActif', null) : null;
+        return gc && gc.id ? gc.id : null;
+    }
+    function deuxiemeGroupe() { return K() && typeof K().deuxiemeGroupe === 'function' ? K().deuxiemeGroupe() : null; }
+    function surLeDeuxiemeGroupe() { var g = deuxiemeGroupe(); return !!g && groupeCoursActifId() === g.id; }
+
+    /** La production du modèle d'« Évaluer », dans le cours du deuxième groupe (lue dans la démo, où qu'on soit). */
+    function productionDuModele() {
+        var g = deuxiemeGroupe();
+        var prods = typeof db !== 'undefined' ? (db.getSync('demo_productions', []) || []) : [];
+        return g ? (Array.isArray(prods) ? prods : []).find(function (p) {
+            return p && p.description === MATERIEL_MODELE.production && p.coursId === g.coursId;
+        }) || null : null;
+    }
+
+    function refusModele() { return deuxiemeGroupe() && productionDuModele() ? null : REFUS_MODELE; }
+
+    // ---------- La carte du modèle (mesure a) ----------
+
+    function nomDuCoursDuModele() {
+        var g = deuxiemeGroupe();
+        var cours = typeof db !== 'undefined' ? (db.getSync('cours', []) || []) : [];
+        var c = g ? cours.find(function (x) { return x && x.id === g.coursId; }) : null;
+        return (c && c.nom) || (K() && K().materiel ? K().materiel.cours.nom : '');
+    }
+
+    function carteDuModele() {
+        var g = deuxiemeGroupe(), D = window.planificationDonnees;
+        var index = g && D && typeof D.getIndex === 'function' ? D.getIndex() : null;
+        return index && Array.isArray(index.cartes) ? index.cartes.find(function (c) { return c && c.coursId === g.coursId; }) || null : null;
+    }
+
+    function carteDuModeleActive() {
+        var c = carteDuModele(), D = window.planificationDonnees;
+        return !!c && D.getIndex().active === c.id;
+    }
+
+    var ouvertureEnCours = false;
+    /** Dans la démo, sur le deuxième groupe : la carte de son cours, ouverte ; créée vide (au nom du cours) si elle n'existe pas. */
+    function ouvrirLaCarteDuModele() {
+        if (ouvertureEnCours || !enDemoModele() || !surLeDeuxiemeGroupe() || !C()) return;
+        ouvertureEnCours = true;
+        try {
+            var c = carteDuModele();
+            if (!c) C().nouvelleCarte(nomDuCoursDuModele());
+            else if (window.planificationDonnees.getIndex().active !== c.id) C().changerCarte(c.id);
+        } finally { ouvertureEnCours = false; }
+    }
+
+    async function allerALaCarteDuModele() {
+        await allerALaCarte();
+        ouvrirLaCarteDuModele();
+    }
+
+    // ---------- Ce que « Remplir » écrit (par les gestes de la page, dans la démo seulement) ----------
+
+    /** Le titre d'un bloc : la donnée, puis le champ, puis l'événement que la carte écoute (elle enregistre). */
+    function ecrireTitre(n, titre) {
+        var b = bloc(n), champ = b ? b.querySelector('.planif-noeud-titre') : null;
+        if (!n || !champ) return;
+        n.titre = titre;
+        champ.textContent = titre;
+        champ.dispatchEvent(new Event('input', { bubbles: true }));
+    }
+
+    /** Un sélecteur de l'en-tête d'une leçon : peuplé au premier contact (focus), puis choisi. */
+    function choisirDansLEntete(n, classe, valeur) {
+        var b = bloc(n), s = b ? b.querySelector('.' + classe) : null;
+        if (!s) return;
+        s.dispatchEvent(new Event('focus'));
+        K().poser(s, String(valeur));
+    }
+
+    function dureePeriode() { return (typeof obtenirDureePeriode === 'function' && obtenirDureePeriode()) || 50; }
+
+    function leconParTitre(titre) { return duType('lecon').find(function (n) { return texte(n) === titre; }) || null; }
+    function lecon3() { return leconParTitre(MATERIEL_MODELE.lecon3.titre); }
+    function autoevaluation() { var l = lecon3(); return enfantsDe(l).find(function (n) { return n.type === 'activite'; }) || null; }
+
+    /** Les deux leçons de plus, leurs activités, et leurs liens à l'idée maîtresse ; posées à droite de la première. */
+    function poserLesDeuxLecons() {
+        var c = C(), l1 = laLecon(), idee = ideeReliee();
+        if (!c || !l1 || !idee || lecon3()) return;
+        var b1 = bloc(l1), largeur = b1 ? b1.offsetWidth : 240;
+        var id = function () { return 'planif-noeud_' + (++c.etat.compteur); };
+        var noeuds = [], dernier = null;
+        [MATERIEL_MODELE.lecon2, MATERIEL_MODELE.lecon3].forEach(function (m, k) {
+            var lid = id();
+            var enfants = m.activites.map(function (t) {
+                var aid = id();
+                noeuds.push({ id: aid, type: 'activite', titre: t, x: 0, y: 0, parent: lid, metadata: { duree: dureePeriode() } });
+                return aid;
+            });
+            noeuds.unshift({ id: lid, type: 'lecon', titre: m.titre, x: l1.x + (k + 1) * (largeur + 60), y: l1.y, enfants: enfants,
+                metadata: { semaine: m.semaine, rangSeance: m.seance } });
+            if (k === 1) dernier = noeuds[0];
+            var lienId = 'planif-lien_' + (++c.etat.compteurLiens);
+            c.etat.liens.set(lienId, { id: lienId, source: idee.id, cible: lid, type: 'se_concretise_dans' });
+        });
+        // L'évaluation, que la personne glissera dans la dernière leçon, se pose juste au-dessus d'elle : les deux se voient
+        // ensemble (sa place seulement ; le glisser reste le geste de la personne).
+        var ev = evaluationNeuve(), bev = bloc(ev);
+        if (ev && !ev.parent && dernier) { ev.x = dernier.x; ev.y = dernier.y - ((bev && bev.offsetHeight) || 60) - 40; }
+        // injecterNoeuds reconstruit la carte (les liens posés compris), l'enregistre et dispose les leçons.
+        c.injecterNoeuds(noeuds);
+        // La veille ne promène pas la vue d'une leçon neuve à l'autre : l'évaluation et la dernière leçon sont amenées ensemble.
+        if (blocsConnus) blocsConnus = blocsConnus.concat(noeuds.map(function (n) { return n.id; }));
+        amenerEnsemble(function () { return [evaluationNeuve(), lecon3()]; }).then(function () { horsDesPalettes(bloc(lecon3())); });
+    }
+
+    var GESTES_REMPLIR = [
+        function () { ecrireTitre(duType('competence').pop(), MATERIEL_MODELE.competence); },
+        function () { ecrireTitre(duType('idee-maitresse').pop(), MATERIEL_MODELE.idee); },
+        function () {
+            var l = duType('lecon').pop();
+            ecrireTitre(l, MATERIEL_MODELE.lecon.titre);
+            choisirDansLEntete(l, 'planif-noeud-semaine', MATERIEL_MODELE.lecon.semaine);
+            choisirDansLEntete(C().etat.noeuds.get(l.id), 'planif-noeud-seance', MATERIEL_MODELE.lecon.seance);
+        },
+        function () { var l = laLecon(); if (l) C().definirObjectifsLecon(l.id, [MATERIEL_MODELE.objectif]); },
+        function () {
+            var a = activiteNeuve(), b = bloc(a);
+            ecrireTitre(a, MATERIEL_MODELE.activite);
+            var champ = b ? b.querySelector('.planif-noeud-duree') : null;
+            if (champ) K().poser(champ, String(dureePeriode()));
+        },
+        function () { ecrireTitre(evaluationNeuve(), MATERIEL_MODELE.evaluation); poserLesDeuxLecons(); }
+    ];
+
+    // Ce que « Remplir » a déjà écrit, étape par étape (une reprise le relit dans la carte).
+    var REMPLI = [
+        function () { return duType('competence').some(function (n) { return texte(n) === MATERIEL_MODELE.competence; }); },
+        function () { return duType('idee-maitresse').some(function (n) { return texte(n) === MATERIEL_MODELE.idee; }); },
+        function () { var l = leconParTitre(MATERIEL_MODELE.lecon.titre); return !!l && leconDatee(l); },
+        function () { return objectifs(laLecon()).some(function (o) { return String(o.texte).trim() === MATERIEL_MODELE.objectif; }); },
+        function () { return duType('activite').some(function (n) { return texte(n) === MATERIEL_MODELE.activite; }); },
+        function () { return duType('evaluation').some(function (n) { return texte(n) === MATERIEL_MODELE.evaluation; }) && !!lecon3(); }
+    ];
+
+    // Le bloc que pose le geste de la page, avant « Remplir » (étape 4 : la zone des objectifs dépliée).
+    var POSE = [
+        function () { return duType('competence').length > 0; },
+        function () { return duType('idee-maitresse').length > 0; },
+        function () { return duType('lecon').length > 0; },
+        objectifsDeplies,
+        function () { return duType('activite').length > 0; },
+        function () { return duType('evaluation').length > 0; }
+    ];
+
+    // « Continuer » (étapes 1 et 4 : la carte n'a pas de bouton de page qui conclut) ; en mémoire, le temps du passage.
+    var continue_ = {};
+
+    var FAIT_MODELE = [
+        function () { return REMPLI[0]() && (continue_[0] || duType('idee-maitresse').length > 0); },
+        function () { return !!ideeReliee(); },
+        function () { return !!leconReliee(); },
+        function () { return objectifs(laLecon()).length > 0 && (continue_[3] || duType('activite').length > 0); },
+        function () { return !!blocQuiSert(); },
+        function () { return !!evaluationAlignee(); }
+    ];
+
+    function premiereNonFaiteModele() {
+        for (var k = 0; k < FAIT_MODELE.length; k++) if (!FAIT_MODELE[k]()) return k;
+        return FAIT_MODELE.length;
+    }
+
+    var TOUCHE_REMPLIR = "Regarde l'exemple se remplir : touche « Remplir »";
+
+    /**
+     * Une bulle du modèle en trois temps. `ouverture` : ses lignes avant le bloc (la dernière, le geste de la page) ;
+     * `apres` : celles d'après « Remplir » ; `continuer` : la bulle se conclut par « Continuer ».
+     */
+    function etapeModele(k, base, o) {
+        var e = Object.create(base);
+        e.titre = o.titre;
+        e.lignesVivantes = true;
+        if (k === 0) { e.lieu = function () { return surLeDeuxiemeGroupe(); }; e.lieuSuite = ": c'est là que tu construis ta carte d'alignement."; }
+        else e.lieu = false;
+        e.confirme = o.confirme || null;
+        e.secondeForme = function () { return surLeDeuxiemeGroupe() && REMPLI[k](); };
+        e.lignes = function () {
+            if (!surLeDeuxiemeGroupe()) {
+                var choix = window.ParcoursEvaluer && window.ParcoursEvaluer.textes ? window.ParcoursEvaluer.textes.choisirLeGroupe : '';
+                return choix ? [consigne(choix)] : [];
+            }
+            if (REMPLI[k]()) return o.apres();
+            if (POSE[k]()) return [consigne(TOUCHE_REMPLIR)];
+            return o.ouverture();
+        };
+        Object.defineProperty(e, 'boutons', { get: function () {
+            if (!surLeDeuxiemeGroupe()) return null;
+            if (REMPLI[k]()) return o.continuer ? [{ libelle: 'Continuer', primaire: true, action: function () { continue_[k] = true; } }] : null;
+            if (POSE[k]()) return [{ libelle: K().mots.remplir, primaire: true, action: function () { K().remplir(GESTES_REMPLIR[k]); } }];
+            return null;
+        } });
+        e.avant = async function () { await allerALaCarteDuModele(); if (base.avant) await base.avant(); };
+        var contourBase = base.contour;
+        e.contour = function () {
+            if (!surLeDeuxiemeGroupe()) return el('selectGroupeCoursHeader');
+            if (!POSE[k]()) return contourBase ? contourBase.call(e) : null;   // le geste de la page (palette, badge)
+            if (!REMPLI[k]()) return null;                                       // « Remplir » est dans la bulle
+            if (o.continuer) return null;                                        // « Continuer » aussi
+            return o.contour ? o.contour() : (contourBase ? contourBase.call(e) : null);
+        };
+        var zonesBase = base.zones;
+        e.zones = function () {
+            if (!surLeDeuxiemeGroupe()) return [];
+            var z = REMPLI[k]() && o.zones ? o.zones() : (zonesBase ? zonesBase.call(e) : []);
+            return (z || []).filter(Boolean);
+        };
+        e.atteint = function () { return surLeDeuxiemeGroupe() && !enSaisie() && FAIT_MODELE[k](); };
+        return e;
+    }
+
+    var etapesDuModele = null;
+    function etapesModele() {
+        if (etapesDuModele) return etapesDuModele;
+        etapesDuModele = [
+            etapeModele(0, ETAPES[0], {
+                titre: 'Ta compétence',
+                continuer: true,
+                ouverture: function () {
+                    return [
+                        note("Dans la démo, tu commences celle du cours de ton deuxième groupe, avec le matériel de l'exemple. Rien ne touche à tes données."),
+                        note("La carte d'alignement n'est pas une tâche de plus : c'est un outil pour monter ton cours, et tu peux utiliser l'application sans elle."),
+                        note("Elle montre comment tes leçons et tes productions mènent à la compétence de ton cours, et donc sur quoi repose la note que tu construis."),
+                        note("Elle garde ces liens pour toi et signale ceux qui manquent : tu n'as plus à tout tenir en tête."),
+                        note("Son principe : tu évalues ce que tu enseignes, et tu enseignes ce que tu évalues, au même niveau d'exigence."),
+                        consigne("Touche « Compétence » dans la palette « Nœuds »")
+                    ];
+                },
+                apres: function () {
+                    return [
+                        note("L'énoncé de l'exemple : « Analyser des textes littéraires »."),
+                        note("Avec ta classe, tu l'écriras tel que le devis ministériel de ton cours décrit la compétence et ses éléments."),
+                        note("Tout part de cette compétence : le reste de la carte s'y rattachera."),
+                        consigne("Touche « Continuer »")
+                    ];
+                }
+            }),
+            etapeModele(1, ETAPES[1], {
+                titre: 'Ton idée maîtresse',
+                confirme: confirmation(1, "C'est fait : la compétence est écrite."),
+                ouverture: function () {
+                    return [
+                        note("Une idée maîtresse, c'est l'essentiel : ce qui restera quand l'étudiant·e aura oublié les détails, et autour de quoi tu organises ton contenu."),
+                        note("Chaque compétence se décline en une ou plusieurs idées maîtresses : une seule suffit pour l'instant."),
+                        note("C'est par tes idées maîtresses que tes leçons se rattacheront à ta compétence."),
+                        consigne("Touche « Idée maîtresse » dans la palette « Nœuds »")
+                    ];
+                },
+                apres: function () {
+                    return [
+                        note("L'idée maîtresse de l'exemple : « Une stratégie de lecture fait regarder le texte sous un angle précis. »"),
+                        note("Elle vient des consignes de la production que l'exemple évaluera à la fin."),
+                        consigne("Depuis l'un des petits cercles au bord de la compétence, tire un trait jusqu'à l'idée maîtresse (le lien « se décline en » s'affiche)", function () { return !!ideeReliee(); }),
+                        note("Pour aller plus loin, « Idées maîtresses », dans la frise au-dessus de la carte, ouvre le guide à la page qui en parle.")
+                    ];
+                }
+            }),
+            etapeModele(2, ETAPES[2], {
+                titre: 'Ta leçon',
+                confirme: confirmation(2, "C'est fait : l'idée maîtresse est reliée à la compétence."),
+                ouverture: function () {
+                    return [
+                        note("Tes leçons structurent ton cours dans le temps : chacune porte sa semaine et sa séance."),
+                        note("Une leçon datée apparaît dans le profil d'un·e étudiant·e absent·e ce jour-là : tu sais quelle matière il ou elle a manquée. Pour cela, des leçons datées suffisent, même sans le reste de ta carte."),
+                        consigne("Touche « Leçon » dans la palette « Nœuds »")
+                    ];
+                },
+                apres: function () {
+                    return [
+                        note("Son titre : « La méthode : manuel, postures, stratégies »."),
+                        note("Dans son en-tête, sa semaine et sa séance : S2, séance A (la première rencontre de la semaine)."),
+                        note("Touchée deux fois, la leçon montre dans l'Inspecteur sa date, calculée d'après l'horaire du deuxième groupe."),
+                        consigne("Tire un trait de l'idée maîtresse jusqu'à la leçon (le lien « se concrétise dans » s'affiche)", function () { return !!leconReliee(); }),
+                        note("C'est ce lien qui fait remonter tes objectifs et tes évaluations jusqu'à la compétence."),
+                        note("Pour aller plus loin, « Leçons », dans la frise, ouvre le guide à la page qui en parle.")
+                    ];
+                }
+            }),
+            etapeModele(3, ETAPES[3], {
+                titre: 'Ton objectif',
+                continuer: true,
+                confirme: confirmation(3, "C'est fait : la leçon est datée et reliée à l'idée maîtresse."),
+                ouverture: function () {
+                    return [
+                        note("L'objectif de leçon est la boussole : c'est lui qui dit ce que l'étudiant·e saura faire à la fin, et c'est par rapport à lui que se choisissent les connaissances, les activités et l'évaluation."),
+                        note("Le verbe que tu choisis, tes activités devront le faire exercer et tes évaluations devront le vérifier."),
+                        consigne("Touche le badge 🎯 dans l'en-tête de la leçon (la zone des objectifs se déplie)")
+                    ];
+                },
+                apres: function () {
+                    return [
+                        note("L'objectif de l'exemple : « Choisir les stratégies de lecture. »"),
+                        note("La production de l'exemple le vérifie : pour y appliquer des stratégies variées, il faut d'abord savoir les choisir."),
+                        consigne("Touche « Continuer »"),
+                        note("Pour aller plus loin, « Objectifs », dans la frise, ouvre le guide à la page qui en parle.")
+                    ];
+                }
+            }),
+            etapeModele(4, ETAPES[4], {
+                titre: 'Ton activité',
+                confirme: confirmation(4, "C'est fait : l'objectif est écrit."),
+                ouverture: function () {
+                    return [
+                        note("La pastille « ! » à côté de l'objectif dit qu'aucun bloc ne le sert encore : elle changera à mesure que tu le relieras."),
+                        note("Le type d'activité dépend de ce que tu vises : un exercice de mémorisation ne développe pas la même chose qu'une analyse de cas."),
+                        consigne("Touche « Activité » dans la palette « Nœuds »")
+                    ];
+                },
+                apres: function () {
+                    return [
+                        note("Son titre : « Modélisation : choix des stratégies dans « Pour que nous puissions vivre » »."),
+                        note("Dans l'exemple, c'est le premier temps : tu montres sur ce texte, vous pratiquez ensuite ensemble sur « Marine », puis en équipe et seul·e sur « Fendant Rioux », avant la pratique autonome évaluée sur « Deux-Rives »."),
+                        note("Cocher l'objectif qu'une activité sert, c'est vérifier qu'aucun objectif ne reste sans moyen."),
+                        geste("Glisse le bloc dans la leçon par sa poignée ⠿", function () { return dansLaLecon(activiteNeuve()); }),
+                        geste("Touche deux fois cette poignée (l'Inspecteur s'ouvre)", function () { return inspecteurOuvertSur(activiteNeuve()); }),
+                        consigne("Dans l'Inspecteur, coche l'objectif que l'activité sert", function () { return !!blocQuiSert(); }),
+                        note("Pour aller plus loin, « Activités », dans la frise, ouvre le guide à la page qui en parle.")
+                    ];
+                }
+            }),
+            etapeModele(5, ETAPES[5], {
+                titre: 'Ton évaluation',
+                confirme: confirmation(5, "C'est fait : l'activité sert l'objectif."),
+                ouverture: function () {
+                    return [
+                        note("La pastille « ⚠ » de l'objectif dit qu'il est servi, mais qu'aucune évaluation ne le vérifie encore."),
+                        note("Formative ou certificative, l'évaluation ferme la boucle : elle vérifie ce que tu as enseigné, au niveau que tu as visé, ni plus, ni moins."),
+                        note("Elle vient après l'activité : sous elle dans la même leçon, ou dans une leçon plus tard, la carte comparant alors les semaines et les séances."),
+                        consigne("Touche « Évaluation » dans la palette « Nœuds »")
+                    ];
+                },
+                apres: function () {
+                    return [
+                        note("L'exemple a ajouté deux leçons, plus tard :"),
+                        note("« Les stratégies de lecture à l'essai » : la pratique guidée sur « Marine », puis « Fendant Rioux », commencé en équipe et terminé seul·e à la maison"),
+                        note("« Retour sur « Fendant Rioux » » : son autoévaluation en classe"),
+                        note("Ces activités servent toutes le même objectif."),
+                        note("L'évaluation s'appelle « Artefact 1 : Appliquer des stratégies de lecture variées (Deux-Rives) ». Elle se place dans la dernière leçon, sous l'autoévaluation."),
+                        geste("Glisse le bloc dans la dernière leçon par sa poignée ⠿, sous l'autoévaluation", evaluationSousLAutoevaluation),
+                        geste("Touche deux fois cette poignée (l'Inspecteur s'ouvre)", function () { return inspecteurOuvertSur(evaluationNeuve()); }),
+                        geste("Dans l'Inspecteur, coche l'objectif que l'évaluation vérifie", function () { var ev = evaluationNeuve(); return !!ev && C().objectifsVerifiesPar(ev).length > 0; }),
+                        consigne("Choisis dans « Production » « Appliquer des stratégies de lecture variées (Deux-Rives) »", function () { return !!evaluationAlignee(); }),
+                        note("Une fois la production choisie, la carte sait quelle production vérifie cet objectif, et ce qu'elle pèse dans la note."),
+                        note("Dans son en-tête, « Formative » ou « Certificative » dit sa visée : ton plan de cours le précisera."),
+                        note("Pour aller plus loin, « Évaluations », dans la frise, ouvre le guide à la page qui en parle.")
+                    ];
+                },
+                // La bulle laisse libres l'évaluation et la leçon où elle va ; l'Inspecteur ouvert, lui seul.
+                zones: function () { var ev = evaluationNeuve(); return aLaisserLibre([bloc(ev), bloc(lecon3())], ev); },
+                contour: function () {
+                    var ev = evaluationNeuve(), l3 = lecon3();
+                    if (ev && l3 && ev.parent !== l3.id) return bloc(l3);
+                    return null;
+                }
+            }),
+            {
+                titre: 'Une chaîne alignée',
+                confirme: confirmation(6, "C'est fait : l'évaluation vérifie l'objectif."),
+                lignesVivantes: true,
+                lignes: function () {
+                    return [
+                        note("Les pastilles ont changé : celle de l'évaluation affiche « ✓ », parce que l'objectif qu'elle vérifie a été enseigné avant ; celle de l'objectif aussi, puisqu'il est servi et vérifié. Le « ⚠ » de la compétence a disparu."),
+                        note("Une carte est alignée quand chaque objectif est servi et vérifié, et que chaque évaluation ne vérifie que des objectifs déjà enseignés."),
+                        note("La carte de l'exemple dit maintenant ce que la production vérifie, et quand chaque temps s'enseigne, de la modélisation à la pratique autonome."),
+                        note("Le « Planificateur » montre ses trois leçons, semaine par semaine."),
+                        // « Objectif atteint : … », « Pour revoir une étape… » et la phrase de la suite : posés par le moteur.
+                        consigne(K().consigneDesSuites(suitesDuModeleCours()))
+                    ];
+                },
+                centre: true,
+                sansSortie: true,
+                avant: async function () { retirerExtras(); },
+                get boutons() { return suitesDuModeleCours(); }
+            }
+        ];
+        return etapesDuModele;
+    }
+
+    function evaluationSousLAutoevaluation() {
+        var ev = evaluationNeuve(), l3 = lecon3(), auto = autoevaluation();
+        if (!ev || !l3 || !auto || ev.parent !== l3.id) return false;
+        var ordre = l3.enfants || [];
+        return ordre.indexOf(ev.id) > ordre.indexOf(auto.id);
+    }
+
+    function suitesDuModeleCours() { return K().suitesDuModele(ID, terminerModele); }
+
+    function definitionDuModele() {
+        return { id: ID + '-modele', etapes: etapesModele(), lienSortie: 'Plus tard',
+            objectif: OBJECTIF_MODELE, objectifAtteint: OBJECTIF_ATTEINT_MODELE };
+    }
+
+    /**
+     * Le modèle part de sa première étape non faite, gestes compris : JAMAIS en visite (règle des modèles, 14 nov. 2026).
+     * Fait, il ne repart que par « Refaire », au panneau, qui remet d'abord la démo à neuf (js/assistance.js).
+     */
+    async function lancerModele() {
+        if (!enDemo() && typeof activerModeDemo === 'function') await activerModeDemo();
+        if (!enDemo()) return;
+        if (refusModele()) {
+            if (window.Assistance && typeof window.Assistance.ouvrirPanneau === 'function') {
+                window.Assistance.ouvrirPanneau();
+                var b = document.querySelector('#panneau-assistance [data-parcours="' + ID + '"] .assistance-modele-bouton');
+                if (b) b.click();
+            }
+            return;
+        }
+        enModele = true;
+        ctxModele = { noeudsAvant: [], leconId: null };
+        continue_ = {};
+        var depuis = 0;
+        if (surLeDeuxiemeGroupe()) {
+            await allerALaCarteDuModele();
+            depuis = premiereNonFaiteModele();
+        }
+        debutDuPassage = depuis;
+        window.Assistance.definirEtatModele(ID, 'en-cours', depuis);
+        var lance = M().lancer(definitionDuModele(), {
+            depuis: depuis,
+            surEtape: function (i) { retirerExtras(); window.Assistance.definirEtatModele(ID, 'en-cours', i); },
+            surQuitter: function () { nettoyer(); },
+            // La dernière bulle n'a pas de « Plus tard » : Échap vaut « Terminer ».
+            surEchap: function () { terminerModele(); },
+            // Sortie de la démo en cours de route : le modèle se ferme et attend.
+            verifier: enDemo
+        });
+        inspecteurDevant(true);
+        veiller();
+        return lance;
+    }
+
+    function terminerModele() {
+        nettoyer();
+        window.Assistance.definirEtatModele(ID, 'fait', 0);
+        M().fermer();
+    }
+
     // ---------- La condition, le lancement, la fin ----------
 
     function condition() {
@@ -657,6 +1161,7 @@
             }
             return;
         }
+        enModele = false;   // la Pratique guidée : son contexte à elle
         // « Reprendre » relit la leçon retenue ; « Commencer » et « Refaire » repartent de la première étape.
         var reprise = window.Assistance.etatDe(ID).etat === 'en-cours';
         if (!reprise) { depuis = 0; majCtx({ leconId: null, noeudsAvant: idsDeLaCarteActive() }); }
@@ -689,7 +1194,11 @@
         grandEcranSeulement: true,
         refus: condition,
         prealable: 'evaluer',
-        lancer: lancer
+        lancer: lancer,
+        // Les deux temps (20 nov. 2026) : le modèle, dans la démo, sur le deuxième groupe.
+        totalModele: 7,
+        lancerModele: lancerModele,
+        refusModele: refusModele
     });
 
     // Pour les bancs : la condition, le repère, les étapes et la variante, lus sans lancer le parcours.
@@ -699,6 +1208,12 @@
         etapes: function () { return ETAPES; },
         definition: function () { return DEF; },
         texteVariante: TEXTE_6_APRES,
-        gesteVariante: GESTE_6_APRES
+        gesteVariante: GESTE_6_APRES,
+        // Le modèle : ses étapes, sa définition, son matériel, son refus.
+        etapesModele: etapesModele,
+        definitionModele: definitionDuModele,
+        materielModele: MATERIEL_MODELE,
+        refusModele: refusModele,
+        texteRefusModele: REFUS_MODELE
     };
 })();
