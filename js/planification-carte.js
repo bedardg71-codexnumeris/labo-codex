@@ -43,15 +43,51 @@ let pileRedo = [];
 let _undoBatch = false;
 
 // === THROTTLE rAF POUR HANDLERS MOUSEMOVE ===
+//
+// #1295 (19 nov. 2026) — une image, un appel : mais avec le DERNIER événement
+// reçu, pas le premier. L'ancienne version gardait le premier `pointermove`
+// d'une image et jetait les suivants ; un glisser rapide (plusieurs mouvements
+// par image : Playwright, ou une main pressée) laissait le bloc en arrière du
+// pointeur. Le relâchement, qui ne relisait pas sa propre position, cherchait
+// alors la cible sous un bloc périmé : l'activité restait 34 px sous la leçon.
+// Et l'image en attente s'exécutait APRÈS le relâchement : elle déplaçait le
+// bloc et retraçait le survol d'une cible déjà jugée.
+//
+// `vider(eFin)` se lance en tête de chaque relâchement : il annule l'image en
+// attente et applique la position finale — celle du `pointerup` lui-même, ou,
+// sur un `pointercancel` (coordonnées non fiables), le dernier mouvement reçu.
+// Sans mouvement reçu (un simple clic), il ne fait rien : un clic ne doit ni
+// déplacer ni aimanter un bloc. Les gestionnaires calculent leur position
+// depuis le point de départ du geste : rejouer la position finale est sûr.
 function throttleRAF(fn) {
     var rafId = null;
-    return function(e) {
+    var enAttente = null;   // dernier événement reçu, pas encore appliqué
+    var applique = null;    // dernier événement appliqué
+    function appliquer(e) {
+        enAttente = null;
+        applique = e;
+        fn(e);
+    }
+    function limite(e) {
+        enAttente = e;
         if (rafId) return;
         rafId = requestAnimationFrame(function() {
-            fn(e);
             rafId = null;
+            if (enAttente) appliquer(enAttente);
         });
+    }
+    limite.vider = function(eFin) {
+        if (rafId) { cancelAnimationFrame(rafId); rafId = null; }
+        if (!enAttente && !applique) return;            // aucun mouvement : un clic
+        var fin = (eFin && eFin.type === 'pointerup') ? eFin : enAttente;
+        if (!fin) return;
+        if (applique && fin.clientX === applique.clientX && fin.clientY === applique.clientY) {
+            enAttente = null;
+            return;                                     // déjà à sa place
+        }
+        appliquer(fin);
     };
+    return limite;
 }
 
 // === CLÉ DE STOCKAGE SÉANCES ===
@@ -7339,6 +7375,7 @@ function attacherEvenements(el, donnees) {
 
             function onUpGroupe(e2) {
                 if (e2 && e2.pointerId !== pid) return;
+                onMoveGroupeThrottled.vider(e2);   // #1295 : la position du relâchement
                 el.classList.remove('planif-dragging', 'planif-dragging-groupe');
                 effacerGuides();
                 majBarreAlignement();
@@ -7427,6 +7464,7 @@ function attacherEvenements(el, donnees) {
 
             function onUpB(e2) {
                 if (e2 && e2.pointerId !== pid) return;
+                onMoveBThrottled.vider(e2);   // #1295 : la cible d'après la position du relâchement
                 el.classList.remove('planif-dragging');
                 effacerGuides();
                 document.removeEventListener('pointermove', onMoveBThrottled);
@@ -7558,6 +7596,7 @@ function attacherEvenements(el, donnees) {
 
             function onUpC(e2) {
                 if (e2 && e2.pointerId !== pid) return;
+                onMoveCThrottled.vider(e2);   // #1295 : la cible d'après la position du relâchement
                 el.classList.remove('planif-dragging');
                 effacerGuides();
                 document.removeEventListener('pointermove', onMoveCThrottled);
@@ -7635,6 +7674,7 @@ function attacherEvenements(el, donnees) {
 
         function onUpD(e2) {
             if (e2 && e2.pointerId !== pid) return;
+            onMoveDThrottled.vider(e2);   // #1295 : la cible d'après la position du relâchement
             el.classList.remove('planif-dragging');
             effacerGuides();
             document.removeEventListener('pointermove', onMoveDThrottled);
@@ -8111,6 +8151,7 @@ function attacherEvenements(el, donnees) {
 
             var surRelachement = function(ev) {
                 if (ev && ev.pointerId !== undefined && ev.pointerId !== pointerId) return;
+                surDeplacement.vider(ev);   // #1295 : la taille mesurée est celle du relâchement
                 poignee.removeEventListener('pointermove', surDeplacement);
                 poignee.removeEventListener('pointerup', surRelachement);
                 poignee.removeEventListener('pointercancel', surRelachement);
@@ -9353,6 +9394,7 @@ function initialiser() {
         }
 
         function onUp(e2) {
+            onMoveThrottled.vider(e2);   // #1295 : un lasso court compte comme un lasso
             document.removeEventListener('pointermove', onMoveThrottled);
             document.removeEventListener('pointerup', onUp);
             document.removeEventListener('pointercancel', onUp);
