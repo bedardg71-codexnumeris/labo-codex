@@ -77,9 +77,10 @@ async function bulleSousLesColonnes(page, contexte) {
  */
 async function zonesNommeesParLeurTitre(page) {
     expect(await page.locator('.pipeline-3col-grid .pipeline-col-titre').allTextContents()).toEqual(['Originaux', 'Inspecteur', 'Aperçu']);
-    const t = await bulle(page).locator('.parcours-bulle-texte').textContent();
+    // 19 nov. 2026 (« Nous faisons » réécrit) : la bulle est en lignes ; « Sous « Inspecteur », choisis la production… ».
+    const t = await bulle(page).locator('.parcours-bulle-lignes').textContent();
     expect(t, 'aucune espace ordinaire à l’intérieur des guillemets').not.toMatch(/« | »/);
-    expect(t).toContain('Sous «\u00a0Inspecteur\u00a0», la production');
+    expect(t).toContain('Sous «\u00a0Inspecteur\u00a0», choisis la production');
     expect(t).toContain('«\u00a0Importer\u00a0»');
 }
 
@@ -142,7 +143,9 @@ async function espaceDuTroisiemeParcours(page, cap) {
     const p3 = await page.evaluate(() => ParcoursEvaluer.contexte());
     expect(await page.evaluate((id) => { const p = (db.getSync(cle('productions'), []) || []).find((x) => x.id === id); return [!!p.grilleId, !!p.echelleId, p.cartoucheId]; }, p3.productionId)).toEqual([true, true, p3.cartoucheId]);
     await expect(item(page).locator('.assistance-parcours-etat')).toHaveText('À faire');
-    await expect(item(page).locator('.assistance-parcours-bouton')).toHaveText('Commencer');
+    // 17 nov. 2026 : « Recevoir » a son modèle ; sur une carte à deux temps, le bouton de la Pratique guidée s'appelle
+    // « Nous faisons », quel que soit l'état ; c'est l'état, dessous, qui dit où en est le parcours.
+    await expect(item(page).locator('.assistance-parcours-bouton')).toHaveText('Nous faisons');
     await capture(page, DOSSIER, `panneau-${cap}-a-faire`);
     await item(page).locator('.assistance-parcours-bouton').click();
     return p3.productionId;
@@ -273,7 +276,9 @@ test('« Recevoir les productions, rendre tes rétroactions », la voie des fich
     await fermerLeRappel(page);
     await ouvrirPanneau(page);
     await expect(item(page).locator('.assistance-parcours-etat')).toHaveText('Étape 8 sur 9');
-    await expect(item(page).locator('.assistance-parcours-bouton')).toHaveText('Reprendre');
+    // 17 nov. 2026 : « Recevoir » a son modèle ; sur une carte à deux temps, le bouton de la Pratique guidée s'appelle
+    // « Nous faisons », quel que soit l'état ; c'est l'état, dessous, qui dit où en est le parcours.
+    await expect(item(page).locator('.assistance-parcours-bouton')).toHaveText('Nous faisons');
     await capture(page, DOSSIER, `panneau-${cap}-en-cours`);
     await item(page).locator('.assistance-parcours-bouton').click();
     await n(page, 8, 9, 'Rends tes rétroactions');
@@ -318,7 +323,9 @@ test('« Recevoir les productions, rendre tes rétroactions », la voie des fich
     expect(await page.evaluate(() => Assistance.etatDe('recevoir').etat)).toBe('fait');
     await ouvrirPanneau(page);
     await expect(item(page).locator('.assistance-parcours-etat')).toHaveText('Fait');
-    await expect(item(page).locator('.assistance-parcours-bouton')).toHaveText('Refaire');
+    // 17 nov. 2026 : « Recevoir » a son modèle ; sur une carte à deux temps, le bouton de la Pratique guidée s'appelle
+    // « Nous faisons », quel que soit l'état ; c'est l'état, dessous, qui dit où en est le parcours.
+    await expect(item(page).locator('.assistance-parcours-bouton')).toHaveText('Nous faisons');
     await capture(page, DOSSIER, `panneau-${cap}-fait`);
 });
 
@@ -347,8 +354,10 @@ test('« Recevoir les productions, rendre tes rétroactions », la voie sans fic
 
     // 2 sur 4 : la rétroaction (la deuxième phrase sans « Spécifique »), le cadenas.
     await n(page, 2, 4, 'Ta rétroaction', { focus: false });
-    await expect(bulle(page).locator('.parcours-bulle-texte')).toContainText("« Générale » reprend les phrases de ta cartouche, critère par critère. Relis-les");
-    await expect(bulle(page).locator('.parcours-bulle-texte')).not.toContainText('Spécifique');
+    // 19 nov. 2026 : « La section « Rétroaction » », sans la ligne « Spécifique » (pas de tampons sans fichier).
+    await expect(bulle(page).locator('.parcours-bulle-lignes')).toContainText("La section «\u00a0Rétroaction\u00a0» montre ce que ton étudiant·e lira");
+    await expect(bulle(page).locator('.parcours-bulle-lignes')).toContainText("«\u00a0Générale\u00a0»\u00a0: les phrases de ta cartouche");
+    await expect(bulle(page).locator('.parcours-bulle-lignes')).not.toContainText('Spécifique');
     await capture(page, DOSSIER, `p4-7-${cap}`);
     await page.click('#btnVerrouillerEvaluation');
 

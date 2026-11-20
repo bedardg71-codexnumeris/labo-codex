@@ -24,8 +24,8 @@ import { actionDeLaListe, valeursActions } from './harness/parcours-3-de-banc.js
 //       puis le bouton de la page) : la grille de l'exemple entre dans l'étiquetage, que la personne fait elle-même ;
 //       la production, les consignes (échéance : le mardi 9 septembre 2025) et la cartouche (ses vingt commentaires)
 //       sont remplies par la bulle ; la rétroaction réécrite porte les quatre commentaires du profil (Structure M,
-//       Rigueur D, Plausibilité D, Nuance D) et « Bon départ ! » ; la fin à deux boutons (« Recevoir » n'a pas encore
-//       son modèle) ; le confinement : la grille, la production, la pratique, la cartouche et l'évaluation vivent dans
+//       Rigueur D, Plausibilité D, Nuance D) et « Bon départ ! » ; la fin à trois boutons (« Recevoir » a son modèle
+//       depuis le 17 nov. 2026) ; le confinement : la grille, la production, la pratique, la cartouche et l'évaluation vivent dans
 //       la démo, aucune clé hors d'elle ne change, et « Remettre la démo à neuf » les efface.
 // MESURE DU 15 NOV. 2026 (ancienne décision 3.1) : la grille de l'exemple, étiquetée, n'offre PAS le choix « des
 // points » / « des niveaux de performance » (il ne paraît que pour une grille qui porte les deux) : elle naît en
@@ -79,7 +79,8 @@ test('« Le refaire avec ma classe » passe par les gardes du panneau : sans cla
     test.setTimeout(180000);
     await ouvrirEspaceVide(page, 1180, 820);
     const refaire = () => page.evaluate(() => ParcoursClasse.suitesDuModele('evaluer', () => {})[0].action());
-    expect(await page.evaluate(() => ParcoursClasse.suitesDuModele('evaluer', () => {}).map((b) => b.libelle))).toEqual(['Le refaire avec ma classe', 'Terminer']);
+    // « Recevoir » a son modèle depuis le 17 nov. 2026 : la fin d'« Évaluer » offre « Voir le parcours suivant ».
+    expect(await page.evaluate(() => ParcoursClasse.suitesDuModele('evaluer', () => {}).map((b) => b.libelle))).toEqual(['Le refaire avec ma classe', 'Voir le parcours suivant', 'Terminer']);
     // Sans classe en place : rien ne part ; le panneau s'ouvre et nomme le préalable.
     await refaire();
     await expect(page.locator('#panneau-assistance')).toBeVisible();
@@ -211,11 +212,21 @@ for (const [L, H] of ORIENTATIONS) {
         await page.check('#productionEcheanceAssignee');
 
         // 4. L'étudiant·e de la ligne que la bulle pointe, nommé·e dans la bulle ; les niveaux imposés ; « Verrouiller ».
+        // TOUJOURS YACK AMICAL (Grégoire, 17 nov. 2026), quel que soit le tri de la Liste : la Liste est d'abord triée par
+        // prénom (le geste de la page), tri qui met Antilope Vaillante, l'une des trois copies du modèle de « Recevoir »,
+        // en première ligne (mesuré le 17 nov. 2026).
+        // Break-test (17 nov. 2026) : `daDeLaLigne` rendant `undefined` dans le modèle (l'ancienne première ligne) →
+        // ROUGE ici (« evaluer|9900006|… », Antilope Vaillante). Rétabli → vert.
         await etape(page, 4, 'Une première production');
         const pid = await page.evaluate((g) => (db.getSync(cle('productions'), []) || []).find((p) => p.grilleId === g).id, grilleId);
-        const evaluer = (await valeursActions(page, pid)).find((v) => v.startsWith('evaluer|'));
-        const da = evaluer.split('|')[1];
+        await page.click('#evaluations-liste th[data-param="prenom"]');
+        await expect(page.locator('#tri-eval-prenom')).toHaveText('↑');
+        expect((await valeursActions(page, pid)).find((v) => v.startsWith('evaluer|')), 'le tri par prénom met Antilope Vaillante en tête').toBe('evaluer|9900006|' + pid);
+        const evaluer = 'evaluer|' + m.etudiantEvalue.da + '|' + pid;
+        const da = m.etudiantEvalue.da;
+        expect(da).toBe('9900007');
         const qui = await page.evaluate((d) => { const e = obtenirEtudiantsCoursActif().find((x) => String(x.da) === d); return e.prenom + ' ' + e.nom; }, da);
+        expect(qui).toBe('Yack Amical');
         await expect(bulle(page)).toContainText(qui);
         await expect(bulle(page)).toContainText("choisis le niveau de l'exemple");
         await expect(bulle(page)).toContainText('Structure M, Rigueur D, Plausibilité D, Nuance D');
@@ -226,6 +237,7 @@ for (const [L, H] of ORIENTATIONS) {
         const criteres = await page.evaluate(() => [...document.querySelectorAll('#listeCriteresGrille1 select[id^="eval_"]')].map((c) => c.id));
         for (const [k, [, niveau]] of m.niveaux.entries()) await page.selectOption('#' + criteres[k], niveau);
         await page.click('#btnVerrouillerEvaluation');
+        await expect.poll(() => page.evaluate((p) => (db.getSync(cle('evaluationsSauvegardees'), []) || []).filter((e) => e.productionId === p).map((e) => e.etudiantDA), pid)).toEqual(['9900007']);
 
         // 5 et 6. La pratique : « Partir d'un modèle », le modèle par standards ; appliquée au cours du deuxième groupe.
         await etape(page, 5, 'Ta pratique');
@@ -289,15 +301,15 @@ for (const [L, H] of ORIENTATIONS) {
         await contourSur(page, '#productionCartouche');
         await page.selectOption('#productionCartouche', cartoucheId);
 
-        // 9. La rétroaction réécrite : les quatre commentaires du profil, et le mot. LA FIN : « Recevoir » n'a pas encore
-        // son modèle : « Voir le parcours suivant » n'y est pas, et la consigne suit les boutons présents.
+        // 9. La rétroaction réécrite : les quatre commentaires du profil, et le mot. LA FIN : depuis le 17 nov. 2026,
+        // « Recevoir » a son modèle : « Voir le parcours suivant » y est, et la consigne suit les boutons présents.
         await etape(page, 9, 'Ta rétroaction, avec tes mots');
         await expect(bulle(page)).toContainText(m.mot);
         await expect(bulle(page).locator('.parcours-bulle-sortie')).toHaveCount(0);
-        await expect(bulle(page).locator('.parcours-bulle-boutons button')).toHaveText(['Le refaire avec ma classe', 'Terminer']);
+        await expect(bulle(page).locator('.parcours-bulle-boutons button')).toHaveText(['Le refaire avec ma classe', 'Voir le parcours suivant', 'Terminer']);
         const fin = await lireBulle(page);
         expect(fin.principal, 'aucun bouton mis en avant').toEqual([]);
-        expect(fin.consignes).toEqual(['Touche « Le refaire avec ma classe », ou « Terminer »']);
+        expect(fin.consignes).toEqual(['Touche « Le refaire avec ma classe », « Voir le parcours suivant », ou « Terminer »']);
         expect(fin.derniere).toBe(fin.consignes[0]);
         await expect(bulle(page).locator('.parcours-bulle-note').last()).toHaveText(/Pour revoir une étape, touche «\s9 sur 9\s»\./);
         const evaluationId = await page.evaluate((p) => (db.getSync(cle('evaluationsSauvegardees'), []) || []).find((e) => e.productionId === p).id, pid);

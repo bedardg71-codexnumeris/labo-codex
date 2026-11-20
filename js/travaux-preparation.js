@@ -619,6 +619,9 @@
      */
     function mettreAJourOverlay() {
         if (!ctxOverlay) return;
+        // Le doigt fait défiler le poste, sauf quand un outil a des poignées à glisser (lot/perspective-coins, 18 nov.
+        // 2026 : la couche, qui couvre tout l'espace, bloquait le défilement au doigt en permanence, `touch-action: none`).
+        canvasOverlay.style.touchAction = (outilActif === 'perspective' || outilActif === 'crop') ? 'none' : 'pan-x pan-y';
         ctxOverlay.clearRect(0, 0, canvasOverlay.width, canvasOverlay.height);
         const source = canvasGeometrique || imageTravail;
         if (!source) return;
@@ -1429,28 +1432,65 @@
         mettreAJourApercu();
     }
 
+    /** « Confirmer le recadrage » : l'outil quitté avant l'opération, comme pour la perspective (son cadre restait dessiné). */
     function appliquerCrop() {
         if (!cropRect || cropRect.width <= 0 || cropRect.height <= 0) return;
-        ajouterOperation({
-            type: 'crop',
-            x: cropRect.x,
-            y: cropRect.y,
-            width: cropRect.width,
-            height: cropRect.height
-        });
+        var cadre = { type: 'crop', x: cropRect.x, y: cropRect.y, width: cropRect.width, height: cropRect.height };
         outilActif = null;
         cropRect = null;
+        ajouterOperation(cadre);
     }
 
-    function activerPerspective() {
-        outilActif = 'perspective';
-        perspectiveCorners = [
+    /** Les poignées à 5 % des bords : le repli quand la détection ne trouve pas la feuille. */
+    function coinsParDefaut() {
+        return [
             { x: 0.05, y: 0.05 },  // TL
             { x: 0.95, y: 0.05 },  // TR
             { x: 0.95, y: 0.95 },  // BR
             { x: 0.05, y: 0.95 }   // BL
         ];
+    }
+
+    /**
+     * « Perspective » (lot/perspective-coins, 17 nov. 2026, décision de Grégoire : « si elle est ajustable par
+     * l'utilisateur ») : les poignées se posent sur les coins de la feuille que la détection trouve, sinon à 5 % des
+     * bords ; l'utilisateur les ajuste ensuite comme avant. La détection lit l'image telle que les poignées la voient
+     * (la géométrie déjà appliquée), pas l'original. Un seul chemin : l'ancien `detecterCoinsAuto`, sans appelant, est retiré.
+     */
+    function activerPerspective() {
+        outilActif = 'perspective';
+        if (!canvasGeometrique && imageTravail) mettreAJourGeometrie();
+        var image = canvasGeometrique || imageTravail;
+        var coins = null;
+        try { coins = image ? detecterCoinsDocument(image) : null; } catch (e) { coins = null; }
+        perspectiveCorners = coinsUtilisables(coins) ? coins : coinsParDefaut();
         mettreAJourApercu();
+    }
+
+    /**
+     * Des coins qu'on peut saisir et qui disent quelque chose : tous dans l'image, et pas le cadre lui-même. Mesuré le
+     * 17 nov. 2026 sur une photo où la feuille remplit l'image : la détection prenait les bords de l'image pour ceux de
+     * la feuille, un coin hors de l'image (x = -0,006), insaisissable. Ces cas reviennent au repli à 5 % des bords.
+     */
+    var MARGE_DU_CADRE = 0.03;
+    function coinsUtilisables(coins) {
+        if (!Array.isArray(coins) || coins.length !== 4) return false;
+        var dansLImage = coins.every(function (c) { return c && c.x >= 0 && c.x <= 1 && c.y >= 0 && c.y <= 1; });
+        var cadre = [[0, 0], [1, 0], [1, 1], [0, 1]];
+        var leCadre = coins.every(function (c, i) {
+            return Math.abs(c.x - cadre[i][0]) < MARGE_DU_CADRE && Math.abs(c.y - cadre[i][1]) < MARGE_DU_CADRE;
+        });
+        return dansLImage && !leCadre;
+    }
+
+    /** Les réglages posés sur la photo ouverte dans le poste (des copies) : ce que les parcours et les bancs lisent. */
+    function operationsEnCours() {
+        return (operations || []).map(function (o) { return Object.assign({}, o); });
+    }
+
+    /** Pour les bancs : les quatre poignées de « Perspective », en fractions de l'image (null hors de l'outil). */
+    function coinsDePerspective() {
+        return perspectiveCorners ? perspectiveCorners.map(function (c) { return { x: c.x, y: c.y }; }) : null;
     }
 
     /* ===============================
@@ -1464,30 +1504,6 @@
     const HOUGH_RHO_RES = 1;          // Resolution en pixels
     const CANNY_LOW = 30;             // Seuil bas Canny
     const CANNY_HIGH = 90;            // Seuil haut Canny
-
-    /**
-     * Detecte automatiquement les 4 coins du document dans l'image
-     * et positionne les poignees de perspective dessus.
-     */
-    function detecterCoinsAuto() {
-        if (!imageTravail) return;
-
-        outilActif = 'perspective';
-        const coins = detecterCoinsDocument(imageTravail);
-
-        if (coins) {
-            perspectiveCorners = coins;
-        } else {
-            // Fallback : coins par defaut si detection echoue
-            perspectiveCorners = [
-                { x: 0.05, y: 0.05 },
-                { x: 0.95, y: 0.05 },
-                { x: 0.95, y: 0.95 },
-                { x: 0.05, y: 0.95 }
-            ];
-        }
-        mettreAJourApercu();
-    }
 
     /**
      * Pipeline complete de detection des bords d'un document.
@@ -2184,15 +2200,16 @@
         return Math.abs(area) / 2;
     }
 
+    /**
+     * « Confirmer perspective ». L'outil est quitté AVANT l'opération (lot/perspective-coins, 18 nov. 2026, vécu par
+     * Grégoire sur l'iPad) : `ajouterOperation` redessine, et les poignées l'étaient encore, sur l'image redressée.
+     */
     function appliquerPerspective() {
         if (!perspectiveCorners) return;
-        ajouterOperation({
-            type: 'perspective',
-            corners: perspectiveCorners.map(p => ({ ...p })),
-            fill: perspectiveFill
-        });
+        var coins = perspectiveCorners.map(p => ({ ...p }));
         outilActif = null;
         perspectiveCorners = null;
+        ajouterOperation({ type: 'perspective', corners: coins, fill: perspectiveFill });
     }
 
     function changerRemplissagePerspective(value) {
@@ -2916,6 +2933,8 @@
         activerCrop: activerCrop,
         appliquerCrop: appliquerCrop,
         activerPerspective: activerPerspective,
+        coinsDePerspective: coinsDePerspective,
+        operationsEnCours: operationsEnCours,
         appliquerPerspective: appliquerPerspective,
         changerRemplissagePerspective: changerRemplissagePerspective,
         changerLuminosite: changerLuminosite,

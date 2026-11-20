@@ -66,18 +66,8 @@ export const GESTES_PROPOSES = {
         "Touche « Actions › Dossier PDF » sur la ligne de ta production, puis « Continuer ».",
         "Touche « Terminer ».",
     ],
-    'js/parcours-recevoir.js': [
-        "Dépose leurs fichiers dans la zone, ou touche « Rien à importer ».",
-        "Choisis ta production, vérifie chaque fichier, puis touche « Importer » et confirme.",
-        "Touche « Actions › Annoter » sur la ligne d'un·e étudiant·e.",
-        "Touche l'engrenage de la palette, règle tes tampons, puis touche « Enregistrer ».",
-        "Pose tes tampons, puis touche « Annoter ▾ » et choisis « Évaluer ».",
-        "Choisis le niveau ou les points de chaque critère.",
-        "Touche « Actions › Évaluer » sur sa ligne, puis choisis le niveau ou les points de chaque critère.",
-        "Relis sa rétroaction, puis touche le cadenas « Verrouiller ».",
-        "Choisis ta production, puis touche « Exporter pour Léa ».",
-        "Touche « Terminer ».",
-    ],
+    // js/parcours-recevoir.js n'a plus de geste proposé : ses bulles sont celles du 19 nov. 2026, réécrites avec Grégoire
+    // (« Nous faisons », sentinelle-parcours-recevoir-2026-11-09.test.js, confrontée à CONSIGNE-2026-11-19-nous-faisons-recevoir.md).
 };
 
 /** Toutes les lignes proposées, sans doublon. */
