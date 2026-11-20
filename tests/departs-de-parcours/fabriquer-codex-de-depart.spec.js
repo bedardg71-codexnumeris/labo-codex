@@ -30,8 +30,10 @@ import { DEPARTS, DOSSIER_DES_DEPARTS, nomDuCodex } from './departs.js';
  */
 const PREPARATIONS = {
     'classe-et-evaluer': async (page) => {
+        // 20 nov. 2026 (plans de travail/CONSIGNE-2026-11-20-essai-parcours.md, D) : le « Nous faisons » neuf d'« Évaluer »
+        // sort sans bulle ni panneau ouvert (avant, le panneau restait ouvert et la fabrique le fermait par Échap).
         await leTroisiemeParcoursFait(page, { cap: 'p3' });
-        await page.keyboard.press('Escape');
+        await expect(page.locator('#panneau-assistance'), 'le troisième parcours fait : aucun panneau ouvert').toHaveCount(0);
     }
 };
 

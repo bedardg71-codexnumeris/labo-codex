@@ -188,6 +188,8 @@
     function boutonPalette(type) { return qs('#planif-palette .planif-palette-btn[data-type="' + type + '"]'); }
     function ports(n) { var b = bloc(n); return b ? [].slice.call(b.querySelectorAll(':scope > .planif-noeud-port')) : []; }
     function inspecteur() { return el('planif-panneau'); }
+    /** L'Inspecteur, s'il est ouvert à l'écran (sinon rien). */
+    function inspecteurOuvert() { var p = inspecteur(); return p && p.classList.contains('visible') && vis(p) ? p : null; }
     function inspecteurOuvertSur(n) { var c = C(); return !!(n && c && c.etat.panneauOuvert && c.etat.panneauNoeudId === n.id && vis(inspecteur())); }
 
     /**
@@ -218,6 +220,11 @@
         var noeudsPal = el('planif-palette'), planif = el('planif-palette-nav');
         if (vis(noeudsPal)) { var p = noeudsPal.getBoundingClientRect(); if (p.right < (g + d) / 2) g = Math.max(g, p.right); }
         if (vis(planif)) { var q = planif.getBoundingClientRect(); if (q.left > (g + d) / 2) d = Math.min(d, q.left); }
+        // L'Inspecteur ouvert borne aussi le canevas libre (20 nov. 2026). Tant que le « Planificateur » était là, il
+        // tenait cette place ; fermé pendant « Je regarde » (F1), il laissait le canevas « libre » jusqu'au bord, sous
+        // l'Inspecteur : mesuré à 1180 × 820, l'évaluation et sa leçon n'étaient plus amenées et restaient dessous.
+        var insp = inspecteurOuvert();
+        if (insp) { var i = insp.getBoundingClientRect(); if (i.left > (g + d) / 2) d = Math.min(d, i.left); }
         return { left: g, right: d, top: h, bottom: b };
     }
 
@@ -349,7 +356,7 @@
         var z = el('planif-zone-travail');
         if (!b || !z) return;
         var r = b.getBoundingClientRect(), zr = z.getBoundingClientRect();
-        var palettes = ['planif-palette', 'planif-palette-nav'].map(el).filter(vis).map(function (p) { return p.getBoundingClientRect(); })
+        var palettes = ['planif-palette', 'planif-palette-nav'].map(el).filter(vis).concat([inspecteurOuvert()].filter(Boolean)).map(function (p) { return p.getBoundingClientRect(); })
             .filter(function (q) { return q.top < r.bottom && r.top < q.bottom; });
         var sous = palettes.some(function (q) { return r.left < q.right && q.left < r.right; });
         if (!sous) return;
