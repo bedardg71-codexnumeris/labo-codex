@@ -224,7 +224,10 @@ test('« Monter ton cours » : les sept étapes, la variante ⚠, « Plus tard �
     await expect(item(page).locator('.assistance-parcours-titre')).toHaveText('Monter ton cours');
     await expect(item(page).locator('.assistance-parcours-ligne')).toHaveText(LIGNE);
     await expect(item(page).locator('.assistance-parcours-etat')).toHaveText('À faire');
-    await expect(item(page).locator('.assistance-parcours-bouton')).toHaveText('Commencer');
+    // 20 nov. 2026 (« Je regarde ») : le parcours a ses deux temps ; ses boutons portent leur nom, pas l'état
+    // (16 nov. 2026, le nom ne suit plus l'état) : « Je regarde », « Nous faisons ».
+    await expect(item(page).locator('.assistance-modele-bouton')).toHaveText('Je regarde');
+    await expect(item(page).locator('.assistance-parcours-bouton')).toHaveText('Nous faisons');
     await capture(page, DOSSIER, `panneau-${cap}-a-faire`);
     await item(page).locator('.assistance-parcours-bouton').click();
 
@@ -290,7 +293,7 @@ test('« Monter ton cours » : les sept étapes, la variante ⚠, « Plus tard �
     await fermerLeRappel(page);
     await ouvrirPanneau(page);
     await expect(item(page).locator('.assistance-parcours-etat')).toHaveText('Étape 4 sur 7');
-    await expect(item(page).locator('.assistance-parcours-bouton')).toHaveText('Reprendre');
+    await expect(item(page).locator('.assistance-parcours-bouton')).toHaveText('Nous faisons');
     await capture(page, DOSSIER, `panneau-${cap}-en-cours`);
     await item(page).locator('.assistance-parcours-bouton').click();
     await n(page, 4, 'Ton objectif');
@@ -394,7 +397,7 @@ test('« Monter ton cours » : les sept étapes, la variante ⚠, « Plus tard �
     expect(await page.evaluate(() => document.body.classList.contains('parcours-inspecteur-devant'))).toBe(false);
     await ouvrirPanneau(page);
     await expect(item(page).locator('.assistance-parcours-etat')).toHaveText('Fait');
-    await expect(item(page).locator('.assistance-parcours-bouton')).toHaveText('Refaire');
+    await expect(item(page).locator('.assistance-parcours-bouton')).toHaveText('Nous faisons');   // le nom, pas l'état (deux temps)
     await capture(page, DOSSIER, `panneau-${cap}-fait`);
 
     // « Refaire » sur la carte remplie : seul ce qui est créé après compte (décision du 9 nov., 16 h 03) ; la compétence
