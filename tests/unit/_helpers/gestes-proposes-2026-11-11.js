@@ -14,16 +14,8 @@ export const GESTES_PROPOSES = {
     'js/parcours-commentaires.js': [
         "Touche « Terminer ».",
     ],
-    'js/parcours-cours.js': [
-        "Touche « Compétence » dans la palette, puis écris son énoncé.",
-        "Touche « Idée maîtresse », écris-la, puis tire un trait de ta compétence jusqu'à elle.",
-        "Touche « Leçon », donne-lui un titre, choisis sa semaine et sa séance, puis tire un trait de ton idée maîtresse jusqu'à elle.",
-        "Touche le badge 🎯 de ta leçon, puis écris ton objectif.",
-        "Touche « Activité », donne-lui un titre, glisse-la dans ta leçon, touche deux fois sa poignée, puis coche son objectif.",
-        "Glisse ton évaluation sous ton activité, par sa poignée ⠿.",
-        "Touche « Évaluation », donne-lui un titre, glisse-la dans ta leçon sous ton activité, touche deux fois sa poignée, coche son objectif, puis choisis ta production.",
-        "Touche « Terminer ».",
-    ],
+    // js/parcours-cours.js n'a plus de geste proposé : ses sept bulles sont celles du 19 nov. 2026, réécrites avec
+    // Grégoire (« Nous faisons », sentinelle-parcours-cours-2026-11-09.test.js).
     // js/parcours-decouvrir.js n'a plus de geste proposé : ses huit bulles sont celles du 16 nov. 2026, réécrites
     // avec Grégoire (sentinelle-parcours-je-regarde-2026-11-16.test.js).
     // js/parcours-donnees.js n'a plus de geste proposé : ses bulles sont celles du 19 nov. 2026, réécrites avec Grégoire

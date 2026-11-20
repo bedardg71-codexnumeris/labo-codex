@@ -336,8 +336,9 @@ for (const [L, H] of ORIENTATIONS) {
         await expect(bulle(page)).toContainText(sansInsecable(t.etape10.devient.lignes[0]).slice(0, 30));
         await expect(bulle(page).locator('.parcours-bulle-confirme')).toBeHidden();
         await expect(bulle(page).locator('.parcours-bulle-sortie')).toHaveCount(0);
-        // « Voir le parcours suivant » n'y est que si le parcours suivant a son modèle : aucun ne l'a (écart nommé au rapport).
-        await expect(bulle(page).locator('.parcours-bulle-boutons button')).toHaveText(['Le refaire avec ma classe', 'Terminer']);
+        // « Voir le parcours suivant » n'y est que si le parcours suivant a son modèle : depuis le 20 nov. 2026, « Monter ton
+        // cours » a le sien (lot/je-regarde-cours) ; les trois suites, de même poids.
+        await expect(bulle(page).locator('.parcours-bulle-boutons button')).toHaveText(['Le refaire avec ma classe', 'Voir le parcours suivant', 'Terminer']);
         // L'export n'écrit rien en base, ni dans la démo ni ailleurs (mesure 3.6) ; seul l'état du modèle change, sur l'appareil.
         expect(ecarts(avantExport, await releve(page), (k) => !DE_L_APPAREIL.test(k)), 'l’export n’écrit rien').toEqual([]);
         await boutonDeBulle(page, 'Terminer').click();
