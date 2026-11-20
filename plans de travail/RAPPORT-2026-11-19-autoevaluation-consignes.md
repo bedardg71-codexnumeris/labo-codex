@@ -1,7 +1,7 @@
 # Rapport — lot `autoevaluation-consignes` (19 nov. 2026)
 
 **Dernier relais (20 nov.).** Les quatre retouches de Cowork sont faites, sur la même branche (PR n° 33) : la case
-garde le dernier choix ; l'aperçu dit où poser les repères manquants ; un banc « Deux colonnes » ; #1296 inscrit (d'abord #1289 ; #1300 depuis l'assemblage de la release du 19 nov., #1296 étant pris par `lot/glisser-alignement`). Porte
+garde le dernier choix ; l'aperçu dit où poser les repères manquants ; un banc « Deux colonnes » ; #1296 inscrit (d'abord #1289 ; #1301 depuis l'assemblage de la release du 19 nov., #1296 étant pris par `lot/glisser-alignement`). Porte
 terrain close par Cowork. `main` n'est pas repris (la mise en ligne de midi y fusionne le lot 1 : on rapprochera
 après). Ni fusion, ni release. Détail : « Suite du 20 nov. », en fin de rapport.
 
@@ -127,7 +127,7 @@ tels quels. Quatre retouches, rien d'autre.
    grille pleine largeur, à l'aperçu (largeurs mesurées) et dans le fichier (positions lues par PDF.js : une colonne de
    droite en page 1, une ligne d'introduction qui passe le milieu en page 2). La grille est la même en continu et en
    deux colonnes (aperçu et PDF identiques, essais L.b et L.c).
-4. **#1296 inscrit, aujourd'hui #1300** (sans correction ; d'abord #1289, renuméroté le 19 nov. au soir à la fusion de `main`, qui avait pris #1289 à #1295 entre-temps ; renuméroté #1300 à l'assemblage de la release, `lot/glisser-alignement` ayant pris #1296 lui aussi) : les neuf rouges d'import sous Chromium. Premier numéro libre mesuré sur toutes
+4. **#1296 inscrit, aujourd'hui #1301** (sans correction ; d'abord #1289, renuméroté le 19 nov. au soir à la fusion de `main`, qui avait pris #1289 à #1295 entre-temps ; renuméroté #1301 à l'assemblage de la release, `lot/glisser-alignement` ayant pris #1296 lui aussi et la session de nuit A #1300) : les neuf rouges d'import sous Chromium. Premier numéro libre mesuré sur toutes
    les branches distantes ; #1279, libre aussi, est laissé aux lots du Mac (en-tête du BACKLOG).
 
 **Trouvaille, non inscrite** (aucun symptôme vécu, règle du 24 août) : les voisines de la case (« Enseignant »,

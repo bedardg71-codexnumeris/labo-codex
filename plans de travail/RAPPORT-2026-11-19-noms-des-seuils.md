@@ -80,7 +80,7 @@ Reste : le regard de Grégoire sur l'aperçu de la PR n° 33 ; les signalements 
    mise en ligne de midi ; elle est faite (1.250.0, `ade09e93`), et le point 2 s'appuie sur le filet de 2 px de la case
    et sur #1294, qui n'existaient que sur `main`. Conséquence : `main` avait pris #1289 à #1295 entre-temps ;
    l'inscription de la branche (les neuf rouges d'import sous Chromium) est renumérotée **#1296**, l'en-tête du
-   BACKLOG le dit. (Puis **#1300** à l'assemblage de la release : `lot/glisser-alignement` avait pris #1296.)
+   BACKLOG le dit. (Puis **#1301** à l'assemblage de la release : `lot/glisser-alignement` avait pris #1296, la session de nuit A #1300.)
 2. **Les étiquettes** paraissent sur les cases de l'échelle montrée d'un critère par niveaux. Ni les « textes gardés
    d'une autre échelle », ni un critère en points. Les codes se comparent sans casse ni espaces.
 3. **La règle #577** (« l'assistant ne dit jamais « seuil » : le mot appartient au dépistage », 28 août) est levée par la
