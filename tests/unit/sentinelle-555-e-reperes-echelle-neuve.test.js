@@ -147,8 +147,8 @@ describe('#555 (e) · les repères d\'une échelle NEUVE, avant enregistrement',
         const { win, element } = monter();
         win.afficherNiveauxNouvelleEchelle();
         const html = element('tableauNiveauxEchelle').innerHTML;
-        expect(html).toContain('Repères de maîtrise');
-        expect(html.indexOf('Repères de maîtrise')).toBeGreaterThan(html.indexOf('data-champ="valeurCalcul"'));
+        expect(html).toContain('Seuils de réussite et de maîtrise');   // ↻ 19 nov. 2026 : noms des seuils (décision de Grégoire)
+        expect(html.indexOf('Seuils de réussite et de maîtrise')).toBeGreaterThan(html.indexOf('data-champ="valeurCalcul"'));
         expect(html).toContain('data-on-change="modifierRepereTempHandler"');
         expect(html).not.toContain('modifierRepereEchelleHandler');
         expect(html).not.toContain('data-echelle-id');
@@ -159,7 +159,7 @@ describe('#555 (e) · les repères d\'une échelle NEUVE, avant enregistrement',
         // Les quatre niveaux par défaut d'une échelle neuve : codes vides.
         win._niveauxNouvelleEchelle = NIVEAUX().map((n) => ({ ...n, code: '' }));
         win.afficherNiveauxNouvelleEchelle();
-        expect(element('tableauNiveauxEchelle').innerHTML).not.toContain('Repères de maîtrise');
+        expect(element('tableauNiveauxEchelle').innerHTML).not.toContain('Seuils de réussite et de maîtrise');   // ↻ 19 nov. 2026 : noms des seuils (décision de Grégoire)
     });
 
     it('le handler du tampon rend visible un refus, comme celui de l\'éditeur vivant', () => {
@@ -217,11 +217,11 @@ describe('#555 (e) · les repères d\'une échelle NEUVE, avant enregistrement',
         win.modifierRepereTemp('seuilMaitrise', 'Y');
         // L'utilisateur renomme ensuite le niveau Y en Q : le repère pointe dans le vide.
         win.modifierNiveauTemp(0, 'code', 'Q');
-        expect(win.reperesNouvelleEchellePourEnregistrement().refuse).toMatch(/Maîtrisé à partir de.*ne fait pas partie/);
+        expect(win.reperesNouvelleEchellePourEnregistrement().refuse).toMatch(/Seuil de maîtrise.*ne fait pas partie/);   // ↻ 19 nov. 2026 : noms des seuils (décision de Grégoire)
 
         await win.sauvegarderEchelleComplete();
         expect(store['a2026_echellesTemplates']).toEqual([]);
-        expect(alertes.some((m) => /Repères de maîtrise/.test(m))).toBe(true);
+        expect(alertes.some((m) => /Seuils de réussite et de maîtrise/.test(m))).toBe(true);   // ↻ 19 nov. 2026 : noms des seuils (décision de Grégoire)
     });
 
     it('annuler vide le tampon des repères avec celui des niveaux', () => {

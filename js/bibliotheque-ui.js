@@ -605,7 +605,6 @@
      *   écrire, ou `undefined` pour annuler l'écriture. #522 lot 4.
      * @param {Function} d.nommerLaCopie     - (copie, source, liste) => void
      * @param {Function} d.forgerProvenance  - (source) => objet `inspireDe`
-     * @param {boolean} [d.cloneProfond]     - clone JSON au lieu d'un étalement
      * @param {Function} [d.siIntrouvable]   - () => void, message d'absence
      * @param {Function} [d.retoucherCopie]  - (copie, source) => void, en fin de course
      * @param {Function} [d.rafraichirUI]    - () => void
@@ -630,12 +629,14 @@
                 return (p || 'ITEM_') + Date.now() + '_' + Math.random().toString(36).slice(2, 8);
             };
 
-            // Étalement ou clone profond : seules les pratiques exigent le second
-            // (sous-objets `configuration` / `jetons` partagés sinon — invariant
-            // « source immuable », durcissement de la Brique C).
-            var copie = d.cloneProfond
-                ? JSON.parse(JSON.stringify(source))
-                : Object.assign({}, source);
+            // ⚠⚠ #1298 (19 nov. 2026) — TOUJOURS UNE COPIE PROFONDE. Le clone n'était
+            // profond que pour les pratiques (`cloneProfond`) ; les quatre autres familles
+            // copiaient par `Object.assign`, qui donne à la copie LES MÊMES sous-objets
+            // (`criteres` d'une grille, `niveaux` d'une échelle, `criteres`, `niveaux` et
+            // `commentaires` d'une cartouche…). IndexedDB, qui enregistre par clonage
+            // structuré, gardait ce partage : changer la copie changeait la source, encore
+            // après rechargement. Le paramètre est retiré : aucune famille ne veut le lien.
+            var copie = JSON.parse(JSON.stringify(source));
 
             copie.id = genererId(d.prefixeId);
             d.nommerLaCopie(copie, source, liste);

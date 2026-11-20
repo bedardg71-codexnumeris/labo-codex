@@ -98,8 +98,9 @@ describe('#583 · R — la réception', () => {
         expect(verdict.avertissements[0]).toMatchObject({ id: 'ECH_583', champ: 'seuilMaitrise', code: 'X' });
         // Texte validé par Grégoire le 25 sept. 2026, avec les libellés de l'écran.
         expect(verdict.preview.avertissements).toEqual([
-            'Échelle « IDME fictive » : le repère « Maîtrisé à partir de » désigne le niveau « X », '
-            + 'qui n\'existe pas dans cette échelle. Ce repère n\'est pas importé ; '
+            // ↻ 19 nov. 2026 (noms des seuils) : « le repère « Maîtrisé à partir de » » devient « le « Seuil de maîtrise » ».
+            'Échelle « IDME fictive » : le « Seuil de maîtrise » désigne le niveau « X », '
+            + 'qui n\'existe pas dans cette échelle. Ce seuil n\'est pas importé ; '
             + 'tu pourras le poser dans l\'éditeur d\'échelle.'
         ]);
     });

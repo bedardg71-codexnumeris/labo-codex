@@ -159,7 +159,8 @@ test.describe('iPad', () => {
         // L'holistique : ses textes par niveau, nommés par l'échelle ; aucun barème.
         const holi = page.locator('#listeCriteres .item-liste').nth(4);
         await expect(holi.locator('.grille-bareme')).toHaveCount(0);
-        await expect(holi.locator('.grille-attendu-niveau strong')).toHaveText(['Insuffisant', 'Maîtrisé']);
+        // ↻ 19 nov. 2026 (lot autoevaluation-consignes) : la case « Pour vérifier » suit les niveaux ; on compte les niveaux seuls.
+        await expect(holi.locator('.grille-attendu-niveaux .grille-attendu-niveau strong')).toHaveText(['Insuffisant', 'Maîtrisé']);
 
         // Donner ses points à « Satisfaisant » : la conversion de CE critère.
         const pts = tranche(page, 0, 2).locator('[data-champ="points"]');

@@ -442,10 +442,11 @@ describe('barème 1 · H — un critère holistique ne change pas', () => {
         const m = monter();
         const carte = m.carte(1);
         expect(carte.querySelector('.grille-bareme')).toBeNull();
-        expect([...carte.querySelectorAll('.grille-attendu-niveau strong')].map(s => s.textContent)).toEqual(['Incomplet', 'Maîtrisé']);
+        // ↻ 19 nov. 2026 (lot autoevaluation-consignes) : la case « Pour vérifier » suit les niveaux ; on compte les niveaux seuls.
+        expect([...carte.querySelectorAll('.grille-attendu-niveaux .grille-attendu-niveau strong')].map(s => s.textContent)).toEqual(['Incomplet', 'Maîtrisé']);
         // 20 oct. : la section « Sous-critères » a ses champs et son bouton ; les textes par niveau, aucun.
         expect([...carte.querySelectorAll('.grille-attendu-niveaux input, .grille-attendu-niveaux button')]).toHaveLength(0);
-        const t = carte.querySelectorAll('.grille-attendu-niveau textarea')[1];
+        const t = carte.querySelectorAll('.grille-attendu-niveaux .grille-attendu-niveau textarea')[1];
         t.value = 'Un texte maîtrisé, revu.';
         // ↻ 18 nov. 2026 (lot descripteurs-grille) : le geste du lot 13 est remplacé par celui des descripteurs.
         await m.win.modifierDescripteurNiveauHandler(t);
@@ -530,7 +531,9 @@ describe('barème 1 · I — aucun calcul ne lit le barème', () => {
         // `parcours-evaluer.js` (troisième parcours d'assistance) y était du 9 au 11 nov. 2026 : il cherchait l'échelle d'une
         // grille dans ses descripteurs. Depuis le 11 nov., il lit `grilleEntierementEnPoints` (une grille composée dans
         // Conception › Grilles n'a pas de descripteurs) : il n'y est plus.
-        expect(lecteurs.sort()).toEqual(['bareme.js', 'grilles.js', 'import-export.js', 'materiel-assistant.js', 'materiel-creation.js']);
+        // ↻ 19 nov. 2026 (lot autoevaluation-consignes) : `export-pdf.js` lit les descripteurs pour IMPRIMER la grille
+        // d'autoévaluation des consignes (`pageAutoevaluation`) ; il ne calcule ni note ni bilan.
+        expect(lecteurs.sort()).toEqual(['bareme.js', 'export-pdf.js', 'grilles.js', 'import-export.js', 'materiel-assistant.js', 'materiel-creation.js']);
     });
 
     it('I.c mêmes points, même note : la portée d’une évaluation enregistrée, avec et sans barème', () => {

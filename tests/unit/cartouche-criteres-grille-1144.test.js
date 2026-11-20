@@ -327,3 +327,62 @@ describe('#1145 — une cartouche dont tous les critères sont ceux d\'une autre
         expect(s.ecritures).toEqual([]);
     });
 });
+
+/* ===================== 19 nov. 2026 — la grille trouvée est une COPIE : ambiguë, rien de proposé */
+
+// Retouche tranchée par Cowork à l'assemblage de la release : depuis #1298, « Dupliquer » une grille garde
+// les identifiants de ses critères. Une copie de G5 qui garde un critère que G5 a perdu porte TOUS les
+// critères de la cartouche de G5 : les identifiants ne disent plus à laquelle elle appartient.
+describe('19 nov. — une grille parente par la copie ne reçoit pas la cartouche : listée ambiguë, rien de proposé', () => {
+    vi.spyOn(console, 'warn').mockImplementation(() => {});
+
+    // La cartouche de G5, aux ids de G4 ; G4 retirée, une grille qui porte ces ids existe, parente ou non.
+    function avecGrilleTrouvee(trouvee, retoucherG5) {
+        const s = stock({ avecG4: false });
+        if (retoucherG5) s.store.a2026_grillesTemplates[0] = retoucherG5(JSON.parse(JSON.stringify(G5)));
+        s.store.a2026_grillesTemplates.push(trouvee);
+        s.store[`a2026_cartouches_${trouvee.id}`] = [];
+        return s;
+    }
+    const copieDeG4Ids = (id, nom, extra) => ({ id, nom, criteres: JSON.parse(JSON.stringify(G4.criteres)), ...extra });
+
+    it('la grille trouvée est une copie de celle de la cartouche (inspireDe.sourceId) : ambiguë, rien d\'écrit', async () => {
+        const s = avecGrilleTrouvee(copieDeG4Ids('G_COPIE', 'Copie fictive', { inspireDe: { nom: G5.nom, sourceId: G5.id } }));
+        const avant = JSON.stringify(s.store);
+        const r = await s.C.verifier({ reparer: true });
+        expect(r.decalees.map(l => [l.cartoucheId, l.action, l.proposition, l.ambigue])).toEqual([['CART_decalee', 'ranger', false, true]]);
+        expect(r.decalees[0].pourquoi).toBe(`ambiguë : « Copie fictive » est une copie de « ${G5.nom} » ; leurs critères portent les mêmes identifiants, qui ne disent pas à laquelle la cartouche appartient`);
+        expect(r.ecrites).toEqual([]);
+        expect(s.ecritures).toEqual([]);
+        expect(JSON.stringify(s.store)).toBe(avant);
+    });
+
+    it('dans l\'autre sens : la grille de la cartouche est une copie de la grille trouvée', async () => {
+        const s = avecGrilleTrouvee(copieDeG4Ids('G_SOURCE', 'Source fictive'), g => ({ ...g, inspireDe: { nom: 'Source fictive', sourceId: 'G_SOURCE' } }));
+        const r = await s.C.verifier({ reparer: true });
+        expect(r.decalees[0].proposition).toBe(false);
+        expect(r.decalees[0].ambigue).toBe(true);
+        expect(r.decalees[0].pourquoi).toMatch(/^ambiguë : « Grille fictive à cinq critères » est une copie de « Source fictive » ;/);
+        expect(s.ecritures).toEqual([]);
+    });
+
+    it('deux copies d\'une même source, ou par idOriginal : ambiguë aussi', async () => {
+        const soeurs = avecGrilleTrouvee(copieDeG4Ids('G_SOEUR', 'Sœur fictive', { inspireDe: { sourceId: 'G_ANCETRE' } }),
+            g => ({ ...g, inspireDe: { sourceId: 'G_ANCETRE' } }));
+        const r1 = await soeurs.C.verifier({ reparer: true });
+        expect(r1.decalees[0].pourquoi).toMatch(/sont des copies d'une même grille/);
+        expect(soeurs.ecritures).toEqual([]);
+        const biblio = avecGrilleTrouvee(copieDeG4Ids('G_BIBLIO', 'Ajout fictif', { idOriginal: G5.id }));
+        const r2 = await biblio.C.verifier({ reparer: true });
+        expect(r2.decalees[0].ambigue).toBe(true);
+        expect(biblio.ecritures).toEqual([]);
+    });
+
+    it('témoin : sans parenté, la même grille trouvée reçoit la cartouche, comme #1145', async () => {
+        const s = avecGrilleTrouvee(copieDeG4Ids('G_SANS_LIEN', 'Grille fictive sans lien', { inspireDe: { sourceId: 'G_AILLEURS' } }));
+        const r = await s.C.verifier({ reparer: true });
+        expect(r.decalees[0].ambigue).toBeUndefined();
+        expect(r.ecrites).toEqual([{ grille: G5.nom, cartouche: 'Cartouche fictive décalée', action: 'ranger', vers: 'Grille fictive sans lien' }]);
+        expect(s.store.a2026_cartouches_G_SANS_LIEN.map(c => c.id)).toEqual(['CART_decalee']);
+    });
+});

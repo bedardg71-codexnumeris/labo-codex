@@ -365,7 +365,7 @@ describe('§ 4 — l\'Aide dit le modèle tel que codé', () => {
 
     it('la ligne : le repère de suffisance, sinon la note de passage, lue à la source', () => {
         const passage = Number(lire('js/interpretation-config.js').match(/const NOTE_DE_PASSAGE = ([\d.]+);/)[1]) * 100;
-        expect(carteRai).toContain(`Ce seuil est le repère « Suffisant à partir de » de l'échelle de tes copies ; si ton échelle n'en a pas, c'est la note de passage, ${passage} %.`);
+        expect(carteRai).toContain(`Ce seuil est le « Seuil minimal de réussite » de l'échelle de tes copies ; si ton échelle n'en a pas, c'est la note de passage, ${passage} %.`);
     });
 
     it('avant le minimum, le signalement, ce qui ne fixe jamais', () => {

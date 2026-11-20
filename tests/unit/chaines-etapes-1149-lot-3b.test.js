@@ -56,7 +56,7 @@ describe('#1149 · E — les quatre étapes d\'une échelle', () => {
         const e = E.etapesChaineEchelle({ id: 'X', niveaux: IDME() }, []);
         expect(e.map(x => [x.id, x.libelle, !!x.arrivee])).toEqual([
             ['niveaux', 'Niveaux', false], ['pourcentages', 'Pourcentages', false],
-            ['reperes', 'Repères', false], ['production', 'Production', true]]);
+            ['reperes', 'Seuils', false], ['production', 'Production', true]]);   // ↻ 19 nov. 2026 : noms des seuils (décision de Grégoire)
     });
 
     it('E.b Niveaux : aucun, un niveau, deux niveaux sans nom, quatre nommés', () => {
