@@ -1,11 +1,13 @@
 # Rapport — assembler la release d'avant lundi (19 nov. 2026)
 
-**Dernier relais.** Branche `lot/assemblage-release`, partie de `origin/main` à `ade09e93` (la 1.250.0). Consigne :
-`plans de travail/CONSIGNE-2026-11-19-assemblage-release.md`. Fait : les trois branches fusionnées en `--no-ff`, dans
-l'ordre, aux têtes données (aucune n'avait bougé) ; les conflits réglés ; la retouche des identifiants (1, 2, 3) ; le
-banc croisé, avec break-test ; Vitest complet ; les bancs Chromium ; un run WebKit sur GitHub. APERÇU seulement (PR
-« APERÇU, ne pas fusionner ») : ni push de `main`, ni release, ni Nouvelles écrites. Reste, sur le Mac : l'accord de
-Grégoire sur l'entrée des Nouvelles (§5), puis le verdict complet, `release.mjs` et le push de `main` (§7).
+**Dernier relais.** Branche `lot/assemblage-release`, partie de `origin/main` à `ade09e93` (la 1.250.0), puis
+`origin/main` à `c857b794` fusionné (deux relais de nuit, `RELAIS.md` seul) : `main` en est l'ancêtre, la fusion se
+fera en avance rapide. Consigne : `plans de travail/CONSIGNE-2026-11-19-assemblage-release.md`. Fait : les trois
+branches fusionnées en `--no-ff`, dans l'ordre, aux têtes données (aucune n'avait bougé) ; les conflits réglés ; la
+retouche des identifiants (1, 2, 3) ; le banc croisé, avec break-test ; Vitest complet ; les bancs Chromium ; un run
+WebKit sur GitHub. PR n° 41, « APERÇU, ne pas fusionner » (brouillon) : ni push de `main`, ni release, ni Nouvelles
+écrites. Reste, sur le Mac : l'accord de Grégoire sur l'entrée des Nouvelles (§5), puis le verdict complet,
+`release.mjs` et le push de `main` (§7).
 
 ## En bref
 
@@ -14,9 +16,10 @@ Grégoire sur l'entrée des Nouvelles (§5), puis le verdict complet, `release.m
 - `PARCOURS_OUVERTS` est identique à celui de `main` (`['decouvrir']`, `js/assistance.js` intouché). Aucun commit
   propre aux branches exclues n'est entré (mesuré commit par commit) ; les deux seuls communs avec
   `lot/nous-faisons-cours` et `lot/je-regarde-cours` sont ceux du glisser, que ces branches avaient fusionnés.
-- Un numéro de fiche servait deux fois : #1296. La fiche des neuf rouges d'import sous Chromium devient **#1300**.
+- Un numéro de fiche servait deux fois : #1296. La fiche des neuf rouges d'import sous Chromium devient **#1301**
+  (#1300 a été pris pendant l'assemblage par la session de nuit A).
 - `dupliquerGrille` n'est atteignable depuis aucun écran (mesuré au navigateur).
-- (En cours : les bancs Chromium et le run WebKit tournent ; cette ligne sera remplacée.)
+- Chromium : aucun rouge neuf (les 44 rouges le sont aussi sur `main`). WebKit Linux : en cours.
 
 ## 1. Les fusions
 
@@ -33,9 +36,16 @@ Commits de fusion : `4c03801d`, `0ed55653`, `59beba07`. Aucune tête n'avait bou
 d'import sous Chromium) ; #1297 par `lot/nous-faisons-classe` et `lot/nous-faisons-recevoir` ; #1298 par
 `lot/dupliquer-copie-profonde` ; #1299 par `lot/nous-faisons-recevoir`. La fiche du glisser garde #1296 : elle a déjà
 essaimé sur `lot/nous-faisons-cours` et `lot/je-regarde-cours`, qui l'ont fusionnée. Celle de l'autoévaluation devient
-**#1300**, premier numéro libre sur toutes les branches ; son intertitre dit d'où elle vient. « Dernier ID utilisé :
-#1300 », avec la trace. Aucun numéro de fiche ne sert deux fois parmi #1290 à #1300 (le double #716 est antérieur, il
-est déjà sur `main`). Les deux rapports de l'autoévaluation qui citaient #1296 portent une parenthèse vers #1300.
+**#1301**. Je l'avais d'abord numérotée #1300, premier numéro libre au balayage du début ; à 1 h 45 UTC, un second
+balayage a trouvé #1300 pris par la session de nuit A sur `lot/nous-faisons-donnees`, poussée entre-temps (son relais
+sur `main` le dit). #1301 est libre sur toutes les branches à cette heure ; à revérifier à la fusion. Son intertitre
+dit d'où elle vient ; « Dernier ID utilisé : #1301 », avec la trace. Aucun numéro de fiche ne sert deux fois parmi
+#1290 à #1301 (le double #716 est antérieur, il est déjà sur `main`). Les deux rapports de l'autoévaluation qui
+citaient #1296 portent une parenthèse vers #1301.
+
+Trouvé en route (antérieur, sur `main`) : la ligne qui porte la liste des 17 rouges WebKit Linux de #1293 était
+décollée de sa fiche (après #1295) ; la fiche #1296 du glisser, insérée juste avant, la faisait lire comme une partie
+de #1296. Remise sous #1293 (`4846ffa5`), une ligne déplacée : j'en avais besoin pour classer les rouges WebKit (§4).
 
 **`index.html`.** Trois blocs, tous des jetons de cache, comme mesuré par Cowork :
 
@@ -108,7 +118,59 @@ coupée, les quatre rougissent. Fichiers restaurés après chaque mutation.
 
 ## 4. Les tests
 
-(En cours : les bancs Chromium et le run WebKit de GitHub tournent.)
+### Vitest
+
+Complet, depuis `tests/`, sur l'assemblage avec la retouche : **935 fichiers, 11 976 essais, tous verts**. Rejoué par
+le hook pre-push à chaque push (vert), et par GitHub sur `0c0bb47c` (job Vitest vert). Les sentinelles anti-cache
+(`anticache-fichiers-modifies`, `cache-busting-main`, `release-bump-cache-417`) rejouées après le dernier jeton : vertes.
+
+### Chromium, paysage et portrait
+
+Les 120 fichiers des quatre lots, du banc croisé et des modules touchés (noms contenant grille, échelle, cartouche,
+production, planif, alignement, pdf, import, export, codex, dupliqu, copies, seuil, autoeval, barème, matériel,
+partage, descripteur, et `wizard-577`), par une configuration temporaire non suivie à deux projets : paysage
+(1 180 × 820) et portrait (820 × 1 180). Les 41 fichiers qui fixent eux-mêmes leur fenêtre tournent une fois ; les 79
+autres, aux deux tailles. Six tranches, trois workers. **716 essais : 671 verts, 44 rouges, 1 sauté.**
+
+**Les 44 rouges rougissent tous aussi sur `main`** (worktree d'`ade09e93`, même configuration, mêmes fichiers) : même
+essai, même fenêtre. **Aucun rouge neuf.** À l'inverse, un essai rouge sur `main` est vert sur l'assemblage
+(`planif-corbeille-fixe-1070`, paysage) : il est intermittent.
+
+| Fichier | Rouges | Fenêtres | Connu |
+|---|---|---|---|
+| `codex-1012-ancien-zip-par-la-case` | 12 | les deux | #1301 (six essais × deux fenêtres) |
+| `import-cartouche-renommee-654` | 4 | les deux | #1301 |
+| `lot-j0-bis-partage-apres-preparation` | 2 | les deux | #1301 ; aussi dans la baseline Linux |
+| `codex-1011-ouvert-sans-espace` | 8 | les deux | rouge sur `main` ; (5) aussi dans la baseline Linux |
+| `lot-i-bis-la-case-ouvre-un-codex` | 4 | les deux | rouge sur `main` ; (1) et (3) intermittents de la baseline Linux |
+| `codex-1012-fichier-d-origine` | 2 | les deux | rouge sur `main` ; (1) dans la baseline Linux |
+| `codex-1182-fusion-copie-par-copie` | 2 | les deux | rouge sur `main` |
+| `codex-1186-fenetre-de-fusion` | 2 | paysage | rouge sur `main` |
+| `codex-1012-avertissement` | 1 | paysage | rouge sur `main` |
+| `1028-archiver-copies` | 1 | paysage | rouge sur `main` |
+| `bareme-3-evaluer` | 2 | sa fenêtre | rouge sur `main` |
+| `grilles-sous-criteres-condense` | 1 | sa fenêtre (iPad) | rouge sur `main` ; intermittent de la baseline du Mac |
+| `planif-menu-vue` | 2 | paysage | rouge sur `main` ; dans la baseline Linux |
+| `planif-corbeille-fixe-1070` | 1 | portrait | rouge sur `main` (paysage) ; dans la baseline Linux |
+
+Ce qui varie : la configuration Chromium le dit en tête, « ~la moitié des specs rougissent en Chromium », surtout
+celles du codex et de l'import, dont les motifs d'erreurs attendues sont écrits pour WebKit. Douze des quatorze
+fichiers touchent au codex, à l'import, aux archives ou aux gestes du planificateur. Comme ils rougissent à l'identique
+sur `main`, ils ne disent rien des lots.
+
+Les bancs des quatre lots et le banc croisé sont **tous verts** sous Chromium, chacun aux fenêtres qu'il fixe
+(1 180 × 820 et 820 × 1 180 pour tous ceux-ci, plus 390 × 844 pour `noms-des-seuils`) :
+`dupliquer-copie-profonde-1298` (16 essais), `dupliquer-copie-profonde-1298-cache` (18),
+`diagnostic-copies-liees-1298` (6), `planif-glisser-relachement-1295` (10), `autoevaluation-consignes` (4),
+`noms-des-seuils` (3), `assemblage-dupliquer-descripteurs-seuils` (4), `descripteurs-niveaux-grille` (2). Les specs
+que l'autoévaluation a retouchées aussi : `bareme-1` (3, à 1 440 et 820), `echelle-reperes-maitrise-rendu` (3, à
+1 600 et 1 280), `materiel-dissection-2b` (2, à 820), `partage-echelle-reperes-583` et
+`wizard-577-reperes-echelle-rendu` (aux deux tailles de la configuration). Le seul essai sauté l'est par son banc
+(`bareme-3-evaluer`, les captures, sans dossier de captures).
+
+### WebKit Linux, sur GitHub (run 44649923269, `0c0bb47c`)
+
+(En cours : la relance des neuf morceaux non joués tourne.)
 
 ## 5. Les Nouvelles proposées (rien d'écrit dans `js/changelog-data.js`)
 
@@ -149,7 +211,7 @@ dans l'entrée.
 2. **Un commentaire dans `dupliquerGrille`** plutôt que rien : la consigne disait « dis-le ». Disposition « commenter
    et oublier » : vrai, sans conséquence observable aujourd'hui, mais la fonction régénère les identifiants à
    l'inverse de la règle du 19 nov., et un rebranchement la réveillerait.
-3. **#1300** pour la fiche des neuf rouges d'import, et non #1296 : celle du glisser est déjà fusionnée ailleurs.
+3. **#1301** pour la fiche des neuf rouges d'import, et non #1296 : celle du glisser est déjà fusionnée ailleurs.
 4. **Les jetons de cache** : un jeton neuf (`f`) pour les trois fichiers touchés par deux lots ; pour ceux qu'un seul
    lot touche, le jeton de ce lot, déjà plus récent que celui de `main`.
 5. **Les bancs Chromium** : un fichier qui fixe lui-même sa fenêtre tourne une fois (il choisit ses fenêtres) ; les
@@ -157,4 +219,31 @@ dans l'entrée.
 
 ## 7. Ce que la session du Mac doit savoir avant le verdict
 
-(En cours.)
+1. **L'ordre.** L'accord de Grégoire sur l'entrée des Nouvelles (§5) d'abord ; elle s'écrit ensuite dans
+   `js/changelog-data.js` (le jeton de ce fichier dans `index.html` suit, le hook anti-cache le demandera). Puis le
+   verdict complet du Mac sur la tête de la branche, puis `release.mjs` en mineure (la 1.251.0 si rien d'autre ne
+   part), puis le push de `main`. `origin/main` (`c857b794`) est ancêtre de la branche : la fusion se fait en avance
+   rapide, sauf si `main` bouge encore d'ici là (revérifier, et revérifier les numéros de fiches, §1).
+2. **Ce que le verdict du Mac peut montrer sans que ce soit une régression des lots.**
+   · `parcours-5-monter-ton-cours` « les sept étapes… (1180 px) » : le lot du glisser l'a **retiré** des échecs connus
+   (`scripts/playwright-baseline.json`, note du 19 nov.), parce que #1295 le répare. Sous WebKit Linux, il a rougi
+   une fois puis passé au second essai. Sur le Mac, le lot l'avait vu vert 3 sur 3 (`--retries=0`, rapport du glisser, §5).
+   S'il rougit au verdict, le rejouer seul avec `--retries=0` départage le défaut de l'intermittence. Les deux essais
+   du clic du banc `planif-glisser-relachement-1295` n'ont jamais tourné sous Safari (rapport du glisser, §5).
+   · « capture 25 » du même fichier : **#1296**, intermittent, absent de la baseline du Mac. Au second essai sous
+   WebKit Linux.
+   · `descripteurs-niveaux-grille`, « iPad en haut » : au second essai sous WebKit Linux (vert au premier essai sous
+   Chromium). Le lot de l'autoévaluation touche son écran (les étiquettes de seuil, la case « Pour vérifier ») : un
+   rouge franc sur le Mac serait à regarder de près, pas à classer d'office.
+3. **Le stock.** #1298 tarit la source, pas le stock : une copie déjà liée à sa source chez Grégoire le reste. Le
+   diagnostic en lecture seule est dans Réglages › Données › Maintenance (« Vérifier les copies liées ») ; il ne peut
+   tourner qu'une fois la release en ligne, sur l'iPad et sur le Mac. La réparation reste à lui proposer
+   (rapport du lot #1298). Pour le glisser, la question du stock reste ouverte (rapport du glisser, §4).
+4. **`CartouchesDecalees` propose moins.** Si Grégoire relance `CartouchesDecalees.verifier()` à la console, une
+   cartouche dont la grille trouvée est une copie de la sienne sort maintenant « ambiguë », sans proposition.
+5. **Les bancs neufs ou retouchés à voir passer au verdict** : `assemblage-dupliquer-descripteurs-seuils` (neuf, ce
+   lot), et ceux des quatre lots (§4). Aucun n'a été joué sous Safari ; ceux qui sont tombés dans les morceaux joués
+   de GitHub l'ont été sous WebKit Linux (§4).
+6. **Fichiers non suivis à ne pas chercher** : la configuration Chromium temporaire
+   (`tests/playwright.assemblage-tmp.config.js`) est exclue par `.git/info/exclude` du conteneur ; elle n'existe pas
+   ailleurs.
