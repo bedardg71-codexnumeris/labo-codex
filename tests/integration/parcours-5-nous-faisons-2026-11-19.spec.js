@@ -3,7 +3,7 @@ import { releverLaBulle } from './harness/releve-bulle.js';
 // La bulle ne couvre jamais ses zones quand une place les laisse libres (Grégoire, 11 nov. 2026) : relevé à chaque essai.
 releverLaBulle(test);
 import { ouvrirPanneau, attendreEtape, bulle } from './harness/classe-de-banc.js';
-import { leParcoursEntier, dossierDesCaptures } from './harness/parcours-3-de-banc.js';
+import { leTroisiemeParcoursFait, dossierDesCaptures } from './harness/nous-faisons-evaluer-de-banc.js';
 import { attendreApplication } from './harness/attendre-application.js';
 
 // =======================================================================
@@ -84,7 +84,7 @@ for (const [largeur, hauteur] of [[1180, 820], [820, 1180]]) {
     test(`« Nous faisons » : la bulle de chaque étape, sa confirmation, ses gestes qui se grisent, ses deux formes et sa fin (${largeur} × ${hauteur})`, async ({ page }) => {
         test.setTimeout(360000);
         dossierDesCaptures('');
-        await leParcoursEntier(page, { niveaux: true, cap: 'p3' });
+        await leTroisiemeParcoursFait(page, { cap: 'p3' });
         await page.keyboard.press('Escape');
         const pid = await page.evaluate(() => ParcoursEvaluer.contexte().productionId);
         await page.setViewportSize({ width: largeur, height: hauteur });

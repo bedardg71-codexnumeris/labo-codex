@@ -9,7 +9,7 @@
 import { expect } from '@playwright/test';
 import { ouvrirPanneau, boutonModele, bulle, attendreEtape, faireLaModelisation, attendreRemplir, REMPLIR } from './deux-temps-de-banc.js';
 import { etiqueter } from './classe-de-banc.js';
-import { actionDeLaListe, valeursActions } from './parcours-3-de-banc.js';
+import { actionDeLaListe, valeursActions } from './nous-faisons-evaluer-de-banc.js';
 
 const boutonDeBulle = (page, nom) => bulle(page).getByRole('button', { name: nom, exact: true });
 const etapeEvaluer = (page, n, titre) => attendreEtape(page, n, 10, titre);

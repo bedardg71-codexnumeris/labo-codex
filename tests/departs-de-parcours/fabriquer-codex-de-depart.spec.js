@@ -2,7 +2,7 @@ import { test, expect } from '@playwright/test';
 import fs from 'node:fs';
 import path from 'node:path';
 import JSZip from 'jszip';
-import { leParcoursEntier, dossierDesCaptures } from '../integration/harness/parcours-3-de-banc.js';
+import { leTroisiemeParcoursFait, dossierDesCaptures } from '../integration/harness/nous-faisons-evaluer-de-banc.js';
 import { DEPARTS, DOSSIER_DES_DEPARTS, nomDuCodex } from './departs.js';
 
 // =======================================================================
@@ -30,7 +30,7 @@ import { DEPARTS, DOSSIER_DES_DEPARTS, nomDuCodex } from './departs.js';
  */
 const PREPARATIONS = {
     'classe-et-evaluer': async (page) => {
-        await leParcoursEntier(page, { niveaux: true, cap: 'p3' });
+        await leTroisiemeParcoursFait(page, { cap: 'p3' });
         await page.keyboard.press('Escape');
     }
 };

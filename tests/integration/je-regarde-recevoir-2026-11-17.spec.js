@@ -9,7 +9,7 @@ import {
     releve, ecarts, horsDeLaDemo, DE_LA_DEMO, DE_L_APPAREIL, peuplerUnTrimestreReel, faireLaModelisation, lireBulle, REMPLIR
 } from './harness/deux-temps-de-banc.js';
 import { flecheVers, nombreDeFleches, etatFleches } from './harness/fleches-de-banc.js';
-import { actionDeLaListe, valeursActions } from './harness/parcours-3-de-banc.js';
+import { actionDeLaListe, valeursActions } from './harness/nous-faisons-evaluer-de-banc.js';
 import { faireLesDeuxModeles, releveDesBlobs, poserUnBlobReel } from './harness/recevoir-modele-de-banc.js';
 
 // =======================================================================

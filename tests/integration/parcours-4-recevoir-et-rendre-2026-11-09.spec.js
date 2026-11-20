@@ -4,14 +4,14 @@ import { releverLaBulle } from './harness/releve-bulle.js';
 releverLaBulle(test);
 import { ouvrirPanneau, attendreEtape, contourSur, bulleNeCouvrePas, capture, bulle, ouvrirEspaceVide, mettreLaClasseEnPlace } from './harness/classe-de-banc.js';
 import { flecheVers, flecheVisant, rienNeRetientLeToucher } from './harness/fleches-de-banc.js';
-import { leParcoursEntier, dossierDesCaptures } from './harness/parcours-3-de-banc.js';
+import { leTroisiemeParcoursFait, dossierDesCaptures } from './harness/nous-faisons-evaluer-de-banc.js';
 import { attendreApplication } from './harness/attendre-application.js';
 
 // =======================================================================
 // LE QUATRIÈME PARCOURS, « RECEVOIR LES PRODUCTIONS, RENDRE TES RÉTROACTIONS » (9 NOVEMBRE 2026)
 // =======================================================================
 // plans de travail/CONSIGNE-LOT-2026-11-08-parcours-4-recevoir-et-rendre.md. Ce banc juge, en faisant les gestes,
-// depuis un espace où le troisième parcours est fait (harness/parcours-3-de-banc.js) :
+// depuis un espace où le troisième parcours est fait (harness/nous-faisons-evaluer-de-banc.js, `leTroisiemeParcoursFait`) :
 //   · le panneau : sans production prête (grille, échelle et cartouche, question 7), le bouton ne lance rien et la
 //     phrase validée le dit — MESURÉ : à la sortie du troisième parcours, la production nomme sa grille et son échelle
 //     (décision du 9 nov., 13 h 37), pas sa cartouche ; le banc lui donne sa cartouche dans sa fiche (rapport, question
@@ -127,7 +127,7 @@ async function magasinDeCopiesDuBanc(page) {
 async function espaceDuTroisiemeParcours(page, cap) {
     await magasinDeCopiesDuBanc(page);
     dossierDesCaptures('');
-    await leParcoursEntier(page, { niveaux: true, cap: 'p3' });
+    await leTroisiemeParcoursFait(page, { cap: 'p3' });
     await page.keyboard.press('Escape');
     dossierDesCaptures(DOSSIER);
     // De bout en bout (décision du 9 nov., 15 h 55) : à la sortie du troisième parcours, la production nomme sa grille, son

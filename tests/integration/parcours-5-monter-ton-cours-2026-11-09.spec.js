@@ -3,14 +3,14 @@ import { releverLaBulle } from './harness/releve-bulle.js';
 // La bulle ne couvre jamais ses zones quand une place les laisse libres (Grégoire, 11 nov. 2026) : relevé à chaque essai.
 releverLaBulle(test);
 import { ouvrirEspaceVide, ouvrirPanneau, attendreEtape, contourSur, bulleNeCouvrePas, capture, bulle, mettreLaClasseEnPlace } from './harness/classe-de-banc.js';
-import { leParcoursEntier, dossierDesCaptures } from './harness/parcours-3-de-banc.js';
+import { leTroisiemeParcoursFait, dossierDesCaptures } from './harness/nous-faisons-evaluer-de-banc.js';
 import { attendreApplication } from './harness/attendre-application.js';
 
 // =======================================================================
 // LE CINQUIÈME PARCOURS, « MONTER TON COURS » (9 NOVEMBRE 2026)
 // =======================================================================
 // plans de travail/CONSIGNE-LOT-2026-11-08-parcours-5-monter-ton-cours.md. Ce banc juge, en faisant les gestes, depuis
-// un espace où le troisième parcours est fait (harness/parcours-3-de-banc.js) :
+// un espace où le troisième parcours est fait (harness/nous-faisons-evaluer-de-banc.js, `leTroisiemeParcoursFait`) :
 //   · le panneau : cinquième entrée, après « Recevoir… » ; sans production, le bouton ne lance rien et la phrase validée
 //     le dit ; à faire, en cours (« Étape 4 sur 7 »), fait ;
 //   · les sept étapes sur la carte d'alignement : la compétence, l'idée maîtresse reliée (« se décline en »), la leçon
@@ -205,7 +205,7 @@ const gestesBulle = (page) => bulle(page).locator('.parcours-bulle-ligne .parcou
 /** Un espace où le troisième parcours est fait ; sa production sera placée dans la carte. */
 async function espaceDuTroisiemeParcours(page) {
     dossierDesCaptures('');
-    await leParcoursEntier(page, { niveaux: true, cap: 'p3' });
+    await leTroisiemeParcoursFait(page, { cap: 'p3' });
     await page.keyboard.press('Escape');
     return page.evaluate(() => ParcoursEvaluer.contexte().productionId);
 }

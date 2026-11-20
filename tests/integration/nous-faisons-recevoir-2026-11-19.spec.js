@@ -4,7 +4,7 @@ import { releverLaBulle } from './harness/releve-bulle.js';
 releverLaBulle(test);
 import { ouvrirPanneau, attendreEtape, bulle } from './harness/classe-de-banc.js';
 import { flecheVers } from './harness/fleches-de-banc.js';
-import { leParcoursEntier, dossierDesCaptures } from './harness/parcours-3-de-banc.js';
+import { leTroisiemeParcoursFait, dossierDesCaptures } from './harness/nous-faisons-evaluer-de-banc.js';
 import { attendreApplication } from './harness/attendre-application.js';
 import { pointCanevas, compteAnnotations } from './harness/banc-copie-annotation.js';
 
@@ -59,7 +59,7 @@ async function fermerLeRappel(page) {
 /** Le troisième parcours fait (sa production a grille, échelle et cartouche), puis le quatrième lancé à la taille voulue. */
 async function lancerLeQuatrieme(page, taille) {
     dossierDesCaptures('');
-    await leParcoursEntier(page, { niveaux: true, cap: 'p3' });
+    await leTroisiemeParcoursFait(page, { cap: 'p3' });
     test.setTimeout(480000);   // l'aide du troisième parcours pose 240 s ; les deux parcours en demandent plus
     await page.keyboard.press('Escape');
     // Un rechargement entre les deux parcours (comme le banc du quatrième parcours, qui recharge à son étape 4). Sans lui,

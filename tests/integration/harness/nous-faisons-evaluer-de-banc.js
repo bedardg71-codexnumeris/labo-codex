@@ -586,7 +586,7 @@ export async function bulle10(page, { cap }) {
  * Le parcours entier, de « Nous faisons » à sa dixième bulle, dans les voies données. Part d'un espace vide : le
  * deuxième parcours est joué d'abord. `voiePratique` : 'modele' ou 'decrire' ; `voieGrille` : 'materiel' ou 'composer'.
  */
-export async function leNousFaisonsEntier(page, { largeur = 1180, hauteur = 820, voiePratique = 'modele', voieGrille = 'materiel', echelleNeuve = false, cap = 'nf3' } = {}) {
+export async function leNousFaisonsEntier(page, { largeur = 1180, hauteur = 820, voiePratique = 'modele', voieGrille = 'materiel', echelleNeuve = false, cap = 'nf3', modele = 'STD-n-meilleurs' } = {}) {
     test.setTimeout(300000);
     await ouvrirEspaceVide(page, largeur, { hauteur });
     await mettreLaClasseEnPlace(page);
@@ -594,7 +594,7 @@ export async function leNousFaisonsEntier(page, { largeur = 1180, hauteur = 820,
     await item(page).locator('.assistance-parcours-bouton').click();
     await expect(page.locator('#panneau-assistance')).toHaveCount(0);
     await bulle1(page, { voie: voiePratique, cap });
-    if (voiePratique === 'modele') await bulle2Modele(page, { cap });
+    if (voiePratique === 'modele') await bulle2Modele(page, { cap, modele });
     else await bulle2Decrire(page, { cap });
     await bulle3(page, { cap });
     await bulle4(page, { neuve: echelleNeuve, cap });
@@ -605,4 +605,21 @@ export async function leNousFaisonsEntier(page, { largeur = 1180, hauteur = 820,
     await bulle8(page, { cap });
     await bulle9(page, { cap });
     await bulle10(page, { cap });
+}
+
+/**
+ * « UN ESPACE OÙ LE TROISIÈME PARCOURS EST FAIT » : le point de départ des bancs des parcours 4 et 5 et du codex de
+ * départ. Le « Nous faisons » d'« Évaluer » joué de bout en bout (un modèle sommatif, la grille composée dans
+ * « Grilles » : deux critères par niveaux, l'Échelle de départ), puis « Terminer ». À la sortie : une pratique
+ * appliquée au cours, une production « Journal de lecture 1 » qui porte sa grille, son échelle et sa cartouche, ses
+ * consignes transmises, et une première évaluation verrouillée ; le parcours est « Fait », aucune bulle, aucun panneau.
+ * (Avant le 20 nov. 2026 : `leParcoursEntier`, de l'ancien harnais parcours-3-de-banc.js, retiré avec l'ancienne
+ * Pratique guidée.)
+ */
+export async function leTroisiemeParcoursFait(page, { cap = 'p3', largeur = 1180, hauteur = 900 } = {}) {
+    await leNousFaisonsEntier(page, { largeur, hauteur, voiePratique: 'modele', modele: 'SOM-litterature', voieGrille: 'composer', cap });
+    await bulle(page).getByRole('button', { name: 'Terminer', exact: true }).click();
+    await expect(bulle(page)).toHaveCount(0);
+    await expect(page.locator('#panneau-assistance')).toHaveCount(0);
+    expect(await page.evaluate(() => Assistance.etatDe('evaluer').etat)).toBe('fait');
 }
