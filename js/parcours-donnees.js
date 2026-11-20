@@ -7,9 +7,9 @@
    dans l'application (chargerCodex, codex.js). Pendant ce parcours, « Ouvrir un codex… » ne
    répond pas (garde ci-dessous), même éclairé à l'étape 4.
 
-   ⚠ Les quatre textes, la ligne du panneau et la phrase du refus sont ceux que Grégoire a
-   validés le 8 nov. (12 h 48 à 13 h 43), posés mot pour mot :
-   tests/unit/sentinelle-parcours-donnees-2026-11-09.test.js les confronte à la consigne.
+   ⚠ La ligne du panneau et la phrase du refus sont celles que Grégoire a validées le 8 nov. Les quatre
+   bulles sont celles du « Nous faisons » réécrit avec lui le 19 nov. (12 h 15 à 12 h 25), en lignes, posées
+   mot pour mot : tests/unit/sentinelle-parcours-donnees-2026-11-09.test.js les confronte à la consigne.
 
    Le moment (étape 3) : une bulle ne peut pas se poser sur une fenêtre du système (choix
    d'emplacement, feuille de partage), et le toucher qui l'ouvre doit rester frais. L'étape 2
@@ -26,39 +26,78 @@
     var M = function () { return window.ParcoursMoteur; };
     var C = function () { return window.Codex; };
 
-    // ---------- Les textes validés (8 nov. 2026) ----------
-
+    // ---------- Les textes ----------
+    // La ligne du panneau et le refus : validés par Grégoire le 8 nov. 2026, inchangés.
     var LIGNE = 'Une copie complète de ton travail, hors du navigateur et rangée dans un lieu protégé : ton codex.';
     var REFUS_SANS_TRIMESTRE = 'Commence par « Mettre ta classe en place » : ton codex gardera ce que tu y auras mis.';
 
-    var TEXTE_1 = "Tes données vivent dans ce navigateur, sur cet appareil : Labo Codex ne les envoie nulle part. Elles peuvent donc être perdues si tu effaces les données de sites, changes de navigateur ou d'ordinateur. Ton codex en garde une copie complète, productions de tes étudiant·es comprises, que tu rouvres sur n'importe quel appareil. Ce fichier ne change que quand tu le mets à jour : l'application ne le fait jamais à ta place. Touche « Codex », en haut de l'écran.";
+    // « NOUS FAISONS », RÉÉCRIT LE 19 NOV. 2026 avec Grégoire (12 h 15 à 12 h 25), dans la forme des « Nous faisons » des
+    // parcours 2 et 4 ; consigne : plans de travail/CONSIGNE-2026-11-19-nous-faisons-donnees.md. Mot pour mot :
+    // tests/unit/sentinelle-parcours-donnees-2026-11-09.test.js les confronte à la consigne. Chaque ligne dans son genre :
+    // une explication (`note`, sans marque), un geste (une flèche ; il se grise quand la page le dit fait), la consigne (en
+    // gras, la dernière de la liste). Pas de phrase du lieu : le bouton « Codex » est dans l'en-tête de toutes les pages.
 
-    var TEXTE_2 = "Touche « Mettre à jour le codex ». Une fenêtre d'aperçu s'ouvre ; son « i » te dit ce que contient le fichier. Touche « Mettre à jour » : l'application rassemble tes données et les fichiers des productions de tes étudiant·es en un seul fichier. Plus tu as importé de productions, plus il est lourd, et plus sa préparation peut prendre un moment. Refais ce geste chaque semaine, et après chaque séance de travail importante : une saisie de présences, une série d'évaluations.";
+    function note(texte) { return { texte: texte, note: true }; }
 
-    var TEXTE_3_DEBUT = "Ton codex contient les noms, les DA et les productions de tes étudiant·es, et il n'est pas chiffré : quiconque a le fichier peut le lire. Range-le dans un lieu protégé : une clé USB chiffrée, ou un dossier synchronisé avec un infonuage chiffré, protégé par un mot de passe solide et une double authentification. Ton ordinateur, lui, devrait avoir un mot de passe et un disque chiffré.";
-    var TEXTE_3_FIN = "Quand le menu affiche « Ton codex est à jour », ta copie est faite.";
-
-    // La phrase « selon le navigateur ». Celle de la fenêtre de choix tient en deux phrases :
-    // le fichier déjà tenu prend la seconde seule (consigne), et des copies qui manquent la
-    // première seule (#1012 : l'application redemande alors où écrire et ne garde pas le
-    // fichier, la seconde serait fausse ; traitement proposé dans le rapport).
-    var FENETRE_1 = "Une fenêtre te demande où l'enregistrer : choisis ta clé ou ton dossier synchronisé.";
-    var FENETRE_2 = "Jusqu'à ce que tu recharges la page, chaque mise à jour réécrira ce même fichier, sans rien te demander.";
-    var PARTAGE = "Ton appareil te propose de partager le fichier : choisis de l'enregistrer, sur ta clé ou dans ton dossier synchronisé.";
-    var TELECHARGEMENT = "Le fichier arrive dans tes téléchargements. Quand tu l'y vois, réponds « Il y est », puis déplace-le sur ta clé ou dans ton dossier synchronisé. Chaque mise à jour t'en remettra un nouveau : c'est le plus récent qui compte.";
-
-    var TEXTE_4 = "Ton codex te servira dans deux cas : pour travailler sur un autre appareil, ou pour retrouver tes données si ce navigateur les perd. Touche alors « Ouvrir un codex… », ici, dans le menu. Attention : ouvrir un codex remplace tout ce qui est dans l'application par le contenu du fichier. Ouvre donc toujours ton codex le plus récent. Pour savoir où tu en es, regarde le haut du menu : « Ton codex est à jour », ou « Ton codex n'a pas tes derniers changements ». Et si tu oublies, le rappel « Mets ton codex à jour » reviendra toutes les deux semaines, ou au rythme que tu choisis.";
-
-    /** La phrase de l'étape 3 pour un chemin d'écriture (Codex.cheminDeLaProchaineEcriture). */
-    function phraseDuChemin(chemin, copiesManquent) {
-        if (chemin === 'tenu') return FENETRE_2;
-        if (chemin === 'fenetre') return copiesManquent ? FENETRE_1 : FENETRE_1 + ' ' + FENETRE_2;
-        if (chemin === 'partage') return PARTAGE;
-        return TELECHARGEMENT;
+    /** La consigne ; `fait` : ce qui la rend faite, quand la page le dit. */
+    function consigne(texte, fait) {
+        var l = { texte: texte, geste: true };
+        if (fait) l.fait = fait;
+        return l;
     }
 
-    function texteEtape3(chemin, copiesManquent) {
-        return TEXTE_3_DEBUT + ' ' + phraseDuChemin(chemin, copiesManquent) + ' ' + TEXTE_3_FIN;
+    // L'objectif du parcours (validé par Grégoire, bulles 1 et 4, 19 nov. 2026). L'objectif atteint met la seconde moitié
+    // entre parenthèses (décidé par Cowork, accepté par Grégoire à 12 h 25 : deux deux-points dans la même phrase sinon).
+    var OBJECTIF = "À la fin de ce parcours, tu seras en mesure de mettre tes données à l'abri : ton codex à jour, rangé dans un lieu protégé.";
+    var OBJECTIF_ATTEINT = "Objectif atteint : tu es en mesure de mettre tes données à l'abri (ton codex à jour, rangé dans un lieu protégé).";
+
+    // L'explication de la fenêtre de choix, après sa consigne (et celle du fichier déjà tenu).
+    var REECRITURE = "Jusqu'à ce que tu recharges la page, chaque mise à jour réécrira ce même fichier, sans rien te demander.";
+
+    /**
+     * Les lignes de l'étape 3 pour un chemin d'écriture (Codex.cheminDeLaProchaineEcriture) : le début commun, puis le geste
+     * et la consigne du chemin. Des copies qui manquent (#1012 : l'application redemande alors où écrire et ne garde pas
+     * le fichier) : la fenêtre sans l'explication de la réécriture, qui serait fausse.
+     */
+    function lignesEtape3(chemin, copiesManquent) {
+        var debut = [
+            note("Le « i » de l'aperçu te dit ce que contient le fichier."),
+            note("Ton codex contient les noms, les DA et les productions de tes étudiant·es, et il n'est pas chiffré : quiconque a le fichier peut le lire."),
+            note("Sa place est dans un lieu protégé : une clé USB chiffrée, ou un dossier synchronisé avec un infonuage chiffré, protégé par un mot de passe solide et une double authentification."),
+            note("Ton appareil, lui, devrait avoir un mot de passe et un disque chiffré.")
+        ];
+        // « Touche « Mettre à jour » » se grise quand l'aperçu s'est refermé sur une écriture en cours (lu : `tentativeEnCours`).
+        var mettreAJour = { texte: "Touche « Mettre à jour »", fait: function () { return !apercu() && tentativeEnCours(); } };
+        if (chemin === 'tenu') return debut.concat([consigne("Touche « Mettre à jour »", codexEcrit), note(REECRITURE)]);
+        if (chemin === 'fenetre') {
+            return debut.concat([mettreAJour, consigne("Dans la fenêtre qui te demande où l'enregistrer, choisis ta clé ou ton dossier synchronisé", codexEcrit)],
+                copiesManquent ? [] : [note(REECRITURE)]);
+        }
+        if (chemin === 'partage') {
+            return debut.concat([mettreAJour, consigne("Quand ton appareil te propose de partager le fichier, choisis de l'enregistrer, sur ta clé ou dans ton dossier synchronisé", codexEcrit)]);
+        }
+        return debut.concat([mettreAJour,
+            consigne("Quand le fichier est dans tes téléchargements, réponds « Il y est », puis déplace-le sur ta clé ou dans ton dossier synchronisé", codexEcrit),
+            note("Chaque mise à jour t'en remettra un nouveau : c'est le plus récent qui compte.")]);
+    }
+
+    // ---------- La confirmation : ce qui vient d'être fait, dans CE passage ----------
+
+    // L'étape d'où part le passage en cours (`lancer`) : null hors d'un passage.
+    var depuisDuPassage = null;
+
+    /**
+     * « C'est fait : … », au-dessus du titre, SEULEMENT si l'étape d'avant a été faite pendant ce passage (décision de
+     * Cowork, la même qu'aux parcours 2 et 4) : les étapes avancent une à une, une étape au-delà de celle du départ suit une
+     * étape faite ici ; celle où l'on reprend (« Reprendre ») n'en a pas.
+     */
+    function confirmation(texte) {
+        var dire = function () {
+            var i = M().etapeCourante();
+            return depuisDuPassage !== null && typeof i === 'number' && i > depuisDuPassage ? texte : '';
+        };
+        dire.texte = texte;   // pour la sentinelle des textes
+        return dire;
     }
 
     // ---------- Ce que le parcours regarde ----------
@@ -122,6 +161,14 @@
         var e = C() && typeof C().etat === 'function' ? C().etat() : null;
         return e && e.actif ? e.derniereSauvegarde : null;
     }
+
+    /** Le codex vient d'être écrit dans cette étape : une nouvelle date (l'état que pose _marquerCodexAJour). */
+    function codexEcrit() {
+        var d = derniereEcriture();
+        return !!d && d !== repereEcriture;
+    }
+
+    function enDemo() { return typeof estEnModeDemo === 'function' && estEnModeDemo(); }
 
     function aUnTrimestreReel() {
         var liste = typeof window.enumererTrimestres === 'function' ? window.enumererTrimestres()
@@ -193,9 +240,17 @@
 
     var ETAPES = [
         {
+            // Validée par Grégoire le 19 nov. 2026, 12 h 15. L'objectif et la phrase de la poignée : posés par le moteur.
             titre: 'Pourquoi un codex',
-            geste: "Touche « Codex », en haut de l'écran.",
-            texte: TEXTE_1,
+            lignes: function () {
+                return [
+                    note("Tes données demeurent dans le navigateur de cet appareil : Labo Codex ne les envoie nulle part."),
+                    note("Elles peuvent donc se perdre si tu effaces les données de sites, ou si tu changes de navigateur ou d'ordinateur."),
+                    note("Ton codex en est une copie complète, productions de tes étudiant·es comprises, dans un seul fichier que tu rouvres sur n'importe quel appareil."),
+                    note("Ce fichier ne change que quand tu le mets à jour : l'application ne le fait jamais à ta place."),
+                    consigne("Touche « Codex », en haut de l'écran", menuOuvert)
+                ];
+            },
             avant: async function () {
                 auDessusDesFenetres(false);
                 bulleADroite(0);
@@ -206,9 +261,17 @@
             atteint: menuOuvert
         },
         {
+            // Validée par Grégoire le 19 nov. 2026, 12 h 17.
             titre: 'Mettre à jour',
-            geste: "Touche « Mettre à jour le codex ».",
-            texte: TEXTE_2,
+            confirme: confirmation("C'est fait : le menu Codex est ouvert."),
+            lignes: function () {
+                return [
+                    note("Mettre ton codex à jour, c'est rassembler tes données et les fichiers des productions de tes étudiant·es en un seul fichier."),
+                    note("Plus tu as importé de productions, plus il est lourd, et plus sa préparation peut prendre un moment."),
+                    note("Refais ce geste chaque semaine, et après chaque travail important : une saisie de présences, une série d'évaluations."),
+                    consigne("Touche « Mettre à jour le codex »")
+                ];
+            },
             avant: async function () {
                 auDessusDesFenetres(false);
                 bulleADroite(0);
@@ -223,18 +286,21 @@
             atteint: function () { return !!apercu(); }
         },
         {
+            // Validée par Grégoire le 19 nov. 2026, 12 h 20 à 12 h 23, dans ses trois formes (fenêtre, partage,
+            // téléchargement) et les deux qui s'en déduisent (le fichier tenu, des copies qui manquent).
             titre: 'Range ton fichier',
-            geste: "Touche « Mettre à jour », puis range ton fichier dans un lieu protégé.",
-            texte: texteEtape3('fenetre', false),
+            confirme: confirmation("C'est fait : l'aperçu de ton codex est ouvert. Rien n'est encore écrit."),
+            chemin: 'fenetre',
+            copiesManquent: false,
+            lignes: function () { return lignesEtape3(ETAPES[2].chemin, ETAPES[2].copiesManquent); },
             avant: async function () {
                 auDessusDesFenetres(true);
-                // La phrase se choisit maintenant, l'aperçu ouvert : avant le toucher qui ouvrira
-                // la fenêtre du système. Le compte des copies manquantes est déjà gardé.
+                // Le chemin se choisit maintenant, l'aperçu ouvert : avant le toucher qui ouvrira la fenêtre du système.
+                // Le compte des copies manquantes est déjà gardé.
                 var t = C().derniereTentative();
                 var manquent = !!(t && t.issue === 'en cours' && t.copiesManquantes > 0);
                 ETAPES[2].chemin = C().cheminDeLaProchaineEcriture(manquent);
                 ETAPES[2].copiesManquent = manquent;
-                ETAPES[2].texte = texteEtape3(ETAPES[2].chemin, manquent);
                 repereEcriture = derniereEcriture();
             },
             zones: function () {
@@ -265,15 +331,23 @@
             },
             // L'état posé par _marquerCodexAJour, après l'écriture réussie : une nouvelle date.
             // Un échec (« Codex non mis à jour ») n'y arrive pas : la bulle reste.
-            atteint: function () {
-                var d = derniereEcriture();
-                return !!d && d !== repereEcriture;
-            }
+            atteint: codexEcrit
         },
         {
+            // Validée par Grégoire le 19 nov. 2026, 12 h 25. Des explications ; puis la fin du moteur (« Pour revoir une
+            // étape… », l'objectif atteint, la phrase de la suite) et sa consigne, qui suit ses boutons.
             titre: 'Quand le rouvrir',
-            geste: "Touche « Terminer ».",
-            texte: TEXTE_4,
+            confirme: confirmation("C'est fait : ton codex est à jour."),
+            lignes: function () {
+                return [
+                    note("Ton codex te servira dans deux cas : pour travailler sur un autre appareil, ou pour retrouver tes données si ce navigateur les perd."),
+                    note("Tu l'ouvriras alors par « Ouvrir un codex… », ici, dans le menu."),
+                    note("Attention : ouvrir un codex remplace tout ce qui est dans l'application par le contenu du fichier. C'est donc toujours ton codex le plus récent qu'il faut ouvrir."),
+                    note("Le haut du menu te dit où tu en es : « Ton codex est à jour », ou « Ton codex n'a pas tes derniers changements »."),
+                    note("Et si tu oublies, le rappel « Mets ton codex à jour » reviendra toutes les deux semaines, ou au rythme que tu choisis."),
+                    consigne("Touche « Terminer »")
+                ];
+            },
             sansSortie: true,
             avant: async function () {
                 auDessusDesFenetres(false);
@@ -287,21 +361,29 @@
         }
     ];
 
-    var DEF = { id: ID, etapes: ETAPES, lienSortie: 'Quitter le parcours' };
+    var DEF = { id: ID, etapes: ETAPES, lienSortie: 'Quitter le parcours', objectif: OBJECTIF, objectifAtteint: OBJECTIF_ATTEINT };
 
     // ---------- Le lancement, la sortie, la fin ----------
 
     async function lancer(depuis) {
+        // Les vraies données : la démo ouverte se referme d'abord (relais du 19 nov. 2026, mesure b : un codex écrit pendant
+        // la démo porte des clés globales de la démo ; décision de Cowork : le mécanisme des parcours 2 et 4).
+        if (enDemo() && typeof desactiverModeDemo === 'function') await desactiverModeDemo();
+        // Un import en cours empêche la sortie de la démo : rien ne part.
+        if (enDemo()) return;
         var d = depuis || 0;
         // L'étape 3 se joue sur l'aperçu ouvert : une reprise à cette étape repart de la deuxième.
         if (d === 2 && !apercu()) d = 1;
         window.Assistance.definirEtat(ID, 'en-cours', d);
+        depuisDuPassage = d;
         var enCours = M().lancer(DEF, {
             depuis: d,
             surEtape: function (i) { window.Assistance.definirEtat(ID, 'en-cours', i); },
             surQuitter: quitter,
             // À la dernière bulle, sans lien de sortie, Échap vaut « Terminer ».
-            surEchap: function () { terminer(); }
+            surEchap: function () { terminer(); },
+            // Entrée dans la démo en cours de route : le parcours se ferme et attend (comme les parcours 2 et 4).
+            verifier: function () { return !enDemo(); }
         });
         // Les éléments du moteur sont créés dès l'appel : on les marque.
         var b = document.getElementById('parcours-bulle');
@@ -335,9 +417,9 @@
     // Pour la sentinelle des textes (tests/unit) : les étapes et les phrases telles qu'elles sont posées.
     window.ParcoursDonnees = {
         etapes: ETAPES,
+        definition: DEF,
         ligne: LIGNE,
         refus: REFUS_SANS_TRIMESTRE,
-        texteEtape3: texteEtape3,
-        phrases: { fenetre1: FENETRE_1, fenetre2: FENETRE_2, partage: PARTAGE, telechargement: TELECHARGEMENT }
+        lignesEtape3: lignesEtape3
     };
 })();

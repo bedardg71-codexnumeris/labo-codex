@@ -62,13 +62,20 @@
     }
 
     // ---------- Ce que le parcours retient (`parcoursRecevoir`) ----------
+    // Dans le modèle (« Je regarde », js/parcours-recevoir-modele.js), le repère vit EN MÉMOIRE : rien ne s'écrit
+    // hors de la démo, pas même la préférence (le patron du modèle d'« Évaluer »).
+
+    var enModele = false;
+    var ctxModele = {};
 
     function lireCtx() {
+        if (enModele) return ctxModele;
         var v = typeof obtenirPreference === 'function' ? obtenirPreference(CLE_CTX) : null;
         return v && typeof v === 'object' ? v : {};
     }
 
     function majCtx(maj) {
+        if (enModele) { ctxModele = Object.assign({}, ctxModele, maj); return ctxModele; }
         var ctx = Object.assign({}, lireCtx(), maj);
         if (typeof definirPreference === 'function') definirPreference(CLE_CTX, ctx);
         return ctx;
@@ -314,13 +321,79 @@
     }
 
     // ---------- Les étapes ----------
+    // « NOUS FAISONS », RÉÉCRIT LE 19 NOV. 2026 avec Grégoire (11 h 17 à 11 h 44), dans la forme de « Je regarde » et du
+    // « Nous faisons » de « Mettre ta classe en place » ; consigne : plans de travail/CONSIGNE-2026-11-19-nous-faisons-recevoir.md.
+    // Mot pour mot : tests/unit/sentinelle-parcours-recevoir-2026-11-09.test.js les confronte à la consigne. Chaque ligne
+    // est dans son genre : une explication (`note`, sans marque), un geste (une flèche ; il se grise quand la page le dit
+    // fait), la consigne (en gras, la dernière de la liste). Un geste dont rien ne dit qu'il est fait garde sa flèche
+    // (`sansTemoin`) ; un geste facultatif ou conditionnel est une explication.
 
-    var TEXTE_7_SPECIFIQUE = "« Générale » reprend les phrases de ta cartouche, critère par critère ; « Spécifique », celles de tes tampons, avec le nombre de fois où tu les as posés.";
-    var TEXTE_7_SANS_FICHIER = "« Générale » reprend les phrases de ta cartouche, critère par critère.";
-    function texte7(deuxieme) {
-        return "Ouvre la palette « Rétroaction » : c'est ce que ton étudiant·e lira dans sa synthèse. " + deuxieme +
-            " Relis-les comme ton étudiant·e les lira. Un mot personnel ? Écris-le dans « Un mot pour ton étudiant·e ». Plus ta cartouche est précise, plus ton étudiant·e comprend ce que tu as constaté dans sa production. Quand tu es satisfait·e, touche le cadenas « Verrouiller », en haut de « Paramètres » : l'évaluation entre dans la note, et la rétroaction ne bougera plus par mégarde.";
+    function note(texte) { return { texte: texte, note: true }; }
+
+    /**
+     * La consigne ; `champs` : ce qui la rend faite, et où vont ses flèches (les critères à remplir). ⚠ Mesuré le 19 nov. 2026 :
+     * au passage en mode Évaluer, les menus ET l'évaluation gardent un instant (moins de 300 ms) les niveaux de la copie
+     * précédente ; la consigne paraît alors faite, puis ne l'est plus. Le parcours ne s'y trompe pas (`tenu`) ; la ligne,
+     * si : dit au rapport du lot.
+     */
+    function consigne(texte, champs) {
+        var l = { texte: texte, geste: true };
+        if (champs) l.champs = champs;
+        return l;
     }
+
+    /** Un geste que la page ne peut pas voir fait (hors de l'application, ou un regard) : la flèche reste, sans crochet. */
+    function sansTemoin(texte) { return { texte: texte, fait: function () { return false; } }; }
+
+    // L'objectif du parcours (validé par Grégoire, bulles 1 et 9, 19 nov. 2026) : posé par le moteur. Une seule écriture.
+    var EN_MESURE = 'de recevoir les productions de ton groupe et de rendre à chacun·e sa rétroaction en PDF';
+
+    // ---------- La confirmation : ce qui vient d'être fait, dans CE passage ----------
+
+    // Le passage en cours : l'étape d'où il est parti (`choisirVoie`), et « Rien à importer » touché à sa bulle 1.
+    var passage = { depuis: null, rienAImporter: false };
+
+    /**
+     * « C'est fait : … », au-dessus du titre, SEULEMENT si l'étape d'avant a été faite pendant ce passage (décision de
+     * Cowork, relais du 19 nov. 2026) : une étape d'où l'on repart (« Reprendre ») n'en a pas. Les étapes avancent une à
+     * une : une étape après celle du départ suit une étape faite ici. La première de la voie sans fichier confirme
+     * « Rien à importer », s'il a été touché dans ce passage.
+     */
+    function confirmation(texte, apresRienAImporter) {
+        var dire = function () {
+            var i = M().etapeCourante();
+            if (passage.depuis === null || typeof i !== 'number') return '';
+            if (i > passage.depuis) return texte;
+            return i === 0 && apresRienAImporter && passage.rienAImporter ? texte : '';
+        };
+        dire.texte = texte;   // pour la sentinelle des textes
+        return dire;
+    }
+
+    // ---------- Ce que la page dit fait ----------
+
+    function valeurDe(id) { var s = el(id); return !!(s && String(s.value || '').trim() !== ''); }
+
+    /** La production ouverte, telle que l'annotation la tient (ses pages). Vide si l'annotation n'est pas celle du fichier ouvert. */
+    function pagesAnnotees() {
+        var t = window.travauxAnnotation;
+        var a = t && typeof t.getAnnotationCourante === 'function' ? t.getAnnotationCourante() : null;
+        var f = fichierOuvert();
+        if (!a || !f || a.fichierId !== f.id || !a.pages) return [];
+        return Object.keys(a.pages).map(function (k) { return a.pages[k] || {}; });
+    }
+
+    function porte(page, quoi) { return Array.isArray(page[quoi]) && page[quoi].length > 0; }
+
+    /** Une marque est posée sur la production ouverte : un trait, un texte, une forme. */
+    function marquePosee() {
+        return pagesAnnotees().some(function (p) { return porte(p, 'strokes') || porte(p, 'textAnnotations') || porte(p, 'shapes'); });
+    }
+
+    /** Un tampon est posé sur la production ouverte. */
+    function tamponPose() { return pagesAnnotees().some(function (p) { return porte(p, 'stickers'); }); }
+
+    function qsVisible(sel) { var e = qs(sel); return vis(e) ? e : null; }
 
     // ---------- L'étape 2 : la bulle sous les trois colonnes ----------
     // Décision de Grégoire (9 nov., 15 h 55) : la bulle ne couvre ni les Originaux, ni l'Inspecteur, ni l'Aperçu ; elle se pose
@@ -347,23 +420,45 @@
     function zonesSousLesColonnes() { return [colonnes(), boutonImporter()].filter(vis); }
 
     var ETAPE_1 = {
+        // Validée par Grégoire le 19 nov. 2026, 11 h 17. L'objectif et la phrase de la poignée : posés par le moteur.
         titre: 'Leurs productions',
-        geste: "Dépose leurs fichiers dans la zone, ou touche « Rien à importer ».",
-        texte: "Tes étudiant·es t'ont remis leurs productions en ligne, dans Léa par exemple ? Télécharge-les dans un dossier, décompresse-les si elles arrivent en ZIP, puis dépose les fichiers ici. Garde leur nom tel quel : il porte le DA de l'étudiant·e, la production et la date de remise, et l'application s'en sert pour ranger chacune. Ta production n'a pas de fichier à importer : elle est sur papier, ou c'est un exposé, une performance, une entrevue ? Touche « Rien à importer » : on passe directement à l'évaluation.",
+        lieu: true,
+        amener: true,
+        lieuSuite: ": c'est là que tu reçois les productions de tes étudiant·es.",
+        lignes: function () {
+            return [
+                note("Cette fois, ce sont les productions de ton groupe : chacune se rangera sous le nom de son étudiant·e, dans ton application."),
+                sansTemoin("Télécharge dans un dossier les fichiers que tes étudiant·es t'ont remis en ligne, sans les renommer (leur nom porte le DA de l'étudiant·e : l'application s'en sert pour trouver à qui est chaque production)"),
+                sansTemoin("S'ils arrivent dans un fichier ZIP, décompresse-le (la zone ne prend que des PDF et des images)"),
+                note("Ta production est sur papier, ou c'est un exposé, une performance, une entrevue ? « Rien à importer » te mène directement à l'évaluation."),
+                consigne("Dépose les fichiers dans la zone, ou touche « Rien à importer »")
+            ];
+        },
         avant: async function () {
             aller('evaluations', 'importer');
             await attendre(function () { return !!el('travaux-drop-zone'); }, 3000);
         },
         zones: function () { return [el('travaux-drop-zone')]; },
         contour: function () { return el('travaux-drop-zone'); },
-        boutons: [{ libelle: 'Rien à importer', action: function () { choisirVoie('sans-fichier', 0); } }],
+        boutons: [{ libelle: 'Rien à importer', action: function () { passage.rienAImporter = true; choisirVoie('sans-fichier', 0); } }],
         atteint: function () { return fileDAttente().length > 0; }
     };
 
     var ETAPE_2 = {
+        // Validée par Grégoire le 19 nov. 2026, 11 h 22. Pas de phrase du lieu : la page n'a pas changé.
         titre: "Vérifie avant d'importer",
-        geste: "Choisis ta production, vérifie chaque fichier, puis touche « Importer » et confirme.",
-        texte: "Avant d'importer, vérifie trois choses. Sous « Inspecteur », la production : elle s'applique à tout le lot. Sous « Aperçu », pour chaque fichier, l'étudiant·e que l'application a trouvé·e par son DA ; s'il manque un nom, touche le fichier et choisis-le sous « Inspecteur ». Sous « Originaux », les pages remises par un·e même étudiant·e : si elles arrivent séparées, coche-les, touche « Réunir en une production », puis remets-les dans l'ordre. Une photo est de travers ou trop sombre ? « Réglages spécifiques » la pivote, la recadre et en règle le contraste. Touche ensuite « Importer », puis confirme. Un fichier mal associé se règle ici d'un geste ; une fois importé, il faut passer par la liste.",
+        confirme: confirmation("C'est fait : tes fichiers sont dans la zone. Rien n'est encore importé."),
+        lignes: function () {
+            return [
+                note("Sous « Originaux », les fichiers que tu viens de déposer : ceux d'une même production y sont encadrés ensemble, pour devenir un seul PDF."),
+                note("Sous « Aperçu », chaque production a trouvé son étudiant·e grâce au DA dans le nom de ses fichiers."),
+                sansTemoin("Vérifie que chaque production porte le bon nom (s'il en manque un, touche-la sous « Originaux », puis choisis l'étudiant·e sous « Inspecteur »)"),
+                { texte: "Sous « Inspecteur », choisis la production que tu leur as demandée (sa grille et sa cartouche viendront avec elle)",
+                  fait: function () { return valeurDe('pipeline-select-production'); } },
+                consigne("Touche « Importer », puis « Oui, importer »"),
+                note("Une photo prise de travers ou trop sombre ? Touche-la, puis l'engrenage « Réglages spécifiques ». C'est pour une photo d'exception : à l'import, l'application ajuste d'office les couleurs de chaque photo.")
+            ];
+        },
         avant: async function () {
             aller('evaluations', 'importer');
             await attendre(function () { return !!qs('.pipeline-col-originaux'); }, 3000);
@@ -373,7 +468,7 @@
         zones: function () { bulleSousLesColonnes(true); return zonesSousLesColonnes(); },
         // Un geste à la fois (Grégoire, 11 nov. 2026, 12 h 05) : la production d'abord, puis « Importer ».
         contour: function () {
-            // « puis confirme » : la confirmation ouverte, son « Oui, importer ».
+            // « puis « Oui, importer » » : la confirmation ouverte, son « Oui, importer ».
             var oui = [].slice.call(document.querySelectorAll('.modal-overlay.actif button')).find(function (b) {
                 return vis(b) && b.textContent.trim().indexOf('Oui, importer') === 0;
             });
@@ -393,9 +488,19 @@
     };
 
     var ETAPE_3 = {
+        // Validée par Grégoire le 19 nov. 2026, 11 h 24.
         titre: 'La liste',
-        geste: "Touche « Actions › Annoter » sur la ligne d'un·e étudiant·e.",
-        texte: "Leurs productions sont importées. Chacune est rangée sous le nom de son étudiant·e, avec le statut « Importé » ; les étudiant·es qui n'ont rien remis restent « Non reçu » : tu vois d'un coup d'œil qui relancer. Une production est sous le mauvais nom ? « Actions › Réassigner » la déplace. Touche maintenant « Actions › Annoter » sur la ligne d'un·e étudiant·e pour l'ouvrir.",
+        confirme: confirmation("C'est fait : les productions sont importées."),
+        lieu: true,
+        amener: true,
+        lieuSuite: ": c'est là que tu vois où en est chaque production de ton groupe.",
+        lignes: function () {
+            return [
+                note("Chaque production est rangée sous le nom de son étudiant·e, avec le statut « Importé ». Qui n'a rien remis reste « Non reçu » : tu vois d'un coup d'œil qui relancer."),
+                note("Une production est sous le mauvais nom ? « Actions › Réassigner » la déplace."),
+                consigne("Sur la ligne d'une production importée, touche « Actions › Annoter »")
+            ];
+        },
         avant: async function () {
             retirerExtras();
             aller('evaluations', 'liste');
@@ -408,10 +513,35 @@
         atteint: annotationOuverteRetenue
     };
 
+    /** La fenêtre des tampons est ouverte : la bulle 4 passe à sa seconde forme. */
+    function fenetreTamponsOuverte() { return vis(fenetreTampons()); }
+
     var ETAPE_4 = {
+        // Validée par Grégoire le 19 nov. 2026, 11 h 29 (sa phrase du lieu, 11 h 28 : « tu y poses tes marques »). Deux
+        // formes : la fenêtre « Rétroactions — Observations » ouverte, ce qui ouvrait la première (la confirmation, le
+        // lieu) disparaît (`secondeForme`, comme la bulle 3 de « Je regarde »).
         titre: 'Tes tampons',
-        geste: "Touche l'engrenage de la palette, règle tes tampons, puis touche « Enregistrer ».",
-        texte: "Avant d'annoter, regarde tes tampons. Chaque tampon que tu poses ajoute sa phrase à la synthèse de rétroaction de ton étudiant·e. Ceux de départ ont été écrits pour l'analyse littéraire : lis leurs phrases avant de t'en servir. Touche l'engrenage de la palette « Tampons » : garde les phrases qui disent ce que tu dirais, réécris les autres, change leur image (ou mets un emoji à sa place), ou crée tes propres tampons, une catégorie par cours si tu en donnes plusieurs. Puis touche « Enregistrer » : tes tampons te suivront d'un trimestre à l'autre, et tu pourras les partager avec tes collègues.",
+        confirme: confirmation("C'est fait : la production est ouverte."),
+        lieu: function () { return !fenetreTamponsOuverte(); },
+        amener: true,
+        lieuSuite: ": c'est là que tu examines la production et que tu y poses tes marques.",
+        lignesVivantes: true,
+        secondeForme: fenetreTamponsOuverte,
+        lignes: function () {
+            if (fenetreTamponsOuverte()) {
+                return [
+                    note("Chaque tampon, avec la phrase qu'il ajoute. Ceux de départ sont des exemples : lis leurs phrases avant de t'en servir."),
+                    sansTemoin("Garde les phrases qui disent ce que tu dirais, réécris les autres"),
+                    consigne("Touche « Enregistrer »"),
+                    note("Tu peux aussi changer leur image ou créer tes propres tampons. « Exporter mes tampons » te permet de les partager avec tes collègues.")
+                ];
+            }
+            return [
+                note("La palette « Tampons » : un tampon est un signe que tu poses sur la production ; chacun ajoute sa phrase à la rétroaction de l'étudiant·e."),
+                note("Ces phrases sont les tiennes : tu les écris une fois, elles servent d'une production à l'autre et d'un trimestre à l'autre."),
+                consigne("Touche l'engrenage de la palette « Tampons »")
+            ];
+        },
         avant: async function () {
             tamponsEnregistres = false;
             await revenirALaProduction();
@@ -441,9 +571,21 @@
     };
 
     var ETAPE_5 = {
+        // Validée par Grégoire le 19 nov. 2026, 11 h 31. Pas de phrase du lieu (même onglet). Les deux premiers gestes se
+        // grisent : la production ouverte porte une marque, puis un tampon (lu dans l'annotation, sans rien écrire).
         titre: 'Annoter',
-        geste: "Pose tes tampons, puis touche « Annoter ▾ » et choisis « Évaluer ».",
-        texte: "Annote la production comme tu le ferais sur papier : souligne, encercle, écris dans la marge. Ces traces restent sur le fichier que ton étudiant·e recevra. Pose aussi tes tampons là où tu observes quelque chose : sur la production, le tampon montre l'endroit ; dans la synthèse, sa phrase dit ce que tu as observé, et combien de fois. Quand tu as fini, touche « Annoter ▾ », au-dessus de la production, et choisis « Évaluer ».",
+        confirme: confirmation("C'est fait : tes tampons sont enregistrés."),
+        lignes: function () {
+            return [
+                note("Tu annotes déjà les productions ; ici, ton étudiant·e retrouvera tes marques dans le PDF que tu lui rendras."),
+                note("Pour un commentaire, prends l'outil « Texte » : tu tapes un paragraphe lisible, qui reste d'un seul tenant."),
+                note("Garde le « Stylo » pour encercler, souligner ou tracer une flèche : chaque trait y devient un élément à part."),
+                note("Un tampon montre l'endroit sur la production ; dans la rétroaction, sa phrase dit ce que tu as observé, et combien de fois."),
+                { texte: "Annote la production", fait: marquePosee },
+                { texte: "Pose tes tampons là où tu observes quelque chose", fait: tamponPose },
+                consigne("Quand tu as fini, touche « Annoter ▾ », puis choisis « Évaluer »")
+            ];
+        },
         avant: function () { return revenirALaProduction(); },
         // Groupe 3 (9 nov., WebKit) : « Annoter ▾ » ouvert, son menu entre dans l'étape. La bulle l'évite (elle couvrait
         // « Évaluer », le geste même qu'elle demande, mesuré à 1180 px) et le contour passe sur « Évaluer ».
@@ -462,10 +604,24 @@
     var critereTenu = tenu(chaqueCritereAttribue);
     var critereTenuSansFichier = tenu(function () { return ecranEvaluationVisible() && chaqueCritereAttribue(); });
 
+    // Les deux voies disent la même chose de la grille, de l'échelle et de la cartouche ; « palette » avec une
+    // production ouverte, « panneau » sans (mesuré : sans fichier, ce sont des panneaux).
+    function ceQuePorteLaProduction(ou) {
+        return "Dans " + ou + " « Paramètres », ce que porte la production que tu leur as demandée : sa grille (les critères), son échelle (les niveaux) et sa cartouche (une phrase de rétroaction prévue pour chaque critère et chaque niveau). L'application les a choisies pour toi.";
+    }
+    var VERIFIE = "Vérifie que ce sont les bonnes, au moins à ta première évaluation (ce sont elles qui feront la note et la rétroaction)";
+
     var ETAPE_6_FICHIER = {
+        // Validée par Grégoire le 19 nov. 2026, 11 h 35 (sa correction : vérifier, au moins à la première évaluation).
         titre: 'Évaluer',
-        geste: "Choisis le niveau ou les points de chaque critère.",
-        texte: "Te voici en mode Évaluer. Dans « Paramètres », ta grille, ton échelle et ta cartouche sont déjà choisies : ce sont celles de ta production. Dans « Évaluation », choisis pour chaque critère le niveau ou les points que tu attribues ; la note se calcule à mesure.",
+        confirme: confirmation("C'est fait : tu es en mode Évaluer."),
+        lignes: function () {
+            return [
+                note(ceQuePorteLaProduction('la palette')),
+                sansTemoin(VERIFIE),
+                consigne("Dans la palette « Évaluation », choisis le niveau ou les points de chaque critère (la note se calcule à mesure)", champsDesCriteres)
+            ];
+        },
         avant: async function () { critereTenu.reprendre(); await revenirALaProduction('evaluer'); },
         zones: function () { return [critereAAttribuer() || el('travaux-palette-eval-droite')]; },
         contour: critereAAttribuer,
@@ -473,9 +629,26 @@
     };
 
     var ETAPE_6_SANS_FICHIER = {
+        // Validée par Grégoire le 19 nov. 2026, 11 h 36. Deux formes : sur la Liste, puis l'évaluation ouverte (seconde forme :
+        // le moteur n'y pose pas de phrase du lieu ; elle y est une ligne, comme le permet le relais).
         titre: 'Évaluer',
-        geste: "Touche « Actions › Évaluer » sur sa ligne, puis choisis le niveau ou les points de chaque critère.",
-        texte: "Rien à importer : touche « Actions › Évaluer » sur la ligne de l'étudiant·e. Ta grille, ton échelle et ta cartouche sont déjà choisies : ce sont celles de ta production. Pour chaque critère, choisis le niveau ou les points que tu attribues.",
+        confirme: confirmation("C'est fait : pas de fichier à importer.", true),
+        lieu: true,
+        amener: true,
+        lieuSuite: ": c'est là que tu vois où en est chaque production de ton groupe.",
+        lignesVivantes: true,
+        secondeForme: ecranEvaluationVisible,
+        lignes: function () {
+            if (ecranEvaluationVisible()) {
+                return [
+                    note("Tu es dans l'onglet « Annoter » : sans fichier, il n'y a rien à annoter, tu évalues directement."),
+                    note(ceQuePorteLaProduction('le panneau')),
+                    sansTemoin(VERIFIE),
+                    consigne("Dans le panneau « Critères », choisis le niveau ou les points de chaque critère (la note se calcule à mesure)", champsDesCriteres)
+                ];
+            }
+            return [consigne("Sur la ligne d'un·e étudiant·e, touche « Actions › Évaluer »")];
+        },
         avant: async function () {
             critereTenuSansFichier.reprendre();
             if (ecranEvaluationVisible()) return;
@@ -492,31 +665,84 @@
         atteint: critereTenuSansFichier
     };
 
+    // Les lignes de « Ta rétroaction », communes aux deux voies ; sans fichier, ni tampons (« Spécifique ») ni palette.
+    var VUES_RETROACTION = {
+        generale: "« Générale » : les phrases de ta cartouche, choisies d'après ton évaluation de chaque critère",
+        specifique: "« Spécifique » : les phrases de tes tampons, avec le nombre de fois où tu les as posés",
+        bilan: "« Bilan » : ses défis et sa force du moment ; plus tard, son progrès d'une production à l'autre"
+    };
+
+    /** La bulle 7 : `ou` (« La palette », « La section »), la zone que montre sa première ligne, et les vues de la voie. */
+    function lignes7(ou, zone, vues) {
+        return [{ texte: ou + " « Rétroaction » montre ce que ton étudiant·e lira dans sa synthèse :", note: true, montre: function () { var z = zone(); return z ? [z] : []; } }]
+            .concat(vues.map(function (v) { return note(VUES_RETROACTION[v]); }), [
+                note("Un mot personnel ? Écris-le dans « Un mot pour ton étudiant·e » : il s'imprime sur son PDF."),
+                note("Verrouiller dit que l'évaluation est terminée : elle compte alors dans la note, et sa rétroaction ne bouge plus par mégarde."),
+                sansTemoin("Relis la rétroaction comme ton étudiant·e la lira"),
+                consigne("Touche le cadenas « Verrouiller », en haut de « Paramètres »")
+            ]);
+    }
+
+    function titrePaletteRetroaction() { return qsVisible('#travaux-palette-eval-retro > .palette-flottante-barre .palette-flottante-titre'); }
+    /**
+     * Sans fichier, la section « Rétroaction » elle-même : son titre (`<h4>Rétroaction</h4>`) est masqué par la page
+     * (`.zone-retroaction-header.u-hide`), il ne peut pas recevoir de flèche (mesuré le 19 nov. 2026). À l'entrée de l'étape,
+     * la section est sous le bas de l'écran (le verrou est en haut) : sa flèche paraît quand on y descend.
+     */
+    function titreSectionRetroaction() { return qsVisible('#travaux-eval-retroaction'); }
+
+    /**
+     * La palette « Rétroaction » ne se ferme pas, mais se replie (« − », classe `replie`, non retenue) : repliée à la bulle 6,
+     * elle l'est encore à l'entrée de la bulle 7, dont les lignes la décrivent. Elle se déplie, sans rien écrire.
+     */
+    function deplierLaRetroaction() {
+        var p = el('travaux-palette-eval-retro');
+        if (p && p.classList.contains('replie') && window.travauxUI && typeof window.travauxUI.togglePaletteEvalReplie === 'function') {
+            window.travauxUI.togglePaletteEvalReplie('travaux-palette-eval-retro');
+        }
+    }
+
     var ETAPE_7_FICHIER = {
+        // Validée par Grégoire le 19 nov. 2026, 11 h 38. Deux flèches, au plus (comme la bulle 9 de « Je regarde ») : le titre
+        // de la palette « Rétroaction », que montre la première ligne, et « Verrouiller ».
         titre: 'Ta rétroaction',
-        geste: "Relis sa rétroaction, puis touche le cadenas « Verrouiller ».",
-        texte: texte7(TEXTE_7_SPECIFIQUE),
-        avant: function () { return revenirALaProduction('evaluer'); },
+        confirme: confirmation("C'est fait : chaque critère est évalué."),
+        lignes: function () { return lignes7('La palette', titrePaletteRetroaction, ['generale', 'specifique', 'bilan']); },
+        avant: async function () { await revenirALaProduction('evaluer'); deplierLaRetroaction(); },
         zones: function () { return [boutonVerrou()]; },
         contour: boutonVerrou,
-        nommeLeContour: true,   // le cadenas « Verrouiller » (11 nov. 2026, 9 h 47)
+        nommeLeContour: false,
         atteint: verrouNeuf
     };
 
     var ETAPE_7_SANS_FICHIER = {
+        // Validée par Grégoire le 19 nov. 2026, 11 h 39 : « La section », sans « Spécifique » (pas de tampons sans fichier).
         titre: 'Ta rétroaction',
-        geste: "Relis sa rétroaction, puis touche le cadenas « Verrouiller ».",
-        texte: texte7(TEXTE_7_SANS_FICHIER),
+        confirme: confirmation("C'est fait : chaque critère est évalué."),
+        lignes: function () { return lignes7('La section', titreSectionRetroaction, ['generale', 'bilan']); },
         zones: function () { return [boutonVerrou()]; },
         contour: boutonVerrou,
-        nommeLeContour: true,   // le cadenas « Verrouiller » (11 nov. 2026, 9 h 47)
+        nommeLeContour: false,
         atteint: verrouNeuf
     };
 
     var ETAPE_8 = {
+        // Validée par Grégoire le 19 nov. 2026, 11 h 41 ; les deux voies.
         titre: 'Rends tes rétroactions',
-        geste: "Choisis ta production, puis touche « Exporter pour Léa ».",
-        texte: "Évalue de la même façon les productions des autres étudiant·es : « Plus tard » garde le parcours ici, et « Reprendre » t'y ramène. Quand tes évaluations sont faites et verrouillées, il reste à rendre tes rétroactions. Choisis la production, laisse « Tous » pour tout le groupe, puis touche « Exporter pour Léa ». Chaque étudiant·e reçoit un PDF : sa synthèse de rétroaction, précédée de sa production annotée si tu l'as importée. Le nom du fichier porte son DA : c'est ce qui permet de le remettre à la bonne personne. Avec plusieurs étudiant·es, les PDF arrivent réunis dans un ZIP.",
+        confirme: confirmation("C'est fait : l'évaluation est verrouillée."),
+        lieu: true,
+        amener: true,
+        lieuSuite: ": c'est là que tu prépares ce que tu remets à tes étudiant·es.",
+        lignes: function () {
+            return [
+                note("Évalue d'abord de la même façon les productions des autres étudiant·es : « Plus tard » garde le parcours ici, et « Reprendre » t'y ramène."),
+                note("Seules les évaluations verrouillées partent. Chacun·e reçoit un PDF : sa production annotée et sa synthèse, ou sa synthèse seule s'il n'y a pas de fichier."),
+                note("Chaque PDF porte dans son nom le nom et le DA de l'étudiant·e : c'est ce qui permet de le remettre à la bonne personne. Avec plusieurs étudiant·es, les PDF arrivent réunis dans un ZIP."),
+                { texte: "Dans la carte « Export Léa », choisis la production que tu leur as demandée et laisse « Étudiant·e » à « — Tous — »",
+                  fait: function () { return valeurDe('travaux-archivage-lea-production'); } },
+                consigne("Touche « Exporter pour Léa »")
+            ];
+        },
         avant: async function () {
             exportTelecharge = false;
             aller('evaluations', 'exporter');
@@ -529,9 +755,19 @@
     };
 
     var ETAPE_9 = {
+        // Validée par Grégoire le 19 nov. 2026, 11 h 44 ; les deux voies. Des explications ; puis la fin du moteur (« Pour
+        // revoir une étape… », l'objectif atteint, la phrase de la suite) et sa consigne, qui suit ses boutons.
         titre: 'Remets-les',
-        geste: "Touche « Terminer ».",
-        texte: "Dernier geste, hors de l'application : remettre les PDF. Dans Léa, par exemple, renomme le ZIP « Travaux.zip », dépose-le dans la liste des travaux de la production, puis touche « Transmettre » : chaque PDF rejoint l'étudiant·e dont il porte le DA. Ailleurs, dépose chaque PDF là où tes étudiant·es reçoivent leurs travaux évalués ; sans fichier, imprime la synthèse et remets-la, avec la production si elle est sur papier. Tu as bouclé le cycle pour lequel Labo Codex existe : recevoir, évaluer, rendre.",
+        confirme: confirmation("C'est fait : tes rétroactions sont exportées."),
+        lignes: function () {
+            return [
+                note("Dernier geste, hors de l'application : remettre les PDF."),
+                note("Garde le fichier exporté tel quel : son nom, avec la production et la date, en fait une archive facile à retrouver."),
+                note("Pour Léa, fais-en une copie renommée « travaux.zip », dépose-la dans la liste des travaux de la production, puis touche « Transmettre » : chaque PDF rejoint l'étudiant·e dont il porte le nom et le DA."),
+                note("Ailleurs, dépose chaque PDF là où tes étudiant·es reçoivent leurs travaux évalués. Sans fichier, tu peux aussi imprimer la synthèse et la remettre, avec la production si elle est sur papier."),
+                consigne("Touche « Terminer »")
+            ];
+        },
         centre: true,
         sansSortie: true,
         boutons: [{ libelle: 'Terminer', primaire: true, action: function () { terminer(); } }]
@@ -543,6 +779,18 @@
     };
 
     function voie() { return lireCtx().voie === 'sans-fichier' ? 'sans-fichier' : 'fichiers'; }
+
+    /**
+     * La définition d'une voie. L'objectif est dit par la première bulle de la voie avec des fichiers (« Leurs productions ») ;
+     * la voie sans fichier part de « Rien à importer », touché sous cette bulle : elle ne le redit pas. L'objectif atteint,
+     * aux deux.
+     */
+    function definition(v) {
+        var def = { id: ID, etapes: VOIES[v], lienSortie: 'Plus tard',
+                    objectifAtteint: 'Objectif atteint : tu es en mesure ' + EN_MESURE + '.' };
+        if (v === 'fichiers') def.objectif = 'À la fin de ce parcours, tu seras en mesure ' + EN_MESURE + '.';
+        return def;
+    }
 
     // ---------- Le lancement, la voie, « Plus tard », la fin ----------
 
@@ -568,10 +816,13 @@
         retirerExtras();
         majCtx({ voie: v });
         window.Assistance.definirEtat(ID, 'en-cours', depuis);
-        return M().lancer({ id: ID, etapes: VOIES[v], lienSortie: 'Plus tard' }, opts(depuis));
+        passage.depuis = depuis || 0;
+        return M().lancer(definition(v), opts(depuis));
     }
 
     async function lancer(depuis) {
+        enModele = false;
+        passage.rienAImporter = false;
         if (enDemo() && typeof desactiverModeDemo === 'function') await desactiverModeDemo();
         if (enDemo()) return;
         if (condition()) {
@@ -608,13 +859,34 @@
         get total() { return VOIES[voie()].length; },
         refus: condition,
         prealable: 'evaluer',
-        lancer: lancer
+        lancer: lancer,
+        // Les deux temps (17 nov. 2026) : le modèle, dans la démo, sur le deuxième groupe (js/parcours-recevoir-modele.js).
+        totalModele: 10,   // dix étapes depuis le 17 nov. 2026, soir (la vérification, le redressement, l'import séparés)
+        lancerModele: function () { return modele() ? modele().lancer() : null; },
+        refusModele: function () { return modele() ? modele().refus() : REFUS; }
     });
+
+    function modele() { return window.ParcoursRecevoirModele || null; }
+
+    /** Ce que le modèle emprunte au parcours : ses étapes, son repère en mémoire, son ménage. Rien d'autre. */
+    var pourLeModele = {
+        etapes: function () { return VOIES.fichiers; },
+        entrer: function (ctx) { enModele = true; ctxModele = Object.assign({}, ctx); },
+        contexte: lireCtx,
+        majContexte: majCtx,
+        fichiersDuGroupe: fichiersDuGroupe,
+        fichierOuvert: fichierOuvert,
+        fileDAttente: fileDAttente,
+        bulleSousLesColonnes: bulleSousLesColonnes,
+        surModale: surModale,
+        nettoyer: function () { retirerExtras(); surModale(false); bulleSousLesColonnes(false); }
+    };
 
     // Pour les bancs : la condition, le repère, les deux voies, lus sans lancer le parcours.
     window.ParcoursRecevoir = {
         refus: condition,
         contexte: lireCtx,
-        voies: function () { return VOIES; }
+        voies: function () { return VOIES; },
+        pourLeModele: pourLeModele
     };
 })();

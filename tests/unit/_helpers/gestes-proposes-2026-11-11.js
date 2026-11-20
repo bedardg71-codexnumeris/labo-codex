@@ -14,24 +14,12 @@ export const GESTES_PROPOSES = {
     'js/parcours-commentaires.js': [
         "Touche « Terminer ».",
     ],
-    'js/parcours-cours.js': [
-        "Touche « Compétence » dans la palette, puis écris son énoncé.",
-        "Touche « Idée maîtresse », écris-la, puis tire un trait de ta compétence jusqu'à elle.",
-        "Touche « Leçon », donne-lui un titre, choisis sa semaine et sa séance, puis tire un trait de ton idée maîtresse jusqu'à elle.",
-        "Touche le badge 🎯 de ta leçon, puis écris ton objectif.",
-        "Touche « Activité », donne-lui un titre, glisse-la dans ta leçon, touche deux fois sa poignée, puis coche son objectif.",
-        "Glisse ton évaluation sous ton activité, par sa poignée ⠿.",
-        "Touche « Évaluation », donne-lui un titre, glisse-la dans ta leçon sous ton activité, touche deux fois sa poignée, coche son objectif, puis choisis ta production.",
-        "Touche « Terminer ».",
-    ],
+    // js/parcours-cours.js n'a plus de geste proposé : ses sept bulles sont celles du 19 nov. 2026, réécrites avec
+    // Grégoire (« Nous faisons », sentinelle-parcours-cours-2026-11-09.test.js).
     // js/parcours-decouvrir.js n'a plus de geste proposé : ses huit bulles sont celles du 16 nov. 2026, réécrites
     // avec Grégoire (sentinelle-parcours-je-regarde-2026-11-16.test.js).
-    'js/parcours-donnees.js': [
-        "Touche « Codex », en haut de l'écran.",
-        "Touche « Mettre à jour le codex ».",
-        "Touche « Mettre à jour », puis range ton fichier dans un lieu protégé.",
-        "Touche « Terminer ».",
-    ],
+    // js/parcours-donnees.js n'a plus de geste proposé : ses bulles sont celles du 19 nov. 2026, réécrites avec Grégoire
+    // (« Nous faisons », sentinelle-parcours-donnees-2026-11-09.test.js, confrontée à CONSIGNE-2026-11-19-nous-faisons-donnees.md).
     // Lot « La carte d'aide dans Apporter mon matériel » (13 nov. 2026) : les lignes de l'accueil et de l'exemple ouvert
     // vivent dans le module que « Ta grille » et la carte de la page appellent toutes deux ; les deux dernières, la sortie
     // de l'exemple dans la page, sont PROPOSÉES ce jour-là.
@@ -66,18 +54,8 @@ export const GESTES_PROPOSES = {
         "Touche « Actions › Dossier PDF » sur la ligne de ta production, puis « Continuer ».",
         "Touche « Terminer ».",
     ],
-    'js/parcours-recevoir.js': [
-        "Dépose leurs fichiers dans la zone, ou touche « Rien à importer ».",
-        "Choisis ta production, vérifie chaque fichier, puis touche « Importer » et confirme.",
-        "Touche « Actions › Annoter » sur la ligne d'un·e étudiant·e.",
-        "Touche l'engrenage de la palette, règle tes tampons, puis touche « Enregistrer ».",
-        "Pose tes tampons, puis touche « Annoter ▾ » et choisis « Évaluer ».",
-        "Choisis le niveau ou les points de chaque critère.",
-        "Touche « Actions › Évaluer » sur sa ligne, puis choisis le niveau ou les points de chaque critère.",
-        "Relis sa rétroaction, puis touche le cadenas « Verrouiller ».",
-        "Choisis ta production, puis touche « Exporter pour Léa ».",
-        "Touche « Terminer ».",
-    ],
+    // js/parcours-recevoir.js n'a plus de geste proposé : ses bulles sont celles du 19 nov. 2026, réécrites avec Grégoire
+    // (« Nous faisons », sentinelle-parcours-recevoir-2026-11-09.test.js, confrontée à CONSIGNE-2026-11-19-nous-faisons-recevoir.md).
 };
 
 /** Toutes les lignes proposées, sans doublon. */

@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Copie fictive : Deux-Rives</title>
+<style>
+@font-face { font-family: "Main"; src: url("polices/__POLICE__"); }
+html, body { margin: 0; padding: 0; }
+body { width: 816px; height: 1056px; position: relative; overflow: hidden;
+  background: #f5f3ee; font-family: "Liberation Sans", Arial, sans-serif; color: #232323; }
+.trou { position: absolute; left: 22px; width: 26px; height: 26px; border-radius: 50%;
+  background: radial-gradient(circle at 45% 40%, #8f877c 0%, #a39b90 55%, #c9c3b8 100%);
+  box-shadow: inset 1px 1px 3px rgba(0,0,0,.35); }
+.entete { position: absolute; top: 30px; left: 192px; width: 436px; font-size: 9px; letter-spacing: .08em; text-transform: uppercase; color: #444; }
+.entete .c { position: absolute; left: 0; right: 0; text-align: center; }
+.entete .d { position: absolute; right: -40px; }
+#cible { position: absolute; top: 108px; left: 192px; width: 436px; }
+.titre { text-align: center; height: 62px; }
+.titre h1 { font-size: 23px; margin: 0 0 3px; font-weight: 700; letter-spacing: .01em; }
+.titre .auteur { font-size: 10.5px; font-style: italic; color: #333; }
+.texte { font-size: 12.3px; line-height: 15.6px; text-align: left; hyphens: none; }
+.texte p { margin: 0; text-indent: 14px; }
+.texte p.premier { text-indent: 0; }
+.epigraphe { font-style: italic; font-size: 10.5px; line-height: 13px; text-align: right; margin: 0 0 10px 190px; }
+.epigraphe .src { font-style: normal; font-size: 8.5px; letter-spacing: .06em; text-transform: uppercase; display: block; margin-top: 2px; }
+.tiret { display: block; text-indent: 14px; }
+.pied { position: absolute; top: 1018px; left: 0; right: 0; text-align: center; font-size: 10px; color: #444; }
+svg.calque { position: absolute; left: 0; top: 0; width: 816px; height: 1056px; pointer-events: none; }
+svg.surligneur { mix-blend-mode: multiply; }
+.note { position: absolute; font-family: "Main", cursive; line-height: 1; white-space: normal; }
+.note span.l { display: inline-block; white-space: pre; }
+</style>
+</head>
+<body>
+<div class="trou" style="top:140px"></div>
+<div class="trou" style="top:515px"></div>
+<div class="trou" style="top:890px"></div>
+<div class="entete"><span class="c">Littérature et écriture</span><span class="d">A2025</span></div>
+
+<div id="cible">
+<div class="titre">
+  <h1>Deux-Rives</h1>
+  <div class="auteur">Texte inventé à la manière de Sébastien Bérubé, <span style="font-style:normal">Rivières-aux-Cartouches</span> (Perce-neige, 2023)</div>
+</div>
+<div class="texte">
+<div class="epigraphe">« Y a des absences qui prennent plus de place que du monde. »<span class="src">Une cliente du dépanneur de Rivière-Verte</span></div>
+<p class="premier">Dans la cuisine d'Aurore-Délia, le calendrier de la caisse populaire montre encore novembre. Novembre 2011. Les saisons ont beau défiler dans la fenêtre au-dessus de l'évier, les outardes ont beau partir pis revenir, ici, c'est novembre. On beurre ses toasts en novembre. On lave la vaisselle en novembre. Même en juillet, quand les maringouins se cognent contre la moustiquaire, la page tourne pas.</p>
+<p>Le gîte s'appelle Deux-Rives parce que la maison regarde la Verte se jeter dans la Saint-Jean, comme deux vieilles qui se rejoignent pour jaser. Douze chambres, un perron qui fait le tour pis une odeur de crêpes qui sort des murs dès cinq heures du matin. Aurore-Délia a soixante-dix-huit ans, des mains pleines de farine et un rire qui fait trembler les tasses. Les chasseurs l'appellent « la mère ». Les camionneurs aussi. Elle les laisse faire.</p>
+<p>À côté de la porte, sur le tapis de caoutchouc, attend une paire de bottes à cap d'acier, lacées serré, la semelle encore croûtée de la boue du chantier. Tous les matins, Aurore-Délia passe le balai autour. Jamais dessous. Les bottes ont pas bougé depuis douze ans, mais la maison fait comme si elles allaient repartir tantôt.</p>
+<p>C'étaient celles de Bébert. Elle le revoit, le premier hiver, à genoux sur le perron, à clouer des planches d'épinette en sacrant contre le frette. « Quand y aura du monde plein les chambres, ma belle, tu vas t'ennuyer du silence. » Il riait fort. Il a eu raison pour le monde. Pour le silence, il s'est trompé : c'est lui qui l'a amené en partant.</p>
+<p>Le soir, quand le dernier client a monté l'escalier, la maison change de voix. Le poêle à bois ronronne comme un vieux chat. Le plancher craque aux mêmes places, comme quelqu'un qui marche sans jamais arriver. Aurore-Délia se verse deux tasses de thé. Elle en boit une. L'autre refroidit en face d'elle, sous le calendrier.</p>
+<p>Un matin, un jeune camionneur d'Edmundston a pointé les bottes avec sa fourchette.<span class="tiret">— C'est-tu à vous autres, ça, madame ?</span><span class="tiret">— C'est à mon homme. Y est parti au bois.</span>Elle lui a resservi du café. Le jeune a pas posé d'autre question. Personne en pose, à Deux-Rives.</p>
+<p>Un jour, quelqu'un va décrocher le calendrier. Quelqu'un va ramasser les bottes pis les porter au sous-sol de l'église. Ce sera pas elle. En attendant, elle balaie autour, elle sort deux tasses, et elle laisse novembre durer le temps qu'il faut.</p>
+</div>
+</div>
+<div class="pied">2</div>
+
+<svg class="calque surligneur" id="surligneur"></svg>
+<svg class="calque" id="stylo"></svg>
+<div id="notes"></div>
+
+<script>
+const COPIE = /*CONFIG*/;
+
+let graine = COPIE.graine;
+function hasard() { graine |= 0; graine = graine + 0x6D2B79F5 | 0; let t = Math.imul(graine ^ graine >>> 15, 1 | graine);
+  t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }
+const h = (a, b) => a + (b - a) * hasard();
+const NS = 'http://www.w3.org/2000/svg';
+const svgS = document.getElementById('surligneur'), svgP = document.getElementById('stylo'), notes = document.getElementById('notes');
+const ENCRE = COPIE.encres, FLUO = COPIE.fluo || {};
+const BORD_G = 192, BORD_D = 628;
+
+// ---------- Trouver un passage par son texte ----------
+const racine = document.getElementById('cible');
+const plat = [], carte = [];
+(function () {
+  const w = document.createTreeWalker(racine, NodeFilter.SHOW_TEXT); let n;
+  while ((n = w.nextNode())) {
+    for (let i = 0; i < n.data.length; i++) { const c = n.data[i];
+      if (/\s/.test(c)) { if (plat.length && plat[plat.length - 1] === ' ') continue; plat.push(' '); carte.push([n, i]); }
+      else { plat.push(c); carte.push([n, i]); } }
+    // une limite d'élément de bloc vaut une espace
+    if (plat.length && plat[plat.length - 1] !== ' ') { plat.push(' '); carte.push([n, n.data.length - 1]); }
+  }
+})();
+const PLAT = plat.join(''), PLATm = PLAT.toLowerCase();
+function occurrences(phrase, opts) {
+  opts = opts || {}; const p = phrase.replace(/\s+/g, ' '); const cible = opts.casse === false ? PLATm : PLAT; const q = opts.casse === false ? p.toLowerCase() : p;
+  const res = []; let i = cible.indexOf(q);
+  while (i !== -1) { const avant = cible[i - 1] || ' ', apres = cible[i + q.length] || ' ';
+    if (!opts.mot || (!/[\p{L}]/u.test(avant) && !/[\p{L}]/u.test(apres))) res.push(i); i = cible.indexOf(q, i + 1); }
+  if (!res.length) throw new Error('Passage introuvable : ' + phrase);
+  return res.map(i => { const r = document.createRange(); const [n0, o0] = carte[i]; const [n1, o1] = carte[i + q.length - 1];
+    r.setStart(n0, o0); r.setEnd(n1, o1 + 1); return r; });
+}
+function passage(spec) { const toutes = occurrences(spec.phrase, spec);
+  if (spec.toutes) return spec.seulement ? spec.seulement.map(k => toutes[k]) : toutes; return [toutes[spec.n || 0]]; }
+function lignes(r) {
+  const brutes = Array.from(r.getClientRects()).filter(x => x.width > 2 && x.height > 4).sort((a, b) => a.top - b.top || a.left - b.left);
+  const out = [];
+  for (const x of brutes) { const d = out.find(o => Math.abs(o.top - x.top) < 4);
+    if (d) { d.left = Math.min(d.left, x.left); d.right = Math.max(d.right, x.right); d.bottom = Math.max(d.bottom, x.bottom); }
+    else out.push({ left: x.left, right: x.right, top: x.top, bottom: x.bottom }); }
+  out.forEach(o => { o.width = o.right - o.left; o.height = o.bottom - o.top; }); return out;
+}
+
+// ---------- Les gestes ----------
+function chemin(svg, d, couleur, largeur, opacite) {
+  const p = document.createElementNS(NS, 'path'); p.setAttribute('d', d); p.setAttribute('fill', 'none'); p.setAttribute('stroke', couleur);
+  p.setAttribute('stroke-width', largeur); p.setAttribute('stroke-linecap', 'round'); p.setAttribute('stroke-linejoin', 'round');
+  p.setAttribute('opacity', opacite || 0.88); svg.appendChild(p); return p;
+}
+function polygone(svg, pts, couleur) { const p = document.createElementNS(NS, 'polygon'); p.setAttribute('points', pts.map(q => q.map(v => v.toFixed(1)).join(',')).join(' ')); p.setAttribute('fill', couleur); svg.appendChild(p); }
+const TRAIT = COPIE.trait || 1.15;
+function surligner(L, cle) { for (const r of L) {
+  const x0 = r.left - h(1, 3), x1 = r.right + h(1, 3), y0 = r.top + h(1.5, 3), y1 = r.bottom - h(0, 1.5), pente = h(-1.2, 1.2);
+  polygone(svgS, [[x0 + h(0, 2), y0 + pente], [x1, y0 - pente], [x1 + h(-1, 1), (y0 + y1) / 2], [x1 - h(0, 2), y1 - pente], [x0, y1 + pente], [x0 - h(0, 1.5), (y0 + y1) / 2]], FLUO[cle]); } }
+function entourer(L, cle) { const r = L[0]; const cx = (r.left + r.right) / 2 + h(-1, 1), cy = (r.top + r.bottom) / 2 + h(-.5, .8);
+  const rx = r.width / 2 + h(3, 6), ry = r.height / 2 + h(1, 3), debut = h(0, 6.28), tour = 6.28 * h(1.05, 1.18); let d = '';
+  for (let i = 0; i <= 28; i++) { const a = debut + tour * i / 28, f = 1 + h(-.05, .05) + i * 0.003;
+    d += (i ? ' L' : 'M') + (cx + Math.cos(a) * rx * f).toFixed(1) + ' ' + (cy + Math.sin(a) * ry * f).toFixed(1); }
+  chemin(svgP, d, ENCRE[cle], TRAIT * 1.05, 0.85); }
+function encadrer(L, cle) { const r = L[0]; const x0 = r.left - h(1.5, 3), x1 = r.right + h(1.5, 3), y0 = r.top + h(0, 1.5), y1 = r.bottom + h(0.5, 2);
+  chemin(svgP, `M${x0} ${y0 + h(-.6,.6)} L${x1 + h(-.6,.6)} ${y0} L${x1} ${y1 + h(-.6,.6)} L${x0 + h(-.6,.6)} ${y1} Z`, ENCRE[cle], TRAIT * 0.9, 0.85); }
+function souligner(L, cle, traits, droit) { for (const r of L) for (const dy of (traits === 2 ? [1.5, 4] : [1.8])) {
+  let d = 'M' + (r.left - 1) + ' ' + (r.bottom + dy + h(-.5, .5)).toFixed(1);
+  for (let x = r.left + 9; x < r.right + 2; x += 9) d += ' L' + x.toFixed(1) + ' ' + (r.bottom + dy + (droit ? h(-.35, .35) : h(-.9, .9))).toFixed(1);
+  chemin(svgP, d, ENCRE[cle], TRAIT, 0.88); } }
+function trait(x0, y0, x1, y1, cle, fleche) {
+  const mx = (x0 + x1) / 2 + h(-4, 4), my = (y0 + y1) / 2 + h(-5, 5);
+  chemin(svgP, `M${x0.toFixed(1)} ${y0.toFixed(1)} Q${mx.toFixed(1)} ${my.toFixed(1)} ${x1.toFixed(1)} ${y1.toFixed(1)}`, ENCRE[cle], TRAIT * 0.95, 0.85);
+  if (fleche) { const a = Math.atan2(y1 - my, x1 - mx);
+    for (const s of [-1, 1]) { const b = a + Math.PI + s * 0.45; chemin(svgP, `M${x1} ${y1} L${x1 + Math.cos(b) * 6} ${y1 + Math.sin(b) * 6}`, ENCRE[cle], TRAIT * 0.95, 0.85); } } }
+function accolade(x, y0, y1, cle, cote) { const s = cote === 'g' ? -1 : 1, m = (y0 + y1) / 2, w = 5;
+  const d = `M${x} ${y0} Q${x + s * w} ${y0} ${x + s * w} ${y0 + 6} L${x + s * w} ${m - 4} Q${x + s * w} ${m} ${x + s * 2 * w} ${m} Q${x + s * w} ${m} ${x + s * w} ${m + 4} L${x + s * w} ${y1 - 6} Q${x + s * w} ${y1} ${x} ${y1}`;
+  chemin(svgP, d, ENCRE[cle], TRAIT, 0.85); }
+function barre(x, y0, y1, cle) { chemin(svgP, `M${x} ${y0} Q${x + h(-1.5, 1.5)} ${(y0 + y1) / 2} ${x + h(-1, 1)} ${y1}`, ENCRE[cle], TRAIT * 1.2, 0.85); }
+
+// ---------- L'écriture ----------
+const P = COPIE.ecriture;
+function ecrire(texte, x, y, largeur, cle, taille, inclinaison, opts) {
+  opts = opts || {};
+  const div = document.createElement('div'); div.className = 'note';
+  Object.assign(div.style, { left: x + 'px', top: y + 'px', width: largeur + 'px', color: ENCRE[cle], fontSize: taille + 'px',
+    fontWeight: P.poids || 400, lineHeight: P.interligne || 1, transform: `rotate(${inclinaison}deg)`, transformOrigin: 'left top' });
+  if (cle === 'crayon') { div.style.opacity = 0.78; }
+  for (const mot of texte.split(/(\s+)/)) {
+    if (/^\s+$/.test(mot)) { div.appendChild(document.createTextNode(' ')); continue; }
+    const m = document.createElement('span'); m.style.display = 'inline-block'; m.style.whiteSpace = 'nowrap';
+    for (const c of mot) { const s = document.createElement('span'); s.className = 'l'; s.textContent = c;
+      s.style.transform = `translateY(${h(-P.saut, P.saut).toFixed(2)}px) rotate(${h(-P.rot, P.rot).toFixed(1)}deg)`; m.appendChild(s); }
+    div.appendChild(m);
+  }
+  notes.appendChild(div);
+  if (opts.rature) { const b = div.getBoundingClientRect(); const hl = div.offsetHeight;
+    const nb = Math.max(1, Math.round(hl / (taille * (P.interligne || 1))));
+    for (let k = 0; k < nb; k++) { const yy = b.top + (k + 0.55) * hl / nb; const x1 = b.left + (k === nb - 1 ? Math.min(b.width, largeurEcrite(div)) : b.width);
+      chemin(svgP, `M${b.left - 2} ${yy + h(-1, 1)} L${x1 + 2} ${yy + h(-1, 1)}`, ENCRE[cle], TRAIT * 1.1, 0.9); } }
+  return div;
+}
+function largeurEcrite(div) { return Math.max(...Array.from(div.children).map(c => c.offsetLeft + c.offsetWidth)); }
+
+const occupe = { g: [], d: [] };
+function libre(cote, y, haut) { let yy = y, bouge = true;
+  while (bouge) { bouge = false; for (const [a, b] of occupe[cote]) if (yy < b + 2 && yy + haut > a - 2) { yy = b + 3; bouge = true; } } return yy; }
+const LARG = COPIE.marges || { g: 122, d: 158 };
+function noter(spec) {
+  const r = passage(spec)[0]; const L = lignes(r); const r0 = L[0], rN = L[L.length - 1];
+  const cle = spec.encre; const taille = spec.taille || h(P.taille[0], P.taille[1]);
+  const voulu = r0.top - 4 + (spec.dy || 0); const essai = {};
+  for (const c of ['g', 'd']) { const div = ecrire(spec.texte, 0, 0, LARG[c], cle, taille, 0); essai[c] = div.offsetHeight; div.remove(); }
+  let cote = spec.cote;
+  if (!cote) { const yg = libre('g', voulu, essai.g), yd = libre('d', voulu, essai.d); cote = Math.abs(yd - voulu) <= Math.abs(yg - voulu) ? 'd' : 'g'; }
+  const haut = essai[cote]; const x = cote === 'g' ? 56 + h(0, 5) : 642 + h(-2, 4);
+  const y = libre(cote, voulu, haut); occupe[cote].push([y, y + haut]);
+  const div = ecrire(spec.texte, x, y, LARG[cote], cle, taille, h(-P.incl, P.incl));
+  const lien = spec.lien || 'aucun';
+  if (lien === 'trait' || lien === 'fleche') {
+    if (cote === 'g') trait(x + Math.min(LARG.g, largeurEcrite(div)) + 3, y + taille * 0.55, BORD_G - 4, r0.top + 8, cle, lien === 'fleche');
+    else trait(x - 3, y + taille * 0.55, BORD_D + 4, (L.length > 1 ? rN.top : r0.top) + 8, cle, lien === 'fleche');
+  } else if (lien === 'accolade') { if (cote === 'g') accolade(BORD_G - 5, r0.top + 1, rN.bottom - 1, cle, 'g'); else accolade(BORD_D + 5, r0.top + 1, rN.bottom - 1, cle, 'd'); }
+  else if (lien === 'barre') { if (cote === 'g') barre(BORD_G - 6, r0.top + 1, rN.bottom - 1, cle); else barre(BORD_D + 6, r0.top + 1, rN.bottom - 1, cle); }
+  return div;
+}
+
+Promise.all([document.fonts.load('16px "Main"', 'aé●◆★'), document.fonts.ready]).then(() => {
+  for (const m of COPIE.marques) for (const r of passage(m)) {
+    const L = lignes(r);
+    if (m.geste === 'fluo') surligner(L, m.cle); else if (m.geste === 'cercle') entourer(L, m.cle);
+    else if (m.geste === 'cadre') encadrer(L, m.cle); else if (m.geste === 'souligne') souligner(L, m.cle, m.traits || 1, m.droit);
+  }
+  for (const e of COPIE.libres) {
+    const div = ecrire(e.texte, e.x, e.y, e.largeur || 400, e.encre, e.taille, e.incl || 0, e);
+    if (e.fluo) { const b = div.getBoundingClientRect(); const w = Math.min(b.width, largeurEcrite(div));
+      polygone(svgS, [[b.left - 3, b.top + 5], [b.left + w + 3, b.top + 4], [b.left + w, b.bottom - 2], [b.left - 2, b.bottom - 1]], FLUO[e.fluo]); }
+    if (e.souligne) { const b = div.getBoundingClientRect(); chemin(svgP, `M${b.left} ${b.bottom + 1} L${b.left + (e.souligne)} ${b.bottom + 2}`, ENCRE[e.encre], TRAIT * 1.1, 0.85); }
+  }
+  let aPlacer = COPIE.notes.slice();
+  if (COPIE.trier) aPlacer = aPlacer.map(n => [n, lignes(passage(n)[0])[0].top + (n.dy || 0)]).sort((a, b) => a[1] - b[1]).map(x => x[0]);
+  for (const n of aPlacer) noter(n);
+  document.body.setAttribute('data-occ', JSON.stringify(occupe)); document.body.setAttribute('data-notes', JSON.stringify(Array.from(document.querySelectorAll('.note')).map(d => [d.textContent.slice(0,18), Math.round(d.offsetTop), d.offsetHeight]))); document.body.setAttribute('data-pret', '1');
+});
+</script>
+</body>
+</html>

@@ -2,10 +2,9 @@
 // LE SIXIÈME PARCOURS, « METTRE TES DONNÉES À L'ABRI » — 9 NOVEMBRE 2026
 // =======================================================================
 // plans de travail/CONSIGNE-LOT-2026-11-08-parcours-6-donnees-a-l-abri.md.
-//   1. Les mots : les quatre bulles, la ligne du panneau, la phrase du refus et le haut du
-//      menu Codex sans codex sont ceux que Grégoire a validés le 8 nov. Chaque chaîne posée
-//      dans le code se trouve TELLE QUELLE dans la consigne ; à l'étape 3, chaque chemin
-//      d'écriture compose le texte commun et sa phrase.
+//   1. Les mots : la ligne du panneau, la phrase du refus et le haut du menu Codex sans codex
+//      sont ceux que Grégoire a validés le 8 nov. Les quatre bulles : le « Nous faisons » du
+//      19 nov. (bloc 1, ci-dessous).
 //   2. Le rappel « Mets ton codex à jour » ne s'ouvre pendant AUCUN parcours : dû, il attend
 //      la fin du parcours ; une mise à jour réussie pendant le parcours le repousse.
 // Break-tests (9 nov.) :
@@ -21,6 +20,7 @@ import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { chargerScript } from './_helpers/charger-script.js';
+import { tranche } from './_helpers/tranche.js';
 
 const racine = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..');
 const lire = (f) => readFileSync(path.join(racine, f), 'utf8');
@@ -37,10 +37,65 @@ function chargerLeParcours() {
     return { win, def: inscrits[0], P: win.ParcoursDonnees };
 }
 
-describe('« Mettre tes données à l’abri » : les mots validés, tels quels', () => {
-    const { def, P } = chargerLeParcours();
+// LE « NOUS FAISONS » DU 19 NOV. 2026 (plans de travail/CONSIGNE-2026-11-19-nous-faisons-donnees.md) : les quatre bulles,
+// réécrites avec Grégoire de 12 h 15 à 12 h 25, sont lues dans le RELAIS de la consigne, où chaque ligne porte son genre
+// ([C] confirmation, [E] explication, [G] geste ; le dernier [G] est la consigne), et confrontées au code chargé hors du
+// navigateur, bulle par bulle, et à la bulle 3 chemin par chemin. La ligne du panneau, le refus, le haut du menu et le
+// rappel restent confrontés à leur consigne du 8 nov. La confirmation présente ou absente, la flèche, le crochet : jugés au
+// navigateur (tests/integration/nous-faisons-donnees-2026-11-19.spec.js).
+const NOUVELLE = lire('plans de travail/CONSIGNE-2026-11-19-nous-faisons-donnees.md');
+const RELAIS = tranche(NOUVELLE, 'Bulle 1, « Pourquoi un codex »', '3. Tests.');
 
-    it('le panneau : le titre, la ligne, quatre étapes, la phrase du refus sans trimestre réel', () => {
+/** Toutes les citations d'une ligne (« … »), guillemets équilibrés, dans l'ordre. */
+function citations(ligne) {
+    const sortie = [];
+    let k = ligne.indexOf('« ');
+    while (k !== -1) {
+        let fin = -1;
+        for (let j = ligne.indexOf(' »', k); j !== -1; j = ligne.indexOf(' »', j + 1)) {
+            const t = ligne.slice(k + 2, j);
+            if ((t.match(/«/g) || []).length === (t.match(/»/g) || []).length) { sortie.push(t); fin = j + 2; break; }
+        }
+        if (fin === -1) break;
+        k = ligne.indexOf('« ', fin);
+    }
+    return sortie;
+}
+
+/** Une bulle du relais : ses lignes [C], [E], [G] dans l'ordre (le dernier [G] devient la consigne). */
+function bulleDuRelais(n) {
+    // Dans le RELAIS (le document nomme aussi ses bulles plus haut, « ## Bulle 3, forme… ») ; la bulle 4 finit avec lui.
+    const bloc = tranche(RELAIS, `Bulle ${n}, `, n < 4 ? `Bulle ${n + 1}, ` : 'les boutons « Parcours suivant » et « Terminer », de même poids.');
+    const b = { confirme: '', objectif: '', lignes: [], chemins: {} };
+    for (const brut of bloc.split('\n')) {
+        const l = brut.trim();
+        let m;
+        if (/^Objectif : « /.test(l)) { b.objectif = citations(l)[0]; continue; }
+        if ((m = /^`(\w+)` : /.exec(l))) { b.chemins[m[1]] = { ligne: l, cites: citations(l) }; continue; }
+        if ((m = /^\[(C|E|G)\]/.exec(l))) {
+            const [texte] = citations(l);
+            if (m[1] === 'C') { b.confirme = texte; continue; }
+            b.lignes.push({ genre: m[1], texte });
+        }
+    }
+    return b;
+}
+
+const seFait = (l) => !l.note && !!(l.fait || l.champs);
+const classer = (lignes) => lignes.map((l) => ({ genre: l.note ? 'E' : l.geste ? 'C' : seFait(l) ? 'G' : 'sans genre', texte: l.texte }));
+/** Le dernier geste d'une liste devient la consigne (la règle du relais). */
+function consigneAuDernier(lignes) {
+    const l = lignes.map((x) => ({ ...x }));
+    for (let k = l.length - 1; k >= 0; k--) if (l[k].genre === 'G') { l[k].genre = 'C'; break; }
+    return l;
+}
+const dite = (nom) => new RegExp('var ' + nom + " = '((?:[^'\\\\]|\\\\.)*)';").exec(lire('js/parcours-moteur.js'))[1].replace(/\\'/g, "'");
+
+describe('« Mettre tes données à l’abri », « Nous faisons » : les quatre bulles du 19 nov., mot pour mot et dans leur genre', () => {
+    const { def, P } = chargerLeParcours();
+    const E = P.etapes;
+
+    it('le panneau : le titre, la ligne, quatre étapes, la phrase du refus sans trimestre réel (consigne du 8 nov.)', () => {
         expect(def.titre).toBe("Mettre tes données à l'abri");
         expect(CONSIGNE).toContain(`Titre : « ${def.titre} »`);
         expect(def.ligne).toBe(P.ligne);
@@ -49,47 +104,63 @@ describe('« Mettre tes données à l’abri » : les mots validés, tels quels'
         expect(CONSIGNE).toContain(`le panneau dit : « ${P.refus} »`);
     });
 
-    it.each([0, 1, 2, 3])('étape %i (de 0) : le titre est celui de la consigne', (i) => {
-        expect(CONSIGNE).toContain(`Étape ${i + 1}, « ${P.etapes[i].titre} »`);
+    it('les titres des quatre bulles', () => {
+        expect(E.map((e) => e.titre)).toEqual(['Pourquoi un codex', 'Mettre à jour', 'Range ton fichier', 'Quand le rouvrir']);
+        E.forEach((e, i) => expect(RELAIS).toContain(`Bulle ${i + 1}, « ${e.titre} »`));
     });
 
-    it.each([0, 1, 3])('étape %i (de 0) : le texte est celui de la consigne', (i) => {
-        expect(CONSIGNE).toContain(`Texte : « ${P.etapes[i].texte} »`);
+    it.each([1, 2, 4])('bulle %i : la confirmation et chaque ligne, dans son genre', (n) => {
+        const b = bulleDuRelais(n);
+        const e = E[n - 1];
+        expect(e.confirme ? e.confirme.texte : '').toBe(b.confirme);
+        expect(!!e.confirme).toBe(n > 1);
+        // La bulle 4 : sa consigne de fin est celle du moteur (jugée plus bas) ; le relais ne la liste pas.
+        const lignes = n === 4 ? e.lignes().filter((l) => !l.geste) : e.lignes();
+        expect(classer(lignes)).toEqual(consigneAuDernier(b.lignes));
+        expect(e.lieu || e.lieuSuite || e.nommeLaSection, 'pas de phrase du lieu dans ce parcours').toBeFalsy();
     });
 
-    it('étape 3 : le texte commun encadre la phrase « selon le navigateur »', () => {
-        const avec = P.texteEtape3('telechargement', false);
-        const [debut, fin] = avec.split(' ' + P.phrases.telechargement + ' ');
-        expect(CONSIGNE).toContain(`Texte : « ${debut} [Phrase selon le navigateur.] ${fin} »`);
+    it('bulle 3, chemin par chemin : le début commun, puis le geste, la consigne et l’explication du chemin', () => {
+        const b = bulleDuRelais(3);
+        expect(E[2].confirme.texte).toBe(b.confirme);
+        const debut = b.lignes.slice(0, 4);
+        const mettre = b.lignes[4];
+        expect(debut.every((l) => l.genre === 'E')).toBe(true);
+        expect(mettre).toEqual({ genre: 'G', texte: 'Touche « Mettre à jour »' });
+        const c = b.chemins;
+        const reecriture = c.fenetre.cites[1];
+        const attendu = {
+            fenetre: [...debut, mettre, { genre: 'C', texte: c.fenetre.cites[0] }, { genre: 'E', texte: reecriture }],
+            fenetreManquent: [...debut, mettre, { genre: 'C', texte: c.fenetre.cites[0] }],
+            tenu: [...debut, { genre: 'C', texte: c.tenu.cites[0] }, { genre: 'E', texte: reecriture }],
+            partage: [...debut, mettre, { genre: 'C', texte: c.partage.cites[0] }],
+            telechargement: [...debut, mettre, { genre: 'C', texte: c.telechargement.cites[0] }, { genre: 'E', texte: c.telechargement.cites[1] }]
+        };
+        // Ce que le relais dit de chaque chemin, relu pour que la table ci-dessus ne s'invente pas.
+        expect(c.fenetre.ligne).toContain('Quand des copies manquent (#1012), la même bulle sans cette explication.');
+        expect(c.tenu.ligne).toContain('pas de second geste ; « Touche « Mettre à jour » » est la consigne, suivie de la même explication.');
+        expect(c.partage.ligne).toContain('rien après.');
+        expect(classer(P.lignesEtape3('fenetre', false))).toEqual(attendu.fenetre);
+        expect(classer(P.lignesEtape3('fenetre', true))).toEqual(attendu.fenetreManquent);
+        expect(classer(P.lignesEtape3('tenu', false))).toEqual(attendu.tenu);
+        expect(classer(P.lignesEtape3('partage', false))).toEqual(attendu.partage);
+        expect(classer(P.lignesEtape3('telechargement', false))).toEqual(attendu.telechargement);
+        // Les lignes de la bulle sont celles de son chemin, choisi à l'entrée de l'étape.
+        expect(classer(E[2].lignes())).toEqual(attendu.fenetre);
     });
 
-    it('étape 3 : les trois phrases de la consigne, chacune selon son chemin', () => {
-        const { fenetre1, fenetre2, partage, telechargement } = P.phrases;
-        expect(CONSIGNE).toContain(`Fenêtre de choix d'emplacement : « ${fenetre1} ${fenetre2} »`);
-        expect(CONSIGNE).toContain(`Feuille de partage : « ${partage} »`);
-        expect(CONSIGNE).toContain(`Téléchargement : « ${telechargement} »`);
-        expect(P.texteEtape3('fenetre', false)).toContain(fenetre1 + ' ' + fenetre2 + ' ');
-        expect(P.texteEtape3('partage', false)).toContain(' ' + partage + ' ');
-        expect(P.texteEtape3('telechargement', false)).toContain(' ' + telechargement + ' ');
+    it('l’objectif (bulle 1) et l’objectif atteint (bulle 4), sur la définition, relus dans le relais', () => {
+        expect(P.definition.objectif).toBe(bulleDuRelais(1).objectif);
+        expect(RELAIS).toContain('l\'objectif atteint entre deux filets : « ' + P.definition.objectifAtteint + ' »');
     });
 
-    it('étape 3 : le fichier tenu prend la phrase de la fenêtre sans sa première phrase (consigne)', () => {
-        const t = P.texteEtape3('tenu', false);
-        expect(t).toContain(' ' + P.phrases.fenetre2 + ' ');
-        expect(t).not.toContain(P.phrases.fenetre1);
-    });
-
-    it('étape 3 : des copies qui manquent, la fenêtre sans la phrase de la réécriture (#1012, proposé)', () => {
-        const t = P.texteEtape3('fenetre', true);
-        expect(t).toContain(' ' + P.phrases.fenetre1 + ' ');
-        expect(t).not.toContain(P.phrases.fenetre2);
-    });
-
-    it('étape 4 : le bouton « Terminer », sans lien de sortie ; les autres étapes en ont un', () => {
-        expect(P.etapes[3].boutons.map((b) => b.libelle)).toEqual(['Terminer']);
-        expect(CONSIGNE).toContain('Bouton « Terminer »');
-        expect(P.etapes[3].sansSortie).toBe(true);
-        expect(P.etapes.slice(0, 3).every((e) => !e.sansSortie)).toBe(true);
+    it('la fin : « Terminer », que le moteur change quand il offre aussi « Parcours suivant »', () => {
+        expect(E[3].boutons.map((b) => b.libelle)).toEqual(['Terminer']);
+        expect(E[3].sansSortie).toBe(true);
+        expect(E.slice(0, 3).every((e) => !e.sansSortie)).toBe(true);
+        expect(E[3].lignes().filter((l) => l.geste).map((l) => l.texte)).toEqual(['Touche « Terminer »']);
+        expect(RELAIS).toContain('la consigne « ' + dite('CONSIGNE_DEUX_SUITES') + '. »');
+        expect(RELAIS).toContain('« Pour revoir une étape, touche « 4 sur 4 ». »');
     });
 
     it('le haut du menu Codex sans codex dit la phrase validée (14 h 47), plus l’ancienne', () => {
@@ -100,9 +171,11 @@ describe('« Mettre tes données à l’abri » : les mots validés, tels quels'
         expect(codex).not.toContain('ouvre ou crée un codex pour commencer');
     });
 
-    it('aucun produit nommé dans les mots neufs (règle de Grégoire, 8 nov.)', () => {
-        const mots = [def.ligne, P.refus, ...P.etapes.map((e) => e.texte),
-            ...Object.values(P.phrases)].join(' ');
+    it('aucun produit nommé (règle de Grégoire, 8 nov.)', () => {
+        const chemins = ['fenetre', 'tenu', 'partage', 'telechargement'];
+        const mots = [def.ligne, P.refus, P.definition.objectif, P.definition.objectifAtteint,
+            ...E.flatMap((e) => e.lignes()), ...chemins.flatMap((c) => P.lignesEtape3(c, false))]
+            .map((l) => (typeof l === 'string' ? l : l.texte)).join(' ');
         expect(mots).not.toMatch(/\b(Chrome|Edge|Safari|Firefox|iPad|iPhone|Mac|Windows|Google|Dropbox|iCloud|OneDrive)\b/);
     });
 });

@@ -73,7 +73,16 @@ const lire = (page) => page.evaluate(() => {
         aide: plat(b.querySelector('.parcours-bulle-aide')),
         petits: [...b.querySelectorAll('.parcours-bulle-aide, .parcours-bulle-revue')].map((e) => parseFloat(getComputedStyle(e).fontSize)),
         fleches: [...document.querySelectorAll('.parcours-fleche')].map((g) => g.getAttribute('data-cible')),
-        confirme: plat(b.querySelector('.parcours-bulle-confirme')),
+        confirme: plat(b.querySelector('.parcours-bulle-confirme:not([hidden])')),
+        // 18 nov. 2026 (Grégoire, 14 h 11) : la confirmation au-dessus du titre et du compteur.
+        confirmeAuDessus: (() => { const c = b.querySelector('.parcours-bulle-confirme:not([hidden])'), t = b.querySelector('.parcours-bulle-tete');
+            return !!c && !!t && c.getBoundingClientRect().bottom <= t.getBoundingClientRect().top + 1 && !!(c.compareDocumentPosition(t) & Node.DOCUMENT_POSITION_FOLLOWING); })(),
+        // Les marques des lignes : rien devant une explication, « → » devant un geste à faire, « ✓ » devant ce qui est fait.
+        marques: [...b.querySelectorAll('.parcours-bulle-lignes > ul > li')].map((li) => {
+            const m = getComputedStyle(li, '::before').content;
+            const sorte = li.classList.contains('est-faite') ? 'fait' : li.classList.contains('parcours-bulle-ligne--geste') ? 'geste' : 'explication';
+            return sorte + ':' + (m === 'none' || m === 'normal' ? '' : m.replace(/["']/g, '').replace(/ \/ .*$/, ''));
+        }),
         lieu: plat(b.querySelector('.parcours-bulle-lieu')),
         ordre: [...lignes.children].map((e) => e.className || e.tagName.toLowerCase()),
         liste: [...b.querySelectorAll('.parcours-bulle-lignes > ul > li > .parcours-bulle-ligne-texte')].map(plat),
@@ -309,7 +318,10 @@ test('« Découvrir » : l’objectif à la première bulle, la confirmation ens
     v = await relever(page, P, 2, '');
     expect(v.objectif).toBeNull();
     expect(v.confirme).toBe("Tu viens d'ouvrir « Détails » : chaque point a maintenant un nom.");
-    expect(v.ordre[0]).toBe('parcours-bulle-confirme');
+    expect(v.confirmeAuDessus, 'la confirmation au-dessus du titre (18 nov.)').toBe(true);
+    // Les marques (18 nov.) : les explications sans tiret, le geste à faire derrière une flèche.
+    expect(v.marques.filter((m) => m.startsWith('explication')).every((m) => m === 'explication:'), JSON.stringify(v.marques)).toBe(true);
+    expect(v.marques.filter((m) => m.startsWith('geste')).every((m) => m === 'geste:→'), JSON.stringify(v.marques)).toBe(true);
     expect(v.liste.slice(0, 2)).toEqual(["Pose le doigt sur le point à l'écart : son nom apparaît",
         "C'est Suricate Loyal. Son assiduité est de 84 % ; celle des autres, de 93 % ou plus"]);
     // Ce que dit la bulle est ce que montre l'écran : son nom, et son « A 84 % », que la consigne fait toucher.
@@ -325,7 +337,8 @@ test('« Découvrir » : l’objectif à la première bulle, la confirmation ens
     // La page a changé (l'onglet du menu passe de « Groupe » à « Profils ») : la bulle le dit, après la confirmation.
     expect(v.lieu).toBe(await lieuDuMenu());
     expect(v.lieu).toBe("Tu es dans « Suivi », à l'onglet « Profils ».");
-    expect(v.ordre.slice(0, 2)).toEqual(['parcours-bulle-confirme', 'parcours-bulle-lieu']);
+    expect(v.confirmeAuDessus).toBe(true);
+    expect(v.ordre[0]).toBe('parcours-bulle-lieu');
     await capture(page, 'j-decouvrir-3');
     await page.click('#contenuProfilEtudiant [data-action="changerSectionProfil"][data-param="accompagnement"]');
 
@@ -459,9 +472,15 @@ test('« Mettre ta classe en place », Je regarde : la bonne section, son nom en
     v = await lire(page);
     expect(v.objectif, 'l’objectif n’est dit qu’à la première bulle').toBeNull();
     expect(v.confirme).toBe("C'est fait : le cours est créé.");
-    expect(v.ordre.slice(0, 2)).toEqual(['parcours-bulle-confirme', 'parcours-bulle-lieu']);
+    expect(v.confirmeAuDessus).toBe(true);
+    expect(v.ordre[0]).toBe('parcours-bulle-lieu');
     const s2 = await jugerSection(2, 'accordeon-groupe-etudiants', (nom) => `Tu es dans la section « ${nom} » : c'est là que tu apportes la liste de ton groupe.`);
     await deuxEtats(2, { consigne: 'Touche « Prévisualiser »', bouton: '#accordeon-groupe-etudiants [data-action="previsualiserDonneesV2"]', idBloc: 'accordeon-groupe-etudiants' });
+    // L'exemple voulu par Grégoire (18 nov. 2026, 14 h 11) : les lignes d'explication sans tiret, « → Touche
+    // « Prévisualiser » » (orange). Depuis la seconde forme (même jour, 16 h 20), la ligne « Remplir », faite (✓),
+    // a disparu avec ce qui précédait. Break-test : le tiret rendu aux lignes
+    // (`.parcours-bulle-ligne::before { content: '\2013' }`) → ROUGE ici. Rétabli → vert.
+    expect((await lire(page)).marques).toEqual(['explication:', 'explication:', 'explication:', 'explication:', 'explication:', 'geste:→']);
     expect((await page.inputValue('#v2-donneesCollees')).split('\n')).toHaveLength(10);
     await page.click('#accordeon-groupe-etudiants [data-action="previsualiserDonneesV2"]');
 
@@ -488,7 +507,7 @@ test('« Mettre ta classe en place », Je regarde : la bonne section, son nom en
     await attendreEtape(page, 5, 8, 'Un groupe-cours');
     await expect(bulle(page)).not.toHaveClass(/est-en-attente/);
     expect((await lire(page)).confirme).toBe("C'est fait : l'horaire est créé.");
-    await jugerSection(5, 'accordeon-groupe-cours', (nom) => `Tu es dans la section « ${nom} » : c'est là que tu réunis ce que tu viens de créer.`);
+    await jugerSection(5, 'accordeon-groupe-cours', (nom) => `Tu es dans la section « ${nom} » : c'est là que tu assembles ce que tu viens de créer.`);
     await deuxEtats(5, { consigne: "Touche « Créer le groupe-cours » (il apparaîtra dans l'en-tête de l'application)", bouton: '#v2-btnCreerGroupeCours', idBloc: 'accordeon-groupe-cours' });
     await page.click('#v2-btnCreerGroupeCours');
 
@@ -510,6 +529,17 @@ test('« Mettre ta classe en place », Je regarde : la bonne section, son nom en
     v = await lire(page);
     expect(v.confirme).toBe("C'est fait : tu es dans ton deuxième groupe.");
     expect(v.lieu).toMatch(/^Tu es dans « Suivi », à l'onglet « [^»]+ »\. Ce qui suit, tu le referas à chaque séance, tes étudiant·es devant toi\.$/);
+    // Avant « Remplir » : la première séance du groupe est déjà choisie, tout le monde présent (Grégoire, essai du 18 nov.
+    // 2026 sur l'iPad : la saisie s'ouvrait sur une date hors de l'horaire, chaque ligne « 0 /0 » en rouge).
+    // Break-test (18 nov. 2026) : `choisirLaPremiereSeance` retiré de l'ouverture de l'étape → ROUGE ici. Rétabli → vert.
+    const seance = await page.evaluate(() => {
+        const cases = [...document.querySelectorAll('#suivi-saisie input[id^="periodes_"]')];
+        return { date: document.getElementById('date-cours').value, n: cases.length, valeurs: [...new Set(cases.map((c) => c.value))], max: [...new Set(cases.map((c) => c.max))] };
+    });
+    expect(seance.n).toBe(10);
+    expect(seance, 'tout le monde présent, 2 périodes sur 2').toMatchObject({ valeurs: ['2'], max: ['2'] });
+    expect(await page.evaluate(() => { const s = obtenirSeancesCompletesDuGroupe(db.getSync('groupeCoursActif', null).id);
+        return Object.keys(s).filter((d) => Array.isArray(s[d]) && s[d].length).sort()[0]; })).toBe(seance.date);
     await deuxEtats(7, { consigne: "Touche « Verrouiller la saisie » (c'est ce qui dit à l'application que cette séance a eu lieu)", bouton: '#btnVerrouillerSaisiePresences' });
     await page.click('#btnVerrouillerSaisiePresences');
 

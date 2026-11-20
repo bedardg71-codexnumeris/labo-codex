@@ -61,7 +61,15 @@
     'use strict';
 
     var CLE_PREF = 'parcoursAssistance';
-    var PARCOURS_OUVERTS = ['decouvrir'];
+    // ⚠ BRANCHE SEULEMENT (lot « Je regarde » de « Recevoir », 17 nov. 2026) : rouverts pour l'aperçu de Grégoire.
+    // À DÉFAIRE AVANT TOUTE FUSION : `git revert` du commit « BRANCHE SEULEMENT », qui rend ['decouvrir'] et les deux
+    // essais du verrou (plans de travail/RAPPORT-2026-11-17-je-regarde-recevoir.md, §5).
+    // ⚠ BRANCHE SEULEMENT (session de nuit A, `lot/nous-faisons-donnees`, 20 nov. 2026) : « Mettre tes données à l'abri »
+    // ouvert pour l'aperçu de son « Nous faisons ». À DÉFAIRE AVANT TOUTE FUSION : `git revert` de ce commit
+    // (plans de travail/RAPPORT-2026-11-19-nous-faisons-donnees.md).
+    // ⚠ ESSAI SEULEMENT (`apercu/essai-parcours`, 20 nov. 2026) : fusion de `lot/nous-faisons-donnees` et de
+    // `lot/je-regarde-cours`, « monter » et « donnees » ouverts ensemble. Cette branche ne se fusionne jamais.
+    var PARCOURS_OUVERTS = ['decouvrir', 'classe', 'evaluer', 'recevoir', 'monter', 'donnees'];
     // L'état en mémoire, que seuls les bancs changent (ouvrirLesParcours) : la liste des identifiants ouverts, ou `true`
     // (tous). Rien ne le garde d'un chargement à l'autre.
     var ouverts = PARCOURS_OUVERTS.slice();
