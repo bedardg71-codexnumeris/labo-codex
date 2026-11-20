@@ -165,7 +165,9 @@ parcours repart de sa première bulle. Le parcours n'a jamais été ouvert hors 
   - **MESURE DEMANDÉE : dans quelle leçon le bloc se trouve-t-il au départ ? DANS AUCUNE.** Lu dans le code : un bloc
     touché dans la palette « Nœuds » naît libre sur la carte, à côté du dernier bloc posé (`placePourBlocNeuf`,
     `creerNoeud` sans parent) ; « Remplir » le pose ensuite juste au-dessus de la dernière leçon, toujours hors
-    d'elle. Mesure au navigateur : § H.
+    d'elle. **Mesuré au navigateur** (banc `je-regarde-cours`, aux deux tailles) : le nœud de l'évaluation a
+    `parent: null` ; il est posé au-dessus de la troisième et dernière leçon, « Retour sur « Fendant Rioux » », au
+    même `x`, 40 px au-dessus d'elle à l'écran.
 
 ## G. L'application, hors parcours
 
@@ -265,7 +267,48 @@ fin-des-parcours-2026-11-20.js`).
 
 **Playwright Chromium, 1180 × 820 et 820 × 1180** : voir le relevé ci-dessous.
 
-<!-- RELEVE-PLAYWRIGHT -->
+Lancés fichier par fichier, par famille (quatre passes en parallèle, d'où quelques expirations sous la charge). « (b) » :
+rouge AVANT le lot, vérifié en lançant le même fichier sur l'arbre de la base (`afbd28b6`), mêmes messages.
+
+| Banc | Chromium |
+|---|---|
+| `nous-faisons-evaluer-2026-11-20` (NEUF : deux voies × deux tailles, la fin, la reprise) | vert, 5 |
+| `fin-des-parcours-2026-11-20` (NEUF : A3) | vert, 4 |
+| `je-regarde-evaluer-2026-11-18` (A1, A2, A3, A5, C1, C3, C4, C5) | vert, 3 |
+| `bulle-largeur-ipad`, `carte-aide-materiel`, `dissection-ipad`, `dissection-legende`, `dissection-defilement-aide`, `essai-novice-lot4-etiquetage` | verts (5, 9, 7, 7, 3, 2) |
+| `lot-e1-conception-creer-ou-modifier`, `lot-e3-creer-ou-modifier`, `type-grille-lot1`, `bareme-grille-neuve-1120`, `tableau-de-notation-1`, `accueil-epure` | verts (11, 15, 1, 4, 22, 10), non modifiés |
+| `en-tete-epure` | 5 verts ; 3 rouges **(b)** (`:31`, `:102`, `:128`) |
+| `nous-faisons-recevoir`, `je-regarde-recevoir`, `nous-faisons-donnees` | verts (4, 4, 5) |
+| `export-lea-verrouillees`, `emojis-et-syntheses-papier`, `un-mot-pour-ton-etudiant`, `perspective-coins`, `import-productions-d-un-tenant`, `etats-vides-preparer-copies` | verts (5, 3, 9, 2, 2, 1), non modifiés |
+| `parcours-4-recevoir-et-rendre` | 2 verts ; 2 rouges **(b)** (la bulle 2 couvre « Importer » : la décision 3.0 du lot du 19 nov., encore ouverte) |
+| `parcours-6-donnees-a-l-abri` | 9 verts ; 5 rouges **(b)** (`:343` sombre et clair, `:422`, `:510`, `:519`) |
+| `parcours-5-monter-ton-cours`, `parcours-5-nous-faisons` | verts (4, 2) |
+| `je-regarde-cours` | vert à 820 × 1180 ; à 1180 × 820, **une régression de F1 trouvée et corrigée** (ci-dessous), puis 5 passages verts sur 5 arrivés à la bulle 6 ; un sixième a rougi plus tôt, sur la cartouche non posée par « Remplir » (trouvaille, déjà là sur la base) |
+| `planif-barre-lot3`, `planif-modele-ia-963` (G2) | verts (13, 3) |
+| `parcours-7-lire-ta-classe`, `parcours-8-commentaires` | verts (7 ; 9 et 5 sautés d'avance), non modifiés |
+| `codex-de-depart-2026-11-20` | 3 rouges **(b)** : le bandeau de mise à jour couvre le bouton du menu |
+| `parcours-9-notation-alternative` | **non suivi** : parcours mis en pause par Grégoire en cours de session ; banc jamais modifié, pas de verdict |
+| la famille « fin des parcours et moteur » (seize bancs : parcours 1 et 2, « Je regarde », deux temps, téléphone, flèches…) | **relevé à venir** (voir plus bas) |
+
+**La régression de F1, corrigée.** Le « Planificateur » fermé, le canevas « libre » allait jusqu'au bord droit, sous
+l'Inspecteur resté ouvert : à 1180 × 820, l'évaluation et sa leçon n'étaient plus amenées et restaient dessous (6
+rouges sur 9 passages du banc ; la base passait). L'Inspecteur ouvert borne maintenant le canevas libre
+(`js/parcours-cours.js`).
+
+**Retirés avec l'ancienne Pratique guidée du parcours 3** : le harnais `parcours-3-de-banc.js`, les bancs
+`parcours-3-evaluer-2026-11-09` et `parcours-3-quatrieme-essai-2026-11-11` ; dans `essai-novice-lot4`, l'essai des deux
+bulles d'ouverture et les deux bulles devant l'exemple ; dans `dissection-ipad`, P7 (« Prendre cette grille »). Ce qui
+jugeait la PAGE (la carte d'aide, la légende, l'étiquetage) est gardé : ces bancs entrent maintenant par la carte de la
+page, ou par la bulle 5 du parcours neuf. « Un espace où le troisième parcours est fait » :
+`leTroisiemeParcoursFait` (harnais `nous-faisons-evaluer-de-banc.js`).
+
+**G5 au banc** (`je-regarde-recevoir`, Chromium, `file://`) : un onglet s'ouvre, il reçoit un seul PDF (1,4 Mo, son nom
+porte le DA 9900002), rien n'est téléchargé, l'application reste dans son onglet et la bulle passe à sa seconde forme.
+
+**Les codex de départ** (`departs/`) n'ont pas été refabriqués : la fabrique passe (lancée vers un dossier
+temporaire), mais les trois fichiers versionnés portent encore un parcours 3 fait à l'ancienne. À décider.
+
+**WebKit** : par GitHub, au push ; pas de verdict lu dans cette session.
 
 ## Les mots qui ne tiennent pas tout à fait à l'écran (signalés, non remplacés)
 
@@ -285,10 +328,15 @@ fin-des-parcours-2026-11-20.js`).
 |---|---|
 | A1, A2 : l'entrée restait dans la seconde forme et la bulle couvrait un choix de l'assistant | **1, corrigé** (mon lot, pas du code étranger) |
 | La bande « Performance (P) » montre trois points après une évaluation (mot n° 4) | **2, à inscrire si tu le confirmes** ; non inscrit : non vécu |
-| « Remplir » de la production du modèle attend au plus 3 s que la cartouche soit offerte ; sous forte charge (mesuré une fois, quatre navigateurs en parallèle), la cartouche n'est pas posée et la bulle redemande « Remplir » | **2, non inscrit** : non vécu, et un second « Remplir » le règle |
+| « Remplir » de la production du modèle attend au plus 3 s que la cartouche soit offerte ; sous charge (mesuré trois fois dans cette session, et une fois sur trois sur la base par un agent), la cartouche n'est pas posée et la bulle redemande « Remplir » | **2, non inscrit** : non vécu, et un second « Remplir » le règle |
 | Le banc retiré `parcours-3-evaluer-2026-11-09` était le seul bout en bout du commentaire d'un palier en points dans la rétroaction (cité par `sentinelle-cartouche-pose-son-echelle`) | **2, à inscrire** : une couverture perdue ; la sentinelle Vitest reste |
 | Deux commentaires du code et deux titres de bancs disent encore « Télécharger un modèle » | **3**, sans effet |
 | Les captures 4 et 15 de l'essai ne sont pas dans le dépôt | dit ; B2 et C4 sont faits d'après la consigne |
+| F1 : le canevas libre passait sous l'Inspecteur (§ H) | **1, corrigé** (mon lot) |
+| À 1180 × 820, à l'accueil de « Mon matériel », la carte d'aide de la page couvre l'entrée « Assistance » du menu (un clic y est intercepté) ; non comparé à la base | **2, non inscrit** : non vécu ; la carte se déplace |
+| Dans `faireLaModelisation` (harnais), un point de la bande manque parfois à la lecture (`lireGeo`), sur la base aussi | **3**, un banc intermittent |
+| `parcours-6` : cinq rouges sur la base (la bulle 3 hors de la fenêtre sur l'aperçu) qui n'étaient pas dans la liste connue | **2, à inscrire si tu le confirmes** ; pas de ce lot |
+| Un fichier d'essai d'un agent (`zz-verif-g2-classe.spec.js`) est entré dans un commit intermédiaire, puis en est sorti | dit ; il n'est plus dans l'arbre |
 
 ## Ce qui n'est pas vérifié
 
