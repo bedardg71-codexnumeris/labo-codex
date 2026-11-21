@@ -92,6 +92,16 @@ describe('B · les autres producteurs de badges affichent le sigle', () => {
         expect(lire('js/comparateur-pratiques.js')).toMatch(/var sigle = \(typeof sigleDuCode === 'function'\) \? sigleDuCode\(code\) : code;\s*\n\s*return '<span class="badge-type-pratique badge-type-' \+ c \+ '">' \+ sigle \+ '<\/span>';/);
         expect(lire('js/export-resultats-finaux.js')).toMatch(/pratiqueCode: [^\n]*sigleDuCode\(pratique\.obtenirCode\(\)\)/);
     });
+
+    it('(correction du 21 nov., 13 h 30) le Comparateur : ses menus, le badge des maquettes et l\'en-tête du CSV lisent le sigle, jamais le code', () => {
+        const comp = lire('js/comparateur-pratiques.js');
+        expect(comp).toMatch(/function _sigle\(code\) \{\s*\n\s*return \(code && typeof sigleDuCode === 'function'\) \? sigleDuCode\(code\) : \(code \|\| ''\);/);
+        expect(comp).toContain("+ _esc(_sigle(p.code) + ' · ' + p.nom) + '</option>';");
+        expect(comp).toMatch(/function _badgeFamille\(p\) \{\s*\n\s*return _badge\(p\.id\);/);
+        expect(comp).toContain("entetes.push(_nomPratique(c.id) + ' (' + _sigle(_codePratique(c.id)) + ')');");
+        expect(comp).not.toMatch(/p\.code \+ ' · '/);
+        expect(comp).not.toMatch(/genererBadgePratiqueHTML\(p\.id\)/);
+    });
 });
 
 /* ---------------------------------------------------------------- C. « CIB » ne s'affiche nulle part */

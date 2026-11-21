@@ -177,3 +177,39 @@ test('la fiche de la pratique : le double seuil, éteint au départ ; allumé, s
     await expect(page.locator('#mat-cibles-double-seuil')).toBeDisabled();
     await expect(page.locator('#mat-cibles-double-seuil-motif')).toHaveText('Aucune cible n\'est terminale : le double seuil ne peut pas s\'allumer. Marque au moins une cible « Cible terminale » dans l\'assistant.');
 });
+
+// Correction du 21 nov. 2026, 13 h 30 (décision de Grégoire, 21 nov., 6 h 56 : le sigle suit le nom ; « CIB » reste un code
+// interne). Chaque écran que la pratique par standards traverse est lu en entier : son texte, ses bulles (`title`), ses
+// étiquettes lues (`aria-label`) et les options de ses menus ; plus l'en-tête du CSV du Comparateur. Aucun « CIB » ;
+// la pratique par standards se lit « STD ».
+async function texteDeLEcran(page) {
+    return page.evaluate(() => [document.body.innerText,
+        ...[...document.querySelectorAll('[title]')].map(e => e.getAttribute('title')),
+        ...[...document.querySelectorAll('[aria-label]')].map(e => e.getAttribute('aria-label')),
+        ...[...document.querySelectorAll('option')].map(o => o.textContent)].join('\n'));
+}
+
+test('« CIB » ne s\'affiche nulle part : tableau, fenêtre, profil, fiche, Comparateur (menus, maquettes, CSV) ; la pratique par standards se lit « STD »', async ({ page }) => {
+    await installer(page, { configuration: { doubleSeuil: { actif: true, seuil: 60, plafond: 55 } } });
+    const vus = {};
+    await ouvrirTableau(page);
+    vus.tableau = await texteDeLEcran(page);
+    await expect(page.locator('.tn-pratique .badge-type-pratique')).toHaveText('STD');
+    await rangee(page, 'Zoé Fictive').locator('.tc-case[data-cible="cible_a"]').click();
+    vus.fenetre = await texteDeLEcran(page);
+    await page.keyboard.press('Escape');
+    await page.evaluate((da) => { window.afficherSection('suivi'); window.afficherProfilComplet(da); }, ZOE);
+    await page.locator('[data-action="changerSectionProfil"][data-param="cibles"]').click();
+    vus.profil = await texteDeLEcran(page);
+    await page.evaluate(() => window.ouvrirReglagesPratique('cib-34'));
+    await expect(page.locator('#mat-cibles-note')).toBeVisible();
+    vus.fiche = await texteDeLEcran(page);
+    await expect(page.locator('#mat-badge-pratique')).toHaveText('STD');
+    await page.evaluate(() => { window.afficherSection('labo'); window.afficherSousSection('labo-comparateur'); window.initialiserComparateurPratiques(); });
+    await expect(page.locator('#labo-comparateur option', { hasText: 'Par standards fictive' }).first()).toHaveText('STD · Par standards fictive');
+    await expect(page.locator('#labo-comparateur .exploration-noeud', { hasText: 'Par standards fictive' }).locator('.badge-type-pratique')).toHaveText('STD');
+    vus.comparateur = await texteDeLEcran(page);
+    vus.csv = await page.evaluate(() => window._comparateurGenererCSV());
+    expect(vus.csv.split('\n')[0]).toContain('Par standards fictive (STD)');
+    for (const [ecran, texte] of Object.entries(vus)) expect(texte, ecran).not.toMatch(/\bCIB\b/);
+});

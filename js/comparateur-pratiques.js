@@ -234,6 +234,12 @@
     // est un jugement posé, pas un calcul sur les données (SPEC §7, SKILL §8 DEN-E).
     function _estDEN(id) { return _codePratique(id) === 'DEN'; }
 
+    // Le SIGLE affiché d'un code interne (registre) : « Par standards » (code CIB) se lit STD, « Par sélection de
+    // productions » (code STD) se lit SEL. Décision de Grégoire, 21 nov. 2026, 6 h 56 : « CIB » ne s'affiche nulle part.
+    function _sigle(code) {
+        return (code && typeof sigleDuCode === 'function') ? sigleDuCode(code) : (code || '');
+    }
+
     // Badge construit depuis le CODE réel (genererBadgePratiqueHTML retombe sur STD
     // par défaut pour un id configurable non mappé — à ne pas réutiliser ici).
     function _badge(id) {
@@ -505,11 +511,10 @@
         return (noeud.enfants || []).some(_sousArbreContientMaquette);
     }
 
+    // Correction du 21 nov. 2026, 13 h 30 : par le code réel (`_badge`), plus par `genererBadgePratiqueHTML`, qui retombe
+    // sur la famille par défaut pour une pratique configurable (une pratique par standards y portait « SEL »).
     function _badgeFamille(p) {
-        if (typeof genererBadgePratiqueHTML === 'function') {
-            try { return genererBadgePratiqueHTML(p.id) || ''; } catch (e) { return ''; }
-        }
-        return '';
+        return _badge(p.id);
     }
 
     // Boutons d'un nœud. GARDE-FOU « max 1 dérivé » (R1) : seule une pratique
@@ -740,7 +745,7 @@
         return dispo.map(function(p) {
             var sel = (p.id === selId) ? ' selected' : '';
             return '<option value="' + _esc(p.id) + '"' + sel + '>'
-                + _esc(p.code + ' · ' + p.nom) + '</option>';
+                + _esc(_sigle(p.code) + ' · ' + p.nom) + '</option>';   // le sigle, jamais le code (21 nov., 13 h 30)
         }).join('');
     }
 
@@ -1120,7 +1125,7 @@
         var cols = _colonnes();
         var entetes = ['Profil', 'DA', 'Niveau atteint', 'Tendance'];
         cols.forEach(function(c) {
-            entetes.push(_nomPratique(c.id) + ' (' + (_codePratique(c.id) || '') + ')');
+            entetes.push(_nomPratique(c.id) + ' (' + _sigle(_codePratique(c.id)) + ')');   // le sigle, jamais le code
         });
         var lignes = [entetes.map(_csvCell).join(',')];
         _profilsActifs().forEach(function(prof) {
