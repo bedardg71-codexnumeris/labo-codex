@@ -67,7 +67,7 @@ describe('B · les autres producteurs de badges affichent le sigle', () => {
         const badge = win.__audit['pratiques-gestion.js'].genererBadgeTypePratique;
         const ancien = badge({ pratiques: ['STD'] });
         expect(texteDuBadge(ancien)).toBe('SEL');
-        expect(ancien).toContain('title="PAN – Sélection de productions : ');
+        expect(ancien).toContain('title="Par sélection de productions : ');   // ↻ G1, 21 nov., 7 h 44 : plus de « PAN » pour SEL
         const neuf = badge({ pratiques: ['CIB'] });
         expect(texteDuBadge(neuf)).toBe('STD');
         expect(neuf).toContain('title="Par standards : un niveau par cible d\'apprentissage du cours ; la note viendra du meilleur niveau démontré pour chaque cible."');
@@ -133,7 +133,8 @@ describe('D · les textes qui disaient « STD » pour l\'ancienne famille disent
         expect(html).toContain('<strong>STD</strong> (Par standards) : ');
         expect(html).not.toContain('<strong>STD</strong> (Standards)');
         const bulles = lire('js/accompagnement-contenu-hover.js');
-        expect(bulles).toContain('STD = par standards (un niveau par cible d\\\'apprentissage), SEL = PAN par sélection de productions');
+        // ↻ G5, 21 nov., 7 h 44 (choix de Grégoire) : « PAN » passe de SEL à STD.
+        expect(bulles).toContain('STD = PAN par standards (un niveau par cible d\\\'apprentissage), SEL = par sélection de productions');
         expect(bulles).not.toContain('STD = PAN basée sur des standards');
         expect(bulles).toContain('(SOM, STD, SEL, SPE, DEN)');
     });

@@ -56,7 +56,7 @@ const TYPE_BADGES = {
     // 21 nov. 2026 (« le sigle suit le nom », décision de Grégoire) : `code` est ici le SIGLE AFFICHÉ (badge du
     // récapitulatif, ligne de « Partir d'un modèle ») ; le code interne vit au registre. `classe` porte la couleur de la
     // famille au récapitulatif : sarcelle pour « Par sélection de productions », bleu pour « Par standards ».
-    'standards': { code: 'SEL', classe: 'sel', label: 'PAN – Sélection de productions', description: 'Tu évalues chaque production par niveaux (ex. : I-D-M-E). La note se construit à partir des productions que ta règle retient, pas de la moyenne de toutes.' },
+    'standards': { code: 'SEL', classe: 'sel', label: 'Par sélection de productions', description: 'Tu évalues chaque production par niveaux (ex. : I-D-M-E). La note se construit à partir des productions que ta règle retient, pas de la moyenne de toutes.' },
     'specifications': { code: 'SPE', classe: 'spe', label: 'PAN – Spécifications', description: 'Chaque travail est jugé acceptable ou non. La note finale dépend du nombre de spécifications réussies (forfaits).' },
     // #319 Lot 5 (#318) : DEN reconnue à l'édition (code/couleur du registre canonique,
     // --den-violet). Elle se crée aussi : la carte « Note finale posée, pas calculée » de
@@ -227,7 +227,7 @@ const ETAPES_WIZARD = {
                 required: true,
                 options: [
                     { value: 'moyenne', label: 'Sommative (SOM)', description: 'Note finale par moyenne pondérée des évaluations.' },
-                    { value: 'niveaux', label: 'PAN – Sélection de productions', description: 'Des niveaux (ex. I-D-M-E) ; la note retient certaines productions.' },
+                    { value: 'niveaux', label: 'Par sélection de productions', description: 'Des niveaux (ex. I-D-M-E) ; la note retient certaines productions.' },
                     { value: 'acceptable', label: 'PAN – Spécifications (SPE)', description: 'Travaux acceptables ou non ; note selon les forfaits réussis.' },
                     { value: 'jugement', label: 'PAN – Dénotation (DEN)', description: 'Note finale certificative posée (non calculée) selon l\'atteinte de cibles d\'apprentissage explicites ; abandonne la fonction de tri.' },
                     // Lot 1 de la pratique « Par standards » (21 nov. 2026).
@@ -2160,7 +2160,7 @@ function genererRecapitulatif() {
     // sommative — rang et moyenne du groupe — part avec son étape.)
     if (r.typePratique === 'standards') {
         html += '<div class="wizard-v2-recap-section">';
-        html += '<h4>Configuration PAN – Sélection de productions</h4>';
+        html += '<h4>Configuration – Par sélection de productions</h4>';
         // #443 : le libellé « Par objectifs » part avec la carte. Le repli
         // `|| r.approcheEvaluation` reste : une pratique stockée qui porte encore
         // l'ancienne valeur s'affiche telle quelle plutôt que « undefined ».

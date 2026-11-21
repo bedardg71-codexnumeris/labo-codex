@@ -2658,7 +2658,7 @@ function gererChangementTypeProduction() {
         'autre': '<strong>Autre :</strong> Tout autre type de production (participation, activités, etc.).',
         'portfolio': '<strong>Portfolio (conteneur) :</strong> Regroupement d\'artefacts permettant d\'évaluer la progression. Le portfolio inclura automatiquement toutes les productions de type «Artefact». Il n\'est pas comptabilisé dans l\'indice de <strong>Complétion (C)</strong>.',
         'artefact-portfolio': '<strong>Artefact :</strong> Production ciblée sur une tâche de nature variée et rattachée au portfolio.<br><br>Les artefacts n\'ont pas de pondération propre. C\'est le portfolio conteneur qui définit la pondération globale.<br><br><em>Pour paramétrer la valeur des artefacts, va dans « Structure des évaluations » dans les Pratiques de notation.</em>',
-        'terminale': '<strong>Évaluation terminale :</strong> Production qui clôt le trimestre ; une seule par trimestre, et facultative. En PAN – Standards, elle entre dans le calcul avec sa pondération (par exemple 40\u00a0%), le reste allant aux artefacts du portfolio ou, sans artefact, aux productions retenues (par exemple 60\u00a0%).'
+        'terminale': '<strong>Évaluation terminale :</strong> Production qui clôt le trimestre ; une seule par trimestre, et facultative. Par sélection de productions, elle entre dans le calcul avec sa pondération (par exemple 40\u00a0%), le reste allant aux artefacts du portfolio ou, sans artefact, aux productions retenues (par exemple 60\u00a0%).'
     };
 
     // Éléments Définition (carte dynamique)

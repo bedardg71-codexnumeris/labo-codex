@@ -49,10 +49,20 @@ A et C (cf. `indices.js`, `portfolio.js`).
 | Code | Id canonique | Couleur (var CSS) | Famille | Calcul de la note | Fichier instance | État |
 |------|--------------|-------------------|---------|-------------------|------------------|------|
 | SOM | `sommative` | `--som-orange` | Sommative | Moyenne pondérée des évaluations | `pratique-sommative.js` | actif |
-| STD (sigle affiché **SEL** depuis le 21 nov. 2026) | `standards` | `--sel-sarcelle` (sarcelle, 21 nov. 2026) | PAN | Portfolio (sélection de N) + terminale | `pratique-pan-standards.js` | actif |
+| STD (sigle affiché **SEL** depuis le 21 nov. 2026) | `standards` | `--sel-sarcelle` (sarcelle, 21 nov. 2026) | `famille: 'PAN'` au registre, **mais aucun écran ne la dit « PAN »** (choix de Grégoire, 21 nov., 7 h 44 ; voir sous le tableau) | Portfolio (sélection de N) + terminale | `pratique-pan-standards.js` | actif |
 | SPE | `specifications` | `--spe-vert` | PAN | Bundles tout-ou-rien par palier | `pratique-pan-specifications.js` | actif |
 | DEN | `denotation` | `--den-violet` | PAN (PRÉN académiquement, voir §2 bis) | Note finale = jugement SAISI, gardé par l'atteinte des cibles (voir §8) | `denotation-jugements.js` + `denotation-saisie-ui.js` ; moteur dans `pratique-configurable.js` | **actif (couche 2, #318)** |
 | CIB (sigle affiché **STD**, 21 nov. 2026 ; « CIB » ne s'affiche nulle part) | `cibles` | `--std-bleu` | PAN | **Pas encore de calcul** (lot 1, 21 nov. 2026) : la note viendra du meilleur niveau démontré par cible, en moyenne pondérée, avec un second seuil (lot 4) | `ensembles-cibles.js` (cibles) ; moteur à venir | **aperçu (branche `lot/moteur-cibles-1-cibles`)** |
+
+**SEL n'est pas dite « PAN » (choix de Grégoire, 21 nov. 2026, 7 h 44 ; les sources ne tranchent pas).** « La preuve
+n'est pas faite que SEL est vraiment une PAN. On dirait une pratique hybride entre PAN et SOM. Demeurons prudent dans
+l'affirmation. » L'application n'affirme ni qu'elle en est une, ni qu'elle n'en est pas une, ni qu'elle est hybride :
+son nom de famille à l'écran est « Par sélection de productions », sans « PAN-Standards », sans « (Standards-Based
+Grading) », sans préfixe « PAN – ». Le libellé `famille: 'PAN'` du registre reste (aucun écran ne le lit, mesuré), comme
+la logique du badge « PAN » de la fiche (`pratiques[0] === 'PAN'`) : la retirer serait aussi une affirmation, Grégoire
+tranchera. Textes : `plans de travail/TEXTES-2026-11-21-selection-sans-PAN.md` ; sentinelle
+`sentinelle-sel-sans-pan-2026-11-21.test.js`. Restent à réécrire (hors du lot) : le glossaire, la fenêtre d'aide, le
+guide pédagogique.
 
 **Identifiants canoniques neutres (Session A, mai 2026)** : un seul id par pratique, sans
 préfixe `pan-`. « PAN » est un **libellé de famille**, plus un préfixe technique ni un
@@ -729,6 +739,7 @@ les valeurs de l'échelle de chimie.
 
 | Date | Changement |
 |------|------------|
+| 2026-11-21 (secondes corrections du lot 1) | **SEL n'est plus dite « PAN »** (choix de Grégoire, 7 h 44) : nom de famille « Par sélection de productions » partout où il s'affiche ; bulles G1, G2, G5 ; remplacements simples (aide des indices, Exploration, profil, Aide, démo). Le libellé du registre et la logique du badge PAN restent. |
 | 2026-11-21 (corrections du lot 1) | **Le sigle suit le nom** (décision de Grégoire) : le registre sépare le `code` interne (STD, CIB, inchangés) du `sigle` affiché (SEL pour `standards`, STD pour `cibles`) ; tout écran lit le sigle (`obtenirSiglePratique`, `sigleDuCode`). Couleurs : sarcelle à SEL, bleu à STD. |
 | 2026-11-21 (lot/moteur-cibles-1-cibles) | **La famille `cibles` (« Par standards », code CIB) entre au tableau du §2**, sans calcul (lot 1). §2 bis, partie STD : le nom retenu, « Par sélection de productions », aligné ; « vraie pratique » retiré (posture pluraliste) ; ce que le lot 1 livre. |
 | 2026-11-20 (lot/standards-conception) | **§2 bis, partie STD refaite d'après les sources** (`plans de travail/CONCEPTION-2026-11-20-pratique-par-standards.md`). La doctrine de la notation par standards est vérifiée page à l'appui (rapport PAREA 2026, articles 2024 et 2025, billets de la CoP) ; l'écart est dit sans détour : la famille de code STD note des productions et en retient, ce n'est pas une notation par standards ; annonce du renommage (« Par productions retenues ») et de la pratique « Par standards » à venir. Liste des sources complétée (§13). Aucun code touché. Signalé sans retouche : l'attribution à *Heart of the loop* dans « reprises sans pénalité » est fausse (la phrase est dans *The Four Pillars*) et « variante délibérée et défendable » n'a pas de source. |

@@ -147,7 +147,10 @@ const AUCUN_ARTEFACT = 'Aucune production n\'est encore évaluée.';
 // validés du renommage (repère M5), plus dans celui du 28 oct.
 const RENOMMAGE = readFileSync(join(resolve(import.meta.dirname, '..', '..'), 'plans de travail/TEXTES-2026-11-20-selection-de-productions.md'), 'utf8');
 /** Les textes `> …` d'un repère du renommage (V1, A5, M5…), lus dans le fichier. */
-const texteRenomme = (repere) => RENOMMAGE.split(/^## /m).find(s => s.startsWith(repere + ' ·')).split('\n').filter(l => l.startsWith('> ')).map(l => l.slice(2).trim());
+const texteRenomme = (repere, fichier = RENOMMAGE) => fichier.split(/^## /m).find(s => s.startsWith(repere + ' ·')).split('\n').filter(l => l.startsWith('> ')).map(l => l.slice(2).trim());
+// 21 nov. 2026, 7 h 44 (choix de Grégoire ; les sources ne tranchent pas) : la pratique n'est plus dite « PAN ». L'encadré F4
+// se lit dans le fichier du 21 nov., qui remplace pour lui celui du 20 nov.
+const SANS_PAN = readFileSync(join(resolve(import.meta.dirname, '..', '..'), 'plans de travail/TEXTES-2026-11-21-selection-sans-PAN.md'), 'utf8');
 const TERMINALE_SEULE_PRODUCTIONS = texteRenomme('M5')[0];
 const TERMINALE_SEULE_ARTEFACTS = texteRenomme('M5')[1];
 
@@ -602,7 +605,10 @@ describe('G · lot 3 : les Productions ne poussent plus vers une terminale', () 
             b.win.gererChangementTypeProduction();
             return b.document.getElementById('texteDefinitionType').innerHTML;
         };
-        expect(definition('terminale')).toBe('<strong>Évaluation terminale :</strong> ' + await texteValide(2));
+        // ↻ 21 nov. 2026, 7 h 44 (choix de Grégoire) : « En PAN – Standards, » devient « Par sélection de productions, » ; le
+        // texte se lit dans le fichier du 21 nov. (repère T2), qui remplace pour lui le texte 2 du lot 3, resté intact.
+        expect(await texteValide(2)).toContain('En PAN – Standards, elle entre dans le calcul');
+        expect(definition('terminale')).toBe('<strong>Évaluation terminale :</strong> ' + texteRenomme('T2', SANS_PAN)[0].replace(/ %/g, '\u00a0%'));
         expect(definition('artefact-portfolio')).toContain('<em>Pour paramétrer la valeur des artefacts, va dans « Structure des évaluations » dans les Pratiques de notation.</em>');
     });
 });
@@ -936,7 +942,7 @@ describe('I · lot 5 : l\'assistant et les mots', () => {
 
     it('les textes statiques : la fiche (7), l\'Aide (8, 9, 11, 12), au caractère près sauf l\'insécable', () => {
         const page = net(lireDuDepot('index.html'));
-        const attendus = [texteRenomme('F4')[0], citations(8)[0], ...citations(9), ...citations(11), ...citations(12)];   // 7 : le repère F4 du renommage (20 nov.)
+        const attendus = [texteRenomme('F4', SANS_PAN)[0], citations(8)[0], ...citations(9), ...citations(11), ...citations(12)];   // 7 : le repère F4 du renommage (21 nov., sans « PAN »)
         expect(attendus).toHaveLength(7);
         for (const t of attendus) expect(page, t).toContain(net(t));
         for (const ancien of ['Le meilleur résultat est retenu pour chaque standard', 'traces retenues au portfolio', 'C\'est une moyenne de notes', 'Minimum d\'artefacts avant calcul formatif']) {

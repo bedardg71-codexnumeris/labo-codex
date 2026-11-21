@@ -18,7 +18,10 @@
 > relais-ci tient lieu de relais de la branche.
 > **Corrections du 21 nov. 2026** (relecture de Grégoire) : § 6 — le sigle suit le nom (SEL, STD ; « CIB » nulle part),
 > les couleurs, A4, A5, E1, F3, les échelles libres éprouvées, le banc des noms réels vert sans contournement, la
-> fixture « Bruno » remplacée, #1302 inscrit. Reste : les textes G1 à G9 à relire ; le passage WebKit du Mac ; le lot 2.
+> fixture « Bruno » remplacée, #1302 inscrit.
+> **Secondes corrections du 21 nov. 2026** (7 h 44) : § 7 — SEL n'est plus dite « PAN » (nom de famille, textes dictés,
+> remplacements simples) ; mesure du badge PAN ; les phrases laissées (guide, glossaire, fenêtre d'aide, parcours,
+> gabarit). Reste : ces phrases et le badge PAN à trancher par Grégoire ; le passage WebKit du Mac ; le lot 2.
 
 ## 1. Ce qui a été livré
 
@@ -172,3 +175,92 @@ gardée telle quelle ; variable renommée `--sel-sarcelle`.
 > Le badge de la pratique « Par sélection de productions » s'appelle maintenant « SEL » (il disait « STD »), et prend la
 > couleur sarcelle. « STD » désigne désormais la nouvelle pratique « Par standards ». Tes pratiques, tes réglages et tes
 > notes ne changent pas.
+
+## 7. Secondes corrections du 21 nov. 2026 (SEL n'est plus dite « PAN »)
+
+Consigne : `plans de travail/CONSIGNE-LOT-2026-11-21-moteur-cibles-1-corrections-2.md`. Même branche, PR n° 44 en
+brouillon, rien dans `main`, aucune release. *Origine de la règle : choix de Grégoire, 21 nov. 2026, 7 h 44 ; les sources
+ne tranchent pas.* Textes posés : `TEXTES-2026-11-21-selection-sans-PAN.md` (il remplace, pour leurs repères seulement,
+les fichiers validés du 20 nov., du 28 oct. et du 29 oct., restés intacts).
+
+### 7.1 Corrigé (le nom de famille, les textes dictés, les remplacements simples)
+
+- **Nom de famille** (`FAMILLES_TAXONOMIQUES.standards`) : « Par sélection de productions », sans parenthèse anglaise.
+  Il s'affiche dans la bibliothèque (ligne de la rangée), sous le titre de la fiche et dans l'aperçu. Le résumé qui le
+  suit disait « Maîtrise de standards/objectifs » : il reprend les mots acceptés D5 (supposé, § 7.5).
+- **Dictés** : 8, 10, 17, 19 (A1, A2, F3, F10, P1, P2, donc E1) ; 12 (A3) ; 18 (F4) ; G1, G2, G5.
+- **Remplacements simples** : l'aide des indices (`etudiants.js`, trois endroits) ; la note de l'Exploration
+  (`comparateur-pratiques.js`) ; le type d'une ressource partagée (`donnees-v2.js`) ; trois diagnostics du profil
+  (`profil-etudiant-actions.js`) ; « Méthodologie de calcul » du profil ; la bulle du type « Évaluation terminale »
+  (`productions.js`) ; la carte « Note » des échelles ; deux titres de l'Aide › Conception ; la pratique de la démo.
+
+### 7.2 Mesure du badge « PAN » sur une pratique SEL (point 4 ; rien n'a changé dans cette logique)
+
+- **Pour une pratique SEL créée par le code actuel, aucun écran n'affiche un badge « PAN »** (mesuré par `grep` des
+  producteurs de badges et des lecteurs du libellé de famille). La fiche affiche SEL ; le badge global (`main.js`) passe
+  par le code puis le sigle et ne rend jamais « PAN » ; le Comparateur et l'Exploration passent par
+  `genererBadgePratiqueHTML` ; la bibliothèque dit la famille en mots depuis #1156.
+- **Le seul chemin vers un badge « PAN »** : `genererBadgeTypePratique` (`js/pratiques-gestion.js`), qui affiche le
+  badge du titre de la fiche (`#mat-badge-pratique`, à l'ouverture d'une pratique et au changement de type).
+  `typesValides` contient `'PAN'`, le texte rendu est « PAN », la bulle est G2. **Condition** : la pratique rangée porte
+  `pratiques[0] === 'PAN'`, ou bien n'a pas de `pratiques` et porte un `type` que le registre ne connaît pas et qui
+  commence par « pan » (repli `toUpperCase().substring(0, 3)`). Aucun écrivain actuel ne produit l'une ou l'autre forme
+  (`CODE_PAR_TYPE`, la table de l'assistant). Seules des données anciennes le pourraient ; je ne peux pas les mesurer chez les gens.
+- **Le libellé `famille: 'PAN'` du registre** (`obtenirLabelFamillePratique`, `obtenirLabelFamille()`) : aucun écran ne
+  le lit (seules ses définitions existent). La valeur interne `indices.pratique === 'PAN'` (`indices.js:526`, toute
+  pratique non sommative) n'avait qu'un lecteur affiché, la ligne « Pratique de notation active » du profil, qui dit
+  maintenant le nom.
+- **Deux textes affirment un badge que l'écran ne montre plus pour SEL** : le guide (« ces pratiques portent toutes,
+  par commodité, le badge « PAN » ») et le glossaire (« l'application lui donne aussi le badge « PAN » par commodité »).
+  Ils sont listés au § 7.3.
+
+### 7.3 Laissé : les phrases qui demandent une réécriture (point 5)
+
+| Où | La phrase en cause |
+|---|---|
+| Guide pédagogique (`guides-pedagogiques.js:310`) | « Dans Labo Codex, ces pratiques portent toutes, par commodité, le badge « PAN ». La recherche est plus précise : Standards et Spécifications sont des PAN ; la dénotation est une PRÉN. » |
+| Guide (`:319-321`) | « Labo Codex implémente actuellement deux PAN » ; titre « PAN-Standards (code STD, aussi appelée Maîtrise) » et sa description |
+| Fenêtre d'aide (`accompagnement-contenu-popup.js:252`) | « PAN par standards (STD) — retient les meilleures démonstrations de compétence… » (dit aussi STD pour SEL) |
+| Glossaire (`accompagnement-contenu-terme.js:214`) | « Quatre pratiques sont disponibles : sommative (SOM), PAN par standards (STD), PAN par spécifications (SPE) et dénotation (DEN). » |
+| Glossaire (`:471-474`) | terme « STD — PAN par standards » ; « Pratique alternative de notation qui compose la note à partir des démonstrations de compétence que retient sa configuration… » |
+| Glossaire (`:498-501`) | « PAN — Pratique Alternative de Notation » : « Terme qui désigne les pratiques Standards (STD) et Spécifications (SPE)… » |
+| Bulle de la pratique d'un groupe (`accompagnement-contenu-hover.js:119`) | « … moyenne sommative traditionnelle ou pratique alternative (meilleurs résultats retenus dans un portfolio, par exemple). » (« pratique alternative » de SEL, en toutes lettres) |
+| Parcours « notation alternative » (`parcours-notation-alternative.js:39, 56, 96`) | « De ta pratique par standards, spécifications ou dénotation… » ; « En standards, la note repose sur les productions… » ; « Te voilà avec une pratique alternative appliquée à ton cours » |
+| Gabarit de grille (`gabarits-utils.js:200-203`) | nom « [STD] Grille par objectifs » (STD désigne maintenant « Par standards ») ; description « Gabarit PAN-Standards : Critères alignés sur les objectifs du cours ». Le gabarit est rangé sous le code de SEL ; « par objectifs » irait plutôt à « Par standards ». Son nom s'imprime : à Grégoire |
+| Champ « Nom » de la fiche (`index.html:5500`) | exemple « Ex: PAN-Standards Littérature ». Proposé : « Ex : Par sélection de productions – Littérature » (la forme que l'assistant affiche déjà) |
+| Implicites, sans nommer SEL (`index.html:5704`, `:11034`) | « Note provisoire » (pratique alternative) ; « en pratique alternative de notation, la note provisoire » |
+
+**Pas affichés, laissés** : `pratiques.js:325` (l'élément `#nomPratiqueDefaut` n'existe pas dans `index.html`) ;
+`obtenirDescription()` du moteur (« Pratique PAN-Standards (SBG)… », aucun lecteur ne l'affiche) ; les noms de
+`pratiques-predefines.js` (seules les clés sont lues) ; les messages de console ; les commentaires. **Les Nouvelles déjà
+publiées** ne changent pas.
+
+### 7.4 Source ou stock
+
+Rien n'est réécrit chez personne. **Reste dans les données** : une pratique déjà nommée « PAN-Standards… » garde son nom ;
+une démo déjà activée garde « PAN – Standards (démo) » jusqu'à sa prochaine activation ; le gabarit de grille déjà semé
+garde son nom et sa description (la source aussi, § 7.3). **Trouvé en chemin** : depuis le 13 nov., sur `main`, le modèle
+de la vue simple crée une pratique SEL **nommée « Par standards »** (le texte V3 d'avant le renommage, qui n'est pas
+encore dans `main`). Les personnes qui l'ont choisi ont une pratique SEL qui porte le nom de la nouvelle famille.
+Mesure seulement, à Grégoire.
+
+### 7.5 Supposé
+
+- Le résumé de la famille, sur la fiche et dans l'aperçu : les mots acceptés D5 (« Des niveaux (ex. I-D-M-E) ; la note
+  retient certaines productions »), à la place de « Maîtrise de standards/objectifs ». La consigne ne dictait que le nom.
+- Dans une phrase, le nom passe en minuscules (« pratique par sélection de productions », comme V1, V2, V6 et M1). Dans la
+  note de l'Exploration, il est entre guillemets, parce qu'une minuscule s'y lirait comme une action.
+- La démo : son nom de pratique contient le nom de famille, et je l'ai remplacé comme un nom de famille.
+- Le banc #310 (« jamais « production » ») ne regarde plus le nom de famille : depuis le 21 nov., ce nom contient le mot.
+
+### 7.6 Preuve
+
+Vitest complet, un seul worker : 940 fichiers, 12 052 verts, 3 rouges (des épingles d'anciens textes, suivies ensuite,
+fichiers rejoués verts), 24 erreurs non gérées (#1302, inchangées). Garde du lot 0 : 16/16. Sentinelle neuve
+`sentinelle-sel-sans-pan-2026-11-21.test.js` : 25 essais, 7 break-tests (X1 à X7, journal en fin de fichier, empreinte
+restaurée à chaque fois). Playwright sous Chromium, les huit spécifications qui portent ces textes : 37 verts, 2 sautés
+(les captures sous drapeau). Captures : `captures-2026-11-21-par-standards-lot-1-sans-pan/` (bibliothèque avec l'aperçu
+SEL ouvert, deux fiches, deux tailles, deux thèmes ; aucune erreur de page). Dans ces captures, la pratique SEL
+emprunte l'échelle de départ créée pour la pratique STD, d'où « Échelle de départ – Par standards » dans son aperçu :
+c'est le montage des captures, pas l'application. **Non vu** : WebKit et Safari ; la fenêtre du glossaire et le guide
+à l'écran ; une donnée réelle portant `pratiques: ['PAN']`.

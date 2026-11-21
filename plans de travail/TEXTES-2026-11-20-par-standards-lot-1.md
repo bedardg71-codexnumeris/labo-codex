@@ -37,6 +37,17 @@ branche le 21 nov. :
 | G8 | Avertissement des productions (une production pondérée hors du calcul) | … mais n'entre pas dans le calcul SEL : seuls le pool d'artefacts et l'évaluation terminale comptent. |
 | G9 | Export des résultats finaux, colonne « Pratique (code) » | SEL (au lieu de STD) pour l'ancienne pratique ; STD pour « Par standards » |
 
+## Seconde relecture de Grégoire, 21 nov. 2026, 7 h 42 – 7 h 44 (consigne `CONSIGNE-LOT-2026-11-21-moteur-cibles-1-corrections-2.md`)
+
+**Acceptés tels quels** : G3, G4, G6, G7, G8, et G9 de la page de Cowork, la ligne de Nouvelles : « Le badge de la pratique
+« Par sélection de productions » s'appelle maintenant « SEL » (il disait « STD »), et prend la couleur sarcelle. « STD »
+désigne désormais la nouvelle pratique « Par standards ». Tes pratiques, tes réglages et tes notes ne changent pas. »
+Elle reste hors du changelog jusqu'à la release.
+
+**Remplacés** (*choix de Grégoire, 21 nov. 2026 ; les sources ne tranchent pas* : l'application ne dit plus « PAN » de
+cette pratique) : G1, G2 et G5, dans `TEXTES-2026-11-21-selection-sans-PAN.md`, avec le nom de famille et les textes du
+renommage qui portaient le préfixe « PAN – ».
+
 ## À trancher d'abord (Grégoire) — tranché le 21 nov., voir ci-dessus
 
 | N° | Question | Proposé | Pourquoi |

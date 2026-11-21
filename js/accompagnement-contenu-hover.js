@@ -313,7 +313,7 @@ const TOOLTIPS = {
     'cn-pratique-titre':
         'Assemblage final de ta pratique : type de notation, échelle, structure des évaluations et système de jetons. C\'est la recette complète de ta façon de construire la note.',
     'cn-pratique-type':
-        'SOM = sommative (moyenne pondérée traditionnelle), STD = par standards (un niveau par cible d\'apprentissage), SEL = PAN par sélection de productions (la note retient certaines productions), SPE = PAN basée sur des spécifications (contrat), DEN = dénotation (pratiques réduisant ou éliminant la notation).',
+        'SOM = sommative (moyenne pondérée traditionnelle), STD = PAN par standards (un niveau par cible d\'apprentissage), SEL = par sélection de productions (la note retient certaines productions), SPE = PAN basée sur des spécifications (contrat), DEN = dénotation (pratiques réduisant ou éliminant la notation).',
     'cn-pratique-echelle':
         'Échelle utilisée pour convertir les pourcentages en niveaux (ex. : I-D-M-E). Configurable dans Échelles.',
     'cn-pratique-jetons':

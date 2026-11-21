@@ -1240,7 +1240,7 @@
      */
     function formaterTypePratique(type) {
         const types = {
-            'pan-standards': 'PAN-Standards',
+            'pan-standards': 'Par sélection de productions',
             'pan-specifications': 'PAN-Spécifications',
             'sommative': 'Sommative',
             'configurable': 'Configurable'

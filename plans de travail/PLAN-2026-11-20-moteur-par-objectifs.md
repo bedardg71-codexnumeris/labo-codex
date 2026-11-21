@@ -77,6 +77,14 @@ Consigne : `plans de travail/CONSIGNE-LOT-2026-11-21-moteur-cibles-1-corrections
 - **Les textes** : tous acceptés, sauf A4, A5, E1 et F3 (`TEXTES-2026-11-20-par-standards-lot-1.md`, en tête).
 - **Confirmé** : l'échelle de départ reste un point de départ facultatif ; n'importe quelle échelle convient (essais à
   trois et à six niveaux) ; les plages à mi-chemin ; une cible sans critère.
+- **SEL n'est pas dite « PAN »** (remarque à 7 h 42, décision à 7 h 44 ; consigne
+  `CONSIGNE-LOT-2026-11-21-moteur-cibles-1-corrections-2.md`). *Origine : choix de Grégoire, 21 nov. 2026 ; les sources
+  ne tranchent pas.* « La preuve n'est pas faite que SEL est vraiment une PAN. On dirait une pratique hybride entre PAN
+  et SOM. Demeurons prudent dans l'affirmation. » L'application n'affirme ni qu'elle en est une, ni qu'elle n'en est
+  pas une, ni qu'elle est hybride. Son nom de famille à l'écran : « Par sélection de productions ». Textes :
+  `TEXTES-2026-11-21-selection-sans-PAN.md`. Acceptés tels quels : G3, G4, G6, G7, G8 et la ligne de Nouvelles du
+  changement de sigle (gardée hors du changelog jusqu'à la release). Le badge « PAN » et le libellé `famille: 'PAN'` du
+  registre restent tels quels : Grégoire tranchera (mesure au rapport, § 7).
 
 ## Vue d'ensemble
 
