@@ -9,6 +9,28 @@
 > **Trois degrés de certitude dans ce document** : *mesuré* (une commande l'a rendu, fichier et ligne donnés),
 > *lu* (le code a été lu, rien n'a été joué), *inféré* (déduit, à confirmer par un essai au lot concerné).
 
+## Décidé par Grégoire (20 nov. 2026, 18 h 46 et 18 h 47)
+
+Relayé par Cowork (`plans de travail/CONSIGNE-LOT-2026-11-20-moteur-cibles-0-garde.md`). Le plan est accepté : la
+collection à part, la famille à elle, les cinq lots dans cet ordre.
+
+- Il termine son trimestre avec sa pratique et son moteur actuels. Ce moteur reste dans l'application ensuite, tel
+  qu'il est.
+- On construit une vraie pratique de notation par standards : le noyau en quatre gestes, puis les couches
+  (pondération par cible, double seuil, notes qualitatives, autres règles de retenue).
+- Le prix du noyau est accepté : dans cette pratique, ni complétion, ni dépistage ou rétroaction par critère, ni PDF
+  de synthèse.
+- Il expérimentera probablement cette pratique lui-même à l'hiver 2027. Conséquence, confirmée par lui : le pont
+  « un critère de grille alimente une cible » (§ 10, question 4) devient une couche à livrer avant sa rentrée
+  d'hiver, après le noyau.
+
+Restent ouverts : les autres questions de didactique (§ 10) et les mots (§ 9), que Cowork règle avec lui. Le lot 1
+attend les mots.
+
+**Arrêtés au lot 0** (noms techniques, 20 nov.) : la clé `inscriptionsCibles` et la méthode `niveaux_par_cible`.
+Provisoires jusqu'au lot 1 : la clé de l'ensemble (`ensemblesCibles` dans les essais) et l'identifiant du type
+(`cibles` dans les essais), qui suit un mot encore ouvert.
+
 ## Vue d'ensemble
 
 1. **Le calcul actuel ne connaît qu'un grain : une évaluation par étudiant·e et par production.** Les quatre
@@ -248,7 +270,8 @@ défaut ; le lot 4 doit le mesurer sur chaque lecteur du tableau plutôt que le 
    `profil-etudiant-actions.js`, `profil-etudiant-calculs.js` et `evaluation-calcul.js` ne nomment ni
    `inscriptionsCibles` ni la méthode neuve.
 3. **Le sens inverse** : la pratique par cibles ne lit pas `evaluationsSauvegardees`. Sinon une évaluation saisie
-   par habitude changerait sa note en silence.
+   par habitude changerait sa note en silence. **Ne peut pas s'épingler avant que le moteur existe : essai à écrire
+   au lot 4** (§ 8).
 4. **Rien n'épingle la pratique de Grégoire sur ses données réelles** : GREG-0 est une fixture. Aucune machine ne
    peut y répondre ici. Proposé au lot 4 : un export des résultats finaux de son trimestre avant et après, comparé
    octet pour octet. C'est une porte terrain au sens du skill (la machine ne peut pas répondre).
@@ -272,6 +295,16 @@ Ordre : 0, puis 1 à 4. Chaque lot est livrable seul ; aucun ne change une note 
 - **Dans le code** : rien dans `js/`. Les sentinelles 1 et 2 du § 6, écrites contre l'état actuel (vertes dès
   aujourd'hui), plus un essai qui échoue si on mute un moteur existant pour lire la clé neuve.
 - **Notes qui changent** : aucune.
+- **Livré le 20 nov. 2026** : `tests/unit/sentinelle-moteur-cibles-0-garde.test.js` (16 essais). Sept cas rejoués
+  nu et habité (SOM-1, GREG-0 à GREG-2, SPE-1, DEN-1, DEN-2) plus le golden master de la sommative ; le store du
+  banc consigne chaque clé lue, donc une lecture de la clé neuve rougit même si aucun chiffre ne bouge. Le cliquet
+  couvre les six fichiers du § 6. Cinq break-tests, journal en fin de fichier.
+- **Appris en posant les break-tests** (mesuré) : une pratique enregistrée, celle de Grégoire comprise, est une
+  `PratiqueConfigurable` ; sa note ne passe par aucune méthode de `pratique-pan-standards.js`. Une lecture posée dans
+  `PratiquePANStandards.calculerPerformance` restait verte : la sentinelle appelle donc aussi les trois instances
+  codées en dur. `pratique-configurable.js`, qui porte la note des pratiques enregistrées, n'est **pas** au cliquet
+  (il recevra le court-circuit du lot 4) : seul le témoin des lectures le garde. Limite assumée : une lecture au nom
+  fabriqué, dans une fonction qu'aucun cas rejoué n'atteint, passe les deux gardes.
 
 ### Lot 1 – « Je dis quelles cibles compte mon cours »
 
@@ -324,6 +357,10 @@ Ordre : 0, puis 1 à 4. Chaque lot est livrable seul ; aucun ne change une note 
   devenu 0 de `indicesCP`.
 - **Sentinelle** : cas A = 75 (65 sans les reprises), cas B = 78, au profil, à l'export et au Comparateur, la même ;
   une valeur ponctuelle manquante → « non calculable », jamais un chiffre ; sentinelles du lot 0 rejouées.
+- **Essai dû à ce lot, inscrit au lot 0 : le sens inverse** (§ 6, point 3). Dans un espace où la pratique par cibles
+  est active, ajouter, modifier ou retirer des évaluations du même DA ne change ni sa note ni son récit, et le
+  moteur par cibles ne lit pas `evaluationsSauvegardees` (même témoin de lectures que la sentinelle du lot 0). Avec
+  son break-test : faire lire les évaluations au moteur neuf rougit l'essai.
 - **Notes qui changent** : celles de la pratique neuve, qui n'en avait pas. Aucune autre. Porte terrain : l'export
   de Grégoire avant et après (§ 6, point 4).
 
@@ -354,8 +391,12 @@ Ordre : 0, puis 1 à 4. Chaque lot est livrable seul ; aucun ne change une note 
 3. **Une échelle pour toutes les cibles, ou une par cible ?** *Recommandation* : une seule, celle de la pratique.
    L'inscription garde tout de même `echelleId`, pour ne pas fermer la porte.
 4. **Un niveau inscrit à partir d'une production évaluée avec une grille** : veut-on un jour qu'une évaluation
-   *propose* des inscriptions (critère aligné sur une cible) ? *Recommandation* : pas dans ce plan. Les deux mondes
-   restent séparés ; un pont viendra s'il est demandé par quelqu'un qui l'a vécu.
+   *propose* des inscriptions (critère aligné sur une cible) ? *Recommandation, corrigée le 20 nov. 2026* (décision de Grégoire, en tête du plan) :
+   **une couche à livrer avant sa rentrée d'hiver 2027, après le noyau.** Il expérimentera probablement cette
+   pratique lui-même : le pont a donc un demandeur. Il n'est pas conçu ici ; le noyau (lots 1 à 4) garde les deux
+   mondes séparés, et la sentinelle du lot 0 devra être relue quand le pont entrera, puisqu'il fera lire une
+   évaluation par le monde des cibles. ~~Pas dans ce plan ; un pont viendra s'il est demandé par quelqu'un qui l'a
+   vécu.~~
 5. **Ce que l'étudiant·e reçoit.** Cette pratique ne produit ni rétroaction par critère ni PDF de synthèse.
    *Recommandation* : le dire à l'enseignant·e au moment du choix, comme pour le résultat sans grille ; un relevé
    par cible pour l'étudiant·e est un besoin probable, à attendre qu'il soit exprimé.
