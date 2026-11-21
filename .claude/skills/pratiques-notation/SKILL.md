@@ -92,16 +92,52 @@ périmée (c'est le cas du skill `labo-codex` §5.2 au 5 juin).
   lieu** — c'est la « question » que le Comparateur doit rendre lisible (E1), à opposer aux
   reprises des PAN. Ne jamais présenter SOM comme l'étalon objectif.
 
-**STD — Standards (par standards / par objectifs)**
-- *Recherche / pratique* : un standard = description claire et observable d'une action
-  démontrant l'apprentissage (Clark, *Standards or specifications?*). « Atteindre » un
-  standard suppose souvent **plusieurs démonstrations dans le temps** (Clark en exige deux),
-  pas une sélection ponctuelle. Garde-fou : ~15 standards / 15 semaines (*Whoops*).
-- *Code Labo Codex* : sélection de N artefacts (méthode configurée) + note terminale,
-  conversion de niveaux IDME.
-- *Écart / vigilance* : l'app raisonne **sélection d'artefacts**, la recherche raisonne
-  **suivi par standard**. Le récit de calcul du Comparateur (E2) doit montrer le *sort de
-  chaque démonstration*, pas seulement « les N meilleurs ».
+**STD — la famille de code « Standards » : des productions retenues, PAS une notation par standards**
+
+> **Refait le 20 nov. 2026** d'après `plans de travail/CONCEPTION-2026-11-20-pratique-par-standards.md` (lecture
+> intégrale du rapport PAREA 2026, des deux articles de *Pédagogie collégiale*, des 53 billets de la CoP et du
+> second corpus). Chaque règle y porte sa page : **lire cette fiche avant tout chantier sur cette famille ou sur
+> la pratique par standards à venir.** Sigles ci-dessous : R = rapport PAREA 2026 ; CJN = « Comment je note en
+> 2025 » (B. Voisard, 24 nov. 2025).
+
+- *Ce que la recherche appelle notation par standards* (doctrine vérifiée) :
+  - **On note la cible, pas l'instrument.** Le degré d'atteinte de chaque cible d'apprentissage est noté
+    directement ; une évaluation qui touche plusieurs cibles rend un niveau par cible et aucune note d'ensemble
+    (R, p. 17, p. 101, p. 119-120 ; quatre principes d'après Townsley et Wilcox, 2024 : R, p. 18).
+  - **Une cible est un objectif du cours** (5 à 13 dans les cours décrits), avec un énoncé et **ses propres
+    critères**, dont certains « essentiels » qui conditionnent le niveau « Acquis » (R, p. 99, p. 102 ; CJN).
+  - **Peu de niveaux** (cinq dans les systèmes associés aux meilleurs résultats), **dont un niveau nommé pour
+    l'absence de données**, le niveau 0, qui vaut **0 %** (R, p. 102-103).
+  - **Le niveau se pose par jugement**, guidé par les critères, sans points, à chaque occasion ; il peut se poser
+    sans production (observation, entretien). La note du cours est ensuite un calcul (R, p. 102-103, p. 193).
+  - **Devant plusieurs traces** : le principe est « les plus représentatives, en priorité les récentes » (R, p. 23 ;
+    Voisard et coll., 2025, p. 17) ; la règle des cours de chimie est **le meilleur niveau démontré, jamais
+    rétrogradé par une reprise** (R, p. 103 ; CJN) ; un regard global sert pour le laboratoire et le projet.
+    Les deux sont écrits : ne pas présenter l'un comme « la » règle.
+  - **Note du cours** : chaque niveau retenu converti en pourcentage (0, 25, 50, 75, 100 dans les cours de
+    l'équipe), moyenne pondérée, poids égaux ou fixés au plan-cadre, et **un second seuil** : note plafonnée à
+    55 % si la moyenne des cibles terminales est sous 60 % (R, p. 103 ; CJN).
+  - **Une reprise n'est pas plafonnée** (Voisard et coll., 2024, p. 30 ; 2025, p. 21) ; les occasions sont
+    limitées en nombre et inscrites au calendrier.
+  - Chez Clark et Talbert, autre modèle : niveau tout ou rien, souvent deux réussites exigées (« often », une
+    seule admise), note finale par table de conditions et non par moyenne ; environ 15 standards pour un
+    trimestre (*Standards or specifications?*, *Whoops*, *Grading for Growth*, chap. 12).
+- *Code Labo Codex* : la famille `standards` (code STD) **note des productions entières avec une grille, puis en
+  retient N** (méthode configurée) + note terminale, conversion de niveaux IDME. C'est la pratique de Grégoire,
+  qu'il nomme lui-même « dossier d'apprentissage (portfolio) ».
+- *Écart, sans détour* : **cette famille n'est pas une notation par standards.** Elle n'a ni cible, ni niveau par
+  cible, ni niveau sans production ; ses critères sont ceux d'une grille, constants d'une production à l'autre,
+  là où la recherche attache des critères propres à chaque cible. Le mode « par objectifs » qui s'en approchait
+  a été retiré à la 1.63. Elle pose aussi un **plafond sur la reprise ciblée**, que les auteurs déconseillent.
+  Ce n'est pas un défaut de la pratique (posture pluraliste : aucune famille n'est « la bonne ») : c'est un
+  défaut de **nom**. Ne jamais écrire, dans une microcopie ou un guide, que cette famille « est » la notation
+  par standards.
+- *Ce qui arrive (décisions de Grégoire, 20 nov. 2026)* : la famille actuelle **change de nom** (« Par
+  productions retenues ») et garde son moteur tel quel ; une **vraie pratique « Par standards »** est construite
+  à côté, avec une famille de code à elle, l'unité « cible » et une collection d'inscriptions à part. Plan :
+  `plans de travail/PLAN-2026-11-20-moteur-par-objectifs.md` ; écarts entre ce plan et les sources : § 9 de la
+  fiche de conception (double seuil, pondération, niveau 0, critères de la cible). Tant que le renommage n'est
+  pas livré, le code STD et l'id `standards` désignent **la pratique par productions retenues**.
 
 **SPE — Spécifications**
 - *Recherche / pratique* : une spécification décrit le **produit réussi entier**, jugé sur
@@ -670,6 +706,15 @@ Standards or specifications?, Whoops, Reasonable reassessments, Heart of the loo
 to ungrading, Mythbusters) ; CoP-PAN (Poulin-Lamarre & Langlois, dénotation au Cégep de
 Sherbrooke) ; Blum (2020) *Ungrading* ; Dyer (équité) ; CSÉ 2018 *Évaluer pour que ça compte
 vraiment*.
+**Ajoutées le 20 nov. 2026 pour la partie STD** (références complètes et pages dans
+`plans de travail/CONCEPTION-2026-11-20-pratique-par-standards.md`, § 1) : Cormier, Voisard, Turcotte et
+Arseneault-Hubert (2026), *Laissons-les se tromper*, rapport PAREA ; Voisard, Cormier et Arseneault-Hubert
+(2024), *Pédagogie collégiale*, 37(2) ; Voisard, Cormier, Turcotte et Arseneault-Hubert (2025), *Pédagogie
+collégiale*, 39(1) ; les billets de la publication « Pratiques alternatives de notation »
+(notationalternative.substack.com), d'août 2025 à nov. 2026 ; Clark et Talbert (2023), *Grading for Growth*,
+chap. 12 ; Girouard-Gagné et coll. (2024). ⚠ Les documents internes de nov. et déc. 2025 du même dossier
+(taxonomie, spécification des profils, gabarits `.json`) ne sont **pas** des sources : l'un d'eux transcrit mal
+les valeurs de l'échelle de chimie.
 
 ---
 
@@ -677,6 +722,7 @@ vraiment*.
 
 | Date | Changement |
 |------|------------|
+| 2026-11-20 (lot/standards-conception) | **§2 bis, partie STD refaite d'après les sources** (`plans de travail/CONCEPTION-2026-11-20-pratique-par-standards.md`). La doctrine de la notation par standards est vérifiée page à l'appui (rapport PAREA 2026, articles 2024 et 2025, billets de la CoP) ; l'écart est dit sans détour : la famille de code STD note des productions et en retient, ce n'est pas une notation par standards ; annonce du renommage (« Par productions retenues ») et de la pratique « Par standards » à venir. Liste des sources complétée (§13). Aucun code touché. Signalé sans retouche : l'attribution à *Heart of the loop* dans « reprises sans pénalité » est fausse (la phrase est dans *The Four Pillars*) et « variante délibérée et défendable » n'a pas de source. |
 | 2026-09-18 (#921) | **Une sommative CONFIGURABLE a son récit, et le profil l'affiche.** `PratiqueConfigurable.decrireCalcul` délègue à `PratiqueSommative.decrireCalcul` pour `moyenne_ponderee` (note = `_calculerPerformanceSommative`, verrou #897 compris ; `synthese.plafonnement = { moyenneOriginale }` quand il a joué). Le récit SOM porte `ponderation` et `poids` en nombres. Le profil rend la carte par `_genererNoteSessionSommative` quand `calculerDetailsNoteFinale` rend null. ⚠ `simulerIndices(da)` SANS id rend `null` (le §7 laisse croire à un repli sur la pratique active : il n'existe pas) — passer `obtenirPratiqueActiveGroupeCours()`. |
 | 2026-09-17 (#898, lot 34, 1.142.31) | **§10 : adopter un modèle Standards sans échelle demande l'échelle** — deux gestes vivants (assistant, bibliothèque), une seule question (`demanderEchelleAdoption`, `uiDialogues.demanderChoix`), parité profil / export / Comparateur prouvée ; cas d'arrêt #909. |
 | 2026-06-28 (#326 CLOS, 1.26.0) | **Comparateur RÉACTIVÉ (`COMPARATEUR_VISIBLE=true`), PR #73 mergée (squash `495cd99a`), constats terrain T1-T5 traités.** Décisions Grégoire : (1) une note STD non constructible rend `null` (« non constructible »), plus jamais un `0` trompeur — `simulerIndices` discrimine par FAMILLE (`obtenirCode()==='STD'`), le repli `calculerPerformance` ne masque plus l'échec STD (préserve SOM/SPE/DEN ; sentinelle 12 cas break-testée) ; (2) dérivation d'une maquette → créer + atterrir sur l'arbre SANS wizard ; (3) T3 : cause réelle = mismatch de FORME (copies en `.config` seul) → `dupliquerPratique`/`deriverMaquette` écrivent la forme CANONIQUE (sentinelle 4 cas). ⚠ `simulerIndices` alimente AUSSI l'export des résultats finaux — vérifié : les 4 pratiques STD abouties construisent 100 % des notes réelles. Journal antérieur (R1-R6, 1.19.0) = étapes intermédiaires, supersédées par cette clôture. |
