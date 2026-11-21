@@ -148,7 +148,9 @@
                 <p class="pc-historique-titre">${esc(MOTS.historique)}</p>
                 ${T.historiqueHTML(ctx, da, l.cible.id, { lectureSeule: true, retenuId: l.retenu ? l.retenu.id : null })}
             </section>`).join('');
-        return `<div class="profil-carte pc-cibles"><h3 class="pc-titre">${esc(MOTS.titreCibles)}</h3>${blocs}</div>`;
+        // Lot 5 (21 nov. 2026) : le relevé que l'étudiant·e reçoit s'ouvre d'ici (`releve-cibles.js`, lecture seule).
+        const releve = (window.ReleveCibles && typeof window.ReleveCibles.boutonProfilHTML === 'function') ? window.ReleveCibles.boutonProfilHTML(da) : '';
+        return `<div class="profil-carte pc-cibles"><h3 class="pc-titre">${esc(MOTS.titreCibles)}${releve}</h3>${blocs}</div>`;
     }
 
     /**

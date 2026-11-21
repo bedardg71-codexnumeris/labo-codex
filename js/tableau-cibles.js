@@ -234,9 +234,11 @@
         // ni rien qui ne vive qu'en vue étendue ; l'export des notes, comme au tableau des productions de la vue simple.
         const p = ctx.presentation;
         const reglages = (p && p.reglages) || { action: 'ouvrirReglagesPratique', param: ctx.pratiqueId, libelle: window.TableauNotation.MOTS.reglages };
-        const gestesSimples = `<div class="tn-gestes"><button type="button" class="btn btn-secondaire" data-action="exporterSyntheseResultatsCSV">${esc(window.TableauNotation.MOTS.exporter)}</button></div>`;   // le mot du tableau de la vue simple, tel quel
+        // Lot 5 (21 nov. 2026) : les relevés des étudiant·es (`releve-cibles.js`, lecture seule), dans les deux vues.
+        const releves = (window.ReleveCibles && typeof window.ReleveCibles.boutonGroupeHTML === 'function') ? window.ReleveCibles.boutonGroupeHTML() : '';
+        const gestesSimples = `<div class="tn-gestes">${releves}<button type="button" class="btn btn-secondaire" data-action="exporterSyntheseResultatsCSV">${esc(window.TableauNotation.MOTS.exporter)}</button></div>`;   // le mot du tableau de la vue simple, tel quel
         const gestes = !avecGestes ? '' : (ctx.simple ? gestesSimples
-            : `<div class="tn-gestes"><button type="button" class="btn btn-principal" data-tc="par-production">${esc(MOTS.parProduction)}</button></div>`);
+            : `<div class="tn-gestes">${releves}<button type="button" class="btn btn-principal" data-tc="par-production">${esc(MOTS.parProduction)}</button></div>`);
         return `<div class="tn-bandeau">
             <div class="tn-pratique">${badge}<span class="tn-pratique-nom">${esc(ctx.pratiqueNom)}</span>
                 <a href="#" class="tn-reglages" data-prevent data-action="${esc(reglages.action)}" data-param="${esc(reglages.param)}">${esc(reglages.libelle || window.TableauNotation.MOTS.reglages)}</a></div>
