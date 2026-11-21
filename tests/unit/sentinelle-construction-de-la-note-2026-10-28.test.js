@@ -21,7 +21,7 @@
 import { describe, it, expect } from 'vitest';
 import { monter, storeBase, clone } from './_helpers/bac-suivi.js';
 
-const DA = { ALICE: '2000001', BRUNO: '2000002' };
+const DA = { ALICE: '2000001', BOREAL: '2000002' };
 
 const E0 = { id: 'E0', nom: 'IDME banc', seuilMaitrise: 'M', niveaux: [
     { code: 'I', nom: 'Insuffisant', min: 0, max: 64, valeurCalcul: 40 }, { code: 'D', nom: 'En développement', min: 65, max: 74, valeurCalcul: 65 },
@@ -48,7 +48,7 @@ const PROD_SOM = [
     { id: 'P1', titre: 'Dissertation', type: 'travail', ponderation: 40, coursId: 'GC1' },
     { id: 'P2', titre: 'Examen', type: 'examen', ponderation: 60, coursId: 'GC1' }
 ];
-const COPIES_SOM = [ev(DA.ALICE, 'P1', 80), ev(DA.ALICE, 'P2', 90), ev(DA.BRUNO, 'P1', 62), ev(DA.BRUNO, 'P2', 71)];
+const COPIES_SOM = [ev(DA.ALICE, 'P1', 80), ev(DA.ALICE, 'P2', 90), ev(DA.BOREAL, 'P1', 62), ev(DA.BOREAL, 'P2', 71)];
 const somConfigurable = (extra) => Object.assign({ id: 'som-banc', nom: 'SOM banc', type: 'sommative', calcul_note: { methode: 'moyenne_ponderee' },
     dansBibliotheque: true, configuration: {} }, extra || {});
 /** La forme que l'assistant écrit pour un verrou (wizard-pratique-v2.js, `conditions_speciales`, action « echec »). */
@@ -62,7 +62,7 @@ const PROD_SPE = [
     { id: 'F1', titre: 'Dossier', type: 'dossier', coursId: 'GC1' }
 ];
 const COPIES_SPE = [ev(DA.ALICE, 'D1', 80), ev(DA.ALICE, 'X1', 90), ev(DA.ALICE, 'D2', 87.5), ev(DA.ALICE, 'F1', 72),
-    ev(DA.BRUNO, 'D1', 71), ev(DA.BRUNO, 'X1', 50), ev(DA.BRUNO, 'D2', 88), ev(DA.BRUNO, 'F1', 90)];
+    ev(DA.BOREAL, 'D1', 71), ev(DA.BOREAL, 'X1', 50), ev(DA.BOREAL, 'D2', 88), ev(DA.BOREAL, 'F1', 90)];
 const TYPES_SPE = [{ id: 'dissertation', nom: 'Dissertation' }, { id: 'examen', nom: 'Examen' }, { id: 'dossier', nom: 'Dossier' }];
 /** La forme que l'application écrit (gabarit, éditeur) : `forfaits` + un seuil à la racine (#708). */
 const speForfaits = ({ seuil = 70, echec = true } = {}) => ({ id: 'spe-banc', nom: 'SPE banc', type: 'specifications', calcul_note: { methode: 'specifications' },
@@ -81,9 +81,9 @@ function prodSTD({ categories = null, conteneur = true } = {}) {
     l.push({ id: 'T1', titre: 'Analyse finale', type: 'terminale', numero: 7, ponderation: 40, coursId: 'GC1' });
     return l;
 }
-const NOTES_STD = { [DA.ALICE]: { A1: 60, A2: 70, A3: 88, A4: 92, A5: 75, A6: 80, T1: 82 }, [DA.BRUNO]: { A1: 90, A2: 55, A3: 72, A4: 66, A5: 95, A6: 70, T1: 68 } };
+const NOTES_STD = { [DA.ALICE]: { A1: 60, A2: 70, A3: 88, A4: 92, A5: 75, A6: 80, T1: 82 }, [DA.BOREAL]: { A1: 90, A2: 55, A3: 72, A4: 66, A5: 95, A6: 70, T1: 68 } };
 const COPIES_STD = [];
-for (const da of [DA.ALICE, DA.BRUNO]) for (const [p, n] of Object.entries(NOTES_STD[da])) COPIES_STD.push(ev(da, p, n));
+for (const da of [DA.ALICE, DA.BOREAL]) for (const [p, n] of Object.entries(NOTES_STD[da])) COPIES_STD.push(ev(da, p, n));
 const CATEGORIES = { A1: 'selection', A2: 'selection', A3: 'selection', A4: 'selection', A5: 'obligatoire', A6: 'obligatoire' };
 /** La forme que l'assistant écrit (wizard-pratique-v2.js) ; en hybride, `methodeSelection: 'meilleurs'` et `categories`. */
 function std({ methodeSelection = 'meilleurs', nombreARetenir = 3, notesFinales = false, categories = null, reglesConformite, minimumCompletion = 3 } = {}) {
@@ -109,7 +109,7 @@ const OBJETS_EXPORTES = ['PratiqueManager', 'denotationJugements', 'modalitesEva
 
 function banc({ pratique, productions, evaluations, jugements = {}, pratiqueId = null }) {
     const store = storeBase();
-    store.test_groupeEtudiants = store.test_groupeEtudiants.filter(e => e.da === DA.ALICE || e.da === DA.BRUNO);
+    store.test_groupeEtudiants = store.test_groupeEtudiants.filter(e => e.da === DA.ALICE || e.da === DA.BOREAL);
     store.test_groupesCours[0].pratiqueId = pratiqueId || pratique.id;
     store.test_pratiquesConfigurables = pratique ? [clone(pratique)] : [];
     store.test_echellesTemplates = [clone(E0)];
@@ -250,7 +250,7 @@ describe('SOM — les cas qui changent la note', () => {
         expect(b.win.simulerIndices(DA.ALICE, 'som-banc').recit.synthese.noteFinale).toBeCloseTo(57.5, 9);
     });
     it('SOM-C13 aucune copie qui compte : non constructible (pas un 0)', () => {
-        const n = note(banc({ pratique: somConfigurable(), productions: PROD_SOM, evaluations: COPIES_SOM.filter(e => e.etudiantDA === DA.BRUNO) }));
+        const n = note(banc({ pratique: somConfigurable(), productions: PROD_SOM, evaluations: COPIES_SOM.filter(e => e.etudiantDA === DA.BOREAL) }));
         expect([n.P, n.comparateur, n.export[0], n.export[1]]).toEqual([null, null, '', 'non constructible']);
     });
 });
@@ -258,10 +258,10 @@ describe('SOM — les cas qui changent la note', () => {
 /* ================================================================ SPÉCIFICATIONS */
 describe('SPE — paliers et forfaits (forme écrite par l\'application)', () => {
     const avec = (copies, pratique = speForfaits()) => note(banc({ pratique, productions: PROD_SPE, evaluations: copies }));
-    it('SPE-1 base, seuil 70 : Alice 2 dissertations + examen + dossier → A (100) ; Bruno examen 50 → aucun palier, F (50)', () => {
+    it('SPE-1 base, seuil 70 : Alice 2 dissertations + examen + dossier → A (100) ; Boréal examen 50 → aucun palier, F (50)', () => {
         const b = banc({ pratique: speForfaits(), productions: PROD_SPE, evaluations: COPIES_SPE });
         expect(note(b)).toMatchObject({ P: 100, comparateur: 100, export: [100, 'provisoire'] });   // E7 : avant « final »
-        expect(note(b, DA.BRUNO).P).toBe(50);
+        expect(note(b, DA.BOREAL).P).toBe(50);
     });
     it('SPE-2 la note est le palier, pas une moyenne : dossier 72 → 69 fait passer d\'A (100) à B (80)', () => {
         expect(avec(remplacer(COPIES_SPE, DA.ALICE, 'F1', { noteFinale: 69 })).P).toBe(80);
@@ -271,7 +271,7 @@ describe('SPE — paliers et forfaits (forme écrite par l\'application)', () =>
     });
     it('SPE-4 sans palier d\'échec et aucun forfait atteint : non constructible, et la cause est dite', () => {
         const b = banc({ pratique: speForfaits({ echec: false }), productions: PROD_SPE, evaluations: COPIES_SPE });
-        const n = note(b, DA.BRUNO);
+        const n = note(b, DA.BOREAL);
         expect([n.P, n.comparateur]).toEqual([null, null]);
         expect(n.export[1]).toBe('non constructible – Ta pratique ne dit pas quelle note donner quand aucun forfait n\'est atteint.');
     });
@@ -371,7 +371,7 @@ describe('STD — les cas qui changent la note', () => {
         expect(avec(remplacer(COPIES_STD, DA.ALICE, 'A4', { jetonDelaiApplique: true })).profil).toBe(84.8);
     });
     it('STD-C7 aucun artefact qui compte et pas de terminale : non constructible', () => {
-        const n = avec(COPIES_STD.filter(e => e.etudiantDA === DA.BRUNO));
+        const n = avec(COPIES_STD.filter(e => e.etudiantDA === DA.BOREAL));
         // ↻ lot 1 des standards sans portfolio (28 oct. 2026) : l'export dit la cause (avant : 'non constructible').
         expect([n.P, n.comparateur, n.profil, n.export[1]]).toEqual([null, null, null, 'non constructible – Aucune production n\'est encore évaluée.']);
     });

@@ -20,7 +20,7 @@
 // init-inline.js compare cette valeur au BUILD_ID lu depuis version.json :
 // si différent, Safari file:// a probablement un main.js périmé en cache,
 // et la séquence reload+bandeau s'enclenche. SYNCHRONISER À CHAQUE BUMP.
-window._SCRIPT_BUILD_main = '1119-2216';
+window._SCRIPT_BUILD_main = '1121-0759';
 
 /* ===============================
    FONCTION GLOBALE: Génération d'ID uniques
@@ -316,8 +316,10 @@ window.genererBadgePratique = function(type, compact = false) {
         ? 'SOM'
         : (typeof obtenirCodePratique === 'function' ? obtenirCodePratique(typePAN) : 'STD');
     classe += ' ' + code.toLowerCase();
+    // 21 nov. 2026 (« le sigle suit le nom ») : le texte est le SIGLE affiché (registre), la classe reste le code interne.
+    const sigle = (typeof sigleDuCode === 'function') ? sigleDuCode(code) : code;
 
-    return `<span class="${classe}">${code}</span>`;
+    return `<span class="${classe}">${sigle}</span>`;
 };
 
 // ✅ Fonction reactiverGroupeDemo() supprimée (Beta 93.5)
@@ -1178,10 +1180,8 @@ document.addEventListener('DOMContentLoaded', function () {
         initialiserModuleCartouches();
     }
 
-    // MODULE 07B: Objectifs d'apprentissage
-    if (typeof initialiserModuleObjectifs === 'function') {
-        initialiserModuleObjectifs();
-    }
+    // MODULE 07B (objectifs d'apprentissage) : retiré au lot 1 « Par standards » (21 nov. 2026) — son écran n'avait plus
+    // d'hôte dans index.html. Les cibles d'une pratique par standards : js/pratiques/ensembles-cibles.js.
 
     // MODULE 08: Cours
     if (typeof initialiserModuleCours === 'function') {

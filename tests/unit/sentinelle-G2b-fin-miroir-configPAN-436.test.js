@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { readFileSync } from 'node:fs';
+import { readFileSync, existsSync, readdirSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -48,7 +48,7 @@ const MODULES_AFFICHAGE = [
     ['js', 'etudiants.js'],
     ['js', 'liste-evaluations.js'],
     ['js', 'pratiques.js'],
-    ['js', 'objectifs.js'],
+    // 'objectifs.js' : retiré avec son écran orphelin (lot 1 « Par standards », 21 nov. 2026) ; voir plus bas.
 ];
 
 describe('G2-b · plus aucun écran ne lit le miroir', () => {
@@ -80,16 +80,18 @@ describe('G2-b · les deux écrivains du miroir sont retirés', () => {
 });
 
 describe('G2-b · l’îlot multi-objectifs, dernier consommateur, est retiré', () => {
-    const objectifs = lire('js', 'objectifs.js');
-
     it('les trois fonctions et leurs exports sont partis', () => {
         // Elles étaient exposées sur window sans aucun appelant — ni data-action,
         // ni appel JS. Elles lisaient `configPAN.ensembleObjectifsId`.
+        // ↻ 21 nov. 2026 (lot 1 « Par standards ») : `js/objectifs.js` est retiré en entier (son écran n'avait plus
+        // d'hôte) ; l'absence se vérifie désormais dans tout js/.
+        expect(existsSync(path.join(racine, 'js', 'objectifs.js'))).toBe(false);
+        const js = readdirSync(path.join(racine, 'js')).filter(f => f.endsWith('.js')).map(f => lire('js', f)).join('\n');
         for (const morte of ['function activerPratiqueMultiObjectifs',
                              'function desactiverPratiqueMultiObjectifs',
                              'function verifierPratiqueMultiObjectifs',
                              'window.activerPratiqueMultiObjectifs']) {
-            expect(objectifs, morte).not.toContain(morte);
+            expect(js, morte).not.toContain(morte);
         }
     });
 

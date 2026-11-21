@@ -910,6 +910,9 @@ async function corrigerDAEtudiantV2() {
         '• ' + c.presences + ' ' + pluriel(c.presences, 'présence', 'présences'),
         '• ' + c.copies + ' ' + pluriel(c.copies, 'copie', 'copies'),
         '• ' + c.resultats + ' ' + pluriel(c.resultats, 'résultat calculé', 'résultats calculés') + ' (indices, portfolio, interventions)',
+        // Lot 2 « Par standards » (21 nov. 2026) : la ligne ne paraît que s'il y en a (texte PROPOSÉ, TEXTES-…-lot-2, H1).
+        // Complément 9 h 17 : une inscription peut être une remarque sans niveau ; le compte dit « inscriptions » (K1').
+        ...(c.inscriptions ? ['• ' + c.inscriptions + ' ' + pluriel(c.inscriptions, 'inscription', 'inscriptions') + ' sur les cibles (pratique par standards)'] : []),
         '',
         'Les autres trimestres et les archives gardent l\'ancien DA.'
     ];

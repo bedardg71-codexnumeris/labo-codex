@@ -30,7 +30,11 @@ const wizardState = {
     reponses: {},            // Réponses collectées à chaque étape
     modeEdition: false,      // true si modification d'une pratique existante
     pratiqueId: null,        // ID de la pratique en édition (null si création)
-    grilleDeBase: null       // Lot E1 : la grille de base proposée, pas encore écrite
+    grilleDeBase: null,      // Lot E1 : la grille de base proposée, pas encore écrite
+    // Lot 1 de la pratique « Par standards » (21 nov. 2026) : même règle que la grille de base — rien n'existe tant
+    // qu'on n'a pas cliqué « Créer la pratique ». L'échelle de départ proposée et l'ensemble de cibles à ranger.
+    echelleDeDepart: null,
+    ensembleCiblesAEcrire: null
 };
 
 /**
@@ -49,12 +53,17 @@ function grillesDuWizard() {
 // badge famille). Un seul endroit à éditer, pas de microcopy dupliqué.
 const TYPE_BADGES = {
     'sommative': { code: 'SOM', classe: 'som', label: 'Sommative', description: 'Ta note finale est calculée par une moyenne pondérée des évaluations. C\'est la méthode traditionnelle, largement utilisée.' },
-    'standards': { code: 'STD', classe: 'std', label: 'PAN – Standards', description: 'Tu évalues par niveaux de maîtrise (ex. : I-D-M-E). La note est construite à partir de la démonstration de compétences, pas d\'une simple moyenne.' },
+    // 21 nov. 2026 (« le sigle suit le nom », décision de Grégoire) : `code` est ici le SIGLE AFFICHÉ (badge du
+    // récapitulatif, ligne de « Partir d'un modèle ») ; le code interne vit au registre. `classe` porte la couleur de la
+    // famille au récapitulatif : sarcelle pour « Par sélection de productions », bleu pour « Par standards ».
+    'standards': { code: 'SEL', classe: 'sel', label: 'Par sélection de productions', description: 'Tu évalues chaque production par niveaux (ex. : I-D-M-E). La note se construit à partir des productions que ta règle retient, pas de la moyenne de toutes.' },
     'specifications': { code: 'SPE', classe: 'spe', label: 'PAN – Spécifications', description: 'Chaque travail est jugé acceptable ou non. La note finale dépend du nombre de spécifications réussies (forfaits).' },
     // #319 Lot 5 (#318) : DEN reconnue à l'édition (code/couleur du registre canonique,
     // --den-violet). Elle se crée aussi : la carte « Note finale posée, pas calculée » de
     // « Décrire ma pratique », et le « Modèle de base » de « Partir d'un modèle ».
-    'denotation': { code: 'DEN', classe: 'den', label: 'PAN – Dénotation', description: 'Rétroaction qualitative sur des cibles et des critères explicites ; la note certificative est posée par jugement à la fin.' }
+    'denotation': { code: 'DEN', classe: 'den', label: 'PAN – Dénotation', description: 'Rétroaction qualitative sur des cibles et des critères explicites ; la note certificative est posée par jugement à la fin.' },
+    // Lot 1 de la pratique « Par standards » (21 nov. 2026). Mots PROPOSÉS (plans de travail/TEXTES-2026-11-20-par-standards-lot-1.md).
+    'cibles': { code: 'STD', classe: 'std', label: 'Par standards', description: 'Pour chaque cible d\'apprentissage du cours, tu inscris le niveau que l\'étudiant·e a démontré. La note du cours viendra du meilleur niveau démontré pour chaque cible, en moyenne pondérée.' }
 };
 
 // ============================================================================
@@ -218,9 +227,11 @@ const ETAPES_WIZARD = {
                 required: true,
                 options: [
                     { value: 'moyenne', label: 'Sommative (SOM)', description: 'Note finale par moyenne pondérée des évaluations.' },
-                    { value: 'niveaux', label: 'PAN – Standards (STD)', description: 'Niveaux de maîtrise (ex. I-D-M-E) convertis en note.' },
+                    { value: 'niveaux', label: 'Par sélection de productions', description: 'Des niveaux (ex. I-D-M-E) ; la note retient certaines productions.' },
                     { value: 'acceptable', label: 'PAN – Spécifications (SPE)', description: 'Travaux acceptables ou non ; note selon les forfaits réussis.' },
-                    { value: 'jugement', label: 'PAN – Dénotation (DEN)', description: 'Note finale certificative posée (non calculée) selon l\'atteinte de cibles d\'apprentissage explicites ; abandonne la fonction de tri.' }
+                    { value: 'jugement', label: 'PAN – Dénotation (DEN)', description: 'Note finale certificative posée (non calculée) selon l\'atteinte de cibles d\'apprentissage explicites ; abandonne la fonction de tri.' },
+                    // Lot 1 de la pratique « Par standards » (21 nov. 2026).
+                    { value: 'cibles', label: 'Par standards', description: 'Un niveau par cible d\'apprentissage du cours ; la note viendra du meilleur niveau démontré pour chaque cible.' }
                 ]
             }
         ],
@@ -229,6 +240,7 @@ const ETAPES_WIZARD = {
             if (reponses.calcNoteFinale === 'niveaux') return 'approche-evaluation';
             if (reponses.calcNoteFinale === 'acceptable') return 'config-specifications';
             if (reponses.calcNoteFinale === 'jugement') return 'config-denotation';
+            if (reponses.calcNoteFinale === 'cibles') return 'config-cibles';
             return null;
         },
         precedent: () => 'calcul-note-finale'
@@ -301,6 +313,63 @@ const ETAPES_WIZARD = {
     },
 
     // ─────────────────────────────────────────────────────────────────────────
+    // BRANCHE « PAR STANDARDS » (lot 1, 21 nov. 2026)
+    // Plan : plans de travail/PLAN-2026-11-20-moteur-par-objectifs.md ; règles : fiche de conception, C1 à C8, E1 à E6.
+    // Les refus sont ceux d'`EnsemblesCibles` (ensembles-cibles.js), lus aussi à la création : écrits une fois.
+    // ─────────────────────────────────────────────────────────────────────────
+
+    'config-cibles': {
+        id: 'config-cibles',
+        titre: 'Les cibles du cours',
+        description: 'Dis les cibles d\'apprentissage de ton cours : pour chacune, une étiquette courte, un énoncé, ses critères et son poids.',
+        branche: 'cibles',
+        ordre: 3,
+        champs: [
+            {
+                id: 'infoCibles',
+                type: 'info',
+                texte: 'Une cible d\'apprentissage est un objectif de ton cours, à mi-chemin entre l\'objectif terminal et le critère ; la plupart des cours en comptent de 6 à 15. Les critères essentiels sont ceux sans lesquels une cible n\'est pas acquise. Une cible terminale est une de celles que vise le second seuil de réussite.'
+            },
+            { id: 'coursCibles', label: 'Cours', type: 'select-cours' },
+            {
+                id: 'ciblesStandards',
+                label: 'Cibles d\'apprentissage',
+                type: 'liste-cibles-standards',
+                marquerEnErreur: false,   // toute la liste en rouge masquerait la case fautive (le poids se marque seul)
+                motifRefus: (el) => window.EnsemblesCibles.motifsRefusCibles(window.EditeurCibles.lireStandards(el))[0] || null
+            }
+        ],
+        suivant: () => 'echelle-cibles',
+        precedent: () => 'calcul-note-finale'
+    },
+
+    'echelle-cibles': {
+        id: 'echelle-cibles',
+        titre: 'L\'échelle des niveaux',
+        description: 'Choisis l\'échelle des niveaux que tu inscriras pour chaque cible, et le niveau qui veut dire « sans donnée ».',
+        branche: 'cibles',
+        ordre: 4,
+        champs: [
+            {
+                id: 'echelleCibles',
+                label: 'Échelle des niveaux',
+                type: 'echelle-cibles',
+                motifRefus: () => {
+                    const choix = _lireChoixEchelleCibles();
+                    return window.EnsemblesCibles.motifsRefusEchelle(echelleDuWizard(choix.echelleId), choix.niveauSansDonnee)[0] || null;
+                }
+            },
+            {
+                id: 'infoSansDonnee',
+                type: 'info',
+                texte: 'Le niveau « sans donnée » vaut 0\u00a0%. Une cible le porte tant qu\'aucun niveau n\'y est inscrit : pendant la session, la note chiffrée attend et la liste des cibles en attente se lit ; à l\'arrêt des notes, la cible compte pour 0\u00a0%.'
+            }
+        ],
+        suivant: () => 'infos-base',
+        precedent: () => 'config-cibles'
+    },
+
+    // ─────────────────────────────────────────────────────────────────────────
     // ÉTAPES COMMUNES
     // ─────────────────────────────────────────────────────────────────────────
 
@@ -333,6 +402,7 @@ const ETAPES_WIZARD = {
             }
             if (reponses.typePratique === 'specifications') return 'choix-modele-bundles';
             if (reponses.typePratique === 'denotation') return 'config-denotation';
+            if (reponses.typePratique === 'cibles') return 'echelle-cibles';   // lot 1 « Par standards »
             return 'grille-criteres'; // PAN-Standards (portfolio — seule approche depuis #443)
         }
     },
@@ -378,6 +448,12 @@ const ETAPES_WIZARD = {
                         description: 'Tu poses la note finale certificative (RREC) selon l\'atteinte de cibles d\'apprentissage explicites, plutôt que de la calculer. La rétroaction en cours de route reste qualitative.'
                     },
                     {
+                        // Lot 1 de la pratique « Par standards » (21 nov. 2026) : la cible est notée, pas la production.
+                        value: 'cibles',
+                        label: 'Un niveau pour chaque cible d\'apprentissage (Par standards)',
+                        description: 'Tu inscris, pour chaque cible du cours, le niveau que l\'étudiant·e a démontré. La note vient des niveaux de chaque cible.'
+                    },
+                    {
                         value: 'pas-certain',
                         label: 'Je ne suis pas certain·e',
                         description: 'Des questions supplémentaires t\'aideront à identifier ta méthode.'
@@ -385,13 +461,14 @@ const ETAPES_WIZARD = {
                 ]
             },
             // Voie rapide (a2) : sortie expert, carte de même poids que les autres options.
-            { id: 'voie-rapide-lien', type: 'lien-action', texte: 'Je sais déjà ce que je veux', description: 'Choisis directement ta famille de pratique (SOM, STD, SPE ou DEN) et passe à sa configuration.', action: 'wizardV2VoieRapide' }
+            { id: 'voie-rapide-lien', type: 'lien-action', texte: 'Je sais déjà ce que je veux', description: 'Choisis directement ta famille de pratique (SOM, STD, SEL, SPE ou DEN) et passe à sa configuration.', action: 'wizardV2VoieRapide' }
         ],
         suivant: (reponses) => {
             if (reponses.calcNoteFinale === 'moyenne') return 'regles-sommative';
             if (reponses.calcNoteFinale === 'niveaux') return 'approche-evaluation';
             if (reponses.calcNoteFinale === 'acceptable') return 'config-specifications';
             if (reponses.calcNoteFinale === 'jugement') return 'config-denotation'; // #318
+            if (reponses.calcNoteFinale === 'cibles') return 'config-cibles';      // lot 1 « Par standards »
             if (reponses.calcNoteFinale === 'pas-certain') return 'sous-questions-guidees';
             return null;
         },
@@ -940,7 +1017,7 @@ function preparerAdoptionModele(r) {
     r._gabaritSource = JSON.parse(JSON.stringify(gabarit));
     // Champs d'affichage du récapitulatif (le diagnostic lit calcNoteFinale).
     const typeCanon = (typeof normaliserIdPratique === 'function' ? normaliserIdPratique(gabarit.type) : gabarit.type);
-    const calcNoteFinaleMap = { 'sommative': 'moyenne', 'standards': 'niveaux', 'specifications': 'acceptable', 'denotation': 'jugement' };
+    const calcNoteFinaleMap = { 'sommative': 'moyenne', 'standards': 'niveaux', 'specifications': 'acceptable', 'denotation': 'jugement', 'cibles': 'cibles' };
     r.typePratique = typeCanon;
     r.calcNoteFinale = calcNoteFinaleMap[typeCanon] || 'moyenne';
     if (!r.nom) r.nom = gabarit.nom || '';
@@ -1230,6 +1307,12 @@ function genererChamp(champ) {
             return genererChampTextarea(champ);
         case 'liste-cibles':
             return genererChampListeCibles(champ);
+        case 'liste-cibles-standards':
+            return genererChampListeCiblesStandards(champ);
+        case 'select-cours':
+            return genererSelectCours(champ);
+        case 'echelle-cibles':
+            return genererChampEchelleCibles(champ);
         case 'number':
             return genererChampNumber(champ);
         case 'toggle':
@@ -1357,6 +1440,153 @@ function genererChampListeCibles(champ) {
             <div id="${WIZARD_V2_ID_PREFIX}${champ.id}" role="group" aria-labelledby="${WIZARD_V2_ID_PREFIX}${champ.id}-label">${window.EditeurCibles.rendre([])}</div>
         </div>
     `;
+}
+
+/* ─── Lot 1 de la pratique « Par standards » (21 nov. 2026) : les cibles, le cours, l'échelle ─── */
+
+/**
+ * Les cibles du cours, dans le mode « Par standards » du composant commun (`EditeurCibles`) : une ligne par cible,
+ * avec son étiquette, son énoncé, ses critères, son poids et la case « terminale ». Les valeurs sont posées au rendu.
+ */
+function genererChampListeCiblesStandards(champ) {
+    const cibles = wizardState.reponses[champ.id] || [];
+    return `
+        <div class="wizard-v2-champ">
+            <label id="${WIZARD_V2_ID_PREFIX}${champ.id}-label">${champ.label}</label>
+            <div id="${WIZARD_V2_ID_PREFIX}${champ.id}" role="group" aria-labelledby="${WIZARD_V2_ID_PREFIX}${champ.id}-label">${window.EditeurCibles.rendreStandards(cibles)}</div>
+        </div>
+    `;
+}
+
+/** Le cours du groupe-cours actif, ou '' : le cours proposé d'office aux cibles (C8 : l'ensemble est rattaché au cours). */
+function coursDuGroupeActif() {
+    try {
+        const actif = db.getSync('groupeCoursActif', null);
+        const groupes = db.getSync(cle('groupesCours'), []) || [];
+        const gc = (actif && actif.id && Array.isArray(groupes)) ? groupes.find(g => g && g.id === actif.id) : null;
+        return (gc && gc.coursId) || '';
+    } catch (e) {
+        return '';
+    }
+}
+
+/**
+ * Le cours auquel l'ensemble de cibles est rattaché (C7, C8). Les cours de la bibliothèque (`cours`, clé globale), hors
+ * démo quand on n'y est pas (même filtre que l'assemblage d'un groupe-cours). D'office : le cours du groupe-cours actif.
+ * Facultatif : un·e enseignant·e sans cours encore créé peut dire ses cibles.
+ */
+function genererSelectCours(champ) {
+    const enDemo = typeof estEnModeDemo === 'function' && estEnModeDemo();
+    const cours = (db.getSync('cours', []) || []).filter(c => c && c.id && (enDemo || !c.isDemo));
+    const choisi = wizardState.reponses[champ.id] !== undefined ? wizardState.reponses[champ.id] : coursDuGroupeActif();
+    const options = cours.map(c => {
+        const libelle = (window.EnsemblesCibles && window.EnsemblesCibles.libelleDuCours(c.id)) || c.id;
+        return `<option value="${echapperHtml(c.id)}"${c.id === choisi ? ' selected' : ''}>${echapperHtml(libelle)}</option>`;
+    }).join('');
+    return `
+        <div class="wizard-v2-champ">
+            <label for="${WIZARD_V2_ID_PREFIX}${champ.id}">${champ.label}</label>
+            <select id="${WIZARD_V2_ID_PREFIX}${champ.id}" name="${champ.id}">
+                <option value="">— Aucun cours pour l'instant —</option>
+                ${options}
+            </select>
+            <small class="wizard-v2-help">Les cibles appartiennent au cours : deux groupes d'un même cours ont les mêmes.</small>
+        </div>
+    `;
+}
+
+/** Les échelles offertes à une pratique par standards : celles de la bibliothèque, plus l'échelle de départ proposée. */
+function echellesDuWizardCibles() {
+    const idsOfferts = new Set(window.obtenirEchellesOffertesAdoption().map(e => e.id));
+    const idChoisi = wizardState.reponses.echelleId;
+    const echelles = (db.getSync(cle('echellesTemplates'), []) || [])
+        .filter(e => e && (idsOfferts.has(e.id) || (idChoisi && e.id === idChoisi)));
+    return wizardState.echelleDeDepart ? echelles.concat([wizardState.echelleDeDepart]) : echelles;
+}
+
+/** Une échelle par son id : en base, ou l'échelle de départ proposée et pas encore écrite. */
+function echelleDuWizard(echelleId) {
+    if (!echelleId) return null;
+    if (wizardState.echelleDeDepart && wizardState.echelleDeDepart.id === echelleId) return wizardState.echelleDeDepart;
+    return (db.getSync(cle('echellesTemplates'), []) || []).find(e => e && e.id === echelleId) || null;
+}
+
+/** Ce que l'écran de l'échelle montre : l'échelle et le niveau « sans donnée » choisis. */
+function _lireChoixEchelleCibles() {
+    const echelle = document.getElementById(`${WIZARD_V2_ID_PREFIX}echelleCibles-echelle`);
+    const niveau = document.getElementById(`${WIZARD_V2_ID_PREFIX}echelleCibles-sansDonnee`);
+    return { echelleId: echelle ? echelle.value : '', niveauSansDonnee: niveau ? niveau.value : '' };
+}
+
+/**
+ * L'échelle des niveaux et le niveau « sans donnée » (E1, E2, E6) : le choix de l'échelle (celles de la bibliothèque,
+ * ou l'échelle de départ que l'assistant propose), puis, parmi ses niveaux qui valent 0 %, celui qui veut dire
+ * « sans donnée ». Aucun niveau n'est choisi d'office pour une échelle existante : c'est l'enseignant·e qui désigne.
+ * Choisir une échelle re-rend l'étape, pour que la liste des niveaux parle de CETTE échelle.
+ */
+function genererChampEchelleCibles(champ) {
+    const echelles = echellesDuWizardCibles();
+    const idChoisi = wizardState.reponses.echelleId || '';
+    const options = echelles.map(e => {
+        const n = Array.isArray(e.niveaux) ? e.niveaux.length : 0;
+        return `<option value="${echapperHtml(e.id)}"${e.id === idChoisi ? ' selected' : ''}>${echapperHtml(e.nom || 'Sans nom')} (${n} niveaux)</option>`;
+    }).join('');
+    const proposer = wizardState.echelleDeDepart ? '' : `
+            <div class="wizard-v2-echelle-depart">
+                <button type="button" class="btn btn-secondaire btn-mini" data-action="wizardV2ProposerEchelleDepart">Proposer l'échelle de départ (5 niveaux)</button>
+                <small class="wizard-v2-help">Cinq niveaux, de 0 à 4, qui valent 0, 25, 50, 75 et 100\u00a0%. Elle n'est enregistrée qu'avec la pratique.</small>
+            </div>`;
+
+    const echelle = echelles.find(e => e.id === idChoisi) || null;
+    let blocNiveau = '';
+    if (echelle) {
+        const possibles = window.EnsemblesCibles.niveauxSansDonneePossibles(echelle);
+        const apercu = (Array.isArray(echelle.niveaux) ? echelle.niveaux : []).map(n => {
+            const v = (n && n.valeurCalcul !== null && n.valeurCalcul !== undefined && n.valeurCalcul !== '') ? formaterPourcentage(n.valeurCalcul) : '—';
+            return `<li><span class="wizard-v2-niveau-code">${echapperHtml(n.code)}</span> ${echapperHtml(n.nom || '')} <span class="wizard-v2-niveau-valeur">${echapperHtml(v)}</span></li>`;
+        }).join('');
+        if (possibles.length === 0) {
+            blocNiveau = genererInfo({ variante: 'attention', texte: echapperHtml(window.EnsemblesCibles.MOTIFS.ECHELLE_SANS_ZERO) });
+        } else {
+            const codeChoisi = String(wizardState.reponses.niveauSansDonnee == null ? '' : wizardState.reponses.niveauSansDonnee);
+            const optionsNiveau = possibles.map(n => `<option value="${echapperHtml(n.code)}"${String(n.code) === codeChoisi ? ' selected' : ''}>${echapperHtml(n.code)} – ${echapperHtml(n.nom || '')}</option>`).join('');
+            blocNiveau = `
+                <div class="wizard-v2-champ">
+                    <label for="${WIZARD_V2_ID_PREFIX}echelleCibles-sansDonnee">Niveau « sans donnée »</label>
+                    <select id="${WIZARD_V2_ID_PREFIX}echelleCibles-sansDonnee">
+                        <option value="">— Désigner le niveau —</option>
+                        ${optionsNiveau}
+                    </select>
+                    <small class="wizard-v2-help">Seuls les niveaux qui valent 0\u00a0% peuvent dire « sans donnée ».</small>
+                </div>`;
+        }
+        blocNiveau += `<ul class="wizard-v2-niveaux-apercu" aria-label="Niveaux de l'échelle">${apercu}</ul>`;
+    }
+
+    return `
+        <div class="wizard-v2-champ" id="${WIZARD_V2_ID_PREFIX}${champ.id}">
+            <label for="${WIZARD_V2_ID_PREFIX}echelleCibles-echelle">${champ.label}</label>
+            <select id="${WIZARD_V2_ID_PREFIX}echelleCibles-echelle" data-on-change="wizardV2RafraichirEtapeCourante">
+                <option value="">-- Sélectionner une échelle --</option>
+                ${options}
+            </select>
+            ${proposer}
+        </div>
+        ${blocNiveau}
+    `;
+}
+
+/**
+ * « Proposer l'échelle de départ » : l'assistant la garde en attente (rien n'est écrit) et la choisit, avec son niveau
+ * « sans donnée ». Elle entre en base avec la pratique, et seulement si la pratique la retient (`finaliserCreationPratique`).
+ */
+function wizardV2ProposerEchelleDepart() {
+    sauvegarderReponsesEtape(wizardState.etapeActuelle);
+    const echelle = window.EnsemblesCibles.echelleDeDepart(genererIdUnique('ECH_'));
+    wizardState.echelleDeDepart = echelle;
+    wizardState.reponses.echelleId = echelle.id;
+    wizardState.reponses.niveauSansDonnee = window.EnsemblesCibles.CODE_SANS_DONNEE_DEPART;
+    afficherEtapeWizardV2(wizardState.etapeActuelle);
 }
 
 /**
@@ -1930,7 +2160,7 @@ function genererRecapitulatif() {
     // sommative — rang et moyenne du groupe — part avec son étape.)
     if (r.typePratique === 'standards') {
         html += '<div class="wizard-v2-recap-section">';
-        html += '<h4>Configuration PAN-Standards</h4>';
+        html += '<h4>Configuration – Par sélection de productions</h4>';
         // #443 : le libellé « Par objectifs » part avec la carte. Le repli
         // `|| r.approcheEvaluation` reste : une pratique stockée qui porte encore
         // l'ancienne valeur s'affiche telle quelle plutôt que « undefined ».
@@ -1990,10 +2220,17 @@ function genererRecapitulatif() {
         html += '</div>';
     }
 
+    // Lot 1 de la pratique « Par standards » (21 nov. 2026) : le cours, les cibles, l'échelle et le niveau « sans
+    // donnée ». Elle ne calcule encore rien : le récapitulatif le dit.
+    if (r.typePratique === 'cibles') {
+        html += genererRecapitulatifCibles(r);
+    }
+
     // Échelle et grille — section « Matériel pédagogique » pour STD/SPE (l'échelle y sert
     // au calcul/conversion de niveaux). DEN les affiche dans SON bloc ci-dessus, en
     // rétroaction formative : la note DEN est un jugement, PAS une conversion de niveaux.
-    if (r.typePratique !== 'sommative' && r.typePratique !== 'denotation') {
+    // Par standards : son échelle est dans sa section, et elle n'a pas de grille.
+    if (!['sommative', 'denotation', 'cibles'].includes(r.typePratique)) {
         html += '<div class="wizard-v2-recap-section">';
         html += '<h4>Matériel pédagogique</h4>';
         if (r.echelleId) {
@@ -2049,6 +2286,37 @@ function genererRecapitulatif() {
         html += '</div>';
     }
 
+    html += '</div>';
+    return html;
+}
+
+/**
+ * Lot 1 « Par standards » — la section du récapitulatif : le cours, chaque cible (sa part du total, « terminale », ses
+ * critères), l'échelle et le niveau « sans donnée ». Tout texte de l'enseignant·e est échappé.
+ */
+function genererRecapitulatifCibles(r) {
+    const EC = window.EnsemblesCibles;
+    const cibles = EC.normaliserCibles(r.ciblesStandards);
+    const total = EC.totalDesPoids(cibles);
+    const echelle = echelleDuWizard(r.echelleId);
+    const niveau = echelle && Array.isArray(echelle.niveaux)
+        ? echelle.niveaux.find(n => n && String(n.code) === String(r.niveauSansDonnee)) : null;
+    const cours = EC.libelleDuCours(r.coursCibles);
+    const lignes = cibles.map(c => {
+        const essentiels = c.criteres.filter(k => k.essentiel).length;
+        const criteres = c.criteres.length === 0 ? 'aucun critère'
+            : `${c.criteres.length} ${c.criteres.length > 1 ? 'critères' : 'critère'}${essentiels > 0 ? `, dont ${essentiels} ${essentiels > 1 ? 'essentiels' : 'essentiel'}` : ''}`;
+        return `<li><strong>${echapperHtml(c.etiquette)}</strong> · ${echapperHtml(EC.formaterPart(EC.partDuTotal(c.poids, total)))}${c.terminale ? ' · cible terminale' : ''} · ${criteres}</li>`;
+    }).join('');
+    let html = '<div class="wizard-v2-recap-section">';
+    html += '<h4>Configuration – Par standards</h4>';
+    html += `<p><strong>Cours\u00a0:</strong> ${cours ? echapperHtml(cours) : 'aucun pour l\'instant'}</p>`;
+    html += `<p><strong>Cibles d'apprentissage\u00a0:</strong> ${cibles.length}</p>`;
+    if (lignes) html += `<ul class="wizard-v2-recap-cibles">${lignes}</ul>`;
+    html += `<p><strong>Échelle\u00a0:</strong> ${echapperHtml(echelle ? (echelle.nom || 'Sans nom') : (r.echelleId || '—'))}</p>`;
+    const libelleNiveau = niveau ? String(niveau.code) + ' – ' + (niveau.nom || '') : '—';
+    html += `<p><strong>Niveau «\u00a0sans donnée\u00a0»\u00a0:</strong> ${echapperHtml(libelleNiveau)}</p>`;
+    html += '<p class="wizard-v2-recap-aide">Cette pratique ne calcule pas encore de note : l\'inscription des niveaux pour chaque cible viendra dans une prochaine version.</p>';
     html += '</div>';
     return html;
 }
@@ -2150,10 +2418,18 @@ function validerEtape(etapeId) {
 
     let valide = true;
     const champsInvalides = [];
+    const motifs = [];   // lot 1 « Par standards » : les refus qui se disent en mots (`champ.motifRefus`)
 
     champs.forEach(champ => {
         // Ignorer les champs de type 'info' (pas de validation)
         if (champ.type === 'info') return;
+
+        // Lot 1 « Par standards » (21 nov. 2026) : un champ qui porte son refus le dit en mots, au lieu de
+        // « Remplis : … ». Aucun autre champ ne passe par ici.
+        if (typeof champ.motifRefus === 'function') {
+            if (!_validerParMotif(champ, motifs)) valide = false;
+            return;
+        }
 
         if (champ.required) {
             let element = null;
@@ -2212,13 +2488,29 @@ function validerEtape(etapeId) {
     });
 
     if (!valide) {
-        const message = champsInvalides.length > 0
+        const remplis = champsInvalides.length > 0
             ? `Remplis\u00a0: ${champsInvalides.join(', ')}`
             : 'Remplis tous les champs obligatoires.';
+        const message = motifs.length > 0
+            ? motifs.concat(champsInvalides.length > 0 ? [remplis] : []).join(' ')
+            : remplis;
         notifications.erreur(message);
     }
 
     return valide;
+}
+
+/**
+ * Lot 1 « Par standards » (21 nov. 2026) : un champ qui porte son refus (`champ.motifRefus`) le dit en mots. Le motif
+ * rejoint `motifs` ; le champ est marqué ou démarqué. Vrai si le champ passe.
+ */
+function _validerParMotif(champ, motifs) {
+    const element = document.getElementById(`${WIZARD_V2_ID_PREFIX}${champ.id}`);
+    const motif = champ.motifRefus(element);
+    const container = element ? element.closest('.wizard-v2-champ') : null;
+    if (container && champ.marquerEnErreur !== false) container.classList.toggle('wizard-v2-champ-erreur', !!motif);
+    if (motif) motifs.push(motif);
+    return !motif;
 }
 
 /**
@@ -2259,6 +2551,13 @@ function sauvegarderReponsesEtape(etapeId) {
             wizardState.reponses[champ.id] = element?.checked || false;
         } else if (champ.type === 'liste-cibles') {
             if (element) wizardState.reponses[champ.id] = window.EditeurCibles.lire(element);
+        } else if (champ.type === 'liste-cibles-standards') {
+            if (element) wizardState.reponses[champ.id] = window.EditeurCibles.lireStandards(element);
+        } else if (champ.type === 'echelle-cibles') {
+            // L'échelle et son niveau « sans donnée » : deux réponses, celles que lit la création.
+            const choix = _lireChoixEchelleCibles();
+            wizardState.reponses.echelleId = choix.echelleId;
+            wizardState.reponses.niveauSansDonnee = choix.niveauSansDonnee;
         } else if (element) {
             wizardState.reponses[champ.id] = element.value;
         }
@@ -2267,6 +2566,9 @@ function sauvegarderReponsesEtape(etapeId) {
     champs.forEach(sauvegarderChamp);
 
 }
+
+/** Lot 1 « Par standards » : les types de champs qui posent leur valeur au rendu (rien à restaurer après coup). */
+const CHAMPS_POSES_AU_RENDU = ['liste-cibles-standards', 'echelle-cibles', 'select-cours'];
 
 /**
  * Restaure les valeurs d'une étape précédemment remplie
@@ -2291,6 +2593,9 @@ function restaurerValeursEtape(etapeId) {
             champ.champs.forEach(sousChamp => restaurerChamp(sousChamp));
             return;
         }
+
+        // Lot 1 « Par standards » : ces trois champs posent leur valeur au rendu.
+        if (CHAMPS_POSES_AU_RENDU.includes(champ.type)) return;
 
         const valeur = wizardState.reponses[champ.id];
         if (valeur === undefined) return;
@@ -2368,6 +2673,11 @@ function deduireTypePratique(reponses) {
         return { type: 'denotation', variante: 'eliminee', regles: [], confiance: 1.0 };
     }
 
+    // Lot 1 de la pratique « Par standards » (21 nov. 2026) : une seule voie, aucune variante.
+    if (q1 === 'cibles') {
+        return { type: 'cibles', variante: null, regles: [], confiance: 1.0 };
+    }
+
     return { type: null, variante: null, regles: [], confiance: 0 };
 }
 
@@ -2441,19 +2751,19 @@ async function creerPratiqueV2() {
         'sommative': 'SOM',
         'standards': 'STD',
         'specifications': 'SPE',
-        'denotation': 'DEN'
+        'denotation': 'DEN',
+        'cibles': 'CIB'          // lot 1 « Par standards »
     };
 
     // Utiliser la classification comportementale déduite
     const classification = deduireTypePratique(r);
     const typeFinal = classification.type || r.typePratique;
 
-    // Bug 31 mai : une pratique PAN-Standards calcule par conversion de niveaux (IDME)
-    // → elle DOIT avoir une échelle. On bloque la création plutôt que de produire une
-    // pratique invalide (qui échouerait ensuite à l'instanciation : « echelle manquante »).
-    // SOM (moyenne pondérée) et SPE (seuils) n'utilisent pas d'échelle IDME → non bloqués.
-    if (typeFinal === 'standards' && !r.echelleId) {
-        notifications.erreur('Choisis une échelle de performance (IDME) avant de créer cette pratique PAN-Standards. Reviens à l\'étape « Échelle de performance ».');
+    // Les refus AVANT toute écriture (`_motifRefusAvantCreation`) : une Standards sans échelle (bug 31 mai) ; une
+    // pratique par standards incomplète (lot 1, 21 nov. 2026).
+    const refus = _motifRefusAvantCreation(typeFinal, r);
+    if (refus) {
+        notifications.erreur(refus);
         return;
     }
 
@@ -2626,11 +2936,95 @@ async function creerPratiqueV2() {
             echelleId: r.echelleId || null,
             grilleId: r.grilleId || null
         };
+    } else if (typeFinal === 'cibles') {
+        // Lot 2 « Par standards » : retirer une cible qui porte des niveaux inscrits pose la question AVANT d'écrire (#717).
+        if (!(await _confirmerRetraitCiblesInscrites(r))) return;
+        _configurerPratiqueParStandards(r, pratique);   // lot 1 « Par standards » (refus déjà relus plus haut)
     }
 
 
     // Finaliser (sauvegarde + fermeture + notification + rafraîchissements).
     await finaliserCreationPratique(pratique);
+}
+
+/**
+ * Les refus qui empêchent la création, AVANT toute écriture. Une réponse gardée d'un aller-retour dans l'assistant ne
+ * passe pas sans eux.
+ * - Bug 31 mai : une pratique PAN-Standards calcule par conversion de niveaux (IDME) → elle DOIT avoir une échelle.
+ *   SOM (moyenne pondérée) et SPE (seuils) n'utilisent pas d'échelle IDME → non bloqués.
+ * - Lot 1 « Par standards » (21 nov. 2026) : les refus d'`EnsemblesCibles` (aucune cible ; une cible sans étiquette ;
+ *   un poids nul ou négatif ; aucune échelle ; aucun niveau « sans donnée »), le premier en mots.
+ * @returns {string|null}
+ */
+function _motifRefusAvantCreation(typeFinal, r) {
+    if (typeFinal === 'standards' && !r.echelleId) {
+        return 'Choisis une échelle de performance (IDME) avant de créer cette pratique par sélection de productions. Reviens à l\'étape « Échelle de performance ».';
+    }
+    if (typeFinal !== 'cibles') return null;
+    const motifs = window.EnsemblesCibles.motifsRefus({ cibles: r.ciblesStandards, echelle: echelleDuWizard(r.echelleId), niveauSansDonnee: r.niveauSansDonnee });
+    return motifs[0] || null;
+}
+
+/**
+ * Lot 2 de la pratique « Par standards » (21 nov. 2026) — LA QUESTION AVANT DE RETIRER UNE CIBLE QUI PORTE DES NIVEAUX
+ * INSCRITS (le patron de #717). En modification seulement : les cibles rangées absentes de la nouvelle liste, et leurs
+ * inscriptions non annulées (`InscriptionsCibles.ciblesRetireesInscrites`). Les inscriptions ne sont PAS effacées : la cible
+ * cesse d'être montrée au tableau. Le codex n'est pas proposé ici (rien ne s'efface ; la phrase du codex pour « cibles » dit
+ * « les efface pour de bon », ce qui serait faux). Rien à demander → vrai.
+ * UN CRITÈRE retiré ou réécrit ne pose pas de question : chaque inscription garde le texte des critères qu'elle a jugés
+ * (`criteres: [{ id, texte, essentiel, respecte }]`), et aucun calcul ne lit les coches (choix de Grégoire, 21 nov. 2026).
+ * Mots PROPOSÉS (TEXTES-2026-11-21-par-standards-lot-2.md, W1 à W4).
+ * @returns {Promise<boolean>} vrai si l'assistant peut écrire
+ */
+async function _confirmerRetraitCiblesInscrites(r) {
+    if (!wizardState.modeEdition || !wizardState.pratiqueId || !window.InscriptionsCibles) return true;
+    const existante = (db.getSync(cle('pratiquesConfigurables'), null) || []).find(p => p.id === wizardState.pratiqueId);
+    const ensembleId = existante && existante.configuration && existante.configuration.ensembleCiblesId;
+    const ensemble = ensembleId ? window.EnsemblesCibles.lireParId(ensembleId) : null;
+    if (!ensemble) return true;
+    const IC = window.InscriptionsCibles;
+    const retraits = IC.ciblesRetireesInscrites(IC.lireToutes(), ensembleId, ensemble.cibles,
+        window.EnsemblesCibles.normaliserCibles(r.ciblesStandards));
+    if (retraits.length === 0) return true;
+    const plusieurs = retraits.length > 1;
+    // Complément du 21 nov., 9 h 17 : une inscription peut être une remarque, sans niveau ; elles sont dites à part.
+    const compte = (n, un, des) => `${n} ${n > 1 ? des : un}`;
+    const lignes = retraits.map(x => `« ${x.cible.etiquette || x.cible.id} » : `
+        + [x.niveaux ? compte(x.niveaux, 'niveau inscrit', 'niveaux inscrits') : '', x.remarques ? compte(x.remarques, 'remarque', 'remarques') : '']
+            .filter(Boolean).join(' et ')
+        + ` pour ${compte(x.eleves, 'étudiant·e', 'étudiant·es')}`);
+    const message = (plusieurs ? 'Tu retires des cibles qui portent des inscriptions.' : 'Tu retires une cible qui porte des inscriptions.')
+        + '\n\n' + lignes.join('\n')
+        + '\n\n' + (plusieurs ? 'Leurs inscriptions restent enregistrées, mais ces cibles ne seront plus montrées au tableau.'
+            : 'Ses inscriptions restent enregistrées, mais cette cible ne sera plus montrée au tableau.')
+        + '\n\nRetirer quand même ?';
+    if (window.uiDialogues && typeof window.uiDialogues.confirmerAction === 'function') {
+        return !!(await window.uiDialogues.confirmerAction({ titre: plusieurs ? 'Retirer des cibles' : 'Retirer une cible', message,
+            preformate: true, texteConfirmer: 'Retirer quand même', variante: 'danger' }));
+    }
+    return confirm(message);
+}
+
+/**
+ * Lot 1 de la pratique « Par standards » (21 nov. 2026) — la méthode et la configuration de la pratique, et l'ensemble de
+ * cibles à ranger avec elle (`finaliserCreationPratique` l'écrit AVANT la pratique). En modification, l'ensemble garde
+ * son identité : la pratique le désigne déjà. (Lot 2 : retirer une cible qui porte des niveaux inscrits pose la question
+ * avant d'écrire, `_confirmerRetraitCiblesInscrites`.) Mute `pratique`.
+ */
+function _configurerPratiqueParStandards(r, pratique) {
+    const existante = (wizardState.modeEdition && wizardState.pratiqueId)
+        ? (db.getSync(cle('pratiquesConfigurables'), null) || []).find(p => p.id === wizardState.pratiqueId) : null;
+    const ensembleId = (existante && existante.configuration && existante.configuration.ensembleCiblesId)
+        || genererIdUnique('ENSC_');
+    wizardState.ensembleCiblesAEcrire = { id: ensembleId, coursId: r.coursCibles || null, cibles: window.EnsemblesCibles.normaliserCibles(r.ciblesStandards) };
+    // La méthode arrêtée au lot 0 ; aucun moteur ne la calcule encore (lot 4). Elle remplace le repli de la chaîne des méthodes.
+    pratique.calcul_note = { methode: 'niveaux_par_cible' };
+    pratique.configuration = {
+        type: 'cibles',
+        ensembleCiblesId: ensembleId,
+        echelleId: r.echelleId,
+        niveauSansDonnee: String(r.niveauSansDonnee)
+    };
 }
 
 /**
@@ -2668,6 +3062,9 @@ async function finaliserCreationPratique(pratique) {
         wizardState.grilleDeBase = null;
     }
 
+    // Lot 1 « Par standards » : l'échelle de départ et l'ensemble de cibles, AVANT la pratique qui les désigne.
+    if (!(await _ecrireCeQueDesigneLaPratique(pratique, enModification))) return;
+
     // Jetons par défaut (décision de Grégoire, 29 oct. 2026) : une pratique CRÉÉE sans réglage de jetons les refuse
     // explicitement. Seule une Spécifications pose la question ; les autres familles en naissaient sans réglage, donc
     // avec les jetons du défaut. En modification, rien : la pratique enregistrée garde ce qu'elle fait.
@@ -2701,6 +3098,34 @@ async function finaliserCreationPratique(pratique) {
     if (typeof window.populerDropdownsAssemblageV2 === 'function') {
         window.populerDropdownsAssemblageV2();
     }
+}
+
+/**
+ * Lot 1 « Par standards » (21 nov. 2026) : l'échelle de départ proposée n'entre en base qu'ici, et seulement si la
+ * pratique la retient ; puis l'ensemble de cibles, que la pratique désigne. Les deux AVANT la pratique : une pratique
+ * n'est jamais écrite en désignant un ensemble ou une échelle qui n'existent pas. Un échec : faux, et rien de plus
+ * n'est écrit.
+ * @returns {Promise<boolean>}
+ */
+async function _ecrireCeQueDesigneLaPratique(pratique, enModification) {
+    const configuration = pratique.configuration || {};
+    const echelleDeDepart = wizardState.echelleDeDepart;
+    if (echelleDeDepart && configuration.echelleId === echelleDeDepart.id) {
+        const ecrite = await modifierEtAnnoncer(cle('echellesTemplates'), (lues) => {
+            const echelles = lues || [];
+            return echelles.some(e => e && e.id === echelleDeDepart.id) ? echelles : echelles.concat([echelleDeDepart]);
+        }, [], { geste: 'Créer la pratique', discret: true }).catch(() => undefined);
+        if (!ecrite) return false;
+        wizardState.echelleDeDepart = null;
+    }
+    const ensembleCibles = wizardState.ensembleCiblesAEcrire;
+    if (ensembleCibles && configuration.ensembleCiblesId === ensembleCibles.id) {
+        const ecrit = await window.EnsemblesCibles.enregistrer(ensembleCibles,
+            { geste: enModification ? 'Appliquer à la pratique' : 'Créer la pratique' });
+        if (!ecrit) return false;
+        wizardState.ensembleCiblesAEcrire = null;
+    }
+    return true;
 }
 
 /**
@@ -2872,7 +3297,8 @@ const CHAMPS_EDITES_PAR_L_ASSISTANT = ['id', 'nom', 'auteur', 'etablissement', '
 const CONFIGURATION_EDITEE_PAR_L_ASSISTANT = {
     sommative: ['conditions_speciales'],
     standards: ['approcheEvaluation', 'echelleId', 'grilleId', 'portfolio', 'categories'],
-    denotation: ['type', 'modeDEN', 'objectifs', 'suggestion', 'echelleId', 'grilleId']
+    denotation: ['type', 'modeDEN', 'objectifs', 'suggestion', 'echelleId', 'grilleId'],
+    cibles: ['type', 'ensembleCiblesId', 'echelleId', 'niveauSansDonnee']   // lot 1 « Par standards »
 };
 function conserverCeQueLAssistantNEditePas(pratique, existante) {
     if (!pratique || !existante) return pratique;
@@ -2973,6 +3399,8 @@ function ouvrirWizardV2(modeEdition = false, pratiqueId = null) {
     wizardState.reponses = {};
     wizardState.modeEdition = modeEdition;
     wizardState.pratiqueId = pratiqueId;
+    wizardState.echelleDeDepart = null;          // lot 1 « Par standards »
+    wizardState.ensembleCiblesAEcrire = null;
 
     // 🆕 Beta 95.4 : Pré-remplir avec le profil enseignant du groupe-cours actif
     if (!modeEdition) {
@@ -3046,6 +3474,8 @@ function fermerWizardV2() {
     wizardState.modeEdition = false;
     wizardState.pratiqueId = null;
     wizardState.grilleDeBase = null;   // lot E1 : abandonner l'assistant n'écrit aucune grille
+    wizardState.echelleDeDepart = null;          // lot 1 « Par standards » : ni échelle de départ…
+    wizardState.ensembleCiblesAEcrire = null;    // … ni ensemble de cibles
 }
 
 /**
@@ -3072,7 +3502,8 @@ function chargerPratiqueExistante(pratiqueId) {
         'sommative': 'moyenne',
         'standards': 'niveaux',
         'specifications': 'acceptable',
-        'denotation': 'jugement'   // #319 Lot 5 : sans ça, une DEN retombait sur 'moyenne' → badge SOM
+        'denotation': 'jugement',  // #319 Lot 5 : sans ça, une DEN retombait sur 'moyenne' → badge SOM
+        'cibles': 'cibles'         // lot 1 « Par standards »
     };
 
     // CO-01 : recharger l'AUTEUR dans les clés que lit la construction
@@ -3204,10 +3635,26 @@ function chargerPratiqueExistante(pratiqueId) {
             }
             wizardState.reponses.echelleId = config.echelleId;
             wizardState.reponses.grilleId = config.grilleId;
+        } else if (typeCanon === 'cibles') {
+            Object.assign(wizardState.reponses, _relireParStandards(config));   // lot 1 « Par standards »
         }
     }
 }
 
+/**
+ * Lot 1 « Par standards » (21 nov. 2026) : les réponses relues d'une pratique par standards. Les cibles reviennent de
+ * leur ensemble, AVEC leurs ids et ceux de leurs critères. Un ensemble introuvable (pratique importée seule) rouvre une
+ * liste vide : l'enregistrer le recrée sous l'id que la pratique désigne déjà.
+ */
+function _relireParStandards(config) {
+    const ensemble = window.EnsemblesCibles.lireParId(config.ensembleCiblesId) || { cibles: [], coursId: '' };
+    return {
+        ciblesStandards: JSON.parse(JSON.stringify(ensemble.cibles || [])),
+        coursCibles: ensemble.coursId || '',
+        echelleId: config.echelleId,
+        niveauSansDonnee: config.niveauSansDonnee
+    };
+}
 
 // ============================================================================
 // EXPORTS
@@ -3227,6 +3674,7 @@ window.wizardV2CreerGrilleDemo = wizardV2CreerGrilleDemo;
 window.wizardV2VoieRapide = wizardV2VoieRapide;
 window.wizardV2RafraichirEtapeCourante = wizardV2RafraichirEtapeCourante;
 window.wizardV2ModifierRepereEchelle = wizardV2ModifierRepereEchelle;   // #577
+window.wizardV2ProposerEchelleDepart = wizardV2ProposerEchelleDepart;   // lot 1 « Par standards »
 window.ouvrirComparateurDepuisWizard = ouvrirComparateurDepuisWizard;
 
 // Exposés pour la testabilité (#317) : la relecture d'édition (#132) et le

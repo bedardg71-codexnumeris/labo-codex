@@ -96,7 +96,10 @@ describe('#343-T1 · DEN éditable inline dans le formulaire mat-', () => {
         expect(bloc).toMatch(/configuration\.objectifs\s*=/);
         expect(bloc).toMatch(/configuration\.suggestion\s*=/);
         expect(bloc).toMatch(/configuration\.grilleId\s*=/);
-        expect(bloc).toMatch(/\['DEN'\]/);
+        // ↻ 21 nov. 2026 (lot 1 « Par standards ») : `pratiques[]` passe par la table `CODE_PAR_TYPE`, qui remplace les deux
+        // chaînes de ternaires (le changement de type, l'écriture) ; la dénotation y garde son code.
+        expect(bloc).toMatch(/pratiquesDuType\(typeCanon\)/);
+        expect(gestion).toMatch(/const CODE_PAR_TYPE = \{[^}]*denotation: 'DEN'/);
     });
     it('chargerPratiquePourModif ne route PLUS DEN vers l\'assistant', () => {
         const i = gestion.indexOf('async function chargerPratiquePourModif');

@@ -151,6 +151,9 @@ const PratiqueManager = {
         let nbUtilisateurGardees = 0;
 
         // Obtenir la liste des IDs de pratiques prédéfinies
+        // ⚠ Constat du lot 1 « Par standards » (21 nov. 2026), laissé tel quel : `Object.keys` rend les NOMS des
+        // constantes (PRATIQUE_PAN_MAITRISE…), pas les `id` des gabarits ; aucune pratique n'est donc reconnue comme
+        // prédéfinie ici. Sans conséquence observable (migration d'une forme ancienne).
         const idsPredefinis = window.PRATIQUES_PREDEFINES
             ? Object.keys(window.PRATIQUES_PREDEFINES)
             : [];

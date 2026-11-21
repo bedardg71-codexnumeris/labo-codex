@@ -175,7 +175,7 @@ describe('B · les prédicats du registre', () => {
 });
 
 /* ================================================================ C */
-const DA = { ALICE: '2000001', BRUNO: '2000002' };
+const DA = { ALICE: '2000001', BOREAL: '2000002' };
 const E0 = { id: 'E0', nom: 'IDME banc', niveaux: [
     { code: 'I', nom: 'Insuffisant', min: 0, max: 64, valeurCalcul: 40 }, { code: 'D', nom: 'En développement', min: 65, max: 74, valeurCalcul: 65 },
     { code: 'M', nom: 'Maîtrisé', min: 75, max: 84, valeurCalcul: 75 }, { code: 'E', nom: 'Étendu', min: 85, max: 100, valeurCalcul: 100 }] };
@@ -211,7 +211,7 @@ const OBJETS_EXPORTES = ['PratiqueManager', 'denotationJugements', 'modalitesEva
 
 function banc({ pratique, productions, evaluations }) {
     const store = storeBase();
-    store.test_groupeEtudiants = store.test_groupeEtudiants.filter(e => e.da === DA.ALICE || e.da === DA.BRUNO);
+    store.test_groupeEtudiants = store.test_groupeEtudiants.filter(e => e.da === DA.ALICE || e.da === DA.BOREAL);
     store.test_groupesCours[0].pratiqueId = pratique.id;
     store.test_pratiquesConfigurables = [clone(pratique)];
     store.test_echellesTemplates = [clone(E0)];
@@ -258,26 +258,26 @@ describe('C · le vrai moteur, sur un magasin sans horaire, sans enseignant, san
     it('C2 spécifications : « acceptable » sans seuil, « non acceptable » ne compte pas ; forfait A 100 ou palier F 50', () => {
         const b = banc({ pratique: spe(), productions: PROD_SPE, evaluations: [
             binaire(DA.ALICE, 'D1', true), binaire(DA.ALICE, 'X1', true),
-            binaire(DA.BRUNO, 'D1', true), binaire(DA.BRUNO, 'X1', false)] });
+            binaire(DA.BOREAL, 'D1', true), binaire(DA.BOREAL, 'X1', false)] });
         expect(lire(b, DA.ALICE).P).toBe(100);
-        expect(lire(b, DA.BRUNO).P).toBe(50);
+        expect(lire(b, DA.BOREAL).P).toBe(50);
         expect(lire(b, DA.ALICE).stockP).toBe(100);
     });
     // ⚠ Le dénominateur de C (pratique configurable) ne comptait que les productions à copie CHIFFRÉE : un jugement sans
     // grille le laissait vide, C nul pour tous (mesuré en écrivant ce banc, corrigé dans pratique-configurable.js).
     it('C3 spécifications : le jugement non acceptable est une REMISE pour C (2 sur 2), un brouillon ne compte nulle part', () => {
         const b = banc({ pratique: spe(), productions: PROD_SPE, evaluations: [
-            binaire(DA.BRUNO, 'D1', true), binaire(DA.BRUNO, 'X1', false),
+            binaire(DA.BOREAL, 'D1', true), binaire(DA.BOREAL, 'X1', false),
             binaire(DA.ALICE, 'D1', true), binaire(DA.ALICE, 'X1', true, { verrouillee: false })] });
-        expect(lire(b, DA.BRUNO).C).toBe(100);
+        expect(lire(b, DA.BOREAL).C).toBe(100);
         expect(lire(b, DA.ALICE).C).toBe(50);
         expect(lire(b, DA.ALICE).P).toBe(50);   // le brouillon « acceptable » ne fait pas le forfait A
     });
     it('C4 TÉMOIN : une copie chiffrée garde son seuil (80 ≥ 70 acceptable, 60 non)', () => {
         const chiffree = (da, p, n) => Object.assign(avecGrille(da, p, 'M'), { noteFinale: n });
         const b = banc({ pratique: spe(), productions: PROD_SPE, evaluations: [
-            chiffree(DA.ALICE, 'D1', 80), chiffree(DA.ALICE, 'X1', 80), chiffree(DA.BRUNO, 'D1', 80), chiffree(DA.BRUNO, 'X1', 60)] });
-        expect([lire(b, DA.ALICE).P, lire(b, DA.BRUNO).P]).toEqual([100, 50]);
+            chiffree(DA.ALICE, 'D1', 80), chiffree(DA.ALICE, 'X1', 80), chiffree(DA.BOREAL, 'D1', 80), chiffree(DA.BOREAL, 'X1', 60)] });
+        expect([lire(b, DA.ALICE).P, lire(b, DA.BOREAL).P]).toEqual([100, 50]);
     });
     // Consigne du lot (9 nov. 2026, reçue après la première passe) : « les deux calculs avec des résultats directs seuls,
     // puis MÊLÉS à des évaluations à grille ».
@@ -296,8 +296,8 @@ describe('C · le vrai moteur, sur un magasin sans horaire, sans enseignant, san
         const chiffree = (da, p, n) => Object.assign(avecGrille(da, p, 'M'), { noteFinale: n });
         const b = banc({ pratique: spe(), productions: PROD_SPE, evaluations: [
             binaire(DA.ALICE, 'D1', true), chiffree(DA.ALICE, 'X1', 80),
-            binaire(DA.BRUNO, 'D1', true), chiffree(DA.BRUNO, 'X1', 60)] });
-        expect([lire(b, DA.ALICE).P, lire(b, DA.BRUNO).P]).toEqual([100, 50]);
+            binaire(DA.BOREAL, 'D1', true), chiffree(DA.BOREAL, 'X1', 60)] });
+        expect([lire(b, DA.ALICE).P, lire(b, DA.BOREAL).P]).toEqual([100, 50]);
     });
     // Précision 3 de Cowork (9 nov., 15 h) : une case dont l'originale est remplacée par une reprise affiche la reprise.
     it('C7 la reprise : la case montre la reprise ; la note la lit dès qu\'elle est verrouillée, et l\'originale d\'ici là (E4)', () => {
@@ -416,7 +416,7 @@ describe('F · les mots validés', () => {
         // n'a plus de remplacement à lui : il écrit la cause que le calcul lui rend, telle quelle.
         expect(registre.causeNoteStdSansProductionNotee(true, false)).toBe('Aucune production n\'est encore évaluée.');
         expect(registre.causeNoteStdSansProductionNotee(false, false)).toBe('Aucune production retenue pour la note n\'est encore évaluée.');   // la jumelle ne bouge pas
-        expect(registre.causeNoteStdSansProductionNotee(true, true)).toBe('Seule l\'évaluation terminale a une note. En standards, la note du cours s\'appuie aussi sur les artefacts du portfolio : elle ne se calcule pas sur la terminale seule.');
+        expect(registre.causeNoteStdSansProductionNotee(true, true)).toBe('Seule l\'évaluation terminale a une note. Par sélection de productions, la note du cours s\'appuie aussi sur les artefacts du portfolio : elle ne se calcule pas sur la terminale seule.');
         expect(lire('js/pratiques/pratique-registre.js')).not.toContain("'Aucun artefact du portfolio n");
         const sim = (cause) => () => ({ noteConstructible: false, P: 0, causeNonConstructible: cause, details: null });
         const avecCause = (cause) => chargerScript('js/tableau-notation.js', { db: { getSync: (k, d) => (d !== undefined ? d : null) }, simulerIndices: sim(cause), echapperHtml: echapper, navigator: MAC },
@@ -430,7 +430,7 @@ describe('F · les mots validés', () => {
         expect(finalisee).not.toContain('Note provisoire');
     });
     it('F2 les états sans tableau, la légende des spécifications, la sous-section et l\'avis du formulaire', () => {
-        expect(ecran.construireHTML({ etat: 'autre-famille' })).toContain('Le tableau de notation sert aux pratiques par standards et par spécifications. Pour la pratique de ce groupe-cours, la Liste reste la vue de tes évaluations.');
+        expect(ecran.construireHTML({ etat: 'autre-famille' })).toContain('Le tableau de notation sert aux pratiques par sélection de productions et par spécifications. Pour la pratique de ce groupe-cours, la Liste reste la vue de tes évaluations.');
         expect(ecran.construireHTML({ etat: 'aucune-pratique' })).toContain('Ce groupe-cours n’a pas de pratique de notation. Choisis-en une dans Conception › Pratiques : le tableau suivra ses réglages.');
         const source = lire('js/tableau-notation.js');
         expect(source).toContain("aideSpe: 'Touche une case pour changer le résultat. Au clavier : A ou N, Retour arrière pour vider, les flèches pour se déplacer.',");

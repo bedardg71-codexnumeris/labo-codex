@@ -88,7 +88,7 @@ test('#872 B · deux cours portent « 00001 » : deux entrées, liste, ajout, é
         r.nbDemo = depart.length;
         await db.set(cle('groupeEtudiants'), depart.concat([
             fiche('8721001', actif.id, '00001', 'Alpha'), fiche('8721002', actif.id, '1', 'Aline'),
-            fiche('8722001', 'COURS-872-B', '00001', 'Bravo'), fiche('8722002', 'COURS-872-B', '00001', 'Brigitte'), fiche('8722003', 'COURS-872-B', '00001', 'Bruno'),
+            fiche('8722001', 'COURS-872-B', '00001', 'Bravo'), fiche('8722002', 'COURS-872-B', '00001', 'Brigitte'), fiche('8722003', 'COURS-872-B', '00001', 'Boréal'),
             fiche('8723001', undefined, '00003', 'Ancienne'),
         ]));
         menu().value = '';

@@ -22,7 +22,7 @@ import { monter, storeBase } from './_helpers/bac-suivi.js';
 
 const NOM_CLE = 'registreLongitudinal';
 const DA = '2000001';   // Alice Assidu : a2024 ET h2026
-const DA2 = '2000002';  // Bruno Absent : a2024 seulement
+const DA2 = '2000002';  // Boréal Absent : a2024 seulement
 const DA3 = '2000003';  // Chloé Cadre : a2024, jamais inscrite, mais le Cadre porte un résultat pour elle
 
 function stock({ avecCadre = false } = {}) {
@@ -36,7 +36,7 @@ function stock({ avecCadre = false } = {}) {
         cours: [{ id: 'C101', codeCours: '601-101-MQ', nomCours: 'Écriture et littérature' }],
         a2024_groupeEtudiants: [
             { da: DA, nom: 'Assidu', prenom: 'Alice', groupe: '00001', coursId: 'C101' },
-            { da: DA2, nom: 'Absent', prenom: 'Bruno', groupe: '00001', coursId: 'C101' },
+            { da: DA2, nom: 'Absent', prenom: 'Boréal', groupe: '00001', coursId: 'C101' },
             { da: DA3, nom: 'Cadre', prenom: 'Chloé', groupe: '00001', coursId: 'C101' }
         ],
         h2026_groupeEtudiants: [{ da: DA, nom: 'Assidu', prenom: 'Alice', groupe: '00002', coursId: 'C101' }],
@@ -45,7 +45,7 @@ function stock({ avecCadre = false } = {}) {
             { id: 'E2', etudiantDA: DA2, coursId: 'C101', grilleId: 'G1', echelleId: 'ECH1', criteres: [] },
             { id: 'E3', etudiantDA: DA2, coursId: 'C101', grilleId: 'G2', criteres: [] }
         ],
-        a2024_grillesTemplates: [{ id: 'G1', nom: 'Grille partagée', criteres: [] }, { id: 'G2', nom: 'Grille de Bruno', criteres: [] }],
+        a2024_grillesTemplates: [{ id: 'G1', nom: 'Grille partagée', criteres: [] }, { id: 'G2', nom: 'Grille de Boréal', criteres: [] }],
         a2024_echellesTemplates: [{ id: 'ECH1', nom: 'IDME', niveaux: [] }],
         a2024_presences: [{ date: '2024-08-26', da: DA, coursId: 'C101', statut: 'present', heures: 2 }]
     });
@@ -253,7 +253,7 @@ describe('#915 lot 3 — retirer du registre (décision 3.1 : un geste de répar
         b.journal.length = 0;
         expect(await b.api.retirerDuRegistre(DA2)).toEqual({ ok: true });
         expect(Object.keys(b.store[NOM_CLE].eleves)).toEqual([DA]);
-        expect(Object.keys(b.store[NOM_CLE].modeles.grilles)).toEqual(['a2024:G1']);   // G2 n'était qu'à Bruno
+        expect(Object.keys(b.store[NOM_CLE].modeles.grilles)).toEqual(['a2024:G1']);   // G2 n'était qu'à Boréal
         expect(Object.keys(b.store[NOM_CLE].modeles.echelles)).toEqual(['a2024:ECH1']); // ECH1 sert encore à Alice
         expect(JSON.stringify(b.store[NOM_CLE])).not.toContain(DA2);
         expect(b.journal.map((j) => j.k)).toEqual([NOM_CLE]);
@@ -289,7 +289,7 @@ describe('#915 lot 3 — retirer du registre (décision 3.1 : un geste de répar
 
     it('sans résultat ultérieur : la confirmation le dit aussi, au singulier quand il n\'y a qu\'un dossier', () => {
         const b = banc();
-        const texte = b.mots.confirmerRetrait('Absent, Bruno', b.api.accorder(1, b.mots.dossiers), '2026-09-18', [], 0);
+        const texte = b.mots.confirmerRetrait('Absent, Boréal', b.api.accorder(1, b.mots.dossiers), '2026-09-18', [], 0);
         expect(texte).toContain('Sa copie du 2026-09-18 (1 dossier) sera effacée');
         // ↻ #1152, lot 5 (29 oct. 2026) : « étudiant·e » dans les écrans d'enseignant (décision de Cowork, plans de travail/TEXTES-2026-10-28-textes-d-ecran.md).
         expect(texte).toContain('Aucun résultat ultérieur n\'a été saisi pour cet·te étudiant·e.');
@@ -308,7 +308,7 @@ describe('#915 lot 3 — retirer du registre (décision 3.1 : un geste de répar
         await b.api.inscrire(DA2);
         b.win.initialiserRegistreLongitudinal();
         expect(await b.win.retirerEleveLongitudinal({ dataset: { da: DA2 } })).toEqual({ ok: true });
-        expect(texteDe(dernier(b.elements['rl-zone-inscrits'], 'rl-eleves'))).not.toContain('Absent, Bruno');
+        expect(texteDe(dernier(b.elements['rl-zone-inscrits'], 'rl-eleves'))).not.toContain('Absent, Boréal');
         const selecteur = tous(dernier(b.elements['rl-zone-saisie'], 'rl-saisie'), (el) => el.name === 'eleve')[0];
         expect(selecteur.children.map((o) => o.value)).toEqual([DA]);
     });
@@ -339,7 +339,7 @@ describe('#915 lot 3 — la ligne de saisie unique', () => {
         const champs = tous(formulaire, (el) => !!el.name);
         expect(champs.map((c) => c.name)).toEqual(['eleve', 'cours', 'trimestre', 'note']);
         for (const c of champs) expect(c.className).toBe('controle-form rl-champ');
-        expect(champs[0].children.map((o) => o.textContent)).toEqual(['Absent, Bruno', 'Assidu, Alice']);
+        expect(champs[0].children.map((o) => o.textContent)).toEqual(['Absent, Boréal', 'Assidu, Alice']);
         expect(champs[1].getAttribute('maxlength')).toBe('40');
         expect(champs[3].getAttribute('inputmode')).toBe('decimal');
         const bouton = tous(formulaire, (el) => el.getAttribute && el.getAttribute('data-action') === 'ajouterResultatLongitudinal')[0];
@@ -357,9 +357,9 @@ describe('#915 lot 3 — la ligne de saisie unique', () => {
         expect(champ(b, 'cours').value).toBe('601-102-MQ');
         expect(champ(b, 'trimestre').value).toBe('H2026');
         expect(champ(b, 'note').value).toBe('');
-        expect(champ(b, 'eleve').children.filter((o) => o.selected).map((o) => o.value)).toEqual([DA]); // Bruno → Alice
+        expect(champ(b, 'eleve').children.filter((o) => o.selected).map((o) => o.value)).toEqual([DA]); // Boréal → Alice
         const lignes = dernier(b.elements['rl-zone-inscrits'], 'rl-eleves').children;
-        expect(texteDe(lignes[0])).toContain('Absent, Bruno');
+        expect(texteDe(lignes[0])).toContain('Absent, Boréal');
         expect(texteDe(lignes[0])).toContain('601-102-MQ · H2026 · 51');
         expect(texteDe(lignes[1])).not.toContain('601-102-MQ');
         // La dernière de la liste reste sur elle-même.

@@ -27,7 +27,7 @@ function storeDuBanc() {
     store.cours = [{ id: 'GC1', sigle: '601-101', titre: 'Cours banc', groupe: '01', actif: true }];
     store.test_groupeEtudiants = [
         { da: DA.CONSTRUIT, nom: 'Tremblay-Banc', prenom: 'Alice', groupe: '01', coursId: 'GC1', statut: 'actif' },
-        { da: DA.NON_CONSTRUIT, nom: 'Gagnon-Banc', prenom: 'Bruno', groupe: '01', coursId: 'GC1', statut: 'actif' },
+        { da: DA.NON_CONSTRUIT, nom: 'Gagnon-Banc', prenom: 'Boréal', groupe: '01', coursId: 'GC1', statut: 'actif' },
         { da: DA.A_NOMBRE, nom: 'Roy-Banc', prenom: 'Chloé', groupe: '01', coursId: 'GC1', statut: 'actif' },
         { da: DA.EXCLU, nom: 'Parti-Banc', prenom: 'Émile', groupe: '01', coursId: 'GC1', statut: 'abandon' }
     ];

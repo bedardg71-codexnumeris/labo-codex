@@ -49,9 +49,20 @@ A et C (cf. `indices.js`, `portfolio.js`).
 | Code | Id canonique | Couleur (var CSS) | Famille | Calcul de la note | Fichier instance | État |
 |------|--------------|-------------------|---------|-------------------|------------------|------|
 | SOM | `sommative` | `--som-orange` | Sommative | Moyenne pondérée des évaluations | `pratique-sommative.js` | actif |
-| STD | `standards` | `--std-bleu` | PAN | Portfolio (sélection de N) + terminale | `pratique-pan-standards.js` | actif |
+| STD (sigle affiché **SEL** depuis le 21 nov. 2026) | `standards` | `--sel-sarcelle` (sarcelle, 21 nov. 2026) | `famille: 'PAN'` au registre, **mais aucun écran ne la dit « PAN »** (choix de Grégoire, 21 nov., 7 h 44 ; voir sous le tableau) | Portfolio (sélection de N) + terminale | `pratique-pan-standards.js` | actif |
 | SPE | `specifications` | `--spe-vert` | PAN | Bundles tout-ou-rien par palier | `pratique-pan-specifications.js` | actif |
 | DEN | `denotation` | `--den-violet` | PAN (PRÉN académiquement, voir §2 bis) | Note finale = jugement SAISI, gardé par l'atteinte des cibles (voir §8) | `denotation-jugements.js` + `denotation-saisie-ui.js` ; moteur dans `pratique-configurable.js` | **actif (couche 2, #318)** |
+| CIB (sigle affiché **STD**, 21 nov. 2026 ; « CIB » ne s'affiche nulle part) | `cibles` | `--std-bleu` | PAN | **Pas encore de calcul** (lot 1, 21 nov. 2026) : la note viendra du meilleur niveau démontré par cible, en moyenne pondérée, avec un second seuil (lot 4) | `ensembles-cibles.js` (cibles) ; moteur à venir | **aperçu (branche `lot/moteur-cibles-1-cibles`)** |
+
+**SEL n'est pas dite « PAN » (choix de Grégoire, 21 nov. 2026, 7 h 44 ; les sources ne tranchent pas).** « La preuve
+n'est pas faite que SEL est vraiment une PAN. On dirait une pratique hybride entre PAN et SOM. Demeurons prudent dans
+l'affirmation. » L'application n'affirme ni qu'elle en est une, ni qu'elle n'en est pas une, ni qu'elle est hybride :
+son nom de famille à l'écran est « Par sélection de productions », sans « PAN-Standards », sans « (Standards-Based
+Grading) », sans préfixe « PAN – ». Le libellé `famille: 'PAN'` du registre reste (aucun écran ne le lit, mesuré), comme
+la logique du badge « PAN » de la fiche (`pratiques[0] === 'PAN'`) : la retirer serait aussi une affirmation, Grégoire
+tranchera. Textes : `plans de travail/TEXTES-2026-11-21-selection-sans-PAN.md` ; sentinelle
+`sentinelle-sel-sans-pan-2026-11-21.test.js`. Restent à réécrire (hors du lot) : le glossaire, la fenêtre d'aide, le
+guide pédagogique.
 
 **Identifiants canoniques neutres (Session A, mai 2026)** : un seul id par pratique, sans
 préfixe `pan-`. « PAN » est un **libellé de famille**, plus un préfixe technique ni un
@@ -92,16 +103,67 @@ périmée (c'est le cas du skill `labo-codex` §5.2 au 5 juin).
   lieu** — c'est la « question » que le Comparateur doit rendre lisible (E1), à opposer aux
   reprises des PAN. Ne jamais présenter SOM comme l'étalon objectif.
 
-**STD — Standards (par standards / par objectifs)**
-- *Recherche / pratique* : un standard = description claire et observable d'une action
-  démontrant l'apprentissage (Clark, *Standards or specifications?*). « Atteindre » un
-  standard suppose souvent **plusieurs démonstrations dans le temps** (Clark en exige deux),
-  pas une sélection ponctuelle. Garde-fou : ~15 standards / 15 semaines (*Whoops*).
-- *Code Labo Codex* : sélection de N artefacts (méthode configurée) + note terminale,
-  conversion de niveaux IDME.
-- *Écart / vigilance* : l'app raisonne **sélection d'artefacts**, la recherche raisonne
-  **suivi par standard**. Le récit de calcul du Comparateur (E2) doit montrer le *sort de
-  chaque démonstration*, pas seulement « les N meilleurs ».
+**STD — la famille de code « Standards » : des productions retenues, PAS une notation par standards**
+
+> **Refait le 20 nov. 2026** d'après `plans de travail/CONCEPTION-2026-11-20-pratique-par-standards.md` (lecture
+> intégrale du rapport PAREA 2026, des deux articles de *Pédagogie collégiale*, des 53 billets de la CoP et du
+> second corpus). Chaque règle y porte sa page : **lire cette fiche avant tout chantier sur cette famille ou sur
+> la pratique par standards à venir.** Sigles ci-dessous : R = rapport PAREA 2026 ; CJN = « Comment je note en
+> 2025 » (B. Voisard, 24 nov. 2025).
+
+- *Ce que la recherche appelle notation par standards* (doctrine vérifiée) :
+  - **On note la cible, pas l'instrument.** Le degré d'atteinte de chaque cible d'apprentissage est noté
+    directement ; une évaluation qui touche plusieurs cibles rend un niveau par cible et aucune note d'ensemble
+    (R, p. 17, p. 101, p. 119-120 ; quatre principes d'après Townsley et Wilcox, 2024 : R, p. 18).
+  - **Une cible est un objectif du cours** (5 à 13 dans les cours décrits), avec un énoncé et **ses propres
+    critères**, dont certains « essentiels » qui conditionnent le niveau « Acquis » (R, p. 99, p. 102 ; CJN).
+  - **Peu de niveaux** (cinq dans les systèmes associés aux meilleurs résultats), **dont un niveau nommé pour
+    l'absence de données**, le niveau 0, qui vaut **0 %** (R, p. 102-103).
+  - **Le niveau se pose par jugement**, guidé par les critères, sans points, à chaque occasion ; il peut se poser
+    sans production (observation, entretien). La note du cours est ensuite un calcul (R, p. 102-103, p. 193).
+  - **Devant plusieurs traces** : le principe est « les plus représentatives, en priorité les récentes » (R, p. 23 ;
+    Voisard et coll., 2025, p. 17) ; la règle des cours de chimie est **le meilleur niveau démontré, jamais
+    rétrogradé par une reprise** (R, p. 103 ; CJN) ; un regard global sert pour le laboratoire et le projet.
+    Les deux sont écrits : ne pas présenter l'un comme « la » règle.
+  - **Note du cours** : chaque niveau retenu converti en pourcentage (0, 25, 50, 75, 100 dans les cours de
+    l'équipe), moyenne pondérée, poids égaux ou fixés au plan-cadre, et **un second seuil** : note plafonnée à
+    55 % si la moyenne des cibles terminales est sous 60 % (R, p. 103 ; CJN).
+  - **Une reprise n'est pas plafonnée** (Voisard et coll., 2024, p. 30 ; 2025, p. 21) ; les occasions sont
+    limitées en nombre et inscrites au calendrier.
+  - Chez Clark et Talbert, autre modèle : niveau tout ou rien, souvent deux réussites exigées (« often », une
+    seule admise), note finale par table de conditions et non par moyenne ; environ 15 standards pour un
+    trimestre (*Standards or specifications?*, *Whoops*, *Grading for Growth*, chap. 12).
+- *Code Labo Codex* : la famille `standards` (code STD) **note des productions entières avec une grille, puis en
+  retient N** (méthode configurée) + note terminale, conversion de niveaux IDME. C'est la pratique de Grégoire,
+  qu'il nomme lui-même « dossier d'apprentissage (portfolio) ».
+- *Écart, sans détour* : **cette famille n'est pas une notation par standards.** Elle n'a ni cible, ni niveau par
+  cible, ni niveau sans production ; ses critères sont ceux d'une grille, constants d'une production à l'autre,
+  là où la recherche attache des critères propres à chaque cible. Le mode « par objectifs » qui s'en approchait
+  a été retiré à la 1.63. Elle pose aussi un **plafond sur la reprise ciblée**, que les auteurs déconseillent.
+  Ce n'est pas un défaut de la pratique (posture pluraliste : aucune famille n'est « la bonne ») : c'est un
+  défaut de **nom**. Ne jamais écrire, dans une microcopie ou un guide, que cette famille « est » la notation
+  par standards.
+- *Ce qui arrive (décisions de Grégoire, 20 nov. 2026)* : la famille actuelle **change de nom** (« Par
+  sélection de productions », lot `lot/renommer-selection-productions`) et garde son moteur, son code STD et son id
+  `standards` tels quels ; une pratique **« Par standards »**, au sens des sources, est construite à côté, avec une
+  famille de code à elle (`cibles`, code CIB, méthode `niveaux_par_cible`), l'unité « cible » et une collection
+  d'inscriptions à part. Plan : `plans de travail/PLAN-2026-11-20-moteur-par-objectifs.md` (décisions du 20 nov. en
+  tête, lots 1 à 5) ; écarts entre le premier plan et les sources : § 9 de la fiche de conception. Posture inchangée :
+  aucune des deux n'est « la vraie » ; elles notent des choses différentes.
+- *Livré au lot 1 (21 nov. 2026, branche d'aperçu, pas dans `main`)* : les cibles du cours (`ensemblesCibles`, par
+  trimestre, module propriétaire `js/pratiques/ensembles-cibles.js` : étiquette, énoncé, critères dont essentiels,
+  poids, terminale, identités permanentes), l'échelle de la pratique et son niveau « sans donnée » (un niveau à 0 %),
+  l'assistant et la fiche. `PratiqueConfigurable.calculerPerformance` rend `null` pour `niveaux_par_cible` et
+  `expliquerNoteNonConstructible` dit pourquoi : aucun calcul avant le lot 4.
+- *Livré au lot 2 (21 nov. 2026, branche `lot/moteur-cibles-2-inscrire`, pas dans `main`)* : les niveaux inscrits
+  (`inscriptionsCibles`, par trimestre, module propriétaire `js/pratiques/inscriptions-cibles.js`) : une liste où l'on
+  AJOUTE, une annulation est une entrée de plus ; chaque inscription garde l'état des critères jugés (`respecte: true |
+  false | null`, null = non renseigné) et **aucun calcul ne lit les coches** (choix de Grégoire, 21 nov.). L'écran :
+  `js/tableau-cibles.js` (Évaluation › Tableau de notation, les cibles en colonnes ; une case montre le DERNIER niveau
+  inscrit, pas le retenu). Toujours aucune note : le lot 3 retient, le lot 4 calcule. **Complément du 21 nov., 9 h 17** :
+  une inscription peut ne porter AUCUN niveau (`niveau: null`, une « remarque » avec un texte) ; ce n'est jamais le niveau
+  « sans donnée » ; une cible qui n'a que des remarques reste sans donnée pour le niveau retenu et pour la note
+  (`InscriptionsCibles.estSansNiveau`).
 
 **SPE — Spécifications**
 - *Recherche / pratique* : une spécification décrit le **produit réussi entier**, jugé sur
@@ -670,6 +732,15 @@ Standards or specifications?, Whoops, Reasonable reassessments, Heart of the loo
 to ungrading, Mythbusters) ; CoP-PAN (Poulin-Lamarre & Langlois, dénotation au Cégep de
 Sherbrooke) ; Blum (2020) *Ungrading* ; Dyer (équité) ; CSÉ 2018 *Évaluer pour que ça compte
 vraiment*.
+**Ajoutées le 20 nov. 2026 pour la partie STD** (références complètes et pages dans
+`plans de travail/CONCEPTION-2026-11-20-pratique-par-standards.md`, § 1) : Cormier et al.
+(2026), *Laissons-les se tromper*, rapport PAREA ; Voisard, Cormier et Arseneault-Hubert
+(2024), *Pédagogie collégiale*, 37(2) ; Voisard et al. (2025), *Pédagogie
+collégiale*, 39(1) ; les billets de la publication « Pratiques alternatives de notation »
+(notationalternative.substack.com), d'août 2025 à nov. 2026 ; Clark et Talbert (2023), *Grading for Growth*,
+chap. 12 ; Girouard-Gagné et coll. (2024). ⚠ Les documents internes de nov. et déc. 2025 du même dossier
+(taxonomie, spécification des profils, gabarits `.json`) ne sont **pas** des sources : l'un d'eux transcrit mal
+les valeurs de l'échelle de chimie.
 
 ---
 
@@ -677,6 +748,11 @@ vraiment*.
 
 | Date | Changement |
 |------|------------|
+| 2026-11-21 (lot/moteur-cibles-2-inscrire) | **Lot 2 de « Par standards »** : `inscriptionsCibles` (ajout seul, annulation par ajout, coches à trois états jamais lues par un calcul), le tableau des cibles, l'inscription, l'historique, le geste par production. §2 bis, partie STD. |
+| 2026-11-21 (secondes corrections du lot 1) | **SEL n'est plus dite « PAN »** (choix de Grégoire, 7 h 44) : nom de famille « Par sélection de productions » partout où il s'affiche ; bulles G1, G2, G5 ; remplacements simples (aide des indices, Exploration, profil, Aide, démo). Le libellé du registre et la logique du badge PAN restent. |
+| 2026-11-21 (corrections du lot 1) | **Le sigle suit le nom** (décision de Grégoire) : le registre sépare le `code` interne (STD, CIB, inchangés) du `sigle` affiché (SEL pour `standards`, STD pour `cibles`) ; tout écran lit le sigle (`obtenirSiglePratique`, `sigleDuCode`). Couleurs : sarcelle à SEL, bleu à STD. |
+| 2026-11-21 (lot/moteur-cibles-1-cibles) | **La famille `cibles` (« Par standards », code CIB) entre au tableau du §2**, sans calcul (lot 1). §2 bis, partie STD : le nom retenu, « Par sélection de productions », aligné ; « vraie pratique » retiré (posture pluraliste) ; ce que le lot 1 livre. |
+| 2026-11-20 (lot/standards-conception) | **§2 bis, partie STD refaite d'après les sources** (`plans de travail/CONCEPTION-2026-11-20-pratique-par-standards.md`). La doctrine de la notation par standards est vérifiée page à l'appui (rapport PAREA 2026, articles 2024 et 2025, billets de la CoP) ; l'écart est dit sans détour : la famille de code STD note des productions et en retient, ce n'est pas une notation par standards ; annonce du renommage (« Par productions retenues ») et de la pratique « Par standards » à venir. Liste des sources complétée (§13). Aucun code touché. Signalé sans retouche : l'attribution à *Heart of the loop* dans « reprises sans pénalité » est fausse (la phrase est dans *The Four Pillars*) et « variante délibérée et défendable » n'a pas de source. |
 | 2026-09-18 (#921) | **Une sommative CONFIGURABLE a son récit, et le profil l'affiche.** `PratiqueConfigurable.decrireCalcul` délègue à `PratiqueSommative.decrireCalcul` pour `moyenne_ponderee` (note = `_calculerPerformanceSommative`, verrou #897 compris ; `synthese.plafonnement = { moyenneOriginale }` quand il a joué). Le récit SOM porte `ponderation` et `poids` en nombres. Le profil rend la carte par `_genererNoteSessionSommative` quand `calculerDetailsNoteFinale` rend null. ⚠ `simulerIndices(da)` SANS id rend `null` (le §7 laisse croire à un repli sur la pratique active : il n'existe pas) — passer `obtenirPratiqueActiveGroupeCours()`. |
 | 2026-09-17 (#898, lot 34, 1.142.31) | **§10 : adopter un modèle Standards sans échelle demande l'échelle** — deux gestes vivants (assistant, bibliothèque), une seule question (`demanderEchelleAdoption`, `uiDialogues.demanderChoix`), parité profil / export / Comparateur prouvée ; cas d'arrêt #909. |
 | 2026-06-28 (#326 CLOS, 1.26.0) | **Comparateur RÉACTIVÉ (`COMPARATEUR_VISIBLE=true`), PR #73 mergée (squash `495cd99a`), constats terrain T1-T5 traités.** Décisions Grégoire : (1) une note STD non constructible rend `null` (« non constructible »), plus jamais un `0` trompeur — `simulerIndices` discrimine par FAMILLE (`obtenirCode()==='STD'`), le repli `calculerPerformance` ne masque plus l'échec STD (préserve SOM/SPE/DEN ; sentinelle 12 cas break-testée) ; (2) dérivation d'une maquette → créer + atterrir sur l'arbre SANS wizard ; (3) T3 : cause réelle = mismatch de FORME (copies en `.config` seul) → `dupliquerPratique`/`deriverMaquette` écrivent la forme CANONIQUE (sentinelle 4 cas). ⚠ `simulerIndices` alimente AUSSI l'export des résultats finaux — vérifié : les 4 pratiques STD abouties construisent 100 % des notes réelles. Journal antérieur (R1-R6, 1.19.0) = étapes intermédiaires, supersédées par cette clôture. |
