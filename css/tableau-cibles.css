@@ -71,6 +71,19 @@
     font-weight: 400;
 }
 
+/* Seulement des remarques (complément du 21 nov., 9 h 17) : aucun niveau, donc aucune couleur ; le ✎ se voit sans survol. */
+.tc-case--remarques {
+    background: transparent;
+    border-style: dashed;
+    border-color: var(--texte-secondaire);
+}
+
+.tc-case-remarque {
+    font-size: 1.1rem;
+    font-weight: 400;
+    color: var(--texte-principal);
+}
+
 .tc-case-point {
     width: 10px;
     height: 10px;
@@ -313,6 +326,11 @@
     padding-left: 17px;   /* aligne son bouton sur ceux des niveaux (bord de 6 px) */
 }
 
+/* « Aucun niveau » (une remarque seulement) : à part des niveaux de l'échelle, le « sans donnée » compris. */
+.tc-niveau--sans {
+    border-color: var(--texte-secondaire);
+}
+
 .tc-niveau-code {
     font-weight: 700;
     font-variant-numeric: tabular-nums;
@@ -395,6 +413,12 @@
     border: 2px solid var(--tn-couleur);
     color: var(--texte-principal);
     font-weight: 600;
+}
+
+.tc-entree-niveau--remarque {
+    border-style: dashed;
+    border-color: var(--texte-secondaire);
+    font-weight: 500;
 }
 
 .tc-entree-origine {

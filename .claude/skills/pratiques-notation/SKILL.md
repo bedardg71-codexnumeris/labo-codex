@@ -160,7 +160,10 @@ périmée (c'est le cas du skill `labo-codex` §5.2 au 5 juin).
   AJOUTE, une annulation est une entrée de plus ; chaque inscription garde l'état des critères jugés (`respecte: true |
   false | null`, null = non renseigné) et **aucun calcul ne lit les coches** (choix de Grégoire, 21 nov.). L'écran :
   `js/tableau-cibles.js` (Évaluation › Tableau de notation, les cibles en colonnes ; une case montre le DERNIER niveau
-  inscrit, pas le retenu). Toujours aucune note : le lot 3 retient, le lot 4 calcule.
+  inscrit, pas le retenu). Toujours aucune note : le lot 3 retient, le lot 4 calcule. **Complément du 21 nov., 9 h 17** :
+  une inscription peut ne porter AUCUN niveau (`niveau: null`, une « remarque » avec un texte) ; ce n'est jamais le niveau
+  « sans donnée » ; une cible qui n'a que des remarques reste sans donnée pour le niveau retenu et pour la note
+  (`InscriptionsCibles.estSansNiveau`).
 
 **SPE — Spécifications**
 - *Recherche / pratique* : une spécification décrit le **produit réussi entier**, jugé sur

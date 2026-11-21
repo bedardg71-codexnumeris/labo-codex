@@ -19,6 +19,12 @@
  * l'historique de la case, et « Annuler cette inscription » (N7) : l'inscription reste, barrée, datée de l'annulation.
  * L'APPLICATION NE CALCULE RIEN À PARTIR DES COCHES (choix de Grégoire, 21 nov. 2026, 8 h 38).
  *
+ * UNE INSCRIPTION SANS NIVEAU (complément du 21 nov., 9 h 17 ; à l'écran, une « remarque », mot PROPOSÉ) : la tuile
+ * « Aucun niveau » (cochée d'office dans la fenêtre d'une case : aucun niveau n'est proposé) et un texte. Le bouton dit ce
+ * qu'il va inscrire (« Inscrire le niveau » ou « Inscrire la remarque »). Une remarque ne change pas le dernier niveau
+ * d'une case ; une case qui n'a QUE des remarques montre ✎ et leur nombre, sans survol (au toucher, une bulle est
+ * invisible).
+ *
  * « INSCRIRE POUR UNE PRODUCTION » (N2, N4) : une production, un·e étudiant·e, et les cibles que la production renseigne ;
  * chacune part sur « Rien ce jour-là » : seules celles qui reçoivent un niveau s'inscrivent.
  *
@@ -37,6 +43,13 @@
         eleve: 'Étudiant·e',
         terminale: 'terminale',
         legende: 'Une case montre le dernier niveau inscrit, pas le niveau retenu ; le petit nombre dit combien d’inscriptions elle porte.',
+        // Complément 9 h 17 : une inscription sans niveau (« remarque », mot PROPOSÉ).
+        legendeRemarques: '✎ : des remarques, aucun niveau encore.',
+        aucunNiveau: 'Aucun niveau',
+        remarqueSeulement: 'une remarque seulement',
+        inscrireRemarque: 'Inscrire la remarque',
+        remarque: 'Remarque, sans niveau',
+        annonceRemarque: (nom, cible) => `${nom}, ${cible} : remarque inscrite.`,
         aide: 'Au clavier : les flèches pour se déplacer, Entrée pour ouvrir une case.',
         aucune: 'aucune inscription',
         echelleTitre: (nom) => (nom ? `Échelle « ${nom} » :` : 'Échelle :'),
@@ -80,10 +93,10 @@
         production: 'Production',
         ciblesDeLaProduction: 'Les cibles de cette production',
         aucuneProductionAuGroupe: 'Aucune production n’est assignée à ce groupe-cours.',
-        inscrireLesNiveaux: 'Inscrire les niveaux',
+        inscrireLesNiveaux: 'Inscrire',   // complément 9 h 17 : une cible peut recevoir une remarque sans niveau
         // Ce que dit la zone lue par le lecteur d'écran
         annonceInscrit: (nom, cible, niveau) => `${nom}, ${cible} : ${niveau} inscrit.`,
-        annonceInscrits: (nom, n) => `${nom} : ${n} ${n > 1 ? 'niveaux inscrits' : 'niveau inscrit'}.`,
+        annonceInscrits: (nom, n) => `${nom} : ${n} ${n > 1 ? 'inscriptions' : 'inscription'}.`,
         annonceAnnulee: 'Inscription annulée.'
     });
 
@@ -178,13 +191,16 @@
         return `<thead><tr><th scope="col" class="tn-col-eleve">${esc(MOTS.eleve)}</th>${cols}</tr></thead>`;
     }
 
-    /** Le libellé lu d'une case, et son infobulle. */
+    /** Le libellé lu d'une case, et son infobulle. Les remarques (aucun niveau) sont dites à part. */
     function _ditLaCase(nom, cible, etat, niveau) {
-        if (!etat.derniere) return `${nom}, ${cible.etiquette} : ${MOTS.aucune}`;
+        const annulees = etat.annulees ? `, ${etat.annulees} ${etat.annulees > 1 ? 'annulées' : 'annulée'}` : '';
+        const r = etat.remarques || 0;
+        const remarques = `${r} ${r > 1 ? 'remarques' : 'remarque'}`;
+        if (!etat.derniere) return r ? `${nom}, ${cible.etiquette} : aucun niveau inscrit, ${remarques}${annulees}` : `${nom}, ${cible.etiquette} : ${MOTS.aucune}`;
         const nomNiveau = niveau ? (niveau.nom || niveau.code) : `${etat.derniere.niveau} (${MOTS.niveauAbsent})`;
         const n = etat.actives;
-        const annulees = etat.annulees ? `, ${etat.annulees} ${etat.annulees > 1 ? 'annulées' : 'annulée'}` : '';
-        return `${nom}, ${cible.etiquette} : dernier niveau inscrit ${nomNiveau}, ${n} ${n > 1 ? 'inscriptions' : 'inscription'}${annulees}`;
+        return `${nom}, ${cible.etiquette} : dernier niveau inscrit ${nomNiveau}, ${n} ${n > 1 ? 'inscriptions' : 'inscription'}`
+            + `${r ? ', dont ' + remarques : ''}${annulees}`;
     }
 
     function _caseHTML(ctx, etudiant, cible, premiere) {
@@ -192,6 +208,11 @@
         const niveau = etat.derniere ? _niveauDuCode(ctx, etat.derniere.niveau) : null;
         const dit = _ditLaCase(_nomEleve(etudiant), cible, etat, niveau);
         const attrs = `data-tc="case" data-da="${esc(etudiant.da)}" data-cible="${esc(cible.id)}" tabindex="${premiere ? '0' : '-1'}" aria-label="${esc(dit)}" title="${esc(dit)}"`;
+        if (!etat.derniere && etat.remarques) {
+            // Seulement des remarques : une marque visible sans survol (✎) et leur nombre ; aucun niveau, aucune couleur.
+            return `<td class="tn-cellule"><button type="button" class="tc-case tc-case--remarques" ${attrs}>`
+                + `<span class="tc-case-remarque" aria-hidden="true">✎</span><span class="tc-case-compte" aria-hidden="true">${esc(String(etat.remarques))}</span></button></td>`;
+        }
         if (!etat.derniere) {
             return `<td class="tn-cellule"><button type="button" class="tc-case tc-case--vide" ${attrs}><span aria-hidden="true">+</span></button></td>`;
         }
@@ -217,7 +238,7 @@
         const rangees = ctx.etudiants.map((e, i) => _rangeeHTML(ctx, e, i)).join('');
         return `${tete}${_bandeauHTML(ctx, true)}${_echelleHTML(ctx)}${_noteAbsenteHTML(ctx)}
             <div class="tn-cadre"><div class="tn-defilement"><table class="tn-tableau tc-tableau">${_enteteHTML(ctx)}<tbody>${rangees}</tbody></table></div></div>
-            <div class="tn-legende"><span class="tn-legende-item tc-legende">${esc(MOTS.legende)}</span><span class="tn-legende-aide">${esc(MOTS.aide)}</span></div>
+            <div class="tn-legende"><span class="tn-legende-item tc-legende">${esc(MOTS.legende)}</span>${rangees.indexOf('tc-case--remarques') !== -1 ? `<span class="tn-legende-item tc-legende">${esc(MOTS.legendeRemarques)}</span>` : ''}<span class="tn-legende-aide">${esc(MOTS.aide)}</span></div>
             <p class="tn-annonce u-lecteur-ecran tc-annonce" aria-live="polite"></p>`;
     }
 
@@ -343,9 +364,17 @@
             <ul class="tc-criteres" aria-describedby="${esc(prefixe)}-criteres-aide">${lignes}</ul>`;
     }
 
-    function _niveauxHTML(ctx, prefixe, avecRien) {
+    /**
+     * Les tuiles du niveau. `parProduction` : « Rien ce jour-là » d'abord, coché d'office (N4). Puis « Aucun niveau » (une
+     * remarque ; complément 9 h 17), cochée d'office dans la fenêtre d'une case : aucun niveau n'est proposé. Puis chaque
+     * niveau de l'échelle, le « sans donnée » compris (E3) : « Aucun niveau » n'est pas lui.
+     */
+    function _niveauxHTML(ctx, prefixe, parProduction) {
         const nom = `${prefixe}-niveau`;
-        const rien = avecRien ? `<label class="tc-niveau tc-niveau--rien"><input type="radio" name="${esc(nom)}" value="" checked><span class="tc-niveau-texte"><span class="tc-niveau-nom">${esc(MOTS.rienCeJour)}</span></span></label>` : '';
+        const tuile = (marqueur, nomTuile, aide, coche, classe) => `<label class="tc-niveau ${classe}"><input type="radio" name="${esc(nom)}" value="" ${marqueur}${coche ? ' checked' : ''}>`
+            + `<span class="tc-niveau-texte"><span class="tc-niveau-nom">${esc(nomTuile)}</span>${aide ? `<span class="tc-niveau-marque">${esc(aide)}</span>` : ''}</span></label>`;
+        const rien = (parProduction ? tuile('data-rien', MOTS.rienCeJour, '', true, 'tc-niveau--rien') : '')
+            + tuile('data-sans-niveau', MOTS.aucunNiveau, MOTS.remarqueSeulement, !parProduction, 'tc-niveau--rien tc-niveau--sans');
         const tuiles = ctx.niveaux.map(n => {
             const marque = String(n.code) === ctx.codeSansDonnee ? `<span class="tc-niveau-marque">${esc(MOTS.sansDonnee)}</span>` : '';
             return `<label class="tc-niveau" style="--tn-couleur: ${esc(_couleur(n))}"><input type="radio" name="${esc(nom)}" value="${esc(n.code)}">`
@@ -382,9 +411,10 @@
         return reponses;
     }
 
+    /** `{ rien, niveau }` : `rien` pour « Rien ce jour-là » ; `niveau` est un code, ou null (« Aucun niveau »). */
     function _lireNiveau(bloc, prefixe) {
         const coche = bloc.querySelector(`input[name="${CSS.escape(prefixe + '-niveau')}"]:checked`);
-        return coche ? coche.value : '';
+        return { rien: !!coche && coche.hasAttribute('data-rien'), niveau: I().lireNiveau(coche ? coche.value : null) };
     }
 
     /* ----- L'inscription d'une case ----- */
@@ -409,8 +439,9 @@
         const h = I().historiqueDeLaCase(ctx.inscriptions, da, ctx.ensemble.id, cibleId);
         if (h.length === 0) return `<p class="tc-aide">${esc(MOTS.historiqueVide)}</p>`;
         const entrees = h.map(({ inscription: i, annulation: a }) => {
-            const niveau = _niveauDuCode(ctx, i.niveau);
-            const nomNiveau = niveau ? `${i.niveau} · ${niveau.nom || ''}` : `${i.niveau} (${MOTS.niveauAbsent})`;
+            const sansNiveau = I().estSansNiveau(i);
+            const niveau = sansNiveau ? null : _niveauDuCode(ctx, i.niveau);
+            const nomNiveau = sansNiveau ? MOTS.remarque : (niveau ? `${i.niveau} · ${niveau.nom || ''}` : `${i.niveau} (${MOTS.niveauAbsent})`);
             const criteres = (i.criteres || []).length ? `<ul class="tc-entree-criteres">${i.criteres.map(_ligneCritereHistorique).join('')}</ul>` : '';
             const fin = a
                 ? `<p class="tc-entree-annulation">${esc(MOTS.annulee(dateLisible(a.date), a.raison))}</p>`
@@ -418,7 +449,7 @@
             return `<li class="tc-entree${a ? ' tc-entree--annulee' : ''}">
                 <div class="tc-entree-corps">
                     <div class="tc-entree-tete"><span class="tc-entree-date">${esc(dateLisible(i.date))}</span>
-                        <span class="tc-entree-niveau" style="--tn-couleur: ${esc(_couleur(niveau))}">${esc(nomNiveau)}</span>
+                        <span class="tc-entree-niveau${sansNiveau ? ' tc-entree-niveau--remarque' : ''}" style="--tn-couleur: ${esc(_couleur(niveau))}">${esc(nomNiveau)}</span>
                         <span class="tc-entree-origine">${esc(_titreProduction(i.productionId))}</span></div>
                     ${i.noteBreve ? `<p class="tc-entree-note">${esc(i.noteBreve)}</p>` : ''}
                     ${criteres}
@@ -452,7 +483,7 @@
                 <section class="tc-section tc-section--ligne">${_origineHTML(ctx, p + '-origine')}${_dateHTML(p + '-date')}</section>
                 <p class="tc-alerte u-hide" role="alert"></p>
                 <div class="modal-actions"><button type="button" class="btn btn-neutre" data-tc="fermer">${esc(MOTS.fermer)}</button>
-                    <button type="button" class="btn btn-principal" data-tc="inscrire">${esc(MOTS.inscrire)}</button></div>
+                    <button type="button" class="btn btn-principal" data-tc="inscrire">${esc(MOTS.inscrireRemarque)}</button></div>
             </form>
             <section class="tc-historique"><h4 class="tc-section-titre">${esc(MOTS.historique)}</h4><div class="tc-historique-hote">${historiqueHTML(ctx, da, cibleId)}</div></section>`;
         return _ouvrirFenetre(html, { mode: 'case', da: String(da), cibleId, retour, ctx });
@@ -465,7 +496,7 @@
         const cible = ctx.cibles.find(c => c.id === cibleId);
         const saisie = {
             da, ensembleId: ctx.ensemble.id, cibleId,
-            niveau: _lireNiveau(bloc, p),
+            niveau: _lireNiveau(bloc, p).niveau,
             echelleId: ctx.echelle ? (ctx.echelle.id || null) : null,
             date: bloc.querySelector('.tc-date').value,
             productionId: bloc.querySelector('.tc-origine').value || null,
@@ -481,7 +512,8 @@
         const etudiant = ctx.etudiants.find(e => String(e.da) === String(da));
         _fermer();
         _rerendre({ da, cibleId });
-        _annoncer(MOTS.annonceInscrit(_nomEleve(etudiant), cible.etiquette, niveau ? (niveau.nom || niveau.code) : saisie.niveau));
+        _annoncer(r.entrees[0].niveau === null ? MOTS.annonceRemarque(_nomEleve(etudiant), cible.etiquette)
+            : MOTS.annonceInscrit(_nomEleve(etudiant), cible.etiquette, niveau ? (niveau.nom || niveau.code) : saisie.niveau));
         return true;
     }
 
@@ -573,15 +605,18 @@
         if (!productionId) motifsTete.push(I().MOTIFS.SANS_PRODUCTION);
         if (!I().dateValide(date)) motifsTete.push(I().MOTIFS.DATE);
         if (motifsTete.length) { _alerte(overlay, motifsTete); return false; }
-        const saisies = Array.from(overlay.querySelectorAll('.tc-pr-cibles [data-tc-bloc]')).map(bloc => {
-            const niveau = _lireNiveau(bloc, bloc.dataset.prefixe);
-            if (!niveau) return null;   // « Rien ce jour-là » : la cible ne reçoit rien (N4)
+        const remplies = Array.from(overlay.querySelectorAll('.tc-pr-cibles [data-tc-bloc]')).map(bloc => {
+            const lu = _lireNiveau(bloc, bloc.dataset.prefixe);
+            if (lu.rien) return null;   // « Rien ce jour-là » : la cible ne reçoit rien (N4)
             const cible = ctx.cibles.find(c => c.id === bloc.dataset.cible);
-            return { da, ensembleId: ctx.ensemble.id, cibleId: cible.id, niveau, echelleId: ctx.echelle ? (ctx.echelle.id || null) : null,
-                date, productionId, noteBreve: bloc.querySelector('.tc-retroaction').value, criteres: I().etatDesCriteres(cible, _lireCoches(bloc)) };
+            return { cible, saisie: { da, ensembleId: ctx.ensemble.id, cibleId: cible.id, niveau: lu.niveau, echelleId: ctx.echelle ? (ctx.echelle.id || null) : null,
+                date, productionId, noteBreve: bloc.querySelector('.tc-retroaction').value, criteres: I().etatDesCriteres(cible, _lireCoches(bloc)) } };
         }).filter(Boolean);
-        if (saisies.length === 0) { _alerte(overlay, [I().MOTIFS.AUCUNE_CIBLE_REMPLIE]); return false; }
-        const motifs = saisies.map(s => I().motifsRefus(s, ctx.echelle)).find(m => m.length) || [];
+        if (remplies.length === 0) { _alerte(overlay, [I().MOTIFS.AUCUNE_CIBLE_REMPLIE]); return false; }
+        // Le refus nomme sa cible (une remarque vide, par exemple) : lisible sans bulle.
+        const enMinuscule = (m) => m.charAt(0).toLowerCase() + m.slice(1);
+        const motifs = remplies.map(x => I().motifsRefus(x.saisie, ctx.echelle).map(m => `« ${x.cible.etiquette} » : ${enMinuscule(m)}`)).find(m => m.length) || [];
+        const saisies = remplies.map(x => x.saisie);
         _alerte(overlay, motifs);
         if (motifs.length) return false;
         const r = await I().inscrire(saisies, { geste: 'Inscrire pour une production' });
@@ -623,12 +658,14 @@
             _alerte(overlay, []);
             return;
         }
-        // Une cible du geste par production : ses critères et sa rétroaction paraissent quand elle reçoit un niveau.
-        if (e.target.type === 'radio') {
-            const bloc = e.target.closest('.tc-bloc-cible');
-            const details = bloc && bloc.querySelector('.tc-bloc-details');
-            if (details) details.classList.toggle('u-hide', e.target.value === '');
-        }
+        if (e.target.type !== 'radio') return;
+        // Une cible du geste par production : ses critères et sa rétroaction paraissent dès qu'elle reçoit quelque chose.
+        const bloc = e.target.closest('.tc-bloc-cible');
+        const details = bloc && bloc.querySelector('.tc-bloc-details');
+        if (details) details.classList.toggle('u-hide', e.target.hasAttribute('data-rien'));
+        // La fenêtre d'une case : le bouton dit ce qu'il va inscrire.
+        const bouton = !bloc && overlay.querySelector('[data-tc="inscrire"]');
+        if (bouton) bouton.textContent = e.target.hasAttribute('data-sans-niveau') ? MOTS.inscrireRemarque : MOTS.inscrire;
     }
 
     window.TableauCibles = {

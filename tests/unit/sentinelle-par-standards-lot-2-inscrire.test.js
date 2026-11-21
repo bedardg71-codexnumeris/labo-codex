@@ -18,6 +18,9 @@
  *      Un critère retiré ne pose pas de question : l'inscription garde le texte du critère jugé.
  *   J. Les cibles offertes pour une production (sa liste facultative ; sans liste, toutes).
  *   K. Une échelle à trois niveaux comme à six : la fenêtre offre chacun, le « sans donnée » compris (E3).
+ *   L. Complément du 21 nov., 9 h 17 : une inscription peut ne porter aucun niveau (une « remarque ») ; `niveau: null`,
+ *      jamais le niveau « sans donnée » ; l'inscription vide est refusée, en mots ; la case garde le dernier niveau après
+ *      une remarque, et montre ✎ quand elle n'a que des remarques ; l'historique, l'annulation, les critères.
  *
  * Données fictives (Zoé Fictive, Yan Inventé, cours « 999-ZZZ-ZZ »). BREAK-TESTS : journal en fin de fichier.
  */
@@ -118,7 +121,7 @@ describe('B · aucune écriture ne réduit la liste ; une annulation ne retire r
         const h = m.IC.historiqueDeLaCase(m.store[CLE], ZOE, 'ENS1', CIBLE.id);
         expect(h).toHaveLength(1);
         expect(h[0].annulation.id).toBe(m.store[CLE][1].id);
-        expect(m.IC.etatDeLaCase(m.store[CLE], ZOE, 'ENS1', CIBLE.id)).toEqual({ derniere: null, actives: 0, annulees: 1 });
+        expect(m.IC.etatDeLaCase(m.store[CLE], ZOE, 'ENS1', CIBLE.id)).toEqual({ derniere: null, actives: 0, remarques: 0, annulees: 1 });
     });
 
     it('refus, sans rien écrire : annuler deux fois ; annuler une inscription introuvable', async () => {
@@ -175,18 +178,15 @@ describe('C · les coches : « non renseigné » n\'est pas « non respecté »,
         expect(m.IC.motifsRefus(saisie(m.IC, { niveau: '1', criteres: tousOui }), ECHELLE)).toEqual([]);
     });
 
-    it('la fenêtre ne propose aucun niveau : cocher tous les critères ne coche aucun niveau, et « Inscrire » sans niveau le demande', async () => {
+    it('la fenêtre ne propose aucun niveau : cocher tous les critères ne coche aucun niveau ; « Aucun niveau » reste coché', async () => {
         const e = monterEcran();
         e.TC.ouvrirInscription(ZOE, CIBLE.id, null);
         const f = e.doc.querySelector('.tc-fenetre');
         f.querySelectorAll('.tc-coche--oui').forEach(b => b.click());
         expect([...f.querySelectorAll('.tc-coche[aria-pressed="true"]')].map(b => b.dataset.valeur)).toEqual(['oui', 'oui', 'oui']);
-        expect(f.querySelectorAll('.tc-niveaux input:checked')).toHaveLength(0);
+        expect(f.querySelectorAll('.tc-niveaux input:checked:not([data-sans-niveau])'), 'aucun niveau de l\'échelle').toHaveLength(0);
+        expect(f.querySelector('.tc-niveaux input[data-sans-niveau]').checked).toBe(true);
         expect(f.querySelector('.tc-alerte').textContent).toBe('');
-        f.querySelector('[data-tc="inscrire"]').click();
-        await new Promise(r => setTimeout(r, 0));
-        expect(f.querySelector('.tc-alerte').textContent).toBe(e.IC.MOTIFS.SANS_NIVEAU);
-        expect(e.store[CLE] || []).toEqual([]);
     });
 
     it('toucher encore une coche la ramène à « non renseigné » ; « Respecté » et « Non respecté » s\'excluent', () => {
@@ -452,7 +452,7 @@ describe('H · la clé `inscriptionsCibles` est inscrite à tous les registres n
         expect(liste(lire('js/correction-da.js'), 'const FAMILLES')).toMatch(/nom: 'inscriptionsCibles', categorie: 'inscriptions'/);
         expect(liste(lire('js/reserve.js'), 'var CLES_FILTRER_PAR_DA')).toContain("'inscriptionsCibles'");
         expect(tranche(lire('js/vue-simple-donnees.js'), 'const CLES_DE_RESULTATS', ';')).toContain("'inscriptionsCibles'");
-        expect(lire('js/codex.js')).toMatch(/inscriptionsCibles: \{ nom: 'les niveaux inscrits par cible'/);
+        expect(lire('js/codex.js')).toMatch(/inscriptionsCibles: \{ nom: 'les inscriptions sur les cibles'/);
         expect(lire('docs/DATA-OWNERSHIP.md')).toMatch(/\| `inscriptionsCibles` \| NS/);
     });
     it('la suppression d\'un trimestre l\'emporte par son préfixe (aucune liste à tenir)', () => {
@@ -597,16 +597,151 @@ describe('K · rien n\'est codé en dur dans l\'échelle : trois niveaux comme s
             expect(e.hote.querySelectorAll('.tn-repere .tn-niveau')).toHaveLength(niveaux.length);
             e.TC.ouvrirInscription(ZOE, CIBLE.id, null);
             const f = e.doc.querySelector('.tc-fenetre');
-            const tuiles = f.querySelectorAll('.tc-niveaux .tc-niveau');
+            const tuiles = f.querySelectorAll('.tc-niveaux .tc-niveau:not(.tc-niveau--rien)');
             expect(tuiles).toHaveLength(niveaux.length);
             expect(tuiles[0].querySelector('.tc-niveau-marque').textContent).toBe('sans donnée');
-            expect(f.querySelectorAll('.tc-niveau-marque')).toHaveLength(1);
+            expect([...tuiles].filter(t => t.querySelector('.tc-niveau-marque'))).toHaveLength(1);
             tuiles[0].querySelector('input').checked = true;
             f.querySelector('[data-tc="inscrire"]').click();
             await new Promise(r => setTimeout(r, 0));
             expect(e.store[CLE].map(i => i.niveau)).toEqual([niveaux[0][0]]);
         });
     }
+});
+
+/* ================================================================ L. Complément du 21 nov., 9 h 17 : une inscription sans niveau */
+describe('L · une inscription peut ne porter aucun niveau (une remarque) ; ce n\'est jamais le niveau « sans donnée »', () => {
+    const I_ = (id, niveau, date, extra) => Object.assign({ id, type: 'inscription', da: ZOE, ensembleId: 'ENS1', cibleId: CIBLE.id, niveau,
+        echelleId: niveau === null ? null : 'ECH-banc', date, horodatage: date + 'T12:00:00.000Z', productionId: null, noteBreve: '', criteres: [] }, extra || {});
+
+    it('une remarque s\'inscrit : `niveau: null`, `echelleId: null`, le texte gardé ; ni « 0 » ni chaîne vide', async () => {
+        const m = monterInscriptions();
+        const sans = saisie(m.IC, { niveau: null, noteBreve: 'Observé en atelier : relève les procédés, hésite sur les effets.' });
+        expect(m.IC.motifsRefus(sans, ECHELLE)).toEqual([]);
+        expect((await m.IC.inscrire([sans])).ok).toBe(true);
+        const [i] = JSON.parse(JSON.stringify(m.store[CLE]));
+        expect(i.niveau).toBeNull();
+        expect(i.echelleId).toBeNull();
+        expect(i.noteBreve).toBe('Observé en atelier : relève les procédés, hésite sur les effets.');
+        expect(m.IC.estSansNiveau(i)).toBe(true);
+        expect(m.IC.construireInscription({ niveau: '' }).niveau, 'une chaîne vide n\'est pas un code').toBeNull();
+    });
+
+    it('le niveau « sans donnée » (0 %) est un niveau : il s\'écrit « 0 », il n\'est pas une remarque, et la case le montre', async () => {
+        const m = monterInscriptions();
+        await m.IC.inscrire([saisie(m.IC, { niveau: '0' })]);
+        expect(m.store[CLE][0].niveau).toBe('0');
+        expect(m.IC.estSansNiveau(m.store[CLE][0])).toBe(false);
+        expect(m.IC.etatDeLaCase(m.store[CLE], ZOE, 'ENS1', CIBLE.id)).toMatchObject({ actives: 1, remarques: 0 });
+        expect(m.IC.etatDeLaCase(m.store[CLE], ZOE, 'ENS1', CIBLE.id).derniere.niveau).toBe('0');
+    });
+
+    it('l\'inscription vide (ni niveau ni texte) est refusée, en mots ; des coches seules ne suffisent pas', () => {
+        const m = monterInscriptions();
+        expect(m.IC.motifsRefus(saisie(m.IC, { niveau: null, noteBreve: '   ' }), ECHELLE)).toEqual([m.IC.MOTIFS.VIDE]);
+        const coches = m.IC.etatDesCriteres(CIBLE, { 'crit-a': true });
+        expect(m.IC.motifsRefus(saisie(m.IC, { niveau: null, noteBreve: '', criteres: coches }), ECHELLE)).toEqual([m.IC.MOTIFS.VIDE]);
+        expect(m.IC.MOTIFS.VIDE).toMatch(/^[A-ZÀ-Ü].{30,}[.]$/);
+    });
+
+    it('à l\'écran : « Inscrire » sans niveau ni texte affiche le refus dans la fenêtre (pas dans une bulle) et n\'écrit rien', async () => {
+        const e = monterEcran();
+        e.TC.ouvrirInscription(ZOE, CIBLE.id, null);
+        const f = e.doc.querySelector('.tc-fenetre');
+        f.querySelector('[data-tc="inscrire"]').click();
+        await new Promise(r => setTimeout(r, 0));
+        const alerte = f.querySelector('.tc-alerte');
+        expect(alerte.textContent).toBe(e.IC.MOTIFS.VIDE);
+        expect(alerte.classList.contains('u-hide')).toBe(false);
+        expect(alerte.getAttribute('role')).toBe('alert');
+        expect(e.store[CLE] || []).toEqual([]);
+    });
+
+    it('à l\'écran : une remarque, avec des critères cochés ; le bouton dit ce qu\'il inscrit', async () => {
+        const e = monterEcran();
+        e.TC.ouvrirInscription(ZOE, CIBLE.id, null);
+        const f = e.doc.querySelector('.tc-fenetre');
+        const bouton = f.querySelector('[data-tc="inscrire"]');
+        expect(bouton.textContent).toBe('Inscrire la remarque');
+        const niveau = f.querySelector('.tc-niveaux input[value="2"]');
+        niveau.checked = true;
+        niveau.dispatchEvent(new e.doc.defaultView.Event('change', { bubbles: true }));
+        expect(bouton.textContent).toBe('Inscrire le niveau');
+        const sans = f.querySelector('.tc-niveaux input[data-sans-niveau]');
+        sans.checked = true;
+        sans.dispatchEvent(new e.doc.defaultView.Event('change', { bubbles: true }));
+        expect(bouton.textContent).toBe('Inscrire la remarque');
+        f.querySelector('.tc-critere[data-critere="crit-a"] .tc-coche--oui').click();
+        f.querySelector('.tc-retroaction').value = 'Bonne piste à l\'oral.';
+        bouton.click();
+        await new Promise(r => setTimeout(r, 0));
+        const [i] = e.store[CLE];
+        expect(i.niveau).toBeNull();
+        expect(i.criteres.map(k => k.respecte)).toEqual([true, null, null]);
+    });
+
+    it('la case garde le DERNIER NIVEAU après une remarque plus récente ; elle compte la remarque et la dit', () => {
+        const liste = [I_('I1', '3', '2026-11-01'), I_('R1', null, '2026-11-10', { noteBreve: 'à revoir' })];
+        const e = monterEcran({ store: { [CLE]: liste } });
+        expect(e.IC.etatDeLaCase(liste, ZOE, 'ENS1', CIBLE.id)).toMatchObject({ actives: 2, remarques: 1 });
+        expect(e.IC.etatDeLaCase(liste, ZOE, 'ENS1', CIBLE.id).derniere.id).toBe('I1');
+        const bouton = e.hote.querySelector(`.tc-case[data-da="${ZOE}"][data-cible="${CIBLE.id}"]`);
+        expect(bouton.querySelector('.tc-case-niveau').textContent).toBe('3');
+        expect(bouton.querySelector('.tc-case-compte').textContent).toBe('2');
+        expect(bouton.getAttribute('aria-label')).toBe('Zoé Fictive, Lire un texte : dernier niveau inscrit Acquis, 2 inscriptions, dont 1 remarque');
+    });
+
+    it('une case qui n\'a que des remarques le montre par ✎ et leur nombre, sans survol, et la légende le dit ; aucun niveau, aucun « 0 »', () => {
+        const liste = [I_('R1', null, '2026-11-02', { noteBreve: 'a' }), I_('R2', null, '2026-11-09', { noteBreve: 'b' })];
+        const e = monterEcran({ store: { [CLE]: liste } });
+        const bouton = e.hote.querySelector(`.tc-case[data-da="${ZOE}"][data-cible="${CIBLE.id}"]`);
+        expect(bouton.classList.contains('tc-case--remarques')).toBe(true);
+        expect(bouton.textContent).toBe('✎2');
+        expect(bouton.querySelector('.tc-case-niveau')).toBeNull();
+        expect(bouton.getAttribute('aria-label')).toBe('Zoé Fictive, Lire un texte : aucun niveau inscrit, 2 remarques');
+        expect([...e.hote.querySelectorAll('.tc-legende')].map(x => x.textContent)).toContain(e.TC.MOTS.legendeRemarques);
+        expect(e.IC.etatDeLaCase(liste, ZOE, 'ENS1', CIBLE.id).derniere).toBeNull();
+    });
+
+    it('l\'historique montre la remarque à sa date, parmi les inscriptions ; annulée, elle reste, barrée', async () => {
+        const liste = [I_('I1', '3', '2026-11-01'), I_('R1', null, '2026-11-05', { noteBreve: 'Hésite sur les effets.' }), I_('I2', '2', '2026-11-12')];
+        const e = monterEcran({ store: { [CLE]: liste } });
+        let html = e.TC.historiqueHTML(e.TC.completerContexte(e.ctx), ZOE, CIBLE.id);
+        const ordre = [...html.matchAll(/class="tc-entree-date">([^<]+)</g)].map(x => x[1]);
+        expect(ordre).toEqual(['12 novembre 2026', '5 novembre 2026', '1 novembre 2026']);
+        expect(html).toContain('tc-entree-niveau--remarque');
+        expect(html).toContain('Remarque, sans niveau');
+        const r = await e.IC.annuler('R1', 'Notée sur la mauvaise cible.');
+        expect(r.ok).toBe(true);
+        expect(e.store[CLE].find(x => x.id === 'R1')).toEqual(liste[1]);
+        html = e.TC.historiqueHTML(e.TC.completerContexte(e.ctx), ZOE, CIBLE.id);
+        expect(html).toMatch(/tc-entree tc-entree--annulee">[\s\S]*Remarque, sans niveau[\s\S]*Annulée le [^<]+ : Notée sur la mauvaise cible\./);
+    });
+
+    it('« inscrire pour une production » : « Aucun niveau » sans texte est refusé en nommant la cible ; avec un texte, c\'est une remarque', async () => {
+        const productions = [{ id: 'P1', titre: 'Dissertation' }];
+        const e = monterEcran({ productions });
+        e.TC.ouvrirParProduction(null);
+        const f = e.doc.querySelector('.tc-fenetre');
+        f.querySelector('.tc-pr-eleve').value = YAN;
+        const prod = f.querySelector('.tc-pr-production');
+        prod.value = 'P1';
+        prod.dispatchEvent(new e.doc.defaultView.Event('change', { bubbles: true }));
+        const bloc = f.querySelector(`.tc-bloc-cible[data-cible="${CIBLE.id}"]`);
+        const sans = bloc.querySelector('input[data-sans-niveau]');
+        sans.checked = true;
+        sans.dispatchEvent(new e.doc.defaultView.Event('change', { bubbles: true }));
+        expect(bloc.querySelector('.tc-bloc-details').classList.contains('u-hide'), 'ses critères et sa rétroaction paraissent').toBe(false);
+        f.querySelector('[data-tc="inscrire-production"]').click();
+        await new Promise(r => setTimeout(r, 0));
+        expect(f.querySelector('.tc-alerte').textContent).toBe('« Lire un texte » : choisis un niveau ou écris une rétroaction : une inscription vide ne s\'inscrit pas.');
+        expect(e.store[CLE] || []).toEqual([]);
+        bloc.querySelector('.tc-retroaction').value = 'A repris la cible à l\'oral.';
+        f.querySelector('[data-tc="inscrire-production"]').click();
+        await new Promise(r => setTimeout(r, 0));
+        expect(e.store[CLE]).toHaveLength(1);
+        expect(e.store[CLE][0]).toMatchObject({ da: YAN, cibleId: CIBLE.id, niveau: null, productionId: 'P1', noteBreve: 'A repris la cible à l\'oral.' });
+    });
 });
 
 /* ================================================================ JOURNAL DES BREAK-TESTS (21 nov. 2026)
@@ -640,4 +775,16 @@ describe('K · rien n\'est codé en dur dans l\'échelle : trois niveaux comme s
  *      ROUGE (1) : J « sa liste, dans l'ordre de l'ensemble… ».
  * BT13 tableau-cibles.js, `_niveauxHTML` : le niveau « sans donnée » retiré des tuiles.
  *      ROUGE (2) : K « à trois niveaux… », K « à six niveaux… ».
+ *
+ * Complément du 21 nov., 9 h 17 (41 essais au vert avant et après) :
+ * BT14 inscriptions-cibles.js, `construireInscription` : une remarque reçoit le code « 0 » (le « sans donnée ») au lieu de null.
+ *      ROUGE (3) : L « une remarque s'inscrit… », L « à l'écran : une remarque… », L « inscrire pour une production… ».
+ * BT15 inscriptions-cibles.js, `motifsRefus` : le refus de l'inscription vide retiré.
+ *      ROUGE (3) : L « l'inscription vide… est refusée », L « à l'écran : Inscrire sans niveau ni texte… », L « inscrire pour une production… ».
+ * BT16 inscriptions-cibles.js, `etatDeLaCase` : la dernière inscription, remarque comprise, devient le « dernier niveau ».
+ *      ROUGE (2) : L « la case garde le DERNIER NIVEAU… », L « une case qui n'a que des remarques… ».
+ * BT17 tableau-cibles.js, `_caseHTML` : la case qui n'a que des remarques rendue vide (« + »).
+ *      ROUGE (1) : L « une case qui n'a que des remarques le montre par ✎… ».
+ * BT18 tableau-cibles.js, `historiqueHTML` : la remarque n'est plus dite « Remarque, sans niveau ».
+ *      ROUGE (1) : L « l'historique montre la remarque à sa date… ».
  */

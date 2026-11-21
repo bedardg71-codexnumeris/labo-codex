@@ -88,8 +88,10 @@ test('inscrire avec des critères cochés, rouvrir, annuler : l\'inscription res
     await expect(f.locator('.tc-critere .cibles-fiche-essentiel')).toHaveCount(2);
     await f.locator('.tc-critere[data-critere="crit_a1"] .tc-coche--oui').click();
     await f.locator('.tc-critere[data-critere="crit_a2"] .tc-coche--non').click();
-    await expect(f.locator('.tc-niveaux input:checked'), 'aucun niveau proposé').toHaveCount(0);
+    await expect(f.locator('.tc-niveaux input:checked:not([data-sans-niveau])'), 'aucun niveau proposé').toHaveCount(0);
+    await expect(f.locator('[data-tc="inscrire"]')).toHaveText('Inscrire la remarque');
     await f.locator('.tc-niveau', { hasText: 'Ça y est presque' }).click();
+    await expect(f.locator('[data-tc="inscrire"]')).toHaveText('Inscrire le niveau');
     await f.locator('.tc-retroaction').fill('Procédés bien relevés ; <b>effets</b> à expliquer.');
     await f.locator('.tc-origine').selectOption('P1');
     await f.locator('[data-tc="inscrire"]').click();
@@ -145,12 +147,45 @@ test('une échelle à trois niveaux : trois tuiles, le « sans donnée » compri
     await ouvrirTableau(page, { niveaux: TROIS });
     await page.locator(`.tc-case[data-da="${ZOE}"][data-cible="cible_b"]`).click();
     const f = page.locator('.tc-fenetre');
-    await expect(f.locator('.tc-niveaux .tc-niveau')).toHaveCount(3);
-    await expect(f.locator('.tc-niveau-marque')).toHaveText(['sans donnée']);
+    await expect(f.locator('.tc-niveaux .tc-niveau:not(.tc-niveau--rien)')).toHaveCount(3);
+    await expect(f.locator('.tc-niveau-marque')).toHaveText(['une remarque seulement', 'sans donnée']);
     await f.locator('.tc-niveau', { hasText: 'Absent' }).click();
     await f.locator('[data-tc="inscrire"]').click();
     await expect(page.locator('.tc-fenetre')).toHaveCount(0);
     expect((await stock(page)).map(i => i.niveau)).toEqual(['A']);
+});
+
+// Complément du 21 nov., 9 h 17 : une inscription peut ne porter aucun niveau (une « remarque »).
+test('une remarque sans niveau : refusée vide ; inscrite avec un texte, la case montre ✎ ; un niveau ensuite la remplace à l\'écran, la remarque reste à l\'historique', async ({ page }) => {
+    const erreurs = [];
+    page.on('pageerror', (e) => erreurs.push(e.message));
+    await ouvrirTableau(page, { niveaux: CINQ });
+    const laCase = page.locator(`.tc-case[data-da="${ZOE}"][data-cible="cible_b"]`);
+    await laCase.click();
+    const f = page.locator('.tc-fenetre');
+    await f.locator('[data-tc="inscrire"]').click();
+    await expect(f.locator('.tc-alerte')).toHaveText('Choisis un niveau ou écris une rétroaction : une inscription vide ne s\'inscrit pas.');
+    await expect(f.locator('.tc-alerte')).toBeVisible();
+    await f.locator('.tc-retroaction').fill('En atelier : les paragraphes ont une idée, les transitions manquent.');
+    await f.locator('[data-tc="inscrire"]').click();
+    await expect(page.locator('.tc-fenetre')).toHaveCount(0);
+    await expect(laCase).toHaveText('✎1');
+    await expect(laCase).toHaveAttribute('aria-label', 'Zoé Fictive, Structurer : aucun niveau inscrit, 1 remarque');
+    await expect(page.locator('.tc-legende', { hasText: '✎' })).toBeVisible();
+    let s = await stock(page);
+    expect(s[0]).toMatchObject({ niveau: null, echelleId: null });
+    // Un niveau ensuite : la case le montre ; la remarque reste comptée et lisible à l'historique.
+    await laCase.click();
+    await f.locator('.tc-niveau', { hasText: 'Acquis' }).click();
+    await f.locator('.tc-date').fill('2026-11-25');
+    await f.locator('[data-tc="inscrire"]').click();
+    await expect(laCase.locator('.tc-case-niveau')).toHaveText('3');
+    await expect(laCase).toHaveAttribute('aria-label', 'Zoé Fictive, Structurer : dernier niveau inscrit Acquis, 2 inscriptions, dont 1 remarque');
+    await laCase.click();
+    await expect(f.locator('.tc-entree-niveau--remarque')).toHaveText('Remarque, sans niveau');
+    s = await stock(page);
+    expect(s.map(i => i.niveau)).toEqual([null, '3']);
+    expect(erreurs).toEqual([]);
 });
 
 test('la fiche d\'une production : les cibles qu\'elle renseigne, cochées, et l\'enregistrement suit le changement', async ({ page }) => {

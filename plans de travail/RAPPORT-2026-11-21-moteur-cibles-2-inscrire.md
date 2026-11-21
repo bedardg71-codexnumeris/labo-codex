@@ -9,11 +9,45 @@
 > « inscrire pour une production », la liste des cibles d'une production, la question de l'assistant avant de retirer une
 > cible inscrite, la phrase de la note absente) ; la clé `inscriptionsCibles` à tous les registres nominatifs ; la page des
 > textes proposés ; le plan révisé (décisions du 21 nov. en tête, lot 2 avec l'origine de chaque règle).
-> **Reste** : les textes à faire corriger par Grégoire (`TEXTES-2026-11-21-par-standards-lot-2.md`, 73 textes et
-> 4 questions) ; ses essais sur l'aperçu ; le passage WebKit du Mac ; le lot 3 (le niveau retenu).
+> **Complément du 21 nov., 9 h 17** (commit à part, § 8) : une inscription peut ne porter aucun niveau (une « remarque »,
+> mot proposé). La forme exacte d'une inscription, celle dont partent les gestes 3 et 4, est au § 0.
+> **Reste** : les textes à faire corriger par Grégoire (`TEXTES-2026-11-21-par-standards-lot-2.md` : 73 textes et
+> 4 questions, puis 16 textes et 1 question du complément) ; ses essais sur l'aperçu ; le passage WebKit du Mac ; le lot 3
+> (le niveau retenu).
 > **PR d'aperçu** : https://github.com/bedardg71-codexnumeris/labo-codex/pull/45 (brouillon, « ne pas fusionner ») ;
 > **aperçu** : https://deploy-preview-45--codexnumeris-051225.netlify.app. `RELAIS.md` (sur `main`) n'est pas touché : ce relais-ci tient
 > lieu de relais de la branche.
+
+## 0. La forme d'une inscription, telle que gardée (le point de départ des gestes 3 et 4)
+
+Clé `<trimestre>_inscriptionsCibles` (par trimestre, `cle('inscriptionsCibles')`) : **un tableau d'entrées, où l'on ajoute
+seulement**. Aucune entrée n'est réécrite, déplacée ni retirée. Seul écrivain : `js/pratiques/inscriptions-cibles.js`.
+
+**Une inscription** (`type: 'inscription'`) :
+
+| Champ | Valeur gardée |
+|---|---|
+| `id` | chaîne unique (`INSC_…`) |
+| `type` | `'inscription'` |
+| `da` | chaîne, le DA de l'étudiant·e |
+| `ensembleId`, `cibleId` | chaînes : l'ensemble de cibles et la cible (identités permanentes) |
+| `niveau` | **le code d'un niveau de l'échelle** (chaîne non vide ; le niveau « sans donnée » est un code comme un autre, p. ex. `'0'`), **ou `null` : AUCUN niveau posé** (une remarque). Jamais `''`, jamais `undefined` à l'écriture ; une lecture tient `''` et `undefined` pour `null` (`InscriptionsCibles.lireNiveau`) |
+| `echelleId` | l'id de l'échelle du niveau ; **`null` quand `niveau` est `null`** |
+| `date` | `'AAAA-MM-JJ'` : la date de la trace (d'office le jour, modifiable) |
+| `horodatage` | ISO 8601 : le moment de l'écriture (départage deux inscriptions de même date) |
+| `productionId` | l'id d'une production, ou `null` (observation, entretien : N3) |
+| `noteBreve` | chaîne (600 caractères au plus) ; `''` si rien. **Jamais vide quand `niveau` est `null`** : l'inscription vide est refusée |
+| `criteres` | tableau, un élément par critère de la cible au moment du jugement : `{ id, texte, essentiel, respecte }` ; `[]` pour une cible sans critère |
+| `criteres[].respecte` | `true` (respecté), `false` (non respecté), **`null` (non renseigné : l'état d'office)**. Aucune coche n'est jamais absente : un critère non renseigné porte `null` |
+
+**Une annulation** (`type: 'annulation'`, N7) : `{ id, type: 'annulation', inscriptionId, da, ensembleId, cibleId, date,
+horodatage, raison }` ; `raison` vaut `''` si rien. Une inscription est annulée s'il existe une annulation qui la désigne
+(la première compte) ; elle-même ne change jamais.
+
+**Ce que les gestes 3 et 4 doivent en lire** : une inscription annulée ne compte pas ; **une inscription à `niveau: null`
+ne porte aucun niveau** : elle n'entre ni au niveau retenu ni à la note, et une cible qui n'a que des remarques reste sans
+donnée (décision du 21 nov., 9 h 17). Les coches ne sont lues par aucun calcul (décision du 21 nov., 8 h 38). Lectures
+pures disponibles : `historiqueDeLaCase`, `etatDeLaCase`, `annulationsParInscription`, `lireNiveau`, `estSansNiveau`.
 
 ## 1. Ce qui a été livré
 
@@ -47,16 +81,9 @@
 - **La note absente** (N1') : « … La note viendra des niveaux inscrits pour chaque cible. » (la fin « et l'inscription des
   niveaux n'est pas encore offerte » est retirée). Aucune note ne se calcule.
 
-## 2. La forme d'une inscription (et pourquoi)
+## 2. Pourquoi cette forme
 
-`<trimestre>_inscriptionsCibles` : **une liste où l'on ajoute**. Deux sortes d'entrées :
-
-```js
-{ id, type: 'inscription', da, ensembleId, cibleId, niveau /* code de l'échelle */, echelleId,
-  date /* 'AAAA-MM-JJ', la trace */, horodatage /* l'écriture */, productionId /* ou null */, noteBreve,
-  criteres: [ { id, texte, essentiel, respecte: true | false | null } ] }
-{ id, type: 'annulation', inscriptionId, da, ensembleId, cibleId, date, horodatage, raison }
-```
+La forme exacte est au § 0.
 
 - **« Non renseigné » ≠ « renseigné, non respecté »** : `respecte: null` (l'état d'office) contre `false`. La liste porte
   TOUS les critères de la cible au moment du jugement, avec leur texte et leur marque « essentiel » : réécrire ou retirer
@@ -148,3 +175,38 @@
    production » et ne remplir qu'une cible ; dans la fiche d'une production, cocher les cibles qu'elle renseigne ; dans
    l'assistant, retirer une cible qui porte des niveaux et lire la question.
 3. **« Dernier niveau inscrit »** au sens de la date de la trace (§ 4) : à confirmer.
+
+## 8. Complément du 21 nov. 2026, 9 h 17 : une inscription sans niveau
+
+Consigne : `plans de travail/CONSIGNE-LOT-2026-11-21-moteur-cibles-2-inscrire-complement.md`. *Choix de Grégoire, 21 nov.
+2026, 9 h 17.* Origine : « cas A, courriel du 21 nov. 2026 : quand il triangule, il prend des notes qualitatives à différents moments et ne pose un niveau que lorsqu'il juge avoir assez de traces ; c'est sa stratégie pour 7 de ses 10 cibles à l'automne 2026 ».
+
+- **La donnée** : `niveau: null` et `echelleId: null` ; le texte dans `noteBreve`. `null` n'est aucun code de l'échelle,
+  pas même celui du niveau « sans donnée » (qui vaut 0 %) : les deux restent distincts dans la donnée et à l'écran (§ 0).
+  Une inscription porte au moins un niveau ou un texte ; des coches seules ne suffisent pas.
+- **La fenêtre d'une case** : une tuile « Aucun niveau » (« une remarque seulement »), **cochée d'office** : aucun niveau
+  n'est proposé, comme avant. Le bouton dit ce qu'il va inscrire : « Inscrire la remarque », ou « Inscrire le niveau » dès
+  qu'un niveau est choisi. Sans niveau ni texte : « Choisis un niveau ou écris une rétroaction : une inscription vide ne
+  s'inscrit pas. », dans la fenêtre (zone d'alerte lue), pas dans une bulle. Les critères se cochent comme pour un niveau.
+- **La case** : elle garde le dernier niveau inscrit ; une remarque plus récente ne le change pas ; le compte inclut les
+  remarques, et le lecteur d'écran dit « dont N remarques ». Une case qui n'a que des remarques montre **✎ et leur
+  nombre**, sans couleur, bord pointillé ; une ligne de légende le dit (elle paraît seulement s'il y en a une).
+- **L'historique** : la remarque à sa date, parmi les inscriptions, avec « Remarque, sans niveau » à la place du niveau.
+  « Annuler cette inscription » vaut pour elle : barrée, datée, jamais effacée.
+- **Inscrire pour une production** : chaque cible offre « Rien ce jour-là » (d'office), « Aucun niveau », puis les niveaux ;
+  une cible sur « Aucun niveau » sans texte est refusée en la nommant ; avec un texte, c'est une remarque. Le bouton devient
+  « Inscrire ».
+- **Ailleurs** : la question de l'assistant compte à part niveaux et remarques (« 2 niveaux inscrits et 1 remarque ») et
+  parle d'« inscriptions » ; « Corriger le DA… » et la fusion du codex disent « inscriptions sur les cibles ».
+- **Je ne m'écarte d'aucun des sept points.** Deux choix d'écran à moi, à la portée de Grégoire : la tuile « Aucun niveau »
+  cochée d'office (une inscription commencée sans choisir de niveau devient une remarque si elle a un texte : le bouton le
+  dit avant l'écriture) ; ✎ comme marque.
+- **Le mot** : « remarque », proposé, non arrêté (Q5 des textes ; seconds choix « note qualitative », « observation »).
+- **Mesuré** : sentinelle, bloc L, 9 essais (une remarque s'inscrit à `null` ; le « sans donnée » reste `'0'` ; l'inscription
+  vide refusée en mots, par le module et à l'écran ; une remarque avec coches ; la case garde le dernier niveau après une
+  remarque ; la case ✎ ; l'historique et l'annulation ; le geste par production), **cinq break-tests** (BT14 à BT18), tous
+  rouges puis retirés ; 41 essais dans le fichier. Spec Chromium : 6 sur 6 (la remarque de bout en bout). Captures refaites
+  avec des remarques (la case ✎ au tableau, une remarque dans l'historique). Vitest complet : 941 fichiers, **12 101 verts, 0 rouge** (les mêmes 24 erreurs non gérées, héritées).
+- **Textes** : `TEXTES-2026-11-21-par-standards-lot-2.md`, section « Complément 9 h 17 » : 16 textes et 1 question, dont 7
+  qui remplacent un texte d'en haut (R1 retiré au profit de C3).
+

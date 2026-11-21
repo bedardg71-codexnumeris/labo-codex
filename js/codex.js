@@ -2618,7 +2618,7 @@ var LIBELLES_DES_CLES = {
     interventions: { nom: 'les interventions' },
     // Lot 2 « Par standards » (21 nov. 2026) : une liste où l'on ajoute (une annulation est une entrée de plus) ; la fusion
     // en fait l'union, sans conflit. Mots PROPOSÉS (TEXTES-2026-11-21-par-standards-lot-2.md, H2).
-    inscriptionsCibles: { nom: 'les niveaux inscrits par cible', unite: 'inscription' }
+    inscriptionsCibles: { nom: 'les inscriptions sur les cibles', unite: 'inscription' }   // K2' (complément 9 h 17)
 };
 
 function _majuscule(s) { return s.charAt(0).toUpperCase() + s.slice(1); }

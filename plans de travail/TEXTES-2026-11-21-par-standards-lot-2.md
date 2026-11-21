@@ -142,6 +142,36 @@ inscription garde le texte des critères qu'elle a jugés, et aucun calcul ne li
 **Compte** : 4 questions, et 73 textes (T 15, I 17, H 8, A 4, P 8, F 2, R 8, W 5, N 1, K 2, L 3 ; les lignes qui en portent
 plusieurs, séparés par « ; », comptent pour une).
 
+## Complément 9 h 17 : une inscription sans niveau (une « remarque »)
+
+Décision de Grégoire, 21 nov. 2026, 9 h 17 : une inscription peut ne porter aucun niveau ; c'est alors une note datée sur
+une cible pour un·e étudiant·e. Tous les textes ci-dessous sont marqués **complément 9 h 17** et sont des PROPOSITIONS.
+
+| N° | Question | Proposé |
+|---|---|---|
+| Q5 (complément 9 h 17) | Le mot de l'interface pour une inscription sans niveau | **« remarque »**. Second choix : « note qualitative » (le mot de la source ; mais « note » se lit aussi comme la note chiffrée). Troisième : « observation » (déjà le mot d'une origine : « Sans production : une observation, un entretien »). Le champ du texte garde son nom, « Rétroaction » (Q1) |
+
+| N° | Où | Texte proposé |
+|---|---|---|
+| C1 (complément 9 h 17) | Première tuile du niveau, dans la fenêtre d'une case (cochée d'office : aucun niveau n'est proposé) ; deuxième tuile de chaque cible dans « Inscrire pour une production » | Aucun niveau ; dessous : une remarque seulement |
+| C2 (complément 9 h 17) | Bouton principal de la fenêtre d'une case, quand « Aucun niveau » est choisi (I16 reste quand un niveau est choisi) | Inscrire la remarque |
+| C3 (complément 9 h 17) | Refus d'une inscription vide (ni niveau ni texte), dans la fenêtre ; **remplace R1**, retiré | Choisis un niveau ou écris une rétroaction : une inscription vide ne s'inscrit pas. |
+| C4 (complément 9 h 17) | Le même refus dans « Inscrire pour une production », qui nomme la cible | « X » : choisis un niveau ou écris une rétroaction : une inscription vide ne s'inscrit pas. |
+| C5 (complément 9 h 17) | Historique, à la place du niveau | Remarque, sans niveau |
+| C6 (complément 9 h 17) | Case qui n'a que des remarques : à l'écran (aucune couleur, bord pointillé) | ✎ et leur nombre |
+| C7 (complément 9 h 17) | Légende (paraît seulement si une case n'a que des remarques) | ✎ : des remarques, aucun niveau encore. |
+| C8 (complément 9 h 17) | Lecteur d'écran et infobulle d'une case qui n'a que des remarques | Zoé Fictive, Analyser un texte : aucun niveau inscrit, 2 remarques |
+| C9 (complément 9 h 17) | Lecteur d'écran et infobulle d'une case qui a un niveau et des remarques (T14, complété) | Zoé Fictive, Analyser un texte : dernier niveau inscrit Acquis, 3 inscriptions, dont 1 remarque |
+| C10 (complément 9 h 17) | Lecteur d'écran, après une remarque | Zoé Fictive, Analyser un texte : remarque inscrite. |
+| C11 (complément 9 h 17) | Bouton principal de « Inscrire pour une production » ; **remplace P8** (« Inscrire les niveaux ») | Inscrire |
+| C12 (complément 9 h 17) | Lecteur d'écran, après « Inscrire » ; **remplace L2** | Yan Inventé : 2 inscriptions. |
+| C13 (complément 9 h 17) | Assistant, première phrase ; **remplace W2** | Tu retires une cible qui porte des inscriptions. ; au pluriel : Tu retires des cibles qui portent des inscriptions. |
+| C14 (complément 9 h 17) | Assistant, une ligne par cible ; **remplace W3** | « X » : N niveaux inscrits et R remarques pour M étudiant·es (chaque partie paraît seulement si elle compte ; au singulier : 1 niveau inscrit, 1 remarque, 1 étudiant·e) |
+| C15 (complément 9 h 17) | « Corriger le DA… », la ligne des inscriptions ; **remplace K1** | • N inscriptions sur les cibles (pratique par standards) |
+| C16 (complément 9 h 17) | Fenêtre de fusion d'un codex ; **remplace K2** | les inscriptions sur les cibles |
+
+**Compte du complément** : 1 question et 16 textes, dont 7 qui remplacent un texte d'en haut (R1, P8, L2, W2, W3, K1, K2).
+
 ## Ce que ces textes ne disent pas encore (non tranché)
 
 - **Le niveau retenu** : lot 3. Le texte T8 dit que la case n'en est pas un ; il changera au lot 3.

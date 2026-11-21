@@ -105,6 +105,21 @@ Consigne : `plans de travail/CONSIGNE-LOT-2026-11-21-moteur-cibles-2-inscrire.md
   retenue** : chaque critère de la cible, tel qu'il était écrit, avec `respecte: true | false | null` ; `null`, l'état
   d'office, veut dire « non renseigné » (lot 2, ci-dessous).
 
+## Décidé par Grégoire, 21 nov. 2026, 9 h 17 (complément du lot 2)
+
+Consigne : `plans de travail/CONSIGNE-LOT-2026-11-21-moteur-cibles-2-inscrire-complement.md`. *Choix de Grégoire, 21 nov. 2026,
+9 h 17.*
+
+- **Une inscription peut ne porter aucun niveau** : c'est alors une note datée sur une cible pour un·e étudiant·e (à l'écran,
+  une « remarque », mot proposé). Origine : « cas A, courriel du 21 nov. 2026 : quand il triangule, il prend des notes qualitatives à différents moments et ne pose un niveau que lorsqu'il juge avoir assez de traces ; c'est sa stratégie pour 7 de ses 10 cibles à l'automne 2026 ».
+- Une inscription porte au moins un niveau ou un texte ; vide des deux, elle est refusée, en mots.
+- **Une remarque n'est pas le niveau « sans donnée » et n'en tient jamais lieu** : `niveau: null`, qui n'est aucun code de
+  l'échelle, pas même celui qui vaut 0 %. Pour les lots 3 et 4 : une cible qui n'a que des remarques reste sans donnée
+  pour le niveau retenu et pour la note.
+- Au tableau, la case garde le dernier niveau inscrit ; une remarque ne le change pas ; une case qui n'a que des remarques
+  le montre sans survol (✎ et leur nombre). L'historique montre les remarques à leur date ; l'annulation vaut pour elles.
+  Les critères à cocher restent offerts. Aucune note calculée.
+
 ## Vue d'ensemble
 
 1. **Le calcul actuel ne connaît qu'un grain : une évaluation par étudiant·e et par production.** Les quatre
@@ -263,8 +278,12 @@ répéter : cette clé est restée **nue de fait**, faute d'inscription au regis
 `annulee: false` n'est pas écrit ; une annulation est une ENTRÉE DE PLUS, et l'inscription ne change jamais (voir le lot 2).
 
 ```js
-{ id, type: 'inscription', da, ensembleId, cibleId, niveau, echelleId, date, horodatage, productionId: 'PROD_…' | null,
-  noteBreve, criteres: [ { id, texte, essentiel, respecte: true | false | null } ] }
+{ id, type: 'inscription', da, ensembleId, cibleId,
+  niveau: '<code>' | null,          // null : AUCUN niveau posé (une remarque ; complément du 21 nov., 9 h 17), jamais le « sans donnée »
+  echelleId: '<id>' | null,         // null quand niveau est null
+  date, horodatage, productionId: 'PROD_…' | null,
+  noteBreve,                        // '' si rien ; jamais vide quand niveau est null (refusée)
+  criteres: [ { id, texte, essentiel, respecte: true | false | null } ] }   // null : non renseigné
 { id, type: 'annulation', inscriptionId, da, ensembleId, cibleId, date, horodatage, raison }
 ```
 
@@ -469,6 +488,7 @@ Consigne : `plans de travail/CONSIGNE-LOT-2026-11-21-moteur-cibles-2-inscrire.md
   | Une cible sans critère est acceptée | *choix de Grégoire, 21 nov. 2026* |
   | Une production déclare, facultativement, les cibles qu'elle renseigne ; sans liste, toutes sont offertes | *décidé par Cowork* (consigne du lot) |
   | La case montre le dernier niveau inscrit, pas le niveau retenu | *choix technique* (consigne : un affichage qui ne préjuge pas du lot 3) |
+  | Une inscription peut ne porter aucun niveau (`niveau: null`, une « remarque ») ; elle porte alors un texte ; jamais le niveau « sans donnée » ; la case garde son dernier niveau, ou montre ✎ si elle n'a que des remarques | *choix de Grégoire, 21 nov. 2026, 9 h 17* ; « cas A, courriel du 21 nov. 2026 : quand il triangule, il prend des notes qualitatives à différents moments et ne pose un niveau que lorsqu'il juge avoir assez de traces ; c'est sa stratégie pour 7 de ses 10 cibles à l'automne 2026 » |
 
 - **Dans le code** : le module propriétaire `js/pratiques/inscriptions-cibles.js` (`InscriptionsCibles` : forme, refus,
   lectures pures, seuls écrivains `inscrire` et `annuler`, par `modifierEtAnnoncer(cle('inscriptionsCibles'))`, qui
@@ -490,6 +510,11 @@ Consigne : `plans de travail/CONSIGNE-LOT-2026-11-21-moteur-cibles-2-inscrire.md
 - **Sentinelle** : `tests/unit/sentinelle-par-standards-lot-2-inscrire.test.js` (32 essais, treize break-tests) ; spec
   `tests/integration/par-standards-lot-2-inscrire.spec.js` (Chromium) ; sentinelle du lot 0 rejouée (16/16).
 - **Notes qui changent** : aucune. Aucun moteur existant ne lit la clé (cliquet du lot 0).
+- **Complément du 21 nov., 9 h 17** (commit à part) : l'inscription sans niveau ci-dessus ; la tuile « Aucun niveau »
+  (cochée d'office dans la fenêtre d'une case), le bouton qui dit ce qu'il inscrit, le refus de l'inscription vide, la
+  case ✎, l'historique, le geste par production. Sentinelle : bloc L (9 essais, cinq break-tests) ; spec Chromium (6).
+  **Pour les lots 3 et 4** : lire le niveau par `InscriptionsCibles.lireNiveau` / `estSansNiveau` ; une remarque n'entre
+  ni au niveau retenu ni à la note.
 
 ### Lot 3 – « Je vois le niveau retenu par cible »
 

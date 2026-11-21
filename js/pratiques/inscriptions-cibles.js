@@ -15,14 +15,23 @@
  *
  * FORME (deux sortes d'entrées, distinguées par `type`) :
  *   inscription : { id, type: 'inscription', da, ensembleId, cibleId,
- *                   niveau,                  // le CODE du niveau dans l'échelle de la pratique (le « sans donnée » compris, E3)
- *                   echelleId,
+ *                   niveau,                  // le CODE du niveau dans l'échelle de la pratique (le « sans donnée » compris, E3),
+ *                                            // ou null : AUCUN niveau posé (complément du 21 nov., 9 h 17 ; voir plus bas)
+ *                   echelleId,               // l'échelle du niveau ; null quand il n'y a pas de niveau
  *                   date,                    // 'AAAA-MM-JJ' : la date de la trace (d'office aujourd'hui, modifiable)
  *                   horodatage,              // ISO : le moment où l'inscription a été écrite
  *                   productionId,            // l'id d'une production, ou null (observation, entretien : N3)
  *                   noteBreve,               // texte libre de l'enseignant·e (la rétroaction, N5) ; '' si rien
  *                   criteres: [ { id, texte, essentiel, respecte } ] }
  *   annulation  : { id, type: 'annulation', inscriptionId, da, ensembleId, cibleId, date, horodatage, raison }
+ *
+ * UNE INSCRIPTION SANS NIVEAU (choix de Grégoire, 21 nov. 2026, 9 h 17 ; à l'écran, une « remarque », mot PROPOSÉ) :
+ * `niveau: null`, `echelleId: null`, et un texte (`noteBreve`). C'est une note datée sur une cible pour un·e étudiant·e.
+ * Origine : « cas A, courriel du 21 nov. 2026 : quand il triangule, il prend des notes qualitatives à différents moments et
+ * ne pose un niveau que lorsqu'il juge avoir assez de traces ; c'est sa stratégie pour 7 de ses 10 cibles à l'automne
+ * 2026 ». `null` n'est AUCUN code de l'échelle, pas même celui du niveau « sans donnée » (qui vaut 0 %) : une cible qui
+ * n'a que des remarques reste sans donnée pour le niveau retenu (lot 3) et pour la note (lot 4). Une inscription porte
+ * au moins un niveau ou un texte ; vide des deux, elle est refusée (`motifsRefus`). Ses critères se cochent de même.
  *
  * L'ÉTAT DES CRITÈRES (choix de Grégoire, 21 nov. 2026, 8 h 38). Chaque critère de la cible, tel qu'il était écrit au
  * moment du jugement (id, texte, « essentiel »), avec `respecte` :
@@ -50,7 +59,8 @@
     /* ------------------------------------------------------------------ Les refus, en mots (propositions) */
     // Mots PROPOSÉS (plans de travail/TEXTES-2026-11-21-par-standards-lot-2.md) : Grégoire les relit sur l'aperçu.
     const MOTIFS = Object.freeze({
-        SANS_NIVEAU: 'Choisis un niveau : c\'est lui qui s\'inscrit.',
+        // Complément du 21 nov., 9 h 17 : le niveau est facultatif, mais pas l'inscription vide.
+        VIDE: 'Choisis un niveau ou écris une rétroaction : une inscription vide ne s\'inscrit pas.',
         NIVEAU_HORS_ECHELLE: 'Ce niveau n\'est pas dans l\'échelle de la pratique : choisis-en un dans la liste.',
         DATE: 'La date n\'est pas valide : choisis une date dans le calendrier.',
         SANS_ELEVE: 'Choisis l\'étudiant·e.',
@@ -113,6 +123,18 @@
         };
     }
 
+    /* ------------------------------------------------------------------ Le niveau absent */
+
+    /** Le niveau lu : un code (chaîne non vide), ou null quand aucun niveau n'est posé. */
+    function lireNiveau(v) {
+        return (v === undefined || v === null || String(v) === '') ? null : String(v);
+    }
+
+    /** Vrai pour une inscription qui ne porte AUCUN niveau (une remarque). Jamais vrai pour le niveau « sans donnée ». */
+    function estSansNiveau(e) {
+        return !!e && lireNiveau(e.niveau) === null;
+    }
+
     /* ------------------------------------------------------------------ Construire (fonctions pures) */
 
     function texteLibre(v, max) {
@@ -125,14 +147,15 @@
      */
     function construireInscription(s) {
         const q = s || {};
+        const niveau = lireNiveau(q.niveau);
         return {
             id: String(q.id || ''),
             type: INSCRIPTION,
             da: String(q.da == null ? '' : q.da),
             ensembleId: String(q.ensembleId || ''),
             cibleId: String(q.cibleId || ''),
-            niveau: String(q.niveau == null ? '' : q.niveau),
-            echelleId: q.echelleId ? String(q.echelleId) : null,
+            niveau: niveau,                                                    // null : aucun niveau posé
+            echelleId: (niveau !== null && q.echelleId) ? String(q.echelleId) : null,
             date: String(q.date || ''),
             horodatage: String(q.horodatage || new Date().toISOString()),
             productionId: q.productionId ? String(q.productionId) : null,
@@ -176,8 +199,9 @@
 
     /**
      * Les refus d'une inscription, dans l'ordre de l'écran. Vide : elle peut s'écrire. Les coches n'y entrent pas : elles
-     * sont facultatives, et l'application ne juge pas le niveau à partir d'elles.
-     * @param {{da, cibleId, niveau, date}} saisie
+     * sont facultatives, et l'application ne juge pas le niveau à partir d'elles. Le niveau est facultatif (complément du
+     * 21 nov., 9 h 17), mais une inscription porte au moins un niveau ou un texte.
+     * @param {{da, cibleId, niveau, noteBreve, date}} saisie
      * @param {Object} echelle - l'échelle de la pratique
      * @returns {string[]}
      */
@@ -185,8 +209,9 @@
         const q = saisie || {};
         const motifs = [];
         if (!q.da) motifs.push(MOTIFS.SANS_ELEVE);
-        if (q.niveau === undefined || q.niveau === null || String(q.niveau) === '') motifs.push(MOTIFS.SANS_NIVEAU);
-        else if (codesDeLEchelle(echelle).indexOf(String(q.niveau)) === -1) motifs.push(MOTIFS.NIVEAU_HORS_ECHELLE);
+        const niveau = lireNiveau(q.niveau);
+        if (niveau === null && texteLibre(q.noteBreve, LONGUEUR_NOTE_BREVE) === '') motifs.push(MOTIFS.VIDE);
+        else if (niveau !== null && codesDeLEchelle(echelle).indexOf(niveau) === -1) motifs.push(MOTIFS.NIVEAU_HORS_ECHELLE);
         if (!dateValide(q.date)) motifs.push(MOTIFS.DATE);
         return motifs;
     }
@@ -229,28 +254,31 @@
     }
 
     /**
-     * Ce qu'une case du tableau montre : la DERNIÈRE inscription non annulée (la plus récente par la date de la trace,
-     * puis par le moment de l'écriture) et le compte des inscriptions. Ce n'est PAS le niveau retenu (lot 3) : aucune
-     * règle de retenue n'est appliquée ici.
-     * @returns {{derniere:Object|null, actives:number, annulees:number}}
+     * Ce qu'une case du tableau montre : la DERNIÈRE inscription non annulée QUI PORTE UN NIVEAU (la plus récente par la
+     * date de la trace, puis par le moment de l'écriture) et le compte des inscriptions. Une remarque (aucun niveau) ne la
+     * change pas ; elle est comptée à part. Ce n'est PAS le niveau retenu (lot 3) : aucune règle de retenue ici.
+     * @returns {{derniere:Object|null, actives:number, remarques:number, annulees:number}}
      */
     function etatDeLaCase(liste, da, ensembleId, cibleId) {
         const h = historiqueDeLaCase(liste, da, ensembleId, cibleId);
         const actives = h.filter(x => !x.annulation);
-        return { derniere: actives.length ? actives[0].inscription : null, actives: actives.length, annulees: h.length - actives.length };
+        const avecNiveau = actives.filter(x => !estSansNiveau(x.inscription));
+        return { derniere: avecNiveau.length ? avecNiveau[0].inscription : null, actives: actives.length,
+            remarques: actives.length - avecNiveau.length, annulees: h.length - actives.length };
     }
 
     /**
-     * Les inscriptions non annulées de chaque cible d'un ensemble : { [cibleId]: { inscriptions, eleves } }. Pour la
-     * question de l'assistant avant de retirer une cible.
+     * Les inscriptions non annulées de chaque cible d'un ensemble : { [cibleId]: { inscriptions, niveaux, remarques, eleves } }.
+     * Pour la question de l'assistant avant de retirer une cible.
      */
     function compterParCible(liste, ensembleId) {
         const annulations = annulationsParInscription(liste);
         const comptes = {};
         (Array.isArray(liste) ? liste : []).forEach(e => {
             if (!estInscription(e) || annulations.has(e.id) || (ensembleId && e.ensembleId !== ensembleId)) return;
-            const c = comptes[e.cibleId] || (comptes[e.cibleId] = { inscriptions: 0, eleves: 0, das: new Set() });
+            const c = comptes[e.cibleId] || (comptes[e.cibleId] = { inscriptions: 0, niveaux: 0, remarques: 0, eleves: 0, das: new Set() });
             c.inscriptions++;
+            if (estSansNiveau(e)) c.remarques++; else c.niveaux++;
             c.das.add(String(e.da));
             c.eleves = c.das.size;
         });
@@ -260,7 +288,7 @@
 
     /**
      * Les cibles enregistrées qui ne sont plus dans la nouvelle liste ET qui portent au moins une inscription non annulée :
-     * `[{ cible, inscriptions, eleves }]`. Lecture seule. Pour la question de l'assistant avant d'écrire (patron de #717).
+     * `[{ cible, inscriptions, niveaux, remarques, eleves }]`. Lecture seule. Pour la question de l'assistant avant d'écrire (patron de #717).
      * @param {Array} liste - les entrées de `inscriptionsCibles`
      * @param {string} ensembleId
      * @param {Array} anciennes - les cibles rangées
@@ -271,7 +299,8 @@
         const comptes = compterParCible(liste, ensembleId);
         return (Array.isArray(anciennes) ? anciennes : [])
             .filter(c => c && c.id && !gardees.has(String(c.id)) && comptes[c.id])
-            .map(c => ({ cible: c, inscriptions: comptes[c.id].inscriptions, eleves: comptes[c.id].eleves }));
+            .map(c => ({ cible: c, inscriptions: comptes[c.id].inscriptions, niveaux: comptes[c.id].niveaux,
+                remarques: comptes[c.id].remarques, eleves: comptes[c.id].eleves }));
     }
 
     /**
@@ -376,6 +405,8 @@
         dateDuJour: dateDuJour,
         dateValide: dateValide,
         lireRespecte: lireRespecte,
+        lireNiveau: lireNiveau,
+        estSansNiveau: estSansNiveau,
         etatDesCriteres: etatDesCriteres,
         compterCriteres: compterCriteres,
         construireInscription: construireInscription,
