@@ -125,7 +125,19 @@
         // Ce que dit la zone lue par le lecteur d'écran
         annonceInscrit: (nom, cible, niveau) => `${nom}, ${cible} : ${niveau} inscrit.`,
         annonceInscrits: (nom, n) => `${nom} : ${n} ${n > 1 ? 'inscriptions' : 'inscription'}.`,
-        annonceAnnulee: 'Inscription annulée.'
+        annonceAnnulee: 'Inscription annulée.',
+        // VUE SIMPLE (21 nov. 2026, « Par standards » à l'essai) : mots PROPOSÉS (TEXTES-2026-11-21-par-standards-vue-simple.md).
+        simple: Object.freeze({
+            introuvable: 'Les cibles de cette pratique sont introuvables dans ce trimestre. Elles se règlent en vue étendue.',
+            aucuneCible: 'Ta pratique n’a pas encore de cible. Écris tes cibles : une par ligne.',
+            aucuneCibleLien: 'Écrire mes cibles',
+            sansEchelle: 'L’échelle de cette pratique est introuvable dans ce trimestre : elle se règle en vue étendue.',
+            choisisNiveau: 'Choisis un niveau : touche une tuile.',
+            date: 'L’inscription prend la date d’aujourd’hui.',
+            derniere: 'Dernière inscription',
+            toutHistorique: 'Toutes les inscriptions de cette cible se lisent en vue étendue.',
+            annulee: 'Inscription annulée. Rien ne s’efface : elle reste, barrée, dans l’historique de la vue étendue.'
+        })
     });
 
     const N = () => window.NoteCibles;
@@ -161,11 +173,29 @@
         ctx.codeSansDonnee = conf.niveauSansDonnee == null ? null : String(conf.niveauSansDonnee);
         ctx.inscriptions = I().lireToutes();
         _completerPourLaNote(ctx, conf);
-        if (!ensemble) ctx.vide = window.EnsemblesCibles.MOTIFS.INTROUVABLE;
-        else if (ctx.cibles.length === 0) ctx.vide = MOTS.aucuneCible;
-        else if (ctx.niveaux.length === 0) ctx.vide = MOTS.sansEchelle;
-        else if (!ctx.etudiants || ctx.etudiants.length === 0) ctx.vide = window.TableauNotation.MOTS.aucunEleve;
+        // Vue simple (21 nov. 2026) : la présentation de `vue-simple.js` ; ses états vides disent où aller (jamais « l'assistant »).
+        ctx.simple = !!ctx.presentation;
+        ctx.videEtat = _etatVide(ctx);
+        ctx.vide = ctx.videEtat ? _motDuVide(ctx) : undefined;
         return ctx;
+    }
+
+    /** Pourquoi le tableau est vide : 'introuvable', 'aucune-cible', 'sans-echelle', 'aucun-eleve', ou null. */
+    function _etatVide(ctx) {
+        if (!ctx.ensemble) return 'introuvable';
+        if (ctx.cibles.length === 0) return 'aucune-cible';
+        if (ctx.niveaux.length === 0) return 'sans-echelle';
+        if (!ctx.etudiants || ctx.etudiants.length === 0) return 'aucun-eleve';
+        return null;
+    }
+
+    /** Le mot d'un tableau vide : celui de la vue simple (qui dit où aller), sinon celui de la vue étendue. */
+    function _motDuVide(ctx) {
+        const S = MOTS.simple;
+        if (ctx.videEtat === 'aucun-eleve') return ((ctx.presentation && ctx.presentation.mots) || {}).aucunEleve || window.TableauNotation.MOTS.aucunEleve;
+        if (ctx.videEtat === 'introuvable') return ctx.simple ? S.introuvable : window.EnsemblesCibles.MOTIFS.INTROUVABLE;
+        if (ctx.videEtat === 'aucune-cible') return ctx.simple ? S.aucuneCible : MOTS.aucuneCible;
+        return ctx.simple ? S.sansEchelle : MOTS.sansEchelle;
     }
 
     /** Lots 3 et 4 : l'ordre de l'échelle (une fois pour la classe), le niveau « sans donnée », les réglages de la note. */
@@ -200,13 +230,26 @@
     /** Le bandeau : la pratique et ses réglages ; le geste « inscrire pour une production » quand le tableau peut l'offrir. */
     function _bandeauHTML(ctx, avecGestes) {
         const badge = typeof genererBadgePratiqueHTML === 'function' ? genererBadgePratiqueHTML('cibles') : '';
-        const reglages = window.TableauNotation.MOTS.reglages;
-        const gestes = avecGestes ? `<div class="tn-gestes"><button type="button" class="btn btn-principal" data-tc="par-production">${esc(MOTS.parProduction)}</button></div>` : '';
+        // Vue simple : « Régler » mène à l'écran Pratique de la vue simple (ses cibles) ; ni « Inscrire pour une production »,
+        // ni rien qui ne vive qu'en vue étendue ; l'export des notes, comme au tableau des productions de la vue simple.
+        const p = ctx.presentation;
+        const reglages = (p && p.reglages) || { action: 'ouvrirReglagesPratique', param: ctx.pratiqueId, libelle: window.TableauNotation.MOTS.reglages };
+        const gestesSimples = `<div class="tn-gestes"><button type="button" class="btn btn-secondaire" data-action="exporterSyntheseResultatsCSV">${esc(window.TableauNotation.MOTS.exporter)}</button></div>`;   // le mot du tableau de la vue simple, tel quel
+        const gestes = !avecGestes ? '' : (ctx.simple ? gestesSimples
+            : `<div class="tn-gestes"><button type="button" class="btn btn-principal" data-tc="par-production">${esc(MOTS.parProduction)}</button></div>`);
         return `<div class="tn-bandeau">
             <div class="tn-pratique">${badge}<span class="tn-pratique-nom">${esc(ctx.pratiqueNom)}</span>
-                <a href="#" class="tn-reglages" data-prevent data-action="ouvrirReglagesPratique" data-param="${esc(ctx.pratiqueId)}">${esc(reglages)}</a></div>
+                <a href="#" class="tn-reglages" data-prevent data-action="${esc(reglages.action)}" data-param="${esc(reglages.param)}">${esc(reglages.libelle || window.TableauNotation.MOTS.reglages)}</a></div>
             ${gestes}
         </div>`;
+    }
+
+    /** Vue simple : le geste qui débloque un état vide (écrire ses cibles ; coller sa liste). */
+    function _gesteVideHTML(ctx) {
+        if (!ctx.simple) return '';
+        const g = ctx.videEtat === 'aucune-cible' ? { action: 'VueSimple.regler', param: 'cibles', libelle: MOTS.simple.aucuneCibleLien }
+            : (ctx.videEtat === 'aucun-eleve' ? ((ctx.presentation.gestes || {})['aucun-eleve'] || null) : null);
+        return g ? `<p class="tn-etat-geste"><button type="button" class="btn btn-principal" data-action="${esc(g.action)}"${g.param ? ` data-param="${esc(g.param)}"` : ''}>${esc(g.libelle)}</button></p>` : '';
     }
 
     function _echelleHTML(ctx) {
@@ -312,7 +355,7 @@
     function construireHTML(base) {
         const ctx = completerContexte(base);
         const tete = `<h3 class="tn-titre" tabindex="-1">${esc(MOTS.titre)}</h3><p class="tn-intro">${esc(MOTS.intro)}</p>`;
-        if (ctx.vide) return `${tete}${_bandeauHTML(ctx, false)}<p class="tn-etat-vide">${esc(ctx.vide)}</p>`;
+        if (ctx.vide) return `${tete}${_bandeauHTML(ctx, false)}<p class="tn-etat-vide">${esc(ctx.vide)}</p>${_gesteVideHTML(ctx)}`;
         const rangees = ctx.etudiants.map((e, i) => _rangeeHTML(ctx, e, i)).join('');
         const legendes = [MOTS.legende, MOTS.legendeSansDonnee(ctx.nomSansDonnee)]
             .concat(rangees.indexOf('tc-case--remarques') !== -1 ? [MOTS.legendeRemarques] : [])
@@ -353,7 +396,7 @@
         if (!_contexteCourant || _contexteCourant.etat !== 'cibles') return;
         const geste = e.target.closest('[data-tc]');
         if (!geste) return;
-        if (geste.dataset.tc === 'case') ouvrirInscription(geste.dataset.da, geste.dataset.cible, geste);
+        if (geste.dataset.tc === 'case') (_contexteCourant.presentation ? ouvrirInscriptionSimple : ouvrirInscription)(geste.dataset.da, geste.dataset.cible, geste);
         else if (geste.dataset.tc === 'par-production') ouvrirParProduction(geste);
     }
 
@@ -407,7 +450,8 @@
     function _ouvrirFenetre(html, etat) {
         _fermer();
         const overlay = document.createElement('div');
-        overlay.className = 'modal-overlay actif tc-overlay';
+        // Vue simple (21 nov. 2026) : `tc-overlay--simple`, des cibles tactiles de 46 px (css/tableau-cibles.css).
+        overlay.className = 'modal-overlay actif tc-overlay' + (etat && etat.mode === 'simple' ? ' tc-overlay--simple' : '');
         overlay.setAttribute('role', 'presentation');
         // security-ok : tout texte de l'enseignant·e et des données est échappé par `esc` (echapperHtml) dans les gabarits.
         overlay.innerHTML = `<div class="modal-contenu tc-fenetre" role="dialog" aria-modal="true" aria-labelledby="tc-fenetre-titre">${html}</div>`;
@@ -450,12 +494,13 @@
      * remarque ; complément 9 h 17), cochée d'office dans la fenêtre d'une case : aucun niveau n'est proposé. Puis chaque
      * niveau de l'échelle, le « sans donnée » compris (E3) : « Aucun niveau » n'est pas lui.
      */
-    function _niveauxHTML(ctx, prefixe, parProduction) {
+    function _niveauxHTML(ctx, prefixe, parProduction, sansRemarque) {
         const nom = `${prefixe}-niveau`;
         const tuile = (marqueur, nomTuile, aide, coche, classe) => `<label class="tc-niveau ${classe}"><input type="radio" name="${esc(nom)}" value="" ${marqueur}${coche ? ' checked' : ''}>`
             + `<span class="tc-niveau-texte"><span class="tc-niveau-nom">${esc(nomTuile)}</span>${aide ? `<span class="tc-niveau-marque">${esc(aide)}</span>` : ''}</span></label>`;
+        // Vue simple (`sansRemarque`) : les niveaux seulement ; la remarque sans niveau vit en vue étendue.
         const rien = (parProduction ? tuile('data-rien', MOTS.rienCeJour, '', true, 'tc-niveau--rien') : '')
-            + tuile('data-sans-niveau', MOTS.aucunNiveau, MOTS.remarqueSeulement, !parProduction, 'tc-niveau--rien tc-niveau--sans');
+            + (sansRemarque ? '' : tuile('data-sans-niveau', MOTS.aucunNiveau, MOTS.remarqueSeulement, !parProduction, 'tc-niveau--rien tc-niveau--sans'));
         const tuiles = ctx.niveaux.map(n => {
             const marque = String(n.code) === ctx.codeSansDonnee ? `<span class="tc-niveau-marque">${esc(MOTS.sansDonnee)}</span>` : '';
             return `<label class="tc-niveau" style="--tn-couleur: ${esc(_couleur(n))}"><input type="radio" name="${esc(nom)}" value="${esc(n.code)}">`
@@ -546,6 +591,39 @@
             + `<span class="tc-retenu-niveau">${esc(nom)}</span>, ${esc(MOTS.retenuDepuis(dateLisible(ligne.retenu.date)))}</p>${plus}${sansDonnee}${plusBas}</div>`;
     }
 
+    function _nomDuNiveauInscrit(i, sansNiveau, niveau) {
+        if (sansNiveau) return MOTS.remarque;
+        return niveau ? `${i.niveau} · ${niveau.nom || ''}` : `${i.niveau} (${MOTS.niveauAbsent})`;
+    }
+
+    /** Le bas d'une inscription : annulée, sa date et sa raison ; sinon « Annuler cette inscription » (sauf en lecture seule). */
+    function _finDeLEntree(i, a, lectureSeule) {
+        if (a) return `<p class="tc-entree-annulation">${esc(MOTS.annulee(dateLisible(a.date), a.raison))}</p>`;
+        return lectureSeule ? '' : `<button type="button" class="btn btn-neutre btn-mini tc-entree-annuler" data-tc="annuler" data-id="${esc(i.id)}">${esc(MOTS.annuler)}</button>`;
+    }
+
+    /** Une inscription de l'historique (datée, son niveau ou « Remarque », son origine, sa rétroaction, ses critères) ;
+     *  annulée : barrée, avec sa date et sa raison ; sinon « Annuler cette inscription », sauf en lecture seule.
+     *  `options.simple` (vue simple, 21 nov. 2026) : ni critères (ils se cochent en vue étendue), ni « Sans production ». */
+    function _entreeHTML(ctx, i, a, options) {
+        const o = options || {};
+        const sansNiveau = I().estSansNiveau(i);
+        const niveau = sansNiveau ? null : _niveauDuCode(ctx, i.niveau);
+        const nomNiveau = _nomDuNiveauInscrit(i, sansNiveau, niveau);
+        const criteres = (!o.simple && (i.criteres || []).length) ? `<ul class="tc-entree-criteres">${i.criteres.map(_ligneCritereHistorique).join('')}</ul>` : '';
+        const origine = (o.simple && !i.productionId) ? '' : `
+                    <span class="tc-entree-origine">${esc(_titreProduction(i.productionId))}</span>`;
+        const fin = _finDeLEntree(i, a, !!o.lectureSeule);
+        const marque = (o.retenu && i.id === o.retenu) ? ` <span class="tc-entree-retenu">${esc(MOTS.marqueRetenu)}</span>` : '';
+        return `<li class="tc-entree${a ? ' tc-entree--annulee' : ''}">
+            <div class="tc-entree-corps">
+                <div class="tc-entree-tete"><span class="tc-entree-date">${esc(dateLisible(i.date))}</span>
+                    <span class="tc-entree-niveau${sansNiveau ? ' tc-entree-niveau--remarque' : ''}" style="--tn-couleur: ${esc(_couleur(niveau))}">${esc(nomNiveau)}</span>${marque}${origine}</div>
+                ${i.noteBreve ? `<p class="tc-entree-note">${esc(i.noteBreve)}</p>` : ''}
+                ${criteres}
+            </div>${fin}</li>`;
+    }
+
     /**
      * L'historique d'une case : chaque inscription, la plus récente d'abord, remarques et annulées comprises (barrées).
      * Celle qui porte le niveau retenu est marquée. `options.lectureSeule` (le profil) : aucun bouton d'annulation.
@@ -555,24 +633,7 @@
         const h = I().historiqueDeLaCase(ctx.inscriptions, da, ctx.ensemble.id, cibleId);
         if (h.length === 0) return `<p class="tc-aide">${esc(MOTS.historiqueVide)}</p>`;
         const retenu = (options && options.retenuId) || null;
-        const entrees = h.map(({ inscription: i, annulation: a }) => {
-            const sansNiveau = I().estSansNiveau(i);
-            const niveau = sansNiveau ? null : _niveauDuCode(ctx, i.niveau);
-            const nomNiveau = sansNiveau ? MOTS.remarque : (niveau ? `${i.niveau} · ${niveau.nom || ''}` : `${i.niveau} (${MOTS.niveauAbsent})`);
-            const criteres = (i.criteres || []).length ? `<ul class="tc-entree-criteres">${i.criteres.map(_ligneCritereHistorique).join('')}</ul>` : '';
-            const fin = a
-                ? `<p class="tc-entree-annulation">${esc(MOTS.annulee(dateLisible(a.date), a.raison))}</p>`
-                : (lectureSeule ? '' : `<button type="button" class="btn btn-neutre btn-mini tc-entree-annuler" data-tc="annuler" data-id="${esc(i.id)}">${esc(MOTS.annuler)}</button>`);
-            const marque = (retenu && i.id === retenu) ? ` <span class="tc-entree-retenu">${esc(MOTS.marqueRetenu)}</span>` : '';
-            return `<li class="tc-entree${a ? ' tc-entree--annulee' : ''}">
-                <div class="tc-entree-corps">
-                    <div class="tc-entree-tete"><span class="tc-entree-date">${esc(dateLisible(i.date))}</span>
-                        <span class="tc-entree-niveau${sansNiveau ? ' tc-entree-niveau--remarque' : ''}" style="--tn-couleur: ${esc(_couleur(niveau))}">${esc(nomNiveau)}</span>${marque}
-                        <span class="tc-entree-origine">${esc(_titreProduction(i.productionId))}</span></div>
-                    ${i.noteBreve ? `<p class="tc-entree-note">${esc(i.noteBreve)}</p>` : ''}
-                    ${criteres}
-                </div>${fin}</li>`;
-        }).join('');
+        const entrees = h.map(({ inscription: i, annulation: a }) => _entreeHTML(ctx, i, a, { lectureSeule, retenu })).join('');
         return `<ol class="tc-historique-liste">${entrees}</ol>`;
     }
 
@@ -641,10 +702,119 @@
         return true;
     }
 
+    /* ----- VUE SIMPLE (21 nov. 2026, « Par standards » à l'essai) : la fenêtre allégée d'une case -----
+       Les niveaux en tuiles (ni « Aucun niveau », ni critères), la rétroaction facultative, la date d'aujourd'hui, aucune
+       production. Puis le niveau retenu en clair et la DERNIÈRE inscription, qu'on peut annuler : le niveau retenu étant le
+       meilleur, un niveau trop haut touché par erreur ne se corrige pas en en inscrivant un plus bas (sans ce geste, la vue
+       simple serait une impasse). L'annulation reste, barrée, visible en vue étendue. Même écrivain, même forme (§ 0). */
+
+    /** La dernière inscription non annulée d'une case (une remarque de la vue étendue comprise), ou null. */
+    function _derniereInscription(ctx, da, cibleId) {
+        const h = I().historiqueDeLaCase(ctx.inscriptions, da, ctx.ensemble.id, cibleId);
+        const x = h.find(y => !y.annulation);
+        return x ? x.inscription : null;
+    }
+
+    /** Le niveau retenu, puis la dernière inscription et son « Annuler », puis où lire le reste. */
+    function _derniereHTML(ctx, da, cibleId) {
+        const ligne = eleveDuContexte(ctx, da).parCible.get(cibleId);
+        const derniere = _derniereInscription(ctx, da, cibleId);
+        const entree = derniere ? `<ol class="tc-historique-liste">${_entreeHTML(ctx, derniere, null, { simple: true, retenu: ligne && ligne.retenu ? ligne.retenu.id : null })}</ol>`
+            : `<p class="tc-aide">${esc(MOTS.historiqueVide)}</p>`;
+        return retenuHTML(ctx, ligne) + entree + `<p class="tc-aide">${esc(MOTS.simple.toutHistorique)}</p>`;
+    }
+
+    /** Ouvre la fenêtre allégée d'une case (vue simple). */
+    function ouvrirInscriptionSimple(da, cibleId, retour) {
+        const ctx = completerContexte(_contexteCourant || {});
+        const cible = ctx.cibles.find(c => c.id === cibleId);
+        const etudiant = (ctx.etudiants || []).find(e => String(e.da) === String(da));
+        if (!cible || !etudiant || ctx.vide) return null;
+        const p = 'tc-vs';
+        const html = `
+            <button type="button" class="modal-fermer" data-tc="fermer" aria-label="${esc(MOTS.fermer)}"><img src="icons/icon-close-window.svg" alt="" class="modal-close-icon"></button>
+            <h3 class="modal-titre" id="tc-fenetre-titre">${esc(MOTS.inscrireTitre)}</h3>
+            <p class="tc-qui">${esc(_nomEleve(etudiant))}</p>
+            <div class="tc-cible">
+                <p class="tc-cible-etiquette">${esc(cible.etiquette)}</p>
+                ${cible.enonce ? `<p class="tc-cible-enonce">${esc(cible.enonce)}</p>` : ''}
+            </div>
+            <form class="tc-formulaire" data-tc-bloc data-prefixe="${p}" novalidate>
+                <section class="tc-section"><h4 class="tc-section-titre" id="${p}-niveau-titre">${esc(MOTS.niveau)}</h4>${_niveauxHTML(ctx, p, false, true)}</section>
+                <section class="tc-section">${_retroactionHTML(p)}<p class="tc-aide">${esc(MOTS.simple.date)}</p></section>
+                <p class="tc-alerte u-hide" role="alert"></p>
+                <div class="modal-actions"><button type="button" class="btn btn-neutre" data-tc="fermer">${esc(MOTS.fermer)}</button>
+                    <button type="button" class="btn btn-principal" data-tc="inscrire-simple">${esc(MOTS.inscrire)}</button></div>
+            </form>
+            <section class="tc-historique"><h4 class="tc-section-titre">${esc(MOTS.simple.derniere)}</h4><div class="tc-derniere-hote">${_derniereHTML(ctx, da, cibleId)}</div></section>`;
+        return _ouvrirFenetre(html, { mode: 'simple', da: String(da), cibleId, retour, ctx });
+    }
+
+    async function _inscrireSimple(overlay) {
+        const { ctx, da, cibleId } = _ouverte;
+        const bloc = overlay.querySelector('[data-tc-bloc]');
+        const cible = ctx.cibles.find(c => c.id === cibleId);
+        const niveau = _lireNiveau(bloc, bloc.dataset.prefixe).niveau;
+        if (niveau === null) { _alerte(overlay, [MOTS.simple.choisisNiveau]); return false; }
+        const saisie = {
+            da, ensembleId: ctx.ensemble.id, cibleId, niveau,
+            echelleId: ctx.echelle ? (ctx.echelle.id || null) : null,
+            date: I().dateDuJour(), productionId: null,
+            noteBreve: bloc.querySelector('.tc-retroaction').value,
+            criteres: I().etatDesCriteres(cible, {})   // chaque critère de la vue étendue, non renseigné : la forme du § 0
+        };
+        const motifs = I().motifsRefus(saisie, ctx.echelle);
+        _alerte(overlay, motifs);
+        if (motifs.length) return false;
+        const r = await I().inscrire([saisie], { geste: 'Inscrire un niveau' });
+        if (!r.ok) return false;
+        const n = _niveauDuCode(ctx, niveau);
+        const etudiant = ctx.etudiants.find(e => String(e.da) === String(da));
+        _fermer();
+        _rerendre({ da, cibleId });
+        _annoncer(MOTS.annonceInscrit(_nomEleve(etudiant), cible.etiquette, n ? (n.nom || n.code) : niveau));
+        return true;
+    }
+
+    /**
+     * Vue simple, écran « Note finale » : la note de chaque étudiant·e, par le moteur des cibles (aucun calcul recopié),
+     * arrondie comme l'indice P ; « En attente » et les cibles nommées ; ou le motif d'une note non calculable.
+     * @returns {{etat: 'cibles', videEtat: ?string, finales: boolean, lignes: Array<{da, nom, prenom, note: ?number, detail: string}>}}
+     */
+    function notesDuGroupe(base) {
+        const ctx = completerContexte(base);
+        if (ctx.vide) return { etat: 'cibles', videEtat: ctx.videEtat, finales: ctx.notesFinales, lignes: [] };
+        const E = N().ETATS;
+        const lignes = ctx.etudiants.map(e => {
+            const n = eleveDuContexte(ctx, e.da).note;
+            const ligne = { da: e.da, nom: e.nom || '', prenom: e.prenom || '', note: null, detail: '' };
+            if (n.etat === E.NOTE) Object.assign(ligne, { note: noteArrondie(n.note), detail: (n.plafonnement && n.plafonnement.applique) ? MOTS.notePlafonnee : '' });
+            else if (n.etat === E.ATTENTE) ligne.detail = `${MOTS.noteEnAttente} : ${MOTS.noteAttenteDe(n.enAttente.map(c => c.etiquette))}`;
+            else ligne.detail = n.motif || MOTS.noteNonCalculable;
+            return ligne;
+        });
+        return { etat: 'cibles', videEtat: null, finales: ctx.notesFinales, lignes };
+    }
+
+    /** Après une annulation : l'historique (vue étendue) ou la dernière inscription et la phrase « rien ne s'efface » (vue simple). */
+    function _redessinerApresAnnulation(overlay) {
+        const ctx = completerContexte(_contexteCourant || {});
+        _ouverte.ctx = ctx;
+        const simple = _ouverte.mode === 'simple';
+        const hote = overlay.querySelector(simple ? '.tc-derniere-hote' : '.tc-historique-hote');
+        // security-ok : _historiqueAvecRetenuHTML et _derniereHTML échappent tout texte (esc)
+        if (hote) hote.innerHTML = simple
+            ? `<p class="tc-aide tc-annulee-simple" role="status">${esc(MOTS.simple.annulee)}</p>` + _derniereHTML(ctx, _ouverte.da, _ouverte.cibleId)
+            : _historiqueAvecRetenuHTML(ctx, _ouverte.da, _ouverte.cibleId);
+        const titre = overlay.querySelector('.tc-historique .tc-section-titre');
+        if (titre) { titre.setAttribute('tabindex', '-1'); titre.focus(); }
+    }
+
     async function _annulerInscription(overlay, id) {
         const raison = (window.uiDialogues && typeof window.uiDialogues.demanderSaisie === 'function')
             ? await window.uiDialogues.demanderSaisie({ titre: MOTS.annulerTitre, message: MOTS.annulerMessage, preformate: true,
-                multiligne: true, texteConfirmer: MOTS.annulerConfirmer, texteAnnuler: MOTS.annulerGarder, variante: 'danger' })
+                multiligne: true, texteConfirmer: MOTS.annulerConfirmer, texteAnnuler: MOTS.annulerGarder, variante: 'danger',
+                classe: (_ouverte && _ouverte.mode === 'simple') ? 'ui-dialogue--tactile' : '' })
             : null;
         if (raison === null) return false;
         const r = await I().annuler(id, raison, { geste: 'Annuler une inscription' });
@@ -653,15 +823,7 @@
             return false;
         }
         // L'historique se redessine dans la fenêtre ouverte ; le tableau derrière aussi.
-        if (_ouverte && _ouverte.overlay === overlay) {
-            const ctx = completerContexte(_contexteCourant || {});
-            _ouverte.ctx = ctx;
-            const hote = overlay.querySelector('.tc-historique-hote');
-            // security-ok : _historiqueAvecRetenuHTML échappe tout texte (esc)
-            if (hote) hote.innerHTML = _historiqueAvecRetenuHTML(ctx, _ouverte.da, _ouverte.cibleId);
-            const titre = overlay.querySelector('.tc-historique .tc-section-titre');
-            if (titre) { titre.setAttribute('tabindex', '-1'); titre.focus(); }
-        }
+        if (_ouverte && _ouverte.overlay === overlay) _redessinerApresAnnulation(overlay);
         _focusApres = _ouverte ? { da: _ouverte.da, cibleId: _ouverte.cibleId } : null;
         if (window.TableauNotation) window.TableauNotation.rafraichirSiAffiche();
         _annoncer(MOTS.annonceAnnulee);
@@ -769,6 +931,7 @@
         if (g === 'fermer') _fermer();
         else if (g === 'coche') _basculerCoche(geste);
         else if (g === 'inscrire') _inscrireCase(overlay);
+        else if (g === 'inscrire-simple') _inscrireSimple(overlay);
         else if (g === 'annuler') _annulerInscription(overlay, geste.dataset.id);
         else if (g === 'inscrire-production') _inscrireProduction(overlay);
     }
@@ -802,6 +965,8 @@
         eleveDuContexte,
         noteArrondie,
         ouvrirInscription,
+        ouvrirInscriptionSimple,   // vue simple (21 nov. 2026)
+        notesDuGroupe,             // vue simple, écran « Note finale »
         ouvrirParProduction,
         dateLisible,
         fermer: _fermer

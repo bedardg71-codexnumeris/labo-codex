@@ -294,6 +294,31 @@
     }
 
     /**
+     * LA QUESTION AVANT DE RETIRER DES CIBLES QUI PORTENT DES INSCRIPTIONS (lot 2, l'assistant ; partagée le 21 nov. 2026
+     * avec la vue simple, qui pose « la même question que l'assistant »). Les inscriptions ne sont pas effacées : la cible
+     * cesse d'être montrée au tableau. Mots PROPOSÉS au lot 2 (W1 à W4), inchangés.
+     * @param {Array} retraits - `ciblesRetireesInscrites`
+     * @returns {{titre: string, message: string, texteConfirmer: string}|null} null : rien à demander
+     */
+    function questionRetraitCibles(retraits) {
+        const liste = Array.isArray(retraits) ? retraits : [];
+        if (liste.length === 0) return null;
+        const plusieurs = liste.length > 1;
+        // Complément du 21 nov., 9 h 17 : une inscription peut être une remarque, sans niveau ; elles sont dites à part.
+        const compte = (n, un, des) => `${n} ${n > 1 ? des : un}`;
+        const lignes = liste.map(x => `« ${x.cible.etiquette || x.cible.id} » : `
+            + [x.niveaux ? compte(x.niveaux, 'niveau inscrit', 'niveaux inscrits') : '', x.remarques ? compte(x.remarques, 'remarque', 'remarques') : '']
+                .filter(Boolean).join(' et ')
+            + ` pour ${compte(x.eleves, 'étudiant·e', 'étudiant·es')}`);
+        const message = (plusieurs ? 'Tu retires des cibles qui portent des inscriptions.' : 'Tu retires une cible qui porte des inscriptions.')
+            + '\n\n' + lignes.join('\n')
+            + '\n\n' + (plusieurs ? 'Leurs inscriptions restent enregistrées, mais ces cibles ne seront plus montrées au tableau.'
+                : 'Ses inscriptions restent enregistrées, mais cette cible ne sera plus montrée au tableau.')
+            + '\n\nRetirer quand même ?';
+        return { titre: plusieurs ? 'Retirer des cibles' : 'Retirer une cible', message, texteConfirmer: 'Retirer quand même' };
+    }
+
+    /**
      * Les cibles qu'un geste « inscrire pour une production » offre : celles que la production déclare
      * (`production.ciblesRenseignees`, facultatif), dans l'ordre de l'ensemble ; sans liste, ou si aucune des cibles
      * déclarées n'est encore dans l'ensemble, toutes les cibles.
@@ -407,6 +432,7 @@
         historiqueDeLaCase: historiqueDeLaCase,
         compterParCible: compterParCible,
         ciblesRetireesInscrites: ciblesRetireesInscrites,
+        questionRetraitCibles: questionRetraitCibles,
         ciblesOffertes: ciblesOffertes,
         ajouter: ajouter,
         lireToutes: lireToutes,

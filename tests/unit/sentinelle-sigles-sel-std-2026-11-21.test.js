@@ -112,7 +112,10 @@ function occurrencesHorsCommentaires(f, motif) {
 const CIB_INTERNE = {
     'js/pratiques/pratique-registre.js': [/cibles:\s*\{ code: 'CIB', sigle: 'STD'/],
     'js/pratiques-gestion.js': [/const typesValides = \[[^\]]*'CIB'/, /^\s*CIB: 'Par standards : /, /const CODE_PAR_TYPE = \{[^}]*cibles: 'CIB'/, /const PAR_CODE = \{[^}]*CIB: 'cibles'/],
-    'js/wizard-pratique-v2.js': [/^\s*'cibles': 'CIB'\s*\/\/ lot 1/]
+    'js/wizard-pratique-v2.js': [/^\s*'cibles': 'CIB'\s*\/\/ lot 1/],
+    // Vue simple, « Par standards » à l'essai (21 nov. 2026) : la pratique née en vue simple porte le code de sa famille,
+    // comme celle de l'assistant (une donnée, jamais affichée).
+    'js/vue-simple.js': [/pratiques: \['CIB'\]/]
 };
 describe('C · « CIB » n\'est écrit qu\'aux places internes', () => {
     it('aucun fichier de js/ ni index.html ne l\'écrit ailleurs, commentaires mis à part', () => {

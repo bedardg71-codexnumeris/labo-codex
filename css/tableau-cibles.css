@@ -370,6 +370,31 @@
     gap: 10px;
 }
 
+/* Vue simple (21 nov. 2026) : le niveau retenu, la dernière inscription et son « Annuler », l'un sous l'autre. */
+.tc-derniere-hote {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+/* La fenêtre d'une case en vue simple (21 nov. 2026) : tout ce qui se touche a 46 px, comme le reste de la vue simple
+   (css/vue-simple.css, « Cibles tactiles »). */
+.tc-overlay--simple .btn,
+.tc-overlay--simple .modal-fermer {
+    min-height: 46px;
+}
+
+.tc-overlay--simple .modal-fermer {
+    min-width: 46px;
+    top: 8px;
+    right: 8px;
+}
+
+/* Après une annulation en vue simple : la phrase qui dit que rien ne s'efface, en tête. */
+.tc-annulee-simple {
+    font-weight: 600;
+}
+
 .tc-historique-liste {
     list-style: none;
     margin: 0;

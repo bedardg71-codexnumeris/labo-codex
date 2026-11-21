@@ -2985,24 +2985,14 @@ async function _confirmerRetraitCiblesInscrites(r) {
     const IC = window.InscriptionsCibles;
     const retraits = IC.ciblesRetireesInscrites(IC.lireToutes(), ensembleId, ensemble.cibles,
         window.EnsemblesCibles.normaliserCibles(r.ciblesStandards));
-    if (retraits.length === 0) return true;
-    const plusieurs = retraits.length > 1;
-    // Complément du 21 nov., 9 h 17 : une inscription peut être une remarque, sans niveau ; elles sont dites à part.
-    const compte = (n, un, des) => `${n} ${n > 1 ? des : un}`;
-    const lignes = retraits.map(x => `« ${x.cible.etiquette || x.cible.id} » : `
-        + [x.niveaux ? compte(x.niveaux, 'niveau inscrit', 'niveaux inscrits') : '', x.remarques ? compte(x.remarques, 'remarque', 'remarques') : '']
-            .filter(Boolean).join(' et ')
-        + ` pour ${compte(x.eleves, 'étudiant·e', 'étudiant·es')}`);
-    const message = (plusieurs ? 'Tu retires des cibles qui portent des inscriptions.' : 'Tu retires une cible qui porte des inscriptions.')
-        + '\n\n' + lignes.join('\n')
-        + '\n\n' + (plusieurs ? 'Leurs inscriptions restent enregistrées, mais ces cibles ne seront plus montrées au tableau.'
-            : 'Ses inscriptions restent enregistrées, mais cette cible ne sera plus montrée au tableau.')
-        + '\n\nRetirer quand même ?';
+    // La question est partagée avec la vue simple (21 nov. 2026) : `InscriptionsCibles.questionRetraitCibles`, mots inchangés.
+    const q = IC.questionRetraitCibles(retraits);
+    if (!q) return true;
     if (window.uiDialogues && typeof window.uiDialogues.confirmerAction === 'function') {
-        return !!(await window.uiDialogues.confirmerAction({ titre: plusieurs ? 'Retirer des cibles' : 'Retirer une cible', message,
-            preformate: true, texteConfirmer: 'Retirer quand même', variante: 'danger' }));
+        return !!(await window.uiDialogues.confirmerAction({ titre: q.titre, message: q.message,
+            preformate: true, texteConfirmer: q.texteConfirmer, variante: 'danger' }));
     }
-    return confirm(message);
+    return confirm(q.message);
 }
 
 /**

@@ -133,13 +133,15 @@
 
     /**
      * « Par standards » (lot 2, 21 nov. 2026) : la famille `cibles` de la désignation (le type rangé, normalisé) ; les cibles
-     * en colonnes, dessinées par js/tableau-cibles.js. En vue simple, rien ne change (le message « autre famille ») : la vue
-     * simple ne crée pas cette pratique. null pour toute autre famille.
+     * en colonnes, dessinées par js/tableau-cibles.js. VUE SIMPLE (21 nov. 2026, à l'essai) : une présentation qui l'accepte
+     * (`cibles`) reçoit le tableau des cibles, allégé (`presentation` dans le contexte) ; une présentation qui ne le déclare
+     * pas garde le message « autre famille », comme avant. null pour toute autre famille.
      */
     function _contexteDesCibles(designation) {
-        if (designation.famille !== 'cibles' || _presentation || !window.TableauCibles) return null;
+        if (designation.famille !== 'cibles' || !window.TableauCibles) return null;
+        if (_presentation && !_presentation.cibles) return null;
         const donnees = designation.donnees || {};
-        return { etat: 'cibles', pratiqueId: designation.id, pratiqueNom: donnees.nom || '', donnees };
+        return { etat: 'cibles', pratiqueId: designation.id, pratiqueNom: donnees.nom || '', donnees, presentation: _presentation || null };
     }
 
     /* L'ÉCHELLE RETENUE (consigne du lot, 9 nov. 2026) : celle de la production si elle en a une, sinon celle de la
@@ -892,6 +894,8 @@
      */
     function notesDuGroupe() {
         const ctx = construireContexte();
+        // « Par standards » (vue simple, 21 nov. 2026) : les notes du moteur des cibles, par le tableau des cibles.
+        if (ctx.etat === 'cibles') return window.TableauCibles.notesDuGroupe(ctx);
         if (ctx.etat !== 'ok' && ctx.etat !== 'aucune-production') return { etat: ctx.etat, finales: false, lignes: [] };
         const lignes = ctx.etudiants.map(e => {
             const r = _resultatEleve(e.da, ctx);

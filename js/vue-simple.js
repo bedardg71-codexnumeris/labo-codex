@@ -96,8 +96,30 @@
         pratiqueIntro: 'Choisis un modèle. Tu régleras ensuite la règle qui construit la note.',
         modeles: [
             { famille: 'standards', modele: 'STD-n-meilleurs', titre: 'Par sélection de productions', texte: 'Chaque production reçoit un niveau. La note se construit à partir des niveaux que la règle retient.', lien: 'Choisir ce modèle' },
-            { famille: 'specifications', modele: 'SPE-simple', titre: 'Par spécifications', texte: 'Chaque production est acceptable ou non acceptable. La note dépend du nombre de productions acceptables.', lien: 'Choisir les spécifications' }
+            { famille: 'specifications', modele: 'SPE-simple', titre: 'Par spécifications', texte: 'Chaque production est acceptable ou non acceptable. La note dépend du nombre de productions acceptables.', lien: 'Choisir les spécifications' },
+            // « Par standards », À L'ESSAI (21 nov. 2026 ; décision de Grégoire, 14 h 19). Mots PROPOSÉS
+            // (TEXTES-2026-11-21-par-standards-vue-simple.md). La famille se reconnaît à son type (`cibles`), jamais à son nom.
+            { famille: 'cibles', modele: 'par-standards', titre: 'Par standards', essai: 'À l’essai', texte: 'Tu écris les cibles de ton cours. Chaque étudiant·e reçoit un niveau par cible ; la note vient du meilleur niveau démontré pour chaque cible.', lien: 'Choisir ce modèle' }
         ],
+        // — « Par standards » (21 nov. 2026, à l'essai) : mots PROPOSÉS
+        ciblesTitre: 'Tes cibles',
+        ciblesIntro: 'Écris les cibles de ton cours, une par ligne : ce que tes étudiant·es doivent pouvoir faire. Tu pourras en ajouter, en renommer ou en retirer ensuite.',
+        ciblesChamp: 'Tes cibles, une par ligne',
+        ciblesExemple: 'Analyser un texte\nStructurer un propos\nRédiger une dissertation',
+        ciblesCreer: 'Créer ma pratique',
+        ciblesAnnuler: 'Annuler',
+        cibleNom: 'Cible',
+        cibleAjouter: '+ Cible',
+        cibleRetirer: 'Retirer',
+        ciblesEnregistrees: 'Cibles enregistrées.',
+        ciblesAucune: 'Ta pratique n’a pas encore de cible.',
+        ciblesEtendue: 'Les énoncés, les poids et les cibles terminales se règlent en vue étendue.',
+        ciblesPoidsRegles: 'Les poids de tes cibles ont été réglés en vue étendue : ils restent tels quels.',
+        niveauxCiblesAide: 'Pour chaque cible, le niveau retenu est le meilleur que l’étudiant·e a démontré. Ces niveaux se règlent en vue étendue.',
+        noteCiblesTitre: 'La note',
+        noteCibles: 'La moyenne des niveaux retenus de tes cibles. Tant qu’une cible n’a aucun niveau, la note attend : les cibles en attente sont nommées.',
+        noteCiblesSeuil: 'Un second seuil, réglé en vue étendue, peut plafonner la note.',
+        noteCiblesFinales: 'Notes finalisées (vue étendue) : une cible sans niveau compte pour 0\u00a0%.',
         pratiqueModele: 'Modèle',
         pratiqueRegle: 'La règle qui construit la note',
         // LE GESTE (règle validée par Grégoire, 9 nov. 2026, 19 h 44) : tout ce qui entre dans la note a une valeur de départ
@@ -153,7 +175,11 @@
             // VALIDÉ par Grégoire, mot pour mot (9 nov. 2026, 21 h 42) : un nom qui RATTACHERAIT au type des productions qui portent déjà ce nom.
             typeDejaPorte: (r) => `Des productions de ton tableau portent déjà le type « ${r.nom} ». Choisis un autre nom.`,
             // PROPOSÉ (le second cas, que la phrase validée ne couvre pas) : renommer DÉTACHERAIT du type les productions qui tiennent à lui par son nom.
-            typeNomGarde: (r) => `Des productions de ton tableau portent le type « ${r.nom} ». Ce nom ne se change pas ici.`
+            typeNomGarde: (r) => `Des productions de ton tableau portent le type « ${r.nom} ». Ce nom ne se change pas ici.`,
+            // « Par standards » (21 nov. 2026) : PROPOSÉS
+            aucuneCible: () => 'Écris au moins une cible.',
+            cibleSansEtiquette: () => 'Chaque ligne nomme une cible : une ligne est vide.',
+            cibleEnDouble: () => 'Deux cibles portent le même nom.'
         },
         pratiqueChanger: 'Changer de modèle',
         pratiqueAutre: 'La pratique de ce groupe n’est ni par sélection de productions ni par spécifications : elle se règle en vue étendue.',
@@ -233,6 +259,7 @@
     let _nouveauGroupe = false;   // « Nouveau groupe » : l'écran Classe montre le formulaire de création, même avec un groupe actif
     let _retraitGroupe = null;    // le groupe dont on a demandé le retrait : il se fait au second geste
     let _miseAJour = null;     // la question posée après un réglage de niveaux : { lot, groupes }
+    let _creationCibles = false;   // « Par standards » choisi : l'écran Pratique montre le champ des cibles, une par ligne
 
     /* ============================== LA VUE ============================== */
 
@@ -330,14 +357,11 @@
         return _pratiques().find((p) => p.id === groupe.pratiqueId) || null;
     }
 
-    /** 'standards', 'specifications', 'autre' (une pratique d'une autre famille, ou introuvable), ou null (aucune pratique). */
+    /** 'standards', 'specifications', 'cibles', 'autre' (une autre famille, ou introuvable), ou null (aucune pratique).
+     *  La famille se lit au TYPE de la pratique, jamais à son nom (`familleDeLaPratique`, 21 nov. 2026). */
     function _famille(groupe) {
         if (!groupe || !groupe.pratiqueId) return null;
-        const p = _pratiqueDuGroupe(groupe);
-        const type = p ? String((p.configuration && p.configuration.type) || p.type || (p.config && p.config.type) || '') : '';
-        if (/standard/i.test(type)) return D().FAMILLES.STD;
-        if (/sp[ée]cification/i.test(type)) return D().FAMILLES.SPE;
-        return 'autre';
+        return D().familleDeLaPratique(_pratiqueDuGroupe(groupe));
     }
 
     function _nomGroupe(groupe) {
@@ -377,6 +401,7 @@
         _miseAJour = null;
         _nouveauGroupe = false;
         _retraitGroupe = null;
+        _creationCibles = false;
         _fermerReglage();
         if (typeof afficherSection === 'function') afficherSection('simple-' + ecran);
         RENDUS[ecran]();
@@ -412,6 +437,7 @@
         _formulaireProduction = false;
         _nouveauGroupe = false;
         _retraitGroupe = null;
+        _creationCibles = false;
         await changerGroupeCoursActifV2(id);
         _rafraichir();
     }
@@ -945,11 +971,70 @@
 
     function _choixModeleHTML() {
         const cartes = MOTS.modeles.map((m) => `<li class="vs-etape">
-                <h3 class="vs-etape-titre">${esc(m.titre)}</h3>
+                <h3 class="vs-etape-titre">${esc(m.titre)}</h3>${m.essai ? `
+                <p class="vs-etape-essai">${esc(m.essai)}</p>` : ''}
                 <p class="vs-etape-texte">${esc(m.texte)}</p>
                 <button type="button" class="btn btn-principal vs-etape-lien" data-action="VueSimple.choisirModele" data-param="${esc(m.modele)}">${esc(m.lien)}</button>
             </li>`).join('');
-        return `<p class="vs-intro">${esc(MOTS.pratiqueIntro)}</p><ul class="vs-etapes vs-etapes--deux">${cartes}</ul>`;
+        return `<p class="vs-intro">${esc(MOTS.pratiqueIntro)}</p><ul class="vs-etapes vs-etapes--trois">${cartes}</ul>`;
+    }
+
+    /* ---------- « Par standards » (21 nov. 2026, à l'essai) ---------- */
+
+    /** Le modèle « Par standards » choisi : ses cibles s'écrivent une par ligne, puis « Créer ma pratique ». */
+    function _creationCiblesHTML(retourHTML) {
+        return `<div class="vs-bloc" id="vs-bloc-creation-cibles"><h3 class="vs-sous-titre">${esc(MOTS.ciblesTitre)}</h3>
+            <p class="vs-note">${esc(MOTS.ciblesIntro)}</p>
+            <div class="groupe-form"><label for="vs-cibles-lignes">${esc(MOTS.ciblesChamp)}</label>
+                <textarea id="vs-cibles-lignes" class="controle-form vs-liste vs-cibles-lignes" rows="6" placeholder="${esc(MOTS.ciblesExemple)}" spellcheck="true"></textarea></div>
+            <div id="vs-reglage-retour">${retourHTML || ''}</div>
+            <p class="vs-gestes"><button type="button" class="btn btn-principal" data-action="VueSimple.creerParStandards">${esc(MOTS.ciblesCreer)}</button>
+                <button type="button" class="btn btn-secondaire" data-action="VueSimple.annulerCreationCibles">${esc(MOTS.ciblesAnnuler)}</button></p></div>`;
+    }
+
+    /** Un mot du tableau des cibles en vue simple (`TableauCibles.MOTS.simple`) : une seule source pour un même texte. */
+    function _motDuTableau(cleMot) {
+        return (window.TableauCibles && window.TableauCibles.MOTS.simple[cleMot]) || '';
+    }
+
+    /** L'ensemble de cibles que la pratique désigne (lecture seule), ou null. */
+    function _ensembleDeLaPratique(pratique) {
+        const id = pratique && pratique.configuration && pratique.configuration.ensembleCiblesId;
+        return (id && window.EnsemblesCibles) ? window.EnsemblesCibles.lireParId(id) : null;
+    }
+
+    function _ciblesLuesHTML(pratique) {
+        const ensemble = _ensembleDeLaPratique(pratique);
+        if (!ensemble) return `<p class="vs-note">${esc(_motDuTableau('introuvable'))}</p>`;
+        const cibles = window.EnsemblesCibles.normaliserCibles(ensemble.cibles);
+        const puces = cibles.map((c) => `<span class="vs-niveau"><strong>${esc(c.etiquette)}</strong></span>`).join('');
+        const poids = D().poidsEgaux(cibles) ? '' : `<p class="vs-note">${esc(MOTS.ciblesPoidsRegles)}</p>`;
+        return (cibles.length ? `<p class="vs-niveaux">${puces}</p>` : `<p class="vs-note">${esc(MOTS.ciblesAucune)}</p>`)
+            + poids + `<p class="vs-note">${esc(MOTS.ciblesEtendue)}</p>`;
+    }
+
+    function _ciblesReglageHTML() {
+        const rangees = _brouillon.cibles.map((c, i) => `<tr><td><input type="text" class="controle-form vs-cible-nom" maxlength="80" value="${esc(c.etiquette)}" aria-label="${esc(MOTS.cibleNom + ' ' + (i + 1))}"></td>
+                <td class="vs-rangee-gestes"><button type="button" class="btn btn-secondaire vs-petit" data-action="VueSimple.cibleGeste" data-param="retirer" data-param2="${i}">${esc(MOTS.cibleRetirer)}</button></td></tr>`).join('');
+        return `<p class="vs-note">${esc(MOTS.ciblesIntro)}</p>
+            <div class="vs-cadre-table"><table class="vs-table vs-reglage"><thead><tr><th scope="col">${esc(MOTS.cibleNom)}</th><th scope="col"></th></tr></thead><tbody>${rangees}</tbody></table></div>
+            <p class="vs-gestes"><button type="button" class="btn btn-secondaire" data-action="VueSimple.cibleGeste" data-param="ajouter">${esc(MOTS.cibleAjouter)}</button></p>`;
+    }
+
+    /** La note : comment elle se fait ; le second seuil et « Notes finalisées » réglés en vue étendue, s'ils le sont. */
+    function _noteCiblesHTML(pratique) {
+        const c = pratique.configuration || {};
+        const seuil = (c.doubleSeuil && c.doubleSeuil.actif === true) ? `<p class="vs-note">${esc(MOTS.noteCiblesSeuil)}</p>` : '';
+        const finales = c.notesFinales === true ? `<p class="vs-note">${esc(MOTS.noteCiblesFinales)}</p>` : '';
+        return `<div class="vs-bloc" id="vs-bloc-note"><div class="vs-bloc-tete"><h3 class="vs-sous-titre">${esc(MOTS.noteCiblesTitre)}</h3></div>
+            <p class="vs-valeur">${esc(MOTS.noteCibles)}</p>${seuil}${finales}</div>`;
+    }
+
+    function _blocsCibHTML(pratique) {
+        const echelle = _echelleDeLaPratique(pratique);
+        return _blocHTML('cibles', MOTS.ciblesTitre, _ciblesLuesHTML(pratique), _ciblesReglageHTML, _reglable(pratique, 'cibles'))
+            + _blocHTML('niveaux', MOTS.niveauxTitre, _niveauxLusHTML(echelle) + `<p class="vs-note">${esc(MOTS.niveauxCiblesAide)}</p>`, () => '', false)
+            + _noteCiblesHTML(pratique);
     }
 
     function _rendrePratique(retourHTML) {
@@ -959,7 +1044,7 @@
         const groupe = _groupeActif();
         if (!groupe) { _ecrire(hote, tete + (_groupes().length ? '' : _sansClasseHTML())); return; }
         const famille = _famille(groupe);
-        if (famille === null) { _ecrire(hote, `${tete}${retourHTML || ''}${_choixModeleHTML()}`); return; }
+        if (famille === null) { _ecrire(hote, `${tete}${_creationCibles ? _creationCiblesHTML(retourHTML) : (retourHTML || '') + _choixModeleHTML()}`); return; }
         if (famille === 'autre') { _ecrire(hote, `${tete}<p class="vs-etat">${esc(MOTS.pratiqueAutre)}</p>`); return; }
         _ecrire(hote, tete + _pratiqueChoisieHTML(groupe, famille, retourHTML));
     }
@@ -969,6 +1054,7 @@
         if (!pratique || !pratique.configuration) return false;
         if (quoi === 'regle') return D().regleStd(pratique).methode !== 'autre';
         if (quoi === 'niveaux') return _echelleLue(pratique).reglable;
+        if (quoi === 'cibles') return D().familleDeLaPratique(pratique) === D().FAMILLES.CIBLES && !!_ensembleDeLaPratique(pratique);
         // Types et paliers : le calcul lit `tableBundles` avant `forfaits` ; une pratique sous cette forme se règle en vue étendue.
         return Array.isArray(pratique.configuration.forfaits) && !Array.isArray(pratique.configuration.tableBundles);
     }
@@ -992,11 +1078,12 @@
     function _pratiqueChoisieHTML(groupe, famille, retourHTML) {
         const pratique = _pratiqueDuGroupe(groupe);
         const std = famille === D().FAMILLES.STD;
+        const cib = famille === D().FAMILLES.CIBLES;   // « Par standards » (21 nov. 2026, à l'essai)
         const nomFamille = (MOTS.modeles.find((m) => m.famille === famille) || {}).titre || '';
         const noms = [nomFamille, pratique.nom].filter((x, i, t) => x && t.indexOf(x) === i).join(' · ');
         // Une pratique importée sous l'ancienne forme (`.config`) se lit en vue étendue, elle ne se règle pas ici.
         const reglable = !!pratique.configuration;
-        const blocs = !reglable ? `<p class="vs-note">${esc(MOTS.regleAutre)}</p>` : (std ? _blocsStdHTML(pratique) : _blocsSpeHTML(pratique));
+        const blocs = !reglable ? `<p class="vs-note">${esc(MOTS.regleAutre)}</p>` : (cib ? _blocsCibHTML(pratique) : (std ? _blocsStdHTML(pratique) : _blocsSpeHTML(pratique)));
         return `<p class="vs-intro"><span class="vs-libelle">${esc(MOTS.pratiqueModele)}</span> ${esc(noms)}</p>
             <div id="vs-pratique-retour">${retourHTML || ''}${_questionMiseAJourHTML()}</div>${reglable ? _reglePartageeHTML(pratique) : ''}${blocs}
             <p class="vs-gestes"><button type="button" class="btn btn-principal" data-action="VueSimple.aller" data-param="resultats">${esc(MOTS.pratiqueSuite)}</button>${_changerModeleHTML(groupe)}</p>`;
@@ -1008,9 +1095,23 @@
         return n > 1 ? `<p class="vs-note">${esc(MOTS.reglePartagee(n))}</p>` : '';
     }
 
-    /** « Changer de modèle » : offert tant que le groupe n'a aucune production. */
+    /** « Par standards » : le groupe porte-t-il déjà des inscriptions sur les cibles de sa pratique ? */
+    function _aDesInscriptions(pratique) {
+        const ensemble = _ensembleDeLaPratique(pratique);
+        if (!ensemble || !window.InscriptionsCibles) return false;
+        return window.InscriptionsCibles.lireToutes().some((e) => e && e.ensembleId === ensemble.id);
+    }
+
+    /** Le modèle se change tant que le groupe n'a aucune production (par standards : aucune inscription sur ses cibles). */
+    function _modeleChangeable(groupe) {
+        const pratique = _pratiqueDuGroupe(groupe);
+        if (pratique && D().familleDeLaPratique(pratique) === D().FAMILLES.CIBLES) return !_aDesInscriptions(pratique);
+        return !_productionsDuCours(groupe.coursId).length;
+    }
+
+    /** « Changer de modèle » : offert tant que le modèle se change (`_modeleChangeable`). */
     function _changerModeleHTML(groupe) {
-        if (_productionsDuCours(groupe.coursId).length) return '';
+        if (!_modeleChangeable(groupe)) return '';
         return `<button type="button" class="btn btn-secondaire" data-action="VueSimple.changerModele">${esc(MOTS.pratiqueChanger)}</button>`;
     }
 
@@ -1025,10 +1126,12 @@
     function regler(quoi) {
         const groupe = _groupeActif();
         const pratique = _pratiqueDuGroupe(groupe);
-        if (['regle', 'niveaux', 'types', 'paliers'].indexOf(quoi) < 0 || !_reglable(pratique, quoi)) { aller('pratique'); return; }
+        if (['regle', 'niveaux', 'types', 'paliers', 'cibles'].indexOf(quoi) < 0 || !_reglable(pratique, quoi)) { aller('pratique'); return; }
         if (_ecran !== 'pratique') aller('pratique');
         _reglage = quoi;
-        _brouillon = D().brouillonDeLaPratique(pratique, _echelleDeLaPratique(pratique) || _echelleDeDepart());
+        _brouillon = quoi === 'cibles'
+            ? Object.assign(D().brouillonDesCibles(window.EnsemblesCibles.normaliserCibles(_ensembleDeLaPratique(pratique).cibles)), { pratiqueId: pratique.id })
+            : D().brouillonDeLaPratique(pratique, _echelleDeLaPratique(pratique) || _echelleDeDepart());
         _rendrePratique();
         const bloc = document.getElementById('vs-bloc-' + quoi);
         const champ = bloc && bloc.querySelector('input');
@@ -1049,6 +1152,10 @@
         if (_reglage === 'niveaux') {
             const codes = valeurs('.vs-n-code'), noms = valeurs('.vs-n-nom'), vals = valeurs('.vs-n-valeur');
             return Object.assign({}, b, { niveaux: b.niveaux.map((n, i) => Object.assign({}, n, { code: codes[i], nom: noms[i], valeur: vals[i] })) });
+        }
+        if (_reglage === 'cibles') {
+            const noms = valeurs('.vs-cible-nom');
+            return Object.assign({}, b, { cibles: b.cibles.map((c, i) => Object.assign({}, c, { etiquette: noms[i] })) });
         }
         if (_reglage === 'types') {
             const noms = valeurs('.vs-type-nom');
@@ -1091,6 +1198,39 @@
         _brouillon = b;
         if (quoi === 'ajouter') _geste(D().gestes.typeAjouter(b));
         else if (quoi === 'retirer') _geste(D().gestes.typeRetirer(b, index, _compterProductions(_pratiqueDuGroupe(_groupeActif()))));
+    }
+
+    function cibleGeste(quoi, index) {
+        if (_reglage !== 'cibles') return;
+        const b = _lireLeReglage();
+        _brouillon = b;
+        if (quoi === 'ajouter') {
+            _geste(D().gestesCibles.ajouter(b, window.EditeurCibles ? window.EditeurCibles.nouvelId() : window.genererIdUnique('cible_')));
+            const champs = document.querySelectorAll('#vs-bloc-cibles .vs-cible-nom');
+            if (champs.length) champs[champs.length - 1].focus();
+        } else if (quoi === 'retirer') _geste(D().gestesCibles.retirer(b, Number(index)));
+    }
+
+    /**
+     * Les cibles réglées (« Par standards ») : la question de l'assistant avant de retirer une cible qui porte des
+     * inscriptions (rien ne s'efface), puis l'ensemble réécrit par son seul écrivain (`EnsemblesCibles.enregistrer`), chaque
+     * cible gardée ENTIÈRE (ce que la vue étendue y a réglé), une cible neuve avec le poids de l'assistant.
+     */
+    async function _enregistrerCibles(pratique, b) {
+        const refus = D().refusDesCibles(b.cibles.map((c) => c.etiquette));
+        if (refus) return { refus };
+        const ensemble = _ensembleDeLaPratique(pratique);
+        const nouvelles = D().ciblesReglees(ensemble.cibles, b);
+        const IC = window.InscriptionsCibles;
+        const q = IC.questionRetraitCibles(IC.ciblesRetireesInscrites(IC.lireToutes(), ensemble.id, ensemble.cibles, nouvelles));
+        if (q) {
+            const oui = (window.uiDialogues && typeof window.uiDialogues.confirmerAction === 'function')
+                ? await window.uiDialogues.confirmerAction({ titre: q.titre, message: q.message, preformate: true, texteConfirmer: q.texteConfirmer, variante: 'danger', classe: 'ui-dialogue--tactile' })
+                : window.confirm(q.message);
+            if (!oui) return { ecrit: false, renonce: true };
+        }
+        const ecrit = await window.EnsemblesCibles.enregistrer({ id: ensemble.id, coursId: ensemble.coursId, cibles: nouvelles }, { geste: MOTS.ciblesTitre });
+        return { mot: MOTS.ciblesEnregistrees, ecrit: !!ecrit };
     }
 
     function palierGeste(quoi, index) {
@@ -1178,6 +1318,7 @@
     function garderValeurs() { _miseAJour = null; _rendrePratique(); }
 
     async function _enregistrerLeReglage(pratique, b) {
+        if (_reglage === 'cibles') return _enregistrerCibles(pratique, b);
         if (_reglage === 'niveaux') return Object.assign({ mot: MOTS.niveauxEnregistres }, await _enregistrerNiveaux(pratique, b));
         if (_reglage === 'regle') {
             return { mot: MOTS.regleEnregistree, ecrit: !!(await _ecrirePratique(D().poserRegleStd(pratique, { methode: b.methode, nombre: b.nombre }), MOTS.pratiqueRegle)) };
@@ -1197,6 +1338,7 @@
         _brouillon = _lireLeReglage();
         const r = await _enregistrerLeReglage(pratique, _brouillon);
         if (r.refus) { _direRefus(r.refus); return; }
+        if (r.renonce) { _rendrePratique(); return; }   // « Par standards » : la question du retrait, refusée — rien n'est écrit, le réglage reste ouvert
         if (r.ecrit) { _apresEcriturePratique(); _fermerReglage(); }
         const groupesDeLaPratique = _groupes().filter((g) => g.pratiqueId === pratique.id).map((g) => g.id);
         _miseAJour = (r.ecrit && r.lot && r.lot.length) ? { lot: r.lot, groupes: groupesDeLaPratique.length, idsGroupes: groupesDeLaPratique } : null;
@@ -1225,9 +1367,66 @@
         return ecrit ? r.echelle : null;
     }
 
+    const MODELE_PAR_STANDARDS = 'par-standards';
+
+    /**
+     * « Par standards » (21 nov. 2026, à l'essai) : une pratique déjà née de ce modèle, qu'aucun groupe n'emploie (laissée
+     * par « Changer de modèle »), est reprise telle quelle ; sinon, l'écran demande les cibles, une par ligne.
+     */
+    async function _choisirParStandards(groupe) {
+        const libre = _pratiqueLibreDuModele(MODELE_PAR_STANDARDS);
+        if (libre) { await window.PratiqueManager.changerPratiqueActive(libre.id); _rendrePratique(); return; }
+        _creationCibles = true;
+        _rendrePratique();
+        const champ = document.getElementById('vs-cibles-lignes');
+        if (champ) champ.focus();
+    }
+
+    function annulerCreationCibles() { _creationCibles = false; _rendrePratique(); }
+
+    /**
+     * « Créer ma pratique » : les chemins de l'assistant, dans son ordre — l'échelle de départ (cinq niveaux, celle de
+     * l'assistant), l'ensemble de cibles (`EnsemblesCibles.enregistrer`, son seul écrivain), puis la pratique, de la forme que
+     * l'assistant écrit (famille `cibles`, méthode `niveaux_par_cible`, le niveau « sans donnée » de l'échelle de départ ; ni
+     * double seuil, ni « Notes finalisées »), assignée au groupe actif. Chaque ligne devient une cible : poids égaux, aucun
+     * critère, aucune cible terminale, énoncé vide.
+     */
+    async function creerParStandards() {
+        const groupe = _groupeActif();
+        if (!groupe || _famille(groupe) !== null || !window.EnsemblesCibles) return;
+        const etiquettes = D().etiquettesDepuisLignes((document.getElementById('vs-cibles-lignes') || {}).value);
+        const refus = D().refusDesCibles(etiquettes);
+        if (refus) { _direRefus(refus); return; }
+        const EC = window.EnsemblesCibles;
+        const maintenant = new Date().toISOString();
+        try {
+            const echelle = EC.echelleDeDepart(window.genererIdUnique('ECH_'));
+            if (!(await window.modifierEtAnnoncer(cle('echellesTemplates'), (lues) => (lues || []).concat([echelle]), [], { geste: MOTS.pratiqueTitre }))) throw new Error('échelle non écrite');
+            const ensembleId = window.genererIdUnique('ENSC_');
+            const idNeuf = () => (window.EditeurCibles ? window.EditeurCibles.nouvelId() : window.genererIdUnique('cible_'));
+            if (!(await EC.enregistrer({ id: ensembleId, coursId: groupe.coursId || null, cibles: D().ciblesNeuves(etiquettes, idNeuf) }, { geste: MOTS.ciblesTitre }))) throw new Error('cibles non écrites');
+            const titre = (MOTS.modeles.find((m) => m.modele === MODELE_PAR_STANDARDS) || {}).titre;
+            const pratique = {
+                id: window.genererIdUnique('PRAT_'), nom: titre, description: '', type: D().FAMILLES.CIBLES, pratiques: ['CIB'],
+                inspireDe: { sourceId: MODELE_PAR_STANDARDS, nom: titre }, dansBibliotheque: true, dateAjout: maintenant, dateCreation: maintenant,
+                calcul_note: { methode: 'niveaux_par_cible' },
+                configuration: { type: D().FAMILLES.CIBLES, ensembleCiblesId: ensembleId, echelleId: echelle.id, niveauSansDonnee: EC.CODE_SANS_DONNEE_DEPART }
+            };
+            if (!(await window.modifierEtAnnoncer(cle('pratiquesConfigurables'), (lues) => (lues || []).concat([pratique]), [], { geste: MOTS.pratiqueTitre }))) throw new Error('pratique non écrite');
+            await window.PratiqueManager.changerPratiqueActive(pratique.id);
+            _creationCibles = false;
+            _apresEcriturePratique();
+            _rendrePratique();
+        } catch (e) {
+            console.error('[Vue simple] pratique par standards non créée :', e);
+            _rendrePratique(`<p class="vs-erreur" role="alert">${esc(MOTS.pratiqueEchec)}</p>`);
+        }
+    }
+
     /** Installe un modèle existant dans le trimestre et l'assigne au groupe actif (les chemins de la vue étendue). */
     async function choisirModele(idModele) {
         const groupe = _groupeActif();
+        if (idModele === MODELE_PAR_STANDARDS) { if (groupe && _famille(groupe) === null) { _fermerReglage(); await _choisirParStandards(groupe); } return; }
         const modele = _modele(idModele);
         if (!groupe || !modele || _famille(groupe) !== null) return;
         _fermerReglage();
@@ -1253,7 +1452,7 @@
     /** « Changer de modèle » (offert tant que le groupe n'a aucune production) : le groupe redevient sans pratique ; la pratique reste au trimestre. */
     async function changerModele() {
         const groupe = _groupeActif();
-        if (!groupe || _productionsDuCours(groupe.coursId).length) return;
+        if (!groupe || !_modeleChangeable(groupe)) return;
         _fermerReglage();
         try {
             await window.PratiqueManager.changerPratiqueActive(null);
@@ -1335,14 +1534,25 @@
     }
 
     function _presentationDuTableau(hote) {
+        const famille = _famille(_groupeActif());
+        // « Par standards » (21 nov. 2026, à l'essai) : le tableau des cibles en vue simple — une case par étudiant·e et par
+        // cible ; ses cibles se règlent à l'écran Pratique.
+        if (famille === D().FAMILLES.CIBLES) {
+            return {
+                hote, cibles: true,
+                mots: { aucunEleve: MOTS.tableau.aucunEleve },
+                reglages: { action: 'VueSimple.regler', param: 'cibles', libelle: MOTS.regler },
+                gestes: { 'aucun-eleve': { libelle: MOTS.cartes[0].lien, action: 'VueSimple.aller', param: 'classe' } }
+            };
+        }
         return {
             hote,
             mots: MOTS.tableau,
             aUneGrille: _aUneGrille,
             // Chaque valeur du tableau qui entre dans la note est à un geste de son réglage : la phrase de la règle, les niveaux
             // (standards), les types et les paliers (spécifications).
-            reglages: { action: 'VueSimple.regler', param: _famille(_groupeActif()) === D().FAMILLES.SPE ? 'types' : 'regle', libelle: MOTS.regler },
-            reglerRepere: { action: 'VueSimple.regler', param: _famille(_groupeActif()) === D().FAMILLES.SPE ? 'paliers' : 'niveaux', libelle: MOTS.regler },
+            reglages: { action: 'VueSimple.regler', param: famille === D().FAMILLES.SPE ? 'types' : 'regle', libelle: MOTS.regler },
+            reglerRepere: { action: 'VueSimple.regler', param: famille === D().FAMILLES.SPE ? 'paliers' : 'niveaux', libelle: MOTS.regler },
             // Chaque colonne se règle depuis son titre ; une colonne qui ne compte pas reste au tableau et le dit ; la phrase
             // de la règle dit combien comptent.
             colonne: { action: 'VueSimple.ouvrirColonne', libelle: MOTS.colonneRegler, motHors: MOTS.colonneHors },
@@ -1547,14 +1757,8 @@
         if (!groupe) { _ecrire(hote, tete + (_groupes().length ? '' : _sansClasseHTML())); return; }
         const r = window.TableauNotation ? window.TableauNotation.notesDuGroupe() : { etat: 'aucune-pratique', lignes: [] };
         const T = window.TableauNotation ? window.TableauNotation.MOTS : {};
-        if (r.etat !== 'ok' && r.etat !== 'aucune-production') {
-            const cleMot = { 'aucune-pratique': 'aucunePratique', 'autre-famille': 'autreFamille', 'aucun-eleve': 'aucunEleve', 'sans-echelle': 'sansEchelle' }[r.etat];
-            const mot = cleMot === 'aucunEleve' ? MOTS.noteSansEleve : (MOTS.tableau[cleMot] || T[cleMot] || '');
-            const geste = r.etat === 'aucune-pratique' ? `<p><button type="button" class="btn btn-principal" data-action="VueSimple.aller" data-param="pratique">${esc(MOTS.cartes[1].lien)}</button></p>`
-                : (r.etat === 'aucun-eleve' ? `<p><button type="button" class="btn btn-principal" data-action="VueSimple.aller" data-param="classe">${esc(MOTS.cartes[0].lien)}</button></p>` : '');
-            _ecrire(hote, `${tete}<p class="vs-etat">${esc(mot)}</p>${geste}`);
-            return;
-        }
+        const sansNote = r.etat === 'cibles' ? (r.videEtat ? _noteCiblesVideHTML(r.videEtat) : null) : _noteSansTableauHTML(r, T);
+        if (sansNote !== null) { _ecrire(hote, tete + sansNote); return; }
         const enteteNote = r.finales ? T.noteFinale : T.noteProvisoire;
         const rangees = r.lignes.map((l) => `<tr><th scope="row">${esc(`${l.prenom} ${l.nom}`.trim())}</th>
             <td class="vs-note-valeur">${esc(l.note === null ? '–' : String(l.note))}</td><td class="vs-note-detail">${esc(l.detail)}</td></tr>`).join('');
@@ -1563,6 +1767,24 @@
                 <button type="button" class="btn btn-secondaire" data-action="VueSimple.aller" data-param="resultats">${esc(MOTS.cartes[2].lien)}</button></p>
             <div class="vs-cadre-table"><table class="vs-table vs-notes"><thead><tr><th scope="col">${esc(MOTS.noteColonnes[0])}</th><th scope="col">${esc(enteteNote)}</th><th scope="col"><span class="u-lecteur-ecran">Détail</span></th></tr></thead>
                 <tbody>${rangees}</tbody></table></div>`);
+    }
+
+    /** L'écran Note sans tableau (aucune pratique, autre famille, aucun·e étudiant·e, sans échelle) ; null si les notes se lisent. */
+    function _noteSansTableauHTML(r, T) {
+        if (r.etat === 'ok' || r.etat === 'aucune-production') return null;
+        const cleMot = { 'aucune-pratique': 'aucunePratique', 'autre-famille': 'autreFamille', 'aucun-eleve': 'aucunEleve', 'sans-echelle': 'sansEchelle' }[r.etat];
+        const mot = cleMot === 'aucunEleve' ? MOTS.noteSansEleve : (MOTS.tableau[cleMot] || T[cleMot] || '');
+        const geste = r.etat === 'aucune-pratique' ? `<p><button type="button" class="btn btn-principal" data-action="VueSimple.aller" data-param="pratique">${esc(MOTS.cartes[1].lien)}</button></p>`
+            : (r.etat === 'aucun-eleve' ? `<p><button type="button" class="btn btn-principal" data-action="VueSimple.aller" data-param="classe">${esc(MOTS.cartes[0].lien)}</button></p>` : '');
+        return `<p class="vs-etat">${esc(mot)}</p>${geste}`;
+    }
+
+    /** « Par standards » : l'écran Note quand le tableau des cibles est vide — il dit pourquoi, et le geste qui le remplit. */
+    function _noteCiblesVideHTML(videEtat) {
+        const bouton = (libelle, action, param) => `<p><button type="button" class="btn btn-principal" data-action="${esc(action)}" data-param="${esc(param)}">${esc(libelle)}</button></p>`;
+        if (videEtat === 'aucun-eleve') return `<p class="vs-etat">${esc(MOTS.noteSansEleve)}</p>${bouton(MOTS.cartes[0].lien, 'VueSimple.aller', 'classe')}`;
+        if (videEtat === 'aucune-cible') return `<p class="vs-etat">${esc(_motDuTableau('aucuneCible'))}</p>${bouton(_motDuTableau('aucuneCibleLien'), 'VueSimple.regler', 'cibles')}`;
+        return `<p class="vs-etat">${esc(_motDuTableau(videEtat === 'sans-echelle' ? 'sansEchelle' : 'introuvable'))}</p>`;
     }
 
     /* ============================== SAUVEGARDER ============================== */
@@ -1612,6 +1834,7 @@
         nouveauGroupe, annulerNouveauGroupe, annulerRetraitGroupe, retirerGroupe: _unALaFois(retirerGroupe), choisirModele: _unALaFois(choisirModele),
         changerModele: _unALaFois(changerModele), enregistrerReglage: _unALaFois(enregistrerReglage),
         regler, annulerReglage, niveauGeste, typeGeste, palierGeste,
+        cibleGeste, creerParStandards: _unALaFois(creerParStandards), annulerCreationCibles,   // « Par standards » (21 nov. 2026)
         ouvrirProduction, fermerProduction, ajouterProduction: _unALaFois(ajouterProduction),
         ouvrirColonne, enregistrerColonne: _unALaFois(enregistrerColonne), retirerColonne: _unALaFois(retirerColonne), colonneNeComptePas: _unALaFois(colonneNeComptePas),
         mettreAJour: _unALaFois(mettreAJour), garderValeurs,

@@ -69,9 +69,14 @@ describe('Renommage « Par sélection de productions » — les vingt textes acc
 
     it('les anciens libellés ont quitté ces endroits', () => {
         const vue = lire('js/vue-simple.js');
-        for (const ancien of ['titre: \'Par standards\'', 'Choisir les standards', 'ni par standards ni', 'par standards ou par', 'par standards et par']) {
+        for (const ancien of ['Choisir les standards', 'ni par standards ni', 'par standards ou par', 'par standards et par']) {
             expect(vue, ancien).not.toContain(ancien);
         }
+        // Révisé le 21 nov. 2026 (mandat « Par standards » dans la vue simple) : le titre « Par standards » revient, mais à la
+        // carte de la NOUVELLE famille (`cibles`, à l'essai), une seule fois ; la carte du modèle par sélection garde le sien.
+        expect(vue.split('titre: \'Par standards\'').length - 1).toBe(1);
+        expect(vue).toContain('{ famille: \'cibles\', modele: \'par-standards\', titre: \'Par standards\',');
+        expect(vue).toContain('{ famille: \'standards\', modele: \'STD-n-meilleurs\', titre: \'Par sélection de productions\',');
         expect(lire('js/tableau-notation.js')).not.toContain('par standards et par');
         const assistant = lire('js/wizard-pratique-v2.js');
         for (const ancien of ['PAN – Standards', 'Configuration PAN-Standards', 'cette pratique PAN-Standards', 'PAN – Sélection de productions']) expect(assistant, ancien).not.toContain(ancien);

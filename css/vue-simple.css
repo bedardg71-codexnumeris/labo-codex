@@ -185,7 +185,7 @@ body.vue-simple .codex-menu {
     font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
 }
 
-/* ---------- Les étapes de l'accueil, les deux modèles ---------- */
+/* ---------- Les étapes de l'accueil, les trois modèles ---------- */
 
 .vs-etapes {
     list-style: none;
@@ -205,8 +205,8 @@ body.vue-simple .codex-menu {
     max-width: 68ch;
 }
 
-.vs-etapes--deux {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+.vs-etapes--trois {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 
 .vs-etape {
@@ -252,6 +252,18 @@ body.vue-simple .codex-menu {
     color: var(--texte-secondaire);
 }
 
+/* « À l'essai » (21 nov. 2026) : la mention se lit sans survol, sous le titre de la carte — un mot discret, encadré,
+   jamais la couleur d'une alerte. */
+.vs-etape-essai {
+    margin: 6px 0 0;
+    padding: 2px 8px;
+    border: 1px solid var(--bordure-claire);
+    border-radius: var(--radius-petit);
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--texte-secondaire);
+}
+
 .vs-etape-etat {
     margin: 0 0 12px;
     font-size: 0.85rem;
@@ -264,27 +276,41 @@ body.vue-simple .codex-menu {
 }
 
 @media (max-width: 999px) {
-    .vs-etapes:not(.vs-etapes--deux) {
+    .vs-etapes:not(.vs-etapes--trois) {
         grid-template-columns: repeat(2, minmax(0, 1fr));
         row-gap: 20px;
     }
 
-    .vs-etapes:not(.vs-etapes--deux) .vs-etape:nth-child(odd) {
+    .vs-etapes:not(.vs-etapes--trois) .vs-etape:nth-child(odd) {
         padding-left: 0;
         border-left: none;
+    }
+
+    /* Les trois modèles, sous 1000 px (iPad en portrait) : l'un sous l'autre plutôt que deux et un. */
+    .vs-etapes--trois {
+        grid-template-columns: 1fr;
+        row-gap: 0;
+    }
+
+    .vs-etapes--trois .vs-etape {
+        padding: 14px 0;
+        border-left: none;
+    }
+
+    .vs-etapes--trois .vs-etape + .vs-etape {
+        border-top: 1px solid var(--bordure-claire);
     }
 }
 
 @media (max-width: 599px) {
     .vs-etapes,
-    .vs-etapes--deux,
-    .vs-etapes:not(.vs-etapes--deux) {
+    .vs-etapes:not(.vs-etapes--trois) {
         grid-template-columns: 1fr;
         row-gap: 0;
     }
 
     .vs-etapes .vs-etape,
-    .vs-etapes:not(.vs-etapes--deux) .vs-etape:nth-child(odd) {
+    .vs-etapes:not(.vs-etapes--trois) .vs-etape:nth-child(odd) {
         padding: 14px 0;
         border-left: none;
     }
@@ -300,6 +326,11 @@ body.vue-simple .codex-menu {
     min-height: 120px;
     font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
     resize: vertical;
+}
+
+/* Les cibles, une par ligne (« Par standards », 21 nov. 2026) : des phrases, pas une liste de codes — la police du texte. */
+.vs-cibles-lignes {
+    font-family: inherit;
 }
 
 .vs-ajout > summary {
@@ -459,6 +490,12 @@ body.vue-simple .codex-menu {
     min-width: 140px;
 }
 
+/* « Par standards » (21 nov. 2026) : le nom d'une cible au réglage, aussi large que la table le permet. */
+.vs-cible-nom {
+    width: 100%;
+    min-width: 200px;
+}
+
 .vs-n-valeur {
     width: 96px;
 }
@@ -466,6 +503,7 @@ body.vue-simple .codex-menu {
 .vs-n-code,
 .vs-n-nom,
 .vs-n-valeur,
+.vs-cible-nom,
 .vs-type-nom,
 .vs-palier-nom,
 .vs-palier-rangee .controle-form {
@@ -636,6 +674,19 @@ body.vue-simple .entete-bouton-icone {
 
 .vs-page .tn-case {
     height: 46px;
+}
+
+/* Les questions posées par la vue simple (« Par standards », 21 nov. 2026 : retirer une cible inscrite, annuler une
+   inscription) : `uiDialogues`, option `classe`. Les boutons à 46 px ; la raison sous sa phrase, sur toute la largeur. */
+.ui-dialogue--tactile .btn {
+    min-height: 46px;
+}
+
+.ui-dialogue--tactile .champ-formulaire {
+    display: block;
+    width: 100%;
+    min-height: 92px;
+    margin-top: 8px;
 }
 
 .vs-page .tn-reglages {
