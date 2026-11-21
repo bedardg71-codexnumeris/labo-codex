@@ -7,7 +7,37 @@
 > **Une ligne par texte**, avec l'endroit où on le lit. « X », « N » : une valeur de l'enseignant·e.
 > Origine d'une règle didactique dite à l'écran : le numéro de la fiche `CONCEPTION-2026-11-20-pratique-par-standards.md`.
 
-## À trancher d'abord (Grégoire)
+## Relecture de Grégoire, 21 nov. 2026 (consigne `CONSIGNE-LOT-2026-11-21-moteur-cibles-1-corrections.md`)
+
+Tous les textes ci-dessous sont **acceptés tels quels**, sauf ceux-ci (*choix de Grégoire, 21 nov. 2026*), posés sur la
+branche le 21 nov. :
+
+| N° | Devient |
+|---|---|
+| A4 | Tu inscris, pour chaque cible du cours, le niveau que l'étudiant·e a démontré. La note vient des niveaux de chaque cible. |
+| A5 | Choisis directement ta famille de pratique (SOM, STD, SEL, SPE ou DEN) et passe à sa configuration. |
+| E1 | STD |
+| F3 | Par standards : un niveau par cible d'apprentissage du cours ; la note viendra du meilleur niveau démontré pour chaque cible. |
+| Q1 | noms acceptés (« Ça y est presque » sans point d'exclamation) |
+| Q2 | **le sigle suit le nom** : « Par standards » s'affiche STD ; « Par sélection de productions » s'affiche SEL ; « CIB » ne s'affiche nulle part |
+| Q3 | « Par standards » garde le bleu du badge STD ; « Par sélection de productions » prend la sarcelle `#0e9384` (`--sel-sarcelle`) |
+| Q4 | plages acceptées |
+
+**Textes neufs ou retouchés par le changement de sigle** (PROPOSÉS ; là où un sigle s'affichait pour l'ancienne famille) :
+
+| N° | Où | Texte |
+|---|---|---|
+| G1 | Bulle du badge SEL (fiche) — mots acceptés du renommage (A1, D5) | PAN – Sélection de productions : des niveaux (ex. I-D-M-E) ; la note retient certaines productions. |
+| G2 | Bulle du badge PAN (fiche) | Pratique alternative de notation (STD, SEL, SPE ou DEN). |
+| G3 | Carte « Note » de Conception › Pratiques (remplace « STD (Standards) permet d'attribuer une cote finale… ») | SEL (Par sélection de productions) : des niveaux (ex. I-D-M-E) ; la note retient certaines productions. |
+| G4 | Même carte, ligne ajoutée | STD (Par standards) : un niveau par cible d'apprentissage du cours ; la note viendra du meilleur niveau démontré pour chaque cible. |
+| G5 | Bulle de « Type de pratique » (fiche) | SOM = sommative (moyenne pondérée traditionnelle), STD = par standards (un niveau par cible d'apprentissage), SEL = PAN par sélection de productions (la note retient certaines productions), SPE = PAN basée sur des spécifications (contrat), DEN = dénotation (pratiques réduisant ou éliminant la notation). |
+| G6 | Bulle de Conception › Pratiques (navigation) | Assemble ta pratique de notation complète (SOM, STD, SEL, SPE, DEN) en associant échelle, structure et jetons. |
+| G7 | État vide de Conception › Pratiques | … type de notation (SOM, STD, SEL, SPE ou DEN), … |
+| G8 | Avertissement des productions (une production pondérée hors du calcul) | … mais n'entre pas dans le calcul SEL : seuls le pool d'artefacts et l'évaluation terminale comptent. |
+| G9 | Export des résultats finaux, colonne « Pratique (code) » | SEL (au lieu de STD) pour l'ancienne pratique ; STD pour « Par standards » |
+
+## À trancher d'abord (Grégoire) — tranché le 21 nov., voir ci-dessus
 
 | N° | Question | Proposé | Pourquoi |
 |---|---|---|---|

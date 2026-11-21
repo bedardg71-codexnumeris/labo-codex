@@ -383,7 +383,7 @@ function validerProductionsStd(productions) {
         // Règle 3a : les pondérées non participantes n'entrent pas dans le calcul.
         candidates.forEach(p => {
             avertissements.push({
-                message: `« ${nomDe(p)} » porte une pondération (${formaterPourcentage(p.ponderation)}) mais n'entre pas dans le calcul STD : seuls le pool d'artefacts et l'évaluation terminale comptent.`
+                message: `« ${nomDe(p)} » porte une pondération (${formaterPourcentage(p.ponderation)}) mais n'entre pas dans le calcul SEL : seuls le pool d'artefacts et l'évaluation terminale comptent.`
             });
         });
         // Règle 3a bis : pondération posée sur un artefact du pool (ignorée aussi).

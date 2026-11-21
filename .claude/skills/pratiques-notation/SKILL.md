@@ -49,10 +49,10 @@ A et C (cf. `indices.js`, `portfolio.js`).
 | Code | Id canonique | Couleur (var CSS) | Famille | Calcul de la note | Fichier instance | État |
 |------|--------------|-------------------|---------|-------------------|------------------|------|
 | SOM | `sommative` | `--som-orange` | Sommative | Moyenne pondérée des évaluations | `pratique-sommative.js` | actif |
-| STD | `standards` | `--std-bleu` | PAN | Portfolio (sélection de N) + terminale | `pratique-pan-standards.js` | actif |
+| STD (sigle affiché **SEL** depuis le 21 nov. 2026) | `standards` | `--sel-sarcelle` (sarcelle, 21 nov. 2026) | PAN | Portfolio (sélection de N) + terminale | `pratique-pan-standards.js` | actif |
 | SPE | `specifications` | `--spe-vert` | PAN | Bundles tout-ou-rien par palier | `pratique-pan-specifications.js` | actif |
 | DEN | `denotation` | `--den-violet` | PAN (PRÉN académiquement, voir §2 bis) | Note finale = jugement SAISI, gardé par l'atteinte des cibles (voir §8) | `denotation-jugements.js` + `denotation-saisie-ui.js` ; moteur dans `pratique-configurable.js` | **actif (couche 2, #318)** |
-| CIB | `cibles` | `--cib-sarcelle` | PAN | **Pas encore de calcul** (lot 1, 21 nov. 2026) : la note viendra du meilleur niveau démontré par cible, en moyenne pondérée, avec un second seuil (lot 4) | `ensembles-cibles.js` (cibles) ; moteur à venir | **aperçu (branche `lot/moteur-cibles-1-cibles`)** |
+| CIB (sigle affiché **STD**, 21 nov. 2026 ; « CIB » ne s'affiche nulle part) | `cibles` | `--std-bleu` | PAN | **Pas encore de calcul** (lot 1, 21 nov. 2026) : la note viendra du meilleur niveau démontré par cible, en moyenne pondérée, avec un second seuil (lot 4) | `ensembles-cibles.js` (cibles) ; moteur à venir | **aperçu (branche `lot/moteur-cibles-1-cibles`)** |
 
 **Identifiants canoniques neutres (Session A, mai 2026)** : un seul id par pratique, sans
 préfixe `pan-`. « PAN » est un **libellé de famille**, plus un préfixe technique ni un
@@ -714,9 +714,9 @@ to ungrading, Mythbusters) ; CoP-PAN (Poulin-Lamarre & Langlois, dénotation au 
 Sherbrooke) ; Blum (2020) *Ungrading* ; Dyer (équité) ; CSÉ 2018 *Évaluer pour que ça compte
 vraiment*.
 **Ajoutées le 20 nov. 2026 pour la partie STD** (références complètes et pages dans
-`plans de travail/CONCEPTION-2026-11-20-pratique-par-standards.md`, § 1) : Cormier, Voisard, Turcotte et
-Arseneault-Hubert (2026), *Laissons-les se tromper*, rapport PAREA ; Voisard, Cormier et Arseneault-Hubert
-(2024), *Pédagogie collégiale*, 37(2) ; Voisard, Cormier, Turcotte et Arseneault-Hubert (2025), *Pédagogie
+`plans de travail/CONCEPTION-2026-11-20-pratique-par-standards.md`, § 1) : Cormier et al.
+(2026), *Laissons-les se tromper*, rapport PAREA ; Voisard, Cormier et Arseneault-Hubert
+(2024), *Pédagogie collégiale*, 37(2) ; Voisard et al. (2025), *Pédagogie
 collégiale*, 39(1) ; les billets de la publication « Pratiques alternatives de notation »
 (notationalternative.substack.com), d'août 2025 à nov. 2026 ; Clark et Talbert (2023), *Grading for Growth*,
 chap. 12 ; Girouard-Gagné et coll. (2024). ⚠ Les documents internes de nov. et déc. 2025 du même dossier
@@ -729,6 +729,7 @@ les valeurs de l'échelle de chimie.
 
 | Date | Changement |
 |------|------------|
+| 2026-11-21 (corrections du lot 1) | **Le sigle suit le nom** (décision de Grégoire) : le registre sépare le `code` interne (STD, CIB, inchangés) du `sigle` affiché (SEL pour `standards`, STD pour `cibles`) ; tout écran lit le sigle (`obtenirSiglePratique`, `sigleDuCode`). Couleurs : sarcelle à SEL, bleu à STD. |
 | 2026-11-21 (lot/moteur-cibles-1-cibles) | **La famille `cibles` (« Par standards », code CIB) entre au tableau du §2**, sans calcul (lot 1). §2 bis, partie STD : le nom retenu, « Par sélection de productions », aligné ; « vraie pratique » retiré (posture pluraliste) ; ce que le lot 1 livre. |
 | 2026-11-20 (lot/standards-conception) | **§2 bis, partie STD refaite d'après les sources** (`plans de travail/CONCEPTION-2026-11-20-pratique-par-standards.md`). La doctrine de la notation par standards est vérifiée page à l'appui (rapport PAREA 2026, articles 2024 et 2025, billets de la CoP) ; l'écart est dit sans détour : la famille de code STD note des productions et en retient, ce n'est pas une notation par standards ; annonce du renommage (« Par productions retenues ») et de la pratique « Par standards » à venir. Liste des sources complétée (§13). Aucun code touché. Signalé sans retouche : l'attribution à *Heart of the loop* dans « reprises sans pénalité » est fausse (la phrase est dans *The Four Pillars*) et « variante délibérée et défendable » n'a pas de source. |
 | 2026-09-18 (#921) | **Une sommative CONFIGURABLE a son récit, et le profil l'affiche.** `PratiqueConfigurable.decrireCalcul` délègue à `PratiqueSommative.decrireCalcul` pour `moyenne_ponderee` (note = `_calculerPerformanceSommative`, verrou #897 compris ; `synthese.plafonnement = { moyenneOriginale }` quand il a joué). Le récit SOM porte `ponderation` et `poids` en nombres. Le profil rend la carte par `_genererNoteSessionSommative` quand `calculerDetailsNoteFinale` rend null. ⚠ `simulerIndices(da)` SANS id rend `null` (le §7 laisse croire à un repli sur la pratique active : il n'existe pas) — passer `obtenirPratiqueActiveGroupeCours()`. |

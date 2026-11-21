@@ -29,6 +29,7 @@ import path from 'node:path';
 import { JSDOM } from 'jsdom';
 import { chargerScript } from './_helpers/charger-script.js';
 import { dbBanc, RACINE } from './_helpers/bac-suivi.js';
+import { tranche } from './_helpers/tranche.js';
 
 const clone = (x) => JSON.parse(JSON.stringify(x));
 const echapperHtml = (s) => String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
@@ -167,6 +168,7 @@ function monterAssistant(store) {
         db: dbBanc(store, journal), cle: (k) => 'test_' + k,
         notifications: { erreur: (m) => erreurs.push(m), succes() {}, info() {}, warning() {} },
         normaliserIdPratique: (t) => t, genererIdUnique: (p) => p + 'NEUF' + (++n), echapperHtml,
+        formaterPourcentage: (v) => String(v).replace('.', ',') + '\u00a0%',
         confirm: () => true
     };
     chargerScript('js/pratiques/ensembles-cibles.js', globaux, win);
@@ -227,6 +229,32 @@ describe('C · l\'assistant réel écrit la pratique, son ensemble de cibles et 
             expect(a.erreurs).toHaveLength(1);
             if (motif) expect(a.erreurs[0]).toBe(motif);
             expect(Object.values(a.win.EnsemblesCibles.MOTIFS).concat(motif ? [motif] : [])).toContain(a.erreurs[0]);
+        });
+    }
+
+    // Décision confirmée le 21 nov. 2026 : rien n'est codé en dur — l'enseignant·e choisit n'importe quelle échelle, son
+    // nombre de niveaux et leurs noms ; l'échelle de départ n'est qu'un point de départ.
+    for (const [nom, niveaux, zero] of [
+        ['trois niveaux', [['N', 'Non démontré', 0, 49.99, 0], ['P', 'Partiel', 50, 79.99, 60], ['A', 'Atteint', 80, 100, 100]], 'N'],
+        ['six niveaux', [['0', 'Rien encore', 0, 9.99, 0], ['1', 'Amorcé', 10, 29.99, 20], ['2', 'En route', 30, 49.99, 40],
+            ['3', 'Presque', 50, 69.99, 60], ['4', 'Atteint', 70, 89.99, 80], ['5', 'Dépassé', 90, 100, 100]], '0']
+    ]) {
+        it('une échelle à ' + nom + ' : la pratique se crée, l\'étape montre ses niveaux et n\'offre que ceux à 0 %', async () => {
+            const echelle = { id: 'ECH-' + niveaux.length, nom: 'Échelle maison à ' + nom, niveaux: niveaux.map(([code, n, min, max, v]) => ({ code, nom: n, min, max, valeurCalcul: v })) };
+            const a = monterAssistant({ test_pratiquesConfigurables: [], test_echellesTemplates: [echelle] });
+            await creer(a, REPONSES(echelle.id, zero));
+            expect(a.erreurs).toEqual([]);
+            expect(a.store.test_pratiquesConfigurables[0].configuration).toMatchObject({ echelleId: echelle.id, niveauSansDonnee: zero });
+            expect(a.store.test_echellesTemplates).toEqual([echelle]);   // l'échelle n'est ni réécrite ni complétée
+            // L'étape de l'échelle, rendue : tous les niveaux à l'aperçu ; au menu « sans donnée », le seul niveau à 0 %.
+            a.win.obtenirEchellesOffertesAdoption = () => [echelle];
+            a.win.wizardState.reponses = { echelleId: echelle.id, niveauSansDonnee: zero };
+            a.win.wizardState.echelleDeDepart = null;
+            const html = a.win.genererContenuEtape(a.win.ETAPES_WIZARD['echelle-cibles']);
+            expect((html.match(/class="wizard-v2-niveau-code"/g) || []).length).toBe(niveaux.length);
+            const menu = tranche(html, 'echelleCibles-sansDonnee"', '</select>');
+            expect((menu.match(/<option value="/g) || []).length).toBe(2);   // l'option vide, et le niveau à 0 %
+            expect(menu).toContain('value="' + zero + '" selected');
         });
     }
 
@@ -327,7 +355,8 @@ describe('D · le registre et la pratique : un code, une méthode, aucune note e
     }
     it('la famille `cibles` : code CIB, famille PAN, méthode niveaux_par_cible', () => {
         const { win } = monter();
-        expect(win.obtenirRepresentationPratique('cibles')).toMatchObject({ code: 'CIB', famille: 'PAN', couleurVar: '--cib-sarcelle' });
+        // 21 nov. 2026 (« le sigle suit le nom ») : le code interne reste CIB ; le sigle affiché est STD, avec le bleu de STD.
+        expect(win.obtenirRepresentationPratique('cibles')).toMatchObject({ code: 'CIB', sigle: 'STD', famille: 'PAN', couleurVar: '--std-bleu' });
         expect(win.METHODE_PAR_FAMILLE.cibles).toBe('niveaux_par_cible');
         expect(win.obtenirRepresentationPratiqueStricte('standards').code).toBe('STD');   // l'autre famille ne bouge pas
     });

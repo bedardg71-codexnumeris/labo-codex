@@ -188,18 +188,22 @@ function genererBadgeTypePratique(pratique) {
     // déjà dans le wizard ; on les rend découvrables ici aussi). Textes STATIQUES
     // (pas de donnée utilisateur) repris des cartes « voie rapide » du wizard, donc
     // pas d'échappement requis. Apostrophes seules → sûres dans un attribut "double".
+    // 21 nov. 2026 (« le sigle suit le nom ») : les bulles sont rangées par CODE interne (celui de `pratiques[0]`) ; le
+    // badge affiche le SIGLE (`sigleDuCode`). Code STD = « Par sélection de productions », sigle SEL (mots acceptés du
+    // renommage, A1 et D5) ; code CIB = « Par standards », sigle STD (F3, version de Grégoire).
     const TOOLTIPS_FAMILLE = {
         SOM: 'Sommative — note finale par moyenne pondérée des évaluations.',
-        STD: 'PAN – Standards — niveaux de maîtrise (ex. I-D-M-E) convertis en note.',
+        STD: 'PAN – Sélection de productions : des niveaux (ex. I-D-M-E) ; la note retient certaines productions.',
         SPE: 'PAN – Spécifications — travaux acceptables ou non ; note selon les forfaits réussis.',
         DEN: 'PAN – Dénotation — note finale certificative posée (non calculée) selon l\'atteinte de cibles d\'apprentissage explicites ; abandonne la fonction de tri.',
-        CIB: 'Par standards — un niveau par cible d\'apprentissage du cours ; la note viendra du meilleur niveau démontré pour chaque cible.',
-        PAN: 'Pratique alternative de notation (STD, SPE ou DEN).'
+        CIB: 'Par standards : un niveau par cible d\'apprentissage du cours ; la note viendra du meilleur niveau démontré pour chaque cible.',
+        PAN: 'Pratique alternative de notation (STD, SEL, SPE ou DEN).'
     };
     const infobulle = TOOLTIPS_FAMILLE[type] || '';
 
-    // Utilise la classe CSS .badge-type-pratique avec modificateur
-    return `<span class="badge-type-pratique badge-type-${type.toLowerCase()}" title="${infobulle}">${type}</span>`;
+    // Utilise la classe CSS .badge-type-pratique avec modificateur (le code interne) ; le texte est le SIGLE affiché.
+    const sigle = (typeof sigleDuCode === 'function') ? sigleDuCode(type) : type;
+    return `<span class="badge-type-pratique badge-type-${type.toLowerCase()}" title="${infobulle}">${sigle}</span>`;
 }
 
 /**

@@ -25,7 +25,7 @@
  *      la fiche, le récit et `obtenirTermeProduction` disent « productions » (TEXTES, lus dans le fichier) ; GREG garde les siens, 84,8
  *      compris ; `utiliser` et `nombreTotal` ne s'écrivent plus, une pratique qui les porte les garde.
  *
- * Données fictives (Alice, Bruno). Banc : les modules RÉELS (le bac du banc du 28 oct.). Aucune écriture dans `js/`.
+ * Données fictives (Alice, Boréal). Banc : les modules RÉELS (le bac du banc du 28 oct.). Aucune écriture dans `js/`.
  * Stock : rien n'est réécrit ; tout se lit au calcul (les captures déjà prises gardent leur P).
  * BREAK-TESTS : journal en fin de fichier.
  */
@@ -36,7 +36,7 @@ import { monter, storeBase, clone } from './_helpers/bac-suivi.js';
 import { chargerScript } from './_helpers/charger-script.js';
 import { tranche } from './_helpers/tranche.js';
 
-const DA = { ALICE: '2000001', BRUNO: '2000002' };
+const DA = { ALICE: '2000001', BOREAL: '2000002' };
 const E0 = { id: 'E0', nom: 'IDME banc', seuilMaitrise: 'M', niveaux: [
     { code: 'I', nom: 'Insuffisant', min: 0, max: 64, valeurCalcul: 40 }, { code: 'D', nom: 'En développement', min: 65, max: 74, valeurCalcul: 65 },
     { code: 'M', nom: 'Maîtrisé', min: 75, max: 84, valeurCalcul: 75 }, { code: 'E', nom: 'Étendu', min: 85, max: 100, valeurCalcul: 100 }
@@ -66,10 +66,10 @@ function prodChimie({ ponderees = true, terminale = false, categories = null } =
     if (!ponderees) l.forEach(p => { delete p.ponderation; });
     return l;
 }
-const NOTES_CHIMIE = { [DA.ALICE]: { L1: 70, L2: 80, L3: 90, X1: 60, X2: 85 }, [DA.BRUNO]: { L1: 55, L2: 65, L3: 75, X1: 80, X2: 70 } };
+const NOTES_CHIMIE = { [DA.ALICE]: { L1: 70, L2: 80, L3: 90, X1: 60, X2: 85 }, [DA.BOREAL]: { L1: 55, L2: 65, L3: 75, X1: 80, X2: 70 } };
 const COPIES_CHIMIE = [];
-for (const da of [DA.ALICE, DA.BRUNO]) for (const [p, n] of Object.entries(NOTES_CHIMIE[da])) COPIES_CHIMIE.push(ev(da, p, n));
-/** Les copies d'Alice réduites à `ids` ; celles de Bruno restent (la production est évaluée dans le groupe). */
+for (const da of [DA.ALICE, DA.BOREAL]) for (const [p, n] of Object.entries(NOTES_CHIMIE[da])) COPIES_CHIMIE.push(ev(da, p, n));
+/** Les copies d'Alice réduites à `ids` ; celles de Boréal restent (la production est évaluée dans le groupe). */
 const seulement = (ids) => COPIES_CHIMIE.filter(c => c.etudiantDA !== DA.ALICE || ids.includes(c.productionId));
 const CATEGORIES = { actif: true, selection: { nombreARetenir: 2, ponderation: 65 }, obligatoires: { nombre: 2, ponderation: 35 } };
 const CATEGORIES_CHIMIE = { L1: 'selection', L2: 'selection', L3: 'selection', X1: 'obligatoire', X2: 'obligatoire' };
@@ -93,7 +93,7 @@ const OBJETS_EXPORTES = ['PratiqueManager', 'denotationJugements', 'modalitesEva
 
 function banc({ pratique, productions, evaluations, modules = [], prefs = {}, globauxEnPlus = {} }) {
     const store = storeBase();
-    store.test_groupeEtudiants = store.test_groupeEtudiants.filter(e => e.da === DA.ALICE || e.da === DA.BRUNO);
+    store.test_groupeEtudiants = store.test_groupeEtudiants.filter(e => e.da === DA.ALICE || e.da === DA.BOREAL);
     store.test_groupesCours[0].pratiqueId = pratique.id;
     store.test_pratiquesConfigurables = [clone(pratique)];
     store.test_echellesTemplates = [clone(E0)];
@@ -535,7 +535,7 @@ describe('G · lot 3 : les Productions ne poussent plus vers une terminale', () 
         const avecConteneur = [{ id: 'PF', titre: 'Portfolio', type: 'portfolio', ponderation: 60, coursId: 'GC1' }].concat(prodChimie());
         const cas = { 'CHIM-1': prodChimie(), 'CHIM-2': prodChimie({ ponderees: false }), 'CHIM-4': prodChimie({ terminale: true }), 'CHIM conteneur': avecConteneur };
         for (const [nom, productions] of Object.entries(cas)) {
-            // toEqual : ni « n'entre pas dans le calcul STD », ni « Choisis laquelle… », ni complément, ni productionId (« Typer comme terminale »).
+            // toEqual : ni « n'entre pas dans le calcul SEL » (STD avant le 21 nov. 2026 : le sigle suit le nom), ni « Choisis laquelle… », ni complément, ni productionId (« Typer comme terminale »).
             expect(avertir(productions), nom).toEqual([{ message: TEXTE_1 }]);
         }
     });
@@ -577,7 +577,7 @@ describe('G · lot 3 : les Productions ne poussent plus vers une terminale', () 
         const sans = (ids, plus = []) => prodGreg().filter(p => !ids.includes(p.id)).concat(plus);
         expect(avertir(prodGreg())).toEqual([]);
         expect(avertir(sans([], [exercice('W1', 1, 10)]))).toEqual([
-            { message: '« Exercice 1 » porte une pondération (10 %) mais n\'entre pas dans le calcul STD : seuls le pool d\'artefacts et l\'évaluation terminale comptent.' }
+            { message: '« Exercice 1 » porte une pondération (10 %) mais n\'entre pas dans le calcul SEL : seuls le pool d\'artefacts et l\'évaluation terminale comptent.' }
         ]);
         expect(avertir(sans(['PF']))).toEqual([
             { message: 'Aucune production « Portfolio (conteneur) » : le pool d\'artefacts vaut le complément de la terminale, soit 60 % (100 − 40). C\'est permis — vérifie que c\'est voulu.' }

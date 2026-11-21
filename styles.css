@@ -87,9 +87,11 @@
     --std-bleu: #0277bd;        /* STD = Bleu */
     --spe-vert: #22c55e;        /* SPE = Vert */
     --den-violet: #8b5cf6;      /* DEN = Mauve/Violet */
-    /* CIB = Par standards (lot 1, 21 nov. 2026) : une famille neuve demande sa couleur. Sarcelle, absente des quatre
-       autres familles ; 3,9:1 sur fond blanc (élément graphique : bordure du diagnostic de l'assistant). PROPOSÉE. */
-    --cib-sarcelle: #0e9384;
+    /* SEL = « Par sélection de productions » (décision de Grégoire, 21 nov. 2026, 6 h 59) : le sigle suit le nom, et
+       l'ancienne famille prend la sarcelle ; le bleu de STD (--std-bleu) reste au badge STD, désormais « Par standards ».
+       Contraste mesuré : 3,80:1 sur blanc, 3,59:1 sur la carte sombre (#1a3040) — au-dessus de 3:1 (élément graphique),
+       sous 4,5:1 pour un texte de taille normale, comme les autres couleurs de famille. */
+    --sel-sarcelle: #0e9384;
     --hybride-violet: #9c27b0;  /* Hybride (obsolète) */
 
     --bleu-meta: #9fc5e8;        /* Bleu pâle pour méta-infos, logos, liens secondaires */
@@ -4514,7 +4516,7 @@ p.apercu-algo-si { margin: 0; display: flex; flex-wrap: wrap; align-items: basel
 }
 .editeur-cibles-terminale-case,
 .editeur-cibles-critere-essentiel {
-    accent-color: var(--cib-sarcelle);
+    accent-color: var(--std-bleu);
 }
 .editeur-cibles-champ--poids {
     flex: 0 0 96px;
@@ -4660,7 +4662,7 @@ p.apercu-algo-si { margin: 0; display: flex; flex-wrap: wrap; align-items: basel
 .cibles-fiche-essentiel {
     font-size: 0.75rem;
     padding: 1px 8px;
-    border: 1px solid var(--cib-sarcelle);
+    border: 1px solid var(--std-bleu);
     border-radius: var(--radius-pill);
     color: var(--texte-principal);
 }
@@ -14723,7 +14725,7 @@ label:has(+ textarea:disabled) {
 .wizard-v2-recap-diagnostic--std { --recap-couleur: var(--std-bleu); }
 .wizard-v2-recap-diagnostic--spe { --recap-couleur: var(--spe-vert); }
 .wizard-v2-recap-diagnostic--den { --recap-couleur: var(--den-violet); }
-.wizard-v2-recap-diagnostic--cib { --recap-couleur: var(--cib-sarcelle); }
+.wizard-v2-recap-diagnostic--sel { --recap-couleur: var(--sel-sarcelle); }   /* « Par sélection de productions » (21 nov. 2026) */
 .wizard-v2-recap-diagnostic--indetermine { --recap-couleur: var(--gris-moyen, #888); }
 
 .wizard-v2-recap-diagnostic-intro {

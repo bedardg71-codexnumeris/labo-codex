@@ -53,14 +53,17 @@ function grillesDuWizard() {
 // badge famille). Un seul endroit à éditer, pas de microcopy dupliqué.
 const TYPE_BADGES = {
     'sommative': { code: 'SOM', classe: 'som', label: 'Sommative', description: 'Ta note finale est calculée par une moyenne pondérée des évaluations. C\'est la méthode traditionnelle, largement utilisée.' },
-    'standards': { code: 'STD', classe: 'std', label: 'PAN – Sélection de productions', description: 'Tu évalues chaque production par niveaux (ex. : I-D-M-E). La note se construit à partir des productions que ta règle retient, pas de la moyenne de toutes.' },
+    // 21 nov. 2026 (« le sigle suit le nom », décision de Grégoire) : `code` est ici le SIGLE AFFICHÉ (badge du
+    // récapitulatif, ligne de « Partir d'un modèle ») ; le code interne vit au registre. `classe` porte la couleur de la
+    // famille au récapitulatif : sarcelle pour « Par sélection de productions », bleu pour « Par standards ».
+    'standards': { code: 'SEL', classe: 'sel', label: 'PAN – Sélection de productions', description: 'Tu évalues chaque production par niveaux (ex. : I-D-M-E). La note se construit à partir des productions que ta règle retient, pas de la moyenne de toutes.' },
     'specifications': { code: 'SPE', classe: 'spe', label: 'PAN – Spécifications', description: 'Chaque travail est jugé acceptable ou non. La note finale dépend du nombre de spécifications réussies (forfaits).' },
     // #319 Lot 5 (#318) : DEN reconnue à l'édition (code/couleur du registre canonique,
     // --den-violet). Elle se crée aussi : la carte « Note finale posée, pas calculée » de
     // « Décrire ma pratique », et le « Modèle de base » de « Partir d'un modèle ».
     'denotation': { code: 'DEN', classe: 'den', label: 'PAN – Dénotation', description: 'Rétroaction qualitative sur des cibles et des critères explicites ; la note certificative est posée par jugement à la fin.' },
     // Lot 1 de la pratique « Par standards » (21 nov. 2026). Mots PROPOSÉS (plans de travail/TEXTES-2026-11-20-par-standards-lot-1.md).
-    'cibles': { code: 'CIB', classe: 'cib', label: 'Par standards', description: 'Pour chaque cible d\'apprentissage du cours, tu inscris le niveau que l\'étudiant·e a démontré. La note du cours viendra du meilleur niveau démontré pour chaque cible, en moyenne pondérée.' }
+    'cibles': { code: 'STD', classe: 'std', label: 'Par standards', description: 'Pour chaque cible d\'apprentissage du cours, tu inscris le niveau que l\'étudiant·e a démontré. La note du cours viendra du meilleur niveau démontré pour chaque cible, en moyenne pondérée.' }
 };
 
 // ============================================================================
@@ -448,7 +451,7 @@ const ETAPES_WIZARD = {
                         // Lot 1 de la pratique « Par standards » (21 nov. 2026) : la cible est notée, pas la production.
                         value: 'cibles',
                         label: 'Un niveau pour chaque cible d\'apprentissage (Par standards)',
-                        description: 'Tu inscris, pour chaque cible du cours, le niveau que l\'étudiant·e a démontré. La note vient des niveaux de chaque cible, pas d\'une note par production.'
+                        description: 'Tu inscris, pour chaque cible du cours, le niveau que l\'étudiant·e a démontré. La note vient des niveaux de chaque cible.'
                     },
                     {
                         value: 'pas-certain',
@@ -458,7 +461,7 @@ const ETAPES_WIZARD = {
                 ]
             },
             // Voie rapide (a2) : sortie expert, carte de même poids que les autres options.
-            { id: 'voie-rapide-lien', type: 'lien-action', texte: 'Je sais déjà ce que je veux', description: 'Choisis directement ta famille de pratique (SOM, STD, SPE, DEN ou CIB) et passe à sa configuration.', action: 'wizardV2VoieRapide' }
+            { id: 'voie-rapide-lien', type: 'lien-action', texte: 'Je sais déjà ce que je veux', description: 'Choisis directement ta famille de pratique (SOM, STD, SEL, SPE ou DEN) et passe à sa configuration.', action: 'wizardV2VoieRapide' }
         ],
         suivant: (reponses) => {
             if (reponses.calcNoteFinale === 'moyenne') return 'regles-sommative';

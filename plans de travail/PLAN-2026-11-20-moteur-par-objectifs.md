@@ -62,7 +62,21 @@ pondération et double seuil ; 5 le relevé de l'étudiant·e. Rien ne se fusion
 existent et que Grégoire les ait essayés.
 
 **Arrêtés au lot 1** (noms techniques, 21 nov.) : la clé de l'ensemble `ensemblesCibles` (par trimestre) et l'identifiant
-du type `cibles` (code affiché CIB, proposé). Le lot 0 les avait posés à titre provisoire : sa sentinelle les garde déjà.
+du type `cibles` (code interne CIB ; sigle affiché STD, décision de Grégoire du 21 nov.). Le lot 0 les avait posés à titre provisoire : sa sentinelle les garde déjà.
+
+## Décidé par Grégoire, 21 nov. 2026 (relecture des textes du lot 1)
+
+Consigne : `plans de travail/CONSIGNE-LOT-2026-11-21-moteur-cibles-1-corrections.md`.
+
+- **Le sigle suit le nom** (6 h 56). À l'écran, « STD » désigne « Par standards » ; « Par sélection de productions »
+  s'affiche « SEL » ; « CIB » ne s'affiche nulle part. Affichage seulement : le code interne des familles ne change pas
+  (`standards` → code STD, `cibles` → code CIB) ; le registre porte un `sigle` à côté du `code`, et tout écran lit le
+  sigle (`obtenirSiglePratique`, `sigleDuCode`, `genererBadgePratiqueHTML`).
+- **Les couleurs** (6 h 59). « Par standards » garde le bleu du badge STD (`--std-bleu`) ; « Par sélection de
+  productions » prend la sarcelle `#0e9384` (`--sel-sarcelle`, ex-`--cib-sarcelle`).
+- **Les textes** : tous acceptés, sauf A4, A5, E1 et F3 (`TEXTES-2026-11-20-par-standards-lot-1.md`, en tête).
+- **Confirmé** : l'échelle de départ reste un point de départ facultatif ; n'importe quelle échelle convient (essais à
+  trois et à six niveaux) ; les plages à mi-chemin ; une cible sans critère.
 
 ## Vue d'ensemble
 
@@ -364,7 +378,7 @@ Ordre : 0, puis 1 à 4. Chaque lot est livrable seul ; aucun ne change une note 
   | L'échelle de départ : cinq niveaux (0 à 4), valeurs 0, 25, 50, 75, 100 % ; noms du système de chimie, **à valider** | E1, E4 (R, p. 103 ; tableau 5.6, p. 102) |
   | Ce niveau sert aussi au travail très incomplet (description du niveau 0 de l'échelle de départ) | E3 |
 
-- **Dans le code** : le type `cibles` (code CIB, couleur `--cib-sarcelle`, famille PAN) et la méthode
+- **Dans le code** : le type `cibles` (code interne CIB, sigle affiché STD et couleur `--std-bleu` depuis le 21 nov. ; famille PAN) et la méthode
   `niveaux_par_cible` au registre ; `PratiqueConfigurable.calculerPerformance` rend `null` pour cette méthode, sans lire
   ni évaluations ni `indicesCP`, et `expliquerNoteNonConstructible` dit pourquoi ; le module propriétaire
   `js/pratiques/ensembles-cibles.js` (refus, échelle de départ, écriture, fiche) ; le mode « standards » du composant

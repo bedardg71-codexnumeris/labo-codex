@@ -240,7 +240,9 @@
         var code = _codePratique(id);
         if (!code) return '';
         var c = code.toLowerCase();
-        return '<span class="badge-type-pratique badge-type-' + c + '">' + code + '</span>';
+        // 21 nov. 2026 : le texte est le sigle affiché (registre) ; la classe reste le code interne.
+        var sigle = (typeof sigleDuCode === 'function') ? sigleDuCode(code) : code;
+        return '<span class="badge-type-pratique badge-type-' + c + '">' + sigle + '</span>';
     }
 
     function _configsPratiques() {

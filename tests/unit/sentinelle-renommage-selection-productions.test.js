@@ -40,7 +40,9 @@ describe('Renommage « Par sélection de productions » — les vingt textes acc
         expect(vue).toContain(`modele: 'STD-n-meilleurs', titre: '${section('V3').textes[0]}',`);
         expect(vue).toMatch(new RegExp(`modele: 'STD-n-meilleurs'[^}]*lien: '${section('V4').textes[0]}' }`));
         const assistant = source('A1');
-        expect(assistant).toContain(`'standards': { code: 'STD', classe: 'std', label: '${section('A1').textes[0]}', description: '${net(section('A1').textes[1])}' }`);
+        // ↻ 21 nov. 2026 (« le sigle suit le nom », décision de Grégoire) : le sigle affiché de cette pratique devient SEL,
+        // et sa couleur au récapitulatif la sarcelle (classe `sel`) ; son nom et sa description ne changent pas.
+        expect(assistant).toContain(`'standards': { code: 'SEL', classe: 'sel', label: '${section('A1').textes[0]}', description: '${net(section('A1').textes[1])}' }`);
         expect(assistant).toContain(`{ value: 'niveaux', label: '${section('A2').textes[0]}', description: '${section('A2').textes[1]}' }`);
         expect(assistant).toContain(`'<h4>${section('A3').textes[0]}</h4>'`);
         expect(source('F3')).toContain(`<option value="standards">${section('F3').textes[0]}</option>`);
