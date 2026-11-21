@@ -52,7 +52,7 @@ A et C (cf. `indices.js`, `portfolio.js`).
 | STD (sigle affiché **SEL** depuis le 21 nov. 2026) | `standards` | `--sel-sarcelle` (sarcelle, 21 nov. 2026) | `famille: 'PAN'` au registre, **mais aucun écran ne la dit « PAN »** (choix de Grégoire, 21 nov., 7 h 44 ; voir sous le tableau) | Portfolio (sélection de N) + terminale | `pratique-pan-standards.js` | actif |
 | SPE | `specifications` | `--spe-vert` | PAN | Bundles tout-ou-rien par palier | `pratique-pan-specifications.js` | actif |
 | DEN | `denotation` | `--den-violet` | PAN (PRÉN académiquement, voir §2 bis) | Note finale = jugement SAISI, gardé par l'atteinte des cibles (voir §8) | `denotation-jugements.js` + `denotation-saisie-ui.js` ; moteur dans `pratique-configurable.js` | **actif (couche 2, #318)** |
-| CIB (sigle affiché **STD**, 21 nov. 2026 ; « CIB » ne s'affiche nulle part) | `cibles` | `--std-bleu` | PAN | **Pas encore de calcul** (lot 1, 21 nov. 2026) : la note viendra du meilleur niveau démontré par cible, en moyenne pondérée, avec un second seuil (lot 4) | `ensembles-cibles.js` (cibles) ; moteur à venir | **aperçu (branche `lot/moteur-cibles-1-cibles`)** |
+| CIB (sigle affiché **STD**, 21 nov. 2026 ; « CIB » ne s'affiche nulle part) | `cibles` | `--std-bleu` | PAN | Le niveau retenu par cible (le meilleur, qui ne redescend pas), puis la moyenne pondérée des valeurs ponctuelles ; un second seuil, réglage éteint au départ ; en attente tant qu'une cible est sans donnée, 0 % à l'arrêt des notes (lots 3 et 4, 21 nov. 2026) | `ensembles-cibles.js`, `inscriptions-cibles.js` ; moteur `note-cibles.js` (lecture seule), branché dans `pratique-configurable.js` | **aperçu (branche `lot/moteur-cibles-3-4-retenu-note`, PR n° 46)** |
 
 **SEL n'est pas dite « PAN » (choix de Grégoire, 21 nov. 2026, 7 h 44 ; les sources ne tranchent pas).** « La preuve
 n'est pas faite que SEL est vraiment une PAN. On dirait une pratique hybride entre PAN et SOM. Demeurons prudent dans
@@ -159,11 +159,21 @@ périmée (c'est le cas du skill `labo-codex` §5.2 au 5 juin).
   (`inscriptionsCibles`, par trimestre, module propriétaire `js/pratiques/inscriptions-cibles.js`) : une liste où l'on
   AJOUTE, une annulation est une entrée de plus ; chaque inscription garde l'état des critères jugés (`respecte: true |
   false | null`, null = non renseigné) et **aucun calcul ne lit les coches** (choix de Grégoire, 21 nov.). L'écran :
-  `js/tableau-cibles.js` (Évaluation › Tableau de notation, les cibles en colonnes ; une case montre le DERNIER niveau
-  inscrit, pas le retenu). Toujours aucune note : le lot 3 retient, le lot 4 calcule. **Complément du 21 nov., 9 h 17** :
+  `js/tableau-cibles.js` (Évaluation › Tableau de notation, les cibles en colonnes ; au lot 2, une case montrait le
+  DERNIER niveau inscrit ; depuis le lot 3, le retenu). Au lot 2, aucune note : le lot 3 retient, le lot 4 calcule. **Complément du 21 nov., 9 h 17** :
   une inscription peut ne porter AUCUN niveau (`niveau: null`, une « remarque » avec un texte) ; ce n'est jamais le niveau
   « sans donnée » ; une cible qui n'a que des remarques reste sans donnée pour le niveau retenu et pour la note
   (`InscriptionsCibles.estSansNiveau`).
+- *Livré aux lots 3 et 4 (21 nov. 2026, branche `lot/moteur-cibles-3-4-retenu-note`, pas dans `main`)* : `NoteCibles`
+  (`js/pratiques/note-cibles.js`, lecture seule ; ne lit ni évaluations, ni `indicesCP`, ni productions). Le niveau
+  retenu : le meilleur parmi les inscriptions non annulées qui portent un niveau, par `ordonnerNiveauxParPlage` (seule
+  source ; ordre illisible : rien de retenu, le motif dit) ; seule une annulation le fait baisser ; un code absent de
+  l'échelle n'est pas lu. La note : moyenne pondérée des valeurs ponctuelles (`valeurNumeriqueDuNiveau`) ; double seuil
+  (`configuration.doubleSeuil`, éteint d'office, 60/55, « inférieure » strict, sans terminale il ne joue pas) ; pendant la
+  session, une cible sans donnée (ou au niveau « sans donnée » inscrit) met la note en attente (`null`, la cause nomme
+  les cibles) ; à l'arrêt des notes (`configuration.notesFinales`), elle vaut 0 %. Une valeur ponctuelle manquante :
+  « non calculable ». La case du tableau montre le niveau retenu (`etatDeLaCase`, le dernier niveau, est retirée) ; la
+  section « Cibles » du profil (`js/profil-cibles.js`) porte le récit. Sentinelle : `sentinelle-par-standards-lots-3-4`.
 
 **SPE — Spécifications**
 - *Recherche / pratique* : une spécification décrit le **produit réussi entier**, jugé sur

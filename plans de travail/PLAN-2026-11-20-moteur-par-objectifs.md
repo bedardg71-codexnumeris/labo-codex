@@ -9,6 +9,37 @@
 > **Trois degrés de certitude dans ce document** : *mesuré* (une commande l'a rendu, fichier et ligne donnés),
 > *lu* (le code a été lu, rien n'a été joué), *inféré* (déduit, à confirmer par un essai au lot concerné).
 
+## Décidé pour les lots 3 et 4 (mandat du 21 nov. 2026 : « gestes 3 et 4 ensemble »)
+
+Mandat relayé par Cowork le 21 nov. 2026 ; **il prime sur ce plan là où ils divergent**. Branche
+`lot/moteur-cibles-3-4-retenu-note` (partie de `lot/moteur-cibles-2-inscrire`, `8ed02c6f`, et réunie à
+`lot/moteur-cibles-1-cibles`, `main` à 1.252.0). Rapport : `RAPPORT-2026-11-21-moteur-cibles-3-4.md`. Textes :
+`TEXTES-2026-11-21-par-standards-lots-3-4.md`. **La cible** : lundi 23 nov., une adresse d'essai fixe pour trois
+enseignant·es qui pratiquent la notation par standards ; rien ne se fusionne dans `main`, aucune release.
+
+| N° | Décision | Origine |
+|---|---|---|
+| 1 | Le niveau retenu d'une cible est le meilleur niveau parmi les inscriptions non annulées qui portent un niveau. Il ne redescend jamais : un niveau plus bas inscrit plus tard ne le change pas | Rapport PAREA 2026, p. 103 ; confirmé par le cas A (courriel du 21 nov. 2026 : « dans mon cas, avec mes systèmes actuels, ce serait conforme ») |
+| 2 | Seule une annulation peut le faire baisser (une trace invalidée) | Choix de Grégoire (rien ne s'efface) ; cohérent avec le billet du cas A sur son cours noté par triangulation |
+| 3 | Une inscription sans niveau n'entre jamais au niveau retenu. Une cible qui n'a que des remarques, ou rien, est « sans donnée » : elle porte le nom du niveau « sans donnée » de l'échelle, jamais un vide ni un zéro chiffré | Mandat ; décision de Grégoire du 21 nov., 9 h 17 (complément du lot 2) |
+| 4 | Au tableau, la case montre le niveau retenu et le nombre d'inscriptions ; la légende change ; un dernier niveau plus bas se lit dans l'historique de la case, sans bulle | Mandat |
+| 5 | Au profil, une section pour cette pratique : une ligne par cible (niveau retenu, date, origine, rétroaction), puis toutes les inscriptions datées (remarques et annulées comprises, barrées) | Mandat ; plan § 4 |
+| 6 | L'ordre des niveaux : `ordonnerNiveauxParPlage`, seule source. Ordre illisible : rien n'est retenu, le motif s'affiche en clair. Un code absent de l'échelle n'est pas lu | Mandat ; plan § 4 |
+| 7 | La note est la moyenne pondérée des valeurs ponctuelles des niveaux retenus, au poids de chaque cible | Rapport, p. 103 (F1, F2) |
+| 8 | **Le double seuil est un réglage de la pratique, éteint au départ.** Allumé : la note est plafonnée (55 % d'office, modifiable) si la moyenne des cibles terminales est inférieure au seuil (60 % d'office, modifiable). Sans cible terminale, il ne peut pas s'allumer et l'écran dit pourquoi. La variante « un seuil par cible essentielle » n'est pas construite | Choix de Grégoire, 21 nov. 2026, 12 h 20 ; cas A, courriel du 21 nov. : le second seuil existe dans son premier système parce que le plan-cadre le prévoit, son second système n'en a pas |
+| 8a | « Inférieure » est strict : 60 % pile n'est pas plafonné | **Supposé par Cowork, à confirmer** (la fiche, § 7 : les sources disent « dépasser », p. 98, et « inférieure à », p. 103) |
+| 8b | La moyenne des terminales est pondérée par leurs poids | **Supposé par Claude Code, à confirmer** (identique au cas de référence quand les terminales pèsent autant) |
+| 9 | Pendant la session : aucune note chiffrée tant qu'une cible est sans donnée ; à la place, la liste des cibles en attente, lisible sans bulle | **Choix de Grégoire, 20 nov. 2026, sans source** ; la réponse du cas A ne le confirme ni ne l'infirme (F7) |
+| 10 | À l'arrêt des notes, une cible sans donnée compte pour 0 % | Rapport, p. 103 (F3) ; confirmé par le cas A (courriel du 21 nov.) |
+| 10a | L'arrêt des notes est la case « Notes finalisées » de la fiche de la pratique (`configuration.notesFinales`) | Supposé par Cowork ; **mesuré** : c'est la case que lisent l'export (statut « final ») et le PDF, écrite pour toutes les familles ; elle vaut pour la pratique, donc pour tous les groupes qui l'emploient |
+| 11 | Une cible dont le niveau retenu EST le niveau « sans donnée » (inscrit) se traite comme une cible sans inscription : en attente pendant la session, 0 % à l'arrêt | **Tranché par Cowork, supposé** |
+| 12 | Le récit de la note au profil : chaque cible, son niveau retenu, sa valeur, son poids ; la moyenne ; le second seuil quand il est allumé, et quand il plafonne. Une valeur ponctuelle manquante : « non calculable » avec son motif, jamais un chiffre | Mandat |
+| 13 | Chaque lecteur de la note éprouvé un à un (§ 5) ; une note absente ne s'affiche « 0 » nulle part, ou l'endroit est dit | Mandat ; plan § 5 |
+| 14 | La trouvaille du lot 2 (le formulaire des productions exige une pondération en « Par standards ») est réglée : aucune pondération exigée | Mandat ; § 11 |
+| 15 | Les coches des critères ne sont lues par aucun calcul ; une reprise n'est jamais plafonnée | Choix de Grégoire, 21 nov. 2026, 8 h 38 ; mandat |
+| — | Le niveau retenu, entre deux inscriptions du même meilleur niveau : la première qui l'a démontré (sa date, son origine, sa rétroaction) | **Supposé par Claude Code**, à confirmer (la note n'en dépend pas) |
+| — | Hors des gestes : l'entrée 1.252 des Nouvelles dit « Son badge dit maintenant « SEL ». » (« , en sarcelle » retiré) | Accepté par Grégoire, 21 nov. 2026, 12 h 18 |
+
 ## Décidé par Grégoire (20 nov. 2026, 18 h 46 et 18 h 47)
 
 Relayé par Cowork (`plans de travail/CONSIGNE-LOT-2026-11-20-moteur-cibles-0-garde.md`). Le plan est accepté : la
@@ -516,7 +547,14 @@ Consigne : `plans de travail/CONSIGNE-LOT-2026-11-21-moteur-cibles-2-inscrire.md
   **Pour les lots 3 et 4** : lire le niveau par `InscriptionsCibles.lireNiveau` / `estSansNiveau` ; une remarque n'entre
   ni au niveau retenu ni à la note.
 
-### Lot 3 – « Je vois le niveau retenu par cible »
+### Lot 3 – « Je vois le niveau retenu par cible » (livré le 21 nov. 2026, avec le lot 4)
+
+> **Livré** sur `lot/moteur-cibles-3-4-retenu-note` (règles et origines : en tête du plan ; rapport :
+> `RAPPORT-2026-11-21-moteur-cibles-3-4.md`). Dans le code : `js/pratiques/note-cibles.js` (`NoteCibles` : `ordreDeLEchelle`,
+> `retenirDansLHistorique`, `retenirParCible`, purs ; `lireEleve`, lecture seule) ; la case du tableau
+> (`js/tableau-cibles.js`) ; la section « Cibles » du profil (`js/profil-cibles.js`). `InscriptionsCibles.etatDeLaCase`
+> (le dernier niveau du lot 2) est retirée. Les cas A et B du banc n'ont pas pu être rejoués : le banc n'avait pas été
+> committé (§ 12) ; la sentinelle pose ses propres cas, une section par règle.
 
 - **Ce que l'utilisateur voit** : au tableau, chaque case montre le niveau retenu (le meilleur démontré, T2, qui ne
   redescend jamais, T3 et décision du 20 nov.) et combien d'inscriptions il y a derrière. Au profil, une section : une
@@ -528,7 +566,13 @@ Consigne : `plans de travail/CONSIGNE-LOT-2026-11-21-moteur-cibles-2-inscrire.md
   pas le retenu ; un code absent de l'échelle n'est pas lu ; ordre illisible → rien de retenu, et le motif.
 - **Notes qui changent** : aucune.
 
-### Lot 4 – « La note du cours vient des niveaux retenus », avec la pondération et le double seuil
+### Lot 4 – « La note du cours vient des niveaux retenus », avec la pondération et le double seuil (livré le 21 nov. 2026)
+
+> **Livré** avec le lot 3. `PratiqueConfigurable` : le court-circuit du lot 1 devient le calcul (`calculerPerformance`,
+> `decrireCalcul`, `expliquerNoteNonConstructible`, par `NoteCibles`) ; le double seuil dans la fiche de la pratique
+> (`configuration.doubleSeuil = { actif, seuil, plafond }`, gardé par l'assistant à la réédition, #938) ; la colonne de la
+> note au tableau ; le récit au profil. Le sens inverse est épinglé (ni évaluations, ni `indicesCP`, ni productions lus).
+> Les lecteurs du § 5, éprouvés : voir le rapport, § 3.
 
 - **Ce que l'utilisateur voit** : la note au profil avec son récit (chaque cible, son niveau, sa valeur, son poids, la
   moyenne pondérée, F1, F2 ; le second seuil quand il plafonne, F4) ; la même note à l'export, au Comparateur, au
@@ -606,9 +650,14 @@ Consigne : `plans de travail/CONSIGNE-LOT-2026-11-21-moteur-cibles-2-inscrire.md
 | `calculerPerformanceParObjectif` (`portfolio.js:658`) sans appelant | **retirée au lot 1** (fait le 21 nov.), même motif |
 | Le gabarit `pan-objectifs-ponderes` est resté au catalogue alors que le changelog 1.63 annonce le départ des gabarits du mode | **retiré au lot 1** (mesuré le 21 nov. : `PRATIQUES_PREDEFINES` n'est lue par aucun écran, seulement par la migration V2 de `pratique-manager.js`, qui en lit les noms de constantes) |
 | `jugementsDenotation` est nue de fait (déjà consigné, `DATA-OWNERSHIP.md:58`) | **déjà inscrit** ; sert d'avertissement pour la clé neuve |
-| `indicesCP` range 0 pour une note non calculable (`portfolio.js:582`) | **inscrire et continuer** ; mesuré lecteur par lecteur au lot 4 |
+| `indicesCP` range 0 pour une note non calculable (`portfolio.js:582`) | **mesuré lecteur par lecteur au lot 4** (rapport du lot, § 3) : la liste et un en-tête du profil corrigés ; l'Aperçu inscrit ci-dessous |
 | Trois sens du mot « objectif » (leçon, texte d'une production, ensemble) | **aux mots** (§ 9) |
-| En « Par standards », le formulaire des productions exige encore une pondération (`raisonChampsObligatoiresProduction` ne connaît que `standards` ; mesuré au lot 2, 21 nov.) : une production qui ne pèse sur aucune note doit en porter une | **inscrire et continuer** : au lot 4, quand la note dira ce que pèse une production (rien) |
+| En « Par standards », le formulaire des productions exige encore une pondération (`raisonChampsObligatoiresProduction` ne connaît que `standards` ; mesuré au lot 2, 21 nov.) : une production qui ne pèse sur aucune note doit en porter une | **réglée au lot 4** (21 nov.) : aucune pondération exigée, l'astérisque part, une phrase le dit sous le champ |
+| `indicesCP` range 0 pour une note non constructible : la liste des étudiant·es l'écrivait « 0 % » (cellule P, moyenne, corrélations, tri) et l'en-tête « Développement des habiletés » du profil aussi | **corrigé au lot 4** (21 nov.) : « — » ; vaut pour toutes les pratiques (aucune note ne change, seulement l'écriture d'une note absente) |
+| Le Comparateur (Labo) écrit « CIB » dans ses menus (`p.code` au lieu du sigle) et le badge « SEL » sur une pratique par standards dans les maquettes (`genererBadgePratiqueHTML` retombe sur la famille par défaut, ce que son propre commentaire déconseille) | **inscrire et continuer** (lot 1, décision « le sigle suit le nom ») : `comparateur-pratiques.js`, `_optionsSelect` et `_badgeFamille` |
+| L'Exploration (« Construction de la note ») décrit une pratique par standards comme une sélection d'artefacts, « Alignement sur des cibles : non couvert », « Pondération : égale » : `construction-attributs.js` ne connaît pas le type `cibles` | **inscrire et continuer** |
+| Les corrélations de l'Aperçu (r(A↔P), r(C↔P)) comptent une note non constructible pour 0 (`tableau-bord-apercu.js`, `_correlations…`), affichées seulement si \|r\| ≥ 0,5 | **inscrire et continuer** (relevé par l'audit des lecteurs du 21 nov.) |
+| Le PDF de synthèse n'a aucune note pour cette pratique (il ne connaît que STD et SOM) | **commenter et oublier** : prix accepté du noyau (« ni PDF de synthèse ») ; aucun « 0 » n'y paraît |
 | Le geste « inscrire pour une production » n'offre que les productions assignées au groupe-cours, hors diagnostiques et hors portfolio conteneur | **choix technique du lot 2**, dit au rapport ; à revoir si Grégoire veut inscrire depuis une production diagnostique |
 
 ## 12. Ce qui n'a pas été mesuré
