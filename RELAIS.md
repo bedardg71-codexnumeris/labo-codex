@@ -7,6 +7,25 @@
 
 ---
 
+## 21 NOV. 2026, 18 H 30 (Claude Code) : **1.253.0 SUR `main` ET EN LIGNE — « PAR STANDARDS », À L'ESSAI, VUE SIMPLE COMPRISE** — verdict complet du Mac, vert, sur secteur
+
+Mandat : Cowork, 21 nov. (décisions de Grégoire : 13 h 53 « je voudrais que nous fassions la release ; je vais la tester une fois publiée », 14 h 17, 14 h 19 ; elles remplacent sa condition du matin, portées en tête de `PLAN-2026-11-20-moteur-par-objectifs.md`). **Le travail le plus récent vit sur `main`** (`origin/main` = `ca76685c2` avant ce relais). Rapport complet, avec les trois mesures et les gestes de Grégoire : `plans de travail/RAPPORT-2026-11-21-release-1.253.0.md`. Arbres : `../labo-codex-par-standards-release` (le travail), `../labo-codex-fusion` (le verdict).
+
+- **Commits** : `867ebc40c` (`main` réuni dans `lot/moteur-cibles-3-4-retenu-note`) ; `69779306c` (l'étiquette « À l'essai », la ligne de Nouvelles, les écrans des deux modèles actuels épinglés, les en-têtes des trois fichiers de textes, le plan) ; `ca76685c2` (release). `main` avancé en avance rapide.
+- **Parti** : les quatre gestes en vue étendue, le parcours entier en vue simple, le lot 1 ; la mention « À l'essai » à la carte du modèle (vue simple), aux deux cartes de l'assistant et dans l'en-tête de la fiche, **allumée par une seule constante** (`EnsemblesCibles.A_L_ESSAI`, `js/pratiques/ensembles-cibles.js`) à éteindre quand les testeurs auront confirmé la pratique ; l'entrée 1.253 des Nouvelles. Les textes affichés partent tels que proposés, **sans relecture**, à corriger après l'essai de Grégoire.
+- **Bancs** : Vitest 944 fichiers, 12 175 verts ; garde du lot 0, 16 sur 16. Écrans neufs vus pour la première fois sous WebKit (vue simple 52 sur 52 ; lots 2 à 4 et tableau, 35 verts). Bancs du module : 38 specs, 230 essais, verts. Neufs : `sentinelle-par-standards-a-l-essai` (break-tests S1 à S5), `par-standards-a-l-essai.spec.js`, `vue-simple-modeles-actuels-epingles.spec.js` (référence prise sur la 1.252.0 ; break-test rouge).
+- **Verdict WebKit** : complet, sur `ca76685c2`, 40 demi-morceaux, de 16 h 21 à 18 h 13, Safari, Chrome et l'app Claude fermés (mesuré), secteur. **Jeton code 0, 1 804 essais, 1 781 verts, 23 au second essai, 0 rouge, 68 sautés.** Mémoire 69 à 79 %, passage le plus long 356 s. ⚠ Une commande (deux appels enchaînés) est partie en arrière-plan ; rien lancé avant sa fin.
+- **Release** : 1.253.0, build `1121-1619` (un premier build `1121-1617` laissait deux jetons d'anti-cache à leur valeur de la 1.252 ; `--build-only` les a remontés). **Push** : 18 h 15, hook passé. **Netlify** : déploiement `6b022617`, prêt, commit `ca76685c2`, publié à 18 h 15 min 56 s ; `version.json` du permalien = `1.253.0` / `1121-1619` ; cinq fichiers servis identiques au commit.
+- **Stock (rien n'est réécrit)** : un codex de la 1.253 ouvert en 1.252 garde tout mais y est mal lu (badge « SEL », tableau des productions) ; réenregistré puis rouvert en 1.253, il est identique. Deux pratiques peuvent s'appeler « Par standards » dans un trimestre : trois menus ne les distinguent pas (Conception › Pratiques, la pratique du groupe dans Cadre › Trimestre, le profil). « STD » à l'ancien sens : six endroits de l'application, deux du guide de relève. Détail et dispositions : rapport, § 4.
+- **Lu, inscrit, non corrigé** (vue simple, rapport § 1) : « Créer ma pratique » en trois écritures sans retour arrière ; « Changer de modèle » offert malgré des productions ; un échec muet à la reprise d'une pratique laissée.
+- **GitHub** : run du push `44960901387`, en cours à l'écriture ; les six push précédents de `main` sont rouges sous WebKit Linux (9 specs hors baseline sur la 1.252.0, vertes sur le Mac). Non instruit.
+- **Complexité** (par rapport à la 1.252.0) : fonctions au-dessus de 15 : 434 → 434 ; somme 10 959 → 10 971 (Δ + 12) ; au-dessus de 30 : 77 → 76 ; fichiers de plus de 1 000 lignes : 44 → 44 ; lignes de code 172 527 → 174 399.
+- **Supposé** : rapport, § 2 (les deux cartes de l'assistant, l'emplacement de la constante, le style de l'étiquette, la couleur verte de l'entrée, « relecture » = la mienne).
+- **Non vérifié** : Safari à la main et l'iPad ; `app.codexnumeris.org` elle-même (Cloudflare Access) ; aucune capture relue par Cowork ; pas de relecture croisée de cette session.
+- **PR d'aperçu n° 44, 45 et 46** : fermées.
+
+---
+
 ## 21 NOV. 2026, 11 H 30 (Claude Code) : **1.252.0 SUR `main` ET EN LIGNE — « STANDARDS » DEVIENT « PAR SÉLECTION DE PRODUCTIONS », SIGLE « SEL » EN SARCELLE, PLUS DITE « PAN »** — verdict complet du Mac, vert, sur secteur ; **le sigle est parti**
 
 Mandat : Cowork, 21 nov. (décision de Grégoire, 8 h 33 : mettre en ligne aujourd'hui). **Le travail le plus récent vit sur `main`** (`origin/main` = `e174ec80f` avant ce relais). Fait dans des arbres à part (`../labo-codex-selection-release`, puis `../labo-codex-fusion` pour le verdict), deux autres sessions occupant l'arbre principal.
