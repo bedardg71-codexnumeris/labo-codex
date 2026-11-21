@@ -3865,6 +3865,11 @@ function _ligneCalculIndicePPanneau(note, differee) {
     return `${quoi} = ${addition}` + (note.formule ? ` ; P = ${echapperHtml(note.formule)}` : '');
 }
 
+/** Lot 4, borné (21 nov. 2026, 13 h 30) : vrai quand la pratique du groupe-cours actif est « Par standards » (famille `cibles`). */
+function _pratiqueActiveParStandards() {
+    return typeof obtenirTypePratiqueActive === 'function' && obtenirTypePratiqueActive() === 'cibles';
+}
+
 function genererSectionPerformance(da) {
     if (typeof obtenirPreference === 'function' && obtenirPreference('afficherDeveloppementHabiletes') === false) {
         return '';
@@ -3931,9 +3936,11 @@ function genererSectionPerformance(da) {
     // établit la note globale, donc c'est elle qui dit dans quoi la note se lit.
     // Sans échelle (une sommative, par exemple), il n'y a pas de code — et c'est
     // la bonne réponse, pas un manque.
-    // Lot 4 « Par standards » (21 nov. 2026) : une note non constructible (P rangé à 0, `noteConstructible: false`)
-    // s'écrit « — », sans niveau : jamais « 0 % » ni le code du niveau le plus bas (#394, règle 4).
-    const sansNote = indices.noteConstructible === false;
+    // Lot 4 « Par standards » (21 nov. 2026), BORNÉ le 21 nov., 13 h 30 (décision de Grégoire du 20 nov. : sa pratique de
+    // l'automne ne change pas, ni ce que ses écrans en disent) : en « Par standards » seulement, une note non constructible
+    // (P rangé à 0, `noteConstructible: false`) s'écrit « — », sans niveau. Ailleurs, l'en-tête d'avant (« 0 % » compris :
+    // plan, § 11).
+    const sansNote = indices.noteConstructible === false && _pratiqueActiveParStandards();
     const lectureNiveauGlobal = sansNote ? { niveau: null, survol: '', raison: 'non-constructible' }
         : ((typeof lireNiveauNoteGlobale === 'function')
             ? lireNiveauNoteGlobale(da, indices.P)

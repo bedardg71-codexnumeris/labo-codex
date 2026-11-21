@@ -35,7 +35,7 @@ import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { JSDOM } from 'jsdom';
 import { chargerScript } from './_helpers/charger-script.js';
-import { RACINE } from './_helpers/bac-suivi.js';
+import { RACINE, monter as monterSuivi, storeBase as storeSuivi } from './_helpers/bac-suivi.js';
 import { fonctionsDeLEchelle } from './_helpers/moteur-cibles.js';
 
 const clone = (x) => JSON.parse(JSON.stringify(x));
@@ -79,6 +79,8 @@ function monter({ inscriptions = [], cibles = CIBLES, echelle = ECHELLE, conf = 
     chargerScript('js/pratiques/note-cibles.js', globaux, win);
     return { win, NC: win.NoteCibles, store, lues, ecrites, globaux, eleve: (da, c = conf) => win.NoteCibles.lireEleve(c, da) };
 }
+/** R13b : le relevé de la liste pour « Par sélection de productions », mesuré sur la version de base (8ed02c6f). */
+const RELEVE_DE_BASE = {"rangees": ["|1|2000002|01|Absent|Bor\u00e9al|80\u00a0%|100\u00a0%|0\u00a0%|Stable|Niveau 1|\u2014|", "|2|2000001|01|Assidu|Alice|90\u00a0%|100\u00a0%|80\u00a0%|Stable|Niveau 1|\u2014|", "|3|2000003|01|Silence|Chlo\u00e9|70\u00a0%|50\u00a0%|60\u00a0%|Stable|Niveau 1|\u2014|"], "moyP": "moy=47\u00a0%", "pearson": [[[90, 80, 70], [80, 0, 60]], [[100, 100, 50], [80, 0, 60]], [[4, 4, 4], [80, 0, 60]], [[1, 1, 1], [80, 0, 60]], [[0, 0, 0], [80, 0, 60]], [[90, 80, 70], [80, 0, 60]], [[100, 100, 50], [80, 0, 60]], [[4, 4, 4], [80, 0, 60]], [[1, 1, 1], [80, 0, 60]], [[0, 0, 0], [80, 0, 60]]], "ordre": ["2000002", "2000003", "2000001"]};   // relevé sur 8ed02c6f, 21 nov. 2026 (BT24)
 const ligne = (eleve, cibleId) => eleve.retenue.lignes.find(l => l.cible.id === cibleId);
 
 /* ================================================================ R1 — le meilleur, qui ne redescend jamais */
@@ -456,13 +458,64 @@ describe('R13 · les lecteurs : une seule note, null jamais 0, et le sens invers
         const d = new JSDOM('<!doctype html><body>' + e.PC.panneau(ZOE) + '</body>').window.document;
         expect(d.querySelector('.pc-note-valeur strong').textContent).toBe('81,3\u00a0%');
     });
-    it('la liste des étudiant·es écrit « — » pour une note non constructible et la sort des moyennes et des corrélations (jamais « 0 % »)', () => {
-        const src = lire('js/etudiants.js');
-        expect(src).toContain('const valeursP_tous = tousIndices.map(indices => (indices.noteConstructible === false ? null : indices.P));');
-        expect(src).toMatch(/indices\.noteConstructible === false \? '<td class="etud-text-center">' \+ tiret \+ '<\/td>'/);
-        expect(src).toContain('.filter(v => v !== null);');
+    it('(borné le 21 nov., 13 h 30) l\'en-tête « Développement des habiletés » du profil ne dit « — » qu\'en « Par standards » ; la liste : R13b', () => {
         const profil = lire('js/profil-etudiant-sections-affichage.js');
+        expect(profil).toContain('const sansNote = indices.noteConstructible === false && _pratiqueActiveParStandards();');
+        expect(profil).toContain("return typeof obtenirTypePratiqueActive === 'function' && obtenirTypePratiqueActive() === 'cibles';");
         expect(profil).toContain("${sansNote ? '—' : prefixeNiveauGlobal + formaterPourcentage(indices.P)}");
+    });
+});
+
+/* ================================================================ R13b — la liste des étudiant·es (correction du 21 nov., 13 h 30) */
+// Décision de Grégoire (20 nov.) : sa pratique de l'automne ne change pas, ni ses calculs ni ce que ses écrans en disent.
+// La garde « une note non constructible s'écrit — » ne joue que pour une pratique par standards. Le relevé ci-dessous, sur le
+// VRAI js/etudiants.js : chaque rangée (texte des cellules), la moyenne « moy=… », les ENTRÉES de chaque corrélation (Pearson
+// enregistre ce qu'on lui passe), et l'ordre du tri par P. Pour « Par sélection de productions », les valeurs attendues ont
+// été relevées sur la version de base de js/etudiants.js (lot/moteur-cibles-2-inscrire, 8ed02c6f) : journal, BT24.
+describe('R13b · la liste des étudiant·es : « — » seulement en « Par standards » ; toute autre pratique, la liste d\'avant', () => {
+    const INDICES = {
+        '2000001': { A: 90, C: 100, P: 80, noteConstructible: true },
+        '2000002': { A: 80, C: 100, P: 0, noteConstructible: false },   // une copie remise, aucune note constructible
+        '2000003': { A: 70, C: 50, P: 60, noteConstructible: true }
+    };
+    function releve(famille) {
+        const store = storeSuivi();
+        const pearson = [];
+        const b = monterSuivi(store, { modules: ['js/interpretation-config.js', 'js/contexte-qualification.js', 'js/etudiants.js'], globaux: {
+            determinerNiveauRaiPedagogique: () => ({ niveau: 1, pattern: 'Stable', label: 'Universel' }),
+            calculerCorrelationPearson: (x, y) => { pearson.push([x.slice(), y.slice()]); return 0; },
+            calculerTousLesIndices: (da) => clone(INDICES[da] || { A: 90, C: 100, P: 80, noteConstructible: true }),
+            calculerEtSauvegarderIndicesAssiduite() {}, calculerEtStockerIndicesCP() {},
+            obtenirConfigPratiqueActive: () => ({ portfolio: { minimumCompletion: 0 } }), obtenirInterventionsEtudiant: () => [],
+            obtenirTypePratiqueActive: () => famille, obtenirTermeProduction: () => 'production', obtenirCodePratique: () => 'STD' } });
+        b.win.afficherListeEtudiantsConsultation();
+        const tbody = b.document.getElementById('tbody-suivi-liste');
+        const texte = (html) => html.replace(/<[^>]+>/g, '|').replace(/[ \t\r\n]*\|[ \t\r\n]*/g, '|').replace(/\|+/g, '|').replace(/[ \t\r\n]+/g, ' ').trim();
+        const rangees = tbody.children.map(tr => texte(tr.innerHTML));
+        const moyP = b.document.getElementById('moy-p').textContent;
+        b.win.trierTableauPar('performance');
+        const das = (h) => (h.match(/\|(\d{7})\|/g) || []).map(x => x.replace(/\|/g, ''));
+        const ordre = tbody.children.map(tr => das(texte(tr.innerHTML))[0]);
+        return { rangees, moyP, pearson, ordre };
+    }
+    it('« Par sélection de productions » : la ligne de l\'élève sans note dit « 0 % », la moyenne compte ce 0, les corrélations aussi, le tri le range à 0 — comme avant le lot', () => {
+        const r = releve('standards');
+        expect(r.rangees.find(x => x.includes('2000002'))).toMatch(/\|0\u00a0%\|/);
+        expect(r.moyP).toBe('moy=47\u00a0%');                      // (80 + 0 + 60) ÷ 3
+        expect(r.pearson.slice(0, 2)).toEqual([[[90, 80, 70], [80, 0, 60]], [[100, 100, 50], [80, 0, 60]]]);
+        expect(r.pearson.slice(2).every(([, y]) => y.includes(0)), 'les corrélations avec P comptent le 0').toBe(true);
+        expect(r.ordre).toEqual(['2000002', '2000003', '2000001']);   // 0, 60, 80
+        expect(r).toEqual(RELEVE_DE_BASE);
+    });
+    it('« Par standards », une note en attente : « — », hors de la moyenne et des corrélations, sous toute note au tri ; aucun 0 compté', () => {
+        const r = releve('cibles');
+        const ligne = r.rangees.find(x => x.includes('2000002'));
+        expect(ligne).not.toMatch(/\|0\u00a0%\|/);
+        expect(ligne).toContain('|100\u00a0%|—|');                // C, puis P : « — »
+        expect(r.moyP).toBe('moy=70\u00a0%');                      // (80 + 60) ÷ 2
+        expect(r.pearson.slice(0, 2)).toEqual([[[90, 70], [80, 60]], [[100, 50], [80, 60]]]);
+        expect(r.pearson.slice(2).every(([, y]) => !y.includes(0) && !y.includes(null))).toBe(true);
+        expect(r.ordre).toEqual(['2000002', '2000003', '2000001']);   // sous toute note
     });
 });
 
@@ -555,4 +608,16 @@ describe('R15 · les coches des critères ne sont lues par aucun calcul ; une re
  *      ROUGE (1) : « « cibles » : à 0 %, aucun type n'est refusé — la terminale et le conte… ».
  * BT15 (R15) `retenirDansLHistorique` : une inscription dont un critère est « non respecté » ne compte plus.
  *      ROUGE (1) : « mêmes niveaux, coches contraires : même niveau retenu, même note ».
+ *
+ * Correction du 21 nov., 13 h 30 (Cowork) — la garde de la liste bornée à « Par standards » (43 essais au vert avant et après) :
+ * BT24 (R13b) `etudiants.js`, `pDeLaListe` : la garde regénéralisée (`enParStandards` ignoré), comme avant la correction.
+ *      ROUGE (1) : « « Par sélection de productions » : la ligne de l'élève sans note dit « 0 % »… ».
+ * BT24b (R13b) `etudiants.js`, l'enrichissement : `sansNoteParStandards` sans la condition de famille.
+ *      ROUGE (1) : le même essai (la cellule « — » et le tri reviennent pour toutes les pratiques).
+ * BT25 (R13b) `etudiants.js`, `pDeLaListe` : la garde retirée (le P tel quel partout, la liste d'avant le lot).
+ *      ROUGE (1) : « « Par standards », une note en attente : « — »… ».
+ * BT26 (R13) `profil-etudiant-sections-affichage.js` : `sansNote` sans `_pratiqueActiveParStandards()`.
+ *      ROUGE (1) : « (borné le 21 nov., 13 h 30) l'en-tête « Développement des habiletés »… ».
+ * CONTRE-ÉPREUVE : l'essai « Par sélection de productions » de R13b, joué sur la version de BASE de js/etudiants.js
+ *      (`git show 8ed02c6f:js/etudiants.js`, fichier remis ensuite) : VERT. Le relevé épinglé est bien la liste d'avant le lot.
  */
