@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { readFileSync } from 'node:fs';
+import { tranche } from './_helpers/tranche.js';
 import { join, resolve } from 'node:path';
 
 // SENTINELLE — la pratique « Standards » se nomme « Par sélection de productions » (20 nov. 2026).
@@ -14,16 +15,23 @@ const lire = (f) => readFileSync(join(racine, f), 'utf8');
 const net = (t) => t.replace(/\\'/g, '\'').replace(/’/g, '\'').replace(/&nbsp;/g, ' ').replace(/ /g, ' ')
     .replace(/<\/?strong>/g, '').replace(/\s+/g, ' ');
 const TEXTES = lire('plans de travail/TEXTES-2026-11-20-selection-de-productions.md');
-/** Les sections « ## REPÈRE · fichier · où » du fichier validé : { repere, fichier, textes }. */
-const SECTIONS = TEXTES.split(/^## /m).slice(1).filter((s) => /^[A-Z]\d+ · /.test(s)).map((s) => {
+/** Les sections « ## REPÈRE · fichier · où » d'un fichier validé : { repere, fichier, textes }. */
+const sectionsDe = (texte) => texte.split(/^## /m).slice(1).filter((s) => /^[A-Z]\d+ · /.test(s)).map((s) => {
     const [repere, fichier] = s.split('\n')[0].split(' · ');
     return { repere, fichier, textes: s.split('\n').filter((l) => l.startsWith('> ')).map((l) => l.slice(2).trim()) };
 });
-const section = (repere) => SECTIONS.find((s) => s.repere === repere);
+const SECTIONS = sectionsDe(TEXTES);
+// ↻ 21 nov. 2026, 7 h 44 (choix de Grégoire ; les sources ne tranchent pas) : la pratique n'est plus dite « PAN ». Le fichier
+// du 21 nov. REMPLACE, pour A1, A2, A3, F3, F4, F10, P1 et P2 seulement, les citations du 20 nov., qui reste intact.
+const SANS_PAN = sectionsDe(lire('plans de travail/TEXTES-2026-11-21-selection-sans-PAN.md'));
+const REMPLACES = ['A1', 'A2', 'A3', 'F3', 'F4', 'F10', 'P1', 'P2'];
+const section = (repere) => (REMPLACES.includes(repere) && SANS_PAN.find((s) => s.repere === repere)) || SECTIONS.find((s) => s.repere === repere);
 const source = (repere) => net(lire(section(repere).fichier));
 
 describe('Renommage « Par sélection de productions » — les vingt textes acceptés le 20 nov. 2026', () => {
-    it('le fichier validé porte les vingt repères, vingt-trois textes', () => {
+    it('le fichier validé du 20 nov. porte les vingt repères, vingt-trois textes ; celui du 21 nov. en remplace huit', () => {
+        expect(REMPLACES.every((r) => SANS_PAN.some((s) => s.repere === r))).toBe(true);
+        expect(REMPLACES.flatMap((r) => section(r).textes).join(' ')).not.toMatch(/\bPAN\b/);
         expect(SECTIONS.map((s) => s.repere)).toEqual(['V1', 'V2', 'V3', 'V4', 'V5', 'V6', 'T1', 'A1', 'A2', 'A3', 'A4', 'A5', 'A6', 'M1',
             'F3', 'F4', 'F10', 'P1', 'P2', 'M5']);
         expect(SECTIONS.flatMap((s) => s.textes)).toHaveLength(23);
@@ -40,7 +48,9 @@ describe('Renommage « Par sélection de productions » — les vingt textes acc
         expect(vue).toContain(`modele: 'STD-n-meilleurs', titre: '${section('V3').textes[0]}',`);
         expect(vue).toMatch(new RegExp(`modele: 'STD-n-meilleurs'[^}]*lien: '${section('V4').textes[0]}' }`));
         const assistant = source('A1');
-        expect(assistant).toContain(`'standards': { code: 'STD', classe: 'std', label: '${section('A1').textes[0]}', description: '${net(section('A1').textes[1])}' }`);
+        // ↻ 21 nov. 2026 (« le sigle suit le nom », décision de Grégoire) : le sigle affiché de cette pratique devient SEL,
+        // et sa couleur au récapitulatif la sarcelle (classe `sel`) ; son nom et sa description ne changent pas.
+        expect(assistant).toContain(`'standards': { code: 'SEL', classe: 'sel', label: '${section('A1').textes[0]}', description: '${net(section('A1').textes[1])}' }`);
         expect(assistant).toContain(`{ value: 'niveaux', label: '${section('A2').textes[0]}', description: '${section('A2').textes[1]}' }`);
         expect(assistant).toContain(`'<h4>${section('A3').textes[0]}</h4>'`);
         expect(source('F3')).toContain(`<option value="standards">${section('F3').textes[0]}</option>`);
@@ -64,13 +74,17 @@ describe('Renommage « Par sélection de productions » — les vingt textes acc
         }
         expect(lire('js/tableau-notation.js')).not.toContain('par standards et par');
         const assistant = lire('js/wizard-pratique-v2.js');
-        for (const ancien of ['PAN – Standards', 'Configuration PAN-Standards', 'cette pratique PAN-Standards']) expect(assistant, ancien).not.toContain(ancien);
+        for (const ancien of ['PAN – Standards', 'Configuration PAN-Standards', 'cette pratique PAN-Standards', 'PAN – Sélection de productions']) expect(assistant, ancien).not.toContain(ancien);
         const registre = lire('js/pratiques/pratique-registre.js');
         for (const ancien of ['PAN-Standards s\\\'appuie', 'En PAN – Standards', 'En standards, la note du cours']) expect(registre, ancien).not.toContain(ancien);
         expect(lire('js/accompagnement-contenu-hover.js')).not.toContain('En standards, la note se construit');
         expect(lire('index.html')).not.toContain('<option value="standards">PAN-Standards</option>');
         expect(lire('js/pratiques/pratique-pan-standards.js')).not.toContain('return "PAN-Standards"');
         expect(lire('js/profil-etudiant-actions.js')).not.toContain('pratique: \'PAN-Standards\'');
+        // 21 nov. 2026, 7 h 44 : le préfixe « PAN – » part aussi (F3, F4, F10, P1, P2).
+        for (const f of ['index.html', 'js/pratiques/pratique-pan-standards.js', 'js/profil-etudiant-actions.js']) {
+            expect(lire(f), f).not.toContain('PAN – Sélection de productions');
+        }
     });
 
     it('rien d\'autre ne bouge : le code STD, l\'identifiant, la famille du modèle, et la phrase lue par les étudiant·es', () => {
@@ -84,9 +98,17 @@ describe('Renommage « Par sélection de productions » — les vingt textes acc
         expect(lire('js/export-resultats-finaux.js')).toContain('pratique.obtenirNom()');   // E1 suit F10, sans texte à lui
     });
 
-    it('la ligne des Nouvelles est gardée pour la release, pas encore publiée', () => {
-        expect(TEXTES).toContain('La pratique « Standards » s\'appelle maintenant « Par sélection de productions ».');
-        expect(lire('js/changelog-data.js')).not.toContain('Par sélection de productions');
+    it('la ligne des Nouvelles est publiée à la 1.252, mot pour mot, avec la phrase du sigle (release du 21 nov. 2026)', () => {
+        const ligne = TEXTES.split('\n').find(l => l.startsWith('La pratique « Standards » s\'appelle maintenant'));
+        expect(ligne).toMatch(/Une pratique que tu avais nommée toi-même garde son nom\.$/);
+        // La typographie du fichier des Nouvelles : apostrophe courbe, espaces insécables dans les guillemets et avant « : ».
+        const typo = (t) => t.replace(/'/g, '’').replace(/« /g, '«&nbsp;').replace(/ »/g, '&nbsp;»').replace(/ :/g, '&nbsp;:');
+        const attendu = typo(ligne + ' Son badge dit maintenant « SEL », en sarcelle.');
+        const journal = lire('js/changelog-data.js');
+        const entree = tranche(journal, "version: '1.252'", "version: '1.251'");
+        expect(entree).toContain("'" + attendu + "'");
+        expect((entree.match(/^\s+'/gm) || []).length).toBe(1);        // une seule ligne dans cette entrée
+        expect(entree).not.toMatch(/STD|Par standards|PAN/);            // rien de la nouvelle pratique, et SEL n'est pas dite PAN
     });
 });
 

@@ -25,7 +25,7 @@
  *      la fiche, le récit et `obtenirTermeProduction` disent « productions » (TEXTES, lus dans le fichier) ; GREG garde les siens, 84,8
  *      compris ; `utiliser` et `nombreTotal` ne s'écrivent plus, une pratique qui les porte les garde.
  *
- * Données fictives (Alice, Bruno). Banc : les modules RÉELS (le bac du banc du 28 oct.). Aucune écriture dans `js/`.
+ * Données fictives (Alice, Boréal). Banc : les modules RÉELS (le bac du banc du 28 oct.). Aucune écriture dans `js/`.
  * Stock : rien n'est réécrit ; tout se lit au calcul (les captures déjà prises gardent leur P).
  * BREAK-TESTS : journal en fin de fichier.
  */
@@ -36,7 +36,7 @@ import { monter, storeBase, clone } from './_helpers/bac-suivi.js';
 import { chargerScript } from './_helpers/charger-script.js';
 import { tranche } from './_helpers/tranche.js';
 
-const DA = { ALICE: '2000001', BRUNO: '2000002' };
+const DA = { ALICE: '2000001', BOREAL: '2000002' };
 const E0 = { id: 'E0', nom: 'IDME banc', seuilMaitrise: 'M', niveaux: [
     { code: 'I', nom: 'Insuffisant', min: 0, max: 64, valeurCalcul: 40 }, { code: 'D', nom: 'En développement', min: 65, max: 74, valeurCalcul: 65 },
     { code: 'M', nom: 'Maîtrisé', min: 75, max: 84, valeurCalcul: 75 }, { code: 'E', nom: 'Étendu', min: 85, max: 100, valeurCalcul: 100 }
@@ -66,10 +66,10 @@ function prodChimie({ ponderees = true, terminale = false, categories = null } =
     if (!ponderees) l.forEach(p => { delete p.ponderation; });
     return l;
 }
-const NOTES_CHIMIE = { [DA.ALICE]: { L1: 70, L2: 80, L3: 90, X1: 60, X2: 85 }, [DA.BRUNO]: { L1: 55, L2: 65, L3: 75, X1: 80, X2: 70 } };
+const NOTES_CHIMIE = { [DA.ALICE]: { L1: 70, L2: 80, L3: 90, X1: 60, X2: 85 }, [DA.BOREAL]: { L1: 55, L2: 65, L3: 75, X1: 80, X2: 70 } };
 const COPIES_CHIMIE = [];
-for (const da of [DA.ALICE, DA.BRUNO]) for (const [p, n] of Object.entries(NOTES_CHIMIE[da])) COPIES_CHIMIE.push(ev(da, p, n));
-/** Les copies d'Alice réduites à `ids` ; celles de Bruno restent (la production est évaluée dans le groupe). */
+for (const da of [DA.ALICE, DA.BOREAL]) for (const [p, n] of Object.entries(NOTES_CHIMIE[da])) COPIES_CHIMIE.push(ev(da, p, n));
+/** Les copies d'Alice réduites à `ids` ; celles de Boréal restent (la production est évaluée dans le groupe). */
 const seulement = (ids) => COPIES_CHIMIE.filter(c => c.etudiantDA !== DA.ALICE || ids.includes(c.productionId));
 const CATEGORIES = { actif: true, selection: { nombreARetenir: 2, ponderation: 65 }, obligatoires: { nombre: 2, ponderation: 35 } };
 const CATEGORIES_CHIMIE = { L1: 'selection', L2: 'selection', L3: 'selection', X1: 'obligatoire', X2: 'obligatoire' };
@@ -93,7 +93,7 @@ const OBJETS_EXPORTES = ['PratiqueManager', 'denotationJugements', 'modalitesEva
 
 function banc({ pratique, productions, evaluations, modules = [], prefs = {}, globauxEnPlus = {} }) {
     const store = storeBase();
-    store.test_groupeEtudiants = store.test_groupeEtudiants.filter(e => e.da === DA.ALICE || e.da === DA.BRUNO);
+    store.test_groupeEtudiants = store.test_groupeEtudiants.filter(e => e.da === DA.ALICE || e.da === DA.BOREAL);
     store.test_groupesCours[0].pratiqueId = pratique.id;
     store.test_pratiquesConfigurables = [clone(pratique)];
     store.test_echellesTemplates = [clone(E0)];
@@ -147,7 +147,10 @@ const AUCUN_ARTEFACT = 'Aucune production n\'est encore évaluée.';
 // validés du renommage (repère M5), plus dans celui du 28 oct.
 const RENOMMAGE = readFileSync(join(resolve(import.meta.dirname, '..', '..'), 'plans de travail/TEXTES-2026-11-20-selection-de-productions.md'), 'utf8');
 /** Les textes `> …` d'un repère du renommage (V1, A5, M5…), lus dans le fichier. */
-const texteRenomme = (repere) => RENOMMAGE.split(/^## /m).find(s => s.startsWith(repere + ' ·')).split('\n').filter(l => l.startsWith('> ')).map(l => l.slice(2).trim());
+const texteRenomme = (repere, fichier = RENOMMAGE) => fichier.split(/^## /m).find(s => s.startsWith(repere + ' ·')).split('\n').filter(l => l.startsWith('> ')).map(l => l.slice(2).trim());
+// 21 nov. 2026, 7 h 44 (choix de Grégoire ; les sources ne tranchent pas) : la pratique n'est plus dite « PAN ». L'encadré F4
+// se lit dans le fichier du 21 nov., qui remplace pour lui celui du 20 nov.
+const SANS_PAN = readFileSync(join(resolve(import.meta.dirname, '..', '..'), 'plans de travail/TEXTES-2026-11-21-selection-sans-PAN.md'), 'utf8');
 const TERMINALE_SEULE_PRODUCTIONS = texteRenomme('M5')[0];
 const TERMINALE_SEULE_ARTEFACTS = texteRenomme('M5')[1];
 
@@ -535,7 +538,7 @@ describe('G · lot 3 : les Productions ne poussent plus vers une terminale', () 
         const avecConteneur = [{ id: 'PF', titre: 'Portfolio', type: 'portfolio', ponderation: 60, coursId: 'GC1' }].concat(prodChimie());
         const cas = { 'CHIM-1': prodChimie(), 'CHIM-2': prodChimie({ ponderees: false }), 'CHIM-4': prodChimie({ terminale: true }), 'CHIM conteneur': avecConteneur };
         for (const [nom, productions] of Object.entries(cas)) {
-            // toEqual : ni « n'entre pas dans le calcul STD », ni « Choisis laquelle… », ni complément, ni productionId (« Typer comme terminale »).
+            // toEqual : ni « n'entre pas dans le calcul SEL » (STD avant le 21 nov. 2026 : le sigle suit le nom), ni « Choisis laquelle… », ni complément, ni productionId (« Typer comme terminale »).
             expect(avertir(productions), nom).toEqual([{ message: TEXTE_1 }]);
         }
     });
@@ -577,7 +580,7 @@ describe('G · lot 3 : les Productions ne poussent plus vers une terminale', () 
         const sans = (ids, plus = []) => prodGreg().filter(p => !ids.includes(p.id)).concat(plus);
         expect(avertir(prodGreg())).toEqual([]);
         expect(avertir(sans([], [exercice('W1', 1, 10)]))).toEqual([
-            { message: '« Exercice 1 » porte une pondération (10 %) mais n\'entre pas dans le calcul STD : seuls le pool d\'artefacts et l\'évaluation terminale comptent.' }
+            { message: '« Exercice 1 » porte une pondération (10 %) mais n\'entre pas dans le calcul SEL : seuls le pool d\'artefacts et l\'évaluation terminale comptent.' }
         ]);
         expect(avertir(sans(['PF']))).toEqual([
             { message: 'Aucune production « Portfolio (conteneur) » : le pool d\'artefacts vaut le complément de la terminale, soit 60 % (100 − 40). C\'est permis — vérifie que c\'est voulu.' }
@@ -602,7 +605,10 @@ describe('G · lot 3 : les Productions ne poussent plus vers une terminale', () 
             b.win.gererChangementTypeProduction();
             return b.document.getElementById('texteDefinitionType').innerHTML;
         };
-        expect(definition('terminale')).toBe('<strong>Évaluation terminale :</strong> ' + await texteValide(2));
+        // ↻ 21 nov. 2026, 7 h 44 (choix de Grégoire) : « En PAN – Standards, » devient « Par sélection de productions, » ; le
+        // texte se lit dans le fichier du 21 nov. (repère T2), qui remplace pour lui le texte 2 du lot 3, resté intact.
+        expect(await texteValide(2)).toContain('En PAN – Standards, elle entre dans le calcul');
+        expect(definition('terminale')).toBe('<strong>Évaluation terminale :</strong> ' + texteRenomme('T2', SANS_PAN)[0].replace(/ %/g, '\u00a0%'));
         expect(definition('artefact-portfolio')).toContain('<em>Pour paramétrer la valeur des artefacts, va dans « Structure des évaluations » dans les Pratiques de notation.</em>');
     });
 });
@@ -936,7 +942,7 @@ describe('I · lot 5 : l\'assistant et les mots', () => {
 
     it('les textes statiques : la fiche (7), l\'Aide (8, 9, 11, 12), au caractère près sauf l\'insécable', () => {
         const page = net(lireDuDepot('index.html'));
-        const attendus = [texteRenomme('F4')[0], citations(8)[0], ...citations(9), ...citations(11), ...citations(12)];   // 7 : le repère F4 du renommage (20 nov.)
+        const attendus = [texteRenomme('F4', SANS_PAN)[0], citations(8)[0], ...citations(9), ...citations(11), ...citations(12)];   // 7 : le repère F4 du renommage (21 nov., sans « PAN »)
         expect(attendus).toHaveLength(7);
         for (const t of attendus) expect(page, t).toContain(net(t));
         for (const ancien of ['Le meilleur résultat est retenu pour chaque standard', 'traces retenues au portfolio', 'C\'est une moyenne de notes', 'Minimum d\'artefacts avant calcul formatif']) {

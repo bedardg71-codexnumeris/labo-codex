@@ -70,12 +70,29 @@ function normaliserIdPratique(id) {
 // le billet CoP vulgarisé), MAIS la dénotation est académiquement une PRÉN (pratique
 // de réduction/élimination de la notation), pas une PAN (Girouard-Gagné et al. 2024).
 // Distinction documentée ici, dans SKILL_pratiques_notation §2 bis, et dans le guide PAN.
+// ⚠ LE CODE N'EST PAS LE SIGLE (décision de Grégoire, 21 nov. 2026, 6 h 56 : « le sigle suit le nom »).
+//   - `code` : l'identifiant INTERNE de la famille. Le moteur le compare (`obtenirCode() === 'STD'`, une douzaine de
+//     branchements du portfolio), et les pratiques rangées chez les gens le portent (`pratiques: ['STD']`). Il ne
+//     change pas : aucune donnée n'est réécrite.
+//   - `sigle` : ce que l'écran AFFICHE. « Par sélection de productions » (code STD) s'affiche SEL ; « STD » ne
+//     s'affiche nulle part. Tout écran qui montre un sigle le lit ici (`obtenirSiglePratique`, `sigleDuCode`,
+//     `genererBadgePratiqueHTML`), jamais le `code`.
+// Couleur (décision de Grégoire, 21 nov. 2026, 6 h 59) : « Par sélection de productions » prend la sarcelle.
 const REPRESENTATIONS_PRATIQUES = {
-    sommative:      { code: 'SOM', couleurVar: '--som-orange', famille: 'Sommative' },
-    standards:      { code: 'STD', couleurVar: '--std-bleu',   famille: 'PAN' },
-    specifications: { code: 'SPE', couleurVar: '--spe-vert',   famille: 'PAN' },
-    denotation:     { code: 'DEN', couleurVar: '--den-violet', famille: 'PAN' } // PRÉN académiquement (voir note ci-dessus)
+    sommative:      { code: 'SOM', sigle: 'SOM', couleurVar: '--som-orange', famille: 'Sommative' },
+    standards:      { code: 'STD', sigle: 'SEL', couleurVar: '--sel-sarcelle', famille: 'PAN' },  // « Par sélection de productions »
+    specifications: { code: 'SPE', sigle: 'SPE', couleurVar: '--spe-vert',   famille: 'PAN' },
+    denotation:     { code: 'DEN', sigle: 'DEN', couleurVar: '--den-violet', famille: 'PAN' } // PRÉN académiquement (voir note ci-dessus)
 };
+
+/** Le sigle AFFICHÉ d'un code interne de famille (`pratiques[0]`, `obtenirCode()`) ; un code inconnu passe tel quel. */
+const SIGLE_PAR_CODE = Object.freeze(Object.keys(REPRESENTATIONS_PRATIQUES).reduce((t, id) => {
+    t[REPRESENTATIONS_PRATIQUES[id].code] = REPRESENTATIONS_PRATIQUES[id].sigle;
+    return t;
+}, {}));
+function sigleDuCode(code) {
+    return (code && Object.prototype.hasOwnProperty.call(SIGLE_PAR_CODE, code)) ? SIGLE_PAR_CODE[code] : code;
+}
 
 // Représentation par défaut = celle de la pratique par défaut (Standards).
 const REPRESENTATION_DEFAUT = REPRESENTATIONS_PRATIQUES[PRATIQUE_DEFAUT];
@@ -92,6 +109,7 @@ function obtenirRepresentationPratique(id) {
     const rep = REPRESENTATIONS_PRATIQUES[idNorm] || REPRESENTATION_DEFAUT;
     return {
         code: rep.code,
+        sigle: rep.sigle,
         couleurVar: rep.couleurVar,
         famille: rep.famille,
         classe: 'badge-type-' + rep.code.toLowerCase()
@@ -111,9 +129,14 @@ function obtenirRepresentationPratiqueStricte(id) {
     return obtenirRepresentationPratique(id);
 }
 
-/** Code court (SOM/STD/SPE/DEN). @param {string} id @returns {string} */
+/** Code court INTERNE (SOM/STD/SPE/DEN) : pour comparer, jamais pour afficher. @param {string} id @returns {string} */
 function obtenirCodePratique(id) {
     return obtenirRepresentationPratique(id).code;
+}
+
+/** Sigle AFFICHÉ (SOM/SEL/SPE/DEN), 21 nov. 2026. @param {string} id @returns {string} */
+function obtenirSiglePratique(id) {
+    return obtenirRepresentationPratique(id).sigle;
 }
 
 /** Couleur sous forme var(--…) (style inline / Chart.js). @param {string} id @returns {string} */
@@ -131,11 +154,12 @@ function obtenirLabelFamillePratique(id) {
  * Sortie 100 % contrôlée (codes du registre, jamais de donnée utilisateur) → pas
  * d'échappement requis, zéro handler inline (conforme CSP script-src 'self').
  * @param {string} id - identifiant de pratique
- * @returns {string} `<span class="badge-type-pratique badge-type-std">STD</span>`
+ * @returns {string} `<span class="badge-type-pratique badge-type-std">SEL</span>` (la classe suit le code interne,
+ *          le texte, le sigle affiché)
  */
 function genererBadgePratiqueHTML(id) {
     const rep = obtenirRepresentationPratique(id);
-    return '<span class="badge-type-pratique ' + rep.classe + '">' + rep.code + '</span>';
+    return '<span class="badge-type-pratique ' + rep.classe + '">' + rep.sigle + '</span>';
 }
 
 // ============================================================================
@@ -1434,6 +1458,8 @@ window.normaliserIdPratique = normaliserIdPratique;
 window.obtenirRepresentationPratique = obtenirRepresentationPratique;
 window.obtenirRepresentationPratiqueStricte = obtenirRepresentationPratiqueStricte;
 window.obtenirCodePratique = obtenirCodePratique;
+window.obtenirSiglePratique = obtenirSiglePratique;   // 21 nov. 2026 : le sigle affiché, séparé du code
+window.sigleDuCode = sigleDuCode;
 window.obtenirCouleurPratique = obtenirCouleurPratique;
 window.obtenirLabelFamillePratique = obtenirLabelFamillePratique;
 window.genererBadgePratiqueHTML = genererBadgePratiqueHTML;

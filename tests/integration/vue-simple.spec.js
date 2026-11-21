@@ -231,10 +231,13 @@ test.describe('Vue simple · le parcours d\'un nouvel arrivant', () => {
             const gc = window.db.getSync('groupeCoursActif', null);
             const p = window.db.getSync(window.cle('pratiquesConfigurables'), []).find((x) => x.id === gc.pratiqueId);
             const echelle = window.db.getSync(window.cle('echellesTemplates'), []).find((e) => e.id === p.configuration.echelleId);
-            return { n: window.db.getSync(window.cle('pratiquesConfigurables'), []).length, type: p.configuration.type, pf: p.configuration.portfolio,
+            return { n: window.db.getSync(window.cle('pratiquesConfigurables'), []).length, nom: p.nom, type: p.configuration.type, pf: p.configuration.portfolio,
                 echelle: { nom: echelle.nom, aElle: echelle.pratiqueId === p.id, lettres: echelle.niveaux.map((x) => x.code).join(' ') } };
         });
         // L'échelle est née avec la pratique : une copie à elle, « Mes niveaux », pas l'échelle de départ du trimestre.
+        // 21 nov. 2026 : le NOM RANGÉ de la pratique créée par le modèle est celui de sa famille. Du 13 au 21 nov., ce
+        // modèle rangeait « Par standards », le nom d'une autre pratique (rapport de la release du 21 nov., STOCK).
+        expect(pratique.nom).toBe('Par sélection de productions');
         expect(pratique).toMatchObject({ n: 1, type: 'standards', pf: { methodeSelection: 'meilleurs', nombreARetenir: 2 }, echelle: { nom: 'Mes niveaux', aElle: true, lettres: 'PS I D M E' } });
 
         // 4. Le tableau sans colonne ne reste pas muet : il dit quoi faire et montre « + Production ».

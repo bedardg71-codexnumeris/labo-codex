@@ -52,10 +52,12 @@ describe('#310 · source consolidée de la note A/C/P (terme dynamique)', () => 
 
     it('pratique standards : utilise « artefact(s) », jamais « production »', () => {
         const html = win.genererExplicationCalculIndices();
-        expect(html).toContain('PAN-Standards');
+        expect(html).toContain('Par sélection de productions');   // ↻ 21 nov. 2026, 7 h 44 (choix de Grégoire) : plus de « PAN-Standards »
+        expect(html).not.toMatch(/\bPAN\b/);
         expect(html).toContain('meilleurs artefacts');
         expect(html).toContain('Un artefact devient');
-        expect(html).not.toContain('production');
+        // Le terme des travaux évalués (#310), pas le nom de la famille : depuis le 21 nov., ce nom contient le mot.
+        expect(html.replaceAll('Par sélection de productions', '')).not.toContain('production');
     });
 
     it('pratique sommative : utilise « production(s) », aucun « artefact » figé', () => {

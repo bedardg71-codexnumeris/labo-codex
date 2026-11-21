@@ -313,7 +313,7 @@ const TOOLTIPS = {
     'cn-pratique-titre':
         'Assemblage final de ta pratique : type de notation, échelle, structure des évaluations et système de jetons. C\'est la recette complète de ta façon de construire la note.',
     'cn-pratique-type':
-        'SOM = sommative (moyenne pondérée traditionnelle), STD = PAN basée sur des standards (par maîtrise), SPE = PAN basée sur des spécifications (contrat), DEN = dénotation (pratiques réduisant ou éliminant la notation).',
+        'SOM = sommative (moyenne pondérée traditionnelle), SEL = par sélection de productions (la note retient certaines productions), SPE = PAN basée sur des spécifications (contrat), DEN = dénotation (pratiques réduisant ou éliminant la notation).',
     'cn-pratique-echelle':
         'Échelle utilisée pour convertir les pourcentages en niveaux (ex. : I-D-M-E). Configurable dans Échelles.',
     'cn-pratique-jetons':
@@ -712,7 +712,7 @@ const TOOLTIPS = {
     'nav-calendrier-vue':
         'Calendrier du trimestre : tableau des mois, jours de cours, congés et reprises.',
     'nav-conception-pratiques':
-        'Assemble ta pratique de notation complète (SOM, STD, SPE, DEN) en associant échelle, structure et jetons.',
+        'Assemble ta pratique de notation complète (SOM, SEL, SPE, DEN) en associant échelle, structure et jetons.',
     'nav-reg-preferences':
         'Personnalise ton interface : outils actifs, ressources affichées, effets visuels et comportement de navigation.',
     'nav-labo-accompagnement':

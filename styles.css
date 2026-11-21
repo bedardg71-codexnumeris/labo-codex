@@ -87,6 +87,11 @@
     --std-bleu: #0277bd;        /* STD = Bleu */
     --spe-vert: #22c55e;        /* SPE = Vert */
     --den-violet: #8b5cf6;      /* DEN = Mauve/Violet */
+    /* SEL = « Par sélection de productions » (décision de Grégoire, 21 nov. 2026, 6 h 59) : le sigle suit le nom, et
+       la famille prend la sarcelle ; --std-bleu n'est plus la couleur d'une famille, d'autres règles le lisent encore.
+       Contraste mesuré : 3,80:1 sur blanc, 3,59:1 sur la carte sombre (#1a3040) — au-dessus de 3:1 (élément graphique),
+       sous 4,5:1 pour un texte de taille normale, comme les autres couleurs de famille. */
+    --sel-sarcelle: #0e9384;
     --hybride-violet: #9c27b0;  /* Hybride (obsolète) */
 
     --bleu-meta: #9fc5e8;        /* Bleu pâle pour méta-infos, logos, liens secondaires */
@@ -14506,9 +14511,9 @@ label:has(+ textarea:disabled) {
     background: color-mix(in srgb, var(--recap-couleur) 8%, var(--surface-carte, transparent));
 }
 .wizard-v2-recap-diagnostic--som { --recap-couleur: var(--som-orange); }
-.wizard-v2-recap-diagnostic--std { --recap-couleur: var(--std-bleu); }
 .wizard-v2-recap-diagnostic--spe { --recap-couleur: var(--spe-vert); }
 .wizard-v2-recap-diagnostic--den { --recap-couleur: var(--den-violet); }
+.wizard-v2-recap-diagnostic--sel { --recap-couleur: var(--sel-sarcelle); }   /* « Par sélection de productions » (21 nov. 2026) */
 .wizard-v2-recap-diagnostic--indetermine { --recap-couleur: var(--gris-moyen, #888); }
 
 .wizard-v2-recap-diagnostic-intro {

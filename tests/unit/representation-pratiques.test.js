@@ -34,7 +34,8 @@ describe('Session B · représentations canoniques', () => {
 
     it('rend la couleur via la variable CSS canonique du design system', () => {
         expect(win.obtenirCouleurPratique('sommative')).toBe('var(--som-orange)');
-        expect(win.obtenirCouleurPratique('standards')).toBe('var(--std-bleu)');
+        // 21 nov. 2026 (décision de Grégoire, 6 h 59) : « Par sélection de productions » prend la sarcelle.
+        expect(win.obtenirCouleurPratique('standards')).toBe('var(--sel-sarcelle)');
         expect(win.obtenirCouleurPratique('specifications')).toBe('var(--spe-vert)');
         expect(win.obtenirCouleurPratique('denotation')).toBe('var(--den-violet)');
     });
@@ -68,17 +69,19 @@ describe('Session B · représentations canoniques', () => {
     it('génère un badge HTML cohérent (classe + code, sans donnée utilisateur)', () => {
         expect(win.genererBadgePratiqueHTML('sommative'))
             .toBe('<span class="badge-type-pratique badge-type-som">SOM</span>');
+        // 21 nov. 2026 (« le sigle suit le nom ») : la classe suit le code interne (STD), le texte le sigle affiché (SEL).
         expect(win.genererBadgePratiqueHTML('standards'))
-            .toBe('<span class="badge-type-pratique badge-type-std">STD</span>');
+            .toBe('<span class="badge-type-pratique badge-type-std">SEL</span>');
         expect(win.genererBadgePratiqueHTML('pan-specifications'))
             .toBe('<span class="badge-type-pratique badge-type-spe">SPE</span>');
         expect(win.genererBadgePratiqueHTML('denotation'))
             .toBe('<span class="badge-type-pratique badge-type-den">DEN</span>');
     });
 
-    it('expose une représentation complète {code, couleurVar, famille, classe}', () => {
+    it('expose une représentation complète {code, sigle, couleurVar, famille, classe}', () => {
+        // 21 nov. 2026 : le sigle affiché (SEL) à côté du code interne (STD) ; la sarcelle à « Par sélection de productions ».
         const rep = win.obtenirRepresentationPratique('standards');
-        expect(rep).toEqual({ code: 'STD', couleurVar: '--std-bleu', famille: 'PAN', classe: 'badge-type-std' });
+        expect(rep).toEqual({ code: 'STD', sigle: 'SEL', couleurVar: '--sel-sarcelle', famille: 'PAN', classe: 'badge-type-std' });
     });
 
     describe('variante stricte (états non-famille préservés par les consommateurs)', () => {

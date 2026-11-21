@@ -49,7 +49,10 @@ function grillesDuWizard() {
 // badge famille). Un seul endroit à éditer, pas de microcopy dupliqué.
 const TYPE_BADGES = {
     'sommative': { code: 'SOM', classe: 'som', label: 'Sommative', description: 'Ta note finale est calculée par une moyenne pondérée des évaluations. C\'est la méthode traditionnelle, largement utilisée.' },
-    'standards': { code: 'STD', classe: 'std', label: 'PAN – Sélection de productions', description: 'Tu évalues chaque production par niveaux (ex. : I-D-M-E). La note se construit à partir des productions que ta règle retient, pas de la moyenne de toutes.' },
+    // 21 nov. 2026 (« le sigle suit le nom », décision de Grégoire) : `code` est ici le SIGLE AFFICHÉ (badge du
+    // récapitulatif, ligne de « Partir d'un modèle ») ; le code interne vit au registre. `classe` porte la couleur de la
+    // famille au récapitulatif : sarcelle pour « Par sélection de productions ».
+    'standards': { code: 'SEL', classe: 'sel', label: 'Par sélection de productions', description: 'Tu évalues chaque production par niveaux (ex. : I-D-M-E). La note se construit à partir des productions que ta règle retient, pas de la moyenne de toutes.' },
     'specifications': { code: 'SPE', classe: 'spe', label: 'PAN – Spécifications', description: 'Chaque travail est jugé acceptable ou non. La note finale dépend du nombre de spécifications réussies (forfaits).' },
     // #319 Lot 5 (#318) : DEN reconnue à l'édition (code/couleur du registre canonique,
     // --den-violet). Elle se crée aussi : la carte « Note finale posée, pas calculée » de
@@ -218,7 +221,7 @@ const ETAPES_WIZARD = {
                 required: true,
                 options: [
                     { value: 'moyenne', label: 'Sommative (SOM)', description: 'Note finale par moyenne pondérée des évaluations.' },
-                    { value: 'niveaux', label: 'PAN – Sélection de productions', description: 'Des niveaux (ex. I-D-M-E) ; la note retient certaines productions.' },
+                    { value: 'niveaux', label: 'Par sélection de productions', description: 'Des niveaux (ex. I-D-M-E) ; la note retient certaines productions.' },
                     { value: 'acceptable', label: 'PAN – Spécifications (SPE)', description: 'Travaux acceptables ou non ; note selon les forfaits réussis.' },
                     { value: 'jugement', label: 'PAN – Dénotation (DEN)', description: 'Note finale certificative posée (non calculée) selon l\'atteinte de cibles d\'apprentissage explicites ; abandonne la fonction de tri.' }
                 ]
@@ -385,7 +388,7 @@ const ETAPES_WIZARD = {
                 ]
             },
             // Voie rapide (a2) : sortie expert, carte de même poids que les autres options.
-            { id: 'voie-rapide-lien', type: 'lien-action', texte: 'Je sais déjà ce que je veux', description: 'Choisis directement ta famille de pratique (SOM, STD, SPE ou DEN) et passe à sa configuration.', action: 'wizardV2VoieRapide' }
+            { id: 'voie-rapide-lien', type: 'lien-action', texte: 'Je sais déjà ce que je veux', description: 'Choisis directement ta famille de pratique (SOM, SEL, SPE ou DEN) et passe à sa configuration.', action: 'wizardV2VoieRapide' }
         ],
         suivant: (reponses) => {
             if (reponses.calcNoteFinale === 'moyenne') return 'regles-sommative';
@@ -1930,7 +1933,7 @@ function genererRecapitulatif() {
     // sommative — rang et moyenne du groupe — part avec son étape.)
     if (r.typePratique === 'standards') {
         html += '<div class="wizard-v2-recap-section">';
-        html += '<h4>Configuration PAN – Sélection de productions</h4>';
+        html += '<h4>Configuration – Par sélection de productions</h4>';
         // #443 : le libellé « Par objectifs » part avec la carte. Le repli
         // `|| r.approcheEvaluation` reste : une pratique stockée qui porte encore
         // l'ancienne valeur s'affiche telle quelle plutôt que « undefined ».
