@@ -901,7 +901,11 @@ function afficherListeEtudiantsConsultation() {
 
     const valeursA_tous = tousIndices.map(indices => indices.A);
     const valeursC_tous = tousIndices.map(indices => indices.C);
-    const valeursP_tous = tousIndices.map(indices => indices.P);
+    // Lot 4 « Par standards » (21 nov. 2026) — UNE NOTE NON CONSTRUCTIBLE N'EST PAS UN ZÉRO (#394, règle 4) : l'indice stocké
+    // range P = 0 avec `noteConstructible: false`. Ici, `null` : la cellule écrit « — », et le P de cet élève sort des
+    // moyennes et des corrélations ; au tri, il passe sous toute note. Dans une pratique par standards, toute la classe est sans note tant
+    // qu'une cible est en attente : sans cette garde, la liste écrivait « 0 % » partout. Vaut pour toutes les pratiques.
+    const valeursP_tous = tousIndices.map(indices => (indices.noteConstructible === false ? null : indices.P));
 
     // Identifier les étudiants actifs (≠ abandon/inactif/décrochage). Règle métier : main.js:60.
     const estExclu = typeof estEtudiantExclu === 'function' ? estEtudiantExclu : () => false;
@@ -913,10 +917,10 @@ function afficherListeEtudiantsConsultation() {
 
     // #743 (lot D, 19 sept. 2026) : une assiduité INCONNUE (`null`) n'entre pas dans la corrélation A-P —
     // Pearson la lirait comme un 0. La paire (A, P) de cet élève est écartée, pas remplacée.
-    const pairesAP = valeursA_actifsCorr.map((a, i) => [a, valeursP_actifsCorr[i]]).filter(paire => paire[0] !== null);
+    const pairesAP = valeursA_actifsCorr.map((a, i) => [a, valeursP_actifsCorr[i]]).filter(paire => paire[0] !== null && paire[1] !== null);
     const r_AP = calculerCorrelationPearson(pairesAP.map(paire => paire[0]), pairesAP.map(paire => paire[1]));
     // Lot N1b (21 sept. 2026) : même règle pour une complétion inconnue (`null`, sans pratique assignée).
-    const pairesCP = valeursC_actifsCorr.map((c, i) => [c, valeursP_actifsCorr[i]]).filter(paire => paire[0] !== null);
+    const pairesCP = valeursC_actifsCorr.map((c, i) => [c, valeursP_actifsCorr[i]]).filter(paire => paire[0] !== null && paire[1] !== null);
     const r_CP = calculerCorrelationPearson(pairesCP.map(paire => paire[0]), pairesCP.map(paire => paire[1]));
 
     // NOUVEAU: Enrichir les données pour le tri (sans assigner les numéros encore)
@@ -970,13 +974,13 @@ function afficherListeEtudiantsConsultation() {
 
     // Moyenne P : actifs ayant au moins une évaluation (C>0 OU P>0), comme l'Aperçu
     const indexActifsAvecEval = indexActifs.filter(i => valeursC_tous[i] > 0 || valeursP_tous[i] > 0);
-    const valeursP_actifsAvecEval = indexActifsAvecEval.map(i => valeursP_tous[i]);
+    const valeursP_actifsAvecEval = indexActifsAvecEval.map(i => valeursP_tous[i]).filter(v => v !== null);
     const nbActifsSansEval = indexActifs.length - indexActifsAvecEval.length;
     const moyenneP = valeursP_actifsAvecEval.length > 0 ? valeursP_actifsAvecEval.reduce((s, v) => s + v, 0) / valeursP_actifsAvecEval.length : null;
 
     // Moyennes filtrées (≥ minimum d'évaluations seulement, parmi actifs)
     const etudiantsQualifies = etudiantsFiltres.filter(e => !estExclu(e) && !e.performanceInsuffisante && (e.indicesCalcules.C > 0 || e.indicesCalcules.P > 0));
-    const vP_qualifies = etudiantsQualifies.map(e => e.indicesCalcules.P);
+    const vP_qualifies = etudiantsQualifies.filter(e => e.indicesCalcules.noteConstructible !== false).map(e => e.indicesCalcules.P);
     const vC_qualifies = etudiantsQualifies.map(e => e.indicesCalcules.C);
     const moyenneP_qualifies = vP_qualifies.length > 0 ? vP_qualifies.reduce((s, v) => s + v, 0) / vP_qualifies.length : null;
     const moyenneC_qualifies = vC_qualifies.length > 0 ? vC_qualifies.reduce((s, v) => s + v, 0) / vC_qualifies.length : null;
@@ -1020,6 +1024,7 @@ function afficherListeEtudiantsConsultation() {
         if (estExclu(e)) return;
         var rai = typeof determinerNiveauRaiPedagogique === 'function' ? determinerNiveauRaiPedagogique(e.da) : null;
         var pVal = valeursP_tous[idx];
+        if (pVal === null) return;   // lot 4 : sans note, l'élève n'entre pas dans les corrélations avec P
 
         // Pattern (exclure données insuffisantes)
         if (rai && scorePattern[rai.pattern] !== undefined && scorePattern[rai.pattern] !== null) {
@@ -1101,8 +1106,9 @@ function afficherListeEtudiantsConsultation() {
                 valeurB = b.indicesCalcules.C;
                 break;
             case 'performance':
-                valeurA = a.indicesCalcules.P;
-                valeurB = b.indicesCalcules.P;
+                // Lot 4 : sans note (non constructible), sous toute note (jamais rangée comme un 0).
+                valeurA = a.indicesCalcules.noteConstructible === false ? -Infinity : a.indicesCalcules.P;
+                valeurB = b.indicesCalcules.noteConstructible === false ? -Infinity : b.indicesCalcules.P;
                 break;
             case 'pattern':
                 valeurA = a.cibleCalculee.pattern;
@@ -1228,7 +1234,9 @@ function afficherListeEtudiantsConsultation() {
         // Colonnes C et P : afficher si évaluations, sinon tiret
         if (aEvaluations) {
             html += '<td class="etud-text-center"><strong style="color: ' + couleurC + ';">' + formaterPourcentage(Math.round(indices.C)) + '</strong></td>';
-            html += '<td class="etud-text-center"><strong style="color: ' + couleurP + ';">' + formaterPourcentage(Math.round(indices.P)) + '</strong></td>';
+            // Lot 4 : une note non constructible s'écrit « — », jamais « 0 % » (#394, règle 4).
+            html += indices.noteConstructible === false ? '<td class="etud-text-center">' + tiret + '</td>'
+                : '<td class="etud-text-center"><strong style="color: ' + couleurP + ';">' + formaterPourcentage(Math.round(indices.P)) + '</strong></td>';
         } else {
             html += '<td class="etud-text-center">' + tiret + '</td>';
             html += '<td class="etud-text-center">' + tiret + '</td>';

@@ -49,7 +49,6 @@ const ANNONCES = {
     'js/interpretation-config.js': 1,
     'js/main.js': 1,
     'js/modelisation.js': 1,
-    'js/objectifs.js': 1,
     'js/partage-import.js': 1,
     'js/partage-section.js': 1,
     'js/planification-bibliotheque.js': 1,

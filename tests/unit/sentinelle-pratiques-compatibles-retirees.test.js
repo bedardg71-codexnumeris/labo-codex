@@ -94,7 +94,8 @@ describe('pratiques compatibles retirées · P.b — les deux témoins de la con
 
 describe('pratiques compatibles retirées · P.c — plus aucune case, plus aucun ancien badge', () => {
     it('P.c.1 les cinq objets ne rendent plus de cases, index.html n\'a plus leurs conteneurs', () => {
-        ['js/grilles.js', 'js/echelles.js', 'js/cartouches.js', 'js/objectifs.js', 'js/productions.js', 'js/productions-liste.js', 'index.html']
+        // `js/objectifs.js` : retiré en entier au lot 1 « Par standards » (21 nov. 2026).
+        ['js/grilles.js', 'js/echelles.js', 'js/cartouches.js', 'js/productions.js', 'js/productions-liste.js', 'index.html']
             .forEach(rel => {
                 const s = source(rel);
                 expect(s.includes('genererCheckboxesPratiques'), rel).toBe(false);
@@ -113,13 +114,13 @@ describe('pratiques compatibles retirées · P.c — plus aucune case, plus aucu
         // des grilles dit la composition en mots (« Holistique et algorithmique ») ; le badge est retiré.
         expect(source('js/grilles.js').includes('genererBadgeComposition')).toBe(false);
         expect(source('js/grilles.js')).toMatch(/function ligneGrilleBibliotheque\(/);
-        ['js/echelles.js', 'js/cartouches.js', 'js/objectifs.js', 'js/productions-liste.js'].forEach(rel => {
+        ['js/echelles.js', 'js/cartouches.js', 'js/productions-liste.js'].forEach(rel => {
             expect(source(rel).includes('genererBadgeComposition'), rel + ' n\'a pas de critères').toBe(false);
         });
     });
 
     it('P.c.3 plus aucune écriture du champ par la saisie — et la production modifiée garde la sienne', () => {
-        ['js/grilles.js', 'js/echelles.js', 'js/cartouches.js', 'js/objectifs.js'].forEach(rel => {
+        ['js/grilles.js', 'js/echelles.js', 'js/cartouches.js'].forEach(rel => {
             expect(source(rel)).not.toMatch(/\.pratiquesCompatibles = |pratiquesCompatibles: pratiquesCompatibles|pratiquesCompatibles: \[\]/);
         });
         const prod = source('js/productions.js');

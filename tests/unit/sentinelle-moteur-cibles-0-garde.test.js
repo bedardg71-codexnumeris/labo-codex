@@ -24,7 +24,7 @@
  * CE QUE CET ESSAI NE PROUVE PAS : le sens inverse (la pratique par cibles ne lit pas les évaluations). Il ne
  * peut pas s'épingler avant que le moteur existe : inscrit au plan, lot 4.
  *
- * Données fictives (Alice Assidu, Bruno Absent : les élèves du banc partagé). Les modules RÉELS, aucun navigateur.
+ * Données fictives (Alice Assidu, Boréal Absent : les élèves du banc partagé). Les modules RÉELS, aucun navigateur.
  * BREAK-TESTS : journal en fin de fichier.
  */
 import { describe, it, expect } from 'vitest';
@@ -41,7 +41,7 @@ const TYPE_PROVISOIRE = 'cibles';
 const JETONS_NEUFS = [CLE_INSCRIPTIONS, METHODE, CLE_ENSEMBLES_PROVISOIRE];
 
 /* ---------------------------------------------------------------- Les objets neufs, posés à la main (plan, § 3) */
-const DA = { ALICE: '2000001', BRUNO: '2000002' };
+const DA = { ALICE: '2000001', BOREAL: '2000002' };
 const ENSEMBLE = { id: 'ENS1', nom: 'Cibles du cours banc', coursId: 'GC1', objectifs: [
     { id: 'cib-a', nom: 'Lire un texte', poids: 1, type: 'fondamental' },
     { id: 'cib-b', nom: 'Rédiger une analyse', poids: 1, type: 'fondamental' },
@@ -53,7 +53,7 @@ let numero = 0;
 const inscription = (da, cibleId, niveau, productionId, date) => ({ id: 'INS' + (++numero), da, ensembleId: 'ENS1', cibleId, niveau, echelleId: 'E0',
     date, horodatage: date + 'T10:00:00.000Z', productionId, annulee: false });
 /** Des niveaux faibles, sur les productions des cas rejoués : un moteur qui les lirait par mégarde baisserait la note. */
-const inscriptionsPour = (productionId) => [DA.ALICE, DA.BRUNO].flatMap(da => [
+const inscriptionsPour = (productionId) => [DA.ALICE, DA.BOREAL].flatMap(da => [
     inscription(da, 'cib-a', 'I', productionId, '2026-05-01'),
     inscription(da, 'cib-a', 'D', productionId, '2026-05-15'),
     inscription(da, 'cib-b', 'I', null, '2026-05-10'),
@@ -76,7 +76,7 @@ const PROD_SOM = [
     { id: 'P1', titre: 'Dissertation', type: 'travail', ponderation: 40, coursId: 'GC1' },
     { id: 'P2', titre: 'Examen', type: 'examen', ponderation: 60, coursId: 'GC1' }
 ];
-const COPIES_SOM = [ev(DA.ALICE, 'P1', 80), ev(DA.ALICE, 'P2', 90), ev(DA.BRUNO, 'P1', 62), ev(DA.BRUNO, 'P2', 71)];
+const COPIES_SOM = [ev(DA.ALICE, 'P1', 80), ev(DA.ALICE, 'P2', 90), ev(DA.BOREAL, 'P1', 62), ev(DA.BOREAL, 'P2', 71)];
 const SOM = { id: 'som-banc', nom: 'SOM banc', type: 'sommative', calcul_note: { methode: 'moyenne_ponderee' }, dansBibliotheque: true, configuration: {} };
 
 // Standards : la pratique de Grégoire (sentinelle-standards-sans-portfolio, GREG-0 à GREG-2)
@@ -100,7 +100,7 @@ const PROD_SPE = [
     { id: 'D2', titre: 'Dissertation 2', type: 'dissertation', coursId: 'GC1' }, { id: 'F1', titre: 'Dossier', type: 'dossier', coursId: 'GC1' }
 ];
 const COPIES_SPE = [ev(DA.ALICE, 'D1', 80), ev(DA.ALICE, 'X1', 90), ev(DA.ALICE, 'D2', 87.5), ev(DA.ALICE, 'F1', 72),
-    ev(DA.BRUNO, 'D1', 71), ev(DA.BRUNO, 'X1', 50), ev(DA.BRUNO, 'D2', 88), ev(DA.BRUNO, 'F1', 90)];
+    ev(DA.BOREAL, 'D1', 71), ev(DA.BOREAL, 'X1', 50), ev(DA.BOREAL, 'D2', 88), ev(DA.BOREAL, 'F1', 90)];
 const SPE = { id: 'spe-banc', nom: 'SPE banc', type: 'specifications', calcul_note: { methode: 'specifications' }, dansBibliotheque: true,
     configuration: { type: 'specifications', seuilAcceptable: 70,
         typesTravaux: [{ id: 'dissertation', nom: 'Dissertation' }, { id: 'examen', nom: 'Examen' }, { id: 'dossier', nom: 'Dossier' }],
@@ -131,7 +131,7 @@ const CAS = [
         attendu: { [DA.ALICE]: { profil: 84.8 } } },
     { nom: 'GREG-2', monde: greg2, production: 'W1', attendu: { [DA.ALICE]: { profil: 84.8 } } },
     { nom: 'SPE-1', monde: () => ({ pratique: SPE, productions: PROD_SPE, evaluations: COPIES_SPE }), production: 'D2',
-        attendu: { [DA.ALICE]: { P: 100, comparateur: 100, export: [100, 'provisoire'] }, [DA.BRUNO]: { P: 50 } } },
+        attendu: { [DA.ALICE]: { P: 100, comparateur: 100, export: [100, 'provisoire'] }, [DA.BOREAL]: { P: 50 } } },
     { nom: 'DEN-1', monde: () => ({ pratique: DEN, productions: PROD_SOM, evaluations: COPIES_SOM, jugements: jugement({ c1: true, c2: true }, 78) }), production: 'P1',
         attendu: { [DA.ALICE]: { P: 78, comparateur: 78, export: [78, 'provisoire'] } } },
     { nom: 'DEN-2', monde: () => ({ pratique: DEN, productions: PROD_SOM, evaluations: COPIES_SOM, jugements: jugement({ c1: true, c2: false }, 78) }), production: 'P1',
@@ -155,7 +155,7 @@ function storeTemoin(store) {
 
 function banc({ pratique, productions, evaluations, jugements = {} }, { habite, production }) {
     const brut = storeBase();
-    brut.test_groupeEtudiants = brut.test_groupeEtudiants.filter(e => e.da === DA.ALICE || e.da === DA.BRUNO);
+    brut.test_groupeEtudiants = brut.test_groupeEtudiants.filter(e => e.da === DA.ALICE || e.da === DA.BOREAL);
     brut.test_groupesCours[0].pratiqueId = pratique.id;
     brut.test_pratiquesConfigurables = [clone(pratique)];
     brut.test_echellesTemplates = [clone(E0)];
@@ -220,7 +220,7 @@ function performanceDe(w, id, da) {
 const jouer = (cas, habite) => {
     const b = banc(cas.monde(), { habite, production: cas.production });
     const notes = {};
-    for (const da of [DA.ALICE, DA.BRUNO]) notes[da] = note(b, da);
+    for (const da of [DA.ALICE, DA.BOREAL]) notes[da] = note(b, da);
     return { b, notes };
 };
 

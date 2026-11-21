@@ -99,7 +99,7 @@ function storeBase() {
         test_groupesCours: [{ id: 'GC1', coursId: 'GC1', trimestreId: 'test', actif: true, groupeNum: '00001' }],
         test_groupeEtudiants: [
             { da: '2000001', nom: 'Chaleureux', prenom: 'Hérisson', groupe: '00001', coursId: 'GC1', statut: 'actif' },
-            { da: '2000002', nom: 'Absent', prenom: 'Bruno', groupe: '00001', coursId: 'GC1', statut: 'actif' },
+            { da: '2000002', nom: 'Absent', prenom: 'Boréal', groupe: '00001', coursId: 'GC1', statut: 'actif' },
             { da: '2000003', nom: 'Comăneci', prenom: 'Nadia', groupe: '1', coursId: 'GC1', statut: 'actif' },   // groupe non padé (stock d'avant)
         ],
         test_presences: [{ date: '2026-09-01', da: '2000001', periodesPresentes: 2, coursId: 'GC1' }, { date: '2026-09-01', da: '2000002', periodesPresentes: 0, coursId: 'GC1' }, { date: '2026-09-01', da: '2000003', periodesPresentes: 2, coursId: 'GC1' }],

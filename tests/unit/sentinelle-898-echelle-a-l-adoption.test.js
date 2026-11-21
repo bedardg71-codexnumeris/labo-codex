@@ -33,7 +33,7 @@ const QUESTION = 'Ce modèle a besoin d\'une échelle de performance pour calcul
 // #909 — la phrase de Grégoire (17 sept. 2026), nom d'écran de la navigation.
 const PHRASE_AUCUNE_ECHELLE = 'Ce modèle a besoin d\'une échelle de performance pour calculer la note, et ce trimestre n\'en a aucune. Crée une échelle dans Conception → Échelles de performance, puis reviens adopter ce modèle.';
 const DA = '1000002';
-const ETUDIANTS = [{ da: DA, nom: 'Standards', prenom: 'Bruno', groupe: '01', coursId: 'GC1' }];
+const ETUDIANTS = [{ da: DA, nom: 'Standards', prenom: 'Boréal', groupe: '01', coursId: 'GC1' }];
 
 /* Deux échelles, comme le pack (« IDME et niv 0 », « IDME 4 niv ») : « plusieurs » est le cas normal.
    Leurs valeurs de calcul DIFFÈRENT exprès : le choix de l'échelle doit se voir dans la note. */

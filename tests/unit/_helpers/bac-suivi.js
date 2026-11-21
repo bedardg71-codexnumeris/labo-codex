@@ -92,7 +92,7 @@ export function storeBase() {
         test_groupesCours: [{ id: 'GC1', coursId: 'GC1', trimestreId: 'test', actif: true, groupeNum: '01' }, { id: 'GC2', coursId: 'GC2', trimestreId: 'test', actif: false, groupeNum: '02' }],
         test_groupeEtudiants: [
             { da: '2000001', nom: 'Assidu', prenom: 'Alice', groupe: '01', coursId: 'GC1', statut: 'actif' },
-            { da: '2000002', nom: 'Absent', prenom: 'Bruno', groupe: '01', coursId: 'GC1', statut: 'actif' },
+            { da: '2000002', nom: 'Absent', prenom: 'Boréal', groupe: '01', coursId: 'GC1', statut: 'actif' },
             { da: '2000003', nom: 'Silence', prenom: 'Chloé', groupe: '01', coursId: 'GC1', statut: 'actif' },
             { da: '2000004', nom: 'Dautre', prenom: 'Dario', groupe: '02', coursId: 'GC2', statut: 'actif' }
         ],

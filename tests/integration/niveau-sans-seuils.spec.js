@@ -13,7 +13,7 @@ const indexHtml = 'file://' + path.join(path.resolve(__dirname, '..', '..'), 'in
 // Écrit et éprouvé sous Chromium (session cloud) ; le verdict WebKit se prend sur le Mac.
 
 const patternsAttendus = [/version\.json/i, /Cross origin requests/i, /Not allowed to load local resource/i, /favicon/i, /ERR_FILE_NOT_FOUND/i];
-const LISTE = '9990001, Albatros, Ada\n9990002, Baobab, Bruno\n9990003, Cormoran, Chloé\n9990004, Dahlia, Dario';
+const LISTE = '9990001, Albatros, Ada\n9990002, Baobab, Boréal\n9990003, Cormoran, Chloé\n9990004, Dahlia, Dario';
 
 async function classeNoteeAvecUnNiveauAjoute(page, { nomDuPlusHaut = null } = {}) {
     const erreurs = [];
@@ -50,7 +50,7 @@ async function classeNoteeAvecUnNiveauAjoute(page, { nomDuPlusHaut = null } = {}
         await page.locator('[data-action="VueSimple.ajouterProduction"]').click();
         await expect(page.locator('#vs-tableau-hote .tn-production-titre', { hasText: nom })).toBeVisible();
     }
-    // Ada : X, X (110) · Bruno : E, M · Chloé : PS, PS (0) · Dario : M, M (75)
+    // Ada : X, X (110) · Boréal : E, M · Chloé : PS, PS (0) · Dario : M, M (75)
     const saisies = ['xx', 'em', 'pp', 'mm'];
     for (let i = 0; i < saisies.length; i++) {
         await page.locator(`#vs-tableau-hote tbody tr:nth-child(${i + 1}) .tn-case`).first().focus();

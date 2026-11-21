@@ -264,13 +264,13 @@ describe('#1152 lot 2c bis · ce que les entrées affirment, lu dans le code', (
         expect(t).toContain('paraît dès que A ou C passe sous « Absences rares »');
     });
 
-    it('profil : la bande à deux lignes et les huit sections, lues dans `SECTIONS_PROFIL`', () => {
+    it('profil : la bande à deux lignes et les neuf sections, lues dans `SECTIONS_PROFIL` (« Cibles » : lots 3 et 4 « Par standards », 21 nov. 2026)', () => {
         const affichage = lire('js', 'profil-etudiant-sections-affichage.js');
         const table = tranche(affichage, 'const SECTIONS_PROFIL = [', '];');
         const libelles = [...table.matchAll(/libelle: '([^']+)'/g)].map((m) => m[1]);
-        expect(libelles).toHaveLength(8);
+        expect(libelles).toHaveLength(9);
         const t = texteDe('profil-etudiant');
-        expect(t).toContain('jusqu\'à huit sections en boutons');
+        expect(t).toContain('jusqu\'à neuf sections en boutons');
         // Les sections, dans l'ordre de la rangée.
         const dites = [...entree('profil-etudiant').querySelectorAll('li > strong')].map((s) => net(s.textContent).replace(/^« | »$/g, ''));
         expect(dites).toEqual(libelles);

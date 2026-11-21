@@ -289,8 +289,8 @@ describe('lot D · 7. une absence motivée RàI survit', () => {
         const b = monterSeance(store, { valeurs: { '2000002': 0, '2000001': 0 } });
         b.win.tousPresents();
         b.avancer(1500);
-        const bruno = fichesDu(store, DATE).filter((p) => p.da === '2000002');
-        expect(bruno).toEqual([{ date: DATE, da: '2000002', periodesPresentes: 0, notes: '', coursId: 'GC1', facultatif: true }]);
+        const boreal = fichesDu(store, DATE).filter((p) => p.da === '2000002');
+        expect(boreal).toEqual([{ date: DATE, da: '2000002', periodesPresentes: 0, notes: '', coursId: 'GC1', facultatif: true }]);
         expect(fichesDu(store, DATE).find((p) => p.da === '2000001').periodesPresentes).toBe(2);
     });
 });

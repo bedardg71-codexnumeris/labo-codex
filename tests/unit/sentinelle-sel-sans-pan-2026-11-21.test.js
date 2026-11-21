@@ -134,14 +134,14 @@ describe('C · aux endroits corrigés, le nom affiché pour SEL ne contient ni �
 /* ================================================================ D. CE QUI NE CHANGE PAS */
 describe('D · ce qui ne change pas', () => {
     it('point 4 : la logique qui peut afficher un badge « PAN » (fiche, `pratiques[0]` à « PAN ») est intacte', () => {
-        expect(lire('js/pratiques-gestion.js')).toContain("const typesValides = ['SOM', 'STD', 'SPE', 'DEN', 'PAN'];");
+        expect(lire('js/pratiques-gestion.js')).toContain("const typesValides = ['SOM', 'STD', 'SPE', 'DEN', 'CIB', 'PAN'];");
         expect((/>([^<]*)<\/span>$/.exec(G.genererBadgeTypePratique({ pratiques: ['PAN'] })) || [])[1]).toBe('PAN');
         expect(REG.obtenirLabelFamillePratique('standards')).toBe('PAN');   // le libellé du registre, lu par aucun écran (mesuré)
     });
     it('les autres familles gardent leurs noms ; le code interne de SEL reste STD', () => {
         expect(G.familleDeLaPratique({ type: 'specifications' }).nom).toBe('PAN-Spécifications');
         expect(G.familleDeLaPratique({ type: 'denotation' }).nom).toBe('PAN-Dénotation');
-        expect(G.familleDeLaPratique({ type: 'cibles' })).toBe(null);   // release du 21 nov. : la famille « Par standards » n'est pas livrée
+        expect(G.familleDeLaPratique({ type: 'cibles' }).nom).toBe('Par standards');
         expect(REG.obtenirCodePratique('standards')).toBe('STD');
     });
 });
@@ -165,9 +165,4 @@ describe('D · ce qui ne change pas', () => {
  *      ROUGE (1) : B « l'assistant… ».
  * X7 — pack-demo-10.js : la pratique de la démo redevient « PAN – Standards (démo) ».
  *      ROUGE (1) : C l'endroit de la démo.
- *
- * RELEASE DU 21 NOV. 2026 (branche lot/selection-productions-release, sans la famille « Par standards ») — trois mutations
- * rejouées sur cette forme, ce fichier lancé seul, chacune retirée :
- *   G2 remis à « … (STD, SEL, SPE ou DEN). » → 1 rouge (B) ; `obtenirNom()` remis à « PAN – Sélection de productions »
- *   → 2 rouges (C) ; la pratique de la démo remise à « PAN – Standards (démo) » → 1 rouge (C).
  */

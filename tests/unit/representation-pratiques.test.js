@@ -34,8 +34,10 @@ describe('Session B · représentations canoniques', () => {
 
     it('rend la couleur via la variable CSS canonique du design system', () => {
         expect(win.obtenirCouleurPratique('sommative')).toBe('var(--som-orange)');
-        // 21 nov. 2026 (décision de Grégoire, 6 h 59) : « Par sélection de productions » prend la sarcelle.
+        // 21 nov. 2026 (décision de Grégoire, 6 h 59) : « Par sélection de productions » prend la sarcelle ; le bleu de STD
+        // reste au badge STD, désormais « Par standards » (code interne `cibles`).
         expect(win.obtenirCouleurPratique('standards')).toBe('var(--sel-sarcelle)');
+        expect(win.obtenirCouleurPratique('cibles')).toBe('var(--std-bleu)');
         expect(win.obtenirCouleurPratique('specifications')).toBe('var(--spe-vert)');
         expect(win.obtenirCouleurPratique('denotation')).toBe('var(--den-violet)');
     });

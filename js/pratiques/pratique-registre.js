@@ -74,15 +74,19 @@ function normaliserIdPratique(id) {
 //   - `code` : l'identifiant INTERNE de la famille. Le moteur le compare (`obtenirCode() === 'STD'`, une douzaine de
 //     branchements du portfolio), et les pratiques rangées chez les gens le portent (`pratiques: ['STD']`). Il ne
 //     change pas : aucune donnée n'est réécrite.
-//   - `sigle` : ce que l'écran AFFICHE. « Par sélection de productions » (code STD) s'affiche SEL ; « STD » ne
-//     s'affiche nulle part. Tout écran qui montre un sigle le lit ici (`obtenirSiglePratique`, `sigleDuCode`,
-//     `genererBadgePratiqueHTML`), jamais le `code`.
-// Couleur (décision de Grégoire, 21 nov. 2026, 6 h 59) : « Par sélection de productions » prend la sarcelle.
+//   - `sigle` : ce que l'écran AFFICHE. « Par sélection de productions » (code STD) s'affiche SEL ; « Par standards »
+//     (code CIB) s'affiche STD ; « CIB » ne s'affiche nulle part. Tout écran qui montre un sigle le lit ici
+//     (`obtenirSiglePratique`, `sigleDuCode`, `genererBadgePratiqueHTML`), jamais le `code`.
+// Couleurs (décision de Grégoire, 21 nov. 2026, 6 h 59) : « Par standards » garde le bleu du badge STD ; « Par sélection
+// de productions » prend la sarcelle.
 const REPRESENTATIONS_PRATIQUES = {
     sommative:      { code: 'SOM', sigle: 'SOM', couleurVar: '--som-orange', famille: 'Sommative' },
     standards:      { code: 'STD', sigle: 'SEL', couleurVar: '--sel-sarcelle', famille: 'PAN' },  // « Par sélection de productions »
     specifications: { code: 'SPE', sigle: 'SPE', couleurVar: '--spe-vert',   famille: 'PAN' },
-    denotation:     { code: 'DEN', sigle: 'DEN', couleurVar: '--den-violet', famille: 'PAN' } // PRÉN académiquement (voir note ci-dessus)
+    denotation:     { code: 'DEN', sigle: 'DEN', couleurVar: '--den-violet', famille: 'PAN' }, // PRÉN académiquement (voir note ci-dessus)
+    // La pratique « Par standards » (lot 1, 21 nov. 2026) : un niveau par cible d'apprentissage, une famille de code à
+    // elle. Sous le code « STD », douze branchements l'enverraient au moteur du portfolio (plan du 20 nov., § 2).
+    cibles:         { code: 'CIB', sigle: 'STD', couleurVar: '--std-bleu',   famille: 'PAN' }
 };
 
 /** Le sigle AFFICHÉ d'un code interne de famille (`pratiques[0]`, `obtenirCode()`) ; un code inconnu passe tel quel. */
@@ -129,12 +133,12 @@ function obtenirRepresentationPratiqueStricte(id) {
     return obtenirRepresentationPratique(id);
 }
 
-/** Code court INTERNE (SOM/STD/SPE/DEN) : pour comparer, jamais pour afficher. @param {string} id @returns {string} */
+/** Code court INTERNE (SOM/STD/SPE/DEN/CIB) : pour comparer, jamais pour afficher. @param {string} id @returns {string} */
 function obtenirCodePratique(id) {
     return obtenirRepresentationPratique(id).code;
 }
 
-/** Sigle AFFICHÉ (SOM/SEL/SPE/DEN), 21 nov. 2026. @param {string} id @returns {string} */
+/** Sigle AFFICHÉ (SOM/SEL/SPE/DEN/STD), 21 nov. 2026. @param {string} id @returns {string} */
 function obtenirSiglePratique(id) {
     return obtenirRepresentationPratique(id).sigle;
 }
@@ -266,7 +270,10 @@ const METHODE_PAR_FAMILLE = {
     sommative: 'moyenne_ponderee',
     specifications: 'specifications',
     denotation: 'jugement_global',
-    standards: 'conversion_niveaux'
+    standards: 'conversion_niveaux',
+    // Lot 1 de la pratique « Par standards » (21 nov. 2026) : la méthode arrêtée au lot 0. Aucun moteur ne la calcule
+    // encore (lot 4) : `PratiqueConfigurable.calculerPerformance` rend null et la pratique dit pourquoi.
+    cibles: 'niveaux_par_cible'
 };
 
 /** La méthode que sa famille donne à une pratique (le type, à la racine, dans `.config` ou `.configuration`), ou null. */

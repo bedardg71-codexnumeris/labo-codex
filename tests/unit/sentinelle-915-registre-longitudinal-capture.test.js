@@ -21,7 +21,7 @@ import { monter, storeBase } from './_helpers/bac-suivi.js';
 
 const NOM_CLE = 'registreLongitudinal';
 const DA = '2000001';   // Alice Assidu : en a2024 (GC1) ET en h2026 (GC3)
-const DA2 = '2000002';  // Bruno Absent : a2024 seulement
+const DA2 = '2000002';  // Boréal Absent : a2024 seulement
 
 function stock() {
     const s = storeBase();
@@ -36,7 +36,7 @@ function stock() {
         cours: [{ id: 'C101', codeCours: '601-101-MQ', nomCours: 'Écriture et littérature' }, { id: 'C102', codeCours: '601-102-MQ', nomCours: 'Littérature et imaginaire' }],
         a2024_groupeEtudiants: [
             { da: DA, nom: 'Assidu', prenom: 'Alice', groupe: '00001', coursId: 'C101', statut: 'actif', programme: '300.A0' },
-            { da: DA2, nom: 'Absent', prenom: 'Bruno', groupe: '00001', coursId: 'C101', statut: 'abandon' }
+            { da: DA2, nom: 'Absent', prenom: 'Boréal', groupe: '00001', coursId: 'C101', statut: 'abandon' }
         ],
         h2026_groupeEtudiants: [{ da: DA, nom: 'Assidu', prenom: 'Alice', groupe: '00002', coursId: 'C102' }],
         demo_groupeEtudiants: [{ da: 'DEMO004', nom: 'Jovial', prenom: 'Castor', groupe: 'demo', coursId: 'demo-cours' }],
@@ -48,7 +48,7 @@ function stock() {
         h2026_evaluationsSauvegardees: [{ id: 'E4', etudiantDA: DA, coursId: 'C102', productionId: 'P9', grilleId: 'G9', criteres: [] }],
         a2024_grillesTemplates: [
             { id: 'G1', nom: 'SRPNF × IDME', criteres: [{ id: 'CR1', nom: 'Structure', ponderation: 50 }, { id: 'CR2', nom: 'Rigueur', ponderation: 50 }] },
-            { id: 'G2', nom: 'Grille de Bruno', criteres: [{ id: 'CRX', nom: 'X' }] }
+            { id: 'G2', nom: 'Grille de Boréal', criteres: [{ id: 'CRX', nom: 'X' }] }
         ],
         a2024_echellesTemplates: [{ id: 'ECH1', nom: 'IDME', niveaux: [{ nom: 'Incomplet' }, { nom: 'Développement' }, { nom: 'Maîtrise' }, { nom: 'Étendu' }] }, { id: 'ECH2', nom: 'Autre', niveaux: [] }],
         h2026_grillesTemplates: [{ id: 'G9', nom: 'Grille H26', criteres: [] }],
@@ -59,12 +59,12 @@ function stock() {
             { date: '2024-08-26', da: DA2, coursId: 'C101', statut: 'present', heures: 2 }
         ],
         a2024_interventions: [
-            { id: 'I1', type: 'groupe', date: '2024-10-15', etudiants: [DA, DA2], notesIndividuelles: { [DA]: 'Alice participe.', [DA2]: 'Bruno absent.' }, titre: 'Atelier' },
-            { id: 'I2', type: 'individuel', date: '2024-11-02', etudiants: [DA2], notesIndividuelles: {}, titre: 'Rencontre Bruno' }
+            { id: 'I1', type: 'groupe', date: '2024-10-15', etudiants: [DA, DA2], notesIndividuelles: { [DA]: 'Alice participe.', [DA2]: 'Boréal absent.' }, titre: 'Atelier' },
+            { id: 'I2', type: 'individuel', date: '2024-11-02', etudiants: [DA2], notesIndividuelles: {}, titre: 'Rencontre Boréal' }
         ],
         a2024_snapshots_C101: {
             hebdomadaires: [
-                { id: 'SEANCE-2024-09-02', dateSeance: '2024-09-02', numSemaine: 2, etudiants: [{ da: DA, nom: 'Alice Assidu', A: 100, C: 50, P: 70, pattern: 'Stable', rai: 'Niveau 1' }, { da: DA2, nom: 'Bruno Absent', A: 50, C: 0, P: 0 }] },
+                { id: 'SEANCE-2024-09-02', dateSeance: '2024-09-02', numSemaine: 2, etudiants: [{ da: DA, nom: 'Alice Assidu', A: 100, C: 50, P: 70, pattern: 'Stable', rai: 'Niveau 1' }, { da: DA2, nom: 'Boréal Absent', A: 50, C: 0, P: 0 }] },
                 { id: 'SEANCE-2024-09-09', dateSeance: '2024-09-09', numSemaine: 3, etudiants: [{ da: DA2, A: 40, C: 0, P: 0 }] }
             ],
             interventions: [{ id: 'I1', date: '2024-10-15', type: 'niveau2', titre: 'Atelier', etudiantsDA: [DA, DA2], avant: { [DA]: { A: 100, C: 50, P: 70 }, [DA2]: { A: 50, C: 0, P: 0 } }, apres: null }],
@@ -115,7 +115,7 @@ describe('#915 lot 2 — les élèves de tous les trimestres, sauf la démo', ()
         const b = banc();
         expect(b.api.rechercher('ASSIDU').map((e) => e.da)).toEqual([DA]);
         expect(b.api.rechercher('álice').map((e) => e.da)).toEqual([DA]);
-        expect(b.api.rechercher('bruno ab').map((e) => e.da)).toEqual([DA2]);
+        expect(b.api.rechercher('boréal ab').map((e) => e.da)).toEqual([DA2]);
         expect(b.api.rechercher('zzz')).toEqual([]);
         expect(b.api.rechercher('').map((e) => e.da)).toEqual([DA2, DA]);
     });
@@ -166,8 +166,8 @@ describe('#915 lot 2 — ce que le dossier emporte, et ce qu\'il laisse', () => 
         expect(d.evaluations.map((e) => e.id)).toEqual(['E1', 'E2']);
         expect(d.evaluations[0].retroactionFinale).toBe('Bien.');
         expect(d.presences.map((p) => p.date)).toEqual(['2024-08-26', '2024-08-28']);
-        // Hors interventions (la composition du groupe est un fait de l'intervention), rien de Bruno ne voyage avec Alice.
-        expect(JSON.stringify(Object.assign({}, d, { interventions: null }))).not.toMatch(/E3|Bruno|2000002/);
+        // Hors interventions (la composition du groupe est un fait de l'intervention), rien de Boréal ne voyage avec Alice.
+        expect(JSON.stringify(Object.assign({}, d, { interventions: null }))).not.toMatch(/E3|Boréal|2000002/);
         expect(issue.resume).toMatchObject({ nbDossiers: 2, nbEvaluations: 3, nbSeances: 2, grilles: ['Grille H26', 'SRPNF × IDME'] });
         expect(issue.resume.poidsOctets).toBeGreaterThan(500);
         expect(issue.resume.poidsModelesOctets).toBeGreaterThan(50);
@@ -186,7 +186,7 @@ describe('#915 lot 2 — ce que le dossier emporte, et ce qu\'il laisse', () => 
         expect(Object.keys(registre.modeles.grilles)).toEqual(['h2026:G9', 'a2024:G1']);
         expect(registre.modeles.grilles['a2024:G1'].criteres).toHaveLength(2);
         expect(Object.keys(registre.modeles.echelles)).toEqual(['a2024:ECH1']);
-        expect(JSON.stringify(registre.modeles)).not.toMatch(/G2|ECH2|Grille de Bruno/);
+        expect(JSON.stringify(registre.modeles)).not.toMatch(/G2|ECH2|Grille de Boréal/);
         expect(d.empreinte).toEqual({
             grilles: [{ id: 'G1', nom: 'SRPNF × IDME', nbCriteres: 2, criteres: [{ id: 'CR1', nom: 'Structure' }, { id: 'CR2', nom: 'Rigueur' }] }],
             echelles: [{ id: 'ECH1', nom: 'IDME', niveaux: ['Incomplet', 'Développement', 'Maîtrise', 'Étendu'] }]
