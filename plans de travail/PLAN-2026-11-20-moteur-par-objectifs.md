@@ -86,6 +86,25 @@ Consigne : `plans de travail/CONSIGNE-LOT-2026-11-21-moteur-cibles-1-corrections
   changement de sigle (gardée hors du changelog jusqu'à la release). Le badge « PAN » et le libellé `famille: 'PAN'` du
   registre restent tels quels : Grégoire tranchera (mesure au rapport, § 7).
 
+## Décidé par Grégoire depuis le lot 1 (21 nov. 2026 ; relayé par Cowork à 8 h 45 pour le lot 2)
+
+Consigne : `plans de travail/CONSIGNE-LOT-2026-11-21-moteur-cibles-2-inscrire.md`. Toutes : *choix de Grégoire, 21 nov. 2026*.
+
+- **Le sigle suit le nom** : « STD » s'affiche pour « Par standards », « SEL » pour « Par sélection de productions » ;
+  « CIB » reste interne. Déjà codé au lot 1 (le tableau des cibles reconnaît la famille par son type, `cibles`, et n'écrit
+  pas « CIB » : sentinelle des sigles).
+- **L'application n'affirme pas que « Par sélection de productions » est une PAN, ni le contraire.**
+- **Rien n'est codé en dur dans l'échelle** : l'enseignant·e décide du nombre de niveaux et de leurs noms. Tout écran du
+  lot 2 tient avec une échelle à trois niveaux comme à six (sentinelle K, spec Playwright).
+- **Une cible sans critère est acceptée** (la fenêtre d'inscription le dit : « Cette cible n'a pas de critère. »).
+- **Les critères à l'inscription** (8 h 38) : au moment d'inscrire un niveau, les critères de la cible s'affichent, les
+  essentiels marqués ; l'enseignant·e PEUT dire ceux qui sont respectés ; elle choisit elle-même le niveau. Les coches sont
+  gardées avec l'inscription. **L'application ne calcule RIEN à partir d'elles** : ni niveau proposé, ni niveau refusé, ni
+  alerte de cohérence (fiche, N1, et l'avertissement des sources sur le calcul, fiche § 6). Les coches sont facultatives :
+  une inscription sans coche est complète, et « rien de coché » ne veut pas dire « aucun critère respecté ». **Forme
+  retenue** : chaque critère de la cible, tel qu'il était écrit, avec `respecte: true | false | null` ; `null`, l'état
+  d'office, veut dire « non renseigné » (lot 2, ci-dessous).
+
 ## Vue d'ensemble
 
 1. **Le calcul actuel ne connaît qu'un grain : une évaluation par étudiant·e et par production.** Les quatre
@@ -238,6 +257,15 @@ répéter : cette clé est restée **nue de fait**, faute d'inscription au regis
   echelleId, date, horodatage,
   productionId: 'PROD_…' | null,              // null : observation, conversation
   annulee: false }                            // une erreur de saisie se marque, elle ne s'efface pas
+```
+
+**Forme livrée au lot 2 (21 nov. 2026)**, qui remplace l'esquisse ci-dessus : deux sortes d'entrées dans la même liste.
+`annulee: false` n'est pas écrit ; une annulation est une ENTRÉE DE PLUS, et l'inscription ne change jamais (voir le lot 2).
+
+```js
+{ id, type: 'inscription', da, ensembleId, cibleId, niveau, echelleId, date, horodatage, productionId: 'PROD_…' | null,
+  noteBreve, criteres: [ { id, texte, essentiel, respecte: true | false | null } ] }
+{ id, type: 'annulation', inscriptionId, da, ensembleId, cibleId, date, horodatage, raison }
 ```
 
 Décidé ici (technique) : à niveau égal, l'inscription retenue est **la première à l'avoir atteint** (la date
@@ -410,20 +438,58 @@ Ordre : 0, puis 1 à 4. Chaque lot est livrable seul ; aucun ne change une note 
 - ⚠ Stock : rien à convertir. L'ancienne clé nue `objectifsTemplates` reste où elle est ; s'il y a des ensembles chez
   Grégoire, on mesure, puis on propose (geste sur ses données : il décide).
 
-### Lot 2 – « J'inscris un niveau pour un·e étudiant·e sur une cible »
+### Lot 2 – « J'inscris un niveau pour un·e étudiant·e sur une cible » (révisé et livré le 21 nov. 2026)
 
-- **Ce que l'utilisateur voit** : au tableau de notation, pour cette pratique, les cibles en colonnes. Toucher une
-  case inscrit un niveau, daté, **avec une note brève : la rétroaction** (N5, décision du 20 nov.) ; on peut dire d'où
-  il vient (une production, ou rien : N3). Un geste « inscrire pour une production » ouvre les cibles qu'elle
-  renseigne, et l'on ne remplit que celles que l'étudiant·e a reprises (N4). Une inscription erronée ou une trace
-  devenue invalide s'annule ; elle reste visible, barrée (N7). Le niveau « sans donnée » s'inscrit comme un autre (E3).
-- **Dans le code** : le module propriétaire de `inscriptionsCibles` (seul écrivain, lecture par `cle()`), inscrit à
-  tous les registres du § 3 ; la saisie au tableau ; l'annonce d'écriture. **Retirer une cible qui porte des niveaux
-  inscrits pose la question avant d'écrire** (le patron de #717), dans l'assistant.
-- **Sentinelle** : deux inscriptions sur la même cible donnent deux entrées ; aucune écriture ne réduit la liste ;
-  la correction d'un DA les déplace ; la note brève est échappée ; un codex enregistré puis rouvert rend la liste à
-  l'identique.
-- **Notes qui changent** : aucune. Sentinelle du lot 0 rejouée.
+Consigne : `plans de travail/CONSIGNE-LOT-2026-11-21-moteur-cibles-2-inscrire.md`. Branche `lot/moteur-cibles-2-inscrire`
+(partie de `lot/moteur-cibles-1-cibles`, `947ea9d5`) ; rien dans `main`. Textes : `TEXTES-2026-11-21-par-standards-lot-2.md`.
+
+- **Ce que l'enseignant·e voit** : au tableau de notation, pour un groupe « Par standards », les cibles en colonnes et les
+  étudiant·es en rangées. Une case montre le DERNIER niveau inscrit et combien d'inscriptions elle porte (pas le niveau
+  retenu : lot 3). La toucher ouvre l'inscription : la cible et son énoncé ; ses critères, chacun « Respecté », « Non
+  respecté » ou laissé non renseigné ; le niveau, parmi tous ceux de l'échelle, le « sans donnée » compris ; la
+  rétroaction ; d'où vient le niveau (une production, ou rien) ; la date, d'office aujourd'hui. Dessous, l'historique de la
+  case, et « Annuler cette inscription ». Un bouton « Inscrire pour une production » ; et, dans la fiche d'une production,
+  la liste facultative des cibles qu'elle renseigne. Dans l'assistant, retirer une cible qui porte des niveaux inscrits pose
+  la question avant d'écrire. Aucune note ne se calcule ; aucun écran de l'étudiant·e.
+- **Les règles du lot et leur origine** :
+
+  | Règle | Origine |
+  |---|---|
+  | Le niveau se pose par jugement : l'enseignant·e le choisit ; les critères le guident, ils ne le calculent pas | N1 |
+  | Les critères s'affichent, les essentiels marqués ; on PEUT dire ceux qui sont respectés ; facultatif ; aucun niveau proposé, refusé ni signalé à partir d'eux | N1, C4, C5 ; *choix de Grégoire, 21 nov. 2026* |
+  | « Non renseigné » n'est pas « non respecté » (`respecte: null` d'office) | *choix de Grégoire, 21 nov. 2026* |
+  | Une production peut toucher plusieurs cibles : un niveau par cible touchée, aucune note d'ensemble (geste par production) | N2 |
+  | Un niveau peut se poser sans production (observation, entretien) | N3 |
+  | L'étudiant·e choisit les cibles qu'il ou elle reprend ; les autres ne reçoivent rien (chaque cible part sur « Rien ce jour-là ») | N4 |
+  | Avec le niveau vient une rétroaction (le champ « Rétroaction », facultatif) | N5 ; *choix de Grégoire, 20 nov. 2026* (« chaque niveau inscrit peut porter une note brève ») |
+  | Chaque inscription est gardée et datée ; deux inscriptions sur la même cible sont deux entrées | N6 (*choix de Grégoire*) |
+  | Une inscription erronée ou une trace devenue invalide s'annule ; elle reste visible, barrée, datée de l'annulation ; une raison facultative | N7 ; la raison : *décidé par Cowork* ; aucune suppression : *limite de Grégoire, 20 sept. 2026* |
+  | Le niveau « sans donnée » s'inscrit comme un autre | E2, E3 |
+  | Toute échelle convient (trois niveaux comme six) | *choix de Grégoire, 21 nov. 2026* |
+  | Une cible sans critère est acceptée | *choix de Grégoire, 21 nov. 2026* |
+  | Une production déclare, facultativement, les cibles qu'elle renseigne ; sans liste, toutes sont offertes | *décidé par Cowork* (consigne du lot) |
+  | La case montre le dernier niveau inscrit, pas le niveau retenu | *choix technique* (consigne : un affichage qui ne préjuge pas du lot 3) |
+
+- **Dans le code** : le module propriétaire `js/pratiques/inscriptions-cibles.js` (`InscriptionsCibles` : forme, refus,
+  lectures pures, seuls écrivains `inscrire` et `annuler`, par `modifierEtAnnoncer(cle('inscriptionsCibles'))`, qui
+  AJOUTENT au bout de ce qui est lu dans la file d'écriture) ; l'écran `js/tableau-cibles.js` et `css/tableau-cibles.css`
+  (le tableau, la fenêtre, l'historique, le geste par production) ; `tableau-notation.js` reconnaît la famille `cibles` et
+  délègue (le tableau des productions ne change pas ; la vue simple garde son message) ; la fiche d'une production
+  (`productions.js`, bloc `productionCiblesBloc`, champ `ciblesRenseignees`, patron #790 : rien n'est réécrit quand le bloc
+  n'est pas affiché) ; l'assistant (`_confirmerRetraitCiblesInscrites`) ; la phrase de la note absente (N1').
+- **Registres nominatifs** : `CLES_NAMESPACEES` (trimestres), `db._SSOT_OWNERS` (propriété), `CorrectionDA.FAMILLES`
+  (catégorie `inscriptions`, la fenêtre compte les inscriptions), la Réserve (`CLES_FILTRER_PAR_DA` : chaque entrée porte
+  `da`, annulations comprises), les clés de résultats du retrait d'un groupe (`vue-simple-donnees.js`), le codex (libellé
+  de la fusion ; une liste à `id` : la fusion en fait l'union, sans conflit, puisque rien n'est réécrit), `DATA-OWNERSHIP.md`.
+  La suppression d'un trimestre l'emporte par son préfixe. L'archivage d'un trimestre la garde sous son préfixe (rien à
+  copier : `CLES_TEMPLATES_ARCHIVES` ne sert qu'aux clés autrefois globales). `ciblesRenseignees` d'une production :
+  déclarée non transportée à l'export d'une production (`CLES_PRODUCTION_NON_TRANSPORTEES`).
+- **Un critère retiré ou réécrit** ne pose pas de question : chaque inscription garde le texte des critères qu'elle a
+  jugés, et rien ne se calcule à partir des coches. **Une cible retirée** : la question, puis la cible cesse d'être
+  montrée ; ses inscriptions restent (lisibles si elle revient sous le même id).
+- **Sentinelle** : `tests/unit/sentinelle-par-standards-lot-2-inscrire.test.js` (32 essais, treize break-tests) ; spec
+  `tests/integration/par-standards-lot-2-inscrire.spec.js` (Chromium) ; sentinelle du lot 0 rejouée (16/16).
+- **Notes qui changent** : aucune. Aucun moteur existant ne lit la clé (cliquet du lot 0).
 
 ### Lot 3 – « Je vois le niveau retenu par cible »
 
@@ -517,6 +583,8 @@ Ordre : 0, puis 1 à 4. Chaque lot est livrable seul ; aucun ne change une note 
 | `jugementsDenotation` est nue de fait (déjà consigné, `DATA-OWNERSHIP.md:58`) | **déjà inscrit** ; sert d'avertissement pour la clé neuve |
 | `indicesCP` range 0 pour une note non calculable (`portfolio.js:582`) | **inscrire et continuer** ; mesuré lecteur par lecteur au lot 4 |
 | Trois sens du mot « objectif » (leçon, texte d'une production, ensemble) | **aux mots** (§ 9) |
+| En « Par standards », le formulaire des productions exige encore une pondération (`raisonChampsObligatoiresProduction` ne connaît que `standards` ; mesuré au lot 2, 21 nov.) : une production qui ne pèse sur aucune note doit en porter une | **inscrire et continuer** : au lot 4, quand la note dira ce que pèse une production (rien) |
+| Le geste « inscrire pour une production » n'offre que les productions assignées au groupe-cours, hors diagnostiques et hors portfolio conteneur | **choix technique du lot 2**, dit au rapport ; à revoir si Grégoire veut inscrire depuis une production diagnostique |
 
 ## 12. Ce qui n'a pas été mesuré
 

@@ -155,6 +155,12 @@ périmée (c'est le cas du skill `labo-codex` §5.2 au 5 juin).
   poids, terminale, identités permanentes), l'échelle de la pratique et son niveau « sans donnée » (un niveau à 0 %),
   l'assistant et la fiche. `PratiqueConfigurable.calculerPerformance` rend `null` pour `niveaux_par_cible` et
   `expliquerNoteNonConstructible` dit pourquoi : aucun calcul avant le lot 4.
+- *Livré au lot 2 (21 nov. 2026, branche `lot/moteur-cibles-2-inscrire`, pas dans `main`)* : les niveaux inscrits
+  (`inscriptionsCibles`, par trimestre, module propriétaire `js/pratiques/inscriptions-cibles.js`) : une liste où l'on
+  AJOUTE, une annulation est une entrée de plus ; chaque inscription garde l'état des critères jugés (`respecte: true |
+  false | null`, null = non renseigné) et **aucun calcul ne lit les coches** (choix de Grégoire, 21 nov.). L'écran :
+  `js/tableau-cibles.js` (Évaluation › Tableau de notation, les cibles en colonnes ; une case montre le DERNIER niveau
+  inscrit, pas le retenu). Toujours aucune note : le lot 3 retient, le lot 4 calcule.
 
 **SPE — Spécifications**
 - *Recherche / pratique* : une spécification décrit le **produit réussi entier**, jugé sur
@@ -739,6 +745,7 @@ les valeurs de l'échelle de chimie.
 
 | Date | Changement |
 |------|------------|
+| 2026-11-21 (lot/moteur-cibles-2-inscrire) | **Lot 2 de « Par standards »** : `inscriptionsCibles` (ajout seul, annulation par ajout, coches à trois états jamais lues par un calcul), le tableau des cibles, l'inscription, l'historique, le geste par production. §2 bis, partie STD. |
 | 2026-11-21 (secondes corrections du lot 1) | **SEL n'est plus dite « PAN »** (choix de Grégoire, 7 h 44) : nom de famille « Par sélection de productions » partout où il s'affiche ; bulles G1, G2, G5 ; remplacements simples (aide des indices, Exploration, profil, Aide, démo). Le libellé du registre et la logique du badge PAN restent. |
 | 2026-11-21 (corrections du lot 1) | **Le sigle suit le nom** (décision de Grégoire) : le registre sépare le `code` interne (STD, CIB, inchangés) du `sigle` affiché (SEL pour `standards`, STD pour `cibles`) ; tout écran lit le sigle (`obtenirSiglePratique`, `sigleDuCode`). Couleurs : sarcelle à SEL, bleu à STD. |
 | 2026-11-21 (lot/moteur-cibles-1-cibles) | **La famille `cibles` (« Par standards », code CIB) entre au tableau du §2**, sans calcul (lot 1). §2 bis, partie STD : le nom retenu, « Par sélection de productions », aligné ; « vraie pratique » retiré (posture pluraliste) ; ce que le lot 1 livre. |
