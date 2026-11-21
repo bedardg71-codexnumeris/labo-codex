@@ -20,7 +20,7 @@
 // init-inline.js compare cette valeur au BUILD_ID lu depuis version.json :
 // si différent, Safari file:// a probablement un main.js périmé en cache,
 // et la séquence reload+bandeau s'enclenche. SYNCHRONISER À CHAQUE BUMP.
-window._SCRIPT_BUILD_main = '1120-2147';
+window._SCRIPT_BUILD_main = '1120-2201';
 
 /* ===============================
    FONCTION GLOBALE: Génération d'ID uniques
@@ -1178,10 +1178,8 @@ document.addEventListener('DOMContentLoaded', function () {
         initialiserModuleCartouches();
     }
 
-    // MODULE 07B: Objectifs d'apprentissage
-    if (typeof initialiserModuleObjectifs === 'function') {
-        initialiserModuleObjectifs();
-    }
+    // MODULE 07B (objectifs d'apprentissage) : retiré au lot 1 « Par standards » (21 nov. 2026) — son écran n'avait plus
+    // d'hôte dans index.html. Les cibles d'une pratique par standards : js/pratiques/ensembles-cibles.js.
 
     // MODULE 08: Cours
     if (typeof initialiserModuleCours === 'function') {

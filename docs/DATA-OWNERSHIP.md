@@ -383,7 +383,7 @@ du matériel qui NE DOIT PAS entrer dans ces flux.
 | `migration_pratiques_namespacees_done` | ssot-ok | `main.js` | 1 |
 | `nomsCategoriesTampons` | ssot-ok | `travaux-outils.js` | 1 |
 | `notesRapport` | ssot-ok | `profil-etudiant-rapport.js` | 1 |
-| `objectifsTemplates` | ssot-ok | `objectifs.js` | 1 |
+| `objectifsTemplates` | sans écrivain (21 nov. 2026 : `objectifs.js` retiré avec son écran orphelin ; la clé nue reste telle quelle chez qui l'a, ni lue ni réécrite) | — | 0 |
 | `ordreAutocollants_` | ssot-ok | `travaux-outils.js` | 1 |
 | `ordreAutocollants_action` | ssot-ok | `travaux-outils.js` | 1 |
 | `ordreAutocollants_comprehension` | ssot-ok | `travaux-outils.js` | 0 |

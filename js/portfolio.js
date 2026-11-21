@@ -628,106 +628,9 @@ async function obtenirIndicesCPAsync(da) {
 
 // obtenirIndicesCP → déplacé dans indices.js (#206)
 
-/* ===============================
-   🎯 CALCULS MULTI-OBJECTIFS
-
-   Support pour le système d'évaluation multi-objectifs
-   - Groupement des évaluations par objectif
-   - Calcul de la performance par objectif (moyenne N meilleurs)
-   - Calcul de la note finale pondérée
-
-   DATE : 26 novembre 2025
-   AUTEUR : Grégoire Bédard (Labo Codex)
-   =============================== */
-
-/**
- * Calcule la performance par objectif pour un étudiant
- *
- * @param {string} da - Numéro DA de l'étudiant
- * @param {string} ensembleId - ID de l'ensemble d'objectifs
- * @returns {Object} - { obj1: {P: 85, nbArtefacts: 5, artefacts: [...]}, obj2: {...}, ... }
- *
- * EXEMPLES :
- * calculerPerformanceParObjectif('1234567', '<ensembleObjectifsId>')
- * → {
- *     obj1: { P: 85, nbArtefacts: 5, artefacts: [{id, note}, ...] },
- *     obj2: { P: 72, nbArtefacts: 3, artefacts: [{id, note}, ...] },
- *     ...
- *   }
- */
-function calculerPerformanceParObjectif(da, ensembleId) {
-    if (!da || !ensembleId) {
-        console.warn('[Multi-Objectifs] DA ou ensembleId manquant');
-        return null;
-    }
-
-    // 1. Charger l'ensemble d'objectifs
-    const ensembles = chargerEnsemblesObjectifs();
-    const ensemble = ensembles.find(e => e.id === ensembleId);
-
-    if (!ensemble || !ensemble.objectifs) {
-        console.warn('[Multi-Objectifs] Ensemble introuvable:', ensembleId);
-        return null;
-    }
-
-    // 2. Charger les productions et évaluations
-    const productions = obtenirDonneesSelonMode('productions');
-    const evaluations = obtenirDonneesSelonMode('evaluationsSauvegardees') || [];
-
-    // 3. Filtrer les évaluations de cet étudiant
-    const evaluationsEleve = evaluations.filter(e =>
-        e.etudiantDA === da &&
-        e.noteFinale !== null &&
-        e.noteFinale !== undefined &&
-        !e.remplaceeParId
-    );
-
-    // 4. Grouper par objectif
-    const performancesParObjectif = {};
-
-    ensemble.objectifs.forEach(objectif => {
-        // Trouver toutes les évaluations liées à cet objectif
-        const evaluationsObjectif = evaluationsEleve.filter(ev => {
-            const prod = productions.find(p => p.id === ev.productionId);
-            return prod && prod.objectif === objectif.id;
-        });
-
-        if (evaluationsObjectif.length === 0) {
-            performancesParObjectif[objectif.id] = {
-                P: null,
-                nbArtefacts: 0,
-                artefacts: []
-            };
-            return;
-        }
-
-        // Trier par note décroissante et prendre les N meilleurs
-        // #394 (L10) : nombre à retenir depuis la config de la pratique active
-        // (pratiquesConfigurables, G2-a) — plus de lecture du snapshot configPAN.
-        const nombreARetenir = (typeof obtenirConfigPratiqueActive === 'function'
-            ? obtenirConfigPratiqueActive()?.portfolio?.nombreARetenir : null) || 3;
-
-        evaluationsObjectif.sort((a, b) => b.noteFinale - a.noteFinale);
-        const meilleurs = evaluationsObjectif.slice(0, nombreARetenir);
-
-        // Calculer la moyenne
-        const somme = meilleurs.reduce((acc, e) => acc + e.noteFinale, 0);
-        const moyenne = somme / meilleurs.length;
-
-        performancesParObjectif[objectif.id] = {
-            P: moyenne,
-            nbArtefacts: evaluationsObjectif.length,
-            artefacts: meilleurs.map(e => ({
-                id: e.productionId,
-                note: e.noteFinale,
-                date: e.dateEvaluation
-            }))
-        };
-    });
-
-
-    return performancesParObjectif;
-}
+/* Lot 1 de la pratique « Par standards » (21 nov. 2026) : `calculerPerformanceParObjectif` RETIRÉE — sans appelant
+   (mesuré au plan du 20 nov., § 1.3), elle lisait les ensembles de l'écran orphelin `objectifs.js` (retiré avec elle) et
+   comparait un texte libre à un identifiant. La note par cibles vient d'un moteur à part (lots 2 à 4). */
 
 /* #402 (L11, audit 5 août 2026) : calculerNoteFinaleMultiObjectifs RETIRÉE —
    somme pondérée jamais normalisée par poidsTotal ET zéro appelant (grep js/ +
@@ -777,8 +680,6 @@ function obtenirConfigCategories(pratiqueIdDemande = null) {
    EXPORTS GLOBAUX
    =============================== */
 
-// Exporter les fonctions multi-objectifs pour utilisation par d'autres modules
-window.calculerPerformanceParObjectif = calculerPerformanceParObjectif;
 
 // 🆕 Beta 95.4 : Exporter les fonctions de catégories
 // #816 — exposé pour être ÉPROUVÉ. Cette fonction décide ce qui s'écrit dans

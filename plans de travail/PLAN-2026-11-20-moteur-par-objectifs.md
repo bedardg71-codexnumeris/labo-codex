@@ -453,6 +453,11 @@ Ordre : 0, puis 1 à 4. Chaque lot est livrable seul ; aucun ne change une note 
 
 ## 10. Les questions de didactique (non tranchées, avec ma recommandation)
 
+> **Mise à jour du 21 nov. 2026** : les questions 1 (cible sans niveau) et 2 (le meilleur, vraiment ?) sont **réglées**
+> par les décisions du 20 nov. (en tête du plan) ; la question 3 (une échelle pour toutes les cibles) est appliquée au
+> lot 1 (E6) ; la question 5 devient le lot 5 (le relevé). Les questions 4, 6 et 7 restent comme écrites ci-dessous
+> (la 7 est réglée au lot 4 par le double seuil).
+
 1. **Une cible sans aucun niveau, que vaut-elle ?** Le banc donne 75,83 (on l'ignore), 56,88 (elle vaut zéro) ou
    « non calculable ». *Recommandation* : « non calculable » tant que « Notes finalisées » n'est pas cochée, avec
    la liste des cibles en attente ; au moment d'arrêter les notes, la question est posée à l'enseignant·e, cible par
@@ -484,9 +489,9 @@ Ordre : 0, puis 1 à 4. Chaque lot est livrable seul ; aucun ne change une note 
 
 | Trouvaille | Issue |
 |---|---|
-| L'écran des ensembles d'objectifs n'a pas d'hôte dans `index.html` | **retiré au lot 1** : c'est le lot qui remplace ce système (zéro-dette), pas du code étranger |
-| `calculerPerformanceParObjectif` (`portfolio.js:658`) sans appelant | **retirée au lot 1**, même motif |
-| Le gabarit `pan-objectifs-ponderes` est resté au catalogue alors que le changelog 1.63 annonce le départ des gabarits du mode | **inscrire et continuer** : à mesurer au lot 1 (est-il offert quelque part ?), retiré s'il ne l'est pas |
+| L'écran des ensembles d'objectifs n'a pas d'hôte dans `index.html` | **retiré au lot 1** (fait le 21 nov. : `js/objectifs.js`, son appel au démarrage et son `<script>`) ; la clé nue `objectifsTemplates` reste telle quelle |
+| `calculerPerformanceParObjectif` (`portfolio.js:658`) sans appelant | **retirée au lot 1** (fait le 21 nov.), même motif |
+| Le gabarit `pan-objectifs-ponderes` est resté au catalogue alors que le changelog 1.63 annonce le départ des gabarits du mode | **retiré au lot 1** (mesuré le 21 nov. : `PRATIQUES_PREDEFINES` n'est lue par aucun écran, seulement par la migration V2 de `pratique-manager.js`, qui en lit les noms de constantes) |
 | `jugementsDenotation` est nue de fait (déjà consigné, `DATA-OWNERSHIP.md:58`) | **déjà inscrit** ; sert d'avertissement pour la clé neuve |
 | `indicesCP` range 0 pour une note non calculable (`portfolio.js:582`) | **inscrire et continuer** ; mesuré lecteur par lecteur au lot 4 |
 | Trois sens du mot « objectif » (leçon, texte d'une production, ensemble) | **aux mots** (§ 9) |

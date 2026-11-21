@@ -2423,7 +2423,7 @@
      * La correspondance était déjà posée par le code ; on la lit désormais sur
      * la donnée configurée au lieu de la redécouvrir sur un nom.
      *
-     * ⚠ NE PAS CONFONDRE AVEC LE `type` D'UN OBJECTIF (`js/objectifs.js`), qui
+     * ⚠ NE PAS CONFONDRE AVEC LE `type` D'UN OBJECTIF (l'ancien `js/objectifs.js`, retiré le 21 nov. 2026), qui
      * porte le même vocabulaire mais est un champ CONFIGURÉ, sur un autre objet.
      * Deux notions distinctes ; seul le mot est commun.
      *

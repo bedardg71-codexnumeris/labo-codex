@@ -190,7 +190,6 @@
  "js/liste-evaluations.js:btn-sm",
  "js/liste-evaluations.js:td-center",
  "js/modes.js:mode-normal",
- "js/objectifs.js:btn-exporter-ensemble",
  "js/planification-carte.js:export-perso-choisies",
  "js/planification-carte.js:planif-badge-gris",
  "js/planification-carte.js:planif-cours-carte-btn",
