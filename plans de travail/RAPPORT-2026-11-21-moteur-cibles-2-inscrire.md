@@ -11,7 +11,8 @@
 > textes proposés ; le plan révisé (décisions du 21 nov. en tête, lot 2 avec l'origine de chaque règle).
 > **Reste** : les textes à faire corriger par Grégoire (`TEXTES-2026-11-21-par-standards-lot-2.md`, 73 textes et
 > 4 questions) ; ses essais sur l'aperçu ; le passage WebKit du Mac ; le lot 3 (le niveau retenu).
-> **PR d'aperçu** : PR_A_VENIR ; **aperçu** : APERCU_A_VENIR. `RELAIS.md` (sur `main`) n'est pas touché : ce relais-ci tient
+> **PR d'aperçu** : https://github.com/bedardg71-codexnumeris/labo-codex/pull/45 (brouillon, « ne pas fusionner ») ;
+> **aperçu** : https://deploy-preview-45--codexnumeris-051225.netlify.app. `RELAIS.md` (sur `main`) n'est pas touché : ce relais-ci tient
 > lieu de relais de la branche.
 
 ## 1. Ce qui a été livré
