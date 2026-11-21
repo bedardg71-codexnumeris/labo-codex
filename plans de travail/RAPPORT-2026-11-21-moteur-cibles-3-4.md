@@ -4,6 +4,16 @@
 > (PR d'aperçu en brouillon, « ne pas fusionner » : https://github.com/bedardg71-codexnumeris/labo-codex/pull/46).
 > Toute correction ultérieure ira sur la branche `lot/moteur-cibles-3-4-retenu-note` : l'adresse ne change pas.
 >
+> **Corrections du 21 nov., 13 h 30 (Cowork), § 9.** Un commit par correction : `dbef22e3` (la liste des étudiant·es
+> bornée à « Par standards »), `54757eb1` (« CIB » nulle part). **Mesuré** : la garde du lot 0, 16 sur 16 ; Vitest
+> complet, un seul worker, sur le code de `54757eb1` : 942 fichiers, 12 150 verts, 0 rouge ; Chromium, les specs des
+> lots 2, 3 et 4 : 13 sur 13 ; la liste d'une pratique « Par sélection de productions » rendue à l'identique de la base
+> (relevé épinglé, contre-épreuve sur la base) ; aucun « CIB » sur six écrans ni dans le CSV ; l'Aperçu d'une classe
+> entière en attente. **Non mesuré** : WebKit, l'iPad au doigt, l'adresse elle-même (refusée par le proxy du conteneur).
+> **Le Mac passe sous WebKit la tête de la branche** : son code est celui de **`54757eb1`** (le commit qui porte ce
+> rapport ne change que des documents), avec `par-standards-lots-3-4.spec.js`, `par-standards-lot-2-inscrire.spec.js` et
+> `tableau-de-notation-1.spec.js`.
+>
 > **Relais (21 nov. 2026).** Branche `lot/moteur-cibles-3-4-retenu-note`, partie de `lot/moteur-cibles-2-inscrire`
 > (`8ed02c6f`), puis réunie à `lot/moteur-cibles-1-cibles` (`8feaac75`, `main` à 1.252.0 ; un seul conflit, des jetons
 > anti-cache d'`index.html`). **Rien n'est fusionné dans `main`, aucune release.** Session : Claude Code dans un conteneur
@@ -48,9 +58,9 @@
 |---|---|---|
 | Profil, section « Cibles » | « Pas encore de note. » et les cibles nommées ; ou « Note non calculable. » et le motif | mesuré |
 | Profil, « Engagement ACP », « Accompagnement », « Rapport » | « — » et la cause (gardés par `noteConstructible`, avant ce lot) | lu (audit) |
-| Profil, en-tête « Développement des habiletés » | **était « 0 % » précédé du code du niveau le plus bas** ; écrit « — » | corrigé, lu ; la section ne paraît qu'avec un portfolio et des artefacts |
+| Profil, en-tête « Développement des habiletés » (*borné à « Par standards » le 21 nov., 13 h 30, § 9*) | **était « 0 % » précédé du code du niveau le plus bas** ; écrit « — » | corrigé, lu ; la section ne paraît qu'avec un portfolio et des artefacts |
 | Tableau de notation (cibles) | « En attente » et les cibles ; « Non calculable » | mesuré |
-| Liste des étudiant·es | **était « 0 % »** dès qu'une copie était remise ; « — », hors de la moyenne, des corrélations, et sous toute note au tri | corrigé, mesuré |
+| Liste des étudiant·es (*borné à « Par standards » le 21 nov., 13 h 30, § 9*) | **était « 0 % »** dès qu'une copie était remise ; « — », hors de la moyenne, des corrélations, et sous toute note au tri | corrigé, mesuré |
 | Export des résultats finaux | cellule vide, « non constructible – » et la cause | mesuré |
 | PDF de synthèse | aucune note pour cette pratique (il ne connaît que STD et SOM) ; aucun « 0 » | lu |
 | Comparateur, profils fictifs | « — non constructible » (les profils fictifs n'ont pas d'inscriptions) | mesuré |
@@ -94,7 +104,7 @@
 
 ## 3. Où je m'écarte du mandat, et pourquoi
 
-1. **La liste des étudiant·es et un en-tête du profil changent pour toutes les pratiques.** Le point 13 demande qu'une note
+1. ~~**La liste des étudiant·es et un en-tête du profil changent pour toutes les pratiques.**~~ **Retiré par la correction 1 du 21 nov., 13 h 30 (§ 9) : la garde ne joue plus qu'en « Par standards ».** Le point 13 demande qu'une note
    absente ne s'affiche « 0 » nulle part ; dans cette pratique, toute la classe est sans note tant qu'une cible est en
    attente, et la liste écrivait « 0 % » pour chacun·e (mesuré). La garde suit l'encodage existant (#394,
    `noteConstructible`) : une note non constructible d'une autre pratique s'écrit aussi « — » et sort de la moyenne
@@ -183,7 +193,7 @@
   l'assistant le garde à la réédition (#938 : il ne nomme que ce qu'il édite).
 - **Le formulaire d'une production** (trouvaille du lot 2) : en « Par standards », aucune pondération n'est exigée ;
   l'astérisque part ; une phrase le dit sous le champ.
-- **Les lecteurs de la note** (§ 1) : la liste des étudiant·es et l'en-tête « Développement des habiletés » du profil
+- **Les lecteurs de la note** (§ 1 ; bornés à « Par standards » le 21 nov., 13 h 30, § 9) : la liste des étudiant·es et l'en-tête « Développement des habiletés » du profil
   écrivaient « 0 % » pour une note non constructible ; ils écrivent « — » (§ 3, écart 1).
 - **Retiré** : `InscriptionsCibles.etatDeLaCase` (le « dernier niveau » du lot 2, sans lecteur une fois la case passée au
   niveau retenu) ; les mots « viendra » et « ne calcule pas encore » (assistant, fiche, Conception).
@@ -194,8 +204,8 @@
 
 | Trouvaille | Issue |
 |---|---|
-| La liste des étudiant·es et l'en-tête « Développement des habiletés » écrivaient « 0 % » pour une note non constructible | **corrigé** (casse le parcours livré : toute la classe en attente) |
-| Le Comparateur écrit « CIB » dans ses menus (le code, pas le sigle) et badge « SEL » une pratique par standards dans les maquettes (`comparateur-pratiques.js`, `_optionsSelect`, `_badgeFamille`) | **inscrire et continuer** (plan, § 11) : la décision « le sigle suit le nom » du lot 1 n'y est pas appliquée |
+| (Borné le 21 nov., 13 h 30 : « Par standards » seulement ; la correction générale est inscrite au plan, § 11, à porter à Grégoire.) La liste des étudiant·es et l'en-tête « Développement des habiletés » écrivaient « 0 % » pour une note non constructible | **corrigé** (casse le parcours livré : toute la classe en attente) |
+| (Corrigé le 21 nov., 13 h 30, § 9.) Le Comparateur écrit « CIB » dans ses menus (le code, pas le sigle) et badge « SEL » une pratique par standards dans les maquettes (`comparateur-pratiques.js`, `_optionsSelect`, `_badgeFamille`) | **inscrire et continuer** (plan, § 11) : la décision « le sigle suit le nom » du lot 1 n'y est pas appliquée |
 | L'Exploration décrit une pratique par standards comme une sélection d'artefacts, « Alignement sur des cibles : non couvert » (`construction-attributs.js` ne connaît pas le type `cibles`) | **inscrire et continuer** |
 | Les corrélations de l'Aperçu comptent une note non constructible pour 0 | **inscrire et continuer** (une phrase affichée seulement si \|r\| ≥ 0,5) |
 | Le PDF de synthèse n'a aucune note pour cette pratique | **commenter et oublier** : prix accepté du noyau ; aucun « 0 » |
@@ -206,7 +216,7 @@
 1. **Les textes** : `TEXTES-2026-11-21-par-standards-lots-3-4.md`, en une seule page avec ceux du lot 2. En tête, les dix
    questions ; quatre touchent la note (Q1 le retenu entre deux égaux, Q2 la moyenne des terminales, Q3 60 % pile, Q4 le
    « sans donnée » inscrit).
-2. **L'écart 1 du § 3** (la liste des étudiant·es pour toutes les pratiques) : à son jugement, s'il préfère le borner.
+2. ~~**L'écart 1 du § 3**~~ (réglé par la correction 1 du 21 nov., 13 h 30) ; **à porter à Grégoire à la place** : la correction générale de la liste pour les autres pratiques (plan, § 11) (la liste des étudiant·es pour toutes les pratiques) : à son jugement, s'il préfère le borner.
 3. **Le passage WebKit du Mac** (§ 1).
 
 ## 8. La dernière passe
@@ -220,3 +230,73 @@
   qui les lisent rejoués, 181 verts.
 - **Playwright sous Chromium** : 58 verts sur les neuf specs du § 1 (10 captures sautées par leur spec). **Aucun verdict
   WebKit** : il est dû au Mac (§ 1).
+
+## 9. Corrections du 21 nov., 13 h 30
+
+Demandées par Cowork, sur la même branche et la même PR (l'adresse ne change pas). Un commit par correction.
+
+### Correction 1 – la liste des étudiant·es, bornée à « Par standards » (`dbef22e3`)
+
+- **Le motif** (Cowork, mesuré dans le diff) : la garde du lot 4 valait pour toutes les pratiques ; un groupe « Par
+  sélection de productions », en sommative, en spécifications ou en dénotation aurait vu « — » au lieu de « 0 % » et
+  d'autres moyennes. **Décision de Grégoire (20 nov.)** : sa pratique de l'automne ne change pas, ni ses calculs ni ce que
+  ses écrans en disent.
+- **Fait** : dans `js/etudiants.js`, la garde ne joue que lorsque la pratique du groupe-cours est de la famille des cibles
+  (`listeEnParStandards`, `pDeLaListe`, `sansNoteParStandards`). Pour toute autre pratique, chaque expression redevient
+  celle de la base, y compris le P `null` d'un élève hors groupe que la base laissait passer.
+- **Au-delà de la demande, même motif** : l'en-tête « Développement des habiletés » du profil, que Cowork n'avait pas
+  nommé, est borné de la même façon. Il s'affiche justement dans la pratique de Grégoire (portfolio et artefacts) et
+  aurait changé pour lui.
+- **Sentinelle** (R13b, sur le vrai `js/etudiants.js` et son banc) : pour « Par sélection de productions » avec une note
+  non constructible, le relevé entier (chaque rangée, « moy=47 % », les entrées des dix appels de corrélation, l'ordre du
+  tri) est **celui mesuré sur la version de base** (`8ed02c6f`), épinglé ; la contre-épreuve (le même essai joué sur la
+  base) est verte. Pour « Par standards » en attente : « — », « moy=70 % » (hors du 0), aucune corrélation ne reçoit de 0,
+  sous toute note au tri. Break-tests BT24, BT24b, BT25 et BT26 : rouges, puis retirés.
+- **Inscrit au plan (§ 11), à porter à Grégoire** : « une note non constructible s'affiche 0 % dans la liste des
+  étudiant·es pour les autres pratiques » (et l'en-tête du profil), issue « inscrire et continuer ».
+
+### Correction 2 – « CIB » ne s'affiche nulle part (`54757eb1`)
+
+- **Fait** : dans `js/comparateur-pratiques.js`, les options des menus, le badge des maquettes et l'en-tête du CSV exporté
+  lisent le sigle (`sigleDuCode`, par le code réel). Le badge passait par `genererBadgePratiqueHTML(p.id)`, qui retombe sur
+  la famille par défaut pour une pratique configurable : une pratique par standards y portait « SEL ».
+  `obtenirSiglePratique(id)` a le même défaut pour un id configurable ; je ne l'emploie donc pas.
+- **Recherche de « CIB » dans la branche** : hors des commentaires, il n'est écrit qu'aux places internes déjà gardées
+  par la sentinelle des sigles (le registre, les tables de codes de la fiche, la correspondance de l'assistant). Le
+  Comparateur était le seul écran, et son CSV le seul fichier exporté, à l'écrire. Le champ `famille` des récits vaut
+  « CIB », mais aucun écran ne l'affiche (il sert aux comparaisons).
+- **Sentinelle** : la spec Chromium « « CIB » ne s'affiche nulle part » lit le texte, les bulles, les étiquettes lues et
+  les options de six écrans (tableau, fenêtre d'une case, profil, fiche, Comparateur, en-tête du CSV). Aucun « CIB » ; la
+  pratique par standards se lit « STD » au bandeau, à la fiche, dans les menus (« STD · Par standards fictive »), au badge
+  des maquettes et dans le CSV. La sentinelle des sigles épingle la voie du sigle. Break-test : le Comparateur d'avant
+  écrit « CIB · Par standards fictive » et les deux rougissent.
+- Effet sur l'autre pratique : dans les menus et le CSV du Comparateur, « Par sélection de productions » se lit
+  désormais « SEL » (elle se lisait « STD », son code), comme la décision du 21 nov., 6 h 56 le veut partout.
+
+### Correction 3 – l'Aperçu, mesuré sans rien y toucher
+
+Une pratique « Par standards », quatre étudiant·es, des copies remises pour trois d'entre eux (C de 0 à 100 %), aucune
+inscription, donc toute la classe en attente. Ce que l'enseignant·e voit dans Suivi › Aperçu (Chromium) :
+
+- **Performance (P)** : « La note du cours ne se construit pas encore : il n'y a rien à répartir. Le dépistage, lui,
+  s'appuie sur les productions déjà évaluées. » Aucun 0, aucune barre de P.
+- **Aucune phrase de corrélation** (« r(A↔P) », « r(C↔P) ») : toutes les notes absentes sont rangées à 0, la corrélation
+  n'a rien à mesurer et la phrase ne paraît pas. Le défaut inscrit (le 0 compté) ne se voit donc que lorsqu'une partie
+  de la classe a une note et que la corrélation atteint 0,5.
+- **Complétion (C)** : la barre et sa moyenne, normales.
+- **Une observation neuve, inscrite au plan (§ 11), sans correction** : l'aide « Méthodes de calcul des indices » dit
+  « pratique active : Sommative » et décrit P comme une moyenne pondérée des évaluations. `genererExplicationCalculIndices`
+  (`etudiants.js`) nomme « Sommative » toute pratique qui n'est pas « Par sélection de productions » (spécifications et
+  dénotation comprises).
+- Les deux trouvailles nommées par Cowork (l'Exploration ; les deux corrélations de l'Aperçu) restent inscrites,
+  intouchées.
+
+### Correction 4 – la passe
+
+- La garde du lot 0 : **16 sur 16**.
+- Vitest complet, un seul worker, sur le code de `54757eb1` : **942 fichiers, 12 150 verts, 0 rouge**.
+- Chromium : `par-standards-lot-2-inscrire.spec.js` 6 sur 6, `par-standards-lots-3-4.spec.js` 7 sur 7 (la spec « CIB »
+  comprise).
+- Jetons anti-cache relevés pour les trois fichiers retouchés (`20261121r`).
+- **Non mesuré** : WebKit et l'iPad (au Mac, sur la tête de la branche, dont le code est celui de `54757eb1`).
+
