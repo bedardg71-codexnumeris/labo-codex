@@ -4509,6 +4509,9 @@ p.apercu-algo-si { margin: 0; display: flex; flex-wrap: wrap; align-items: basel
 .editeur-cibles-poids {
     font-variant-numeric: tabular-nums;
 }
+.editeur-cibles--std input.editeur-cibles-poids.editeur-cibles-poids--refuse {
+    border-color: var(--rouge-erreur);
+}
 .editeur-cibles-terminale-case,
 .editeur-cibles-critere-essentiel {
     accent-color: var(--cib-sarcelle);

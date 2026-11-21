@@ -52,6 +52,7 @@ A et C (cf. `indices.js`, `portfolio.js`).
 | STD | `standards` | `--std-bleu` | PAN | Portfolio (sélection de N) + terminale | `pratique-pan-standards.js` | actif |
 | SPE | `specifications` | `--spe-vert` | PAN | Bundles tout-ou-rien par palier | `pratique-pan-specifications.js` | actif |
 | DEN | `denotation` | `--den-violet` | PAN (PRÉN académiquement, voir §2 bis) | Note finale = jugement SAISI, gardé par l'atteinte des cibles (voir §8) | `denotation-jugements.js` + `denotation-saisie-ui.js` ; moteur dans `pratique-configurable.js` | **actif (couche 2, #318)** |
+| CIB | `cibles` | `--cib-sarcelle` | PAN | **Pas encore de calcul** (lot 1, 21 nov. 2026) : la note viendra du meilleur niveau démontré par cible, en moyenne pondérée, avec un second seuil (lot 4) | `ensembles-cibles.js` (cibles) ; moteur à venir | **aperçu (branche `lot/moteur-cibles-1-cibles`)** |
 
 **Identifiants canoniques neutres (Session A, mai 2026)** : un seul id par pratique, sans
 préfixe `pan-`. « PAN » est un **libellé de famille**, plus un préfixe technique ni un
@@ -133,11 +134,17 @@ périmée (c'est le cas du skill `labo-codex` §5.2 au 5 juin).
   défaut de **nom**. Ne jamais écrire, dans une microcopie ou un guide, que cette famille « est » la notation
   par standards.
 - *Ce qui arrive (décisions de Grégoire, 20 nov. 2026)* : la famille actuelle **change de nom** (« Par
-  productions retenues ») et garde son moteur tel quel ; une **vraie pratique « Par standards »** est construite
-  à côté, avec une famille de code à elle, l'unité « cible » et une collection d'inscriptions à part. Plan :
-  `plans de travail/PLAN-2026-11-20-moteur-par-objectifs.md` ; écarts entre ce plan et les sources : § 9 de la
-  fiche de conception (double seuil, pondération, niveau 0, critères de la cible). Tant que le renommage n'est
-  pas livré, le code STD et l'id `standards` désignent **la pratique par productions retenues**.
+  sélection de productions », lot `lot/renommer-selection-productions`) et garde son moteur, son code STD et son id
+  `standards` tels quels ; une pratique **« Par standards »**, au sens des sources, est construite à côté, avec une
+  famille de code à elle (`cibles`, code CIB, méthode `niveaux_par_cible`), l'unité « cible » et une collection
+  d'inscriptions à part. Plan : `plans de travail/PLAN-2026-11-20-moteur-par-objectifs.md` (décisions du 20 nov. en
+  tête, lots 1 à 5) ; écarts entre le premier plan et les sources : § 9 de la fiche de conception. Posture inchangée :
+  aucune des deux n'est « la vraie » ; elles notent des choses différentes.
+- *Livré au lot 1 (21 nov. 2026, branche d'aperçu, pas dans `main`)* : les cibles du cours (`ensemblesCibles`, par
+  trimestre, module propriétaire `js/pratiques/ensembles-cibles.js` : étiquette, énoncé, critères dont essentiels,
+  poids, terminale, identités permanentes), l'échelle de la pratique et son niveau « sans donnée » (un niveau à 0 %),
+  l'assistant et la fiche. `PratiqueConfigurable.calculerPerformance` rend `null` pour `niveaux_par_cible` et
+  `expliquerNoteNonConstructible` dit pourquoi : aucun calcul avant le lot 4.
 
 **SPE — Spécifications**
 - *Recherche / pratique* : une spécification décrit le **produit réussi entier**, jugé sur
@@ -722,6 +729,7 @@ les valeurs de l'échelle de chimie.
 
 | Date | Changement |
 |------|------------|
+| 2026-11-21 (lot/moteur-cibles-1-cibles) | **La famille `cibles` (« Par standards », code CIB) entre au tableau du §2**, sans calcul (lot 1). §2 bis, partie STD : le nom retenu, « Par sélection de productions », aligné ; « vraie pratique » retiré (posture pluraliste) ; ce que le lot 1 livre. |
 | 2026-11-20 (lot/standards-conception) | **§2 bis, partie STD refaite d'après les sources** (`plans de travail/CONCEPTION-2026-11-20-pratique-par-standards.md`). La doctrine de la notation par standards est vérifiée page à l'appui (rapport PAREA 2026, articles 2024 et 2025, billets de la CoP) ; l'écart est dit sans détour : la famille de code STD note des productions et en retient, ce n'est pas une notation par standards ; annonce du renommage (« Par productions retenues ») et de la pratique « Par standards » à venir. Liste des sources complétée (§13). Aucun code touché. Signalé sans retouche : l'attribution à *Heart of the loop* dans « reprises sans pénalité » est fausse (la phrase est dans *The Four Pillars*) et « variante délibérée et défendable » n'a pas de source. |
 | 2026-09-18 (#921) | **Une sommative CONFIGURABLE a son récit, et le profil l'affiche.** `PratiqueConfigurable.decrireCalcul` délègue à `PratiqueSommative.decrireCalcul` pour `moyenne_ponderee` (note = `_calculerPerformanceSommative`, verrou #897 compris ; `synthese.plafonnement = { moyenneOriginale }` quand il a joué). Le récit SOM porte `ponderation` et `poids` en nombres. Le profil rend la carte par `_genererNoteSessionSommative` quand `calculerDetailsNoteFinale` rend null. ⚠ `simulerIndices(da)` SANS id rend `null` (le §7 laisse croire à un repli sur la pratique active : il n'existe pas) — passer `obtenirPratiqueActiveGroupeCours()`. |
 | 2026-09-17 (#898, lot 34, 1.142.31) | **§10 : adopter un modèle Standards sans échelle demande l'échelle** — deux gestes vivants (assistant, bibliothèque), une seule question (`demanderEchelleAdoption`, `uiDialogues.demanderChoix`), parité profil / export / Comparateur prouvée ; cas d'arrêt #909. |

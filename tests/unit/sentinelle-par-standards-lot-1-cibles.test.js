@@ -99,6 +99,9 @@ describe('A · identité permanente des cibles et des critères (mode « Par sta
         champ.value = '0';
         win.EditeurCibles.majTotal(champ);
         expect(hote.querySelector('.editeur-cibles-total').textContent).toMatch(/^Total des poids : —/);
+        // Le poids fautif, et lui seul, est marqué (le refus de l'assistant ne rougit pas toute la liste).
+        expect([...hote.querySelectorAll('.editeur-cibles-poids')].map(i => i.getAttribute('aria-invalid'))).toEqual(['false', 'false', 'true']);
+        expect(champ.classList.contains('editeur-cibles-poids--refuse')).toBe(true);
     });
 
     it('le mode de la dénotation ne change pas : mêmes lignes, même forme { id, nom }', () => {
@@ -309,7 +312,7 @@ function storeTemoin(store) {
 }
 describe('D · le registre et la pratique : un code, une méthode, aucune note encore, et la raison en mots', () => {
     const PRATIQUE = { id: 'cib-banc', nom: 'Par standards banc', type: 'cibles', calcul_note: { methode: 'niveaux_par_cible' }, dansBibliotheque: true,
-        configuration: { type: 'cibles', ensembleCiblesId: 'ENS1', echelleId: 'ECH-depart', niveauSansDonnee: '0' } };
+        configuration: { type: 'cibles', ensembleCiblesId: 'ENS1', echelleId: 'ECH-banc', niveauSansDonnee: '0' } };   // l'échelle de départ du banc (B)
     function monter() {
         const store = { pratiquesConfigurables: [clone(PRATIQUE)], echellesTemplates: [clone(ECHELLE_DEPART)],
             evaluationsSauvegardees: [{ etudiantDA: '2000001', productionId: 'P1', noteFinale: 90 }], indicesCP: { '2000001': { actuel: { P: 77 } } } };

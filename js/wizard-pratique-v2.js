@@ -332,6 +332,7 @@ const ETAPES_WIZARD = {
                 id: 'ciblesStandards',
                 label: 'Cibles d\'apprentissage',
                 type: 'liste-cibles-standards',
+                marquerEnErreur: false,   // toute la liste en rouge masquerait la case fautive (le poids se marque seul)
                 motifRefus: (el) => window.EnsemblesCibles.motifsRefusCibles(window.EditeurCibles.lireStandards(el))[0] || null
             }
         ],
@@ -2504,7 +2505,7 @@ function _validerParMotif(champ, motifs) {
     const element = document.getElementById(`${WIZARD_V2_ID_PREFIX}${champ.id}`);
     const motif = champ.motifRefus(element);
     const container = element ? element.closest('.wizard-v2-champ') : null;
-    if (container) container.classList.toggle('wizard-v2-champ-erreur', !!motif);
+    if (container && champ.marquerEnErreur !== false) container.classList.toggle('wizard-v2-champ-erreur', !!motif);
     if (motif) motifs.push(motif);
     return !motif;
 }

@@ -301,6 +301,10 @@
         champs.forEach((i, n) => {
             const part = i.closest('.editeur-cibles-ligne')?.querySelector('.editeur-cibles-part');
             if (part) part.textContent = etat.parts[n];
+            // Le poids fautif, et lui seul, se marque : le refus nomme sa cible, la case la montre.
+            const refuse = !(lirePoidsLocal(i.value) > 0);
+            i.classList.toggle('editeur-cibles-poids--refuse', refuse);
+            i.setAttribute('aria-invalid', refuse ? 'true' : 'false');
         });
         const ligne = editeur.querySelector('.editeur-cibles-total');
         if (ligne) {
