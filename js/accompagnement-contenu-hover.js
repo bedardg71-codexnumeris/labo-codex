@@ -478,7 +478,7 @@ const TOOLTIPS = {
     'wizard-etape-config-sommative-regles':
         'Le verrou plafonne la note finale quand l’évaluation choisie n’atteint pas le seuil, même si la moyenne est plus haute.',
     'wizard-etape-approche-evaluation':
-        'En standards, la note se construit sur le portfolio ; à l’étape suivante, tu choisis quels artefacts comptent.',
+        'Par sélection de productions, la note se construit sur le portfolio ; à l’étape suivante, tu choisis quels artefacts comptent.',
     'wizard-etape-config-portfolio':
         'Ici, tu dis quels artefacts comptent : les N meilleurs, tous, les N derniers, ou les N meilleurs plus les obligatoires. Les autres restent visibles, mais n’entrent pas dans la note.',
     'wizard-etape-config-specifications':

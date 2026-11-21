@@ -324,14 +324,14 @@ test.describe('Vue simple · le parcours d\'un nouvel arrivant', () => {
         await page.evaluate(() => window.naviguerVers('suivi', 'liste'));
         await expect(page.locator('#suivi-liste')).toContainText('Albatros');
         await page.evaluate(() => window.naviguerVers('conception', 'pratiques-notation'));
-        await expect(page.locator('#selectionPratiques')).toContainText('Par standards');
+        await expect(page.locator('#selectionPratiques')).toContainText('Par sélection de productions');
         await page.evaluate(() => window.naviguerVers('conception', 'productions'));
         await expect(page.locator('#conception-productions')).toContainText('Production 3');
 
         // 9. Il revient à la vue simple : idem.
         await basculer(page, 'simple');
         await expect(page.locator('#section-simple-accueil')).toBeVisible();
-        await expect(ecran(page, 'accueil').locator('.vs-etape-etat')).toHaveText(['4 étudiant·es', 'Par standards']);
+        await expect(ecran(page, 'accueil').locator('.vs-etape-etat')).toHaveText(['4 étudiant·es', 'Par sélection de productions']);
         await allerA(page, 'resultats');
         await expect(page.locator('#vs-tableau-hote .tn-case')).toHaveCount(12);
         await expect(noteTn(page, 1)).toHaveText('88');
@@ -1634,7 +1634,7 @@ test.describe('Vue simple · le passage vers la vue étendue', () => {
         await expect(page.locator('#suivi-saisie')).toContainText('Configurer l\'horaire dans Cadre › Trimestre');
         // La pratique née en vue simple s'ouvre dans Conception › Pratiques.
         await page.evaluate(() => window.naviguerVers('conception', 'pratiques-notation'));
-        await expect(page.locator('#selectionPratiques')).toContainText('Par standards (active)');
+        await expect(page.locator('#selectionPratiques')).toContainText('Par sélection de productions (active)');
         expect(erreurs).toEqual([]);
     });
 });
@@ -1672,10 +1672,10 @@ test.describe('Vue simple · quelqu\'un qui a déjà des données', () => {
         await basculer(page, 'simple');
         await allerA(page, 'resultats');
         await expect(ecran(page, 'resultats').locator('.vs-select option')).toHaveText(['Cours fictif A · groupe 01', 'Cours fictif B · groupe 02 (autre pratique)']);
-        await expect(ecran(page, 'resultats').locator('.vs-note')).toHaveText('Un groupe dont la pratique n’est ni par standards ni par spécifications se suit en vue étendue.');
+        await expect(ecran(page, 'resultats').locator('.vs-note')).toHaveText('Un groupe dont la pratique n’est ni par sélection de productions ni par spécifications se suit en vue étendue.');
         await expect(page.locator('#vs-tableau-hote .tn-production-titre')).toHaveText(['Production fictive']);
         await ecran(page, 'resultats').locator('.vs-select').selectOption('GC_SOM');
-        await expect(page.locator('#vs-tableau-hote .tn-etat-vide')).toHaveText('Le tableau sert aux pratiques par standards et par spécifications. La pratique de ce groupe se suit en vue étendue.');
+        await expect(page.locator('#vs-tableau-hote .tn-etat-vide')).toHaveText('Le tableau sert aux pratiques par sélection de productions et par spécifications. La pratique de ce groupe se suit en vue étendue.');
         await allerA(page, 'note');
         await expect(ecran(page, 'note').locator('.vs-select')).toHaveValue('GC_SOM');
         await ecran(page, 'note').locator('.vs-select').selectOption('GC_STD');
