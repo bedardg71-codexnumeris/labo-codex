@@ -21,6 +21,17 @@
 
     var CHANGELOG = [
         {
+            // 1.252 (21 nov. 2026 : la pratique « Standards » renommée « Par sélection de productions », son sigle SEL en
+            // sarcelle) — ligne acceptée par Grégoire le 20 nov., complétée d'une phrase le 21 nov., mot pour mot ; seule
+            // la typographie du fichier est appliquée. Le titre est de Claude Code (supposé, dit au rapport de la release).
+            version: '1.252',
+            couleur: 'bleu',
+            titre: '«&nbsp;Standards&nbsp;» devient «&nbsp;Par sélection de productions&nbsp;»',
+            items: [
+                'La pratique «&nbsp;Standards&nbsp;» s’appelle maintenant «&nbsp;Par sélection de productions&nbsp;». Le nom dit ce que fait le calcul&nbsp;: chaque production reçoit un niveau et la note se construit à partir de celles que ta règle retient. Tes pratiques, tes réglages et tes notes ne changent pas. Une pratique que tu avais nommée toi-même garde son nom. Son badge dit maintenant «&nbsp;SEL&nbsp;», en sarcelle.'
+            ]
+        },
+        {
             // 1.251 (19 nov. 2026 : la grille d'autoévaluation dans le PDF des consignes, les noms des deux seuils,
             // « Dupliquer » en copie profonde (#1298), le glisser d'Alignement (#1295)) — titre et quatre lignes
             // approuvés par Grégoire le 19 nov. 2026 à 22 h 09, mot pour mot ; seule la typographie du fichier

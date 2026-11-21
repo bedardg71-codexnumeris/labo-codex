@@ -92,6 +92,6 @@
 > Seule l'évaluation terminale a une note. Par sélection de productions, la note du cours s'appuie aussi sur les productions retenues : elle ne se calcule pas sur la terminale seule.
 > Seule l'évaluation terminale a une note. Par sélection de productions, la note du cours s'appuie aussi sur les artefacts du portfolio : elle ne se calcule pas sur la terminale seule.
 
-## La ligne des Nouvelles, acceptée, à garder pour la release (pas écrite dans `js/changelog-data.js` par ce lot)
+## La ligne des Nouvelles, acceptée (publiée à la 1.252 le 21 nov. 2026, suivie de la phrase du sigle : « Son badge dit maintenant « SEL », en sarcelle. »)
 
 La pratique « Standards » s'appelle maintenant « Par sélection de productions ». Le nom dit ce que fait le calcul : chaque production reçoit un niveau et la note se construit à partir de celles que ta règle retient. Tes pratiques, tes réglages et tes notes ne changent pas. Une pratique que tu avais nommée toi-même garde son nom.
