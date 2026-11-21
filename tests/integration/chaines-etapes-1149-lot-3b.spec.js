@@ -368,7 +368,7 @@ test('Pratiques : sommative (Pondération à 70 %, puis 110 % critique) ; standa
     await OUVRIR.pratique(page, 'pratique_banc_std');
     c = await lireChaine(page, 'chainePratique');
     expect(c.ids).toEqual(['methode', 'echelle', 'groupe-cours']);
-    expect(c.etapes.methode.info).toBe('PAN-Standards');
+    expect(c.etapes.methode.info).toBe('PAN – Sélection de productions');
     expect(c.etapes.echelle).toMatchObject({ reglee: false, info: 'à choisir' });
     await cliquerSansEcrire(page, 'chainePratique', 'echelle');
     expect(await dansLaVue(page, '#mat-echelle-id')).toBe(true);

@@ -39,7 +39,7 @@
         aSaisir: 'à saisir',
         avecGrille: 'évaluée avec une grille ; toucher pour l’ouvrir',
         aucunePratique: 'Ce groupe-cours n’a pas de pratique de notation. Choisis-en une dans Conception › Pratiques : le tableau suivra ses réglages.',
-        autreFamille: 'Le tableau de notation sert aux pratiques par standards et par spécifications. Pour la pratique de ce groupe-cours, la Liste reste la vue de tes évaluations.',
+        autreFamille: 'Le tableau de notation sert aux pratiques par sélection de productions et par spécifications. Pour la pratique de ce groupe-cours, la Liste reste la vue de tes évaluations.',
         aucunEleve: 'Aucun·e étudiant·e dans ce groupe-cours. Ajoute ta liste dans Cadre › Trimestre pour remplir le tableau.',
         aucuneProduction: 'Aucune production n’entre dans la note de ta pratique. Crée tes productions dans Conception › Productions.',
         sansEchelle: 'Ni tes productions ni ta pratique n’ont d’échelle dont les niveaux portent une valeur : aucun niveau ne peut être saisi.',

@@ -41,7 +41,7 @@
         sousTitreAccueil: 'Quatre étapes, de ta liste d’étudiant·es à ta note finale.',
         cartes: [
             { ecran: 'classe', titre: 'Ta classe', texte: 'Colle ta liste d’étudiant·es : DA, nom, prénom.', lien: 'Coller ma liste' },
-            { ecran: 'pratique', titre: 'Ta pratique', texte: 'Choisis un modèle, par standards ou par spécifications, et la règle qui construit la note.', lien: 'Choisir un modèle' },
+            { ecran: 'pratique', titre: 'Ta pratique', texte: 'Choisis un modèle, par sélection de productions ou par spécifications, et la règle qui construit la note.', lien: 'Choisir un modèle' },
             { ecran: 'resultats', titre: 'Tes résultats', texte: 'Inscris un niveau, ou acceptable / non acceptable, dans un tableau : tes étudiant·es en lignes, tes productions en colonnes.', lien: 'Ouvrir le tableau' },
             { ecran: 'note', titre: 'Ta note finale', texte: 'Vois la note de chaque étudiant·e et exporte-les en CSV, prêtes pour ton relevé.', lien: 'Voir les notes' }
         ],
@@ -88,14 +88,14 @@
         groupe: 'Groupe',
         groupeChoisir: 'Choisis un groupe',
         groupeAutrePratique: 'autre pratique',
-        groupeMotAutres: 'Un groupe dont la pratique n’est ni par standards ni par spécifications se suit en vue étendue.',
+        groupeMotAutres: 'Un groupe dont la pratique n’est ni par sélection de productions ni par spécifications se suit en vue étendue.',
         sansClasse: 'Commence par ta classe : colle ta liste d’étudiant·es.',
         sansClasseLien: 'Coller ma liste',
         // — Pratique
         pratiqueTitre: 'Ta pratique',
         pratiqueIntro: 'Choisis un modèle. Tu régleras ensuite la règle qui construit la note.',
         modeles: [
-            { famille: 'standards', modele: 'STD-n-meilleurs', titre: 'Par standards', texte: 'Chaque production reçoit un niveau. La note se construit à partir des niveaux que la règle retient.', lien: 'Choisir les standards' },
+            { famille: 'standards', modele: 'STD-n-meilleurs', titre: 'Par sélection de productions', texte: 'Chaque production reçoit un niveau. La note se construit à partir des niveaux que la règle retient.', lien: 'Choisir ce modèle' },
             { famille: 'specifications', modele: 'SPE-simple', titre: 'Par spécifications', texte: 'Chaque production est acceptable ou non acceptable. La note dépend du nombre de productions acceptables.', lien: 'Choisir les spécifications' }
         ],
         pratiqueModele: 'Modèle',
@@ -156,14 +156,14 @@
             typeNomGarde: (r) => `Des productions de ton tableau portent le type « ${r.nom} ». Ce nom ne se change pas ici.`
         },
         pratiqueChanger: 'Changer de modèle',
-        pratiqueAutre: 'La pratique de ce groupe n’est ni par standards ni par spécifications : elle se règle en vue étendue.',
+        pratiqueAutre: 'La pratique de ce groupe n’est ni par sélection de productions ni par spécifications : elle se règle en vue étendue.',
         pratiqueSuite: 'Ouvrir le tableau',
         pratiqueEchec: 'La pratique n’a pas pu être enregistrée.',
         reglePartagee: (n) => `Ce réglage vaut pour les ${n} groupes qui ont cette pratique.`,
         // — Résultats (le tableau garde ses mots validés ; ceux-ci remplacent les messages qui nomment la vue étendue)
         tableau: {
             aucunePratique: 'Ce groupe n’a pas encore de pratique. Choisis un modèle : le tableau suivra sa règle.',
-            autreFamille: 'Le tableau sert aux pratiques par standards et par spécifications. La pratique de ce groupe se suit en vue étendue.',
+            autreFamille: 'Le tableau sert aux pratiques par sélection de productions et par spécifications. La pratique de ce groupe se suit en vue étendue.',
             aucunEleve: 'Ce groupe n’a pas encore d’étudiant·es. Colle ta liste pour remplir le tableau.',
             aucuneProduction: 'Ton tableau n’a pas encore de colonne. Ajoute ta première production : un nom et une date.'
         },
