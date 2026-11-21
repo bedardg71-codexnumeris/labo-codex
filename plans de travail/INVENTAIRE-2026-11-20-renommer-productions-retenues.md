@@ -1,5 +1,9 @@
 # Inventaire — renommer la pratique « Standards » en « Par productions retenues »
 
+> **Nom retenu (Grégoire, 20 nov. 2026, 20 h 02) : « Par sélection de productions ».** « Par productions retenues » est abandonné : lire ce nom partout ci-dessous comme l'ancienne proposition.
+> **Portée réduite à vingt textes** (là où on choisit la pratique et là où on la nomme), acceptés mot pour mot à 20 h 44 et posés sur `lot/renommer-selection-productions` : `TEXTES-2026-11-20-selection-de-productions.md`, consigne `CONSIGNE-LOT-2026-11-20-renommer-selection-productions.md`.
+> **Le reste de cet inventaire attend** : l'aide, le glossaire, les parcours, le badge et les réécritures du §4 ne sont pas appliqués.
+
 > Lecture seule. Mesuré le 21 nov. 2026 sur `origin/main` à `e31a8556`. Aucun fichier de `js/`, d'`index.html` ni de `styles.css` n'a changé.
 > Consigne : `CONSIGNE-2026-11-20-renommer-productions-retenues-inventaire.md`.
 > **Tous les textes proposés ici attendent le oui de Grégoire** (correction du 20 nov., 19 h 08). Rien ne s'applique avant sa relecture.

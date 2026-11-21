@@ -143,8 +143,13 @@ const avec = (pratique, productions, evaluations) => note(banc({ pratique, produ
 const AUCUNE_PRODUCTION = 'Aucune production retenue pour la note n\'est encore évaluée.';
 // La phrase d'un pool d'artefacts sans évaluation (9 nov. 2026, 17 h 38 : Grégoire remplace « Aucun artefact du portfolio n'est encore évalué. », validée le 28 oct., par cette phrase, partout).
 const AUCUN_ARTEFACT = 'Aucune production n\'est encore évaluée.';
-const TERMINALE_SEULE_PRODUCTIONS = 'Seule l\'évaluation terminale a une note. En standards, la note du cours s\'appuie aussi sur les productions retenues : elle ne se calcule pas sur la terminale seule.';
-const TERMINALE_SEULE_ARTEFACTS = 'Seule l\'évaluation terminale a une note. En standards, la note du cours s\'appuie aussi sur les artefacts du portfolio : elle ne se calcule pas sur la terminale seule.';
+// 20 nov. 2026 : la pratique se nomme « Par sélection de productions ». Les deux phrases se lisent dans le fichier de textes
+// validés du renommage (repère M5), plus dans celui du 28 oct.
+const RENOMMAGE = readFileSync(join(resolve(import.meta.dirname, '..', '..'), 'plans de travail/TEXTES-2026-11-20-selection-de-productions.md'), 'utf8');
+/** Les textes `> …` d'un repère du renommage (V1, A5, M5…), lus dans le fichier. */
+const texteRenomme = (repere) => RENOMMAGE.split(/^## /m).find(s => s.startsWith(repere + ' ·')).split('\n').filter(l => l.startsWith('> ')).map(l => l.slice(2).trim());
+const TERMINALE_SEULE_PRODUCTIONS = texteRenomme('M5')[0];
+const TERMINALE_SEULE_ARTEFACTS = texteRenomme('M5')[1];
 
 /* ================================================================ A. LE POOL */
 describe('A · le pool sans « Artefact » prend les productions évaluées, quelle que soit leur pondération', () => {
@@ -762,6 +767,8 @@ const LOT_5 = lireDuDepot('plans de travail/TEXTES-2026-10-29-standards-lot-5.md
 const sectionLot5 = (n) => LOT_5.split(/^## /m).find(s => s.startsWith(n + '.'));
 /** Les citations `> …` du texte n, lues dans le fichier. */
 const citations = (n) => sectionLot5(n).split('\n').filter(l => l.startsWith('> ') && !l.startsWith('> **')).map(l => l.slice(2).trim());
+/** Le texte 1 du lot 5, dont la troisième citation (l'information sous la carte) est remplacée par le repère A5 du renommage. */
+const approcheSansArtefact = () => [citations(1)[0], citations(1)[1], texteRenomme('A5')[0]];
 /** La colonne « Sans Artefact » de la table du texte 4, par endroit. */
 const nombreRetenu = (ou) => sectionLot5(4).split('\n').find(l => l.startsWith('| ' + ou)).split('|')[3].trim();
 const HYBRIDE = 'Hybride (N meilleures + Obligatoires)';
@@ -817,7 +824,7 @@ describe('I · lot 5 : l\'assistant et les mots', () => {
 
     it('CHIM : l\'assistant dit « productions », ses deux champs morts partis', () => {
         const a = lireAssistant(assistant(std(), prodChimie()).win);
-        expect(a.approche).toEqual(citations(1));
+        expect(a.approche).toEqual(approcheSansArtefact());
         expect(a.etape).toEqual(citations(2));
         expect(a.modes).toEqual([citations(3)[0], citations(3)[1], citations(3)[2], HYBRIDE]);
         expect(a.retenu).toBe(nombreRetenu('Assistant'));
@@ -834,7 +841,7 @@ describe('I · lot 5 : l\'assistant et les mots', () => {
     it('GREG : les mots d\'aujourd\'hui, sauf les textes pour toutes les pratiques', () => {
         const a = lireAssistant(assistant(std(), prodGreg()).win);
         expect(a.approche).toEqual(['Par artefacts (portfolio)', 'Les étudiant·es soumettent des artefacts. La note finale est calculée à partir des N meilleurs artefacts.',
-            'PAN-Standards s\'appuie sur le portfolio : c\'est la progression à travers les artefacts qui construit la note.']);
+            texteRenomme('A4')[0]]);
         expect(a.etape).toEqual(['Configuration du portfolio', 'Paramètre la gestion des artefacts']);
         expect(a.modes).toEqual(['N meilleurs artefacts', 'Tous les artefacts', 'N derniers artefacts', HYBRIDE]);
         expect(a.retenu).toBe('Nombre d\'artefacts retenus pour la note finale');
@@ -860,7 +867,7 @@ describe('I · lot 5 : l\'assistant et les mots', () => {
     it('un corpus vide : la variante « productions »', () => {
         const w = assistant(std(), []).win;
         expect(w.coursActifFaitDArtefacts()).toBe(false);
-        expect(lireAssistant(w).approche).toEqual(citations(1));
+        expect(lireAssistant(w).approche).toEqual(approcheSansArtefact());
     });
 
     it('un « Artefact » seulement dans l\'autre cours ne change pas la variante : c\'est le cours actif qui décide', () => {
@@ -929,7 +936,7 @@ describe('I · lot 5 : l\'assistant et les mots', () => {
 
     it('les textes statiques : la fiche (7), l\'Aide (8, 9, 11, 12), au caractère près sauf l\'insécable', () => {
         const page = net(lireDuDepot('index.html'));
-        const attendus = [citations(7)[0], citations(8)[0], ...citations(9), ...citations(11), ...citations(12)];
+        const attendus = [texteRenomme('F4')[0], citations(8)[0], ...citations(9), ...citations(11), ...citations(12)];   // 7 : le repère F4 du renommage (20 nov.)
         expect(attendus).toHaveLength(7);
         for (const t of attendus) expect(page, t).toContain(net(t));
         for (const ancien of ['Le meilleur résultat est retenu pour chaque standard', 'traces retenues au portfolio', 'C\'est une moyenne de notes', 'Minimum d\'artefacts avant calcul formatif']) {

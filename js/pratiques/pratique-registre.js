@@ -834,7 +834,7 @@ const MOTS_POOL_STD = {
         approche: 'Par artefacts (portfolio)',
         variante: 'Par artefacts',
         approcheDescription: 'Les étudiant·es soumettent des artefacts. La note finale est calculée à partir des N meilleurs artefacts.',
-        approcheInfo: 'PAN-Standards s\'appuie sur le portfolio : c\'est la progression à travers les artefacts qui construit la note.',
+        approcheInfo: 'Cette pratique s\'appuie sur le portfolio : c\'est la progression à travers les artefacts qui construit la note.',
         etapeTitre: 'Configuration du portfolio',
         etapeDescription: 'Paramètre la gestion des artefacts',
         modeMeilleurs: 'N meilleurs artefacts',
@@ -849,7 +849,7 @@ const MOTS_POOL_STD = {
         approche: 'Par productions',
         variante: 'Par productions',
         approcheDescription: 'La note se calcule à partir de tes productions évaluées, sauf les diagnostiques.',
-        approcheInfo: 'En PAN – Standards, la note repose sur plusieurs productions : à l\'étape suivante, tu choisis lesquelles elle retient (les meilleures, les dernières ou toutes).',
+        approcheInfo: 'Ici, la note repose sur plusieurs productions : à l\'étape suivante, tu choisis lesquelles elle retient (les meilleures, les dernières ou toutes).',
         etapeTitre: 'Les productions qui font la note',
         etapeDescription: 'Choisis combien en retenir, et lesquelles.',
         modeMeilleurs: 'N meilleures productions',
@@ -930,7 +930,7 @@ function obtenirIdsPoolStdDuCorpus(productions) {
  */
 function causeNoteStdSansProductionNotee(avecArtefacts, terminaleNotee) {
     if (terminaleNotee) {
-        return 'Seule l\'évaluation terminale a une note. En standards, la note du cours s\'appuie aussi sur '
+        return 'Seule l\'évaluation terminale a une note. Par sélection de productions, la note du cours s\'appuie aussi sur '
             + (avecArtefacts ? 'les artefacts du portfolio' : 'les productions retenues')
             + ' : elle ne se calcule pas sur la terminale seule.';
     }

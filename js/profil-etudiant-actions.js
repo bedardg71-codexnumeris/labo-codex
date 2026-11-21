@@ -506,7 +506,7 @@ function calculerDetailsNoteFinale(da, pratiqueIdDemande = null) {
     const cfg = _obtenirConfigPortfolioCalcul(modalites, pratiqueIdDemande);
     if (cfg.erreur) {
         return {
-            pratique: 'PAN-Standards',
+            pratique: 'PAN – Sélection de productions',
             pratiqueId: pratiqueId,
             pratiqueNom: pratiqueNom,
             erreur: cfg.erreur,
@@ -705,7 +705,7 @@ function calculerDetailsNoteFinale(da, pratiqueIdDemande = null) {
     };
 
     return {
-        pratique: 'PAN-Standards',
+        pratique: 'PAN – Sélection de productions',
         erreur: erreurConfiguration || causeNoteAbsente,
         // La même phrase, seule : ce que la pratique déclare au rapport et à l'export (`expliquerNoteNonConstructible`).
         causeNoteAbsente: causeNoteAbsente,

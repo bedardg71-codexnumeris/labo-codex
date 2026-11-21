@@ -49,7 +49,7 @@ function grillesDuWizard() {
 // badge famille). Un seul endroit à éditer, pas de microcopy dupliqué.
 const TYPE_BADGES = {
     'sommative': { code: 'SOM', classe: 'som', label: 'Sommative', description: 'Ta note finale est calculée par une moyenne pondérée des évaluations. C\'est la méthode traditionnelle, largement utilisée.' },
-    'standards': { code: 'STD', classe: 'std', label: 'PAN – Standards', description: 'Tu évalues par niveaux de maîtrise (ex. : I-D-M-E). La note est construite à partir de la démonstration de compétences, pas d\'une simple moyenne.' },
+    'standards': { code: 'STD', classe: 'std', label: 'PAN – Sélection de productions', description: 'Tu évalues chaque production par niveaux (ex. : I-D-M-E). La note se construit à partir des productions que ta règle retient, pas de la moyenne de toutes.' },
     'specifications': { code: 'SPE', classe: 'spe', label: 'PAN – Spécifications', description: 'Chaque travail est jugé acceptable ou non. La note finale dépend du nombre de spécifications réussies (forfaits).' },
     // #319 Lot 5 (#318) : DEN reconnue à l'édition (code/couleur du registre canonique,
     // --den-violet). Elle se crée aussi : la carte « Note finale posée, pas calculée » de
@@ -218,7 +218,7 @@ const ETAPES_WIZARD = {
                 required: true,
                 options: [
                     { value: 'moyenne', label: 'Sommative (SOM)', description: 'Note finale par moyenne pondérée des évaluations.' },
-                    { value: 'niveaux', label: 'PAN – Standards (STD)', description: 'Niveaux de maîtrise (ex. I-D-M-E) convertis en note.' },
+                    { value: 'niveaux', label: 'PAN – Sélection de productions', description: 'Des niveaux (ex. I-D-M-E) ; la note retient certaines productions.' },
                     { value: 'acceptable', label: 'PAN – Spécifications (SPE)', description: 'Travaux acceptables ou non ; note selon les forfaits réussis.' },
                     { value: 'jugement', label: 'PAN – Dénotation (DEN)', description: 'Note finale certificative posée (non calculée) selon l\'atteinte de cibles d\'apprentissage explicites ; abandonne la fonction de tri.' }
                 ]
@@ -1930,7 +1930,7 @@ function genererRecapitulatif() {
     // sommative — rang et moyenne du groupe — part avec son étape.)
     if (r.typePratique === 'standards') {
         html += '<div class="wizard-v2-recap-section">';
-        html += '<h4>Configuration PAN-Standards</h4>';
+        html += '<h4>Configuration PAN – Sélection de productions</h4>';
         // #443 : le libellé « Par objectifs » part avec la carte. Le repli
         // `|| r.approcheEvaluation` reste : une pratique stockée qui porte encore
         // l'ancienne valeur s'affiche telle quelle plutôt que « undefined ».
@@ -2453,7 +2453,7 @@ async function creerPratiqueV2() {
     // pratique invalide (qui échouerait ensuite à l'instanciation : « echelle manquante »).
     // SOM (moyenne pondérée) et SPE (seuils) n'utilisent pas d'échelle IDME → non bloqués.
     if (typeFinal === 'standards' && !r.echelleId) {
-        notifications.erreur('Choisis une échelle de performance (IDME) avant de créer cette pratique PAN-Standards. Reviens à l\'étape « Échelle de performance ».');
+        notifications.erreur('Choisis une échelle de performance (IDME) avant de créer cette pratique par sélection de productions. Reviens à l\'étape « Échelle de performance ».');
         return;
     }
 
