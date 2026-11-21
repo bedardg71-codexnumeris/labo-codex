@@ -75,7 +75,12 @@ test('CHIM · aucun « Artefact » : l\'assistant et la fiche disent « producti
 
     await ouvrirAssistant(page, 'approche-evaluation');
     await expect(page.locator('.wizard-v2-card-title').filter({ hasText: citations(1)[0] })).toBeVisible();
-    await expect(page.getByText(citations(1)[2])).toBeVisible();
+    // ↻ 21 nov. 2026 : l'information sous la carte ne dit plus « En PAN – Standards » ; son texte est le repère A5 du
+    // renommage, accepté le 20 nov. (TEXTES-2026-11-20-selection-de-productions.md). Le fichier du 29 oct. reste intact.
+    const A5 = lire('plans de travail/TEXTES-2026-11-20-selection-de-productions.md').split(/^## /m).find(x => x.startsWith('A5 ·')).split('\n').find(l => l.startsWith('> ')).slice(2).trim();
+    expect(A5).toMatch(/^Ici, la note repose sur plusieurs productions/);
+    await expect(page.getByText(A5)).toBeVisible();
+    await expect(page.getByText(citations(1)[2])).toHaveCount(0);
     await ouvrirAssistant(page, 'config-portfolio');
     await expect(page.locator('#wizard-v2-description')).toHaveText(citations(2)[1]);
     await expect(page.locator('label').filter({ hasText: 'Nombre de productions retenues pour la note finale' })).toBeVisible();

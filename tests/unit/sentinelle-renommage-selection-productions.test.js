@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { readFileSync } from 'node:fs';
+import { tranche } from './_helpers/tranche.js';
 import { join, resolve } from 'node:path';
 
 // SENTINELLE — la pratique « Standards » se nomme « Par sélection de productions » (20 nov. 2026).
@@ -97,9 +98,17 @@ describe('Renommage « Par sélection de productions » — les vingt textes acc
         expect(lire('js/export-resultats-finaux.js')).toContain('pratique.obtenirNom()');   // E1 suit F10, sans texte à lui
     });
 
-    it('la ligne des Nouvelles est gardée pour la release, pas encore publiée', () => {
-        expect(TEXTES).toContain('La pratique « Standards » s\'appelle maintenant « Par sélection de productions ».');
-        expect(lire('js/changelog-data.js')).not.toContain('Par sélection de productions');
+    it('la ligne des Nouvelles est publiée à la 1.252, mot pour mot, avec la phrase du sigle (release du 21 nov. 2026)', () => {
+        const ligne = TEXTES.split('\n').find(l => l.startsWith('La pratique « Standards » s\'appelle maintenant'));
+        expect(ligne).toMatch(/Une pratique que tu avais nommée toi-même garde son nom\.$/);
+        // La typographie du fichier des Nouvelles : apostrophe courbe, espaces insécables dans les guillemets et avant « : ».
+        const typo = (t) => t.replace(/'/g, '’').replace(/« /g, '«&nbsp;').replace(/ »/g, '&nbsp;»').replace(/ :/g, '&nbsp;:');
+        const attendu = typo(ligne + ' Son badge dit maintenant « SEL », en sarcelle.');
+        const journal = lire('js/changelog-data.js');
+        const entree = tranche(journal, "version: '1.252'", "version: '1.251'");
+        expect(entree).toContain("'" + attendu + "'");
+        expect((entree.match(/^\s+'/gm) || []).length).toBe(1);        // une seule ligne dans cette entrée
+        expect(entree).not.toMatch(/STD|Par standards|PAN/);            // rien de la nouvelle pratique, et SEL n'est pas dite PAN
     });
 });
 

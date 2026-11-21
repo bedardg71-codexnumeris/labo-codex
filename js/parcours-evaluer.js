@@ -1078,7 +1078,7 @@
         }),
         niveaux: Object.freeze([['Structure', 'M'], ['Rigueur', 'D'], ['Plausibilité', 'D'], ['Nuance', 'D']]),
         echelle: 'IDME et niv 0',
-        // Le modèle par standards de l'assistant (`STD-n-meilleurs`, celui que la vue simple appelle « Par standards »).
+        // Le modèle par standards de l'assistant (`STD-n-meilleurs`, celui que la vue simple appelle « Par sélection de productions »).
         pratique: Object.freeze({ id: 'STD-n-meilleurs', nom: 'N meilleures évaluations' }),
         // SUPPOSITION (15 nov. 2026) : le matériel ne nomme pas la cartouche ; elle prend le titre de la production.
         cartouche: 'Artefact 1',

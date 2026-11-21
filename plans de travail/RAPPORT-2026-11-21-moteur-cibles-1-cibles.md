@@ -264,3 +264,17 @@ SEL ouvert, deux fiches, deux tailles, deux thèmes ; aucune erreur de page). Da
 emprunte l'échelle de départ créée pour la pratique STD, d'où « Échelle de départ – Par standards » dans son aperçu :
 c'est le montage des captures, pas l'application. **Non vu** : WebKit et Safari ; la fenêtre du glossaire et le guide
 à l'écran ; une donnée réelle portant `pratiques: ['PAN']`.
+
+## 8. `main` réuni dans la branche (21 nov. 2026, 11 h 15, session de la release 1.252.0)
+
+Le renommage est en ligne depuis 11 h 03 (1.252.0, build 1121-0855, `e174ec80f`) : nom « Par sélection de productions »
+sans « PAN », sigle SEL en sarcelle, garde du lot 0, ligne de Nouvelles. Rien de « Par standards » n'est dans `main`.
+Cette branche repart de ce `main`. **Conflits réglés** : partout la forme complète du lot 1 (famille `cibles`, les listes
+« (SOM, STD, SEL, SPE ou DEN) », G4, G5 entier, les bancs à deux familles) ; de `main`, les quatre points de version
+(1.252.0, build de branche 1121-1108), l'entrée 1.252 des Nouvelles, l'assertion du nom rangé en vue simple, le banc
+`standards-sans-portfolio-lot-5` qui suit A5, l'essai des Nouvelles « publiée ». La règle
+`.wizard-v2-recap-diagnostic--std`, retirée de `main` (plus aucune famille n'y porte la classe), est rétablie ici.
+**À refaire à l'arrivée de « Par standards » dans `main`** : l'entrée de Nouvelles du sigle STD ; les textes A5, G4, G5,
+G6, G7 reprennent leur forme complète (c'est déjà celle de cette branche).
+**Bancs rejoués sur la fusion** : Vitest 940 fichiers, 12 055 verts ; Playwright WebKit, 14 specs du module : 139 verts,
+1 au second essai (`tableau-de-notation-1`, titre de colonne à 820 px), 13 sautés. Verdict complet non pris sur cette branche.
