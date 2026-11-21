@@ -2937,6 +2937,8 @@ async function creerPratiqueV2() {
             grilleId: r.grilleId || null
         };
     } else if (typeFinal === 'cibles') {
+        // Lot 2 « Par standards » : retirer une cible qui porte des niveaux inscrits pose la question AVANT d'écrire (#717).
+        if (!(await _confirmerRetraitCiblesInscrites(r))) return;
         _configurerPratiqueParStandards(r, pratique);   // lot 1 « Par standards » (refus déjà relus plus haut)
     }
 
@@ -2964,10 +2966,46 @@ function _motifRefusAvantCreation(typeFinal, r) {
 }
 
 /**
+ * Lot 2 de la pratique « Par standards » (21 nov. 2026) — LA QUESTION AVANT DE RETIRER UNE CIBLE QUI PORTE DES NIVEAUX
+ * INSCRITS (le patron de #717). En modification seulement : les cibles rangées absentes de la nouvelle liste, et leurs
+ * inscriptions non annulées (`InscriptionsCibles.ciblesRetireesInscrites`). Les inscriptions ne sont PAS effacées : la cible
+ * cesse d'être montrée au tableau. Le codex n'est pas proposé ici (rien ne s'efface ; la phrase du codex pour « cibles » dit
+ * « les efface pour de bon », ce qui serait faux). Rien à demander → vrai.
+ * UN CRITÈRE retiré ou réécrit ne pose pas de question : chaque inscription garde le texte des critères qu'elle a jugés
+ * (`criteres: [{ id, texte, essentiel, respecte }]`), et aucun calcul ne lit les coches (choix de Grégoire, 21 nov. 2026).
+ * Mots PROPOSÉS (TEXTES-2026-11-21-par-standards-lot-2.md, W1 à W4).
+ * @returns {Promise<boolean>} vrai si l'assistant peut écrire
+ */
+async function _confirmerRetraitCiblesInscrites(r) {
+    if (!wizardState.modeEdition || !wizardState.pratiqueId || !window.InscriptionsCibles) return true;
+    const existante = (db.getSync(cle('pratiquesConfigurables'), null) || []).find(p => p.id === wizardState.pratiqueId);
+    const ensembleId = existante && existante.configuration && existante.configuration.ensembleCiblesId;
+    const ensemble = ensembleId ? window.EnsemblesCibles.lireParId(ensembleId) : null;
+    if (!ensemble) return true;
+    const IC = window.InscriptionsCibles;
+    const retraits = IC.ciblesRetireesInscrites(IC.lireToutes(), ensembleId, ensemble.cibles,
+        window.EnsemblesCibles.normaliserCibles(r.ciblesStandards));
+    if (retraits.length === 0) return true;
+    const plusieurs = retraits.length > 1;
+    const lignes = retraits.map(x => `« ${x.cible.etiquette || x.cible.id} » : ${x.inscriptions} ${x.inscriptions > 1 ? 'niveaux inscrits' : 'niveau inscrit'}`
+        + ` pour ${x.eleves} ${x.eleves > 1 ? 'étudiant·es' : 'étudiant·e'}`);
+    const message = (plusieurs ? 'Tu retires des cibles qui portent des niveaux inscrits.' : 'Tu retires une cible qui porte des niveaux inscrits.')
+        + '\n\n' + lignes.join('\n')
+        + '\n\n' + (plusieurs ? 'Leurs inscriptions restent enregistrées, mais ces cibles ne seront plus montrées au tableau.'
+            : 'Ses inscriptions restent enregistrées, mais cette cible ne sera plus montrée au tableau.')
+        + '\n\nRetirer quand même ?';
+    if (window.uiDialogues && typeof window.uiDialogues.confirmerAction === 'function') {
+        return !!(await window.uiDialogues.confirmerAction({ titre: plusieurs ? 'Retirer des cibles' : 'Retirer une cible', message,
+            preformate: true, texteConfirmer: 'Retirer quand même', variante: 'danger' }));
+    }
+    return confirm(message);
+}
+
+/**
  * Lot 1 de la pratique « Par standards » (21 nov. 2026) — la méthode et la configuration de la pratique, et l'ensemble de
  * cibles à ranger avec elle (`finaliserCreationPratique` l'écrit AVANT la pratique). En modification, l'ensemble garde
- * son identité : la pratique le désigne déjà. (Lot 2 : retirer une cible qui porte des niveaux inscrits posera la
- * question avant d'écrire, comme #717.) Mute `pratique`.
+ * son identité : la pratique le désigne déjà. (Lot 2 : retirer une cible qui porte des niveaux inscrits pose la question
+ * avant d'écrire, `_confirmerRetraitCiblesInscrites`.) Mute `pratique`.
  */
 function _configurerPratiqueParStandards(r, pratique) {
     const existante = (wizardState.modeEdition && wizardState.pratiqueId)

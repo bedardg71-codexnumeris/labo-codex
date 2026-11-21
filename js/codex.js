@@ -2615,7 +2615,10 @@ var LIBELLES_DES_CLES = {
     personnalisationObservations: { nom: 'tes tampons personnalisés', ou: 'Annotation › Tampons', unite: 'tampon', entrees: _nomDuTampon },
     brouillonDissection: { nom: 'ta grille en cours dans « Apporter mon matériel »', titre: 'Ta grille en cours',
         ou: 'Conception › Apporter mon matériel', cote: _coteDeLaGrilleEnCours },
-    interventions: { nom: 'les interventions' }
+    interventions: { nom: 'les interventions' },
+    // Lot 2 « Par standards » (21 nov. 2026) : une liste où l'on ajoute (une annulation est une entrée de plus) ; la fusion
+    // en fait l'union, sans conflit. Mots PROPOSÉS (TEXTES-2026-11-21-par-standards-lot-2.md, H2).
+    inscriptionsCibles: { nom: 'les niveaux inscrits par cible', unite: 'inscription' }
 };
 
 function _majuscule(s) { return s.charAt(0).toUpperCase() + s.slice(1); }

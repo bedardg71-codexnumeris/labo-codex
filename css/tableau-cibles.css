@@ -1,0 +1,491 @@
+/* =========================================================================
+   LE TABLEAU DES CIBLES — la pratique « Par standards », lot 2 (21 nov. 2026)
+   js/tableau-cibles.js, dans Évaluation › Tableau de notation. Les classes `tn-*` (le tableau, la colonne des noms
+   fixée, le bord estompé) viennent de css/tableau-notation.css ; celles-ci ajoutent la case des cibles et la fenêtre
+   d'inscription. Couleurs : variables de styles.css seulement ; la couleur d'un niveau vient de l'échelle
+   (--tn-couleur, filtrée par `couleurSure`). Cibles tactiles : 44 px au moins (iPad).
+   ========================================================================= */
+
+/* ---------- Le tableau des cibles ---------- */
+.tc-tableau .tn-cellule {
+    padding: 4px 8px;
+}
+
+/* La phrase de la note absente, une fois au-dessus du tableau (celle que dit le profil). */
+.tc-note-absente {
+    margin: 0;
+}
+
+/* La fenêtre défile seule : sur l'iPad, son défilement ne fait pas bouger la page derrière. */
+.tc-overlay {
+    overscroll-behavior: contain;
+}
+
+/* ---------- La colonne d'une cible ---------- */
+.tc-col-cible {
+    min-width: 88px;
+    max-width: 132px;
+}
+
+.tc-repere-marque {
+    color: var(--texte-secondaire);
+    font-size: 0.8rem;
+}
+
+/* ---------- La case : le dernier niveau inscrit, pas le niveau retenu ----------
+   Une surface neutre (ni le remplissage « compte dans la note » ni le contour « ne compte pas » du tableau des
+   productions), un point de la couleur du niveau, le code, et le nombre d'inscriptions en petit. 72 × 48. */
+.tc-case {
+    --tn-couleur: var(--accent-primaire);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    position: relative;
+    min-width: 72px;
+    min-height: 48px;
+    padding: 4px 10px;
+    border-radius: 8px;
+    border: 1px solid var(--bordure-moyenne);
+    background: var(--surface-element);
+    color: var(--texte-principal);
+    font: inherit;
+    font-weight: 700;
+    cursor: pointer;
+    touch-action: manipulation;
+}
+
+.tc-case:hover {
+    border-color: var(--accent-primaire);
+}
+
+.tc-case:focus-visible {
+    outline: var(--focus-ring-width) solid var(--focus-ring-color);
+    outline-offset: var(--focus-ring-offset);
+}
+
+.tc-case--vide {
+    background: transparent;
+    border-style: dashed;
+    color: var(--texte-secondaire);
+    font-weight: 400;
+}
+
+.tc-case-point {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--tn-couleur);
+    flex: none;
+}
+
+.tc-case-niveau {
+    font-variant-numeric: tabular-nums;
+}
+
+.tc-case-compte {
+    position: absolute;
+    top: 2px;
+    right: 4px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    color: var(--texte-secondaire);
+    font-variant-numeric: tabular-nums;
+}
+
+.tc-legende {
+    white-space: normal;
+}
+
+/* ---------- La fenêtre d'inscription ---------- */
+.tc-fenetre.modal-contenu {
+    max-width: 760px;
+    margin: 32px auto;
+    padding: 24px 28px;
+}
+
+.tc-qui {
+    margin: 0 0 8px 0;
+    color: var(--texte-secondaire);
+}
+
+.tc-cible {
+    padding: 12px 14px;
+    border-left: 4px solid var(--std-bleu);
+    background: var(--surface-element);
+    border-radius: 6px;
+    margin-bottom: 16px;
+}
+
+.tc-cible-etiquette {
+    margin: 0;
+    font-weight: 700;
+    color: var(--texte-principal);
+}
+
+.tc-cible-enonce {
+    margin: 6px 0 0 0;
+    color: var(--texte-principal);
+    line-height: 1.45;
+}
+
+.tc-formulaire {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.tc-section {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.tc-section--ligne {
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 12px 16px;
+    align-items: flex-start;
+}
+
+.tc-section--ligne > .tc-champ {
+    flex: 1 1 220px;
+}
+
+.tc-section--ligne > .tc-champ--date {
+    flex: 0 1 180px;
+}
+
+.tc-section-titre {
+    margin: 0;
+    font-size: 1rem;
+    color: var(--texte-principal);
+}
+
+.tc-section-titre:focus {
+    outline: none;
+}
+
+.tc-champ {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.tc-champ-nom {
+    font-weight: 600;
+    color: var(--texte-principal);
+}
+
+.tc-champ .controle-form {
+    min-height: 44px;
+}
+
+.tc-retroaction {
+    resize: vertical;
+}
+
+.tc-aide {
+    margin: 0;
+    font-size: 0.85rem;
+    color: var(--texte-secondaire);
+    line-height: 1.45;
+}
+
+.tc-alerte {
+    margin: 0;
+    padding: 10px 12px;
+    border-radius: 6px;
+    border: 1px solid var(--niveau-attention-critique);
+    color: var(--texte-principal);
+}
+
+/* Les critères : chacun « respecté », « non respecté » ou non renseigné (aucun bouton pressé). */
+.tc-criteres {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.tc-critere {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px 16px;
+    flex-wrap: wrap;
+    padding: 6px 0;
+    border-bottom: 1px solid var(--bordure-claire);
+}
+
+.tc-critere-texte {
+    flex: 1 1 260px;
+    color: var(--texte-principal);
+    line-height: 1.4;
+}
+
+.tc-critere-choix {
+    display: inline-flex;
+    gap: 6px;
+    flex: none;
+}
+
+.tc-coche {
+    min-height: 44px;
+    min-width: 44px;
+    padding: 6px 12px;
+    border-radius: 6px;
+    border: 1px solid var(--bordure-moyenne);
+    background: transparent;
+    color: var(--texte-principal);
+    font: inherit;
+    cursor: pointer;
+    touch-action: manipulation;
+}
+
+.tc-coche:focus-visible {
+    outline: var(--focus-ring-width) solid var(--focus-ring-color);
+    outline-offset: var(--focus-ring-offset);
+}
+
+.tc-coche--oui[aria-pressed="true"] {
+    border: 2px solid var(--niveau-attention-minimal);
+    background: color-mix(in srgb, var(--niveau-attention-minimal) 22%, transparent);
+    font-weight: 600;
+}
+
+.tc-coche--non[aria-pressed="true"] {
+    border: 2px solid var(--niveau-attention-critique);
+    background: color-mix(in srgb, var(--niveau-attention-critique) 22%, transparent);
+    font-weight: 600;
+}
+
+/* Le niveau : une tuile par niveau de l'échelle (de trois à six, ou plus), qui passe à la ligne. */
+.tc-niveaux {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 8px;
+}
+
+/* Une tuile : le bouton et le code sur la première ligne, le nom dessous, sur toute la largeur (un nom ne se coupe
+   jamais au milieu d'un mot, mesuré à 820 px). */
+.tc-niveau {
+    --tn-couleur: var(--accent-primaire);
+    display: grid;
+    grid-template-columns: auto 1fr;
+    align-items: center;
+    column-gap: 8px;
+    row-gap: 2px;
+    min-height: 48px;
+    padding: 6px 12px;
+    border: 1px solid var(--bordure-moyenne);
+    border-left: 6px solid var(--tn-couleur);
+    border-radius: 6px;
+    cursor: pointer;
+    color: var(--texte-principal);
+    touch-action: manipulation;
+}
+
+.tc-niveau input {
+    width: 20px;
+    height: 20px;
+    margin: 0;
+    flex: none;
+    accent-color: var(--accent-primaire);
+}
+
+.tc-niveau:has(input:checked) {
+    border-color: var(--accent-primaire);
+    border-left-color: var(--tn-couleur);
+    background: var(--bleu-tres-pale);
+}
+
+.tc-niveau:has(input:focus-visible) {
+    outline: var(--focus-ring-width) solid var(--focus-ring-color);
+    outline-offset: var(--focus-ring-offset);
+}
+
+.tc-niveau--rien {
+    border-style: dashed;
+    border-left-width: 1px;
+    padding-left: 17px;   /* aligne son bouton sur ceux des niveaux (bord de 6 px) */
+}
+
+.tc-niveau-code {
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+}
+
+.tc-niveau-texte {
+    grid-column: 1 / -1;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+
+.tc-niveau--rien .tc-niveau-texte {
+    grid-column: auto;
+}
+
+.tc-niveau-nom {
+    line-height: 1.3;
+    overflow-wrap: break-word;
+}
+
+.tc-niveau-marque {
+    font-size: 0.75rem;
+    color: var(--texte-secondaire);
+}
+
+/* ---------- L'historique d'une case ---------- */
+.tc-historique {
+    margin-top: 24px;
+    padding-top: 16px;
+    border-top: 1px solid var(--bordure-claire);
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.tc-historique-liste {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.tc-entree {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    flex-wrap: wrap;
+    gap: 8px 16px;
+    padding: 10px 12px;
+    border: 1px solid var(--bordure-claire);
+    border-radius: 6px;
+}
+
+.tc-entree-corps {
+    flex: 1 1 320px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.tc-entree-tete {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 4px 12px;
+}
+
+.tc-entree-date {
+    font-weight: 600;
+    color: var(--texte-principal);
+}
+
+.tc-entree-niveau {
+    --tn-couleur: var(--accent-primaire);
+    padding: 1px 10px;
+    border-radius: var(--radius-pill);
+    border: 2px solid var(--tn-couleur);
+    color: var(--texte-principal);
+    font-weight: 600;
+}
+
+.tc-entree-origine {
+    color: var(--texte-secondaire);
+    font-size: 0.9rem;
+}
+
+.tc-entree-note {
+    margin: 0;
+    color: var(--texte-principal);
+    white-space: pre-wrap;
+    line-height: 1.45;
+}
+
+.tc-entree-criteres {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    font-size: 0.9rem;
+    color: var(--texte-principal);
+}
+
+.tc-entree-critere {
+    line-height: 1.5;
+}
+
+.tc-entree-signe {
+    display: inline-block;
+    width: 1.4em;
+    font-weight: 700;
+}
+
+.tc-entree-critere--oui .tc-entree-signe { color: var(--niveau-attention-minimal); }
+.tc-entree-critere--non .tc-entree-signe { color: var(--niveau-attention-critique); }
+.tc-entree-critere--vide .tc-entree-signe { color: var(--texte-secondaire); }
+
+.tc-entree-annuler {
+    min-height: 44px;
+    flex: none;
+    border: 1px solid var(--bordure-moyenne);
+}
+
+/* Une inscription annulée reste visible, barrée ; la ligne de l'annulation (sa date, sa raison) ne l'est pas. */
+.tc-entree--annulee {
+    border-style: dashed;
+}
+
+.tc-entree--annulee .tc-entree-corps {
+    text-decoration: line-through;
+    opacity: 0.72;
+}
+
+.tc-entree-annulation {
+    flex-basis: 100%;
+    margin: 0;
+    font-size: 0.9rem;
+    color: var(--texte-principal);
+}
+
+/* ---------- Le geste « inscrire pour une production » ---------- */
+.tc-bloc-cible {
+    margin: 0 0 12px 0;
+    padding: 12px 14px;
+    border: 1px solid var(--bordure-claire);
+    border-radius: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.tc-bloc-cible > legend {
+    padding: 0 6px;
+}
+
+.tc-bloc-details {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.tc-bloc-details.u-hide {
+    display: none;
+}
+
+/* ---------- L'iPad debout, et plus étroit ---------- */
+@media (max-width: 860px) {
+    .tc-fenetre.modal-contenu {
+        margin: 12px;
+        padding: 18px 16px;
+    }
+    .tc-niveaux {
+        grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+    }
+}

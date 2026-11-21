@@ -24,12 +24,13 @@
 const METHODES_AVEC_ECHELLE = ['conversion_niveaux'];
 
 // La pratique « Par standards » (lot 1, 21 nov. 2026) : sa méthode est arrêtée (`niveaux_par_cible`, lot 0), mais aucun
-// moteur ne la calcule encore — l'inscription des niveaux arrive au lot 2, la note au lot 4. Plutôt qu'un chiffre, la
-// pratique DIT pourquoi : la phrase sort par `expliquerNoteNonConstructible` (profil, rapport, export, Suivi).
-// Mots PROPOSÉS (plans de travail/TEXTES-2026-11-20-par-standards-lot-1.md).
+// moteur ne la calcule encore — les niveaux s'inscrivent depuis le lot 2, la note arrive au lot 4. Plutôt qu'un chiffre,
+// la pratique DIT pourquoi : la phrase sort par `expliquerNoteNonConstructible` (profil, rapport, export, Suivi, tableau).
+// Mots PROPOSÉS : N1 du lot 1 (accepté), retouché au lot 2 (N1', TEXTES-2026-11-21-par-standards-lot-2.md) pour ne plus
+// dire que l'inscription n'est pas offerte.
 const METHODE_PAR_STANDARDS = 'niveaux_par_cible';
 const MOTIF_PAR_STANDARDS_SANS_CALCUL = 'Pas encore de note : cette pratique par standards ne calcule pas encore. '
-    + 'La note viendra des niveaux inscrits pour chaque cible, et l\'inscription des niveaux n\'est pas encore offerte.';
+    + 'La note viendra des niveaux inscrits pour chaque cible.';
 
 // ============================================================================
 // CLASSE PRINCIPALE

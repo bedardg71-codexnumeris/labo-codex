@@ -97,7 +97,10 @@ var CLES_FILTRER_PAR_DA = [
     'etudiantsSuivis',
     // La trace des élèves retirés (« Supprimer ») : un retiré n'est plus dans aucun groupe,
     // le filtre ne garde donc rien. Sans groupe connu, sa trace ne voyage pas avec un groupe.
-    'elevesDesinscrits'
+    'elevesDesinscrits',
+    // Lot 2 « Par standards » (21 nov. 2026) : les niveaux inscrits. Chaque entrée (inscription ou annulation) porte `da` :
+    // seules celles des élèves du groupe partent avec lui.
+    'inscriptionsCibles'
 ];
 
 // Clés à NE PAS filtrer (partagées entre groupes du même cours/trimestre)

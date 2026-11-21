@@ -1607,6 +1607,8 @@ async function prerenseignerFormulaireProduction(prod) {
     // 🆕 Beta 98.3 : Échéances par groupe-cours (multi-groupe)
     peuplerEcheancesParGroupe(prod);
 
+    poserCiblesRenseignees(prod);   // lot 2 « Par standards » (21 nov. 2026)
+
     // Gérer l'affichage des champs spécifiques au type
     gererChangementTypeProduction();
 
@@ -1617,6 +1619,54 @@ async function prerenseignerFormulaireProduction(prod) {
     }
 
     rendreChaineProduction();   // #1149, lot 3b : la chaîne lit le formulaire qu'on vient de remplir
+}
+
+/**
+ * Lot 2 de la pratique « Par standards » (21 nov. 2026) — LES CIBLES QU'UNE PRODUCTION RENSEIGNE (facultatif ; décidé par
+ * Cowork : la production le déclare dans sa propre configuration). Le bloc ne paraît que si la pratique du groupe-cours actif
+ * est « Par standards » : une case par cible de son ensemble. Aucune case cochée : le geste « inscrire pour une production »
+ * offre toutes les cibles (`InscriptionsCibles.ciblesOffertes`). Rangé dans `production.ciblesRenseignees` (des ids de
+ * cibles). Ce champ n'entre pas dans le gabarit de la bibliothèque : ce sont des ids d'un ensemble du trimestre.
+ * Mots PROPOSÉS (TEXTES-2026-11-21-par-standards-lot-2.md, P1 et P2).
+ */
+function poserCiblesRenseignees(prod) {
+    const bloc = document.getElementById('productionCiblesBloc');
+    if (!bloc) return;
+    const cibles = (window.EnsemblesCibles && typeof window.EnsemblesCibles.ciblesDeLaPratiqueActive === 'function')
+        ? window.EnsemblesCibles.ciblesDeLaPratiqueActive() : null;
+    if (!cibles || cibles.length === 0) {
+        bloc.innerHTML = '';
+        bloc.classList.add('u-hide');
+        return;
+    }
+    const cochees = new Set((prod && Array.isArray(prod.ciblesRenseignees)) ? prod.ciblesRenseignees.map(String) : []);
+    // security-ok : étiquettes et ids échappés par echapperHtml
+    bloc.innerHTML = `<fieldset class="prod-cibles-renseignees">
+        <legend class="label-formulaire">Cibles que cette production renseigne</legend>
+        <p class="prod-cibles-aide">Facultatif. Sans choix, toutes les cibles sont offertes quand tu inscris des niveaux pour cette production.</p>
+        ${cibles.map(c => `<label class="prod-cible"><input type="checkbox" class="prod-cible-case" value="${echapperHtml(c.id)}"${cochees.has(String(c.id)) ? ' checked' : ''}><span>${echapperHtml(c.etiquette)}</span></label>`).join('')}
+    </fieldset>`;
+    bloc.classList.remove('u-hide');
+}
+
+/**
+ * Ce que la fiche écrit des cibles renseignées : `{ ciblesRenseignees }` si le bloc était affiché, sinon `{}` (rien n'est
+ * réécrit, règle de #790). Les ids d'un AUTRE ensemble (un autre groupe-cours, une autre pratique) sont gardés tels quels.
+ */
+function champCiblesRenseignees(lu, existante) {
+    if (!lu) return {};
+    const affichees = new Set(lu.affichees);
+    const avant = (existante && Array.isArray(existante.ciblesRenseignees)) ? existante.ciblesRenseignees : [];
+    return { ciblesRenseignees: avant.filter(x => !affichees.has(String(x))).concat(lu.cochees) };
+}
+
+/** `{ affichees, cochees }` (des ids), ou `null` quand le bloc n'est pas affiché. */
+function lireCiblesRenseignees() {
+    const bloc = document.getElementById('productionCiblesBloc');
+    if (!bloc || bloc.classList.contains('u-hide')) return null;
+    const cases = Array.from(bloc.querySelectorAll('.prod-cible-case'));
+    if (cases.length === 0) return null;
+    return { affichees: cases.map(c => c.value), cochees: cases.filter(c => c.checked).map(c => c.value) };
 }
 
 // Réinitialise le formulaire en mode ajout (refactor étape 4, 16 mai 2026)
@@ -1662,6 +1712,7 @@ function reinitialiserFormulaireProduction() {
     // #790 — une fiche neuve n'hérite pas du marqueur de la précédente.
     const caseDiagnostiqueNeuve = document.getElementById('productionDiagnostique');
     if (caseDiagnostiqueNeuve) caseDiagnostiqueNeuve.checked = false;
+    poserCiblesRenseignees(null);   // lot 2 « Par standards » : une fiche neuve n'hérite pas des cibles de la précédente
 
     // 🆕 Beta 98.3 : Échéances par groupe-cours (multi-groupe)
     peuplerChampsPersonnalises(null);                                        // #499 — une fiche neuve n'hérite pas des champs de la précédente
@@ -1825,8 +1876,12 @@ function lireDonneesFormulaireProduction() {
     const caseDiagnostique = document.getElementById('productionDiagnostique');
     const diagnostique = caseDiagnostique ? !!caseDiagnostique.checked : null;
 
+    // Lot 2 « Par standards » (21 nov. 2026) — même règle que #790 : `null` quand le bloc n'est pas affiché (la pratique
+    // du groupe-cours actif n'est pas « Par standards ») ; rien n'est alors réécrit.
+    const ciblesRenseignees = lireCiblesRenseignees();
+
     return { titre, activiteApprentissage, type, ponderation, objectif, tache, detailTache,
-             champsPersonnalises, titresBlocs, ordreBlocs, diagnostique,
+             champsPersonnalises, titresBlocs, ordreBlocs, diagnostique, ciblesRenseignees,
              echeancesParGroupe, dateEcheance, grilleId, echelleId, cartoucheId };
 }
 
@@ -2099,6 +2154,9 @@ function construireProductionData(d, evaluations, idEnEdition) {
     if (d.diagnostique !== null && d.diagnostique !== undefined) {
         productionData.diagnostique = !!d.diagnostique;
     }
+
+    // Lot 2 « Par standards » (21 nov. 2026) — les cibles que la production renseigne (`champCiblesRenseignees`).
+    Object.assign(productionData, champCiblesRenseignees(d.ciblesRenseignees, existingProd));
 
     // #468/CO-17 : champs d'ÉTAT — à la création seulement (voir l'entête).
     // #489 (15 oct. 2026) : le verrou d'une production entière est retiré, plus de `verrouille` ici.

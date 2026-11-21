@@ -49,7 +49,10 @@ const HAUSSES_ASSUMEES = {
     // `_configurerPratiqueParStandards`, `_ecrireCeQueDesigneLaPratique`, `_validerParMotif`) ; `creerPratiqueV2` et
     // `genererRecapitulatif` ne montent pas, `appliquerFormulaireDansCollection` descend sous 30 (table `CODE_PAR_TYPE`).
     // +1, le minimum.
-    'js/wizard-pratique-v2.js : chargerPratiqueExistante': 'lot 1 « Par standards » (21 nov. 2026) : 40 → 41, la famille `cibles` à la relecture'
+    'js/wizard-pratique-v2.js : chargerPratiqueExistante': 'lot 1 « Par standards » (21 nov. 2026) : 40 → 41, la famille `cibles` à la relecture',
+    // La question avant de retirer une cible qui porte des niveaux inscrits (le patron de #717) : un `if` d'une ligne, qui
+    // délègue à `_confirmerRetraitCiblesInscrites` (la lecture des inscriptions, la phrase, la fenêtre). +1, le minimum.
+    'js/wizard-pratique-v2.js : creerPratiqueV2': 'lot 2 « Par standards » (21 nov. 2026) : 75 → 76, la question avant de retirer une cible inscrite'
 };
 
 /** Compare deux relevés { fichier: { nom: cyc | [cyc…] } } : hausses, neuves, baisses (à reporter). */

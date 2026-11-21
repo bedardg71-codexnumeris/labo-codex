@@ -205,7 +205,11 @@
         // 🆕 La pratique « Par standards », lot 1 (21 nov. 2026) : les ensembles de cibles du cours, par trimestre
         // comme les pratiques qui les désignent. Propriétaire : js/pratiques/ensembles-cibles.js. Collection neuve,
         // sans résidu nu à rapatrier. Ne pas reprendre l'ancienne clé nue `objectifsTemplates`, laissée telle quelle.
-        'ensemblesCibles'
+        'ensemblesCibles',
+        // 🆕 La pratique « Par standards », lot 2 (21 nov. 2026) : les niveaux inscrits, une liste où l'on ajoute (une
+        // annulation est une entrée de plus). Propriétaire : js/pratiques/inscriptions-cibles.js. Chaque entrée porte un DA :
+        // CorrectionDA.FAMILLES, la Réserve (par DA) et le retrait d'un groupe (vue simple) la nomment aussi.
+        'inscriptionsCibles'
     ];
 
     // 🆕 #464/CT-26 : clés inconnues déjà signalées (un seul warn par clé et par

@@ -367,8 +367,9 @@ describe('D · le registre et la pratique : un code, une méthode, aucune note e
         expect(p.obtenirCode()).toBe('CIB');
         lues.length = 0;
         expect(p.calculerPerformance('2000001')).toBeNull();
+        // Lot 2 (21 nov. 2026) : la phrase ne dit plus que l'inscription n'est pas offerte (N1', TEXTES-…-lot-2).
         expect(p.expliquerNoteNonConstructible('2000001')).toBe('Pas encore de note : cette pratique par standards ne calcule pas encore. '
-            + 'La note viendra des niveaux inscrits pour chaque cible, et l\'inscription des niveaux n\'est pas encore offerte.');
+            + 'La note viendra des niveaux inscrits pour chaque cible.');
         expect(lues.filter(k => /evaluationsSauvegardees|indicesCP/.test(k))).toEqual([]);
     });
 });

@@ -191,7 +191,8 @@
      * ne peut pas porter. Limite de Grégoire (20 sept. 2026) : aucun geste n'efface un résultat de façon irréversible.
      */
     const CLES_DE_RESULTATS = Object.freeze(['evaluationsSauvegardees', 'presences', 'fichiersTravaux', 'annotationsTravaux',
-        'corbeilleFichiers', 'portfoliosEleves', 'interventions', 'jugementsDenotation', 'notesRapport']);
+        'corbeilleFichiers', 'portfoliosEleves', 'interventions', 'jugementsDenotation', 'notesRapport',
+        'inscriptionsCibles']);   // lot 2 « Par standards » (21 nov. 2026) : les niveaux inscrits
     /** Les clés composées d'un groupe-cours (`<trim>_<préfixe><id>`) : présentes et non vides, elles portent des données. */
     const PREFIXES_DU_GROUPE = Object.freeze(['snapshots_', 'etudiantsSuivis_gc_', 'datesVerrouillees_gc_']);
     const CHAMPS_DA = ['etudiantDA', 'etudiantDa', 'da'];

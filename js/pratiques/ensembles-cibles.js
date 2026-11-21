@@ -32,6 +32,8 @@
     const MOTIF_ECHELLE_SANS_ZERO = 'Cette échelle n\'a aucun niveau qui vaut 0\u00a0% : le niveau « sans donnée » vaut 0\u00a0%. Choisis une autre échelle, ou ajoute-lui ce niveau dans Conception → Échelles de performance.';
     const MOTIF_SANS_DONNEE = 'Désigne le niveau qui veut dire « sans donnée » : une cible le porte tant qu\'aucun niveau n\'y est inscrit.';
     const MOTIF_SANS_ETIQUETTE = 'Une cible n\'a pas d\'étiquette : donne-lui une étiquette courte, ou retire-la.';
+    // Texte F10 du lot 1 (accepté) : la fiche le dit, et le tableau des cibles (lot 2) le reprend tel quel.
+    const MOTIF_INTROUVABLE = 'Les cibles de cette pratique sont introuvables dans ce trimestre. Rouvre la pratique dans l\'assistant pour les dire.';
     function motifPoids(cible) {
         const nom = cible.etiquette || 'sans étiquette';
         if (!Number.isFinite(cible.poids)) return `Donne un poids à la cible « ${nom} » : chaque cible a besoin d'un poids plus grand que zéro.`;
@@ -231,6 +233,19 @@
         return ecrite !== undefined;
     }
 
+    /**
+     * Les cibles de la pratique du groupe-cours actif, si elle est « Par standards » ; sinon null. Lecture seule. Lu par le
+     * formulaire des productions (lot 2 : les cibles qu'une production renseigne).
+     * @returns {Array|null}
+     */
+    function ciblesDeLaPratiqueActive() {
+        const d = (typeof window.designerPratiqueActive === 'function') ? window.designerPratiqueActive() : null;
+        const conf = d && d.etat === 'ok' && d.donnees ? (d.donnees.configuration || {}) : null;
+        if (!conf || conf.type !== 'cibles') return null;
+        const ensemble = lireParId(conf.ensembleCiblesId);
+        return ensemble ? normaliserCibles(ensemble.cibles) : null;
+    }
+
     /* ------------------------------------------------------------------ La fiche (lecture seule) */
 
     function esc(texte) {
@@ -294,8 +309,7 @@
         const conf = configuration || {};
         const ensemble = lireParId(conf.ensembleCiblesId);
         if (!ensemble) {
-            return '<p class="cibles-fiche-absent">Les cibles de cette pratique sont introuvables dans ce trimestre. '
-                + 'Rouvre la pratique dans l\'assistant pour les dire.</p>';
+            return `<p class="cibles-fiche-absent">${esc(MOTIF_INTROUVABLE)}</p>`;
         }
         const cibles = Array.isArray(ensemble.cibles) ? ensemble.cibles : [];
         const total = totalDesPoids(cibles);
@@ -313,7 +327,7 @@
         CLE: CLE,
         CODE_SANS_DONNEE_DEPART: CODE_SANS_DONNEE_DEPART,
         MOTIFS: { AUCUNE_CIBLE: MOTIF_AUCUNE_CIBLE, SANS_ETIQUETTE: MOTIF_SANS_ETIQUETTE, AUCUNE_ECHELLE: MOTIF_AUCUNE_ECHELLE,
-            ECHELLE_SANS_ZERO: MOTIF_ECHELLE_SANS_ZERO, SANS_DONNEE: MOTIF_SANS_DONNEE },
+            ECHELLE_SANS_ZERO: MOTIF_ECHELLE_SANS_ZERO, SANS_DONNEE: MOTIF_SANS_DONNEE, INTROUVABLE: MOTIF_INTROUVABLE },
         lirePoids: lirePoids,
         normaliserCible: normaliserCible,
         normaliserCibles: normaliserCibles,
@@ -328,6 +342,7 @@
         echelleDeDepart: echelleDeDepart,
         lireTous: lireTous,
         lireParId: lireParId,
+        ciblesDeLaPratiqueActive: ciblesDeLaPratiqueActive,
         enregistrer: enregistrer,
         libelleDuCours: libelleDuCours,
         rendreFiche: rendreFiche

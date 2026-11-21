@@ -30099,6 +30099,35 @@ body.mode-clair {
     font-size: 0.8rem;
 }
 
+/* Lot 2 « Par standards » (21 nov. 2026) — les cibles qu'une production renseigne (formulaire des productions,
+   `poserCiblesRenseignees`). Une case par cible ; le label porte la cible tactile de 44 px. */
+.prod-cibles-renseignees {
+    margin: 12px 0 0 0;
+    padding: 12px;
+    border: 1px solid var(--bordure-claire);
+    border-left: 4px solid var(--std-bleu);
+    border-radius: 4px;
+}
+.prod-cibles-aide {
+    margin: 0 0 6px 0;
+    color: var(--texte-secondaire);
+    font-size: 0.8rem;
+}
+.prod-cible {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-height: 44px;
+    cursor: pointer;
+    font-weight: normal;
+}
+.prod-cible input[type="checkbox"] {
+    width: 20px;
+    height: 20px;
+    margin: 0;
+    flex: 0 0 auto;
+}
+
 /* Lot E3 (28 sept. 2026) — la case d'une fenêtre de confirmation (`confirmerAction`,
    option `caseACocher`) : même forme que le marqueur diagnostique ci-dessus. Le label
    enveloppe la case et son texte : cible tactile de 44 px sur toute la rangée. */
