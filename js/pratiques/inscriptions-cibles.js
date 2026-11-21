@@ -44,8 +44,9 @@
  * ⚠ L'APPLICATION NE CALCULE RIEN À PARTIR DES COCHES : ni niveau proposé, ni niveau refusé, ni alerte de cohérence
  * (fiche, N1 ; avertissement des sources sur le calcul, fiche § 6). Aucune fonction de ce module ne les lit pour décider.
  *
- * CE QUE CE MODULE NE FAIT PAS : il ne retient aucun niveau (lot 3) et ne calcule aucune note (lot 4). Il ne lit ni
- * n'écrit `evaluationsSauvegardees`.
+ * CE QUE CE MODULE NE FAIT PAS : il ne retient aucun niveau et ne calcule aucune note (lots 3 et 4 : `NoteCibles`,
+ * js/pratiques/note-cibles.js, qui lit cette liste par les fonctions pures ci-dessous). Il ne lit ni n'écrit
+ * `evaluationsSauvegardees`.
  */
 (function () {
     'use strict';
@@ -230,7 +231,7 @@
         return parId;
     }
 
-    /** La plus récente d'abord : la date de la trace, puis le moment de l'écriture. */
+    /** La plus récente d'abord : la date de la trace, puis le moment de l'écriture (l'ordre de l'historique). */
     function plusRecenteDAbord(a, b) {
         return String(b.date || '').localeCompare(String(a.date || ''))
             || String(b.horodatage || '').localeCompare(String(a.horodatage || ''));
@@ -253,19 +254,8 @@
             .map(i => ({ inscription: i, annulation: annulations.get(i.id) || null }));
     }
 
-    /**
-     * Ce qu'une case du tableau montre : la DERNIÈRE inscription non annulée QUI PORTE UN NIVEAU (la plus récente par la
-     * date de la trace, puis par le moment de l'écriture) et le compte des inscriptions. Une remarque (aucun niveau) ne la
-     * change pas ; elle est comptée à part. Ce n'est PAS le niveau retenu (lot 3) : aucune règle de retenue ici.
-     * @returns {{derniere:Object|null, actives:number, remarques:number, annulees:number}}
-     */
-    function etatDeLaCase(liste, da, ensembleId, cibleId) {
-        const h = historiqueDeLaCase(liste, da, ensembleId, cibleId);
-        const actives = h.filter(x => !x.annulation);
-        const avecNiveau = actives.filter(x => !estSansNiveau(x.inscription));
-        return { derniere: avecNiveau.length ? avecNiveau[0].inscription : null, actives: actives.length,
-            remarques: actives.length - avecNiveau.length, annulees: h.length - actives.length };
-    }
+    // `etatDeLaCase` (le DERNIER niveau inscrit d'une case, lot 2) est retirée au lot 3 (21 nov. 2026) : la case montre
+    // désormais le niveau retenu, lu par `NoteCibles.retenirDansLHistorique` (js/pratiques/note-cibles.js).
 
     /**
      * Les inscriptions non annulées de chaque cible d'un ensemble : { [cibleId]: { inscriptions, niveaux, remarques, eleves } }.
@@ -415,7 +405,6 @@
         motifsRefus: motifsRefus,
         annulationsParInscription: annulationsParInscription,
         historiqueDeLaCase: historiqueDeLaCase,
-        etatDeLaCase: etatDeLaCase,
         compterParCible: compterParCible,
         ciblesRetireesInscrites: ciblesRetireesInscrites,
         ciblesOffertes: ciblesOffertes,

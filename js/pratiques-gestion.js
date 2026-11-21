@@ -133,7 +133,7 @@ const FAMILLES_TAXONOMIQUES = {
     'specifications': { nom: 'PAN-Spécifications', anglais: 'Specifications Grading', resume: 'Évaluation dichotomique par forfaits' },
     'denotation': { nom: 'PAN-Dénotation', resume: 'Note finale certificative posée (non calculée) selon l\'atteinte de cibles d\'apprentissage' },
     // Lot 1 de la pratique « Par standards » (21 nov. 2026). Mots PROPOSÉS.
-    'cibles': { nom: 'Par standards', resume: 'Un niveau par cible d\'apprentissage ; la note viendra du meilleur niveau démontré pour chaque cible' }
+    'cibles': { nom: 'Par standards', resume: 'Un niveau par cible d\'apprentissage ; la note vient du meilleur niveau démontré pour chaque cible' }
 };
 
 /**
@@ -200,7 +200,7 @@ function genererBadgeTypePratique(pratique) {
         STD: 'Par sélection de productions : des niveaux (ex. I-D-M-E) ; la note retient certaines productions.',
         SPE: 'PAN – Spécifications — travaux acceptables ou non ; note selon les forfaits réussis.',
         DEN: 'PAN – Dénotation — note finale certificative posée (non calculée) selon l\'atteinte de cibles d\'apprentissage explicites ; abandonne la fonction de tri.',
-        CIB: 'Par standards : un niveau par cible d\'apprentissage du cours ; la note viendra du meilleur niveau démontré pour chaque cible.',
+        CIB: 'Par standards : un niveau par cible d\'apprentissage du cours ; la note vient du meilleur niveau démontré pour chaque cible.',
         PAN: 'Pratique alternative de notation.'
     };
     const infobulle = TOOLTIPS_FAMILLE[type] || '';
@@ -1537,6 +1537,77 @@ function afficherFicheParStandardsMat(pratique) {
     if (!hote) return;
     // security-ok: rendreFiche échappe tout texte de l'enseignant·e (étiquettes, énoncés, critères, noms)
     hote.innerHTML = (estParStandards && window.EnsemblesCibles) ? window.EnsemblesCibles.rendreFiche(pratique.configuration) : '';
+    if (estParStandards) poserDoubleSeuilParStandardsMat(pratique);
+}
+
+/** Les cibles de l'ensemble que désigne une pratique par standards (rangées), ou []. Lecture seule. */
+function ciblesDeLaPratiqueMat(pratique) {
+    const EC = window.EnsemblesCibles;
+    const conf = (pratique && pratique.configuration) || {};
+    const ensemble = EC ? EC.lireParId(conf.ensembleCiblesId) : null;
+    return ensemble ? EC.normaliserCibles(ensemble.cibles) : [];
+}
+
+/**
+ * Lots 3 et 4 « Par standards » (21 nov. 2026) — LE DOUBLE SEUIL, réglage de la pratique, éteint au départ (choix de
+ * Grégoire, 21 nov. 2026, 12 h 20). Sans cible terminale, il ne peut pas s'allumer : la case reste décochée, fermée, et
+ * l'écran dit pourquoi (`verrouillerTypeParStandardsMat` la referme après le mode lecture seule de la démo, qui rouvre
+ * tous les champs). Le seuil et le plafond (60 et 55 d'office) ne se règlent que le double seuil allumé.
+ * @param {Object} pratique
+ */
+function poserDoubleSeuilParStandardsMat(pratique) {
+    if (!window.NoteCibles) return;
+    const ds = window.NoteCibles.lireDoubleSeuil(pratique.configuration);
+    const terminales = window.NoteCibles.aDesCiblesTerminales(ciblesDeLaPratiqueMat(pratique));
+    setCheckbox('mat-cibles-double-seuil', ds.actif && terminales);
+    setValeurChamp('mat-cibles-seuil', String(ds.seuil));
+    setValeurChamp('mat-cibles-plafond', String(ds.plafond));
+    const motif = document.getElementById('mat-cibles-double-seuil-motif');
+    if (motif) motif.classList.toggle('u-hide', terminales);
+    const seuils = document.getElementById('mat-cibles-seuils');
+    if (seuils) seuils.classList.toggle('u-hide', !(ds.actif && terminales));
+}
+
+/** Lots 3 et 4 : après l'écriture, le double seuil allumé montre son seuil et son plafond ; éteint, il les cache. Relu tel qu'écrit. */
+function reposerDoubleSeuilApresEcritureMat() {
+    const ecrite = (db.getSync(cle('pratiquesConfigurables'), null) || []).find(p => p.id === pratiqueEnEditionMateriel);
+    if (!ecrite || !estParStandardsMat(ecrite)) return;
+    poserDoubleSeuilParStandardsMat(ecrite);
+    verrouillerDoubleSeuilSansTerminaleMat(ecrite);
+}
+
+/**
+ * Lots 3 et 4 : le double seuil est le seul réglage de la note que la fiche écrit pour une pratique par standards (les
+ * cibles, l'échelle et le niveau « sans donnée » restent à l'assistant). Mute `pratique.configuration`.
+ */
+function ecrireDoubleSeuilParStandardsMat(pratique, typeCanon) {
+    if (typeCanon !== 'cibles' || !window.NoteCibles) return;
+    pratique.configuration.doubleSeuil = lireDoubleSeuilDuFormulaireMat(pratique);
+}
+
+/** Ferme la case du double seuil quand aucune cible n'est terminale. Ne rouvre jamais rien. */
+function verrouillerDoubleSeuilSansTerminaleMat(pratique) {
+    const caseDS = document.getElementById('mat-cibles-double-seuil');
+    if (!caseDS || !estParStandardsMat(pratique) || !window.NoteCibles) return;
+    if (!window.NoteCibles.aDesCiblesTerminales(ciblesDeLaPratiqueMat(pratique))) caseDS.disabled = true;
+}
+
+/**
+ * Le double seuil tel que le formulaire le dit, pour l'enregistrement. Sans cible terminale : éteint. Un seuil ou un
+ * plafond vide ou hors de 0 à 100 garde la valeur enregistrée (ou celle d'office) : jamais un nombre inventé.
+ * @param {Object} pratique - la pratique telle qu'enregistrée
+ * @returns {{actif:boolean, seuil:number, plafond:number}}
+ */
+function lireDoubleSeuilDuFormulaireMat(pratique) {
+    const avant = window.NoteCibles.lireDoubleSeuil(pratique.configuration);
+    const terminales = window.NoteCibles.aDesCiblesTerminales(ciblesDeLaPratiqueMat(pratique));
+    const lire = (id, defaut) => {
+        const brut = String(getValeurChamp(id) == null ? '' : getValeurChamp(id)).trim().replace(',', '.');
+        const n = Number(brut);
+        return (brut !== '' && Number.isFinite(n) && n >= 0 && n <= 100) ? n : defaut;
+    };
+    return { actif: terminales && getCheckbox('mat-cibles-double-seuil'), seuil: lire('mat-cibles-seuil', avant.seuil),
+        plafond: lire('mat-cibles-plafond', avant.plafond) };
 }
 
 function estParStandardsMat(pratique) {
@@ -1551,6 +1622,7 @@ function estParStandardsMat(pratique) {
 function verrouillerTypeParStandardsMat(pratique) {
     const menu = document.getElementById('mat-pratique-type');
     if (menu && estParStandardsMat(pratique)) menu.disabled = true;
+    verrouillerDoubleSeuilSansTerminaleMat(pratique);   // lots 3 et 4
 }
 
 /** « Modifier les cibles dans l'assistant » : rouvre la pratique ouverte dans l'assistant, en modification. */
@@ -1719,6 +1791,7 @@ async function sauvegarderConfigPratiqueMat() {
 
     await modifierEtAnnoncer(cle('pratiquesConfigurables'), appliquerFormulaireDansCollection, [], { geste: 'Modifier la pratique' });
     rendreChainePratique();   // #1149, lot 3b : l'échelle choisie, une conversion vers DEN
+    reposerDoubleSeuilApresEcritureMat();   // lots 3 et 4 : une pratique par standards seulement
     return true;
 }
 
@@ -1820,6 +1893,9 @@ function appliquerFormulaireDansCollection(lues) {
         // skill §8/§10) ; on le pose pour rester valide à l'édition ET à une conversion vers DEN.
         configurations[index].calcul_note = { methode: 'jugement_global' };
     }
+
+    // Lots 3 et 4 « Par standards » : le double seuil (`notesFinales` est écrit plus haut, pour tous).
+    ecrireDoubleSeuilParStandardsMat(configurations[index], typeCanon);
 
     // Échelle
     // Lot 1 « Par standards » : l'échelle et son niveau « sans donnée » vont ensemble et se choisissent dans

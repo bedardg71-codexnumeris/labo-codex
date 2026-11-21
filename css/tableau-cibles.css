@@ -11,9 +11,12 @@
     padding: 4px 8px;
 }
 
-/* La phrase de la note absente, une fois au-dessus du tableau (celle que dit le profil). */
-.tc-note-absente {
+/* Lot 3 : l'ordre des niveaux illisible, une fois au-dessus du tableau. Rien n'est retenu. */
+.tc-ordre-illisible {
     margin: 0;
+    color: var(--texte-principal);
+    border-left: 4px solid var(--niveau-attention-modere);
+    padding-left: 10px;
 }
 
 /* La fenêtre défile seule : sur l'iPad, son défilement ne fait pas bouger la page derrière. */
@@ -32,7 +35,7 @@
     font-size: 0.8rem;
 }
 
-/* ---------- La case : le dernier niveau inscrit, pas le niveau retenu ----------
+/* ---------- La case : le niveau retenu (lot 3) ----------
    Une surface neutre (ni le remplissage « compte dans la note » ni le contour « ne compte pas » du tableau des
    productions), un point de la couleur du niveau, le code, et le nombre d'inscriptions en petit. 72 × 48. */
 .tc-case {
@@ -512,4 +515,272 @@
     .tc-niveaux {
         grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
     }
+}
+
+/* =========================================================================
+   LOTS 3 ET 4 (21 nov. 2026) — le niveau retenu, la note
+   ========================================================================= */
+
+/* Une cible sans donnée : le NOM du niveau « sans donnée » de l'échelle, en petit, sur deux lignes au plus. */
+.tc-case-sans-donnee {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    max-width: 104px;
+    font-size: 0.72rem;
+    line-height: 1.2;
+    font-weight: 500;
+    font-style: italic;
+    color: var(--texte-secondaire);
+    text-align: center;
+    overflow-wrap: normal;
+}
+
+/* La colonne de la note, au bout de chaque rangée : fixée à droite comme celle du tableau des productions (`tn-col-note`,
+   `tn-note`), elle reste visible quand les cibles défilent (iPad debout, dix cibles et plus). */
+.tc-col-note {
+    min-width: 120px;
+    max-width: 180px;
+}
+
+.tc-cellule-note {
+    vertical-align: middle;
+    max-width: 180px;
+    white-space: normal;
+}
+
+.tc-note-valeur {
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    color: var(--texte-principal);
+}
+
+.tc-note-etat {
+    display: block;
+    font-weight: 600;
+    color: var(--texte-principal);
+}
+
+.tc-note-detail {
+    display: block;
+    font-size: 0.78rem;
+    line-height: 1.3;
+    color: var(--texte-secondaire);
+    white-space: normal;
+}
+
+.tc-cellule-note--attente .tc-note-etat {
+    font-style: italic;
+}
+
+/* Le niveau retenu en clair, au-dessus de l'historique (fenêtre d'une case, profil). */
+.tc-retenu {
+    --tn-couleur: var(--accent-primaire);
+    margin: 0 0 12px 0;
+    padding: 10px 12px;
+    border-radius: 6px;
+    border-left: 4px solid var(--tn-couleur);
+    background: var(--surface-element);
+}
+
+.tc-retenu--sans-donnee,
+.tc-retenu--illisible {
+    border-left-style: dashed;
+    border-left-color: var(--texte-secondaire);
+}
+
+.tc-retenu-ligne {
+    margin: 0 0 4px 0;
+    color: var(--texte-principal);
+}
+
+.tc-retenu-ligne:last-child {
+    margin-bottom: 0;
+}
+
+.tc-retenu-niveau {
+    font-weight: 600;
+}
+
+.tc-retenu-plus-bas {
+    color: var(--texte-principal);
+    font-style: italic;
+}
+
+/* La marque de l'inscription qui porte le niveau retenu, dans l'historique. */
+.tc-entree-retenu {
+    padding: 1px 8px;
+    border-radius: var(--radius-pill);
+    border: 1px solid var(--std-bleu);
+    color: var(--texte-principal);
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+/* ---------- Le profil : la section « Cibles » ---------- */
+.pc-panneau {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.pc-note .alerte {
+    margin: 0 0 12px 0;
+}
+
+.pc-cibles .pc-titre {
+    margin-bottom: 16px;
+}
+
+.pc-ligne td {
+    vertical-align: middle;
+}
+
+.pc-titre {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+    margin: 0 0 12px 0;
+    color: var(--accent-primaire);
+}
+
+.pc-note-valeur {
+    margin: 0 0 12px 0;
+    font-size: 1.15rem;
+    color: var(--texte-principal);
+}
+
+.pc-note-libelle {
+    color: var(--texte-secondaire);
+}
+
+.pc-defilement {
+    overflow-x: auto;
+}
+
+/* L'en-tête de rangée du tableau commun est plein (bleu) : ici, la cible se lit sur la surface, sa marque « terminale » aussi. */
+.tableau.pc-recit tbody th[scope="row"] {
+    background: transparent;
+    color: var(--texte-principal);
+    font-weight: 600;
+    text-align: left;
+}
+
+.pc-ligne--attente td {
+    font-style: italic;
+    color: var(--texte-secondaire);
+}
+
+.pc-terminale {
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: var(--texte-secondaire);
+}
+
+.pc-moyenne,
+.pc-seuil {
+    margin: 10px 0 0 0;
+    color: var(--texte-principal);
+}
+
+.pc-seuil--plafonne {
+    font-weight: 600;
+}
+
+.pc-attente {
+    margin: 0 0 12px 0;
+    padding: 10px 12px;
+    border-left: 4px dashed var(--texte-secondaire);
+    background: var(--surface-element);
+    border-radius: 6px;
+}
+
+.pc-attente-titre {
+    margin: 0 0 6px 0;
+    font-weight: 600;
+    color: var(--texte-principal);
+}
+
+.pc-attente-liste {
+    margin: 0 0 8px 0;
+    padding-left: 20px;
+}
+
+.pc-aide {
+    margin: 0;
+    font-size: 0.9rem;
+    color: var(--texte-secondaire);
+}
+
+.pc-cible {
+    padding: 14px 0;
+    border-top: 1px solid var(--bordure-claire);
+}
+
+.pc-cible:first-of-type {
+    border-top: none;
+    padding-top: 0;
+}
+
+.pc-cible-titre {
+    margin: 0 0 6px 0;
+    color: var(--texte-principal);
+}
+
+.pc-historique-titre {
+    margin: 10px 0 6px 0;
+    font-weight: 600;
+    font-size: 0.9rem;
+    color: var(--texte-secondaire);
+}
+
+/* ---------- La fiche de la pratique : la note du cours et le double seuil ---------- */
+.cibles-reglages-note {
+    padding-top: 14px;
+    border-top: 1px solid var(--bordure-claire);
+}
+
+.cibles-reglages-titre {
+    margin: 0 0 8px 0;
+    color: var(--texte-principal);
+}
+
+.cibles-reglages-texte {
+    margin: 4px 0 10px 0;
+    line-height: 1.5;
+}
+
+.cibles-reglages-case {
+    min-height: 44px;
+    cursor: pointer;
+}
+
+.cibles-reglages-motif {
+    margin: 4px 0 10px 0;
+    padding: 8px 10px;
+    border-left: 4px solid var(--niveau-attention-modere);
+    background: var(--surface-element);
+    color: var(--texte-principal);
+    font-size: 0.9rem;
+}
+
+.cibles-reglages-seuils {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+}
+
+.cibles-reglages-seuil {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    font-size: 0.9rem;
+    color: var(--texte-principal);
+}
+
+.cibles-reglages-seuil .controle-form {
+    width: 120px;
+    min-height: 44px;
 }

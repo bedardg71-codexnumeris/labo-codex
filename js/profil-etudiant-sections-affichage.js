@@ -2311,6 +2311,9 @@ const SECTIONS_PROFIL = [
     // DEN couche 2 (#318) : panneau de saisie du jugement.
     { id: 'jugement',       libelle: 'Jugement',                    titre: 'Jugement (dénotation)',       infobulle: '',                      aide: null,             pref: 'jugementDenActif',
       contenu: (da) => window.denotationSaisie.panneau(da) },
+    // Lots 3 et 4 « Par standards » (21 nov. 2026) : la note et son récit, puis le niveau retenu de chaque cible et ses inscriptions.
+    { id: 'cibles',         libelle: 'Cibles',                      titre: 'Cibles et note',              infobulle: '',                      aide: null,             pref: 'ciblesActif',
+      contenu: (da) => window.ProfilCibles.panneau(da) },
     { id: 'mobilisation',   libelle: 'Engagement ACP',              titre: 'Engagement ACP',              infobulle: 'profil-mobilisation',   aide: 'mobilisation',   pref: 'engagementVisible',
       contenu: (da) => genererSectionMobilisationEngagement(da) },
     { id: 'progression',    libelle: 'Progression temporelle ACP',  titre: 'Progression temporelle ACP',  infobulle: 'profil-progression',    aide: null,             pref: 'progressionVisible',
@@ -2338,7 +2341,10 @@ function _lirePrefsProfil() {
         // pratique active du groupe-cours est une dénotation (note saisie).
         jugementDenActif:     !!(window.denotationSaisie
                                   && typeof window.denotationSaisie.estActive === 'function'
-                                  && window.denotationSaisie.estActive())
+                                  && window.denotationSaisie.estActive()),
+        // Lots 3 et 4 « Par standards » : section « Cibles » visible seulement quand la pratique active est par standards.
+        ciblesActif:          !!(window.ProfilCibles && typeof window.ProfilCibles.estActive === 'function'
+                                  && window.ProfilCibles.estActive())
     };
 }
 
@@ -3925,9 +3931,13 @@ function genererSectionPerformance(da) {
     // établit la note globale, donc c'est elle qui dit dans quoi la note se lit.
     // Sans échelle (une sommative, par exemple), il n'y a pas de code — et c'est
     // la bonne réponse, pas un manque.
-    const lectureNiveauGlobal = (typeof lireNiveauNoteGlobale === 'function')
-        ? lireNiveauNoteGlobale(da, indices.P)
-        : { niveau: null, survol: '', raison: 'helper-absent' };
+    // Lot 4 « Par standards » (21 nov. 2026) : une note non constructible (P rangé à 0, `noteConstructible: false`)
+    // s'écrit « — », sans niveau : jamais « 0 % » ni le code du niveau le plus bas (#394, règle 4).
+    const sansNote = indices.noteConstructible === false;
+    const lectureNiveauGlobal = sansNote ? { niveau: null, survol: '', raison: 'non-constructible' }
+        : ((typeof lireNiveauNoteGlobale === 'function')
+            ? lireNiveauNoteGlobale(da, indices.P)
+            : { niveau: null, survol: '', raison: 'helper-absent' });
     const prefixeNiveauGlobal = lectureNiveauGlobal.niveau
         ? `<span title="${echapperHtml(lectureNiveauGlobal.survol)}">${echapperHtml(String(lectureNiveauGlobal.niveau.code))}</span> `
         : '';
@@ -3978,7 +3988,7 @@ ${noteLue ? `
             <!-- En-tête avec indice P -->
             <div class="u-flex-between-mb15">
                 <!-- Session C (#303) : mode comparatif retiré — indice P unique (pratique active). -->
-                <strong class="profil-valeur-grande-bleu" style="margin-left: auto;"${survolPourcentageGlobal}>${prefixeNiveauGlobal}${formaterPourcentage(indices.P)}</strong>
+                <strong class="profil-valeur-grande-bleu" style="margin-left: auto;"${sansNote ? '' : survolPourcentageGlobal}>${sansNote ? '—' : prefixeNiveauGlobal + formaterPourcentage(indices.P)}</strong>
             </div>
 
             <!-- 🆕 MÉTHODE DE CALCUL EXPLICITE -->

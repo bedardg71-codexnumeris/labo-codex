@@ -62,12 +62,14 @@ const CINQ = [['0', 'Données insuffisantes', 0, 'var(--gris-moyen)'], ['1', 'En
     .map(([code, nom, v, couleur], i) => ({ code, nom, valeurCalcul: v, min: i * 20, max: i * 20 + 19, couleur }));
 const stock = (page) => page.evaluate((T) => window.db.getSync(T + '_inscriptionsCibles'), T);
 
-test('le tableau des cibles : une colonne par cible, la phrase de la note absente, une case vide par étudiant·e', async ({ page }) => {
+test('le tableau des cibles : une colonne par cible, la note en attente (lot 4), une case sans donnée par étudiant·e', async ({ page }) => {
     const erreurs = [];
     page.on('pageerror', (e) => erreurs.push(e.message));
     await ouvrirTableau(page, { niveaux: CINQ });
     await expect(page.locator('.tc-col-cible .tn-production-titre')).toHaveText(['Analyser un texte', 'Structurer', 'Rédiger une dissertation']);
-    await expect(page.locator('.tc-note-absente')).toHaveText('Pas encore de note : cette pratique par standards ne calcule pas encore. La note viendra des niveaux inscrits pour chaque cible.');
+    // Lot 4 (21 nov. 2026) : la phrase « ne calcule pas encore » est retirée ; la note a sa colonne (en attente, ici).
+    await expect(page.locator('.tc-note-absente')).toHaveCount(0);
+    await expect(page.locator('.tc-cellule-note .tc-note-etat')).toHaveText(['En attente', 'En attente', 'En attente']);
     await expect(page.locator('.tc-case')).toHaveCount(9);
     await expect(page.locator('.tc-case--vide')).toHaveCount(9);
     // La cible tactile : 44 px au moins, dans les deux sens.
@@ -96,7 +98,7 @@ test('inscrire avec des critères cochés, rouvrir, annuler : l\'inscription res
     await f.locator('.tc-origine').selectOption('P1');
     await f.locator('[data-tc="inscrire"]').click();
     await expect(page.locator('.tc-fenetre')).toHaveCount(0);
-    await expect(laCase).toHaveAttribute('aria-label', 'Zoé Fictive, Analyser un texte : dernier niveau inscrit Ça y est presque, 1 inscription');
+    await expect(laCase).toHaveAttribute('aria-label', 'Zoé Fictive, Analyser un texte : niveau retenu Ça y est presque, 1 inscription');   // lot 3
     let s = await stock(page);
     expect(s).toHaveLength(1);
     expect(s[0]).toMatchObject({ type: 'inscription', da: ZOE, cibleId: 'cible_a', niveau: '2', productionId: 'P1' });
@@ -117,7 +119,8 @@ test('inscrire avec des critères cochés, rouvrir, annuler : l\'inscription res
     expect(s[1]).toMatchObject({ type: 'annulation', inscriptionId: s[0].id, raison: 'Erreur de saisie : mauvaise étudiante.' });
     await page.keyboard.press('Escape');
     await expect(page.locator('.tc-fenetre')).toHaveCount(0);
-    await expect(laCase).toHaveAttribute('aria-label', 'Zoé Fictive, Analyser un texte : aucune inscription');
+    // Lot 3 : la case dit aussi l'inscription annulée (elle se lit à l'historique, barrée).
+    await expect(laCase).toHaveAttribute('aria-label', 'Zoé Fictive, Analyser un texte : sans donnée (Données insuffisantes), aucune inscription, 1 annulée');
     expect(erreurs).toEqual([]);
 });
 
@@ -169,8 +172,8 @@ test('une remarque sans niveau : refusée vide ; inscrite avec un texte, la case
     await f.locator('.tc-retroaction').fill('En atelier : les paragraphes ont une idée, les transitions manquent.');
     await f.locator('[data-tc="inscrire"]').click();
     await expect(page.locator('.tc-fenetre')).toHaveCount(0);
-    await expect(laCase).toHaveText('✎1');
-    await expect(laCase).toHaveAttribute('aria-label', 'Zoé Fictive, Structurer : aucun niveau inscrit, 1 remarque');
+    await expect(laCase).toHaveText('✎Données insuffisantes1');   // lot 3 : la cible est sans donnée, son nom se lit
+    await expect(laCase).toHaveAttribute('aria-label', 'Zoé Fictive, Structurer : sans donnée (Données insuffisantes), 1 remarque');
     await expect(page.locator('.tc-legende', { hasText: '✎' })).toBeVisible();
     let s = await stock(page);
     expect(s[0]).toMatchObject({ niveau: null, echelleId: null });
@@ -180,7 +183,7 @@ test('une remarque sans niveau : refusée vide ; inscrite avec un texte, la case
     await f.locator('.tc-date').fill('2026-11-25');
     await f.locator('[data-tc="inscrire"]').click();
     await expect(laCase.locator('.tc-case-niveau')).toHaveText('3');
-    await expect(laCase).toHaveAttribute('aria-label', 'Zoé Fictive, Structurer : dernier niveau inscrit Acquis, 2 inscriptions, dont 1 remarque');
+    await expect(laCase).toHaveAttribute('aria-label', 'Zoé Fictive, Structurer : niveau retenu Acquis, 2 inscriptions, dont 1 remarque');   // lot 3
     await laCase.click();
     await expect(f.locator('.tc-entree-niveau--remarque')).toHaveText('Remarque, sans niveau');
     s = await stock(page);

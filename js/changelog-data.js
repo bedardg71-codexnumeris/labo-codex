@@ -28,7 +28,7 @@
             couleur: 'bleu',
             titre: '«&nbsp;Standards&nbsp;» devient «&nbsp;Par sélection de productions&nbsp;»',
             items: [
-                'La pratique «&nbsp;Standards&nbsp;» s’appelle maintenant «&nbsp;Par sélection de productions&nbsp;». Le nom dit ce que fait le calcul&nbsp;: chaque production reçoit un niveau et la note se construit à partir de celles que ta règle retient. Tes pratiques, tes réglages et tes notes ne changent pas. Une pratique que tu avais nommée toi-même garde son nom. Son badge dit maintenant «&nbsp;SEL&nbsp;», en sarcelle.'
+                'La pratique «&nbsp;Standards&nbsp;» s’appelle maintenant «&nbsp;Par sélection de productions&nbsp;». Le nom dit ce que fait le calcul&nbsp;: chaque production reçoit un niveau et la note se construit à partir de celles que ta règle retient. Tes pratiques, tes réglages et tes notes ne changent pas. Une pratique que tu avais nommée toi-même garde son nom. Son badge dit maintenant «&nbsp;SEL&nbsp;».'
             ]
         },
         {

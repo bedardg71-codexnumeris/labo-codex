@@ -27,6 +27,7 @@ import { describe, it, expect } from 'vitest';
 import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { JSDOM } from 'jsdom';
+import { fonctionsDeLEchelle } from './_helpers/moteur-cibles.js';
 import { chargerScript } from './_helpers/charger-script.js';
 import { dbBanc, RACINE } from './_helpers/bac-suivi.js';
 import { tranche } from './_helpers/tranche.js';
@@ -287,7 +288,7 @@ describe('C · l\'assistant réel écrit la pratique, son ensemble de cibles et 
         expect(ens.dateCreation).toBe(creeLe);
     });
 
-    it('le récapitulatif nomme le cours, chaque cible, l\'échelle et le niveau « sans donnée », et dit qu\'elle ne calcule pas encore', () => {
+    it('le récapitulatif nomme le cours, chaque cible, l\'échelle et le niveau « sans donnée », et dit comment la note se fait (révisé au lot 4)', () => {
         const a = monterAssistant({ test_pratiquesConfigurables: [], test_echellesTemplates: [], cours: [{ id: 'COURS-ZZZ', codeCours: '999-ZZZ-ZZ', nomCours: 'Cours de banc' }] });
         a.win.wizardState.echelleDeDepart = a.win.EnsemblesCibles.echelleDeDepart('ECH-depart');
         a.win.wizardState.reponses = Object.assign(REPONSES('ECH-depart', '0'), { typePratique: 'cibles' });
@@ -298,7 +299,9 @@ describe('C · l\'assistant réel écrit la pratique, son ensemble de cibles et 
         expect(html).toContain('cible terminale');
         expect(html).toContain('Échelle de départ – Par standards');
         expect(html).toContain('0 – Données insuffisantes');
-        expect(html).toContain('ne calcule pas encore de note');
+        // Lot 4 (21 nov. 2026) : la pratique calcule ; le récapitulatif ne dit plus qu'elle ne calcule pas encore.
+        expect(html).toContain('La note est la moyenne pondérée des niveaux retenus');
+        expect(html).not.toContain('ne calcule pas encore');
         expect(html).not.toContain('Matériel pédagogique');
     });
 
@@ -343,6 +346,7 @@ describe('D · le registre et la pratique : un code, une méthode, aucune note e
         configuration: { type: 'cibles', ensembleCiblesId: 'ENS1', echelleId: 'ECH-banc', niveauSansDonnee: '0' } };   // l'échelle de départ du banc (B)
     function monter() {
         const store = { pratiquesConfigurables: [clone(PRATIQUE)], echellesTemplates: [clone(ECHELLE_DEPART)],
+            ensemblesCibles: [{ id: 'ENS1', coursId: null, cibles: clone(CIBLES) }],   // lot 4 : la note lit l'ensemble
             evaluationsSauvegardees: [{ etudiantDA: '2000001', productionId: 'P1', noteFinale: 90 }], indicesCP: { '2000001': { actuel: { P: 77 } } } };
         const t = storeTemoin(store);
         const win = { PratiqueManager: {} };   // la présence du gestionnaire ouvre la bibliothèque au registre (obtenirPratiqueParId)
@@ -351,6 +355,11 @@ describe('D · le registre et la pratique : un code, une méthode, aucune note e
             PratiqueConfigurable: function (config) { return new win.PratiqueConfigurable(config); } };
         chargerScript('js/pratiques/pratique-configurable.js', globaux, win);
         chargerScript('js/pratiques/pratique-registre.js', globaux, win);
+        // Lot 4 : le moteur de la note (l'ensemble, les inscriptions, NoteCibles), avec l'ordre et la valeur réels.
+        const g2 = Object.assign({}, globaux, fonctionsDeLEchelle(), { obtenirEchelleResolue: (id) => clone(store.echellesTemplates.find(e => e.id === id) || null) });
+        chargerScript('js/pratiques/ensembles-cibles.js', g2, win);
+        chargerScript('js/pratiques/inscriptions-cibles.js', g2, win);
+        chargerScript('js/pratiques/note-cibles.js', g2, win);
         return { win, lues: t.lues };
     }
     it('la famille `cibles` : code CIB, famille PAN, méthode niveaux_par_cible', () => {
@@ -360,17 +369,18 @@ describe('D · le registre et la pratique : un code, une méthode, aucune note e
         expect(win.METHODE_PAR_FAMILLE.cibles).toBe('niveaux_par_cible');
         expect(win.obtenirRepresentationPratiqueStricte('standards').code).toBe('STD');   // l'autre famille ne bouge pas
     });
-    it('la pratique se construit, sa note est null, et sa cause se dit en mots — sans lire les évaluations ni le cache', () => {
+    it('(révisé au lot 4) sans inscription, sa note est null et sa cause nomme les cibles en attente — sans lire les évaluations ni le cache', () => {
         const { win, lues } = monter();
         const p = win.obtenirPratiqueParId('cib-banc');
         expect(p).toBeTruthy();
         expect(p.obtenirCode()).toBe('CIB');
         lues.length = 0;
         expect(p.calculerPerformance('2000001')).toBeNull();
-        // Lot 2 (21 nov. 2026) : la phrase ne dit plus que l'inscription n'est pas offerte (N1', TEXTES-…-lot-2).
-        expect(p.expliquerNoteNonConstructible('2000001')).toBe('Pas encore de note : cette pratique par standards ne calcule pas encore. '
-            + 'La note viendra des niveaux inscrits pour chaque cible.');
+        // Lot 4 (21 nov. 2026) : la phrase N1' (« ne calcule pas encore ») est retirée ; la cause est celle de NoteCibles.
+        expect(p.expliquerNoteNonConstructible('2000001')).toBe('Pas encore de note : les cibles « Lire un texte », « Rédiger une analyse » sont sans donnée. '
+            + 'La note se calcule quand chaque cible a un niveau retenu, ou à l’arrêt des notes.');
         expect(lues.filter(k => /evaluationsSauvegardees|indicesCP/.test(k))).toEqual([]);
+        expect(lues.filter(k => /inscriptionsCibles/.test(k)).length, 'elle lit les inscriptions').toBeGreaterThan(0);
     });
 });
 

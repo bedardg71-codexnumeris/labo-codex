@@ -70,7 +70,7 @@ describe('B · les autres producteurs de badges affichent le sigle', () => {
         expect(ancien).toContain('title="Par sélection de productions : ');   // ↻ G1, 21 nov., 7 h 44 : plus de « PAN » pour SEL
         const neuf = badge({ pratiques: ['CIB'] });
         expect(texteDuBadge(neuf)).toBe('STD');
-        expect(neuf).toContain('title="Par standards : un niveau par cible d\'apprentissage du cours ; la note viendra du meilleur niveau démontré pour chaque cible."');
+        expect(neuf).toContain('title="Par standards : un niveau par cible d\'apprentissage du cours ; la note vient du meilleur niveau démontré pour chaque cible."');
         expect(texteDuBadge(badge({ type: 'standards' }))).toBe('SEL');
         expect(texteDuBadge(badge({ type: 'cibles' }))).toBe('STD');
         expect(neuf + ancien).not.toMatch(/—/);   // F3 : sans tiret cadratin

@@ -8,10 +8,16 @@
  * rangées, les CIBLES en colonnes (au lieu des productions). `tableau-notation.js` reconnaît la famille (code CIB), bâtit
  * la liste des étudiant·es et des productions du groupe, et délègue le dessin ici.
  *
- * UNE CASE montre le DERNIER niveau inscrit (la plus récente des inscriptions non annulées) et, en petit, combien
- * d'inscriptions elle porte. Ce n'est pas le niveau retenu (lot 3) : la case n'a ni le remplissage ni le contour du
- * tableau des productions, qui disent « compte » et « ne compte pas » ; elle a une surface neutre et un point de la
- * couleur du niveau, et la légende dit « pas le niveau retenu ».
+ * UNE CASE montre le NIVEAU RETENU (lot 3, 21 nov. 2026 : le meilleur niveau parmi les inscriptions non annulées qui
+ * portent un niveau ; il ne redescend pas, seule une annulation le fait baisser ; `NoteCibles`, js/pratiques/note-cibles.js)
+ * et, en petit, combien d'inscriptions elle porte. Une cible sans donnée (aucune inscription, ou seulement des remarques)
+ * porte le NOM du niveau « sans donnée » de l'échelle, jamais un vide ni un zéro. Ordre des niveaux illisible : rien n'est
+ * retenu, et le motif se lit au-dessus du tableau. Surface neutre et point de la couleur du niveau, comme au lot 2.
+ * Si le dernier niveau inscrit est plus bas que le retenu, l'historique de la case le dit, en clair (sans bulle).
+ *
+ * LA NOTE (lot 4) : une colonne au bout de chaque rangée. La note (arrondie comme l'indice P, `arrondirIndiceSurCent`) ;
+ * pendant la session, tant qu'une cible est sans donnée, « En attente » et les cibles nommées, sans bulle ; « Non
+ * calculable » et son motif ; « plafonnée » quand le double seuil a joué.
  *
  * TOUCHER UNE CASE ouvre l'inscription : la cible et son énoncé ; ses critères, chacun « respecté », « non respecté » ou
  * laissé non renseigné ; le niveau, choisi par l'enseignant·e parmi ceux de l'échelle (le « sans donnée » compris) ; la
@@ -21,9 +27,9 @@
  *
  * UNE INSCRIPTION SANS NIVEAU (complément du 21 nov., 9 h 17 ; à l'écran, une « remarque », mot PROPOSÉ) : la tuile
  * « Aucun niveau » (cochée d'office dans la fenêtre d'une case : aucun niveau n'est proposé) et un texte. Le bouton dit ce
- * qu'il va inscrire (« Inscrire le niveau » ou « Inscrire la remarque »). Une remarque ne change pas le dernier niveau
- * d'une case ; une case qui n'a QUE des remarques montre ✎ et leur nombre, sans survol (au toucher, une bulle est
- * invisible).
+ * qu'il va inscrire (« Inscrire le niveau » ou « Inscrire la remarque »). Une remarque n'entre jamais au niveau retenu ;
+ * une case qui n'a QUE des remarques montre ✎, leur nombre et le nom du niveau « sans donnée », sans survol (au toucher,
+ * une bulle est invisible).
  *
  * « INSCRIRE POUR UNE PRODUCTION » (N2, N4) : une production, un·e étudiant·e, et les cibles que la production renseigne ;
  * chacune part sur « Rien ce jour-là » : seules celles qui reçoivent un niveau s'inscrivent.
@@ -42,9 +48,31 @@
         parProduction: 'Inscrire pour une production',
         eleve: 'Étudiant·e',
         terminale: 'terminale',
-        legende: 'Une case montre le dernier niveau inscrit, pas le niveau retenu ; le petit nombre dit combien d’inscriptions elle porte.',
+        // Lot 3 : la case montre le niveau retenu (mots PROPOSÉS, TEXTES-2026-11-21-par-standards-lots-3-4.md).
+        legende: 'Une case montre le niveau retenu : le meilleur niveau inscrit, qui ne redescend pas. Le petit nombre dit combien d’inscriptions elle porte.',
+        legendeSansDonnee: (nom) => `« ${nom} » : aucun niveau inscrit pour cette cible (sans donnée).`,
         // Complément 9 h 17 : une inscription sans niveau (« remarque », mot PROPOSÉ).
         legendeRemarques: '✎ : des remarques, aucun niveau encore.',
+        // Lot 4 : la colonne de la note.
+        colNote: 'Note',
+        legendeNote: 'Note : la moyenne pondérée des niveaux retenus. Tant qu’une cible est sans donnée, pas de note : les cibles en attente sont nommées.',
+        legendeNoteFinale: 'Note : la moyenne pondérée des niveaux retenus. Notes finalisées : une cible sans donnée compte pour 0\u00a0%.',
+        noteEnAttente: 'En attente',
+        noteAttenteDe: (etiquettes) => etiquettes.join(', '),
+        noteNonCalculable: 'Non calculable',
+        notePlafonnee: 'plafonnée',
+        ditNote: (nom, note) => `${nom} : note ${note}`,
+        ditNoteAttente: (nom, etiquettes) => `${nom} : pas encore de note, en attente de ${etiquettes.join(', ')}`,
+        ditNoteNonCalculable: (nom, motif) => `${nom} : note non calculable. ${motif}`,
+        // L'historique d'une case : le niveau retenu, en clair.
+        retenuTitre: 'Niveau retenu',
+        retenuDepuis: (date) => `inscrit le ${date}.`,
+        retenuSansDonnee: (nom) => `Sans donnée : « ${nom} ». Aucun niveau n’est inscrit pour cette cible.`,
+        retenuSansDonneeInscrit: 'Ce niveau dit « sans donnée » : pendant la session, la cible est en attente ; à l’arrêt des notes, elle compte pour 0\u00a0%.',
+        dernierPlusBas: (nom, date) => `Le dernier niveau inscrit, ${nom} (le ${date}), est plus bas : le niveau retenu ne redescend pas.`,
+        retenuIllisible: 'Aucun niveau n’est retenu :',
+        marqueRetenu: 'niveau retenu',
+        caseIllisible: 'ordre des niveaux illisible',
         aucunNiveau: 'Aucun niveau',
         remarqueSeulement: 'une remarque seulement',
         inscrireRemarque: 'Inscrire la remarque',
@@ -100,6 +128,8 @@
         annonceAnnulee: 'Inscription annulée.'
     });
 
+    const N = () => window.NoteCibles;
+
     const I = () => window.InscriptionsCibles;
     const esc = (t) => echapperHtml(t == null ? '' : String(t));
     let _focusApres = null;          // { da, cibleId } : la case qui reprend le focus après un rendu
@@ -130,11 +160,22 @@
         ctx.niveaux = ((ctx.echelle && ctx.echelle.niveaux) || []).filter(n => n && n.code != null && String(n.code) !== '');
         ctx.codeSansDonnee = conf.niveauSansDonnee == null ? null : String(conf.niveauSansDonnee);
         ctx.inscriptions = I().lireToutes();
+        _completerPourLaNote(ctx, conf);
         if (!ensemble) ctx.vide = window.EnsemblesCibles.MOTIFS.INTROUVABLE;
         else if (ctx.cibles.length === 0) ctx.vide = MOTS.aucuneCible;
         else if (ctx.niveaux.length === 0) ctx.vide = MOTS.sansEchelle;
         else if (!ctx.etudiants || ctx.etudiants.length === 0) ctx.vide = window.TableauNotation.MOTS.aucunEleve;
         return ctx;
+    }
+
+    /** Lots 3 et 4 : l'ordre de l'échelle (une fois pour la classe), le niveau « sans donnée », les réglages de la note. */
+    function _completerPourLaNote(ctx, conf) {
+        ctx.ordre = N().ordreDeLEchelle(ctx.echelle);
+        const sansDonnee = N().codeNorme(ctx.codeSansDonnee);
+        ctx.niveauSansDonnee = sansDonnee === '' ? null : (ctx.niveaux.find(n => N().codeNorme(n.code) === sansDonnee) || null);
+        ctx.nomSansDonnee = N().nomSansDonnee({ niveauSansDonnee: ctx.niveauSansDonnee });
+        ctx.notesFinales = conf.notesFinales === true;
+        ctx.doubleSeuil = N().lireDoubleSeuil(conf);
     }
 
     function _niveauDuCode(ctx, code) {
@@ -176,11 +217,26 @@
         return `<div class="tn-repere"><span class="tn-repere-titre">${esc(MOTS.echelleTitre(ctx.echelle && ctx.echelle.nom))}</span>${niveaux}</div>`;
     }
 
-    /** La phrase de la note absente : celle que la pratique déclare (profil, rapport, export), une fois, au-dessus du tableau. */
-    function _noteAbsenteHTML(ctx) {
-        const p = typeof window.obtenirPratiqueParId === 'function' ? window.obtenirPratiqueParId(ctx.pratiqueId) : null;
-        const phrase = (p && typeof p.expliquerNoteNonConstructible === 'function') ? p.expliquerNoteNonConstructible(null) : '';
-        return phrase ? `<p class="tn-avis tc-note-absente">${esc(phrase)}</p>` : '';
+    /** Ordre des niveaux illisible (lot 3) : le motif, une fois, au-dessus du tableau. Rien n'est retenu. */
+    function _ordreIllisibleHTML(ctx) {
+        return (ctx.ordre && !ctx.ordre.ok) ? `<p class="tn-avis tc-ordre-illisible" role="status">${esc(ctx.ordre.motif)}</p>` : '';
+    }
+
+    /**
+     * Le niveau retenu de chaque cible, et la note, pour un·e étudiant·e : `NoteCibles` sur le contexte déjà lu (une
+     * lecture des inscriptions pour la classe). Même calcul que `calculerPerformance` de la pratique.
+     */
+    function eleveDuContexte(ctx, da) {
+        const retenue = N().retenirParCible({ liste: ctx.inscriptions, da, ensembleId: ctx.ensemble.id, cibles: ctx.cibles,
+            echelle: ctx.echelle, codeSansDonnee: ctx.codeSansDonnee });
+        const note = N().calculerNote({ retenue, notesFinales: ctx.notesFinales, doubleSeuil: ctx.doubleSeuil });
+        return { retenue, note, parCible: new Map(retenue.lignes.map(l => [l.cible.id, l])) };
+    }
+
+    /** La note telle que l'indice P l'arrondit (portfolio.js, `arrondirIndiceSurCent`) : la même partout. */
+    function noteArrondie(note) {
+        if (typeof note !== 'number' || !Number.isFinite(note)) return null;
+        return (typeof window.arrondirIndiceSurCent === 'function') ? window.arrondirIndiceSurCent(note / 100) : Math.round(note);
     }
 
     function _enteteHTML(ctx) {
@@ -188,43 +244,65 @@
             + `<span class="tn-production-titre">${esc(c.etiquette)}</span>`
             + (c.terminale ? `<span class="tn-production-date">${esc(MOTS.terminale)}</span>` : '')
             + `</th>`).join('');
-        return `<thead><tr><th scope="col" class="tn-col-eleve">${esc(MOTS.eleve)}</th>${cols}</tr></thead>`;
+        return `<thead><tr><th scope="col" class="tn-col-eleve">${esc(MOTS.eleve)}</th>${cols}<th scope="col" class="tn-col-note tc-col-note">${esc(MOTS.colNote)}</th></tr></thead>`;
     }
 
-    /** Le libellé lu d'une case, et son infobulle. Les remarques (aucun niveau) sont dites à part. */
-    function _ditLaCase(nom, cible, etat, niveau) {
-        const annulees = etat.annulees ? `, ${etat.annulees} ${etat.annulees > 1 ? 'annulées' : 'annulée'}` : '';
-        const r = etat.remarques || 0;
+    /** Le libellé lu d'une case, et son infobulle (le même texte : rien ne s'y lit qui ne se voie aussi). */
+    function _ditLaCase(nom, cible, ligne, ctx) {
+        const annulees = ligne.annulees ? `, ${ligne.annulees} ${ligne.annulees > 1 ? 'annulées' : 'annulée'}` : '';
+        const r = ligne.remarques || 0;
         const remarques = `${r} ${r > 1 ? 'remarques' : 'remarque'}`;
-        if (!etat.derniere) return r ? `${nom}, ${cible.etiquette} : aucun niveau inscrit, ${remarques}${annulees}` : `${nom}, ${cible.etiquette} : ${MOTS.aucune}`;
-        const nomNiveau = niveau ? (niveau.nom || niveau.code) : `${etat.derniere.niveau} (${MOTS.niveauAbsent})`;
-        const n = etat.actives;
-        return `${nom}, ${cible.etiquette} : dernier niveau inscrit ${nomNiveau}, ${n} ${n > 1 ? 'inscriptions' : 'inscription'}`
-            + `${r ? ', dont ' + remarques : ''}${annulees}`;
+        const n = ligne.actives;
+        const compte = !n ? MOTS.aucune : (r === n ? remarques : `${n} ${n > 1 ? 'inscriptions' : 'inscription'}${r ? ', dont ' + remarques : ''}`);
+        if (!ctx.ordre.ok) return `${nom}, ${cible.etiquette} : ${MOTS.caseIllisible}, ${compte}${annulees}`;
+        if (!ligne.retenu) return `${nom}, ${cible.etiquette} : ${MOTS.sansDonnee} (${ctx.nomSansDonnee}), ${compte}${annulees}`;
+        const nomNiveau = ligne.niveau ? (ligne.niveau.nom || ligne.niveau.code) : ligne.retenu.niveau;
+        return `${nom}, ${cible.etiquette} : niveau retenu ${nomNiveau}, ${compte}${annulees}`;
     }
 
-    function _caseHTML(ctx, etudiant, cible, premiere) {
-        const etat = I().etatDeLaCase(ctx.inscriptions, etudiant.da, ctx.ensemble.id, cible.id);
-        const niveau = etat.derniere ? _niveauDuCode(ctx, etat.derniere.niveau) : null;
-        const dit = _ditLaCase(_nomEleve(etudiant), cible, etat, niveau);
+    function _caseHTML(ctx, etudiant, cible, premiere, eleve) {
+        const ligne = eleve.parCible.get(cible.id);
+        const dit = _ditLaCase(_nomEleve(etudiant), cible, ligne, ctx);
         const attrs = `data-tc="case" data-da="${esc(etudiant.da)}" data-cible="${esc(cible.id)}" tabindex="${premiere ? '0' : '-1'}" aria-label="${esc(dit)}" title="${esc(dit)}"`;
-        if (!etat.derniere && etat.remarques) {
-            // Seulement des remarques : une marque visible sans survol (✎) et leur nombre ; aucun niveau, aucune couleur.
-            return `<td class="tn-cellule"><button type="button" class="tc-case tc-case--remarques" ${attrs}>`
-                + `<span class="tc-case-remarque" aria-hidden="true">✎</span><span class="tc-case-compte" aria-hidden="true">${esc(String(etat.remarques))}</span></button></td>`;
+        const compte = ligne.actives ? `<span class="tc-case-compte" aria-hidden="true">${esc(String(ligne.actives))}</span>` : '';
+        if (!ctx.ordre.ok) {
+            // Ordre illisible : rien n'est retenu (le motif est au-dessus du tableau) ; la case garde son compte.
+            return `<td class="tn-cellule"><button type="button" class="tc-case tc-case--vide" ${attrs}><span aria-hidden="true">?</span>${compte}</button></td>`;
         }
-        if (!etat.derniere) {
-            return `<td class="tn-cellule"><button type="button" class="tc-case tc-case--vide" ${attrs}><span aria-hidden="true">+</span></button></td>`;
+        if (!ligne.retenu) {
+            // Sans donnée : le NOM du niveau « sans donnée » de l'échelle (jamais un vide ni un zéro) ; ✎ s'il y a des remarques.
+            const remarque = ligne.remarques ? `<span class="tc-case-remarque" aria-hidden="true">✎</span>` : '';
+            return `<td class="tn-cellule"><button type="button" class="tc-case tc-case--vide${ligne.remarques ? ' tc-case--remarques' : ''}" ${attrs}>`
+                + `${remarque}<span class="tc-case-sans-donnee" aria-hidden="true">${esc(ctx.nomSansDonnee)}</span>${compte}</button></td>`;
         }
-        const style = ` style="--tn-couleur: ${esc(_couleur(niveau))}"`;
+        const style = ` style="--tn-couleur: ${esc(_couleur(ligne.niveau))}"`;
         return `<td class="tn-cellule"><button type="button" class="tc-case"${style} ${attrs}>`
-            + `<span class="tc-case-point" aria-hidden="true"></span><span class="tc-case-niveau" aria-hidden="true">${esc(etat.derniere.niveau)}</span>`
-            + `<span class="tc-case-compte" aria-hidden="true">${esc(String(etat.actives))}</span></button></td>`;
+            + `<span class="tc-case-point" aria-hidden="true"></span><span class="tc-case-niveau" aria-hidden="true">${esc(ligne.retenu.niveau)}</span>`
+            + `${compte}</button></td>`;
+    }
+
+    /** La case de la note, au bout de la rangée (lot 4). Tout se lit sans bulle. */
+    function _caseNoteHTML(ctx, etudiant, eleve) {
+        const nom = _nomEleve(etudiant);
+        const n = eleve.note;
+        if (n.etat === N().ETATS.NOTE) {
+            const valeur = (typeof window.formaterPourcentage === 'function') ? window.formaterPourcentage(noteArrondie(n.note)) : String(noteArrondie(n.note));
+            const plafond = (n.plafonnement && n.plafonnement.applique) ? `<span class="tc-note-detail">${esc(MOTS.notePlafonnee)}</span>` : '';
+            return `<td class="tn-cellule tn-note tc-cellule-note" aria-label="${esc(MOTS.ditNote(nom, valeur))}"><span class="tc-note-valeur">${esc(valeur)}</span>${plafond}</td>`;
+        }
+        if (n.etat === N().ETATS.ATTENTE) {
+            const etiquettes = n.enAttente.map(c => c.etiquette);
+            return `<td class="tn-cellule tn-note tc-cellule-note tc-cellule-note--attente" aria-label="${esc(MOTS.ditNoteAttente(nom, etiquettes))}">`
+                + `<span class="tc-note-etat">${esc(MOTS.noteEnAttente)}</span><span class="tc-note-detail">${esc(MOTS.noteAttenteDe(etiquettes))}</span></td>`;
+        }
+        return `<td class="tn-cellule tn-note tc-cellule-note tc-cellule-note--attente" aria-label="${esc(MOTS.ditNoteNonCalculable(nom, n.motif || ''))}">`
+            + `<span class="tc-note-etat">${esc(MOTS.noteNonCalculable)}</span>${ctx.ordre.ok ? `<span class="tc-note-detail">${esc(n.motif || '')}</span>` : ''}</td>`;
     }
 
     function _rangeeHTML(ctx, etudiant, i) {
-        const cases = ctx.cibles.map((c, j) => _caseHTML(ctx, etudiant, c, i === 0 && j === 0)).join('');
-        return `<tr><th scope="row" class="tn-eleve">${esc(_nomEleve(etudiant))}</th>${cases}</tr>`;
+        const eleve = eleveDuContexte(ctx, etudiant.da);
+        const cases = ctx.cibles.map((c, j) => _caseHTML(ctx, etudiant, c, i === 0 && j === 0, eleve)).join('');
+        return `<tr><th scope="row" class="tn-eleve">${esc(_nomEleve(etudiant))}</th>${cases}${_caseNoteHTML(ctx, etudiant, eleve)}</tr>`;
     }
 
     /**
@@ -236,9 +314,12 @@
         const tete = `<h3 class="tn-titre" tabindex="-1">${esc(MOTS.titre)}</h3><p class="tn-intro">${esc(MOTS.intro)}</p>`;
         if (ctx.vide) return `${tete}${_bandeauHTML(ctx, false)}<p class="tn-etat-vide">${esc(ctx.vide)}</p>`;
         const rangees = ctx.etudiants.map((e, i) => _rangeeHTML(ctx, e, i)).join('');
-        return `${tete}${_bandeauHTML(ctx, true)}${_echelleHTML(ctx)}${_noteAbsenteHTML(ctx)}
+        const legendes = [MOTS.legende, MOTS.legendeSansDonnee(ctx.nomSansDonnee)]
+            .concat(rangees.indexOf('tc-case--remarques') !== -1 ? [MOTS.legendeRemarques] : [])
+            .concat([ctx.notesFinales ? MOTS.legendeNoteFinale : MOTS.legendeNote]);
+        return `${tete}${_bandeauHTML(ctx, true)}${_echelleHTML(ctx)}${_ordreIllisibleHTML(ctx)}
             <div class="tn-cadre"><div class="tn-defilement"><table class="tn-tableau tc-tableau">${_enteteHTML(ctx)}<tbody>${rangees}</tbody></table></div></div>
-            <div class="tn-legende"><span class="tn-legende-item tc-legende">${esc(MOTS.legende)}</span>${rangees.indexOf('tc-case--remarques') !== -1 ? `<span class="tn-legende-item tc-legende">${esc(MOTS.legendeRemarques)}</span>` : ''}<span class="tn-legende-aide">${esc(MOTS.aide)}</span></div>
+            <div class="tn-legende">${legendes.map(l => `<span class="tn-legende-item tc-legende">${esc(l)}</span>`).join('')}<span class="tn-legende-aide">${esc(MOTS.aide)}</span></div>
             <p class="tn-annonce u-lecteur-ecran tc-annonce" aria-live="polite"></p>`;
     }
 
@@ -435,9 +516,45 @@
         return p ? `${MOTS.production} : ${p.titre || p.nom || id}` : `${MOTS.production} : ${MOTS.productionIntrouvable}`;
     }
 
-    function historiqueHTML(ctx, da, cibleId) {
+    function _nomEtCode(niveau, code) {
+        return niveau ? `${niveau.code} · ${niveau.nom || ''}`.trim() : String(code);
+    }
+
+    /**
+     * Le niveau retenu d'une case, en clair (lot 3) : le niveau et la date où il a été inscrit ; ou « sans donnée » et le
+     * nom de ce niveau ; et, si le dernier niveau inscrit est plus bas, la phrase qui le dit — lisible sans bulle.
+     * @param {Object} ctx
+     * @param {Object} ligne - une ligne de `NoteCibles.retenirParCible`
+     */
+    function retenuHTML(ctx, ligne, options) {
+        const details = !!(options && options.details);
+        if (!ctx.ordre || !ctx.ordre.ok) {
+            return `<div class="tc-retenu tc-retenu--illisible"><p class="tc-retenu-ligne"><strong>${esc(MOTS.retenuIllisible)}</strong> ${esc(ctx.ordre ? ctx.ordre.motif : '')}</p></div>`;
+        }
+        if (!ligne.retenu) {
+            return `<div class="tc-retenu tc-retenu--sans-donnee"><p class="tc-retenu-ligne"><strong>${esc(MOTS.retenuTitre)} :</strong> ${esc(MOTS.retenuSansDonnee(ctx.nomSansDonnee))}</p></div>`;
+        }
+        const nom = _nomEtCode(ligne.niveau, ligne.retenu.niveau);
+        const style = ` style="--tn-couleur: ${esc(_couleur(ligne.niveau))}"`;
+        const sansDonnee = ligne.sansDonneeInscrit ? `<p class="tc-retenu-ligne tc-aide">${esc(MOTS.retenuSansDonneeInscrit)}</p>` : '';
+        const plusBas = ligne.dernierPlusBas
+            ? `<p class="tc-retenu-ligne tc-retenu-plus-bas">${esc(MOTS.dernierPlusBas(_nomEtCode(ligne.dernierNiveau, ligne.dernier.niveau), dateLisible(ligne.dernier.date)))}</p>` : '';
+        // Au profil (`details`) : son origine et sa rétroaction, celles de l'inscription retenue.
+        const plus = details ? `<p class="tc-retenu-ligne">${esc(_titreProduction(ligne.retenu.productionId))}</p>`
+            + (ligne.retenu.noteBreve ? `<p class="tc-retenu-ligne"><strong>${esc(MOTS.retroaction)} :</strong> ${esc(ligne.retenu.noteBreve)}</p>` : '') : '';
+        return `<div class="tc-retenu"${style}><p class="tc-retenu-ligne"><strong>${esc(MOTS.retenuTitre)} :</strong> `
+            + `<span class="tc-retenu-niveau">${esc(nom)}</span>, ${esc(MOTS.retenuDepuis(dateLisible(ligne.retenu.date)))}</p>${plus}${sansDonnee}${plusBas}</div>`;
+    }
+
+    /**
+     * L'historique d'une case : chaque inscription, la plus récente d'abord, remarques et annulées comprises (barrées).
+     * Celle qui porte le niveau retenu est marquée. `options.lectureSeule` (le profil) : aucun bouton d'annulation.
+     */
+    function historiqueHTML(ctx, da, cibleId, options) {
+        const lectureSeule = !!(options && options.lectureSeule);
         const h = I().historiqueDeLaCase(ctx.inscriptions, da, ctx.ensemble.id, cibleId);
         if (h.length === 0) return `<p class="tc-aide">${esc(MOTS.historiqueVide)}</p>`;
+        const retenu = (options && options.retenuId) || null;
         const entrees = h.map(({ inscription: i, annulation: a }) => {
             const sansNiveau = I().estSansNiveau(i);
             const niveau = sansNiveau ? null : _niveauDuCode(ctx, i.niveau);
@@ -445,11 +562,12 @@
             const criteres = (i.criteres || []).length ? `<ul class="tc-entree-criteres">${i.criteres.map(_ligneCritereHistorique).join('')}</ul>` : '';
             const fin = a
                 ? `<p class="tc-entree-annulation">${esc(MOTS.annulee(dateLisible(a.date), a.raison))}</p>`
-                : `<button type="button" class="btn btn-neutre btn-mini tc-entree-annuler" data-tc="annuler" data-id="${esc(i.id)}">${esc(MOTS.annuler)}</button>`;
+                : (lectureSeule ? '' : `<button type="button" class="btn btn-neutre btn-mini tc-entree-annuler" data-tc="annuler" data-id="${esc(i.id)}">${esc(MOTS.annuler)}</button>`);
+            const marque = (retenu && i.id === retenu) ? ` <span class="tc-entree-retenu">${esc(MOTS.marqueRetenu)}</span>` : '';
             return `<li class="tc-entree${a ? ' tc-entree--annulee' : ''}">
                 <div class="tc-entree-corps">
                     <div class="tc-entree-tete"><span class="tc-entree-date">${esc(dateLisible(i.date))}</span>
-                        <span class="tc-entree-niveau${sansNiveau ? ' tc-entree-niveau--remarque' : ''}" style="--tn-couleur: ${esc(_couleur(niveau))}">${esc(nomNiveau)}</span>
+                        <span class="tc-entree-niveau${sansNiveau ? ' tc-entree-niveau--remarque' : ''}" style="--tn-couleur: ${esc(_couleur(niveau))}">${esc(nomNiveau)}</span>${marque}
                         <span class="tc-entree-origine">${esc(_titreProduction(i.productionId))}</span></div>
                     ${i.noteBreve ? `<p class="tc-entree-note">${esc(i.noteBreve)}</p>` : ''}
                     ${criteres}
@@ -458,9 +576,15 @@
         return `<ol class="tc-historique-liste">${entrees}</ol>`;
     }
 
+    /** Le niveau retenu en clair, puis l'historique de la case (la fenêtre d'une case). */
+    function _historiqueAvecRetenuHTML(ctx, da, cibleId) {
+        const ligne = eleveDuContexte(ctx, da).parCible.get(cibleId);
+        return retenuHTML(ctx, ligne) + historiqueHTML(ctx, da, cibleId, { retenuId: ligne && ligne.retenu ? ligne.retenu.id : null });
+    }
+
     /**
      * Ouvre l'inscription d'une case : la cible, ses critères, le niveau, la rétroaction, l'origine, la date ; puis
-     * l'historique de la case.
+     * le niveau retenu et l'historique de la case.
      */
     function ouvrirInscription(da, cibleId, retour) {
         const ctx = completerContexte(_contexteCourant || {});
@@ -485,7 +609,7 @@
                 <div class="modal-actions"><button type="button" class="btn btn-neutre" data-tc="fermer">${esc(MOTS.fermer)}</button>
                     <button type="button" class="btn btn-principal" data-tc="inscrire">${esc(MOTS.inscrireRemarque)}</button></div>
             </form>
-            <section class="tc-historique"><h4 class="tc-section-titre">${esc(MOTS.historique)}</h4><div class="tc-historique-hote">${historiqueHTML(ctx, da, cibleId)}</div></section>`;
+            <section class="tc-historique"><h4 class="tc-section-titre">${esc(MOTS.historique)}</h4><div class="tc-historique-hote">${_historiqueAvecRetenuHTML(ctx, da, cibleId)}</div></section>`;
         return _ouvrirFenetre(html, { mode: 'case', da: String(da), cibleId, retour, ctx });
     }
 
@@ -533,8 +657,8 @@
             const ctx = completerContexte(_contexteCourant || {});
             _ouverte.ctx = ctx;
             const hote = overlay.querySelector('.tc-historique-hote');
-            // security-ok : historiqueHTML échappe tout texte (esc)
-            if (hote) hote.innerHTML = historiqueHTML(ctx, _ouverte.da, _ouverte.cibleId);
+            // security-ok : _historiqueAvecRetenuHTML échappe tout texte (esc)
+            if (hote) hote.innerHTML = _historiqueAvecRetenuHTML(ctx, _ouverte.da, _ouverte.cibleId);
             const titre = overlay.querySelector('.tc-historique .tc-section-titre');
             if (titre) { titre.setAttribute('tabindex', '-1'); titre.focus(); }
         }
@@ -674,6 +798,9 @@
         construireHTML,
         apresRendu,
         historiqueHTML,
+        retenuHTML,
+        eleveDuContexte,
+        noteArrondie,
         ouvrirInscription,
         ouvrirParProduction,
         dateLisible,

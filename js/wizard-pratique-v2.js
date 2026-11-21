@@ -63,7 +63,7 @@ const TYPE_BADGES = {
     // « Décrire ma pratique », et le « Modèle de base » de « Partir d'un modèle ».
     'denotation': { code: 'DEN', classe: 'den', label: 'PAN – Dénotation', description: 'Rétroaction qualitative sur des cibles et des critères explicites ; la note certificative est posée par jugement à la fin.' },
     // Lot 1 de la pratique « Par standards » (21 nov. 2026). Mots PROPOSÉS (plans de travail/TEXTES-2026-11-20-par-standards-lot-1.md).
-    'cibles': { code: 'STD', classe: 'std', label: 'Par standards', description: 'Pour chaque cible d\'apprentissage du cours, tu inscris le niveau que l\'étudiant·e a démontré. La note du cours viendra du meilleur niveau démontré pour chaque cible, en moyenne pondérée.' }
+    'cibles': { code: 'STD', classe: 'std', label: 'Par standards', description: 'Pour chaque cible d\'apprentissage du cours, tu inscris le niveau que l\'étudiant·e a démontré. La note du cours vient du meilleur niveau démontré pour chaque cible, en moyenne pondérée.' }
 };
 
 // ============================================================================
@@ -231,7 +231,7 @@ const ETAPES_WIZARD = {
                     { value: 'acceptable', label: 'PAN – Spécifications (SPE)', description: 'Travaux acceptables ou non ; note selon les forfaits réussis.' },
                     { value: 'jugement', label: 'PAN – Dénotation (DEN)', description: 'Note finale certificative posée (non calculée) selon l\'atteinte de cibles d\'apprentissage explicites ; abandonne la fonction de tri.' },
                     // Lot 1 de la pratique « Par standards » (21 nov. 2026).
-                    { value: 'cibles', label: 'Par standards', description: 'Un niveau par cible d\'apprentissage du cours ; la note viendra du meilleur niveau démontré pour chaque cible.' }
+                    { value: 'cibles', label: 'Par standards', description: 'Un niveau par cible d\'apprentissage du cours ; la note vient du meilleur niveau démontré pour chaque cible.' }
                 ]
             }
         ],
@@ -2316,7 +2316,7 @@ function genererRecapitulatifCibles(r) {
     html += `<p><strong>Échelle\u00a0:</strong> ${echapperHtml(echelle ? (echelle.nom || 'Sans nom') : (r.echelleId || '—'))}</p>`;
     const libelleNiveau = niveau ? String(niveau.code) + ' – ' + (niveau.nom || '') : '—';
     html += `<p><strong>Niveau «\u00a0sans donnée\u00a0»\u00a0:</strong> ${echapperHtml(libelleNiveau)}</p>`;
-    html += '<p class="wizard-v2-recap-aide">Cette pratique ne calcule pas encore de note : l\'inscription des niveaux pour chaque cible viendra dans une prochaine version.</p>';
+    html += '<p class="wizard-v2-recap-aide">La note est la moyenne pondérée des niveaux retenus : pour chaque cible, le meilleur niveau inscrit. Le double seuil, éteint au départ, se règle dans la fiche de la pratique.</p>';
     html += '</div>';
     return html;
 }

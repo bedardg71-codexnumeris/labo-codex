@@ -103,12 +103,14 @@ describe('Renommage « Par sélection de productions » — les vingt textes acc
         expect(ligne).toMatch(/Une pratique que tu avais nommée toi-même garde son nom\.$/);
         // La typographie du fichier des Nouvelles : apostrophe courbe, espaces insécables dans les guillemets et avant « : ».
         const typo = (t) => t.replace(/'/g, '’').replace(/« /g, '«&nbsp;').replace(/ »/g, '&nbsp;»').replace(/ :/g, '&nbsp;:');
-        const attendu = typo(ligne + ' Son badge dit maintenant « SEL », en sarcelle.');
+        // 21 nov. 2026, 12 h 18 (accepté par Grégoire) : « en sarcelle » retiré, le badge est blanc à l'écran.
+        const attendu = typo(ligne + ' Son badge dit maintenant « SEL ».');
         const journal = lire('js/changelog-data.js');
         const entree = tranche(journal, "version: '1.252'", "version: '1.251'");
         expect(entree).toContain("'" + attendu + "'");
         expect((entree.match(/^\s+'/gm) || []).length).toBe(1);        // une seule ligne dans cette entrée
         expect(entree).not.toMatch(/STD|Par standards|PAN/);            // rien de la nouvelle pratique, et SEL n'est pas dite PAN
+        expect(entree, 'le badge est blanc à l\'écran : la phrase ne dit pas sa couleur').not.toMatch(/sarcelle/);
     });
 });
 

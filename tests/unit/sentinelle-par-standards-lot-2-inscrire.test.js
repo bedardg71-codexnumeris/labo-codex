@@ -12,15 +12,16 @@
  *   D. La correction d'un DA déplace les inscriptions (et les annulations), sans en ajouter ni en retirer.
  *   E. La note brève, la raison d'une annulation et les textes de la cible sont échappés à l'affichage.
  *   F. Un codex enregistré puis rouvert rend la liste à l'identique (vrai ZIP, vrai `chargerCodex`).
- *   G. Une case montre le DERNIER niveau inscrit, pas le meilleur (le niveau retenu est le lot 3).
+ *   G. (Révisé au lot 3, 21 nov. 2026.) Une case montre le NIVEAU RETENU, le meilleur ; elle ne montre plus le dernier.
+ *      Une case sans donnée porte le nom du niveau « sans donnée ». (`etatDeLaCase`, le dernier niveau, est retirée.)
  *   H. La clé est inscrite à tous les registres nominatifs.
  *   I. L'assistant pose la question avant de retirer une cible qui porte des niveaux inscrits ; ses inscriptions restent.
  *      Un critère retiré ne pose pas de question : l'inscription garde le texte du critère jugé.
  *   J. Les cibles offertes pour une production (sa liste facultative ; sans liste, toutes).
  *   K. Une échelle à trois niveaux comme à six : la fenêtre offre chacun, le « sans donnée » compris (E3).
  *   L. Complément du 21 nov., 9 h 17 : une inscription peut ne porter aucun niveau (une « remarque ») ; `niveau: null`,
- *      jamais le niveau « sans donnée » ; l'inscription vide est refusée, en mots ; la case garde le dernier niveau après
- *      une remarque, et montre ✎ quand elle n'a que des remarques ; l'historique, l'annulation, les critères.
+ *      jamais le niveau « sans donnée » ; l'inscription vide est refusée, en mots ; une remarque n'entre pas au niveau
+ *      retenu (révisé au lot 3), et la case montre ✎ quand elle n'a que des remarques ; l'historique, l'annulation, les critères.
  *
  * Données fictives (Zoé Fictive, Yan Inventé, cours « 999-ZZZ-ZZ »). BREAK-TESTS : journal en fin de fichier.
  */
@@ -33,6 +34,7 @@ import { chargerScript } from './_helpers/charger-script.js';
 import { dbBanc, RACINE } from './_helpers/bac-suivi.js';
 import { monterFichierSortant } from './_helpers/monter-fichier-sortant.js';
 import { tranche } from './_helpers/tranche.js';
+import { fonctionsDeLEchelle } from './_helpers/moteur-cibles.js';
 
 const clone = (x) => JSON.parse(JSON.stringify(x));
 const echapperHtml = (s) => String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
@@ -56,12 +58,16 @@ function monterInscriptions(store = {}) {
     const win = { echapperHtml };
     let n = 0;
     chargerScript('js/pratiques/inscriptions-cibles.js', { db: dbBanc(store, journal), cle: (k) => 'test_' + k, echapperHtml }, win);
+    chargerScript('js/pratiques/note-cibles.js', { ...fonctionsDeLEchelle() }, win);   // lot 3 : le niveau retenu d'une case
     win.genererIdUnique = (p) => p + 'BANC' + (++n);
     return { win, IC: win.InscriptionsCibles, store, journal };
 }
 const saisie = (IC, quoi = {}) => Object.assign({ da: ZOE, ensembleId: 'ENS1', cibleId: CIBLE.id, niveau: '2', echelleId: ECHELLE.id,
     date: '2026-11-21', productionId: null, noteBreve: '', criteres: IC.etatDesCriteres(CIBLE, {}) }, quoi);
 const ecritures = (journal) => journal.filter(e => e.k === CLE).map(e => e.v);
+/** Lot 3 : ce qu'une case retient (le meilleur niveau) et ses comptes, par `NoteCibles` sur l'historique de la case. */
+const etatCase = (win, liste, da = ZOE, cibleId = CIBLE.id, echelle = ECHELLE) => win.NoteCibles.retenirDansLHistorique(
+    win.InscriptionsCibles.historiqueDeLaCase(liste, da, 'ENS1', cibleId), win.NoteCibles.ordreDeLEchelle(echelle));
 
 describe('A · deux inscriptions sur la même cible donnent deux entrées', () => {
     it('deux gestes, deux entrées, dans l\'ordre ; l\'historique de la case les montre toutes les deux', async () => {
@@ -73,7 +79,7 @@ describe('A · deux inscriptions sur la même cible donnent deux entrées', () =
         expect(liste.map(e => e.type)).toEqual(['inscription', 'inscription']);
         expect(new Set(liste.map(e => e.id)).size).toBe(2);
         expect(m.IC.historiqueDeLaCase(liste, ZOE, 'ENS1', CIBLE.id)).toHaveLength(2);
-        expect(m.IC.etatDeLaCase(liste, ZOE, 'ENS1', CIBLE.id).actives).toBe(2);
+        expect(etatCase(m.win, liste).actives).toBe(2);
     });
 
     it('la forme rangée d\'une inscription : identité, étudiant·e, cible, niveau (code), date, note brève, production ou rien, critères', async () => {
@@ -121,7 +127,7 @@ describe('B · aucune écriture ne réduit la liste ; une annulation ne retire r
         const h = m.IC.historiqueDeLaCase(m.store[CLE], ZOE, 'ENS1', CIBLE.id);
         expect(h).toHaveLength(1);
         expect(h[0].annulation.id).toBe(m.store[CLE][1].id);
-        expect(m.IC.etatDeLaCase(m.store[CLE], ZOE, 'ENS1', CIBLE.id)).toEqual({ derniere: null, actives: 0, remarques: 0, annulees: 1 });
+        expect(etatCase(m.win, m.store[CLE])).toMatchObject({ retenu: null, actives: 0, remarques: 0, annulees: 1 });
     });
 
     it('refus, sans rien écrire : annuler deux fois ; annuler une inscription introuvable', async () => {
@@ -295,11 +301,13 @@ function monterEcran({ store = {}, etudiants, cibles, echelle = ECHELLE, product
         CSS: { escape: (s) => String(s).replace(/["\\]/g, '\\$&') },
         obtenirEchelleResolue: (id) => (base.test_echellesTemplates || []).find(e => e.id === id) || null,
         genererBadgePratiqueHTML: () => '<span class="badge-type-pratique">STD</span>',
-        obtenirDonneesSelonMode: (k) => (k === 'productions' ? (productions || []) : [])
+        obtenirDonneesSelonMode: (k) => (k === 'productions' ? (productions || []) : []),
+        ...fonctionsDeLEchelle()   // lots 3 et 4 : l'ordre des niveaux et la valeur ponctuelle, les fonctions réelles
     };
     let n = 0;
     chargerScript('js/pratiques/ensembles-cibles.js', globaux, win);
     chargerScript('js/pratiques/inscriptions-cibles.js', globaux, win);
+    chargerScript('js/pratiques/note-cibles.js', globaux, win);   // lots 3 et 4 : le niveau retenu, la note
     win.genererIdUnique = (p) => p + 'ECRAN' + (++n);
     win.TableauNotation = { MOTS: { reglages: 'Réglages de la pratique', aucunEleve: 'Aucun·e étudiant·e.' },
         couleurSure: (c) => (c || 'var(--accent-primaire)'), rafraichirSiAffiche() {} };
@@ -412,34 +420,36 @@ describe('F · un codex enregistré puis rouvert rend la liste à l\'identique',
 });
 
 /* ================================================================ G. La case : le dernier, pas le meilleur */
-describe('G · une case montre le DERNIER niveau inscrit et le compte ; ce n\'est pas le niveau retenu', () => {
+describe('G · (révisé au lot 3) une case montre le NIVEAU RETENU et le compte ; plus le dernier', () => {
     const I = (id, niveau, date, h) => ({ id, type: 'inscription', da: ZOE, ensembleId: 'ENS1', cibleId: CIBLE.id, niveau, echelleId: 'ECH-banc', date,
         horodatage: h || date + 'T12:00:00.000Z', productionId: null, noteBreve: '', criteres: [] });
-    it('« Avancé » le 1er nov., puis « En apprentissage » le 10 nov. : la case dit 1, pas 4 ; elle compte deux inscriptions', () => {
+    it('« Avancé » le 1er nov., puis « En apprentissage » le 10 nov. : la case dit 4, pas 1 ; elle compte deux inscriptions', () => {
         const e = monterEcran({ store: { [CLE]: [I('I1', '4', '2026-11-01'), I('I2', '1', '2026-11-10')] } });
-        const etat = e.IC.etatDeLaCase(e.store[CLE], ZOE, 'ENS1', CIBLE.id);
-        expect(etat.derniere.niveau).toBe('1');
+        const etat = etatCase(e.win, e.store[CLE]);
+        expect(etat.retenu.niveau).toBe('4');
         expect(etat.actives).toBe(2);
         const bouton = e.hote.querySelector(`.tc-case[data-da="${ZOE}"][data-cible="${CIBLE.id}"]`);
-        expect(bouton.querySelector('.tc-case-niveau').textContent).toBe('1');
+        expect(bouton.querySelector('.tc-case-niveau').textContent).toBe('4');
         expect(bouton.querySelector('.tc-case-compte').textContent).toBe('2');
-        expect(bouton.getAttribute('aria-label')).toBe('Zoé Fictive, Lire un texte : dernier niveau inscrit En apprentissage, 2 inscriptions');
-        expect(e.hote.innerHTML).toContain('pas le niveau retenu');
+        expect(bouton.getAttribute('aria-label')).toBe('Zoé Fictive, Lire un texte : niveau retenu Avancé, 2 inscriptions');
+        expect(e.hote.innerHTML).toContain('Une case montre le niveau retenu');
+        expect(e.hote.innerHTML).not.toContain('pas le niveau retenu');
     });
-    it('« dernier » : la date de la trace d\'abord, puis le moment de l\'écriture ; une inscription annulée ne compte pas', () => {
+    it('le meilleur l\'emporte sur le plus récent ; une inscription annulée ne compte pas', () => {
         const liste = [I('I1', '2', '2026-11-10', '2026-11-10T09:00:00.000Z'), I('I2', '3', '2026-11-10', '2026-11-10T10:00:00.000Z'),
-            I('I3', '4', '2026-11-05', '2026-11-11T10:00:00.000Z'),
+            I('I3', '1', '2026-11-12', '2026-11-12T10:00:00.000Z'),
             { id: 'X', type: 'annulation', inscriptionId: 'I2', da: ZOE, ensembleId: 'ENS1', cibleId: CIBLE.id, date: '2026-11-12', horodatage: '2026-11-12T00:00:00.000Z', raison: '' }];
         const m = monterInscriptions();
-        expect(m.IC.etatDeLaCase(liste, ZOE, 'ENS1', CIBLE.id)).toMatchObject({ actives: 2, annulees: 1 });
-        expect(m.IC.etatDeLaCase(liste, ZOE, 'ENS1', CIBLE.id).derniere.id).toBe('I1');
-        expect(m.IC.etatDeLaCase(liste.slice(0, 3), ZOE, 'ENS1', CIBLE.id).derniere.id).toBe('I2');
+        expect(etatCase(m.win, liste)).toMatchObject({ actives: 2, annulees: 1 });
+        expect(etatCase(m.win, liste).retenu.id).toBe('I1');
+        expect(etatCase(m.win, liste.slice(0, 3)).retenu.id).toBe('I2');
     });
-    it('une case sans inscription dit « aucune inscription » et invite à toucher', () => {
+    it('une case sans inscription porte le nom du niveau « sans donnée », jamais un vide ni un zéro', () => {
         const e = monterEcran();
         const bouton = e.hote.querySelector(`.tc-case[data-da="${YAN}"][data-cible="${CIBLE.id}"]`);
         expect(bouton.classList.contains('tc-case--vide')).toBe(true);
-        expect(bouton.getAttribute('aria-label')).toBe('Yan Inventé, Lire un texte : aucune inscription');
+        expect(bouton.textContent).toBe('Données insuffisantes');
+        expect(bouton.getAttribute('aria-label')).toBe('Yan Inventé, Lire un texte : sans donnée (Données insuffisantes), aucune inscription');
     });
 });
 
@@ -632,8 +642,8 @@ describe('L · une inscription peut ne porter aucun niveau (une remarque) ; ce n
         await m.IC.inscrire([saisie(m.IC, { niveau: '0' })]);
         expect(m.store[CLE][0].niveau).toBe('0');
         expect(m.IC.estSansNiveau(m.store[CLE][0])).toBe(false);
-        expect(m.IC.etatDeLaCase(m.store[CLE], ZOE, 'ENS1', CIBLE.id)).toMatchObject({ actives: 1, remarques: 0 });
-        expect(m.IC.etatDeLaCase(m.store[CLE], ZOE, 'ENS1', CIBLE.id).derniere.niveau).toBe('0');
+        expect(etatCase(m.win, m.store[CLE])).toMatchObject({ actives: 1, remarques: 0 });
+        expect(etatCase(m.win, m.store[CLE]).retenu.niveau).toBe('0');
     });
 
     it('l\'inscription vide (ni niveau ni texte) est refusée, en mots ; des coches seules ne suffisent pas', () => {
@@ -680,15 +690,15 @@ describe('L · une inscription peut ne porter aucun niveau (une remarque) ; ce n
         expect(i.criteres.map(k => k.respecte)).toEqual([true, null, null]);
     });
 
-    it('la case garde le DERNIER NIVEAU après une remarque plus récente ; elle compte la remarque et la dit', () => {
+    it('(révisé au lot 3) une remarque plus récente n\'entre pas au niveau retenu ; la case la compte et la dit', () => {
         const liste = [I_('I1', '3', '2026-11-01'), I_('R1', null, '2026-11-10', { noteBreve: 'à revoir' })];
         const e = monterEcran({ store: { [CLE]: liste } });
-        expect(e.IC.etatDeLaCase(liste, ZOE, 'ENS1', CIBLE.id)).toMatchObject({ actives: 2, remarques: 1 });
-        expect(e.IC.etatDeLaCase(liste, ZOE, 'ENS1', CIBLE.id).derniere.id).toBe('I1');
+        expect(etatCase(e.win, liste)).toMatchObject({ actives: 2, remarques: 1 });
+        expect(etatCase(e.win, liste).retenu.id).toBe('I1');
         const bouton = e.hote.querySelector(`.tc-case[data-da="${ZOE}"][data-cible="${CIBLE.id}"]`);
         expect(bouton.querySelector('.tc-case-niveau').textContent).toBe('3');
         expect(bouton.querySelector('.tc-case-compte').textContent).toBe('2');
-        expect(bouton.getAttribute('aria-label')).toBe('Zoé Fictive, Lire un texte : dernier niveau inscrit Acquis, 2 inscriptions, dont 1 remarque');
+        expect(bouton.getAttribute('aria-label')).toBe('Zoé Fictive, Lire un texte : niveau retenu Acquis, 2 inscriptions, dont 1 remarque');
     });
 
     it('une case qui n\'a que des remarques le montre par ✎ et leur nombre, sans survol, et la légende le dit ; aucun niveau, aucun « 0 »', () => {
@@ -696,11 +706,12 @@ describe('L · une inscription peut ne porter aucun niveau (une remarque) ; ce n
         const e = monterEcran({ store: { [CLE]: liste } });
         const bouton = e.hote.querySelector(`.tc-case[data-da="${ZOE}"][data-cible="${CIBLE.id}"]`);
         expect(bouton.classList.contains('tc-case--remarques')).toBe(true);
-        expect(bouton.textContent).toBe('✎2');
+        // Révisé au lot 3 : ✎, le nom du niveau « sans donnée » (la cible est sans donnée), et le compte.
+        expect(bouton.textContent).toBe('✎Données insuffisantes2');
         expect(bouton.querySelector('.tc-case-niveau')).toBeNull();
-        expect(bouton.getAttribute('aria-label')).toBe('Zoé Fictive, Lire un texte : aucun niveau inscrit, 2 remarques');
+        expect(bouton.getAttribute('aria-label')).toBe('Zoé Fictive, Lire un texte : sans donnée (Données insuffisantes), 2 remarques');
         expect([...e.hote.querySelectorAll('.tc-legende')].map(x => x.textContent)).toContain(e.TC.MOTS.legendeRemarques);
-        expect(e.IC.etatDeLaCase(liste, ZOE, 'ENS1', CIBLE.id).derniere).toBeNull();
+        expect(etatCase(e.win, liste).retenu).toBeNull();
     });
 
     it('l\'historique montre la remarque à sa date, parmi les inscriptions ; annulée, elle reste, barrée', async () => {
@@ -783,6 +794,8 @@ describe('L · une inscription peut ne porter aucun niveau (une remarque) ; ce n
  *      ROUGE (3) : L « l'inscription vide… est refusée », L « à l'écran : Inscrire sans niveau ni texte… », L « inscrire pour une production… ».
  * BT16 inscriptions-cibles.js, `etatDeLaCase` : la dernière inscription, remarque comprise, devient le « dernier niveau ».
  *      ROUGE (2) : L « la case garde le DERNIER NIVEAU… », L « une case qui n'a que des remarques… ».
+ *      (Lot 3, 21 nov. 2026 : `etatDeLaCase` est retirée ; la règle « une remarque n'entre pas au niveau retenu » est
+ *      gardée par la sentinelle des lots 3 et 4, règle 3, et son break-test.)
  * BT17 tableau-cibles.js, `_caseHTML` : la case qui n'a que des remarques rendue vide (« + »).
  *      ROUGE (1) : L « une case qui n'a que des remarques le montre par ✎… ».
  * BT18 tableau-cibles.js, `historiqueHTML` : la remarque n'est plus dite « Remarque, sans niveau ».

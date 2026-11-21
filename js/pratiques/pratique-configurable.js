@@ -23,14 +23,13 @@
 // « Échelle » n'y paraît que pour ces méthodes).
 const METHODES_AVEC_ECHELLE = ['conversion_niveaux'];
 
-// La pratique « Par standards » (lot 1, 21 nov. 2026) : sa méthode est arrêtée (`niveaux_par_cible`, lot 0), mais aucun
-// moteur ne la calcule encore — les niveaux s'inscrivent depuis le lot 2, la note arrive au lot 4. Plutôt qu'un chiffre,
-// la pratique DIT pourquoi : la phrase sort par `expliquerNoteNonConstructible` (profil, rapport, export, Suivi, tableau).
-// Mots PROPOSÉS : N1 du lot 1 (accepté), retouché au lot 2 (N1', TEXTES-2026-11-21-par-standards-lot-2.md) pour ne plus
-// dire que l'inscription n'est pas offerte.
+// La pratique « Par standards » (méthode `niveaux_par_cible`, arrêtée au lot 0). Lots 3 et 4 (21 nov. 2026) : la note
+// est la moyenne pondérée des valeurs ponctuelles des niveaux retenus, calculée par `NoteCibles` (js/pratiques/note-cibles.js),
+// qui ne lit ni les évaluations ni `indicesCP`. Sans note (une cible en attente pendant la session, une valeur ponctuelle
+// manquante, un ordre illisible), la pratique DIT pourquoi : `expliquerNoteNonConstructible` (profil, rapport, export,
+// Suivi, tableau). La phrase N1' des lots 1 et 2 (« ne calcule pas encore ») est retirée avec le court-circuit.
 const METHODE_PAR_STANDARDS = 'niveaux_par_cible';
-const MOTIF_PAR_STANDARDS_SANS_CALCUL = 'Pas encore de note : cette pratique par standards ne calcule pas encore. '
-    + 'La note viendra des niveaux inscrits pour chaque cible.';
+const MOTIF_PAR_STANDARDS_SANS_MOTEUR = 'Note non calculable : le moteur de la pratique par standards n’est pas chargé.';
 
 // ============================================================================
 // CLASSE PRINCIPALE
@@ -205,9 +204,9 @@ class PratiqueConfigurable {
             return pDen === null ? null : pDen / 100;
         }
 
-        // Lot 1 de la pratique « Par standards » : aucun calcul encore, donc aucune note — jamais le cache `indicesCP`,
-        // jamais un zéro. La cause se lit par `expliquerNoteNonConstructible`.
-        if (this.config.calcul_note && this.config.calcul_note.methode === METHODE_PAR_STANDARDS) return null;
+        // Par standards (lot 4) : la note vient des niveaux retenus — jamais le cache `indicesCP`, jamais les évaluations.
+        // Sans note (attente, non calculable) : null, jamais un zéro ; la cause se lit par `expliquerNoteNonConstructible`.
+        if (this._estParStandards()) return this._noteParStandardsDecimale(da);
 
         // #709 (audit du 5 septembre 2026, constat F-1) — LE CACHE `indicesCP` NE SE LIT QUE
         // POUR LA MÉTHODE QUI EN DÉPEND. Avant, il se lisait ici pour TOUTES les méthodes,
@@ -444,6 +443,7 @@ class PratiqueConfigurable {
      */
     decrireCalcul(da) {
         if (!da) return null;
+        if (this._estParStandards()) return this._recitParStandards(da);
         if (this.config.calcul_note && this.config.calcul_note.methode === 'specifications') {
             // #708 — le récit d'une SPE configurable vient du même délégué que sa note
             // (parité C2-c), sous le nom de CETTE pratique.
@@ -519,6 +519,71 @@ class PratiqueConfigurable {
     }
 
     /**
+     * Par standards (lot 4) — l'état de la note d'un·e étudiant·e, lu par `NoteCibles` sur la configuration de CETTE
+     * pratique : `{ etat: 'note' | 'attente' | 'non-calculable', note (0-100) | null, motif, enAttente, lignes, plafonnement }`.
+     * Lecture seule.
+     * @param {string} da
+     * @returns {Object}
+     */
+    _noteParStandards(da) {
+        if (!window.NoteCibles) return { etat: 'non-calculable', note: null, motif: MOTIF_PAR_STANDARDS_SANS_MOTEUR };
+        return window.NoteCibles.lireEleve(this.config.configuration || {}, da).note;
+    }
+
+    /** Vrai pour une pratique « Par standards » (méthode `niveaux_par_cible`). */
+    _estParStandards() {
+        return !!(this.config.calcul_note && this.config.calcul_note.methode === METHODE_PAR_STANDARDS);
+    }
+
+    /** La note sur 0-1, ou null (attente, non calculable) : jamais un zéro à la place d'une note absente. */
+    _noteParStandardsDecimale(da) {
+        const n = this._noteParStandards(da);
+        return (n.etat === 'note' && typeof n.note === 'number') ? n.note / 100 : null;
+    }
+
+    /** La cause d'une note absente (attente, non calculable), ou null quand la note existe ou sans DA. */
+    _causeParStandards(da) {
+        if (!da) return null;
+        const n = this._noteParStandards(da);
+        return n.etat === 'note' ? null : (n.motif || null);
+    }
+
+    /**
+     * Par standards (lot 4) — le récit de la note, dans la forme commune (`{ famille, pratiqueNom, resultats, synthese }`)
+     * que lisent le Comparateur et l'export. Une ligne par cible : son niveau retenu (code), sa valeur ponctuelle, et ce
+     * qu'elle fait dans la note (« compte », « attente », 0 % à l'arrêt des notes). La note est celle de
+     * `calculerPerformance` (même lecture, aucun calcul parallèle) ; null tant qu'elle n'existe pas — jamais un zéro.
+     * @param {string} da
+     * @returns {Object|null}
+     */
+    _recitParStandards(da) {
+        const n = this._noteParStandards(da);
+        if (!n || !Array.isArray(n.lignes)) return null;
+        const resultats = n.lignes.map(l => ({
+            label: l.cible.etiquette,
+            date: null,
+            niveau: l.niveau ? String(l.niveau.code) : null,
+            note: (typeof l.valeur === 'number') ? l.valeur : null,
+            sort: l.compte === 'attente' ? 'attente' : 'compte',
+            detail: l.compte === 'attente' ? 'sans donnée, en attente'
+                : (l.compte === 'zero-arret' ? 'sans donnée : 0\u00a0% à l’arrêt des notes' : 'niveau retenu')
+        }));
+        return {
+            famille: this.obtenirCode(),
+            pratiqueNom: this.obtenirNom(),
+            resultats: resultats,
+            synthese: {
+                formuleTexte: 'moyenne pondérée des niveaux retenus',
+                noteFinale: (n.etat === 'note' && typeof n.note === 'number') ? n.note : null,
+                plafonnement: (n.plafonnement && n.plafonnement.applique)
+                    ? { type: 'second-seuil', moyenneOriginale: n.moyenne, noteGardee: n.note } : null,
+                etat: n.etat,
+                motif: n.etat === 'note' ? null : (n.motif || null)
+            }
+        };
+    }
+
+    /**
      * L'instance PanSpecifications jetable configurée avec la config de CETTE pratique,
      * ou null si la classe est absente ou la config incomplète.
      *
@@ -572,7 +637,7 @@ class PratiqueConfigurable {
     /**
      * Lot N4 (#713) — la cause d'une note absente, lue au moteur de la famille (source unique :
      * `PratiquePanSpecifications.expliquerNoteNonConstructible`). Hors spécifications : null.
-     * Par standards (lot 1, 21 nov. 2026) : la pratique ne calcule pas encore ; elle le dit, pour tout DA.
+     * Par standards (lots 3 et 4, 21 nov. 2026) : la cause que dit `NoteCibles` (cibles en attente, valeur manquante, ordre illisible) ; null sans DA.
      * Configuration sans types ou sans forfaits : l'instance ne se construit pas, et c'est la cause.
      * Standards (lot 1 des standards sans portfolio, 28 oct. 2026) : la phrase que rend le calcul de la note quand aucune
      * production du pool n'a de note (`causeNoteAbsente`, source : `causeNoteStdSansProductionNotee` du registre).
@@ -580,7 +645,7 @@ class PratiqueConfigurable {
      * @returns {string|null}
      */
     expliquerNoteNonConstructible(da) {
-        if (this.config.calcul_note && this.config.calcul_note.methode === METHODE_PAR_STANDARDS) return MOTIF_PAR_STANDARDS_SANS_CALCUL;
+        if (this._estParStandards()) return this._causeParStandards(da);
         if (this.obtenirCode() === 'STD') {
             const details = (typeof window.calculerDetailsNoteFinale === 'function')
                 ? window.calculerDetailsNoteFinale(da, this.config.id) : null;

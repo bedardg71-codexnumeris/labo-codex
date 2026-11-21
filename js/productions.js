@@ -1962,8 +1962,13 @@ function raisonChampsObligatoiresProduction(d) {
     // (sa part de la note ; à 0 %, elle ne compterait pour rien) et le conteneur (la part du pool ; à 0 %, « Pondérations
     // nulles »). Retouche du verdict de Cowork, 29 oct. La famille se lit sur la désignation du groupe-cours (stockage,
     // `obtenirTypePratiqueActive`), pas sur le DOM ; les autres familles ne changent pas.
-    const enStandards = typeof window.obtenirTypePratiqueActive === 'function' && window.obtenirTypePratiqueActive() === 'standards';
-    const ponderationExigee = enStandards ? (d.type === 'terminale' || d.type === 'portfolio') : d.type !== 'artefact-portfolio';
+    const famille = typeof window.obtenirTypePratiqueActive === 'function' ? window.obtenirTypePratiqueActive() : null;
+    const enStandards = famille === 'standards';
+    // Lot 4 « Par standards » (21 nov. 2026 ; trouvaille du lot 2, plan § 11) : la note vient des niveaux retenus des cibles,
+    // et la pondération d'une production n'y entre pas. Elle n'est donc exigée pour aucun type.
+    const enCibles = famille === 'cibles';
+    const ponderationExigee = enCibles ? false
+        : (enStandards ? (d.type === 'terminale' || d.type === 'portfolio') : d.type !== 'artefact-portfolio');
     if (ponderationExigee && d.ponderation === 0) return 'la pondération est requise : plus de 0\u00a0%.';
     return '';
 }
@@ -2854,6 +2859,21 @@ function gererChangementTypeProduction() {
             notePonderation.innerHTML = 'Pour une évaluation formative, utilisez une pondération de 0\u00a0%.';
         }
     }
+
+    poserPonderationParStandards(type, groupePonderation, notePonderation);
+}
+
+/**
+ * Lot 4 « Par standards » (21 nov. 2026) : la pondération d'une production n'entre pas dans la note (elle vient des niveaux
+ * retenus des cibles) et n'est pas exigée ; le champ reste, sans effet sur la note, son astérisque part, et la note le dit.
+ */
+function poserPonderationParStandards(type, groupePonderation, notePonderation) {
+    const enCibles = typeof window.obtenirTypePratiqueActive === 'function' && window.obtenirTypePratiqueActive() === 'cibles';
+    const asterisquePonderation = groupePonderation ? groupePonderation.querySelector('.champ-requis') : null;
+    if (asterisquePonderation) asterisquePonderation.classList.toggle('u-hide', enCibles);
+    if (!enCibles || !type || type === 'artefact-portfolio' || !notePonderation) return;
+    notePonderation.classList.remove('u-hide');
+    notePonderation.textContent = 'Par standards : la pondération d\u2019une production n\u2019entre pas dans la note, qui vient des niveaux retenus des cibles. Elle n\u2019est pas exigée.';
 }
 
 /**
