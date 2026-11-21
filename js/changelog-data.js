@@ -21,6 +21,18 @@
 
     var CHANGELOG = [
         {
+            // 1.253 (21 nov. 2026 : la pratique « Par standards » mise en ligne À L'ESSAI, vue simple comprise) — titre et
+            // texte acceptés par Grégoire le 21 nov. à 14 h 17, mot pour mot, sauf la troisième phrase, ajustée par Cowork
+            // à 15 h 50 parce que la vue simple offre maintenant la pratique ; seule la typographie du fichier est
+            // appliquée. Les deux chemins (« parmi les modèles », « Conception › Pratiques ») sont ceux de l'écran.
+            version: '1.253',
+            couleur: 'vert',
+            titre: 'Une nouvelle pratique à l’essai&nbsp;: «&nbsp;Par standards&nbsp;»',
+            items: [
+                'Tu dis les cibles d’apprentissage de ton cours, puis tu inscris un niveau par cible pour chaque étudiant·e. L’application retient le meilleur niveau démontré et construit la note. Elle se choisit en vue simple, parmi les modèles, ou en vue étendue, dans Conception › Pratiques. Des enseignant·es qui notent ainsi la mettent à l’épreuve ces jours-ci&nbsp;: elle peut encore changer. Tes pratiques actuelles et tes notes ne changent pas.'
+            ]
+        },
+        {
             // 1.252 (21 nov. 2026 : la pratique « Standards » renommée « Par sélection de productions », son sigle SEL en
             // sarcelle) — ligne acceptée par Grégoire le 20 nov., complétée d'une phrase le 21 nov., mot pour mot ; seule
             // la typographie du fichier est appliquée. Le titre est de Claude Code (supposé, dit au rapport de la release).

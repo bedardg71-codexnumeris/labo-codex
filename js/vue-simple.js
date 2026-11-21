@@ -99,7 +99,8 @@
             { famille: 'specifications', modele: 'SPE-simple', titre: 'Par spécifications', texte: 'Chaque production est acceptable ou non acceptable. La note dépend du nombre de productions acceptables.', lien: 'Choisir les spécifications' },
             // « Par standards », À L'ESSAI (21 nov. 2026 ; décision de Grégoire, 14 h 19). Mots PROPOSÉS
             // (TEXTES-2026-11-21-par-standards-vue-simple.md). La famille se reconnaît à son type (`cibles`), jamais à son nom.
-            { famille: 'cibles', modele: 'par-standards', titre: 'Par standards', essai: 'À l’essai', texte: 'Tu écris les cibles de ton cours. Chaque étudiant·e reçoit un niveau par cible ; la note vient du meilleur niveau démontré pour chaque cible.', lien: 'Choisir ce modèle' }
+            // `essai` : la carte porte la mention « À l'essai » tant que `EnsemblesCibles.A_L_ESSAI` est allumée (une seule constante).
+            { famille: 'cibles', modele: 'par-standards', titre: 'Par standards', essai: true, texte: 'Tu écris les cibles de ton cours. Chaque étudiant·e reçoit un niveau par cible ; la note vient du meilleur niveau démontré pour chaque cible.', lien: 'Choisir ce modèle' }
         ],
         // — « Par standards » (21 nov. 2026, à l'essai) : mots PROPOSÉS
         ciblesTitre: 'Tes cibles',
@@ -971,8 +972,8 @@
 
     function _choixModeleHTML() {
         const cartes = MOTS.modeles.map((m) => `<li class="vs-etape">
-                <h3 class="vs-etape-titre">${esc(m.titre)}</h3>${m.essai ? `
-                <p class="vs-etape-essai">${esc(m.essai)}</p>` : ''}
+                <h3 class="vs-etape-titre">${esc(m.titre)}</h3>${(m.essai && window.EnsemblesCibles && window.EnsemblesCibles.estALEssai()) ? `
+                <p class="vs-etape-essai">${esc(window.EnsemblesCibles.MOT_A_L_ESSAI)}</p>` : ''}
                 <p class="vs-etape-texte">${esc(m.texte)}</p>
                 <button type="button" class="btn btn-principal vs-etape-lien" data-action="VueSimple.choisirModele" data-param="${esc(m.modele)}">${esc(m.lien)}</button>
             </li>`).join('');

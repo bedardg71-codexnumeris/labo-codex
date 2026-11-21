@@ -231,7 +231,7 @@ const ETAPES_WIZARD = {
                     { value: 'acceptable', label: 'PAN – Spécifications (SPE)', description: 'Travaux acceptables ou non ; note selon les forfaits réussis.' },
                     { value: 'jugement', label: 'PAN – Dénotation (DEN)', description: 'Note finale certificative posée (non calculée) selon l\'atteinte de cibles d\'apprentissage explicites ; abandonne la fonction de tri.' },
                     // Lot 1 de la pratique « Par standards » (21 nov. 2026).
-                    { value: 'cibles', label: 'Par standards', description: 'Un niveau par cible d\'apprentissage du cours ; la note vient du meilleur niveau démontré pour chaque cible.' }
+                    { value: 'cibles', label: 'Par standards', essai: true, description: 'Un niveau par cible d\'apprentissage du cours ; la note vient du meilleur niveau démontré pour chaque cible.' }
                 ]
             }
         ],
@@ -450,6 +450,7 @@ const ETAPES_WIZARD = {
                     {
                         // Lot 1 de la pratique « Par standards » (21 nov. 2026) : la cible est notée, pas la production.
                         value: 'cibles',
+                        essai: true,   // la mention « À l'essai » (EnsemblesCibles.A_L_ESSAI, une seule constante)
                         label: 'Un niveau pour chaque cible d\'apprentissage (Par standards)',
                         description: 'Tu inscris, pour chaque cible du cours, le niveau que l\'étudiant·e a démontré. La note vient des niveaux de chaque cible.'
                     },
@@ -1727,6 +1728,14 @@ function genererChampSelectDisciplines(champ) {
 }
 
 /**
+ * La mention « À l'essai » d'une carte (21 nov. 2026) : une option marquée `essai` la porte tant que la constante
+ * `EnsemblesCibles.A_L_ESSAI` est allumée ; lisible sans survol, à la suite du titre de la carte.
+ */
+function _etiquetteEssaiDeLOption(opt) {
+    return (opt && opt.essai && window.EnsemblesCibles) ? ' ' + window.EnsemblesCibles.etiquetteEssaiHTML() : '';
+}
+
+/**
  * Génère des cartes radio
  */
 function genererRadioCards(champ) {
@@ -1748,7 +1757,7 @@ function genererRadioCards(champ) {
                        ${checked}
                        ${disabled}>
                 <div class="wizard-v2-card-content">
-                    <div class="wizard-v2-card-title">${opt.label}</div>
+                    <div class="wizard-v2-card-title">${opt.label}${_etiquetteEssaiDeLOption(opt)}</div>
                     <div class="wizard-v2-card-description">${opt.description}</div>
                 </div>
             </label>

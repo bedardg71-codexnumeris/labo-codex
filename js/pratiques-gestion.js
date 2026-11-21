@@ -1243,6 +1243,7 @@ function remplirFormulairePratique(pratique) {
 
     if (titrePratique) titrePratique.textContent = pratique.nom || 'Sans titre';
     if (badgePratique) badgePratique.innerHTML = genererBadgeTypePratique(pratique);
+    afficherEssaiPratiqueMat(typeCanon);
     // Ligne 2 : description personnalisée ou description taxonomique
     if (descriptionPratique) {
         descriptionPratique.textContent = pratique.description || obtenirDescriptionCourtePratique(pratique);
@@ -1661,6 +1662,17 @@ function changerTypePratiqueMat() {
     }
 
     sauvegarderConfigPratiqueMat();
+}
+
+/**
+ * « À l'essai » (21 nov. 2026) : l'en-tête de la fiche d'une pratique « Par standards » porte la mention tant que la
+ * constante `EnsemblesCibles.A_L_ESSAI` est allumée ; la place est vidée pour toute autre famille.
+ */
+function afficherEssaiPratiqueMat(typeCanon) {
+    const essaiPratique = document.getElementById('mat-essai-pratique');
+    if (!essaiPratique) return;
+    // security-ok : `etiquetteEssaiHTML` ne rend qu'un mot fixe, échappé.
+    essaiPratique.innerHTML = (typeCanon === 'cibles' && window.EnsemblesCibles) ? window.EnsemblesCibles.etiquetteEssaiHTML() : '';
 }
 
 /**

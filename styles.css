@@ -4627,6 +4627,22 @@ p.apercu-algo-si { margin: 0; display: flex; flex-wrap: wrap; align-items: basel
 }
 
 /* Lot 1 « Par standards » — la fiche de la pratique montre les cibles (lecture seule). */
+/* « À l'essai » (21 nov. 2026) : la mention de la pratique « Par standards » en vue étendue (les cartes de l'assistant,
+   l'en-tête de la fiche). Lisible sans survol, en clair et en sombre : le texte et le cadre prennent la couleur du texte
+   secondaire du thème ; jamais la couleur d'une alerte. Allumée par `EnsemblesCibles.A_L_ESSAI` (une seule constante). */
+.etiquette-essai {
+    display: inline-block;
+    padding: 1px 8px;
+    border: 1px solid var(--texte-secondaire);
+    border-radius: var(--radius-petit);
+    font-size: 0.8rem;
+    font-weight: 600;
+    line-height: 1.5;
+    color: var(--texte-secondaire);
+    white-space: nowrap;
+    vertical-align: middle;
+}
+
 .cibles-fiche {
     margin-top: 4px;
 }

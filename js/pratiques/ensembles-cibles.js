@@ -323,8 +323,31 @@
             </div>`;
     }
 
+    /* « À L'ESSAI » (21 nov. 2026 ; décision de Grégoire, 14 h 17) — UNE SEULE CONSTANTE allume et éteint la mention aux
+       trois endroits où la pratique « Par standards » se choisit ou se présente : la carte du modèle en vue simple
+       (js/vue-simple.js), les cartes de l'assistant de création (js/wizard-pratique-v2.js), l'en-tête de sa fiche
+       (js/pratiques-gestion.js). Elle passe à `false` quand les testeurs auront confirmé la pratique ; rien d'autre à toucher.
+       Les trois endroits lisent `window.EnsemblesCibles.A_L_ESSAI` au moment de dessiner (sentinelle
+       tests/unit/sentinelle-par-standards-a-l-essai.test.js, banc tests/integration/par-standards-a-l-essai.spec.js). */
+    const A_L_ESSAI = true;
+    const MOT_A_L_ESSAI = 'À l’essai';
+
+    /** La mention est-elle allumée ? Lue sur l'objet publié, à chaque dessin. */
+    function estALEssai() {
+        return window.EnsemblesCibles.A_L_ESSAI === true;
+    }
+
+    /** La mention en étiquette (vue étendue), lisible sans survol ; '' quand la constante est éteinte. */
+    function etiquetteEssaiHTML() {
+        return estALEssai() ? `<span class="etiquette-essai">${esc(MOT_A_L_ESSAI)}</span>` : '';
+    }
+
     window.EnsemblesCibles = {
         CLE: CLE,
+        A_L_ESSAI: A_L_ESSAI,
+        MOT_A_L_ESSAI: MOT_A_L_ESSAI,
+        estALEssai: estALEssai,
+        etiquetteEssaiHTML: etiquetteEssaiHTML,
         CODE_SANS_DONNEE_DEPART: CODE_SANS_DONNEE_DEPART,
         MOTIFS: { AUCUNE_CIBLE: MOTIF_AUCUNE_CIBLE, SANS_ETIQUETTE: MOTIF_SANS_ETIQUETTE, AUCUNE_ECHELLE: MOTIF_AUCUNE_ECHELLE,
             ECHELLE_SANS_ZERO: MOTIF_ECHELLE_SANS_ZERO, SANS_DONNEE: MOTIF_SANS_DONNEE, INTROUVABLE: MOTIF_INTROUVABLE },

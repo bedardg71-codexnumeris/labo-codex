@@ -1,5 +1,7 @@
 # Textes proposés : « Par standards » dans la vue simple (à l'essai)
 
+> **Partis en ligne le 21 nov. 2026 sans relecture, par décision de Grégoire (13 h 53) ; à corriger après son essai.**
+
 > Claude Code, 21 nov. 2026. Mandat du 21 nov. (décision de Grégoire, 14 h 19 : « il faut que la vue simple soit
 > fonctionnelle avant la release »), branche `lot/moteur-cibles-3-4-retenu-note`, PR n° 46.
 > **Tout ce qui suit est une PROPOSITION.** Ces textes partent en ligne tels quels (décision de Grégoire, 13 h 53) et se

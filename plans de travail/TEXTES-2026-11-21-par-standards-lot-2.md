@@ -1,5 +1,7 @@
 # Textes proposés – « Par standards », lot 2 (inscrire un niveau)
 
+> **Partis en ligne le 21 nov. 2026 sans relecture, par décision de Grégoire (13 h 53) ; à corriger après son essai.**
+
 > Claude Code, 21 nov. 2026. Consigne : `plans de travail/CONSIGNE-LOT-2026-11-21-moteur-cibles-2-inscrire.md`.
 > **Tout ce qui suit est une PROPOSITION** : ces mots vivent sur l'aperçu (branche `lot/moteur-cibles-2-inscrire`) jusqu'à
 > ce que Grégoire les corrige. Imposés par la consigne : « cible », « niveau », « critère essentiel ». Le mot du champ de

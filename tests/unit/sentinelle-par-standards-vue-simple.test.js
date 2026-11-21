@@ -85,8 +85,10 @@ describe('V2. Les cartes des modèles', () => {
     });
 
     it('la troisième : « Par standards », famille `cibles`, la mention « À l\'essai » (lue sans survol : un paragraphe de la carte)', () => {
-        expect(cartes).toMatch(/\{ famille: 'cibles', modele: 'par-standards', titre: 'Par standards', essai: 'À l’essai', /);
-        expect(tranche(VS, 'function _choixModeleHTML() {', '\n    }')).toContain('<p class="vs-etape-essai">${esc(m.essai)}</p>');
+        // Release 1.253.0 (21 nov. 2026) : la mention est allumée par UNE constante, commune à la vue étendue
+        // (`EnsemblesCibles.A_L_ESSAI`) ; le détail est verrouillé par sentinelle-par-standards-a-l-essai.test.js.
+        expect(cartes).toMatch(/\{ famille: 'cibles', modele: 'par-standards', titre: 'Par standards', essai: true, /);
+        expect(tranche(VS, 'function _choixModeleHTML() {', '\n    }')).toContain('<p class="vs-etape-essai">${esc(window.EnsemblesCibles.MOT_A_L_ESSAI)}</p>');
     });
 });
 

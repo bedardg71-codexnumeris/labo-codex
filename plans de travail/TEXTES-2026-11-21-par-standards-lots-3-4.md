@@ -1,5 +1,7 @@
 # Textes proposés – « Par standards », lots 3 et 4 (le niveau retenu, la note)
 
+> **Partis en ligne le 21 nov. 2026 sans relecture, par décision de Grégoire (13 h 53) ; à corriger après son essai.**
+
 > Claude Code, 21 nov. 2026. Mandat du 21 nov. (« gestes 3 et 4 ensemble »), branche `lot/moteur-cibles-3-4-retenu-note`.
 > **Tout ce qui suit est une PROPOSITION** : ces mots vivent sur l'aperçu jusqu'à ce que Grégoire les relise, en une seule
 > page avec ceux du lot 2 (`TEXTES-2026-11-21-par-standards-lot-2.md`). Aucun n'est arrêté.

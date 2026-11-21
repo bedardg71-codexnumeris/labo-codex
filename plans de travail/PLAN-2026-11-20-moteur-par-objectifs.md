@@ -9,6 +9,24 @@
 > **Trois degrés de certitude dans ce document** : *mesuré* (une commande l'a rendu, fichier et ligne donnés),
 > *lu* (le code a été lu, rien n'a été joué), *inféré* (déduit, à confirmer par un essai au lot concerné).
 
+## Décidé le 21 nov. 2026, après-midi : mise en ligne À L'ESSAI (release 1.253.0)
+
+**Ces trois décisions de Grégoire remplacent sa condition du matin** (« rien dans `main` avant son essai et la
+confirmation des testeurs », reprise plus bas dans ce plan et dans les rapports des lots 2, 3 et 4) :
+
+| Heure | Décision | Dans ses mots |
+|---|---|---|
+| 13 h 53 | La pratique « Par standards » part en ligne maintenant ; son essai se fait sur la version publiée | « je voudrais que nous fassions la release ; je vais la tester une fois publiée » |
+| 14 h 17 | Elle part marquée « À l'essai », avec une ligne de Nouvelles qui le dit | l'étiquette et le texte de la ligne, acceptés (troisième phrase ajustée par Cowork à 15 h 50) |
+| 14 h 19 | La vue simple doit l'offrir avant la release | « il faut que la vue simple soit fonctionnelle avant la release ; c'est ce que les gens vont d'abord tester » |
+
+Ce qui en découle : la branche `lot/moteur-cibles-3-4-retenu-note` entre dans `main` ; la mention « À l'essai » se lit
+à la carte du modèle (vue simple), aux cartes de l'assistant et dans l'en-tête de la fiche (vue étendue), allumée par
+une seule constante (`EnsemblesCibles.A_L_ESSAI`) qui s'éteindra quand les testeurs auront confirmé la pratique ; les
+textes des trois fichiers `TEXTES-2026-11-21-par-standards-*` partent tels que proposés, à corriger après l'essai.
+**Ce qui ne change pas** : les essais de Grégoire et des trois enseignant·es restent dus ; ils se font sur la version
+en ligne au lieu de l'adresse d'aperçu.
+
 ## Décidé pour les lots 3 et 4 (mandat du 21 nov. 2026 : « gestes 3 et 4 ensemble »)
 
 Mandat relayé par Cowork le 21 nov. 2026 ; **il prime sur ce plan là où ils divergent**. Branche
