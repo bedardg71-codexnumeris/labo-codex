@@ -12,6 +12,10 @@
 > page des textes proposés ; le plan révisé (décisions du 20 nov. en tête, lots 1 à 5).
 > **Reste** : les textes à faire corriger par Grégoire (`TEXTES-2026-11-20-par-standards-lot-1.md`, 80 textes et
 > 4 questions) ; le passage WebKit du Mac ; le lot 2 (inscrire un niveau).
+> **PR d'aperçu** : https://github.com/bedardg71-codexnumeris/labo-codex/pull/44 (brouillon, « ne pas fusionner ») ;
+> **aperçu** : https://deploy-preview-44--codexnumeris-051225.netlify.app (prêt sur `20c767dc`). `RELAIS.md` (sur
+> `main`) n'est pas touché : la consigne interdit toute écriture dans `main` d'ici l'essai des quatre gestes ; ce
+> relais-ci tient lieu de relais de la branche.
 
 ## 1. Ce qui a été livré
 
