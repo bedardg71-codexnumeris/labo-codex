@@ -87,6 +87,9 @@
     --std-bleu: #0277bd;        /* STD = Bleu */
     --spe-vert: #22c55e;        /* SPE = Vert */
     --den-violet: #8b5cf6;      /* DEN = Mauve/Violet */
+    /* CIB = Par standards (lot 1, 21 nov. 2026) : une famille neuve demande sa couleur. Sarcelle, absente des quatre
+       autres familles ; 3,9:1 sur fond blanc (élément graphique : bordure du diagnostic de l'assistant). PROPOSÉE. */
+    --cib-sarcelle: #0e9384;
     --hybride-violet: #9c27b0;  /* Hybride (obsolète) */
 
     --bleu-meta: #9fc5e8;        /* Bleu pâle pour méta-infos, logos, liens secondaires */
@@ -4464,6 +4467,213 @@ p.apercu-algo-si { margin: 0; display: flex; flex-wrap: wrap; align-items: basel
 }
 .editeur-cibles-ajouter {
     min-height: 44px;
+}
+
+/* Lot 1 « Par standards » (21 nov. 2026) — le mode « standards » de l'éditeur des cibles : une carte par cible
+   (étiquette, poids et sa part, « terminale », gestes ; puis l'énoncé ; puis les critères, un par ligne). Cibles
+   tactiles à 44 px ; la rangée du haut passe à la ligne sous 820 px (iPad en portrait). */
+.editeur-cibles-ligne--std {
+    display: block;
+    padding: 12px;
+    margin-bottom: 12px;
+    border: 1px solid var(--gris-tres-clair);
+    border-radius: var(--radius-moyen);
+    background: var(--surface-element);
+}
+.editeur-cibles-std-entete {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    gap: 8px 12px;
+}
+.editeur-cibles-champ {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+.editeur-cibles-champ-nom {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--texte-secondaire);
+}
+.editeur-cibles-champ--etiquette {
+    flex: 1 1 220px;
+    min-width: 0;
+}
+.editeur-cibles-etiquette,
+.editeur-cibles-poids,
+.editeur-cibles-enonce {
+    width: 100%;
+    box-sizing: border-box;
+}
+.editeur-cibles-poids {
+    font-variant-numeric: tabular-nums;
+}
+.editeur-cibles-terminale-case,
+.editeur-cibles-critere-essentiel {
+    accent-color: var(--cib-sarcelle);
+}
+.editeur-cibles-champ--poids {
+    flex: 0 0 96px;
+}
+.editeur-cibles-champ--enonce {
+    margin-top: 10px;
+}
+.editeur-cibles-champ--enonce textarea {
+    min-height: 56px;
+}
+.editeur-cibles-part {
+    min-width: 56px;
+    padding-bottom: 12px;
+    font-variant-numeric: tabular-nums;
+    color: var(--texte-secondaire);
+}
+.editeur-cibles-terminale,
+.editeur-cibles-essentiel {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    min-height: 44px;
+    cursor: pointer;
+    font-weight: normal;
+}
+.editeur-cibles-terminale input,
+.editeur-cibles-essentiel input {
+    width: 20px;
+    height: 20px;
+    margin: 0;
+}
+.editeur-cibles-std-gestes {
+    display: inline-flex;
+    margin-left: auto;
+}
+.editeur-cibles-criteres {
+    margin-top: 10px;
+}
+.editeur-cibles-criteres-liste {
+    list-style: none;
+    margin: 4px 0 6px 0;
+    padding: 0;
+}
+.editeur-cibles-critere {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 4px 10px;
+    margin-bottom: 4px;
+}
+.editeur-cibles-critere-texte {
+    flex: 1 1 240px;
+    min-width: 0;
+}
+.editeur-cibles-critere .btn-icone-nu {
+    min-width: 44px;
+    min-height: 44px;
+    flex-shrink: 0;
+}
+.editeur-cibles-critere .btn-delete-icon {
+    width: 14px;
+    height: 14px;
+}
+.editeur-cibles--std .btn-mini {
+    min-height: 44px;
+}
+.editeur-cibles-total {
+    margin: 4px 0 10px 0;
+    font-size: 0.9rem;
+    color: var(--texte-secondaire);
+}
+.editeur-cibles-total--incomplet {
+    color: var(--rouge-erreur);
+}
+
+/* Lot 1 « Par standards » — l'échelle des niveaux dans l'assistant (aperçu de ses niveaux et de leurs valeurs). */
+.wizard-v2-echelle-depart {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+    margin-top: 6px;
+}
+.wizard-v2-echelle-depart .btn-mini {
+    min-height: 44px;
+}
+.wizard-v2-niveaux-apercu {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 14px;
+    font-size: 0.85rem;
+    color: var(--texte-secondaire);
+}
+.wizard-v2-niveau-code {
+    font-weight: 700;
+    color: var(--texte-principal);
+}
+.wizard-v2-niveau-valeur {
+    font-variant-numeric: tabular-nums;
+}
+.wizard-v2-recap-cibles {
+    margin: 4px 0 10px 18px;
+    padding: 0;
+    font-size: 0.9rem;
+}
+
+/* Lot 1 « Par standards » — la fiche de la pratique montre les cibles (lecture seule). */
+.cibles-fiche {
+    margin-top: 4px;
+}
+.cibles-fiche-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px 18px;
+    margin: 0 0 10px 0;
+    font-size: 0.9rem;
+}
+.cibles-fiche-liste {
+    margin: 0;
+    padding-left: 22px;
+}
+.cibles-fiche-cible {
+    margin-bottom: 12px;
+}
+.cibles-fiche-entete {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 4px 12px;
+}
+.cibles-fiche-etiquette {
+    font-weight: 700;
+}
+.cibles-fiche-poids {
+    font-size: 0.85rem;
+    color: var(--texte-secondaire);
+    font-variant-numeric: tabular-nums;
+}
+.cibles-fiche-terminale,
+.cibles-fiche-essentiel {
+    font-size: 0.75rem;
+    padding: 1px 8px;
+    border: 1px solid var(--cib-sarcelle);
+    border-radius: var(--radius-pill);
+    color: var(--texte-principal);
+}
+.cibles-fiche-enonce {
+    margin: 4px 0;
+}
+.cibles-fiche-criteres {
+    margin: 4px 0 0 0;
+    padding-left: 18px;
+    font-size: 0.9rem;
+}
+.cibles-fiche-sans-critere,
+.cibles-fiche-total,
+.cibles-fiche-absent {
+    font-size: 0.9rem;
+    color: var(--texte-secondaire);
 }
 .den-suggestion-note {
     display: block;
@@ -10195,6 +10405,7 @@ body.mode-clair .bloc-rlo-separateur {
 .badge-type-std,
 .badge-type-spe,
 .badge-type-den,
+.badge-type-cib,
 .badge-type-multi { /* style uniforme hérité de .badge-type-pratique */ }
 
 /* Badges caractéristiques (pills colorées selon le mode) */
@@ -14509,6 +14720,7 @@ label:has(+ textarea:disabled) {
 .wizard-v2-recap-diagnostic--std { --recap-couleur: var(--std-bleu); }
 .wizard-v2-recap-diagnostic--spe { --recap-couleur: var(--spe-vert); }
 .wizard-v2-recap-diagnostic--den { --recap-couleur: var(--den-violet); }
+.wizard-v2-recap-diagnostic--cib { --recap-couleur: var(--cib-sarcelle); }
 .wizard-v2-recap-diagnostic--indetermine { --recap-couleur: var(--gris-moyen, #888); }
 
 .wizard-v2-recap-diagnostic-intro {

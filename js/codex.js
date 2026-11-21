@@ -737,6 +737,7 @@ function _estBiblioPartagee(cle) {
         'grillesTemplates',
         'echellesTemplates',
         'pratiquesConfigurables',
+        'ensemblesCibles',          // lot 1 « Par standards » (21 nov. 2026) : une collection d'objets à `id`
         'bibliothequePratiques',
         'bibliothequeGrilles',
         'bibliothequeEchelles',

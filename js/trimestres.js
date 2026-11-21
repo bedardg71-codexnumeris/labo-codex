@@ -201,7 +201,11 @@
         // trimestre, comme les grilles qu'elle crée ; en démo, `cle()` le range sous `demo_` et
         // il ne touche pas celui de l'enseignant. Sans semis ; exclu de l'archive d'un groupe
         // (reserve.js) : un travail en cours ne voyage pas.
-        'brouillonDissection'
+        'brouillonDissection',
+        // 🆕 La pratique « Par standards », lot 1 (21 nov. 2026) : les ensembles de cibles du cours, par trimestre
+        // comme les pratiques qui les désignent. Propriétaire : js/pratiques/ensembles-cibles.js. Collection neuve,
+        // sans résidu nu à rapatrier. Ne pas reprendre l'ancienne clé nue `objectifsTemplates`, laissée telle quelle.
+        'ensemblesCibles'
     ];
 
     // 🆕 #464/CT-26 : clés inconnues déjà signalées (un seul warn par clé et par

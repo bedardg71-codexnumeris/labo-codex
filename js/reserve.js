@@ -135,6 +135,9 @@ var CLES_SANS_FILTRE = [
     'grillesTemplates',
     'echellesTemplates',
     'pratiquesConfigurables',
+    // Lot 1 « Par standards » (21 nov. 2026) : les cibles du cours, qu'une pratique désigne. Aucun élève : elles
+    // voyagent avec la pratique, comme son échelle.
+    'ensemblesCibles',
     // #683 (15 oct. 2026) : les suppressions du matériel de départ dans ce trimestre (des
     // identifiants, aucun élève) : elles voyagent avec les grilles qu'elles concernent.
     'ressourcesSupprimeesTrimestre',

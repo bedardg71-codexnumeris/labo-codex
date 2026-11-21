@@ -74,7 +74,11 @@ const REPRESENTATIONS_PRATIQUES = {
     sommative:      { code: 'SOM', couleurVar: '--som-orange', famille: 'Sommative' },
     standards:      { code: 'STD', couleurVar: '--std-bleu',   famille: 'PAN' },
     specifications: { code: 'SPE', couleurVar: '--spe-vert',   famille: 'PAN' },
-    denotation:     { code: 'DEN', couleurVar: '--den-violet', famille: 'PAN' } // PRÉN académiquement (voir note ci-dessus)
+    denotation:     { code: 'DEN', couleurVar: '--den-violet', famille: 'PAN' }, // PRÉN académiquement (voir note ci-dessus)
+    // La pratique « Par standards » (lot 1, 21 nov. 2026) : un niveau par cible d'apprentissage, une famille de code à
+    // elle. Sous « STD », douze branchements l'enverraient au moteur du portfolio (plan du 20 nov., § 2). Le code et la
+    // couleur sont des PROPOSITIONS (plans de travail/TEXTES-2026-11-20-par-standards-lot-1.md).
+    cibles:         { code: 'CIB', couleurVar: '--cib-sarcelle', famille: 'PAN' }
 };
 
 // Représentation par défaut = celle de la pratique par défaut (Standards).
@@ -242,7 +246,10 @@ const METHODE_PAR_FAMILLE = {
     sommative: 'moyenne_ponderee',
     specifications: 'specifications',
     denotation: 'jugement_global',
-    standards: 'conversion_niveaux'
+    standards: 'conversion_niveaux',
+    // Lot 1 de la pratique « Par standards » (21 nov. 2026) : la méthode arrêtée au lot 0. Aucun moteur ne la calcule
+    // encore (lot 4) : `PratiqueConfigurable.calculerPerformance` rend null et la pratique dit pourquoi.
+    cibles: 'niveaux_par_cible'
 };
 
 /** La méthode que sa famille donne à une pratique (le type, à la racine, dans `.config` ou `.configuration`), ou null. */

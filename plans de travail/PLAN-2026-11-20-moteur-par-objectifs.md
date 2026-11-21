@@ -31,6 +31,39 @@ attend les mots.
 Provisoires jusqu'au lot 1 : la clé de l'ensemble (`ensemblesCibles` dans les essais) et l'identifiant du type
 (`cibles` dans les essais), qui suit un mot encore ouvert.
 
+## Décidé par Grégoire depuis le plan (20 nov. 2026, 20 h 32 ; relayé par Cowork à 21 h 25)
+
+Relayé par Cowork (`plans de travail/CONSIGNE-LOT-2026-11-20-moteur-cibles-1-cibles.md`). Grégoire a lu le modèle
+tiré de la fiche `CONCEPTION-2026-11-20-pratique-par-standards.md` et l'a approuvé ; Cowork a sondé cinq pages du
+rapport contre la fiche (p. 98, 99, 102, 103, 108) : exactes. Sa pratique de l'automne ne change pas.
+
+- **Le modèle.** Une cible a une étiquette, un énoncé, des critères dont certains essentiels, un poids, et elle est
+  terminale ou non (C3 à C6). L'échelle a un niveau nommé pour l'absence de données valables, qui vaut 0 % (E2, F3).
+  Inscrire un niveau est un jugement (N1). Le niveau retenu est le meilleur démontré (T2). La note est une moyenne
+  pondérée (F1). Le double seuil fait partie du cœur (F4 ; écarts É1 à É4 de la fiche).
+- **Un niveau déjà communiqué ne redescend jamais**, même pour une cible jugée sur un ensemble de traces (réponse de
+  vive voix de l'auteur principal des sources, rapportée par Grégoire). La question 2 du § 10 est réglée : « le
+  meilleur » vaut dans tous les cas, et la couche « retenue par jugement » est **retirée** (§ 7).
+- **Chaque niveau inscrit peut porter une note brève** : c'est la rétroaction (N5), pas un champ accessoire (lot 2).
+- **Une cible sans donnée** : pendant la session, aucune note chiffrée et la liste des cibles en attente (*choix de
+  Grégoire, sans source* ; F7) ; à l'arrêt des notes, 0 % (F3 ; R, p. 103). À l'écran, elle porte le nom du niveau
+  « sans donnée » de l'échelle, pas un vide. La question 1 du § 10 est réglée ainsi.
+- **Le poids de chaque cible se règle par l'enseignant·e** (F2). Se conformer au plan-cadre est son affaire :
+  l'application ne le vérifie pas.
+- **Les mots** : « cible », et « cible d'apprentissage » à la première mention, sur les écrans de l'enseignant·e. Le mot
+  que lit l'étudiant·e n'est pas tranché. La pratique s'appelle « Par standards ». La pratique actuelle devient « Par
+  sélection de productions » (lot `lot/renommer-selection-productions`, réuni sur la branche du lot 1) ; elle cessera
+  d'être proposée quand celle-ci existera, sans que son calcul soit retiré.
+- **Un relevé par cible pour l'étudiant·e** suit le cœur de près (S1 à S3). Puis un pont entre les critères d'une
+  grille et les cibles, avant l'hiver 2027 : **non conçu ici**.
+
+**Les lots deviennent** : 1 les cibles et l'échelle ; 2 inscrire un niveau ; 3 le niveau retenu ; 4 la note, avec
+pondération et double seuil ; 5 le relevé de l'étudiant·e. Rien ne se fusionne dans `main` avant que les quatre gestes
+existent et que Grégoire les ait essayés.
+
+**Arrêtés au lot 1** (noms techniques, 21 nov.) : la clé de l'ensemble `ensemblesCibles` (par trimestre) et l'identifiant
+du type `cibles` (code affiché CIB, proposé). Le lot 0 les avait posés à titre provisoire : sa sentinelle les garde déjà.
+
 ## Vue d'ensemble
 
 1. **Le calcul actuel ne connaît qu'un grain : une évaluation par étudiant·e et par production.** Les quatre
@@ -280,10 +313,10 @@ défaut ; le lot 4 doit le mesurer sur chaque lecteur du tableau plutôt que le 
 
 | Couche à venir | Entre-t-elle sans changer la forme ? |
 |---|---|
-| Un poids par cible | oui : `poids` sur l'objectif de l'ensemble (le champ existe déjà, § 1.1) ; le moteur passe d'une moyenne à une moyenne pondérée |
-| Un sous-ensemble de cibles (double seuil) | oui : un marqueur sur l'objectif (`type` existe : fondamental, intégrateur, transversal) et une condition dans `configuration` ; les inscriptions ne changent pas |
-| Une note brève par inscription | oui : un champ `note` sur l'inscription. Texte libre de l'enseignant·e : `echapperHtml` à tout affichage |
-| Une autre règle de retenue | oui : `configuration.retenue` (`meilleur` aujourd'hui). Tout l'historique est gardé, donc « le plus récent » ou une tendance centrale se calculent sur le stock déjà écrit. « Le jugement » demande une inscription d'un genre à part (un niveau posé par l'enseignant·e, qui prime) : la forme l'admet par un champ, non conçu ici |
+| Un poids par cible | **entré au cœur** (décision du 20 nov.) : `poids` sur chaque cible depuis le lot 1 ; la moyenne pondérée au lot 4 |
+| Un sous-ensemble de cibles (double seuil) | **entré au cœur** (décision du 20 nov.) : `terminale` sur chaque cible depuis le lot 1 ; la condition au lot 4 |
+| Une note brève par inscription | **entrée au cœur** (lot 2) : c'est la rétroaction (N5). Texte libre de l'enseignant·e : `echapperHtml` à tout affichage |
+| Une autre règle de retenue | oui : `configuration.retenue` (`meilleur` aujourd'hui). Tout l'historique est gardé, donc « le plus récent » ou une tendance centrale se calculent sur le stock déjà écrit. ~~« Le jugement » demande une inscription d'un genre à part~~ : **retiré** (décision du 20 nov. : le jugement est l'inscription, un niveau communiqué ne redescend pas) |
 | Des sous-objectifs (cas C) | oui pour le rangement : `parentId` sur l'objectif, inscriptions sur les feuilles. **Non réglé** : comment un objectif parent tire son niveau de ses enfants. C'est une question de didactique, pas de forme |
 
 ## 8. Les lots
@@ -306,63 +339,103 @@ Ordre : 0, puis 1 à 4. Chaque lot est livrable seul ; aucun ne change une note 
   (il recevra le court-circuit du lot 4) : seul le témoin des lectures le garde. Limite assumée : une lecture au nom
   fabriqué, dans une fonction qu'aucun cas rejoué n'atteint, passe les deux gardes.
 
-### Lot 1 – « Je dis quelles cibles compte mon cours »
+### Lot 1 – « Je dis quelles cibles compte mon cours » (révisé le 20 nov., 21 h 25 ; livré le 21 nov.)
 
-- **Ce que l'utilisateur voit** : dans l'assistant, un choix de pratique de plus ; une étape où il nomme ses cibles
-  (une ligne par cible, monter, descendre, retirer) et choisit son échelle. La fiche de la pratique montre les
-  cibles. Le groupe-cours peut recevoir cette pratique.
-- **Dans le code** : le type neuf au registre (représentation, `METHODE_PAR_FAMILLE`) ; l'ensemble de cibles rangé
-  par trimestre, avec `coursId` et des identités permanentes ; `EditeurCibles` réemployé ; l'étape de l'assistant
-  et son retour en édition ; la liste de contrôle des 11 fichiers (§ 2). **Retraits du même lot** : l'écran
-  orphelin de `objectifs.js`, `calculerPerformanceParObjectif` (`portfolio.js:658`), le gabarit
-  `pan-objectifs-ponderes` s'il n'a pas de lecteur (à mesurer), la sentinelle #467 de la liste orpheline.
-- **Sentinelle** : une cible renommée ou déplacée garde son identité ; une pratique par cibles sans cible ou sans
-  échelle est refusée ; les modèles de l'assistant existants s'écrivent octet pour octet comme avant
-  (`sentinelle-wizard-golden-creation-319`).
-- **Notes qui changent** : aucune. La pratique neuve rend « non calculable » avec sa cause (aucun niveau inscrit).
-- ⚠ Stock : des ensembles peuvent exister sous l'ancienne clé nue chez qui a utilisé l'écran avant qu'il perde son
-  hôte. On ne les convertit pas d'office ; on mesure s'il y en a chez Grégoire, puis on propose.
+- **Ce que l'enseignant·e voit** : dans l'assistant, un choix de plus, « Par standards » (voie rapide et question
+  « Comment calcules-tu la note finale ? ») ; une étape « Les cibles du cours » (le cours, puis une carte par cible :
+  étiquette, poids et sa part du total, case « Cible terminale », énoncé, critères un par ligne, chacun avec sa case
+  « Critère essentiel » ; ajouter, retirer, monter, descendre ; poids égaux d'office, total lu sous la liste) ; une
+  étape « L'échelle des niveaux » (une échelle de la bibliothèque, ou l'échelle de départ proposée, puis le niveau
+  « sans donnée » parmi ses niveaux qui valent 0 %). La fiche de la pratique montre les cibles. Un groupe-cours peut
+  recevoir la pratique. Elle ne calcule rien, et la note le dit en mots.
+- **Les règles du lot et leur origine** :
+
+  | Règle | Origine |
+  |---|---|
+  | Une cible est un objectif du cours, à mi-chemin entre l'objectif terminal et le critère ; 6 à 15 par cours (texte d'aide, aucun refus) | C1, C2 |
+  | Une cible a une étiquette courte et un énoncé | C3 |
+  | Une cible porte ses critères, un par ligne | C4 |
+  | Un critère peut être marqué « essentiel » | C5 |
+  | Une cible est terminale ou non | C6 |
+  | L'ensemble est rattaché au cours (choix facultatif d'un cours ; d'office, celui du groupe-cours actif) | C7, C8 (*choix de Grégoire*) |
+  | Chaque cible a un poids, plus grand que zéro, réglé par l'enseignant·e ; égaux d'office ; total lu, jamais vérifié contre un plan-cadre | F2, *choix de Grégoire* |
+  | Une échelle pour toutes les cibles de la pratique | E6 |
+  | L'échelle désigne son niveau « sans donnée », qui vaut 0 % ; seuls les niveaux à 0 % peuvent l'être | E2, F3, *choix de Grégoire* (« qui vaut 0 % ») |
+  | L'échelle de départ : cinq niveaux (0 à 4), valeurs 0, 25, 50, 75, 100 % ; noms du système de chimie, **à valider** | E1, E4 (R, p. 103 ; tableau 5.6, p. 102) |
+  | Ce niveau sert aussi au travail très incomplet (description du niveau 0 de l'échelle de départ) | E3 |
+
+- **Dans le code** : le type `cibles` (code CIB, couleur `--cib-sarcelle`, famille PAN) et la méthode
+  `niveaux_par_cible` au registre ; `PratiqueConfigurable.calculerPerformance` rend `null` pour cette méthode, sans lire
+  ni évaluations ni `indicesCP`, et `expliquerNoteNonConstructible` dit pourquoi ; le module propriétaire
+  `js/pratiques/ensembles-cibles.js` (refus, échelle de départ, écriture, fiche) ; le mode « standards » du composant
+  `EditeurCibles` (le mode de la dénotation est inchangé) ; l'assistant (deux étapes, création, réédition, récapitulatif) ;
+  la fiche (`pratiques-gestion.js`, lecture seule, menu du type verrouillé pour cette pratique, carte commune de
+  l'échelle masquée pour elle) ; la clé inscrite à `CLES_NAMESPACEES`, `db._SSOT_OWNERS`, la Réserve (`CLES_SANS_FILTRE`),
+  le codex (`_estBiblioPartagee`), `DATA-OWNERSHIP.md`. Pas à `CorrectionDA.FAMILLES` : un ensemble ne porte aucun DA.
+- **Forme rangée** : `<trim>_ensemblesCibles = [{ id, coursId, cibles: [{ id, etiquette, enonce, criteres: [{ id, texte,
+  essentiel }], poids, terminale }], dateCreation, dateModification }]` ; la pratique : `configuration: { type: 'cibles',
+  ensembleCiblesId, echelleId, niveauSansDonnee }` (un code). Pas de `retenue` : « le meilleur » vaut dans tous les cas,
+  un champ sans lecteur n'est pas écrit.
+- **Refus, en mots** : aucune cible ; une cible commencée sans étiquette (ajouté : son énoncé se perdait en silence) ; un
+  poids nul, négatif ou absent ; aucune échelle ; une échelle sans niveau à 0 % ; aucun niveau « sans donnée » désigné.
+- **Retraits du même lot, dans un commit à part** : l'écran orphelin de `objectifs.js`, `calculerPerformanceParObjectif`
+  (`portfolio.js`), le gabarit `pan-objectifs-ponderes` s'il n'est offert nulle part. Aucune donnée d'utilisateur
+  effacée ni réécrite, pas même l'ancienne clé nue `objectifsTemplates`.
+- **Sentinelle** : `tests/unit/sentinelle-par-standards-lot-1-cibles.test.js` (identité, refus, assistant réel, registre,
+  registres nominatifs ; sept break-tests) ; `sentinelle-wizard-golden-creation-319` inchangée ; sentinelle du lot 0
+  rejouée.
+- **Notes qui changent** : aucune.
+- ⚠ Stock : rien à convertir. L'ancienne clé nue `objectifsTemplates` reste où elle est ; s'il y a des ensembles chez
+  Grégoire, on mesure, puis on propose (geste sur ses données : il décide).
 
 ### Lot 2 – « J'inscris un niveau pour un·e étudiant·e sur une cible »
 
 - **Ce que l'utilisateur voit** : au tableau de notation, pour cette pratique, les cibles en colonnes. Toucher une
-  case inscrit un niveau, daté ; on peut dire d'où il vient (une production, ou rien). Un geste « inscrire pour
-  une production » ouvre les cibles qu'elle renseigne, et l'on ne remplit que celles que l'étudiant·e a reprises
-  (cas A). Une inscription erronée s'annule ; elle reste visible, barrée.
+  case inscrit un niveau, daté, **avec une note brève : la rétroaction** (N5, décision du 20 nov.) ; on peut dire d'où
+  il vient (une production, ou rien : N3). Un geste « inscrire pour une production » ouvre les cibles qu'elle
+  renseigne, et l'on ne remplit que celles que l'étudiant·e a reprises (N4). Une inscription erronée ou une trace
+  devenue invalide s'annule ; elle reste visible, barrée (N7). Le niveau « sans donnée » s'inscrit comme un autre (E3).
 - **Dans le code** : le module propriétaire de `inscriptionsCibles` (seul écrivain, lecture par `cle()`), inscrit à
-  tous les registres du § 3 ; la saisie au tableau ; l'annonce d'écriture (`annoncerEcritureUsager`).
+  tous les registres du § 3 ; la saisie au tableau ; l'annonce d'écriture. **Retirer une cible qui porte des niveaux
+  inscrits pose la question avant d'écrire** (le patron de #717), dans l'assistant.
 - **Sentinelle** : deux inscriptions sur la même cible donnent deux entrées ; aucune écriture ne réduit la liste ;
-  la correction d'un DA les déplace ; le texte d'origine est échappé ; un codex enregistré puis rouvert rend la
-  liste à l'identique.
-- **Notes qui changent** : aucune (le moteur n'existe pas encore). Sentinelle du lot 0 rejouée.
+  la correction d'un DA les déplace ; la note brève est échappée ; un codex enregistré puis rouvert rend la liste à
+  l'identique.
+- **Notes qui changent** : aucune. Sentinelle du lot 0 rejouée.
 
 ### Lot 3 – « Je vois le niveau retenu par cible »
 
-- **Ce que l'utilisateur voit** : au tableau, chaque case montre le niveau retenu, et combien d'inscriptions il y a
-  derrière. Au profil, une section : une ligne par cible, le niveau retenu, sa date, sa source, puis l'historique.
-  Une cible sans niveau se lit comme telle, pas comme un zéro.
-- **Dans le code** : la fonction pure du banc, portée dans un module (`retenirParCible`), qui prend des
-  inscriptions, des cibles et une échelle ; l'ordre par `ordonnerNiveauxParPlage` ; la section du profil.
+- **Ce que l'utilisateur voit** : au tableau, chaque case montre le niveau retenu (le meilleur démontré, T2, qui ne
+  redescend jamais, T3 et décision du 20 nov.) et combien d'inscriptions il y a derrière. Au profil, une section : une
+  ligne par cible, le niveau retenu, sa date, sa source, sa note brève, puis l'historique. **Une cible sans niveau
+  porte le nom du niveau « sans donnée »** de l'échelle, jamais un vide ni un zéro chiffré.
+- **Dans le code** : `retenirParCible(inscriptions, cibles, echelle)`, pur ; l'ordre par `ordonnerNiveauxParPlage` ;
+  la section du profil.
 - **Sentinelle** : les cas A et B du banc, au niveau près ; un niveau plus bas inscrit après un plus haut ne change
   pas le retenu ; un code absent de l'échelle n'est pas lu ; ordre illisible → rien de retenu, et le motif.
 - **Notes qui changent** : aucune.
 
-### Lot 4 – « La note du cours vient des niveaux retenus »
+### Lot 4 – « La note du cours vient des niveaux retenus », avec la pondération et le double seuil
 
-- **Ce que l'utilisateur voit** : la note au profil avec son récit (chaque cible, son niveau, sa valeur, la
-  moyenne) ; la même note à l'export des résultats finaux, au Comparateur, au tableau. Quand elle ne peut pas se
-  calculer, la cause en mots.
-- **Dans le code** : le court-circuit de `calculerPerformance` et `decrireCalcul` dans `pratique-configurable.js` ;
-  le diagnostic (`_diagnostiquerNoteNonCalculable`) ; chaque lecteur du § 5 éprouvé un à un, dont le `null`
-  devenu 0 de `indicesCP`.
-- **Sentinelle** : cas A = 75 (65 sans les reprises), cas B = 78, au profil, à l'export et au Comparateur, la même ;
-  une valeur ponctuelle manquante → « non calculable », jamais un chiffre ; sentinelles du lot 0 rejouées.
-- **Essai dû à ce lot, inscrit au lot 0 : le sens inverse** (§ 6, point 3). Dans un espace où la pratique par cibles
-  est active, ajouter, modifier ou retirer des évaluations du même DA ne change ni sa note ni son récit, et le
-  moteur par cibles ne lit pas `evaluationsSauvegardees` (même témoin de lectures que la sentinelle du lot 0). Avec
-  son break-test : faire lire les évaluations au moteur neuf rougit l'essai.
-- **Notes qui changent** : celles de la pratique neuve, qui n'en avait pas. Aucune autre. Porte terrain : l'export
-  de Grégoire avant et après (§ 6, point 4).
+- **Ce que l'utilisateur voit** : la note au profil avec son récit (chaque cible, son niveau, sa valeur, son poids, la
+  moyenne pondérée, F1, F2 ; le second seuil quand il plafonne, F4) ; la même note à l'export, au Comparateur, au
+  tableau. **Pendant la session, une cible sans donnée empêche la note chiffrée** et la liste des cibles en attente se
+  lit (F7, *choix de Grégoire*) ; **à l'arrêt des notes, elle compte pour 0 %** (F3).
+- **Dans le code** : le court-circuit du lot 1 devient le calcul (`calculerPerformance`, `decrireCalcul`) ; le
+  diagnostic ; chaque lecteur du § 5 éprouvé un à un, dont le `null` devenu 0 de `indicesCP`. Le second seuil : à
+  régler dans la pratique (seuil et plafond ; défauts du rapport, 60 et 55, **à faire valider** : le cas exact de 60
+  n'est pas tranché par les sources, fiche § 7).
+- **Sentinelle** : cas A et B recalculés avec poids et seuil ; une valeur ponctuelle manquante → « non calculable »,
+  jamais un chiffre ; le sens inverse (le moteur par cibles ne lit pas `evaluationsSauvegardees`) ; sentinelles du lot 0
+  rejouées.
+- **Notes qui changent** : celles de la pratique neuve. Aucune autre. Porte terrain : l'export de Grégoire avant et
+  après (§ 6, point 4).
+
+### Lot 5 – « L'étudiant·e reçoit un relevé par cible »
+
+- Les cibles, leurs critères, la définition des niveaux dès le départ (S1) ; un niveau par cible, jamais une note par
+  instrument (S2) ; où il ou elle en est sur chaque cible (S3). Le mot imprimé pour l'étudiant·e (« cible » ou
+  « objectif ») attend Grégoire (É6).
 
 ## 9. Les mots (proposés, aucun arrêté)
 

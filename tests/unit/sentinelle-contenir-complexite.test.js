@@ -43,7 +43,13 @@ const HAUSSES_ASSUMEES = {
     // La cause d'une note Standards qui manque rejoint `erreur` (`erreurConfiguration || causeNoteAbsente`) ; la cause, la
     // formule et les copies remplacées sortent en fonctions (`_causeNoteAbsenteStd`, `_formuleRecitStd`,
     // `_copiesRemplaceesDuPoolStd`). +1, le minimum.
-    'js/profil-etudiant-actions.js : calculerDetailsNoteFinale': 'lot 1 des standards sans portfolio (28 oct. 2026) : 48 → 49, la cause dans `erreur`'
+    'js/profil-etudiant-actions.js : calculerDetailsNoteFinale': 'lot 1 des standards sans portfolio (28 oct. 2026) : 48 → 49, la cause dans `erreur`',
+    // La relecture d'une pratique par standards : une branche d'une ligne dans la chaîne des familles, qui délègue à
+    // `_relireParStandards`. Les autres ajouts du lot sortent en fonctions (`_motifRefusAvantCreation`,
+    // `_configurerPratiqueParStandards`, `_ecrireCeQueDesigneLaPratique`, `_validerParMotif`) ; `creerPratiqueV2` et
+    // `genererRecapitulatif` ne montent pas, `appliquerFormulaireDansCollection` descend sous 30 (table `CODE_PAR_TYPE`).
+    // +1, le minimum.
+    'js/wizard-pratique-v2.js : chargerPratiqueExistante': 'lot 1 « Par standards » (21 nov. 2026) : 40 → 41, la famille `cibles` à la relecture'
 };
 
 /** Compare deux relevés { fichier: { nom: cyc | [cyc…] } } : hausses, neuves, baisses (à reporter). */
