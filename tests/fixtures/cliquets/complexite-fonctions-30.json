@@ -55,7 +55,7 @@
   "genererLigneHTML": 39
  },
  "js/main.js": {
-  "(anonyme)": 36,
+  "(anonyme)": 35,
   "auDbReady": 70
  },
  "js/migration-diagnostic.js": {
@@ -77,8 +77,7 @@
   "construireDonneesModele": 31
  },
  "js/pratiques-gestion.js": {
-  "remplirFormulairePratique": 57,
-  "appliquerFormulaireDansCollection": 31
+  "remplirFormulairePratique": 57
  },
  "js/pratiques/pratique-registre.js": {
   "construireConfigComplete": 49
@@ -162,6 +161,6 @@
  "js/wizard-pratique-v2.js": {
   "genererRecapitulatif": 43,
   "creerPratiqueV2": 75,
-  "chargerPratiqueExistante": 40
+  "chargerPratiqueExistante": 41
  }
 }

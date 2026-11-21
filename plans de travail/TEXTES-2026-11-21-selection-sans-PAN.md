@@ -58,12 +58,7 @@
 
 ## G5 · js/accompagnement-contenu-hover.js · la bulle de « Type de pratique »
 
-> SOM = sommative (moyenne pondérée traditionnelle), SEL = par sélection de productions (la note retient certaines productions), SPE = PAN basée sur des spécifications (contrat), DEN = dénotation (pratiques réduisant ou éliminant la notation).
-
-*Release du 21 nov. 2026 (consigne de Grégoire, 8 h 33)* : le texte accepté porte aussi le segment « STD = PAN par
-standards (un niveau par cible d'apprentissage), », placé après « SOM = … ». Il est retiré tant que la pratique
-« Par standards » n'est pas en ligne, et reviendra avec elle. De même, A5, G6 et G7 n'écrivent que
-« (SOM, SEL, SPE ou DEN) », et la ligne G4 de la carte « Note » attend la nouvelle pratique.
+> SOM = sommative (moyenne pondérée traditionnelle), STD = PAN par standards (un niveau par cible d'apprentissage), SEL = par sélection de productions (la note retient certaines productions), SPE = PAN basée sur des spécifications (contrat), DEN = dénotation (pratiques réduisant ou éliminant la notation).
 
 ## T2 · js/productions.js · la bulle du type « Évaluation terminale » (remplace le texte 2 de `TEXTES-2026-10-29-standards-lot-3.md`, qui reste intact)
 

@@ -2292,6 +2292,7 @@
         'grillesTemplates':         ['grilles.js'],
         'echellesTemplates':        ['echelles.js'],
         'pratiquesConfigurables':   ['pratiques.js', 'wizard-pratique-v2.js'],
+        'ensemblesCibles':          ['ensembles-cibles.js'],   // lot 1 « Par standards » (21 nov. 2026)
         // Indices
         'indicesCP':                ['portfolio.js'],
         'indicesAssiduite':         ['indices.js', 'saisie-presences.js'],

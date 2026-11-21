@@ -18,7 +18,7 @@ import { ouvrirEspaceVide, mettreLaClasseEnPlace, capture } from './harness/clas
 // tests/unit/import-productions-d-un-tenant.test.js.
 //
 // Données manifestement fictives (règle 6) : la classe du deuxième parcours (classe-de-banc.js),
-// plus deux personnes au même nom de famille, « Nomfictif Alice » et « Nomfictif Bruno ».
+// plus deux personnes au même nom de famille, « Nomfictif Alice » et « Nomfictif Boréal ».
 // Captures : CAPTURES_PARCOURS=1 les écrit dans « plans de travail/captures-2026-11-10-import-productions-d-un-tenant/ ».
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -28,15 +28,15 @@ const DOSSIER = process.env.CAPTURES_PARCOURS
 
 const HOMONYMES = [
     { da: '2412345', nom: 'Nomfictif', prenom: 'Alice' },
-    { da: '2498765', nom: 'Nomfictif', prenom: 'Bruno' }
+    { da: '2498765', nom: 'Nomfictif', prenom: 'Boréal' }
 ];
-// Le dépôt entrelacé : les pages d'Alice, de Bruno et de Cléo Cormoran (classe du banc), dans le désordre.
+// Le dépôt entrelacé : les pages d'Alice, de Boréal et de Cléo Cormoran (classe du banc), dans le désordre.
 const DEPOT = [
     ['Nomfictif_Alice', '2412345', 2, '09h00m10s'],
-    ['Nomfictif_Bruno', '2498765', 1, '09h05m00s'],
+    ['Nomfictif_Boreal', '2498765', 1, '09h05m00s'],
     ['Nomfictif_Alice', '2412345', 1, '09h00m00s'],
     ['Cormoran_Cleo', '2390003', 1, '09h07m00s'],
-    ['Nomfictif_Bruno', '2498765', 2, '09h05m10s'],
+    ['Nomfictif_Boreal', '2498765', 2, '09h05m10s'],
     ['Nomfictif_Alice', '2412345', 3, '09h00m20s']
 ];
 
@@ -127,7 +127,7 @@ for (const largeur of [820, 1180]) {
         // A. Le dépôt entrelacé devient d'un seul tenant, dans l'ordre de remise.
         await deposer(page);
         let etat = await lireLesCadres(page);
-        expect(etat.ordre).toEqual(['Alice p1', 'Alice p2', 'Alice p3', 'Bruno p1', 'Bruno p2', 'Cleo p1']);
+        expect(etat.ordre).toEqual(['Alice p1', 'Alice p2', 'Alice p3', 'Boreal p1', 'Boreal p2', 'Cleo p1']);
         aucunCadreFaux(etat);
         expect(etat.cadres.map((c) => c.lignes)).toEqual([[0, 1, 2], [3, 4]]);
         // Les flèches redeviennent utiles : Alice p2 peut monter et descendre dans sa production.
@@ -136,10 +136,10 @@ for (const largeur of [820, 1180]) {
 
         // C. Les homonymes, « Nom, Prénom » dans l'Aperçu ; Cléo, le nom seul.
         const apercu = page.locator('.pipeline-col-confirmes .pipeline-meta-nom');
-        await expect(apercu).toHaveText(['Nomfictif, Alice', 'Nomfictif, Alice', 'Nomfictif, Alice', 'Nomfictif, Bruno', 'Nomfictif, Bruno', 'Cormoran']);
+        await expect(apercu).toHaveText(['Nomfictif, Alice', 'Nomfictif, Alice', 'Nomfictif, Alice', 'Nomfictif, Boréal', 'Nomfictif, Boréal', 'Cormoran']);
         await captureOptimisation(page, `01-depot-d-un-seul-tenant-${largeur}`);
 
-        // B. Cocher les deux pages de Bruno, qui forment déjà sa production : rien ne bouge, un message le dit.
+        // B. Cocher les deux pages de Boréal, qui forment déjà sa production : rien ne bouge, un message le dit.
         await page.locator('.pipeline-case-reunir').nth(3).click();
         await page.locator('.pipeline-case-reunir').nth(4).click();
         await expect(page.locator('.pipeline-btn-reunir')).toHaveText('Réunir en une production');
@@ -149,7 +149,7 @@ for (const largeur of [820, 1180]) {
         expect((await lireLesCadres(page)).cles).toEqual(etat.cles);
         await captureOptimisation(page, `02-deja-une-production-${largeur}`);
 
-        // B. Décocher Bruno ; cocher Alice p2 et p3 : elles se détachent, Alice p1 reste seule dans la sienne.
+        // B. Décocher Boréal ; cocher Alice p2 et p3 : elles se détachent, Alice p1 reste seule dans la sienne.
         await page.locator('.pipeline-case-reunir').nth(3).click();
         await page.locator('.pipeline-case-reunir').nth(4).click();
         await page.locator('.pipeline-case-reunir').nth(1).click();
@@ -157,7 +157,7 @@ for (const largeur of [820, 1180]) {
         await page.locator('.pipeline-btn-reunir').click();
         await expect(page.locator('.pipeline-col-originaux .pipeline-groupe-encadre[data-groupe-id^="copie_"]')).toHaveCount(1);
         etat = await lireLesCadres(page);
-        expect(etat.ordre).toEqual(['Alice p1', 'Alice p2', 'Alice p3', 'Bruno p1', 'Bruno p2', 'Cleo p1']);
+        expect(etat.ordre).toEqual(['Alice p1', 'Alice p2', 'Alice p3', 'Boreal p1', 'Boreal p2', 'Cleo p1']);
         expect(etat.cles[0]).toBe('2412345_Journal-3');
         expect(etat.cles[1]).toMatch(/^copie_/);
         aucunCadreFaux(etat);

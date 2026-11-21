@@ -141,7 +141,7 @@ describe('#553 · comportement (b) — deux critères « Français… » ont cha
     // Ce que rend maintenant le producteur (prouvé dans l'autre sentinelle #553) : une clé par critère, entière.
     const MOYENNES = {
         2000001: { francaisoral: 0.10, francaisecrit: 0.20, comprehension: 0.90 },   // Alice : les deux en défi
-        2000002: { francaisoral: 0.30, francaisecrit: 0.90, comprehension: 0.90 }    // Bruno : l'oral seulement
+        2000002: { francaisoral: 0.30, francaisecrit: 0.90, comprehension: 0.90 }    // Boréal : l'oral seulement
     };
     const GLOBAUX = {
         determinerNiveauRaiPedagogique: () => ({ niveau: 2, pattern: 'Stable', label: 'x' }), calculerTousLesIndices: () => ({ A: 100, C: 100, P: 80 }),

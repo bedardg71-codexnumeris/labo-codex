@@ -25,7 +25,7 @@
  *   · (9 nov.) la garde « sans pratique » retirée (`receptionVautRemise` rend vrai sur null) → 3 rouges (la famille, les
  *     deux captures) ;
  *   · (9 nov., relecture neuve) les spécifications codées en dur qui comptent les copies importées comme acceptables, sous
- *     un nom de clé déguisé (que le motif de texte ne voit pas) → 1 rouge (Bruno à 2/2 au lieu de 0/2) ;
+ *     un nom de clé déguisé (que le motif de texte ne voit pas) → 1 rouge (Boréal à 2/2 au lieu de 0/2) ;
  *   · `evaluation.verrouillee === false` retiré de `evaluationCorrigeLaReception` → 1 rouge (le brouillon « plagiat » corrige) ;
  *   · la garde du remplacement retirée de `evaluationCorrigeLaReception` → 1 rouge (le doublon réconcilié corrige) ;
  *   · captures, C de chaque élève sans les copies reçues → 1 rouge ;
@@ -41,8 +41,8 @@ import path from 'node:path';
 
 const registre = () => chargerScript('js/pratiques/pratique-registre.js', {}, {});
 
-// Un groupe de quatre, fictif : Alice est évaluée ; Bruno et Chloé ont remis par import ; Dario a remis sur papier.
-const ALICE = '2000001', BRUNO = '2000002', CHLOE = '2000003', DARIO = '2000005';
+// Un groupe de quatre, fictif : Alice est évaluée ; Boréal et Chloé ont remis par import ; Dario a remis sur papier.
+const ALICE = '2000001', BOREAL = '2000002', CHLOE = '2000003', DARIO = '2000005';
 const evaluee = (id, da, prod, extra = {}) => Object.assign(
     { id, etudiantDA: da, productionId: prod, noteFinale: 80, niveauFinal: 'M', verrouillee: true, ponderationCouverte: 100, coursId: 'GC1', dateEvaluation: '2026-03-10' }, extra);
 const fichier = (id, da, prod, extra = {}) => Object.assign(
@@ -51,25 +51,25 @@ const fichier = (id, da, prod, extra = {}) => Object.assign(
 describe('La règle (pratique-registre.js)', () => {
     it('une copie reçue par import est remise ; sans réception (null : autre famille), seule l\'évaluation confirme', () => {
         const r = registre();
-        const recues = r.lireCopiesRecues([fichier('F1', BRUNO, 'P1')]);
-        expect(r.productionRemiseParEleve(BRUNO, 'P1', [], recues)).toBe(true);
-        expect(r.productionRemiseParEleve(BRUNO, 'P1', [], null)).toBe(false);          // la règle d'avant
+        const recues = r.lireCopiesRecues([fichier('F1', BOREAL, 'P1')]);
+        expect(r.productionRemiseParEleve(BOREAL, 'P1', [], recues)).toBe(true);
+        expect(r.productionRemiseParEleve(BOREAL, 'P1', [], null)).toBe(false);          // la règle d'avant
         expect(r.productionRemiseParEleve(DARIO, 'P1', [], recues)).toBe(false);        // papier, pas encore évalué
-        expect(r.productionRemiseParEleve(BRUNO, 'P2', [], recues)).toBe(false);        // reçue pour P1, pas pour P2
+        expect(r.productionRemiseParEleve(BOREAL, 'P2', [], recues)).toBe(false);        // reçue pour P1, pas pour P2
         expect(r.productionRemiseParEleve(DARIO, 'P1', [evaluee('E', DARIO, 'P1')], recues)).toBe(true);   // l'évaluation confirme
     });
 
     it('une fiche orpheline (sans production) ou sans élève n\'est la remise de rien', () => {
         const r = registre();
-        const recues = r.lireCopiesRecues([fichier('F1', BRUNO, ''), fichier('F2', '', 'P1'), null]);
+        const recues = r.lireCopiesRecues([fichier('F1', BOREAL, ''), fichier('F2', '', 'P1'), null]);
         expect(recues.size).toBe(0);
         expect(r.lireCopiesRecues([fichier('F3', CHLOE, 'P1')]).size).toBe(1);   // TÉMOIN
     });
 
     it('l\'évaluation enregistrée corrige la réception : non recevable (plagiat, IA) ou « Non reçu » ; pas un brouillon', () => {
         const r = registre();
-        const recues = r.lireCopiesRecues([fichier('F1', BRUNO, 'P1')]);
-        const corrigee = (extra) => r.productionRemiseParEleve(BRUNO, 'P1', [evaluee('E', BRUNO, 'P1', extra)], recues);
+        const recues = r.lireCopiesRecues([fichier('F1', BOREAL, 'P1')]);
+        const corrigee = (extra) => r.productionRemiseParEleve(BOREAL, 'P1', [evaluee('E', BOREAL, 'P1', extra)], recues);
         expect(corrigee({ statutIntegrite: 'plagiat' })).toBe(false);
         expect(corrigee({ statutIntegrite: 'ia', noteFinale: null })).toBe(false);      // écartée : sans note, le statut suffit
         expect(corrigee({ statutRemise: 'non-recu', noteFinale: 0 })).toBe(false);
@@ -85,13 +85,13 @@ describe('La règle (pratique-registre.js)', () => {
         // Relecture neuve du 9 nov. : la garde du remplacement n'avait aucun essai. Le doublon (#360) est remplacé par E2,
         // un brouillon qui ne compte pas encore : seule la réception reste, et rien d'actif ne la corrige.
         const r = registre();
-        const recues = r.lireCopiesRecues([fichier('F1', BRUNO, 'P1')]);
-        const doublon = evaluee('E1', BRUNO, 'P1', { statutIntegrite: 'plagiat', remplaceeParId: 'E2', reconcilieParDoublon: true });
-        const remplacante = evaluee('E2', BRUNO, 'P1', { verrouillee: false });
-        expect(r.productionRemiseParEleve(BRUNO, 'P1', [doublon, remplacante], recues)).toBe(true);
+        const recues = r.lireCopiesRecues([fichier('F1', BOREAL, 'P1')]);
+        const doublon = evaluee('E1', BOREAL, 'P1', { statutIntegrite: 'plagiat', remplaceeParId: 'E2', reconcilieParDoublon: true });
+        const remplacante = evaluee('E2', BOREAL, 'P1', { verrouillee: false });
+        expect(r.productionRemiseParEleve(BOREAL, 'P1', [doublon, remplacante], recues)).toBe(true);
         // TÉMOIN : le même « plagiat », actif (pas remplacé), corrige.
-        const actif = evaluee('E1', BRUNO, 'P1', { statutIntegrite: 'plagiat' });
-        expect(r.productionRemiseParEleve(BRUNO, 'P1', [actif, remplacante], recues)).toBe(false);
+        const actif = evaluee('E1', BOREAL, 'P1', { statutIntegrite: 'plagiat' });
+        expect(r.productionRemiseParEleve(BOREAL, 'P1', [actif, remplacante], recues)).toBe(false);
     });
 
     it('la famille décide : les quatre familles (9 nov.) ; sans pratique, non', () => {
@@ -105,12 +105,12 @@ describe('La règle (pratique-registre.js)', () => {
 });
 
 describe('Le cas de la consigne, dans chaque classe et chaque famille qui compte des remises', () => {
-    // P1 : trois copies importées (Alice, Bruno, Chloé), une seule évaluée et verrouillée (Alice). Dario : papier, rien.
+    // P1 : trois copies importées (Alice, Boréal, Chloé), une seule évaluée et verrouillée (Alice). Dario : papier, rien.
     function store({ fichiers = true } = {}) {
         const s = storeBase();
         s.test_productions = [{ id: 'P1', titre: 'Analyse 1', type: 'travail', ponderation: 20, dateEcheance: '2026-03-01', coursId: 'GC1' }];
         s.test_evaluationsSauvegardees = [evaluee('E_ALICE', ALICE, 'P1')];
-        s.test_fichiersTravaux = fichiers ? [fichier('F_A', ALICE, 'P1'), fichier('F_B', BRUNO, 'P1'), fichier('F_C', CHLOE, 'P1')] : [];
+        s.test_fichiersTravaux = fichiers ? [fichier('F_A', ALICE, 'P1'), fichier('F_B', BOREAL, 'P1'), fichier('F_C', CHLOE, 'P1')] : [];
         return s;
     }
     function instance(fichierJs, classe, s, config) {
@@ -129,46 +129,46 @@ describe('Le cas de la consigne, dans chaque classe et chaque famille qui compte
     ];
     PRATIQUES.forEach(([fichierJs, classeJs, config]) => {
         const classe = classeJs + ' (' + config.type + ')';
-        it(`${classe} : Bruno et Chloé, importés et pas encore évalués, sont remis (1/1) ; Dario, sur papier, ne l'est pas (0/1)`, () => {
+        it(`${classe} : Boréal et Chloé, importés et pas encore évalués, sont remis (1/1) ; Dario, sur papier, ne l'est pas (0/1)`, () => {
             const s = store();
             const c = (da) => { const d = instance(fichierJs, classeJs, s, config).calculerDetailsCompletion(da); return [d.remis, d.total]; };
             expect(c(ALICE)).toEqual([1, 1]);
-            expect(c(BRUNO)).toEqual([1, 1]);
+            expect(c(BOREAL)).toEqual([1, 1]);
             expect(c(CHLOE)).toEqual([1, 1]);
             expect(c(DARIO)).toEqual([0, 1]);
         });
 
-        it(`${classe} : TÉMOIN, sans les fiches importées, Bruno et Chloé retombent à 0/1 (la règle d'avant)`, () => {
+        it(`${classe} : TÉMOIN, sans les fiches importées, Boréal et Chloé retombent à 0/1 (la règle d'avant)`, () => {
             const s = store({ fichiers: false });
-            const d = instance(fichierJs, classeJs, s, config).calculerDetailsCompletion(BRUNO);
+            const d = instance(fichierJs, classeJs, s, config).calculerDetailsCompletion(BOREAL);
             expect([d.remis, d.total]).toEqual([0, 1]);
         });
 
         it(`${classe} : le dénominateur ne bouge pas, des copies importées sans aucune évaluation n'y font pas entrer la production`, () => {
             const s = store();
             s.test_evaluationsSauvegardees = [];
-            expect(instance(fichierJs, classeJs, s, config).calculerDetailsCompletion(BRUNO)).toBeNull();
+            expect(instance(fichierJs, classeJs, s, config).calculerDetailsCompletion(BOREAL)).toBeNull();
         });
 
-        it(`${classe} : l'évaluation corrige, Bruno marqué plagiat et Chloé « Non reçu » ne sont plus remis`, () => {
+        it(`${classe} : l'évaluation corrige, Boréal marqué plagiat et Chloé « Non reçu » ne sont plus remis`, () => {
             const s = store();
-            s.test_evaluationsSauvegardees.push(evaluee('E_BRUNO', BRUNO, 'P1', { statutIntegrite: 'plagiat' }));
+            s.test_evaluationsSauvegardees.push(evaluee('E_BOREAL', BOREAL, 'P1', { statutIntegrite: 'plagiat' }));
             s.test_evaluationsSauvegardees.push(evaluee('E_CHLOE', CHLOE, 'P1', { statutRemise: 'non-recu', noteFinale: 0 }));
             const c = (da) => { const d = instance(fichierJs, classeJs, s, config).calculerDetailsCompletion(da); return [d.remis, d.total]; };
-            expect(c(BRUNO)).toEqual([0, 1]);
+            expect(c(BOREAL)).toEqual([0, 1]);
             expect(c(CHLOE)).toEqual([0, 1]);
         });
     });
 
     // LES STANDARDS CODÉS EN DUR (une pratique « standards » absente de la bibliothèque) : leur dénominateur est autre,
     // les travaux ASSIGNÉS avec une échéance, qu'une copie soit évaluée ou non. Il ne change pas ; seul ce qui compte comme
-    // remis change. Mesuré le 9 nov. : avant l'extension, Bruno et Chloé, importés, étaient à 0/1 ; après, 1/1.
+    // remis change. Mesuré le 9 nov. : avant l'extension, Boréal et Chloé, importés, étaient à 0/1 ; après, 1/1.
     const STANDARDS_DUR = ['js/pratiques/pratique-pan-standards.js', 'PratiquePANStandards', { id: 'standards' }];
-    it('PratiquePANStandards (codée en dur) : Bruno et Chloé importés sont remis (1/1) ; Dario, sur papier, 0/1', () => {
+    it('PratiquePANStandards (codée en dur) : Boréal et Chloé importés sont remis (1/1) ; Dario, sur papier, 0/1', () => {
         const s = store();
         const c = (da) => { const d = instance(...STANDARDS_DUR.slice(0, 2), s, STANDARDS_DUR[2]).calculerDetailsCompletion(da); return [d.remis, d.total]; };
         expect(c(ALICE)).toEqual([1, 1]);
-        expect(c(BRUNO)).toEqual([1, 1]);
+        expect(c(BOREAL)).toEqual([1, 1]);
         expect(c(CHLOE)).toEqual([1, 1]);
         expect(c(DARIO)).toEqual([0, 1]);
     });
@@ -179,35 +179,35 @@ describe('Le cas de la consigne, dans chaque classe et chaque famille qui compte
         const s = store();
         s.test_evaluationsSauvegardees = [];
         const c = (da) => { const d = instance(...STANDARDS_DUR.slice(0, 2), s, STANDARDS_DUR[2]).calculerDetailsCompletion(da); return [d.remis, d.total]; };
-        expect(c(BRUNO)).toEqual([1, 1]);
+        expect(c(BOREAL)).toEqual([1, 1]);
         expect(c(DARIO)).toEqual([0, 1]);
         // TÉMOIN : sans les fiches importées, la règle d'avant (0/1).
         const sans = store({ fichiers: false });
-        const d = instance(...STANDARDS_DUR.slice(0, 2), sans, STANDARDS_DUR[2]).calculerDetailsCompletion(BRUNO);
+        const d = instance(...STANDARDS_DUR.slice(0, 2), sans, STANDARDS_DUR[2]).calculerDetailsCompletion(BOREAL);
         expect([d.remis, d.total]).toEqual([0, 1]);
     });
 
-    it('PratiquePANStandards (codée en dur) : l\'évaluation corrige, Bruno marqué plagiat n\'est plus remis', () => {
+    it('PratiquePANStandards (codée en dur) : l\'évaluation corrige, Boréal marqué plagiat n\'est plus remis', () => {
         const s = store();
-        s.test_evaluationsSauvegardees.push(evaluee('E_BRUNO', BRUNO, 'P1', { statutIntegrite: 'plagiat' }));
-        const d = instance(...STANDARDS_DUR.slice(0, 2), s, STANDARDS_DUR[2]).calculerDetailsCompletion(BRUNO);
+        s.test_evaluationsSauvegardees.push(evaluee('E_BOREAL', BOREAL, 'P1', { statutIntegrite: 'plagiat' }));
+        const d = instance(...STANDARDS_DUR.slice(0, 2), s, STANDARDS_DUR[2]).calculerDetailsCompletion(BOREAL);
         expect([d.remis, d.total]).toEqual([0, 1]);
     });
 
     // LES SPÉCIFICATIONS CODÉES EN DUR : leur C n'est pas une part de remises, c'est la part des travaux ACCEPTABLES du
     // palier le plus haut. Une copie reçue n'y est pas encore jugée : l'extension n'y entre pas, leur sens ne change pas.
     it('PratiquePanSpecifications (codée en dur) : inchangée, une copie importée et non évaluée n\'y compte pas', () => {
-        // Relecture neuve du 9 nov. : sans évaluation de Bruno, le calcul rendait null avant toute lecture ; l'essai ne
-        // gardait donc que par le texte. Ici Bruno a UNE évaluation non acceptable (40 < 60) sur P1 et des copies importées
+        // Relecture neuve du 9 nov. : sans évaluation de Boréal, le calcul rendait null avant toute lecture ; l'essai ne
+        // gardait donc que par le texte. Ici Boréal a UNE évaluation non acceptable (40 < 60) sur P1 et des copies importées
         // pour P1 et P2 : il reste à 0/2 ; un travail acceptable le met à 1/2, et les copies importées n'y ajoutent rien.
         const s = store();
         s.test_productions.push({ id: 'P2', titre: 'Analyse 2', type: 'travail', ponderation: 20, dateEcheance: '2026-03-08', coursId: 'GC1' });
-        s.test_fichiersTravaux.push(fichier('F_B2', BRUNO, 'P2'));
+        s.test_fichiersTravaux.push(fichier('F_B2', BOREAL, 'P2'));
         const config = { id: 'pan-specifications', typesTravaux: [{ id: 'travail', nom: 'Travail', seuilAcceptable: 60 }],
             tableBundles: [{ noteFixe: 85, requis: { travail: 2 } }] };
         const c = (note) => {
-            s.test_evaluationsSauvegardees = [evaluee('E_BRUNO', BRUNO, 'P1', { noteFinale: note })];
-            const d = instance('js/pratiques/pratique-pan-specifications.js', 'PratiquePanSpecifications', s, config).calculerDetailsCompletion(BRUNO);
+            s.test_evaluationsSauvegardees = [evaluee('E_BOREAL', BOREAL, 'P1', { noteFinale: note })];
+            const d = instance('js/pratiques/pratique-pan-specifications.js', 'PratiquePanSpecifications', s, config).calculerDetailsCompletion(BOREAL);
             return [d.remis, d.total];
         };
         expect(c(40)).toEqual([0, 2]);   // non acceptable, deux copies importées : rien ne compte
@@ -223,7 +223,7 @@ describe('Les captures du Suivi suivent la remise, dans les quatre familles (sna
         const store = {
             test_evaluationsSauvegardees: [evaluee('E_ALICE', ALICE, 'P1')],
             test_productions: PRODUCTIONS,
-            test_fichiersTravaux: fichiers ? [fichier('F_B', BRUNO, 'P1')] : [],
+            test_fichiersTravaux: fichiers ? [fichier('F_B', BOREAL, 'P1')] : [],
             infoCours: { id: 'GC1', _groupeCoursId: 'GC1' }
         };
         const lire = (k) => JSON.parse(JSON.stringify(store['test_' + String(k).replace(/^test_/, '')] || []));
@@ -243,28 +243,28 @@ describe('Les captures du Suivi suivent la remise, dans les quatre familles (sna
         return win;
     }
 
-    it('en sommative, le C historique de Bruno, importé et pas encore évalué, vaut 100 ; sans sa fiche, 0', () => {
-        expect(bac('SOM').calculerIndicesHistoriques(BRUNO, '2026-03-16').C).toBe(100);
-        expect(bac('SOM', { fichiers: false }).calculerIndicesHistoriques(BRUNO, '2026-03-16').C).toBe(0);
+    it('en sommative, le C historique de Boréal, importé et pas encore évalué, vaut 100 ; sans sa fiche, 0', () => {
+        expect(bac('SOM').calculerIndicesHistoriques(BOREAL, '2026-03-16').C).toBe(100);
+        expect(bac('SOM', { fichiers: false }).calculerIndicesHistoriques(BOREAL, '2026-03-16').C).toBe(0);
     });
 
-    it('dans les trois autres familles aussi, le C historique de Bruno importé vaut 100 ; sans sa fiche, 0', () => {
+    it('dans les trois autres familles aussi, le C historique de Boréal importé vaut 100 ; sans sa fiche, 0', () => {
         ['STD', 'SPE', 'DEN'].forEach(code => {
-            expect([code, bac(code).calculerIndicesHistoriques(BRUNO, '2026-03-16').C]).toEqual([code, 100]);
-            expect([code, bac(code, { fichiers: false }).calculerIndicesHistoriques(BRUNO, '2026-03-16').C]).toEqual([code, 0]);
+            expect([code, bac(code).calculerIndicesHistoriques(BOREAL, '2026-03-16').C]).toEqual([code, 100]);
+            expect([code, bac(code, { fichiers: false }).calculerIndicesHistoriques(BOREAL, '2026-03-16').C]).toEqual([code, 0]);
         });
     });
 
     it('sans pratique résolue, la capture garde la règle d\'avant : 0', () => {
-        expect(bac(null).calculerIndicesHistoriques(BRUNO, '2026-03-16').C).toBe(0);
+        expect(bac(null).calculerIndicesHistoriques(BOREAL, '2026-03-16').C).toBe(0);
     });
 
-    // Le C du groupe d'une capture : le taux de remise du dernier travail dû (#726). Alice évaluée, Bruno importé.
+    // Le C du groupe d'une capture : le taux de remise du dernier travail dû (#726). Alice évaluée, Boréal importé.
     async function releve(code, { fichiers = true, evaluationsEnPlus = [] } = {}) {
         const store = {
             test_evaluationsSauvegardees: [evaluee('E_ALICE', ALICE, 'P1'), ...evaluationsEnPlus],
             test_productions: PRODUCTIONS,
-            test_fichiersTravaux: fichiers ? [fichier('F_B', BRUNO, 'P1')] : [],
+            test_fichiersTravaux: fichiers ? [fichier('F_B', BOREAL, 'P1')] : [],
             infoCours: { id: 'GC1', _groupeCoursId: 'GC1' }
         };
         const clone = (x) => JSON.parse(JSON.stringify(x));
@@ -282,19 +282,19 @@ describe('Les captures du Suivi suivent la remise, dans les quatre familles (sna
             definirContexteSimulation() {}, effacerContexteSimulation() {}, calculerNoteDuCours: () => null,
             arrondirIndiceSurCent: (x) => Math.round(x * 100),
             obtenirCalendrierComplet: () => ({}), obtenirSeancesCompletes: () => ({}),
-            obtenirEtudiantsCoursActif: () => [{ da: ALICE, nom: 'Fictive', prenom: 'Alice', groupe: '01' }, { da: BRUNO, nom: 'Fictif', prenom: 'Bruno', groupe: '01' }],
+            obtenirEtudiantsCoursActif: () => [{ da: ALICE, nom: 'Fictive', prenom: 'Alice', groupe: '01' }, { da: BOREAL, nom: 'Fictif', prenom: 'Boréal', groupe: '01' }],
             estEtudiantExclu: () => false,
             notifications: { succes() {}, erreur() {}, info() {} } }, win);
         return win.capturerSnapshotSeance('2026-03-16', null, { numeroSemaine: 10 });
     }
 
-    it('en sommative, le C du groupe compte Bruno importé : 100 % ; sans sa fiche, 50 % ; marqué plagiat, 50 %', async () => {
+    it('en sommative, le C du groupe compte Boréal importé : 100 % ; sans sa fiche, 50 % ; marqué plagiat, 50 %', async () => {
         expect((await releve('SOM')).groupe.moyenneC).toBe(100);
         expect((await releve('SOM', { fichiers: false })).groupe.moyenneC).toBe(50);
-        expect((await releve('SOM', { evaluationsEnPlus: [evaluee('E_BRUNO', BRUNO, 'P1', { statutIntegrite: 'plagiat' })] })).groupe.moyenneC).toBe(50);
+        expect((await releve('SOM', { evaluationsEnPlus: [evaluee('E_BOREAL', BOREAL, 'P1', { statutIntegrite: 'plagiat' })] })).groupe.moyenneC).toBe(50);
     });
 
-    it('dans les trois autres familles, le C du groupe compte Bruno importé : 100 % ; sans sa fiche, 50 %', async () => {
+    it('dans les trois autres familles, le C du groupe compte Boréal importé : 100 % ; sans sa fiche, 50 %', async () => {
         for (const code of ['STD', 'SPE', 'DEN']) {
             expect([code, (await releve(code)).groupe.moyenneC]).toEqual([code, 100]);
             expect([code, (await releve(code, { fichiers: false })).groupe.moyenneC]).toEqual([code, 50]);

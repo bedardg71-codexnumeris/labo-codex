@@ -100,7 +100,7 @@ function storeBase() {
         test_groupesCours: [{ id: 'GC1', coursId: 'GC1', trimestreId: 'test', actif: true, groupeNum: '01' }, { id: 'GC2', coursId: 'GC2', trimestreId: 'test', actif: false, groupeNum: '02' }],
         test_groupeEtudiants: [
             { da: '2000001', nom: 'Assidu', prenom: 'Alice', groupe: '01', coursId: 'GC1', statut: 'actif' },
-            { da: '2000002', nom: 'Absent', prenom: 'Bruno', groupe: '01', coursId: 'GC1', statut: 'actif' },
+            { da: '2000002', nom: 'Absent', prenom: 'Boréal', groupe: '01', coursId: 'GC1', statut: 'actif' },
             { da: '2000003', nom: 'Silence', prenom: 'Chloé', groupe: '01', coursId: 'GC1', statut: 'actif' },
             { da: '2000004', nom: 'Dautre', prenom: 'Dario', groupe: '02', coursId: 'GC2', statut: 'actif' }
         ],
@@ -232,19 +232,19 @@ describe('5 · Interventions — gestes et écritures', () => {
     it('I-2 · Enregistrer : la note individuelle d\'un élève DÉCOCHÉ était effacée — depuis #772, un champ affiché rempli est conservé (valeur d\'après)', () => {
         const store = storeBase();
         store.test_interventions = [{ id: 'I1', titre: 'Rattrapage', date: '2026-09-01', heure: '10:00', duree: 2, type: 'groupe', niveauRai: 2, contexte: 'rattrapage', description: '',
-            etudiants: ['2000001', '2000002'], analyse: null, observations: '', notesIndividuelles: { 2000001: 'Alice progresse.', 2000002: 'Bruno absent, à revoir.' }, criteresCibles: [], objectifVise: '', bilan: null, statut: 'en-cours', jamaisSauvegardee: false }];
-        // Le formulaire, tel que l'enseignant le laisse : Alice cochée, Bruno décoché (il n'est pas venu), ses champs de note intacts.
+            etudiants: ['2000001', '2000002'], analyse: null, observations: '', notesIndividuelles: { 2000001: 'Alice progresse.', 2000002: 'Boréal absent, à revoir.' }, criteresCibles: [], objectifVise: '', bilan: null, statut: 'en-cours', jamaisSauvegardee: false }];
+        // Le formulaire, tel que l'enseignant le laisse : Alice cochée, Boréal décoché (il n'est pas venu), ses champs de note intacts.
         const cbAlice = elementDom({ value: '2000001', checked: true }), cbBruno = elementDom({ value: '2000002', checked: false });
         const b = monterI(store, {
-            elements: { interventionNiveau: elementDom({ value: '2' }), interventionContexte: elementDom({ value: 'rattrapage' }), interventionTitre: elementDom({ value: 'Rattrapage' }), interventionDate: elementDom({ value: '2026-09-01' }), interventionHeure: elementDom({ value: '10:00' }), interventionDuree: elementDom({ value: '2' }), interventionDescription: elementDom({ value: '' }), observationsIntervention: elementDom({ value: 'obs' }), objectifVise: elementDom({ value: '' }), 'note-2000001': elementDom({ value: 'Alice progresse.' }), 'note-2000002': elementDom({ value: 'Bruno absent, à revoir.' }) },
+            elements: { interventionNiveau: elementDom({ value: '2' }), interventionContexte: elementDom({ value: 'rattrapage' }), interventionTitre: elementDom({ value: 'Rattrapage' }), interventionDate: elementDom({ value: '2026-09-01' }), interventionHeure: elementDom({ value: '10:00' }), interventionDuree: elementDom({ value: '2' }), interventionDescription: elementDom({ value: '' }), observationsIntervention: elementDom({ value: 'obs' }), objectifVise: elementDom({ value: '' }), 'note-2000001': elementDom({ value: 'Alice progresse.' }), 'note-2000002': elementDom({ value: 'Boréal absent, à revoir.' }) },
             selecteurs: { '#listeEtudiantsIntervention input[type="checkbox"]': [cbAlice, cbBruno], '#listeEtudiantsIntervention input[type="checkbox"]:checked': [cbAlice], 'input[name="interventionStatut"]:checked': elementDom({ value: 'en-cours' }), '#criteresCiblesContainer .critere-cible-cb:checked': [] }
         });
         b.win.sauvegarderPresencesIntervention('I1');
         const i = store.test_interventions[0];
         noter('I2', { etudiants: i.etudiants, notes: i.notesIndividuelles, ecritures: b.journal.filter(j => j.k === 'test_interventions').length, notif: b.notifs.map(n => n.t) });
         expect(i.etudiants).toEqual(['2000001']);
-        // Avant #772 : { 2000001 } seulement — la note de Bruno n'existait plus. Après : son champ, affiché et rempli, est conservé.
-        expect(i.notesIndividuelles).toEqual({ 2000001: 'Alice progresse.', 2000002: 'Bruno absent, à revoir.' });
+        // Avant #772 : { 2000001 } seulement — la note de Boréal n'existait plus. Après : son champ, affiché et rempli, est conservé.
+        expect(i.notesIndividuelles).toEqual({ 2000001: 'Alice progresse.', 2000002: 'Boréal absent, à revoir.' });
         expect(b.journal.filter(j => j.k === 'test_interventions').length).toBe(1);   // une écriture complète pour un clic — deux avant le lot 5 du cadrage 11
     });
 
@@ -329,7 +329,7 @@ describe('5 · Interventions — gestes et écritures', () => {
 
     it('I-7 · Note individuelle d\'un élève parti (#748) : l\'en-tête comptait 2 notes pour une seule ligne rendue — depuis le lot 5 du cadrage 11, la note reste, grisée, « (n\'est plus dans le groupe) » (valeur d\'après)', () => {
         const store = storeBase();
-        store.test_groupeEtudiants = store.test_groupeEtudiants.filter(e => e.da !== '2000002');   // Bruno a quitté le trimestre
+        store.test_groupeEtudiants = store.test_groupeEtudiants.filter(e => e.da !== '2000002');   // Boréal a quitté le trimestre
         store.test_interventions = [{ id: 'I5', titre: 'T', date: '2026-09-01', heure: '', duree: 2, type: 'groupe', niveauRai: 2, contexte: 'rattrapage', description: '',
             etudiants: ['2000001', '2000002'], analyse: { nbEtudiants: 2, patternsCommuns: {}, progressions: {}, niveauxRai: { 1: 0, 2: 2, 3: 0 } }, observations: '', notesIndividuelles: { 2000001: 'a', 2000002: 'b' }, criteresCibles: [], objectifVise: '', bilan: null, statut: 'en-cours', jamaisSauvegardee: false }];
         const liste = elementDom();
@@ -337,10 +337,10 @@ describe('5 · Interventions — gestes et écritures', () => {
         b.win.afficherListeInterventions();
         const html = liste.innerHTML;
         const bloc = html.slice(html.indexOf('Notes individuelles'));
-        noter('I7', { compteur: (bloc.match(/<strong>(\d+)<\/strong>/) || [])[1], lignesAlice: (bloc.match(/Alice/g) || []).length, lignesBruno: (bloc.match(/Bruno|2000002/g) || []).length });
+        noter('I7', { compteur: (bloc.match(/<strong>(\d+)<\/strong>/) || [])[1], lignesAlice: (bloc.match(/Alice/g) || []).length, lignesBruno: (bloc.match(/Boréal|2000002/g) || []).length });
         expect(html).toContain('Notes individuelles');
         expect(bloc).toContain('Alice');
-        // Constat d'origine (6 sept.) : ni « Bruno » ni « 2000002 » — sa note n'était pas rendue. Bruno a quitté le
+        // Constat d'origine (6 sept.) : ni « Boréal » ni « 2000002 » — sa note n'était pas rendue. Boréal a quitté le
         // trimestre : plus de fiche, donc son DA, grisé, avec la mention ; le compteur compte ses deux lignes.
         expect(bloc).toContain('<div class="etud-texte-gris-clair" style="margin-bottom: 8px; font-size: 0.9rem;">');
         expect(bloc).toContain('<strong>2000002</strong> (n\'est plus dans le groupe) : b');
@@ -843,7 +843,7 @@ describe('4 · Profils individuels — écritures du profil, anonymisation, grap
 
     it('P-2 · Le volet confidentiel : écrit EN CLAIR sous <trim>_confidentielEtudiants, remplace tout le sous-objet du DA (le stock `servicesAdaptes` et `portrait*` tombe — lot 4 du cadrage 11), et réécrit les notes de présence en cascade', () => {
         const store = storeBase();
-        store.test_confidentielEtudiants = { [DA]: { notes: 'ancienne note', categorie: 'x', portraitNuance: '3', servicesAdaptes: true }, '2000002': { notes: 'Bruno' } };
+        store.test_confidentielEtudiants = { [DA]: { notes: 'ancienne note', categorie: 'x', portraitNuance: '3', servicesAdaptes: true }, '2000002': { notes: 'Boréal' } };
         const ta = elementDom({ value: 'note présence modifiée', dataset: { date: '2026-09-01', da: DA } });
         const b = monterP(store, { selecteurs: { '#confidentiel-notes-presences .note-presence-editable': [ta] } });
         b.win.ouvrirModalConfidentiel(DA);
@@ -860,7 +860,7 @@ describe('4 · Profils individuels — écritures du profil, anonymisation, grap
         expect(caseSA).toMatchObject({ checked: false, disabled: true });   // l'élève de banc n'a pas `sa: 'Oui'` dans la liste : la case le reflète, sans se cocher
         expect(ecrit[DA]).not.toHaveProperty('servicesAdaptes');            // plus écrit : la liste des étudiant·es fait foi
         expect(ecrit[DA]).not.toHaveProperty('portraitNuance');             // le sous-objet est remplacé par ce que le formulaire porte — et le portrait n'y est plus
-        expect(ecrit['2000002']).toEqual({ notes: 'Bruno' });   // les autres DA sont intacts
+        expect(ecrit['2000002']).toEqual({ notes: 'Boréal' });   // les autres DA sont intacts
         expect(b.modifs).toEqual([{ da: DA, date: '2026-09-01', note: 'note présence modifiée' }]);
         expect(JSON.stringify(ecrit)).toContain('TDAH');
     });

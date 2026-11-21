@@ -1,25 +1,21 @@
 /**
- * SENTINELLE (21 nov. 2026) — LE SIGLE SUIT LE NOM. Version de la release du renommage (21 nov. 2026).
+ * SENTINELLE (21 nov. 2026) — LE SIGLE SUIT LE NOM.
  *
- * Décision de Grégoire (21 nov. 2026, 6 h 56) : la pratique « Par sélection de productions » s'affiche « SEL », en
- * sarcelle. Changement d'AFFICHAGE seulement : le CODE interne de la famille (STD) ne change pas — le moteur le compare
- * et les pratiques rangées chez les gens le portent (`pratiques: ['STD']`).
- *
- * PÉRIMÈTRE (règle de Grégoire, 21 nov., 8 h 33) : rien de la nouvelle pratique « Par standards » dans `main` avant que
- * ses quatre gestes existent. Ce banc tient donc aussi qu'aucune famille `cibles`, aucun code « CIB » et aucun texte
- * « Par standards » ne sont livrés ici, et que les listes de sigles ne nomment que les familles qui existent
- * (SOM, SEL, SPE, DEN). Le lot 1 de « Par standards » reprendra ce banc dans sa forme complète.
+ * Décision de Grégoire (21 nov. 2026, 6 h 56) : à l'écran, « STD » désigne la pratique « Par standards » ; la pratique
+ * « Par sélection de productions » s'affiche « SEL » ; « CIB » ne s'affiche nulle part. Changement d'AFFICHAGE seulement :
+ * le CODE interne des familles (STD pour l'ancienne, CIB pour la nouvelle) ne change pas — le moteur le compare et les
+ * pratiques rangées chez les gens le portent (`pratiques: ['STD']`). Consigne :
+ * plans de travail/CONSIGNE-LOT-2026-11-21-moteur-cibles-1-corrections.md.
  *
  * VERROUILLÉ ICI :
  *   A. Le registre sépare le code (interne) du sigle (affiché) ; son badge montre le sigle.
  *   B. Les producteurs de badges hors registre (la fiche, l'assistant, le badge global, le Comparateur, l'export)
  *      affichent le sigle : une pratique qui porte `pratiques: ['STD']` se lit « SEL ».
- *   C. Rien de la nouvelle pratique : ni « CIB », ni famille `cibles`, ni « Par standards » offert à l'écran.
+ *   C. « CIB » n'est écrit qu'aux places INTERNES mesurées (un code, une clé) : aucune ailleurs.
  *   D. Les textes qui nommaient l'ancienne famille « STD » disent « SEL » (A5, l'état vide, l'avertissement des
- *      productions, la carte « Note » de la Conception, deux bulles), et aucun n'offre « STD ».
+ *      productions, la carte « Note » de la Conception, deux bulles).
  *
- * Hors de ce banc, et dit au rapport : le glossaire, la fenêtre d'aide et le guide pédagogique disent encore « STD »
- * (définitions à réécrire, sorties du périmètre).
+ * Hors de ce banc, et dit au rapport : le glossaire, la fenêtre d'aide et le guide pédagogique (sortis du périmètre).
  * BREAK-TESTS : journal en fin de fichier.
  */
 import { describe, it, expect } from 'vitest';
@@ -35,30 +31,33 @@ const REG = chargerScript('js/pratiques/pratique-registre.js', { db, cle: (k) =>
 const texteDuBadge = (html) => (/>([^<]*)<\/span>\s*$/.exec(html) || [])[1];
 
 describe('A · le registre : le code reste, le sigle s\'affiche', () => {
-    const FAMILLES = ['sommative', 'standards', 'specifications', 'denotation'];
     it('les codes INTERNES ne bougent pas', () => {
-        expect(FAMILLES.map(REG.obtenirCodePratique)).toEqual(['SOM', 'STD', 'SPE', 'DEN']);
+        expect(['sommative', 'standards', 'specifications', 'denotation', 'cibles'].map(REG.obtenirCodePratique))
+            .toEqual(['SOM', 'STD', 'SPE', 'DEN', 'CIB']);
     });
-    it('les sigles AFFICHÉS suivent le nom : SEL pour « Par sélection de productions » ; « STD » n\'est le sigle de personne', () => {
-        expect(FAMILLES.map(REG.obtenirSiglePratique)).toEqual(['SOM', 'SEL', 'SPE', 'DEN']);
-        expect(['SOM', 'STD', 'SPE', 'DEN', 'PAN'].map(REG.sigleDuCode)).toEqual(['SOM', 'SEL', 'SPE', 'DEN', 'PAN']);
+    it('les sigles AFFICHÉS suivent le nom : SEL pour « Par sélection de productions », STD pour « Par standards »', () => {
+        expect(['sommative', 'standards', 'specifications', 'denotation', 'cibles'].map(REG.obtenirSiglePratique))
+            .toEqual(['SOM', 'SEL', 'SPE', 'DEN', 'STD']);
+        expect(['SOM', 'STD', 'SPE', 'DEN', 'CIB', 'PAN'].map(REG.sigleDuCode)).toEqual(['SOM', 'SEL', 'SPE', 'DEN', 'STD', 'PAN']);
     });
     it('le badge du registre montre le sigle ; sa classe garde le code', () => {
         expect(REG.genererBadgePratiqueHTML('standards')).toBe('<span class="badge-type-pratique badge-type-std">SEL</span>');
+        expect(texteDuBadge(REG.genererBadgePratiqueHTML('cibles'))).toBe('STD');
         expect(texteDuBadge(REG.genererBadgePratiqueHTML('pan-standards'))).toBe('SEL');   // un id ancien, normalisé
     });
-    it('la couleur : la sarcelle à « Par sélection de productions »', () => {
+    it('les couleurs : la sarcelle à « Par sélection de productions », le bleu de STD à « Par standards »', () => {
         expect(REG.obtenirCouleurPratique('standards')).toBe('var(--sel-sarcelle)');
+        expect(REG.obtenirCouleurPratique('cibles')).toBe('var(--std-bleu)');
         const css = lire('styles.css');
         expect(css).toMatch(/--sel-sarcelle: #0e9384;/);
         expect(css).not.toMatch(/--cib-sarcelle/);
         expect(css).toMatch(/\.wizard-v2-recap-diagnostic--sel \{ --recap-couleur: var\(--sel-sarcelle\); \}/);
-        expect(css).not.toMatch(/\.wizard-v2-recap-diagnostic--std\b/);   // plus aucune famille ne porte la classe « std » au récapitulatif
+        expect(css).toMatch(/\.wizard-v2-recap-diagnostic--std \{ --recap-couleur: var\(--std-bleu\); \}/);
     });
 });
 
 describe('B · les autres producteurs de badges affichent le sigle', () => {
-    it('la fiche (`genererBadgeTypePratique`) : `pratiques: [\'STD\']` se lit SEL, et sa bulle le dit sans « PAN »', () => {
+    it('la fiche (`genererBadgeTypePratique`) : `pratiques: [\'STD\']` se lit SEL, `[\'CIB\']` se lit STD, et leurs bulles le disent', () => {
         const win = {};
         chargerAvecInterne('js/pratiques-gestion.js', {
             db, cle: (k) => k, echapperHtml, sigleDuCode: REG.sigleDuCode,
@@ -68,25 +67,24 @@ describe('B · les autres producteurs de badges affichent le sigle', () => {
         const badge = win.__audit['pratiques-gestion.js'].genererBadgeTypePratique;
         const ancien = badge({ pratiques: ['STD'] });
         expect(texteDuBadge(ancien)).toBe('SEL');
-        expect(ancien).toContain('title="Par sélection de productions : ');   // G1, 21 nov., 7 h 44 : plus de « PAN » pour SEL
+        expect(ancien).toContain('title="Par sélection de productions : ');   // ↻ G1, 21 nov., 7 h 44 : plus de « PAN » pour SEL
+        const neuf = badge({ pratiques: ['CIB'] });
+        expect(texteDuBadge(neuf)).toBe('STD');
+        expect(neuf).toContain('title="Par standards : un niveau par cible d\'apprentissage du cours ; la note viendra du meilleur niveau démontré pour chaque cible."');
         expect(texteDuBadge(badge({ type: 'standards' }))).toBe('SEL');
-        expect(ancien).not.toMatch(/—/);
-        // Aucun badge ne rend « STD », quelle que soit la forme rangée d'une pratique des quatre familles.
-        for (const p of [{ pratiques: ['SOM'] }, { pratiques: ['STD'] }, { pratiques: ['SPE'] }, { pratiques: ['DEN'] }, { type: 'pan-standards' }]) {
-            expect(texteDuBadge(badge(p)), JSON.stringify(p)).not.toBe('STD');
-        }
-        expect(badge({ pratiques: ['PAN'] })).toContain('title="Pratique alternative de notation."');   // G2
+        expect(texteDuBadge(badge({ type: 'cibles' }))).toBe('STD');
+        expect(neuf + ancien).not.toMatch(/—/);   // F3 : sans tiret cadratin
     });
 
     it('l\'assistant : le badge du récapitulatif et la ligne de « Partir d\'un modèle »', () => {
         const win = { addEventListener() {}, removeEventListener() {}, echapperHtml };
         chargerScript('js/wizard-pratique-v2.js', { db, cle: (k) => k, echapperHtml, normaliserIdPratique: (t) => t }, win);
-        expect(win.TYPE_BADGES.standards).toMatchObject({ code: 'SEL', classe: 'sel', label: 'Par sélection de productions' });
-        expect(Object.keys(win.TYPE_BADGES).sort()).toEqual(['denotation', 'sommative', 'specifications', 'standards']);
-        expect(Object.values(win.TYPE_BADGES).map(b => b.code).sort()).toEqual(['DEN', 'SEL', 'SOM', 'SPE']);
+        expect(win.TYPE_BADGES.standards).toMatchObject({ code: 'SEL', classe: 'sel' });
+        expect(win.TYPE_BADGES.cibles).toMatchObject({ code: 'STD', classe: 'std', label: 'Par standards' });
         const lien = win.ETAPES_WIZARD['calcul-note-finale'].champs.find(c => c.id === 'voie-rapide-lien');
-        expect(lien.description).toBe('Choisis directement ta famille de pratique (SOM, SEL, SPE ou DEN) et passe à sa configuration.');   // A5, périmètre de la release
-        expect(win.ETAPES_WIZARD['calcul-note-finale'].champs[0].options.some(o => o.value === 'cibles')).toBe(false);
+        expect(lien.description).toBe('Choisis directement ta famille de pratique (SOM, STD, SEL, SPE ou DEN) et passe à sa configuration.');
+        const carte = win.ETAPES_WIZARD['calcul-note-finale'].champs[0].options.find(o => o.value === 'cibles');
+        expect(carte.description).toBe('Tu inscris, pour chaque cible du cours, le niveau que l\'étudiant·e a démontré. La note vient des niveaux de chaque cible.');
     });
 
     it('le badge global, le Comparateur et l\'export passent par le sigle', () => {
@@ -96,61 +94,63 @@ describe('B · les autres producteurs de badges affichent le sigle', () => {
     });
 });
 
-/* ---------------------------------------------------------------- C. Rien de la nouvelle pratique « Par standards » */
-const FICHIERS = () => [...new Set(lire('index.html').match(/js\/[\w./-]+\.js/g))].concat(['index.html']);
-describe('C · rien de la nouvelle pratique « Par standards » n\'est livré', () => {
-    it('« CIB » n\'est écrit nulle part dans js/ ni index.html, commentaires compris', () => {
-        const vus = FICHIERS().filter(f => { try { return /\bCIB\b/.test(lire(f)); } catch (e) { return false; } });
-        expect(vus).toEqual([]);
-    });
-    it('le registre n\'a que quatre familles, et ni l\'éditeur des ensembles de cibles ni son script ne sont chargés', () => {
-        expect(REG.obtenirRepresentationPratiqueStricte('cibles')).toBe(null);
-        expect(lire('index.html')).not.toMatch(/ensembles-cibles\.js/);
-    });
-    it('« Par standards » ne s\'écrit qu\'à une phrase connue du parcours « notation alternative », laissée à Grégoire (rapport du 21 nov., STOCK et NON VU)', () => {
+/* ---------------------------------------------------------------- C. « CIB » ne s'affiche nulle part */
+function occurrencesHorsCommentaires(f, motif) {
+    return lire(f).split('\n').filter(l => !/^\s*(\/\/|\*|\/\*|<!--)/.test(l) && motif.test(l));
+}
+// Les seules places de « CIB » : le code interne et ses clés (mesuré le 21 nov. 2026).
+const CIB_INTERNE = {
+    'js/pratiques/pratique-registre.js': [/cibles:\s*\{ code: 'CIB', sigle: 'STD'/],
+    'js/pratiques-gestion.js': [/const typesValides = \[[^\]]*'CIB'/, /^\s*CIB: 'Par standards : /, /const CODE_PAR_TYPE = \{[^}]*cibles: 'CIB'/, /const PAR_CODE = \{[^}]*CIB: 'cibles'/],
+    'js/wizard-pratique-v2.js': [/^\s*'cibles': 'CIB'\s*\/\/ lot 1/]
+};
+describe('C · « CIB » n\'est écrit qu\'aux places internes', () => {
+    it('aucun fichier de js/ ni index.html ne l\'écrit ailleurs, commentaires mis à part', () => {
+        const fichiers = [...new Set(lire('index.html').match(/js\/[\w./-]+\.js/g))].concat(['index.html']);
         const vus = {};
-        for (const f of FICHIERS()) {
-            let l; try { l = lire(f).split('\n').filter(x => /Par standards/.test(x)); } catch (e) { continue; }
-            if (l.length) vus[f] = l;
+        for (const f of fichiers) {
+            let lignes;
+            try { lignes = occurrencesHorsCommentaires(f, /\bCIB\b/); } catch (e) { continue; }
+            if (f === 'index.html') lignes = lignes.filter(l => !/<script src=/.test(l));   // les notes de version des <script>
+            if (lignes.length) vus[f] = lignes;
         }
-        expect(Object.keys(vus)).toEqual(['js/parcours-notation-alternative.js']);
-        expect(vus['js/parcours-notation-alternative.js'].length).toBe(1);
-        // La phrase dit l'ancienne famille par son ancien nom, en début de phrase ; elle n'offre aucune pratique nouvelle.
-        expect(vus['js/parcours-notation-alternative.js'][0]).toContain('Par standards, la note retient certaines productions selon une règle que tu choisis');
+        expect(Object.keys(vus).sort()).toEqual(Object.keys(CIB_INTERNE).sort());
+        for (const [f, motifs] of Object.entries(CIB_INTERNE)) {
+            expect(vus[f].length, f).toBe(motifs.length);
+            for (const l of vus[f]) expect(motifs.some(m => m.test(l)), f + ' : ' + l.trim()).toBe(true);
+        }
     });
 });
 
 /* ---------------------------------------------------------------- D. Les textes qui nommaient l'ancienne famille « STD » */
-describe('D · les textes qui disaient « STD » pour l\'ancienne famille disent « SEL », et aucun n\'offre « STD »', () => {
+describe('D · les textes qui disaient « STD » pour l\'ancienne famille disent « SEL »', () => {
     it('l\'état vide, l\'avertissement des productions, la carte « Note », deux bulles', () => {
-        expect(lire('js/etats-vides.js')).toContain('type de notation (SOM, SEL, SPE ou DEN)');   // G7
-        expect(lire('js/productions.js')).toContain("mais n'entre pas dans le calcul SEL : ");      // G8
+        expect(lire('js/etats-vides.js')).toContain('type de notation (SOM, STD, SEL, SPE ou DEN)');
+        expect(lire('js/productions.js')).toContain("mais n'entre pas dans le calcul SEL : ");
         expect(lire('js/productions.js')).not.toContain('calcul STD :');
         const html = lire('index.html');
-        expect(html).toContain('<strong>SEL</strong> (Par sélection de productions) : ');           // G3
-        expect(html).not.toContain('<strong>STD</strong>');                                         // G4 attend la nouvelle pratique
+        expect(html).toContain('<strong>SEL</strong> (Par sélection de productions) : ');
+        expect(html).toContain('<strong>STD</strong> (Par standards) : ');
+        expect(html).not.toContain('<strong>STD</strong> (Standards)');
         const bulles = lire('js/accompagnement-contenu-hover.js');
-        // G5, périmètre de la release : sans le segment « STD = PAN par standards (…) ».
-        expect(bulles).toContain('SOM = sommative (moyenne pondérée traditionnelle), SEL = par sélection de productions (la note retient certaines productions), SPE = PAN basée sur des spécifications (contrat), DEN = dénotation (pratiques réduisant ou éliminant la notation).');
-        expect(bulles).not.toMatch(/STD = /);
-        expect(bulles).toContain('(SOM, SEL, SPE, DEN)');                                           // G6
-        for (const f of ['js/etats-vides.js', 'js/accompagnement-contenu-hover.js', 'js/wizard-pratique-v2.js']) {
-            expect(lire(f), f).not.toMatch(/\(SOM, STD/);
-        }
+        // ↻ G5, 21 nov., 7 h 44 (choix de Grégoire) : « PAN » passe de SEL à STD.
+        expect(bulles).toContain('STD = PAN par standards (un niveau par cible d\\\'apprentissage), SEL = par sélection de productions');
+        expect(bulles).not.toContain('STD = PAN basée sur des standards');
+        expect(bulles).toContain('(SOM, STD, SEL, SPE, DEN)');
     });
 });
 
-/* ================================================================ JOURNAL DES BREAK-TESTS
+/* ================================================================ JOURNAL DES BREAK-TESTS (21 nov. 2026)
  *
- * Le journal S1 à S4 du lot 1 (21 nov. 2026, matin) portait sur la forme à deux familles ; il est rejoué ici sur la forme
- * de la release. Chaque mutation posée dans `js/` ou `index.html`, ce fichier lancé seul, le rouge relevé, la mutation
- * retirée (`git diff` vide après chacune).
- * 11 essais verts avant (21 nov. 2026, 8 h 50).
- * S1 — pratique-registre.js : le sigle de `standards` remis à « STD ».                          ROUGE (3) : A (sigles), A (badge), B (fiche).
- * S2 — wizard-pratique-v2.js : A5 remis à « (SOM, STD, SEL, SPE ou DEN) ».                      ROUGE (2) : B (assistant), D.
- * S3 — pratiques-gestion.js, `genererBadgeTypePratique` : `${sigle}` → `${type}`.               ROUGE (1) : B (fiche).
- * S4 — main.js, `genererBadgePratique` : `${sigle}` → `${code}`.                                ROUGE (1) : B (badge global…).
- * S5 — pratique-registre.js : une famille `cibles` (code CIB, sigle STD) ajoutée.               ROUGE (2) : C (« CIB »), C (quatre familles).
- * S6 — accompagnement-contenu-hover.js : le segment « STD = PAN par standards (…) » remis à G5. ROUGE (1) : D.
- * S7 — index.html : la ligne G4 « <strong>STD</strong> (Par standards) » remise à la carte.     ROUGE (2) : C (« Par standards »), D.
+ * Chaque mutation posée dans `js/`, ce fichier lancé seul, le rouge relevé, la mutation retirée. 9 essais verts avant.
+ *
+ * S1 — pratique-registre.js : le sigle de `standards` remis à « STD ».
+ *      ROUGE (3) : A « les sigles AFFICHÉS… », A « le badge du registre… », B « la fiche… » (le badge d'une pratique
+ *      qui porte `pratiques: ['STD']` redit STD pour l'ancienne famille).
+ * S2 — wizard-pratique-v2.js : A5 remis à « (SOM, STD, SPE, DEN ou CIB) ».
+ *      ROUGE (2) : B « l'assistant… », C « … ne l'écrit ailleurs » (un « CIB » affiché).
+ * S3 — pratiques-gestion.js, `genererBadgeTypePratique` : le badge affiche `${type}` (le code) au lieu du sigle.
+ *      ROUGE (1) : B « la fiche… ».
+ * S4 — main.js, `genererBadgePratique` : `${sigle}` → `${code}`.
+ *      ROUGE (1) : B « le badge global, le Comparateur et l'export… ».
  */

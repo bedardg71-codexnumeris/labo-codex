@@ -88,7 +88,7 @@ function banc(pratiqueId, o = {}) {
     store.test_seancesCompletes = seances();
     store.test_groupeEtudiants = [
         { da: DA.ASSIDU, nom: 'Assidu', prenom: 'Alice', groupe: '01', coursId: 'GC1', statut: 'actif' },
-        { da: DA.EXCLU, nom: 'Exclu', prenom: 'Bruno', groupe: '01', coursId: 'GC1', statut },
+        { da: DA.EXCLU, nom: 'Exclu', prenom: 'Boréal', groupe: '01', coursId: 'GC1', statut },
         { da: DA.TEMOIN, nom: 'Témoin', prenom: 'Chloé', groupe: '01', coursId: 'GC1', statut: 'actif' }
     ].filter(e => !(o.sansLui && e.da === DA.EXCLU));
     const ids = pratiqueId === 'som-banc' ? ['P1', 'P2', 'P3', 'P4'] : ['A1', 'A2', 'A3', 'A4'];
@@ -272,7 +272,7 @@ describe('lot E · #745 — le profil de l\'exclu s\'ouvre et dit son statut', (
         expect(b.win.profilActuelDA).toBe(DA.EXCLU);
         // #1151 : la carte d'identité de la barre latérale est partie ; le nom est dans le menu (l'option sélectionnée),
         // le statut est la PREMIÈRE étiquette de la ligne de l'élève, avant le groupe.
-        expect(texte(html.match(/<option value="\d+"\s*selected>[^<]*/)[0])).toMatch(/^Exclu, Bruno/);
+        expect(texte(html.match(/<option value="\d+"\s*selected>[^<]*/)[0])).toMatch(/^Exclu, Boréal/);
         const etiquettes = tranche(html, 'rangee-selection-etiquettes', 'rangee-selection-sections', { longueurMin: 80 });
         expect(texte('<div class="' + etiquettes)).toMatch(/^Décrochage · hors des moyennes du groupe\s+Groupe/);
     });

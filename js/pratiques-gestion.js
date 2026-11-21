@@ -131,7 +131,9 @@ const FAMILLES_TAXONOMIQUES = {
     // le résumé reprend les mots acceptés de la carte de la voie rapide (D5), à la place de « Maîtrise de standards/objectifs ».
     'standards': { nom: 'Par sélection de productions', resume: 'Des niveaux (ex. I-D-M-E) ; la note retient certaines productions' },
     'specifications': { nom: 'PAN-Spécifications', anglais: 'Specifications Grading', resume: 'Évaluation dichotomique par forfaits' },
-    'denotation': { nom: 'PAN-Dénotation', resume: 'Note finale certificative posée (non calculée) selon l\'atteinte de cibles d\'apprentissage' }
+    'denotation': { nom: 'PAN-Dénotation', resume: 'Note finale certificative posée (non calculée) selon l\'atteinte de cibles d\'apprentissage' },
+    // Lot 1 de la pratique « Par standards » (21 nov. 2026). Mots PROPOSÉS.
+    'cibles': { nom: 'Par standards', resume: 'Un niveau par cible d\'apprentissage ; la note viendra du meilleur niveau démontré pour chaque cible' }
 };
 
 /**
@@ -182,7 +184,7 @@ function genererBadgeTypePratique(pratique) {
 
     if (!type) return '';
 
-    const typesValides = ['SOM', 'STD', 'SPE', 'DEN', 'PAN'];
+    const typesValides = ['SOM', 'STD', 'SPE', 'DEN', 'CIB', 'PAN'];
     if (!typesValides.includes(type)) return '';
 
     // #343-T3 — infobulle au survol du tag de famille (les explications existaient
@@ -191,13 +193,14 @@ function genererBadgeTypePratique(pratique) {
     // pas d'échappement requis. Apostrophes seules → sûres dans un attribut "double".
     // 21 nov. 2026 (« le sigle suit le nom ») : les bulles sont rangées par CODE interne (celui de `pratiques[0]`) ; le
     // badge affiche le SIGLE (`sigleDuCode`). Code STD = « Par sélection de productions », sigle SEL (mots acceptés du
-    // renommage, A1 et D5). 21 nov., 7 h 44 (choix de
+    // renommage, A1 et D5) ; code CIB = « Par standards », sigle STD (F3, version de Grégoire). 21 nov., 7 h 44 (choix de
     // Grégoire) : aucune bulle ne dit « PAN » de SEL (G1), et la bulle PAN ne liste plus de sigles (G2).
     const TOOLTIPS_FAMILLE = {
         SOM: 'Sommative — note finale par moyenne pondérée des évaluations.',
         STD: 'Par sélection de productions : des niveaux (ex. I-D-M-E) ; la note retient certaines productions.',
         SPE: 'PAN – Spécifications — travaux acceptables ou non ; note selon les forfaits réussis.',
         DEN: 'PAN – Dénotation — note finale certificative posée (non calculée) selon l\'atteinte de cibles d\'apprentissage explicites ; abandonne la fonction de tri.',
+        CIB: 'Par standards : un niveau par cible d\'apprentissage du cours ; la note viendra du meilleur niveau démontré pour chaque cible.',
         PAN: 'Pratique alternative de notation.'
     };
     const infobulle = TOOLTIPS_FAMILLE[type] || '';
@@ -205,6 +208,15 @@ function genererBadgeTypePratique(pratique) {
     // Utilise la classe CSS .badge-type-pratique avec modificateur (le code interne) ; le texte est le SIGLE affiché.
     const sigle = (typeof sigleDuCode === 'function') ? sigleDuCode(type) : type;
     return `<span class="badge-type-pratique badge-type-${type.toLowerCase()}" title="${infobulle}">${sigle}</span>`;
+}
+
+/**
+ * Le code court d'un type canonique, pour `pratiques[]` et le badge de la fiche. Lot 1 « Par standards » (21 nov.
+ * 2026) : une table, à la place des deux chaînes de ternaires qui la répétaient (le changement de type, l'écriture).
+ */
+const CODE_PAR_TYPE = { standards: 'STD', specifications: 'SPE', sommative: 'SOM', denotation: 'DEN', cibles: 'CIB' };
+function pratiquesDuType(typeCanon) {
+    return CODE_PAR_TYPE[typeCanon] ? [CODE_PAR_TYPE[typeCanon]] : [];
 }
 
 /* ===============================
@@ -227,7 +239,7 @@ function genererBadgeTypePratique(pratique) {
  */
 function familleDeLaPratique(pratique) {
     if (!pratique) return null;
-    const PAR_CODE = { SOM: 'sommative', STD: 'standards', SPE: 'specifications', DEN: 'denotation' };
+    const PAR_CODE = { SOM: 'sommative', STD: 'standards', SPE: 'specifications', DEN: 'denotation', CIB: 'cibles' };
     const source = (Array.isArray(pratique.pratiques) && pratique.pratiques[0]) || pratique.type ||
         (pratique.configuration && pratique.configuration.type) || '';
     let code = PAR_CODE[source] ? source : null;
@@ -1085,6 +1097,7 @@ async function chargerPratiquePourModif(pratiqueId) {
         BibliothequeUI.appliquerModeLectureSeuleDemo(conteneurEdition, deDemo ? pratique : null, 'dupliquerEtEditerPratique', 'Dupliquer pour créer ma pratique');
     }
 
+    verrouillerTypeParStandardsMat(pratique);   // lot 1 « Par standards »
     pratiqueOuverte = pratique;
     rendreChainePratique();   // #1149, lot 3b
 }
@@ -1350,6 +1363,9 @@ function remplirFormulairePratique(pratique) {
         window.EditeurCibles.poser(document.getElementById('mat-den-cibles'), []);
     }
 
+    // Lot 1 « Par standards » : la fiche des cibles, et le menu du type verrouillé (ou l'option fermée).
+    afficherFicheParStandardsMat(pratique);
+
     // Échelle de performance
     if (pratique.configuration?.echelleId) {
         setValeurChamp('mat-echelle-id', pratique.configuration.echelleId);
@@ -1469,7 +1485,7 @@ function afficherConfigurationTypeMat(type) {
     const typeCanon = (typeof normaliserIdPratique === 'function' ? normaliserIdPratique(type) : type);
 
     // Cacher toutes les sections (style.display pour surcharger le style inline du HTML)
-    const sections = ['mat-config-pan-standards', 'mat-config-sommative', 'mat-config-pan-specifications', 'mat-config-denotation', 'mat-config-defaut'];
+    const sections = ['mat-config-pan-standards', 'mat-config-sommative', 'mat-config-pan-specifications', 'mat-config-denotation', 'mat-config-cibles', 'mat-config-defaut'];
     sections.forEach(id => {
         const el = document.getElementById(id);
         if (el) el.style.display = 'none';
@@ -1489,11 +1505,59 @@ function afficherConfigurationTypeMat(type) {
         configId = 'mat-config-pan-specifications';
     } else if (typeCanon === 'denotation') {
         configId = 'mat-config-denotation';
+    } else if (typeCanon === 'cibles') {
+        configId = 'mat-config-cibles';
     }
 
     const config = document.getElementById(configId);
     if (config) config.style.display = '';
+
+    // Lot 1 « Par standards » : son échelle se lit dans sa section (avec le niveau « sans donnée ») ; la carte commune
+    // de l'échelle, qui la réécrirait seule, est masquée pour elle.
+    const carteEchelle = document.getElementById('mat-carte-echelle');
+    if (carteEchelle) carteEchelle.style.display = (typeCanon === 'cibles') ? 'none' : '';
 }
+
+/**
+ * Lot 1 de la pratique « Par standards » (21 nov. 2026) — LA FICHE MONTRE LES CIBLES, ELLE NE LES ÉDITE PAS.
+ * L'ensemble de cibles a un seul écrivain, l'assistant (`EnsemblesCibles.enregistrer`). Le type d'une pratique par
+ * standards ne se change pas ici (son ensemble et son échelle n'auraient plus de sens), et une autre pratique ne
+ * devient pas « Par standards » par ce menu : elle se crée dans l'assistant.
+ * @param {Object} pratique
+ */
+function afficherFicheParStandardsMat(pratique) {
+    const estParStandards = estParStandardsMat(pratique);
+    const menu = document.getElementById('mat-pratique-type');
+    const option = menu ? menu.querySelector('option[value="cibles"]') : null;
+    if (option) option.disabled = !estParStandards;
+    // Une autre pratique ouverte après une pratique par standards retrouve son menu ; le mode lecture seule de la démo,
+    // appliqué ensuite, le referme s'il le faut, et `verrouillerTypeParStandardsMat` le verrouille pour celle-ci.
+    if (menu && !estParStandards) menu.disabled = false;
+    const hote = document.getElementById('mat-cibles-fiche');
+    if (!hote) return;
+    // security-ok: rendreFiche échappe tout texte de l'enseignant·e (étiquettes, énoncés, critères, noms)
+    hote.innerHTML = (estParStandards && window.EnsemblesCibles) ? window.EnsemblesCibles.rendreFiche(pratique.configuration) : '';
+}
+
+function estParStandardsMat(pratique) {
+    const type = pratique && pratique.type;
+    return ((typeof normaliserIdPratique === 'function') ? normaliserIdPratique(type) : type) === 'cibles';
+}
+
+/**
+ * Le menu du type d'une pratique par standards est verrouillé. Posé APRÈS le mode lecture seule de la démo
+ * (`appliquerModeLectureSeuleDemo`), qui rend les champs à leur état : il ne fait que verrouiller, jamais déverrouiller.
+ */
+function verrouillerTypeParStandardsMat(pratique) {
+    const menu = document.getElementById('mat-pratique-type');
+    if (menu && estParStandardsMat(pratique)) menu.disabled = true;
+}
+
+/** « Modifier les cibles dans l'assistant » : rouvre la pratique ouverte dans l'assistant, en modification. */
+function modifierCiblesDansAssistantMat() {
+    if (typeof ouvrirWizardV2 === 'function' && pratiqueEnEditionMateriel) ouvrirWizardV2(true, pratiqueEnEditionMateriel);
+}
+window.modifierCiblesDansAssistantMat = modifierCiblesDansAssistantMat;
 
 /* ===============================
    HANDLERS DU FORMULAIRE (préfixe mat-)
@@ -1512,10 +1576,7 @@ function changerTypePratiqueMat() {
     const badge = document.getElementById('mat-badge-pratique');
     if (badge) {
         const typeCanon = (typeof normaliserIdPratique === 'function' ? normaliserIdPratique(type) : type);
-        const pratiques = typeCanon === 'standards' ? ['STD'] :
-                         typeCanon === 'specifications' ? ['SPE'] :
-                         typeCanon === 'sommative' ? ['SOM'] :
-                         typeCanon === 'denotation' ? ['DEN'] : [];
+        const pratiques = pratiquesDuType(typeCanon);
         badge.innerHTML = genererBadgeTypePratique({ pratiques });
     }
 
@@ -1693,10 +1754,7 @@ function appliquerFormulaireDansCollection(lues) {
         document.querySelector('input[name="mat-affichage-note"]:checked')?.value || 'complet';
 
     // Mettre à jour pratiques[]
-    configurations[index].pratiques = typeCanon === 'standards' ? ['STD'] :
-                                      typeCanon === 'specifications' ? ['SPE'] :
-                                      typeCanon === 'sommative' ? ['SOM'] :
-                                      typeCanon === 'denotation' ? ['DEN'] : [];
+    configurations[index].pratiques = pratiquesDuType(typeCanon);
 
     // Initialiser la configuration si absente
     if (!configurations[index].configuration) {
@@ -1764,7 +1822,9 @@ function appliquerFormulaireDansCollection(lues) {
     }
 
     // Échelle
-    configurations[index].configuration.echelleId = getValeurChamp('mat-echelle-id');
+    // Lot 1 « Par standards » : l'échelle et son niveau « sans donnée » vont ensemble et se choisissent dans
+    // l'assistant ; la carte de l'échelle est masquée pour cette pratique, et le formulaire ne la réécrit pas.
+    if (typeCanon !== 'cibles') configurations[index].configuration.echelleId = getValeurChamp('mat-echelle-id');
 
     // Système de jetons
     // #853 (relecture de Cowork) : jetons réglés ailleurs (assistant, import) → le moteur ne lit pas le

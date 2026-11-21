@@ -14,14 +14,14 @@
  * Le banc monte les modules RÉELS (bac du Suivi, même montage que #716) et juge chaque famille sur ses chemins :
  * l'indice P écrit par `calculerEtStockerIndicesCP`, la note du profil (`calculerDetailsNoteFinale`, standards),
  * le Comparateur (`simulerIndices` : note et récit) et les captures (`calculerIndicesHistoriques`).
- * Alice a la copie non recevable ; Bruno, toutes ses copies recevables, est le témoin.
+ * Alice a la copie non recevable ; Boréal, toutes ses copies recevables, est le témoin.
  */
 import { describe, it, expect } from 'vitest';
 import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { monter, storeBase, clone, RACINE } from './_helpers/bac-suivi.js';
 
-const DA = { ALICE: '2000001', BRUNO: '2000002' };
+const DA = { ALICE: '2000001', BOREAL: '2000002' };
 const FIN = '2026-06-30';
 
 const E0 = { id: 'E0', nom: 'IDME0 banc', seuilMaitrise: 'M', niveaux: [
@@ -43,7 +43,7 @@ const PRODUCTIONS_SOM = [
     { id: 'P1', titre: 'Dissertation', type: 'travail', ponderation: 40, dateEcheance: '2026-02-01', coursId: 'GC1' },
     { id: 'P2', titre: 'Examen', type: 'examen', ponderation: 60, dateEcheance: '2026-03-15', coursId: 'GC1' }
 ];
-const COPIES_SOM = [ev(DA.ALICE, 'P1', 87.5), ev(DA.ALICE, 'P2', 90), ev(DA.BRUNO, 'P1', 62), ev(DA.BRUNO, 'P2', 71)];
+const COPIES_SOM = [ev(DA.ALICE, 'P1', 87.5), ev(DA.ALICE, 'P2', 90), ev(DA.BOREAL, 'P1', 62), ev(DA.BOREAL, 'P2', 71)];
 const PRATIQUE_SOM = { id: 'som-banc', nom: 'SOM banc', type: 'sommative', calcul_note: { methode: 'moyenne_ponderee' }, dansBibliotheque: true, configuration: { approcheEvaluation: 'sommative' } };
 
 /* ------------------------------------------------------------------ Spécifications */
@@ -54,7 +54,7 @@ const PRODUCTIONS_SPE = [
     { id: 'F1', titre: 'Dossier', type: 'dossier', dateEcheance: '2026-04-01', coursId: 'GC1' }
 ];
 const COPIES_SPE = [ev(DA.ALICE, 'D1', 80), ev(DA.ALICE, 'X1', 90), ev(DA.ALICE, 'D2', 87.5), ev(DA.ALICE, 'F1', 72),
-    ev(DA.BRUNO, 'D1', 71), ev(DA.BRUNO, 'X1', 50), ev(DA.BRUNO, 'D2', 88), ev(DA.BRUNO, 'F1', 90)];
+    ev(DA.BOREAL, 'D1', 71), ev(DA.BOREAL, 'X1', 50), ev(DA.BOREAL, 'D2', 88), ev(DA.BOREAL, 'F1', 90)];
 const PRATIQUE_SPE = { id: 'spe-banc', nom: 'SPE banc', type: 'specifications', calcul_note: { methode: 'specifications' }, dansBibliotheque: true,
     configuration: { type: 'specifications',
         typesTravaux: [{ id: 'dissertation', nom: 'Dissertation', seuilAcceptable: 70 }, { id: 'examen', nom: 'Examen', seuilAcceptable: 70 }, { id: 'dossier', nom: 'Dossier', seuilAcceptable: 70 }],
@@ -74,9 +74,9 @@ function productionsSTD(categories = null) {
     l.push({ id: 'T1', titre: 'Analyse finale', type: 'terminale', numero: 7, ponderation: 40, dateEcheance: ECHEANCES.T1, coursId: 'GC1' });
     return l;
 }
-const NOTES_STD = { [DA.ALICE]: { A1: 60, A2: 70, A3: 88, A4: 92, A5: 75, A6: 80, T1: 82 }, [DA.BRUNO]: { A1: 90, A2: 55, A3: 72, A4: 66, A5: 95, A6: 70, T1: 68 } };
+const NOTES_STD = { [DA.ALICE]: { A1: 60, A2: 70, A3: 88, A4: 92, A5: 75, A6: 80, T1: 82 }, [DA.BOREAL]: { A1: 90, A2: 55, A3: 72, A4: 66, A5: 95, A6: 70, T1: 68 } };
 const COPIES_STD = [];
-for (const da of [DA.ALICE, DA.BRUNO]) for (const [p, n] of Object.entries(NOTES_STD[da])) COPIES_STD.push(ev(da, p, n));
+for (const da of [DA.ALICE, DA.BOREAL]) for (const [p, n] of Object.entries(NOTES_STD[da])) COPIES_STD.push(ev(da, p, n));
 function pratiqueSTD({ hybride = false, notesFinales = false, methodeSelection = 'meilleurs' } = {}) {
     return { id: 'std-banc', nom: 'STD banc', type: 'standards', calcul_note: { methode: 'conversion_niveaux' }, dansBibliotheque: true,
         configuration: Object.assign({ type: 'standards', approcheEvaluation: 'par-artefacts', echelleId: 'E0', grilleId: 'G1',
@@ -100,7 +100,7 @@ const OBJETS_EXPORTES = ['PratiqueManager', 'denotationJugements', 'modalitesEva
 
 function banc({ pratique, productions, evaluations, jugements = {} }) {
     const store = storeBase();
-    store.test_groupeEtudiants = store.test_groupeEtudiants.filter(e => e.da === DA.ALICE || e.da === DA.BRUNO);
+    store.test_groupeEtudiants = store.test_groupeEtudiants.filter(e => e.da === DA.ALICE || e.da === DA.BOREAL);
     store.test_groupesCours[0].pratiqueId = pratique.id;
     store.test_pratiquesConfigurables = [clone(pratique)];
     store.test_echellesTemplates = [clone(E0)];
@@ -150,8 +150,8 @@ describe('Sommative — la copie non recevable vaut 0 (P, Comparateur, captures)
         expect(ligne).toMatchObject({ sort: 'compte', note: 0 });
         expect(recitDe(b, DA.ALICE).synthese.noteFinale).toBeCloseTo(54, 6);
     });
-    it('TÉMOIN — Bruno, tout recevable : 67 partout (la valeur de #716)', () => {
-        expect(chemins(b, DA.BRUNO)).toEqual({ P: 67, comparateur: 67, capture: 67, profil: null });
+    it('TÉMOIN — Boréal, tout recevable : 67 partout (la valeur de #716)', () => {
+        expect(chemins(b, DA.BOREAL)).toEqual({ P: 67, comparateur: 67, capture: 67, profil: null });
     });
     it('TÉMOIN — la même copie RECEVABLE garde sa note : Alice 89', () => {
         const t = banc({ pratique: PRATIQUE_SOM, productions: PRODUCTIONS_SOM, evaluations: COPIES_SOM });
@@ -189,10 +189,10 @@ describe('Spécifications — la copie non recevable est un travail non satisfai
     it('Alice : une seule dissertation satisfaisante → palier C (60) — avant : 87,5 ≥ 70, palier A (100)', () => {
         expect(chemins(b, DA.ALICE)).toEqual({ P: 60, comparateur: 60, capture: 60, profil: null });
     });
-    it('TÉMOIN — la même copie recevable : palier A (100) ; Bruno : palier F (50)', () => {
+    it('TÉMOIN — la même copie recevable : palier A (100) ; Boréal : palier F (50)', () => {
         const t = banc({ pratique: PRATIQUE_SPE, productions: PRODUCTIONS_SPE, evaluations: COPIES_SPE });
         expect(chemins(t, DA.ALICE).P).toBe(100);
-        expect(chemins(b, DA.BRUNO).P).toBe(50);
+        expect(chemins(b, DA.BOREAL).P).toBe(50);
     });
 });
 
@@ -227,11 +227,11 @@ describe('Standards — hors du portfolio ; la terminale non recevable vaut 0', 
         const c = chemins(b, DA.ALICE);
         expect([c.P, c.comparateur, c.profil]).toEqual([76, 76, 76.3]);
     });
-    it('TÉMOIN — tout recevable : Alice 84,8, Bruno inchangé entre les deux bancs', () => {
+    it('TÉMOIN — tout recevable : Alice 84,8, Boréal inchangé entre les deux bancs', () => {
         const t = banc({ pratique: pratiqueSTD(), productions: productionsSTD(), evaluations: COPIES_STD });
         const b = banc({ pratique: pratiqueSTD(), productions: productionsSTD(), evaluations: marquer(COPIES_STD, DA.ALICE, 'T1') });
         expect(chemins(t, DA.ALICE).profil).toBe(84.8);
-        expect(chemins(b, DA.BRUNO)).toEqual(chemins(t, DA.BRUNO));
+        expect(chemins(b, DA.BOREAL)).toEqual(chemins(t, DA.BOREAL));
     });
 });
 

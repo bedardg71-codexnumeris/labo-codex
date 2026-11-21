@@ -64,7 +64,7 @@ const r2 = (x) => (typeof x === 'number' ? Math.round(x * 100) / 100 : x);
 const DA = { SOM: '1000001', STD: '1000002', SPE: '1000003', DEN: '1000004' };
 const ETUDIANTS = [
     { da: DA.SOM, nom: 'Sommative', prenom: 'Alice', groupe: '01', coursId: 'GC1' },
-    { da: DA.STD, nom: 'Standards', prenom: 'Bruno', groupe: '01', coursId: 'GC1' },
+    { da: DA.STD, nom: 'Standards', prenom: 'Boréal', groupe: '01', coursId: 'GC1' },
     { da: DA.SPE, nom: 'Specifications', prenom: 'Chloé', groupe: '01', coursId: 'GC1' },
     { da: DA.DEN, nom: 'Denotation', prenom: 'Dani', groupe: '01', coursId: 'GC1' }
 ];
