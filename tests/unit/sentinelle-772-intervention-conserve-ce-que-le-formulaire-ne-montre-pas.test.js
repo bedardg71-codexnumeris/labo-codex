@@ -32,17 +32,17 @@ const champs = (valeurs) => Object.assign({ interventionNiveau: elementDom({ val
 const intervention = (extra) => Object.assign({ id: 'I1', titre: 'T', date: '2026-09-01', heure: '', duree: 2, type: 'groupe', niveauRai: 2, contexte: 'rattrapage', description: '', etudiants: [], analyse: null, observations: '', notesIndividuelles: {}, criteresCibles: [], objectifVise: '', bilan: null, statut: 'en-cours', jamaisSauvegardee: false }, extra);
 
 describe('#772 · enregistrer une intervention', () => {
-    it('décocher Bruno (absent) garde sa note ; vider le champ affiché d\'Alice efface la sienne ; Chloé cochée avec une note la reçoit', () => {
+    it('décocher Boréal (absent) garde sa note ; vider le champ affiché d\'Alice efface la sienne ; Chloé cochée avec une note la reçoit', () => {
         const store = storeBase();
-        store.test_interventions = [intervention({ etudiants: ['2000001', '2000002'], notesIndividuelles: { 2000001: 'Alice progresse.', 2000002: 'Bruno absent, à revoir.' } })];
+        store.test_interventions = [intervention({ etudiants: ['2000001', '2000002'], notesIndividuelles: { 2000001: 'Alice progresse.', 2000002: 'Boréal absent, à revoir.' } })];
         const cases = [elementDom({ value: '2000001', checked: true }), elementDom({ value: '2000002', checked: false }), elementDom({ value: '2000003', checked: true })];
         const b = monter(store, { modules: ['js/interventions.js'], globaux: GLOBAUX,
-            elements: champs({ 'note-2000001': elementDom({ value: '' }), 'note-2000002': elementDom({ value: 'Bruno absent, à revoir.' }), 'note-2000003': elementDom({ value: 'Chloé : plan convenu.' }) }),
+            elements: champs({ 'note-2000001': elementDom({ value: '' }), 'note-2000002': elementDom({ value: 'Boréal absent, à revoir.' }), 'note-2000003': elementDom({ value: 'Chloé : plan convenu.' }) }),
             selecteurs: { '#listeEtudiantsIntervention input[type="checkbox"]': cases, '#listeEtudiantsIntervention input[type="checkbox"]:checked': cases.filter(c => c.checked), 'input[name="interventionStatut"]:checked': elementDom({ value: 'en-cours' }), '#criteresCiblesContainer .critere-cible-cb:checked': [] } });
         b.win.sauvegarderPresencesIntervention('I1');
         const i = store.test_interventions[0];
         expect(i.etudiants.sort()).toEqual(['2000001', '2000003']);
-        expect(i.notesIndividuelles).toEqual({ 2000002: 'Bruno absent, à revoir.', 2000003: 'Chloé : plan convenu.' });
+        expect(i.notesIndividuelles).toEqual({ 2000002: 'Boréal absent, à revoir.', 2000003: 'Chloé : plan convenu.' });
     });
 
     it('une intervention de GC2 rouverte sous GC1 et enregistrée sans rien toucher garde Dario et sa note', () => {

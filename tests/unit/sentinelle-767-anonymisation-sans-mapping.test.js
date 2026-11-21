@@ -19,7 +19,7 @@ import { chargerScript } from './_helpers/charger-script.js';
 
 const ETUDIANTS = [
     { da: '2000001', nom: 'Assidu', prenom: 'Alice', groupe: '01', coursId: 'GC1' },
-    { da: '2000002', nom: 'Absent', prenom: 'Bruno', groupe: '01', coursId: 'GC1' }
+    { da: '2000002', nom: 'Absent', prenom: 'Boréal', groupe: '01', coursId: 'GC1' }
 ];
 function monter(store) {
     const journal = [];

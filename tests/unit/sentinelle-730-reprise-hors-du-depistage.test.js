@@ -57,7 +57,7 @@ const EXPORTS = (() => { const n = new Set(); for (const f of MODULES) for (cons
 
 function monter() {
     const store = { test_evaluationsSauvegardees: clone(EVALUATIONS), test_productions: clone(PRODUCTIONS), test_echellesTemplates: [clone(E0)], test_grillesTemplates: [clone(GRILLE)],
-        test_groupeEtudiants: [{ da: DA, nom: 'Absent', prenom: 'Bruno' }] };
+        test_groupeEtudiants: [{ da: DA, nom: 'Absent', prenom: 'Boréal' }] };
     const db = { getSync: (k, d) => (k in store ? clone(store[k]) : (d !== undefined ? d : null)), setSync: (k, v) => { store[k] = clone(v); }, get: async () => null, set: async () => {} };
     const cle = (k) => (String(k).startsWith('test_') ? k : 'test_' + k);
     const win = { addEventListener() {}, removeEventListener() {}, obtenirTrimestreId: () => 'test', dateLocaleYMD: () => '2026-05-15' };

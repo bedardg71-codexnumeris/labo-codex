@@ -98,7 +98,7 @@ describe('#915 lot 1 — ouvrir le sous-onglet lit, et n\'écrit rien', () => {
 
     it('registre peuplé : une ligne par inscrit·e, triée par nom puis prénom, bâtie par le DOM (aucun innerHTML)', () => {
         const store = Object.assign(storeBase(), { [NOM_CLE]: registre({
-            '2000002': { da: '2000002', nom: 'Absent', prenom: 'Bruno', inscritLe: '2026-09-17T23:30:00.000Z' },
+            '2000002': { da: '2000002', nom: 'Absent', prenom: 'Boréal', inscritLe: '2026-09-17T23:30:00.000Z' },
             '2000001': { da: '2000001', nom: 'Assidu', prenom: 'Alice', inscritLe: '2026-09-10' },
             '2000005': { da: '2000005', nom: 'Absent', prenom: 'Anna', inscritLe: '2026-09-12' }
         }) });

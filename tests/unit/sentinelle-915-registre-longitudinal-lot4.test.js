@@ -37,7 +37,7 @@ function stock() {
         cours: [{ id: 'C101', codeCours: '601-101-MQ', nomCours: 'Écriture et littérature' }],
         a2025_groupeEtudiants: [
             { da: DA, nom: 'Assidu', prenom: 'Alice', groupe: '00001', coursId: 'C101', statut: 'actif', programme: '300.A0' },
-            { da: DA2, nom: 'Absent', prenom: 'Bruno', groupe: '00001', coursId: 'C101' }
+            { da: DA2, nom: 'Absent', prenom: 'Boréal', groupe: '00001', coursId: 'C101' }
         ],
         h2026_groupeEtudiants: [{ da: DA, nom: 'Assidu', prenom: 'Alice', groupe: '00002', coursId: 'C101' }],
         // La forme RÉELLE d'une évaluation rangée (relevée dans le pack démo) : critereNom, niveauSelectionne (un CODE).
@@ -219,7 +219,7 @@ describe('#915 lot 4 — le dossier déplié', () => {
         b.win.initialiserRegistreLongitudinal();
         expect(b.journal).toEqual([]);
         expect(b.appelsCalcul).toEqual([]);
-        // Bruno : une évaluation sans date ni note ni critère — le rendu tient, sans « undefined ».
+        // Boréal : une évaluation sans date ni note ni critère — le rendu tient, sans « undefined ».
         const texte = texteDe(dossierDe(b, DA2));
         expect(texte).toContain('Artefact 1');
         expect(texte).not.toMatch(/undefined|null|NaN/);

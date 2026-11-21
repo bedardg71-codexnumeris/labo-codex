@@ -16,6 +16,9 @@
 > **aperçu** : https://deploy-preview-44--codexnumeris-051225.netlify.app (prêt sur `20c767dc`). `RELAIS.md` (sur
 > `main`) n'est pas touché : la consigne interdit toute écriture dans `main` d'ici l'essai des quatre gestes ; ce
 > relais-ci tient lieu de relais de la branche.
+> **Corrections du 21 nov. 2026** (relecture de Grégoire) : § 6 — le sigle suit le nom (SEL, STD ; « CIB » nulle part),
+> les couleurs, A4, A5, E1, F3, les échelles libres éprouvées, le banc des noms réels vert sans contournement, la
+> fixture « Bruno » remplacée, #1302 inscrit. Reste : les textes G1 à G9 à relire ; le passage WebKit du Mac ; le lot 2.
 
 ## 1. Ce qui a été livré
 
@@ -94,3 +97,78 @@
 Aucune porte terrain : le passage des écrans neufs sous WebKit est une mesure de machine (le Mac,
 `playwright --project webkit`, un navigateur à la fois), pas une vérification de Grégoire. Ses essais des quatre
 gestes, avant toute fusion, viendront avec les lots 2 à 4.
+
+## 6. Corrections du 21 nov. 2026 (relecture de Grégoire)
+
+Consigne : `plans de travail/CONSIGNE-LOT-2026-11-21-moteur-cibles-1-corrections.md`. Même branche, PR n° 44 en
+brouillon, rien dans `main`, aucune release.
+
+**Séparer le code du sigle, en une ligne** : le registre garde le `code` interne de chaque famille (STD pour
+`standards`, CIB pour `cibles` : le moteur le compare et les pratiques rangées le portent, rien n'est réécrit) et y ajoute
+un `sigle` affiché (SEL, STD) ; tout écran qui montre un sigle le lit au registre (`obtenirSiglePratique`, `sigleDuCode`,
+`genererBadgePratiqueHTML`).
+
+### 6.1 Où un sigle s'affiche (mesuré : `grep` de `STD`, `CIB` et des lecteurs du code dans `js/` et `index.html`)
+
+| Endroit | Avant | Fait |
+|---|---|---|
+| Badge du registre (`genererBadgePratiqueHTML` : Exploration, tableau de notation, Comparateur, données du trimestre) | le code | **le sigle** (SEL, STD) |
+| Badge de la fiche, du menu et de la bibliothèque (`genererBadgeTypePratique`, lit `pratiques[0]` rangé) | le code rangé | **le sigle** ; bulles : SEL (G1), STD (F3), PAN (G2) |
+| Badge global (`genererBadgePratique`, main.js : profil, listes) | le code | **le sigle** |
+| Badge du Comparateur (`_badge`) | le code | **le sigle** |
+| Export des résultats finaux, colonne « Pratique (code) » | STD | **SEL** (STD pour « Par standards ») ; aucun lecteur ne relit ce fichier (mesuré) |
+| Assistant : badge du récapitulatif, ligne de « Partir d'un modèle » (`TYPE_BADGES`) | STD, CIB | **SEL, STD** ; couleurs du récapitulatif : sarcelle, bleu |
+| Assistant : A5 | « (SOM, STD, SPE, DEN ou CIB) » | **« (SOM, STD, SEL, SPE ou DEN) »** |
+| Avertissement des productions (`productions.js`) | « calcul STD » | **« calcul SEL »** (G8) |
+| État vide de Conception › Pratiques | « (SOM, STD, SPE ou DEN) » | **« (SOM, STD, SEL, SPE ou DEN) »** (G7) |
+| Carte « Note » de Conception › Pratiques (`index.html`) | « STD (Standards) permet… » | **SEL et STD, chacun avec son nom** (G3, G4) |
+| Bulles de « Type de pratique » et de la navigation (`accompagnement-contenu-hover.js`) | STD = standards (ancienne) | **SEL et STD** (G5, G6) |
+| **Glossaire** (`accompagnement-contenu-terme.js` : « Pratique de notation », « STD — PAN par standards », « PAN ») | STD = ancienne famille | **laissé : hors du périmètre** (définitions à réécrire, pas un sigle à remplacer) |
+| **Fenêtre d'aide** (`accompagnement-contenu-popup.js`, « PAN par standards (STD) — retient les meilleures… ») | idem | **laissé : hors du périmètre** |
+| **Guide pédagogique** (`guides-pedagogiques.js`, « PAN-Standards (code STD, aussi appelée Maîtrise) ») | idem | **laissé : hors du périmètre** |
+| Gabarit de grille « [STD] Grille par objectifs » (`gabarits-utils.js`) | préfixe STD | **laissé** : retiré à l'affichage par `formaterTitre` ; un nom de grille relève de Grégoire (règle 3) ; copies rangées chez les gens |
+| Nouvelles déjà publiées (`changelog-data.js`) | STD | **laissé** (historique publié) |
+| Codes internes (moteur, `pratiques[]`, pack démo, modèles de la bibliothèque, légende du PDF par code, tableau de notation, vue simple) | STD, CIB | **inchangés** (interne, jamais affiché tel quel) |
+
+« CIB » ne s'écrit plus qu'aux six places internes mesurées (registre, quatre clés de la fiche, l'assistant), et le banc
+`sentinelle-sigles-sel-std-2026-11-21` en tient la liste.
+
+### 6.2 Couleurs et contraste (formule WCAG)
+
+| Couleur | Blanc sur la couleur (badge du récapitulatif) | Texte sur carte claire `#ffffff` | Texte sur carte sombre `#1a3040` |
+|---|---|---|---|
+| sarcelle `#0e9384` (SEL) | 3,80 | 3,80 | 3,59 |
+| bleu `#0277bd` (STD, inchangé) | 4,80 | 4,80 | 2,84 |
+| orange SOM, pour mémoire | 2,79 | 2,79 | 4,88 |
+
+La sarcelle passe 3:1 (élément graphique) dans les deux thèmes ; aucune couleur de famille n'atteint 4,5:1 dans les deux
+thèmes pour un texte de taille normale (le libellé coloré et la pastille blanche du récapitulatif). Couleur de Grégoire
+gardée telle quelle ; variable renommée `--sel-sarcelle`.
+
+### 6.3 Le reste
+
+- **Textes** A4, A5, E1, F3 posés ; textes neufs G1 à G9 proposés (`TEXTES-…`, en tête).
+- **Échelles libres** : essais à trois et à six niveaux (la pratique se crée ; l'étape montre tous les niveaux et n'offre
+  au « sans donnée » que le niveau à 0 %).
+- **Noms réels** : « Cormier et al. (2026) » dans la fiche, le skill et sa consigne ; « Voisard et al. (2025) » pour
+  l'article de 2025 ; deux billets cités par leur titre et « billet d'une coautrice de Cormier et al. (2026) ». Le banc
+  est vert sans contournement.
+- **Fixture** : l'élève fictif « Bruno » devient « Boréal » dans 40 bancs (« Boreal » dans les noms de fichiers d'import,
+  sans accent) ; « Bruno Voisard » reste là où il est l'auteur d'une pratique (deux bancs #342), et le banc #690 garde ce
+  prénom (il vérifie qu'il ne revient pas dans le code).
+- **Erreurs non gérées** : inscrites, #1302 (12 `requestAnimationFrame`, 8 `notif.remove`, 2 `toast.remove`, 2 `db is not
+  defined` ; pas seulement « db is not defined »).
+
+### 6.4 Supposé (à corriger en dix secondes)
+
+- La bulle du badge SEL reprend des mots déjà acceptés du renommage (A1, D5) plutôt que d'en inventer.
+- La carte « Note » de Conception › Pratiques nomme chaque sigle par son nom (G3, G4) : seulement changer le sigle aurait
+  donné « SEL (Standards) ».
+- L'export montre le sigle (le renommage avait gardé STD ; la décision du 21 nov. s'applique aux exports).
+- Les classes CSS (`badge-type-std`…) suivent le code interne : invisibles, elles ne changent pas.
+
+### 6.5 Ligne de Nouvelles PROPOSÉE (non écrite dans `changelog-data.js`)
+
+> Le badge de la pratique « Par sélection de productions » s'appelle maintenant « SEL » (il disait « STD »), et prend la
+> couleur sarcelle. « STD » désigne désormais la nouvelle pratique « Par standards ». Tes pratiques, tes réglages et tes
+> notes ne changent pas.

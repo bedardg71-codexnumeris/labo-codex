@@ -24,7 +24,7 @@ const lire = (f) => readFileSync(path.join(RACINE, f), 'utf8');
 
 const ELEVES = [
     { da: '2000001', nom: 'Tremblay-Banc', prenom: 'Alice', groupe: '01', coursId: 'GC1', statut: 'actif' },
-    { da: '2000002', nom: 'Gagnon-Banc', prenom: 'Bruno', groupe: '01', coursId: 'GC1', statut: 'actif' }
+    { da: '2000002', nom: 'Gagnon-Banc', prenom: 'Boréal', groupe: '01', coursId: 'GC1', statut: 'actif' }
 ];
 
 async function exporter(resultats, registre) {

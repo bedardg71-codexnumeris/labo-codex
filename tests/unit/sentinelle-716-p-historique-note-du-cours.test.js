@@ -21,7 +21,7 @@ import { readFileSync, readdirSync } from 'node:fs';
 import path from 'node:path';
 import { monter, storeBase, clone, RACINE } from './_helpers/bac-suivi.js';
 
-const DA = { ALICE: '2000001', BRUNO: '2000002' };
+const DA = { ALICE: '2000001', BOREAL: '2000002' };
 const FIN = '2026-06-30';       // après toutes les échéances
 const MI = '2026-03-10';        // A1, A2, A3 dus ; A4 (15 mars) ne l'est pas
 
@@ -44,10 +44,10 @@ function productionsSTD(categories = null) {
     l.push({ id: 'T1', titre: 'Analyse finale', type: 'terminale', numero: 7, ponderation: 40, dateEcheance: ECHEANCES.T1, coursId: 'GC1' });
     return l;
 }
-const NOTES_STD = { [DA.ALICE]: { A1: 60, A2: 70, A3: 88, A4: 92, A5: 75, A6: 80, T1: 82 }, [DA.BRUNO]: { A1: 90, A2: 55, A3: 72, A4: 66, A5: 95, A6: 70, T1: 68 } };
+const NOTES_STD = { [DA.ALICE]: { A1: 60, A2: 70, A3: 88, A4: 92, A5: 75, A6: 80, T1: 82 }, [DA.BOREAL]: { A1: 90, A2: 55, A3: 72, A4: 66, A5: 95, A6: 70, T1: 68 } };
 function copiesSTD(sauf = []) {
     const l = [];
-    for (const da of [DA.ALICE, DA.BRUNO]) for (const [p, n] of Object.entries(NOTES_STD[da])) if (!sauf.includes(da + ':' + p)) l.push(ev(da, p, n));
+    for (const da of [DA.ALICE, DA.BOREAL]) for (const [p, n] of Object.entries(NOTES_STD[da])) if (!sauf.includes(da + ':' + p)) l.push(ev(da, p, n));
     return l;
 }
 function pratiqueSTD({ methodeSelection = 'meilleurs', hybride = false, notesFinales = false } = {}) {
@@ -63,7 +63,7 @@ const PRODUCTIONS_SOM = [
     { id: 'P1', titre: 'Dissertation', type: 'travail', ponderation: 40, dateEcheance: '2026-02-01', coursId: 'GC1' },
     { id: 'P2', titre: 'Examen', type: 'examen', ponderation: 60, dateEcheance: '2026-03-15', coursId: 'GC1' }
 ];
-const COPIES_SOM = [ev(DA.ALICE, 'P1', 84), ev(DA.ALICE, 'P2', 90), ev(DA.BRUNO, 'P1', 62), ev(DA.BRUNO, 'P2', 71)];
+const COPIES_SOM = [ev(DA.ALICE, 'P1', 84), ev(DA.ALICE, 'P2', 90), ev(DA.BOREAL, 'P1', 62), ev(DA.BOREAL, 'P2', 71)];
 const PRATIQUE_SOM = { id: 'som-banc', nom: 'SOM banc', type: 'sommative', calcul_note: { methode: 'moyenne_ponderee' }, dansBibliotheque: true, configuration: { approcheEvaluation: 'sommative' } };
 
 const PRODUCTIONS_SPE = [
@@ -73,7 +73,7 @@ const PRODUCTIONS_SPE = [
     { id: 'F1', titre: 'Dossier', type: 'dossier', dateEcheance: '2026-04-01', coursId: 'GC1' }
 ];
 const COPIES_SPE = [ev(DA.ALICE, 'D1', 80), ev(DA.ALICE, 'X1', 90), ev(DA.ALICE, 'D2', 75), ev(DA.ALICE, 'F1', 72),
-    ev(DA.BRUNO, 'D1', 71), ev(DA.BRUNO, 'X1', 50), ev(DA.BRUNO, 'D2', 88), ev(DA.BRUNO, 'F1', 90)];
+    ev(DA.BOREAL, 'D1', 71), ev(DA.BOREAL, 'X1', 50), ev(DA.BOREAL, 'D2', 88), ev(DA.BOREAL, 'F1', 90)];
 const PRATIQUE_SPE = { id: 'spe-banc', nom: 'SPE banc', type: 'specifications', calcul_note: { methode: 'specifications' }, dansBibliotheque: true,
     configuration: { type: 'specifications',
         typesTravaux: [{ id: 'dissertation', nom: 'Dissertation', seuilAcceptable: 70 }, { id: 'examen', nom: 'Examen', seuilAcceptable: 70 }, { id: 'dossier', nom: 'Dossier', seuilAcceptable: 70 }],
@@ -98,7 +98,7 @@ const OBJETS_EXPORTES = ['PratiqueManager', 'denotationJugements', 'modalitesEva
 
 function banc({ pratique, productions, evaluations, jugements = {} }) {
     const store = storeBase();
-    store.test_groupeEtudiants = store.test_groupeEtudiants.filter(e => e.da === DA.ALICE || e.da === DA.BRUNO);
+    store.test_groupeEtudiants = store.test_groupeEtudiants.filter(e => e.da === DA.ALICE || e.da === DA.BOREAL);
     store.test_groupesCours[0].pratiqueId = pratique ? pratique.id : null;
     store.test_pratiquesConfigurables = pratique ? [clone(pratique)] : [];
     store.test_echellesTemplates = [clone(E0)];
@@ -135,7 +135,7 @@ function noteSurLesEchues(jeu, date, echeances) {
     const pratique = jeu.pratique ? clone(jeu.pratique) : null;
     if (pratique && pratique.configuration) pratique.configuration.notesFinales = false;
     const b = banc(Object.assign({}, jeu, { pratique, evaluations: jeu.evaluations.filter(e => echeances[e.productionId] <= date) }));
-    return [DA.ALICE, DA.BRUNO].map(da => (stocke(b, da).noteConstructible ? stocke(b, da).P : null));
+    return [DA.ALICE, DA.BOREAL].map(da => (stocke(b, da).noteConstructible ? stocke(b, da).P : null));
 }
 const echeancesDe = (productions) => Object.fromEntries(productions.filter(p => p.dateEcheance).map(p => [p.id, p.dateEcheance]));
 
@@ -153,16 +153,16 @@ describe('#716 · l\'identité : à une date postérieure à toutes les échéan
     for (const [nom, jeu] of Object.entries(JEUX)) {
         it(nom, () => {
             const b = banc(jeu);
-            const attendus = [DA.ALICE, DA.BRUNO].map(da => stocke(b, da));
+            const attendus = [DA.ALICE, DA.BOREAL].map(da => stocke(b, da));
             // Garde de non-vide : deux notes réelles, et différentes (sinon l'identité ne départagerait rien).
             expect(attendus.every(s => s.noteConstructible && s.P > 0), nom).toBe(true);
             expect(attendus[0].P).not.toBe(attendus[1].P);
-            expect([historique(b, DA.ALICE, FIN), historique(b, DA.BRUNO, FIN)], nom).toEqual(attendus.map(s => s.P));
+            expect([historique(b, DA.ALICE, FIN), historique(b, DA.BOREAL, FIN)], nom).toEqual(attendus.map(s => s.P));
         });
     }
-    it('valeurs à la main (sommative) : Alice (84 × 40 + 90 × 60) / 100 = 87,6 → 88 ; Bruno (62 × 40 + 71 × 60) / 100 = 67,4 → 67', () => {
+    it('valeurs à la main (sommative) : Alice (84 × 40 + 90 × 60) / 100 = 87,6 → 88 ; Boréal (62 × 40 + 71 × 60) / 100 = 67,4 → 67', () => {
         const b = banc(JEUX.sommative);
-        expect([historique(b, DA.ALICE, FIN), historique(b, DA.BRUNO, FIN)]).toEqual([88, 67]);
+        expect([historique(b, DA.ALICE, FIN), historique(b, DA.BOREAL, FIN)]).toEqual([88, 67]);
     });
 });
 
@@ -172,11 +172,11 @@ describe('#716 · une date intermédiaire : la note du cours recalculée sur les
             const date = nom === 'sommative' ? '2026-02-20' : MI;
             const attendu = noteSurLesEchues(jeu, date, echeancesDe(jeu.productions));
             const b = banc(jeu);
-            const obtenu = [historique(b, DA.ALICE, date), historique(b, DA.BRUNO, date)];
+            const obtenu = [historique(b, DA.ALICE, date), historique(b, DA.BOREAL, date)];
             expect(attendu.every(p => typeof p === 'number'), nom).toBe(true);   // non-vide
             expect(obtenu, nom).toEqual(attendu);
             // …et ce n'est PAS la note de fin de trimestre : la date filtre réellement.
-            expect(obtenu, nom).not.toEqual([stocke(b, DA.ALICE).P, stocke(b, DA.BRUNO).P]);
+            expect(obtenu, nom).not.toEqual([stocke(b, DA.ALICE).P, stocke(b, DA.BOREAL).P]);
         });
     }
     it('une évaluation échue APRÈS la date ne change pas son P (A4, due le 15 mars, passe de 92 à 20)', () => {
@@ -199,17 +199,17 @@ describe('#716 · une date intermédiaire : la note du cours recalculée sur les
 });
 
 describe('#716 · décision 1A : à une date passée, la note est provisoire (« notes finales » ne s\'applique pas)', () => {
-    it('Bruno n\'a pas remis l\'obligatoire A6 : l\'indice stocké (notes finales) la compte 0, le P historique l\'ignore — comme la même pratique en provisoire', () => {
-        const sauf = [DA.BRUNO + ':A6'];
+    it('Boréal n\'a pas remis l\'obligatoire A6 : l\'indice stocké (notes finales) la compte 0, le P historique l\'ignore — comme la même pratique en provisoire', () => {
+        const sauf = [DA.BOREAL + ':A6'];
         const finale = banc({ pratique: pratiqueSTD({ hybride: true, notesFinales: true }), productions: productionsSTD(CATEGORIES), evaluations: copiesSTD(sauf) });
         const provisoire = banc({ pratique: pratiqueSTD({ hybride: true, notesFinales: false }), productions: productionsSTD(CATEGORIES), evaluations: copiesSTD(sauf) });
-        const pStocke = stocke(finale, DA.BRUNO).P, pProvisoire = stocke(provisoire, DA.BRUNO).P;
+        const pStocke = stocke(finale, DA.BOREAL).P, pProvisoire = stocke(provisoire, DA.BOREAL).P;
         expect(pStocke).toBeLessThan(pProvisoire);                        // le réglage mord bien sur l'indice d'aujourd'hui
-        expect(historique(finale, DA.BRUNO, FIN)).toBe(pProvisoire);      // …pas sur le P historique
-        expect(historique(finale, DA.BRUNO, MI)).toBe(historique(provisoire, DA.BRUNO, MI));
+        expect(historique(finale, DA.BOREAL, FIN)).toBe(pProvisoire);      // …pas sur le P historique
+        expect(historique(finale, DA.BOREAL, MI)).toBe(historique(provisoire, DA.BOREAL, MI));
         // Et le réglage lui-même n'est pas touché : après le calcul historique, l'indice se recalcule toujours en finale.
         finale.win.calculerEtStockerIndicesCP();
-        expect(stocke(finale, DA.BRUNO).P).toBe(pStocke);
+        expect(stocke(finale, DA.BOREAL).P).toBe(pStocke);
     });
 });
 

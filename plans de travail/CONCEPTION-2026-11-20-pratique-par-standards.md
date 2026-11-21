@@ -39,9 +39,9 @@
 
 | Sigle | Source | Lu |
 |---|---|---|
-| R | Cormier, Voisard, Turcotte et Arseneault-Hubert (2026), *Laissons-les se tromper*, rapport PAREA, Cégep André-Laurendeau, 249 p. | en entier (quatre tranches) |
+| R | Cormier et al. (2026), *Laissons-les se tromper*, rapport PAREA, Cégep André-Laurendeau, 249 p. | en entier (quatre tranches) |
 | PC24 | Voisard, Cormier et Arseneault-Hubert (2024), « Les pratiques alternatives de notation : pour mieux soutenir les apprentissages et en témoigner », *Pédagogie collégiale*, vol. 37, n° 2, p. 26-35 | en entier |
-| PC25 | Voisard, Cormier, Turcotte et Arseneault-Hubert (2025), « Vers une note plus juste et plus équitable : comment les PIEA orientent-elles nos actions ? », *Pédagogie collégiale*, vol. 39, n° 1, p. 16-24 | en entier |
+| PC25 | Voisard et al. (2025), « Vers une note plus juste et plus équitable : comment les PIEA orientent-elles nos actions ? », *Pédagogie collégiale*, vol. 39, n° 1, p. 16-24 | en entier |
 | GfG12 | Clark et Talbert (2023), *Grading for Growth*, chap. 12, traduction française en douze sections | en entier |
 | CSE | Conseil supérieur de l'éducation (2018), *Évaluer pour que ça compte vraiment*, sommaire, napperon, chap. 2-3 | en entier |
 | Billets | Publication « Pratiques alternatives de notation » (notationalternative.substack.com), 53 billets du 25 août 2025 au 16 nov. 2026 | en entier |
@@ -62,7 +62,7 @@ Les billets cités le plus souvent :
 | 4ÉTAPES | « Quatre étapes pour intégrer des pratiques alternatives de notation dans un cours », B. Voisard et F. Arseneault-Hubert, 22 sept. 2025 |
 | BOUCHÉES | « Commencer à faire des PAN par petites bouchées », C. Cormier, 22 sept. 2025 (le billet sur la grille du cours dans Léa) |
 | PROJET | « Noter autrement dans un cours de projet », B. Voisard, 23 mars 2026 |
-| ASSIETTE | « Une semaine dans mon assiette d'évaluation », V. Turcotte, 13 avril 2026 |
+| ASSIETTE | « Une semaine dans mon assiette d'évaluation », billet d'une coautrice de Cormier et al. (2026), 13 avril 2026 |
 | SMR | Trois billets de J.-F. Bastien sur le seuil minimal de réussite, 6 avril, 27 avril et 25 mai 2026 |
 | AGIR | « Noter autrement, oui, mais sur quoi agir ? », B. Voisard, 21 sept. 2026 |
 | EFFETS | « Les effets de la note sur l'apprentissage », B. Voisard, 26 oct. 2026 |
@@ -154,7 +154,7 @@ Précisions qui comptent pour le moteur :
 
 - **Les définitions des niveaux sont des seuils sur les critères** : aucun critère respecté, au moins un, tous les
   essentiels, tous (R, tableau 5.6, p. 102 ; CJN). Un seul critère essentiel manquant plafonne à « Ça y est
-  presque ! » (CJN ; V. Turcotte, « Quand les PAN orientent et organisent le travail étudiant », 16 févr. 2026).
+  presque ! » (CJN ; « Quand les PAN orientent et organisent le travail étudiant », billet d'une coautrice de Cormier et al. (2026), 16 févr. 2026).
   Le niveau « Acquis » demande les essentiels « généralement » selon le rapport (p. 102), trois fois sur quatre
   selon CJN.
 - **Le niveau 0 couvre trois cas** : cible pas encore évaluée, étudiant·e pas encore évalué·e, travail très

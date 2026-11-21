@@ -93,7 +93,7 @@ function storeBase() {
         groupeCoursActif: { id: 'GC1', trimestreId: 'test', coursId: 'GC1', groupeNum: '01' },
         test_groupeEtudiants: [
             { da: '2000001', nom: 'Assidu', prenom: 'Alice', coursId: 'GC1', statut: 'actif' },
-            { da: '2000002', nom: 'Absent', prenom: 'Bruno', coursId: 'GC1', statut: 'actif' },
+            { da: '2000002', nom: 'Absent', prenom: 'Boréal', coursId: 'GC1', statut: 'actif' },
             { da: '2000003', nom: 'Silence', prenom: 'Chloé', coursId: 'GC1', statut: 'actif' },
             { da: '2000004', nom: 'Dautre', prenom: 'Dario', coursId: 'GC2', statut: 'actif' },
             { da: '2000005', nom: 'Einstein', prenom: 'Eva', coursId: 'GC1', statut: 'actif' },
