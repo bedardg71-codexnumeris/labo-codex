@@ -4,7 +4,8 @@ Un « Modèle par standards » dans la liste « Choisis un modèle » de l'assis
 
 ## En tête
 
-**PR en brouillon et aperçu** : à compléter après le push.
+**Aperçu** : https://deploy-preview-52--codexnumeris-051225.netlify.app (vérifié : il sert l'assistant du lot, version 1.253.0).
+**PR en brouillon, « NE PAS FUSIONNER »** : https://github.com/bedardg71-codexnumeris/labo-codex/pull/52 (Vitest vert sur GitHub).
 **Branche** : `lot/modele-par-standards`, partie de `origin/main` à `16360f43c` (1.253.0). Arbre : `../labo-codex-modele-standards`. Ni fusion ni release.
 
 ### Ce que j'ai mesuré au point A (lu dans le code, sur main)
