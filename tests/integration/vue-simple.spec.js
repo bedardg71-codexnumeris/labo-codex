@@ -2098,3 +2098,87 @@ test.describe('Vue simple · « Par standards », à l\'essai (mandat du 21 nov.
         expect(erreurs).toEqual([]);
     });
 });
+
+/* =====================================================================================================================
+   « PAR STANDARDS » TROUVABLE EN VUE SIMPLE (mandat du 22 nov. 2026 ; textes acceptés par Grégoire à 9 h 12). Constat
+   sur iPad : un groupe qui a déjà des productions arrive à « Ta pratique » sans moyen de choisir « Par standards », et
+   l'accueil ne nomme ni les standards ni les cibles. La garde ne bouge pas : le modèle d'un groupe qui a des productions
+   ne change pas. L'écran le dit, et ouvre la porte d'un groupe d'essai. Noms fictifs.
+   ===================================================================================================================== */
+
+const PHRASE_FIGEE = 'Ce groupe a déjà des résultats : son modèle ne change plus. Pour essayer un autre modèle, crée un groupe d’essai.';
+const LISTE_ESSAI = '9990021, Saule, Sacha\n9990022, Tilleul, Théo';
+
+test.describe('Vue simple · « Par standards » trouvable (mandat du 22 nov. 2026)', () => {
+    test('l’accueil nomme les trois modèles, et les cibles comme colonnes du tableau', async ({ page }) => {
+        const erreurs = await ouvrir(page);
+        const textes = ecran(page, 'accueil').locator('.vs-etape-texte');
+        await expect(textes.nth(1)).toHaveText('Choisis un modèle : par standards, par spécifications ou par sélection de productions. Tu règles ensuite ce qui construit la note.');
+        await expect(textes.nth(2)).toHaveText('Inscris un niveau, ou acceptable / non acceptable, dans un tableau : tes étudiant·es en lignes, tes cibles ou tes productions en colonnes.');
+        expect(erreurs).toEqual([]);
+    });
+
+    test('un groupe sans production : « Changer de modèle », et pas la phrase', async ({ page }) => {
+        const erreurs = await ouvrir(page);
+        await collerLaClasse(page);
+        await choisirLeModele(page, 'STD-n-meilleurs');
+        await expect(page.locator('[data-action="VueSimple.changerModele"]')).toHaveCount(1);
+        await expect(ecran(page, 'pratique').locator('[data-vs-pratique="figee"]')).toHaveCount(0);
+        expect(erreurs).toEqual([]);
+    });
+
+    test('un groupe qui a une production : la phrase sous « Modèle », « Nouveau groupe » mène à la classe, puis à « Par standards » et à ses cibles', async ({ page }) => {
+        const erreurs = await ouvrir(page);
+        await collerLaClasse(page);
+        await choisirLeModele(page, 'STD-n-meilleurs');
+        await allerA(page, 'resultats');
+        await ajouterProduction(page, 'Essai fictif', '2026-11-20');
+
+        // 1. « Ta pratique » : plus de « Changer de modèle » ; la phrase, juste sous la ligne « Modèle », et le bouton.
+        await allerA(page, 'pratique');
+        const pratique = ecran(page, 'pratique');
+        await expect(page.locator('[data-action="VueSimple.changerModele"]')).toHaveCount(0);
+        const fige = pratique.locator('[data-vs-pratique="figee"]');
+        await expect(fige.locator('.vs-note')).toHaveText(PHRASE_FIGEE);
+        expect(await fige.evaluate((n) => n.previousElementSibling && n.previousElementSibling.textContent.trim().startsWith('Modèle'))).toBe(true);
+        await expect(fige.locator('[data-action="VueSimple.nouveauGroupe"]')).toHaveText('Nouveau groupe');
+
+        // 2. « Nouveau groupe » : l'écran Classe, son formulaire de création ouvert.
+        await fige.locator('[data-action="VueSimple.nouveauGroupe"]').click();
+        await expect(page.locator('#section-simple-classe')).toBeVisible();
+        await expect(page.locator('#vs-liste')).toBeVisible();
+        await expect(ecran(page, 'classe').locator('[data-action="VueSimple.annulerNouveauGroupe"]')).toBeVisible();
+
+        // 3. La même liste : personne n'est inscrit deux fois le même trimestre, le groupe ne naît pas (règle de la vue étendue).
+        await page.fill('#vs-liste', LISTE);
+        await ecran(page, 'classe').locator('[data-action="VueSimple.creerClasse"]').click();
+        await expect(ecran(page, 'classe').locator('.vs-erreur')).toHaveText('Toutes ces personnes sont déjà inscrites ce trimestre : le groupe n’a pas été créé.');
+
+        // 4. D'autres noms : le groupe d'essai naît, devient le groupe actif, et « Ta pratique » offre les trois cartes.
+        await page.fill('#vs-liste', LISTE_ESSAI);
+        await ecran(page, 'classe').locator('[data-action="VueSimple.creerClasse"]').click();
+        await expect(ecran(page, 'classe').locator('.vs-succes')).toHaveText('Classe créée : 2 étudiant·es.');
+        await ecran(page, 'classe').locator('[data-action="VueSimple.aller"][data-param="pratique"]').click();
+        await expect(pratique.locator('[data-action="VueSimple.choisirModele"]')).toHaveCount(3);
+        await expect(pratique.locator('[data-vs-pratique="figee"]')).toHaveCount(0);
+
+        // 5. « Par standards » : le champ des cibles.
+        await pratique.locator('[data-action="VueSimple.choisirModele"][data-param="par-standards"]').click();
+        await expect(page.locator('#vs-cibles-lignes')).toBeVisible();
+        await expect(page.locator('label[for="vs-cibles-lignes"]')).toHaveText('Tes cibles, une par ligne');
+        expect(erreurs).toEqual([]);
+    });
+
+    test('« Par standards » avec un niveau inscrit : la même phrase, là où « Changer de modèle » disparaît', async ({ page }) => {
+        const erreurs = await ouvrir(page);
+        await collerLaClasse(page);
+        await choisirParStandards(page, 'Analyser');
+        await expect(ecran(page, 'pratique').locator('[data-vs-pratique="figee"]')).toHaveCount(0);
+        await allerA(page, 'resultats');
+        await inscrire(page, 1, 1, '2');
+        await allerA(page, 'pratique');
+        await expect(page.locator('[data-action="VueSimple.changerModele"]')).toHaveCount(0);
+        await expect(ecran(page, 'pratique').locator('[data-vs-pratique="figee"] .vs-note')).toHaveText(PHRASE_FIGEE);
+        expect(erreurs).toEqual([]);
+    });
+});

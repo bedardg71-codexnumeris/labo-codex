@@ -21,6 +21,16 @@
 
     var CHANGELOG = [
         {
+            // 1.255 (22 nov. 2026 : « Par standards » trouvable en vue simple) — titre et ligne PROPOSÉS par Claude Code,
+            // à valider par Grégoire avant la mise en ligne.
+            version: '1.255',
+            couleur: 'bleu',
+            titre: '«&nbsp;Par standards&nbsp;», trouvable en vue simple',
+            items: [
+                'En vue simple, l’accueil nomme les trois modèles&nbsp;: par standards, par spécifications et par sélection de productions. Sur «&nbsp;Ta pratique&nbsp;», un groupe qui a déjà des résultats garde son modèle et le dit&nbsp;; «&nbsp;Nouveau groupe&nbsp;» t’amène à créer un groupe d’essai pour en essayer un autre.'
+            ]
+        },
+        {
             // 1.254 (22 nov. 2026 : assemblage de cinq lots — le voyage des cibles, le « Modèle par standards », le
             // Comparateur « Par standards » et sa synthèse, les guides « som » et « pan » retirés) — titre et quatre
             // lignes acceptés par Grégoire le 22 nov. à 6 h 38, tels quels ; seule la typographie du fichier est appliquée.

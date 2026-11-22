@@ -39,10 +39,11 @@
         confidentialiteTete: 'Tes données restent chez toi.',
         confidentialite: (sauvegarder) => `Tout ce que tu entres ici est gardé dans ton navigateur, sur cet appareil. Rien n’est transmis à un serveur, personne d’autre n’y a accès. Pour en garder une copie, utilise « ${sauvegarder} ».`,
         sousTitreAccueil: 'Quatre étapes, de ta liste d’étudiant·es à ta note finale.',
+        // Cartes 2 et 3 : ACCEPTÉES par Grégoire, mot pour mot (22 nov. 2026, 9 h 12) — « Par standards » trouvable en vue simple.
         cartes: [
             { ecran: 'classe', titre: 'Ta classe', texte: 'Colle ta liste d’étudiant·es : DA, nom, prénom.', lien: 'Coller ma liste' },
-            { ecran: 'pratique', titre: 'Ta pratique', texte: 'Choisis un modèle, par sélection de productions ou par spécifications, et la règle qui construit la note.', lien: 'Choisir un modèle' },
-            { ecran: 'resultats', titre: 'Tes résultats', texte: 'Inscris un niveau, ou acceptable / non acceptable, dans un tableau : tes étudiant·es en lignes, tes productions en colonnes.', lien: 'Ouvrir le tableau' },
+            { ecran: 'pratique', titre: 'Ta pratique', texte: 'Choisis un modèle : par standards, par spécifications ou par sélection de productions. Tu règles ensuite ce qui construit la note.', lien: 'Choisir un modèle' },
+            { ecran: 'resultats', titre: 'Tes résultats', texte: 'Inscris un niveau, ou acceptable / non acceptable, dans un tableau : tes étudiant·es en lignes, tes cibles ou tes productions en colonnes.', lien: 'Ouvrir le tableau' },
             { ecran: 'note', titre: 'Ta note finale', texte: 'Vois la note de chaque étudiant·e et exporte-les en CSV, prêtes pour ton relevé.', lien: 'Voir les notes' }
         ],
         // PROPOSÉ par Claude Code (9 nov. 2026) ; « élève » remplacé par « étudiant·e » sur décision de Grégoire
@@ -183,6 +184,9 @@
             cibleEnDouble: () => 'Deux cibles portent le même nom.'
         },
         pratiqueChanger: 'Changer de modèle',
+        // ACCEPTÉ par Grégoire, mot pour mot (22 nov. 2026, 9 h 12) : là où « Changer de modèle » ne s'offre plus parce que le
+        // groupe a des productions (par standards : des niveaux inscrits). Le bouton qui suit reprend `groupeNouveau`.
+        pratiqueFigee: 'Ce groupe a déjà des résultats : son modèle ne change plus. Pour essayer un autre modèle, crée un groupe d’essai.',
         pratiqueAutre: 'La pratique de ce groupe n’est ni par sélection de productions ni par spécifications : elle se règle en vue étendue.',
         pratiqueSuite: 'Ouvrir le tableau',
         pratiqueEchec: 'La pratique n’a pas pu être enregistrée.',
@@ -656,7 +660,11 @@
 
     /* ---------- PLUSIEURS GROUPES : en créer un autre, retirer un groupe vide ---------- */
 
-    function nouveauGroupe() { _nouveauGroupe = true; _retraitGroupe = null; _rendreClasse(); }
+    /** « Nouveau groupe » : à l'écran Classe, ou depuis « Ta pratique » quand le modèle ne change plus (`_modeleFigeHTML`). */
+    function nouveauGroupe() {
+        if (_ecran !== 'classe') aller('classe');   // `aller` referme tout formulaire : le drapeau se pose après
+        _nouveauGroupe = true; _retraitGroupe = null; _rendreClasse();
+    }
     function annulerNouveauGroupe() { _nouveauGroupe = false; _rendreClasse(); }
     function annulerRetraitGroupe() { _retraitGroupe = null; _rendreClasse(); }
 
@@ -1085,7 +1093,7 @@
         // Une pratique importée sous l'ancienne forme (`.config`) se lit en vue étendue, elle ne se règle pas ici.
         const reglable = !!pratique.configuration;
         const blocs = !reglable ? `<p class="vs-note">${esc(MOTS.regleAutre)}</p>` : (cib ? _blocsCibHTML(pratique) : (std ? _blocsStdHTML(pratique) : _blocsSpeHTML(pratique)));
-        return `<p class="vs-intro"><span class="vs-libelle">${esc(MOTS.pratiqueModele)}</span> ${esc(noms)}</p>
+        return `<p class="vs-intro"><span class="vs-libelle">${esc(MOTS.pratiqueModele)}</span> ${esc(noms)}</p>${_modeleFigeHTML(groupe)}
             <div id="vs-pratique-retour">${retourHTML || ''}${_questionMiseAJourHTML()}</div>${reglable ? _reglePartageeHTML(pratique) : ''}${blocs}
             <p class="vs-gestes"><button type="button" class="btn btn-principal" data-action="VueSimple.aller" data-param="resultats">${esc(MOTS.pratiqueSuite)}</button>${_changerModeleHTML(groupe)}</p>`;
     }
@@ -1114,6 +1122,18 @@
     function _changerModeleHTML(groupe) {
         if (!_modeleChangeable(groupe)) return '';
         return `<button type="button" class="btn btn-secondaire" data-action="VueSimple.changerModele">${esc(MOTS.pratiqueChanger)}</button>`;
+    }
+
+    /**
+     * Le pendant de `_changerModeleHTML` : là où le modèle ne se change plus, la phrase qui le dit et la porte vers un groupe
+     * d'essai (« Nouveau groupe », qui mène à l'écran Classe, formulaire ouvert). Le bouton manque pendant la démonstration,
+     * comme à l'écran Classe (`_gestesDuGroupeHTML`) : la création y est refusée.
+     */
+    function _modeleFigeHTML(groupe) {
+        if (_modeleChangeable(groupe)) return '';
+        const bouton = _demoOuverte() ? ''
+            : `<p class="vs-gestes"><button type="button" class="btn btn-secondaire" data-action="VueSimple.nouveauGroupe">${esc(MOTS.groupeNouveau)}</button></p>`;
+        return `<div class="vs-bloc" data-vs-pratique="figee"><p class="vs-note">${esc(MOTS.pratiqueFigee)}</p>${bouton}</div>`;
     }
 
     function _apresEcriturePratique() {
