@@ -1,3 +1,7 @@
+> **Partis en ligne le 22 nov. 2026 sans relecture ; à corriger après l'essai de Grégoire.** (Release 1.254.0, assemblage de cinq lots.)
+
+> **Décision de Grégoire, 22 nov. 2026, 6 h 23 : l'échelle du « Modèle par standards » reste « Échelle de départ – Par standards » (0 à 4, « 0 – Données insuffisantes »), pas l'IDME.** Raison : le niveau zéro doit dire l'absence de donnée, pas un niveau d'apprentissage ; c'est l'échelle que l'assistant et la vue simple proposent déjà (acceptée par lui le 21 nov., 6 h 53).
+
 # Textes — « Modèle par standards » dans l'assistant (21 nov. 2026)
 
 Mots PROPOSÉS, non arrêtés. Grégoire les relit sur l'aperçu (Conception → Pratiques → « + Nouvelle pratique » → « Partir d'un modèle »). Source unique dans le code : `MODELE_PAR_STANDARDS`, `js/wizard-pratique-v2.js`.

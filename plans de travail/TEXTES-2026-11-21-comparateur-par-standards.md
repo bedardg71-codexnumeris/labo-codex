@@ -1,3 +1,5 @@
+> **Partis en ligne le 22 nov. 2026 sans relecture ; à corriger après l'essai de Grégoire.** (Release 1.254.0, assemblage de cinq lots.)
+
 # Textes — comparateur, colonne « Par standards » (21 nov. 2026)
 
 Mots PROPOSÉS, non arrêtés. Grégoire les relit sur l'aperçu (Labo → Exploration, une colonne sur une pratique « Par standards »). Source unique dans le code : `js/pratiques/construction-attributs.js`.

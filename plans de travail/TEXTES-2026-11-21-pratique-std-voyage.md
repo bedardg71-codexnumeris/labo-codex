@@ -1,3 +1,5 @@
+> **Partis en ligne le 22 nov. 2026 sans relecture ; à corriger après l'essai de Grégoire.** (Release 1.254.0, assemblage de cinq lots.)
+
 # Textes — lot pratique-std-voyage (21 nov. 2026)
 
 Mots PROPOSÉS, non arrêtés. Grégoire les relit sur l'aperçu. Les mots repris tels quels des autres bibliothèques ne sont pas des propositions : ils sont listés à la fin pour mémoire.

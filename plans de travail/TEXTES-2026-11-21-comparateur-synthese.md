@@ -1,3 +1,5 @@
+> **Partis en ligne le 22 nov. 2026 sans relecture ; à corriger après l'essai de Grégoire.** (Release 1.254.0, assemblage de cinq lots.)
+
 # Textes proposés – Comparateur : la synthèse de chaque pratique
 
 > Claude Code, 21 nov. 2026. Branche `lot/comparateur-synthese`. **Tout ce qui suit est une PROPOSITION, non arrêtée** :
