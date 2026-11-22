@@ -9,7 +9,7 @@
 ## Ce qui est retiré
 
 - `index.html`, Conception › Pratiques de notation : le bloc des deux boutons (`data-param="som"` et `data-param="pan"`), conteneur `u-mb-15` compris. À sa place, un commentaire HTML d'une ligne : la date, la décision, et que le texte reste dans `js/guides-pedagogiques.js`.
-- `index.html`, Labo › aide, carte « Les pratiques alternatives de notation (PAN) » : la fin de phrase « ; la théorie, dans le guide « Modalités » de Conception → Pratiques. » La phrase envoyait vers un bouton qui n'existe plus (point 3 du mandat). Elle se termine maintenant après « Choisir ta pratique de notation ». ⚠ Le commentaire au-dessus de cette carte dit que deux phrases de ce paragraphe ont été validées « mot pour mot » par Grégoire le 28 oct. ; la phrase coupée est la troisième (celle qui dit où trouver familles et théorie), mais **à relire par Grégoire** : la queue reviendra quand les guides reviendront.
+- `index.html`, Labo › aide, carte « Les pratiques alternatives de notation (PAN) » : la fin de phrase « ; la théorie, dans le guide « Modalités » de Conception → Pratiques. » La phrase envoyait vers un bouton qui n'existe plus (point 3 du mandat). Elle se termine maintenant après « Choisir ta pratique de notation ». ⚠ Le commentaire au-dessus de cette carte dit que deux phrases de ce paragraphe ont été validées « mot pour mot » par Grégoire le 28 oct. ; le paragraphe n'a que deux phrases, et la coupe touche la seconde (où trouver familles et théorie) : elle fait donc peut-être partie du texte validé — **à relire par Grégoire** : la queue reviendra quand les guides reviendront.
 
 ## Ce qui reste
 
