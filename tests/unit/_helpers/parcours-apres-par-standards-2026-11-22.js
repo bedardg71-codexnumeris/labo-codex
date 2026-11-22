@@ -8,7 +8,10 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const RACINE = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..', '..');
-export const CONSIGNE_22_NOV = readFileSync(path.join(RACINE, 'plans de travail/CONSIGNE-2026-11-22-parcours-apres-par-standards.md'), 'utf8');
+// Même forme que les helpers du 18 et du 20 nov. (`lire`) : `plans de travail/` est dans le `paths-ignore` de la CI ; une
+// consigne figée, validée mot pour mot, n'est plus modifiée seule (sentinelle-ci-paths-ignore : voir le rapport du lot).
+const lire = (f) => readFileSync(path.join(RACINE, f), 'utf8');
+export const CONSIGNE_22_NOV = lire('plans de travail/CONSIGNE-2026-11-22-parcours-apres-par-standards.md');
 
 /** La section d'un repère de la consigne (« A1. », « B2. »…), jusqu'au repère suivant. */
 export function sectionDu22(repere) {
