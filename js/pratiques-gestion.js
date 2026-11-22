@@ -262,8 +262,7 @@ function lignePratiqueBibliotheque(pratique, auteurActif) {
 
 /**
  * Lot modele-fourni-non-supprimable (22 nov. 2026) — la mention d'un modèle fourni avec l'application, intact.
- * ⚠ MOTS PROPOSÉS, en attente du feu vert de Grégoire (règle du mandat : les mots nouveaux lui sont rendus avant de
- * s'afficher).
+ * Mots validés par Grégoire le 22 nov. 2026.
  */
 const MENTION_MODELE_FOURNI = 'fourni avec l\'application';
 

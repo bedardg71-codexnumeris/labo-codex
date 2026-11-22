@@ -527,7 +527,7 @@ test('pratiques : chaque rangée du trimestre porte « Garder dans ma bibliothè
     // La famille en mots, à la place des badges ; « Gabarit » parti.
     await expect(rangee(page, 'pratiques', 'trimestre', 'Par sélection de productions (démo)').locator('.biblio2-rangee-meta')).toHaveText(/^Par sélection de productions( · par .+)?$/);   // ↻ 21 nov. 2026, 7 h 44 : le nom de famille, sans « PAN »
     // ↻ lot modele-fourni-non-supprimable (22 nov. 2026) : un modèle fourni, intact, dit « fourni avec l'application » à la
-    // place de son auteur (mots proposés, en attente du feu vert de Grégoire ; banc : modele-fourni-non-supprimable.spec.js).
+    // place de son auteur (mots validés par Grégoire le 22 nov. 2026 ; banc : modele-fourni-non-supprimable.spec.js).
     await expect(rangee(page, 'pratiques', 'bibliotheque', 'Modèle sommatif').locator('.biblio2-rangee-meta')).toHaveText('Sommative · fourni avec l\'application');
     await expect(rangee(page, 'pratiques', 'bibliotheque', 'Modèle de base').locator('.biblio2-rangee-meta')).toHaveText('PAN-Dénotation · fourni avec l\'application');
     const fen = page.locator(FAMILLES.pratiques.sel);

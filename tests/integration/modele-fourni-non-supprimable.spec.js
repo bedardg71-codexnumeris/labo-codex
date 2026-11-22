@@ -28,8 +28,7 @@ const indexHtml = 'file://' + path.join(path.resolve(__dirname, '..', '..'), 'in
 //   · deux pratiques de même nom DANS CE TRIMESTRE : le groupe reste (seul le côté bibliothèque est filtré).
 // Noms fictifs. Contexte Playwright neuf à chaque essai.
 //
-// ⚠ Les mots « fourni avec l'application » sont PROPOSÉS, en attente du feu vert de Grégoire : s'il les change, ce
-//   banc change avec eux (constante MENTION ci-dessous).
+// Les mots « fourni avec l'application » sont validés par Grégoire (22 nov. 2026) ; constante MENTION ci-dessous.
 //
 // BREAK-TESTS : voir le rapport du lot (plans de travail/RAPPORT-2026-11-22-modele-fourni-non-supprimable.md).
 // ═══════════════════════════════════════════════════════════════════════════════════════════

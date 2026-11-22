@@ -7,8 +7,9 @@
 > **Fait** : la mesure (lecture de Cowork confirmée, copies qui peuvent différer, les quatre autres bibliothèques) ; le
 > correctif pour un modèle fourni intact (rangée, ⋮, bloc des doublons, garde de la fonction) ; un banc d'intégration
 > (6 essais) et une sentinelle unitaire (4 essais), break-tests faits.
-> **Reste** : le feu vert de Grégoire sur les mots « fourni avec l'application » (§ 3.1) ; sa décision sur la copie qui
-> diffère (§ 3.2, proposition non posée) ; le verdict WebKit sur le Mac.
+> **Décisions de Grégoire (22 nov. 2026)** : « fourni avec l'application » VALIDÉ (§ 3.1) ; la proposition pour la copie
+> qui diffère n'est pas à développer maintenant (§ 3.2, rien de posé).
+> **Reste** : le verdict WebKit sur le Mac ; le numéro de suivi, à la fusion.
 
 ## 1. Ce qu'on voit maintenant, en gestes
 
@@ -80,7 +81,7 @@ Aucune n'est corrigée dans ce mandat ; aucune ne montre le symptôme.
 
 ## 3. Les mots proposés
 
-### 3.1 Posés sur la branche, en attente de ton feu vert
+### 3.1 Posés sur la branche — validés par Grégoire le 22 nov. 2026
 
 - La ligne d'un modèle fourni intact : **« Sommative · fourni avec l'application »** (la famille, puis la mention, à la
   place de « par Gabarit Labo Codex » ou « par Demo Labo Codex »). Une seule constante à changer
@@ -88,7 +89,7 @@ Aucune n'est corrigée dans ce mandat ; aucune ne montre le symptôme.
 
 Supposition nommée : la mention REMPLACE l'auteur plutôt que de s'y ajouter, pour ne pas allonger la ligne sur l'iPad.
 
-### 3.2 Proposés seulement — la copie qui diffère du modèle (rien de posé)
+### 3.2 Proposés seulement — la copie qui diffère du modèle (rien de posé ; « pas maintenant », Grégoire, 22 nov. 2026)
 
 - Dans le ⋮, à la place de « Supprimer de ma bibliothèque » : **« Revenir au modèle d'origine »**.
 - La question : **« Remplacer ta version de « Modèle sommatif » par celle fournie avec l'application ? Ta version sera
