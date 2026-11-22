@@ -2106,7 +2106,7 @@ test.describe('Vue simple · « Par standards », à l\'essai (mandat du 21 nov.
    ne change pas. L'écran le dit, et ouvre la porte d'un groupe d'essai. Noms fictifs.
    ===================================================================================================================== */
 
-const PHRASE_FIGEE = 'Ce groupe a déjà des résultats : son modèle ne change plus. Pour essayer un autre modèle, crée un groupe d’essai.';
+const PHRASE_FIGEE = 'Ce groupe a déjà des productions ou des résultats : son modèle ne change plus. Pour essayer un autre modèle, crée un groupe d’essai.';
 const LISTE_ESSAI = '9990021, Saule, Sacha\n9990022, Tilleul, Théo';
 
 test.describe('Vue simple · « Par standards » trouvable (mandat du 22 nov. 2026)', () => {
@@ -2152,7 +2152,7 @@ test.describe('Vue simple · « Par standards » trouvable (mandat du 22 nov. 20
         // 3. La même liste : personne n'est inscrit deux fois le même trimestre, le groupe ne naît pas (règle de la vue étendue).
         await page.fill('#vs-liste', LISTE);
         await ecran(page, 'classe').locator('[data-action="VueSimple.creerClasse"]').click();
-        await expect(ecran(page, 'classe').locator('.vs-erreur')).toHaveText('Toutes ces personnes sont déjà inscrites ce trimestre : le groupe n’a pas été créé.');
+        await expect(ecran(page, 'classe').locator('.vs-erreur')).toHaveText('Toutes ces personnes sont déjà inscrites ce trimestre : le groupe n’a pas été créé. Pour essayer un modèle, utilise « Créer un groupe d’essai ».');
 
         // 4. D'autres noms : le groupe d'essai naît, devient le groupe actif, et « Ta pratique » offre les trois cartes.
         await page.fill('#vs-liste', LISTE_ESSAI);

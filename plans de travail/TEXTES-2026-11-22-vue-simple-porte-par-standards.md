@@ -16,9 +16,9 @@
 
 > Inscris un niveau, ou acceptable / non acceptable, dans un tableau : tes étudiant·es en lignes, tes cibles ou tes productions en colonnes.
 
-## F1 · js/vue-simple.js · « Ta pratique », sous la ligne « Modèle », quand le modèle ne change plus
+## F1 · js/vue-simple.js · « Ta pratique », sous la ligne « Modèle », quand le modèle ne change plus — ↻ 9 h 54
 
-> Ce groupe a déjà des résultats : son modèle ne change plus. Pour essayer un autre modèle, crée un groupe d’essai.
+> Ce groupe a déjà des productions ou des résultats : son modèle ne change plus. Pour essayer un autre modèle, crée un groupe d’essai.
 
 ## V2 · js/vue-simple.js · la note sous le sélecteur de groupe (`groupeMotAutres`) — acceptée le 22 nov. (décision A)
 
@@ -35,3 +35,19 @@
 ## G1 · js/vue-simple.js · le bouton du groupe d'essai (`groupeEssai`) — accepté le 22 nov., 9 h 39
 
 > Créer un groupe d’essai
+
+## G2 · js/vue-simple.js · le nom du cours d'un groupe d'essai (`groupeEssaiNom`) — accepté le 22 nov., 9 h 54
+
+> Cours d’essai
+
+## G3 · js/vue-simple.js · l'aide du bouton (`groupeEssaiAide`) — acceptée le 22 nov., 9 h 54
+
+> Pour essayer un modèle sans toucher à tes groupes : un groupe de quatre personnes fictives, rien à coller.
+
+## G4 · js/vue-simple.js · l'avis après la création (`groupeEssaiCree`, pour 4) — accepté le 22 nov., 9 h 54
+
+> Groupe d’essai créé, avec 4 personnes fictives.
+
+## G5 · js/vue-simple.js · le refus d'une liste déjà inscrite (`groupeAucunNouveau`) — accepté le 22 nov., 9 h 54
+
+> Toutes ces personnes sont déjà inscrites ce trimestre : le groupe n’a pas été créé. Pour essayer un modèle, utilise « Créer un groupe d’essai ».

@@ -21,13 +21,13 @@
 
     var CHANGELOG = [
         {
-            // 1.255 (22 nov. 2026 : « Par standards » trouvable en vue simple) — titre et ligne PROPOSÉS par Claude Code,
-            // à valider par Grégoire avant la mise en ligne.
+            // 1.255 (22 nov. 2026 : « Par standards » trouvable en vue simple) — titre et deux lignes proposés par Claude Code,
+            // la seconde acceptée par Grégoire à 9 h 54 ; la première ajustée à la phrase de 9 h 54. Titre : à confirmer.
             version: '1.255',
             couleur: 'bleu',
             titre: '«&nbsp;Par standards&nbsp;», trouvable en vue simple',
             items: [
-                'En vue simple, l’accueil nomme les trois modèles&nbsp;: par standards, par spécifications et par sélection de productions. Sur «&nbsp;Ta pratique&nbsp;», un groupe qui a déjà des résultats garde son modèle et le dit&nbsp;; «&nbsp;Nouveau groupe&nbsp;» t’amène à créer un groupe d’essai pour en essayer un autre.',
+                'En vue simple, l’accueil nomme les trois modèles&nbsp;: par standards, par spécifications et par sélection de productions. Sur «&nbsp;Ta pratique&nbsp;», un groupe qui a déjà des productions ou des résultats garde son modèle et le dit&nbsp;; «&nbsp;Nouveau groupe&nbsp;» t’amène à créer un groupe d’essai pour en essayer un autre.',
                 '«&nbsp;Créer un groupe d’essai&nbsp;», à côté de la liste à coller, crée un groupe de quatre personnes fictives, sans rien coller&nbsp;: de quoi essayer un modèle sans toucher à tes groupes. Il se retire comme tout groupe.'
             ]
         },

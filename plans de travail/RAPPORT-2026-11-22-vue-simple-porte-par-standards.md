@@ -1,15 +1,17 @@
 # Rapport – « Par standards » trouvable en vue simple (22 nov. 2026)
 
-**Dernier relais** : branche `lot/vue-simple-porte-standards`, partie de `origin/main` `78e952293` (1.254.0). Arbre :
-`../labo-codex-porte-standards`. Fait : les trois gestes (textes acceptés à 9 h 12) ; les trois textes « ni… ni… »
-(décision A) ; « Créer un groupe d'essai » (décision de 9 h 39, § 5). Release 1.255.0 préparée (build `1122-0945`).
-**Non fusionné, non poussé sur `main`** : attend la validation des mots proposés (§ 5 : nom du cours, aide, avis ; deux
-lignes de Nouvelles) et le feu vert de Grégoire pour la mise en ligne.
+**Dernier relais** : branche `lot/vue-simple-porte-standards`, partie de `origin/main` `78e952293` (1.254.0), à jour
+avec `main` (aucun commit de `main` depuis). Arbre : `../labo-codex-porte-standards`. **LOT COMPLET, PRÊT POUR LA MISE EN
+LIGNE** : release 1.255.0, build `1122-0956`. Tous les mots affichés sont acceptés par Grégoire (9 h 12, 9 h 39, 9 h 54 ;
+fichier `TEXTES-2026-11-22-vue-simple-porte-par-standards.md`), sauf le TITRE de l'entrée de Nouvelles (« « Par
+standards », trouvable en vue simple »), proposé. **Reste, avant le push** : le verdict complet WebKit sur le Mac
+(`node scripts/verdict-en-morceaux.mjs`, Cowork, Chrome et Safari fermés, secteur), puis fusion en avance rapide dans
+`main` et push, sur le feu vert de Grégoire. Le mandat des critères part d'ici, sur une branche à part.
 ## 1. Ce qui change à l'écran
 
 - Accueil, étapes 2 et 3 : les textes acceptés (`TEXTES-2026-11-22-vue-simple-porte-par-standards.md`, V1 et E3).
 - « Ta pratique », groupe dont le modèle ne change plus (des productions ; par standards : un niveau inscrit) : la phrase
-  F1 sous la ligne « Modèle », puis « Nouveau groupe », qui ouvre l'écran Classe, formulaire de création ouvert. Pendant la
+  F1 (« des productions ou des résultats », 9 h 54) sous la ligne « Modèle », puis « Nouveau groupe », qui ouvre l'écran Classe, formulaire de création ouvert. Pendant la
   démonstration, le bouton manque (comme à l'écran Classe : la création y est refusée) ; la phrase reste.
 - La garde n'a pas bougé (`_modeleChangeable`).
 
@@ -71,3 +73,14 @@ tant qu'elle ne porte rien) rend « Changer de modèle ».
 **Preuves** : Vitest `elevesDEssai` (séries, format refusé à la liste collée) ; banc « Créer un groupe d'essai », 2 essais.
 Break-tests : série figée à 1 → unitaire et parcours rouges ; garde de la démo retirée → essai de la démo rouge. Banc
 de la vue simple et voisins : 63 verts (WebKit). Vitest complet : 948 fichiers, 12 305 verts.
+
+## 6. Clôture (22 nov., 9 h 56 à 10 h 05)
+
+- Décisions de 9 h 54 posées : nom du cours, aide, avis, refus de la liste (qui nomme le bouton, interpolé) ; phrase F1
+  changée ; ligne 1 de Nouvelles ajustée (« des productions ou des résultats »).
+- Audit statique contre `main` : aucun `innerHTML` neuf hors `_ecrire`, aucun handler inline, aucun `eval`, aucun
+  `console.log` ; aucune zone protégée ni module sensible touché. Specs : aucun `page.click`/`waitForTimeout` ajouté.
+- Bancs (WebKit, Mac) : vue simple, épinglage des modèles actuels, « à l'essai » : 63 verts. Vitest complet : 948 fichiers,
+  12 305 verts. Version : quatre points synchrones, 1.255.0 / `1122-0956`.
+- Complexité (par rapport à la 1.254.0) : au-dessus de 15 : 434 → 434 ; somme 10 950 → 10 950 ; au-dessus de 30 : 75 → 75.
+- **Non pris** : le verdict complet WebKit (Cowork ouvert : règle 8 de `PROTOCOLE.md`). Rien poussé sur `main`.

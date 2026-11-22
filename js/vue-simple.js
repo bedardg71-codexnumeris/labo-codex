@@ -75,8 +75,11 @@
         groupePorteResultats: 'Ce groupe porte des résultats : il ne se retire pas ici.',
         groupeRetire: 'Groupe retiré.',
         // PROPOSÉ par Claude Code (10 nov. 2026) : la même personne ne s'inscrit qu'une fois par trimestre (règle de la vue étendue).
-        groupeAucunNouveau: 'Toutes ces personnes sont déjà inscrites ce trimestre : le groupe n’a pas été créé.',
-        // « Créer un groupe d'essai » : ACCEPTÉ par Grégoire (22 nov. 2026, 9 h 39). Le nom du cours, l'aide et l'avis : PROPOSÉS.
+        // ↻ 22 nov. 2026, 9 h 54 : la sortie nommée (proposée par Claude Code, acceptée par Grégoire). Le bouton est interpolé
+        // (`groupeEssai`) pour ne jamais en diverger.
+        groupeAucunNouveau: (essai) => `Toutes ces personnes sont déjà inscrites ce trimestre : le groupe n’a pas été créé. Pour essayer un modèle, utilise « ${essai} ».`,
+        // « Créer un groupe d'essai » : ACCEPTÉ par Grégoire (22 nov. 2026, 9 h 39). Le nom du cours, l'aide et l'avis :
+        // proposés par Claude Code, ACCEPTÉS par Grégoire (22 nov. 2026, 9 h 54).
         groupeEssai: 'Créer un groupe d’essai',
         groupeEssaiNom: 'Cours d’essai',
         groupeEssaiAide: 'Pour essayer un modèle sans toucher à tes groupes : un groupe de quatre personnes fictives, rien à coller.',
@@ -191,9 +194,9 @@
             cibleEnDouble: () => 'Deux cibles portent le même nom.'
         },
         pratiqueChanger: 'Changer de modèle',
-        // ACCEPTÉ par Grégoire, mot pour mot (22 nov. 2026, 9 h 12) : là où « Changer de modèle » ne s'offre plus parce que le
+        // ACCEPTÉ par Grégoire, mot pour mot (22 nov. 2026, 9 h 12 ; ↻ 9 h 54, « des productions ou des résultats ») : là où « Changer de modèle » ne s'offre plus parce que le
         // groupe a des productions (par standards : des niveaux inscrits). Le bouton qui suit reprend `groupeNouveau`.
-        pratiqueFigee: 'Ce groupe a déjà des résultats : son modèle ne change plus. Pour essayer un autre modèle, crée un groupe d’essai.',
+        pratiqueFigee: 'Ce groupe a déjà des productions ou des résultats : son modèle ne change plus. Pour essayer un autre modèle, crée un groupe d’essai.',
         pratiqueAutre: 'La pratique de ce groupe n’est ni par standards, ni par spécifications, ni par sélection de productions : elle se règle en vue étendue.',
         pratiqueSuite: 'Ouvrir le tableau',
         pratiqueEchec: 'La pratique n’a pas pu être enregistrée.',
@@ -644,7 +647,7 @@
         const actif = _nouveauGroupe ? null : _groupeActif();
         const deja = actif ? [] : _dejaInscrits(lecture.fiches);
         if (deja.length === lecture.fiches.length) {
-            dire(`<p class="vs-erreur" role="alert">${esc(MOTS.groupeAucunNouveau)}</p>${_refuseesHTML(deja)}`);
+            dire(`<p class="vs-erreur" role="alert">${esc(MOTS.groupeAucunNouveau(MOTS.groupeEssai))}</p>${_refuseesHTML(deja)}`);
             return;
         }
         const nomCours = _nomCoursSaisi(actif);
