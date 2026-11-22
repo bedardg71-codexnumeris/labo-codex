@@ -33,70 +33,182 @@
 
     var REFUS = 'Commence par « Évaluer une première production » : il te faut une production et sa grille pour automatiser tes commentaires.';
 
-    // ---------- Les bulles, mot pour mot (validées le 8 nov., 17 h 13 à 17 h 38) ----------
+    // ---------- Les bulles, mot pour mot (validées par Grégoire le 22 nov. 2026) ----------
+    // plans de travail/CONSIGNE-2026-11-22-echelle-de-depart-et-parcours-6-7-8.md, § 4.2 : dix bulles sur le chemin
+    // complet, la variante sans fichier, mot pour mot ; tests/unit/sentinelle-parcours-commentaires-2026-11-22.test.js les
+    // confronte à la consigne, dans les deux sens. Elles remplacent les douze textes du 8 nov.
+    // Une bulle : `titre` ; `confirme` (en petit au-dessus du titre) ; `lieuSuite` (la suite de la phrase du lieu, que le
+    // moteur ouvre par « Tu es dans « X », à l'onglet « Y » ») ; `lignes` : ['n', explication], ['g', geste], ['c', geste
+    // principal] ; `puis` : la bulle après le geste. L'entrée, l'objectif et l'objectif atteint : le moteur (`OBJECTIFS`).
+
+    var OBJECTIFS = {
+        pratique: "À la fin de ce parcours, tu seras en mesure de régler un critère algorithmique dans ta grille et de l'appliquer à une première production.",
+        pratiqueAtteint: "Objectif atteint : tu es en mesure de régler un critère algorithmique dans ta grille et de l'appliquer à une première production."
+    };
 
     var TEXTES = {
         grille: {
             titre: "Ta grille",
-            texte: "Un critère algorithmique calcule sa note à partir de ce que tu relèves et comptes dans la production de chaque étudiant·e, et il écrit à ta place le commentaire qui convient à chaque cas. Il prend place dans une grille, seul ou à côté de tes autres critères. Choisis dans le menu en haut de la page la grille de ta prochaine production, ou touche « + Nouvelle grille ». Ajoute ce critère avant d'évaluer cette production : les évaluations déjà enregistrées garderaient leur note sans lui, et les productions ne seraient pas toutes évaluées sur les mêmes critères.",
-            geste: "Ajoute un critère, nomme-le, puis choisis « Algorithmique » dans son menu « Type » : l'atelier du critère s'ouvre.",
+            lieuSuite: ": c'est là que tu composes tes grilles.",
+            lignes: [
+                ['n', "Cette fois, c'est ton propre matériel : ta grille et les productions de ton groupe."],
+                ['n', "Ce parcours suit des productions évaluées. Si ta pratique est « Par standards », les commentaires par cible viendront dans une prochaine version."],
+                ['n', "Tu comptes déjà certaines choses quand tu corriges : des erreurs de français, ou des unités oubliées dans des calculs. Un critère algorithmique garde ce compte, en tire sa note et écrit le commentaire qui convient."],
+                ['n', "Il prend place dans une grille, seul ou à côté de tes autres critères."],
+                ['n', "Prends la grille d'une production que tu n'as pas encore évaluée. Les évaluations déjà enregistrées garderaient leur note sans ce critère : tes étudiant·es ne seraient pas tou·tes évalué·es sur les mêmes critères."],
+                ['c', "Choisis cette grille dans le menu en haut de la page, ou touche « + Nouvelle grille »"]
+            ],
+            puis: { lignes: [
+                ['g', "Touche « + Ajouter un critère »"],
+                ['g', "Écris son nom (ce que tu relèves, par exemple « Français écrit » ou « Unités de mesure »)"],
+                ['c', "Dans le menu « Type » de ce critère, choisis « Algorithmique »"]
+            ] }
         },
         compte: {
             titre: "Ce que tu comptes",
-            texte: "Voici l'atelier de ton critère. En haut, ses cinq étapes, à faire dans l'ordre : une coche marque celles qui sont réglées, un point d'exclamation celles qui t'attendent. Commence par nommer ce que tu relèves dans une production et ce à quoi tu rapportes ce compte : des erreurs sur des mots, des unités manquantes sur des calculs, ou ce qui convient à ta discipline. Écris chaque nom au singulier et au pluriel : l'étudiant·e les lira dans la phrase qui lui donne son compte, et dans son PDF.",
-            geste: "Écris les quatre formes.",
+            confirme: "C'est fait : ton critère est algorithmique. Son atelier s'est ouvert.",
+            lignes: [
+                ['n', "L'atelier règle le critère en cinq étapes, à faire dans l'ordre. Elles sont en haut : une coche marque celles qui sont réglées, un point d'exclamation celles qui t'attendent."],
+                ['n', "La première, « Ce que tu relèves et comptes », demande deux noms : ce que tu comptes dans une production, puis ce à quoi tu rapportes ce compte. Des erreurs sur des mots, des unités manquantes sur des calculs, ou ce qui convient à ta discipline."],
+                ['n', "Écris chaque nom au singulier et au pluriel : l'étudiant·e les lira dans la phrase qui lui donne son compte et dans son PDF."],
+                ['c', "Écris les quatre formes"]
+            ]
         },
         codes: {
             titre: "Tes codes",
-            texte: "Tes codes sont les catégories de ce que tu relèves : chacun a un numéro, que tu poseras sur la production, et un nom. Ajoute un sous-critère par code. Sa pondération dit ce que pèse un code posé : 1 par défaut, 0,5 pour le compter à moitié. Ouvre son « Observation » et écris ce que l'étudiant·e lira à propos de ce code : sa rétroaction reprend les trois codes les plus fréquents de sa production, avec leur nombre et leur observation. Tu enseignes le français écrit ? « Partir de la liste du français écrit » crée d'un coup dix codes, que tu modifies ensuite.",
-            geste: "Ajoute tes codes, puis touche « Continuer ».",
+            confirme: "C'est fait : l'application sait ce que tu comptes et ce à quoi tu le rapportes.",
+            lignes: [
+                ['n', "Tu es à l'étape « Codes utilisés ». Un code est une catégorie de ce que tu relèves. Il porte un nom et un numéro : c'est ce numéro que tu poseras sur la production."],
+                ['n', "Tu écris peut-être déjà un chiffre ou une abréviation dans la marge ; ici, l'application compte chaque code que tu poses."],
+                ['g', "Touche « + Ajouter un sous-critère » et nomme ton premier code"],
+                ['n', "Sa pondération dit ce que vaut un code posé dans le compte : 1 au départ, 0,5 pour le compter à moitié."],
+                ['g', "Ouvre son « Observation » et écris ce que l'étudiant·e lira quand ce code revient souvent dans sa production"],
+                ['g', "Ajoute tes autres codes de la même façon"],
+                ['n', "Tu enseignes le français écrit ? « Partir de la liste du français écrit (codes 1 à 10) » crée dix codes d'un coup, que tu modifies ensuite."],
+                ['c', "Touche « Continuer »"]
+            ]
         },
         note: {
             titre: "Ta note",
-            texte: "Donne d'abord au critère sa pondération, à côté de son type : c'est sa part dans la note de la grille. Si ta grille a d'autres critères, l'étape « Pondération », en tête de la fiche, te dit si le total tombe juste. Choisis ensuite comment ce que tu comptes construit la note. Trois calculs sont prêts : une pénalité proportionnelle à la longueur, où le même compte coûte moins dans une production plus longue ; un rapport visé, où une occurrence à chaque 60 mots, par exemple, donne la note entière ; une pénalité fixe, où chaque occurrence retire les mêmes points. Le premier est choisi au départ. Ajuste le réglage de celui que tu retiens : la carte montre aussitôt la note d'une production fictive.",
-            geste: "Écris la pondération, choisis ton calcul, puis touche « Continuer ».",
+            confirme: "C'est fait : ton critère a ses codes.",
+            lignes: [
+                ['n', "Tu es à l'étape « Note calculée ». Deux réglages font la note de ce critère."],
+                ['g', "Écris sa pondération, dans l'en-tête du critère, à côté de son type (ce que pèse le critère dans le résultat de la production)"],
+                ['n', "Si ta grille a d'autres critères, l'étape « Pondération », en tête de la fiche, te dit si le total tombe juste."],
+                ['n', "Trois calculs sont prêts. « Pénalité proportionnelle à la longueur » : le même compte coûte moins dans une production plus longue. « Rapport visé » : un rapport que tu fixes donne la note entière, par exemple une occurrence à chaque 60 mots. « Pénalité fixe » : chaque occurrence retire les mêmes points."],
+                ['g', "Choisis ton calcul et ajuste son réglage (la carte montre aussitôt la note d'une production fictive)"],
+                ['c', "Touche « Continuer »"]
+            ]
         },
-        cas: {
-            titre: "Tes cas",
-            texte: "Un compte seul ne dit pas si c'est beaucoup. Si tu as une limite en tête, fixe-la : une longueur de référence et la tolérance sur cette longueur, par exemple au plus 4 unités manquantes pour 12 calculs. L'application situe alors chaque production dans des paliers, de « Aucune occurrence » à « Au-delà », et l'étudiant·e lit la phrase du palier où tombe sa production. Réécris ces phrases avec tes mots. Pas de limite ? Laisse l'étape telle quelle : la phrase du compte suffit. La simulation montre ce que lirait l'étudiant·e : change le compte de la production fictive, ou touche « Voir ce que l'étudiant·e lirait à ce palier ».",
-            geste: "Fixe ta limite si tu en as une, relis la simulation, puis touche « Continuer ».",
-        },
-        lit: {
+        casLit: {
             titre: "Ce que l'étudiant·e lit",
-            texte: "Voici les phrases que l'application écrira à ta place sur chaque production. La première donne le compte, sous le critère et dans le PDF de l'étudiant·e : « Ta production contient… ». Les deux autres s'écrivent dans son bilan, selon le cas : quand la note de ce critère tombe à 0, et quand tous les critères de la grille sont maîtrisés. Les blocs, comme le compte ou le nom du critère, se remplissent à l'évaluation. Tu peux réécrire tout le reste, et poser d'autres blocs depuis la palette, là où est ton curseur. « Revenir au modèle » remet la phrase de départ. Si le nom de ton critère contient « français », ces phrases partent du modèle « Français écrit » : choisis « Générique » au menu « Modèle des phrases » pour que tes noms y paraissent. Ta grille est nouvelle ? Donne-lui un nom (il s'imprime dans le PDF de tes étudiant·es), puis touche « Créer la grille ». Une grille existante s'enregistre d'elle-même.",
-            geste: "Relis tes phrases, puis touche « Continuer », ou « Créer la grille » pour une grille nouvelle.",
+            confirme: "C'est fait : la note de ton critère a sa règle.",
+            lignes: [
+                ['n', "Tu es à l'étape « Cas d'interprétation ». Un compte seul ne dit pas si c'est beaucoup."],
+                ['n', "Tu as peut-être un repère en tête. Ici, il s'appelle une limite et tient en deux nombres : une longueur de référence et la tolérance sur cette longueur, par exemple au plus 4 unités manquantes pour 12 calculs."],
+                ['n', "Avec une limite, l'application situe chaque production dans un palier. L'étudiant·e lit la phrase du palier où tombe sa production."],
+                ['g', "Si tu as un repère, touche « Fixer une limite », écris ses deux nombres, puis réécris les phrases des paliers avec tes mots"],
+                ['n', "Pas de repère ? Laisse l'étape telle quelle : la phrase du compte suffit."],
+                ['c', "Touche « Continuer »"]
+            ],
+            puis: { lignes: [
+                ['n', "Voici les phrases que l'application écrira à ta place sur chaque production."],
+                ['n', "La première donne le compte : « Ta production contient… ». Les deux autres vont dans le bilan : l'une quand la note de ce critère tombe à 0, l'autre quand tous les critères de la grille sont maîtrisés."],
+                ['n', "Les blocs colorés, comme le compte, se remplissent à l'évaluation. Le reste se réécrit avec tes mots ; « Revenir au modèle » remet la phrase de départ."],
+                ['g', "Relis tes phrases"],
+                ['n', "Ta grille est nouvelle ? Donne-lui un nom (il s'imprime dans le PDF de tes étudiant·es)."],
+                ['c', "Touche « Continuer », ou « Créer la grille » pour une grille nouvelle"]
+            ] }
         },
         production: {
             titre: "Ta production",
-            texte: "Ta grille est prête : relie-la maintenant à la production qu'elle évaluera. Choisis ta prochaine production dans le menu en haut de la page, ou crée-la avec « + Nouvelle production », comme ta première. Dans « Grille de critères d'évaluation », choisis la grille que tu viens de régler. Choisis une production que tu n'as pas encore évaluée : une production déjà évaluée garde la grille de ses évaluations. Garde une échelle de performance : elle traduit la note de ce critère en niveau, comme pour tes autres critères. La cartouche, elle, ne sert pas à ce critère : il écrit ses phrases seul.",
-            geste: "Choisis ta grille ; pour une production nouvelle, touche ensuite « Créer la production ».",
+            confirme: "C'est fait : ton critère est réglé et ta grille est enregistrée.",
+            lieuSuite: ": c'est là que tu décris ce que tu demandes à tes étudiant·es.",
+            lignes: [
+                ['n', "Ta grille ne sert qu'une fois reliée à la production qu'elle évaluera."],
+                ['g', "Choisis ta prochaine production dans le menu en haut de la page, ou touche « + Nouvelle production »"],
+                ['g', "Dans « Grille de critères d'évaluation », choisis la grille que tu viens de régler"],
+                ['n', "Garde son échelle de performance : elle traduit la note de ce critère en niveau, comme pour tes autres critères."],
+                ['c', "Pour une production nouvelle, touche « Créer la production »"]
+            ]
         },
         productions: {
-            titre: "Tes productions",
-            texte: "Pour poser tes codes, il te faut les productions de tes étudiant·es dans l'application. Dépose leurs fichiers ici, vérifie l'étudiant·e de chacun, puis touche « Importer ». Une fois tes fichiers déposés, choisis bien, dans l'Inspecteur, la production à laquelle tu viens d'associer ta grille : elle s'applique à tout le lot. Le parcours « Recevoir les productions, rendre tes rétroactions » détaille chacun de ces gestes. Tes productions sont sans fichier ? Touche « Rien à importer » : tu taperas ton compte à l'évaluation.",
-            geste: "Importe au moins une production, ou touche « Rien à importer ».",
+            titre: "Leurs productions",
+            confirme: "C'est fait : ta grille est reliée à ta production.",
+            lieuSuite: ": c'est là que tu reçois les productions de tes étudiant·es.",
+            lignes: [
+                ['n', "Pour poser tes codes, il te faut leurs productions dans l'application. Tu l'as fait au parcours 4 ; les gestes sont les mêmes."],
+                ['g', "Dépose leurs fichiers dans la zone"],
+                ['g', "Sous « Inspecteur », choisis la production à laquelle tu viens de relier ta grille"],
+                ['c', "Touche « Importer », puis « Oui, importer »"],
+                ['n', "Ta production est sur papier, ou c'est un exposé, une performance ? Touche « Rien à importer » : tu écriras ton compte à l'évaluation."]
+            ]
         },
         poser: {
             titre: "Poser tes codes",
-            texte: "Dans la liste, touche « Actions › Annoter » sur la ligne d'une production importée. La palette « Codes » porte les codes de ta grille. Touche un code, puis l'endroit de la production où tu l'observes : son numéro s'y pose, dans sa couleur. Sur un clavier, la touche de son numéro le choisit aussi (0 pour le code 10). Chaque code posé compte : leur nombre paraît dans la palette, et le compte du critère se fait tout seul, chaque code selon sa pondération. Les codes identifient des éléments de la production ; les tampons, eux, la commentent : tu peux poser les deux.",
-            geste: "Pose tes codes, puis touche « Annoter ▾ », en haut de la production, et choisis « Évaluer ».",
+            confirme: "C'est fait : les productions de ton groupe sont reçues.",
+            lieuSuite: ": c'est là que tu vois chaque production de ton groupe, une ligne par étudiant·e.",
+            lignes: [
+                ['c', "Sur la ligne d'une production reçue, touche « Actions › Annoter »"]
+            ],
+            puis: { lignes: [
+                ['n', "La palette « Codes » porte les codes de ta grille."],
+                ['g', "Touche un code, puis l'endroit de la production où tu l'observes : son numéro s'y pose"],
+                ['n', "Sur un clavier, la touche de son numéro le choisit aussi (0 pour le code 10). Le nombre de codes posés paraît dans la palette : le compte se fait seul."],
+                ['n', "Un code relève ; il ne commente pas. Pour un commentaire sur la production, prends l'outil « Texte ». Le « Stylo » sert à encercler ou à tracer une flèche."],
+                ['c', "Quand tu as fini, touche « Annoter ▾ », en haut de la production, puis choisis « Évaluer »"]
+            ] }
         },
         retro: {
             titre: "Ta rétroaction s'écrit seule",
-            texte: "Dans « Évaluation », ton critère algorithmique porte déjà le compte de tes codes. Écris ce à quoi tu le rapportes, par exemple le nombre de mots ou de calculs de cette production : sans ce nombre, la note ne se calcule pas, sauf avec une pénalité fixe. Évalue tes autres critères comme d'habitude. Ouvre ensuite la palette « Rétroaction ». Sous ton critère, tu trouves la phrase du compte et, si tu as fixé une limite, celle de son palier ; dans « Spécifique », ses trois codes les plus fréquents, avec leur observation ; et son PDF nommera, sous « Points récurrents », le code qui revient le plus. Tu n'as écrit aucune phrase pour cette production : tout vient de tes règles. Relis-la comme ton étudiant·e la lira. Un mot personnel ? Écris-le dans « Un mot pour ton étudiant·e ». Puis touche le cadenas « Verrouiller », en haut de « Paramètres ».",
-            geste: "Écris ce nombre, relis la rétroaction, puis verrouille.",
+            confirme: "C'est fait : tes codes sont posés. Tu es en mode Évaluer.",
+            lignes: [
+                ['n', "Dans la palette « Évaluation », ton critère algorithmique porte déjà le compte de tes codes."],
+                ['g', "Écris ce à quoi tu le rapportes, par exemple le nombre de mots ou de calculs de cette production (la note se calcule aussitôt)"],
+                ['g', "Évalue tes autres critères comme d'habitude"],
+                ['n', "Dans la palette « Rétroaction », sous ton critère : la phrase du compte et, si tu as fixé une limite, celle du palier. Dans la vue « Spécifique » : les codes les plus fréquents, chacun avec son observation."],
+                ['n', "Tu n'as écrit aucune de ces phrases pour cette production : elles viennent toutes de tes règles."],
+                ['g', "Relis la rétroaction comme ton étudiant·e la lira (un mot personnel s'écrit dans « Un mot pour ton étudiant·e »)"],
+                ['c', "Touche le cadenas « Verrouiller », en haut de la palette « Paramètres »"]
+            ]
         },
         retroSans: {
             titre: "Ta rétroaction s'écrit seule",
-            texte: "Pas besoin d'importer : touche « Actions › Évaluer » sur la ligne de l'étudiant·e. Dans le panneau « Critères », ton critère algorithmique attend deux nombres : ton compte, et ce à quoi tu le rapportes, par exemple le nombre de mots ou de calculs de sa production. Tapé, ton compte vaut tel quel : la pondération de tes codes ne s'applique pas. Évalue tes autres critères comme d'habitude. Regarde ensuite la rétroaction, à côté : sous ton critère, tu trouves la phrase du compte et, si tu as fixé une limite, celle de son palier. Sans codes posés, l'application ne sait pas lesquels reviennent : ni « Spécifique » ni « Bilan » ne les nomment. Tu n'as écrit aucune phrase pour cette production : tout vient de tes règles. Relis-la comme ton étudiant·e la lira. Un mot personnel ? Écris-le dans « Un mot pour ton étudiant·e ». Puis touche le cadenas « Verrouiller », en haut de « Paramètres ».",
-            geste: "Tape tes deux nombres, relis la rétroaction, puis verrouille.",
+            confirme: "C'est fait : pas de fichier à importer.",
+            lieuSuite: ": c'est là que tu vois chaque production de ton groupe, une ligne par étudiant·e.",
+            lignes: [
+                ['c', "Sur la ligne d'un·e étudiant·e, touche « Actions › Évaluer »"]
+            ],
+            puis: { lignes: [
+                ['n', "Sans fichier, il n'y a pas de codes à poser : tu comptes de ton côté."],
+                ['g', "Dans le panneau « Critères », écris tes deux nombres : ton compte et ce à quoi tu le rapportes"],
+                ['g', "Évalue tes autres critères comme d'habitude"],
+                ['n', "La rétroaction, à côté, porte la phrase du compte et, si tu as fixé une limite, celle du palier. Elle ne nomme pas tes codes : l'application ne sait pas lesquels reviennent."],
+                ['c', "Relis-la, puis touche le cadenas « Verrouiller »"]
+            ] }
         },
         loin: {
-            titre: "Pour aller plus loin",
-            texte: "Te voilà avec une première rétroaction écrite à partir de tes règles. Chaque production que tu évalueras avec cette grille recevra la sienne de la même façon. Tu n'as rien de plus à faire ; si tu veux aller plus loin, à ton rythme, tout se trouve dans l'atelier du critère. « Montrer d'où vient chaque phrase », dans la simulation, et l'encadré « Ce que l'application choisit sans toi », dans l'étape « Cas d'interprétation », disent comment chaque phrase se construit. Une table de cas ajoute un texte selon une valeur de la production, comme la note ou le code le plus fréquent. « Composer ton propre calcul » va au-delà des trois calculs prêts. Un palier peut nommer un service d'aide, ou te signaler l'étudiant·e à côté de son niveau RàI. « Enregistrer ces paliers sous un nom… » les garde pour une autre grille. Pour un prochain critère, crée-le dans Grilles : tant qu'il n'a aucun code, Conception › Mon matériel y colle d'un coup une liste tirée d'un tableur.",
-            geste: "Touche « Terminer ».",
+            titre: "Et pour tes prochaines productions",
+            confirme: "C'est fait : l'évaluation est verrouillée.",
+            lignes: [
+                ['n', "Chaque production que tu évalueras avec cette grille recevra sa rétroaction de la même façon : tu poses tes codes, l'application compte et écrit."],
+                ['n', "Le réglage est fait. Tu peux y revenir quand tu veux, dans l'atelier du critère."]
+            ]
         }
     };
+
+    /** Une ligne de la bulle : ['n'|'g'|'c', texte] ; `plus` : sa fonction `fait`, ou { fait, champs, montre }. */
+    function ligne(def, plus) {
+        var t = def[0], texte = def[1];
+        var o = typeof plus === 'function' ? { fait: plus } : (plus || {});
+        var l = t === 'c' ? { texte: texte, geste: true } : t === 'g' ? { texte: texte } : { texte: texte, note: true };
+        if (o.fait) l.fait = o.fait;
+        else if (t === 'g' && !o.champs) l.fait = function () { return false; };
+        if (o.champs) l.champs = o.champs;
+        if (o.montre) { l.montre = o.montre; delete l.note; }
+        return l;
+    }
+    function lignesDe(defs, plus) { return defs.map(function (d, k) { return ligne(d, plus && plus[k]); }); }
 
     // ---------- Ce que le parcours lit (il n'écrit jamais dans les données) ----------
 
@@ -482,8 +594,8 @@
 
     // ---------- Les étapes ----------
 
-    var ETAPES = {
-        grille: Object.assign({}, TEXTES.grille, {
+    var MECANIQUE = {
+        grille: ({
             avant: async function () {
                 aller('conception', 'grille-criteres');
                 await attendre(function () { return sousSectionVisible('conception-grille-criteres'); }, 2000);
@@ -506,7 +618,7 @@
             },
             atteint: function () { return !!atelier(); }
         }),
-        compte: Object.assign({}, TEXTES.compte, {
+        compte: ({
             // Ce que la bulle ne couvre que faute de mieux (11 nov. 2026 : la règle de `bulleHors`, retirée, passe au moteur).
             aussiEviter: function () { var a = atelier(); return [a && a.querySelector('.atelier-algo-chaine')]; },
             avant: function () { return assurerAtelier('compte'); },
@@ -519,7 +631,7 @@
                 return reglee('compte');
             }
         }),
-        codes: Object.assign({}, TEXTES.codes, {
+        codes: ({
             avant: function () { return assurerAtelier('codes'); },
             zones: function () { return [sectionAtelier('codes')]; },
             contour: function () { return boutonQuiDit(corpsAtelier('codes'), 'Ajouter un sous-crit'); },
@@ -527,7 +639,7 @@
                 attend: function () { return nombreDeCodes() > 0 ? '' : ATTENTES.codes; } }],
             atteint: function () { return false; }
         }),
-        note: Object.assign({}, TEXTES.note, {
+        note: ({
             avant: function () { return assurerAtelier('note'); },
             zones: function () { return [champPonderation(carteDuCritere()), sectionAtelier('note')]; },
             contour: function () {
@@ -541,7 +653,7 @@
                 attend: function () { return reglee('note') ? '' : (ponderationManque() ? ATTENTES.ponderation : ATTENTES.calcul); } }],
             atteint: function () { return false; }
         }),
-        cas: Object.assign({}, TEXTES.cas, {
+        cas: ({
             // Ce que la bulle ne couvre que faute de mieux (11 nov. 2026 : la règle de `bulleHors`, retirée, passe au moteur).
             // « ou touche « Retirer la limite » » (la phrase sous « Continuer », 11 nov. 2026) : la bulle ne le couvre pas non plus.
             aussiEviter: function () {
@@ -563,7 +675,7 @@
                 attend: function () { return reglee('paliers') ? '' : ATTENTES.limite; } }],
             atteint: function () { return false; }
         }),
-        lit: Object.assign({}, TEXTES.lit, {
+        lit: ({
             // Ce que la bulle ne couvre que faute de mieux (11 nov. 2026 : la règle de `bulleHors`, retirée, passe au moteur).
             aussiEviter: function () { return [enCreation() ? vis(document.getElementById('nomGrilleTemplate')) : null]; },
             avant: function () { return assurerAtelier('eleve'); },
@@ -588,7 +700,7 @@
                 return !!(creationVue && g && grilleExiste(g.id) && atelier());
             }
         }),
-        production: Object.assign({}, TEXTES.production, {
+        production: ({
             avant: async function () {
                 aller('conception', 'productions');
                 await attendre(function () { return sousSectionVisible('conception-productions'); }, 2000);
@@ -608,7 +720,7 @@
             },
             atteint: function () { return productionsDuParcours().length > 0; }
         }),
-        productions: Object.assign({}, TEXTES.productions, {
+        productions: ({
             avant: async function () {
                 aller('evaluations', 'importer');
                 await attendre(function () { return !!vis(document.getElementById('travaux-drop-zone')); }, 2000);
@@ -624,7 +736,7 @@
             } }],
             atteint: function () { return fichiersImportes(productionsDuParcours()).length > 0; }
         }),
-        poser: Object.assign({}, TEXTES.poser, {
+        poser: ({
             // Ce que la bulle ne couvre que faute de mieux (11 nov. 2026 : la règle de `bulleHors`, retirée, passe au moteur).
             aussiEviter: function () {
                 return annoterOuvert() ? [palette('travaux-palette-erreurs-fr'), vis(document.getElementById('travaux-btn-actions'))] : [];
@@ -654,7 +766,7 @@
                 return evaluationOuverte();
             }
         }),
-        retro: Object.assign({}, TEXTES.retro, {
+        retro: ({
             avant: async function () {
                 retenirVerrous();
                 if (evaluationOuverte()) return;
@@ -672,7 +784,7 @@
                 return verrouNeuf();
             }
         }),
-        retroSans: Object.assign({}, TEXTES.retroSans, {
+        retroSans: ({
             avant: async function () {
                 retenirVerrous();
                 if (evaluationOuverte()) return;
@@ -690,7 +802,7 @@
                 return verrouNeuf();
             }
         }),
-        loin: Object.assign({}, TEXTES.loin, {
+        loin: ({
             centre: true,
             sansSortie: true,
             boutons: [{ libelle: 'Terminer', primaire: true, action: function () { terminer(); } }]
@@ -700,9 +812,109 @@
     // Vu en création pendant l'étape 6 : la grille est nouvelle, l'étape attend qu'elle soit créée.
     var creationVue = false;
 
+    // ---------- Les bulles : la mécanique ci-dessus, les lignes du 22 nov. ----------
+
+    /** Une étape : sa mécanique (ses descripteurs copiés, getters compris), puis ce que `o` redonne. */
+    function etape(mecanique, o) {
+        var e = {};
+        Object.keys(mecanique).forEach(function (k) { Object.defineProperty(e, k, Object.getOwnPropertyDescriptor(mecanique, k)); });
+        Object.keys(o).forEach(function (k) { Object.defineProperty(e, k, Object.getOwnPropertyDescriptor(o, k)); });
+        // Une bulle en lignes ne fléche ses zones que si elle les déclare (`designe`, js/parcours-moteur.js).
+        if (!e.fleches && e.zones) e.fleches = function () { return ((e.zones && e.zones()) || []).filter(Boolean); };
+        return e;
+    }
+
+    // L'étape où ce passage a commencé : une bulle ne confirme l'étape d'avant que si elle a été faite pendant ce passage,
+    // et que l'étape d'avant, sur le chemin, est bien celle que la confirmation nomme (une étape sautée n'en a pas).
+    var debutDuPassage = 0;
+    function confirmation(bulle, avant) {
+        return function () {
+            var m = M(), i = m && m.joue(DEF) ? m.etapeCourante() : null;
+            var chemin = lireCtx().chemin || [];
+            if (i === null || i <= debutDuPassage || chemin[i - 1] !== avant) return '';
+            return TEXTES[bulle].confirme;
+        };
+    }
+
+    // La bulle 5 : deux formes, l'étape « Cas d'interprétation », puis « Ce que l'étudiant·e lit » (« Continuer »).
+    var formeLit = false;
+
+    var ETAPES = {
+        grille: etape(MECANIQUE.grille, {
+            titre: TEXTES.grille.titre, amener: true, lieu: true, lieuSuite: TEXTES.grille.lieuSuite, lignesVivantes: true,
+            secondeForme: function () { return ficheOuverte(); },
+            lignes: function () {
+                if (!ficheOuverte()) return lignesDe(TEXTES.grille.lignes);
+                return lignesDe(TEXTES.grille.puis.lignes, [function () { return !!carteAjoutee(); }, function () {
+                    var c = carteAjoutee(), n = c ? c.querySelector('input[type="text"]') : null;
+                    return !!(n && String(n.value || '').trim() && n.value !== 'Nouveau critère');
+                }, function () { return !!atelier(); }]);
+            }
+        }),
+        compte: etape(MECANIQUE.compte, { titre: TEXTES.compte.titre, confirme: confirmation('compte', 'grille'),
+            lignes: function () { return lignesDe(TEXTES.compte.lignes, [null, null, null, function () { return reglee('compte'); }]); } }),
+        codes: etape(MECANIQUE.codes, { titre: TEXTES.codes.titre, confirme: confirmation('codes', 'compte'), lignesVivantes: true,
+            lignes: function () {
+                var un = function () { return nombreDeCodes() > 0; };
+                return lignesDe(TEXTES.codes.lignes, [null, null, un, null, null, function () { return nombreDeCodes() > 1; }]);
+            } }),
+        note: etape(MECANIQUE.note, { titre: TEXTES.note.titre, confirme: confirmation('note', 'codes'), lignesVivantes: true,
+            lignes: function () {
+                return lignesDe(TEXTES.note.lignes, [null, { champs: function () { return [champPonderation(carteDuCritere())].filter(Boolean); } }, null, null,
+                    function () { return reglee('note'); }]);
+            } }),
+        casLit: etape(MECANIQUE.cas, {
+            titre: TEXTES.casLit.titre,
+            confirme: confirmation('casLit', 'note'),
+            lignesVivantes: true,
+            secondeForme: function () { return formeLit; },
+            avant: function () { return assurerAtelier(formeLit ? 'eleve' : 'paliers'); },
+            lignes: function () { return lignesDe(formeLit ? TEXTES.casLit.puis.lignes : TEXTES.casLit.lignes); },
+            aussiEviter: function () { return formeLit ? MECANIQUE.lit.aussiEviter() : MECANIQUE.cas.aussiEviter(); },
+            zones: function () { return formeLit ? MECANIQUE.lit.zones() : MECANIQUE.cas.zones(); },
+            contour: function () { return formeLit ? MECANIQUE.lit.contour() : MECANIQUE.cas.contour(); },
+            get boutons() {
+                if (formeLit) return MECANIQUE.lit.boutons;
+                return [{ libelle: 'Continuer', primaire: true,
+                    action: function () { formeLit = true; creationVue = enCreation(); assurerAtelier('eleve'); },
+                    attend: function () { return reglee('paliers') ? '' : ATTENTES.limite; } }];
+            },
+            atteint: function () { return formeLit && MECANIQUE.lit.atteint(); }
+        }),
+        production: etape(MECANIQUE.production, { titre: TEXTES.production.titre, confirme: confirmation('production', 'casLit'),
+            amener: true, lieu: true, lieuSuite: TEXTES.production.lieuSuite, lignes: function () { return lignesDe(TEXTES.production.lignes); } }),
+        productions: etape(MECANIQUE.productions, { titre: TEXTES.productions.titre, confirme: confirmation('productions', 'production'),
+            amener: true, lieu: true, lieuSuite: TEXTES.productions.lieuSuite, lignes: function () { return lignesDe(TEXTES.productions.lignes); } }),
+        poser: etape(MECANIQUE.poser, { titre: TEXTES.poser.titre, confirme: confirmation('poser', 'productions'),
+            amener: true, lieu: function () { return !annoterOuvert() && !evaluationOuverte(); }, lieuSuite: TEXTES.poser.lieuSuite, lignesVivantes: true,
+            secondeForme: function () { return annoterOuvert(); },
+            lignes: function () { return lignesDe(annoterOuvert() ? TEXTES.poser.puis.lignes : TEXTES.poser.lignes); } }),
+        retro: etape(MECANIQUE.retro, { titre: TEXTES.retro.titre, confirme: confirmation('retro', 'poser'), lignesVivantes: true,
+            lignes: function () {
+                return lignesDe(TEXTES.retro.lignes, [null, { champs: function () { return [champAlgo('eval_mots_')].filter(Boolean); } }]);
+            } }),
+        retroSans: etape(MECANIQUE.retroSans, { titre: TEXTES.retroSans.titre, confirme: confirmation('retroSans', 'productions'),
+            amener: true, lieu: function () { return !evaluationOuverte(); }, lieuSuite: TEXTES.retroSans.lieuSuite, lignesVivantes: true,
+            secondeForme: function () { return evaluationOuverte(); },
+            lignes: function () {
+                return evaluationOuverte() ? lignesDe(TEXTES.retroSans.puis.lignes, [null, { champs: function () { return [champAlgo('eval_erreurs_'), champAlgo('eval_mots_')].filter(Boolean); } }])
+                    : lignesDe(TEXTES.retroSans.lignes);
+            } }),
+        // La consigne des boutons : « Touche « Terminer » », que le moteur dit « Touche « Voir le parcours 9 », ou
+        // « Terminer » » quand il offre la suite (`consigneDeLaFin`) ; elle suit les boutons, elle n'est pas un texte écrit.
+        loin: etape(MECANIQUE.loin, { titre: TEXTES.loin.titre, confirme: confirmation('loin', null),
+            lignes: function () { return lignesDe(TEXTES.loin.lignes).concat([{ texte: 'Touche « Terminer »', geste: true }]); } })
+    };
+    // La dernière bulle confirme le verrou, d'où que l'on vienne (la rétroaction avec ou sans fichier).
+    ETAPES.loin.confirme = function () {
+        var m = M(), i = m && m.joue(DEF) ? m.etapeCourante() : null;
+        var chemin = lireCtx().chemin || [];
+        return i !== null && i > debutDuPassage && /^retro/.test(chemin[i - 1] || '') ? TEXTES.loin.confirme : '';
+    };
+
     // ---------- Le chemin : les étapes qui s'appliquent, dans l'ordre de la consigne ----------
 
-    var ORDRE = ['grille', 'compte', 'codes', 'note', 'cas', 'lit', 'production', 'productions', 'poser', 'retro', 'retroSans', 'loin'];
+    var ORDRE = ['grille', 'compte', 'codes', 'note', 'casLit', 'production', 'productions', 'poser', 'retro', 'retroSans', 'loin'];
 
     /** Ce que les données disent aujourd'hui des étapes 7 et 8 (une étape déjà figée ne bouge plus). */
     function sautsPrevus(c) {
@@ -716,7 +928,7 @@
     }
 
     function cheminDe(c, s) {
-        var k = ['grille', 'compte', 'codes', 'note', 'cas', 'lit'];
+        var k = ['grille', 'compte', 'codes', 'note', 'casLit'];
         if (!s.saute7) k.push('production');
         if (!s.saute8) k.push('productions');
         if (c.sansFichier) k.push('retroSans');
@@ -725,7 +937,7 @@
         return k;
     }
 
-    var DEF = { id: ID, etapes: [], lienSortie: 'Plus tard' };
+    var DEF = { id: ID, etapes: [], lienSortie: 'Plus tard', objectif: OBJECTIFS.pratique, objectifAtteint: OBJECTIFS.pratiqueAtteint };
 
     function poserChemin(cles) { DEF.etapes = cles.map(function (k) { return ETAPES[k]; }); }
 
@@ -761,7 +973,7 @@
         // pas encore choisie, et `avant` referme une fiche restée ouverte), aucune pendant une création.
         // Fiche fermée (« Reprendre » après un rechargement) : la grille retenue reste, l'étape la rouvre.
         if (i === 0) c.grilleId = null;
-        else if (i <= ORDRE.indexOf('lit') + 1 && ficheOuverte()) c.grilleId = grilleOuverte() ? grilleOuverte().id : null;
+        else if (i <= ORDRE.indexOf('casLit') + 1 && ficheOuverte()) c.grilleId = grilleOuverte() ? grilleOuverte().id : null;
         var s = sautsPrevus(c);
         var neuf = cheminDe(c, s);
         var cleEtape = neuf[i];
@@ -773,7 +985,7 @@
         c.chemin = neuf;
         ecrireCtx(c);
         poserChemin(neuf);
-        if (cleEtape === 'lit') creationVue = enCreation();
+        if (cleEtape === 'casLit') { formeLit = false; creationVue = enCreation(); }
         window.Assistance.definirEtat(ID, 'en-cours', i);
     }
 
@@ -787,6 +999,8 @@
         var chemin = Array.isArray(c.chemin) && c.chemin.length ? c.chemin : cheminDe(c, sautsPrevus(c));
         poserChemin(chemin);
         var i = Math.min(reprise ? depuis : 0, chemin.length - 1);
+        debutDuPassage = i;
+        formeLit = false;
         return M().lancer(DEF, {
             depuis: i,
             surEtape: surEtape,
@@ -820,5 +1034,6 @@
     });
 
     // Pour les bancs : les étapes telles qu'elles sont posées, et le chemin courant.
-    window.ParcoursCommentaires = { etapes: ETAPES, chemin: function () { return DEF.etapes.slice(); }, refus: refus };
+    window.ParcoursCommentaires = { etapes: ETAPES, textes: TEXTES, objectifs: OBJECTIFS, attentes: ATTENTES, ordre: ORDRE,
+        chemin: function () { return DEF.etapes.slice(); }, definition: DEF, refus: refus };
 })();

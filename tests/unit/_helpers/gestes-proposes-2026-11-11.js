@@ -11,9 +11,9 @@ export const GESTES_PROPOSES = {
     // « Mettre ta classe en place » n'a plus de ligne du geste à part (14 nov. 2026, essai novice) : chaque bulle est
     // une liste de lignes, la consigne en dernier, et toutes viennent de plans de travail/CONSIGNE-2026-11-14-essai-novice.md
     // (sentinelle-parcours-classe-2026-11-09.test.js, qui nomme aussi ce que la session a écrit).
-    'js/parcours-commentaires.js': [
-        "Touche « Terminer ».",
-    ],
+    // js/parcours-commentaires.js n'a plus de geste proposé : son « Nous faisons » est celui du 22 nov. 2026, écrit avec
+    // Grégoire (sentinelle-parcours-commentaires-2026-11-22.test.js, confrontée à
+    // CONSIGNE-2026-11-22-echelle-de-depart-et-parcours-6-7-8.md, § 4.2).
     // js/parcours-cours.js n'a plus de geste proposé : ses sept bulles sont celles du 19 nov. 2026, réécrites avec
     // Grégoire (« Nous faisons », sentinelle-parcours-cours-2026-11-09.test.js).
     // js/parcours-decouvrir.js n'a plus de geste proposé : ses huit bulles sont celles du 16 nov. 2026, réécrites

@@ -224,7 +224,7 @@ test('panneau : la démo et un service d’orthopédagogie font refuser ; avec u
     await ouvrirPanneau(page);
     await item(page).locator('.assistance-parcours-bouton').click();
     await attendreTitre(page, 'Ta grille');
-    await expect(rang(page)).toHaveText('1 sur 11');
+    await expect(rang(page)).toHaveText('1 sur 10');
     await expect(page.locator('#conception-grille-criteres')).toBeVisible();
 });
 
@@ -417,7 +417,7 @@ async function reglerUneGrilleNeuve(page, cap = async () => {}) {
     await ouvrirPanneau(page);
     await item(page).locator('.assistance-parcours-bouton').click();
     await attendreTitre(page, 'Ta grille');
-    await expect(rang(page)).toHaveText('1 sur 11');
+    await expect(rang(page)).toHaveText('1 sur 10');
     await contourSur(page, '#conception-grille-criteres .rangee-selection');
     await cap(1);
     await toucher(page, '#conception-grille-criteres [data-action="creerNouvelleGrille"]');
@@ -427,13 +427,13 @@ async function reglerUneGrilleNeuve(page, cap = async () => {}) {
     await page.selectOption('#listeCriteres select[data-on-change="modifierTypeCritereTempHandler"]', 'algorithmique');
 
     await attendreTitre(page, 'Ce que tu comptes');
-    await expect(rang(page)).toHaveText('2 sur 11');
+    await expect(rang(page)).toHaveText('2 sur 10');
     await expect(page.locator('#listeCriteres .atelier-algo-etape[data-etape="compte"]')).toHaveAttribute('data-ouverte', '');
     await cap(2);
     await ecrireLesQuatreFormes(page);
 
     await attendreTitre(page, 'Tes codes');
-    await expect(rang(page)).toHaveText('3 sur 11');
+    await expect(rang(page)).toHaveText('3 sur 10');
     // « Continuer » attend qu'un code pèse plus de 0 : visible, inactif, la raison dessous (11 nov. 2026, 12 h 05).
     await continuerAttend(page, ATTENTE.codes);
     await cap(3);
@@ -445,7 +445,7 @@ async function reglerUneGrilleNeuve(page, cap = async () => {}) {
 
     // 4. Ta note (capture 32) : sans pondération, « Continuer » le dit ; le champ, à côté du type, est amené à l'écran.
     await attendreTitre(page, 'Ta note');
-    await expect(rang(page)).toHaveText('4 sur 11');
+    await expect(rang(page)).toHaveText('4 sur 10');
     await continuerAttend(page, ATTENTE.ponderation);
     await contourSur(page, '#listeCriteres input[data-on-change="modifierPonderationCritereTempHandler"]');
     await aLEcran(page, '#listeCriteres input[data-on-change="modifierPonderationCritereTempHandler"]');
@@ -457,8 +457,8 @@ async function reglerUneGrilleNeuve(page, cap = async () => {}) {
 
     // 5. Tes cas (capture 33) : sans limite, réglée ; une limite fixée et vide, « Continuer » attend, et la flèche et le
     // halo vont à la longueur, puis à la tolérance, un geste à la fois ; la limite retirée, l'étape est réglée de nouveau.
-    await attendreTitre(page, 'Tes cas');
-    await expect(rang(page)).toHaveText('5 sur 11');
+    await attendreTitre(page, "Ce que l'étudiant·e lit");
+    await expect(rang(page)).toHaveText('5 sur 10');
     await contourSur(page, '#listeCriteres .table-cas-fixer');
     await continuerPret(page);
     await cap(5);
@@ -479,8 +479,10 @@ async function reglerUneGrilleNeuve(page, cap = async () => {}) {
     await continuerPret(page);
     await boutonBulle(page, 'Continuer').click();
 
-    await attendreTitre(page, "Ce que l'étudiant·e lit");
-    await expect(rang(page)).toHaveText('6 sur 11');
+    // 22 nov. 2026 : « Tes cas » et « Ce que l'étudiant·e lit » sont les deux formes de la bulle 5 (consigne du 22 nov.,
+    // § 4.2) : « Continuer » change la forme, pas la bulle.
+    await expect(bulle(page)).toContainText("Voici les phrases que l'application écrira à ta place sur chaque production.");
+    await expect(rang(page)).toHaveText('5 sur 10');
     // Une grille nouvelle : elle avance quand la grille est créée ; « Continuer » attend, et le dit.
     await continuerAttend(page, ATTENTE.grille);
     await contourSur(page, '#listeCriteres .atelier-algo-etape[data-etape="eleve"] .atelier-algo-etape-corps');
@@ -502,21 +504,21 @@ async function reglerUneGrilleNeuve(page, cap = async () => {}) {
  */
 async function finirLeCheminAvecFichier(page, grille, cap = async () => {}) {
     await attendreTitre(page, 'Ta production');
-    await expect(rang(page)).toHaveText('7 sur 11');
+    await expect(rang(page)).toHaveText('6 sur 10');
     await cap(7);
     await page.selectOption('#menuProductions', 'P_P8_2');
     await contourSur(page, '#productionGrille');
     await page.selectOption('#productionGrille', grille.id);
 
-    await attendreTitre(page, 'Tes productions');
-    await expect(rang(page)).toHaveText('8 sur 11');
+    await attendreTitre(page, 'Leurs productions');
+    await expect(rang(page)).toHaveText('7 sur 10');
     await contourSur(page, '#travaux-drop-zone');
     await expect(boutonBulle(page, 'Rien à importer')).toBeVisible();
     await cap(8);
     await poserFichierImporte(page);
 
     await attendreTitre(page, 'Poser tes codes');
-    await expect(rang(page)).toHaveText('9 sur 11');
+    await expect(rang(page)).toHaveText('8 sur 10');
     const actions = '#evaluations-liste tr[data-production-id="P_P8_2"] select.eval-actions-select';
     await contourSur(page, actions);
     await page.selectOption(actions, 'annoter|FT_P8_1|P_P8_2');
@@ -559,7 +561,7 @@ async function finirLeCheminAvecFichier(page, grille, cap = async () => {}) {
     await toucher(page, '#travaux-btn-evaluer');
 
     await attendreTitre(page, "Ta rétroaction s'écrit seule");
-    await expect(rang(page)).toHaveText('10 sur 11');
+    await expect(rang(page)).toHaveText('9 sur 10');
     await expect(page.locator('#eval_erreurs_' + grille.critereId)).toHaveValue('2', { timeout: 6000 });
     await contourSur(page, '#eval_mots_' + grille.critereId);
     await bulleNeCouvrePasLeContour(page);
@@ -582,8 +584,8 @@ async function finirLeCheminAvecFichier(page, grille, cap = async () => {}) {
     await cap(10);
     await toucher(page, '#btnVerrouillerEvaluation');
 
-    await attendreTitre(page, 'Pour aller plus loin');
-    await expect(rang(page)).toHaveText('11 sur 11');
+    await attendreTitre(page, 'Et pour tes prochaines productions');
+    await expect(rang(page)).toHaveText('10 sur 10');
     await expect(bulle(page).locator('.parcours-bulle-sortie')).toHaveCount(0);
     await cap(11);
     await boutonBulle(page, 'Terminer').click();
@@ -600,22 +602,22 @@ test('de bout en bout, avec fichier : une grille neuve, deux codes posés, la r�
     await expect(item(page)).toHaveAttribute('data-etat', 'fait');
 });
 
-test('l’étape 8 sautée : la production associée à l’étape 7 a déjà ses fichiers (8 sur 10) ; une grille restée ouverte au lancement n’est pas celle du parcours', async ({ page }) => {
+test('l’étape 8 sautée : la production associée à l’étape 7 a déjà ses fichiers (7 sur 9) ; une grille restée ouverte au lancement n’est pas celle du parcours', async ({ page }) => {
     test.setTimeout(120000);
     await ouvrirEspace(page, 1180);
     await poserFichierImporte(page);   // « Rédaction 2 » a déjà une production importée, sans grille
     // Une grille déjà employée reste ouverte au lancement : le parcours la referme, et la grille neuve
-    // est celle du parcours (le compte reste « n sur 11 » pendant les étapes 2 à 6, pas « n sur 10 »).
+    // est celle du parcours (le compte reste « n sur 10 » pendant les étapes 2 à 5, pas « n sur 9 »).
     await page.evaluate(() => naviguerVers('conception', 'grille-criteres'));
     await page.evaluate(() => chargerGrillePourModif('G_P8_1'));
     await expect(page.locator('#conteneurEditionGrille')).toBeVisible();
     const grille = await reglerUneGrilleNeuve(page);
     await attendreTitre(page, 'Ta production');
-    await expect(rang(page)).toHaveText('7 sur 11');
+    await expect(rang(page)).toHaveText('6 sur 10');
     await page.selectOption('#menuProductions', 'P_P8_2');
     await page.selectOption('#productionGrille', grille.id);
     await attendreTitre(page, 'Poser tes codes');
-    await expect(rang(page)).toHaveText('8 sur 10');
+    await expect(rang(page)).toHaveText('7 sur 9');
 });
 
 // Corrections du 9 nov. (décision 2) : à 820 px, l'orange « Grille enregistrée : ses critères totalisent… »
@@ -773,13 +775,13 @@ async function cheminSansFichier(page, cap = async () => {}) {
 
     // La grille porte déjà une production : l'étape 7 ne compte pas (10 étapes au lieu de 11).
     await attendreTitre(page, 'Ce que tu comptes');
-    await expect(rang(page)).toHaveText('2 sur 10');
+    await expect(rang(page)).toHaveText('2 sur 9');
     await cap(2);
     await ecrireLesQuatreFormes(page);
 
     // « Plus tard » ferme la bulle ; le parcours attend dans le panneau ; « Reprendre » revient à la même étape.
     await attendreTitre(page, 'Tes codes');
-    await expect(rang(page)).toHaveText('3 sur 10');
+    await expect(rang(page)).toHaveText('3 sur 9');
     await bulle(page).locator('.parcours-bulle-sortie').click();
     await expect(bulle(page)).toHaveCount(0);
     // Un rechargement entre les deux : « Reprendre » retrouve la grille du parcours et rouvre sa fiche.
@@ -789,12 +791,12 @@ async function cheminSansFichier(page, cap = async () => {}) {
     await rouvrirLesParcours(page); // fermés dans l'application depuis le 15 nov. 2026 : le banc les rouvre
     await ouvrirPanneau(page);
     await expect(item(page)).toHaveAttribute('data-etat', 'en-cours');
-    await expect(item(page).locator('.assistance-parcours-etat')).toHaveText('Étape 3 sur 10');
+    await expect(item(page).locator('.assistance-parcours-etat')).toHaveText('Étape 3 sur 9');
     await expect(item(page).locator('.assistance-parcours-bouton')).toHaveText('Reprendre');
     await capture(page, 'sans-fichier-panneau-en-cours');
     await item(page).locator('.assistance-parcours-bouton').click();
     await attendreTitre(page, 'Tes codes');
-    await expect(rang(page)).toHaveText('3 sur 10');
+    await expect(rang(page)).toHaveText('3 sur 9');
     for (let k = 0; k < 2; k++) {
         await toucher(page, '#listeCriteres .atelier-algo-etape[data-etape="codes"] [data-action="ajouterSousCritere"]');
     }
@@ -809,26 +811,26 @@ async function cheminSansFichier(page, cap = async () => {}) {
     await page.locator(pond).last().dispatchEvent('change');
     await expect(boutonBulle(page, 'Continuer')).toBeVisible();
     await boutonBulle(page, 'Continuer').click();
-    await attendreTitre(page, 'Tes cas');
+    await attendreTitre(page, "Ce que l'étudiant·e lit");
     await cap(5);
     await boutonBulle(page, 'Continuer').click();
 
     // Une grille existante s'enregistre d'elle-même : « Continuer », pas « Créer la grille ».
-    await attendreTitre(page, "Ce que l'étudiant·e lit");
-    await expect(rang(page)).toHaveText('6 sur 10');
+    await expect(bulle(page)).toContainText("Voici les phrases que l'application écrira à ta place sur chaque production.");
+    await expect(rang(page)).toHaveText('5 sur 9');
     await cap(6);
     await expect(boutonBulle(page, 'Continuer')).toBeVisible();
     await boutonBulle(page, 'Continuer').click();
 
-    await attendreTitre(page, 'Tes productions');
-    await expect(rang(page)).toHaveText('7 sur 10');
+    await attendreTitre(page, 'Leurs productions');
+    await expect(rang(page)).toHaveText('6 sur 9');
     await cap(8);
     await boutonBulle(page, 'Rien à importer').click();
 
     // Sans fichier : l'étape 9 sautée, la variante de l'étape 10 ; 9 étapes en tout.
     await attendreTitre(page, "Ta rétroaction s'écrit seule");
-    await expect(rang(page)).toHaveText('8 sur 9');
-    await expect(bulle(page).locator('.parcours-bulle-texte')).toContainText("Pas besoin d'importer");
+    await expect(rang(page)).toHaveText('7 sur 8');
+    await expect(bulle(page)).toContainText("Sur la ligne d'un·e étudiant·e, touche « Actions › Évaluer »");
     const evaluer = '#evaluations-liste tr[data-production-id="P_P8_1"][data-da="1111111"] select.eval-actions-select';
     await contourSur(page, evaluer);
     await cap(10);
@@ -860,8 +862,8 @@ async function cheminSansFichier(page, cap = async () => {}) {
     await capture(page, 'sans-fichier-1180-sombre-10-verrou');
     await toucher(page, '#btnVerrouillerEvaluation');
 
-    await attendreTitre(page, 'Pour aller plus loin');
-    await expect(rang(page)).toHaveText('9 sur 9');
+    await attendreTitre(page, 'Et pour tes prochaines productions');
+    await expect(rang(page)).toHaveText('8 sur 8');
     await cap(11);
     await boutonBulle(page, 'Terminer').click();
     await ouvrirPanneau(page);
