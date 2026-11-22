@@ -809,3 +809,90 @@
     width: 120px;
     min-height: 44px;
 }
+
+/* ---------- Lot 5 : le relevé de l'étudiant·e (fenêtre d'aperçu) ---------- */
+.rc-bouton {
+    margin-left: auto;
+}
+
+.tn-gestes .rc-bouton {
+    margin-left: 0;
+}
+
+.rc-fenetre.modal-contenu {
+    margin: 16px auto;
+    padding: 24px 28px;
+    width: min(920px, calc(100vw - 32px));
+    max-width: none;
+    max-height: calc(100vh - 32px);
+    display: flex;
+    flex-direction: column;
+}
+
+.rc-aide {
+    margin: 0 0 12px 0;
+    color: var(--texte-secondaire);
+    font-size: 0.9rem;
+}
+
+.rc-reglages {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    gap: 12px 20px;
+    margin-bottom: 12px;
+}
+
+.rc-champ {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    font-size: 0.85rem;
+    color: var(--texte-secondaire);
+    min-width: 180px;
+}
+
+.rc-coche {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-height: 40px;
+    color: var(--texte-principal);
+}
+
+/* Le papier est blanc dans les deux thèmes : c'est ce qui sera imprimé. */
+.rc-apercu {
+    flex: 1 1 auto;
+    min-height: 200px;
+    overflow: auto;
+    padding: 12px;
+    border: 1px solid var(--bordure-moyenne);
+    border-radius: 6px;
+    background: var(--surface-element);
+}
+
+.rc-apercu > [data-releve-feuille] {
+    margin: 0 auto;
+    box-shadow: 0 1px 6px rgba(0, 0, 0, 0.25);
+}
+
+.rc-etat {
+    min-height: 1.4em;
+    margin: 8px 0 0 0;
+    font-size: 0.9rem;
+    color: var(--texte-secondaire);
+}
+
+.rc-etat--alerte {
+    color: var(--texte-principal);
+    font-weight: 600;
+}
+
+.rc-fenetre .modal-actions {
+    flex-wrap: wrap;
+}
+
+/* Le défilement de l'aperçu ne fait pas défiler la page derrière la fenêtre. */
+.rc-overlay {
+    overscroll-behavior: contain;
+}
