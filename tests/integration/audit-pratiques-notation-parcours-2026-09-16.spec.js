@@ -43,7 +43,7 @@ const FAMILLES = {
         reponses: { nom: 'Pratique (labo)', prenom: 'Test', nomAuteur: 'Labo', etablissement: 'Cégep banc', discipline: '*premier*', porteEntree: 'decrire', calcNoteFinale: 'moyenne', reglesSommatives: ['double_verrou'], nbEvaluationsPrevues: '4', seuilVaBien: '80', seuilDifficulte: '70', seuilGrandeDifficulte: '60',
             nomEvalVerrouillee: 'Dissertation', seuilVerrou: '90', plafondVerrou: '50', afficherRang: true },
         attendu: 'moyenne pondérée 84×40 + 90×60 = 87,6 ; verrou « Dissertation < 90 → max 50 » APPLIQUÉ depuis le lot 29 (#897) : 50 au profil et à l\'export' },
-    STD: { da: '1000002', nom: 'Standards', prenom: 'Bruno',
+    STD: { da: '1000002', nom: 'Standards', prenom: 'Boréal',
         productions: [{ id: 'PORT', titre: 'Portfolio', type: 'portfolio', ponderation: 60, regles: { nombreARetenir: 3, minimumCompletion: 1, nombreTotal: 6 } },
             { id: 'TERM', titre: 'Analyse finale', type: 'terminale', ponderation: 40, numero: 7, dateEcheance: '2026-05-01' },
             ...[1, 2, 3, 4, 5, 6].map(i => ({ id: 'A' + i, titre: 'Artefact ' + i, type: 'artefact-portfolio', numero: i, ponderation: 0, dateEcheance: '2026-0' + (1 + Math.floor(i / 3)) + '-1' + i }))],

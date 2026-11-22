@@ -30,7 +30,7 @@ const ev = (id, da, pid, note, extra) => Object.assign({
     criteres: [{ critereId: 'c1', critereNom: 'Structure', ponderation: 100, niveauSelectionne: 'B' }]
 }, extra || {});
 
-// Alice : P1 repris une fois (55 → 80). Bruno : P2 repris deux fois (60 → 70 → 85).
+// Alice : P1 repris une fois (55 → 80). Boréal : P2 repris deux fois (60 → 70 → 85).
 // Chloé : P1 repris, original supprimé (pratique « supprimer l'originale »).
 function evaluations(extra) {
     return [...(extra || []),

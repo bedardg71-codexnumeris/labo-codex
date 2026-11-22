@@ -44,7 +44,7 @@ const clone = (x) => JSON.parse(JSON.stringify(x));
 const DA = { STD: '1000002', SOM: '1000001', VIDE: '1000009' };
 const ETUDIANTS = [
     { da: DA.SOM, nom: 'Sommative', prenom: 'Alice', groupe: '01', coursId: 'GC1' },
-    { da: DA.STD, nom: 'Standards', prenom: 'Bruno', groupe: '01', coursId: 'GC1' },
+    { da: DA.STD, nom: 'Standards', prenom: 'Boréal', groupe: '01', coursId: 'GC1' },
     { da: DA.VIDE, nom: 'Sansnote', prenom: 'Élie', groupe: '01', coursId: 'GC1' }
 ];
 const E1 = { id: 'E1', nom: 'IDME banc', niveaux: [

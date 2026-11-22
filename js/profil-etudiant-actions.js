@@ -152,7 +152,7 @@ function _diagnostiquerNoteNonCalculable() {
     const famille = (typeof normaliserIdPratique === 'function') ? normaliserIdPratique(pratiqueData.type || '') : (pratiqueData.type || '');
     const methode = pratiqueData.calcul_note && pratiqueData.calcul_note.methode;
     if (famille === 'sommative' || methode === 'moyenne_ponderee') {
-        return 'Cette pratique est de type Sommative (moyenne pondérée). La note de session affichée ici se calcule par portfolio, propre aux PAN-Standards : le calcul Sommatif dans le profil n\'est pas encore branché. Tes données sont cohérentes – c\'est l\'affichage qui ne couvre pas encore cette famille (à venir).';
+        return 'Cette pratique est de type Sommative (moyenne pondérée). La note de session affichée ici se calcule par portfolio, propre aux pratiques par sélection de productions : le calcul Sommatif dans le profil n\'est pas encore branché. Tes données sont cohérentes – c\'est l\'affichage qui ne couvre pas encore cette famille (à venir).';
     }
     if (famille === 'specifications' || methode === 'specifications') {
         return 'Cette pratique est de type Spécifications (exigences/seuils). Son calcul dans le profil n\'est pas encore branché. Tes données sont cohérentes – c\'est l\'affichage qui ne couvre pas encore cette famille (à venir).';
@@ -171,9 +171,9 @@ function _diagnostiquerNoteNonCalculable() {
     // deux inexactitudes héritées ; la même phrase paraît aussi dans la carte Contexte, sans le bouton qu'elle nomme.
     const sansArtefact = typeof obtenirTermeProduction === 'function' && obtenirTermeProduction('singulier') !== 'artefact';
     if (sansArtefact) {
-        return 'Pratique PAN-Standards, mais la carte « Structure des évaluations » de sa fiche n\'est pas réglée (productions pour la note finale, minimum de productions évaluées). Ouvre « Réglages de la pratique » pour la régler.';
+        return 'Pratique par sélection de productions, mais la carte « Structure des évaluations » de sa fiche n\'est pas réglée (productions pour la note finale, minimum de productions évaluées). Ouvre « Réglages de la pratique » pour la régler.';
     }
-    return 'Pratique PAN-Standards, mais sa configuration de portfolio (nombre d\'artefacts à retenir, minimum requis) est absente ou incomplète. Ouvre « Réglages de la pratique » pour la compléter.';
+    return 'Pratique par sélection de productions, mais sa configuration de portfolio (nombre d\'artefacts à retenir, minimum requis) est absente ou incomplète. Ouvre « Réglages de la pratique » pour la compléter.';
 }
 // #318 DEN-4 : exposé pour la sentinelle du diagnostic DEN (diagnostic-denotation-DEN4).
 window._diagnostiquerNoteNonCalculable = _diagnostiquerNoteNonCalculable;
@@ -506,7 +506,7 @@ function calculerDetailsNoteFinale(da, pratiqueIdDemande = null) {
     const cfg = _obtenirConfigPortfolioCalcul(modalites, pratiqueIdDemande);
     if (cfg.erreur) {
         return {
-            pratique: 'PAN-Standards',
+            pratique: 'Par sélection de productions',
             pratiqueId: pratiqueId,
             pratiqueNom: pratiqueNom,
             erreur: cfg.erreur,
@@ -705,7 +705,7 @@ function calculerDetailsNoteFinale(da, pratiqueIdDemande = null) {
     };
 
     return {
-        pratique: 'PAN-Standards',
+        pratique: 'Par sélection de productions',
         erreur: erreurConfiguration || causeNoteAbsente,
         // La même phrase, seule : ce que la pratique déclare au rapport et à l'export (`expliquerNoteNonConstructible`).
         causeNoteAbsente: causeNoteAbsente,

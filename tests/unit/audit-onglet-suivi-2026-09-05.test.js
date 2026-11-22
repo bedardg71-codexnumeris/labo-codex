@@ -73,7 +73,7 @@ const r3 = (x) => (typeof x === 'number' ? Math.round(x * 1000) / 1000 : x);
 const DA = { ASSIDU: '2000001', ABSENT: '2000002', SILENCE: '2000003', INCOHERENT: '2000004' };
 const ETUDIANTS = [
     { da: DA.ASSIDU, nom: 'Assidu', prenom: 'Alice', groupe: '01', coursId: 'GC1', statut: 'actif' },
-    { da: DA.ABSENT, nom: 'Absent', prenom: 'Bruno', groupe: '01', coursId: 'GC1', statut: 'actif' },
+    { da: DA.ABSENT, nom: 'Absent', prenom: 'Boréal', groupe: '01', coursId: 'GC1', statut: 'actif' },
     { da: DA.SILENCE, nom: 'Silence', prenom: 'Chloé', groupe: '01', coursId: 'GC1', statut: 'actif' }
     // DA.INCOHERENT n'est PAS dans le groupe : c'est le premier de ses trois défauts.
 ];
@@ -847,16 +847,16 @@ describe('E · le cycle d\'une intervention et ce qu\'il écrit', () => {
     it('E3 · retirer l\'élève du groupe : l\'intervention garde son DA ; sa note individuelle disparaissait de l\'affichage sans un mot — depuis le lot 5 du cadrage 11, elle reste, grisée, « (n\'est plus dans le groupe) » (valeur d\'après)', () => {
         const b = monter(jeuBase());
         const id = creer(b);
-        b.store.test_interventions[0].etudiants = [DA.ABSENT]; b.store.test_interventions[0].notesIndividuelles = { [DA.ABSENT]: 'Note confidentielle sur Bruno' };
-        const avec = b.interne['interventions.js'].genererAffichageNotesIndividuelles({ [DA.ABSENT]: 'Note confidentielle sur Bruno' });
+        b.store.test_interventions[0].etudiants = [DA.ABSENT]; b.store.test_interventions[0].notesIndividuelles = { [DA.ABSENT]: 'Note confidentielle sur Boréal' };
+        const avec = b.interne['interventions.js'].genererAffichageNotesIndividuelles({ [DA.ABSENT]: 'Note confidentielle sur Boréal' });
         b.store.test_groupeEtudiants = b.store.test_groupeEtudiants.filter(e => e.da !== DA.ABSENT);
-        const sans = b.interne['interventions.js'].genererAffichageNotesIndividuelles({ [DA.ABSENT]: 'Note confidentielle sur Bruno' });
-        noter('E3', { daConserve: b.win.obtenirIntervention(id).etudiants, noteVisibleAvant: /Bruno/.test(avec), noteVisibleApres: /Bruno/.test(sans), compteurAffiche: (sans.match(/<strong>(\d+)<\/strong>/) || [])[1] });
+        const sans = b.interne['interventions.js'].genererAffichageNotesIndividuelles({ [DA.ABSENT]: 'Note confidentielle sur Boréal' });
+        noter('E3', { daConserve: b.win.obtenirIntervention(id).etudiants, noteVisibleAvant: /Boréal/.test(avec), noteVisibleApres: /Boréal/.test(sans), compteurAffiche: (sans.match(/<strong>(\d+)<\/strong>/) || [])[1] });
         expect(b.win.obtenirIntervention(id).etudiants).toEqual([DA.ABSENT]);
         expect(/Note confidentielle/.test(avec)).toBe(true);
         // Constat d'origine (5 sept.) : la note disparaissait et le compteur disait 1 sur une liste vide.
         expect(/Note confidentielle/.test(sans)).toBe(true);
-        expect(sans).toContain('<strong>' + DA.ABSENT + '</strong> (n\'est plus dans le groupe) : Note confidentielle sur Bruno');
+        expect(sans).toContain('<strong>' + DA.ABSENT + '</strong> (n\'est plus dans le groupe) : Note confidentielle sur Boréal');
         expect((sans.match(/<strong>(\d+)<\/strong>/) || [])[1]).toBe('1');   // le compteur dit 1, et la ligne est là
     });
 

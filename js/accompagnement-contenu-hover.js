@@ -313,7 +313,7 @@ const TOOLTIPS = {
     'cn-pratique-titre':
         'Assemblage final de ta pratique : type de notation, échelle, structure des évaluations et système de jetons. C\'est la recette complète de ta façon de construire la note.',
     'cn-pratique-type':
-        'SOM = sommative (moyenne pondérée traditionnelle), STD = PAN basée sur des standards (par maîtrise), SPE = PAN basée sur des spécifications (contrat), DEN = dénotation (pratiques réduisant ou éliminant la notation).',
+        'SOM = sommative (moyenne pondérée traditionnelle), STD = PAN par standards (un niveau par cible d\'apprentissage), SEL = par sélection de productions (la note retient certaines productions), SPE = PAN basée sur des spécifications (contrat), DEN = dénotation (pratiques réduisant ou éliminant la notation).',
     'cn-pratique-echelle':
         'Échelle utilisée pour convertir les pourcentages en niveaux (ex. : I-D-M-E). Configurable dans Échelles.',
     'cn-pratique-jetons':
@@ -478,7 +478,7 @@ const TOOLTIPS = {
     'wizard-etape-config-sommative-regles':
         'Le verrou plafonne la note finale quand l’évaluation choisie n’atteint pas le seuil, même si la moyenne est plus haute.',
     'wizard-etape-approche-evaluation':
-        'En standards, la note se construit sur le portfolio ; à l’étape suivante, tu choisis quels artefacts comptent.',
+        'Par sélection de productions, la note se construit sur le portfolio ; à l’étape suivante, tu choisis quels artefacts comptent.',
     'wizard-etape-config-portfolio':
         'Ici, tu dis quels artefacts comptent : les N meilleurs, tous, les N derniers, ou les N meilleurs plus les obligatoires. Les autres restent visibles, mais n’entrent pas dans la note.',
     'wizard-etape-config-specifications':
@@ -712,7 +712,7 @@ const TOOLTIPS = {
     'nav-calendrier-vue':
         'Calendrier du trimestre : tableau des mois, jours de cours, congés et reprises.',
     'nav-conception-pratiques':
-        'Assemble ta pratique de notation complète (SOM, STD, SPE, DEN) en associant échelle, structure et jetons.',
+        'Assemble ta pratique de notation complète (SOM, STD, SEL, SPE, DEN) en associant échelle, structure et jetons.',
     'nav-reg-preferences':
         'Personnalise ton interface : outils actifs, ressources affichées, effets visuels et comportement de navigation.',
     'nav-labo-accompagnement':

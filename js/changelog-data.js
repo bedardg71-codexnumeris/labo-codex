@@ -21,6 +21,43 @@
 
     var CHANGELOG = [
         {
+            // 1.254 (22 nov. 2026 : assemblage de cinq lots — le voyage des cibles, le « Modèle par standards », le
+            // Comparateur « Par standards » et sa synthèse, les guides « som » et « pan » retirés) — titre et quatre
+            // lignes acceptés par Grégoire le 22 nov. à 6 h 38, tels quels ; seule la typographie du fichier est appliquée.
+            version: '1.254',
+            couleur: 'vert',
+            titre: '«&nbsp;Par standards&nbsp;» voyage, et l’Exploration la décrit',
+            items: [
+                '«&nbsp;Garder dans ma bibliothèque&nbsp;» paraît sur chaque pratique de ton trimestre. Une pratique «&nbsp;Par standards&nbsp;» emporte ses cibles et son échelle d’un trimestre à l’autre, par un fichier ou par un partage&nbsp;; les niveaux de tes étudiant·es, eux, ne partent jamais. Un ancien fichier qui ne les contient pas te le dit.',
+                'Dans l’assistant, «&nbsp;Partir d’un modèle&nbsp;» offre un «&nbsp;Modèle par standards&nbsp;»&nbsp;: il t’amène tout droit aux cibles de ton cours, avec l’échelle de départ de 0 à 4 («&nbsp;0 – Données insuffisantes&nbsp;»).',
+                'Dans l’Exploration des pratiques, une colonne «&nbsp;Par standards&nbsp;» se décrit par ses propres lignes (cibles comptées, niveau «&nbsp;sans donnée&nbsp;», double seuil), et «&nbsp;Ce que règle cette pratique&nbsp;», sous chaque colonne, reprend les réglages du récapitulatif.',
+                'Les guides «&nbsp;Comprendre sa sommative&nbsp;» et «&nbsp;Modalités&nbsp;» quittent Conception&nbsp;›&nbsp;Pratiques le temps de leur révision.'
+            ]
+        },
+        {
+            // 1.253 (21 nov. 2026 : la pratique « Par standards » mise en ligne À L'ESSAI, vue simple comprise) — titre et
+            // texte acceptés par Grégoire le 21 nov. à 14 h 17, mot pour mot, sauf la troisième phrase, ajustée par Cowork
+            // à 15 h 50 parce que la vue simple offre maintenant la pratique ; seule la typographie du fichier est
+            // appliquée. Les deux chemins (« parmi les modèles », « Conception › Pratiques ») sont ceux de l'écran.
+            version: '1.253',
+            couleur: 'vert',
+            titre: 'Une nouvelle pratique à l’essai&nbsp;: «&nbsp;Par standards&nbsp;»',
+            items: [
+                'Tu dis les cibles d’apprentissage de ton cours, puis tu inscris un niveau par cible pour chaque étudiant·e. L’application retient le meilleur niveau démontré et construit la note. Elle se choisit en vue simple, parmi les modèles, ou en vue étendue, dans Conception › Pratiques. Des enseignant·es qui notent ainsi la mettent à l’épreuve ces jours-ci&nbsp;: elle peut encore changer. Tes pratiques actuelles et tes notes ne changent pas.'
+            ]
+        },
+        {
+            // 1.252 (21 nov. 2026 : la pratique « Standards » renommée « Par sélection de productions », son sigle SEL en
+            // sarcelle) — ligne acceptée par Grégoire le 20 nov., complétée d'une phrase le 21 nov., mot pour mot ; seule
+            // la typographie du fichier est appliquée. Le titre est de Claude Code (supposé, dit au rapport de la release).
+            version: '1.252',
+            couleur: 'bleu',
+            titre: '«&nbsp;Standards&nbsp;» devient «&nbsp;Par sélection de productions&nbsp;»',
+            items: [
+                'La pratique «&nbsp;Standards&nbsp;» s’appelle maintenant «&nbsp;Par sélection de productions&nbsp;». Le nom dit ce que fait le calcul&nbsp;: chaque production reçoit un niveau et la note se construit à partir de celles que ta règle retient. Tes pratiques, tes réglages et tes notes ne changent pas. Une pratique que tu avais nommée toi-même garde son nom. Son badge dit maintenant «&nbsp;SEL&nbsp;».'
+            ]
+        },
+        {
             // 1.251 (19 nov. 2026 : la grille d'autoévaluation dans le PDF des consignes, les noms des deux seuils,
             // « Dupliquer » en copie profonde (#1298), le glisser d'Alignement (#1295)) — titre et quatre lignes
             // approuvés par Grégoire le 19 nov. 2026 à 22 h 09, mot pour mot ; seule la typographie du fichier

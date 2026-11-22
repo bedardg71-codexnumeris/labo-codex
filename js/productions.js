@@ -383,7 +383,7 @@ function validerProductionsStd(productions) {
         // Règle 3a : les pondérées non participantes n'entrent pas dans le calcul.
         candidates.forEach(p => {
             avertissements.push({
-                message: `« ${nomDe(p)} » porte une pondération (${formaterPourcentage(p.ponderation)}) mais n'entre pas dans le calcul STD : seuls le pool d'artefacts et l'évaluation terminale comptent.`
+                message: `« ${nomDe(p)} » porte une pondération (${formaterPourcentage(p.ponderation)}) mais n'entre pas dans le calcul SEL : seuls le pool d'artefacts et l'évaluation terminale comptent.`
             });
         });
         // Règle 3a bis : pondération posée sur un artefact du pool (ignorée aussi).
@@ -1638,6 +1638,8 @@ async function prerenseignerFormulaireProduction(prod) {
     // 🆕 Beta 98.3 : Échéances par groupe-cours (multi-groupe)
     peuplerEcheancesParGroupe(prod);
 
+    poserCiblesRenseignees(prod);   // lot 2 « Par standards » (21 nov. 2026)
+
     // Gérer l'affichage des champs spécifiques au type
     gererChangementTypeProduction();
 
@@ -1648,6 +1650,54 @@ async function prerenseignerFormulaireProduction(prod) {
     }
 
     rendreChaineProduction();   // #1149, lot 3b : la chaîne lit le formulaire qu'on vient de remplir
+}
+
+/**
+ * Lot 2 de la pratique « Par standards » (21 nov. 2026) — LES CIBLES QU'UNE PRODUCTION RENSEIGNE (facultatif ; décidé par
+ * Cowork : la production le déclare dans sa propre configuration). Le bloc ne paraît que si la pratique du groupe-cours actif
+ * est « Par standards » : une case par cible de son ensemble. Aucune case cochée : le geste « inscrire pour une production »
+ * offre toutes les cibles (`InscriptionsCibles.ciblesOffertes`). Rangé dans `production.ciblesRenseignees` (des ids de
+ * cibles). Ce champ n'entre pas dans le gabarit de la bibliothèque : ce sont des ids d'un ensemble du trimestre.
+ * Mots PROPOSÉS (TEXTES-2026-11-21-par-standards-lot-2.md, P1 et P2).
+ */
+function poserCiblesRenseignees(prod) {
+    const bloc = document.getElementById('productionCiblesBloc');
+    if (!bloc) return;
+    const cibles = (window.EnsemblesCibles && typeof window.EnsemblesCibles.ciblesDeLaPratiqueActive === 'function')
+        ? window.EnsemblesCibles.ciblesDeLaPratiqueActive() : null;
+    if (!cibles || cibles.length === 0) {
+        bloc.innerHTML = '';
+        bloc.classList.add('u-hide');
+        return;
+    }
+    const cochees = new Set((prod && Array.isArray(prod.ciblesRenseignees)) ? prod.ciblesRenseignees.map(String) : []);
+    // security-ok : étiquettes et ids échappés par echapperHtml
+    bloc.innerHTML = `<fieldset class="prod-cibles-renseignees">
+        <legend class="label-formulaire">Cibles que cette production renseigne</legend>
+        <p class="prod-cibles-aide">Facultatif. Sans choix, toutes les cibles sont offertes quand tu inscris des niveaux pour cette production.</p>
+        ${cibles.map(c => `<label class="prod-cible"><input type="checkbox" class="prod-cible-case" value="${echapperHtml(c.id)}"${cochees.has(String(c.id)) ? ' checked' : ''}><span>${echapperHtml(c.etiquette)}</span></label>`).join('')}
+    </fieldset>`;
+    bloc.classList.remove('u-hide');
+}
+
+/**
+ * Ce que la fiche écrit des cibles renseignées : `{ ciblesRenseignees }` si le bloc était affiché, sinon `{}` (rien n'est
+ * réécrit, règle de #790). Les ids d'un AUTRE ensemble (un autre groupe-cours, une autre pratique) sont gardés tels quels.
+ */
+function champCiblesRenseignees(lu, existante) {
+    if (!lu) return {};
+    const affichees = new Set(lu.affichees);
+    const avant = (existante && Array.isArray(existante.ciblesRenseignees)) ? existante.ciblesRenseignees : [];
+    return { ciblesRenseignees: avant.filter(x => !affichees.has(String(x))).concat(lu.cochees) };
+}
+
+/** `{ affichees, cochees }` (des ids), ou `null` quand le bloc n'est pas affiché. */
+function lireCiblesRenseignees() {
+    const bloc = document.getElementById('productionCiblesBloc');
+    if (!bloc || bloc.classList.contains('u-hide')) return null;
+    const cases = Array.from(bloc.querySelectorAll('.prod-cible-case'));
+    if (cases.length === 0) return null;
+    return { affichees: cases.map(c => c.value), cochees: cases.filter(c => c.checked).map(c => c.value) };
 }
 
 // Réinitialise le formulaire en mode ajout (refactor étape 4, 16 mai 2026)
@@ -1694,6 +1744,7 @@ function reinitialiserFormulaireProduction() {
     // #790 — une fiche neuve n'hérite pas du marqueur de la précédente.
     const caseDiagnostiqueNeuve = document.getElementById('productionDiagnostique');
     if (caseDiagnostiqueNeuve) caseDiagnostiqueNeuve.checked = false;
+    poserCiblesRenseignees(null);   // lot 2 « Par standards » : une fiche neuve n'hérite pas des cibles de la précédente
 
     // 🆕 Beta 98.3 : Échéances par groupe-cours (multi-groupe)
     peuplerChampsPersonnalises(null);                                        // #499 — une fiche neuve n'hérite pas des champs de la précédente
@@ -1857,8 +1908,12 @@ function lireDonneesFormulaireProduction() {
     const caseDiagnostique = document.getElementById('productionDiagnostique');
     const diagnostique = caseDiagnostique ? !!caseDiagnostique.checked : null;
 
+    // Lot 2 « Par standards » (21 nov. 2026) — même règle que #790 : `null` quand le bloc n'est pas affiché (la pratique
+    // du groupe-cours actif n'est pas « Par standards ») ; rien n'est alors réécrit.
+    const ciblesRenseignees = lireCiblesRenseignees();
+
     return { titre, activiteApprentissage, type, ponderation, objectif, tache, detailTache,
-             champsPersonnalises, titresBlocs, ordreBlocs, diagnostique,
+             champsPersonnalises, titresBlocs, ordreBlocs, diagnostique, ciblesRenseignees,
              echeancesParGroupe, dateEcheance, grilleId, echelleId, cartoucheId };
 }
 
@@ -1939,8 +1994,13 @@ function raisonChampsObligatoiresProduction(d) {
     // (sa part de la note ; à 0 %, elle ne compterait pour rien) et le conteneur (la part du pool ; à 0 %, « Pondérations
     // nulles »). Retouche du verdict de Cowork, 29 oct. La famille se lit sur la désignation du groupe-cours (stockage,
     // `obtenirTypePratiqueActive`), pas sur le DOM ; les autres familles ne changent pas.
-    const enStandards = typeof window.obtenirTypePratiqueActive === 'function' && window.obtenirTypePratiqueActive() === 'standards';
-    const ponderationExigee = enStandards ? (d.type === 'terminale' || d.type === 'portfolio') : d.type !== 'artefact-portfolio';
+    const famille = typeof window.obtenirTypePratiqueActive === 'function' ? window.obtenirTypePratiqueActive() : null;
+    const enStandards = famille === 'standards';
+    // Lot 4 « Par standards » (21 nov. 2026 ; trouvaille du lot 2, plan § 11) : la note vient des niveaux retenus des cibles,
+    // et la pondération d'une production n'y entre pas. Elle n'est donc exigée pour aucun type.
+    const enCibles = famille === 'cibles';
+    const ponderationExigee = enCibles ? false
+        : (enStandards ? (d.type === 'terminale' || d.type === 'portfolio') : d.type !== 'artefact-portfolio');
     if (ponderationExigee && d.ponderation === 0) return 'la pondération est requise : plus de 0\u00a0%.';
     return '';
 }
@@ -2131,6 +2191,9 @@ function construireProductionData(d, evaluations, idEnEdition) {
     if (d.diagnostique !== null && d.diagnostique !== undefined) {
         productionData.diagnostique = !!d.diagnostique;
     }
+
+    // Lot 2 « Par standards » (21 nov. 2026) — les cibles que la production renseigne (`champCiblesRenseignees`).
+    Object.assign(productionData, champCiblesRenseignees(d.ciblesRenseignees, existingProd));
 
     // #468/CO-17 : champs d'ÉTAT — à la création seulement (voir l'entête).
     // #489 (15 oct. 2026) : le verrou d'une production entière est retiré, plus de `verrouille` ici.
@@ -2690,7 +2753,7 @@ function gererChangementTypeProduction() {
         'autre': '<strong>Autre :</strong> Tout autre type de production (participation, activités, etc.).',
         'portfolio': '<strong>Portfolio (conteneur) :</strong> Regroupement d\'artefacts permettant d\'évaluer la progression. Le portfolio inclura automatiquement toutes les productions de type «Artefact». Il n\'est pas comptabilisé dans l\'indice de <strong>Complétion (C)</strong>.',
         'artefact-portfolio': '<strong>Artefact :</strong> Production ciblée sur une tâche de nature variée et rattachée au portfolio.<br><br>Les artefacts n\'ont pas de pondération propre. C\'est le portfolio conteneur qui définit la pondération globale.<br><br><em>Pour paramétrer la valeur des artefacts, va dans « Structure des évaluations » dans les Pratiques de notation.</em>',
-        'terminale': '<strong>Évaluation terminale :</strong> Production qui clôt le trimestre ; une seule par trimestre, et facultative. En PAN – Standards, elle entre dans le calcul avec sa pondération (par exemple 40\u00a0%), le reste allant aux artefacts du portfolio ou, sans artefact, aux productions retenues (par exemple 60\u00a0%).'
+        'terminale': '<strong>Évaluation terminale :</strong> Production qui clôt le trimestre ; une seule par trimestre, et facultative. Par sélection de productions, elle entre dans le calcul avec sa pondération (par exemple 40\u00a0%), le reste allant aux artefacts du portfolio ou, sans artefact, aux productions retenues (par exemple 60\u00a0%).'
     };
 
     // Éléments Définition (carte dynamique)
@@ -2828,6 +2891,21 @@ function gererChangementTypeProduction() {
             notePonderation.innerHTML = 'Pour une évaluation formative, utilisez une pondération de 0\u00a0%.';
         }
     }
+
+    poserPonderationParStandards(type, groupePonderation, notePonderation);
+}
+
+/**
+ * Lot 4 « Par standards » (21 nov. 2026) : la pondération d'une production n'entre pas dans la note (elle vient des niveaux
+ * retenus des cibles) et n'est pas exigée ; le champ reste, sans effet sur la note, son astérisque part, et la note le dit.
+ */
+function poserPonderationParStandards(type, groupePonderation, notePonderation) {
+    const enCibles = typeof window.obtenirTypePratiqueActive === 'function' && window.obtenirTypePratiqueActive() === 'cibles';
+    const asterisquePonderation = groupePonderation ? groupePonderation.querySelector('.champ-requis') : null;
+    if (asterisquePonderation) asterisquePonderation.classList.toggle('u-hide', enCibles);
+    if (!enCibles || !type || type === 'artefact-portfolio' || !notePonderation) return;
+    notePonderation.classList.remove('u-hide');
+    notePonderation.textContent = 'Par standards : la pondération d\u2019une production n\u2019entre pas dans la note, qui vient des niveaux retenus des cibles. Elle n\u2019est pas exigée.';
 }
 
 /**

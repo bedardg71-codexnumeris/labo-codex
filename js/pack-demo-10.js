@@ -7406,7 +7406,7 @@ const PACK_DEMARRAGE = {
   "pratiquesConfigurables": [
     {
       "id": "demo-std-litt",
-      "nom": "PAN – Standards (démo)",
+      "nom": "Par sélection de productions (démo)",
       "auteur": "Demo Labo Codex",
       "calcul_note": { "methode": "conversion_niveaux" },
       "echelle": {

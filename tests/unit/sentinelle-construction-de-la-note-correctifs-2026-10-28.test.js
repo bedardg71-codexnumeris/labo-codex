@@ -17,14 +17,14 @@
  *   E16 : pendant la fenêtre, la Liste dit « Compte jusqu'à sa reprise », sans grisé ; « Remplacée », grisée, ensuite.
  *   IDX : l'index des évaluations ne survit pas au lot qui l'a construit (un tableau modifié en place hors lot).
  *   E14 : en dénotation, un jugement sans note est non calculable (DEN-4 au banc de la mesure ; ici, le stock).
- * Monte les modules RÉELS (même bac que le banc de la mesure). Données fictives (Alice, Bruno).
+ * Monte les modules RÉELS (même bac que le banc de la mesure). Données fictives (Alice, Boréal).
  */
 import { describe, it, expect } from 'vitest';
 import { monter, storeBase, clone } from './_helpers/bac-suivi.js';
 import { chargerScript } from './_helpers/charger-script.js';
 import { predicatsTableauNotation } from './_helpers/predicats-copie.js';
 
-const DA = { ALICE: '2000001', BRUNO: '2000002' };
+const DA = { ALICE: '2000001', BOREAL: '2000002' };
 const E0 = { id: 'E0', nom: 'IDME banc', seuilMaitrise: 'M', niveaux: [
     { code: 'I', nom: 'Insuffisant', min: 0, max: 64, valeurCalcul: 40 }, { code: 'D', nom: 'En développement', min: 65, max: 74, valeurCalcul: 65 },
     { code: 'M', nom: 'Maîtrisé', min: 75, max: 84, valeurCalcul: 75 }, { code: 'E', nom: 'Étendu', min: 85, max: 100, valeurCalcul: 100 }
@@ -47,7 +47,7 @@ const PROD_SOM = [
     { id: 'P1', titre: 'Dissertation', type: 'travail', ponderation: 40, coursId: 'GC1' },
     { id: 'P2', titre: 'Examen', type: 'examen', ponderation: 60, coursId: 'GC1' }
 ];
-const COPIES_SOM = [ev(DA.ALICE, 'P1', 80), ev(DA.ALICE, 'P2', 90), ev(DA.BRUNO, 'P1', 62), ev(DA.BRUNO, 'P2', 71)];
+const COPIES_SOM = [ev(DA.ALICE, 'P1', 80), ev(DA.ALICE, 'P2', 90), ev(DA.BOREAL, 'P1', 62), ev(DA.BOREAL, 'P2', 71)];
 const som = (configuration = {}) => ({ id: 'som-banc', nom: 'SOM banc', type: 'sommative', calcul_note: { methode: 'moyenne_ponderee' }, dansBibliotheque: true, configuration });
 
 const PROD_SPE = [{ id: 'D1', titre: 'Dissertation 1', type: 'dissertation', coursId: 'GC1' }, { id: 'X1', titre: 'Examen 1', type: 'examen', coursId: 'GC1' }];
@@ -78,7 +78,7 @@ const OBJETS_EXPORTES = ['PratiqueManager', 'denotationJugements', 'modalitesEva
 
 function banc({ pratique, productions, evaluations, jugements = {}, pratiqueId = null }) {
     const store = storeBase();
-    store.test_groupeEtudiants = store.test_groupeEtudiants.filter(e => e.da === DA.ALICE || e.da === DA.BRUNO);
+    store.test_groupeEtudiants = store.test_groupeEtudiants.filter(e => e.da === DA.ALICE || e.da === DA.BOREAL);
     store.test_groupesCours[0].pratiqueId = pratiqueId || pratique.id;
     store.test_pratiquesConfigurables = pratique ? [clone(pratique)] : [];
     store.test_echellesTemplates = [clone(E0)];
@@ -349,7 +349,7 @@ describe('IDX — l\'index des évaluations ne survit pas au lot qui l\'a constr
     }
     it('IDX-a hors lot : une reprise ajoutée en place laisse compter l\'originale ; verrouillée en place, elle la remplace (jamais les deux)', () => {
         const r = registre();
-        r.liste.push(ev(DA.BRUNO, 'P1', 62, { remplaceeParId: 'EV-X' }), ev(DA.ALICE, 'P1', 80));
+        r.liste.push(ev(DA.BOREAL, 'P1', 62, { remplaceeParId: 'EV-X' }), ev(DA.ALICE, 'P1', 80));
         expect(r.win.evaluationEntreDansLaNote(r.liste[0])).toBe(false);   // l'index se construit sur ce tableau
         const orig = r.liste[1];
         orig.remplaceeParId = orig.id + '-R';                               // ce que fait appliquerJetonReprise

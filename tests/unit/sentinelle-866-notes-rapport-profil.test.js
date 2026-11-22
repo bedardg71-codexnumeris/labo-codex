@@ -124,11 +124,11 @@ describe('#866 — les notes du rapport survivent au changement de sous-section'
 
     it('3 quater · l\'attente d\'un élève ne déborde pas sur un autre', () => {
         const store = storeBase();
-        store.test_notesRapport = { '2000002': 'Celle de Bruno' };
+        store.test_notesRapport = { '2000002': 'Celle de Boréal' };
         const b = monterRapport(store);
         b.champNotes.value = 'Celle d\'Alice, pas encore écrite';
         b.win.planifierEnregistrementNotesRapport(DA, b.champNotes);
-        expect(b.win.obtenirNotesRapport('2000002')).toBe('Celle de Bruno');
+        expect(b.win.obtenirNotesRapport('2000002')).toBe('Celle de Boréal');
         expect(b.win.obtenirNotesRapport('2000003')).toBe('');
         b.restaurerHorloge();
     });
@@ -145,11 +145,11 @@ describe('#866 — les notes du rapport survivent au changement de sous-section'
 
     it('5 · une note vidée retire son entrée ; les autres élèves ne bougent pas', () => {
         const store = storeBase();
-        store.test_notesRapport = { [DA]: 'À effacer', '2000002': 'Celle de Bruno reste' };
+        store.test_notesRapport = { [DA]: 'À effacer', '2000002': 'Celle de Boréal reste' };
         const b = monterRapport(store);
         b.champNotes.value = '   ';
         b.win.enregistrerNotesRapport(DA, b.champNotes);
-        expect(store.test_notesRapport).toEqual({ '2000002': 'Celle de Bruno reste' });
+        expect(store.test_notesRapport).toEqual({ '2000002': 'Celle de Boréal reste' });
         b.restaurerHorloge();
     });
 

@@ -70,6 +70,6 @@ test('GREG · six artefacts, un conteneur, une terminale et un exercice pondér�
     page.on('pageerror', (e) => erreurs.push(e.message));
     const zone = await zoneAVerifier(page, GREG);
     await expect(zone.locator('li')).toHaveCount(1);
-    await expect(zone.locator('li')).toHaveText('« Exercice 1 » porte une pondération (10 %) mais n\'entre pas dans le calcul STD : seuls le pool d\'artefacts et l\'évaluation terminale comptent.');
+    await expect(zone.locator('li')).toHaveText('« Exercice 1 » porte une pondération (10 %) mais n\'entre pas dans le calcul SEL : seuls le pool d\'artefacts et l\'évaluation terminale comptent.');
     expect(erreurs).toEqual([]);
 });

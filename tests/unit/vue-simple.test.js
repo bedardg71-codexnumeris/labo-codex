@@ -169,10 +169,10 @@ describe('B. La navigation de la vue étendue, identique avant et après', () =>
 
 describe('C. La liste collée', () => {
     it('lit « DA, nom, prénom » séparés par virgule, point-virgule, tabulation ou espaces', () => {
-        const r = D.analyserListeCollee('9990001, Albatros, Ada\n9990002;Baobab;Bruno\n9990003\tCormoran\tChloé\n9990004 Dahlia Dario Junior');
+        const r = D.analyserListeCollee('9990001, Albatros, Ada\n9990002;Baobab;Boréal\n9990003\tCormoran\tChloé\n9990004 Dahlia Dario Junior');
         expect(r.refusees).toEqual([]);
         expect(r.fiches).toEqual([
-            { da: '9990001', nom: 'Albatros', prenom: 'Ada' }, { da: '9990002', nom: 'Baobab', prenom: 'Bruno' },
+            { da: '9990001', nom: 'Albatros', prenom: 'Ada' }, { da: '9990002', nom: 'Baobab', prenom: 'Boréal' },
             { da: '9990003', nom: 'Cormoran', prenom: 'Chloé' }, { da: '9990004', nom: 'Dahlia', prenom: 'Dario Junior' }
         ]);
     });
@@ -191,8 +191,8 @@ describe('C. La liste collée', () => {
     });
 
     it('refuse une ligne sans nom ou sans prénom, et un DA collé deux fois', () => {
-        const r = D.analyserListeCollee('9990001, Albatros\n9990002, Baobab, Bruno\n9990002, Baobab, Bruno');
-        expect(r.fiches).toEqual([{ da: '9990002', nom: 'Baobab', prenom: 'Bruno' }]);
+        const r = D.analyserListeCollee('9990001, Albatros\n9990002, Baobab, Boréal\n9990002, Baobab, Boréal');
+        expect(r.fiches).toEqual([{ da: '9990002', nom: 'Baobab', prenom: 'Boréal' }]);
         expect(r.refusees.map((x) => x.raison)).toEqual([D.RAISONS.incomplet, D.RAISONS.double]);
     });
 
@@ -205,7 +205,7 @@ describe('C. La liste collée', () => {
        Noms INVENTÉS ; la forme est celle de l'export : valeurs ="…", point-virgule, point-virgule final, titres, statut. */
     const TITRES_LEA = 'No de DA;Groupe;Nom de l\'étudiant;Prénom de l\'étudiant;Statut du cours;Prog.;Services adaptés;';
     const NOMS_LEA = [
-        ['Albatros', 'Ada'], ['Baobab', 'Bruno'], ['Cormoran', 'Chloé'], ['Dahlia', 'Désiré'], ['Épervier', 'Élodie'],
+        ['Albatros', 'Ada'], ['Baobab', 'Boréal'], ['Cormoran', 'Chloé'], ['Dahlia', 'Désiré'], ['Épervier', 'Élodie'],
         ['Fougère-Lanoix', 'Félix'], ['Goéland', 'Gaëlle'], ['D\'Hirondelle', 'Hugo'], ['Ibis', 'Inès'], ['Jacinthe', 'Jérôme'],
         ['Kiwi', 'Karine'], ['Lupin', 'Léo'], ['Mélèze', 'Maëlle'], ['Narval', 'Noé'], ['Orme', 'Océane'],
         ['Pélican', 'Pierre-Luc'], ['Quetzal', 'Quentin'], ['Roitelet', 'Rosalie'], ['Saule', 'Sébastien'], ['Tétras', 'Thérèse']
@@ -221,7 +221,7 @@ describe('C. La liste collée', () => {
         const r = D.analyserListeCollee(listeLea(';'));
         expect(r.refusees).toEqual([]);
         expect(r.fiches).toHaveLength(19);
-        expect(r.inactifs).toEqual([{ da: '2600002', nom: 'Baobab', prenom: 'Bruno' }]);
+        expect(r.inactifs).toEqual([{ da: '2600002', nom: 'Baobab', prenom: 'Boréal' }]);
         expect(r.fiches[0]).toEqual({ da: '2600001', nom: 'Albatros', prenom: 'Ada' });
         expect(r.fiches.map((f) => f.nom)).toContain('Fougère-Lanoix');
         expect(r.fiches.map((f) => f.nom)).toContain('D\'Hirondelle');
@@ -249,7 +249,7 @@ describe('C. La liste collée', () => {
     });
 
     it('aucune ligne lue : chaque cause est dite une fois, avec son nombre et un exemple', () => {
-        const r = D.analyserListeCollee('Albatros;Ada\nBaobab;Bruno\n123;Trop;Court\n9990001;Cormoran');
+        const r = D.analyserListeCollee('Albatros;Ada\nBaobab;Boréal\n123;Trop;Court\n9990001;Cormoran');
         expect(r.fiches).toEqual([]);
         expect(D.refusParCause(r.refusees)).toEqual([
             { raison: D.RAISONS.da, nombre: 3, exemple: 'Albatros;Ada' },

@@ -35,7 +35,7 @@ function amorcer({ T, famille, evaluations }) {
             forfaits: [{ id: 1, lettre: 'Excellence', note: 90, travaux: { ex: 4, pr: 2 } }, { id: 2, lettre: 'Bien', note: 80, travaux: { ex: 3, pr: 2 } },
                 { id: 3, lettre: 'Réussite', note: 65, travaux: { ex: 2, pr: 1 } }, { id: 4, lettre: 'Sous la réussite', note: 50, travaux: {} }] } };
     const pratique = famille === 'SPE' ? spe : std;
-    const eleves = [['Albatros', 'Ada'], ['Baobab', 'Bruno'], ['Cormoran', 'Chloé'], ['Dahlia', 'Dario']];
+    const eleves = [['Albatros', 'Ada'], ['Baobab', 'Boréal'], ['Cormoran', 'Chloé'], ['Dahlia', 'Dario']];
     const productions = famille === 'SPE'
         ? [['EX1', 'Exercice 1', 'ex', '2026-09-11'], ['EX2', 'Exercice 2', 'ex', '2026-09-25'], ['EX3', 'Exercice 3', 'ex', '2026-10-09'],
             ['EX4', 'Exercice 4', 'ex', '2026-11-06'], ['PR1', 'Projet 1', 'pr', '2026-10-23'], ['PR2', 'Projet 2', 'pr', '2026-12-04']]
@@ -59,7 +59,7 @@ function amorcer({ T, famille, evaluations }) {
     ['overlay-backup-reminder', 'transition-bandeau'].forEach((id) => { const n = document.getElementById(id); if (n) n.remove(); });
 }
 
-// Bruno a une copie évaluée AVEC une grille en Production 2 (standards).
+// Boréal a une copie évaluée AVEC une grille en Production 2 (standards).
 const COPIE_GRILLE = { id: 'EG1', etudiantDA: '9990011', productionId: 'P2', grilleId: 'G_X', grilleNom: 'Grille fictive', echelleId: 'E_TN', noteFinale: 75, niveauFinal: 'M',
     verrouillee: true, statutRemise: 'evalue', statutIntegrite: 'recevable', criteres: [{ critereId: 'c', critereNom: 'Critère', niveauSelectionne: 'M', ponderation: 100 }],
     dateEvaluation: '2026-09-26T12:00:00.000Z', coursId: 'cours-tn', groupeCoursId: 'GC_TN' };
@@ -186,7 +186,7 @@ test.describe('Tableau de notation · standards', () => {
         await kase(page, 1, 1).focus();
         await page.keyboard.press('m');
         const avant = await sansGrilleDe(page, '9990010', 'P1');
-        // Le geste : dans Évaluer, choisir l'élève dont la copie a été notée au tableau (Bruno d'abord, sans copie en P1).
+        // Le geste : dans Évaluer, choisir l'élève dont la copie a été notée au tableau (Boréal d'abord, sans copie en P1).
         await page.evaluate(() => window.evaluerProduction('9990011', 'P1'));
         await page.waitForFunction(() => !window._evaluerSansCopieEnCours && !window._modifierEvaluationEnCours
             && document.getElementById('selectEtudiantEval').value === '9990011', null, { timeout: 15000 });
@@ -301,7 +301,7 @@ test.describe('Tableau de notation · la consigne', () => {
         await kase(page, 1, 2).focus();
         await page.keyboard.press('m');
         expect(await sansGrilleDe(page, '9990010', 'P2')).toMatchObject({ verrouillee: true, noteFinale: 75 });
-        // Léa : la copie à grille de Bruno part ; le résultat d'Ada, verrouillé lui aussi, n'est ni retenu ni « laissé de côté ».
+        // Léa : la copie à grille de Boréal part ; le résultat d'Ada, verrouillé lui aussi, n'est ni retenu ni « laissé de côté ».
         const lea = await page.evaluate(() => {
             const s = window.travauxArchivage.selectionnerEvaluationsLea('P2', null, false);
             return { retenues: s.evaluations.map((e) => e.id), nonVerrouillees: s.nonVerrouillees.length };

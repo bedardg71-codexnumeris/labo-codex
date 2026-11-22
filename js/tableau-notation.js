@@ -39,7 +39,7 @@
         aSaisir: 'à saisir',
         avecGrille: 'évaluée avec une grille ; toucher pour l’ouvrir',
         aucunePratique: 'Ce groupe-cours n’a pas de pratique de notation. Choisis-en une dans Conception › Pratiques : le tableau suivra ses réglages.',
-        autreFamille: 'Le tableau de notation sert aux pratiques par standards et par spécifications. Pour la pratique de ce groupe-cours, la Liste reste la vue de tes évaluations.',
+        autreFamille: 'Le tableau de notation sert aux pratiques par sélection de productions et par spécifications. Pour la pratique de ce groupe-cours, la Liste reste la vue de tes évaluations.',
         aucunEleve: 'Aucun·e étudiant·e dans ce groupe-cours. Ajoute ta liste dans Cadre › Trimestre pour remplir le tableau.',
         aucuneProduction: 'Aucune production n’entre dans la note de ta pratique. Crée tes productions dans Conception › Productions.',
         sansEchelle: 'Ni tes productions ni ta pratique n’ont d’échelle dont les niveaux portent une valeur : aucun niveau ne peut être saisi.',
@@ -120,6 +120,8 @@
         if (designation.etat !== 'ok') return { etat: 'aucune-pratique' };
         const pratique = window.obtenirPratiqueParId(designation.id);
         const famille = pratique && typeof pratique.obtenirCode === 'function' ? pratique.obtenirCode() : null;
+        const cibles = _contexteDesCibles(designation);
+        if (cibles) return cibles;
         if (D().FAMILLES_DU_TABLEAU.indexOf(famille) < 0) return { etat: 'autre-famille' };
         const donnees = designation.donnees || {};
         return {
@@ -127,6 +129,19 @@
             config: (typeof obtenirConfigPratiqueActive === 'function' ? obtenirConfigPratiqueActive() : null) || {},
             echelle: famille === 'STD' ? (_utilisable(window.construireConfigComplete(donnees).echelle) || _echelleParId(ID_ECHELLE_DE_DEPART)) : null
         };
+    }
+
+    /**
+     * « Par standards » (lot 2, 21 nov. 2026) : la famille `cibles` de la désignation (le type rangé, normalisé) ; les cibles
+     * en colonnes, dessinées par js/tableau-cibles.js. VUE SIMPLE (21 nov. 2026, à l'essai) : une présentation qui l'accepte
+     * (`cibles`) reçoit le tableau des cibles, allégé (`presentation` dans le contexte) ; une présentation qui ne le déclare
+     * pas garde le message « autre famille », comme avant. null pour toute autre famille.
+     */
+    function _contexteDesCibles(designation) {
+        if (designation.famille !== 'cibles' || !window.TableauCibles) return null;
+        if (_presentation && !_presentation.cibles) return null;
+        const donnees = designation.donnees || {};
+        return { etat: 'cibles', pratiqueId: designation.id, pratiqueNom: donnees.nom || '', donnees, presentation: _presentation || null };
     }
 
     /* L'ÉCHELLE RETENUE (consigne du lot, 9 nov. 2026) : celle de la production si elle en a une, sinon celle de la
@@ -158,10 +173,15 @@
         return D().cycleDeLaFamille(ctx.famille, _echelleDe(ctx, productionId));
     }
 
-    function _completerProductions(ctx) {
+    /** Les productions assignées au groupe-cours actif, hors diagnostiques (`ProductionDiagnostique`). */
+    function _productionsDuGroupe() {
         const gcId = (db.getSync('groupeCoursActif', null) || {}).id || null;
         const brutes = (obtenirDonneesSelonMode('productions') || []).filter(p => p && _assignee(p, gcId));
-        const productions = window.ProductionDiagnostique ? window.ProductionDiagnostique.filtrerProductions(brutes) : brutes;
+        return window.ProductionDiagnostique ? window.ProductionDiagnostique.filtrerProductions(brutes) : brutes;
+    }
+
+    function _completerProductions(ctx) {
+        const productions = _productionsDuGroupe();
         if (ctx.famille === 'STD') {
             const r = _productionsStd(productions, ctx.config);
             ctx.productions = _productionsTriees(r.liste);
@@ -177,6 +197,13 @@
 
     function construireContexte() {
         const ctx = _contexteDeBase();
+        if (ctx.etat === 'cibles') {
+            // Les rangées et l'origine d'un niveau (lot 2 « Par standards ») : les mêmes étudiant·es, les productions du groupe
+            // (un portfolio conteneur n'est pas une trace : ce sont ses artefacts).
+            ctx.etudiants = _etudiants();
+            ctx.productions = _productionsTriees(_productionsDuGroupe().filter(p => p.type !== 'portfolio'));
+            return ctx;
+        }
         if (ctx.etat !== 'ok') return ctx;
         _completerProductions(ctx);
         ctx.etudiants = _etudiants();
@@ -535,6 +562,7 @@
     }
 
     function construireHTML(ctx) {
+        if (ctx.etat === 'cibles') return window.TableauCibles.construireHTML(ctx);   // lot 2 « Par standards »
         const tete = `<h3 class="tn-titre" tabindex="-1">${esc(MOTS.titre)}</h3><p class="tn-intro">${esc(MOTS.intro)}</p>`;
         if (ctx.etat !== 'ok') return `${tete}${_etatVideHTML(ctx)}`;
         const rangees = ctx.etudiants.map(e => _rangeeHTML(e, ctx)).join('');
@@ -563,8 +591,10 @@
         // Le défilement survit au rendu : une saisie dans une colonne de droite ne ramène pas le tableau à gauche.
         const avant = hote.querySelector('.tn-defilement');
         const defilement = avant ? avant.scrollLeft : 0;
-        hote.innerHTML = construireHTML(construireContexte());
+        const ctx = construireContexte();
+        hote.innerHTML = construireHTML(ctx);
         _poserEcoutes(hote);
+        if (ctx.etat === 'cibles') window.TableauCibles.apresRendu(hote, ctx);   // ses écoutes, et la case qui reprend le focus
         const zone = hote.querySelector('.tn-defilement');
         if (zone) {
             zone.scrollLeft = defilement;
@@ -864,6 +894,8 @@
      */
     function notesDuGroupe() {
         const ctx = construireContexte();
+        // « Par standards » (vue simple, 21 nov. 2026) : les notes du moteur des cibles, par le tableau des cibles.
+        if (ctx.etat === 'cibles') return window.TableauCibles.notesDuGroupe(ctx);
         if (ctx.etat !== 'ok' && ctx.etat !== 'aucune-production') return { etat: ctx.etat, finales: false, lignes: [] };
         const lignes = ctx.etudiants.map(e => {
             const r = _resultatEleve(e.da, ctx);

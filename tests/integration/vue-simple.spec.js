@@ -28,7 +28,7 @@ const OU_CODEX_EST_TOLERE = [
     '.notification-succes'         // la confirmation ou l'échec du geste (« Codex mis à jour », « Codex non mis à jour »)
 ];
 const PHRASE_CODEX = 'Tes données restent dans ce navigateur. Enregistre-les dans un fichier, ton codex, pour ne pas les perdre et pour les rouvrir ailleurs.';
-const LISTE = '9990001, Albatros, Ada\n9990002;Baobab;Bruno\n9990003\tCormoran\tChloé\n9990004 Dahlia Dario';
+const LISTE = '9990001, Albatros, Ada\n9990002;Baobab;Boréal\n9990003\tCormoran\tChloé\n9990004 Dahlia Dario';
 
 async function ouvrir(page) {
     const erreurs = [];
@@ -111,7 +111,7 @@ async function ajouterProduction(page, nom, date, type) {
     await expect(page.locator('#vs-tableau-hote .tn-production-titre', { hasText: new RegExp(`^${nom}$`) })).toBeVisible();
 }
 
-/** Le novice par standards, SANS OUVRIR AUCUN RÉGLAGE : classe, modèle, trois productions, des résultats pour Ada et un pour Bruno. */
+/** Le novice par standards, SANS OUVRIR AUCUN RÉGLAGE : classe, modèle, trois productions, des résultats pour Ada et un pour Boréal. */
 async function novice(page) {
     await collerLaClasse(page);
     await choisirLeModele(page, 'STD-n-meilleurs');
@@ -217,7 +217,7 @@ test.describe('Vue simple · le parcours d\'un nouvel arrivant', () => {
                 actifId: (window.db.getSync('groupeCoursActif', null) || {}).id === gc[0].id };
         });
         expect(coulisse).toMatchObject({ trimestres: 1, actif: true, groupes: 1, horaireId: null, pratiqueId: null, cours: [['Mon cours', 'cours']], actifId: true });
-        expect(coulisse.eleves).toEqual(['9990001 Albatros Ada true', '9990002 Baobab Bruno true', '9990003 Cormoran Chloé true', '9990004 Dahlia Dario true']);
+        expect(coulisse.eleves).toEqual(['9990001 Albatros Ada true', '9990002 Baobab Boréal true', '9990003 Cormoran Chloé true', '9990004 Dahlia Dario true']);
         expect((coulisse.calendrier || {}).dateDebut || '').toBe('');   // aucun faux calendrier
         expect(coulisse.horaires || []).toEqual([]);                    // aucun faux horaire
         expect(coulisse.conges || []).toEqual([]);
@@ -231,10 +231,13 @@ test.describe('Vue simple · le parcours d\'un nouvel arrivant', () => {
             const gc = window.db.getSync('groupeCoursActif', null);
             const p = window.db.getSync(window.cle('pratiquesConfigurables'), []).find((x) => x.id === gc.pratiqueId);
             const echelle = window.db.getSync(window.cle('echellesTemplates'), []).find((e) => e.id === p.configuration.echelleId);
-            return { n: window.db.getSync(window.cle('pratiquesConfigurables'), []).length, type: p.configuration.type, pf: p.configuration.portfolio,
+            return { n: window.db.getSync(window.cle('pratiquesConfigurables'), []).length, nom: p.nom, type: p.configuration.type, pf: p.configuration.portfolio,
                 echelle: { nom: echelle.nom, aElle: echelle.pratiqueId === p.id, lettres: echelle.niveaux.map((x) => x.code).join(' ') } };
         });
         // L'échelle est née avec la pratique : une copie à elle, « Mes niveaux », pas l'échelle de départ du trimestre.
+        // 21 nov. 2026 : le NOM RANGÉ de la pratique créée par le modèle est celui de sa famille. Du 13 au 21 nov., ce
+        // modèle rangeait « Par standards », le nom d'une autre pratique (rapport de la release du 21 nov., STOCK).
+        expect(pratique.nom).toBe('Par sélection de productions');
         expect(pratique).toMatchObject({ n: 1, type: 'standards', pf: { methodeSelection: 'meilleurs', nombreARetenir: 2 }, echelle: { nom: 'Mes niveaux', aElle: true, lettres: 'PS I D M E' } });
 
         // 4. Le tableau sans colonne ne reste pas muet : il dit quoi faire et montre « + Production ».
@@ -324,14 +327,14 @@ test.describe('Vue simple · le parcours d\'un nouvel arrivant', () => {
         await page.evaluate(() => window.naviguerVers('suivi', 'liste'));
         await expect(page.locator('#suivi-liste')).toContainText('Albatros');
         await page.evaluate(() => window.naviguerVers('conception', 'pratiques-notation'));
-        await expect(page.locator('#selectionPratiques')).toContainText('Par standards');
+        await expect(page.locator('#selectionPratiques')).toContainText('Par sélection de productions');
         await page.evaluate(() => window.naviguerVers('conception', 'productions'));
         await expect(page.locator('#conception-productions')).toContainText('Production 3');
 
         // 9. Il revient à la vue simple : idem.
         await basculer(page, 'simple');
         await expect(page.locator('#section-simple-accueil')).toBeVisible();
-        await expect(ecran(page, 'accueil').locator('.vs-etape-etat')).toHaveText(['4 étudiant·es', 'Par standards']);
+        await expect(ecran(page, 'accueil').locator('.vs-etape-etat')).toHaveText(['4 étudiant·es', 'Par sélection de productions']);
         await allerA(page, 'resultats');
         await expect(page.locator('#vs-tableau-hote .tn-case')).toHaveCount(12);
         await expect(noteTn(page, 1)).toHaveText('88');
@@ -391,7 +394,7 @@ test.describe('Vue simple · le parcours d\'un nouvel arrivant', () => {
    de titres, colonne « Statut du cours » vide ou « Inactif ». Vingt lignes, une inactive, accents, trait d'union, apostrophe. */
 const TITRES_LEA = ['No de DA', 'Groupe', 'Nom de l\'étudiant', 'Prénom de l\'étudiant', 'Statut du cours', 'Prog.', 'Services adaptés', ''];
 const NOMS_LEA = [
-    ['Albatros', 'Ada'], ['Baobab', 'Bruno'], ['Cormoran', 'Chloé'], ['Dahlia', 'Désiré'], ['Épervier', 'Élodie'],
+    ['Albatros', 'Ada'], ['Baobab', 'Boréal'], ['Cormoran', 'Chloé'], ['Dahlia', 'Désiré'], ['Épervier', 'Élodie'],
     ['Fougère-Lanoix', 'Félix'], ['Goéland', 'Gaëlle'], ['D\'Hirondelle', 'Hugo'], ['Ibis', 'Inès'], ['Jacinthe', 'Jérôme'],
     ['Kiwi', 'Karine'], ['Lupin', 'Léo'], ['Mélèze', 'Maëlle'], ['Narval', 'Noé'], ['Orme', 'Océane'],
     ['Pélican', 'Pierre-Luc'], ['Quetzal', 'Quentin'], ['Roitelet', 'Rosalie'], ['Saule', 'Sébastien'], ['Tétras', 'Thérèse']
@@ -419,10 +422,10 @@ test.describe('Vue simple · la liste de Léa, collée telle quelle', () => {
             await expect(ecran(page, 'classe').locator('.vs-succes')).toHaveText('Classe créée : 19 étudiant·es.');
             const inactifs = ecran(page, 'classe').locator('[data-vs-liste="inactifs"]');
             await expect(inactifs.locator('p')).toHaveText('1 personne de ta liste a le statut « Inactif » : mise de côté.');
-            await expect(inactifs.locator('li')).toHaveText([`Baobab Bruno ${daLea(1)}`]);
+            await expect(inactifs.locator('li')).toHaveText([`Baobab Boréal ${daLea(1)}`]);
             const inscrits = await elevesInscrits(page);
             expect(inscrits).toHaveLength(19);
-            expect(inscrits).not.toContain(`${daLea(1)} Baobab Bruno`);
+            expect(inscrits).not.toContain(`${daLea(1)} Baobab Boréal`);
             NOMS_LEA.forEach(([nom, prenom], i) => { if (i !== 1) expect(inscrits).toContain(`${daLea(i)} ${nom} ${prenom}`); });
             expect(erreurs).toEqual([]);
         });
@@ -445,7 +448,7 @@ test.describe('Vue simple · la liste de Léa, collée telle quelle', () => {
 /* ============================== PLUSIEURS GROUPES ==============================
    Décision de Grégoire (10 nov. 2026, 13 h 26), après son essai : « Nouveau groupe » et « Retirer ce groupe » sur « Ta
    classe ». Le retrait n'est offert que pour un groupe qui ne porte aucun résultat (limite du 20 sept. 2026). Noms inventés. */
-const LISTE_ATELIER = '9990011, Ulmaire, Ulysse\n9990012, Verveine, Victoire\n9990013, Wapiti, Wanda\n9990002, Baobab, Bruno';
+const LISTE_ATELIER = '9990011, Ulmaire, Ulysse\n9990012, Verveine, Victoire\n9990013, Wapiti, Wanda\n9990002, Baobab, Boréal';
 
 const groupesEnBase = (page) => page.evaluate(() => (window.db.getSync(window.cle('groupesCours'), []) || []).map((g) => {
     const cours = (window.db.getSync('cours', []) || []).find((c) => c.id === g.coursId);
@@ -520,7 +523,7 @@ test.describe('Vue simple · plusieurs groupes', () => {
         await nouveauGroupe(page, 'Atelier fictif', LISTE_ATELIER);
         await expect(ecran(page, 'classe').locator('.vs-succes')).toHaveText('Classe créée : 3 étudiant·es.');
         // La même personne ne s'inscrit qu'une fois par trimestre (règle de l'import de la vue étendue) : nommée, jamais déplacée.
-        await expect(ecran(page, 'classe').locator('.vs-refusees li')).toHaveText(['Baobab Bruno 9990002 : déjà dans un groupe de ce trimestre']);
+        await expect(ecran(page, 'classe').locator('.vs-refusees li')).toHaveText(['Baobab Boréal 9990002 : déjà dans un groupe de ce trimestre']);
         expect(await groupesEnBase(page)).toEqual([
             { cours: 'Mon cours', das: ['9990001', '9990002', '9990003', '9990004'] },
             { cours: 'Atelier fictif', das: ['9990011', '9990012', '9990013'] }
@@ -633,7 +636,7 @@ test.describe('Vue simple · les gestes tiennent', () => {
         await collerLaClasse(page);
         await choisirLeModele(page, 'STD-n-meilleurs');
         await page.locator('[data-action="VueSimple.changerModele"]').click();
-        await expect(page.locator('[data-action="VueSimple.choisirModele"]')).toHaveCount(2);
+        await expect(page.locator('[data-action="VueSimple.choisirModele"]')).toHaveCount(3);   // trois modèles depuis le 21 nov. 2026 (« Par standards », à l'essai)
         await choisirLeModele(page, 'STD-n-meilleurs');
         expect(await page.evaluate(() => window.db.getSync(window.cle('pratiquesConfigurables'), []).length)).toBe(1);
         expect(erreurs).toEqual([]);
@@ -732,7 +735,7 @@ test.describe('Vue simple · A. par standards, les niveaux se règlent', () => {
         for (const [n, d] of [['Production 1', '2026-11-02'], ['Production 2', '2026-11-09'], ['Production 3', '2026-11-16']]) await ajouterProduction(page, n, d);
         await expect(page.locator('#vs-tableau-hote .tn-repere-titre')).toHaveText('Échelle « Mes niveaux » :');
         await expect(page.locator('#vs-tableau-hote .tn-repere')).not.toContainText(/IDME|départ/i);
-        // Ada : A, C, Z → (95 + 61,5 + 30) / 3 = 62,17 → 62. Bruno : B, B → 82. Le toucher suit l'ordre réglé : vide → A.
+        // Ada : A, C, Z → (95 + 61,5 + 30) / 3 = 62,17 → 62. Boréal : B, B → 82. Le toucher suit l'ordre réglé : vide → A.
         await caseTn(page, 1, 1).click();
         await expect(caseTn(page, 1, 1)).toHaveText('A');
         await caseTn(page, 1, 2).focus(); await page.keyboard.press('c');
@@ -931,7 +934,7 @@ test.describe('Vue simple · les seuils, la mise à jour des valeurs, les colonn
     test('« Mettre à jour » : le compte exact, seule la valeur est écrite, aucune copie avec grille n\'est touchée ; « Annuler », au tableau, rend l\'empreinte d\'avant ; la note se recalcule à la main avant et après', async ({ page }) => {
         test.setTimeout(120000);
         const erreurs = await ouvrir(page);
-        await novice(page);   // Ada : E 100, M 75, D 65 → 80 ; Bruno : I 40
+        await novice(page);   // Ada : E 100, M 75, D 65 → 80 ; Boréal : I 40
         // Chloé a une copie évaluée AVEC une grille, niveau « M », dans la même échelle : le geste ne doit jamais la toucher.
         await page.evaluate(async () => {   // security-ok: fixture fictive du banc
             const gc = window.db.getSync('groupeCoursActif', null);
@@ -1219,7 +1222,7 @@ test.describe('Vue simple · B. par spécifications, les types et les paliers se
         await ajouterProduction(page, 'Travail fictif', '2026-11-02', 'Travail long');
         await ajouterProduction(page, 'Examen fictif', '2026-11-09', 'Examen');
         await ajouterProduction(page, 'Atelier fictif', '2026-11-16', 'Atelier');
-        // Ada : travail et examen acceptables → Réussite (70). Bruno : travail non acceptable → plancher (45).
+        // Ada : travail et examen acceptables → Réussite (70). Boréal : travail non acceptable → plancher (45).
         await caseTn(page, 1, 1).focus(); await page.keyboard.press('a');
         await caseTn(page, 1, 2).focus(); await page.keyboard.press('a');
         await caseTn(page, 2, 1).focus(); await page.keyboard.press('n');
@@ -1634,7 +1637,7 @@ test.describe('Vue simple · le passage vers la vue étendue', () => {
         await expect(page.locator('#suivi-saisie')).toContainText('Configurer l\'horaire dans Cadre › Trimestre');
         // La pratique née en vue simple s'ouvre dans Conception › Pratiques.
         await page.evaluate(() => window.naviguerVers('conception', 'pratiques-notation'));
-        await expect(page.locator('#selectionPratiques')).toContainText('Par standards (active)');
+        await expect(page.locator('#selectionPratiques')).toContainText('Par sélection de productions (active)');
         expect(erreurs).toEqual([]);
     });
 });
@@ -1672,10 +1675,10 @@ test.describe('Vue simple · quelqu\'un qui a déjà des données', () => {
         await basculer(page, 'simple');
         await allerA(page, 'resultats');
         await expect(ecran(page, 'resultats').locator('.vs-select option')).toHaveText(['Cours fictif A · groupe 01', 'Cours fictif B · groupe 02 (autre pratique)']);
-        await expect(ecran(page, 'resultats').locator('.vs-note')).toHaveText('Un groupe dont la pratique n’est ni par standards ni par spécifications se suit en vue étendue.');
+        await expect(ecran(page, 'resultats').locator('.vs-note')).toHaveText('Un groupe dont la pratique n’est ni par sélection de productions ni par spécifications se suit en vue étendue.');
         await expect(page.locator('#vs-tableau-hote .tn-production-titre')).toHaveText(['Production fictive']);
         await ecran(page, 'resultats').locator('.vs-select').selectOption('GC_SOM');
-        await expect(page.locator('#vs-tableau-hote .tn-etat-vide')).toHaveText('Le tableau sert aux pratiques par standards et par spécifications. La pratique de ce groupe se suit en vue étendue.');
+        await expect(page.locator('#vs-tableau-hote .tn-etat-vide')).toHaveText('Le tableau sert aux pratiques par sélection de productions et par spécifications. La pratique de ce groupe se suit en vue étendue.');
         await allerA(page, 'note');
         await expect(ecran(page, 'note').locator('.vs-select')).toHaveValue('GC_SOM');
         await ecran(page, 'note').locator('.vs-select').selectOption('GC_STD');
@@ -1754,5 +1757,344 @@ test.describe('En-tête · une seule barre de navigation, y compris pendant le c
         expect(await retirerLaRegleDuHead(page)).toBe(2);
         await avantLeScript(page, false);
         expect(await lireEntete(page)).toEqual({ etendue: true, simple: true, bas: true });
+    });
+});
+
+/* =====================================================================================================================
+   « PAR STANDARDS » EN VUE SIMPLE, À L'ESSAI (mandat du 21 nov. 2026, décision de Grégoire, 14 h 19 : « il faut que la
+   vue simple soit fonctionnelle avant la release ; c'est ce que les gens vont d'abord tester »). Rapport :
+   `plans de travail/RAPPORT-2026-11-21-par-standards-vue-simple.md`. Tout par l'interface de la vue simple, sauf où c'est
+   dit (ce que la vue étendue aurait réglé est semé, nommé). Noms fictifs. Écrit et éprouvé sous Chromium ; WebKit sur le Mac.
+   ===================================================================================================================== */
+
+const LIGNES_CIBLES = '  Analyser un texte  \n\nStructurer un propos\nRédiger une dissertation\n';
+const CIBLES = ['Analyser un texte', 'Structurer un propos', 'Rédiger une dissertation'];
+const ADA = '9990001';
+const BOREAL = '9990002';
+
+const lireBase = (page) => page.evaluate(() => {
+    const g = (k) => window.db.getSync(window.cle(k), []);
+    const groupes = g('groupesCours');
+    return {
+        pratiques: g('pratiquesConfigurables'), ensembles: g('ensemblesCibles'), inscriptions: g('inscriptionsCibles'),
+        echelles: g('echellesTemplates'), pratiqueDuGroupe: (Array.isArray(groupes) && groupes[0]) ? groupes[0].pratiqueId : null
+    };
+});
+
+/** « Par standards » : la carte, puis les cibles une par ligne, puis « Créer ma pratique ». */
+async function choisirParStandards(page, lignes) {
+    await allerA(page, 'pratique');
+    await page.locator('[data-action="VueSimple.choisirModele"][data-param="par-standards"]').click();
+    await page.fill('#vs-cibles-lignes', lignes);
+    await page.locator('[data-action="VueSimple.creerParStandards"]').click();
+    await expect(ecran(page, 'pratique').locator('#vs-bloc-cibles')).toBeVisible();
+}
+
+const caseCible = (page, rangee, colonne) => page.locator(`#vs-tableau-hote tbody tr:nth-child(${rangee}) .tc-case`).nth(colonne - 1);
+const noteCible = (page, rangee) => page.locator(`#vs-tableau-hote tbody tr:nth-child(${rangee}) .tn-note`);
+const fenetre = (page) => page.locator('.tc-fenetre');
+
+/** Touche une case, choisit un niveau (et une rétroaction), « Inscrire le niveau » : la fenêtre se ferme. */
+async function inscrire(page, rangee, colonne, niveau, retroaction) {
+    await caseCible(page, rangee, colonne).click();
+    await expect(fenetre(page)).toBeVisible();
+    await fenetre(page).locator(`.tc-niveau:has(input[value="${niveau}"])`).click();
+    if (retroaction) await fenetre(page).locator('.tc-retroaction').fill(retroaction);
+    await fenetre(page).locator('[data-tc="inscrire-simple"]').click();
+    await expect(fenetre(page)).toHaveCount(0);
+}
+
+/** Tout ce qui se touche a au moins 44 px de haut (le plancher de l'application ; consigne du mandat). */
+async function cibleTactile(locator, ou) {
+    for (const n of await locator.all()) {
+        const boite = await n.boundingBox();
+        if (!boite) continue;   // non affiché
+        expect(boite.height >= 44 ? null : `${ou} : « ${(await n.innerText()).trim().slice(0, 40)} » fait ${boite.height} px`).toBeNull();
+    }
+}
+
+/** « CIB » est le code interne : il ne s'affiche nulle part (consigne du 21 nov., 13 h 30). */
+async function aucunCib(page, ou) {
+    const lu = await ceQuiSeLit(page);
+    const m = (lu.texte + '\n' + lu.attributs).match(/\bCIB\b/);
+    expect(m ? `${ou} : « CIB » se lit` : null).toBeNull();
+}
+
+test.describe('Vue simple · « Par standards », à l\'essai (mandat du 21 nov. 2026)', () => {
+    test('le parcours : choisir le modèle, écrire trois cibles, inscrire, annuler, la note quitte « En attente »', async ({ page }) => {
+        const erreurs = await ouvrir(page);
+        await collerLaClasse(page);
+
+        // 1. La carte, à côté des deux modèles actuels ; « À l'essai » se lit sans survol.
+        await allerA(page, 'pratique');
+        await expect(page.locator('[data-action="VueSimple.choisirModele"]')).toHaveCount(3);
+        const carte = ecran(page, 'pratique').locator('.vs-etape', { hasText: 'Par standards' });
+        await expect(carte.locator('.vs-etape-essai')).toHaveText('À l’essai');
+        await expect(carte.locator('.vs-etape-essai')).toBeVisible();
+        await carte.locator('[data-action="VueSimple.choisirModele"]').click();
+        await expect(page.locator('#vs-cibles-lignes')).toBeVisible();
+        await aucunMotInterdit(page, 'Pratique, les cibles à écrire');
+
+        // Rien d'écrit : un refus, dit à l'écran.
+        await page.locator('[data-action="VueSimple.creerParStandards"]').click();
+        await expect(ecran(page, 'pratique').locator('.vs-erreur')).toHaveText('Écris au moins une cible.');
+        expect((await lireBase(page)).pratiques).toEqual([]);
+
+        // 2. Une cible par ligne : les lignes vides tombent, les espaces aussi.
+        await page.fill('#vs-cibles-lignes', LIGNES_CIBLES);
+        await page.locator('[data-action="VueSimple.creerParStandards"]').click();
+        await expect(ecran(page, 'pratique').locator('#vs-bloc-cibles .vs-niveau')).toHaveText(CIBLES);
+        let b = await lireBase(page);
+        expect(b.pratiques).toHaveLength(1);
+        const p = b.pratiques[0];
+        expect(b.pratiqueDuGroupe).toBe(p.id);
+        expect(p).toMatchObject({ nom: 'Par standards', type: 'cibles', calcul_note: { methode: 'niveaux_par_cible' },
+            configuration: { type: 'cibles', niveauSansDonnee: '0' } });
+        expect(p.configuration.doubleSeuil).toBeUndefined();      // double seuil éteint
+        expect(p.configuration.notesFinales).toBeUndefined();
+        const ensemble = b.ensembles.find((e) => e.id === p.configuration.ensembleCiblesId);
+        expect(ensemble.cibles.map((c) => c.etiquette)).toEqual(CIBLES);
+        ensemble.cibles.forEach((c) => expect(c).toMatchObject({ enonce: '', criteres: [], poids: 1, terminale: false }));
+        const echelle = b.echelles.find((e) => e.id === p.configuration.echelleId);
+        expect(echelle.niveaux.map((n) => n.code)).toEqual(['0', '1', '2', '3', '4']);   // l'échelle de départ, cinq niveaux
+        await aucunMotInterdit(page, 'Pratique, par standards');
+        await aucunCib(page, 'Pratique');
+
+        // 3. Le tableau : les étudiant·es en rangées, les cibles en colonnes ; la note attend.
+        await allerA(page, 'resultats');
+        await expect(page.locator('#vs-tableau-hote .tc-case')).toHaveCount(12);
+        await expect(page.locator('#vs-tableau-hote .tn-note')).toHaveCount(4);
+        await expect(noteCible(page, 1)).toContainText('En attente');
+        await expect(page.locator('#vs-tableau-hote [data-action="VueSimple.ouvrirProduction"]')).toHaveCount(0);
+        await aucunMotInterdit(page, 'Résultats');
+        await aucunCib(page, 'Résultats');
+
+        // La fenêtre de la case : les tuiles des niveaux, la rétroaction ; ni critère, ni « sans niveau », ni production.
+        await caseCible(page, 1, 1).click();
+        await expect(fenetre(page).locator('.tc-niveau')).toHaveCount(5);
+        await expect(fenetre(page).locator('.tc-critere, [data-sans-niveau], [data-rien], select')).toHaveCount(0);
+        await cibleTactile(fenetre(page).locator('button, .tc-niveau, textarea'), 'La fenêtre d\'une case');
+        await aucunMotInterdit(page, 'La fenêtre d\'une case');
+        await fenetre(page).locator('[data-tc="inscrire-simple"]').click();
+        await expect(fenetre(page).locator('.tc-alerte')).toContainText('Choisis un niveau : touche une tuile.');
+        expect((await lireBase(page)).inscriptions).toEqual([]);
+        await page.keyboard.press('Escape');
+
+        await inscrire(page, 1, 1, '3', 'Bonne analyse.');
+        b = await lireBase(page);
+        expect(b.inscriptions).toHaveLength(1);
+        const aujourdhui = await page.evaluate(() => window.InscriptionsCibles.dateDuJour());
+        expect(b.inscriptions[0]).toMatchObject({ type: 'inscription', da: ADA, cibleId: ensemble.cibles[0].id, niveau: '3',
+            productionId: null, noteBreve: 'Bonne analyse.', date: aujourdhui, criteres: [] });
+        await expect(noteCible(page, 1)).toContainText('En attente');
+        await inscrire(page, 1, 2, '4');
+        await inscrire(page, 1, 3, '4');
+        await expect(noteCible(page, 1)).toHaveText(/^92\s%$/);   // (75 + 100 + 100) / 3
+
+        // 4. Corriger une erreur : la dernière inscription, « Annuler » ; elle reste au stock, barrée.
+        await caseCible(page, 1, 3).click();
+        await expect(fenetre(page).locator('.tc-derniere-hote .tc-entree')).toHaveCount(1);
+        await expect(fenetre(page).locator('.tc-derniere-hote .tc-entree-niveau')).toHaveText('4 · Avancé');
+        await cibleTactile(fenetre(page).locator('button'), 'La fenêtre, la dernière inscription');
+        await fenetre(page).locator('[data-tc="annuler"]').click();
+        await cibleTactile(page.locator('#overlay-ui-dialogue button, #ui-dialogue-saisie'), 'La question « Annuler cette inscription »');
+        await page.locator('#ui-dialogue-saisie').fill('Erreur de saisie.');
+        await page.locator('#overlay-ui-dialogue .btn-supprimer').click();
+        await expect(fenetre(page).locator('.tc-annulee-simple')).toHaveText('Inscription annulée. Rien ne s’efface : elle reste, barrée, dans l’historique de la vue étendue.');
+        b = await lireBase(page);
+        expect(b.inscriptions).toHaveLength(4);   // trois inscriptions et une annulation : rien n'est effacé
+        expect(b.inscriptions[3]).toMatchObject({ type: 'annulation', inscriptionId: b.inscriptions[2].id, raison: 'Erreur de saisie.' });
+        await page.keyboard.press('Escape');
+        await expect(noteCible(page, 1)).toContainText('En attente');
+        await expect(noteCible(page, 1)).toContainText('Rédiger une dissertation');
+
+        // 5. La note quitte « En attente ».
+        await inscrire(page, 1, 3, '2');
+        await expect(noteCible(page, 1)).toHaveText(/^75\s%$/);   // (75 + 100 + 50) / 3
+
+        // La note finale : le même moteur ; une note qui attend nomme ses cibles, jamais 0.
+        await allerA(page, 'note');
+        const rangees = ecran(page, 'note').locator('.vs-notes tbody tr');
+        await expect(rangees).toHaveCount(4);
+        await expect(rangees.nth(0).locator('.vs-note-valeur')).toHaveText('75');
+        await expect(rangees.nth(1).locator('.vs-note-valeur')).toHaveText('–');
+        await expect(rangees.nth(1).locator('.vs-note-detail')).toHaveText(`En attente : ${CIBLES.join(', ')}`);
+        await aucunMotInterdit(page, 'Note finale');
+        await aucunCib(page, 'Note finale');
+
+        // 6. L'export : la note d'Ada ; une note en attente n'est jamais un 0.
+        const [telechargement] = await Promise.all([page.waitForEvent('download'),
+            ecran(page, 'note').locator('[data-action="exporterSyntheseResultatsCSV"]').click()]);
+        const csv = readFileSync(await telechargement.path(), 'utf8');
+        // Les champs d'une ligne du CSV (virgules hors guillemets).
+        const champs = (ligne) => (ligne.match(/("([^"]|"")*"|[^,]*)(,|$)/g) || []).map((c) => c.replace(/,$/, '').replace(/^"|"$/g, ''));
+        const lignes = csv.replace(/^\uFEFF/, '').split(/\r?\n/).filter(Boolean).map(champs);
+        const colonne = lignes[0].indexOf('Note finale (arrondie à l\'entier)');
+        const statut = lignes[0].indexOf('Statut');
+        const de = (da) => lignes.find((l) => l[0] === da);
+        expect(colonne).toBeGreaterThan(0);
+        expect(de(ADA)[colonne]).toBe('75');
+        expect(de(BOREAL)[colonne]).toBe('');   // pas de note : la case reste vide, jamais 0
+        expect(de(BOREAL)[statut]).toMatch(/^non constructible – Pas encore de note : les cibles « Analyser un texte », « Structurer un propos », « Rédiger une dissertation » sont sans donnée\./);
+        expect(lignes.map((l) => l[lignes[0].indexOf('Pratique (code)')]).slice(1)).toEqual(['STD', 'STD', 'STD', 'STD']);   // le sigle affiché, jamais « CIB »
+        expect(csv).not.toMatch(/\bCIB\b/);
+        expect(erreurs).toEqual([]);
+    });
+
+    test('le réglage des cibles : ajouter, renommer, retirer ; une cible inscrite pose la question de l\'assistant ; rien ne s\'efface', async ({ page }) => {
+        const erreurs = await ouvrir(page);
+        await collerLaClasse(page);
+        await choisirParStandards(page, 'Analyser\nStructurer');
+        await allerA(page, 'resultats');
+        await inscrire(page, 1, 1, '3');
+        const avant = await lireBase(page);
+        const [a, s] = avant.ensembles[0].cibles;
+
+        // Renommer, ajouter : chaque cible gardée l'est entière ; la neuve prend le poids commun.
+        await regler(page, 'cibles');
+        await expect(page.locator('#vs-bloc-cibles .vs-cible-nom')).toHaveCount(2);
+        await page.locator('#vs-bloc-cibles .vs-cible-nom').nth(1).fill('Structurer un propos');
+        await page.locator('#vs-bloc-cibles [data-action="VueSimple.cibleGeste"][data-param="ajouter"]').click();
+        await page.locator('#vs-bloc-cibles .vs-cible-nom').nth(2).fill('Rédiger');
+        await aucunMotInterdit(page, 'Pratique, le réglage des cibles');
+        await cibleTactile(ecran(page, 'pratique').locator('button, input'), 'Le réglage des cibles');
+        await enregistrerLeReglage(page, 'Cibles enregistrées.');
+        let b = await lireBase(page);
+        expect(b.ensembles).toHaveLength(1);
+        expect(b.ensembles[0].cibles.map((c) => [c.id, c.etiquette, c.poids])).toEqual([[a.id, 'Analyser', 1], [s.id, 'Structurer un propos', 1], [expect.any(String), 'Rédiger', 1]]);
+
+        // Les refus : dits, rien n'est écrit.
+        await regler(page, 'cibles');
+        await page.locator('#vs-bloc-cibles .vs-cible-nom').nth(2).fill('analyser');
+        await page.locator('[data-action="VueSimple.enregistrerReglage"]').click();
+        await expect(page.locator('#vs-reglage-retour .vs-erreur')).toHaveText('Deux cibles portent le même nom.');
+        await page.locator('#vs-bloc-cibles .vs-cible-nom').nth(2).fill('   ');
+        await page.locator('[data-action="VueSimple.enregistrerReglage"]').click();
+        await expect(page.locator('#vs-reglage-retour .vs-erreur')).toHaveText('Chaque ligne nomme une cible : une ligne est vide.');
+        await page.locator('#vs-bloc-cibles .vs-cible-nom').nth(2).fill('Rédiger');
+        expect((await lireBase(page)).ensembles).toEqual(b.ensembles);
+
+        // Retirer la cible inscrite : la question de l'assistant. « Annuler » : rien n'est écrit, le réglage reste ouvert.
+        await page.locator('#vs-bloc-cibles [data-action="VueSimple.cibleGeste"][data-param="retirer"]').first().click();
+        await expect(page.locator('#vs-bloc-cibles .vs-cible-nom')).toHaveCount(2);
+        await page.locator('[data-action="VueSimple.enregistrerReglage"]').click();
+        const question = page.locator('#overlay-ui-dialogue');
+        await expect(question).toContainText('Retirer une cible');
+        await expect(question).toContainText('Tu retires une cible qui porte des inscriptions.');
+        await expect(question).toContainText('« Analyser » : 1 niveau inscrit pour 1 étudiant·e');
+        await expect(question).toContainText('Ses inscriptions restent enregistrées, mais cette cible ne sera plus montrée au tableau.');
+        await cibleTactile(question.locator('button'), 'La question du retrait');
+        await question.locator('.btn-neutre').click();
+        await expect(question).toHaveCount(0);
+        expect((await lireBase(page)).ensembles).toEqual(b.ensembles);
+        await expect(page.locator('[data-action="VueSimple.enregistrerReglage"]')).toBeVisible();
+
+        // « Retirer quand même » : la cible quitte l'ensemble, ses inscriptions restent au stock.
+        await page.locator('[data-action="VueSimple.enregistrerReglage"]').click();
+        await question.locator('.btn-supprimer').click();
+        await expect(ecran(page, 'pratique').locator('.vs-succes')).toHaveText('Cibles enregistrées.');
+        b = await lireBase(page);
+        expect(b.ensembles[0].cibles.map((c) => c.etiquette)).toEqual(['Structurer un propos', 'Rédiger']);
+        expect(b.inscriptions).toEqual(avant.inscriptions);
+        await allerA(page, 'resultats');
+        await expect(page.locator('#vs-tableau-hote .tc-case')).toHaveCount(8);
+        expect(erreurs).toEqual([]);
+    });
+
+    test('enrichie en vue étendue, rouverte en vue simple : poids, cible terminale, second seuil, remarque — tout se lit, rien n\'est réécrit', async ({ page }) => {
+        const erreurs = await ouvrir(page);
+        await collerLaClasse(page);
+        await choisirParStandards(page, 'A\nB\nC');
+        // SEMÉ — ce que la vue étendue aurait réglé (l'assistant, la fiche de la pratique, l'inscription d'une remarque) :
+        // poids 2-1-1, un critère sur A, C terminale, le second seuil (60, plafond 55) ; puis des inscriptions.
+        await page.evaluate(async ({ ada, boreal }) => {
+            const p = window.db.getSync(window.cle('pratiquesConfigurables'), [])[0];
+            const e = window.EnsemblesCibles.lireParId(p.configuration.ensembleCiblesId);
+            const [a, b, c] = e.cibles;
+            await window.EnsemblesCibles.enregistrer({ id: e.id, coursId: e.coursId, cibles: [
+                Object.assign({}, a, { poids: 2, criteres: [{ id: 'k1', texte: 'Cite le texte', essentiel: true }] }),
+                Object.assign({}, b, { poids: 1 }), Object.assign({}, c, { poids: 1, terminale: true })] });
+            await window.modifierEtAnnoncer(window.cle('pratiquesConfigurables'), (l) => l.map((x) => (x.id === p.id
+                ? Object.assign({}, x, { configuration: Object.assign({}, x.configuration, { doubleSeuil: { actif: true, seuil: 60, plafond: 55 } }) }) : x)), []);
+            const s = (da, cibleId, niveau, noteBreve) => ({ da, ensembleId: e.id, cibleId, niveau, echelleId: p.configuration.echelleId,
+                date: '2026-11-20', productionId: null, noteBreve: noteBreve || '', criteres: [] });
+            const r = await window.InscriptionsCibles.inscrire([s(ada, a.id, '4'), s(ada, b.id, '4'), s(ada, c.id, '1'),
+                s(boreal, a.id, '4'), s(boreal, b.id, '1'), s(boreal, c.id, '4'), s('9990003', a.id, null, 'Remarque seule.')], {});
+            if (!r.ok) throw new Error('inscriptions semées refusées');
+            await window.db.flush();
+        }, { ada: ADA, boreal: BOREAL });
+        await redemarrerLaVue(page);
+        const avant = await empreinte(page);
+
+        await allerA(page, 'pratique');
+        await expect(ecran(page, 'pratique').locator('#vs-bloc-cibles')).toContainText('Les poids de tes cibles ont été réglés en vue étendue : ils restent tels quels.');
+        await expect(ecran(page, 'pratique').locator('#vs-bloc-note')).toContainText('Un second seuil, réglé en vue étendue, peut plafonner la note.');
+        await aucunMotInterdit(page, 'Pratique, enrichie');
+        await allerA(page, 'resultats');
+        await expect(noteCible(page, 1)).toHaveText(/^55\s%\s*plafonnée$/);   // (2 × 100 + 100 + 25) / 4 = 81,25, plafonnée : C terminale à 25 < 60
+        await expect(noteCible(page, 2)).toHaveText(/^81\s%$/);                // (2 × 100 + 25 + 100) / 4 = 81,25 : les poids comptent
+        await expect(caseCible(page, 3, 1)).toHaveClass(/tc-case--remarques/);  // une case qui ne porte qu'une remarque le montre
+        await caseCible(page, 3, 1).click();
+        await expect(fenetre(page).locator('.tc-derniere-hote .tc-entree-niveau')).toHaveText('Remarque, sans niveau');
+        await expect(fenetre(page).locator('.tc-derniere-hote .tc-entree-note')).toHaveText('Remarque seule.');
+        await aucunMotInterdit(page, 'La fenêtre d\'une case, enrichie');
+        await page.keyboard.press('Escape');
+        await allerA(page, 'note');
+        const rangees = ecran(page, 'note').locator('.vs-notes tbody tr');
+        await expect(rangees.nth(0).locator('.vs-note-valeur')).toHaveText('55');
+        await expect(rangees.nth(0).locator('.vs-note-detail')).toHaveText('plafonnée');
+        await expect(rangees.nth(1).locator('.vs-note-valeur')).toHaveText('81');
+        await basculer(page, 'etendue');
+        await basculer(page, 'simple');
+        expect(differences(avant, await empreinte(page))).toEqual([]);   // lire, basculer, revenir : rien n'est écrit
+
+        // Ajouter une cible en vue simple : les poids réglés ne bougent pas, la terminale et le critère restent.
+        await regler(page, 'cibles');
+        await page.locator('#vs-bloc-cibles [data-action="VueSimple.cibleGeste"][data-param="ajouter"]').click();
+        await page.locator('#vs-bloc-cibles .vs-cible-nom').nth(3).fill('D');
+        await enregistrerLeReglage(page, 'Cibles enregistrées.');
+        const cibles = (await lireBase(page)).ensembles[0].cibles;
+        expect(cibles.map((c) => [c.etiquette, c.poids, c.terminale, c.criteres.length])).toEqual([['A', 2, false, 1], ['B', 1, false, 0], ['C', 1, true, 0], ['D', 1, false, 0]]);
+        expect(erreurs).toEqual([]);
+    });
+
+    test('le stock : une pratique « Par standards » née de l\'ancienne vue simple (famille par sélection) garde ses écrans', async ({ page }) => {
+        const erreurs = await ouvrir(page);
+        await collerLaClasse(page);
+        await choisirLeModele(page, 'STD-n-meilleurs');
+        // SEMÉ — le nom que l'ancien modèle donnait (avant le 21 nov.) : la famille se lit au type, jamais au nom.
+        await page.evaluate(async () => {
+            await window.modifierEtAnnoncer(window.cle('pratiquesConfigurables'), (l) => l.map((x) => Object.assign({}, x, { nom: 'Par standards' })), []);
+            await window.db.flush();
+        });
+        await redemarrerLaVue(page);
+        const avant = await empreinte(page);
+        await allerA(page, 'pratique');
+        await expect(ecran(page, 'pratique').locator('#vs-bloc-regle')).toBeVisible();
+        await expect(ecran(page, 'pratique').locator('#vs-bloc-cibles')).toHaveCount(0);
+        await allerA(page, 'resultats');
+        await expect(page.locator('#vs-tableau-hote .tc-case')).toHaveCount(0);
+        await expect(ecran(page, 'resultats').locator('[data-action="VueSimple.ouvrirProduction"]').first()).toBeVisible();
+        await allerA(page, 'note');
+        await allerA(page, 'accueil');
+        expect(differences(avant, await empreinte(page))).toEqual([]);
+        expect(erreurs).toEqual([]);
+    });
+
+    test('« Changer de modèle » : offert tant qu\'aucun niveau n\'est inscrit ; le modèle repris ne double rien', async ({ page }) => {
+        const erreurs = await ouvrir(page);
+        await collerLaClasse(page);
+        await choisirParStandards(page, 'Analyser');
+        await page.locator('[data-action="VueSimple.changerModele"]').click();
+        await expect(page.locator('[data-action="VueSimple.choisirModele"]')).toHaveCount(3);
+        await page.locator('[data-action="VueSimple.choisirModele"][data-param="par-standards"]').click();
+        await expect(ecran(page, 'pratique').locator('#vs-bloc-cibles')).toBeVisible();   // reprise, sans redemander les cibles
+        let b = await lireBase(page);
+        expect([b.pratiques.length, b.ensembles.length]).toEqual([1, 1]);
+        await allerA(page, 'resultats');
+        await inscrire(page, 1, 1, '2');
+        await allerA(page, 'pratique');
+        await expect(page.locator('[data-action="VueSimple.changerModele"]')).toHaveCount(0);
+        expect(erreurs).toEqual([]);
     });
 });

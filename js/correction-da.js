@@ -128,6 +128,12 @@
         { nom: 'confidentielEtudiants', categorie: 'autres', deplacer: cleDObjet },
         { nom: 'chronoEvaluations', categorie: 'autres', deplacer: (v, a, n) => champDeTableau(v, 'etudiantDA', a, n) },
         { nom: 'elevesDesinscrits', categorie: 'autres', deplacer: (v, a, n) => champDeTableau(v, 'da', a, n) },
+        // Lot 2 « Par standards » (21 nov. 2026) : les niveaux inscrits. Chaque entrée (inscription ou annulation) porte
+        // `da` ; toutes passent, aucune n'est ajoutée ni retirée. La fenêtre compte les inscriptions, pas les annulations.
+        {
+            nom: 'inscriptionsCibles', categorie: 'inscriptions', deplacer: (v, a, n) => champDeTableau(v, 'da', a, n),
+            afficher: (v, da) => (Array.isArray(v) ? v.filter((e) => e && e.type === 'inscription' && memeDA(e.da, da)).length : 0)
+        },
         // Clés composées, énumérées (hors des boucles du registre)
         {
             nom: 'snapshots_', compose: true, categorie: 'resultats',
@@ -268,7 +274,7 @@
                 apres: nouveau && !t.conflit ? compter(famille, t.valeur, nouveau) : 0
             };
         });
-        const comptes = { evaluations: 0, presences: 0, copies: 0, resultats: 0, autres: 0, jetons: 0, denotation: 0, longitudinal: 0 };
+        const comptes = { evaluations: 0, presences: 0, copies: 0, resultats: 0, autres: 0, jetons: 0, denotation: 0, longitudinal: 0, inscriptions: 0 };
         parCle.forEach((c) => {
             comptes[c.famille.categorie] += c.famille.afficher ? c.famille.afficher(lireBrut(c.cle), ancien) : c.ancien;
         });

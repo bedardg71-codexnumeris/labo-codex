@@ -191,7 +191,8 @@
      * ne peut pas porter. Limite de Grégoire (20 sept. 2026) : aucun geste n'efface un résultat de façon irréversible.
      */
     const CLES_DE_RESULTATS = Object.freeze(['evaluationsSauvegardees', 'presences', 'fichiersTravaux', 'annotationsTravaux',
-        'corbeilleFichiers', 'portfoliosEleves', 'interventions', 'jugementsDenotation', 'notesRapport']);
+        'corbeilleFichiers', 'portfoliosEleves', 'interventions', 'jugementsDenotation', 'notesRapport',
+        'inscriptionsCibles']);   // lot 2 « Par standards » (21 nov. 2026) : les niveaux inscrits
     /** Les clés composées d'un groupe-cours (`<trim>_<préfixe><id>`) : présentes et non vides, elles portent des données. */
     const PREFIXES_DU_GROUPE = Object.freeze(['snapshots_', 'etudiantsSuivis_gc_', 'datesVerrouillees_gc_']);
     const CHAMPS_DA = ['etudiantDA', 'etudiantDa', 'da'];
@@ -299,7 +300,23 @@
 
     /* ============================== LA PRATIQUE ============================== */
 
-    const FAMILLES = Object.freeze({ STD: 'standards', SPE: 'specifications' });
+    // CIBLES : la pratique « Par standards » (21 nov. 2026, à l'essai), famille `cibles`. La clé ne reprend pas le code interne
+    // de la famille, qui ne s'écrit qu'aux places mesurées (sentinelle des sigles, C).
+    const FAMILLES = Object.freeze({ STD: 'standards', SPE: 'specifications', CIBLES: 'cibles' });
+
+    /**
+     * La famille d'une pratique, lue à son TYPE rangé, jamais à son nom (21 nov. 2026). Depuis le 10 nov., l'ancien modèle
+     * de la vue simple a nommé « Par standards » des pratiques de la famille « Par sélection de productions » : elles restent
+     * de cette famille, avec leur comportement, et ne sont pas réécrites. 'standards', 'specifications', 'cibles', ou 'autre'
+     * (une autre famille, ou rien de lisible).
+     */
+    function familleDeLaPratique(p) {
+        const type = p ? String((p.configuration && p.configuration.type) || p.type || (p.config && p.config.type) || '') : '';
+        if (type === FAMILLES.CIBLES) return FAMILLES.CIBLES;
+        if (/standard/i.test(type)) return FAMILLES.STD;
+        if (/sp[ée]cification/i.test(type)) return FAMILLES.SPE;
+        return 'autre';
+    }
 
     /** Les règles des standards offertes en vue simple : celles des deux modèles existants, et « toutes ». */
     const REGLES_STD = Object.freeze(['meilleurs', 'recents', 'tous']);
@@ -597,6 +614,78 @@
         return p;
     }
 
+    /* ============================== « PAR STANDARDS », À L'ESSAI (21 nov. 2026) ==============================
+       Mandat du 21 nov. (décision de Grégoire, 14 h 19 : « il faut que la vue simple soit fonctionnelle avant la release »).
+       En vue simple, une cible n'a qu'une étiquette : ni énoncé, ni critère, ni « terminale » ; les poids sont égaux d'office.
+       Tout ce que la vue étendue y ajoute (énoncés, critères, poids réglés, cibles terminales) est GARDÉ tel quel. */
+
+    const LONGUEUR_ETIQUETTE = 80;
+
+    /** Les étiquettes écrites, une par ligne : les lignes vides ne comptent pas, les espaces autour sont retirés. */
+    function etiquettesDepuisLignes(texte) {
+        return String(texte || '').split(/\r?\n/).map((l) => l.trim()).filter(Boolean).map((l) => l.slice(0, LONGUEUR_ETIQUETTE));
+    }
+
+    /** Ce qui empêche d'enregistrer des étiquettes : aucune cible ; une étiquette vide ; deux pareilles (sans casse). */
+    function refusDesCibles(etiquettes) {
+        const liste = etiquettes || [];
+        if (!liste.length) return { refus: 'aucuneCible' };
+        if (liste.some((e) => !String(e).trim())) return { refus: 'cibleSansEtiquette' };
+        if (_doublon(liste)) return { refus: 'cibleEnDouble' };
+        return null;
+    }
+
+    /**
+     * Le poids d'une cible neuve : la règle de l'assistant (`EditeurCibles`, « égaux d'office ») — le poids commun si toutes
+     * les cibles ont le même, sinon 1. Des poids égaux n'ont rien à recalculer : la part de chaque cible (son poids sur le
+     * total) suit leur nombre. Des poids réglés en vue étendue (inégaux) ne sont jamais touchés.
+     */
+    function poidsDUneCibleNeuve(poids) {
+        const p = (poids || []).map(Number);
+        return (p.length && p.every((x) => x > 0 && x === p[0])) ? p[0] : 1;
+    }
+
+    /** Une cible née en vue simple : une étiquette, le poids donné ; ni énoncé, ni critère, ni « terminale ». */
+    function cibleSimple(id, etiquette, poids) {
+        return { id: String(id), etiquette: String(etiquette || '').trim(), enonce: '', criteres: [], poids, terminale: false };
+    }
+
+    /** Les cibles d'une pratique neuve : une par étiquette, poids égaux (1). */
+    function ciblesNeuves(etiquettes, idNeuf) {
+        return (etiquettes || []).map((e) => cibleSimple(idNeuf(), e, 1));
+    }
+
+    /** Le brouillon des cibles : l'identité et l'étiquette de chacune, dans l'ordre. */
+    function brouillonDesCibles(cibles) {
+        return { cibles: (cibles || []).filter((c) => c && c.id).map((c) => ({ id: String(c.id), etiquette: c.etiquette || '' })) };
+    }
+
+    /** Les gestes du brouillon des cibles (un brouillon neuf ; l'ancien n'est pas muté). Le retrait ne refuse rien ici :
+     *  une cible qui porte des inscriptions pose la question à l'enregistrement, comme dans l'assistant. */
+    const gestesCibles = {
+        ajouter: (b, id) => Object.assign({}, b, { cibles: b.cibles.concat([{ id: String(id), etiquette: '', neuve: true }]) }),
+        retirer: (b, index) => (b.cibles[index] ? Object.assign({}, b, { cibles: b.cibles.filter((_, i) => i !== index) }) : b)
+    };
+
+    /**
+     * Les cibles à écrire. Une cible gardée est l'ANCIENNE, entière (énoncé, critères, poids, « terminale » de la vue
+     * étendue), avec l'étiquette du brouillon ; une cible neuve prend le poids de l'assistant, calculé sur les cibles gardées.
+     */
+    function ciblesReglees(anciennes, brouillon) {
+        const parId = new Map((anciennes || []).filter((c) => c && c.id).map((c) => [String(c.id), c]));
+        const gardees = brouillon.cibles.filter((x) => parId.has(x.id)).map((x) => parId.get(x.id).poids);
+        const poidsNeuf = poidsDUneCibleNeuve(gardees);
+        return brouillon.cibles.map((x) => (parId.has(x.id)
+            ? Object.assign({}, parId.get(x.id), { etiquette: String(x.etiquette).trim() })
+            : cibleSimple(x.id, x.etiquette, poidsNeuf)));
+    }
+
+    /** Les poids sont-ils égaux ? (sinon, ils ont été réglés en vue étendue : la vue simple le dit et n'y touche pas) */
+    function poidsEgaux(cibles) {
+        const p = (cibles || []).map((c) => Number(c && c.poids));
+        return p.length > 0 && p.every((x) => x === p[0]);
+    }
+
     /* ============================== LA RÈGLE « NE NOMME RIEN QUI N'EXISTE PAS » ============================== */
 
     /** Le matériel que l'application sème d'elle-même dans un trimestre (import-export.js, `IDS_MATERIEL_SEME`). */
@@ -616,7 +705,8 @@
         applicationVide, vueAuDemarrage,
         analyserListeCollee, refusParCause, CLES_DE_RESULTATS, PREFIXES_DU_GROUPE, elevesDuGroupe, porteursDeResultats, nomCoursParDefaut,
         trimestreDeLaDate, ficheEleve, groupeCoursLeger, productionLegere,
-        pratiqueDepuisModele, regleStd, poserRegleStd,
+        pratiqueDepuisModele, regleStd, poserRegleStd, familleDeLaPratique,
+        etiquettesDepuisLignes, refusDesCibles, poidsDUneCibleNeuve, cibleSimple, ciblesNeuves, brouillonDesCibles, gestesCibles, ciblesReglees, poidsEgaux,
         brouillonDeLaPratique, gestes, refusDesNiveaux, refusDesSpecifications, niveauxRegles, echelleReglee, niveauxChanges, poserSpecifications, NOM_ECHELLE,
         resultatsAMettreAJour, appliquerMiseAJour, colonneModifiee, poserCompte,
         aUneGrille, rangDeProduction

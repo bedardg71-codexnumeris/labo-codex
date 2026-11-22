@@ -1245,7 +1245,7 @@
         // Liste. Elle n'a pas de copie dans le modèle de « Recevoir » (Loutre Enjouée, Tapir Doux, Antilope Vaillante).
         etudiantEvalue: Object.freeze({ da: '9900007', nom: 'Yack Amical' }),
         echelle: 'IDME et niv 0',
-        // Le modèle par standards de l'assistant (`STD-n-meilleurs`).
+        // Le modèle par standards de l'assistant (`STD-n-meilleurs`, celui que la vue simple appelle « Par sélection de productions »).
         pratique: Object.freeze({ id: 'STD-n-meilleurs', nom: 'N meilleures évaluations' }),
         // Son nom est celui de la production (consigne, C.4).
         cartouche: 'Appliquer des stratégies de lecture variées (Deux-Rives)',

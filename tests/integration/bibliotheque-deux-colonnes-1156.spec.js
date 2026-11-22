@@ -24,7 +24,7 @@ const dossierCaptures = process.env.CAPTURES_1156 || null;
 //     ramenée dit « Aussi » et « Déjà », sans « Garder → » ; la ligne en clair et l'aperçu ; ⋮ ;
 //     « Supprimer définitivement » garde l'exemplaire et le dit ; une retirée se retrouve et revient ;
 //     la ligne d'import au pied de la bibliothèque, et sa bulle ;
-//   · pratiques : aucune rangée du trimestre ne porte de passage ; l'encadré est parti ; une maquette
+//   · pratiques : chaque rangée du trimestre porte « Garder → » ou son état calme (#1164, 21 nov. 2026 ; avant : aucun passage) ; l'encadré est parti ; une maquette
 //     n'apparaît dans aucune colonne (la note la signale) ; la famille en mots ; ⋮ ; la phrase dans la
 //     confirmation avec un exemplaire, absente sans ; la ligne d'import au pied de « Dans ce trimestre » ;
 //   · les deux mesures de la phrase « Ce que tu y modifies… » ;
@@ -506,7 +506,7 @@ test('pratiques : les deux titres, les boutons du milieu et l’encadré partis,
     });
 });
 
-test('pratiques : aucune rangée du trimestre ne porte de passage ; la famille en mots ; « ← Utiliser » ramène un gabarit, la fenêtre reste ouverte', async ({ page }) => {
+test('pratiques : chaque rangée du trimestre porte « Garder dans ma bibliothèque → » ou son état calme (#1164) ; la famille en mots ; « ← Utiliser » ramène un gabarit, la fenêtre reste ouverte', async ({ page }) => {
     test.setTimeout(120000);
     await ouvrirDemo(page, 'pratiques', 1440, 560);
     await ouvrirBibliotheque(page, 'pratiques');
@@ -514,11 +514,18 @@ test('pratiques : aucune rangée du trimestre ne porte de passage ; la famille e
     const trimestre = colonne(page, 'pratiques', 'trimestre').locator('.biblio2-liste').first();
     const nbTrimestre = await trimestre.locator(':scope > .biblio2-rangee').count();
     expect(nbTrimestre).toBeGreaterThanOrEqual(2);
-    await expect(trimestre.locator('.biblio2-passage')).toHaveCount(0);
+    // #1164 (lot pratique-std-voyage, 21 nov. 2026) — « aucune rangée ne porte de passage » est RETIRÉ : chaque rangée porte
+    // le geste « Garder dans ma bibliothèque », ou l'état calme quand elle a déjà son exemplaire. Jamais les deux, jamais rien.
+    const nbPassages = await trimestre.locator(':scope > .biblio2-rangee .biblio2-passage').count();
+    const nbEtats = await trimestre.locator(':scope > .biblio2-rangee .biblio2-etat').count();
+    expect(nbPassages + nbEtats).toBe(nbTrimestre);
+    expect(nbPassages).toBeGreaterThanOrEqual(1);
+    for (const libelle of await trimestre.locator('.biblio2-passage').allTextContents()) expect(libelle).toContain('Garder dans ma bibliothèque');
+    await expect(trimestre.locator('.biblio2-passage[data-action="garderPratiqueDansBibliotheque"]')).toHaveCount(nbPassages);
     await expect(colonne(page, 'pratiques', 'trimestre').getByRole('button', { name: 'Tout garder dans ma bibliothèque' })).toHaveCount(0);
 
     // La famille en mots, à la place des badges ; « Gabarit » parti.
-    await expect(rangee(page, 'pratiques', 'trimestre', 'PAN – Standards (démo)').locator('.biblio2-rangee-meta')).toHaveText(/^PAN-Standards( · par .+)?$/);
+    await expect(rangee(page, 'pratiques', 'trimestre', 'Par sélection de productions (démo)').locator('.biblio2-rangee-meta')).toHaveText(/^Par sélection de productions( · par .+)?$/);   // ↻ 21 nov. 2026, 7 h 44 : le nom de famille, sans « PAN »
     await expect(rangee(page, 'pratiques', 'bibliotheque', 'Modèle sommatif').locator('.biblio2-rangee-meta')).toHaveText(/^Sommative · par /);
     await expect(rangee(page, 'pratiques', 'bibliotheque', 'Modèle de base').locator('.biblio2-rangee-meta')).toHaveText(/^PAN-Dénotation · par /);
     const fen = page.locator(FAMILLES.pratiques.sel);
@@ -561,9 +568,9 @@ test('pratiques : l’aperçu dit la description, puis l’échelle et la grille
     const lignes = await r.locator('.biblio2-apercu tr').evaluateAll(trs => trs.map(tr => [...tr.cells].map(td => td.textContent.trim())));
     expect(lignes).toEqual([['Échelle de performance', echelle.nom, ''], ['Grille de critères d\'évaluation', 'Grille-4', '']]);
 
-    const demo = rangee(page, 'pratiques', 'trimestre', 'PAN – Standards (démo)');
+    const demo = rangee(page, 'pratiques', 'trimestre', 'Par sélection de productions (démo)');
     await demo.locator('.biblio2-rangee-nom').click();
-    await expect(demo.locator('.biblio2-apercu .biblio2-apercu-texte').first()).toHaveText('PAN-Standards - Maîtrise de standards/objectifs');
+    await expect(demo.locator('.biblio2-apercu .biblio2-apercu-texte').first()).toHaveText('Par sélection de productions - Des niveaux (ex. I-D-M-E) ; la note retient certaines productions');
 
     // Retouche du lot 3 : l'éditeur recompose la même table ; une pratique DEN sans description y lisait
     // « denotation » brut (aucune entrée canonique), elle lit maintenant le nom de la famille.
@@ -620,7 +627,7 @@ test('pratiques : ⋮, les libellés et leurs actions ; la phrase dans la confir
     // bibliothèque) porte la phrase ; une pratique de la démo, sans exemplaire, non.
     await rangee(page, 'pratiques', 'bibliotheque', 'Modèle sommatif').locator('.biblio2-passage').click();
     await expect(rangee(page, 'pratiques', 'trimestre', 'Modèle sommatif')).toHaveCount(1);
-    for (const nom of ['Modèle sommatif', 'PAN – Standards (démo)']) {
+    for (const nom of ['Modèle sommatif', 'Par sélection de productions (démo)']) {
         const r = rangee(page, 'pratiques', 'trimestre', nom);
         await r.locator('.biblio2-kebab').click();
         await r.getByRole('menuitem', { name: 'Supprimer définitivement' }).click();
@@ -629,7 +636,7 @@ test('pratiques : ⋮, les libellés et leurs actions ; la phrase dans la confir
     await expect(rangee(page, 'pratiques', 'bibliotheque', 'Modèle sommatif').locator('.biblio2-passage')).toHaveCount(1);
     expect(questions).toEqual([
         `Supprimer définitivement la pratique «Modèle sommatif» ?\n\nCette action est irréversible.\n\n${PHRASE_EXEMPLAIRE}`,
-        'Supprimer définitivement la pratique «PAN – Standards (démo)» ?\n\nCette action est irréversible.'
+        'Supprimer définitivement la pratique «Par sélection de productions (démo)» ?\n\nCette action est irréversible.'
     ]);
 });
 
@@ -685,11 +692,11 @@ test('mesure : une pratique ramenée est un objet séparé ; une retirée absent
     // #1160, pour les pratiques (consigne du lot 3, § 3.1) : une pratique retirée qui n'est pas dans la
     // bibliothèque ne se retrouve ni dans l'une ni dans l'autre colonne — comme avant ce lot (la section 2
     // d'avant ne listait que la bibliothèque). Mesuré, pas corrigé.
-    const r = rangee(page, 'pratiques', 'trimestre', 'PAN – Standards (démo)');
+    const r = rangee(page, 'pratiques', 'trimestre', 'Par sélection de productions (démo)');
     await r.locator('.biblio2-kebab').click();
     await r.getByRole('menuitem', { name: 'Retirer de ce trimestre' }).click();
-    await expect(rangee(page, 'pratiques', 'trimestre', 'PAN – Standards (démo)')).toHaveCount(0);
-    await expect(page.locator(FAMILLES.pratiques.sel + ' .biblio2-rangee', { hasText: 'PAN – Standards (démo)' })).toHaveCount(0);
+    await expect(rangee(page, 'pratiques', 'trimestre', 'Par sélection de productions (démo)')).toHaveCount(0);
+    await expect(page.locator(FAMILLES.pratiques.sel + ' .biblio2-rangee', { hasText: 'Par sélection de productions (démo)' })).toHaveCount(0);
     expect(await page.evaluate(() => (db.getSync(cle('pratiquesConfigurables'), []) || []).find(p => p.id === 'demo-std-litt').dansBibliotheque)).toBe(false);
 });
 

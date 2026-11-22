@@ -66,7 +66,7 @@
     // affiche alors 0. Ce n'est pas nécessairement une erreur : c'est un état attendu
     // d'un outil encore en construction.
     var NOTE_DEV_TITRE = 'Outil en développement';
-    var NOTE_DEV_TEXTE = 'L’Exploration des pratiques est en construction. Pour certaines pratiques — surtout PAN-Standards — une note peut s’afficher à 0 : le plus souvent, cela veut dire que la note ne peut pas être construite à partir des paramètres choisis et des résultats réels disponibles, pas qu’il y a forcément une erreur. Lis les résultats avec prudence.';
+    var NOTE_DEV_TEXTE = 'L’Exploration des pratiques est en construction. Pour certaines pratiques — surtout « Par sélection de productions » — une note peut s’afficher à 0 : le plus souvent, cela veut dire que la note ne peut pas être construite à partir des paramètres choisis et des résultats réels disponibles, pas qu’il y a forcément une erreur. Lis les résultats avec prudence.';
 
     /* ── Source de données du banc (#326 R4) ───────────────────
        'fictif' (défaut) = profils-types GÉNÉRÉS depuis l'échelle de l'utilisateur
@@ -234,13 +234,21 @@
     // est un jugement posé, pas un calcul sur les données (SPEC §7, SKILL §8 DEN-E).
     function _estDEN(id) { return _codePratique(id) === 'DEN'; }
 
+    // Le SIGLE affiché d'un code interne (registre) : « Par standards » (code CIB) se lit STD, « Par sélection de
+    // productions » (code STD) se lit SEL. Décision de Grégoire, 21 nov. 2026, 6 h 56 : « CIB » ne s'affiche nulle part.
+    function _sigle(code) {
+        return (code && typeof sigleDuCode === 'function') ? sigleDuCode(code) : (code || '');
+    }
+
     // Badge construit depuis le CODE réel (genererBadgePratiqueHTML retombe sur STD
     // par défaut pour un id configurable non mappé — à ne pas réutiliser ici).
     function _badge(id) {
         var code = _codePratique(id);
         if (!code) return '';
         var c = code.toLowerCase();
-        return '<span class="badge-type-pratique badge-type-' + c + '">' + code + '</span>';
+        // 21 nov. 2026 : le texte est le sigle affiché (registre) ; la classe reste le code interne.
+        var sigle = (typeof sigleDuCode === 'function') ? sigleDuCode(code) : code;
+        return '<span class="badge-type-pratique badge-type-' + c + '">' + sigle + '</span>';
     }
 
     function _configsPratiques() {
@@ -318,6 +326,20 @@
         if (cfg) return cfg;
         return { type: _CODE_VERS_TYPE[_codePratique(id)] || null };
     }
+    // « Par standards » (21 nov. 2026) : ses cibles vivent dans un ensemble rangé par trimestre, et l'extracteur est
+    // PUR. On les lit ici, par leur propriétaire (`EnsemblesCibles`), et le double seuil par le moteur (`NoteCibles`).
+    // Lecture seule. Ensemble introuvable : `cibles: null`, et la colonne le dit. Toute autre famille : rien.
+    function _contexteExtraction(id) {
+        var cfg = _configPourExtraction(id);
+        var conf = (cfg && cfg.configuration) || {};
+        if (String((cfg && cfg.type) || conf.type || '').toLowerCase() !== 'cibles') return undefined;
+        var EC = window.EnsemblesCibles, NC = window.NoteCibles;
+        var ensemble = EC ? EC.lireParId(conf.ensembleCiblesId) : null;
+        return {
+            cibles: ensemble ? EC.normaliserCibles(ensemble.cibles) : null,
+            doubleSeuil: NC ? NC.lireDoubleSeuil(conf) : undefined
+        };
+    }
 
     // Profils réels (source 'reel') : étudiant·es du groupe actif, lecture seule.
     function _profilsReels() {
@@ -354,7 +376,7 @@
         return cols.map(function(c) {
             var parAxe = {};
             if (typeof ConstructionAttributs !== 'undefined' && ConstructionAttributs.extraire) {
-                ConstructionAttributs.extraire(_configPourExtraction(c.id)).attributs
+                ConstructionAttributs.extraire(_configPourExtraction(c.id), _contexteExtraction(c.id)).attributs
                     .forEach(function(a) { parAxe[a.axe] = a; });
             }
             return parAxe;
@@ -411,7 +433,9 @@
         cols.forEach(function(c, slot) {
             h += '<th scope="col" class="comparateur-col-pratique">' + _enteteColonne(slot, c.id, dispo) + '</th>';
         });
-        h += '</tr></thead><tbody>';
+        h += '</tr>';
+        h += _ligneSynthese(cols);   // « Ce que règle cette pratique » (21 nov. 2026)
+        h += '</thead><tbody>';
 
         // SECTION 1 — Construction de la note (lignes R3, alignées par axe).
         h += '<tr class="comparateur-section-tete"><th colspan="' + (nbCol + 1) + '" scope="colgroup">Construction de la note</th></tr>';
@@ -503,11 +527,10 @@
         return (noeud.enfants || []).some(_sousArbreContientMaquette);
     }
 
+    // Correction du 21 nov. 2026, 13 h 30 : par le code réel (`_badge`), plus par `genererBadgePratiqueHTML`, qui retombe
+    // sur la famille par défaut pour une pratique configurable (une pratique par standards y portait « SEL »).
     function _badgeFamille(p) {
-        if (typeof genererBadgePratiqueHTML === 'function') {
-            try { return genererBadgePratiqueHTML(p.id) || ''; } catch (e) { return ''; }
-        }
-        return '';
+        return _badge(p.id);
     }
 
     // Boutons d'un nœud. GARDE-FOU « max 1 dérivé » (R1) : seule une pratique
@@ -738,7 +761,7 @@
         return dispo.map(function(p) {
             var sel = (p.id === selId) ? ' selected' : '';
             return '<option value="' + _esc(p.id) + '"' + sel + '>'
-                + _esc(p.code + ' · ' + p.nom) + '</option>';
+                + _esc(_sigle(p.code) + ' · ' + p.nom) + '</option>';   // le sigle, jamais le code (21 nov., 13 h 30)
         }).join('');
     }
 
@@ -757,6 +780,38 @@
             h += '<button type="button" class="comparateur-editer-lien" data-editer-id="' + _esc(id) + '">Éditer la pratique</button>';
         }
         return h;
+    }
+
+    // « Ce que règle cette pratique » (lot/comparateur-synthese, 21 nov. 2026) : sous le menu de chaque colonne, un volet
+    // replié d'office. Une rangée de <td> dans l'en-tête : son texte ne devient pas le nom de la colonne pour un lecteur
+    // d'écran. Aucune colonne n'a rien à dire : pas de rangée.
+    function _ligneSynthese(cols) {
+        var syntheses = cols.map(function(c) { return _syntheseColonne(c.id); });
+        if (!syntheses.some(Boolean)) return '';
+        var h = '<tr class="comparateur-ligne-synthese"><td class="comparateur-col-profil"></td>';
+        syntheses.forEach(function(corps, slot) {
+            h += '<td class="comparateur-cellule-synthese">' + (corps
+                ? '<details class="comparateur-synthese" data-slot="' + slot + '"><summary>Ce que règle cette pratique</summary>'
+                    + '<div class="comparateur-synthese-corps">' + corps + '</div></details>'
+                : '') + '</td>';
+        });
+        return h + '</tr>';
+    }
+
+    // Ce que règle la pratique d'une colonne (lot/comparateur-synthese, 21 nov. 2026). Une pratique enregistrée : la
+    // section « Configuration – <type> » du récapitulatif de l'assistant, mot pour mot (`syntheseConfigurationDePratique`,
+    // wizard-pratique-v2.js, source unique ; ses textes de l'enseignant·e y sont échappés). Une famille de base (sans
+    // enveloppe), ou une pratique dont le récapitulatif n'a pas de section (sommative) : sa description courte, telle
+    // quelle (`obtenirDescriptionCourtePratique`), échappée ici. Rien : chaîne vide, pas de volet. Lecture seule.
+    function _syntheseColonne(id) {
+        var env = _enveloppe(id);
+        if (env && typeof syntheseConfigurationDePratique === 'function') {
+            var section = syntheseConfigurationDePratique(env);
+            if (section) return section;
+        }
+        var desc = (typeof obtenirDescriptionCourtePratique === 'function')
+            ? obtenirDescriptionCourtePratique(env || { type: id }) : '';
+        return desc ? '<p>' + _esc(desc) + '</p>' : '';
     }
 
     // Re-rend uniquement le tableau (les sélecteurs y vivent désormais ; l'hôte
@@ -817,7 +872,14 @@
 
     function _rerendreMatrice(panel) {
         var hote = panel.querySelector('#comparateur-matrice');
+        // Un volet ouvert le reste quand une autre colonne change de pratique (le tableau est rendu à neuf).
+        var ouverts = hote ? Array.prototype.map.call(hote.querySelectorAll('details.comparateur-synthese[open]'),
+            function(d) { return d.getAttribute('data-slot'); }) : [];
         if (hote) hote.innerHTML = _rendreMatrice();
+        if (hote) ouverts.forEach(function(slot) {
+            var d = hote.querySelector('details.comparateur-synthese[data-slot="' + slot + '"]');
+            if (d) d.open = true;
+        });
         // Le diff suit l'état des colonnes (D-4) : re-rendu au même moment.
         var diffHote = panel.querySelector('#comparateur-diff');
         if (diffHote) diffHote.innerHTML = _rendreDiff(_colonnes());
@@ -1118,7 +1180,7 @@
         var cols = _colonnes();
         var entetes = ['Profil', 'DA', 'Niveau atteint', 'Tendance'];
         cols.forEach(function(c) {
-            entetes.push(_nomPratique(c.id) + ' (' + (_codePratique(c.id) || '') + ')');
+            entetes.push(_nomPratique(c.id) + ' (' + _sigle(_codePratique(c.id)) + ')');   // le sigle, jamais le code
         });
         var lignes = [entetes.map(_csvCell).join(',')];
         _profilsActifs().forEach(function(prof) {

@@ -58,6 +58,8 @@
     // Squelette commun (overlay + modale + titre + section message).
     function _construireBase(options) {
         const overlay = _creer('div', { className: 'modal-overlay actif', id: 'overlay-ui-dialogue', attrs: { role: 'presentation' } });
+        // `classe` (21 nov. 2026) : une classe de plus sur le fond, au choix de l'appelant (la vue simple : `ui-dialogue--tactile`).
+        if (options.classe && overlay.classList) overlay.classList.add(options.classe);
         const modal = _creer('div', { className: 'modal-contenu modal-compact', attrs: { role: 'dialog', 'aria-modal': 'true', 'aria-labelledby': 'ui-dialogue-titre' } });
 
         const titre = _creer('h3', { className: 'modal-titre', id: 'ui-dialogue-titre', texte: options.titre || 'Confirmer' });
@@ -81,6 +83,7 @@
      * @param {string} [options.texteConfirmer] Libellé du bouton d'action (défaut « Confirmer »).
      * @param {string} [options.texteAnnuler]   Libellé du bouton d'annulation (défaut « Annuler »).
      * @param {string} [options.variante]       'danger' → bouton destructif rouge + focus sur Annuler.
+     * @param {string} [options.classe]         Une classe de plus sur le fond (21 nov. 2026 ; vue simple : `ui-dialogue--tactile`).
      * @param {object} [options.caseACocher]    Lot E3 (28 sept. 2026) : une case, TOUJOURS décochée à
      *   l'ouverture — `{ texte, aide }` (l'aide s'écrit sous la case). Un choix que l'usager fait
      *   lui-même : rien ne le coche pour lui.
@@ -168,6 +171,7 @@
      * @param {string} [options.texteConfirmer] Libellé du bouton (défaut « OK »).
      * @param {string} [options.texteAnnuler]   Libellé d'annulation (défaut « Annuler »).
      * @param {string} [options.variante]       'danger' → bouton d'action destructif (rouge).
+     * @param {string} [options.classe]         Une classe de plus sur le fond (21 nov. 2026 ; vue simple : `ui-dialogue--tactile`).
      * @returns {Promise<string|null>} la chaîne saisie, ou null si annulé.
      */
     function demanderSaisie(options) {

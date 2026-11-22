@@ -83,7 +83,7 @@ class PratiquePANStandards {
     // ========================================================================
 
     obtenirNom() {
-        return "PAN-Standards";
+        return "Par sélection de productions";
     }
 
     obtenirId() {

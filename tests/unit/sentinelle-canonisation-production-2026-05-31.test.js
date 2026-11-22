@@ -19,7 +19,7 @@ describe('Volet B étape 2 · canonisation de la production', () => {
     const gestion = lire('js/pratiques-gestion.js');
 
     it('Unité 2 · le <select> mat-pratique-type a des options canoniques (plus de value legacy)', () => {
-        expect(indexHtml).toMatch(/<option value="standards">PAN-Standards<\/option>/);
+        expect(indexHtml).toMatch(/<option value="standards">Par sélection de productions<\/option>/);   // ↻ 21 nov. 2026, 7 h 44 : sans « PAN – »
         expect(indexHtml).toMatch(/<option value="specifications">PAN-Spécifications<\/option>/);
         expect(indexHtml).not.toMatch(/<option value="pan-standards">/);
         expect(indexHtml).not.toMatch(/<option value="pan-specifications">/);

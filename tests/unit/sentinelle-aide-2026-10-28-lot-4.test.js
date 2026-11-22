@@ -61,11 +61,16 @@ const SPECIFICATIONS = paragraphes('✅ **Spécifications');
 // Le lot 5 des standards sans portfolio retouche ce paragraphe (textes 8, 11 et 12, validés le 29 oct., 21 h 43 à 21 h 47) :
 // chaque paire « aujourd'hui → nouveau » est lue dans son fichier TEXTES, et chacune doit s'appliquer.
 const TEXTES_LOT_5 = lire('plans de travail', 'TEXTES-2026-10-29-standards-lot-5.md');
+const SANS_PAN = lire('plans de travail', 'TEXTES-2026-11-21-selection-sans-PAN.md');
 const RETOUCHES_LOT_5 = [...TEXTES_LOT_5.matchAll(/ujourd'hui : « (.+) »\n> (.+)/g)].map((m) => [net(m[1]), net(m[2])]);
 const STANDARDS = paragraphes('✅ **Standards, réécriture').map((p) => {
     const faites = RETOUCHES_LOT_5.filter(([avant]) => p.includes(avant));
     expect(faites, 'les retouches 8, 11 (deux phrases) et 12').toHaveLength(4);
-    return faites.reduce((t, [avant, apres]) => t.replace(avant, apres), p);
+    // ↻ 21 nov. 2026, 7 h 44 (choix de Grégoire ; les sources ne tranchent pas) : le titre du bloc ne dit plus « PAN ». Il se
+    // lit dans le fichier du 21 nov. (repère H2), qui le remplace pour ce bloc ; le fichier du 28 oct. reste intact.
+    const titre = SANS_PAN.split(/^## /m).find((s) => s.startsWith('H2 ·')).split('\n').find((l) => l.startsWith('> ')).slice(2).trim();
+    expect(p.startsWith('PAN – Standards. ')).toBe(true);
+    return faites.reduce((t, [avant, apres]) => t.replace(avant, apres), p).replace(/^PAN – Standards\. /, titre + ' ');
 });
 const STANDARDS_DU_28 = paragraphes('✅ **Standards : validées');
 const DENOTATION = paragraphes('✅ **Dénotation');

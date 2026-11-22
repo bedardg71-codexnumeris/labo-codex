@@ -97,7 +97,10 @@ var CLES_FILTRER_PAR_DA = [
     'etudiantsSuivis',
     // La trace des élèves retirés (« Supprimer ») : un retiré n'est plus dans aucun groupe,
     // le filtre ne garde donc rien. Sans groupe connu, sa trace ne voyage pas avec un groupe.
-    'elevesDesinscrits'
+    'elevesDesinscrits',
+    // Lot 2 « Par standards » (21 nov. 2026) : les niveaux inscrits. Chaque entrée (inscription ou annulation) porte `da` :
+    // seules celles des élèves du groupe partent avec lui.
+    'inscriptionsCibles'
 ];
 
 // Clés à NE PAS filtrer (partagées entre groupes du même cours/trimestre)
@@ -135,6 +138,9 @@ var CLES_SANS_FILTRE = [
     'grillesTemplates',
     'echellesTemplates',
     'pratiquesConfigurables',
+    // Lot 1 « Par standards » (21 nov. 2026) : les cibles du cours, qu'une pratique désigne. Aucun élève : elles
+    // voyagent avec la pratique, comme son échelle.
+    'ensemblesCibles',
     // #683 (15 oct. 2026) : les suppressions du matériel de départ dans ce trimestre (des
     // identifiants, aucun élève) : elles voyagent avec les grilles qu'elles concernent.
     'ressourcesSupprimeesTrimestre',

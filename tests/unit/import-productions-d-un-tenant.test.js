@@ -22,7 +22,7 @@ import { chargerScript } from './_helpers/charger-script.js';
 
 const ETUDIANTS = [
     { da: '2412345', nom: 'Nomfictif', prenom: 'Alice' },
-    { da: '2498765', nom: 'Nomfictif', prenom: 'Bruno' },
+    { da: '2498765', nom: 'Nomfictif', prenom: 'Boréal' },
     { da: '2400011', nom: 'Exemplaire', prenom: 'Chloé' },
     { da: '2400022', nom: 'Témoin', prenom: 'Dario' },
     { da: '2400033', nom: 'TEMOIN', prenom: 'Élie' }
@@ -40,13 +40,13 @@ function faireFichier(nomFichier) {
     return blob;
 }
 
-/** Le dépôt entrelacé : Alice, Bruno (même nom de famille), Chloé, pages dans le désordre. */
+/** Le dépôt entrelacé : Alice, Boréal (même nom de famille), Chloé, pages dans le désordre. */
 const DEPOT_ENTRELACE = [
     lea('Nomfictif_Alice', '2412345', 2, '09h00m10s'),
-    lea('Nomfictif_Bruno', '2498765', 1, '09h05m00s'),
+    lea('Nomfictif_Boreal', '2498765', 1, '09h05m00s'),
     lea('Nomfictif_Alice', '2412345', 1, '09h00m00s'),
     lea('Exemplaire_Chloe', '2400011', 1, '09h07m00s'),
-    lea('Nomfictif_Bruno', '2498765', 2, '09h05m10s'),
+    lea('Nomfictif_Boreal', '2498765', 2, '09h05m10s'),
     lea('Nomfictif_Alice', '2412345', 3, '09h00m20s')
 ];
 const court = (f) => f.nomFichier.split('_')[1] + ' ' + f.nomFichier.match(/-(p\d)_/)[1];
@@ -114,7 +114,7 @@ describe('A. dès le dépôt, les pages d\'une production se suivent, dans l\'or
     it('une file entrelacée devient d\'un seul tenant : chaque production à la place de sa première page, ses pages par numéro', () => {
         ti.ajouterFichiersEnAttente(DEPOT_ENTRELACE.map(faireFichier));
         expect(ti.obtenirFileDAttente().map(court)).toEqual([
-            'Alice p1', 'Alice p2', 'Alice p3', 'Bruno p1', 'Bruno p2', 'Chloe p1'
+            'Alice p1', 'Alice p2', 'Alice p3', 'Boreal p1', 'Boreal p2', 'Chloe p1'
         ]);
     });
 
@@ -126,17 +126,17 @@ describe('A. dès le dépôt, les pages d\'une production se suivent, dans l\'or
     });
 
     it('un second dépôt range ses pages avec la production déjà en file, et un fichier seul garde sa place', () => {
-        ti.ajouterFichiersEnAttente([lea('Nomfictif_Alice', '2412345', 2, '09h00m10s'), 'IMG_0412.pdf', lea('Nomfictif_Bruno', '2498765', 1, '09h05m00s')].map(faireFichier));
+        ti.ajouterFichiersEnAttente([lea('Nomfictif_Alice', '2412345', 2, '09h00m10s'), 'IMG_0412.pdf', lea('Nomfictif_Boreal', '2498765', 1, '09h05m00s')].map(faireFichier));
         ti.ajouterFichiersEnAttente([lea('Nomfictif_Alice', '2412345', 1, '09h00m00s'), 'IMG_0413.pdf'].map(faireFichier));
         expect(ti.obtenirFileDAttente().map((f) => (f.groupeDocumentId ? court(f) : f.nomFichier))).toEqual([
-            'Alice p1', 'Alice p2', 'IMG_0412.pdf', 'Bruno p1', 'IMG_0413.pdf'
+            'Alice p1', 'Alice p2', 'IMG_0412.pdf', 'Boreal p1', 'IMG_0413.pdf'
         ]);
     });
 
     it('la file rangée est persistée : rechargée, elle revient dans le même ordre', () => {
         ti.ajouterFichiersEnAttente(DEPOT_ENTRELACE.map(faireFichier));
         const apres = monter(session).travauxImport.obtenirFileDAttente();
-        expect(apres.map(court)).toEqual(['Alice p1', 'Alice p2', 'Alice p3', 'Bruno p1', 'Bruno p2', 'Chloe p1']);
+        expect(apres.map(court)).toEqual(['Alice p1', 'Alice p2', 'Alice p3', 'Boreal p1', 'Boreal p2', 'Chloe p1']);
     });
 
     it('une file entrelacée persistée AVANT le correctif est rassemblée à la restauration, sans retri', () => {
@@ -148,7 +148,7 @@ describe('A. dès le dépôt, les pages d\'une production se suivent, dans l\'or
         session.setItem('pipeline_queue', JSON.stringify(ancienne));
         const apres = monter(session).travauxImport.obtenirFileDAttente();
         // Rassemblée à la place de la première page de chacune, dans l'ordre où elles étaient : p2 avant p1 pour Alice.
-        expect(apres.map(court)).toEqual(['Alice p2', 'Alice p1', 'Alice p3', 'Bruno p1', 'Bruno p2', 'Chloe p1']);
+        expect(apres.map(court)).toEqual(['Alice p2', 'Alice p1', 'Alice p3', 'Boreal p1', 'Boreal p2', 'Chloe p1']);
         // Et persistée telle quelle.
         expect(JSON.parse(session.getItem('pipeline_queue')).map((d) => d.nomFichier)).toEqual(apres.map((f) => f.nomFichier));
     });
@@ -193,7 +193,7 @@ describe('B. « Réunir » prend exactement les pages cochées', () => {
         const r = ti.reunirEnUneCopie([1, 2]);
         expect(r).toMatchObject({ debut: 1, nombre: 2 });
         const file = ti.obtenirFileDAttente();
-        expect(file.map(court)).toEqual(['Alice p1', 'Alice p2', 'Alice p3', 'Bruno p1', 'Bruno p2', 'Chloe p1']);
+        expect(file.map(court)).toEqual(['Alice p1', 'Alice p2', 'Alice p3', 'Boreal p1', 'Boreal p2', 'Chloe p1']);
         expect(file[0].groupeDocumentId).toBe('2412345_Journal-3');
         expect(ti.estCopieReunie(file[1].groupeDocumentId)).toBe(true);
         expect(file[2].groupeDocumentId).toBe(file[1].groupeDocumentId);
@@ -201,10 +201,10 @@ describe('B. « Réunir » prend exactement les pages cochées', () => {
     });
 
     it('détacher au milieu : la production d\'origine se referme, la nouvelle se place juste après', () => {
-        // Alice p1 et p3 restent ensemble ; p2 et Bruno p1 deviennent une production.
+        // Alice p1 et p3 restent ensemble ; p2 et Boréal p1 deviennent une production.
         ti.reunirEnUneCopie([1, 3]);
         const file = ti.obtenirFileDAttente();
-        expect(file.map(court)).toEqual(['Alice p1', 'Alice p3', 'Alice p2', 'Bruno p1', 'Bruno p2', 'Chloe p1']);
+        expect(file.map(court)).toEqual(['Alice p1', 'Alice p3', 'Alice p2', 'Boreal p1', 'Boreal p2', 'Chloe p1']);
         expect(cles().slice(0, 2)).toEqual(['2412345_Journal-3', '2412345_Journal-3']);
         expect(cles()[2]).toBe(cles()[3]);
         expect(ti.estCopieReunie(cles()[2])).toBe(true);
@@ -212,10 +212,10 @@ describe('B. « Réunir » prend exactement les pages cochées', () => {
     });
 
     it('réunir deux productions par les seules pages cochées : les autres pages restent dans la leur', () => {
-        // Alice p3 (rang 2) et Bruno p1 (rang 3).
+        // Alice p3 (rang 2) et Boréal p1 (rang 3).
         ti.reunirEnUneCopie([2, 3]);
         const file = ti.obtenirFileDAttente();
-        expect(file.map(court)).toEqual(['Alice p1', 'Alice p2', 'Alice p3', 'Bruno p1', 'Bruno p2', 'Chloe p1']);
+        expect(file.map(court)).toEqual(['Alice p1', 'Alice p2', 'Alice p3', 'Boreal p1', 'Boreal p2', 'Chloe p1']);
         expect(cles().slice(0, 2)).toEqual(['2412345_Journal-3', '2412345_Journal-3']);
         expect(cles()[2]).toBe(cles()[3]);
         expect(cles()[4]).toBe('2498765_Journal-3');
@@ -256,7 +256,7 @@ describe('C. deux personnes au même nom de famille : « Nom, Prénom » dans l\
 
     it('les homonymes (Nomfictif) sont nommés « Nom, Prénom »', () => {
         expect(win.travauxUI.nomDansLApercu(fichierDe('2412345'))).toBe('Nomfictif, Alice');
-        expect(win.travauxUI.nomDansLApercu(fichierDe('2498765'))).toBe('Nomfictif, Bruno');
+        expect(win.travauxUI.nomDansLApercu(fichierDe('2498765'))).toBe('Nomfictif, Boréal');
     });
 
     it('comparés sans accents ni casse (Témoin, TEMOIN)', () => {

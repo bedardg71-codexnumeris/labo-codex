@@ -531,7 +531,11 @@ const CLES_PRODUCTION_NON_TRANSPORTEES = {
     // est décidé à l'arrivée, par le chemin d'import — pas par le fichier.
     // ⚠ Conséquence assumée et INCHANGÉE depuis toujours : restaurer une archive
     // rend des productions sans `coursId`. À trancher séparément.
-    coursId: 'rattachement local au cours actif — décidé à l\'arrivée, jamais par le fichier'
+    coursId: 'rattachement local au cours actif — décidé à l\'arrivée, jamais par le fichier',
+    // Lot 2 « Par standards » (21 nov. 2026) : des ids de cibles d'un ensemble du trimestre (la pratique du groupe-cours).
+    // Chez le destinataire, ou dans un autre trimestre, ils ne désignent rien ; la production arrive sans liste, et toutes
+    // les cibles sont alors offertes (`InscriptionsCibles.ciblesOffertes`). Le codex, lui, emporte tout tel quel.
+    ciblesRenseignees: 'ids de cibles d\'un ensemble du trimestre — sans objet chez le destinataire ; sans liste, toutes les cibles sont offertes'
 };
 
 /**

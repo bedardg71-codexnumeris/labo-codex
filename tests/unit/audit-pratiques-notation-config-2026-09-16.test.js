@@ -54,7 +54,7 @@ const STATUT_SANS_TYPES_NI_FORFAITS = 'non constructible – Ta pratique n\'a pa
 const DA = { SOM: '1000001', STD: '1000002', SPE: '1000003', DEN: '1000004' };
 const ETUDIANTS = [
     { da: DA.SOM, nom: 'Sommative', prenom: 'Alice', groupe: '01', coursId: 'GC1' },
-    { da: DA.STD, nom: 'Standards', prenom: 'Bruno', groupe: '01', coursId: 'GC1' },
+    { da: DA.STD, nom: 'Standards', prenom: 'Boréal', groupe: '01', coursId: 'GC1' },
     { da: DA.SPE, nom: 'Specifications', prenom: 'Chloé', groupe: '01', coursId: 'GC1' },
     { da: DA.DEN, nom: 'Denotation', prenom: 'Dani', groupe: '01', coursId: 'GC1' }
 ];
@@ -820,7 +820,7 @@ describe('lot 29 · SOM : le verrou écrit par l\'assistant s\'applique à la no
         expect(noteDe(b, DA.SOM, stock.id).perf).toBe(87.6);   // E1 (28 oct. 2026) : l'Exercice à pondération 0 n'entre plus (avant : 87,43)
     });
 
-    it('la copie d\'un·e AUTRE élève ne déclenche rien : Bruno a 40 à la Dissertation, Alice (84 ≥ 60) garde 87,43', async () => {
+    it('la copie d\'un·e AUTRE élève ne déclenche rien : Boréal a 40 à la Dissertation, Alice (84 ≥ 60) garde 87,43', async () => {
         const jeu = jeuSOM();
         jeu.evaluations.push(ev('EV_AUTRE', DA.STD, 'P1', 40, 'I'));
         const b = monter(jeu);

@@ -25,7 +25,7 @@ import { monter, storeBase, elementDom, clone } from './_helpers/bac-suivi.js';
 
 const AUJOURDHUI = '2026-09-06';
 const DAS = ['2000001', '2000002', '2000003'];
-const BRUNO = '2000002';
+const BOREAL = '2000002';
 // Mardi et jeudi : le groupe est vu deux fois par semaine.
 const S0 = '2026-08-20';   // jeudi, semaine 1
 const S1 = '2026-08-25';   // mardi, semaine 2
@@ -105,7 +105,7 @@ async function scenarioDeBase(b) {
     await saisir(b, S0);
     await saisir(b, S1);
     await saisir(b, S3);
-    await saisir(b, S4, { valeurs: { [BRUNO]: 1 }, touches: [BRUNO] });
+    await saisir(b, S4, { valeurs: { [BOREAL]: 1 }, touches: [BOREAL] });
 }
 
 describe('le graphique suit les présences — chaque enregistrement capture sa séance', () => {
@@ -114,7 +114,7 @@ describe('le graphique suit les présences — chaque enregistrement capture sa 
         await saisir(b, S0);
         expect(captures(b).map((s) => s.dateSeance)).toEqual([S0]);
         expect(capture(b, S0).numSemaine).toBe(1);
-        expect(aDe(capture(b, S0), BRUNO)).toBe(100);
+        expect(aDe(capture(b, S0), BOREAL)).toBe(100);
     });
 
     it('2. deux saisies dans la même semaine : deux captures, chacune la sienne', async () => {
@@ -122,9 +122,9 @@ describe('le graphique suit les présences — chaque enregistrement capture sa 
         await scenarioDeBase(b);
         expect(captures(b).map((s) => s.dateSeance), 'S2, jamais saisie, n\'a pas de capture').toEqual([S0, S1, S3, S4]);
         expect(captures(b).map((s) => s.numSemaine)).toEqual([1, 2, 3, 3]);
-        // Bruno n'a qu'une période sur deux le jeudi S4 : 7 périodes sur 8 au cumul.
-        expect(aDe(capture(b, S3), BRUNO)).toBe(100);
-        expect(aDe(capture(b, S4), BRUNO)).toBe(88);
+        // Boréal n'a qu'une période sur deux le jeudi S4 : 7 périodes sur 8 au cumul.
+        expect(aDe(capture(b, S3), BOREAL)).toBe(100);
+        expect(aDe(capture(b, S4), BOREAL)).toBe(88);
     });
 
     it('3. une correction à une date antérieure recapture sa séance et les suivantes ; les autres ne bougent pas', async () => {
@@ -133,17 +133,17 @@ describe('le graphique suit les présences — chaque enregistrement capture sa 
         const avant = clone(captures(b));
         marquerCaptures(b);
 
-        // La correction : Bruno était absent le mardi S1.
-        await saisir(b, S1, { valeurs: { [BRUNO]: 0 }, touches: [BRUNO] });
+        // La correction : Boréal était absent le mardi S1.
+        await saisir(b, S1, { valeurs: { [BOREAL]: 0 }, touches: [BOREAL] });
 
         const apres = captures(b);
         expect(apres.map((s) => s.dateSeance), 'aucune capture créée pour S2, jamais saisie').toEqual([S0, S1, S3, S4]);
         // S0, avant la correction : intacte, horodatage compris (elle n'a pas été refaite).
         expect(capture(b, S0)).toEqual({ ...avant.find((s) => s.dateSeance === S0), timestamp: 'MARQUE-' + S0 });
-        // S1, S3, S4 : refaites, et l'absence de Bruno s'y lit (A cumulatif).
+        // S1, S3, S4 : refaites, et l'absence de Boréal s'y lit (A cumulatif).
         for (const d of [S1, S3, S4]) expect(capture(b, d).timestamp, `${d} refaite`).not.toBe('MARQUE-' + d);
-        expect([S1, S3, S4].map((d) => aDe(capture(b, d), BRUNO))).toEqual([50, 67, 63]);
-        expect([S1, S3, S4].map((d) => aDe(avant.find((s) => s.dateSeance === d), BRUNO))).toEqual([100, 100, 88]);
+        expect([S1, S3, S4].map((d) => aDe(capture(b, d), BOREAL))).toEqual([50, 67, 63]);
+        expect([S1, S3, S4].map((d) => aDe(avant.find((s) => s.dateSeance === d), BOREAL))).toEqual([100, 100, 88]);
         expect(capture(b, S1).groupe.moyenneA).toBeLessThan(avant.find((s) => s.dateSeance === S1).groupe.moyenneA);
     });
 
@@ -151,7 +151,7 @@ describe('le graphique suit les présences — chaque enregistrement capture sa 
         const b = monterSaisie(storeTrimestre());
         await scenarioDeBase(b);
         marquerCaptures(b);
-        await saisir(b, S2, { valeurs: { [BRUNO]: 0 } });
+        await saisir(b, S2, { valeurs: { [BOREAL]: 0 } });
         expect(captures(b).map((s) => s.dateSeance)).toEqual([S0, S1, S2, S3, S4]);
         expect(captures(b).map((s) => s.numSemaine)).toEqual([1, 2, 2, 3, 3]);
         expect(capture(b, S0).timestamp).toBe('MARQUE-' + S0);

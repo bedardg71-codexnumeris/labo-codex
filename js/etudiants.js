@@ -375,7 +375,7 @@ function genererExplicationCalculIndices(complementHtml = '') {
 
     // Lot N1b (21 sept. 2026) : sans pratique assignée, l'aide ne nomme aucune pratique (avant : « PAN-Standards »,
     // le repli PRATIQUE_DEFAUT) et dit, pour P, la phrase du diagnostic du profil — aucun mot neuf.
-    let html = '<strong>Méthodes de calcul des indices' + (pratique ? ' (pratique active : ' + (isPAN ? 'PAN-Standards' : 'Sommative') + ')' : '') + '</strong><br><br>';
+    let html = '<strong>Méthodes de calcul des indices' + (pratique ? ' (pratique active : ' + (isPAN ? 'Par sélection de productions' : 'Sommative') + ')' : '') + '</strong><br><br>';
 
     // A - Assiduité (TOUJOURS DYNAMIQUE - comportement cumulatif)
     html += '<strong class="u-texte-bleu">A (Assiduité)</strong> : ';
@@ -405,7 +405,7 @@ function genererExplicationCalculIndices(complementHtml = '') {
         const diagnostic = (typeof window._diagnostiquerNoteNonCalculable === 'function') ? window._diagnostiquerNoteNonCalculable() : '';
         if (diagnostic) html += '<br>→ ' + echapperHtml(diagnostic);
     } else if (isPAN) {
-        html += '<br>→ <strong>PAN-Standards</strong> : Moyenne des <strong>' + nbArtefacts + ' meilleurs ' + termePlur + '</strong> selon l\'échelle IDME. ';
+        html += '<br>→ <strong>Par sélection de productions</strong> : Moyenne des <strong>' + nbArtefacts + ' meilleurs ' + termePlur + '</strong> selon l\'échelle IDME. ';
         html += '<br><em class="etud-texte-gris-petit">&nbsp;&nbsp;&nbsp;Les niveaux IDME (Incomplet, Développement, Maîtrise, Étendu) sont convertis en pourcentages.</em>';
         html += '<br><em class="etud-texte-gris-petit">&nbsp;&nbsp;&nbsp;Seuls les ' + nbArtefacts + ' meilleurs ' + termePlur + ' comptent dans le calcul de P</em>';
     } else {
@@ -417,7 +417,7 @@ function genererExplicationCalculIndices(complementHtml = '') {
     html += '<br><br>';
     html += '<strong class="u-texte-bleu">Résumé</strong> : ';
     html += '<strong>A et C</strong> mesurent le <strong>comportement cumulatif observable</strong> (contexte d\'apprentissage favorable ou non). ';
-    html += '<strong>P</strong> mesure la <strong>qualité de l\'apprentissage</strong> selon la pratique pédagogique choisie (Sommative, PAN-Standards, ou autre).';
+    html += '<strong>P</strong> mesure la <strong>qualité de l\'apprentissage</strong> selon la pratique pédagogique choisie (Sommative, Par sélection de productions, ou autre).';
 
     html += '<br><br>';
     html += '<em class="etud-texte-gris-moyen">💡 La pratique de notation et ses paramètres peuvent être modifiés dans <strong>Conception → Pratiques de notation</strong></em>';
@@ -788,6 +788,29 @@ function compterEvaluationsPourMinimum(productions, evaluations) {
     return evalsParDA;
 }
 
+/**
+ * Lot 4 « Par standards » (21 nov. 2026), BORNÉ le 21 nov., 13 h 30 (Cowork ; décision de Grégoire du 20 nov. : sa pratique
+ * de l'automne ne change pas, ni ses calculs ni ce que ses écrans en disent). Vrai quand la pratique du groupe-cours actif
+ * est de la famille des cibles (« Par standards »).
+ * @returns {boolean}
+ */
+function listeEnParStandards() {
+    return typeof obtenirTypePratiqueActive === 'function' && obtenirTypePratiqueActive() === 'cibles';
+}
+
+/**
+ * Le P d'une ligne de la liste. En « Par standards », une note non constructible (l'indice stocké range P = 0 avec
+ * `noteConstructible: false`) devient `null` : la cellule écrit « — », et l'élève sort des moyennes, des corrélations, et
+ * passe sous toute note au tri. Pour toute autre pratique, le P tel quel, comme avant le lot : une note non constructible
+ * s'y lit encore « 0 % » (inscrit au plan, § 11 : une correction générale, hors de ce lot, à porter à Grégoire).
+ * @param {Object} indices - `calculerTousLesIndices(da)`
+ * @param {boolean} enParStandards - `listeEnParStandards()`
+ * @returns {number|null}
+ */
+function pDeLaListe(indices, enParStandards) {
+    return (enParStandards && indices.noteConstructible === false) ? null : indices.P;
+}
+
 function afficherListeEtudiantsConsultation() {
 
     // 🔄 FORCER le recalcul des indices A, C et P avant affichage.
@@ -901,7 +924,10 @@ function afficherListeEtudiantsConsultation() {
 
     const valeursA_tous = tousIndices.map(indices => indices.A);
     const valeursC_tous = tousIndices.map(indices => indices.C);
-    const valeursP_tous = tousIndices.map(indices => indices.P);
+    // Lot 4 « Par standards » (21 nov. 2026), BORNÉ le 21 nov., 13 h 30 : la garde ne joue que pour une pratique par
+    // standards (`pDeLaListe`, `listeEnParStandards`, plus bas). Pour toute autre pratique, la liste est celle d'avant.
+    const enParStandards = listeEnParStandards();
+    const valeursP_tous = tousIndices.map(indices => pDeLaListe(indices, enParStandards));
 
     // Identifier les étudiants actifs (≠ abandon/inactif/décrochage). Règle métier : main.js:60.
     const estExclu = typeof estEtudiantExclu === 'function' ? estEtudiantExclu : () => false;
@@ -913,10 +939,10 @@ function afficherListeEtudiantsConsultation() {
 
     // #743 (lot D, 19 sept. 2026) : une assiduité INCONNUE (`null`) n'entre pas dans la corrélation A-P —
     // Pearson la lirait comme un 0. La paire (A, P) de cet élève est écartée, pas remplacée.
-    const pairesAP = valeursA_actifsCorr.map((a, i) => [a, valeursP_actifsCorr[i]]).filter(paire => paire[0] !== null);
+    const pairesAP = valeursA_actifsCorr.map((a, i) => [a, valeursP_actifsCorr[i]]).filter(paire => paire[0] !== null && (!enParStandards || paire[1] !== null));
     const r_AP = calculerCorrelationPearson(pairesAP.map(paire => paire[0]), pairesAP.map(paire => paire[1]));
     // Lot N1b (21 sept. 2026) : même règle pour une complétion inconnue (`null`, sans pratique assignée).
-    const pairesCP = valeursC_actifsCorr.map((c, i) => [c, valeursP_actifsCorr[i]]).filter(paire => paire[0] !== null);
+    const pairesCP = valeursC_actifsCorr.map((c, i) => [c, valeursP_actifsCorr[i]]).filter(paire => paire[0] !== null && (!enParStandards || paire[1] !== null));
     const r_CP = calculerCorrelationPearson(pairesCP.map(paire => paire[0]), pairesCP.map(paire => paire[1]));
 
     // NOUVEAU: Enrichir les données pour le tri (sans assigner les numéros encore)
@@ -929,7 +955,8 @@ function afficherListeEtudiantsConsultation() {
         return {
             ...e,
             indicesCalcules: indices,
-            cibleCalculee: niveauInfo
+            cibleCalculee: niveauInfo,
+            sansNoteParStandards: enParStandards && indices.noteConstructible === false   // lot 4, borné : « — » et hors des moyennes
         };
     }));
 
@@ -970,13 +997,13 @@ function afficherListeEtudiantsConsultation() {
 
     // Moyenne P : actifs ayant au moins une évaluation (C>0 OU P>0), comme l'Aperçu
     const indexActifsAvecEval = indexActifs.filter(i => valeursC_tous[i] > 0 || valeursP_tous[i] > 0);
-    const valeursP_actifsAvecEval = indexActifsAvecEval.map(i => valeursP_tous[i]);
+    const valeursP_actifsAvecEval = indexActifsAvecEval.map(i => valeursP_tous[i]).filter(v => !enParStandards || v !== null);
     const nbActifsSansEval = indexActifs.length - indexActifsAvecEval.length;
     const moyenneP = valeursP_actifsAvecEval.length > 0 ? valeursP_actifsAvecEval.reduce((s, v) => s + v, 0) / valeursP_actifsAvecEval.length : null;
 
     // Moyennes filtrées (≥ minimum d'évaluations seulement, parmi actifs)
     const etudiantsQualifies = etudiantsFiltres.filter(e => !estExclu(e) && !e.performanceInsuffisante && (e.indicesCalcules.C > 0 || e.indicesCalcules.P > 0));
-    const vP_qualifies = etudiantsQualifies.map(e => e.indicesCalcules.P);
+    const vP_qualifies = etudiantsQualifies.filter(e => !e.sansNoteParStandards).map(e => e.indicesCalcules.P);
     const vC_qualifies = etudiantsQualifies.map(e => e.indicesCalcules.C);
     const moyenneP_qualifies = vP_qualifies.length > 0 ? vP_qualifies.reduce((s, v) => s + v, 0) / vP_qualifies.length : null;
     const moyenneC_qualifies = vC_qualifies.length > 0 ? vC_qualifies.reduce((s, v) => s + v, 0) / vC_qualifies.length : null;
@@ -1020,6 +1047,7 @@ function afficherListeEtudiantsConsultation() {
         if (estExclu(e)) return;
         var rai = typeof determinerNiveauRaiPedagogique === 'function' ? determinerNiveauRaiPedagogique(e.da) : null;
         var pVal = valeursP_tous[idx];
+        if (enParStandards && pVal === null) return;   // lot 4, borné : sans note par standards, hors des corrélations avec P
 
         // Pattern (exclure données insuffisantes)
         if (rai && scorePattern[rai.pattern] !== undefined && scorePattern[rai.pattern] !== null) {
@@ -1101,8 +1129,9 @@ function afficherListeEtudiantsConsultation() {
                 valeurB = b.indicesCalcules.C;
                 break;
             case 'performance':
-                valeurA = a.indicesCalcules.P;
-                valeurB = b.indicesCalcules.P;
+                // Lot 4, borné à « Par standards » : sans note, sous toute note (jamais rangée comme un 0).
+                valeurA = a.sansNoteParStandards ? -Infinity : a.indicesCalcules.P;
+                valeurB = b.sansNoteParStandards ? -Infinity : b.indicesCalcules.P;
                 break;
             case 'pattern':
                 valeurA = a.cibleCalculee.pattern;
@@ -1228,7 +1257,9 @@ function afficherListeEtudiantsConsultation() {
         // Colonnes C et P : afficher si évaluations, sinon tiret
         if (aEvaluations) {
             html += '<td class="etud-text-center"><strong style="color: ' + couleurC + ';">' + formaterPourcentage(Math.round(indices.C)) + '</strong></td>';
-            html += '<td class="etud-text-center"><strong style="color: ' + couleurP + ';">' + formaterPourcentage(Math.round(indices.P)) + '</strong></td>';
+            // Lot 4, borné à « Par standards » : une note en attente s'écrit « — », jamais « 0 % » (#394, règle 4).
+            html += etudiant.sansNoteParStandards ? '<td class="etud-text-center">' + tiret + '</td>'
+                : '<td class="etud-text-center"><strong style="color: ' + couleurP + ';">' + formaterPourcentage(Math.round(indices.P)) + '</strong></td>';
         } else {
             html += '<td class="etud-text-center">' + tiret + '</td>';
             html += '<td class="etud-text-center">' + tiret + '</td>';

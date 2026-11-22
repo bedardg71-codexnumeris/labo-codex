@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { readFileSync } from 'node:fs';
+import { readFileSync, existsSync, readdirSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { chargerScript } from './_helpers/charger-script.js';
@@ -48,9 +48,13 @@ describe('#296 — état des seeds après migration', () => {
     });
 
     it('le résidu michel-calcul-diff est supprimé (fonction + id)', () => {
-        const src = lire('js/objectifs.js');
-        expect(src).not.toContain('creerEnsembleCalculDiff');
-        expect(src).not.toContain("id: 'objectifs-michel-calcul-diff'");
+        // ↻ 21 nov. 2026 (lot 1 « Par standards ») : `js/objectifs.js` est retiré en entier ; le résidu ne revient nulle part.
+        expect(existsSync(path.join(racine, 'js', 'objectifs.js'))).toBe(false);
+        for (const f of readdirSync(path.join(racine, 'js')).filter(n => n.endsWith('.js'))) {
+            const src = lire('js/' + f);
+            expect(src, f).not.toContain('creerEnsembleCalculDiff');
+            expect(src, f).not.toContain("id: 'objectifs-michel-calcul-diff'");
+        }
     });
 
     it('les gabarits/exemples gardent « Labo Codex » (désormais visibles)', () => {

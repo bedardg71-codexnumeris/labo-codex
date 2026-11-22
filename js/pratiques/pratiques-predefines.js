@@ -468,123 +468,10 @@ const PRATIQUE_PAN_MAITRISE = {
 };
 
 // ============================================================================
-// PRATIQUE 5 : PAN-Objectifs pondérés
+// PRATIQUE 5 : RETIRÉE (lot 1 « Par standards », 21 nov. 2026). « PAN-Objectifs pondérés » (`pan-objectifs-ponderes`,
+// méthode du mode « par objectifs » retiré à la 1.63) n'était offerte par aucun écran : `PRATIQUES_PREDEFINES` n'est lue
+// que par la migration V2 de pratique-manager.js. Une pratique par cibles se crée dans l'assistant (« Par standards »).
 // ============================================================================
-
-const PRATIQUE_PAN_OBJECTIFS_PONDERES = {
-    id: 'pan-objectifs-ponderes',
-    nom: 'PAN-Objectifs pondérés',
-    auteur: 'Labo Codex',
-    etablissement: 'Cégep',
-    description: '13 objectifs évalués en mode PAN avec pondérations variables selon importance',
-    discipline: 'Général',
-    version: '1.0',
-    date_creation: '2025-11-26',
-
-    echelle: {
-        type: 'niveaux',
-        niveaux: [
-            {
-                code: 'I',
-                label: 'Incomplet',
-                description: 'Compréhension insuffisante de l\'objectif',
-                valeur_numerique: 1,
-                valeur_pourcentage: 50,
-                couleur: '#FF6B6B',
-                ordre: 1
-            },
-            {
-                code: 'D',
-                label: 'en Développement',
-                description: 'Développement en cours, maîtrise partielle',
-                valeur_numerique: 2,
-                valeur_pourcentage: 70,
-                couleur: '#FFD93D',
-                ordre: 2
-            },
-            {
-                code: 'M',
-                label: 'Maîtrisé',
-                description: 'Maîtrise satisfaisante de l\'objectif',
-                valeur_numerique: 3,
-                valeur_pourcentage: 80,
-                couleur: '#6BCF7F',
-                ordre: 3
-            },
-            {
-                code: 'E',
-                label: 'Étendu',
-                description: 'Maîtrise approfondie avec transfert',
-                valeur_numerique: 4,
-                valeur_pourcentage: 92.5,
-                couleur: '#4D96FF',
-                ordre: 4
-            }
-        ]
-    },
-
-    structure_evaluations: {
-        type: 'objectifs-multiples',
-        description: 'Système multi-objectifs avec pondérations variables',
-        objectifs: [
-            { id: 'obj1', nom: 'Limites et continuité', poids: 8, type: 'fondamental' },
-            { id: 'obj2', nom: 'Dérivées simples', poids: 8, type: 'fondamental' },
-            { id: 'obj3', nom: 'Dérivées composées', poids: 10, type: 'integrateur' },
-            { id: 'obj4', nom: 'Applications des dérivées', poids: 12, type: 'integrateur' },
-            { id: 'obj5', nom: 'Optimisation', poids: 15, type: 'integrateur' },
-            { id: 'obj6', nom: 'Analyse graphique', poids: 7, type: 'fondamental' },
-            { id: 'obj7', nom: 'Théorèmes fondamentaux', poids: 10, type: 'integrateur' },
-            { id: 'obj8', nom: 'Intégration', poids: 12, type: 'integrateur' },
-            { id: 'obj9', nom: 'Applications des intégrales', poids: 8, type: 'fondamental' },
-            { id: 'obj10', nom: 'Séries', poids: 5, type: 'fondamental' },
-            { id: 'obj11', nom: 'Modélisation mathématique', poids: 5, type: 'fondamental' },
-            { id: 'obj12', nom: 'Communication mathématique', poids: 5, type: 'transversal' },
-            { id: 'obj13', nom: 'Rigueur démonstrative', poids: 5, type: 'transversal' }
-        ],
-        poids_total: 100
-    },
-
-    calcul_note: {
-        methode: 'pan-par-objectif',
-        description: 'Mode PAN appliqué à chaque objectif, puis combinaison pondérée',
-        nombre_artefacts_par_objectif: 3,
-        mode_selection: 'N_meilleurs',
-        mode_combinaison: 'moyenne_ponderee_objectifs',
-        normalisation: 'poids_total_100',
-        formule: 'Note_finale = Σ (Note_objectif_i × Poids_i) / 100'
-    },
-
-    systeme_reprises: {
-        type: 'par-objectif',
-        description: 'Reprises possibles pour chaque objectif individuellement',
-        limite: 'illimitees',
-        niveau_retrogradable: false
-    },
-
-    gestion_criteres: {
-        type: 'par_objectif',
-        description: 'Chaque objectif a ses propres critères définis dans grilles'
-    },
-
-    seuils: {
-        type: 'pourcentage',
-        va_bien: 80,
-        difficulte: 70,
-        grande_difficulte: 60
-    },
-
-    interface: {
-        afficher_notes_chiffrees: true,
-        afficher_rang: false,
-        afficher_moyenne_groupe: true,
-        terminologie: {
-            evaluation: 'Objectif',
-            critere: 'Critère',
-            note_finale: 'Note finale',
-            reprise: 'Reprise'
-        }
-    }
-};
 
 // ============================================================================
 // PRATIQUE 6 : Sommative avec remplacement
@@ -811,7 +698,6 @@ window.PRATIQUES_PREDEFINES = {
     PRATIQUE_PAN_STANDARDS_CINQ_NIVEAUX,
     PRATIQUE_SOMMATIVE_TRADITIONNELLE,
     PRATIQUE_PAN_SPECIFICATIONS,
-    PRATIQUE_PAN_OBJECTIFS_PONDERES,
     PRATIQUE_SOMMATIVE_REMPLACEMENT,
     PRATIQUE_PAN_JUGEMENT_GLOBAL
 };
