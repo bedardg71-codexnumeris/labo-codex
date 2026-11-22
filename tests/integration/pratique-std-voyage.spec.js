@@ -257,7 +257,7 @@ test('captures : la fenêtre des pratiques, 1180 × 820 et 820 × 1180, clair et
         for (const sombre of [false, true]) {
             await page.evaluate((s) => document.body.classList.toggle('mode-clair', !s), sombre);
             await rangeeBibliotheque(page, 'Par standards fictive').scrollIntoViewIfNeeded();
-            await page.waitForTimeout(300);
+            await page.evaluate(() => new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r))));   // le thème est peint
             await page.screenshot({ path: path.join(dossier, `pratiques-${l}x${h}-${sombre ? 'sombre' : 'clair'}.png`) });
         }
     }
