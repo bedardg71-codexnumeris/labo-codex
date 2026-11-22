@@ -7,6 +7,25 @@
 
 ---
 
+## 22 NOV. 2026, 9 H 20 (Claude Code) : **1.254.0 SUR `main` ET EN LIGNE — L'ASSEMBLAGE DE CINQ LOTS : LE VOYAGE DES CIBLES, LE « MODÈLE PAR STANDARDS », LE COMPARATEUR « PAR STANDARDS » ET SA SYNTHÈSE, LES GUIDES SOM/PAN RETIRÉS** — verdict complet du Mac, vert, sur secteur
+
+Mandat : Cowork, 22 nov. (décision de Grégoire de 6 h 23, complément de 6 h 27). **Le travail le plus récent vit sur `main`** (`bad001143` pour le code). Rapport complet : `plans de travail/RAPPORT-2026-11-22-release-1.254.0.md`. Arbres : `../labo-codex-assemblage-1.254` (le travail), `../labo-codex-fusion` (le verdict).
+
+- **Réunis, dans l'ordre** : `lot/pratique-std-voyage` (PR 48), `lot/modele-par-standards` (PR 52), `lot/comparateur-par-standards` (PR 49), `lot/comparateur-synthese` (PR 51), `lot/retirer-guides-pratiques` (PR 50). Conflits : les seuls numéros de cache d'`index.html` ; aucun écran contradictoire. Les cinq PR, marquées « fusionnées » par GitHub au push.
+- **Décisions portées** : l'échelle du « Modèle par standards » reste « Échelle de départ – Par standards » (22 nov., 6 h 23) ; la coupe de l'aide PAN acceptée (22 nov., 6 h 27), écrite au commentaire daté d'`index.html`. TEXTES des quatre lots qui en ont : « Partis en ligne le 22 nov. 2026 sans relecture ».
+- **Nouvelles** : acceptées par Grégoire à 6 h 38, telles quelles.
+- **Verdict WebKit** : un premier, sur `15e628f9b`, arrêté au morceau 6b : `pied-de-page-et-assistance` rouge à 820 px, causé par le build lui-même (« 1122-0639 » plus large que « 1121-1619 »). Grégoire : corriger. Correctif `bad001143` (build en chiffres de même largeur, écarts resserrés ; tient quel que soit le build). Verdict complet sur `bad001143`, 7 h 22 à 9 h 08, app Claude, Chrome et Safari fermés (mesuré), secteur : **jeton code 0, 1 823 essais, 1 802 verts, 21 au second essai (aucun des cinq lots), 0 rouge, 70 sautés.**
+- **Bancs** : Vitest 948 fichiers, 12 304 verts ; garde du lot 0, 16 sur 16 ; bancs des cinq lots et voisins, 138 verts.
+- **Release** : 1.254.0, build `1122-0639`. **Push** : 9 h 10, hook passé. **Netlify** : `6b02f7ce`, prêt, commit `bad001143`, publié à 9 h 10 min 42 s ; cinq fichiers servis identiques au commit.
+- **Relecture adverse du voyage** : rien d'un trimestre écrasé, échelle différente jamais réécrite, aucune inscription ne voyage, ancien fichier le dit, fichier réel « PAN-STD H27 essai » sans dommage au trimestre. **Réserve** : un import remplace l'exemplaire de BIBLIOTHÈQUE de même identité (règle de #599, étendue au fichier « une pratique ») ; « Garder » puis importer l'ancien fichier lui ôte ses cibles. Rapport, § 4.
+- **Comparateur « Par standards »** contre `note-cibles.js` : « Temporalité » faux (Réglages → Préférences, au lieu de Labo › Outils d'observation, toutes familles), « Reprises » incomplet (l'annulation), « Choix et flexibilité » douteux (les jetons). Rapport, § 5. Rien inscrit au BACKLOG (aucun symptôme vécu).
+- **Branches** : `main` réuni dans `lot/moteur-cibles-5-releve` (`1062e3ecd`, conflit de cache réglé, Vitest vert) et `lot/pratique-en-usage` (`ad9917f7c`), poussées. « Pratique en usage » et « grille de cible » partent de `bad001143`. **Numéro libre au BACKLOG : #1303.**
+- **GitHub** : run du push `45031355584`, en cours à l'écriture.
+- **Complexité** (par rapport à la 1.253.0) : au-dessus de 15 : 434 → 434 ; somme 10 971 → 10 950 (Δ − 21) ; au-dessus de 30 : 76 → 75 ; fichiers de plus de 1 000 lignes : 44 → 44 ; lignes 174 399 → 174 832.
+- **Non vérifié** : Safari à la main et l'iPad ; `app.codexnumeris.org` (Cloudflare Access) ; aucune capture relue par Cowork.
+
+---
+
 ## 21 NOV. 2026, 18 H 30 (Claude Code) : **1.253.0 SUR `main` ET EN LIGNE — « PAR STANDARDS », À L'ESSAI, VUE SIMPLE COMPRISE** — verdict complet du Mac, vert, sur secteur
 
 Mandat : Cowork, 21 nov. (décisions de Grégoire : 13 h 53 « je voudrais que nous fassions la release ; je vais la tester une fois publiée », 14 h 17, 14 h 19 ; elles remplacent sa condition du matin, portées en tête de `PLAN-2026-11-20-moteur-par-objectifs.md`). **Le travail le plus récent vit sur `main`** (`origin/main` = `ca76685c2` avant ce relais). Rapport complet, avec les trois mesures et les gestes de Grégoire : `plans de travail/RAPPORT-2026-11-21-release-1.253.0.md`. Arbres : `../labo-codex-par-standards-release` (le travail), `../labo-codex-fusion` (le verdict).
