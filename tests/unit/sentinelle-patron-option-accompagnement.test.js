@@ -88,9 +88,11 @@ describe('Patron `.option-accompagnement` — aucune règle sans porteur', () =>
         }
     });
 
-    it('le bouton « Guide », lui, est VIVANT — cinq en-têtes de carte le portent', () => {
+    it('le bouton « Guide », lui, est VIVANT — trois en-têtes de carte le portent', () => {
         // L'autre moitié de l'invariant : nettoyer ne doit pas emporter ce
-        // qui sert. Cinq guides accessibles (som, pan, solo, acp, rai).
+        // qui sert. Trois guides accessibles (solo, acp, rai) : les boutons
+        // som et pan de Conception › Pratiques sont retirés le 21 nov. 2026,
+        // le temps de leur révision (sentinelle #302).
         //
         // ⚠ L'attribut est matché EN ENTIER (`class="…"`), pas en sous-chaîne.
         // Premier jet : /option-accompagnement-guide-btn/g. Le break-test l'a
@@ -99,7 +101,7 @@ describe('Patron `.option-accompagnement` — aucune règle sans porteur', () =>
         // qui n'avaient plus de style. Une sous-chaîne ne prouve pas une classe.
         expect(css).toContain('.option-accompagnement-guide-btn');
         const boutons = html.match(/class="option-accompagnement-guide-btn"/g) || [];
-        expect(boutons.length).toBe(5);
+        expect(boutons.length).toBe(3);
     });
 
     it('le mode clair garde ses trois correctifs de contraste sur ce bouton', () => {

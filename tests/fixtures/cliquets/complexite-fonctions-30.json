@@ -159,8 +159,7 @@
   "exporterFormatRecherche": 34
  },
  "js/wizard-pratique-v2.js": {
-  "genererRecapitulatif": 43,
   "creerPratiqueV2": 76,
-  "chargerPratiqueExistante": 41
+  "reponsesDepuisPratique": 38
  }
 }
