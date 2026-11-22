@@ -352,7 +352,10 @@
         schemas.TYPES_ENTITES.forEach(function (t) {
             entites[schemas.CLES_ENTITES[t]] = [];
         });
-        entites[schemas.CLES_ENTITES[type]].push(projeterEntite(itemPrincipal, type));
+        // Lot pratique-std-voyage (21 nov. 2026) : une pratique « Par standards » part avec ses cibles et son échelle
+        // (`configuration.ciblesEmportees`, dans l'objet libre ; jamais une inscription).
+        var aProjeter = (type === 'pratique' && window.EnsemblesCibles) ? window.EnsemblesCibles.emporter(itemPrincipal) : itemPrincipal;
+        entites[schemas.CLES_ENTITES[type]].push(projeterEntite(aProjeter, type));
 
         var references = [];
         if (inclureDependances) {

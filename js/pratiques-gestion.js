@@ -280,6 +280,15 @@ function apercuPratiqueBibliotheque(pratique, catalogues) {
     if (echelle) lignes.push(['Échelle de performance', echelle, '']);
     const grille = nomDans(catalogues.grilles, conf.grilleId);
     if (grille) lignes.push(['Grille de critères d\'évaluation', grille, '']);
+    // Lot pratique-std-voyage : un exemplaire « Par standards » de la bibliothèque dit les cibles qu'il emporte, et son
+    // échelle même quand ce trimestre ne l'a pas.
+    const EC = window.EnsemblesCibles;
+    if (EC && EC.aEmporte(pratique)) {
+        const emporte = conf[EC.CHAMP_EMPORTE];
+        if (!echelle && emporte.echelle && emporte.echelle.nom) lignes.unshift(['Échelle de performance', emporte.echelle.nom, '']);
+        const etiquettes = EC.etiquettesEmportees(pratique);
+        if (etiquettes.length) lignes.push(['Cibles', etiquettes.join(', '), '']);
+    }
     return { paragraphes: [description, BibliothequeUI.formaterInspireDe(pratique)], lignes: lignes };
 }
 
@@ -335,11 +344,11 @@ async function preparerDonneesBibliothequePratiques() {
             typeof obtenirToutesLesGrillesBibliotheque === 'function' ? (await obtenirToutesLesGrillesBibliotheque() || []) : [])
     };
 
-    // Colonne « Dans ce trimestre ». Pas de « Garder → » ni de « Tout garder » : aucun geste d'avant ne
-    // versait une pratique du trimestre dans la bibliothèque (`importerPratiquesDansBibliotheque` n'a
-    // pas d'appelant ; consigne du lot 3, § 2.1 ; inscrit). L'état calme paraît quand la relation unique
-    // (`BibliothequeUI.lieeAExemplaire`) le dit — un gabarit livré avec l'app compte : il est listé dans
-    // la bibliothèque.
+    // Colonne « Dans ce trimestre ». #1164 (lot pratique-std-voyage, 21 nov. 2026) : « Garder dans ma
+    // bibliothèque → » sur chaque rangée, pour toutes les familles (`garderPratiqueDansBibliotheque`), au
+    // patron des grilles. Pas de « Tout garder » : un seul geste, par rangée. L'état calme paraît quand la
+    // relation unique (`BibliothequeUI.lieeAExemplaire`) le dit — un gabarit livré avec l'app compte : il
+    // est listé dans la bibliothèque.
     const rangeesTrimestre = pratiquesDansBibliotheque.map(pratique => {
         const rangee = {
             id: pratique.id,
@@ -357,7 +366,11 @@ async function preparerDonneesBibliothequePratiques() {
                 { label: 'Supprimer définitivement', action: 'supprimerPratiqueDefinitivement', param: pratique.id, classe: 'btn-supprimer', title: 'Supprimer définitivement' }
             ]
         };
-        if (toutesBibliotheque.some(ex => BibliothequeUI.lieeAExemplaire(pratique, ex))) rangee.etat = 'Aussi dans ta bibliothèque';
+        if (toutesBibliotheque.some(ex => BibliothequeUI.lieeAExemplaire(pratique, ex))) {
+            rangee.etat = 'Aussi dans ta bibliothèque';
+        } else {
+            rangee.passage = { label: 'Garder dans ma bibliothèque', action: 'garderPratiqueDansBibliotheque', param: pratique.id, sens: 'versBibliotheque' };
+        }
         return rangee;
     });
 
@@ -579,6 +592,8 @@ function verifierDependancesPratique(pratique) {
         const grilles = (db.getSync(cle('grillesTemplates'), []) || []).filter(g => g && g.dansBibliotheque !== false);
         if (!grilles.some(g => g.id === conf.grilleId)) manquantes.push('grille de rétroaction');
     }
+    // Lot pratique-std-voyage : une pratique « Par standards » arrivée sans ses cibles le dit aussi.
+    if (conf.type === 'cibles' && window.EnsemblesCibles && !window.EnsemblesCibles.lireParId(conf.ensembleCiblesId)) manquantes.push('cibles');
     return manquantes;
 }
 
@@ -621,6 +636,20 @@ function copierPratiqueDepuisTrimestre(pratiqueSource, srcId) {
     if (window.annoncerEcritureUsager) window.annoncerEcritureUsager(cle('pratiquesConfigurables'));   // lot F : geste hors témoin (copierPratiqueDepuisTrimestre)
 
     return { pratique: nouvellePratique, depsManquantes: verifierDependancesPratique(nouvellePratique) };
+}
+
+/**
+ * Lot pratique-std-voyage (21 nov. 2026) — l'import d'un trimestre à l'autre, AVEC ce que la pratique désigne. Une
+ * pratique « Par standards » emporte une copie de son ensemble de cibles et de son échelle, lus dans le trimestre
+ * SOURCE (jamais écrit), et les dépose dans le trimestre actif AVANT d'y être copiée ; la copie nomme l'ensemble recréé.
+ * Les autres familles passent telles quelles à `copierPratiqueDepuisTrimestre`, qui reste synchrone et inchangée.
+ * @returns {Promise<{pratique:Object, depsManquantes:Array<string>}|null>} null : le dépôt a échoué, rien n'est copié
+ */
+async function importerPratiqueDepuisTrimestre(pratiqueSource, srcId) {
+    const EC = window.EnsemblesCibles;
+    const prete = EC ? await EC.deposer(EC.emporter(pratiqueSource, srcId), { geste: 'Importer depuis un autre trimestre' }) : pratiqueSource;
+    if (!prete) return null;
+    return copierPratiqueDepuisTrimestre(prete, srcId);
 }
 
 /**
@@ -692,7 +721,8 @@ async function importerUnePratiqueTrimestre(srcId, pratiqueId) {
     // choisi, l'aperçu déplié et le défilement disparaissent avec l'ancien DOM.
     const etatSection = etatImportPratiques();
 
-    const res = copierPratiqueDepuisTrimestre(pratique, srcId);
+    const res = await importerPratiqueDepuisTrimestre(pratique, srcId);
+    if (!res) return;   // le témoin a dit pourquoi ; rien n'a été copié
 
     fermerModalBibliothequePratiques();
     await afficherListePratiquesMateriel();
@@ -739,7 +769,8 @@ async function importerToutPratiquesTrimestreModal() {
     let nb = 0;
     const depsGlobales = new Set();
     for (const pratique of pratiques) {
-        const res = copierPratiqueDepuisTrimestre(pratique, srcId);
+        const res = await importerPratiqueDepuisTrimestre(pratique, srcId);
+        if (!res) continue;   // le témoin a dit pourquoi ; cette pratique n'est pas copiée
         nb++;
         res.depsManquantes.forEach(d => depsGlobales.add(d));
     }
@@ -799,6 +830,17 @@ async function ajouterPratiqueALaSelection(pratiqueId) {
         const reponseEchelle = await demanderEchelleAdoption(enBase || configSource);
         if (!reponseEchelle.adopter) return;
         echelleAdoption = reponseEchelle.echelleId;
+    }
+
+    // Lot pratique-std-voyage (21 nov. 2026) — un exemplaire « Par standards » DÉPOSE ses cibles et son échelle dans ce
+    // trimestre AVANT d'y entrer (`EnsemblesCibles.deposer`) : la pratique écrite nomme l'ensemble recréé. Seulement pour
+    // une entrée neuve que la garde d'identité laissera passer (lue ici une première fois, rejugée dans la file) : une
+    // pratique déjà en base garde l'ensemble qu'elle nomme. Les autres familles : `configSource`, tel quel.
+    const EC = window.EnsemblesCibles;
+    if (EC && EC.aEmporte(configSource) && !enBase
+        && ajouterAvecGardeIdentite(db.getSync(cle('pratiquesConfigurables'), null) || [], configSource).ajoute) {
+        configSource = await EC.deposer(configSource, { geste: 'Utiliser dans ce trimestre' });
+        if (!configSource) return;   // le témoin a dit pourquoi ; rien n'est ajouté
     }
 
     // #522 — la recherche, la garde d'identité et l'écriture tiennent dans la
@@ -889,6 +931,37 @@ async function ajouterPratiqueALaSelection(pratiqueId) {
     }
 
     notifications.succes(`Pratique "${configSource.nom}" ajoutée`);
+}
+
+/**
+ * #1164 (lot pratique-std-voyage, 21 nov. 2026) — « Garder dans ma bibliothèque → » : une pratique du trimestre entre
+ * dans la bibliothèque, par l'écriture qui existait sans appelant (`importerPratiquesDansBibliotheque`). Toutes les
+ * familles ; une pratique « Par standards » emporte une copie de ses cibles et de son échelle (`EnsemblesCibles.emporter`).
+ * Rien n'est retiré ni réécrit dans le trimestre : la pratique, son ensemble, ses inscriptions restent où ils sont.
+ * @param {string} pratiqueId - la pratique du trimestre
+ */
+async function garderPratiqueDansBibliotheque(pratiqueId) {
+    try {
+        const pratique = (db.getSync(cle('pratiquesConfigurables'), null) || []).find(p => p.id === pratiqueId);
+        if (!pratique) {
+            alert('Pratique introuvable');
+            return;
+        }
+        const EC = window.EnsemblesCibles;
+        const resultat = await importerPratiquesDansBibliotheque([EC ? EC.emporter(pratique) : pratique], { sourceLocale: true });
+
+        fermerModalBibliothequePratiques();
+        await afficherBibliothequePratiques();
+
+        if (resultat.ajoutees > 0) {
+            notifications.succes('Pratique ajoutée à la bibliothèque !');
+        } else {
+            notifications.info('Cette pratique était déjà dans la bibliothèque.');
+        }
+    } catch (error) {
+        console.error('Erreur lors de l\'ajout à la bibliothèque:', error);
+        alert('Erreur lors de l\'ajout de la pratique à la bibliothèque.');
+    }
 }
 
 /**
@@ -2544,7 +2617,8 @@ async function partagerPratiqueMateriel(pratiqueId) {
         version: '1.0',
         type: 'configuration-pratique',
         dateExport: new Date().toISOString(),
-        configuration: pratique
+        // Lot pratique-std-voyage : une pratique « Par standards » part avec ses cibles et son échelle.
+        configuration: window.EnsemblesCibles ? window.EnsemblesCibles.emporter(pratique) : pratique
     };
 
     // Beta 99.39 : Nommage standardisé via helper unifié (#262 Phase 2)
@@ -2606,7 +2680,8 @@ async function exporterPratiquesUtilisateur() {
     // Lot 4 des standards sans portfolio (29 oct. 2026) : comme au partage `.lcz` (`projeterEntite`), les productions
     // exclues ne partent pas — des ids de productions d'ici ; chez qui reçoit, tout compte par défaut.
     const aExporter = configurations.map(c => {
-        const copie = Object.assign({}, c);
+        // Lot pratique-std-voyage : une pratique « Par standards » part avec ses cibles et son échelle.
+        const copie = Object.assign({}, window.EnsemblesCibles ? window.EnsemblesCibles.emporter(c) : c);
         for (const champ of ['configuration', 'config']) {   // où le calcul la lit (#712)
             if (!copie[champ] || !('productionsExclues' in copie[champ])) continue;
             copie[champ] = Object.assign({}, copie[champ]);
@@ -3277,6 +3352,8 @@ window.ouvrirExplorationMaquettes = ouvrirExplorationMaquettes;
 // #327 — la gestion des répertoires de classement est passée au helper générique
 // BibliothequeUI.repertoires (js/bibliotheque-ui.js). Plus d'exports spécifiques ici.
 window.ajouterPratiqueALaSelection = ajouterPratiqueALaSelection;
+window.garderPratiqueDansBibliotheque = garderPratiqueDansBibliotheque;   // #1164
+window.importerPratiqueDepuisTrimestre = importerPratiqueDepuisTrimestre;
 window.retirerPratiqueDeLaSelection = retirerPratiqueDeLaSelection;
 window.retirerPratiqueDeBibliothequeMateriel = retirerPratiqueDeBibliothequeMateriel;
 

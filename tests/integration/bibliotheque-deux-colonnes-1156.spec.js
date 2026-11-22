@@ -24,7 +24,7 @@ const dossierCaptures = process.env.CAPTURES_1156 || null;
 //     ramenée dit « Aussi » et « Déjà », sans « Garder → » ; la ligne en clair et l'aperçu ; ⋮ ;
 //     « Supprimer définitivement » garde l'exemplaire et le dit ; une retirée se retrouve et revient ;
 //     la ligne d'import au pied de la bibliothèque, et sa bulle ;
-//   · pratiques : aucune rangée du trimestre ne porte de passage ; l'encadré est parti ; une maquette
+//   · pratiques : chaque rangée du trimestre porte « Garder → » ou son état calme (#1164, 21 nov. 2026 ; avant : aucun passage) ; l'encadré est parti ; une maquette
 //     n'apparaît dans aucune colonne (la note la signale) ; la famille en mots ; ⋮ ; la phrase dans la
 //     confirmation avec un exemplaire, absente sans ; la ligne d'import au pied de « Dans ce trimestre » ;
 //   · les deux mesures de la phrase « Ce que tu y modifies… » ;
@@ -506,7 +506,7 @@ test('pratiques : les deux titres, les boutons du milieu et l’encadré partis,
     });
 });
 
-test('pratiques : aucune rangée du trimestre ne porte de passage ; la famille en mots ; « ← Utiliser » ramène un gabarit, la fenêtre reste ouverte', async ({ page }) => {
+test('pratiques : chaque rangée du trimestre porte « Garder dans ma bibliothèque → » ou son état calme (#1164) ; la famille en mots ; « ← Utiliser » ramène un gabarit, la fenêtre reste ouverte', async ({ page }) => {
     test.setTimeout(120000);
     await ouvrirDemo(page, 'pratiques', 1440, 560);
     await ouvrirBibliotheque(page, 'pratiques');
@@ -514,7 +514,14 @@ test('pratiques : aucune rangée du trimestre ne porte de passage ; la famille e
     const trimestre = colonne(page, 'pratiques', 'trimestre').locator('.biblio2-liste').first();
     const nbTrimestre = await trimestre.locator(':scope > .biblio2-rangee').count();
     expect(nbTrimestre).toBeGreaterThanOrEqual(2);
-    await expect(trimestre.locator('.biblio2-passage')).toHaveCount(0);
+    // #1164 (lot pratique-std-voyage, 21 nov. 2026) — « aucune rangée ne porte de passage » est RETIRÉ : chaque rangée porte
+    // le geste « Garder dans ma bibliothèque », ou l'état calme quand elle a déjà son exemplaire. Jamais les deux, jamais rien.
+    const nbPassages = await trimestre.locator(':scope > .biblio2-rangee .biblio2-passage').count();
+    const nbEtats = await trimestre.locator(':scope > .biblio2-rangee .biblio2-etat').count();
+    expect(nbPassages + nbEtats).toBe(nbTrimestre);
+    expect(nbPassages).toBeGreaterThanOrEqual(1);
+    for (const libelle of await trimestre.locator('.biblio2-passage').allTextContents()) expect(libelle).toContain('Garder dans ma bibliothèque');
+    await expect(trimestre.locator('.biblio2-passage[data-action="garderPratiqueDansBibliotheque"]')).toHaveCount(nbPassages);
     await expect(colonne(page, 'pratiques', 'trimestre').getByRole('button', { name: 'Tout garder dans ma bibliothèque' })).toHaveCount(0);
 
     // La famille en mots, à la place des badges ; « Gabarit » parti.

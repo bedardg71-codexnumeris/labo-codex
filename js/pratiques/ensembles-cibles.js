@@ -6,7 +6,8 @@
  *
  * PROPRIÉTAIRE de la clé `ensemblesCibles` (par trimestre : `cle('ensemblesCibles')`). Seul écrivain : `enregistrer`,
  * appelé par l'assistant de pratique (wizard-pratique-v2.js) à la création ou à la modification d'une pratique
- * par standards. La fiche de la pratique (pratiques-gestion.js) la LIT seulement.
+ * par standards, par la vue simple, et par `deposer` (plus bas) quand une pratique arrive dans un trimestre avec ses
+ * cibles (lot pratique-std-voyage). La fiche de la pratique (pratiques-gestion.js) la LIT seulement.
  *
  * FORME (rangée par trimestre, rattachée au cours — C7, C8) :
  *   { id, coursId, cibles: [ { id, etiquette, enonce, criteres: [ { id, texte, essentiel } ], poids, terminale } ],
@@ -246,6 +247,118 @@
         return ensemble ? normaliserCibles(ensemble.cibles) : null;
     }
 
+    /* ------------------------------------------------------------------ Le voyage (lot pratique-std-voyage, 21 nov. 2026) */
+    /*
+     * Une pratique « Par standards » NOMME son ensemble de cibles, qui vit à part, par trimestre : sortie de son trimestre
+     * sans lui, elle arrive en disant « cibles introuvables » (mesuré le 21 nov. 2026 sur un banc : import d'un trimestre
+     * à l'autre). Pour voyager (bibliothèque, autre trimestre, fichier), elle EMPORTE une copie de ses définitions dans
+     * `configuration.ciblesEmportees = { cibles, coursId, echelle }`, et les DÉPOSE à l'arrivée dans un trimestre :
+     *   - l'ensemble est recréé sous une identité NEUVE (deux pratiques ne partagent jamais un ensemble ; aucun ensemble
+     *     déjà présent n'est réécrit) ; les cibles et les critères gardent leur identité permanente ;
+     *   - l'échelle est recréée sous son identité si le trimestre ne l'a pas ; s'il l'a, elle sert telle quelle ;
+     *   - le cours reste nommé s'il existe encore dans la bibliothèque des cours, sinon aucun ;
+     *   - le bagage est retiré : dans un trimestre, la seule source des cibles est `ensemblesCibles`.
+     * CE QUI NE VOYAGE JAMAIS : les inscriptions, les annulations, rien qui touche un·e étudiant·e. Ce bloc ne lit ni
+     * n'écrit la clé des niveaux inscrits (sentinelle-pratique-std-voyage ; ce fichier ne la nomme pas : lot 1). Les autres familles de pratiques passent inchangées :
+     * `emporter` rend l'objet reçu, `deposer` ne fait rien.
+     */
+    const CHAMP_EMPORTE = 'ciblesEmportees';
+
+    function estParCibles(pratique) {
+        return !!(pratique && pratique.configuration && pratique.configuration.type === 'cibles');
+    }
+
+    /** Une échelle telle qu'elle voyage : ses niveaux et ses mots, sans ses états locaux (verrou, dates, provenance). */
+    function echelleQuiVoyage(echelle) {
+        if (!echelle || !echelle.id || !Array.isArray(echelle.niveaux)) return null;
+        const copie = JSON.parse(JSON.stringify(echelle));
+        ['verrouille', 'dansBibliotheque', 'idOriginal', 'dateImport', 'dateAjoutBiblio', 'dateAjout', 'estDemo', 'isDemo',
+            'inspireDeTrimestre', 'auteurOriginal'].forEach(k => { delete copie[k]; });
+        return copie;
+    }
+
+    /**
+     * La pratique avec ses définitions : une COPIE profonde qui porte `configuration.ciblesEmportees`. Lecture seule : ni
+     * la pratique reçue ni son trimestre ne sont touchés. Une pratique d'une autre famille, ou dont l'ensemble est
+     * introuvable, est rendue telle quelle (le même objet).
+     * @param {Object} pratique
+     * @param {string} [trimestreSourceId] - le trimestre où lire l'ensemble et l'échelle ; absent : le trimestre actif
+     * @returns {Object}
+     */
+    function emporter(pratique, trimestreSourceId) {
+        if (!estParCibles(pratique) || typeof db === 'undefined') return pratique;
+        const cleDe = (nom) => (trimestreSourceId && typeof cleSource === 'function') ? cleSource(nom, trimestreSourceId) : cle(nom);
+        const conf = pratique.configuration;
+        const ensembles = db.getSync(cleDe(CLE), []);
+        const ensemble = (Array.isArray(ensembles) ? ensembles : []).find(e => e && e.id === conf.ensembleCiblesId) || null;
+        // Déjà en voyage (un exemplaire de la bibliothèque, un fichier reçu) : son bagage est le bon.
+        if (!ensemble) return pratique;
+        const echelles = db.getSync(cleDe('echellesTemplates'), []);
+        const echelle = (Array.isArray(echelles) ? echelles : []).find(e => e && e.id === conf.echelleId) || null;
+        const copie = JSON.parse(JSON.stringify(pratique));
+        copie.configuration[CHAMP_EMPORTE] = {
+            cibles: normaliserCibles(ensemble.cibles),
+            coursId: ensemble.coursId ? String(ensemble.coursId) : null,
+            echelle: echelleQuiVoyage(echelle)
+        };
+        return copie;
+    }
+
+    /** La pratique porte-t-elle des définitions à déposer ? */
+    function aEmporte(pratique) {
+        const b = estParCibles(pratique) ? pratique.configuration[CHAMP_EMPORTE] : null;
+        return !!(b && typeof b === 'object' && Array.isArray(b.cibles));
+    }
+
+    /** L'échelle reçue, par la liste blanche des imports quand elle est chargée (un fichier d'une ou d'un collègue). */
+    function echelleADeposer(echelle) {
+        const brute = echelleQuiVoyage(echelle);
+        if (!brute) return null;
+        const propre = (typeof window.assainirImportJson === 'function') ? window.assainirImportJson(brute, 'echelle') : brute;
+        if (!propre || !propre.id || !Array.isArray(propre.niveaux)) return null;
+        return Object.assign({}, propre, { dansBibliotheque: true, verrouille: false, dateCreation: propre.dateCreation || new Date().toISOString() });
+    }
+
+    /**
+     * Dépose dans le trimestre ACTIF ce que la pratique emporte, AVANT qu'elle y soit écrite (une pratique n'est jamais
+     * écrite en désignant un ensemble qui n'existe pas). Rend une COPIE de la pratique, prête à écrire : elle nomme
+     * l'ensemble recréé et ne porte plus de bagage. Sans bagage : la pratique reçue, telle quelle. Échec d'écriture :
+     * `null` (le témoin l'a dit), et la pratique ne doit pas être écrite.
+     * @param {Object} pratique
+     * @param {{geste?:string}} [options]
+     * @returns {Promise<Object|null>}
+     */
+    async function deposer(pratique, options) {
+        if (!aEmporte(pratique)) return pratique;
+        const geste = (options && options.geste) || 'Utiliser dans ce trimestre';
+        const copie = JSON.parse(JSON.stringify(pratique));
+        const bagage = copie.configuration[CHAMP_EMPORTE];
+        delete copie.configuration[CHAMP_EMPORTE];
+
+        const echelle = echelleADeposer(bagage.echelle);
+        // Déjà dans le trimestre : elle sert telle quelle, rien n'y est écrit.
+        const dejaLa = (liste) => (Array.isArray(liste) ? liste : []).some(e => e && e.id === copie.configuration.echelleId);
+        if (echelle && echelle.id === copie.configuration.echelleId && !dejaLa(db.getSync(cle('echellesTemplates'), []))) {
+            const ecrite = await modifierEtAnnoncer(cle('echellesTemplates'), (lues) => {
+                const liste = Array.isArray(lues) ? lues : [];
+                return dejaLa(liste) ? liste : liste.concat([echelle]);
+            }, [], { geste: geste, discret: true }).catch(() => undefined);
+            if (!ecrite) return null;
+        }
+
+        const coursConnu = bagage.coursId && (db.getSync('cours', []) || []).some(c => c && c.id === bagage.coursId);
+        const ensembleId = genererIdUnique('ENSC_');
+        const ecrit = await enregistrer({ id: ensembleId, coursId: coursConnu ? bagage.coursId : null, cibles: bagage.cibles }, { geste: geste });
+        if (!ecrit) return null;
+        copie.configuration.ensembleCiblesId = ensembleId;
+        return copie;
+    }
+
+    /** Les étiquettes des cibles qu'une pratique emporte (l'aperçu de la bibliothèque), ou []. */
+    function etiquettesEmportees(pratique) {
+        return aEmporte(pratique) ? normaliserCibles(pratique.configuration[CHAMP_EMPORTE].cibles).map(c => c.etiquette) : [];
+    }
+
     /* ------------------------------------------------------------------ La fiche (lecture seule) */
 
     function esc(texte) {
@@ -367,6 +480,11 @@
         lireParId: lireParId,
         ciblesDeLaPratiqueActive: ciblesDeLaPratiqueActive,
         enregistrer: enregistrer,
+        CHAMP_EMPORTE: CHAMP_EMPORTE,
+        emporter: emporter,
+        aEmporte: aEmporte,
+        deposer: deposer,
+        etiquettesEmportees: etiquettesEmportees,
         libelleDuCours: libelleDuCours,
         rendreFiche: rendreFiche
     };
