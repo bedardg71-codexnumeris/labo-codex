@@ -729,23 +729,36 @@
         return cours.find(function (c) { return c && c.creeEnDemonstration === true && c.nature !== 'service'; }) || null;
     }
 
-    /** Les étudiant·es ajouté·es dans la démo : celles et ceux qui ne viennent pas du pack (DA « DEMO… »). */
+    /*
+     * CE QUI VIENT DU PACK (22 nov. 2026, lot `demo-par-standards`, accord de Cowork) : le pack a désormais DEUX groupes,
+     * le premier (GC_DEMO) et un troisième en « Par standards » (GC_DEMO_STD, ses DA en 97000…). Reconnaître le pack par
+     * le seul identifiant `GC_DEMO` faisait prendre ce troisième groupe pour celui que la personne vient de monter.
+     * `peuplerNamespace` (js/demo-namespace.js) marque `isDemo` tout ce qu'il écrit ; aucun geste de la personne ne pose
+     * cette marque sur un groupe-cours, un horaire ou une fiche. Les anciens critères (GC_DEMO, HOR_DEMO, « DEMO… »)
+     * restent : un état d'avant la marque (#464) ne change pas de lecture. Aucune bulle, aucun mot, aucun geste ne change.
+     */
+    function duPack(x) {
+        return !!x && x.isDemo === true;
+    }
+
+    /** Les étudiant·es ajouté·es dans la démo : celles et ceux qui ne viennent pas du pack (DA « DEMO… », ou marqué·es). */
     function etudiantsAjoutes() {
-        return lire('groupeEtudiants').filter(function (e) { return e && e.da && String(e.da).indexOf('DEMO') !== 0; });
+        return lire('groupeEtudiants').filter(function (e) { return e && e.da && String(e.da).indexOf('DEMO') !== 0 && !duPack(e); });
     }
 
     function horaireCree() {
-        return lire('horaires').find(function (h) { return h && h.id && h.id !== 'HOR_DEMO'; }) || null;
+        return lire('horaires').find(function (h) { return h && h.id && h.id !== 'HOR_DEMO' && !duPack(h); }) || null;
     }
 
     function groupeCoursCree() {
-        return lire('groupesCours').find(function (g) { return g && g.id && g.id !== 'GC_DEMO'; }) || null;
+        return lire('groupesCours').find(function (g) { return g && g.id && g.id !== 'GC_DEMO' && !duPack(g); }) || null;
     }
 
     /** Le groupe-cours actif est celui qu'on vient de créer. */
     function surLeGroupeCree() {
         var actif = groupeCoursActif();
-        return !!actif && actif.id !== 'GC_DEMO' && lire('groupesCours').some(function (g) { return g && g.id === actif.id; });
+        return !!actif && actif.id !== 'GC_DEMO'
+            && lire('groupesCours').some(function (g) { return g && g.id === actif.id && !duPack(g); });
     }
 
     var FAIT_MODELE = [
@@ -957,8 +970,8 @@
     function deuxiemeGroupe() {
         if (typeof db === 'undefined') return null;
         var liste = function (nom) { var v = db.getSync('demo_' + nom, []); return Array.isArray(v) ? v : []; };
-        var g = liste('groupesCours').find(function (x) { return x && x.id && x.id !== 'GC_DEMO'; });
-        var n = liste('groupeEtudiants').filter(function (e) { return e && e.da && String(e.da).indexOf('DEMO') !== 0; }).length;
+        var g = liste('groupesCours').find(function (x) { return x && x.id && x.id !== 'GC_DEMO' && !duPack(x); });
+        var n = liste('groupeEtudiants').filter(function (e) { return e && e.da && String(e.da).indexOf('DEMO') !== 0 && !duPack(e); }).length;
         return g && n ? g : null;
     }
 
