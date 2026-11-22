@@ -792,7 +792,9 @@ async function cheminSansFichier(page, cap = async () => {}) {
     await ouvrirPanneau(page);
     await expect(item(page)).toHaveAttribute('data-etat', 'en-cours');
     await expect(item(page).locator('.assistance-parcours-etat')).toHaveText('Étape 3 sur 9');
-    await expect(item(page).locator('.assistance-parcours-bouton')).toHaveText('Reprendre');
+    // 22 nov. 2026 (la suite, point 6) : la carte a deux temps ; « Nous faisons » reprend (son bouton garde son nom,
+    // l'état dit l'étape), comme au parcours 7.
+    await expect(item(page).locator('.assistance-parcours-bouton')).toHaveText('Nous faisons');
     await capture(page, 'sans-fichier-panneau-en-cours');
     await item(page).locator('.assistance-parcours-bouton').click();
     await attendreTitre(page, 'Tes codes');

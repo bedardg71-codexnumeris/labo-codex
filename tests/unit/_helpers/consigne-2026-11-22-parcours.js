@@ -49,7 +49,8 @@ export function bullesDu(repere) {
         if (!b) throw new Error(repere + ' : ligne hors bulle : ' + l);
         if (l.startsWith('(petit) ')) {
             const t = l.slice('(petit) '.length);
-            const p = t.indexOf(' (');
+            // Une note de la consigne : la parenthèse qui FINIT la ligne (« (des erreurs) », au milieu, est du texte).
+            const p = t.endsWith(')') ? t.lastIndexOf(' (') : -1;
             b.petit = p === -1 ? t : t.slice(0, p);
             if (p !== -1) b.petitNote = t.slice(p + 2, -1);
             continue;

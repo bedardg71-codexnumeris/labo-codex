@@ -363,6 +363,198 @@
 
     var DEF = { id: ID, etapes: ETAPES, lienSortie: 'Quitter le parcours', objectif: OBJECTIF, objectifAtteint: OBJECTIF_ATTEINT };
 
+    // =================================================================
+    // « JE REGARDE » (la Modélisation, 22 nov. 2026) : une VISITE du menu « Codex », dans la démo, en cinq bulles
+    // (plans de travail/CONSIGNE-2026-11-22-echelle-de-depart-et-parcours-6-7-8.md, § 5, mot pour mot ; la suite, point 7).
+    // La personne ne touche que « Codex » (bulle 1) ; elle avance ensuite par « Continuer », dans la bulle. Pendant toute
+    // la visite, RIEN ne répond dans le menu (`garderLeMenu`) : aucun fichier ne s'écrit, rien ne s'ouvre. Des bulles 2 à
+    // 5, le menu reste ouvert, quoi qu'on touche (`garderLeMenuOuvert`). Les flèches désignent sans la pulsation de « ce
+    // que tu toucheras » : aucun contour. Le « Nous faisons » ne change pas.
+    // =================================================================
+
+    var TEXTES_MODELE = {
+        objectif: "À la fin de ce parcours, tu seras en mesure d'expliquer où demeurent tes données et de décrire comment ton codex les met à l'abri.",
+        objectifAtteint: "Objectif atteint : tu es en mesure d'expliquer où demeurent tes données et de décrire comment ton codex les met à l'abri.",
+        bulles: [
+            {
+                titre: 'Pourquoi un codex',
+                lignes: [
+                    ['n', "Dans la démo, tu visites le menu « Codex » sans rien y lancer : aucun fichier ne s'écrit. Rien ne touche à tes données."],
+                    ['n', "Tes notes et les productions de tes étudiant·es, tu les gardes déjà quelque part : dans un classeur ou dans un dossier de ton ordinateur."],
+                    ['n', "Labo Codex, lui, les garde dans le navigateur de cet appareil, le logiciel qui t'affiche cette page : il ne les envoie nulle part."],
+                    ['n', "Elles peuvent donc se perdre si tu effaces les données de sites, ou si tu changes de navigateur ou d'ordinateur."],
+                    ['n', "Ton codex en est une copie complète, productions de tes étudiant·es comprises, dans un seul fichier que tu rouvres sur n'importe quel appareil."],
+                    ['c', "Touche « Codex », en haut de l'écran"]
+                ]
+            },
+            {
+                titre: 'Mettre à jour',
+                confirme: "C'est fait : le menu Codex est ouvert.",
+                lignes: [
+                    ['n', "Mettre ton codex à jour, c'est rassembler tes données et les fichiers des productions de tes étudiant·es en un seul fichier."],
+                    ['n', "Ce fichier ne change que quand tu le mets à jour : l'application ne le fait jamais à ta place."],
+                    ['n', "Avec ta classe, ce geste se refait chaque semaine et après chaque travail important : une saisie de présences ou une série d'évaluations."],
+                    ['n', "Dans cette visite, « Mettre à jour le codex » ne répond pas : tu le feras avec ta classe, en « Nous faisons »."],
+                    ['c', "Touche « Continuer »"]
+                ]
+            },
+            {
+                titre: 'Un lieu protégé',
+                confirme: "C'est fait : tu as vu « Mettre à jour le codex ».",
+                lignes: [
+                    ['n', "Avec ta classe, ce bouton ouvre d'abord un aperçu : il te montre ce que le fichier contiendra et rien ne s'écrit avant ton accord."],
+                    ['n', "Ton codex contient les noms, les DA et les productions de tes étudiant·es, et il n'est pas chiffré : quiconque a le fichier peut le lire."],
+                    ['n', "Sa place est dans un lieu protégé : une clé USB chiffrée, ou un dossier synchronisé avec un infonuage chiffré, protégé par un mot de passe solide et une double authentification."],
+                    ['n', "Ton appareil, lui, devrait avoir un mot de passe et un disque chiffré."],
+                    ['c', "Touche « Continuer »"]
+                ]
+            },
+            {
+                titre: 'Où en est ton codex',
+                confirme: "C'est fait : tu as vu où ranger ton codex.",
+                lignes: [
+                    ['n', "Le haut du menu parle de ton codex à toi, même dans la démo."],
+                    ['n', "Tant que tu n'en as pas, il dit « Pas encore de codex »."],
+                    ['n', "Ensuite, il te dit où tu en es : « Ton codex est à jour », ou « Ton codex n'a pas tes derniers changements »."],
+                    ['n', "Une fois ton codex créé, une pastille paraît à côté du mot « Codex », dans l'en-tête : verte quand il est à jour, orange quand il n'a pas tes derniers changements."],
+                    ['n', "Et si tu oublies, le rappel « Mets ton codex à jour » reviendra toutes les deux semaines, ou au rythme que tu choisis."],
+                    ['c', "Touche « Continuer »"]
+                ]
+            },
+            {
+                titre: 'Quand le rouvrir',
+                confirme: "C'est fait : tu as vu où lire l'état de ton codex.",
+                lignes: [
+                    ['n', "Ton codex te servira dans deux cas : pour travailler sur un autre appareil, ou pour retrouver tes données si ce navigateur les perd."],
+                    ['n', "Tu l'ouvriras alors par « Ouvrir un codex… », ici, dans le menu."],
+                    ['n', "Attention : ouvrir un codex remplace tout ce qui est dans l'application par le contenu du fichier. C'est donc toujours ton codex le plus récent qu'il faut ouvrir."],
+                    ['n', "Dans cette visite, « Ouvrir un codex… » ne répond pas."]
+                ]
+            }
+        ]
+    };
+
+    var K = function () { return window.ParcoursClasse; };
+    var enModele = false;
+    var debutDuModele = 0;
+
+    function lignesDuModele(defs) {
+        return defs.map(function (d) { return d[0] === 'c' ? { texte: d[1], geste: true } : note(d[1]); });
+    }
+    function confirmeDuModele(k) {
+        return function () {
+            var i = M() && M().joue(DEF_MODELE) ? M().etapeCourante() : null;
+            return i !== null && i > debutDuModele ? TEXTES_MODELE.bulles[k].confirme : '';
+        };
+    }
+    function suivanteDuModele() { var i = M().etapeCourante(); if (i !== null) M().allerA(i + 1); }
+    var CONTINUER = [{ libelle: 'Continuer', primaire: true, action: suivanteDuModele }];
+    function menuEntier() { var m = document.getElementById('codex-menu'); return menuOuvert() ? m : null; }
+
+    /** Une bulle de la visite : le menu ouvert, une flèche vers ce dont elle parle, AUCUN contour (pas de pulsation). */
+    function bulleDeLaVisite(k, vise) {
+        var b = TEXTES_MODELE.bulles[k];
+        return {
+            titre: b.titre,
+            confirme: confirmeDuModele(k),
+            lignes: function () { return lignesDuModele(b.lignes); },
+            avant: async function () { ouvrirMenu(); },
+            // Le menu entier : la bulle ne le couvre pas ; la flèche va à ce qu'elle nomme.
+            zones: function () { return [menuEntier()]; },
+            fleches: function () { return [vise()]; },
+            contour: function () { return null; },
+            boutons: CONTINUER
+        };
+    }
+
+    function suitesDuModele() { return K().suitesDuModele(ID, terminerModele); }
+
+    var ETAPES_MODELE = [
+        {
+            titre: TEXTES_MODELE.bulles[0].titre,
+            lignes: function () {
+                var l = lignesDuModele(TEXTES_MODELE.bulles[0].lignes);
+                l[l.length - 1].fait = menuOuvert;
+                return l;
+            },
+            avant: async function () { fermerMenu(); },
+            contour: boutonCodex,
+            atteint: menuOuvert
+        },
+        bulleDeLaVisite(1, itemMettreAJour),
+        bulleDeLaVisite(2, itemMettreAJour),
+        bulleDeLaVisite(3, hautDuMenu),
+        (function () {
+            var e = bulleDeLaVisite(4, itemOuvrir);
+            e.lignesVivantes = true;
+            e.lignes = function () {
+                return lignesDuModele(TEXTES_MODELE.bulles[4].lignes).concat([{ texte: K().consigneDesSuites(suitesDuModele()), geste: true }]);
+            };
+            e.sansSortie = true;
+            Object.defineProperty(e, 'boutons', { configurable: true, get: function () { return suitesDuModele(); } });
+            return e;
+        })()
+    ];
+
+    var DEF_MODELE = { id: ID + '-modele', etapes: ETAPES_MODELE, lienSortie: 'Plus tard', objectif: TEXTES_MODELE.objectif, objectifAtteint: TEXTES_MODELE.objectifAtteint };
+
+    function visiteEnCours() { return enModele && M() && M().joue(DEF_MODELE); }
+
+    /**
+     * Pendant la visite, RIEN ne répond dans le menu « Codex » : « Mettre à jour le codex », « Mettre à jour dans un autre
+     * fichier… », « Ouvrir un codex… », « Nouveau codex », le renommage par le nom en haut du menu, et le reste (la garde
+     * de « Ouvrir un codex… » du « Nous faisons », étendue au menu entier). Aucun fichier ne s'écrit.
+     */
+    function garderLeMenu(ev) {
+        if (!visiteEnCours()) return;
+        var menu = document.getElementById('codex-menu');
+        if (!menu || !ev.target || !menu.contains(ev.target)) return;
+        ev.preventDefault();
+        ev.stopPropagation();
+    }
+    window.addEventListener('click', garderLeMenu, true);
+
+    /**
+     * Des bulles 2 à 5, le menu reste ouvert, quoi qu'on touche : la bulle, sa poignée, « Continuer » (le menu se referme
+     * à tout toucher hors de lui, `_fermerMenuExterne`, js/codex.js). Ce passage, sur window, vient après celui du
+     * document, dans le même toucher : le menu se rouvre avant d'être redessiné.
+     */
+    function garderLeMenuOuvert() {
+        if (!visiteEnCours() || M().etapeCourante() < 1) return;
+        if (!menuOuvert()) ouvrirMenu();
+    }
+    window.addEventListener('click', garderLeMenuOuvert, false);
+
+    /** La visite ne pose rien : « Refaire » n'a rien à défaire (la démo n'est pas remise à neuf, les modèles d'avant restent). */
+    async function defaireModele() {
+        if (!enDemo() && typeof activerModeDemo === 'function') await activerModeDemo();
+        return enDemo();
+    }
+
+    async function lancerModele() {
+        if (!enDemo() && typeof activerModeDemo === 'function') await activerModeDemo();
+        if (!enDemo()) return;
+        enModele = true;
+        var e = window.Assistance.etatModeleDe ? window.Assistance.etatModeleDe(ID) : null;
+        var depuis = e && e.etat === 'en-cours' ? Math.max(0, Math.min(e.etape || 0, ETAPES_MODELE.length - 1)) : 0;
+        debutDuModele = depuis;
+        window.Assistance.definirEtatModele(ID, 'en-cours', depuis);
+        return M().lancer(DEF_MODELE, {
+            depuis: depuis,
+            surEtape: function (n) { window.Assistance.definirEtatModele(ID, 'en-cours', n); },
+            surQuitter: function () { enModele = false; fermerMenu(); },
+            surEchap: function () { terminerModele(); },
+            verifier: enDemo
+        });
+    }
+
+    function terminerModele() {
+        enModele = false;
+        window.Assistance.definirEtatModele(ID, 'fait', 0);
+        M().fermer();
+        fermerMenu();
+    }
+
     // ---------- Le lancement, la sortie, la fin ----------
 
     async function lancer(depuis) {
@@ -411,7 +603,11 @@
         total: ETAPES.length,
         refus: function () { return aUnTrimestreReel() ? null : REFUS_SANS_TRIMESTRE; },
         prealable: 'classe',
-        lancer: lancer
+        lancer: lancer,
+        // Les deux temps (22 nov. 2026) : la visite du menu « Codex », dans la démo.
+        totalModele: ETAPES_MODELE.length,
+        lancerModele: lancerModele,
+        defaireModele: defaireModele
     });
 
     // Pour la sentinelle des textes (tests/unit) : les étapes et les phrases telles qu'elles sont posées.
@@ -420,6 +616,9 @@
         definition: DEF,
         ligne: LIGNE,
         refus: REFUS_SANS_TRIMESTRE,
-        lignesEtape3: lignesEtape3
+        lignesEtape3: lignesEtape3,
+        textesModele: TEXTES_MODELE,
+        etapesModele: ETAPES_MODELE,
+        definitionModele: DEF_MODELE
     };
 })();

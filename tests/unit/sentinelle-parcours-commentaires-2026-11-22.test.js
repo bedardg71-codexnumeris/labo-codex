@@ -8,10 +8,12 @@
 //   · « Nous faisons » : dix bulles sur le chemin complet (grille, compte, codes, note, cas et lecture en une bulle à deux
 //     formes, production, productions, poser, rétroaction, suite) ; la variante sans fichier remplace les bulles 8 et 9.
 //   · L'objectif et l'objectif atteint ; la phrase sous « Continuer » de la bulle 3, celle du code.
+//   · « Je regarde » (§ 4.1 ; la suite du 22 nov., 15 h, point 6) : huit bulles ; « [nombre] » de la bulle 7 devient 300,
+//     comme la suite le cite ; ce que « Remplir » pose, lu dans la consigne ; le refus PROPOSÉ, dans le moule de 1.7.
 // Break-test (22 nov.) : au rapport du lot.
 import { describe, it, expect } from 'vitest';
 import { chargerScript } from './_helpers/charger-script.js';
-import { bullesDu } from './_helpers/consigne-2026-11-22-parcours.js';
+import { bullesDu, consigneDu, citations, ligneDeLaSuite, texteDeLaSuite } from './_helpers/consigne-2026-11-22-parcours.js';
 
 function charger() {
     const enregistres = [];
@@ -23,9 +25,12 @@ function charger() {
 const { P, def } = charger();
 const CHEMIN = ['grille', 'compte', 'codes', 'note', 'casLit', 'production', 'productions', 'poser', 'retro', 'loin'];
 
+// L'insécable devant « % » (la règle des nombres à la française, sentinelle-1137) : une espace pour la consigne, aucun mot
+// ne change (bulle 4 du « Je regarde » : « 20 % »).
+const plat = (lignes) => lignes.map(([t, x]) => [t, x.replace(/\u00a0%/g, ' %')]);
 const vuDuCode = (b, premiere) => ({
     titre: b.titre, petit: premiere ? null : (b.confirme || null), lieuSuite: b.lieuSuite === undefined ? null : b.lieuSuite,
-    lignes: b.lignes, puis: b.puis ? b.puis.lignes : null
+    lignes: plat(b.lignes), puis: b.puis ? plat(b.puis.lignes) : null
 });
 const vuDeLaConsigne = (c, premiere) => ({
     titre: c.titre, petit: premiere ? null : (c.petit || null), lieuSuite: c.lieu ? c.lieu.suite : null,
@@ -63,5 +68,75 @@ describe('§ 4.2 · « Nous faisons », bulle par bulle', () => {
         expect([bulles[0].objectif, bulles[9].atteint]).toEqual([P.objectifs.pratique, P.objectifs.pratiqueAtteint]);
         expect([P.definition.objectif, P.definition.objectifAtteint]).toEqual([P.objectifs.pratique, P.objectifs.pratiqueAtteint]);
         expect(bulles[9].suite).toBe('Suite suggérée : le parcours 9 (son nom lu dans le panneau). Boutons : « Voir le parcours 9 », « Terminer ».');
+    });
+});
+
+// ---------------------------------------------------------------------------------------------------------------
+// « JE REGARDE » (§ 4.1, et la suite, point 6)
+// ---------------------------------------------------------------------------------------------------------------
+
+/** La ligne de la bulle 7 que la suite cite en entier (« → Écris le nombre de mots : 300 (…) »). */
+const LIGNE_DES_MOTS = citations(ligneDeLaSuite('6.')).find((c) => c.startsWith('→ Écris le nombre de mots'));
+
+/** Les bulles de § 4.1, « [nombre] » remplacé par la ligne que cite la suite ; elle doit y trouver sa place une fois. */
+function bullesDuModele() {
+    let faites = 0;
+    const poser = (lignes) => lignes.map(([t, x]) => {
+        if (!/\[nombre\]/.test(x)) return [t, x];
+        faites++;
+        expect('→ ' + x.replace('[nombre]', '300')).toBe(LIGNE_DES_MOTS);
+        return [t, LIGNE_DES_MOTS.slice(2)];
+    });
+    const out = bullesDu('4.1').map((b) => Object.assign({}, b, { lignes: poser(b.lignes), puis: b.puis ? Object.assign({}, b.puis, { lignes: poser(b.puis.lignes) }) : null }));
+    expect(faites, 'la ligne « [nombre] » de la bulle 7').toBe(1);
+    return out;
+}
+
+describe('§ 4.1 · « Je regarde », bulle par bulle', () => {
+    const consigne = bullesDuModele();
+
+    it('huit bulles, numérotées « n sur 8 », de part et d\'autre', () => {
+        expect(consigne.map((b) => [b.rang, b.total])).toEqual(Array.from({ length: 8 }, (_, i) => [i + 1, 8]));
+        expect(P.textesModele.bulles).toHaveLength(8);
+        expect(P.etapesModele).toHaveLength(8);
+        expect(def.totalModele).toBe(8);
+    });
+
+    it.each(Array.from({ length: 8 }, (_, k) => [k + 1]))('bulle %i : mêmes mots, même ordre, dans les deux sens', (n) => {
+        expect(vuDuCode(P.textesModele.bulles[n - 1], n === 1)).toEqual(vuDeLaConsigne(consigne[n - 1], n === 1));
+    });
+
+    it('l\'entrée, l\'objectif, l\'objectif atteint et la suite ; les titres des étapes', () => {
+        const premiere = consigne[0], derniere = consigne[7];
+        expect(premiere.petit).toBe(`Parcours 8 · ${def.titre} · Je regarde`);
+        expect([premiere.objectif, derniere.atteint]).toEqual([P.textesModele.objectif, P.textesModele.objectifAtteint]);
+        expect([P.definitionModele.objectif, P.definitionModele.objectifAtteint]).toEqual([P.textesModele.objectif, P.textesModele.objectifAtteint]);
+        expect(derniere.suite).toBe('Suite suggérée : le parcours 9 (son nom lu dans le panneau, comme pour les autres). Boutons : « Le refaire avec ma classe », « Voir le parcours 9 », « Terminer ».');
+        expect(P.etapesModele.map((e) => e.titre)).toEqual(consigne.map((b) => b.titre));
+    });
+
+    it('ce que « Remplir » pose, lu dans la consigne : le nom, les quatre formes, les pondérations, la limite, les niveaux ; 300 mots', () => {
+        const c = consigneDu('4.1'), m = P.materielModele;
+        expect(c).toContain(`ajoute un cinquième critère, « ${m.critere} », à la « ${m.grille} »`);
+        expect(c).toContain(`à la bulle 1, le nom « ${m.critere} »`);
+        expect(c).toContain('à la bulle 2, ' + m.noms.map((x) => `« ${x[2]} »`).join(', ').replace(/, (« mots »)$/, ', $1'));
+        const p = m.ponderations;
+        expect(c).toContain(`la pondération ${p['Français écrit']} % pour « Français écrit » et les quatre autres ramenés à Structure ${p.Structure}, Rigueur ${p.Rigueur}, Plausibilité ${p['Plausibilité']}, Nuance ${p.Nuance}`);
+        expect(c).toContain(`la limite de ${m.limite.erreursTolerees} erreurs pour ${m.limite.motsReference} mots`);
+        const n = m.niveaux;
+        expect(c).toContain(`les quatre niveaux d'Antilope Vaillante : Structure ${n.Structure}, Rigueur ${n.Rigueur}, Plausibilité ${n['Plausibilité']}, Nuance ${n.Nuance}`);
+        expect(LIGNE_DES_MOTS).toContain(`: ${m.mots} (`);
+        // « Refaire » rend aux quatre critères leurs pondérations d'avant, celles de la grille de l'exemple (parcours 3).
+        expect(Object.values(m.avant).reduce((a, b) => a + b, 0)).toBe(100);
+        expect(Object.values(p).reduce((a, b) => a + b, 0)).toBe(100);
+    });
+
+    it('le refus PROPOSÉ : le moule de 1.7, la production d\'Antilope Vaillante ; il renvoie au modèle de « Recevoir »', () => {
+        expect(P.texteRefusModele).toBe(texteDeLaSuite('1.7').replace('la production de Tapir Doux', 'la production d\'Antilope Vaillante'));
+        expect(P.texteRefusModele).not.toBe(texteDeLaSuite('1.7'));
+        expect(def.prealable(P.texteRefusModele)).toBe('recevoir');
+        expect(def.prealable('autre')).toBe('evaluer');
+        expect(typeof def.lancerModele).toBe('function');
+        expect(typeof def.defaireModele).toBe('function');
     });
 });

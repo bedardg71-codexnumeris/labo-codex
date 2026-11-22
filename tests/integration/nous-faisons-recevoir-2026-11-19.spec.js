@@ -139,6 +139,8 @@ for (const taille of TAILLES) {
             "O À la fin de ce parcours, tu seras en mesure de recevoir les productions de ton groupe et de rendre à chacun·e sa rétroaction en PDF.",
             "L Tu es dans « Évaluation », à l'onglet « Préparer » : c'est là que tu reçois les productions de tes étudiant·es.",
             "E Cette fois, ce sont les productions de ton groupe : chacune se rangera sous le nom de son étudiant·e, dans ton application.",
+            // La suite du 22 nov. (15 h), point 4 : la phrase « Par standards », après celle des données.
+            "E Ce parcours suit des productions évaluées. Si ta pratique est « Par standards », la rétroaction par cible viendra dans une prochaine version.",
             "G Télécharge dans un dossier les fichiers que tes étudiant·es t'ont remis en ligne, sans les renommer (leur nom porte le DA de l'étudiant·e : l'application s'en sert pour trouver à qui est chaque production)",
             "G S'ils arrivent dans un fichier ZIP, décompresse-le (la zone ne prend que des PDF et des images)",
             "E Ta production est sur papier, ou c'est un exposé, une performance, une entrevue ? « Rien à importer » te mène directement à l'évaluation.",

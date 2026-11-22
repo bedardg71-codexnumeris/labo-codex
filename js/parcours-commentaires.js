@@ -265,12 +265,19 @@
 
     // ---------- Le contexte du parcours (sa préférence ; jamais les données de la personne) ----------
 
+    // LA MODÉLISATION (« Je regarde ») garde son contexte EN MÉMOIRE : la préférence de la Pratique guidée, une clé hors de
+    // la démo, n'est jamais touchée par le modèle (le confinement).
+    var enModele = false;
+    var ctxModele = {};
+
     function lireCtx() {
+        if (enModele) return Object.assign({}, ctxModele);
         var v = typeof obtenirPreference === 'function' ? obtenirPreference(CLE_CTX) : null;
         return v && typeof v === 'object' ? Object.assign({}, v) : {};
     }
 
     function ecrireCtx(c) {
+        if (enModele) { ctxModele = Object.assign({}, c); return; }
         if (typeof definirPreference === 'function') definirPreference(CLE_CTX, c);
     }
 
@@ -539,7 +546,11 @@
     function evaluationOuverte() {
         if (evaluationSansFichier()) return true;
         var f = fichierOuvert();
-        return !!(mode() === 'evaluer' && $('#travaux-palette-eval-gauche') && f && idsDuParcours().indexOf(f.productionId) !== -1);
+        // Sur la page d'annotation VISIBLE (22 nov. 2026) : la visionneuse garde son dernier fichier et son mode quand on
+        // quitte la page. Mesuré au « Je regarde » : le modèle de « Recevoir » la laisse en « Évaluer » sur la copie de
+        // Loutre Enjouée (même production) ; la bulle 6 se croyait dans l'évaluation, sans aller à la Liste.
+        return !!(mode() === 'evaluer' && sousSectionVisible('evaluations-annoter') && $('#travaux-palette-eval-gauche') && f
+            && idsDuParcours().indexOf(f.productionId) !== -1);
     }
 
     /** Le menu « Actions » d'une ligne de la liste qui offre ce geste sur une production du parcours. */
@@ -842,6 +853,9 @@
     var ETAPES = {
         grille: etape(MECANIQUE.grille, {
             titre: TEXTES.grille.titre, amener: true, lieu: true, lieuSuite: TEXTES.grille.lieuSuite, lignesVivantes: true,
+            // 22 nov. 2026, 15 h (consigne de la suite, 5) : à 1180 × 820, la première bulle, haute de 745 px, couvrait
+            // « + Nouvelle grille » ; elle se limite à la bande libre sous la rangée du menu, son texte y défile.
+            serrer: true,
             secondeForme: function () { return ficheOuverte(); },
             lignes: function () {
                 if (!ficheOuverte()) return lignesDe(TEXTES.grille.lignes);
@@ -949,7 +963,10 @@
      */
     function garderLeType(ev) {
         var m = M();
-        if (!m || !m.joue(DEF) || DEF.etapes[m.etapeCourante()] !== ETAPES.grille) return;
+        var enNous = m && m.joue(DEF) && DEF.etapes[m.etapeCourante()] === ETAPES.grille;
+        // La bulle 1 du modèle aussi (22 nov. 2026) : le « Type » d'un des quatre critères de la grille de l'exemple.
+        var auModele = m && DEF_MODELE && m.joue(DEF_MODELE) && m.etapeCourante() === 0;
+        if (!enNous && !auModele) return;
         var menu = ev.target && ev.target.closest ? ev.target.closest('select[data-on-change^="modifierTypeCritere"]') : null;
         if (!menu) return;
         var ajoutee = carteAjoutee();
@@ -989,9 +1006,430 @@
         window.Assistance.definirEtat(ID, 'en-cours', i);
     }
 
+    // =================================================================
+    // « JE REGARDE » (la Modélisation), huit bulles, dans la démo, sur le deuxième groupe, après les modèles des parcours 2,
+    // 3 et 4 (consigne du 22 nov., § 4.1 ; la suite, § 6). Le critère « Français écrit » s'ajoute DIRECTEMENT à la « Grille
+    // générale à 4 critères » (mesuré : ni les notes, ni la Liste, ni les indices P, ni le PDF des évaluations déjà posées
+    // ne changent). « Remplir » pose ce que la consigne dit, bulle par bulle, par les champs de la page ; rien ne s'écrit
+    // hors de la démo. « Refaire » retire le cinquième critère (les quatre retrouvent 20, 30, 15, 35), les codes posés sur
+    // la copie d'Antilope Vaillante et son évaluation (`defaireModele`) ; Tapir Doux et le reste restent.
+    // =================================================================
+
+    var TEXTES_MODELE = {
+        objectif: "À la fin de ce parcours, tu seras en mesure d'expliquer comment les codes que tu poses sur une production deviennent une note et des commentaires.",
+        objectifAtteint: "Objectif atteint : tu es en mesure d'expliquer comment les codes que tu poses sur une production deviennent une note et des commentaires.",
+        bulles: [
+            {
+                titre: "Ta grille",
+                lieuSuite: ": c'est là que tu composes tes grilles.",
+                lignes: [
+                    ['n', "Dans la démo, tu reprends la grille de ton deuxième groupe, avec le matériel de l'exemple. Rien ne touche à tes données."],
+                    ['n', "Ce parcours suit des productions évaluées. Si ta pratique est « Par standards », les commentaires par cible viendront dans une prochaine version."],
+                    ['n', "Tu comptes déjà certaines choses quand tu corriges : des erreurs de français, ou des unités oubliées dans des calculs. Ici, l'application garde ce compte et en tire la note d'un critère."],
+                    ['n', "Ce critère est dit algorithmique : sa note se calcule à partir de ce que tu comptes, selon une règle que tu fixes une seule fois. Les autres critères, eux, reçoivent le niveau que tu choisis."],
+                    ['n', "Il écrit aussi le commentaire qui convient à chaque compte. C'est ce que veut dire « automatiser tes commentaires »."],
+                    ['c', "Dans le menu en haut de la page, choisis « Grille générale à 4 critères »"]
+                ],
+                puis: { lignes: [
+                    ['n', "Ses quatre critères s'évaluent par niveaux. Le critère algorithmique s'ajoute à côté d'eux."],
+                    ['g', "Au bas de la liste des critères, touche « + Ajouter un critère »"],
+                    ['g', "Regarde l'exemple se remplir : touche « Remplir » (le nom du critère s'écrit : « Français écrit »)"],
+                    ['c', "Dans le menu « Type » de ce critère, choisis « Algorithmique »"]
+                ] }
+            },
+            {
+                titre: "Ce que tu comptes",
+                confirme: "C'est fait : le critère « Français écrit » est algorithmique. Son atelier s'est ouvert.",
+                lignes: [
+                    ['n', "L'atelier règle le critère en cinq étapes, à faire dans l'ordre. Elles sont en haut : une coche marque celles qui sont réglées."],
+                    ['n', "La première, « Ce que tu relèves et comptes », demande deux noms : ce que tu comptes dans une production, puis ce à quoi tu rapportes ce compte. Douze erreurs ne disent pas la même chose dans 300 mots que dans 900."],
+                    ['n', "Chaque nom s'écrit au singulier et au pluriel, parce que l'étudiant·e les lira dans une phrase : « Ta production contient 12 erreurs pour 600 mots. »"],
+                    ['n', "Dans une autre discipline, ce serait par exemple « unité manquante » et « calcul »."],
+                    ['c', "Regarde l'exemple se remplir : touche « Remplir » (« erreur », « erreurs », « mot », « mots »)"]
+                ]
+            },
+            {
+                titre: "Tes codes",
+                confirme: "C'est fait : l'application sait ce que tu comptes (des erreurs) et ce à quoi tu le rapportes (des mots).",
+                lignes: [
+                    ['n', "Tu es à l'étape « Codes utilisés ». Un code est une catégorie de ce que tu relèves. Il porte un nom et un numéro : c'est ce numéro que tu poseras sur la production."],
+                    ['n', "Tu écris peut-être déjà un chiffre ou une abréviation dans la marge ; ici, l'application compte chaque code que tu poses."],
+                    ['n', "Pour le français écrit, une liste de dix codes est prête. Dans une autre discipline, tu écrirais les tiens, un à la fois."],
+                    ['c', "Touche « Partir de la liste du français écrit (codes 1 à 10) »"]
+                ],
+                puis: { lignes: [
+                    ['n', "Chaque rangée est un code : son numéro, son nom et sa pondération. La pondération d'un code dit ce que vaut un code posé dans le compte : 1 au départ, 0,5 pour le compter à moitié."],
+                    ['n', "Sous chaque code, son « Observation » : la phrase que l'étudiant·e lira quand ce code revient souvent dans sa production."],
+                    ['g', "Ouvre l'« Observation » du code 1 et lis-la"],
+                    ['c', "Touche « Continuer »"]
+                ] }
+            },
+            {
+                titre: "Ta note",
+                confirme: "C'est fait : ton critère a ses dix codes.",
+                lignes: [
+                    ['n', "Tu es à l'étape « Note calculée ». Deux réglages font la note de ce critère."],
+                    ['n', "Le premier est sa pondération, dans l'en-tête du critère, à côté de son type : ce que pèse le critère dans le résultat de la production."],
+                    ['n', "Le second est le calcul. Trois sont prêts. L'exemple garde celui qui est choisi au départ, « Pénalité proportionnelle à la longueur » : le même nombre d'erreurs coûte moins dans une production plus longue."],
+                    ['g', "Regarde l'exemple se remplir : touche « Remplir » (la pondération s'écrit : 20\u00a0%)"],
+                    ['n', "La carte montre aussitôt la note d'une production fictive. Change son nombre d'erreurs : la note suit."],
+                    ['c', "Touche « Continuer »"]
+                ]
+            },
+            {
+                titre: "Ce que l'étudiant·e lit",
+                confirme: "C'est fait : la note de ton critère a sa règle.",
+                lignes: [
+                    ['n', "Tu es à l'étape « Cas d'interprétation ». Un compte seul ne dit pas si c'est beaucoup."],
+                    ['n', "Tu as sans doute un repère en tête : au-delà d'un certain nombre d'erreurs, tu t'inquiètes. Ici, ce repère s'appelle une limite. Elle tient en deux nombres : une longueur de référence et la tolérance sur cette longueur."],
+                    ['n', "Avec une limite, l'application situe chaque production dans un palier. L'étudiant·e lit la phrase du palier où tombe sa production."],
+                    ['g', "Touche « Fixer une limite »"],
+                    ['g', "Regarde l'exemple se remplir : touche « Remplir » (au plus 30 erreurs pour 900 mots)"],
+                    ['c', "Lis les phrases des paliers, puis touche « Continuer »"]
+                ],
+                puis: { lignes: [
+                    ['n', "Voici les phrases que l'application écrira à ta place sur chaque production."],
+                    ['n', "La première donne le compte : « Ta production contient… ». Elle paraît sous le critère et dans le PDF de l'étudiant·e."],
+                    ['n', "Les deux autres vont dans son bilan : l'une quand la note de ce critère tombe à 0, l'autre quand tous les critères de la grille sont maîtrisés."],
+                    ['n', "Les blocs colorés, comme le compte, se remplissent à l'évaluation. Le reste se réécrit avec tes mots."],
+                    ['c', "Lis les trois phrases, puis touche « Continuer »"]
+                ] }
+            },
+            {
+                titre: "Poser tes codes",
+                confirme: "C'est fait : ton critère est réglé. La grille s'est enregistrée d'elle-même.",
+                lieuSuite: ": c'est là que tu vois chaque production de ton groupe, une ligne par étudiant·e.",
+                lignes: [
+                    ['n', "Cette grille est celle de la production « Artefact 1 ». Celle d'Antilope Vaillante est déjà reçue et n'est pas encore évaluée."],
+                    ['c', "Sur la ligne d'Antilope Vaillante, touche « Actions › Annoter »"]
+                ],
+                puis: { lignes: [
+                    ['n', "La palette « Codes » porte les dix codes de ta grille."],
+                    ['n', "Ici, on expérimente l'application, pas la correction : pose tes codes au hasard, sans lire le texte."],
+                    ['g', "Touche un code dans la palette, puis un endroit de la production : son numéro s'y pose"],
+                    ['g', "Recommence jusqu'à six codes (suggestion pour suivre l'exemple : trois fois le code 1, deux fois le code 4, une fois le code 10)"],
+                    ['n', "Le nombre de codes posés paraît dans la palette : le compte se fait seul."],
+                    ['c', "En haut de la production, touche « Annoter ▾ », puis choisis « Évaluer »"]
+                ] }
+            },
+            {
+                titre: "Ta rétroaction s'écrit seule",
+                confirme: "C'est fait : six codes sont posés. Tu es en mode Évaluer.",
+                lignes: [
+                    ['n', "Dans la palette « Évaluation », « Français écrit » porte déjà son compte : 6 erreurs."],
+                    ['n', "Il lui manque ce à quoi tu rapportes ce compte : la longueur de cette production."],
+                    ['g', "Écris le nombre de mots : 300 (la note du critère se calcule aussitôt)"],
+                    ['g', "Regarde l'exemple se remplir : touche « Remplir » (les quatre autres critères reçoivent leur niveau, comme au parcours 3)"],
+                    ['n', "Dans la palette « Rétroaction », sous « Français écrit » : la phrase du compte, puis celle du palier. Dans la vue « Spécifique » : les codes les plus fréquents, chacun avec son observation."],
+                    ['n', "Tu n'as écrit aucune de ces phrases pour cette production : elles viennent toutes de tes règles."],
+                    ['g', "Lis la rétroaction comme Antilope Vaillante la lira"],
+                    ['c', "Touche le cadenas « Verrouiller », en haut de la palette « Paramètres »"]
+                ]
+            },
+            {
+                titre: "Et pour tes prochaines productions",
+                confirme: "C'est fait : l'évaluation d'Antilope Vaillante est verrouillée.",
+                lignes: [
+                    ['n', "Chaque production évaluée avec cette grille recevra sa rétroaction de la même façon : tu poses tes codes, l'application compte et écrit."],
+                    ['n', "Le réglage se fait une fois. Tu peux y revenir quand tu veux, dans l'atelier du critère."]
+                ]
+            }
+        ]
+    };
+
+    // PROPOSÉ par la session (22 nov. 2026), dans le moule du refus validé du parcours 7 (la suite, 1.7) : le panneau, sans le
+    // « Je regarde » de « Recevoir » (la copie d'Antilope Vaillante n'est pas importée) ou sans la grille du modèle d'« Évaluer ».
+    var REFUS_MODELE = "Commence par le « Je regarde » de « Recevoir les productions, rendre tes rétroactions » : c'est là qu'on importe la production d'Antilope Vaillante, que ce parcours évalue.";
+
+    var MATERIEL_MODELE = Object.freeze({
+        grille: 'Grille générale à 4 critères',
+        critere: 'Français écrit',
+        noms: Object.freeze([['erreurs', 'singulier', 'erreur'], ['erreurs', 'pluriel', 'erreurs'], ['mots', 'singulier', 'mot'], ['mots', 'pluriel', 'mots']]),
+        ponderations: Object.freeze({ 'Français écrit': 20, Structure: 16, Rigueur: 24, 'Plausibilité': 12, Nuance: 28 }),
+        avant: Object.freeze({ Structure: 20, Rigueur: 30, 'Plausibilité': 15, Nuance: 35 }),
+        limite: Object.freeze({ motsReference: '900', erreursTolerees: '30' }),
+        mots: '300',
+        antilope: Object.freeze({ da: '9900006', nom: 'Antilope Vaillante' }),
+        niveaux: Object.freeze({ Structure: 'M', Rigueur: 'M', 'Plausibilité': 'E', Nuance: 'M' })
+    });
+
+    var K = function () { return window.ParcoursClasse; };
+    function deLaDemo(nom) { var v = typeof db !== 'undefined' ? db.getSync('demo_' + nom, []) : []; return Array.isArray(v) ? v : []; }
+    function deuxiemeGroupe() { return K() && typeof K().deuxiemeGroupe === 'function' ? K().deuxiemeGroupe() : null; }
+    function surLeDeuxiemeGroupe() {
+        var g = deuxiemeGroupe(), gc = typeof db !== 'undefined' ? db.getSync('groupeCoursActif', null) : null;
+        return !!g && !!gc && gc.id === g.id;
+    }
+    function grilleDuModele() { return deLaDemo('grillesTemplates').find(function (g) { return g && g.nom === MATERIEL_MODELE.grille; }) || null; }
+    function copieDAntilope() { return deLaDemo('fichiersTravaux').find(function (f) { return f && String(f.etudiantDA) === MATERIEL_MODELE.antilope.da && f.productionId; }) || null; }
+    function evaluationDAntilope() {
+        var c = copieDAntilope();
+        return c ? deLaDemo('evaluationsSauvegardees').find(function (e) {
+            return e && String(e.etudiantDA) === MATERIEL_MODELE.antilope.da && e.productionId === c.productionId && !e.remplaceeParId;
+        }) || null : null;
+    }
+    function refusModele() { return deuxiemeGroupe() && grilleDuModele() && copieDAntilope() ? null : REFUS_MODELE; }
+
+    function poserChamp(champ, valeur) { return K() && typeof K().poser === 'function' ? K().poser(champ, valeur) : false; }
+    function remplir(geste) { return K() && typeof K().remplir === 'function' ? K().remplir(geste) : false; }
+
+    function grilleDuModeleOuverte() { var g = grilleOuverte(); return !!g && g.nom === MATERIEL_MODELE.grille; }
+    function nomDuCritereAjoute() { var c = carteAjoutee(), n = c ? c.querySelector('input[data-champ="nom"]') : null; return n ? String(n.value || '').trim() : ''; }
+    function critereDuModele() { var c = critere(); return !!c && c.nom === MATERIEL_MODELE.critere; }
+    function champNom(paire, forme) { var a = atelier(); return a ? vis(a.querySelector('.noms-algo input[data-nom-paire="' + paire + '"][data-nom-forme="' + forme + '"]')) : null; }
+    function boutonListeFrancais() { return vis($('#listeCriteres [data-action="initialiserSousCriteresParDefaut"]')); }
+    function nomDeLaCarte(carte) { var n = carte ? carte.querySelector('input[data-champ="nom"]') : null; return n ? String(n.value || '').trim() : ''; }
+    function ponderationsPosees() {
+        return cartesDesCriteres().every(function (c) {
+            var voulu = MATERIEL_MODELE.ponderations[nomDeLaCarte(c)], p = champPonderation(c);
+            return voulu === undefined || (p && Number(p.value) === voulu);
+        });
+    }
+    function champLimite(cleChamp) { var corps = corpsAtelier('paliers'); return corps ? vis(corps.querySelector('[data-param-cle="' + cleChamp + '"]')) : null; }
+    function limiteFixee() { return !!champLimite('motsReference'); }
+    function limitePosee() { var m = champLimite('motsReference'), e = champLimite('erreursTolerees'); return !!(m && e && m.value === MATERIEL_MODELE.limite.motsReference && e.value === MATERIEL_MODELE.limite.erreursTolerees); }
+    function ligneDAntilope() {
+        var c = copieDAntilope();
+        return c ? $('#evaluations-liste tr[data-da="' + MATERIEL_MODELE.antilope.da + '"][data-production-id="' + c.productionId + '"]') : null;
+    }
+    function menuDAntilope() { var l = ligneDAntilope(), s = l ? l.querySelector('select.eval-actions-select') : null; return s && s.querySelector('option[value^="annoter|"]') ? vis(s) : null; }
+    function annoterAntilope() { var f = fichierOuvert(); return annoterOuvert() && !!f && String(f.etudiantDA) === MATERIEL_MODELE.antilope.da; }
+    function niveauxDuFormulaire() {
+        var g = grilleDuModele();
+        return g ? g.criteres.filter(function (c) { return MATERIEL_MODELE.niveaux[c.nom]; }).map(function (c) { return [c, vis(document.getElementById('eval_' + c.id))]; }) : [];
+    }
+    function niveauxPoses() { var n = niveauxDuFormulaire(); return n.length === 4 && n.every(function (x) { return x[1] && x[1].value === MATERIEL_MODELE.niveaux[x[0].nom]; }); }
+
+    var GESTES_MODELE = {
+        nom: function () { var c = carteAjoutee(), n = c ? c.querySelector('input[data-champ="nom"]') : null; poserChamp(n, MATERIEL_MODELE.critere); },
+        noms: function () { MATERIEL_MODELE.noms.forEach(function (x) { poserChamp(champNom(x[0], x[1]), x[2]); }); },
+        // Chaque carte relue par son nom : un champ posé peut faire redessiner la fiche.
+        ponderations: function () {
+            Object.keys(MATERIEL_MODELE.ponderations).forEach(function (nom) {
+                var c = cartesDesCriteres().find(function (x) { return nomDeLaCarte(x) === nom; });
+                if (c) poserChamp(champPonderation(c), String(MATERIEL_MODELE.ponderations[nom]));
+            });
+        },
+        limite: function () { poserChamp(champLimite('motsReference'), MATERIEL_MODELE.limite.motsReference); poserChamp(champLimite('erreursTolerees'), MATERIEL_MODELE.limite.erreursTolerees); },
+        niveaux: function () { niveauxDuFormulaire().forEach(function (x) { if (x[1]) poserChamp(x[1], MATERIEL_MODELE.niveaux[x[0].nom]); }); }
+    };
+
+    var debutDuModele = 0;
+    function confirmationModele(k) { return function () { return k > debutDuModele ? TEXTES_MODELE.bulles[k].confirme : ''; }; }
+    var B = TEXTES_MODELE.bulles;
+    var REMPLIR = function (geste, primaire) { return { libelle: K().mots.remplir, primaire: !!primaire, action: function () { remplir(geste); } }; };
+    var formeLitModele = false;
+
+    /** Une bulle du modèle : hors du deuxième groupe, elle n'avance pas et montre le menu de l'en-tête. */
+    function etapeDuModele(mecanique, o) {
+        var e = etape(mecanique, o);
+        var lignesDe_ = e.lignes, contour = e.contour, zones = e.zones, atteint = e.atteint, lieu = e.lieu;
+        var choix = function () { return window.ParcoursEvaluer && window.ParcoursEvaluer.textes ? window.ParcoursEvaluer.textes.choisirLeGroupe : ''; };
+        e.lignesVivantes = true;
+        e.lignes = function () { return surLeDeuxiemeGroupe() ? (lignesDe_ ? lignesDe_.call(e) : []) : [{ texte: choix(), geste: true }]; };
+        e.contour = function () { return surLeDeuxiemeGroupe() ? (contour ? contour.call(e) : null) : document.getElementById('selectGroupeCoursHeader'); };
+        e.zones = function () { return surLeDeuxiemeGroupe() && zones ? (zones.call(e) || []).filter(Boolean) : []; };
+        e.fleches = function () { return e.zones(); };
+        if (atteint) e.atteint = function () { return surLeDeuxiemeGroupe() && !!atteint.call(e); };
+        if (lieu) e.lieu = function () { return surLeDeuxiemeGroupe() && (typeof lieu === 'function' ? !!lieu() : true); };
+        var boutons = Object.getOwnPropertyDescriptor(e, 'boutons');
+        Object.defineProperty(e, 'boutons', { configurable: true, get: function () {
+            if (!surLeDeuxiemeGroupe()) return null;
+            return boutons ? (boutons.get ? boutons.get.call(e) : boutons.value) : null;
+        } });
+        return e;
+    }
+
+    function suitesDuModele() { return K().suitesDuModele(ID, terminerModele); }
+
+    var ETAPES_MODELE = [
+        etapeDuModele(MECANIQUE.grille, {
+            titre: B[0].titre, lieu: true, amener: true, serrer: true, lieuSuite: B[0].lieuSuite,
+            secondeForme: grilleDuModeleOuverte,
+            lignes: function () {
+                if (!grilleDuModeleOuverte()) return lignesDe(B[0].lignes);
+                return lignesDe(B[0].puis.lignes, [null, function () { return !!carteAjoutee(); }, function () { return nomDuCritereAjoute() === MATERIEL_MODELE.critere; }, function () { return critereDuModele(); }]);
+            },
+            contour: function () {
+                if (!grilleDuModeleOuverte()) return vis(document.getElementById('menuGrilles')) || rangeeDesGrilles();
+                var c = carteAjoutee();
+                if (!c) return boutonAjouterCritere();
+                if (nomDuCritereAjoute() !== MATERIEL_MODELE.critere) return null;
+                return menuType(c);
+            },
+            get boutons() {
+                return grilleDuModeleOuverte() && carteAjoutee() && nomDuCritereAjoute() !== MATERIEL_MODELE.critere ? [REMPLIR(GESTES_MODELE.nom)] : null;
+            },
+            atteint: function () { return !!atelier() && critereDuModele(); }
+        }),
+        etapeDuModele(MECANIQUE.compte, {
+            titre: B[1].titre, confirme: confirmationModele(1),
+            lignes: function () { return lignesDe(B[1].lignes, [null, null, null, null, function () { return reglee('compte'); }]); },
+            contour: function () { return null; },
+            get boutons() { return reglee('compte') ? null : [REMPLIR(GESTES_MODELE.noms, true)]; }
+        }),
+        etapeDuModele(MECANIQUE.codes, {
+            titre: B[2].titre, confirme: confirmationModele(2),
+            secondeForme: function () { return nombreDeCodes() > 0; },
+            lignes: function () { return nombreDeCodes() > 0 ? lignesDe(B[2].puis.lignes) : lignesDe(B[2].lignes); },
+            contour: function () { return nombreDeCodes() > 0 ? null : boutonListeFrancais(); },
+            get boutons() { return nombreDeCodes() > 0 ? [{ libelle: 'Continuer', primaire: true, action: suivante }] : null; }
+        }),
+        etapeDuModele(MECANIQUE.note, {
+            titre: B[3].titre, confirme: confirmationModele(3),
+            lignes: function () { return lignesDe(B[3].lignes, [null, null, null, ponderationsPosees, null, function () { return false; }]); },
+            contour: function () { return null; },
+            get boutons() {
+                var b = [{ libelle: 'Continuer', primaire: true, action: suivante, attend: function () { return reglee('note') ? '' : ATTENTES.ponderation; } }];
+                return ponderationsPosees() ? b : [REMPLIR(GESTES_MODELE.ponderations)].concat(b);
+            }
+        }),
+        etapeDuModele(MECANIQUE.cas, {
+            titre: B[4].titre, confirme: confirmationModele(4),
+            secondeForme: function () { return formeLitModele; },
+            avant: function () { return assurerAtelier(formeLitModele ? 'eleve' : 'paliers'); },
+            lignes: function () { return formeLitModele ? lignesDe(B[4].puis.lignes) : lignesDe(B[4].lignes, [null, null, null, limiteFixee, limitePosee]); },
+            aussiEviter: function () { return formeLitModele ? MECANIQUE.lit.aussiEviter() : MECANIQUE.cas.aussiEviter(); },
+            zones: function () { return formeLitModele ? MECANIQUE.lit.zones() : MECANIQUE.cas.zones(); },
+            contour: function () {
+                if (formeLitModele) return null;
+                return limiteFixee() ? null : boutonQuiDit(corpsAtelier('paliers'), 'Fixer une limite');
+            },
+            get boutons() {
+                if (formeLitModele) return [{ libelle: 'Continuer', primaire: true, action: suivante }];
+                var c = [{ libelle: 'Continuer', primaire: true, action: function () { formeLitModele = true; assurerAtelier('eleve'); },
+                    attend: function () { return reglee('paliers') ? '' : ATTENTES.limite; } }];
+                return limiteFixee() && !limitePosee() ? [REMPLIR(GESTES_MODELE.limite)].concat(c) : c;
+            },
+            atteint: function () { return false; }
+        }),
+        etapeDuModele(MECANIQUE.poser, {
+            titre: B[5].titre, confirme: confirmationModele(5),
+            lieu: function () { return !annoterAntilope() && !evaluationOuverte(); }, amener: true, lieuSuite: B[5].lieuSuite,
+            secondeForme: annoterAntilope,
+            avant: async function () {
+                if (annoterOuvert() || evaluationOuverte()) return;
+                aller('evaluations', 'liste');
+                await attendre(menuDAntilope, 3000);
+            },
+            lignes: function () { return annoterAntilope() ? lignesDe(B[5].puis.lignes, [null, null, function () { return Number(($('#travaux-errfr-total-pastille') || {}).textContent) > 0; }, function () { return Number(($('#travaux-errfr-total-pastille') || {}).textContent) >= 6; }]) : lignesDe(B[5].lignes); },
+            zones: function () { return annoterAntilope() ? MECANIQUE.poser.zones() : [ligneDAntilope()]; },
+            contour: function () { return annoterAntilope() ? (palette('travaux-palette-erreurs-fr') || vis(document.getElementById('travaux-btn-actions'))) : menuDAntilope(); },
+            nommeLeContour: function () { return !annoterAntilope(); },
+            atteint: function () { var f = fichierOuvert(); return evaluationOuverte() && !!f && String(f.etudiantDA) === MATERIEL_MODELE.antilope.da; }
+        }),
+        etapeDuModele(MECANIQUE.retro, {
+            titre: B[6].titre, confirme: confirmationModele(6),
+            lignes: function () {
+                return lignesDe(B[6].lignes, [null, null, { champs: function () { return [champAlgo('eval_mots_')].filter(Boolean); } }, niveauxPoses]);
+            },
+            get boutons() { return niveauxPoses() ? null : [REMPLIR(GESTES_MODELE.niveaux)]; },
+            atteint: function () { var e = evaluationDAntilope(); return !!(e && e.verrouillee); }
+        }),
+        {
+            titre: B[7].titre,
+            confirme: confirmationModele(7),
+            lignesVivantes: true,
+            lignes: function () { return lignesDe(B[7].lignes).concat([{ texte: K().consigneDesSuites(suitesDuModele()), geste: true }]); },
+            centre: true,
+            sansSortie: true,
+            get boutons() { return suitesDuModele(); }
+        }
+    ];
+
+    var DEF_MODELE = { id: ID + '-modele', etapes: ETAPES_MODELE, lienSortie: 'Plus tard', objectif: TEXTES_MODELE.objectif, objectifAtteint: TEXTES_MODELE.objectifAtteint };
+
+    /**
+     * « Refaire » (au panneau) : ce que CE modèle a écrit dans la démo — le cinquième critère (les quatre autres retrouvent
+     * leurs pondérations d'avant), les codes posés sur la copie d'Antilope Vaillante, son évaluation. Les clés écrites
+     * doivent être celles de la démo. Le reste (Tapir Doux, les modèles d'avant) reste.
+     */
+    async function defaireModele() {
+        if (!enDemo() && typeof activerModeDemo === 'function') await activerModeDemo();
+        if (!enDemo() || typeof cle !== 'function') return false;
+        var cleG = cle('grillesTemplates'), cleE = cle('evaluationsSauvegardees'), cleA = cle('annotationsTravaux');
+        if ([cleG, cleE, cleA].some(function (k) { return k.indexOf('demo_') !== 0; })) return false;
+        var g = grilleDuModele(), copie = copieDAntilope(), e = evaluationDAntilope();
+        if (g) db.setSync(cleG, (db.getSync(cleG, []) || []).map(function (x) { return x && x.id === g.id ? grilleSansLeCritere(x) : x; }));
+        retirerDeLaListe(cleA, copie && function (a) { return a.fichierId === copie.id; });
+        retirerDeLaListe(cleE, e && function (x) { return x.id === e.id; });
+        refermerLaFiche(g);
+        return true;
+    }
+
+    /** La grille de l'exemple sans le cinquième critère ; les quatre autres retrouvent leurs pondérations d'avant (une copie). */
+    function grilleSansLeCritere(x) {
+        var y = JSON.parse(JSON.stringify(x));
+        y.criteres = (y.criteres || []).filter(function (c) { return c && c.nom !== MATERIEL_MODELE.critere; });
+        y.criteres.forEach(function (c) { if (MATERIEL_MODELE.avant[c.nom] !== undefined) c.ponderation = MATERIEL_MODELE.avant[c.nom]; });
+        return y;
+    }
+
+    /** Retire d'une liste de la démo ce que `vise` reconnaît ; sans `vise`, rien n'est écrit. */
+    function retirerDeLaListe(cleListe, vise) {
+        if (!vise) return;
+        db.setSync(cleListe, (db.getSync(cleListe, []) || []).filter(function (o) { return !o || !vise(o); }));
+    }
+
+    /**
+     * La fiche de la grille de l'exemple, restée ouverte, montrerait encore le cinquième critère et son atelier (mesuré au
+     * banc : les bulles 1 et 2 se croyaient faites) : elle se referme ; la bulle 1 la fait rouvrir par le menu.
+     */
+    function refermerLaFiche(g) {
+        var ouverte = typeof grilleTemplateActuelle !== 'undefined' ? grilleTemplateActuelle : null;
+        if (g && ouverte && ouverte.id === g.id && typeof annulerFormGrille === 'function') annulerFormGrille();
+    }
+
+    /** Ce qu'un passage interrompu (« Plus tard ») a laissé : le cinquième critère, des codes, une évaluation non verrouillée. */
+    function passageInterrompu() {
+        var g = grilleDuModele(), copie = copieDAntilope(), e = evaluationDAntilope();
+        var critereLa = !!g && (g.criteres || []).some(function (c) { return c && c.nom === MATERIEL_MODELE.critere; });
+        var codesLa = !!copie && deLaDemo('annotationsTravaux').some(function (a) { return a && a.fichierId === copie.id; });
+        return !(e && e.verrouillee) && (critereLa || codesLa || !!e);
+    }
+
+    async function lancerModele() {
+        if (!enDemo() && typeof activerModeDemo === 'function') await activerModeDemo();
+        if (!enDemo()) return;
+        if (refusModele()) {
+            if (window.Assistance && typeof window.Assistance.ouvrirPanneau === 'function') {
+                window.Assistance.ouvrirPanneau();
+                var b = document.querySelector('#panneau-assistance [data-parcours="' + ID + '"] .assistance-modele-bouton');
+                if (b) b.click();
+            }
+            return;
+        }
+        // Le modèle ne reprend pas au milieu (DÉCIDÉ par la session, 22 nov. 2026) : un passage interrompu repart de la
+        // bulle 1, après avoir retiré de la démo ce que CE modèle y avait posé (sinon un second « Français écrit »
+        // s'ajouterait). Fini (l'évaluation verrouillée), il repart de sa dernière bulle ; « Refaire » défait tout.
+        if (passageInterrompu()) await defaireModele();
+        enModele = true;
+        ctxModele = { grilleId: grilleDuModele().id };
+        formeLitModele = false;
+        cartesAuDepart = { cle: null, n: 0 };
+        var e = evaluationDAntilope();
+        var depuis = e && e.verrouillee ? ETAPES_MODELE.length - 1 : 0;
+        debutDuModele = depuis;
+        window.Assistance.definirEtatModele(ID, 'en-cours', depuis);
+        return M().lancer(DEF_MODELE, {
+            depuis: depuis,
+            surEtape: function (n) { window.Assistance.definirEtatModele(ID, 'en-cours', n); },
+            surQuitter: function () { enModele = false; },
+            surEchap: function () { terminerModele(); },
+            verifier: enDemo
+        });
+    }
+
+    function terminerModele() {
+        enModele = false;
+        window.Assistance.definirEtatModele(ID, 'fait', 0);
+        M().fermer();
+    }
+
     // ---------- Le lancement, « Plus tard », la fin ----------
 
     async function lancer(depuis) {
+        enModele = false;   // la Pratique guidée : son contexte à elle (la préférence)
         var e = window.Assistance.etatDe(ID);
         var reprise = e.etat === 'en-cours' && depuis > 0;
         var c = reprise ? lireCtx() : {};
@@ -1029,11 +1467,18 @@
         // Pas sur téléphone (file de Cowork, 9 nov. : à la fusion du groupe 3, avec la bulle sur téléphone).
         grandEcranSeulement: true,
         refus: refus,
-        prealable: 'evaluer',
-        lancer: lancer
+        prealable: function (raison) { return raison === REFUS_MODELE ? 'recevoir' : 'evaluer'; },
+        lancer: lancer,
+        // Les deux temps (22 nov. 2026) : le modèle, dans la démo, sur le deuxième groupe.
+        totalModele: ETAPES_MODELE.length,
+        lancerModele: lancerModele,
+        refusModele: refusModele,
+        defaireModele: defaireModele
     });
 
     // Pour les bancs : les étapes telles qu'elles sont posées, et le chemin courant.
     window.ParcoursCommentaires = { etapes: ETAPES, textes: TEXTES, objectifs: OBJECTIFS, attentes: ATTENTES, ordre: ORDRE,
+        textesModele: TEXTES_MODELE, etapesModele: ETAPES_MODELE, definitionModele: DEF_MODELE, materielModele: MATERIEL_MODELE,
+        refusModele: refusModele, texteRefusModele: REFUS_MODELE, enModele: function () { return enModele; },
         chemin: function () { return DEF.etapes.slice(); }, definition: DEF, refus: refus };
 })();

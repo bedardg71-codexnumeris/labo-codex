@@ -159,6 +159,7 @@
        section?: () => Element,    // la section de la page dont parle la bulle : la page y défile, son nom a le halo
        nommeLaSection?: bool,      // la phrase du lieu dit la section ; lieuSuite?: string, ce qui suit cette phrase
        lieuVerbe?: string | () => string, // le début de la phrase du lieu, au lieu de « Tu es dans » (« Tu es revenu·e dans »)
+       serrer?: bool,              // sans place qui laisse le contour libre : la bulle se limite à la bande libre (voir `serrer`)
        confirme?: string | () => string, // la première ligne : le geste précédent, nommé (« C'est fait : … »)
        secondeForme?: () => bool,  // la bulle a changé de forme dans l'étape (après « Remplir ») : voir « LA SECONDE FORME »
        avant?: async () => void,   // place la page (idempotent : sert aussi à la reprise)
@@ -227,6 +228,7 @@
     var SONDE_MS = 120;
     var MARGE = 8;
     var ECART = 12;
+    var HALO = 5;     // la pulsation déborde de ce qu'il faut toucher de HALO px de chaque côté
     var FLECHE_MIN = 24;       // en deçà, une flèche ne se lit pas : elle n'est pas tracée
     var FLECHE_RETRAIT = 6;    // la pointe s'arrête à quelques px du bord de la cible
     var FLECHES_MAX = 3;       // au-delà de trois cibles, une seule flèche vers leur union
@@ -2087,24 +2089,55 @@
             place = { x: (vw - bw) / 2, y: Math.max(hautEntete() + 16, (vh - bh) / 2) };
             if (place.y + bh > vh - MARGE) place.y = Math.max(MARGE, vh - bh - MARGE);
         } else {
-            place = placerLoin(evites, bw, bh, cadreUtile());
-            // AVANT DE COUVRIR CE QU'ELLE ÉVITE, la bulle s'élargit aussi (16 nov. 2026 ; « Ton trimestre » à 1180 × 900 :
-            // au-dessus de la rangée « session, année, nom », il reste 477 px ; haute de 476 px, la bulle y tenait à
-            // 1 px près, et la ligne de la poignée, dite par la première bulle de chaque parcours, la faisait couvrir le
-            // nom du trimestre). Plus large, elle est moins haute : si cette forme ne couvre PLUS RIEN de ce qu'elle
-            // évite, elle la garde jusqu'à la bulle suivante ; sinon elle reprend sa largeur, et l'essai n'est pas refait
-            // à chaque passage de la sonde (`parcours-bulle--etroite` ; les deux classes partent avec `rendreBulle`).
-            // ⚠ « Couvre moins » ne suffit pas (mesuré le 16 nov. 2026, « Pourquoi étiqueter » à 1180 × 820) : large,
-            // la bulle mordait un peu moins sur la zone de collage, mais couvrait 23 % du texte de la page au lieu de 5 %.
-            if (place.aire > 0 && !b.classList.contains('parcours-bulle--elargie') && !b.classList.contains('parcours-bulle--etroite')) {
-                b.classList.add('parcours-bulle--elargie');
-                var large = placerLoin(evites, b.offsetWidth, b.offsetHeight, cadreUtile());
-                if (large.aire <= 1) place = large;
-                else { b.classList.remove('parcours-bulle--elargie'); b.classList.add('parcours-bulle--etroite'); }
-            }
+            place = moinsCouvrir(b, evites, placerLoin(evites, bw, bh, cadreUtile()));
         }
         b.style.left = Math.round(place.x) + 'px';
         b.style.top = Math.round(place.y) + 'px';
+    }
+
+    /**
+     * Une place qui couvre ce que la bulle évite : deux essais avant de s'y résoudre (sortis de `placerBulle`, 22 nov.
+     * 2026, pour qu'elle reste sous le seuil de complexité).
+     */
+    function moinsCouvrir(b, evites, place) {
+        // AVANT DE COUVRIR CE QU'ELLE ÉVITE, la bulle s'élargit aussi (16 nov. 2026 ; « Ton trimestre » à 1180 × 900 :
+        // au-dessus de la rangée « session, année, nom », il reste 477 px ; haute de 476 px, la bulle y tenait à
+        // 1 px près, et la ligne de la poignée, dite par la première bulle de chaque parcours, la faisait couvrir le
+        // nom du trimestre). Plus large, elle est moins haute : si cette forme ne couvre PLUS RIEN de ce qu'elle
+        // évite, elle la garde jusqu'à la bulle suivante ; sinon elle reprend sa largeur, et l'essai n'est pas refait
+        // à chaque passage de la sonde (`parcours-bulle--etroite` ; les deux classes partent avec `rendreBulle`).
+        // ⚠ « Couvre moins » ne suffit pas (mesuré le 16 nov. 2026, « Pourquoi étiqueter » à 1180 × 820) : large,
+        // la bulle mordait un peu moins sur la zone de collage, mais couvrait 23 % du texte de la page au lieu de 5 %.
+        if (place.aire > 0 && !b.classList.contains('parcours-bulle--elargie') && !b.classList.contains('parcours-bulle--etroite')) {
+            b.classList.add('parcours-bulle--elargie');
+            var large = placerLoin(evites, b.offsetWidth, b.offsetHeight, cadreUtile());
+            if (large.aire <= 1) place = large;
+            else { b.classList.remove('parcours-bulle--elargie'); b.classList.add('parcours-bulle--etroite'); }
+        }
+        // `serrer` (22 nov. 2026, parcours 8, « Nous faisons », bulle 1 à 1180 × 820 : haute de 745 px, la bulle ne
+        // tenait nulle part sans couvrir la rangée du menu, et couvrait « + Nouvelle grille ») : une étape qui le
+        // déclare, quand aucune place ne laisse libre ce qu'elle évite, se limite à la bande libre la plus haute,
+        // au-dessus ou au-dessous du contour ; son texte y défile (le filet). Aucun mot ne change.
+        if (place.aire > 0) place = serrerHorsDuContour(b, evites) || place;
+        return place;
+    }
+
+    /**
+     * Voir `serrer`, dans `placerBulle`. La bulle se limite à la hauteur de la bande libre la plus haute, au-dessus ou
+     * au-dessous du contour ; à cette hauteur, la place se cherche comme toujours (`placerLoin`), parmi tout ce qu'elle
+     * évite : la bande lui en garantit une qui ne couvre pas le contour (22 nov. 2026 : posée d'office sous le contour, la
+     * bulle 1 du « Je regarde » couvrait 176 px² d'une zone qu'une autre place laissait libre). Rend null quand l'étape ne
+     * le déclare pas, ou que la bande est trop basse.
+     */
+    function serrerHorsDuContour(b, evites) {
+        var etape = etapeCourante(), c = etape && etape.serrer ? contourDe(etape) : null;
+        if (!visible(c)) return null;
+        var rc = c.getBoundingClientRect(), cadre = cadreUtile();
+        var dessous = cadre.bas - rc.bottom - 2 * ECART, dessus = rc.top - cadre.haut - 2 * ECART;
+        var h = Math.max(dessous, dessus);
+        if (h < 240) return null;
+        b.style.maxHeight = Math.floor(h) + 'px';
+        return placerLoin(evites, b.offsetWidth, b.offsetHeight, cadreUtile());
     }
 
     // ---------- La poignée : déplacer la bulle ----------
@@ -2461,6 +2494,22 @@
             Math.min(Math.max((r.top + r.bottom) / 2, 0), ecranGarde().hauteur - 1));
         return !!t && t !== el && t.contains(el);
     }
+    /**
+     * Ce qu'il faut toucher, rogné par un conteneur qui défile de côté (la colonne « Actions » de la Liste, à 820 px : de
+     * 814 à 964 px, mesuré le 22 nov. 2026) : ce conteneur seul défile, jusqu'à le montrer en entier. La page ne bouge
+     * pas : sur une bulle qui dit le lieu, elle reste en haut.
+     */
+    function amenerDeCote(el) {
+        for (var p = el.parentElement; p && p !== document.body; p = p.parentElement) {
+            var ox = getComputedStyle(p).overflowX;
+            if ((ox !== 'auto' && ox !== 'scroll') || p.scrollWidth <= p.clientWidth) continue;
+            var r = el.getBoundingClientRect(), rp = p.getBoundingClientRect();
+            var droite = Math.min(rp.right, ecranGarde().largeur) - ECART, gauche = Math.max(rp.left, 0) + ECART;
+            if (r.right > droite) p.scrollLeft += r.right - droite;
+            else if (r.left < gauche) p.scrollLeft -= gauche - r.left;
+            return;
+        }
+    }
     function suivreContour(contourEl) {
         var s = visible(contourEl) ? signatureDe(contourEl) : '';
         if (s === etat.contourSuivi) return;
@@ -2475,10 +2524,10 @@
         if (!visible(contourEl) || !seVoit(contourEl)) { c.hidden = true; return; }
         var r = contourEl.getBoundingClientRect();
         c.hidden = false;
-        c.style.left = (r.left - 5) + 'px';
-        c.style.top = (r.top - 5) + 'px';
-        c.style.width = (r.width + 10) + 'px';
-        c.style.height = (r.height + 10) + 'px';
+        c.style.left = (r.left - HALO) + 'px';
+        c.style.top = (r.top - HALO) + 'px';
+        c.style.width = (r.width + 2 * HALO) + 'px';
+        c.style.height = (r.height + 2 * HALO) + 'px';
     }
 
     /** Un passage de la sonde : contour, section actuelle, bulle, flèches, puis l'état atteint. */
@@ -2551,8 +2600,14 @@
     /** Ce que la bulle évite : ses zones, pesées 1, et ce qu'elle ne couvre que faute de mieux, pesé POIDS_CONTOUR. */
     function placerBulleLoin(zones, prio) {
         var autres = zones.filter(function (z) { return prio.indexOf(z) === -1; });
-        var s = sectionDe(etapeCourante());
-        placerBulle(rectsDePlace(autres).concat(rectsDePlace(prio).map(function (r) { return pese(r, POIDS_CONTOUR); })), s ? rectsDe([s.bloc]) : null);
+        var s = sectionDe(etapeCourante()), c = contourDe(etapeCourante());
+        // Le contour, avec le halo de sa pulsation (HALO px de chaque côté, `poserPulsation`) : collée à la palette
+        // « Codes » (parcours 8, 820 × 1180, 22 nov. 2026), la bulle ne la couvrait pas, mais couvrait 5 px de son halo.
+        var rects = prio.filter(visible).map(function (el) {
+            var r = trajetDe(el);
+            return el === c ? { left: r.left - HALO, top: r.top - HALO, right: r.right + HALO, bottom: r.bottom + HALO } : r;
+        });
+        placerBulle(rectsDePlace(autres).concat(rects.map(function (r) { return pese(r, POIDS_CONTOUR); })), s ? rectsDe([s.bloc]) : null);
     }
 
     /** Ce que la bulle ne couvre que faute de mieux : le contour, ce que l'étape déclare dans `aussiEviter`, le nom de sa section. */
@@ -2637,6 +2692,7 @@
             // 820 × 1180 : haute de 585 px, elle couvrait sept des dix points dont elle parle). Sans cela, rien ne bouge.
             if (etape.amener) amenerDansLaVue(elementsVises(etape), etat.elements.bulle.offsetHeight);
             var c0 = contourDe(etape);
+            if (visible(c0)) amenerDeCote(c0);
             etat.contourSuivi = visible(c0) ? signatureDe(c0) : '';
             return;
         }
