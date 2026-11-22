@@ -1089,6 +1089,7 @@ async function supprimerPratiqueDeBibliothequePartagee(pratiqueId) {
 
     // Lot modele-fourni-non-supprimable (22 nov. 2026) — une copie identique au modèle fourni est refusée comme le modèle
     // lui-même : la retirer ne changerait rien à l'écran. La fenêtre n'offre plus ce geste ; la fonction dit la même règle.
+    // (Deux copies sous le même id — une collision — : seule la première est lue ici ; le bandeau des doublons la signale.)
     if (!copie || estFourniIntact(copie)) {
         // L'ID n'existe que dans le seed (ou sa copie est identique) — gabarit non supprimable
         if (typeof notifications !== 'undefined' && notifications.info) {

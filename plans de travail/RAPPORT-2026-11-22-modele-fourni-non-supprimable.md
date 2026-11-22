@@ -108,4 +108,51 @@ alors sur elles, ce qui est cohérent avec le § 3.2.
 
 ## 5. Tests
 
-*(Complété au § 5 après les passes ; voir ci-dessous.)*
+**Lancé ici :**
+
+- **Vitest, suite entière** (depuis `tests/`) : verte au hook pre-push du commit `a4a0f627`. Deux sentinelles avaient
+  d'abord rougi et ont dicté la forme du code, sans qu'on les touche : `sentinelle-291-detecteurs-retires` (l'appel
+  `reunirSources(…), 'nom')` sans parenthèse interne : la liste filtrée passe par une variable) et
+  `sentinelle-contenir-complexite` (`supprimerPratiqueDeBibliothequePartagee` montait de 14 à 16 : la garde passe par
+  `estFourniIntact`, elle reste à 15).
+- **Neuf** : `tests/unit/sentinelle-modele-fourni-intact.test.js` (4 essais) ;
+  `tests/integration/modele-fourni-non-supprimable.spec.js` (6 essais, verts sous **Chromium**).
+- **Mis à jour** : `bibliotheque-deux-colonnes-1156.spec.js`, deux essais qui supposaient l'ancien comportement
+  (« Sommative · par … » sur un modèle fourni ; le ⋮ de la bibliothèque éprouvé sur « Modèle simple », un modèle fourni,
+  désormais sur une pratique fictive à soi). Les six essais « pratiques » du fichier passent sous Chromium.
+- **Bancs voisins** (16 fichiers qui touchent la bibliothèque des pratiques ou ses modèles, Chromium) : 121 passés,
+  9 échoués, 7 sautés. Les 2 de #1156 sont ceux mis à jour ci-dessus. Les 7 autres (`pratique-std-voyage`,
+  `vue-simple-modeles-actuels-epingles`) **rougissent aussi sur `main` à `78e95229`**, rejoués dans une copie à part :
+  5 échecs, et `pratique-std-voyage` change d'essais rouges d'une passe à l'autre (le 203 dans les trois passes). Ils ne
+  touchent ni la ligne des modèles fournis ni le bloc des doublons. Le verdict WebKit de la 1.254.0 était vert : je les
+  tiens pour une instabilité de Chromium, sans l'avoir prouvé.
+
+**Break-tests** (chaque mutation posée, l'essai rougit, l'original remis) :
+
+| Mutation | Rougit |
+|---|---|
+| « Supprimer » toujours offert dans le ⋮ | intégration 1, 2, 3 |
+| filtre des doublons retiré | intégration 1, 2, 4 |
+| la fonction accepte la copie identique | intégration 1 |
+| filtre des doublons posé aussi côté trimestre | intégration 6 |
+| la ligne garde l'auteur | intégration 1, 2, 4 |
+| `configuration` comptée parmi la tenue | unitaire 3 |
+| seules les clés du modèle comparées (un champ ajouté passe) | unitaire 3 |
+| clés non triées avant comparaison | unitaire 2 |
+| `jetons` compté parmi la tenue | unitaire 3 |
+| l'auteur et la licence comptent | unitaire 2 |
+
+**Pas lancé ici, et pas prétendu :**
+
+- **WebKit** : absent du conteneur. Le verdict complet sous WebKit se prend sur le Mac.
+- Le banc d'intégration n'a jamais tourné sous WebKit : à inclure dans ce verdict.
+- **Tes données réelles** : je ne sais pas si ta copie de « Modèle sommatif » est identique au modèle (§ 2.2). Ce
+  correctif n'écrit rien : pas de porte terrain (règle 2 du skill `portes-terrain`), mais c'est ce que tu verras en
+  ouvrant la bibliothèque.
+
+## 6. Ce qui reste hors du lot
+
+- **Numéro de suivi** : aucun numéro pris dans `SUIVI-BUGS.md` ni `BACKLOG.md`. Décision : il se prendra à la fusion,
+  comme la version et les Nouvelles, pour éviter qu'une autre branche prenne le même (incident du 8 août).
+- **Trouvaille, issue 3 (commentée et oubliée)** : si deux copies portent le même id que le modèle (une collision), la
+  garde de la fonction ne lit que la première. Le bandeau des doublons signale déjà une collision d'identifiant.
