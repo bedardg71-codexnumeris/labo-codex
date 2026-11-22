@@ -836,6 +836,8 @@ async function ajouterPratiqueALaSelection(pratiqueId) {
     // trimestre AVANT d'y entrer (`EnsemblesCibles.deposer`) : la pratique écrite nomme l'ensemble recréé. Seulement pour
     // une entrée neuve que la garde d'identité laissera passer (lue ici une première fois, rejugée dans la file) : une
     // pratique déjà en base garde l'ensemble qu'elle nomme. Les autres familles : `configSource`, tel quel.
+    // (Une pratique supprimée définitivement puis reprise ici reçoit un ensemble NEUF : l'ancien et ses niveaux inscrits
+    // restent dans le trimestre, intacts, sans pratique qui les nomme. Rien n'est effacé ; c'est voulu.)
     const EC = window.EnsemblesCibles;
     if (EC && EC.aEmporte(configSource) && !enBase
         && ajouterAvecGardeIdentite(db.getSync(cle('pratiquesConfigurables'), null) || [], configSource).ajoute) {
