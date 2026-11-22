@@ -6,7 +6,9 @@
 
 ## 0. En tête
 
-**L'adresse de l'aperçu : il n'y en a pas encore.** La session cloud n'a pas reçu le droit de pousser sur le dépôt
+**L'adresse de l'aperçu :** <https://deploy-preview-47--codexnumeris-051225.netlify.app> ; **la PR en brouillon :**
+<https://github.com/bedardg71-codexnumeris/labo-codex/pull/47>. La branche a été poussée et la PR ouverte par le Mac, le
+21 novembre 2026 ; la suite de ce paragraphe dit l'état à la remise du paquet. La session cloud n'a pas reçu le droit de pousser sur le dépôt
 (l'ajout du dépôt en écriture a été refusé par le garde-fou de la session). Le lot est entier dans un commit local sur
 `lot/moteur-cibles-5-releve` ; **la PR en brouillon « ne pas fusionner » reste à ouvrir**, par une session qui peut
 pousser (le Mac), à partir du paquet remis à Grégoire. C'est le seul point du mandat non tenu.
