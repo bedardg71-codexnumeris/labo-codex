@@ -1,8 +1,8 @@
 # Rapport — Comparateur : la synthèse de chaque pratique (21 nov. 2026)
 
 - **Branche** : `lot/comparateur-synthese`, partie d'`origin/main` à `16360f43c` (1.253.0). Ni fusion ni release.
-- **PR** (brouillon, NE PAS FUSIONNER) : à compléter après ouverture.
-- **Aperçu** : à compléter après ouverture.
+- **PR** (brouillon, NE PAS FUSIONNER) : https://github.com/bedardg71-codexnumeris/labo-codex/pull/51
+- **Aperçu** : https://deploy-preview-51--codexnumeris-051225.netlify.app (vérifié : il sert le code de la branche, jetons `20261121w`/`x`).
 - **Décision** : Grégoire, 21 nov. 2026, 21 h 26. **État** : fait ; vérifié sous Chromium (captures) et WebKit (bancs).
 
 ## A. Mesuré d'abord : une pratique « Par standards » dans le comparateur
