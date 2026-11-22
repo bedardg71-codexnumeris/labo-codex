@@ -544,6 +544,17 @@
      * compris. Refusée, ou la remise à neuf ratée : rien ne change, rien ne part. Rien ne sort jamais de la démo.
      */
     async function refaireModele(def) {
+        // UN MODÈLE QUI SAIT DÉFAIRE CE QU'IL A POSÉ (22 nov. 2026 ; consigne du 22 nov., § 3.1 et § 4.1 : « défaire retire
+        // l'évaluation et l'intervention » ; « Refaire retire le cinquième critère, les codes posés et l'évaluation
+        // d'Antilope Vaillante ; Tapir Doux reste intact ») : `defaireModele()` retire de la démo ce que CE modèle y a
+        // écrit, et lui seul ; le modèle repart de sa première bulle. La démo n'est pas remise à neuf : les modèles d'avant
+        // et leurs traces restent. Sans question : rien ne sort de la démo, et ce qui part, ce modèle l'avait posé.
+        if (typeof def.defaireModele === 'function') {
+            fermerPanneau({ sansRetourFocus: true });
+            if (await def.defaireModele() === false) return;
+            def.lancerModele();
+            return;
+        }
         var premier = premierModele();
         if (!premier || typeof window.remettreDemoANeuf !== 'function') return;
         var accepte = await window.uiDialogues.confirmerAction({

@@ -140,8 +140,11 @@ function installerOuvertures() {
         if (!stable || signe !== stable.signe || pl.passages <= stable.passages) { if (!stable || signe !== stable.signe) stable = { signe, passages: pl.passages }; return; }
         juge = true;
         const ecarts = [];
-        const geste = bulle.querySelector('.parcours-bulle-geste');
-        if (!geste || !geste.textContent.trim() || !(geste.getBoundingClientRect().height > 0)) ecarts.push('la bulle ne nomme pas le geste (pas de ligne du geste)');
+        // ↻ 22 nov. 2026 : depuis le moule du 20 nov., le geste se nomme dans les lignes de la bulle (le geste principal, en
+        // gras, `parcours-bulle-ligne--geste`) ; l'ancienne ligne du geste à part (`parcours-bulle-geste`) compte encore.
+        const geste = [...bulle.querySelectorAll('.parcours-bulle-geste, .parcours-bulle-ligne--geste')]
+            .find((g) => g.textContent.trim() && g.getBoundingClientRect().height > 0);
+        if (!geste) ecarts.push('la bulle ne nomme pas le geste (pas de ligne du geste)');
         const boutons = [...bulle.querySelectorAll('.parcours-bulle-boutons button')];
         boutons.forEach((b) => {
             const s = getComputedStyle(b);

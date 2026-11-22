@@ -158,6 +158,7 @@
        amener?: bool,              // avec `lieu` : ce que l'étape montre est amené sous l'en-tête si la bulle n'y tient pas
        section?: () => Element,    // la section de la page dont parle la bulle : la page y défile, son nom a le halo
        nommeLaSection?: bool,      // la phrase du lieu dit la section ; lieuSuite?: string, ce qui suit cette phrase
+       lieuVerbe?: string | () => string, // le début de la phrase du lieu, au lieu de « Tu es dans » (« Tu es revenu·e dans »)
        confirme?: string | () => string, // la première ligne : le geste précédent, nommé (« C'est fait : … »)
        secondeForme?: () => bool,  // la bulle a changé de forme dans l'étape (après « Remplir ») : voir « LA SECONDE FORME »
        avant?: async () => void,   // place la page (idempotent : sert aussi à la reprise)
@@ -491,12 +492,15 @@
      * nommée (`nommeLaSection`) : « …, à la section « S » », ou « Tu es dans la section « S » » quand la page n'a pas
      * changé. `suite` : ce qui suit, dans la même phrase si elle commence par un deux-points, sinon dans la suivante.
      */
-    function phraseDuLieu(lieu, section, suite) {
+    function phraseDuLieu(lieu, section, suite, verbe) {
         var nom = section && section.nom ? section.nom : '';
+        // `lieuVerbe` (22 nov. 2026, parcours 7, « Nous faisons », bulle 6 après la grille de dépistage) : le début de la
+        // phrase quand la personne REVIENT à une page (« Tu es revenu·e dans »). Les noms restent lus dans le menu.
+        var dans = verbe || 'Tu es dans';
         var ou = '';
-        if (lieu && nom) ou = 'Tu es dans « ' + lieu.section + ' », à la section « ' + nom + ' »';
+        if (lieu && nom) ou = dans + ' « ' + lieu.section + ' », à la section « ' + nom + ' »';
         else if (nom) ou = 'Tu es dans la section « ' + nom + ' »';
-        else if (lieu) ou = 'Tu es dans « ' + lieu.section + ' »' + (lieu.onglet ? ", à l'onglet « " + lieu.onglet + ' »' : '');
+        else if (lieu) ou = dans + ' « ' + lieu.section + ' »' + (lieu.onglet ? ", à l'onglet « " + lieu.onglet + ' »' : '');
         if (!ou) return '';
         if (!suite) return ou + '.';
         return ou + (String(suite).charAt(0) === ':' ? ' ' : '. ') + suite;
@@ -1163,7 +1167,7 @@
         if (etat.i === 0 && !seconde) phrase('parcours-bulle-objectif', texteDe(etat.def.objectif));
         poserEntree(seconde);
         poserConfirmation(seconde ? {} : etape);
-        if (!seconde) phrase('parcours-bulle-lieu', phraseDuLieu(lieu, etape.nommeLaSection ? sectionDe(etape) : null, texteDe(etape.lieuSuite)));
+        if (!seconde) phrase('parcours-bulle-lieu', phraseDuLieu(lieu, etape.nommeLaSection ? sectionDe(etape) : null, texteDe(etape.lieuSuite), texteDe(etape.lieuVerbe)));
         var ul = null;
         var poser = function (ligne, dans, sousLigne) {
             var li = document.createElement('li');

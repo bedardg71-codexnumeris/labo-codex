@@ -1,0 +1,79 @@
+// LES BULLES DES PARCOURS 6, 7 ET 8 VALIDÉES LE 22 NOV. 2026, LUES DANS LA CONSIGNE ELLE-MÊME
+// (plans de travail/CONSIGNE-2026-11-22-echelle-de-depart-et-parcours-6-7-8.md, sections 3 à 5). Aucun texte n'est recopié
+// dans les tests : chaque bloc « Début. … Fin. » est découpé ici en bulles, selon les conventions de la consigne :
+//   « BULLE n sur N · « Titre » » ouvre une bulle ; « (petit) » la ligne au-dessus du titre ; « → » un geste ; « →→ » le
+//   geste principal ; « Puis : » la bulle après le geste ; « Tu es dans « X », à l'onglet « Y » … » la phrase du lieu ;
+//   « À la fin de ce parcours… », « Objectif atteint : … », « Suite suggérée : … » : l'objectif, l'objectif atteint et la
+//   suite, posés par le moteur ; une ligne tout entre parenthèses : une note de la consigne, pas un texte de la bulle.
+import { readFileSync } from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+
+const RACINE = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..', '..');
+const lire = (f) => readFileSync(path.join(RACINE, f), 'utf8');
+export const CONSIGNE_22_NOV_SOIR = lire('plans de travail/CONSIGNE-2026-11-22-echelle-de-depart-et-parcours-6-7-8.md');
+
+/** Le bloc « Début. … Fin. » qui suit le repère (« 3.1 », « 3.2 », « 4.1 », « 4.2 », « 5. ») dans la consigne. */
+export function blocDu(repere) {
+    const i = CONSIGNE_22_NOV_SOIR.indexOf('\n' + repere + ' ');
+    if (i === -1) throw new Error('consigne du 22 nov. (soir) : repère « ' + repere + ' » introuvable');
+    const debut = CONSIGNE_22_NOV_SOIR.indexOf('\nDébut.\n', i);
+    const fin = CONSIGNE_22_NOV_SOIR.indexOf('\nFin.\n', debut);
+    if (debut === -1 || fin === -1) throw new Error(repere + ' : bloc « Début. … Fin. » introuvable');
+    return CONSIGNE_22_NOV_SOIR.slice(debut + '\nDébut.\n'.length, fin);
+}
+
+/** Le texte entre l'objectif d'un repère et son bloc (« 3.1 « JE REGARDE », … Début. ») : les consignes de travail. */
+export function consigneDu(repere) {
+    const i = CONSIGNE_22_NOV_SOIR.indexOf('\n' + repere + ' ');
+    return CONSIGNE_22_NOV_SOIR.slice(i + 1, CONSIGNE_22_NOV_SOIR.indexOf('\nDébut.\n', i));
+}
+
+const RE_TETE = /^BULLE (\d+) sur (\d+) · « (.+?) »(?: \((.+)\))?$/;
+const RE_LIEU = /^(Tu es dans « [^»]+ », à l'onglet « [^»]+ ») ?(:.*|\.)$/;
+
+/**
+ * Les bulles d'un bloc : { rang, total, titre, condition, petit, petitNote, objectif, lieu: {dit, suite}, lignes: [[t, texte]],
+ * puis: { etiquette, lieu, lignes }, atteint, suite, notes: [] } ; `variantes` : les blocs nommés hors bulle (« LA VARIANTE
+ * SANS FICHIER »), même forme.
+ */
+export function bullesDu(repere) {
+    const lignes = blocDu(repere).split('\n').map((l) => l.trim()).filter(Boolean);
+    const bulles = [];
+    let b = null, cible = null;
+    const neuve = (o) => { b = Object.assign({ lignes: [], notes: [], puis: null }, o); bulles.push(b); cible = b; };
+    for (const l of lignes) {
+        const tete = RE_TETE.exec(l);
+        if (tete) { neuve({ rang: +tete[1], total: +tete[2], titre: tete[3], condition: tete[4] || null }); continue; }
+        if (/^LA VARIANTE /.test(l)) { neuve({ rang: null, variante: l }); continue; }
+        if (!b) throw new Error(repere + ' : ligne hors bulle : ' + l);
+        if (l.startsWith('(petit) ')) {
+            const t = l.slice('(petit) '.length);
+            const p = t.indexOf(' (');
+            b.petit = p === -1 ? t : t.slice(0, p);
+            if (p !== -1) b.petitNote = t.slice(p + 2, -1);
+            continue;
+        }
+        if (/^Puis(,.*)? :$/.test(l)) { b.puis = { etiquette: l, lignes: [] }; cible = b.puis; continue; }
+        if (l.startsWith('À la fin de ce parcours, ')) { b.objectif = l; continue; }
+        if (l.startsWith('Objectif atteint : ')) { b.atteint = l; continue; }
+        if (l.startsWith('Suite suggérée : ')) { b.suite = l; continue; }
+        if (/^\(.*\)$/.test(l)) { b.notes.push(l.slice(1, -1)); continue; }
+        const lieu = RE_LIEU.exec(l);
+        if (lieu) { cible.lieu = { dit: lieu[1], suite: lieu[2] === '.' ? '' : lieu[2] }; continue; }
+        if (l.startsWith('→→ ')) { cible.lignes.push(['c', l.slice(3)]); continue; }
+        if (l.startsWith('→ ')) { cible.lignes.push(['g', l.slice(2)]); continue; }
+        cible.lignes.push(['n', l]);
+    }
+    return bulles;
+}
+
+/**
+ * Une ligne de la consigne à crochets (« au [niveau affiché] ») devient une expression : chaque crochet, un texte non
+ * vide. Sans crochet, l'égalité stricte.
+ */
+export function correspond(attendu, lu) {
+    if (!/\[[^\]]+\]/.test(attendu)) return attendu === lu;
+    const re = new RegExp('^' + attendu.split(/\[[^\]]+\]/).map((s) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('(.+)') + '$');
+    return re.test(lu);
+}

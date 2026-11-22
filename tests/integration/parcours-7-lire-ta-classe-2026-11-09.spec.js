@@ -9,6 +9,7 @@ import { attendreApplication } from './harness/attendre-application.js';
 import { attendreRepos, suivreLesReactions } from './harness/attendre-repos.js';
 import { deuxSondes } from './harness/classe-de-banc.js';
 import { flecheVers, nombreDeFleches, rienNeRetientLeToucher } from './harness/fleches-de-banc.js';
+import { bulleDit } from './harness/bulle-du-22-nov.js';
 
 // =======================================================================
 // LE SEPTIÈME PARCOURS, « LIRE TA CLASSE ET INTERVENIR » — 9 NOVEMBRE 2026
@@ -300,9 +301,14 @@ test('le bouton refuse sans présences, refuse quand personne ne s’écarte, la
 async function parcourir(page, { largeur, theme, designee }) {
     const suffixe = `${largeur}-${theme}`;
     await commencer(page);
+    // 22 nov. 2026 : les neuf bulles de « Nous faisons » (consigne du 22 nov., § 3.2), lues à l'écran, mot pour mot (les
+    // textes du module ; la sentinelle Vitest les confronte à la consigne).
+    const { t, o } = await page.evaluate(() => JSON.parse(JSON.stringify({ t: ParcoursLireTaClasse.textes.pratique, o: ParcoursLireTaClasse.objectifs })));
 
     // Étape 1 : les trois bandes, le contour sur « Détails ».
     await attendreEtape(page, 1);
+    const v1 = await bulleDit(page, { titre: t[0].titre, lieuSuite: t[0].lieuSuite, lignes: t[0].lignes, objectif: o.pratique }, 'bulle 1');
+    expect(v1.entree).toBe('Parcours 7 · Lire ta classe et intervenir · Nous faisons');
     await contourSur(page, '#btn-toggle-panneau-prioritaire');
     // Capture 28 : « Détails » a sa flèche dès l'ouverture.
     await flecheVers(page, '#btn-toggle-panneau-prioritaire', 'étape 1, « Détails »');
@@ -312,6 +318,7 @@ async function parcourir(page, { largeur, theme, designee }) {
 
     // Étape 2 : le panneau des noms, le contour sur les filtres ; un filtre, puis le A de la personne.
     await attendreEtape(page, 2);
+    await bulleDit(page, { titre: t[1].titre, confirme: t[1].confirme, lieuSuite: null, lignes: t[1].lignes }, 'bulle 2');
     await contourSur(page, '#suivi-tri-boutons');
     await capture(page, `p7-etape-2-${suffixe}`);
     await page.click('#suivi-tri-boutons .prioritaire-tri-btn[data-tri="M"]');
@@ -321,6 +328,7 @@ async function parcourir(page, { largeur, theme, designee }) {
 
     // Étape 3 : son engagement ; les pastilles d'absence ne répondent pas (touchées, elles quitteraient le profil).
     await attendreEtape(page, 3);
+    await bulleDit(page, { titre: t[2].titre, confirme: t[2].confirme, lieuSuite: t[2].lieuSuite, lignes: t[2].lignes }, 'bulle 3');
     expect(await page.evaluate(() => window.ParcoursLireTaClasse.memoire.da)).toBe(ECARTE.da);
     await contourSur(page, '#contenuProfilEtudiant [data-action="changerSectionProfil"][data-param="accompagnement"]');
     // 11 nov. 2026 : la flèche va aux absences datées, pas à la carte entière.
@@ -344,6 +352,7 @@ async function parcourir(page, { largeur, theme, designee }) {
 
     // Étape 4 : les deux cartes, rien à toucher ; « Continuer » mène à l'étape 5 sans grille désignée, sinon à la 6.
     await attendreEtape(page, 4);
+    await bulleDit(page, { titre: t[3].titre, confirme: t[3].confirme, lieuSuite: null, lignes: t[3].lignes }, 'bulle 4');
     // Les liens des deux cartes sont gardés : touché, le premier ne quitte pas le profil, l'étape reste la quatrième.
     const liens4 = await page.evaluate(() => window.ParcoursLireTaClasse.etapes[3].gardes().length);
     if (!designee) {
@@ -359,11 +368,14 @@ async function parcourir(page, { largeur, theme, designee }) {
     if (!designee) {
         // Étape 5 : le lien de la carte RàI, puis le menu des grilles dans Labo › Observation.
         await attendreEtape(page, 5);
+        await bulleDit(page, { titre: t[4].titre, confirme: t[4].confirme, lieuSuite: null, lignes: t[4].lignes }, 'bulle 5');
         const lien = '#profil-contenu-dynamique [data-action="ouvrirOutilsObservation"]';
         await contourSur(page, lien);
         await capture(page, `p7-etape-5a-${suffixe}`);
         await page.click(lien);
         await contourSur(page, '#v2-pref-grille-reference');
+        // « Puis : » dans Labo › Observation : la phrase du lieu, sans confirmation.
+        await bulleDit(page, { titre: t[4].titre, confirme: '', lieuSuite: t[4].puis.lieuSuite, lignes: t[4].puis.lignes }, 'bulle 5, dans Labo › Observation');
         // Le menu est amené dans la vue une fois le défilement d'ouvrirOutilsObservation fini. Mesuré le 9 nov. :
         // pendant ce défilement lisse, le menu PASSE à l'écran ; la mesure attend donc une page immobile.
         const menuALEcran = () => page.evaluate(() => new Promise((ok) => {
@@ -382,8 +394,14 @@ async function parcourir(page, { largeur, theme, designee }) {
         await page.selectOption('#v2-pref-grille-reference', GRILLE.id);
     }
 
-    // Étape 6 : de retour à son profil, le contour sur « + Nouvelle intervention ».
+    // Étape 6 : de retour à son profil, le contour sur « + Nouvelle intervention ». Après la bulle 5, sa confirmation et
+    // « Tu es revenu·e dans « Suivi », à l'onglet « Profils ». » (la variante de la consigne).
     await attendreEtape(page, 6);
+    if (designee) await bulleDit(page, { titre: t[5].titre, confirme: t[5].confirme, lieuSuite: null, lignes: t[5].lignes }, 'bulle 6');
+    else {
+        const v6 = await bulleDit(page, { titre: t[5].titre, confirme: t[5].apresLaGrille.confirme, lieuSuite: '', lieuVerbe: t[5].apresLaGrille.lieuVerbe, lignes: t[5].lignes }, 'bulle 6, après la grille');
+        expect(v6.lignes.find((l) => l[0] === 'lieu')[1]).toBe("Tu es revenu·e dans « Suivi », à l'onglet « Profils ».");
+    }
     expect(await page.evaluate(() => obtenirPreference('grilleReferenceDepistage'))).toBe(GRILLE.id);
     await expect(page.locator('#contenuProfilEtudiant [data-action="changerSectionProfil"][data-param="accompagnement"]')).toHaveAttribute('aria-current', 'true');
     const nouvelle = page.locator('#profil-contenu-dynamique [data-action="naviguerVersNouvelleIntervention"]', { hasText: '+ Nouvelle intervention' });
@@ -394,6 +412,7 @@ async function parcourir(page, { largeur, theme, designee }) {
     // Étape 7 : la fiche, son nom coché d'avance. Capture 29 : un geste à la fois — le titre, vide, a le contour et la
     // flèche dès l'ouverture, amené dans la vue ; écrit, ils passent à « Créer l'intervention ».
     await attendreEtape(page, 7);
+    await bulleDit(page, { titre: t[6].titre, confirme: t[6].confirme, lieuSuite: t[6].lieuSuite, lignes: t[6].lignes }, 'bulle 7');
     await expect(page.locator(`#etud-${ECARTE.da}`)).toBeChecked();
     await contourSur(page, '#interventionTitre');
     await flecheVers(page, '#interventionTitre', 'étape 7, le titre');
@@ -406,6 +425,7 @@ async function parcourir(page, { largeur, theme, designee }) {
 
     // Étape 8 : l'intervention est créée ; la pulsation sur le statut, qui ne répond pas (il écrirait sur l'intervention).
     await attendreEtape(page, 8);
+    await bulleDit(page, { titre: t[7].titre, confirme: t[7].confirme, lieuSuite: null, lignes: t[7].lignes }, 'bulle 8');
     const creee = await page.evaluate(() => {
         const id = window.ParcoursLireTaClasse.memoire.ficheId;
         const i = (obtenirInterventions() || []).find((x) => x.id === id);
@@ -437,8 +457,14 @@ async function parcourir(page, { largeur, theme, designee }) {
     await capture(page, `p7-etape-8-${suffixe}`);
     await bulle(page).getByRole('button', { name: 'Continuer' }).click();
 
-    // Étape 9 : au centre ; « Terminer » : le parcours passe à « Fait ».
+    // Étape 9 : au centre ; « Terminer » : le parcours passe à « Fait ». L'objectif atteint, la suite suggérée (le
+    // parcours 8), « Voir le parcours 8 » et « Terminer », de même poids.
     await attendreEtape(page, 9);
+    const v9 = await bulleDit(page, { titre: t[8].titre, confirme: t[8].confirme, lieuSuite: null,
+        lignes: t[8].lignes.concat([['c', 'Touche « Voir le parcours 8 », ou « Terminer »']]) }, 'bulle 9');
+    expect(v9.lignes.filter((l) => l[0] === 'fin').map((l) => l[1])).toEqual(expect.arrayContaining([o.pratiqueAtteint,
+        'Suite suggérée : le parcours 8, « Automatiser tes commentaires ».']));
+    expect(v9.boutons).toEqual(['Voir le parcours 8', 'Terminer']);
     await expect(bulle(page).locator('.parcours-bulle-sortie')).toHaveCount(0);
     // Rien de désigné : aucune flèche ; et rien ne retient le toucher, un coin de la page atteint la page.
     await nombreDeFleches(page, 0, 'étape 9');
@@ -461,6 +487,15 @@ test('les neuf étapes en faisant les gestes, sans grille de dépistage désign�
     await suivreLesReactions(page);
     await groupeAvecUnePersonneAlEcart(page, {});
     await parcourir(page, { largeur: 1180, theme: 'sombre', designee: false });
+    expect(erreurs, 'erreurs console').toEqual([]);
+});
+
+test('les neuf étapes en faisant les gestes, sans grille de dépistage désignée (820 × 1180, l’iPad debout, sombre)', async ({ page }) => {
+    test.setTimeout(240000);
+    const erreurs = brancherEcouteurs(page);
+    await suivreLesReactions(page);
+    await groupeAvecUnePersonneAlEcart(page, { largeur: 820, hauteur: 1180 });
+    await parcourir(page, { largeur: 820, theme: 'sombre', designee: false });
     expect(erreurs, 'erreurs console').toEqual([]);
 });
 
@@ -650,7 +685,8 @@ test('« Plus tard » ferme la bulle, le parcours attend à la même étape ; «
     expect(await page.evaluate(() => Assistance.etatDe('lire-ta-classe'))).toEqual({ etat: 'en-cours', etape: 2 });
     await ouvrirPanneau(page);
     await expect(item(page).locator('.assistance-parcours-etat')).toHaveText('Étape 3 sur 9');
-    await item(page).getByRole('button', { name: 'Reprendre' }).click();
+    // 22 nov. 2026 : la carte a deux temps ; « Nous faisons » reprend (son bouton garde son nom, l'état dit l'étape).
+    await item(page).locator('.assistance-parcours-bouton').click();
     await attendreEtape(page, 3);
     // Échap vaut « Plus tard ».
     await page.keyboard.press('Escape');
