@@ -5,7 +5,8 @@ Le comparateur (Labo → Exploration) décrit la pratique « Par standards » pa
 ## En tête
 
 **Branche** : `lot/comparateur-par-standards`, partie de `origin/main` à `16360f43c` (1.253.0). Arbre de travail : `../labo-codex-comparateur-std`. Ni fusion ni release.
-**PR en brouillon et aperçu** : voir la fin du rapport.
+**Aperçu** : https://deploy-preview-49--codexnumeris-051225.netlify.app (vérifié : il sert les fichiers du lot, version 1.253.0).
+**PR en brouillon, « NE PAS FUSIONNER »** : https://github.com/bedardg71-codexnumeris/labo-codex/pull/49 (Vitest vert sur GitHub ; Playwright non jugé, par construction).
 
 ## Ce que la colonne STD affiche maintenant
 
@@ -84,6 +85,6 @@ Quatre sentinelles existantes ont rougi en chemin sur mon propre code, et m'ont 
 - `tests/unit/sentinelle-comparateur-par-standards.test.js`, `tests/integration/comparateur-par-standards.spec.js`.
 - `plans de travail/TEXTES-2026-11-21-comparateur-par-standards.md`.
 
-## Aperçu et PR
+## Voir la colonne sur l'aperçu
 
-À compléter après le push.
+Il faut un trimestre qui contient une pratique « Par standards ». Ouvre Labo, puis Exploration ; dans l'en-tête d'une colonne du comparateur, choisis cette pratique. La section « Construction de la note » porte les lignes du tableau ci-dessus.
