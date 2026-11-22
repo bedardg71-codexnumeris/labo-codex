@@ -3,6 +3,7 @@ import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { chargerScript } from './_helpers/charger-script.js';
 import { monter, storeBase, chargerAvecInterne, RACINE } from './_helpers/bac-suivi.js';
+import { COMMENTAIRES_PS_27_OCT } from './_helpers/echelle-de-depart-27-oct.js';
 
 // SENTINELLE — « PS – Préstructurel » dans tout ce qui lit l'Échelle de départ (27 oct. 2026, seconde retouche).
 // VERDICT-RELECTURE-2026-10-27-aide-lot-2b-retouche.md, « La seconde retouche », points 1 à 5 : PS entrait dans
@@ -14,6 +15,10 @@ import { monter, storeBase, chargerAvecInterne, RACINE } from './_helpers/bac-su
 //   4. une copie à 0 % s'annonce « 0 % », pas « --% », à la suppression ;
 //   5. PS a sa couleur dans les graphiques de progression et dans l'aperçu PDF.
 // Données FICTIVES.
+//
+// ↻ 22 nov. 2026 — la source ne sème plus « PS » (B5 : la colonne « PS » de la « Cartouche de départ » devient la
+// colonne « 0 », ses commentaires « L'évaluation n'est pas possible. »). Les lecteurs (1, 3, 4, 5) ne changent pas :
+// un trimestre installé avant garde « PS ». Seul le § 2 suit la source, et vérifie que le stock garde ses mots.
 
 const lire = (f) => readFileSync(path.join(RACINE, f), 'utf8');
 
@@ -66,13 +71,9 @@ describe('#1152 · 1 — l\'export anonymisé compte les copies PS', () => {
     });
 });
 
-describe('#1152 · 2 — la Cartouche de départ porte PS, dans les mots de Grégoire', () => {
-    const MOTS = {
-        CR_COMPREHENSION_PS: 'La réponse ne traite pas encore du sujet demandé. Relis la consigne et repère ce qu\'elle te demande.',
-        CR_APPLICATION_PS: 'Les connaissances ne sont pas encore appliquées à la tâche demandée. Repars d\'un exemple vu en classe.',
-        CR_ANALYSE_PS: 'Aucun élément de l\'analyse demandée n\'est encore présent. Commence par nommer les éléments à examiner.',
-        CR_SYNTHESE_PS: 'La synthèse demandée n\'est pas encore amorcée. Commence par dégager l\'idée principale.'
-    };
+describe('#1152 · 2 — la Cartouche de départ : « 0 » à la source (22 nov.), PS et ses mots dans le stock', () => {
+    const MOTS = COMMENTAIRES_PS_27_OCT;
+    const AUCUN = 'L\'évaluation n\'est pas possible.';
 
     async function semer(store) {
         store.a2026_grillesTemplates = [{ id: 'GRILLE_GENERIQUE', nom: 'Grille de départ', criteres: [] }];
@@ -81,14 +82,25 @@ describe('#1152 · 2 — la Cartouche de départ porte PS, dans les mots de Gré
         return store.a2026_cartouches_GRILLE_GENERIQUE;
     }
 
-    it('un trimestre neuf : cinq niveaux, PS en tête ; vingt commentaires, dont les quatre PS mot pour mot', async () => {
+    it('un trimestre neuf : cinq niveaux, « 0 – Aucun » en tête ; vingt commentaires, dont les quatre du « 0 » (B5, mot pour mot)', async () => {
         const [cartouche] = await semer({});
-        expect(cartouche.niveaux.map((n) => n.code)).toEqual(['PS', 'I', 'D', 'M', 'E']);
-        expect(cartouche.niveaux[0]).toEqual({ code: 'PS', nom: 'Préstructurel' });
+        expect(cartouche.niveaux.map((n) => n.code)).toEqual(['0', 'I', 'D', 'M', 'E']);
+        expect(cartouche.niveaux[0]).toEqual({ code: '0', nom: 'Aucun' });
         expect(Object.keys(cartouche.commentaires)).toHaveLength(20);
-        for (const [cle, mots] of Object.entries(MOTS)) expect(cartouche.commentaires[cle], cle).toBe(mots);
+        for (const crit of ['CR_COMPREHENSION', 'CR_APPLICATION', 'CR_ANALYSE', 'CR_SYNTHESE']) {
+            expect(cartouche.commentaires[crit + '_0'], crit).toBe(AUCUN);
+            expect(cartouche.commentaires[crit + '_PS'], crit + ' : plus de colonne PS semée').toBeUndefined();
+        }
         // Chaque critère × niveau a son commentaire (la matrice est pleine).
         for (const c of cartouche.criteres) for (const n of cartouche.niveaux) expect(cartouche.commentaires[c.id + '_' + n.code], c.id + '_' + n.code).toBeTruthy();
+    });
+
+    it('TARIR, PAS RÉPARER : une cartouche de départ semée entre le 27 oct. et le 22 nov. garde sa colonne PS et ses quatre mots', async () => {
+        const ancienne = { id: 'CART_GENERIQUE', nom: 'Cartouche de départ',
+            niveaux: [{ code: 'PS', nom: 'Préstructurel' }, { code: 'I' }, { code: 'D' }, { code: 'M' }, { code: 'E' }],
+            commentaires: { ...MOTS, CR_ANALYSE_I: 'v' } };
+        const store = { a2026_cartouches_GRILLE_GENERIQUE: [JSON.parse(JSON.stringify(ancienne))] };
+        expect(await semer(store)).toEqual([ancienne]);
     });
 
     it('TARIR, PAS RÉPARER : une cartouche de départ déjà semée garde ses niveaux et ses seize commentaires', async () => {

@@ -104,7 +104,7 @@ describe('#1152 lot 3 · un seul glossaire', () => {
         const progression = Number(lire('js', 'interpretation-config.js').match(/progressionArtefacts: ([\d.]+)/)[1]);
         expect(terme('seuils-de-depistage').definition).toContain(`Progression ${Math.round(progression * 100)} points`);
 
-        const niveaux = [...tranche(lire('js', 'echelles.js'), 'const niveauxDefaut = [', '];').matchAll(/code: '([A-Z]+)',\s*nom: '([^']+)'/g)];
+        const niveaux = [...tranche(lire('js', 'echelles.js'), 'const niveauxDefaut = [', '];').matchAll(/code: '([A-Z0-9]+)',\s*nom: '([^']+)'/g)];   // ↻ 22 nov. 2026 : le premier code est « 0 » (« 0 – Aucun »)
         const echelle = terme('echelle-de-performance').definition;
         const nombres = ['', '', '', '', 'quatre', 'cinq', 'six'];
         expect(echelle).toContain(`a ${nombres[niveaux.length]} niveaux`);

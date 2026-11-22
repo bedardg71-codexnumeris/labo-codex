@@ -90,15 +90,24 @@
  *   (`sansNiveauZero`), de la couverture des plages et des distributions du tableau de bord. « PS » est un niveau
  *   comme I, D, M et E : un pourcentage de 0 à 39,99 % le donne. ⚠ Sa valeur ponctuelle est un VRAI ZÉRO
  *   (`valeurNumeriqueDuNiveau` la lit telle quelle, plus bas). Couleur : `--gris-moyen`, redéfinie dans les deux modes.
+ * ↻ 22 nov. 2026 — L'ÉCHELLE DE DÉPART DEVIENT CELLE DE GRÉGOIRE : « PS – Préstructurel » n'est plus semé ; le premier
+ *   niveau est « 0 – Aucun », le NON RECEVABLE, bâti comme le « 0 » de l'échelle « IDME et niv 0 » de la démo (plage
+ *   0 à 0, valeur 0, ni description ni palier SOLO) ; « I » commence à 0 % au lieu de 40 %. Décision de Grégoire,
+ *   22 nov., 12 h 27 (plans de travail/CONSIGNE-2026-11-22-echelle-de-depart-et-parcours-6-7-8.md, § 1, piste a du
+ *   rapport du matin, § B0.4). AUCUN POURCENTAGE NE DONNE « 0 » : `sansNiveauZero` l'écarte de la déduction, et « I »
+ *   reçoit tout ce qui va de 0 à 64,99 %. Conséquence acceptée : dans un trimestre neuf, un critère à 30 % reçoit « I »
+ *   (valeur 40) au lieu de « PS » (valeur 0). Couleur gardée : `--gris-moyen`, celle de l'ancien premier niveau,
+ *   redéfinie dans les deux modes (la démo porte un hex, #831100, qui ne suit pas le mode sombre).
+ *   AUCUN CALCUL N'EST MODIFIÉ, TARIR PAS RÉPARER : seul le semis lit cette constante ; un trimestre qui a déjà
+ *   `ECHELLE_IDME_DEPART` garde « PS – Préstructurel », et les deux lecteurs de « PS » (tableau de bord, archive) le
+ *   lisent encore (sentinelle-echelle-de-depart-aucun-1-22-nov.test.js).
  */
 const niveauxDefaut = [
     {
-        code: 'PS',
-        nom: 'Préstructurel',
-        description: 'Préstructurel',
-        niveauSOLO: 'prestructurel',
+        code: '0',
+        nom: 'Aucun',
         min: 0,
-        max: 39.99,
+        max: 0,
         valeurCalcul: 0,
         couleur: 'var(--gris-moyen)'
     },
@@ -107,7 +116,7 @@ const niveauxDefaut = [
         nom: 'Incomplet',
         description: 'Unistructurel',
         niveauSOLO: 'unistructurel',
-        min: 40,
+        min: 0,
         max: 64.99,
         valeurCalcul: 40,
         couleur: 'var(--niveau-attention-critique)'
@@ -400,7 +409,8 @@ async function assurerEchelleIdmeDeDepart() {
         // aux trois pièces semées, et c'est lui qui doit se voir dans une liste.
         nom: 'Échelle de départ (IDME)',
         // ↻ 27 oct. 2026 : cinq niveaux, avec « PS » (§ 4.4 du verdict du lot 2b de l'Aide). Le stock garde sa description.
-        description: 'Cinq niveaux — Préstructurel, Incomplet, Développement, Maîtrise, Étendu. '
+        // ↻ 22 nov. 2026 (B1, validé par Grégoire) : « 0 – Aucun » remplace « PS ». Le stock garde sa description.
+        description: 'Cinq niveaux : Aucun, Incomplet, Développement, Maîtrise, Étendu. '
             + 'Les valeurs ponctuelles sont un point de départ : modifie-les, ou remplace '
             + 'l\'échelle entière. Rien ici n\'est une norme du projet.',
         // Copie PROFONDE : la constante partagée ne doit jamais devenir mutable

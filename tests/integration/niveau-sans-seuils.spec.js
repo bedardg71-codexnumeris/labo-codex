@@ -50,8 +50,10 @@ async function classeNoteeAvecUnNiveauAjoute(page, { nomDuPlusHaut = null } = {}
         await page.locator('[data-action="VueSimple.ajouterProduction"]').click();
         await expect(page.locator('#vs-tableau-hote .tn-production-titre', { hasText: nom })).toBeVisible();
     }
-    // Ada : X, X (110) · Boréal : E, M · Chloé : PS, PS (0) · Dario : M, M (75)
-    const saisies = ['xx', 'em', 'pp', 'mm'];
+    // Ada : X, X (110) · Boréal : E, M · Chloé : 0, 0 (0) · Dario : M, M (75)
+    // ↻ 22 nov. 2026 : l'échelle de départ d'un trimestre neuf a « 0 – Aucun » en tête (avant : « PS – Préstructurel ») ;
+    // « Mes niveaux » en est la copie, et la touche de Chloé devient « 0 ». Sa note reste 0.
+    const saisies = ['xx', 'em', '00', 'mm'];
     for (let i = 0; i < saisies.length; i++) {
         await page.locator(`#vs-tableau-hote tbody tr:nth-child(${i + 1}) .tn-case`).first().focus();
         for (const lettre of saisies[i]) { await page.keyboard.press(lettre); await page.keyboard.press('ArrowRight'); }
@@ -79,7 +81,10 @@ test.describe('niveau sans seuils — la vue étendue', () => {
         const suivi = page.locator('#suivi-groupe');
         // Mesuré avant ce lot : « Préstructurel : 0 • Exemplaire : 1 • … • Étendu : 1 » — l'étudiante à 0 dans le niveau
         // ajouté, l'étudiante à 110 nulle part.
-        await expect(suivi).toContainText('Préstructurel : 1 • Incomplet : 0 • Développement : 0 • Maîtrise : 1 • Étendu : 2');
+        // ↻ 22 nov. 2026 : l'échelle de départ neuve a « 0 – Aucun » en tête, le non recevable, que la répartition écarte
+        // par son code (calcul inchangé) ; la note de 0 se range donc au plus bas niveau À SEUILS, « Incomplet » (dès 0 %).
+        await expect(suivi).toContainText('Distribution : Incomplet : 1 • Développement : 0 • Maîtrise : 1 • Étendu : 2');
+        await expect(suivi).not.toContainText('Aucun :');
         await expect(suivi).not.toContainText('Exemplaire :');
         await expect(suivi).toContainText('3 étudiant·es (75 %) ont atteint ou dépassé le niveau de maîtrise.');
         expect(erreurs).toEqual([]);
@@ -103,7 +108,9 @@ test.describe('niveau sans seuils — la vue étendue', () => {
             const lire = (da, pct) => { const l = window.lireNiveauNoteGlobale(da, pct); return [l.niveau ? l.niveau.code : null, l.raison]; };
             return { ada: lire('9990001', 110), dario: lire('9990004', 75), chloe: lire('9990003', 0) };
         });
-        expect(lu).toEqual({ ada: ['E', null], dario: ['M', null], chloe: ['PS', null] });
+        // ↻ 22 nov. 2026 : 0 % tombe dans la plage du « 0 – Aucun » (0 à 0) ; ce lecteur-ci ne l'écarte pas (calcul
+        // inchangé ; la répartition, elle, range Chloé en « Incomplet » — écart rapporté au relais du 22 nov.).
+        expect(lu).toEqual({ ada: ['E', null], dario: ['M', null], chloe: ['0', null] });
         expect(erreurs).toEqual([]);
     });
 
@@ -115,10 +122,12 @@ test.describe('niveau sans seuils — la vue étendue', () => {
             const lu = new DOMParser().parseFromString(window.ExportPDF.apercuEchelle(e), 'text/html');
             return [...lu.querySelectorAll('tbody tr')].map((tr) => [...tr.children].map((td) => td.textContent.replace(/\s+/g, ' ').trim()));   // l'espace insécable devant « % » ramenée à une espace
         }, echelle);
-        expect(rangees.map((r) => r[0])).toEqual(['PS', 'I', 'D', 'M', 'E', 'X']);
+        // ↻ 22 nov. 2026 : « 0 – Aucun » en tête (0 à 0, sans palier SOLO : « — »), « I » dès 0 % (échelle de départ neuve).
+        expect(rangees.map((r) => r[0])).toEqual(['0', 'I', 'D', 'M', 'E', 'X']);
         expect(rangees[5]).toEqual(['X', 'Exemplaire', '—', '—']);
         expect(rangees[4][3]).toBe('85 % - 100 %');
-        expect(rangees.map((r) => r[3])).toEqual(['0 % - 39,99 %', '40 % - 64,99 %', '65 % - 74,99 %', '75 % - 84,99 %', '85 % - 100 %', '—']);
+        expect(rangees[0]).toEqual(['0', 'Aucun', '—', '0 % - 0 %']);
+        expect(rangees.map((r) => r[3])).toEqual(['0 % - 0 %', '0 % - 64,99 %', '65 % - 74,99 %', '75 % - 84,99 %', '85 % - 100 %', '—']);
     });
 
     test('le partage ne refuse plus la valeur 110 du niveau ajouté', async ({ page }) => {

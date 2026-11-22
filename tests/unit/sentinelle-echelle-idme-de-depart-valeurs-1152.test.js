@@ -36,18 +36,22 @@ const CLE = 'a2026_echellesTemplates';
 
 describe('Échelle de départ (IDME) · les valeurs ponctuelles de Grégoire, au semis seulement', () => {
     // ↻ 27 oct. 2026 (§ 4.3-4.4) : le cinquième niveau, « PS – Préstructurel », 0 à 39,99 %, valeur 0 ; « I » commence à 40 %.
-    it('un trimestre neuf reçoit PS = 0, puis 40 / 65 / 75 / 100 ; codes, noms, paliers SOLO et couleurs', async () => {
+    // ↻ 22 nov. 2026 (décision de Grégoire, 12 h 27) : « 0 – Aucun » remplace « PS », bâti comme le « 0 » de « IDME et
+    //   niv 0 » de la démo (0 à 0, valeur 0, ni description ni palier SOLO) ; « I » commence à 0 %. Ne changent pas : les
+    //   noms des quatre autres niveaux, leurs autres bornes, leurs valeurs (40, 65, 75, 100), leurs couleurs.
+    it('un trimestre neuf reçoit « 0 » = 0, puis 40 / 65 / 75 / 100 ; codes, noms, paliers SOLO et couleurs', async () => {
         const store = {};
         await charger(store).assurerEchelleIdmeDeDepart();
         const niveaux = store[CLE][0].niveaux;
-        expect(niveaux.map((n) => [n.code, n.valeurCalcul])).toEqual([['PS', 0], ['I', 40], ['D', 65], ['M', 75], ['E', 100]]);
+        expect(niveaux.map((n) => [n.code, n.valeurCalcul])).toEqual([['0', 0], ['I', 40], ['D', 65], ['M', 75], ['E', 100]]);
         expect(niveaux.map((n) => [n.code, n.nom, n.niveauSOLO, n.min, n.max, n.couleur])).toEqual([
-            ['PS', 'Préstructurel', 'prestructurel', 0, 39.99, 'var(--gris-moyen)'],
-            ['I', 'Incomplet', 'unistructurel', 40, 64.99, 'var(--niveau-attention-critique)'],
+            ['0', 'Aucun', undefined, 0, 0, 'var(--gris-moyen)'],
+            ['I', 'Incomplet', 'unistructurel', 0, 64.99, 'var(--niveau-attention-critique)'],
             ['D', 'Développement', 'multistructurel', 65, 74.99, 'var(--niveau-attention-modere)'],
             ['M', 'Maîtrise', 'relationnel', 75, 84.99, 'var(--niveau-attention-minimal)'],
             ['E', 'Étendu', 'abstrait_etendu', 85, 100, 'var(--niveau-attention-nul)']
         ]);
+        expect(niveaux[0]).not.toHaveProperty('description');
     });
 
     it('un trimestre qui a déjà son échelle de départ, aux anciennes valeurs, la garde telle quelle', async () => {

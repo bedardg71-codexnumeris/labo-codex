@@ -27,7 +27,8 @@ import { pointCanevas, compteAnnotations } from './harness/banc-copie-annotation
 
 const TAILLES = [[1180, 820], [820, 1180]];
 // Les codes de l'« Échelle de départ (IDME) », celle de la production du troisième parcours (20 nov. 2026).
-const NIVEAUX = ['PS', 'I', 'D', 'M', 'E'];
+// ↻ 22 nov. 2026 : « 0 – Aucun » en tête au semis d'un trimestre neuf (décision de Grégoire, 12 h 27).
+const NIVEAUX = ['0', 'I', 'D', 'M', 'E'];
 const PDF_LEA = 'Baobab_Basile_2390002_Journal de lecture 1__Remis_le_2026-11-03_10h00m00s.png';
 const item = (page) => page.locator('#panneau-assistance [data-parcours="recevoir"]');
 const n = (page, k, total, titre, opts = { focus: false }) => attendreEtape(page, k, total, titre, opts);

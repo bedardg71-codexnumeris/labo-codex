@@ -90,7 +90,8 @@ describe('barème 2 · A — le lexique', () => {
         const A3_NIVEAUX = 'Par défaut, quatre niveaux alignés sur IDME : Incomplet, Développement, Maîtrise, Étendu.';
         expect(un('A3')).toContain(A3_NIVEAUX);
         expect(terme('echelle-de-performance').definition).toBe(un('A3').replace(A3_NIVEAUX,
-            'L’« Échelle de départ (IDME) » que l’application installe a cinq niveaux : « PS – Préstructurel » en tête, puis Incomplet, Développement, Maîtrise, Étendu.'));
+            // ↻ 22 nov. 2026 (B4, validé par Grégoire) : « 0 – Aucun » en tête.
+            'L’« Échelle de départ (IDME) » que l’application installe a cinq niveaux : « 0 – Aucun » en tête, puis Incomplet, Développement, Maîtrise, Étendu.'));
         // ↻ 21 oct. : la parenthèse d'« algorithmique » est réglée par le lot de mots (critere-algorithmique-mots.test.js, A1).
         const avantAlgo = (t) => t.slice(0, t.indexOf('algorithmique ('));
         expect(avantAlgo(terme('type-de-critere').definition)).toBe(avantAlgo(un('A4')));

@@ -1,6 +1,7 @@
 import { test, expect } from '@playwright/test';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { echelleDeDepart27Oct, COMMENTAIRES_PS_27_OCT } from '../unit/_helpers/echelle-de-depart-27-oct.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const indexHtml = 'file://' + path.join(path.resolve(__dirname, '..', '..'), 'index.html');
@@ -21,11 +22,17 @@ const indexHtml = 'file://' + path.join(path.resolve(__dirname, '..', '..'), 'in
 //     semée dans ce trimestre neuf — les mots de Grégoire (27 oct., 18 h 38 ; seconde retouche, point 2).
 //
 // Données FICTIVES ; lecture de ce que l'application rend, aucun texte d'élève écrit.
+//
+// ↻ 22 nov. 2026 — LA SOURCE NE SÈME PLUS « PS » (décision de Grégoire, 12 h 27 : « 0 – Aucun » en tête, « I » dès 0 %).
+// TARIR, PAS RÉPARER : un trimestre installé entre le 27 oct. et le 22 nov. GARDE son échelle et sa cartouche de départ
+// à « PS », et tout ce qui les lit n'a pas changé. Ce banc monte donc ce STOCK : le vrai semis, puis l'échelle et la
+// cartouche de départ ramenées à leur forme du 27 oct. (`unit/_helpers/echelle-de-depart-27-oct.js`), puis le semis
+// rejoué, qui ne doit rien réécrire. Le semis neuf a son banc : echelle-de-depart-aucun-2026-11-22.spec.js.
 
 const T = 'a2026';
 const DA = '1152001';
 
-const MONTER = `async ({ T, DA }) => {
+const MONTER = `async ({ T, DA, STOCK_ECHELLE, MOTS_PS }) => {
     window.db.setSync('trimestres', [{ id: T, nom: 'Automne 2026', annee: 2026, session: 'A', actif: true }]);
     window.db.setSync('trimestreActif', T);
     window.trimestreActif = T;
@@ -33,6 +40,19 @@ const MONTER = `async ({ T, DA }) => {
     await window.assurerGrilleDeDepart();
     await window.assurerEchelleIdmeDeDepart();
     await window.assurerCartoucheDeDepart();
+    // Le stock du 27 oct. : l'échelle de départ à « PS », la cartouche de départ à sa colonne « PS » et ses quatre mots.
+    window.db.setSync(T + '_echellesTemplates', window.db.getSync(T + '_echellesTemplates', [])
+        .map((e) => (e.id === 'ECHELLE_IDME_DEPART' ? STOCK_ECHELLE : e)));   // security-ok: fixture littérale du banc
+    window.db.setSync(T + '_cartouches_GRILLE_GENERIQUE', window.db.getSync(T + '_cartouches_GRILLE_GENERIQUE', []).map((c) => {
+        if (c.id !== 'CART_GENERIQUE') return c;
+        const commentaires = Object.fromEntries(Object.entries(c.commentaires).filter(([k]) => !k.endsWith('_0')));
+        return { ...c, niveaux: [{ code: 'PS', nom: 'Préstructurel' }].concat(c.niveaux.filter((n) => n.code !== '0')),
+            commentaires: { ...MOTS_PS, ...commentaires } };
+    }));   // security-ok: fixture littérale du banc
+    const avant = JSON.stringify([window.db.getSync(T + '_echellesTemplates', []), window.db.getSync(T + '_cartouches_GRILLE_GENERIQUE', [])]);
+    await window.assurerEchelleIdmeDeDepart();
+    await window.assurerCartoucheDeDepart();
+    const stockIntact = JSON.stringify([window.db.getSync(T + '_echellesTemplates', []), window.db.getSync(T + '_cartouches_GRILLE_GENERIQUE', [])]) === avant;
     const coursId = 'cours-1152';
     window.db.setSync('cours', [{ id: coursId, codeCours: 'FIC101', titre: 'Cours fictif' }]);
     window.db.setSync(T + '_groupesCours', [{ id: 'GC1152', trimestreId: T, coursId, groupeNum: '01', pratiqueId: 'sommative', actif: true }]);
@@ -43,7 +63,7 @@ const MONTER = `async ({ T, DA }) => {
     window.db.setSync('groupeCoursActif', { id: 'GC1152', trimestreId: T });
     const grille = window.db.getSync(T + '_grillesTemplates', []).find((g) => g.id === 'GRILLE_GENERIQUE');
     const echelle = window.db.getSync(T + '_echellesTemplates', []).find((e) => e.id === 'ECHELLE_IDME_DEPART');
-    return { codes: echelle.niveaux.map((n) => n.code), criteres: grille.criteres.map((c) => ({ id: c.id, nom: c.nom, ponderation: c.ponderation })) };
+    return { stockIntact, codes: echelle.niveaux.map((n) => n.code), criteres: grille.criteres.map((c) => ({ id: c.id, nom: c.nom, ponderation: c.ponderation })) };
 }`;
 
 async function monter(page) {
@@ -53,11 +73,12 @@ async function monter(page) {
     await page.goto(indexHtml);
     await page.waitForFunction(() => window.dbReady === true && typeof window.assurerEchelleIdmeDeDepart === 'function'
         && window.syntheseRetroactionData && window.travauxExportPDF && window.jspdf, null, { timeout: 20000 });
-    const r = await page.evaluate('(' + MONTER + ')(' + JSON.stringify({ T, DA }) + ')');
+    const r = await page.evaluate('(' + MONTER + ')(' + JSON.stringify({ T, DA, STOCK_ECHELLE: echelleDeDepart27Oct(), MOTS_PS: COMMENTAIRES_PS_27_OCT }) + ')');
+    expect(r.stockIntact, 'le semis rejoué ne réécrit ni l\'échelle ni la cartouche de départ du stock').toBe(true);
     return { erreurs, ...r };
 }
 
-test('PS · à l\'évaluation, une copie au niveau Préstructurel vaut 0 % et se nomme « PS »', async ({ page }) => {
+test('PS (stock du 27 oct.) · à l\'évaluation, une copie au niveau Préstructurel vaut 0 % et se nomme « PS »', async ({ page }) => {
     const { erreurs, codes } = await monter(page);
     expect(codes).toEqual(['PS', 'I', 'D', 'M', 'E']);
     const r = await page.evaluate(() => {
@@ -91,7 +112,7 @@ test('PS · à l\'évaluation, une copie au niveau Préstructurel vaut 0 % et se
     expect(erreurs).toEqual([]);
 });
 
-test('PS · enregistrée : la Liste, la note sommative et le PDF lisent 0 et PS ; ce que dit la Cartouche de départ', async ({ page }) => {
+test('PS (stock du 27 oct.) · enregistrée : la Liste, la note sommative et le PDF lisent 0 et PS ; ce que dit la Cartouche de départ', async ({ page }) => {
     test.setTimeout(90000);
     const { erreurs, criteres } = await monter(page);
     await page.evaluate(({ T, DA, criteres }) => {
@@ -133,7 +154,7 @@ test('PS · enregistrée : la Liste, la note sommative et le PDF lisent 0 et PS 
     const pdf = await page.evaluate(() => window._feedback1152[window._feedback1152.length - 1]);
     expect([pdf.noteFinale, pdf.niveauFinal]).toEqual([0, 'PS']);
     expect(pdf.criteres.map((c) => c.code)).toEqual(criteres.map(() => 'PS'));
-    // La Cartouche de départ du trimestre neuf donne à chaque critère son commentaire PS (seconde retouche, point 2).
+    // La Cartouche de départ du stock donne à chaque critère son commentaire PS (seconde retouche, point 2).
     const cartouche = await page.evaluate((T) => window.db.getSync(T + '_cartouches_GRILLE_GENERIQUE', [])
         .find((c) => c.id === 'CART_GENERIQUE'), T);
     expect(cartouche.niveaux.map((n) => n.code)).toEqual(['PS', 'I', 'D', 'M', 'E']);

@@ -254,7 +254,8 @@ test('« Recevoir les productions, rendre tes rétroactions », la voie des fich
     // critères par niveaux (avant : quatre), et l'« Échelle de départ (IDME) », codes PS, I, D, M, E (avant : une échelle
     // à quatre niveaux, codes I, P, S, R).
     expect(champs.length).toBe(2);
-    expect(await page.locator('#' + champs[0]).evaluate((x) => [...x.options].map((o) => o.value).filter(Boolean))).toEqual(['PS', 'I', 'D', 'M', 'E']);
+    // ↻ 22 nov. 2026 : « 0 – Aucun » en tête au semis d'un trimestre neuf (décision de Grégoire, 12 h 27).
+    expect(await page.locator('#' + champs[0]).evaluate((x) => [...x.options].map((o) => o.value).filter(Boolean))).toEqual(['0', 'I', 'D', 'M', 'E']);
     await contourSur(page, '#' + champs[0]);
     await capture(page, DOSSIER, `p4-6-${cap}`);
     await page.selectOption('#' + champs[0], 'M');

@@ -3,6 +3,7 @@ import { readFileSync, readdirSync, statSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { JSDOM } from 'jsdom';
+import { tranche } from './_helpers/tranche.js';
 
 // SENTINELLE — #1152, lot 2b de la refonte de l'Aide (27 oct. 2026) : la Conception dit l'écran d'aujourd'hui, en
 // moins de mots.
@@ -87,17 +88,23 @@ describe('#1152 lot 2b · ce que les entrées affirment, lu dans le code', () =>
         const echelles = lire('js', 'echelles.js');
         expect(echelles).toContain('nom: \'Échelle de départ (IDME)\'');
         // ↻ Retouche (§ 4.3-4.4 du verdict) : le niveau « PS – Préstructurel » en tête ; le code se lit tel quel (1 à 3 caractères).
-        const niveaux = [...echelles.matchAll(/code: '([A-Z]{1,3})',\s*nom: '([^']+)',[\s\S]*?niveauSOLO: '([a-z_]+)',\s*min: ([\d.]+),\s*max: ([\d.]+),\s*valeurCalcul: ([\d.]+)/g)]
+        // ↻ 22 nov. 2026 : « 0 – Aucun » en tête, le non recevable (aucun palier SOLO, aucune plage : « — ») ; en face, le
+        // texte B2, validé par Grégoire, mot pour mot. « I » commence à 0 %.
+        const source = tranche(echelles, 'const niveauxDefaut = [', '];');
+        const zero = source.match(/code: '0',\s*nom: '([^']+)',\s*min: ([\d.]+),\s*max: ([\d.]+),\s*valeurCalcul: ([\d.]+)/);
+        expect(zero, 'le « 0 » en tête de niveauxDefaut').not.toBeNull();
+        const niveaux = [...source.matchAll(/code: '([A-Z]{1,3})',\s*nom: '([^']+)',[\s\S]*?niveauSOLO: '([a-z_]+)',\s*min: ([\d.]+),\s*max: ([\d.]+),\s*valeurCalcul: ([\d.]+)/g)]
             .map((m) => ({ code: m[1], nom: m[2], solo: m[3], min: Number(m[4]), max: Number(m[5]), valeur: Number(m[6]) }));
-        expect(niveaux.map((n) => n.code)).toEqual(['PS', 'I', 'D', 'M', 'E']);
+        expect(niveaux.map((n) => n.code)).toEqual(['I', 'D', 'M', 'E']);
         const fr = (n) => String(n).replace('.', ',');
         const SOLO = { prestructurel: 'Préstructurel', unistructurel: 'Unistructurel', multistructurel: 'Multistructurel', relationnel: 'Relationnel', abstrait_etendu: 'Abstrait étendu' };
-        const attendu = niveaux.map((n, i) => [
-            `${n.code} – ${n.nom}`,
-            SOLO[n.solo],
-            n.max === 100 ? `${fr(n.min)} % et plus` : `${fr(n.min)} à ${fr(n.max)} %`,
-            fr(n.valeur)
-        ]);
+        const attendu = [[`0 – ${zero[1]}`, 'L\'évaluation n\'est pas possible (aucune donnée, plagiat, usage interdit de l\'IA).', '—', fr(zero[4])]]
+            .concat(niveaux.map((n, i) => [
+                `${n.code} – ${n.nom}`,
+                SOLO[n.solo],
+                n.max === 100 ? `${fr(n.min)} % et plus` : `${fr(n.min)} à ${fr(n.max)} %`,
+                fr(n.valeur)
+            ]));
         const tableaux = entree('solo').querySelectorAll('table');
         expect(tableaux).toHaveLength(2);
         const lu = [...tableaux[1].querySelectorAll('tbody tr')].map((tr) => [...tr.querySelectorAll('td')].map((td) => net(td.textContent)));
@@ -114,8 +121,13 @@ describe('#1152 lot 2b · ce que les entrées affirment, lu dans le code', () =>
         const ICONES = { Préstructurel: 'solo-pre-couleur.svg', Unistructurel: 'solo-uni-couleur.svg', Multistructurel: 'solo-multi-couleur.svg',
             Relationnel: 'solo-relationnel-couleur.svg', 'Abstrait étendu': 'solo-etendu-couleur.svg' };
         const tableaux = [...entree('solo').querySelectorAll('table')];
-        const cellules = [...tableaux[0].querySelectorAll('tbody tr td:first-child'), ...tableaux[1].querySelectorAll('tbody tr td:nth-child(2)')];
-        expect(cellules).toHaveLength(10);   // ↻ § 4.3-4.4 : Préstructurel dans les deux tableaux
+        // ↻ 22 nov. 2026 (B2) : la rangée « 0 – Aucun » du second tableau n'a pas de palier SOLO ni d'icône : en face, ce qu'il
+        // veut dire. Le premier tableau (les paliers eux-mêmes) garde ses cinq rangées, Préstructurel compris.
+        const rangeeZero = tableaux[1].querySelector('tbody tr td:nth-child(2)');
+        expect(net(rangeeZero.textContent)).toBe('L\'évaluation n\'est pas possible (aucune donnée, plagiat, usage interdit de l\'IA).');
+        expect(rangeeZero.querySelector('img'), 'aucune icône SOLO en face de « 0 – Aucun »').toBeNull();
+        const cellules = [...tableaux[0].querySelectorAll('tbody tr td:first-child'), ...[...tableaux[1].querySelectorAll('tbody tr td:nth-child(2)')].slice(1)];
+        expect(cellules).toHaveLength(9);   // ↻ § 4.3-4.4 : Préstructurel dans les deux tableaux ; ↻ 22 nov. : dans le premier seulement
         for (const td of cellules) {
             const nom = net(td.textContent);
             const img = td.querySelector('img.aide-icone-solo');

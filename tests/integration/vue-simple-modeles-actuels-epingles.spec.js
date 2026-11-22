@@ -137,4 +137,12 @@ for (const m of MODELES) {
  *   · Break-test : `pratiqueModele: 'Modèle'` devenu `'Le modèle'` dans js/vue-simple.js — les deux essais rougissent sur
  *     l'écran « pratique » ; défait, vert.
  *   · La constante « À l'essai » éteinte (`A_L_ESSAI = false`) : vert, les écrans des modèles actuels n'en dépendent pas.
+ *
+ * REPRISE VOULUE (22 nov. 2026, session du cloud, Chromium seulement) : l'échelle de départ d'un trimestre neuf a
+ * « 0 – Aucun » en tête au lieu de « PS – Préstructurel » (décision de Grégoire, 12 h 27). La référence WebKit n'a PAS
+ * été reprise par EPINGLER (pas de WebKit ici) : sous Chromium, la base (`51688aac`) et la tête ont été relevées toutes
+ * deux, et leurs relevés ne diffèrent qu'en deux fragments de « Par sélection de productions » (« Tes niveaux » de
+ * l'écran « pratique », le repère de l'écran « resultats ») ; ces deux fragments, et eux seuls, ont été reportés à la
+ * main dans la référence. ⚠ Sous Chromium, ce banc rougit aussi sur la base : la référence est WebKit. Son verdict
+ * reste celui du Mac.
  */

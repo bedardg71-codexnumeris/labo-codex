@@ -381,7 +381,11 @@ describe('Les gestes décrits sont ceux du code', () => {
         // les quatre rangées sont vérifiées par sentinelle-aide-2026-10-27-lot-2b.test.js.
         // ↻ Retouche du lot 2b (27 oct., § 4.3-4.4 du verdict) : « I » commence à 40 % (le niveau « PS » le précède) ;
         // la plage de « I » se termine juste sous la borne de « D », lue ici.
-        expect(AIDE).toContain(`<td class="text-center">40 à ${minD - 1},99&nbsp;%</td>`);
+        // ↻ 22 nov. 2026 : « I » commence à 0 % (« 0 – Aucun » le précède, et aucun pourcentage ne le donne) ; la borne basse
+        // est lue à la source, elle aussi.
+        const minI = parseInt(tranche(echelles, 'nom: \'Incomplet\'').match(/min: (\d+)/)[1], 10);
+        expect(minI).toBe(0);
+        expect(AIDE).toContain(`<td class="text-center">${minI} à ${minD - 1},99&nbsp;%</td>`);
     });
 
     it('plus de langue de code dans l\'Aide', () => {

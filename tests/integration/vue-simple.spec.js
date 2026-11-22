@@ -238,7 +238,8 @@ test.describe('Vue simple · le parcours d\'un nouvel arrivant', () => {
         // 21 nov. 2026 : le NOM RANGÉ de la pratique créée par le modèle est celui de sa famille. Du 13 au 21 nov., ce
         // modèle rangeait « Par standards », le nom d'une autre pratique (rapport de la release du 21 nov., STOCK).
         expect(pratique.nom).toBe('Par sélection de productions');
-        expect(pratique).toMatchObject({ n: 1, type: 'standards', pf: { methodeSelection: 'meilleurs', nombreARetenir: 2 }, echelle: { nom: 'Mes niveaux', aElle: true, lettres: 'PS I D M E' } });
+        // ↻ 22 nov. 2026 : « Mes niveaux » copie l'échelle de départ d'un trimestre neuf, « 0 – Aucun » en tête (avant : « PS »).
+        expect(pratique).toMatchObject({ n: 1, type: 'standards', pf: { methodeSelection: 'meilleurs', nombreARetenir: 2 }, echelle: { nom: 'Mes niveaux', aElle: true, lettres: '0 I D M E' } });
 
         // 4. Le tableau sans colonne ne reste pas muet : il dit quoi faire et montre « + Production ».
         await allerA(page, 'resultats');
@@ -258,8 +259,9 @@ test.describe('Vue simple · le parcours d\'un nouvel arrivant', () => {
 
         // 5. Il inscrit ses résultats au tableau.
         await expect(page.locator('#vs-tableau-hote .tn-case')).toHaveCount(12);
-        await caseTn(page, 1, 1).click();   // au toucher : '' → PS
-        await expect(caseTn(page, 1, 1)).toHaveText('PS');
+        // ↻ 22 nov. 2026 : le premier niveau de l'échelle de départ d'un trimestre neuf est « 0 – Aucun » (avant : « PS »).
+        await caseTn(page, 1, 1).click();   // au toucher : '' → 0
+        await expect(caseTn(page, 1, 1)).toHaveText('0');
         await caseTn(page, 1, 1).focus();
         await page.keyboard.press('e');
         await page.keyboard.press('ArrowRight');
@@ -913,7 +915,8 @@ test.describe('Vue simple · les seuils, la mise à jour des valeurs, les colonn
         await rangee(page, 5).locator('.vs-n-valeur').fill('110');   // au-dessus de 100 : permis, sans plafond
         await enregistrerLeReglage(page, 'Niveaux enregistrés.');
         const e = await echelle(page);
-        expect(e.niveaux.map((n) => [n.code, n.valeurCalcul, n.min, n.max])).toEqual([['PS', 0, 0, 39.99], ['I', 40, 40, 64.99], ['D', 65, 65, 74.99], ['M', 75, 75, 84.99], ['E', 95, 85, 100], ['X', 110, undefined, undefined]]);
+        // ↻ 22 nov. 2026 : « 0 – Aucun » (0 à 0) en tête, « I » dès 0 % (échelle de départ d'un trimestre neuf).
+        expect(e.niveaux.map((n) => [n.code, n.valeurCalcul, n.min, n.max])).toEqual([['0', 0, 0, 0], ['I', 40, 0, 64.99], ['D', 65, 65, 74.99], ['M', 75, 75, 84.99], ['E', 95, 85, 100], ['X', 110, undefined, undefined]]);
         expect(await convertir()).toEqual(['M', 'E', 'E', 'E', 'E', 'E']);   // la copie à 90 % garde « Étendu » ; « X », sans seuils, ne reçoit aucun pourcentage, même hors de toute plage
         await allerA(page, 'resultats');
         await ajouterProduction(page, 'Production 1', '2026-11-02');

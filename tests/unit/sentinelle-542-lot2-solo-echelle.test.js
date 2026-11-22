@@ -180,8 +180,11 @@ describe('#542 lot 2 · le SEED est étiqueté, les données existantes ne le so
 
     // ↻ 27 oct. 2026 : le seed passe à cinq niveaux — « PS – Préstructurel » en tête, « I » décrit « Unistructurel »
     // (décision de Grégoire, 27 oct., 17 h 56-17 h 57 et 18 h 06 ; VERDICT-RELECTURE-2026-10-27-aide-lot-2b.md, § 4.3-4.4).
-    it('les cinq niveaux du seed portent leur étiquette', () => {
-        expect(SRC).toMatch(/description: 'Préstructurel',\s*\n\s*niveauSOLO: 'prestructurel',/);
+    // ↻ 22 nov. 2026 : « 0 – Aucun » remplace « PS » (décision de Grégoire, 12 h 27). Le non recevable n'est pas un palier
+    // SOLO : comme le « 0 » de « IDME et niv 0 » de la démo, il n'a ni étiquette ni description. Les quatre autres gardent les leurs.
+    it('les quatre niveaux I, D, M, E du seed portent leur étiquette ; le « 0 – Aucun » n\'en porte pas', () => {
+        expect(SRC).toMatch(/code: '0',\s*\n\s*nom: 'Aucun',\s*\n\s*min: 0,/);
+        expect(SRC).not.toMatch(/niveauSOLO: 'prestructurel'/);
         // Un seed est une échelle LIVRÉE, que l'utilisateur voit et modifie —
         // pas une valeur qu'un calcul invente. C'est la règle posée par
         // Grégoire le 26 août, et elle autorise ceci.
@@ -204,7 +207,9 @@ describe('#542 lot 2 · le SEED est étiqueté, les données existantes ne le so
         // exports remis aux élèves. La remplacer priverait toute échelle non
         // SOLO du seul endroit où dire ce que son niveau signifie.
         // ↻ 27 oct. 2026 : « Préstructurel » a son niveau ; la description de « I » devient « Unistructurel » (§ 4.3-4.4).
-        expect(SRC).toContain("description: 'Préstructurel'");
+        // ↻ 22 nov. 2026 : le niveau « Préstructurel » n'est plus semé ; la description de « I » ne change pas (1.3 de la
+        // consigne : c'est un mot de Grégoire, mesuré et rapporté, pas touché).
+        expect(SRC).not.toContain("description: 'Préstructurel'");
         expect(SRC).toContain("description: 'Unistructurel'");
         expect(SRC).toContain("description: 'Multistructurel'");
         expect(SRC).toContain("description: 'Relationnel'");

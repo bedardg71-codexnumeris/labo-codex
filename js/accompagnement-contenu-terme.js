@@ -115,7 +115,8 @@ const GLOSSAIRE = {
         categorie: 'Structure',
         etape: 'numerisation',
         // A3, validé G. 20 oct. 2026, 9 h 23 (plans de travail/TEXTES-2026-10-20-bareme.md) : les critères holistiques seuls.
-        definition: 'Les niveaux que tu attribues aux critères holistiques lors de l’évaluation ; une seule échelle par évaluation. L’« Échelle de départ (IDME) » que l’application installe a cinq niveaux : « PS – Préstructurel » en tête, puis Incomplet, Développement, Maîtrise, Étendu. Tu configures les seuils, les valeurs ponctuelles et les couleurs selon ton jugement professionnel.',
+        // B4, validé G. 22 nov. 2026 : « 0 – Aucun » en tête (l'Échelle de départ ne sème plus « PS – Préstructurel »).
+        definition: 'Les niveaux que tu attribues aux critères holistiques lors de l’évaluation ; une seule échelle par évaluation. L’« Échelle de départ (IDME) » que l’application installe a cinq niveaux : « 0 – Aucun » en tête, puis Incomplet, Développement, Maîtrise, Étendu. Tu configures les seuils, les valeurs ponctuelles et les couleurs selon ton jugement professionnel.',
         voir: 'Conception › Échelles'
     },
 
