@@ -93,7 +93,8 @@ const genres = async (page) => (await lireBulle(page)).lignes.map((l) => l.slice
 // 20 nov. 2026 (plans de travail/CONSIGNE-2026-11-20-essai-parcours.md, A1 et A2) : la phrase de la poignée n'est plus la
 // dernière des lignes de la première bulle ; elle est au-dessus du titre (`.parcours-bulle-aide`), sous la ligne qui
 // nomme le parcours (`.parcours-bulle-identite` ; ce parcours n'a pas de « Je regarde » : pas de troisième partie).
-const IDENTITE = "Parcours 6 · Mettre tes données à l'abri";
+// 22 nov. 2026 (la suite, point 7) : la carte a deux temps ; l'entrée nomme le temps, comme aux parcours 2, 7 et 8.
+const IDENTITE = "Parcours 6 · Mettre tes données à l'abri · Nous faisons";
 const POIGNEE = 'Tu peux déplacer cette bulle par sa poignée et faire défiler la page pour mieux voir.';
 const DEBUT_3 = [
     "E Le « i » de l'aperçu te dit ce que contient le fichier.",

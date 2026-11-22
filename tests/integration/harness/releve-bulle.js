@@ -45,8 +45,11 @@ function installer() {
         if (!pl || pl.deplacee || pl.telephone || !b) { enAttente = null; return; }
         // Le contour (ce qu'il faut toucher) pèse dix mille fois une zone : il n'est couvert que faute de mieux.
         const prio = pl.prioritaires || [pl.contour];
+        // Le contour avec le halo de sa pulsation (22 nov. 2026) : le moteur l'évite aussi (`placement().halo`).
+        const h = pl.halo || 0;
+        const avecHalo = (el) => { const r = rectDe(el); return r && el === pl.contour ? { left: r.left - h, top: r.top - h, right: r.right + h, bottom: r.bottom + h } : r; };
         const rs = pl.zones.filter((z) => prio.indexOf(z) === -1).map(rectDe).filter(Boolean)
-            .concat(prio.map(rectDe).filter(Boolean).map((r) => Object.assign(r, { poids: 10000 })));
+            .concat(prio.map(avecHalo).filter(Boolean).map((r) => Object.assign(r, { poids: 10000 })));
         const titre = (document.querySelector('#parcours-bulle .parcours-bulle-titre') || {}).textContent || '';
         const rang = (document.querySelector('#parcours-bulle .parcours-bulle-rang') || {}).textContent || '';
         const r = lire();

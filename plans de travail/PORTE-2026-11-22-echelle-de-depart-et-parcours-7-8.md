@@ -1,57 +1,73 @@
-# Porte terrain — l'échelle de départ « 0 – Aucun », le parcours 7 et le « Nous faisons » du parcours 8 (aperçu n° 54, 22 nov. 2026)
+# Porte terrain — les parcours 6, 7 et 8, dans leurs deux temps (aperçu n° 54, 22 nov. 2026, mise à jour de 15 h)
 
 > La TRACE (ce fichier). L'OPÉRATION (l'artefact avec « Copier mes résultats ») est à publier par Cowork depuis ce texte.
-> Sur l'iPad, dans Safari : **https://deploy-preview-54--codexnumeris-051225.netlify.app**. Le Chromium du nuage a joué
-> tous ces chemins ; ce qui reste ici, c'est ce qu'une machine ne voit pas : Safari, le toucher, l'iPad couché et debout,
-> et tes mots relus à l'écran. Aucun geste ne touche tes vraies données (tout se joue dans la démo, ou dans un
-> trimestre d'essai que tu crées pour le point A).
-> Rapport du lot : `plans de travail/RAPPORT-2026-11-22-echelle-de-depart-et-parcours-6-7-8.md`.
+> Rapports : `plans de travail/RAPPORT-2026-11-22-parcours-6-7-8-suite.md` (cette mise à jour) et
+> `plans de travail/RAPPORT-2026-11-22-echelle-de-depart-et-parcours-6-7-8.md` (la première).
+> Le Chromium du nuage a joué tous ces chemins, aux deux tailles de l'iPad (1180 × 820 et 820 × 1180) : les mots, les
+> gestes, ce que « Remplir » pose, ce qui ne répond pas, le confinement. Restent ici ce qu'une machine ne voit pas :
+> **Safari, le doigt, l'iPad couché et debout**, et **trois décisions** (§ 3). Ce qui échoue devient un item du BACKLOG.
 
-## A. L'échelle de départ d'un trimestre neuf (2 portes)
+## 0. Préalable (1 geste)
 
-- [ ] **A1.** Dans un trimestre d'essai neuf, Conception › Échelles, « Échelle de départ (IDME) » : cinq niveaux, **« 0 –
-  Aucun »** en tête (plage 0 à 0), puis « I – Incomplet » **dès 0 %** ; la description commence par « Cinq niveaux :
-  Aucun, Incomplet, Développement, Maîtrise, Étendu. ».
-- [ ] **A2.** L'Aide « SOLO et l'échelle de départ (IDME) » : la première rangée dit « 0 – Aucun » et, en face,
-  « L'évaluation n'est pas possible (aucune donnée, plagiat, usage interdit de l'IA). » ; la plage dit « — ». La phrase
-  d'avant le tableau (« relie chacun de ses niveaux à un palier SOLO ») te convient-elle encore ?
+- [ ] **0.1** Sur l'iPad, dans Safari, ouvre **https://deploy-preview-54--codexnumeris-051225.netlify.app** et recharge
+  (si un onglet de l'aperçu était déjà ouvert : vide son cache). ⮕ Attendu : l'application s'ouvre, vide. C'est un
+  APERÇU, à son adresse à lui : il n'a pas tes données et n'y touche pas. Tout se joue dans sa démo (et, pour le
+  point 2.4, dans un trimestre d'essai créé dans l'aperçu).
 
-## B. Parcours 7, « Je regarde » (iPad couché, puis debout ; 8 portes)
+## 1. Données
 
-Préalable : les « Je regarde » des parcours 2, 3 et 4 faits dans la démo (sinon le panneau refuse et la pulsation va à
-celui de « Recevoir »).
+Aucun geste ne touche tes vraies données : rien ici.
 
-- [ ] **B1.** Bulle 1 : l'entrée « Parcours 7 · Lire ta classe et intervenir · Je regarde », l'objectif, « Tu es dans
-  « Suivi », à l'onglet « Groupe » … » ; « Remplir » : le point de Tapir Doux se place sur la bande « Performance (P) ».
-  ⚠ Avant « Remplir », il a déjà un point gris à gauche (« note non constructible ») : la bulle dit qu'il n'en a pas.
-- [ ] **B2.** « Détails », puis la bulle 2 : seule la pastille P de Tapir Doux répond (son A, son C et les autres non).
-- [ ] **B3.** Bulle 3 : le profil s'ouvre sur « Engagement ACP » ; les flèches vont aux absences et aux productions.
-- [ ] **B4.** Bulle 4 : **relis les deux lignes remplies d'après l'écran** — « Elle situe Tapir Doux au « Niveau 2 -
-  Préventif » : « Ses derniers résultats sont sous le seuil minimal de réussite. La note du cours ne s'affiche pas
-  encore. ». » et « « Défi principal : Nuance ». … » (les guillemets autour des mots de l'écran sont de la session).
-- [ ] **B5.** Bulle 6 : « Remplir » écrit ton plan ; la description garde ses six lignes, une par étape ; « Créer
-  l'intervention ».
-- [ ] **B6.** Bulle 7 : toucher « Complétée » ne fait rien ; « Continuer ».
-- [ ] **B7.** Bulle 8 : trois boutons de même poids, « Suite suggérée : le parcours 8 … ». Aucune bulle ne couvre ce
-  qu'elle désigne, couché comme debout.
-- [ ] **B8.** Au panneau, « Je regarde » du parcours 7 (fait) : l'évaluation de Tapir Doux et l'intervention partent,
-  le reste de la démo reste ; la bulle redemande le deuxième groupe, puis « Remplir ».
+## 2. À l'écran, au doigt (8 portes, tag `iPad`)
 
-## C. Parcours 7, « Nous faisons » (sur un trimestre d'essai avec des présences ; 3 portes)
+Préalable des points 2.2, 2.3 et 2.5 : les « Je regarde » des parcours 2, 3 et 4 faits dans la démo de l'aperçu (sinon
+le panneau refuse et la pulsation va à celui qui manque).
 
-- [ ] **C1.** Les neuf bulles se lisent ; sans grille de dépistage, la bulle 5 passe par Labo › Observation, puis la
-  bulle 6 dit « Tu es revenu·e dans « Suivi », à l'onglet « Profils ». ».
-- [ ] **C2.** Bulle 7, la fiche : les flèches vont au titre, puis aux champs vides ; la date et le niveau, déjà remplis,
-  ne se cochent que si tu les touches.
-- [ ] **C3.** Bulle 9 : « Voir le parcours 8 » et « Terminer ».
+### Parcours 6, « Je regarde » (la visite du menu « Codex »)
 
-## D. Parcours 8, « Nous faisons » (2 portes ; ⚠ le banc du nuage est rouge à 1180 × 820)
+- [ ] **2.1** iPad couché. Assistance › parcours 6 › « Je regarde ». À la bulle 1, touche « Codex ». Aux bulles 2 à 5,
+  touche « Ouvrir un codex… », puis « Mettre à jour le codex ». ⮕ Attendu : rien ne s'ouvre (ni aperçu, ni fenêtre de
+  fichier), le menu reste ouvert, la bulle ne change pas d'étape.
+- [ ] **2.2** Toujours aux bulles 2 à 5 : touche le texte de la bulle, puis sa poignée ⠿, puis « Continuer ».
+  ⮕ Attendu : le menu reste ouvert chaque fois ; une flèche (sans pulsation) va à ce que la bulle nomme.
 
-- [ ] **D1.** Bulle 1, iPad couché : la bulle couvre-t-elle « + Nouvelle grille » ? (Le banc dit oui à 1180 × 820.)
-- [ ] **D2.** Bulle 5 : « Continuer » fait passer de « Cas d'interprétation » à « Ce que l'étudiant·e lit » dans la même
-  bulle (« 5 sur 10 »).
+### Parcours 7
 
-## E. Ce qui n'est pas dans cet aperçu
+- [ ] **2.3** « Je regarde », iPad debout. Bulle 1, avant « Remplir ». ⮕ Attendu : le point de Tapir Doux est gris,
+  tout à gauche de la bande « Performance (P) » ; après « Remplir », c'est le plus bas du groupe.
+- [ ] **2.4** « Nous faisons », sur un trimestre d'essai avec des présences. ⮕ Attendu : les neuf bulles se lisent ; à
+  la bulle 7, les flèches vont au titre de la fiche, puis aux champs vides.
 
-Le « Je regarde » du parcours 8 et le parcours 6 ne sont pas faits. Le parcours 9 est ouvert seulement pour que la fin du
-parcours 8 offre sa suite : il n'est pas à essayer.
+### Parcours 8
+
+- [ ] **2.5** « Je regarde », iPad debout. Bulle 6, sur la Liste. ⮕ Attendu : la ligne d'Antilope Vaillante montre
+  « Actions » avec la pulsation, sans que tu aies à faire défiler le tableau de côté.
+- [ ] **2.6** Bulle 6, la copie ouverte : pose six codes au doigt (un code dans la palette, puis un endroit de la
+  production). ⮕ Attendu : le nombre de codes posés, dans la palette, monte jusqu'à 6 ; la bulle ne couvre ni la
+  palette ni « Annoter ▾ ».
+- [ ] **2.7** Bulle 7 : écris 300 dans le nombre de mots, puis « Remplir ». ⮕ Attendu : sous « Français écrit », la
+  phrase du compte et celle du palier ; les quatre autres critères à M, M, E, M ; le cadenas verrouille.
+- [ ] **2.8** « Nous faisons », iPad couché, bulle 1. ⮕ Attendu : la bulle laisse « + Nouvelle grille » libre ; son
+  texte défile s'il est long (avant ce lot, elle le couvrait).
+
+## 3. Décisions — ce ne sont pas des vérifications (un champ de saisie chacune)
+
+Des mots validés le 22 nov. qui ne tiennent pas tout à fait à l'écran, codés tels quels. Écris ce que tu choisis.
+
+- **3.1** Parcours 8, « Je regarde », bulle 6 : « Cette grille est celle de la production « Artefact 1 ». » La Liste
+  nomme cette production « Appliquer des stratégies de lecture variées (Deux-Rives) » ; « Artefact 1 » n'y paraît pas.
+  ⮕ Ton choix : garder, ou les mots qui la remplacent. `[ champ ]`
+- **3.2** Parcours 8, « Je regarde », bulle 5 : « La première donne le compte : « Ta production contient… ». » La
+  rétroaction écrite pour Antilope Vaillante dit « Ta rédaction contient 6 erreurs de français pour 300 mots. »
+  ⮕ Ton choix : garder, ou les mots qui la remplacent. `[ champ ]`
+- **3.3** Le refus proposé du parcours 8, « Je regarde » (sans le « Je regarde » de « Recevoir ») : « Commence par le
+  « Je regarde » de « Recevoir les productions, rendre tes rétroactions » : c'est là qu'on importe la production
+  d'Antilope Vaillante, que ce parcours évalue. » ⮕ Validé, ou tes mots. `[ champ ]`
+
+## 4. Ce que la session n'a pas pu vérifier
+
+- Safari et l'iPad (WebKit n'existe pas dans le conteneur) : c'est le § 2.
+- En **vue simple**, le bouton s'appelle « Sauvegarder », pas « Codex », et l'entrée « Assistance » du menu de
+  l'en-tête n'a pas pu être touchée par le banc : les parcours ne s'y lancent pas (mesuré sous Chromium, pas sur
+  l'iPad).
+- Le parcours 9 est ouvert seulement pour que la fin du parcours 8 offre sa suite : il n'est pas à essayer.

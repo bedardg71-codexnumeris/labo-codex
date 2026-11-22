@@ -2892,7 +2892,7 @@
             if (!etat || !etat.vus) return null;
             return { zones: etat.vus.zones.slice(), contour: etat.vus.contourEl, prioritaires: prioritaires(etat.vus.contourEl),
                      deplacee: !!etat.deplacee, passages: etat.passages || 0, zoom: sousLeZoom(),
-                     telephone: etat.telephone, cadre: cadreUtile() };
+                     telephone: etat.telephone, cadre: cadreUtile(), halo: HALO };
         }
     };
 
