@@ -77,3 +77,42 @@ export function correspond(attendu, lu) {
     const re = new RegExp('^' + attendu.split(/\[[^\]]+\]/).map((s) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('(.+)') + '$');
     return re.test(lu);
 }
+
+// ---------------------------------------------------------------------------------------------------------------
+// LA SUITE (consigne du 22 nov., 15 h : plans de travail/CONSIGNE-2026-11-22-parcours-6-7-8-suite.md). Ses textes
+// retouchent des bulles de la précédente ; on les lit ici, dans la consigne elle-même, guillemets emboîtés compris.
+// ---------------------------------------------------------------------------------------------------------------
+export const CONSIGNE_SUITE = lire('plans de travail/CONSIGNE-2026-11-22-parcours-6-7-8-suite.md');
+
+/** La ligne d'un repère de la suite (« 1.1 », « 3.2 »…). */
+export function ligneDeLaSuite(repere) {
+    const i = CONSIGNE_SUITE.indexOf('\n' + repere + ' ');
+    if (i === -1) throw new Error('consigne de la suite : repère « ' + repere + ' » introuvable');
+    return CONSIGNE_SUITE.slice(i + 1, CONSIGNE_SUITE.indexOf('\n', i + 1));
+}
+
+/** Les citations de premier niveau d'un texte (« … »), dans l'ordre, guillemets emboîtés gardés dedans. */
+export function citations(texte) {
+    const out = [];
+    let n = 0, debut = -1;
+    for (let k = 0; k < texte.length; k++) {
+        if (texte[k] === '«') { if (n === 0) debut = k; n++; }
+        else if (texte[k] === '»') { n--; if (n === 0) out.push(texte.slice(debut + 1, k).trim()); }
+    }
+    return out;
+}
+
+/** « X » devient : « Y » — la première citation avant « devient : », la première après. */
+export function retoucheDeLaSuite(repere) {
+    const l = ligneDeLaSuite(repere);
+    const pivot = l.indexOf(' devient : «');
+    if (pivot === -1) throw new Error(repere + ' : pas de « devient : »');
+    const avant = citations(l.slice(0, pivot)), apres = citations(l.slice(pivot));
+    return { avant: avant[avant.length - 1], apres: apres[0] };
+}
+
+/** La dernière citation d'un repère de la suite (le texte validé d'une ligne qui en remplace une autre). */
+export function texteDeLaSuite(repere) {
+    const c = citations(ligneDeLaSuite(repere));
+    return c[c.length - 1];
+}

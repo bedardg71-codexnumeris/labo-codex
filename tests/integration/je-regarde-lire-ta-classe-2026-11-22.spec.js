@@ -91,6 +91,17 @@ for (const [L, H] of TAILLES) {
         expect(v1.entree, 'l’entrée').toBe('Parcours 7 · Lire ta classe et intervenir · Je regarde');
         expect(v1.lignes.find((l) => l[0] === 'lieu')[1]).toBe(aPlat("Tu es dans « Suivi », à l'onglet « Groupe » " + t[0].lieuSuite));
         expect(v1.boutons).toEqual([REMPLIR]);
+        // 1.8 (consigne de la suite) : avant l'évaluation, son point est gris, tout à gauche de la bande P.
+        const pointsDeP = () => page.evaluate(() => {
+            const bandes = [...document.querySelectorAll('#carte-indicateurs-acpe .barre-etudiant')];
+            const parDa = {};
+            bandes.forEach((p) => { (parDa[p.dataset.da] = parDa[p.dataset.da] || []).push(p); });
+            return Object.entries(parDa).map(([da, ps]) => { const p = ps[ps.length - 1]; return { da, gauche: parseFloat(p.style.left), gris: p.classList.contains('barre-etudiant-sans-eval') }; });
+        });
+        const avantP = await pointsDeP();
+        const tapirAvant = avantP.find((x) => x.da === TAPIR);
+        expect(tapirAvant.gris, 'son point est gris (sans évaluation)').toBe(true);
+        expect(tapirAvant.gauche, 'tout à gauche de la bande').toBeLessThan(5);
         await boutonDeBulle(page, REMPLIR).click();
         await bulleDit(page, { titre: t[0].titre, lieuSuite: null, lignes: t[0].puis.lignes, objectif: null }, 'bulle 1, après « Remplir »');
         const pose = await etatDeTapir(page);
@@ -101,6 +112,12 @@ for (const [L, H] of TAILLES) {
         // Son point sur la bande « Performance (P) » : 45 %, le plus bas du groupe (mesure M1).
         await expect.poll(() => page.evaluate((da) => { const p = [...document.querySelectorAll('#carte-indicateurs-acpe .barre-etudiant[data-da="' + da + '"]')].pop(); return p ? p.getAttribute('title') : ''; }, TAPIR))
             .toMatch(/^Doux, Tapir : 45\s%$/);
+        // 1.8 : son point a pris sa place, le plus bas des points évalués du groupe.
+        await expect.poll(async () => {
+            const ps = (await pointsDeP()).filter((x) => !x.gris);
+            const t = ps.find((x) => x.da === TAPIR);
+            return !!t && ps.every((x) => x.da === TAPIR || x.gauche > t.gauche);
+        }, { message: 'le point de Tapir Doux, le plus bas du groupe' }).toBe(true);
         await contourSur(page, '#btn-toggle-panneau-prioritaire');
         await flecheVers(page, '#btn-toggle-panneau-prioritaire', 'bulle 1, « Détails »');
         await page.click('#btn-toggle-panneau-prioritaire');
@@ -134,6 +151,17 @@ for (const [L, H] of TAILLES) {
         await expect(carte).toContainText(m4.niveau);
         await expect(carte).toContainText(m4.phrase);
         await expect(carte).toContainText('Défi principal : ' + m4.defi);
+        // 1.8, MESURE (rien changé) : pourquoi « Nuance » parmi trois critères à égalité. Les moyennes par critère, et les
+        // pondérations de la grille de dépistage que lit `diagnostiquerForcesChallenges` (tri : le score, puis la
+        // pondération la plus forte). Relevé pour le rapport.
+        const pourquoi = await page.evaluate((da) => {
+            const g = typeof obtenirGrilleReferenceDepistage === 'function' ? obtenirGrilleReferenceDepistage() : null;
+            return { grille: g ? g.nom : null, ponderations: g ? g.criteres.map((c) => [c.nom, c.ponderation]) : null,
+                moyennes: typeof calculerMoyennesCriteres === 'function' ? calculerMoyennesCriteres(da) : null };
+        }, TAPIR);
+        test.info().annotations.push({ type: `pourquoi « Nuance » (${L} × ${H})`, description: JSON.stringify(pourquoi) });
+        const pond = Object.fromEntries((pourquoi.ponderations || []).map(([n, p]) => [n, p]));
+        expect(pond['Nuance'], 'Nuance pèse plus que Rigueur et Plausibilité dans la grille de dépistage').toBeGreaterThan(Math.max(pond['Rigueur'], pond['Plausibilité']));
         await boutonDeBulle(page, 'Continuer').click();
 
         // 5. Ouvrir l'intervention : « HISTORIQUE », aucune ; « + Nouvelle intervention ».
@@ -150,6 +178,10 @@ for (const [L, H] of TAILLES) {
         expect((await lireToute(page)).lignes.find((l) => l[0] === 'lieu')[1]).toBe(aPlat("Tu es dans « Suivi », à l'onglet « Interventions » " + t[5].lieuSuite));
         await expect(page.locator(`#etud-${TAPIR}`)).toBeChecked();
         await expect(page.locator('#interventionDate')).toHaveValue('2026-11-10');
+        // 1.8 : la fiche propose le niveau 2 et coche les quatre critères (ce que disent 1.5 et 1.6).
+        await expect(page.locator('#interventionNiveau')).toHaveValue('2');
+        expect(await page.evaluate(() => [...document.querySelectorAll('#criteresCiblesContainer .critere-cible-cb:checked')].map((c) => c.value).sort()))
+            .toEqual(['Nuance', 'Plausibilité', 'Rigueur', 'Structure']);
         await boutonDeBulle(page, REMPLIR).click();
         await bulleDit(page, { titre: t[5].titre, lieuSuite: null, lignes: t[5].puis.lignes }, 'bulle 6, après « Remplir »');
         await expect(page.locator('#interventionTitre')).toHaveValue(plan.titre);

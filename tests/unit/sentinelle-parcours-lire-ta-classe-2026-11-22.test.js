@@ -13,7 +13,7 @@
 // Break-test (22 nov.) : au rapport du lot (plans de travail/RAPPORT-2026-11-22-echelle-de-depart-et-parcours-6-7-8.md).
 import { describe, it, expect } from 'vitest';
 import { chargerScript } from './_helpers/charger-script.js';
-import { bullesDu, correspond, CONSIGNE_22_NOV_SOIR } from './_helpers/consigne-2026-11-22-parcours.js';
+import { bullesDu, correspond, CONSIGNE_22_NOV_SOIR, retoucheDeLaSuite, texteDeLaSuite } from './_helpers/consigne-2026-11-22-parcours.js';
 
 function charger() {
     const enregistres = [];
@@ -24,6 +24,28 @@ function charger() {
 
 const { P, def } = charger();
 const TEMPS = [['3.1', 'modele', 'Je regarde', 8], ['3.2', 'pratique', 'Nous faisons', 9]];
+
+/**
+ * LA SUITE DU 22 NOV. (15 h ; plans de travail/CONSIGNE-2026-11-22-parcours-6-7-8-suite.md, 1.1 à 1.6) : six phrases du
+ * « Je regarde » retouchées, lues dans la nouvelle consigne et appliquées aux bulles de la précédente. Chaque retouche
+ * doit trouver sa ligne (sinon l'une des deux consignes a bougé).
+ */
+const LIGNE_DU_NIVEAU = 'Elle situe Tapir Doux au [niveau affiché] : [la phrase que la carte affiche].';
+const LIGNE_DU_DEFI = '« Défi principal : [le critère affiché] ». Le défi, c\'est le critère de la grille où ses résultats sont les plus bas.';
+function retouchees(bulles) {
+    const remplacements = ['1.1', '1.2', '1.5', '1.6'].map((r) => [r, retoucheDeLaSuite(r)])
+        .concat([['1.3', { avant: LIGNE_DU_NIVEAU, apres: texteDeLaSuite('1.3') }], ['1.4', { avant: LIGNE_DU_DEFI, apres: texteDeLaSuite('1.4') }]]);
+    const faites = new Set();
+    const poser = (lignes) => lignes.map(([t, x]) => {
+        const r = remplacements.find(([, v]) => v.avant === x);
+        if (!r) return [t, x];
+        faites.add(r[0]);
+        return [t, r[1].apres];
+    });
+    const out = bulles.map((b) => Object.assign({}, b, { lignes: poser(b.lignes), puis: b.puis ? Object.assign({}, b.puis, { lignes: poser(b.puis.lignes) }) : null }));
+    expect([...faites].sort(), 'chaque retouche de la suite a trouvé sa ligne').toEqual(['1.1', '1.2', '1.3', '1.4', '1.5', '1.6']);
+    return out;
+}
 
 /** Ce que le code dit d'une bulle, dans la forme de la consigne. */
 function vuDuCode(b, k) {
@@ -48,7 +70,7 @@ function vuDeLaConsigne(c) {
 }
 
 describe.each(TEMPS)('§ %s · « %s » (%s), bulle par bulle', (repere, cle, nom, total) => {
-    const consigne = bullesDu(repere);
+    const consigne = repere === '3.1' ? retouchees(bullesDu(repere)) : bullesDu(repere);
     const code = P.textes[cle];
 
     it(`${total} bulles, numérotées « n sur ${total} », de part et d'autre`, () => {
@@ -85,12 +107,12 @@ describe.each(TEMPS)('§ %s · « %s » (%s), bulle par bulle', (repere, cle, no
 });
 
 describe('les cas particuliers de la consigne', () => {
-    it('« Je regarde », bulle 4 : les deux lignes à crochets sont celles de l\'écran (M4), et la note de la consigne les demande', () => {
-        const b4 = bullesDu('3.1')[3];
-        expect(b4.notes.join(' ')).toMatch(/remplis-les avec ce que M4 a montré, mot pour mot/);
+    it('« Je regarde », bulle 4 : les deux lignes de la suite (1.3, 1.4) citent ce que l\'écran affiche (M4), relu au banc (1.8)', () => {
         const lignes = P.textes.modele[3].lignes.map((l) => l[1]);
-        expect(lignes).toContain(`Elle situe Tapir Doux au « ${P.ecranM4.niveau} » : « ${P.ecranM4.phrase} ».`);
-        expect(lignes).toContain(`« Défi principal : ${P.ecranM4.defi} ». Le défi, c'est le critère de la grille où ses résultats sont les plus bas.`);
+        expect(lignes).toContain(texteDeLaSuite('1.3'));
+        expect(lignes).toContain(texteDeLaSuite('1.4'));
+        expect(texteDeLaSuite('1.3')).toContain(`« ${P.ecranM4.niveau} »`);
+        expect(texteDeLaSuite('1.4')).toContain(`« Défi principal : ${P.ecranM4.defi} »`);
     });
 
     it('« Nous faisons », bulle 5 : seulement sans grille de dépistage ; la bulle 6, après elle, sa confirmation et son lieu', () => {
@@ -119,10 +141,10 @@ describe('les cas particuliers de la consigne', () => {
         expect(consigne).toContain('Description, chaque ligne numérotée sur sa propre ligne : « ' + description.join(' ') + ' »');
     });
 
-    it('les refus : ceux du panneau sont ceux du code (8 et 9 nov.) ; celui du modèle, proposé, nomme le modèle de « Recevoir »', () => {
+    it('les refus : ceux du panneau sont ceux du code (8 et 9 nov.) ; celui du modèle, celui de la suite (1.7), mot pour mot', () => {
         expect(P.refus.sansPresences).toBe("Commence par « Mettre ta classe en place » : tes présences donnent le premier signal.");
         expect(P.refus9nov.demo).toBe('Ce parcours se joue sur ta propre classe : quitte la démonstration pour le commencer.');
-        expect(P.texteRefusModele).toMatch(/^Commence par la Modélisation de « Recevoir les productions, rendre tes rétroactions » : /);
+        expect(P.texteRefusModele).toBe(texteDeLaSuite('1.7'));
         expect(def.prealable(P.texteRefusModele)).toBe('recevoir');
         expect(def.totalModele).toBe(8);
         expect(def.total).toBe(9);

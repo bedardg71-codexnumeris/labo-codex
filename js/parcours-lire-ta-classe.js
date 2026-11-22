@@ -55,9 +55,9 @@
         sansDonnee: "Son profil n'a encore aucune donnée que l'Accompagnement puisse lire : choisis une autre personne."
     };
 
-    // PROPOSÉ par la session (22 nov. 2026), sur le modèle du refus d'« Évaluer » : le panneau, sans le modèle de
-    // « Recevoir » (la copie de Tapir Doux n'est pas importée dans la démo). Posé dans l'aperçu, à valider par Grégoire.
-    var REFUS_MODELE = "Commence par la Modélisation de « Recevoir les productions, rendre tes rétroactions » : ce modèle évalue la production de Tapir Doux, qu'on y importe.";
+    // Validé par Grégoire le 22 nov. 2026, 15 h 11 à 15 h 15 (consigne de la suite, 1.7) : le panneau, sans le « Je
+    // regarde » de « Recevoir » (la copie de Tapir Doux n'est pas importée dans la démo).
+    var REFUS_MODELE = "Commence par le « Je regarde » de « Recevoir les productions, rendre tes rétroactions » : c'est là qu'on importe la production de Tapir Doux, que ce parcours évalue.";
 
     // =================================================================
     // LES TEXTES — VALIDÉS PAR GRÉGOIRE LE 22 NOV. 2026, MOT POUR MOT (consigne du 22 nov., § 3.1 et § 3.2)
@@ -66,8 +66,9 @@
     // `lignes` : ['n', explication] sans marque, ['g', geste] (→), ['c', geste principal] (→→, en gras) ; `puis` : la
     // bulle après le geste (« Puis : » de la consigne). L'entrée, l'objectif, l'objectif atteint et la suite suggérée sont
     // posés par le moteur (`OBJECTIFS`, la définition).
-    // Les deux lignes à crochets de la bulle 4 de « Je regarde » sont remplies d'après l'écran (mesure M4, 22 nov.,
-    // dans la démo : la carte RàI de Tapir Doux après son évaluation D, I, I, I), mot pour mot, entre guillemets.
+    // Six phrases de « Je regarde » (bulles 1, 4 et 6) ajustées le 22 nov. 2026 (15 h 11 à 15 h 15) à ce que l'écran a
+    // montré (mesures M1, M4, M5) : plans de travail/CONSIGNE-2026-11-22-parcours-6-7-8-suite.md, 1.1 à 1.6. Les deux
+    // lignes à crochets de la bulle 4 sont désormais celles de Grégoire (1.3, 1.4).
     // =================================================================
 
     var OBJECTIFS = {
@@ -77,7 +78,7 @@
         pratiqueAtteint: "Objectif atteint : tu es en mesure d'utiliser le suivi de ta classe pour planifier une intervention auprès d'un·e étudiant·e qui a besoin de toi."
     };
 
-    // Ce que la carte RàI de Tapir Doux affiche (mesure M4) : les crochets de la bulle 4, et ce que le banc relit à l'écran.
+    // Ce que la carte RàI de Tapir Doux affiche (mesure M4) : ce que le banc relit à l'écran (1.8).
     var ECRAN_M4 = Object.freeze({
         niveau: 'Niveau 2 - Préventif',
         phrase: "Ses derniers résultats sont sous le seuil minimal de réussite. La note du cours ne s'affiche pas encore.",
@@ -94,13 +95,13 @@
                     ['n', "Ce parcours suit des productions évaluées. Si ta pratique est « Par standards », le suivi de tes cibles viendra dans une prochaine version."],
                     ['n', "Tu sais déjà, en rendant des productions évaluées, qui a eu de la difficulté. Ici, l'application garde ces résultats en mémoire et les met sous tes yeux avant le prochain cours."],
                     ['n', "Chaque point blanc est un·e étudiant·e. Dans ce parcours, on regarde surtout la bande « Performance (P) » : elle vient des évaluations."],
-                    ['n', "Tapir Doux t'a remis sa production, mais elle n'est pas encore évaluée : il n'a pas de point sur cette bande."],
+                    ['n', "Tapir Doux t'a remis sa production, mais elle n'est pas encore évaluée : son point est gris, tout à gauche de la bande."],
                     ['c', "Regarde l'exemple se remplir : touche « Remplir »"]
                 ],
                 puis: {
                     lignes: [
                         ['n', "L'exemple vient d'évaluer la production de Tapir Doux : D pour la structure, I pour les trois autres critères."],
-                        ['n', "Sur la bande « Performance (P) », son point vient d'apparaître, à l'écart des autres."],
+                        ['n', "Sur la bande « Performance (P) », son point a pris sa place : c'est le plus bas du groupe."],
                         ['c', "Touche « Détails » pour mettre un nom sur chaque point"]
                     ]
                 }
@@ -136,8 +137,8 @@
                 lignes: [
                     ['n', "La carte « Contexte d'apprentissage » résume son assiduité et sa complétion : rien ne l'arrête de ce côté."],
                     ['n', "La carte « Modèle de la Réponse à l'intervention (RàI) » dose l'aide en trois niveaux : au niveau 1, ton enseignement en classe suffit ; au niveau 2, une aide préventive s'ajoute, souvent en petit groupe ; au niveau 3, l'aide devient intensive et souvent individuelle."],
-                    ['n', "Elle situe Tapir Doux au « " + ECRAN_M4.niveau + " » : « " + ECRAN_M4.phrase + " »."],
-                    ['n', "« Défi principal : " + ECRAN_M4.defi + " ». Le défi, c'est le critère de la grille où ses résultats sont les plus bas."],
+                    ['n', "Elle situe Tapir Doux au « Niveau 2 - Préventif » : ses derniers résultats sont sous le seuil minimal de réussite, et la note du cours ne s'affiche pas encore."],
+                    ['n', "« Défi principal : Nuance ». Le défi, c'est un critère de la grille où ses résultats sont les plus bas. Ici, trois critères sont à égalité : la carte n'en nomme qu'un."],
                     ['n', "Le niveau indique l'intensité de l'aide requise par ton étudiant·e ; le défi dit où porter cette aide, concrètement."],
                     ['n', "Mais l'intervention, c'est toi qui la décides et c'est toi qui la prépares."],
                     ['c', "Touche « Continuer »"]
@@ -166,9 +167,9 @@
                 puis: {
                     lignes: [
                         ['n', "« Titre : » : « Rencontre individuelle : de la lecture à l'interprétation »."],
-                        ['n', "« Niveau RàI : » : « Niveau 3 – Intensif, individuel », pour une période. Le niveau d'une intervention, c'est toi qui le choisis."],
+                        ['n', "« Niveau RàI : » : la fiche proposait le niveau 2 ; l'exemple choisit « Niveau 3 – Intensif, individuel », pour une rencontre d'une période. Le niveau d'une intervention, c'est toi qui le choisis."],
                         ['n', "« Description (optionnel) : » : le plan de la rencontre, un constat puis cinq étapes."],
-                        ['n', "« Critères ciblés » : seule la rigueur reste cochée. On n'agit pas sur tout à la fois : l'exemple choisit un seul critère."],
+                        ['n', "« Critères ciblés » : la fiche cochait les quatre critères ; l'exemple ne garde que la rigueur. On n'agit pas sur tout à la fois."],
                         ['n', "« Objectif visé » : ce que tu espères voir changer."],
                         ['g', "Lis le plan"],
                         ['c', "Touche « Créer l'intervention »"]
