@@ -205,7 +205,8 @@ const ETAPES_WIZARD = {
                 options: obtenirOptionsModeles()
             }
         ],
-        suivant: () => 'recapitulatif',
+        // Le « Modèle par standards » (21 nov. 2026) n'est pas un gabarit qu'on clone : il ouvre l'étape des cibles.
+        suivant: (reponses) => reponses._modeleParStandards ? 'config-cibles' : 'recapitulatif',
         precedent: () => 'entree-pratique'
     },
 
@@ -339,8 +340,9 @@ const ETAPES_WIZARD = {
                 motifRefus: (el) => window.EnsemblesCibles.motifsRefusCibles(window.EditeurCibles.lireStandards(el))[0] || null
             }
         ],
-        suivant: () => 'echelle-cibles',
-        precedent: () => 'calcul-note-finale'
+        // Par le « Modèle par standards », l'échelle est déjà posée : son étape ne s'ouvre que si elle manque.
+        suivant: (reponses) => (reponses._modeleParStandards && !_echelleDuModeleManque(reponses)) ? 'recapitulatif' : 'echelle-cibles',
+        precedent: (reponses) => reponses._modeleParStandards ? 'choix-modele' : 'calcul-note-finale'
     },
 
     'echelle-cibles': {
@@ -365,7 +367,7 @@ const ETAPES_WIZARD = {
                 texte: 'Le niveau « sans donnée » vaut 0\u00a0%. Une cible le porte tant qu\'aucun niveau n\'y est inscrit : pendant la session, la note chiffrée attend et la liste des cibles en attente se lit ; à l\'arrêt des notes, la cible compte pour 0\u00a0%.'
             }
         ],
-        suivant: () => 'infos-base',
+        suivant: (reponses) => reponses._modeleParStandards ? 'recapitulatif' : 'infos-base',
         precedent: () => 'config-cibles'
     },
 
@@ -942,7 +944,8 @@ const ETAPES_WIZARD = {
         suivant: () => null, // Fin du wizard
         // #319 Lot 2 (a6) : infos-base précède désormais le récap. Cas modèle (a7) :
         // l'adoption d'un gabarit saute à la fin → le retour ramène au choix du modèle.
-        precedent: (reponses) => reponses._modeleAdopte ? 'choix-modele' : 'infos-base'
+        precedent: (reponses) => reponses._modeleAdopte ? 'choix-modele'
+            : (reponses._modeleParStandards ? 'config-cibles' : 'infos-base')
     }
 };
 
@@ -977,20 +980,92 @@ function obtenirOptionsModeles() {
         try { modeles = obtenirToutesLesPratiquesBibliothequeSync(true) || []; }
         catch (e) { modeles = []; }
     }
-    return modeles
-        .filter(m => m && m.id)
-        .map(m => {
-            const titre = echapperHtml(m.nom || 'Sans nom');
-            const badge = libelleFamilleModele(m);
-            const meta = [badge, m.discipline ? echapperHtml(m.discipline) : '']
-                .filter(Boolean).join(' · ');
-            return {
-                value: m.id,
-                // Le titre est échappé ; le badge famille est ajouté en HTML contrôlé.
-                label: meta ? `${titre} <span class="wizard-v2-modele-famille">${meta}</span>` : titre,
-                description: echapperHtml(m.description || '')
-            };
-        });
+    const versOption = (m) => {
+        const titre = echapperHtml(m.nom || 'Sans nom');
+        const badge = libelleFamilleModele(m);
+        const meta = [badge, m.discipline ? echapperHtml(m.discipline) : '']
+            .filter(Boolean).join(' · ');
+        return {
+            value: m.id,
+            // Le titre est échappé ; le badge famille est ajouté en HTML contrôlé.
+            label: meta ? `${titre} <span class="wizard-v2-modele-famille">${meta}</span>` : titre,
+            description: echapperHtml(m.description || '')
+        };
+    };
+    const liste = modeles.filter(m => m && m.id);
+    const options = liste.map(versOption);
+    // Le « Modèle par standards » suit les modèles de l'application, avant les pratiques de la bibliothèque.
+    if (window.EnsemblesCibles) {
+        const apresLesModeles = liste.filter(m => m.estGabarit && m.dateAjoutBiblio === null).length;
+        options.splice(apresLesModeles, 0, Object.assign(versOption(MODELE_PAR_STANDARDS), { essai: true }));
+    }
+    return options;
+}
+
+/**
+ * LE « MODÈLE PAR STANDARDS » (21 nov. 2026, décision de Grégoire de 21 h 33). Il n'est PAS dans
+ * `MODELES_PRATIQUES_PREDEFINIS` et n'entre jamais dans la bibliothèque : il n'existe que dans cette liste. Ce n'est pas
+ * un gabarit qu'on clone (il ne porte aucune cible : les cibles appartiennent au cours de l'enseignant·e), c'est une
+ * ENTRÉE dans le chemin « Par standards » de l'assistant, réglages posés : l'échelle de départ, son niveau « sans
+ * donnée », le double seuil éteint. ⛔ GARDE : aucune autre voie (bibliothèque, « Utiliser dans ce trimestre »,
+ * « Dupliquer », vue simple, démo) ne le voit, donc aucune ne peut l'installer sans cibles ; ici, la création passe par
+ * l'étape des cibles et par les refus d'`EnsemblesCibles` (`_motifRefusAvantCreation`).
+ * L'identité est celle du modèle de la vue simple (provenance commune) ; elle ne commence pas par « STD- », l'ancien
+ * sens. Mots PROPOSÉS : plans de travail/TEXTES-2026-11-21-modele-par-standards.md.
+ */
+const MODELE_PAR_STANDARDS = Object.freeze({
+    id: 'par-standards',
+    nom: 'Modèle par standards',
+    description: 'Pour débuter avec une notation par standards : tu écris les cibles de ton cours',
+    type: 'cibles',
+    discipline: 'Général'
+});
+
+/** L'échelle de départ déjà rangée dans le trimestre (même nom, mêmes codes et valeurs), ou null : on ne la double pas. */
+function _echelleDeDepartDejaLa() {
+    const EC = window.EnsemblesCibles;
+    const depart = EC.echelleDeDepart('');
+    const forme = (e) => JSON.stringify((Array.isArray(e.niveaux) ? e.niveaux : []).map(n => [String(n && n.code), Number(n && n.valeurCalcul)]));
+    return (db.getSync(cle('echellesTemplates'), []) || [])
+        .find(e => e && e.id && e.nom === depart.nom && forme(e) === forme(depart)) || null;
+}
+
+/** Par le « Modèle par standards » : l'échelle posée est-elle refusée (absente, ou sans son niveau « sans donnée ») ? */
+function _echelleDuModeleManque(r) {
+    return window.EnsemblesCibles.motifsRefusEchelle(echelleDuWizard(r.echelleId), r.niveauSansDonnee).length > 0;
+}
+
+/**
+ * Le « Modèle par standards » est choisi : rien n'est cloné, rien n'est écrit. Les réponses sont posées comme si
+ * l'enseignant·e avait décrit une pratique par standards, et l'assistant ouvre l'étape des cibles.
+ * @param {Object} r - wizardState.reponses (muté)
+ */
+function preparerModeleParStandards(r) {
+    const EC = window.EnsemblesCibles;
+    delete r._modeleAdopte;
+    delete r._gabaritSource;
+    r._modeleParStandards = true;
+    r.typePratique = 'cibles';
+    r.calcNoteFinale = 'cibles';
+    if (_echelleDuModeleManque(r)) {
+        const dejaLa = _echelleDeDepartDejaLa();
+        if (!dejaLa && !wizardState.echelleDeDepart) wizardState.echelleDeDepart = EC.echelleDeDepart(genererIdUnique('ECH_'));
+        r.echelleId = (dejaLa || wizardState.echelleDeDepart).id;
+        r.niveauSansDonnee = EC.CODE_SANS_DONNEE_DEPART;
+    }
+    if (!r.nom) r.nom = MODELE_PAR_STANDARDS.nom;
+}
+
+/** Le « Modèle par standards » n'est plus le choix : ses réglages posés d'office repartent, les cibles écrites restent. */
+function quitterModeleParStandards(r) {
+    if (!r._modeleParStandards) return;
+    delete r._modeleParStandards;
+    if (wizardState.echelleDeDepart && r.echelleId === wizardState.echelleDeDepart.id) {
+        wizardState.echelleDeDepart = null;
+        delete r.echelleId;
+        delete r.niveauSansDonnee;
+    }
+    if (r.nom === MODELE_PAR_STANDARDS.nom) delete r.nom;
 }
 
 /**
@@ -1002,6 +1077,11 @@ function obtenirOptionsModeles() {
  * @param {Object} r - wizardState.reponses (muté)
  */
 function preparerAdoptionModele(r) {
+    if (r.modeleChoisi === MODELE_PAR_STANDARDS.id && window.EnsemblesCibles) {
+        preparerModeleParStandards(r);
+        return;
+    }
+    quitterModeleParStandards(r);
     let modeles = [];
     if (typeof obtenirToutesLesPratiquesBibliothequeSync === 'function') {
         try { modeles = obtenirToutesLesPratiquesBibliothequeSync(true) || []; }
@@ -1031,6 +1111,7 @@ function preparerAdoptionModele(r) {
  * @param {Object} r - wizardState.reponses (muté)
  */
 function reinitialiserAdoptionModele(r) {
+    quitterModeleParStandards(r);
     delete r._modeleAdopte;
     delete r._gabaritSource;
     delete r.modeleChoisi;
@@ -3024,6 +3105,12 @@ function _configurerPratiqueParStandards(r, pratique) {
         echelleId: r.echelleId,
         niveauSansDonnee: String(r.niveauSansDonnee)
     };
+    // Née du « Modèle par standards » : sa provenance, et les jetons éteints comme pour toute pratique installée d'un
+    // modèle (décision du 29 oct. 2026). Le double seuil n'est pas écrit : absent, il est éteint (`NoteCibles`).
+    if (r._modeleParStandards && !existante) {
+        pratique.inspireDe = { sourceId: MODELE_PAR_STANDARDS.id, nom: MODELE_PAR_STANDARDS.nom };
+        pratique.jetons = { actif: false };
+    }
 }
 
 /**
@@ -3699,5 +3786,9 @@ window.genererContenuEtape = genererContenuEtape;
 // lui (#469, 12 oct. 2026, cible absente) ; la pose reste pour les bancs (#577).
 window.TYPE_BADGES = TYPE_BADGES;               // #577 (testabilité du rendu d'une étape)
 window.afficherEtapeWizardV2 = afficherEtapeWizardV2;           // #577 (spec WebKit : rendre une étape dans le vrai DOM)
+window.obtenirOptionsModeles = obtenirOptionsModeles;           // « Modèle par standards » (21 nov. 2026) : la liste de « Choisis un modèle », pour la sentinelle
+window.MODELE_ASSISTANT_PAR_STANDARDS = MODELE_PAR_STANDARDS;
+window.preparerAdoptionModele = preparerAdoptionModele;         // idem : ce que le choix d'un modèle pose dans les réponses
+window.reinitialiserAdoptionModele = reinitialiserAdoptionModele;
 
 })();
