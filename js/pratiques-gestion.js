@@ -3358,6 +3358,7 @@ function confirmerEtFermerImportPratiques() {
 
 // Module principal
 window.initialiserModulePratiquesMateriel = initialiserModulePratiquesMateriel;
+window.obtenirDescriptionCourtePratique = obtenirDescriptionCourtePratique;   // l'Exploration des pratiques (Labo) : le volet d'une famille de base (21 nov. 2026)
 window.etapesChainePratique = etapesChainePratique;   // #1149, lot 3b
 window.rendreChainePratique = rendreChainePratique;
 window.afficherListePratiquesMateriel = afficherListePratiquesMateriel;
