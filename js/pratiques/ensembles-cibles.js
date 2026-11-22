@@ -6,7 +6,8 @@
  *
  * PROPRIÉTAIRE de la clé `ensemblesCibles` (par trimestre : `cle('ensemblesCibles')`). Seul écrivain : `enregistrer`,
  * appelé par l'assistant de pratique (wizard-pratique-v2.js) à la création ou à la modification d'une pratique
- * par standards. La fiche de la pratique (pratiques-gestion.js) la LIT seulement.
+ * par standards, par la vue simple, et par `deposer` (plus bas) quand une pratique arrive dans un trimestre avec ses
+ * cibles (lot pratique-std-voyage). La fiche de la pratique (pratiques-gestion.js) la LIT seulement.
  *
  * FORME (rangée par trimestre, rattachée au cours — C7, C8) :
  *   { id, coursId, cibles: [ { id, etiquette, enonce, criteres: [ { id, texte, essentiel } ], poids, terminale } ],
@@ -246,6 +247,175 @@
         return ensemble ? normaliserCibles(ensemble.cibles) : null;
     }
 
+    /* ------------------------------------------------------------------ Le voyage (lot pratique-std-voyage, 21 nov. 2026) */
+    /*
+     * Une pratique « Par standards » NOMME son ensemble de cibles, qui vit à part, par trimestre : sortie de son trimestre
+     * sans lui, elle arrive en disant « cibles introuvables » (mesuré le 21 nov. 2026 sur un banc : import d'un trimestre
+     * à l'autre). Pour voyager (bibliothèque, autre trimestre, fichier), elle EMPORTE une copie de ses définitions dans
+     * `configuration.ciblesEmportees = { cibles, coursId, echelle }`, et les DÉPOSE à l'arrivée dans un trimestre :
+     *   - l'ensemble est recréé sous une identité NEUVE (deux pratiques ne partagent jamais un ensemble ; aucun ensemble
+     *     déjà présent n'est réécrit) ; les cibles et les critères gardent leur identité permanente ;
+     *   - l'échelle (complément du 21 nov., 22 h) : une échelle IDENTIQUE déjà là sert telle quelle (même identité, ou
+     *     même nom, et les mêmes niveaux : codes, noms, valeurs ponctuelles, bornes) ; sinon elle est recréée, sous son
+     *     identité si elle est libre, sous une identité neuve et le nom suivi de « (importée) » si une échelle
+     *     DIFFÉRENTE la porte déjà. Aucune échelle présente n'est réécrite. La pratique nomme celle qui sert ;
+     *   - le cours reste nommé s'il existe encore dans la bibliothèque des cours, sinon aucun ;
+     *   - le bagage est retiré : dans un trimestre, la seule source des cibles est `ensemblesCibles`.
+     * CE QUI NE VOYAGE JAMAIS : les inscriptions, les annulations, rien qui touche un·e étudiant·e. Ce bloc ne lit ni
+     * n'écrit la clé des niveaux inscrits (sentinelle-pratique-std-voyage ; ce fichier ne la nomme pas : lot 1). Les autres familles de pratiques passent inchangées :
+     * `emporter` rend l'objet reçu, `deposer` ne fait rien.
+     */
+    const CHAMP_EMPORTE = 'ciblesEmportees';
+
+    function estParCibles(pratique) {
+        return !!(pratique && pratique.configuration && pratique.configuration.type === 'cibles');
+    }
+
+    /** Une échelle telle qu'elle voyage : ses niveaux et ses mots, sans ses états locaux (verrou, dates, provenance). */
+    function echelleQuiVoyage(echelle) {
+        if (!echelle || !echelle.id || !Array.isArray(echelle.niveaux)) return null;
+        const copie = JSON.parse(JSON.stringify(echelle));
+        ['verrouille', 'dansBibliotheque', 'idOriginal', 'dateImport', 'dateAjoutBiblio', 'dateAjout', 'estDemo', 'isDemo',
+            'inspireDeTrimestre', 'auteurOriginal'].forEach(k => { delete copie[k]; });
+        return copie;
+    }
+
+    /**
+     * La pratique avec ses définitions : une COPIE profonde qui porte `configuration.ciblesEmportees`. Lecture seule : ni
+     * la pratique reçue ni son trimestre ne sont touchés. Une pratique d'une autre famille, ou dont l'ensemble est
+     * introuvable, est rendue telle quelle (le même objet).
+     * @param {Object} pratique
+     * @param {string} [trimestreSourceId] - le trimestre où lire l'ensemble et l'échelle ; absent : le trimestre actif
+     * @returns {Object}
+     */
+    function emporter(pratique, trimestreSourceId) {
+        if (!estParCibles(pratique) || typeof db === 'undefined') return pratique;
+        const cleDe = (nom) => (trimestreSourceId && typeof cleSource === 'function') ? cleSource(nom, trimestreSourceId) : cle(nom);
+        const conf = pratique.configuration;
+        const ensembles = db.getSync(cleDe(CLE), []);
+        const ensemble = (Array.isArray(ensembles) ? ensembles : []).find(e => e && e.id === conf.ensembleCiblesId) || null;
+        // Déjà en voyage (un exemplaire de la bibliothèque, un fichier reçu) : son bagage est le bon.
+        if (!ensemble) return pratique;
+        const echelles = db.getSync(cleDe('echellesTemplates'), []);
+        const echelle = (Array.isArray(echelles) ? echelles : []).find(e => e && e.id === conf.echelleId) || null;
+        const copie = JSON.parse(JSON.stringify(pratique));
+        copie.configuration[CHAMP_EMPORTE] = {
+            cibles: normaliserCibles(ensemble.cibles),
+            coursId: ensemble.coursId ? String(ensemble.coursId) : null,
+            echelle: echelleQuiVoyage(echelle)
+        };
+        return copie;
+    }
+
+    /** La pratique porte-t-elle des définitions à déposer ? */
+    function aEmporte(pratique) {
+        const b = estParCibles(pratique) ? pratique.configuration[CHAMP_EMPORTE] : null;
+        return !!(b && typeof b === 'object' && Array.isArray(b.cibles));
+    }
+
+    /** L'échelle reçue, par la liste blanche des imports quand elle est chargée (un fichier d'une ou d'un collègue). */
+    function echelleADeposer(echelle) {
+        const brute = echelleQuiVoyage(echelle);
+        if (!brute) return null;
+        const propre = (typeof window.assainirImportJson === 'function') ? window.assainirImportJson(brute, 'echelle') : brute;
+        if (!propre || !propre.id || !Array.isArray(propre.niveaux)) return null;
+        return Object.assign({}, propre, { dansBibliotheque: true, verrouille: false, dateCreation: propre.dateCreation || new Date().toISOString() });
+    }
+
+    /** Deux échelles disent-elles la même chose pour le calcul et pour l'écran ? Leurs niveaux, dans l'ordre. */
+    function memesNiveaux(a, b) {
+        const forme = (e) => JSON.stringify(((e && Array.isArray(e.niveaux)) ? e.niveaux : []).map(n => n
+            ? [String(n.code), String(n.nom == null ? '' : n.nom), valeurDuNiveau(n), n.min == null ? null : Number(n.min), n.max == null ? null : Number(n.max)]
+            : null));
+        return forme(a) === forme(b);
+    }
+
+    const SUFFIXE_ECHELLE_IMPORTEE = ' (importée)';
+
+    /**
+     * L'échelle qui servira à l'arrivée. Pure. Une échelle identique déjà là (même identité, même nom, ou le nom d'une
+     * copie déjà importée) : la sienne, rien à écrire. Sinon l'échelle reçue : sous son identité si elle est libre, sous
+     * `idNeuf()` et un nom suffixé si une échelle DIFFÉRENTE porte déjà cette identité.
+     * @returns {{id:string, aEcrire:(Object|null)}}
+     */
+    function choisirEchelle(liste, echelle, idNeuf) {
+        const locales = (Array.isArray(liste) ? liste : []).filter(e => e && e.id);
+        const nomCopie = String(echelle.nom || '') + SUFFIXE_ECHELLE_IMPORTEE;
+        const jumelle = locales.find(e => (e.id === echelle.id || e.nom === echelle.nom || e.nom === nomCopie) && memesNiveaux(e, echelle));
+        if (jumelle) return { id: jumelle.id, aEcrire: null };
+        if (!locales.some(e => e.id === echelle.id)) return { id: echelle.id, aEcrire: echelle };
+        const copie = Object.assign({}, echelle, { id: idNeuf(), nom: nomCopie });
+        return { id: copie.id, aEcrire: copie };
+    }
+
+    /** Dépose l'échelle reçue dans le trimestre actif si aucune identique n'y est. Rend l'identité qui sert, ou null (écriture refusée). */
+    async function deposerEchelle(echelle, geste) {
+        let neuf = null;
+        const idNeuf = () => (neuf || (neuf = genererIdUnique('ECH_')));
+        let choix = choisirEchelle(db.getSync(cle('echellesTemplates'), []), echelle, idNeuf);
+        if (!choix.aEcrire) return choix.id;
+        const ecrite = await modifierEtAnnoncer(cle('echellesTemplates'), (lues) => {
+            const liste = Array.isArray(lues) ? lues : [];
+            choix = choisirEchelle(liste, echelle, idNeuf);   // relue dans la file
+            return choix.aEcrire ? liste.concat([choix.aEcrire]) : liste;
+        }, [], { geste: geste, discret: true }).catch(() => undefined);
+        return ecrite ? choix.id : null;
+    }
+
+    /**
+     * Une pratique « Par standards » qui arrive SANS ses cibles : aucun bagage, et l'ensemble qu'elle nomme n'est pas dans
+     * le trimestre actif (un fichier ou un exemplaire d'avant le 21 nov. 2026). Lecture seule. L'appelant le DIT.
+     */
+    function arriveSansCibles(pratique) {
+        return estParCibles(pratique) && !aEmporte(pratique) && !lireParId(pratique.configuration.ensembleCiblesId);
+    }
+
+    /** Les mots de cet avis (PROPOSÉS : TEXTES-2026-11-21-pratique-std-voyage.md, V7). */
+    function avisSansCibles(nom) {
+        return {
+            titre: `« ${nom || 'Cette pratique'} » arrive sans ses cibles.`,
+            detail: 'Ce fichier ne les contient pas. Rouvre la pratique dans l\'assistant pour les dire.'
+        };
+    }
+
+    /**
+     * Dépose dans le trimestre ACTIF ce que la pratique emporte, AVANT qu'elle y soit écrite (une pratique n'est jamais
+     * écrite en désignant un ensemble qui n'existe pas). Rend une COPIE de la pratique, prête à écrire : elle nomme
+     * l'ensemble recréé et ne porte plus de bagage. Sans bagage : la pratique reçue, telle quelle. Échec d'écriture :
+     * `null` (le témoin l'a dit), et la pratique ne doit pas être écrite.
+     * @param {Object} pratique
+     * @param {{geste?:string}} [options]
+     * @returns {Promise<Object|null>}
+     */
+    async function deposer(pratique, options) {
+        if (!aEmporte(pratique)) return pratique;
+        const geste = (options && options.geste) || 'Utiliser dans ce trimestre';
+        const copie = JSON.parse(JSON.stringify(pratique));
+        const bagage = copie.configuration[CHAMP_EMPORTE];
+        delete copie.configuration[CHAMP_EMPORTE];
+
+        // L'échelle du bagage : une identique déjà là sert telle quelle ; sinon elle est recréée (`deposerEchelle`). La
+        // pratique nomme celle qui sert : un partage .lcz arrive en nommant une identité préfixée qui n'existe pas ici.
+        const echelle = echelleADeposer(bagage.echelle);
+        if (echelle) {
+            const echelleId = await deposerEchelle(echelle, geste);
+            if (!echelleId) return null;
+            copie.configuration.echelleId = echelleId;
+        }
+
+        const coursConnu = bagage.coursId && (db.getSync('cours', []) || []).some(c => c && c.id === bagage.coursId);
+        const ensembleId = genererIdUnique('ENSC_');
+        const ecrit = await enregistrer({ id: ensembleId, coursId: coursConnu ? bagage.coursId : null, cibles: bagage.cibles }, { geste: geste });
+        if (!ecrit) return null;
+        copie.configuration.ensembleCiblesId = ensembleId;
+        return copie;
+    }
+
+    /** Les étiquettes des cibles qu'une pratique emporte (l'aperçu de la bibliothèque), ou []. */
+    function etiquettesEmportees(pratique) {
+        return aEmporte(pratique) ? normaliserCibles(pratique.configuration[CHAMP_EMPORTE].cibles).map(c => c.etiquette) : [];
+    }
+
     /* ------------------------------------------------------------------ La fiche (lecture seule) */
 
     function esc(texte) {
@@ -367,6 +537,15 @@
         lireParId: lireParId,
         ciblesDeLaPratiqueActive: ciblesDeLaPratiqueActive,
         enregistrer: enregistrer,
+        CHAMP_EMPORTE: CHAMP_EMPORTE,
+        emporter: emporter,
+        aEmporte: aEmporte,
+        deposer: deposer,
+        memesNiveaux: memesNiveaux,
+        choisirEchelle: choisirEchelle,
+        arriveSansCibles: arriveSansCibles,
+        avisSansCibles: avisSansCibles,
+        etiquettesEmportees: etiquettesEmportees,
         libelleDuCours: libelleDuCours,
         rendreFiche: rendreFiche
     };

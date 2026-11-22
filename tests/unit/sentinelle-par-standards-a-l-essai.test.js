@@ -11,7 +11,8 @@
  *   E1. La constante est allumée, déclarée une seule fois, et l'étiquette la lit sur l'objet publié : éteinte, rien.
  *   E2. Le mot « À l'essai » n'est écrit qu'à UNE place du code de l'application (ensembles-cibles.js).
  *   E3. Les trois endroits passent par la constante : la carte de la vue simple (`estALEssai`), les deux options de
- *       l'assistant où « Par standards » se choisit (`essai: true`, dessinées par `_etiquetteEssaiDeLOption`), l'en-tête
+ *       l'assistant où « Par standards » se choisit et la carte du « Modèle par standards » (21 nov., lot
+ *       modèle-par-standards) (`essai: true`, dessinées par `_etiquetteEssaiDeLOption`), l'en-tête
  *       de la fiche (`etiquetteEssaiHTML`, pour la seule famille `cibles`). Aucune autre option, aucun autre modèle.
  *
  * BREAK-TESTS : journal en fin de fichier.
@@ -83,10 +84,13 @@ describe('E3. Les trois endroits passent par la constante', () => {
         expect(rendu).toContain('<p class="vs-etape-essai">${esc(window.EnsemblesCibles.MOT_A_L_ESSAI)}</p>');
     });
 
-    it('l\'assistant : les deux options `cibles` sont marquées, aucune autre, et les cartes passent par `etiquetteEssaiHTML`', () => {
+    it('l\'assistant : les deux options `cibles` et le « Modèle par standards » sont marqués, aucun autre, et les cartes passent par `etiquetteEssaiHTML`', () => {
         const W = lire('js/wizard-pratique-v2.js');
         const marquees = horsCommentaires('js/wizard-pratique-v2.js', /\bessai: true\b/);
-        expect(marquees.length).toBe(2);
+        // 21 nov. 2026 (lot modèle-par-standards) : une troisième place, la carte du « Modèle par standards » dans
+        // « Choisis un modèle ». Elle seule ; les cinq modèles prédéfinis ne portent pas la marque.
+        expect(marquees.length).toBe(3);
+        expect(marquees.filter(l => /Object\.assign\(versOption\(MODELE_PAR_STANDARDS\), \{ essai: true \}\)/.test(l)).length).toBe(1);
         // Chaque option `value: 'cibles'` d'une liste de cartes porte la marque (sur sa ligne ou la suivante).
         const lignes = W.split('\n');
         const options = lignes.map((l, i) => ({ l, i })).filter(({ l }) => /^\s*(\{ )?value: 'cibles',/.test(l));

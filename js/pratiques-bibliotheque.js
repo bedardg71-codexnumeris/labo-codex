@@ -353,14 +353,21 @@ async function obtenirConfigurationPratiqueParId(configId) {
  * @param {Object} configuration - La configuration à ajouter
  * @returns {Promise<boolean>} true si ajoutée, false si déjà existante
  */
-async function ajouterPratiqueALaBibliotheque(configuration) {
+async function ajouterPratiqueALaBibliotheque(configuration, options) {
     // B-β — passage obligé par assainirObjet. Le schéma pratique inclut
     // `configuration` en type 'object' brut pour préserver la structure
     // riche (typesTravaux, forfaits, portfolio) sans devoir
     // la modéliser exhaustivement.
-    const configSafe = (typeof window.assainirObjet === 'function' && window.SCHEMAS_IMPORT && window.SCHEMAS_IMPORT.pratique)
+    let configSafe = (typeof window.assainirObjet === 'function' && window.SCHEMAS_IMPORT && window.SCHEMAS_IMPORT.pratique)
         ? window.assainirObjet(configuration, window.SCHEMAS_IMPORT.pratique)
         : configuration;
+    // Lot pratique-std-voyage (21 nov. 2026) — la liste blanche, pensée pour un fichier reçu, ne connaît pas `jetons` (le
+    // réglage des jetons à la racine de la pratique ; mesuré : il se perdait). Une pratique du trimestre que son auteur·e
+    // garde (`garderPratiqueDansBibliotheque`, source locale) garde son réglage : sans lui, une pratique qui refuse les
+    // jetons les offrirait à son retour dans un trimestre. Un fichier reçu ne passe pas par ici avec cette option.
+    if (options && options.sourceLocale === true && configuration && configuration.jetons && typeof configuration.jetons === 'object') {
+        configSafe = Object.assign({}, configSafe, { jetons: JSON.parse(JSON.stringify(configuration.jetons)) });
+    }
 
     // #599 — la présence est vérifiée DANS la file. Hors file, deux ajouts
     // concurrents du même item passaient tous les deux, et la bibliothèque
@@ -545,14 +552,15 @@ async function appliquerConfigurationPratique(configId) {
 /**
  * Importer des configurations dans la bibliothèque
  * @param {Array} configurations - Tableau de configurations à importer
+ * @param {{sourceLocale?: boolean}} [options] - `sourceLocale` : des pratiques du trimestre, gardées par leur auteur·e
  * @returns {Promise<{ajoutees: number, existantes: number}>}
  */
-async function importerPratiquesDansBibliotheque(configurations) {
+async function importerPratiquesDansBibliotheque(configurations, options) {
     let ajoutees = 0;
     let existantes = 0;
 
     for (const config of configurations) {
-        const resultat = await ajouterPratiqueALaBibliotheque(config);
+        const resultat = await ajouterPratiqueALaBibliotheque(config, options);
         if (resultat) {
             ajoutees++;
         } else {
