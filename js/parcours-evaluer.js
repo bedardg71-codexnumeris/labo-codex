@@ -1656,6 +1656,21 @@
         return aussiEviterLAssistantOuvert();
     }
 
+    /**
+     * « Choisis un modèle », dans le modèle (« Je regarde », étape 2) : ce que la bulle fait toucher, seulement, la carte
+     * de l'exemple et « Suivant → ». Mesuré le 22 nov. 2026 à 1180 × 820, après la carte « Modèle par standards » venue
+     * de la 1.252.0 : à éviter les six cartes au poids du contour, la bulle n'avait plus de place que sur « Suivant → »
+     * (le moindre recouvrement), et le toucher de la personne tombait sur la bulle. Même règle que la question de
+     * l'échelle, plus bas (18 nov.). Au récapitulatif (plus de cartes de modèle), rien ne change.
+     */
+    function aussiEviterAuChoixDuModele() {
+        if (questionDeLEchelle() || !wizardOuvert()) return aussiEviterDansLAssistant();
+        var choix = qs('#modalWizardPratiqueV2 input[name="modeleChoisi"][value="' + MATERIEL.pratique.id + '"]');
+        var carte = choix ? choix.closest('.wizard-v2-radio-card') : null;
+        if (!carte) return aussiEviterDansLAssistant();
+        return [carte, el('wizard-v2-btn-suivant'), el('wizard-v2-btn-creer')];
+    }
+
     function ligneDeLEchelle() {
         return [].slice.call(document.querySelectorAll('#overlay-ui-dialogue .ui-dialogue-choix-ligne')).filter(function (l) {
             return String(l.textContent || '').indexOf(MATERIEL.echelle) !== -1;
@@ -2028,7 +2043,7 @@
                 confirme: function () { return auRecapitulatif() ? '' : T.etape2.confirme; },
                 lignes: function () { return auRecapitulatif() ? forme(T.etape2.devient) : forme(T.etape2); },
                 zones: zonesDeLAssistant,
-                aussiEviter: aussiEviterDansLAssistant,
+                aussiEviter: aussiEviterAuChoixDuModele,
                 contour: ouToucherDansLAssistant,
                 nommeLeContour: true,
                 atteint: function () { return questionDeLEchelle() || pratiqueCreee(); }
