@@ -4,6 +4,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { tranche } from './_helpers/tranche.js';
 import { sectionDeLaConsigne } from './_helpers/fin-des-parcours-2026-11-20.js';
+import { retoucherLignes22 } from './_helpers/parcours-apres-par-standards-2026-11-22.js';
 
 // =======================================================================
 // SENTINELLE DU LOT « JE REGARDE » D'« ÉVALUER UNE PREMIÈRE PRODUCTION » (18 NOVEMBRE 2026)
@@ -20,6 +21,8 @@ import { sectionDeLaConsigne } from './_helpers/fin-des-parcours-2026-11-20.js';
 //   4. Le confinement : le modèle ne retient rien hors de la démo et ne remplit que par les outils communs.
 // Break-test (18 nov. 2026) : dans `TEXTES.etape3.lignes[2]`, « (un M vaut 75 %) » remplacé par « (un M vaut 80 %) » →
 // ROUGE (2, dans les deux sens). Rétabli → vert.
+// Depuis le 22 nov. 2026 (plans de travail/CONSIGNE-2026-11-22-parcours-apres-par-standards.md, A1 à A4), quatre lignes
+// de la consigne du 18 sont lues retouchées par celle du 22 (tests/unit/_helpers/parcours-apres-par-standards-2026-11-22.js).
 
 const RACINE = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..');
 const lire = (f) => readFileSync(path.join(RACINE, f), 'utf8');
@@ -191,7 +194,12 @@ describe('2. les textes des dix bulles : ceux de la section D, mot pour mot', ()
     // Les lignes de la consigne du 18 nov., retouchées par celle du 20 (une seule passe, pour toutes les bulles).
     (() => {
         const marques = bulles.map((b) => b.lignes.length);
-        const toutes = retoucher20(bulles.reduce((a, b) => a.concat(b.lignes.map((l, k) => ({ l, b })).map((x) => x.l)), []));
+        const retouchees20 = retoucher20(bulles.reduce((a, b) => a.concat(b.lignes.map((l, k) => ({ l, b })).map((x) => x.l)), []));
+        // Puis les quatre phrases du 22 nov. (« Par standards » devenu « Par sélection de productions », consigne du
+        // 22 nov., A1 à A4) : lues dans cette consigne, chacune doit trouver sa ligne.
+        const r22 = retoucherLignes22(retouchees20, ['A1.', 'A2.', 'A3.', 'A4.'], aPlat);
+        expect(r22.servies, 'chaque retouche du 22 nov. trouve sa ligne dans la consigne du 18').toEqual(['A1.', 'A2.', 'A3.', 'A4.']);
+        const toutes = r22.lignes;
         // (C2 ajoute une ligne à la bulle 6 : on redécoupe d'après ce compte.)
         let i = 0;
         bulles.forEach((b, k) => { const n = marques[k] + (k === 5 ? 1 : 0); b.lignes = toutes.slice(i, i + n); i += n; });

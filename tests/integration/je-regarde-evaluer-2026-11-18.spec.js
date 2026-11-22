@@ -109,7 +109,10 @@ function juge(page, t, m, { rangeesAMain }) {
             await lignesContiennent(page, t.etape2.devient.lignes, ctx);
             await consignes(page, t.etape2.devient.consignes, ctx);
             await contourSur(page, '#wizard-v2-btn-creer');
-            await expect(page.locator('#modalWizardPratiqueV2')).toContainText('PAN – Standards');
+            // A3 de la consigne du 22 nov. : la bulle dit « Par sélection de productions » ; le récapitulatif doit le dire aussi,
+            // pour « N meilleures évaluations » (le nom de sa famille, à côté du sigle SEL).
+            await expect(page.locator('#modalWizardPratiqueV2 .wizard-v2-recap-badge-label')).toHaveText('Par sélection de productions');
+            await expect(page.locator('#modalWizardPratiqueV2 .wizard-v2-recap-badge')).toHaveText('SEL');
             break;
         case 3:
             await confirme(page, t.etape3.confirme, ctx);

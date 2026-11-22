@@ -701,7 +701,7 @@
                 choix: function () {
                     return [
                         note("Chaque carte est une pratique toute prête, décrite en une ligne."),
-                        note("Le code à côté du nom dit sa famille : SOM pour la sommative, STD pour les standards ; les autres codes désignent d'autres pratiques alternatives."),
+                        note("Le code à côté du nom dit sa famille : SOM pour la sommative, SEL pour la sélection de productions, STD pour les standards ; les autres codes désignent d'autres pratiques."),
                         note("Adopter un modèle ne t'engage pas : tu pourras le renommer et l'ajuster ensuite."),
                         consigne("Touche le modèle le plus proche de ta façon de noter, puis « Suivant → »")
                     ];
@@ -1340,14 +1340,14 @@
             confirme: "C'est fait : tu es à l'écran « Choisis un modèle ».",
             lignes: [
                 "Chaque carte est une pratique toute prête, décrite en une ligne",
-                "Le code à côté du nom dit sa famille : SOM pour la sommative, STD pour les standards ; les autres codes désignent d'autres pratiques alternatives",
-                "L'exemple prend « N meilleures évaluations », par standards : chaque production reçoit un niveau de maîtrise et la note retient les 7 meilleures évaluations sur 10",
+                "Le code à côté du nom dit sa famille : SOM pour la sommative, SEL pour la sélection de productions, STD pour les standards ; les autres codes désignent d'autres pratiques",
+                "L'exemple prend « N meilleures évaluations », par sélection de productions : chaque production reçoit un niveau de maîtrise et la note retient les 7 meilleures évaluations sur 10",
                 "Avec ta classe, tu choisiras la tienne, qu'elle soit traditionnelle ou alternative"
             ],
             consignes: ["Touche « N meilleures évaluations », puis « Suivant → »"],
             devient: {
                 lignes: [
-                    "Le récapitulatif dit sa famille et ce qu'elle fait : « PAN – Standards » (PAN : pratique alternative de notation)",
+                    "Le récapitulatif dit sa famille et ce qu'elle fait : « Par sélection de productions »",
                     "Son nom reste modifiable ; l'exemple le garde tel quel"
                 ],
                 consignes: ["Touche « Créer la pratique »"]
@@ -1357,7 +1357,7 @@
             titre: 'Une échelle de performance',
             confirme: "C'est fait : l'assistant te demande une échelle.",
             lignes: [
-                "Par standards, tu ne comptes pas de points : tu situes ce que l'étudiant·e a réussi à un niveau",
+                "Avec cette pratique, tu ne comptes pas de points : tu situes ce que l'étudiant·e a réussi à un niveau",
                 "L'échelle de performance nomme ces niveaux. Celle de l'exemple, « IDME et niv 0 », en a cinq : 0 « Aucun », I « Incomplet ou insuffisant », D « En développement », M « Maîtrisé », E « Étendu »",
                 "Pour établir la note, l'application convertit ensuite chaque niveau en pourcentage (un M vaut 75\u00a0%)",
                 "Tu retrouveras ces niveaux à chaque étape de ce parcours, jusqu'à l'évaluation"

@@ -20,6 +20,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { tranche } from './_helpers/tranche.js';
 import { CONSIGNE_20_NOV, suiteFactice } from './_helpers/fin-des-parcours-2026-11-20.js';
+import { RETOUCHES_22_NOV } from './_helpers/parcours-apres-par-standards-2026-11-22.js';
 
 const racine = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..');
 const lire = (f) => readFileSync(path.join(racine, f), 'utf8');
@@ -42,7 +43,14 @@ const DEF = definitions.evaluer;
 
 // ---------- La consigne, section D, lue ----------
 
-const D = tranche(CONSIGNE_20_NOV, 'D. PARCOURS 3, « NOUS FAISONS » : DIX BULLES NEUVES', '\nE. PARCOURS 4, « RECEVOIR LES PRODUCTIONS », « JE REGARDE »');
+// Le 22 nov. 2026 (plans de travail/CONSIGNE-2026-11-22-parcours-apres-par-standards.md, A1) : la phrase des codes de
+// famille, dans la voie « Partir d'un modèle », est lue retouchée par cette consigne (SEL et STD) ; une seule occurrence.
+const D = (() => {
+    const brut = tranche(CONSIGNE_20_NOV, 'D. PARCOURS 3, « NOUS FAISONS » : DIX BULLES NEUVES', '\nE. PARCOURS 4, « RECEVOIR LES PRODUCTIONS », « JE REGARDE »');
+    const a1 = RETOUCHES_22_NOV.find((r) => r.repere === 'A1.');
+    if (brut.split(a1.avant).length !== 2) throw new Error('consigne du 20 nov., section D : la phrase de A1 (22 nov.) n’y est pas une fois');
+    return brut.replace(a1.avant, a1.apres);
+})();
 
 /** Le texte entre guillemets qui s'ouvre à `i` (sur « ), guillemets emboîtés compris ; rend [texte, fin]. */
 function citation(texte, i) {
