@@ -21,6 +21,16 @@
 
     var CHANGELOG = [
         {
+            // 1.256 (22 nov. 2026 : les critères d'une cible en vue simple) — titre et ligne PROPOSÉS par Claude Code, à
+            // valider par Grégoire avant la mise en ligne.
+            version: '1.256',
+            couleur: 'vert',
+            titre: 'Des critères pour tes cibles, en vue simple',
+            items: [
+                'En vue simple, «&nbsp;+ Ajouter un critère&nbsp;», sous chaque cible de «&nbsp;Ta pratique&nbsp;», lui donne des critères, un par ligne, avec la case «&nbsp;Critère essentiel&nbsp;». En inscrivant un niveau, chaque critère se marque «&nbsp;Respecté&nbsp;» ou «&nbsp;Non respecté&nbsp;», ou reste vide&nbsp;; le niveau reste ton choix. Les critères sont les mêmes qu’en vue étendue.'
+            ]
+        },
+        {
             // 1.255 (22 nov. 2026 : « Par standards » trouvable en vue simple) — titre et deux lignes proposés par Claude Code,
             // la seconde acceptée par Grégoire à 9 h 54 ; la première ajustée à la phrase de 9 h 54. Titre : à confirmer.
             version: '1.255',

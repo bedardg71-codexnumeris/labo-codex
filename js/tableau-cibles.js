@@ -604,13 +604,14 @@
 
     /** Une inscription de l'historique (datée, son niveau ou « Remarque », son origine, sa rétroaction, ses critères) ;
      *  annulée : barrée, avec sa date et sa raison ; sinon « Annuler cette inscription », sauf en lecture seule.
-     *  `options.simple` (vue simple, 21 nov. 2026) : ni critères (ils se cochent en vue étendue), ni « Sans production ». */
+     *  `options.simple` (vue simple, 21 nov. 2026) : pas de « Sans production ». Les critères s'y lisent depuis le 22 nov.
+     *  (ils se cochent aussi en vue simple). */
     function _entreeHTML(ctx, i, a, options) {
         const o = options || {};
         const sansNiveau = I().estSansNiveau(i);
         const niveau = sansNiveau ? null : _niveauDuCode(ctx, i.niveau);
         const nomNiveau = _nomDuNiveauInscrit(i, sansNiveau, niveau);
-        const criteres = (!o.simple && (i.criteres || []).length) ? `<ul class="tc-entree-criteres">${i.criteres.map(_ligneCritereHistorique).join('')}</ul>` : '';
+        const criteres = (i.criteres || []).length ? `<ul class="tc-entree-criteres">${i.criteres.map(_ligneCritereHistorique).join('')}</ul>` : '';
         const origine = (o.simple && !i.productionId) ? '' : `
                     <span class="tc-entree-origine">${esc(_titreProduction(i.productionId))}</span>`;
         const fin = _finDeLEntree(i, a, !!o.lectureSeule);
@@ -703,7 +704,9 @@
     }
 
     /* ----- VUE SIMPLE (21 nov. 2026, « Par standards » à l'essai) : la fenêtre allégée d'une case -----
-       Les niveaux en tuiles (ni « Aucun niveau », ni critères), la rétroaction facultative, la date d'aujourd'hui, aucune
+       Les critères de la cible, s'il y en a (22 nov. 2026, décision de Grégoire, 9 h 14 : elle remplace, pour les critères,
+       celle du 21 nov. à 14 h 20), cochés comme en vue étendue (mêmes morceaux, mêmes mots) ; rien n'est calculé à partir
+       des coches. Les niveaux en tuiles (sans « Aucun niveau »), la rétroaction facultative, la date d'aujourd'hui, aucune
        production. Puis le niveau retenu en clair et la DERNIÈRE inscription, qu'on peut annuler : le niveau retenu étant le
        meilleur, un niveau trop haut touché par erreur ne se corrige pas en en inscrivant un plus bas (sans ce geste, la vue
        simple serait une impasse). L'annulation reste, barrée, visible en vue étendue. Même écrivain, même forme (§ 0). */
@@ -740,6 +743,7 @@
                 ${cible.enonce ? `<p class="tc-cible-enonce">${esc(cible.enonce)}</p>` : ''}
             </div>
             <form class="tc-formulaire" data-tc-bloc data-prefixe="${p}" novalidate>
+                ${(cible.criteres || []).length ? `<section class="tc-section"><h4 class="tc-section-titre">${esc(MOTS.criteres)}</h4>${_criteresHTML(cible, p)}</section>` : ''}
                 <section class="tc-section"><h4 class="tc-section-titre" id="${p}-niveau-titre">${esc(MOTS.niveau)}</h4>${_niveauxHTML(ctx, p, false, true)}</section>
                 <section class="tc-section">${_retroactionHTML(p)}<p class="tc-aide">${esc(MOTS.simple.date)}</p></section>
                 <p class="tc-alerte u-hide" role="alert"></p>
@@ -761,7 +765,7 @@
             echelleId: ctx.echelle ? (ctx.echelle.id || null) : null,
             date: I().dateDuJour(), productionId: null,
             noteBreve: bloc.querySelector('.tc-retroaction').value,
-            criteres: I().etatDesCriteres(cible, {})   // chaque critère de la vue étendue, non renseigné : la forme du § 0
+            criteres: I().etatDesCriteres(cible, _lireCoches(bloc))   // la forme du § 0 ; un critère sans coche : non renseigné
         };
         const motifs = I().motifsRefus(saisie, ctx.echelle);
         _alerte(overlay, motifs);

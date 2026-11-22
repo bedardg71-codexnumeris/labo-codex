@@ -384,6 +384,12 @@
     min-height: 46px;
 }
 
+/* Les critères en vue simple (22 nov. 2026) : « Respecté », « Non respecté » à 46 px, comme le reste. */
+.tc-overlay--simple .tc-coche {
+    min-height: 46px;
+    min-width: 46px;
+}
+
 .tc-overlay--simple .modal-fermer {
     min-width: 46px;
     top: 8px;

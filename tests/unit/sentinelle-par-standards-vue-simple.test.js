@@ -131,7 +131,8 @@ describe('V4. Le réglage garde chaque cible entière', () => {
 
     it('renommer : seule l\'étiquette change ; énoncé, critères, poids et « terminale » restent', () => {
         const b = D.brouillonDesCibles(anciennes);
-        expect(b).toEqual({ cibles: [{ id: 'a', etiquette: 'A' }, { id: 'b', etiquette: 'B' }] });
+        // ↻ 22 nov. 2026 (critères en vue simple) : le brouillon porte les critères de chaque cible, identités comprises.
+        expect(b).toEqual({ cibles: [{ id: 'a', etiquette: 'A', criteres: [{ id: 'k', texte: 'Cite', essentiel: true }] }, { id: 'b', etiquette: 'B', criteres: [] }] });
         b.cibles[0].etiquette = '  A2 ';
         expect(D.ciblesReglees(anciennes, b)).toEqual([Object.assign({}, anciennes[0], { etiquette: 'A2' }), anciennes[1]]);
     });
@@ -176,5 +177,43 @@ describe('V5. Rien ne s\'efface ; une seule question ; « CIB » ne s\'affiche p
     it('« CIB », comme texte, n\'apparaît dans js/vue-simple.js qu\'au champ `pratiques` de la pratique (une donnée, jamais affichée)', () => {
         expect(VS.match(/['"`]CIB['"`]/g)).toEqual(["'CIB'"]);
         expect(VS).toContain("pratiques: ['CIB']");
+    });
+});
+
+// 22 nov. 2026 (décision de Grégoire, 9 h 14) : les critères d'une cible se règlent en vue simple. Une seule source :
+// l'ensemble de cibles de la vue étendue (`criteres: [{ id, texte, essentiel }]`). Retirer un critère ne touche aucune
+// inscription : chacune garde le texte des critères qu'elle a jugés (`InscriptionsCibles.etatDesCriteres`).
+describe('V4 bis. Les critères d\'une cible, au réglage de la vue simple', () => {
+    const anciennes = [
+        { id: 'a', etiquette: 'A', enonce: 'Énoncé', criteres: [{ id: 'k1', texte: 'Cite', essentiel: true }, { id: 'k2', texte: 'Explique', essentiel: false }], poids: 2, terminale: true },
+        { id: 'b', etiquette: 'B', enonce: '', criteres: [], poids: 1, terminale: false }
+    ];
+
+    it('ajouter, renommer, cocher « essentiel », retirer : les identités restent, le reste de la cible aussi', () => {
+        let b = D.brouillonDesCibles(anciennes);
+        b = D.gestesCibles.critereAjouter(b, 1, 'k3');
+        b.cibles[1].criteres[0].texte = '  Nomme  ';
+        b.cibles[1].criteres[0].essentiel = true;
+        b.cibles[0].criteres[1].texte = 'Explique avec précision';
+        b = D.gestesCibles.critereRetirer(b, 0, 0);
+        const r = D.ciblesReglees(anciennes, b);
+        expect(r[0]).toEqual(Object.assign({}, anciennes[0], { criteres: [{ id: 'k2', texte: 'Explique avec précision', essentiel: false }] }));
+        expect(r[1]).toEqual(Object.assign({}, anciennes[1], { criteres: [{ id: 'k3', texte: 'Nomme', essentiel: true }] }));
+    });
+
+    it('une ligne de critère laissée vide n\'est pas un critère ; l\'ancien brouillon n\'est jamais muté', () => {
+        const b0 = D.brouillonDesCibles(anciennes);
+        const b1 = D.gestesCibles.critereAjouter(b0, 0, 'k9');
+        expect(b0.cibles[0].criteres).toHaveLength(2);
+        expect(D.ciblesReglees(anciennes, b1)[0].criteres.map((k) => k.id)).toEqual(['k1', 'k2']);
+        expect(D.gestesCibles.critereRetirer(b0, 5, 0)).toBe(b0);
+    });
+
+    it('une cible neuve peut naître avec ses critères ; un brouillon sans critères garde ceux de l\'ancienne', () => {
+        const b = D.gestesCibles.critereAjouter(D.gestesCibles.ajouter(D.brouillonDesCibles(anciennes), 'c'), 2, 'k4');
+        b.cibles[2].etiquette = 'C';
+        b.cibles[2].criteres[0].texte = 'Structure';
+        expect(D.ciblesReglees(anciennes, b)[2]).toEqual({ id: 'c', etiquette: 'C', enonce: '', criteres: [{ id: 'k4', texte: 'Structure', essentiel: false }], poids: 1, terminale: false });
+        expect(D.ciblesReglees(anciennes, { cibles: [{ id: 'a', etiquette: 'A' }] })[0].criteres).toEqual(anciennes[0].criteres);
     });
 });

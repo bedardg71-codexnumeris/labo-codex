@@ -19,6 +19,10 @@ const CLE_CHOIX = 'laboCodex.vue';
 
 // La règle arrêtée par Grégoire : un novice ne lit aucun de ces mots en vue simple.
 const MOTS_INTERDITS = /horaire|cong[ée]s?\b|calendrier|grille|crit[èe]re|cartouche|annotation|pr[ée]sence|d[ée]pistage|portfolio|artefact/i;
+// ↻ 22 nov. 2026 (décision de Grégoire, 9 h 14 : les critères d'une cible se règlent en vue simple, mots acceptés « Critères,
+// un par ligne », « Critère essentiel »…) : « critère » se lit dans les seules zones des cibles d'une pratique « Par
+// standards », nommées ici. Partout ailleurs, la règle du 9 nov. tient.
+const OU_CRITERE_SE_LIT = ['#vs-bloc-cibles', '.tc-fenetre'];
 // Décision de Grégoire (9 nov. 2026, 19 h 35) : « étudiant·e », jamais « élève », sur tout écran de la vue simple.
 const MOT_ELEVE = /[ée]l[èe]ves?\b/i;
 // « codex » : toléré dans la phrase qui l'introduit et, pour cette version (décision de Cowork, 19 h 40), à ces endroits, nommés un à un.
@@ -161,15 +165,17 @@ async function basculer(page, vue) {
 
 /** Ce qu'un utilisateur lit à l'écran : le texte rendu, et les libellés portés par les éléments visibles. */
 async function ceQuiSeLit(page) {
-    return page.evaluate((toleres) => {
+    return page.evaluate(([toleres, criteres]) => {
         const visibles = [...document.querySelectorAll('body *')].filter((n) => (n.checkVisibility ? n.checkVisibility() : n.offsetParent !== null));
         const attributs = visibles.map((n) => ['title', 'aria-label', 'placeholder', 'alt'].map((a) => n.getAttribute(a)).filter(Boolean).join(' | ')).filter(Boolean);
-        const texte = document.body.innerText;
+        let texte = document.body.innerText;
+        // « critère » retiré du texte des zones des cibles, et d'elles seules (le reste de leur texte est lu).
+        criteres.forEach((sel) => document.querySelectorAll(sel).forEach((n) => { const t = n.innerText; if (t) texte = texte.split(t).join(t.replace(/crit[èe]res?/gi, '')); }));
         // Le texte hors des endroits où « codex » est toléré : celui de ces éléments est retiré du texte lu.
         let horsToleres = texte;
         toleres.forEach((sel) => document.querySelectorAll(sel).forEach((n) => { const t = n.innerText; if (t) horsToleres = horsToleres.split(t).join(''); }));
         return { texte, horsToleres, attributs: attributs.join('\n') };
-    }, OU_CODEX_EST_TOLERE);
+    }, [OU_CODEX_EST_TOLERE, OU_CRITERE_SE_LIT]);
 }
 
 async function aucunMotInterdit(page, ou) {
@@ -1843,7 +1849,7 @@ test.describe('Vue simple · « Par standards », à l\'essai (mandat du 21 nov.
         // 2. Une cible par ligne : les lignes vides tombent, les espaces aussi.
         await page.fill('#vs-cibles-lignes', LIGNES_CIBLES);
         await page.locator('[data-action="VueSimple.creerParStandards"]').click();
-        await expect(ecran(page, 'pratique').locator('#vs-bloc-cibles .vs-niveau')).toHaveText(CIBLES);
+        await expect(ecran(page, 'pratique').locator('#vs-bloc-cibles .vs-cible-lue-tete strong')).toHaveText(CIBLES);
         let b = await lireBase(page);
         expect(b.pratiques).toHaveLength(1);
         const p = b.pratiques[0];
@@ -2277,6 +2283,141 @@ test.describe('Vue simple · « Créer un groupe d\'essai » (décision du 22 no
         await expect(ecran(page, 'classe').locator('[data-action="VueSimple.creerGroupeEssai"]')).toHaveCount(0);
         const n = await page.evaluate(async () => { await window.VueSimple.creerGroupeEssai(); return window.db.getSync(window.cle('groupesCours'), []).length; });
         expect(n).toBe(1);   // l'action appelée directement ne crée rien
+        expect(erreurs).toEqual([]);
+    });
+});
+
+/* =====================================================================================================================
+   LES CRITÈRES D'UNE CIBLE EN VUE SIMPLE (décision de Grégoire, 22 nov. 2026, 9 h 14 ; elle remplace, pour les critères,
+   celle du 21 nov. à 14 h 20). En option : la création ne change pas. Une seule source, l'ensemble de cibles de la vue
+   étendue. Les coches ne décident de rien. Retirer un critère ne touche aucune inscription. Noms fictifs.
+   ===================================================================================================================== */
+
+const lireEnsemble = (page) => page.evaluate(() => (window.db.getSync(window.cle('ensemblesCibles'), []) || [])[0]);
+const lireInscriptions = (page) => page.evaluate(() => (window.db.getSync(window.cle('inscriptionsCibles'), []) || []).filter((e) => e && e.type !== 'annulation'));
+const cibleLue = (page, i) => ecran(page, 'pratique').locator('.vs-cible-lue').nth(i);
+
+test.describe('Vue simple · les critères d\'une cible (décision du 22 nov. 2026)', () => {
+    test('ajouter des critères sous une cible : « + Ajouter un critère », une ligne par critère, « Critère essentiel » ; puis renommer et retirer', async ({ page }) => {
+        const erreurs = await ouvrir(page);
+        await collerLaClasse(page);
+        await choisirParStandards(page, 'Analyser un texte\nStructurer un propos');
+
+        // 1. Lues : chaque cible a son bouton, aucune n'a de critère ; la ligne de la vue étendue reste.
+        await expect(ecran(page, 'pratique').locator('[data-action="VueSimple.ajouterCritere"]')).toHaveText(['+ Ajouter un critère', '+ Ajouter un critère']);
+        await expect(ecran(page, 'pratique').locator('.vs-criteres-lus')).toHaveCount(0);
+        await expect(ecran(page, 'pratique').locator('#vs-bloc-cibles')).toContainText('Les énoncés, les poids et les cibles terminales se règlent en vue étendue.');
+
+        // 2. Sous la première : le réglage s'ouvre sur une ligne de critère neuve, le curseur dedans ; l'aide B3 se lit.
+        await cibleLue(page, 0).locator('[data-action="VueSimple.ajouterCritere"]').click();
+        const bloc = ecran(page, 'pratique').locator('#vs-bloc-cibles');
+        await expect(bloc).toContainText('Les critères essentiels sont ceux sans lesquels une cible n’est pas acquise.');
+        const criteres1 = bloc.locator('.vs-criteres').nth(0);
+        await expect(criteres1.locator('.vs-libelle')).toHaveText('Critères, un par ligne');
+        await expect(criteres1.locator('.vs-critere-texte')).toBeFocused();
+        await page.keyboard.type('Cite le texte');
+        await criteres1.locator('.vs-critere-essentiel').click();
+        await criteres1.locator('[data-action="VueSimple.critereGeste"][data-param="ajouter"]').click();
+        await expect(criteres1.locator('.vs-critere-texte').nth(1)).toBeFocused();
+        await page.keyboard.type('Explique le procédé');
+        await bloc.locator('.vs-criteres').nth(1).locator('[data-action="VueSimple.critereGeste"][data-param="ajouter"]').click();
+        await page.keyboard.type('Annonce le plan');
+        await enregistrerLeReglage(page, 'Cibles enregistrées.');
+
+        // 3. Lus sous chaque cible ; écrits dans l'ensemble de la vue étendue, chacun avec son identité.
+        await expect(cibleLue(page, 0).locator('.vs-criteres-lus li')).toHaveText(['Cite le texte Critère essentiel', 'Explique le procédé']);
+        await expect(cibleLue(page, 1).locator('.vs-criteres-lus li')).toHaveText(['Annonce le plan']);
+        let e = await lireEnsemble(page);
+        expect(e.cibles.map((c) => c.criteres.map((k) => [k.texte, k.essentiel]))).toEqual([[['Cite le texte', true], ['Explique le procédé', false]], [['Annonce le plan', false]]]);
+        const ids = e.cibles[0].criteres.map((k) => k.id);
+        expect(ids.every(Boolean) && ids[0] !== ids[1]).toBe(true);
+
+        // 4. Renommer le second, retirer le premier : l'identité du renommé reste.
+        await regler(page, 'cibles');
+        await bloc.locator('.vs-criteres').nth(0).locator('.vs-critere-texte').nth(1).fill('Explique le procédé et son effet');
+        await bloc.locator('.vs-criteres').nth(0).locator('[data-action="VueSimple.critereGeste"][data-param="retirer"]').first().click();
+        await enregistrerLeReglage(page, 'Cibles enregistrées.');
+        e = await lireEnsemble(page);
+        expect(e.cibles[0].criteres).toEqual([{ id: ids[1], texte: 'Explique le procédé et son effet', essentiel: false }]);
+        expect(erreurs).toEqual([]);
+    });
+
+    test('inscrire un niveau : les critères de la cible se cochent, rien n\'est calculé ; une cible sans critère n\'en montre aucun', async ({ page }) => {
+        const erreurs = await ouvrir(page);
+        await collerLaClasse(page);
+        await choisirParStandards(page, 'Analyser un texte\nStructurer un propos');
+        await cibleLue(page, 0).locator('[data-action="VueSimple.ajouterCritere"]').click();
+        await page.keyboard.type('Cite le texte');
+        await ecran(page, 'pratique').locator('.vs-criteres').nth(0).locator('[data-param="ajouter"]').click();
+        await page.keyboard.type('Explique le procédé');
+        await enregistrerLeReglage(page, 'Cibles enregistrées.');
+
+        await allerA(page, 'resultats');
+        await caseCible(page, 1, 1).click();
+        await expect(fenetre(page)).toBeVisible();
+        await expect(fenetre(page).locator('.tc-critere')).toHaveCount(2);
+        await expect(fenetre(page).locator('.tc-critere').first().locator('.tc-coche')).toHaveText(['Respecté', 'Non respecté']);
+        await fenetre(page).locator('.tc-critere').first().locator('.tc-coche--oui').click();
+        await fenetre(page).locator('.tc-niveau:has(input[value="2"])').click();
+        await fenetre(page).locator('[data-tc="inscrire-simple"]').click();
+        await expect(fenetre(page)).toHaveCount(0);
+        const [i] = await lireInscriptions(page);
+        expect([i.niveau, i.criteres.map((k) => [k.texte, k.respecte])]).toEqual(['2', [['Cite le texte', true], ['Explique le procédé', null]]]);
+
+        // La dernière inscription montre ses critères ; la cible sans critère n'a pas de section « Critères ».
+        await caseCible(page, 1, 1).click();
+        await expect(fenetre(page).locator('.tc-derniere-hote .tc-entree-critere')).toHaveCount(2);
+        await fenetre(page).locator('[data-tc="fermer"]').first().click();
+        await caseCible(page, 1, 2).click();
+        await expect(fenetre(page).locator('.tc-critere')).toHaveCount(0);
+        await expect(fenetre(page).locator('.tc-section-titre', { hasText: /^Critères$/ })).toHaveCount(0);
+        expect(erreurs).toEqual([]);
+    });
+
+    test('des critères réglés en vue étendue se lisent en vue simple, et l\'inverse ; retirer un critère coché ne touche pas l\'inscription', async ({ page }) => {
+        const erreurs = await ouvrir(page);
+        await collerLaClasse(page);
+        await choisirParStandards(page, 'Analyser un texte');
+        // La vue étendue écrit par le même écrivain (`EnsemblesCibles.enregistrer`) : énoncé, poids, critères.
+        await page.evaluate(async () => {
+            const e = window.db.getSync(window.cle('ensemblesCibles'), [])[0];
+            const c = Object.assign({}, e.cibles[0], { enonce: 'Énoncé fictif', poids: 3, criteres: [{ id: 'k-et-1', texte: 'Repère les procédés', essentiel: true }, { id: 'k-et-2', texte: 'Cite', essentiel: false }] });
+            await window.EnsemblesCibles.enregistrer({ id: e.id, coursId: e.coursId, cibles: [c] }, { geste: 'banc' });
+        });
+        await allerA(page, 'note');
+        await allerA(page, 'pratique');
+        await expect(cibleLue(page, 0).locator('.vs-criteres-lus li')).toHaveText(['Repère les procédés Critère essentiel', 'Cite']);
+
+        // Une inscription qui coche le premier critère.
+        await allerA(page, 'resultats');
+        await caseCible(page, 1, 1).click();
+        await fenetre(page).locator('.tc-critere').first().locator('.tc-coche--non').click();
+        await fenetre(page).locator('.tc-niveau:has(input[value="1"])').click();
+        await fenetre(page).locator('[data-tc="inscrire-simple"]').click();
+        await expect(fenetre(page)).toHaveCount(0);
+        const avant = JSON.stringify(await lireInscriptions(page));
+
+        // En vue simple : le premier retiré, un critère ajouté. L'énoncé et le poids de la vue étendue restent.
+        await regler(page, 'cibles');
+        const bloc = ecran(page, 'pratique').locator('#vs-bloc-cibles .vs-criteres').nth(0);
+        await bloc.locator('[data-param="retirer"]').first().click();
+        await bloc.locator('[data-param="ajouter"]').click();
+        await page.keyboard.type('Conclut');
+        await enregistrerLeReglage(page, 'Cibles enregistrées.');
+        const e = await lireEnsemble(page);
+        expect([e.cibles[0].enonce, e.cibles[0].poids]).toEqual(['Énoncé fictif', 3]);
+        expect(e.cibles[0].criteres.map((k) => k.texte)).toEqual(['Cite', 'Conclut']);
+        // L'inverse : l'éditeur de la vue étendue, posé sur ces cibles puis relu, rend les critères de la vue simple, identités comprises.
+        const etendue = await page.evaluate(() => {
+            const cibles = window.EnsemblesCibles.normaliserCibles(window.db.getSync(window.cle('ensemblesCibles'), [])[0].cibles);
+            const hote = document.createElement('div');
+            window.EditeurCibles.poserStandards(hote, cibles);
+            return window.EditeurCibles.lireStandards(hote)[0].criteres;
+        });
+        expect(etendue).toEqual(e.cibles[0].criteres);
+        // L'inscription passée garde le critère retiré, son texte et sa coche : rien n'est effacé.
+        expect(JSON.stringify(await lireInscriptions(page))).toBe(avant);
+        expect(JSON.parse(avant)[0].criteres[0]).toEqual({ id: 'k-et-1', texte: 'Repère les procédés', essentiel: true, respecte: false });
         expect(erreurs).toEqual([]);
     });
 });

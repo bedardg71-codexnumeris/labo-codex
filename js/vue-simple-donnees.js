@@ -672,29 +672,54 @@
         return (etiquettes || []).map((e) => cibleSimple(idNeuf(), e, 1));
     }
 
-    /** Le brouillon des cibles : l'identité et l'étiquette de chacune, dans l'ordre. */
+    /** Les critères d'une cible au brouillon : identité, texte, « essentiel » (la forme de la vue étendue, sans plus). */
+    function _criteresAuBrouillon(criteres) {
+        return (criteres || []).filter((k) => k && k.id).map((k) => ({ id: String(k.id), texte: String(k.texte == null ? '' : k.texte), essentiel: k.essentiel === true }));
+    }
+
+    /** Le brouillon des cibles : l'identité, l'étiquette et les critères de chacune, dans l'ordre. */
     function brouillonDesCibles(cibles) {
-        return { cibles: (cibles || []).filter((c) => c && c.id).map((c) => ({ id: String(c.id), etiquette: c.etiquette || '' })) };
+        return { cibles: (cibles || []).filter((c) => c && c.id).map((c) => ({ id: String(c.id), etiquette: c.etiquette || '', criteres: _criteresAuBrouillon(c.criteres) })) };
+    }
+
+    /** Un brouillon neuf où la cible `index` a reçu `change(critères)` ; une cible absente laisse le brouillon tel quel. */
+    function _avecCriteres(b, index, change) {
+        if (!b.cibles[index]) return b;
+        return Object.assign({}, b, { cibles: b.cibles.map((c, i) => (i === index ? Object.assign({}, c, { criteres: change(c.criteres || []) }) : c)) });
     }
 
     /** Les gestes du brouillon des cibles (un brouillon neuf ; l'ancien n'est pas muté). Le retrait ne refuse rien ici :
-     *  une cible qui porte des inscriptions pose la question à l'enregistrement, comme dans l'assistant. */
+     *  une cible qui porte des inscriptions pose la question à l'enregistrement, comme dans l'assistant. Retirer un critère
+     *  ne pose aucune question : chaque inscription garde le texte des critères qu'elle a jugés (`etatDesCriteres`). */
     const gestesCibles = {
-        ajouter: (b, id) => Object.assign({}, b, { cibles: b.cibles.concat([{ id: String(id), etiquette: '', neuve: true }]) }),
-        retirer: (b, index) => (b.cibles[index] ? Object.assign({}, b, { cibles: b.cibles.filter((_, i) => i !== index) }) : b)
+        ajouter: (b, id) => Object.assign({}, b, { cibles: b.cibles.concat([{ id: String(id), etiquette: '', criteres: [], neuve: true }]) }),
+        retirer: (b, index) => (b.cibles[index] ? Object.assign({}, b, { cibles: b.cibles.filter((_, i) => i !== index) }) : b),
+        critereAjouter: (b, index, id) => _avecCriteres(b, index, (ks) => ks.concat([{ id: String(id), texte: '', essentiel: false }])),
+        critereRetirer: (b, index, rang) => _avecCriteres(b, index, (ks) => ks.filter((_, j) => j !== rang))
     };
 
+    /** Les critères à écrire : le texte rogné ; une ligne vide n'est pas un critère (règle de `normaliserCible`). */
+    function _criteresAEcrire(criteres) {
+        return _criteresAuBrouillon(criteres).map((k) => Object.assign(k, { texte: k.texte.trim() })).filter((k) => k.texte);
+    }
+
     /**
-     * Les cibles à écrire. Une cible gardée est l'ANCIENNE, entière (énoncé, critères, poids, « terminale » de la vue
-     * étendue), avec l'étiquette du brouillon ; une cible neuve prend le poids de l'assistant, calculé sur les cibles gardées.
+     * Les cibles à écrire. Une cible gardée est l'ANCIENNE, entière (énoncé, poids, « terminale » de la vue étendue), avec
+     * l'étiquette et les critères du brouillon (qui les a reçus de l'ancienne, identités comprises) ; une cible neuve prend
+     * le poids de l'assistant, calculé sur les cibles gardées. Un brouillon sans critères (`criteres` absent) garde ceux de
+     * l'ancienne.
      */
     function ciblesReglees(anciennes, brouillon) {
         const parId = new Map((anciennes || []).filter((c) => c && c.id).map((c) => [String(c.id), c]));
         const gardees = brouillon.cibles.filter((x) => parId.has(x.id)).map((x) => parId.get(x.id).poids);
         const poidsNeuf = poidsDUneCibleNeuve(gardees);
-        return brouillon.cibles.map((x) => (parId.has(x.id)
-            ? Object.assign({}, parId.get(x.id), { etiquette: String(x.etiquette).trim() })
-            : cibleSimple(x.id, x.etiquette, poidsNeuf)));
+        return brouillon.cibles.map((x) => {
+            const ancienne = parId.get(x.id);
+            const criteres = Array.isArray(x.criteres) ? _criteresAEcrire(x.criteres) : (ancienne ? ancienne.criteres : []);
+            return ancienne
+                ? Object.assign({}, ancienne, { etiquette: String(x.etiquette).trim(), criteres })
+                : Object.assign(cibleSimple(x.id, x.etiquette, poidsNeuf), { criteres });
+        });
     }
 
     /** Les poids sont-ils égaux ? (sinon, ils ont été réglés en vue étendue : la vue simple le dit et n'y touche pas) */
