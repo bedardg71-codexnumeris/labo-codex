@@ -119,7 +119,7 @@ test(`profil › Engagement (${largeur} px) · deux absences, deux titres de le�
 // doivent se trouver à l'écran : une sonde qui ne trouve jamais rien ne prouverait rien. ⚠ Le numéro de groupe réel
 // paraît déjà, en anonymisation, dans le sélecteur de cours de l'en-tête (« gr. 0demo », mesuré avant ce correctif) :
 // sa sonde se borne donc au profil.
-test('profil › Engagement, en anonymisation : les mêmes leçons sous les absences ; ni nom, ni DA, ni groupe réels', async ({ page }) => {
+test('profil › Engagement, en anonymisation : les mêmes leçons sous les absences ; ni nom, ni DA, ni groupe réels ; plus de « Gr. ? »', async ({ page }) => {
     test.setTimeout(120000);
     await page.setViewportSize({ width: 1280, height: 1024 });
     page.on('dialog', (d) => d.dismiss());
@@ -199,7 +199,11 @@ test('profil › Engagement, en anonymisation : les mêmes leçons sous les abse
         const normal = await releve();
         await changerMode(MODES.ANONYMISATION); await pause(800);
         const anonyme = await releve();
-        return { dates: [a1.date, a2.date, a3.date], normal, anonyme, mode: db.getSync('modeApplication') };
+        // « Groupe Gr. ? » (19 nov.) : une table de groupes posée sur un autre trimestre, qui ne connaît pas ce groupe.
+        db.setSync('mapping_groupes_anonymes', { '00001': 'Gr. A', '00002': 'Gr. B' });
+        const tablePerimee = await releve();
+        return { dates: [a1.date, a2.date, a3.date], normal, anonyme, tablePerimee, mode: db.getSync('modeApplication'),
+            table: db.getSync('mapping_groupes_anonymes', null) };
     });
 
     expect(r.erreur).toBeUndefined();
@@ -221,6 +225,16 @@ test('profil › Engagement, en anonymisation : les mêmes leçons sous les abse
         expect(r.anonyme.trouve[k].profil, `« ${k} » réel absent du profil`).toBe(false);
         expect(r.anonyme.trouve[k].carteHtml, `« ${k} » réel absent du HTML de la carte Assiduité`).toBe(false);
     });
-    expect(r.anonyme.etiquetteGroupe).toMatch(/^Groupe\s+Gr\. [A-Z?]$/);
+    expect(r.anonyme.etiquetteGroupe).toMatch(/^Groupe\s+Gr\. [A-Z]$/);
+
+    // 3. Table de groupes posée ailleurs : le groupe reçoit la première lettre libre (« Gr. C »), plus « Gr. ? » ;
+    //    « Gr. A » et « Gr. B » gardent leurs groupes ; les leçons et le masque tiennent toujours.
+    expect(r.tablePerimee.etiquetteGroupe).toMatch(/^Groupe\s+Gr\. C$/);
+    expect(r.table['00001']).toBe('Gr. A');
+    expect(r.table['00002']).toBe('Gr. B');
+    expect(r.tablePerimee.parDate).toEqual(r.normal.parDate);
+    Object.keys(r.tablePerimee.trouve).forEach(k => {
+        expect(r.tablePerimee.trouve[k].profil, `« ${k} » réel absent du profil (table posée ailleurs)`).toBe(false);
+    });
     expect(erreurs).toEqual([]);
 });

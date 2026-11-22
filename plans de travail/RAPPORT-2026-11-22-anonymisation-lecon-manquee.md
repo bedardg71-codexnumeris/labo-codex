@@ -1,8 +1,9 @@
 # Rapport · la leçon manquée en mode anonymisation (22 nov. 2026)
 
-Branche : `claude/stoic-heisenberg-yncp9u`, partie de `origin/main` à `78e952293` (1.254.0). Commit unique, poussé sur la
+Branche : `claude/stoic-heisenberg-yncp9u`, partie de `origin/main` à `78e952293` (1.254.0). Deux commits, poussés sur la
 branche seule. **Rien sur `main`, aucune release** : le mandat réserve la mise en ligne au feu vert de Grégoire.
-Fait : correctif, deux essais, break-test. Reste : feu vert, fusion, verdict WebKit du Mac, ligne de SUIVI-BUGS (proposée § 5).
+Fait : la leçon manquée (commit 1) ; « Gr. ? », posé sur l'accord de Grégoire du 22 nov. (commit 2) ; essais et
+break-tests des deux. Reste : feu vert, fusion, verdict WebKit du Mac, ligne de SUIVI-BUGS (proposée § 5).
 
 Mandat : Cowork, 22 nov., sur le commentaire de Grégoire du 19 nov. (1.250.0, iPad). En anonymisation, la carte
 « Assiduité » du profil (section « Engagement ACP ») n'affiche plus la leçon prévue sous chaque absence ; l'étiquette dit
@@ -19,8 +20,9 @@ Rejoué dans Chromium sur le pack démo, avec une carte d'alignement qui place d
 | 3e absence (aucune leçon ce jour-là) | « mer. 8 oct. 1 pér. » | idem | idem |
 | étiquette du groupe | « Groupe demo » | « Groupe Gr. A » | « Groupe Gr. A » (inchangée) |
 
-Même résultat avec un mapping de groupes qui ne connaît pas le groupe (étiquette « Groupe Gr. ? ») : les leçons
-reviennent aussi.
+Avec une table de groupes qui ne connaît pas le groupe (posée sur un autre trimestre) : avant, « Groupe Gr. ? » et pas
+de leçon ; après le commit 1, les leçons reviennent ; après le commit 2, l'étiquette dit « Groupe Gr. C » (A et B étaient
+pris).
 
 ## 2. Le maillon qui cassait
 
@@ -44,7 +46,7 @@ Ce sont des dates, rien d'identifiant.
 
 **Source ou stock** : source seulement. Rien n'est écrit ; il n'y a pas de stock.
 
-## 3. « Groupe Gr. ? » : un autre défaut, pas la même ligne
+## 3. « Groupe Gr. ? » : un autre défaut, pas la même ligne (posé au commit 2)
 
 `anonymiserGroupe` (`js/modes.js`) lit la clé **globale** `mapping_groupes_anonymes` (non préfixée par trimestre). Elle la
 crée une seule fois, au premier passage, avec les groupes du trimestre actif à ce moment-là, puis ne l'étend jamais. Un
@@ -54,10 +56,17 @@ Inférence, non vérifiable sans ses données : la table de Grégoire a été cr
 groupes de l'automne 2026 n'y sont pas. Ce n'est pas voulu : deux groupes réels différents s'afficheraient tous deux
 « Gr. ? ».
 
-**Correction proposée, non posée** : quand un groupe manque à la table, `anonymiserGroupe` lui donne la lettre libre
-suivante et réécrit la table, comme `genererMappingAnonyme` étend déjà la table des élèves ; les lettres déjà données ne
-bougent pas, et la garde d'écriture (`modes.js`, qui relit la même table pour rendre « Gr. A » à son numéro) continue de
-fonctionner. Elle écrit dans une clé d'affichage de l'app, pas dans ses trimestres. Aucun mot nouveau à l'écran.
+**Correction posée** (accord de Grégoire, 22 nov.) : quand un groupe manque à la table, `anonymiserGroupe` lui donne la
+première lettre libre et réécrit la table, comme `genererMappingAnonyme` étend déjà la table des élèves. Les lettres déjà
+données ne bougent pas. Jamais de doublon : la garde d'écriture (`retirerSubstitutionsAnonymisation`) relit la même table
+pour rendre une lettre à son numéro, et une lettre portée par deux groupes y rendrait le mauvais ; les 26 lettres prises,
+« Gr. ? » comme avant. Elle écrit dans une clé d'affichage de l'app, pas dans ses trimestres. Aucun mot nouveau à l'écran.
+Cache de `index.html` monté (`modes.js?v=20261122a`).
+
+**Source ou stock** : les deux, sans geste à part. La table périmée déjà écrite chez Grégoire se complète d'elle-même au
+prochain affichage en anonymisation ; rien d'autre n'est touché. Écrans concernés par la même fonction : l'étiquette du
+profil, les listes et évaluations anonymisées, l'en-tête du profil et l'aperçu du tableau de bord
+(`profil-etudiant-sections-affichage.js`, `tableau-bord-apercu.js`).
 
 ## 4. Les essais
 
@@ -70,7 +79,16 @@ fonctionner. Elle écrit dans une clé d'affichage de l'app, pas dans ses trimes
   doivent trouver ces valeurs.
 - **Break-test** : correctif retiré, les deux essais rougissent (Vitest : 1 rouge sur 20 ; Playwright : leçons attendues,
   absentes). Correctif remis, les deux verts.
-- **Suite Vitest complète** : 948 fichiers, 12 305 essais verts.
+- **« Gr. ? », Vitest**, `tests/unit/sentinelle-anonymisation-groupe-lettre-libre.test.js`, cinq cas sur `modes.js` réel :
+  table périmée → « Gr. C », A et B intacts ; lettre stable, table non réécrite à la seconde lecture ; deux groupes neufs,
+  deux lettres ; 26 lettres prises → « Gr. ? », table intacte ; la garde d'écriture rend « Gr. C » à « 01 ».
+- **« Gr. ? », Playwright** : l'essai en anonymisation a une troisième phase, table posée ailleurs → « Groupe Gr. C »,
+  leçons et masque tenus.
+- **Break-test « Gr. ? »** : bloc retiré, 4 cas Vitest sur 5 rougissent (le cas « 26 lettres » reste vert par construction)
+  et Playwright reçoit « Groupe Gr. ? ». Bloc remis, tout vert.
+- **Suite Vitest complète** : 949 fichiers, 12 310 essais verts (après le commit 2 ; le noyau a signalé un processus tué
+  pendant la course, sans rouge au bilan).
+- **Specs d'anonymisation voisines, après le commit 2** (lot A, rangée du profil, parcours 7) : 24 verts.
 - **Specs voisines en Chromium** (signal des consignes, anonymisation lot A, rangée du profil, registre longitudinal) :
   23 verts, 1 rouge, `registre-longitudinal-915` R5 (géométrie des tuiles), **rouge à l'identique sans le correctif** :
   préexistant sous Chromium, sans lien.
@@ -80,10 +98,10 @@ fonctionner. Elle écrit dans une clé d'affichage de l'app, pas dans ses trimes
 ## 5. Dispositions
 
 - **Corrigé maintenant** : la leçon manquée en anonymisation (mandat).
-- **Proposé, non posé** : « Gr. ? » (§ 3), à la décision de Grégoire.
+- **Posé sur accord de Grégoire** : « Gr. ? » (§ 3).
 - **Trouvaille, signalée et non inscrite** (aucun symptôme vécu) : en anonymisation, le sélecteur de cours de l'en-tête
   affiche toujours le numéro de groupe réel (« 601-101 · gr. 0demo »), mesuré avant le correctif. Grégoire jugera si ça
   compte en démonstration.
 - **Commenté et oublié** : le rouge R5 de `registre-longitudinal-915` sous Chromium.
 - **Ligne de SUIVI-BUGS proposée** (numéro à confirmer à la fusion ; `#1303` était libre au relais du 22 nov., 9 h 20) :
-  `| 1303 | Grégoire | 19 nov. | 22 nov. | (build de la release) | En anonymisation, le profil n'affiche plus la leçon manquée sous les absences | 2.2 métadonnées : obtenirGcIdEleve comparait la lettre substituée (« Gr. A ») au groupeNum ; compare groupeReel || groupe (synthese-retroaction-data.js) |`
+  `| 1303 | Grégoire | 19 nov. | 22 nov. | (build de la release) | En anonymisation, le profil n'affiche plus la leçon manquée sous les absences ; l'étiquette dit « Groupe Gr. ? » | 2.2 métadonnées : obtenirGcIdEleve comparait la lettre substituée (« Gr. A ») au groupeNum ; compare groupeReel || groupe (synthese-retroaction-data.js). « Gr. ? » : la table globale des lettres de groupe n'était jamais étendue ; anonymiserGroupe donne la première lettre libre, sans doublon (modes.js) |`
