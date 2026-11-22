@@ -375,3 +375,154 @@ describe('V8 · les accroches du lot dans le code', () => {
  * NON JOUABLE EN UNITAIRE : la relecture de l'échelle DANS la file (une course entre deux arrivées) ; la garde avant la
  *      file (BT2b) est celle qui est jugée.
  */
+
+/* ------------------------------------------------------------------ Complément du 21 nov. 2026, 22 h (mandat de Cowork, 21 h) */
+/*
+ * V9   l'échelle : une IDENTIQUE déjà là sert (même identité, même nom, ou une copie déjà importée) ; une DIFFÉRENTE
+ *      qui porte la même identité n'est ni réécrite ni employée : l'échelle reçue arrive en copie, sous une identité
+ *      neuve et le nom suivi de « (importée) », et la pratique la nomme ;
+ * V10  un partage .lcz nomme une identité d'échelle préfixée : à l'arrivée, la pratique nomme celle qui sert ;
+ * V11  une « Par standards » sans bagage et sans ensemble dans le trimestre : `arriveSansCibles`, et ses mots.
+ * Break-tests du complément : journal BT16 à BT20, en fin de fichier.
+ */
+const AUTRE = () => Object.assign(clone(ECHELLE), { niveaux: clone(ECHELLE.niveaux).map(n => (n.code === '1' ? Object.assign(n, { valeurCalcul: 40 }) : n)) });
+
+describe('V9 · l\'échelle à l\'arrivée : identique, elle sert ; différente, une copie', () => {
+    it('même identité, niveaux DIFFÉRENTS : l\'échelle en place n\'est ni réécrite ni employée ; une copie « (importée) » arrive et la pratique la nomme', async () => {
+        const enPlace = AUTRE();
+        const { EC, store } = monter({ act_echellesTemplates: [clone(enPlace)] });
+        const arrivee = await EC.deposer(EC.emporter(clone(STD), 'src'));
+        expect(store.act_echellesTemplates).toHaveLength(2);
+        expect(store.act_echellesTemplates[0]).toEqual(enPlace);
+        const copie = store.act_echellesTemplates[1];
+        expect(copie.id).not.toBe(ECHELLE.id);
+        expect(copie.id).toMatch(/^ECH_/);
+        expect(copie.nom).toBe('Échelle du voyage (importée)');
+        expect(copie.niveaux).toEqual(ECHELLE.niveaux);
+        expect(copie.verrouille).toBe(false);
+        expect(arrivee.configuration.echelleId).toBe(copie.id);
+        expect(arrivee.configuration.niveauSansDonnee).toBe('0');
+    });
+
+    it('un second dépôt retrouve la copie déjà importée : aucune troisième échelle', async () => {
+        const { EC, store } = monter({ act_echellesTemplates: [AUTRE()] });
+        const un = await EC.deposer(EC.emporter(clone(STD), 'src'));
+        const deux = await EC.deposer(EC.emporter(clone(STD), 'src'));
+        expect(store.act_echellesTemplates).toHaveLength(2);
+        expect(deux.configuration.echelleId).toBe(un.configuration.echelleId);
+        expect(store.act_ensemblesCibles).toHaveLength(2);   // chaque pratique garde son propre ensemble
+    });
+
+    it('une autre identité, le même nom et les mêmes niveaux : elle sert, rien n\'est écrit aux échelles', async () => {
+        const jumelle = Object.assign(clone(ECHELLE), { id: 'ECH-locale', verrouille: false });
+        const { EC, store, journal } = monter({ act_echellesTemplates: [clone(jumelle)] });
+        const arrivee = await EC.deposer(EC.emporter(clone(STD), 'src'));
+        expect(store.act_echellesTemplates).toEqual([jumelle]);
+        expect(cles(journal)).toEqual(['act_ensemblesCibles']);
+        expect(arrivee.configuration.echelleId).toBe('ECH-locale');
+    });
+
+    it('le même nom, des niveaux différents, une autre identité : ce n\'est pas elle ; l\'échelle reçue arrive sous son identité', async () => {
+        const homonyme = Object.assign(AUTRE(), { id: 'ECH-homonyme' });
+        const { EC, store } = monter({ act_echellesTemplates: [clone(homonyme)] });
+        const arrivee = await EC.deposer(EC.emporter(clone(STD), 'src'));
+        expect(store.act_echellesTemplates.map(e => e.id)).toEqual(['ECH-homonyme', ECHELLE.id]);
+        expect(arrivee.configuration.echelleId).toBe(ECHELLE.id);
+    });
+
+    it('`memesNiveaux` : les codes, les noms, les valeurs ponctuelles et les bornes ; ni le nom de l\'échelle ni ses états locaux', () => {
+        const { EC } = monter();
+        expect(EC.memesNiveaux(ECHELLE, Object.assign(clone(ECHELLE), { nom: 'Autre nom', verrouille: false, id: 'x' }))).toBe(true);
+        for (const [champ, valeur] of [['code', '9'], ['nom', 'Autre'], ['valeurCalcul', 26], ['min', 13], ['max', 38]]) {
+            const e = clone(ECHELLE);
+            e.niveaux[1][champ] = valeur;
+            expect(EC.memesNiveaux(ECHELLE, e), champ).toBe(false);
+        }
+        expect(EC.memesNiveaux(ECHELLE, Object.assign(clone(ECHELLE), { niveaux: ECHELLE.niveaux.slice(0, 2) }))).toBe(false);
+    });
+});
+
+describe('V10 · un partage .lcz : la pratique nomme l\'échelle qui sert, pas l\'identité préfixée du paquet', () => {
+    const recue = () => {
+        const { EC } = monter();
+        const p = EC.emporter(clone(STD), 'src');
+        p.configuration.echelleId = 'PARTAGE_abc_' + ECHELLE.id;   // ce que fait `prefixerEntites` à la réception
+        return p;
+    };
+    it('trimestre vide : l\'échelle du bagage est recréée sous son identité, et nommée', async () => {
+        const { EC, store } = monter();
+        const arrivee = await EC.deposer(recue());
+        expect(store.act_echellesTemplates.map(e => e.id)).toEqual([ECHELLE.id]);
+        expect(arrivee.configuration.echelleId).toBe(ECHELLE.id);
+        expect(arrivee.configuration).not.toHaveProperty('ciblesEmportees');
+        expect(store.act_ensemblesCibles[0].id).toBe(arrivee.configuration.ensembleCiblesId);
+    });
+    it('l\'échelle identique est déjà là : elle sert, et la pratique la nomme', async () => {
+        const { EC, store } = monter({ act_echellesTemplates: [clone(ECHELLE)] });
+        const arrivee = await EC.deposer(recue());
+        expect(store.act_echellesTemplates).toHaveLength(1);
+        expect(arrivee.configuration.echelleId).toBe(ECHELLE.id);
+    });
+});
+
+describe('V11 · une « Par standards » qui arrive sans ses cibles se reconnaît, et se dit', () => {
+    it('sans bagage, et son ensemble absent du trimestre actif : oui', () => {
+        const { EC } = monter();
+        expect(EC.arriveSansCibles(clone(STD))).toBe(true);
+    });
+    it('avec son bagage, ou avec son ensemble dans le trimestre actif, ou d\'une autre famille : non', () => {
+        const { EC } = monter({ act_ensemblesCibles: [clone(ENSEMBLE)] });
+        expect(EC.arriveSansCibles(clone(STD))).toBe(false);
+        const vide = monter();
+        expect(vide.EC.arriveSansCibles(vide.EC.emporter(clone(STD), 'src'))).toBe(false);
+        expect(vide.EC.arriveSansCibles(clone(SOM))).toBe(false);
+        expect(vide.EC.arriveSansCibles(null)).toBe(false);
+    });
+    it('les mots de l\'avis nomment la pratique et renvoient à l\'assistant', () => {
+        const { EC } = monter();
+        const avis = EC.avisSansCibles('Par standards fictive');
+        expect(avis.titre).toBe('« Par standards fictive » arrive sans ses cibles.');
+        expect(avis.detail).toBe('Ce fichier ne les contient pas. Rouvre la pratique dans l\'assistant pour les dire.');
+    });
+});
+
+describe('V12 · les portes par fichier déposent ou disent (lu dans le code ; joué au banc)', () => {
+    const gestion = sansCommentaires(readFileSync(path.join(RACINE, 'js/pratiques-gestion.js'), 'utf8'));
+    const partage = sansCommentaires(readFileSync(path.join(RACINE, 'js/partage-section.js'), 'utf8'));
+    it('« Dupliquer » un partage : une pratique qui emporte passe par le dépôt, jamais par l\'écriture directe', () => {
+        expect(partage).toMatch(/if \(partagee && EC\.aEmporte\(partagee\)\) \{\s*return partageSection\.dupliquerPratiqueAvecCibles\(partagee\)/);
+        expect(partage).toMatch(/window\.EnsemblesCibles\.deposer\(copie, \{ geste: 'Dupliquer' \}\)\.then\(function \(prete\) \{\s*if \(!prete\) return null;\s*ajouterACollection\(window\.cle\('pratiquesConfigurables'\), prete\)/);
+    });
+    it('le fichier « Exporter (JSON) » d\'une seule pratique a un lecteur', () => {
+        expect(gestion).toMatch(/if \(donnees\.type === 'configuration-pratique' && une && typeof une === 'object' && !Array\.isArray\(une\)\) return \[une\];/);
+        expect(gestion).toMatch(/let pratiquesImportees = pratiquesDuFichier\(donnees\);/);
+    });
+    it('l\'import d\'un fichier et « Utiliser dans ce trimestre » disent une arrivée sans cibles', () => {
+        expect(gestion).toMatch(/pratiquesImportees\.forEach\(direArriveeSansCibles\);/);
+        expect(gestion).toMatch(/direArriveeSansCibles\(verifPratiques\.find\(p => p\.id === pratiqueId\)\);/);
+        expect(gestion).toMatch(/if \(!EC \|\| !pratique \|\| !EC\.arriveSansCibles\(pratique\)\) return;\s*const avis = EC\.avisSansCibles\(pratique\.nom\);\s*notifications\.info\(avis\.titre, avis\.detail\);/);
+        expect(partage).toMatch(/EC\.arriveSansCibles\(partagee\)/);
+    });
+});
+
+/*
+ * JOURNAL DES BREAK-TESTS DU COMPLÉMENT (joués un à un le 21 nov. 2026, chacun rétabli avant le suivant)
+ * Voir la fin du rapport (plans de travail/RAPPORT-2026-11-21-pratique-std-voyage.md, « Complément »).
+ */
+/*
+ * BT16 (V9) `choisirEchelle` : une échelle de même identité sert, quels que soient ses niveaux (la règle d'avant).
+ *      ROUGE (3) : « même identité, niveaux DIFFÉRENTS… », « un second dépôt… », « une autre identité, le même nom… ».
+ *      Banc, ROUGE (1) : « une échelle DIFFÉRENTE porte déjà la même identité… ».
+ * BT17 (V10) `deposer` : la pratique ne nomme plus l'échelle qui sert.
+ *      ROUGE (4) : deux essais de V9, les deux de V10. Banc, ROUGE (2) : le partage .lcz, l'échelle différente.
+ * BT18 (V12) `partageSection.dupliquer` : le dépôt contourné.
+ *      ROUGE (1) : « Dupliquer un partage… ». Banc, ROUGE (1) : le partage .lcz.
+ * BT19 (V12) `pratiquesDuFichier` : le lecteur du fichier d'une seule pratique retiré.
+ *      ROUGE (1) : « le fichier Exporter (JSON) d'une seule pratique a un lecteur ». Banc, ROUGE (2) : « Exporter
+ *      (JSON) », l'ancien fichier.
+ * BT20 (V11) `confirmerImportPratiques` : l'avis d'une arrivée sans cibles retiré.
+ *      ROUGE (1) : « l'import d'un fichier et Utiliser… ». Banc, ROUGE (1) : l'ancien fichier.
+ * BT21 (V11) `ajouterPratiqueALaSelection` : l'avis retiré.
+ *      ROUGE (1) : le même. Banc, ROUGE (1) : l'ancien fichier.
+ * (BT19 à BT21 rejoués après le découpage en `pratiquesDuFichier` et `direArriveeSansCibles`.)
+ */

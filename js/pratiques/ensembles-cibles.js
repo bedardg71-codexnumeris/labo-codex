@@ -255,7 +255,10 @@
      * `configuration.ciblesEmportees = { cibles, coursId, echelle }`, et les DÉPOSE à l'arrivée dans un trimestre :
      *   - l'ensemble est recréé sous une identité NEUVE (deux pratiques ne partagent jamais un ensemble ; aucun ensemble
      *     déjà présent n'est réécrit) ; les cibles et les critères gardent leur identité permanente ;
-     *   - l'échelle est recréée sous son identité si le trimestre ne l'a pas ; s'il l'a, elle sert telle quelle ;
+     *   - l'échelle (complément du 21 nov., 22 h) : une échelle IDENTIQUE déjà là sert telle quelle (même identité, ou
+     *     même nom, et les mêmes niveaux : codes, noms, valeurs ponctuelles, bornes) ; sinon elle est recréée, sous son
+     *     identité si elle est libre, sous une identité neuve et le nom suivi de « (importée) » si une échelle
+     *     DIFFÉRENTE la porte déjà. Aucune échelle présente n'est réécrite. La pratique nomme celle qui sert ;
      *   - le cours reste nommé s'il existe encore dans la bibliothèque des cours, sinon aucun ;
      *   - le bagage est retiré : dans un trimestre, la seule source des cibles est `ensemblesCibles`.
      * CE QUI NE VOYAGE JAMAIS : les inscriptions, les annulations, rien qui touche un·e étudiant·e. Ce bloc ne lit ni
@@ -319,6 +322,62 @@
         return Object.assign({}, propre, { dansBibliotheque: true, verrouille: false, dateCreation: propre.dateCreation || new Date().toISOString() });
     }
 
+    /** Deux échelles disent-elles la même chose pour le calcul et pour l'écran ? Leurs niveaux, dans l'ordre. */
+    function memesNiveaux(a, b) {
+        const forme = (e) => JSON.stringify(((e && Array.isArray(e.niveaux)) ? e.niveaux : []).map(n => n
+            ? [String(n.code), String(n.nom == null ? '' : n.nom), valeurDuNiveau(n), n.min == null ? null : Number(n.min), n.max == null ? null : Number(n.max)]
+            : null));
+        return forme(a) === forme(b);
+    }
+
+    const SUFFIXE_ECHELLE_IMPORTEE = ' (importée)';
+
+    /**
+     * L'échelle qui servira à l'arrivée. Pure. Une échelle identique déjà là (même identité, même nom, ou le nom d'une
+     * copie déjà importée) : la sienne, rien à écrire. Sinon l'échelle reçue : sous son identité si elle est libre, sous
+     * `idNeuf()` et un nom suffixé si une échelle DIFFÉRENTE porte déjà cette identité.
+     * @returns {{id:string, aEcrire:(Object|null)}}
+     */
+    function choisirEchelle(liste, echelle, idNeuf) {
+        const locales = (Array.isArray(liste) ? liste : []).filter(e => e && e.id);
+        const nomCopie = String(echelle.nom || '') + SUFFIXE_ECHELLE_IMPORTEE;
+        const jumelle = locales.find(e => (e.id === echelle.id || e.nom === echelle.nom || e.nom === nomCopie) && memesNiveaux(e, echelle));
+        if (jumelle) return { id: jumelle.id, aEcrire: null };
+        if (!locales.some(e => e.id === echelle.id)) return { id: echelle.id, aEcrire: echelle };
+        const copie = Object.assign({}, echelle, { id: idNeuf(), nom: nomCopie });
+        return { id: copie.id, aEcrire: copie };
+    }
+
+    /** Dépose l'échelle reçue dans le trimestre actif si aucune identique n'y est. Rend l'identité qui sert, ou null (écriture refusée). */
+    async function deposerEchelle(echelle, geste) {
+        let neuf = null;
+        const idNeuf = () => (neuf || (neuf = genererIdUnique('ECH_')));
+        let choix = choisirEchelle(db.getSync(cle('echellesTemplates'), []), echelle, idNeuf);
+        if (!choix.aEcrire) return choix.id;
+        const ecrite = await modifierEtAnnoncer(cle('echellesTemplates'), (lues) => {
+            const liste = Array.isArray(lues) ? lues : [];
+            choix = choisirEchelle(liste, echelle, idNeuf);   // relue dans la file
+            return choix.aEcrire ? liste.concat([choix.aEcrire]) : liste;
+        }, [], { geste: geste, discret: true }).catch(() => undefined);
+        return ecrite ? choix.id : null;
+    }
+
+    /**
+     * Une pratique « Par standards » qui arrive SANS ses cibles : aucun bagage, et l'ensemble qu'elle nomme n'est pas dans
+     * le trimestre actif (un fichier ou un exemplaire d'avant le 21 nov. 2026). Lecture seule. L'appelant le DIT.
+     */
+    function arriveSansCibles(pratique) {
+        return estParCibles(pratique) && !aEmporte(pratique) && !lireParId(pratique.configuration.ensembleCiblesId);
+    }
+
+    /** Les mots de cet avis (PROPOSÉS : TEXTES-2026-11-21-pratique-std-voyage.md, V7). */
+    function avisSansCibles(nom) {
+        return {
+            titre: `« ${nom || 'Cette pratique'} » arrive sans ses cibles.`,
+            detail: 'Ce fichier ne les contient pas. Rouvre la pratique dans l\'assistant pour les dire.'
+        };
+    }
+
     /**
      * Dépose dans le trimestre ACTIF ce que la pratique emporte, AVANT qu'elle y soit écrite (une pratique n'est jamais
      * écrite en désignant un ensemble qui n'existe pas). Rend une COPIE de la pratique, prête à écrire : elle nomme
@@ -335,15 +394,13 @@
         const bagage = copie.configuration[CHAMP_EMPORTE];
         delete copie.configuration[CHAMP_EMPORTE];
 
+        // L'échelle du bagage : une identique déjà là sert telle quelle ; sinon elle est recréée (`deposerEchelle`). La
+        // pratique nomme celle qui sert : un partage .lcz arrive en nommant une identité préfixée qui n'existe pas ici.
         const echelle = echelleADeposer(bagage.echelle);
-        // Déjà dans le trimestre : elle sert telle quelle, rien n'y est écrit.
-        const dejaLa = (liste) => (Array.isArray(liste) ? liste : []).some(e => e && e.id === copie.configuration.echelleId);
-        if (echelle && echelle.id === copie.configuration.echelleId && !dejaLa(db.getSync(cle('echellesTemplates'), []))) {
-            const ecrite = await modifierEtAnnoncer(cle('echellesTemplates'), (lues) => {
-                const liste = Array.isArray(lues) ? lues : [];
-                return dejaLa(liste) ? liste : liste.concat([echelle]);
-            }, [], { geste: geste, discret: true }).catch(() => undefined);
-            if (!ecrite) return null;
+        if (echelle) {
+            const echelleId = await deposerEchelle(echelle, geste);
+            if (!echelleId) return null;
+            copie.configuration.echelleId = echelleId;
         }
 
         const coursConnu = bagage.coursId && (db.getSync('cours', []) || []).some(c => c && c.id === bagage.coursId);
@@ -484,6 +541,10 @@
         emporter: emporter,
         aEmporte: aEmporte,
         deposer: deposer,
+        memesNiveaux: memesNiveaux,
+        choisirEchelle: choisirEchelle,
+        arriveSansCibles: arriveSansCibles,
+        avisSansCibles: avisSansCibles,
         etiquettesEmportees: etiquettesEmportees,
         libelleDuCours: libelleDuCours,
         rendreFiche: rendreFiche

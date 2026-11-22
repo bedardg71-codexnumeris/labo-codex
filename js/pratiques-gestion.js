@@ -933,6 +933,7 @@ async function ajouterPratiqueALaSelection(pratiqueId) {
     }
 
     notifications.succes(`Pratique "${configSource.nom}" ajoutée`);
+    direArriveeSansCibles(verifPratiques.find(p => p.id === pratiqueId));
 }
 
 /**
@@ -2781,23 +2782,39 @@ async function importerPratiquesUtilisateur(eventOuEl) {
 }
 
 /**
+ * Les pratiques qu'un fichier .json apporte, quel que soit son âge. Lève une erreur si aucune forme n'est reconnue.
+ *   - { metadata, contenu: { pratiques: [...] } } : « Exporter les pratiques de ce trimestre » (format CC) ;
+ *   - { configurations: [...] } : l'ancien format ;
+ *   - { type: 'configuration-pratique', configuration: {...} } : « Exporter (JSON) » d'UNE pratique
+ *     (`partagerPratiqueMateriel`, `exporterConfigurationPratique`). Ce fichier n'avait aucun lecteur (« Format
+ *     invalide », mesuré le 21 nov. 2026) : une pratique, la même porte.
+ */
+function pratiquesDuFichier(donnees) {
+    if (donnees.contenu && donnees.contenu.pratiques) return donnees.contenu.pratiques;
+    if (donnees.configurations) return donnees.configurations;
+    const une = donnees.configuration;
+    if (donnees.type === 'configuration-pratique' && une && typeof une === 'object' && !Array.isArray(une)) return [une];
+    throw new Error('Format invalide: pratiques ou configurations non trouvées');
+}
+
+/**
+ * Une « Par standards » qui arrive SANS ses cibles (un fichier ou un exemplaire d'avant le voyage des cibles, 21 nov.
+ * 2026) : elle entre quand même, et ça se DIT, jamais en silence. Les autres pratiques : rien.
+ */
+function direArriveeSansCibles(pratique) {
+    const EC = window.EnsemblesCibles;
+    if (!EC || !pratique || !EC.arriveSansCibles(pratique)) return;
+    const avis = EC.avisSansCibles(pratique.nom);
+    notifications.info(avis.titre, avis.detail);
+}
+
+/**
  * Confirme l'import et fusionne les pratiques
  * AJOUTÉ (8 jan 2026) : Fonction helper appelée depuis le modal de confirmation
  */
 window.confirmerImportPratiques = async function(donnees) {
     try {
-        let pratiquesImportees;
-
-        // Extraire le contenu (supporter ancien format et nouveau format CC)
-        if (donnees.contenu && donnees.contenu.pratiques) {
-            // Nouveau format CC: { metadata, contenu: { pratiques: [...] } }
-            pratiquesImportees = donnees.contenu.pratiques;
-        } else if (donnees.configurations) {
-            // Ancien format: { configurations: [...] }
-            pratiquesImportees = donnees.configurations;
-        } else {
-            throw new Error('Format invalide: pratiques ou configurations non trouvées');
-        }
+        let pratiquesImportees = pratiquesDuFichier(donnees);
 
         if (!Array.isArray(pratiquesImportees)) {
             throw new Error('Format invalide: les pratiques doivent être un tableau');
@@ -2852,6 +2869,7 @@ window.confirmerImportPratiques = async function(donnees) {
         // #1156 — « Pratiques disponibles » n'existe plus : les mots des grilles, des échelles et des cartouches.
         details.push(ligneMasquee || 'Elles sont dans ta bibliothèque : « Utiliser dans ce trimestre » les ajoute à ce trimestre.');
         notifications.succes('Import réussi', details.join(' '));
+        pratiquesImportees.forEach(direArriveeSansCibles);
 
     } catch (error) {
         console.error('Erreur lors de l\'import:', error);

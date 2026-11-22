@@ -58,6 +58,48 @@ Autre mesure, non prévue au mandat : la liste blanche par laquelle toute pratiq
 - **Trouvailles non portées au BACKLOG** : aucune n'a été vécue par Grégoire, et la règle du 24 août les en écarte. Elles sont inscrites ci-dessous, avec leur disposition ; à Cowork de dire si l'une monte.
 - **Rituel de fin de session** : non lancé (ni release ni fusion). L'audit du diff contre les règles de sécurité est fait par la sentinelle et par relecture.
 
+## Complément du 21 nov., 22 h — l'arrivée par fichier (mandat de Cowork de 21 h, option A de Grégoire)
+
+Le mandat de 21 h, écrit sur `main`, ne voyait pas cette branche. Comparé à elle, il laissait quatre écarts. Trois sont traités ici ; le quatrième (une fiche à un nouveau numéro) tombe : la fiche reste #1164.
+
+### Mesuré avant de construire (WebKit, trimestres fictifs)
+
+| Porte | Avant le complément |
+|---|---|
+| « Exporter les pratiques de ce trimestre », puis « Importer des pratiques » et « ← Utiliser dans ce trimestre » | La pratique arrivait avec ses cibles et son échelle. Aucun banc ne le gardait |
+| « Exporter (JSON) » d'une pratique, puis « Importer des pratiques » | **Refusé : « Format invalide: pratiques ou configurations non trouvées ».** Ce fichier n'avait aucun lecteur. C'est la forme du fichier « PAN-STD H27 essai » de Grégoire |
+| « Exporter pour partager » (.lcz), puis « Importer le partage d'une ou d'un collègue » et « Dupliquer » | **La pratique était écrite dans le trimestre sans que ses cibles soient déposées** : elle gardait son bagage, nommait un ensemble absent et une échelle à l'identité préfixée ; le tableau disait « cibles introuvables » |
+| Un fichier d'avant le lot, sans cibles embarquées | Aucun mot à l'import |
+
+La porte .lcz est celle que des collègues emploieront pour partager.
+
+### Ce qui change
+
+1. **Le partage .lcz dépose.** « Dupliquer » une pratique « Par standards » reçue passe par le propriétaire des cibles : l'ensemble est recréé sous une identité neuve, l'échelle est déposée, puis la pratique est écrite sans bagage.
+2. **« Exporter (JSON) » a un lecteur** : « Importer des pratiques » accepte ce fichier d'une seule pratique.
+3. **Un ancien fichier le dit** : à l'import, puis à « ← Utiliser dans ce trimestre », un avis nomme la pratique et dit qu'elle arrive sans ses cibles (texte V7). Rien n'est inventé : ni ensemble, ni échelle.
+4. **L'échelle, tranchée** : une échelle identique déjà présente est réutilisée (même identité ou même nom, et les mêmes niveaux : codes, noms, valeurs ponctuelles, bornes). Si une échelle différente porte la même identité, elle n'est ni réécrite ni employée : l'échelle reçue arrive en copie, « (importée) », et la pratique la nomme. Avant, une échelle de même identité servait telle quelle, même retouchée : la note pouvait changer sans un mot. La supposition 4 ci-dessus est remplacée par cette règle.
+
+Le geste du mandat, joué au banc : exporter, importer dans un autre trimestre, les cibles, leurs critères et l'échelle sont là, et la note se calcule (66,67 % pour deux niveaux inscrits sur des cibles de poids 1 et 2).
+
+### Mesuré, lu, non vu (complément)
+
+**Mesuré** : Vitest complet, 945 fichiers, 12 211 essais verts. Sentinelle du lot : 36 essais (13 neufs). Six mutations (BT16 à BT21), toutes rouges, journal en fin de sentinelle. Banc du lot sous WebKit : 10 essais (5 neufs). Bancs voisins sous WebKit, en trois passages : 20, 28 et 11 essais verts (partage, bibliothèque des pratiques, « Par standards », import entre trimestres, adoption de l'échelle).
+
+**Lu, pas joué** : la fenêtre de confiance et de prévisualisation d'un .lcz (le banc intègre le paquet après validation, sans elle ; elle a son propre banc). `exporterConfigurationPratique` (bibliothèque) : même forme de fichier que « Exporter (JSON) », pas de banc propre.
+
+**Non vu** : Safari (Mac, iPad) ; le verdict Playwright complet, dû avant fusion (`import-export.js` n'est pas touché ; `partage-section.js` l'est).
+
+### Supposé (complément)
+
+- L'avis V7 paraît aux deux moments (import, puis utilisation) : le second est celui où la pratique entre dans le trimestre.
+- Le stock : une pratique déjà dupliquée d'un .lcz avant ce complément reste sans cibles et le dit au tableau ; rien n'est réparé d'office.
+- Deux fonctions découpées pour tenir le cliquet de complexité (`pratiquesDuFichier`, `direArriveeSansCibles`, `deposerEchelle`).
+
+### Fichiers du complément
+
+`js/pratiques/ensembles-cibles.js` (l'échelle, l'avis), `js/pratiques-gestion.js` (le lecteur, l'avis), `js/partage-section.js` (« Dupliquer »), `index.html` (trois versions de cache), la sentinelle et le banc du lot, le fichier des textes (V7 à V9).
+
 ## Voir le voyage sur l'aperçu
 
 Il faut un trimestre qui contient une pratique « Par standards », et un second trimestre.

@@ -239,6 +239,151 @@ test('« Exporter (JSON) » emporte les cibles et l\'échelle, aucune inscriptio
     expect(lcz.configuration.ciblesEmportees.cibles).toHaveLength(2);
 });
 
+/* ------------------------------------------------------------------ Complément du 21 nov. 2026, 22 h : l'arrivée PAR FICHIER */
+// Mandat de Cowork (21 h) : « exporter la pratique, l'importer dans un autre trimestre ; ses cibles, leurs critères et son
+// échelle sont là, et la note se calcule ». Mesuré avant : le fichier groupé arrivait bien ; « Exporter (JSON) » était
+// refusé (« Format invalide ») ; le partage .lcz écrivait la pratique sans déposer ses cibles.
+
+const lireFichier = async (telechargement) => (await import('node:fs')).readFileSync(await telechargement.path());
+
+/** Importe un fichier .json par « Importer des pratiques », dans le trimestre actif, et confirme. */
+async function importerJson(page, nom, texte) {
+    await fenetre(page);
+    await page.setInputFiles('#fichier-import-pratiques-modal', { name: nom, mimeType: 'application/json', buffer: Buffer.from(texte) });
+    await page.locator('.modal-import-pratiques .btn-confirmer').click();
+    await expect(page.locator('.modal-import-pratiques')).toHaveCount(0);
+}
+const utiliser = async (page, nom) => {
+    await fenetre(page);
+    await rangeeBibliotheque(page, nom).locator('[data-action="ajouterPratiqueALaSelection"]').click();
+    await expect(rangeeTrimestre(page, nom)).toHaveCount(1);
+};
+const avis = (page) => page.locator('.notification-info .notification-texte');
+
+test('fichier « Exporter les pratiques de ce trimestre » → autre trimestre : les cibles, l\'échelle, et la note se calcule', async ({ page }) => {
+    const erreurs = [];
+    page.on('pageerror', (e) => erreurs.push(e.message));
+    await ouvrir(page);
+    const avant = await source(page);
+    const [t] = await Promise.all([page.waitForEvent('download'),
+        page.evaluate(() => { window.demanderMetadonneesEnrichies = async () => ({ description: 'Fichier fictif' }); window.exporterPratiquesUtilisateur(); })]);
+    const texte = (await lireFichier(t)).toString('utf8');
+    expect(texte).not.toContain(ZOE);
+    expect(await source(page)).toEqual(avant);
+
+    await activer(page, D);
+    await importerJson(page, 'pratiques.json', texte);
+    await utiliser(page, 'Par standards fictive');
+    const a = await arrivee(page);
+    const pratique = a.pratiques.find(p => p.nom === 'Par standards fictive');
+    jugerArrivee(a, pratique);
+    await expect(avis(page).filter({ hasText: 'sans ses cibles' })).toHaveCount(0);
+
+    // La note se calcule : Yan, « Avancé » (100) sur la cible de poids 1, « Ça y est presque » (50) sur celle de poids 2.
+    const note = await page.evaluate(({ D, pratiqueId }) => {
+        const p = window.db.getSync(D + '_pratiquesConfigurables').find(x => x.id === pratiqueId);
+        const I = (id, cibleId, niveau) => ({ id, type: 'inscription', da: '2100002', ensembleId: p.configuration.ensembleCiblesId, cibleId, niveau,
+            echelleId: p.configuration.echelleId, date: '2027-02-01', horodatage: '2027-02-01T10:00:00.000Z', productionId: null, noteBreve: '', criteres: [] });
+        // security-ok: fixtures littérales du banc.
+        window.db.setSync(D + '_inscriptionsCibles', [I('N1', 'cible_a', '4'), I('N2', 'cible_b', '2')]);
+        const n = window.NoteCibles.lireEleve(p.configuration, '2100002').note;
+        return { etat: n.etat, note: Math.round(n.note * 100) / 100 };
+    }, { D, pratiqueId: pratique.id });
+    expect(note).toEqual({ etat: 'note', note: 66.67 });
+    expect(await source(page)).toEqual(avant);
+    expect(erreurs).toEqual([]);
+});
+
+test('fichier « Exporter (JSON) » d\'une pratique → autre trimestre : il a un lecteur, et la pratique arrive avec ses cibles', async ({ page }) => {
+    const alertes = [];
+    page.on('dialog', async (d) => { alertes.push(d.message()); await d.accept(); });
+    await ouvrir(page);
+    const [t] = await Promise.all([page.waitForEvent('download'), page.evaluate(() => window.partagerPratiqueMateriel('cib-voy'))]);
+    const texte = (await lireFichier(t)).toString('utf8');
+    await activer(page, D);
+    await importerJson(page, 'une-pratique.json', texte);
+    expect(alertes).toEqual([]);                                    // avant : « Format invalide: pratiques ou configurations non trouvées »
+    await utiliser(page, 'Par standards fictive');
+    const a = await arrivee(page);
+    jugerArrivee(a, a.pratiques.find(p => p.nom === 'Par standards fictive'));
+    await tableauDArrivee(page, a.pratiques[0].id);
+    await expect(page.locator('.tc-col-cible .tn-production-titre')).toHaveText(['Analyser un texte', 'Rédiger une dissertation']);
+});
+
+test('un ANCIEN fichier, sans cibles embarquées : l\'import le dit, « Utiliser » le redit, rien n\'est inventé', async ({ page }) => {
+    await ouvrir(page);
+    // Le fichier tel qu'il sortait avant le lot : la pratique nomme son ensemble et son échelle, sans les porter.
+    const ancien = JSON.stringify({ version: '1.0', type: 'configuration-pratique', dateExport: '2026-11-21T20:00:00.000Z', configuration: STD });
+    await activer(page, D);
+    await importerJson(page, 'ancien.json', ancien);
+    await expect(avis(page).filter({ hasText: '« Par standards fictive » arrive sans ses cibles.' })).toHaveCount(1);
+    await expect(avis(page).filter({ hasText: 'arrive sans ses cibles' }).first())
+        .toContainText('Ce fichier ne les contient pas. Rouvre la pratique dans l\'assistant pour les dire.');
+    await page.evaluate(() => document.querySelectorAll('.notification-info').forEach(n => n.remove()));
+
+    await utiliser(page, 'Par standards fictive');
+    await expect(avis(page).filter({ hasText: '« Par standards fictive » arrive sans ses cibles.' })).toHaveCount(1);
+    const a = await arrivee(page);
+    expect(a.ensembles).toEqual([]);                                // aucun ensemble inventé
+    expect(a.echelles).toEqual([]);
+    expect(a.pratiques).toHaveLength(1);
+    expect(a.pratiques[0].configuration.ensembleCiblesId).toBe(ENSEMBLE.id);
+    // Une pratique d'une autre famille, par le même fichier : aucun avis.
+    await page.evaluate(() => document.querySelectorAll('.notification-info').forEach(n => n.remove()));
+    await importerJson(page, 'sommative.json', JSON.stringify({ version: '1.0', type: 'configuration-pratique', configuration: SOM }));
+    await expect(avis(page).filter({ hasText: 'sans ses cibles' })).toHaveCount(0);
+});
+
+test('partage .lcz → « Dupliquer » dans un autre trimestre : les cibles et l\'échelle sont déposées, la pratique les nomme', async ({ page }) => {
+    const erreurs = [];
+    page.on('pageerror', (e) => erreurs.push(e.message));
+    await ouvrir(page);
+    await fenetre(page);
+    const attente = page.waitForEvent('download');
+    await page.evaluate(() => { window.partageExport.exporterPourPartager('pratique', 'cib-voy'); });
+    await page.getByRole('button', { name: 'Exporter (.lcz)' }).click();
+    const octets = [...await lireFichier(await attente)];
+
+    await activer(page, D);
+    // La réception, sans la fenêtre de confiance (jugée ailleurs : partage-import-rendu) : lecture, validation, intégration.
+    const recu = await page.evaluate(async (octets) => {
+        const f = new File([new Uint8Array(octets)], 'pratique.lcz', { type: 'application/zip' });
+        const verdict = window.partageValidation.validerPackage(await window.partageImport.lirePackageDepuisFichier(f));
+        if (!verdict.valide) return { erreurs: verdict.erreurs };
+        window.partageImport.integrerPackage(verdict.packageNettoye, { statutConfiance: 'nouveau' });
+        const p = (window.db.getSync('partage_pratiques', []) || [])[0];
+        return { id: p.id, echelleId: p.configuration.echelleId, bagage: !!p.configuration.ciblesEmportees };
+    }, octets);
+    expect(recu.erreurs).toBeUndefined();
+    expect(recu.bagage).toBe(true);
+    expect(recu.echelleId).not.toBe(ECHELLE.id);                    // l'identité préfixée du paquet
+
+    await page.evaluate((id) => window.partageSection.dupliquer('pratique', id), recu.id);
+    await expect.poll(async () => (await arrivee(page)).pratiques.length).toBe(1);
+    const a = await arrivee(page);
+    jugerArrivee(a, a.pratiques[0]);                                // dont : l'échelle nommée est celle du trimestre, plus de bagage
+    expect(a.pratiques[0].id).not.toBe(recu.id);
+    await tableauDArrivee(page, a.pratiques[0].id);
+    await expect(page.locator('.tc-col-cible .tn-production-titre')).toHaveText(['Analyser un texte', 'Rédiger une dissertation']);
+    expect(erreurs).toEqual([]);
+});
+
+test('une échelle DIFFÉRENTE porte déjà la même identité à l\'arrivée : elle n\'est pas réécrite, une copie « (importée) » sert', async ({ page }) => {
+    await ouvrir(page);
+    const autre = { id: ECHELLE.id, nom: 'Échelle fictive du voyage', dansBibliotheque: true,
+        niveaux: NIVEAUX.map(n => (n.code === '2' ? Object.assign({}, n, { valeurCalcul: 60 }) : n)) };
+    await page.evaluate(({ D, autre }) => { window.db.setSync(D + '_echellesTemplates', [autre]); }, { D, autre });   // security-ok: fixture littérale
+    await activer(page, D);
+    await page.evaluate(async ({ S }) => { await window.importerUnePratiqueTrimestre(S, 'cib-voy'); }, { S });
+    await expect.poll(async () => (await arrivee(page)).pratiques.length).toBe(1);
+    const a = await arrivee(page);
+    expect(a.echelles).toHaveLength(2);
+    expect(a.echelles[0]).toEqual(autre);
+    expect(a.echelles[1].nom).toBe('Échelle fictive du voyage (importée)');
+    expect(a.echelles[1].niveaux).toEqual(NIVEAUX);
+    expect(a.pratiques[0].configuration.echelleId).toBe(a.echelles[1].id);
+});
+
 // Les captures du rapport : posées seulement à la demande (CAPTURES_VOYAGE = un dossier). La fenêtre des pratiques après
 // « Garder » : une rangée à l'état calme, une rangée qui offre le geste, l'aperçu de l'exemplaire qui dit ses cibles.
 test('captures : la fenêtre des pratiques, 1180 × 820 et 820 × 1180, clair et sombre', async ({ page }) => {

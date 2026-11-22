@@ -604,14 +604,44 @@
 
     /** data-action="partageSection.dupliquer" param=type param2=id */
     partageSection.dupliquer = function (type, id) {
+        // Lot pratique-std-voyage (21 nov. 2026) : une pratique « Par standards » partagée DÉPOSE ses cibles et son
+        // échelle dans le trimestre avant d'y être copiée (asynchrone : l'écriture passe par le propriétaire des cibles).
+        var EC = window.EnsemblesCibles;
+        var partagee = (type === 'pratique' && EC) ? trouverPartage(type, id) : null;
+        if (partagee && EC.aEmporte(partagee)) {
+            return partageSection.dupliquerPratiqueAvecCibles(partagee).then(function (resultat) {
+                if (!resultat) return;
+                if (typeof notifications !== 'undefined' && notifications.succes) notifications.succes(resultat.libelle);
+                rafraichirApres(type);
+            });
+        }
         var resultat = partageSection.dupliquerVersMesDocuments(type, id);
         if (!resultat) return;
         if (typeof notifications !== 'undefined' && notifications.succes) {
             notifications.succes(resultat.libelle);
         }
+        // Une « Par standards » d'un partage d'avant le voyage des cibles : elle arrive sans elles, et ça se dit.
+        if (partagee && EC.arriveSansCibles(partagee) && typeof notifications !== 'undefined' && notifications.info) {
+            var avis = EC.avisSansCibles(nomDe(partagee));
+            notifications.info(avis.titre, avis.detail);
+        }
         // Rafraîchir la modale d'où l'action vient (la copie apparaît en
         // Section 1 — elle est dansBibliotheque: true).
         rafraichirApres(type);
+    };
+
+    /**
+     * La copie d'une pratique « Par standards » partagée : ses cibles et son échelle sont déposées d'abord
+     * (`EnsemblesCibles.deposer`), puis la pratique est écrite, sans bagage, en nommant l'ensemble recréé.
+     * Dépôt refusé : rien n'est écrit (le témoin l'a dit). Retourne { libelle, idNouveau } ou null.
+     */
+    partageSection.dupliquerPratiqueAvecCibles = function (item) {
+        var copie = copiePropre(item, 'pratique');
+        return window.EnsemblesCibles.deposer(copie, { geste: 'Dupliquer' }).then(function (prete) {
+            if (!prete) return null;
+            ajouterACollection(window.cle('pratiquesConfigurables'), prete);
+            return { idNouveau: prete.id, libelle: 'Pratique « ' + nomDe(item) + ' » copiée dans tes documents, avec ses cibles' };
+        });
     };
 
     // ------------------------------------------------------------------
