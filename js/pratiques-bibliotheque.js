@@ -278,6 +278,47 @@ function obtenirToutesLesPratiquesBibliothequeSync(inclureGabarits = true) {
 }
 
 /**
+ * Lot modele-fourni-non-supprimable (22 nov. 2026) — les champs de TENUE d'un exemplaire : quand et par qui il est
+ * entré, sa licence, son drapeau de gabarit. Ils ne changent rien à ce que la pratique calcule ni à ce qu'elle
+ * propose. Tout autre champ compte : un champ qu'on ne connaît pas fait une copie DIFFÉRENTE, jamais l'inverse.
+ */
+const CHAMPS_DE_TENUE = ['dansBibliotheque', 'dateAjout', 'dateAjoutBiblio', 'dateModification', 'dateCreation',
+    'dateImport', 'estGabarit', 'auteur', 'auteurOriginal', 'metadata_cc', 'metadata', 'institution'];
+
+/** JSON aux clés triées, à toute profondeur : deux objets égaux s'écrivent pareil, quel que soit l'ordre des clés. */
+function formeCanonique(valeur) {
+    if (Array.isArray(valeur)) return '[' + valeur.map(formeCanonique).join(',') + ']';
+    if (valeur && typeof valeur === 'object') {
+        return '{' + Object.keys(valeur).filter(k => valeur[k] !== undefined).sort()
+            .map(k => JSON.stringify(k) + ':' + formeCanonique(valeur[k])).join(',') + '}';
+    }
+    return JSON.stringify(valeur === undefined ? null : valeur);
+}
+
+/**
+ * Lot modele-fourni-non-supprimable (22 nov. 2026) — vrai pour un modèle fourni avec l'application, tel qu'il est
+ * fourni : le prédéfini lui-même, ou une copie qui porte son `id` et ne diffère de lui que par les champs de tenue.
+ * Le supprimer de la bibliothèque n'aurait aucun effet visible : le prédéfini reprend sa place à la lecture
+ * (`obtenirToutesLesPratiquesBibliotheque`). Bug vécu par Grégoire le 22 nov. 2026 : deux avertissements de
+ * suppression définitive, et la ligne toujours là.
+ * ⚠ Une copie qui diffère (une version modifiée, ou une version d'avant un changement du modèle) n'est PAS
+ * reconnue : la supprimer change quelque chose, et ce geste reste à décider (rapport du lot).
+ * @param {Object} pratique
+ * @returns {boolean}
+ */
+function estModeleFourniIntact(pratique) {
+    if (!pratique || typeof pratique.id !== 'string') return false;
+    if (!Object.prototype.hasOwnProperty.call(MODELES_PRATIQUES_PREDEFINIS, pratique.id)) return false;
+    const modele = MODELES_PRATIQUES_PREDEFINIS[pratique.id];
+    const champs = new Set(Object.keys(modele).concat(Object.keys(pratique)));
+    for (const champ of champs) {
+        if (CHAMPS_DE_TENUE.indexOf(champ) !== -1) continue;
+        if (formeCanonique(pratique[champ]) !== formeCanonique(modele[champ])) return false;
+    }
+    return true;
+}
+
+/**
  * Obtenir les configurations d'un type de pratique spécifique
  * @param {string} typePratique - Type de pratique (specifications, standards, etc.)
  * @returns {Promise<Array>} Tableau des configurations de ce type
@@ -708,6 +749,7 @@ window.demanderEchelleAdoption = demanderEchelleAdoption;
 window.poserEchelleAdoption = poserEchelleAdoption;
 window.obtenirToutesLesPratiquesBibliotheque = obtenirToutesLesPratiquesBibliotheque;
 window.obtenirToutesLesPratiquesBibliothequeSync = obtenirToutesLesPratiquesBibliothequeSync;
+window.estModeleFourniIntact = estModeleFourniIntact;
 window.obtenirPratiquesParType = obtenirPratiquesParType;
 window.obtenirPratiquesParDiscipline = obtenirPratiquesParDiscipline;
 window.obtenirDisciplinesDisponiblesPratiques = obtenirDisciplinesDisponiblesPratiques;

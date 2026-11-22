@@ -261,6 +261,24 @@ function lignePratiqueBibliotheque(pratique, auteurActif) {
 }
 
 /**
+ * Lot modele-fourni-non-supprimable (22 nov. 2026) — la mention d'un modèle fourni avec l'application, intact.
+ * ⚠ MOTS PROPOSÉS, en attente du feu vert de Grégoire (règle du mandat : les mots nouveaux lui sont rendus avant de
+ * s'afficher).
+ */
+const MENTION_MODELE_FOURNI = 'fourni avec l\'application';
+
+/** Lot modele-fourni-non-supprimable — un modèle fourni avec l'application, intact (`estModeleFourniIntact`, pratiques-bibliotheque.js). */
+function estFourniIntact(pratique) {
+    return typeof estModeleFourniIntact === 'function' && estModeleFourniIntact(pratique);
+}
+
+/** Lot modele-fourni-non-supprimable — la ligne d'un modèle fourni intact : sa famille, puis la mention (à la place de l'auteur). */
+function lignePratiqueFournie(pratique) {
+    const famille = familleDeLaPratique(pratique);
+    return (famille ? famille.nom + ' · ' : '') + MENTION_MODELE_FOURNI;
+}
+
+/**
  * #1156 — L'aperçu qu'ouvre le nom d'une rangée : la description de la pratique, ou sa description
  * taxonomique sans la parenthèse anglaise ; la provenance ; puis l'échelle et la grille qu'elle
  * emploie (`configuration.echelleId`, `configuration.grilleId`), cherchées dans ce trimestre puis
@@ -314,9 +332,14 @@ async function preparerDonneesBibliothequePratiques() {
     }
     const pratiquesDisponibles = BibliothequeUI.filtrerParMaquette(BibliothequeUI.filtrerParModeDemo(toutesBibliotheque));
 
+    // Lot modele-fourni-non-supprimable (22 nov. 2026) — un modèle fourni avec l'application, intact, n'a rien à trancher :
+    // il ne se supprime pas. Il sort donc de l'analyse des doublons (côté bibliothèque seulement : ce qui est dans ce
+    // trimestre appartient à l'enseignant·e, et y reste).
+    const disponiblesATrancher = pratiquesDisponibles.filter(p => !estFourniIntact(p));
+
     // #291 — réunion des deux magasins avant analyse (cf. grilles.js).
     const doublonsDetectes = analyserDoublons(
-        reunirSources(pratiquesDansBibliotheque, pratiquesDisponibles), 'nom');
+        reunirSources(pratiquesDansBibliotheque, disponiblesATrancher), 'nom');
     // #291 — la puce d'identifiant ne s'affiche que sur une rangée que le bandeau nomme.
     const idsNommes = new Set();
     doublonsDetectes.forEach(groupe => groupe.exemplaires.forEach(ex => idsNommes.add(ex.id)));
@@ -388,13 +411,18 @@ async function preparerDonneesBibliothequePratiques() {
         if (repCourant) {
             menu.push({ label: 'Retirer du dossier', action: 'BibliothequeUI.repertoires.retirer', param: 'pratiques', param2: pratique.id, title: 'Sortir du dossier (repasse en non classées)' });
         }
-        if (menu.length) menu.push({ separateur: true });
-        menu.push({ label: 'Supprimer de ma bibliothèque', action: 'supprimerPratiqueDeBibliothequePartagee', param: pratique.id, classe: 'btn-supprimer', title: 'Supprimer de la bibliothèque' });
+        // Lot modele-fourni-non-supprimable — un modèle fourni, intact, n'offre pas « Supprimer » : le geste n'aurait aucun
+        // effet visible (le modèle reprend sa place à la lecture). Sa ligne dit d'où il vient, à la place de son auteur.
+        const fourniIntact = estFourniIntact(pratique);
+        if (!fourniIntact) {
+            if (menu.length) menu.push({ separateur: true });
+            menu.push({ label: 'Supprimer de ma bibliothèque', action: 'supprimerPratiqueDeBibliothequePartagee', param: pratique.id, classe: 'btn-supprimer', title: 'Supprimer de la bibliothèque' });
+        }
 
         const rangee = {
             id: pratique.id,
             nom: BibliothequeUI.formaterTitre(pratique.nom || 'Sans titre'),
-            ligne: lignePratiqueBibliotheque(pratique, auteurActif),
+            ligne: fourniIntact ? lignePratiqueFournie(pratique) : lignePratiqueBibliotheque(pratique, auteurActif),
             afficherId: idsNommes.has(pratique.id),
             dossier: repCourant,
             apercu: apercuPratiqueBibliotheque(pratique, catalogues),
@@ -1052,14 +1080,17 @@ async function supprimerPratiqueDeBibliothequePartagee(pratiqueId) {
     // Une pratique peut exister à deux endroits :
     //   - dans bibliothequePratiques IDB (copie utilisateur, supprimable)
     //   - dans MODELES_PRATIQUES_PREDEFINIS (seed code source, non supprimable depuis l'UI)
-    // Si l'ID partage entre les deux, on autorise la suppression de la copie IDB :
-    // le seed se réinjecte automatiquement au prochain rafraîchissement via
-    // obtenirToutesLesPratiquesBibliotheque (ligne 568 de pratiques-bibliotheque.js).
+    // Si l'ID partage entre les deux et que la copie DIFFÈRE du seed, on autorise la suppression de
+    // la copie IDB : le seed se réinjecte au prochain rafraîchissement via
+    // obtenirToutesLesPratiquesBibliotheque. (Ce que ce geste devrait dire dans ce cas — « revenir au
+    // modèle d'origine » — est une proposition du lot modele-fourni-non-supprimable, pas encore tranchée.)
     const bibliotheque = await db.get('bibliothequePratiques') || [];
-    const estDansIDB = bibliotheque.some(p => p.id === pratiqueId);
+    const copie = bibliotheque.find(p => p.id === pratiqueId);
 
-    if (!estDansIDB) {
-        // L'ID n'existe que dans le seed — gabarit pur non supprimable
+    // Lot modele-fourni-non-supprimable (22 nov. 2026) — une copie identique au modèle fourni est refusée comme le modèle
+    // lui-même : la retirer ne changerait rien à l'écran. La fenêtre n'offre plus ce geste ; la fonction dit la même règle.
+    if (!copie || estFourniIntact(copie)) {
+        // L'ID n'existe que dans le seed (ou sa copie est identique) — gabarit non supprimable
         if (typeof notifications !== 'undefined' && notifications.info) {
             notifications.info('Gabarit prédéfini', 'Ce gabarit est fourni par défaut avec l\'application et ne peut pas être supprimé. Il se réinjecte automatiquement au rafraîchissement.');
         } else {
