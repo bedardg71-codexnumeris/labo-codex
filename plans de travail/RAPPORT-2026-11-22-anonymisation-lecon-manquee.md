@@ -1,9 +1,10 @@
 # Rapport · la leçon manquée en mode anonymisation (22 nov. 2026)
 
-Branche : `claude/stoic-heisenberg-yncp9u`, partie de `origin/main` à `78e952293` (1.254.0). Deux commits, poussés sur la
-branche seule. **Rien sur `main`, aucune release** : le mandat réserve la mise en ligne au feu vert de Grégoire.
-Fait : la leçon manquée (commit 1) ; « Gr. ? », posé sur l'accord de Grégoire du 22 nov. (commit 2) ; essais et
-break-tests des deux. Reste : feu vert, fusion, verdict WebKit du Mac, ligne de SUIVI-BUGS (proposée § 5).
+Branche : `claude/stoic-heisenberg-yncp9u`, partie de `origin/main` à `78e952293` (1.254.0), **fusionnée sur `main` en
+fast-forward, release 1.254.1 (build `1122-1216`)**, sur la demande de Grégoire du 22 nov. (« fusionne »).
+Fait : la leçon manquée (commit 1) ; « Gr. ? », posé sur l'accord de Grégoire (commit 2) ; essais et break-tests des deux ;
+SUIVI-BUGS #1303. Reste : le verdict WebKit du Mac (non pris : conteneur sans WebKit), Safari et l'iPad à la main ; une
+entrée « Nouvelles » à proposer à Grégoire (aucune écrite : ce serait un mot nouveau à l'écran).
 
 Mandat : Cowork, 22 nov., sur le commentaire de Grégoire du 19 nov. (1.250.0, iPad). En anonymisation, la carte
 « Assiduité » du profil (section « Engagement ACP ») n'affiche plus la leçon prévue sous chaque absence ; l'étiquette dit
@@ -103,5 +104,6 @@ profil, les listes et évaluations anonymisées, l'en-tête du profil et l'aper�
   affiche toujours le numéro de groupe réel (« 601-101 · gr. 0demo »), mesuré avant le correctif. Grégoire jugera si ça
   compte en démonstration.
 - **Commenté et oublié** : le rouge R5 de `registre-longitudinal-915` sous Chromium.
-- **Ligne de SUIVI-BUGS proposée** (numéro à confirmer à la fusion ; `#1303` était libre au relais du 22 nov., 9 h 20) :
+- **Ligne de SUIVI-BUGS inscrite** sous **#1303** (22 nov., demande de Grégoire), dans une forme plus longue que la
+  proposition d'origine, conservée ici :
   `| 1303 | Grégoire | 19 nov. | 22 nov. | (build de la release) | En anonymisation, le profil n'affiche plus la leçon manquée sous les absences ; l'étiquette dit « Groupe Gr. ? » | 2.2 métadonnées : obtenirGcIdEleve comparait la lettre substituée (« Gr. A ») au groupeNum ; compare groupeReel || groupe (synthese-retroaction-data.js). « Gr. ? » : la table globale des lettres de groupe n'était jamais étendue ; anonymiserGroupe donne la première lettre libre, sans doublon (modes.js) |`
