@@ -172,6 +172,46 @@ complètes ont laissé, par critère : le pont (§ C) ; (5) le relevé à porté
 5. Thème sombre : la fenêtre lisible, le papier blanc.
 6. Les parcours « Par standards » existants, inchangés (tableau, profil).
 
+### Verdicts du Mac, sous Safari (21 novembre 2026, en soirée)
+
+Safari 27.2 sur macOS 27.2.1, piloté par `safaridriver`, **sur l'aperçu en ligne** (`deploy-preview-47`, commit
+`9843ccb4e`), clics réels, écran déverrouillé. Session d'automatisation de Safari : stockage à part, vide, fictif.
+Captures : `captures-2026-11-21-releve-par-cible/safari/`.
+
+| Point | Verdict | Sur quoi il repose |
+|---|---|---|
+| 1. Échelle du papier | **Passé** | 1180 × 820 : le papier (816 px) tient dans l'aperçu (864 px), `zoom` reste à 1. 820 × 1180 : `zoom` = 0,849, papier de 693 px dans un aperçu de 732 px. Aucun débordement horizontal, ni de l'aperçu ni de la page. Captures `1-apercu-*` relues. |
+| 2. PDF au nom de l'étudiant·e, pages nettes | **Passé**, un doute visuel | Safari a écrit dans Téléchargements `Releve_Fictive_Zoé_2100001.pdf` (le « é » intact) et le ZIP `Releves_FRA101-Cours-fictif_2026-11-21.zip`, qui contient `…Zoé…`, `…Léa…`, `…Inventé…`. Deux pages, une image de 1632 × 2112 px chacune (192 ppp sur une feuille Lettre). Pages relues (`4-pdf-page-1.png`, `-2.png`) : accents, apostrophes, « · », ✓ et ✕ justes, texte net. **Doute laissé à Grégoire** : l'espace entre certains mots est irrégulier dans le PDF (« monter d'ici », « s'enchaînent bien », « Acquis, depuis ») ; lisible, mais visible à l'œil. |
+| 3. ZIP sur l'iPad, groupe réel | Non jugé | À Grégoire. |
+| 4. Défilement au doigt | Non jugé | À Grégoire. |
+| 5. Thème sombre | **Passé** | Captures `1-apercu-*-sombre` relues dans les deux formats : fenêtre, libellés, menus et boutons lisibles ; le papier reste blanc, texte noir. |
+| 6. Parcours existants | **Passé** | Les 16 essais (`par-standards-a-l-essai`, `-lot-2-inscrire`, `-lots-3-4`) verts, 16 sur 16. |
+
+**Comment les bancs ont été rejoués.** Playwright ne pilote pas Safari : un adaptateur de session (hors dépôt) rend
+la même API au-dessus de `safaridriver`, et les bancs sont joués tels quels, l'adresse de l'aperçu à la place de
+`file://`. Trois écarts avec Playwright, à connaître pour peser ces verts :
+- l'amorce qui éteint `navigator.webdriver` (essai de la vue simple) ne peut pas précéder le chargement ; le choix de
+  la vue est rejoué juste après (`VueSimple.demarrer()`) ;
+- les erreurs de page ne sont captées qu'après le chargement, pas pendant ;
+- `fill` et `selectOption` posent la valeur et émettent `input` et `change` (comme Playwright) ; les clics et la
+  touche Échap sont ceux de Safari.
+
+**Le banc du lot 5 lui-même, sous Safari** : PDF et ZIP verts, captures faites ; **le premier essai est rouge tel
+qu'écrit** (« aucune écriture, dans aucune clé du stockage »). La clé qui apparaît est `a2026_indicesPatternsRaI` :
+le recalcul des indices que lance l'ouverture du profil, et qui finit ici après la photo du stockage. En attendant
+cette clé avant la photo, l'essai est vert trois fois sur trois : le relevé n'écrit rien, c'est le banc qui photographie
+trop tôt.
+
+**Trouvailles, inscrites sans y toucher** (hors de ce mandat) :
+1. *Le banc du lot 5 photographie le stockage avant la fin du recalcul des indices* (ci-dessus) : vert sous Chromium
+   et WebKit en `file://`, rouge sous Safari en ligne. À corriger dans le banc avant qu'il serve de sentinelle.
+2. *Les pages du PDF ne sont pas au format Lettre, seulement à ses proportions* : `MediaBox` de 2176 × 2816 points
+   (30 × 39 pouces) au lieu de 612 × 792. Identique dans le PDF produit sous Chromium (`releve-zoe-fictive.pdf`) : ce
+   n'est pas Safari. Une impression « ajuster à la page » le masque ; une impression à 100 % non.
+3. *L'aperçu Netlify porte sa propre barre* (un cadre de 780 × 48 px au bas de la fenêtre, `app.netlify.com/cdp`) :
+   elle a couvert une tuile de niveau au bas de la fenêtre « par production » en 1280 × 728 (clic repris après
+   défilement). Elle n'existe pas en production ; Grégoire la verra sur l'iPad en passant les points 3 et 4.
+
 ## 7. Les gestes pour voir le relevé
 
 Avec un groupe dont la pratique est « Par standards » et quelques niveaux inscrits :
