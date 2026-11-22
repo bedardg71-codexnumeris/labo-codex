@@ -80,6 +80,9 @@
         etape1: {
             lieuSuite: ": c'est là que tu reçois les productions de tes étudiant·es.",
             phrase: "Dans la démo, trois étudiant·es du deuxième groupe t'ont remis leur production. Rien ne touche à tes données.",
+            // Validée par Grégoire le 22 nov. 2026, 15 h 11 à 15 h 15 (plans de travail/CONSIGNE-2026-11-22-parcours-6-7-8-suite.md,
+            // 4) : après la phrase qui dit dans quelles données on travaille, comme aux parcours 7 et 8.
+            phraseStandards: "Ce parcours suit des productions évaluées. Si ta pratique est « Par standards », la rétroaction par cible viendra dans une prochaine version.",
             lignes: ["Avec ta classe, elles viennent de Léa : tu les télécharges, puis tu les déposes ici"],
             consignes: ["Regarde-les arriver : touche « Remplir »"]
         },
@@ -525,6 +528,7 @@
         var l = [];
         if (t.lieu) l.push(note(t.lieu));
         if (t.phrase) l.push(note(t.phrase));
+        if (t.phraseStandards) l.push(note(t.phraseStandards));
         return l.concat(lignes(t.lignes || []), (consignes || t.consignes || []).map(function (c, k) {
             return faites && faites[k] ? { texte: c, fait: function () { return true; } } : consigne(c);
         }));

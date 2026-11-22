@@ -5,6 +5,10 @@ import { fileURLToPath } from 'node:url';
 import { chargerScript } from './_helpers/charger-script.js';
 import { tranche } from './_helpers/tranche.js';
 import { echelleDeDepart27Oct } from './_helpers/echelle-de-depart-27-oct.js';
+import { ligneDeLaSuite, citations, texteDeLaSuite } from './_helpers/consigne-2026-11-22-parcours.js';
+
+// La description de « I » (consigne de la suite, 3.1) : la citation qui suit « de la carte d'aide : ».
+const DESCRIPTION_DE_I = citations(ligneDeLaSuite('3.1').split("de la carte d'aide : ")[1])[0];
 
 // SENTINELLE — « 0 – Aucun » EN TÊTE DE L'ÉCHELLE DE DÉPART D'UN TRIMESTRE NEUF (22 nov. 2026).
 // Consigne : plans de travail/CONSIGNE-2026-11-22-echelle-de-depart-et-parcours-6-7-8.md, § 1 (décision de Grégoire,
@@ -68,14 +72,16 @@ describe('1.1 · la source : « 0 – Aucun » en tête, « I » dès 0 %, le re
         expect(echelle.niveaux.some((n) => n.code === 'PS'), 'plus de « PS » semé').toBe(false);
     });
 
-    it('les quatre autres : mêmes noms, mêmes valeurs, mêmes couleurs, mêmes bornes hautes ; seule la borne basse de « I » passe de 40 à 0', async () => {
+    it('les quatre autres : mêmes noms, mêmes valeurs, mêmes couleurs, mêmes bornes hautes ; « I » : sa borne basse à 0, sa description (3.1)', async () => {
+        expect(DESCRIPTION_DE_I).toBe('Préstructurel, unistructurel');
         const [echelle] = (await semer()).a2026_echellesTemplates;
         const avant = echelleDeDepart27Oct().niveaux.slice(1);
         const apres = echelle.niveaux.slice(1);
         expect(apres.map((n) => n.code)).toEqual(['I', 'D', 'M', 'E']);
         for (let i = 0; i < 4; i++) {
             const attendu = { ...avant[i] };
-            if (attendu.code === 'I') attendu.min = 0;
+            // « I » : sa borne basse à 0 (22 nov., 12 h 27) ; sa description, celle de la suite (3.1), lue dans la consigne.
+            if (attendu.code === 'I') { attendu.min = 0; attendu.description = DESCRIPTION_DE_I; }
             expect(apres[i], attendu.code).toEqual(attendu);
         }
     });
@@ -121,6 +127,15 @@ describe('1.4 · B2 à B5, mot pour mot', () => {
         const cellules = [...premiere.matchAll(/<td[^>]*>([\s\S]*?)<\/td>/g)].map((m) => m[1].trim());
         expect(cellules[0]).toBe('<strong>0</strong> – Aucun');
         expect(cellules[1]).toBe('L\'évaluation n\'est pas possible (aucune donnée, plagiat, usage interdit de l\'IA).');
+    });
+
+    it('3.2 (la suite) : la phrase qui présente le tableau de la carte d\'aide, et la rangée « I » (3.1)', () => {
+        const html = lire('index.html');
+        const p = tranche(html, '<p class="mt-10">L\'«&nbsp;Échelle de départ (IDME)&nbsp;», que l\'application installe', '</p>');
+        const texte = p.replace(/<[^>]+>/g, '').replace(/&nbsp;/g, ' ').replace(/\s+/g, ' ').trim();
+        expect(texte).toBe(texteDeLaSuite('3.2'));
+        const tableau = tranche(html, 'que l\'application installe, relie', '</table>');
+        expect(tableau).toContain('<td><strong>I</strong> – Incomplet</td>\n                                        <td><img src="icons/solo-uni-couleur.svg" alt="" class="aide-icone-solo">' + DESCRIPTION_DE_I + '</td>');
     });
 
     it('B3 : le guide SOLO', () => {

@@ -93,15 +93,17 @@ describe('#1152 lot 2b · ce que les entrées affirment, lu dans le code', () =>
         const source = tranche(echelles, 'const niveauxDefaut = [', '];');
         const zero = source.match(/code: '0',\s*nom: '([^']+)',\s*min: ([\d.]+),\s*max: ([\d.]+),\s*valeurCalcul: ([\d.]+)/);
         expect(zero, 'le « 0 » en tête de niveauxDefaut').not.toBeNull();
-        const niveaux = [...source.matchAll(/code: '([A-Z]{1,3})',\s*nom: '([^']+)',[\s\S]*?niveauSOLO: '([a-z_]+)',\s*min: ([\d.]+),\s*max: ([\d.]+),\s*valeurCalcul: ([\d.]+)/g)]
-            .map((m) => ({ code: m[1], nom: m[2], solo: m[3], min: Number(m[4]), max: Number(m[5]), valeur: Number(m[6]) }));
+        // ↻ 22 nov. 2026, 15 h (3.1) : la colonne « Palier SOLO » dit la DESCRIPTION de chaque niveau semé (« I » :
+        // « Préstructurel, unistructurel » ; D, M, E : leur palier), lue à la source.
+        const niveaux = [...source.matchAll(/code: '([A-Z]{1,3})',\s*nom: '([^']+)',[\s\S]*?description: '([^']+)',\s*niveauSOLO: '([a-z_]+)',\s*min: ([\d.]+),\s*max: ([\d.]+),\s*valeurCalcul: ([\d.]+)/g)]
+            .map((m) => ({ code: m[1], nom: m[2], description: m[3], solo: m[4], min: Number(m[5]), max: Number(m[6]), valeur: Number(m[7]) }));
         expect(niveaux.map((n) => n.code)).toEqual(['I', 'D', 'M', 'E']);
         const fr = (n) => String(n).replace('.', ',');
         const SOLO = { prestructurel: 'Préstructurel', unistructurel: 'Unistructurel', multistructurel: 'Multistructurel', relationnel: 'Relationnel', abstrait_etendu: 'Abstrait étendu' };
         const attendu = [[`0 – ${zero[1]}`, 'L\'évaluation n\'est pas possible (aucune donnée, plagiat, usage interdit de l\'IA).', '—', fr(zero[4])]]
             .concat(niveaux.map((n, i) => [
                 `${n.code} – ${n.nom}`,
-                SOLO[n.solo],
+                n.description,
                 n.max === 100 ? `${fr(n.min)} % et plus` : `${fr(n.min)} à ${fr(n.max)} %`,
                 fr(n.valeur)
             ]));
@@ -129,7 +131,9 @@ describe('#1152 lot 2b · ce que les entrées affirment, lu dans le code', () =>
         const cellules = [...tableaux[0].querySelectorAll('tbody tr td:first-child'), ...[...tableaux[1].querySelectorAll('tbody tr td:nth-child(2)')].slice(1)];
         expect(cellules).toHaveLength(9);   // ↻ § 4.3-4.4 : Préstructurel dans les deux tableaux ; ↻ 22 nov. : dans le premier seulement
         for (const td of cellules) {
-            const nom = net(td.textContent);
+            // ↻ 22 nov. 2026, 15 h (3.1) : la rangée « I » dit « Préstructurel, unistructurel » ; son icône reste celle de son
+            // palier, unistructurel (son `niveauSOLO`).
+            const nom = net(td.textContent) === 'Préstructurel, unistructurel' ? 'Unistructurel' : net(td.textContent);
             const img = td.querySelector('img.aide-icone-solo');
             expect(img, nom).toBeTruthy();
             expect(img.getAttribute('src'), nom).toBe(`icons/${ICONES[nom]}`);

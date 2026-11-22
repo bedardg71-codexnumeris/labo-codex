@@ -114,7 +114,10 @@ const niveauxDefaut = [
     {
         code: 'I',
         nom: 'Incomplet',
-        description: 'Unistructurel',
+        // ↻ 22 nov. 2026, 15 h (consigne de la suite, 3.1, validé par Grégoire) : « Préstructurel, unistructurel », comme le
+        // « I » de « IDME et niv 0 » de la démo. `niveauSOLO` GARDÉ : l'interprétation SOLO du profil
+        // (profil-etudiant-helpers.js) et l'export au format recherche (trimestres.js) le lisent ; le retirer les changerait.
+        description: 'Préstructurel, unistructurel',
         niveauSOLO: 'unistructurel',
         min: 0,
         max: 64.99,

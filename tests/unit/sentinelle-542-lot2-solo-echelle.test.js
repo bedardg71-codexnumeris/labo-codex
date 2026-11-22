@@ -188,7 +188,8 @@ describe('#542 lot 2 · le SEED est étiqueté, les données existantes ne le so
         // Un seed est une échelle LIVRÉE, que l'utilisateur voit et modifie —
         // pas une valeur qu'un calcul invente. C'est la règle posée par
         // Grégoire le 26 août, et elle autorise ceci.
-        expect(SRC).toMatch(/description: 'Unistructurel',\s*\n\s*niveauSOLO: 'unistructurel',/);
+        // ↻ 22 nov. 2026, 15 h : la description de « I » devient « Préstructurel, unistructurel » ; son étiquette reste.
+        expect(SRC).toMatch(/description: 'Préstructurel, unistructurel',\s*\n\s*niveauSOLO: 'unistructurel',/);
         expect(SRC).toMatch(/description: 'Multistructurel',\s*\n\s*niveauSOLO: 'multistructurel',/);
         expect(SRC).toMatch(/description: 'Relationnel',\s*\n\s*niveauSOLO: 'relationnel',/);
         expect(SRC).toMatch(/description: 'Abstrait étendu',\s*\n\s*niveauSOLO: 'abstrait_etendu',/);
@@ -210,7 +211,8 @@ describe('#542 lot 2 · le SEED est étiqueté, les données existantes ne le so
         // ↻ 22 nov. 2026 : le niveau « Préstructurel » n'est plus semé ; la description de « I » ne change pas (1.3 de la
         // consigne : c'est un mot de Grégoire, mesuré et rapporté, pas touché).
         expect(SRC).not.toContain("description: 'Préstructurel'");
-        expect(SRC).toContain("description: 'Unistructurel'");
+        // ↻ 22 nov. 2026, 15 h (consigne de la suite, 3.1) : « I » dit « Préstructurel, unistructurel », comme dans la démo.
+        expect(SRC).toContain("description: 'Préstructurel, unistructurel'");
         expect(SRC).toContain("description: 'Multistructurel'");
         expect(SRC).toContain("description: 'Relationnel'");
         expect(SRC).toContain("description: 'Abstrait étendu'");

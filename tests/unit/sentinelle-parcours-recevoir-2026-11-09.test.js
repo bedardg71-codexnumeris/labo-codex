@@ -20,6 +20,7 @@ import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { chargerScript } from './_helpers/charger-script.js';
+import { ligneDeLaSuite, citations } from './_helpers/consigne-2026-11-22-parcours.js';
 import { tranche } from './_helpers/tranche.js';
 
 const racine = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..');
@@ -145,6 +146,13 @@ describe('« Recevoir les productions, rendre tes rétroactions », « Nous fais
         if (k !== -1 && !b.formes[0].some((l) => l.texte === STYLO)) {
             expect(sectionDeLaConsigne('E3.')).toContain('dans les deux temps : ajoute l\'explication « ' + STYLO + ' »');
             b.formes[0].splice(k + 1, 0, Object.assign({}, b.formes[0][k], { texte: STYLO }));
+        }
+        // LA SUITE DU 22 NOV. 2026 (15 h ; CONSIGNE-2026-11-22-parcours-6-7-8-suite.md, 4) : la première bulle dit, après la phrase
+        // des données (« Cette fois, ce sont les productions de ton groupe… »), une phrase de plus, relue dans cette consigne.
+        if (n === 1 && voie === 'fichiers') {
+            const P4 = citations(ligneDeLaSuite('4.'))[1];
+            expect(b.formes[0][0].texte).toMatch(/^Cette fois, ce sont les productions de ton groupe/);
+            b.formes[0].splice(1, 0, { genre: 'E', texte: P4, jamaisGrise: false });
         }
         const etapeDe = (ouvert) => charger(null, ouvert).api.voies()[voie][i];
         const etape = etapeDe([]);

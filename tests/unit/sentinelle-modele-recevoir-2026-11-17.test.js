@@ -4,6 +4,7 @@ import path from 'node:path';
 import vm from 'node:vm';
 import { fileURLToPath } from 'node:url';
 import { tranche } from './_helpers/tranche.js';
+import { ligneDeLaSuite, citations } from './_helpers/consigne-2026-11-22-parcours.js';
 import { sectionDeLaConsigne } from './_helpers/fin-des-parcours-2026-11-20.js';
 
 // =====================================================================
@@ -136,8 +137,13 @@ describe('Le modèle de « Recevoir » : le matériel de la consigne', () => {
             'TEXTES.etape10.devient.lignes[1]': "Avec ta classe, tu laisseras « Étudiant·e » à « — Tous — » : toutes les évaluations verrouillées partent d'un coup, réunies dans un fichier ZIP",
             'TEXTES.etape10.devient.lignes[2]': "Pour Léa, fais une copie de ce ZIP renommée « travaux.zip » : c'est le nom qu'elle attend pour remettre chaque PDF à l'étudiant·e dont il porte le nom et le DA"
         };
+        // LA SUITE DU 22 NOV. 2026 (15 h ; plans de travail/CONSIGNE-2026-11-22-parcours-6-7-8-suite.md, 4) : une phrase à la
+        // première bulle, relue dans cette consigne.
+        const DE_LA_SUITE = { 'TEXTES.etape1.phraseStandards': citations(ligneDeLaSuite('4.'))[1] };
+        expect(DE_LA_SUITE['TEXTES.etape1.phraseStandards']).toMatch(/^Ce parcours suit des productions évaluées\. /);
         const vus = new Set();
         for (const [ou, texte] of textes) {
+            if (DE_LA_SUITE[ou]) { vus.add(ou); expect(texte, ou).toBe(DE_LA_SUITE[ou]); continue; }
             if (RETOUCHES[ou]) expect(texte, ou).toBe(RETOUCHES[ou]);
             else if (DU_20_NOV[ou]) {
                 vus.add(ou);
@@ -148,7 +154,7 @@ describe('Le modèle de « Recevoir » : le matériel de la consigne', () => {
                 else expect(E, ou).toContain('« ' + texte);
             } else expect(partieC, ou).toContain(texte);
         }
-        expect([...vus].sort(), 'chaque retouche du 20 nov. est dans TEXTES').toEqual(Object.keys(DU_20_NOV).sort());
+        expect([...vus].sort(), 'chaque retouche du 20 nov. et de la suite du 22 nov. est dans TEXTES').toEqual(Object.keys(DU_20_NOV).concat(Object.keys(DE_LA_SUITE)).sort());
         // Ce que la bulle 10 disait avant (huit évaluations, « — Tous — » dans la consigne) est parti.
         expect(src).not.toMatch(/Huit évaluations verrouillées partent|et laisse « Étudiant·e » à « — Tous — »/);
         for (const k of ['etape1', 'etape5', 'etape6', 'etape10']) {

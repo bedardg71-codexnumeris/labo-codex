@@ -428,6 +428,8 @@
         lignes: function () {
             return [
                 note("Cette fois, ce sont les productions de ton groupe : chacune se rangera sous le nom de son étudiant·e, dans ton application."),
+                // Validée par Grégoire le 22 nov. 2026, 15 h 11 à 15 h 15 (CONSIGNE-2026-11-22-parcours-6-7-8-suite.md, 4).
+                note("Ce parcours suit des productions évaluées. Si ta pratique est « Par standards », la rétroaction par cible viendra dans une prochaine version."),
                 sansTemoin("Télécharge dans un dossier les fichiers que tes étudiant·es t'ont remis en ligne, sans les renommer (leur nom porte le DA de l'étudiant·e : l'application s'en sert pour trouver à qui est chaque production)"),
                 sansTemoin("S'ils arrivent dans un fichier ZIP, décompresse-le (la zone ne prend que des PDF et des images)"),
                 note("Ta production est sur papier, ou c'est un exposé, une performance, une entrevue ? « Rien à importer » te mène directement à l'évaluation."),
