@@ -249,6 +249,23 @@
         return `${defaut} ${i}`;
     }
 
+    /**
+     * « Créer un groupe d'essai » (22 nov. 2026, décision de Grégoire, 9 h 39) : quatre personnes fictives, rien à coller.
+     * Les noms reprennent la façon de la démo (un animal, une qualité : ses totems), sans reprendre les siens. Le DA porte
+     * des lettres, « ESSAI-<série>-<rang> » : aucun DA réel n'a de lettres (sept chiffres, `analyserListeCollee`), et aucune
+     * liste collée ne peut en produire un. La série est la plus petite dont aucun DA n'est pris ce trimestre : deux groupes
+     * d'essai ne se heurtent jamais à la règle « une personne, une inscription par trimestre ».
+     */
+    const ELEVES_D_ESSAI = Object.freeze([['Agile', 'Renard'], ['Curieuse', 'Loutre'], ['Patient', 'Hibou'], ['Tenace', 'Tortue']]);   // par nom : l'ordre du tableau suit celui des DA
+
+    function elevesDEssai(dasPris) {
+        const pris = new Set((dasPris || []).map((d) => String(d)));
+        const da = (serie, i) => `ESSAI-${serie}-${String(i + 1).padStart(2, '0')}`;
+        let serie = 1;
+        while (ELEVES_D_ESSAI.some((_, i) => pris.has(da(serie, i)))) serie++;
+        return ELEVES_D_ESSAI.map(([nom, prenom], i) => ({ da: da(serie, i), nom, prenom }));
+    }
+
     /* ============================== CE QUI NAÎT EN COULISSE ============================== */
 
     /** Le trimestre d'une date : janvier à mai, hiver ; juin et juillet, été ; août à décembre, automne (règle de rencontres.js). */
@@ -703,7 +720,7 @@
     window.VueSimpleDonnees = {
         VUES, CLE_CHOIX, CLE_MARQUE, ECRANS, FAMILLES, REGLES_STD, GROUPE_SIMPLE, RAISONS,
         applicationVide, vueAuDemarrage,
-        analyserListeCollee, refusParCause, CLES_DE_RESULTATS, PREFIXES_DU_GROUPE, elevesDuGroupe, porteursDeResultats, nomCoursParDefaut,
+        analyserListeCollee, refusParCause, CLES_DE_RESULTATS, PREFIXES_DU_GROUPE, elevesDuGroupe, porteursDeResultats, nomCoursParDefaut, elevesDEssai,
         trimestreDeLaDate, ficheEleve, groupeCoursLeger, productionLegere,
         pratiqueDepuisModele, regleStd, poserRegleStd, familleDeLaPratique,
         etiquettesDepuisLignes, refusDesCibles, poidsDUneCibleNeuve, cibleSimple, ciblesNeuves, brouillonDesCibles, gestesCibles, ciblesReglees, poidsEgaux,

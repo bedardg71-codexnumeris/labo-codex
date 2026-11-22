@@ -26,9 +26,9 @@ const SECTIONS = sectionsDe(TEXTES);
 const SANS_PAN = sectionsDe(lire('plans de travail/TEXTES-2026-11-21-selection-sans-PAN.md'));
 const REMPLACES = ['A1', 'A2', 'A3', 'F3', 'F4', 'F10', 'P1', 'P2'];
 // ↻ 22 nov. 2026, 9 h 12 (textes acceptés par Grégoire) : « Par standards » trouvable en vue simple. Le fichier du 22 nov.
-// REMPLACE, pour V1 seulement, la citation du 20 nov., qui reste intacte.
+// REMPLACE, pour V1 seulement, la citation du 20 nov., qui reste intacte ; et, décision A du même jour, V2, V5 et V6.
 const PORTE_STD = sectionsDe(lire('plans de travail/TEXTES-2026-11-22-vue-simple-porte-par-standards.md'));
-const REMPLACES_22 = ['V1'];
+const REMPLACES_22 = ['V1', 'V2', 'V5', 'V6'];
 const section = (repere) => (REMPLACES_22.includes(repere) && PORTE_STD.find((s) => s.repere === repere))
     || (REMPLACES.includes(repere) && SANS_PAN.find((s) => s.repere === repere)) || SECTIONS.find((s) => s.repere === repere);
 const source = (repere) => net(lire(section(repere).fichier));

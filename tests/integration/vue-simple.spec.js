@@ -1675,10 +1675,10 @@ test.describe('Vue simple · quelqu\'un qui a déjà des données', () => {
         await basculer(page, 'simple');
         await allerA(page, 'resultats');
         await expect(ecran(page, 'resultats').locator('.vs-select option')).toHaveText(['Cours fictif A · groupe 01', 'Cours fictif B · groupe 02 (autre pratique)']);
-        await expect(ecran(page, 'resultats').locator('.vs-note')).toHaveText('Un groupe dont la pratique n’est ni par sélection de productions ni par spécifications se suit en vue étendue.');
+        await expect(ecran(page, 'resultats').locator('.vs-note')).toHaveText('Un groupe dont la pratique n’est ni par standards, ni par spécifications, ni par sélection de productions se suit en vue étendue.');
         await expect(page.locator('#vs-tableau-hote .tn-production-titre')).toHaveText(['Production fictive']);
         await ecran(page, 'resultats').locator('.vs-select').selectOption('GC_SOM');
-        await expect(page.locator('#vs-tableau-hote .tn-etat-vide')).toHaveText('Le tableau sert aux pratiques par sélection de productions et par spécifications. La pratique de ce groupe se suit en vue étendue.');
+        await expect(page.locator('#vs-tableau-hote .tn-etat-vide')).toHaveText('Le tableau sert aux pratiques par standards, par spécifications et par sélection de productions. La pratique de ce groupe se suit en vue étendue.');
         await allerA(page, 'note');
         await expect(ecran(page, 'note').locator('.vs-select')).toHaveValue('GC_SOM');
         await ecran(page, 'note').locator('.vs-select').selectOption('GC_STD');
@@ -2179,6 +2179,104 @@ test.describe('Vue simple · « Par standards » trouvable (mandat du 22 nov. 20
         await allerA(page, 'pratique');
         await expect(page.locator('[data-action="VueSimple.changerModele"]')).toHaveCount(0);
         await expect(ecran(page, 'pratique').locator('[data-vs-pratique="figee"] .vs-note')).toHaveText(PHRASE_FIGEE);
+        expect(erreurs).toEqual([]);
+    });
+});
+
+/* =====================================================================================================================
+   « CRÉER UN GROUPE D'ESSAI » (décision de Grégoire, 22 nov. 2026, 9 h 39). La règle reste : une personne n'est inscrite
+   qu'une fois par trimestre. La sortie : un groupe de quatre personnes fictives (DA « ESSAI-<série>-<rang> »), sans rien
+   coller, qui ne touche aucun groupe existant et se retire comme tout groupe. Noms fictifs.
+   ===================================================================================================================== */
+
+/** Ce qui appartient aux groupes existants : leurs étudiant·es, leurs productions, leurs résultats, leur pratique. */
+const sonEmpreinte = (page, coursIds) => page.evaluate((ids) => {
+    const g = (k) => window.db.getSync(window.cle(k), []) || [];
+    return JSON.stringify({
+        eleves: g('groupeEtudiants').filter((e) => ids.includes(e.coursId)),
+        productions: g('productions').filter((p) => ids.includes(p.coursId)),
+        evaluations: g('evaluationsSauvegardees'),
+        groupes: g('groupesCours').filter((x) => ids.includes(x.coursId)).map((x) => ({ id: x.id, pratiqueId: x.pratiqueId })),
+        pratiques: g('pratiquesConfigurables')
+    });
+}, coursIds);
+
+const DA_ESSAI = (serie) => [1, 2, 3, 4].map((i) => `ESSAI-${serie}-0${i}`);
+
+test.describe('Vue simple · « Créer un groupe d\'essai » (décision du 22 nov. 2026)', () => {
+    test('depuis « Ta pratique » figée : le bouton à côté de la liste, quatre personnes fictives, puis « Choisir ma pratique » ; le second groupe d\'essai ne heurte pas le premier', async ({ page }) => {
+        const erreurs = await ouvrir(page);
+        await collerLaClasse(page);
+        await choisirLeModele(page, 'STD-n-meilleurs');
+        await allerA(page, 'resultats');
+        await ajouterProduction(page, 'Essai fictif', '2026-11-20');
+        await caseTn(page, 1, 1).focus();
+        await page.keyboard.press('m');
+        await expect(caseTn(page, 1, 1)).toHaveText('M');
+        const premier = await page.evaluate(() => window.db.getSync(window.cle('groupesCours'), [])[0].coursId);
+        const avant = await sonEmpreinte(page, [premier]);
+
+        // 1. « Ta pratique » → « Nouveau groupe » → Classe : la liste, et « Créer un groupe d'essai » à côté, avec son aide.
+        await allerA(page, 'pratique');
+        await ecran(page, 'pratique').locator('[data-vs-pratique="figee"] [data-action="VueSimple.nouveauGroupe"]').click();
+        const classe = ecran(page, 'classe');
+        await expect(page.locator('#vs-liste')).toBeVisible();
+        const essai = classe.locator('[data-vs-classe="essai"]');
+        await expect(essai.locator('[data-action="VueSimple.creerGroupeEssai"]')).toHaveText('Créer un groupe d’essai');
+        await expect(essai.locator('.vs-note')).toHaveText('Pour essayer un modèle sans toucher à tes groupes : un groupe de quatre personnes fictives, rien à coller.');
+
+        // 2. Le bouton : l'avis, le groupe actif, ses quatre personnes, « Choisir ma pratique ».
+        await essai.locator('[data-action="VueSimple.creerGroupeEssai"]').click();
+        await expect(classe.locator('.vs-succes')).toHaveText('Groupe d’essai créé, avec 4 personnes fictives.');
+        await expect(classe.locator('.vs-intro').first()).toHaveText('Cours d’essai · groupe 1 · 4 étudiant·es');
+        await expect(classe.locator('.vs-table tbody td:first-child')).toHaveText(DA_ESSAI(1));
+        expect(await sonEmpreinte(page, [premier])).toBe(avant);   // rien du premier groupe n'a bougé
+        await classe.locator('[data-action="VueSimple.aller"][data-param="pratique"]').click();
+        await expect(ecran(page, 'pratique').locator('[data-action="VueSimple.choisirModele"]')).toHaveCount(3);
+
+        // 3. Un second groupe d'essai : « Cours d'essai 2 », une autre série de DA ; personne n'est refusé.
+        await allerA(page, 'classe');
+        await classe.locator('[data-action="VueSimple.nouveauGroupe"]').click();
+        await classe.locator('[data-action="VueSimple.creerGroupeEssai"]').click();
+        await expect(classe.locator('.vs-succes')).toHaveText('Groupe d’essai créé, avec 4 personnes fictives.');
+        await expect(classe.locator('.vs-intro').first()).toHaveText('Cours d’essai 2 · groupe 1 · 4 étudiant·es');
+        await expect(classe.locator('.vs-table tbody td:first-child')).toHaveText(DA_ESSAI(2));
+        expect(await groupesEnBase(page)).toEqual([
+            { cours: 'Mon cours', das: ['9990001', '9990002', '9990003', '9990004'] },
+            { cours: 'Cours d’essai', das: DA_ESSAI(1) },
+            { cours: 'Cours d’essai 2', das: DA_ESSAI(2) }
+        ]);
+        expect(await sonEmpreinte(page, [premier])).toBe(avant);
+
+        // 4. Il se retire comme tout groupe (aucun résultat) ; le premier reste intact.
+        await classe.locator('[data-action="VueSimple.retirerGroupe"]').click();
+        await classe.locator('.vs-question [data-action="VueSimple.retirerGroupe"]').click();
+        await expect(classe.locator('.vs-succes')).toHaveText('Groupe retiré.');
+        expect((await groupesEnBase(page)).map((g) => g.cours)).toEqual(['Mon cours', 'Cours d’essai']);
+        expect(await sonEmpreinte(page, [premier])).toBe(avant);
+        expect(erreurs).toEqual([]);
+    });
+
+    test('à la création d\'une première classe, pas de bouton ; pendant la démonstration, ni à « Classe » ni sur « Ta pratique »', async ({ page }) => {
+        const erreurs = await ouvrir(page);
+        await ecran(page, 'accueil').locator('[data-param="classe"]').click();
+        await expect(page.locator('#vs-liste')).toBeVisible();
+        await expect(ecran(page, 'classe').locator('[data-action="VueSimple.creerGroupeEssai"]')).toHaveCount(0);
+        await page.fill('#vs-liste', LISTE);
+        await ecran(page, 'classe').locator('[data-action="VueSimple.creerClasse"]').click();
+        await choisirLeModele(page, 'STD-n-meilleurs');
+        await allerA(page, 'resultats');
+        await ajouterProduction(page, 'Essai fictif', '2026-11-20');
+        // La démonstration simulée : la seule chose que lisent les gardes (`estEnModeDemo`).
+        await page.evaluate(() => { window.estEnModeDemo = () => true; });
+        await allerA(page, 'pratique');
+        await expect(ecran(page, 'pratique').locator('[data-vs-pratique="figee"] .vs-note')).toBeVisible();
+        await expect(ecran(page, 'pratique').locator('[data-action="VueSimple.nouveauGroupe"]')).toHaveCount(0);
+        await page.evaluate(() => window.VueSimple.nouveauGroupe());
+        await expect(page.locator('#vs-liste')).toBeVisible();
+        await expect(ecran(page, 'classe').locator('[data-action="VueSimple.creerGroupeEssai"]')).toHaveCount(0);
+        const n = await page.evaluate(async () => { await window.VueSimple.creerGroupeEssai(); return window.db.getSync(window.cle('groupesCours'), []).length; });
+        expect(n).toBe(1);   // l'action appelée directement ne crée rien
         expect(erreurs).toEqual([]);
     });
 });

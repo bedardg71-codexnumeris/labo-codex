@@ -76,6 +76,11 @@
         groupeRetire: 'Groupe retiré.',
         // PROPOSÉ par Claude Code (10 nov. 2026) : la même personne ne s'inscrit qu'une fois par trimestre (règle de la vue étendue).
         groupeAucunNouveau: 'Toutes ces personnes sont déjà inscrites ce trimestre : le groupe n’a pas été créé.',
+        // « Créer un groupe d'essai » : ACCEPTÉ par Grégoire (22 nov. 2026, 9 h 39). Le nom du cours, l'aide et l'avis : PROPOSÉS.
+        groupeEssai: 'Créer un groupe d’essai',
+        groupeEssaiNom: 'Cours d’essai',
+        groupeEssaiAide: 'Pour essayer un modèle sans toucher à tes groupes : un groupe de quatre personnes fictives, rien à coller.',
+        groupeEssaiCree: (n) => `Groupe d’essai créé, avec ${n} personnes fictives.`,
         // PROPOSÉ : la cause de l'import de la vue étendue (« Déjà inscrit… ce trimestre », validée le 19 sept. 2026), tournée
         // sans accord, comme tous les mots de la vue simple (décision de Grégoire du 9 nov., 20 h 49).
         dejaInscrit: 'déjà dans un groupe de ce trimestre',
@@ -89,7 +94,9 @@
         groupe: 'Groupe',
         groupeChoisir: 'Choisis un groupe',
         groupeAutrePratique: 'autre pratique',
-        groupeMotAutres: 'Un groupe dont la pratique n’est ni par sélection de productions ni par spécifications se suit en vue étendue.',
+        // ↻ 22 nov. 2026 : groupeMotAutres, pratiqueAutre et tableau.autreFamille nomment les trois modèles (proposés par
+        // Claude Code, acceptés par Grégoire le 22 nov. ; TEXTES-2026-11-22-vue-simple-porte-par-standards.md, V2, V5, V6).
+        groupeMotAutres: 'Un groupe dont la pratique n’est ni par standards, ni par spécifications, ni par sélection de productions se suit en vue étendue.',
         sansClasse: 'Commence par ta classe : colle ta liste d’étudiant·es.',
         sansClasseLien: 'Coller ma liste',
         // — Pratique
@@ -187,14 +194,14 @@
         // ACCEPTÉ par Grégoire, mot pour mot (22 nov. 2026, 9 h 12) : là où « Changer de modèle » ne s'offre plus parce que le
         // groupe a des productions (par standards : des niveaux inscrits). Le bouton qui suit reprend `groupeNouveau`.
         pratiqueFigee: 'Ce groupe a déjà des résultats : son modèle ne change plus. Pour essayer un autre modèle, crée un groupe d’essai.',
-        pratiqueAutre: 'La pratique de ce groupe n’est ni par sélection de productions ni par spécifications : elle se règle en vue étendue.',
+        pratiqueAutre: 'La pratique de ce groupe n’est ni par standards, ni par spécifications, ni par sélection de productions : elle se règle en vue étendue.',
         pratiqueSuite: 'Ouvrir le tableau',
         pratiqueEchec: 'La pratique n’a pas pu être enregistrée.',
         reglePartagee: (n) => `Ce réglage vaut pour les ${n} groupes qui ont cette pratique.`,
         // — Résultats (le tableau garde ses mots validés ; ceux-ci remplacent les messages qui nomment la vue étendue)
         tableau: {
             aucunePratique: 'Ce groupe n’a pas encore de pratique. Choisis un modèle : le tableau suivra sa règle.',
-            autreFamille: 'Le tableau sert aux pratiques par sélection de productions et par spécifications. La pratique de ce groupe se suit en vue étendue.',
+            autreFamille: 'Le tableau sert aux pratiques par standards, par spécifications et par sélection de productions. La pratique de ce groupe se suit en vue étendue.',
             aucunEleve: 'Ce groupe n’a pas encore d’étudiant·es. Colle ta liste pour remplir le tableau.',
             aucuneProduction: 'Ton tableau n’a pas encore de colonne. Ajoute ta première production : un nom et une date.'
         },
@@ -527,7 +534,7 @@
         }
         if (!groupe || _nouveauGroupe) {
             const annuler = groupe ? `<p><button type="button" class="btn btn-secondaire" data-action="VueSimple.annulerNouveauGroupe">${esc(MOTS.productionAnnuler)}</button></p>` : '';
-            _ecrire(hote, `${tete}${retourHTML || ''}<p class="vs-intro">${esc(MOTS.classeIntro)}</p><div class="vs-bloc">${_champListeHTML(true)}${annuler}</div>`);
+            _ecrire(hote, `${tete}${retourHTML || ''}<p class="vs-intro">${esc(MOTS.classeIntro)}</p><div class="vs-bloc">${_champListeHTML(true)}${groupe ? _groupeEssaiHTML() : ''}${annuler}</div>`);
             return;
         }
         const rangees = eleves.map((e) => `<tr><td>${esc(e.da)}</td><td>${esc(e.nom)}</td><td>${esc(e.prenom)}</td></tr>`).join('');
@@ -659,6 +666,38 @@
     }
 
     /* ---------- PLUSIEURS GROUPES : en créer un autre, retirer un groupe vide ---------- */
+
+    /** « Créer un groupe d'essai », à côté de la liste, quand on crée un AUTRE groupe ; jamais pendant la démonstration. */
+    function _groupeEssaiHTML() {
+        if (_demoOuverte()) return '';
+        return `<div data-vs-classe="essai"><p class="vs-note">${esc(MOTS.groupeEssaiAide)}</p>
+            <p><button type="button" class="btn btn-secondaire" data-action="VueSimple.creerGroupeEssai">${esc(MOTS.groupeEssai)}</button></p></div>`;
+    }
+
+    /**
+     * Un groupe d'essai : un cours neuf (« Cours d'essai », puis « Cours d'essai 2 »…), son groupe, quatre personnes
+     * fictives (`elevesDEssai` : des DA à lettres, une série libre ce trimestre). Par les chemins de « Nouveau groupe » :
+     * rien d'un groupe existant n'est lu pour écrire, sauf les DA pris, pour ne pas les heurter. Il se retire comme tout groupe.
+     */
+    async function creerGroupeEssai() {
+        if (_demoOuverte() || !_groupeActif()) return;
+        const retour = document.getElementById('vs-classe-retour');
+        try {
+            const trimestre = _assurerTrimestre();
+            const pris = trimestre ? (db.getSync(cle('groupeEtudiants'), []) || []).map((e) => e && e.da) : [];
+            const fiches = D().elevesDEssai(pris);
+            const nom = D().nomCoursParDefaut(MOTS.groupeEssaiNom, _groupes().map((g) => (_cours(g.coursId) || {}).nomCours));
+            const groupe = await _naitreGroupe(nom);
+            const r = await _inscrire(fiches, groupe);
+            if (!r.ecrit || r.ajoutes !== fiches.length) throw new Error('personnes fictives non inscrites');
+            await _activerGroupeNe(groupe);
+            _nouveauGroupe = false;
+            _rendreClasse(`<p class="vs-succes" role="status">${esc(MOTS.groupeEssaiCree(r.ajoutes))}</p>`);
+        } catch (e) {
+            console.error('[Vue simple] groupe d’essai non créé :', e);
+            if (retour) _ecrire(retour, `<p class="vs-erreur" role="alert">${esc(MOTS.classeEchec)}</p>`);
+        }
+    }
 
     /** « Nouveau groupe » : à l'écran Classe, ou depuis « Ta pratique » quand le modèle ne change plus (`_modeleFigeHTML`). */
     function nouveauGroupe() {
@@ -1852,7 +1891,7 @@
     window.VueSimple = {
         MOTS, estSimple, vueCourante, basculer, demarrer, aller,
         changerGroupe, creerClasse: _unALaFois(creerClasse),
-        nouveauGroupe, annulerNouveauGroupe, annulerRetraitGroupe, retirerGroupe: _unALaFois(retirerGroupe), choisirModele: _unALaFois(choisirModele),
+        nouveauGroupe, annulerNouveauGroupe, creerGroupeEssai: _unALaFois(creerGroupeEssai), annulerRetraitGroupe, retirerGroupe: _unALaFois(retirerGroupe), choisirModele: _unALaFois(choisirModele),
         changerModele: _unALaFois(changerModele), enregistrerReglage: _unALaFois(enregistrerReglage),
         regler, annulerReglage, niveauGeste, typeGeste, palierGeste,
         cibleGeste, creerParStandards: _unALaFois(creerParStandards), annulerCreationCibles,   // « Par standards » (21 nov. 2026)
