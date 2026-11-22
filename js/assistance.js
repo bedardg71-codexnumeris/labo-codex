@@ -69,7 +69,12 @@
     // (plans de travail/RAPPORT-2026-11-19-nous-faisons-donnees.md).
     // ⚠ ESSAI SEULEMENT (`apercu/essai-parcours`, 20 nov. 2026) : fusion de `lot/nous-faisons-donnees` et de
     // `lot/je-regarde-cours`, « monter » et « donnees » ouverts ensemble. Cette branche ne se fusionne jamais.
-    var PARCOURS_OUVERTS = ['decouvrir', 'classe', 'evaluer', 'recevoir', 'monter', 'donnees'];
+    // ⚠ BRANCHE SEULEMENT (`claude/relaxed-feynman-0vcwct`, 22 nov. 2026) : « Lire ta classe et intervenir » et
+    // « Automatiser tes commentaires » ouverts pour l'aperçu de leurs deux temps ; « Mettre en place ta notation
+    // alternative » aussi, SEULEMENT pour que la dernière bulle du parcours 8 offre sa suite (le parcours 9 n'est pas à
+    // essayer : il sera réécrit). À DÉFAIRE AVANT TOUTE FUSION : `git revert` de ce commit
+    // (plans de travail/RAPPORT-2026-11-22-echelle-de-depart-et-parcours-6-7-8.md).
+    var PARCOURS_OUVERTS = ['decouvrir', 'classe', 'evaluer', 'recevoir', 'monter', 'donnees', 'lire-ta-classe', 'commentaires', 'notation-alternative'];
     // L'état en mémoire, que seuls les bancs changent (ouvrirLesParcours) : la liste des identifiants ouverts, ou `true`
     // (tous). Rien ne le garde d'un chargement à l'autre.
     var ouverts = PARCOURS_OUVERTS.slice();
