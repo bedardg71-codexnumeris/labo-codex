@@ -914,10 +914,13 @@
             padding: 20px 0 8px;
             border-top: 1px solid var(--bordure-claire);
         }
+        /* 22 nov. 2026 (release 1.254.0, décision de Grégoire) : 10 px entre le texte et le logo (14 avant). À 820 px, la
+           ligne de la version et de « Nouveautés » manquait de 2 px avec le build « 1122-0639 » (le banc
+           pied-de-page-et-assistance a rougi au verdict) ; ces 4 px et les deux réglages plus bas lui rendent sa place. */
         .accueil-pied-moitie {
             display: flex;
             align-items: center;
-            gap: 14px;
+            gap: 10px;
             min-width: 0;
         }
         .accueil-pied-application {
@@ -946,7 +949,7 @@
             flex-wrap: wrap;
             justify-content: flex-end;
             align-items: baseline;
-            column-gap: 10px;
+            column-gap: 6px;   /* 22 nov. 2026 : 10 px avant (voir .accueil-pied-moitie) */
         }
         /* Sur le fond de la page, pas d'une carte : --texte-muted y tombait à 4,4:1 en clair. Le secondaire
            donne 5,71:1 (clair) et 6,76:1 (sombre), mesuré le 7 nov. 2026. */
@@ -956,9 +959,13 @@
         }
         /* 11 nov. 2026 : le build à côté de la version, jamais coupé ; un cran plus petit, pour que la version, le build
            et « Nouveautés » tiennent sur une ligne à 820 px (mesuré sous WebKit : 1 px de trop à la taille de la version). */
+        /* 22 nov. 2026 : des chiffres de même largeur. La largeur du build ne dépend plus de ses chiffres (le « 1 » est
+           étroit : « 1121-1619 » tenait, « 1122-0639 » passait sous la version à 820 px). Mesuré sous WebKit, 820 px :
+           284,5 px demandés pour 286,2 disponibles, quel que soit le build. */
         .accueil-pied-build {
             white-space: nowrap;
             font-size: 0.72rem;
+            font-variant-numeric: tabular-nums;
         }
         .accueil-pied-lien {
             display: inline-flex;
