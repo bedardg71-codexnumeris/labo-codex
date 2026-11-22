@@ -36,6 +36,18 @@
    seul SPE porte des jetons (le wizard n'en écrit que pour `specifications`) ; la
    section jetons « STD » des captures venait de l'ancien éditeur mort (#338). On ne
    liste donc PAS les jetons comme axe STD.
+
+   LA FAMILLE « CIBLES » (21 nov. 2026) — la pratique « Par standards » (type « cibles », sigle affiché STD).
+   Elle n'avait aucune branche ici : elle tombait dans les branches par défaut, écrites pour l'ancienne famille
+   « standards » (devenue « Par sélection de productions », sigle SEL), et sa colonne disait « Sélection
+   d'artefacts », « Non couvert (la note se rapporte à des instruments) » et « La reprise prend la place de la
+   copie d'origine » : trois lignes fausses. Elle a maintenant SES lignes (`_lignesCibles`), tirées de sa config
+   et des règles de plans de travail/CONCEPTION-2026-11-20-pratique-par-standards.md.
+   ⮕ Ce module reste PUR : les cibles vivent dans un ensemble rangé par trimestre, que l'APPELANT lit par son
+   propriétaire (`EnsemblesCibles`) et passe dans `contexte.cibles`.
+
+   ⛔ GARDE CONTRE LA RÉCIDIVE : une famille que ce module ne connaît pas (`FAMILLES_DECRITES`) ne traverse
+   PLUS les branches par défaut. Elle reçoit `NON_DECRIT` (`_lignesFamilleInconnue`) : rien d'emprunté.
    =============================================================================== */
 (function () {
     'use strict';
@@ -89,6 +101,24 @@
 
     // Une valeur que l'application ne sait pas produire. Elle s'AFFICHE.
     var NON_COUVERT = 'Non couvert par l\'application';
+
+    // Les familles que ce module sait décrire. Toute autre reçoit NON_DECRIT, jamais les valeurs d'une voisine.
+    var FAMILLES_DECRITES = ['sommative', 'standards', 'specifications', 'denotation', 'cibles'];
+    // Une famille que le comparateur ne sait pas (encore) décrire. Elle s'AFFICHE, comme NON_COUVERT.
+    var NON_DECRIT = 'Non décrit par le comparateur pour cette pratique';
+
+    // Les libellés des lignes que plusieurs familles portent : une seule source (la colonne de gauche prend celui
+    // de la première colonne qui porte l'axe ; deux écritures finiraient par diverger selon l'ordre des colonnes).
+    var LIBELLES = {
+        nbProductions: 'Productions comptées',
+        alignementCibles: 'Alignement sur des cibles d\'apprentissage',
+        reprises: 'Reprises',
+        objetNote: 'Ce à quoi la note se rapporte',
+        temporaliteNote: 'Temporalité de la note',
+        granulariteEvaluation: 'Niveaux de performance (évaluations)',
+        granulariteCours: 'Niveaux de la note du cours',
+        ponderation: 'Pondération'
+    };
 
     // -------------------------------------------------------------------------
     // Valeurs de base par famille. Chacune est rangée sous un paramètre par
@@ -343,7 +373,7 @@
 
     /** OBJET — de quoi la note dépend. */
     function _objet(config, famille, out) {
-        out.push(_row('nbProductions', 'Productions comptées', _nbProductions(config, famille), 'objet'));
+        out.push(_row('nbProductions', LIBELLES.nbProductions, _nbProductions(config, famille), 'objet'));
         if (famille === 'standards') {
             var portfolio = _lire(config, 'portfolio') || {};
             var cats = portfolio.categories || _conf(config).categories;
@@ -351,13 +381,13 @@
                 (cats && cats.actif) ? 'Portfolio + obligatoires/terminale (catégories)' : 'Portfolio seul', 'objet'));
         }
         if (famille === 'sommative') _pousserRegles(config, out, 'objet');
-        out.push(_row('alignementCibles', 'Alignement sur des cibles d\'apprentissage',
+        out.push(_row('alignementCibles', LIBELLES.alignementCibles,
             _alignementCibles(famille), 'objet'));
     }
 
     /** RÉVISABILITÉ — ce qui peut être repris, et combien de fois. */
     function _revisabilite(config, famille, out) {
-        out.push(_row('reprises', 'Reprises', _reprises(config, famille), 'revisabilite'));
+        out.push(_row('reprises', LIBELLES.reprises, _reprises(config, famille), 'revisabilite'));
         if (famille === 'standards') {
             var portfolio = _lire(config, 'portfolio') || {};
             var sel = String(portfolio.methodeSelection || '');
@@ -384,7 +414,7 @@
 
     /** COMMUNICATION — ce que la note dit, et quand. */
     function _communication(config, famille, out) {
-        out.push(_row('objetNote', 'Ce à quoi la note se rapporte', _objetNote(famille), 'communication'));
+        out.push(_row('objetNote', LIBELLES.objetNote, _objetNote(famille), 'communication'));
         if (famille !== 'sommative') {
             // Pas d'échelle en SOM, par design.
             _ajouterEchelle(config, out,
@@ -395,19 +425,19 @@
             out.push(_row('grille', 'Grille de critères (rétroaction)',
                 grilleId ? 'Rattachée' : 'Optionnelle (critères explicités par les cibles)', 'communication'));
         }
-        out.push(_row('temporaliteNote', 'Temporalité de la note', _temporaliteNote(), 'communication'));
+        out.push(_row('temporaliteNote', LIBELLES.temporaliteNote, _temporaliteNote(), 'communication'));
     }
 
     /** GRANULARITÉ — combien de niveaux, aux évaluations et au cours. */
     function _granularite(config, famille, out) {
-        out.push(_row('granulariteEvaluation', 'Niveaux de performance (évaluations)',
+        out.push(_row('granulariteEvaluation', LIBELLES.granulariteEvaluation,
             _granulariteEvaluation(config, famille), 'granularite'));
-        out.push(_row('granulariteCours', 'Niveaux de la note du cours', NON_COUVERT, 'granularite'));
+        out.push(_row('granulariteCours', LIBELLES.granulariteCours, NON_COUVERT, 'granularite'));
     }
 
     /** DÉTERMINATION — algorithme, jugement, ou les deux. */
     function _determination(config, famille, out) {
-        out.push(_row('ponderation', 'Pondération', _ponderation(config, famille), 'determination'));
+        out.push(_row('ponderation', LIBELLES.ponderation, _ponderation(config, famille), 'determination'));
         if (famille === 'denotation') {
             out.push(_row('noteFinale', 'Note finale',
                 'Jugement saisi, gardé par l\'atteinte des cibles (RREC 60/59)', 'determination'));
@@ -449,23 +479,156 @@
         out.push(_row('echelle', 'Échelle de performance', valeur, 'communication'));
     }
 
+    // -------------------------------------------------------------------------
+    // LA FAMILLE « CIBLES » — la pratique « Par standards » (21 nov. 2026).
+    //
+    // Chaque valeur vient de la config de la pratique (`configuration` : ensembleCiblesId, echelleId,
+    // niveauSansDonnee, notesFinales, doubleSeuil), de son échelle résolue, et de son ensemble de cibles
+    // (`contexte.cibles`, lu par l'appelant). Les phrases fixes disent ce que fait `NoteCibles`
+    // (js/pratiques/note-cibles.js) ; le numéro de la règle de la fiche de conception est en marge.
+    // Elle ne porte NI « Productions comptées », NI « Méthode de sélection », NI « Composantes » : ces lignes
+    // sont absentes, et le Comparateur affiche « s.o. » dans sa colonne. Les coches « essentiel » des critères
+    // ne sont lues par aucun calcul (choix de Grégoire, 21 nov. 2026) : elles ne sont pas décrites ici.
+    // MOTS D'ÉCRAN : PROPOSÉS (plans de travail/TEXTES-2026-11-21-comparateur-par-standards.md).
+    // -------------------------------------------------------------------------
+    var ENSEMBLE_INTROUVABLE = 'Cibles introuvables dans ce trimestre';
+    var ECHELLE_INTROUVABLE = 'Échelle introuvable dans ce trimestre';
+
+    /** « 5 cibles, dont 2 terminales » — C6 : les terminales sont celles que vise le second seuil. */
+    function _ciblesComptees(cibles) {
+        if (!cibles) return ENSEMBLE_INTROUVABLE;
+        if (cibles.length === 0) return 'Aucune cible';
+        var t = cibles.filter(function (c) { return c && c.terminale === true; }).length;
+        return cibles.length + (cibles.length > 1 ? ' cibles' : ' cible') + ', '
+            + (t === 0 ? 'aucune terminale' : ('dont ' + t + (t > 1 ? ' terminales' : ' terminale')));
+    }
+
+    /** F2 : les poids sont égaux, ou fixés. Un poids illisible ou nul se dit (la note ne se calcule pas). */
+    function _ponderationCibles(cibles) {
+        if (!cibles) return ENSEMBLE_INTROUVABLE;
+        if (cibles.length === 0) return 'Aucune cible';
+        var poids = cibles.map(function (c) { return (c && typeof c.poids === 'number' && isFinite(c.poids) && c.poids > 0) ? c.poids : null; });
+        if (poids.indexOf(null) !== -1) return 'Au moins une cible n\'a pas de poids plus grand que zéro';
+        var min = Math.min.apply(null, poids), max = Math.max.apply(null, poids);
+        return min === max ? 'Égale entre les cibles'
+            : 'Inégale entre les cibles (poids de ' + formaterNombre(min) + ' à ' + formaterNombre(max) + ')';
+    }
+
+    /** E2 : le niveau nommé pour l'absence de données — celui que désigne `configuration.niveauSansDonnee`. */
+    function _niveauSansDonnee(config) {
+        var code = _conf(config).niveauSansDonnee;
+        var norme = (code === undefined || code === null) ? '' : String(code).trim().toUpperCase();
+        if (norme === '') return 'Aucun niveau désigné';
+        var ech = _lire(config, 'echelle');
+        var niveaux = (ech && Array.isArray(ech.niveaux)) ? ech.niveaux : [];
+        if (niveaux.length === 0) return ECHELLE_INTROUVABLE;
+        for (var i = 0; i < niveaux.length; i++) {
+            var n = niveaux[i];
+            if (n && n.code != null && String(n.code).trim().toUpperCase() === norme) return String(n.nom || n.code);
+        }
+        return 'Le niveau désigné n\'est plus dans l\'échelle';
+    }
+
+    /**
+     * F4 : le second seuil. `contexte.doubleSeuil` est la lecture du moteur (`NoteCibles.lireDoubleSeuil` : éteint,
+     * 60 et 55 d'office) ; sans elle, ce que la config porte, sans rien inventer.
+     */
+    function _doubleSeuil(config, contexte, cibles) {
+        var brut = _conf(config).doubleSeuil || {};
+        var ds = contexte.doubleSeuil || { actif: brut.actif === true, seuil: brut.seuil, plafond: brut.plafond };
+        if (ds.actif !== true) return 'Éteint';
+        if (cibles && !cibles.some(function (c) { return c && c.terminale === true; })) {
+            return 'Allumé, sans effet : aucune cible terminale';
+        }
+        if (typeof ds.seuil !== 'number' || typeof ds.plafond !== 'number') return 'Allumé';
+        return 'Note plafonnée à ' + formaterPourcentage(ds.plafond) + ' si la moyenne des cibles terminales est sous '
+            + formaterPourcentage(ds.seuil);
+    }
+
+    function _lignesCibles(config, contexte, out) {
+        var cibles = Array.isArray(contexte.cibles) ? contexte.cibles : null;
+        var ech = _lire(config, 'echelle');
+        var nbNiveaux = (ech && Array.isArray(ech.niveaux)) ? ech.niveaux.length : 0;
+
+        // OBJET — F8 : rien d'autre que l'atteinte des cibles n'entre dans la note.
+        out.push(_row('ciblesComptees', 'Cibles comptées', _ciblesComptees(cibles), 'objet'));
+        out.push(_row('alignementCibles', LIBELLES.alignementCibles, 'Couvert (la note se rapporte aux cibles)', 'objet'));
+
+        // RÉVISABILITÉ — T2, T3, O1 : le meilleur niveau démontré, jamais rétrogradé, jamais plafonné.
+        out.push(_row('reprises', LIBELLES.reprises,
+            'Le meilleur niveau démontré est retenu pour chaque cible ; une reprise ne le fait jamais baisser', 'revisabilite'));
+
+        _agentivite(out);
+
+        // COMMUNICATION — S2 : un niveau par cible, jamais une note par instrument.
+        out.push(_row('objetNote', LIBELLES.objetNote, 'Cibles d\'apprentissage', 'communication'));
+        _ajouterEchelle(config, out, ECHELLE_INTROUVABLE);
+        out.push(_row('temporaliteNote', LIBELLES.temporaliteNote, _temporaliteNote(), 'communication'));
+
+        // GRANULARITÉ — E1, E2.
+        out.push(_row('granulariteEvaluation', LIBELLES.granulariteEvaluation,
+            nbNiveaux ? (nbNiveaux + ' niveaux') : ECHELLE_INTROUVABLE, 'granularite'));
+        out.push(_row('niveauSansDonnee', 'Niveau « sans donnée »', _niveauSansDonnee(config), 'granularite'));
+        out.push(_row('granulariteCours', LIBELLES.granulariteCours, NON_COUVERT, 'granularite'));
+
+        // DÉTERMINATION — F1 à F4, F7.
+        out.push(_row('ponderation', LIBELLES.ponderation, _ponderationCibles(cibles), 'determination'));
+        out.push(_row('calculNote', 'Calcul de la note',
+            'Moyenne pondérée des valeurs des niveaux retenus', 'determination'));
+        out.push(_row('doubleSeuil', 'Double seuil', _doubleSeuil(config, contexte, cibles), 'determination'));
+        out.push(_row('notesFinalisees', 'Notes finalisées',
+            _conf(config).notesFinales === true
+                ? 'Oui : une cible sans donnée compte pour ' + formaterPourcentage(0)
+                : 'Non : pas de note tant qu\'une cible est sans donnée', 'determination'));
+    }
+
+    /**
+     * ⛔ LA GARDE. Une famille absente de FAMILLES_DECRITES : les six paramètres, et NON_DECRIT partout où la
+     * valeur viendrait d'une branche par famille. Seuls restent les faits qui ne dépendent d'aucune famille :
+     * l'échelle que la config porte, le réglage global de la temporalité, et les deux « non couvert » de l'outil.
+     */
+    function _lignesFamilleInconnue(config, out) {
+        var ech = _lire(config, 'echelle');
+        var nbNiveaux = (ech && Array.isArray(ech.niveaux)) ? ech.niveaux.length : 0;
+        out.push(_row('nbProductions', LIBELLES.nbProductions, NON_DECRIT, 'objet'));
+        out.push(_row('alignementCibles', LIBELLES.alignementCibles, NON_DECRIT, 'objet'));
+        out.push(_row('reprises', LIBELLES.reprises, NON_DECRIT, 'revisabilite'));
+        _agentivite(out);
+        out.push(_row('objetNote', LIBELLES.objetNote, NON_DECRIT, 'communication'));
+        _ajouterEchelle(config, out, NON_DECRIT);
+        out.push(_row('temporaliteNote', LIBELLES.temporaliteNote, _temporaliteNote(), 'communication'));
+        out.push(_row('granulariteEvaluation', LIBELLES.granulariteEvaluation,
+            nbNiveaux ? (nbNiveaux + ' niveaux') : NON_DECRIT, 'granularite'));
+        out.push(_row('granulariteCours', LIBELLES.granulariteCours, NON_COUVERT, 'granularite'));
+        out.push(_row('ponderation', LIBELLES.ponderation, NON_DECRIT, 'determination'));
+    }
+
     /**
      * Extrait les attributs de construction de la note d'une config RÉSOLUE.
      * @param {object} config - sortie de construireConfigComplete (ou compatible).
+     * @param {{cibles?:Array, doubleSeuil?:{actif:boolean, seuil:number, plafond:number}}} [contexte] - famille
+     *   « cibles » seulement : les cibles de l'ensemble (normalisées ; null ou absent = ensemble introuvable) et le
+     *   double seuil tel que le moteur le lit. Ce module ne lit aucun stockage : l'appelant les fournit.
      * @returns {{famille:string, attributs:Array<{axe,libelle,valeur,parametre}>}}
      *   Liste ordonnée SELON LES SIX PARAMÈTRES. Les six sont toujours
      *   représentés, y compris ceux que l'application ne couvre pas.
-     *   Repli neutre : config vide → aucune exception, des valeurs lisibles.
+     *   Famille inconnue ou config vide → aucune exception, NON_DECRIT : aucune valeur empruntée.
      */
-    function extraire(config) {
+    function extraire(config, contexte) {
         var famille = _famille(config);
         var out = [];
-        _objet(config, famille, out);
-        _revisabilite(config, famille, out);
-        _agentivite(out);
-        _communication(config, famille, out);
-        _granularite(config, famille, out);
-        _determination(config, famille, out);
+        if (famille === 'cibles') {
+            _lignesCibles(config, contexte || {}, out);
+        } else if (FAMILLES_DECRITES.indexOf(famille) === -1) {
+            _lignesFamilleInconnue(config, out);
+        } else {
+            _objet(config, famille, out);
+            _revisabilite(config, famille, out);
+            _agentivite(out);
+            _communication(config, famille, out);
+            _granularite(config, famille, out);
+            _determination(config, famille, out);
+        }
         return { famille: famille, attributs: out };
     }
 
@@ -474,6 +637,7 @@
         libelleModeleForfaits: libelleModeleForfaits,
         libelleRegleSommative: libelleRegleSommative,
         extraire: extraire,
+        NON_DECRIT: NON_DECRIT,
         PARAMETRES: PARAMETRES.map(function (p) { return { cle: p.cle, libelle: p.libelle }; })
     };
 
