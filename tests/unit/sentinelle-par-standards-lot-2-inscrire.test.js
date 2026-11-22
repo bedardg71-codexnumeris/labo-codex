@@ -86,8 +86,10 @@ describe('A · deux inscriptions sur la même cible donnent deux entrées', () =
         const m = monterInscriptions();
         await m.IC.inscrire([saisie(m.IC, { noteBreve: '  Les idées sont là ; la citation manque.  ', productionId: 'P1' })]);
         const [i] = m.store[CLE];
+        // 22 nov. 2026 (l'écran d'observation) : `origine` s'ajoute ; une production désignée l'impose.
         expect(Object.keys(i).sort()).toEqual(['cibleId', 'criteres', 'da', 'date', 'echelleId', 'ensembleId', 'horodatage', 'id',
-            'niveau', 'noteBreve', 'productionId', 'type']);
+            'niveau', 'noteBreve', 'origine', 'productionId', 'type']);
+        expect(i.origine).toBe('production');
         expect(i).toMatchObject({ type: 'inscription', da: ZOE, ensembleId: 'ENS1', cibleId: CIBLE.id, niveau: '2', echelleId: 'ECH-banc',
             date: '2026-11-21', productionId: 'P1', noteBreve: 'Les idées sont là ; la citation manque.' });
         expect(i.horodatage).toMatch(/^\d{4}-\d{2}-\d{2}T/);
@@ -646,11 +648,12 @@ describe('L · une inscription peut ne porter aucun niveau (une remarque) ; ce n
         expect(etatCase(m.win, m.store[CLE]).retenu.niveau).toBe('0');
     });
 
-    it('l\'inscription vide (ni niveau ni texte) est refusée, en mots ; des coches seules ne suffisent pas', () => {
+    it('l\'inscription vide (ni niveau, ni texte, ni critère renseigné) est refusée, en mots ; un critère renseigné suffit depuis le 22 nov.', () => {
         const m = monterInscriptions();
         expect(m.IC.motifsRefus(saisie(m.IC, { niveau: null, noteBreve: '   ' }), ECHELLE)).toEqual([m.IC.MOTIFS.VIDE]);
+        // Révisé le 22 nov. 2026 (l'écran d'observation) : des coches seules SUFFISENT désormais (sentinelle-observation-par-standards).
         const coches = m.IC.etatDesCriteres(CIBLE, { 'crit-a': true });
-        expect(m.IC.motifsRefus(saisie(m.IC, { niveau: null, noteBreve: '', criteres: coches }), ECHELLE)).toEqual([m.IC.MOTIFS.VIDE]);
+        expect(m.IC.motifsRefus(saisie(m.IC, { niveau: null, noteBreve: '', criteres: coches }), ECHELLE)).toEqual([]);
         expect(m.IC.MOTIFS.VIDE).toMatch(/^[A-ZÀ-Ü].{30,}[.]$/);
     });
 
@@ -745,7 +748,7 @@ describe('L · une inscription peut ne porter aucun niveau (une remarque) ; ce n
         expect(bloc.querySelector('.tc-bloc-details').classList.contains('u-hide'), 'ses critères et sa rétroaction paraissent').toBe(false);
         f.querySelector('[data-tc="inscrire-production"]').click();
         await new Promise(r => setTimeout(r, 0));
-        expect(f.querySelector('.tc-alerte').textContent).toBe('« Lire un texte » : choisis un niveau ou écris une rétroaction : une inscription vide ne s\'inscrit pas.');
+        expect(f.querySelector('.tc-alerte').textContent).toBe('« Lire un texte » : choisis un niveau, renseigne un critère ou écris une rétroaction : une inscription vide ne s\'inscrit pas.');
         expect(e.store[CLE] || []).toEqual([]);
         bloc.querySelector('.tc-retroaction').value = 'A repris la cible à l\'oral.';
         f.querySelector('[data-tc="inscrire-production"]').click();

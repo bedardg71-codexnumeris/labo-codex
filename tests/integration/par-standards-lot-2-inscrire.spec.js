@@ -167,7 +167,7 @@ test('une remarque sans niveau : refusée vide ; inscrite avec un texte, la case
     await laCase.click();
     const f = page.locator('.tc-fenetre');
     await f.locator('[data-tc="inscrire"]').click();
-    await expect(f.locator('.tc-alerte')).toHaveText('Choisis un niveau ou écris une rétroaction : une inscription vide ne s\'inscrit pas.');
+    await expect(f.locator('.tc-alerte')).toHaveText('Choisis un niveau, renseigne un critère ou écris une rétroaction : une inscription vide ne s\'inscrit pas.');
     await expect(f.locator('.tc-alerte')).toBeVisible();
     await f.locator('.tc-retroaction').fill('En atelier : les paragraphes ont une idée, les transitions manquent.');
     await f.locator('[data-tc="inscrire"]').click();

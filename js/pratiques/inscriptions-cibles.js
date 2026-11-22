@@ -21,6 +21,7 @@
  *                   date,                    // 'AAAA-MM-JJ' : la date de la trace (d'office aujourd'hui, modifiable)
  *                   horodatage,              // ISO : le moment où l'inscription a été écrite
  *                   productionId,            // l'id d'une production, ou null (observation, entretien : N3)
+ *                   origine,                 // 'production', 'observation' ou 'conversation' (22 nov. 2026 ; voir plus bas)
  *                   noteBreve,               // texte libre de l'enseignant·e (la rétroaction, N5) ; '' si rien
  *                   criteres: [ { id, texte, essentiel, respecte } ] }
  *   annulation  : { id, type: 'annulation', inscriptionId, da, ensembleId, cibleId, date, horodatage, raison }
@@ -31,7 +32,8 @@
  * ne pose un niveau que lorsqu'il juge avoir assez de traces ; c'est sa stratégie pour 7 de ses 10 cibles à l'automne
  * 2026 ». `null` n'est AUCUN code de l'échelle, pas même celui du niveau « sans donnée » (qui vaut 0 %) : une cible qui
  * n'a que des remarques reste sans donnée pour le niveau retenu (lot 3) et pour la note (lot 4). Une inscription porte
- * au moins un niveau ou un texte ; vide des deux, elle est refusée (`motifsRefus`). Ses critères se cochent de même.
+ * au moins un niveau, un texte ou un critère renseigné (élargi le 22 nov. 2026) ; vide des trois, elle est refusée
+ * (`motifsRefus`). Ses critères se cochent de même.
  *
  * L'ÉTAT DES CRITÈRES (choix de Grégoire, 21 nov. 2026, 8 h 38). Chaque critère de la cible, tel qu'il était écrit au
  * moment du jugement (id, texte, « essentiel »), avec `respecte` :
@@ -43,6 +45,19 @@
  * inscription passée dit avoir jugé. Une cible sans critère donne `criteres: []`.
  * ⚠ L'APPLICATION NE CALCULE RIEN À PARTIR DES COCHES : ni niveau proposé, ni niveau refusé, ni alerte de cohérence
  * (fiche, N1 ; avertissement des sources sur le calcul, fiche § 6). Aucune fonction de ce module ne les lit pour décider.
+ *
+ * L'ORIGINE D'UNE INSCRIPTION (décision de Grégoire, 22 nov. 2026, l'écran d'observation) : trois valeurs.
+ *   production   : elle désigne une production (`productionId`) ;
+ *   observation  : vue en classe, sans copie (pendant une pratique guidée) ;
+ *   conversation : un échange hors séance (au bureau, par message).
+ * Les inscriptions écrites avant le 22 nov. n'ont pas ce champ, et ne sont PAS réécrites : `lireOrigine` les lit
+ * « production » si elles désignent une production, « observation » sinon. Une inscription qui désigne une production est
+ * toujours « production » (la forme rangée l'impose). Le champ voyage avec l'entrée : la fusion de deux codex réunit par
+ * `id`, et une entrée n'étant jamais réécrite, le champ ne crée aucun conflit.
+ *
+ * LA RÈGLE D'ACCEPTATION (élargie le 22 nov. 2026, l'écran d'observation) : une inscription porte un niveau, un texte, OU
+ * au moins un critère renseigné (respecté ou non respecté). Une observation d'une seule touche est donc valide. Vide des
+ * trois, elle est refusée (`motifsRefus`). Les coches restent sans calcul : elles rendent l'inscription non vide, rien de plus.
  *
  * CE QUE CE MODULE NE FAIT PAS : il ne retient aucun niveau et ne calcule aucune note (lots 3 et 4 : `NoteCibles`,
  * js/pratiques/note-cibles.js, qui lit cette liste par les fonctions pures ci-dessous). Il ne lit ni n'écrit
@@ -61,7 +76,9 @@
     // Mots PROPOSÉS (plans de travail/TEXTES-2026-11-21-par-standards-lot-2.md) : Grégoire les relit sur l'aperçu.
     const MOTIFS = Object.freeze({
         // Complément du 21 nov., 9 h 17 : le niveau est facultatif, mais pas l'inscription vide.
-        VIDE: 'Choisis un niveau ou écris une rétroaction : une inscription vide ne s\'inscrit pas.',
+        // Élargi le 22 nov. 2026 : un critère renseigné suffit aussi (l'écran d'observation).
+        VIDE: 'Choisis un niveau, renseigne un critère ou écris une rétroaction : une inscription vide ne s\'inscrit pas.',
+        OBSERVATION_VIDE: 'Renseigne un critère ou écris ce que tu as vu : une observation vide ne s\'inscrit pas.',
         NIVEAU_HORS_ECHELLE: 'Ce niveau n\'est pas dans l\'échelle de la pratique : choisis-en un dans la liste.',
         DATE: 'La date n\'est pas valide : choisis une date dans le calendrier.',
         SANS_ELEVE: 'Choisis l\'étudiant·e.',
@@ -136,6 +153,32 @@
         return !!e && lireNiveau(e.niveau) === null;
     }
 
+    /* ------------------------------------------------------------------ L'origine (22 nov. 2026) */
+
+    const ORIGINES = Object.freeze({ PRODUCTION: 'production', OBSERVATION: 'observation', CONVERSATION: 'conversation' });
+    const LISTE_ORIGINES = Object.freeze([ORIGINES.PRODUCTION, ORIGINES.OBSERVATION, ORIGINES.CONVERSATION]);
+
+    /**
+     * L'origine d'une inscription. Enregistrée : telle quelle. Absente (inscription d'avant le 22 nov.) ou inconnue :
+     * « production » si l'inscription désigne une production, « observation » sinon. Rien n'est réécrit.
+     */
+    function lireOrigine(e) {
+        if (!e) return ORIGINES.OBSERVATION;
+        if (LISTE_ORIGINES.indexOf(e.origine) !== -1) return e.origine;
+        return e.productionId ? ORIGINES.PRODUCTION : ORIGINES.OBSERVATION;
+    }
+
+    /** L'origine à ranger : une production désignée l'impose ; sinon « conversation » si demandée, « observation » d'office. */
+    function origineARanger(origine, productionId) {
+        if (productionId) return ORIGINES.PRODUCTION;
+        return origine === ORIGINES.CONVERSATION ? ORIGINES.CONVERSATION : ORIGINES.OBSERVATION;
+    }
+
+    /** Vrai quand au moins un critère est renseigné (respecté ou non respecté). */
+    function aUnCritereRenseigne(criteres) {
+        return (Array.isArray(criteres) ? criteres : []).some(k => k && lireRespecte(k.respecte) !== null);
+    }
+
     /* ------------------------------------------------------------------ Construire (fonctions pures) */
 
     function texteLibre(v, max) {
@@ -144,11 +187,12 @@
 
     /**
      * Une inscription dans sa forme rangée.
-     * @param {{id, da, ensembleId, cibleId, niveau, echelleId, date, horodatage, productionId, noteBreve, criteres}} s
+     * @param {{id, da, ensembleId, cibleId, niveau, echelleId, date, horodatage, productionId, origine, noteBreve, criteres}} s
      */
     function construireInscription(s) {
         const q = s || {};
         const niveau = lireNiveau(q.niveau);
+        const productionId = q.productionId ? String(q.productionId) : null;
         return {
             id: String(q.id || ''),
             type: INSCRIPTION,
@@ -159,7 +203,8 @@
             echelleId: (niveau !== null && q.echelleId) ? String(q.echelleId) : null,
             date: String(q.date || ''),
             horodatage: String(q.horodatage || new Date().toISOString()),
-            productionId: q.productionId ? String(q.productionId) : null,
+            productionId: productionId,
+            origine: origineARanger(q.origine, productionId),
             noteBreve: texteLibre(q.noteBreve, LONGUEUR_NOTE_BREVE),
             criteres: (Array.isArray(q.criteres) ? q.criteres : []).filter(k => k && k.id).map(k => ({
                 id: String(k.id),
@@ -201,8 +246,8 @@
     /**
      * Les refus d'une inscription, dans l'ordre de l'écran. Vide : elle peut s'écrire. Les coches n'y entrent pas : elles
      * sont facultatives, et l'application ne juge pas le niveau à partir d'elles. Le niveau est facultatif (complément du
-     * 21 nov., 9 h 17), mais une inscription porte au moins un niveau ou un texte.
-     * @param {{da, cibleId, niveau, noteBreve, date}} saisie
+     * 21 nov., 9 h 17), mais une inscription porte au moins un niveau, un texte ou un critère renseigné (22 nov. 2026).
+     * @param {{da, cibleId, niveau, noteBreve, date, criteres}} saisie
      * @param {Object} echelle - l'échelle de la pratique
      * @returns {string[]}
      */
@@ -211,7 +256,7 @@
         const motifs = [];
         if (!q.da) motifs.push(MOTIFS.SANS_ELEVE);
         const niveau = lireNiveau(q.niveau);
-        if (niveau === null && texteLibre(q.noteBreve, LONGUEUR_NOTE_BREVE) === '') motifs.push(MOTIFS.VIDE);
+        if (niveau === null && texteLibre(q.noteBreve, LONGUEUR_NOTE_BREVE) === '' && !aUnCritereRenseigne(q.criteres)) motifs.push(MOTIFS.VIDE);
         else if (niveau !== null && codesDeLEchelle(echelle).indexOf(niveau) === -1) motifs.push(MOTIFS.NIVEAU_HORS_ECHELLE);
         if (!dateValide(q.date)) motifs.push(MOTIFS.DATE);
         return motifs;
@@ -256,6 +301,24 @@
 
     // `etatDeLaCase` (le DERNIER niveau inscrit d'une case, lot 2) est retirée au lot 3 (21 nov. 2026) : la case montre
     // désormais le niveau retenu, lu par `NoteCibles.retenirDansLHistorique` (js/pratiques/note-cibles.js).
+
+    /**
+     * LES ÉTUDIANT·ES VU·ES À UNE DATE POUR UNE CIBLE (l'écran d'observation, 22 nov. 2026) : les DA qui portent, à cette
+     * date, une inscription non annulée d'origine « observation » ou « conversation ». Une production ne compte pas : ce
+     * repère dit qui a été regardé·e en classe ou entendu·e, rien d'autre. Ne lit aucun niveau.
+     * @returns {Set<string>}
+     */
+    function vusALaDate(liste, ensembleId, cibleId, date) {
+        const annulations = annulationsParInscription(liste);
+        const vus = new Set();
+        (Array.isArray(liste) ? liste : []).forEach(e => {
+            if (!estInscription(e) || annulations.has(e.id) || e.cibleId !== cibleId || e.date !== date) return;
+            if (ensembleId && e.ensembleId !== ensembleId) return;
+            if (lireOrigine(e) === ORIGINES.PRODUCTION) return;
+            vus.add(String(e.da));
+        });
+        return vus;
+    }
 
     /**
      * Les inscriptions non annulées de chaque cible d'un ensemble : { [cibleId]: { inscriptions, niveaux, remarques, eleves } }.
@@ -417,6 +480,10 @@
         LONGUEUR_NOTE_BREVE: LONGUEUR_NOTE_BREVE,
         LONGUEUR_RAISON: LONGUEUR_RAISON,
         MOTIFS: MOTIFS,
+        ORIGINES: ORIGINES,
+        lireOrigine: lireOrigine,
+        aUnCritereRenseigne: aUnCritereRenseigne,
+        vusALaDate: vusALaDate,
         dateDuJour: dateDuJour,
         dateValide: dateValide,
         lireRespecte: lireRespecte,
