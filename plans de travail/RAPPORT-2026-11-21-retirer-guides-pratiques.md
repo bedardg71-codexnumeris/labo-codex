@@ -1,8 +1,8 @@
 # Rapport — Retirer les deux guides de Conception › Pratiques (21 nov. 2026)
 
 - **Branche** : `lot/retirer-guides-pratiques`, partie d'`origin/main` à `16360f43c` (1.253.0).
-- **PR** (brouillon, NE PAS FUSIONNER) : à compléter après ouverture.
-- **Aperçu** : à compléter après ouverture.
+- **PR** (brouillon, NE PAS FUSIONNER) : https://github.com/bedardg71-codexnumeris/labo-codex/pull/50
+- **Aperçu** : https://deploy-preview-50--codexnumeris-051225.netlify.app (vérifié : plus aucun `data-param="som"` dans son index.html, le commentaire daté y est).
 - **Décision** : Grégoire, 21 nov. 2026, 21 h 25 — les guides « Comprendre sa sommative » et « Modalités » sont jugés trop prescriptifs ; leurs boutons partent le temps de la révision.
 - **État** : fait. Ni fusion ni release : la branche part avec la prochaine version.
 
