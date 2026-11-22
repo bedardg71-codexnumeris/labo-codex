@@ -21,6 +21,20 @@
 
     var CHANGELOG = [
         {
+            // 1.254 (22 nov. 2026 : assemblage de cinq lots — le voyage des cibles, le « Modèle par standards », le
+            // Comparateur « Par standards » et sa synthèse, les guides « som » et « pan » retirés) — titre et quatre
+            // lignes acceptés par Grégoire le 22 nov. à 6 h 38, tels quels ; seule la typographie du fichier est appliquée.
+            version: '1.254',
+            couleur: 'vert',
+            titre: '«&nbsp;Par standards&nbsp;» voyage, et l’Exploration la décrit',
+            items: [
+                '«&nbsp;Garder dans ma bibliothèque&nbsp;» paraît sur chaque pratique de ton trimestre. Une pratique «&nbsp;Par standards&nbsp;» emporte ses cibles et son échelle d’un trimestre à l’autre, par un fichier ou par un partage&nbsp;; les niveaux de tes étudiant·es, eux, ne partent jamais. Un ancien fichier qui ne les contient pas te le dit.',
+                'Dans l’assistant, «&nbsp;Partir d’un modèle&nbsp;» offre un «&nbsp;Modèle par standards&nbsp;»&nbsp;: il t’amène tout droit aux cibles de ton cours, avec l’échelle de départ de 0 à 4 («&nbsp;0 – Données insuffisantes&nbsp;»).',
+                'Dans l’Exploration des pratiques, une colonne «&nbsp;Par standards&nbsp;» se décrit par ses propres lignes (cibles comptées, niveau «&nbsp;sans donnée&nbsp;», double seuil), et «&nbsp;Ce que règle cette pratique&nbsp;», sous chaque colonne, reprend les réglages du récapitulatif.',
+                'Les guides «&nbsp;Comprendre sa sommative&nbsp;» et «&nbsp;Modalités&nbsp;» quittent Conception&nbsp;›&nbsp;Pratiques le temps de leur révision.'
+            ]
+        },
+        {
             // 1.253 (21 nov. 2026 : la pratique « Par standards » mise en ligne À L'ESSAI, vue simple comprise) — titre et
             // texte acceptés par Grégoire le 21 nov. à 14 h 17, mot pour mot, sauf la troisième phrase, ajustée par Cowork
             // à 15 h 50 parce que la vue simple offre maintenant la pratique ; seule la typographie du fichier est

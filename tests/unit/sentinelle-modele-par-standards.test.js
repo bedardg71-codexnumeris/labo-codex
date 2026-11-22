@@ -94,7 +94,9 @@ describe('M2 · le modèle n\'existe que dans la liste de l\'assistant', () => {
     });
     it('aucun autre fichier de js/ ne le nomme : il vit dans l\'assistant seul', () => {
         const scripts = [...new Set([...readFileSync(path.join(RACINE, 'index.html'), 'utf8').matchAll(/<script src="(js\/[\w./-]+\.js)/g)].map(m => m[1]))];
-        const quiLeNomment = scripts.filter(f => /MODELE_ASSISTANT_PAR_STANDARDS|Modèle par standards/.test(sansCommentaires(readFileSync(path.join(RACINE, f), 'utf8'))));
+        // 22 nov. 2026 (release 1.254.0) : les Nouvelles (js/changelog-data.js) le nomment — des mots affichés, pas une
+        // voie qui l'offre ; elles sont seules exclues. Toute autre porte qui le nommerait fait toujours rougir.
+        const quiLeNomment = scripts.filter(f => f !== 'js/changelog-data.js').filter(f => /MODELE_ASSISTANT_PAR_STANDARDS|Modèle par standards/.test(sansCommentaires(readFileSync(path.join(RACINE, f), 'utf8'))));
         expect(quiLeNomment).toEqual(['js/wizard-pratique-v2.js']);
     });
     it('son identité ne commence pas par « STD- » (l\'ancien sens), et le code interne ne s\'y lit pas', () => {
