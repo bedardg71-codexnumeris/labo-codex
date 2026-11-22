@@ -128,7 +128,7 @@ describe('lot N6 · #935 — un réglage, un nom', () => {
         // Deux exceptions nommées, qui ne sont pas des écrivains de la pratique : la réponse de l'assistant garde son
         // id d'étape, et la pratique configurable TRANSMET au moteur la valeur que la pratique porte (lecture).
         expect(occurrences(/(?<![.\w])seuilAcceptabilite\s*:|\.seuilAcceptabilite\s*=(?!=)/)).toEqual([
-            'js/wizard-pratique-v2.js: if (seuil !== undefined) wizardState.reponses.seuilAcceptabilite = seuil;',
+            'js/wizard-pratique-v2.js: if (seuil !== undefined) reponses.seuilAcceptabilite = seuil;',   // ↻ 21 nov. 2026 : relue dans `reponsesDepuisPratique`
             'js/pratiques/pratique-configurable.js: seuilAcceptabilite: cfg.seuilAcceptabilite,'
         ].sort((a, b) => JS.indexOf(a.split(':')[0]) - JS.indexOf(b.split(':')[0])));
     });

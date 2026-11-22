@@ -2165,76 +2165,47 @@ function genererRecapitulatif() {
     if (r.discipline) html += `<p><strong>Discipline\u00a0:</strong> ${echapperHtml(r.discipline)}</p>`;
     html += '</div>';
 
-    // Section spécifique selon le type (#900, lot N6 : la section « Configuration » d'une
-    // sommative — rang et moyenne du groupe — part avec son étape.)
-    if (r.typePratique === 'standards') {
-        html += '<div class="wizard-v2-recap-section">';
-        html += '<h4>Configuration – Par sélection de productions</h4>';
-        // #443 : le libellé « Par objectifs » part avec la carte. Le repli
-        // `|| r.approcheEvaluation` reste : une pratique stockée qui porte encore
-        // l'ancienne valeur s'affiche telle quelle plutôt que « undefined ».
-        const approcheLabels = {
-            'par-artefacts': window.motsPoolStd().approche
-        };
-        html += `<p><strong>Approche\u00a0:</strong> ${approcheLabels[r.approcheEvaluation] || r.approcheEvaluation}</p>`;
+    // La section « Configuration – <type> » : source unique, partagée avec l'Exploration des pratiques (21 nov. 2026).
+    html += genererSectionConfiguration(r);
 
-        if (r.approcheEvaluation === 'par-artefacts') {
-            // #133 : le wizard prime — on affiche les réponses saisies, défauts
-            // alignés sur l'écriture (plus de lecture prioritaire de Primo).
-            const nbRetenus = r.nbArtefactsRetenus || 7;
-            const mots = window.motsPoolStd();
-            html += `<p><strong>${mots.retenusRecapitulatif}\u00a0:</strong> ${nbRetenus}</p>`;
-            const modeSelectionLabels = {
-                'n_meilleurs': mots.modeMeilleurs,
-                'tous': mots.modeTous,
-                'derniers': mots.modeDerniers,
-                'hybride': 'Hybride (N meilleures + Obligatoires)'
-            };
-            const modeSelection = r.modeSelectionPortfolio || 'n_meilleurs';
-            html += `<p><strong>Construction de la note\u00a0:</strong> ${modeSelectionLabels[modeSelection] || modeSelection}</p>`;
-        }
+    html += genererSectionMateriel(r);   // comparateur-synthese (21 nov. 2026) : sortie en fonction, texte inchangé
+
+    // ─── #319 Lot 4 — exemple de conséquence (a8) + réassurance non-destructive (a9) ───
+    html += genererSectionExemple(classification.type);
+    if (!wizardState.modeEdition) {
+        // a9 — création seulement : la garantie existe dans sauvegarderPratique,
+        // on la rend visible (encadré info bleu réutilisé, design system).
+        html += '<div class="wizard-v2-info-block">'
+              + '<span>Ta pratique active n\'est pas modifiée : celle-ci s\'ajoute à ta bibliothèque.</span>'
+              + '</div>';
+    }
+
+    // ─── Lien vers le banc de décision (#326, demande terrain 17 juin) ───
+    // Depuis le formulaire d'une pratique, accès direct au comparateur du Labo
+    // pour mettre cette pratique en regard d'autres sur des profils-types.
+    // #345 — masquage réversible : toute la section (titre + aide + bouton) est
+    // gated par COMPARATEUR_VISIBLE (config.js). Ne PAS laisser le titre orphelin.
+    if (typeof COMPARATEUR_VISIBLE === 'undefined' || COMPARATEUR_VISIBLE) {
+        html += '<div class="wizard-v2-recap-section">';
+        html += '<h4>Comparer ce type de notation</h4>';
+        html += '<p class="wizard-v2-recap-aide">Le banc de décision du Labo met plusieurs pratiques en regard, sur des profils-types, pour voir ce que chaque réglage change sur les notes.</p>';
+        html += '<button type="button" class="btn btn-secondaire" data-action="ouvrirComparateurDepuisWizard">Ouvrir l\'Exploration des pratiques</button>';
         html += '</div>';
     }
 
-    if (r.typePratique === 'specifications') {
-        html += '<div class="wizard-v2-recap-section">';
-        html += '<h4>Configuration PAN-Spécifications</h4>';
-        html += `<p><strong>Seuil d'acceptabilité\u00a0:</strong> ${formaterPourcentage(r.seuilAcceptabilite)}</p>`;
-        html += `<p><strong>Système de jetons\u00a0:</strong> ${r.utiliserJetons ? 'Activé' : 'Désactivé'}</p>`;
-        if (r.utiliserJetons) {
-            html += `<p><strong>Jetons délai\u00a0:</strong> ${r.nbJetonsDelai} (${r.dureeDelaiJours} jours)</p>`;
-            html += `<p><strong>Jetons reprise\u00a0:</strong> ${r.nbJetonsReprise}</p>`;
-        }
-        html += '</div>';
-    }
+    html += '</div>';
+    return html;
+}
 
-    if (r.typePratique === 'denotation') {
-        const cibles = Array.isArray(r.ciblesDenotation) ? r.ciblesDenotation : [];
-        const methodeLabels = { 'mode': 'Mode', 'mediane': 'Médiane', 'moyenne': 'Moyenne' };
-        html += '<div class="wizard-v2-recap-section">';
-        html += '<h4>Configuration PAN-Dénotation</h4>';
-        html += `<p><strong>Mode :</strong> Éliminée (jugement narratif → note)</p>`;
-        html += `<p><strong>Cibles d'apprentissage :</strong> ${cibles.length}</p>`;
-        html += `<p><strong>Suggestion statistique :</strong> ${methodeLabels[r.methodeSuggestionDen] || r.methodeSuggestionDen || 'Mode'}</p>`;
-        // #343 (b) : échelle/grille de rétroaction formative (n'entrent pas dans la note).
-        if (r.echelleId) {
-            const echelles = db.getSync(cle('echellesTemplates'), []);
-            const echelle = echelles.find(e => e.id === r.echelleId);
-            html += `<p><strong>Échelle (rétroaction) :</strong> ${echapperHtml(echelle?.nom || r.echelleId)}</p>`;
-        }
-        if (r.grilleId) {
-            const grille = grillesDuWizard().find(g => g.id === r.grilleId);
-            html += `<p><strong>Grille (rétroaction) :</strong> ${echapperHtml(grille?.nom || r.grilleId)}</p>`;
-        }
-        html += '</div>';
-    }
-
-    // Lot 1 de la pratique « Par standards » (21 nov. 2026) : le cours, les cibles, l'échelle et le niveau « sans
-    // donnée ». Elle ne calcule encore rien : le récapitulatif le dit.
-    if (r.typePratique === 'cibles') {
-        html += genererRecapitulatifCibles(r);
-    }
-
+/**
+ * La section « Matériel pédagogique » du récapitulatif (échelle, seuils, grille), sortie de `genererRecapitulatif` le
+ * 21 nov. 2026 (lot/comparateur-synthese) pour que la section « Configuration » en sorte sans faire monter le compte des
+ * fonctions complexes. Texte inchangé ; l'Exploration des pratiques ne la montre pas.
+ * @param {Object} r - réponses de l'assistant
+ * @returns {string} HTML
+ */
+function genererSectionMateriel(r) {
+    let html = '';
     // Échelle et grille — section « Matériel pédagogique » pour STD/SPE (l'échelle y sert
     // au calcul/conversion de niveaux). DEN les affiche dans SON bloc ci-dessus, en
     // rétroaction formative : la note DEN est un jugement, PAS une conversion de niveaux.
@@ -2271,31 +2242,91 @@ function genererRecapitulatif() {
         }
         html += '</div>';
     }
+    return html;
+}
 
-    // ─── #319 Lot 4 — exemple de conséquence (a8) + réassurance non-destructive (a9) ───
-    html += genererSectionExemple(classification.type);
-    if (!wizardState.modeEdition) {
-        // a9 — création seulement : la garantie existe dans sauvegarderPratique,
-        // on la rend visible (encadré info bleu réutilisé, design system).
-        html += '<div class="wizard-v2-info-block">'
-              + '<span>Ta pratique active n\'est pas modifiée : celle-ci s\'ajoute à ta bibliothèque.</span>'
-              + '</div>';
-    }
-
-    // ─── Lien vers le banc de décision (#326, demande terrain 17 juin) ───
-    // Depuis le formulaire d'une pratique, accès direct au comparateur du Labo
-    // pour mettre cette pratique en regard d'autres sur des profils-types.
-    // #345 — masquage réversible : toute la section (titre + aide + bouton) est
-    // gated par COMPARATEUR_VISIBLE (config.js). Ne PAS laisser le titre orphelin.
-    if (typeof COMPARATEUR_VISIBLE === 'undefined' || COMPARATEUR_VISIBLE) {
+/**
+ * La section « Configuration – <type> » du récapitulatif, seule (lot/comparateur-synthese, 21 nov. 2026). SOURCE UNIQUE
+ * de ce texte : le récapitulatif de l'assistant l'appelle avec ses réponses, et l'Exploration des pratiques (Labo) avec celles d'une
+ * pratique enregistrée (`syntheseConfigurationDePratique`). Chaîne vide pour une famille qui n'en a pas (sommative).
+ * Lecture seule ; tout texte de l'enseignant·e est échappé.
+ * @param {Object} r - réponses de l'assistant
+ * @returns {string} HTML
+ */
+function genererSectionConfiguration(r) {
+    // Les valeurs relues d'une pratique enregistrée (ou importée) sont échappées : l'Exploration des pratiques les rend
+    // aussi (21 nov. 2026). `String` d'abord : une valeur absente s'écrit comme avant.
+    const e = (v) => echapperHtml(String(v));
+    let html = '';
+    // Section spécifique selon le type (#900, lot N6 : la section « Configuration » d'une
+    // sommative — rang et moyenne du groupe — part avec son étape.)
+    if (r.typePratique === 'standards') {
         html += '<div class="wizard-v2-recap-section">';
-        html += '<h4>Comparer ce type de notation</h4>';
-        html += '<p class="wizard-v2-recap-aide">Le banc de décision du Labo met plusieurs pratiques en regard, sur des profils-types, pour voir ce que chaque réglage change sur les notes.</p>';
-        html += '<button type="button" class="btn btn-secondaire" data-action="ouvrirComparateurDepuisWizard">Ouvrir l\'Exploration des pratiques</button>';
+        html += '<h4>Configuration – Par sélection de productions</h4>';
+        // #443 : le libellé « Par objectifs » part avec la carte. Le repli
+        // `|| r.approcheEvaluation` reste : une pratique stockée qui porte encore
+        // l'ancienne valeur s'affiche telle quelle plutôt que « undefined ».
+        const approcheLabels = {
+            'par-artefacts': window.motsPoolStd().approche
+        };
+        html += `<p><strong>Approche\u00a0:</strong> ${e(approcheLabels[r.approcheEvaluation] || r.approcheEvaluation)}</p>`;
+
+        if (r.approcheEvaluation === 'par-artefacts') {
+            // #133 : le wizard prime — on affiche les réponses saisies, défauts
+            // alignés sur l'écriture (plus de lecture prioritaire de Primo).
+            const nbRetenus = r.nbArtefactsRetenus || 7;
+            const mots = window.motsPoolStd();
+            html += `<p><strong>${mots.retenusRecapitulatif}\u00a0:</strong> ${e(nbRetenus)}</p>`;
+            const modeSelectionLabels = {
+                'n_meilleurs': mots.modeMeilleurs,
+                'tous': mots.modeTous,
+                'derniers': mots.modeDerniers,
+                'hybride': 'Hybride (N meilleures + Obligatoires)'
+            };
+            const modeSelection = r.modeSelectionPortfolio || 'n_meilleurs';
+            html += `<p><strong>Construction de la note\u00a0:</strong> ${e(modeSelectionLabels[modeSelection] || modeSelection)}</p>`;
+        }
         html += '</div>';
     }
 
-    html += '</div>';
+    if (r.typePratique === 'specifications') {
+        html += '<div class="wizard-v2-recap-section">';
+        html += '<h4>Configuration PAN-Spécifications</h4>';
+        html += `<p><strong>Seuil d'acceptabilité\u00a0:</strong> ${e(formaterPourcentage(r.seuilAcceptabilite))}</p>`;
+        html += `<p><strong>Système de jetons\u00a0:</strong> ${r.utiliserJetons ? 'Activé' : 'Désactivé'}</p>`;
+        if (r.utiliserJetons) {
+            html += `<p><strong>Jetons délai\u00a0:</strong> ${e(r.nbJetonsDelai)} (${e(r.dureeDelaiJours)} jours)</p>`;
+            html += `<p><strong>Jetons reprise\u00a0:</strong> ${e(r.nbJetonsReprise)}</p>`;
+        }
+        html += '</div>';
+    }
+
+    if (r.typePratique === 'denotation') {
+        const cibles = Array.isArray(r.ciblesDenotation) ? r.ciblesDenotation : [];
+        const methodeLabels = { 'mode': 'Mode', 'mediane': 'Médiane', 'moyenne': 'Moyenne' };
+        html += '<div class="wizard-v2-recap-section">';
+        html += '<h4>Configuration PAN-Dénotation</h4>';
+        html += `<p><strong>Mode :</strong> Éliminée (jugement narratif → note)</p>`;
+        html += `<p><strong>Cibles d'apprentissage :</strong> ${cibles.length}</p>`;
+        html += `<p><strong>Suggestion statistique :</strong> ${e(methodeLabels[r.methodeSuggestionDen] || r.methodeSuggestionDen || 'Mode')}</p>`;
+        // #343 (b) : échelle/grille de rétroaction formative (n'entrent pas dans la note).
+        if (r.echelleId) {
+            const echelles = db.getSync(cle('echellesTemplates'), []);
+            const echelle = echelles.find(e => e.id === r.echelleId);
+            html += `<p><strong>Échelle (rétroaction) :</strong> ${echapperHtml(echelle?.nom || r.echelleId)}</p>`;
+        }
+        if (r.grilleId) {
+            const grille = grillesDuWizard().find(g => g.id === r.grilleId);
+            html += `<p><strong>Grille (rétroaction) :</strong> ${echapperHtml(grille?.nom || r.grilleId)}</p>`;
+        }
+        html += '</div>';
+    }
+
+    // Lot 1 de la pratique « Par standards » (21 nov. 2026) : le cours, les cibles, l'échelle et le niveau « sans
+    // donnée ». Elle ne calcule encore rien : le récapitulatif le dit.
+    if (r.typePratique === 'cibles') {
+        html += genererRecapitulatifCibles(r);
+    }
     return html;
 }
 
@@ -3490,6 +3521,24 @@ function chargerPratiqueExistante(pratiqueId) {
         return;
     }
 
+    wizardState.reponses = reponsesDepuisPratique(pratique);
+    const conf = pratique.configuration;
+    const typeLu = (typeof normaliserIdPratique === 'function' ? normaliserIdPratique(pratique.type) : pratique.type);
+    if (conf && typeLu === 'standards' && (conf.approcheEvaluation === 'par-objectifs' || conf.objectifs)) {
+        console.warn('[WizardV2] Approche « par objectifs » retirée (#443) : la pratique « '
+            + (pratique.nom || pratique.id) + ' » s\'ouvre sur le portfolio. '
+            + 'Sa configuration `objectifs` est ignorée, et sera remplacée si tu sauvegardes.');
+    }
+}
+
+/**
+ * Les réponses de l'assistant relues d'une pratique ENREGISTRÉE — le geste de « Modifier » (`chargerPratiqueExistante`),
+ * extrait le 21 nov. 2026 pour que l'Exploration des pratiques (Labo) rende la même section « Configuration » que le récapitulatif
+ * (`syntheseConfigurationDePratique`). Lecture seule : rien n'est écrit, `wizardState` n'est pas touché.
+ * @param {Object} pratique - l'enveloppe enregistrée (pratiquesConfigurables)
+ * @returns {Object} réponses
+ */
+function reponsesDepuisPratique(pratique) {
     // Mapper les données vers les réponses du wizard.
     // Normalisation défensive à la lecture : pratique.type peut être stocké en
     // legacy ('standards'…) dans d'anciennes données ; normaliserIdPratique
@@ -3510,7 +3559,7 @@ function chargerPratiqueExistante(pratiqueId) {
     // l'éditeur retape, ou par du vide quand l'étape infos est sautée.
     const morceauxAuteur = (pratique.auteur || '').trim().split(/\s+/).filter(Boolean);
 
-    wizardState.reponses = {
+    const reponses = {
         nom: pratique.nom,
         auteur: pratique.auteur,
         prenom: morceauxAuteur.length > 1 ? morceauxAuteur[0] : '',
@@ -3540,9 +3589,9 @@ function chargerPratiqueExistante(pratiqueId) {
             // plafonnement ne se relisent plus ici — ils passent tels quels à l'enregistrement.)
             for (const regle of (config.conditions_speciales || [])) {
                 if (regle && regle.type === 'double_verrou') {
-                    wizardState.reponses.nomEvalVerrouillee = regle.condition?.evaluation;
-                    wizardState.reponses.seuilVerrou = regle.condition?.seuil;
-                    wizardState.reponses.plafondVerrou = regle.consequence?.note_max;
+                    reponses.nomEvalVerrouillee = regle.condition?.evaluation;
+                    reponses.seuilVerrou = regle.condition?.seuil;
+                    reponses.plafondVerrou = regle.consequence?.note_max;
                 }
             }
         } else if (typeCanon === 'standards') {
@@ -3554,17 +3603,17 @@ function chargerPratiqueExistante(pratiqueId) {
             // avant l'enregistrement, et le portfolio survivait ; seul un enregistrement qui ne
             // traverse pas l'étape le perdait (le banc de l'audit). La relecture ne dépend plus
             // de cette carte : un portfolio présent EST l'approche par artefacts.
-            wizardState.reponses.approcheEvaluation = config.approcheEvaluation
+            reponses.approcheEvaluation = config.approcheEvaluation
                 || (config.portfolio ? 'par-artefacts' : undefined);
-            wizardState.reponses.echelleId = config.echelleId;
-            wizardState.reponses.grilleId = config.grilleId;
+            reponses.echelleId = config.echelleId;
+            reponses.grilleId = config.grilleId;
 
             if (config.portfolio) {
                 // #132 : la création écrit les noms standardisés (nombreARetenir /
                 // methodeSelection / minimumCompletion). Relire d'anciens noms rendait
                 // undefined → la config réelle était écrasée par les défauts à la
                 // re-sauvegarde. On relit les bons noms.
-                wizardState.reponses.minAvantCalculFormatif = config.portfolio.minimumCompletion;
+                reponses.minAvantCalculFormatif = config.portfolio.minimumCompletion;
                 // Restaurer la méthode de sélection (sinon le round-trip repart sur 'n_meilleurs').
                 // L'écriture stocke 'meilleurs' pour le mode 'n_meilleurs' → mapping inverse.
                 // B-2 (suite) : la table ignorait le vocabulaire du MOTEUR. `recents` (le gabarit
@@ -3578,10 +3627,10 @@ function chargerPratiqueExistante(pratiqueId) {
                 };
                 // #900 (lot N6) : hybride = catégories actives, comme au moteur et au formulaire de
                 // gestion ; `portfolio.hybride` reste lu pour les pratiques qui le portent encore.
-                wizardState.reponses.modeSelectionPortfolio = (config.portfolio.hybride || config.categories?.actif)
+                reponses.modeSelectionPortfolio = (config.portfolio.hybride || config.categories?.actif)
                     ? 'hybride'
                     : (methodeVersMode[config.portfolio.methodeSelection] || 'n_meilleurs');
-                wizardState.reponses.nbArtefactsRetenus = _nombreRetenuARelire(config, wizardState.reponses.modeSelectionPortfolio);
+                reponses.nbArtefactsRetenus = _nombreRetenuARelire(config, reponses.modeSelectionPortfolio);
             }
 
             // #443 (10 août 2026) — NORMALISATION d'une pratique legacy « par
@@ -3597,11 +3646,10 @@ function chargerPratiqueExistante(pratiqueId) {
             // sentinelle est un cliquet d'ABSENCE qui grep ce fichier en
             // entier, commentaires compris. Une note de bas de page suffit à
             // le faire rougir — c'est arrivé en écrivant celle-ci.
+            // (21 nov. 2026 : l'avertissement console est donné par `chargerPratiqueExistante` seul — l'Exploration des
+            // pratiques relit aussi par ici, à chaque rendu.)
             if (config.approcheEvaluation === 'par-objectifs' || config.objectifs) {
-                console.warn('[WizardV2] Approche « par objectifs » retirée (#443) : la pratique « '
-                    + (pratique.nom || pratique.id) + ' » s\'ouvre sur le portfolio. '
-                    + 'Sa configuration `objectifs` est ignorée, et sera remplacée si tu sauvegardes.');
-                wizardState.reponses.approcheEvaluation = 'par-artefacts';
+                reponses.approcheEvaluation = 'par-artefacts';
             }
         } else if (typeCanon === 'specifications') {
             // Lot N4 (#854, volet spécifications) — ROUVRIR NE CHANGE RIEN. Sans cette branche, le seuil
@@ -3610,34 +3658,53 @@ function chargerPratiqueExistante(pratiqueId) {
             // puis `seuilAcceptabilite` (l'assistant d'avant N6). Types et forfaits ne sont pas des réponses
             // de l'assistant : ils passent tels quels à l'enregistrement (`conserverConfigurationSpecifications`).
             const seuil = (typeof config.seuilAcceptable === 'number') ? config.seuilAcceptable : config.seuilAcceptabilite;
-            if (seuil !== undefined) wizardState.reponses.seuilAcceptabilite = seuil;
+            if (seuil !== undefined) reponses.seuilAcceptabilite = seuil;
             const jetons = config.jetons || {};
-            wizardState.reponses.utiliserJetons = jetons.activer === true;
+            reponses.utiliserJetons = jetons.activer === true;
             if (jetons.activer === true) {
                 if (jetons.delai) {
-                    wizardState.reponses.nbJetonsDelai = jetons.delai.nombre;
-                    wizardState.reponses.dureeDelaiJours = jetons.delai.dureeJours;
-                    wizardState.reponses.delaiSurReprise = jetons.delai.surReprise === true;
+                    reponses.nbJetonsDelai = jetons.delai.nombre;
+                    reponses.dureeDelaiJours = jetons.delai.dureeJours;
+                    reponses.delaiSurReprise = jetons.delai.surReprise === true;
                 }
-                if (jetons.reprise) wizardState.reponses.nbJetonsReprise = jetons.reprise.nombre;
+                if (jetons.reprise) reponses.nbJetonsReprise = jetons.reprise.nombre;
             }
-            if (config.modeleBundle !== undefined) wizardState.reponses.modeleBundle = config.modeleBundle;
+            if (config.modeleBundle !== undefined) reponses.modeleBundle = config.modeleBundle;
         } else if (typeCanon === 'denotation') {
             // #343 (b) round-trip d'édition DEN : restaurer les cibles, la suggestion, et
             // l'échelle/grille de rétroaction. #717 : les cibles reviennent AVEC leur id.
             if (Array.isArray(config.objectifs)) {
-                wizardState.reponses.ciblesDenotation = config.objectifs
+                reponses.ciblesDenotation = config.objectifs
                     .filter(o => o && o.id).map(o => ({ id: o.id, nom: o.nom }));
             }
             if (config.suggestion && config.suggestion.methode) {
-                wizardState.reponses.methodeSuggestionDen = config.suggestion.methode;
+                reponses.methodeSuggestionDen = config.suggestion.methode;
             }
-            wizardState.reponses.echelleId = config.echelleId;
-            wizardState.reponses.grilleId = config.grilleId;
+            reponses.echelleId = config.echelleId;
+            reponses.grilleId = config.grilleId;
         } else if (typeCanon === 'cibles') {
-            Object.assign(wizardState.reponses, _relireParStandards(config));   // lot 1 « Par standards »
+            Object.assign(reponses, _relireParStandards(config));   // lot 1 « Par standards »
         }
     }
+    return reponses;
+}
+
+/**
+ * Ce que règle une pratique ENREGISTRÉE : la section « Configuration – <type> » de son récapitulatif, mot pour mot
+ * (lot/comparateur-synthese, 21 nov. 2026). Lue par l'Exploration des pratiques (Labo), sous le menu de chaque colonne. Chaîne vide
+ * si la famille n'en a pas.
+ * @param {Object} pratique - l'enveloppe enregistrée
+ * @returns {string} HTML
+ */
+function syntheseConfigurationDePratique(pratique) {
+    if (!pratique) return '';
+    // Les pratiques de la démo (et des modèles) ne portent leur famille que sous `configuration.type` ; relues telles
+    // quelles, elles passeraient pour des sommatives et n'auraient aucune section. On lit la famille là où elle est, sur
+    // une copie : la pratique enregistrée n'est pas touchée. (« Modifier » lit encore le seul `type` : inscrit au
+    // rapport du lot, 21 nov. 2026.)
+    const lue = (!pratique.type && pratique.configuration && pratique.configuration.type)
+        ? Object.assign({}, pratique, { type: pratique.configuration.type }) : pratique;
+    return genererSectionConfiguration(reponsesDepuisPratique(lue));
 }
 
 /**
@@ -3680,6 +3747,9 @@ window.ouvrirComparateurDepuisWizard = ouvrirComparateurDepuisWizard;
 // calcul du nombre d'étapes (#134) sont verrouillés par sentinelles. wizardState
 // est exposé pour permettre aux tests de poser les réponses et de lire le résultat.
 window.chargerPratiqueExistante = chargerPratiqueExistante;
+window.reponsesDepuisPratique = reponsesDepuisPratique;                 // comparateur-synthese (21 nov. 2026)
+window.syntheseConfigurationDePratique = syntheseConfigurationDePratique; // l'Exploration des pratiques (Labo) : « Ce que règle cette pratique »
+window.genererSectionConfiguration = genererSectionConfiguration;
 window.calculerNbEtapes = calculerNbEtapes;
 window.calculerProgression = calculerProgression;               // #343-T4b (testabilité de l'invariant total ≥ numéro)
 window.obtenirEtapeSuivante = obtenirEtapeSuivante;

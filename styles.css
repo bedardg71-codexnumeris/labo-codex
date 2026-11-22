@@ -24570,6 +24570,41 @@ body.planif-plein-ecran-actif #planif-guide-panel {
    note est un jugement (non simulable). Texte atténué + italique. */
 .comparateur-cellule--den { color: var(--texte-secondaire, #80a0b0); font-style: italic; font-size: 0.85rem; }
 
+/* « Ce que règle cette pratique » (lot/comparateur-synthese, 21 nov. 2026) : sous le menu de chaque colonne, un
+   <details> natif replié d'office. Replié, une seule ligne (la cible tactile de l'iPad, 44 px) ; ouvert, le texte se
+   plie à la largeur de sa colonne (overflow-wrap). Le corps est la section « Configuration » du récapitulatif de
+   l'assistant, mot pour mot : son fond et ses marges de carte sont retirés ici, ses mots restent.
+   Variables uniquement (deux modes). */
+.comparateur-ligne-synthese td { padding-top: 0; padding-bottom: 4px; }
+.comparateur-cellule-synthese { vertical-align: top; }
+.comparateur-synthese { max-width: 240px; font-size: 0.82rem; color: var(--texte-secondaire, #8aa4b0); }
+.comparateur-synthese > summary {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    min-height: 44px;
+    cursor: pointer;
+    font-weight: 600;
+    color: var(--texte-principal, #d0e0e4);
+    list-style: none;
+}
+.comparateur-synthese > summary::-webkit-details-marker { display: none; }
+.comparateur-synthese > summary::before {
+    content: '▸';
+    color: var(--texte-muted, #80a0b0);
+    transition: transform 0.15s ease;
+}
+.comparateur-synthese[open] > summary::before { transform: rotate(90deg); }
+.comparateur-synthese > summary:focus-visible { outline: 2px solid var(--accent-primaire, #065dbb); outline-offset: 2px; border-radius: 4px; }
+.comparateur-synthese-corps { overflow-wrap: anywhere; padding-bottom: 6px; }
+.comparateur-synthese-corps .wizard-v2-recap-section { padding: 0; background: none; border-radius: 0; }
+.comparateur-synthese-corps .wizard-v2-recap-section h4 { font-size: 0.82rem; margin: 0 0 6px; padding-bottom: 4px; }
+.comparateur-synthese-corps p,
+.comparateur-synthese-corps .wizard-v2-recap-section p { margin: 4px 0; font-size: 0.82rem; color: var(--texte-secondaire, #8aa4b0); }
+.comparateur-synthese-corps .wizard-v2-recap-section p strong { color: var(--texte-principal, #d0e0e4); }
+.comparateur-synthese-corps .wizard-v2-recap-cibles { margin: 4px 0 6px 16px; font-size: 0.82rem; }
+.comparateur-synthese-corps .wizard-v2-recap-aide { font-size: 0.8rem; margin: 4px 0 0; }
+
 /* D-4 : bloc « ce que ces réglages changent » — affiché AVANT la matrice quand
    les colonnes comparées sont des variantes d'une même souche. « Ce qui change »
    d'abord, l'écart de note discret ensuite. Variables uniquement (deux modes). */

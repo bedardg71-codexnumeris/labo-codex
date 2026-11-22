@@ -419,7 +419,9 @@
         cols.forEach(function(c, slot) {
             h += '<th scope="col" class="comparateur-col-pratique">' + _enteteColonne(slot, c.id, dispo) + '</th>';
         });
-        h += '</tr></thead><tbody>';
+        h += '</tr>';
+        h += _ligneSynthese(cols);   // « Ce que règle cette pratique » (21 nov. 2026)
+        h += '</thead><tbody>';
 
         // SECTION 1 — Construction de la note (lignes R3, alignées par axe).
         h += '<tr class="comparateur-section-tete"><th colspan="' + (nbCol + 1) + '" scope="colgroup">Construction de la note</th></tr>';
@@ -766,6 +768,38 @@
         return h;
     }
 
+    // « Ce que règle cette pratique » (lot/comparateur-synthese, 21 nov. 2026) : sous le menu de chaque colonne, un volet
+    // replié d'office. Une rangée de <td> dans l'en-tête : son texte ne devient pas le nom de la colonne pour un lecteur
+    // d'écran. Aucune colonne n'a rien à dire : pas de rangée.
+    function _ligneSynthese(cols) {
+        var syntheses = cols.map(function(c) { return _syntheseColonne(c.id); });
+        if (!syntheses.some(Boolean)) return '';
+        var h = '<tr class="comparateur-ligne-synthese"><td class="comparateur-col-profil"></td>';
+        syntheses.forEach(function(corps, slot) {
+            h += '<td class="comparateur-cellule-synthese">' + (corps
+                ? '<details class="comparateur-synthese" data-slot="' + slot + '"><summary>Ce que règle cette pratique</summary>'
+                    + '<div class="comparateur-synthese-corps">' + corps + '</div></details>'
+                : '') + '</td>';
+        });
+        return h + '</tr>';
+    }
+
+    // Ce que règle la pratique d'une colonne (lot/comparateur-synthese, 21 nov. 2026). Une pratique enregistrée : la
+    // section « Configuration – <type> » du récapitulatif de l'assistant, mot pour mot (`syntheseConfigurationDePratique`,
+    // wizard-pratique-v2.js, source unique ; ses textes de l'enseignant·e y sont échappés). Une famille de base (sans
+    // enveloppe), ou une pratique dont le récapitulatif n'a pas de section (sommative) : sa description courte, telle
+    // quelle (`obtenirDescriptionCourtePratique`), échappée ici. Rien : chaîne vide, pas de volet. Lecture seule.
+    function _syntheseColonne(id) {
+        var env = _enveloppe(id);
+        if (env && typeof syntheseConfigurationDePratique === 'function') {
+            var section = syntheseConfigurationDePratique(env);
+            if (section) return section;
+        }
+        var desc = (typeof obtenirDescriptionCourtePratique === 'function')
+            ? obtenirDescriptionCourtePratique(env || { type: id }) : '';
+        return desc ? '<p>' + _esc(desc) + '</p>' : '';
+    }
+
     // Re-rend uniquement le tableau (les sélecteurs y vivent désormais ; l'hôte
     // #comparateur-matrice persiste, donc l'écouteur délégué survit au re-rendu).
     /* ── Diff « avant matrice » (D-4) ─────────────────────── */
@@ -824,7 +858,14 @@
 
     function _rerendreMatrice(panel) {
         var hote = panel.querySelector('#comparateur-matrice');
+        // Un volet ouvert le reste quand une autre colonne change de pratique (le tableau est rendu à neuf).
+        var ouverts = hote ? Array.prototype.map.call(hote.querySelectorAll('details.comparateur-synthese[open]'),
+            function(d) { return d.getAttribute('data-slot'); }) : [];
         if (hote) hote.innerHTML = _rendreMatrice();
+        if (hote) ouverts.forEach(function(slot) {
+            var d = hote.querySelector('details.comparateur-synthese[data-slot="' + slot + '"]');
+            if (d) d.open = true;
+        });
         // Le diff suit l'état des colonnes (D-4) : re-rendu au même moment.
         var diffHote = panel.querySelector('#comparateur-diff');
         if (diffHote) diffHote.innerHTML = _rendreDiff(_colonnes());
