@@ -1432,6 +1432,25 @@ function anonymiserGroupe(groupe) {
         db.setSync('mapping_groupes_anonymes', mappingGroupes);
     }
 
+    // 22 nov. 2026 — la table est GLOBALE et se crée une seule fois, avec les groupes du
+    // trimestre actif ce jour-là : un groupe venu plus tard (autre trimestre, groupe ajouté)
+    // sortait en « Gr. ? », et deux groupes différents se confondaient (Grégoire, 19 nov.,
+    // « Groupe Gr. ? » au profil). Il reçoit la première lettre libre ; les lettres déjà
+    // données ne bougent pas. Jamais de doublon : la garde d'écriture (`groupesParLettre`,
+    // plus haut) relit cette table pour rendre une lettre à son numéro, et une lettre portée
+    // par deux groupes y rendrait le mauvais. Les 26 lettres prises : « Gr. ? », comme avant.
+    if (!mappingGroupes[groupe]) {
+        const prises = new Set(Object.values(mappingGroupes));
+        for (let i = 0; i < 26; i++) {
+            const lettre = `Gr. ${String.fromCharCode(65 + i)}`;
+            if (!prises.has(lettre)) {
+                mappingGroupes = { ...mappingGroupes, [groupe]: lettre };
+                db.setSync('mapping_groupes_anonymes', mappingGroupes);
+                break;
+            }
+        }
+    }
+
     return mappingGroupes[groupe] || `Gr. ?`;
 }
 

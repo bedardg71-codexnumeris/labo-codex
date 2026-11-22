@@ -1794,7 +1794,12 @@
         if (!da) return null;
         const eleves = lireDonneesNamespace('groupeEtudiants');
         const eleve = eleves.find(e => e.da === da);
-        if (!eleve || !eleve.groupe) return null;
+        // En anonymisation, `groupe` porte la lettre substituée (« Gr. A », « Gr. ? ») et le
+        // numéro réel vit dans `groupeReel` (modes.js, anonymiserDonnees) : comparer la lettre
+        // au `groupeNum` rendait null, et la leçon manquée du profil comme l'échéance du groupe
+        // se taisaient (19 nov. 2026). Le numéro sert ici à trouver un id, il ne s'affiche pas.
+        const groupeEleve = eleve ? (eleve.groupeReel || eleve.groupe) : null;
+        if (!groupeEleve) return null;
 
         const gcs = lireDonneesNamespace('groupesCours');
         const infoCoursActif = db.getSync('infoCours', null);
@@ -1805,7 +1810,7 @@
         // pas « 0demo » (pack démo, mesuré le 24 sept. 2026) : la fonction rendait null,
         // et l'échéance du groupe comme la leçon manquée de l'élève se taisaient.
         const norm = (typeof normaliserNumeroGroupe === 'function') ? normaliserNumeroGroupe : (g) => String(g || '');
-        const memeGroupe = (g) => norm(g.groupeNum) === norm(eleve.groupe);
+        const memeGroupe = (g) => norm(g.groupeNum) === norm(groupeEleve);
 
         // Match par numero de groupe + coursId actif (cas multi-cours)
         if (coursIdActif) {

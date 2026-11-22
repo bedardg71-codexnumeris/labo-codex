@@ -277,6 +277,19 @@ describe('#942 · le profil : chaque absence de `obtenirDetailsAssiduite` porte 
         expect(win.obtenirDetailsAssiduite('9000001').absences.find(a => a.date === '2026-09-18').lecons).toEqual(['La carte mentale']);
     });
 
+    it('en anonymisation (19 nov. 2026) : le groupe se retrouve par `groupeReel`, pas par la lettre substituée', () => {
+        // La fiche telle que la rend `anonymiserDonnees` (modes.js) : la lettre dans `groupe`, le numéro dans `groupeReel`.
+        const { win, ecrites } = monterProfil({ eleve: { da: '9000001', groupe: 'Gr. B', groupeReel: '02', coursId: 'C1' } });
+        expect(win.syntheseRetroactionData.groupeCoursIdDeLEleve('9000001')).toBe('GC_02');
+        expect(win.obtenirDetailsAssiduite('9000001').absences.find(a => a.date === '2026-09-18').lecons).toEqual(['La carte mentale']);
+        // « Gr. ? » (groupe absent du mapping de groupes) : la lettre ne départage rien, le numéro réel, si.
+        const { win: win2 } = monterProfil({ eleve: { da: '9000001', groupe: 'Gr. ?', groupeReel: '01', coursId: 'C1' } });
+        expect(win2.syntheseRetroactionData.groupeCoursIdDeLEleve('9000001')).toBe('GC_01');
+        expect(win2.obtenirDetailsAssiduite('9000001').absences.map(a => a.lecons))
+            .toEqual([['La lecture active'], ['La carte mentale'], ['Le plan détaillé', 'Atelier de révision']]);
+        expect(ecrites, 'aucune donnée écrite').toEqual([]);
+    });
+
     it('élève sans groupe : les absences restent, sans titre', () => {
         const { win } = monterProfil({ eleve: { da: '9000001', coursId: 'C1' } });
         const abs = win.obtenirDetailsAssiduite('9000001').absences;

@@ -7,6 +7,22 @@
 
 ---
 
+## 22 NOV. 2026, 12 H 20 (Claude Code) : **1.254.1 SUR `main` — EN ANONYMISATION, LA LEÇON MANQUÉE REVIENT AU PROFIL ET « GR. ? » DISPARAÎT** — sans verdict WebKit du Mac
+
+Mandat : Cowork, 22 nov., sur le commentaire de Grégoire du 19 nov. (1.250.0, iPad). « Gr. ? », la ligne de SUIVI-BUGS et la fusion : demandés par Grégoire dans la session. **Le travail le plus récent vit sur `main`.** Session cloud, branche `claude/stoic-heisenberg-yncp9u`, fusionnée en fast-forward sur `78e952293`. Rapport : `plans de travail/RAPPORT-2026-11-22-anonymisation-lecon-manquee.md`.
+
+- **Le maillon** : `obtenirGcIdEleve` (`synthese-retroaction-data.js`) comparait la lettre substituée (« Gr. A ») au `groupeNum` ; en anonymisation, le groupe rendait `null` et la carte « Assiduité » taisait les leçons. Compare `groupeReel || groupe`. Par lecture, non rejoué : l'échéance par groupe du PDF de synthèse et le bandeau « Consignes transmises » en profitent aussi.
+- **« Gr. ? »** : la table globale `mapping_groupes_anonymes`, jamais étendue ; `anonymiserGroupe` (`modes.js`) donne la première lettre libre, sans doublon (la garde d'écriture relit la table), « Gr. ? » au-delà de 26 lettres. Source ; la table déjà écrite chez Grégoire se complète d'elle-même.
+- **Bancs** : Vitest 949 fichiers, 12 310 verts. Chromium : `profil-942-lecon-manquee` 3 verts ; specs voisines (lot A, rangée du profil, parcours 7, signal des consignes, registre longitudinal) vertes sauf `registre-longitudinal-915` R5, rouge à l'identique sans le correctif (géométrie des tuiles sous Chromium). Break-tests : les trois essais neufs rougissent sans leurs correctifs.
+- **Verdict WebKit : NON PRIS** (conteneur sans WebKit). Le push n'est pas jugé au jeton du Mac ; seul le run GitHub du push jugera, sous WebKit Linux.
+- **Release** : 1.254.1, build `1122-1216`. **Nouvelles** : aucune entrée écrite (mot nouveau à l'écran : à proposer à Grégoire).
+- **Numéros** : #1303 pris (SUIVI-BUGS) ; « Dernier ID utilisé » corrigé (il disait #1301 alors que #1302 était inscrit). **Numéro libre : #1304.**
+- **Trouvaille signalée, non inscrite** (aucun symptôme vécu) : en anonymisation, le sélecteur de cours de l'en-tête affiche le numéro de groupe réel (« gr. 0demo »).
+- **Complexité** (par rapport à la 1.254.0) : au-dessus de 15 : 434 → 434 ; somme 10 950 → 10 950 ; au-dessus de 30 : 75 → 75 ; fichiers de plus de 1 000 lignes : 44 → 44 ; lignes 174 832 → 174 844.
+- **Non vérifié** : Safari à la main, l'iPad, les données réelles de Grégoire, Netlify à l'écriture de ce relais.
+
+---
+
 ## 22 NOV. 2026, 9 H 20 (Claude Code) : **1.254.0 SUR `main` ET EN LIGNE — L'ASSEMBLAGE DE CINQ LOTS : LE VOYAGE DES CIBLES, LE « MODÈLE PAR STANDARDS », LE COMPARATEUR « PAR STANDARDS » ET SA SYNTHÈSE, LES GUIDES SOM/PAN RETIRÉS** — verdict complet du Mac, vert, sur secteur
 
 Mandat : Cowork, 22 nov. (décision de Grégoire de 6 h 23, complément de 6 h 27). **Le travail le plus récent vit sur `main`** (`bad001143` pour le code). Rapport complet : `plans de travail/RAPPORT-2026-11-22-release-1.254.0.md`. Arbres : `../labo-codex-assemblage-1.254` (le travail), `../labo-codex-fusion` (le verdict).

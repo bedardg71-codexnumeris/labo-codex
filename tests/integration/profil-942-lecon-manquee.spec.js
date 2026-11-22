@@ -108,3 +108,133 @@ test(`profil › Engagement (${largeur} px) · deux absences, deux titres de le�
     expect(erreurs).toEqual([]);
 });
 }
+
+// 19 nov. 2026 (Grégoire, 1.250.0, iPad) — EN ANONYMISATION, CHAQUE ABSENCE NOMME AUSSI SA LEÇON, ET RIEN NE SE DÉMASQUE.
+//
+// Le maillon qui cassait : `groupeCoursIdDeLEleve` comparait `groupe` au `groupeNum` du groupe-cours ; en
+// anonymisation, `groupe` porte la lettre substituée (« Gr. A ») et le numéro réel vit dans `groupeReel`. Le groupe
+// n'était plus trouvé, le lecteur des leçons rendait [] : les pastilles restaient sans titre.
+//
+// Les sondes d'identité (prénom, nom, DA, numéro de groupe réels) sont d'abord éprouvées en mode NORMAL, où elles
+// doivent se trouver à l'écran : une sonde qui ne trouve jamais rien ne prouverait rien. ⚠ Le numéro de groupe réel
+// paraît déjà, en anonymisation, dans le sélecteur de cours de l'en-tête (« gr. 0demo », mesuré avant ce correctif) :
+// sa sonde se borne donc au profil.
+test('profil › Engagement, en anonymisation : les mêmes leçons sous les absences ; ni nom, ni DA, ni groupe réels ; plus de « Gr. ? »', async ({ page }) => {
+    test.setTimeout(120000);
+    await page.setViewportSize({ width: 1280, height: 1024 });
+    page.on('dialog', (d) => d.dismiss());
+    const erreurs = [];
+    page.on('pageerror', (e) => erreurs.push(e.message));
+    await page.goto(indexHtml);
+    await page.waitForLoadState('domcontentloaded');
+    await attendreApplication(page);
+    await page.evaluate(async () => {
+        localStorage.clear();
+        if (window.db && db.memoryCache) db.memoryCache.clear();
+        await new Promise((res) => {
+            const req = indexedDB.deleteDatabase('LaboCodexDB');
+            req.onsuccess = req.onerror = req.onblocked = () => res();
+            setTimeout(res, 1500);
+        });
+    });
+    await page.reload();
+    await page.waitForLoadState('domcontentloaded');
+    await attendreApplication(page);
+
+    const r = await page.evaluate(async () => {
+        const pause = (ms) => new Promise((res) => setTimeout(res, ms));
+        await window.activerModeDemo();
+        await pause(1500);
+
+        const eleves = obtenirDonneesSelonMode('groupeEtudiants') || [];
+        const eleve = eleves.find(e => (obtenirDetailsAssiduite(e.da).absences || []).length >= 3);
+        if (!eleve) return { erreur: 'aucun élève du pack démo n\'a trois absences' };
+        const da = eleve.da;
+        const gcId = window.syntheseRetroactionData.groupeCoursIdDeLEleve(da);
+        const gc = (obtenirDonneesSelonMode('groupesCours') || []).find(g => g.id === gcId);
+        const table = db.getSync('seancesCompletes_gc_' + gcId, {}) || {};
+        const position = (date) => {
+            const sem = parseInt(((table[date] || [])[0] || {}).numeroSemaine, 10);
+            const memes = Object.keys(table).filter(d => (table[d] || []).length && parseInt(table[d][0].numeroSemaine, 10) === sem).sort();
+            return { semaine: sem, rang: memes.indexOf(date) + 1 };
+        };
+        const [a1, a2, a3] = obtenirDetailsAssiduite(da).absences;
+        const noeud = (id, titre, p) => ({ id, type: 'lecon', titre, parent: null, enfants: [], x: 0, y: 0,
+            metadata: { semaine: p.semaine, rangSeance: p.rang } });
+        db.setSync(cle('planification_mindmap'), {
+            index: { active: 'carte_942', compteurCartes: 1, cartes: [{ id: 'carte_942', nom: 'Carte banc', coursId: gc.coursId }] },
+            cartes: { carte_942: { compteur: 2, compteurLiens: 0, liens: [], noeuds: [
+                noeud('L1', 'La carte mentale', position(a1.date)), noeud('L2', 'Le schéma narratif', position(a2.date))
+            ] } }
+        });
+
+        // Les valeurs réelles, lues dans le magasin et non à l'écran.
+        const fiche = (db.getSync(cle('groupeEtudiants'), []) || []).find(e => e.da === da);
+        const sondes = { prenom: fiche.prenom, nom: fiche.nom, da: fiche.da, groupe: fiche.groupe };
+        const present = (texte, valeur) => !!valeur
+            && new RegExp('(^|[^\\p{L}\\p{N}])' + valeur.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '(?![\\p{L}\\p{N}])', 'u').test(texte);
+
+        const releve = async () => {
+            afficherProfilComplet(da); await pause(500);
+            changerSectionProfil('mobilisation'); await pause(500);
+            const profil = document.getElementById('contenuProfilEtudiant');
+            const pastilles = Array.from(profil.querySelectorAll('.badge-absence[data-action="naviguerVersPresenceAvecDate"]'));
+            const carte = pastilles.length ? pastilles[0].closest('.profil-carte') : null;
+            const pageVisible = document.body.innerText;
+            const profilVisible = profil.innerText;
+            const carteHtml = carte ? carte.outerHTML : '';
+            const trouve = {};
+            Object.entries(sondes).forEach(([k, v]) => {
+                trouve[k] = { page: present(pageVisible, v), profil: present(profilVisible, v), carteHtml: !!v && carteHtml.includes(v) };
+            });
+            return {
+                parDate: Object.fromEntries(pastilles.map(b => [b.getAttribute('data-param'),
+                    Array.from(b.querySelectorAll('.badge-absence-lecon')).map(s => s.textContent.trim())])),
+                etiquetteGroupe: (Array.from(profil.querySelectorAll('.rangee-selection-etiquette')).map(s => s.textContent.trim())
+                    .find(t => t.startsWith('Groupe')) || null),
+                trouve
+            };
+        };
+
+        const normal = await releve();
+        await changerMode(MODES.ANONYMISATION); await pause(800);
+        const anonyme = await releve();
+        // « Groupe Gr. ? » (19 nov.) : une table de groupes posée sur un autre trimestre, qui ne connaît pas ce groupe.
+        db.setSync('mapping_groupes_anonymes', { '00001': 'Gr. A', '00002': 'Gr. B' });
+        const tablePerimee = await releve();
+        return { dates: [a1.date, a2.date, a3.date], normal, anonyme, tablePerimee, mode: db.getSync('modeApplication'),
+            table: db.getSync('mapping_groupes_anonymes', null) };
+    });
+
+    expect(r.erreur).toBeUndefined();
+    expect(r.mode).toBe('anonymisation');
+    // Les sondes sont éprouvées : en mode normal, le prénom, le nom, le DA et le groupe réels se lisent au profil.
+    ['prenom', 'nom', 'da'].forEach(k => expect(r.normal.trouve[k].page, `sonde « ${k} » éprouvée en mode normal`).toBe(true));
+    expect(r.normal.trouve.groupe.profil, 'sonde « groupe » éprouvée en mode normal').toBe(true);
+
+    // 1. Les mêmes leçons qu'en mode normal, sous les mêmes absences.
+    expect(r.normal.parDate[r.dates[0]]).toEqual(['La carte mentale']);
+    expect(r.normal.parDate[r.dates[1]]).toEqual(['Le schéma narratif']);
+    expect(r.anonyme.parDate).toEqual(r.normal.parDate);
+    expect(r.anonyme.parDate[r.dates[2]], 'une absence sans leçon reste sans titre').toEqual([]);
+
+    // 2. Rien ne se démasque : ni à l'écran (page entière pour le nom et le DA, profil pour le groupe), ni dans le HTML
+    //    de la carte « Assiduité » (attributs compris).
+    ['prenom', 'nom', 'da'].forEach(k => expect(r.anonyme.trouve[k].page, `« ${k} » réel absent de la page`).toBe(false));
+    Object.keys(r.anonyme.trouve).forEach(k => {
+        expect(r.anonyme.trouve[k].profil, `« ${k} » réel absent du profil`).toBe(false);
+        expect(r.anonyme.trouve[k].carteHtml, `« ${k} » réel absent du HTML de la carte Assiduité`).toBe(false);
+    });
+    expect(r.anonyme.etiquetteGroupe).toMatch(/^Groupe\s+Gr\. [A-Z]$/);
+
+    // 3. Table de groupes posée ailleurs : le groupe reçoit la première lettre libre (« Gr. C »), plus « Gr. ? » ;
+    //    « Gr. A » et « Gr. B » gardent leurs groupes ; les leçons et le masque tiennent toujours.
+    expect(r.tablePerimee.etiquetteGroupe).toMatch(/^Groupe\s+Gr\. C$/);
+    expect(r.table['00001']).toBe('Gr. A');
+    expect(r.table['00002']).toBe('Gr. B');
+    expect(r.tablePerimee.parDate).toEqual(r.normal.parDate);
+    Object.keys(r.tablePerimee.trouve).forEach(k => {
+        expect(r.tablePerimee.trouve[k].profil, `« ${k} » réel absent du profil (table posée ailleurs)`).toBe(false);
+    });
+    expect(erreurs).toEqual([]);
+});
