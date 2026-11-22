@@ -326,6 +326,20 @@
         if (cfg) return cfg;
         return { type: _CODE_VERS_TYPE[_codePratique(id)] || null };
     }
+    // « Par standards » (21 nov. 2026) : ses cibles vivent dans un ensemble rangé par trimestre, et l'extracteur est
+    // PUR. On les lit ici, par leur propriétaire (`EnsemblesCibles`), et le double seuil par le moteur (`NoteCibles`).
+    // Lecture seule. Ensemble introuvable : `cibles: null`, et la colonne le dit. Toute autre famille : rien.
+    function _contexteExtraction(id) {
+        var cfg = _configPourExtraction(id);
+        var conf = (cfg && cfg.configuration) || {};
+        if (String((cfg && cfg.type) || conf.type || '').toLowerCase() !== 'cibles') return undefined;
+        var EC = window.EnsemblesCibles, NC = window.NoteCibles;
+        var ensemble = EC ? EC.lireParId(conf.ensembleCiblesId) : null;
+        return {
+            cibles: ensemble ? EC.normaliserCibles(ensemble.cibles) : null,
+            doubleSeuil: NC ? NC.lireDoubleSeuil(conf) : undefined
+        };
+    }
 
     // Profils réels (source 'reel') : étudiant·es du groupe actif, lecture seule.
     function _profilsReels() {
@@ -362,7 +376,7 @@
         return cols.map(function(c) {
             var parAxe = {};
             if (typeof ConstructionAttributs !== 'undefined' && ConstructionAttributs.extraire) {
-                ConstructionAttributs.extraire(_configPourExtraction(c.id)).attributs
+                ConstructionAttributs.extraire(_configPourExtraction(c.id), _contexteExtraction(c.id)).attributs
                     .forEach(function(a) { parAxe[a.axe] = a; });
             }
             return parAxe;
