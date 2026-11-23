@@ -408,7 +408,7 @@ function afficherBandeauVersion(beta, build, distant) {
     if (!bandeau || !elBuild || !elTexte || !elDate) return;
 
     const maintenant = new Date();
-    const dateStr = maintenant.toLocaleDateString('fr-CA', { day: 'numeric', month: 'long', year: 'numeric' });
+    const dateStr = window.dateEnLettres(maintenant, { day: 'numeric', month: 'long', year: 'numeric' });
     const heureStr = maintenant.toLocaleTimeString('fr-CA', { hour: '2-digit', minute: '2-digit' });
 
     elBuild.textContent = `BÊTA PUBLIQUE ${beta} (BUILD ${build})`;

@@ -324,7 +324,7 @@ function formaterDateFrancaise(ymd) {
     const MOIS = ['janvier', 'février', 'mars', 'avril', 'mai', 'juin',
         'juillet', 'août', 'septembre', 'octobre', 'novembre', 'décembre'];
     const mois = MOIS[parseInt(morceaux[1], 10) - 1];
-    return mois ? `${parseInt(morceaux[2], 10)} ${mois} ${morceaux[0]}` : ymd;
+    return mois ? `${window.dateEnLettres.jourEnLettres(morceaux[2])} ${mois} ${morceaux[0]}` : ymd;
 }
 
 /** Crochet ✓ tracé au trait (les polices standard jsPDF n'ont pas U+2713). */

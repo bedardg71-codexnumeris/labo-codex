@@ -220,7 +220,7 @@
             var date = new Date(fiche.premierContact);
             premierContact = isNaN(date.getTime())
                 ? String(fiche.premierContact).slice(0, 10)
-                : date.toLocaleDateString('fr-CA', { year: 'numeric', month: 'long', day: 'numeric' });
+                : window.dateEnLettres(date, { year: 'numeric', month: 'long', day: 'numeric' });
         }
         var nb = fiche.nbImports || 0;
         var imports = nb === 1 ? '1 import accepté' : nb + ' imports acceptés';

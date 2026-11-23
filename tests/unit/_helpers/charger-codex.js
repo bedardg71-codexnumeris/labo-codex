@@ -2,6 +2,7 @@ import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { monterFichierSortant } from './monter-fichier-sortant.js';
+import { poserDateEnLettres } from './date-en-lettres.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const racineProjet = path.resolve(__dirname, '..', '..', '..');
@@ -67,6 +68,7 @@ export function chargerCodex(dbOverride = null, globaux = {}, transformer = (sou
     // Lot A1 (30 sept. 2026) : l'assemblage et le téléchargement du fichier vivent dans
     // js/fichier-sortant.js, que `genererCodex` appelle par `window.FichierSortant`.
     monterFichierSortant(fauxWindow, { document: fauxDocument });
+    poserDateEnLettres(fauxWindow);   // 23 nov. 2026 : la date en toutes lettres (« 1er »)
 
     const fn = new Function(
         'window', 'document', 'console', 'localStorage', 'sessionStorage', 'db',

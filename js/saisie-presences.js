@@ -1487,7 +1487,7 @@ function mettreAJourEnteteDateSeance(dateStr) {
     if (message) {
         // Préfixer la date formatée (ex: "23 février 2026 — 2ème séance...")
         const dateObj = new Date(dateStr + 'T12:00:00');
-        const dateFR = dateObj.toLocaleDateString('fr-CA', { day: 'numeric', month: 'long', year: 'numeric' });
+        const dateFR = window.dateEnLettres(dateObj, { day: 'numeric', month: 'long', year: 'numeric' });
         infoSeance.textContent = `${dateFR} — ${message}`;
         infoSeance.classList.remove('u-hide');
     } else {

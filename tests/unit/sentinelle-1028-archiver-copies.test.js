@@ -4,6 +4,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import JSZip from 'jszip';
 import { monterFichierSortant } from './_helpers/monter-fichier-sortant.js';
+import { poserDateEnLettres } from './_helpers/date-en-lettres.js';
 
 // =====================================================================
 // SENTINELLE DE #1028 — ARCHIVER LES COPIES D'UN TRIMESTRE CLOS (ses données restent)
@@ -156,6 +157,7 @@ function monter(db, magasin, options = {}) {
     const notifications = {};
     for (const type of ['succes', 'erreur', 'info', 'warning']) notifications[type] = (titre, message) => journal.notifications.push({ type, titre, message });
     monterFichierSortant(win, { document: doc, setTimeout: fauxSetTimeout, URL: FauxURL });
+    poserDateEnLettres(win);   // 23 nov. 2026 : la date en toutes lettres (« 1er »), chargée par index.html avant ces modules
     const fichiers = ['js/reserve.js', 'js/reserve-verifier.js', 'js/reserve-trimestre.js', 'js/reserve-emprunter.js',
         'js/reserve-renvoyer.js', 'js/reserve-revenir.js', MODULE];
     let mordu = false;
@@ -326,7 +328,7 @@ describe('#1028 · (a) l\'aller-retour : archiver les copies, faire évoluer les
         const M = banc.win.ReserveCopies.MOTS;
         expect(M.different.texte({ copiesAbsentes: 2, copiesDifferentes: 1, dateArchive: '2032-06-01T12:00:00' }).split('\n')).toEqual([
             'Rien n\'a été retiré.',
-            'Depuis son archive du 1 juin 2032 : 2 copies ajoutées, 1 copie modifiée.',
+            'Depuis son archive du 1er juin 2032 : 2 copies ajoutées, 1 copie modifiée.',
             'Pour archiver ses copies : archive le trimestre de nouveau, vérifie la nouvelle archive, puis archive ses copies.'
         ]);
         expect(M.interrompu.texte({ nom: 'Hiver 2032' })).toBe(

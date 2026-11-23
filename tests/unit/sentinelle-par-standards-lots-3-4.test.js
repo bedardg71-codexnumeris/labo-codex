@@ -217,7 +217,7 @@ describe('R5 · au profil : une ligne par cible (retenu, date, origine, rétroac
         const blocs = [...d.querySelectorAll('.pc-cible')];
         expect(blocs.map(b => b.querySelector('.pc-cible-titre').textContent.trim())).toEqual(['Analyser', 'Structurer', 'Dissertation Cible terminale']);
         const a = blocs[0].querySelector('.tc-retenu').textContent;
-        expect(a).toContain('Niveau retenu : 4 · Avancé, inscrit le 1 octobre 2026.');
+        expect(a).toContain('Niveau retenu : 4 · Avancé, inscrit le 1er octobre 2026.');
         expect(a).toContain('Production : Analyse 1');
         expect(a).toContain('Rétroaction : Très bonne analyse.');
         const entrees = [...blocs[0].querySelectorAll('.tc-entree')];

@@ -2642,7 +2642,7 @@ function _heure(d) { return d.getHours() + ' h ' + String(d.getMinutes()).padSta
 function _dateLongue(iso, avecHeure) {
     var d = new Date(iso);
     if (isNaN(d.getTime())) return String(iso);
-    var jour = d.getDate() + ' ' + d.toLocaleDateString('fr-CA', { month: 'long' }) + ' ' + d.getFullYear();
+    var jour = window.dateEnLettres(d, { day: 'numeric', month: 'long', year: 'numeric' });
     return avecHeure ? jour + ' à ' + _heure(d) : jour;
 }
 
@@ -4796,7 +4796,7 @@ function _formaterDateLocale(dateISO) {
     if (!dateISO) return 'jamais';
     try {
         var d = new Date(dateISO);
-        return d.toLocaleDateString('fr-CA', {
+        return window.dateEnLettres(d, {
             year: 'numeric', month: 'long', day: 'numeric',
             hour: '2-digit', minute: '2-digit'
         });

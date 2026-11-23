@@ -1,6 +1,7 @@
 import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { poserDateEnLettres } from './date-en-lettres.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const racineProjet = path.resolve(__dirname, '..', '..', '..');
@@ -213,6 +214,11 @@ export function chargerScript(cheminRelatifProjet, globaux = {}, fauxWindowExist
         new Function('window', '"use strict";\n' +
             readFileSync(path.join(racineProjet, 'js/taille-fichier.js'), 'utf8'))(fauxWindow);
     }
+
+    // Publication des parcours (23 nov. 2026) — `js/date-en-lettres.js`, la seule façon d'écrire une date en toutes
+    // lettres (« 1er octobre »), chargé par index.html avant tout module qui en écrit une : le VRAI, une fois par
+    // sandbox, quand le harnais n'en fournit pas.
+    poserDateEnLettres(fauxWindow);
 
     // #1120 (20 oct. 2026) — même règle pour `js/bareme.js`, la lecture unique d'un barème, chargée
     // par index.html avant `export-pdf.js` qui la lit. Module pur : il ne pose que `window.bareme`.

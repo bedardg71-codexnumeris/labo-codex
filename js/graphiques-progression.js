@@ -1044,7 +1044,7 @@ function creerGraphiqueIndividuel(canvasId, da) {
                                 if (dateSeance) {
                                     const date = new Date(dateSeance + 'T12:00:00');
                                     const options = { day: 'numeric', month: 'long', year: 'numeric' };
-                                    const dateFormatee = date.toLocaleDateString('fr-CA', options);
+                                    const dateFormatee = window.dateEnLettres(date, options);
                                     return `Sem. ${snapshot.numSemaine} (${dateFormatee})`;
                                 }
                                 return tooltipItems[0].label;

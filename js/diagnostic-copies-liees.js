@@ -193,7 +193,7 @@ async function verifier() {
     var res = analyserEnregistrements(enregistrements);
     var maintenant = new Date();
     res.texte = formaterRapport(res, {
-        quand: maintenant.toLocaleDateString('fr-CA', { day: 'numeric', month: 'long', year: 'numeric' })
+        quand: window.dateEnLettres(maintenant, { day: 'numeric', month: 'long', year: 'numeric' })
             + ', ' + maintenant.toLocaleTimeString('fr-CA', { hour: '2-digit', minute: '2-digit' }),
         appareil: decrireAppareil(),
         version: window.VERSION_APP || window.VERSION_MAJEURE || ''

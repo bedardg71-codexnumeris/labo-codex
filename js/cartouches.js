@@ -2616,7 +2616,7 @@ async function exporterCartoucheEnTexte() {
     }
     if (cartoucheActuel.dateCreation) {
         const date = new Date(cartoucheActuel.dateCreation);
-        lignes.push('Date : ' + date.toLocaleDateString('fr-CA', { year: 'numeric', month: 'long', day: 'numeric' }));
+        lignes.push('Date : ' + window.dateEnLettres(date, { year: 'numeric', month: 'long', day: 'numeric' }));
     }
     if (cartoucheActuel.description) {
         lignes.push('Description : ' + cartoucheActuel.description);

@@ -147,7 +147,7 @@ function _versionApp() {
 
 function _jour(iso) {
     try {
-        return new Date(iso).toLocaleDateString('fr-CA', { year: 'numeric', month: 'long', day: 'numeric' });
+        return window.dateEnLettres(new Date(iso), { year: 'numeric', month: 'long', day: 'numeric' });
     } catch (e) {
         return String(iso || '').slice(0, 10);
     }

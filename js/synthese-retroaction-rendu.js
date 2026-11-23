@@ -966,7 +966,7 @@
         try {
             const d = new Date(String(iso).indexOf('T') >= 0 ? iso : iso + 'T00:00:00');
             if (isNaN(d.getTime())) return iso;
-            return d.toLocaleDateString('fr-CA', { day: 'numeric', month: 'long' });
+            return window.dateEnLettres(d, { day: 'numeric', month: 'long' });
         } catch (e) {
             return iso;
         }

@@ -4,6 +4,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import JSZip from 'jszip';
 import { monterFichierSortant } from './_helpers/monter-fichier-sortant.js';
+import { poserDateEnLettres } from './_helpers/date-en-lettres.js';
 
 // =====================================================================
 // SENTINELLE D'E3 (#1024) — RENVOYER UN TRIMESTRE AUX ARCHIVES
@@ -199,6 +200,7 @@ function monter(db, magasin, options = {}) {
     const notifications = {};
     for (const type of ['succes', 'erreur', 'info', 'warning']) notifications[type] = (titre, message) => journal.notifications.push({ type, titre, message });
     monterFichierSortant(win, { document: doc, setTimeout: fauxSetTimeout, URL: FauxURL });
+    poserDateEnLettres(win);   // 23 nov. 2026 : la date en toutes lettres (« 1er »), chargée par index.html avant ces modules
     for (const fichier of ['js/reserve.js', 'js/reserve-verifier.js', 'js/reserve-trimestre.js', 'js/reserve-emprunter.js', MODULE]) {
         const brut = readFileSync(path.join(racine, fichier), 'utf8');
         const mutation = options.muter && options.muter[fichier];

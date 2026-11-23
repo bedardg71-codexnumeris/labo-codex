@@ -1035,7 +1035,7 @@ function titreInterventionAffiche(intervention, repli, nom) {
         const d = intervention.date ? new Date(intervention.date + 'T12:00:00') : null;
         const quoi = nom || 'Intervention';
         return (d && !isNaN(d.getTime()))
-            ? quoi + ' du ' + d.toLocaleDateString('fr-CA', { day: 'numeric', month: 'long' })
+            ? quoi + ' du ' + window.dateEnLettres(d, { day: 'numeric', month: 'long' })
             : quoi;
     }
     return intervention.titre || repli || '';

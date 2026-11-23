@@ -722,7 +722,7 @@ describe('L · une inscription peut ne porter aucun niveau (une remarque) ; ce n
         const e = monterEcran({ store: { [CLE]: liste } });
         let html = e.TC.historiqueHTML(e.TC.completerContexte(e.ctx), ZOE, CIBLE.id);
         const ordre = [...html.matchAll(/class="tc-entree-date">([^<]+)</g)].map(x => x[1]);
-        expect(ordre).toEqual(['12 novembre 2026', '5 novembre 2026', '1 novembre 2026']);
+        expect(ordre).toEqual(['12 novembre 2026', '5 novembre 2026', '1er novembre 2026']);
         expect(html).toContain('tc-entree-niveau--remarque');
         expect(html).toContain('Remarque, sans niveau');
         const r = await e.IC.annuler('R1', 'Notée sur la mauvaise cible.');

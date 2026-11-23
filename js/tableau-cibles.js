@@ -229,7 +229,7 @@
     function dateLisible(iso) {
         if (!iso) return '';
         const d = new Date(String(iso).length === 10 ? iso + 'T12:00:00' : iso);
-        return isNaN(d) ? String(iso) : d.toLocaleDateString('fr-CA', { day: 'numeric', month: 'long', year: 'numeric' });
+        return isNaN(d) ? String(iso) : window.dateEnLettres(d, { day: 'numeric', month: 'long', year: 'numeric' });
     }
 
     /* ============================== LE TABLEAU ============================== */

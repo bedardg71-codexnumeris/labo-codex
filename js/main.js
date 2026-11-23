@@ -276,7 +276,7 @@ window.IDS_GABARITS_HARDCODES = [
 window.formaterDate = function(dateISO) {
     if (!dateISO) return '—';
     const date = new Date(dateISO + 'T12:00:00');
-    return date.toLocaleDateString('fr-CA', { year: 'numeric', month: 'long', day: 'numeric' });
+    return window.dateEnLettres(date, { year: 'numeric', month: 'long', day: 'numeric' });
 };
 
 /** "6 fév." */
@@ -290,7 +290,7 @@ window.formaterDateCourte = function(dateISO) {
 window.formaterDateComplete = function(dateISO) {
     if (!dateISO) return '—';
     const date = new Date(dateISO + 'T12:00:00');
-    return date.toLocaleDateString('fr-CA', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+    return window.dateEnLettres(date, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
 };
 
 /* ===============================

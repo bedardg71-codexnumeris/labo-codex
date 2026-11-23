@@ -4293,7 +4293,7 @@
             const p = productions.find(x => x && x.id === f.productionId);
             const nomEleve = e ? `${e.nom || ''}, ${e.prenom || ''}` : (f.etudiantDA || f.nomFichier || '');
             const nomProduction = p ? (p.titre || p.nom || f.productionId) : (f.productionId || '');
-            const exporteeLe = new Date(f.dateExport).toLocaleDateString('fr-CA', { day: 'numeric', month: 'long', year: 'numeric' });
+            const exporteeLe = window.dateEnLettres(new Date(f.dateExport), { day: 'numeric', month: 'long', year: 'numeric' });
             if (travauxResolution.trouverEvaluationPourFichier(f)) nbEvaluees++;
             return `<li data-fichier-id="${echapperHtml(f.id)}">
                     <span><strong>${echapperHtml(nomEleve)}</strong> · ${echapperHtml(nomProduction)}</span>

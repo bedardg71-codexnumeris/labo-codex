@@ -76,7 +76,7 @@ function _jour(iso) {
     if (!iso) return '?';
     var d = new Date(iso);
     if (isNaN(d.getTime())) return '?';
-    return d.toLocaleDateString('fr-CA', { day: 'numeric', month: 'long', year: 'numeric' });
+    return window.dateEnLettres(d, { day: 'numeric', month: 'long', year: 'numeric' });
 }
 
 var CHEMIN = 'Réglages › Données › Archives';

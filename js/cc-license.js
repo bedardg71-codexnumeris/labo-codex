@@ -1077,7 +1077,7 @@ function genererPanneauMetadonnees(ressource, typeRessource) {
         if (!dateStr) return null;
         try {
             const date = new Date(dateStr);
-            return date.toLocaleDateString('fr-CA', {
+            return window.dateEnLettres(date, {
                 year: 'numeric',
                 month: 'long',
                 day: 'numeric'

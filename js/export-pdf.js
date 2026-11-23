@@ -1118,7 +1118,7 @@ async function exporterReferentielCompletPDF(options = {}) {
     doc.text(options.cours || 'Cours', largeurPage / 2, hauteurPage / 3 + 15, { align: 'center' });
     doc.text(options.trimestre || 'Trimestre', largeurPage / 2, hauteurPage / 3 + 25, { align: 'center' });
 
-    const dateExport = new Date().toLocaleDateString('fr-CA', {
+    const dateExport = window.dateEnLettres(new Date(), {
         year: 'numeric',
         month: 'long',
         day: 'numeric'
@@ -2089,7 +2089,7 @@ function datesDeRemise(production) {
         if (!iso) return '';
         const d = new Date(iso + 'T12:00:00');
         if (isNaN(d.getTime())) return iso;
-        return d.toLocaleDateString('fr-CA', {
+        return window.dateEnLettres(d, {
             weekday: 'long', day: 'numeric', month: 'long', year: 'numeric'
         });
     };

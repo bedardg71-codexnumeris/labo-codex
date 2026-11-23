@@ -658,7 +658,7 @@
     function formaterDate(iso) {
         var date = new Date(iso);
         if (isNaN(date.getTime())) return String(iso || 'date inconnue').slice(0, 10);
-        return date.toLocaleDateString('fr-CA', { year: 'numeric', month: 'long', day: 'numeric' });
+        return window.dateEnLettres(date, { year: 'numeric', month: 'long', day: 'numeric' });
     }
 
     // ------------------------------------------------------------------

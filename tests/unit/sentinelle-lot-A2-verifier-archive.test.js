@@ -5,6 +5,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import JSZip from 'jszip';
 import { monterFichierSortant } from './_helpers/monter-fichier-sortant.js';
+import { poserDateEnLettres } from './_helpers/date-en-lettres.js';
 
 // =====================================================================
 // SENTINELLE DU LOT A2 (CHANTIER DES ARCHIVES) — VÉRIFIER UNE ARCHIVE
@@ -202,6 +203,7 @@ function monter(db, options = {}) {
     for (const type of ['succes', 'erreur', 'info', 'warning']) notifications[type] = (titre, message) => journal.notifications.push({ type, titre, message });
 
     monterFichierSortant(win, { document: doc, setTimeout: fauxSetTimeout, URL: FauxURL });
+    poserDateEnLettres(win);   // 23 nov. 2026 : la date en toutes lettres (« 1er »), chargée par index.html avant ces modules
     const charger = (fichier) => {
         const brut = readFileSync(path.join(racine, fichier), 'utf8');
         const code = options.muter && options.muter[fichier] ? options.muter[fichier](brut) : brut;

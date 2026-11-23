@@ -10029,7 +10029,7 @@ function formaterDatesTrimestre(debut, fin) {
         var jour = parseInt(m[3], 10);
         var mois = MOIS_DATES_TRIMESTRE[parseInt(m[2], 10) - 1];
         if (!mois || jour < 1 || jour > 31) return null;
-        return (jour === 1 ? '1er' : String(jour)) + ' ' + mois;
+        return window.dateEnLettres.jourEnLettres(jour) + ' ' + mois;
     }
     var jd = jourMois(d), jf = jourMois(f);
     if (!jd || !jf) return null;

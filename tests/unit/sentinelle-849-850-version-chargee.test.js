@@ -26,6 +26,7 @@ import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import vm from 'node:vm';
 import { fileURLToPath } from 'node:url';
+import { poserDateEnLettres } from './_helpers/date-en-lettres.js';
 
 const RACINE = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..');
 const SOURCE = readFileSync(path.join(RACINE, 'js', 'init-inline.js'), 'utf8');
@@ -73,6 +74,7 @@ function monter({ version, idb = {}, reponseServeur = null }) {
         }
     };
     ctx.window = ctx;
+    poserDateEnLettres(ctx);   // 23 nov. 2026 : la date en toutes lettres (« 1er »), chargée par index.html avant init-inline.js
     vm.createContext(ctx);
     vm.runInContext(SOURCE, ctx);
     return { ctx, dom, stock, ls, run: (code) => vm.runInContext(code, ctx) };

@@ -370,7 +370,7 @@ function formaterJourEtMois(ymd) {
     // UTC : le jour de la semaine ne doit pas dépendre du fuseau de l'appareil.
     var d = new Date(Date.UTC(a, mo - 1, j));
     if (d.getUTCMonth() !== mo - 1 || d.getUTCDate() !== j) return null;
-    return JOURS_FR[d.getUTCDay()] + ' ' + j + ' ' + MOIS_FR[mo - 1];
+    return JOURS_FR[d.getUTCDay()] + ' ' + window.dateEnLettres.jourEnLettres(j) + ' ' + MOIS_FR[mo - 1];
 }
 
 /**

@@ -100,7 +100,7 @@ test('la fenêtre d\'une case : le niveau retenu en clair, et le dernier niveau 
     await ouvrirTableau(page);
     await rangee(page, 'Zoé Fictive').locator('.tc-case[data-cible="cible_a"]').click();
     const f = page.locator('.tc-fenetre');
-    await expect(f.locator('.tc-retenu .tc-retenu-ligne').first()).toHaveText('Niveau retenu : 4 · Avancé, inscrit le 1 octobre 2026.');
+    await expect(f.locator('.tc-retenu .tc-retenu-ligne').first()).toHaveText('Niveau retenu : 4 · Avancé, inscrit le 1er octobre 2026.');
     await expect(f.locator('.tc-retenu-plus-bas')).toHaveText('Le dernier niveau inscrit, 2 · Ça y est presque (le 10 novembre 2026), est plus bas : le niveau retenu ne redescend pas.');
     await expect(f.locator('.tc-entree-retenu')).toHaveCount(1);
 });
