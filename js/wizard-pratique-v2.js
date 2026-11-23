@@ -174,7 +174,7 @@ const ETAPES_WIZARD = {
                     {
                         value: 'modele',
                         label: 'Partir d\'un modèle',
-                        description: 'Choisis un gabarit prêt à l\'emploi ou une de tes pratiques. Tu l\'adoptes telle quelle ; tu pourras la renommer et l\'ajuster ensuite.'
+                        description: 'Choisis un gabarit prêt à l\'emploi ou une de tes pratiques ; tu pourras la renommer et l\'ajuster ensuite.'
                     },
                     {
                         value: 'decrire',
@@ -191,7 +191,7 @@ const ETAPES_WIZARD = {
     'choix-modele': {
         id: 'choix-modele',
         titre: 'Choisis un modèle',
-        description: 'Adopter un modèle copie sa configuration dans une nouvelle pratique. L\'original n\'est pas modifié — tu pourras renommer et ajuster ta copie ensuite.',
+        description: 'Adopter un modèle crée une nouvelle pratique à partir de lui ; l\'original n\'est pas modifié et tu pourras renommer et ajuster ta copie ensuite.',
         branche: 'commune',
         ordre: 2,
         // Liste construite dynamiquement : gabarits prédéfinis + pratiques de la
@@ -329,7 +329,7 @@ const ETAPES_WIZARD = {
             {
                 id: 'infoCibles',
                 type: 'info',
-                texte: 'Une cible d\'apprentissage est un objectif de ton cours, à mi-chemin entre l\'objectif terminal et le critère ; la plupart des cours en comptent de 6 à 15. Les critères essentiels sont ceux sans lesquels une cible n\'est pas acquise. Une cible terminale est une de celles que vise le second seuil de réussite.'
+                texte: 'Une cible d\'apprentissage est un objectif de ton cours, à mi-chemin entre l\'objectif terminal et le critère ; un cours en compte souvent de cinq à une quinzaine. Les critères essentiels sont ceux sans lesquels une cible n\'est pas acquise. Une cible terminale est une de celles que vise le second seuil de réussite.'
             },
             { id: 'coursCibles', label: 'Cours', type: 'select-cours' },
             {

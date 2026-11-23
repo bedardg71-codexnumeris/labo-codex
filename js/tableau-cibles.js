@@ -86,7 +86,7 @@
         // La fenêtre d'inscription
         inscrireTitre: 'Inscrire un niveau',
         criteres: 'Critères',
-        criteresAide: 'Facultatif. Touche « Respecté » ou « Non respecté » ; touche encore pour laisser le critère non renseigné. Le niveau reste ton choix.',
+        criteresAide: 'Facultatif. Touche « Respecté » ou « Non respecté » ; touche de nouveau le même bouton pour laisser le critère non renseigné. Le niveau reste ton choix.',
         sansCritere: 'Cette cible n’a pas de critère.',
         essentiel: 'critère essentiel',
         respecte: 'Respecté',

@@ -10098,7 +10098,7 @@ const PACK_DEMARRAGE = {
     "productions": [
       {
         "id": "PROD_DEMO_STD_DEUXRIVES",
-        "titre": "Stratégies de lecture : « Deux-Rives »",
+        "titre": "Stratégies de lecture sur « Deux-Rives »",
         "description": "Stratégies de lecture appliquées au texte « Deux-Rives »",
         "type": "travail",
         "numero": 1,
@@ -10112,7 +10112,7 @@ const PACK_DEMARRAGE = {
       },
       {
         "id": "PROD_DEMO_STD_MARINE",
-        "titre": "Stratégies de lecture : « Marine »",
+        "titre": "Stratégies de lecture sur « Marine »",
         "description": "Stratégies de lecture appliquées au texte « Marine »",
         "type": "travail",
         "numero": 2,
@@ -10241,8 +10241,8 @@ const PACK_DEMARRAGE = {
      *       groupe), dans l'absence de production, et dans ce que la bulle du parcours dira. `origine` : la base (`main`)
      *       ne le connaît pas et ne le range pas ; `lot/observation-par-standards` le range, et lit une inscription sans
      *       ce champ et sans production comme une « observation ».
-     *   (b) Sur « Stratégies de lecture : « Deux-Rives » », le niveau 2 (« Ça y est presque »).
-     *   (c) Deux semaines plus tard, sur « Stratégies de lecture : « Marine » », le niveau 3 (« Acquis »).
+     *   (b) Sur « Stratégies de lecture sur « Deux-Rives » », le niveau 2 (« Ça y est presque »).
+     *   (c) Deux semaines plus tard, sur « Stratégies de lecture sur « Marine » », le niveau 3 (« Acquis »).
      * Posées, le niveau retenu est 3, le 2 reste à l'historique, et la note vaut 68,75 % (affichée 69) :
      * tests/unit/demo-par-standards-2026-11-22.test.js le vérifie.
      */
@@ -10258,20 +10258,20 @@ const PACK_DEMARRAGE = {
             { "id": "demo-crit-nuance", "texte": "Nuance", "essentiel": false, "respecte": null }
           ] },
         { "da": "9700001", "ensembleId": "ENSC_DEMO_STD", "cibleId": "demo-cible-ls", "niveau": "2", "echelleId": "ECH_DEMO_STD", "date": "2025-09-17", "productionId": "PROD_DEMO_STD_DEUXRIVES",
-          "noteBreve": "",
+          "noteBreve": "Tu relèves bien les procédés. Pour la plausibilité, appuie ton hypothèse sur une citation précise du texte.",
           "criteres": [
-            { "id": "demo-crit-structure", "texte": "Structure", "essentiel": true, "respecte": null },
-            { "id": "demo-crit-rigueur", "texte": "Rigueur", "essentiel": true, "respecte": null },
-            { "id": "demo-crit-plausibilite", "texte": "Plausibilité", "essentiel": true, "respecte": null },
-            { "id": "demo-crit-nuance", "texte": "Nuance", "essentiel": false, "respecte": null }
+            { "id": "demo-crit-structure", "texte": "Structure", "essentiel": true, "respecte": true },
+            { "id": "demo-crit-rigueur", "texte": "Rigueur", "essentiel": true, "respecte": true },
+            { "id": "demo-crit-plausibilite", "texte": "Plausibilité", "essentiel": true, "respecte": false },
+            { "id": "demo-crit-nuance", "texte": "Nuance", "essentiel": false, "respecte": false }
           ] },
         { "da": "9700001", "ensembleId": "ENSC_DEMO_STD", "cibleId": "demo-cible-ls", "niveau": "3", "echelleId": "ECH_DEMO_STD", "date": "2025-10-01", "productionId": "PROD_DEMO_STD_MARINE",
-          "noteBreve": "",
+          "noteBreve": "Ton hypothèse s'appuie maintenant sur le texte. Pour aller vers « Avancé », nuance-la : tiens compte d'un passage qui la contredit.",
           "criteres": [
-            { "id": "demo-crit-structure", "texte": "Structure", "essentiel": true, "respecte": null },
-            { "id": "demo-crit-rigueur", "texte": "Rigueur", "essentiel": true, "respecte": null },
-            { "id": "demo-crit-plausibilite", "texte": "Plausibilité", "essentiel": true, "respecte": null },
-            { "id": "demo-crit-nuance", "texte": "Nuance", "essentiel": false, "respecte": null }
+            { "id": "demo-crit-structure", "texte": "Structure", "essentiel": true, "respecte": true },
+            { "id": "demo-crit-rigueur", "texte": "Rigueur", "essentiel": true, "respecte": true },
+            { "id": "demo-crit-plausibilite", "texte": "Plausibilité", "essentiel": true, "respecte": true },
+            { "id": "demo-crit-nuance", "texte": "Nuance", "essentiel": false, "respecte": false }
           ] }
       ]
     }

@@ -120,7 +120,7 @@ describe('A · le troisième groupe : son cours, son groupe-cours, dix totems ne
 
     it('deux productions du groupe, la seconde deux semaines après la première, toutes deux sur « La lecture stratégique »', () => {
         const [a, b] = BLOC.productions;
-        expect([a.titre, b.titre].map(t => t.replace(/ /g, ' '))).toEqual(['Stratégies de lecture : « Deux-Rives »', 'Stratégies de lecture : « Marine »']);
+        expect([a.titre, b.titre].map(t => t.replace(/ /g, ' '))).toEqual(['Stratégies de lecture sur « Deux-Rives »', 'Stratégies de lecture sur « Marine »']);
         expect([a.coursId, b.coursId]).toEqual(['demo-cours-std', 'demo-cours-std']);
         expect((new Date(b.dateEcheance) - new Date(a.dateEcheance)) / 86400000).toBe(14);
         const debut = PACK.cadreCalendrier.dateDebut, fin = PACK.cadreCalendrier.finCours;
@@ -276,6 +276,15 @@ describe('E · l\'histoire de Marmotte Pétillante, posée par l\'écrivain rée
         expect(histoire[0].origine).toBe('observation');
         const dates = BLOC.productions.map(p => p.dateEcheance);
         expect([histoire[1].date, histoire[2].date]).toEqual(dates);
+    });
+
+    // Retouche f de l'assemblage (consigne du 22 nov., publication des parcours) : (b) et (c) reçoivent leurs critères et
+    // leur rétroaction, mot pour mot. Break-test (23 nov.) : Nuance de (b) remise à null → rouge ; un mot de (c) changé → rouge.
+    it('(b) et (c) portent leurs critères et leur rétroaction (retouche f de l\'assemblage)', () => {
+        expect(histoire[1].criteres.map(k => [k.texte, k.respecte])).toEqual([['Structure', true], ['Rigueur', true], ['Plausibilité', false], ['Nuance', false]]);
+        expect(histoire[1].noteBreve).toBe('Tu relèves bien les procédés. Pour la plausibilité, appuie ton hypothèse sur une citation précise du texte.');
+        expect(histoire[2].criteres.map(k => [k.texte, k.respecte])).toEqual([['Structure', true], ['Rigueur', true], ['Plausibilité', true], ['Nuance', false]]);
+        expect(histoire[2].noteBreve).toBe('Ton hypothèse s\'appuie maintenant sur le texte. Pour aller vers « Avancé », nuance-la : tiens compte d\'un passage qui la contredit.');
     });
 
     it('chaque saisie passe le refus de l\'écrivain (`motifsRefus`) : rien ne bloquera le parcours', async () => {
