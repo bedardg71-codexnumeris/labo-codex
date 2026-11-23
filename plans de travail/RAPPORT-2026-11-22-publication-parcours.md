@@ -512,3 +512,18 @@ huit parcours ont un « Je regarde », sept ont les deux temps. Sur téléphone,
 6. **Les 17 rouges de la base sous Chromium** : la plupart tiennent à Chromium (le toucher, des largeurs). Sous WebKit,
    leur état est celui du dernier verdict du Mac ; `codex-de-depart` (le bandeau qui couvre le menu) est à regarder.
 7. **Les dates au premier du mois** : `par-standards-lots-3-4` attend maintenant « inscrit le 1er octobre 2026 ».
+
+### 10.7 En ligne : ce qui a été lu après le push
+
+- **Mesuré sur `origin/main`** (`b551a2ae0`, le même commit que `origin/lot/publication-parcours`) : `version.json`
+  rend `{"build":"1122-2306","beta":"1.258.0"}` ; `version.js`, `js/init-inline.js` et `js/main.js` disent la même
+  chose ; `index.html` porte `version.js?v=11222306` ; `PARCOURS_OUVERTS` compte neuf identifiants, dont `cibles` ;
+  les entrées 1.255 à 1.258 des Nouvelles y sont.
+- **Mesuré chez Netlify** (lecture du projet `codexnumeris-051225`) : le déploiement de production courant,
+  `6b03bdb044d10574ed3693d7`, est à l'état « ready », branche `main`, commit `b551a2ae0`, publié le 22 nov. à
+  23 h 15 (heure de Toronto), vers `app.codexnumeris.org`. Le précédent portait `d0dd74205` (la 1.254.1).
+- **Non mesuré** : la page servie elle-même. Le proxy du conteneur refuse `app.codexnumeris.org`, donc ni
+  `version.json` en ligne, ni l'écran, n'ont été lus d'ici. Que la 1.258.0 soit servie est une inférence, tirée de
+  la fiche du déploiement, pas une lecture.
+- **Ce commit-ci** n'ajoute que ce paragraphe : il déclenche un déploiement de plus, sans changer ni le numéro ni le
+  build.
