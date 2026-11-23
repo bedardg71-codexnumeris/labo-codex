@@ -202,14 +202,18 @@ describe('C · « Remettre la démo à neuf » verse le troisième groupe dans l
         expect('demo_vieux' in r.store, 'la remise à neuf efface d\'abord la démo').toBe(false);
     });
 
-    it('le stock : une démo déjà installée sous la même version n\'est PAS réécrite au chargement (version non montée, rapport § 6)', async () => {
+    // ↻ 23 nov. 2026 (publication des parcours, point 4) : la version reste 21.3, et une démo déjà installée reçoit le
+    // troisième groupe par ajout seulement (tests/unit/demo-deja-ouverte-troisieme-groupe.test.js le juge en détail).
+    it('le stock : une démo déjà installée sous la même version n\'est PAS réécrite ; elle reçoit le troisième groupe en plus (version non montée)', async () => {
         const avant = { demo_groupesCours: [{ id: 'GC_DEMO', isDemo: true }, { id: 'GC_MONTE', coursId: 'c-monte' }], demo_groupeEtudiants: [{ da: '9900002' }] };
         const store = clone(avant);
         const db = { getSync: (k, d) => (k in store ? clone(store[k]) : (d !== undefined ? d : null)), setSync: (k, v) => { store[k] = clone(v); } };
         const localStorage = { getItem: (k) => (k === 'demo-version-installee' ? PACK._metadata.version : null), setItem: () => {} };
         const win = chargerScript('js/demo-namespace.js', { db, PACK_DEMARRAGE: PACK, localStorage });
         await win.initialiserDemoNamespace();
-        expect(store, 'le deuxième groupe monté par la personne reste ; le troisième n\'arrive que par « Remettre la démo à neuf »').toEqual(avant);
+        expect(store.demo_groupesCours.slice(0, 2), 'le deuxième groupe monté par la personne reste').toEqual(avant.demo_groupesCours);
+        expect(store.demo_groupeEtudiants[0]).toEqual(avant.demo_groupeEtudiants[0]);
+        expect(store.demo_groupesCours.map(g => g.id)).toEqual(['GC_DEMO', 'GC_MONTE', 'GC_DEMO_STD']);
         expect(PACK._metadata.version).toBe('21.3');
     });
 

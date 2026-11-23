@@ -305,6 +305,62 @@ function peuplerNamespace(pack) {
 }
 
 /**
+ * LA DÉMO DÉJÀ OUVERTE (publication des parcours, 23 nov. 2026 ; décision de Cowork, règle de Grégoire : jamais
+ * d'effacement irréversible). La version du pack reste 21.3 : une démo installée avant le troisième groupe n'est pas
+ * réécrite au chargement (`initialiserDemoNamespace`), et c'est voulu, car ce qu'on y a fait (le deuxième groupe de la
+ * Modélisation, la grille et l'évaluation d'« Évaluer »…) y vit. Elle reçoit ici le SEUL bloc `groupeParStandards`,
+ * quand il manque : son cours (de `listeCours`), son horaire, son groupe-cours et ses collections.
+ *   · « Quand il manque » : `demo_groupesCours` existe (la démo est installée) et n'a pas `GC_DEMO_STD`. Déjà là, rien.
+ *   · Ajout seulement, par identité (skill integrite-globaux, § 3.2, « push sans replace ») : un item n'entre que si
+ *     aucun item de même id n'est dans la clé ; aucun item existant n'est réécrit ni retiré ; aucune clé n'est retirée.
+ *   · Marqué `isDemo`, comme `peuplerNamespace` (les détecteurs des parcours le reconnaissent ainsi, `duPack`).
+ *   · L'histoire de Marmotte Pétillante n'entre pas : elle n'est pas dans l'état de départ.
+ *   · La démo ouverte au chargement (`demo-actif`) : son cours rejoint aussi `cours`, comme à l'entrée
+ *     (`fusionnerDemoVersGlobaux`, même règle) ; la sortie l'en retire (son id est dans le pack, il porte `isDemo`) ;
+ *     l'en-tête est repeuplé.
+ * Idempotente : un second appel ne trouve rien à faire. Jugée par tests/unit/demo-deja-ouverte-troisieme-groupe.test.js
+ * et tests/integration/demo-deja-ouverte-troisieme-groupe-2026-11-23.spec.js.
+ * @param {Object} pack
+ * @returns {boolean} true si le bloc a été versé
+ */
+function verserGroupeParStandardsSiAbsent(pack) {
+    const bloc = pack && pack.groupeParStandards;
+    if (!bloc || !bloc.groupeCours || !bloc.groupeCours.id) return false;
+    const groupes = db.getSync(cleDemo('groupesCours'), null);
+    if (!Array.isArray(groupes)) return false;   // démo jamais installée : peuplerNamespace la versera entière
+    if (groupes.some(function(g) { return g && g.id === bloc.groupeCours.id; })) return false;
+
+    const troisieme = ajoutsDuGroupeParStandards(pack);
+    const coursDuGroupe = (pack.listeCours || []).filter(function(c) { return c && c.id === bloc.groupeCours.coursId; });
+    const ajouts = Object.assign({}, troisieme.collections, {
+        listeCours: coursDuGroupe,
+        horaires: troisieme.horaire ? [troisieme.horaire] : [],
+        groupesCours: [troisieme.groupeCours]
+    });
+    function ajouterSansRemplacer(nomCle, items) {
+        const actuel = db.getSync(nomCle, null);
+        const liste = Array.isArray(actuel) ? actuel.slice() : [];
+        let ajoute = false;
+        items.forEach(function(item) {
+            if (!item || !item.id || liste.some(function(x) { return x && x.id === item.id; })) return;
+            liste.push(Object.assign({}, item, { isDemo: true }));
+            ajoute = true;
+        });
+        if (ajoute) db.setSync(nomCle, liste);
+    }
+    Object.keys(ajouts).forEach(function(nom) { ajouterSansRemplacer(cleDemo(nom), ajouts[nom]); });
+    if (db.getSync('demo-actif', null) === 'true') {
+        // `cours` seul : `listeCours`, clé d'héritage, est vidée dans `cours` à chaque démarrage (trimestre-v2-cours.js).
+        ajouterSansRemplacer('cours', coursDuGroupe);
+        // L'en-tête a pu se peupler avant ce versement (initialiserDemoNamespace n'est pas attendu au démarrage) : il
+        // offre maintenant le troisième groupe, comme à l'entrée dans la démo (demo-activation.js).
+        if (typeof window.peuplerDropdownGroupeCoursActif === 'function') window.peuplerDropdownGroupeCoursActif();
+    }
+    console.warn('[DEMO-INIT] Le troisième groupe (« Par standards ») ajouté à la démo déjà installée');
+    return true;
+}
+
+/**
  * Initialisation idempotente du namespace demo_*.
  * - Au premier run : charge le pack et peuple demo_*
  * - Aux runs suivants : compare la version du pack au flag demo-version-installee ;
@@ -331,7 +387,8 @@ async function initialiserDemoNamespace() {
         const versionPack = (pack._metadata && pack._metadata.version) || '0';
 
         if (versionInstallee === versionPack) {
-            // Déjà à jour, rien à refresh
+            // Déjà à jour, rien à refresh — sauf le troisième groupe, s'il manque (ajout seulement).
+            verserGroupeParStandardsSiAbsent(pack);
             return;
         }
 
@@ -371,6 +428,11 @@ async function reinstallerDemoDuPack() {
 
 window.reinstallerDemoDuPack = reinstallerDemoDuPack;
 window.ajoutsDuGroupeParStandards = ajoutsDuGroupeParStandards;
+// Le parcours 9 l'appelle avant sa première bulle (une démo déjà ouverte reçoit le troisième groupe s'il lui manque).
+window.verserGroupeParStandardsSiAbsent = async function() {
+    const pack = await chargerPackDemarrage();
+    return pack ? verserGroupeParStandardsSiAbsent(pack) : false;
+};
 window.cleDemo = cleDemo;
 window.initialiserDemoNamespace = initialiserDemoNamespace;
 window.CARTE_DEMO_ALIGNEMENT = CARTE_DEMO_ALIGNEMENT;
