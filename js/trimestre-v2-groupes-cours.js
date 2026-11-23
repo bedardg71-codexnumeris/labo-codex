@@ -548,6 +548,7 @@ async function nouveauGroupeCoursV2() {
     if (horaireHidden) horaireHidden.value = '';
     if (horaireNom) horaireNom.textContent = '— Sélectionne un groupe —';
     if (selectPratique) selectPratique.value = '';  // Beta 95.3
+    poserSimulationFicheGroupeCoursV2('');
 
     // Mettre à jour le titre et bouton
     const titre = document.getElementById('v2-titreFormGroupeCours');
@@ -614,6 +615,7 @@ function editerGroupeCoursV2(gc) {
     if (selectHoraire) selectHoraire.value = gc.horaireId || '';
     if (selectEnseignant) selectEnseignant.value = gc.enseignantId || '';
     if (selectPratique) selectPratique.value = gc.pratiqueId || '';  // Beta 95.3
+    poserSimulationFicheGroupeCoursV2(gc.simulationPratiqueId || '');
     // #925 : l'étape 3 a été peuplée avant que le cours soit posé ; son compte suit maintenant ce cours
     // (le numéro choisi est gardé : la liste des numéros ne change pas).
     if (typeof window.populerDropdownGroupesAssemblageV2 === 'function') window.populerDropdownGroupesAssemblageV2();
@@ -664,7 +666,7 @@ function groupeCoursEnCreationSaisi() {
     const formulaire = document.getElementById('v2-formulaireGroupeCours');
     if (!formulaire || formulaire.classList.contains('u-hide')) return false;
     if (groupeCoursEnEditionId) return false;
-    return ['v2-gc-cours', 'v2-gc-groupe', 'v2-gc-enseignant', 'v2-gc-pratique']
+    return ['v2-gc-cours', 'v2-gc-groupe', 'v2-gc-enseignant', 'v2-gc-pratique', 'v2-gc-simulation']
         .some(id => String(document.getElementById(id)?.value || '').trim());
 }
 if (window.uiDialogues) window.uiDialogues.declarerFicheEnCreation('groupeCours', groupeCoursEnCreationSaisi);
@@ -700,12 +702,63 @@ function changerChampGroupeCoursV2(el) {
     return sauvegarderGroupeCoursV2();
 }
 
+/**
+ * Simulation (23 nov. 2026) : pose la valeur du champ « Simulation » de la fiche. Un lien vers une pratique qui n'est plus
+ * offerte (supprimée, ou sortie de la bibliothèque) garde son option, dite « Pratique supprimée » : enregistrer la fiche
+ * pour une autre raison ne retire pas le lien.
+ */
+function poserSimulationFicheGroupeCoursV2(id) {
+    const select = document.getElementById('v2-gc-simulation');
+    if (!select) return;
+    const valeur = id || '';
+    if (valeur && !Array.from(select.options).some(o => o.value === valeur)) {
+        const option = document.createElement('option');
+        option.value = valeur;
+        option.textContent = window.SimulationPratique ? window.SimulationPratique.MOTS.champSupprimee : valeur;
+        select.appendChild(option);
+    }
+    select.value = valeur;
+}
+window.poserSimulationFicheGroupeCoursV2 = poserSimulationFicheGroupeCoursV2;
+
 /** Lot E2 : un refus de vérification, par le témoin commun. */
 function _refuserGroupeCoursV2(phrase, geste) {
     if (window.temoinEnregistrement) {
         window.temoinEnregistrement.nonEnregistre(window.raisonPourTemoin(phrase), geste, cle('groupesCours'));
     }
     return false;
+}
+
+/** Un refus qui remet la fiche d'un groupe-cours existant au stock (en création, la saisie reste). */
+function _refuserEtRemettreGroupeCoursV2(phrase, geste) {
+    if (groupeCoursEnEditionId) _remettreGroupeCoursEnBaseV2();
+    return _refuserGroupeCoursV2(phrase, geste);
+}
+
+/* ----- Simulation (23 nov. 2026, js/simulation-pratique.js) : `simulationPratiqueId`, écrit ici seulement ----- */
+
+/** Le choix du champ « Simulation » de la fiche : l'id d'une pratique, ou null. */
+function _simulationChoisieV2() {
+    return document.getElementById('v2-gc-simulation')?.value || null;
+}
+
+/**
+ * Jamais la pratique de notation du groupe, ni une pratique qui partage ses cibles (ce qui s'y inscrirait compterait dans la
+ * note). Un lien déjà rangé et laissé tel quel n'est pas rejugé. Refusé : le témoin le dit, la fiche est remise, true.
+ */
+function _simulationRefuseeV2(simulationPratiqueId, pratiqueId, geste) {
+    if (!window.SimulationPratique) return false;
+    const range = (db.getSync(cle('groupesCours'), []) || []).find(g => g && g.id === groupeCoursEnEditionId);
+    const refus = window.SimulationPratique.motifDeRefus(simulationPratiqueId, pratiqueId, (range && range.simulationPratiqueId) || null);
+    if (!refus) return false;
+    _refuserEtRemettreGroupeCoursV2(refus, geste);
+    return true;
+}
+
+/** Le champ n'existe que s'il y a une simulation : un groupe-cours sans simulation garde sa forme d'avant le lot. */
+function _rangerSimulationV2(gc, simulationPratiqueId) {
+    if (simulationPratiqueId) gc.simulationPratiqueId = simulationPratiqueId;
+    else delete gc.simulationPratiqueId;
 }
 
 /** Lot E2 : un refus sur un groupe-cours existant remet ses champs au stock. */
@@ -781,6 +834,8 @@ function sauvegarderGroupeCoursV2() {
     const horaireId = document.getElementById('v2-gc-horaire')?.value;
     const enseignantId = document.getElementById('v2-gc-enseignant')?.value;
     const pratiqueId = document.getElementById('v2-gc-pratique')?.value || null;  // Beta 95.3
+    // Simulation (23 nov. 2026) : une pratique « Par standards » à côté de `pratiqueId`, qui n'est jamais écrit pour elle.
+    const simulationPratiqueId = _simulationChoisieV2();
 
     // Validation (5 éléments requis). Lot E2 : par le témoin, au tutoiement (relevé des mots).
     if (!trimestreId) return _refuserGroupeCoursV2('Choisis le trimestre.', geste);
@@ -800,13 +855,13 @@ function sauvegarderGroupeCoursV2() {
             // Chantier du démo : la collection en nom NU, la garde la passe elle-même par cle().
             { id: horaireId, collection: 'horaires', labelType: 'horaire' },
             { id: enseignantId, collection: 'enseignants', labelType: 'enseignant' },
-            { id: pratiqueId, collection: 'pratiquesConfigurables', labelType: 'pratique' }
+            { id: pratiqueId, collection: 'pratiquesConfigurables', labelType: 'pratique' },
+            { id: simulationPratiqueId, collection: 'pratiquesConfigurables', labelType: 'pratique' }
         ], { cible: cle('groupesCours') });   // écrire dans la démo n'est pas refusé
-        if (violation) {
-            if (!creation) _remettreGroupeCoursEnBaseV2();
-            return _refuserGroupeCoursV2(violation.message, geste);
-        }
+        if (violation) return _refuserEtRemettreGroupeCoursV2(violation.message, geste);
     }
+
+    if (_simulationRefuseeV2(simulationPratiqueId, pratiqueId, geste)) return false;
 
     // Générer le nom
     const nom = genererNomGroupeCoursV2();
@@ -880,6 +935,7 @@ function sauvegarderGroupeCoursV2() {
             pratiqueId,   // Beta 95.3
             dateModification: new Date().toISOString()
         };
+        _rangerSimulationV2(groupesCours[index], simulationPratiqueId);
     } else {
         // Ajout : actif = true SEULEMENT si premier groupe-cours créé.
         // Pour activer un autre GC après coup, utiliser le bouton « Activer ce groupe-cours »
@@ -897,6 +953,7 @@ function sauvegarderGroupeCoursV2() {
             dateCreation: new Date().toISOString(),
             actif: estPremier
         };
+        _rangerSimulationV2(nouveauGC, simulationPratiqueId);
         groupesCours.push(nouveauGC);
         idEcrit = nouveauGC.id;
         if (estPremier) premierActif = nouveauGC;

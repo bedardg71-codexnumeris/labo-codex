@@ -38,6 +38,12 @@
  * l'enseignant·e (étiquettes, énoncés, critères, noms, rétroactions, raisons) passe par `echapperHtml` ; aucun handler
  * inline : les gestes passent par l'attribut `data-tc` et une écoute posée sur l'hôte ou la fenêtre.
  * Mots de l'écran : PROPOSÉS (plans de travail/TEXTES-2026-11-21-par-standards-lot-2.md).
+ *
+ * SIMULATION (23 nov. 2026, js/simulation-pratique.js) : le même tableau, monté dans un autre hôte, sur le contexte d'une
+ * pratique qui n'est pas la pratique désignée (`simulation: true`). LE CONTEXTE VIT SUR L'HÔTE (`hote._tcContexte`) : un
+ * clic lit celui de SON hôte, jamais celui du dernier tableau dessiné (le tableau officiel peut se redessiner derrière).
+ * Sous la simulation : la marque au titre du tableau et de chaque fenêtre ; aucun bouton d'export ; le redessin après une
+ * écriture repasse par la simulation, jamais par le tableau officiel.
  */
 (function () {
     'use strict';
@@ -215,6 +221,16 @@
         ctx.doubleSeuil = N().lireDoubleSeuil(conf);
     }
 
+    /** « Simulation », en étiquette, quand le contexte est celui d'une simulation ; '' sinon. */
+    function _marqueHTML(ctx) {
+        return (ctx && ctx.simulation && window.SimulationPratique) ? window.SimulationPratique.marqueHTML() + ' ' : '';
+    }
+
+    /** Le titre du tableau : « Tableau de notation » ; sous la simulation, la marque et son propre titre. */
+    function _titreDuTableauHTML(ctx) {
+        return ctx.simulation ? `${_marqueHTML(ctx)}${esc(window.SimulationPratique.MOTS.titre)}` : esc(MOTS.titre);
+    }
+
     function _niveauDuCode(ctx, code) {
         return ctx.niveaux.find(n => String(n.code) === String(code)) || null;
     }
@@ -243,7 +259,9 @@
         const reglages = (p && p.reglages) || { action: 'ouvrirReglagesPratique', param: ctx.pratiqueId, libelle: window.TableauNotation.MOTS.reglages };
         // L'écran d'observation (22 nov. 2026) : « Observer », dans les deux vues, par le même composant (observation-cibles.js).
         const observer = window.ObservationCibles ? `<button type="button" class="btn btn-principal" data-tc="observer">${esc(MOTS.observer)}</button>` : '';
-        const gestesSimples = `<div class="tn-gestes">${observer}<button type="button" class="btn btn-secondaire" data-action="exporterSyntheseResultatsCSV">${esc(window.TableauNotation.MOTS.exporter)}</button></div>`;   // le mot du tableau de la vue simple, tel quel
+        // Simulation (23 nov. 2026) : ce bouton exporte les notes de la pratique OFFICIELLE ; sous la simulation, il n'existe pas.
+        const exporter = ctx.simulation ? '' : `<button type="button" class="btn btn-secondaire" data-action="exporterSyntheseResultatsCSV">${esc(window.TableauNotation.MOTS.exporter)}</button>`;   // le mot du tableau de la vue simple, tel quel
+        const gestesSimples = `<div class="tn-gestes">${observer}${exporter}</div>`;
         const gestes = !avecGestes ? '' : (ctx.simple ? gestesSimples
             : `<div class="tn-gestes">${observer}<button type="button" class="btn btn-secondaire" data-tc="par-production">${esc(MOTS.parProduction)}</button></div>`);
         return `<div class="tn-bandeau">
@@ -363,7 +381,7 @@
      */
     function construireHTML(base) {
         const ctx = completerContexte(base);
-        const tete = `<h3 class="tn-titre" tabindex="-1">${esc(MOTS.titre)}</h3><p class="tn-intro">${esc(MOTS.intro)}</p>`;
+        const tete = `<h3 class="tn-titre" tabindex="-1">${_titreDuTableauHTML(ctx)}</h3><p class="tn-intro">${esc(MOTS.intro)}</p>`;
         if (ctx.vide) return `${tete}${_bandeauHTML(ctx, false)}<p class="tn-etat-vide">${esc(ctx.vide)}</p>${_gesteVideHTML(ctx)}`;
         const rangees = ctx.etudiants.map((e, i) => _rangeeHTML(ctx, e, i)).join('');
         const legendes = [MOTS.legende, MOTS.legendeSansDonnee(ctx.nomSansDonnee)]
@@ -377,11 +395,12 @@
 
     /* ============================== APRÈS LE RENDU : LES ÉCOUTES, LE FOCUS ============================== */
 
-    let _contexteCourant = null;
+    let _contexteCourant = null;   // le dernier tableau dessiné : seulement pour un appel sans hôte (`ouvrirInscription` au banc)
 
-    /** Appelé par `tableau-notation.js` après chaque rendu du tableau des cibles. */
+    /** Appelé après chaque rendu du tableau des cibles (`tableau-notation.js` ; `simulation-pratique.js` dans son hôte). */
     function apresRendu(hote, base) {
         _contexteCourant = base;
+        hote._tcContexte = base;   // le contexte de CET hôte : ses clics n'en lisent pas d'autre
         if (!hote._tcEcoutes) {
             hote._tcEcoutes = true;
             hote.addEventListener('click', _surClicTableau);
@@ -402,12 +421,13 @@
     }
 
     function _surClicTableau(e) {
-        if (!_contexteCourant || _contexteCourant.etat !== 'cibles') return;
+        const base = e.currentTarget._tcContexte;
+        if (!base || base.etat !== 'cibles') return;
         const geste = e.target.closest('[data-tc]');
         if (!geste) return;
-        if (geste.dataset.tc === 'case') (_contexteCourant.presentation ? ouvrirInscriptionSimple : ouvrirInscription)(geste.dataset.da, geste.dataset.cible, geste);
-        else if (geste.dataset.tc === 'par-production') ouvrirParProduction(geste);
-        else if (geste.dataset.tc === 'observer' && window.ObservationCibles) window.ObservationCibles.ouvrir(completerContexte(_contexteCourant), geste);
+        if (geste.dataset.tc === 'case') (base.presentation ? ouvrirInscriptionSimple : ouvrirInscription)(geste.dataset.da, geste.dataset.cible, geste, base);
+        else if (geste.dataset.tc === 'par-production') ouvrirParProduction(geste, base);
+        else if (geste.dataset.tc === 'observer' && window.ObservationCibles) window.ObservationCibles.ouvrir(completerContexte(base), geste);
     }
 
     const FLECHES = { ArrowLeft: [0, -1], ArrowRight: [0, 1], ArrowUp: [-1, 0], ArrowDown: [1, 0] };
@@ -427,13 +447,23 @@
         if (suivant) _donnerLeFocus(e.currentTarget, suivant);
     }
 
-    function _rerendre(focus) {
+    /**
+     * Redessine le tableau derrière une écriture. `ctx` : le contexte sous lequel elle a été faite ; sous la simulation,
+     * c'est le tableau de la simulation qui se redessine (jamais l'officiel : il retomberait sur la pratique désignée).
+     */
+    function _rerendre(focus, ctx) {
         _focusApres = focus || null;
+        if (ctx && ctx.simulation) {
+            if (window.SimulationPratique) window.SimulationPratique.rerendre();
+            return;
+        }
         if (window.TableauNotation && typeof window.TableauNotation.rafraichirSiAffiche === 'function') window.TableauNotation.rafraichirSiAffiche();
     }
 
     function _annoncer(texte) {
-        const zone = document.querySelector('.tc-annonce');
+        // Deux hôtes peuvent porter un tableau des cibles (l'officiel, la simulation) : la zone lue est celle qu'on voit.
+        const zones = Array.from(document.querySelectorAll('.tc-annonce'));
+        const zone = zones.find(z => z.offsetParent !== null) || zones[0];
         if (zone) zone.textContent = texte;
     }
 
@@ -684,15 +714,15 @@
      * Ouvre l'inscription d'une case : la cible, ses critères, le niveau, la rétroaction, l'origine, la date ; puis
      * le niveau retenu et l'historique de la case.
      */
-    function ouvrirInscription(da, cibleId, retour) {
-        const ctx = completerContexte(_contexteCourant || {});
+    function ouvrirInscription(da, cibleId, retour, base) {
+        const ctx = completerContexte(base || _contexteCourant || {});
         const cible = ctx.cibles.find(c => c.id === cibleId);
         const etudiant = (ctx.etudiants || []).find(e => String(e.da) === String(da));
         if (!cible || !etudiant || ctx.vide) return null;
         const p = 'tc-un';
         const html = `
             <button type="button" class="modal-fermer" data-tc="fermer" aria-label="${esc(MOTS.fermer)}"><img src="icons/icon-close-window.svg" alt="" class="modal-close-icon"></button>
-            <h3 class="modal-titre" id="tc-fenetre-titre">${esc(MOTS.inscrireTitre)}</h3>
+            <h3 class="modal-titre" id="tc-fenetre-titre">${_marqueHTML(ctx)}${esc(MOTS.inscrireTitre)}</h3>
             <p class="tc-qui">${esc(_nomEleve(etudiant))}</p>
             <div class="tc-cible">
                 <p class="tc-cible-etiquette">${esc(cible.etiquette)}${cible.terminale ? ` <span class="cibles-fiche-terminale">Cible terminale</span>` : ''}</p>
@@ -708,7 +738,7 @@
                     <button type="button" class="btn btn-principal" data-tc="inscrire">${esc(MOTS.inscrireRemarque)}</button></div>
             </form>
             <section class="tc-historique"><h4 class="tc-section-titre">${esc(MOTS.historique)}</h4><div class="tc-historique-hote">${_historiqueAvecRetenuHTML(ctx, da, cibleId)}</div></section>`;
-        return _ouvrirFenetre(html, { mode: 'case', da: String(da), cibleId, retour, ctx });
+        return _ouvrirFenetre(html, { mode: 'case', da: String(da), cibleId, retour, ctx, base: base || _contexteCourant || {} });
     }
 
     async function _inscrireCase(overlay) {
@@ -733,7 +763,7 @@
         const niveau = _niveauDuCode(ctx, saisie.niveau);
         const etudiant = ctx.etudiants.find(e => String(e.da) === String(da));
         _fermer();
-        _rerendre({ da, cibleId });
+        _rerendre({ da, cibleId }, ctx);
         _annoncer(r.entrees[0].niveau === null ? MOTS.annonceRemarque(_nomEleve(etudiant), cible.etiquette)
             : MOTS.annonceInscrit(_nomEleve(etudiant), cible.etiquette, niveau ? (niveau.nom || niveau.code) : saisie.niveau));
         return true;
@@ -764,8 +794,8 @@
     }
 
     /** Ouvre la fenêtre allégée d'une case (vue simple). */
-    function ouvrirInscriptionSimple(da, cibleId, retour) {
-        const ctx = completerContexte(_contexteCourant || {});
+    function ouvrirInscriptionSimple(da, cibleId, retour, base) {
+        const ctx = completerContexte(base || _contexteCourant || {});
         const cible = ctx.cibles.find(c => c.id === cibleId);
         const etudiant = (ctx.etudiants || []).find(e => String(e.da) === String(da));
         if (!cible || !etudiant || ctx.vide) return null;
@@ -787,7 +817,7 @@
                     <button type="button" class="btn btn-principal" data-tc="inscrire-simple">${esc(MOTS.inscrire)}</button></div>
             </form>
             <section class="tc-historique"><h4 class="tc-section-titre">${esc(MOTS.simple.derniere)}</h4><div class="tc-derniere-hote">${_derniereHTML(ctx, da, cibleId)}</div></section>`;
-        return _ouvrirFenetre(html, { mode: 'simple', da: String(da), cibleId, retour, ctx });
+        return _ouvrirFenetre(html, { mode: 'simple', da: String(da), cibleId, retour, ctx, base: base || _contexteCourant || {} });
     }
 
     async function _inscrireSimple(overlay) {
@@ -811,7 +841,7 @@
         const n = _niveauDuCode(ctx, niveau);
         const etudiant = ctx.etudiants.find(e => String(e.da) === String(da));
         _fermer();
-        _rerendre({ da, cibleId });
+        _rerendre({ da, cibleId }, ctx);
         _annoncer(MOTS.annonceInscrit(_nomEleve(etudiant), cible.etiquette, n ? (n.nom || n.code) : niveau));
         return true;
     }
@@ -838,7 +868,7 @@
 
     /** Après une annulation : l'historique (vue étendue) ou la dernière inscription et la phrase « rien ne s'efface » (vue simple). */
     function _redessinerApresAnnulation(overlay) {
-        const ctx = completerContexte(_contexteCourant || {});
+        const ctx = completerContexte(_ouverte.base || _contexteCourant || {});
         _ouverte.ctx = ctx;
         const simple = _ouverte.mode === 'simple';
         const hote = overlay.querySelector(simple ? '.tc-derniere-hote' : '.tc-historique-hote');
@@ -864,8 +894,7 @@
         }
         // L'historique se redessine dans la fenêtre ouverte ; le tableau derrière aussi.
         if (_ouverte && _ouverte.overlay === overlay) _redessinerApresAnnulation(overlay);
-        _focusApres = _ouverte ? { da: _ouverte.da, cibleId: _ouverte.cibleId } : null;
-        if (window.TableauNotation) window.TableauNotation.rafraichirSiAffiche();
+        _rerendre(_ouverte ? { da: _ouverte.da, cibleId: _ouverte.cibleId } : null, _ouverte ? _ouverte.ctx : null);
         _annoncer(MOTS.annonceAnnulee);
         return true;
     }
@@ -894,15 +923,15 @@
     }
 
     /** Ouvre le geste « inscrire pour une production » : l'étudiant·e, la production, la date, puis les cibles offertes. */
-    function ouvrirParProduction(retour) {
-        const ctx = completerContexte(_contexteCourant || {});
+    function ouvrirParProduction(retour, base) {
+        const ctx = completerContexte(base || _contexteCourant || {});
         if (ctx.vide) return null;
         const eleves = ctx.etudiants.map(e => `<option value="${esc(e.da)}">${esc(_nomEleve(e))}</option>`).join('');
         const prods = (ctx.productions || []).map(p => `<option value="${esc(p.id)}">${esc(p.titre || p.nom || p.id)}</option>`).join('');
         const aucune = (ctx.productions || []).length === 0 ? `<p class="tc-aide">${esc(MOTS.aucuneProductionAuGroupe)}</p>` : '';
         const html = `
             <button type="button" class="modal-fermer" data-tc="fermer" aria-label="${esc(MOTS.fermer)}"><img src="icons/icon-close-window.svg" alt="" class="modal-close-icon"></button>
-            <h3 class="modal-titre" id="tc-fenetre-titre">${esc(MOTS.productionTitre)}</h3>
+            <h3 class="modal-titre" id="tc-fenetre-titre">${_marqueHTML(ctx)}${esc(MOTS.productionTitre)}</h3>
             <p class="tc-aide">${esc(MOTS.productionIntro)}</p>
             <form class="tc-formulaire" novalidate>
                 <section class="tc-section tc-section--ligne">
@@ -949,7 +978,7 @@
         if (!r.ok) return false;
         const etudiant = ctx.etudiants.find(e => String(e.da) === String(da));
         _fermer();
-        _rerendre({ da, cibleId: saisies[0].cibleId });
+        _rerendre({ da, cibleId: saisies[0].cibleId }, ctx);
         _annoncer(MOTS.annonceInscrits(_nomEleve(etudiant), saisies.length));
         return true;
     }

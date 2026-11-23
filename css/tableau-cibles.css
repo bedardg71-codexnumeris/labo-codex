@@ -1044,3 +1044,83 @@
     color: var(--texte-secondaire);
     min-height: 1.2em;
 }
+
+/* ============================== SIMULATION (23 nov. 2026, js/simulation-pratique.js) ==============================
+   Une pratique « Par standards » posée à côté de la pratique officielle d'un groupe. La marque « Simulation » se lit sans
+   survol, au bandeau de l'écran (qui reste en vue quand la page défile), au titre du tableau et de chaque fenêtre.
+   Couleurs : les jetons « attention » de styles.css (aucune couleur neuve). */
+.sim-marque {
+    display: inline-block;
+    padding: 1px 8px;
+    border: 1px solid var(--alerte-bordure-attention);
+    border-radius: var(--radius-petit);
+    background: var(--alerte-fond-attention);
+    color: var(--alerte-texte-attention);
+    font-size: 0.8rem;
+    font-weight: 700;
+    line-height: 1.5;
+    letter-spacing: 0.02em;
+    white-space: nowrap;
+    vertical-align: middle;
+}
+
+.sim-entree {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-top: 16px;
+    padding: 12px;
+    border: 1px dashed var(--alerte-bordure-attention);
+    border-radius: var(--radius-petit);
+}
+
+.sim-entree--aucune {
+    border-color: var(--bordure-moyenne);
+}
+
+.sim-entree-texte {
+    flex: 1 1 240px;
+    margin: 0;
+    line-height: 1.5;
+    color: var(--texte-secondaire);
+}
+
+.sim-entree .btn,
+.sim-revenir {
+    min-height: 44px;   /* cible tactile (iPad) */
+}
+
+.sim-bandeau {
+    position: sticky;
+    top: 0;
+    z-index: 5;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-bottom: 12px;
+    padding: 10px 12px;
+    border: 1px solid var(--alerte-bordure-attention);
+    border-radius: var(--radius-petit);
+    background: var(--surface-carte);
+    box-shadow: inset 0 0 0 999px var(--alerte-fond-attention);
+}
+
+.sim-bandeau-texte {
+    flex: 1 1 280px;
+    line-height: 1.5;
+}
+
+/* L'écran de la simulation : un liseré sur toute sa hauteur, pour qu'aucune partie du tableau ne se lise sans la marque. */
+.tableau-simulation {
+    padding-left: 12px;
+    border-left: 4px solid var(--alerte-bordure-attention);
+}
+
+.sim-champ-aide {
+    margin: 4px 0 0;
+    font-size: 0.85rem;
+    line-height: 1.4;
+    color: var(--texte-secondaire);
+}

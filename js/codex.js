@@ -2773,7 +2773,23 @@ function _coteDeLElement(nomCle, e, autre, donnees) {
     }
     var note = (_nomDeBase(nomCle) === 'evaluationsSauvegardees' && autre && autre.noteFinale !== e.noteFinale)
         ? 'Note : ' + _valeurCourte(e.noteFinale) : '';
-    return { texte: 'Modifiée le ' + _dateCourte(_dateDe(e)), detail: note };
+    return { texte: 'Modifiée le ' + _dateCourte(_dateDe(e)), detail: note || _direLaSimulation(nomCle, e, autre, donnees) };
+}
+
+/**
+ * Simulation (23 nov. 2026, js/simulation-pratique.js) : un groupe-cours dont la simulation diffère d'un côté à l'autre le
+ * DIT de chaque côté (sans cela les deux côtés se lisent pareil, et le choix se ferait à l'aveugle). Le conflit reste
+ * tranché objet entier ; les inscriptions faites sous la simulation sont unies à part (`inscriptionsCibles`).
+ */
+function _direLaSimulation(nomCle, e, autre, donnees) {
+    if (_nomDeBase(nomCle) !== 'groupesCours' || !autre) return '';
+    var id = e.simulationPratiqueId || null;
+    if (id === (autre.simulationPratiqueId || null)) return '';
+    if (!id) return 'Aucune simulation';
+    var prefixe = (/^([aeh]\d{4})_/.exec(nomCle) || [])[1];
+    var liste = donnees[(prefixe ? prefixe + '_' : '') + 'pratiquesConfigurables'];
+    var p = Array.isArray(liste) ? liste.find(function(x) { return x && x.id === id; }) : null;
+    return 'Simulation : ' + (p && p.nom ? '« ' + p.nom + ' »' : 'pratique introuvable de ce côté');
 }
 
 /** #1186 — un conflit d'élément (même id, différent des deux côtés), de chaque côté. */

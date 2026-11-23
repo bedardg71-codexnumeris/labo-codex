@@ -100,7 +100,7 @@ ci-dessous.
 | `journeesSansCours` | NS | `trimestre-v2-init.js` (CRUD du formulaire) | trimestre.js (générateur), calendrier-vue, trimestre-v2 (validations #369) | Fusion #374 (5 août 2026) des ex-clés `evenementsPrevus`+`evenementsImprevus` — migrées au boot par `migrerJourneesSansCours()` (migrations.js, sans flag, idempotente) ; anciens noms acceptés en LECTURE seulement (reserve, import-export) pour les archives pré-fusion |
 | `planification_mindmap` | NS | `planification-donnees.js` | planification-carte, planification | Pattern exemplaire (1 écrivain) |
 | `snapshots` | NS | `snapshots.js` (via variable composite `cleSnap`) | trimestres, trimestre | Clé composite : `h2026_snapshots_[coursId]` |
-| `groupesCours` | NS | `trimestres.js` (via variable) | organisateur, travaux-ui, modes, calendrier-vue, productions, rythme, tableau-bord-apercu, travaux-import, trimestre-v2 (7 lecteurs) | OK SSOT — écriture via variable `cleGroupesCours` |
+| `groupesCours` | NS | `trimestres.js` (via variable) | organisateur, travaux-ui, modes, calendrier-vue, productions, rythme, tableau-bord-apercu, travaux-import, trimestre-v2 (7 lecteurs) | OK SSOT — écriture via variable `cleGroupesCours`. **Champ `simulationPratiqueId` (23 nov. 2026)** : une pratique « Par standards » posée à côté de `pratiqueId`, absent quand il n'y en a pas. Écrivain unique : la fiche du groupe-cours (`trimestre-v2-groupes-cours.js`, `_rangerSimulationV2`) ; lecteur unique : `simulation-pratique.js` (`lire`) ; la fusion (`codex.js`) le nomme pour dire le conflit. Jamais dans `infoCours` ni `groupeCoursActif`. Aucun calcul de note ne le lit. |
 
 ---
 
