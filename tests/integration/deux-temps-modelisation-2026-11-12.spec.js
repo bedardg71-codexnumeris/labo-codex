@@ -170,11 +170,14 @@ test('la modélisation de « Mettre ta classe en place », de bout en bout dans 
         etudiants: (db.getSync('demo_groupeEtudiants', []) || []).length,
         horaires: (db.getSync('demo_horaires', []) || []).length,
         groupes: (db.getSync('demo_groupesCours', []) || []).length,
-        seances: ((db.getSync('demo_horaires', []) || []).find((h) => h.id !== 'HOR_DEMO').seances || []).map((se) => se.jour),
+        seances: ((db.getSync('demo_horaires', []) || []).find((h) => h.id !== 'HOR_DEMO' && !h.isDemo).seances || []).map((se) => se.jour),
         etat: Assistance.etatModeleDe('classe'),
         reel: Assistance.etatDe('classe')
     }));
-    expect(cree).toEqual({ cours: [[m.cours.code, true]], etudiants: 20, horaires: 2, groupes: 2, seances: ['Mardi', 'Vendredi'],
+    // 22 nov. 2026 (lot demo-par-standards) : le pack porte deux groupes (le premier et un troisième, « Par standards ») :
+    // vingt étudiant·es, deux horaires, deux groupes-cours au départ ; la Modélisation en ajoute dix, un et un.
+    // L'horaire créé est celui qui n'est pas du pack (`isDemo`), comme le lisent les détecteurs de parcours-classe.js.
+    expect(cree).toEqual({ cours: [[m.cours.code, true]], etudiants: 30, horaires: 3, groupes: 3, seances: ['Mardi', 'Vendredi'],
         etat: { etat: 'en-cours', etape: 7 }, reel: { etat: 'a-faire', etape: 0 } });
     // L'échéance du modèle d'« Évaluer » (le mardi 9 septembre 2025, semaine 4 de la démo) est une séance de ce groupe.
     expect(await page.evaluate(() => {
@@ -259,7 +262,7 @@ test('la modélisation de « Mettre ta classe en place », de bout en bout dans 
     expect(await page.evaluate(() => ({
         etudiants: (db.getSync('demo_groupeEtudiants', []) || []).length, groupes: (db.getSync('demo_groupesCours', []) || []).length,
         cours: (db.getSync('cours', []) || []).filter((c) => c.creeEnDemonstration).length, modeles: Assistance.etatModeleDe('evaluer').etat
-    })), 'la démo est revenue à son départ, et les modèles qui en dépendent sont à refaire').toEqual({ etudiants: 10, groupes: 1, cours: 0, modeles: 'a-faire' });
+    })), 'la démo est revenue à son départ, et les modèles qui en dépendent sont à refaire').toEqual({ etudiants: 20, groupes: 2, cours: 0, modeles: 'a-faire' });   // le départ du pack : deux groupes (22 nov. 2026)
     // Il montre ses contours et écrit dans la démo : « Remplir », la pulsation sur « Créer le cours », puis le cours créé.
     await attendreRemplir(page, 'Refaire, étape 1');
     await remplirPuisVoir(page, { consigne: 'Touche « Créer le cours »', bouton: '#v2-btnCreerCours', contexte: 'Refaire, étape 1' });
@@ -329,7 +332,7 @@ test('« Remettre la démo à neuf » : une confirmation, la démo du pack, les 
     await page.fill('#v2-donneesCollees', '9900001\t00002\tCâlin\tKoala\n9900002\t00002\tEnjouée\tLoutre');
     await page.click('#accordeon-groupe-etudiants [data-action="previsualiserDonneesV2"]');
     await page.click('#v2-btnConfirmerImport');
-    await expect.poll(() => page.evaluate(() => (db.getSync('demo_groupeEtudiants', []) || []).length)).toBe(12);
+    await expect.poll(() => page.evaluate(() => (db.getSync('demo_groupeEtudiants', []) || []).length)).toBe(22);   // les vingt du pack (22 nov. 2026) et deux
     await page.evaluate(() => desactiverModeDemo());
     await expect.poll(() => enDemo(page)).toBe(false);
     const avant = await releve(page);
@@ -355,7 +358,7 @@ test('« Remettre la démo à neuf » : une confirmation, la démo du pack, les 
     expect(ecarts(duPack, apres, (k) => DE_LA_DEMO.test(k)), 'la démo du pack').toEqual([]);
     expect(ecarts(avant, apres, horsDeLaDemo), 'les autres clés identiques').toEqual([]);
 
-    // La démo ouverte : elle se remet à neuf et reste ouverte, avec ses dix étudiant·es et son seul cours.
+    // La démo ouverte : elle se remet à neuf et reste ouverte, avec les vingt étudiant·es du pack (deux groupes depuis le 22 nov. 2026).
     await page.evaluate(() => activerModeDemo());
     await page.evaluate(() => db.setSync('demo_groupeEtudiants', (db.getSync('demo_groupeEtudiants', []) || []).slice(0, 4)));
     await ouvrirPanneau(page);
@@ -363,7 +366,7 @@ test('« Remettre la démo à neuf » : une confirmation, la démo du pack, les 
     await page.evaluate(() => document.querySelectorAll('.notifications-pile > *').forEach((n) => n.remove()));
     await page.getByRole('dialog').filter({ hasText: 'Remettre la démo à neuf' }).last().getByRole('button', { name: 'Remettre à neuf' }).click();
     await expect(page.locator('.notifications-pile')).toContainText('La démo est remise à neuf.', { timeout: 15000 });
-    expect(await page.evaluate(() => (db.getSync('demo_groupeEtudiants', []) || []).length)).toBe(10);
+    expect(await page.evaluate(() => (db.getSync('demo_groupeEtudiants', []) || []).length)).toBe(20);   // les vingt du pack (22 nov. 2026)
     expect(await enDemo(page)).toBe(true);
     await page.evaluate(() => desactiverModeDemo());
     await expect.poll(() => enDemo(page)).toBe(false);

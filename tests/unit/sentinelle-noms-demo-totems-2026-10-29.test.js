@@ -134,7 +134,9 @@ describe('#1180 · D. le stock : un namespace démo déjà installé reçoit les
         expect(s.stockage['demo-version-installee']).toBe(PACK._metadata.version);
         const castor = s.donnees.demo_groupeEtudiants.find((e) => e.da === 'DEMO004');
         expect([castor.prenom, castor.nom]).toEqual(['Castor', 'Jovial']);
-        expect(s.donnees.demo_groupeEtudiants.map((e) => e.da).sort()).toEqual(Object.keys(TOTEMS));
+        // 22 nov. 2026 (lot demo-par-standards) : la démo porte aussi un troisième groupe (DA 97000…, son propre cours) ;
+        // l'égalité porte sur le premier groupe, celui des dix totems. Les anciens noms restent cherchés dans tout le namespace.
+        expect(s.donnees.demo_groupeEtudiants.filter((e) => e.coursId === 'demo-cours').map((e) => e.da).sort()).toEqual(Object.keys(TOTEMS));
         const texte = JSON.stringify([s.donnees.demo_groupeEtudiants, s.donnees.demo_evaluationsSauvegardees]);
         expect(ANCIENS.filter((n) => motEntier(n).test(texte))).toEqual([]);
         expect(texte).toContain('Bonjour Castor !');

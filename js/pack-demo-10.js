@@ -2,7 +2,9 @@
  * Pack de démonstration - 10 étudiants anonymisés (A2025)
  * Généré le 2026-02-07 ; réduit de 20 à 10 élèves le 2026-09-13 (#852) ;
  * Artefact 9 : carte mentale → plan de rédaction, le 2026-09-13 (#855) ;
- * élèves renommés en totems scouts (animal + qualité), le 2026-10-29 (#1180)
+ * élèves renommés en totems scouts (animal + qualité), le 2026-10-29 (#1180) ;
+ * un troisième groupe en « Par standards » (bloc `groupeParStandards`, en fin de pack), le 2026-11-22 ;
+ * version du pack NON montée ce jour-là (elle réécrirait la démo de chacun : décision laissée à Grégoire, rapport du lot)
  * Source : données réelles A2025 anonymisées
  *
  * 10 étudiants • 11 productions • 101 évaluations • 313 présences
@@ -30,6 +32,17 @@ const PACK_DEMARRAGE = {
       "annee": "2025",
       "trimestreId": "demo",
       "groupe": "demo",
+      "enseignant": "Primo Primavera",
+      "actif": true
+    },
+    {
+      "id": "demo-cours-std",
+      "sigle": "601-998-DM",
+      "titre": "Lire et écrire par cibles (Démo)",
+      "session": "A",
+      "annee": "2025",
+      "trimestreId": "demo",
+      "groupe": "00003",
       "enseignant": "Primo Primavera",
       "actif": true
     }
@@ -10021,7 +10034,248 @@ const PACK_DEMARRAGE = {
       "verrouille": false,
       "dansBibliotheque": true
     }
-  ]
+  ],
+  /*
+   * LE TROISIÈME GROUPE DE LA DÉMO, EN « PAR STANDARDS » (22 nov. 2026).
+   * Consigne : `plans de travail/CONSIGNE-2026-11-22-demo-par-standards-suite.md` (voie B, décidée par Grégoire de
+   * 15 h 39 à 15 h 52). Rapport : `plans de travail/RAPPORT-2026-11-22-demo-par-standards-suite.md`.
+   *
+   * Un cours (dans `listeCours`, plus haut : l'entrée et la sortie de la démo les lisent là) et un groupe-cours à lui,
+   * pour que sa pratique ne touche ni le premier groupe (GC_DEMO) ni le deuxième (celui que monte la Modélisation de
+   * « Mettre ta classe en place »). Dix totems neufs, des DA d'une plage neuve (97000…) : ni `DEMO…` ni `99000…`.
+   * Ce bloc vit à part des collections du premier groupe : leurs sentinelles (les dix totems, les 101 copies, les deux
+   * échelles) ne le voient pas. `peuplerNamespace` (js/demo-namespace.js) le verse dans les clés `demo_*`, marqué
+   * `isDemo`, comme le reste du pack ; « Remettre la démo à neuf » le réécrit tel quel.
+   *
+   * L'ÉTAT DE DÉPART : Marmotte Pétillante a un niveau sur quatre cibles et RIEN sur « La lecture stratégique » (sa note
+   * est « en attente », voulu) ; les neuf autres ont un niveau sur chacune des cinq cibles (niveaux choisis par Claude
+   * Code, à corriger par Grégoire). `histoire` (plus bas) n'est PAS dans l'état de départ : c'est le matériel du futur
+   * parcours.
+   */
+  "groupeParStandards": {
+    "groupeCours": {
+      "id": "GC_DEMO_STD",
+      "nom": "DEMO-601-998-DM-00003 (Mer-AM / Jeu-PM)",
+      "trimestreId": "demo",
+      "coursId": "demo-cours-std",
+      "groupeNum": "00003",
+      "horaireId": "HOR_DEMO_STD",
+      "enseignantId": "ENS_DEMO",
+      "pratiqueId": "demo-cib-litt",
+      "actif": false,
+      "auteur": "Demo Labo Codex",
+      "dateCreation": "2026-11-22"
+    },
+    "horaire": {
+      "id": "HOR_DEMO_STD",
+      "nom": "Mer-AM / Jeu-PM",
+      "groupeAssocie": "00003",
+      "periodesParSeance": 2,
+      "seances": [
+        { "id": "SEANCE_DEMO_STD_A", "lettre": "A", "jour": "Mercredi", "heureDebut": "08:00", "heureFin": "09:40", "nombrePeriodes": 2, "duree": 2, "local": "1712" },
+        { "id": "SEANCE_DEMO_STD_B", "lettre": "B", "jour": "Jeudi", "heureDebut": "13:00", "heureFin": "14:40", "nombrePeriodes": 2, "duree": 2, "local": "2309" }
+      ],
+      "auteur": "Demo Labo Codex",
+      "dateCreation": "2026-11-22"
+    },
+    // Prénom : l'animal ; nom : la qualité (comme le premier groupe). Marmotte Pétillante porte le récit.
+    "groupeEtudiants": [
+      {"id":1763000000001,"da":"9700001","groupe":"00003","nom":"Pétillante","prenom":"Marmotte","programme":"200.B1","sa":"","caf":"","coursId":"demo-cours-std"},
+      {"id":1763000000002,"da":"9700002","groupe":"00003","nom":"Lumineuse","prenom":"Girafe","programme":"200.B1","sa":"","caf":"","coursId":"demo-cours-std"},
+      {"id":1763000000003,"da":"9700003","groupe":"00003","nom":"Cordiale","prenom":"Panthère","programme":"310.B1","sa":"","caf":"","coursId":"demo-cours-std"},
+      {"id":1763000000004,"da":"9700004","groupe":"00003","nom":"Prévenante","prenom":"Tortue","programme":"200.B1","sa":"","caf":"","coursId":"demo-cours-std"},
+      {"id":1763000000005,"da":"9700005","groupe":"00003","nom":"Charmante","prenom":"Chouette","programme":"081.06","sa":"","caf":"","coursId":"demo-cours-std"},
+      {"id":1763000000006,"da":"9700006","groupe":"00003","nom":"Taquin","prenom":"Kangourou","programme":"200.B1","sa":"","caf":"","coursId":"demo-cours-std"},
+      {"id":1763000000007,"da":"9700007","groupe":"00003","nom":"Radieux","prenom":"Colibri","programme":"310.B1","sa":"","caf":"","coursId":"demo-cours-std"},
+      {"id":1763000000008,"da":"9700008","groupe":"00003","nom":"Patient","prenom":"Tigre","programme":"200.B1","sa":"","caf":"","coursId":"demo-cours-std"},
+      {"id":1763000000009,"da":"9700009","groupe":"00003","nom":"Gentil","prenom":"Zèbre","programme":"200.B1","sa":"","caf":"","coursId":"demo-cours-std"},
+      {"id":1763000000010,"da":"9700010","groupe":"00003","nom":"Joueur","prenom":"Écureuil","programme":"310.B1","sa":"","caf":"","coursId":"demo-cours-std"}
+
+    ],
+    // La pondération d'une production n'entre pas dans la note de cette pratique (consigne, point 3). Les deux textes de
+    // lecture : « Deux-Rives » (le texte créé pour l'exercice, celui du modèle d'« Évaluer ») et « Marine » (celui de la
+    // carte d'alignement de la démo), à deux semaines d'écart, un mercredi, jour de cours du groupe.
+    "productions": [
+      {
+        "id": "PROD_DEMO_STD_DEUXRIVES",
+        "titre": "Stratégies de lecture : « Deux-Rives »",
+        "description": "Stratégies de lecture appliquées au texte « Deux-Rives »",
+        "type": "travail",
+        "numero": 1,
+        "ponderation": 0,
+        "grilleId": "",
+        "verrouille": false,
+        "dansBibliotheque": true,
+        "coursId": "demo-cours-std",
+        "dateEcheance": "2025-09-17",
+        "ciblesRenseignees": ["demo-cible-ls"]
+      },
+      {
+        "id": "PROD_DEMO_STD_MARINE",
+        "titre": "Stratégies de lecture : « Marine »",
+        "description": "Stratégies de lecture appliquées au texte « Marine »",
+        "type": "travail",
+        "numero": 2,
+        "ponderation": 0,
+        "grilleId": "",
+        "verrouille": false,
+        "dansBibliotheque": true,
+        "coursId": "demo-cours-std",
+        "dateEcheance": "2025-10-01",
+        "ciblesRenseignees": ["demo-cible-ls"]
+      }
+    ],
+    // L'« Échelle de départ – Par standards » telle que l'assistant la range (js/pratiques/ensembles-cibles.js,
+    // `echelleDeDepart`), sous une identité de la démo. « 0 – Données insuffisantes » dit « sans donnée ».
+    "echelle": {
+      "id": "ECH_DEMO_STD",
+      "nom": "Échelle de départ – Par standards",
+      "description": "Cinq niveaux, de 0 à 4, qui valent 0, 25, 50, 75 et 100 %. Le niveau 0 dit « sans donnée ». Les noms et les valeurs sont un point de départ : modifie-les dans Conception → Échelles de performance.",
+      "niveaux": [
+        { "code": "0", "nom": "Données insuffisantes", "description": "Pas encore de trace valable : cible pas encore évaluée, ou travail très incomplet.", "min": 0, "max": 12.49, "valeurCalcul": 0, "couleur": "var(--gris-moyen)" },
+        { "code": "1", "nom": "En apprentissage", "description": "Aucun critère n'est encore respecté.", "min": 12.5, "max": 37.49, "valeurCalcul": 25, "couleur": "var(--niveau-attention-critique)" },
+        { "code": "2", "nom": "Ça y est presque", "description": "Au moins un critère est respecté, mais pas tous les critères essentiels.", "min": 37.5, "max": 62.49, "valeurCalcul": 50, "couleur": "var(--niveau-attention-modere)" },
+        { "code": "3", "nom": "Acquis", "description": "Tous les critères essentiels sont respectés.", "min": 62.5, "max": 87.49, "valeurCalcul": 75, "couleur": "var(--niveau-attention-minimal)" },
+        { "code": "4", "nom": "Avancé", "description": "Tous les critères sont respectés.", "min": 87.5, "max": 100, "valeurCalcul": 100, "couleur": "var(--niveau-attention-nul)" }
+      ],
+      "estDemo": true,
+      "verrouille": false,
+      "dansBibliotheque": true,
+      "dateCreation": "2026-11-22T12:00:00.000Z"
+    },
+    // La forme que l'assistant écrit (js/wizard-pratique-v2.js, `_configurerPratiqueParStandards`). Le double seuil est
+    // absent, donc éteint ; ni « Notes finalisées », ni cible terminale. L'identifiant commence par « demo- » : le
+    // modèle d'« Évaluer » reconnaît ainsi les pratiques du pack (`poserLeRepereModele`).
+    "pratique": {
+      "id": "demo-cib-litt",
+      "nom": "Par standards (démo)",
+      "auteur": "Demo Labo Codex",
+      "description": "",
+      "type": "cibles",
+      "dansBibliotheque": true,
+      "dateCreation": "2026-11-22T12:00:00.000Z",
+      "calcul_note": { "methode": "niveaux_par_cible" },
+      "configuration": { "type": "cibles", "ensembleCiblesId": "ENSC_DEMO_STD", "echelleId": "ECH_DEMO_STD", "niveauSansDonnee": "0" }
+    },
+    // Cinq cibles, par leur étiquette seule (énoncé vide), dans l'ordre et aux poids de la consigne (les poids de
+    // l'hiver, le français écrit fondu dans « La rédaction » : supposé par Cowork). La première seule a des critères.
+    "ensembleCibles": {
+      "id": "ENSC_DEMO_STD",
+      "coursId": "demo-cours-std",
+      "cibles": [
+        { "id": "demo-cible-ls", "etiquette": "La lecture stratégique", "enonce": "", "poids": 25, "terminale": false, "criteres": [
+          { "id": "demo-crit-structure", "texte": "Structure", "essentiel": true },
+          { "id": "demo-crit-rigueur", "texte": "Rigueur", "essentiel": true },
+          { "id": "demo-crit-plausibilite", "texte": "Plausibilité", "essentiel": true },
+          { "id": "demo-crit-nuance", "texte": "Nuance", "essentiel": false }
+        ] },
+        { "id": "demo-cible-la", "etiquette": "La lecture analytique", "enonce": "", "poids": 30, "terminale": false, "criteres": [] },
+        { "id": "demo-cible-plan", "etiquette": "Le plan", "enonce": "", "poids": 10, "terminale": false, "criteres": [] },
+        { "id": "demo-cible-red", "etiquette": "La rédaction", "enonce": "", "poids": 25, "terminale": false, "criteres": [] },
+        { "id": "demo-cible-rev", "etiquette": "La révision", "enonce": "", "poids": 10, "terminale": false, "criteres": [] }
+      ],
+      "dateCreation": "2026-11-22T12:00:00.000Z",
+      "dateModification": "2026-11-22T12:00:00.000Z"
+    },
+    // L'état de départ des inscriptions, dans la forme que range js/pratiques/inscriptions-cibles.js. « La lecture
+    // stratégique » des neuf autres vient de la production « Deux-Rives » ; les quatre autres cibles, d'aucune
+    // production (à corriger si Grégoire les veut rattachées).
+    "inscriptions": [
+      {"id":"INSC_DEMO_STD_9700001_la","type":"inscription","da":"9700001","ensembleId":"ENSC_DEMO_STD","cibleId":"demo-cible-la","niveau":"3","echelleId":"ECH_DEMO_STD","date":"2025-10-29","horodatage":"2025-10-29T17:00:00.000Z","productionId":null,"noteBreve":"","criteres":[]},
+      {"id":"INSC_DEMO_STD_9700001_plan","type":"inscription","da":"9700001","ensembleId":"ENSC_DEMO_STD","cibleId":"demo-cible-plan","niveau":"3","echelleId":"ECH_DEMO_STD","date":"2025-11-12","horodatage":"2025-11-12T17:00:00.000Z","productionId":null,"noteBreve":"","criteres":[]},
+      {"id":"INSC_DEMO_STD_9700001_red","type":"inscription","da":"9700001","ensembleId":"ENSC_DEMO_STD","cibleId":"demo-cible-red","niveau":"2","echelleId":"ECH_DEMO_STD","date":"2025-11-26","horodatage":"2025-11-26T17:00:00.000Z","productionId":null,"noteBreve":"","criteres":[]},
+      {"id":"INSC_DEMO_STD_9700001_rev","type":"inscription","da":"9700001","ensembleId":"ENSC_DEMO_STD","cibleId":"demo-cible-rev","niveau":"3","echelleId":"ECH_DEMO_STD","date":"2025-12-10","horodatage":"2025-12-10T17:00:00.000Z","productionId":null,"noteBreve":"","criteres":[]},
+      {"id":"INSC_DEMO_STD_9700002_ls","type":"inscription","da":"9700002","ensembleId":"ENSC_DEMO_STD","cibleId":"demo-cible-ls","niveau":"3","echelleId":"ECH_DEMO_STD","date":"2025-09-17","horodatage":"2025-09-17T17:00:00.000Z","productionId":"PROD_DEMO_STD_DEUXRIVES","noteBreve":"","criteres":[{"id":"demo-crit-structure","texte":"Structure","essentiel":true,"respecte":null},{"id":"demo-crit-rigueur","texte":"Rigueur","essentiel":true,"respecte":null},{"id":"demo-crit-plausibilite","texte":"Plausibilité","essentiel":true,"respecte":null},{"id":"demo-crit-nuance","texte":"Nuance","essentiel":false,"respecte":null}]},
+      {"id":"INSC_DEMO_STD_9700002_la","type":"inscription","da":"9700002","ensembleId":"ENSC_DEMO_STD","cibleId":"demo-cible-la","niveau":"3","echelleId":"ECH_DEMO_STD","date":"2025-10-29","horodatage":"2025-10-29T17:00:00.000Z","productionId":null,"noteBreve":"","criteres":[]},
+      {"id":"INSC_DEMO_STD_9700002_plan","type":"inscription","da":"9700002","ensembleId":"ENSC_DEMO_STD","cibleId":"demo-cible-plan","niveau":"4","echelleId":"ECH_DEMO_STD","date":"2025-11-12","horodatage":"2025-11-12T17:00:00.000Z","productionId":null,"noteBreve":"","criteres":[]},
+      {"id":"INSC_DEMO_STD_9700002_red","type":"inscription","da":"9700002","ensembleId":"ENSC_DEMO_STD","cibleId":"demo-cible-red","niveau":"3","echelleId":"ECH_DEMO_STD","date":"2025-11-26","horodatage":"2025-11-26T17:00:00.000Z","productionId":null,"noteBreve":"","criteres":[]},
+      {"id":"INSC_DEMO_STD_9700002_rev","type":"inscription","da":"9700002","ensembleId":"ENSC_DEMO_STD","cibleId":"demo-cible-rev","niveau":"3","echelleId":"ECH_DEMO_STD","date":"2025-12-10","horodatage":"2025-12-10T17:00:00.000Z","productionId":null,"noteBreve":"","criteres":[]},
+      {"id":"INSC_DEMO_STD_9700003_ls","type":"inscription","da":"9700003","ensembleId":"ENSC_DEMO_STD","cibleId":"demo-cible-ls","niveau":"4","echelleId":"ECH_DEMO_STD","date":"2025-09-17","horodatage":"2025-09-17T17:00:00.000Z","productionId":"PROD_DEMO_STD_DEUXRIVES","noteBreve":"","criteres":[{"id":"demo-crit-structure","texte":"Structure","essentiel":true,"respecte":null},{"id":"demo-crit-rigueur","texte":"Rigueur","essentiel":true,"respecte":null},{"id":"demo-crit-plausibilite","texte":"Plausibilité","essentiel":true,"respecte":null},{"id":"demo-crit-nuance","texte":"Nuance","essentiel":false,"respecte":null}]},
+      {"id":"INSC_DEMO_STD_9700003_la","type":"inscription","da":"9700003","ensembleId":"ENSC_DEMO_STD","cibleId":"demo-cible-la","niveau":"4","echelleId":"ECH_DEMO_STD","date":"2025-10-29","horodatage":"2025-10-29T17:00:00.000Z","productionId":null,"noteBreve":"","criteres":[]},
+      {"id":"INSC_DEMO_STD_9700003_plan","type":"inscription","da":"9700003","ensembleId":"ENSC_DEMO_STD","cibleId":"demo-cible-plan","niveau":"3","echelleId":"ECH_DEMO_STD","date":"2025-11-12","horodatage":"2025-11-12T17:00:00.000Z","productionId":null,"noteBreve":"","criteres":[]},
+      {"id":"INSC_DEMO_STD_9700003_red","type":"inscription","da":"9700003","ensembleId":"ENSC_DEMO_STD","cibleId":"demo-cible-red","niveau":"4","echelleId":"ECH_DEMO_STD","date":"2025-11-26","horodatage":"2025-11-26T17:00:00.000Z","productionId":null,"noteBreve":"","criteres":[]},
+      {"id":"INSC_DEMO_STD_9700003_rev","type":"inscription","da":"9700003","ensembleId":"ENSC_DEMO_STD","cibleId":"demo-cible-rev","niveau":"3","echelleId":"ECH_DEMO_STD","date":"2025-12-10","horodatage":"2025-12-10T17:00:00.000Z","productionId":null,"noteBreve":"","criteres":[]},
+      {"id":"INSC_DEMO_STD_9700004_ls","type":"inscription","da":"9700004","ensembleId":"ENSC_DEMO_STD","cibleId":"demo-cible-ls","niveau":"2","echelleId":"ECH_DEMO_STD","date":"2025-09-17","horodatage":"2025-09-17T17:00:00.000Z","productionId":"PROD_DEMO_STD_DEUXRIVES","noteBreve":"","criteres":[{"id":"demo-crit-structure","texte":"Structure","essentiel":true,"respecte":null},{"id":"demo-crit-rigueur","texte":"Rigueur","essentiel":true,"respecte":null},{"id":"demo-crit-plausibilite","texte":"Plausibilité","essentiel":true,"respecte":null},{"id":"demo-crit-nuance","texte":"Nuance","essentiel":false,"respecte":null}]},
+      {"id":"INSC_DEMO_STD_9700004_la","type":"inscription","da":"9700004","ensembleId":"ENSC_DEMO_STD","cibleId":"demo-cible-la","niveau":"2","echelleId":"ECH_DEMO_STD","date":"2025-10-29","horodatage":"2025-10-29T17:00:00.000Z","productionId":null,"noteBreve":"","criteres":[]},
+      {"id":"INSC_DEMO_STD_9700004_plan","type":"inscription","da":"9700004","ensembleId":"ENSC_DEMO_STD","cibleId":"demo-cible-plan","niveau":"3","echelleId":"ECH_DEMO_STD","date":"2025-11-12","horodatage":"2025-11-12T17:00:00.000Z","productionId":null,"noteBreve":"","criteres":[]},
+      {"id":"INSC_DEMO_STD_9700004_red","type":"inscription","da":"9700004","ensembleId":"ENSC_DEMO_STD","cibleId":"demo-cible-red","niveau":"2","echelleId":"ECH_DEMO_STD","date":"2025-11-26","horodatage":"2025-11-26T17:00:00.000Z","productionId":null,"noteBreve":"","criteres":[]},
+      {"id":"INSC_DEMO_STD_9700004_rev","type":"inscription","da":"9700004","ensembleId":"ENSC_DEMO_STD","cibleId":"demo-cible-rev","niveau":"3","echelleId":"ECH_DEMO_STD","date":"2025-12-10","horodatage":"2025-12-10T17:00:00.000Z","productionId":null,"noteBreve":"","criteres":[]},
+      {"id":"INSC_DEMO_STD_9700005_ls","type":"inscription","da":"9700005","ensembleId":"ENSC_DEMO_STD","cibleId":"demo-cible-ls","niveau":"3","echelleId":"ECH_DEMO_STD","date":"2025-09-17","horodatage":"2025-09-17T17:00:00.000Z","productionId":"PROD_DEMO_STD_DEUXRIVES","noteBreve":"","criteres":[{"id":"demo-crit-structure","texte":"Structure","essentiel":true,"respecte":null},{"id":"demo-crit-rigueur","texte":"Rigueur","essentiel":true,"respecte":null},{"id":"demo-crit-plausibilite","texte":"Plausibilité","essentiel":true,"respecte":null},{"id":"demo-crit-nuance","texte":"Nuance","essentiel":false,"respecte":null}]},
+      {"id":"INSC_DEMO_STD_9700005_la","type":"inscription","da":"9700005","ensembleId":"ENSC_DEMO_STD","cibleId":"demo-cible-la","niveau":"2","echelleId":"ECH_DEMO_STD","date":"2025-10-29","horodatage":"2025-10-29T17:00:00.000Z","productionId":null,"noteBreve":"","criteres":[]},
+      {"id":"INSC_DEMO_STD_9700005_plan","type":"inscription","da":"9700005","ensembleId":"ENSC_DEMO_STD","cibleId":"demo-cible-plan","niveau":"3","echelleId":"ECH_DEMO_STD","date":"2025-11-12","horodatage":"2025-11-12T17:00:00.000Z","productionId":null,"noteBreve":"","criteres":[]},
+      {"id":"INSC_DEMO_STD_9700005_red","type":"inscription","da":"9700005","ensembleId":"ENSC_DEMO_STD","cibleId":"demo-cible-red","niveau":"3","echelleId":"ECH_DEMO_STD","date":"2025-11-26","horodatage":"2025-11-26T17:00:00.000Z","productionId":null,"noteBreve":"","criteres":[]},
+      {"id":"INSC_DEMO_STD_9700005_rev","type":"inscription","da":"9700005","ensembleId":"ENSC_DEMO_STD","cibleId":"demo-cible-rev","niveau":"2","echelleId":"ECH_DEMO_STD","date":"2025-12-10","horodatage":"2025-12-10T17:00:00.000Z","productionId":null,"noteBreve":"","criteres":[]},
+      {"id":"INSC_DEMO_STD_9700006_ls","type":"inscription","da":"9700006","ensembleId":"ENSC_DEMO_STD","cibleId":"demo-cible-ls","niveau":"2","echelleId":"ECH_DEMO_STD","date":"2025-09-17","horodatage":"2025-09-17T17:00:00.000Z","productionId":"PROD_DEMO_STD_DEUXRIVES","noteBreve":"","criteres":[{"id":"demo-crit-structure","texte":"Structure","essentiel":true,"respecte":null},{"id":"demo-crit-rigueur","texte":"Rigueur","essentiel":true,"respecte":null},{"id":"demo-crit-plausibilite","texte":"Plausibilité","essentiel":true,"respecte":null},{"id":"demo-crit-nuance","texte":"Nuance","essentiel":false,"respecte":null}]},
+      {"id":"INSC_DEMO_STD_9700006_la","type":"inscription","da":"9700006","ensembleId":"ENSC_DEMO_STD","cibleId":"demo-cible-la","niveau":"1","echelleId":"ECH_DEMO_STD","date":"2025-10-29","horodatage":"2025-10-29T17:00:00.000Z","productionId":null,"noteBreve":"","criteres":[]},
+      {"id":"INSC_DEMO_STD_9700006_plan","type":"inscription","da":"9700006","ensembleId":"ENSC_DEMO_STD","cibleId":"demo-cible-plan","niveau":"2","echelleId":"ECH_DEMO_STD","date":"2025-11-12","horodatage":"2025-11-12T17:00:00.000Z","productionId":null,"noteBreve":"","criteres":[]},
+      {"id":"INSC_DEMO_STD_9700006_red","type":"inscription","da":"9700006","ensembleId":"ENSC_DEMO_STD","cibleId":"demo-cible-red","niveau":"2","echelleId":"ECH_DEMO_STD","date":"2025-11-26","horodatage":"2025-11-26T17:00:00.000Z","productionId":null,"noteBreve":"","criteres":[]},
+      {"id":"INSC_DEMO_STD_9700006_rev","type":"inscription","da":"9700006","ensembleId":"ENSC_DEMO_STD","cibleId":"demo-cible-rev","niveau":"2","echelleId":"ECH_DEMO_STD","date":"2025-12-10","horodatage":"2025-12-10T17:00:00.000Z","productionId":null,"noteBreve":"","criteres":[]},
+      {"id":"INSC_DEMO_STD_9700007_ls","type":"inscription","da":"9700007","ensembleId":"ENSC_DEMO_STD","cibleId":"demo-cible-ls","niveau":"3","echelleId":"ECH_DEMO_STD","date":"2025-09-17","horodatage":"2025-09-17T17:00:00.000Z","productionId":"PROD_DEMO_STD_DEUXRIVES","noteBreve":"","criteres":[{"id":"demo-crit-structure","texte":"Structure","essentiel":true,"respecte":null},{"id":"demo-crit-rigueur","texte":"Rigueur","essentiel":true,"respecte":null},{"id":"demo-crit-plausibilite","texte":"Plausibilité","essentiel":true,"respecte":null},{"id":"demo-crit-nuance","texte":"Nuance","essentiel":false,"respecte":null}]},
+      {"id":"INSC_DEMO_STD_9700007_la","type":"inscription","da":"9700007","ensembleId":"ENSC_DEMO_STD","cibleId":"demo-cible-la","niveau":"3","echelleId":"ECH_DEMO_STD","date":"2025-10-29","horodatage":"2025-10-29T17:00:00.000Z","productionId":null,"noteBreve":"","criteres":[]},
+      {"id":"INSC_DEMO_STD_9700007_plan","type":"inscription","da":"9700007","ensembleId":"ENSC_DEMO_STD","cibleId":"demo-cible-plan","niveau":"3","echelleId":"ECH_DEMO_STD","date":"2025-11-12","horodatage":"2025-11-12T17:00:00.000Z","productionId":null,"noteBreve":"","criteres":[]},
+      {"id":"INSC_DEMO_STD_9700007_red","type":"inscription","da":"9700007","ensembleId":"ENSC_DEMO_STD","cibleId":"demo-cible-red","niveau":"2","echelleId":"ECH_DEMO_STD","date":"2025-11-26","horodatage":"2025-11-26T17:00:00.000Z","productionId":null,"noteBreve":"","criteres":[]},
+      {"id":"INSC_DEMO_STD_9700007_rev","type":"inscription","da":"9700007","ensembleId":"ENSC_DEMO_STD","cibleId":"demo-cible-rev","niveau":"4","echelleId":"ECH_DEMO_STD","date":"2025-12-10","horodatage":"2025-12-10T17:00:00.000Z","productionId":null,"noteBreve":"","criteres":[]},
+      {"id":"INSC_DEMO_STD_9700008_ls","type":"inscription","da":"9700008","ensembleId":"ENSC_DEMO_STD","cibleId":"demo-cible-ls","niveau":"2","echelleId":"ECH_DEMO_STD","date":"2025-09-17","horodatage":"2025-09-17T17:00:00.000Z","productionId":"PROD_DEMO_STD_DEUXRIVES","noteBreve":"","criteres":[{"id":"demo-crit-structure","texte":"Structure","essentiel":true,"respecte":null},{"id":"demo-crit-rigueur","texte":"Rigueur","essentiel":true,"respecte":null},{"id":"demo-crit-plausibilite","texte":"Plausibilité","essentiel":true,"respecte":null},{"id":"demo-crit-nuance","texte":"Nuance","essentiel":false,"respecte":null}]},
+      {"id":"INSC_DEMO_STD_9700008_la","type":"inscription","da":"9700008","ensembleId":"ENSC_DEMO_STD","cibleId":"demo-cible-la","niveau":"3","echelleId":"ECH_DEMO_STD","date":"2025-10-29","horodatage":"2025-10-29T17:00:00.000Z","productionId":null,"noteBreve":"","criteres":[]},
+      {"id":"INSC_DEMO_STD_9700008_plan","type":"inscription","da":"9700008","ensembleId":"ENSC_DEMO_STD","cibleId":"demo-cible-plan","niveau":"2","echelleId":"ECH_DEMO_STD","date":"2025-11-12","horodatage":"2025-11-12T17:00:00.000Z","productionId":null,"noteBreve":"","criteres":[]},
+      {"id":"INSC_DEMO_STD_9700008_red","type":"inscription","da":"9700008","ensembleId":"ENSC_DEMO_STD","cibleId":"demo-cible-red","niveau":"3","echelleId":"ECH_DEMO_STD","date":"2025-11-26","horodatage":"2025-11-26T17:00:00.000Z","productionId":null,"noteBreve":"","criteres":[]},
+      {"id":"INSC_DEMO_STD_9700008_rev","type":"inscription","da":"9700008","ensembleId":"ENSC_DEMO_STD","cibleId":"demo-cible-rev","niveau":"3","echelleId":"ECH_DEMO_STD","date":"2025-12-10","horodatage":"2025-12-10T17:00:00.000Z","productionId":null,"noteBreve":"","criteres":[]},
+      {"id":"INSC_DEMO_STD_9700009_ls","type":"inscription","da":"9700009","ensembleId":"ENSC_DEMO_STD","cibleId":"demo-cible-ls","niveau":"4","echelleId":"ECH_DEMO_STD","date":"2025-09-17","horodatage":"2025-09-17T17:00:00.000Z","productionId":"PROD_DEMO_STD_DEUXRIVES","noteBreve":"","criteres":[{"id":"demo-crit-structure","texte":"Structure","essentiel":true,"respecte":null},{"id":"demo-crit-rigueur","texte":"Rigueur","essentiel":true,"respecte":null},{"id":"demo-crit-plausibilite","texte":"Plausibilité","essentiel":true,"respecte":null},{"id":"demo-crit-nuance","texte":"Nuance","essentiel":false,"respecte":null}]},
+      {"id":"INSC_DEMO_STD_9700009_la","type":"inscription","da":"9700009","ensembleId":"ENSC_DEMO_STD","cibleId":"demo-cible-la","niveau":"3","echelleId":"ECH_DEMO_STD","date":"2025-10-29","horodatage":"2025-10-29T17:00:00.000Z","productionId":null,"noteBreve":"","criteres":[]},
+      {"id":"INSC_DEMO_STD_9700009_plan","type":"inscription","da":"9700009","ensembleId":"ENSC_DEMO_STD","cibleId":"demo-cible-plan","niveau":"3","echelleId":"ECH_DEMO_STD","date":"2025-11-12","horodatage":"2025-11-12T17:00:00.000Z","productionId":null,"noteBreve":"","criteres":[]},
+      {"id":"INSC_DEMO_STD_9700009_red","type":"inscription","da":"9700009","ensembleId":"ENSC_DEMO_STD","cibleId":"demo-cible-red","niveau":"3","echelleId":"ECH_DEMO_STD","date":"2025-11-26","horodatage":"2025-11-26T17:00:00.000Z","productionId":null,"noteBreve":"","criteres":[]},
+      {"id":"INSC_DEMO_STD_9700009_rev","type":"inscription","da":"9700009","ensembleId":"ENSC_DEMO_STD","cibleId":"demo-cible-rev","niveau":"3","echelleId":"ECH_DEMO_STD","date":"2025-12-10","horodatage":"2025-12-10T17:00:00.000Z","productionId":null,"noteBreve":"","criteres":[]},
+      {"id":"INSC_DEMO_STD_9700010_ls","type":"inscription","da":"9700010","ensembleId":"ENSC_DEMO_STD","cibleId":"demo-cible-ls","niveau":"3","echelleId":"ECH_DEMO_STD","date":"2025-09-17","horodatage":"2025-09-17T17:00:00.000Z","productionId":"PROD_DEMO_STD_DEUXRIVES","noteBreve":"","criteres":[{"id":"demo-crit-structure","texte":"Structure","essentiel":true,"respecte":null},{"id":"demo-crit-rigueur","texte":"Rigueur","essentiel":true,"respecte":null},{"id":"demo-crit-plausibilite","texte":"Plausibilité","essentiel":true,"respecte":null},{"id":"demo-crit-nuance","texte":"Nuance","essentiel":false,"respecte":null}]},
+      {"id":"INSC_DEMO_STD_9700010_la","type":"inscription","da":"9700010","ensembleId":"ENSC_DEMO_STD","cibleId":"demo-cible-la","niveau":"2","echelleId":"ECH_DEMO_STD","date":"2025-10-29","horodatage":"2025-10-29T17:00:00.000Z","productionId":null,"noteBreve":"","criteres":[]},
+      {"id":"INSC_DEMO_STD_9700010_plan","type":"inscription","da":"9700010","ensembleId":"ENSC_DEMO_STD","cibleId":"demo-cible-plan","niveau":"1","echelleId":"ECH_DEMO_STD","date":"2025-11-12","horodatage":"2025-11-12T17:00:00.000Z","productionId":null,"noteBreve":"","criteres":[]},
+      {"id":"INSC_DEMO_STD_9700010_red","type":"inscription","da":"9700010","ensembleId":"ENSC_DEMO_STD","cibleId":"demo-cible-red","niveau":"2","echelleId":"ECH_DEMO_STD","date":"2025-11-26","horodatage":"2025-11-26T17:00:00.000Z","productionId":null,"noteBreve":"","criteres":[]},
+      {"id":"INSC_DEMO_STD_9700010_rev","type":"inscription","da":"9700010","ensembleId":"ENSC_DEMO_STD","cibleId":"demo-cible-rev","niveau":"2","echelleId":"ECH_DEMO_STD","date":"2025-12-10","horodatage":"2025-12-10T17:00:00.000Z","productionId":null,"noteBreve":"","criteres":[]}
+
+    ],
+    /*
+     * L'HISTOIRE DE MARMOTTE PÉTILLANTE sur « La lecture stratégique » : le matériel du futur parcours, comme le
+     * `MATERIEL` des autres parcours. ABSENTE de l'état de départ (`peuplerNamespace` ne la verse pas). Trois saisies,
+     * dans l'ordre, de la forme que prend `InscriptionsCibles.inscrire` (qui leur donne une identité et un horodatage).
+     *   (a) Une observation en classe, pendant un atelier d'annotation sur « Deux-Rives » (jeudi 11 sept. 2025, jour de
+     *       cours du groupe). Le contexte n'a pas de champ et n'en reçoit pas : il vit dans la date (une séance du
+     *       groupe), dans l'absence de production, et dans ce que la bulle du parcours dira. `origine` : la base (`main`)
+     *       ne le connaît pas et ne le range pas ; `lot/observation-par-standards` le range, et lit une inscription sans
+     *       ce champ et sans production comme une « observation ».
+     *   (b) Sur « Stratégies de lecture : « Deux-Rives » », le niveau 2 (« Ça y est presque »).
+     *   (c) Deux semaines plus tard, sur « Stratégies de lecture : « Marine » », le niveau 3 (« Acquis »).
+     * Posées, le niveau retenu est 3, le 2 reste à l'historique, et la note vaut 68,75 % (affichée 69) :
+     * tests/unit/demo-par-standards-2026-11-22.test.js le vérifie.
+     */
+    "histoire": {
+      "da": "9700001",
+      "inscriptions": [
+        { "da": "9700001", "ensembleId": "ENSC_DEMO_STD", "cibleId": "demo-cible-ls", "niveau": null, "echelleId": null, "date": "2025-09-11", "productionId": null, "origine": "observation",
+          "noteBreve": "Relève bien les procédés ; son hypothèse ne s'appuie pas encore sur le texte.",
+          "criteres": [
+            { "id": "demo-crit-structure", "texte": "Structure", "essentiel": true, "respecte": true },
+            { "id": "demo-crit-rigueur", "texte": "Rigueur", "essentiel": true, "respecte": true },
+            { "id": "demo-crit-plausibilite", "texte": "Plausibilité", "essentiel": true, "respecte": false },
+            { "id": "demo-crit-nuance", "texte": "Nuance", "essentiel": false, "respecte": null }
+          ] },
+        { "da": "9700001", "ensembleId": "ENSC_DEMO_STD", "cibleId": "demo-cible-ls", "niveau": "2", "echelleId": "ECH_DEMO_STD", "date": "2025-09-17", "productionId": "PROD_DEMO_STD_DEUXRIVES",
+          "noteBreve": "",
+          "criteres": [
+            { "id": "demo-crit-structure", "texte": "Structure", "essentiel": true, "respecte": null },
+            { "id": "demo-crit-rigueur", "texte": "Rigueur", "essentiel": true, "respecte": null },
+            { "id": "demo-crit-plausibilite", "texte": "Plausibilité", "essentiel": true, "respecte": null },
+            { "id": "demo-crit-nuance", "texte": "Nuance", "essentiel": false, "respecte": null }
+          ] },
+        { "da": "9700001", "ensembleId": "ENSC_DEMO_STD", "cibleId": "demo-cible-ls", "niveau": "3", "echelleId": "ECH_DEMO_STD", "date": "2025-10-01", "productionId": "PROD_DEMO_STD_MARINE",
+          "noteBreve": "",
+          "criteres": [
+            { "id": "demo-crit-structure", "texte": "Structure", "essentiel": true, "respecte": null },
+            { "id": "demo-crit-rigueur", "texte": "Rigueur", "essentiel": true, "respecte": null },
+            { "id": "demo-crit-plausibilite", "texte": "Plausibilité", "essentiel": true, "respecte": null },
+            { "id": "demo-crit-nuance", "texte": "Nuance", "essentiel": false, "respecte": null }
+          ] }
+      ]
+    }
+  }
 };
 
 // Export global pour donnees-demo.js

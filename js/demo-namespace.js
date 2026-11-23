@@ -149,11 +149,39 @@ function chargerPackDemarrage() {
 }
 
 /**
+ * Le troisième groupe de la démo, en « Par standards » (22 nov. 2026) : ce que son bloc du pack
+ * (`pack.groupeParStandards`) ajoute à chaque collection. Le bloc vit à part des collections du
+ * premier groupe (leurs sentinelles ne le voient pas) ; il les rejoint ici, à l'écriture de `demo_*`.
+ * Son `histoire` n'en fait PAS partie : c'est le matériel du futur parcours, absent de l'état de départ.
+ * Pure : ne lit que le pack.
+ * @param {Object} pack
+ * @returns {{collections: Object<string, Array>, groupeCours: (Object|null), horaire: (Object|null)}}
+ */
+function ajoutsDuGroupeParStandards(pack) {
+    const bloc = pack && pack.groupeParStandards;
+    if (!bloc || typeof bloc !== 'object') return { collections: {}, groupeCours: null, horaire: null };
+    const liste = (v) => (Array.isArray(v) ? v : (v ? [v] : []));
+    return {
+        collections: {
+            groupeEtudiants: liste(bloc.groupeEtudiants),
+            productions: liste(bloc.productions),
+            echellesTemplates: liste(bloc.echelle),
+            pratiquesConfigurables: liste(bloc.pratique),
+            ensemblesCibles: liste(bloc.ensembleCibles),
+            inscriptionsCibles: liste(bloc.inscriptions)
+        },
+        groupeCours: bloc.groupeCours || null,
+        horaire: bloc.horaire || null
+    };
+}
+
+/**
  * Peuple le namespace demo_* avec toutes les données du pack.
  * Écrit uniquement dans demo_*, ne touche aucune clé globale.
  */
 function peuplerNamespace(pack) {
     if (!pack) return;
+    const troisieme = ajoutsDuGroupeParStandards(pack);
 
     // Collections directement issues du pack.
     // Note : 'presences' est traité séparément plus bas — le pack le stocke
@@ -171,13 +199,19 @@ function peuplerNamespace(pack) {
         'echellesTemplates',
         'modalitesEvaluation',
         'dureePeriode',
-        'pratiquesConfigurables'
+        'pratiquesConfigurables',
+        // Le troisième groupe (« Par standards ») : ses cibles et ses inscriptions de départ.
+        'ensemblesCibles',
+        'inscriptionsCibles'
     ];
 
     for (let i = 0; i < collectionsDuPack.length; i++) {
         const nom = collectionsDuPack[i];
-        if (pack[nom] !== undefined) {
-            let valeur = pack[nom];
+        let valeur = pack[nom];
+        if (troisieme.collections[nom] && troisieme.collections[nom].length) {
+            valeur = (Array.isArray(valeur) ? valeur : []).concat(troisieme.collections[nom]);
+        }
+        if (valeur !== undefined) {
             // 🆕 #464/CO-02 (21 août 2026) : estampiller isDemo:true sur chaque item
             // du pack À L'ÉCRITURE du namespace démo. Sans le flag, estItemDemo()
             // rendait false pour les modèles du pack (aucun item ne portait isDemo,
@@ -244,7 +278,7 @@ function peuplerNamespace(pack) {
         isDemo: true,
         auteur: 'Demo Labo Codex',
         dateCreation: (pack._metadata && pack._metadata.date) || '2026-02-06'
-    }]);
+    }].concat(troisieme.horaire ? [Object.assign({}, troisieme.horaire, { isDemo: true })] : []));
 
     // Groupe-cours démo.
     const premierCoursDemo = (pack.listeCours || [])[0];
@@ -262,7 +296,7 @@ function peuplerNamespace(pack) {
             isDemo: true,
             auteur: 'Demo Labo Codex',
             dateCreation: (pack._metadata && pack._metadata.date) || '2026-02-06'
-        }]);
+        }].concat(troisieme.groupeCours ? [Object.assign({}, troisieme.groupeCours, { isDemo: true })] : []));
     }
 
     // Carte mentale démo (alignement pédagogique).
@@ -336,6 +370,7 @@ async function reinstallerDemoDuPack() {
 // ============================================
 
 window.reinstallerDemoDuPack = reinstallerDemoDuPack;
+window.ajoutsDuGroupeParStandards = ajoutsDuGroupeParStandards;
 window.cleDemo = cleDemo;
 window.initialiserDemoNamespace = initialiserDemoNamespace;
 window.CARTE_DEMO_ALIGNEMENT = CARTE_DEMO_ALIGNEMENT;
