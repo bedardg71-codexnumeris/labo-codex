@@ -37,10 +37,9 @@ export const GESTES_PROPOSES = {
     // js/parcours-lire-ta-classe.js n'a plus de geste proposé : ses deux temps sont ceux du 22 nov. 2026, écrits avec
     // Grégoire (sentinelle-parcours-lire-ta-classe-2026-11-22.test.js, confrontée à
     // CONSIGNE-2026-11-22-echelle-de-depart-et-parcours-6-7-8.md, § 3).
-    'js/parcours-notation-alternative.js': [
-        "Touche « Actions › Dossier PDF » sur la ligne de ta production, puis « Continuer ».",
-        "Touche « Terminer ».",
-    ],
+    // js/parcours-notation-alternative.js est retiré (23 nov. 2026) : le neuvième parcours est « Suivre ton groupe par
+    // cibles » (js/parcours-cibles.js), dont les douze bulles sont celles de Grégoire
+    // (sentinelle-parcours-cibles-2026-11-23.test.js, confrontée à CONSIGNE-2026-11-22-parcours-9-je-regarde.md).
     // js/parcours-recevoir.js n'a plus de geste proposé : ses bulles sont celles du 19 nov. 2026, réécrites avec Grégoire
     // (« Nous faisons », sentinelle-parcours-recevoir-2026-11-09.test.js, confrontée à CONSIGNE-2026-11-19-nous-faisons-recevoir.md).
 };

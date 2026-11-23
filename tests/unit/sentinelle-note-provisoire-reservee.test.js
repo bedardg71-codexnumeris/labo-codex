@@ -34,11 +34,8 @@ const EXCEPTIONS = [
     { fichier: 'index.html', contient: 'ou de « Note provisoire » (pratique alternative), et retire la liste', nb: 1, motif: PRATIQUE_ALTERNATIVE },
     { fichier: 'js/accompagnement-contenu-terme.js', contient: 'ou de « Note provisoire » (pratique alternative), et ne listent plus', nb: 1, motif: PRATIQUE_ALTERNATIVE },
     { fichier: 'js/synthese-retroaction-rendu.js', contient: 'Note provisoire', nb: 4, motif: PRATIQUE_ALTERNATIVE },
-    // Le neuvième parcours (8 nov. 2026, nuit) : la bulle 7, validée par Grégoire, nomme le bloc des standards.
-    { fichier: 'js/parcours-notation-alternative.js', contient: 'En standards, elle montre aussi une « Note provisoire »', nb: 1, motif: PRATIQUE_ALTERNATIVE },
-    // Corrections du neuvième parcours (9 nov. 2026) : la bulle 4, validée par Grégoire ce jour-là, dit ce que
-    // « Note chiffrée » ajoute « en standards, à la note provisoire » : une pratique alternative.
-    { fichier: 'js/parcours-notation-alternative.js', contient: 'et, en standards, à la note provisoire', nb: 1, motif: PRATIQUE_ALTERNATIVE },
+    // (L'ancien neuvième parcours, « Mettre en place ta notation alternative », est retiré le 23 nov. 2026 : ses deux
+    // mentions sont parties avec lui.)
     // Tableau de notation, lot 1 (9 nov. 2026) : le tableau ne sert que les standards et les spécifications.
     { fichier: 'js/tableau-notation.js', contient: 'Note provisoire', nb: 1, motif: PRATIQUE_ALTERNATIVE },
 ];

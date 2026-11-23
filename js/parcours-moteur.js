@@ -159,6 +159,7 @@
        section?: () => Element,    // la section de la page dont parle la bulle : la page y défile, son nom a le halo
        nommeLaSection?: bool,      // la phrase du lieu dit la section ; lieuSuite?: string, ce qui suit cette phrase
        lieuVerbe?: string | () => string, // le début de la phrase du lieu, au lieu de « Tu es dans » (« Tu es revenu·e dans »)
+       lieuDit?: string | () => string,   // la phrase du lieu, écrite par l'étape (mot pour mot), à la place de celle du moteur
        serrer?: bool,              // sans place qui laisse le contour libre : la bulle se limite à la bande libre (voir `serrer`)
        confirme?: string | () => string, // la première ligne : le geste précédent, nommé (« C'est fait : … »)
        secondeForme?: () => bool,  // la bulle a changé de forme dans l'étape (après « Remplir ») : voir « LA SECONDE FORME »
@@ -1169,7 +1170,10 @@
         if (etat.i === 0 && !seconde) phrase('parcours-bulle-objectif', texteDe(etat.def.objectif));
         poserEntree(seconde);
         poserConfirmation(seconde ? {} : etape);
-        if (!seconde) phrase('parcours-bulle-lieu', phraseDuLieu(lieu, etape.nommeLaSection ? sectionDe(etape) : null, texteDe(etape.lieuSuite), texteDe(etape.lieuVerbe)));
+        // `lieuDit` (23 nov. 2026, parcours 9) : la phrase du lieu écrite par l'étape, mot pour mot, à la place de celle
+        // que le moteur compose (une fiche, un tableau, un profil : des lieux que le menu ne nomme pas à lui seul).
+        if (!seconde) phrase('parcours-bulle-lieu', etape.lieuDit !== undefined ? texteDe(etape.lieuDit)
+            : phraseDuLieu(lieu, etape.nommeLaSection ? sectionDe(etape) : null, texteDe(etape.lieuSuite), texteDe(etape.lieuVerbe)));
         var ul = null;
         var poser = function (ligne, dans, sousLigne) {
             var li = document.createElement('li');

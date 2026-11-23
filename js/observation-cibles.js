@@ -273,6 +273,21 @@
         if (retour && document.contains(retour)) retour.focus();
     }
 
+    /**
+     * La date des observations de l'écran ouvert, à la place de celle du jour (23 nov. 2026, le parcours « Suivre ton
+     * groupe par cibles » : l'observation de son exemple porte la date de son histoire, une séance de la démo). Les
+     * absent·es et « vu aujourd'hui » suivent cette date. Refusée : l'écran fermé, une date qui n'en est pas une.
+     * @param {string} date - AAAA-MM-JJ
+     * @returns {boolean} true si la date est posée
+     */
+    function dater(date) {
+        if (!_etat || !/^\d{4}-\d{2}-\d{2}$/.test(String(date || ''))) return false;
+        _etat.date = String(date);
+        _etat.absents = _lireAbsents(_etat.ctx, _etat.date);
+        _dessiner(null, null);
+        return true;
+    }
+
     function _surTouche(e) {
         if (e.key !== 'Escape' || !_etat) return;
         if (document.getElementById('overlay-ui-dialogue')) return;
@@ -366,6 +381,7 @@
         MOTS,
         ouvrir,
         fermer,
+        dater,
         quiDefile,
         etatDuCarrousel,
         absentsDuJour,

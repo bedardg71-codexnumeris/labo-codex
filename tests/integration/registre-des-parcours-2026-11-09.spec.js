@@ -21,10 +21,10 @@ const TITRES = [
     "Mettre tes données à l'abri",
     'Lire ta classe et intervenir',
     'Automatiser tes commentaires',
-    'Mettre en place ta notation alternative'
+    'Suivre ton groupe par cibles'   // 23 nov. 2026 : il remplace « Mettre en place ta notation alternative »
 ];
 
-test('neuf parcours, dans l’ordre du panneau ; le cinquième et le huitième pour grand écran seulement', async ({ page }) => {
+test('neuf parcours, dans l’ordre du panneau ; le cinquième, le huitième et le neuvième pour grand écran seulement', async ({ page }) => {
     const erreurs = [];
     page.on('pageerror', (e) => erreurs.push(String(e)));
     await page.setViewportSize({ width: 1180, height: 820 });
@@ -34,7 +34,7 @@ test('neuf parcours, dans l’ordre du panneau ; le cinquième et le huitième p
         titre: d.titre, grandEcran: !!d.grandEcranSeulement, refus: typeof d.refus === 'function'
     })));
     expect(reg.map((d) => d.titre)).toEqual(TITRES);
-    expect(reg.filter((d) => d.grandEcran).map((d) => d.titre)).toEqual(['Monter ton cours', 'Automatiser tes commentaires']);
+    expect(reg.filter((d) => d.grandEcran).map((d) => d.titre)).toEqual(['Monter ton cours', 'Automatiser tes commentaires', 'Suivre ton groupe par cibles']);
     // La condition d'entrée s'appelle `refus` partout (unifié aux groupes 2 et 3) : aucun parcours n'en a d'autre nom.
     expect(await page.evaluate(() => window.Assistance.parcours().filter((d) => 'condition' in d).length)).toBe(0);
     // Les pastilles du panneau disent 1 à 9 ; le menu, « 1 sur 9 ».

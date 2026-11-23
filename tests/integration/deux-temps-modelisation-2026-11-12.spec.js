@@ -68,9 +68,19 @@ test('le panneau : le texte en quatre temps numérotés, deux états par parcour
     // (c) Un parcours qui a son modèle porte DEUX états, un par temps, chacun son bouton ; les autres, un seul.
     const avec = await page.evaluate(() => Assistance.parcours().filter((d) => typeof d.lancerModele === 'function').map((d) => d.id));
     // 17 nov. 2026 : « Recevoir » a son modèle (js/parcours-recevoir-modele.js). 20 nov. 2026 : « Monter ton cours » aussi
-    // (js/parcours-cours.js, lot/je-regarde-cours).
-    expect(avec).toEqual(['classe', 'evaluer', 'recevoir', 'monter']);
-    for (const id of avec) {
+    // (js/parcours-cours.js, lot/je-regarde-cours). 22 nov. 2026 : les parcours 6, 7 et 8 (ce banc ne l'avait pas suivi :
+    // rouge sur la base). 23 nov. 2026 : le neuvième, « Suivre ton groupe par cibles », n'a QUE son modèle, un seul temps.
+    expect(avec).toEqual(['classe', 'evaluer', 'recevoir', 'monter', 'donnees', 'lire-ta-classe', 'commentaires', 'cibles']);
+    {
+        const temps = carte(page, 'cibles').locator('.assistance-temps');
+        await expect(temps).toHaveCount(1);
+        await expect(temps.locator('.assistance-temps-mots')).toHaveText(['Modélisation']);
+        await expect(temps.locator('.assistance-modele-etat')).toHaveText('À faire');
+        await expect(boutonModele(page, 'cibles')).toHaveText('Je regarde');
+        await expect(boutonPratique(page, 'cibles')).toHaveCount(0);
+        expect((await boutonModele(page, 'cibles').boundingBox()).height).toBeGreaterThanOrEqual(44);
+    }
+    for (const id of avec.filter((x) => x !== 'cibles')) {
         const temps = carte(page, id).locator('.assistance-temps');
         await expect(temps).toHaveCount(2);
         // 16 nov. 2026 (Grégoire) : « Je regarde » et « Nous faisons » ; sous chacun, en petit, le nom du temps ; puis l'état.

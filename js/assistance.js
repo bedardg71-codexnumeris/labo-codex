@@ -48,8 +48,8 @@
    LE VERROU DES PARCOURS (`PARCOURS_OUVERTS`) : la liste des parcours OUVERTS dans l'application livrée, par leur
    identifiant. Fermés en entier le 15 nov. 2026 (1.248.1) ; « Découvrir » seul rouvert le 16 nov. ; OUVERTS POUR DE VRAI
    le 23 nov. 2026 (mandat de Grégoire du 22 nov., 20 h 36 ; plans de travail/CONSIGNE-2026-11-22-publication-parcours.md) :
-   les parcours 2 à 8. Le neuvième reste fermé jusqu'au relais suivant. Un parcours fermé reste inscrit, mais il n'est
-   offert nulle part et rien ne le lance :
+   les parcours 2 à 8, puis le neuvième, « Suivre ton groupe par cibles » (js/parcours-cibles.js), qui n'a pour
+   l'instant que son « Je regarde ». Un parcours fermé reste inscrit, mais il n'est offert nulle part et rien ne le lance :
    · le panneau ne liste que les parcours ouverts, puis dit « À venir » pour les autres, sans les nommer ;
    · `Assistance.parcours()` ne rend que les ouverts (la porte « Tu enseignes ? » de l'accueil, la fin de « Découvrir ») ;
    · `suivantDe` ne rend qu'un parcours ouvert (la suite suggérée à la fin d'un parcours, « Voir le parcours N ») ;
@@ -62,7 +62,7 @@
     'use strict';
 
     var CLE_PREF = 'parcoursAssistance';
-    var PARCOURS_OUVERTS = ['decouvrir', 'classe', 'evaluer', 'recevoir', 'monter', 'donnees', 'lire-ta-classe', 'commentaires'];
+    var PARCOURS_OUVERTS = ['decouvrir', 'classe', 'evaluer', 'recevoir', 'monter', 'donnees', 'lire-ta-classe', 'commentaires', 'cibles'];
     // L'état en mémoire, que seuls les bancs changent (ouvrirLesParcours) : la liste des identifiants ouverts, ou `true`
     // (tous). Rien ne le garde d'un chargement à l'autre.
     var ouverts = PARCOURS_OUVERTS.slice();
@@ -139,6 +139,7 @@
         var modeles = Object.assign({}, etatAppareil().modeles || {});
         modeles[id] = { etat: etatParcours, etape: etape || 0 };
         ecrireAppareil(Object.assign({}, etatAppareil(), { modeles: modeles }));
+        majMenu();   // le rang du menu suit aussi un parcours qui n'a que « Je regarde »
     }
 
     /** La démo remise à neuf : ses modélisations sont à refaire. */
@@ -160,6 +161,20 @@
         var e = lireTout()[id];
         if (!e || (e.etat !== 'en-cours' && e.etat !== 'fait')) return { etat: 'a-faire', etape: 0 };
         return { etat: e.etat, etape: typeof e.etape === 'number' ? e.etape : 0 };
+    }
+
+    /**
+     * UN SEUL TEMPS, « JE REGARDE » (23 nov. 2026, le neuvième parcours ; décision de Grégoire, 22 nov., 20 h 32) : une
+     * définition qui a sa Modélisation (`lancerModele`) et pas de Pratique guidée (`lancer`). Sa carte ne porte que
+     * « Je regarde » ; son état (la pastille, le rang du menu) est celui de sa Modélisation ; rien n'y promet un second temps.
+     */
+    function seulementModele(def) {
+        return !!def && typeof def.lancerModele === 'function' && typeof def.lancer !== 'function';
+    }
+
+    /** L'état d'un parcours pour sa carte et pour le rang du menu : celui de son seul temps quand il n'en a qu'un. */
+    function etatDuParcours(def) {
+        return seulementModele(def) ? etatModeleDe(def.id) : etatDe(def.id);
     }
 
     function definirEtat(id, etatParcours, etape) {
@@ -196,8 +211,8 @@
     /** Le rang du parcours en cours (le premier), sinon du premier à faire ; rien si tout est fait. */
     function rangAAfficher() {
         var liste = offerts();
-        var idx = liste.findIndex(function (p) { return etatDe(p.id).etat === 'en-cours'; });
-        if (idx === -1) idx = liste.findIndex(function (p) { return etatDe(p.id).etat !== 'fait'; });
+        var idx = liste.findIndex(function (p) { return etatDuParcours(p).etat === 'en-cours'; });
+        if (idx === -1) idx = liste.findIndex(function (p) { return etatDuParcours(p).etat !== 'fait'; });
         return idx === -1 ? '' : rangDe(liste[idx]) + ' sur ' + totalParcours();
     }
 
@@ -295,7 +310,8 @@
 
     function creerParcoursItem(def) {
         var aModele = typeof def.lancerModele === 'function';
-        var e = etatDe(def.id);
+        var unSeul = seulementModele(def);
+        var e = etatDuParcours(def);
         var li = document.createElement('li');
         li.className = 'assistance-parcours-item';
         // L'état de la carte est celui du parcours sur les vraies données (le rang du menu le lit aussi).
@@ -354,16 +370,19 @@
             corps.appendChild(creerBoutonParcours(def, { etat: e, refuse: refuse, titre: h, corps: corps }));
         } else {
             // Deux temps, côte à côte, chacun son bouton et son état (Grégoire, 14 nov. 2026, 9 h 21 ; 16 nov.).
-            li.dataset.temps = 'deux';
+            // Un seul temps (23 nov. 2026) : « Je regarde », à la même place ; aucun bouton « Nous faisons ».
+            li.dataset.temps = unSeul ? 'un' : 'deux';
             var em = etatModeleDe(def.id);
             var deux = document.createElement('div');
             deux.className = 'assistance-deux-temps';
             deux.appendChild(creerTemps(def, 'modele', em, def.totalModele, function (mots) {
                 return creerBoutonModele(def, { etat: em, refuse: refuse, titre: h, temps: mots, corps: corps });
             }));
-            deux.appendChild(creerTemps(def, 'pratique', e, def.total, function (mots) {
-                return creerBoutonParcours(def, { etat: e, refuse: refuse, titre: h, temps: mots, corps: corps });
-            }));
+            if (!unSeul) {
+                deux.appendChild(creerTemps(def, 'pratique', e, def.total, function (mots) {
+                    return creerBoutonParcours(def, { etat: e, refuse: refuse, titre: h, temps: mots, corps: corps });
+                }));
+            }
             corps.appendChild(deux);
         }
 
@@ -780,7 +799,11 @@
      * écrits qu'ici. Rien après le dernier parcours.
      */
     function suiteDe(id) {
-        var s = suivantDe(id);
+        // Une définition peut nommer sa suite (`suite`, 23 nov. 2026 : le neuvième parcours, le dernier du panneau,
+        // suggère le sixième) ; sinon, c'est le parcours qui la suit dans le panneau. Un parcours fermé n'est pas offert.
+        var def = definitionDe(id);
+        var nommee = def && def.suite ? definitionDe(def.suite) : null;
+        var s = nommee && estOuvert(nommee.id) ? nommee : suivantDe(id);
         if (!s) return null;
         var n = rangDe(s);
         return {
@@ -800,7 +823,7 @@
     function lancerParcours(id) {
         if (!estOuvert(id)) return false;
         var def = definitionDe(id);
-        if (!def) return false;
+        if (!def || typeof def.lancer !== 'function') return false;
         var petit = tropPetitPour(def);
         var raison = petit ? null : (typeof def.refus === 'function' ? def.refus() : null);
         if (petit || raison) {

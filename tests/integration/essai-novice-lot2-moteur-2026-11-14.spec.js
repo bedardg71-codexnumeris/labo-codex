@@ -348,10 +348,8 @@ test('(e) dans chaque parcours du panneau, la consigne de la dernière bulle cor
             evaluer: () => window.ParcoursEvaluer.etapes(),
             monter: () => window.ParcoursCours.etapes(),
             'lire-ta-classe': () => window.ParcoursLireTaClasse.etapes,
-            // Ses étapes ne sont construites qu'au lancement, selon la famille : le banc prend le texte de sa dernière
-            // bulle (TEXTES) et son bouton « Terminer » (DEFINITIONS['plus-loin'], jugé par son propre banc).
-            'notation-alternative': () => [{ titre: window.ParcoursNotationAlternative.TEXTES['plus-loin'].titre,
-                geste: window.ParcoursNotationAlternative.TEXTES['plus-loin'].geste, boutons: [{ libelle: 'Terminer', primaire: true }] }],
+            // Le neuvième (23 nov. 2026) n'a que son « Je regarde » : pas de `lancer` à intercepter, ses étapes sont exposées.
+            cibles: () => window.ParcoursCibles.etapesModele,
             recevoir: () => Object.values(window.ParcoursRecevoir.voies())[0]
         };
         const defs = [];
@@ -393,8 +391,8 @@ test('(e) dans chaque parcours du panneau, la consigne de la dernière bulle cor
     const simple = (t) => /^Touche « Terminer »\.?$/.test(t || '');
     const simples = fins.filter((f) => simple(f.propre));
     expect(fins).toHaveLength(9);
-    // Les sept parcours dont la fin dit « Touche « Terminer » » ; les deux autres ont leur consigne à eux.
-    expect(simples.map((f) => f.id).sort()).toEqual(['classe', 'commentaires', 'monter', 'donnees', 'lire-ta-classe', 'notation-alternative', 'recevoir'].sort());
+    // Les six parcours dont la fin dit « Touche « Terminer » » ; les trois autres ont leur consigne à eux.
+    expect(simples.map((f) => f.id).sort()).toEqual(['classe', 'commentaires', 'monter', 'donnees', 'lire-ta-classe', 'recevoir'].sort());
     expect(simples.some((f) => f.aUnSuivant)).toBe(true);
     for (const f of simples) {
         const point = f.propre.endsWith('.') ? '.' : '';
@@ -409,8 +407,12 @@ test('(e) dans chaque parcours du panneau, la consigne de la dernière bulle cor
         }
     }
     // Hors de la règle, nommés : « Découvrir » offre ses deux boutons à lui ; « Évaluer » finit sur un geste composé
-    // (« … verrouille, puis touche « Terminer ». ») que le moteur ne réécrit pas (signalé à Cowork le 14 nov.).
+    // (« … verrouille, puis touche « Terminer ». ») que le moteur ne réécrit pas (signalé à Cowork le 14 nov.) ; le
+    // neuvième, « Suivre ton groupe par cibles » (23 nov. 2026), nomme sa suite à lui (le parcours 6) et ses deux boutons.
     const autres = fins.filter((f) => !simple(f.propre));
-    expect(autres.map((f) => f.id).sort()).toEqual(['decouvrir', 'evaluer']);
+    expect(autres.map((f) => f.id).sort()).toEqual(['cibles', 'decouvrir', 'evaluer']);
+    const neuvieme = fins.find((f) => f.id === 'cibles');
+    expect(neuvieme.boutons).toEqual(['Voir le parcours 6', 'Terminer']);
+    expect(neuvieme.propre).toBe('Touche « Voir le parcours 6 », ou « Terminer »');
     for (const f of autres) expect(f.dite, f.id).toBe(f.propre);
 });

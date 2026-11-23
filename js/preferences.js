@@ -150,10 +150,9 @@
         // Il remplace tourGuide_etape / _complete / _etapes_vues (la visite en sept étapes,
         // retirée) : celles déjà écrites restent dans le stockage, rien ne les lit plus.
         parcoursAssistance: {},
-        // Ce que le neuvième parcours, « Mettre en place ta notation alternative », retient d'une étape à
-        // l'autre et pour « Reprendre » (js/parcours-notation-alternative.js, 8 nov. 2026) : son chemin
-        // (étape 1 sautée, famille) et des identifiants (pratiques, évaluation verrouillée). Aucun nom ni DA.
-        parcoursNotationAlternative: {},
+        // (`parcoursNotationAlternative`, le chemin de l'ancien neuvième parcours, n'a plus de défaut depuis le 23 nov.
+        // 2026 : ce parcours est remplacé par « Suivre ton groupe par cibles ». Une valeur déjà écrite reste dans le
+        // stockage ; rien ne la lit plus.)
 
         // Le repère du troisième parcours, « Évaluer une première production » (js/parcours-evaluer.js,
         // 9 nov. 2026), pour « Reprendre » : ce qui existait à « Commencer » (grillesAvant, productionsAvant,
