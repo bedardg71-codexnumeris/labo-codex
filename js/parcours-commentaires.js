@@ -1089,7 +1089,7 @@
                 ],
                 puis: { lignes: [
                     ['n', "Voici les phrases que l'application écrira à ta place sur chaque production."],
-                    ['n', "La première donne le compte : « Ta production contient… ». Elle paraît sous le critère et dans le PDF de l'étudiant·e."],
+                    ['n', "La première donne le compte : « Ta rédaction contient… ». Elle paraît sous le critère et dans le PDF de l'étudiant·e."],
                     ['n', "Les deux autres vont dans son bilan : l'une quand la note de ce critère tombe à 0, l'autre quand tous les critères de la grille sont maîtrisés."],
                     ['n', "Les blocs colorés, comme le compte, se remplissent à l'évaluation. Le reste se réécrit avec tes mots."],
                     ['c', "Lis les trois phrases, puis touche « Continuer »"]
@@ -1100,7 +1100,7 @@
                 confirme: "C'est fait : ton critère est réglé. La grille s'est enregistrée d'elle-même.",
                 lieuSuite: ": c'est là que tu vois chaque production de ton groupe, une ligne par étudiant·e.",
                 lignes: [
-                    ['n', "Cette grille est celle de la production « Artefact 1 ». Celle d'Antilope Vaillante est déjà reçue et n'est pas encore évaluée."],
+                    ['n', "Cette grille est celle de la production sur « Deux-Rives ». Celle d'Antilope Vaillante est déjà reçue et n'est pas encore évaluée."],
                     ['c', "Sur la ligne d'Antilope Vaillante, touche « Actions › Annoter »"]
                 ],
                 puis: { lignes: [

@@ -100,7 +100,7 @@ function _texteDuChamp(champ, valeurEnBase) {
    et le bloc « Gestion des absences » sont cachés : ils supposent une séance de groupe.
    (Le champ « Séance concernée », écrit et jamais lu, est retiré le 29 oct. 2026 : #1152,
    retouche 2 du lot 5, décision de Grégoire. Une intervention qui porte `seanceConcernee`
-   la garde, sans lecteur ; le report des présences écrit à la date de l'intervention.)
+   la garde, sans lecteur.)
    =============================== */
 const VOCABULAIRES = {
     interventions: {
@@ -115,10 +115,6 @@ const VOCABULAIRES = {
         modifier: 'Modifier l\'intervention',
         creee: 'Intervention créée.',
         pasEncoreCree: 'Cette intervention n\'est pas encore créée.',
-        // Mots acceptés par Grégoire le 28 sept. (19 h 46), mot pour mot.
-        completerTitre: 'Marquer cette intervention complétée ?',
-        caseReport: 'Reporter les présences dans la saisie des présences : la présence à cette intervention compensera une absence au cours.',
-        caseReportUneFois: 'Le report se fait une seule fois : il ne se refait pas si tu modifies l\'intervention ensuite.',
         labelNiveau: 'Niveau R\u00e0I :',
         // #1152, lot 5 (texte n° 14, décidé par Grégoire le 28 oct. 2026) : le niveau porte son nom d'intensité.
         niveau2: 'Niveau 2 – Préventif, en groupe ciblé',
@@ -142,10 +138,6 @@ const VOCABULAIRES = {
         modifier: 'Modifier la rencontre',
         creee: 'Rencontre créée.',
         pasEncoreCree: 'Cette rencontre n\'est pas encore créée.',
-        // Même phrase, « rencontre » pour « intervention » (comme le titre accepté).
-        completerTitre: 'Marquer cette rencontre complétée ?',
-        caseReport: 'Reporter les présences dans la saisie des présences : la présence à cette rencontre compensera une absence au cours.',
-        caseReportUneFois: 'Le report se fait une seule fois : il ne se refait pas si tu modifies la rencontre ensuite.',
         labelNiveau: 'Rencontre :',
         niveau2: 'En sous-groupe',
         niveau3: 'Individuelle',
@@ -1252,7 +1244,7 @@ function ouvrirIntervention(interventionId, options) {
     // Lot E3 (D3) : l'écouteur unique de la fiche (un nœud neuf à chaque rendu : rien ne s'empile).
     const fiche = container.querySelector('[data-fiche-intervention]');
     if (fiche && typeof fiche.addEventListener === 'function') {
-        fiche.addEventListener('change', (e) => { surChangementFicheIntervention(interventionId, e.target); });
+        fiche.addEventListener('change', (e) => { surChangementFicheIntervention(interventionId); });
     }
 
     // Initialiser la visibilité des blocs contexte/absences
@@ -1635,27 +1627,22 @@ function _poserFormulaireSurIntervention(intervention) {
  * · Une intervention existante s'enregistre toute seule, champ par champ (`surChangementFicheIntervention`) :
  *   aucun message, la fiche reste ouverte ; le témoin commun parle.
  *
- * ⚠⚠ LE REPORT VERS LES PRÉSENCES (`transfererPresencesVersModule`) n'a lieu qu'au PASSAGE à « Complétée »
- * (ou à la création d'une intervention déjà complétée), ET SEULEMENT SI L'USAGER L'A CHOISI : la case
- * « Reporter les présences… » de la question de complétion, décochée par défaut. Décision de Grégoire
- * (28 sept., 19 h 43) : « la compensation d'une absence par la présence à une intervention est laissée à
- * la discrétion de l'usager ». Sans ce choix (`options.reporter !== true`), rien ne s'écrit dans les
- * présences : ni présence RàI, ni absence motivée de rattrapage.
- * Avant ce lot, chaque « Enregistrer » d'une intervention complétée relançait le report ; une date
- * corrigée en laissait à l'ancienne date (`ajouterPresencesIntervention` ajoute, ne retire jamais).
- * Aucune présence déjà écrite n'est touchée (le passé reste tel quel, Grégoire, 19 h 45).
+ * ⚠⚠ PLUS AUCUN REPORT VERS LES PRÉSENCES (23 nov. 2026, décision de Grégoire du 22 nov., 20 h 51). La case
+ * « Reporter les présences dans la saisie des présences… » de la question de complétion (lot E3, 28 sept.) est
+ * RETIRÉE, avec la question qui ne servait qu'à la porter et l'écrivain qu'elle déclenchait
+ * (`transfererPresencesVersModule`, et `ajouterPresencesIntervention` de saisie-presences.js). Elle ne faisait pas
+ * ce qu'elle promettait (#1304, mesuré à l'écran le 22 nov.) : datée d'un jour de cours, elle n'écrivait rien là où
+ * une fiche existait ; datée d'un autre jour, sa présence n'entrait pas dans l'assiduité.
+ * SOURCE TARIE, STOCK GARDÉ : les présences facultatives qu'elle a déjà écrites restent telles quelles dans
+ * `presences` ; rien ne les réécrit, rien ne les retire, et leurs lecteurs (la saisie, l'assiduité) ne changent pas.
+ * La compensation d'une absence doit rester un choix de l'utilisateur (Grégoire, 22 nov.) : à concevoir (#1304).
+ * Passer à « Complétée » enregistre, sans question ; le bilan paraît.
  *
  * @param {string} interventionId
- * @param {{reporter: boolean}} [options] - la réponse à la question de complétion
- * @returns {boolean|Promise<boolean>} true si l'intervention a été écrite ; une promesse quand la
- *   création d'une intervention déjà complétée doit d'abord poser la question
+ * @returns {boolean} true si l'intervention a été écrite
  */
-function sauvegarderPresencesIntervention(interventionId, options) {
+function sauvegarderPresencesIntervention(interventionId) {
     const creation = _estBrouillon(interventionId);
-    // Créer une intervention déjà « Complétée » : la même question qu'au passage, AVANT toute écriture.
-    if (creation && options === undefined && _statutDuFormulaire() === 'completee' && !_mioDuFormulaire()) {
-        return _demanderReport().then(reponse => (reponse ? sauvegarderPresencesIntervention(interventionId, reponse) : false));
-    }
     // La collection lue est COPIÉE avant d'être modifiée (lot E2, R1) : `db.getSync` peut rendre l'objet
     // de son cache, et une écriture qui échoue le laisserait faux en mémoire.
     const interventions = JSON.parse(JSON.stringify(obtenirInterventions()));
@@ -1681,11 +1668,6 @@ function sauvegarderPresencesIntervention(interventionId, options) {
     if (!sauvegarderDonneesSelonMode('interventions', interventions, { geste })) return false;
     if (creation) _brouillon = null;
 
-    // Le report, au seul passage à « Complétée », et seulement si la case est cochée (voir l'en-tête).
-    if (nouveauStatut === 'completee' && ancienStatut !== 'completee' && options && options.reporter === true) {
-        transfererPresencesVersModule(interventionId);
-    }
-
     if (creation) {
         notifications.succes(V().creee);
         ouvrirIntervention(interventionId);
@@ -1696,159 +1678,18 @@ function sauvegarderPresencesIntervention(interventionId, options) {
     return true;
 }
 
-function _statutDuFormulaire() {
-    const radio = document.querySelector('input[name="interventionStatut"]:checked');
-    return radio ? radio.value : 'en-cours';
-}
-
-/** Un MIO n'écrit pas de présences : pas de question, pas de case. */
-function _mioDuFormulaire() {
-    const niveau = parseInt((document.getElementById('interventionNiveau') || {}).value, 10);
-    const contexte = (document.getElementById('interventionContexte') || {}).value;
-    return niveau === 2 && contexte === 'mio' && !_surService();
-}
-
-/**
- * La question de complétion, avec sa case DÉCOCHÉE par défaut (mots de Grégoire, 28 sept., 19 h 46).
- * Pour un rattrapage (les non-participant·es reçoivent une absence motivée), la case le dit aussi.
- * @returns {Promise<{reporter: boolean}|null>} null si « Annuler »
- */
-async function _demanderReport() {
-    if (!window.uiDialogues) return { reporter: false };   // sans question, aucun report
-    const contexte = (document.getElementById('interventionContexte') || {}).value;
-    const niveau = parseInt((document.getElementById('interventionNiveau') || {}).value, 10);
-    const rattrapage = niveau === 2 && contexte === 'rattrapage' && !_surService();
-    const texte = rattrapage
-        ? V().caseReport.replace(/\.$/, '') + ' ; les non-participant·es auront une absence motivée.'
-        : V().caseReport;
-    const reponse = await window.uiDialogues.confirmerAction({
-        titre: V().completerTitre,
-        caseACocher: { texte: texte, aide: V().caseReportUneFois },
-        texteAnnuler: 'Annuler',
-        texteConfirmer: 'Marquer complétée'
-    });
-    return reponse ? { reporter: reponse.coche === true } : null;
-}
-
 /**
  * Lot E3 (D3) — un changement dans la fiche. En création, rien n'est écrit avant le bouton. Sur une
- * intervention existante, l'écrivain unique ; le passage à « Complétée » pose d'abord la question, dont
- * la case (décochée) décide du report des présences (sauf un MIO, qui n'en écrit pas).
+ * intervention existante, l'écrivain unique. Le passage à « Complétée » s'enregistre comme tout autre
+ * changement (23 nov. 2026 : la question de complétion et sa case sont retirées, voir l'écrivain).
  * @param {string} interventionId
- * @param {Element} [champ]
  */
-async function surChangementFicheIntervention(interventionId, champ) {
+async function surChangementFicheIntervention(interventionId) {
     // Les écouteurs du même changement agissent d'abord (contexte, analyse, critères pré-cochés).
     await new Promise(resolve => setTimeout(resolve, 0));
     if (_estBrouillon(interventionId)) return false;
     if (!document.querySelector('[data-fiche-intervention="' + interventionId + '"]')) return false;
-
-    let options = { reporter: false };
-    if (champ && champ.name === 'interventionStatut' && champ.value === 'completee') {
-        const enBase = obtenirInterventions().find(i => i.id === interventionId);
-        if (enBase && enBase.statut !== 'completee' && !_mioDuFormulaire()) {
-            const reponse = await _demanderReport();
-            if (!reponse) {
-                const enPreparation = document.querySelector('input[name="interventionStatut"][value="en-cours"]');
-                if (enPreparation) enPreparation.checked = true;
-                return false;
-            }
-            options = reponse;
-        }
-    }
-    return sauvegarderPresencesIntervention(interventionId, options);
-}
-
-/**
- * Transférer les présences d'une intervention vers le module presences.js
- * Cette fonction crée des entrées de présences facultatives pour TOUS les étudiants,
- * qu'ils aient participé ou non à l'intervention.
- *
- * @param {string} interventionId - ID de l'intervention
- */
-function transfererPresencesVersModule(interventionId) {
-    const intervention = obtenirIntervention(interventionId);
-    if (!intervention) {
-        console.error('❌ Intervention introuvable:', interventionId);
-        return;
-    }
-
-    // Les MIO ne génèrent pas d'entrées de présences/absences
-    if (intervention.type === 'mio') {
-        return;
-    }
-
-    // Obtenir tous les étudiants du groupe (filtrés par groupe-cours actif)
-    // Tier 6.4 : Utiliser l'API centralisée de saisie-presences.js
-    const etudiants = typeof obtenirEtudiantsCoursActif === 'function'
-        ? obtenirEtudiantsCoursActif()
-        : obtenirDonneesSelonMode('groupeEtudiants');
-
-    // #540 lot C : ces périodes-là entrent au NUMÉRATEUR de l'assiduité — une présence
-    // écrite dans les données. Le repli `|| 2` en inventait deux quand l'intervention ne
-    // disait rien. En pratique `_construireIntervention` pose toujours une durée, donc le repli
-    // ne se déclenchait pas ; il n'en était pas moins une valeur métier en dur sur le
-    // chemin d'écriture des présences. On refuse et on le dit, plutôt que de compter des
-    // périodes que personne n'a saisies.
-    const dureeIntervention = parseFloat(intervention.duree);
-    if (!(dureeIntervention > 0)) {
-        if (typeof notifications !== 'undefined' && notifications.erreur) {
-            notifications.erreur(
-                'Durée de l\'intervention manquante',
-                'Indique sa durée en périodes avant de reporter les présences : c\'est elle qui est comptée à l\'assiduité.');
-        }
-        return;
-    }
-    const marquerMotives = intervention.marquerNonParticipantsMotives === true;
-
-    // Construire les entrées de présence
-    const entrees = [];
-    let nbPresentsAjoutes = 0;
-    let nbAbsentsAjoutes = 0;
-
-    etudiants.forEach(etudiant => {
-        const estPresent = intervention.etudiants.includes(etudiant.da);
-
-        if (!marquerMotives && !estPresent) {
-            return;
-        }
-
-        let heures, note;
-        if (estPresent) {
-            heures = dureeIntervention;
-            note = `Intervention RàI : ${intervention.titre}`;
-            nbPresentsAjoutes++;
-        } else {
-            heures = 0;
-            note = 'Absence motivée RàI';
-            nbAbsentsAjoutes++;
-        }
-
-        entrees.push({
-            date: intervention.date,
-            da: etudiant.da,
-            heures: heures,
-            notes: note,
-            coursId: typeof obtenirCoursActifId === 'function' ? obtenirCoursActifId() : undefined,
-            facultatif: true
-        });
-    });
-
-    // Écriture centralisée (inclut recalcul indices d'assiduité)
-    if (typeof window.ajouterPresencesIntervention === 'function') {
-        window.ajouterPresencesIntervention(entrees);
-    } else {
-        // Fallback si l'API n'est pas encore chargée
-        console.warn('⚠️ ajouterPresencesIntervention non disponible — écriture directe');
-        const clePresences = cle('presences');
-        let presences = db.getSync(clePresences, []);
-        entrees.forEach(e => presences.push(e));
-        db.setSync(clePresences, presences);
-        if (typeof calculerEtSauvegarderIndicesAssiduite === 'function') {
-            calculerEtSauvegarderIndicesAssiduite();
-        }
-    }
-
+    return sauvegarderPresencesIntervention(interventionId);
 }
 
 /* ===============================
@@ -1922,7 +1763,6 @@ window.clesCriteresGrilleReference = clesCriteresGrilleReference;
 window.suggererObjectifIntervention = suggererObjectifIntervention;
 window.sauvegarderPresencesIntervention = sauvegarderPresencesIntervention;
 // terminerIntervention et rouvrirIntervention supprimés (Phase 5)
-window.transfererPresencesVersModule = transfererPresencesVersModule;
 window.initialiserModuleInterventions = initialiserModuleInterventions;
 window.formaterDateLisible = formaterDateLisible;
 window.genererBadgeStatut = genererBadgeStatut;

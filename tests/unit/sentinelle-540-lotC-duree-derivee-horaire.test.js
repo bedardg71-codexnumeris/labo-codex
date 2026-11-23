@@ -304,18 +304,13 @@ describe('#540-C/E — les gardes de chargement rendent 0, jamais 2', () => {
 describe('#540-C/F — la durée d\'une intervention n\'est plus inventée', () => {
     const SRC_INTERVENTIONS = sansCommentaires(lire('js', 'interventions.js'));
 
-    // Le chemin d'ÉCRITURE des présences, et lui seul.
-    const iTransfert = SRC_INTERVENTIONS.indexOf('function transfererPresencesVersModule');
-    const CORPS_TRANSFERT = SRC_INTERVENTIONS.slice(iTransfert, SRC_INTERVENTIONS.indexOf('\n}', iTransfert));
-
-    it('la sentinelle vise bien la fonction de report', () => {
-        expect(iTransfert).toBeGreaterThan(-1);
-        expect(CORPS_TRANSFERT).toContain('ajouterPresencesIntervention');
-    });
-
-    it('le report des présences refuse une durée absente', () => {
-        expect(CORPS_TRANSFERT).not.toContain('intervention.duree || 2');
-        expect(CORPS_TRANSFERT).toContain('parseFloat(intervention.duree)');
+    // ↻ 23 nov. 2026 (décision de Grégoire, 22 nov., 20 h 51 ; #1304) : le chemin d'ÉCRITURE des présences d'une
+    // intervention (`transfererPresencesVersModule`) est retiré avec la case « Reporter les présences… ». Plus aucune
+    // durée n'entre dans les présences par une intervention : la règle du lot C n'a plus rien à y garder.
+    it('le report des présences est retiré : une intervention n\'écrit plus aucune période dans les présences', () => {
+        expect(SRC_INTERVENTIONS).not.toContain('function transfererPresencesVersModule');
+        expect(SRC_INTERVENTIONS).not.toContain('ajouterPresencesIntervention');
+        expect(SRC_INTERVENTIONS).not.toMatch(/cle\('presences'\)/);
     });
 
     it('les DÉFAUTS DE FORMULAIRE, eux, restent — ils proposent, ils ne comptent pas', () => {

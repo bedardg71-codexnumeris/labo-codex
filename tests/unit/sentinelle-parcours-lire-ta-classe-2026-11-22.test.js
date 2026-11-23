@@ -13,7 +13,7 @@
 // Break-test (22 nov.) : au rapport du lot (plans de travail/RAPPORT-2026-11-22-echelle-de-depart-et-parcours-6-7-8.md).
 import { describe, it, expect } from 'vitest';
 import { chargerScript } from './_helpers/charger-script.js';
-import { bullesDu, correspond, CONSIGNE_22_NOV_SOIR, retoucheDeLaSuite, texteDeLaSuite } from './_helpers/consigne-2026-11-22-parcours.js';
+import { bullesDu, correspond, CONSIGNE_22_NOV_SOIR, retoucheDeLaSuite, texteDeLaSuite, retouchesDeLaRelease, appliquerRetouches } from './_helpers/consigne-2026-11-22-parcours.js';
 
 function charger() {
     const enregistres = [];
@@ -47,6 +47,18 @@ function retouchees(bulles) {
     return out;
 }
 
+/**
+ * LA RELEASE (22 nov. 2026, 20 h 51 ; plans de travail/CONSIGNE-2026-11-22-release-publication.md, 1a) : la case qui
+ * offrait de reporter les présences est retirée de l'application (#1304) ; la bulle 8 de « Nous faisons » ne la nomme
+ * plus. La retouche est lue dans la consigne de la release et appliquée à la bulle de la précédente ; elle doit y
+ * trouver sa ligne, une fois. Break-test (23 nov. 2026) : la phrase de la case remise dans le code → bulle 8 rouge.
+ */
+function sansLaCase(bulles) {
+    const r = appliquerRetouches(bulles, [retouchesDeLaRelease().a]);
+    expect(r.faites, 'la retouche 1a de la release a trouvé sa ligne').toEqual([1]);
+    return r.bulles;
+}
+
 /** Ce que le code dit d'une bulle, dans la forme de la consigne. */
 function vuDuCode(b, k) {
     return {
@@ -70,7 +82,7 @@ function vuDeLaConsigne(c) {
 }
 
 describe.each(TEMPS)('§ %s · « %s » (%s), bulle par bulle', (repere, cle, nom, total) => {
-    const consigne = repere === '3.1' ? retouchees(bullesDu(repere)) : bullesDu(repere);
+    const consigne = repere === '3.1' ? retouchees(bullesDu(repere)) : sansLaCase(bullesDu(repere));
     const code = P.textes[cle];
 
     it(`${total} bulles, numérotées « n sur ${total} », de part et d'autre`, () => {

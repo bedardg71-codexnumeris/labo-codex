@@ -462,7 +462,8 @@ describe('A · les présences saisies deviennent l\'indice A', () => {
         noter('A6', { parMode, directes });
         // ↻ Lot E3 (D0 point 2, 28 sept. 2026) : `modifierNotesPresence` (le volet confidentiel) passe au témoin commun.
         expect(parMode).toBe(2);   // ecrirePresencesSeance, modifierNotesPresence
-        expect(directes).toBe(1);  // ajouterPresencesIntervention
+        // ↻ 23 nov. 2026 : `ajouterPresencesIntervention` est retiré avec la case « Reporter les présences… » (#1304).
+        expect(directes).toBe(0);
     });
 });
 
@@ -815,30 +816,29 @@ describe('E · le cycle d\'une intervention et ce qu\'il écrit', () => {
         expect(b.win.interventionsDuContexteActif(sousGC2).length).toBe(0);
     });
 
-    it('E2 · le transfert des présences d\'un rattrapage : l\'absent présent au rattrapage passe de 40 à 50 % ; un rattrapage hors séance ne compte pas ; un présent le jour même est ignoré', () => {
-        // À la main : Absent n'a pas de fiche le 9 février (absent). Le rattrapage du 9 février (2 périodes) où il est présent
-        // écrit une fiche facultative { heures: 2 } → calculerAssiduite lit `heures` comme des périodes (#728) → présent 2/2 ce
-        // jour-là → 10/20 = 0,50. Assidu, absent du rattrapage : « Absence motivée RàI » à 0 — mais il a déjà une fiche le 9 février
-        // (présent au cours) : le contrôle de doublon (da + date + coursId, sans regarder `facultatif`) rejette l'entrée.
+    // ↻ 23 nov. 2026 (décision de Grégoire, 22 nov., 20 h 51) : la case « Reporter les présences… » et son écrivain
+    // (`transfererPresencesVersModule`) sont retirés (#1304). SOURCE TARIE, STOCK GARDÉ : les fiches facultatives qu'elle a
+    // déjà écrites restent dans `presences`, et leurs lecteurs ne changent pas. Cet essai les pose telles qu'elle les
+    // écrivait et relit l'assiduité : les mêmes nombres qu'avant le retrait.
+    it('E2 · le stock de l\'ancien report : une fiche facultative déjà écrite compte toujours (40 → 50 %) ; l\'absence motivée retire toujours la séance ; hors séance, rien', () => {
+        // À la main : Absent n'a pas de fiche le 9 février (absent). La fiche facultative { heures: 2 } du rattrapage du 9 février
+        // → calculerAssiduite lit `heures` comme des périodes (#728) → présent 2/2 ce jour-là → 10/20 = 0,50.
         const jeu = jeuBase(); jeu.presences = jeu.presences.filter(p => !(p.da === DA.SILENCE && p.date === '2026-02-09'));   // Silence absent du cours ce jour-là
         const b = monter(jeu); b.calculerTout();
+        expect(typeof b.win.transfererPresencesVersModule, 'l\'écrivain est retiré').toBe('undefined');
         const silenceAvant = b.win.calculerAssiduite(DA.SILENCE, null).indice;   // 18/20 = 0,90
-        const id = creer(b);
-        participer(b, id, [DA.ABSENT]);
-        b.win.transfererPresencesVersModule(id);
+        const coursId = (b.store.test_presences.find(p => p.coursId) || {}).coursId;
+        b.store.test_presences.push(
+            { date: '2026-02-09', da: DA.ABSENT, heures: 2, notes: 'Intervention RàI : Rattrapage banc', coursId, facultatif: true },
+            { date: '2026-02-09', da: DA.SILENCE, heures: 0, notes: 'Absence motivée RàI', coursId, facultatif: true });
+        b.calculerTout();
         const silenceApres = b.win.calculerAssiduite(DA.SILENCE, null);
-        const fiches = b.store.test_presences.filter(p => p.date === '2026-02-09' && p.facultatif).map(p => ({ da: p.da, heures: p.heures, notes: p.notes }));
         const aApres = b.win.calculerAssiduite(DA.ABSENT, null);
-        // Hors séance : un rattrapage un mardi.
-        const id2 = creer(b, { date: '2026-02-10', seanceConcernee: null, marquerNonParticipantsMotives: false, contexte: 'hors-classe' });
-        participer(b, id2, [DA.ABSENT]);
-        b.win.transfererPresencesVersModule(id2);
+        // Hors séance : une fiche facultative un mardi.
+        b.store.test_presences.push({ date: '2026-02-10', da: DA.ABSENT, heures: 2, notes: 'Intervention RàI : Rattrapage banc', coursId, facultatif: true });
+        b.calculerTout();
         const aMardi = b.win.calculerAssiduite(DA.ABSENT, null);
-        noter('E2', { fiches, A_apres: aApres.indice, A_apresMardi: aMardi.indice, silence: { avant: silenceAvant, apres: silenceApres.indice, offertes: silenceApres.periodesOffertes } });
-        expect(fiches).toEqual([
-            { da: DA.ABSENT, heures: 2, notes: 'Intervention RàI : Rattrapage banc' },
-            { da: DA.SILENCE, heures: 0, notes: 'Absence motivée RàI' }
-        ]);   // Assidu : rejeté par le contrôle de doublon (il a une fiche régulière le même jour)
+        noter('E2', { A_apres: aApres.indice, A_apresMardi: aMardi.indice, silence: { avant: silenceAvant, apres: silenceApres.indice, offertes: silenceApres.periodesOffertes } });
         expect([silenceAvant, silenceApres.indice, silenceApres.periodesOffertes]).toEqual([0.9, 1, 18]);   // l'absence motivée RETIRE la séance : 18/18
         expect(aApres.indice).toBe(0.5);
         expect(aMardi.indice).toBe(0.5);   // le mardi n'est pas une séance : rien ne change
@@ -868,7 +868,8 @@ describe('E · le cycle d\'une intervention et ce qu\'il écrit', () => {
         const src = readFileSync(path.join(RACINE, 'js/interventions.js'), 'utf8');
         const res = noter('E4', { setSync: (src.match(/db\.setSync\(/g) || []).length, parMode: (src.match(/sauvegarderDonneesSelonMode\(/g) || []).length });
         expect(res.parMode).toBe(2);
-        expect(res.setSync).toBe(2);
+        // ↻ 23 nov. 2026 : le repli d'écriture directe des présences est parti avec `transfererPresencesVersModule` (#1304).
+        expect(res.setSync).toBe(1);
     });
 
     it('E5 · le bilan avant/après traduisait une moyenne 0-1 en lettre par 0,85 / 0,75 / 0,65 écrits en clair — depuis le 30 oct. 2026, par l\'échelle des copies du groupe (valeur d\'après ; le comportement : audit du 6, I-5, et la sentinelle du lot)', () => {

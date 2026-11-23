@@ -117,3 +117,48 @@ export function texteDeLaSuite(repere) {
     const c = citations(ligneDeLaSuite(repere));
     return c[c.length - 1];
 }
+
+// ---------------------------------------------------------------------------------------------------------------
+// LA RELEASE (consigne du 22 nov., 20 h 36 à 20 h 56 : plans de travail/CONSIGNE-2026-11-22-release-publication.md, point 1).
+// Trois retouches de bulles déjà validées, lues ici, dans la consigne elle-même.
+// ---------------------------------------------------------------------------------------------------------------
+export const CONSIGNE_RELEASE = lire('plans de travail/CONSIGNE-2026-11-22-release-publication.md');
+
+/** La ligne d'une retouche de la release (« a », « b », « c »). */
+function ligneDeLaRelease(lettre) {
+    const i = CONSIGNE_RELEASE.indexOf('\n' + lettre + ') ');
+    if (i === -1) throw new Error('consigne de la release : retouche « ' + lettre + ' » introuvable');
+    return CONSIGNE_RELEASE.slice(i + 1, CONSIGNE_RELEASE.indexOf('\n', i + 1));
+}
+
+/**
+ * Les trois retouches : { avant, apres }, des morceaux de ligne.
+ *   a · « retire la phrase « P » ; le paragraphe devient « Y ». » : avant = Y + ' ' + P, après = Y ;
+ *   b, c · « X » devient « Y ».
+ */
+export function retouchesDeLaRelease() {
+    const a = ligneDeLaRelease('a');
+    const iRetire = a.indexOf('retire la phrase «'), iDevient = a.indexOf('le paragraphe devient «');
+    if (iRetire === -1 || iDevient === -1) throw new Error('retouche a : la consigne a changé de forme');
+    const phrase = citations(a.slice(iRetire, iDevient))[0], reste = citations(a.slice(iDevient))[0];
+    const devient = (lettre) => {
+        const l = ligneDeLaRelease(lettre);
+        const pivot = l.indexOf(' devient «');
+        if (pivot === -1) throw new Error('retouche ' + lettre + ' : pas de « devient »');
+        const avant = citations(l.slice(0, pivot)), apres = citations(l.slice(pivot));
+        return { avant: avant[avant.length - 1], apres: apres[0] };
+    };
+    return { a: { avant: reste + ' ' + phrase, apres: reste, phrase }, b: devient('b'), c: devient('c') };
+}
+
+/** Applique des retouches (des morceaux de ligne) aux bulles d'une consigne ; chacune doit trouver sa ligne, une fois. */
+export function appliquerRetouches(bulles, retouches) {
+    const faites = retouches.map(() => 0);
+    const poser = (lignes) => lignes.map(([t, x]) => {
+        let y = x;
+        retouches.forEach((r, k) => { if (y.includes(r.avant)) { y = y.replace(r.avant, r.apres); faites[k]++; } });
+        return [t, y];
+    });
+    const out = bulles.map((b) => Object.assign({}, b, { lignes: poser(b.lignes), puis: b.puis ? Object.assign({}, b.puis, { lignes: poser(b.puis.lignes) }) : null }));
+    return { bulles: out, faites };
+}

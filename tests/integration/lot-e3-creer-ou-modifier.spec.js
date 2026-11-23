@@ -229,7 +229,8 @@ test('(P-d) un nom vidé : « Non enregistré – Modifier la production : le no
 
 /* ────────────────────────────────────────────────────────────── interventions */
 //   (I-a) une intervention COMPLÉTÉE modifiée : écrite sans bouton, AUCUNE présence écrite (empreinte) ;
-//   (I-b) le passage à « Complétée » : la question ; « Annuler » n'écrit rien ; « Marquer complétée » reporte ;
+//   (I-b) le passage à « Complétée » : aucune question, aucune case, aucune présence écrite (23 nov. 2026 : la case
+//         « Reporter les présences… » est retirée, #1304) ; une présence facultative déjà écrite reste ;
 //   (I-c) une nouvelle intervention n'existe pas avant « Créer l'intervention » ; « Fermer » pose la question ;
 //   (I-d) changer de sous-onglet puis revenir : la création en cours est toujours là.
 
@@ -275,51 +276,44 @@ test('(I-a) intervention complétée modifiée : écrite sans bouton, aucune pr�
     expect(await questionOuverte(page)).toBe('');
 });
 
-test('(I-b) passage à « Complétée » : la question et sa case DÉCOCHÉE ; « Annuler » n\'écrit rien ; sans la case, aucune présence ; cochée, le report', async ({ page }) => {
+// ↻ 23 nov. 2026 (décision de Grégoire, 22 nov., 20 h 51 ; CONSIGNE-2026-11-22-release-publication.md, 1a) : la case est
+// retirée, avec la question qui la portait. Source tarie, stock gardé : ce banc pose une présence facultative comme
+// l'ancienne case les écrivait, et la retrouve intacte.
+test('(I-b) passage à « Complétée » : ni question ni case ; le bilan paraît ; aucune présence écrite ; le stock de l\'ancien report reste', async ({ page }) => {
     test.setTimeout(120000);
     await ouvrirDemo(page);
     const stock = [await uneIntervention(page)];
-    await page.evaluate((stock) => { db.setSync(cle('interventions'), stock); }, stock);
+    const da = stock[0].etudiants[0];
+    await page.evaluate(({ stock, da }) => {
+        db.setSync(cle('interventions'), stock);
+        const presences = JSON.parse(JSON.stringify(db.getSync(cle('presences'), []) || []));
+        presences.push({ date: '2026-09-09', da, heures: 2, notes: 'Intervention RàI : une ancienne', coursId: obtenirCoursActifId(), facultatif: true });
+        db.setSync(cle('presences'), presences);
+    }, { stock, da });
     await page.evaluate(() => naviguerVers('suivi', 'interventions'));
     await attendreRepos(page);
     await page.evaluate(() => ouvrirIntervention('INT-E3'));
     await attendreRepos(page);
     const avant = await empreintePresences(page);
-    const laCase = () => page.evaluate(() => {
-        const c = document.querySelector('#overlay-ui-dialogue input[type="checkbox"]');
-        return c ? { coche: c.checked, texte: c.parentElement.textContent.trim() } : null;
-    });
 
-    // (1) « Annuler » : rien d'écrit, le statut revient.
     await changer(page, 'input[name="interventionStatut"][value="completee"]', true);
-    expect(await questionOuverte(page)).toBe('Marquer cette intervention complétée ?');
-    expect(await laCase()).toEqual({ coche: false, texte: 'Reporter les présences dans la saisie des présences : la présence à cette intervention compensera une absence au cours.' });
-    await repondre(page, 'Annuler');
-    expect((await interventions(page))[0].statut).toBe('en-cours');
-    // pause-gardee : « Annuler » n'écrit rien : un constat d'absence
-    await pause(page, 600);
-    expect(await empreintePresences(page)).toBe(avant);
-    expect(await page.evaluate(() => document.querySelector('input[name="interventionStatut"][value="en-cours"]').checked)).toBe(true);
-
-    // (2) « Marquer complétée » sans toucher la case : complétée, AUCUNE présence.
-    await changer(page, 'input[name="interventionStatut"][value="completee"]', true);
-    await repondre(page, 'Marquer complétée');
-    // pause-gardee : case décochée, aucune présence écrite : un constat d'absence
+    // pause-gardee : aucune question ne s'ouvre, aucune présence ne s'écrit : un constat d'absence
     await pause(page, 1100);
+    expect(await questionOuverte(page), 'aucune question').toBe('');
+    expect(await page.evaluate(() => document.querySelectorAll('#overlay-ui-dialogue input[type="checkbox"]').length), 'aucune case').toBe(0);
     expect((await interventions(page))[0].statut).toBe('completee');
-    expect(await empreintePresences(page), 'case décochée : rien dans les présences').toBe(avant);
     expect(await visible(page, '#observationsBilan'), 'le bilan paraît').toBe(true);
+    expect(await empreintePresences(page), 'aucune présence écrite, le stock intact').toBe(avant);
+    expect(await page.evaluate(() => document.body.textContent.includes('Reporter les présences dans la saisie'))).toBe(false);
 
-    // (3) De retour « En préparation », puis complétée case COCHÉE : le report, une fois.
+    // De retour « En préparation », puis complétée de nouveau : toujours rien.
     await changer(page, 'input[name="interventionStatut"][value="en-cours"]', true);
     await changer(page, 'input[name="interventionStatut"][value="completee"]', true);
-    await page.evaluate(() => { document.querySelector('#overlay-ui-dialogue input[type="checkbox"]').click(); });
-    await repondre(page, 'Marquer complétée');
-    // pause-gardee : le report a lieu une fois : un second report n'aurait aucun signal
+    // pause-gardee : un second passage n'écrit rien non plus : un constat d'absence
     await pause(page, 1100);
-    const da = stock[0].etudiants[0];
-    const reportees = await page.evaluate(({ da }) => (db.getSync(cle('presences'), []) || []).filter(p => p.da === da && p.date === '2026-09-10' && p.facultatif), { da });
-    expect(reportees.length, 'case cochée : le report a eu lieu, une fois').toBe(1);
+    expect(await empreintePresences(page)).toBe(avant);
+    const facultatives = await page.evaluate(({ da }) => (db.getSync(cle('presences'), []) || []).filter(p => p.da === da && p.facultatif).map(p => p.date), { da });
+    expect(facultatives, 'la présence de l\'ancien report reste, seule').toEqual(['2026-09-09']);
 });
 
 test('(I-c) nouvelle intervention : rien avant « Créer l\'intervention » ; « Fermer » pose la question', async ({ page }) => {

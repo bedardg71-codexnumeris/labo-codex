@@ -13,7 +13,7 @@
 // Break-test (22 nov.) : au rapport du lot.
 import { describe, it, expect } from 'vitest';
 import { chargerScript } from './_helpers/charger-script.js';
-import { bullesDu, consigneDu, citations, ligneDeLaSuite, texteDeLaSuite } from './_helpers/consigne-2026-11-22-parcours.js';
+import { bullesDu, consigneDu, citations, ligneDeLaSuite, texteDeLaSuite, retouchesDeLaRelease, appliquerRetouches } from './_helpers/consigne-2026-11-22-parcours.js';
 
 function charger() {
     const enregistres = [];
@@ -89,7 +89,15 @@ function bullesDuModele() {
     });
     const out = bullesDu('4.1').map((b) => Object.assign({}, b, { lignes: poser(b.lignes), puis: b.puis ? Object.assign({}, b.puis, { lignes: poser(b.puis.lignes) }) : null }));
     expect(faites, 'la ligne « [nombre] » de la bulle 7').toBe(1);
-    return out;
+    // LA RELEASE (22 nov. 2026, 20 h 52 ; CONSIGNE-2026-11-22-release-publication.md, 1b et 1c) : deux phrases ajustées à
+    // ce que l'écran montre (la production sur « Deux-Rives » ; « Ta rédaction contient… »). Lues dans la consigne de la
+    // release, appliquées aux bulles 6 et 5 ; chacune doit y trouver sa ligne, une fois.
+    // Break-tests (23 nov. 2026) : « Artefact 1 » remis dans la bulle 6 du code → bulle 6 rouge ; « Ta production
+    // contient… » remis dans la bulle 5 → bulle 5 rouge.
+    const R = retouchesDeLaRelease();
+    const r = appliquerRetouches(out, [R.b, R.c]);
+    expect(r.faites, 'les retouches 1b et 1c de la release ont trouvé leur ligne').toEqual([1, 1]);
+    return r.bulles;
 }
 
 describe('§ 4.1 · « Je regarde », bulle par bulle', () => {

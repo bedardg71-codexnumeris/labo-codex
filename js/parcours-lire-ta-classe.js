@@ -302,7 +302,7 @@
                 lignes: [
                     ['n', "Ce qui suit, tu le feras une fois l'intervention donnée."],
                     ['n', "Tu rouvres la fiche (à l'onglet « Interventions », par le bouton « Ouvrir », ou depuis son profil), tu coches les personnes présentes et tu notes ce que tu as observé sous « Observations générales »."],
-                    ['n', "Tu choisis ensuite « Complétée ». Une case t'offre alors de reporter ces présences dans ta saisie : c'est toi qui décides si la présence à l'intervention compense une absence au cours."],
+                    ['n', "Tu choisis ensuite « Complétée »."],
                     ['n', "Le « Bilan post-intervention » apparaît : pour chaque critère ciblé, les résultats avant et après, puis « Objectif atteint ? » et « Suite envisagée »."],
                     ['n', "Une remontée n'est qu'un signe : qui part du plus bas remonte souvent un peu, même sans intervention."],
                     ['c', "Touche « Continuer »"]

@@ -316,18 +316,15 @@ describe('#1152 lot 2c bis · ce que les entrées affirment, lu dans le code', (
         }
     });
 
-    it('planifier-rai : la case de report et ses mots sont ceux de l\'écran ; la durée par défaut est celle du champ', () => {
+    // ↻ 23 nov. 2026 (décision de Grégoire, 22 nov., 20 h 51) : la case « Reporter les présences… » est retirée de
+    // l'écran (js/interventions.js, #1304) ; le paragraphe de l'Aide qui la décrivait part avec elle.
+    it('planifier-rai : la durée par défaut est celle du champ ; l\'Aide ne décrit plus la case de report, retirée de l\'écran', () => {
         const interv = lire('js', 'interventions.js');
-        const caseReport = interv.match(/caseReport: '([^:]+) :/)[1];
-        const uneFois = interv.match(/caseReportUneFois: '([^:]+) :/)[1];
         const duree = interv.match(/id="interventionDuree"[^>]*value="\$\{intervention\.duree \|\| (\d+)\}"/)[1];
         const t = texteDe('planifier-rai');
-        expect(t).toContain(`« ${caseReport}… », décochée par défaut`);
-        expect(t).toContain(`${uneFois}.`);
         expect(t).toContain(`« Durée (périodes) », ${duree} par défaut`);
-        // Le rattrapage seul marque les non-participant·es (interventions.js, enregistrement de la fiche).
-        expect(interv).toMatch(/if \(contexteSave === 'rattrapage'\) \{[^}]*marquerNonParticipantsMotives = true;/);
-        expect(t).toMatch(/en « Séance de rattrapage — les non-participants ont congé », les autres reçoivent une absence motivée/);
+        expect(interv).not.toContain('caseReport');
+        expect(t).not.toMatch(/Reporter les présences|pose une question|Le report se fait une seule fois|reçoivent une absence motivée/);
         expect(t).not.toMatch(/2 heures|transfère automatiquement|se propagent/);
     });
 

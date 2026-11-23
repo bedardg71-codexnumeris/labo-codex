@@ -6,16 +6,28 @@
  * Une nouvelle n'existe qu'au clic « Créer l'intervention » / « Créer la rencontre ». « Annuler » devient
  * « Fermer ».
  *
- * ⚠⚠ LE POINT DE LA CONSIGNE : modifier une intervention COMPLÉTÉE n'écrit aucune présence. Le report vers
- * les présences n'a lieu qu'au passage à « Complétée », après une question. Mesuré avant le lot : chaque
- * « Enregistrer » d'une intervention complétée relançait le report (`ajouterPresencesIntervention` ajoute,
- * ne retire jamais) ; une date corrigée laissait les présences de l'ancienne date.
+ * ⚠⚠ LE POINT DE LA CONSIGNE : modifier une intervention COMPLÉTÉE n'écrit aucune présence.
+ *
+ * ↻ 23 NOV. 2026 (décision de Grégoire, 22 nov., 20 h 51 ; plans de travail/CONSIGNE-2026-11-22-release-publication.md,
+ * 1a) : LA CASE « Reporter les présences dans la saisie des présences… » EST RETIRÉE, avec la question de complétion qui
+ * ne servait qu'à la porter et l'écrivain qu'elle déclenchait. Elle ne faisait pas ce qu'elle promettait (#1304). Passer
+ * à « Complétée », ou créer une intervention déjà complétée, n'écrit plus AUCUNE présence, sans question. SOURCE TARIE,
+ * STOCK GARDÉ : une présence facultative déjà écrite par l'ancienne case reste telle quelle (essai « le stock »).
+ * Break-tests (23 nov. 2026), chacun rouge puis remis à l'identique : (1) un report remis dans l'écrivain
+ * (`db.setSync(cle('presences'), …)` au passage à « Complétée ») → « aucune présence » et « le stock » rouges ; (2) la
+ * question remise (`uiDialogues.confirmerAction` au passage) → « aucune question » rouge ; (3) `caseReport` remis dans
+ * les mots → « rien ne reste de la case » rouge.
  *
  * Harnais : `bac-suivi.js` (modes.js RÉEL, store partagé). Noms fictifs.
  */
 // ↻ #1152, retouche 2 du lot 5 (29 oct. 2026, plans de travail/VERDICT-RELECTURE-2026-10-29-aide-lot-5.md) : le champ « Séance concernée » (interventionSeance) est retiré.
 import { describe, it, expect, vi } from 'vitest';
 import { monter, storeBase, elementDom } from './_helpers/bac-suivi.js';
+import { readFileSync } from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+
+const RACINE = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..');
 
 const intervention = (extra) => Object.assign({ id: 'I1', titre: 'Rattrapage', date: '2026-09-01', heure: '', duree: 2, type: 'groupe', niveauRai: 2,
     contexte: 'en-classe', description: '', etudiants: ['2000001'], analyse: null, observations: '', notesIndividuelles: {}, criteresCibles: [],
@@ -43,8 +55,8 @@ function banc({ interventions = [], vue = 'interventions', statut = 'en-cours', 
     const uiDialogues = {
         declarerFicheEnCreation: (g, p) => { fiches[g] = p; },
         quitterCreationSiConfirme: vi.fn(async (g, titre) => { if (!fiches[g] || !fiches[g]()) return true; questions.push(titre); return quitter; }),
-        // Décision de Grégoire (28 sept., 19 h 43) : la question porte une case, décochée par défaut ;
-        // la vraie fenêtre rend `{ coche }` (essais dans ui-dialogues-315), ce banc joue la réponse.
+        // (Jusqu'au 23 nov. 2026, le passage à « Complétée » posait ici une question à case ; plus aucune : ce faux garde la
+        // trace d'un appel qui ne doit plus venir.)
         confirmerAction: vi.fn(async (o) => { confirmations.push(o.titre); cases.push(o.caseACocher); return confirmer ? { coche } : false; })
     };
     const b = monter(store, { modules: ['js/interventions.js'],
@@ -95,68 +107,55 @@ describe('lot E3 · intervention existante — champ par champ, par le témoin',
         expect(b.confirmations).toEqual([]);
     });
 
-    it('le passage à « Complétée » pose la question ; « Annuler » : rien d\'écrit, aucune présence, le statut revient', async () => {
-        const b = banc({ interventions: [intervention()], statut: 'completee', confirmer: false });
-        b.win.uiDialogues = b.uiDialogues;
-        const avant = JSON.stringify(b.store.test_presences);
-        expect(await b.changer(b.radioStatut)).toBe(false);
-        expect(b.confirmations).toEqual(['Marquer cette intervention complétée ?']);
-        expect(b.ecritures()).toBe(0);
-        expect(JSON.stringify(b.store.test_presences)).toBe(avant);
-        expect(b.radioEnCours.checked).toBe(true);
-    });
-
-    it('LA CASE DÉCOCHÉE (défaut) : l\'intervention est complétée, AUCUNE présence écrite', async () => {
-        const b = banc({ interventions: [intervention()], statut: 'completee', confirmer: true, coche: false });
+    it('le passage à « Complétée » : aucune question, l\'intervention est complétée, AUCUNE présence écrite', async () => {
+        const b = banc({ interventions: [intervention()], statut: 'completee' });
         b.win.uiDialogues = b.uiDialogues;
         const avant = JSON.stringify(b.store.test_presences);
         expect(await b.changer(b.radioStatut)).toBe(true);
+        expect(b.confirmations, 'aucune question').toEqual([]);
         expect(b.store.test_interventions[0].statut).toBe('completee');
         expect(JSON.stringify(b.store.test_presences)).toBe(avant);
         expect(b.ecritures('test_presences')).toBe(0);
-        // Les mots de Grégoire, mot pour mot (28 sept., 19 h 46).
-        expect(b.cases).toEqual([{
-            texte: 'Reporter les présences dans la saisie des présences : la présence à cette intervention compensera une absence au cours.',
-            aide: 'Le report se fait une seule fois : il ne se refait pas si tu modifies l\'intervention ensuite.'
-        }]);
     });
 
-    it('LA CASE COCHÉE : l\'intervention s\'écrit et les présences sont reportées, une fois', async () => {
-        const b = banc({ interventions: [intervention()], statut: 'completee', confirmer: true, coche: true });
+    it('rattrapage : ni présence ni absence motivée écrite ; un MIO : rien non plus', async () => {
+        const b = banc({ interventions: [intervention({ contexte: 'rattrapage', marquerNonParticipantsMotives: true })], statut: 'completee', contexte: 'rattrapage' });
         b.win.uiDialogues = b.uiDialogues;
         expect(await b.changer(b.radioStatut)).toBe(true);
         expect(b.store.test_interventions[0].statut).toBe('completee');
-        expect(b.store.test_presences.filter(p => p.date === '2026-09-01')).toEqual([expect.objectContaining({ da: '2000001', heures: 2, facultatif: true })]);
-        // Un second changement sur l'intervention désormais complétée ne reporte plus rien.
-        const apres = JSON.stringify(b.store.test_presences);
-        b.champ('interventionDate').value = '2026-09-03';
-        await b.changer(b.champ('interventionDate'));
-        expect(JSON.stringify(b.store.test_presences)).toBe(apres);
-    });
+        expect(b.ecritures('test_presences')).toBe(0);
+        expect(b.confirmations).toEqual([]);
 
-    it('rattrapage : la case dit aussi l\'absence motivée ; cochée, les non-participant·es la reçoivent ; décochée, rien', async () => {
-        const b = banc({ interventions: [intervention({ contexte: 'rattrapage', marquerNonParticipantsMotives: true })], statut: 'completee', coche: true, contexte: 'rattrapage' });
-        b.win.uiDialogues = b.uiDialogues;
-        expect(await b.changer(b.radioStatut)).toBe(true);
-        expect(b.cases[0].texte).toBe('Reporter les présences dans la saisie des présences : la présence à cette intervention compensera une absence au cours ; les non-participant·es auront une absence motivée.');
-        const du1er = b.store.test_presences.filter(p => p.date === '2026-09-01');
-        expect(du1er.find(p => p.da === '2000001')).toMatchObject({ heures: 2 });
-        expect(du1er.filter(p => p.da !== '2000001').every(p => p.heures === 0 && p.notes === 'Absence motivée RàI')).toBe(true);
-        expect(du1er.length).toBeGreaterThan(1);
-
-        const c = banc({ interventions: [intervention({ contexte: 'rattrapage', marquerNonParticipantsMotives: true })], statut: 'completee', coche: false, contexte: 'rattrapage' });
+        const c = banc({ interventions: [intervention({ type: 'mio', contexte: 'mio' })], statut: 'completee', contexte: 'mio' });
         c.win.uiDialogues = c.uiDialogues;
-        await c.changer(c.radioStatut);
+        expect(await c.changer(c.radioStatut)).toBe(true);
+        expect(c.confirmations).toEqual([]);
         expect(c.ecritures('test_presences')).toBe(0);
     });
 
-    it('un MIO (aucune présence) : ni question ni case ; complété, rien de reporté', async () => {
-        const b = banc({ interventions: [intervention({ type: 'mio', contexte: 'mio' })], statut: 'completee', contexte: 'mio' });
+    it('LE STOCK : une présence facultative déjà écrite par l\'ancienne case reste telle quelle', async () => {
+        const b = banc({ interventions: [intervention()], statut: 'completee' });
         b.win.uiDialogues = b.uiDialogues;
+        const ancienne = { date: '2026-09-01', da: '2000001', heures: 2, notes: 'Intervention RàI : Rattrapage', coursId: 'GC1', facultatif: true };
+        b.store.test_presences.push(ancienne);
+        const avant = JSON.stringify(b.store.test_presences);
         expect(await b.changer(b.radioStatut)).toBe(true);
-        expect(b.confirmations).toEqual([]);
-        expect(b.store.test_interventions[0].statut).toBe('completee');
+        b.champ('interventionDate').value = '2026-09-03';
+        await b.changer(b.champ('interventionDate'));
+        expect(JSON.stringify(b.store.test_presences), 'ni réécrite, ni retirée, ni doublée').toBe(avant);
         expect(b.ecritures('test_presences')).toBe(0);
+    });
+
+    it('rien ne reste de la case : ni ses mots, ni la question, ni l\'écrivain des présences', () => {
+        const interventions = readFileSync(path.join(RACINE, 'js/interventions.js'), 'utf8');
+        const presences = readFileSync(path.join(RACINE, 'js/saisie-presences.js'), 'utf8');
+        for (const parti of ['caseReport', 'completerTitre', '_demanderReport', 'caseACocher', 'function transfererPresencesVersModule', 'window.transfererPresencesVersModule']) {
+            expect(interventions, parti).not.toContain(parti);
+        }
+        expect(interventions).not.toMatch(/cle\('presences'\)/);
+        expect(presences).not.toContain('window.ajouterPresencesIntervention');
+        const b = banc({ interventions: [intervention()] });
+        expect(typeof b.win.transfererPresencesVersModule).toBe('undefined');
     });
 
     it('une fiche fermée n\'écrit plus rien', async () => {
@@ -196,21 +195,14 @@ describe('lot E3 · nouvelle intervention — rien avant « Créer l\'interventi
         expect(b.conteneur().innerHTML).not.toContain('Créer l\'intervention');
     });
 
-    it('créer une intervention DÉJÀ complétée pose la même question : « Annuler » n\'écrit rien ; décochée, aucune présence ; cochée, le report', async () => {
-        for (const [confirmer, coche, attendu] of [[false, false, 'rien'], [true, false, 'sans report'], [true, true, 'report']]) {
-            const b = banc({ statut: 'completee', confirmer, coche });
-            b.win.uiDialogues = b.uiDialogues;
-            const id = ouvrirBrouillon(b);
-            const r = await b.win.sauvegarderPresencesIntervention(id);
-            expect(b.confirmations, attendu).toEqual(['Marquer cette intervention complétée ?']);
-            if (attendu === 'rien') {
-                expect(r).toBe(false);
-                expect(b.ecritures()).toBe(0);
-                continue;
-            }
-            expect(b.store.test_interventions.map(i => i.statut), attendu).toEqual(['completee']);
-            expect(b.ecritures('test_presences'), attendu).toBe(attendu === 'report' ? 1 : 0);
-        }
+    it('créer une intervention DÉJÀ complétée : aucune question, écrite complétée, aucune présence', () => {
+        const b = banc({ statut: 'completee' });
+        b.win.uiDialogues = b.uiDialogues;
+        const id = ouvrirBrouillon(b);
+        expect(b.win.sauvegarderPresencesIntervention(id)).toBe(true);
+        expect(b.confirmations).toEqual([]);
+        expect(b.store.test_interventions.map(i => i.statut)).toEqual(['completee']);
+        expect(b.ecritures('test_presences')).toBe(0);
     });
 
     it('rencontre : « Créer la rencontre », « Rencontre créée. »', () => {

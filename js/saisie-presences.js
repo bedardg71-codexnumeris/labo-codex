@@ -2471,7 +2471,7 @@ window.modifierNotesPresence = function(da, date, notes, coursId) {
 
     for (var i = 0; i < presences.length; i++) {
         // Match (da, date) ET coursId si dispos. Pattern aligne sur les autres
-        // writers (ecrirePresencesSeance, ajouterPresencesIntervention) qui
+        // writers (ecrirePresencesSeance) qui
         // filtrent tous par coursId.
         var p = presences[i];
         var matchCoursId = !coursId || !p.coursId || p.coursId === coursId;
@@ -2487,45 +2487,8 @@ window.modifierNotesPresence = function(da, date, notes, coursId) {
     return sauvegarderDonneesSelonMode('presences', presences, { geste: 'Note de présence' });
 };
 
-/**
- * Ajoute des entrées de présence depuis une intervention RàI.
- * Utilisé par : interventions.js (transfererPresencesVersModule)
- *
- * @param {Array} entrees - Objets présence { da, date, periodesPresentes, heures, notes, coursId, facultatif }
- * @returns {number} nombre d'entrées ajoutées
- */
-window.ajouterPresencesIntervention = function(entrees) {
-    if (!entrees || entrees.length === 0) return 0;
-
-    var clePresences = cle('presences');
-    var presences = db.getSync(clePresences, []);
-    var ajoutees = 0;
-
-    for (var i = 0; i < entrees.length; i++) {
-        var e = entrees[i];
-        // Vérifier doublon (même da + même date + même coursId)
-        var existe = presences.some(function(p) {
-            return p.da === e.da && p.date === e.date && p.coursId === e.coursId;
-        });
-        if (!existe) {
-            // Marquer comme facultatif (intervention RàI)
-            e.facultatif = true;
-            presences.push(e);
-            ajoutees++;
-        }
-    }
-
-    // « Le graphique suit les présences » (8 nov. 2026) : pas de recapture ici. Une présence RàI n'entre
-    // dans l'assiduité qu'à une séance du cours déjà saisie (`construireDatesSaisiesGroupe`), où l'élève a
-    // déjà sa fiche — et un doublon (même élève, même date, même cours) n'est pas ajouté.
-    if (ajoutees > 0) {
-        db.setSync(clePresences, presences);
-        // Recalculer les indices d'assiduité (les présences facultatives comptent)
-        if (typeof calculerEtSauvegarderIndicesAssiduite === 'function') {
-            calculerEtSauvegarderIndicesAssiduite();
-        }
-    }
-    return ajoutees;
-};
+// (`ajouterPresencesIntervention`, l'écrivain des présences facultatives d'une intervention, est retiré le 23 nov. 2026
+// avec la case « Reporter les présences… » qui était son seul appelant : js/interventions.js, #1304. Les présences
+// `facultatif: true` déjà écrites restent dans `presences` ; leurs lecteurs ne changent pas.)
 
 })();
