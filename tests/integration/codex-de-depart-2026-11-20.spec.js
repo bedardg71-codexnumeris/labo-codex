@@ -15,7 +15,7 @@ import { DEPARTS, DOSSIER_DES_DEPARTS, nomDuCodex } from '../departs-de-parcours
 //      (Safari n'a pas `showOpenFilePicker` : le banc le retire, Chromium le prendrait sinon), puis « Recharger » ;
 //   3. le panneau « Assistance », le bouton « Nous faisons » du parcours visé ;
 //   4. sa première bulle paraît (« 1 sur N », son titre), sans refus dans le panneau.
-// Les parcours sont ceux que la branche ouvre (`PARCOURS_OUVERTS`) : le harnais ne les rouvre pas ici.
+// Les parcours sont ceux que l'application ouvre (`PARCOURS_OUVERTS`).
 // Break-tests (20 nov., au rapport) : un codex sans ses productions (ou sans trimestre), un fichier coupé en deux, et
 // « monter » retiré de `PARCOURS_OUVERTS` font rougir l'essai.
 // Ce banc lit les fichiers COMMIS (DEPARTS_DOSSIER pour un autre dossier) : c'est ce que Grégoire télécharge.
@@ -26,9 +26,7 @@ async function espaceVide(page) {
     page.setDefaultTimeout(20000);
     await page.setViewportSize({ width: 1180, height: 820 });
     await page.goto(indexHtml);
-    // `parcoursFermes` : le banc juge les parcours que l'aperçu ouvre VRAIMENT (`PARCOURS_OUVERTS`), pas ceux que le
-    // harnais rouvre en mémoire (attendre-application.js).
-    await attendreApplication(page, { parcoursFermes: true });
+    await attendreApplication(page);
     const t = await page.evaluate(() => ({
         trimestres: (window.enumererTrimestres ? window.enumererTrimestres() : []).filter((x) => x && x.id !== 'demo').length,
         codexActif: Codex.etat().actif === true
@@ -46,7 +44,7 @@ async function ouvrirLeCodex(page, fichier) {
     const recharger = page.locator('#overlay-ui-dialogue').getByRole('button', { name: 'Recharger', exact: true });
     await expect(recharger, 'l’ouverture propose de recharger').toBeVisible({ timeout: 30000 });
     await Promise.all([page.waitForEvent('load'), recharger.click()]);
-    await attendreApplication(page, { parcoursFermes: true });
+    await attendreApplication(page);
 }
 
 for (const d of DEPARTS) {

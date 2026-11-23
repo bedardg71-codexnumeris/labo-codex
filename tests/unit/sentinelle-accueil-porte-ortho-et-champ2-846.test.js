@@ -166,7 +166,7 @@ const MOTS_BANDEAU = [
     'Un accès gratuit et sécuritaire',
     'Labo Codex est en bêta publique depuis le 3 juin 2026\u00a0: ton expérience influence sa construction. Pour entrer, tu donnes ton adresse de courriel et tu reçois un code. C’est la seule information que tu transmets. Tout le reste demeure dans le navigateur de ton appareil, protégé comme le reste de ton ordinateur par ton mot de passe de session et tes sauvegardes habituelles. Il n’y a ni frais, ni abonnement, ni publicité.',
     'Besoin d’un coup de main\u00a0?',
-    'L’aide est accessible dans l’application, sous «\u00a0Assistance\u00a0». Des parcours assistés s’y ajouteront bientôt pour te montrer les gestes un à un. Les guides pédagogiques sont là si tu veux aller plus loin.',
+    'L’aide est accessible dans l’application, sous «\u00a0Assistance\u00a0». Des parcours assistés t’y montrent les gestes un à un. Les guides pédagogiques sont là si tu veux aller plus loin.',
     'Envie d’en parler avec des collègues\u00a0?',
     'L’Association québécoise de pédagogie collégiale (AQPC) héberge une communauté de pratique Labo Codex. Enseignant·es et conseiller·ères pédagogiques y réfléchissent ensemble à leur pratique et construisent du matériel pédagogique et disciplinaire à partager.',
 ];

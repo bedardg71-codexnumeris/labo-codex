@@ -1,5 +1,4 @@
 import { test, expect } from '@playwright/test';
-import { rouvrirLesParcours } from './harness/attendre-application.js';
 import { releverLaBulle } from './harness/releve-bulle.js';
 // La bulle ne couvre jamais ses zones quand une place les laisse libres (Grégoire, 11 nov. 2026) : relevé à chaque essai.
 releverLaBulle(test);
@@ -63,7 +62,6 @@ async function ouvrirEspace(page, largeur, { clair = false, hauteur = 900, avecG
     await page.goto(indexHtml);
     await page.waitForFunction(() => typeof window.db !== 'undefined' && window.db.ready && window.Assistance
         && window.ParcoursCommentaires && window.travauxStockage, null, { timeout: 30000 });
-    await rouvrirLesParcours(page); // fermés dans l'application depuis le 15 nov. 2026 : le banc les rouvre
     await page.evaluate(async ({ T, avecGrille }) => {
         localStorage.clear();
         if (window.db && db.memoryCache) db.memoryCache.clear();
@@ -76,7 +74,6 @@ async function ouvrirEspace(page, largeur, { clair = false, hauteur = 900, avecG
     await page.reload();
     await page.waitForFunction(() => typeof window.db !== 'undefined' && window.db.ready && window.Assistance
         && window.ParcoursCommentaires && window.travauxStockage, null, { timeout: 30000 });
-    await rouvrirLesParcours(page); // fermés dans l'application depuis le 15 nov. 2026 : le banc les rouvre
     await page.evaluate(({ T, avecGrille, verrouDejaPose }) => {
         // security-ok: fixtures littérales du banc, aucune source externe ; noms fictifs.
         const coursId = 'cours-p8';
@@ -122,7 +119,6 @@ async function ouvrirEspace(page, largeur, { clair = false, hauteur = 900, avecG
     await page.reload();
     await page.waitForFunction(() => typeof window.db !== 'undefined' && window.db.ready && window.Assistance
         && window.ParcoursCommentaires && window.travauxStockage, null, { timeout: 30000 });
-    await rouvrirLesParcours(page); // fermés dans l'application depuis le 15 nov. 2026 : le banc les rouvre
     await page.evaluate((c) => {
         definirPreference('modeClair', c);
         document.body.classList.toggle('mode-clair', c);
@@ -788,7 +784,6 @@ async function cheminSansFichier(page, cap = async () => {}) {
     await page.reload();
     await page.waitForFunction(() => typeof window.db !== 'undefined' && window.db.ready && window.Assistance
         && window.ParcoursCommentaires && window.travauxStockage, null, { timeout: 30000 });
-    await rouvrirLesParcours(page); // fermés dans l'application depuis le 15 nov. 2026 : le banc les rouvre
     await ouvrirPanneau(page);
     await expect(item(page)).toHaveAttribute('data-etat', 'en-cours');
     await expect(item(page).locator('.assistance-parcours-etat')).toHaveText('Étape 3 sur 9');

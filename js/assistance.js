@@ -46,35 +46,23 @@
    titre, le texte validé par Grégoire, et son bouton ne lance rien.
 
    LE VERROU DES PARCOURS (`PARCOURS_OUVERTS`) : la liste des parcours OUVERTS dans l'application livrée, par leur
-   identifiant. Fermés en entier le 15 nov. 2026 (1.248.1) ; depuis le 16 nov. 2026 (demande de Grégoire, 15 h 48 ;
-   plans de travail/CONSIGNE-2026-11-16-decouvrir-en-ligne.md), « Découvrir » SEUL est ouvert. Un parcours fermé
-   reste inscrit, mais il n'est offert nulle part et rien ne le lance :
+   identifiant. Fermés en entier le 15 nov. 2026 (1.248.1) ; « Découvrir » seul rouvert le 16 nov. ; OUVERTS POUR DE VRAI
+   le 23 nov. 2026 (mandat de Grégoire du 22 nov., 20 h 36 ; plans de travail/CONSIGNE-2026-11-22-publication-parcours.md) :
+   les parcours 2 à 8. Le neuvième reste fermé jusqu'au relais suivant. Un parcours fermé reste inscrit, mais il n'est
+   offert nulle part et rien ne le lance :
    · le panneau ne liste que les parcours ouverts, puis dit « À venir » pour les autres, sans les nommer ;
-   · `Assistance.parcours()` ne rend que les ouverts : la porte « Tu enseignes ? » de l'accueil et la fin de
-     « Découvrir » y cherchent « Mettre ta classe en place » et ne l'y trouvent pas ;
+   · `Assistance.parcours()` ne rend que les ouverts (la porte « Tu enseignes ? » de l'accueil, la fin de « Découvrir ») ;
    · `suivantDe` ne rend qu'un parcours ouvert (la suite suggérée à la fin d'un parcours, « Voir le parcours N ») ;
    · `lancerParcours` refuse un parcours fermé ; le rang du menu et la remise à neuf de la démo (qui sert les
      modèles) ne comptent que les ouverts.
-   Les bancs rouvrent tout en mémoire (`ouvrirLesParcours`, par le harnais) : le code des parcours fermés reste jugé.
+   Les bancs jugent l'application telle qu'elle est livrée ; un banc qui a besoin d'un autre jeu de parcours le pose en
+   mémoire (`ouvrirLesParcours`).
    ================================================================= */
 (function () {
     'use strict';
 
     var CLE_PREF = 'parcoursAssistance';
-    // ⚠ BRANCHE SEULEMENT (lot « Je regarde » de « Recevoir », 17 nov. 2026) : rouverts pour l'aperçu de Grégoire.
-    // À DÉFAIRE AVANT TOUTE FUSION : `git revert` du commit « BRANCHE SEULEMENT », qui rend ['decouvrir'] et les deux
-    // essais du verrou (plans de travail/RAPPORT-2026-11-17-je-regarde-recevoir.md, §5).
-    // ⚠ BRANCHE SEULEMENT (session de nuit A, `lot/nous-faisons-donnees`, 20 nov. 2026) : « Mettre tes données à l'abri »
-    // ouvert pour l'aperçu de son « Nous faisons ». À DÉFAIRE AVANT TOUTE FUSION : `git revert` de ce commit
-    // (plans de travail/RAPPORT-2026-11-19-nous-faisons-donnees.md).
-    // ⚠ ESSAI SEULEMENT (`apercu/essai-parcours`, 20 nov. 2026) : fusion de `lot/nous-faisons-donnees` et de
-    // `lot/je-regarde-cours`, « monter » et « donnees » ouverts ensemble. Cette branche ne se fusionne jamais.
-    // ⚠ BRANCHE SEULEMENT (`claude/relaxed-feynman-0vcwct`, 22 nov. 2026) : « Lire ta classe et intervenir » et
-    // « Automatiser tes commentaires » ouverts pour l'aperçu de leurs deux temps ; « Mettre en place ta notation
-    // alternative » aussi, SEULEMENT pour que la dernière bulle du parcours 8 offre sa suite (le parcours 9 n'est pas à
-    // essayer : il sera réécrit). À DÉFAIRE AVANT TOUTE FUSION : `git revert` de ce commit
-    // (plans de travail/RAPPORT-2026-11-22-echelle-de-depart-et-parcours-6-7-8.md).
-    var PARCOURS_OUVERTS = ['decouvrir', 'classe', 'evaluer', 'recevoir', 'monter', 'donnees', 'lire-ta-classe', 'commentaires', 'notation-alternative'];
+    var PARCOURS_OUVERTS = ['decouvrir', 'classe', 'evaluer', 'recevoir', 'monter', 'donnees', 'lire-ta-classe', 'commentaires'];
     // L'état en mémoire, que seuls les bancs changent (ouvrirLesParcours) : la liste des identifiants ouverts, ou `true`
     // (tous). Rien ne le garde d'un chargement à l'autre.
     var ouverts = PARCOURS_OUVERTS.slice();

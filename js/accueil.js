@@ -134,7 +134,7 @@ function genererBanniereBienvenue() {
             </div>
             <div class="apropos-deux apropos-avec-filet">
                 <div class="apropos-concepts">
-                    <p><strong>Besoin d’un coup de main ?</strong> L’aide est accessible dans l’application, sous « Assistance ». Des parcours assistés s’y ajouteront bientôt pour te montrer les gestes un à un. Les guides pédagogiques sont là si tu veux aller plus loin.</p>
+                    <p><strong>Besoin d’un coup de main ?</strong> L’aide est accessible dans l’application, sous « Assistance ». Des parcours assistés t’y montrent les gestes un à un. Les guides pédagogiques sont là si tu veux aller plus loin.</p>
                     <ul class="apropos-liens banniere-bienvenue-actions">
                         <li><button type="button" class="apropos-lien" data-action="ouvrirPanneauAssistance">Assistance</button></li>
                         <li><button type="button" class="apropos-lien" data-action="naviguerAccueilCarte" data-param="labo|labo-accompagnement">Guides pédagogiques</button></li>
@@ -330,10 +330,7 @@ function deplacerFocusVersSection(section) {
  */
 function commencerParLeTrimestre() {
     const classe = window.Assistance.parcours().find(function(p) { return p.id === 'classe'; });
-    if (classe) { classe.lancer(); return; }
-    // Parcours fermés (15 nov. 2026, js/assistance.js) : la porte ne reste pas muette, elle mène à
-    // Cadre › Trimestre, là où le parcours commençait.
-    naviguerAccueilCarte('calendrier|calendrier-trimestre');
+    if (classe) classe.lancer();
 }
 
 /**
