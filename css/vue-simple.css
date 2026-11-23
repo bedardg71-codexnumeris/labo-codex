@@ -490,6 +490,77 @@ body.vue-simple .codex-menu {
     min-width: 140px;
 }
 
+/* Les critères d'une cible (22 nov. 2026) : lus sous chaque cible ; au réglage, une ligne par critère sous la cible. */
+.vs-cible-lue-tete {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.vs-criteres-lus {
+    margin: 4px 0 0;
+    padding-left: 20px;
+    color: var(--texte-secondaire);
+}
+
+.vs-cible-criteres td {
+    padding-top: 0;
+}
+
+.vs-criteres {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+    padding-left: 16px;
+}
+
+.vs-criteres-liste {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    width: 100%;
+}
+
+.vs-critere {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.vs-critere-texte {
+    flex: 1 1 220px;
+    min-height: 46px;
+}
+
+.vs-critere-essentiel {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    min-height: 46px;
+    cursor: pointer;
+}
+
+.vs-critere-essentiel-case {
+    width: 22px;
+    height: 22px;
+}
+
+.vs-cibles-lues {
+    gap: 10px;
+}
+
+.vs-cible-lue + .vs-cible-lue {
+    padding-top: 10px;
+    border-top: 1px solid var(--bordure-claire);
+}
+
 /* « Par standards » (21 nov. 2026) : le nom d'une cible au réglage, aussi large que la table le permet. */
 .vs-cible-nom {
     width: 100%;

@@ -292,6 +292,20 @@ describe('C bis. Plusieurs groupes, et le retrait d\'un groupe vide (décision d
         expect(D.nomCoursParDefaut('Mon cours', ['Mon cours'])).toBe('Mon cours 2');
         expect(D.nomCoursParDefaut('Mon cours', ['mon cours', 'Mon cours 2', 'Atelier'])).toBe('Mon cours 3');
     });
+
+    // 22 nov. 2026 (décision de Grégoire, 9 h 39) : « Créer un groupe d'essai ». Des DA à lettres, qu'aucune liste collée ne
+    // produit ; une série libre ce trimestre, pour que deux groupes d'essai ne se heurtent pas.
+    it('le groupe d\'essai : quatre personnes fictives, des DA qu\'aucune liste collée ne peut produire, une série libre', () => {
+        const a = D.elevesDEssai([]);
+        expect(a.map((f) => f.da)).toEqual(['ESSAI-1-01', 'ESSAI-1-02', 'ESSAI-1-03', 'ESSAI-1-04']);
+        expect(a.every((f) => f.nom && f.prenom && !/^\d{7}$/.test(f.da))).toBe(true);
+        const collee = D.analyserListeCollee(a.map((f) => `${f.da}, ${f.nom}, ${f.prenom}`).join('\n'));
+        expect(collee.fiches).toEqual([]);   // le DA à lettres est refusé à la liste collée : il ne peut venir que d'ici
+        const b = D.elevesDEssai(['1234567'].concat(a.map((f) => f.da)));
+        expect(b.map((f) => f.da)).toEqual(['ESSAI-2-01', 'ESSAI-2-02', 'ESSAI-2-03', 'ESSAI-2-04']);
+        expect(D.elevesDEssai(['ESSAI-1-03']).map((f) => f.da)[0]).toBe('ESSAI-2-01');   // une série entamée n'est pas reprise
+        expect(D.elevesDEssai(['ESSAI-2-01']).map((f) => f.da)[0]).toBe('ESSAI-1-01');   // la série 1 retirée redevient libre
+    });
 });
 
 describe('D. Ce qui naît en coulisse', () => {

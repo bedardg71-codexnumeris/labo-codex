@@ -384,6 +384,12 @@
     min-height: 46px;
 }
 
+/* Les critères en vue simple (22 nov. 2026) : « Respecté », « Non respecté » à 46 px, comme le reste. */
+.tc-overlay--simple .tc-coche {
+    min-height: 46px;
+    min-width: 46px;
+}
+
 .tc-overlay--simple .modal-fermer {
     min-width: 46px;
     top: 8px;
@@ -808,4 +814,233 @@
 .cibles-reglages-seuil .controle-form {
     width: 120px;
     min-height: 44px;
+}
+
+/* =========================================================================
+   L'ÉCRAN D'OBSERVATION (22 nov. 2026, « Par standards » à l'essai) — js/observation-cibles.js
+   Un·e étudiant·e à la fois, un carrousel léger. iPad tenu d'une main : zones de 48 px, rien au survol. La fenêtre
+   prend presque tout l'écran ; le bouton qui inscrit reste au bas, à portée du pouce.
+   ========================================================================= */
+.oc-fenetre {
+    width: min(760px, 96vw);
+    max-width: 96vw;
+    margin: 12px auto;
+    padding: 20px;
+}
+
+.oc-overlay .btn,
+.oc-overlay .modal-fermer,
+.oc-overlay .tc-coche {
+    min-height: 48px;
+}
+
+.oc-overlay .tc-coche {
+    min-width: 48px;
+    padding: 0 14px;
+}
+
+.oc-overlay .modal-fermer {
+    min-width: 48px;
+    top: 8px;
+    right: 8px;
+}
+
+.oc-section {
+    margin: 12px 0;
+}
+
+/* Le choix de la cible : une tuile par cible, qui passe à la ligne. */
+.oc-tuiles {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 8px;
+}
+
+.oc-tuile,
+.oc-bascule-choix,
+.oc-nom-choix,
+.oc-pastille {
+    min-height: 48px;
+    border: 1px solid var(--bordure-moyenne);
+    border-radius: 8px;
+    background: transparent;
+    color: var(--texte-principal);
+    font: inherit;
+    cursor: pointer;
+    touch-action: manipulation;
+}
+
+.oc-tuile {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 2px;
+    padding: 8px 12px;
+    text-align: left;
+}
+
+.oc-tuile-nom {
+    font-weight: 600;
+}
+
+.oc-tuile-detail,
+.oc-position {
+    color: var(--texte-secondaire);
+    font-size: 0.85rem;
+}
+
+.oc-tuile[aria-pressed="true"],
+.oc-bascule-choix[aria-pressed="true"],
+.oc-nom-choix[aria-pressed="true"] {
+    border: 2px solid var(--accent-primaire);
+    background: color-mix(in srgb, var(--accent-primaire) 18%, transparent);
+    font-weight: 600;
+}
+
+.oc-tuile:focus-visible,
+.oc-bascule-choix:focus-visible,
+.oc-nom-choix:focus-visible,
+.oc-pastille:focus-visible {
+    outline: var(--focus-ring-width) solid var(--focus-ring-color);
+    outline-offset: var(--focus-ring-offset);
+}
+
+/* Deux choix côte à côte : « Tout le groupe » / « Quelques étudiant·es » ; « Observation » / « Conversation ». */
+.oc-bascule {
+    display: inline-flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.oc-bascule-choix {
+    padding: 0 16px;
+}
+
+.oc-noms {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 8px;
+}
+
+.oc-nom-choix {
+    padding: 0 14px;
+}
+
+/* L'écran d'un·e étudiant·e : la cible, l'origine, le carrousel, le nom en grand. */
+.oc-tete {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    padding-right: 48px;
+}
+
+.oc-cible {
+    margin: 0;
+    font-weight: 600;
+}
+
+.oc-origine {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+    margin: 8px 0;
+}
+
+.oc-origine-nom {
+    color: var(--texte-secondaire);
+}
+
+.oc-carrousel {
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    -webkit-overflow-scrolling: touch;
+    margin: 8px -4px;
+    padding: 4px;
+}
+
+.oc-carrousel-liste {
+    display: flex;
+    gap: 6px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.oc-pastille {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: center;
+    gap: 2px;
+    min-width: 120px;
+    padding: 4px 12px;
+    white-space: nowrap;
+    text-align: left;
+}
+
+.oc-pastille[aria-current="true"] {
+    border: 2px solid var(--accent-primaire);
+    background: color-mix(in srgb, var(--accent-primaire) 18%, transparent);
+    font-weight: 600;
+}
+
+.oc-pastille--absent .oc-pastille-nom {
+    color: var(--texte-secondaire);
+}
+
+/* Les deux marques : un mot, lisible sans survol ni couleur seule. */
+.oc-marque {
+    font-size: 0.8rem;
+    font-weight: 400;
+    color: var(--texte-secondaire);
+}
+
+.oc-marque--vu::before {
+    content: "✓ ";
+    color: var(--niveau-attention-minimal);
+}
+
+.oc-qui {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 4px 12px;
+    margin: 12px 0 4px;
+}
+
+.oc-nom {
+    margin: 0;
+    font-size: 1.6rem;
+    line-height: 1.2;
+}
+
+.oc-nom:focus {
+    outline: none;
+}
+
+.oc-note {
+    width: 100%;
+}
+
+/* Le bouton qui inscrit : large, au bas, à portée du pouce. */
+.oc-actions {
+    position: sticky;
+    bottom: 0;
+    background: var(--surface-carte, #1a3040);
+    padding-top: 8px;
+}
+
+.oc-inscrire {
+    flex: 1 1 auto;
+    min-height: 56px;
+    font-size: 1.05rem;
+}
+
+.oc-annonce {
+    margin: 4px 0 0;
+    color: var(--texte-secondaire);
+    min-height: 1.2em;
 }

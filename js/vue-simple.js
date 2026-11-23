@@ -39,10 +39,11 @@
         confidentialiteTete: 'Tes données restent chez toi.',
         confidentialite: (sauvegarder) => `Tout ce que tu entres ici est gardé dans ton navigateur, sur cet appareil. Rien n’est transmis à un serveur, personne d’autre n’y a accès. Pour en garder une copie, utilise « ${sauvegarder} ».`,
         sousTitreAccueil: 'Quatre étapes, de ta liste d’étudiant·es à ta note finale.',
+        // Cartes 2 et 3 : ACCEPTÉES par Grégoire, mot pour mot (22 nov. 2026, 9 h 12) — « Par standards » trouvable en vue simple.
         cartes: [
             { ecran: 'classe', titre: 'Ta classe', texte: 'Colle ta liste d’étudiant·es : DA, nom, prénom.', lien: 'Coller ma liste' },
-            { ecran: 'pratique', titre: 'Ta pratique', texte: 'Choisis un modèle, par sélection de productions ou par spécifications, et la règle qui construit la note.', lien: 'Choisir un modèle' },
-            { ecran: 'resultats', titre: 'Tes résultats', texte: 'Inscris un niveau, ou acceptable / non acceptable, dans un tableau : tes étudiant·es en lignes, tes productions en colonnes.', lien: 'Ouvrir le tableau' },
+            { ecran: 'pratique', titre: 'Ta pratique', texte: 'Choisis un modèle : par standards, par spécifications ou par sélection de productions. Tu règles ensuite ce qui construit la note.', lien: 'Choisir un modèle' },
+            { ecran: 'resultats', titre: 'Tes résultats', texte: 'Inscris un niveau, ou acceptable / non acceptable, dans un tableau : tes étudiant·es en lignes, tes cibles ou tes productions en colonnes.', lien: 'Ouvrir le tableau' },
             { ecran: 'note', titre: 'Ta note finale', texte: 'Vois la note de chaque étudiant·e et exporte-les en CSV, prêtes pour ton relevé.', lien: 'Voir les notes' }
         ],
         // PROPOSÉ par Claude Code (9 nov. 2026) ; « élève » remplacé par « étudiant·e » sur décision de Grégoire
@@ -74,7 +75,15 @@
         groupePorteResultats: 'Ce groupe porte des résultats : il ne se retire pas ici.',
         groupeRetire: 'Groupe retiré.',
         // PROPOSÉ par Claude Code (10 nov. 2026) : la même personne ne s'inscrit qu'une fois par trimestre (règle de la vue étendue).
-        groupeAucunNouveau: 'Toutes ces personnes sont déjà inscrites ce trimestre : le groupe n’a pas été créé.',
+        // ↻ 22 nov. 2026, 9 h 54 : la sortie nommée (proposée par Claude Code, acceptée par Grégoire). Le bouton est interpolé
+        // (`groupeEssai`) pour ne jamais en diverger.
+        groupeAucunNouveau: (essai) => `Toutes ces personnes sont déjà inscrites ce trimestre : le groupe n’a pas été créé. Pour essayer un modèle, utilise « ${essai} ».`,
+        // « Créer un groupe d'essai » : ACCEPTÉ par Grégoire (22 nov. 2026, 9 h 39). Le nom du cours, l'aide et l'avis :
+        // proposés par Claude Code, ACCEPTÉS par Grégoire (22 nov. 2026, 9 h 54).
+        groupeEssai: 'Créer un groupe d’essai',
+        groupeEssaiNom: 'Cours d’essai',
+        groupeEssaiAide: 'Pour essayer un modèle sans toucher à tes groupes : un groupe de quatre personnes fictives, rien à coller.',
+        groupeEssaiCree: (n) => `Groupe d’essai créé, avec ${n} personnes fictives.`,
         // PROPOSÉ : la cause de l'import de la vue étendue (« Déjà inscrit… ce trimestre », validée le 19 sept. 2026), tournée
         // sans accord, comme tous les mots de la vue simple (décision de Grégoire du 9 nov., 20 h 49).
         dejaInscrit: 'déjà dans un groupe de ce trimestre',
@@ -88,7 +97,9 @@
         groupe: 'Groupe',
         groupeChoisir: 'Choisis un groupe',
         groupeAutrePratique: 'autre pratique',
-        groupeMotAutres: 'Un groupe dont la pratique n’est ni par sélection de productions ni par spécifications se suit en vue étendue.',
+        // ↻ 22 nov. 2026 : groupeMotAutres, pratiqueAutre et tableau.autreFamille nomment les trois modèles (proposés par
+        // Claude Code, acceptés par Grégoire le 22 nov. ; TEXTES-2026-11-22-vue-simple-porte-par-standards.md, V2, V5, V6).
+        groupeMotAutres: 'Un groupe dont la pratique n’est ni par standards, ni par spécifications, ni par sélection de productions se suit en vue étendue.',
         sansClasse: 'Commence par ta classe : colle ta liste d’étudiant·es.',
         sansClasseLien: 'Coller ma liste',
         // — Pratique
@@ -115,6 +126,13 @@
         ciblesEnregistrees: 'Cibles enregistrées.',
         ciblesAucune: 'Ta pratique n’a pas encore de cible.',
         ciblesEtendue: 'Les énoncés, les poids et les cibles terminales se règlent en vue étendue.',
+        // Les critères d'une cible (22 nov. 2026, décision de Grégoire, 9 h 14) : les textes ACCEPTÉS du lot 1 (21 nov. ;
+        // TEXTES-2026-11-20-par-standards-lot-1.md, B3, B15, B17, B18, B19), les mêmes qu'en vue étendue (editeur-cibles.js).
+        criteresChamp: 'Critères, un par ligne',
+        critereEssentiel: 'Critère essentiel',
+        critereAjouter: '+ Ajouter un critère',
+        critereRetirer: 'Retirer ce critère',
+        criteresAide: 'Les critères essentiels sont ceux sans lesquels une cible n’est pas acquise.',
         ciblesPoidsRegles: 'Les poids de tes cibles ont été réglés en vue étendue : ils restent tels quels.',
         niveauxCiblesAide: 'Pour chaque cible, le niveau retenu est le meilleur que l’étudiant·e a démontré. Ces niveaux se règlent en vue étendue.',
         noteCiblesTitre: 'La note',
@@ -183,14 +201,17 @@
             cibleEnDouble: () => 'Deux cibles portent le même nom.'
         },
         pratiqueChanger: 'Changer de modèle',
-        pratiqueAutre: 'La pratique de ce groupe n’est ni par sélection de productions ni par spécifications : elle se règle en vue étendue.',
+        // ACCEPTÉ par Grégoire, mot pour mot (22 nov. 2026, 9 h 12 ; ↻ 9 h 54, « des productions ou des résultats ») : là où « Changer de modèle » ne s'offre plus parce que le
+        // groupe a des productions (par standards : des niveaux inscrits). Le bouton qui suit reprend `groupeNouveau`.
+        pratiqueFigee: 'Ce groupe a déjà des productions ou des résultats : son modèle ne change plus. Pour essayer un autre modèle, crée un groupe d’essai.',
+        pratiqueAutre: 'La pratique de ce groupe n’est ni par standards, ni par spécifications, ni par sélection de productions : elle se règle en vue étendue.',
         pratiqueSuite: 'Ouvrir le tableau',
         pratiqueEchec: 'La pratique n’a pas pu être enregistrée.',
         reglePartagee: (n) => `Ce réglage vaut pour les ${n} groupes qui ont cette pratique.`,
         // — Résultats (le tableau garde ses mots validés ; ceux-ci remplacent les messages qui nomment la vue étendue)
         tableau: {
             aucunePratique: 'Ce groupe n’a pas encore de pratique. Choisis un modèle : le tableau suivra sa règle.',
-            autreFamille: 'Le tableau sert aux pratiques par sélection de productions et par spécifications. La pratique de ce groupe se suit en vue étendue.',
+            autreFamille: 'Le tableau sert aux pratiques par standards, par spécifications et par sélection de productions. La pratique de ce groupe se suit en vue étendue.',
             aucunEleve: 'Ce groupe n’a pas encore d’étudiant·es. Colle ta liste pour remplir le tableau.',
             aucuneProduction: 'Ton tableau n’a pas encore de colonne. Ajoute ta première production : un nom et une date.'
         },
@@ -523,7 +544,7 @@
         }
         if (!groupe || _nouveauGroupe) {
             const annuler = groupe ? `<p><button type="button" class="btn btn-secondaire" data-action="VueSimple.annulerNouveauGroupe">${esc(MOTS.productionAnnuler)}</button></p>` : '';
-            _ecrire(hote, `${tete}${retourHTML || ''}<p class="vs-intro">${esc(MOTS.classeIntro)}</p><div class="vs-bloc">${_champListeHTML(true)}${annuler}</div>`);
+            _ecrire(hote, `${tete}${retourHTML || ''}<p class="vs-intro">${esc(MOTS.classeIntro)}</p><div class="vs-bloc">${_champListeHTML(true)}${groupe ? _groupeEssaiHTML() : ''}${annuler}</div>`);
             return;
         }
         const rangees = eleves.map((e) => `<tr><td>${esc(e.da)}</td><td>${esc(e.nom)}</td><td>${esc(e.prenom)}</td></tr>`).join('');
@@ -633,7 +654,7 @@
         const actif = _nouveauGroupe ? null : _groupeActif();
         const deja = actif ? [] : _dejaInscrits(lecture.fiches);
         if (deja.length === lecture.fiches.length) {
-            dire(`<p class="vs-erreur" role="alert">${esc(MOTS.groupeAucunNouveau)}</p>${_refuseesHTML(deja)}`);
+            dire(`<p class="vs-erreur" role="alert">${esc(MOTS.groupeAucunNouveau(MOTS.groupeEssai))}</p>${_refuseesHTML(deja)}`);
             return;
         }
         const nomCours = _nomCoursSaisi(actif);
@@ -656,7 +677,43 @@
 
     /* ---------- PLUSIEURS GROUPES : en créer un autre, retirer un groupe vide ---------- */
 
-    function nouveauGroupe() { _nouveauGroupe = true; _retraitGroupe = null; _rendreClasse(); }
+    /** « Créer un groupe d'essai », à côté de la liste, quand on crée un AUTRE groupe ; jamais pendant la démonstration. */
+    function _groupeEssaiHTML() {
+        if (_demoOuverte()) return '';
+        return `<div data-vs-classe="essai"><p class="vs-note">${esc(MOTS.groupeEssaiAide)}</p>
+            <p><button type="button" class="btn btn-secondaire" data-action="VueSimple.creerGroupeEssai">${esc(MOTS.groupeEssai)}</button></p></div>`;
+    }
+
+    /**
+     * Un groupe d'essai : un cours neuf (« Cours d'essai », puis « Cours d'essai 2 »…), son groupe, quatre personnes
+     * fictives (`elevesDEssai` : des DA à lettres, une série libre ce trimestre). Par les chemins de « Nouveau groupe » :
+     * rien d'un groupe existant n'est lu pour écrire, sauf les DA pris, pour ne pas les heurter. Il se retire comme tout groupe.
+     */
+    async function creerGroupeEssai() {
+        if (_demoOuverte() || !_groupeActif()) return;
+        const retour = document.getElementById('vs-classe-retour');
+        try {
+            const trimestre = _assurerTrimestre();
+            const pris = trimestre ? (db.getSync(cle('groupeEtudiants'), []) || []).map((e) => e && e.da) : [];
+            const fiches = D().elevesDEssai(pris);
+            const nom = D().nomCoursParDefaut(MOTS.groupeEssaiNom, _groupes().map((g) => (_cours(g.coursId) || {}).nomCours));
+            const groupe = await _naitreGroupe(nom);
+            const r = await _inscrire(fiches, groupe);
+            if (!r.ecrit || r.ajoutes !== fiches.length) throw new Error('personnes fictives non inscrites');
+            await _activerGroupeNe(groupe);
+            _nouveauGroupe = false;
+            _rendreClasse(`<p class="vs-succes" role="status">${esc(MOTS.groupeEssaiCree(r.ajoutes))}</p>`);
+        } catch (e) {
+            console.error('[Vue simple] groupe d’essai non créé :', e);
+            if (retour) _ecrire(retour, `<p class="vs-erreur" role="alert">${esc(MOTS.classeEchec)}</p>`);
+        }
+    }
+
+    /** « Nouveau groupe » : à l'écran Classe, ou depuis « Ta pratique » quand le modèle ne change plus (`_modeleFigeHTML`). */
+    function nouveauGroupe() {
+        if (_ecran !== 'classe') aller('classe');   // `aller` referme tout formulaire : le drapeau se pose après
+        _nouveauGroupe = true; _retraitGroupe = null; _rendreClasse();
+    }
     function annulerNouveauGroupe() { _nouveauGroupe = false; _rendreClasse(); }
     function annulerRetraitGroupe() { _retraitGroupe = null; _rendreClasse(); }
 
@@ -1004,20 +1061,46 @@
         return (id && window.EnsemblesCibles) ? window.EnsemblesCibles.lireParId(id) : null;
     }
 
+    /** Les critères d'une cible, lus : leur texte, « Critère essentiel » pour ceux qui le sont. Rien s'il n'y en a pas. */
+    function _criteresLusHTML(cible) {
+        if (!cible.criteres.length) return '';
+        const lignes = cible.criteres.map((k) => `<li>${esc(k.texte)}${k.essentiel ? ` <span class="cibles-fiche-essentiel">${esc(MOTS.critereEssentiel)}</span>` : ''}</li>`).join('');
+        return `<ul class="vs-criteres-lus">${lignes}</ul>`;
+    }
+
+    /** Les cibles, lues : chacune avec ses critères (ceux de la vue étendue compris) et, si elles se règlent ici,
+     *  « + Ajouter un critère », qui ouvre le réglage des cibles sur une ligne de critère neuve. */
     function _ciblesLuesHTML(pratique) {
         const ensemble = _ensembleDeLaPratique(pratique);
         if (!ensemble) return `<p class="vs-note">${esc(_motDuTableau('introuvable'))}</p>`;
         const cibles = window.EnsemblesCibles.normaliserCibles(ensemble.cibles);
-        const puces = cibles.map((c) => `<span class="vs-niveau"><strong>${esc(c.etiquette)}</strong></span>`).join('');
+        const reglable = _reglable(pratique, 'cibles');
+        const lignes = cibles.map((c, i) => `<li class="vs-cible-lue" data-cible-id="${esc(c.id)}"><div class="vs-cible-lue-tete"><strong>${esc(c.etiquette)}</strong>`
+            + (reglable ? `<button type="button" class="btn btn-secondaire vs-petit" data-action="VueSimple.ajouterCritere" data-param="${i}">${esc(MOTS.critereAjouter)}</button>` : '')
+            + `</div>${_criteresLusHTML(c)}</li>`).join('');
         const poids = D().poidsEgaux(cibles) ? '' : `<p class="vs-note">${esc(MOTS.ciblesPoidsRegles)}</p>`;
-        return (cibles.length ? `<p class="vs-niveaux">${puces}</p>` : `<p class="vs-note">${esc(MOTS.ciblesAucune)}</p>`)
+        return (cibles.length ? `<ul class="vs-paliers-lus vs-cibles-lues">${lignes}</ul>` : `<p class="vs-note">${esc(MOTS.ciblesAucune)}</p>`)
             + poids + `<p class="vs-note">${esc(MOTS.ciblesEtendue)}</p>`;
+    }
+
+    /** Les critères d'une cible au réglage : une ligne par critère (texte, « Critère essentiel », « Retirer ce critère »),
+     *  puis « + Ajouter un critère ». */
+    function _criteresReglageHTML(c, i) {
+        const id = `vs-criteres-${i}`;
+        const lignes = (c.criteres || []).map((k, j) => `<li class="vs-critere">
+                <input type="text" class="controle-form vs-critere-texte" maxlength="200" value="${esc(k.texte)}" aria-labelledby="${id}">
+                <label class="vs-critere-essentiel"><input type="checkbox" class="vs-critere-essentiel-case"${k.essentiel ? ' checked' : ''}><span>${esc(MOTS.critereEssentiel)}</span></label>
+                <button type="button" class="btn btn-secondaire vs-petit" data-action="VueSimple.critereGeste" data-param="retirer" data-param2="${i}" data-param3="${j}">${esc(MOTS.critereRetirer)}</button></li>`).join('');
+        const liste = lignes ? `<span class="vs-libelle" id="${id}">${esc(MOTS.criteresChamp)}</span><ul class="vs-criteres-liste">${lignes}</ul>` : '';
+        return `<div class="vs-criteres" data-cible="${i}">${liste}
+                <button type="button" class="btn btn-secondaire vs-petit" data-action="VueSimple.critereGeste" data-param="ajouter" data-param2="${i}">${esc(MOTS.critereAjouter)}</button></div>`;
     }
 
     function _ciblesReglageHTML() {
         const rangees = _brouillon.cibles.map((c, i) => `<tr><td><input type="text" class="controle-form vs-cible-nom" maxlength="80" value="${esc(c.etiquette)}" aria-label="${esc(MOTS.cibleNom + ' ' + (i + 1))}"></td>
-                <td class="vs-rangee-gestes"><button type="button" class="btn btn-secondaire vs-petit" data-action="VueSimple.cibleGeste" data-param="retirer" data-param2="${i}">${esc(MOTS.cibleRetirer)}</button></td></tr>`).join('');
-        return `<p class="vs-note">${esc(MOTS.ciblesIntro)}</p>
+                <td class="vs-rangee-gestes"><button type="button" class="btn btn-secondaire vs-petit" data-action="VueSimple.cibleGeste" data-param="retirer" data-param2="${i}">${esc(MOTS.cibleRetirer)}</button></td></tr>
+            <tr class="vs-cible-criteres"><td colspan="2">${_criteresReglageHTML(c, i)}</td></tr>`).join('');
+        return `<p class="vs-note">${esc(MOTS.ciblesIntro)}</p><p class="vs-note">${esc(MOTS.criteresAide)}</p>
             <div class="vs-cadre-table"><table class="vs-table vs-reglage"><thead><tr><th scope="col">${esc(MOTS.cibleNom)}</th><th scope="col"></th></tr></thead><tbody>${rangees}</tbody></table></div>
             <p class="vs-gestes"><button type="button" class="btn btn-secondaire" data-action="VueSimple.cibleGeste" data-param="ajouter">${esc(MOTS.cibleAjouter)}</button></p>`;
     }
@@ -1085,7 +1168,7 @@
         // Une pratique importée sous l'ancienne forme (`.config`) se lit en vue étendue, elle ne se règle pas ici.
         const reglable = !!pratique.configuration;
         const blocs = !reglable ? `<p class="vs-note">${esc(MOTS.regleAutre)}</p>` : (cib ? _blocsCibHTML(pratique) : (std ? _blocsStdHTML(pratique) : _blocsSpeHTML(pratique)));
-        return `<p class="vs-intro"><span class="vs-libelle">${esc(MOTS.pratiqueModele)}</span> ${esc(noms)}</p>
+        return `<p class="vs-intro"><span class="vs-libelle">${esc(MOTS.pratiqueModele)}</span> ${esc(noms)}</p>${_modeleFigeHTML(groupe)}
             <div id="vs-pratique-retour">${retourHTML || ''}${_questionMiseAJourHTML()}</div>${reglable ? _reglePartageeHTML(pratique) : ''}${blocs}
             <p class="vs-gestes"><button type="button" class="btn btn-principal" data-action="VueSimple.aller" data-param="resultats">${esc(MOTS.pratiqueSuite)}</button>${_changerModeleHTML(groupe)}</p>`;
     }
@@ -1114,6 +1197,18 @@
     function _changerModeleHTML(groupe) {
         if (!_modeleChangeable(groupe)) return '';
         return `<button type="button" class="btn btn-secondaire" data-action="VueSimple.changerModele">${esc(MOTS.pratiqueChanger)}</button>`;
+    }
+
+    /**
+     * Le pendant de `_changerModeleHTML` : là où le modèle ne se change plus, la phrase qui le dit et la porte vers un groupe
+     * d'essai (« Nouveau groupe », qui mène à l'écran Classe, formulaire ouvert). Le bouton manque pendant la démonstration,
+     * comme à l'écran Classe (`_gestesDuGroupeHTML`) : la création y est refusée.
+     */
+    function _modeleFigeHTML(groupe) {
+        if (_modeleChangeable(groupe)) return '';
+        const bouton = _demoOuverte() ? ''
+            : `<p class="vs-gestes"><button type="button" class="btn btn-secondaire" data-action="VueSimple.nouveauGroupe">${esc(MOTS.groupeNouveau)}</button></p>`;
+        return `<div class="vs-bloc" data-vs-pratique="figee"><p class="vs-note">${esc(MOTS.pratiqueFigee)}</p>${bouton}</div>`;
     }
 
     function _apresEcriturePratique() {
@@ -1156,7 +1251,15 @@
         }
         if (_reglage === 'cibles') {
             const noms = valeurs('.vs-cible-nom');
-            return Object.assign({}, b, { cibles: b.cibles.map((c, i) => Object.assign({}, c, { etiquette: noms[i] })) });
+            const blocs = document.querySelectorAll('#vs-bloc-cibles .vs-criteres');
+            const criteresLus = (c, i) => {
+                const lignes = blocs[i] ? Array.from(blocs[i].querySelectorAll('.vs-critere')) : [];
+                return (c.criteres || []).map((k, j) => (lignes[j] ? Object.assign({}, k, {
+                    texte: lignes[j].querySelector('.vs-critere-texte').value,
+                    essentiel: lignes[j].querySelector('.vs-critere-essentiel-case').checked
+                }) : k));
+            };
+            return Object.assign({}, b, { cibles: b.cibles.map((c, i) => Object.assign({}, c, { etiquette: noms[i], criteres: criteresLus(c, i) })) });
         }
         if (_reglage === 'types') {
             const noms = valeurs('.vs-type-nom');
@@ -1210,6 +1313,33 @@
             const champs = document.querySelectorAll('#vs-bloc-cibles .vs-cible-nom');
             if (champs.length) champs[champs.length - 1].focus();
         } else if (quoi === 'retirer') _geste(D().gestesCibles.retirer(b, Number(index)));
+    }
+
+    function _idCritere() {
+        return (window.EditeurCibles && window.EditeurCibles.nouvelIdCritere) ? window.EditeurCibles.nouvelIdCritere() : window.genererIdUnique('critere_');
+    }
+
+    /** Une ligne de critère neuve sous la cible `index`, le curseur dedans. */
+    function _ajouterLigneCritere(b, index) {
+        _geste(D().gestesCibles.critereAjouter(b, index, _idCritere()));
+        const bloc = document.querySelectorAll('#vs-bloc-cibles .vs-criteres')[index];
+        const champs = bloc ? bloc.querySelectorAll('.vs-critere-texte') : [];
+        if (champs.length) champs[champs.length - 1].focus();
+    }
+
+    /** Au réglage des cibles : « + Ajouter un critère » (sous une cible), « Retirer ce critère ». */
+    function critereGeste(quoi, index, rang) {
+        if (_reglage !== 'cibles') return;
+        const b = _lireLeReglage();
+        _brouillon = b;
+        if (quoi === 'ajouter') _ajouterLigneCritere(b, Number(index));
+        else if (quoi === 'retirer') _geste(D().gestesCibles.critereRetirer(b, Number(index), Number(rang)));
+    }
+
+    /** Depuis les cibles lues : « + Ajouter un critère » ouvre le réglage des cibles, une ligne de critère neuve sous celle-ci. */
+    function ajouterCritere(index) {
+        regler('cibles');
+        if (_reglage === 'cibles') _ajouterLigneCritere(_brouillon, Number(index));
     }
 
     /**
@@ -1832,10 +1962,10 @@
     window.VueSimple = {
         MOTS, estSimple, vueCourante, basculer, demarrer, aller,
         changerGroupe, creerClasse: _unALaFois(creerClasse),
-        nouveauGroupe, annulerNouveauGroupe, annulerRetraitGroupe, retirerGroupe: _unALaFois(retirerGroupe), choisirModele: _unALaFois(choisirModele),
+        nouveauGroupe, annulerNouveauGroupe, creerGroupeEssai: _unALaFois(creerGroupeEssai), annulerRetraitGroupe, retirerGroupe: _unALaFois(retirerGroupe), choisirModele: _unALaFois(choisirModele),
         changerModele: _unALaFois(changerModele), enregistrerReglage: _unALaFois(enregistrerReglage),
         regler, annulerReglage, niveauGeste, typeGeste, palierGeste,
-        cibleGeste, creerParStandards: _unALaFois(creerParStandards), annulerCreationCibles,   // « Par standards » (21 nov. 2026)
+        cibleGeste, critereGeste, ajouterCritere, creerParStandards: _unALaFois(creerParStandards), annulerCreationCibles,   // « Par standards » (21 nov. 2026)
         ouvrirProduction, fermerProduction, ajouterProduction: _unALaFois(ajouterProduction),
         ouvrirColonne, enregistrerColonne: _unALaFois(enregistrerColonne), retirerColonne: _unALaFois(retirerColonne), colonneNeComptePas: _unALaFois(colonneNeComptePas),
         mettreAJour: _unALaFois(mettreAJour), garderValeurs,

@@ -96,9 +96,14 @@
         rienCeJour: 'Rien ce jour-là',
         retroaction: 'Rétroaction',
         retroactionAide: 'Ce qui est acquis, ce qui reste à travailler.',
-        origine: 'D’où vient ce niveau ?',
-        origineAucune: '— Aucune production —',
-        origineAide: 'Sans production : une observation, un entretien.',
+        // L'origine (22 nov. 2026) : trois valeurs ; mots PROPOSÉS (TEXTES-2026-11-22-observation-par-standards.md).
+        origine: 'D’où vient cette inscription ?',
+        origineObservation: 'Observation en classe',
+        origineConversation: 'Conversation (hors séance)',
+        origineProductions: 'Une production',
+        origineAide: 'Conversation : un échange au bureau, par message.',
+        lueObservation: 'Observation',
+        lueConversation: 'Conversation',
         date: 'Date',
         inscrire: 'Inscrire le niveau',
         fermer: 'Fermer',
@@ -126,6 +131,8 @@
         annonceInscrit: (nom, cible, niveau) => `${nom}, ${cible} : ${niveau} inscrit.`,
         annonceInscrits: (nom, n) => `${nom} : ${n} ${n > 1 ? 'inscriptions' : 'inscription'}.`,
         annonceAnnulee: 'Inscription annulée.',
+        // L'écran d'observation (22 nov. 2026) : le geste qui l'ouvre, au bandeau (mot PROPOSÉ).
+        observer: 'Observer',
         // VUE SIMPLE (21 nov. 2026, « Par standards » à l'essai) : mots PROPOSÉS (TEXTES-2026-11-21-par-standards-vue-simple.md).
         simple: Object.freeze({
             introuvable: 'Les cibles de cette pratique sont introuvables dans ce trimestre. Elles se règlent en vue étendue.',
@@ -234,9 +241,11 @@
         // ni rien qui ne vive qu'en vue étendue ; l'export des notes, comme au tableau des productions de la vue simple.
         const p = ctx.presentation;
         const reglages = (p && p.reglages) || { action: 'ouvrirReglagesPratique', param: ctx.pratiqueId, libelle: window.TableauNotation.MOTS.reglages };
-        const gestesSimples = `<div class="tn-gestes"><button type="button" class="btn btn-secondaire" data-action="exporterSyntheseResultatsCSV">${esc(window.TableauNotation.MOTS.exporter)}</button></div>`;   // le mot du tableau de la vue simple, tel quel
+        // L'écran d'observation (22 nov. 2026) : « Observer », dans les deux vues, par le même composant (observation-cibles.js).
+        const observer = window.ObservationCibles ? `<button type="button" class="btn btn-principal" data-tc="observer">${esc(MOTS.observer)}</button>` : '';
+        const gestesSimples = `<div class="tn-gestes">${observer}<button type="button" class="btn btn-secondaire" data-action="exporterSyntheseResultatsCSV">${esc(window.TableauNotation.MOTS.exporter)}</button></div>`;   // le mot du tableau de la vue simple, tel quel
         const gestes = !avecGestes ? '' : (ctx.simple ? gestesSimples
-            : `<div class="tn-gestes"><button type="button" class="btn btn-principal" data-tc="par-production">${esc(MOTS.parProduction)}</button></div>`);
+            : `<div class="tn-gestes">${observer}<button type="button" class="btn btn-secondaire" data-tc="par-production">${esc(MOTS.parProduction)}</button></div>`);
         return `<div class="tn-bandeau">
             <div class="tn-pratique">${badge}<span class="tn-pratique-nom">${esc(ctx.pratiqueNom)}</span>
                 <a href="#" class="tn-reglages" data-prevent data-action="${esc(reglages.action)}" data-param="${esc(reglages.param)}">${esc(reglages.libelle || window.TableauNotation.MOTS.reglages)}</a></div>
@@ -398,6 +407,7 @@
         if (!geste) return;
         if (geste.dataset.tc === 'case') (_contexteCourant.presentation ? ouvrirInscriptionSimple : ouvrirInscription)(geste.dataset.da, geste.dataset.cible, geste);
         else if (geste.dataset.tc === 'par-production') ouvrirParProduction(geste);
+        else if (geste.dataset.tc === 'observer' && window.ObservationCibles) window.ObservationCibles.ouvrir(completerContexte(_contexteCourant), geste);
     }
 
     const FLECHES = { ArrowLeft: [0, -1], ArrowRight: [0, 1], ArrowUp: [-1, 0], ArrowDown: [1, 0] };
@@ -475,8 +485,11 @@
 
     /* ----- Les morceaux communs : les critères, le niveau, la rétroaction ----- */
 
-    function _criteresHTML(cible, prefixe) {
-        if (!cible.criteres || cible.criteres.length === 0) return `<p class="tc-aide">${esc(MOTS.sansCritere)}</p>`;
+    /** Les critères d'une cible, chacun « Respecté » / « Non respecté » / non renseigné. `mots` (l'écran d'observation) :
+     *  `{ aide, sansCritere }`, qui remplacent ceux de la fenêtre d'inscription (ceux-ci parlent du niveau). */
+    function _criteresHTML(cible, prefixe, mots) {
+        const m = Object.assign({ aide: MOTS.criteresAide, sansCritere: MOTS.sansCritere }, mots || {});
+        if (!cible.criteres || cible.criteres.length === 0) return `<p class="tc-aide">${esc(m.sansCritere)}</p>`;
         const lignes = cible.criteres.map(k => `
             <li class="tc-critere" data-critere="${esc(k.id)}">
                 <span class="tc-critere-texte">${esc(k.texte)}${k.essentiel ? ` <span class="cibles-fiche-essentiel">${esc(MOTS.essentiel)}</span>` : ''}</span>
@@ -485,7 +498,7 @@
                     <button type="button" class="tc-coche tc-coche--non" aria-pressed="false" data-tc="coche" data-valeur="non">${esc(MOTS.nonRespecte)}</button>
                 </span>
             </li>`).join('');
-        return `<p class="tc-aide" id="${esc(prefixe)}-criteres-aide">${esc(MOTS.criteresAide)}</p>
+        return `<p class="tc-aide" id="${esc(prefixe)}-criteres-aide">${esc(m.aide)}</p>
             <ul class="tc-criteres" aria-describedby="${esc(prefixe)}-criteres-aide">${lignes}</ul>`;
     }
 
@@ -515,11 +528,25 @@
             <textarea id="${esc(id)}" class="controle-form tc-retroaction" rows="3" maxlength="${I().LONGUEUR_NOTE_BREVE}" placeholder="${esc(MOTS.retroactionAide)}"></textarea></label>`;
     }
 
+    /** Valeur de l'option « conversation » du choix de l'origine (une production a pour valeur son id ; l'observation, ''). */
+    const VALEUR_CONVERSATION = '__conversation';
+
+    /** L'origine (22 nov. 2026) : l'observation d'office, la conversation, ou une production du groupe. */
     function _origineHTML(ctx, id) {
         const options = (ctx.productions || []).map(p => `<option value="${esc(p.id)}">${esc(p.titre || p.nom || p.id)}</option>`).join('');
+        const productions = options ? `<optgroup label="${esc(MOTS.origineProductions)}">${options}</optgroup>` : '';
         return `<label class="tc-champ" for="${esc(id)}"><span class="tc-champ-nom">${esc(MOTS.origine)}</span>
-            <select id="${esc(id)}" class="controle-form tc-origine"><option value="">${esc(MOTS.origineAucune)}</option>${options}</select>
+            <select id="${esc(id)}" class="controle-form tc-origine"><option value="">${esc(MOTS.origineObservation)}</option>`
+            + `<option value="${VALEUR_CONVERSATION}">${esc(MOTS.origineConversation)}</option>${productions}</select>
             <span class="tc-aide">${esc(MOTS.origineAide)}</span></label>`;
+    }
+
+    /** `{ productionId, origine }` lus du choix de l'origine. */
+    function _lireOrigine(select) {
+        const v = select ? select.value : '';
+        if (v === VALEUR_CONVERSATION) return { productionId: null, origine: I().ORIGINES.CONVERSATION };
+        if (v) return { productionId: v, origine: I().ORIGINES.PRODUCTION };
+        return { productionId: null, origine: I().ORIGINES.OBSERVATION };
     }
 
     function _dateHTML(id) {
@@ -554,6 +581,13 @@
             + `${k.essentiel ? ` <span class="cibles-fiche-essentiel">${esc(MOTS.essentiel)}</span>` : ''}</li>`;
     }
 
+    /** L'origine d'une inscription, en clair : la production et son titre ; « Observation » ; « Conversation ». */
+    function origineLue(i) {
+        const o = I().lireOrigine(i);
+        if (o === I().ORIGINES.PRODUCTION) return _titreProduction(i.productionId);
+        return o === I().ORIGINES.CONVERSATION ? MOTS.lueConversation : MOTS.lueObservation;
+    }
+
     function _titreProduction(id) {
         if (!id) return MOTS.sansProduction;
         const toutes = (typeof obtenirDonneesSelonMode === 'function') ? (obtenirDonneesSelonMode('productions') || []) : [];
@@ -585,7 +619,7 @@
         const plusBas = ligne.dernierPlusBas
             ? `<p class="tc-retenu-ligne tc-retenu-plus-bas">${esc(MOTS.dernierPlusBas(_nomEtCode(ligne.dernierNiveau, ligne.dernier.niveau), dateLisible(ligne.dernier.date)))}</p>` : '';
         // Au profil (`details`) : son origine et sa rétroaction, celles de l'inscription retenue.
-        const plus = details ? `<p class="tc-retenu-ligne">${esc(_titreProduction(ligne.retenu.productionId))}</p>`
+        const plus = details ? `<p class="tc-retenu-ligne">${esc(origineLue(ligne.retenu))}</p>`
             + (ligne.retenu.noteBreve ? `<p class="tc-retenu-ligne"><strong>${esc(MOTS.retroaction)} :</strong> ${esc(ligne.retenu.noteBreve)}</p>` : '') : '';
         return `<div class="tc-retenu"${style}><p class="tc-retenu-ligne"><strong>${esc(MOTS.retenuTitre)} :</strong> `
             + `<span class="tc-retenu-niveau">${esc(nom)}</span>, ${esc(MOTS.retenuDepuis(dateLisible(ligne.retenu.date)))}</p>${plus}${sansDonnee}${plusBas}</div>`;
@@ -604,15 +638,18 @@
 
     /** Une inscription de l'historique (datée, son niveau ou « Remarque », son origine, sa rétroaction, ses critères) ;
      *  annulée : barrée, avec sa date et sa raison ; sinon « Annuler cette inscription », sauf en lecture seule.
-     *  `options.simple` (vue simple, 21 nov. 2026) : ni critères (ils se cochent en vue étendue), ni « Sans production ». */
+     *  `options.simple` (vue simple, 21 nov. 2026). Les critères s'y lisent depuis le 22 nov.
+     *  (ils se cochent aussi en vue simple). */
     function _entreeHTML(ctx, i, a, options) {
         const o = options || {};
         const sansNiveau = I().estSansNiveau(i);
         const niveau = sansNiveau ? null : _niveauDuCode(ctx, i.niveau);
         const nomNiveau = _nomDuNiveauInscrit(i, sansNiveau, niveau);
-        const criteres = (!o.simple && (i.criteres || []).length) ? `<ul class="tc-entree-criteres">${i.criteres.map(_ligneCritereHistorique).join('')}</ul>` : '';
-        const origine = (o.simple && !i.productionId) ? '' : `
-                    <span class="tc-entree-origine">${esc(_titreProduction(i.productionId))}</span>`;
+        const criteres = (i.criteres || []).length ? `<ul class="tc-entree-criteres">${i.criteres.map(_ligneCritereHistorique).join('')}</ul>` : '';
+        // L'origine (22 nov. 2026), dans les deux vues : « Observation », « Conversation » ou la production. Une inscription
+        // d'avant sans production se lit « Observation » (règle du mandat ; elle disait « Sans production », cachée en vue simple).
+        const origine = `
+                    <span class="tc-entree-origine tc-entree-origine--${esc(I().lireOrigine(i))}">${esc(origineLue(i))}</span>`;
         const fin = _finDeLEntree(i, a, !!o.lectureSeule);
         const marque = (o.retenu && i.id === o.retenu) ? ` <span class="tc-entree-retenu">${esc(MOTS.marqueRetenu)}</span>` : '';
         return `<li class="tc-entree${a ? ' tc-entree--annulee' : ''}">
@@ -684,7 +721,7 @@
             niveau: _lireNiveau(bloc, p).niveau,
             echelleId: ctx.echelle ? (ctx.echelle.id || null) : null,
             date: bloc.querySelector('.tc-date').value,
-            productionId: bloc.querySelector('.tc-origine').value || null,
+            ...(_lireOrigine(bloc.querySelector('.tc-origine'))),
             noteBreve: bloc.querySelector('.tc-retroaction').value,
             criteres: I().etatDesCriteres(cible, _lireCoches(bloc))
         };
@@ -703,7 +740,9 @@
     }
 
     /* ----- VUE SIMPLE (21 nov. 2026, « Par standards » à l'essai) : la fenêtre allégée d'une case -----
-       Les niveaux en tuiles (ni « Aucun niveau », ni critères), la rétroaction facultative, la date d'aujourd'hui, aucune
+       Les critères de la cible, s'il y en a (22 nov. 2026, décision de Grégoire, 9 h 14 : elle remplace, pour les critères,
+       celle du 21 nov. à 14 h 20), cochés comme en vue étendue (mêmes morceaux, mêmes mots) ; rien n'est calculé à partir
+       des coches. Les niveaux en tuiles (sans « Aucun niveau »), la rétroaction facultative, la date d'aujourd'hui, aucune
        production. Puis le niveau retenu en clair et la DERNIÈRE inscription, qu'on peut annuler : le niveau retenu étant le
        meilleur, un niveau trop haut touché par erreur ne se corrige pas en en inscrivant un plus bas (sans ce geste, la vue
        simple serait une impasse). L'annulation reste, barrée, visible en vue étendue. Même écrivain, même forme (§ 0). */
@@ -740,6 +779,7 @@
                 ${cible.enonce ? `<p class="tc-cible-enonce">${esc(cible.enonce)}</p>` : ''}
             </div>
             <form class="tc-formulaire" data-tc-bloc data-prefixe="${p}" novalidate>
+                ${(cible.criteres || []).length ? `<section class="tc-section"><h4 class="tc-section-titre">${esc(MOTS.criteres)}</h4>${_criteresHTML(cible, p)}</section>` : ''}
                 <section class="tc-section"><h4 class="tc-section-titre" id="${p}-niveau-titre">${esc(MOTS.niveau)}</h4>${_niveauxHTML(ctx, p, false, true)}</section>
                 <section class="tc-section">${_retroactionHTML(p)}<p class="tc-aide">${esc(MOTS.simple.date)}</p></section>
                 <p class="tc-alerte u-hide" role="alert"></p>
@@ -761,7 +801,7 @@
             echelleId: ctx.echelle ? (ctx.echelle.id || null) : null,
             date: I().dateDuJour(), productionId: null,
             noteBreve: bloc.querySelector('.tc-retroaction').value,
-            criteres: I().etatDesCriteres(cible, {})   // chaque critère de la vue étendue, non renseigné : la forme du § 0
+            criteres: I().etatDesCriteres(cible, _lireCoches(bloc))   // la forme du § 0 ; un critère sans coche : non renseigné
         };
         const motifs = I().motifsRefus(saisie, ctx.echelle);
         _alerte(overlay, motifs);
@@ -964,6 +1004,11 @@
         retenuHTML,
         eleveDuContexte,
         noteArrondie,
+        origineLue,                // 22 nov. 2026 : l'origine d'une inscription, en clair
+        criteresHTML: _criteresHTML,   // l'écran d'observation : les mêmes critères, les mêmes mots
+        lireCoches: _lireCoches,
+        basculerCoche: _basculerCoche,
+        rerendre: _rerendre,
         ouvrirInscription,
         ouvrirInscriptionSimple,   // vue simple (21 nov. 2026)
         notesDuGroupe,             // vue simple, écran « Note finale »
