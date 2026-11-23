@@ -62,7 +62,8 @@ async function installer(page, { simulation = null, pratiqueOfficielle = 'sel-si
             parStandards('cib-sim', 'Standards à simuler', 'ENSC_SIM'),
             parStandards('cib-off', 'Standards officiels', 'ENSC_OFF'),
             parStandards('cib-jumelle', 'Standards jumeaux', 'ENSC_OFF')]);
-        const P = (id, numero, type) => ({ id, titre: 'Production ' + numero, type, numero, groupeCoursId: GC, ponderation: 10, dateEcheance: '2026-10-0' + numero, echelleId: echelle.id });
+        const P = (id, numero, type) => ({ id, titre: 'Production ' + numero, type, numero, groupeCoursId: GC, ponderation: 10, dateEcheance: '2026-10-0' + numero, echelleId: echelle.id,
+            dansBibliotheque: true });   // comme toute production réelle : sans lui, la migration `migrerProductionsVersBibliotheque` l'ajoute à l'ouverture du module, parfois entre les deux instantanés (vu rouge 1 fois sur 6, 23 nov.)
         window.db.setSync(T + '_productions', [P('P1', 1, 'artefact-portfolio'), P('P2', 2, 'artefact-portfolio'), P('P3', 3, 'artefact-portfolio')]);
         const E = (id, da, productionId, note, niveau) => ({ id, etudiantDA: da, productionId, noteFinale: note, niveauFinal: niveau, verrouillee: true, statutRemise: 'remis',
             dateEvaluation: '2026-10-10', echelleId: echelle.id, groupeCoursId: GC, coursId });
@@ -157,6 +158,14 @@ test('un groupe sans simulation : aucune entrée, aucun écran, et sa forme au s
     expect(await page.evaluate(() => window.SimulationPratique.ouvrir())).toBe(false);
     // La fiche enregistrée sans simulation n'ajoute pas le champ au groupe-cours.
     await poserDansLaFiche(page, '');
+    await expect(page.locator('#v2-gc-simulation-rangee')).not.toHaveClass(/u-hide/);   // le trimestre a des « Par standards » à offrir (la section du Cadre n'est pas à l'écran ici : on lit la classe)
+    // Sans aucune « Par standards » dans le trimestre, la rangée du champ n'existe pas à l'écran : la fiche garde sa hauteur
+    // d'avant (la bulle du parcours « ma classe » couvrait le champ du trimestre ; parcours-2-ma-classe, essai 436).
+    await page.evaluate(({ T }) => {
+        window.db.setSync(T + '_pratiquesConfigurables', window.db.getSync(T + '_pratiquesConfigurables').filter(p => p.type !== 'cibles'));
+        window.populerDropdownsAssemblageV2();
+    }, { T });
+    await expect(page.locator('#v2-gc-simulation-rangee')).toHaveClass(/u-hide/);
     expect(Object.keys(await groupeRange(page))).not.toContain('simulationPratiqueId');
     expect(erreurs).toEqual([]);
 });

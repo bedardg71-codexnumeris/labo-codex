@@ -705,7 +705,7 @@ function changerChampGroupeCoursV2(el) {
 /**
  * Simulation (23 nov. 2026) : pose la valeur du champ « Simulation » de la fiche. Un lien vers une pratique qui n'est plus
  * offerte (supprimée, ou sortie de la bibliothèque) garde son option, dite « Pratique supprimée » : enregistrer la fiche
- * pour une autre raison ne retire pas le lien.
+ * pour une autre raison ne retire pas le lien. Sans pratique à offrir ni lien posé, la rangée du champ reste cachée.
  */
 function poserSimulationFicheGroupeCoursV2(id) {
     const select = document.getElementById('v2-gc-simulation');
@@ -718,6 +718,9 @@ function poserSimulationFicheGroupeCoursV2(id) {
         select.appendChild(option);
     }
     select.value = valeur;
+    // La rangée ne paraît que s'il y a quelque chose à choisir : une pratique « Par standards », ou un lien déjà posé.
+    const rangee = document.getElementById('v2-gc-simulation-rangee');
+    if (rangee) rangee.classList.toggle('u-hide', select.options.length <= 1);
 }
 window.poserSimulationFicheGroupeCoursV2 = poserSimulationFicheGroupeCoursV2;
 
