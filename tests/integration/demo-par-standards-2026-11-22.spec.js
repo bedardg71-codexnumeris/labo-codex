@@ -69,7 +69,7 @@ for (const [L, H] of TAILLES_A) {
         await ouvrirPanneau(page);
         await boutonModele(page, 'classe').click();
         await faireLaModelisation(page);
-        await expect(bulle(page).locator('.parcours-bulle-boutons button')).toHaveText(['Le refaire avec ma classe', 'Voir le parcours suivant', 'Terminer']);
+        await expect(bulle(page).locator('.parcours-bulle-boutons button')).toHaveText(['Le refaire avec ma classe', 'Voir le parcours 3', 'Terminer']);   // ↻ 23 nov. 2026, à la réunion des lots : « Voir le parcours N » (20 nov.), le mot que ce banc lisait sur `main` était « Voir le parcours suivant »
         await bulle(page).getByRole('button', { name: 'Terminer', exact: true }).click();
         await expect(bulle(page)).toHaveCount(0);
         expect(await enDemo(page)).toBe(true);

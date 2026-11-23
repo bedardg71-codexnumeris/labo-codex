@@ -307,6 +307,9 @@ async function enregistrerParcoursGrandEcran(page) {
     // Le titre et la ligne du parcours « Automatiser tes commentaires » (branche du 8), pour la capture.
     await page.evaluate(() => {
         window.__lance = 0;
+        // Un parcours d'essai n'est pas dans la liste livrée (`PARCOURS_OUVERTS`) : le banc l'ouvre en mémoire.
+        // (Avant le 23 nov. 2026, le harnais rouvrait tout après chaque chargement.)
+        Assistance.ouvrirLesParcours(true);
         Assistance.enregistrer({
             id: 'essai-grand-ecran', titre: 'Automatiser tes commentaires',
             ligne: "De ta grille à une rétroaction qui s'écrit seule, à partir de ce que tu relèves et comptes dans chaque production.",
