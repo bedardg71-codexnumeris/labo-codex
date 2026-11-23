@@ -217,3 +217,128 @@ possible sous Chromium).
    22 nov. : **non touchés, remontés ici** (les mots sont à lui).
 4. **La carte d'Aide « Explorer la démonstration »** ne compte toujours que le premier groupe (trouvaille 1 du lot de la
    démo) : **inscrire et continuer**, inchangé.
+
+---
+
+# DEUXIÈME RELAIS — LE PARCOURS 9, « SUIVRE TON GROUPE PAR CIBLES »
+
+## 9. Le parcours 9, « Je regarde »
+
+Consigne : `plans de travail/CONSIGNE-2026-11-22-parcours-9-je-regarde.md` (copiée telle quelle, `4991b377c`).
+Code : `e6b3cd6ad` ; build recalculé `41b5afda3` (`1122-2218`, version inchangée).
+
+### 9.1 Ce qui est fait
+
+- **`js/parcours-cibles.js`** (neuf), identifiant `cibles`, rang 9. Les douze bulles, mot pour mot. Il se joue dans la
+  démo, sur le troisième groupe ; chaque étape remet la démo sur ce groupe. Une démo déjà ouverte à qui le groupe manque
+  le reçoit avant la première bulle (le versement du § 4).
+- **Un seul temps.** La définition n'a pas de `lancer`. Au panneau, sa carte porte le rang 9, le titre, la ligne
+  « Pour la pratique « Par standards ». », et un seul bouton, « Je regarde », avec « Modélisation » et son état dessous :
+  ni « Nous faisons », ni « Pratique guidée ». Sa pastille et le rang du menu suivent l'état de ce seul temps
+  (`seulementModele`, `js/assistance.js`). La dernière bulle offre « Voir le parcours 6 » et « Terminer ».
+- **La suite suggérée** : une définition peut nommer sa suite (`suite: 'donnees'`) ; sinon c'est, comme avant, le
+  parcours qui la suit au panneau. La phrase et le libellé restent composés par le panneau.
+- **Ouvert** : `PARCOURS_OUVERTS` porte `cibles`. Plus rien n'est « À venir ».
+- **L'ancien neuvième parcours est retiré**, pas gardé à côté : `js/parcours-notation-alternative.js`, sa sentinelle et
+  son banc ; le défaut `parcoursNotationAlternative` des préférences (une valeur déjà écrite chez quelqu'un reste dans
+  ses préférences, rien ne la lit : **stock assumé**) ; l'événement `dossierPdfLivre` de l'export PDF, dont il était le
+  seul lecteur ; ses deux formes de bulle dans `css/parcours.css`.
+- **Deux petits ajouts ailleurs** : `lieuDit` au moteur (la phrase du lieu écrite par l'étape, à la place de celle que
+  le moteur compose à partir du menu) ; `ObservationCibles.dater(date)` (la date des observations de l'écran ouvert).
+
+### 9.2 Ce que « Remplir » pose, et qui inscrit
+
+« Remplir » écrit dans les champs de l'écran ; **c'est la personne qui inscrit**, par les boutons de l'application.
+
+| Bulle | « Remplir » pose | Le geste qui inscrit |
+|---|---|---|
+| 4 | la cible « La lecture stratégique », « Tout le groupe », **et la date de l'histoire (11 sept. 2025) à la place de celle du jour** | « Commencer » (rien ne s'écrit) |
+| 5 | Structure et Rigueur « Respecté », Plausibilité « Non respecté », Nuance vide ; le texte de (a) | « Inscrire et passer au suivant » : (a) |
+| 7 | les quatre critères de (b), le niveau 2, sa rétroaction, la production sur « Deux-Rives », le 17 sept. 2025 | « Inscrire le niveau » : (b) |
+| 8 | les quatre critères de (c), le niveau 3, sa rétroaction, la production sur « Marine », le 1er oct. 2025 | « Inscrire le niveau » : (c) |
+
+Les mots, les critères, les dates et les productions viennent du pack (`histoire.inscriptions`), pas du parcours.
+
+**« Refaire »** (au panneau, le parcours fait) : seules les inscriptions de Marmotte Pétillante sur « La lecture
+stratégique » partent (le pack n'en a aucune pour elle sur cette cible), et les annulations qui les désigneraient. La
+démo n'est pas remise à neuf, aucune question n'est posée. Les clés écrites doivent commencer par `demo_`.
+
+**La reprise** (décidé par la session) : un passage interrompu REPREND, chaque bulle se règle sur ce qui est déjà
+inscrit. Mesuré : après un rechargement à la bulle 3, la démo est toujours ouverte sur le troisième groupe, la carte dit
+« Étape 3 sur 12 », et « Je regarde » reprend à la bulle 3.
+
+### 9.3 Chaque phrase qui cite l'écran, mesurée (Chromium, le vrai `index.html`, aux deux tailles)
+
+| Bulle | Ce que la bulle cite | À l'écran |
+|---|---|---|
+| 1 | cinq cibles et leurs poids (25, 30, 10, 25, 10) | la fiche : « Poids 25 · 25 % », 30, 10, 25, 10, dans cet ordre |
+| 1 | « à « Pratiques de notation » » | le titre de la page ; **l'onglet du menu, lui, dit « Pratiques »** |
+| 2 | quatre critères, trois « critère essentiel » | Structure, Rigueur, Plausibilité « critère essentiel » ; Nuance sans marque |
+| 2 | l'« Échelle de départ – Par standards », de 0 à 4 ; « 0 – Données insuffisantes », « 3 – Acquis », « 4 – Avancé » | l'échelle du groupe : ce nom, cinq niveaux, ces codes et ces noms |
+| 3 | « Évaluation », « Tableau de notation » ; une rangée par étudiant·e, une colonne par cible | le menu dit ces deux noms ; dix rangées, cinq colonnes |
+| 5 | le carrousel dit qui a été vu aujourd'hui | après l'inscription, « vu aujourd'hui » sur Marmotte Pétillante, et sur elle seule |
+| 6 | la case porte ✎, aucun niveau | « ✎ », « Données insuffisantes », le compte 1 |
+| 7 | la fenêtre « Inscrire un niveau » | son titre ; ses parties : « Critères », « Niveau », « Rétroaction », « D'où vient cette inscription ? », « Date » |
+| 7, 8 | « Inscrire le niveau » ; les noms des deux productions ; « 2 – Ça y est presque », « 3 – Acquis » | le bouton prend ce nom dès qu'un niveau est choisi ; les productions s'appellent « Stratégies de lecture sur « Deux-Rives » » et « … sur « Marine » » ; les tuiles « 2 » « Ça y est presque », « 3 » « Acquis » |
+| 9 | le petit nombre compte ses inscriptions | la case : « 3 », compte « 3 » (« 3 inscriptions, dont 1 remarque ») |
+| 9 | « Niveau retenu : 3 · Acquis, inscrit le 1er octobre 2025. » | mot pour mot (le « 1er » du § 3) |
+| 9 | le 2 sur « Deux-Rives » reste dans l'historique | « 17 septembre 2025 · 2 · Ça y est presque · Production : Stratégies de lecture sur « Deux-Rives » » |
+| 10 | « En attente » avant, puis 69 % ; la colonne « Note » | avant : « En attente », « La lecture stratégique » ; après : « 69 % » ; l'en-tête « Note » |
+| 11 | la carte « Note du cours » donne 68,8 % | « Note actuelle 68,8 % » |
+| 11 | « La rédaction », à « 2 – Ça y est presque », vaut 50 % ; les quatre autres 75 % | le tableau : 3 · Acquis, 75 % (quatre fois) ; La rédaction, 2 · Ça y est presque, 50 % |
+
+### 9.4 Les mots qui ne tiennent pas tout à fait à l'écran (codés tels quels, rien réécrit)
+
+1. **Bulle 9** : « La case de Marmotte Pétillante montre maintenant « 3 – Acquis » ». La case montre **« 3 »** (un point de
+   couleur, le code, le compte). Le nom « Acquis » se lit dans son infobulle (« niveau retenu Acquis ») et dans le repère
+   de l'échelle au-dessus du tableau.
+2. **« 3 – Acquis », « 2 – Ça y est presque », « 4 – Avancé »** (bulles 2, 7, 8, 9, 11) : là où l'application écrit le
+   code et le nom ensemble (la fenêtre, le profil), elle écrit **« 3 · Acquis »**, avec un point médian. La bulle 9 cite la
+   ligne du niveau retenu avec ce point, comme l'écran.
+3. **Bulle 7** : « … et la production d'où vient le niveau ». Le champ s'appelle « D'où vient cette inscription ? » (un
+   menu : « Observation en classe », « Conversation (hors séance) », ou une production), suivi de « Date ».
+4. **Bulle 1** : l'onglet du menu dit « Pratiques » ; « Pratiques de notation » est le titre de la page (tableau du 9.3).
+5. **Bulle 2** : « « 3 – Acquis » quand tous les critères essentiels sont respectés, « 4 – Avancé » quand tous le sont ».
+   L'application ne calcule ni n'affiche cette règle : le niveau reste le choix de l'enseignant·e (la fenêtre le dit :
+   « Le niveau reste ton choix. »). C'est un repère de la bulle, pas une citation de l'écran.
+6. **Bulle 5** : « aujourd'hui ». L'écran d'observation prend la date du jour ; l'exemple lui donne la date de
+   l'histoire. « vu aujourd'hui » se lit donc, dans l'exemple, pour le 11 septembre 2025.
+
+### 9.5 Supposé ou décidé par la session (parcours 9)
+
+- **La parenthèse de la bulle 10** : « → Touche « Suivant » (le tableau n'a pas de lien vers le profil : « Suivant » y mène
+  le parcours) ». Lue comme une **note pour Claude Code**, pas comme des mots de la bulle (la règle des consignes du
+  22 nov. : une parenthèse qui finit une ligne est une note) : la bulle dit « Touche « Suivant » ». ⚠ **À corriger en dix
+  secondes si c'était un mot de la bulle.** De même la parenthèse de l'en-tête de la bulle 5 et celle des boutons de la 12.
+- **« ─── Objectif atteint ─── »** (bulle 12) : posé par le moteur, comme aux autres parcours. La phrase suit leur
+  règle : « Objectif atteint : tu es en mesure de décrire comment suivre ton groupe par cibles : nommer tes cibles,
+  inscrire ce que tu observes et le niveau atteint, puis lire la note qui en découle. » **Elle n'est pas écrite dans la
+  consigne** : dérivée de l'objectif.
+- **Ce que le moule ajoute à la dernière bulle**, comme aux autres parcours : « Pour revoir une étape, touche
+  « 12 sur 12 ». », « Chaque parcours a son objectif. C'est toi qui choisis la suite. », et la consigne « Touche « Voir le
+  parcours 6 », ou « Terminer » ».
+- **La phrase de la poignée** : le moteur la pose déjà, en petit, sur la première bulle de tout parcours. Les lignes
+  grises des bulles 4 et 7 (celles de la consigne) s'y ajoutent.
+- **`grandEcranSeulement`** : le parcours n'est pas offert sur téléphone (sous 500 px), comme le cinquième et le huitième.
+- **Les gardes** : à la fin de la bulle 5, « Inscrire » ne répond pas pour la personne suivante ; à la bulle 9,
+  « Inscrire » et « Annuler cette inscription » ne répondent pas dans la fenêtre (on y lit l'historique).
+- **« Suivant »** : le bouton des bulles 1, 2, 10 et 11 porte ce nom (la consigne) ; les autres parcours disent
+  « Continuer ».
+- Si l'écran d'observation ou la fenêtre est refermé avant le geste attendu, la bulle revient à celle qui l'ouvre.
+
+### 9.6 Les vérifications du parcours 9
+
+- **Sentinelle** `tests/unit/sentinelle-parcours-cibles-2026-11-23.test.js` (20 essais) : elle lit la consigne et le
+  vrai module, dans les deux sens, bulle par bulle, formes successives et lignes grises comprises ; l'entrée, l'objectif,
+  la ligne du panneau, la suite, « un seul temps », « ouvert », l'ancien parcours retiré, les mots de l'histoire lus dans
+  le pack. **Cinq break-tests** (un mot de la bulle 9 ; une forme de la bulle 5 retirée ; la ligne grise de la bulle 7
+  retirée ; un `lancer` ajouté ; `cibles` retiré de la liste) : chacun rouge, puis le code remis à l'identique.
+- **Banc** `tests/integration/je-regarde-cibles-2026-11-23.spec.js`, Chromium : **A**, à 1180 × 820 et 820 × 1180, sur un
+  trimestre réel peuplé : la carte, les douze bulles et chacune de leurs formes mot pour mot, le tableau du 9.3, ce que
+  « Remplir » pose, la date de (a), les gardes, la bulle dans l'écran, la fin, **à la sortie de la démo aucune clé hors de
+  la démo ne change**, puis « Refaire » (les trois inscriptions partent, les 49 autres sont identiques octet pour octet,
+  le modèle repart de sa première bulle, et de nouveau aucune clé hors de la démo ne change). **B** : une démo sans le
+  troisième groupe le reçoit avant la première bulle. **3 sur 3.** **Cinq break-tests** (la date du jour gardée ; la garde
+  de la bulle 5 retirée ; « Refaire » qui ne retire rien ; le versement retiré ; une clé écrite hors de la démo) : chacun
+  rouge, puis le code remis à l'identique.
+- **Vitest complet** (sur `41b5afda3`) : **957 fichiers, 12 329 essais, tous verts.**
