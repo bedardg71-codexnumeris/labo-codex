@@ -3,7 +3,7 @@ import { releverLaBulle } from './harness/releve-bulle.js';
 // La bulle ne couvre jamais ses zones quand une place les laisse libres (Grégoire, 11 nov. 2026) : relevé à chaque essai.
 releverLaBulle(test);
 import { ouvrirPanneau, attendreEtape, contourSur, bulleNeCouvrePas, capture, bulle, ouvrirEspaceVide, mettreLaClasseEnPlace } from './harness/classe-de-banc.js';
-import { flecheVers, flecheVisant, rienNeRetientLeToucher } from './harness/fleches-de-banc.js';
+import { flecheVers, rienNeRetientLeToucher } from './harness/fleches-de-banc.js';
 import { leTroisiemeParcoursFait, dossierDesCaptures } from './harness/nous-faisons-evaluer-de-banc.js';
 import { attendreApplication } from './harness/attendre-application.js';
 
@@ -224,7 +224,12 @@ test('« Recevoir les productions, rendre tes rétroactions », la voie des fich
     // ↻ 10 nov. 2026 (« Les flèches des parcours ») : l'essai lisait ici le voile « normal ». Le voile est retiré : la
     // palette revenue est ce dont parle la bulle (une flèche y va), et rien ne retient plus le toucher.
     // ↻ 11 nov. 2026 : la bulle, plus haute de sa ligne du geste, chevauche la palette ; la flèche entre dans sa partie visible.
-    await flecheVisant(page, '#travaux-palette-tampons', 'étape 4, à la reprise');
+    // ↻ 23 nov. 2026 (lot « bulle et bandeau ») : l'attente change. Depuis que la bulle est en lignes (19 nov.), ses
+    // flèches vont aux gestes de ses lignes et à ce qu'il faut toucher, plus aux zones (`designe`, js/parcours-moteur.js) :
+    // la flèche va à l'ENGRENAGE de la palette, que la consigne nomme, et la palette, zone de la bulle, n'est pas couverte.
+    // Ce rouge était caché derrière celui de l'étape 2 (mesuré sur 4d1043cce, le jugement de l'étape 2 retiré).
+    await flecheVers(page, '#travaux-palette-tampons [title="Personnaliser"]', 'étape 4, à la reprise');
+    await bulleNeCouvrePas(page, '#travaux-palette-tampons', 'étape 4, à la reprise');
     await rienNeRetientLeToucher(page, [[12, 12], [600, 400]], 'étape 4, à la reprise');
     await capture(page, DOSSIER, `p4-4-reprise-${cap}`);
     await page.locator('#travaux-palette-tampons [title="Personnaliser"]').click();

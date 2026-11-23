@@ -99,8 +99,8 @@ function definirModeExpertFromEl(el) {
 // VERSION_MAJEURE et BUILD_ID sont lus depuis version.js au chargement : la version du
 // code chargé, pas celle du serveur (#849). Les valeurs ici servent de repli si
 // version.js manque ; release.mjs les tient à jour.
-let VERSION_MAJEURE = '1.258.0';
-let BUILD_ID = '1122-2306';
+let VERSION_MAJEURE = '1.258.1';
+let BUILD_ID = '1123-1652';
 // Snapshot du build contenu dans CE fichier script (pour détecter les scripts périmés)
 const _SCRIPT_BUILD = BUILD_ID;
 
@@ -425,7 +425,23 @@ function afficherBandeauVersion(beta, build, distant) {
     if (btnNouveautes) btnNouveautes.hidden = distant;
     bandeauBuildLocal = distant ? null : build;
 
+    poserBandeauSousLEntete(bandeau);
     bandeau.classList.add('visible');
+}
+
+/**
+ * Le bandeau se pose SOUS l'en-tête et sous la bande du groupe actif (23 nov. 2026, verdict WebKit de la 1.258.0).
+ * Fixé à 20 px du haut, il couvrait « Codex », le sélecteur de thème et le menu ; à 820 px, la fin de la navigation
+ * aussi : il fallait le fermer pour atteindre le menu. Sa place est mesurée quand il paraît (le bas de ces deux bandes,
+ * la page en haut) ; sans elles, la feuille de style décide (20 px du haut).
+ */
+function poserBandeauSousLEntete(bandeau) {
+    const bas = ['header.entete', '#bandeau-groupe-cours'].map((s) => {
+        const el = document.querySelector(s);
+        return el && el.offsetHeight > 0 ? el.getBoundingClientRect().bottom + window.scrollY : 0;
+    });
+    const sous = Math.round(Math.max(...bas));
+    if (sous > 0) bandeau.style.top = (sous + 12) + 'px';
 }
 
 function fermerBandeauMiseAJour() {

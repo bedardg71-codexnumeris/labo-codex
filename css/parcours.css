@@ -266,6 +266,12 @@ body.mode-clair {
     overscroll-behavior: contain;
     -webkit-overflow-scrolling: touch;
 }
+/* 23 nov. 2026 : une bulle plafonnée (js/parcours-moteur.js, la bande libre) coupe ses lignes. Tant qu'il en reste à
+   lire plus bas, leur bord du bas se fond : on voit qu'elles défilent. Posée et retirée par le moteur. */
+.parcours-bulle-lignes--a-suivre {
+    -webkit-mask-image: linear-gradient(to bottom, #000 calc(100% - 36px), transparent);
+    mask-image: linear-gradient(to bottom, #000 calc(100% - 36px), transparent);
+}
 /* La phrase du lieu (« Tu es dans « X », à l'onglet « Y ». ») et les notes : des phrases, hors de la liste.
    16 nov. 2026 : l'objectif du parcours (sa première bulle), entre deux filets fins ; la ligne qui confirme le geste
    précédent, avec le crochet des lignes faites (ce n'est pas un éloge : la même marque, le même vert). */

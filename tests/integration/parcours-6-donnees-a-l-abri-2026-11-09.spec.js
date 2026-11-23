@@ -379,7 +379,12 @@ for (const clair of [false, true]) {
 
         await ecrireEtAttendreEtape4(page);
         expect(await page.evaluate(() => window.__ecritures)).toBe(1);
-        await bulleDit(page, textes.textes[3]);
+        // ↻ 23 nov. 2026 (lot « bulle et bandeau ») : l'attente change. Depuis la publication des parcours 2 à 8
+        // (7bc06f379, 23 nov.), le parcours 7 suit celui-ci dans le panneau : la dernière bulle offre « Voir le parcours 7 »
+        // et sa consigne devient celle des deux suites (`consigneDeLaFin`, js/parcours-moteur.js, décision du 14 nov.).
+        // L'essai attendait encore « Touche « Terminer » » ; ce rouge était caché derrière celui de la bulle 3.
+        await bulleDit(page, textes.textes[3].map((l) => (l === 'Touche « Terminer »' ? 'Touche « Voir le parcours 7 », ou « Terminer »' : l)));
+        await expect(bulle(page).getByRole('button', { name: 'Voir le parcours 7' })).toBeVisible();
         await expect(bulle(page).locator('.parcours-bulle-sortie')).toHaveCount(0);
         await capture(page, `1180-${theme}-etape-4`);
 

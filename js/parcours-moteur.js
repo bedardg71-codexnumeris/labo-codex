@@ -255,6 +255,7 @@
     var MENU_DE_NAVIGATION = '.navigation-principale, .sous-navigation';
     var JOINT = 2;             // deux rectangles à moins de 2 px l'un de l'autre se touchent (les cellules d'un tableau)
     var EVITES_MAX = 24;       // au-delà, ce que la bulle évite est fondu de proche en proche (voir `reduireEvites`)
+    var HAUTEUR_MIN_SERREE = 240; // une bulle limitée à une bande libre (`tenirDansLaBandeLibre`, `serrer`) : pas plus basse, on n'y lirait plus
     var PAGES_MAX = 3;
 
     // PROPOSÉ (10 nov. 2026, à valider par Grégoire) : le nom de la poignée pour le lecteur d'écran.
@@ -1464,6 +1465,7 @@
         b.className = 'parcours-bulle' + (etat.telephone ? ' parcours-bulle--telephone' : '');
         b.classList.toggle('est-en-attente', etat.enAttente);   // la bulle attend encore la page (règle b)
         b.style.maxHeight = '';
+        etat.forme = null;   // la forme gardée (`placerBulle`) part avec la bulle d'avant
         // Sur téléphone, la largeur est posée AVANT de mesurer le texte (son plancher de trois lignes).
         b.style.left = etat.telephone ? MARGE + 'px' : b.style.left;
         b.style.right = etat.telephone ? MARGE + 'px' : '';
@@ -2070,51 +2072,111 @@
     function placerBulle(evites, secondaires) {
         var b = etat.elements.bulle;
         poserReserveBas(0);
-        var vw = largeurPage(), vh = basEcran();
-        // Le filet : jamais plus haute que l'écran utile ; au-delà, son texte défile.
-        b.style.maxHeight = Math.max(0, vh - 2 * MARGE) + 'px';
-        // AVANT LE FILET : une bulle plus haute que l'écran utile S'ÉLARGIT (16 nov. 2026, l'iPad couché : « Poser ton
-        // cadre », 761 px pour 695, passait sous le bandeau de la démo avec ses boutons). Plus large, elle a moins de
-        // lignes, et ses boutons tiennent côte à côte. Jusqu'à la bulle suivante (la classe part avec `rendreBulle`).
         var utile = cadreUtile();
-        if (!b.classList.contains('parcours-bulle--elargie') && hauteurNaturelle() > utile.bas - utile.haut) b.classList.add('parcours-bulle--elargie');
-        if (etat.deplacee) { poserDeplacee(); return; }
-        var bw = b.offsetWidth, bh = b.offsetHeight;
-        var place;
-        if (secondaires && secondaires.length) {
-            // Une étape à section : loin de ce qu'elle désigne, puis hors de la section autant que possible.
-            place = placerLoin(evites, bw, bh, cadreUtile(), secondaires);
-        } else if (!evites.length && aUnLieu(etapeCourante())) {
-            // La bulle guide, la page agit (règle 5) : une bulle qui présente une page, sans rien y désigner, se range
-            // dans son coin, en bas à droite ; au centre, elle couvrait le texte de la page et son formulaire.
-            var cadre = cadreUtile();
-            place = { x: Math.max(cadre.gauche, cadre.droite - bw), y: Math.max(cadre.haut, cadre.bas - bh) };
-        } else if (!evites.length) {
-            place = { x: (vw - bw) / 2, y: Math.max(hautEntete() + 16, (vh - bh) / 2) };
-            if (place.y + bh > vh - MARGE) place.y = Math.max(MARGE, vh - bh - MARGE);
-        } else {
-            place = moinsCouvrir(b, evites, placerLoin(evites, bw, bh, cadreUtile()));
+        // LA FORME GARDÉE (23 nov. 2026) : tant que rien n'a changé (ce qu'elle évite, l'écran utile, sa largeur, son
+        // texte), la bulle garde sa hauteur plafonnée et sa largeur d'un passage de la sonde au suivant. Défaire puis
+        // refaire le plafond toutes les 120 ms ramenait en haut le texte qu'on fait défiler dans la bulle.
+        var garde = !etat.deplacee && !!etat.forme && etat.forme.cle === cleDeForme(b, evites, secondaires, utile);
+        if (!garde) {
+            etat.forme = null;
+            // Sa largeur se rechoisit avec sa hauteur (23 nov. 2026, « Ce que l'étudiant·e lit », parcours 8 : élargie
+            // pour tenir à côté du champ de la longueur, la bulle le restait quand l'étape passait au champ de la
+            // tolérance, et le couvrait). Déplacée par la personne, elle garde la forme qu'elle avait.
+            if (!etat.deplacee) b.classList.remove('parcours-bulle--elargie', 'parcours-bulle--etroite');
+            poserFilet(b, utile);
+            // AVANT LE FILET : une bulle plus haute que l'écran utile S'ÉLARGIT (16 nov. 2026, l'iPad couché : « Poser ton
+            // cadre », 761 px pour 695, passait sous le bandeau de la démo avec ses boutons). Plus large, elle a moins de
+            // lignes, et ses boutons tiennent côte à côte.
+            // Sa hauteur ENTIÈRE : le filet, qui vaut maintenant l'écran utile, la plafonne déjà, et ses lignes défilent.
+            if (!b.classList.contains('parcours-bulle--elargie') && hauteurEntiere(b) > utile.bas - utile.haut) b.classList.add('parcours-bulle--elargie');
         }
+        if (etat.deplacee) { poserDeplacee(); direQuIlResteALire(b); return; }
+        var place = choisirPlace(b, evites, secondaires, utile, garde);
         b.style.left = Math.round(place.x) + 'px';
         b.style.top = Math.round(place.y) + 'px';
+        if (!garde) etat.forme = { cle: cleDeForme(b, evites, secondaires, utile), aise: !!place.aise };
+        direQuIlResteALire(b);
+    }
+
+    /**
+     * Une bulle plafonnée coupe ses lignes : tant qu'il en reste à lire plus bas, leur bord du bas se fond
+     * (`parcours-bulle-lignes--a-suivre`, css/parcours.css), pour qu'on sache qu'elles défilent. Mesuré le 23 nov. 2026,
+     * « Ton trimestre » à 1180 × 820 : la consigne, dernière ligne, était sous la coupe, sans rien qui le dise.
+     */
+    function direQuIlResteALire(b) {
+        var l = b.querySelector('.parcours-bulle-lignes');
+        if (l) l.classList.toggle('parcours-bulle-lignes--a-suivre', l.scrollHeight - l.clientHeight - l.scrollTop > 4);
+    }
+
+    /** La place de la bulle selon ce que l'étape désigne (sorti de `placerBulle`, 23 nov. 2026 : le seuil de complexité). */
+    function choisirPlace(b, evites, secondaires, utile, garde) {
+        var bw = b.offsetWidth, bh = b.offsetHeight;
+        // Limitée à une bande libre cherchée à ECART px de ce qu'elle évite, elle y garde cette distance (`ecartes`).
+        var aEviter = garde && etat.forme.aise ? ecartes(evites) : evites;
+        if (!evites.length && !(secondaires && secondaires.length)) return placeSansRienEviter(bw, bh, utile);
+        // Une étape à section (`secondaires`) : loin de ce qu'elle désigne, puis hors de la section autant que possible.
+        var place = placerLoin(aEviter, bw, bh, utile, secondaires);
+        return garde ? place : moinsCouvrir(b, evites, place, secondaires);
+    }
+
+    /** Sans rien de désigné : dans son coin si la bulle présente une page, sinon au centre. */
+    function placeSansRienEviter(bw, bh, utile) {
+        // La bulle guide, la page agit (règle 5) : une bulle qui présente une page, sans rien y désigner, se range
+        // dans son coin, en bas à droite ; au centre, elle couvrait le texte de la page et son formulaire.
+        if (aUnLieu(etapeCourante())) return { x: Math.max(utile.gauche, utile.droite - bw), y: Math.max(utile.haut, utile.bas - bh) };
+        var vw = largeurPage(), vh = basEcran();
+        var place = { x: (vw - bw) / 2, y: Math.max(hautEntete() + 16, (vh - bh) / 2) };
+        if (place.y + bh > vh - MARGE) place.y = Math.max(MARGE, vh - bh - MARGE);
+        return place;
+    }
+
+    /**
+     * Le filet : jamais plus haute que l'écran utile (sous l'en-tête, au-dessus du bandeau de la démo), ni que le plafond
+     * que sa feuille de style lui donne ; au-delà, son texte défile dans la bulle. 23 nov. 2026 : le filet valait la
+     * fenêtre entière (moins les marges) et se posait en ligne, par-dessus la feuille de style. Mesuré à 1180 × 900,
+     * « Range ton fichier » : sous l'en-tête (84 px), la bulle, haute de 837 px pour 800 px d'écran utile, dépassait le
+     * bas de la fenêtre de 29 px, « Quitter le parcours » coupé ; à 1179 px, le plafond de la bulle posée sur l'aperçu
+     * (`parcours--par-dessus-les-fenetres`, 55 % de la fenêtre) ne s'appliquait plus.
+     */
+    function poserFilet(b, utile) {
+        b.style.maxHeight = '';
+        var feuille = parseFloat(window.getComputedStyle(b).maxHeight);
+        var ecran = Math.max(0, utile.bas - utile.haut);
+        b.style.maxHeight = Math.floor(feuille > 0 ? Math.min(feuille, ecran) : ecran) + 'px';
+    }
+
+    /** La hauteur de la bulle si rien ne la plafonnait : la sienne, plus ce qui défile en elle (ses lignes, son texte). */
+    function hauteurEntiere(b) {
+        var deborde = function (el) { return el ? Math.max(0, el.scrollHeight - el.clientHeight) : 0; };
+        return b.offsetHeight + deborde(b) + deborde(b.querySelector('.parcours-bulle-lignes')) + deborde(b.querySelector('.parcours-bulle-texte'));
+    }
+
+    /** Ce dont dépend la forme de la bulle (sa hauteur plafonnée, sa largeur) : voir « LA FORME GARDÉE ». */
+    function cleDeForme(b, evites, secondaires, utile) {
+        var dire = function (rs) {
+            return (rs || []).map(function (r) { return [r.left, r.top, r.right, r.bottom, r.poids || 1].map(Math.round).join(','); }).join(';');
+        };
+        var entiere = hauteurEntiere(b);
+        return [dire(evites), dire(secondaires), [utile.gauche, utile.haut, utile.droite, utile.bas].map(Math.round).join(','),
+                b.className, b.offsetWidth, entiere].join('|');
     }
 
     /**
      * Une place qui couvre ce que la bulle évite : deux essais avant de s'y résoudre (sortis de `placerBulle`, 22 nov.
      * 2026, pour qu'elle reste sous le seuil de complexité).
      */
-    function moinsCouvrir(b, evites, place) {
+    function moinsCouvrir(b, evites, place, secondaires) {
         // AVANT DE COUVRIR CE QU'ELLE ÉVITE, la bulle s'élargit aussi (16 nov. 2026 ; « Ton trimestre » à 1180 × 900 :
         // au-dessus de la rangée « session, année, nom », il reste 477 px ; haute de 476 px, la bulle y tenait à
         // 1 px près, et la ligne de la poignée, dite par la première bulle de chaque parcours, la faisait couvrir le
         // nom du trimestre). Plus large, elle est moins haute : si cette forme ne couvre PLUS RIEN de ce qu'elle
-        // évite, elle la garde jusqu'à la bulle suivante ; sinon elle reprend sa largeur, et l'essai n'est pas refait
-        // à chaque passage de la sonde (`parcours-bulle--etroite` ; les deux classes partent avec `rendreBulle`).
+        // évite, elle la garde tant que rien ne change (« LA FORME GARDÉE », `placerBulle`) ; sinon elle reprend sa
+        // largeur (`parcours-bulle--etroite`). Les deux classes partent avec `rendreBulle`, et quand ce qu'elle évite change.
         // ⚠ « Couvre moins » ne suffit pas (mesuré le 16 nov. 2026, « Pourquoi étiqueter » à 1180 × 820) : large,
         // la bulle mordait un peu moins sur la zone de collage, mais couvrait 23 % du texte de la page au lieu de 5 %.
         if (place.aire > 0 && !b.classList.contains('parcours-bulle--elargie') && !b.classList.contains('parcours-bulle--etroite')) {
             b.classList.add('parcours-bulle--elargie');
-            var large = placerLoin(evites, b.offsetWidth, b.offsetHeight, cadreUtile());
+            var large = placerLoin(evites, b.offsetWidth, b.offsetHeight, cadreUtile(), secondaires);
             if (large.aire <= 1) place = large;
             else { b.classList.remove('parcours-bulle--elargie'); b.classList.add('parcours-bulle--etroite'); }
         }
@@ -2122,8 +2184,80 @@
         // tenait nulle part sans couvrir la rangée du menu, et couvrait « + Nouvelle grille ») : une étape qui le
         // déclare, quand aucune place ne laisse libre ce qu'elle évite, se limite à la bande libre la plus haute,
         // au-dessus ou au-dessous du contour ; son texte y défile (le filet). Aucun mot ne change.
+        // LA BANDE LIBRE (23 nov. 2026 ; « Ton trimestre » à 1180 × 820, « Vérifie avant d'importer » à 1180 et à 820 px :
+        // la bulle couvrait les champs qu'elle demande de remplir, et « Importer » qu'elle demande de toucher). Avant de
+        // couvrir quoi que ce soit, la bulle se limite à la plus haute bande où elle ne couvre RIEN de ce qu'elle évite ;
+        // son texte y défile (le filet). Aucun mot ne change. Pour toutes les étapes, sans rien déclarer.
+        if (place.aire > 0) place = tenirDansLaBandeLibre(b, evites, secondaires) || place;
         if (place.aire > 0) place = serrerHorsDuContour(b, evites) || place;
         return place;
+    }
+
+    /**
+     * La plus grande hauteur à laquelle une bulle large de `bw` tient dans `cadre` sans rien couvrir de `evites` ; 0 quand
+     * il n'y en a pas. À une place donnée de gauche à droite, ce que la bulle rencontre ne change qu'aux bords des
+     * rectangles : il suffit d'essayer le bord gauche et le bord droit du cadre, et les places collées à gauche et à
+     * droite de chaque rectangle. Pure.
+     */
+    function hauteurLibre(evites, bw, cadre) {
+        var g = cadre.gauche, d = Math.max(g, cadre.droite - bw);
+        var xs = [g, d];
+        evites.forEach(function (r) { xs.push(Math.floor(r.left - bw), Math.ceil(r.right)); });
+        var meilleure = 0;
+        xs.forEach(function (x) {
+            x = borne(x, g, d);
+            // En px entiers, du côté LIBRE : la bulle se pose au pixel, et un demi-pixel sur le contour pèse dix mille fois.
+            var y = Math.ceil(cadre.haut);
+            evites.filter(function (r) { return r.right > x && r.left < x + bw && r.bottom > cadre.haut && r.top < cadre.bas; })
+                .sort(function (A, B) { return A.top - B.top; })
+                .forEach(function (r) { meilleure = Math.max(meilleure, Math.floor(r.top) - y); y = Math.max(y, Math.ceil(r.bottom)); });
+            meilleure = Math.max(meilleure, Math.floor(cadre.bas) - y);
+        });
+        return Math.max(0, meilleure);
+    }
+
+    /**
+     * Voir « LA BANDE LIBRE », dans `moinsCouvrir`. La bulle se limite à la plus haute bande libre de tout ce qu'elle
+     * évite ; à cette hauteur, la place se cherche comme toujours (`placerLoin`). La bande se cherche d'abord à ECART px
+     * de ce qu'elle évite : collée à un champ, la bulle ne le couvre pas, mais la flèche qui le désigne n'a plus la
+     * place de se tracer (mesuré le 23 nov. 2026, « Ton trimestre » à 1180 × 820 : à 5 px de « Fin des cours », cinq
+     * flèches pour six champs). Rend null quand aucune bande n'est assez haute pour qu'on y lise (HAUTEUR_MIN_SERREE).
+     */
+    function tenirDansLaBandeLibre(b, evites, secondaires) {
+        var cadre = cadreUtile();
+        var bande = bandeLibre(b, evites, cadre);
+        // Plus large, la bulle a moins de lignes : si sa bande libre en montre alors une plus grande part (ou la tient à
+        // ECART px, ce que l'étroite ne fait pas), elle s'élargit. Une bulle dont l'étape fixe la largeur ne change pas.
+        if (b.classList.contains('parcours-bulle--etroite')) {
+            b.classList.add('parcours-bulle--elargie');
+            var large = bandeLibre(b, evites, cadre);
+            var mieux = !!large && (!bande || (large.aise && !bande.aise) || (large.aise === bande.aise && large.part > bande.part + 0.02));
+            if (mieux) { bande = large; b.classList.remove('parcours-bulle--etroite'); }
+            else b.classList.remove('parcours-bulle--elargie');
+        }
+        if (!bande) return null;
+        b.style.maxHeight = Math.min(bande.h, parseFloat(b.style.maxHeight) || bande.h) + 'px';
+        var place = placerLoin(bande.aise ? ecartes(evites) : evites, b.offsetWidth, b.offsetHeight, cadre, secondaires);
+        place.aise = bande.aise;
+        return place;
+    }
+
+    /**
+     * La bande libre de la bulle à sa largeur du moment : sa hauteur, si elle est à ECART px de ce que la bulle évite, et
+     * la part du texte entier qu'elle montre. Null quand aucune n'est assez haute pour qu'on y lise.
+     */
+    function bandeLibre(b, evites, cadre) {
+        var bw = b.offsetWidth, aise = true, h = hauteurLibre(ecartes(evites), bw, cadre);
+        if (h < HAUTEUR_MIN_SERREE) { aise = false; h = hauteurLibre(evites, bw, cadre); }
+        if (h < HAUTEUR_MIN_SERREE) return null;
+        return { h: h, aise: aise, part: Math.min(1, h / Math.max(1, hauteurEntiere(b))) };
+    }
+
+    /** Ce que la bulle évite, tenu à ECART px : chaque rectangle grandi d'ECART de chaque côté, son poids gardé. Pure. */
+    function ecartes(evites) {
+        return evites.map(function (r) {
+            return { left: r.left - ECART, top: r.top - ECART, right: r.right + ECART, bottom: r.bottom + ECART, poids: r.poids };
+        });
     }
 
     /**
@@ -2139,8 +2273,8 @@
         var rc = c.getBoundingClientRect(), cadre = cadreUtile();
         var dessous = cadre.bas - rc.bottom - 2 * ECART, dessus = rc.top - cadre.haut - 2 * ECART;
         var h = Math.max(dessous, dessus);
-        if (h < 240) return null;
-        b.style.maxHeight = Math.floor(h) + 'px';
+        if (h < HAUTEUR_MIN_SERREE) return null;
+        b.style.maxHeight = Math.min(Math.floor(h), parseFloat(b.style.maxHeight) || h) + 'px';
         return placerLoin(evites, b.offsetWidth, b.offsetHeight, cadreUtile());
     }
 
@@ -2889,7 +3023,7 @@
         mouvementReduit: mouvementReduit,
         // La géométrie des flèches et du déplacement, en fonctions pures (tests/unit).
         geometrie: { tracerFleche: tracerFleche, grouperCibles: grouperCibles, bornerDeplacement: bornerDeplacement, placerLoin: placerLoin,
-                     reduireEvites: reduireEvites, placesEssayees: placesEssayees },
+                     reduireEvites: reduireEvites, placesEssayees: placesEssayees, hauteurLibre: hauteurLibre },
         // Pour le relevé des bancs (tests/integration/harness/releve-bulle.js) : ce que l'étape désigne, la bulle
         // déplacée ou non, l'écran utile. Lecture seule.
         placement: function () {
