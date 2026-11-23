@@ -67,7 +67,10 @@ describe('E2. Le mot n\'est écrit qu\'à une place', () => {
         const motif = /À l[’']essai/;
         // Le commentaire en fin de ligne (`// …`, `<!-- … -->`) est retiré : seul ce qui s'exécute ou s'affiche compte.
         const sansFin = (l) => l.replace(/<!--.*?-->/g, '').replace(/\s\/\/ .*$/, '');
-        const vus = SCRIPTS.concat(['index.html']).filter((f) => horsCommentaires(f, motif).some((l) => motif.test(sansFin(l))));
+        // Les Nouvelles sont de la prose publiée, pas l'étiquette de la pratique : l'entrée 1.258 (mots de Grégoire, 22 nov.
+        // 2026) dit des PARCOURS qu'ils sont « À l'essai ». Elle ne suit pas la constante, et c'est voulu.
+        const vus = SCRIPTS.concat(['index.html']).filter((f) => f !== 'js/changelog-data.js')
+            .filter((f) => horsCommentaires(f, motif).some((l) => motif.test(sansFin(l))));
         expect(vus).toEqual(['js/pratiques/ensembles-cibles.js']);
         expect(horsCommentaires('js/pratiques/ensembles-cibles.js', motif).length).toBe(1);
     });

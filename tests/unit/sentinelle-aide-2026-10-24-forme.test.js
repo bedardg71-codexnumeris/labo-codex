@@ -177,7 +177,8 @@ describe('#1152 lot 1 · les quatre retraits (§5) : motifs mesurés au texte d\
         expect(carte('rai-absences')).toBeNull();
         const t = texte(carte('planifier-rai'));
         expect(t).not.toMatch(/se propagent automatiquement aux présences/);
-        expect(t).toContain('Le report se fait une seule fois.');
+        // ↻ 23 nov. 2026 : la case de report est retirée de l'écran (#1304) ; l'entrée ne la décrit plus du tout.
+        expect(t).not.toMatch(/Le report se fait une seule fois|Reporter les présences/);
     });
     it('bilan-reflexif : plus de partie « Importer les résultats » tant que #1054 n\'est pas corrigée', () => {
         const t = texte(carte('bilan-reflexif'));
