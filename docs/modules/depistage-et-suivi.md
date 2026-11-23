@@ -339,7 +339,7 @@ Profil etudiant > Accompagnement > «+ Nouvelle intervention»
 | `afficherAnalyseTempsReel(id)` | Apercu du sous-groupe en temps reel |
 | `mettreAJourCriteresCibles(id)` | Mise a jour des criteres cibles quand la selection change |
 | `suggererObjectifIntervention(id)` | Suggestion automatique d'objectif mesurable |
-| `transfererPresencesVersModule(id)` | Transfert des presences vers le module presences |
+| ~~`transfererPresencesVersModule(id)`~~ | Retirée le 23 nov. 2026 avec la case « Reporter les présences… » (#1304) : une intervention n'écrit plus de présences |
 
 (Numeros de ligne retires le 12 sept. 2026 : ils etaient perimes.)
 

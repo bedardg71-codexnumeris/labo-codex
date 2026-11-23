@@ -197,7 +197,7 @@ Source : `plans de travail/TRIAGE-audits-2026-08-21.md`, lignes D1 et D2 (#471, 
 `indices.js` (`calculerEtSauvegarderIndicesAssiduite()`) est le seul point d'écriture. 7 lecteurs.
 
 ### 3. `presences` — Refactorée Tier 6.4
-`saisie-presences.js` est le seul écrivain depuis avril 2026 (API `modifierNotesPresence()` + `ajouterPresencesIntervention()` créées pour migrer interventions.js et profil-etudiant.js).
+`saisie-presences.js` est le seul écrivain depuis avril 2026 (API `modifierNotesPresence()`, créée pour migrer profil-etudiant.js). `ajouterPresencesIntervention()` est retirée le 23 nov. 2026 avec la case « Reporter les présences… » d'une intervention (#1304) : `interventions.js` n'écrit plus dans `presences` ; les présences `facultatif: true` déjà écrites y restent.
 
 ### 4. `interventions` — Owner unique
 `interventions.js` seul écrivain. 1 lecteur (evaluation).
