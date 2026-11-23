@@ -7,6 +7,21 @@
 
 ---
 
+## 23 NOV. 2026, 18 H 15 (Claude Code) : **1.258.1 SUR `main` ET EN LIGNE — LA BULLE ENTIÈRE DANS L'ÉCRAN UTILE ET HORS DE CE QU'ELLE DÉSIGNE, LE BANDEAU DE VERSION SOUS L'EN-TÊTE** — ⚠ sans verdict WebKit complet, écart décidé par Grégoire
+
+Mandat : feu vert de Grégoire, 23 nov., 18 h 05, relayé par la session coordonnatrice de Cowork, qui a relu `lot/bulle-et-bandeau` (`46b680bdf`). **Le travail le plus récent vit sur `main`.** `main` avancé en avance rapide de `4d1043cce` à `46b680bdf` (aucun commit de fusion), depuis `../labo-codex-fusion`. Rapport complet : `plans de travail/RAPPORT-2026-11-23-bulle-et-bandeau.md`.
+
+- ⚠ **L'ÉCART, DIT EN CLAIR : PAS DE VERDICT WEBKIT COMPLET.** 270 essais ciblés (53 bancs) joués sur environ 1 900 ; décision de Grégoire du 23 nov. à 18 h 05. Le crochet de push a laissé passer (Vitest vert, « aucun verdict local pour ce commit »). **Les 9 rouges restants sont ceux des familles A (8) et E (1) du verdict du matin** (`RAPPORT-2026-11-23-verdict-webkit-1.258.0.md`, sur `origin/lot/verdict-1.258`) : hors mandat, non touchés.
+- **Ce que la 1.258.1 porte** : la règle générale de la bulle (`js/parcours-moteur.js`, `css/parcours.css`) et le bandeau de version posé sous l'en-tête et la bande du groupe (`js/init-inline.js`) ; les 12 rouges des familles B et C verts. Aucun mot de bulle ne change ; `js/changelog-data.js` intact hors jeton.
+- **Nouvelles : AUCUNE ligne**, décision de Grégoire (« telle quelle »).
+- **Trois limites connues et acceptées pour cette version** (§ 3 du rapport) : parcours 2 à 1180 × 820, la bulle ne montre que deux lignes et demie, la consigne est sous la coupe ; parcours 2, la bulle couvre la colonne « Semaines spéciales » ; parcours 6 à 820 px, la bulle couvre le haut de l'aperçu. **La première bulle du parcours 2 sera raccourcie avec Grégoire dans un lot à part : ne pas y toucher d'ici là.**
+- **Bancs, sur `ff520be07`** : Vitest 958 fichiers, 12 334 verts. WebKit ciblé : 235 passés, 5 verts au second essai, 9 rouges, 21 sautés.
+- **Release** : 1.258.1, build `1123-1652`. **Netlify** : déploiement de production `6b04c80bbf371df39e254c5d`, `ready`, `commit_ref` `46b680bdf`, publié le 23 nov. à 18 h 11.
+- **À inscrire, pas encore fait** (§ 9 du rapport) : `parcours-8` 623 (l'étape ne déclare pas `serrer`) ; `en-tete-epure` 249 ; les instables `parcours-4` 155 et `je-regarde-cours` 158. **Numéros** : aucun pris. **Numéro libre : #1305.**
+- **Non vérifié** : le verdict complet (quelque 1 670 essais des autres bancs) ; Chromium ; l'iPad au doigt (glisser, défilement intérieur de la bulle, fondu sous Safari iPad, clavier à l'écran) ; le bandeau à 390 px ; les données réelles de Grégoire ; `app.codexnumeris.org` lui-même (derrière Cloudflare Access).
+
+---
+
 ## 22 NOV. 2026, 23 H 15 (Claude Code) : **1.258.0 SUR `main` ET EN LIGNE — LES PARCOURS ASSISTÉS S'OUVRENT (2 À 9), « OBSERVER EN CIRCULANT », LA VUE SIMPLE « PAR STANDARDS »** — ⚠ sans verdict WebKit du Mac, écart décidé par Grégoire
 
 Mandat : Grégoire, 22 nov., 20 h 36 et 20 h 56, relayé par Cowork en trois consignes (`plans de travail/CONSIGNE-2026-11-22-publication-parcours.md`, `…-parcours-9-je-regarde.md`, `…-release-publication.md`). **Le travail le plus récent vit sur `main`.** Session cloud, branche `lot/publication-parcours` (partie de `claude/relaxed-feynman-0vcwct`), fusionnée en avance rapide. Rapport complet : `plans de travail/RAPPORT-2026-11-22-publication-parcours.md`. PR d'aperçu : bedardg71-codexnumeris/labo-codex#56.
