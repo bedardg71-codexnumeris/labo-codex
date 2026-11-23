@@ -342,3 +342,39 @@ inscrit. Mesuré : après un rechargement à la bulle 3, la démo est toujours o
   de la bulle 5 retirée ; « Refaire » qui ne retire rien ; le versement retiré ; une clé écrite hors de la démo) : chacun
   rouge, puis le code remis à l'identique.
 - **Vitest complet** (sur `41b5afda3`) : **957 fichiers, 12 329 essais, tous verts.**
+- **La batterie des parcours** (37 fichiers : les 36 de l'assemblage sans l'ancien banc du parcours 9, plus le banc
+  neuf), sous Chromium, sur `41b5afda3`, en trois lots lancés ensemble : **147 verts, 23 rouges, 14 sautés.**
+
+| Rouges | Nombre | Cause |
+|---|---|---|
+| Les 17 de la base, **tous retrouvés, même essai** | 17 | comme au § 6 |
+| `codex-de-depart` (rouge sur la base, § 6) | 3 | le bandeau « nouvelle version » couvre le menu |
+| `essai-novice-lot2-moteur` 315 | 1 | **venu de ce relais** : sous l'identité du neuvième parcours, le moteur offre maintenant « Voir le parcours 6 » (il nomme sa suite) ; le banc disait « le dernier parcours n'offre que « Terminer » ». **Banc corrigé** (`f8f791afd` : la règle se juge sur un panneau dont le dernier ne nomme rien), rejoué : vert |
+| Instables sous la charge des trois lots | 2 | `nous-faisons-evaluer` à 820 × 1180 (un contour lu 121 px trop tôt) ; `parcours-je-regarde` 297, « Découvrir » (le triangle en rotation, déjà nommé instable aux rapports d'avant). **Rejoués seuls : verts** (5 sur 5 et 3 sur 3) |
+
+  **Ce que le § 6 supposait est vérifié** : le neuvième ouvert, `registre-des-parcours`, `parcours-je-regarde` 261,
+  `essai-novice` (e) et `je-regarde-commentaires` B (aux deux tailles) sont verts. `deux-temps-modelisation` 47, périmé
+  sur la base, est corrigé (il compte les huit parcours à modèle, dont le neuvième à un seul temps) : vert.
+  `parcours-fleches` 425, rouge au § 6 sur les deux arbres, est vert à ce passage : instable.
+  **Aucun rouge propre au parcours 9 ne reste.**
+
+### 9.7 Non vérifié (parcours 9)
+
+- **Safari et l'iPad** : le toucher sur l'écran d'observation et dans la fenêtre, la bulle par-dessus ces deux fenêtres
+  (elle passe au-dessus par la classe `parcours-sur-modale` ; au banc, elle tient dans l'écran et aucun geste demandé
+  n'est couvert, les clics de Playwright en font foi ; **personne ne l'a regardée**), le clavier de l'iPad qui monte
+  quand « Remplir » pose un texte.
+- **En vue simple** : la fenêtre d'une case n'y a ni production ni date ; le parcours se lance du panneau « Assistance »,
+  que la vue simple n'offre pas de la même façon (rapport précédent, § 7). Non essayé.
+- **Sur téléphone** : le parcours n'y est pas offert (décision de la session, § 9.5).
+- « Voir le parcours 6 » : le libellé et la phrase sont jugés ; le panneau qui s'ouvre devant le sixième parcours l'est
+  par le banc de la fin des parcours, pour les autres parcours seulement.
+
+### 9.8 Trouvailles (parcours 9), et leur issue
+
+1. **L'écran d'observation prend la date du jour sans l'offrir** : hors du parcours, une observation faite hier ne
+   s'inscrit que par la fenêtre d'une case (son rapport le dit déjà). `dater` existe maintenant, mais seul le parcours
+   l'appelle. **Commenter et oublier** (aucun symptôme vécu).
+2. **Les bulles 1 des deux temps du parcours 7** (« … viendra dans une prochaine version ») : § 8, point 3. **Remonté.**
+3. **La carte « Besoin d'un coup de main ? »** et l'Aide ne disent rien du neuvième parcours ni de son seul temps :
+   rien d'inexact, rien à changer.
