@@ -129,7 +129,9 @@
 
     function _titreHTML() {
         const essai = (window.EnsemblesCibles && typeof window.EnsemblesCibles.etiquetteEssaiHTML === 'function') ? window.EnsemblesCibles.etiquetteEssaiHTML() : '';
-        return `<h3 class="modal-titre" id="oc-titre">${esc(MOTS.titre)} ${essai}</h3>`;
+        // Simulation (23 nov. 2026) : la marque, au titre de la fenêtre, à chaque étape.
+        const simulation = (_etat.ctx.simulation && window.SimulationPratique) ? window.SimulationPratique.marqueHTML() + ' ' : '';
+        return `<h3 class="modal-titre" id="oc-titre">${simulation}${esc(MOTS.titre)} ${essai}</h3>`;
     }
 
     function _choixHTML() {
@@ -265,11 +267,11 @@
 
     function fermer() {
         if (!_etat) return;
-        const { overlay, retour, ecrit } = _etat;
+        const { overlay, retour, ecrit, ctx } = _etat;
         document.removeEventListener('keydown', _surTouche, true);
         if (overlay && overlay.parentNode) overlay.parentNode.removeChild(overlay);
         _etat = null;
-        if (ecrit && T() && typeof T().rerendre === 'function') T().rerendre(null);   // le tableau derrière : ses comptes ont changé
+        if (ecrit && T() && typeof T().rerendre === 'function') T().rerendre(null, ctx);   // le tableau derrière (celui de la simulation, sous elle) : ses comptes ont changé
         if (retour && document.contains(retour)) retour.focus();
     }
 

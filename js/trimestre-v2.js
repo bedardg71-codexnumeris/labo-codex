@@ -278,6 +278,23 @@ function populerDropdownGroupesAssemblageV2() {
 /**
  * Peuple les dropdowns du formulaire d'assemblage (5 éléments Beta 95.2)
  */
+/**
+ * Simulation (23 nov. 2026, js/simulation-pratique.js) : le champ « Simulation » de la fiche du groupe-cours. Parmi les
+ * pratiques offertes au champ « Pratique de notation », les « Par standards ». Le choix en cours est gardé.
+ */
+function _peuplerSimulationAssemblageV2(pratiques) {
+    const select = document.getElementById('v2-gc-simulation');
+    const S = window.SimulationPratique;
+    if (!select || !S) return;
+    const garde = select.value;
+    document.getElementById('v2-gc-simulation-libelle').textContent = S.MOTS.champ;
+    document.getElementById('v2-gc-simulation-aide').textContent = S.MOTS.champAide;
+    // security-ok : mots de l'écran et données échappés (echapperHtml).
+    select.innerHTML = `<option value="">${echapperHtml(S.MOTS.champAucune)}</option>`
+        + S.candidatesParmi(pratiques).map(p => `<option value="${echapperHtml(p.id)}">${echapperHtml(p.nom || p.id || 'Sans nom')}</option>`).join('');
+    window.poserSimulationFicheGroupeCoursV2(garde);
+}
+
 function populerDropdownsAssemblageV2() {
 
     // Beta 95.2: Dropdown Trimestres
@@ -374,6 +391,8 @@ function populerDropdownsAssemblageV2() {
             html += `<option value="${echapperHtml(p.id)}">${echapperHtml(nom)}</option>`;
         });
         selectPratique.innerHTML = html;
+
+        _peuplerSimulationAssemblageV2(pratiques);
     }
 
     // Retour testeur du 18 sept. 2026 : ce hub est rejoué après chaque

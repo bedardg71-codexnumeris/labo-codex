@@ -195,15 +195,28 @@
         ctx.productions = _productionsTriees(_productionsSpe(productions, ctx.types));
     }
 
+    /** Les rangées et l'origine d'un niveau (lot 2 « Par standards ») : les étudiant·es du groupe-cours actif, ses productions
+        (un portfolio conteneur n'est pas une trace : ce sont ses artefacts). */
+    function _completerCibles(ctx) {
+        ctx.etudiants = _etudiants();
+        ctx.productions = _productionsTriees(_productionsDuGroupe().filter(p => p.type !== 'portfolio'));
+        return ctx;
+    }
+
+    /**
+     * SIMULATION (23 nov. 2026, js/simulation-pratique.js) : le contexte du tableau des cibles pour une pratique « Par
+     * standards » qui N'EST PAS la pratique désignée du groupe. Mêmes étudiant·es, mêmes productions ; `simulation: true`
+     * suit le contexte jusqu'aux fenêtres (la marque, le redessin, l'export absent). La désignation n'est pas lue.
+     * @param {{id: string, donnees: Object}} pratique - l'entrée de bibliothèque de la pratique simulée
+     */
+    function contexteDeSimulation(pratique) {
+        const donnees = pratique.donnees || {};
+        return _completerCibles({ etat: 'cibles', pratiqueId: pratique.id, pratiqueNom: donnees.nom || '', donnees, presentation: null, simulation: true });
+    }
+
     function construireContexte() {
         const ctx = _contexteDeBase();
-        if (ctx.etat === 'cibles') {
-            // Les rangées et l'origine d'un niveau (lot 2 « Par standards ») : les mêmes étudiant·es, les productions du groupe
-            // (un portfolio conteneur n'est pas une trace : ce sont ses artefacts).
-            ctx.etudiants = _etudiants();
-            ctx.productions = _productionsTriees(_productionsDuGroupe().filter(p => p.type !== 'portfolio'));
-            return ctx;
-        }
+        if (ctx.etat === 'cibles') return _completerCibles(ctx);
         if (ctx.etat !== 'ok') return ctx;
         _completerProductions(ctx);
         ctx.etudiants = _etudiants();
@@ -602,6 +615,8 @@
         }
         _marquerDebordement();
         if (aRendre) _reprendreFocus(hote, aRendre);
+        // Simulation (23 nov. 2026) : son entrée, sous le tableau officiel. Vue étendue seulement.
+        if (!_presentation && window.SimulationPratique) window.SimulationPratique.apresRenduOfficiel();
     }
 
     function _reprendreFocus(hote, focus) {
@@ -633,8 +648,16 @@
         return { gauche: largeur('.tn-col-eleve'), droite: largeur('.tn-col-note') };
     }
 
-    function _marquerDebordement() {
-        const hote = _hote();
+    function _marquerDebordement() { _marquerDebordementDe(_hote()); }
+
+    /** Simulation (23 nov. 2026) : le même bord estompé pour le tableau monté dans un autre hôte. */
+    function suivreDebordement(hote) {
+        const zone = hote && hote.querySelector('.tn-defilement');
+        if (zone) zone.addEventListener('scroll', () => _marquerDebordementDe(hote), { passive: true });
+        _marquerDebordementDe(hote);
+    }
+
+    function _marquerDebordementDe(hote) {
         const cadre = hote && hote.querySelector('.tn-cadre');
         const zone = cadre && cadre.querySelector('.tn-defilement');
         if (!zone) return;
@@ -912,6 +935,8 @@
             afficherSousSection('evaluations-tableau');
             return;
         }
+        // Rouvrir la sous-section montre toujours le tableau officiel : la simulation s'ouvre par son entrée.
+        if (window.SimulationPratique) window.SimulationPratique.fermer();
         rendre(null);
         const titre = _hote() && _hote().querySelector('.tn-titre');
         if (titre) titre.focus();
@@ -930,6 +955,8 @@
         quitterPresentation,   // vue simple quittée
         notesDuGroupe,         // vue simple : l'écran « Note finale »
         noterGesteLot,         // vue simple : la mise à jour des valeurs, que « Annuler » défait en un geste
+        contexteDeSimulation,  // simulation (23 nov. 2026) : le contexte des cibles d'une pratique non désignée
+        suivreDebordement,     // simulation : le bord estompé, dans son hôte
         normeDeLEleve,         // le profil et le PDF : la norme du tableau pour une personne (11 nov. 2026)
         MOTS,                  // vue simple : les mots validés, repris tels quels (gelés)
         construireHTML,        // exposés pour le banc (tests/unit/tableau-notation-1.test.js)

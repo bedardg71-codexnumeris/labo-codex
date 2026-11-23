@@ -56,7 +56,8 @@ function executer(appel, trimestre, valeurs) {
 const SITE_PRATIQUE = ['js/pratiques-gestion.js', 'async function sauvegarderConfigPratiqueMat('];
 const SITE_GROUPE = ['js/trimestre-v2-groupes-cours.js', 'Phase 4.C : interdire les références à des items démo'];
 const VALEURS_PRATIQUE = { echelleIdCourante: 'ECH_DEMO_1' };
-const VALEURS_GROUPE = { coursId: 'demo-cours', horaireId: 'HOR_1', enseignantId: 'ENS_DEMO', pratiqueId: 'demo-std-litt' };
+// `simulationPratiqueId` (23 nov. 2026) : la simulation du groupe passe par la même garde ; ici, aucune.
+const VALEURS_GROUPE = { coursId: 'demo-cours', horaireId: 'HOR_1', enseignantId: 'ENS_DEMO', pratiqueId: 'demo-std-litt', simulationPratiqueId: null };
 
 describe('l\'échelle d\'une pratique (pratiques-gestion.js)', () => {
     const appel = appelDuSite(...SITE_PRATIQUE);
