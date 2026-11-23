@@ -312,11 +312,21 @@ test('(e) la fin : « Voir le parcours N » et « Terminer » de même poids, et
     }, ids[1]), 'le focus au premier bouton de la carte suggérée').toBe(true);
 });
 
-test('(e) le dernier parcours du panneau n\'offre que « Terminer » ; une carte sans rang n\'a ni compteur ni phrase', async ({ page }) => {
+test('(e) un parcours que rien ne suit n\'offre que « Terminer » ; le neuvième offre la suite qu\'il nomme ; une carte sans rang n\'a ni compteur ni phrase', async ({ page }) => {
     test.setTimeout(120000);
     await ouvrir(page);
+    // ↻ 23 nov. 2026 : le neuvième parcours, le dernier du panneau, NOMME sa suite (`suite`, le sixième) : sous son
+    // identité, le moteur offre « Voir le parcours 6 ». La règle « rien après le dernier » se juge donc sur un panneau où
+    // le dernier ne nomme rien : le banc n'y laisse ouverts que les deux premiers.
     const ids = await page.evaluate(() => window.Assistance.parcours().map((p) => p.id));
     await lancerLeFictif(page, { id: ids[ids.length - 1], lancer: { depuis: 2 } });
+    await expect(page.locator('#parcours-bulle .parcours-bulle-boutons .btn')).toHaveText(['Voir le parcours 6', 'Terminer']);
+    await expect(page.locator('#parcours-bulle .parcours-bulle-geste')).toHaveText('Touche «\u00a0Voir le parcours 6\u00a0», ou «\u00a0Terminer\u00a0».');
+    await page.evaluate((deux) => {
+        window.ParcoursMoteur.fermer();
+        window.Assistance.ouvrirLesParcours(deux);
+        return window.ParcoursMoteur.lancer(Object.assign({}, window.__banc.def, { id: deux[1] }), { depuis: 2 });
+    }, ids.slice(0, 2));
     await expect(page.locator('#parcours-bulle .parcours-bulle-boutons .btn')).toHaveText(['Terminer']);
     await expect(page.locator('#parcours-bulle .parcours-bulle-geste')).toHaveText('Touche «\u00a0Terminer\u00a0».');
     await page.evaluate(() => {
