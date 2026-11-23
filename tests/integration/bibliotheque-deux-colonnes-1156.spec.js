@@ -526,8 +526,10 @@ test('pratiques : chaque rangée du trimestre porte « Garder dans ma bibliothè
 
     // La famille en mots, à la place des badges ; « Gabarit » parti.
     await expect(rangee(page, 'pratiques', 'trimestre', 'Par sélection de productions (démo)').locator('.biblio2-rangee-meta')).toHaveText(/^Par sélection de productions( · par .+)?$/);   // ↻ 21 nov. 2026, 7 h 44 : le nom de famille, sans « PAN »
-    await expect(rangee(page, 'pratiques', 'bibliotheque', 'Modèle sommatif').locator('.biblio2-rangee-meta')).toHaveText(/^Sommative · par /);
-    await expect(rangee(page, 'pratiques', 'bibliotheque', 'Modèle de base').locator('.biblio2-rangee-meta')).toHaveText(/^PAN-Dénotation · par /);
+    // ↻ lot modele-fourni-non-supprimable (22 nov. 2026) : un modèle fourni, intact, dit « fourni avec l'application » à la
+    // place de son auteur (mots validés par Grégoire le 22 nov. 2026 ; banc : modele-fourni-non-supprimable.spec.js).
+    await expect(rangee(page, 'pratiques', 'bibliotheque', 'Modèle sommatif').locator('.biblio2-rangee-meta')).toHaveText('Sommative · fourni avec l\'application');
+    await expect(rangee(page, 'pratiques', 'bibliotheque', 'Modèle de base').locator('.biblio2-rangee-meta')).toHaveText('PAN-Dénotation · fourni avec l\'application');
     const fen = page.locator(FAMILLES.pratiques.sel);
     await expect(fen.locator('.badge-type-pratique')).toHaveCount(0);
     await expect(fen.locator('.badge-source')).toHaveCount(0);
@@ -590,7 +592,11 @@ test('pratiques : ⋮, les libellés et leurs actions ; la phrase dans la confir
     await ouvrirDemo(page, 'pratiques', 1440, 900);
     const questions = [];
     page.on('dialog', (d) => { if (/^Supprimer définitivement la pratique/.test(d.message())) questions.push(d.message()); });
+    // ↻ lot modele-fourni-non-supprimable (22 nov. 2026) : le ⋮ de la bibliothèque s'éprouvait sur « Modèle simple », un modèle
+    // fourni ; intact, il n'offre plus « Supprimer » (ni ⋮). Le geste s'éprouve sur une pratique à soi.
+    await semerPratiquesBibliotheque(page, [{ id: 'PRAT_BANC_MENU', nom: 'Pratique fictive du menu', type: 'sommative' }]);
     await ouvrirBibliotheque(page, 'pratiques');
+    await expect(rangee(page, 'pratiques', 'bibliotheque', 'Modèle simple').locator('.biblio2-kebab')).toHaveCount(0);
 
     const rt = () => rangee(page, 'pratiques', 'trimestre', 'PAN – Spécifications (démo)');
     const id = await rt().getAttribute('data-biblio-item-id');
@@ -612,7 +618,7 @@ test('pratiques : ⋮, les libellés et leurs actions ; la phrase dans la confir
         menu = await ouvrirMenu(rt());
         await menu.getByRole('menuitem', { name: libelle, exact: true }).click();
     }
-    menu = await ouvrirMenu(rangee(page, 'pratiques', 'bibliotheque', 'Modèle simple'));
+    menu = await ouvrirMenu(rangee(page, 'pratiques', 'bibliotheque', 'Pratique fictive du menu'));
     await expect(menu.locator('.biblio-menu-item')).toHaveText(['Supprimer de ma bibliothèque']);
     await menu.getByRole('menuitem', { name: 'Supprimer de ma bibliothèque' }).click();
     expect(await page.evaluate(() => window.__appels)).toEqual([
@@ -620,7 +626,7 @@ test('pratiques : ⋮, les libellés et leurs actions ; la phrase dans la confir
         ['exporterPourPartager', 'pratique', id],
         ['partagerPratiqueMateriel', id],
         ['retirerPratiqueDeBibliothequeMateriel', id],
-        ['supprimerPratiqueDeBibliothequePartagee', 'SPE-simple']
+        ['supprimerPratiqueDeBibliothequePartagee', 'PRAT_BANC_MENU']
     ]);
 
     // « Supprimer définitivement », pour de vrai : un gabarit ramené (son exemplaire reste dans la
