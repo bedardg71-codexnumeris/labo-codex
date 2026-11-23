@@ -21,6 +21,26 @@
 
     var CHANGELOG = [
         {
+            // 1.258 (23 nov. 2026 : la publication des parcours) — titre et ligne de Grégoire (22 nov., consigne de la release),
+            // mot pour mot ; seule la typographie du fichier est appliquée.
+            version: '1.258',
+            couleur: 'vert',
+            titre: 'Les parcours assistés s’ouvrent',
+            items: [
+                'Dans le panneau «&nbsp;Assistance&nbsp;», huit parcours rejoignent «&nbsp;Découvrir&nbsp;». Chacun se fait en deux temps&nbsp;: «&nbsp;Je regarde&nbsp;», dans la démo, puis «&nbsp;Nous faisons&nbsp;», avec ta classe. Le neuvième, «&nbsp;Suivre ton groupe par cibles&nbsp;», pour la pratique «&nbsp;Par standards&nbsp;», n’a pour l’instant que son «&nbsp;Je regarde&nbsp;». À l’essai&nbsp;: tes retours les feront évoluer.'
+            ]
+        },
+        {
+            // 1.257 (23 nov. 2026 : l'écran d'observation de « Par standards ») — titre et ligne de Grégoire (22 nov., consigne
+            // de la release), mot pour mot ; seule la typographie du fichier est appliquée.
+            version: '1.257',
+            couleur: 'vert',
+            titre: 'Observer en circulant',
+            items: [
+                'Au tableau des cibles de «&nbsp;Par standards&nbsp;», «&nbsp;Observer&nbsp;» ouvre un écran pour noter ce que tu observes en classe, pendant les travaux ou en entrevue&nbsp;: une cible, un·e étudiant·e à la fois, les critères de la cible et une note brève, puis le suivant. Chaque inscription dit son origine (observation, conversation ou production) et se retrouve au profil, sous ses cibles. L’écran ne pose aucun niveau.'
+            ]
+        },
+        {
             // 1.256 (22 nov. 2026 : les critères d'une cible en vue simple) — titre et ligne PROPOSÉS par Claude Code, à
             // valider par Grégoire avant la mise en ligne.
             version: '1.256',
