@@ -378,3 +378,137 @@ inscrit. Mesuré : après un rechargement à la bulle 3, la démo est toujours o
 2. **Les bulles 1 des deux temps du parcours 7** (« … viendra dans une prochaine version ») : § 8, point 3. **Remonté.**
 3. **La carte « Besoin d'un coup de main ? »** et l'Aide ne disent rien du neuvième parcours ni de son seul temps :
    rien d'inexact, rien à changer.
+
+---
+
+# TROISIÈME RELAIS — LA RELEASE ET LA MISE EN LIGNE
+
+## 10. La release 1.258.0
+
+Consigne : `plans de travail/CONSIGNE-2026-11-22-release-publication.md` (copiée telle quelle, `b486ce138`).
+
+### 10.1 Les trois retouches (`7ef72aa8a`)
+
+**a) La case du report des présences est retirée.**
+
+*Mesuré avant de retirer.* La case « Reporter les présences dans la saisie des présences… » vivait dans la question
+« Marquer cette intervention complétée ? » (`_demanderReport`, `js/interventions.js`), posée au passage à « Complétée »
+et à la création d'une intervention déjà complétée. **Ce qu'elle écrivait**, cochée : par `transfererPresencesVersModule`
+puis `ajouterPresencesIntervention` (`js/saisie-presences.js`), des fiches de `presences` marquées `facultatif: true`,
+à la date de l'intervention (la durée en `heures` pour les participant·es ; en contexte « rattrapage », `heures: 0` et
+« Absence motivée RàI » pour les autres), jamais là où une fiche existait déjà pour ce jour. **Ce qui lit ces fiches** :
+la saisie des présences et le calcul de l'assiduité, comme toute fiche de `presences` ; rien ne lit la case elle-même.
+
+*Ce qui est retiré* : la case ; la question, qui ne servait qu'à la porter (**décidé par la session** : passer à
+« Complétée » enregistre sans question, et le bilan paraît, ce que dit maintenant la bulle) ; les deux écrivains ; les
+mots `caseReport`, `caseReportUneFois`, `completerTitre` des deux vocabulaires (intervention, rencontre) ; le paragraphe
+de l'Aide qui décrivait la case. `js/interventions.js` n'écrit plus dans `presences`.
+
+**SOURCE TARIE, STOCK GARDÉ.** Les présences facultatives déjà écrites par la case restent dans `presences`, telles
+quelles : rien ne les réécrit, rien ne les retire, et leurs lecteurs ne changent pas. Jugé par trois essais : la fiche
+d'intervention (« le stock » : une présence facultative posée avant reste identique après deux passages à
+« Complétée ») ; l'audit du Suivi, E2 (l'assiduité relue sur ce stock rend les mêmes nombres qu'avant : 40 → 50 %, et
+l'absence motivée retire toujours la séance) ; le banc `lot-e3`, I-b (dans le navigateur).
+
+*La bulle 8 du « Nous faisons » de « Lire ta classe »* : le paragraphe est « Tu choisis ensuite « Complétée ». ».
+**#1304 reste ouvert**, avec la note de Grégoire (la compensation d'une absence doit rester un choix de l'utilisateur, à
+concevoir plus tard).
+
+⚠ **Trouvaille, remontée à Grégoire (mots et pédagogie), inscrite à #1304, non touchée** : dans la fiche, le contexte
+« Séance de rattrapage — les non-participants ont congé » et son bloc « Gestion des absences » disent encore que les
+non-participant·es « bénéficieront d'un congé (absence motivée) », et l'infobulle `interv-gestion-absences` que « les
+absences sont motivées automatiquement ». Seule la case retirée l'écrivait (et seulement cochée) : **plus rien ne le
+fait**. La retouche demandée s'arrêtait à la case et à la bulle.
+
+*Laissé en place* : l'option `caseACocher` de `uiDialogues` (la fenêtre de confirmation générique) n'a plus d'appelant ;
+elle garde son essai. **Commenter et oublier** : c'est la forme que prendra sans doute le choix à concevoir.
+
+**b) et c)** « Automatiser tes commentaires », « Je regarde » : la bulle 6 dit « Cette grille est celle de la production
+sur « Deux-Rives ». » ; la bulle 5, « La première donne le compte : « Ta rédaction contient… ». » (le « Nous faisons »
+du même parcours dit toujours « Ta production contient… » : la retouche ne le visait pas).
+
+**Sentinelles et break-tests.** Les trois retouches sont LUES dans la consigne de la release et appliquées aux bulles
+des consignes d'avant ; chacune doit y trouver sa ligne, une fois. Break-tests, chacun rouge puis le code remis à
+l'identique : la phrase de la case remise dans la bulle 8 ; « Artefact 1 » remis ; « Ta production contient… » remis ;
+un report remis dans l'écrivain de la fiche ; la question remise ; `caseReport` remis dans les mots.
+Quatre sentinelles ont suivi (`b6f34f7d6`) : l'Aide sans la case ; deux cliquets qui descendent (fonctions au-dessus de
+15 : 434 → 433 ; pauses des bancs : 618 → 617) ; « À l'essai », que la Nouvelle 1.258 écrit pour les parcours, hors de
+l'étiquette de la pratique.
+
+### 10.2 Les Nouvelles (`bbefbb5e4`)
+
+1.255 et 1.256 : telles quelles. Ajoutées, mot pour mot, à la typographie du fichier : **1.257, « Observer en
+circulant »** et **1.258, « Les parcours assistés s'ouvrent »**, toutes deux en vert (des fonctionnalités). Aucune autre
+ligne.
+
+### 10.3 La release (`db0b5a035`)
+
+`origin/main` n'avait pas bougé (`d0dd74205`) : rien à réunir. `node scripts/release.mjs --set 1.258.0` : l'intention
+est `minor` ; `minor` seul aurait donné 1.257.0, et la consigne veut le numéro de la dernière entrée des Nouvelles
+(**décidé par la session**). Les quatre points de vérité disent **1.258.0, build `1122-2306`** (mesuré : `version.json`,
+`version.js`, `js/init-inline.js`, `js/main.js` ; l'ancien build n'est plus nulle part dans le code).
+**Le verdict WebKit n'est PAS pris** (écart décidé par Grégoire, 20 h 56) : écrit au message de la release et dans
+`RELAIS.md`.
+
+**Juste avant, sur le code d'avant le bump :**
+- **Vitest complet** : 957 fichiers, 12 327 essais, verts ; rejoué sur le commit de la release : identique.
+- **La batterie des parcours** (37 fichiers, Chromium, trois lots ensemble) : **148 verts, 22 rouges, 14 sautés.**
+
+| Rouges | Nombre | Cause |
+|---|---|---|
+| Les 17 de la base, **tous retrouvés, même essai** | 17 | comme au § 6 |
+| `codex-de-depart` (rouge sur la base) | 3 | le bandeau « nouvelle version » couvre le menu |
+| Instables sous la charge | 2 | `je-regarde-evaluer` C à 820 × 1180 : **vert rejoué seul** ; `parcours-je-regarde` 297, « Découvrir » (le triangle en rotation) : rejoué seul deux fois, **un vert, un rouge**, comme sur la base aux rapports d'avant |
+
+  **Aucun rouge neuf.** Les bancs des parcours 7 et 8 (les deux temps) et du parcours 9 sont verts avec les retouches.
+- **Les bancs de la vue simple, de « Par standards », du troisième groupe, du modèle fourni et de la fiche
+  d'intervention** (15 fichiers) : **134 verts, 3 rouges, 2 sautés.** Les 2 rouges de plateforme de l'épinglage (§ 6) ;
+  `bibliotheque-deux-colonnes-1156` 218, **vert rejoué seul** (lancé pendant d'autres bancs).
+- **L'écran d'observation** : pas de banc à lui (§ 6) ; traversé par le banc du parcours 9 ; sa sentinelle unitaire verte.
+
+### 10.4 Les parcours ouverts, et leurs temps
+
+| Rang | Parcours | Temps |
+|---|---|---|
+| 1 | Découvrir | un seul (la visite de la démo) |
+| 2 | Mettre ta classe en place | « Je regarde » · « Nous faisons » |
+| 3 | Évaluer une première production | « Je regarde » · « Nous faisons » |
+| 4 | Recevoir les productions, rendre tes rétroactions | « Je regarde » · « Nous faisons » |
+| 5 | Monter ton cours | « Je regarde » · « Nous faisons » |
+| 6 | Mettre tes données à l'abri | « Je regarde » · « Nous faisons » |
+| 7 | Lire ta classe et intervenir | « Je regarde » · « Nous faisons » |
+| 8 | Automatiser tes commentaires | « Je regarde » · « Nous faisons » |
+| 9 | Suivre ton groupe par cibles | « Je regarde » seulement |
+
+Mesuré au banc (`registre-des-parcours`, `deux-temps-modelisation`) : neuf cartes, rangs 1 à 9, « 1 sur 9 » au menu ;
+huit parcours ont un « Je regarde », sept ont les deux temps. Sur téléphone, les parcours 5, 8 et 9 ne sont pas offerts.
+
+### 10.5 Ce qui est mesuré, supposé, non vérifié (l'ensemble)
+
+- **Mesuré** : tout ce que disent les § 6, 9.3, 9.6 et 10.3, sous Chromium et par Vitest.
+- **Supposé ou décidé par la session**, à corriger d'un mot : § 7, § 9.5, et ici la question de complétion retirée avec
+  sa case, `--set 1.258.0`.
+- **Mots de la session, à valider par Grégoire** : « Des parcours assistés t'y montrent les gestes un à un. » (§ 5).
+- **Non vérifié** : **Safari et l'iPad, en entier** ; les données réelles de Grégoire (rien n'y est réécrit : le seul
+  écrivain ajouté ne touche que `demo_*`) ; l'adresse en ligne (le proxy du conteneur la refuse) ; la vue simple pour
+  les parcours.
+- **Aucune porte terrain n'est écrite** (skill `portes-terrain`, règles 1 et 2) : rien ici n'écrit de façon
+  irréversible dans des données réelles, et Grégoire a décidé de publier pour l'essai des testeurs. Ce qui n'est pas
+  vérifié est dit ci-dessus et ci-dessous.
+
+### 10.6 Ce que le verdict WebKit de demain devra regarder en premier
+
+1. **Le parcours 9** (`je-regarde-cibles-2026-11-23.spec.js`), jamais vu sous WebKit : la bulle par-dessus l'écran
+   d'observation et par-dessus la fenêtre « Inscrire un niveau » ; à la main sur l'iPad, couché et debout : la bulle
+   couvre-t-elle un bouton à toucher, le clavier monte-t-il quand « Remplir » pose un texte.
+2. **Les « Je regarde » des parcours 6, 7 et 8** et le « Nous faisons » du 8 : écrits le 22 nov. dans le cloud, jamais
+   vus sous WebKit non plus (`je-regarde-donnees`, `je-regarde-lire-ta-classe`, `je-regarde-commentaires`).
+3. **`vue-simple-modeles-actuels-epingles`** : sa référence, prise sous WebKit, a été fusionnée à la main (§ 1, point 3).
+   Un rouge ici dirait que la fusion s'est trompée, ou qu'un écran de la vue simple a bougé.
+4. **`pied-de-page-et-assistance` à 820 px** : la version et « Nouveautés » sur une même ligne, avec « 1.258.0 » et le
+   build `1122-2306` (ce banc a déjà rougi pour un build plus large, le 22 nov.).
+5. **`demo-deja-ouverte-troisieme-groupe`** : la démo de Grégoire, ouverte avant ce soir, doit montrer trois groupes
+   après un rechargement, et garder tout ce qu'il y a fait.
+6. **Les 17 rouges de la base sous Chromium** : la plupart tiennent à Chromium (le toucher, des largeurs). Sous WebKit,
+   leur état est celui du dernier verdict du Mac ; `codex-de-depart` (le bandeau qui couvre le menu) est à regarder.
+7. **Les dates au premier du mois** : `par-standards-lots-3-4` attend maintenant « inscrit le 1er octobre 2026 ».
