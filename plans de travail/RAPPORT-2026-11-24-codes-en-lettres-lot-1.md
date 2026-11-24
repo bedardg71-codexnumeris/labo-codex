@@ -8,7 +8,7 @@
 >
 > (Sans `-c`, la configuration par défaut est WebKit.)
 
-**Dernier relais.** Branche `lot/codes-en-lettres-1-lisibles`, partie de `main` à `5a2bc31be`. Mandat de Cowork du 24 nov. 2026, 15 h 45. Lot 1 fait : mesure de l'étape 0, codes lisibles (cercle, curseur, PDF, palette), refus à la saisie (accent, casse), vraie raison à l'écran de la grille. Ni fusion dans `main`, ni bump, ni ligne de Nouvelles, ni entrée de `RELAIS.md` (elle s'écrira à la fusion, exception décidée par Cowork). Aperçu : demande en brouillon « APERÇU, ne pas fusionner » (adresse plus bas). Reste : le passage WebKit sur le Mac, les gestes à essayer, les deux lots suivants (diagnostic erreurs-mots, suivi).
+**Dernier relais.** Branche `lot/codes-en-lettres-1-lisibles`, partie de `main` à `5a2bc31be` ; le lot est le commit `c1c6d414d`, ce rapport complété au commit suivant. Mandat de Cowork du 24 nov. 2026, 15 h 45. Lot 1 fait : mesure de l'étape 0, codes lisibles (cercle, curseur, PDF, palette), refus à la saisie (accent, casse), vraie raison à l'écran de la grille. Ni fusion dans `main`, ni bump, ni ligne de Nouvelles, ni entrée de `RELAIS.md` (elle s'écrira à la fusion, exception décidée par Cowork). Aperçu : demande en brouillon « APERÇU, ne pas fusionner » (adresse plus bas). Reste : le passage WebKit sur le Mac, les gestes à essayer, les deux lots suivants (diagnostic erreurs-mots, suivi).
 
 ---
 
@@ -146,7 +146,19 @@ Un script rend, sur `main` puis sur la branche, une grille aux codes 1 à 9 **et
 
 ### Bancs Playwright voisins, `main` contre branche (Chromium)
 
-<!-- RÉSULTAT PLAYWRIGHT VOISINS -->
+Chromium fait rougir une partie des bancs par construction (leurs motifs d'erreurs attendues sont rédigés pour WebKit) : un vert ou un rouge n'y vaut qu'en comparaison. J'ai donc lancé les 59 bancs voisins (tous ceux dont le nom touche la palette, les codes, l'annotation, la grille, le critère algorithmique ou le PDF) sur `main`, puis sur la branche avec le banc neuf.
+
+| | verts | rouges | sautés |
+|---|---|---|---|
+| `main` (59 fichiers) | 292 | 6 | 12 |
+| branche (les 59 + le banc neuf, 7 essais) | 297 | 8 | 12 |
+
+Les 6 rouges de `main` sont les mêmes sur la branche. Les deux rouges de plus, rejoués seuls de part et d'autre :
+
+- `critere-algorithmique-dit-vrai.spec.js:143` (#1131) : 2 sur 5 sur `main`, 2 sur 5 sur la branche. L'essai lit la base, fait ses gestes, puis la relit, et une « Grille de départ » semée entre-temps le fait rougir : une course dans l'essai.
+- `critere-algorithmique-calculs-4a.spec.js:71` : 4 sur 9 sur `main`, 4 sur 12 sur la branche, la même assertion qui tombe des deux côtés (« le défilement ne saute pas », 19 à 24 px). La grille de cet essai n'a aucun sous-critère écarté : la note que j'ai changée y garde mot pour mot son texte d'avant.
+
+⮕ Aucune régression trouvée sous Chromium ; c'est le passage WebKit sur le Mac qui jugera (commande en tête).
 
 ### Captures
 
@@ -176,17 +188,22 @@ Dossier `plans de travail/captures-2026-11-24-codes-en-lettres/` (avant = `main`
 3. **CSS et branche mortes de la colonne ancrée** : plus aucun élément ne porte `.annot-col-droite` ni `#annot-errfr-contenu` (aucune occurrence dans `index.html` ni `js/`), mais `styles.css:28801-28810` les stylise et `rafraichirPalettesApresPersonnalisation` les cherche (`travaux-outils.js:4225-4228`), lignes de `main`.
 4. **La rétroaction écrite trie les codes inconnus de la grille par `parseInt`** (`evaluation-retroaction.js:238`), qui rend `NaN` pour un code en lettres : l'ordre de ces codes-là n'est pas défini. Sans effet sur un code que la grille connaît (trié par sa place dans la liste).
 5. **La règle de ce qu'un code peut être est recopiée trois fois** (point d) : un futur changement (des accents, par exemple) devra toucher les trois.
-6. Hors du lot par mandat : **aucune touche du clavier ne pose un code en lettres** (`toucheDuCode` ne donne de touche qu'aux codes 1 à 10). Non traité.
+6. **Deux bancs instables sous Chromium, sur `main` comme sur la branche** : `critere-algorithmique-dit-vrai.spec.js:143` (une « Grille de départ » semée pendant l'essai) et `critere-algorithmique-calculs-4a.spec.js:71` (un saut de défilement de 19 à 24 px). Chiffres dans « La preuve ». Non mesuré sous WebKit.
+7. Hors du lot par mandat : **aucune touche du clavier ne pose un code en lettres** (`toucheDuCode` ne donne de touche qu'aux codes 1 à 10). Non traité.
 
 ## Aperçu
 
-<!-- ADRESSE APERÇU -->
+**https://deploy-preview-59--codexnumeris-051225.netlify.app**, demande en brouillon [bedardg71-codexnumeris/labo-codex#59](https://github.com/bedardg71-codexnumeris/labo-codex/pull/59) (« APERÇU, ne pas fusionner »).
+
+Netlify l'annonce prêt (« Deploy Preview ready! ») pour le commit `c1c6d414d`, celui du lot. Je ne l'ai pas ouvert : le réseau du nuage refuse l'hôte `netlify.app`. Le numéro en bas de page reste celui de `main` (1.258.1, build 1123-1652), puisque le lot ne bumpe pas : c'est le jeton `?v=20261123l` des fichiers du lot qui distingue l'aperçu.
 
 ## Les gestes à essayer
 
 Ce lot ne touche que l'apparence et deux refus de saisie : un raté se voit à l'écran et se corrige, rien ne s'écrit dans tes données (règle 2 des portes terrain : pas de porte due). Ces gestes servent à voir, de tes yeux, ce qu'aucune machine du nuage ne peut juger : Safari et l'iPad. Sur l'adresse de l'aperçu, d'abord le Mac, puis l'iPad.
 
-1. Ouvre l'adresse de l'aperçu, crée une grille avec un critère algorithmique et donne à ses sous-critères les codes fictifs K-A, K-B, K-C, M-A, M-B, M-C, T-A, T-B, T-C, V-A, V-B, QRS, W-A, W-B (noms « Code fictif 1 » à « Code fictif 14 »).
+L'aperçu est une adresse à part : il ne voit pas tes données de `app.codexnumeris.org`, et rien de ce que tu y fais ne les touche.
+
+1. Ouvre https://deploy-preview-59--codexnumeris-051225.netlify.app, crée une grille avec un critère algorithmique et donne à ses sous-critères les codes fictifs K-A, K-B, K-C, M-A, M-B, M-C, T-A, T-B, T-C, V-A, V-B, QRS, W-A, W-B (noms « Code fictif 1 » à « Code fictif 14 »).
    ⮕ Attendu : la note sous les sous-critères dit « ces 14 sous-critères ».
 2. Dans un quinzième sous-critère, tape « k-a ».
    ⮕ Attendu : le champ se marque et le témoin dit que « K-A » est déjà dans ce critère.
