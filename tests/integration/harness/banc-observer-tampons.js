@@ -18,14 +18,14 @@ export const attendre = (page, ms) => page.evaluate((d) => new Promise((r) => se
 
 /**
  * Ouvre le tableau des cibles d'un groupe fictif.
- * @param {{nTampons?: number, avecCritere?: number, nCriteres?: number, nEleves?: number, observation?: boolean, inscriptions?: Array}} o
+ * @param {{nTampons?: number, avecCritere?: number, nCriteres?: number, nEleves?: number, observation?: boolean, inscriptions?: Array, index?: string}} o
  *   nTampons : tampons créés dans une catégorie à soi ; les `avecCritere` premiers déclarent chacun un critère de la cible
  *   (le premier, le deuxième…) ; observation : la catégorie est cochée « d'observation » (vrai d'office s'il y a des tampons).
  */
 export async function ouvrirTableau(page, o = {}) {
     const { nTampons = 0, avecCritere = 0, nCriteres = 4, nEleves = 5, inscriptions = [] } = o;
     const observation = o.observation === undefined ? nTampons > 0 : o.observation;
-    await page.goto(indexHtml);
+    await page.goto(o.index || indexHtml);   // `index` : un autre arbre du dépôt, pour comparer deux versions de l'écran
     await page.waitForFunction(() => window.dbReady === true && window.TableauCibles && window.InscriptionsCibles && window.ObservationCibles && window.travauxOutils, null, { timeout: 20000 });
     await page.evaluate(({ T, GC, ENSEMBLE, CIBLE, CAT, eleves, criteres, nTampons, avecCritere, observation, inscriptions }) => {
         // security-ok: fixtures littérales du banc, aucune source externe.

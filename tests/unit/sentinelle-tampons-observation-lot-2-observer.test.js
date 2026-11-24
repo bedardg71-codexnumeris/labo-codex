@@ -457,7 +457,7 @@ describe('H · rien en dur, et les lecteurs du champ', () => {
         expect(OC.MOTS.tampons).toBe('Tampons d’observation');
         expect(OC.MOTS.tamponRetenu('Tampon fictif', 'Zoé Fictive')).toBe('« Tampon fictif » retenu pour Zoé Fictive.');
         expect(OC.MOTS.tamponRelache('Tampon fictif')).toBe('« Tampon fictif » relâché.');
-        expect(OC.MOTS.tamponsRetenus(['A', 'B'])).toBe(' : A, B');
+        expect(OC.MOTS.tamponsRetenus(['A', 'B'])).toBe('\u00a0: A, B');
         expect(OC.MOTS.tamponsRetenus([])).toBe('');
     });
 });

@@ -81,7 +81,7 @@
         reglerTampons: 'Régler mes tampons',
         tampons: 'Tampons d’observation',
         tamponsDuCritere: (critere) => `Tampons d’observation : ${critere}`,
-        tamponsRetenus: (noms) => (noms.length ? ` : ${noms.join(', ')}` : ''),
+        tamponsRetenus: (noms) => (noms.length ? `\u00a0: ${noms.join(', ')}` : ''),   // espace insécable : elle ouvre un bloc, une espace simple y serait mangée
         tamponRetenu: (tampon, nom) => `« ${tampon} » retenu pour ${nom}.`,
         tamponRelache: (tampon) => `« ${tampon} » relâché.`,
         tamponsRelus: 'Tes tampons sont à jour.'

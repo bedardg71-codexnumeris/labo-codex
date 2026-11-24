@@ -142,6 +142,8 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
 
 **À traiter au lot suivant des tampons d'observation**, quand l'écran « Observer » montrera les tampons : c'est là qu'il faut une porte vers leurs réglages.
 
+**↻ 24 nov. 2026 — TRAITÉ SUR `lot/tampons-observation-2-observer`, NON FUSIONNÉ** : sur « Observer », « Régler mes tampons » ouvre la fenêtre des tampons sans qu'aucune copie soit ouverte (mesuré sous WebKit et Chromium ; essai « depuis « Observer », sans aucune copie… »). Reste ouvert tant que le lot n'est pas en ligne. Hors de « Observer » (un groupe sans pratique par cibles), le seul chemin reste Annoter.
+
 ### #1308 · Dans la démo, rien ne dit quel groupe est « Par standards », 24 novembre 2026 (vécu par Grégoire sur l'iPad, aperçu n° 58 ; inscrit sur consigne de Cowork, 15 h 35, sans y toucher)
 
 **Symptôme** : dans la démo, le nom du groupe « 601-998-DM · gr. 00003 » ne dit pas que c'est le groupe « Par standards ». Grégoire a dû le demander pour essayer les tampons d'observation, qui ne se règlent que dans un groupe qui a une pratique par cibles.
