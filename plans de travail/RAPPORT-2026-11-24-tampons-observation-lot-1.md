@@ -3,7 +3,9 @@
 > Claude Code, sur le Mac, branche `lot/tampons-observation-1-regler` partie de `main` = `65bb52857` (après fusion de
 > `mesure/tampons-observation`, en avance rapide, poussée). Consigne : Cowork, « Gestion des pratiques de notation 5 »,
 > 24 nov., 13 h 55. **Rien n'est en ligne** : aucun bump, aucune ligne de Nouvelles, aucune fusion du code dans `main`.
-> **Aperçu** : ADRESSE_APERCU
+> **Aperçu** : https://deploy-preview-58--codexnumeris-051225.netlify.app (demande n° 58, en brouillon, « APERÇU, ne pas fusionner » ;
+> vérifié : `js/travaux-outils.js` y est identique à celui de la branche, jetons `20261123t`, version 1.258.1 inchangée).
+> Sur GitHub, Vitest est vert sur cette demande ; Playwright n'y a pas été joué (une demande de fusion ne le déclenche pas).
 
 **Fait.** Dans la fenêtre des tampons, chaque catégorie peut être dite « d'observation » et chacun de ses tampons peut déclarer un critère ; le jeu de tampons, la bibliothèque et le codex emportent les deux. Vert sous WebKit et Chromium (17 essais sur 17 chacun), Vitest complet vert (12 356), 21 break-tests rouges sur 21.
 **Ce qui contredit la consigne** (détail au § 2) : 1. « une pratique par cibles existe dans le codex » est mesuré dans le **trimestre actif** seulement, et j'ai codé sans m'arrêter pour le demander ; 2. un critère ne voyage que s'il est **montré** (sa catégorie est d'observation) ; 3. la bibliothèque a **cinq** sorties, pas trois, et les cinq emportent le critère ; 4. « au pixel près » tient sous WebKit ; sous Chromium, une bande de 2 px de bulles animées diffère aussi entre deux passes de `main`.
