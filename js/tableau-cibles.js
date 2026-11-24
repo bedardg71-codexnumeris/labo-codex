@@ -77,6 +77,8 @@
         remarqueSeulement: 'une remarque seulement',
         inscrireRemarque: 'Inscrire la remarque',
         remarque: 'Remarque, sans niveau',
+        // 24 nov. 2026, mot PROPOSÉ (TEXTES-2026-11-24-tampons-observation-lot-2.md) : le nom lu de la liste des tampons d'une trace.
+        tamponsPoses: 'Tampons posés',
         annonceRemarque: (nom, cible) => `${nom}, ${cible} : remarque inscrite.`,
         aide: 'Au clavier : les flèches pour se déplacer, Entrée pour ouvrir une case.',
         aucune: 'aucune inscription',
@@ -486,13 +488,17 @@
     /* ----- Les morceaux communs : les critères, le niveau, la rétroaction ----- */
 
     /** Les critères d'une cible, chacun « Respecté » / « Non respecté » / non renseigné. `mots` (l'écran d'observation) :
-     *  `{ aide, sansCritere }`, qui remplacent ceux de la fenêtre d'inscription (ceux-ci parlent du niveau). */
+     *  `{ aide, sansCritere }`, qui remplacent ceux de la fenêtre d'inscription (ceux-ci parlent du niveau) ; et
+     *  `aCote(critere)` (24 nov. 2026, les tampons d'observation) : du HTML déjà échappé, placé sur la rangée du critère,
+     *  entre son texte et ses coches. Sans `aCote`, ou s'il ne rend rien, la rangée est celle d'avant, au caractère près. */
     function _criteresHTML(cible, prefixe, mots) {
         const m = Object.assign({ aide: MOTS.criteresAide, sansCritere: MOTS.sansCritere }, mots || {});
         if (!cible.criteres || cible.criteres.length === 0) return `<p class="tc-aide">${esc(m.sansCritere)}</p>`;
+        const aCote = (k) => { const h = typeof m.aCote === 'function' ? m.aCote(k) : ''; return h ? `
+                ${h}` : ''; };
         const lignes = cible.criteres.map(k => `
             <li class="tc-critere" data-critere="${esc(k.id)}">
-                <span class="tc-critere-texte">${esc(k.texte)}${k.essentiel ? ` <span class="cibles-fiche-essentiel">${esc(MOTS.essentiel)}</span>` : ''}</span>
+                <span class="tc-critere-texte">${esc(k.texte)}${k.essentiel ? ` <span class="cibles-fiche-essentiel">${esc(MOTS.essentiel)}</span>` : ''}</span>${aCote(k)}
                 <span class="tc-critere-choix" role="group" aria-label="${esc(k.texte)}">
                     <button type="button" class="tc-coche tc-coche--oui" aria-pressed="false" data-tc="coche" data-valeur="oui">${esc(MOTS.respecte)}</button>
                     <button type="button" class="tc-coche tc-coche--non" aria-pressed="false" data-tc="coche" data-valeur="non">${esc(MOTS.nonRespecte)}</button>
@@ -572,13 +578,32 @@
 
     /* ----- L'inscription d'une case ----- */
 
-    function _ligneCritereHistorique(k) {
+    /**
+     * Les tampons d'une trace (24 nov. 2026), en lecture : le NOM copié dans l'inscription, toujours ; l'image, cherchée par
+     * l'identifiant, si le tampon existe encore sur ce poste (`travauxOutils.imageDuTampon`) ; sinon l'emoji copié, sinon
+     * le nom seul. Renommer ou supprimer un tampon ne change donc pas ce qu'une trace déjà inscrite dit.
+     */
+    function tamponsLusHTML(tampons, classe) {
+        const liste = (Array.isArray(tampons) ? tampons : []).filter(t => t && t.id);
+        if (liste.length === 0) return '';
+        const outils = window.travauxOutils;
+        const puces = liste.map(t => {
+            const image = (outils && typeof outils.imageDuTampon === 'function') ? outils.imageDuTampon(t.id) : null;
+            const dessin = image ? `<img class="tc-tampon-image${image.emoji ? ' tc-tampon-image--emoji' : ''}" src="${esc(image.src)}" alt="">`
+                : (t.emoji ? `<span class="tc-tampon-emoji" aria-hidden="true">${esc(t.emoji)}</span>` : '');
+            return `<li class="tc-tampon" data-tampon="${esc(t.id)}">${dessin}<span class="tc-tampon-nom">${esc(t.nom || t.id)}</span></li>`;
+        }).join('');
+        return `<ul class="tc-tampons ${esc(classe || '')}" aria-label="${esc(MOTS.tamponsPoses)}">${puces}</ul>`;
+    }
+
+    function _ligneCritereHistorique(k, tampons) {
         const r = I().lireRespecte(k.respecte);
         const signe = r === true ? '✓' : (r === false ? '✗' : '–');
         const etat = r === true ? MOTS.respecte.toLowerCase() : (r === false ? MOTS.nonRespecte.toLowerCase() : 'non renseigné');
         return `<li class="tc-entree-critere tc-entree-critere--${r === true ? 'oui' : (r === false ? 'non' : 'vide')}">`
             + `<span class="tc-entree-signe" aria-hidden="true">${signe}</span><span class="u-lecteur-ecran">${esc(etat)} : </span>${esc(k.texte)}`
-            + `${k.essentiel ? ` <span class="cibles-fiche-essentiel">${esc(MOTS.essentiel)}</span>` : ''}</li>`;
+            + `${k.essentiel ? ` <span class="cibles-fiche-essentiel">${esc(MOTS.essentiel)}</span>` : ''}`
+            + `${tamponsLusHTML(tampons, 'tc-tampons--critere')}</li>`;   // un geste vu à propos de ce critère : à côté, sans le cocher
     }
 
     /** L'origine d'une inscription, en clair : la production et son titre ; « Observation » ; « Conversation ». */
@@ -645,7 +670,11 @@
         const sansNiveau = I().estSansNiveau(i);
         const niveau = sansNiveau ? null : _niveauDuCode(ctx, i.niveau);
         const nomNiveau = _nomDuNiveauInscrit(i, sansNiveau, niveau);
-        const criteres = (i.criteres || []).length ? `<ul class="tc-entree-criteres">${i.criteres.map(_ligneCritereHistorique).join('')}</ul>` : '';
+        // Les tampons (24 nov. 2026) : à côté du critère qu'ils déclarent, sinon sous la cible (rapprochés à l'affichage).
+        const places = I().rapprocherTampons(I().lireTampons(i), i.criteres);
+        // Une trace faite seulement de tampons ne se lit pas « Remarque, sans niveau » : la date, l'origine, les tampons.
+        const tamponsSeuls = I().estDeTamponsSeuls(i);
+        const criteres = (i.criteres || []).length ? `<ul class="tc-entree-criteres">${i.criteres.map(k => _ligneCritereHistorique(k, places.parCritere[k.id])).join('')}</ul>` : '';
         // L'origine (22 nov. 2026), dans les deux vues : « Observation », « Conversation » ou la production. Une inscription
         // d'avant sans production se lit « Observation » (règle du mandat ; elle disait « Sans production », cachée en vue simple).
         const origine = `
@@ -655,8 +684,9 @@
         return `<li class="tc-entree${a ? ' tc-entree--annulee' : ''}">
             <div class="tc-entree-corps">
                 <div class="tc-entree-tete"><span class="tc-entree-date">${esc(dateLisible(i.date))}</span>
-                    <span class="tc-entree-niveau${sansNiveau ? ' tc-entree-niveau--remarque' : ''}" style="--tn-couleur: ${esc(_couleur(niveau))}">${esc(nomNiveau)}</span>${marque}${origine}</div>
+                    ${tamponsSeuls ? '' : `<span class="tc-entree-niveau${sansNiveau ? ' tc-entree-niveau--remarque' : ''}" style="--tn-couleur: ${esc(_couleur(niveau))}">${esc(nomNiveau)}</span>`}${marque}${origine}</div>
                 ${i.noteBreve ? `<p class="tc-entree-note">${esc(i.noteBreve)}</p>` : ''}
+                ${tamponsLusHTML(places.sousLaCible, 'tc-tampons--cible')}
                 ${criteres}
             </div>${fin}</li>`;
     }
@@ -1006,6 +1036,7 @@
         noteArrondie,
         origineLue,                // 22 nov. 2026 : l'origine d'une inscription, en clair
         criteresHTML: _criteresHTML,   // l'écran d'observation : les mêmes critères, les mêmes mots
+        tamponsLusHTML,            // 24 nov. 2026 : les tampons d'une trace, en lecture
         lireCoches: _lireCoches,
         basculerCoche: _basculerCoche,
         rerendre: _rerendre,

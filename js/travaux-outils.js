@@ -991,8 +991,8 @@
     //     borné. Une catégorie qui cesse d'être d'observation ne l'efface pas : il n'est plus MONTRÉ, mais il VOYAGE
     //     toujours (retouche du 24 nov., 15 h 35 : décocher, exporter puis réimporter l'effaçait ; aucune donnée ne
     //     se perd sans retour). Le jeu exporté et les cinq gestes de la bibliothèque l'emportent, cochée ou non.
-    // Ce lot RÈGLE et fait VOYAGER. Aucun autre écran ne lit ces deux données (« Observer », le profil, l'inscription
-    // et la copie : lot suivant).
+    // Le lot 1 RÈGLE et fait VOYAGER. Le lot 2 (24 nov.) les fait lire par l'écran « Observer » (`tamponsDObservation`) ;
+    // la copie : lot suivant.
     const CLE_CATEGORIES_OBSERVATION = 'categoriesObservation';
     const LONGUEUR_MAX_CRITERE_TAMPON = 200;
     // La phrase d'aide : acceptée par Grégoire le 22 nov. 2026, mot pour mot. Les autres mots de ce bloc : acceptés
@@ -1053,6 +1053,48 @@
         if (!persObj[id]) persObj[id] = {};
         persObj[id].critere = propre;
         sauvegarderPersonnalisationObservations(persObj);
+    }
+
+    /**
+     * LOT 2, « OBSERVER » (24 nov. 2026) — les tampons que l'écran « Observer » offre : ceux des catégories d'observation,
+     * dans l'ordre de la palette (les catégories, puis leurs tampons), sans les catégories ni les tampons masqués. Chaque
+     * entrée est ce qu'une inscription COPIE au moment du geste : `{ id, nom, categorieId, categorieNom, critere, emoji }`.
+     * Jamais l'image (elle se cherche par `imageDuTampon`). Sans catégorie d'observation : `[]`.
+     * SUPPOSITION NOMMÉE : une catégorie fournie cochée « d'observation » est offerte même si sa préférence (actions RLO,
+     * taxonomie SOLO) la retire de la palette d'Annoter : la cocher est un choix explicite.
+     */
+    function tamponsDObservation() {
+        var cats = obtenirCategoriesObservation();
+        if (cats.length === 0) return [];
+        var catsMasquees = db.getSync('categoriesMasquees', null) || [];
+        var elemMasques = db.getSync('elementsMasques', null) || [];
+        var nomsCat = obtenirNomsCategories();
+        var perso = obtenirCategoriesPerso();
+        var persObs = obtenirPersonnalisationObservations();
+        var liste = [];
+        obtenirOrdreCategories().forEach(function(catId) {
+            if (cats.indexOf(catId) === -1 || catsMasquees.indexOf(catId) !== -1) return;
+            var aSoi = perso.find(function(c) { return c && c.id === catId; });
+            var nomCat = nomsCat[catId] || (aSoi && aSoi.nom) || NOMS_CATEGORIES_DEFAUT[catId] || catId;
+            obtenirAutocollantsOrdonnes(catId).forEach(function(a) {
+                if (a.legacy || elemMasques.indexOf(a.id) !== -1) return;
+                var pers = persObs[a.id] || {};
+                liste.push({ id: a.id, nom: a.nom, categorieId: catId, categorieNom: nomCat,
+                    critere: normaliserCritereTampon(pers.critere), emoji: (typeof pers.emoji === 'string') ? pers.emoji : '' });
+            });
+        });
+        return liste;
+    }
+
+    /**
+     * L'image d'un tampon qui existe sur ce poste : `{ src, emoji }` (`emoji` : il garde ses couleurs, #1244), ou null
+     * (tampon supprimé, ou sans image). Pour montrer une trace inscrite : le nom vient de l'inscription, l'image d'ici.
+     */
+    function imageDuTampon(id) {
+        var a = AUTOCOLLANTS.find(function(x) { return x.id === id; });
+        if (!a) return null;
+        var src = imagesAutocollants[id] ? imagesAutocollants[id].src : (a.fichier ? DOSSIER_AUTOCOLLANTS + a.fichier : '');
+        return src ? { src: src, emoji: tamponGardeSesCouleurs(id) } : null;
     }
 
     /**
@@ -4671,6 +4713,9 @@
         imageVersBase64: imageVersBase64,
         // Tampons d'observation, lot 1 : ce que la bibliothèque de tampons lit et écrit (tampons-bibliotheque.js).
         critereDuTampon: critereDuTampon,
+        // Lot 2 : ce que l'écran « Observer » offre, et l'image d'un tampon pour une trace déjà inscrite.
+        tamponsDObservation: tamponsDObservation,
+        imageDuTampon: imageDuTampon,
         declarerCritereTampon: declarerCritereTampon,
         // Wrappers delegation (Phase 5)
         setEpaisseurActiveFromSlider: setEpaisseurActiveFromSlider,

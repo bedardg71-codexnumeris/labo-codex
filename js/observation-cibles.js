@@ -23,6 +23,20 @@
  * L'ÉCRAN NE POSE PAS DE NIVEAU. Une observation est une inscription de `inscriptionsCibles` sans niveau ni production
  * (`niveau: null`) : elle n'entre jamais au niveau retenu ni à la note. Seul écrivain : `InscriptionsCibles.inscrire`.
  *
+ * LES TAMPONS D'OBSERVATION (24 nov. 2026, « Tampons d'observation », lot 2 ; décisions de Grégoire du 24 nov.).
+ * Mots PROPOSÉS : plans de travail/TEXTES-2026-11-24-tampons-observation-lot-2.md.
+ *   · L'écran offre les tampons des catégories dites « d'observation » (`travauxOutils.tamponsDObservation`). Un tampon
+ *     qui déclare un critère de la cible se place SUR LA RANGÉE de ce critère ; les autres tiennent en une rangée
+ *     au-dessus des critères. Toucher un tampon le RETIENT pour l'étudiant·e affiché·e (état pressé : un contour épais et
+ *     un ✓, pas seulement une couleur) ; le toucher encore le relâche ; passer à quelqu'un d'autre repart à vide.
+ *   · « Inscrire et passer au suivant » range, dans la même inscription, la COPIE de chaque tampon retenu. UN TAMPON NE
+ *     COCHE AUCUN CRITÈRE et ne pose aucun niveau : les coches ne sont lues que de leurs boutons (`TableauCibles.lireCoches`).
+ *   · Un tampon seul suffit à inscrire. Le compte des touches : un tampon, puis « Inscrire » : deux par étudiant·e.
+ *   · « Régler mes tampons » ouvre la fenêtre des tampons (travaux-outils.js) sans qu'aucune copie soit ouverte (#1307) ;
+ *     à sa fermeture, les tampons de l'écran sont relus, et ce qui était en cours (coches, texte) est gardé.
+ *   · SANS CATÉGORIE D'OBSERVATION, l'écran est celui d'avant, hors de cette porte. Les tampons n'ont pas la classe des
+ *     critères (`tc-critere`) : un banc lit les coches sur tous les éléments de cette classe.
+ *
  * Sécurité : tout nom, étiquette, critère passe par `echapperHtml` ; aucun handler inline (attribut `data-oc` et une
  * écoute posée sur la fenêtre). Sur iPad : des zones de 48 px, rien qui dépende d'un survol.
  */
@@ -62,7 +76,15 @@
         finTitre: 'Fin de la liste',
         fin: (vus, n) => `${vus} sur ${n} ${n > 1 ? 'étudiant·es vu·es' : 'étudiant·e vu·e'} aujourd’hui pour cette cible. Touche un nom pour revenir à quelqu’un.`,
         recommencer: 'Revenir au début',
-        carrousel: 'Les étudiant·es'
+        carrousel: 'Les étudiant·es',
+        // 24 nov. 2026, les tampons d'observation : mots PROPOSÉS (TEXTES-2026-11-24-tampons-observation-lot-2.md).
+        reglerTampons: 'Régler mes tampons',
+        tampons: 'Tampons d’observation',
+        tamponsDuCritere: (critere) => `Tampons d’observation : ${critere}`,
+        tamponsRetenus: (noms) => (noms.length ? ` : ${noms.join(', ')}` : ''),
+        tamponRetenu: (tampon, nom) => `« ${tampon} » retenu pour ${nom}.`,
+        tamponRelache: (tampon) => `« ${tampon} » relâché.`,
+        tamponsRelus: 'Tes tampons sont à jour.'
     });
 
     const I = () => window.InscriptionsCibles;
@@ -70,7 +92,9 @@
     const esc = (t) => echapperHtml(t == null ? '' : String(t));
     const PREFIXE = 'oc';
 
-    let _etat = null;   // { overlay, ctx, etape: 'choix'|'observer', cibleId, groupeEntier, gardes:Set, index, origine, date, absents:Set, retour }
+    let _etat = null;   // { overlay, ctx, etape: 'choix'|'observer', cibleId, groupeEntier, gardes:Set, index, origine, date, absents:Set, retour,
+                        //   tampons: ceux que l'écran offre, retenus: Set des identifiants retenus pour l'étudiant·e affiché·e }
+    const FENETRE_TAMPONS = 'modal-retro-observations';   // la fenêtre des réglages des tampons (travaux-outils.js)
 
     /* ============================== Fonctions pures ============================== */
 
@@ -105,17 +129,33 @@
         return new Set(separer(eleves || [], duGroupe, date).absents.map(e => String(e.da)));
     }
 
-    /** La saisie d'une observation (la forme de `InscriptionsCibles.inscrire`) : aucun niveau, aucune production. */
+    /** La saisie d'une observation (la forme de `InscriptionsCibles.inscrire`) : aucun niveau, aucune production. Les
+     *  tampons retenus y sont copiés tels quels ; les critères ne viennent QUE des réponses : un tampon n'en coche aucun. */
     function saisieObservation(o) {
         return { da: String(o.da), ensembleId: o.ensembleId, cibleId: o.cible.id, niveau: null, echelleId: null, date: o.date,
-            productionId: null, origine: o.origine, noteBreve: o.noteBreve || '', criteres: I().etatDesCriteres(o.cible, o.reponses || {}) };
+            productionId: null, origine: o.origine, noteBreve: o.noteBreve || '', criteres: I().etatDesCriteres(o.cible, o.reponses || {}),
+            tampons: I().construireTampons(o.tampons) };
     }
 
-    /** Les refus d'une observation : vide (ni critère renseigné ni texte), puis ceux du module propriétaire (date…). */
-    function motifsObservation(saisie) {
-        const vide = !I().aUnCritereRenseigne(saisie.criteres) && String(saisie.noteBreve || '').trim() === '';
-        if (vide) return [I().MOTIFS.OBSERVATION_VIDE];
+    /** Les refus d'une observation : vide (ni critère renseigné, ni texte, ni tampon), puis ceux du module propriétaire
+     *  (date…). `tamponsOfferts` : l'écran offre des tampons, et le refus le dit ; sinon c'est le mot d'avant. */
+    function motifsObservation(saisie, tamponsOfferts) {
+        const vide = !I().aUnCritereRenseigne(saisie.criteres) && String(saisie.noteBreve || '').trim() === '' && !I().aUnTampon(saisie.tampons);
+        if (vide) return [tamponsOfferts ? I().MOTIFS.OBSERVATION_VIDE_TAMPONS : I().MOTIFS.OBSERVATION_VIDE];
         return I().motifsRefus(saisie, null);
+    }
+
+    /** Les tampons que l'écran offre (ceux des catégories d'observation), ou `[]` : lus des réglages, jamais nommés ici. */
+    function tamponsOfferts() {
+        const outils = window.travauxOutils;
+        const lus = (outils && typeof outils.tamponsDObservation === 'function') ? outils.tamponsDObservation() : [];
+        return I().construireTampons(lus);
+    }
+
+    /** Parmi `tampons`, ceux que `retenus` désigne, dans l'ordre de l'écran. */
+    function tamponsRetenus(tampons, retenus) {
+        const r = retenus instanceof Set ? retenus : new Set(retenus || []);
+        return (tampons || []).filter(t => r.has(t.id));
     }
 
     /* ============================== Le dessin ============================== */
@@ -183,7 +223,7 @@
         const etats = etatDuCarrousel(eleves, ctx.inscriptions, { ensembleId: ctx.ensemble.id, cibleId: cible.id, date: _etat.date, absents: _etat.absents });
         const tete = `${_fermerHTML()}${_titreHTML()}
             <div class="oc-tete"><p class="oc-cible">${esc(cible.etiquette)}</p>
-                <button type="button" class="btn btn-neutre btn-mini" data-oc="changer">${esc(MOTS.changerCible)}</button></div>
+                <span class="oc-tete-gestes">${_porteReglagesHTML()}<button type="button" class="btn btn-neutre btn-mini" data-oc="changer">${esc(MOTS.changerCible)}</button></span></div>
             ${_origineHTML()}${_carrouselHTML(etats)}`;
         if (_etat.index >= eleves.length) {
             const vus = etats.filter(x => x.vu).length;
@@ -197,11 +237,15 @@
         const marques = (x.vu ? `<span class="oc-marque oc-marque--vu">${esc(MOTS.vu)}</span>` : '')
             + (x.absent ? `<span class="oc-marque oc-marque--absent">${esc(MOTS.absent)}</span>` : '');
         const dernier = _etat.index === eleves.length - 1;
+        // Les tampons : sur la rangée du critère qu'ils déclarent (rapprochés aux critères de la cible), sinon en tête.
+        const places = I().rapprocherTampons(_etat.tampons, cible.criteres);
         return `${tete}
             <form data-oc-bloc novalidate>
                 <div class="oc-qui"><h4 class="oc-nom" id="oc-nom" tabindex="-1">${esc(x.nom)}</h4>
                     <span class="oc-position">${esc(MOTS.position(_etat.index + 1, eleves.length))}</span>${marques}</div>
-                <section class="oc-section">${T().criteresHTML(cible, PREFIXE, { aide: MOTS.criteresAide, sansCritere: MOTS.sansCritere })}</section>
+                ${_tamponsBlocHTML(places.sousLaCible)}
+                <section class="oc-section">${T().criteresHTML(cible, PREFIXE, { aide: MOTS.criteresAide, sansCritere: MOTS.sansCritere,
+                    aCote: (k) => _tamponsDuCritereHTML(k, places.parCritere[k.id]) })}</section>
                 <label class="tc-champ" for="oc-note"><span class="tc-champ-nom">${esc(MOTS.note)}</span>
                     <textarea id="oc-note" class="controle-form oc-note" rows="2" maxlength="${I().LONGUEUR_NOTE_BREVE}" placeholder="${esc(MOTS.noteAide)}"></textarea></label>
                 <p class="tc-alerte u-hide" role="alert"></p>
@@ -211,9 +255,93 @@
             <p class="oc-annonce" role="status" aria-live="polite"></p>`;
     }
 
+    /* ----- Les tampons d'observation (24 nov. 2026) ----- */
+
+    /** La porte vers les réglages des tampons : là dès que la fenêtre des tampons existe, avec ou sans catégorie cochée. */
+    function _porteReglagesHTML() {
+        const outils = window.travauxOutils;
+        if (!outils || typeof outils.ouvrirEditionRetroObservations !== 'function') return '';
+        return `<button type="button" class="btn btn-neutre btn-mini" data-oc="reglages">${esc(MOTS.reglerTampons)}</button>`;
+    }
+
+    /** Un tampon à toucher : son image si le poste l'a, sinon son emoji, sinon ses premières lettres ; son nom est lu. */
+    function _tamponHTML(t) {
+        const outils = window.travauxOutils;
+        const image = (outils && typeof outils.imageDuTampon === 'function') ? outils.imageDuTampon(t.id) : null;
+        const dessin = image ? `<img class="oc-tampon-image${image.emoji ? ' oc-tampon-image--emoji' : ''}" src="${esc(image.src)}" alt="">`
+            : `<span class="oc-tampon-lettres" aria-hidden="true">${esc(t.emoji || String(t.nom || '?').slice(0, 2))}</span>`;
+        return `<button type="button" class="oc-tampon" data-oc="tampon" data-tampon="${esc(t.id)}" aria-pressed="${_etat.retenus.has(t.id)}"`
+            + ` aria-label="${esc(t.nom)}" title="${esc(t.nom)}">${dessin}<span class="oc-tampon-coche" aria-hidden="true">✓</span></button>`;
+    }
+
+    function _nomsRetenus() { return tamponsRetenus(_etat.tampons, _etat.retenus).map(t => t.nom); }
+
+    /** La rangée du haut : l'étiquette, les noms des tampons retenus (lisibles sans survol), puis les tampons sans critère de la cible. */
+    function _tamponsBlocHTML(sousLaCible) {
+        if (!_etat.tampons.length) return '';
+        const rangee = sousLaCible.length ? `<div class="oc-tampons" role="group" aria-labelledby="oc-tampons-titre">${sousLaCible.map(_tamponHTML).join('')}</div>` : '';
+        return `<section class="oc-section oc-tampons-bloc"><p class="oc-tampons-tete"><span class="tc-champ-nom" id="oc-tampons-titre">${esc(MOTS.tampons)}</span>`
+            + `<span class="oc-tampons-retenus">${esc(MOTS.tamponsRetenus(_nomsRetenus()))}</span></p>${rangee}</section>`;
+    }
+
+    /** Sur la rangée d'un critère : les tampons qui le déclarent. Une autre classe que celle des critères. */
+    function _tamponsDuCritereHTML(k, tampons) {
+        if (!tampons || !tampons.length) return '';
+        return `<span class="oc-tampons oc-tampons--critere" role="group" aria-label="${esc(MOTS.tamponsDuCritere(k.texte))}">${tampons.map(_tamponHTML).join('')}</span>`;
+    }
+
+    /** Toucher un tampon : retenu, ou relâché. Rien d'autre ne change (aucune coche), et la fenêtre n'est pas redessinée. */
+    function _basculerTampon(bouton) {
+        const id = String(bouton.dataset.tampon);
+        const tampon = _etat.tampons.find(t => t.id === id);
+        if (!tampon) return;
+        const retenu = !_etat.retenus.has(id);
+        if (retenu) _etat.retenus.add(id); else _etat.retenus.delete(id);
+        bouton.setAttribute('aria-pressed', String(retenu));
+        const noms = _etat.overlay.querySelector('.oc-tampons-retenus');
+        if (noms) noms.textContent = MOTS.tamponsRetenus(_nomsRetenus());
+        const zone = _etat.overlay.querySelector('.oc-annonce');
+        const eleve = _defile()[_etat.index];
+        if (zone) zone.textContent = retenu ? MOTS.tamponRetenu(tampon.nom, nomEleve(eleve)) : MOTS.tamponRelache(tampon.nom);
+        _alerte([]);
+    }
+
+    /** Ouvre les réglages des tampons par-dessus l'écran (aucune copie requise) ; à leur fermeture, relit les tampons. */
+    function _ouvrirReglages() {
+        const outils = window.travauxOutils;
+        if (!outils || typeof outils.ouvrirEditionRetroObservations !== 'function') return;
+        outils.ouvrirEditionRetroObservations();
+        if (!document.getElementById(FENETRE_TAMPONS) || typeof MutationObserver !== 'function') return;
+        const veille = new MutationObserver(() => {
+            if (document.getElementById(FENETRE_TAMPONS)) return;
+            veille.disconnect();
+            if (_etat) _relireTampons();
+        });
+        veille.observe(document.body, { childList: true });
+    }
+
+    /** Les tampons relus après un passage aux réglages ; ce qui était en cours (coches, texte, tampons encore offerts) est gardé. */
+    function _relireTampons() {
+        const bloc = _etat.overlay.querySelector('[data-oc-bloc]');
+        const enCours = bloc ? { reponses: T().lireCoches(bloc), note: bloc.querySelector('.oc-note').value } : null;
+        _etat.tampons = tamponsOfferts();
+        const offerts = new Set(_etat.tampons.map(t => t.id));
+        _etat.retenus = new Set([..._etat.retenus].filter(id => offerts.has(id)));
+        _dessiner(_etat.etape === 'observer' ? MOTS.tamponsRelus : null, '[data-oc="reglages"]');
+        const neuf = _etat.overlay.querySelector('[data-oc-bloc]');
+        if (!enCours || !neuf) return;
+        neuf.querySelector('.oc-note').value = enCours.note;
+        neuf.querySelectorAll('.tc-critere').forEach(li => {
+            if (!Object.prototype.hasOwnProperty.call(enCours.reponses, li.dataset.critere)) return;
+            const coche = li.querySelector(`.tc-coche[data-valeur="${enCours.reponses[li.dataset.critere] ? 'oui' : 'non'}"]`);
+            if (coche) coche.setAttribute('aria-pressed', 'true');
+        });
+    }
+
     /** Redessine la fenêtre ; garde l'annonce et place la pastille courante en vue. */
     function _dessiner(annonce, focus) {
         const contenu = _etat.overlay.querySelector('.oc-fenetre');
+        contenu.classList.toggle('oc-fenetre--tampons', _etat.etape === 'observer' && _etat.tampons.length > 0);
         // security-ok : tout texte des données passe par `esc` (echapperHtml) dans les gabarits.
         contenu.innerHTML = _etat.etape === 'choix' ? _choixHTML() : _observerHTML();
         const zone = contenu.querySelector('.oc-annonce');
@@ -258,7 +386,8 @@
         document.body.appendChild(overlay);
         document.addEventListener('keydown', _surTouche, true);
         _etat = { overlay, ctx, etape: 'choix', cibleId: ctx.cibles.length === 1 ? ctx.cibles[0].id : null, groupeEntier: true,
-            gardes: new Set(), index: 0, origine: I().ORIGINES.OBSERVATION, date, absents: _lireAbsents(ctx, date), retour, ecrit: false };
+            gardes: new Set(), index: 0, origine: I().ORIGINES.OBSERVATION, date, absents: _lireAbsents(ctx, date), retour, ecrit: false,
+            tampons: tamponsOfferts(), retenus: new Set() };
         _dessiner(null, '.oc-tuile');
         return overlay;
     }
@@ -291,6 +420,7 @@
     function _surTouche(e) {
         if (e.key !== 'Escape' || !_etat) return;
         if (document.getElementById('overlay-ui-dialogue')) return;
+        if (document.getElementById(FENETRE_TAMPONS)) return;   // les réglages des tampons sont ouverts par-dessus : Échap ne ferme pas l'écran dessous
         e.preventDefault();
         fermer();
     }
@@ -302,12 +432,14 @@
         if (motifs.length) { _alerte(motifs); return false; }
         _etat.etape = 'observer';
         _etat.index = 0;
+        _etat.retenus = new Set();
         _dessiner(null, '#oc-nom');
         return true;
     }
 
     function _aller(index, annonce) {
         _etat.index = Math.max(0, index);
+        _etat.retenus = new Set();   // passer à quelqu'un d'autre repart à vide
         _dessiner(annonce, _etat.index >= _defile().length ? '#oc-fin-titre' : '#oc-nom');
     }
 
@@ -316,8 +448,9 @@
         const eleve = _defile()[_etat.index];
         if (!bloc || !eleve) return false;
         const saisie = saisieObservation({ da: eleve.da, ensembleId: _etat.ctx.ensemble.id, cible: _cible(), date: _etat.date,
-            origine: _etat.origine, noteBreve: bloc.querySelector('.oc-note').value, reponses: T().lireCoches(bloc) });
-        const motifs = motifsObservation(saisie);
+            origine: _etat.origine, noteBreve: bloc.querySelector('.oc-note').value, reponses: T().lireCoches(bloc),
+            tampons: tamponsRetenus(_etat.tampons, _etat.retenus) });
+        const motifs = motifsObservation(saisie, _etat.tampons.length > 0);
         _alerte(motifs);
         if (motifs.length) return false;
         const r = await I().inscrire([saisie], { geste: 'Inscrire une observation' });
@@ -352,6 +485,8 @@
         aller: (g) => _aller(Number(g.dataset.index) || 0),
         passer: () => _aller(_etat.index + 1),
         recommencer: () => _aller(0),
+        tampon: (g) => _basculerTampon(g),
+        reglages: () => _ouvrirReglages(),
         inscrire: () => _inscrire()
     };
 
@@ -386,6 +521,8 @@
         etatDuCarrousel,
         absentsDuJour,
         saisieObservation,
-        motifsObservation
+        motifsObservation,
+        tamponsOfferts,
+        tamponsRetenus
     };
 })();

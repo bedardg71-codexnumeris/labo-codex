@@ -1044,3 +1044,181 @@
     color: var(--texte-secondaire);
     min-height: 1.2em;
 }
+
+/* ============================================================================
+   LES TAMPONS D'OBSERVATION — lot 2, « observer » (24 nov. 2026)
+   Sur l'écran « Observer » : `.oc-tampon` (à toucher). À l'historique et au profil : `.tc-tampon` (à lire).
+   Jamais la classe des critères (`tc-critere`) : un banc lit les coches sur tous les éléments de cette classe.
+   ============================================================================ */
+
+.oc-tete-gestes {
+    display: inline-flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: 8px;
+}
+
+.oc-tampons-tete {
+    display: flex;
+    align-items: baseline;
+    min-width: 0;
+    margin: 0 0 6px;
+}
+
+.oc-tampons-tete .tc-champ-nom {
+    flex: none;
+}
+
+/* Les noms des tampons retenus : lisibles sans survol (un iPad n'en a pas), sur une ligne. */
+.oc-tampons-retenus {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    color: var(--texte-secondaire);
+}
+
+.oc-tampons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+/* Sur la rangée d'un critère, entre son texte et ses coches. */
+.oc-tampons--critere {
+    flex: 0 1 auto;
+    justify-content: flex-end;
+}
+
+.oc-tampon {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 48px;
+    height: 48px;
+    padding: 0;
+    border: 1px solid var(--bordure-moyenne);
+    border-radius: 8px;
+    background: transparent;
+    color: var(--texte-principal);
+    font: inherit;
+    cursor: pointer;
+    touch-action: manipulation;
+}
+
+.oc-tampon:focus-visible {
+    outline: var(--focus-ring-width) solid var(--focus-ring-color);
+    outline-offset: var(--focus-ring-offset);
+}
+
+.oc-tampon-image {
+    width: 30px;
+    height: 30px;
+    object-fit: contain;
+    pointer-events: none;
+    filter: invert(1);   /* les dessins fournis sont noirs : clairs sur le fond sombre, comme dans la palette d'Annoter */
+}
+
+.mode-clair .oc-tampon-image,
+.oc-tampon-image--emoji,
+.mode-clair .oc-tampon-image--emoji {
+    filter: none;        /* un emoji garde ses couleurs (#1244) */
+}
+
+.oc-tampon-lettres {
+    font-size: 1.1rem;
+    font-weight: 600;
+    pointer-events: none;
+}
+
+/* Retenu : un contour épais ET un ✓ dans le coin, pas seulement une couleur. */
+.oc-tampon-coche {
+    display: none;
+    position: absolute;
+    top: -7px;
+    right: -7px;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: var(--accent-primaire);
+    color: var(--surface-carte, #1a3040);
+    font-size: 0.8rem;
+    font-weight: 700;
+    line-height: 20px;
+    text-align: center;
+    pointer-events: none;
+}
+
+.oc-tampon[aria-pressed="true"] {
+    border: 3px solid var(--accent-primaire);
+    background: color-mix(in srgb, var(--accent-primaire) 18%, transparent);
+}
+
+.oc-tampon[aria-pressed="true"] .oc-tampon-coche {
+    display: block;
+}
+
+/* À lire : les tampons d'une trace, à l'historique d'une case et au profil. */
+.tc-tampons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px 8px;
+    margin: 4px 0 0;
+    padding: 0;
+    list-style: none;
+}
+
+.tc-tampons--critere {
+    display: inline-flex;
+    margin: 0 0 0 8px;
+    vertical-align: middle;
+}
+
+.tc-tampon {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 1px 8px;
+    border: 1px solid var(--bordure-moyenne);
+    border-radius: 999px;
+    color: var(--texte-principal);
+    font-size: 0.85rem;
+    line-height: 1.4;
+}
+
+.tc-tampon-image {
+    width: 16px;
+    height: 16px;
+    object-fit: contain;
+    filter: invert(1);
+}
+
+.mode-clair .tc-tampon-image,
+.tc-tampon-image--emoji,
+.mode-clair .tc-tampon-image--emoji {
+    filter: none;
+}
+
+/* Quand l'écran offre des tampons, la fenêtre se resserre : avec quatre critères et douze tampons, tous les tampons et
+   « Inscrire et passer au suivant » se voient sans défilement dans 1180 × 700 (mesuré le 24 nov. 2026). Sans tampon,
+   rien de ceci ne s'applique : l'écran reste celui d'avant. Les cibles tactiles gardent 48 px. */
+.oc-fenetre--tampons.modal-contenu {
+    margin-top: 12px;
+}
+
+.oc-fenetre--tampons .oc-section {
+    margin: 6px 0;
+}
+
+.oc-fenetre--tampons .oc-qui {
+    margin: 8px 0 2px;
+}
+
+.oc-fenetre--tampons .tc-criteres {
+    gap: 0;
+}
+
+.oc-fenetre--tampons .tc-critere {
+    padding: 3px 0;
+}

@@ -87,8 +87,10 @@ describe('A · deux inscriptions sur la même cible donnent deux entrées', () =
         await m.IC.inscrire([saisie(m.IC, { noteBreve: '  Les idées sont là ; la citation manque.  ', productionId: 'P1' })]);
         const [i] = m.store[CLE];
         // 22 nov. 2026 (l'écran d'observation) : `origine` s'ajoute ; une production désignée l'impose.
+        // 24 nov. 2026 (« Tampons d'observation », lot 2) : `tampons` s'ajoute, la copie des tampons posés ; vide ici.
         expect(Object.keys(i).sort()).toEqual(['cibleId', 'criteres', 'da', 'date', 'echelleId', 'ensembleId', 'horodatage', 'id',
-            'niveau', 'noteBreve', 'origine', 'productionId', 'type']);
+            'niveau', 'noteBreve', 'origine', 'productionId', 'tampons', 'type']);
+        expect(i.tampons).toEqual([]);
         expect(i.origine).toBe('production');
         expect(i).toMatchObject({ type: 'inscription', da: ZOE, ensembleId: 'ENS1', cibleId: CIBLE.id, niveau: '2', echelleId: 'ECH-banc',
             date: '2026-11-21', productionId: 'P1', noteBreve: 'Les idées sont là ; la citation manque.' });

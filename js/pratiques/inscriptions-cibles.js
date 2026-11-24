@@ -23,7 +23,8 @@
  *                   productionId,            // l'id d'une production, ou null (observation, entretien : N3)
  *                   origine,                 // 'production', 'observation' ou 'conversation' (22 nov. 2026 ; voir plus bas)
  *                   noteBreve,               // texte libre de l'enseignant·e (la rétroaction, N5) ; '' si rien
- *                   criteres: [ { id, texte, essentiel, respecte } ] }
+ *                   criteres: [ { id, texte, essentiel, respecte } ],
+ *                   tampons: [ { id, nom, categorieId, categorieNom, critere, emoji } ] }   // 24 nov. 2026 ; voir plus bas
  *   annulation  : { id, type: 'annulation', inscriptionId, da, ensembleId, cibleId, date, horodatage, raison }
  *
  * UNE INSCRIPTION SANS NIVEAU (choix de Grégoire, 21 nov. 2026, 9 h 17 ; à l'écran, une « remarque », mot PROPOSÉ) :
@@ -59,6 +60,20 @@
  * au moins un critère renseigné (respecté ou non respecté). Une observation d'une seule touche est donc valide. Vide des
  * trois, elle est refusée (`motifsRefus`). Les coches restent sans calcul : elles rendent l'inscription non vide, rien de plus.
  *
+ * LES TAMPONS D'OBSERVATION (décisions de Grégoire, 24 nov. 2026 ; « Tampons d'observation », lot 2). Un tampon consigne
+ * un geste acquis que l'on voit l'étudiant·e faire. Il ne consigne jamais un manque, ne pose pas de niveau et NE COCHE
+ * AUCUN CRITÈRE : `criteres[].respecte` ne dépend jamais de `tampons`. Chaque tampon est COPIÉ au moment du geste
+ * (identifiant, nom, identifiant et nom de sa catégorie, critère déclaré, emoji s'il en a un) : renommer ou supprimer le
+ * tampon ne change pas ce qu'une inscription passée dit. JAMAIS l'image : elle pèse jusqu'à 2 650 caractères et une séance
+ * en inscrit des dizaines ; à l'affichage elle se cherche par l'identifiant sur le poste, et le nom suffit sans elle.
+ * Les inscriptions d'avant n'ont pas ce champ et ne sont pas réécrites : `lireTampons` les lit sans tampon.
+ * Un tampon suffit à rendre l'inscription non vide (`motifsRefus`). Une trace faite SEULEMENT de tampons (ni niveau, ni
+ * texte, ni critère renseigné : `estDeTamponsSeuls`) ne pose pas de niveau : au tableau sa case montre ✎, comme une
+ * remarque ; à l'historique et au profil elle se lit par sa date, son origine et ses tampons, sans « Remarque ».
+ * LE RAPPROCHEMENT d'un critère déclaré (`rapprocherTampons`) se fait À L'AFFICHAGE seulement, contre les textes des
+ * critères copiés dans la MÊME inscription : texte rogné, sans égard à la casse ; le premier qui correspond. Rien n'est
+ * écrit à ce sujet dans l'inscription. Sans critère déclaré, ou si aucun ne correspond : sous la cible, sans plus.
+ *
  * CE QUE CE MODULE NE FAIT PAS : il ne retient aucun niveau et ne calcule aucune note (lots 3 et 4 : `NoteCibles`,
  * js/pratiques/note-cibles.js, qui lit cette liste par les fonctions pures ci-dessous). Il ne lit ni n'écrit
  * `evaluationsSauvegardees`.
@@ -71,6 +86,12 @@
     const ANNULATION = 'annulation';
     const LONGUEUR_NOTE_BREVE = 600;   // une note BRÈVE : la zone de saisie s'arrête là (choix technique)
     const LONGUEUR_RAISON = 300;
+    // Les tampons d'une inscription (24 nov. 2026). Bornes techniques : celles des réglages des tampons (un nom et un nom
+    // de catégorie de 100 caractères, un critère de 200), et un plafond de tampons par inscription.
+    const LONGUEUR_NOM_TAMPON = 100;
+    const LONGUEUR_CRITERE_TAMPON = 200;
+    const LONGUEUR_EMOJI_TAMPON = 16;
+    const MAX_TAMPONS = 40;
 
     /* ------------------------------------------------------------------ Les refus, en mots (propositions) */
     // Mots PROPOSÉS (plans de travail/TEXTES-2026-11-21-par-standards-lot-2.md) : Grégoire les relit sur l'aperçu.
@@ -79,6 +100,8 @@
         // Élargi le 22 nov. 2026 : un critère renseigné suffit aussi (l'écran d'observation).
         VIDE: 'Choisis un niveau, renseigne un critère ou écris une rétroaction : une inscription vide ne s\'inscrit pas.',
         OBSERVATION_VIDE: 'Renseigne un critère ou écris ce que tu as vu : une observation vide ne s\'inscrit pas.',
+        // 24 nov. 2026, mot PROPOSÉ (TEXTES-2026-11-24-tampons-observation-lot-2.md) : dit seulement quand l'écran offre des tampons.
+        OBSERVATION_VIDE_TAMPONS: 'Touche un tampon, renseigne un critère ou écris ce que tu as vu : une observation vide ne s\'inscrit pas.',
         NIVEAU_HORS_ECHELLE: 'Ce niveau n\'est pas dans l\'échelle de la pratique : choisis-en un dans la liste.',
         DATE: 'La date n\'est pas valide : choisis une date dans le calendrier.',
         SANS_ELEVE: 'Choisis l\'étudiant·e.',
@@ -179,6 +202,78 @@
         return (Array.isArray(criteres) ? criteres : []).some(k => k && lireRespecte(k.respecte) !== null);
     }
 
+    /* ------------------------------------------------------------------ Les tampons (24 nov. 2026, fonctions pures) */
+
+    function texteBorne(v, max) {
+        return String(v == null ? '' : v).replace(/\s+/g, ' ').trim().slice(0, max).trim();
+    }
+
+    /**
+     * Les tampons d'une inscription dans leur forme rangée : la COPIE de chacun au moment du geste. Sans identifiant, un
+     * tampon n'entre pas ; le même identifiant n'entre qu'une fois ; jamais d'image ni d'autre champ.
+     * @param {Array<{id, nom, categorieId, categorieNom, critere, emoji}>} liste
+     */
+    function construireTampons(liste) {
+        const vus = new Set();
+        const rendus = [];
+        (Array.isArray(liste) ? liste : []).forEach(t => {
+            const id = (t && t.id != null) ? String(t.id) : '';
+            if (!id || vus.has(id) || rendus.length >= MAX_TAMPONS) return;
+            vus.add(id);
+            rendus.push({
+                id: id,
+                nom: texteBorne(t.nom, LONGUEUR_NOM_TAMPON),
+                categorieId: t.categorieId == null ? '' : String(t.categorieId),
+                categorieNom: texteBorne(t.categorieNom, LONGUEUR_NOM_TAMPON),
+                critere: texteBorne(t.critere, LONGUEUR_CRITERE_TAMPON),
+                emoji: texteBorne(t.emoji, LONGUEUR_EMOJI_TAMPON)
+            });
+        });
+        return rendus;
+    }
+
+    /** Les tampons d'une inscription, lus : une inscription d'avant le 24 nov. n'en a pas (`[]`). Rien n'est réécrit. */
+    function lireTampons(e) {
+        return (e && Array.isArray(e.tampons)) ? e.tampons.filter(t => t && t.id) : [];
+    }
+
+    /** Vrai quand au moins un tampon est posé. */
+    function aUnTampon(tampons) {
+        return (Array.isArray(tampons) ? tampons : []).some(t => t && t.id);
+    }
+
+    /**
+     * Vrai pour une trace faite SEULEMENT de tampons : aucun niveau, aucun texte, aucun critère renseigné, au moins un
+     * tampon (Grégoire, 24 nov. 2026, 16 h 22). Elle ne se lit pas « Remarque » à l'historique ni au profil.
+     */
+    function estDeTamponsSeuls(e) {
+        return estSansNiveau(e) && texteLibre(e.noteBreve, LONGUEUR_NOTE_BREVE) === '' && !aUnCritereRenseigne(e.criteres) && aUnTampon(lireTampons(e));
+    }
+
+    /** Le texte d'un critère pour le comparer : rogné, espaces resserrées, sans égard à la casse. */
+    function critereCompare(texte) {
+        return String(texte == null ? '' : texte).replace(/\s+/g, ' ').trim().toLocaleLowerCase('fr');
+    }
+
+    /**
+     * OÙ SE MONTRE CHAQUE TAMPON (à l'affichage seulement ; rien n'est écrit) : à côté du PREMIER critère de `criteres`
+     * dont le texte correspond à son critère déclaré, sinon sous la cible. Ne lit ni n'écrit aucune coche.
+     * @param {Array} tampons - forme rangée
+     * @param {Array<{id, texte}>} criteres - ceux de l'inscription (ou de la cible, sur l'écran « Observer »)
+     * @returns {{ parCritere: Object<string, Array>, sousLaCible: Array }}
+     */
+    function rapprocherTampons(tampons, criteres) {
+        const liste = (Array.isArray(criteres) ? criteres : []).filter(k => k && k.id);
+        const rendu = { parCritere: {}, sousLaCible: [] };
+        (Array.isArray(tampons) ? tampons : []).filter(t => t && t.id).forEach(t => {
+            const cherche = critereCompare(t.critere);
+            const trouve = cherche ? liste.find(k => critereCompare(k.texte) === cherche) : null;
+            if (!trouve) { rendu.sousLaCible.push(t); return; }
+            (rendu.parCritere[trouve.id] || (rendu.parCritere[trouve.id] = [])).push(t);
+        });
+        return rendu;
+    }
+
     /* ------------------------------------------------------------------ Construire (fonctions pures) */
 
     function texteLibre(v, max) {
@@ -187,7 +282,7 @@
 
     /**
      * Une inscription dans sa forme rangée.
-     * @param {{id, da, ensembleId, cibleId, niveau, echelleId, date, horodatage, productionId, origine, noteBreve, criteres}} s
+     * @param {{id, da, ensembleId, cibleId, niveau, echelleId, date, horodatage, productionId, origine, noteBreve, criteres, tampons}} s
      */
     function construireInscription(s) {
         const q = s || {};
@@ -211,7 +306,8 @@
                 texte: String(k.texte == null ? '' : k.texte),
                 essentiel: k.essentiel === true,
                 respecte: lireRespecte(k.respecte)
-            }))
+            })),
+            tampons: construireTampons(q.tampons)   // 24 nov. 2026 : la copie de chaque tampon ; ne touche aucune coche
         };
     }
 
@@ -246,8 +342,9 @@
     /**
      * Les refus d'une inscription, dans l'ordre de l'écran. Vide : elle peut s'écrire. Les coches n'y entrent pas : elles
      * sont facultatives, et l'application ne juge pas le niveau à partir d'elles. Le niveau est facultatif (complément du
-     * 21 nov., 9 h 17), mais une inscription porte au moins un niveau, un texte ou un critère renseigné (22 nov. 2026).
-     * @param {{da, cibleId, niveau, noteBreve, date, criteres}} saisie
+     * 21 nov., 9 h 17), mais une inscription porte au moins un niveau, un texte, un critère renseigné (22 nov. 2026) ou un
+     * tampon (24 nov. 2026).
+     * @param {{da, cibleId, niveau, noteBreve, date, criteres, tampons}} saisie
      * @param {Object} echelle - l'échelle de la pratique
      * @returns {string[]}
      */
@@ -256,7 +353,7 @@
         const motifs = [];
         if (!q.da) motifs.push(MOTIFS.SANS_ELEVE);
         const niveau = lireNiveau(q.niveau);
-        if (niveau === null && texteLibre(q.noteBreve, LONGUEUR_NOTE_BREVE) === '' && !aUnCritereRenseigne(q.criteres)) motifs.push(MOTIFS.VIDE);
+        if (niveau === null && texteLibre(q.noteBreve, LONGUEUR_NOTE_BREVE) === '' && !aUnCritereRenseigne(q.criteres) && !aUnTampon(q.tampons)) motifs.push(MOTIFS.VIDE);
         else if (niveau !== null && codesDeLEchelle(echelle).indexOf(niveau) === -1) motifs.push(MOTIFS.NIVEAU_HORS_ECHELLE);
         if (!dateValide(q.date)) motifs.push(MOTIFS.DATE);
         return motifs;
@@ -483,6 +580,12 @@
         ORIGINES: ORIGINES,
         lireOrigine: lireOrigine,
         aUnCritereRenseigne: aUnCritereRenseigne,
+        // 24 nov. 2026 : les tampons d'observation
+        construireTampons: construireTampons,
+        lireTampons: lireTampons,
+        aUnTampon: aUnTampon,
+        estDeTamponsSeuls: estDeTamponsSeuls,
+        rapprocherTampons: rapprocherTampons,
         vusALaDate: vusALaDate,
         dateDuJour: dateDuJour,
         dateValide: dateValide,
