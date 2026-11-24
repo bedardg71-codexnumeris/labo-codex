@@ -1,15 +1,23 @@
-# Textes proposés – « Tampons d'observation », lot 1 (régler)
+# Textes – « Tampons d'observation », lot 1 (régler)
+
+> **ACCEPTÉE PAR GRÉGOIRE LE 24 NOV. 2026 À 15 H 31**, telle que proposée, avec **un retrait** : dans l'aide C2, la
+> seconde phrase, « Rien d'autre ne change pour l'instant. », est retirée. Réponses : Q1 « D'observation » ; Q2 la
+> phrase part ; Q3 « Critère (facultatif) ». Les annonces L1 et L2 sont validées par Cowork telles quelles.
+> **Q4, répondue à 15 h 33 : deux titres existants changent** (voir « Les deux titres », plus bas).
+> Relayé par Cowork, « Gestion des pratiques de notation 5 », 24 nov., 15 h 35. Ce qui suit est l'état accepté.
 
 > Claude Code, 24 nov. 2026. Consigne de lot : Cowork, « Gestion des pratiques de notation 5 », 24 nov., 13 h 55.
-> **Tout ce qui suit est une PROPOSITION, sauf A1** (la phrase acceptée par Grégoire le 22 nov., reprise mot pour mot).
-> Ces mots vivent sur l'aperçu (branche `lot/tampons-observation-1-regler`) jusqu'à ce que Grégoire les corrige ; rien
+> A1 est la phrase acceptée par Grégoire le 22 nov., reprise mot pour mot ; les autres étaient des propositions jusqu'au
+> 24 nov., 15 h 31. Ces mots vivent sur l'aperçu (branche `lot/tampons-observation-1-regler`) ; rien
 > n'est en ligne. **Une ligne par texte**, avec l'endroit où on le lit. Les textes sont tous réunis au même endroit du
 > code (`MOTS_OBSERVATION` et `AIDE_TAMPON_OBSERVATION`, `js/travaux-outils.js` ; le libellé de fusion, `js/codex.js`) :
 > une correction se fait en une ligne.
 > « X » : le nom que l'enseignant·e a donné à sa catégorie. « N » : un nombre.
 > Ces textes ne se montrent que si une pratique par cibles existe dans le trimestre actif (voir le rapport, § 2).
 
-## Les questions (une réponse de Grégoire change le texte)
+## Les questions, et les réponses de Grégoire (24 nov., 15 h 31 et 15 h 33)
+
+**Q1 : « D'observation ». Q2 : la phrase part. Q3 : « Critère (facultatif) ». Q4 : les deux titres changent.**
 
 | N° | Question | Proposé |
 |---|---|---|
@@ -23,7 +31,7 @@
 | N° | Où | Texte |
 |---|---|---|
 | C1 | Case à cocher, à droite du nom de chaque catégorie (fournie ou à soi) | D'observation |
-| C2 | Aide, sous « Tu enseignes plus d'un cours ? … » | Coche « D'observation » pour une catégorie dont les tampons disent ce que tu vois l'étudiant·e faire. Rien d'autre ne change pour l'instant. |
+| C2 | Aide, sous « Tu enseignes plus d'un cours ? … » | Coche « D'observation » pour une catégorie dont les tampons disent ce que tu vois l'étudiant·e faire. |
 
 ## La fenêtre des tampons, plus bas : la section d'une catégorie d'observation
 
@@ -56,6 +64,20 @@
 | F1 | Le nom de la donnée quand elle arrive ou diffère entre deux codex | tes catégories de tampons d'observation |
 | F2 | Où elle se règle (même mot que pour les autres données des tampons) | Annotation › Tampons |
 | F3 | Le nom d'une de ses entrées | catégorie |
+
+## Les deux titres (Grégoire, 24 nov., 15 h 33 ; la réponse à Q4)
+
+Ils dataient du temps où « observation » voulait dire « tampon » en général. Ils sont vus par **tous** les utilisateurs,
+pas seulement en « Par standards ».
+
+| N° | Où | Avant | Maintenant |
+|---|---|---|---|
+| TI1 | Le titre de la fenêtre des tampons | Rétroactions — Observations | Tampons et rétroactions |
+| TI2 | Le titre donné d'office à un jeu de tampons exporté (fenêtre des métadonnées, puis dans le fichier) | Tampons d'observation | Tampons |
+
+Un fichier exporté avant ce changement garde son titre : à l'import, le titre d'un fichier reçu s'affiche tel qu'il est
+écrit. La catégorie fournie « Observations » et les noms des tampons ne changent pas : ce sont des contenus que
+l'utilisateur renomme.
 
 ## Ce que le lot n'a pas eu à écrire
 

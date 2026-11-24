@@ -136,6 +136,18 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
 
 ## A faire
 
+### #1307 · Sans copie importée, aucun chemin vers les réglages des tampons, 24 novembre 2026 (vécu par Grégoire sur l'iPad, aperçu n° 58 ; inscrit sur consigne de Cowork, 15 h 35, sans y toucher)
+
+**Symptôme** : la fenêtre des tampons (« Tampons et rétroactions ») ne s'ouvre que depuis Évaluation › Annoter, par la roue de la palette « Tampons », et la palette n'existe que si une copie est ouverte. Sans copie importée, rien ne mène aux réglages des tampons. Grégoire a dû importer une copie artificielle pour y arriver.
+
+**À traiter au lot suivant des tampons d'observation**, quand l'écran « Observer » montrera les tampons : c'est là qu'il faut une porte vers leurs réglages.
+
+### #1308 · Dans la démo, rien ne dit quel groupe est « Par standards », 24 novembre 2026 (vécu par Grégoire sur l'iPad, aperçu n° 58 ; inscrit sur consigne de Cowork, 15 h 35, sans y toucher)
+
+**Symptôme** : dans la démo, le nom du groupe « 601-998-DM · gr. 00003 » ne dit pas que c'est le groupe « Par standards ». Grégoire a dû le demander pour essayer les tampons d'observation, qui ne se règlent que dans un groupe qui a une pratique par cibles.
+
+**À décider** : où le dire (le nom du groupe de la démo, ou un repère à l'écran). Ce sont des mots que l'utilisateur lit : à Grégoire.
+
 ### #1304 · La case « Reporter les présences… » d'une intervention complétée ne compense aucune absence, 22 novembre 2026 (mesuré à l'écran par `claude/relaxed-feynman-0vcwct` ; inscrit sur consigne de Cowork, sans toucher ni la case ni la bulle 8 du parcours 7)
 
 **Symptôme** : la case du dialogue « Marquer cette intervention complétée ? » promet « la présence à cette intervention compensera une absence au cours ». Mesuré dans la démo (Chromium, 22 nov.), Yack Amical absent à la séance saisie du 22 août (A = 0 %, 0 période sur 2), intervention de niveau 3, deux périodes, sa présence cochée, « Complétée », la case cochée :

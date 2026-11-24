@@ -9,7 +9,68 @@
 
 **Fait.** Dans la fenêtre des tampons, chaque catégorie peut être dite « d'observation » et chacun de ses tampons peut déclarer un critère ; le jeu de tampons, la bibliothèque et le codex emportent les deux. Vert sous WebKit et Chromium (17 essais sur 17 chacun), Vitest complet vert (12 356), 21 break-tests rouges sur 21.
 **Ce qui contredit la consigne** (détail au § 2) : 1. « une pratique par cibles existe dans le codex » est mesuré dans le **trimestre actif** seulement, et j'ai codé sans m'arrêter pour le demander ; 2. un critère ne voyage que s'il est **montré** (sa catégorie est d'observation) ; 3. la bibliothèque a **cinq** sorties, pas trois, et les cinq emportent le critère ; 4. « au pixel près » tient sous WebKit ; sous Chromium, une bande de 2 px de bulles animées diffère aussi entre deux passes de `main`.
+**⮕ RETOUCHE DU 24 NOV., 15 h 35 (section suivante) : le critère voyage toujours (le point 2 ci-dessous est corrigé), les mots sont acceptés, deux titres changent ; lot toujours sur sa branche, non fusionné, rien en ligne.**
 **Ce qui reste** : les mots (page `TEXTES-2026-11-24-tampons-observation-lot-1.md`, quatre questions) ; un essai au doigt sur l'iPad (la case, la liste de suggestions du champ), qu'aucun banc ne joue.
+
+---
+
+## Retouche du 24 nov. 2026, 15 h 35 (consigne de Cowork, après l'essai de Grégoire sur son iPad, 15 h 13 à 15 h 30)
+
+**DERNIER RELAIS.** Branche `lot/tampons-observation-1-regler`, **non fusionnée dans `main`** : un push sur `main` est publié d'office par Netlify (`DEPLOY.md`, § 2), et la consigne demande de ne rien mettre en ligne avant les retours des testeurs du 25 nov. Aucun bump, aucune ligne de Nouvelles. Le verdict complet n'a pas été pris : il suit la règle 7 (un seul, le soir).
+
+**Fait.**
+1. **Le critère voyage toujours.** `critereDuTampon` ne regarde plus la catégorie ; l'import d'un jeu non plus. Le critère part dans l'export d'un jeu et dans les cinq gestes de la bibliothèque, que sa catégorie soit cochée ou non, et entre de même ; il reste non montré tant qu'elle ne l'est pas. Ceci corrige le point 2 de « Ce qui contredit la consigne », ci-dessus.
+2. **Les mots** sont acceptés (Grégoire, 15 h 31) ; la seconde phrase de l'aide C2 est retirée. La page de textes le dit en tête.
+3. **Deux titres** (Grégoire, 15 h 33) : la fenêtre s'intitule « Tampons et rétroactions », un jeu exporté « Tampons ». La catégorie fournie « Observations » et les noms des tampons ne sont pas touchés.
+4. **Deux trouvailles vécues par Grégoire** inscrites au BACKLOG, sans correction : #1307 et #1308.
+
+**Les occurrences des deux titres** (tout le dépôt, toutes graphies : apostrophe droite ou courbe, échappements `\u`, tirets).
+
+| Chaîne | Où | Nature | Geste |
+|---|---|---|---|
+| « Rétroactions — Observations » | `js/travaux-outils.js` (le `<h2>` de la fenêtre) | **écran** : la seule occurrence affichée | remplacée |
+| | `js/parcours-recevoir.js` (trois commentaires) | commentaire ; aucune bulle de parcours ne cite ce titre | remplacée |
+| | `tests/integration/emojis-et-syntheses-papier.spec.js` (un commentaire) | commentaire ; aucun banc n'asserte ce titre | remplacée |
+| | `plans de travail/` (cinq consignes et rapports du 8 au 19 nov., la page d'observation aveugle) | traces datées | laissées |
+| « Tampons d'observation » (titre d'un jeu) | `js/travaux-outils.js`, deux fois dans `exporterTampons` (titre demandé, titre écrit au fichier) | **écran et fichier** | remplacées |
+| | `plans de travail/EXPORT-TAMPONS-GREGOIRE-2026-11-01-22h21.json` | un fichier exporté le 1er nov. : c'est le cas « fichier d'hier » | laissé |
+| | `docs/securite/audits/TESTS-DEFENSE-A-2026-05-08.md` (une ligne de tableau) | audit daté | laissé |
+| | les autres occurrences (commentaires « Tampons d'observation, lot 1 », noms de fichiers, titres de bancs) | le nom du lot, pas le titre | laissées |
+
+Aucune occurrence dans l'aide, dans les textes des parcours, dans `docs/modules/` ni dans une sentinelle de textes.
+
+**La preuve.**
+
+| Suite | Moteur | Résultat |
+|---|---|---|
+| `tests/integration/tampons-observation-lot-1-regler.spec.js` (17 essais du lot, 6 de la retouche) | WebKit (Playwright 2287) | **23 sur 23** |
+| Le même | Chromium (1223, config jetable, non commitée) | **23 sur 23** |
+| `tests/unit/sentinelle-tampons-observation-lot-1-regler.test.js` | Vitest | **26 sur 26** |
+| Vitest complet | | **12 360 sur 12 360** (959 fichiers) |
+| Les cinq bancs voisins du module (barre d'outils, bibliothèque #1158, emojis, lot F, tampons masqués #1216) | WebKit | 36 verts, 2 exclus, **1 instable** (`tampons-masques-bibliotheque-1216.spec.js:211`, la trouvaille T1, verte au second essai) |
+
+**Un rouge du lot, trouvé et fini ici.** `bibliotheque-deux-colonnes-1158.spec.js:409` rougissait depuis `e1c8ac569` (rejoué sur ce commit : rouge) : son sélecteur `.travaux-retro-cat-aide` attendait une seule aide dans le bloc des catégories, et l'aide C2 du lot porte la même classe. Le premier passage n'avait pas joué les bancs voisins. Le sélecteur de cet essai écarte maintenant l'aide du lot ; l'écran n'a pas changé.
+
+**Break-tests des sentinelles neuves : 8 mutations, 8 rouges** ; chaque fichier remis après sa mutation, arbre propre vérifié.
+
+| N° | Mutation | Rouge |
+|---|---|---|
+| R1 | `critereDuTampon` exige de nouveau une catégorie d'observation | Vitest B (4 essais) ; WebKit : « cocher, écrire, décocher, exporter… », « la bibliothèque, catégorie non cochée… » |
+| R2 | l'import d'un jeu n'accepte le critère que d'une catégorie d'observation | WebKit : « cocher, écrire, décocher, exporter… » |
+| R3 | le titre de la fenêtre revient à l'ancien | Vitest G ; WebKit : « la fenêtre s'intitule… » |
+| R4 | le titre écrit au fichier exporté revient à l'ancien | Vitest G ; WebKit : « un jeu exporté s'intitule… » |
+| R5 | la seconde phrase de C2 revient | Vitest G |
+| R6 | l'aperçu d'import réécrit l'ancien titre d'un fichier reçu | WebKit : « un fichier exporté hier… » |
+| R7 | la bibliothèque n'emporte plus le critère | WebKit : « la bibliothèque, catégorie non cochée… » |
+| R8 | le titre demandé à l'export revient à l'ancien | Vitest G ; WebKit : « un jeu exporté s'intitule… » |
+
+**La comparaison au pixel, refaite en excluant le titre** (WebKit, `main` = `5a2bc31be` contre le lot, même espace portant une liste et un critère, sans pratique par cibles ; 1180 × 820 et 820 × 1180, clair et sombre, en haut et défilée). Elle ne tient plus pour le titre : il change pour tout le monde, c'est voulu.
+- Hors du rectangle du titre et hors d'une lisière de 12 px : **8 captures sur 8 identiques**. Le titre garde la même hauteur (31,19 px) : rien ne bouge dessous.
+- Jusqu'au bord : 4 sur 8 identiques ; les 4 autres diffèrent de 1, 3, 4 et 50 pixels, tous dans cette lisière (coins arrondis, bord haut). Inférence, non mesurée cette fois : le fond animé derrière les coins. Le premier passage avait mesuré la même chose sous Chromium entre deux passes de `main`.
+
+**Source ou stock.** Le critère : rien à réparer, aucun fichier n'a pu perdre un critère en dehors de l'aperçu (rien n'était en ligne). Les titres : la source change ; un fichier déjà exporté garde l'ancien titre et s'affiche tel quel (essai « un fichier exporté hier… »). C'est assumé, et demandé par la consigne.
+
+**Ce que je n'ai pas refait.** Les douze captures de `captures-2026-11-24-tampons-observation-lot-1/` datent d'avant la retouche : elles montrent l'ancien titre, et celles « avec pratique par cibles » la phrase retirée de C2.
 
 ---
 
