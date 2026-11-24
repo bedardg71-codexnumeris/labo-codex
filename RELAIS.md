@@ -7,6 +7,19 @@
 
 ---
 
+## 24 NOV. 2026, 14 H 45 (Claude Code) : **TAMPONS D'OBSERVATION, LOT 1 « RÉGLER » — SUR `lot/tampons-observation-1-regler`, NON FUSIONNÉ (APERÇU SEULEMENT)**
+
+Mandat : consigne de lot de la session coordonnatrice de Cowork (« Gestion des pratiques de notation 5 », 24 nov., 13 h 55), lot lancé par Grégoire à 13 h 46. **Le travail le plus récent vit sur `lot/tampons-observation-1-regler` (`e1c8ac569`), arbre `../labo-codex-tampons-observation`. Il ne se fusionne pas : la consigne l'interdit dans ce lot.** Rapport : `plans de travail/RAPPORT-2026-11-24-tampons-observation-lot-1.md` (sur la branche).
+
+- **Sur `main` aujourd'hui** : `mesure/tampons-observation` fusionnée en avance rapide (`2e2ce7828` → `65bb52857` : la règle 15 de `PROTOCOLE.md` et le rapport de mesure), poussée ; Vitest vert au crochet, aucun fichier observable au navigateur. Aucun bump : la version reste 1.258.1, build `1123-1652`.
+- **Ce que le lot porte** : deux données neuves, `categoriesObservation` (clé globale, une donnée à la fusion) et `personnalisationObservations[id].critere` ; la fenêtre des tampons les règle quand un ensemble de cibles existe dans le trimestre actif ; le jeu de tampons, la bibliothèque et le codex les emportent. Aucun autre écran ne les lit.
+- **Aperçu** : https://deploy-preview-58--codexnumeris-051225.netlify.app (demande n° 58, en brouillon, « APERÇU, ne pas fusionner »).
+- **Bancs** : WebKit 17 sur 17, Chromium 17 sur 17, Vitest 12 356 verts, 21 break-tests rouges sur 21. Pas de verdict WebKit complet (rien ne part en ligne).
+- **En attente de Grégoire, par Cowork** : les mots, `plans de travail/TEXTES-2026-11-24-tampons-observation-lot-1.md` (sur la branche).
+- **Numéros** : aucun pris. **Numéro libre : #1305.**
+
+---
+
 ## 23 NOV. 2026, 18 H 15 (Claude Code) : **1.258.1 SUR `main` ET EN LIGNE — LA BULLE ENTIÈRE DANS L'ÉCRAN UTILE ET HORS DE CE QU'ELLE DÉSIGNE, LE BANDEAU DE VERSION SOUS L'EN-TÊTE** — ⚠ sans verdict WebKit complet, écart décidé par Grégoire
 
 Mandat : feu vert de Grégoire, 23 nov., 18 h 05, relayé par la session coordonnatrice de Cowork, qui a relu `lot/bulle-et-bandeau` (`46b680bdf`). **Le travail le plus récent vit sur `main`.** `main` avancé en avance rapide de `4d1043cce` à `46b680bdf` (aucun commit de fusion), depuis `../labo-codex-fusion`. Rapport complet : `plans de travail/RAPPORT-2026-11-23-bulle-et-bandeau.md`.
