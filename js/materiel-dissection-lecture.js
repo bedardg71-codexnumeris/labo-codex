@@ -1169,6 +1169,9 @@
     D.MAX_POIDS = 100;
     // Le code vit dans un identifiant posé sur la copie (`errfr_<code>`) : la règle de `codes-annotation.js`.
     var CODE_VALIDE = /^[A-Za-z0-9_-]{1,20}$/;
+    // Un code NEUF a quatre caractères au plus (décision de Grégoire, 24 nov. 2026) : la règle de la saisie,
+    // `codesAnnotation.MAX_SAISIE` (une sentinelle garde l'égalité). Une liste collée est une saisie.
+    D.MAX_CARACTERES_CODE = 4;
     // Les étiquettes d'une grille : avec des codes, elles n'auraient nulle part où aller.
     var DE_GRILLE = ['titre', 'description', 'section', 'soustotal', 'total', 'critere', 'souscritere', 'ponderation', 'descripteur', 'points', 'niveau'];
 
@@ -1191,10 +1194,11 @@
         }
         if (!R.codes.length) manque('au moins un code : pose l’étiquette « Code » sur chaque code', 'aucunCode');
         if (R.codes.length > D.MAX_CODES) manque('au plus ' + D.MAX_CODES + ' codes (ta liste en a ' + R.codes.length + ')');
-        var vus = {}, illisibles = [], doubles = [], sansPoids = [], tropLourds = [];
+        var vus = {}, illisibles = [], tropLongs = [], doubles = [], sansPoids = [], tropLourds = [];
         var codes = R.codes.map(function (e) {
             var code = propre(e.code);
             if (!CODE_VALIDE.test(code)) illisibles.push(code);
+            else if (code.length > D.MAX_CARACTERES_CODE) tropLongs.push(code);
             else if (vus[code]) { if (doubles.indexOf(code) < 0) doubles.push(code); }
             vus[code] = true;
             var poids = e.poids == null ? 1 : e.poids;
@@ -1203,6 +1207,7 @@
             return { code: code, nom: e.nom.join(' ').trim(), poids: poids, commentaire: e.commentaire.join('\n').trim() };
         });
         if (illisibles.length) manque('des codes faits de lettres, de chiffres, de « - » ou de « _ », 20 caractères au plus (' + nommer(illisibles) + ')');
+        if (tropLongs.length) manque('des codes de ' + D.MAX_CARACTERES_CODE + ' caractères au plus (' + nommer(tropLongs) + ')');
         if (doubles.length) manque('des codes différents (' + nommer(doubles) + ' en double)');
         if (sansPoids.length) manque('un poids plus grand que 0 (' + nommer(sansPoids) + ')');
         if (tropLourds.length) manque('un poids de ' + D.MAX_POIDS + ' au plus (' + nommer(tropLourds) + ')');

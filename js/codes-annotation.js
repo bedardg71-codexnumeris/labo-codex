@@ -30,7 +30,8 @@
      sommePonderee(grille, compteurs) la somme des codes posés, chacun à son poids
      toucheDuCode(code)                la touche du clavier d'un code : son numéro, 0 pour le 10
      raisonsSansCode(critere)          pourquoi chaque sous-critère ne donne pas de code (24 nov. 2026)
-     refusCodeSaisi(scs, rang, valeur) le refus d'un code tapé dans la grille : illisible, ou en double à la casse près
+     refusCodeSaisi(scs, rang, valeur) le refus d'un code tapé dans la grille : illisible, plus de quatre caractères,
+                                       ou en double à la casse près
 
    Chaque code : { id, code, numero, nom, couleur, retroaction, source, poids }
      id        ce qui est écrit sur la copie : `errfr_<code>`. ⚠ LE PRÉFIXE RESTE,
@@ -259,19 +260,34 @@ function raisonsSansCode(critere) {
 }
 
 /**
+ * QUATRE CARACTÈRES AU PLUS POUR UN CODE NEUF (décision de Grégoire, 24 nov. 2026, 17 h 45) : plus long, un code couvre
+ * trop de surface sur la copie. ⚠ C'est une règle de SAISIE, pas de ce qu'un code POSABLE peut être (`CODE_VALIDE`,
+ * vingt au plus, inchangé) : une grille enregistrée, importée ou partagée garde ses codes plus longs, posables et
+ * comptés comme hier (tarir n'est pas réparer). Les portes d'entrée qui la lisent : la saisie de la grille
+ * (`refusCodeSaisi`), la liste collée (`materielDissectionLecture.codesCompris`, `MAX_CARACTERES_CODE`).
+ */
+var MAX_SAISIE = 4;
+// Ce que la saisie accepte comme caractères (la longueur est à part) : lettres sans accent, chiffres, tiret, souligné.
+var CARACTERES_PERMIS = /^[A-Za-z0-9_-]+$/;
+
+/**
  * LE REFUS D'UN CODE À LA SAISIE (lot « codes en lettres », 24 nov. 2026) : `valeur` tapée au rang `index`
  * des `sousCriteres` d'un critère algorithmique. Rend null (accepté), ou :
- *   { raison: 'caracteres' }              le code ne pourrait pas se poser ;
+ *   { raison: 'caracteres' }              un caractère que la saisie ne prend pas (un accent, une espace…) ;
+ *   { raison: 'long' }                    plus de MAX_SAISIE caractères ;
  *   { raison: 'double', autre: '<code>' } un autre rang porte le même code à la casse près (« k-a » et
  *                                         « K-A ») : deux codes que l'œil ne distingue pas, comptés à part.
- * Un code vide n'est pas refusé (hier non plus). Le même rang qui ne change que de casse n'est pas un doublon. Pure.
+ * Un code vide n'est pas refusé (hier non plus). Ce que la ligne porte déjà n'est pas une saisie neuve : un code
+ * ancien, laissé tel quel, n'est pas refusé. Le même rang qui ne change que de casse n'est pas un doublon. Pure.
  */
 function refusCodeSaisi(sousCriteres, index, valeur) {
     var numero = (valeur === undefined || valeur === null) ? '' : String(valeur).trim();
     if (!numero) return null;
-    if (!CODE_VALIDE.test(numero)) return { raison: 'caracteres' };
-    var sansCasse = numero.toUpperCase();
     var scs = Array.isArray(sousCriteres) ? sousCriteres : [];
+    if (scs[index] && _numeroDe(scs[index]) === numero) return null;
+    if (!CARACTERES_PERMIS.test(numero)) return { raison: 'caracteres' };
+    if (numero.length > MAX_SAISIE) return { raison: 'long' };
+    var sansCasse = numero.toUpperCase();
     for (var j = 0; j < scs.length; j++) {
         if (j === index) continue;
         var autre = _numeroDe(scs[j]);
@@ -483,6 +499,7 @@ var api = {
     apercuCodes: apercuCodes,
     raisonsSansCode: raisonsSansCode,
     refusCodeSaisi: refusCodeSaisi,
+    MAX_SAISIE: MAX_SAISIE,
     listeCodes: listeCodes,
     code: code,
     sommePonderee: sommePonderee,

@@ -1,14 +1,14 @@
 # Rapport : des codes d'annotation en lettres, lisibles partout (lot 1)
 
-> **Rien n'a été jugé sous Safari ni sur l'iPad.** Le nuage n'a pas WebKit : tout ce qui suit a tourné sous Chromium (Linux, police DejaVu Sans). Le passage WebKit est à lancer sur le Mac, depuis `tests/` :
+> **Rien n'a été jugé sous Safari ni sur l'iPad, ni au lot 1 ni à sa suite.** Le nuage n'a pas WebKit : tout ce qui suit a tourné sous Chromium (Linux, police DejaVu Sans). Le passage WebKit est à lancer sur le Mac, depuis `tests/` :
 >
 > ```bash
-> cd tests && npx playwright test integration/codes-en-lettres-lisibles.spec.js integration/codes-par-grille-gabarit.spec.js integration/codes-par-grille-palette.spec.js integration/codes-touche-est-le-numero.spec.js integration/critere-algorithmique-palette.spec.js integration/erreurs-palette-codes-fermee.spec.js --trace off
+> cd tests && npx playwright test integration/codes-en-lettres-lisibles.spec.js integration/essai-codes-en-lettres-depart.spec.js integration/codes-par-grille-gabarit.spec.js integration/codes-par-grille-palette.spec.js integration/codes-touche-est-le-numero.spec.js integration/critere-algorithmique-palette.spec.js integration/critere-algorithmique-coller-codes.spec.js integration/erreurs-palette-codes-fermee.spec.js --trace off
 > ```
 >
 > (Sans `-c`, la configuration par défaut est WebKit.)
 
-**Dernier relais.** Branche `lot/codes-en-lettres-1-lisibles`, partie de `main` à `5a2bc31be` ; le lot est le commit `c1c6d414d`, ce rapport complété au commit suivant. Mandat de Cowork du 24 nov. 2026, 15 h 45. Lot 1 fait : mesure de l'étape 0, codes lisibles (cercle, curseur, PDF, palette), refus à la saisie (accent, casse), vraie raison à l'écran de la grille. Ni fusion dans `main`, ni bump, ni ligne de Nouvelles, ni entrée de `RELAIS.md` (elle s'écrira à la fusion, exception décidée par Cowork). Aperçu : demande en brouillon « APERÇU, ne pas fusionner » (adresse plus bas). Reste : le passage WebKit sur le Mac, les gestes à essayer, les deux lots suivants (diagnostic erreurs-mots, suivi).
+**Dernier relais.** Branche `lot/codes-en-lettres-1-lisibles`, partie de `main` à `5a2bc31be`. Lot 1 (mandat de Cowork du 24 nov. 2026, 15 h 45) : commits `c1c6d414d` et `3dc0cf3cf` ; mesure de l'étape 0, codes lisibles, refus à la saisie (accent, casse), vraie raison à l'écran de la grille. **Suite (consigne de 17 h 55) : commit suivant, section « Suite : la pastille » plus bas** ; la pastille (copie, curseur, PDF, synthèse) remplace le texte qui rapetissait dans le cercle, quatre caractères au plus à la saisie, la palette alignée à trois et quatre caractères, un fichier de départ d'essai. Ni fusion dans `main`, ni bump, ni ligne de Nouvelles, ni entrée de `RELAIS.md` (elle s'écrira à la fusion, exception décidée par Cowork). Aperçu : demande en brouillon « APERÇU, ne pas fusionner » (adresse plus bas). Reste : le passage WebKit sur le Mac, les gestes à essayer (à partir du fichier de départ), le retrait des pièces d'essai avant la fusion, les deux lots suivants (diagnostic erreurs-mots, suivi).
 
 ---
 
@@ -70,26 +70,26 @@ La règle de ce qu'un code peut être (`/^[A-Za-z0-9_-]{1,20}$/`) est recopiée 
 ## Ce qui est fait, en gestes d'utilisateur
 
 1. **Je monte une grille aux codes de deux ou trois caractères** (« K-A », « QRS ») : la saisie les accepte comme avant.
-2. **Je tape un code accentué** (« É-A ») dans le champ Code : il est refusé, le champ se marque et le témoin dit « Non enregistré : un code s’écrit en lettres sans accent, chiffres, tiret ou souligné, 20 caractères au plus. » Rien n'est écrit dans la grille.
+2. **Je tape un code accentué** (« É-A ») dans le champ Code : il est refusé, le champ se marque et le témoin dit « Non enregistré : un code s’écrit en lettres sans accent, chiffres, tiret ou souligné. » (↻ suite : « 20 caractères au plus » retiré) Rien n'est écrit dans la grille.
 3. **Je tape « k-a » alors que « K-A » existe dans le critère** : refusé, et le témoin nomme l'autre code. Changer la casse d'un code sur sa propre ligne reste permis.
 4. **J'ouvre une grille déjà enregistrée qui porte un code accentué** : la note sous les sous-critères ne dit plus « pondération 0 » ; elle nomme le code et dit pourquoi il ne se pose pas. Rien n'est réécrit dans la grille.
 5. **J'ouvre une copie et je regarde la palette Codes** : chaque code de trois caractères tient sur une ligne, dans une gélule de même largeur, et les noms s'alignent en colonne. Un code d'un ou deux caractères garde son rond.
-6. **Je pose « K-A » sur la copie** : le code entier se lit dans le cercle, ses bords ne sont plus rognés. Même chose **sous le curseur** et **dans le PDF**. Un code d'un chiffre, ou « 10 », ne change pas d'un pixel.
+6. ↻ *Remplacé par la suite (la pastille).* **Je pose « K-A » sur la copie** : le code entier se lit dans le cercle, ses bords ne sont plus rognés. Même chose **sous le curseur** et **dans le PDF**. Un code d'un chiffre, ou « 10 », ne change pas d'un pixel.
 
 ## Ce que j'ai tranché, et ce que j'ai supposé
 
-- **Au-delà de trois caractères : ajuster, pas refuser.** Le texte diminue dans le cercle jusqu'à tenir, sans plancher. Mes raisons : la règle des codes admet vingt caractères depuis le 3 septembre, la palette compacte les porte depuis le 1er novembre, et une grille enregistrée peut déjà en avoir (la saisie ne les touche pas). Refuser à quatre poserait un nombre propre à un usage (Règle 15 : le contenant, pas le contenu). Supposé : un code de dix caractères dans un cercle de 7 px se lit mal, mais il se lit entier, ce qui vaut mieux qu'un code tronqué qu'on lit autrement.
+- ↻ *Renversé par Grégoire (17 h 45) : la pastille, et quatre caractères au plus à la saisie ; voir la suite.* **Au-delà de trois caractères : ajuster, pas refuser.** Le texte diminue dans le cercle jusqu'à tenir, sans plancher. Mes raisons : la règle des codes admet vingt caractères depuis le 3 septembre, la palette compacte les porte depuis le 1er novembre, et une grille enregistrée peut déjà en avoir (la saisie ne les touche pas). Refuser à quatre poserait un nombre propre à un usage (Règle 15 : le contenant, pas le contenu). Supposé : un code de dix caractères dans un cercle de 7 px se lit mal, mais il se lit entier, ce qui vaut mieux qu'un code tronqué qu'on lit autrement.
 - **Un code accentué : la vraie raison, pas posable.** Le rendre posable toucherait les trois copies de la règle (codes, tables de cas, dissection) et l'identifiant `errfr_<code>`, qui voyage dans les annotations exportées. Il ouvrirait aussi deux risques : deux codes identiques à l'œil (un « A » latin et un « А » cyrillique) et un « É » composé différemment sur le Mac et sur l'iPad (NFC/NFD). Supposé : des codes sans accent suffisent au besoin décrit. Si une utilisatrice en a besoin, c'est un lot à part.
 - **La casse : le refus vaut à la saisie seulement.** Une grille enregistrée qui porte « K-A » et « k-a » garde deux codes, comme hier : les relire autrement changerait le compte et la somme pondérée de copies déjà annotées (tarir n'est pas réparer). Le même refus vaut pour un doublon exact, qui ne se posait déjà pas. Il vaut pour tout critère algorithmique, activé ou non (le champ Code n'existe que là).
 - **Le stock fourni, mesuré** : le pack de démonstration porte onze codes (`0` à `10`), aucun doublon de casse, aucun code non posable, aucun de plus de trois caractères. Les trois départs fournis (`departs/*.zip`) n'ont aucun critère algorithmique (leurs critères sont holistiques ou à cocher, sans sous-critère). L'assistant et la création de matériel fabriquent leurs codes à partir de la saisie : pas de gabarit codé en dur. Rien n'est donc à réparer dans le stock fourni.
 - **La marge du cercle : 0,93 du rayon.** À 0,9, « 10 » (le repli) rapetissait d'une fraction de pixel aux petits rayons de la copie : son coin d'encre arrive à 0,923 du rayon (mesuré sous Chromium, DejaVu Sans grasse ; Helvetica est plus étroite).
-- **La gélule de trois caractères fait 3,25 em (36,4 px)**, pour aligner les noms. Mesuré : de 29,5 px (« T-B ») à 34,4 px (« W-A ») sans elle. Supposé : sur le Mac, la police système reste sous 36 px pour trois capitales ; si elle dépasse, la gélule s'allonge et un nom se décale de quelques pixels, sans rien recouvrir.
+- ↻ *Étendu par la suite à quatre caractères (4,25 em).* **La gélule de trois caractères fait 3,25 em (36,4 px)**, pour aligner les noms. Mesuré : de 29,5 px (« T-B ») à 34,4 px (« W-A ») sans elle. Supposé : sur le Mac, la police système reste sous 36 px pour trois capitales ; si elle dépasse, la gélule s'allonge et un nom se décale de quelques pixels, sans rien recouvrir.
 
 ## Fichiers touchés
 
 | Fichier | Ce qui change |
 |---|---|
-| `js/annotation-formes.js` | `tailleCodeDansCercle` (pure) et `ecrireCodeDansCercle` : la règle du code dans son cercle, une seule fois pour la copie, le PDF et le curseur |
+| `js/annotation-formes.js` | `tailleCodeDansCercle` (pure) et `ecrireCodeDansCercle` : la règle du code dans son cercle, une seule fois pour la copie, le PDF et le curseur (↻ suite : retirées, remplacées par `geometriePastille`, `geometrieCode`, `dessinerCode`) |
 | `js/travaux-annotation.js` | la copie appelle `ecrireCodeDansCercle` (3 lignes) |
 | `js/travaux-export-pdf.js` | le PDF appelle `ecrireCodeDansCercle` (3 lignes) |
 | `js/codes-annotation.js` | `raisonsSansCode` (la raison de chaque écart, règle inchangée), `refusCodeSaisi` ; `_depuisSousCriteres` lit `raisonsSansCode` |
@@ -197,25 +197,197 @@ Dossier `plans de travail/captures-2026-11-24-codes-en-lettres/` (avant = `main`
 
 Netlify l'annonce prêt (« Deploy Preview ready! ») pour le commit `c1c6d414d`, celui du lot. Je ne l'ai pas ouvert : le réseau du nuage refuse l'hôte `netlify.app`. Le numéro en bas de page reste celui de `main` (1.258.1, build 1123-1652), puisque le lot ne bumpe pas : c'est le jeton `?v=20261123l` des fichiers du lot qui distingue l'aperçu.
 
+## Suite : la pastille (consigne de Cowork du 24 nov., 17 h 55)
+
+> **Toujours rien sous Safari ni sur l'iPad.** Commande WebKit mise à jour en tête du rapport.
+
+Décisions de Grégoire (17 h 45 à 17 h 49), appliquées : la pastille sur la copie ; quatre caractères au plus ; rien de propre à un métier ; aucun raccourci clavier pour un code en lettres (rien codé : la touche reste celle des codes 1 à 10).
+
+### Ce qui est fait, en gestes d'utilisateur
+
+1. **Je pose « K-A », « QRST » ou « W-12 » sur la copie** : le code se dessine dans une pastille de la hauteur du cercle, aux bouts arrondis, centrée sur le point touché, **le texte à la taille d'un chiffre**. Même règle **sous le curseur** (l'image s'élargit, le point actif reste au centre) et **dans le PDF**.
+2. **Un code d'un ou deux caractères** (« 7 », « 10 ») garde le cercle d'hier, au pixel près.
+3. **Je tape « ABCDE »** dans le champ Code : refusé ; le témoin dit « Non enregistré : un code a quatre caractères au plus : plus long, il couvre trop de place sur la copie. »
+4. **Je colle, dans « Apporter mon matériel », une liste où un code a cinq caractères** : ce qui manque le nomme (« des codes de 4 caractères au plus (« ABCDE ») »).
+5. **Une grille déjà enregistrée porte « ABCDEF »** : il reste posable et compté comme hier ; sur la copie, sa pastille s'arrête à la largeur de quatre caractères larges et son texte rapetisse pour y tenir. Retaper la même valeur sur sa ligne n'est pas refusé.
+6. **Je touche le bout d'une pastille** : elle se sélectionne ; je la glisse, la duplique, l'efface ; un rectangle de sélection qui ne couvre que son bout la prend ; ses poignées sont aux coins de la pastille, et la tirer la fait grandir autour de son centre.
+7. **La palette Codes** : les noms des codes de trois et de quatre caractères commencent à la même abscisse (capture ci-dessous).
+8. **La page de synthèse du PDF** : « QRST » tient dans sa pastille, sur une ligne, avant son nom.
+9. **Un fichier de départ** : je l'ouvre dans l'aperçu et je pose des codes tout de suite (« Les gestes à essayer »).
+
+### Ce que j'ai tranché, et ce que j'ai supposé
+
+- **Cercle ou pastille selon la longueur du code, pas sa largeur** : un ou deux caractères, le cercle ; trois et plus, la pastille, même pour un code étroit. Une règle qu'on prévoit à l'œil, et l'identité au pixel des codes d'un ou deux caractères (comparée à `main`, ci-dessous).
+- **La taille du texte** : celle d'un chiffre dans un cercle de même rayon (1,2 × le rayon ; 18 px au curseur). Le texte n'est réduit qu'au-delà du plafond.
+- **Le plafond** : la largeur de « MMMM » (quatre capitales larges) à la taille d'un chiffre, mesurée au dessin. Supposé : « la largeur de quatre caractères » veut dire quatre caractères larges, pas quatre « I ». Un code de quatre « W » (plus larges que « M ») se réduirait d'un cheveu ; aucun des dix-sept ne l'est.
+- **Rien n'est enregistré** : la largeur se calcule au dessin, à partir du code. La sélection la relit de la même fonction (`geometrieCode`).
+- **Le redimensionnement d'un code en pastille se fait autour de son centre** (le rapport des distances du pointeur au centre), alors que les autres symboles s'ancrent au coin opposé. Sans cela, ancrer au coin du cadre élargi déplaçait la donnée au premier geste. Les codes d'un ou deux caractères gardent l'ancrage d'hier.
+- **La saisie** : un code déjà présent sur sa ligne n'est pas une saisie neuve (sinon, retoucher une grille ancienne refuserait son propre code). L'ordre des refus : caractères, longueur, doublon.
+- **La page de synthèse** : dès qu'un des deux codes listés a trois caractères ou plus, la colonne des pastilles passe de 22 à 30 px pour les deux lignes (les noms restent alignés) ; sinon, rien ne change (comparé au pixel à `main`). Au-delà de quatre, la police mono y rapetisse en proportion (9 × 4 / longueur).
+- **La palette étendue** : 4,25 em (47,6 px) pour les codes de trois et quatre caractères **quand la liste porte un code de quatre ou plus** (`:has()`, déjà employé 46 fois dans `styles.css`) ; une liste de codes à trois caractères garde ses 36,4 px.
+- **La borne de quatre** vit dans `codesAnnotation.MAX_SAISIE` ; la dissection, qui se charge sans ce module en Node, en garde une copie (`MAX_CARACTERES_CODE`) que Vitest tient égale.
+
+### Les portes d'entrée d'un code neuf (mesurées)
+
+| Porte | Ce qu'elle fait | Quatre au plus ? |
+|---|---|---|
+| Le champ « Code » de la grille (`grilles.js:6296`, `modifierSousCritere` → `refusCodeSousCritere`, `:5455`) | saisie libre | **oui** : refus T3 |
+| La liste collée, « Apporter mon matériel » (`materiel-dissection-lecture.js:1188`, `codesCompris` → `materiel-creation.js:172`) | les codes du document | **oui** : raison C1, rien n'est créé |
+| « + Ajouter un sous-critère » (`grilles.js:5439`, `codeSousCritereNeuf`) | le plus grand code numérique, plus un | numérique ; ne passerait cinq chiffres qu'après un code 9 999 (non traité) |
+| La liste de départ, codes 1 à 10 (`grilles.js:6234`, `initialiserSousCriteresParDefaut`) | dix codes fixes | sans objet |
+| L'assistant de matériel (`materiel-assistant.js:320`) | le rang, 0, 1, 2… | numérique |
+| La migration des anciennes catégories (`grilles.js:6694`) | le stock d'hier | **ce qui voyage : rien refusé** |
+| L'import d'une grille, le partage (`partage-schemas.js`, chaîne de 20), le codex, l'import-export | ce qui voyage | **rien refusé** |
+
+### La surface : la pastille comparée au cercle (mesurée, Chromium)
+
+Largeur de la couleur ÷ diamètre du cercle, sur la copie (rayon 14,8 px), dans le PDF (rayon 48 px) et au curseur (image ÷ 30 px) :
+
+| Codes | Copie | PDF | Curseur |
+|---|---|---|---|
+| Trois caractères (K-A, W-B, M-C, QRS) | 1,28 à 1,59 | 1,26 à 1,53 | 1,40 à 1,67 |
+| Quatre caractères (K-AB, W-12, QRST) | 1,66 à 1,96 | 1,66 à 1,93 | 1,73 à 2,03 |
+| Le stock, six caractères (ABCDEF, plafonné) | 2,16 | 2,18 | |
+
+En surface (1 + 4 × (largeur − 1) / π, la pastille étant un cercle allongé d'un rectangle) : de 1,36 à 1,75 fois le cercle à trois caractères, de 1,84 à 2,22 à quatre, 2,49 au plafond. « QRS » et « QRST » sont les plus larges : le « Q » et le « R ».
+
+### Fichiers touchés (suite)
+
+| Fichier | Ce qui change |
+|---|---|
+| `js/annotation-formes.js` | `geometriePastille` (pure), `geometrieCode`, `tracerPastille`, `dessinerCode` : la règle, une fois ; `tailleCodeDansCercle` et `ecrireCodeDansCercle` retirées |
+| `js/travaux-annotation.js` | la copie appelle `dessinerCode` ; `numeroDuCode`, `demiLargeurPastille`, `cadreALaPastille` (le cadre suit la pastille), `redimensionnerPastille` |
+| `js/travaux-export-pdf.js` | le PDF appelle `dessinerCode` |
+| `js/synthese-retroaction-rendu.js` | la pastille de la page de synthèse (`renderErreurs`) |
+| `js/codes-annotation.js` | `MAX_SAISIE`, le refus « long », la ligne inchangée qui n'est pas une saisie neuve |
+| `js/grilles.js` | le texte T3, T1 et N1 sans « 20 caractères au plus » |
+| `js/materiel-dissection-lecture.js` | `MAX_CARACTERES_CODE`, la raison C1 |
+| `departs.html`, `departs/ESSAI-codes-en-lettres-lot-1.zip` | **essai** : la section et le fichier |
+| `tests/departs-de-parcours/essai-codes-en-lettres.js`, `essai-codes-en-lettres.spec.js` | **essai** : la fabrique du fichier |
+| `tests/integration/essai-codes-en-lettres-depart.spec.js` | **essai** : le banc qui ouvre le fichier |
+| `tests/integration/codes-en-lettres-lisibles.spec.js` | 11 essais (7 neufs ou réancrés) |
+| `tests/unit/codes-en-lettres-lot1.test.js` | 21 essais (A, B réancrés ; D, E étendus) |
+| `tests/unit/sentinelle-contenir-complexite.test.js`, `tests/fixtures/cliquets/complexite-fonctions-30.json` | une hausse assumée, écrite : `appliquerRedimensionnement` 35 → 36 (un `if` d'une ligne qui délègue) |
+
+**Fichiers communs avec `lot/tampons-observation-1-regler` (`e1c8ac569`), lignes touchées, cumulées depuis `main` :**
+
+- `js/travaux-outils.js` : **lignes 2056 à 2067 de `main`** (le curseur, `genererCurseurErrFr`). La branche des tampons touche 981-1112, puis 2931 et au-delà.
+- `styles.css` : **lignes 18807 à 18832** (la gélule et l'alignement) et **28757-28758** (la compacte). La branche des tampons ajoute autour de 27624.
+- `index.html` : **neuf jetons `?v=`** à `20261123m` (lignes 20, 11782, 11791, 11798, 11916, 11917, 11919, 11922, 11923). Conflit certain à la fusion sur `styles.css` (20) et `travaux-outils.js` (11917).
+
+### La preuve (suite)
+
+#### Rouge avant, vert après (Playwright, Chromium)
+
+« Avant » est l'état de 17 h 38 (`3dc0cf3cf`), sur lequel j'ai lancé le banc réécrit avant toute retouche.
+
+| Essai | À 17 h 38 | Après |
+|---|---|---|
+| 1 · la copie | rouge : « K-A » dans le cercle, encre de 9 px contre 12 pour « 7 » | vert : pastilles, encre de 12 à 15 px, « 7 » inchangé |
+| 2 · le PDF | rouge : « K-A » à 32 px d'encre contre 40 | vert |
+| 3 · le curseur | rouge : image de 32 px, encre de 10 px | vert : image de 42 à 61 px, encre de 12 à 15 px |
+| 3 bis · toucher, déplacer, dupliquer, effacer, rectangle, poignée | rouge : le bout de la pastille ne se touche pas | vert |
+| 4 · palette, noms alignés (trois et quatre) | rouge : les codes de quatre poussent leur nom de 1,4 à 4,4 px | vert : une seule abscisse |
+| 4 ter · page de synthèse | rouge : « QRST » sort de son rond de 18 px | vert : une ligne, dans la pastille, avant le nom |
+| 5 bis · « ABCDE » à la saisie ; « ABCDEF » ancien | rouge : « ABCDE » écrit | vert |
+| 4 bis, 5, 6 (gardes) | vertes | vertes |
+
+#### Break-tests de la suite
+
+Dix ruptures, chacune seule, puis restaurée (empreintes des fichiers vérifiées) :
+
+| Rupture | Rougit |
+|---|---|
+| A1 · toujours le cercle | essais 1, 2, 3 ; Vitest B (3) |
+| A2 · le texte rapetisse dans la pastille | essais 1, 2 |
+| A3 · pas de plafond | essai 1 ; Vitest A et B |
+| A4 · le cadre ne suit pas la pastille | essai 3 bis (rejoué sur le code final) |
+| A5 · le redimensionnement ancré au coin du cadre | essai 3 bis (rejoué sur le code final) |
+| B · la synthèse garde le rond de 18 px | essai 4 ter |
+| C1 · la saisie accepte cinq caractères | essai 5 bis ; Vitest D |
+| C2 · la liste collée accepte cinq caractères | Vitest E |
+| C3 · un code ancien laissé tel quel est refusé | essai 5 bis ; Vitest D |
+| D · les noms ne s'alignent plus à quatre caractères | essai 4 |
+| Le fichier de départ privé de sa copie | le banc d'ouverture du fichier |
+
+#### Non-régression au pixel, comparée à `main`
+
+Les codes d'un et deux caractères : le même script qu'au lot 1 (grille 1 à 9 et repli 1 à 10 ; copie, PDF, curseurs, palettes étendue et compacte ; deux tailles d'écran, deux thèmes) : **8 configurations sur 8 identiques**. La page de synthèse avec « 10 » et « 7 » : **identique** (même empreinte). La palette compacte avec les dix-sept codes en lettres : **identique** dans les quatre configurations (taille, thème) ; seule l'étendue change, comme voulu.
+
+#### Vitest et bancs voisins
+
+- **Vitest complet** (depuis `tests/`), sur l'état final : **959 fichiers, 12 355 essais, tous verts**. Un cliquet a rougi en chemin : `sentinelle-contenir-complexite` refusait `calculerBBox` à 31 et `appliquerRedimensionnement` monté de 35 à 40. J'ai extrait (`cadreALaPastille`, `redimensionnerPastille`) : `calculerBBox` revient sous 31, et la hausse restante (35 → 36, un `if` d'une ligne) est écrite dans `HAUSSES_ASSUMEES`, comme le cliquet le demande.
+- **Les bancs voisins, `main` contre branche** (Chromium) : les 59 du lot 1, plus 19 de la dissection, du matériel et des départs, et mes deux bancs.
+
+| | verts | rouges | sautés |
+|---|---|---|---|
+| `main` (78 fichiers) | 348 | 7 | 12 |
+| branche (les 78, plus le banc neuf et celui du fichier d'essai) | 355 | 11 | 12 |
+
+Les 7 rouges de `main` sont rouges sur la branche aussi. Les 4 de plus, rejoués seuls de part et d'autre :
+
+- `critere-algorithmique-dit-vrai.spec.js:143` : la course déjà mesurée au lot 1 (2 sur 5 de chaque côté).
+- `bareme-grille-neuve-1120.spec.js:168` et `:181` : instables des deux côtés. Rejoués seuls, ils passent sur la branche, et l'un rougit sur `main` (`:178`).
+- `critere-algorithmique-calculs-4c.spec.js:159` : **instable sur `main` (1 échec sur 15), plus souvent sur la branche (6 sur 19)**, et déjà à 17 h 38 (2 sur 6). Avec le `grilles.js` de `main` sur la branche, il échoue encore (2 sur 8) : la cause n'est pas dans `grilles.js`, **et je ne l'ai pas isolée**. Ce que l'erreur montre : l'essai tape « x » dans le décompte (la vue éditable), écrit ensuite directement le champ caché (un geste qu'aucun utilisateur ne fait), et la vue, en perdant le focus, réécrit son texte affiché (l'ancien) par-dessus. C'est une course entre deux écritures. Je la crois propre à l'essai, sans la prouver. Inscrite aux trouvailles (10).
+
+⮕ Aucune régression établie sous Chromium. Une instabilité plus fréquente, de cause non isolée, reste à suivre ; c'est le passage WebKit sur le Mac qui jugera.
+
+### Captures
+
+Dossier `plans de travail/captures-2026-11-24-codes-en-lettres-suite/`. « Avant » : l'état de 17 h 38 (`3dc0cf3cf`) ; « après » : la suite. Les dix-sept codes posés à la taille d'un vrai geste :
+
+- `copie-<taille>-<thème>-<avant|apres>.png` (huit) ;
+- `palette-<taille>-<thème>-<avant|apres>.png` (huit ; la palette agrandie pour montrer ses dix-huit codes, le code ancien « ABCDEF » n'y est pas : la grille des captures porte les dix-sept) ;
+- `pdf-page1-<avant|apres>.png` : le haut de la page 1 du vrai PDF, relu par pdf.js ;
+- `curseur-<avant|apres>.png` : six curseurs, agrandis quatre fois.
+
+⚠ **Une erreur de ma part, au lot 1** : mes captures « après » de 17 h 38 avaient été prises **avant** ma dernière retouche CSS (la largeur commune des gélules). Le rapport disait les noms alignés, d'après le banc ; la capture montrait l'état d'avant. Les captures de la suite sont prises sur le code commité.
+
+### Le fichier de départ d'essai
+
+- **Ce qu'il porte** : une classe montée par les gestes de « Mettre ta classe en place » (Automne 2026, 601-101-MQ, quatre personnes manifestement fictives, « Fictif-01 Personne-01 » à « Fictif-04 Personne-04 ») ; la grille « Grille fictive : codes en lettres » (un critère algorithmique, les dix-sept codes) ; la production « Production fictive : codes en lettres » ; la copie fictive `tests/fixtures/perspective-coins/loutre-pleine-image.jpg` (un texte inventé, déjà au dépôt), importée par le vrai chemin d'import, associée à « Fictif-01 ». Le codex s'appelle « ESSAI, codes en lettres (fictif) » ; 235 Ko.
+- **Où** : `departs/ESSAI-codes-en-lettres-lot-1.zip`, servi par l'aperçu à `/departs.html` (une section « Essai : les codes en lettres » en tête).
+- **Ce qui le prouve** : `tests/integration/essai-codes-en-lettres-depart.spec.js` l'ouvre dans un espace vide par les gestes de l'iPad, ouvre la copie par la liste des évaluations, trouve les dix-sept codes et pose « QRST ». Un codex privé de sa copie le fait rougir.
+- **À retirer avant la fusion : oui.** Les pièces : `departs/ESSAI-codes-en-lettres-lot-1.zip`, la section `data-essai="codes-en-lettres"` de `departs.html`, `tests/departs-de-parcours/essai-codes-en-lettres.js`, `tests/departs-de-parcours/essai-codes-en-lettres.spec.js`, `tests/integration/essai-codes-en-lettres-depart.spec.js`. ⚠ `departs.html` et `departs/` sont eux-mêmes marqués « essai seulement » dans `scripts/construire-publication.mjs` depuis le 20 nov. : c'est à la session principale de dire s'ils restent publiés.
+
+### Ce qui n'est pas vérifié (suite)
+
+- Safari et l'iPad (redit) : la mesure de l'encre et le dessin des bouts arrondis sous WebKit ; `:has()` dans la palette ; le curseur élargi (Safari accepte des images de curseur jusqu'à 128 px, je ne l'ai pas vu) ; l'ouverture du fichier d'essai sur l'iPad.
+- La page de synthèse rastérisée par html2canvas dans le vrai PDF : je l'ai mesurée rendue au navigateur, pas dans le PDF.
+- Le redimensionnement au doigt : éprouvé à la souris (événements de pointeur), pas au toucher.
+- La police du Mac : la gélule de 4,25 em suppose quatre capitales ordinaires sous 47,6 px.
+
+### Rejoué ou seulement lu (suite)
+
+- **Rejoué** (Chromium) : tout ce qui précède ; le fichier de départ, fabriqué puis rouvert dans un espace vide ; les portes d'entrée « champ Code » et « liste collée ».
+- **Seulement lu** : les portes « + Ajouter un sous-critère », « liste de départ », « assistant », « migration », « import et partage » (leurs codes sont numériques, fixes ou voyagent : lus dans le code, pas rejoués).
+
+### Trouvailles hors du lot (suite, issue « inscrire et continuer »)
+
+8. **« + Ajouter un sous-critère » ne connaît pas la borne de quatre** : après un code « 9999 », il proposerait « 10000 ». Sans conséquence observable aujourd'hui.
+9. **La raison voisine de la liste collée dit encore « 20 caractères au plus »** pour un code illisible (`materiel-dissection-lecture.js`, ancrée par un banc d'un autre lot) : proposée au fichier des textes.
+10. **`critere-algorithmique-calculs-4c.spec.js:159` perd une course plus souvent sur la branche** (6 sur 19, contre 1 sur 15 sur `main`), cause non isolée (détail dans « La preuve (suite) »). À bisecter, fichier par fichier, sur une machine au calme ; ou à rendre l'essai sûr (écrire par la vue, comme un utilisateur).
+
 ## Les gestes à essayer
 
-Ce lot ne touche que l'apparence et deux refus de saisie : un raté se voit à l'écran et se corrige, rien ne s'écrit dans tes données (règle 2 des portes terrain : pas de porte due). Ces gestes servent à voir, de tes yeux, ce qu'aucune machine du nuage ne peut juger : Safari et l'iPad. Sur l'adresse de l'aperçu, d'abord le Mac, puis l'iPad.
+Ce lot touche l'apparence et deux refus de saisie : rien ne s'écrit dans tes données, l'aperçu est une adresse à part qui ne voit pas celles d'`app.codexnumeris.org` (règle 2 des portes terrain : pas de porte due). Ces gestes servent à voir de tes yeux ce qu'aucune machine du nuage ne juge : Safari et l'iPad.
 
-L'aperçu est une adresse à part : il ne voit pas tes données de `app.codexnumeris.org`, et rien de ce que tu y fais ne les touche.
+**Ouvrir le fichier de départ dans l'aperçu**
 
-1. Ouvre https://deploy-preview-59--codexnumeris-051225.netlify.app, crée une grille avec un critère algorithmique et donne à ses sous-critères les codes fictifs K-A, K-B, K-C, M-A, M-B, M-C, T-A, T-B, T-C, V-A, V-B, QRS, W-A, W-B (noms « Code fictif 1 » à « Code fictif 14 »).
-   ⮕ Attendu : la note sous les sous-critères dit « ces 14 sous-critères ».
-2. Dans un quinzième sous-critère, tape « k-a ».
-   ⮕ Attendu : le champ se marque et le témoin dit que « K-A » est déjà dans ce critère.
-3. Tape « É-A » à la place.
-   ⮕ Attendu : refusé aussi, le témoin dit qu'un code s'écrit sans accent.
-4. Ouvre une copie d'une production évaluée avec cette grille, en Annoter, et regarde la palette Codes.
-   ⮕ Attendu : chaque code sur une ligne, dans une gélule, les noms alignés. Avant : « K- » et « A » l'un sous l'autre.
-5. Pose K-A, QRS et W-B sur la copie, puis zoome.
-   ⮕ Attendu : les trois codes se lisent en entier dans leur cercle. Avant : les bords rognés, « W-B » lu « W-E ».
-6. Sur le Mac seulement : choisis W-B et survole la copie.
-   ⮕ Attendu : le curseur montre « W-B » entier.
-7. Exporte le PDF de cette copie et ouvre-le dans Aperçu.
-   ⮕ Attendu : les trois codes se lisent en entier dans leur cercle.
-8. Ouvre une copie évaluée avec une de tes grilles habituelles (codes 1 à 10).
-   ⮕ Attendu : rien n'a changé, ni la palette ni les codes posés.
+1. Ouvre **https://deploy-preview-59--codexnumeris-051225.netlify.app/departs.html** et touche « Télécharger le fichier » sous « Essai : les codes en lettres ».
+2. Touche « Ouvrir l'application » ; dans l'application, « Codex », puis « Ouvrir un codex », choisis `ESSAI-codes-en-lettres-lot-1.zip`, puis « Recharger ».
+3. Va dans « Évaluations », la liste ; sur la ligne de Fictif-01 Personne-01, menu des actions, « Annoter ».
+
+**Puis, d'abord sur le Mac, ensuite sur l'iPad (cinq gestes)**
+
+1. Regarde la palette Codes.
+   ⮕ Attendu : dix-sept codes, chacun sur une ligne, les noms en colonne. Avant : « K- » et « A » l'un sous l'autre.
+2. Pose « K-A », « QRST » et « W-12 » sur la copie, puis zoome.
+   ⮕ Attendu : chacun dans une pastille, le texte aussi gros qu'un chiffre. Avant : un cercle, le texte rapetissé.
+3. Sur le Mac : choisis « QRST » et survole la copie.
+   ⮕ Attendu : le curseur montre la pastille « QRST » entière. Sur l'iPad : touche le bout d'une pastille avec l'outil de sélection et glisse-la.
+   ⮕ Attendu : elle se sélectionne par son bout et suit le doigt.
+4. Exporte le PDF de la copie et ouvre-le (Aperçu sur le Mac, Fichiers sur l'iPad).
+   ⮕ Attendu : les pastilles comme à l'écran ; sur la page de synthèse, le code le plus fréquent dans sa pastille, sur une ligne.
+5. Dans « Conception › Grilles », ouvre « Grille fictive : codes en lettres » et tape « ABCDE » dans un champ Code.
+   ⮕ Attendu : refusé, le témoin dit « quatre caractères au plus ».

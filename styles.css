@@ -18819,9 +18819,16 @@ tr.ligne-import-ecartee td {
     white-space: nowrap;
 }
 /* Trois caractères : une même largeur, pour que les noms s'alignent en colonne (mesuré au banc, 24 nov. : de 29,5 px
-   « T-B » à 34,4 px « W-A » ; 3,25 em = 36,4 px). Au-delà, la gélule prend la longueur du code. */
+   « T-B » à 34,4 px « W-A » ; 3,25 em = 36,4 px). Quand la liste porte aussi un code de quatre caractères (ou plus,
+   le stock), trois et quatre prennent la largeur de quatre (mesuré : de 37,8 px « K-AB » à 40,8 px « QRST » ; 4,25 em
+   = 47,6 px, de quoi tenir quatre capitales ordinaires) : une seule colonne de noms (suite de 17 h 55, point 3).
+   Au-delà, la gélule prend la longueur du code. */
 .travaux-errfr-item.errfr-tuile-3 .travaux-errfr-numero {
     min-width: 3.25em;
+}
+.travaux-errfr-liste:has(.errfr-tuile-2-cases, .errfr-tuile-rangee) .errfr-tuile-3 .travaux-errfr-numero,
+.travaux-errfr-liste .errfr-tuile-2-cases .travaux-errfr-numero {
+    min-width: 4.25em;
 }
 .travaux-errfr-nom {
     white-space: nowrap;

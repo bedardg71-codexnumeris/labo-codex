@@ -639,14 +639,23 @@
         if (!errors || !errors.length) return '';
         const total = ctx.feedback.errorsTotal || 0;
 
+        // Codes en lettres (24 nov. 2026) : un code de trois caractères et plus prend une pastille, et la colonne s'élargit
+        // pour toutes les lignes (les noms restent alignés) ; jusqu'à deux, le rond et la colonne d'hier, à l'identique.
+        // Au-delà de quatre (le stock), le texte rapetisse pour tenir dans la largeur de quatre.
+        const texteCode = (e) => String(e.code != null ? e.code : '?');
+        const enPastille = errors.some(e => texteCode(e).length >= 3);
         const lignes = errors.map((e, i) => {
             const retro = e.retroaction
                 ? `<div style="font-size: 8.5px; line-height: 1.35; margin-top: 2px;">${esc(e.retroaction)}</div>`
                 : '';
             const pastilleBg = e.color || INK;
+            const code = texteCode(e);
+            const forme = code.length >= 3
+                ? `min-width: 18px; height: 18px; padding: 0 4px; box-sizing: border-box; border-radius: 9px; white-space: nowrap; font-size: ${code.length > 4 ? +(9 * 4 / code.length).toFixed(2) : 9}px;`
+                : 'width: 18px; height: 18px; border-radius: 50%; font-size: 9px;';
             return `
-                <div style="display: grid; grid-template-columns: 22px 1fr 26px; gap: 6px; align-items: start; padding: 5px 0; ${i === 0 ? '' : `border-top: 1px dashed ${LINE};`}">
-                    <div style="width: 18px; height: 18px; border-radius: 50%; background: ${pastilleBg}; color: ${texteSur(pastilleBg)}; display: flex; align-items: center; justify-content: center; font-family: ${FONT_MONO}; font-size: 9px; font-weight: 700; margin-top: 1px;">${esc(e.code != null ? e.code : '?')}</div>
+                <div style="display: grid; grid-template-columns: ${enPastille ? 30 : 22}px 1fr 26px; gap: 6px; align-items: start; padding: 5px 0; ${i === 0 ? '' : `border-top: 1px dashed ${LINE};`}">
+                    <div style="${forme} background: ${pastilleBg}; color: ${texteSur(pastilleBg)}; display: flex; align-items: center; justify-content: center; font-family: ${FONT_MONO}; font-weight: 700; margin-top: 1px;">${esc(code)}</div>
                     <div>
                         <div style="font-size: 9px; font-weight: 600;">${esc(e.name)}</div>
                         ${retro}

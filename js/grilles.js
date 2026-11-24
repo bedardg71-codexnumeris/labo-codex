@@ -4042,7 +4042,7 @@ function phrasesCodesEcartes(nVides, illisibles, doubles) {
     if (nVides > 0) t += ` Un sous-critère sans code ne se pose pas (${nVides === 1 ? 'un ici' : nVides + ' ici'}).`;
     if (illisibles.length) {
         t += (illisibles.length === 1 ? ' Ce code ne se pose pas : ' : ' Ces codes ne se posent pas : ') + liste(illisibles)
-            + '. Un code s’écrit en lettres sans accent, chiffres, tiret ou souligné, 20 caractères au plus.';
+            + '. Un code s’écrit en lettres sans accent, chiffres, tiret ou souligné.';
     }
     if (doubles.length) {
         t += (doubles.length === 1 ? ' Ce code est déjà pris plus haut et ne se pose pas : ' : ' Ces codes sont déjà pris plus haut et ne se posent pas : ')
@@ -5414,7 +5414,8 @@ const REFUS_SOUS_CRITERES = {
     trop: (max) => 'Au plus ' + max + ' sous-critères par critère',
     nomLong: (max) => 'Le nom d’un sous-critère fait ' + max + ' caractères au plus',
     // Codes en lettres, lot 1 (24 nov. 2026) — PROPOSITIONS, `plans de travail/TEXTES-2026-11-24-codes-en-lettres-lot-1.md`.
-    codeIllisible: 'Un code s’écrit en lettres sans accent, chiffres, tiret ou souligné, 20 caractères au plus',
+    codeIllisible: 'Un code s’écrit en lettres sans accent, chiffres, tiret ou souligné',
+    codeLong: 'Un code a quatre caractères au plus : plus long, il couvre trop de place sur la copie',
     codeDouble: (autre) => 'Le code « ' + autre + ' » est déjà dans ce critère : majuscules et minuscules y comptent pour la même lettre'
 };
 
@@ -5456,7 +5457,8 @@ function refusCodeSousCritere(critere, scIndex, valeur) {
     if (!critere || critere.type !== 'algorithmique' || !C || typeof C.refusCodeSaisi !== 'function') return null;
     const r = C.refusCodeSaisi(critere.sousCriteres, scIndex, valeur);
     if (!r) return null;
-    return r.raison === 'double' ? REFUS_SOUS_CRITERES.codeDouble(r.autre) : REFUS_SOUS_CRITERES.codeIllisible;
+    if (r.raison === 'double') return REFUS_SOUS_CRITERES.codeDouble(r.autre);
+    return r.raison === 'long' ? REFUS_SOUS_CRITERES.codeLong : REFUS_SOUS_CRITERES.codeIllisible;
 }
 
 /** Le refus d'un nom de sous-critère trop long ; sinon `null`. */
