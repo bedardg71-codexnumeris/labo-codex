@@ -7,6 +7,18 @@
 
 ---
 
+## 24 NOV. 2026, 17 H (Claude Code) : **TAMPONS D'OBSERVATION, LOT 1 — RETOUCHE FAITE, LOT TOUJOURS SUR `lot/tampons-observation-1-regler`, NON FUSIONNÉ**
+
+Mandat : retouche relayée par Cowork (« Gestion des pratiques de notation 5 », 24 nov., 15 h 35), après l'essai de Grégoire sur son iPad. **Le travail le plus récent vit sur `lot/tampons-observation-1-regler` (`cf7d461ef`), arbre `../labo-codex-tampons-observation`. Il n'est PAS fusionné : un push sur `main` est publié d'office par Netlify (`DEPLOY.md`, § 2), et la consigne demande de ne rien mettre en ligne avant les retours des testeurs du 25 nov. au soir.** Rapport : `plans de travail/RAPPORT-2026-11-24-tampons-observation-lot-1.md`, section « Retouche » (sur la branche).
+
+- **Fait** : le critère d'un tampon voyage toujours (export d'un jeu, cinq gestes de la bibliothèque, import), que sa catégorie soit cochée ou non ; les mots sont acceptés par Grégoire (15 h 31), la seconde phrase de l'aide C2 retirée ; deux titres changent pour tous (15 h 33) : la fenêtre « Tampons et rétroactions », un jeu exporté « Tampons ». Un fichier exporté avant garde son titre.
+- **Bancs** : le banc du lot, WebKit 23 sur 23 et Chromium 23 sur 23 ; Vitest complet 12 360 verts ; 8 break-tests rouges sur 8. Bancs voisins du module : 36 verts, 1 instable connu (`tampons-masques-bibliotheque-1216.spec.js:211`). Un rouge du lot trouvé et fini (`bibliotheque-deux-colonnes-1158.spec.js:409`, sélecteur). **Pas de verdict WebKit complet** : règle 7, un seul le soir.
+- **Aperçu** : https://deploy-preview-58--codexnumeris-051225.netlify.app, à jour (`cf7d461ef`, jetons `20261123u`, version 1.258.1 inchangée).
+- **Reste, avec Grégoire** : la fusion, la mise en ligne et sa ligne de Nouvelles, après les retours des testeurs. Aucun bump n'est fait.
+- **Numéros pris sur la branche** : #1307 (sans copie importée, aucun chemin vers les réglages des tampons) et #1308 (dans la démo, rien ne dit quel groupe est « Par standards »). #1305 n'est pas pris ; #1306 l'est par une autre branche. **Numéro libre : #1309.**
+
+---
+
 ## 24 NOV. 2026, 14 H 45 (Claude Code) : **TAMPONS D'OBSERVATION, LOT 1 « RÉGLER » — SUR `lot/tampons-observation-1-regler`, NON FUSIONNÉ (APERÇU SEULEMENT)**
 
 Mandat : consigne de lot de la session coordonnatrice de Cowork (« Gestion des pratiques de notation 5 », 24 nov., 13 h 55), lot lancé par Grégoire à 13 h 46. **Le travail le plus récent vit sur `lot/tampons-observation-1-regler` (`e1c8ac569`), arbre `../labo-codex-tampons-observation`. Il ne se fusionne pas : la consigne l'interdit dans ce lot.** Rapport : `plans de travail/RAPPORT-2026-11-24-tampons-observation-lot-1.md` (sur la branche).
