@@ -112,6 +112,17 @@ async function importerDansBibliotheque(tampons) {
 // PARTAGER — tampon perso → bibliothèque
 // ============================================
 
+/**
+ * Tampons d'observation, lot 1 (24 nov. 2026) — le critère qu'un tampon déclare part avec lui : « Garder », l'export
+ * d'un tampon ou d'une catégorie. Seul `travaux-outils.js` lit et écrit `personnalisationObservations` ; il ne rend
+ * le critère que s'il est montré (la catégorie du tampon est d'observation). Sans critère, l'entrée n'a pas le champ.
+ */
+function _avecCritere(entree) {
+    var critere = (typeof travauxOutils !== 'undefined' && travauxOutils.critereDuTampon) ? travauxOutils.critereDuTampon(entree.id) : '';
+    if (critere) entree.critere = critere;
+    return entree;
+}
+
 async function partagerTampon(tamponId) {
     // Chercher dans AUTOCOLLANTS (built-in + custom)
     var autocollants = (typeof travauxOutils !== 'undefined' && travauxOutils.obtenirAutocollants)
@@ -136,7 +147,7 @@ async function partagerTampon(tamponId) {
         }
     };
 
-    var ok = await ajouterALaBibliotheque(entry);
+    var ok = await ajouterALaBibliotheque(_avecCritere(entry));
     if (ok) {
         notifications.succes('Tampon « ' + tampon.nom + ' » ajouté à la bibliothèque');
     }
@@ -174,6 +185,8 @@ async function ajouterDepuisBibliotheque(tamponId) {
         imagesCustom[tampon.id] = tampon.imageBase64;
         db.setSync('tamponsImages', imagesCustom);
     }
+    // Tampons d'observation, lot 1 : le critère que l'entrée déclare arrive avec elle (rangé par travaux-outils.js).
+    if (tampon.critere && typeof travauxOutils !== 'undefined' && travauxOutils.declarerCritereTampon) travauxOutils.declarerCritereTampon(tampon.id, tampon.critere);
     if (window.annoncerEcritureUsager) window.annoncerEcritureUsager('tamponsPersonnalises');   // lot F : geste hors témoin (ajouter un tampon depuis la bibliothèque)
     // #1158 — la palette le montre tout de suite, et la colonne « Dans ta palette » aussi.
     if (typeof travauxOutils !== 'undefined' && travauxOutils.rechargerTamponsPersonnalises) travauxOutils.rechargerTamponsPersonnalises();
@@ -503,7 +516,7 @@ async function exporterUnTampon(tamponId) {
         type: 'monitorage-tampons',
         version: 1,
         dateExport: new Date().toISOString(),
-        tampons: [{
+        tampons: [_avecCritere({
             id: tampon.id,
             nom: tampon.nom,
             fichier: tampon.fichier || '',
@@ -511,7 +524,7 @@ async function exporterUnTampon(tamponId) {
             imageBase64: await _capturerImageBase64(tamponId),
             custom: tampon.custom || false,
             metadata_cc: { licence: 'CC BY-NC-SA 4.0', auteur: '', description_courte: tampon.nom }
-        }]
+        })]
     };
 
     var blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
@@ -558,7 +571,7 @@ async function exporterCategorie(catId) {
     var nomCat = nomsCat[catId] || catId;
 
     var tamponsExport = await Promise.all(tampons.map(async function(t) {
-        return {
+        return _avecCritere({
             id: t.id,
             nom: t.nom,
             fichier: t.fichier || '',
@@ -566,7 +579,7 @@ async function exporterCategorie(catId) {
             imageBase64: await _capturerImageBase64(t.id),
             custom: t.custom || false,
             metadata_cc: { licence: 'CC BY-NC-SA 4.0', auteur: '', description_courte: t.nom }
-        };
+        });
     }));
 
     var payload = {
@@ -614,7 +627,7 @@ async function partagerCategorie(catId) {
             custom: t.custom || false,
             metadata_cc: { licence: 'CC BY-NC-SA 4.0', auteur: '', description_courte: t.nom }
         };
-        var ok = await ajouterALaBibliotheque(entry);
+        var ok = await ajouterALaBibliotheque(_avecCritere(entry));
         if (ok) ajoutes++;
     }
 

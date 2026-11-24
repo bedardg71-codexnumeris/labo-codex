@@ -27622,6 +27622,67 @@ body.mode-clair {
     font-size: 0.8rem;
     color: var(--texte-secondaire);
 }
+/* Tampons d'observation, lot 1 (24 nov. 2026) — la case d'une catégorie, l'aide de sa section, le champ du critère
+   d'un tampon. Rien de ceci n'existe dans la fenêtre sans pratique par cibles. Cible tactile de 44 px (iPad). */
+.travaux-retro-cat-observation {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    min-height: 44px;
+    padding: 0 4px;
+    flex-shrink: 0;
+    font-size: 0.8rem;
+    color: var(--texte-principal);
+    white-space: nowrap;
+    cursor: pointer;
+}
+.travaux-retro-cat-observation input {
+    width: 18px;
+    height: 18px;
+    margin: 0;
+    accent-color: var(--bleu-principal);
+}
+.travaux-retro-cat-observation input:focus-visible {
+    outline: none;
+    box-shadow: var(--focus-ring);
+}
+.travaux-retro-observation-aide {
+    margin: 0 0 8px;
+    font-size: 0.8rem;
+    color: var(--texte-secondaire);
+}
+.travaux-retro-observation-aide p {
+    margin: 0 0 2px;
+}
+.travaux-retro-critere {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 6px 0;
+}
+.travaux-retro-critere[hidden],
+.travaux-retro-observation-aide[hidden] {
+    display: none;
+}
+.travaux-retro-critere label {
+    flex-shrink: 0;
+    font-size: 0.8rem;
+    color: var(--texte-secondaire);
+}
+.travaux-retro-critere-input {
+    flex: 1;
+    min-width: 0;
+    font-size: 0.85rem;
+    padding: 4px 8px;
+    border: 1px solid var(--bordure-claire);
+    border-radius: var(--radius-moyen);
+    background: var(--surface-input, var(--surface-carte));
+    color: var(--texte-principal);
+}
+.travaux-retro-critere-input:focus-visible {
+    outline: none;
+    box-shadow: var(--focus-ring);
+}
 .travaux-retro-textarea {
     width: 100%;
     min-height: 150px;

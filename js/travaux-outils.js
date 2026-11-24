@@ -980,6 +980,137 @@
     }
 
     // =========================================================================
+    // TAMPONS D'OBSERVATION — lot 1, « régler » (24 nov. 2026)
+    // =========================================================================
+    // Consigne : plans de travail/RAPPORT-2026-11-24-tampons-observation-lot-1.md. Deux données, et rien d'autre :
+    //   · `categoriesObservation` (globale, comme `categoriesMasquees`) : la liste des identifiants des catégories que
+    //     l'utilisateur dit « d'observation ». ABSENTE, elle vaut « aucune » : aucune catégorie ne l'est d'office, pas
+    //     même une catégorie fournie, et rien ne s'écrit chez qui n'a rien réglé. À la fusion de deux codex, c'est une
+    //     DONNÉE (elle n'est pas dans `REGLAGES_DE_L_APPAREIL`, codex.js).
+    //   · `personnalisationObservations[id].critere` : le critère qu'un tampon déclare, facultatif. Texte libre, rogné,
+    //     borné. Une catégorie qui cesse d'être d'observation ne l'efface pas : il n'est plus montré, ni emporté.
+    // Ce lot RÈGLE et fait VOYAGER. Aucun autre écran ne lit ces deux données (« Observer », le profil, l'inscription
+    // et la copie : lot suivant).
+    const CLE_CATEGORIES_OBSERVATION = 'categoriesObservation';
+    const LONGUEUR_MAX_CRITERE_TAMPON = 200;
+    // La seule phrase acceptée (Grégoire, 22 nov. 2026), mot pour mot. Les autres mots de ce bloc sont PROPOSÉS :
+    // plans de travail/TEXTES-2026-11-24-tampons-observation-lot-1.md.
+    const AIDE_TAMPON_OBSERVATION = 'Un tampon d’observation nomme ce que tu vois l’étudiant·e faire. La cause, tu la chercheras avec elle ou lui.';
+    const MOTS_OBSERVATION = {
+        caseCategorie: 'D’observation',
+        aideCategories: 'Coche « D’observation » pour une catégorie dont les tampons disent ce que tu vois l’étudiant·e faire. Rien d’autre ne change pour l’instant.',
+        libelleCritere: 'Critère (facultatif)',
+        aideCritere: 'Si ce tampon se rapporte à un critère d’une de tes cibles, écris-le ou choisis-le dans la liste. Tu peux laisser vide.',
+        annonceCochee: function(nom) { return '« ' + nom + ' » est maintenant une catégorie d’observation. Chacun de ses tampons peut déclarer un critère.'; },
+        annonceDecochee: function(nom) { return '« ' + nom + ' » n’est plus une catégorie d’observation. Les critères déjà écrits sont gardés, mais ne sont plus montrés.'; },
+        statsImport: function(n) { return ', dont ' + n + (n > 1 ? ' catégories d’observation' : ' catégorie d’observation'); }
+    };
+
+    /** Le critère déclaré, dans sa forme rangée : du texte, espaces resserrés, rogné, borné. Tout le reste rend ''. */
+    function normaliserCritereTampon(texte) {
+        if (typeof texte !== 'string') return '';
+        return texte.replace(/\s+/g, ' ').trim().slice(0, LONGUEUR_MAX_CRITERE_TAMPON).trim();
+    }
+
+    /**
+     * Les catégories d'observation, parmi celles qui existent sur ce poste. L'identifiant d'une catégorie à soi
+     * supprimée peut rester dans la liste rangée : il est ignoré ici.
+     */
+    function obtenirCategoriesObservation() {
+        var rangees = db.getSync(CLE_CATEGORIES_OBSERVATION, null);
+        if (!Array.isArray(rangees)) return [];
+        var connues = CATEGORIES_BUILTIN.slice();
+        obtenirCategoriesPerso().forEach(function(c) { connues.push(c.id); });
+        return rangees.filter(function(id, i) {
+            return typeof id === 'string' && connues.indexOf(id) !== -1 && rangees.indexOf(id) === i;
+        });
+    }
+
+    /** Range la liste. Rien n'est écrit quand rien n'était rangé et que la liste est vide (personne n'a rien réglé). */
+    function sauvegarderCategoriesObservation(liste) {
+        var avant = db.getSync(CLE_CATEGORIES_OBSERVATION, null);
+        var apres = (Array.isArray(liste) && liste.length > 0) ? liste : null;
+        if (JSON.stringify(Array.isArray(avant) ? avant : null) === JSON.stringify(apres) && (apres !== null || avant === null)) return;
+        db.setSync(CLE_CATEGORIES_OBSERVATION, apres);
+    }
+
+    /** Le critère qu'un tampon déclare, s'il est MONTRÉ : sa catégorie est d'observation. Sinon ''. C'est ce qui voyage. */
+    function critereDuTampon(id) {
+        var tampon = AUTOCOLLANTS.find(function(a) { return a.id === id; });
+        if (!tampon || obtenirCategoriesObservation().indexOf(tampon.categorie) === -1) return '';
+        var pers = obtenirPersonnalisationObservations()[id];
+        return normaliserCritereTampon(pers && pers.critere);
+    }
+
+    /** Range le critère qu'un tampon arrive en déclarant (« Utiliser », depuis la bibliothèque). Vide : rien n'est écrit. */
+    function declarerCritereTampon(id, critere) {
+        var propre = normaliserCritereTampon(critere);
+        if (!id || !propre) return;
+        var persObj = obtenirPersonnalisationObservations();
+        if (!persObj[id]) persObj[id] = {};
+        persObj[id].critere = propre;
+        sauvegarderPersonnalisationObservations(persObj);
+    }
+
+    /**
+     * La fenêtre des tampons sert à tout le monde : les deux réglages ne s'y montrent que si une pratique par cibles
+     * existe. MESURE RETENUE (supposition nommée au rapport) : un ensemble de cibles, avec au moins une cible, dans
+     * le trimestre actif. Les textes de leurs critères servent de suggestions au champ du critère.
+     */
+    function criteresDesCiblesDefinies() {
+        var ensembles = (window.EnsemblesCibles && typeof window.EnsemblesCibles.lireTous === 'function') ? window.EnsemblesCibles.lireTous() : [];
+        var avecCibles = ensembles.filter(function(e) { return e && Array.isArray(e.cibles) && e.cibles.length > 0; });
+        if (avecCibles.length === 0) return null;
+        var textes = [];
+        avecCibles.forEach(function(e) {
+            e.cibles.forEach(function(c) {
+                (c && Array.isArray(c.criteres) ? c.criteres : []).forEach(function(k) {
+                    var t = normaliserCritereTampon(k && k.texte);
+                    if (t && textes.indexOf(t) === -1) textes.push(t);
+                });
+            });
+        });
+        return textes;
+    }
+
+    function _htmlCaseObservation(catId, cochee) {
+        return '<label class="travaux-retro-cat-observation">' +
+            '<input type="checkbox" data-cat-observation-id="' + echapperHtml(catId) + '"' + (cochee ? ' checked' : '') + '>' +
+            '<span>' + echapperHtml(MOTS_OBSERVATION.caseCategorie) + '</span></label>';
+    }
+
+    function _htmlAideObservation(catId, montree) {
+        return '<div class="travaux-retro-observation-aide" data-observation-aide="' + echapperHtml(catId) + '"' + (montree ? '' : ' hidden') + '>' +
+            '<p>' + echapperHtml(AIDE_TAMPON_OBSERVATION) + '</p>' +
+            '<p>' + echapperHtml(MOTS_OBSERVATION.aideCritere) + '</p></div>';
+    }
+
+    function _htmlCritereTampon(id, critere, montre) {
+        var idChamp = 'travaux-retro-critere-' + id;
+        return '<div class="travaux-retro-critere"' + (montre ? '' : ' hidden') + '>' +
+            '<label for="' + echapperHtml(idChamp) + '">' + echapperHtml(MOTS_OBSERVATION.libelleCritere) + '</label>' +
+            '<input type="text" id="' + echapperHtml(idChamp) + '" class="travaux-retro-critere-input" data-critere-id="' + echapperHtml(id) + '"' +
+            ' value="' + echapperHtml(critere) + '" maxlength="' + LONGUEUR_MAX_CRITERE_TAMPON + '" list="travaux-retro-criteres-suggeres" autocomplete="off">' +
+            '</div>';
+    }
+
+    /** La case d'une catégorie vient de changer : son aide et le champ du critère de chacun de ses tampons suivent. */
+    function _suivreCaseObservation(modal, caseEl) {
+        var catId = caseEl.dataset.catObservationId;
+        var montre = caseEl.checked;
+        modal.querySelectorAll('[data-observation-aide]').forEach(function(aide) {
+            if (aide.dataset.observationAide === catId) aide.hidden = !montre;
+        });
+        var liste = document.getElementById('travaux-retro-obs-liste-' + catId);
+        if (liste && modal.contains(liste)) liste.querySelectorAll('.travaux-retro-critere').forEach(function(bloc) { bloc.hidden = !montre; });
+        var annonce = modal.querySelector('#travaux-retro-observation-annonce');
+        var champNom = caseEl.closest('[data-cat-row]');
+        champNom = champNom ? champNom.querySelector('input[data-cat-id]') : null;
+        var nom = (champNom && champNom.value) || catId;
+        if (annonce) annonce.textContent = montre ? MOTS_OBSERVATION.annonceCochee(nom) : MOTS_OBSERVATION.annonceDecochee(nom);
+    }
+
+    // =========================================================================
     // MIGRATION RLO — IDs `contenu-*` → `action-*` (chantier 4, avril 2026)
     // =========================================================================
     // Renomme les 6 tampons de la catégorie Contenu/méthode pour refléter la
@@ -2929,6 +3060,12 @@
         var couleursCat = obtenirCouleursCategories();
         // #1216 — ce que la fenêtre montre : l'enregistrement ne doit réécrire que ces catégories-là.
         overlay.dataset.categoriesRendues = JSON.stringify(ordreCategories.filter(function(c) { return catsMasquees.indexOf(c) === -1; }));
+        // Tampons d'observation, lot 1 : les deux réglages ne se montrent que si une pratique par cibles existe.
+        // Sans elle, la fenêtre est celle d'avant, et l'enregistrement ne touche ni la liste ni les critères.
+        var criteresSuggeres = criteresDesCiblesDefinies();
+        var observationOfferte = criteresSuggeres !== null;
+        var catsObservation = observationOfferte ? obtenirCategoriesObservation() : [];
+        if (observationOfferte) overlay.dataset.observationOfferte = '1';
 
         html += '<div id="travaux-retro-categories" style="margin-bottom:16px; display:flex; flex-direction:column; gap:6px;">';
         ordreCategories.forEach(function(catId) {
@@ -2942,6 +3079,7 @@
             html += '<span class="travaux-retro-drag-handle" title="Glisser pour r\u00e9ordonner" style="cursor:grab;">\u2630</span>';
             html += renderPickerCouleur(coulCat, { dataAttrs: { 'color-cat-id': catId } });
             html += '<input type="text" class="travaux-retro-nom-input" data-cat-id="' + echapperHtml(catId) + '"' + (estPerso ? ' data-cat-perso-id="' + echapperHtml(catId) + '"' : '') + ' value="' + echapperHtml((nomsCat[catId] || '')) + '">';
+            if (observationOfferte) html += _htmlCaseObservation(catId, catsObservation.indexOf(catId) !== -1);
             html += menuCatHTML;
             html += '</div>';
         });
@@ -2949,6 +3087,13 @@
         // #1158 — la phrase de Grégoire (25 oct. 2026, 16 h 47), mot pour mot : les tampons restent
         // communs à tous les trimestres, une catégorie par cours les range.
         html += '<p class="travaux-retro-cat-aide">Tu enseignes plus d\'un cours ? Cr\u00e9e une cat\u00e9gorie par cours pour y ranger ses tampons.</p>';
+        if (observationOfferte) {
+            html += '<p class="travaux-retro-cat-aide" data-observation-aide-categories>' + echapperHtml(MOTS_OBSERVATION.aideCategories) + '</p>';
+            html += '<div id="travaux-retro-observation-annonce" class="u-lecteur-ecran" aria-live="polite"></div>';
+            html += '<datalist id="travaux-retro-criteres-suggeres">';
+            criteresSuggeres.forEach(function(texte) { html += '<option value="' + echapperHtml(texte) + '"></option>'; });
+            html += '</datalist>';
+        }
         html += '</div>';
 
         // Helper pour generer une ligne de tampon (Phase C #267 \u2014 menu \u22ee remplace \ud83d\uddd1)
@@ -2972,6 +3117,7 @@
             r += '<input type="text" class="travaux-retro-raccourci-input" data-raccourci-id="' + echapperHtml(a.id) + '" value="' + echapperHtml(raccourci) + '" maxlength="1" placeholder="\u2328" title="Raccourci clavier (1 touche)">';
             r += menuHTML;
             r += '</div>';
+            if (observationOfferte) r += _htmlCritereTampon(a.id, normaliserCritereTampon(persObs[a.id] && persObs[a.id].critere), catsObservation.indexOf(a.categorie) !== -1);
             r += '<textarea class="travaux-retro-textarea" data-retro-id="' + echapperHtml(a.id) + '" rows="3">' + echapperHtml(texte) + '</textarea>';
             r += '</div>';
             return r;
@@ -3008,6 +3154,7 @@
             if (catsMasquees.indexOf(catId) !== -1) return;
             var nomCat = nomsCat[catId] || catId;
             html += '<div class="travaux-retro-cat-label" style="font-weight:600; margin:12px 0 6px; color:var(--texte-principal);" data-cat-section="' + echapperHtml(catId) + '">' + echapperHtml(nomCat) + '</div>';
+            if (observationOfferte && catId !== 'symboles') html += _htmlAideObservation(catId, catsObservation.indexOf(catId) !== -1);
 
             if (catId === 'symboles') {
                 // Symboles built-in
@@ -3070,6 +3217,13 @@
             if (e.target === overlay) overlay.remove();
         });
         document.body.appendChild(overlay);
+
+        // Tampons d'observation : la case d'une catégorie, fournie, à soi ou ajoutée à l'instant.
+        if (observationOfferte) {
+            overlay.addEventListener('change', function(e) {
+                if (e.target && e.target.matches && e.target.matches('input[data-cat-observation-id]')) _suivreCaseObservation(overlay, e.target);
+            });
+        }
 
         // Wiring: clic sur l'image → ouvre le file input
         overlay.querySelectorAll('.travaux-retro-img-upload').forEach(function(wrap) {
@@ -3293,6 +3447,17 @@
             if (!persObj[id]) persObj[id] = {};
             persObj[id].icone = inp.value;
         });
+        // Tampons d'observation : le critère d'un tampon dont la catégorie est cochée. Un champ non montré (catégorie
+        // non cochée) n'est pas lu : le critère déjà rangé reste tel quel. Sans les réglages, aucun champ n'existe.
+        modal.querySelectorAll('input[data-critere-id]').forEach(function(inp) {
+            var bloc = inp.closest('.travaux-retro-critere');
+            if (!bloc || bloc.hidden) return;
+            var id = inp.dataset.critereId;
+            var critere = normaliserCritereTampon(inp.value);
+            if (!persObj[id]) persObj[id] = {};
+            if (critere) persObj[id].critere = critere;
+            else delete persObj[id].critere;
+        });
         sauvegarderPersonnalisationObservations(persObj);
 
         // Symboles Unicode personnalises
@@ -3331,6 +3496,18 @@
         });
         // Categories perso supprimees : deja gerees (absentes de catsPerso)
         db.setSync('categoriesMasquees', catsMasquees.length > 0 ? catsMasquees : null);
+
+        // Tampons d'observation : les catégories cochées. Comme pour #1216, seules les catégories que la fenêtre a
+        // montrées sont réécrites ; une catégorie masquée garde ce qu'elle était, une catégorie supprimée ici sort.
+        if (modal.dataset.observationOfferte === '1') {
+            var renduesObs = JSON.parse(modal.dataset.categoriesRendues || '[]');
+            var rangeesObs = db.getSync(CLE_CATEGORIES_OBSERVATION, null);
+            var catsObs = (Array.isArray(rangeesObs) ? rangeesObs : []).filter(function(id) { return renduesObs.indexOf(id) === -1; });
+            modal.querySelectorAll('input[data-cat-observation-id]').forEach(function(c) {
+                if (c.checked && catsObs.indexOf(c.dataset.catObservationId) === -1) catsObs.push(c.dataset.catObservationId);
+            });
+            sauvegarderCategoriesObservation(catsObs);
+        }
 
         // Detecter les elements masques (symboles/tampons built-in supprimes du DOM)
         // #1216 — sans rien retirer, la liste compte déjà 17 ids : les 14 anciens tampons et jetons, et les 3
@@ -3438,6 +3615,7 @@
         db.setSync('symbolesUnicodePerso', null);
         db.setSync('categoriesPerso', null);
         db.setSync('categoriesMasquees', null);
+        sauvegarderCategoriesObservation([]);   // tampons d'observation : plus aucune catégorie ne l'est (les critères partent avec `personnalisationObservations`)
         db.setSync('elementsMasques', null);
         db.setSync('ordreCategories', null);
         db.setSync('couleursCategories', null);
@@ -3458,6 +3636,16 @@
         appliquerPersonnalisations();
         // Rouvrir le modal pour refleter l'ordre et les valeurs par defaut
         ouvrirEditionRetroObservations();
+    }
+
+    /** Le champ du critère d'un tampon ajouté à l'instant : montré si la case de sa catégorie est cochée. */
+    function _critereDuTamponAjoute(liste, id, categorie) {
+        var modal = liste.closest('#modal-retro-observations');
+        if (!modal || modal.dataset.observationOfferte !== '1') return '';
+        var cochee = Array.from(modal.querySelectorAll('input[data-cat-observation-id]')).some(function(c) {
+            return c.dataset.catObservationId === categorie && c.checked;
+        });
+        return _htmlCritereTampon(id, '', cochee);
     }
 
     /**
@@ -3489,6 +3677,7 @@
                 '<input type="text" class="travaux-retro-nom-input" data-nom-id="' + id + '" value="" placeholder="Nom du tampon">' +
                 menuTamponHTML +
             '</div>' +
+            _critereDuTamponAjoute(liste, id, categorie) +
             '<textarea class="travaux-retro-textarea" data-retro-id="' + id + '" rows="3"></textarea>';
 
         liste.appendChild(div);
@@ -3598,6 +3787,8 @@
         // Ajouter la ligne dans la zone des noms de categories
         var catContainer = document.getElementById('travaux-retro-categories');
         if (!catContainer) return;
+        var modalObs = catContainer.closest('#modal-retro-observations');
+        var observationOfferte = !!modalObs && modalObs.dataset.observationOfferte === '1';
         // #1158 — le bouton « + Ajouter une catégorie » lui-même : depuis le ⋮ de chaque rangée (#267),
         // le premier <button> de la zone était celui de la première rangée, et insertBefore échouait.
         var btnAjouter = catContainer.querySelector(':scope > [data-action="travauxOutils.ajouterCategorieRetroObs"]');
@@ -3615,6 +3806,7 @@
             '<span class="travaux-retro-drag-handle" title="Glisser pour r\u00e9ordonner" style="cursor:grab;">\u2630</span>' +
             renderPickerCouleur(coulDefaut, { dataAttrs: { 'color-cat-id': id } }) +
             '<input type="text" class="travaux-retro-nom-input" data-cat-id="' + id + '" data-cat-perso-id="' + id + '" value="' + nom + '">' +
+            (observationOfferte ? _htmlCaseObservation(id, false) : '') +
             menuNouveauCatHTML;
         catContainer.insertBefore(rowDiv, btnAjouter);
 
@@ -3647,6 +3839,7 @@
         catBtn.onclick = function() { ajouterTamponRetroObs(id); };
 
         actionsDiv.parentNode.insertBefore(catLabel, actionsDiv);
+        if (observationOfferte) catLabel.insertAdjacentHTML('afterend', _htmlAideObservation(id, false));
         actionsDiv.parentNode.insertBefore(catListe, actionsDiv);
         actionsDiv.parentNode.insertBefore(catBtn, actionsDiv);
 
@@ -3750,6 +3943,7 @@
                 categorie: a.categorie,
                 imageBase64: base64,
                 emoji: (persObs[a.id] && persObs[a.id].emoji) || undefined,   // #1244 : il garde ses couleurs chez qui l'importe
+                critere: critereDuTampon(a.id) || undefined,   // tampons d'observation : le critère déclaré, s'il est montré
                 retroaction: retroObs[a.id] || '',
                 custom: a.custom || false
             });
@@ -3771,13 +3965,15 @@
 
         // Construire les categories
         var categories = [];
+        var catsObservation = obtenirCategoriesObservation();
         ordreCategories.forEach(function(catId) {
             if (catsMasquees.indexOf(catId) !== -1) return;
             categories.push({
                 id: catId,
                 nom: nomsCat[catId] || catId,
                 couleur: couleursCat[catId] || null,
-                builtin: CATEGORIES_BUILTIN.indexOf(catId) !== -1
+                builtin: CATEGORIES_BUILTIN.indexOf(catId) !== -1,
+                observation: catsObservation.indexOf(catId) !== -1 || undefined   // présent seulement quand c'est vrai
             });
         });
 
@@ -3840,6 +4036,8 @@
                 // Stats p\u00e9dagogiques (chiffres d\u00e9riv\u00e9s des tableaux, s\u00fbrs par construction)
                 var stats = nbTampons + ' tampon(s), ' + nbCats + ' cat\u00e9gorie(s)';
                 if (nbSymPerso > 0) stats += ', ' + nbSymPerso + ' symbole(s) Unicode';
+                var nbCatsObservation = (contenu.categories || []).filter(function(c) { return c && c.observation === true; }).length;
+                if (nbCatsObservation > 0) stats += MOTS_OBSERVATION.statsImport(nbCatsObservation);
 
                 // D\u00e9fense A : badge CC rendu dans une iframe sandbox isol\u00e9e.
                 // Voir js/securite-apercu-sandbox.js et MODELE-MENACES.md \u00a7D-01.
@@ -3905,10 +4103,12 @@
             var couleursCat = {};
             var catsPerso = [];
             var ordreCategories = [];
+            var catsObservation = [];   // tampons d'observation : la liste suit le fichier, comme le reste (l'import remplace)
             categoriesImport.forEach(function(cat) {
                 nomsCat[cat.id] = cat.nom;
                 if (cat.couleur) couleursCat[cat.id] = cat.couleur;
                 ordreCategories.push(cat.id);
+                if (cat.observation === true && typeof cat.id === 'string' && catsObservation.indexOf(cat.id) === -1) catsObservation.push(cat.id);
                 if (!cat.builtin && CATEGORIES_BUILTIN.indexOf(cat.id) === -1) {
                     catsPerso.push({ id: cat.id, nom: cat.nom });
                 }
@@ -3917,6 +4117,7 @@
             sauvegarderCouleursCategories(couleursCat);
             sauvegarderCategoriesPerso(catsPerso);
             sauvegarderOrdreCategories(ordreCategories);
+            sauvegarderCategoriesObservation(catsObservation);
 
             // 2. Restaurer les tampons image
             var persObj = {};
@@ -3937,6 +4138,12 @@
                     if (typeof t.emoji === 'string' && t.emoji) persObj[t.id].emoji = t.emoji;   // #1244
                 }
                 if (t.retroaction) retroObj[t.id] = t.retroaction;
+                // Tampons d'observation : le critère n'entre que pour un tampon d'une catégorie que le fichier dit d'observation.
+                var critereImporte = catsObservation.indexOf(t.categorie) !== -1 ? normaliserCritereTampon(t.critere) : '';
+                if (critereImporte) {
+                    if (!persObj[t.id]) persObj[t.id] = {};
+                    persObj[t.id].critere = critereImporte;
+                }
 
                 // Verifier si c'est un autocollant existant ou custom
                 var existant = AUTOCOLLANTS.find(function(a) { return a.id === t.id; });
@@ -4459,6 +4666,9 @@
         rechargerTamponsPersonnalises: rechargerTamponsPersonnalises,
         obtenirImageAutocollant: function(id) { return imagesAutocollants[id] || null; },
         imageVersBase64: imageVersBase64,
+        // Tampons d'observation, lot 1 : ce que la bibliothèque de tampons lit et écrit (tampons-bibliotheque.js).
+        critereDuTampon: critereDuTampon,
+        declarerCritereTampon: declarerCritereTampon,
         // Wrappers delegation (Phase 5)
         setEpaisseurActiveFromSlider: setEpaisseurActiveFromSlider,
         ouvrirFilePickerImportTampons: ouvrirFilePickerImportTampons,

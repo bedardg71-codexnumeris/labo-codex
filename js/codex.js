@@ -2613,6 +2613,9 @@ var LIBELLES_DES_CLES = {
         entrees: { dateObjectif: 'Date objectif (remise)', heureObjectif: 'Heure objectif (remise)' } },
     retroactionsObservations: { nom: 'les textes de tes tampons', ou: 'Annotation › Tampons', unite: 'texte', entrees: _nomDuTampon },
     personnalisationObservations: { nom: 'tes tampons personnalisés', ou: 'Annotation › Tampons', unite: 'tampon', entrees: _nomDuTampon },
+    // Tampons d'observation, lot 1 (24 nov. 2026) : une DONNÉE, pas un réglage de l'appareil (elle n'est pas dans
+    // REGLAGES_DE_L_APPAREIL). Mots PROPOSÉS (TEXTES-2026-11-24-tampons-observation-lot-1.md).
+    categoriesObservation: { nom: 'tes catégories de tampons d\'observation', ou: 'Annotation › Tampons', unite: 'catégorie' },
     brouillonDissection: { nom: 'ta grille en cours dans « Apporter mon matériel »', titre: 'Ta grille en cours',
         ou: 'Conception › Apporter mon matériel', cote: _coteDeLaGrilleEnCours },
     interventions: { nom: 'les interventions' },
