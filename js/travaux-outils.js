@@ -2058,12 +2058,9 @@
         ctx.beginPath();
         ctx.arc(taille / 2, taille / 2, taille / 2 - 1, 0, Math.PI * 2);
         ctx.fill();
-        // Numero blanc
+        // Numero blanc — codes en lettres (24 nov. 2026) : la règle de la copie et du PDF (annotation-formes.js).
         ctx.fillStyle = '#ffffff';
-        ctx.font = 'bold ' + Math.round(taille * 0.55) + 'px sans-serif';
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
-        ctx.fillText(code, taille / 2, taille / 2 + 1);
+        annotationFormes.ecrireCodeDansCercle(ctx, code, taille / 2, taille / 2 + 1, taille / 2 - 1, Math.round(taille * 0.55));
         const url = 'url(' + c.toDataURL() + ') 16 16, crosshair';
         _curseurCache[outilId] = url;
         return url;

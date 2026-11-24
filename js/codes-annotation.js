@@ -29,6 +29,8 @@
      grilleDeCopie(fichier) la grille d'une copie, via sa production, ou null
      sommePonderee(grille, compteurs) la somme des codes posés, chacun à son poids
      toucheDuCode(code)                la touche du clavier d'un code : son numéro, 0 pour le 10
+     raisonsSansCode(critere)          pourquoi chaque sous-critère ne donne pas de code (24 nov. 2026)
+     refusCodeSaisi(scs, rang, valeur) le refus d'un code tapé dans la grille : illisible, ou en double à la casse près
 
    Chaque code : { id, code, numero, nom, couleur, retroaction, source, poids }
      id        ce qui est écrit sur la copie : `errfr_<code>`. ⚠ LE PRÉFIXE RESTE,
@@ -220,18 +222,74 @@ var CODE_VALIDE = /^[A-Za-z0-9_-]{1,20}$/;
 // elle finit dans un `style="background:…"`.
 var COULEUR_VALIDE = /^#(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8})$/;
 
+function _numeroDe(sc) {
+    if (!sc) return '';
+    // ⚠ Ligne ancrée telle quelle par `sentinelle-lot4-C-gabarit-algo-range.test.js` (H.f) : la liste lit le CODE, jamais le rang.
+    var numero = (sc.code === undefined || sc.code === null) ? '' : String(sc.code).trim();
+    return numero;
+}
+
+/**
+ * POURQUOI UN SOUS-CRITÈRE NE DONNE PAS DE CODE (lot « codes en lettres », 24 nov. 2026). L'écran de la
+ * grille comptait tout écart comme « pondération 0 » : un code accentué y passait pour un poids nul. Une
+ * raison par sous-critère, dans l'ordre de la liste, avec la règle EXACTE de `_depuisSousCriteres` (qui la lit) :
+ *   'poids'      sa pondération n'est pas positive ;
+ *   'vide'       il n'a pas de code ;
+ *   'caracteres' son code ne peut pas vivre dans un identifiant (`CODE_VALIDE` : lettres sans accent,
+ *                chiffres, tiret, souligné, vingt au plus) ;
+ *   'double'     un sous-critère plus haut porte déjà le même code, au caractère près — le premier gagne ;
+ *   null         il donne un code.
+ * ⚠ La casse : deux codes qui ne diffèrent que par elle restent DEUX codes ici, comme hier — une grille
+ * enregistrée n'est pas relue autrement (tarir n'est pas réparer). C'est la saisie qui refuse le second
+ * (`refusCodeSaisi`). Pure.
+ */
+function raisonsSansCode(critere) {
+    // Sans prototype : un code « constructor » ou « toString » n'est pas un doublon de l'objet lui-même.
+    var vus = Object.create(null);
+    var scs = (critere && Array.isArray(critere.sousCriteres)) ? critere.sousCriteres : [];
+    return scs.map(function(sc) {
+        if (!sc || !(Number(sc.ponderation) > 0)) return 'poids';
+        var numero = _numeroDe(sc);
+        if (!numero) return 'vide';
+        if (!CODE_VALIDE.test(numero)) return 'caracteres';
+        if (vus[numero]) return 'double';
+        vus[numero] = true;
+        return null;
+    });
+}
+
+/**
+ * LE REFUS D'UN CODE À LA SAISIE (lot « codes en lettres », 24 nov. 2026) : `valeur` tapée au rang `index`
+ * des `sousCriteres` d'un critère algorithmique. Rend null (accepté), ou :
+ *   { raison: 'caracteres' }              le code ne pourrait pas se poser ;
+ *   { raison: 'double', autre: '<code>' } un autre rang porte le même code à la casse près (« k-a » et
+ *                                         « K-A ») : deux codes que l'œil ne distingue pas, comptés à part.
+ * Un code vide n'est pas refusé (hier non plus). Le même rang qui ne change que de casse n'est pas un doublon. Pure.
+ */
+function refusCodeSaisi(sousCriteres, index, valeur) {
+    var numero = (valeur === undefined || valeur === null) ? '' : String(valeur).trim();
+    if (!numero) return null;
+    if (!CODE_VALIDE.test(numero)) return { raison: 'caracteres' };
+    var sansCasse = numero.toUpperCase();
+    var scs = Array.isArray(sousCriteres) ? sousCriteres : [];
+    for (var j = 0; j < scs.length; j++) {
+        if (j === index) continue;
+        var autre = _numeroDe(scs[j]);
+        if (autre && autre.toUpperCase() === sansCasse) return { raison: 'double', autre: autre };
+    }
+    return null;
+}
+
 function _depuisSousCriteres(critere) {
-    var vus = {};
     var liste = [];
     var scs = (critere && Array.isArray(critere.sousCriteres)) ? critere.sousCriteres : [];
-    scs.forEach(function(sc) {
-        if (!sc || !(Number(sc.ponderation) > 0)) return;
-        var numero = (sc.code === undefined || sc.code === null) ? '' : String(sc.code).trim();
-        // Sans numéro, ou un numéro qui ne peut pas vivre dans un identifiant :
-        // rien à écrire sur la copie ; un numéro en double, le premier gagne —
-        // deux codes de même identifiant seraient indiscernables.
-        if (!numero || !CODE_VALIDE.test(numero) || vus[numero]) return;
-        vus[numero] = true;
+    // Sans poids, sans numéro, ou un numéro qui ne peut pas vivre dans un identifiant : rien à écrire sur la
+    // copie ; un numéro en double, le premier gagne — deux codes de même identifiant seraient indiscernables.
+    // La règle vit dans `raisonsSansCode`, que l'écran de la grille lit aussi (24 nov. 2026).
+    var raisons = raisonsSansCode(critere);
+    scs.forEach(function(sc, i) {
+        if (raisons[i] !== null) return;
+        var numero = _numeroDe(sc);
         var nom = (typeof sc.nom === 'string' && sc.nom.trim()) ? sc.nom.trim() : 'Code ' + numero;
         liste.push({
             id: PREFIXE + numero,
@@ -423,6 +481,8 @@ var api = {
     RETROACTIONS_DEFAUT: RETROACTIONS_DEFAUT,
     estActive: estActive,
     apercuCodes: apercuCodes,
+    raisonsSansCode: raisonsSansCode,
+    refusCodeSaisi: refusCodeSaisi,
     listeCodes: listeCodes,
     code: code,
     sommePonderee: sommePonderee,

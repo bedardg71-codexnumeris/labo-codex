@@ -18804,6 +18804,25 @@ tr.ligne-import-ecartee td {
     color: white;
     flex-shrink: 0;
 }
+/* CODES EN LETTRES (24 nov. 2026) — un code de trois caractères et plus (« K-A ») se coupait au tiret, sur deux
+   lignes, dans le rond de 20 px. Sa pastille s'allonge en gélule, sur une ligne, et pousse le nom au lieu de le
+   recouvrir. Les classes de longueur sont celles de la version compacte (`_classeLongueurCode`, posées dans les
+   deux versions) : un code d'un ou deux caractères n'en a aucune et garde son rond au pixel près. La compacte
+   prend le pas (sélecteurs par l'identifiant de la palette) ; elle remet le remplissage à zéro plus bas. */
+.travaux-errfr-item.errfr-tuile-3 .travaux-errfr-numero,
+.travaux-errfr-item.errfr-tuile-2-cases .travaux-errfr-numero,
+.travaux-errfr-item.errfr-tuile-rangee .travaux-errfr-numero {
+    width: auto;
+    min-width: 20px;
+    padding: 0 5px;
+    border-radius: var(--radius-pill);
+    white-space: nowrap;
+}
+/* Trois caractères : une même largeur, pour que les noms s'alignent en colonne (mesuré au banc, 24 nov. : de 29,5 px
+   « T-B » à 34,4 px « W-A » ; 3,25 em = 36,4 px). Au-delà, la gélule prend la longueur du code. */
+.travaux-errfr-item.errfr-tuile-3 .travaux-errfr-numero {
+    min-width: 3.25em;
+}
 .travaux-errfr-nom {
     white-space: nowrap;
     overflow: hidden;
@@ -28728,6 +28747,8 @@ body.mode-clair {
     inset: 0;
     width: auto;
     height: auto;
+    padding: 0;   /* la gélule de l'étendue (codes en lettres, 24 nov. 2026) ne passe pas dans la tuile : */
+    min-width: 0; /* ni son remplissage, ni sa largeur minimale */
     overflow: hidden;
     border-radius: 0;
     font-size: 15px;

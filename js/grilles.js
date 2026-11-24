@@ -4031,6 +4031,26 @@ function destinationDesCodes(critere, criteres) {
         + ' critères algorithmiques, et les codes posés vont tous au premier.' };
 }
 
+/**
+ * Les phrases des sous-critères écartés pour une autre raison que leur poids (codes en lettres, lot 1, 24 nov.
+ * 2026) — PROPOSITIONS, `plans de travail/TEXTES-2026-11-24-codes-en-lettres-lot-1.md`. Les codes sont nommés : on
+ * les retrouve dans la liste. Texte brut, échappé par l'appelant.
+ */
+function phrasesCodesEcartes(nVides, illisibles, doubles) {
+    const liste = (scs) => scs.map(sc => String(sc.code).trim()).join(', ');
+    let t = '';
+    if (nVides > 0) t += ` Un sous-critère sans code ne se pose pas (${nVides === 1 ? 'un ici' : nVides + ' ici'}).`;
+    if (illisibles.length) {
+        t += (illisibles.length === 1 ? ' Ce code ne se pose pas : ' : ' Ces codes ne se posent pas : ') + liste(illisibles)
+            + '. Un code s’écrit en lettres sans accent, chiffres, tiret ou souligné, 20 caractères au plus.';
+    }
+    if (doubles.length) {
+        t += (doubles.length === 1 ? ' Ce code est déjà pris plus haut et ne se pose pas : ' : ' Ces codes sont déjà pris plus haut et ne se posent pas : ')
+            + liste(doubles) + '.';
+    }
+    return t;
+}
+
 function rendreActivationCodes(critere, ctx) {
     if (typeof window.codesAnnotation === 'undefined') return '';
     const esc = (t) => (typeof echapperHtml === 'function' ? echapperHtml(String(t == null ? '' : t)) : '');
@@ -4045,13 +4065,17 @@ function rendreActivationCodes(critere, ctx) {
     const actif = window.codesAnnotation.donneSesCodes(critere);
     const apercu = window.codesAnnotation.apercuCodes(critere);
     const n = apercu.length;
-    const sansPoids = (critere.sousCriteres || []).length - n;
+    // Codes en lettres (24 nov. 2026) : chaque sous-critère écarté avec SA raison. Avant, tout écart passait pour
+    // « pondération 0 » — un code accentué compris, qui pesait 1.
+    const raisons = window.codesAnnotation.raisonsSansCode(critere);
+    const ecartes = (raison) => (critere.sousCriteres || []).filter((sc, i) => raisons[i] === raison);
+    const sansPoids = ecartes('poids').length;
     const note = actif
         ? `Sur toute copie évaluée avec cette grille, la palette des codes montre ${n === 1 ? 'ce sous-critère' : 'ces ' + n + ' sous-critères'} : le numéro est le code, avec le nom, la couleur et l'observation d'ici.`
         : `Ce critère utilise encore les dix codes de la palette générale ; tu les configures dans Annoter, sous l’engrenage de la palette.`;   // lot 3a (ébauche du 26 oct.)
-    const precision = sansPoids > 0
+    const precision = (sansPoids > 0
         ? ` Un sous-critère de pondération 0 n'est pas un code posable (${sansPoids === 1 ? 'un ici' : sansPoids + ' ici'}).`
-        : '';
+        : '') + phrasesCodesEcartes(ecartes('vide').length, ecartes('caracteres'), ecartes('double'));
     // 21 oct. 2026 — un critère MARQUÉ (né depuis l'étape 0) n'a pas de repli à choisir : ses codes sont ses
     // sous-critères. Pas de case ; la note d'une case cochée, dès qu'il en a un qui se pose.
     if (critere[window.codesAnnotation.MARQUE] === true) {
@@ -5388,7 +5412,10 @@ const TEXTES_SOUS_CRITERES = {
 };
 const REFUS_SOUS_CRITERES = {
     trop: (max) => 'Au plus ' + max + ' sous-critères par critère',
-    nomLong: (max) => 'Le nom d’un sous-critère fait ' + max + ' caractères au plus'
+    nomLong: (max) => 'Le nom d’un sous-critère fait ' + max + ' caractères au plus',
+    // Codes en lettres, lot 1 (24 nov. 2026) — PROPOSITIONS, `plans de travail/TEXTES-2026-11-24-codes-en-lettres-lot-1.md`.
+    codeIllisible: 'Un code s’écrit en lettres sans accent, chiffres, tiret ou souligné, 20 caractères au plus',
+    codeDouble: (autre) => 'Le code « ' + autre + ' » est déjà dans ce critère : majuscules et minuscules y comptent pour la même lettre'
 };
 
 /** Les bornes de l'assistant, lues chez lui (une seule source) ; sans lui, aucune borne. */
@@ -5417,6 +5444,19 @@ function codeSousCritereNeuf(scs) {
 function refusAjoutSousCritere(n) {
     const max = _bornesSousCriteres().nombre;
     return n >= max ? REFUS_SOUS_CRITERES.trop(max) : null;
+}
+
+/**
+ * Le refus d'un code tapé au rang `scIndex` d'un critère algorithmique ; sinon `null` (codes en lettres, lot 1,
+ * 24 nov. 2026). La règle est celle des codes posables (`codesAnnotation.refusCodeSaisi`) ; les mots sont ici.
+ * Un autre type de critère n'a pas de champ Code : rien n'est refusé.
+ */
+function refusCodeSousCritere(critere, scIndex, valeur) {
+    const C = window.codesAnnotation;
+    if (!critere || critere.type !== 'algorithmique' || !C || typeof C.refusCodeSaisi !== 'function') return null;
+    const r = C.refusCodeSaisi(critere.sousCriteres, scIndex, valeur);
+    if (!r) return null;
+    return r.raison === 'double' ? REFUS_SOUS_CRITERES.codeDouble(r.autre) : REFUS_SOUS_CRITERES.codeIllisible;
 }
 
 /** Le refus d'un nom de sous-critère trop long ; sinon `null`. */
@@ -6253,7 +6293,10 @@ async function ajouterSousCritere(cible, critereIndex) {
  */
 async function modifierSousCritere(cible, critereIndex, sousCritereIndex, champ, valeur) {
     // 20 oct. : la borne de l'assistant (`MAX_NOM`) ; un nom refusé n'écrit rien.
-    const refuse = champ === 'nom' ? refusNomSousCritere(valeur) : null;
+    // 24 nov. (codes en lettres) : un code qui ne se poserait pas, ou le même qu'un autre à la casse près, non plus.
+    const refuse = champ === 'nom' ? refusNomSousCritere(valeur)
+        : champ === 'code' ? refusCodeSousCritere(_critereLuCible(cible, critereIndex), sousCritereIndex, valeur)
+        : null;
     if (refuse) return { refuse };
     // ⚠ C'est LE geste de #510 : le `change` d'un champ de sous-critère part au
     // blur, donc au moment précis où l'on clique dans le champ suivant (sérialisé par `_modifierCritereCible`).

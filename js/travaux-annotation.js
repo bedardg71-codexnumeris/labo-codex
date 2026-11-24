@@ -3108,12 +3108,9 @@
         ctx.arc(mx, my, rayon, 0, Math.PI * 2);
         ctx.fill();
 
-        // Numero blanc au centre
+        // Numero blanc au centre — à la taille d'hier, ou plus petit s'il déborderait (codes en lettres, 24 nov. 2026).
         ctx.fillStyle = '#ffffff';
-        ctx.font = 'bold ' + Math.round(rayon * 1.2) + 'px sans-serif';
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
-        ctx.fillText(numero, mx, my);
+        annotationFormes.ecrireCodeDansCercle(ctx, numero, mx, my, rayon, Math.round(rayon * 1.2));
     }
 
     /**

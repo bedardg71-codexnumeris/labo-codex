@@ -148,7 +148,64 @@
         return { x1: Math.min.apply(null, xs), y1: Math.min.apply(null, ys), x2: Math.max.apply(null, xs), y2: Math.max.apply(null, ys) };
     }
 
+    /* ---------------------------------------------------------------------
+       LE CODE DANS SON CERCLE (lot « codes en lettres », 24 nov. 2026)
+
+       Un code d'annotation s'écrit en blanc dans un disque de sa couleur, à trois endroits : la copie
+       (travaux-annotation.js), le PDF (travaux-export-pdf.js) et le curseur (travaux-outils.js). Il s'y
+       écrivait à une taille fixe (1,2 × le rayon) : un chiffre tient, deux lettres tiennent, trois caractères
+       (« K-A ») débordent du disque et le blanc se perd sur la page blanche — on lit autre chose.
+
+       La règle, une seule fois pour les trois : la taille d'hier tant que le coin de l'encre tient dans
+       MARGE_CODE × rayon ; sinon la taille qui l'y fait tenir (l'encre croît en proportion de la taille).
+       ⚠ Un code qui tenait garde EXACTEMENT sa taille d'hier : un code d'un chiffre ne bouge pas d'un pixel,
+       ni « 10 » du repli. Mesuré au banc le 24 nov. (Chromium, DejaVu Sans grasse ; Helvetica est plus étroite) :
+       le coin de l'encre de « 10 » va jusqu'à 0,923 du rayon aux petits rayons (6,8 à 10 px, ceux de la copie
+       à l'écran) — d'où 0,93 et non 0,9, qui le réduisait d'une fraction de pixel. Sous 6 px de rayon, « 10 »
+       dépassait déjà le disque (1,04) : il se réduit, et c'est voulu. Comparaison au pixel avec `main` : rapport.
+       Au-delà de trois caractères, le texte diminue encore, sans plancher : le code entier reste dans le
+       disque (décision de la session, dite au rapport : rien n'est refusé à la saisie, la palette compacte
+       porte déjà jusqu'à vingt caractères depuis le 1er nov.).
+       --------------------------------------------------------------------- */
+    var MARGE_CODE = 0.93;
+
+    /**
+     * La taille de police d'un code dans un cercle de rayon `rayon`. `base` : la taille d'hier ;
+     * `demiLargeur`, `demiHauteur` : la demi-boîte de l'encre À CETTE TAILLE, comptée depuis le point d'écriture
+     * (centré, milieu). Rend `base` si le coin tient, sinon la taille réduite. Pure.
+     */
+    function tailleCodeDansCercle(rayon, base, demiLargeur, demiHauteur) {
+        var coin = Math.sqrt(demiLargeur * demiLargeur + demiHauteur * demiHauteur);
+        var place = rayon * MARGE_CODE;
+        if (!(coin > place)) return base;
+        return base * place / coin;
+    }
+
+    /**
+     * Écrit `texte` centré en (mx, my), dans le cercle de rayon `rayon`, en gras, à la taille d'hier (`base`)
+     * ou plus petit s'il le faut. Laisse au contexte la couleur que l'appelant a posée (fillStyle).
+     */
+    function ecrireCodeDansCercle(ctx, texte, mx, my, rayon, base) {
+        texte = String(texte);
+        ctx.font = 'bold ' + base + 'px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        var m = ctx.measureText(texte);
+        // L'encre, si le moteur la donne (Safari, Chrome) ; sinon la chasse et une hauteur de capitale.
+        var gauche = (typeof m.actualBoundingBoxLeft === 'number') ? m.actualBoundingBoxLeft : m.width / 2;
+        var droite = (typeof m.actualBoundingBoxRight === 'number') ? m.actualBoundingBoxRight : m.width / 2;
+        var haut = (typeof m.actualBoundingBoxAscent === 'number') ? m.actualBoundingBoxAscent : base * 0.4;
+        var bas = (typeof m.actualBoundingBoxDescent === 'number') ? m.actualBoundingBoxDescent : base * 0.4;
+        var taille = tailleCodeDansCercle(rayon, base, Math.max(gauche, droite), Math.max(haut, bas));
+        if (taille !== base) ctx.font = 'bold ' + taille + 'px sans-serif';
+        ctx.fillText(texte, mx, my);
+        return taille;
+    }
+
     var api = {
+        MARGE_CODE: MARGE_CODE,
+        tailleCodeDansCercle: tailleCodeDansCercle,
+        ecrireCodeDansCercle: ecrireCodeDansCercle,
         contourPolygone: contourPolygone,
         contourEllipse: contourEllipse,
         pointsVagueContour: pointsVagueContour,
