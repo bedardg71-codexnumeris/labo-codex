@@ -1222,3 +1222,17 @@
 .oc-fenetre--tampons .tc-critere {
     padding: 3px 0;
 }
+
+/* Le bloc des tampons ne déborde pas de la fenêtre ; un nom long passe à la ligne ; l'emoji copié garde sa taille. */
+.oc-tampons-bloc {
+    min-width: 0;
+}
+
+.tc-tampon-nom {
+    overflow-wrap: anywhere;
+}
+
+.tc-tampon-emoji {
+    font-size: 1rem;
+    line-height: 1;
+}
