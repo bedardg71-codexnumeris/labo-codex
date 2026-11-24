@@ -22,7 +22,7 @@ const enregistrer = async (page) => { await page.evaluate(() => window.travauxOu
 
 /** Une pratique par cibles existe : un ensemble de cibles fictif dans le trimestre du banc. */
 const poserCibles = (page, criteres = ['Critère fictif A', 'Critère fictif B']) => page.evaluate((criteres) => {
-    window.db.setSync(window.cle('ensemblesCibles'), [{ id: 'ENSC_BANC', coursId: null, dateCreation: '2031-01-01T00:00:00.000Z', dateModification: '2031-01-01T00:00:00.000Z',
+    window.db.setSync(window.cle('ensemblesCibles'), [{ id: 'ENSC_BANC', coursId: null, dateCreation: '2031-01-01T00:00:00.000Z', dateModification: '2031-01-01T00:00:00.000Z', // security-ok: fixture de test
         cibles: [{ id: 'cible-banc-1', etiquette: 'Cible fictive', enonce: '', poids: 1, terminale: false,
             criteres: criteres.map((texte, i) => ({ id: 'crit-banc-' + i, texte, essentiel: i === 0 })) }] }]);
 }, criteres);
@@ -141,7 +141,7 @@ test.describe('Tampons d’observation, lot 1 — la fenêtre sans pratique par 
 
     test('une liste et un critère déjà rangés ne sont ni montrés ni perdus quand on enregistre sans pratique par cibles', async ({ page }) => {
         const r = await regler(page);
-        await page.evaluate(() => window.db.setSync(window.cle('ensemblesCibles'), []));   // la pratique par cibles n'existe plus
+        await page.evaluate(() => window.db.setSync(window.cle('ensemblesCibles'), []));   // security-ok: fixture de test (la pratique par cibles n'existe plus)
         await ouvrirCopie(page);
         await ouvrirFenetre(page);
         await expect(page.locator(`${M} [data-cat-observation-id], ${M} .travaux-retro-critere`)).toHaveCount(0);
@@ -288,6 +288,9 @@ test.describe('Tampons d’observation, lot 1 — régler', () => {
         await ouvrirCopie(page);
         await ouvrirFenetre(page);
         await expect(critereDe(page, r.tampon)).toHaveValue(PIEGE.replace(/\s+/g, ' ').slice(0, 200).trim());
+        // Renommée, la catégorie à soi garde son identifiant : elle est toujours d'observation, sous son nouveau nom.
+        await expect(caseDe(page, r.catPerso)).toBeChecked();
+        await expect(page.locator(`${M} input[data-cat-id="${r.catPerso}"]`)).toHaveValue('<i>Cat</i> "fictive"');
         await expect(page.locator(`${M} [data-piege]`)).toHaveCount(0);
         expect(await page.evaluate(() => window.__piege)).toBeUndefined();
         const inline = await page.locator(`${M} .travaux-retro-cat-observation, ${M} .travaux-retro-cat-observation *, ${M} .travaux-retro-critere, ${M} .travaux-retro-critere *, ${M} .travaux-retro-observation-aide`)

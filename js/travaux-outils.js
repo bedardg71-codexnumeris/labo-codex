@@ -1090,7 +1090,7 @@
         return '<div class="travaux-retro-critere"' + (montre ? '' : ' hidden') + '>' +
             '<label for="' + echapperHtml(idChamp) + '">' + echapperHtml(MOTS_OBSERVATION.libelleCritere) + '</label>' +
             '<input type="text" id="' + echapperHtml(idChamp) + '" class="travaux-retro-critere-input" data-critere-id="' + echapperHtml(id) + '"' +
-            ' value="' + echapperHtml(critere) + '" maxlength="' + LONGUEUR_MAX_CRITERE_TAMPON + '" list="travaux-retro-criteres-suggeres" autocomplete="off">' +
+            ' value="' + echapperHtml(critere) + '" maxlength="' + echapperHtml(String(LONGUEUR_MAX_CRITERE_TAMPON)) + '" list="travaux-retro-criteres-suggeres" autocomplete="off">' +
             '</div>';
     }
 
