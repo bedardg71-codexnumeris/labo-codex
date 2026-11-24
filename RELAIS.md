@@ -7,6 +7,18 @@
 
 ---
 
+## 24 NOV. 2026, 19 H 30 (Claude Code) : **TAMPONS D'OBSERVATION, LOT 2 « OBSERVER » — SUR `lot/tampons-observation-2-observer`, NON FUSIONNÉ (APERÇU SEULEMENT)**
+
+Mandat : consigne de lot de Cowork (« Gestion des pratiques de notation 5 », 24 nov., 16 h 30) ; décisions de Grégoire du 24 nov. **Le travail le plus récent vit sur `lot/tampons-observation-2-observer` (`1fb2623d8`), arbre `../labo-codex-tampons-observer`, partie de `lot/tampons-observation-1-regler` (`cf7d461ef`). Ni le lot 1 ni le lot 2 ne sont dans `main` : un push sur `main` est publié d'office.** Rapport : `plans de travail/RAPPORT-2026-11-24-tampons-observation-lot-2.md` (sur la branche).
+
+- **Ce que le lot porte** : sur « Observer », les tampons des catégories d'observation se touchent pour l'étudiant·e affiché·e ; l'inscription reçoit un champ, `tampons` (la copie de chaque tampon : identifiant, nom, catégorie, critère déclaré, emoji ; jamais l'image) ; un tampon suffit à inscrire, ne coche aucun critère, ne pose aucun niveau ; l'historique d'une case et le profil les montrent ; « Régler mes tampons » ouvre les réglages depuis « Observer », sans copie (#1307).
+- **Aperçu** : https://deploy-preview-60--codexnumeris-051225.netlify.app (demande n° 60, en brouillon, « APERÇU, ne pas fusionner » ; elle porte les lots 1 et 2). La demande n° 58 (lot 1 seul) reste ouverte.
+- **Bancs** : WebKit 14 sur 14, Chromium 14 sur 14, Vitest complet 12 392 verts, 19 break-tests rouges sur 19 ; bancs voisins (parcours « Suivre ton groupe par cibles », démo, lots de la pratique par cibles, lot 1) verts. Pas de verdict WebKit complet (rien ne part en ligne).
+- **En attente de Grégoire, par Cowork** : son essai sur l'iPad (cinq étudiant·es de suite, portrait et paysage) et `plans de travail/TEXTES-2026-11-24-tampons-observation-lot-2.md` (six questions, sur la branche).
+- **Numéros** : aucun pris ; #1307 est noté « traité sur la branche » au BACKLOG de la branche. **Numéro libre : #1309.**
+
+---
+
 ## 24 NOV. 2026, 17 H (Claude Code) : **TAMPONS D'OBSERVATION, LOT 1 — RETOUCHE FAITE, LOT TOUJOURS SUR `lot/tampons-observation-1-regler`, NON FUSIONNÉ**
 
 Mandat : retouche relayée par Cowork (« Gestion des pratiques de notation 5 », 24 nov., 15 h 35), après l'essai de Grégoire sur son iPad. **Le travail le plus récent vit sur `lot/tampons-observation-1-regler` (`cf7d461ef`), arbre `../labo-codex-tampons-observation`. Il n'est PAS fusionné : un push sur `main` est publié d'office par Netlify (`DEPLOY.md`, § 2), et la consigne demande de ne rien mettre en ligne avant les retours des testeurs du 25 nov. au soir.** Rapport : `plans de travail/RAPPORT-2026-11-24-tampons-observation-lot-1.md`, section « Retouche » (sur la branche).
