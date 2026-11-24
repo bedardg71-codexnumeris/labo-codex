@@ -11,8 +11,9 @@
  * VERROUILLÉ ICI, sur les modules RÉELS (la fenêtre, l'export et l'import d'un jeu et la bibliothèque sont joués au
  * navigateur : tests/integration/tampons-observation-lot-1-regler.spec.js) :
  *   A. Le critère rangé : du texte, rogné, borné ; rien n'est écrit pour un critère vide ou qui n'est pas du texte.
- *   B. Le critère qui voyage est celui qui est MONTRÉ : la catégorie du tampon est d'observation. Aucune catégorie ne
- *      l'est d'office ; l'identifiant d'une catégorie qui n'existe plus est ignoré ; un critère non montré reste rangé.
+ *   B. Le critère VOYAGE TOUJOURS, que la catégorie du tampon soit d'observation ou non (retouche du 24 nov., 15 h 35 :
+ *      décocher, exporter puis réimporter l'effaçait). Seul un identifiant qui n'est celui d'aucun tampon ne rend rien.
+ *   G. Les mots acceptés par Grégoire le 24 nov. (15 h 31, 15 h 33) : l'aide C2 sans sa seconde phrase, les deux titres.
  *   C. La liste blanche de la bibliothèque (SCHEMAS_IMPORT.tampon) laisse entrer `critere`, et lui seul de neuf.
  *   D. Un codex enregistré puis rouvert rend les deux données à l'identique (vrai ZIP, vrai `charger`).
  *   E. À la fusion de deux codex, la liste est une DONNÉE : elle vient quand elle manque ici, elle est en conflit
@@ -78,7 +79,7 @@ describe('A · le critère rangé : du texte, rogné, borné', () => {
     });
 });
 
-describe('B · le critère qui voyage est celui qui est montré', () => {
+describe('B · le critère voyage toujours, catégorie d\'observation ou non', () => {
     const AVEC_CRITERES = { [PERS]: { [TAMPON]: { critere: 'Critère fictif' }, [AUTRE_TAMPON]: { critere: 'Autre critère fictif' } } };
 
     it('sans liste rangée, aucune catégorie n\'est d\'observation, pas même une catégorie fournie', () => {
@@ -88,12 +89,13 @@ describe('B · le critère qui voyage est celui qui est montré', () => {
         expect(fournies.length, 'témoin : l\'application fournit des catégories').toBeGreaterThan(0);
         const tous = o.obtenirAutocollants().filter((a) => !a.legacy);
         expect(tous.some((a) => fournies.includes(a.categorie)), 'témoin : et des tampons dans ces catégories').toBe(true);
-        for (const a of tous) expect(o.critereDuTampon(a.id), a.id).toBe('');
+        for (const a of tous.filter((t) => !t.custom)) expect(o.critereDuTampon(a.id), a.id).toBe('');
+        expect(o.critereDuTampon(TAMPON), 'aucune catégorie cochée : le critère rangé voyage quand même').toBe('Critère fictif');
     });
-    it('la catégorie cochée rend le critère de ses tampons, et d\'eux seuls', () => {
+    it('la catégorie cochée rend le critère de ses tampons ; la catégorie non cochée aussi', () => {
         const { o } = monterOutils(Object.assign({ [CLE]: [CAT] }, AVEC_CRITERES));
         expect(o.critereDuTampon(TAMPON)).toBe('Critère fictif');
-        expect(o.critereDuTampon(AUTRE_TAMPON), 'sa catégorie n\'est pas d\'observation : non montré, donc non emporté').toBe('');
+        expect(o.critereDuTampon(AUTRE_TAMPON), 'sa catégorie n\'est pas d\'observation : non montré, mais emporté').toBe('Autre critère fictif');
         expect(o.critereDuTampon('custom-inconnu')).toBe('');
     });
     it('l\'identifiant d\'une catégorie qui n\'existe plus est ignoré à la lecture', () => {
@@ -101,13 +103,14 @@ describe('B · le critère qui voyage est celui qui est montré', () => {
             tamponsPersonnalises: [{ id: TAMPON, nom: 'Tampon fictif', categorie: CAT }, { id: 'custom-orphelin', nom: 'Orphelin fictif', categorie: 'cat-supprimee' }] },
         { [PERS]: { [TAMPON]: { critere: 'Critère fictif' }, 'custom-orphelin': { critere: 'Critère orphelin' } } }));
         expect(o.critereDuTampon(TAMPON)).toBe('Critère fictif');
-        expect(o.critereDuTampon('custom-orphelin')).toBe('');
+        expect(o.critereDuTampon('custom-orphelin'), 'sa catégorie n\'existe plus : son critère voyage encore').toBe('Critère orphelin');
+        expect(o.critereDuTampon('custom-inconnu'), 'aucun tampon de cet identifiant').toBe('');
         expect(ecritures, 'lire ne répare rien : rien n\'est écrit').toEqual([]);
     });
-    it('une liste qui n\'est pas une liste vaut « aucune »', () => {
+    it('une liste qui n\'est pas une liste vaut « aucune », et le critère voyage quand même', () => {
         for (const valeur of [null, 'tout', { [CAT]: true }, 1]) {
             const { o } = monterOutils(Object.assign({ [CLE]: valeur }, AVEC_CRITERES));
-            expect(o.critereDuTampon(TAMPON), JSON.stringify(valeur)).toBe('');
+            expect(o.critereDuTampon(TAMPON), JSON.stringify(valeur)).toBe('Critère fictif');
         }
     });
     it('un critère rangé trop long ou mal espacé (venu d\'ailleurs) sort propre', () => {
@@ -251,5 +254,31 @@ describe('F · les registres, un seul écrivain, aucune lecture sans appelant', 
         const source = lire('js/travaux-outils.js').replace(/\\u([0-9a-f]{4})/g, (_, h) => String.fromCharCode(parseInt(h, 16)));
         expect(source).toContain('Un tampon d’observation nomme ce que tu vois l’étudiant·e faire. La cause, tu la chercheras avec elle ou lui.');
         expect(source, 'le nom de travail est « tampon d\'observation » : pas « marque »').not.toMatch(/marque d[’']observation/i);
+    });
+});
+
+describe('G · les mots acceptés par Grégoire le 24 nov. 2026 (15 h 31 et 15 h 33)', () => {
+    // Les guillemets des textes portent des espaces insécables, comme dans le code.
+    const source = lire('js/travaux-outils.js').replace(/\\u([0-9a-f]{4})/g, (_, h) => String.fromCharCode(parseInt(h, 16)));
+
+    it('l\'aide des catégories (C2) tient en une phrase : « Rien d\'autre ne change pour l\'instant. » est retirée', () => {
+        expect(source).toContain("aideCategories: 'Coche « D’observation » pour une catégorie dont les tampons disent ce que tu vois l’étudiant·e faire.',");
+        expect(source).not.toMatch(/Rien d[’']autre ne change/);
+    });
+    it('la case, le champ et les deux annonces sont ceux de la page de textes', () => {
+        expect(source).toContain("caseCategorie: 'D’observation',");
+        expect(source).toContain("libelleCritere: 'Critère (facultatif)',");
+        expect(source).toContain("'« ' + nom + ' » est maintenant une catégorie d’observation. Chacun de ses tampons peut déclarer un critère.'");
+        expect(source).toContain("'« ' + nom + ' » n’est plus une catégorie d’observation. Les critères déjà écrits sont gardés, mais ne sont plus montrés.'");
+    });
+    it('la fenêtre s\'intitule « Tampons et rétroactions », et un jeu exporté « Tampons » : les anciens titres ne sont plus écrits', () => {
+        expect(source).toContain('<h2 style="margin-top:0">Tampons et rétroactions</h2>');
+        expect(source).not.toMatch(/Rétroactions (—|–|-) Observations/);
+        expect(source.match(/demanderMetadonneesEnrichies\('Tampons', /g)).toHaveLength(1);
+        expect(source.match(/ajouterMetadonnéesCC\(contenu, 'tampons', 'Tampons', /g)).toHaveLength(1);
+        expect(source, 'le titre d\'un jeu exporté').not.toMatch(/['"]Tampons d[’']observation['"]/);
+    });
+    it('la catégorie fournie « Observations » garde son nom : c\'est un contenu, que l\'utilisateur renomme', () => {
+        expect(source).toContain("observations: 'Observations'");
     });
 });

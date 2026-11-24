@@ -988,17 +988,20 @@
     //     même une catégorie fournie, et rien ne s'écrit chez qui n'a rien réglé. À la fusion de deux codex, c'est une
     //     DONNÉE (elle n'est pas dans `REGLAGES_DE_L_APPAREIL`, codex.js).
     //   · `personnalisationObservations[id].critere` : le critère qu'un tampon déclare, facultatif. Texte libre, rogné,
-    //     borné. Une catégorie qui cesse d'être d'observation ne l'efface pas : il n'est plus montré, ni emporté.
+    //     borné. Une catégorie qui cesse d'être d'observation ne l'efface pas : il n'est plus MONTRÉ, mais il VOYAGE
+    //     toujours (retouche du 24 nov., 15 h 35 : décocher, exporter puis réimporter l'effaçait ; aucune donnée ne
+    //     se perd sans retour). Le jeu exporté et les cinq gestes de la bibliothèque l'emportent, cochée ou non.
     // Ce lot RÈGLE et fait VOYAGER. Aucun autre écran ne lit ces deux données (« Observer », le profil, l'inscription
     // et la copie : lot suivant).
     const CLE_CATEGORIES_OBSERVATION = 'categoriesObservation';
     const LONGUEUR_MAX_CRITERE_TAMPON = 200;
-    // La seule phrase acceptée (Grégoire, 22 nov. 2026), mot pour mot. Les autres mots de ce bloc sont PROPOSÉS :
+    // La phrase d'aide : acceptée par Grégoire le 22 nov. 2026, mot pour mot. Les autres mots de ce bloc : acceptés
+    // par Grégoire le 24 nov. 2026 à 15 h 31, avec un retrait (la seconde phrase de l'aide des catégories) :
     // plans de travail/TEXTES-2026-11-24-tampons-observation-lot-1.md.
     const AIDE_TAMPON_OBSERVATION = 'Un tampon d’observation nomme ce que tu vois l’étudiant·e faire. La cause, tu la chercheras avec elle ou lui.';
     const MOTS_OBSERVATION = {
         caseCategorie: 'D’observation',
-        aideCategories: 'Coche « D’observation » pour une catégorie dont les tampons disent ce que tu vois l’étudiant·e faire. Rien d’autre ne change pour l’instant.',
+        aideCategories: 'Coche « D’observation » pour une catégorie dont les tampons disent ce que tu vois l’étudiant·e faire.',
         libelleCritere: 'Critère (facultatif)',
         aideCritere: 'Si ce tampon se rapporte à un critère d’une de tes cibles, écris-le ou choisis-le dans la liste. Tu peux laisser vide.',
         annonceCochee: function(nom) { return '« ' + nom + ' » est maintenant une catégorie d’observation. Chacun de ses tampons peut déclarer un critère.'; },
@@ -1034,10 +1037,10 @@
         db.setSync(CLE_CATEGORIES_OBSERVATION, apres);
     }
 
-    /** Le critère qu'un tampon déclare, s'il est MONTRÉ : sa catégorie est d'observation. Sinon ''. C'est ce qui voyage. */
+    /** Le critère qu'un tampon déclare, que sa catégorie soit d'observation ou non : c'est ce qui VOYAGE. Sans tampon, ''. */
     function critereDuTampon(id) {
         var tampon = AUTOCOLLANTS.find(function(a) { return a.id === id; });
-        if (!tampon || obtenirCategoriesObservation().indexOf(tampon.categorie) === -1) return '';
+        if (!tampon) return '';
         var pers = obtenirPersonnalisationObservations()[id];
         return normaliserCritereTampon(pers && pers.critere);
     }
@@ -3046,7 +3049,7 @@
         overlay.className = 'modal-overlay actif';
 
         let html = '<div class="modal-contenu travaux-retro-modal">';
-        html += '<h2 style="margin-top:0">R\u00e9troactions \u2014 Observations</h2>';
+        html += '<h2 style="margin-top:0">Tampons et r\u00e9troactions</h2>';
         html += '<p style="color:var(--texte-secondaire);font-size:0.85rem;margin-bottom:16px;">Ces textes appara\u00eetront dans la r\u00e9troaction g\u00e9n\u00e9r\u00e9e pour l\'\u00e9tudiant\u00b7e lorsque le tampon correspondant est utilis\u00e9. Clique sur l\'image pour la remplacer. Glissez \u2630 pour r\u00e9ordonner.</p>';
 
         // Noms des categories editables
@@ -3943,7 +3946,7 @@
                 categorie: a.categorie,
                 imageBase64: base64,
                 emoji: (persObs[a.id] && persObs[a.id].emoji) || undefined,   // #1244 : il garde ses couleurs chez qui l'importe
-                critere: critereDuTampon(a.id) || undefined,   // tampons d'observation : le critère déclaré, s'il est montré
+                critere: critereDuTampon(a.id) || undefined,   // tampons d'observation : le critère déclaré, catégorie cochée ou non
                 retroaction: retroObs[a.id] || '',
                 custom: a.custom || false
             });
@@ -3991,11 +3994,11 @@
 
         // Demander metadonnees CC
         var metaEnrichies = typeof demanderMetadonneesEnrichies === 'function'
-            ? await demanderMetadonneesEnrichies('Tampons d\u2019observation', tampons.length + ' tampon(s)')
+            ? await demanderMetadonneesEnrichies('Tampons', tampons.length + ' tampon(s)')
             : {};
         if (!metaEnrichies) return; // Annule
 
-        var donnees = ajouterMetadonn\u00e9esCC(contenu, 'tampons', 'Tampons d\u2019observation', metaEnrichies);
+        var donnees = ajouterMetadonn\u00e9esCC(contenu, 'tampons', 'Tampons', metaEnrichies);
         // Beta 95.3 : Nommage standardisé via helper unifié (horodaté pour éviter écrasement)
         var nomFichier = genererNomFichierExport('tampons', { inclureLicence: true, precisionDate: 'minute' });
 
@@ -4138,8 +4141,8 @@
                     if (typeof t.emoji === 'string' && t.emoji) persObj[t.id].emoji = t.emoji;   // #1244
                 }
                 if (t.retroaction) retroObj[t.id] = t.retroaction;
-                // Tampons d'observation : le critère n'entre que pour un tampon d'une catégorie que le fichier dit d'observation.
-                var critereImporte = catsObservation.indexOf(t.categorie) !== -1 ? normaliserCritereTampon(t.critere) : '';
+                // Tampons d'observation : le critère entre avec son tampon, que le fichier dise sa catégorie d'observation ou non.
+                var critereImporte = normaliserCritereTampon(t.critere);
                 if (critereImporte) {
                     if (!persObj[t.id]) persObj[t.id] = {};
                     persObj[t.id].critere = critereImporte;

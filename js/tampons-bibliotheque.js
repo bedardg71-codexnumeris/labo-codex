@@ -114,8 +114,8 @@ async function importerDansBibliotheque(tampons) {
 
 /**
  * Tampons d'observation, lot 1 (24 nov. 2026) — le critère qu'un tampon déclare part avec lui : « Garder », l'export
- * d'un tampon ou d'une catégorie. Seul `travaux-outils.js` lit et écrit `personnalisationObservations` ; il ne rend
- * le critère que s'il est montré (la catégorie du tampon est d'observation). Sans critère, l'entrée n'a pas le champ.
+ * d'un tampon ou d'une catégorie. Seul `travaux-outils.js` lit et écrit `personnalisationObservations` ; il rend le
+ * critère que la catégorie du tampon soit d'observation ou non (retouche du 24 nov.). Sans critère, l'entrée n'a pas le champ.
  */
 function _avecCritere(entree) {
     var critere = (typeof travauxOutils !== 'undefined' && travauxOutils.critereDuTampon) ? travauxOutils.critereDuTampon(entree.id) : '';

@@ -106,7 +106,7 @@ const exporterJeu = (page) => page.evaluate(async () => {
     const avant = URL.createObjectURL, meta = window.demanderMetadonneesEnrichies;
     let lu = null;
     URL.createObjectURL = (b) => { lu = b; return avant.call(URL, b); };
-    window.demanderMetadonneesEnrichies = async () => ({});
+    window.demanderMetadonneesEnrichies = async (titre) => { window.__titreDemande = titre; return {}; };
     await window.travauxOutils.exporterTampons();
     URL.createObjectURL = avant; window.demanderMetadonneesEnrichies = meta;
     return JSON.parse(await lu.text());
@@ -205,9 +205,10 @@ test.describe('Tampons d’observation, lot 1 — régler', () => {
         await enregistrer(page);
         await troisChargements(page, [r.catPerso], r.attendu);
 
-        // Non montré, il ne voyage pas : le fichier exporté ne le porte pas.
+        // Non montré, il voyage quand même (retouche du 24 nov., 15 h 35) : le fichier exporté le porte.
         const fichier = contenuDe(await exporterJeu(page));
-        expect(fichier.tampons.find((t) => t.id === r.tampon).critere).toBeUndefined();
+        expect(fichier.tampons.find((t) => t.id === r.tampon).critere).toBe(r.attendu[r.tampon]);
+        expect(fichier.categories.find((k) => k.id === r.cat).observation, 'et sa catégorie n’est pas dite d’observation').toBeUndefined();
         expect(fichier.tampons.find((t) => t.id === r.cree).critere).toBe(r.attendu[r.cree]);
 
         await ouvrirFenetre(page);
@@ -342,7 +343,7 @@ test.describe('Tampons d’observation, lot 1 — le voyage', () => {
         contenuDe(sans).categories.forEach((k) => { delete k.observation; });
         await importerJeu(page, sans);
         await listeVide(page);
-        expect((await criteresRanges(page)).lu, 'sans catégorie d’observation dans le fichier, aucun critère n’entre').toEqual({});
+        expect((await criteresRanges(page)).lu, 'sans catégorie d’observation dans le fichier, les critères entrent quand même').toEqual(r.attendu);
         await importerJeu(page, fichier);
         expect((await range(page, CLE)).lu.sort()).toEqual([r.cat, r.catPerso].sort());
         expect((await criteresRanges(page)).lu).toEqual(r.attendu);
@@ -359,12 +360,13 @@ test.describe('Tampons d’observation, lot 1 — le voyage', () => {
         const t1 = c.tampons.find((t) => t.id === r.tampon);
         t1.critere = '<script>window.__piege=1</script>Critère <b>importé</b>   ' + 'w'.repeat(400);
         t1.cibleId = 'cible-banc-1'; t1.observation = true;
-        c.tampons.find((t) => t.id === r.cree).critere = 'Critère d’une catégorie que le fichier ne dit pas d’observation';
+        c.tampons.find((t) => t.id === r.cree).critere = '  Critère d’une catégorie que le   fichier ne dit pas d’observation ';
         c.tampons.push({ id: 'custom-banc-objet', nom: 'Tampon au critère mal formé', categorie: r.cat, critere: { texte: 'x' }, custom: true });
         await importerJeu(page, fichier);
         expect((await range(page, CLE)).lu).toEqual([r.cat]);
         const crit = (await criteresRanges(page)).lu;
-        expect(Object.keys(crit)).toEqual([r.tampon]);
+        expect(Object.keys(crit).sort(), 'le tampon au critère mal formé n’en a pas').toEqual([r.tampon, r.cree].sort());
+        expect(crit[r.cree], 'sa catégorie n’est pas d’observation dans le fichier : le critère entre, rogné').toBe('Critère d’une catégorie que le fichier ne dit pas d’observation');
         expect(crit[r.tampon]).not.toMatch(/[<>]/);
         expect(crit[r.tampon], 'les balises sont retirées ; ce qu’elles entouraient reste du texte').toMatch(/Critère importé w+$/);
         expect(crit[r.tampon]).toHaveLength(200);
@@ -425,5 +427,147 @@ test.describe('Tampons d’observation, lot 1 — le voyage', () => {
         }, r.catPerso);
         expect(gardes.find((t) => t.id === r.cree).critere).toBe(r.attendu[r.cree]);
         expect('critere' in gardes.find((t) => t.id === sans)).toBe(false);
+    });
+});
+
+// ═══════════════════════════════════════════════════════════════════════════════════════════
+// RETOUCHE DU 24 NOV. 2026, 15 h 35 (Cowork, après l'essai de Grégoire sur son iPad)
+// 1. Le critère voyage TOUJOURS, que sa catégorie soit cochée ou non : aucune donnée perdue sans retour.
+// 3. Deux titres changent (Grégoire, 15 h 33) ; le titre d'un fichier REÇU s'affiche tel qu'il est écrit.
+// ═══════════════════════════════════════════════════════════════════════════════════════════
+test.describe('Tampons d’observation, lot 1 — retouche : le critère voyage toujours', () => {
+    /** Cocher, écrire un critère, enregistrer ; puis décocher, enregistrer. Le critère reste rangé, non montré. */
+    async function reglerPuisDecocher(page) {
+        const r = await regler(page);
+        await ouvrirFenetre(page);
+        await caseDe(page, r.cat).uncheck();
+        await caseDe(page, r.catPerso).uncheck();
+        await enregistrer(page);
+        await listeVide(page);
+        expect((await criteresRanges(page)).lu, 'témoin : décocher n’efface pas').toEqual(r.attendu);
+        return r;
+    }
+
+    test('cocher, écrire un critère, décocher, exporter, réimporter dans un espace vide, recocher : le critère est là', async ({ page, browser }) => {
+        const r = await reglerPuisDecocher(page);
+        const fichier = await exporterJeu(page);
+        const c = contenuDe(fichier);
+        expect(c.categories.some((k) => 'observation' in k), 'témoin : le fichier ne dit aucune catégorie d’observation').toBe(false);
+        expect(Object.fromEntries(c.tampons.filter((t) => t.critere !== undefined).map((t) => [t.id, t.critere]))).toEqual(r.attendu);
+
+        const ailleurs = await browser.newContext();
+        const page2 = await ailleurs.newPage();
+        await ouvrirCopie(page2);
+        expect((await range(page2, PERS)).lu, 'témoin : l’espace est vide').toBe('(absente)');
+        await importerJeu(page2, fichier);
+        for (let i = 1; i <= 3; i++) {
+            await ouvrirCopie(page2);
+            await attendre(page2, 300);
+            expect(['(absente)', null], `chargement ${i}, aucune catégorie d’observation`).toContainEqual((await range(page2, CLE)).lu);
+            const cr = await criteresRanges(page2);
+            expect(cr.lu, `chargement ${i}, critères lus`).toEqual(r.attendu);
+            expect(cr.idb, `chargement ${i}, critères dans IndexedDB`).toEqual(r.attendu);
+        }
+        // Non montré tant que la catégorie n'est pas cochée ; recochée, le critère est dans son champ.
+        await poserCibles(page2);
+        await ouvrirFenetre(page2);
+        for (const [cat, tampon] of [[r.cat, r.tampon], [r.catPerso, r.cree]]) {
+            await expect(caseDe(page2, cat)).not.toBeChecked();
+            await expect(critereDe(page2, tampon)).toBeHidden();
+            await caseDe(page2, cat).check();
+            await expect(critereDe(page2, tampon)).toBeVisible();
+            await expect(critereDe(page2, tampon)).toHaveValue(r.attendu[tampon]);
+        }
+        await enregistrer(page2);
+        await troisChargements(page2, [r.cat, r.catPerso].sort((a, b) => c.categories.findIndex((x) => x.id === a) - c.categories.findIndex((x) => x.id === b)), r.attendu);
+        await ailleurs.close();
+    });
+
+    test('la bibliothèque, catégorie non cochée : ses cinq gestes emportent le critère', async ({ page, browser }) => {
+        const r = await reglerPuisDecocher(page);
+        const exporte = (appel) => page.evaluate(async ({ appel }) => {
+            const avant = URL.createObjectURL;
+            let lu = null;
+            URL.createObjectURL = (b) => { lu = b; return avant.call(URL, b); };
+            await window.tamponsBibliotheque[appel[0]](appel[1]);
+            URL.createObjectURL = avant;
+            return JSON.parse(await lu.text());
+        }, { appel });
+        // 1 et 2 : exporter un tampon, exporter une catégorie.
+        expect((await exporte(['exporterUnTampon', r.cree])).tampons[0].critere, 'exporter un tampon').toBe(r.attendu[r.cree]);
+        expect((await exporte(['exporterCategorie', r.catPerso])).tampons.find((t) => t.id === r.cree).critere, 'exporter une catégorie').toBe(r.attendu[r.cree]);
+        // 3 et 4 : « Garder » un tampon, « Garder » une catégorie.
+        const garder = (geste, arg) => page.evaluate(async ({ geste, arg, id }) => {
+            window.db.setSync('bibliothequeTampons', []);   // security-ok: fixture de test (chaque geste part d'une bibliothèque vide)
+            window.tamponsBibliotheque.afficherBibliothequeTampons();
+            await window.tamponsBibliotheque[geste](arg);
+            return (window.db.getSync('bibliothequeTampons', []) || []).find((t) => t.id === id) || null;
+        }, { geste, arg, id: r.cree });
+        expect((await garder('partagerTampon', r.cree)).critere, '« Garder » un tampon').toBe(r.attendu[r.cree]);
+        const entree = await garder('partagerCategorie', r.catPerso);
+        expect(entree.critere, '« Garder » une catégorie').toBe(r.attendu[r.cree]);
+        // 5 : « Utiliser », dans un espace vide où aucune catégorie n'est d'observation.
+        const ailleurs = await browser.newContext();
+        const page2 = await ailleurs.newPage();
+        await ouvrirCopie(page2);
+        await page2.evaluate(async ({ entree }) => {
+            await window.tamponsBibliotheque.importerDansBibliotheque([entree]);
+            await window.tamponsBibliotheque.ajouterDepuisBibliotheque(entree.id);
+        }, { entree });
+        await attendre(page2, 300);
+        await troisChargements(page2, '(absente)', { [r.cree]: r.attendu[r.cree] });
+        await ailleurs.close();
+    });
+});
+
+test.describe('Tampons d’observation, lot 1 — retouche : les deux titres', () => {
+    const ANCIEN_TITRE = 'Tampons d’observation';
+
+    test('la fenêtre s’intitule « Tampons et rétroactions », avec ou sans pratique par cibles', async ({ page }) => {
+        await ouvrirCopie(page);
+        await ouvrirFenetre(page);
+        await expect(page.locator(`${M} h2`).first()).toHaveText('Tampons et rétroactions');
+        await page.evaluate(() => window.travauxOutils.fermerModalRetroObservations());
+        await poserCibles(page);
+        await ouvrirFenetre(page);
+        await expect(page.locator(`${M} h2`).first()).toHaveText('Tampons et rétroactions');
+        expect(await page.locator(M).innerText()).not.toMatch(/Rétroactions\s*[—–-]\s*Observations/);
+    });
+
+    test('un jeu exporté s’intitule « Tampons » : c’est le titre demandé et celui que porte le fichier', async ({ page }) => {
+        await ouvrirCopie(page);
+        const fichier = await exporterJeu(page);
+        expect(await page.evaluate(() => window.__titreDemande)).toBe('Tampons');
+        expect(fichier.metadata.nom).toBe('Tampons');
+        expect(JSON.stringify(fichier.metadata)).not.toContain('observation');
+    });
+
+    test('un fichier exporté hier, sous l’ancien titre, s’importe comme avant ; son titre s’affiche tel qu’il est écrit', async ({ page, browser }) => {
+        const r = await regler(page);
+        const fichier = await exporterJeu(page);
+        fichier.metadata.nom = ANCIEN_TITRE;
+
+        const ailleurs = await browser.newContext();
+        const page2 = await ailleurs.newPage();
+        await ouvrirCopie(page2);
+        await ouvrirFenetre(page2);
+        await page2.locator('#fichier-import-tampons').setInputFiles({ name: 'tampons-hier.json', mimeType: 'application/json', buffer: Buffer.from(JSON.stringify(fichier)) });
+        const apercu = page2.locator('.modal-import-tampons');
+        await expect(apercu.locator('.modal-js-contenu')).toBeVisible();   // l'enveloppe n'a pas de taille : c'est son contenu qu'on voit
+        const cadre = apercu.locator('[data-apercu-cc-slot] iframe');
+        await expect(cadre).toHaveCount(1);
+        const srcdoc = await cadre.getAttribute('srcdoc');
+        expect(srcdoc, 'le titre du fichier, tel qu’il est écrit').toContain('<p class="cc-badge-titre">' + ANCIEN_TITRE + '</p>');
+        await apercu.locator('[data-action="travauxOutils.confirmerEtFermerImportTampons"]').click();
+        await attendre(page2, 300);
+        await troisChargements(page2, [r.cat, r.catPerso].sort((a, b) => contenuDe(fichier).categories.findIndex((x) => x.id === a) - contenuDe(fichier).categories.findIndex((x) => x.id === b)), r.attendu);
+        await ailleurs.close();
+    });
+
+    test('la catégorie fournie « Observations » et les noms des tampons ne changent pas', async ({ page }) => {
+        await ouvrirCopie(page);
+        await ouvrirFenetre(page);
+        const noms = await page.locator('#travaux-retro-categories input[data-cat-id]').evaluateAll((l) => l.map((i) => i.value));
+        expect(noms).toContain('Observations');
     });
 });
