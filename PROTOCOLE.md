@@ -563,3 +563,9 @@ troisième catégorie ; elle ne lui retire pas l'arbitrage.
 - **Dans le cloud** : une conversation du Projet répertorie le bug et le corrige sur une branche partie de `origin/main`, avec son banc et son break-test, et ouvre une pull request. Le cloud n'écrit ni `SUIVI-BUGS.md` ni `BACKLOG.md` : il propose la ligne de suivi dans le corps de la PR.
 - **Sur le Mac, par la session principale** : la fusion (`git merge --no-ff`) dans le `main` local, le passage sous WebKit, le numéro au registre (compteur de `BACKLOG.md`, règle 9, qui avance ici) et la mise en ligne.
 - ⛔ **Jamais de fusion par l'application GitHub** : Netlify publie chaque `main`, si bien qu'elle mettrait le correctif en ligne aussitôt, sans verdict WebKit, et ferait diverger le `main` local. La PR se ferme d'elle-même au push de `main`.
+
+---
+
+## Règle 15 – le cadre est provisoire, le travail est itératif (24 novembre 2026)
+
+Nous mesurons, nous évaluons, nous cadrons, nous planifions, nous replanifions, nous codons, nous ajustons, nous pratiquons. L'application est en chantier et la réflexion de Grégoire se transforme à travers elle : coder, c'est aussi travailler l'architecture des idées. Un cadre ou un plan accepté vaut jusqu'à ce que la pratique ou une rencontre le déplace ; le réviser n'est pas un échec du plan. Conséquence pour le code : on bâtit le contenant, pas le contenu. Les mots, les catégories et les contenus fournis à l'utilisateur ne sont jamais définitifs ; aucun lot ne les fige.
