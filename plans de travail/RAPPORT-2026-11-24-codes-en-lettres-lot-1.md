@@ -8,7 +8,7 @@
 >
 > (Sans `-c`, la configuration par défaut est WebKit.)
 
-**Dernier relais.** Branche `lot/codes-en-lettres-1-lisibles`, partie de `main` à `5a2bc31be`. Lot 1 (mandat de Cowork du 24 nov. 2026, 15 h 45) : commits `c1c6d414d` et `3dc0cf3cf` ; mesure de l'étape 0, codes lisibles, refus à la saisie (accent, casse), vraie raison à l'écran de la grille. **Suite (consigne de 17 h 55) : commit suivant, section « Suite : la pastille » plus bas** ; la pastille (copie, curseur, PDF, synthèse) remplace le texte qui rapetissait dans le cercle, quatre caractères au plus à la saisie, la palette alignée à trois et quatre caractères, un fichier de départ d'essai. Ni fusion dans `main`, ni bump, ni ligne de Nouvelles, ni entrée de `RELAIS.md` (elle s'écrira à la fusion, exception décidée par Cowork). Aperçu : demande en brouillon « APERÇU, ne pas fusionner » (adresse plus bas). Reste : le passage WebKit sur le Mac, les gestes à essayer (à partir du fichier de départ), le retrait des pièces d'essai avant la fusion, les deux lots suivants (diagnostic erreurs-mots, suivi).
+**Dernier relais.** Branche `lot/codes-en-lettres-1-lisibles`, partie de `main` à `5a2bc31be`. Lot 1 (mandat de Cowork du 24 nov. 2026, 15 h 45) : commits `c1c6d414d` et `3dc0cf3cf` ; mesure de l'étape 0, codes lisibles, refus à la saisie (accent, casse), vraie raison à l'écran de la grille. **Suite (consigne de 17 h 55) : commit suivant, section « Suite : la pastille » plus bas** ; la pastille (copie, curseur, PDF, synthèse) remplace le texte qui rapetissait dans le cercle, quatre caractères au plus à la saisie, la palette alignée à trois et quatre caractères, un fichier de départ d'essai. Ni fusion dans `main`, ni bump, ni ligne de Nouvelles, ni entrée de `RELAIS.md` (elle s'écrira à la fusion, exception décidée par Cowork). Aperçu : demande en brouillon « APERÇU, ne pas fusionner » (adresse plus bas). **Retour d'essai (iPad, 24 nov., 19 h 10) : section « Retour d'essai » plus bas** ; le fichier d'essai porte une évaluation commencée et le PDF se produit par les gestes ; la copie exportée sans code (défaut 1) existe sur `main`, pour toute annotation d'une copie en image : **correctif proposé, pas appliqué, il attend l'accord de Grégoire**. Reste : la décision sur le défaut 1, le passage WebKit sur le Mac, les gestes à essayer (réécrits au retour), le retrait des pièces d'essai avant la fusion, les deux lots suivants (diagnostic erreurs-mots, suivi).
 
 ---
 
@@ -368,26 +368,96 @@ Dossier `plans de travail/captures-2026-11-24-codes-en-lettres-suite/`. « Avant
 9. **La raison voisine de la liste collée dit encore « 20 caractères au plus »** pour un code illisible (`materiel-dissection-lecture.js`, ancrée par un banc d'un autre lot) : proposée au fichier des textes.
 10. **`critere-algorithmique-calculs-4c.spec.js:159` perd une course plus souvent sur la branche** (6 sur 19, contre 1 sur 15 sur `main`), cause non isolée (détail dans « La preuve (suite) »). À bisecter, fichier par fichier, sur une machine au calme ; ou à rendre l'essai sûr (écrire par la vue, comme un utilisateur).
 
+## Retour d'essai (Grégoire, iPad, 24 nov., 19 h 10 à 19 h 30)
+
+> **Toujours rien sous Safari ni sur l'iPad.** Tout ce qui suit a tourné sous Chromium, dans le nuage. La commande WebKit en tête du rapport vaut encore ; elle comprend `essai-codes-en-lettres-depart.spec.js`, qui joue maintenant le PDF de bout en bout.
+
+Vu et jugé bon par Grégoire : la palette, les pastilles, le déplacement par le bout. Je ne l'ai pas remesuré.
+
+### Défaut 1 : la copie exportée n'a aucun code
+
+**Où il existe (rejoué, Chromium).** Sur `main` (`5a2bc31be`) comme sur la branche, avec un code d'un chiffre comme avec des codes en lettres, et même pour un trait de stylo : la version « _annote » d'une copie **en image** ne porte **aucune** annotation. La version annotée d'une copie **en PDF** les porte toutes, sur `main` comme sur la branche. Ce n'est donc ni la branche ni les codes en lettres.
+
+**Cause (lue, puis confirmée par le correctif).** `aplatirAnnotationsImage` (`js/travaux-archivage.js:633` et `:647`) appelle le dessin sans l'attendre, puis transforme aussitôt le canevas en JPEG. Or `travauxExportPDF.dessinerAnnotationsSurCtx` (`js/travaux-export-pdf.js:274`) est asynchrone et attend le chargement des autocollants **avant** son premier trait : quand le JPEG se fait, rien n'est encore dessiné. Le chemin d'une copie importée en PDF (`rendrePDFAvecAnnotations`, que tu m'as demandé de vérifier) attend, lui, son dessin (`js/travaux-export-pdf.js:1220`) : il est sain.
+
+**Ancienneté.** Le défaut est déjà là dans le plus vieux commit que ce clone connaît (il est tronqué, au 22 nov.) : je ne peux pas le dater plus loin d'ici. Inférence : il remonte au jour où le dessin de l'export est devenu asynchrone, pour les autocollants.
+
+**Pas corrigé : plus large et plus ancien que le lot.** Le correctif touche toutes les annotations d'une copie en image, pas les seuls codes en lettres. Tu as écrit « s'il est plus large et ancien, dis-le avant d'élargir » : je le dis, et il attend ton accord. Il est prêt dans `plans de travail/PROPOSITION-2026-11-25-copie-exportee-annotee/` :
+
+- `correctif.diff` : trois lignes de `js/travaux-archivage.js` (`img.onload` devient `async`, l'appel du dessin est attendu, la fonction relais rend sa promesse). L'appliquer demande aussi de changer le jeton `?v=` de ce fichier dans `index.html`, fichier partagé avec la branche des tampons (une ligne de plus en conflit possible).
+- `copie-exportee-annotee-2026-11-25.spec.js` : le banc, hors de la suite parce qu'il est rouge sans le correctif. Deux copies fictives (une image, un PDF), chacune avec « 7 », « K-A », « QRST » et un trait ; l'export par la fonction de « Exporter des travaux » ; il compte les pixels rouges de chaque version annotée.
+
+| Mesure (Chromium, banc de la proposition) | Image annotée | PDF annoté |
+|---|---|---|
+| `main` et la branche, sans correctif | 0 pixel rouge : **rouge** | 31 428 |
+| La branche, correctif appliqué | 14 325 : **vert** | 31 428 |
+| Break-test : correctif appliqué, seul l'`await` retiré | 0 : **rouge** | 31 428 |
+
+Correctif appliqué le temps de ces mesures, puis retiré : le dépôt n'en garde que la proposition.
+
+**Les images jointes** (`plans de travail/captures-2026-11-25-codes-en-lettres-retour/`), exportées par les gestes de l'écran à partir du fichier d'essai, trois codes posés (« Évaluation › Exporter », « Exporter des travaux », « Télécharger ») :
+
+- `copie-exportee-annotee-avant.jpg` : la version « _annote » telle que l'export la rend aujourd'hui, sans un code (0 pixel du rouge de « K-A ») ;
+- `copie-exportee-annotee-apres.jpg` : la même, correctif appliqué le temps de l'export (504 pixels du rouge de « K-A », les trois pastilles visibles).
+
+### Défaut 2 : le PDF n'était pas jouable avec le fichier d'essai
+
+**Cause (rejouée).** Le fichier ne portait aucune évaluation ; « Exporter pour Léa » n'exporte qu'une évaluation verrouillée. Sans elle, le compteur dit « Aucune évaluation trouvée » et l'export échoue.
+
+**Ce que j'ai ajouté au fichier.** Une évaluation commencée, non verrouillée, de la copie de Fictif-01 : 300 mots. La fabrique la fait par les gestes (« Annoter ▾ », « Évaluer », le champ Mots), pas par une écriture en base. Le fichier régénéré pèse 236 Ko ; sa phrase dans `departs.html` dit « son évaluation commencée » (E2 du fichier des textes).
+
+**Les gestes, tels que je les ai joués à l'écran (Chromium, 1180 × 820), bouton par bouton :**
+
+1. `departs.html` : « Télécharger le fichier » sous « Essai : les codes en lettres », puis « Ouvrir l'application ».
+2. « Codex », « Ouvrir un codex », le fichier `ESSAI-codes-en-lettres-lot-1.zip`, « Recharger ».
+3. « Évaluations », la liste ; sur la ligne de Fictif-01 Personne-01, le menu des actions, « Annoter ».
+4. Dans la palette Codes, « K-A », puis un toucher sur la copie ; de même « QRST » et « W-12 ».
+5. « Annoter ▾ », puis « Évaluer » : Mots montre 300, Erreurs montre 3. Dans Paramètres, « Verrouiller ».
+6. Le sous-onglet « Exporter » ; dans le bloc « Export Léa », Production « Production fictive : codes en lettres » : le compteur dit « 1 PDF pour 1 étudiant·e ».
+7. « Exporter pour Léa » : un PDF se télécharge (`Fictif-_2390001_Production-fictive-codes-en-lettres_Evalue.pdf`), deux pages.
+
+**La preuve.**
+
+- Le banc `tests/integration/essai-codes-en-lettres-depart.spec.js` rouvre le fichier **commis** dans un espace vide (témoin : aucun trimestre, aucun codex actif) et joue ces sept gestes. Vert : deux pages, 3 566 pixels du rouge de « K-A » sur la copie, 2 529 sur la synthèse.
+- Break-test : le fichier d'avant le retour, sans évaluation, fait rougir l'essai du PDF (« Aucune évaluation trouvée ») ; un codex privé de sa copie fait rougir les deux essais.
+- Les images : `pdf-lea-page1-haut.png` (le haut de la copie, les trois pastilles) et `pdf-lea-page2-synthese.png` (la synthèse : « K-A » et « QRST » chacun dans sa pastille, sur une ligne, devant « Code fictif 1 » et « Code fictif 16 »).
+- À savoir en regardant la synthèse : elle dit « évalué 10 novembre ». C'est la date inscrite dans le fichier d'essai (`dateEvaluation` à 2026-11-10 dans le ZIP, mesuré), pas le jour de l'essai. Je n'ai pas cherché pourquoi la fabrique la fige.
+
+### Ce que j'ai tranché
+
+- **Défaut 1 laissé tel quel**, proposition prête : c'est ta consigne (« dis-le avant d'élargir »).
+- **Les trouvailles ci-dessous restent dans ce rapport**, pas au BACKLOG : trois d'entre elles ont un symptôme que Grégoire a vécu et y ont droit, mais `BACKLOG.md` vit sur `main` ; je les y inscris à la fusion, avec l'entrée de `RELAIS.md`.
+
+### Trouvailles hors du lot (retour d'essai, issue « inscrire et continuer »)
+
+11. **Le nom du ZIP prend la date en temps universel** (vécu par Grégoire : `travaux_a2026_2026-11-25.zip` le 24 au soir, heure de Montréal). Lu : `new Date().toISOString().split('T')[0]` à `js/travaux-archivage.js:788` (« Exporter des travaux ») et `:953` (« Exporter pour Léa ») ; le dépôt a déjà `dateLocaleYMD` (`js/date-utils.js:22`). Pas rejoué : le nuage tourne en temps universel, une reproduction ici ne prouverait rien.
+12. **« Exporter pour Léa » sans évaluation verrouillée dit deux choses contraires** (vécu par Grégoire). Rejoué (Chromium, fichier d'avant le retour) : le bouton reste actif alors que le compteur dit « Aucune évaluation trouvée » ; après l'alerte « L'export Léa a échoué : Aucune évaluation trouvée pour ces critères. », la ligne « Préparation des PDF : ça peut prendre un moment. » et la barre à 3 % restent affichées. Lu, pas rejoué : quand une personne est choisie, `ouvrirOngletDuPdf()` (`js/travaux-archivage.js:950`) ouvre un onglet vide avant toute vérification ; c'est probablement l'onglet que Grégoire a vu.
+13. **La version annotée d'une copie PNG est un JPEG nommé `.png`** (lu : `js/travaux-archivage.js:652`, `'image/jpeg'`, et le nom garde l'extension d'origine). Sans conséquence observée.
+14. **`_grilleExport` n'est posé que par `genererDocPDF`** (`js/travaux-export-pdf.js:35`, lu). Dans « Exporter des travaux » et `rendrePDFAvecAnnotations`, il vaut `null` ou la grille d'un export précédent ; un code d'un chiffre sous une grille à codes activée pourrait alors s'y dessiner à sa position de repli. Les codes en lettres n'en dépendent pas. Pas rejoué.
+
+### Rejoué ou seulement lu (retour)
+
+- **Rejoué** (Chromium) : le défaut 1 sur `main` et sur la branche, le correctif et son break-test ; le chemin PDF de « Exporter des travaux » ; la régénération du fichier d'essai, sa réouverture dans un espace vide et le PDF produit par les gestes ; les messages contraires de l'export Léa (trouvaille 12, sauf l'onglet).
+- **Seulement lu** : la date en temps universel (11), l'onglet vide (12), le JPEG nommé `.png` (13), `_grilleExport` (14), l'ancienneté du défaut 1.
+- **Lancé avant le commit du retour** : les douze essais de `codes-en-lettres-lisibles.spec.js` et `essai-codes-en-lettres-depart.spec.js`, verts ; Vitest complet depuis `tests/` : 959 fichiers, 12 355 tests, verts.
+
 ## Les gestes à essayer
 
-Ce lot touche l'apparence et deux refus de saisie : rien ne s'écrit dans tes données, l'aperçu est une adresse à part qui ne voit pas celles d'`app.codexnumeris.org` (règle 2 des portes terrain : pas de porte due). Ces gestes servent à voir de tes yeux ce qu'aucune machine du nuage ne juge : Safari et l'iPad.
+Réécrits au retour d'essai : seulement ce que Grégoire n'a pas encore vu. Rien de ces gestes ne s'écrit dans tes données ; l'aperçu est une adresse à part, qui ne voit pas celles d'`app.codexnumeris.org` (pas de porte due). Ils servent à juger de tes yeux ce qu'aucune machine du nuage ne juge : Safari et l'iPad.
 
-**Ouvrir le fichier de départ dans l'aperçu**
+**Ouvrir le fichier d'essai dans l'aperçu (comme hier)**
 
-1. Ouvre **https://deploy-preview-59--codexnumeris-051225.netlify.app/departs.html** et touche « Télécharger le fichier » sous « Essai : les codes en lettres ».
-2. Touche « Ouvrir l'application » ; dans l'application, « Codex », puis « Ouvrir un codex », choisis `ESSAI-codes-en-lettres-lot-1.zip`, puis « Recharger ».
-3. Va dans « Évaluations », la liste ; sur la ligne de Fictif-01 Personne-01, menu des actions, « Annoter ».
+1. Ouvre **https://deploy-preview-59--codexnumeris-051225.netlify.app/departs.html** et touche « Télécharger le fichier » sous « Essai : les codes en lettres ». ⚠ Reprends-le : celui d'hier n'avait pas d'évaluation.
+2. Touche « Ouvrir l'application » ; « Codex », « Ouvrir un codex », choisis `ESSAI-codes-en-lettres-lot-1.zip`, « Recharger ».
+3. « Évaluations », la liste ; sur la ligne de Fictif-01 Personne-01, le menu des actions, « Annoter ».
 
-**Puis, d'abord sur le Mac, ensuite sur l'iPad (cinq gestes)**
+**Puis, d'abord sur le Mac, ensuite sur l'iPad**
 
-1. Regarde la palette Codes.
-   ⮕ Attendu : dix-sept codes, chacun sur une ligne, les noms en colonne. Avant : « K- » et « A » l'un sous l'autre.
-2. Pose « K-A », « QRST » et « W-12 » sur la copie, puis zoome.
-   ⮕ Attendu : chacun dans une pastille, le texte aussi gros qu'un chiffre. Avant : un cercle, le texte rapetissé.
-3. Sur le Mac : choisis « QRST » et survole la copie.
-   ⮕ Attendu : le curseur montre la pastille « QRST » entière. Sur l'iPad : touche le bout d'une pastille avec l'outil de sélection et glisse-la.
-   ⮕ Attendu : elle se sélectionne par son bout et suit le doigt.
-4. Exporte le PDF de la copie et ouvre-le (Aperçu sur le Mac, Fichiers sur l'iPad).
-   ⮕ Attendu : les pastilles comme à l'écran ; sur la page de synthèse, le code le plus fréquent dans sa pastille, sur une ligne.
-5. Dans « Conception › Grilles », ouvre « Grille fictive : codes en lettres » et tape « ABCDE » dans un champ Code.
-   ⮕ Attendu : refusé, le témoin dit « quatre caractères au plus ».
+1. **Le curseur (Mac seulement).** Dans la palette Codes, choisis « QRST » et survole la copie sans cliquer.
+   ⮕ Attendu : le curseur montre la pastille « QRST » entière, la pointe au centre de la pastille.
+2. **Le PDF et sa page de synthèse.** Pose « K-A », « QRST » et « W-12 » sur la copie. « Annoter ▾ », « Évaluer » (Mots montre 300, Erreurs montre 3), puis dans Paramètres « Verrouiller ». Le sous-onglet « Exporter » ; dans « Export Léa », Production « Production fictive : codes en lettres » (le compteur dit « 1 PDF pour 1 étudiant·e »), puis « Exporter pour Léa ». Ouvre le PDF (Aperçu sur le Mac, Fichiers sur l'iPad).
+   ⮕ Attendu : page 1, la copie avec ses trois pastilles comme à l'écran ; page 2, « K-A » et « QRST » chacun dans sa pastille, sur une ligne. La synthèse dit « évalué 10 novembre » : c'est la date du fichier d'essai.
+3. **Le refus de « ABCDE ».** « Conception › Grilles », ouvre « Grille fictive : codes en lettres » et tape « ABCDE » dans un champ Code.
+   ⮕ Attendu : le témoin dit « Non enregistré : un code a quatre caractères au plus : plus long, il couvre trop de place sur la copie. » ; rien ne s'enregistre.
+4. **La copie exportée : seulement après le correctif du défaut 1**, si tu l'acceptes. Le sous-onglet « Exporter », « Exporter des travaux », « Télécharger » ; dans le ZIP, ouvre `copie-fictive_annote.jpg` (dans le dossier de Fictif-01, puis celui de la production).
+   ⮕ Attendu après le correctif : les trois pastilles sur la copie. Aujourd'hui, la copie sans un code : c'est le défaut 1, déjà vu.

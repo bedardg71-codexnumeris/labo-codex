@@ -48,4 +48,4 @@ La liste s'affiche avec ce qui manque avant de créer (« Avant de créer, il re
 | # | Où | Texte | Source |
 |---|---|---|---|
 | E1 | `departs.html`, titre de la section d'essai | Essai : les codes en lettres | `departs.html` |
-| E2 | `departs.html`, sa phrase | Une classe fictive de quatre personnes, une production, une grille aux dix-sept codes fictifs (K-A à W-12) et une copie fictive déjà importée : ouvre la copie et pose des codes tout de suite. | `departs.html` |
+| E2 | `departs.html`, sa phrase (↻ retour d'essai : « son évaluation commencée ») | Une classe fictive de quatre personnes, une production, une grille aux dix-sept codes fictifs (K-A à W-12) et une copie fictive déjà importée, son évaluation commencée : ouvre la copie et pose des codes tout de suite. | `departs.html` |

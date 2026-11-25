@@ -19,7 +19,8 @@ import { FICHIER_ESSAI, NOM_ESSAI, CODES } from './essai-codes-en-lettres.js';
 //   · une grille dont le critère algorithmique porte les dix-sept codes fictifs (consignes du 24 nov.) ;
 //   · une production qui la nomme ;
 //   · une copie fictive déjà importée par le vrai chemin d'import (tests/fixtures/perspective-coins/loutre-pleine-image.jpg :
-//     un texte inventé, déjà au dépôt), associée à la première personne.
+//     un texte inventé, déjà au dépôt), associée à la première personne ;
+//   · son évaluation commencée (300 mots), non verrouillée : le PDF se produit ensuite par les gestes (retour d'essai).
 // ⛔ Aucune donnée réelle. Les codes : K-A … W-B, K-AB, QRST, W-12, « Code fictif 1 » à « 17 ».
 
 const COPIE = path.join(RACINE, 'tests', 'fixtures', 'perspective-coins', 'loutre-pleine-image.jpg');
@@ -94,6 +95,27 @@ test('fabriquer : ESSAI, codes en lettres', async ({ page }) => {
     console.log('IMPORT →', JSON.stringify(importe));
     expect(importe.fichiers).toEqual([expect.objectContaining({ da: ids.da, productionId: ids.productionId })]);
 
+    // 3 bis. Une évaluation COMMENCÉE, par les gestes d'Évaluer (retour d'essai du 24 nov., 19 h 30 : sans évaluation,
+    // « Exporter pour Léa » ne produit rien). La copie ouverte depuis la liste, « Annoter ▾ », « Évaluer », 300 mots.
+    // Non verrouillée : les codes que Grégoire posera la suivent (le compte d'erreurs), puis il la verrouille.
+    const fermerLeRappel = () => page.evaluate(() => { const o = document.getElementById('overlay-backup-reminder'); if (o) o.remove(); });
+    await page.evaluate(() => naviguerVers('evaluations', 'liste'));
+    const menu = page.locator('select.eval-actions-select:has(option[value^="annoter|"])').first();
+    await expect(menu).toBeVisible();
+    await menu.selectOption(await menu.evaluate((s) => s.querySelector('option[value^="annoter|"]').value));
+    await page.waitForFunction(() => !!document.querySelector('#evaluations-annoter.sous-section.active'), null, { timeout: 15000 });
+    await fermerLeRappel();
+    await page.click('#travaux-btn-actions');
+    await page.click('#travaux-btn-evaluer');
+    const mots = page.locator('input[id^="eval_mots_"]').first();
+    await expect(mots).toBeVisible();
+    // Le chargement de l'évaluation suspend l'enregistrement automatique (`_debouncerAutoSave`) : saisir après, comme
+    // une personne qui lit l'écran avant de taper.
+    await expect.poll(() => page.evaluate(() => !window._autoSaveSuspendu && !(window._chargementsEvaluationEnCours > 0))).toBe(true);
+    await mots.fill('300');
+    await mots.dispatchEvent('change');
+    await expect.poll(() => page.evaluate(() => (obtenirDonneesSelonMode('evaluationsSauvegardees') || []).length), { message: 'l’évaluation s’enregistre seule', timeout: 15000 }).toBe(1);
+
     // 4. Le fichier : le vrai `Codex.generer`, l'aperçu « voici ce qui part » accepté d'office.
     await page.evaluate(() => { definirPreference('modeClair', true); });
     await repondreAuRappel(page);
@@ -120,8 +142,12 @@ test('fabriquer : ESSAI, codes en lettres', async ({ page }) => {
         eleves: (donnees[t + '_groupeEtudiants'] || []).length,
         copies: (donnees[t + '_fichiersTravaux'] || []).length,
         images: travaux.length,
+        evaluations: (donnees[t + '_evaluationsSauvegardees'] || []).map((e) => ({
+            da: e.etudiantDA, verrouillee: !!e.verrouillee,
+            mots: Number(((e.donneesAlgorithmiques || {}).CR_ESSAI_CODES || {}).mots) })),
         sansLaDemo: Object.keys(donnees).filter((k) => /^demo_/.test(k)).length
-    }).toEqual({ codes: CODES, production: true, eleves: 4, copies: 1, images: 1, sansLaDemo: 0 });
+    }).toEqual({ codes: CODES, production: true, eleves: 4, copies: 1, images: 1,
+        evaluations: [{ da: ids.da, verrouillee: false, mots: 300 }], sansLaDemo: 0 });
     fs.mkdirSync(DOSSIER_DES_DEPARTS, { recursive: true });
     fs.writeFileSync(path.join(DOSSIER_DES_DEPARTS, FICHIER_ESSAI), octets);
     console.log('ÉCRIT →', FICHIER_ESSAI, octets.length, 'octets ; fichiers du zip :', Object.keys(zip.files).join(', '));
