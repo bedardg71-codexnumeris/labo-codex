@@ -677,7 +677,7 @@ describe('L · une inscription peut ne porter aucun niveau (une remarque) ; ce n
         e.TC.ouvrirInscription(ZOE, CIBLE.id, null);
         const f = e.doc.querySelector('.tc-fenetre');
         const bouton = f.querySelector('[data-tc="inscrire"]');
-        expect(bouton.textContent).toBe('Inscrire la remarque');
+        expect(bouton.textContent).toBe('Inscrire sans niveau');
         const niveau = f.querySelector('.tc-niveaux input[value="2"]');
         niveau.checked = true;
         niveau.dispatchEvent(new e.doc.defaultView.Event('change', { bubbles: true }));
@@ -685,7 +685,7 @@ describe('L · une inscription peut ne porter aucun niveau (une remarque) ; ce n
         const sans = f.querySelector('.tc-niveaux input[data-sans-niveau]');
         sans.checked = true;
         sans.dispatchEvent(new e.doc.defaultView.Event('change', { bubbles: true }));
-        expect(bouton.textContent).toBe('Inscrire la remarque');
+        expect(bouton.textContent).toBe('Inscrire sans niveau');
         f.querySelector('.tc-critere[data-critere="crit-a"] .tc-coche--oui').click();
         f.querySelector('.tc-retroaction').value = 'Bonne piste à l\'oral.';
         bouton.click();

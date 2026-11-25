@@ -66,7 +66,7 @@ Sous le nom de l'étudiant·e, sur l'écran « Observer », dès qu'une inscript
 | N° | Où | Le texte | Statut |
 |---|---|---|---|
 | D1 | Les traces du jour portent des tampons : leurs noms, une fois chacun, dans l'ordre inscrit | Déjà inscrit aujourd'hui : Incertain, Inexact | **Accepté par Grégoire le 24 nov. 2026 (18 h 55), mot pour mot** |
-| D2 | Les traces du jour ne portent aucun tampon (des coches, un texte, un niveau) | Déjà inscrit aujourd'hui. | **PROPOSÉ.** Seconds choix : « Déjà inscrit aujourd'hui, sans tampon. » ; « Une inscription existe déjà aujourd'hui. » |
+| D2 | Les traces du jour ne portent aucun tampon (des coches, un texte, un niveau) | Déjà inscrit aujourd'hui. | **Validé par Cowork le 24 nov. 2026, 19 h 45, sous l'étiquette « À l'essai ».** |
 
 Deux précisions, à trancher si elles gênent : (a) « aujourd'hui » veut dire la date de l'écran, comme la marque « vu aujourd'hui » qui existait déjà ; (b) si les traces du jour mêlent des traces avec et sans tampon, la ligne nomme les tampons et ne dit rien de plus des autres.
 
@@ -76,10 +76,11 @@ Depuis la règle de Q4, ces textes peuvent nommer « remarque » une trace qui n
 
 | N° | Où | Ce qu'il dit | Quand il devient inexact |
 |---|---|---|---|
-| M1 | Fenêtre d'une case (vue étendue), la tuile sans niveau | « Aucun niveau » / « une remarque seulement » | Si l'on coche un critère sans écrire de texte |
-| M2 | Fenêtre d'une case, le bouton quand cette tuile est choisie | « Inscrire la remarque » | Idem |
-| M3 | Annonce pour lecteur d'écran après ce geste | « Zoé Fictive, Cible : remarque inscrite. » | Idem |
+| M1 | Fenêtre d'une case (vue étendue), la tuile sans niveau | ~~« une remarque seulement »~~ → **« Aucun niveau » / « une trace seulement »** | **Accepté par Grégoire le 24 nov. 2026 à 19 h 43. Fait.** |
+| M2 | Fenêtre d'une case, le bouton quand cette tuile est choisie | ~~« Inscrire la remarque »~~ → **« Inscrire sans niveau »** | **Accepté par Grégoire le 24 nov. 2026 à 19 h 43. Fait.** |
+| M3 | Annonce pour lecteur d'écran après ce geste | ~~« … : remarque inscrite. »~~ → **« Zoé Fictive, Cible : trace inscrite, sans niveau. »** | **Accepté par Grégoire le 24 nov. 2026 à 19 h 43. Fait.** |
 | M4 | Parcours « Suivre ton groupe par cibles », bulle « Une case par cible » | « Sa case de « La lecture stratégique » porte maintenant ✎ : une remarque, aucun niveau encore. L'observation ne pose pas de niveau. » | Jamais dans le parcours : l'observation de l'exemple porte un texte, c'est bien une remarque. Mais la bulle reprend les mots de l'ANCIENNE légende ; la légende neuve dit « des traces à lire ». Bulle validée mot pour mot : non touchée |
 | M5 | Historique et profil, l'étiquette | « Remarque, sans niveau » | Reste, pour les traces qui portent un texte (Q4) |
 | M6 | Infobulle d'une case qui a des niveaux et des traces sans niveau | « 3 inscriptions, dont 1 trace sans niveau » | SUPPOSÉ : la forme de Q5 appliquée aussi à ce cas mixte (elle disait « dont 1 remarque »), pour que la même case ne dise pas deux mots |
 
+Essai de Grégoire sur l'iPad (24 nov., 19 h 41, aperçu n° 60, paysage en plein écran, dix tampons, quatre critères) : la ligne D1 se lit sous le nom et tout tient jusqu'à « Inscrire et passer au suivant ». Retouche validée par lui. Restent M4 (la bulle du parcours, non touchée : validée mot pour mot, son exemple porte un texte) et M5 (l'étiquette, qui reste pour une trace avec texte).

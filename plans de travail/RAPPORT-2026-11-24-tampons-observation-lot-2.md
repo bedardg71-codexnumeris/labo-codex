@@ -208,6 +208,16 @@ Pas joué : le verdict WebKit complet ; l'essai sur iPad de la retouche.
 
 `captures-2026-11-24-tampons-observation-lot-2/observer-deja-inscrit-12-tampons-{1180x700,820x1180}-{clair,sombre}.png`.
 
+## 10. Second complément du 24 nov. 2026, 19 h 45
+
+Essai de Grégoire sur l'iPad à 19 h 41 : la retouche est validée par lui.
+
+- **Trois textes de la fenêtre d'une case** (Grégoire, 19 h 43, mot pour mot) : « une trace seulement », « Inscrire sans niveau », « [étudiant·e], [cible] : trace inscrite, sans niveau. » Les clés de `MOTS` changent de nom avec eux (`traceSeulement`, `inscrireSansNiveau`, `annonceSansNiveau`).
+- **Le parcours** : LU, aucune bulle ne cite ces trois textes ni ne désigne le bouton par son texte ; aucune bulle touchée. VU : le banc du parcours est vert sans changement.
+- **Bancs mis à jour pour ces chaînes** : `sentinelle-par-standards-lot-2-inscrire.test.js` (2), `par-standards-lot-2-inscrire.spec.js` (2). Une sentinelle neuve verrouille les trois textes et l'étiquette qui reste.
+- **Preuve (VU)** : WebKit 49 sur 49 (lots 1 et 2, inscription « Par standards », parcours) ; Chromium 40 sur 40 (lots 1 et 2) ; Vitest complet 12 401 sur 12 401.
+- **Deux trouvailles de Grégoire, inscrites sans y toucher** : #1309 (« Quitter la démo » au toucher : ne se reproduit pas sous WebKit du Mac sur `main` ; cible de 25 px de haut à 8 px du bas) et #1310 (« prêt » et « pas de pratique » ensemble : se reproduit sur `main`).
+
 ## Journal des break-tests (24 nov. 2026 ; V : Vitest, P : WebKit)
 
 | N° | Mutation | Rouge |

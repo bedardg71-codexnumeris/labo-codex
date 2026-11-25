@@ -27,7 +27,7 @@
  *
  * UNE INSCRIPTION SANS NIVEAU (complément du 21 nov., 9 h 17 ; à l'écran, une « remarque », mot PROPOSÉ) : la tuile
  * « Aucun niveau » (cochée d'office dans la fenêtre d'une case : aucun niveau n'est proposé) et un texte. Le bouton dit ce
- * qu'il va inscrire (« Inscrire le niveau » ou « Inscrire la remarque »). Une remarque n'entre jamais au niveau retenu ;
+ * qu'il va inscrire (« Inscrire le niveau » ou « Inscrire sans niveau »). Une remarque n'entre jamais au niveau retenu ;
  * une case qui n'a QUE des remarques montre ✎, leur nombre et le nom du niveau « sans donnée », sans survol (au toucher,
  * une bulle est invisible).
  *
@@ -74,12 +74,13 @@
         marqueRetenu: 'niveau retenu',
         caseIllisible: 'ordre des niveaux illisible',
         aucunNiveau: 'Aucun niveau',
-        remarqueSeulement: 'une remarque seulement',
-        inscrireRemarque: 'Inscrire la remarque',
+        // Mots de Grégoire (24 nov. 2026, 19 h 43) : « remarque » désigne un texte écrit, pas une trace sans niveau.
+        traceSeulement: 'une trace seulement',
+        inscrireSansNiveau: 'Inscrire sans niveau',
         remarque: 'Remarque, sans niveau',
         // 24 nov. 2026, mot PROPOSÉ (TEXTES-2026-11-24-tampons-observation-lot-2.md) : le nom lu de la liste des tampons d'une trace.
         tamponsPoses: 'Tampons posés',
-        annonceRemarque: (nom, cible) => `${nom}, ${cible} : remarque inscrite.`,
+        annonceSansNiveau: (nom, cible) => `${nom}, ${cible} : trace inscrite, sans niveau.`,
         aide: 'Au clavier : les flèches pour se déplacer, Entrée pour ouvrir une case.',
         aucune: 'aucune inscription',
         echelleTitre: (nom) => (nom ? `Échelle « ${nom} » :` : 'Échelle :'),
@@ -519,7 +520,7 @@
             + `<span class="tc-niveau-texte"><span class="tc-niveau-nom">${esc(nomTuile)}</span>${aide ? `<span class="tc-niveau-marque">${esc(aide)}</span>` : ''}</span></label>`;
         // Vue simple (`sansRemarque`) : les niveaux seulement ; la remarque sans niveau vit en vue étendue.
         const rien = (parProduction ? tuile('data-rien', MOTS.rienCeJour, '', true, 'tc-niveau--rien') : '')
-            + (sansRemarque ? '' : tuile('data-sans-niveau', MOTS.aucunNiveau, MOTS.remarqueSeulement, !parProduction, 'tc-niveau--rien tc-niveau--sans'));
+            + (sansRemarque ? '' : tuile('data-sans-niveau', MOTS.aucunNiveau, MOTS.traceSeulement, !parProduction, 'tc-niveau--rien tc-niveau--sans'));
         const tuiles = ctx.niveaux.map(n => {
             const marque = String(n.code) === ctx.codeSansDonnee ? `<span class="tc-niveau-marque">${esc(MOTS.sansDonnee)}</span>` : '';
             return `<label class="tc-niveau" style="--tn-couleur: ${esc(_couleur(n))}"><input type="radio" name="${esc(nom)}" value="${esc(n.code)}">`
@@ -741,7 +742,7 @@
                 <section class="tc-section tc-section--ligne">${_origineHTML(ctx, p + '-origine')}${_dateHTML(p + '-date')}</section>
                 <p class="tc-alerte u-hide" role="alert"></p>
                 <div class="modal-actions"><button type="button" class="btn btn-neutre" data-tc="fermer">${esc(MOTS.fermer)}</button>
-                    <button type="button" class="btn btn-principal" data-tc="inscrire">${esc(MOTS.inscrireRemarque)}</button></div>
+                    <button type="button" class="btn btn-principal" data-tc="inscrire">${esc(MOTS.inscrireSansNiveau)}</button></div>
             </form>
             <section class="tc-historique"><h4 class="tc-section-titre">${esc(MOTS.historique)}</h4><div class="tc-historique-hote">${_historiqueAvecRetenuHTML(ctx, da, cibleId)}</div></section>`;
         return _ouvrirFenetre(html, { mode: 'case', da: String(da), cibleId, retour, ctx });
@@ -770,7 +771,7 @@
         const etudiant = ctx.etudiants.find(e => String(e.da) === String(da));
         _fermer();
         _rerendre({ da, cibleId });
-        _annoncer(r.entrees[0].niveau === null ? MOTS.annonceRemarque(_nomEleve(etudiant), cible.etiquette)
+        _annoncer(r.entrees[0].niveau === null ? MOTS.annonceSansNiveau(_nomEleve(etudiant), cible.etiquette)
             : MOTS.annonceInscrit(_nomEleve(etudiant), cible.etiquette, niveau ? (niveau.nom || niveau.code) : saisie.niveau));
         return true;
     }
@@ -1028,7 +1029,7 @@
         if (details) details.classList.toggle('u-hide', e.target.hasAttribute('data-rien'));
         // La fenêtre d'une case : le bouton dit ce qu'il va inscrire.
         const bouton = !bloc && overlay.querySelector('[data-tc="inscrire"]');
-        if (bouton) bouton.textContent = e.target.hasAttribute('data-sans-niveau') ? MOTS.inscrireRemarque : MOTS.inscrire;
+        if (bouton) bouton.textContent = e.target.hasAttribute('data-sans-niveau') ? MOTS.inscrireSansNiveau : MOTS.inscrire;
     }
 
     window.TableauCibles = {

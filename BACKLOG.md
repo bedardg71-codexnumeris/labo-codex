@@ -144,6 +144,22 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
 
 **↻ 24 nov. 2026 — TRAITÉ SUR `lot/tampons-observation-2-observer`, NON FUSIONNÉ** : sur « Observer », « Régler mes tampons » ouvre la fenêtre des tampons sans qu'aucune copie soit ouverte (mesuré sous WebKit et Chromium ; essai « depuis « Observer », sans aucune copie… »). Reste ouvert tant que le lot n'est pas en ligne. Hors de « Observer » (un groupe sans pratique par cibles), le seul chemin reste Annoter.
 
+### #1310 · « Ton espace de travail est prêt » s'affiche pour un groupe sans pratique de notation, 24 novembre 2026 (vécu par Grégoire sur l'iPad, 19 h 38, aperçu n° 60 ; inscrit sur consigne de Cowork, 19 h 45, sans y toucher)
+
+**Symptôme** : hors démo, avec un groupe « 601-101-MQ · gr. 00001 · Mardi matin · A26 », deux messages se contredisaient à l'écran. En bas : « Ton espace de travail est prêt : trimestre, cours, groupe, horaire et pratique sont configurés. » Dans le Tableau de notation : « Ce groupe-cours n'a pas de pratique de notation. »
+
+**Mesuré sur `main` (1.258.1, `813eb3b09`), WebKit, 24 nov.** : SE REPRODUIT. Un groupe fictif avec un horaire et sans pratique montre les deux messages ensemble dans Évaluation. LU : la condition du bandeau (`js/transitions.js`, transition `numerisation-croisement`) ne regarde que l'horaire du groupe actif (`groupeActifAUnHoraire`), jamais sa pratique. Ne vient pas du lot des tampons : ni `transitions.js` ni `tableau-notation.js` n'y sont touchés.
+
+**À décider** : la condition du bandeau (exiger une pratique), ou ses mots. Ce sont des mots que l'utilisateur lit : à Grégoire.
+
+### #1309 · Dans la bande « Mode démonstration », « Quitter la démo » n'a pas répondu au toucher sur l'iPad, 24 novembre 2026 (vécu par Grégoire, 19 h 38, aperçu n° 60, paysage en plein écran ; inscrit sur consigne de Cowork, 19 h 45, sans y toucher)
+
+**Symptôme** : le bouton « Quitter la démo » du bandeau vert n'a pas répondu au toucher. Grégoire a quitté par le menu en haut à droite.
+
+**Mesuré sur `main` (1.258.1, `813eb3b09`), WebKit du Mac avec toucher simulé, 1180 × 820, 24 nov.** : NE SE REPRODUIT PAS (le toucher quitte la démo, depuis l'accueil et depuis Évaluation ; rien ne recouvre le bouton). Mais le bouton mesure 118 × 25 px, à 8 px du bas de l'écran : sous les 44 px d'une cible tactile, et dans la zone que l'iPad réserve à sa barre d'accueil en plein écran. C'est une cause PLAUSIBLE, pas démontrée : WebKit du Mac n'a pas cette zone. Le code du bandeau est le même sur `main` et sur l'aperçu (le lot des tampons n'y touche pas).
+
+**À faire** : l'éprouver sur l'iPad lui-même (porte terrain : le toucher, en plein écran et dans Safari) avant de corriger.
+
 ### #1308 · Dans la démo, rien ne dit quel groupe est « Par standards », 24 novembre 2026 (vécu par Grégoire sur l'iPad, aperçu n° 58 ; inscrit sur consigne de Cowork, 15 h 35, sans y toucher)
 
 **Symptôme** : dans la démo, le nom du groupe « 601-998-DM · gr. 00003 » ne dit pas que c'est le groupe « Par standards ». Grégoire a dû le demander pour essayer les tampons d'observation, qui ne se règlent que dans un groupe qui a une pratique par cibles.

@@ -557,4 +557,12 @@ describe('I · retouche du 24 nov. : « Déjà inscrit aujourd\'hui », et l\'hi
         expect(q(3, 2, 1)).toContain('« Cible fictive » : 1 niveau inscrit et 3 traces sans niveau pour 2 étudiant·es');
         expect(q(2, 1)).not.toMatch(/remarque/i);
     });
+    it('la fenêtre d\'une case : les trois textes de Grégoire (24 nov., 19 h 43) ; « remarque » n\'y nomme plus une trace sans niveau', () => {
+        const { TC } = monter();
+        expect(TC.MOTS.traceSeulement).toBe('une trace seulement');
+        expect(TC.MOTS.inscrireSansNiveau).toBe('Inscrire sans niveau');
+        expect(TC.MOTS.annonceSansNiveau('Zoé Fictive', 'Cible fictive')).toBe('Zoé Fictive, Cible fictive : trace inscrite, sans niveau.');
+        expect(TC.MOTS.remarque, 'l\'étiquette reste pour une trace qui porte un texte').toBe('Remarque, sans niveau');
+        expect([TC.MOTS.remarqueSeulement, TC.MOTS.inscrireRemarque, TC.MOTS.annonceRemarque]).toEqual([undefined, undefined, undefined]);
+    });
 });
