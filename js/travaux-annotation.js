@@ -1799,6 +1799,58 @@
      * @param {Object} data - Donnees de l'annotation
      * @returns {{ x1: number, y1: number, x2: number, y2: number }}
      */
+    /** Le code qu'un `errfr_*` affiche sur la copie ouverte (le même que `dessinerErreurFrancais`). */
+    function numeroDuCode(type) {
+        if (typeof codesAnnotation !== 'undefined' && typeof travauxOutils !== 'undefined' && travauxOutils.grilleCourante) {
+            return codesAnnotation.code(travauxOutils.grilleCourante(), type).numero;
+        }
+        return type.replace('errfr_', '');
+    }
+
+    /**
+     * Codes en lettres (24 nov. 2026) — la demi-largeur, en coordonnées normalisées, de la pastille d'un code de trois
+     * caractères et plus, telle que `dessinerErreurFrancais` la dessine ; 0 pour un cercle ou une autre forme.
+     */
+    function demiLargeurPastille(forme) {
+        if (!forme || typeof forme.type !== 'string' || forme.type.indexOf('errfr_') !== 0) return 0;
+        if (!canvasAnnotation || !ctxAnnotation || typeof annotationFormes === 'undefined') return 0;
+        const w = canvasAnnotation.width, h = canvasAnnotation.height;
+        const rayon = Math.min(Math.abs(forme.x2 - forme.x1) * w, Math.abs(forme.y2 - forme.y1) * h) / 2;
+        const g = annotationFormes.geometrieCode(ctxAnnotation, numeroDuCode(forme.type), rayon, Math.round(rayon * 1.2));
+        return g.forme === 'pastille' ? g.demiLargeur / w : 0;
+    }
+
+    /**
+     * Codes en lettres (24 nov. 2026) — un code en pastille déborde de son carré enregistré : le cadre (le toucher, le
+     * rectangle de sélection, les poignées) prend la largeur dessinée, autour du même centre. La donnée ne change pas.
+     */
+    function cadreALaPastille(forme, x1, x2) {
+        const demi = demiLargeurPastille(forme);
+        if (!(demi > (x2 - x1) / 2)) return { x1: x1, x2: x2 };
+        const centre = (x1 + x2) / 2;
+        return { x1: centre - demi, x2: centre + demi };
+    }
+
+    /**
+     * Codes en lettres (24 nov. 2026) — le cadre d'un code en pastille est plus large que son carré enregistré ; l'ancrer
+     * au coin opposé du cadre déplacerait la donnée. Il grandit autour de son centre, dans le rapport des distances du
+     * pointeur au centre (au début du geste, puis maintenant) : sans saut, carré gardé. Rend `true` s'il l'a fait.
+     */
+    function redimensionnerPastille(sel, xNorm, yNorm) {
+        if (sel.type !== 'shape' || !donneesAvantModif || !deplacementOrigine || !(demiLargeurPastille(sel.data) > 0)) return false;
+        const d0 = donneesAvantModif;
+        const w = canvasAnnotation.width, h = canvasAnnotation.height;
+        const cx = (d0.x1 + d0.x2) / 2, cy = (d0.y1 + d0.y2) / 2;
+        const r0 = Math.hypot((deplacementOrigine.x - cx) * w, (deplacementOrigine.y - cy) * h);
+        const r1 = Math.hypot((xNorm - cx) * w, (yNorm - cy) * h);
+        const k = r0 > 0 ? Math.max(0.25, r1 / r0) : 1;
+        const hx = (d0.x2 - d0.x1) / 2 * k, hy = (d0.y2 - d0.y1) / 2 * k;
+        sel.data.x1 = cx - hx; sel.data.x2 = cx + hx;
+        sel.data.y1 = cy - hy; sel.data.y2 = cy + hy;
+        sel.bbox = calculerBBox(sel.type, sel.data);
+        return true;
+    }
+
     function calculerBBox(type, data) {
         switch (type) {
             case 'stroke': {
@@ -1824,7 +1876,9 @@
                     if (data.cx > sx2) sx2 = data.cx;
                     if (data.cy > sy2) sy2 = data.cy;
                 }
-                return { x1: sx1, y1: sy1, x2: sx2, y2: sy2 };
+                // Codes en lettres (24 nov. 2026) : le cadre d'un code en pastille prend la largeur dessinée.
+                const cadre = cadreALaPastille(data, sx1, sx2);
+                return { x1: cadre.x1, y1: sy1, x2: cadre.x2, y2: sy2 };
             }
             case 'text': {
                 const w = canvasAnnotation?.width || 1000;
@@ -2328,6 +2382,8 @@
             sel.bbox = calculerBBox(sel.type, sel.data);
             return;
         }
+
+        if (redimensionnerPastille(sel, xNorm, yNorm)) return;   // codes en lettres (24 nov. 2026)
 
         const bbox = dimensionsOriginales;
 
@@ -3097,23 +3153,11 @@
         // copie ouverte (`codesAnnotation`) : le code du sous-critère sous une
         // grille activée, la position dans l'ordre personnalisé en repli (hier).
         // Un code que la liste ne connaît pas garde son numéro : jamais effacé.
-        let numero = type.replace('errfr_', '');
-        if (typeof codesAnnotation !== 'undefined' && typeof travauxOutils !== 'undefined' && travauxOutils.grilleCourante) {
-            numero = codesAnnotation.code(travauxOutils.grilleCourante(), type).numero;
-        }
+        const numero = numeroDuCode(type);
 
-        // Cercle rempli
-        ctx.fillStyle = color || '#888888';
-        ctx.beginPath();
-        ctx.arc(mx, my, rayon, 0, Math.PI * 2);
-        ctx.fill();
-
-        // Numero blanc au centre
-        ctx.fillStyle = '#ffffff';
-        ctx.font = 'bold ' + Math.round(rayon * 1.2) + 'px sans-serif';
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
-        ctx.fillText(numero, mx, my);
+        // Codes en lettres (24 nov. 2026) : le cercle d'hier jusqu'à deux caractères, une pastille au-delà, le
+        // texte à la taille d'un chiffre — une seule règle pour la copie, le PDF et le curseur (annotation-formes.js).
+        annotationFormes.dessinerCode(ctx, numero, mx, my, rayon, Math.round(rayon * 1.2), color || '#888888');
     }
 
     /**

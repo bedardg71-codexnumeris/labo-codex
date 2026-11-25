@@ -124,7 +124,7 @@
  "js/travaux-annotation.js": {
   "onPointerDown": 48,
   "onKeyDown": 38,
-  "appliquerRedimensionnement": 35,
+  "appliquerRedimensionnement": 36,
   "dessinerForme": 36,
   "annuler": 32,
   "retablir": 32

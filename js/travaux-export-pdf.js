@@ -608,15 +608,8 @@
                     if (typeof codesAnnotation !== 'undefined') {
                         numE = codesAnnotation.code(_grilleExport, forme.type).numero;
                     }
-                    ctx.fillStyle = forme.color || '#888888';
-                    ctx.beginPath();
-                    ctx.arc(mxE, myE, rayonE, 0, Math.PI * 2);
-                    ctx.fill();
-                    ctx.fillStyle = '#ffffff';
-                    ctx.font = 'bold ' + Math.round(rayonE * 1.2) + 'px sans-serif';
-                    ctx.textAlign = 'center';
-                    ctx.textBaseline = 'middle';
-                    ctx.fillText(numE, mxE, myE);
+                    // Codes en lettres (24 nov. 2026) : la règle de l'écran, une seule fois (annotation-formes.js).
+                    annotationFormes.dessinerCode(ctx, numE, mxE, myE, rayonE, Math.round(rayonE * 1.2), forme.color || '#888888');
                 } else if (forme.type.startsWith('sym-')
                         && travauxOutils.OUTILS[forme.type]) {
                     // Symboles Unicode personnalises — miroir du default de

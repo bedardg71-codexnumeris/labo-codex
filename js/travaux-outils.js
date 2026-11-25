@@ -2053,18 +2053,13 @@
         const c = document.createElement('canvas');
         c.width = taille; c.height = taille;
         const ctx = c.getContext('2d');
-        // Cercle colore
-        ctx.fillStyle = couleur;
-        ctx.beginPath();
-        ctx.arc(taille / 2, taille / 2, taille / 2 - 1, 0, Math.PI * 2);
-        ctx.fill();
-        // Numero blanc
-        ctx.fillStyle = '#ffffff';
-        ctx.font = 'bold ' + Math.round(taille * 0.55) + 'px sans-serif';
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
-        ctx.fillText(code, taille / 2, taille / 2 + 1);
-        const url = 'url(' + c.toDataURL() + ') 16 16, crosshair';
+        // Codes en lettres (24 nov. 2026) : la règle de la copie et du PDF (annotation-formes.js) ; une pastille
+        // élargit l'image, le point actif reste au centre.
+        const g = annotationFormes.geometrieCode(ctx, code, taille / 2 - 1, Math.round(taille * 0.55));
+        const largeur = Math.max(taille, Math.ceil(g.demiLargeur * 2) + 2);
+        if (largeur !== taille) c.width = largeur;
+        annotationFormes.dessinerCode(ctx, code, largeur / 2, taille / 2, taille / 2 - 1, Math.round(taille * 0.55), couleur, 1);
+        const url = 'url(' + c.toDataURL() + ') ' + Math.round(largeur / 2) + ' 16, crosshair';
         _curseurCache[outilId] = url;
         return url;
     }

@@ -56,7 +56,11 @@ const HAUSSES_ASSUMEES = {
     'js/wizard-pratique-v2.js : reponsesDepuisPratique': 'lot 1 « Par standards » (21 nov. 2026) : 40 → 41, la famille `cibles` à la relecture (alors `chargerPratiqueExistante`)',
     // La question avant de retirer une cible qui porte des niveaux inscrits (le patron de #717) : un `if` d'une ligne, qui
     // délègue à `_confirmerRetraitCiblesInscrites` (la lecture des inscriptions, la phrase, la fenêtre). +1, le minimum.
-    'js/wizard-pratique-v2.js : creerPratiqueV2': 'lot 2 « Par standards » (21 nov. 2026) : 75 → 76, la question avant de retirer une cible inscrite'
+    'js/wizard-pratique-v2.js : creerPratiqueV2': 'lot 2 « Par standards » (21 nov. 2026) : 75 → 76, la question avant de retirer une cible inscrite',
+    // Le redimensionnement d'un code en pastille (codes en lettres, suite du 24 nov. 2026) : un `if` d'une ligne, qui
+    // délègue à `redimensionnerPastille` (travaux-annotation.js : le centre gardé, sans saut). Le cadre élargi sort aussi
+    // en fonction (`cadreALaPastille`), `calculerBBox` ne monte pas. +1, le minimum.
+    'js/travaux-annotation.js : appliquerRedimensionnement': 'codes en lettres, suite (24 nov. 2026) : 35 → 36, un code en pastille grandit autour de son centre'
 };
 
 /** Compare deux relevés { fichier: { nom: cyc | [cyc…] } } : hausses, neuves, baisses (à reporter). */

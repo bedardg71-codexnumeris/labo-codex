@@ -148,7 +148,119 @@
         return { x1: Math.min.apply(null, xs), y1: Math.min.apply(null, ys), x2: Math.max.apply(null, xs), y2: Math.max.apply(null, ys) };
     }
 
+    /* ---------------------------------------------------------------------
+       LE CODE DANS SON CERCLE, OU SA PASTILLE (lot « codes en lettres », 24 nov. 2026)
+
+       Un code d'annotation s'écrit en blanc dans une forme de sa couleur, à trois endroits : la copie
+       (travaux-annotation.js), le PDF (travaux-export-pdf.js) et le curseur (travaux-outils.js). Une seule règle :
+         · UN OU DEUX CARACTÈRES : le cercle d'hier, au pixel près (même suite de gestes sur le contexte :
+           couleur, arc, remplissage, blanc, police à 1,2 × le rayon, centré) ;
+         · TROIS CARACTÈRES ET PLUS : une PASTILLE (décision de Grégoire, 24 nov. 2026, 17 h 45) — la hauteur du
+           cercle, des bouts arrondis du même rayon, une largeur selon le texte, et le texte À LA TAILLE D'UN
+           CHIFFRE dans un cercle de ce rayon. Elle reste centrée sur le point touché ;
+         · PLUS DE QUATRE (le stock seulement : la saisie refuse au-delà de quatre, une grille enregistrée garde
+           ses codes) : la pastille s'arrête à la largeur de quatre caractères larges (PLAFOND, « MMMM ») et le
+           texte rapetisse pour y tenir.
+       ↻ Remplace la règle de 17 h 38 (le texte rapetissait dans un cercle fixe) : un code de trois caractères y
+         devenait trop petit pour se lire d'un coup d'œil (capture de la copie, vue par Grégoire).
+       Rien n'est enregistré : la largeur se calcule au dessin, à partir du code. La sélection la relit
+       (`geometrieCode`, travaux-annotation.js).
+       --------------------------------------------------------------------- */
+    var MARGE_CODE = 0.93;          // le coin de l'encre reste à 93 % du rayon du bout arrondi
+    var CARACTERES_EN_CERCLE = 2;   // jusque-là, le cercle d'hier
+    var PLAFOND = 'MMMM';           // la largeur de quatre caractères larges
+
+    /**
+     * La pastille d'un texte, en pixels. `rayon` : celui du cercle ; `demiEncre` et `demiHauteur` : la demi-largeur
+     * et la demi-hauteur de l'encre à la taille d'un chiffre ; `demiEncrePlafond` : la demi-largeur de PLAFOND à
+     * cette taille. Rend `demiDroite` (le demi-segment droit entre les deux bouts), `demiLargeur` (de bout à bout),
+     * et `echelle` (1, sauf au-delà du plafond, où le texte rapetisse). Pure.
+     */
+    function geometriePastille(rayon, demiEncre, demiHauteur, demiEncrePlafond) {
+        var place = rayon * MARGE_CODE;
+        var h = Math.min(demiHauteur, place * 0.999);
+        var enBout = Math.sqrt(place * place - h * h);   // ce que l'encre peut avancer dans un bout arrondi
+        var droit = Math.max(0, demiEncre - enBout);
+        var droitMax = Math.max(0, demiEncrePlafond - enBout);
+        var echelle = 1;
+        if (droit > droitMax) {
+            // Plus petit, le texte est aussi moins haut : il avance davantage dans le bout. Rester à `enBout`
+            // calculé à pleine taille garde une marge.
+            echelle = (droitMax + enBout) / demiEncre;
+            droit = droitMax;
+        }
+        return { demiDroite: droit, demiLargeur: droit + rayon, echelle: echelle };
+    }
+
+    /** L'encre d'un texte en gras à la taille `taille` : demi-largeur et demi-hauteur, depuis un point centré, au milieu. */
+    function _encre(ctx, texte, taille) {
+        ctx.font = 'bold ' + taille + 'px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        var m = ctx.measureText(texte);
+        // L'encre, si le moteur la donne (Safari, Chrome) ; sinon la chasse et une hauteur de capitale.
+        var gauche = (typeof m.actualBoundingBoxLeft === 'number') ? m.actualBoundingBoxLeft : m.width / 2;
+        var droite = (typeof m.actualBoundingBoxRight === 'number') ? m.actualBoundingBoxRight : m.width / 2;
+        var haut = (typeof m.actualBoundingBoxAscent === 'number') ? m.actualBoundingBoxAscent : taille * 0.4;
+        var bas = (typeof m.actualBoundingBoxDescent === 'number') ? m.actualBoundingBoxDescent : taille * 0.4;
+        return { demiLargeur: Math.max(gauche, droite), demiHauteur: Math.max(haut, bas) };
+    }
+
+    /**
+     * La forme d'un code de rayon `rayon`, `base` étant la taille d'un chiffre : { forme: 'cercle' | 'pastille',
+     * rayon, demiLargeur, demiDroite, taille }. Un cercle ne touche pas au contexte ; une pastille le mesure, entre
+     * `save` et `restore`.
+     */
+    function geometrieCode(ctx, texte, rayon, base) {
+        texte = String(texte);
+        if (texte.length <= CARACTERES_EN_CERCLE) {
+            return { forme: 'cercle', rayon: rayon, demiLargeur: rayon, demiDroite: 0, taille: base };
+        }
+        ctx.save();
+        var e = _encre(ctx, texte, base);
+        var plafond = _encre(ctx, PLAFOND, base);
+        ctx.restore();
+        var g = geometriePastille(rayon, e.demiLargeur, e.demiHauteur, plafond.demiLargeur);
+        return { forme: 'pastille', rayon: rayon, demiLargeur: g.demiLargeur, demiDroite: g.demiDroite, taille: base * g.echelle };
+    }
+
+    /** Le contour d'une pastille centrée en (cx, cy) : deux bouts de rayon `rayon`, un segment droit de 2 × `demiDroite`. */
+    function tracerPastille(ctx, cx, cy, rayon, demiDroite) {
+        ctx.moveTo(cx - demiDroite, cy - rayon);
+        ctx.lineTo(cx + demiDroite, cy - rayon);
+        ctx.arc(cx + demiDroite, cy, rayon, -Math.PI / 2, Math.PI / 2);
+        ctx.lineTo(cx - demiDroite, cy + rayon);
+        ctx.arc(cx - demiDroite, cy, rayon, Math.PI / 2, Math.PI * 1.5);
+        ctx.closePath();
+    }
+
+    /**
+     * Dessine un code : sa forme de couleur `couleur`, centrée en (cx, cy), puis le texte en blanc
+     * (`decalageTexte` : le pixel de plus du curseur, hier). Rend la géométrie.
+     */
+    function dessinerCode(ctx, texte, cx, cy, rayon, base, couleur, decalageTexte) {
+        texte = String(texte);
+        var g = geometrieCode(ctx, texte, rayon, base);
+        ctx.fillStyle = couleur;
+        ctx.beginPath();
+        if (g.forme === 'cercle') ctx.arc(cx, cy, rayon, 0, Math.PI * 2);
+        else tracerPastille(ctx, cx, cy, rayon, g.demiDroite);
+        ctx.fill();
+        ctx.fillStyle = '#ffffff';
+        ctx.font = 'bold ' + g.taille + 'px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(texte, cx, cy + (decalageTexte || 0));
+        return g;
+    }
+
     var api = {
+        MARGE_CODE: MARGE_CODE,
+        CARACTERES_EN_CERCLE: CARACTERES_EN_CERCLE,
+        PLAFOND: PLAFOND,
+        geometriePastille: geometriePastille,
+        geometrieCode: geometrieCode,
+        dessinerCode: dessinerCode,
         contourPolygone: contourPolygone,
         contourEllipse: contourEllipse,
         pointsVagueContour: pointsVagueContour,
