@@ -195,7 +195,7 @@ Dossier `plans de travail/captures-2026-11-24-codes-en-lettres/` (avant = `main`
 
 **https://deploy-preview-59--codexnumeris-051225.netlify.app**, demande en brouillon [bedardg71-codexnumeris/labo-codex#59](https://github.com/bedardg71-codexnumeris/labo-codex/pull/59) (« APERÇU, ne pas fusionner »).
 
-Netlify l'annonce prêt (« Deploy Preview ready! ») pour le commit `c1c6d414d`, celui du lot. Je ne l'ai pas ouvert : le réseau du nuage refuse l'hôte `netlify.app`. Le numéro en bas de page reste celui de `main` (1.258.1, build 1123-1652), puisque le lot ne bumpe pas : c'est le jeton `?v=20261123l` des fichiers du lot qui distingue l'aperçu.
+Netlify reconstruit l'aperçu à chaque poussée de la branche. Il l'a annoncé prêt (« Deploy Preview ready! ») pour `c1c6d414d` (le lot 1), puis pour `b018478a3` (la suite). Je ne l'ai pas ouvert : le réseau du nuage refuse l'hôte `netlify.app`. Le numéro en bas de page reste celui de `main` (1.258.1, build 1123-1652), puisque le lot ne bumpe pas : c'est le jeton `?v=20261123m` des fichiers du lot qui distingue l'aperçu. Le fichier d'essai : `/departs.html` de la même adresse.
 
 ## Suite : la pastille (consigne de Cowork du 24 nov., 17 h 55)
 
