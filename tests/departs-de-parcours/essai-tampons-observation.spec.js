@@ -101,7 +101,7 @@ test('fabriquer : ESSAI, tampons d’observation, étape 3', async ({ page }) =>
             productions.push(p);
             idsProductions[d.cle] = p.id;
         });
-        await db.set(cle('productions'), productions);
+        await db.set(cle('productions'), productions); // security-ok: données fictives créées sur place, fichier d'essai
         const eleves = db.getSync(cle('groupeEtudiants'), []);
         return { productions: idsProductions, eleves: eleves.map((e) => ({ da: e.da, nom: e.prenom + ' ' + e.nom })), pratiqueId: pratique.id, ensembleId };
     }, { PRATIQUE, CIBLES, CAT_OBSERVATION, CAT_AUTRE, TAMPONS, PRODUCTIONS });
