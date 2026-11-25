@@ -1087,6 +1087,31 @@
     }
 
     /**
+     * LOT 3, « SUR UNE PRODUCTION » (25 nov. 2026) — un tampon POSÉ sur une production est-il, à cet instant, un tampon
+     * d'observation ? Oui si le tampon existe sur ce poste et que sa catégorie est cochée « D'observation » maintenant.
+     * Rend alors ce qu'une inscription copierait (la forme de `tamponsDObservation`) ; sinon null. Un tampon posé ne garde
+     * que son identifiant : son nom, sa catégorie et son critère sont lus AU PRÉSENT.
+     * SUPPOSITION NOMMÉE : un tampon ou une catégorie MASQUÉS (retirés de la palette) restent lus : la trace est déjà sur
+     * la production, et la retirer de la palette n'y retire rien (ce qu'« Observer » OFFRE, lui, suit les masques).
+     */
+    function tamponDObservation(id) {
+        var a = AUTOCOLLANTS.find(function(x) { return x.id === id; });
+        if (!a || a.legacy || !a.categorie) return null;
+        // Un tampon créé puis supprimé reste dans la liste en mémoire jusqu'au rechargement de la page : c'est la liste
+        // RANGÉE qui dit s'il existe encore (la trace lue est la même avant et après un rechargement).
+        if (a.custom) {
+            var ranges = db.getSync('tamponsPersonnalises', null);
+            if (!Array.isArray(ranges) || !ranges.some(function(c) { return c && c.id === id; })) return null;
+        }
+        if (obtenirCategoriesObservation().indexOf(a.categorie) === -1) return null;
+        var aSoi = obtenirCategoriesPerso().find(function(c) { return c && c.id === a.categorie; });
+        var nomCat = obtenirNomsCategories()[a.categorie] || (aSoi && aSoi.nom) || NOMS_CATEGORIES_DEFAUT[a.categorie] || a.categorie;
+        var pers = obtenirPersonnalisationObservations()[id] || {};
+        return { id: a.id, nom: a.nom, categorieId: a.categorie, categorieNom: nomCat,
+            critere: normaliserCritereTampon(pers.critere), emoji: (typeof pers.emoji === 'string') ? pers.emoji : '' };
+    }
+
+    /**
      * L'image d'un tampon qui existe sur ce poste : `{ src, emoji }` (`emoji` : il garde ses couleurs, #1244), ou null
      * (tampon supprimé, ou sans image). Pour montrer une trace inscrite : le nom vient de l'inscription, l'image d'ici.
      */
@@ -4715,6 +4740,7 @@
         critereDuTampon: critereDuTampon,
         // Lot 2 : ce que l'écran « Observer » offre, et l'image d'un tampon pour une trace déjà inscrite.
         tamponsDObservation: tamponsDObservation,
+        tamponDObservation: tamponDObservation,   // lot 3 : un tampon posé sur une production, lu au présent
         imageDuTampon: imageDuTampon,
         declarerCritereTampon: declarerCritereTampon,
         // Wrappers delegation (Phase 5)

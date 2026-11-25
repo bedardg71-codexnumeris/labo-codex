@@ -1263,3 +1263,54 @@
     font-size: 1rem;
     line-height: 1;
 }
+
+/* ============================================================================
+   LES TAMPONS D'OBSERVATION — lot 3, « sur une production » (25 nov. 2026)
+   Au profil : le rang « sous cette production » (`.pc-productions`, `.pc-production`) et, sous la cible qu'une
+   production vise seule, la trace lue en direct (`.tc-entree--directe`). Dans « Inscrire pour une production » :
+   les tampons de la production, dans le bloc de chaque cible (`.tc-pr-tampons`), dessinés comme ceux d'« Observer ».
+   ============================================================================ */
+
+.pc-productions .tc-aide {
+    margin: 0 0 10px;
+}
+
+.pc-production {
+    padding: 14px 0;
+    border-top: 1px solid var(--bordure-claire);
+}
+
+.pc-production:first-of-type {
+    border-top: none;
+    padding-top: 0;
+}
+
+/* Une trace lue sur une production : elle n'est dans aucun stock. Un bord en tirets ET une marque écrite. */
+.tc-entree--directe {
+    border-style: dashed;
+}
+
+.tc-entree-directe {
+    padding: 1px 8px;
+    border-radius: var(--radius-pill);
+    border: 1px dashed var(--bordure-moyenne);
+    color: var(--texte-secondaire);
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+.tc-pr-tampons-hote:empty {
+    display: none;
+}
+
+.tc-pr-tampons {
+    margin: 8px 0 12px;
+}
+
+.tc-pr-tampons .tc-aide {
+    margin: 6px 0 0;
+}
+
+.tc-pr-annonce {
+    margin: 0;
+}

@@ -518,6 +518,142 @@
         return offertes.length ? offertes : toutes.slice();
     }
 
+    /* ------------------------------------------------------------------ Les tampons posés sur une production (25 nov. 2026, fonctions pures)
+       « Tampons d'observation », lot 3. UNE SEULE SOURCE : poser un tampon sur une production n'écrit AUCUNE inscription.
+       Ces fonctions LISENT les annotations des productions d'un·e étudiant·e et en tirent des traces ; rien n'est écrit.
+       Un tampon retiré ou déplacé de la production disparaît donc de lui-même, sans trace fantôme.
+       Est « d'observation » un tampon que `lireTampon(id)` reconnaît AU MOMENT DE LA LECTURE (sa catégorie est cochée) :
+       le tampon posé ne garde que son identifiant. Au moment d'inscrire, la trace est COPIÉE (forme du lot 2) et ne bouge plus. */
+
+    /** L'instant où un tampon a été posé, en millisecondes, lu de son identifiant (`STK_<instant>`, écrit à la pose et
+     *  gardé quand on le déplace) ; null si l'identifiant n'en porte pas. */
+    function instantDeLaPose(tamponPose) {
+        const m = /^STK_(\d{12,14})(?:_|$)/.exec(String(tamponPose && tamponPose.id || ''));
+        const n = m ? Number(m[1]) : NaN;
+        return Number.isFinite(n) ? n : null;
+    }
+
+    /** L'instant d'une date ISO, ou null. */
+    function instantDuTexte(texte) {
+        const n = texte ? Date.parse(String(texte)) : NaN;
+        return Number.isFinite(n) ? n : null;
+    }
+
+    /**
+     * LES TRACES LUES SUR LES PRODUCTIONS d'un·e étudiant·e : par production, puis par jour de pose, les tampons
+     * d'observation posés (chacun une fois par jour, dans l'ordre de pose, dans sa forme de copie).
+     * LA DATE d'une trace : le jour, à l'heure de l'appareil, de l'instant de la pose ; à défaut (identifiant sans
+     * instant), la dernière modification de l'annotation, puis l'import du fichier.
+     * @param {Array} fichiers - `fichiersTravaux` (un fichier : `{ id, etudiantDA, productionId }`)
+     * @param {Array} annotations - `annotationsTravaux` (une annotation : `{ fichierId, pages: { [rang]: { stickers } } }`)
+     * @param {string} da
+     * @param {function(string): ?Object} lireTampon - l'identifiant d'un tampon → sa copie s'il est d'observation, sinon null
+     * @returns {Array<{productionId: string, jours: Array<{date: string, horodatage: string, tampons: Array}>}>}
+     *   les productions par trace la plus récente d'abord ; les jours, le plus récent d'abord
+     */
+    /** Les tampons d'observation posés sur les pages d'UNE annotation : `[{ instant, tampon }]`. */
+    function posesDeLAnnotation(annotation, copieDe, repli) {
+        const pages = (annotation && annotation.pages && typeof annotation.pages === 'object') ? annotation.pages : {};
+        const poses = [];
+        Object.keys(pages).forEach(rang => {
+            const page = pages[rang];
+            (page && Array.isArray(page.stickers) ? page.stickers : []).forEach(pose => {
+                const id = pose && pose.autocollantId != null ? String(pose.autocollantId) : '';
+                const tampon = id ? copieDe(id) : null;
+                if (tampon) poses.push({ instant: instantDeLaPose(pose) || repli, tampon: tampon });
+            });
+        });
+        return poses;
+    }
+
+    /** Des poses rangées par jour (à l'heure de l'appareil), le plus récent d'abord ; chaque tampon une fois par jour. */
+    function joursDesPoses(poses) {
+        const jours = new Map();
+        poses.forEach(p => {
+            const date = dateDuJour(new Date(p.instant));
+            const jour = jours.get(date) || { date: date, instant: p.instant, poses: [] };
+            jours.set(date, jour);
+            jour.instant = Math.max(jour.instant, p.instant);
+            jour.poses.push(p);
+        });
+        return Array.from(jours.values()).map(j => ({
+            date: j.date,
+            horodatage: new Date(j.instant).toISOString(),
+            tampons: construireTampons(j.poses.slice().sort((x, y) => x.instant - y.instant).map(x => x.tampon))
+        })).sort(plusRecenteDAbord);
+    }
+
+    function tracesDesProductions(fichiers, annotations, da, lireTampon) {
+        const lire = typeof lireTampon === 'function' ? lireTampon : () => null;
+        const parFichier = new Map();
+        (Array.isArray(annotations) ? annotations : []).forEach(a => { if (a && a.fichierId && !parFichier.has(a.fichierId)) parFichier.set(a.fichierId, a); });
+        const connus = new Map();   // identifiant du tampon → sa copie, ou null : lu une fois
+        const copieDe = (id) => { if (!connus.has(id)) connus.set(id, lire(id) || null); return connus.get(id); };
+        const parProduction = new Map();
+        (Array.isArray(fichiers) ? fichiers : []).filter(f => f && f.productionId && String(f.etudiantDA) === String(da)).forEach(f => {
+            const a = parFichier.get(f.id);
+            const poses = posesDeLAnnotation(a, copieDe, instantDuTexte(a && a.dateModification) || instantDuTexte(f.dateImport) || 0);
+            if (poses.length) parProduction.set(f.productionId, (parProduction.get(f.productionId) || []).concat(poses));
+        });
+        const rendu = [];
+        parProduction.forEach((poses, productionId) => rendu.push({ productionId: String(productionId), jours: joursDesPoses(poses) }));
+        return rendu.sort((x, y) => plusRecenteDAbord(x.jours[0], y.jours[0]));
+    }
+
+    /** Les tampons d'observation d'UNE production, tous jours confondus, chacun une fois, dans l'ordre de pose : ce que
+     *  « Inscrire pour une production » montre et copie. */
+    function tamponsDeLaProduction(traces, productionId) {
+        const t = (Array.isArray(traces) ? traces : []).find(x => x && x.productionId === String(productionId));
+        if (!t) return [];
+        return construireTampons(t.jours.slice().reverse().reduce((tous, j) => tous.concat(j.tampons), []));
+    }
+
+    /**
+     * LA cible qu'une production vise, quand elle en vise UNE SEULE : elle déclare exactement une cible
+     * (`production.ciblesRenseignees`) et cette cible est dans l'ensemble. Zéro, plusieurs, ou une cible qui n'est plus
+     * dans l'ensemble : null (la trace reste sous la production).
+     */
+    function cibleUnique(production, cibles) {
+        const declarees = (production && Array.isArray(production.ciblesRenseignees)) ? production.ciblesRenseignees.map(String) : [];
+        if (declarees.length !== 1) return null;
+        const c = (Array.isArray(cibles) ? cibles : []).find(x => x && String(x.id) === declarees[0]);
+        return c ? String(c.id) : null;
+    }
+
+    /** Vrai quand une inscription non annulée existe pour cette personne, cette cible et cette production. */
+    function estInscritePourLaProduction(liste, da, ensembleId, cibleId, productionId) {
+        const annulations = annulationsParInscription(liste);
+        return (Array.isArray(liste) ? liste : []).some(e => estInscription(e) && duneCase(e, da, ensembleId, cibleId)
+            && e.productionId === String(productionId) && !annulations.has(e.id));
+    }
+
+    /**
+     * LES TRACES LUES EN DIRECT SOUS UNE CIBLE : celles des productions qui visent cette seule cible, tant qu'aucune
+     * inscription non annulée n'existe pour la production et la cible (dès qu'il y en a une, c'est elle qu'on lit : la
+     * lecture en direct ne s'y ajoute pas une seconde fois). Chaque trace a la forme d'une inscription sans niveau,
+     * sans texte et sans coche, d'origine « production », marquée `enDirect` ; elle n'a pas d'identifiant : elle n'existe
+     * dans aucun stock.
+     * @param {Array} traces - `tracesDesProductions`
+     * @param {Array} productions - celles du groupe
+     * @param {{ liste: Array, da: string, ensembleId: string, cible: Object, cibles: Array }} o
+     */
+    function tracesEnDirectSousLaCible(traces, productions, o) {
+        const q = o || {};
+        const cible = q.cible || {};
+        const rendu = [];
+        (Array.isArray(traces) ? traces : []).forEach(t => {
+            const production = (Array.isArray(productions) ? productions : []).find(p => p && String(p.id) === t.productionId);
+            if (!production || cibleUnique(production, q.cibles) !== String(cible.id)) return;
+            if (estInscritePourLaProduction(q.liste, q.da, q.ensembleId, cible.id, t.productionId)) return;
+            t.jours.forEach(j => rendu.push({
+                id: '', type: INSCRIPTION, enDirect: true, da: String(q.da), ensembleId: String(q.ensembleId || ''), cibleId: String(cible.id),
+                niveau: null, echelleId: null, date: j.date, horodatage: j.horodatage, productionId: t.productionId,
+                origine: ORIGINES.PRODUCTION, noteBreve: '', criteres: etatDesCriteres(cible, {}), tampons: j.tampons
+            }));
+        });
+        return rendu.sort(plusRecenteDAbord);
+    }
+
     /* ------------------------------------------------------------------ Ajouter (fonction pure) */
 
     /**
@@ -629,6 +765,14 @@
         ciblesRetireesInscrites: ciblesRetireesInscrites,
         questionRetraitCibles: questionRetraitCibles,
         ciblesOffertes: ciblesOffertes,
+        // 25 nov. 2026, lot 3 : les tampons d'observation posés sur une production, LUS (rien n'est écrit)
+        instantDeLaPose: instantDeLaPose,
+        tracesDesProductions: tracesDesProductions,
+        tamponsDeLaProduction: tamponsDeLaProduction,
+        cibleUnique: cibleUnique,
+        estInscritePourLaProduction: estInscritePourLaProduction,
+        tracesEnDirectSousLaCible: tracesEnDirectSousLaCible,
+        plusRecenteDAbord: plusRecenteDAbord,
         ajouter: ajouter,
         lireToutes: lireToutes,
         inscrire: inscrire,

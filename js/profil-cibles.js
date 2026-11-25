@@ -47,7 +47,10 @@
         seuilAtteint: 'Elle atteint le seuil : pas de plafond.',
         titreCibles: 'Les cibles',
         historique: 'Toutes les inscriptions',
-        aucuneCible: 'Cette pratique n’a aucune cible.'
+        aucuneCible: 'Cette pratique n’a aucune cible.',
+        // 25 nov. 2026, lot 3 « sur une production » : mots PROPOSÉS (TEXTES-2026-11-25-tampons-observation-lot-3.md).
+        titreProductions: 'Sur ses productions',
+        aideProductions: 'Les tampons d’observation que tu as posés sur ses productions, à la date où tu les as posés.'
     });
 
     const esc = (t) => echapperHtml(t == null ? '' : String(t));
@@ -137,18 +140,31 @@
 
     /* ------------------------------------------------------------------ Les cibles */
 
-    function _carteCiblesHTML(ctx, eleve, da) {
+    function _carteCiblesHTML(ctx, eleve, da, traces) {
         if (!ctx.cibles.length) return `<div class="profil-carte pc-cibles"><p class="tc-aide">${esc(MOTS.aucuneCible)}</p></div>`;
         const T = window.TableauCibles;
+        const I = window.InscriptionsCibles;
+        // Lot 3 (25 nov. 2026) : sous la cible qu'une production vise SEULE, ses tampons d'observation, lus en direct tant
+        // qu'aucune inscription n'existe pour cette production et cette cible.
+        const productions = (typeof obtenirDonneesSelonMode === 'function') ? (obtenirDonneesSelonMode('productions') || []) : [];
+        const enDirect = (cible) => (traces.length ? I.tracesEnDirectSousLaCible(traces, productions, { liste: ctx.inscriptions, da,
+            ensembleId: ctx.ensemble.id, cible, cibles: ctx.cibles }) : []);
         const blocs = eleve.retenue.lignes.map(l => `
             <section class="pc-cible">
                 <h4 class="pc-cible-titre">${esc(l.cible.etiquette)}${l.cible.terminale ? ` <span class="cibles-fiche-terminale">Cible terminale</span>` : ''}</h4>
                 ${l.cible.enonce ? `<p class="tc-cible-enonce">${esc(l.cible.enonce)}</p>` : ''}
                 ${T.retenuHTML(ctx, l, { details: true })}
                 <p class="pc-historique-titre">${esc(MOTS.historique)}</p>
-                ${T.historiqueHTML(ctx, da, l.cible.id, { lectureSeule: true, retenuId: l.retenu ? l.retenu.id : null })}
+                ${T.historiqueHTML(ctx, da, l.cible.id, { lectureSeule: true, retenuId: l.retenu ? l.retenu.id : null, enDirect: enDirect(l.cible) })}
             </section>`).join('');
         return `<div class="profil-carte pc-cibles"><h3 class="pc-titre">${esc(MOTS.titreCibles)}</h3>${blocs}</div>`;
+    }
+
+    /** Le rang « sous cette production » (lot 3) : la carte n'existe que si une production porte un tampon d'observation. */
+    function _carteProductionsHTML(traces) {
+        if (!traces.length) return '';
+        return `<div class="profil-carte pc-productions"><h3 class="pc-titre">${esc(MOTS.titreProductions)}</h3>
+            <p class="tc-aide">${esc(MOTS.aideProductions)}</p>${window.TableauCibles.tracesDesProductionsHTML(traces)}</div>`;
     }
 
     /**
@@ -164,7 +180,8 @@
             pratiqueNom: designation.donnees.nom || '', etudiants: [_etudiant(da)] });
         if (!ctx.ensemble) return `<div class="profil-carte pc-note"><div class="alerte alerte-attention">${esc(ctx.vide || '')}</div></div>`;
         const eleve = window.TableauCibles.eleveDuContexte(ctx, da);
-        return `<div class="pc-panneau">${_carteNoteHTML(designation, eleve)}${_carteCiblesHTML(ctx, eleve, da)}</div>`;
+        const traces = window.TableauCibles.tracesDesProductions(da);
+        return `<div class="pc-panneau">${_carteNoteHTML(designation, eleve)}${_carteCiblesHTML(ctx, eleve, da, traces)}${_carteProductionsHTML(traces)}</div>`;
     }
 
     window.ProfilCibles = { MOTS, estActive, panneau };
