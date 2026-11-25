@@ -17,6 +17,9 @@
  *   F. Ce que l'écran offre vient des réglages : catégories d'observation seulement, ni masqués ni anciens.
  *   G. Le voyage du champ : codex enregistré puis rouvert, fusion de deux codex, Réserve, correction d'un DA.
  *   H. Rien en dur ; un tampon n'entre ni au niveau retenu ni à la note ; les lecteurs du champ.
+ *   I. RETOUCHE (24 nov., 19 h) : « Déjà inscrit aujourd'hui » (même étudiant·e, même cible, même ensemble, même date,
+ *      non annulées, toutes origines ; les noms une fois chacun, dans l'ordre inscrit) ; à l'historique, la liste des
+ *      critères ne s'affiche pas quand aucun n'est renseigné, sauf le critère qui porte un tampon.
  *
  * RIEN EN DUR : les tampons, catégories et critères de ce banc sont créés ici, fictifs. BREAK-TESTS : journal au rapport.
  */
@@ -156,15 +159,19 @@ describe('C · aucune inscription ne coche un critère du fait d\'un tampon', ()
         expect(observation(m, { reponses, tampons: [T1, T2] }).criteres).toEqual(observation(m, { reponses }).criteres);
         expect(observation(m, { reponses, tampons: [T1] }).criteres.map(k => k.respecte)).toEqual([null, false]);
     });
-    it('une trace de tampons seuls ne pose pas de niveau ; un texte ou une coche en font autre chose', () => {
+    it('une trace de tampons ne pose pas de niveau ; elle n\'est une « remarque » que si elle porte un texte (Grégoire, 24 nov., 18 h 57)', () => {
         const { IC } = monter();
-        expect(IC.estDeTamponsSeuls(inscrite({ tampons: [T1] }))).toBe(true);
+        const coche = [{ id: 'crit-a', texte: 'x', essentiel: false, respecte: true }];
         expect(IC.estSansNiveau(inscrite({ tampons: [T1] }))).toBe(true);
-        expect(IC.estDeTamponsSeuls(inscrite({ tampons: [T1], noteBreve: 'Un texte' }))).toBe(false);
-        expect(IC.estDeTamponsSeuls(inscrite({ tampons: [T1], criteres: [{ id: 'crit-a', texte: 'x', essentiel: false, respecte: true }] }))).toBe(false);
-        expect(IC.estDeTamponsSeuls(inscrite({ tampons: [T1], niveau: '1' }))).toBe(false);
-        expect(IC.estDeTamponsSeuls(inscrite())).toBe(false);
+        expect(IC.estUneRemarque(inscrite({ tampons: [T1] }))).toBe(false);
+        expect(IC.estUneRemarque(inscrite({ criteres: coche })), 'une coche seule n\'est pas une remarque').toBe(false);
+        expect(IC.estUneRemarque(inscrite({ tampons: [T1], criteres: coche }))).toBe(false);
+        expect(IC.estUneRemarque(inscrite({ noteBreve: '   ' })), 'des espaces ne sont pas un texte').toBe(false);
+        expect(IC.estUneRemarque(inscrite({ tampons: [T1], noteBreve: 'Un texte' }))).toBe(true);
+        expect(IC.estUneRemarque(inscrite({ noteBreve: 'Un texte', niveau: '1' })), 'avec un niveau, ce n\'est pas une remarque').toBe(false);
+        expect(IC.estDeTamponsSeuls, 'retirée : la règle du texte la remplace').toBeUndefined();
     });
+
     it('un tampon n\'entre ni au niveau retenu ni à la note : la case reste sans donnée', () => {
         const m = monter();
         const liste = [inscrite({ tampons: [T1, T2] })];
@@ -254,7 +261,8 @@ describe('E · l\'historique et la case', () => {
         const lignes = [...boite.querySelectorAll('.tc-entree-critere')];
         expect(lignes[0].querySelector('.tc-tampons--critere .tc-tampon-nom').textContent).toBe(T1.nom);
         expect(lignes[0].classList.contains('tc-entree-critere--vide'), 'le tampon ne coche pas le critère').toBe(true);
-        expect(lignes[1].querySelector('.tc-tampon')).toBeNull();
+        expect(lignes.map(l => l.textContent).join(' '), 'aucun critère renseigné : seul le critère qui porte un tampon se lit (retouche du 24 nov.)').not.toContain('Critère fictif B');
+        expect(lignes).toHaveLength(1);
         expect([...boite.querySelectorAll('.tc-tampons--cible .tc-tampon-nom')].map(e => e.textContent)).toEqual([T2.nom]);
     });
     it('le nom lu est celui de l\'inscription : avec l\'image si le poste a le tampon, l\'emoji copié sinon, le nom seul à défaut', () => {
@@ -440,7 +448,7 @@ describe('H · rien en dur, et les lecteurs du champ', () => {
         for (const nom of fournies.concat(fournis)) expect(neuf, nom).not.toMatch(new RegExp('[\'"`]' + nom + '[\'"`]'));
     });
     it('seuls le module propriétaire, l\'écran « Observer » et le tableau des cibles lisent les tampons d\'une inscription', () => {
-        const lecteurs = fichiersJs.filter((f) => /lireTampons|construireTampons|rapprocherTampons|estDeTamponsSeuls|tamponsLusHTML/.test(lire(f))).sort();
+        const lecteurs = fichiersJs.filter((f) => /lireTampons|construireTampons|rapprocherTampons|dejaInscritALaDate|tamponsLusHTML/.test(lire(f))).sort();
         expect(lecteurs).toEqual(['js/observation-cibles.js', 'js/pratiques/inscriptions-cibles.js', 'js/tableau-cibles.js']);
         const offrent = fichiersJs.filter((f) => /tamponsDObservation|imageDuTampon/.test(lire(f))).sort();
         expect(offrent).toEqual(['js/observation-cibles.js', 'js/tableau-cibles.js', 'js/travaux-outils.js']);
@@ -459,5 +467,94 @@ describe('H · rien en dur, et les lecteurs du champ', () => {
         expect(OC.MOTS.tamponRelache('Tampon fictif')).toBe('« Tampon fictif » relâché.');
         expect(OC.MOTS.tamponsRetenus(['A', 'B'])).toBe('\u00a0: A, B');
         expect(OC.MOTS.tamponsRetenus([])).toBe('');
+    });
+});
+
+describe('I · retouche du 24 nov. : « Déjà inscrit aujourd\'hui », et l\'historique sans la liste de tirets', () => {
+    const T3 = { id: 'custom-banc-3', nom: 'Tampon fictif 3', categorieId: 'cat-banc', categorieNom: 'Catégorie fictive', critere: '', emoji: '' };
+    const JOUR = '2026-11-24';
+    const deja = (IC, liste, quoi = {}) => IC.dejaInscritALaDate(liste, quoi.da || ZOE, quoi.ensembleId || 'ENS1', quoi.cibleId || CIBLE.id, quoi.date || JOUR);
+    it('les noms des tampons des traces du jour, une fois chacun, dans l\'ordre où ils ont été inscrits', () => {
+        const { IC } = monter();
+        const premiere = inscrite({ id: 'I1', horodatage: '2026-11-24T15:00:00.000Z', tampons: [T1, T2] });
+        const seconde = inscrite({ id: 'I2', horodatage: '2026-11-24T15:05:00.000Z', tampons: [T2, T3] });
+        expect(deja(IC, [premiere, seconde])).toEqual({ inscriptions: 2, tampons: [T1.nom, T2.nom, T3.nom] });
+        expect(deja(IC, [seconde, premiere]), 'l\'ordre est celui de l\'écriture, pas celui de la liste').toEqual({ inscriptions: 2, tampons: [T1.nom, T2.nom, T3.nom] });
+    });
+    it('une inscription annulée n\'y paraît pas ; ni une autre cible, un autre jour, un·e autre étudiant·e, un autre ensemble', () => {
+        const { IC } = monter();
+        const liste = [
+            inscrite({ id: 'I1', tampons: [T1] }),
+            inscrite({ id: 'I2', tampons: [T2] }),
+            { id: 'A1', type: 'annulation', inscriptionId: 'I2', da: ZOE, ensembleId: 'ENS1', cibleId: CIBLE.id, date: JOUR, horodatage: '2026-11-24T16:00:00.000Z', raison: '' },
+            inscrite({ id: 'I3', cibleId: 'une-autre-cible', tampons: [T3] }),
+            inscrite({ id: 'I4', date: '2026-11-23', tampons: [T3] }),
+            inscrite({ id: 'I5', da: YAN, tampons: [T3] }),
+            inscrite({ id: 'I6', ensembleId: 'ENS2', tampons: [T3] })
+        ];
+        expect(deja(IC, liste)).toEqual({ inscriptions: 1, tampons: [T1.nom] });
+        expect(deja(IC, liste, { da: YAN }), 'témoin : l\'autre étudiant·e a bien la sienne').toEqual({ inscriptions: 1, tampons: [T3.nom] });
+        expect(deja(IC, liste, { date: '2026-11-22' })).toEqual({ inscriptions: 0, tampons: [] });
+    });
+    it('toutes les origines comptent ; des traces sans tampon se comptent sans nom ; rien n\'est écrit', () => {
+        const { IC } = monter();
+        const liste = [inscrite({ id: 'I1', origine: 'production', productionId: 'P1', niveau: '2', echelleId: ECHELLE.id }),
+            inscrite({ id: 'I2', origine: 'conversation', noteBreve: 'Un texte fictif' })];
+        const avant = clone(liste);
+        expect(deja(IC, liste)).toEqual({ inscriptions: 2, tampons: [] });
+        expect(liste).toEqual(avant);
+        expect(deja(IC, null)).toEqual({ inscriptions: 0, tampons: [] });
+    });
+    it('les mots de la ligne : avec des tampons, ceux de Grégoire (18 h 55) ; sans tampon, le mot court proposé', () => {
+        const { OC } = monter();
+        expect(OC.MOTS.dejaInscrit(['Incertain', 'Inexact'])).toBe('Déjà inscrit aujourd’hui\u00a0: Incertain, Inexact');
+        expect(OC.MOTS.dejaInscrit([])).toBe('Déjà inscrit aujourd’hui.');
+    });
+    const historique = (m, liste) => {
+        m.store[CLE] = liste;
+        m.rendre();
+        const boite = m.doc.createElement('div');
+        boite.innerHTML = m.TC.historiqueHTML(m.TC.completerContexte(m.ctx), ZOE, CIBLE.id, {});
+        return boite;
+    };
+    it('à l\'historique, aucun critère renseigné : la liste des critères ne s\'affiche pas (tampons seuls, texte seul)', () => {
+        const m = monter();
+        expect(historique(m, [inscrite({ tampons: [T2] })]).querySelector('.tc-entree-criteres')).toBeNull();
+        expect(historique(m, [inscrite({ noteBreve: 'Un texte fictif' })]).querySelector('.tc-entree-criteres')).toBeNull();
+    });
+    it('dès qu\'un seul critère est renseigné, la liste s\'affiche entière, comme avant', () => {
+        const m = monter();
+        const criteres = CIBLE.criteres.map((k, n) => Object.assign({ respecte: n === 1 ? false : null }, k));
+        const boite = historique(m, [inscrite({ criteres, tampons: [T2] })]);
+        expect([...boite.querySelectorAll('.tc-entree-critere')].map(l => l.className.replace('tc-entree-critere tc-entree-critere--', ''))).toEqual(['vide', 'non']);
+    });
+    it('Q4 : sans niveau et sans texte (une coche, des tampons, les deux), aucune étiquette ; avec un texte, « Remarque, sans niveau »', () => {
+        const m = monter();
+        const coche = CIBLE.criteres.map((k, n) => Object.assign({ respecte: n === 0 ? true : null }, k));
+        const etiquette = (quoi) => historique(m, [inscrite(quoi)]).querySelector('.tc-entree-niveau');
+        expect(etiquette({ criteres: coche }), 'une coche seule').toBeNull();
+        expect(etiquette({ tampons: [T2] }), 'des tampons seuls').toBeNull();
+        expect(etiquette({ criteres: coche, tampons: [T2] }), 'une coche et des tampons').toBeNull();
+        expect(historique(m, [inscrite({ criteres: coche })]).textContent).not.toMatch(/remarque|sans niveau/i);
+        expect(etiquette({ noteBreve: 'Un texte fictif' }).textContent).toBe('Remarque, sans niveau');
+        expect(etiquette({ noteBreve: 'Un texte fictif', criteres: coche, tampons: [T2] }).textContent).toBe('Remarque, sans niveau');
+        expect(etiquette({ niveau: '2', echelleId: ECHELLE.id }).textContent, 'témoin : un niveau garde son étiquette').toContain('Acquis');
+    });
+    it('Q5 : les trois textes du tableau, mots de Grégoire (24 nov., 18 h 58)', () => {
+        const m = monter();
+        expect(m.TC.MOTS.legendeRemarques).toBe('✎ : des traces à lire, aucun niveau encore.');
+        m.store[CLE] = [inscrite({ tampons: [T2] })];
+        let laCase = m.rendre().querySelector(`.tc-case[data-da="${ZOE}"]`);
+        expect(laCase.getAttribute('aria-label')).toMatch(/, 1 trace sans niveau$/);
+        expect(laCase.getAttribute('title')).toBe(laCase.getAttribute('aria-label'));
+        m.store[CLE] = [inscrite({ id: 'I1', tampons: [T2] }), inscrite({ id: 'I2', noteBreve: 'Un texte fictif' })];
+        laCase = m.rendre().querySelector(`.tc-case[data-da="${ZOE}"]`);
+        expect(laCase.getAttribute('aria-label')).toMatch(/, 2 traces sans niveau$/);
+        expect(m.doc.getElementById('hote').textContent).toContain('✎ : des traces à lire, aucun niveau encore.');
+        const q = (remarques, eleves, niveaux = 0) => m.IC.questionRetraitCibles([{ cible: { id: 'a', etiquette: 'Cible fictive' }, niveaux, remarques, eleves }]).message;
+        expect(q(2, 1)).toContain('« Cible fictive » : 2 traces sans niveau pour 1 étudiant·e');
+        expect(q(1, 1)).toContain('« Cible fictive » : 1 trace sans niveau pour 1 étudiant·e');
+        expect(q(3, 2, 1)).toContain('« Cible fictive » : 1 niveau inscrit et 3 traces sans niveau pour 2 étudiant·es');
+        expect(q(2, 1)).not.toMatch(/remarque/i);
     });
 });

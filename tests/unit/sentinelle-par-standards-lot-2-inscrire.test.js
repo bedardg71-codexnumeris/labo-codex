@@ -703,7 +703,7 @@ describe('L · une inscription peut ne porter aucun niveau (une remarque) ; ce n
         const bouton = e.hote.querySelector(`.tc-case[data-da="${ZOE}"][data-cible="${CIBLE.id}"]`);
         expect(bouton.querySelector('.tc-case-niveau').textContent).toBe('3');
         expect(bouton.querySelector('.tc-case-compte').textContent).toBe('2');
-        expect(bouton.getAttribute('aria-label')).toBe('Zoé Fictive, Lire un texte : niveau retenu Acquis, 2 inscriptions, dont 1 remarque');
+        expect(bouton.getAttribute('aria-label')).toBe('Zoé Fictive, Lire un texte : niveau retenu Acquis, 2 inscriptions, dont 1 trace sans niveau');
     });
 
     it('une case qui n\'a que des remarques le montre par ✎ et leur nombre, sans survol, et la légende le dit ; aucun niveau, aucun « 0 »', () => {
@@ -714,7 +714,7 @@ describe('L · une inscription peut ne porter aucun niveau (une remarque) ; ce n
         // Révisé au lot 3 : ✎, le nom du niveau « sans donnée » (la cible est sans donnée), et le compte.
         expect(bouton.textContent).toBe('✎Données insuffisantes2');
         expect(bouton.querySelector('.tc-case-niveau')).toBeNull();
-        expect(bouton.getAttribute('aria-label')).toBe('Zoé Fictive, Lire un texte : sans donnée (Données insuffisantes), 2 remarques');
+        expect(bouton.getAttribute('aria-label')).toBe('Zoé Fictive, Lire un texte : sans donnée (Données insuffisantes), 2 traces sans niveau');
         expect([...e.hote.querySelectorAll('.tc-legende')].map(x => x.textContent)).toContain(e.TC.MOTS.legendeRemarques);
         expect(etatCase(e.win, liste).retenu).toBeNull();
     });

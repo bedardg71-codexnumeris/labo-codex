@@ -52,7 +52,7 @@
         legende: 'Une case montre le niveau retenu : le meilleur niveau inscrit, qui ne redescend pas. Le petit nombre dit combien d’inscriptions elle porte.',
         legendeSansDonnee: (nom) => `« ${nom} » : aucun niveau inscrit pour cette cible (sans donnée).`,
         // Complément 9 h 17 : une inscription sans niveau (« remarque », mot PROPOSÉ).
-        legendeRemarques: '✎ : des remarques, aucun niveau encore.',
+        legendeRemarques: '✎ : des traces à lire, aucun niveau encore.',   // mots de Grégoire, 24 nov. 2026, 18 h 58
         // Lot 4 : la colonne de la note.
         colNote: 'Note',
         legendeNote: 'Note : la moyenne pondérée des niveaux retenus. Tant qu’une cible est sans donnée, pas de note : les cibles en attente sont nommées.',
@@ -305,7 +305,7 @@
     function _ditLaCase(nom, cible, ligne, ctx) {
         const annulees = ligne.annulees ? `, ${ligne.annulees} ${ligne.annulees > 1 ? 'annulées' : 'annulée'}` : '';
         const r = ligne.remarques || 0;
-        const remarques = `${r} ${r > 1 ? 'remarques' : 'remarque'}`;
+        const remarques = `${r} ${r > 1 ? 'traces' : 'trace'} sans niveau`;   // mots de Grégoire, 24 nov. 2026, 18 h 58
         const n = ligne.actives;
         const compte = !n ? MOTS.aucune : (r === n ? remarques : `${n} ${n > 1 ? 'inscriptions' : 'inscription'}${r ? ', dont ' + remarques : ''}`);
         if (!ctx.ordre.ok) return `${nom}, ${cible.etiquette} : ${MOTS.caseIllisible}, ${compte}${annulees}`;
@@ -672,9 +672,15 @@
         const nomNiveau = _nomDuNiveauInscrit(i, sansNiveau, niveau);
         // Les tampons (24 nov. 2026) : à côté du critère qu'ils déclarent, sinon sous la cible (rapprochés à l'affichage).
         const places = I().rapprocherTampons(I().lireTampons(i), i.criteres);
-        // Une trace faite seulement de tampons ne se lit pas « Remarque, sans niveau » : la date, l'origine, les tampons.
-        const tamponsSeuls = I().estDeTamponsSeuls(i);
-        const criteres = (i.criteres || []).length ? `<ul class="tc-entree-criteres">${i.criteres.map(k => _ligneCritereHistorique(k, places.parCritere[k.id])).join('')}</ul>` : '';
+        // « Remarque, sans niveau » seulement si la trace porte un TEXTE (Grégoire, 24 nov. 2026, 18 h 57). Sans niveau et
+        // sans texte (des coches, des tampons ou les deux) : la date, l'origine et son contenu, sans étiquette.
+        const sansEtiquette = sansNiveau && !I().estUneRemarque(i);
+        // Les critères (retouche du 24 nov. 2026, décision de Cowork) : dès qu'un seul est renseigné, la liste entière ;
+        // quand AUCUN ne l'est, la liste de tirets est du bruit et ne s'affiche pas. Il ne reste alors que les critères
+        // qui portent un tampon (Grégoire : un tampon qui déclare un critère s'affiche à côté de ce critère).
+        const aLire = I().aUnCritereRenseigne(i.criteres) ? (i.criteres || [])
+            : (i.criteres || []).filter(k => (places.parCritere[k.id] || []).length > 0);
+        const criteres = aLire.length ? `<ul class="tc-entree-criteres">${aLire.map(k => _ligneCritereHistorique(k, places.parCritere[k.id])).join('')}</ul>` : '';
         // L'origine (22 nov. 2026), dans les deux vues : « Observation », « Conversation » ou la production. Une inscription
         // d'avant sans production se lit « Observation » (règle du mandat ; elle disait « Sans production », cachée en vue simple).
         const origine = `
@@ -684,7 +690,7 @@
         return `<li class="tc-entree${a ? ' tc-entree--annulee' : ''}">
             <div class="tc-entree-corps">
                 <div class="tc-entree-tete"><span class="tc-entree-date">${esc(dateLisible(i.date))}</span>
-                    ${tamponsSeuls ? '' : `<span class="tc-entree-niveau${sansNiveau ? ' tc-entree-niveau--remarque' : ''}" style="--tn-couleur: ${esc(_couleur(niveau))}">${esc(nomNiveau)}</span>`}${marque}${origine}</div>
+                    ${sansEtiquette ? '' : `<span class="tc-entree-niveau${sansNiveau ? ' tc-entree-niveau--remarque' : ''}" style="--tn-couleur: ${esc(_couleur(niveau))}">${esc(nomNiveau)}</span>`}${marque}${origine}</div>
                 ${i.noteBreve ? `<p class="tc-entree-note">${esc(i.noteBreve)}</p>` : ''}
                 ${tamponsLusHTML(places.sousLaCible, 'tc-tampons--cible')}
                 ${criteres}

@@ -10,6 +10,8 @@
 **Ce qui contredit la consigne** (détail au § 3) : 1. la cible de forme est atteinte pour douze tampons, **pas pour vingt** (à 1180 × 700, le dernier passe de 32 px sous la bande d'actions) ; 2. les tampons d'« Observer » montrent leur **image sans leur nom** : le nom se lit sur la ligne de l'étiquette une fois le tampon retenu ; 3. au **tableau**, trois textes existants disent encore « remarque » pour une trace de tampons seuls (l'infobulle de la case, la légende, la question avant de retirer une cible) : la décision de 16 h 22 vise l'historique et le profil, je n'y ai pas touché.
 **Ce qui reste** : l'essai de Grégoire sur l'iPad (cinq étudiant·es de suite, portrait et paysage) et la page de textes `TEXTES-2026-11-24-tampons-observation-lot-2.md` (six questions). Pas de verdict WebKit complet : rien ne part en ligne.
 
+**RETOUCHE du 24 nov., 19 h** (essai de Grégoire sur l'iPad, 18 h 47 ; détail au § 9) : la ligne « Déjà inscrit aujourd'hui », l'historique sans la liste de tirets, Q4 et Q5 (acceptées par Grégoire). Les chiffres de l'en-tête ci-dessus datent d'avant : le § 9 porte ceux de la retouche. Le point 3 de « ce qui contredit » est levé par Q5.
+
 ---
 
 ## 1. Le champ neuf
@@ -158,6 +160,53 @@ Dans `plans de travail/captures-2026-11-24-tampons-observation-lot-2/` (WebKit, 
 
 1. **L'essai sur l'iPad** : charger la démo n'y suffit pas (elle n'a aucune catégorie cochée). Sur l'aperçu, dans un groupe en pratique par cibles : « Observer », choisir une cible, « Régler mes tampons », cocher « D'observation » pour une catégorie, « Enregistrer » ; puis cinq étudiant·es de suite, en portrait et en paysage.
 2. **La page de textes** : `plans de travail/TEXTES-2026-11-24-tampons-observation-lot-2.md`, six questions.
+
+## 9. Retouche du 24 nov. 2026, 19 h
+
+Consigne : Cowork, 19 h 00, et son complément (Q4, Q5). Ce que Grégoire a vécu : revenu sur un·e élève déjà noté·e, l'écran vide laissait croire que rien n'était enregistré ; il a refait la trace deux fois.
+
+### 9.1 « Déjà inscrit aujourd'hui »
+
+- **Lecture** : `InscriptionsCibles.dejaInscritALaDate(liste, da, ensembleId, cibleId, date)` rend `{ inscriptions, tampons }` : les inscriptions non annulées de cette personne, pour cette cible de cet ensemble, à cette date, toutes origines ; les noms de leurs tampons, une fois chacun, par ordre d'écriture. N'écrit rien.
+- **Écran** : sous le nom, `<p class="oc-deja" id="oc-deja">` ; le nom, qui reçoit le focus à l'arrivée, porte `aria-describedby="oc-deja"` (c'est ainsi que la ligne est lue). Tampons, coches et texte restent vides ; inscrire AJOUTE une inscription.
+- **La date** : celle de l'écran (`_etat.date`), la même que la marque « vu aujourd'hui ».
+- **Sans tampon** dans les traces du jour : « Déjà inscrit aujourd'hui. » (proposé, D2 de la page de textes).
+- **Effet hors des tampons** : la ligne paraît aussi sur un écran sans catégorie d'observation dès qu'une trace du jour existe (la consigne le demande : « des coches ou un texte seulement »). L'écran sans catégorie n'est donc plus identique au lot 1 dans ce cas précis ; sans trace du jour, rien n'a changé.
+- **La forme** : avec la ligne, quatre critères et douze tampons à 1180 × 700, le dernier tampon est à 639 px (WebKit) et 640 px (Chromium), la bande à 644 : **la cible tient, avec 4 à 5 px de marge**. Pour y arriver, la tête se resserre quand la ligne paraît, et les rangées de critères perdent 1 px de marge haut et bas dès que des tampons sont offerts. Vingt tampons : toujours pas (déjà dit).
+
+### 9.2 L'historique (point 2)
+
+VU avant de changer : quatre essais lisent `.tc-entree-critere`. Deux sont étrangers (`demo-par-standards-2026-11-22.spec.js:152`, `vue-simple.spec.js:2372`) et portent chacun au moins un critère renseigné : la liste entière s'affiche, ils ne changent pas. Deux sont du lot (la sentinelle Vitest et le banc, essai du profil) et verrouillent la décision de Grégoire « un tampon qui déclare un critère s'affiche à côté de ce critère » sur une trace de tampons seuls. Aucune bulle de parcours ne désigne ces lignes (LU : `js/parcours-cibles.js`, aucune occurrence de `tc-entree`).
+
+Fait : quand aucun critère n'est renseigné, la liste ne s'affiche pas. **Une exception, que j'ai tranchée** : le critère qui porte un tampon reste, seul, avec son tampon à côté (sinon le tampon perdrait son critère, contre la décision de Grégoire). Dans la capture de Grégoire, aucun tampon ne déclarait de critère : la liste disparaît en entier. Les deux essais du lot sont mis à jour (une rangée au lieu de quatre).
+
+### 9.3 Q4 et Q5
+
+- **Q4** : `estUneRemarque` (sans niveau ET un texte) remplace `estDeTamponsSeuls`, retirée. Sans texte, aucune étiquette à l'historique ni au profil.
+- **Q5** : les trois textes, mot pour mot. Supposé : le cas mixte de l'infobulle suit la même forme (« 3 inscriptions, dont 1 trace sans niveau »).
+- **Bancs mis à jour pour ces chaînes** : `sentinelle-par-standards-lot-2-inscrire.test.js` (2 chaînes), `sentinelle-par-standards-lots-3-4.test.js` (1), `par-standards-lot-2-inscrire.spec.js` (2), `je-regarde-cibles-2026-11-23.spec.js` (1). Aucun n'attendait « Remarque » sur une trace sans texte.
+- **Non touché, listé** : cinq endroits disent encore « remarque » (M1 à M5 de la page de textes), dont une bulle du parcours qui reprend l'ancienne légende.
+- **Stock** : rien n'est réécrit ; les traces d'une seule coche déjà inscrites changent de lecture, pas de contenu.
+
+### 9.4 La preuve (VU)
+
+| Suite | Résultat |
+|---|---|
+| Banc du lot 2, WebKit | 17 sur 17 |
+| Banc du lot 1, WebKit | 23 sur 23 |
+| Les deux, Chromium (config jetable, retirée) | 40 sur 40 |
+| Vitest complet | 12 400 sur 12 400 |
+| Voisins, WebKit (démo, parcours « Suivre ton groupe par cibles », à l'essai, lot 2 inscrire, lots 3 et 4) | 21 verts, 2 instables verts à la reprise |
+
+Les deux instables : `demo-par-standards-2026-11-22.spec.js:86`, aux deux tailles, au harnais (`deux-temps-de-banc.js:156`, la création du cours), avant tout écran touché ici ; le même essai avait déjà été instable une fois avant la retouche.
+
+Break-tests, retouche : R1 annulée comptée ; R2 la date ignorée ; R3 la cible ignorée ; R3b l'étudiant·e ignoré·e ; R4 doublons ; R5 l'ordre ; R6 la liste toujours entière ; R6b le critère au tampon retiré ; R7 l'étiquette toujours là ; R8 remarque sans texte ; R9, R10, R11 les trois textes d'avant ; R17 le mot sans tampon ; R12 la ligne jamais dessinée ; R13 sans `aria-describedby` ; R15 la ligne à côté du nom ; R16 les tampons déjà inscrits pressés ; R14c et R14d la forme. **Vingt rouges.** R14 (les marges de la tête remises) est restée VERTE : mutation trop faible (643 px pour 644), remplacée par R14c et R14d.
+
+Pas joué : le verdict WebKit complet ; l'essai sur iPad de la retouche.
+
+### 9.5 Captures de la retouche
+
+`captures-2026-11-24-tampons-observation-lot-2/observer-deja-inscrit-12-tampons-{1180x700,820x1180}-{clair,sombre}.png`.
 
 ## Journal des break-tests (24 nov. 2026 ; V : Vitest, P : WebKit)
 

@@ -177,7 +177,7 @@ describe('R4 · au tableau, la case montre le niveau retenu et le compte ; l\'hi
         const b = caseDe(e, ZOE, 'cib-a');
         expect(b.querySelector('.tc-case-niveau').textContent).toBe('4');
         expect(b.querySelector('.tc-case-compte').textContent).toBe('3');
-        expect(b.getAttribute('aria-label')).toBe('Zoé Fictive, Analyser : niveau retenu Avancé, 3 inscriptions, dont 1 remarque');
+        expect(b.getAttribute('aria-label')).toBe('Zoé Fictive, Analyser : niveau retenu Avancé, 3 inscriptions, dont 1 trace sans niveau');
         const legendes = [...e.hote.querySelectorAll('.tc-legende')].map(x => x.textContent);
         expect(legendes).toContain(e.TC.MOTS.legende);
         expect(e.TC.MOTS.legende).toMatch(/niveau retenu/);

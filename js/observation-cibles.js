@@ -34,6 +34,9 @@
  *   · Un tampon seul suffit à inscrire. Le compte des touches : un tampon, puis « Inscrire » : deux par étudiant·e.
  *   · « Régler mes tampons » ouvre la fenêtre des tampons (travaux-outils.js) sans qu'aucune copie soit ouverte (#1307) ;
  *     à sa fermeture, les tampons de l'écran sont relus, et ce qui était en cours (coches, texte) est gardé.
+ *   · « DÉJÀ INSCRIT AUJOURD'HUI » (retouche du 24 nov., Grégoire, 18 h 55) : revenu sur quelqu'un qui porte déjà une
+ *     trace à la date de l'écran pour cette cible, on lit sous son nom les tampons déjà inscrits. Les tampons et les
+ *     coches restent relâchés : inscrire AJOUTE une trace, rien n'est réécrit ni fusionné.
  *   · SANS CATÉGORIE D'OBSERVATION, l'écran est celui d'avant, hors de cette porte. Les tampons n'ont pas la classe des
  *     critères (`tc-critere`) : un banc lit les coches sur tous les éléments de cette classe.
  *
@@ -84,7 +87,9 @@
         tamponsRetenus: (noms) => (noms.length ? `\u00a0: ${noms.join(', ')}` : ''),   // espace insécable : elle ouvre un bloc, une espace simple y serait mangée
         tamponRetenu: (tampon, nom) => `« ${tampon} » retenu pour ${nom}.`,
         tamponRelache: (tampon) => `« ${tampon} » relâché.`,
-        tamponsRelus: 'Tes tampons sont à jour.'
+        tamponsRelus: 'Tes tampons sont à jour.',
+        // Retouche du 24 nov. (Grégoire, 18 h 55) : ce qui est déjà inscrit ce jour-là pour cet·te étudiant·e et cette cible.
+        dejaInscrit: (noms) => (noms.length ? `Déjà inscrit aujourd’hui\u00a0: ${noms.join(', ')}` : 'Déjà inscrit aujourd’hui.')
     });
 
     const I = () => window.InscriptionsCibles;
@@ -237,12 +242,16 @@
         const marques = (x.vu ? `<span class="oc-marque oc-marque--vu">${esc(MOTS.vu)}</span>` : '')
             + (x.absent ? `<span class="oc-marque oc-marque--absent">${esc(MOTS.absent)}</span>` : '');
         const dernier = _etat.index === eleves.length - 1;
+        // Ce qui est déjà inscrit à la date de l'écran pour cette personne et cette cible : dit sous son nom, et lu à
+        // l'arrivée (le nom, qui reçoit le focus, est décrit par cette ligne). Rien n'est pressé pour autant.
+        const deja = I().dejaInscritALaDate(ctx.inscriptions, x.da, ctx.ensemble.id, cible.id, _etat.date);
+        const dejaHTML = deja.inscriptions > 0 ? `<p class="oc-deja" id="oc-deja">${esc(MOTS.dejaInscrit(deja.tampons))}</p>` : '';
         // Les tampons : sur la rangée du critère qu'ils déclarent (rapprochés aux critères de la cible), sinon en tête.
         const places = I().rapprocherTampons(_etat.tampons, cible.criteres);
         return `${tete}
             <form data-oc-bloc novalidate>
-                <div class="oc-qui"><h4 class="oc-nom" id="oc-nom" tabindex="-1">${esc(x.nom)}</h4>
-                    <span class="oc-position">${esc(MOTS.position(_etat.index + 1, eleves.length))}</span>${marques}</div>
+                <div class="oc-qui${dejaHTML ? ' oc-qui--deja' : ''}"><h4 class="oc-nom" id="oc-nom" tabindex="-1"${dejaHTML ? ' aria-describedby="oc-deja"' : ''}>${esc(x.nom)}</h4>
+                    <span class="oc-position">${esc(MOTS.position(_etat.index + 1, eleves.length))}</span>${marques}${dejaHTML}</div>
                 ${_tamponsBlocHTML(places.sousLaCible)}
                 <section class="oc-section">${T().criteresHTML(cible, PREFIXE, { aide: MOTS.criteresAide, sansCritere: MOTS.sansCritere,
                     aCote: (k) => _tamponsDuCritereHTML(k, places.parCritere[k.id]) })}</section>

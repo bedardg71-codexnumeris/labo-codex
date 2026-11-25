@@ -242,7 +242,7 @@ for (const [L, H] of TAILLES) {
         await bulleEst(page, 8, -1, { contour: true });
         await expect(caseDeMarmotte(page).locator('.tc-case-niveau')).toHaveText('3');
         await expect(caseDeMarmotte(page).locator('.tc-case-compte')).toHaveText('3');
-        expect(await caseDeMarmotte(page).getAttribute('title')).toContain('niveau retenu Acquis, 3 inscriptions, dont 1 remarque');
+        expect(await caseDeMarmotte(page).getAttribute('title')).toContain('niveau retenu Acquis, 3 inscriptions, dont 1 trace sans niveau');
         await caseDeMarmotte(page).click();
         await bulleEst(page, 8, 0, { contour: true });
         expect(await texte(fenetre(page).locator('.tc-retenu .tc-retenu-ligne').first())).toBe('Niveau retenu : 3 · Acquis, inscrit le 1er octobre 2025.');

@@ -67,9 +67,9 @@
  * tampon ne change pas ce qu'une inscription passée dit. JAMAIS l'image : elle pèse jusqu'à 2 650 caractères et une séance
  * en inscrit des dizaines ; à l'affichage elle se cherche par l'identifiant sur le poste, et le nom suffit sans elle.
  * Les inscriptions d'avant n'ont pas ce champ et ne sont pas réécrites : `lireTampons` les lit sans tampon.
- * Un tampon suffit à rendre l'inscription non vide (`motifsRefus`). Une trace faite SEULEMENT de tampons (ni niveau, ni
- * texte, ni critère renseigné : `estDeTamponsSeuls`) ne pose pas de niveau : au tableau sa case montre ✎, comme une
- * remarque ; à l'historique et au profil elle se lit par sa date, son origine et ses tampons, sans « Remarque ».
+ * Un tampon suffit à rendre l'inscription non vide (`motifsRefus`). Une trace sans niveau ne pose pas de niveau : au
+ * tableau sa case montre ✎. Elle ne s'appelle « Remarque » que si elle porte un TEXTE (`estUneRemarque` ; Grégoire,
+ * 24 nov. 2026, 18 h 57) : faite de coches, de tampons ou des deux, elle se lit par sa date, son origine et son contenu.
  * LE RAPPROCHEMENT d'un critère déclaré (`rapprocherTampons`) se fait À L'AFFICHAGE seulement, contre les textes des
  * critères copiés dans la MÊME inscription : texte rogné, sans égard à la casse ; le premier qui correspond. Rien n'est
  * écrit à ce sujet dans l'inscription. Sans critère déclaré, ou si aucun ne correspond : sous la cible, sans plus.
@@ -243,11 +243,12 @@
     }
 
     /**
-     * Vrai pour une trace faite SEULEMENT de tampons : aucun niveau, aucun texte, aucun critère renseigné, au moins un
-     * tampon (Grégoire, 24 nov. 2026, 16 h 22). Elle ne se lit pas « Remarque » à l'historique ni au profil.
+     * Vrai pour une REMARQUE : une trace sans niveau qui porte un TEXTE (règle de Grégoire, 24 nov. 2026, 18 h 57 : le mot
+     * « remarque » désigne un texte que l'enseignant·e a écrit). Une trace sans niveau faite de coches, de tampons ou des
+     * deux n'en est pas une : à l'historique et au profil elle se lit par sa date, son origine et son contenu, sans étiquette.
      */
-    function estDeTamponsSeuls(e) {
-        return estSansNiveau(e) && texteLibre(e.noteBreve, LONGUEUR_NOTE_BREVE) === '' && !aUnCritereRenseigne(e.criteres) && aUnTampon(lireTampons(e));
+    function estUneRemarque(e) {
+        return estSansNiveau(e) && texteLibre(e && e.noteBreve, LONGUEUR_NOTE_BREVE) !== '';
     }
 
     /** Le texte d'un critère pour le comparer : rogné, espaces resserrées, sans égard à la casse. */
@@ -418,6 +419,28 @@
     }
 
     /**
+     * CE QUI EST DÉJÀ INSCRIT À UNE DATE POUR UNE CASE (24 nov. 2026, retouche du lot 2 des tampons d'observation ;
+     * Grégoire, 18 h 55 : revenu sur un·e élève déjà noté·e, l'écran vide laissait croire que rien n'était enregistré).
+     * Les inscriptions NON ANNULÉES de cet·te étudiant·e, pour cette cible de cet ensemble, à cette date, toutes origines
+     * comprises ; et les noms de leurs tampons, une fois chacun, dans l'ordre où ils ont été inscrits. Ne lit aucun
+     * niveau, n'écrit rien.
+     * @returns {{inscriptions: number, tampons: Array<string>}}
+     */
+    function dejaInscritALaDate(liste, da, ensembleId, cibleId, date) {
+        const annulations = annulationsParInscription(liste);
+        const duJour = (Array.isArray(liste) ? liste : [])
+            .map((e, rang) => ({ e, rang }))
+            .filter(({ e }) => estInscription(e) && !annulations.has(e.id) && e.date === date && duneCase(e, da, ensembleId, cibleId))
+            .sort((a, b) => String(a.e.horodatage || '').localeCompare(String(b.e.horodatage || '')) || a.rang - b.rang);
+        const noms = [];
+        duJour.forEach(({ e }) => lireTampons(e).forEach(t => {
+            const nom = String(t.nom || t.id);
+            if (noms.indexOf(nom) === -1) noms.push(nom);
+        }));
+        return { inscriptions: duJour.length, tampons: noms };
+    }
+
+    /**
      * Les inscriptions non annulées de chaque cible d'un ensemble : { [cibleId]: { inscriptions, niveaux, remarques, eleves } }.
      * Pour la question de l'assistant avant de retirer une cible.
      */
@@ -464,10 +487,11 @@
         const liste = Array.isArray(retraits) ? retraits : [];
         if (liste.length === 0) return null;
         const plusieurs = liste.length > 1;
-        // Complément du 21 nov., 9 h 17 : une inscription peut être une remarque, sans niveau ; elles sont dites à part.
+        // Complément du 21 nov., 9 h 17 : une inscription peut être sans niveau ; elles sont dites à part. Mots de
+        // Grégoire (24 nov. 2026, 18 h 58) : « 2 traces sans niveau pour 1 étudiant·e ».
         const compte = (n, un, des) => `${n} ${n > 1 ? des : un}`;
         const lignes = liste.map(x => `« ${x.cible.etiquette || x.cible.id} » : `
-            + [x.niveaux ? compte(x.niveaux, 'niveau inscrit', 'niveaux inscrits') : '', x.remarques ? compte(x.remarques, 'remarque', 'remarques') : '']
+            + [x.niveaux ? compte(x.niveaux, 'niveau inscrit', 'niveaux inscrits') : '', x.remarques ? compte(x.remarques, 'trace sans niveau', 'traces sans niveau') : '']
                 .filter(Boolean).join(' et ')
             + ` pour ${compte(x.eleves, 'étudiant·e', 'étudiant·es')}`);
         const message = (plusieurs ? 'Tu retires des cibles qui portent des inscriptions.' : 'Tu retires une cible qui porte des inscriptions.')
@@ -584,9 +608,10 @@
         construireTampons: construireTampons,
         lireTampons: lireTampons,
         aUnTampon: aUnTampon,
-        estDeTamponsSeuls: estDeTamponsSeuls,
+        estUneRemarque: estUneRemarque,
         rapprocherTampons: rapprocherTampons,
         vusALaDate: vusALaDate,
+        dejaInscritALaDate: dejaInscritALaDate,   // 24 nov. 2026 : la ligne « Déjà inscrit aujourd'hui » de l'écran d'observation
         dateDuJour: dateDuJour,
         dateValide: dateValide,
         lireRespecte: lireRespecte,

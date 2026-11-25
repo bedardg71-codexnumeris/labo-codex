@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { ouvrirTableau, ouvrirObserver, stock, attendre, eleves, criteres, CIBLE, CAT } from './harness/banc-observer-tampons.js';
+import { ouvrirTableau, ouvrirObserver, stock, attendre, eleves, criteres, CIBLE, CAT, ENSEMBLE } from './harness/banc-observer-tampons.js';
 
 // ═══════════════════════════════════════════════════════════════════════════════════════════
 // TAMPONS D'OBSERVATION, LOT 2 : OBSERVER (24 nov. 2026)
@@ -206,6 +206,8 @@ test.describe('Tampons d’observation, lot 2 — relire : la case, l’historiq
         await expect(entree.locator('.tc-tampon img'), 'le poste a encore ce tampon : son image est montrée').toHaveCount(1);
         await expect(entree.locator('.tc-entree-niveau')).toHaveCount(0);
         expect(await entree.innerText()).not.toMatch(/remarque|sans niveau/i);
+        await expect(entree.locator('.tc-entree-critere'), 'aucun critère renseigné : pas de liste de tirets (retouche du 24 nov.)').toHaveCount(0);
+        expect(await entree.innerText()).not.toMatch(/Critère fictif/);
     });
 
     test('au profil : la même lecture, datée, avec son origine, sans « remarque » ni bouton d’annulation', async ({ page }) => {
@@ -219,7 +221,7 @@ test.describe('Tampons d’observation, lot 2 — relire : la case, l’historiq
         const lignes = entree.locator('.tc-entree-critere');
         await expect(lignes.nth(0).locator('.tc-tampon-nom')).toHaveText('Tampon fictif 1');
         await expect(lignes.nth(0)).toHaveClass(/tc-entree-critere--vide/);
-        await expect(lignes.nth(1).locator('.tc-tampon')).toHaveCount(0);
+        await expect(lignes, 'aucun critère renseigné : seul celui qui porte un tampon se lit (retouche du 24 nov.)').toHaveCount(1);
         expect(await entree.innerText()).not.toMatch(/remarque|sans niveau/i);
         await expect(page.locator('.pc-cible [data-tc="annuler"]')).toHaveCount(0);
     });
@@ -333,5 +335,107 @@ test.describe('Tampons d’observation, lot 2 — la porte vers les réglages, e
         await inscrire(page);
         await expect(page.locator(`${ECRAN} .tc-alerte`)).toBeVisible();
         expect(await stock(page)).toEqual([]);
+    });
+});
+
+// RETOUCHE du 24 nov. 2026, 19 h (essai de Grégoire sur son iPad, 18 h 47) : revenu sur un·e élève déjà noté·e, l'écran
+// vide laissait croire que rien n'était enregistré. Sa correction, mot pour mot (18 h 55) : « je lis sous son nom :
+// "Déjà inscrit aujourd'hui : Incertain, Inexact". Les tampons restent relâchés : si j'en touche un et que j'inscris,
+// j'ajoute une trace, sans refaire la première. »
+test.describe('Tampons d’observation, lot 2 — retouche : « Déjà inscrit aujourd’hui »', () => {
+    const deja = (page) => page.locator(`${ECRAN} .oc-deja`);
+    const revenirA = async (page, rang) => { await page.locator(`${ECRAN} .oc-pastille`).nth(rang).click(); await attendre(page, 150); };
+    const JOUR = '2031-03-04';
+    const trace = (id, quoi) => Object.assign({ id, type: 'inscription', da: ZOE.da, ensembleId: ENSEMBLE, cibleId: CIBLE, niveau: null, echelleId: null, date: JOUR,
+        horodatage: JOUR + 'T10:00:00.000Z', productionId: null, origine: 'observation', noteBreve: '', criteres: CRITERES.map((k) => Object.assign({ respecte: null }, k)), tampons: [] }, quoi);
+
+    test('inscrire deux tampons pour A, passer à B, revenir à A : la ligne nomme les deux, rien n’est pressé ; un tampon de plus ajoute une trace, et la ligne en nomme trois', async ({ page }) => {
+        await ouvrirTableau(page, { nTampons: 6, avecCritere: 2 });
+        await ouvrirObserver(page);
+        await expect(deja(page), 'personne n’est encore inscrit·e : aucune ligne').toHaveCount(0);
+        await expect(page.locator('#oc-nom')).not.toHaveAttribute('aria-describedby', /.+/);
+        await tampon(page, 3).click();
+        await tampon(page, 4).click();
+        await inscrire(page);
+        await expect(page.locator('#oc-nom')).toHaveText(nomDe(YAN));
+        await expect(deja(page), 'un·e autre étudiant·e n’a pas la ligne').toHaveCount(0);
+        const premiere = await stock(page);
+        await revenirA(page, 0);
+        await expect(page.locator('#oc-nom')).toHaveText(nomDe(ZOE));
+        await expect(deja(page)).toHaveText('Déjà inscrit aujourd’hui : Tampon fictif 3, Tampon fictif 4');
+        await expect(deja(page)).toBeVisible();
+        await expect(page.locator(`${ECRAN} .oc-tampon[aria-pressed="true"]`), 'les tampons restent relâchés').toHaveCount(0);
+        await expect(page.locator(`${ECRAN} .tc-coche[aria-pressed="true"]`)).toHaveCount(0);
+        await expect(page.locator(`${ECRAN} .oc-note`)).toHaveValue('');
+        // Lue à l'arrivée : le nom reçoit le focus, et la ligne le décrit.
+        await expect(page.locator('#oc-nom')).toBeFocused();
+        await expect(page.locator('#oc-nom')).toHaveAttribute('aria-describedby', 'oc-deja');
+        const m = await page.evaluate(() => ({ nom: document.getElementById('oc-nom').getBoundingClientRect().bottom, ligne: document.getElementById('oc-deja').getBoundingClientRect().top }));
+        expect(m.ligne, 'la ligne est sous le nom').toBeGreaterThanOrEqual(m.nom - 1);
+        // Un tampon de plus : une trace AJOUTÉE, la première intacte.
+        await tampon(page, 1).click();
+        await inscrire(page);
+        const apres = await stock(page);
+        expect(apres).toHaveLength(2);
+        expect(apres[0], 'la première trace n’est ni réécrite ni fusionnée').toEqual(premiere[0]);
+        expect(apres[1].tampons.map((t) => t.id)).toEqual(['custom-obs2-1']);
+        await revenirA(page, 0);
+        await expect(deja(page)).toHaveText('Déjà inscrit aujourd’hui : Tampon fictif 3, Tampon fictif 4, Tampon fictif 1');
+        await expect(page.locator(`${ECRAN} .oc-tampon[aria-pressed="true"]`)).toHaveCount(0);
+    });
+
+    test('une autre cible, un autre jour, un·e autre étudiant·e n’y paraissent pas ; une inscription annulée disparaît de la ligne ; sans tampon, la ligne dit seulement qu’une inscription existe', async ({ page }) => {
+        await ouvrirTableau(page, { nTampons: 6, inscriptions: [
+            trace('I-autre-cible', { cibleId: CIBLE + '_nue', criteres: [], tampons: [copie(5)] }),
+            trace('I-autre-jour', { date: '2031-03-03', horodatage: '2031-03-03T10:00:00.000Z', tampons: [copie(6)] }),
+            trace('I-autre-eleve', { da: YAN.da, tampons: [copie(4)] }),
+            trace('I-texte', { da: LOU.da, origine: 'conversation', noteBreve: 'Un texte fictif' })] });
+        await ouvrirObserver(page);
+        expect(await page.evaluate((j) => window.ObservationCibles.dater(j), JOUR)).toBe(true);
+        await expect(page.locator('#oc-nom')).toHaveText(nomDe(ZOE));
+        await expect(deja(page), 'ni l’autre cible, ni l’autre jour, ni l’autre étudiant·e').toHaveCount(0);
+        await revenirA(page, 1);
+        await expect(deja(page), 'témoin : la trace de l’autre étudiant·e se lit chez elle').toHaveText('Déjà inscrit aujourd’hui : Tampon fictif 4');
+        await revenirA(page, 2);
+        await expect(deja(page), 'sans tampon : le mot court').toHaveText('Déjà inscrit aujourd’hui.');
+        // Une trace pour Zoé, puis son annulation par l'historique de sa case.
+        await revenirA(page, 0);
+        await tampon(page, 2).click();
+        await inscrire(page);
+        await revenirA(page, 0);
+        await expect(deja(page)).toHaveText('Déjà inscrit aujourd’hui : Tampon fictif 2');
+        await page.locator(`${ECRAN} [data-oc="fermer"]`).first().click();
+        await ouvrirCase(page, ZOE.da);
+        await page.locator('.tc-historique-liste .tc-entree').first().locator('[data-tc="annuler"]').click();
+        await page.locator('#overlay-ui-dialogue .btn-supprimer').click();
+        await expect(page.locator('.tc-historique-liste .tc-entree--annulee')).toHaveCount(1);
+        await page.evaluate(() => window.TableauCibles.fermer());
+        await ouvrirObserver(page);
+        await page.evaluate((j) => window.ObservationCibles.dater(j), JOUR);
+        await expect(page.locator('#oc-nom')).toHaveText(nomDe(ZOE));
+        await expect(deja(page), 'annulée, la trace ne paraît plus à la ligne').toHaveCount(0);
+        await revenirA(page, 1);
+        await expect(deja(page), 'témoin : la ligne de l’autre étudiant·e est toujours là').toHaveCount(1);
+    });
+
+    test('la forme tient avec la ligne : à 1180 × 700, quatre critères et douze tampons, rien ne passe sous la bande d’actions', async ({ page }) => {
+        await page.setViewportSize({ width: 1180, height: 700 });
+        await ouvrirTableau(page, { nTampons: 12, avecCritere: 4 });
+        await ouvrirObserver(page);
+        await tampon(page, 5).click();
+        await tampon(page, 6).click();
+        await inscrire(page);
+        await revenirA(page, 0);
+        await expect(deja(page)).toBeVisible();
+        const m = await page.evaluate(() => {
+            const r = [...document.querySelectorAll('.oc-fenetre .oc-tampon')].map((b) => b.getBoundingClientRect());
+            const a = document.querySelector('.oc-actions').getBoundingClientRect();
+            const b = document.querySelector('.oc-inscrire').getBoundingClientRect();
+            return { n: r.length, bas: Math.max(...r.map((x) => x.bottom)), bande: a.top, inscrireBas: b.bottom, defilement: document.querySelector('.oc-overlay').scrollTop };
+        });
+        expect(m.n).toBe(12);
+        expect(m.defilement, 'sans défilement').toBe(0);
+        expect(m.bas, 'le dernier tampon est au-dessus de la bande d’actions').toBeLessThanOrEqual(m.bande);
+        expect(m.inscrireBas, '« Inscrire et passer au suivant » se voit en entier').toBeLessThanOrEqual(700);
     });
 });

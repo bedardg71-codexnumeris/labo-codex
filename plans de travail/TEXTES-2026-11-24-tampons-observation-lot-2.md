@@ -12,12 +12,12 @@
 
 | N° | Question | Proposé |
 |---|---|---|
-| Q1 | Le nom de la porte vers les réglages (P1) | **« Régler mes tampons »**. Second choix : « Mes tampons ». La fenêtre qu'elle ouvre s'intitule « Tampons et rétroactions » (accepté le 24 nov., 15 h 33) |
-| Q2 | L'étiquette de la rangée de tampons (R1) | **« Tampons d'observation »**, le mot du réglage (« D'observation »). Second choix, plus court : « Tampons » |
-| Q3 | Ce qui remplace « Remarque, sans niveau » pour une trace de tampons seuls (H1) | **Rien** : la ligne dit la date, l'origine, puis les tampons, comme tu l'as dit à 16 h 22. Aucun mot ne prend la place |
-| Q4 | Une trace qui porte des tampons et une **coche**, sans texte : elle se lit encore « Remarque, sans niveau » (c'est le cas depuis le 22 nov. pour une coche seule) | Je n'y ai pas touché : ta phrase de 16 h 22 parle d'une trace « faite seulement de tampons ». À dire si une coche sans texte ne doit plus s'appeler « remarque » non plus |
-| Q5 | Au **tableau**, la case d'une trace de tampons seuls montre ✎ (ta décision). Mais trois textes existants du tableau disent encore « remarque » pour toute trace sans niveau : l'infobulle et le nom lu de la case (« 1 remarque »), la légende (« ✎ : des remarques, aucun niveau encore. ») et la question avant de retirer une cible (« 2 remarques pour 1 étudiant·e ») | Je n'y ai pas touché : ta phrase vise l'historique et le profil. Si ces trois textes doivent changer, une proposition : « à lire » à la place de « remarque » (« 1 trace à lire », « ✎ : quelque chose à lire, aucun niveau encore. ») |
-| Q6 | Le refus d'une observation vide (V1) ne change que si l'écran offre des tampons | Sans tampon offert, le mot d'avant reste, tel quel |
+| Q1 | Le nom de la porte vers les réglages (P1) | **« Régler mes tampons »**. Second choix : « Mes tampons ». La fenêtre qu'elle ouvre s'intitule « Tampons et rétroactions » (accepté le 24 nov., 15 h 33) **Validé par Cowork le 24 nov. 2026, 19 h, sous l'étiquette « À l'essai » : comme proposé.** |
+| Q2 | L'étiquette de la rangée de tampons (R1) | **« Tampons d'observation »**, le mot du réglage (« D'observation »). Second choix, plus court : « Tampons » **Validé par Cowork le 24 nov. 2026, 19 h, sous l'étiquette « À l'essai » : comme proposé.** |
+| Q3 | Ce qui remplace « Remarque, sans niveau » pour une trace de tampons seuls (H1) | **Rien** : la ligne dit la date, l'origine, puis les tampons, comme tu l'as dit à 16 h 22. Aucun mot ne prend la place **Validé par Cowork le 24 nov. 2026, 19 h : comme proposé.** Étendu par la réponse à Q4. |
+| Q4 | Une trace qui porte des tampons et une **coche**, sans texte : elle se lit encore « Remarque, sans niveau » (c'est le cas depuis le 22 nov. pour une coche seule) | Je n'y ai pas touché : ta phrase de 16 h 22 parle d'une trace « faite seulement de tampons ». À dire si une coche sans texte ne doit plus s'appeler « remarque » non plus **ACCEPTÉE PAR GRÉGOIRE LE 24 NOV. 2026 (18 h 57).** La règle : « remarque » désigne un texte que l'enseignant·e a écrit. Une trace sans niveau porte « Remarque, sans niveau » seulement si elle porte un texte ; faite de coches, de tampons ou des deux, elle montre la date, l'origine et son contenu, sans étiquette. Fait dans la retouche ; une trace d'une seule coche (depuis le 22 nov.) perd donc l'étiquette. |
+| Q5 | Au **tableau**, la case d'une trace de tampons seuls montre ✎ (ta décision). Mais trois textes existants du tableau disent encore « remarque » pour toute trace sans niveau : l'infobulle et le nom lu de la case (« 1 remarque »), la légende (« ✎ : des remarques, aucun niveau encore. ») et la question avant de retirer une cible (« 2 remarques pour 1 étudiant·e ») | Je n'y ai pas touché : ta phrase vise l'historique et le profil. Si ces trois textes doivent changer, une proposition : « à lire » à la place de « remarque » (« 1 trace à lire », « ✎ : quelque chose à lire, aucun niveau encore. ») **ACCEPTÉE PAR GRÉGOIRE LE 24 NOV. 2026 (18 h 58), mot pour mot.** Infobulle et nom lu de la case : « 1 trace sans niveau », « N traces sans niveau ». Légende : « ✎ : des traces à lire, aucun niveau encore. » Question avant de retirer une cible : « 2 traces sans niveau pour 1 étudiant·e ». Fait dans la retouche. |
+| Q6 | Le refus d'une observation vide (V1) ne change que si l'écran offre des tampons | Sans tampon offert, le mot d'avant reste, tel quel **Validé par Cowork le 24 nov. 2026, 19 h : comme proposé.** |
 
 ## L'écran « Observer »
 
@@ -58,3 +58,28 @@
 - Aucune ligne de Nouvelles (rien ne part en ligne).
 - Aucun mot dans le parcours « Suivre ton groupe par cibles » ni dans la démo : ils ne montrent aucun tampon.
 - Aucun texte lu par un·e étudiant·e : les inscriptions ne se lisent qu'au tableau des cibles et au profil, côté enseignant·e.
+
+## Retouche du 24 nov. 2026, 19 h : « Déjà inscrit aujourd'hui »
+
+Sous le nom de l'étudiant·e, sur l'écran « Observer », dès qu'une inscription non annulée existe à la date de l'écran pour cette personne et cette cible.
+
+| N° | Où | Le texte | Statut |
+|---|---|---|---|
+| D1 | Les traces du jour portent des tampons : leurs noms, une fois chacun, dans l'ordre inscrit | Déjà inscrit aujourd'hui : Incertain, Inexact | **Accepté par Grégoire le 24 nov. 2026 (18 h 55), mot pour mot** |
+| D2 | Les traces du jour ne portent aucun tampon (des coches, un texte, un niveau) | Déjà inscrit aujourd'hui. | **PROPOSÉ.** Seconds choix : « Déjà inscrit aujourd'hui, sans tampon. » ; « Une inscription existe déjà aujourd'hui. » |
+
+Deux précisions, à trancher si elles gênent : (a) « aujourd'hui » veut dire la date de l'écran, comme la marque « vu aujourd'hui » qui existait déjà ; (b) si les traces du jour mêlent des traces avec et sans tampon, la ligne nomme les tampons et ne dit rien de plus des autres.
+
+## Ce qui dit encore « remarque » pour une inscription sans niveau (non changé, à porter à Grégoire)
+
+Depuis la règle de Q4, ces textes peuvent nommer « remarque » une trace qui ne porte aucun texte. Aucun n'a été touché.
+
+| N° | Où | Ce qu'il dit | Quand il devient inexact |
+|---|---|---|---|
+| M1 | Fenêtre d'une case (vue étendue), la tuile sans niveau | « Aucun niveau » / « une remarque seulement » | Si l'on coche un critère sans écrire de texte |
+| M2 | Fenêtre d'une case, le bouton quand cette tuile est choisie | « Inscrire la remarque » | Idem |
+| M3 | Annonce pour lecteur d'écran après ce geste | « Zoé Fictive, Cible : remarque inscrite. » | Idem |
+| M4 | Parcours « Suivre ton groupe par cibles », bulle « Une case par cible » | « Sa case de « La lecture stratégique » porte maintenant ✎ : une remarque, aucun niveau encore. L'observation ne pose pas de niveau. » | Jamais dans le parcours : l'observation de l'exemple porte un texte, c'est bien une remarque. Mais la bulle reprend les mots de l'ANCIENNE légende ; la légende neuve dit « des traces à lire ». Bulle validée mot pour mot : non touchée |
+| M5 | Historique et profil, l'étiquette | « Remarque, sans niveau » | Reste, pour les traces qui portent un texte (Q4) |
+| M6 | Infobulle d'une case qui a des niveaux et des traces sans niveau | « 3 inscriptions, dont 1 trace sans niveau » | SUPPOSÉ : la forme de Q5 appliquée aussi à ce cas mixte (elle disait « dont 1 remarque »), pour que la même case ne dise pas deux mots |
+
