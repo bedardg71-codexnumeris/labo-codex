@@ -107,7 +107,7 @@ Consigne de retouche de Cowork, sur le texte accepté par Grégoire : « Quand l
 | R1 | **La fenêtre et le profil ne comptent pas de la même façon, et je l'ai laissé.** La fenêtre compte ses blocs ; le profil exige exactement une cible déclarée. Deux cas s'écartent : une production sans cible déclarée dans un ensemble d'une seule cible, et une production qui déclare deux cibles dont une seule est encore dans l'ensemble. Dans les deux, la fenêtre offre un bloc et retient tout d'office, mais le profil ne lit pas la trace en direct sous la cible | Que le point 5 (« le profil ne change pas ») l'emporte. Cas rare ; à aligner si Grégoire le veut |
 | R2 | **L'annonce A2** disait « remis dans l'inscription » : faux pour un premier toucher. Elle dit maintenant « retenu pour l'inscription de « cible » », dans les deux cas | Un seul texte suffit ; les mots restent à Grégoire (page de textes) |
 | R3 | **Changer d'étudiant·e** redessine les tampons de chaque bloc selon la même règle : ce qui avait été touché pour l'étudiant·e d'avant n'est pas gardé (les niveaux, coches et textes le sont, comme avant) | Que les tampons d'une autre personne n'ont rien à garder |
-| R4 | **La ligne des noms** (I2) dit « : aucun » tant que rien n'est retenu, puis les noms retenus | |
+| R4 | **La ligne des noms** (I2) dit « : aucun » tant que rien n'est retenu, puis les noms retenus. *Changé le 25 nov., midi (§ 11) : la ligne passe sous les tampons et dit « Retenus pour cette cible : aucun ».* | |
 | R5 | **Un tampon retenu par son critère se relâche d'un toucher**, comme les autres | Que l'exception donne un départ, pas une obligation |
 
 **La preuve de la retouche** (25 nov., un passage à la fois, en alternance avec une autre session)
@@ -239,11 +239,13 @@ Aucune entrée au BACKLOG.
 
 ### Groupe 1 : ouvrir le fichier
 
-1. Dans Safari, ouvre un onglet de navigation privée, puis l'adresse `https://deploy-preview-62--codexnumeris-051225.netlify.app/departs.html`. Sous « Essai : les tampons d'observation », touche « Télécharger le fichier », puis « Ouvrir l'application ». (Ces trois libellés sont ceux que j'ai écrits dans la page ; la demande de téléchargement de Safari, je ne l'ai pas vue.)
+1. Dans Safari, dans un onglet **ordinaire** (pas de navigation privée : sur l'iPad, les images du fichier n'y sont pas rangées, #1311), ouvre l'adresse `https://deploy-preview-62--codexnumeris-051225.netlify.app/departs.html`. Si la bande verte « Mode démonstration » est là, touche d'abord « Quitter la démo ». Sous « Essai : les tampons d'observation », touche « Télécharger le fichier », puis « Ouvrir l'application ». (Ces trois libellés sont ceux que j'ai écrits dans la page ; la demande de téléchargement de Safari, je ne l'ai pas vue.)
 2. Dans l'application, touche « Codex » (VU), en haut à droite, puis « Ouvrir un codex… » (VU). Dans le sélecteur de fichiers de l'iPad, choisis le fichier téléchargé.
-3. Une fenêtre « Recharger la page » (VU) paraît : touche « Recharger » (VU).
+3. Si une fenêtre « Modèle antérieur détecté » (VU) s'ouvre, touche « Remplacer » (VU) : l'espace portait déjà des données. Puis une fenêtre « Recharger la page » (VU) paraît : touche « Recharger » (VU).
 
-**Tu dois voir** : sous les onglets, le groupe « 601-101-MQ · gr. 00001 » (VU) ; le bouton « Codex » avec un point vert (VU) ; aucune bande « Mode démonstration ». Si elle paraît, ou si une fenêtre « Modèle antérieur détecté » (VU) s'ouvre au geste 2, l'espace n'était pas vide : voir § 10, b).
+> **Corrigé le 25 nov., midi** : ce chemin (onglet ordinaire, « Quitter la démo » si la bande est là, « Ouvrir un codex… », « Remplacer », « Recharger ») est celui qui a marché pour Grégoire sur l'iPad. L'onglet de navigation privée, conseillé ici ce matin, n'y est PAS un geste sûr : à 10 h 59, l'écran d'Annoter y a affiché « Fichier manquant — rouvre le codex après avoir libéré de l'espace » (#1311).
+
+**Tu dois voir** : sous les onglets, le groupe « 601-101-MQ · gr. 00001 » (VU) ; le bouton « Codex » avec un point vert (VU) ; aucune bande « Mode démonstration ». Si elle paraît après l'ouverture, la démo était active (#1312) : « Quitter la démo », puis rechoisis le groupe dans le menu sous les onglets. Ce que « Remplacer » laisse derrière lui : § 10, b).
 
 ### Groupe 2 : poser un tampon sur la production à une cible
 
@@ -266,7 +268,7 @@ Aucune entrée au BACKLOG.
 2. Sous « Étudiant·e » (VU), choisis « Personne-01 Fictif-01 » ; sous « Production » (VU), « Production fictive : une cible ».
 3. Touche le tampon : il se relâche. Touche-le de nouveau : il est retenu. Choisis « 3 Acquis » (VU), puis « Inscrire » (VU).
 
-**Tu dois voir**, avant le geste 3 : un seul bloc, « Cible fictive A » ; sous « Tampons d'observation posés sur cette production » (VU), « Tampon fictif 2 », déjà retenu (une coche sur le tampon, VU). Après le premier toucher, la ligne dit « : aucun » (VU).
+**Tu dois voir**, avant le geste 3 : un seul bloc, « Cible fictive A » ; sous « Tampons d'observation posés sur cette production » (VU, seule sur sa ligne), le tampon, déjà retenu (une coche, VU) ; sous lui, « Retenus pour cette cible : Tampon fictif 2 » (VU). Après le premier toucher, cette ligne dit « Retenus pour cette cible : aucun » (VU).
 
 ### Groupe 5 : relire encore
 
@@ -280,7 +282,7 @@ Aucune entrée au BACKLOG.
 2. Pose « Tampon fictif 1 (critère A1) », puis « Tampon fictif 3 », comme au groupe 2.
 3. Évaluation › Tableau de notation › « Inscrire pour une production » ; « Personne-01 Fictif-01 » et « Production fictive : deux cibles ».
 
-**Tu dois voir** : deux blocs, « Cible fictive A » et « Cible fictive B » (VU) ; chacun montre les deux tampons. Sous A, « Tampon fictif 1 (critère A1) » est déjà retenu, et lui seul (VU). Sous B, rien n'est retenu : la ligne dit « : aucun » (VU). La phrase d'aide commence par « Touche les tampons qui concernent cette cible » (VU).
+**Tu dois voir** : deux blocs, « Cible fictive A » et « Cible fictive B » (VU) ; chacun montre les deux tampons. Sous A, « Tampon fictif 1 (critère A1) » est déjà retenu, et lui seul (VU) : la ligne sous les tampons dit « Retenus pour cette cible : Tampon fictif 1 (critère A1) » (VU). Sous B, rien n'est retenu : « Retenus pour cette cible : aucun » (VU). La phrase d'aide commence par « Touche les tampons qui concernent cette cible » (VU) ; sous A seulement, elle se termine par « Un tampon qui porte un critère de cette cible est déjà retenu. » (VU).
 
 ### Groupe 7 : toucher sous une cible
 
@@ -335,7 +337,7 @@ Aucun code de l'application n'a changé. Ni fusion, ni bump, ni ligne de Nouvell
 - Une fenêtre s'interpose avant le rechargement : « Modèle antérieur détecté », avec « Annuler » et « Remplacer » (VU). Elle paraît parce que les deux fichiers ont le même trimestre et des cours d'identités différentes. Elle n'annonce rien de grave ici ; il faut toucher « Remplacer ».
 - Ensuite : **un remplacement clé par clé, pas un espace neuf**. Ce que le fichier porte remplace ce qui était là (groupe, productions, images, tampons, pratique). Ce qu'il ne porte pas **reste** : mesuré, l'évaluation du fichier des codes en lettres (une, orpheline) et son image (sept images en base au lieu de six). La démo, si elle était active, reste active.
 - Ce que tu as importé à la main ce matin, je ne l'ai pas : je ne peux pas dire ce qui en resterait, seulement que la règle est celle-là.
-- **Le geste sûr** : un onglet de navigation privée. Ce qui est vérifié : dans un contexte de navigateur neuf (stockage vide, ce que fait chaque essai du banc), le fichier s'ouvre sans bande, sans fenêtre « Modèle antérieur détecté », et tout le parcours se joue. Ce qui ne l'est pas : la navigation privée de Safari sur l'iPad elle-même (je n'ai ni Safari ni iPad). Lu dans `netlify.toml` : les aperçus ne passent par aucune porte d'accès, un onglet privé ne demandera donc pas de code. À savoir : fermer l'onglet privé efface l'essai.
+- **Le geste sûr : CORRIGÉ le 25 nov., midi.** J'avais écrit ici : un onglet de navigation privée. **C'est faux sur l'iPad** : Grégoire l'a essayé, et à 10 h 59 l'écran d'Annoter affichait « Fichier manquant — rouvre le codex après avoir libéré de l'espace » ; le même fichier dans un onglet ordinaire montre l'image (#1311). Mon erreur : j'avais vérifié un contexte de navigateur neuf sous Chromium et tenu la navigation privée de Safari pour équivalente, en écrivant moi-même que je ne l'avais pas vue. **Le chemin qui a marché sur l'iPad** : un onglet ordinaire ; « Quitter la démo » si la bande verte est là ; « Ouvrir un codex… » ; « Remplacer » ; « Recharger ». Ce chemin laisse dans l'espace les clés que le fichier ne porte pas (ci-dessus, #1313) : sans effet mesuré sur le parcours de l'essai. Lu dans `netlify.toml` : les aperçus ne passent par aucune porte d'accès.
 
 **c) Le chemin sur l'iPad** : le groupe 1 du § 9. Seuls les gestes dans l'application sont vus ; ceux de Safari (téléchargement, sélecteur de fichiers) sont décrits.
 
@@ -392,8 +394,8 @@ Chacune le dit dans son en-tête. Le § 9 de ce rapport cite le fichier : à ré
 
 | Trouvaille | Issue |
 |---|---|
-| Ouvrir un codex sur une démo active laisse la bande et l'état de démo | **Inscrire et continuer** : à dire à Cowork ; pas d'entrée au backlog de ma main (symptôme vécu par Grégoire à 9 h 34, c'est à la session principale de l'inscrire) |
-| Ouvrir un codex par-dessus un autre laisse les clés que le nouveau ne porte pas (une évaluation orpheline mesurée) | **Inscrire et continuer** : connu du code (`_planifierPurgeEspace`, la purge n'est qu'un aperçu, #336) ; rien à ajouter |
+| Ouvrir un codex sur une démo active laisse la bande et l'état de démo | **Inscrit : #1312** (25 nov., midi, sur consigne de Cowork) |
+| Ouvrir un codex par-dessus un autre laisse les clés que le nouveau ne porte pas (une évaluation orpheline mesurée) | **Inscrit : #1313** (25 nov., midi, sur consigne de Cowork) |
 | La liste d'Évaluation › Liste dépasse l'écran à 1180 de large (la colonne des actions est hors champ) | **Commenter et oublier** : l'écran le dit lui-même ; le parcours passe par Évaluation › Annoter |
 
 ### L'arbre du Mac

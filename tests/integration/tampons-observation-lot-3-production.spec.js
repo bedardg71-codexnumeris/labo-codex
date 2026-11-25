@@ -151,7 +151,7 @@ test.describe('Tampons d’observation, lot 3 — poser sur une production : la 
         await expect(rangProduction(page, P_UNE).locator('.tc-tampon-nom').first()).toHaveText(mechant);
         await expect(page.locator('.pc-panneau b')).toHaveCount(0);
         await ouvrirParProduction(page, ZOE, P_UNE);
-        await expect(bloc(page, CIBLE_A).locator('.oc-tampons-retenus')).toContainText(mechant);
+        await expect(bloc(page, CIBLE_A).locator('.tc-pr-retenus')).toContainText(mechant);
         await expect(page.locator('.tc-fenetre b')).toHaveCount(0);
         expect(await page.evaluate(() => window.__pr3)).toBeUndefined();
         expect(await page.locator('.pc-panneau, .tc-fenetre').evaluateAll((els) => els.some((e) => e.querySelector('[onclick],[onerror],[onchange]')))).toBe(false);
@@ -169,13 +169,18 @@ test.describe('Tampons d’observation, lot 3 — « Inscrire pour une productio
         await expect(b.locator('.tc-pr-tampons .oc-tampon')).toHaveCount(2);
         await expect(b.locator('.tc-pr-tampons .oc-tampon[aria-pressed="true"]')).toHaveCount(2);
         await expect(b.locator('.tc-pr-tampons .tc-champ-nom')).toHaveText('Tampons d’observation posés sur cette production');
-        await expect(b.locator('.oc-tampons-retenus')).toHaveText(' : Tampon fictif 1, Tampon fictif 2');
+        // 25 nov., midi : l'étiquette reste SEULE sur sa ligne (ni deux-points ni noms) ; les noms retenus ont la leur,
+        // entre les tampons et la phrase d'aide. La seconde phrase ne paraît jamais dans une fenêtre à un seul bloc.
+        await expect(b.locator('.tc-pr-tampons .oc-tampons-tete')).toHaveText('Tampons d’observation posés sur cette production');
+        expect(await ordreDuBloc(page, CIBLE_A)).toEqual(['oc-tampons-tete', 'oc-tampons', 'tc-pr-retenus', 'tc-aide']);
+        await expect(b.locator('.tc-pr-aide-critere')).toHaveCount(0);
+        await expect(b.locator('.tc-pr-retenus')).toHaveText('Retenus pour cette cible : Tampon fictif 1, Tampon fictif 2');
         const taille = await tamponDuBloc(page, CIBLE_A, 2).boundingBox();
         expect(Math.min(taille.width, taille.height), 'une cible de 44 px au moins').toBeGreaterThanOrEqual(44);
         // Retirer le second : relâché, annoncé, et rien n'est écrit sur la production.
         await tamponDuBloc(page, CIBLE_A, 2).click();
         await expect(tamponDuBloc(page, CIBLE_A, 2)).toHaveAttribute('aria-pressed', 'false');
-        await expect(b.locator('.oc-tampons-retenus')).toHaveText(' : Tampon fictif 1');
+        await expect(b.locator('.tc-pr-retenus')).toHaveText('Retenus pour cette cible : Tampon fictif 1');
         await expect(page.locator('.tc-fenetre .tc-pr-annonce')).toHaveText('« Tampon fictif 2 » retiré de l’inscription de « Cible fictive A ». Il reste sur la production.');
         await choisirNiveau(page, CIBLE_A, '2');
         await inscrire(page);
@@ -214,7 +219,9 @@ test.describe('Tampons d’observation, lot 3 — « Inscrire pour une productio
     });
 
     // ── Plusieurs cibles (décision de Grégoire, 25 nov. 2026, 8 h 22) : rien n'est retenu d'office, sauf par un critère ──
+    const ordreDuBloc = (page, cibleId) => bloc(page, cibleId).locator('.tc-pr-tampons > *').evaluateAll((els) => els.map((e) => e.classList[0]));
     const presses = (page, cibleId) => bloc(page, cibleId).locator('.tc-pr-tampons .oc-tampon[aria-pressed="true"]');
+    const AIDE_CRITERE = 'Un tampon qui porte un critère de cette cible est déjà retenu.';
     const AIDE_UNE = 'Ils entrent dans l’inscription de cette cible. Touche un tampon pour le retirer de l’inscription : il reste sur la production.';
     const AIDE_PLUSIEURS = 'Touche les tampons qui concernent cette cible : ils entrent dans son inscription et restent sur la production.';
 
@@ -224,6 +231,8 @@ test.describe('Tampons d’observation, lot 3 — « Inscrire pour une productio
         await expect(page.locator('.tc-fenetre .tc-bloc-cible')).toHaveCount(1);
         await expect(presses(page, CIBLE_A)).toHaveCount(2);
         await expect(bloc(page, CIBLE_A).locator('.tc-pr-tampons .tc-aide')).toHaveText(AIDE_UNE);
+        await expect(bloc(page, CIBLE_A).locator('.tc-pr-aide-critere'), 'jamais dans une fenêtre à un seul bloc').toHaveCount(0);
+        await expect(bloc(page, CIBLE_A).locator('.tc-pr-retenus'), 'la ligne des noms vaut pour un bloc').toHaveText('Retenus pour cette cible : Tampon fictif 2, Tampon fictif 3');
         await choisirNiveau(page, CIBLE_A, '1');
         await inscrire(page);
         expect((await inscriptions(page)).map((i) => i.tampons.map((t) => t.id))).toEqual([[tamponId(2), tamponId(3)]]);
@@ -236,7 +245,7 @@ test.describe('Tampons d’observation, lot 3 — « Inscrire pour une productio
         for (const c of [CIBLE_A, CIBLE_B]) {
             await expect(bloc(page, c).locator('.tc-pr-tampons .oc-tampon'), 'tous visibles').toHaveCount(2);
             await expect(presses(page, c), 'aucun retenu d’office').toHaveCount(0);
-            await expect(bloc(page, c).locator('.oc-tampons-retenus')).toHaveText(' : aucun');
+            await expect(bloc(page, c).locator('.tc-pr-retenus')).toHaveText('Retenus pour cette cible : aucun');
             await expect(bloc(page, c).locator('.tc-pr-tampons .tc-aide')).toHaveText(AIDE_PLUSIEURS);
         }
         await choisirNiveau(page, CIBLE_A, '1');
@@ -254,18 +263,40 @@ test.describe('Tampons d’observation, lot 3 — « Inscrire pour une productio
         // Le tampon 1 déclare le premier critère de la cible A ; la cible B n'a aucun critère.
         await expect(tamponDuBloc(page, CIBLE_A, 1)).toHaveAttribute('aria-pressed', 'true');
         await expect(tamponDuBloc(page, CIBLE_A, 3)).toHaveAttribute('aria-pressed', 'false');
-        await expect(bloc(page, CIBLE_A).locator('.oc-tampons-retenus')).toHaveText(' : Tampon fictif 1');
+        await expect(bloc(page, CIBLE_A).locator('.tc-pr-retenus')).toHaveText('Retenus pour cette cible : Tampon fictif 1');
         await expect(presses(page, CIBLE_B)).toHaveCount(0);
+        await expect(bloc(page, CIBLE_B).locator('.tc-pr-retenus')).toHaveText('Retenus pour cette cible : aucun');
+        // La seconde phrase : dans le bloc au tampon à critère, pas dans l'autre ; les noms entre les tampons et l'aide.
+        await expect(bloc(page, CIBLE_A).locator('.tc-pr-tampons .tc-aide')).toHaveText(AIDE_PLUSIEURS + ' ' + AIDE_CRITERE);
+        await expect(bloc(page, CIBLE_B).locator('.tc-pr-tampons .tc-aide')).toHaveText(AIDE_PLUSIEURS);
+        for (const c of [CIBLE_A, CIBLE_B]) {
+            await expect(bloc(page, c).locator('.tc-pr-tampons .oc-tampons-tete')).toHaveText('Tampons d’observation posés sur cette production');
+            expect(await ordreDuBloc(page, c)).toEqual(['oc-tampons-tete', 'oc-tampons', 'tc-pr-retenus', 'tc-aide']);
+        }
+        if (process.env.LOT3_CAPTURES) {
+            const taille = page.viewportSize();
+            for (const [l, h] of [[1180, 820], [820, 1180]]) {
+                await page.setViewportSize({ width: l, height: h });
+                await bloc(page, CIBLE_A).locator('.tc-pr-tampons').scrollIntoViewIfNeeded();
+                await page.screenshot({ path: `${process.env.LOT3_CAPTURES}/inscrire-deux-cibles-retenus-sous-les-tampons-${l}x${h}-clair.png` });
+            }
+            await page.setViewportSize(taille);
+        }
+        // Relâché ensuite, le tampon à critère n'emporte pas la phrase : elle dit l'état de départ. Puis il est retenu de nouveau.
+        await tamponDuBloc(page, CIBLE_A, 1).click();
+        await expect(bloc(page, CIBLE_A).locator('.tc-pr-retenus')).toHaveText('Retenus pour cette cible : aucun');
+        await expect(bloc(page, CIBLE_A).locator('.tc-pr-aide-critere')).toHaveText(AIDE_CRITERE);
+        await tamponDuBloc(page, CIBLE_A, 1).click();
         // Toucher le 3 sous B : retenu sous B, annoncé ; rien ne bouge sous A.
         await tamponDuBloc(page, CIBLE_B, 3).click();
         await expect(tamponDuBloc(page, CIBLE_B, 3)).toHaveAttribute('aria-pressed', 'true');
         await expect(page.locator('.tc-fenetre .tc-pr-annonce')).toHaveText('« Tampon fictif 3 » retenu pour l’inscription de « Cible fictive B ».');
-        await expect(bloc(page, CIBLE_B).locator('.oc-tampons-retenus')).toHaveText(' : Tampon fictif 3');
+        await expect(bloc(page, CIBLE_B).locator('.tc-pr-retenus')).toHaveText('Retenus pour cette cible : Tampon fictif 3');
         await expect(tamponDuBloc(page, CIBLE_A, 3), 'retenir sous B ne change rien sous A').toHaveAttribute('aria-pressed', 'false');
         // Un second toucher relâche ; un troisième retient de nouveau.
         await tamponDuBloc(page, CIBLE_B, 3).click();
         await expect(tamponDuBloc(page, CIBLE_B, 3)).toHaveAttribute('aria-pressed', 'false');
-        await expect(bloc(page, CIBLE_B).locator('.oc-tampons-retenus')).toHaveText(' : aucun');
+        await expect(bloc(page, CIBLE_B).locator('.tc-pr-retenus')).toHaveText('Retenus pour cette cible : aucun');
         await tamponDuBloc(page, CIBLE_B, 3).click();
         await choisirNiveau(page, CIBLE_A, '1');
         await bloc(page, CIBLE_B).locator('.tc-niveau input[data-sans-niveau]').check({ force: true });

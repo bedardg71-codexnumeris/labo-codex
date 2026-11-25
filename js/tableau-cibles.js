@@ -87,7 +87,11 @@
         tamponsProductionAide: 'Ils entrent dans l’inscription de cette cible. Touche un tampon pour le retirer de l’inscription : il reste sur la production.',
         // 25 nov. 2026, 8 h 22 : la production vise plusieurs cibles, rien n'est retenu d'office (mot PROPOSÉ par Cowork).
         tamponsProductionAidePlusieurs: 'Touche les tampons qui concernent cette cible : ils entrent dans son inscription et restent sur la production.',
-        tamponsProductionRetenus: (noms) => (noms.length ? `\u00a0: ${noms.join(', ')}` : '\u00a0: aucun'),
+        // 25 nov. 2026, midi (essai de Grégoire sur l'iPad) : la seconde phrase, dans le seul bloc où un tampon est retenu
+        // d'office par son critère ; et les noms retenus sur leur propre ligne, SOUS les tampons (accolés à l'étiquette,
+        // « … posés sur cette production : aucun » se lisait « aucun tampon posé »).
+        tamponsProductionAideCritere: 'Un tampon qui porte un critère de cette cible est déjà retenu.',
+        tamponsProductionRetenus: (noms) => `Retenus pour cette cible\u00a0: ${noms.length ? noms.join(', ') : 'aucun'}`,
         tamponRetire: (tampon, cible) => `« ${tampon} » retiré de l’inscription de « ${cible} ». Il reste sur la production.`,
         tamponRetenu: (tampon, cible) => `« ${tampon} » retenu pour l’inscription de « ${cible} ».`,
         aide: 'Au clavier : les flèches pour se déplacer, Entrée pour ouvrir une case.',
@@ -981,10 +985,13 @@
         const id = `${prefixe}-tampons`;
         const retenus = new Set(I().tamponsRetenusDOffice(liste, cible, nombreDeBlocs));
         const aide = nombreDeBlocs === 1 ? MOTS.tamponsProductionAide : MOTS.tamponsProductionAidePlusieurs;
-        return `<div class="tc-section tc-pr-tampons"><p class="oc-tampons-tete"><span class="tc-champ-nom" id="${esc(id)}">${esc(MOTS.tamponsProduction)}</span>`
-            + `<span class="oc-tampons-retenus">${esc(MOTS.tamponsProductionRetenus(liste.filter(t => retenus.has(String(t.id))).map(t => t.nom)))}</span></p>`
-            + `<div class="oc-tampons" role="group" aria-labelledby="${esc(id)}" aria-describedby="${esc(id)}-aide">${liste.map(t => _tamponATouchHTML(t, retenus.has(String(t.id)))).join('')}</div>`
-            + `<p class="tc-aide" id="${esc(id)}-aide">${esc(aide)}</p></div>`;
+        // À plusieurs blocs, les seuls retenus d'office le sont par leur critère : la seconde phrase dit cet état de DÉPART.
+        // Écrite ici, à l'ouverture du bloc, elle reste si le tampon est relâché ensuite (un toucher ne refait que la ligne des noms).
+        const aideCritere = (nombreDeBlocs > 1 && retenus.size > 0) ? ` <span class="tc-pr-aide-critere">${esc(MOTS.tamponsProductionAideCritere)}</span>` : '';
+        return `<div class="tc-section tc-pr-tampons"><p class="oc-tampons-tete"><span class="tc-champ-nom" id="${esc(id)}">${esc(MOTS.tamponsProduction)}</span></p>`
+            + `<div class="oc-tampons" role="group" aria-labelledby="${esc(id)}" aria-describedby="${esc(id)}-retenus ${esc(id)}-aide">${liste.map(t => _tamponATouchHTML(t, retenus.has(String(t.id)))).join('')}</div>`
+            + `<p class="tc-pr-retenus" id="${esc(id)}-retenus">${esc(MOTS.tamponsProductionRetenus(liste.filter(t => retenus.has(String(t.id))).map(t => t.nom)))}</p>`
+            + `<p class="tc-aide" id="${esc(id)}-aide">${esc(aide)}${aideCritere}</p></div>`;
     }
 
     /** Les tampons d'observation de la production choisie pour l'étudiant·e choisi·e (les deux requis ; sinon `[]`). */
@@ -1020,7 +1027,7 @@
         if (!bloc || !tampon) return;
         const retenu = bouton.getAttribute('aria-pressed') !== 'true';
         bouton.setAttribute('aria-pressed', String(retenu));
-        const noms = bloc.querySelector('.oc-tampons-retenus');
+        const noms = bloc.querySelector('.tc-pr-retenus');
         if (noms) noms.textContent = MOTS.tamponsProductionRetenus(_tamponsRetenusDuBloc(bloc).map(t => t.nom));
         const cible = _ouverte.ctx.cibles.find(c => c.id === bloc.dataset.cible);
         const zone = _ouverte.overlay.querySelector('.tc-pr-annonce');

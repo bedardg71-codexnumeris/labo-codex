@@ -1307,6 +1307,13 @@
     margin: 8px 0 12px;
 }
 
+/* Les noms retenus pour cette cible : leur propre ligne, sous les tampons, et elle passe à la ligne si elle est longue. */
+.tc-pr-retenus {
+    margin: 6px 0 0;
+    color: var(--texte-secondaire);
+    overflow-wrap: anywhere;
+}
+
 .tc-pr-tampons .tc-aide {
     margin: 6px 0 0;
 }

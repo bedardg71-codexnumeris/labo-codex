@@ -284,11 +284,13 @@ test('LE PARCOURS de l’essai, dans l’ordre du rapport (§ 9) : poser et reli
     await expect(page.locator('.tc-fenetre .tc-bloc-cible')).toHaveCount(1);
     await expect(bloc(page, CIBLE_A).locator('.tc-pr-tampons .tc-champ-nom')).toHaveText('Tampons d’observation posés sur cette production');
     await expect(presses(page, CIBLE_A)).toHaveCount(1);
-    await expect(bloc(page, CIBLE_A).locator('.oc-tampons-retenus')).toHaveText(' : ' + T2.nom);
+    await expect(bloc(page, CIBLE_A).locator('.tc-pr-retenus')).toHaveText('Retenus pour cette cible : ' + T2.nom);
+    await expect(bloc(page, CIBLE_A).locator('.tc-pr-tampons .oc-tampons-tete'), 'l’étiquette seule, sans deux-points ni noms').toHaveText('Tampons d’observation posés sur cette production');
+    await expect(bloc(page, CIBLE_A).locator('.tc-pr-aide-critere'), 'jamais dans une fenêtre à un seul bloc').toHaveCount(0);
     await capture(page, '07-inscrire-une-cible');
     await tamponDuBloc(page, CIBLE_A, T2).click();
     await expect(tamponDuBloc(page, CIBLE_A, T2)).toHaveAttribute('aria-pressed', 'false');
-    await expect(bloc(page, CIBLE_A).locator('.oc-tampons-retenus')).toHaveText(' : aucun');
+    await expect(bloc(page, CIBLE_A).locator('.tc-pr-retenus')).toHaveText('Retenus pour cette cible : aucun');
     await tamponDuBloc(page, CIBLE_A, T2).click();
     await expect(tamponDuBloc(page, CIBLE_A, T2)).toHaveAttribute('aria-pressed', 'true');
     await expect(bloc(page, CIBLE_A).locator('.tc-niveau', { hasText: 'Acquis' })).toHaveCount(1);
@@ -316,9 +318,11 @@ test('LE PARCOURS de l’essai, dans l’ordre du rapport (§ 9) : poser et reli
     for (const c of CIBLES) await expect(bloc(page, c).locator('.tc-pr-tampons .oc-tampon'), 'chaque bloc montre les deux tampons').toHaveCount(2);
     await expect(tamponDuBloc(page, CIBLE_A, T1), 'le tampon à critère, déjà retenu sous la cible A').toHaveAttribute('aria-pressed', 'true');
     await expect(tamponDuBloc(page, CIBLE_A, T3)).toHaveAttribute('aria-pressed', 'false');
-    await expect(bloc(page, CIBLE_A).locator('.oc-tampons-retenus')).toHaveText(' : ' + T1.nom);
+    await expect(bloc(page, CIBLE_A).locator('.tc-pr-retenus')).toHaveText('Retenus pour cette cible : ' + T1.nom);
     await expect(presses(page, CIBLE_B), 'rien de retenu sous la cible B').toHaveCount(0);
-    await expect(bloc(page, CIBLE_B).locator('.oc-tampons-retenus')).toHaveText(' : aucun');
+    await expect(bloc(page, CIBLE_B).locator('.tc-pr-retenus')).toHaveText('Retenus pour cette cible : aucun');
+    await expect(bloc(page, CIBLE_A).locator('.tc-pr-aide-critere'), 'la seconde phrase, dans le bloc au tampon à critère').toHaveText('Un tampon qui porte un critère de cette cible est déjà retenu.');
+    await expect(bloc(page, CIBLE_B).locator('.tc-pr-aide-critere'), 'pas dans l’autre bloc').toHaveCount(0);
     await capture(page, '09-inscrire-deux-cibles');
 
     // ── Groupe 7 : toucher sous une cible. Retenu là, pas sous l'autre ; un second toucher relâche. ──
@@ -328,7 +332,7 @@ test('LE PARCOURS de l’essai, dans l’ordre du rapport (§ 9) : poser et reli
     await tamponDuBloc(page, CIBLE_B, T3).click();
     await expect(tamponDuBloc(page, CIBLE_B, T3)).toHaveAttribute('aria-pressed', 'false');
     await tamponDuBloc(page, CIBLE_B, T3).click();
-    await expect(bloc(page, CIBLE_B).locator('.oc-tampons-retenus')).toHaveText(' : ' + T3.nom);
+    await expect(bloc(page, CIBLE_B).locator('.tc-pr-retenus')).toHaveText('Retenus pour cette cible : ' + T3.nom);
     await bloc(page, CIBLE_B).scrollIntoViewIfNeeded();
     await capture(page, '10-inscrire-deux-cibles-touche');
     await choisirNiveau(page, CIBLE_A, '2');

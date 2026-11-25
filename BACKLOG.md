@@ -136,6 +136,38 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
 
 ## A faire
 
+### #1311 · Sous Safari sur l'iPad, en navigation privée, les images d'un codex ouvert ne sont pas rangées, et le message ne dit pas pourquoi, 25 novembre 2026 (vécu par Grégoire sur l'iPad, 10 h 59, aperçu n° 62 ; inscrit sur consigne de Cowork, midi, sans y toucher)
+
+**Symptôme** : dans un onglet de navigation privée de Safari, le fichier d'essai `ESSAI-tampons-observation-lot-3.zip` ouvert par « Ouvrir un codex… », l'écran d'Annoter affiche « Fichier manquant — rouvre le codex après avoir libéré de l'espace » (`js/travaux-visionneuse.js:207`). Le même fichier, ouvert dans un onglet ordinaire, montre l'image.
+
+**Ce qui est établi** : les deux observations de Grégoire, et le texte du message (LU). **Ce qui ne l'est pas** : la cause. Que la navigation privée de Safari refuse ou limite le rangement des images en base est une inférence ; rien n'a été mesuré (ni Safari ni iPad dans la session du nuage, et WebKit de Playwright n'a pas ce mode). Le message, lui, parle d'espace à libérer : il ne dit pas la vraie cause, quelle qu'elle soit.
+
+**À faire** : mesurer sur l'iPad ce que l'ouverture range en navigation privée (porte terrain), puis décider. Les mots du message sont lus par l'utilisateur : à Grégoire. D'ici là, l'onglet privé n'est pas un geste sûr pour un essai sur l'iPad (rapport du lot 3, § 9 groupe 1 et § 10 b, corrigés).
+
+### #1312 · La démo survit à l'ouverture d'un codex : la bande « Mode démonstration » reste, 25 novembre 2026 (vécu par Grégoire sur l'iPad, 9 h 34, aperçu n° 62 ; reproduit sous Chromium ; inscrit sur consigne de Cowork, midi, sans y toucher)
+
+**Symptôme** : la démo active, « Ouvrir un codex… » installe le fichier, mais la bande verte « Mode démonstration » reste alors que le groupe affiché est celui du fichier.
+
+**Mesuré (Chromium, 25 nov.)** : espace vide, « Explorer la démo », puis un fichier d'essai : `demo-actif` reste à `'true'`. Aucun des deux fichiers d'essai ne porte cette clé (lu dans leur zip). « Quitter la démo » retire ensuite la bande et garde les données, mais laisse l'application sans groupe choisi. Détail : rapport du lot 3, § 10 a).
+
+**À décider** : ce qu'ouvrir un codex doit faire d'une démo active (la quitter d'abord, ou le demander). Voisin de #1309 et de #1313.
+
+### #1313 · Ouvrir un codex par-dessus des données laisse les clés que le fichier ne porte pas, 25 novembre 2026 (mesuré par la session du nuage sous Chromium ; inscrit sur consigne de Cowork, midi, sans y toucher)
+
+**Mesuré** : un fichier d'essai ouvert, puis un second par-dessus (« Remplacer »). Ce que le second porte remplace ce qui était là ; ce qu'il ne porte pas reste : une évaluation du premier, orpheline, et son image (sept images en base au lieu de six). Un remplacement clé par clé, pas un espace neuf.
+
+**LU** : `_planifierPurgeEspace` (`js/codex.js`) calcule ce qui serait à retirer, et cette purge n'est qu'un aperçu (#336). Le défaut est donc connu du code ; cette entrée lui donne un symptôme mesuré. Détail : rapport du lot 3, § 10 b).
+
+**⚠ Source et stock** : corriger l'ouverture tarirait la source ; les espaces déjà mélangés resteraient mélangés. Retirer des clés chez quelqu'un est un geste sur ses données : à Grégoire.
+
+### #1314 · La fenêtre « Modèle antérieur détecté » montre un texte d'atelier et des identifiants bruts, 25 novembre 2026 (rapporté par Cowork à midi, après l'essai de Grégoire sur l'iPad, aperçu n° 62 ; la fenêtre vue aussi par la session du nuage sous Chromium ; inscrit sur consigne, sans y toucher)
+
+**Symptôme** : la fenêtre dit à l'utilisateur « c'est exactement le scénario des incidents des 10-11 juin (productions « Non associé », indices à zéro) » et cite des identifiants de cours bruts (`COURS_1794…`). Un texte écrit pour l'atelier, resté à l'écran : l'utilisateur ne connaît ni ces incidents ni ces identifiants.
+
+**LU** : le message est composé dans `js/codex.js` (vers la ligne 1938) ; la fenêtre est ouverte à deux endroits (titres aux lignes 872 et 4215). Elle paraît dès que le fichier et l'espace ont le même trimestre et des cours d'identités différentes, ce qui n'a rien de grave dans le cas vécu (deux fichiers d'essai).
+
+**À décider** : **les mots de cette fenêtre reviennent à Grégoire** (un texte que l'utilisateur lit, devant un geste qui remplace ses données). Quoi montrer à la place des identifiants est à trancher avec eux.
+
 ### #1307 · Sans copie importée, aucun chemin vers les réglages des tampons, 24 novembre 2026 (vécu par Grégoire sur l'iPad, aperçu n° 58 ; inscrit sur consigne de Cowork, 15 h 35, sans y toucher)
 
 **Symptôme** : la fenêtre des tampons (« Tampons et rétroactions ») ne s'ouvre que depuis Évaluation › Annoter, par la roue de la palette « Tampons », et la palette n'existe que si une copie est ouverte. Sans copie importée, rien ne mène aux réglages des tampons. Grégoire a dû importer une copie artificielle pour y arriver.
