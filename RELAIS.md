@@ -7,6 +7,12 @@
 
 ---
 
+## 24 NOV. 2026, 21 H (Claude Code) : **TAMPONS D'OBSERVATION, LOT 2 — SECOND COMPLÉMENT FAIT, TOUJOURS SUR `lot/tampons-observation-2-observer`, NON FUSIONNÉ**
+
+- **Branche** : `lot/tampons-observation-2-observer` à `c7db591a8` (poussée). Rien dans `main`, aucun bump. Aperçu : demande n° 60 (brouillon). Retouche validée par Grégoire sur l'iPad (19 h 41).
+- **Fait** : les trois textes de la fenêtre d'une case (« une trace seulement », « Inscrire sans niveau », l'annonce « trace inscrite, sans niveau. »), mots de Grégoire de 19 h 43. Preuve : WebKit 49 sur 49, Chromium 40 sur 40, Vitest 12 401.
+- **⚠ NUMÉROS PRIS SUR LA BRANCHE, PAS ENCORE DANS `main`** : #1307 à #1310 du BACKLOG. #1309 : « Quitter la démo » sans réponse au toucher sur l'iPad (non reproduit sous WebKit du Mac ; cible de 25 px à 8 px du bas). #1310 : « Ton espace de travail est prêt » affiché pour un groupe sans pratique (se reproduit sur `main` 1.258.1 : la condition ne regarde que l'horaire).
+
 ## 24 NOV. 2026, 20 H 15 (Claude Code) : **TAMPONS D'OBSERVATION, LOT 2 — RETOUCHE FAITE, TOUJOURS SUR `lot/tampons-observation-2-observer`, NON FUSIONNÉ**
 
 - **Branche** : `lot/tampons-observation-2-observer` à `7c4620791` (poussée). Rien dans `main`, aucun bump, aucune ligne de Nouvelles. Aperçu : demande n° 60 (brouillon).
