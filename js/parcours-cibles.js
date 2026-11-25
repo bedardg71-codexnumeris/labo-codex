@@ -21,7 +21,8 @@
 
    CE QUE « REMPLIR » POSE : l'histoire de Marmotte Pétillante, du pack (`PACK_DEMARRAGE.groupeParStandards.histoire`),
    dans les champs de l'écran ; c'est la personne qui inscrit, par les boutons de l'application.
-   · (a), l'observation : la cible et le groupe choisis (bulle 4), puis les critères et le texte (bulle 5). L'écran
+   · (a), l'observation : la cible et le groupe choisis (bulle 4), puis les critères, le tampon d'observation
+     « Identification » et le texte (bulle 5 ; 25 nov. 2026, décision de Grégoire). L'écran
      d'observation prend d'ordinaire la date du jour : « Remplir » lui donne la date de l'histoire
      (`ObservationCibles.dater`), une séance du groupe de la démo.
    · (b) puis (c) : dans la fenêtre « Inscrire un niveau », les critères, le niveau, la rétroaction, la production et la
@@ -122,7 +123,9 @@
                 ['c', "Touche « Remplir »"]
             ],
             puis: [[
-                ['n', "L'exemple a marqué Structure et Rigueur « Respecté », Plausibilité « Non respecté ». Il a laissé Nuance vide : ce critère ne se voyait pas ce jour-là. Il a écrit : « Relève bien les procédés ; son hypothèse ne s'appuie pas encore sur le texte. »"],
+                ['n', "L'exemple a marqué Structure et Rigueur « Respecté », Plausibilité « Non respecté ». Il a laissé Nuance vide : ce critère ne se voyait pas ce jour-là."],
+                ['n', "Il a touché le tampon « Identification » : un geste que Marmotte Pétillante fait déjà bien. Un tampon d'observation ne pose pas de niveau."],
+                ['n', "Il a écrit : « Son hypothèse ne s'appuie pas encore sur le texte. »"],
                 ['c', "Touche « Inscrire et passer au suivant »"]
             ], [
                 ['n', "L'écran passe à la personne suivante. En classe, tu continuerais ; ici, on s'arrête là."],
@@ -133,7 +136,7 @@
             titre: 'Une case par cible',
             confirme: "C'est fait : ton observation de Marmotte Pétillante est inscrite.",
             lignes: [
-                ['n', "Sa case de « La lecture stratégique » porte maintenant ✎ : une remarque, aucun niveau encore. L'observation ne pose pas de niveau."],
+                ['n', "Sa case de « La lecture stratégique » porte maintenant ✎ : une trace à lire, aucun niveau encore. L'observation ne pose pas de niveau."],
                 ['n', "Marmotte Pétillante a remis ses stratégies de lecture sur « Deux-Rives ». C'est à partir de cette production qu'un niveau s'inscrit."],
                 ['c', "Touche sa case de « La lecture stratégique »"]
             ]
@@ -386,7 +389,7 @@
             var g = dansLEcran('[data-oc="groupe-entier"]');
             if (g && !groupeEntierChoisi()) g.click();
         },
-        // Bulle 5 : (a), les critères et le texte, pour Marmotte Pétillante.
+        // Bulle 5 : (a), les critères, le tampon d'observation et le texte, pour Marmotte Pétillante.
         observation: function () {
             var a = histoire()[0];
             if (!a) return;
@@ -394,6 +397,7 @@
             var bloc = blocObservation();
             if (!bloc || !surMarmotte()) return;
             poserLesCoches(bloc, a);
+            toucherLesTampons(a);
             poser(bloc.querySelector('.oc-note'), a.noteBreve);
         },
         // Bulles 7 et 8 : (b), puis (c), dans la fenêtre, sans inscrire.
@@ -420,11 +424,28 @@
         if (p) p.click();
     }
 
+    /**
+     * Les tampons de la saisie, tels que l'écran « Observer » les offre (25 nov. 2026). Un tampon que l'écran n'offre
+     * pas (retiré de la palette par la personne, dont les réglages sont les mêmes dans la démo et hors d'elle) est
+     * passé : l'exemple ne se bloque pas sur lui, et rien n'est réglé à sa place.
+     */
+    function tamponsOfferts(saisie) {
+        return (saisie && Array.isArray(saisie.tampons) ? saisie.tampons : []).map(function (t) {
+            return dansLEcran('.oc-tampon[data-tampon="' + t.id + '"]');
+        }).filter(Boolean);
+    }
+    function toucherLesTampons(saisie) {
+        tamponsOfferts(saisie).forEach(function (b) { if (b.getAttribute('aria-pressed') !== 'true') b.click(); });
+    }
+    function tamponsSont(saisie) {
+        return tamponsOfferts(saisie).every(function (b) { return b.getAttribute('aria-pressed') === 'true'; });
+    }
+
     function observationPosee() {
         var a = histoire()[0], bloc = blocObservation();
         if (!a || !bloc || !surMarmotte()) return false;
         var note = bloc.querySelector('.oc-note');
-        return cochesSont(bloc, a) && !!note && note.value === a.noteBreve;
+        return cochesSont(bloc, a) && tamponsSont(a) && !!note && note.value === a.noteBreve;
     }
 
     function niveauPose(k) {

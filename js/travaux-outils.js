@@ -304,20 +304,23 @@
     const DOSSIER_AUTOCOLLANTS = 'autocollants/';
 
     const AUTOCOLLANTS = [
-        // --- Action (RLO) (6) ---
-        // Les fichiers PNG conservent leur nom physique `contenu-*.png` — le mapping vit ici.
-        { id: 'action-reperage',     nom: 'Rep\u00e9rage', fichier: 'icons8-check-mark.svg',   categorie: 'action' },
-        { id: 'action-liaison',      nom: 'Liaison',      fichier: 'icons8-verified-account.svg', categorie: 'action' },
-        { id: 'action-ouverture',    nom: 'Ouverture',    fichier: 'icons8-approval.svg',      categorie: 'action' },
-        { id: 'action-incertain',    nom: 'Incertain',    fichier: 'icons8-help.svg',          categorie: 'action' },
-        { id: 'action-incomplet',    nom: 'Incomplet',    fichier: 'icons8-in-progress.svg',   categorie: 'action' },
-        { id: 'action-inexact',      nom: 'Inexact',      fichier: 'icons8-cancel.svg',        categorie: 'action' },
+        // --- Opérations (6) --- (25 nov. 2026, décision de Grégoire : le jeu fourni à tout le monde.)
+        // La catégorie garde son identifiant `action` ; les trois premiers tampons gardent le leur (une copie déjà
+        // tamponnée les retrouve) et changent de nom, d'image et de phrase ; les trois suivants sont neufs. Les dessins
+        // (autocollants/operations/) sont de Grégoire Bédard, CC BY-NC-SA 4.0. Rien de ceci n'écrit chez personne : ce
+        // sont les valeurs lues quand l'utilisateur n'a rien rangé pour cet identifiant.
+        { id: 'action-reperage',       nom: 'Identification',      fichier: 'operations/identification.svg', categorie: 'action' },
+        { id: 'action-liaison',        nom: 'Relation',            fichier: 'operations/relation.svg',       categorie: 'action' },
+        { id: 'action-ouverture',      nom: 'D\u00e9duction',      fichier: 'operations/deduction.svg',      categorie: 'action' },
+        { id: 'action-interpretation', nom: 'Interpr\u00e9tation', fichier: 'operations/interpretation.svg', categorie: 'action' },
+        { id: 'action-comparaison',    nom: 'Comparaison',         fichier: 'operations/comparaison.svg',    categorie: 'action' },
+        { id: 'action-induction',      nom: 'Induction',           fichier: 'operations/induction.svg',      categorie: 'action' },
         // --- Compréhension (4) ---
         { id: 'comp-uni',            nom: 'Unistructurel',   fichier: 'solo/comprehension-uni.svg',         categorie: 'comprehension' },
         { id: 'comp-multi',          nom: 'Multistructurel', fichier: 'solo/comprehension-multi.svg',       categorie: 'comprehension' },
         { id: 'comp-relationnel',    nom: 'Relationnel',  fichier: 'solo/comprehension-relationnel.svg', categorie: 'comprehension' },
         { id: 'comp-etendu',         nom: '\u00c9tendu',       fichier: 'solo/comprehension-etendu.svg',      categorie: 'comprehension' },
-        // --- Observations (12) ---
+        // --- Observations (16) ---
         { id: 'obs-approfondir',     nom: 'Approfondir',      fichier: 'icons8-construction.svg',       categorie: 'observations' },
         { id: 'obs-attention',       nom: 'Attention',         fichier: 'icons8-high-risk.svg',          categorie: 'observations' },
         { id: 'obs-confusion',       nom: 'Confusion',         fichier: 'icons8-confusion-avec-pointe.svg', categorie: 'observations' },
@@ -331,6 +334,11 @@
         { id: 'obs-sans-preuve',     nom: 'Sans preuve',       fichier: 'icons8-delete-message.svg',    categorie: 'observations' },
         { id: 'obs-soupcon',         nom: 'Soup\u00e7on IA',        fichier: 'icons8-science-fiction.svg',    categorie: 'observations' },
         { id: 'obs-longueur',        nom: 'Détour',            fichier: 'icons8-squiggly-arrow.svg',    categorie: 'observations' },
+        // Les trois manques de l'ancienne catégorie « Action » (25 nov. 2026) : même identifiant, même nom, même image,
+        // même phrase ; leur catégorie devient « Observations », à la suite des treize autres.
+        { id: 'action-incertain',    nom: 'Incertain',         fichier: 'icons8-help.svg',              categorie: 'observations' },
+        { id: 'action-incomplet',    nom: 'Incomplet',         fichier: 'icons8-in-progress.svg',       categorie: 'observations' },
+        { id: 'action-inexact',      nom: 'Inexact',           fichier: 'icons8-cancel.svg',            categorie: 'observations' },
         // --- Legacy (évaluations antérieures) ---
         { id: 'bien',           nom: 'Bien',             fichier: 'qualit\u00e9 1 bien.png',                    categorie: 'qualite', legacy: true },
         { id: 'tres-bien',      nom: 'Tr\u00e8s bien',   fichier: 'qualit\u00e9 2 tr\u00e8s bien.png',         categorie: 'qualite', legacy: true },
@@ -747,10 +755,14 @@
        =============================== */
 
     const RETROACTIONS_OBSERVATIONS_DEFAUT = {
-        // === Actions (RLO + qualité du raisonnement) ===
-        'action-reperage':    "L'étudiant·e repère un élément, le nomme correctement, le restitue avec exactitude.",
-        'action-liaison':     "L'étudiant·e infère, relie des éléments entre eux, interprète.",
-        'action-ouverture':   "L'étudiant·e transfère à d'autres contextes, généralise, dépasse le cadre immédiat.",
+        // === Opérations (25 nov. 2026 : les six phrases sont de Grégoire, mot pour mot) ===
+        'action-reperage':       "Tu identifies un élément, le nommes correctement, le restitues avec exactitude.",
+        'action-liaison':        "Tu relies des éléments entre eux.",
+        'action-ouverture':      "Tu appliques une idée générale à un cas particulier du texte.",
+        'action-interpretation': "Tu fais une inférence ou tu expliques l'effet ou le sens que produit un élément.",
+        'action-comparaison':    "Tu rapproches deux éléments pour en dégager les ressemblances et les différences.",
+        'action-induction':      "Tu tires une idée générale de plusieurs exemples.",
+        // Les trois manques, passés sous « Observations » : phrases inchangées.
         'action-incertain':   "L'explication ou le raisonnement est ambigu.",
         'action-incomplet':   "L'explication ou le raisonnement est inachevé.",
         'action-inexact':     "L'explication ou le raisonnement comporte une erreur factuelle.",
@@ -816,7 +828,7 @@
 
     // Noms des categories de tampons
     const NOMS_CATEGORIES_DEFAUT = {
-        action: 'Action',
+        action: 'Op\u00e9rations',   // 25 nov. 2026 : c'était « Action ». L'identifiant ne change pas ; un nom rangé par l'utilisateur reste.
         comprehension: 'Compr\u00e9hension',
         observations: 'Observations'
     };
@@ -1019,7 +1031,7 @@
      * Les catégories d'observation, parmi celles qui existent sur ce poste. L'identifiant d'une catégorie à soi
      * supprimée peut rester dans la liste rangée : il est ignoré ici.
      */
-    function obtenirCategoriesObservation() {
+    function _categoriesObservationRangees() {
         var rangees = db.getSync(CLE_CATEGORIES_OBSERVATION, null);
         if (!Array.isArray(rangees)) return [];
         var connues = CATEGORIES_BUILTIN.slice();
@@ -1027,6 +1039,21 @@
         return rangees.filter(function(id, i) {
             return typeof id === 'string' && connues.indexOf(id) !== -1 && rangees.indexOf(id) === i;
         });
+    }
+
+    /**
+     * LA DÉMO (25 nov. 2026, décision de Grégoire) : dans la démo seulement, la catégorie fournie « Opérations »
+     * (`action`) est une catégorie d'observation, pour que l'écran « Observer » y montre ses six tampons. C'est une
+     * LECTURE : rien n'est rangé, donc rien de la démo ne s'écrit hors d'elle et il n'y a rien à défaire à la sortie.
+     * Hors de la démo, aucune catégorie n'est cochée d'office. Ce qui VOYAGE (le jeu exporté) lit la liste rangée.
+     */
+    const CATEGORIE_OBSERVATION_DE_LA_DEMO = 'action';
+    function _demoOuverte() { return db.getSync('demo-actif', null) === 'true'; }
+
+    function obtenirCategoriesObservation() {
+        var liste = _categoriesObservationRangees();
+        if (_demoOuverte() && liste.indexOf(CATEGORIE_OBSERVATION_DE_LA_DEMO) === -1) liste.push(CATEGORIE_OBSERVATION_DE_LA_DEMO);
+        return liste;
     }
 
     /** Range la liste. Rien n'est écrit quand rien n'était rangé et que la liste est vide (personne n'a rien réglé). */
@@ -3108,7 +3135,16 @@
         const existant = document.getElementById('modal-retro-observations');
         if (existant) existant.remove();
 
-        const retroActuelles = obtenirRetroactionsObservations();
+        // 25 nov. 2026 : une phrase que l'utilisateur n'a jamais rangée (tampon fourni arrivé APRÈS son dernier
+        // enregistrement) se lit dans le jeu fourni, comme le fait `observationsDesTampons`. Sans cela, la fenêtre
+        // montrait un champ vide pour les trois tampons neufs, et l'enregistrer rangeait ce vide. Une clé présente,
+        // même vide, reste le choix de l'utilisateur.
+        const retroActuelles = Object.assign({}, obtenirRetroactionsObservations());
+        _defautsAutocollants.forEach(function(a) {
+            if (!Object.prototype.hasOwnProperty.call(retroActuelles, a.id) && RETROACTIONS_OBSERVATIONS_DEFAUT[a.id]) {
+                retroActuelles[a.id] = RETROACTIONS_OBSERVATIONS_DEFAUT[a.id];
+            }
+        });
         const persObs = obtenirPersonnalisationObservations();
         const nomsCat = obtenirNomsCategories();
         const overlay = document.createElement('div');
@@ -3475,6 +3511,24 @@
         });
     }
 
+    /** Les catégories cochées « D'observation » dans la fenêtre, rangées (appelée par `enregistrerRetroObservations`). */
+    function _enregistrerCategoriesObservation(modal) {
+        var renduesObs = JSON.parse(modal.dataset.categoriesRendues || '[]');
+        var rangeesObs = db.getSync(CLE_CATEGORIES_OBSERVATION, null);
+        var catsObs = (Array.isArray(rangeesObs) ? rangeesObs : []).filter(function(id) { return renduesObs.indexOf(id) === -1; });
+        // Dans la démo, « Opérations » est d'observation par LECTURE (`obtenirCategoriesObservation`) : sa case est
+        // montrée cochée sans que rien soit rangé. L'enregistrement laisse donc cette entrée comme elle était rangée.
+        var demoObs = _demoOuverte();
+        var actionRangee = demoObs && Array.isArray(rangeesObs) && rangeesObs.indexOf(CATEGORIE_OBSERVATION_DE_LA_DEMO) !== -1;
+        if (demoObs) catsObs = catsObs.filter(function(id) { return id !== CATEGORIE_OBSERVATION_DE_LA_DEMO; });
+        modal.querySelectorAll('input[data-cat-observation-id]').forEach(function(c) {
+            if (demoObs && c.dataset.catObservationId === CATEGORIE_OBSERVATION_DE_LA_DEMO) return;
+            if (c.checked && catsObs.indexOf(c.dataset.catObservationId) === -1) catsObs.push(c.dataset.catObservationId);
+        });
+        if (demoObs && actionRangee) catsObs.push(CATEGORIE_OBSERVATION_DE_LA_DEMO);
+        sauvegarderCategoriesObservation(catsObs);
+    }
+
     function enregistrerRetroObservations() {
         const modal = document.getElementById('modal-retro-observations');
         if (!modal) return;
@@ -3569,15 +3623,7 @@
 
         // Tampons d'observation : les catégories cochées. Comme pour #1216, seules les catégories que la fenêtre a
         // montrées sont réécrites ; une catégorie masquée garde ce qu'elle était, une catégorie supprimée ici sort.
-        if (modal.dataset.observationOfferte === '1') {
-            var renduesObs = JSON.parse(modal.dataset.categoriesRendues || '[]');
-            var rangeesObs = db.getSync(CLE_CATEGORIES_OBSERVATION, null);
-            var catsObs = (Array.isArray(rangeesObs) ? rangeesObs : []).filter(function(id) { return renduesObs.indexOf(id) === -1; });
-            modal.querySelectorAll('input[data-cat-observation-id]').forEach(function(c) {
-                if (c.checked && catsObs.indexOf(c.dataset.catObservationId) === -1) catsObs.push(c.dataset.catObservationId);
-            });
-            sauvegarderCategoriesObservation(catsObs);
-        }
+        if (modal.dataset.observationOfferte === '1') _enregistrerCategoriesObservation(modal);
 
         // Detecter les elements masques (symboles/tampons built-in supprimes du DOM)
         // #1216 — sans rien retirer, la liste compte déjà 17 ids : les 14 anciens tampons et jetons, et les 3
@@ -4035,7 +4081,7 @@
 
         // Construire les categories
         var categories = [];
-        var catsObservation = obtenirCategoriesObservation();
+        var catsObservation = _categoriesObservationRangees();   // ce qui voyage : la liste rangée, jamais la lecture de la démo
         ordreCategories.forEach(function(catId) {
             if (catsMasquees.indexOf(catId) !== -1) return;
             categories.push({

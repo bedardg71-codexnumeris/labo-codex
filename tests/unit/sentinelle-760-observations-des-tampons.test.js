@@ -171,6 +171,6 @@ describe('#760 · la spécifique lit le même lecteur et échappe ce que l\'util
             tamponsPersonnalises: [{ id: 'custom-y', nom: 'Tom & Jerry', categorie: 'observations' }],
             retroactionsObservations: { 'custom-y': 'Si x < y, dis-le « clairement ».', 'action-liaison': 'Tu relies.' }
         }, [{ autocollantId: 'action-liaison' }, { autocollantId: 'custom-y' }]);
-        expect(copie.texte).toBe('Action\nLiaison (1) — Tu relies.\n\nObservations\nTom & Jerry (1) — Si x < y, dis-le « clairement ».');
+        expect(copie.texte).toBe('Opérations\nRelation (1) — Tu relies.\n\nObservations\nTom & Jerry (1) — Si x < y, dis-le « clairement ».');
     });
 });

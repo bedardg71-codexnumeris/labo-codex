@@ -246,7 +246,17 @@ describe('F · les registres, un seul écrivain, aucune lecture sans appelant', 
         const { o } = monterOutils();
         const fournies = o.obtenirOrdreCategories().filter((c) => c !== CAT && c !== AUTRE_CAT);
         const tampons = o.obtenirAutocollants().filter((a) => !a.custom).map((a) => a.id);
-        for (const nom of fournies.concat(tampons)) expect(bloc, nom).not.toMatch(new RegExp('[\'"]' + nom + '[\'"]'));
+        // UNE exception, décidée par Grégoire le 25 nov. 2026 : dans la démo seulement, la catégorie fournie
+        // « Opérations » est d'observation, par lecture. Elle tient en une constante, nommée une seule fois ; chacun
+        // de ses usages est sous la garde de la démo.
+        const exception = "    const CATEGORIE_OBSERVATION_DE_LA_DEMO = 'action';\n";
+        expect(bloc.split(exception).length - 1, 'la constante de la démo, une fois').toBe(1);
+        const sansException = bloc.replace(exception, '');
+        expect(sansException.length, 'règle 10 : la tranche n\'est pas vide').toBeGreaterThan(5000);
+        for (const nom of fournies.concat(tampons)) expect(sansException, nom).not.toMatch(new RegExp('[\'"]' + nom + '[\'"]'));
+        const usages = outils.split('\n').filter((l) => l.includes('CATEGORIE_OBSERVATION_DE_LA_DEMO') && !l.includes('const CATEGORIE_OBSERVATION_DE_LA_DEMO'));
+        expect(usages.length).toBeGreaterThan(0);
+        for (const l of usages) expect(l, 'sous la garde de la démo').toMatch(/_demoOuverte\(\)|demoObs/);
     });
     it('la phrase d\'aide acceptée le 22 nov. est dans le code, mot pour mot', () => {
         const { o } = monterOutils();
