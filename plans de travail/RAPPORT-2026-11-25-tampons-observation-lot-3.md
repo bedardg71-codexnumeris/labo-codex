@@ -436,6 +436,8 @@ Ce que les bancs lisent à l'écran : la ligne « Retenus pour cette cible » da
 
 **Captures** (Chromium, clair, 1180 × 820 et 820 × 1180) : `inscrire-deux-cibles-retenu-par-son-critere-*.png`, remplacées. **Les autres captures de la fenêtre** (`inscrire-pour-une-production-*`, `inscrire-un-tampon-retire-*`, `inscrire-deux-cibles-rien-de-retenu-*`) montrent encore la ligne des noms à son ancienne place : je ne les ai pas reprises.
 
+**Vérifié en ligne** (25 nov., après le push de `d19d36d`) : sur l'aperçu n° 62, `index.html` appelle `tableau-cibles.js?v=20261123i` et `tableau-cibles.css?v=20261123g` ; le script servi a la même empreinte que le fichier commis et porte les deux textes ; la feuille servie porte `.tc-pr-retenus` ; le fichier d'essai rend toujours 200. Lu par requête, pas dans un navigateur sur l'aperçu.
+
 ### Deux ratés de mon premier jet, corrigés avant la fin
 
 1. J'avais donné à la seconde phrase une classe sans règle CSS (`tc-pr-aide-critere`) : le cliquet #679 l'a vue (Vitest, 1 rouge sur 12 433). Le repère est maintenant un attribut, `data-tc-aide-critere`. Le premier commit poussé de la retouche (`917a2c8`) porte ce défaut ; le suivant le retire.
