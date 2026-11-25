@@ -1,4 +1,6 @@
 import { test, expect } from '@playwright/test';
+import fs9 from 'node:fs';
+import path9 from 'node:path';
 import {
     ouvrirEspaceVide, ouvrirPanneau, bulle, enDemo, releve, ecarts, horsDeLaDemo, peuplerUnTrimestreReel, sansInsecable
 } from './harness/deux-temps-de-banc.js';
@@ -96,6 +98,23 @@ const inscriptionsDeMarmotte = (page) => page.evaluate(([da, cible]) => (db.getS
 const autresInscriptions = (page) => page.evaluate(([da, cible]) => JSON.stringify((db.getSync('demo_inscriptionsCibles', []) || [])
     .filter((x) => !(String(x.da) === da && x.cibleId === cible))), [DA, CIBLE]);
 
+// 25 nov. 2026 : la bulle 5 touche un tampon d'observation. PARCOURS9_CAPTURES=<dossier> : la bulle 5 avant et après
+// « Remplir » (l'écran « Observer » et ses six tampons), puis la bulle 6, à la taille de l'essai en cours.
+const CAPTURES9 = process.env.PARCOURS9_CAPTURES || '';
+async function capture9(page, nom, L, H) {
+    if (!CAPTURES9) return;
+    fs9.mkdirSync(CAPTURES9, { recursive: true });
+    await page.screenshot({ path: path9.join(CAPTURES9, `${nom}-${L}x${H}-clair.png`) });
+}
+const OPERATIONS = ['Identification', 'Relation', 'Déduction', 'Interprétation', 'Comparaison', 'Induction'];
+/** Les tampons de l'écran « Observer » : [nom lu, retenu ?], dans l'ordre de l'écran. */
+const tamponsDeLEcran = (page) => ecran(page).locator('.oc-tampon').evaluateAll((l) => l.map((b) => [b.getAttribute('aria-label'), b.getAttribute('aria-pressed') === 'true']));
+/** Deux boîtes se recouvrent-elles ? */
+const recouvre = (a, b) => !!a && !!b && a.x < b.x + b.width && b.x < a.x + a.width && a.y < b.y + b.height && b.y < a.y + a.height;
+/** Les tampons que porte l'inscription (a) de Marmotte Pétillante, tels que rangés dans la démo. */
+const tamponsDeLObservation = (page) => page.evaluate(([da, cible]) => (db.getSync('demo_inscriptionsCibles', []) || [])
+    .filter((x) => x.type === 'inscription' && String(x.da) === da && x.cibleId === cible && x.niveau === null).map((x) => x.tampons), [DA, CIBLE]);
+
 async function lancerLeModele(page) {
     await ouvrirPanneau(page);
     await carte(page).locator('.assistance-modele-bouton').click();
@@ -180,19 +199,51 @@ for (const [L, H] of TAILLES) {
         // ---- 5 · Ce que tu vois : le carrousel sur Marmotte Pétillante ; (a) posée, inscrite ; l'écran refermé.
         await bulleEst(page, 4, -1, { boutons: ['Remplir'], contour: false });
         await expect(ecran(page).locator('#oc-nom')).toHaveText(NOM);
+        // La démo : la rangée « Tampons d'observation » et les six tampons d'« Opérations », aucun retenu ; rien n'est
+        // rangé pour cela hors de la démo (la catégorie y est d'observation par lecture).
+        expect(await tamponsDeLEcran(page)).toEqual(OPERATIONS.map((n) => [n, false]));
+        expect(await page.evaluate(() => db.getSync('categoriesObservation', null)), 'aucune catégorie cochée dans les réglages de la personne').toBeNull();
+        // Les six tampons tiennent à l'écran avec les quatre critères, sans cacher « Inscrire et passer au suivant ».
+        await expect(ecran(page).locator('.tc-critere')).toHaveCount(4);
+        const inscrireB = await ecran(page).locator('[data-oc="inscrire"]').boundingBox();
+        expect(inscrireB.y + inscrireB.height, '« Inscrire et passer au suivant » est dans l\'écran').toBeLessThanOrEqual(H + 0.5);
+        for (const b of await ecran(page).locator('.oc-tampon').all()) {
+            const boite = await b.boundingBox();
+            expect(Math.min(boite.width, boite.height), 'une cible de 44 px au moins').toBeGreaterThanOrEqual(44);
+            expect(boite.x >= 0 && boite.x + boite.width <= L + 0.5 && boite.y >= 0 && boite.y + boite.height <= H + 0.5, 'le tampon est dans l\'écran').toBe(true);
+            expect(recouvre(boite, inscrireB), 'aucun tampon ne recouvre le bouton').toBe(false);
+        }
+        expect(await ecran(page).locator('.oc-tampon img').evaluateAll((l) => l.map((i) => i.complete && i.naturalWidth > 0))).toEqual([true, true, true, true, true, true]);
+        await capture9(page, 'bulle-5-avant-remplir', L, H);
         await dansLaBulle(page, 'Remplir').click();
         await bulleEst(page, 4, 0, { contour: true });
+        // « Remplir » a touché « Identification », et lui seul.
+        expect(await tamponsDeLEcran(page)).toEqual(OPERATIONS.map((n) => [n, n === 'Identification']));
+        // La bulle, dans sa forme la plus haute (trois paragraphes) : elle ne cache ni le tampon touché ni le bouton qu'elle désigne.
+        const bulleB = await bulle(page).boundingBox();
+        expect(recouvre(bulleB, await ecran(page).locator('[data-oc="inscrire"]').boundingBox()), 'la bulle ne cache pas « Inscrire et passer au suivant »').toBe(false);
+        expect(recouvre(bulleB, await ecran(page).locator('.oc-tampon[aria-pressed="true"]').boundingBox()), 'la bulle ne cache pas le tampon touché').toBe(false);
+        expect(await bulle(page).evaluate((b) => b.scrollHeight <= b.clientHeight + 1), 'la bulle se lit sans défiler').toBe(true);
+        await capture9(page, 'bulle-5-apres-remplir', L, H);
         expect(await ecran(page).locator('.tc-critere').evaluateAll((l) => l.map((li) => (li.querySelector('.tc-coche[aria-pressed="true"]') || { dataset: {} }).dataset.valeur || 'vide')))
             .toEqual(['oui', 'oui', 'non', 'vide']);
         await expect(ecran(page).locator('.oc-note')).toHaveValue(histoire[0].noteBreve);
         await ecran(page).locator('[data-oc="inscrire"]').click();
         await bulleEst(page, 4, 1, { contour: true });
+        await capture9(page, 'bulle-5-apres-inscription', L, H);
+        // Le ✕ que la bulle demande de toucher est à l'écran, et la bulle ne le cache pas.
+        const fermerB = await ecran(page).locator('.modal-fermer').boundingBox();
+        expect(fermerB.y >= 0 && fermerB.y + fermerB.height <= H + 0.5, 'le ✕ est dans l\'écran').toBe(true);
+        expect(recouvre(await bulle(page).boundingBox(), fermerB), 'la bulle ne cache pas le ✕').toBe(false);
         await expect(ecran(page).locator('#oc-nom'), 'l\'écran passe à la personne suivante').not.toHaveText(NOM);
         await expect(ecran(page).locator('.oc-pastille--vu .oc-pastille-nom')).toHaveText([NOM]);
         expect(await texte(ecran(page).locator('.oc-pastille--vu .oc-marque--vu'))).toBe('vu aujourd’hui');
         // (a) porte la date de l'histoire, pas celle du jour ; son origine est l'observation.
         expect(await inscriptionsDeMarmotte(page)).toEqual([{ niveau: null, date: '2025-09-11', productionId: null, origine: 'observation', noteBreve: histoire[0].noteBreve,
             criteres: [['Structure', true], ['Rigueur', true], ['Plausibilité', false], ['Nuance', null]] }]);
+        // (a) porte le tampon touché, copié par l'application (la forme du lot 2), et le texte raccourci.
+        expect(await tamponsDeLObservation(page)).toEqual([[{ id: 'action-reperage', nom: 'Identification', categorieId: 'action', categorieNom: 'Opérations', critere: '', emoji: '' }]]);
+        expect(histoire[0].noteBreve).toBe('Son hypothèse ne s\'appuie pas encore sur le texte.');
         // « On s'arrête là » : le bouton d'inscription ne répond pas pour la personne suivante.
         await ecran(page).locator('.tc-coche[data-valeur="oui"]').first().click();
         await ecran(page).locator('[data-oc="inscrire"]').click();
@@ -202,6 +253,7 @@ for (const [L, H] of TAILLES) {
 
         // ---- 6 · Une case par cible : ✎, aucun niveau.
         await bulleEst(page, 5, -1, { contour: true });
+        await capture9(page, 'bulle-6', L, H);
         await expect(caseDeMarmotte(page).locator('.tc-case-remarque')).toHaveText('✎');
         await expect(caseDeMarmotte(page).locator('.tc-case-sans-donnee')).toHaveText('Données insuffisantes');
         await expect(caseDeMarmotte(page).locator('.tc-case-niveau')).toHaveCount(0);
