@@ -106,7 +106,7 @@ describe('A · une démo d\'avant, vécue : tout reste, le troisième groupe arr
         expect(s.demo_inscriptionsCibles).toHaveLength(PACK.groupeParStandards.inscriptions.length);
         const verses = [...s.demo_groupesCours.slice(-1), ...s.demo_horaires.slice(-1), ...s.demo_listeCours.slice(-1), ...dix, ...s.demo_inscriptionsCibles];
         expect(verses.every(x => x.isDemo === true)).toBe(true);
-        expect(JSON.stringify(s)).not.toContain('ne s\'appuie pas encore sur le texte');
+        expect(JSON.stringify(s)).not.toContain('Relève bien les procédés');
     });
 
     it('idempotent : un second chargement n\'écrit plus rien', async () => {

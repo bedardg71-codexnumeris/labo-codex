@@ -10241,9 +10241,6 @@ const PACK_DEMARRAGE = {
      *       groupe), dans l'absence de production, et dans ce que la bulle du parcours dira. `origine` : la base (`main`)
      *       ne le connaît pas et ne le range pas ; `lot/observation-par-standards` le range, et lit une inscription sans
      *       ce champ et sans production comme une « observation ».
-     *       25 nov. 2026 (décision de Grégoire) : (a) porte aussi un tampon d'observation, « Identification », dans la
-     *       forme qu'une inscription copie (lot 2 des tampons), et son texte est raccourci. Le parcours touche le
-     *       tampon sur l'écran « Observer » ; c'est l'application qui range sa copie, lue au présent.
      *   (b) Sur « Stratégies de lecture sur « Deux-Rives » », le niveau 2 (« Ça y est presque »).
      *   (c) Deux semaines plus tard, sur « Stratégies de lecture sur « Marine » », le niveau 3 (« Acquis »).
      * Posées, le niveau retenu est 3, le 2 reste à l'historique, et la note vaut 68,75 % (affichée 69) :
@@ -10253,8 +10250,7 @@ const PACK_DEMARRAGE = {
       "da": "9700001",
       "inscriptions": [
         { "da": "9700001", "ensembleId": "ENSC_DEMO_STD", "cibleId": "demo-cible-ls", "niveau": null, "echelleId": null, "date": "2025-09-11", "productionId": null, "origine": "observation",
-          "noteBreve": "Son hypothèse ne s'appuie pas encore sur le texte.",
-          "tampons": [ { "id": "action-reperage", "nom": "Identification", "categorieId": "action", "categorieNom": "Opérations", "critere": "", "emoji": "" } ],
+          "noteBreve": "Relève bien les procédés ; son hypothèse ne s'appuie pas encore sur le texte.",
           "criteres": [
             { "id": "demo-crit-structure", "texte": "Structure", "essentiel": true, "respecte": true },
             { "id": "demo-crit-rigueur", "texte": "Rigueur", "essentiel": true, "respecte": true },

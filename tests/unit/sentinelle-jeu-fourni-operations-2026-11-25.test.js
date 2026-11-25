@@ -254,11 +254,22 @@ describe('Le parcours 9, « Je regarde » : le tampon de l\'histoire', () => {
         expect(code).toContain('toucherLesTampons(a);');
         expect(code).toContain('return cochesSont(bloc, a) && tamponsSont(a) && !!note && note.value === a.noteBreve;');
     });
-    it('le tampon que la bulle 5 nomme est celui de l\'histoire, et son nom est celui du jeu fourni', () => {
-        const pack = chargerScript('js/pack-demo-10.js').PACK_DEMARRAGE.groupeParStandards;
-        const [t] = pack.histoire.inscriptions[0].tampons;
+    it('le tampon que la bulle 5 nomme est celui que « Remplir » touche, et son nom est celui du jeu fourni ; le texte qu\'elle cite est celui qu\'il pose', () => {
+        const win = { addEventListener() {}, removeEventListener() {}, Assistance: { enregistrer() {} }, PACK_DEMARRAGE: chargerScript('js/pack-demo-10.js').PACK_DEMARRAGE };
+        chargerScript('js/parcours-cibles.js', { db: { getSync: (k, d) => d } }, win);
+        const P = win.ParcoursCibles;
+        const [a, b, c] = P.histoire();
+        expect(a.tampons.map((t) => t.id)).toEqual(['action-reperage']);
+        expect(a.noteBreve).toBe("Son hypothèse ne s'appuie pas encore sur le texte.");
+        // Le reste de (a), et (b) et (c) en entier, viennent du pack, non modifié (il ne change qu'avec une release).
+        const pack = win.PACK_DEMARRAGE.groupeParStandards.histoire.inscriptions;
+        expect([a.date, a.niveau, a.criteres, b, c]).toEqual([pack[0].date, pack[0].niveau, pack[0].criteres, pack[1], pack[2]]);
+        expect(pack[0].tampons, 'témoin : le pack ne porte pas le tampon').toBeUndefined();
         const { o } = monter({ 'demo-actif': 'true' });
-        expect(o.tamponsDObservation().find((x) => x.id === t.id), 'la forme rangée au pack est celle que l\'application copie').toEqual(t);
-        expect(code).toContain(`Il a touché le tampon « ${t.nom} » : un geste que Marmotte Pétillante fait déjà bien. Un tampon d'observation ne pose pas de niveau.`);
+        const offert = o.tamponsDObservation().find((x) => x.id === a.tampons[0].id);
+        expect(offert.nom, 'le nom que la bulle dit est celui du jeu fourni').toBe(a.tampons[0].nom);
+        const bulle5 = P.textes[4].puis[0].map((l) => l[1]);
+        expect(bulle5[1]).toBe(`Il a touché le tampon « ${offert.nom} » : un geste que Marmotte Pétillante fait déjà bien. Un tampon d'observation ne pose pas de niveau.`);
+        expect(bulle5[2]).toBe(`Il a écrit : « ${a.noteBreve} »`);
     });
 });

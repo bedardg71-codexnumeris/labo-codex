@@ -148,7 +148,7 @@ for (const [L, H] of ORIENTATIONS) {
         expect(await texte(entrees.nth(1).locator('.tc-entree-niveau'))).toContain('Ça y est presque');
         await expect(entrees.nth(1).locator('.tc-entree-retenu')).toHaveCount(0);
         await expect(entrees.nth(2).locator('.tc-entree-niveau--remarque')).toHaveCount(1);
-        await expect(entrees.nth(2).locator('.tc-entree-note')).toHaveText('Son hypothèse ne s\'appuie pas encore sur le texte.');
+        await expect(entrees.nth(2).locator('.tc-entree-note')).toHaveText('Relève bien les procédés ; son hypothèse ne s\'appuie pas encore sur le texte.');
         expect(await entrees.nth(2).locator('.tc-entree-critere').evaluateAll((l) => l.map((x) => x.className.replace('tc-entree-critere tc-entree-critere--', ''))))
             .toEqual(['oui', 'oui', 'non', 'vide']);
         await page.keyboard.press('Escape');

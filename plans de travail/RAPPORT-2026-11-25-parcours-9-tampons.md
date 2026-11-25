@@ -25,9 +25,9 @@
 |---|---|
 | `js/travaux-outils.js` | `AUTOCOLLANTS` : les trois tampons renommés (nom, image), les trois neufs (`action-interpretation`, `action-comparaison`, `action-induction`), les trois manques déplacés sous `observations`, à la suite. `RETROACTIONS_OBSERVATIONS_DEFAUT` : les six phrases. `NOMS_CATEGORIES_DEFAUT.action` : « Opérations ». `obtenirCategoriesObservation` : la lecture de la démo (§ 3, B). `_enregistrerCategoriesObservation` : sortie d'`enregistrerRetroObservations`, avec la garde de la démo. `ouvrirEditionRetroObservations` : une phrase jamais rangée se lit dans le jeu fourni (§ 3, A4). |
 | `autocollants/operations/` | Les six SVG, tels que fournis, et `LICENCE.txt` (Grégoire Bédard, CC BY-NC-SA 4.0). |
-| `js/pack-demo-10.js` | L'histoire, saisie (a) : le texte raccourci et le tampon « Identification » (la forme qu'une inscription copie). L'état de départ de la démo ne change pas ; la version du pack reste 21.3. |
-| `js/parcours-cibles.js` | Bulle 5 : trois paragraphes après « Remplir », qui touche les tampons de la saisie. Bulle 6 : « une trace à lire ». |
-| `index.html` | Jetons anti-cache : `travaux-outils.js` `20261123w` → `x` ; `parcours-cibles.js` `20261122c` → `20261123a`. |
+| `js/parcours-cibles.js` | Bulle 5 : trois paragraphes après « Remplir », qui touche le tampon de la saisie (a). `SAISIE_A` : le texte raccourci de (a) et son tampon, posés par-dessus l'histoire du pack (§ 3, C). Bulle 6 : « une trace à lire ». |
+| `js/pack-demo-10.js` | **Non touché** (§ 3, C). |
+| `index.html` | Jetons anti-cache : `travaux-outils.js` `20261123w` → `x` ; `parcours-cibles.js` `20261122c` → `20261123b`. |
 | `plans de travail/CONSIGNE-2026-11-22-parcours-9-je-regarde.md` | Bulles 5 et 6 : les mots acceptés le 25 nov. (la sentinelle du parcours confronte le code à ce fichier). |
 | `BACKLOG.md` | #1315, #1316, #1317. |
 | Bancs | § 4. |
@@ -75,8 +75,8 @@ Inventaire au § 5. Les comptes ne changent pas. Ce qui devient incohérent : le
 5. Une catégorie `action` que la personne a retirée de sa palette n'est pas offerte sur « Observer », même dans la démo : « Remplir » passe alors le tampon sans se bloquer, et la bulle 5 nomme un tampon qui n'est pas à l'écran. De même, dans un espace du cas #1315, le tampon s'appelle « Repérage » et la bulle dit « Identification ». Les réglages des tampons sont les mêmes dans la démo et hors d'elle : c'est antérieur au lot.
 
 **C. Le parcours**
-1. La saisie (a) du pack porte le tampon dans la forme qu'une inscription copie (lot 2 des tampons). « Remplir » touche le bouton ; c'est l'application qui range la copie. Le banc vérifie que les deux formes sont égales.
-2. La version du pack ne bouge pas : l'histoire n'est pas dans l'état de départ, une démo déjà installée la lit dans le pack chargé.
+1. **Le pack de la démo n'est pas touché, contre mon premier jet.** J'avais écrit le texte raccourci et le tampon dans la saisie (a) du pack ; le crochet de push l'a refusé (sentinelle #825) : le pack est chargé sous le jeton du build et ne change qu'avec une release, que ce lot n'a pas le droit de faire. Les deux vivent donc dans `js/parcours-cibles.js` (`SAISIE_A`), que `histoire()` pose par-dessus la saisie (a) du pack. Conséquence : le pack garde l'ancien texte de (a) (« Relève bien les procédés ; … »), que plus rien ne pose. **À reporter dans le pack à la release de l'assemblage, puis retirer `SAISIE_A`** ; je ne peux pas le faire d'ici.
+2. « Remplir » touche le bouton du tampon ; c'est l'application qui range sa copie dans l'inscription. Le banc lit cette copie dans la démo.
 
 **D. La sentinelle du lot 1 des tampons** exigeait que le code des tampons d'observation ne nomme aucune catégorie fournie. La décision B la contredit à la lettre. Je l'ai modifiée pour admettre UNE constante, nommée une fois, dont chaque usage est sous la garde de la démo ; le reste de la règle tient.
 
@@ -158,8 +158,8 @@ Rien dans l'aide du guide (`docs/guide/03-glossaire.md`), ni dans les fichiers d
 
 ## 8. Ce que la session d'assemblage doit savoir
 
-- **Fichiers de code touchés** : `js/travaux-outils.js`, `js/parcours-cibles.js`, `js/pack-demo-10.js`, `index.html` (deux jetons), `autocollants/operations/` (neuf).
-- **Jetons anti-cache avancés dans `index.html`** : `js/travaux-outils.js?v=20261123x`, `js/parcours-cibles.js?v=20261123a`. `js/pack-demo-10.js` n'a pas de jeton dans `index.html` : il est chargé avec le jeton du build (`js/demo-namespace.js`). **Sans bump, un navigateur qui a déjà le pack de ce build garde l'ancienne histoire** (l'ancien texte de (a), sans tampon) : « Remplir » poserait alors l'ancien texte et ne toucherait aucun tampon. L'aperçu est une autre adresse, donc un cache neuf ; en ligne, le bump de l'assemblage règle la question.
+- **Fichiers de code touchés** : `js/travaux-outils.js`, `js/parcours-cibles.js`, `index.html` (deux jetons), `autocollants/operations/` (neuf).
+- **Jetons anti-cache avancés dans `index.html`** : `js/travaux-outils.js?v=20261123x`, `js/parcours-cibles.js?v=20261123b`. `js/pack-demo-10.js` n'est pas modifié (§ 3, C) : aucun risque de pack périmé en cache. **À faire à la release** : reporter `SAISIE_A` dans la saisie (a) du pack et la retirer de `js/parcours-cibles.js`.
 - **Conflits prévisibles** : `index.html` (les lignes des jetons, si une autre branche les avance aussi) ; `BACKLOG.md` (tête de « A faire » : #1315 à #1317 ici, à la suite de #1311 à #1314 de la branche des tampons) ; `js/travaux-outils.js` si le correctif de la copie exportée y touche (je ne connais pas ce correctif). La branche contient tout `lot/tampons-observation-3-production` jusqu'à `677a8a1f`, pièces d'essai comprises : elle doit venir APRÈS les tampons, et après le retrait des pièces d'essai par l'autre session (conflit possible sur `departs.html` et les fichiers d'essai, que je n'ai pas modifiés).
 - **`tests/integration/harness/banc-copie-annotation.js`** : `ouvrirCopie(page, url)` accepte une adresse servie ; sans elle, rien ne change pour les autres bancs.
 - **Verdict WebKit** : aucun. À prendre sur le Mac.
@@ -173,6 +173,7 @@ Rien dans l'aide du guide (`docs/guide/03-glossaire.md`), ni dans les fichiers d
 | « Opérations » absente de la palette d'Annoter sans la préférence | **Inscrit : #1316** |
 | Le profil « Gestes cognitifs » et ce qui l'entoure reposent sur l'ancien modèle | **Inscrit : #1317** |
 | La fenêtre des tampons montrait vide la phrase d'un tampon fourni jamais rangée | **Corrigé** : c'est mon lot (les trois tampons neufs en dépendaient) |
+| Le pack de la démo garde l'ancien texte de la saisie (a), que plus rien ne pose | **Dit ici** (§ 3, C) : à reporter à la release ; pas d'entrée au BACKLOG, c'est un geste de l'assemblage de ce soir |
 | La bulle 5 recouvre la colonne « Non respecté » ; en paysage, le haut de l'écran « Observer » sort quand un tampon est touché | **Dit ici, avec capture** : la consigne demandait de le dire sans raccourcir |
 | Les trois anciens fichiers d'image ne sont plus cités | **Laissés** (§ 1) : dit ici |
 | L'essai `:451` du lot 1 dépasse 30 s sous Chromium dans le conteneur, avant le lot | **Commenté ici** : sans conséquence pour l'utilisateur |

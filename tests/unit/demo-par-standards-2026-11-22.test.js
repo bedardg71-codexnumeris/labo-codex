@@ -275,11 +275,7 @@ describe('E · l\'histoire de Marmotte Pétillante, posée par l\'écrivain rée
             ['demo-cible-ls', '2', 'PROD_DEMO_STD_DEUXRIVES', '2025-09-17'],
             ['demo-cible-ls', '3', 'PROD_DEMO_STD_MARINE', '2025-10-01']]);
         expect(histoire.every(s => s.da === MARMOTTE && s.ensembleId === 'ENSC_DEMO_STD')).toBe(true);
-        expect(histoire[0].noteBreve).toBe('Son hypothèse ne s\'appuie pas encore sur le texte.');
-        // 25 nov. 2026 : (a) porte un tampon d'observation, dans la forme qu'une inscription copie (lot 2 des tampons).
-        expect(histoire[0].tampons).toEqual([{ id: 'action-reperage', nom: 'Identification', categorieId: 'action', categorieNom: 'Opérations', critere: '', emoji: '' }]);
-        expect(histoire[1].tampons, 'ni (b) ni (c) n\'en portent').toBeUndefined();
-        expect(histoire[2].tampons).toBeUndefined();
+        expect(histoire[0].noteBreve).toBe('Relève bien les procédés ; son hypothèse ne s\'appuie pas encore sur le texte.');
         expect(histoire[0].criteres.map(k => [k.texte, k.respecte])).toEqual([['Structure', true], ['Rigueur', true], ['Plausibilité', false], ['Nuance', null]]);
         expect(histoire[0].origine).toBe('observation');
         const dates = BLOC.productions.map(p => p.dateEcheance);

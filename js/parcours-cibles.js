@@ -22,7 +22,7 @@
    CE QUE « REMPLIR » POSE : l'histoire de Marmotte Pétillante, du pack (`PACK_DEMARRAGE.groupeParStandards.histoire`),
    dans les champs de l'écran ; c'est la personne qui inscrit, par les boutons de l'application.
    · (a), l'observation : la cible et le groupe choisis (bulle 4), puis les critères, le tampon d'observation
-     « Identification » et le texte (bulle 5 ; 25 nov. 2026, décision de Grégoire). L'écran
+     « Identification » et le texte (bulle 5 ; 25 nov. 2026, décision de Grégoire : `SAISIE_A`, qui complète le pack). L'écran
      d'observation prend d'ordinaire la date du jour : « Remplir » lui donne la date de l'histoire
      (`ObservationCibles.dater`), une séance du groupe de la démo.
    · (b) puis (c) : dans la fenêtre « Inscrire un niveau », les critères, le niveau, la rétroaction, la production et la
@@ -58,6 +58,16 @@
         cible: 'demo-cible-ls',
         da: '9700001',
         nom: 'Marmotte Pétillante'
+    });
+
+    // 25 nov. 2026 (décision de Grégoire, 17 h 07 à 17 h 55) : ce que la saisie (a) de l'histoire porte au parcours. Son
+    // texte raccourci et le tampon d'observation que « Remplir » touche sur l'écran « Observer » (« Identification »,
+    // du jeu fourni : c'est l'application qui range sa copie dans l'inscription). POURQUOI ICI ET PAS DANS LE PACK : le
+    // pack de la démo est chargé sous le jeton du build et ne change qu'avec une release (sentinelle #825) ; ce lot n'en
+    // fait pas. Le pack garde donc l'ancien texte de (a), que plus rien ne pose : à reporter dans le pack à la release.
+    var SAISIE_A = Object.freeze({
+        noteBreve: "Son hypothèse ne s'appuie pas encore sur le texte.",
+        tampons: Object.freeze([Object.freeze({ id: 'action-reperage', nom: 'Identification' })])
     });
 
     // =================================================================
@@ -228,7 +238,8 @@
     /** Les trois saisies de l'histoire, (a), (b), (c), lues dans le pack (chargé avec la démo). */
     function histoire() {
         var pack = window.PACK_DEMARRAGE, bloc = pack && pack.groupeParStandards;
-        return bloc && bloc.histoire && Array.isArray(bloc.histoire.inscriptions) ? bloc.histoire.inscriptions : [];
+        var liste = bloc && bloc.histoire && Array.isArray(bloc.histoire.inscriptions) ? bloc.histoire.inscriptions : [];
+        return liste.map(function (s, k) { return k === 0 ? Object.assign({}, s, SAISIE_A) : s; });
     }
 
     /** L'inscription de la démo (non annulée) qui porte une saisie de l'histoire : même personne, même cible, même date, même niveau. */
@@ -804,5 +815,5 @@
     // Pour la sentinelle des textes et les bancs.
     window.ParcoursCibles = { textes: TEXTES, objectif: OBJECTIF, objectifAtteint: OBJECTIF_ATTEINT, poignee: POIGNEE, ligne: LIGNE,
         titre: TITRE, rang: RANG, suite: SUITE, materiel: MATERIEL, etapesModele: ETAPES_MODELE, definitionModele: DEF_MODELE,
-        motSuivant: MOT_SUIVANT, inscrite: inscrite, histoire: histoire };
+        motSuivant: MOT_SUIVANT, inscrite: inscrite, histoire: histoire, saisieA: SAISIE_A };
 })();
