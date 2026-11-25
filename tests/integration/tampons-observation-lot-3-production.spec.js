@@ -173,7 +173,7 @@ test.describe('Tampons d’observation, lot 3 — « Inscrire pour une productio
         // entre les tampons et la phrase d'aide. La seconde phrase ne paraît jamais dans une fenêtre à un seul bloc.
         await expect(b.locator('.tc-pr-tampons .oc-tampons-tete')).toHaveText('Tampons d’observation posés sur cette production');
         expect(await ordreDuBloc(page, CIBLE_A)).toEqual(['oc-tampons-tete', 'oc-tampons', 'tc-pr-retenus', 'tc-aide']);
-        await expect(b.locator('.tc-pr-aide-critere')).toHaveCount(0);
+        await expect(b.locator('[data-tc-aide-critere]')).toHaveCount(0);
         await expect(b.locator('.tc-pr-retenus')).toHaveText('Retenus pour cette cible : Tampon fictif 1, Tampon fictif 2');
         const taille = await tamponDuBloc(page, CIBLE_A, 2).boundingBox();
         expect(Math.min(taille.width, taille.height), 'une cible de 44 px au moins').toBeGreaterThanOrEqual(44);
@@ -231,7 +231,7 @@ test.describe('Tampons d’observation, lot 3 — « Inscrire pour une productio
         await expect(page.locator('.tc-fenetre .tc-bloc-cible')).toHaveCount(1);
         await expect(presses(page, CIBLE_A)).toHaveCount(2);
         await expect(bloc(page, CIBLE_A).locator('.tc-pr-tampons .tc-aide')).toHaveText(AIDE_UNE);
-        await expect(bloc(page, CIBLE_A).locator('.tc-pr-aide-critere'), 'jamais dans une fenêtre à un seul bloc').toHaveCount(0);
+        await expect(bloc(page, CIBLE_A).locator('[data-tc-aide-critere]'), 'jamais dans une fenêtre à un seul bloc').toHaveCount(0);
         await expect(bloc(page, CIBLE_A).locator('.tc-pr-retenus'), 'la ligne des noms vaut pour un bloc').toHaveText('Retenus pour cette cible : Tampon fictif 2, Tampon fictif 3');
         await choisirNiveau(page, CIBLE_A, '1');
         await inscrire(page);
@@ -285,7 +285,7 @@ test.describe('Tampons d’observation, lot 3 — « Inscrire pour une productio
         // Relâché ensuite, le tampon à critère n'emporte pas la phrase : elle dit l'état de départ. Puis il est retenu de nouveau.
         await tamponDuBloc(page, CIBLE_A, 1).click();
         await expect(bloc(page, CIBLE_A).locator('.tc-pr-retenus')).toHaveText('Retenus pour cette cible : aucun');
-        await expect(bloc(page, CIBLE_A).locator('.tc-pr-aide-critere')).toHaveText(AIDE_CRITERE);
+        await expect(bloc(page, CIBLE_A).locator('[data-tc-aide-critere]')).toHaveText(AIDE_CRITERE);
         await tamponDuBloc(page, CIBLE_A, 1).click();
         // Toucher le 3 sous B : retenu sous B, annoncé ; rien ne bouge sous A.
         await tamponDuBloc(page, CIBLE_B, 3).click();

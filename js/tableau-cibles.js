@@ -987,7 +987,7 @@
         const aide = nombreDeBlocs === 1 ? MOTS.tamponsProductionAide : MOTS.tamponsProductionAidePlusieurs;
         // À plusieurs blocs, les seuls retenus d'office le sont par leur critère : la seconde phrase dit cet état de DÉPART.
         // Écrite ici, à l'ouverture du bloc, elle reste si le tampon est relâché ensuite (un toucher ne refait que la ligne des noms).
-        const aideCritere = (nombreDeBlocs > 1 && retenus.size > 0) ? ` <span class="tc-pr-aide-critere">${esc(MOTS.tamponsProductionAideCritere)}</span>` : '';
+        const aideCritere = (nombreDeBlocs > 1 && retenus.size > 0) ? ` <span data-tc-aide-critere>${esc(MOTS.tamponsProductionAideCritere)}</span>` : '';
         return `<div class="tc-section tc-pr-tampons"><p class="oc-tampons-tete"><span class="tc-champ-nom" id="${esc(id)}">${esc(MOTS.tamponsProduction)}</span></p>`
             + `<div class="oc-tampons" role="group" aria-labelledby="${esc(id)}" aria-describedby="${esc(id)}-retenus ${esc(id)}-aide">${liste.map(t => _tamponATouchHTML(t, retenus.has(String(t.id)))).join('')}</div>`
             + `<p class="tc-pr-retenus" id="${esc(id)}-retenus">${esc(MOTS.tamponsProductionRetenus(liste.filter(t => retenus.has(String(t.id))).map(t => t.nom)))}</p>`
