@@ -2,12 +2,12 @@
 
 > Claude Code, sur le Mac, branche `lot/tampons-observation-3-production`, partie de `lot/tampons-observation-2-observer`
 > (`c7db591a8`), arbre `../labo-codex-tampons-production`. Consigne : Cowork, « Gestion des pratiques de notation 5 »,
-> 25 nov., 5 h 50 ; décisions de Grégoire du 25 nov. (5 h 39, 5 h 40). **Rien n'est en ligne** : aucun bump, aucune ligne de
+> 25 nov., 5 h 50 ; décisions de Grégoire du 25 nov. (5 h 39, 5 h 40, et 8 h 22 pour la retouche « plusieurs cibles », § 3 bis). **Rien n'est en ligne** : aucun bump, aucune ligne de
 > Nouvelles, rien dans `main`. **Aperçu** : https://deploy-preview-62--codexnumeris-051225.netlify.app (demande n° 62, en
 > brouillon, « APERÇU, ne pas fusionner » ; elle porte les lots 1, 2 et 3).
 
-**Fait.** Un tampon d'observation posé sur une production se lit aussitôt au profil, section « Cibles » : sous sa production, à la date de la pose, et sous la cible quand la production n'en vise qu'une. « Inscrire pour une production » montre ces tampons dans le bloc de chaque cible, avant le niveau ; on en retire en les touchant ; ceux qui restent sont copiés dans l'inscription. Poser un tampon n'écrit aucune inscription. Vert sous WebKit et Chromium (14 essais sur 14 chacun), Vitest complet vert (12 425), 20 break-tests rouges sur 20.
-**Ce qui contredit la consigne** : rien dans les mesures a) à d). Trois points que la consigne ne tranche pas et que j'ai tranchés (§ 3) : 1. avec plusieurs cibles, chaque bloc reçoit d'office tous les tampons ; 2. un tampon posé APRÈS l'inscription ne rejoint plus la cible (seulement la production) ; 3. « aussitôt » veut dire au plus 2 secondes (le délai d'enregistrement d'Annoter, non touché).
+**Fait.** Un tampon d'observation posé sur une production se lit aussitôt au profil, section « Cibles » : sous sa production, à la date de la pose, et sous la cible quand la production n'en vise qu'une. « Inscrire pour une production » montre ces tampons dans le bloc de chaque cible, avant le niveau ; ceux qui sont retenus sont copiés dans l'inscription. **Retouche du 25 nov., 8 h 22 (§ 3 bis)** : une seule cible offerte, tous retenus d'office ; plusieurs, aucun, sauf le tampon qui porte un critère de la cible. Poser un tampon n'écrit aucune inscription. Vert sous WebKit et Chromium (18 essais sur 18 chacun), Vitest complet vert (12 433), 26 break-tests rouges sur 26.
+**Ce qui contredit la consigne** : rien dans les mesures a) à d). Trois points que la consigne ne tranchait pas et que j'ai tranchés (§ 3) : 1. avec plusieurs cibles, chaque bloc recevait d'office tous les tampons (**renversé par Grégoire à 8 h 22**, § 3 bis) ; 2. un tampon posé APRÈS l'inscription ne rejoint plus la cible (seulement la production) ; 3. « aussitôt » veut dire au plus 2 secondes (le délai d'enregistrement d'Annoter, non touché).
 **Ce qui reste** : l'essai de Grégoire sur l'iPad (§ 9), la page de textes (`TEXTES-2026-11-25-tampons-observation-lot-3.md`, quatre questions), la place du rang « Sur ses productions », proposée sur capture (§ 4). Pas de verdict WebKit complet : rien ne part en ligne.
 
 ---
@@ -65,7 +65,7 @@
 
 | N° | Décision | Ce que j'ai supposé |
 |---|---|---|
-| 1 | **Plusieurs cibles dans « Inscrire pour une production »** : chaque bloc de cible montre tous les tampons de la production, retenus d'office ; on retire dans un bloc sans toucher l'autre | Que « sous la cible choisie » vaut pour chaque cible qui reçoit quelque chose. Conséquence : sans retrait, le même tampon est copié sous deux cibles. **À confirmer par Grégoire** |
+| 1 | **REMPLACÉE par la décision de Grégoire du 25 nov. 2026, 8 h 22** (§ 3 bis). Une seule cible offerte : ses tampons sont retenus d'office. Plusieurs : aucun n'est retenu d'office, on touche sous chaque cible ceux qui la concernent ; exception, un tampon qui porte un critère est déjà retenu sous la cible qui porte ce critère | Ma décision d'origine (« chaque bloc montre tous les tampons, retenus d'office ») copiait le même tampon sous deux cibles sans geste : renversée |
 | 2 | **« Rien ce jour-là »** : la cible ne reçoit rien, tampons compris. « Aucun niveau » avec des tampons : une trace sans niveau (un tampon seul suffit, lot 2) | |
 | 3 | **Un tampon posé après l'inscription** ne paraît plus sous la cible (l'inscription y est seule, comme tranché par Cowork) ; il paraît sous la production | Que c'est assumé. Pour l'y faire entrer, on inscrit de nouveau |
 | 4 | **Une inscription annulée** rend la lecture en direct sous la cible | Que « non annulée » le veut |
@@ -79,6 +79,68 @@
 | 12 | **Changer d'étudiant·e** dans la fenêtre remplace les tampons et garde les niveaux, coches et textes déjà saisis | |
 
 **« Aussitôt »** (LU) : Annoter enregistre 2 secondes après le dernier geste, et tout de suite quand on quitte l'écran (`travaux-annotation.js:20`, `:282`). Le profil lit ce qui est enregistré : la trace y est dès qu'on y arrive. Je n'ai pas touché à ce délai.
+
+## 3 bis. La retouche du 25 nov., 8 h 22 : une production qui vise plusieurs cibles
+
+Consigne de retouche de Cowork, sur le texte accepté par Grégoire : « Quand la production vise une seule cible, ses tampons sont retenus d'office sous cette cible. Quand elle en vise plusieurs, aucun tampon n'est retenu d'office : je touche, sous chaque cible, ceux qui la concernent. Une exception : un tampon auquel j'ai donné un critère est déjà retenu sous la cible qui porte ce critère. »
+
+**La règle, en une fonction pure** : `tamponsRetenusDOffice(tampons, cible, nombreDeBlocs)` (`js/pratiques/inscriptions-cibles.js`). La fenêtre lui passe le nombre de blocs de cible qu'elle offre.
+
+**Mesuré pour « aucune cible déclarée »** (LU dans `ciblesOffertes`, VU au banc) : la fenêtre offre alors **toutes les cibles de l'ensemble**, dans leur ordre. Il en va de même quand aucune des cibles déclarées n'est encore dans l'ensemble. La règle s'applique au nombre de blocs : un ensemble de deux cibles ou plus, rien n'est retenu d'office, sauf par un critère ; un ensemble d'une seule cible, un seul bloc, tout est retenu.
+
+**Les six points tranchés par Cowork : aucun n'est contredit par le code.**
+
+| Point | Ce que le code fait |
+|---|---|
+| 1. Le nombre de blocs | Un bloc : tout retenu. Deux ou plus : rien, sauf l'exception. Jugé à `ciblesOffertes(...).length`, et au nombre de blocs à l'écran quand l'étudiant·e change |
+| 2. L'exception | `tamponsRetenusDOffice` appelle `rapprocherTampons` du lot 2 (celle d'« Observer ») : texte rogné, espaces resserrées, sans égard à la casse. Aucune seconde comparaison (une sentinelle le lit). **Deux cibles qui portent un critère du même texte : le tampon est retenu d'office sous les deux** (Vitest G) |
+| 3. Tous visibles | Chaque bloc montre tous les tampons ; un toucher retient, un second relâche ; un bloc ne change rien à l'autre |
+| 4. Pas de trace vide | La règle du lot 2 tient sans retouche : « Aucun niveau » sans tampon retenu, sans texte et sans critère est refusé (`motifsRefus`, motif « vide »), le refus nomme la cible, rien n'est écrit, la fenêtre reste ouverte. « Rien ce jour-là » : la cible ne reçoit rien |
+| 5. Le profil | Inchangé : `cibleUnique` n'est pas touchée |
+| 6. La ligne d'aide | Deux textes : celui d'avant pour un seul bloc, la proposition de Cowork pour plusieurs (page de textes, I3 et I4) |
+
+**Ce que j'ai tranché au-delà de cette consigne**
+
+| N° | Décision | Ce que j'ai supposé |
+|---|---|---|
+| R1 | **La fenêtre et le profil ne comptent pas de la même façon, et je l'ai laissé.** La fenêtre compte ses blocs ; le profil exige exactement une cible déclarée. Deux cas s'écartent : une production sans cible déclarée dans un ensemble d'une seule cible, et une production qui déclare deux cibles dont une seule est encore dans l'ensemble. Dans les deux, la fenêtre offre un bloc et retient tout d'office, mais le profil ne lit pas la trace en direct sous la cible | Que le point 5 (« le profil ne change pas ») l'emporte. Cas rare ; à aligner si Grégoire le veut |
+| R2 | **L'annonce A2** disait « remis dans l'inscription » : faux pour un premier toucher. Elle dit maintenant « retenu pour l'inscription de « cible » », dans les deux cas | Un seul texte suffit ; les mots restent à Grégoire (page de textes) |
+| R3 | **Changer d'étudiant·e** redessine les tampons de chaque bloc selon la même règle : ce qui avait été touché pour l'étudiant·e d'avant n'est pas gardé (les niveaux, coches et textes le sont, comme avant) | Que les tampons d'une autre personne n'ont rien à garder |
+| R4 | **La ligne des noms** (I2) dit « : aucun » tant que rien n'est retenu, puis les noms retenus | |
+| R5 | **Un tampon retenu par son critère se relâche d'un toucher**, comme les autres | Que l'exception donne un départ, pas une obligation |
+
+**La preuve de la retouche** (25 nov., un passage à la fois, en alternance avec une autre session)
+
+| Suite | Moteur | Résultat |
+|---|---|---|
+| Banc du lot 3 (5 essais neufs, 1 remplacé) | WebKit | **18 sur 18** |
+| Le même | Chromium (config jetable, retirée ; `playwright.chromium.config.js` du dépôt vise un conteneur, pas ce Mac) | **18 sur 18** |
+| Sentinelle du lot 3 (section G neuve, 8 essais) | Vitest | **32 sur 32** |
+| Vitest complet | | **12 433 sur 12 433** (961 fichiers) |
+| Bancs des lots 1 et 2 | WebKit | **40 sur 40** |
+
+Un rouge de mon fait, trouvé par Vitest complet et fini : j'avais daté d'aujourd'hui les jetons anti-cache des deux fichiers ; ils doivent porter le jour du build (23 nov., aucun bump). Remis, sentinelle verte.
+
+Les voisins du tableau des cibles (23 essais du premier rendu) ne sont pas rejoués : la retouche ne touche que la fenêtre « Inscrire pour une production ».
+
+| Essai demandé | Essai du banc |
+|---|---|
+| Une cible, tout retenu | « une seule cible : un seul bloc, tous les tampons retenus d'office… » |
+| Deux cibles, rien de retenu ; inscrire sans rien toucher ne copie aucun tampon | « deux cibles, aucun tampon à critère… » |
+| Deux cibles, un tampon à critère, retenu sous celle-là seulement ; toucher sous une cible ne copie que sous celle-là | « deux cibles, un tampon qui déclare un critère de l'une… » |
+| Pas de trace vide | « deux cibles : « Rien ce jour-là » partout n'inscrit rien ; « Aucun niveau » sans tampon retenu… » |
+| Aucune cible déclarée | « une production sans cible déclarée… » |
+
+| N° | Mutation (chacune remet « retenu d'office », ou en retire la règle) | Rouge |
+|---|---|---|
+| B21 | plusieurs blocs retiennent tout, comme un seul | V : G (4) ; P : 4 essais |
+| B22 | l'exception du critère est retirée | V : G (4) ; P : « …un critère de l'une… », « …sans cible déclarée… » |
+| B23 | tout tampon est dessiné pressé | V : G ; P : 4 essais |
+| B24 | la fenêtre annonce toujours un seul bloc | V : G ; P : 4 essais |
+| B25 | au changement d'étudiant·e, la règle d'un seul bloc est rejouée | V : G ; P : « …sans cible déclarée… » |
+| B26 | la phrase d'aide reste celle du retrait | P : « …aucun tampon à critère… », « …sans cible déclarée… » |
+
+Six mutations, six rouges ; fichiers remis après chacune.
 
 ## 4. La place du rang « sous cette production » : proposition sur capture
 
@@ -146,6 +208,12 @@ Dans `plans de travail/captures-2026-11-25-tampons-observation-lot-3/` (WebKit, 
 - `inscrire-pour-une-production-*.png` : les tampons dans le bloc de la cible, avant tout niveau ;
 - `inscrire-un-tampon-retire-*.png` : un tampon retiré, un niveau choisi.
 
+**Un défaut de mon premier rendu, vu à la retouche** : en portrait (820 × 1180), `profil-sous-la-cible-*` et `profil-sous-la-production-*` sont la même image, octet pour octet : la page n'a pas défilé entre les deux prises. Les deux cartes y sont visibles ensemble ; je ne les ai pas reprises.
+
+Retouche de 8 h 22 (clair seulement, comme demandé) :
+- `inscrire-deux-cibles-rien-de-retenu-*.png` : deux cibles, deux tampons sans critère, aucun retenu ;
+- `inscrire-deux-cibles-retenu-par-son-critere-*.png` : le tampon qui porte un critère de la première cible, retenu sous elle seule.
+
 ## 7. Sécurité
 
 - Le nom d'un tampon et le titre d'une production passent par `echapperHtml` au profil et dans la fenêtre (essai « sont du texte », break-test B9).
@@ -170,9 +238,12 @@ La démo « Par standards » n'a aucune production importée (rapport de mesure,
 2. **Poser.** Importer une production pour un·e étudiant·e (une photo ou un PDF), l'ouvrir en Annoter, poser un tampon de cette catégorie et un tampon d'une autre catégorie.
 3. **Relire.** Suivi › le profil de l'étudiant·e › section « Cibles » (VU). Attendu : la carte « Sur ses productions » montre le premier tampon à la date d'aujourd'hui, pas le second ; si la production vise une seule cible, il paraît aussi sous cette cible avec « pas encore inscrite ».
 4. **Retirer.** Revenir en Annoter, retirer le tampon de la production, revenir au profil : il n'y est plus.
-5. **Inscrire.** Le reposer, puis Évaluation › Tableau de notation (vue étendue) › « Inscrire pour une production » (VU) › choisir l'étudiant·e et la production. Attendu : le tampon paraît dans le bloc de la cible, au-dessus des niveaux. Le toucher le retire de l'inscription ; le toucher de nouveau le remet. Choisir un niveau › « Inscrire » (VU).
+5. **Inscrire, une seule cible.** Le reposer, puis Évaluation › Tableau de notation (vue étendue) › « Inscrire pour une production » (VU) › choisir l'étudiant·e et la production. Attendu : le tampon paraît dans le bloc de la cible, au-dessus des niveaux. Le toucher le retire de l'inscription ; le toucher de nouveau le remet. Choisir un niveau › « Inscrire » (VU).
 6. **Relire encore.** Au profil : sous la cible, une seule entrée pour cette production, avec le niveau et le tampon, sans « pas encore inscrite » ; sous « Sur ses productions », le tampon est toujours là.
-7. **Sur l'iPad** : le toucher des tampons dans la fenêtre, en portrait et en paysage.
+7. **Inscrire, deux cibles** (décision de 8 h 22). Sur une production qui déclare deux cibles, poser deux tampons d'observation : l'un sans critère, l'autre auquel tu as donné un critère d'une des deux cibles (« Régler mes tampons »). Ouvrir « Inscrire pour une production », choisir l'étudiant·e et cette production. Attendu : deux blocs de cible ; chacun montre les deux tampons ; aucun n'est retenu, sauf le tampon à critère, déjà retenu sous la cible qui porte ce critère, et sous elle seulement. La ligne des noms dit « : aucun » là où rien n'est retenu.
+8. **Toucher sous une cible.** Toucher le tampon sans critère sous la seconde cible : il est retenu là, pas sous la première. Le toucher de nouveau le relâche. Le retenir, choisir un niveau pour chaque cible, « Inscrire ». Au profil : chaque cible lit son inscription avec ses seuls tampons ; « Sur ses productions » garde les deux.
+9. **Sans rien toucher.** Refaire le geste pour un·e autre étudiant·e avec deux tampons sans critère, choisir un niveau sous chaque cible sans toucher aucun tampon, « Inscrire » : aucune des deux inscriptions ne porte de tampon. Avec « Aucun niveau » et rien d'autre sous une cible : refus, rien n'est inscrit.
+10. **Sur l'iPad** : le toucher des tampons dans la fenêtre, en portrait et en paysage.
 
 ## Journal des break-tests (25 nov. 2026 ; V : Vitest, P : WebKit)
 

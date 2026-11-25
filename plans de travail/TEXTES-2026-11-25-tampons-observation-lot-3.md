@@ -22,14 +22,17 @@ Le nom lu par un lecteur d'écran pour la liste des tampons d'une trace reste ce
 |---|---|---|---|
 | I1 | Étiquette, dans le bloc de chaque cible, au-dessus des niveaux | **Tampons d'observation posés sur cette production** | Ce qui annonce les tampons. |
 | I2 | À droite de l'étiquette : les noms des tampons qui entreront dans l'inscription | « : *Tampon A*, *Tampon B* » ; quand tous sont retirés : « : aucun » | Les tampons sont montrés par leur image seule, comme sur « Observer » ; cette ligne dit leurs noms sans survol. |
-| I3 | Phrase sous les tampons : le geste pour en retirer un | Ils entrent dans l'inscription de cette cible. Touche un tampon pour le retirer de l'inscription : il reste sur la production. | Le geste est le même que sur « Observer » (un tampon pressé est retenu, le toucher le relâche). |
+| I3 | Phrase sous les tampons, quand la fenêtre offre **une seule cible** (tous retenus d'office) | Ils entrent dans l'inscription de cette cible. Touche un tampon pour le retirer de l'inscription : il reste sur la production. | Le geste est le même que sur « Observer » (un tampon pressé est retenu, le toucher le relâche). |
+| I4 | La même phrase, quand la fenêtre offre **plusieurs cibles** (aucun retenu d'office, sauf par son critère ; décision du 25 nov., 8 h 22) | Touche les tampons qui concernent cette cible : ils entrent dans son inscription et restent sur la production. | **Proposition de Cowork**, posée telle quelle. Elle ne dit pas qu'un tampon peut être déjà retenu par son critère : la ligne I2 le montre (son nom y est), sans l'expliquer. Faut-il le dire, par exemple « Un tampon qui porte un critère de cette cible est déjà retenu. » ? |
 
 ## Annonces pour lecteur d'écran
 
 | N° | Quand | Texte proposé |
 |---|---|---|
 | A1 | Un tampon est retiré de l'inscription d'une cible | « *Tampon* » retiré de l'inscription de « *cible* ». Il reste sur la production. |
-| A2 | Il est remis | « *Tampon* » remis dans l'inscription de « *cible* ». |
+| A2 | Il est retenu (touché une première fois quand rien n'est retenu d'office, ou remis après un retrait) | « *Tampon* » retenu pour l'inscription de « *cible* ». |
+
+A2 disait « remis dans l'inscription » : faux pour un tampon qu'on touche une première fois sous une cible, depuis la décision de 8 h 22. Un seul texte pour les deux cas ; à corriger au besoin.
 
 Chaque tampon à toucher porte son nom (lu, et en infobulle) ; son état retenu ou relâché est dit par `aria-pressed`.
 

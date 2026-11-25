@@ -620,6 +620,23 @@
         return c ? String(c.id) : null;
     }
 
+    /**
+     * LES TAMPONS RETENUS D'OFFICE dans le bloc d'une cible d'« Inscrire pour une production » (décision de Grégoire,
+     * 25 nov. 2026, 8 h 22). La fenêtre offre UN SEUL bloc de cible : tous. Elle en offre PLUSIEURS : aucun, sauf le
+     * tampon qui déclare un critère de CETTE cible (le rapprochement du lot 2, `rapprocherTampons` : la même comparaison
+     * que sur « Observer »). Deux cibles qui portent un critère du même texte retiennent donc toutes deux ce tampon.
+     * @param {Array} tampons - forme rangée
+     * @param {{criteres: Array}} cible - celle du bloc
+     * @param {number} nombreDeBlocs - les blocs de cible que la fenêtre offre pour cette production
+     * @returns {Array<string>} les identifiants retenus d'office
+     */
+    function tamponsRetenusDOffice(tampons, cible, nombreDeBlocs) {
+        const liste = (Array.isArray(tampons) ? tampons : []).filter(t => t && t.id);
+        if (nombreDeBlocs === 1) return liste.map(t => String(t.id));
+        const parCritere = rapprocherTampons(liste, cible && cible.criteres).parCritere;
+        return Object.keys(parCritere).reduce((ids, k) => ids.concat(parCritere[k].map(t => String(t.id))), []);
+    }
+
     /** Vrai quand une inscription non annulée existe pour cette personne, cette cible et cette production. */
     function estInscritePourLaProduction(liste, da, ensembleId, cibleId, productionId) {
         const annulations = annulationsParInscription(liste);
@@ -770,6 +787,7 @@
         tracesDesProductions: tracesDesProductions,
         tamponsDeLaProduction: tamponsDeLaProduction,
         cibleUnique: cibleUnique,
+        tamponsRetenusDOffice: tamponsRetenusDOffice,
         estInscritePourLaProduction: estInscritePourLaProduction,
         tracesEnDirectSousLaCible: tracesEnDirectSousLaCible,
         plusRecenteDAbord: plusRecenteDAbord,

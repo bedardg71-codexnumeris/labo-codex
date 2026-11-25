@@ -4,7 +4,7 @@ import { monter, ouvrirProfilCibles, ouvrirParProduction, ouvrirEnAnnoter, poser
 
 // ═══════════════════════════════════════════════════════════════════════════════════════════
 // TAMPONS D'OBSERVATION, LOT 3 : SUR UNE PRODUCTION (25 nov. 2026)
-// Consigne de lot (Cowork, 25 nov., 5 h 50) ; décisions de Grégoire du 25 nov. (5 h 39, 5 h 40) ; rapport :
+// Consigne de lot (Cowork, 25 nov., 5 h 50) ; décisions de Grégoire du 25 nov. (5 h 39, 5 h 40, 8 h 22) ; rapport :
 // plans de travail/RAPPORT-2026-11-25-tampons-observation-lot-3.md.
 //
 // Le vrai index.html, le vrai écran Annoter, le vrai profil, le vrai tableau des cibles. Cible WebKit ; se relance sous
@@ -213,24 +213,102 @@ test.describe('Tampons d’observation, lot 3 — « Inscrire pour une productio
         await expect(cible(page, 0).locator('.tc-entree--directe')).toHaveCount(1);
     });
 
-    test('deux cibles : chacune voit les tampons, on retire dans l’une sans toucher l’autre ; « Rien ce jour-là » n’inscrit rien ; un tampon seul suffit, sans niveau', async ({ page }) => {
+    // ── Plusieurs cibles (décision de Grégoire, 25 nov. 2026, 8 h 22) : rien n'est retenu d'office, sauf par un critère ──
+    const presses = (page, cibleId) => bloc(page, cibleId).locator('.tc-pr-tampons .oc-tampon[aria-pressed="true"]');
+    const AIDE_UNE = 'Ils entrent dans l’inscription de cette cible. Touche un tampon pour le retirer de l’inscription : il reste sur la production.';
+    const AIDE_PLUSIEURS = 'Touche les tampons qui concernent cette cible : ils entrent dans son inscription et restent sur la production.';
+
+    test('une seule cible : un seul bloc, tous les tampons retenus d’office, et la phrase du retrait', async ({ page }) => {
+        await monter(page, { annotations: [annotation(ZOE, P_UNE, { 0: [pose(tamponId(2), JOUR_1), pose(tamponId(3), JOUR_2)] })] });
+        await ouvrirParProduction(page, ZOE, P_UNE);
+        await expect(page.locator('.tc-fenetre .tc-bloc-cible')).toHaveCount(1);
+        await expect(presses(page, CIBLE_A)).toHaveCount(2);
+        await expect(bloc(page, CIBLE_A).locator('.tc-pr-tampons .tc-aide')).toHaveText(AIDE_UNE);
+        await choisirNiveau(page, CIBLE_A, '1');
+        await inscrire(page);
+        expect((await inscriptions(page)).map((i) => i.tampons.map((t) => t.id))).toEqual([[tamponId(2), tamponId(3)]]);
+    });
+
+    test('deux cibles, aucun tampon à critère : chaque bloc montre tous les tampons, aucun n’est retenu ; inscrire sans rien toucher ne copie aucun tampon sous aucune cible', async ({ page }) => {
+        const suivi = await monter(page, { annotations: [annotation(ZOE, P_DEUX, { 0: [pose(tamponId(2), JOUR_1), pose(tamponId(3), JOUR_2)] })] });
+        await ouvrirParProduction(page, ZOE, P_DEUX);
+        await expect(page.locator('.tc-fenetre .tc-bloc-cible')).toHaveCount(2);
+        for (const c of [CIBLE_A, CIBLE_B]) {
+            await expect(bloc(page, c).locator('.tc-pr-tampons .oc-tampon'), 'tous visibles').toHaveCount(2);
+            await expect(presses(page, c), 'aucun retenu d’office').toHaveCount(0);
+            await expect(bloc(page, c).locator('.oc-tampons-retenus')).toHaveText(' : aucun');
+            await expect(bloc(page, c).locator('.tc-pr-tampons .tc-aide')).toHaveText(AIDE_PLUSIEURS);
+        }
+        await choisirNiveau(page, CIBLE_A, '1');
+        await choisirNiveau(page, CIBLE_B, '2');
+        await inscrire(page);
+        const liste = await inscriptions(page);
+        expect(liste.map((i) => [i.cibleId, i.niveau, i.tampons])).toEqual([[CIBLE_A, '1', []], [CIBLE_B, '2', []]]);
+        expect((await annotationsRangees(page))[0].pages[0].stickers.map((s) => s.autocollantId), 'la production garde ses tampons').toEqual([tamponId(2), tamponId(3)]);
+        expect(suivi.erreurs).toEqual([]);
+    });
+
+    test('deux cibles, un tampon qui déclare un critère de l’une : retenu d’office sous celle-là seulement ; toucher sous une cible ne copie que sous celle-là ; un second toucher relâche', async ({ page }) => {
         await monter(page, { annotations: [annotation(ZOE, P_DEUX, { 0: [pose(tamponId(1), JOUR_1), pose(tamponId(3), JOUR_2)] })] });
         await ouvrirParProduction(page, ZOE, P_DEUX);
-        await expect(bloc(page, CIBLE_A).locator('.tc-pr-tampons .oc-tampon')).toHaveCount(2);
-        await expect(bloc(page, CIBLE_B).locator('.tc-pr-tampons .oc-tampon')).toHaveCount(2);
-        // Rien de choisi nulle part : rien n'est inscrit, malgré les tampons.
-        await inscrire(page);
-        expect(await inscriptions(page)).toEqual([]);
-        await expect(page.locator('.tc-fenetre .tc-alerte')).toBeVisible();
-        // A : un niveau, le tampon 3 retiré. B : « Aucun niveau », ses deux tampons.
-        await tamponDuBloc(page, CIBLE_A, 3).click();
+        // Le tampon 1 déclare le premier critère de la cible A ; la cible B n'a aucun critère.
+        await expect(tamponDuBloc(page, CIBLE_A, 1)).toHaveAttribute('aria-pressed', 'true');
+        await expect(tamponDuBloc(page, CIBLE_A, 3)).toHaveAttribute('aria-pressed', 'false');
+        await expect(bloc(page, CIBLE_A).locator('.oc-tampons-retenus')).toHaveText(' : Tampon fictif 1');
+        await expect(presses(page, CIBLE_B)).toHaveCount(0);
+        // Toucher le 3 sous B : retenu sous B, annoncé ; rien ne bouge sous A.
+        await tamponDuBloc(page, CIBLE_B, 3).click();
         await expect(tamponDuBloc(page, CIBLE_B, 3)).toHaveAttribute('aria-pressed', 'true');
+        await expect(page.locator('.tc-fenetre .tc-pr-annonce')).toHaveText('« Tampon fictif 3 » retenu pour l’inscription de « Cible fictive B ».');
+        await expect(bloc(page, CIBLE_B).locator('.oc-tampons-retenus')).toHaveText(' : Tampon fictif 3');
+        await expect(tamponDuBloc(page, CIBLE_A, 3), 'retenir sous B ne change rien sous A').toHaveAttribute('aria-pressed', 'false');
+        // Un second toucher relâche ; un troisième retient de nouveau.
+        await tamponDuBloc(page, CIBLE_B, 3).click();
+        await expect(tamponDuBloc(page, CIBLE_B, 3)).toHaveAttribute('aria-pressed', 'false');
+        await expect(bloc(page, CIBLE_B).locator('.oc-tampons-retenus')).toHaveText(' : aucun');
+        await tamponDuBloc(page, CIBLE_B, 3).click();
         await choisirNiveau(page, CIBLE_A, '1');
         await bloc(page, CIBLE_B).locator('.tc-niveau input[data-sans-niveau]').check({ force: true });
         await inscrire(page);
         const liste = await inscriptions(page);
-        expect(liste.map((i) => [i.cibleId, i.niveau, i.tampons.map((t) => t.id)])).toEqual([[CIBLE_A, '1', [tamponId(1)]], [CIBLE_B, null, [tamponId(1), tamponId(3)]]]);
+        expect(liste.map((i) => [i.cibleId, i.niveau, i.tampons.map((t) => t.id)])).toEqual([[CIBLE_A, '1', [tamponId(1)]], [CIBLE_B, null, [tamponId(3)]]]);
         expect(liste.every((i) => i.origine === 'production' && i.productionId === P_DEUX.id)).toBe(true);
+        // Le profil ne change pas : deux cibles, aucune lecture en direct sous une cible ; chaque cible lit son inscription.
+        await ouvrirProfilCibles(page, ZOE);
+        await expect(page.locator('.pc-cible .tc-entree--directe')).toHaveCount(0);
+        await expect(cible(page, 0).locator('.tc-tampon-nom')).toHaveText(['Tampon fictif 1']);
+        await expect(cible(page, 1).locator('.tc-tampon-nom')).toHaveText(['Tampon fictif 3']);
+    });
+
+    test('deux cibles : « Rien ce jour-là » partout n’inscrit rien ; « Aucun niveau » sans tampon retenu ni texte est refusé, sans trace vide ; un tampon touché suffit', async ({ page }) => {
+        await monter(page, { annotations: [annotation(ZOE, P_DEUX, { 0: [pose(tamponId(2), JOUR_1), pose(tamponId(3), JOUR_2)] })] });
+        await ouvrirParProduction(page, ZOE, P_DEUX);
+        await inscrire(page);
+        expect(await inscriptions(page)).toEqual([]);
+        await expect(page.locator('.tc-fenetre .tc-alerte')).toBeVisible();
+        await bloc(page, CIBLE_B).locator('.tc-niveau input[data-sans-niveau]').check({ force: true });
+        await inscrire(page);
+        expect(await inscriptions(page), 'aucune trace vide').toEqual([]);
+        await expect(page.locator('.tc-fenetre .tc-alerte')).toBeVisible();
+        await expect(page.locator('.tc-fenetre .tc-alerte')).toContainText('Cible fictive B');
+        await expect(page.locator('.tc-fenetre'), 'la fenêtre reste ouverte').toBeVisible();
+        await tamponDuBloc(page, CIBLE_B, 2).click();
+        await inscrire(page);
+        expect((await inscriptions(page)).map((i) => [i.cibleId, i.niveau, i.tampons.map((t) => t.id)])).toEqual([[CIBLE_B, null, [tamponId(2)]]]);
+    });
+
+    test('une production sans cible déclarée : la fenêtre offre toutes les cibles de l’ensemble, donc la règle des blocs multiples', async ({ page }) => {
+        await monter(page, { annotations: [annotation(ZOE, P_SANS, { 0: [pose(tamponId(1), JOUR_1), pose(tamponId(2), JOUR_2)] })] });
+        await ouvrirParProduction(page, ZOE, P_SANS);
+        await expect(page.locator('.tc-fenetre .tc-bloc-cible')).toHaveCount(2);
+        await expect(presses(page, CIBLE_A).evaluateAll((els) => els.map((e) => e.dataset.tampon)), 'seul le tampon à critère').resolves.toEqual([tamponId(1)]);
+        await expect(presses(page, CIBLE_B)).toHaveCount(0);
+        await expect(bloc(page, CIBLE_B).locator('.tc-pr-tampons .tc-aide')).toHaveText(AIDE_PLUSIEURS);
+        // Changer d'étudiant·e puis revenir : la même règle est rejouée.
+        await page.locator('.tc-pr-eleve').selectOption(YAN.da);
+        await page.locator('.tc-pr-eleve').selectOption(ZOE.da);
+        await expect(presses(page, CIBLE_A)).toHaveCount(1);
+        await expect(presses(page, CIBLE_B)).toHaveCount(0);
     });
 
     test('changer d’étudiant·e remplace les tampons et garde ce qui est saisi ; sans tampon sur la production, le bloc est celui d’avant', async ({ page }) => {

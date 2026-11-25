@@ -13,6 +13,8 @@
  *   D. Sous la cible : en direct tant qu'aucune inscription non annulée n'existe pour la production et la cible.
  *   E. Ce qu'« Inscrire pour une production » copie : la forme du lot 2, chaque tampon une fois.
  *   F. Une seule source : lire n'écrit rien ; la pose, la rétroaction et le PDF ne nomment pas les inscriptions.
+ *   G. Retenu d'office (décision de Grégoire, 25 nov., 8 h 22) : un seul bloc de cible, tous les tampons ; plusieurs,
+ *      aucun, sauf celui qui déclare un critère de la cible (le rapprochement du lot 2).
  *
  * RIEN EN DUR : tampons, productions et cibles sont fictifs. BREAK-TESTS : journal au rapport.
  */
@@ -245,5 +247,69 @@ describe('F · une seule source : lire n\'écrit rien', () => {
     it('aucun tampon, catégorie ou critère fourni par l\'application n\'est nommé dans le code du lot', () => {
         const neuf = lire('js/pratiques/inscriptions-cibles.js').split('Les tampons posés sur une production')[1].split('Ajouter (fonction pure)')[0];
         expect(neuf).not.toMatch(/['"](action|comprehension|observations|qualite|diagnostic)['"]/);
+    });
+});
+
+describe('G · retenu d\'office dans « Inscrire pour une production » (décision du 25 nov. 2026, 8 h 22)', () => {
+    const T3 = { id: 'custom-banc-3', nom: 'Tampon fictif 3', categorieId: 'cat-banc', categorieNom: 'Catégorie fictive', critere: 'Critère fictif ailleurs', emoji: '' };
+    const TOUS = [T1, T2, T3];
+
+    it('un seul bloc de cible : tous les tampons sont retenus d\'office', () => {
+        expect(I.tamponsRetenusDOffice(TOUS, CIBLE_A, 1)).toEqual([T1.id, T2.id, T3.id]);
+        expect(I.tamponsRetenusDOffice(TOUS, CIBLE_B, 1), 'même sans critère sur la cible').toEqual([T1.id, T2.id, T3.id]);
+    });
+
+    it('plusieurs blocs : aucun tampon retenu d\'office, sauf celui qui déclare un critère de CETTE cible', () => {
+        expect(I.tamponsRetenusDOffice(TOUS, CIBLE_A, 2), 'T1 déclare le critère A1').toEqual([T1.id]);
+        expect(I.tamponsRetenusDOffice(TOUS, CIBLE_B, 2), 'la cible B ne porte pas ce critère').toEqual([]);
+        expect(I.tamponsRetenusDOffice([T2, T3], CIBLE_A, 2)).toEqual([]);
+        expect(I.tamponsRetenusDOffice(TOUS, CIBLE_A, 3)).toEqual([T1.id]);
+    });
+
+    it('l\'exception est le rapprochement du lot 2, pas une seconde comparaison : mêmes tampons que `rapprocherTampons` place à côté d\'un critère', () => {
+        const variantes = [Object.assign({}, T1, { critere: '  critère   FICTIF a1 ' }), Object.assign({}, T2, { critere: 'Critère fictif A' }), T3];
+        const places = I.rapprocherTampons(variantes, CIBLE_A.criteres).parCritere;
+        const aCote = Object.keys(places).reduce((ids, k) => ids.concat(places[k].map(t => t.id)), []);
+        expect(aCote).toEqual([T1.id]);
+        expect(I.tamponsRetenusDOffice(variantes, CIBLE_A, 2)).toEqual(aCote);
+        const corps = lire('js/pratiques/inscriptions-cibles.js').split('function tamponsRetenusDOffice')[1].split('\n    }')[0];
+        expect(corps).toMatch(/rapprocherTampons\(/);
+        expect(corps, 'aucune comparaison de texte à part').not.toMatch(/critereCompare|toLowerCase|toLocaleLowerCase|===\s*t\.critere/);
+    });
+
+    it('deux cibles qui portent un critère du même texte : le tampon est retenu d\'office sous les deux', () => {
+        const jumelle = { id: 'cib-c', etiquette: 'Cible fictive C', criteres: [{ id: 'crit-c1', texte: 'Critère fictif A1', essentiel: false }] };
+        expect(I.tamponsRetenusDOffice(TOUS, CIBLE_A, 2)).toEqual([T1.id]);
+        expect(I.tamponsRetenusDOffice(TOUS, jumelle, 2)).toEqual([T1.id]);
+    });
+
+    it('sans tampon, sans cible, sans nombre : rien, et aucune erreur', () => {
+        expect(I.tamponsRetenusDOffice(null, CIBLE_A, 2)).toEqual([]);
+        expect(I.tamponsRetenusDOffice(TOUS, null, 2)).toEqual([]);
+        expect(I.tamponsRetenusDOffice(TOUS, CIBLE_A, undefined), 'un nombre inconnu ne retient pas tout d\'office : le critère seul').toEqual([T1.id]);
+        expect(I.tamponsRetenusDOffice([], CIBLE_A, 1)).toEqual([]);
+    });
+
+    it('sans cible déclarée, la fenêtre offre toutes les cibles de l\'ensemble : la règle se juge à ce nombre', () => {
+        expect(I.ciblesOffertes(P_SANS, CIBLES).map(c => c.id)).toEqual(['cib-a', 'cib-b']);
+        expect(I.ciblesOffertes(P_SANS, [CIBLE_B]).map(c => c.id), 'un ensemble d\'une seule cible : un seul bloc').toEqual(['cib-b']);
+        expect(I.ciblesOffertes(P_UNE, CIBLES)).toHaveLength(1);
+        expect(I.ciblesOffertes(P_DEUX, CIBLES)).toHaveLength(2);
+    });
+
+    it('« Aucun niveau » sans tampon retenu, sans texte, sans critère : la trace vide est refusée (règle du lot 2)', () => {
+        const vide = { da: ZOE, ensembleId: 'ENS1', cibleId: 'cib-b', niveau: null, date: '2031-10-20', productionId: P_DEUX.id, noteBreve: '', criteres: [], tampons: [] };
+        expect(I.motifsRefus(vide, null)).toEqual([I.MOTIFS.VIDE]);
+        expect(I.motifsRefus(Object.assign({}, vide, { tampons: [T2] }), null)).toEqual([]);
+    });
+
+    it('la fenêtre : un tampon n\'est pressé que s\'il est retenu d\'office, et le nombre de blocs est celui des cibles offertes', () => {
+        const f = lire('js/tableau-cibles.js');
+        const bouton = f.split('function _tamponATouchHTML')[1].split('\n    }')[0];
+        expect(bouton).toMatch(/aria-pressed="\$\{retenu \? 'true' : 'false'\}"/);
+        expect(bouton).not.toMatch(/aria-pressed="true"/);
+        expect(f).toMatch(/I\(\)\.tamponsRetenusDOffice\(liste, cible, nombreDeBlocs\)/);
+        expect(f).toMatch(/_blocCibleProductionHTML\(ctx, c, tampons, offertes\.length\)/);
+        expect(f).toMatch(/_tamponsDuBlocHTML\(bloc\.dataset\.prefixe, tampons, cibles\.find\(c => c\.id === bloc\.dataset\.cible\), blocs\.length\)/);
     });
 });

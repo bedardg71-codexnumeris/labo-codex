@@ -85,9 +85,11 @@
         traceEnDirect: 'pas encore inscrite',
         tamponsProduction: 'Tampons d’observation posés sur cette production',
         tamponsProductionAide: 'Ils entrent dans l’inscription de cette cible. Touche un tampon pour le retirer de l’inscription : il reste sur la production.',
+        // 25 nov. 2026, 8 h 22 : la production vise plusieurs cibles, rien n'est retenu d'office (mot PROPOSÉ par Cowork).
+        tamponsProductionAidePlusieurs: 'Touche les tampons qui concernent cette cible : ils entrent dans son inscription et restent sur la production.',
         tamponsProductionRetenus: (noms) => (noms.length ? `\u00a0: ${noms.join(', ')}` : '\u00a0: aucun'),
         tamponRetire: (tampon, cible) => `« ${tampon} » retiré de l’inscription de « ${cible} ». Il reste sur la production.`,
-        tamponRemis: (tampon, cible) => `« ${tampon} » remis dans l’inscription de « ${cible} ».`,
+        tamponRetenu: (tampon, cible) => `« ${tampon} » retenu pour l’inscription de « ${cible} ».`,
         aide: 'Au clavier : les flèches pour se déplacer, Entrée pour ouvrir une case.',
         aucune: 'aucune inscription',
         echelleTitre: (nom) => (nom ? `Échelle « ${nom} » :` : 'Échelle :'),
@@ -957,28 +959,32 @@
     /* ----- Le geste « inscrire pour une production » ----- */
 
     /** Un tampon de la production, à toucher : pressé, il entre dans l'inscription de cette cible (le dessin du lot 2). */
-    function _tamponATouchHTML(t) {
+    function _tamponATouchHTML(t, retenu) {
         const outils = window.travauxOutils;
         const image = (outils && typeof outils.imageDuTampon === 'function') ? outils.imageDuTampon(t.id) : null;
         const dessin = image ? `<img class="oc-tampon-image${image.emoji ? ' oc-tampon-image--emoji' : ''}" src="${esc(image.src)}" alt="">`
             : `<span class="oc-tampon-lettres" aria-hidden="true">${esc(t.emoji || String(t.nom || '?').slice(0, 2))}</span>`;
-        return `<button type="button" class="oc-tampon" data-tc="tampon-production" data-tampon="${esc(t.id)}" aria-pressed="true"`
+        return `<button type="button" class="oc-tampon" data-tc="tampon-production" data-tampon="${esc(t.id)}" aria-pressed="${retenu ? 'true' : 'false'}"`
             + ` aria-label="${esc(t.nom)}" title="${esc(t.nom)}">${dessin}<span class="oc-tampon-coche" aria-hidden="true">✓</span></button>`;
     }
 
     /**
      * Lot 3 (25 nov. 2026) : dans le bloc d'une cible, les tampons d'observation posés sur la production de l'étudiant·e,
-     * vus AVANT d'attribuer le niveau. Tous retenus d'office ; en toucher un le retire de l'inscription de cette cible
-     * (il reste sur la production). Sans tampon : rien, le bloc est celui d'avant.
+     * vus AVANT d'attribuer le niveau. UN SEUL bloc de cible : tous retenus d'office, en toucher un le retire. PLUSIEURS
+     * blocs (décision de Grégoire, 25 nov. 2026, 8 h 22) : aucun n'est retenu d'office, sauf celui qui déclare un critère
+     * de cette cible ; on touche ceux qui la concernent (`tamponsRetenusDOffice`). Un tampon reste toujours sur la
+     * production. Sans tampon : rien, le bloc est celui d'avant.
      */
-    function _tamponsDuBlocHTML(prefixe, tampons) {
+    function _tamponsDuBlocHTML(prefixe, tampons, cible, nombreDeBlocs) {
         const liste = tampons || [];
         if (liste.length === 0) return '';
         const id = `${prefixe}-tampons`;
+        const retenus = new Set(I().tamponsRetenusDOffice(liste, cible, nombreDeBlocs));
+        const aide = nombreDeBlocs === 1 ? MOTS.tamponsProductionAide : MOTS.tamponsProductionAidePlusieurs;
         return `<div class="tc-section tc-pr-tampons"><p class="oc-tampons-tete"><span class="tc-champ-nom" id="${esc(id)}">${esc(MOTS.tamponsProduction)}</span>`
-            + `<span class="oc-tampons-retenus">${esc(MOTS.tamponsProductionRetenus(liste.map(t => t.nom)))}</span></p>`
-            + `<div class="oc-tampons" role="group" aria-labelledby="${esc(id)}" aria-describedby="${esc(id)}-aide">${liste.map(_tamponATouchHTML).join('')}</div>`
-            + `<p class="tc-aide" id="${esc(id)}-aide">${esc(MOTS.tamponsProductionAide)}</p></div>`;
+            + `<span class="oc-tampons-retenus">${esc(MOTS.tamponsProductionRetenus(liste.filter(t => retenus.has(String(t.id))).map(t => t.nom)))}</span></p>`
+            + `<div class="oc-tampons" role="group" aria-labelledby="${esc(id)}" aria-describedby="${esc(id)}-aide">${liste.map(t => _tamponATouchHTML(t, retenus.has(String(t.id)))).join('')}</div>`
+            + `<p class="tc-aide" id="${esc(id)}-aide">${esc(aide)}</p></div>`;
     }
 
     /** Les tampons d'observation de la production choisie pour l'étudiant·e choisi·e (les deux requis ; sinon `[]`). */
@@ -992,10 +998,12 @@
     function _relireTamponsDesBlocs(overlay) {
         const tampons = _tamponsDuChoix(overlay);
         if (_ouverte) _ouverte.tamponsProduction = tampons;
-        overlay.querySelectorAll('.tc-pr-cibles [data-tc-bloc]').forEach(bloc => {
+        const blocs = overlay.querySelectorAll('.tc-pr-cibles [data-tc-bloc]');
+        const cibles = (_ouverte && _ouverte.ctx.cibles) || [];
+        blocs.forEach(bloc => {
             const hote = bloc.querySelector('.tc-pr-tampons-hote');
             // security-ok : _tamponsDuBlocHTML échappe tout texte (esc)
-            if (hote) hote.innerHTML = _tamponsDuBlocHTML(bloc.dataset.prefixe, tampons);
+            if (hote) hote.innerHTML = _tamponsDuBlocHTML(bloc.dataset.prefixe, tampons, cibles.find(c => c.id === bloc.dataset.cible), blocs.length);
         });
     }
 
@@ -1005,7 +1013,7 @@
         return ((_ouverte && _ouverte.tamponsProduction) || []).filter(t => presses.has(t.id));
     }
 
-    /** Toucher un tampon du bloc : retiré de l'inscription de cette cible, ou remis. Rien n'est écrit sur la production. */
+    /** Toucher un tampon du bloc : retenu pour l'inscription de cette cible, ou retiré. Rien n'est écrit sur la production. */
     function _basculerTamponProduction(bouton) {
         const bloc = bouton.closest('[data-tc-bloc]');
         const tampon = ((_ouverte && _ouverte.tamponsProduction) || []).find(t => t.id === String(bouton.dataset.tampon));
@@ -1016,15 +1024,15 @@
         if (noms) noms.textContent = MOTS.tamponsProductionRetenus(_tamponsRetenusDuBloc(bloc).map(t => t.nom));
         const cible = _ouverte.ctx.cibles.find(c => c.id === bloc.dataset.cible);
         const zone = _ouverte.overlay.querySelector('.tc-pr-annonce');
-        if (zone) zone.textContent = (retenu ? MOTS.tamponRemis : MOTS.tamponRetire)(tampon.nom, cible ? cible.etiquette : '');
+        if (zone) zone.textContent = (retenu ? MOTS.tamponRetenu : MOTS.tamponRetire)(tampon.nom, cible ? cible.etiquette : '');
     }
 
-    function _blocCibleProductionHTML(ctx, cible, tampons) {
+    function _blocCibleProductionHTML(ctx, cible, tampons, nombreDeBlocs) {
         const p = 'tc-pr-' + cible.id.replace(/[^A-Za-z0-9_-]/g, '');
         return `<fieldset class="tc-bloc-cible" data-tc-bloc data-prefixe="${esc(p)}" data-cible="${esc(cible.id)}">
             <legend class="tc-cible-etiquette">${esc(cible.etiquette)}${cible.terminale ? ` <span class="cibles-fiche-terminale">Cible terminale</span>` : ''}</legend>
             ${cible.enonce ? `<p class="tc-cible-enonce">${esc(cible.enonce)}</p>` : ''}
-            <div class="tc-pr-tampons-hote">${_tamponsDuBlocHTML(p, tampons)}</div>
+            <div class="tc-pr-tampons-hote">${_tamponsDuBlocHTML(p, tampons, cible, nombreDeBlocs)}</div>
             <h5 class="u-lecteur-ecran" id="${esc(p)}-niveau-titre">${esc(MOTS.niveau)} : ${esc(cible.etiquette)}</h5>
             ${_niveauxHTML(ctx, p, true)}
             <div class="tc-bloc-details u-hide">
@@ -1038,7 +1046,7 @@
         const production = (ctx.productions || []).find(x => x.id === productionId) || null;
         if (!production) return '';
         const offertes = I().ciblesOffertes(production, ctx.cibles);
-        return `<h4 class="tc-section-titre">${esc(MOTS.ciblesDeLaProduction)}</h4>${offertes.map(c => _blocCibleProductionHTML(ctx, c, tampons)).join('')}`;
+        return `<h4 class="tc-section-titre">${esc(MOTS.ciblesDeLaProduction)}</h4>${offertes.map(c => _blocCibleProductionHTML(ctx, c, tampons, offertes.length)).join('')}`;
     }
 
     /** Ouvre le geste « inscrire pour une production » : l'étudiant·e, la production, la date, puis les cibles offertes. */
