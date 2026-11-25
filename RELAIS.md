@@ -7,6 +7,13 @@
 
 ---
 
+## 24 NOV. 2026, 20 H 15 (Claude Code) : **TAMPONS D'OBSERVATION, LOT 2 — RETOUCHE FAITE, TOUJOURS SUR `lot/tampons-observation-2-observer`, NON FUSIONNÉ**
+
+- **Branche** : `lot/tampons-observation-2-observer` à `7c4620791` (poussée). Rien dans `main`, aucun bump, aucune ligne de Nouvelles. Aperçu : demande n° 60 (brouillon).
+- **Fait** (consigne de Cowork, 19 h, et son complément) : la ligne « Déjà inscrit aujourd'hui : … » sous le nom, sur « Observer » ; à l'historique, la liste des critères ne s'affiche plus quand aucun n'est renseigné (sauf le critère qui porte un tampon) ; Q4 : « Remarque, sans niveau » seulement si la trace porte un texte ; Q5 : les trois textes du tableau (« N traces sans niveau », la légende, la question de retrait).
+- **Preuve** : lots 1 et 2 sous WebKit et Chromium, 40 sur 40 chacun ; Vitest complet 12 400 ; 20 break-tests rouges.
+- **Reste** : l'essai de Grégoire sur l'iPad ; le mot D2 (« Déjà inscrit aujourd'hui. ») ; cinq endroits qui disent encore « remarque » (M1 à M5), dont une bulle du parcours qui reprend l'ancienne légende. Détail : § 9 du rapport et la page de textes, sur la branche.
+
 ## 24 NOV. 2026, 19 H 30 (Claude Code) : **TAMPONS D'OBSERVATION, LOT 2 « OBSERVER » — SUR `lot/tampons-observation-2-observer`, NON FUSIONNÉ (APERÇU SEULEMENT)**
 
 Mandat : consigne de lot de Cowork (« Gestion des pratiques de notation 5 », 24 nov., 16 h 30) ; décisions de Grégoire du 24 nov. **Le travail le plus récent vit sur `lot/tampons-observation-2-observer` (`1fb2623d8`), arbre `../labo-codex-tampons-observer`, partie de `lot/tampons-observation-1-regler` (`cf7d461ef`). Ni le lot 1 ni le lot 2 ne sont dans `main` : un push sur `main` est publié d'office.** Rapport : `plans de travail/RAPPORT-2026-11-24-tampons-observation-lot-2.md` (sur la branche).
