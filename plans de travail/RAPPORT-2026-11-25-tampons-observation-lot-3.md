@@ -8,7 +8,8 @@
 
 **Fait.** Un tampon d'observation posé sur une production se lit aussitôt au profil, section « Cibles » : sous sa production, à la date de la pose, et sous la cible quand la production n'en vise qu'une. « Inscrire pour une production » montre ces tampons dans le bloc de chaque cible, avant le niveau ; ceux qui sont retenus sont copiés dans l'inscription. **Retouche du 25 nov., 8 h 22 (§ 3 bis)** : une seule cible offerte, tous retenus d'office ; plusieurs, aucun, sauf le tampon qui porte un critère de la cible. Poser un tampon n'écrit aucune inscription. Vert sous WebKit et Chromium (18 essais sur 18 chacun), Vitest complet vert (12 433), 26 break-tests rouges sur 26.
 **Ce qui contredit la consigne** : rien dans les mesures a) à d). Trois points que la consigne ne tranchait pas et que j'ai tranchés (§ 3) : 1. avec plusieurs cibles, chaque bloc recevait d'office tous les tampons (**renversé par Grégoire à 8 h 22**, § 3 bis) ; 2. un tampon posé APRÈS l'inscription ne rejoint plus la cible (seulement la production) ; 3. « aussitôt » veut dire au plus 2 secondes (le délai d'enregistrement d'Annoter, non touché).
-**Ce qui reste** : l'essai de Grégoire sur l'iPad (§ 9), la page de textes (`TEXTES-2026-11-25-tampons-observation-lot-3.md`, quatre questions), la place du rang « Sur ses productions », proposée sur capture (§ 4). Pas de verdict WebKit complet : rien ne part en ligne.
+**Fichier d'essai (25 nov., session du nuage, consigne de 9 h 45 ; § 9 réécrit, § 10 neuf)** : `departs/ESSAI-tampons-observation-lot-3.zip`, servi par l'aperçu à `/departs.html` ; un banc l'ouvre et joue l'essai (Chromium seulement). Aucun code de l'application n'a changé. Cinq pièces d'essai à retirer avant la fusion (§ 10).
+**Ce qui reste** : l'essai de Grégoire sur l'iPad (§ 9, à partir du fichier d'essai), la page de textes (`TEXTES-2026-11-25-tampons-observation-lot-3.md`, quatre questions), la place du rang « Sur ses productions », proposée sur capture (§ 4). Pas de verdict WebKit complet : rien ne part en ligne.
 
 ---
 
@@ -230,20 +231,172 @@ Retouche de 8 h 22 (clair seulement, comme demandé) :
 
 Aucune entrée au BACKLOG.
 
-## 9. Les gestes d'essai pour Grégoire
+## 9. Les gestes d'essai pour Grégoire, à partir du fichier d'essai
 
-La démo « Par standards » n'a aucune production importée (rapport de mesure, point 8) : l'essai se fait sur l'aperçu, **dans un groupe d'essai dont la pratique est par cibles**, avec au moins une production qui déclare une seule cible et une autre qui en déclare deux ou aucune. Les libellés marqués (VU) sont ceux que j'ai vus à l'écran ; les autres sont décrits, pas cités.
+> Réécrit le 25 nov. (consigne de Cowork de 9 h 45) par la session du nuage : l'essai part du fichier `ESSAI-tampons-observation-lot-3.zip` (§ 10). Chaque groupe de gestes a été joué par le banc `essai-tampons-observation-depart.spec.js`, sous Chromium, à 1180 sur 820. **(VU)** : le libellé ou le chemin a été vu à l'écran dans ce banc (capture ou lecture du texte affiché). Ce qui n'est pas marqué est décrit, pas cité. **Rien de ceci n'a été vu sur l'iPad ni sous Safari.**
 
-1. **Régler.** Évaluation › Tableau de notation › « Observer » (VU) › choisir une cible › « Régler mes tampons » (VU) › cocher « D'observation » (VU) pour une catégorie › « Enregistrer ».
-2. **Poser.** Importer une production pour un·e étudiant·e (une photo ou un PDF), l'ouvrir en Annoter, poser un tampon de cette catégorie et un tampon d'une autre catégorie.
-3. **Relire.** Suivi › le profil de l'étudiant·e › section « Cibles » (VU). Attendu : la carte « Sur ses productions » montre le premier tampon à la date d'aujourd'hui, pas le second ; si la production vise une seule cible, il paraît aussi sous cette cible avec « pas encore inscrite ».
-4. **Retirer.** Revenir en Annoter, retirer le tampon de la production, revenir au profil : il n'y est plus.
-5. **Inscrire, une seule cible.** Le reposer, puis Évaluation › Tableau de notation (vue étendue) › « Inscrire pour une production » (VU) › choisir l'étudiant·e et la production. Attendu : le tampon paraît dans le bloc de la cible, au-dessus des niveaux. Le toucher le retire de l'inscription ; le toucher de nouveau le remet. Choisir un niveau › « Inscrire » (VU).
-6. **Relire encore.** Au profil : sous la cible, une seule entrée pour cette production, avec le niveau et le tampon, sans « pas encore inscrite » ; sous « Sur ses productions », le tampon est toujours là.
-7. **Inscrire, deux cibles** (décision de 8 h 22). Sur une production qui déclare deux cibles, poser deux tampons d'observation : l'un sans critère, l'autre auquel tu as donné un critère d'une des deux cibles (« Régler mes tampons »). Ouvrir « Inscrire pour une production », choisir l'étudiant·e et cette production. Attendu : deux blocs de cible ; chacun montre les deux tampons ; aucun n'est retenu, sauf le tampon à critère, déjà retenu sous la cible qui porte ce critère, et sous elle seulement. La ligne des noms dit « : aucun » là où rien n'est retenu.
-8. **Toucher sous une cible.** Toucher le tampon sans critère sous la seconde cible : il est retenu là, pas sous la première. Le toucher de nouveau le relâche. Le retenir, choisir un niveau pour chaque cible, « Inscrire ». Au profil : chaque cible lit son inscription avec ses seuls tampons ; « Sur ses productions » garde les deux.
-9. **Sans rien toucher.** Refaire le geste pour un·e autre étudiant·e avec deux tampons sans critère, choisir un niveau sous chaque cible sans toucher aucun tampon, « Inscrire » : aucune des deux inscriptions ne porte de tampon. Avec « Aucun niveau » et rien d'autre sous une cible : refus, rien n'est inscrit.
-10. **Sur l'iPad** : le toucher des tampons dans la fenêtre, en portrait et en paysage.
+**Ce que le fichier porte.** Le groupe « 601-101-MQ · gr. 00001 » (VU), quatre personnes : « Fictif-01, Personne-01 » à « Fictif-04, Personne-04 » (VU). Deux cibles : « Cible fictive A » et « Cible fictive B » (VU). Trois productions, nommées d'après ce qu'elles renseignent (VU). Trois tampons d'observation, « Tampon fictif 1 (critère A1) », « Tampon fictif 2 », « Tampon fictif 3 » (VU), et un tampon d'une autre catégorie, « Tampon fictif hors observation » (VU). Seules les deux premières personnes ont des images importées.
+
+### Groupe 1 : ouvrir le fichier
+
+1. Dans Safari, ouvre un onglet de navigation privée, puis l'adresse `https://deploy-preview-62--codexnumeris-051225.netlify.app/departs.html`. Sous « Essai : les tampons d'observation », touche « Télécharger le fichier », puis « Ouvrir l'application ». (Ces trois libellés sont ceux que j'ai écrits dans la page ; la demande de téléchargement de Safari, je ne l'ai pas vue.)
+2. Dans l'application, touche « Codex » (VU), en haut à droite, puis « Ouvrir un codex… » (VU). Dans le sélecteur de fichiers de l'iPad, choisis le fichier téléchargé.
+3. Une fenêtre « Recharger la page » (VU) paraît : touche « Recharger » (VU).
+
+**Tu dois voir** : sous les onglets, le groupe « 601-101-MQ · gr. 00001 » (VU) ; le bouton « Codex » avec un point vert (VU) ; aucune bande « Mode démonstration ». Si elle paraît, ou si une fenêtre « Modèle antérieur détecté » (VU) s'ouvre au geste 2, l'espace n'était pas vide : voir § 10, b).
+
+### Groupe 2 : poser un tampon sur la production à une cible
+
+1. Évaluation › Annoter (VU). Une liste de six lignes (VU) : sur la ligne « Fictif-01, Personne-01 » dont la production est « Production fictive : une cible », touche « Annoter » (VU).
+2. L'image s'ouvre, elle dit « IMAGE FICTIVE (essai) » (VU). Dans la palette « Tampons » (VU), à droite, descends jusqu'à « Catégorie fictive (observation) » (VU) ; touche « Tampon fictif 2 », puis touche l'image.
+3. Plus bas dans la même palette, sous « Catégorie fictive (autre) » (VU), touche « Tampon fictif hors observation », puis touche l'image ailleurs.
+
+**Tu dois voir** : les deux tampons sur l'image (VU), et « Enregistré » (VU) en bas à gauche, de lui-même.
+
+### Groupe 3 : relire au profil
+
+1. Suivi › Profils (VU). Le menu des personnes est sur « Fictif-01, Personne-01 (2390001) » (VU).
+2. Touche « Cibles » (VU).
+
+**Tu dois voir** : en bas, la carte « Sur ses productions » (VU), avec « Production : Production fictive : une cible » (VU), la date d'aujourd'hui et « Tampon fictif 2 » seulement ; le tampon de l'autre catégorie n'est nulle part. Plus haut, sous « Cible fictive A », la même trace avec « pas encore inscrite » (VU). Rien sous « Cible fictive B ».
+
+### Groupe 4 : inscrire, une cible
+
+1. Évaluation › Tableau de notation (VU), puis « Inscrire pour une production » (VU).
+2. Sous « Étudiant·e » (VU), choisis « Personne-01 Fictif-01 » ; sous « Production » (VU), « Production fictive : une cible ».
+3. Touche le tampon : il se relâche. Touche-le de nouveau : il est retenu. Choisis « 3 Acquis » (VU), puis « Inscrire » (VU).
+
+**Tu dois voir**, avant le geste 3 : un seul bloc, « Cible fictive A » ; sous « Tampons d'observation posés sur cette production » (VU), « Tampon fictif 2 », déjà retenu (une coche sur le tampon, VU). Après le premier toucher, la ligne dit « : aucun » (VU).
+
+### Groupe 5 : relire encore
+
+1. Suivi › Profils › « Cibles ».
+
+**Tu dois voir** : sous « Cible fictive A », « Niveau retenu : 3 · Acquis » (VU) ; une seule entrée pour cette production, avec le niveau et « Tampon fictif 2 », sans « pas encore inscrite ». Sous « Sur ses productions », le tampon est toujours là.
+
+### Groupe 6 : inscrire, deux cibles, le tampon à critère déjà retenu
+
+1. Évaluation › Annoter. L'écran rouvre la dernière production (VU) : dans le menu des productions, en haut à gauche, choisis « Production fictive : deux cibles » (VU), puis touche le nom « Fictif-01, Personne-01 » (VU), à côté.
+2. Pose « Tampon fictif 1 (critère A1) », puis « Tampon fictif 3 », comme au groupe 2.
+3. Évaluation › Tableau de notation › « Inscrire pour une production » ; « Personne-01 Fictif-01 » et « Production fictive : deux cibles ».
+
+**Tu dois voir** : deux blocs, « Cible fictive A » et « Cible fictive B » (VU) ; chacun montre les deux tampons. Sous A, « Tampon fictif 1 (critère A1) » est déjà retenu, et lui seul (VU). Sous B, rien n'est retenu : la ligne dit « : aucun » (VU). La phrase d'aide commence par « Touche les tampons qui concernent cette cible » (VU).
+
+### Groupe 7 : toucher sous une cible
+
+1. Dans le bloc « Cible fictive B », touche le tampon 3 : il est retenu là, pas sous A (VU). Touche-le de nouveau : relâché. Une troisième fois : retenu.
+2. Choisis un niveau sous chaque cible, puis « Inscrire ».
+3. Suivi › Profils › « Cibles ».
+
+**Tu dois voir** : sous « Cible fictive A », l'inscription de cette production avec « Tampon fictif 1 (critère A1) » seul ; sous « Cible fictive B », avec « Tampon fictif 3 » seul ; sous « Sur ses productions », les deux.
+
+### Groupe 8 : sans rien toucher
+
+1. Évaluation › Annoter ; « Production fictive : deux cibles » ; le nom « Fictif-02, Personne-02 » (VU). Pose « Tampon fictif 2 » et « Tampon fictif 3 ».
+2. « Inscrire pour une production » ; « Personne-02 Fictif-02 », « Production fictive : deux cibles ». Sans toucher aucun tampon, choisis « Aucun niveau » (VU) sous « Cible fictive A », puis « Inscrire ».
+3. Choisis ensuite un niveau sous chaque cible, toujours sans toucher de tampon, puis « Inscrire ».
+
+**Tu dois voir**, au geste 2 : aucun tampon retenu, sous aucune cible ; un refus en bas de la fenêtre, « « Cible fictive A » : choisis un niveau, renseigne un critère ou écris une rétroaction : une inscription vide ne s'inscrit pas. » (VU) ; la fenêtre reste ouverte. Au geste 3 : la fenêtre s'inscrit, et au profil de « Fictif-02 » aucune des deux inscriptions ne porte de tampon (lu dans la base par le banc, pas regardé à l'écran).
+
+### Groupe 9 : la production sans cible déclarée
+
+1. Évaluation › Annoter ; « Production fictive : aucune cible déclarée » ; « Fictif-02, Personne-02 ». Pose « Tampon fictif 1 (critère A1) » et « Tampon fictif 2 ».
+2. Suivi › Profils ; choisis « Fictif-02, Personne-02 (2390002) » ; « Cibles ».
+3. Évaluation › Tableau de notation › « Inscrire pour une production » ; « Personne-02 Fictif-02 », « Production fictive : aucune cible déclarée ».
+
+**Tu dois voir**, au geste 2 : les deux tampons sous « Sur ses productions », et aucune trace « pas encore inscrite » sous une cible. Au geste 3 : les deux blocs (VU) ; sous A, « Tampon fictif 1 (critère A1) » déjà retenu (VU) ; sous B, rien.
+
+### Ce que ce fichier ne fait pas essayer
+
+- **Retirer un tampon de la production** (l'ancien geste 4) : le banc de l'étape 3 le joue ; le banc du fichier, non. Le geste reste à faire à la main si tu veux le voir.
+- **Régler** (cocher « D'observation », donner un critère) : le fichier arrive déjà réglé. C'est l'étape 1.
+- **Le toucher au doigt, le portrait, Safari** : rien de cela n'est joué ici.
+
+## 10. Le fichier de départ d'essai (session du nuage, 25 nov., consigne de 9 h 45)
+
+Aucun code de l'application n'a changé. Ni fusion, ni bump, ni ligne de Nouvelles, ni entrée de `RELAIS.md`.
+
+### Ce qu'il porte, et comment il est fait
+
+- **La classe** : montée par les gestes de « Mettre ta classe en place » (Automne 2026, 601-101-MQ, groupe 00001, quatre personnes « Fictif-01 Personne-01 » à « Fictif-04 Personne-04 »).
+- **La pratique** « Par standards (fictive, essai) » : écrite dans l'ordre et la forme de `creerParStandards` (`js/vue-simple.js`) : l'échelle de départ, l'ensemble par `EnsemblesCibles.enregistrer`, la pratique, `PratiqueManager.changerPratiqueActive`. Deux cibles ; critères « Critère fictif A1 », « A2 », « B1 », « B2 ».
+- **Les tampons** : dans la forme que l'éditeur de tampons enregistre (`enregistrerRetroObservations`), écrits dans les clés, **pas par les gestes de l'éditeur**. « Catégorie fictive (observation) », cochée, trois tampons, dont le premier déclare « Critère fictif A1 » ; « Catégorie fictive (autre) », non cochée, un tampon.
+- **Les trois productions** : par `construireProductionData`, puis `ciblesRenseignees` (une cible, deux, liste vide).
+- **Six images** : dessinées par la fabrique (leur texte dit « IMAGE FICTIVE (essai) », la production et la personne), importées par le vrai chemin d'import, pour les deux premières personnes.
+- **Aucun tampon posé, aucune inscription** (témoins lus dans le zip).
+- Deux avis fermés par leur geste à la fabrique, pour qu'ils ne couvrent pas l'essai : le rappel de mise à jour du codex (comme les autres fichiers de départ) et le jalon « Ton espace de travail est prêt » (`js/transitions.js`).
+- Le codex s'appelle « ESSAI, tampons d'observation (fictif) » ; 239 Ko.
+
+### Les mesures demandées
+
+**a) La bande « Mode démonstration ».** Cause : la démo était active dans l'aperçu au moment d'ouvrir le fichier, et ouvrir un codex ne la quitte pas. Mesuré (Chromium) : espace vide, « Explorer la démo », puis le fichier des codes en lettres : `demo-actif` reste à `'true'`, la bande reste, alors que le groupe affiché est celui du fichier. Aucun des deux fichiers d'essai ne porte cette clé (lu dans leur zip). Dans un espace vide, le fichier s'ouvre **sans** la bande : le banc l'exige. **Ce que la bande change pour l'essai** : rien de mesuré sur le tableau des cibles ni sur la liste d'Annoter (les deux paraissent sous la bande). Deux réserves : je n'ai pas joué tout le parcours sous la bande, et « Quitter la démo » retire la bande et garde les données, mais laisse l'application sans groupe choisi (il faut le rechoisir dans le menu sous les onglets). C'est une inférence que cela vient du retour à l'état d'avant la démo ; je n'ai pas lu ce code.
+
+**b) Ouvrir le fichier dans un espace qui porte déjà des données.** Mesuré : le fichier des codes en lettres ouvert, puis celui-ci par-dessus.
+- Une fenêtre s'interpose avant le rechargement : « Modèle antérieur détecté », avec « Annuler » et « Remplacer » (VU). Elle paraît parce que les deux fichiers ont le même trimestre et des cours d'identités différentes. Elle n'annonce rien de grave ici ; il faut toucher « Remplacer ».
+- Ensuite : **un remplacement clé par clé, pas un espace neuf**. Ce que le fichier porte remplace ce qui était là (groupe, productions, images, tampons, pratique). Ce qu'il ne porte pas **reste** : mesuré, l'évaluation du fichier des codes en lettres (une, orpheline) et son image (sept images en base au lieu de six). La démo, si elle était active, reste active.
+- Ce que tu as importé à la main ce matin, je ne l'ai pas : je ne peux pas dire ce qui en resterait, seulement que la règle est celle-là.
+- **Le geste sûr** : un onglet de navigation privée. Ce qui est vérifié : dans un contexte de navigateur neuf (stockage vide, ce que fait chaque essai du banc), le fichier s'ouvre sans bande, sans fenêtre « Modèle antérieur détecté », et tout le parcours se joue. Ce qui ne l'est pas : la navigation privée de Safari sur l'iPad elle-même (je n'ai ni Safari ni iPad). Lu dans `netlify.toml` : les aperçus ne passent par aucune porte d'accès, un onglet privé ne demandera donc pas de code. À savoir : fermer l'onglet privé efface l'essai.
+
+**c) Le chemin sur l'iPad** : le groupe 1 du § 9. Seuls les gestes dans l'application sont vus ; ceux de Safari (téléchargement, sélecteur de fichiers) sont décrits.
+
+### La preuve
+
+| Suite | Moteur | Résultat |
+|---|---|---|
+| La fabrique (témoins lus dans le zip : chaque pièce de la consigne) | Chromium | 1 sur 1 |
+| `essai-tampons-observation-depart.spec.js` : la preuve de la consigne, puis le parcours du § 9 | Chromium | **2 sur 2**, cinq passages de suite |
+| Banc de l'étape 3, rejoué | Chromium | **18 sur 18** |
+| Vitest complet | | **12 433 sur 12 433 (961 fichiers)** |
+
+**Chromium suffit ici**, et c'est tout ce que cette session a : le banc éprouve que le fichier porte ses pièces et que l'essai se joue à partir de lui. Le comportement de l'étape 3 sous WebKit a son propre banc (§ 5). Rien n'a tourné sous WebKit dans cette session.
+
+**Break-tests du banc** (25 nov., Chromium ; un fichier privé d'une pièce, lu par `DEPARTS_DOSSIER`) :
+
+| N° | Le fichier privé de… | Rouge |
+|---|---|---|
+| E1 | la coche « D'observation » de la catégorie | les 2 essais (« Sur ses productions » absent) |
+| E2 | la pratique du groupe (groupe non par cibles) | les 2 (pas de tableau des cibles) |
+| E3 | une de ses six images | les 2 (image absente de l'espace ; page blanche en Annoter). **Passait vert au premier jet** : le banc ne regardait que la taille du canevas. Durci : l'image doit être dans l'espace et son encre à l'écran |
+| E4 | la seconde cible de la production « deux cibles » | les 2 (case décochée ; un seul bloc) |
+| E5 | le critère du tampon 1 | le parcours (le tampon n'est plus retenu sous A) ; la preuve reste verte, elle ne lit pas le critère |
+| E6 | (ajout) la clé de la démo posée dans le fichier | les 2 (bande affichée) |
+
+Six sur six après durcissement.
+
+**Un rouge de mon fait, fini** : une pause fixe dans le banc faisait rougir la sentinelle des pauses (618 pour un plafond de 617). Remplacée par une condition.
+
+### Pièces d'essai : à retirer avant la fusion
+
+- `departs/ESSAI-tampons-observation-lot-3.zip`
+- la section `data-essai="tampons-observation"` de `departs.html`
+- `tests/departs-de-parcours/essai-tampons-observation.js`
+- `tests/departs-de-parcours/essai-tampons-observation.spec.js`
+- `tests/integration/essai-tampons-observation-depart.spec.js`
+
+Chacune le dit dans son en-tête. Le § 9 de ce rapport cite le fichier : à réécrire ou à dater au retrait.
+
+### Ce que j'ai tranché au-delà de la consigne
+
+| N° | Décision | Ce que j'ai supposé |
+|---|---|---|
+| F1 | Les tampons sont écrits dans leurs clés, pas par les gestes de l'éditeur | Que la forme lue dans `enregistrerRetroObservations` suffit ; la palette, le profil et la fenêtre les lisent (VU) |
+| F2 | Les images sont dessinées par la fabrique, pas tirées des fixtures | Qu'une image qui dit ce qu'elle est aide l'essai ; le fichier reste léger |
+| F3 | Le jalon « Ton espace de travail est prêt » est fermé à la fabrique | Qu'il gênerait : il reste à l'écran d'un onglet à l'autre tant qu'on ne le ferme pas |
+| F4 | La production sans cible porte une liste vide, pas un champ absent | C'est ce que la fiche écrit quand son bloc est affiché et que rien n'est coché |
+| F5 | Un second essai au banc, le parcours du § 9 en entier | Que des gestes marqués (VU) doivent avoir été joués |
+| F6 | Le retrait d'un tampon (ancien geste 4) n'est pas dans le parcours du banc | Hors de l'ordre demandé ; dit au § 9 |
+
+### Trouvailles (trois issues)
+
+| Trouvaille | Issue |
+|---|---|
+| Ouvrir un codex sur une démo active laisse la bande et l'état de démo | **Inscrire et continuer** : à dire à Cowork ; pas d'entrée au backlog de ma main (symptôme vécu par Grégoire à 9 h 34, c'est à la session principale de l'inscrire) |
+| Ouvrir un codex par-dessus un autre laisse les clés que le nouveau ne porte pas (une évaluation orpheline mesurée) | **Inscrire et continuer** : connu du code (`_planifierPurgeEspace`, la purge n'est qu'un aperçu, #336) ; rien à ajouter |
+| La liste d'Évaluation › Liste dépasse l'écran à 1180 de large (la colonne des actions est hors champ) | **Commenter et oublier** : l'écran le dit lui-même ; le parcours passe par Évaluation › Annoter |
+
+### L'arbre du Mac
+
+`../labo-codex-tampons-production` est en retard d'un commit sur `origin/lot/tampons-observation-3-production` après ce push : `git pull --ff-only` avant d'y retravailler.
 
 ## Journal des break-tests (25 nov. 2026 ; V : Vitest, P : WebKit)
 
