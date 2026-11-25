@@ -299,7 +299,12 @@ test.describe('Tampons d’observation, lot 3 — « Inscrire pour une productio
         await expect(bloc(page, CIBLE_B).locator('.tc-pr-retenus')).toHaveText('Retenus pour cette cible : aucun');
         await tamponDuBloc(page, CIBLE_B, 3).click();
         await choisirNiveau(page, CIBLE_A, '1');
-        await bloc(page, CIBLE_B).locator('.tc-niveau input[data-sans-niveau]').check({ force: true });
+        // La tuile elle-même, comme un doigt (25 nov., midi) : le bloc B est plus bas depuis la ligne des noms, et un
+        // `check({ force: true })` sur le bouton radio caché ratait une fois sur trois (cause présumée, non mesurée : le défilement de la fenêtre).
+        const sansNiveauB = bloc(page, CIBLE_B).locator('.tc-niveau', { has: page.locator('input[data-sans-niveau]') });
+        await sansNiveauB.scrollIntoViewIfNeeded();
+        await sansNiveauB.click();
+        await expect(sansNiveauB.locator('input[data-sans-niveau]')).toBeChecked();
         await inscrire(page);
         const liste = await inscriptions(page);
         expect(liste.map((i) => [i.cibleId, i.niveau, i.tampons.map((t) => t.id)])).toEqual([[CIBLE_A, '1', [tamponId(1)]], [CIBLE_B, null, [tamponId(3)]]]);

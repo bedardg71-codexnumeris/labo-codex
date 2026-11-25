@@ -10,6 +10,7 @@
 **Ce qui contredit la consigne** : rien dans les mesures a) à d). Trois points que la consigne ne tranchait pas et que j'ai tranchés (§ 3) : 1. avec plusieurs cibles, chaque bloc recevait d'office tous les tampons (**renversé par Grégoire à 8 h 22**, § 3 bis) ; 2. un tampon posé APRÈS l'inscription ne rejoint plus la cible (seulement la production) ; 3. « aussitôt » veut dire au plus 2 secondes (le délai d'enregistrement d'Annoter, non touché).
 **Fichier d'essai (25 nov., session du nuage, consigne de 9 h 45 ; § 9 réécrit, § 10 neuf)** : `departs/ESSAI-tampons-observation-lot-3.zip`, servi par l'aperçu à `/departs.html` ; un banc l'ouvre et joue l'essai (Chromium seulement). Aucun code de l'application n'a changé. Cinq pièces d'essai à retirer avant la fusion (§ 10).
 **Ce qui reste** : l'essai de Grégoire sur l'iPad (§ 9, à partir du fichier d'essai), la page de textes (`TEXTES-2026-11-25-tampons-observation-lot-3.md`, quatre questions), la place du rang « Sur ses productions », proposée sur capture (§ 4). Pas de verdict WebKit complet : rien ne part en ligne.
+**Retouche du 25 nov., midi (session du nuage, consigne de Cowork après l'essai de Grégoire sur l'iPad, § 11)** : deux textes de « Inscrire pour une production » changent (I2 : les noms retenus sur leur ligne, sous les tampons ; I4 : une seconde phrase dans le bloc au tampon à critère). Les autres textes sont acceptés. #1311 à #1314 inscrits. Le § 9 (groupe 1) et le § 10 b) sont corrigés : l'onglet privé n'est pas un geste sûr sur l'iPad. Chromium vert, Vitest complet vert ; **rien n'a tourné sous WebKit** (absent du conteneur).
 
 ---
 
@@ -401,6 +402,57 @@ Chacune le dit dans son en-tête. Le § 9 de ce rapport cite le fichier : à ré
 ### L'arbre du Mac
 
 `../labo-codex-tampons-production` est en retard de trois commits sur `origin/lot/tampons-observation-3-production` après ce push : `git pull --ff-only` avant d'y retravailler.
+
+## 11. La retouche du 25 nov., midi : deux textes, après l'essai de Grégoire sur l'iPad
+
+> Session du nuage. Consigne : Cowork, 25 nov., midi. Grégoire a essayé l'étape 3 sur l'iPad (Safari, aperçu n° 62, le fichier d'essai), de 11 h 10 à 11 h 47 : groupes 1 à 7 du § 9 conformes (rapporté par Cowork ; je ne l'ai pas vu). Il garde la carte « Sur ses productions » en bas et la marque « pas encore inscrite ».
+
+### Ce qui change
+
+- **I2.** L'étiquette « Tampons d'observation posés sur cette production » reste seule sur sa ligne. Les noms retenus ont leur ligne, entre les tampons et la phrase d'aide : « Retenus pour cette cible : Tampon A, Tampon B », ou « Retenus pour cette cible : aucun ». Dans un bloc comme dans plusieurs. La place demandée se lit bien aux deux formats (captures) : je n'en ai pas choisi d'autre.
+- **I4.** Dans une fenêtre à plusieurs cibles, le bloc où au moins un tampon est retenu d'office par son critère ajoute : « Un tampon qui porte un critère de cette cible est déjà retenu. » La phrase est écrite à l'ouverture du bloc ; un toucher ne refait que la ligne des noms, elle reste donc si le tampon est relâché. **Cela ne coûte rien au code** (aucun état à garder). Elle est refaite, selon la même règle, quand l'étudiant·e ou la production change.
+- « Observer » (lot 2) n'est pas touché : sa ligne de noms garde sa forme (`.oc-tampons-retenus`) ; son banc est rejoué.
+
+Fichiers : `js/tableau-cibles.js` (`MOTS`, `_tamponsDuBlocHTML`, `_basculerTamponProduction`), `css/tableau-cibles.css` (`.tc-pr-retenus`), `index.html` (jetons anti-cache des deux fichiers), les deux bancs, la page de textes.
+
+### La preuve
+
+| Quoi | Où | Résultat |
+|---|---|---|
+| Banc du lot 3 (18 essais), banc du fichier d'essai (2), banc du lot 2 (17) | Chromium du conteneur (`playwright.chromium.config.js`) | **37 sur 37, deux passages de suite** (74 sur 74) |
+| Vitest complet | conteneur | **12 433 sur 12 433** (961 fichiers), rejoué vert par le crochet pré-push |
+| WebKit | | **RIEN N'A TOURNÉ** : le conteneur n'a pas WebKit (`/opt/pw-browsers/webkit-2287` absent ; les 35 essais lancés ont tous échoué au lancement du navigateur, aucun n'a jugé). Ni Safari, ni iPad. |
+
+Ce que les bancs lisent à l'écran : la ligne « Retenus pour cette cible » dans une fenêtre à un bloc et à deux blocs, avec des noms et avec « aucun » ; l'étiquette seule sur sa ligne ; l'ordre étiquette, tampons, noms, aide ; la seconde phrase présente sous la cible A (tampon à critère), absente sous B, absente quand aucun tampon ne porte de critère, absente dans la fenêtre à un bloc ; présente encore après le relâchement du tampon.
+
+**Mutations (Chromium, les deux bancs, 20 essais ; rejouées sur l'état final)** :
+
+| Mutation | Rouges |
+|---|---|
+| I2 : le texte d'avant (« : aucun », sans « Retenus pour cette cible ») | 5 |
+| I2 : la ligne des noms remonte à côté de l'étiquette | 3 |
+| I4 : la seconde phrase dans tous les blocs d'une fenêtre à plusieurs cibles | 4 |
+| I4 : la seconde phrase aussi dans la fenêtre à un bloc | 3 |
+
+**Captures** (Chromium, clair, 1180 × 820 et 820 × 1180) : `inscrire-deux-cibles-retenu-par-son-critere-*.png`, remplacées. **Les autres captures de la fenêtre** (`inscrire-pour-une-production-*`, `inscrire-un-tampon-retire-*`, `inscrire-deux-cibles-rien-de-retenu-*`) montrent encore la ligne des noms à son ancienne place : je ne les ai pas reprises.
+
+### Deux ratés de mon premier jet, corrigés avant la fin
+
+1. J'avais donné à la seconde phrase une classe sans règle CSS (`tc-pr-aide-critere`) : le cliquet #679 l'a vue (Vitest, 1 rouge sur 12 433). Le repère est maintenant un attribut, `data-tc-aide-critere`. Le premier commit poussé de la retouche (`917a2c8`) porte ce défaut ; le suivant le retire.
+2. L'essai « deux cibles, un tampon qui déclare un critère… » est devenu instable (1 échec sur 3) : son `check({ force: true })` sur le bouton radio caché « Aucun niveau » du bloc B ratait par moments, le bloc étant plus bas depuis la ligne ajoutée. Cause présumée, non mesurée : le défilement de la fenêtre. L'essai touche maintenant la tuile, comme un doigt : 12 passages sur 12, puis les deux passages complets. **Je n'ai pas établi que ce raté est sans équivalent pour un doigt** : c'est une inférence (un doigt touche la tuile visible, pas un bouton caché).
+
+### Ce que j'ai tranché au-delà de la consigne
+
+- La ligne des noms passe à la ligne si elle est longue, au lieu d'être coupée par « … » comme sur « Observer ».
+- La seconde phrase suit la première dans le même paragraphe d'aide ; la ligne des noms est rattachée aux tampons pour un lecteur d'écran (`aria-describedby`).
+- Les jetons anti-cache de `tableau-cibles.js` et `tableau-cibles.css` avancent dans `index.html` : le crochet de commit l'exige. Ce n'est pas un bump : `version.json` n'est pas touché.
+- Le banc du lot 3 prend les deux captures quand `LOT3_CAPTURES` nomme un dossier ; sans cela, il n'en prend aucune.
+- #1311 à #1314 sont placés en tête de « A faire ».
+- #1314 : la consigne ne dit pas qui a vu la fenêtre sur l'iPad ; j'ai écrit « rapporté par Cowork », sans l'attribuer à Grégoire.
+
+### Trouvailles (trois issues)
+
+Les quatre de la consigne : **inscrites**, #1311 à #1314, aucune corrigée. Rien d'autre trouvé en chemin, hors mes deux ratés ci-dessus, qui étaient mon lot.
 
 ## Journal des break-tests (25 nov. 2026 ; V : Vitest, P : WebKit)
 
