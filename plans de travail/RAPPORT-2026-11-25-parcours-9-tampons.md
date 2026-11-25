@@ -11,7 +11,7 @@
 **Mesuré.** @@SUITES@@ Les six dessins se dessinent dans la fenêtre « Tampons et rétroactions », la palette d'Annoter, l'écran « Observer », sur une copie et par la fonction qui dessine le PDF exporté (pixels comptés, § 4). Aucun rendu n'est sorti vide : je n'ai corrigé aucun rendu. La note de Marmotte Pétillante ne bouge pas (69 % au tableau, 68,8 % au profil : le banc du parcours les lit toujours).
 
 **⚠ Trois choses que la mesure a fait paraître et que la consigne ne tranchait pas** (§ 2, toutes inscrites) :
-1. **#1315 : l'espace qui a déjà enregistré la fenêtre des tampons ne reçoit PAS « Opérations ».** « Enregistrer » range tous les noms et toutes les phrases affichés, renommés ou non. Un tel espace garde « Action », « Repérage », « Liaison », « Ouverture » et ses anciennes phrases, sur les dessins neufs. C'est probablement le cas de l'espace de Grégoire (inférence : je n'ai pas son fichier). **À trancher avant l'assemblage.**
+1. **#1315 : l'espace qui a déjà enregistré la fenêtre des tampons ne reçoit PAS « Opérations ».** « Enregistrer » range tous les noms et toutes les phrases affichés, renommés ou non. Un tel espace garde « Action », « Repérage », « Liaison », « Ouverture » et ses anciennes phrases, sur les dessins neufs. C'est probablement le cas de l'espace de Grégoire (inférence : je n'ai pas son fichier). **Tranché par Grégoire le 25 nov. à 18 h 45 : laisser tel quel pour la version de ce soir.**
 2. **#1316 : dans la palette d'Annoter, « Opérations » ne paraît que si la préférence « Observation des actions » est allumée** ; elle est éteinte par défaut. Le jeu est fourni à tout le monde dans la fenêtre des tampons et sur « Observer », pas dans la palette.
 3. **#1317 : le profil « Gestes cognitifs », son graphique, le glossaire et l'export de recherche reposent sur Repérage / Liaison / Ouverture.** Non touchés : c'est une réécriture, et de la pédagogie.
 
@@ -46,6 +46,8 @@ La consigne disait (lu par Cowork, pas essayé) : le jeu fourni est une base, le
 Un espace qui a enregistré une seule fois, pour quoi que ce soit, porte donc « Repérage », « Action » et l'ancienne phrase comme des choix. Mesuré (sentinelle neuve, cas (f)) : après le lot, il garde ces noms et ces phrases, reçoit le dessin neuf sous l'ancien nom (l'image fournie n'est jamais rangée) et reçoit les trois tampons neufs avec leur phrase.
 
 Ce que cela veut dire pour le cas (b) de la consigne : « garde SON nom, SON image et SA phrase » est vrai pour le nom et la phrase, et pour l'image **seulement s'il avait importé la sienne**. Celui qui a renommé « Repérage » en gardant l'image fournie verra son nom sur le dessin d'« Identification ».
+
+**Décision de Grégoire (25 nov., 18 h 45, relayée par Cowork) : laisser tel quel pour la version de ce soir.** Ne rien réparer, ne rien écrire dans le stock, ne pas changer la lecture des noms rangés. Pour lui, Repérage, Liaison et Ouverture sont les mêmes gestes qu'Identification, Relation et Déduction, mieux nommés : ce que j'appelle plus bas un glissement de sens n'en est pas un à ses yeux. Ce qui suit est ce que j'avais écrit avant sa réponse.
 
 Je n'ai rien réparé : rien ne distingue un nom rangé d'office d'un nom choisi, et écrire chez quelqu'un remonte à Grégoire. Trois voies sont écrites à #1315. **Celle qui tente le plus a un coût qu'il faut voir** : lire comme « non choisi » un nom rangé identique à l'ancien nom fourni donnerait « Opérations » à tout le monde sans rien écrire, mais ses copies déjà tamponnées « Ouverture » (transférer, généraliser) se liraient « Déduction » (appliquer une idée générale à un cas), y compris dans ce que ses étudiant·es relisent. Les identifiants gardés font que ce glissement de sens existe déjà pour tout espace qui n'a jamais enregistré la fenêtre.
 
@@ -142,7 +144,7 @@ Rien dans l'aide du guide (`docs/guide/03-glossaire.md`), ni dans les fichiers d
 
 > **Tampons : la catégorie « Action » devient « Opérations ».** Elle compte maintenant six tampons : Identification, Relation et Déduction remplacent Repérage, Liaison et Ouverture, et Interprétation, Comparaison et Induction s'ajoutent. Incertain, Incomplet et Inexact passent sous « Observations ». Rien n'est effacé : un nom ou une phrase que tu as donnés restent les tiens.
 
-⚠ La dernière phrase est vraie. Mais tant que #1315 n'est pas tranché, la première ne l'est pas pour qui a déjà enregistré la fenêtre des tampons : il garde « Action ». Et tant que #1316 ne l'est pas, « Opérations » ne paraît dans la palette d'Annoter qu'avec la préférence « Observation des actions ».
+⚠ La dernière phrase est vraie. Mais, #1315 étant laissé tel quel ce soir, la première ne l'est pas pour qui a déjà enregistré la fenêtre des tampons : il garde « Action », « Repérage », « Liaison », « Ouverture ». Et tant que #1316 ne l'est pas, « Opérations » ne paraît dans la palette d'Annoter qu'avec la préférence « Observation des actions ».
 
 ## 7. Les gestes pour Grégoire, sur l'iPad
 
@@ -163,7 +165,7 @@ Rien dans l'aide du guide (`docs/guide/03-glossaire.md`), ni dans les fichiers d
 - **Conflits prévisibles** : `index.html` (les lignes des jetons, si une autre branche les avance aussi) ; `BACKLOG.md` (tête de « A faire » : #1315 à #1317 ici, à la suite de #1311 à #1314 de la branche des tampons) ; `js/travaux-outils.js` si le correctif de la copie exportée y touche (je ne connais pas ce correctif). La branche contient tout `lot/tampons-observation-3-production` jusqu'à `677a8a1f`, pièces d'essai comprises : elle doit venir APRÈS les tampons, et après le retrait des pièces d'essai par l'autre session (conflit possible sur `departs.html` et les fichiers d'essai, que je n'ai pas modifiés).
 - **`tests/integration/harness/banc-copie-annotation.js`** : `ouvrirCopie(page, url)` accepte une adresse servie ; sans elle, rien ne change pour les autres bancs.
 - **Verdict WebKit** : aucun. À prendre sur le Mac.
-- **À trancher par Grégoire avant de mettre en ligne** : #1315, et la ligne de Nouvelles.
+- **Tranché** : #1315, laisser tel quel ce soir (Grégoire, 18 h 45). **À relire par Grégoire** : la ligne de Nouvelles. **#1316 et #1317** : Cowork les lui soumet ; je n'y touche pas.
 
 ## 9. Trouvailles (trois issues)
 

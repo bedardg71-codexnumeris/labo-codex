@@ -142,7 +142,9 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
 
 **Pourquoi le lot ne l'a pas réparé** : rien ne distingue un nom rangé d'office d'un nom choisi, et la consigne interdit de réécrire chez un utilisateur. C'est le stock, pas la source.
 
-**À décider (Grégoire : ses données, et des mots que ses étudiant·es lisent)** : (1) laisser tel quel ; (2) lire comme « non choisi » un nom ou une phrase rangés qui sont, mot pour mot, l'ancien texte fourni (une lecture, sans rien écrire ; mais ses copies déjà tamponnées « Ouverture » se liraient alors « Déduction », dont le sens n'est pas le même) ; (3) le lui proposer à l'écran. **Inconnu** : combien d'espaces sont dans ce cas, dont le sien ; se mesure sur son fichier, pas ici.
+**↻ DÉCIDÉ par Grégoire, 25 nov. 2026, 18 h 45 (relayé par Cowork)** : **laisser tel quel pour la version de ce soir** (la voie 1). Rien n'est réparé, rien n'est écrit dans le stock, la lecture des noms rangés ne change pas. Pour lui, Repérage, Liaison et Ouverture sont les mêmes gestes qu'Identification, Relation et Déduction, mieux nommés : le glissement de sens que je craignais pour les copies déjà tamponnées n'en est pas un. Reste ouvert pour une version suivante.
+
+**Les voies écrites avant la décision** : (1) laisser tel quel ; (2) lire comme « non choisi » un nom ou une phrase rangés qui sont, mot pour mot, l'ancien texte fourni (une lecture, sans rien écrire ; mais ses copies déjà tamponnées « Ouverture » se liraient alors « Déduction », dont le sens n'est pas le même) ; (3) le lui proposer à l'écran. **Inconnu** : combien d'espaces sont dans ce cas, dont le sien ; se mesure sur son fichier, pas ici.
 
 ### #1316 · « Opérations » n'entre dans la palette d'Annoter que si la préférence « Observation des actions » est allumée, 25 novembre 2026 (mesuré par `lot/parcours-9-tampons`, sans y toucher)
 
