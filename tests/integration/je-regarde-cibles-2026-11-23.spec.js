@@ -104,7 +104,7 @@ const CAPTURES9 = process.env.PARCOURS9_CAPTURES || '';
 async function capture9(page, nom, L, H) {
     if (!CAPTURES9) return;
     fs9.mkdirSync(CAPTURES9, { recursive: true });
-    await page.screenshot({ path: path9.join(CAPTURES9, `${nom}-${L}x${H}-clair.png`) });
+    await page.screenshot({ path: path9.join(CAPTURES9, `${nom}-${L}x${H}-sombre.png`) });
 }
 const OPERATIONS = ['Identification', 'Relation', 'Déduction', 'Interprétation', 'Comparaison', 'Induction'];
 /** Les tampons de l'écran « Observer » : [nom lu, retenu ?], dans l'ordre de l'écran. */

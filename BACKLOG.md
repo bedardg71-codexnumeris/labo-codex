@@ -136,6 +136,26 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
 
 ## A faire
 
+### #1315 · L'espace qui a déjà enregistré « Tampons et rétroactions » garde « Action », « Repérage », « Liaison », « Ouverture » sur les dessins neufs, 25 novembre 2026 (mesuré par `lot/parcours-9-tampons` ; à trancher par Grégoire avant l'assemblage)
+
+**Mesuré** (`tests/unit/sentinelle-jeu-fourni-operations-2026-11-25.test.js`, cas (f)) : « Enregistrer », dans la fenêtre des tampons, range le nom de CHAQUE tampon affiché, celui de CHAQUE catégorie et CHAQUE phrase, même quand rien n'a été renommé (`enregistrerRetroObservations`, `js/travaux-outils.js`). Un tel espace porte donc les anciens noms fournis comme s'ils étaient les siens. Après le lot « Opérations », il garde « Action », « Repérage », « Liaison », « Ouverture » et les anciennes phrases, mais reçoit les dessins neufs (l'image n'est pas rangée) et les trois tampons neufs : « Ouverture » sur le dessin de « Déduction ».
+
+**Pourquoi le lot ne l'a pas réparé** : rien ne distingue un nom rangé d'office d'un nom choisi, et la consigne interdit de réécrire chez un utilisateur. C'est le stock, pas la source.
+
+**À décider (Grégoire : ses données, et des mots que ses étudiant·es lisent)** : (1) laisser tel quel ; (2) lire comme « non choisi » un nom ou une phrase rangés qui sont, mot pour mot, l'ancien texte fourni (une lecture, sans rien écrire ; mais ses copies déjà tamponnées « Ouverture » se liraient alors « Déduction », dont le sens n'est pas le même) ; (3) le lui proposer à l'écran. **Inconnu** : combien d'espaces sont dans ce cas, dont le sien ; se mesure sur son fichier, pas ici.
+
+### #1316 · « Opérations » n'entre dans la palette d'Annoter que si la préférence « Observation des actions » est allumée, 25 novembre 2026 (mesuré par `lot/parcours-9-tampons`, sans y toucher)
+
+**Mesuré** (`tests/integration/jeu-fourni-operations-2026-11-25.spec.js`, essai de la palette) : dans un espace neuf, la palette « Tampons » d'Annoter ne montre pas la catégorie `action` : `genererContenuTampons` (`js/travaux-outils.js`) la retire tant que la préférence `activerActionsRLO` n'est pas allumée, et elle est éteinte par défaut (`js/preferences.js`). La fenêtre « Tampons et rétroactions » et l'écran « Observer », eux, la montrent. Depuis le lot, Incertain, Incomplet et Inexact sont sous « Observations » : ils paraissent dans la palette SANS la préférence, alors qu'ils en dépendaient.
+
+**À décider** : le jeu fourni « à tout le monde » doit-il paraître dans la palette sans cette préférence ? Lié à #1317 (la préférence porte aussi le profil « Gestes cognitifs »).
+
+### #1317 · Le profil « Gestes cognitifs », son graphique, le glossaire et l'export de recherche reposent encore sur Repérage / Liaison / Ouverture, 25 novembre 2026 (inventorié par `lot/parcours-9-tampons`, sans y toucher)
+
+**Lu** (inventaire au rapport du lot, § 5) : `js/actions-rlo.js` compte six identifiants en deux familles (trois « gestes cognitifs », trois « gestes en difficulté ») ; `js/profil-etudiant-diagnostics.js` et `js/graphiques-progression.js` les affichent sous « Repérage », « Liaison », « Ouverture » ; `js/trimestres.js` les exporte (`gestes_cognitifs`, `gestes_en_difficulte`, `ratios_cognitifs`) ; le glossaire (`js/accompagnement-contenu-terme.js`, entrées ACO, RLO, Profil ACO), deux infobulles et la carte de la préférence (`index.html`, « Observation des actions ») les définissent. Les comptes ne changent pas (ils se font par identifiant, pas par catégorie), mais les trois tampons neufs ne sont comptés nulle part, les libellés ne sont plus ceux des tampons, et les deux familles ne sont plus les catégories.
+
+**À décider (pédagogie : ce que ce profil mesure)** : le modèle de ce profil avec six opérations, et ses mots. Tout cela est derrière la préférence « Observation des actions », éteinte par défaut.
+
 ### #1311 · Sous Safari sur l'iPad, en navigation privée, les images d'un codex ouvert ne sont pas rangées, et le message ne dit pas pourquoi, 25 novembre 2026 (vécu par Grégoire sur l'iPad, 10 h 59, aperçu n° 62 ; inscrit sur consigne de Cowork, midi, sans y toucher)
 
 **Symptôme** : dans un onglet de navigation privée de Safari, le fichier d'essai `ESSAI-tampons-observation-lot-3.zip` ouvert par « Ouvrir un codex… », l'écran d'Annoter affiche « Fichier manquant — rouvre le codex après avoir libéré de l'espace » (`js/travaux-visionneuse.js:207`). Le même fichier, ouvert dans un onglet ordinaire, montre l'image.
