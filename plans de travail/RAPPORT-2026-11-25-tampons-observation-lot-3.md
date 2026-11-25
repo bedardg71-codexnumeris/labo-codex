@@ -348,6 +348,8 @@ Aucun code de l'application n'a changé. Ni fusion, ni bump, ni ligne de Nouvell
 | Banc de l'étape 3, rejoué | Chromium | **18 sur 18** |
 | Vitest complet | | **12 433 sur 12 433 (961 fichiers)** |
 
+**Vérifié en ligne** (25 nov., après le push, commit `e8a107f`) : `https://deploy-preview-62--codexnumeris-051225.netlify.app/departs/ESSAI-tampons-observation-lot-3.zip` rend 200, `application/zip`, 238 620 octets, la même empreinte que le fichier commis ; `/departs.html` rend 200 et porte la section d'essai et son lien. Ce fichier téléchargé, ouvert dans l'application EN LIGNE (Chromium, contexte neuf) : codex ouvert, groupe affiché, aucune bande de démo, six lignes dans Évaluation › Annoter. Pour le faire, l'hôte de l'aperçu n° 62 a été ajouté aux hôtes permis de l'environnement « labo-codex » des sessions du nuage (approuvé à l'écran) ; il peut en être retiré.
+
 **Chromium suffit ici**, et c'est tout ce que cette session a : le banc éprouve que le fichier porte ses pièces et que l'essai se joue à partir de lui. Le comportement de l'étape 3 sous WebKit a son propre banc (§ 5). Rien n'a tourné sous WebKit dans cette session.
 
 **Break-tests du banc** (25 nov., Chromium ; un fichier privé d'une pièce, lu par `DEPARTS_DOSSIER`) :
@@ -396,7 +398,7 @@ Chacune le dit dans son en-tête. Le § 9 de ce rapport cite le fichier : à ré
 
 ### L'arbre du Mac
 
-`../labo-codex-tampons-production` est en retard d'un commit sur `origin/lot/tampons-observation-3-production` après ce push : `git pull --ff-only` avant d'y retravailler.
+`../labo-codex-tampons-production` est en retard de trois commits sur `origin/lot/tampons-observation-3-production` après ce push : `git pull --ff-only` avant d'y retravailler.
 
 ## Journal des break-tests (25 nov. 2026 ; V : Vitest, P : WebKit)
 
