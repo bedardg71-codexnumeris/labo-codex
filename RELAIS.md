@@ -7,7 +7,20 @@
 
 ---
 
-## 26 NOV. 2026, 7 H 10 (Claude Code) : **1.259.0 PRÉPARÉE SUR `lot/version-2026-11-25` — « DES TAMPONS POUR OBSERVER » ; EN ATTENTE DU FEU VERT DE GRÉGOIRE POUR `main`**
+## 26 NOV. 2026, 8 H (Claude Code) : **1.259.0 SUR `main` ET EN LIGNE — « DES TAMPONS POUR OBSERVER »** — ⚠ verdict WebKit Linux de GitHub ROUGE (33 hors de sa base), sans verdict WebKit complet du Mac sur ce commit
+
+**Le travail le plus récent vit sur `main`.** Feu vert écrit par Grégoire dans la session, le 26 nov. vers 7 h 12. `main` avancé en avance rapide de `57f759ceb` à `65d974977` (aucun commit de fusion), depuis `../labo-codex-fusion`, poussé à 7 h 13 ; le crochet a rejoué Vitest (vert) et laissé passer faute de jeton WebKit sur ce commit. Cette entrée est un commit de relais à part, demandé par Grégoire (« relais »).
+
+- **En ligne** : déploiement de production Netlify `6b0822850ba9a34d69ef0fda`, publié le 26 nov. à 7 h 14 min 18 s (12:14:18 UTC), `commit_ref` `65d974977`. Par son permalien : `version.json` et `version.js` disent 1.259.0, build `1126-0653` ; `index.html`, `js/changelog-data.js`, `js/pack-demo-10.js`, `js/parcours-cibles.js` et `js/travaux-archivage.js` identiques octet pour octet au commit. `app.codexnumeris.org` lui-même n'a pas été lu (Cloudflare Access).
+- ⚠ **GitHub, run `45817720999` sur `65d974977`, rendu à 7 h 51 : Vitest vert ; `Playwright — verdict` ROUGE.** WebKit Linux, 20 morceaux tous joués : 1 943 essais, 1 866 verts, 29 verts au second essai, 48 rouges, 65 sautés ; 6 essais non jugés sur cette plateforme. **33 rouges absents de `scripts/playwright-baseline-linux.json`** (15 connus). La release n'a mis à jour que la base du Mac, pas celle de Linux.
+  - **27 des 33 étaient déjà rouges sous Linux sur la 1.258.0** (run `45110647563`, `b551a2ae0`, 50 hors base ce jour-là ; 23 de ceux-là sont verts aujourd'hui). Le run de la 1.258.1 (`45286560201`) n'avait rien jugé : six morceaux sans WebKit.
+  - **6 n'étaient pas rouges sous Linux sur la 1.258.0** : `carte-aide-materiel` I1 (#1320, rouge aussi sur le Mac et sur `main` avant la version) ; `comptes-erreurs-stock-1142` et `en-tete-epure` « une rangée d'onglets qui déborde » (verts au second essai au verdict du Mac du 25 nov.) ; `fin-des-parcours` 58, 820 × 1180 (« 5 sur 8 » reçu pour « 6 sur 8 ») ; `vue-simple` 1465, novice (la fenêtre « Mettre à jour le codex » ne paraît pas après `Codex.actionEnregistrer`) ; **`tampons-observation-lot-1-regler` 495, « le critère voyage toujours », un banc de CETTE version** (délai de 30 s dépassé dans `ouvrirCopie`, à l'ouverture d'une copie, au premier essai et à la reprise).
+  - **Sur le Mac** : ce banc des tampons est vert au rejeu ciblé du 26 nov. (31 sur 31) et au verdict complet du 25 nov. ; `vue-simple` et `fin-des-parcours` n'étaient pas rouges au verdict complet du 25 nov. (pris sur `f4f436d81`, avant le commit de release). **Inféré, non vérifié** : des écarts de WebKit Linux ou de délai, pas des défauts de la version ; aucun des trois n'a été rejoué, ni la 1.258.1 jugée sous Linux pour dire depuis quand.
+  - **Issue** : rapporté ici et à Grégoire, **rien corrigé, rien inscrit au BACKLOG** (aucun symptôme vécu) ; la base Linux n'a pas été touchée : ce qu'elle admet se décide.
+- **Rien de supprimé** : ni branche, ni arbre. L'arbre `../labo-codex-correctif-export` garde son commit local `ace7308ea` (la « 1.258.2 », remplacée par cette version) : rien à pousser de là. L'aperçu n° 64 reste un brouillon ouvert.
+- Le détail de la version (ce qui part, ce qui ne part pas, les Nouvelles, la base des rouges du Mac, les suites, les écarts) est dans l'entrée de 7 h 10 ci-dessous, écrite avant le feu vert.
+
+## 26 NOV. 2026, 7 H 10 (Claude Code) : **1.259.0 PRÉPARÉE SUR `lot/version-2026-11-25` — « DES TAMPONS POUR OBSERVER »** (feu vert reçu depuis : voir l'entrée de 8 h ci-dessus)
 
 Mandat : relais de la session coordonnatrice de Cowork, 26 nov., 6 h 55 (second message : la release). Branche `lot/version-2026-11-25`, arbre `../labo-codex-version-1125`, partie de `main` à `57f759ceb` (1.258.1). Rapport de l'assemblage : `plans de travail/RAPPORT-2026-11-25-version-assemblage.md`. **Tant que `main` n'est pas avancé, le travail le plus récent vit sur cette branche** ; aperçu : demande n° 64 (brouillon).
 
