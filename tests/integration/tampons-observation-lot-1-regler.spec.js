@@ -121,6 +121,50 @@ async function listeVide(page) {
     expect(await page.evaluate(() => window.db.getSync('categoriesObservation', null))).toBeNull();
 }
 
+// 25 nov. 2026 (lot « Opérations ») : dans la démo, la catégorie fournie `action` est d'observation PAR LECTURE. Le
+// banc pose le seul drapeau que cette lecture regarde (`demo-actif`) ; la démo entière est jouée par le banc du parcours 9.
+test.describe('Tampons d’observation — dans la démo, « Opérations » est d’observation sans que rien soit rangé', () => {
+    const drapeau = (page, v) => page.evaluate((v) => { if (v) window.db.setSync('demo-actif', 'true'); else window.db.removeSync('demo-actif'); }, v);
+
+    test('la case d’« Opérations » se montre cochée ; « Enregistrer » ne la range pas ; une autre case cochée dans la démo, elle, est rangée ; hors de la démo, « Opérations » n’est plus cochée', async ({ page }) => {
+        await ouvrirCopie(page);
+        await poserCibles(page);
+        await drapeau(page, true);
+        await ouvrirFenetre(page);
+        await expect(caseDe(page, 'action')).toBeChecked();
+        await expect(caseDe(page, 'observations')).not.toBeChecked();
+        await enregistrer(page);
+        // Rien n'a jamais été rangé : la clé est absente, dans l'application comme dans IndexedDB.
+        expect(await range(page, CLE)).toMatchObject({ lu: '(absente)', idb: '(absente)' });
+        expect(await page.evaluate(() => window.travauxOutils.tamponsDObservation().length), 'témoin : la démo offre pourtant les six tampons').toBe(6);
+        // Une catégorie que la personne coche elle-même dans la démo est son réglage : elle est rangée, seule.
+        await ouvrirFenetre(page);
+        await caseDe(page, 'observations').check();
+        await enregistrer(page);
+        expect((await range(page, CLE)).lu).toEqual(['observations']);
+        expect(await page.evaluate(() => window.travauxOutils.tamponsDObservation().map((t) => t.categorieId).filter((c, i, l) => l.indexOf(c) === i).sort())).toEqual(['action', 'observations']);
+        // Hors de la démo : « Opérations » n'est pas cochée, ce que la personne a coché le reste.
+        await drapeau(page, false);
+        await ouvrirFenetre(page);
+        await expect(caseDe(page, 'action')).not.toBeChecked();
+        await expect(caseDe(page, 'observations')).toBeChecked();
+        expect(await page.evaluate(() => window.travauxOutils.tamponsDObservation().every((t) => t.categorieId === 'observations'))).toBe(true);
+    });
+
+    test('une personne qui avait coché « Opérations » elle-même la garde rangée après un enregistrement dans la démo', async ({ page }) => {
+        await ouvrirCopie(page);
+        await poserCibles(page);
+        await ouvrirFenetre(page);
+        await caseDe(page, 'action').check();
+        await enregistrer(page);
+        expect((await range(page, CLE)).lu).toEqual(['action']);
+        await drapeau(page, true);
+        await ouvrirFenetre(page);
+        await enregistrer(page);
+        expect((await range(page, CLE)).lu).toEqual(['action']);
+    });
+});
+
 test.describe('Tampons d’observation, lot 1 — la fenêtre sans pratique par cibles', () => {
     test('rien de neuf ne s’y montre, et « Enregistrer » n’écrit ni la liste ni un critère', async ({ page }) => {
         await ouvrirCopie(page);

@@ -7,6 +7,21 @@
 
 ---
 
+## 25 NOV. 2026, SOIR (Claude Code, session du nuage) : **TAMPONS « OPÉRATIONS » ET « JE REGARDE » DU PARCOURS 9 SUR `lot/parcours-9-tampons`, NON FUSIONNÉ ; APERÇU EN DEMANDE N° 63** — sans verdict WebKit
+
+Mandat : relais de Cowork du 25 nov., 18 h 05 (conversation du parcours 9) ; décisions de Grégoire de 17 h 07 à 17 h 56, et de 18 h 45 pour #1315. **Cette entrée vit sur la branche du lot, pas sur `main`** (consigne). Branche partie de `lot/tampons-observation-3-production` à `677a8a1f`. Rapport complet : `plans de travail/RAPPORT-2026-11-25-parcours-9-tampons.md`.
+
+- **Ce que la branche porte** : la catégorie fournie `action` s'appelle « Opérations », avec six tampons (Identification, Relation, Déduction, Interprétation, Comparaison, Induction) ; Incertain, Incomplet, Inexact sous « Observations » ; dans la démo seulement, « Opérations » est d'observation, par lecture ; parcours 9, « Je regarde », bulles 5 et 6. Rien n'est écrit chez un utilisateur.
+- **Rien n'est en ligne** : ni fusion, ni bump, ni ligne de Nouvelles (une ligne est PROPOSÉE au § 6 du rapport, à relire par Grégoire). Les pièces d'essai du lot 3 ne sont pas touchées.
+- **#1315, DÉCIDÉ par Grégoire (18 h 45) : laisser tel quel ce soir.** Un espace qui a déjà enregistré « Tampons et rétroactions » garde « Action », « Repérage », « Liaison », « Ouverture » sur les dessins neufs.
+- **#1316 et #1317, ouverts, non touchés** : Cowork les soumet à Grégoire. #1316 : « Opérations » ne paraît dans la palette d'Annoter qu'avec la préférence « Observation des actions ». #1317 : le profil « Gestes cognitifs » repose encore sur Repérage / Liaison / Ouverture.
+- **Pour l'assemblage** (§ 8 du rapport) : jetons avancés dans `index.html` (`travaux-outils.js?v=20261123x`, `parcours-cibles.js?v=20261123b`) ; `js/pack-demo-10.js` n'est PAS touché (il ne change qu'avec une release) : **à la release, reporter `SAISIE_A` de `js/parcours-cibles.js` dans la saisie (a) du pack et la retirer du parcours.**
+- **Bancs** : Vitest 962 fichiers, 12 461 verts. Chromium, les sept bancs du lot : 72 sur 73 (le rouge l'est aussi au commit de départ). Douze mutations rouges. **WebKit : rien** (absent du conteneur).
+- **Numéros pris** : #1315, #1316, #1317. **Numéro libre : #1318.**
+- **Non vérifié** : WebKit, Safari, l'iPad ; les données réelles de Grégoire ; un PDF ouvert dans un lecteur ; le mode sombre de la fenêtre des tampons.
+
+---
+
 ## 23 NOV. 2026, 18 H 15 (Claude Code) : **1.258.1 SUR `main` ET EN LIGNE — LA BULLE ENTIÈRE DANS L'ÉCRAN UTILE ET HORS DE CE QU'ELLE DÉSIGNE, LE BANDEAU DE VERSION SOUS L'EN-TÊTE** — ⚠ sans verdict WebKit complet, écart décidé par Grégoire
 
 Mandat : feu vert de Grégoire, 23 nov., 18 h 05, relayé par la session coordonnatrice de Cowork, qui a relu `lot/bulle-et-bandeau` (`46b680bdf`). **Le travail le plus récent vit sur `main`.** `main` avancé en avance rapide de `4d1043cce` à `46b680bdf` (aucun commit de fusion), depuis `../labo-codex-fusion`. Rapport complet : `plans de travail/RAPPORT-2026-11-23-bulle-et-bandeau.md`.

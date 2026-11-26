@@ -4,11 +4,11 @@
 > `lot/tampons-observation-3-production` à `677a8a1f`. Consigne : Cowork, relais du 25 nov., 18 h 05 (conversation du
 > parcours 9) ; décisions de Grégoire du 25 nov., 17 h 07 à 17 h 56. **Rien n'est en ligne** : aucune fusion, aucun
 > bump, aucune ligne de Nouvelles, rien dans `main`. Les pièces d'essai du lot 3 ne sont pas touchées.
-> **Commit** : @@COMMIT@@. **Aperçu** : @@APERCU@@.
+> **Commit** : la tête de `lot/parcours-9-tampons` (le code du lot est entier à `e638341` ; les commits suivants ne portent que des bancs, ce rapport, le BACKLOG et le relais). **Aperçu** : https://deploy-preview-63--codexnumeris-051225.netlify.app (demande de fusion n° 63, en brouillon, « APERÇU, ne pas fusionner »).
 
 **Fait.** La catégorie fournie `action` s'appelle « Opérations » et porte six tampons, avec les dessins et les phrases de Grégoire : Identification, Relation, Déduction (identifiants gardés), Interprétation, Comparaison, Induction (neufs). Incertain, Incomplet et Inexact passent sous « Observations », inchangés. Dans la démo seulement, « Opérations » est une catégorie d'observation : l'écran « Observer » y montre les six tampons. Au parcours 9, « Je regarde », « Remplir » touche « Identification » à la bulle 5 ; les bulles 5 et 6 portent les mots acceptés à 17 h 55 et 17 h 56.
 
-**Mesuré.** @@SUITES@@ Les six dessins se dessinent dans la fenêtre « Tampons et rétroactions », la palette d'Annoter, l'écran « Observer », sur une copie et par la fonction qui dessine le PDF exporté (pixels comptés, § 4). Aucun rendu n'est sorti vide : je n'ai corrigé aucun rendu. La note de Marmotte Pétillante ne bouge pas (69 % au tableau, 68,8 % au profil : le banc du parcours les lit toujours).
+**Mesuré.** Vitest complet vert : 962 fichiers, 12 461 essais. Sous Chromium, les sept bancs du lot : 72 verts sur 73, le rouge étant un dépassement de temps déjà présent au commit de départ. Douze mutations, douze rouges. **Rien n'a tourné sous WebKit** (absent du conteneur). Les six dessins se dessinent dans la fenêtre « Tampons et rétroactions », la palette d'Annoter, l'écran « Observer », sur une copie et par la fonction qui dessine le PDF exporté (pixels comptés, § 4). Aucun rendu n'est sorti vide : je n'ai corrigé aucun rendu. La note de Marmotte Pétillante ne bouge pas (69 % au tableau, 68,8 % au profil : le banc du parcours les lit toujours).
 
 **⚠ Trois choses que la mesure a fait paraître et que la consigne ne tranchait pas** (§ 2, toutes inscrites) :
 1. **#1315 : l'espace qui a déjà enregistré la fenêtre des tampons ne reçoit PAS « Opérations ».** « Enregistrer » range tous les noms et toutes les phrases affichés, renommés ou non. Un tel espace garde « Action », « Repérage », « Liaison », « Ouverture » et ses anciennes phrases, sur les dessins neufs. C'est probablement le cas de l'espace de Grégoire (inférence : je n'ai pas son fichier). **Tranché par Grégoire le 25 nov. à 18 h 45 : laisser tel quel pour la version de ce soir.**
@@ -84,7 +84,15 @@ Inventaire au § 5. Les comptes ne changent pas. Ce qui devient incohérent : le
 
 ## 4. Les preuves
 
-@@PREUVES@@
+| Quoi | Où | Résultat |
+|---|---|---|
+| Vitest complet | conteneur (`cd tests && npx vitest run`) | **962 fichiers, 12 461 sur 12 461** ; vert aussi sur GitHub (job « Vitest » de la demande n° 63) |
+| Les sept bancs du lot : jeu fourni (5), parcours 9 (3), démo « Par standards » (2), lots 1, 2 et 3 des tampons, rétroaction #760 | Chromium du conteneur (`playwright.chromium.config.js`) | **72 sur 73**. Le rouge : lot 1, « cocher, écrire un critère, décocher, exporter, réimporter… », dépassement de 30 s, rouge aussi au commit de départ |
+| Les 35 bancs qui touchent aux tampons, au profil des actions ou au parcours 9 (220 essais) | Chromium | 204 verts, 4 sautés, 12 rouges au premier passage. Rejoués : 5 venaient de mon arbre en cours de changement pendant le passage (verts ensuite), 1 d'une assertion que j'avais oubliée de mettre à jour (corrigée), **6 sont rouges au commit de départ aussi** (ci-dessous) |
+| WebKit | | **RIEN N'A TOURNÉ** : absent du conteneur. Ni Safari, ni iPad |
+| L'aperçu n° 63 | par requête | `index.html` appelle `travaux-outils.js?v=20261123x` et `parcours-cibles.js?v=20261123b` ; les deux scripts servis et `autocollants/operations/induction.svg` ont l'empreinte des fichiers commis (mesuré à `e638341`). Lu par requête, pas dans un navigateur ouvert sur l'aperçu |
+
+Bancs neufs ou étendus : `tests/unit/sentinelle-jeu-fourni-operations-2026-11-25.test.js` (28 essais), `tests/integration/jeu-fourni-operations-2026-11-25.spec.js` (5), deux essais ajoutés à `tampons-observation-lot-1-regler.spec.js` (la démo et l'enregistrement de la fenêtre), le banc du parcours 9 étendu.
 
 ### Les cas (a) à (e) de la consigne
 
@@ -116,11 +124,36 @@ Inventaire au § 5. Les comptes ne changent pas. Ce qui devient incohérent : le
 
 ### Mutations
 
-@@MUTATIONS@@
+Chacune remise ensuite ; sentinelles Vitest (87 essais sur quatre fichiers) ou l'essai Chromium nommé.
 
-### Ce qui était rouge avant moi
+| Mutation | Rouges |
+|---|---|
+| Le nom fourni de la catégorie redevient « Action » | 5 (Vitest), 1 (fenêtre d'un espace neuf) |
+| « Incertain » reste sous `action` | 9 |
+| La démo ne lit plus « Opérations » comme catégorie d'observation | 4 |
+| L'enregistrement de la fenêtre, dans la démo, range la case montrée cochée | 2 (les deux essais de la démo, lot 1) |
+| La lecture de la démo vaut hors de la démo | 2 |
+| La fenêtre relit un champ vide pour une phrase jamais rangée | 1 |
+| Une phrase fournie changée d'un mot | 1 |
+| Un dessin retouché (un rayon) | 1 |
+| Un dessin vidé de son cercle | 1 (les pixels du PDF) |
+| « Remplir » ne touche plus le tampon | 1 (Vitest), 1 (parcours 9 à 1180 × 820) |
+| L'ancien texte de (a) | 2 |
+| Bulle 6 : l'ancien mot, « une remarque » | 1 |
 
-`tests/integration/tampons-observation-lot-1-regler.spec.js:451` (« cocher, écrire un critère, décocher, exporter, réimporter… ») dépasse 30 s sous Chromium dans ce conteneur, **au commit de départ `677a8a1f` aussi** (deux passages sur un arbre à part). Le rapport du lot 1 le dit vert sous WebKit et Chromium sur le Mac : c'est la lenteur du conteneur, pas le lot. Non touché.
+### Ce qui était rouge avant moi (sous Chromium, dans ce conteneur)
+
+Rejoués sur un arbre à part au commit de départ `677a8a1f` : les six y sont rouges aussi. Non touchés.
+
+| Essai | Ce qu'il dit |
+|---|---|
+| `tampons-observation-lot-1-regler.spec.js`, « cocher, écrire un critère, décocher, exporter, réimporter… » | dépassement de 30 s |
+| `annotation-formes-fermees-polygone.spec.js:105` | un cercle pointillé compte 1 969 pixels, plus que le seuil (1 935) |
+| `annotation-tampon-premier-toucher-1209.spec.js:31` | « Tainted canvases may not be exported » : le harnais n'attend que le message de WebKit |
+| `tampons-masques-bibliotheque-1216.spec.js:211` | deux tampons de plus qu'attendu dans une liste |
+| `tampons-masques-bibliotheque-1216.spec.js:259` et `:302` | cherche l'absence de « svg » dans une image PNG en base64, qui contient ces trois lettres par hasard |
+
+Ces bancs sont écrits pour WebKit, le navigateur de référence du projet. **Je n'ai pas vérifié qu'ils y sont verts** : c'est une inférence à partir des rapports antérieurs. Un autre essai du lot 1 (`:198`) a dépassé 30 s une fois, pendant le passage des 220, et passe seul.
 
 ## 5. Les autres endroits qui nomment « Action », « Repérage », « Liaison », « Ouverture »
 
@@ -148,7 +181,7 @@ Rien dans l'aide du guide (`docs/guide/03-glossaire.md`), ni dans les fichiers d
 
 ## 7. Les gestes pour Grégoire, sur l'iPad
 
-1. Dans Safari, dans un onglet ordinaire (pas de navigation privée), ouvre l'aperçu : @@APERCU@@
+1. Dans Safari, dans un onglet ordinaire (pas de navigation privée), ouvre l'aperçu : https://deploy-preview-63--codexnumeris-051225.netlify.app
 2. Touche « Explorer la démo ».
 3. Ouvre le panneau des parcours, puis « Suivre ton groupe par cibles », « Je regarde ».
 4. Avance jusqu'à la bulle 5, « Ce que tu vois ». **Tu dois voir**, sur l'écran « Observer », la rangée « Tampons d'observation » et six tampons.
@@ -178,7 +211,7 @@ Rien dans l'aide du guide (`docs/guide/03-glossaire.md`), ni dans les fichiers d
 | Le pack de la démo garde l'ancien texte de la saisie (a), que plus rien ne pose | **Dit ici** (§ 3, C) : à reporter à la release ; pas d'entrée au BACKLOG, c'est un geste de l'assemblage de ce soir |
 | La bulle 5 recouvre la colonne « Non respecté » ; en paysage, le haut de l'écran « Observer » sort quand un tampon est touché | **Dit ici, avec capture** : la consigne demandait de le dire sans raccourcir |
 | Les trois anciens fichiers d'image ne sont plus cités | **Laissés** (§ 1) : dit ici |
-| L'essai `:451` du lot 1 dépasse 30 s sous Chromium dans le conteneur, avant le lot | **Commenté ici** : sans conséquence pour l'utilisateur |
+| Six essais rouges sous Chromium dans ce conteneur, au commit de départ aussi (§ 4) | **Commenté ici** : aucun symptôme pour l'utilisateur ; à confirmer par le verdict WebKit du Mac |
 | Les trois dessins Identification, Relation et Interprétation se ressemblent à 25 px (une flèche et un ou deux points dans un cercle) | **Dit ici** : ce sont les dessins de Grégoire, je n'y touche pas ; visible sur `palette-annoter-*` |
 
 ## 10. Les captures
