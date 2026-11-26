@@ -167,9 +167,7 @@ describe('un seul temps, ouvert, à la place de l\'ancien neuvième parcours', (
         const pack = chargerScript('js/pack-demo-10.js').PACK_DEMARRAGE.groupeParStandards;
         const [a, b, c] = pack.histoire.inscriptions;
         const dit = (k, forme) => P.textes[k].puis[forme].map((l) => l[1]).join(' ');
-        // 25 nov. 2026 : le texte de (a) est celui que le parcours pose (`saisieA`, qui complète le pack ; le pack ne change qu'avec une release).
-        expect(a.noteBreve.length, 'témoin : le pack porte toujours un texte pour (a)').toBeGreaterThan(10);
-        expect(dit(4, 0)).toContain(`« ${P.saisieA.noteBreve} »`);
+        expect(dit(4, 0)).toContain(`« ${a.noteBreve} »`);
         expect(dit(6, 0)).toContain(`« ${b.noteBreve} »`);
         expect(dit(7, 1)).toContain(`« ${c.noteBreve} »`);
         const titres = pack.productions.map((p) => p.titre.replace(/ /g, ' '));

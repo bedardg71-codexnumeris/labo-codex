@@ -130,7 +130,7 @@ for (const [L, H] of TAILLES) {
         await ouvrirEspaceVide(page, L, H);
         await peuplerUnTrimestreReel(page);
         const avant = await releve(page);
-        const histoire = await page.evaluate(async () => { await window.verserGroupeParStandardsSiAbsent(); return window.ParcoursCibles.histoire(); });   // le pack, et ce que le parcours pose de plus pour (a) (25 nov. 2026)
+        const histoire = await page.evaluate(async () => { await window.verserGroupeParStandardsSiAbsent(); return PACK_DEMARRAGE.groupeParStandards.histoire.inscriptions; });
 
         // La carte du panneau : rang 9, sa ligne, un seul temps (« Je regarde »), aucun « Nous faisons ».
         await ouvrirPanneau(page);

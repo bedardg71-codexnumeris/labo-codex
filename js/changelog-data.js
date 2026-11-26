@@ -21,6 +21,22 @@
 
     var CHANGELOG = [
         {
+            // 1.259 (26 nov. 2026 : les tampons d'observation, le jeu « Opérations », la copie exportée en image) — titre et
+            // cinq lignes de Grégoire, acceptés un à un (25 nov., 8 h 18 et 19 h 44 ; 26 nov., 6 h 48 à 6 h 49), mot pour
+            // mot ; seule la typographie du fichier est appliquée. Ligne 3 : l'ancien titre est écrit tel qu'il était à
+            // l'écran, avec un tiret cadratin (le `<h2>` de `js/travaux-outils.js` sur `main`, à `57f759ceb`).
+            version: '1.259',
+            couleur: 'vert',
+            titre: 'Des tampons pour observer',
+            items: [
+                '<strong>Par standards&nbsp;: des tampons d’observation.</strong> Dans «&nbsp;Tampons et rétroactions&nbsp;», coche «&nbsp;D’observation&nbsp;» sur les catégories de ton choix. Sur «&nbsp;Observer&nbsp;», tu touches ces tampons pour garder la trace d’un geste que tu vois l’étudiant·e faire, sans poser de niveau. Posé sur une production, un tampon d’observation paraît aussi à son profil et te revient au moment d’inscrire un niveau pour cette production. À l’essai.',
+                '<strong>Tampons&nbsp;: la catégorie «&nbsp;Action&nbsp;» devient «&nbsp;Opérations&nbsp;».</strong> Elle compte six tampons&nbsp;: Identification, Relation et Déduction (les anciens Repérage, Liaison et Ouverture, mieux nommés), plus Interprétation, Comparaison et Induction. Incertain, Incomplet et Inexact passent sous «&nbsp;Observations&nbsp;». Rien n’est effacé&nbsp;: si tu avais déjà enregistré tes tampons, tu gardes tes anciens noms.',
+                '<strong>La fenêtre des tampons change de nom.</strong> «&nbsp;Rétroactions — Observations&nbsp;» s’appelle maintenant «&nbsp;Tampons et rétroactions&nbsp;», et un jeu que tu exportes s’intitule «&nbsp;Tampons&nbsp;». Tes tampons et tes rétroactions n’ont pas bougé.',
+                '<strong>Le parcours «&nbsp;Suivre ton groupe par cibles&nbsp;» montre les tampons.</strong> Dans son «&nbsp;Je regarde&nbsp;», l’écran «&nbsp;Observer&nbsp;» te fait voir un tampon d’observation qu’on touche pour un·e étudiant·e, puis la trace qu’il laisse.',
+                'La version annotée d’une copie reçue en image (une photo ou une numérisation) porte maintenant tes annotations quand tu exportes tes travaux. Depuis février, elle sortait sans elles. Les archives déjà téléchargées ne peuvent pas être réparées&nbsp;; tes annotations, elles, sont intactes dans l’application&nbsp;: exporte de nouveau pour obtenir les bonnes versions.'
+            ]
+        },
+        {
             // 1.258 (23 nov. 2026 : la publication des parcours) — titre et ligne de Grégoire (22 nov., consigne de la release),
             // mot pour mot ; seule la typographie du fichier est appliquée.
             version: '1.258',

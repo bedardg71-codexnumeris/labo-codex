@@ -148,6 +148,12 @@
 > sous quel protocole l'application était ouverte, alors que c'est exactement ce qui départage les deux
 > affichages — il a fallu le déduire. Inscrit au BACKLOG : ajouter `location.protocol` au rapport de bug.
 
+## Corrigés (25 novembre 2026 — la version annotée d'une copie en image porte ses annotations à l'export ; préparé le 25 nov. sur `correctif/copie-exportee-annotee`, livré avec la 1.259.0)
+
+| # | Testeur | Date | Description | Correctif |
+|---|---|---|---|---|
+| 1319 | Grégoire (essai sur l'iPad) | 24 nov. 2026 | **La version « _annote » d'une copie reçue en image (JPEG, PNG) sortait du ZIP de « Exporter des travaux » sans aucune annotation** : ni code, ni trait, ni tampon. Depuis le 19 févr. 2026 (`0fbe7dca6`, Beta 97.8). Les copies en PDF et l'export pour Léa n'ont jamais été touchés. *(Inscrit #1311 sur la branche du correctif, renuméroté #1319 à la release : le #1311 du BACKLOG est la fiche de la navigation privée de Safari.)* | **2.6 concurrence asynchrone.** `aplatirAnnotationsImage` (`js/travaux-archivage.js`) n'attendait pas `dessinerAnnotationsSurCtx`, devenu asynchrone le 19 févr. : le JPEG se faisait avant le premier trait. Le dessin est attendu ; une image illisible, un dessin qui lève ou un canevas vide rejettent au lieu de rendre `null`, et le bilan de l'export nomme la copie (« sa version annotée n'a pas pu être produite (l'original est dans l'archive) »). Banc `copie-exportee-annotee-2026-11-25.spec.js` (6 essais, rouges sur `main`, verts sous Chromium et WebKit ; 3 break-tests). Essai de Grégoire sur l'iPad, aperçu n° 61, 25 nov. 8 h 10 : la copie exportée porte ses traits, ses codes et ses tampons. **Source tarie ; le stock (les ZIP déjà téléchargés) ne se répare pas** : les annotations sont intactes dans l'application, un nouvel export donne les bonnes versions (dit aux Nouvelles). Rapport : `plans de travail/RAPPORT-2026-11-25-copie-exportee-annotee.md`. |
+
 ## Corrigés (22 novembre 2026 — en anonymisation, la leçon manquée revient au profil, « Gr. ? » cède la place à une lettre ; sur `main` en 1.254.1, build `1122-1216`)
 
 | # | Testeur | Date | Description | Correctif |
