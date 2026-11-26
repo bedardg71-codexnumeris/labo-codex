@@ -234,6 +234,8 @@ Aucune entrée au BACKLOG.
 
 ## 9. Les gestes d'essai pour Grégoire, à partir du fichier d'essai
 
+> **↻ 25 nov. 2026, soir (assemblage, `lot/version-2026-11-25`)** : les cinq pièces d'essai du § 10 sont RETIRÉES de la branche d'assemblage (le fichier `ESSAI-tampons-observation-lot-3.zip`, sa section de `departs.html`, sa fabrique et ses deux bancs). Ce § 9 et le § 10 décrivent l'essai tel qu'il a été joué le 25 nov. ; le fichier ne vit plus que sur `lot/tampons-observation-3-production` et l'aperçu n° 62.
+
 > Réécrit le 25 nov. (consigne de Cowork de 9 h 45) par la session du nuage : l'essai part du fichier `ESSAI-tampons-observation-lot-3.zip` (§ 10). Chaque groupe de gestes a été joué par le banc `essai-tampons-observation-depart.spec.js`, sous Chromium, à 1180 sur 820. **(VU)** : le libellé ou le chemin a été vu à l'écran dans ce banc (capture ou lecture du texte affiché). Ce qui n'est pas marqué est décrit, pas cité. **Rien de ceci n'a été vu sur l'iPad ni sous Safari.**
 
 **Ce que le fichier porte.** Le groupe « 601-101-MQ · gr. 00001 » (VU), quatre personnes : « Fictif-01, Personne-01 » à « Fictif-04, Personne-04 » (VU). Deux cibles : « Cible fictive A » et « Cible fictive B » (VU). Trois productions, nommées d'après ce qu'elles renseignent (VU). Trois tampons d'observation, « Tampon fictif 1 (critère A1) », « Tampon fictif 2 », « Tampon fictif 3 » (VU), et un tampon d'une autre catégorie, « Tampon fictif hors observation » (VU). Seules les deux premières personnes ont des images importées.
