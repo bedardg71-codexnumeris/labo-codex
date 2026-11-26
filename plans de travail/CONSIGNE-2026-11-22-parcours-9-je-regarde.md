@@ -38,14 +38,16 @@ Bulle 5 « Ce que tu vois ». Le carrousel s'ouvre sur Marmotte Pétillante (ou 
 (petit) C'est fait : la cible et le groupe sont choisis.
 Le carrousel, en haut, te dit qui tu as déjà vu aujourd'hui. L'exemple s'arrête sur Marmotte Pétillante.
 → Touche « Remplir »
-[après « Remplir » : Structure et Rigueur « Respecté », Plausibilité « Non respecté », Nuance vide, et le texte de (a)] L'exemple a marqué Structure et Rigueur « Respecté », Plausibilité « Non respecté ». Il a laissé Nuance vide : ce critère ne se voyait pas ce jour-là. Il a écrit : « Relève bien les procédés ; son hypothèse ne s'appuie pas encore sur le texte. »
+[après « Remplir » : Structure et Rigueur « Respecté », Plausibilité « Non respecté », Nuance vide, le tampon « Identification » touché, et le texte de (a) ; texte accepté par Grégoire le 25 nov. 2026, 17 h 55] L'exemple a marqué Structure et Rigueur « Respecté », Plausibilité « Non respecté ». Il a laissé Nuance vide : ce critère ne se voyait pas ce jour-là.
+Il a touché le tampon « Identification » : un geste que Marmotte Pétillante fait déjà bien. Un tampon d'observation ne pose pas de niveau.
+Il a écrit : « Son hypothèse ne s'appuie pas encore sur le texte. »
 → Touche « Inscrire et passer au suivant »
 [après l'inscription] L'écran passe à la personne suivante. En classe, tu continuerais ; ici, on s'arrête là.
 → Touche ✕ pour fermer l'écran
 
 Bulle 6 « Une case par cible ». Au tableau.
 (petit) C'est fait : ton observation de Marmotte Pétillante est inscrite.
-Sa case de « La lecture stratégique » porte maintenant ✎ : une remarque, aucun niveau encore. L'observation ne pose pas de niveau.
+Sa case de « La lecture stratégique » porte maintenant ✎ : une trace à lire, aucun niveau encore. L'observation ne pose pas de niveau.
 Marmotte Pétillante a remis ses stratégies de lecture sur « Deux-Rives ». C'est à partir de cette production qu'un niveau s'inscrit.
 → Touche sa case de « La lecture stratégique »
 

@@ -136,6 +136,90 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
 
 ## A faire
 
+### #1315 · L'espace qui a déjà enregistré « Tampons et rétroactions » garde « Action », « Repérage », « Liaison », « Ouverture » sur les dessins neufs, 25 novembre 2026 (mesuré par `lot/parcours-9-tampons` ; à trancher par Grégoire avant l'assemblage)
+
+**Mesuré** (`tests/unit/sentinelle-jeu-fourni-operations-2026-11-25.test.js`, cas (f)) : « Enregistrer », dans la fenêtre des tampons, range le nom de CHAQUE tampon affiché, celui de CHAQUE catégorie et CHAQUE phrase, même quand rien n'a été renommé (`enregistrerRetroObservations`, `js/travaux-outils.js`). Un tel espace porte donc les anciens noms fournis comme s'ils étaient les siens. Après le lot « Opérations », il garde « Action », « Repérage », « Liaison », « Ouverture » et les anciennes phrases, mais reçoit les dessins neufs (l'image n'est pas rangée) et les trois tampons neufs : « Ouverture » sur le dessin de « Déduction ».
+
+**Pourquoi le lot ne l'a pas réparé** : rien ne distingue un nom rangé d'office d'un nom choisi, et la consigne interdit de réécrire chez un utilisateur. C'est le stock, pas la source.
+
+**↻ DÉCIDÉ par Grégoire, 25 nov. 2026, 18 h 45 (relayé par Cowork)** : **laisser tel quel pour la version de ce soir** (la voie 1). Rien n'est réparé, rien n'est écrit dans le stock, la lecture des noms rangés ne change pas. Pour lui, Repérage, Liaison et Ouverture sont les mêmes gestes qu'Identification, Relation et Déduction, mieux nommés : le glissement de sens que je craignais pour les copies déjà tamponnées n'en est pas un. Reste ouvert pour une version suivante.
+
+**Les voies écrites avant la décision** : (1) laisser tel quel ; (2) lire comme « non choisi » un nom ou une phrase rangés qui sont, mot pour mot, l'ancien texte fourni (une lecture, sans rien écrire ; mais ses copies déjà tamponnées « Ouverture » se liraient alors « Déduction », dont le sens n'est pas le même) ; (3) le lui proposer à l'écran. **Inconnu** : combien d'espaces sont dans ce cas, dont le sien ; se mesure sur son fichier, pas ici.
+
+### #1316 · « Opérations » n'entre dans la palette d'Annoter que si la préférence « Observation des actions » est allumée, 25 novembre 2026 (mesuré par `lot/parcours-9-tampons`, sans y toucher)
+
+**Mesuré** (`tests/integration/jeu-fourni-operations-2026-11-25.spec.js`, essai de la palette) : dans un espace neuf, la palette « Tampons » d'Annoter ne montre pas la catégorie `action` : `genererContenuTampons` (`js/travaux-outils.js`) la retire tant que la préférence `activerActionsRLO` n'est pas allumée, et elle est éteinte par défaut (`js/preferences.js`). La fenêtre « Tampons et rétroactions » et l'écran « Observer », eux, la montrent. Depuis le lot, Incertain, Incomplet et Inexact sont sous « Observations » : ils paraissent dans la palette SANS la préférence, alors qu'ils en dépendaient.
+
+**À décider** : le jeu fourni « à tout le monde » doit-il paraître dans la palette sans cette préférence ? Lié à #1317 (la préférence porte aussi le profil « Gestes cognitifs »).
+
+### #1317 · Le profil « Gestes cognitifs », son graphique, le glossaire et l'export de recherche reposent encore sur Repérage / Liaison / Ouverture, 25 novembre 2026 (inventorié par `lot/parcours-9-tampons`, sans y toucher)
+
+**Lu** (inventaire au rapport du lot, § 5) : `js/actions-rlo.js` compte six identifiants en deux familles (trois « gestes cognitifs », trois « gestes en difficulté ») ; `js/profil-etudiant-diagnostics.js` et `js/graphiques-progression.js` les affichent sous « Repérage », « Liaison », « Ouverture » ; `js/trimestres.js` les exporte (`gestes_cognitifs`, `gestes_en_difficulte`, `ratios_cognitifs`) ; le glossaire (`js/accompagnement-contenu-terme.js`, entrées ACO, RLO, Profil ACO), deux infobulles et la carte de la préférence (`index.html`, « Observation des actions ») les définissent. Les comptes ne changent pas (ils se font par identifiant, pas par catégorie), mais les trois tampons neufs ne sont comptés nulle part, les libellés ne sont plus ceux des tampons, et les deux familles ne sont plus les catégories.
+
+**À décider (pédagogie : ce que ce profil mesure)** : le modèle de ce profil avec six opérations, et ses mots. Tout cela est derrière la préférence « Observation des actions », éteinte par défaut.
+
+### #1311 · Sous Safari sur l'iPad, en navigation privée, les images d'un codex ouvert ne sont pas rangées, et le message ne dit pas pourquoi, 25 novembre 2026 (vécu par Grégoire sur l'iPad, 10 h 59, aperçu n° 62 ; inscrit sur consigne de Cowork, midi, sans y toucher)
+
+**Symptôme** : dans un onglet de navigation privée de Safari, le fichier d'essai `ESSAI-tampons-observation-lot-3.zip` ouvert par « Ouvrir un codex… », l'écran d'Annoter affiche « Fichier manquant — rouvre le codex après avoir libéré de l'espace » (`js/travaux-visionneuse.js:207`). Le même fichier, ouvert dans un onglet ordinaire, montre l'image.
+
+**Ce qui est établi** : les deux observations de Grégoire, et le texte du message (LU). **Ce qui ne l'est pas** : la cause. Que la navigation privée de Safari refuse ou limite le rangement des images en base est une inférence ; rien n'a été mesuré (ni Safari ni iPad dans la session du nuage, et WebKit de Playwright n'a pas ce mode). Le message, lui, parle d'espace à libérer : il ne dit pas la vraie cause, quelle qu'elle soit.
+
+**À faire** : mesurer sur l'iPad ce que l'ouverture range en navigation privée (porte terrain), puis décider. Les mots du message sont lus par l'utilisateur : à Grégoire. D'ici là, l'onglet privé n'est pas un geste sûr pour un essai sur l'iPad (rapport du lot 3, § 9 groupe 1 et § 10 b, corrigés).
+
+### #1312 · La démo survit à l'ouverture d'un codex : la bande « Mode démonstration » reste, 25 novembre 2026 (vécu par Grégoire sur l'iPad, 9 h 34, aperçu n° 62 ; reproduit sous Chromium ; inscrit sur consigne de Cowork, midi, sans y toucher)
+
+**Symptôme** : la démo active, « Ouvrir un codex… » installe le fichier, mais la bande verte « Mode démonstration » reste alors que le groupe affiché est celui du fichier.
+
+**Mesuré (Chromium, 25 nov.)** : espace vide, « Explorer la démo », puis un fichier d'essai : `demo-actif` reste à `'true'`. Aucun des deux fichiers d'essai ne porte cette clé (lu dans leur zip). « Quitter la démo » retire ensuite la bande et garde les données, mais laisse l'application sans groupe choisi. Détail : rapport du lot 3, § 10 a).
+
+**À décider** : ce qu'ouvrir un codex doit faire d'une démo active (la quitter d'abord, ou le demander). Voisin de #1309 et de #1313.
+
+### #1313 · Ouvrir un codex par-dessus des données laisse les clés que le fichier ne porte pas, 25 novembre 2026 (mesuré par la session du nuage sous Chromium ; inscrit sur consigne de Cowork, midi, sans y toucher)
+
+**Mesuré** : un fichier d'essai ouvert, puis un second par-dessus (« Remplacer »). Ce que le second porte remplace ce qui était là ; ce qu'il ne porte pas reste : une évaluation du premier, orpheline, et son image (sept images en base au lieu de six). Un remplacement clé par clé, pas un espace neuf.
+
+**LU** : `_planifierPurgeEspace` (`js/codex.js`) calcule ce qui serait à retirer, et cette purge n'est qu'un aperçu (#336). Le défaut est donc connu du code ; cette entrée lui donne un symptôme mesuré. Détail : rapport du lot 3, § 10 b).
+
+**⚠ Source et stock** : corriger l'ouverture tarirait la source ; les espaces déjà mélangés resteraient mélangés. Retirer des clés chez quelqu'un est un geste sur ses données : à Grégoire.
+
+### #1314 · La fenêtre « Modèle antérieur détecté » montre un texte d'atelier et des identifiants bruts, 25 novembre 2026 (rapporté par Cowork à midi, après l'essai de Grégoire sur l'iPad, aperçu n° 62 ; la fenêtre vue aussi par la session du nuage sous Chromium ; inscrit sur consigne, sans y toucher)
+
+**Symptôme** : la fenêtre dit à l'utilisateur « c'est exactement le scénario des incidents des 10-11 juin (productions « Non associé », indices à zéro) » et cite des identifiants de cours bruts (`COURS_1794…`). Un texte écrit pour l'atelier, resté à l'écran : l'utilisateur ne connaît ni ces incidents ni ces identifiants.
+
+**LU** : le message est composé dans `js/codex.js` (vers la ligne 1938) ; la fenêtre est ouverte à deux endroits (titres aux lignes 872 et 4215). Elle paraît dès que le fichier et l'espace ont le même trimestre et des cours d'identités différentes, ce qui n'a rien de grave dans le cas vécu (deux fichiers d'essai).
+
+**À décider** : **les mots de cette fenêtre reviennent à Grégoire** (un texte que l'utilisateur lit, devant un geste qui remplace ses données). Quoi montrer à la place des identifiants est à trancher avec eux.
+
+### #1307 · Sans copie importée, aucun chemin vers les réglages des tampons, 24 novembre 2026 (vécu par Grégoire sur l'iPad, aperçu n° 58 ; inscrit sur consigne de Cowork, 15 h 35, sans y toucher)
+
+**Symptôme** : la fenêtre des tampons (« Tampons et rétroactions ») ne s'ouvre que depuis Évaluation › Annoter, par la roue de la palette « Tampons », et la palette n'existe que si une copie est ouverte. Sans copie importée, rien ne mène aux réglages des tampons. Grégoire a dû importer une copie artificielle pour y arriver.
+
+**À traiter au lot suivant des tampons d'observation**, quand l'écran « Observer » montrera les tampons : c'est là qu'il faut une porte vers leurs réglages.
+
+**↻ 24 nov. 2026 — TRAITÉ SUR `lot/tampons-observation-2-observer`, NON FUSIONNÉ** : sur « Observer », « Régler mes tampons » ouvre la fenêtre des tampons sans qu'aucune copie soit ouverte (mesuré sous WebKit et Chromium ; essai « depuis « Observer », sans aucune copie… »). Reste ouvert tant que le lot n'est pas en ligne. Hors de « Observer » (un groupe sans pratique par cibles), le seul chemin reste Annoter.
+
+### #1310 · « Ton espace de travail est prêt » s'affiche pour un groupe sans pratique de notation, 24 novembre 2026 (vécu par Grégoire sur l'iPad, 19 h 38, aperçu n° 60 ; inscrit sur consigne de Cowork, 19 h 45, sans y toucher)
+
+**Symptôme** : hors démo, avec un groupe « 601-101-MQ · gr. 00001 · Mardi matin · A26 », deux messages se contredisaient à l'écran. En bas : « Ton espace de travail est prêt : trimestre, cours, groupe, horaire et pratique sont configurés. » Dans le Tableau de notation : « Ce groupe-cours n'a pas de pratique de notation. »
+
+**Mesuré sur `main` (1.258.1, `813eb3b09`), WebKit, 24 nov.** : SE REPRODUIT. Un groupe fictif avec un horaire et sans pratique montre les deux messages ensemble dans Évaluation. LU : la condition du bandeau (`js/transitions.js`, transition `numerisation-croisement`) ne regarde que l'horaire du groupe actif (`groupeActifAUnHoraire`), jamais sa pratique. Ne vient pas du lot des tampons : ni `transitions.js` ni `tableau-notation.js` n'y sont touchés.
+
+**À décider** : la condition du bandeau (exiger une pratique), ou ses mots. Ce sont des mots que l'utilisateur lit : à Grégoire.
+
+### #1309 · Dans la bande « Mode démonstration », « Quitter la démo » n'a pas répondu au toucher sur l'iPad, 24 novembre 2026 (vécu par Grégoire, 19 h 38, aperçu n° 60, paysage en plein écran ; inscrit sur consigne de Cowork, 19 h 45, sans y toucher)
+
+**Symptôme** : le bouton « Quitter la démo » du bandeau vert n'a pas répondu au toucher. Grégoire a quitté par le menu en haut à droite.
+
+**Mesuré sur `main` (1.258.1, `813eb3b09`), WebKit du Mac avec toucher simulé, 1180 × 820, 24 nov.** : NE SE REPRODUIT PAS (le toucher quitte la démo, depuis l'accueil et depuis Évaluation ; rien ne recouvre le bouton). Mais le bouton mesure 118 × 25 px, à 8 px du bas de l'écran : sous les 44 px d'une cible tactile, et dans la zone que l'iPad réserve à sa barre d'accueil en plein écran. C'est une cause PLAUSIBLE, pas démontrée : WebKit du Mac n'a pas cette zone. Le code du bandeau est le même sur `main` et sur l'aperçu (le lot des tampons n'y touche pas).
+
+**À faire** : l'éprouver sur l'iPad lui-même (porte terrain : le toucher, en plein écran et dans Safari) avant de corriger.
+
+### #1308 · Dans la démo, rien ne dit quel groupe est « Par standards », 24 novembre 2026 (vécu par Grégoire sur l'iPad, aperçu n° 58 ; inscrit sur consigne de Cowork, 15 h 35, sans y toucher)
+
+**Symptôme** : dans la démo, le nom du groupe « 601-998-DM · gr. 00003 » ne dit pas que c'est le groupe « Par standards ». Grégoire a dû le demander pour essayer les tampons d'observation, qui ne se règlent que dans un groupe qui a une pratique par cibles.
+
+**À décider** : où le dire (le nom du groupe de la démo, ou un repère à l'écran). Ce sont des mots que l'utilisateur lit : à Grégoire.
+
 ### #1304 · La case « Reporter les présences… » d'une intervention complétée ne compense aucune absence, 22 novembre 2026 (mesuré à l'écran par `claude/relaxed-feynman-0vcwct` ; inscrit sur consigne de Cowork, sans toucher ni la case ni la bulle 8 du parcours 7)
 
 **Symptôme** : la case du dialogue « Marquer cette intervention complétée ? » promet « la présence à cette intervention compensera une absence au cours ». Mesuré dans la démo (Chromium, 22 nov.), Yack Amical absent à la séance saisie du 22 août (A = 0 %, 0 période sur 2), intervention de niveau 3, deux périodes, sa présence cochée, « Complétée », la case cochée :

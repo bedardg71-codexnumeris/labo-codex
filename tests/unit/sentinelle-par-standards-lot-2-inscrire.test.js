@@ -87,8 +87,10 @@ describe('A · deux inscriptions sur la même cible donnent deux entrées', () =
         await m.IC.inscrire([saisie(m.IC, { noteBreve: '  Les idées sont là ; la citation manque.  ', productionId: 'P1' })]);
         const [i] = m.store[CLE];
         // 22 nov. 2026 (l'écran d'observation) : `origine` s'ajoute ; une production désignée l'impose.
+        // 24 nov. 2026 (« Tampons d'observation », lot 2) : `tampons` s'ajoute, la copie des tampons posés ; vide ici.
         expect(Object.keys(i).sort()).toEqual(['cibleId', 'criteres', 'da', 'date', 'echelleId', 'ensembleId', 'horodatage', 'id',
-            'niveau', 'noteBreve', 'origine', 'productionId', 'type']);
+            'niveau', 'noteBreve', 'origine', 'productionId', 'tampons', 'type']);
+        expect(i.tampons).toEqual([]);
         expect(i.origine).toBe('production');
         expect(i).toMatchObject({ type: 'inscription', da: ZOE, ensembleId: 'ENS1', cibleId: CIBLE.id, niveau: '2', echelleId: 'ECH-banc',
             date: '2026-11-21', productionId: 'P1', noteBreve: 'Les idées sont là ; la citation manque.' });
@@ -675,7 +677,7 @@ describe('L · une inscription peut ne porter aucun niveau (une remarque) ; ce n
         e.TC.ouvrirInscription(ZOE, CIBLE.id, null);
         const f = e.doc.querySelector('.tc-fenetre');
         const bouton = f.querySelector('[data-tc="inscrire"]');
-        expect(bouton.textContent).toBe('Inscrire la remarque');
+        expect(bouton.textContent).toBe('Inscrire sans niveau');
         const niveau = f.querySelector('.tc-niveaux input[value="2"]');
         niveau.checked = true;
         niveau.dispatchEvent(new e.doc.defaultView.Event('change', { bubbles: true }));
@@ -683,7 +685,7 @@ describe('L · une inscription peut ne porter aucun niveau (une remarque) ; ce n
         const sans = f.querySelector('.tc-niveaux input[data-sans-niveau]');
         sans.checked = true;
         sans.dispatchEvent(new e.doc.defaultView.Event('change', { bubbles: true }));
-        expect(bouton.textContent).toBe('Inscrire la remarque');
+        expect(bouton.textContent).toBe('Inscrire sans niveau');
         f.querySelector('.tc-critere[data-critere="crit-a"] .tc-coche--oui').click();
         f.querySelector('.tc-retroaction').value = 'Bonne piste à l\'oral.';
         bouton.click();
@@ -701,7 +703,7 @@ describe('L · une inscription peut ne porter aucun niveau (une remarque) ; ce n
         const bouton = e.hote.querySelector(`.tc-case[data-da="${ZOE}"][data-cible="${CIBLE.id}"]`);
         expect(bouton.querySelector('.tc-case-niveau').textContent).toBe('3');
         expect(bouton.querySelector('.tc-case-compte').textContent).toBe('2');
-        expect(bouton.getAttribute('aria-label')).toBe('Zoé Fictive, Lire un texte : niveau retenu Acquis, 2 inscriptions, dont 1 remarque');
+        expect(bouton.getAttribute('aria-label')).toBe('Zoé Fictive, Lire un texte : niveau retenu Acquis, 2 inscriptions, dont 1 trace sans niveau');
     });
 
     it('une case qui n\'a que des remarques le montre par ✎ et leur nombre, sans survol, et la légende le dit ; aucun niveau, aucun « 0 »', () => {
@@ -712,7 +714,7 @@ describe('L · une inscription peut ne porter aucun niveau (une remarque) ; ce n
         // Révisé au lot 3 : ✎, le nom du niveau « sans donnée » (la cible est sans donnée), et le compte.
         expect(bouton.textContent).toBe('✎Données insuffisantes2');
         expect(bouton.querySelector('.tc-case-niveau')).toBeNull();
-        expect(bouton.getAttribute('aria-label')).toBe('Zoé Fictive, Lire un texte : sans donnée (Données insuffisantes), 2 remarques');
+        expect(bouton.getAttribute('aria-label')).toBe('Zoé Fictive, Lire un texte : sans donnée (Données insuffisantes), 2 traces sans niveau');
         expect([...e.hote.querySelectorAll('.tc-legende')].map(x => x.textContent)).toContain(e.TC.MOTS.legendeRemarques);
         expect(etatCase(e.win, liste).retenu).toBeNull();
     });

@@ -27,7 +27,7 @@
  *
  * UNE INSCRIPTION SANS NIVEAU (complément du 21 nov., 9 h 17 ; à l'écran, une « remarque », mot PROPOSÉ) : la tuile
  * « Aucun niveau » (cochée d'office dans la fenêtre d'une case : aucun niveau n'est proposé) et un texte. Le bouton dit ce
- * qu'il va inscrire (« Inscrire le niveau » ou « Inscrire la remarque »). Une remarque n'entre jamais au niveau retenu ;
+ * qu'il va inscrire (« Inscrire le niveau » ou « Inscrire sans niveau »). Une remarque n'entre jamais au niveau retenu ;
  * une case qui n'a QUE des remarques montre ✎, leur nombre et le nom du niveau « sans donnée », sans survol (au toucher,
  * une bulle est invisible).
  *
@@ -52,7 +52,7 @@
         legende: 'Une case montre le niveau retenu : le meilleur niveau inscrit, qui ne redescend pas. Le petit nombre dit combien d’inscriptions elle porte.',
         legendeSansDonnee: (nom) => `« ${nom} » : aucun niveau inscrit pour cette cible (sans donnée).`,
         // Complément 9 h 17 : une inscription sans niveau (« remarque », mot PROPOSÉ).
-        legendeRemarques: '✎ : des remarques, aucun niveau encore.',
+        legendeRemarques: '✎ : des traces à lire, aucun niveau encore.',   // mots de Grégoire, 24 nov. 2026, 18 h 58
         // Lot 4 : la colonne de la note.
         colNote: 'Note',
         legendeNote: 'Note : la moyenne pondérée des niveaux retenus. Tant qu’une cible est sans donnée, pas de note : les cibles en attente sont nommées.',
@@ -74,10 +74,26 @@
         marqueRetenu: 'niveau retenu',
         caseIllisible: 'ordre des niveaux illisible',
         aucunNiveau: 'Aucun niveau',
-        remarqueSeulement: 'une remarque seulement',
-        inscrireRemarque: 'Inscrire la remarque',
+        // Mots de Grégoire (24 nov. 2026, 19 h 43) : « remarque » désigne un texte écrit, pas une trace sans niveau.
+        traceSeulement: 'une trace seulement',
+        inscrireSansNiveau: 'Inscrire sans niveau',
         remarque: 'Remarque, sans niveau',
-        annonceRemarque: (nom, cible) => `${nom}, ${cible} : remarque inscrite.`,
+        // 24 nov. 2026, mot PROPOSÉ (TEXTES-2026-11-24-tampons-observation-lot-2.md) : le nom lu de la liste des tampons d'une trace.
+        tamponsPoses: 'Tampons posés',
+        annonceSansNiveau: (nom, cible) => `${nom}, ${cible} : trace inscrite, sans niveau.`,
+        // 25 nov. 2026, lot 3 « sur une production » : mots PROPOSÉS (TEXTES-2026-11-25-tampons-observation-lot-3.md).
+        traceEnDirect: 'pas encore inscrite',
+        tamponsProduction: 'Tampons d’observation posés sur cette production',
+        tamponsProductionAide: 'Ils entrent dans l’inscription de cette cible. Touche un tampon pour le retirer de l’inscription : il reste sur la production.',
+        // 25 nov. 2026, 8 h 22 : la production vise plusieurs cibles, rien n'est retenu d'office (mot PROPOSÉ par Cowork).
+        tamponsProductionAidePlusieurs: 'Touche les tampons qui concernent cette cible : ils entrent dans son inscription et restent sur la production.',
+        // 25 nov. 2026, midi (essai de Grégoire sur l'iPad) : la seconde phrase, dans le seul bloc où un tampon est retenu
+        // d'office par son critère ; et les noms retenus sur leur propre ligne, SOUS les tampons (accolés à l'étiquette,
+        // « … posés sur cette production : aucun » se lisait « aucun tampon posé »).
+        tamponsProductionAideCritere: 'Un tampon qui porte un critère de cette cible est déjà retenu.',
+        tamponsProductionRetenus: (noms) => `Retenus pour cette cible\u00a0: ${noms.length ? noms.join(', ') : 'aucun'}`,
+        tamponRetire: (tampon, cible) => `« ${tampon} » retiré de l’inscription de « ${cible} ». Il reste sur la production.`,
+        tamponRetenu: (tampon, cible) => `« ${tampon} » retenu pour l’inscription de « ${cible} ».`,
         aide: 'Au clavier : les flèches pour se déplacer, Entrée pour ouvrir une case.',
         aucune: 'aucune inscription',
         echelleTitre: (nom) => (nom ? `Échelle « ${nom} » :` : 'Échelle :'),
@@ -303,7 +319,7 @@
     function _ditLaCase(nom, cible, ligne, ctx) {
         const annulees = ligne.annulees ? `, ${ligne.annulees} ${ligne.annulees > 1 ? 'annulées' : 'annulée'}` : '';
         const r = ligne.remarques || 0;
-        const remarques = `${r} ${r > 1 ? 'remarques' : 'remarque'}`;
+        const remarques = `${r} ${r > 1 ? 'traces' : 'trace'} sans niveau`;   // mots de Grégoire, 24 nov. 2026, 18 h 58
         const n = ligne.actives;
         const compte = !n ? MOTS.aucune : (r === n ? remarques : `${n} ${n > 1 ? 'inscriptions' : 'inscription'}${r ? ', dont ' + remarques : ''}`);
         if (!ctx.ordre.ok) return `${nom}, ${cible.etiquette} : ${MOTS.caseIllisible}, ${compte}${annulees}`;
@@ -486,13 +502,17 @@
     /* ----- Les morceaux communs : les critères, le niveau, la rétroaction ----- */
 
     /** Les critères d'une cible, chacun « Respecté » / « Non respecté » / non renseigné. `mots` (l'écran d'observation) :
-     *  `{ aide, sansCritere }`, qui remplacent ceux de la fenêtre d'inscription (ceux-ci parlent du niveau). */
+     *  `{ aide, sansCritere }`, qui remplacent ceux de la fenêtre d'inscription (ceux-ci parlent du niveau) ; et
+     *  `aCote(critere)` (24 nov. 2026, les tampons d'observation) : du HTML déjà échappé, placé sur la rangée du critère,
+     *  entre son texte et ses coches. Sans `aCote`, ou s'il ne rend rien, la rangée est celle d'avant, au caractère près. */
     function _criteresHTML(cible, prefixe, mots) {
         const m = Object.assign({ aide: MOTS.criteresAide, sansCritere: MOTS.sansCritere }, mots || {});
         if (!cible.criteres || cible.criteres.length === 0) return `<p class="tc-aide">${esc(m.sansCritere)}</p>`;
+        const aCote = (k) => { const h = typeof m.aCote === 'function' ? m.aCote(k) : ''; return h ? `
+                ${h}` : ''; };
         const lignes = cible.criteres.map(k => `
             <li class="tc-critere" data-critere="${esc(k.id)}">
-                <span class="tc-critere-texte">${esc(k.texte)}${k.essentiel ? ` <span class="cibles-fiche-essentiel">${esc(MOTS.essentiel)}</span>` : ''}</span>
+                <span class="tc-critere-texte">${esc(k.texte)}${k.essentiel ? ` <span class="cibles-fiche-essentiel">${esc(MOTS.essentiel)}</span>` : ''}</span>${aCote(k)}
                 <span class="tc-critere-choix" role="group" aria-label="${esc(k.texte)}">
                     <button type="button" class="tc-coche tc-coche--oui" aria-pressed="false" data-tc="coche" data-valeur="oui">${esc(MOTS.respecte)}</button>
                     <button type="button" class="tc-coche tc-coche--non" aria-pressed="false" data-tc="coche" data-valeur="non">${esc(MOTS.nonRespecte)}</button>
@@ -513,7 +533,7 @@
             + `<span class="tc-niveau-texte"><span class="tc-niveau-nom">${esc(nomTuile)}</span>${aide ? `<span class="tc-niveau-marque">${esc(aide)}</span>` : ''}</span></label>`;
         // Vue simple (`sansRemarque`) : les niveaux seulement ; la remarque sans niveau vit en vue étendue.
         const rien = (parProduction ? tuile('data-rien', MOTS.rienCeJour, '', true, 'tc-niveau--rien') : '')
-            + (sansRemarque ? '' : tuile('data-sans-niveau', MOTS.aucunNiveau, MOTS.remarqueSeulement, !parProduction, 'tc-niveau--rien tc-niveau--sans'));
+            + (sansRemarque ? '' : tuile('data-sans-niveau', MOTS.aucunNiveau, MOTS.traceSeulement, !parProduction, 'tc-niveau--rien tc-niveau--sans'));
         const tuiles = ctx.niveaux.map(n => {
             const marque = String(n.code) === ctx.codeSansDonnee ? `<span class="tc-niveau-marque">${esc(MOTS.sansDonnee)}</span>` : '';
             return `<label class="tc-niveau" style="--tn-couleur: ${esc(_couleur(n))}"><input type="radio" name="${esc(nom)}" value="${esc(n.code)}">`
@@ -572,13 +592,32 @@
 
     /* ----- L'inscription d'une case ----- */
 
-    function _ligneCritereHistorique(k) {
+    /**
+     * Les tampons d'une trace (24 nov. 2026), en lecture : le NOM copié dans l'inscription, toujours ; l'image, cherchée par
+     * l'identifiant, si le tampon existe encore sur ce poste (`travauxOutils.imageDuTampon`) ; sinon l'emoji copié, sinon
+     * le nom seul. Renommer ou supprimer un tampon ne change donc pas ce qu'une trace déjà inscrite dit.
+     */
+    function tamponsLusHTML(tampons, classe) {
+        const liste = (Array.isArray(tampons) ? tampons : []).filter(t => t && t.id);
+        if (liste.length === 0) return '';
+        const outils = window.travauxOutils;
+        const puces = liste.map(t => {
+            const image = (outils && typeof outils.imageDuTampon === 'function') ? outils.imageDuTampon(t.id) : null;
+            const dessin = image ? `<img class="tc-tampon-image${image.emoji ? ' tc-tampon-image--emoji' : ''}" src="${esc(image.src)}" alt="">`
+                : (t.emoji ? `<span class="tc-tampon-emoji" aria-hidden="true">${esc(t.emoji)}</span>` : '');
+            return `<li class="tc-tampon" data-tampon="${esc(t.id)}">${dessin}<span class="tc-tampon-nom">${esc(t.nom || t.id)}</span></li>`;
+        }).join('');
+        return `<ul class="tc-tampons ${esc(classe || '')}" aria-label="${esc(MOTS.tamponsPoses)}">${puces}</ul>`;
+    }
+
+    function _ligneCritereHistorique(k, tampons) {
         const r = I().lireRespecte(k.respecte);
         const signe = r === true ? '✓' : (r === false ? '✗' : '–');
         const etat = r === true ? MOTS.respecte.toLowerCase() : (r === false ? MOTS.nonRespecte.toLowerCase() : 'non renseigné');
         return `<li class="tc-entree-critere tc-entree-critere--${r === true ? 'oui' : (r === false ? 'non' : 'vide')}">`
             + `<span class="tc-entree-signe" aria-hidden="true">${signe}</span><span class="u-lecteur-ecran">${esc(etat)} : </span>${esc(k.texte)}`
-            + `${k.essentiel ? ` <span class="cibles-fiche-essentiel">${esc(MOTS.essentiel)}</span>` : ''}</li>`;
+            + `${k.essentiel ? ` <span class="cibles-fiche-essentiel">${esc(MOTS.essentiel)}</span>` : ''}`
+            + `${tamponsLusHTML(tampons, 'tc-tampons--critere')}</li>`;   // un geste vu à propos de ce critère : à côté, sans le cocher
     }
 
     /** L'origine d'une inscription, en clair : la production et son titre ; « Observation » ; « Conversation ». */
@@ -632,8 +671,15 @@
 
     /** Le bas d'une inscription : annulée, sa date et sa raison ; sinon « Annuler cette inscription » (sauf en lecture seule). */
     function _finDeLEntree(i, a, lectureSeule) {
+        if (i.enDirect) return '';   // lot 3 : une trace lue sur une production n'est dans aucun stock, rien à annuler
         if (a) return `<p class="tc-entree-annulation">${esc(MOTS.annulee(dateLisible(a.date), a.raison))}</p>`;
         return lectureSeule ? '' : `<button type="button" class="btn btn-neutre btn-mini tc-entree-annuler" data-tc="annuler" data-id="${esc(i.id)}">${esc(MOTS.annuler)}</button>`;
+    }
+
+    /** Les marques d'une entrée : « niveau retenu » ; « pas encore inscrite » pour une trace lue sur une production (lot 3). */
+    function _marquesDeLEntree(i, retenu) {
+        return ((retenu && i.id === retenu) ? ` <span class="tc-entree-retenu">${esc(MOTS.marqueRetenu)}</span>` : '')
+            + (i.enDirect ? ` <span class="tc-entree-directe">${esc(MOTS.traceEnDirect)}</span>` : '');
     }
 
     /** Une inscription de l'historique (datée, son niveau ou « Remarque », son origine, sa rétroaction, ses critères) ;
@@ -645,18 +691,31 @@
         const sansNiveau = I().estSansNiveau(i);
         const niveau = sansNiveau ? null : _niveauDuCode(ctx, i.niveau);
         const nomNiveau = _nomDuNiveauInscrit(i, sansNiveau, niveau);
-        const criteres = (i.criteres || []).length ? `<ul class="tc-entree-criteres">${i.criteres.map(_ligneCritereHistorique).join('')}</ul>` : '';
+        // Les tampons (24 nov. 2026) : à côté du critère qu'ils déclarent, sinon sous la cible (rapprochés à l'affichage).
+        const places = I().rapprocherTampons(I().lireTampons(i), i.criteres);
+        // « Remarque, sans niveau » seulement si la trace porte un TEXTE (Grégoire, 24 nov. 2026, 18 h 57). Sans niveau et
+        // sans texte (des coches, des tampons ou les deux) : la date, l'origine et son contenu, sans étiquette.
+        const sansEtiquette = sansNiveau && !I().estUneRemarque(i);
+        // Les critères (retouche du 24 nov. 2026, décision de Cowork) : dès qu'un seul est renseigné, la liste entière ;
+        // quand AUCUN ne l'est, la liste de tirets est du bruit et ne s'affiche pas. Il ne reste alors que les critères
+        // qui portent un tampon (Grégoire : un tampon qui déclare un critère s'affiche à côté de ce critère).
+        const aLire = I().aUnCritereRenseigne(i.criteres) ? (i.criteres || [])
+            : (i.criteres || []).filter(k => (places.parCritere[k.id] || []).length > 0);
+        const criteres = aLire.length ? `<ul class="tc-entree-criteres">${aLire.map(k => _ligneCritereHistorique(k, places.parCritere[k.id])).join('')}</ul>` : '';
         // L'origine (22 nov. 2026), dans les deux vues : « Observation », « Conversation » ou la production. Une inscription
         // d'avant sans production se lit « Observation » (règle du mandat ; elle disait « Sans production », cachée en vue simple).
         const origine = `
                     <span class="tc-entree-origine tc-entree-origine--${esc(I().lireOrigine(i))}">${esc(origineLue(i))}</span>`;
+        // Lot 3 (25 nov. 2026) : une trace LUE sur une production (`enDirect`) n'est dans aucun stock ; elle n'a ni bouton
+        // d'annulation ni niveau retenu, et le dit par une marque.
         const fin = _finDeLEntree(i, a, !!o.lectureSeule);
-        const marque = (o.retenu && i.id === o.retenu) ? ` <span class="tc-entree-retenu">${esc(MOTS.marqueRetenu)}</span>` : '';
-        return `<li class="tc-entree${a ? ' tc-entree--annulee' : ''}">
+        const marque = _marquesDeLEntree(i, o.retenu);
+        return `<li class="tc-entree${a ? ' tc-entree--annulee' : ''}${i.enDirect ? ' tc-entree--directe' : ''}">
             <div class="tc-entree-corps">
                 <div class="tc-entree-tete"><span class="tc-entree-date">${esc(dateLisible(i.date))}</span>
-                    <span class="tc-entree-niveau${sansNiveau ? ' tc-entree-niveau--remarque' : ''}" style="--tn-couleur: ${esc(_couleur(niveau))}">${esc(nomNiveau)}</span>${marque}${origine}</div>
+                    ${sansEtiquette ? '' : `<span class="tc-entree-niveau${sansNiveau ? ' tc-entree-niveau--remarque' : ''}" style="--tn-couleur: ${esc(_couleur(niveau))}">${esc(nomNiveau)}</span>`}${marque}${origine}</div>
                 ${i.noteBreve ? `<p class="tc-entree-note">${esc(i.noteBreve)}</p>` : ''}
+                ${tamponsLusHTML(places.sousLaCible, 'tc-tampons--cible')}
                 ${criteres}
             </div>${fin}</li>`;
     }
@@ -667,11 +726,42 @@
      */
     function historiqueHTML(ctx, da, cibleId, options) {
         const lectureSeule = !!(options && options.lectureSeule);
-        const h = I().historiqueDeLaCase(ctx.inscriptions, da, ctx.ensemble.id, cibleId);
+        // Lot 3 (25 nov. 2026) : `options.enDirect`, les traces lues sur les productions qui visent cette seule cible
+        // (le profil). Elles prennent leur place par leur date ; sans elles, la liste est celle d'avant.
+        const enDirect = ((options && options.enDirect) || []).map(i => ({ inscription: i, annulation: null }));
+        const h = I().historiqueDeLaCase(ctx.inscriptions, da, ctx.ensemble.id, cibleId).concat(enDirect);
+        if (enDirect.length) h.sort((x, y) => I().plusRecenteDAbord(x.inscription, y.inscription));
         if (h.length === 0) return `<p class="tc-aide">${esc(MOTS.historiqueVide)}</p>`;
         const retenu = (options && options.retenuId) || null;
         const entrees = h.map(({ inscription: i, annulation: a }) => _entreeHTML(ctx, i, a, { lectureSeule, retenu })).join('');
         return `<ol class="tc-historique-liste">${entrees}</ol>`;
+    }
+
+    /* ----- Lot 3 (25 nov. 2026) : les tampons d'observation posés sur les productions, LUS ----- */
+
+    /**
+     * Les traces lues sur les productions d'un·e étudiant·e du groupe-cours actif (`InscriptionsCibles.tracesDesProductions`).
+     * Lecture synchrone de ce qui est déjà en mémoire (`fichiersTravaux`, `annotationsTravaux`) ; rien n'est écrit, aucune
+     * production n'est ouverte. Sans le module des productions ou celui des tampons : `[]`.
+     */
+    function tracesDesProductions(da) {
+        const stockage = window.travauxStockage, outils = window.travauxOutils;
+        if (!stockage || !outils || typeof outils.tamponDObservation !== 'function') return [];
+        return I().tracesDesProductions(stockage.obtenirFichiersGroupeActif(), stockage.obtenirAnnotations(), da, outils.tamponDObservation);
+    }
+
+    /**
+     * Le rang « sous cette production » (le profil) : chaque production qui porte des tampons d'observation, puis ses
+     * traces, une par jour de pose, dessinées comme une entrée de l'historique (la date, les tampons). Sans trace : ''.
+     */
+    function tracesDesProductionsHTML(traces) {
+        return (traces || []).map(t => `
+            <section class="pc-production" data-production="${esc(t.productionId)}">
+                <h4 class="pc-cible-titre">${esc(_titreProduction(t.productionId))}</h4>
+                <ol class="tc-historique-liste">${t.jours.map(j => `<li class="tc-entree"><div class="tc-entree-corps">
+                    <div class="tc-entree-tete"><span class="tc-entree-date">${esc(dateLisible(j.date))}</span></div>
+                    ${tamponsLusHTML(j.tampons, 'tc-tampons--cible')}</div></li>`).join('')}</ol>
+            </section>`).join('');
     }
 
     /** Le niveau retenu en clair, puis l'historique de la case (la fenêtre d'une case). */
@@ -705,7 +795,7 @@
                 <section class="tc-section tc-section--ligne">${_origineHTML(ctx, p + '-origine')}${_dateHTML(p + '-date')}</section>
                 <p class="tc-alerte u-hide" role="alert"></p>
                 <div class="modal-actions"><button type="button" class="btn btn-neutre" data-tc="fermer">${esc(MOTS.fermer)}</button>
-                    <button type="button" class="btn btn-principal" data-tc="inscrire">${esc(MOTS.inscrireRemarque)}</button></div>
+                    <button type="button" class="btn btn-principal" data-tc="inscrire">${esc(MOTS.inscrireSansNiveau)}</button></div>
             </form>
             <section class="tc-historique"><h4 class="tc-section-titre">${esc(MOTS.historique)}</h4><div class="tc-historique-hote">${_historiqueAvecRetenuHTML(ctx, da, cibleId)}</div></section>`;
         return _ouvrirFenetre(html, { mode: 'case', da: String(da), cibleId, retour, ctx });
@@ -734,7 +824,7 @@
         const etudiant = ctx.etudiants.find(e => String(e.da) === String(da));
         _fermer();
         _rerendre({ da, cibleId });
-        _annoncer(r.entrees[0].niveau === null ? MOTS.annonceRemarque(_nomEleve(etudiant), cible.etiquette)
+        _annoncer(r.entrees[0].niveau === null ? MOTS.annonceSansNiveau(_nomEleve(etudiant), cible.etiquette)
             : MOTS.annonceInscrit(_nomEleve(etudiant), cible.etiquette, niveau ? (niveau.nom || niveau.code) : saisie.niveau));
         return true;
     }
@@ -872,11 +962,84 @@
 
     /* ----- Le geste « inscrire pour une production » ----- */
 
-    function _blocCibleProductionHTML(ctx, cible) {
+    /** Un tampon de la production, à toucher : pressé, il entre dans l'inscription de cette cible (le dessin du lot 2). */
+    function _tamponATouchHTML(t, retenu) {
+        const outils = window.travauxOutils;
+        const image = (outils && typeof outils.imageDuTampon === 'function') ? outils.imageDuTampon(t.id) : null;
+        const dessin = image ? `<img class="oc-tampon-image${image.emoji ? ' oc-tampon-image--emoji' : ''}" src="${esc(image.src)}" alt="">`
+            : `<span class="oc-tampon-lettres" aria-hidden="true">${esc(t.emoji || String(t.nom || '?').slice(0, 2))}</span>`;
+        return `<button type="button" class="oc-tampon" data-tc="tampon-production" data-tampon="${esc(t.id)}" aria-pressed="${retenu ? 'true' : 'false'}"`
+            + ` aria-label="${esc(t.nom)}" title="${esc(t.nom)}">${dessin}<span class="oc-tampon-coche" aria-hidden="true">✓</span></button>`;
+    }
+
+    /**
+     * Lot 3 (25 nov. 2026) : dans le bloc d'une cible, les tampons d'observation posés sur la production de l'étudiant·e,
+     * vus AVANT d'attribuer le niveau. UN SEUL bloc de cible : tous retenus d'office, en toucher un le retire. PLUSIEURS
+     * blocs (décision de Grégoire, 25 nov. 2026, 8 h 22) : aucun n'est retenu d'office, sauf celui qui déclare un critère
+     * de cette cible ; on touche ceux qui la concernent (`tamponsRetenusDOffice`). Un tampon reste toujours sur la
+     * production. Sans tampon : rien, le bloc est celui d'avant.
+     */
+    function _tamponsDuBlocHTML(prefixe, tampons, cible, nombreDeBlocs) {
+        const liste = tampons || [];
+        if (liste.length === 0) return '';
+        const id = `${prefixe}-tampons`;
+        const retenus = new Set(I().tamponsRetenusDOffice(liste, cible, nombreDeBlocs));
+        const aide = nombreDeBlocs === 1 ? MOTS.tamponsProductionAide : MOTS.tamponsProductionAidePlusieurs;
+        // À plusieurs blocs, les seuls retenus d'office le sont par leur critère : la seconde phrase dit cet état de DÉPART.
+        // Écrite ici, à l'ouverture du bloc, elle reste si le tampon est relâché ensuite (un toucher ne refait que la ligne des noms).
+        const aideCritere = (nombreDeBlocs > 1 && retenus.size > 0) ? ` <span data-tc-aide-critere>${esc(MOTS.tamponsProductionAideCritere)}</span>` : '';
+        return `<div class="tc-section tc-pr-tampons"><p class="oc-tampons-tete"><span class="tc-champ-nom" id="${esc(id)}">${esc(MOTS.tamponsProduction)}</span></p>`
+            + `<div class="oc-tampons" role="group" aria-labelledby="${esc(id)}" aria-describedby="${esc(id)}-retenus ${esc(id)}-aide">${liste.map(t => _tamponATouchHTML(t, retenus.has(String(t.id)))).join('')}</div>`
+            + `<p class="tc-pr-retenus" id="${esc(id)}-retenus">${esc(MOTS.tamponsProductionRetenus(liste.filter(t => retenus.has(String(t.id))).map(t => t.nom)))}</p>`
+            + `<p class="tc-aide" id="${esc(id)}-aide">${esc(aide)}${aideCritere}</p></div>`;
+    }
+
+    /** Les tampons d'observation de la production choisie pour l'étudiant·e choisi·e (les deux requis ; sinon `[]`). */
+    function _tamponsDuChoix(overlay) {
+        const da = overlay.querySelector('.tc-pr-eleve') ? overlay.querySelector('.tc-pr-eleve').value : '';
+        const productionId = overlay.querySelector('.tc-pr-production') ? overlay.querySelector('.tc-pr-production').value : '';
+        return (da && productionId) ? I().tamponsDeLaProduction(tracesDesProductions(da), productionId) : [];
+    }
+
+    /** L'étudiant·e a changé : ses tampons remplacent ceux des blocs ; les niveaux, coches et textes déjà saisis restent. */
+    function _relireTamponsDesBlocs(overlay) {
+        const tampons = _tamponsDuChoix(overlay);
+        if (_ouverte) _ouverte.tamponsProduction = tampons;
+        const blocs = overlay.querySelectorAll('.tc-pr-cibles [data-tc-bloc]');
+        const cibles = (_ouverte && _ouverte.ctx.cibles) || [];
+        blocs.forEach(bloc => {
+            const hote = bloc.querySelector('.tc-pr-tampons-hote');
+            // security-ok : _tamponsDuBlocHTML échappe tout texte (esc)
+            if (hote) hote.innerHTML = _tamponsDuBlocHTML(bloc.dataset.prefixe, tampons, cibles.find(c => c.id === bloc.dataset.cible), blocs.length);
+        });
+    }
+
+    /** Les tampons retenus d'un bloc : ceux encore pressés, dans l'ordre de l'écran, dans leur forme de copie. */
+    function _tamponsRetenusDuBloc(bloc) {
+        const presses = new Set(Array.from(bloc.querySelectorAll('.tc-pr-tampons .oc-tampon[aria-pressed="true"]')).map(b => String(b.dataset.tampon)));
+        return ((_ouverte && _ouverte.tamponsProduction) || []).filter(t => presses.has(t.id));
+    }
+
+    /** Toucher un tampon du bloc : retenu pour l'inscription de cette cible, ou retiré. Rien n'est écrit sur la production. */
+    function _basculerTamponProduction(bouton) {
+        const bloc = bouton.closest('[data-tc-bloc]');
+        const tampon = ((_ouverte && _ouverte.tamponsProduction) || []).find(t => t.id === String(bouton.dataset.tampon));
+        if (!bloc || !tampon) return;
+        const retenu = bouton.getAttribute('aria-pressed') !== 'true';
+        bouton.setAttribute('aria-pressed', String(retenu));
+        const noms = bloc.querySelector('.tc-pr-retenus');
+        if (noms) noms.textContent = MOTS.tamponsProductionRetenus(_tamponsRetenusDuBloc(bloc).map(t => t.nom));
+        const cible = _ouverte.ctx.cibles.find(c => c.id === bloc.dataset.cible);
+        const zone = _ouverte.overlay.querySelector('.tc-pr-annonce');
+        if (zone) zone.textContent = (retenu ? MOTS.tamponRetenu : MOTS.tamponRetire)(tampon.nom, cible ? cible.etiquette : '');
+    }
+
+    function _blocCibleProductionHTML(ctx, cible, tampons, nombreDeBlocs) {
         const p = 'tc-pr-' + cible.id.replace(/[^A-Za-z0-9_-]/g, '');
         return `<fieldset class="tc-bloc-cible" data-tc-bloc data-prefixe="${esc(p)}" data-cible="${esc(cible.id)}">
             <legend class="tc-cible-etiquette">${esc(cible.etiquette)}${cible.terminale ? ` <span class="cibles-fiche-terminale">Cible terminale</span>` : ''}</legend>
             ${cible.enonce ? `<p class="tc-cible-enonce">${esc(cible.enonce)}</p>` : ''}
+            <div class="tc-pr-tampons-hote">${_tamponsDuBlocHTML(p, tampons, cible, nombreDeBlocs)}</div>
             <h5 class="u-lecteur-ecran" id="${esc(p)}-niveau-titre">${esc(MOTS.niveau)} : ${esc(cible.etiquette)}</h5>
             ${_niveauxHTML(ctx, p, true)}
             <div class="tc-bloc-details u-hide">
@@ -886,11 +1049,11 @@
         </fieldset>`;
     }
 
-    function _ciblesDeLaProductionHTML(ctx, productionId) {
+    function _ciblesDeLaProductionHTML(ctx, productionId, tampons) {
         const production = (ctx.productions || []).find(x => x.id === productionId) || null;
         if (!production) return '';
         const offertes = I().ciblesOffertes(production, ctx.cibles);
-        return `<h4 class="tc-section-titre">${esc(MOTS.ciblesDeLaProduction)}</h4>${offertes.map(c => _blocCibleProductionHTML(ctx, c)).join('')}`;
+        return `<h4 class="tc-section-titre">${esc(MOTS.ciblesDeLaProduction)}</h4>${offertes.map(c => _blocCibleProductionHTML(ctx, c, tampons, offertes.length)).join('')}`;
     }
 
     /** Ouvre le geste « inscrire pour une production » : l'étudiant·e, la production, la date, puis les cibles offertes. */
@@ -914,6 +1077,7 @@
                 </section>
                 ${aucune}
                 <div class="tc-pr-cibles"></div>
+                <p class="u-lecteur-ecran tc-pr-annonce" aria-live="polite"></p>
                 <p class="tc-alerte u-hide" role="alert"></p>
                 <div class="modal-actions"><button type="button" class="btn btn-neutre" data-tc="fermer">${esc(MOTS.fermer)}</button>
                     <button type="button" class="btn btn-principal" data-tc="inscrire-production">${esc(MOTS.inscrireLesNiveaux)}</button></div>
@@ -936,7 +1100,8 @@
             if (lu.rien) return null;   // « Rien ce jour-là » : la cible ne reçoit rien (N4)
             const cible = ctx.cibles.find(c => c.id === bloc.dataset.cible);
             return { cible, saisie: { da, ensembleId: ctx.ensemble.id, cibleId: cible.id, niveau: lu.niveau, echelleId: ctx.echelle ? (ctx.echelle.id || null) : null,
-                date, productionId, noteBreve: bloc.querySelector('.tc-retroaction').value, criteres: I().etatDesCriteres(cible, _lireCoches(bloc)) } };
+                date, productionId, noteBreve: bloc.querySelector('.tc-retroaction').value, criteres: I().etatDesCriteres(cible, _lireCoches(bloc)),
+                tampons: _tamponsRetenusDuBloc(bloc) } };   // lot 3 : la COPIE des tampons de la production encore retenus pour cette cible
         }).filter(Boolean);
         if (remplies.length === 0) { _alerte(overlay, [I().MOTIFS.AUCUNE_CIBLE_REMPLIE]); return false; }
         // Le refus nomme sa cible (une remarque vide, par exemple) : lisible sans bulle.
@@ -974,6 +1139,7 @@
         else if (g === 'inscrire-simple') _inscrireSimple(overlay);
         else if (g === 'annuler') _annulerInscription(overlay, geste.dataset.id);
         else if (g === 'inscrire-production') _inscrireProduction(overlay);
+        else if (g === 'tampon-production') _basculerTamponProduction(geste);
     }
 
     function _surChangementFenetre(e) {
@@ -981,10 +1147,12 @@
         if (e.target.classList.contains('tc-pr-production') && _ouverte) {
             const hote = overlay.querySelector('.tc-pr-cibles');
             // security-ok : _ciblesDeLaProductionHTML échappe tout texte (esc)
-            hote.innerHTML = _ciblesDeLaProductionHTML(_ouverte.ctx, e.target.value);
+            _ouverte.tamponsProduction = _tamponsDuChoix(overlay);
+            hote.innerHTML = _ciblesDeLaProductionHTML(_ouverte.ctx, e.target.value, _ouverte.tamponsProduction);
             _alerte(overlay, []);
             return;
         }
+        if (e.target.classList.contains('tc-pr-eleve') && _ouverte) { _relireTamponsDesBlocs(overlay); return; }
         if (e.target.type !== 'radio') return;
         // Une cible du geste par production : ses critères et sa rétroaction paraissent dès qu'elle reçoit quelque chose.
         const bloc = e.target.closest('.tc-bloc-cible');
@@ -992,7 +1160,7 @@
         if (details) details.classList.toggle('u-hide', e.target.hasAttribute('data-rien'));
         // La fenêtre d'une case : le bouton dit ce qu'il va inscrire.
         const bouton = !bloc && overlay.querySelector('[data-tc="inscrire"]');
-        if (bouton) bouton.textContent = e.target.hasAttribute('data-sans-niveau') ? MOTS.inscrireRemarque : MOTS.inscrire;
+        if (bouton) bouton.textContent = e.target.hasAttribute('data-sans-niveau') ? MOTS.inscrireSansNiveau : MOTS.inscrire;
     }
 
     window.TableauCibles = {
@@ -1006,6 +1174,9 @@
         noteArrondie,
         origineLue,                // 22 nov. 2026 : l'origine d'une inscription, en clair
         criteresHTML: _criteresHTML,   // l'écran d'observation : les mêmes critères, les mêmes mots
+        tamponsLusHTML,            // 24 nov. 2026 : les tampons d'une trace, en lecture
+        tracesDesProductions,      // 25 nov. 2026, lot 3 : les tampons d'observation posés sur les productions, lus
+        tracesDesProductionsHTML,
         lireCoches: _lireCoches,
         basculerCoche: _basculerCoche,
         rerendre: _rerendre,

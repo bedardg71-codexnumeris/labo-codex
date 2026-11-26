@@ -1415,6 +1415,9 @@ const SCHEMAS_IMPORT = {
         // la Défense O (re-encodage canvas).
         imageBase64: { type: 'string', maxLen: 10000000 },
         categorie: { type: 'string', maxLen: 100 },
+        // Tampons d'observation, lot 1 (24 nov. 2026) : le critère qu'un tampon déclare, facultatif. Même borne que
+        // LONGUEUR_MAX_CRITERE_TAMPON (travaux-outils.js), qui le rogne de nouveau en le rangeant.
+        critere: { type: 'string', maxLen: 200 },
         custom: { type: 'boolean' },
         auteur: { type: 'string', maxLen: 100 },
         auteurOriginal: { type: 'string', maxLen: 100 },

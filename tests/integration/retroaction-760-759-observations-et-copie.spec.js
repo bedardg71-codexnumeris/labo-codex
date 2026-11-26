@@ -119,8 +119,8 @@ test('#760 + #759 · la générale liste les tampons de la spécifique, dans le 
     });
 
     // La spécifique, dans l'ordre des réglages (catégorie personnelle comprise, jeton absent).
-    expect(lu.titresSpec).toEqual(['Observations', 'Style', 'Action']);
-    expect(lu.tamponsSpec).toEqual(['Thèse', 'Soupçon IA', 'Belle image', 'Liaison']);
+    expect(lu.titresSpec).toEqual(['Observations', 'Style', 'Opérations']);
+    expect(lu.tamponsSpec).toEqual(['Thèse', 'Soupçon IA', 'Belle image', 'Relation']);
     // La générale : les mêmes, dans le même ordre, sous les mêmes titres.
     expect(lu.bloc.trim()).toBe([
         'Observations',
@@ -130,8 +130,8 @@ test('#760 + #759 · la générale liste les tampons de la spécifique, dans le 
         'Style',
         'Belle image (×1) :', 'Ton image frappe.',
         '',
-        'Action',
-        'Liaison (×1) :', "L'étudiant·e infère, relie des éléments entre eux, interprète."
+        'Opérations',
+        'Relation (×1) :', "Tu relies des éléments entre eux."
     ].join('\n'));
 
     // « Copier tout » : le bouton du pied de la rétroaction.
@@ -143,7 +143,7 @@ test('#760 + #759 · la générale liste les tampons de la spécifique, dans le 
     const copie = await page.evaluate(() => window._presse760[window._presse760.length - 1]);
     const spec = copie.split('=== RÉTROACTION SPÉCIFIQUE ===\n')[1].split('\n\n=== BILAN ===')[0];
     expect(spec.startsWith('Observations\nThèse (2) — L\'idée directrice manque.\nSoupçon IA (1) — ')).toBe(true);
-    expect(spec).toContain('\n\nStyle\nBelle image (1) — Ton image frappe.\n\nAction\nLiaison (1) — ');
+    expect(spec).toContain('\n\nStyle\nBelle image (1) — Ton image frappe.\n\nOpérations\nRelation (1) — ');
     // Aucune phrase collée à la suivante, nulle part dans le texte copié.
     expect(copie).not.toMatch(/[.!?»)][A-ZÀ-Ý]/);
 

@@ -13,7 +13,7 @@
    tests/unit/sentinelle-parcours-recevoir-2026-11-09.test.js les confronte à la consigne.
 
    · Une étape avance sur l'état atteint : des fichiers dans la file, un fichier neuf en stock, la page
-     d'annotation ouverte, « Enregistrer » touché dans « Rétroactions — Observations », le mode Évaluer,
+     d'annotation ouverte, « Enregistrer » touché dans « Tampons et rétroactions », le mode Évaluer,
      chaque critère avec son niveau ou ses points, une évaluation neuve verrouillée, l'export Léa fini.
    · Le parcours retient sa voie et ce qui existait à « Commencer » (`parcoursRecevoir`, une préférence :
      des identifiants, rien des données de la personne), pour « Reprendre » comme pour « Refaire ».
@@ -164,7 +164,7 @@
     function engrenageTampons() { var p = paletteTampons(); return p ? p.querySelector('[title="Personnaliser"]') : null; }
     function fenetreTampons() { return el('modal-retro-observations'); }
 
-    // « Enregistrer » touché dans « Rétroactions — Observations » : noté au toucher (la fenêtre se ferme ensuite).
+    // « Enregistrer » touché dans « Tampons et rétroactions » : noté au toucher (la fenêtre se ferme ensuite).
     var tamponsEnregistres = false;
     document.addEventListener('click', function (ev) {
         var t = ev.target;
@@ -520,7 +520,7 @@
 
     var ETAPE_4 = {
         // Validée par Grégoire le 19 nov. 2026, 11 h 29 (sa phrase du lieu, 11 h 28 : « tu y poses tes marques »). Deux
-        // formes : la fenêtre « Rétroactions — Observations » ouverte, ce qui ouvrait la première (la confirmation, le
+        // formes : la fenêtre « Tampons et rétroactions » ouverte, ce qui ouvrait la première (la confirmation, le
         // lieu) disparaît (`secondeForme`, comme la bulle 3 de « Je regarde »).
         titre: 'Tes tampons',
         confirme: confirmation("C'est fait : la production est ouverte."),

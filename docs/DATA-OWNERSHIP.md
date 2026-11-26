@@ -357,6 +357,7 @@ du matériel qui NE DOIT PAS entrer dans ces flux.
 | `anonymisation_afficher_da_reel` | ssot-ok | `modes.js` | 1 |
 | `autoreflexionBilan` | ssot-ok | `bilan-reflexif-core.js` | 0 |
 | `categoriesMasquees` | ssot-ok | `travaux-outils.js` | 1 |
+| `categoriesObservation` | ssot-ok | `travaux-outils.js` | 1 |
 | `categoriesPerso` | ssot-ok | `travaux-outils.js` | 1 |
 | `categoriesTamponsRepliees` | ssot-ok | `travaux-outils.js` | 1 |
 | `cc-derniere-description` | ssot-ok | `cc-license.js` | 1 |

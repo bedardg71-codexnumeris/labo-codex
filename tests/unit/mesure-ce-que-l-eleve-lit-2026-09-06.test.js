@@ -542,12 +542,12 @@ describe('mesure · ce que l\'élève lit dans son PDF et dans le texte copié v
 
     it('CONSTAT 4 (corrigé, #760) · le bloc « --- Observations --- » du texte Léa liste les tampons du catalogue courant, comme la spécifique', () => {
         [H, A, G].forEach(x => {
-            expect(x.m.lea.generale).toContain('--- Observations ---\n\nAction\nLiaison (×1) :');
+            expect(x.m.lea.generale).toContain('--- Observations ---\n\nOpérations\nRelation (×1) :');
             expect(x.m.lea.generale).toContain('Observations\nId. directrice (×2) :\nL\'idée directrice n\'est pas adéquatement identifiée.');
             expect(x.m.lea.generale).toContain('--- Langue ---');
             // Le PDF de synthèse lit le même lecteur : mêmes catégories, dans l'ordre des réglages.
             const pdf = x.blocs.find(bl => roleDuBloc(bl) === 'tampons + erreurs annotées').texte;
-            const rangs = ['Liaison', 'Relationnel', 'Id. directrice'].map(n => pdf.indexOf(n));
+            const rangs = ['Relation', 'Relationnel', 'Id. directrice'].map(n => pdf.indexOf(n));
             expect(rangs.every(r => r !== -1)).toBe(true);
             expect(rangs).toEqual([...rangs].sort((u, v) => u - v));
         });

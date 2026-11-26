@@ -91,7 +91,7 @@ test('inscrire avec des critères cochés, rouvrir, annuler : l\'inscription res
     await f.locator('.tc-critere[data-critere="crit_a1"] .tc-coche--oui').click();
     await f.locator('.tc-critere[data-critere="crit_a2"] .tc-coche--non').click();
     await expect(f.locator('.tc-niveaux input:checked:not([data-sans-niveau])'), 'aucun niveau proposé').toHaveCount(0);
-    await expect(f.locator('[data-tc="inscrire"]')).toHaveText('Inscrire la remarque');
+    await expect(f.locator('[data-tc="inscrire"]')).toHaveText('Inscrire sans niveau');
     await f.locator('.tc-niveau', { hasText: 'Ça y est presque' }).click();
     await expect(f.locator('[data-tc="inscrire"]')).toHaveText('Inscrire le niveau');
     await f.locator('.tc-retroaction').fill('Procédés bien relevés ; <b>effets</b> à expliquer.');
@@ -151,7 +151,7 @@ test('une échelle à trois niveaux : trois tuiles, le « sans donnée » compri
     await page.locator(`.tc-case[data-da="${ZOE}"][data-cible="cible_b"]`).click();
     const f = page.locator('.tc-fenetre');
     await expect(f.locator('.tc-niveaux .tc-niveau:not(.tc-niveau--rien)')).toHaveCount(3);
-    await expect(f.locator('.tc-niveau-marque')).toHaveText(['une remarque seulement', 'sans donnée']);
+    await expect(f.locator('.tc-niveau-marque')).toHaveText(['une trace seulement', 'sans donnée']);
     await f.locator('.tc-niveau', { hasText: 'Absent' }).click();
     await f.locator('[data-tc="inscrire"]').click();
     await expect(page.locator('.tc-fenetre')).toHaveCount(0);
@@ -173,7 +173,7 @@ test('une remarque sans niveau : refusée vide ; inscrite avec un texte, la case
     await f.locator('[data-tc="inscrire"]').click();
     await expect(page.locator('.tc-fenetre')).toHaveCount(0);
     await expect(laCase).toHaveText('✎Données insuffisantes1');   // lot 3 : la cible est sans donnée, son nom se lit
-    await expect(laCase).toHaveAttribute('aria-label', 'Zoé Fictive, Structurer : sans donnée (Données insuffisantes), 1 remarque');
+    await expect(laCase).toHaveAttribute('aria-label', 'Zoé Fictive, Structurer : sans donnée (Données insuffisantes), 1 trace sans niveau');
     await expect(page.locator('.tc-legende', { hasText: '✎' })).toBeVisible();
     let s = await stock(page);
     expect(s[0]).toMatchObject({ niveau: null, echelleId: null });
@@ -183,7 +183,7 @@ test('une remarque sans niveau : refusée vide ; inscrite avec un texte, la case
     await f.locator('.tc-date').fill('2026-11-25');
     await f.locator('[data-tc="inscrire"]').click();
     await expect(laCase.locator('.tc-case-niveau')).toHaveText('3');
-    await expect(laCase).toHaveAttribute('aria-label', 'Zoé Fictive, Structurer : niveau retenu Acquis, 2 inscriptions, dont 1 remarque');   // lot 3
+    await expect(laCase).toHaveAttribute('aria-label', 'Zoé Fictive, Structurer : niveau retenu Acquis, 2 inscriptions, dont 1 trace sans niveau');   // lot 3
     await laCase.click();
     await expect(f.locator('.tc-entree-niveau--remarque')).toHaveText('Remarque, sans niveau');
     s = await stock(page);

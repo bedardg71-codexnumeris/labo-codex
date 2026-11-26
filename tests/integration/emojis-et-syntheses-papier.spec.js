@@ -12,7 +12,7 @@ const indexHtml = 'file://' + path.join(racineProjet, 'index.html');
 // « LES EMOJIS COMME TAMPONS, ET LES SYNTHÈSES PDF DES COPIES SUR PAPIER » (8 nov. 2026, décisions de Grégoire)
 // =======================================================================
 //
-// #1244 — un emoji devient un vrai tampon : « + Ajouter » dans « Rétroactions — Observations », l'emoji tapé dans
+// #1244 — un emoji devient un vrai tampon : « + Ajouter » dans « Tampons et rétroactions », l'emoji tapé dans
 // « ou un emoji » ; l'application l'écrit dans une image PNG. Il garde ses couleurs (ni teinte de catégorie, ni
 // inversion) ; sa phrase arrive dans la synthèse de l'étudiant·e, sous sa vignette en couleurs.
 // #1245 — « Exporter pour Léa » produit aussi la synthèse seule d'une copie évaluée sur papier, nommée avec le DA ; la

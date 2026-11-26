@@ -414,7 +414,9 @@ test('la gestion des tampons : la phrase de Grégoire sous « + Ajouter une cat�
     await expect(zone).toBeVisible();
 
     const bouton = zone.locator('[data-action="travauxOutils.ajouterCategorieRetroObs"]');
-    const phrase = zone.locator('.travaux-retro-cat-aide');
+    // Tampons d'observation, lot 1 (24 nov. 2026) : dans un espace qui a une pratique par cibles, une seconde aide suit
+    // celle-ci, de la même classe (« Coche « D'observation »… »). La phrase de Grégoire est la première, sous le bouton.
+    const phrase = zone.locator('.travaux-retro-cat-aide:not([data-observation-aide-categories])');
     await expect(phrase).toHaveText('Tu enseignes plus d\'un cours ? Crée une catégorie par cours pour y ranger ses tampons.');
     // Juste sous le bouton, en texte d'aide : la couleur secondaire, sans encadré.
     expect(await bouton.evaluate(b => b.nextElementSibling && b.nextElementSibling.classList.contains('travaux-retro-cat-aide'))).toBe(true);
@@ -466,7 +468,7 @@ test('captures pour Grégoire : les tampons, Mac 1440 clair et sombre (un aperç
 
     await page.setViewportSize({ width: 1440, height: 900 });
     await page.locator('[data-action="travauxOutils.ouvrirEditionRetroObservations"]').click();
-    await page.locator('#travaux-retro-categories .travaux-retro-cat-aide').scrollIntoViewIfNeeded();
+    await page.locator('#travaux-retro-categories .travaux-retro-cat-aide').first().scrollIntoViewIfNeeded();
     await attendreRepos(page);
     await page.screenshot({ path: path.join(dossierCaptures, 'gestion-tampons-phrase-mac-1440-clair.png') });
 });

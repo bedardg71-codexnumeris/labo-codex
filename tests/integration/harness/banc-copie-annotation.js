@@ -20,7 +20,7 @@ const patternsAttendus = [
     /The operation is insecure/
 ];
 
-async function monter(page) {
+async function monter(page, url = indexHtml) {
     const suivi = { dialogues: [], erreurs: [] };
     const estAttendue = (m) => patternsAttendus.some((re) => re.test(m));
     page.on('dialog', (d) => { suivi.dialogues.push(d.message()); d.dismiss().catch(() => {}); });
@@ -29,7 +29,7 @@ async function monter(page) {
         if (msg.type() === 'error') { const m = `console.error: ${msg.text()}`; if (!estAttendue(m)) suivi.erreurs.push(m); }
     });
 
-    await page.goto(indexHtml);
+    await page.goto(url);
     await page.waitForFunction(() => typeof window.executerActionEval === 'function'
         && window.travauxUI && window.travauxStockage && typeof window.db !== 'undefined');
     await page.evaluate(({ da }) => {
@@ -66,9 +66,10 @@ async function monter(page) {
 
 export const attendre = (page, ms) => page.evaluate((d) => new Promise((r) => setTimeout(r, d)), ms);
 
-/** La copie ouverte en mode Annoter. Rend le suivi { dialogues, erreurs }. */
-export async function ouvrirCopie(page) {
-    const suivi = await monter(page);
+/** La copie ouverte en mode Annoter. Rend le suivi { dialogues, erreurs }. `url` : l'application servie ailleurs qu'en
+ *  `file://` (un banc qui lit les pixels d'un canevas où une image de tampon est dessinée : en `file://`, il est illisible). */
+export async function ouvrirCopie(page, url) {
+    const suivi = await monter(page, url);
     await page.evaluate(() => window.afficherSection('evaluations'));
     await page.waitForFunction(() => !!document.querySelector('#section-evaluations.active') && window.travauxUI.getModeCourant() === 'annoter', null, { timeout: 10000 });
     await attendre(page, 400);

@@ -23,7 +23,8 @@
  *                   productionId,            // l'id d'une production, ou null (observation, entretien : N3)
  *                   origine,                 // 'production', 'observation' ou 'conversation' (22 nov. 2026 ; voir plus bas)
  *                   noteBreve,               // texte libre de l'enseignant·e (la rétroaction, N5) ; '' si rien
- *                   criteres: [ { id, texte, essentiel, respecte } ] }
+ *                   criteres: [ { id, texte, essentiel, respecte } ],
+ *                   tampons: [ { id, nom, categorieId, categorieNom, critere, emoji } ] }   // 24 nov. 2026 ; voir plus bas
  *   annulation  : { id, type: 'annulation', inscriptionId, da, ensembleId, cibleId, date, horodatage, raison }
  *
  * UNE INSCRIPTION SANS NIVEAU (choix de Grégoire, 21 nov. 2026, 9 h 17 ; à l'écran, une « remarque », mot PROPOSÉ) :
@@ -59,6 +60,20 @@
  * au moins un critère renseigné (respecté ou non respecté). Une observation d'une seule touche est donc valide. Vide des
  * trois, elle est refusée (`motifsRefus`). Les coches restent sans calcul : elles rendent l'inscription non vide, rien de plus.
  *
+ * LES TAMPONS D'OBSERVATION (décisions de Grégoire, 24 nov. 2026 ; « Tampons d'observation », lot 2). Un tampon consigne
+ * un geste acquis que l'on voit l'étudiant·e faire. Il ne consigne jamais un manque, ne pose pas de niveau et NE COCHE
+ * AUCUN CRITÈRE : `criteres[].respecte` ne dépend jamais de `tampons`. Chaque tampon est COPIÉ au moment du geste
+ * (identifiant, nom, identifiant et nom de sa catégorie, critère déclaré, emoji s'il en a un) : renommer ou supprimer le
+ * tampon ne change pas ce qu'une inscription passée dit. JAMAIS l'image : elle pèse jusqu'à 2 650 caractères et une séance
+ * en inscrit des dizaines ; à l'affichage elle se cherche par l'identifiant sur le poste, et le nom suffit sans elle.
+ * Les inscriptions d'avant n'ont pas ce champ et ne sont pas réécrites : `lireTampons` les lit sans tampon.
+ * Un tampon suffit à rendre l'inscription non vide (`motifsRefus`). Une trace sans niveau ne pose pas de niveau : au
+ * tableau sa case montre ✎. Elle ne s'appelle « Remarque » que si elle porte un TEXTE (`estUneRemarque` ; Grégoire,
+ * 24 nov. 2026, 18 h 57) : faite de coches, de tampons ou des deux, elle se lit par sa date, son origine et son contenu.
+ * LE RAPPROCHEMENT d'un critère déclaré (`rapprocherTampons`) se fait À L'AFFICHAGE seulement, contre les textes des
+ * critères copiés dans la MÊME inscription : texte rogné, sans égard à la casse ; le premier qui correspond. Rien n'est
+ * écrit à ce sujet dans l'inscription. Sans critère déclaré, ou si aucun ne correspond : sous la cible, sans plus.
+ *
  * CE QUE CE MODULE NE FAIT PAS : il ne retient aucun niveau et ne calcule aucune note (lots 3 et 4 : `NoteCibles`,
  * js/pratiques/note-cibles.js, qui lit cette liste par les fonctions pures ci-dessous). Il ne lit ni n'écrit
  * `evaluationsSauvegardees`.
@@ -71,6 +86,12 @@
     const ANNULATION = 'annulation';
     const LONGUEUR_NOTE_BREVE = 600;   // une note BRÈVE : la zone de saisie s'arrête là (choix technique)
     const LONGUEUR_RAISON = 300;
+    // Les tampons d'une inscription (24 nov. 2026). Bornes techniques : celles des réglages des tampons (un nom et un nom
+    // de catégorie de 100 caractères, un critère de 200), et un plafond de tampons par inscription.
+    const LONGUEUR_NOM_TAMPON = 100;
+    const LONGUEUR_CRITERE_TAMPON = 200;
+    const LONGUEUR_EMOJI_TAMPON = 16;
+    const MAX_TAMPONS = 40;
 
     /* ------------------------------------------------------------------ Les refus, en mots (propositions) */
     // Mots PROPOSÉS (plans de travail/TEXTES-2026-11-21-par-standards-lot-2.md) : Grégoire les relit sur l'aperçu.
@@ -79,6 +100,8 @@
         // Élargi le 22 nov. 2026 : un critère renseigné suffit aussi (l'écran d'observation).
         VIDE: 'Choisis un niveau, renseigne un critère ou écris une rétroaction : une inscription vide ne s\'inscrit pas.',
         OBSERVATION_VIDE: 'Renseigne un critère ou écris ce que tu as vu : une observation vide ne s\'inscrit pas.',
+        // 24 nov. 2026, mot PROPOSÉ (TEXTES-2026-11-24-tampons-observation-lot-2.md) : dit seulement quand l'écran offre des tampons.
+        OBSERVATION_VIDE_TAMPONS: 'Touche un tampon, renseigne un critère ou écris ce que tu as vu : une observation vide ne s\'inscrit pas.',
         NIVEAU_HORS_ECHELLE: 'Ce niveau n\'est pas dans l\'échelle de la pratique : choisis-en un dans la liste.',
         DATE: 'La date n\'est pas valide : choisis une date dans le calendrier.',
         SANS_ELEVE: 'Choisis l\'étudiant·e.',
@@ -179,6 +202,79 @@
         return (Array.isArray(criteres) ? criteres : []).some(k => k && lireRespecte(k.respecte) !== null);
     }
 
+    /* ------------------------------------------------------------------ Les tampons (24 nov. 2026, fonctions pures) */
+
+    function texteBorne(v, max) {
+        return String(v == null ? '' : v).replace(/\s+/g, ' ').trim().slice(0, max).trim();
+    }
+
+    /**
+     * Les tampons d'une inscription dans leur forme rangée : la COPIE de chacun au moment du geste. Sans identifiant, un
+     * tampon n'entre pas ; le même identifiant n'entre qu'une fois ; jamais d'image ni d'autre champ.
+     * @param {Array<{id, nom, categorieId, categorieNom, critere, emoji}>} liste
+     */
+    function construireTampons(liste) {
+        const vus = new Set();
+        const rendus = [];
+        (Array.isArray(liste) ? liste : []).forEach(t => {
+            const id = (t && t.id != null) ? String(t.id) : '';
+            if (!id || vus.has(id) || rendus.length >= MAX_TAMPONS) return;
+            vus.add(id);
+            rendus.push({
+                id: id,
+                nom: texteBorne(t.nom, LONGUEUR_NOM_TAMPON),
+                categorieId: t.categorieId == null ? '' : String(t.categorieId),
+                categorieNom: texteBorne(t.categorieNom, LONGUEUR_NOM_TAMPON),
+                critere: texteBorne(t.critere, LONGUEUR_CRITERE_TAMPON),
+                emoji: texteBorne(t.emoji, LONGUEUR_EMOJI_TAMPON)
+            });
+        });
+        return rendus;
+    }
+
+    /** Les tampons d'une inscription, lus : une inscription d'avant le 24 nov. n'en a pas (`[]`). Rien n'est réécrit. */
+    function lireTampons(e) {
+        return (e && Array.isArray(e.tampons)) ? e.tampons.filter(t => t && t.id) : [];
+    }
+
+    /** Vrai quand au moins un tampon est posé. */
+    function aUnTampon(tampons) {
+        return (Array.isArray(tampons) ? tampons : []).some(t => t && t.id);
+    }
+
+    /**
+     * Vrai pour une REMARQUE : une trace sans niveau qui porte un TEXTE (règle de Grégoire, 24 nov. 2026, 18 h 57 : le mot
+     * « remarque » désigne un texte que l'enseignant·e a écrit). Une trace sans niveau faite de coches, de tampons ou des
+     * deux n'en est pas une : à l'historique et au profil elle se lit par sa date, son origine et son contenu, sans étiquette.
+     */
+    function estUneRemarque(e) {
+        return estSansNiveau(e) && texteLibre(e && e.noteBreve, LONGUEUR_NOTE_BREVE) !== '';
+    }
+
+    /** Le texte d'un critère pour le comparer : rogné, espaces resserrées, sans égard à la casse. */
+    function critereCompare(texte) {
+        return String(texte == null ? '' : texte).replace(/\s+/g, ' ').trim().toLocaleLowerCase('fr');
+    }
+
+    /**
+     * OÙ SE MONTRE CHAQUE TAMPON (à l'affichage seulement ; rien n'est écrit) : à côté du PREMIER critère de `criteres`
+     * dont le texte correspond à son critère déclaré, sinon sous la cible. Ne lit ni n'écrit aucune coche.
+     * @param {Array} tampons - forme rangée
+     * @param {Array<{id, texte}>} criteres - ceux de l'inscription (ou de la cible, sur l'écran « Observer »)
+     * @returns {{ parCritere: Object<string, Array>, sousLaCible: Array }}
+     */
+    function rapprocherTampons(tampons, criteres) {
+        const liste = (Array.isArray(criteres) ? criteres : []).filter(k => k && k.id);
+        const rendu = { parCritere: {}, sousLaCible: [] };
+        (Array.isArray(tampons) ? tampons : []).filter(t => t && t.id).forEach(t => {
+            const cherche = critereCompare(t.critere);
+            const trouve = cherche ? liste.find(k => critereCompare(k.texte) === cherche) : null;
+            if (!trouve) { rendu.sousLaCible.push(t); return; }
+            (rendu.parCritere[trouve.id] || (rendu.parCritere[trouve.id] = [])).push(t);
+        });
+        return rendu;
+    }
+
     /* ------------------------------------------------------------------ Construire (fonctions pures) */
 
     function texteLibre(v, max) {
@@ -187,7 +283,7 @@
 
     /**
      * Une inscription dans sa forme rangée.
-     * @param {{id, da, ensembleId, cibleId, niveau, echelleId, date, horodatage, productionId, origine, noteBreve, criteres}} s
+     * @param {{id, da, ensembleId, cibleId, niveau, echelleId, date, horodatage, productionId, origine, noteBreve, criteres, tampons}} s
      */
     function construireInscription(s) {
         const q = s || {};
@@ -211,7 +307,8 @@
                 texte: String(k.texte == null ? '' : k.texte),
                 essentiel: k.essentiel === true,
                 respecte: lireRespecte(k.respecte)
-            }))
+            })),
+            tampons: construireTampons(q.tampons)   // 24 nov. 2026 : la copie de chaque tampon ; ne touche aucune coche
         };
     }
 
@@ -246,8 +343,9 @@
     /**
      * Les refus d'une inscription, dans l'ordre de l'écran. Vide : elle peut s'écrire. Les coches n'y entrent pas : elles
      * sont facultatives, et l'application ne juge pas le niveau à partir d'elles. Le niveau est facultatif (complément du
-     * 21 nov., 9 h 17), mais une inscription porte au moins un niveau, un texte ou un critère renseigné (22 nov. 2026).
-     * @param {{da, cibleId, niveau, noteBreve, date, criteres}} saisie
+     * 21 nov., 9 h 17), mais une inscription porte au moins un niveau, un texte, un critère renseigné (22 nov. 2026) ou un
+     * tampon (24 nov. 2026).
+     * @param {{da, cibleId, niveau, noteBreve, date, criteres, tampons}} saisie
      * @param {Object} echelle - l'échelle de la pratique
      * @returns {string[]}
      */
@@ -256,7 +354,7 @@
         const motifs = [];
         if (!q.da) motifs.push(MOTIFS.SANS_ELEVE);
         const niveau = lireNiveau(q.niveau);
-        if (niveau === null && texteLibre(q.noteBreve, LONGUEUR_NOTE_BREVE) === '' && !aUnCritereRenseigne(q.criteres)) motifs.push(MOTIFS.VIDE);
+        if (niveau === null && texteLibre(q.noteBreve, LONGUEUR_NOTE_BREVE) === '' && !aUnCritereRenseigne(q.criteres) && !aUnTampon(q.tampons)) motifs.push(MOTIFS.VIDE);
         else if (niveau !== null && codesDeLEchelle(echelle).indexOf(niveau) === -1) motifs.push(MOTIFS.NIVEAU_HORS_ECHELLE);
         if (!dateValide(q.date)) motifs.push(MOTIFS.DATE);
         return motifs;
@@ -321,6 +419,28 @@
     }
 
     /**
+     * CE QUI EST DÉJÀ INSCRIT À UNE DATE POUR UNE CASE (24 nov. 2026, retouche du lot 2 des tampons d'observation ;
+     * Grégoire, 18 h 55 : revenu sur un·e élève déjà noté·e, l'écran vide laissait croire que rien n'était enregistré).
+     * Les inscriptions NON ANNULÉES de cet·te étudiant·e, pour cette cible de cet ensemble, à cette date, toutes origines
+     * comprises ; et les noms de leurs tampons, une fois chacun, dans l'ordre où ils ont été inscrits. Ne lit aucun
+     * niveau, n'écrit rien.
+     * @returns {{inscriptions: number, tampons: Array<string>}}
+     */
+    function dejaInscritALaDate(liste, da, ensembleId, cibleId, date) {
+        const annulations = annulationsParInscription(liste);
+        const duJour = (Array.isArray(liste) ? liste : [])
+            .map((e, rang) => ({ e, rang }))
+            .filter(({ e }) => estInscription(e) && !annulations.has(e.id) && e.date === date && duneCase(e, da, ensembleId, cibleId))
+            .sort((a, b) => String(a.e.horodatage || '').localeCompare(String(b.e.horodatage || '')) || a.rang - b.rang);
+        const noms = [];
+        duJour.forEach(({ e }) => lireTampons(e).forEach(t => {
+            const nom = String(t.nom || t.id);
+            if (noms.indexOf(nom) === -1) noms.push(nom);
+        }));
+        return { inscriptions: duJour.length, tampons: noms };
+    }
+
+    /**
      * Les inscriptions non annulées de chaque cible d'un ensemble : { [cibleId]: { inscriptions, niveaux, remarques, eleves } }.
      * Pour la question de l'assistant avant de retirer une cible.
      */
@@ -367,10 +487,11 @@
         const liste = Array.isArray(retraits) ? retraits : [];
         if (liste.length === 0) return null;
         const plusieurs = liste.length > 1;
-        // Complément du 21 nov., 9 h 17 : une inscription peut être une remarque, sans niveau ; elles sont dites à part.
+        // Complément du 21 nov., 9 h 17 : une inscription peut être sans niveau ; elles sont dites à part. Mots de
+        // Grégoire (24 nov. 2026, 18 h 58) : « 2 traces sans niveau pour 1 étudiant·e ».
         const compte = (n, un, des) => `${n} ${n > 1 ? des : un}`;
         const lignes = liste.map(x => `« ${x.cible.etiquette || x.cible.id} » : `
-            + [x.niveaux ? compte(x.niveaux, 'niveau inscrit', 'niveaux inscrits') : '', x.remarques ? compte(x.remarques, 'remarque', 'remarques') : '']
+            + [x.niveaux ? compte(x.niveaux, 'niveau inscrit', 'niveaux inscrits') : '', x.remarques ? compte(x.remarques, 'trace sans niveau', 'traces sans niveau') : '']
                 .filter(Boolean).join(' et ')
             + ` pour ${compte(x.eleves, 'étudiant·e', 'étudiant·es')}`);
         const message = (plusieurs ? 'Tu retires des cibles qui portent des inscriptions.' : 'Tu retires une cible qui porte des inscriptions.')
@@ -395,6 +516,159 @@
         if (declarees.length === 0) return toutes.slice();
         const offertes = toutes.filter(c => c && declarees.indexOf(String(c.id)) !== -1);
         return offertes.length ? offertes : toutes.slice();
+    }
+
+    /* ------------------------------------------------------------------ Les tampons posés sur une production (25 nov. 2026, fonctions pures)
+       « Tampons d'observation », lot 3. UNE SEULE SOURCE : poser un tampon sur une production n'écrit AUCUNE inscription.
+       Ces fonctions LISENT les annotations des productions d'un·e étudiant·e et en tirent des traces ; rien n'est écrit.
+       Un tampon retiré ou déplacé de la production disparaît donc de lui-même, sans trace fantôme.
+       Est « d'observation » un tampon que `lireTampon(id)` reconnaît AU MOMENT DE LA LECTURE (sa catégorie est cochée) :
+       le tampon posé ne garde que son identifiant. Au moment d'inscrire, la trace est COPIÉE (forme du lot 2) et ne bouge plus. */
+
+    /** L'instant où un tampon a été posé, en millisecondes, lu de son identifiant (`STK_<instant>`, écrit à la pose et
+     *  gardé quand on le déplace) ; null si l'identifiant n'en porte pas. */
+    function instantDeLaPose(tamponPose) {
+        const m = /^STK_(\d{12,14})(?:_|$)/.exec(String(tamponPose && tamponPose.id || ''));
+        const n = m ? Number(m[1]) : NaN;
+        return Number.isFinite(n) ? n : null;
+    }
+
+    /** L'instant d'une date ISO, ou null. */
+    function instantDuTexte(texte) {
+        const n = texte ? Date.parse(String(texte)) : NaN;
+        return Number.isFinite(n) ? n : null;
+    }
+
+    /**
+     * LES TRACES LUES SUR LES PRODUCTIONS d'un·e étudiant·e : par production, puis par jour de pose, les tampons
+     * d'observation posés (chacun une fois par jour, dans l'ordre de pose, dans sa forme de copie).
+     * LA DATE d'une trace : le jour, à l'heure de l'appareil, de l'instant de la pose ; à défaut (identifiant sans
+     * instant), la dernière modification de l'annotation, puis l'import du fichier.
+     * @param {Array} fichiers - `fichiersTravaux` (un fichier : `{ id, etudiantDA, productionId }`)
+     * @param {Array} annotations - `annotationsTravaux` (une annotation : `{ fichierId, pages: { [rang]: { stickers } } }`)
+     * @param {string} da
+     * @param {function(string): ?Object} lireTampon - l'identifiant d'un tampon → sa copie s'il est d'observation, sinon null
+     * @returns {Array<{productionId: string, jours: Array<{date: string, horodatage: string, tampons: Array}>}>}
+     *   les productions par trace la plus récente d'abord ; les jours, le plus récent d'abord
+     */
+    /** Les tampons d'observation posés sur les pages d'UNE annotation : `[{ instant, tampon }]`. */
+    function posesDeLAnnotation(annotation, copieDe, repli) {
+        const pages = (annotation && annotation.pages && typeof annotation.pages === 'object') ? annotation.pages : {};
+        const poses = [];
+        Object.keys(pages).forEach(rang => {
+            const page = pages[rang];
+            (page && Array.isArray(page.stickers) ? page.stickers : []).forEach(pose => {
+                const id = pose && pose.autocollantId != null ? String(pose.autocollantId) : '';
+                const tampon = id ? copieDe(id) : null;
+                if (tampon) poses.push({ instant: instantDeLaPose(pose) || repli, tampon: tampon });
+            });
+        });
+        return poses;
+    }
+
+    /** Des poses rangées par jour (à l'heure de l'appareil), le plus récent d'abord ; chaque tampon une fois par jour. */
+    function joursDesPoses(poses) {
+        const jours = new Map();
+        poses.forEach(p => {
+            const date = dateDuJour(new Date(p.instant));
+            const jour = jours.get(date) || { date: date, instant: p.instant, poses: [] };
+            jours.set(date, jour);
+            jour.instant = Math.max(jour.instant, p.instant);
+            jour.poses.push(p);
+        });
+        return Array.from(jours.values()).map(j => ({
+            date: j.date,
+            horodatage: new Date(j.instant).toISOString(),
+            tampons: construireTampons(j.poses.slice().sort((x, y) => x.instant - y.instant).map(x => x.tampon))
+        })).sort(plusRecenteDAbord);
+    }
+
+    function tracesDesProductions(fichiers, annotations, da, lireTampon) {
+        const lire = typeof lireTampon === 'function' ? lireTampon : () => null;
+        const parFichier = new Map();
+        (Array.isArray(annotations) ? annotations : []).forEach(a => { if (a && a.fichierId && !parFichier.has(a.fichierId)) parFichier.set(a.fichierId, a); });
+        const connus = new Map();   // identifiant du tampon → sa copie, ou null : lu une fois
+        const copieDe = (id) => { if (!connus.has(id)) connus.set(id, lire(id) || null); return connus.get(id); };
+        const parProduction = new Map();
+        (Array.isArray(fichiers) ? fichiers : []).filter(f => f && f.productionId && String(f.etudiantDA) === String(da)).forEach(f => {
+            const a = parFichier.get(f.id);
+            const poses = posesDeLAnnotation(a, copieDe, instantDuTexte(a && a.dateModification) || instantDuTexte(f.dateImport) || 0);
+            if (poses.length) parProduction.set(f.productionId, (parProduction.get(f.productionId) || []).concat(poses));
+        });
+        const rendu = [];
+        parProduction.forEach((poses, productionId) => rendu.push({ productionId: String(productionId), jours: joursDesPoses(poses) }));
+        return rendu.sort((x, y) => plusRecenteDAbord(x.jours[0], y.jours[0]));
+    }
+
+    /** Les tampons d'observation d'UNE production, tous jours confondus, chacun une fois, dans l'ordre de pose : ce que
+     *  « Inscrire pour une production » montre et copie. */
+    function tamponsDeLaProduction(traces, productionId) {
+        const t = (Array.isArray(traces) ? traces : []).find(x => x && x.productionId === String(productionId));
+        if (!t) return [];
+        return construireTampons(t.jours.slice().reverse().reduce((tous, j) => tous.concat(j.tampons), []));
+    }
+
+    /**
+     * LA cible qu'une production vise, quand elle en vise UNE SEULE : elle déclare exactement une cible
+     * (`production.ciblesRenseignees`) et cette cible est dans l'ensemble. Zéro, plusieurs, ou une cible qui n'est plus
+     * dans l'ensemble : null (la trace reste sous la production).
+     */
+    function cibleUnique(production, cibles) {
+        const declarees = (production && Array.isArray(production.ciblesRenseignees)) ? production.ciblesRenseignees.map(String) : [];
+        if (declarees.length !== 1) return null;
+        const c = (Array.isArray(cibles) ? cibles : []).find(x => x && String(x.id) === declarees[0]);
+        return c ? String(c.id) : null;
+    }
+
+    /**
+     * LES TAMPONS RETENUS D'OFFICE dans le bloc d'une cible d'« Inscrire pour une production » (décision de Grégoire,
+     * 25 nov. 2026, 8 h 22). La fenêtre offre UN SEUL bloc de cible : tous. Elle en offre PLUSIEURS : aucun, sauf le
+     * tampon qui déclare un critère de CETTE cible (le rapprochement du lot 2, `rapprocherTampons` : la même comparaison
+     * que sur « Observer »). Deux cibles qui portent un critère du même texte retiennent donc toutes deux ce tampon.
+     * @param {Array} tampons - forme rangée
+     * @param {{criteres: Array}} cible - celle du bloc
+     * @param {number} nombreDeBlocs - les blocs de cible que la fenêtre offre pour cette production
+     * @returns {Array<string>} les identifiants retenus d'office
+     */
+    function tamponsRetenusDOffice(tampons, cible, nombreDeBlocs) {
+        const liste = (Array.isArray(tampons) ? tampons : []).filter(t => t && t.id);
+        if (nombreDeBlocs === 1) return liste.map(t => String(t.id));
+        const parCritere = rapprocherTampons(liste, cible && cible.criteres).parCritere;
+        return Object.keys(parCritere).reduce((ids, k) => ids.concat(parCritere[k].map(t => String(t.id))), []);
+    }
+
+    /** Vrai quand une inscription non annulée existe pour cette personne, cette cible et cette production. */
+    function estInscritePourLaProduction(liste, da, ensembleId, cibleId, productionId) {
+        const annulations = annulationsParInscription(liste);
+        return (Array.isArray(liste) ? liste : []).some(e => estInscription(e) && duneCase(e, da, ensembleId, cibleId)
+            && e.productionId === String(productionId) && !annulations.has(e.id));
+    }
+
+    /**
+     * LES TRACES LUES EN DIRECT SOUS UNE CIBLE : celles des productions qui visent cette seule cible, tant qu'aucune
+     * inscription non annulée n'existe pour la production et la cible (dès qu'il y en a une, c'est elle qu'on lit : la
+     * lecture en direct ne s'y ajoute pas une seconde fois). Chaque trace a la forme d'une inscription sans niveau,
+     * sans texte et sans coche, d'origine « production », marquée `enDirect` ; elle n'a pas d'identifiant : elle n'existe
+     * dans aucun stock.
+     * @param {Array} traces - `tracesDesProductions`
+     * @param {Array} productions - celles du groupe
+     * @param {{ liste: Array, da: string, ensembleId: string, cible: Object, cibles: Array }} o
+     */
+    function tracesEnDirectSousLaCible(traces, productions, o) {
+        const q = o || {};
+        const cible = q.cible || {};
+        const rendu = [];
+        (Array.isArray(traces) ? traces : []).forEach(t => {
+            const production = (Array.isArray(productions) ? productions : []).find(p => p && String(p.id) === t.productionId);
+            if (!production || cibleUnique(production, q.cibles) !== String(cible.id)) return;
+            if (estInscritePourLaProduction(q.liste, q.da, q.ensembleId, cible.id, t.productionId)) return;
+            t.jours.forEach(j => rendu.push({
+                id: '', type: INSCRIPTION, enDirect: true, da: String(q.da), ensembleId: String(q.ensembleId || ''), cibleId: String(cible.id),
+                niveau: null, echelleId: null, date: j.date, horodatage: j.horodatage, productionId: t.productionId,
+                origine: ORIGINES.PRODUCTION, noteBreve: '', criteres: etatDesCriteres(cible, {}), tampons: j.tampons
+            }));
+        });
+        return rendu.sort(plusRecenteDAbord);
     }
 
     /* ------------------------------------------------------------------ Ajouter (fonction pure) */
@@ -483,7 +757,14 @@
         ORIGINES: ORIGINES,
         lireOrigine: lireOrigine,
         aUnCritereRenseigne: aUnCritereRenseigne,
+        // 24 nov. 2026 : les tampons d'observation
+        construireTampons: construireTampons,
+        lireTampons: lireTampons,
+        aUnTampon: aUnTampon,
+        estUneRemarque: estUneRemarque,
+        rapprocherTampons: rapprocherTampons,
         vusALaDate: vusALaDate,
+        dejaInscritALaDate: dejaInscritALaDate,   // 24 nov. 2026 : la ligne « Déjà inscrit aujourd'hui » de l'écran d'observation
         dateDuJour: dateDuJour,
         dateValide: dateValide,
         lireRespecte: lireRespecte,
@@ -501,6 +782,15 @@
         ciblesRetireesInscrites: ciblesRetireesInscrites,
         questionRetraitCibles: questionRetraitCibles,
         ciblesOffertes: ciblesOffertes,
+        // 25 nov. 2026, lot 3 : les tampons d'observation posés sur une production, LUS (rien n'est écrit)
+        instantDeLaPose: instantDeLaPose,
+        tracesDesProductions: tracesDesProductions,
+        tamponsDeLaProduction: tamponsDeLaProduction,
+        cibleUnique: cibleUnique,
+        tamponsRetenusDOffice: tamponsRetenusDOffice,
+        estInscritePourLaProduction: estInscritePourLaProduction,
+        tracesEnDirectSousLaCible: tracesEnDirectSousLaCible,
+        plusRecenteDAbord: plusRecenteDAbord,
         ajouter: ajouter,
         lireToutes: lireToutes,
         inscrire: inscrire,
