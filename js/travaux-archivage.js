@@ -620,41 +620,65 @@
     }
 
     /**
+     * PROPOSÉ (25 nov. 2026, mots que lit l'enseignant·e, à valider par Grégoire) : la raison que le bilan d'un export
+     * donne pour une copie en image dont la version annotée n'a pas pu être produite. Le bilan l'écrit après le nom de
+     * la copie : « … 1 en échec : • Nom / copie.jpg — <raison> ».
+     */
+    const RAISON_SANS_VERSION_ANNOTEE = 'sa version annotée n’a pas pu être produite (l’original est dans l’archive)';
+
+    /**
      * Aplatit les annotations sur une image
+     *
+     * Correctif du 25 nov. 2026 (retour d'essai de Grégoire, iPad) : le dessin des annotations est asynchrone (il
+     * attend les images des tampons) et il était appelé sans être attendu ; le JPEG se faisait avant lui, et la
+     * version annotée sortait identique à l'original : ni code, ni trait, ni tampon. Il est attendu.
+     * Et un échec n'est plus muet ni bloquant : une image illisible, un dessin qui lève, un canevas qui ne rend rien
+     * rejettent la promesse (avant, l'image illisible rendait `null`, que l'appelant sautait en silence ; une
+     * exception dans le dessin laissait la promesse sans réponse). `_ajouterFichierAuZip` laisse passer le rejet :
+     * l'appelant nomme la copie dans son bilan (#565, #891), son original déjà dans l'archive.
+     *
      * @param {Blob} imageBlob - L'image originale
      * @param {Object} annotation - Les annotations
-     * @returns {Promise<Blob>} L'image avec annotations
+     * @returns {Promise<Blob>} L'image avec annotations ; rejetée avec RAISON_SANS_VERSION_ANNOTEE en cas d'échec
      */
     async function aplatirAnnotationsImage(imageBlob, annotation) {
-        return new Promise((resolve) => {
+        return new Promise((resolve, reject) => {
             const img = new Image();
             const url = URL.createObjectURL(imageBlob);
+            const echouer = (cause) => {
+                console.warn('[Travaux-Archivage] Version annotée impossible :', cause);
+                reject(new Error(RAISON_SANS_VERSION_ANNOTEE));
+            };
 
-            img.onload = () => {
+            img.onload = async () => {
                 URL.revokeObjectURL(url);
+                try {
+                    const canvas = document.createElement('canvas');
+                    canvas.width = img.width;
+                    canvas.height = img.height;
+                    const ctx = canvas.getContext('2d');
 
-                const canvas = document.createElement('canvas');
-                canvas.width = img.width;
-                canvas.height = img.height;
-                const ctx = canvas.getContext('2d');
+                    // Dessiner l'image originale
+                    ctx.drawImage(img, 0, 0);
 
-                // Dessiner l'image originale
-                ctx.drawImage(img, 0, 0);
+                    // Dessiner les annotations de la page 0, et ATTENDRE le dessin avant le JPEG
+                    const donnees = annotation.pages[0];
+                    if (donnees) {
+                        await dessinerAnnotationsSurCanvas(ctx, donnees, img.width, img.height);
+                    }
 
-                // Dessiner les annotations de la page 0
-                const donnees = annotation.pages[0];
-                if (donnees) {
-                    dessinerAnnotationsSurCanvas(ctx, donnees, img.width, img.height);
+                    canvas.toBlob((blob) => {
+                        if (blob) resolve(blob);
+                        else echouer('le canevas n’a rendu aucune image');
+                    }, 'image/jpeg', 0.9);
+                } catch (e) {
+                    echouer(e);
                 }
-
-                canvas.toBlob((blob) => {
-                    resolve(blob);
-                }, 'image/jpeg', 0.9);
             };
 
             img.onerror = () => {
                 URL.revokeObjectURL(url);
-                resolve(null);
+                echouer('image illisible');
             };
 
             img.src = url;
@@ -664,10 +688,10 @@
     /**
      * Dessine des annotations sur un canvas
      * Delegue a la fonction partagee de travaux-export-pdf.js
-     * (inclut le rendu des stickers)
+     * (inclut le rendu des stickers). Asynchrone : rend la promesse du dessin, que l'appelant attend.
      */
     function dessinerAnnotationsSurCanvas(ctx, donnees, w, h) {
-        travauxExportPDF.dessinerAnnotationsSurCtx(ctx, w, h, donnees, 1);
+        return travauxExportPDF.dessinerAnnotationsSurCtx(ctx, w, h, donnees, 1);
     }
 
     /* ===============================
