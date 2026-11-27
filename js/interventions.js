@@ -951,7 +951,8 @@ function ouvrirIntervention(interventionId, options) {
     var criteresInitHtml = '';
     if (grilleRef && grilleRef.criteres && grilleRef.criteres.length > 0) {
         criteresInitHtml = grilleRef.criteres.map(function(c) {
-            var checked = intervention.criteresCibles.indexOf(c.nom) >= 0 ? 'checked' : '';
+            // 27 nov. 2026 : un nom enregistré qui ne diffère que par les majuscules, les accents ou les espaces reste coché.
+            var checked = intervention.criteresCibles.some(function(nom) { return window.cleCritere(nom) === window.cleCritere(c.nom); }) ? 'checked' : '';
             // #552 — une seule écriture de la table SOLO, dans
             // `profil-etudiant-calculs.js`. Elle vivait ici en double.
             var niveauLabel = typeof libelleNiveauSOLO === 'function'

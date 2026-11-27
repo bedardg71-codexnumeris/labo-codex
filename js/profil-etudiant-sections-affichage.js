@@ -3565,14 +3565,8 @@ function _genererGraphiqueCriteresHTML(da) {
     );
     if (evaluationsAvecCriteres.length === 0) return '';
 
-    // Critères uniques pour la légende
-    const criteresSet = new Set();
-    evaluationsAvecCriteres.forEach(e => {
-        e.criteres.forEach(c => {
-            if (c.critereNom) criteresSet.add(c.critereNom);
-        });
-    });
-    const criteresUniques = Array.from(criteresSet).sort();
+    // Critères uniques pour la légende : la même liste que le graphique (27 nov. 2026).
+    const criteresUniques = window.criteresDistinctsDesEvaluations(evaluationsAvecCriteres);
     const COULEURS_CRITERES = [
         '#E91E63', '#9C27B0', '#3F51B5', '#00BCD4',
         '#4CAF50', '#FF9800', '#795548', '#607D8B'

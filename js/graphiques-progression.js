@@ -2075,18 +2075,9 @@ function obtenirDonneesCriteres(da) {
         // Récupérer les productions pour les noms
         const productions = obtenirDonneesSelonMode('productions') || [];
 
-        // Extraire les critères uniques depuis toutes les évaluations
-        const criteresSet = new Set();
-        evaluationsEtudiant.forEach(e => {
-            if (e.criteres && Array.isArray(e.criteres)) {
-                e.criteres.forEach(c => {
-                    if (c.critereNom) {
-                        criteresSet.add(c.critereNom);
-                    }
-                });
-            }
-        });
-        const criteresUniques = Array.from(criteresSet).sort();
+        // Les critères uniques : un nom qui ne diffère que par les majuscules, les accents ou les espaces est le même
+        // critère (27 nov. 2026). La légende du profil lit la même liste.
+        const criteresUniques = window.criteresDistinctsDesEvaluations(evaluationsEtudiant);
 
         if (criteresUniques.length === 0) {
             console.warn(`Aucun critère trouvé dans les évaluations pour DA ${da}`);
@@ -2113,7 +2104,7 @@ function obtenirDonneesCriteres(da) {
             donneesCriteres[nomCritere] = evaluationsEtudiant.map(e => {
                 // #1226, suite (4 nov. 2026) : une copie non recevable garde sa colonne, son point reste vide.
                 if (window.evaluationNonRecevable(e)) return null;
-                const critere = e.criteres.find(c => c.critereNom === nomCritere);
+                const critere = e.criteres.find(c => window.cleCritere(c.critereNom) === window.cleCritere(nomCritere));
                 if (!critere) return null;
                 const enPoints = typeof critere.points === 'number' && !isNaN(critere.points);
                 const niveau = critere.niveauSelectionne;

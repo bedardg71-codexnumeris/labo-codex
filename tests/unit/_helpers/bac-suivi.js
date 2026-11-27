@@ -161,10 +161,13 @@ export function monter(store, opts = {}) {
     // Lot 5 du cadrage 11 (12 sept. 2026), ↻ 30 oct. : la lettre du bilan d'une intervention se situe dans l'échelle
     // (`situerPourcentageDansEchelle`, js/profil-etudiant-helpers.js, chargé avant interventions.js dans l'app). Le banc
     // fournit la VRAIE : une copie ici dériverait sans que personne le voie.
-    if (!('situerPourcentageDansEchelle' in globaux)) {
+    // 27 nov. 2026 (fiche 3 du lot « Suivi ») : de même, la règle du nom d'un critère (`cleCritere`) et la liste du
+    // graphique des critères, que les modules du suivi lisent par `window`.
+    const helpersVrais = ['situerPourcentageDansEchelle', 'cleCritere', 'criteresDistinctsDesEvaluations'].filter((nom) => !(nom in globaux));
+    if (helpersVrais.length) {
         const winHelpers = {};
         chargerScript('js/profil-etudiant-helpers.js', globaux, winHelpers);
-        globaux.situerPourcentageDansEchelle = winHelpers.situerPourcentageDansEchelle;
+        for (const nom of helpersVrais) globaux[nom] = winHelpers[nom];
     }
     // 30 oct. 2026 (une seule source par famille de seuils) : les seuils et leurs lecteurs sont les VRAIS, comme dans
     // l'app (`interpretation-config.js`, sur le store du banc), sauf si le banc fournit son propre `obtenirSeuil`.

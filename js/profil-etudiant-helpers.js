@@ -923,6 +923,24 @@ function cleCritere(nom) {
 }
 
 /**
+ * Les crit\u00e8res distincts d'un lot de copies, pour le graphique des crit\u00e8res d'un profil et sa l\u00e9gende (d\u00e9cision de
+ * Gr\u00e9goire, 27 nov. 2026) : deux noms qui ne diff\u00e8rent que par les majuscules, les accents ou les espaces sont UN
+ * crit\u00e8re (`cleCritere`) ; \u00ab Structure \u00bb et \u00ab Structure du texte \u00bb restent deux. Le nom montr\u00e9 est celui de la copie la
+ * plus r\u00e9cente (SUPPOS\u00c9 : c'est l'orthographe que l'enseignant\u00b7e emploie maintenant). Rien n'est r\u00e9\u00e9crit.
+ * @param {Array} evaluations - copies portant `criteres: [{ critereNom }]`, dans n'importe quel ordre
+ * @returns {Array<string>} les noms montr\u00e9s, tri\u00e9s comme avant (`sort()`)
+ */
+function criteresDistinctsDesEvaluations(evaluations) {
+    const parCle = new Map();
+    (evaluations || []).slice()
+        .sort((a, b) => String(a.dateEvaluation || '').localeCompare(String(b.dateEvaluation || '')))
+        .forEach(e => (Array.isArray(e.criteres) ? e.criteres : []).forEach(c => {
+            if (c && c.critereNom) parCle.set(cleCritere(c.critereNom), c.critereNom);
+        }));
+    return Array.from(parCle.values()).sort();
+}
+
+/**
  * Les critères à représenter dans les blocs du profil : ceux de la GRILLE de
  * l'utilisateur, dans son ordre à elle.
  *
@@ -1109,6 +1127,7 @@ window.survolNiveauAtteint = survolNiveauAtteint;
 // #550 — le diagnostiqueur qui NOMME la cause quand il n'y a pas de grille.
 window.diagnostiquerGrilleReferenceDepistage = diagnostiquerGrilleReferenceDepistage;
 window.cleCritere = cleCritere;
+window.criteresDistinctsDesEvaluations = criteresDistinctsDesEvaluations;   // 27 nov. 2026 : le graphique des critères et sa légende
 window.criteresDeLaGrillePourAffichage = criteresDeLaGrillePourAffichage;
 window.obtenirCriteresAvecValeurs = obtenirCriteresAvecValeurs;
 window.initialiserModuleProfilEtudiant = initialiserModuleProfilEtudiant;
