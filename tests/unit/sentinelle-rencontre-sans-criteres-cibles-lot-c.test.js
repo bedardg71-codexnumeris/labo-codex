@@ -95,7 +95,7 @@ describe('2 · hors service, la carte est là, telle qu\'en 1.137.0', () => {
 
     it('sans grille de référence, le message d\'invite de 1.137.0 reste (hors service, rien ne change — même son chemin)', () => {
         const html = banc({ service: false, vue: 'interventions', globaux: { obtenirGrilleReferenceDepistage: () => null } }).rendre();
-        expect(html).toContain('Configure une grille de référence dans Conception › Grilles de critères pour activer le ciblage par critère.');
+        expect(html).toContain('Choisis ta grille de dépistage dans Labo › Observation pour cibler des critères.');
     });
 
     it('« Suggérer » répond : un critère coché et un élève sélectionné donnent un objectif', () => {

@@ -974,7 +974,7 @@ function ouvrirIntervention(interventionId, options) {
                 '</label>';
         }).join('');
     } else {
-        criteresInitHtml = '<p class="text-muted" style="font-style: italic;">Configure une grille de référence dans Conception › Grilles de critères pour activer le ciblage par critère.</p>';
+        criteresInitHtml = '<p class="text-muted" style="font-style: italic;">Choisis ta grille de dépistage dans Labo › Observation pour cibler des critères.</p>';
     }
 
     // Consigne du 12 sept., 10 h 35 (lot C, décision de Grégoire) : sur un service, la carte « Critères ciblés /
