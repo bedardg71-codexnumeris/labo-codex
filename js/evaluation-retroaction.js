@@ -1112,6 +1112,15 @@ function _compterErreursFrancaisBilan() {
     return totalErreursFr;
 }
 
+/**
+ * #1204 (décision de Grégoire, 27 nov. 2026) — le compte d'un critère algorithmique, dans ses deux
+ * modes : le mode des codes par catégorie n'écrit que `totalErreurs` (le nombre brut de codes posés,
+ * celui que l'élève lit), le mode simple `erreurs`. Même lecture que `comptes-erreurs-stock.js`.
+ */
+function _erreursDitesAlgo(da) {
+    return (da.erreurs !== undefined) ? da.erreurs : da.totalErreurs;
+}
+
 function _detecterAlgoA0Bilan(grilleDef, ec, totalErreursFr) {
     if (!grilleDef) return null;
     var algoA0 = null;
@@ -1120,10 +1129,7 @@ function _detecterAlgoA0Bilan(grilleDef, ec, totalErreursFr) {
         // Source 1 : données algorithmiques calculées
         if (ec.donneesAlgorithmiques && ec.donneesAlgorithmiques[gc.id]) {
             var da = ec.donneesAlgorithmiques[gc.id];
-            // #1204 (décision de Grégoire, 27 nov. 2026) — le mode des codes par catégorie n'écrit que
-            // `totalErreurs` (le nombre brut de codes posés, celui que l'élève lit) : la phrase de bilan
-            // sort aussi pour lui. Même lecture que `comptes-erreurs-stock.js` : `erreurs`, sinon `totalErreurs`.
-            var erreursDites = (da.erreurs !== undefined) ? da.erreurs : da.totalErreurs;
+            var erreursDites = _erreursDitesAlgo(da);   // #1204
             if (da.pourcentage !== undefined && da.pourcentage <= 0 && erreursDites > 0) {
                 // #581 — le CRITÈRE voyage, pas seulement son nom : c'est lui
                 // qui porte le modèle d'énoncé réglé dans le gabarit.
