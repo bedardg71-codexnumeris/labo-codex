@@ -1,8 +1,10 @@
 # Rapport : Suivi, quatre fiches décidées par Grégoire (27 novembre 2026)
 
-Branche `lot/suivi-2026-11-27`, partie de `lot/file-sans-gregoire-2026-11-27` à `951de3f8`. **Aucune fusion vers `main`, aucun bump, rien au changelog.** Un commit par fiche : `bb13738b` (fiche 1), `24bc8a44` (fiche 3), `528f68a6` (fiche 4). La fiche 2 s'est arrêtée à la mesure, comme le mandat le prévoyait : elle attend Grégoire. Textes posés mot pour mot ; aucun autre texte lu par l'utilisateur ou par l'élève n'a changé.
+Branche `lot/suivi-2026-11-27`, partie de `lot/file-sans-gregoire-2026-11-27` à `951de3f8`. **Aucune fusion vers `main`, aucun bump, rien au changelog.** Un commit par fiche : `bb13738b` (fiche 1), `24bc8a44` (fiche 3), `528f68a6` (fiche 4) ; puis, sur la consigne de 14 h 33, `8e616980` (fiche 2, reprise) et `a6156e4d` (fiche 6, #1321). **La fiche 5 est arrêtée avant tout code** : elle change ce que lisent les élèves (section 7).
 
-**Reste** : la décision de Grégoire sur la fiche 2 (section 2) ; le regard à l'écran (section 6) ; le verdict du Mac avant toute fusion.
+**Reste** : la décision de Grégoire sur la fiche 5 (section 7) ; les cinq textes d'aide qui disent encore « 70 % par défaut » (section 8) ; le regard à l'écran, réduit (section 10) ; le verdict du Mac avant toute fusion.
+
+Les sections 1 à 6 sont l'état du matin, gardées telles quelles ; la suite commence à la section 7.
 
 ## 1. Fiche 1 : la phrase sous la bande de performance (#1190), faite
 
@@ -106,3 +108,99 @@ Preuve : `tests/unit/intervention-statut-terminee-2026-11-27.test.js` (break-tes
 - Avant toute fusion : le verdict du Mac.
 
 **Vitest complet** (27 nov., conteneur, depuis `tests/`, sur `528f68a6` plus le commentaire corrigé) : 967 fichiers, 12 497 essais verts.
+
+## 7. Fiche 5 : l'échelle de départ porte ses deux seuils, ARRÊTÉE avant tout code
+
+Le mandat dit de s'arrêter si quoi que ce soit que lisent les élèves change. **C'est le cas, à trois endroits** (mesuré au code, pas à l'écran) :
+1. **Le bilan de l'évaluation.** `zoneDuNiveau` (`js/evaluation-retroaction.js:898`) range chaque critère en priorité, signalé ou acquis ; ce bilan est copié sous « === BILAN === » dans ce qui est remis à l'élève. Sur une échelle sans seuils, la zone vaut `null` et rien n'est dit. Lue à 60 et 75, l'échelle de départ ferait nommer les priorités et l'acquis.
+2. **Le PDF de synthèse**, par la même lecture (`js/synthese-retroaction-data.js:909`).
+3. **Le PDF des consignes.** La grille d'autoévaluation (`pageAutoevaluation`, `js/export-pdf.js`) n'existe que si l'échelle porte ses deux seuils. Elle apparaîtrait, quand la grille a des descripteurs à ces niveaux, avec : « Le seuil minimal de réussite correspond au niveau D de l'échelle ; le seuil de maîtrise, au niveau M. »
+
+**Le 60 % ne peut pas s'écrire tel quel.** Un seuil est un CODE de niveau (`seuilSuffisance: 'D'`), et il vaut le `min` de ce niveau. Les niveaux de l'échelle de départ : I de 0 à 64,99, D de 65 à 74,99, M de 75 à 84,99, E de 85 à 100. 75 % est le début de M. 60 % tombe au milieu de I. Trois issues :
+- (a) le seuil minimal sur D, soit **65 %** : le niveau le plus proche, et le seul que le PDF peut nommer. C'est ma recommandation ;
+- (b) faire commencer D à 60 : toute note de 60 à 64,99 passerait de I à D, sur les copies que reçoivent les élèves. Écartée ;
+- (c) un seuil en pourcentage, détaché des niveaux : le PDF (« correspond au niveau … »), les zones (par rang) et l'éditeur de grilles ne savent pas le lire. Un changement de modèle.
+
+**Reconnaître une échelle de départ déjà installée, en une ligne** : son identifiant, `ECHELLE_IDME_DEPART`, réservé à elle (#524, jamais réutilisé).
+- **Modifiée sans seuils**, elle garde cet identifiant : elle serait lue sur D et M tant que ces deux codes existent, à SES `min` (D déplacé à 60 donnerait 60 %). Un code supprimé : ce seuil-là manque.
+- ⚠ **« Mes niveaux » (Vue simple) ne se reconnaît pas.** C'est une copie sous un identifiant neuf (`ECH_…`), née sans `origines` (`echelleReglee`, `js/vue-simple-donnees.js:597-610`). La recevoir demanderait une marque posée à la naissance (la source seulement : les « Mes niveaux » déjà nées resteraient sans), ou une reconnaissance par le nom « Mes niveaux » et `pratiqueId`, plus fragile. À décider.
+
+**Où poser la lecture** :
+- `obtenirEchelleResolue` (`js/profil-etudiant-calculs.js:116`) sert `reperesPerformance` (phrase de la fiche 1, pastilles, bande, seuil de défi) et `zoneDuNiveau` (bilan, synthèse).
+- Mais le PDF des consignes (`js/export-pdf.js:1648, 2914, 3466, 4211`), le modèle de cartouche (`js/cartouches.js:2386`) et les éditeurs (échelles, grilles, assistant) lisent l'échelle enregistrée directement. Onze fichiers nomment aujourd'hui `seuilSuffisance` ou `seuilMaitrise`, dont trois schémas d'import et de partage.
+- Proposition : une fonction pure dans `js/echelles.js` (« les deux seuils d'une échelle », avec la règle de l'échelle de départ), que tous ces lecteurs appellent à la place des deux champs. Sans elle, il y aurait un second chemin.
+
+Aujourd'hui, la phrase de la fiche 1 se tait toujours pour qui a gardé l'échelle de départ ; elle reparlera avec cette fiche.
+
+## 8. Fiche 2, reprise : le seuil de défi suit le seuil de maîtrise, faite (`8e616980`)
+
+**La règle**, à un seul endroit : `obtenirSeuil('defiSpecifique')` (`js/interpretation-config.js`), que lisent tous les écrans. Dans l'ordre :
+- un **choix enregistré** compte d'abord : la valeur posée au champ, qui écrit maintenant une marque, `defiSpecifiqueChoisi` ; ou toute valeur enregistrée avant ce jour qui n'est pas 0,70 (un 0,65 est gardé) ;
+- un **0,70 sans marque** compte pour laissé par défaut ;
+- **sans choix**, le seuil de maîtrise de l'échelle, lu par `reperesPerformance` ;
+- **sans seuil de maîtrise**, 70 %.
+Rien n'est réécrit dans les données. La marque était nécessaire : sans elle, un 70 tapé demain au champ se lirait comme un défaut.
+
+**La page Labo › Observation** :
+- le champ s'enregistre par son propre geste (`sauvegarderSeuilDefiV2`) ;
+- toucher un autre champ de la page ne l'écrit plus (`sauvegarderSeuilsV2`) ;
+- le champ montre la valeur en vigueur (75 sur la démo), sans rien écrire à l'ouverture ;
+- **vidé, il oublie le choix** et le seuil suit de nouveau l'échelle, sans mot nouveau ;
+- « Restaurer les seuils de détection » oublie aussi le choix.
+- **Bornes choisies : 1 à 100.** 1, parce que la conversion refuse 0 (`_pointsEnFraction`) ; 100, pour tenir tout seuil de maîtrise possible. Une valeur tapée au-delà de 100 est ramenée à 100.
+
+**Les textes de Grégoire**, mot pour mot :
+- l'aide sous le champ ;
+- l'infobulle `depist-seuil-defi`, suivie de « Règle le dépistage seulement. ».
+L'espace avant le point-virgule est insécable, comme ailleurs dans l'app (un signe ne commence jamais une ligne). J'ai gardé la ligne « *Règle le dépistage seulement.* » sous l'aide du champ, qui la portait déjà : le mandat ne la nommait pas.
+
+**Un texte changé hors des textes donnés** : la carte d'aide « Configurer la grille de critères pour le dépistage » (`index.html:11270`) cite les bornes du champ. « de 60 à 80 % » y devient « de 1 à 100 % », pour qu'elle reste vraie ; une sentinelle l'exige. À défaire si Grégoire préfère.
+
+⚠ **Cinq textes disent encore « 70 % par défaut », faux dès que l'échelle porte un seuil de maîtrise** (vrai encore pour l'échelle de départ, faute de fiche 5) :
+- `index.html:10941` (l'IPB) ;
+- `index.html:11032` (le profil) ;
+- `index.html:11117` (la RàI) ;
+- `index.html:11270` (la grille de dépistage) ;
+- `js/accompagnement-contenu-popup.js:909` (« Défi : ≤ 70 % », aide « Paramètres d'analyse »).
+Non touchés : leurs mots sont à Grégoire, par Cowork.
+
+**Mesure sur la démo**, dans Chromium, sur le code d'avant (`b6a96d82`) puis d'après (`8e616980`). Élèves fictifs ; pratique par standards ; échelle `ECH_DEMO_…` à seuils D (65 %) et M (75 %) ; aucun réglage enregistré.
+
+| | Avant | Après |
+|---|---|---|
+| Seuil de défi | 0,70 | 0,75 |
+| Couples élève × critère en défi | 13 sur 50 | 26 sur 50 (13 passent du côté « défi », aucun n'en sort) |
+| Étudiant·es avec un défi principal | 6 sur 10 | 8 sur 10 (2 en reçoivent un ; aucun défi principal déjà là ne change) |
+| Pattern | | 2 passent de « Stable » à « Défi spécifique » |
+| Niveau RàI | | aucun changement |
+
+**Écrans qui changent** : le défi principal et les forces du profil ; l'IPB (suivi des fondations) ; les critères pré-cochés « en défi » d'une intervention et leur compteur ; le pattern « Défi spécifique » ; la pratique Standards (`detecterDefis`). **Rien de ce que lisent les élèves** : ni la rétroaction, ni la synthèse, ni les PDF ne lisent ce seuil (mesuré au code).
+
+**Les essais** : `tests/unit/seuil-defi-suit-la-maitrise-2026-11-27.test.js`, 14 essais (10 rouges avant ; break-tests : la lecture retirée, 7 rouges ; l'écriture remise dans `sauvegarderSeuilsV2`, 2 rouges). Trois bancs ont suivi :
+- `bac-suivi.js` lit maintenant la vraie `reperesPerformance`, comme l'app ;
+- l'audit du 5 sept. pose un 70 choisi, parce que ses calculs à la main sont écrits à 70 ;
+- la sentinelle #823 suit le nouveau geste.
+
+## 9. Fiche 6 : deux suites des trouvailles, faite (`a6156e4d`)
+
+- **#1321** (inscrit au BACKLOG et coché ; le compteur est à #1321) : la légende du graphique des critères passe le nom par `echapperHtml`, dans le texte et dans `data-critere`. Le navigateur rend le nom exact à `dataset`, et la bascule masque de nouveau la courbe de « Qualité de l'expression ». Preuve : `tests/unit/legende-criteres-echappee-1321.test.js`, avec un nom à apostrophe et à chevron (break-test rouge).
+- « … lors d'interventions RàI complétées. » devient « … lors d'interventions RàI terminées. » (`js/profil-etudiant-sections-affichage.js:3333`).
+- Le préfixe du dépistage (`js/profil-etudiant-calculs.js:873, 1075`) : pas touché.
+
+## 10. Vérifié, et pas vérifié (suite de 14 h 33)
+
+- **Chromium est disponible dans ce conteneur** (`/opt/pw-browsers/chromium`, config `tests/playwright.chromium.config.js`) ; le rapport du matin le croyait absent. Joués et verts sous Chromium :
+  - `seuils-une-source.spec.js` (6) ;
+  - `niveau-sans-seuils.spec.js` (5, dont l'essai modifié à la fiche 1) ;
+  - `lot-e3-creer-ou-modifier.spec.js` (15, dont le passage au statut terminé).
+- **Vu dans Chromium sur la démo** :
+  - sous la bande P, « 7 étudiant·es (70 %) ont atteint ou dépassé le seuil de maîtrise. » ;
+  - le champ du seuil de défi à 75, bornes 1 à 100, avec l'aide neuve.
+  La démo n'a aucune intervention terminée : la pastille « Terminée » n'y paraît pas, et elle n'est éprouvée que par Vitest.
+- **Pas vu** :
+  - rien sous WebKit (Safari, iPad) : un vert Chromium est un indice, pas un verdict Safari ;
+  - la bascule d'une courbe dans un vrai profil (Vitest seulement) ;
+  - une intervention rouverte avec des critères au nom presque pareil (fiche 3, Vitest seulement).
+- Avant toute fusion : le verdict du Mac.
+
+**Vitest complet** (27 nov., après-midi, conteneur, depuis `tests/`, sur `a6156e4d` plus ce rapport) : 969 fichiers, 12 514 essais verts.
