@@ -153,3 +153,19 @@ describe('#551, ↻ 30 oct. 2026 · un repère à zéro reste à zéro dans la s
 //   Me : `(… : null) || 0.64` sur idme.insuffisant             → 2 rouges ((b) insuffisant, 555 cas 5 bis)
 //   Mf : 1re phrase lit `Math.round(0.64 * 100)` en dur         → 1 rouge (lot-5 B « déplacé à 0,66 ») — le couplage par le nombre
 // 98/98 verts une fois restauré (cmp identique).
+
+describe('#1264 · « Suggérer » sans rien à suggérer laisse l\'objectif déjà écrit', () => {
+    const apres = ({ personnes, criteres }) => {
+        const globaux = Object.assign({}, GLOBAUX_INTERVENTIONS, { calculerMoyennesCriteres: () => ({ structure: 0.5 }) });
+        const b = monter(storeBase(), { modules: ['js/interventions.js'], globaux,
+            elements: { objectifVise: elementDom({ value: 'Relire son plan' }) },
+            selecteurs: {
+                '#listeEtudiantsIntervention input[type="checkbox"]:checked': personnes ? [elementDom({ value: '2000001', checked: true })] : [],
+                '.critere-cible-cb:checked': criteres ? [elementDom({ value: 'Structure', checked: true })] : [] } });
+        b.win.suggererObjectifIntervention('I');
+        return b.document.getElementById('objectifVise').value;
+    };
+    it('aucun critère coché : le texte reste', () => { expect(apres({ personnes: true, criteres: false })).toBe('Relire son plan'); });
+    it('personne de coché : le texte reste', () => { expect(apres({ personnes: false, criteres: true })).toBe('Relire son plan'); });
+    it('témoin : avec une personne et un critère, la suggestion remplace le texte', () => { expect(apres({ personnes: true, criteres: true })).toMatch(/^Amener Structure/); });
+});

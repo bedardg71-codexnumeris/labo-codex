@@ -1418,17 +1418,12 @@ function suggererObjectifIntervention(interventionId) {
     var checkboxes = document.querySelectorAll('#listeEtudiantsIntervention input[type="checkbox"]:checked');
     var dasSelectionnes = Array.from(checkboxes).map(function(cb) { return cb.value; });
 
-    if (dasSelectionnes.length === 0) {
-        _poserObjectif(objectifField, '');
-        return;
-    }
+    // #1264 : sans personne ou sans critère coché, il n'y a rien à suggérer ; l'objectif déjà écrit reste.
+    if (dasSelectionnes.length === 0) return;
 
     // Trouver le critère ciblé le plus faible
     var criteresCibles = Array.from(document.querySelectorAll('.critere-cible-cb:checked')).map(function(cb) { return cb.value; });
-    if (criteresCibles.length === 0) {
-        _poserObjectif(objectifField, '');
-        return;
-    }
+    if (criteresCibles.length === 0) return;
 
     // Les repères de l'échelle de l'enseignant (30 oct. 2026) : sans repère de maîtrise, il n'y a pas de
     // second palier à viser.
