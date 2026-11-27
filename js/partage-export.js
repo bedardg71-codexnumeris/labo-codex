@@ -246,7 +246,7 @@
             if (nbDeps > 0) {
                 carte.appendChild(el('p', null,
                     'Le package embarque aussi ' + nbDeps + ' ressource(s) liée(s) '
-                    + '(grille et cartouches associées), pour que l\'item fonctionne chez la personne qui l\'importe.'));
+                    + '(grille, échelle et cartouches associées), pour que l\'item fonctionne chez la personne qui l\'importe.'));
             }
 
             // S5/#623 — DIRE d'où viennent les cartouches. Décision de Grégoire du
