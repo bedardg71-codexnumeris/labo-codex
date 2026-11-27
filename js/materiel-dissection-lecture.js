@@ -123,6 +123,9 @@
      * Les rangées lues par `materielLecture` ({ rangees, avant, apres }) → un document 'table'.
      * Le texte avant et après le tableau (un titre, une note) devient une rangée d'une case sur
      * toute la largeur : il reste à l'écran, étiquetable comme le reste.
+     * #1097 (27 nov. 2026) : un collage de plusieurs tableaux arrive en un seul document, leurs rangées
+     * à la suite ; le texte lu entre deux tableaux (`lu.entre`) devient de même une rangée pleine largeur,
+     * à sa place. Il s'étiquette comme le reste : « Section » sur un titre de partie, par exemple.
      */
     function docDuTableau(lu) {
         var nouveau = fabrique();
@@ -133,6 +136,7 @@
         function rangeeHors(t) { return [{ cs: largeur, rs: 1, lines: [nouveau(t)] }]; }
         var rows = (lu.avant || []).map(rangeeHors);
         lu.rangees.forEach(function (row, r) {
+            ((lu.entre && lu.entre[r]) || []).forEach(function (t) { rows.push(rangeeHors(t)); });
             rows.push(row.map(function (cell) {
                 return {
                     cs: Math.max(1, cell.span || 1),

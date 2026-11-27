@@ -34,9 +34,13 @@
  * Modèle de dépendances RÉEL (≠ exemple « grille → échelle » de la spec
  * d'avril : les grilles ne référencent pas d'échelle dans le modèle de
  * données — écart documenté dans SESSION.md) :
- *   - grille      → ses cartouches (`cartouches_{grilleId}`, clé globale)
- *   - cartouche   → sa grille (grilleId)
- *   - production  → sa grille (si grilleId non vide) + cartouches de celle-ci
+ *   - grille      → ses cartouches (`cartouches_{grilleId}`, clé globale), et l'échelle que
+ *     nomment les descripteurs de ses critères (`criteres[].descripteurs.echelleId`, #1090,
+ *     27 nov. 2026). Avant : jamais, et chez qui reçoit l'id ne menait à rien. Une échelle de
+ *     démonstration, ou qui ne passerait pas seule la validation d'import, ne part pas : la
+ *     grille part alors comme avant (`echellePeutVoyager`).
+ *   - cartouche   → sa grille (grilleId), avec ce que la grille emporte
+ *   - production  → sa grille (si grilleId non vide), avec ce que la grille emporte
  *   - pratique    → l'échelle que nomme `configuration.echelleId` (#1075, point 9,
  *     22 oct. 2026). Avant : « aucune », sur la foi d'une échelle EMBARQUÉE ; or une
  *     pratique de l'assistant ne porte que la référence, et le paquet partait sans
@@ -245,13 +249,16 @@
                 nature: 'utilise'
             });
             ajouterCartouchesDeGrille(grilleId);
+            ajouterEchellesDeGrille(grille);
         }
 
         // #1075, point 9 : l'échelle nommée par une pratique part avec elle.
-        function ajouterEchelle(echelleId, depuisType, depuisId) {
+        // #1090 : `garde` (facultative) dit si l'échelle lue peut partir.
+        function ajouterEchelle(echelleId, depuisType, depuisId, garde) {
             var lireEchelle = typeof lire.echelleParId === 'function' ? lire.echelleParId : LECTEURS_UTILISATEUR.echelleParId;
             var echelle = lireEchelle(echelleId);
             if (!echelle) return;
+            if (typeof garde === 'function' && !garde(echelle)) return;
             resultat.entites.echelles = (resultat.entites.echelles || []);
             resultat.entites.echelles.push(projeterEntite(echelle, 'echelle'));
             resultat.references.push({
@@ -261,8 +268,16 @@
             });
         }
 
+        // #1090 : l'échelle des descripteurs d'une grille part avec elle, une fois par échelle.
+        function ajouterEchellesDeGrille(grille) {
+            echellesDesDescripteurs(grille).forEach(function (echelleId) {
+                ajouterEchelle(echelleId, 'grille', grille.id, echellePeutVoyager);
+            });
+        }
+
         if (type === 'grille') {
             ajouterCartouchesDeGrille(item.id);
+            ajouterEchellesDeGrille(item);
         } else if (type === 'cartouche' && item.grilleId) {
             ajouterGrille(item.grilleId, 'cartouche', item.id);
         } else if (type === 'production' && item.grilleId) {
@@ -275,6 +290,52 @@
         return resultat;
     }
     partageFormat.rassemblerDependances = rassemblerDependances;
+
+    /**
+     * #1090 — les échelles que nomment les descripteurs d'une grille, sans doublon, dans l'ordre des
+     * critères. Tous les critères comptent : un critère en points peut porter des textes liés à une échelle
+     * (assistant d'avant #1125), et `rebrancherReferences` (type grille) les suit tous à l'import.
+     * @param {Object} grille
+     * @returns {string[]}
+     */
+    function echellesDesDescripteurs(grille) {
+        var ids = [];
+        ((grille && Array.isArray(grille.criteres)) ? grille.criteres : []).forEach(function (c) {
+            var d = c && c.descripteurs;
+            var id = d && typeof d === 'object' ? d.echelleId : null;
+            if (typeof id === 'string' && id && ids.indexOf(id) === -1) ids.push(id);
+        });
+        return ids;
+    }
+    partageFormat.echellesDesDescripteurs = echellesDesDescripteurs;
+
+    /**
+     * #1090 — une échelle peut-elle partir avec la grille qui la nomme ? Deux refus, et ils ne coûtent
+     * rien à la grille, qui part alors comme avant ce lot :
+     *   · une échelle de démonstration (`estItemDemo`) : la même règle qu'à l'export d'un item seul
+     *     (`partage-export.js`, « Le matériel de démonstration ne s'exporte pas ») ;
+     *   · une échelle qui, SEULE, ne passerait pas la validation d'import (onze niveaux, un id `demo-`…) :
+     *     l'éditeur ne borne pas tout ce que le schéma borne, et l'auto-contrôle de l'export refuse le paquet
+     *     ENTIER. Sans cette garde, une grille qui se partageait avant ne se partagerait plus.
+     * La validation est celle de `partage-validation.js`, appelée telle quelle : aucune règle recopiée ici.
+     * Sans ce module (banc qui ne le charge pas), l'échelle part : l'auto-contrôle de l'export, lui, l'exige.
+     * @param {Object} echelle - telle que lue chez l'émettrice
+     * @returns {boolean}
+     */
+    function echellePeutVoyager(echelle) {
+        var bibliotheque = window.BibliothequeUI;
+        if (bibliotheque && typeof bibliotheque.estItemDemo === 'function' && bibliotheque.estItemDemo(echelle)) return false;
+        var validation = window.partageValidation;
+        if (!validation || typeof validation.validerPackage !== 'function') return true;
+        try {
+            var seule = partageFormat.construirePackage(echelle, {
+                type: 'echelle', inclureDependances: false, identiteAuteur: 'Contrôle', chaineAttribution: []
+            });
+            return validation.validerPackage(seule).valide === true;
+        } catch (e) {
+            return false;
+        }
+    }
 
     /**
      * Normalise `identiteAuteur` (chaîne ou objet) vers le schéma
