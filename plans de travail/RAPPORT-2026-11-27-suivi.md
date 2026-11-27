@@ -290,3 +290,20 @@ Essai : `tests/unit/aides-seuil-de-defi-2026-11-27.test.js` (rouge avant). Quatr
 ## 13. Fiche 8 : #1322 inscrit, sans code (`fa86ebde`)
 
 Le dépistage reconnaît aussi un critère à son début (`js/profil-etudiant-calculs.js`, 873 et 1075). On n'y touche pas avant la publication (Grégoire, 14 h 37). Le compteur du BACKLOG est à #1322 ; #1323 et #1324 restent réservés à ce lot.
+
+## 14. Vérifié, et pas vérifié (suite de 15 h 06)
+
+**Vitest complet** depuis `tests/` (conteneur, sur `fa86ebde`) : 971 fichiers, 12 528 essais verts.
+
+**Sous Chromium**, sur le commit de la fiche 5 (`4b0cdf5a`) : les 31 fichiers d'intégration qui touchent l'échelle de départ, ses seuils, la Vue simple, l'autoévaluation, les parcours et les réglages, soit 151 essais. Résultat : 144 verts, 3 sautés, 4 rouges, tous dans `autoevaluation-consignes.spec.js`.
+- **Deux de ces rouges venaient de la fiche 5.** L'essai sème l'échelle de départ en la supposant « SANS repères » : vrai jusqu'à ce jour, faux depuis A. Il la ramène maintenant à une échelle de départ semée avant le 27 nov. (ses seuils retirés), et le parcours éprouve alors B côté élève : sans repères, l'aperçu le dit et le PDF n'a pas la page ; repères posés, la page paraît.
+- **Les quatre rouges qui restent sont identiques à ceux du commit d'avant la fiche 5** (`f372dde6`, rejoué) : le nombre de feuilles de l'aperçu (lignes 246 et 389), un écart propre à Chromium que la base Linux (`scripts/playwright-baseline-linux.json`) ne nomme pas. Pas de mon lot ; à juger sous WebKit.
+
+**Reste à voir sous Safari et sur l'iPad** (rien n'a été joué sous WebKit) :
+- la phrase sous la bande P, sur un groupe à l'échelle de départ ANCIENNE (sans seuils) et sur un groupe à l'échelle de départ NEUVE ; la Vue simple dans les deux cas ;
+- pour un compte neuf : la grille d'autoévaluation du PDF des consignes, qui paraît maintenant d'office (une page de plus remise à l'élève), et le bilan de l'évaluation qui nomme les priorités et l'acquis ;
+- pour un compte ancien : le PDF des consignes et le bilan inchangés ;
+- le champ du seuil de défi (75 sur la démo, bornes 1 à 100, l'aide) et les cinq aides de la fiche 7 ;
+- la pastille « Terminée » d'une intervention terminée ; la bascule d'une courbe dans un vrai profil ;
+- `autoevaluation-consignes.spec.js` en entier, sous WebKit.
+- Avant toute fusion : le verdict du Mac.
