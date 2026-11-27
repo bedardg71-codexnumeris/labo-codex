@@ -438,14 +438,10 @@ function chargerCadreCalendrierV2() {
         }
     }
 
-    // Si pas de cadre, réinitialiser les statistiques et sortir
+    // Si pas de cadre, redessiner la ligne du trimestre et sortir. #1253 (27 nov. 2026) : cette branche n'écrivait
+    // que dans des spans masqués ; la ligne visible gardait les chiffres d'avant (la démo quittée sans trimestre).
     if (!cadre) {
-        const elemSemaines = document.getElementById('v2-nombreSemaines');
-        const elemJours = document.getElementById('v2-nombreJoursCours');
-        const elemStats = document.getElementById('v2-statsCongesReprises');
-        if (elemSemaines) elemSemaines.textContent = '0';
-        if (elemJours) elemJours.textContent = '0';
-        if (elemStats) elemStats.textContent = '';
+        window.afficherStatistiquesTrimestreV2();
         return;
     }
 

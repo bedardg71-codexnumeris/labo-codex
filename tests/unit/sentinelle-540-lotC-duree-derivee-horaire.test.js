@@ -212,8 +212,11 @@ describe('#540-C/C — le format ne se déclare plus globalement', () => {
         // `genererSeancesCompletes` perdait les heures (`debut` vs `heureDebut`) et ne
         // propageait aucune période : le dénominateur de l'assiduité ne pouvait pas voir
         // ce que l'utilisateur avait déclaré à l'écran Horaire.
+        // #1253 (27 nov. 2026) : la projection vit dans `calculerSeancesCompletes`, que `genererSeancesCompletes` appelle.
         const SRC_HORAIRE_JS = sansCommentaires(lire('js', 'horaire.js'));
-        const i = SRC_HORAIRE_JS.indexOf('function genererSeancesCompletes');
+        const g = SRC_HORAIRE_JS.indexOf('function genererSeancesCompletes');
+        expect(SRC_HORAIRE_JS.slice(g, SRC_HORAIRE_JS.indexOf('\n}\n', g) + 2)).toContain('calculerSeancesCompletes(calendrierComplet, seancesHoraire)');
+        const i = SRC_HORAIRE_JS.indexOf('function calculerSeancesCompletes');
         const corps = SRC_HORAIRE_JS.slice(i, SRC_HORAIRE_JS.indexOf('\n}\n', i) + 2);
         expect(corps).toContain('nombrePeriodes: seance.nombrePeriodes');
         expect(corps).toContain('seance.heureDebut');

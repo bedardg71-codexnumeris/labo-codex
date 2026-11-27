@@ -606,6 +606,30 @@ function genererSeancesCompletes(coursId = null) {
         return {};
     }
 
+    const seancesCompletes = calculerSeancesCompletes(calendrierComplet, seancesHoraire);
+
+    // 🆕 BETA 95 : Stocker dans clé spécifique au cours
+    db.setSyncSiChange(cleOutput, seancesCompletes);   // #1040 : rien si inchangé
+
+    return seancesCompletes;
+}
+
+/**
+ * LES SÉANCES D'UN HORAIRE POSÉ SUR LE CALENDRIER DU TRIMESTRE (#1253, 27 nov. 2026 : extraite de
+ * `genererSeancesCompletes`, sans rien y changer). Pure : ni lecture, ni écriture.
+ *
+ * ⚠ Le calendrier marque « cours » la RÉUNION des jours de tous les groupes-cours du trimestre
+ * (`genererCalendrierComplet`, trimestre.js) : un jour de cours n'est une séance que pour le groupe
+ * dont l'horaire a une séance ce jour-là. Les journées sans cours et les semaines spéciales n'y sont
+ * pas « cours » ; une reprise suit l'horaire du jour qu'elle remplace (`jourRemplace`).
+ * Deux lecteurs, une règle : la génération du groupe actif (ci-dessus) et le compte d'un groupe-cours
+ * désigné (`seancesPrevuesDuGroupeCours`, ci-dessous).
+ *
+ * @param {Object} calendrierComplet - {date: {statut, jourSemaine, numeroSemaine, jourRemplace}}
+ * @param {Array} seancesHoraire - séances hebdomadaires de l'horaire ({jour, heureDebut, ...})
+ * @returns {Object} - Table `date -> [séances]` (format ci-dessus)
+ */
+function calculerSeancesCompletes(calendrierComplet, seancesHoraire) {
     // Créer un index des séances par jour de semaine
     const seancesParJour = {};
     seancesHoraire.forEach(seance => {
@@ -659,7 +683,6 @@ function genererSeancesCompletes(coursId = null) {
 
     // ÉTAPE 2 : Pour chaque semaine, trier chronologiquement et assigner A, B, etc.
     const seancesCompletes = {};
-    let compteurSeances = 0;
     const nomsSeances = ['A', 'B', 'C', 'D', 'E']; // Support jusqu'à 5 séances/semaine
 
     Object.entries(joursParSemaine).forEach(([numSemaine, jours]) => {
@@ -671,7 +694,6 @@ function genererSeancesCompletes(coursId = null) {
             const nomSeanceChronologique = nomsSeances[index] || `S${index + 1}`;
 
             seancesCompletes[jour.date] = jour.seancesHoraire.map(seance => {
-                compteurSeances++;
                 return {
                     id: `SEANCE-${jour.date}-${nomSeanceChronologique}`,
                     seanceHoraireId: seance.id,
@@ -710,13 +732,46 @@ function genererSeancesCompletes(coursId = null) {
     // pour un tableau vide). seancesCompletes ne doit contenir que les dates où le
     // groupe-cours actif a effectivement une séance configurée dans son horaire.
 
-    // 🆕 BETA 95 : Stocker dans clé spécifique au cours
-    db.setSyncSiChange(cleOutput, seancesCompletes);   // #1040 : rien si inchangé
-
-    if (idCours) {
-    }
-
     return seancesCompletes;
+}
+
+/**
+ * LES SÉANCES PRÉVUES D'UN GROUPE-COURS AU TRIMESTRE (#1253, décision de Grégoire, 27 nov. 2026 :
+ * « le nombre de jours de cours doit correspondre au nombre de séances. Pour chaque groupe. »).
+ * Son horaire posé sur le calendrier du trimestre actif, par la règle des séances complètes
+ * (`calculerSeancesCompletes`) : journées sans cours retirées, reprises comptées. Deux séances le même jour
+ * en font deux.
+ *
+ * Ses semaines : la dernière semaine (« paquet de 5 », #368) où il a une séance. La même règle que la ligne du
+ * trimestre (`calculerStatistiquesCalendrier`), sur ses seules séances. ⚠ Pas le nombre du trimestre : celui-là
+ * est pris sur la réunion des jours de tous les groupes. Mesuré dans la démo le 27 nov. : le trimestre y compte
+ * 16 semaines parce que le groupe du mercredi et du jeudi a cours le jeudi 11 décembre, 16e paquet de deux jours ;
+ * le groupe du lundi et du mercredi y aurait lu « 16 semaines • 30 séances » pour des séances tenues en 15.
+ *
+ * Lecture seule. ⚠ Pas par `obtenirSeancesCompletesDuGroupe` : ce cache n'existe que pour un groupe-cours
+ * déjà activé, et ne suit pas le calendrier quand une date change. Ni par `genererSeancesCompletes`, qui
+ * écrit et ne connaît que le groupe actif.
+ *
+ * @param {Object|null} groupeCours - le groupe-cours désigné (son `horaireId` fait foi)
+ * @returns {{seances: number, semaines: number}|null} null quand il n'y a rien à compter : pas de groupe-cours,
+ *   pas d'horaire (ou introuvable, ou sans séance), pas de calendrier.
+ */
+function seancesPrevuesDuGroupeCours(groupeCours) {
+    if (!groupeCours || !groupeCours.horaireId) return null;
+    const horaires = db.getSync(cle('horaires'), []);
+    const horaire = Array.isArray(horaires) ? horaires.find(h => h && h.id === groupeCours.horaireId) : null;
+    if (!horaire || !Array.isArray(horaire.seances) || horaire.seances.length === 0) return null;
+    const calendrier = db.getSync(cle('calendrierComplet'), null);
+    if (!calendrier || typeof calendrier !== 'object' || Object.keys(calendrier).length === 0) return null;
+    let seances = 0;
+    let semaines = 0;
+    Object.values(calculerSeancesCompletes(calendrier, horaire.seances)).forEach(duJour => {
+        duJour.forEach(seance => {
+            seances++;
+            if (seance.numeroSemaine > semaines) semaines = seance.numeroSemaine;   // une reprise un samedi n'en a pas
+        });
+    });
+    return { seances, semaines };
 }
 
 /**
@@ -1602,6 +1657,7 @@ function afficherSeancesExistantes() {
 window.genererSeancesCompletes = genererSeancesCompletes;
 window.obtenirSeancesCompletes = obtenirSeancesCompletes;
 window.obtenirSeancesCompletesDuGroupe = obtenirSeancesCompletesDuGroupe;
+window.seancesPrevuesDuGroupeCours = seancesPrevuesDuGroupeCours;   // #1253 : le compte de la fiche du groupe-cours
 window.obtenirSeancesJour = obtenirSeancesJour;
 window.obtenirRangSeanceDansSemaine = obtenirRangSeanceDansSemaine;
 

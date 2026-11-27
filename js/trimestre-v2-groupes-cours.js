@@ -432,9 +432,45 @@ function _trimestreExistePourGC(gc) {
     return Array.isArray(trimestres) && trimestres.some(t => t && t.id === gc.trimestreId);
 }
 
+/**
+ * #1253 (décisions de Grégoire, 27 nov. 2026, 12 h 10 et 12 h 13) — LE NOMBRE DE SÉANCES, SUR CHAQUE GROUPE-COURS.
+ * « Le nombre de jours de cours doit correspondre au nombre de séances. Pour chaque groupe. » Un jour de cours du
+ * calendrier n'est une séance que pour le groupe qui a cours ce jour-là : séances et semaines viennent de SON
+ * horaire posé sur le calendrier (`seancesPrevuesDuGroupeCours`, horaire.js, qui dit pourquoi ses semaines ne
+ * sont pas celles du trimestre). Une bande sous la carte du groupe-cours, du même dessin que la ligne du
+ * trimestre : « 15 semaines • 30 séances ». Rien sans horaire (pas de « 0 séance »), rien pour un service : sa
+ * présence se note dans la rencontre.
+ * @param {Object|null} gc - le groupe-cours que montre la carte
+ */
+function afficherSeancesGroupeCoursV2(gc) {
+    const ligne = document.getElementById('v2-seancesGroupeCours');
+    if (!ligne) return;
+    let texte = '';
+    const coursObj = gc ? _resoudreCoursPourCarteGC(gc).coursObj : null;
+    if (gc && !(coursObj && coursObj.nature === 'service') && typeof window.seancesPrevuesDuGroupeCours === 'function') {
+        const prevu = window.seancesPrevuesDuGroupeCours(gc);
+        if (prevu && prevu.seances > 0 && prevu.semaines > 0) {
+            texte = `${prevu.semaines} ${window.pluriel(prevu.semaines, 'semaine', 'semaines')} • ${prevu.seances} ${window.pluriel(prevu.seances, 'séance', 'séances')}`;
+        }
+    }
+    ligne.textContent = texte;
+    ligne.classList.toggle('u-hide', !texte);
+}
+
+/**
+ * #1253 : le calendrier a changé (une date du trimestre, une journée sans cours, une reprise) ; la ligne du
+ * groupe-cours ouvert suit. Appelé par `afficherStatistiquesTrimestreV2` (trimestre-v2.js), qui suit le calendrier.
+ */
+function rafraichirSeancesGroupeCoursV2() {
+    const id = groupeCoursEnEditionId || document.getElementById('v2-selectGroupeCours')?.value || '';
+    const gc = id ? (db.getSync(cle('groupesCours'), []) || []).find(g => g && g.id === id) : null;
+    afficherSeancesGroupeCoursV2(gc || null);
+}
+
 function mettreAJourCarteResumeGroupeCoursV2(gc) {
     const carte = document.getElementById('v2-carteResumeGroupeCours');
     if (!carte) return;
+    afficherSeancesGroupeCoursV2(gc || null);   // #1253
 
     if (!gc) {
         carte.innerHTML = '<p class="etat-vide-resume">Aucun groupe-cours sélectionné</p>';
@@ -1212,6 +1248,7 @@ window.populerDropdownGroupeCoursV2 = populerDropdownGroupeCoursV2;
 // changement de trimestre, n'a donc JAMAIS tourné depuis sa livraison.
 window.afficherEtatVideGroupeCoursV2 = afficherEtatVideGroupeCoursV2;
 window.mettreAJourCarteResumeGroupeCoursV2 = mettreAJourCarteResumeGroupeCoursV2;
+window.rafraichirSeancesGroupeCoursV2 = rafraichirSeancesGroupeCoursV2;   // #1253 : appelé quand le calendrier change
 window.rafraichirAffichageGroupesCoursV2 = rafraichirAffichageGroupesCoursV2;   // #472
 window.nomGroupeCours = nomGroupeCours;   // #472
 window.nouveauGroupeCoursV2 = nouveauGroupeCoursV2;

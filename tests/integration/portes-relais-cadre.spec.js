@@ -118,16 +118,18 @@ test('#366 · Les deux écrans affichent les MÊMES statistiques, calculées (pl
         db.setSync(window.cle('cadreCalendrier'), { dateDebut: '2026-08-20' }); // security-ok: fixture de test locale
     });
 
-    // Écran 1 : sidebar du Trimestre (fonction pure via afficherStatistiquesTrimestreV2)
+    // Écran 1 : sidebar du Trimestre (fonction pure via afficherStatistiquesTrimestreV2).
+    // #1253 (27 nov. 2026, décision de Grégoire) : elle ne dit plus les jours de cours (le nombre de séances se dit
+    // sur chaque groupe-cours) ; les semaines y restent, calculées comme sur la Légende.
     const sidebar = await page.evaluate(() => {
         window.afficherStatistiquesTrimestreV2();
         return {
             semaines: document.getElementById('v2-nombreSemainesSidebar')?.textContent,
-            jours: document.getElementById('v2-nombreJoursCoursSidebar')?.textContent
+            jours: document.getElementById('v2-nombreJoursCoursSidebar')
         };
     });
-    expect(sidebar.semaines).toBe('2');
-    expect(sidebar.jours).toBe('9');
+    expect(sidebar.semaines).toBe('2 semaines');
+    expect(sidebar.jours).toBeNull();
 
     // Écran 2 : carte Légende du Calendrier scolaire (même fonction pure)
     await page.evaluate(() => {

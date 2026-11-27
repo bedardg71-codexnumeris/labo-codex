@@ -168,10 +168,28 @@ function afficherAvertissementsCadreV2() {
     zone.classList.remove('u-hide');
 }
 
+/**
+ * La ligne de résumé de la partie « Trimestre » (Cadre › Trimestre) : « Trimestre : 15 semaines (aucun congé) ».
+ * #1253 (décisions de Grégoire, 27 nov. 2026, 12 h 10 et 12 h 13) :
+ *  - elle ne dit plus « jours de cours » : le calendrier marque « cours » la réunion des jours de tous les groupes,
+ *    ce n'est le nombre de séances d'aucun d'eux. Le nombre de séances se dit sur chaque groupe-cours
+ *    (`afficherSeancesGroupeCoursV2`, trimestre-v2-groupes-cours.js), qui suit ici le calendrier ;
+ *  - elle ne paraît pas sans trimestre. Mesuré le 27 nov. : à la sortie de la démo sans trimestre à rendre, elle
+ *    gardait les chiffres de la démo (« 15 semaines • 30 jours de cours ») ; au chargement, elle disait « 0 ».
+ */
 function afficherStatistiquesTrimestreV2() {
     // #369 : rafraîchir les avertissements au même rythme que les statistiques
     // (après chaque save, chargement de section, ajout/retrait d'événement).
     afficherAvertissementsCadreV2();
+    if (typeof window.rafraichirSeancesGroupeCoursV2 === 'function') window.rafraichirSeancesGroupeCoursV2();   // #1253
+
+    const ligne = document.getElementById('v2-apercuTrimestreSidebar');
+    const elemSemainesSidebar = document.getElementById('v2-nombreSemainesSidebar');
+    const elemCongesReprisesSidebar = document.getElementById('v2-statsCongesReprisesSidebar');
+
+    const trimestreId = typeof window.obtenirTrimestreId === 'function' ? window.obtenirTrimestreId() : '';
+    if (ligne) ligne.classList.toggle('u-hide', !trimestreId);
+    if (!trimestreId) return;
 
     // Lire depuis db avec clé namespacée
     let calendrier = null;
@@ -181,39 +199,16 @@ function afficherStatistiquesTrimestreV2() {
         console.error('[Trimestre V2] Erreur lecture calendrier:', e);
     }
 
-    // Éléments originaux (masqués pour compatibilité)
-    const elemSemaines = document.getElementById('v2-nombreSemaines');
-    const elemJours = document.getElementById('v2-nombreJoursCours');
-    const elemCongesReprises = document.getElementById('v2-statsCongesReprises');
-
-    // Éléments sidebar (Beta 95.2)
-    const elemSemainesSidebar = document.getElementById('v2-nombreSemainesSidebar');
-    const elemJoursSidebar = document.getElementById('v2-nombreJoursCoursSidebar');
-    const elemCongesReprisesSidebar = document.getElementById('v2-statsCongesReprisesSidebar');
-
     // Comptage : source unique #366 (fonction pure partagée)
     const stats = calculerStatistiquesCalendrier(calendrier);
+    const semaines = stats ? stats.semaines : 0;
+    if (elemSemainesSidebar) elemSemainesSidebar.textContent = `${semaines} ${window.pluriel(semaines, 'semaine', 'semaines')}`;
     if (!stats) {
-        if (elemSemaines) elemSemaines.textContent = '0';
-        if (elemJours) elemJours.textContent = '0';
-        if (elemCongesReprises) elemCongesReprises.textContent = '';
-        if (elemSemainesSidebar) elemSemainesSidebar.textContent = '0';
-        if (elemJoursSidebar) elemJoursSidebar.textContent = '0';
         if (elemCongesReprisesSidebar) elemCongesReprisesSidebar.textContent = '';
         return;
     }
-    const semaines = stats.semaines;
-    const joursCours = stats.joursCours;
     const conges = stats.conges;
     const reprises = stats.reprises;
-
-    // Remplir éléments originaux (masqués)
-    if (elemSemaines) elemSemaines.textContent = semaines;
-    if (elemJours) elemJours.textContent = joursCours;
-
-    // Remplir éléments sidebar (Beta 95.2)
-    if (elemSemainesSidebar) elemSemainesSidebar.textContent = semaines;
-    if (elemJoursSidebar) elemJoursSidebar.textContent = joursCours;
 
     // Générer le texte contextuel pour congés/reprises
     let texte = '';
@@ -230,7 +225,6 @@ function afficherStatistiquesTrimestreV2() {
         texte = `(${reprises} reprise${reprises > 1 ? 's' : ''})`;
     }
 
-    if (elemCongesReprises) elemCongesReprises.textContent = texte;
     if (elemCongesReprisesSidebar) elemCongesReprisesSidebar.textContent = texte;
 }
 

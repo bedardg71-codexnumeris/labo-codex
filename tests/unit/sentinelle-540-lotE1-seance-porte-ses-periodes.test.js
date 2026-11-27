@@ -136,16 +136,19 @@ describe('#540-E1/B — chaque séance porte ses périodes, et c\'est exigé', (
     });
 });
 
+// #1253 (27 nov. 2026) : la projection est sortie, telle quelle, dans `calculerSeancesCompletes`, que
+// `genererSeancesCompletes` appelle (et que le compte de séances d'un groupe-cours appelle aussi).
 describe('#540-E1/C — le nombre voyage jusqu\'au cache de l\'assiduité', () => {
     it('genererSeancesCompletes propage nombrePeriodes', () => {
-        const corps = corpsDe(SRC_HORAIRE, 'genererSeancesCompletes');
+        expect(corpsDe(SRC_HORAIRE, 'genererSeancesCompletes')).toContain('calculerSeancesCompletes(calendrierComplet, seancesHoraire)');
+        const corps = corpsDe(SRC_HORAIRE, 'calculerSeancesCompletes');
         expect(corps).toContain('nombrePeriodes: seance.nombrePeriodes');
     });
 
     it('et ne perd plus les heures des séances du formulaire', () => {
         // Elles portent `heureDebut`/`heureFin`, jamais `debut`/`fin` : la projection
         // écrivait `debut: undefined` et une fin calculée à partir de rien.
-        const corps = corpsDe(SRC_HORAIRE, 'genererSeancesCompletes');
+        const corps = corpsDe(SRC_HORAIRE, 'calculerSeancesCompletes');
         expect(corps).toContain('seance.heureDebut');
         expect(corps).toContain('seance.heureFin');
     });
