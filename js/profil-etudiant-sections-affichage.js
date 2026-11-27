@@ -3330,7 +3330,7 @@ function genererSectionProgression(da) {
                     Les graphiques de progression afficheront l'évolution temporelle des indices A-C-P-E une fois que des données auront été collectées.
                 </p>
                 <p class="u-texte-gris-clair" style="font-size: 0.85rem;">
-                    Les captures sont enregistrées automatiquement chaque semaine et lors d'interventions RàI complétées.
+                    Les captures sont enregistrées automatiquement chaque semaine et lors d'interventions RàI terminées.
                 </p>
             </div>
         `;
@@ -3573,11 +3573,14 @@ function _genererGraphiqueCriteresHTML(da) {
     ];
     const legendeHTML = criteresUniques.map((critere, index) => {
         const couleur = COULEURS_CRITERES[index % COULEURS_CRITERES.length];
-        const critereEscaped = critere.replace(/'/g, "\\'");
+        // #1321 (27 nov. 2026) : le nom vient d'une grille, parfois importée (règle de sécurité n° 1). Échappé dans le texte
+        // ET dans l'attribut : le navigateur rend le nom exact à `dataset.critere`, que la bascule compare au nom de la courbe.
+        // (Avant : une barre oblique devant l'apostrophe, relue telle quelle : « Qualité de l'expression » ne se masquait pas.)
+        const critereEchappe = echapperHtml(critere);
         return `<label style="display: inline-flex; align-items: center; gap: 4px; cursor: pointer; color: ${couleur}; font-size: 0.78rem;">
-            <input type="checkbox" checked data-on-change="toggleCritereIndivHandler" data-critere="${critereEscaped}" data-da="${da}">
+            <input type="checkbox" checked data-on-change="toggleCritereIndivHandler" data-critere="${critereEchappe}" data-da="${da}">
             <span style="width: 10px; height: 10px; background: ${couleur}; border-radius: 50%; display: inline-block;"></span>
-            ${critere}
+            ${critereEchappe}
         </label>`;
     }).join('');
 

@@ -2,6 +2,8 @@
 
 > **Pour Claude** : Ce fichier liste les **items ouverts** uniquement. L'historique complet des items livrés (313 items, fév-mai 2026) vit dans `BACKLOG-ARCHIVE.md`.
 >
+> **Dernier ID utilisé : #1321** (27 nov. 2026, `lot/suivi-2026-11-27` — #1321 : la légende du graphique des critères d'un profil insérait le nom sans `echapperHtml`, corrigé le jour même ; #1321 à #1324 réservés à ce lot par Cowork, une autre session en reçoit d'autres).
+>
 > **Dernier ID utilisé : #1320** (26 nov. 2026, `lot/version-2026-11-25`, la release 1.259.0 — #1319 : le bug de la copie exportée sans ses annotations, corrigé, à SUIVI-BUGS (c'était #1311 sur `correctif/copie-exportee-annotee`) ; #1320 : `carte-aide-materiel` I1 à 1180 × 820, rouge sur `main`, inscrit sur consigne de Cowork, non corrigé).
 > **Dernier ID utilisé : #1318** (25 nov. 2026, soir, `lot/version-2026-11-25`, l'assemblage — #1318 : au parcours 9, la bulle 5 recouvre la colonne « Non respecté » ; #1305 et #1306 pris par des lots non fusionnés, #1307 à #1314 par les branches des tampons d'observation, #1315 à #1317 par `lot/parcours-9-tampons` ; **#1319 est réservé** au bug de la copie exportée sans ses annotations, inscrit #1311 sur `correctif/copie-exportee-annotee` et renuméroté à la release, le #1311 du BACKLOG étant la fiche de la navigation privée de Safari).
 > **Dernier ID utilisé : #1304** (22 nov. 2026, `claude/relaxed-feynman-0vcwct` — #1304 : la case du report des présences d'une intervention ne compense aucune absence, mesuré à l'écran ; mesuré sur toutes les branches : #1304 libre).
@@ -137,6 +139,10 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
 ---
 
 ## A faire
+
+### #1321 · La légende du graphique des critères d'un profil insère le nom d'un critère sans `echapperHtml`, 27 novembre 2026 (lu au code par `lot/suivi-2026-11-27`, fiche 3 ; inscrit et corrigé sur consigne de Cowork, fiche 6)
+
+- [x] **#1321 – Le nom d'un critère entre sans `echapperHtml` dans la légende du graphique des critères du profil** (`_genererGraphiqueCriteresHTML`, `js/profil-etudiant-sections-affichage.js`), règle de sécurité n° 1 : un nom vient d'une grille, parfois importée. Son `data-critere` échappait l'apostrophe par une barre oblique que la bascule relisait telle quelle : la courbe de « Qualité de l'expression » ne se masquait pas. Aucun symptôme vécu. ✅ **Réglé le 27 nov. 2026 (`lot/suivi-2026-11-27`), pas en ligne** : le nom passe par `echapperHtml`, dans le texte et dans l'attribut. Preuve : `tests/unit/legende-criteres-echappee-1321.test.js` (un nom à apostrophe et à chevron ; la bascule masque puis remontre sa courbe ; break-test rouge). Le stock : rien n'est écrit, le correctif est à l'affichage seulement.
 
 ### #1320 · `carte-aide-materiel` I1 à 1180 × 820 : « le texte de la carte ne défile pas » est rouge sous WebKit, sur `main` aussi, 26 novembre 2026 (trouvé au verdict complet de l'assemblage ; inscrit sur consigne de Cowork, sans le corriger)
 
