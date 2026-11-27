@@ -923,12 +923,12 @@ function cleCritere(nom) {
 }
 
 /**
- * Les crit\u00e8res distincts d'un lot de copies, pour le graphique des crit\u00e8res d'un profil et sa l\u00e9gende (d\u00e9cision de
- * Gr\u00e9goire, 27 nov. 2026) : deux noms qui ne diff\u00e8rent que par les majuscules, les accents ou les espaces sont UN
- * crit\u00e8re (`cleCritere`) ; \u00ab Structure \u00bb et \u00ab Structure du texte \u00bb restent deux. Le nom montr\u00e9 est celui de la copie la
- * plus r\u00e9cente (SUPPOS\u00c9 : c'est l'orthographe que l'enseignant\u00b7e emploie maintenant). Rien n'est r\u00e9\u00e9crit.
+ * Les critères distincts d'un lot de copies, pour le graphique des critères d'un profil et sa légende (décision de
+ * Grégoire, 27 nov. 2026) : deux noms qui ne diffèrent que par les majuscules, les accents ou les espaces sont UN
+ * critère (`cleCritere`) ; « Structure » et « Structure du texte » restent deux. Le nom montré est celui de la copie la
+ * plus récente (SUPPOSÉ : c'est l'orthographe que l'enseignant·e emploie maintenant). Rien n'est réécrit.
  * @param {Array} evaluations - copies portant `criteres: [{ critereNom }]`, dans n'importe quel ordre
- * @returns {Array<string>} les noms montr\u00e9s, tri\u00e9s comme avant (`sort()`)
+ * @returns {Array<string>} les noms montrés, triés comme avant (`sort()`)
  */
 function criteresDistinctsDesEvaluations(evaluations) {
     const parCle = new Map();
