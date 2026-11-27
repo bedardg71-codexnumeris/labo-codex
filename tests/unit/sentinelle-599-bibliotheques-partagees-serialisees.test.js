@@ -156,6 +156,21 @@ describe('#599 · A — deux gestes en rafale sur le MÊME magasin partagé', ()
         expect([a, b].filter(Boolean), 'un seul ajout annonce un succès').toHaveLength(1);
     });
 
+    it('#1161 · une grille ramenée de la bibliothèque et restée telle quelle n\'y est pas versée une seconde fois', async () => {
+        const { db, win } = await monterBiblioGrilles();
+        await db.set(CLE, []);   // security-ok: littéral de banc, aucune source externe
+        await win.ajouterGrilleALaBibliotheque(GRILLE('G_A', 'Grille A'));
+
+        const ramenee = { ...GRILLE('G_NEUF', 'Grille A'), idOriginal: 'G_A' };
+        expect(await win.ajouterGrilleALaBibliotheque(ramenee), 'déjà présente').toBe(false);
+        expect(await db.get(CLE)).toHaveLength(1);
+
+        // Témoin : modifiée depuis, elle est un exemplaire à part, comme avant.
+        const modifiee = { ...ramenee, criteres: [{ id: 'CR_1', nom: 'Critère revu' }] };
+        expect(await win.ajouterGrilleALaBibliotheque(modifiee)).toBe(true);
+        expect((await db.get(CLE)).map(g => g.id)).toEqual(['G_A', 'G_NEUF']);
+    });
+
     it('A.d deux retraits concurrents d\'items DIFFÉRENTS retirent les deux', async () => {
         const { db, win } = await monterBiblioGrilles();
         await db.set(CLE, [GRILLE('G_A', 'A'), GRILLE('G_B', 'B'), GRILLE('G_C', 'C')]);   // security-ok: littéral de banc

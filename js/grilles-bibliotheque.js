@@ -57,6 +57,17 @@ function _assainirGrilleSafe(g) {
     return g;
 }
 
+/**
+ * #1161 — une grille ramenée de la bibliothèque par « ← Utiliser dans ce trimestre » porte un `id` neuf et nomme
+ * sa source dans `idOriginal`. Tant qu'elle n'a pas changé (même nom, mêmes critères), elle EST l'exemplaire de la
+ * bibliothèque : la reverser en écrirait un second, homonyme. Une grille modifiée depuis reste un exemplaire à part.
+ */
+function _exemplaireInchange(bibliotheque, grille) {
+    const source = grille && grille.idOriginal ? bibliotheque.find(g => g.id === grille.idOriginal) : null;
+    if (!source) return false;
+    return source.nom === grille.nom && JSON.stringify(source.criteres || []) === JSON.stringify(grille.criteres || []);
+}
+
 async function ajouterGrilleALaBibliotheque(grille) {
     // B-β — passage obligé par assainirObjet (whitelist + débalisage).
     const grilleSafe = _assainirGrilleSafe(grille);
@@ -68,7 +79,7 @@ async function ajouterGrilleALaBibliotheque(grille) {
     const ecritLotF = await db.modifier(CLE_BIBLIOTHEQUE_GRILLES, (lues) => {
         const bibliotheque = lues || [];
 
-        const existe = bibliotheque.some(g => g.id === grilleSafe.id);
+        const existe = bibliotheque.some(g => g.id === grilleSafe.id) || _exemplaireInchange(bibliotheque, grille);
         if (existe) {
             dejaPresente = true;
             return undefined;
