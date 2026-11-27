@@ -587,6 +587,9 @@
 
     /** Le nom de l'échelle née avec une pratique de la vue simple. PROPOSÉ (ni « IDME », ni « de départ »). */
     const NOM_ECHELLE = 'Mes niveaux';
+    // 27 nov. 2026 (fiche 5 du lot « Suivi ») : l'échelle de départ (echelles.js) et ses deux seuils d'office.
+    const ID_ECHELLE_DE_DEPART = 'ECHELLE_IDME_DEPART';
+    const SEUILS_DE_L_ECHELLE_DE_DEPART = Object.freeze({ seuilSuffisance: 'D', seuilMaitrise: 'M' });
 
     /**
      * L'échelle de la pratique, réglée. Elle APPARTIENT à la pratique (`pratiqueId`) : née avec elle en vue simple, ou
@@ -603,10 +606,31 @@
         // « ≠ », que le retrait d'un niveau utilisé reste refusé et que « Mettre à jour » les retrouve. À la NAISSANCE d'une
         // pratique, aucune origine : aucun résultat ne peut la précéder, et l'échelle de départ est celle d'autres colonnes.
         const origines = (naissance || !echelle) ? [] : (Array.isArray(echelle.origines) ? echelle.origines : []).concat([echelle.id]);
-        const base = propre ? _copie(echelle) : { id: idNeuf, nom: NOM_ECHELLE, pratiqueId: pratique.id, origines, dansBibliotheque: true, verrouille: false, dateCreation: maintenant };
-        base.niveaux = niveauxRegles(echelle ? echelle.niveaux : [], niveauxDuBrouillon);
+        const niveaux = niveauxRegles(echelle ? echelle.niveaux : [], niveauxDuBrouillon);
+        const base = propre ? _copie(echelle) : Object.assign({ id: idNeuf, nom: NOM_ECHELLE, pratiqueId: pratique.id, origines, dansBibliotheque: true, verrouille: false, dateCreation: maintenant },
+            _seuilsDeLaCopie(echelle, niveaux, naissance));
+        base.niveaux = niveaux;
         base.dateModification = maintenant;
         return { echelle: base, copiee: !propre };
+    }
+
+    /**
+     * Ce qu'une copie garde des deux seuils et de l'origine (fiche 5 du lot « Suivi », 27 nov. 2026 ; tranché par Cowork).
+     * Née d'une échelle de départ, elle porte la marque d'origine et ses deux seuils : ceux de l'échelle de départ, ou D et
+     * M quand elle, semée avant ce jour, n'en a pas (comme une échelle de départ neuve, `echelles.js`). Copiée au réglage,
+     * elle garde les seuils de l'échelle copiée dont le niveau existe encore, et sa marque. Un seuil dont le niveau a
+     * disparu n'est pas gardé.
+     */
+    function _seuilsDeLaCopie(echelle, niveaux, naissance) {
+        const nee = !!naissance && !!echelle && echelle.id === ID_ECHELLE_DE_DEPART;
+        const avecSeuils = !!echelle && !!(echelle.seuilSuffisance || echelle.seuilMaitrise);
+        const source = avecSeuils ? echelle : (nee ? SEUILS_DE_L_ECHELLE_DE_DEPART : {});
+        const codes = new Set(niveaux.map((n) => String(n.code)));
+        const r = {};
+        ['seuilSuffisance', 'seuilMaitrise'].forEach((champ) => { if (source[champ] && codes.has(String(source[champ]))) r[champ] = source[champ]; });
+        const origine = nee ? ID_ECHELLE_DE_DEPART : (echelle && echelle.origine);
+        if (origine) r.origine = origine;
+        return r;
     }
 
     /** L'échelle a-t-elle changé ? (une règle changée sans toucher aux niveaux ne copie ni n'écrit aucune échelle) */

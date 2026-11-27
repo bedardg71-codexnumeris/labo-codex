@@ -23,8 +23,8 @@ describe('#1192 · l\'aide des seuils dit les défauts du code', () => {
         expect(nombre(/Progression\s*:\s*(\d+)\s*points/)).toBe(Math.round(D.progressionArtefacts * 100));
         expect(nombre(/Progression\s*:\s*(\d+)\s*points/)).toBe(10);
     });
-    it('« Sensibilité des flèches » et « Défi » suivent aussi leurs défauts', () => {
+    it('« Sensibilité des flèches » suit son défaut ; « Défi » part du seuil de maîtrise (fiche 7 du lot « Suivi », 27 nov. 2026)', () => {
         expect(nombre(/Sensibilité des flèches par critère\s*:\s*(\d+)\s*points/)).toBe(Math.round(D.directionRisque * 100));
-        expect(nombre(/Défi\s*:\s*≤\s*(\d+)/)).toBe(Math.round(D.defiSpecifique * 100));
+        expect(texte).toContain('Défi\u00a0: sous le seuil de défi, qui part du seuil de maîtrise de ton échelle.');
     });
 });

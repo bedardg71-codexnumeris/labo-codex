@@ -135,7 +135,8 @@ describe('#775 · la carte du groupe ne répartit que les élèves dont la note 
         const w = win();
         const etudiants = groupe(28, { nonConstructible: true });
         expect(w.__distribution(etudiants)).toBeNull();
-        expect(w.__interpretation(etudiants, clone(E0))).toBe('');
+        // ↻ 27 nov. 2026 (#1190) : la phrase lit les deux repères. Posés ici, pour que seul le filtre #775 la fasse taire.
+        expect(w.__interpretation(etudiants, { echelle: clone(E0), suffisance: 65, maitrise: 75, audela: 85, passage: 60 })).toBe('');
         expect(w.__notePassage(etudiants)).toBe('');
     });
 

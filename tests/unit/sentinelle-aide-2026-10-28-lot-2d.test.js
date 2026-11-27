@@ -185,7 +185,9 @@ describe('#1152 lot 2d · ce que les entrées affirment, lu dans le code', () =>
         const champ = doc.getElementById('v2-seuil-defi');
         expect(champ.getAttribute('value')).toBeNull();   // 30 oct. 2026 : le défaut se lit à la source, le champ n'en porte plus de copie
         const t = texteDe('grille-depistage');
-        expect(t).toContain(`« Seuil de défi spécifique » (${defi} % par défaut, de ${champ.getAttribute('min')} à ${champ.getAttribute('max')} %`);
+        // ↻ 27 nov. 2026 (fiche 7 du lot « Suivi ») : le seuil de défi part du seuil de maîtrise de l'échelle ; les bornes restent celles du champ.
+        expect(t).toContain(`« Seuil de défi spécifique » (au départ, le seuil de maîtrise de ton échelle, de ${champ.getAttribute('min')} à ${champ.getAttribute('max')} %`);
+        expect(t).not.toContain(`(${defi} % par défaut`);
         expect(t).toContain('par son nom, égal ou qui commence de même, sans tenir compte des accents, de la casse ni des espaces');
         expect(t).toContain('il prend les points, le niveau à défaut');
         expect(t).toContain('la pondération ne départage que deux critères de même score');

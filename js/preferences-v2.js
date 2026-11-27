@@ -240,9 +240,11 @@
             seuilRisque.value = _fractionEnPoints(seuils.directionRisque, window.SEUILS_PAR_DEFAUT.directionRisque);
         }
 
+        // 27 nov. 2026 : le champ montre le seuil de défi EN VIGUEUR (le choix enregistré, ou le seuil de maîtrise de
+        // l'échelle), lu à sa seule source ; rien n'est écrit à l'ouverture.
         const seuilDefi = document.getElementById('v2-seuil-defi');
         if (seuilDefi) {
-            seuilDefi.value = _fractionEnPoints(seuils.defiSpecifique, window.SEUILS_PAR_DEFAUT.defiSpecifique);
+            seuilDefi.value = Math.round(obtenirSeuil('defiSpecifique') * 100);
         }
     }
 
@@ -366,8 +368,12 @@
      * patterns, qui vit dans le même objet (#823).
      * Écrit directement dans seuilsInterpretation (non migré vers l'API)
      * pour préserver la structure mixte (champs plats + sous-objets idme/risque/interpretation).
+     * ⚠ 27 nov. 2026 (fiche 2 du lot « Suivi ») : elle n'écrit plus le seuil de défi. Il s'écrit par son seul champ
+     * (`sauvegarderSeuilDefiV2`) ; `oublierLeDefi` (« Restaurer les seuils de détection ») retire le choix.
+     * @param {Element} [_element] - le champ du geste (passé par le répartiteur, non lu)
+     * @param {{oublierLeDefi: boolean}} [options]
      */
-    function sauvegarderSeuilsV2() {
+    function sauvegarderSeuilsV2(_element, options = {}) {
         // Lot E3 : la collection lue est COPIÉE avant d'être modifiée (lot E2, R1).
         const seuils = JSON.parse(JSON.stringify(db.getSync('seuilsInterpretation') || {}));
 
@@ -424,15 +430,45 @@
             seuils.directionRisque = _pointsEnFraction(seuilRisque.value, defauts.directionRisque);
         }
 
-        const seuilDefi = document.getElementById('v2-seuil-defi');
-        if (seuilDefi) {
-            seuils.defiSpecifique = _pointsEnFraction(seuilDefi.value, defauts.defiSpecifique);
-        }
+        if (options.oublierLeDefi) _oublierLeChoixDuDefi(seuils);
 
         // Lot E3 (D0 point 2) : par le témoin commun (clé globale, inscrite à CLES_GLOBALES).
         const resultat = sauvegarderDonneesSelonMode('seuilsInterpretation', seuils, { geste: GESTE_SEUILS });
         rendreExemplesAxeBarres();   // Les exemples de l'axe portent ces seuils.
         return resultat;
+    }
+
+    /**
+     * Le champ « Seuil de défi spécifique », par son propre geste (fiche 2 du lot « Suivi », 27 nov. 2026) : la valeur
+     * tapée est un CHOIX, enregistré avec sa marque (`defiSpecifiqueChoisi`), même 70 ; champ vidé, le choix est oublié
+     * et le seuil suit de nouveau le seuil de maîtrise de l'échelle. Une valeur hors de 1 à 100 se ramène dans ces bornes.
+     */
+    function sauvegarderSeuilDefiV2() {
+        const champ = document.getElementById('v2-seuil-defi');
+        if (!champ) return false;
+        const seuils = JSON.parse(JSON.stringify(db.getSync('seuilsInterpretation') || {}));
+        const fraction = _pointsEnFraction(champ.value, null);
+        if (fraction === null) {
+            _oublierLeChoixDuDefi(seuils);
+        } else {
+            seuils.defiSpecifique = Math.min(1, fraction);
+            seuils.defiSpecifiqueChoisi = true;
+        }
+        const resultat = sauvegarderDonneesSelonMode('seuilsInterpretation', seuils, { geste: GESTE_SEUILS });
+        _montrerSeuilDeDefi();
+        return resultat;
+    }
+
+    /** Retire le choix du seuil de défi : la valeur par défaut, sans marque de choix (lue comme « suit l'échelle »). */
+    function _oublierLeChoixDuDefi(seuils) {
+        seuils.defiSpecifique = window.SEUILS_PAR_DEFAUT.defiSpecifique;
+        delete seuils.defiSpecifiqueChoisi;
+    }
+
+    /** Le champ du seuil de défi montre la valeur en vigueur, lue à sa seule source. */
+    function _montrerSeuilDeDefi() {
+        const champ = document.getElementById('v2-seuil-defi');
+        if (champ) champ.value = Math.round(obtenirSeuil('defiSpecifique') * 100);
     }
 
     /** Lot E3 : les trois seuils d'interprétation reprennent ce qui est enregistré (le chargement le fait pareil). */
@@ -470,7 +506,6 @@
         const fenetreAnalyse = document.getElementById('v2-pref-fenetre-patterns');
         const seuilProgression = document.getElementById('v2-seuil-progression');
         const seuilRisque = document.getElementById('v2-seuil-risque');
-        const seuilDefi = document.getElementById('v2-seuil-defi');
 
         const defauts = window.SEUILS_PAR_DEFAUT;
         if (fenetreAnalyse) fenetreAnalyse.value = defauts.nombreProductionsAnalyse;
@@ -478,10 +513,12 @@
         // En points, comme les champs ; la fraction est posée à l'écriture.
         if (seuilProgression) seuilProgression.value = _fractionEnPoints(defauts.progressionArtefacts);
         if (seuilRisque) seuilRisque.value = _fractionEnPoints(defauts.directionRisque);
-        if (seuilDefi) seuilDefi.value = _fractionEnPoints(defauts.defiSpecifique);
 
         // #823 : la fenêtre y passe aussi. Lot E3 : le message ne suit qu'une écriture réussie.
-        if (sauvegarderSeuilsV2()) notifications.succes('Seuils de détection restaurés');
+        // 27 nov. 2026 : le seuil de défi n'est pas remis à 70 ; son choix est oublié, il suit de nouveau l'échelle.
+        const ecrit = sauvegarderSeuilsV2(null, { oublierLeDefi: true });
+        _montrerSeuilDeDefi();
+        if (ecrit) notifications.succes('Seuils de détection restaurés');
     }
 
     /**
@@ -663,6 +700,7 @@
     window.initialiserPreferencesV2 = initialiserPreferencesV2;
     window.sauvegarderPreferencesV2 = sauvegarderPreferencesV2;
     window.sauvegarderSeuilsV2 = sauvegarderSeuilsV2;
+    window.sauvegarderSeuilDefiV2 = sauvegarderSeuilDefiV2;   // 27 nov. 2026 : le seul écrivain du seuil de défi
     window.sauvegarderAxeBarresV2 = sauvegarderAxeBarresV2;
     window.voirCeQueMesSeuilsDonnentV2 = voirCeQueMesSeuilsDonnentV2;
     window.sauvegarderReponseDuGroupeV2 = sauvegarderReponseDuGroupeV2;

@@ -112,10 +112,13 @@ describe('#1152 · 2 — la Cartouche de départ : « 0 » à la source (22 nov.
     });
 });
 
-describe('#1152 · 3 — le message « en difficulté » du tableau de bord compte PS et I ensemble', () => {
-    const ECHELLE = { niveaux: [
+// ↻ 27 nov. 2026 (#1190) : la phrase ne nomme plus les niveaux ; elle range sous le seuil minimal de réussite (ici D, 65)
+// tout ce qui est plus bas, PS et I compris. Les repères : ceux que `reperesPerformance` rend pour cette échelle.
+describe('#1152 · 3 — le message « sous le seuil minimal » du tableau de bord compte PS et I ensemble', () => {
+    const ECHELLE = { seuilSuffisance: 'D', seuilMaitrise: 'M', niveaux: [
         { code: '0', min: 0, max: 0 }, { code: 'PS', min: 0, max: 39.99 }, { code: 'I', min: 40, max: 64.99 },
         { code: 'D', min: 65, max: 74.99 }, { code: 'M', min: 75, max: 84.99 }, { code: 'E', min: 85, max: 100 }] };
+    const REPERES = { echelle: ECHELLE, suffisance: 65, maitrise: 75, audela: 85, passage: 60 };
 
     function interpreter(etudiants) {
         const win = { addEventListener() {}, removeEventListener() {}, pluriel: (n, s, p) => (n > 1 ? p : s) };
@@ -123,16 +126,16 @@ describe('#1152 · 3 — le message « en difficulté » du tableau de bord comp
         chargerAvecInterne('js/tableau-bord-apercu.js', { db, cle: (k) => 'test_' + k, formaterPourcentage: (v) => v + ' %',
             document: { addEventListener() {}, getElementById: () => null, querySelector: () => null, querySelectorAll: () => [], readyState: 'complete' } },
         win, ['genererInterpretationPerformance']);
-        return win.__audit['tableau-bord-apercu.js'].genererInterpretationPerformance(etudiants, ECHELLE);
+        return win.__audit['tableau-bord-apercu.js'].genererInterpretationPerformance(etudiants, REPERES);
     }
 
-    it('deux étudiant·es PS et un I : « 3 étudiant·es en difficulté »', () => {
+    it('deux étudiant·es PS et un I : « 3 étudiant·es sous le seuil minimal de réussite »', () => {
         const msg = interpreter([{ da: 'a', valeur: 0.10 }, { da: 'b', valeur: 0.30 }, { da: 'c', valeur: 0.50 }, { da: 'd', valeur: 0.80 }]);
-        expect(msg).toMatch(/3 étudiant·es en difficulté/);
+        expect(msg).toMatch(/3 étudiant·es sous le seuil minimal de réussite/);
     });
 
     it('un·e seul·e étudiant·e, PS : le message le nomme encore (il y était, au niveau I, avant PS)', () => {
-        expect(interpreter([{ da: 'a', valeur: 0.20 }])).toMatch(/1 étudiant·e en difficulté/);
+        expect(interpreter([{ da: 'a', valeur: 0.20 }])).toMatch(/1 étudiant·e sous le seuil minimal de réussite/);
     });
 });
 

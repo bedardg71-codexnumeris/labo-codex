@@ -736,7 +736,7 @@ const AIDE_CONTEXTUELLE = {
                     "Critères ciblés — Pré-cochés automatiquement depuis les défis communs du sous-groupe (grille de dépistage). Tu peux ajuster.",
                     "Objectif visé — Vide au départ ; « Suggérer » en propose un, d'après le critère ciblé le plus faible du sous-groupe et le prochain seuil de ton échelle. Tu peux le modifier librement.",
                     "Observations — Notes générales et individuelles par étudiant.",
-                    "Bilan — Apparaît quand tu marques l'intervention comme complétée. Comparaison automatique avant/après sur les critères ciblés."
+                    "Bilan — Apparaît quand tu marques l'intervention comme terminée. Comparaison automatique avant/après sur les critères ciblés."
                 ]
             },
             {
@@ -746,7 +746,7 @@ const AIDE_CONTEXTUELLE = {
             {
                 type: 'exemple',
                 titre: "Enseigner, évaluer, ajuster",
-                contenu: "Tu interviens sur les critères ciblés (niveau 2). Au fil des productions suivantes, tu observes la trajectoire. Quand tu marques l’intervention comme complétée, le bilan compare les scores avant et après sur les critères ciblés. Selon le résultat, tu choisis\u00a0: reconduire l’intervention, ajuster la cible, ou référer vers un soutien plus intensif."
+                contenu: "Tu interviens sur les critères ciblés (niveau 2). Au fil des productions suivantes, tu observes la trajectoire. Quand tu marques l’intervention comme terminée, le bilan compare les scores avant et après sur les critères ciblés. Selon le résultat, tu choisis\u00a0: reconduire l’intervention, ajuster la cible, ou référer vers un soutien plus intensif."
             },
             {
                 type: 'alerte',
@@ -906,7 +906,7 @@ const AIDE_CONTEXTUELLE = {
             {
                 type: 'exemple',
                 titre: 'Valeurs par défaut',
-                contenu: 'Progression\u00a0: 10 points (%). Sensibilité des flèches par critère\u00a0: 5 points (%). Défi\u00a0: ≤\u00a070\u00a0%.'
+                contenu: 'Progression\u00a0: 10 points (%). Sensibilité des flèches par critère\u00a0: 5 points (%). Défi\u00a0: sous le seuil de défi, qui part du seuil de maîtrise de ton échelle.'
             },
             {
                 type: 'conseil',

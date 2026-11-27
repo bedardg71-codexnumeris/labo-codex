@@ -911,13 +911,16 @@ function genererDiagnosticNotePassage(etudiants) {
 
 /**
  * 🆕 BETA 91: Génère une interprétation pédagogique de la performance du groupe
- * Analyse les niveaux IDME et les patterns pour identifier progression et difficultés
+ * #1190 (décision de Grégoire, 27 nov. 2026) : la phrase ne nomme plus aucun niveau. Elle range chaque étudiant·e par
+ * rapport aux deux repères de l'échelle, le seuil minimal de réussite et le seuil de maîtrise, lus à la même source que
+ * les pastilles et la bande (`reperesPerformance`). Avant, elle lisait les codes M, E, D, PS et I en dur, et se taisait
+ * chez qui nomme ses niveaux autrement. Un repère absent reste absent : la phrase qui le nomme ne se dit pas.
  * @param {Array} etudiants - [{da, valeur: 0-1}, ...] étudiants avec leur performance
- * @param {Object} echelle - Échelle IDME active
+ * @param {Object} reperes - `window.reperesPerformance()`, lu une fois par l'appelant
  * @returns {string} - Message d'interprétation pédagogique
  */
-function genererInterpretationPerformance(etudiants, echelle) {
-    if (!etudiants || etudiants.length === 0 || !echelle) {
+function genererInterpretationPerformance(etudiants, reperes) {
+    if (!etudiants || etudiants.length === 0 || !reperes) {
         return '';
     }
 
@@ -932,59 +935,47 @@ function genererInterpretationPerformance(etudiants, echelle) {
     // Lire les patterns stockés
     const patterns = db.getSync(cle('indicesPatternsRaI'), null) || db.getSync('indicesPatternsRaI', {});
 
-    // Classifier les étudiants par niveau IDME
-    // Lot « niveau sans seuils » (10 nov. 2026) : un niveau sans seuils ne reçoit personne (avant : la plage 0 à 100 lui
-    // était prêtée), et une note au-dessus du plus haut seuil se range dans le plus haut niveau (`niveauQuiRecoit`).
-    const niveaux = echelle.niveaux.filter(n => n.code !== '0' && n.code !== 0 && window.niveauADesSeuils(n));
-    const parNiveau = {};
-
-    niveaux.forEach(niveau => {
-        parNiveau[niveau.code] = [];
-    });
-
-    etudiants.forEach(etudiant => {
-        const niveau = window.niveauQuiRecoit(niveaux, etudiant.valeur * 100);
-        if (niveau) parNiveau[niveau.code].push(etudiant);
-    });
+    // Les deux repères, en pourcentages (null quand l'échelle ne le porte pas).
+    const suffisance = reperes.suffisance;
+    const maitrise = reperes.maitrise;
+    const pourcentage = (etudiant) => etudiant.valeur * 100;
+    const aLaMaitrise = maitrise == null ? [] : etudiants.filter(e => pourcentage(e) >= maitrise);
+    const entreLesDeux = (suffisance == null || maitrise == null) ? [] : etudiants.filter(e => pourcentage(e) >= suffisance && pourcentage(e) < maitrise);
+    const sousLeMinimal = suffisance == null ? [] : etudiants.filter(e => pourcentage(e) < suffisance);
 
     // Analyser selon les objectifs pédagogiques
     const messages = [];
     const total = etudiants.length;
 
-    // 1. Combien ont atteint M ou E (objectif atteint)
-    const niveauM = parNiveau['M'] || [];
-    const niveauE = parNiveau['E'] || [];
-    const objectifAtteint = niveauM.length + niveauE.length;
+    // 1. Combien ont atteint ou dépassé le seuil de maîtrise (objectif atteint)
+    const objectifAtteint = aLaMaitrise.length;
 
     if (objectifAtteint > 0) {
         const pct = Math.round((objectifAtteint / total) * 100);
-        messages.push(`${objectifAtteint} ${window.pluriel(objectifAtteint, 'étudiant·e', 'étudiant·es')} (${formaterPourcentage(pct)}) ${window.pluriel(objectifAtteint, 'a', 'ont')} atteint ou dépassé le niveau de maîtrise`);   // #1208 : le verbe s'accorde
+        messages.push(`${objectifAtteint} ${window.pluriel(objectifAtteint, 'étudiant·e', 'étudiant·es')} (${formaterPourcentage(pct)}) ${window.pluriel(objectifAtteint, 'a', 'ont')} atteint ou dépassé le seuil de maîtrise`);   // #1208 : le verbe s'accorde
     }
 
-    // 2. Parmi les D, combien en progression (pattern favorable)
-    const niveauD = parNiveau['D'] || [];
-    const dEnProgression = niveauD.filter(etudiant => {
+    // 2. Entre les deux seuils, combien en progression (pattern favorable)
+    const enProgression = entreLesDeux.filter(etudiant => {
         const pattern = patterns[etudiant.da];
         return pattern && pattern.pattern === 'Stable';   // lot 2 : le niveau 1 se lit au groupe, il ne dit plus une progression
     });
 
-    if (dEnProgression.length > 0) {
-        messages.push(`${dEnProgression.length} ${window.pluriel(dEnProgression.length, 'étudiant·e', 'étudiant·es')} en Développement ${window.pluriel(dEnProgression.length, 'montre', 'montrent')} une progression favorable et ${window.pluriel(dEnProgression.length, 'pourrait', 'pourraient')} atteindre la maîtrise prochainement`);   // #1208
+    if (enProgression.length > 0) {
+        messages.push(`${enProgression.length} ${window.pluriel(enProgression.length, 'étudiant·e', 'étudiant·es')} entre le seuil minimal de réussite et le seuil de maîtrise ${window.pluriel(enProgression.length, 'montre', 'montrent')} une progression favorable et ${window.pluriel(enProgression.length, 'pourrait', 'pourraient')} atteindre la maîtrise prochainement`);   // #1208
     }
 
-    // 3. Parmi les PS et les I, combien montrent des progrès (pattern pas difficulté persistante)
-    // #1152 (27 oct. 2026) : « PS – Préstructurel » est sous I ; avant lui, ces étudiant·es étaient comptés au niveau I.
-    const niveauI = ['PS', 'I'].flatMap(code => parNiveau[code] || []);
-    const iAvecProgres = niveauI.filter(etudiant => {
+    // 3. Sous le seuil minimal de réussite, combien montrent des progrès (pattern pas difficulté persistante)
+    const avecProgres = sousLeMinimal.filter(etudiant => {
         const pattern = patterns[etudiant.da];
         return pattern && pattern.pattern !== 'Difficulté persistante';
     });
 
-    if (niveauI.length > 0) {
-        if (iAvecProgres.length > 0) {
-            messages.push(`Parmi les ${niveauI.length} ${window.pluriel(niveauI.length, 'étudiant·e', 'étudiant·es')} en difficulté, ${iAvecProgres.length} ${window.pluriel(iAvecProgres.length, 'montre', 'montrent')} des signes de progrès`);   // #1208
+    if (sousLeMinimal.length > 0) {
+        if (avecProgres.length > 0) {
+            messages.push(`Parmi les ${sousLeMinimal.length} ${window.pluriel(sousLeMinimal.length, 'étudiant·e', 'étudiant·es')} sous le seuil minimal de réussite, ${avecProgres.length} ${window.pluriel(avecProgres.length, 'montre', 'montrent')} des signes de progrès`);   // #1208
         } else {
-            messages.push(`${niveauI.length} ${window.pluriel(niveauI.length, 'étudiant·e', 'étudiant·es')} en difficulté ${window.pluriel(niveauI.length, 'nécessite', 'nécessitent')} un accompagnement intensif`);   // #1208
+            messages.push(`${sousLeMinimal.length} ${window.pluriel(sousLeMinimal.length, 'étudiant·e', 'étudiant·es')} sous le seuil minimal de réussite ${window.pluriel(sousLeMinimal.length, 'nécessite', 'nécessitent')} un accompagnement intensif`);   // #1208
         }
     }
 
@@ -2176,8 +2167,8 @@ function genererBarreDistribution(label, etudiantsSOM, etudiantsPAN, type, affic
 
             if (raiActive) {
                 // Interprétation pédagogique avancée avec patterns
-                const echelle = window.reperesPerformance().echelle;
-                interpretation = echelle ? genererInterpretationPerformance(etudiants, echelle) : '';
+                const reperes = window.reperesPerformance();
+                interpretation = reperes.echelle ? genererInterpretationPerformance(etudiants, reperes) : '';
             }
 
             if (distribution) {

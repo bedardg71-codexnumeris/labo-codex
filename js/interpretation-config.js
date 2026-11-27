@@ -39,6 +39,8 @@ const SEUILS_PAR_DEFAUT = {
 
     // Identification des défis SRPNF
     // Score en dessous duquel un critère est considéré comme un défi
+    // ↻ 27 nov. 2026 : le seuil sans choix ni seuil de maîtrise sur l'échelle ; un 0,70 enregistré sans marque de
+    // choix compte pour ce défaut (voir `seuilDeDefi`, plus bas).
     defiSpecifique: 0.70,  // 70% - Seuil conventionnel ; non validé empiriquement (voir RELECTURE-2026-09-17)
 
     // Paliers de l'assiduité et de la complétion (décision de Grégoire, 30 oct. 2026). LA source de tous
@@ -188,12 +190,35 @@ function reinitialiserSeuilsInterpretation() {
 }
 
 /**
+ * LE SEUIL DE DÉFI D'UN CRITÈRE (fiche 2 du lot « Suivi », décisions de Grégoire du 27 nov. 2026).
+ * Un choix enregistré compte d'abord : la valeur posée au champ « Seuil de défi spécifique », qui écrit aussi
+ * `defiSpecifiqueChoisi`, ou toute valeur enregistrée avant ce jour qui n'est pas 0,70. Un 0,70 sans cette marque
+ * compte pour laissé par défaut : jusqu'au 27 nov., chaque champ de la page l'écrivait, choisi ou non.
+ * Sans choix, le seuil de défi est le seuil de maîtrise de l'échelle, lu à la source de la famille P
+ * (`reperesPerformance`, contexte-qualification.js, lu à l'appel) ; sans seuil de maîtrise, `SEUILS_PAR_DEFAUT`.
+ * Rien n'est réécrit.
+ */
+function defiEstUnChoix(seuils) {
+    const v = seuils && seuils.defiSpecifique;
+    if (typeof v !== 'number' || !isFinite(v) || v <= 0) return false;
+    return seuils.defiSpecifiqueChoisi === true || Math.abs(v - SEUILS_PAR_DEFAUT.defiSpecifique) > 1e-9;
+}
+
+function seuilDeDefi(seuils) {
+    if (defiEstUnChoix(seuils)) return seuils.defiSpecifique;
+    const reperes = (typeof window.reperesPerformance === 'function') ? window.reperesPerformance() : null;
+    if (reperes && typeof reperes.maitrise === 'number' && isFinite(reperes.maitrise)) return reperes.maitrise / 100;
+    return SEUILS_PAR_DEFAUT.defiSpecifique;
+}
+
+/**
  * Obtient un seuil spécifique
  * @param {string} chemin - Chemin vers le seuil (ex: 'progressionArtefacts', 'interpretation.bon')
  * @returns {number} - Valeur du seuil
  */
 function obtenirSeuil(chemin) {
     const seuils = chargerSeuilsInterpretation();
+    if (chemin === 'defiSpecifique') return seuilDeDefi(seuils);   // 27 nov. 2026 : la seule lecture du seuil de défi
     const parties = chemin.split('.');
     let valeur = seuils;
 
@@ -232,6 +257,7 @@ function initialiserModuleInterpretation() {
     window.sauvegarderSeuilsInterpretation = sauvegarderSeuilsInterpretation;
     window.reinitialiserSeuilsInterpretation = reinitialiserSeuilsInterpretation;
     window.obtenirSeuil = obtenirSeuil;
+    window.defiEstUnChoix = defiEstUnChoix;
     window.SEUILS_PAR_DEFAUT = SEUILS_PAR_DEFAUT;
     window.NOTE_DE_PASSAGE = NOTE_DE_PASSAGE;
 

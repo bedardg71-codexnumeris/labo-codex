@@ -171,10 +171,12 @@ function monter(store, opts = {}) {
     }
     // Lot 5 du cadrage 11 (12 sept. 2026), ↻ 30 oct. : la lettre du bilan d'une intervention se situe dans l'échelle —
     // la VRAIE `situerPourcentageDansEchelle` (js/profil-etudiant-helpers.js, chargé avant interventions.js dans l'app).
-    if (!('situerPourcentageDansEchelle' in globaux)) {
+    // 27 nov. 2026 (fiche 3 du lot « Suivi ») : de même, `cleCritere` et la liste du graphique des critères (voir bac-suivi.js).
+    const helpersVrais = ['situerPourcentageDansEchelle', 'cleCritere', 'criteresDistinctsDesEvaluations'].filter((nom) => !(nom in globaux));
+    if (helpersVrais.length) {
         const winHelpers = {};
         chargerScript('js/profil-etudiant-helpers.js', globaux, winHelpers);
-        globaux.situerPourcentageDansEchelle = winHelpers.situerPourcentageDansEchelle;
+        for (const nom of helpersVrais) globaux[nom] = winHelpers[nom];
     }
     // 30 oct. 2026 : les seuils et leurs lecteurs sont les VRAIS, comme dans l'app (voir bac-suivi.js).
     const winConfig = {};

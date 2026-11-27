@@ -54,7 +54,8 @@ const EMPLOIS_CONNUS = {
     // Le libellé du repère, la copie dans `dupliquerEchelle`, le refus croisé,
     // et le `<select>` de l'éditeur : tous sur l'échelle.
     // #1149, lot 3b (24 oct. 2026) : +2, l'étape « Repères » de la chaîne lit le code posé (`e.seuilMaitrise`).
-    'js/echelles.js': 7,
+    // ↻ 27 nov. 2026 (fiche 5 du lot « Suivi ») : +1, l'échelle de départ semée porte son seuil de maîtrise (« M »).
+    'js/echelles.js': 8,
     // Le transport à l'import : `SCHEMAS_IMPORT.echelle.seuilMaitrise`.
     'js/import-export.js': 1,
     // #583 : le transport au PARTAGE (`SCHEMA_ENTITE.echelle.seuilMaitrise`), et le
@@ -63,7 +64,9 @@ const EMPLOIS_CONNUS = {
     'js/partage-validation.js': 1,
     // 30 oct. 2026 : `reperesPerformance` lit le CODE posé sur l'échelle, et le transporte quand deux échelles
     // aux mêmes plages se fondent en une.
-    'js/contexte-qualification.js': 4,
+    // ↻ 27 nov. 2026 (fiche 5 du lot « Suivi ») : +2, l'échelle de départ sans seuils est lue à « M » pour
+    // l'enseignant·e (le code prêté, et la garde « restée sans seuils »).
+    'js/contexte-qualification.js': 6,
     // `rangDuCode(echelle.seuilMaitrise)` dans `zoneDuCodeDansNiveaux`.
     'js/profil-etudiant-calculs.js': 1,
     // #577 : l'assistant LIT le repère de l'échelle choisie (avertissement si
@@ -80,6 +83,9 @@ const EMPLOIS_CONNUS = {
     // 19 nov. 2026 (noms des seuils, point 2) : l'éditeur de grilles LIT le code du seuil de maîtrise de l'échelle
     // montrée pour poser l'étiquette « Seuil de maîtrise » sur sa case de niveau (`etiquettesSeuilsDuNiveau`).
     'js/grilles.js': 1,
+    // 27 nov. 2026 (fiche 5 du lot « Suivi ») : « Mes niveaux » née d'une échelle de départ porte le code « M » ;
+    // copiée au réglage, elle garde le code posé (la constante, la lecture de l'échelle copiée, la boucle des deux champs).
+    'js/vue-simple-donnees.js': 3,
     // (L'exception `js/pratique-notation-v2.js`, code mort, est tombée avec lui : #469, 11 oct. 2026.)
 };
 

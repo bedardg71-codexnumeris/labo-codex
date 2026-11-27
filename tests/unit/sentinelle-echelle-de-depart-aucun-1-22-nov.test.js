@@ -96,19 +96,19 @@ describe('1.1 · la source : « 0 – Aucun » en tête, « I » dès 0 %, le re
 
 describe('1.2 · aucun calcul modifié, aucune échelle déjà semée réécrite', () => {
     // Les neuf lignes, telles qu'elles sont à la base du lot (`a440e7ae`) : sept écartent le code « 0 », deux lisent « PS ».
+    // ↻ 27 nov. 2026 (#1190, décision de Grégoire) : la phrase sous la bande P ne range plus par niveau, elle lit les deux
+    // seuils de l'échelle ; ses deux lignes (le code « 0 » écarté, « PS » lu) partent avec elle. Restent six et une.
     const LIGNES = [
         ['js/evaluation-calcul.js', "    return niveauDuPourcentage(pctFinal, echelleSelectionnee.niveaux, { sansNiveauZero: true });"],
         ['js/evaluation-calcul.js', "    return niveauDuPourcentage(pct, niveaux, { sansNiveauZero: true });"],
         ['js/comptes-erreurs-stock.js', "        var niveau = window.niveauDuPourcentage(r.pctBorne, ctx.niveaux, { sansNiveauZero: true });"],
         ['js/echelles.js', "        .filter(n => n && n.code !== '0' && n.code !== 0)"],
-        ['js/tableau-bord-apercu.js', "    const niveaux = echelle.niveaux.filter(n => n.code !== '0' && n.code !== 0 && window.niveauADesSeuils(n));"],
         ['js/tableau-bord-apercu.js', "        .filter(n => n.code !== '0' && n.code !== 0 && window.niveauADesSeuils(n)) // Exclure niveau 0 (plagiat)"],
         ['js/contexte-qualification.js', "    return ((echelle && echelle.niveaux) || []).filter((n) => n && n.code !== '0' && n.code !== 0);"],
-        ['js/tableau-bord-apercu.js', "    const niveauI = ['PS', 'I'].flatMap(code => parNiveau[code] || []);"],
         ['js/trimestres.js', "                        const nbPS = evaluationsCritere.filter(n => n === 'PS').length;"]
     ];
 
-    it('les sept endroits qui écartent le code « 0 » et les deux qui lisent « PS » sont là, tels quels', () => {
+    it('les six endroits qui écartent le code « 0 » et celui qui lit « PS » sont là, tels quels', () => {
         const absentes = LIGNES.filter(([f, ligne]) => !lire(f).split('\n').includes(ligne)).map(([f, l]) => f + ' : ' + l.trim());
         expect(absentes).toEqual([]);
     });

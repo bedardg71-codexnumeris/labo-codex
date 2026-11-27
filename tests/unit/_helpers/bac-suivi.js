@@ -161,14 +161,19 @@ export function monter(store, opts = {}) {
     // Lot 5 du cadrage 11 (12 sept. 2026), ↻ 30 oct. : la lettre du bilan d'une intervention se situe dans l'échelle
     // (`situerPourcentageDansEchelle`, js/profil-etudiant-helpers.js, chargé avant interventions.js dans l'app). Le banc
     // fournit la VRAIE : une copie ici dériverait sans que personne le voie.
-    if (!('situerPourcentageDansEchelle' in globaux)) {
+    // 27 nov. 2026 (fiche 3 du lot « Suivi ») : de même, la règle du nom d'un critère (`cleCritere`) et la liste du
+    // graphique des critères, que les modules du suivi lisent par `window`.
+    const helpersVrais = ['situerPourcentageDansEchelle', 'cleCritere', 'criteresDistinctsDesEvaluations'].filter((nom) => !(nom in globaux));
+    if (helpersVrais.length) {
         const winHelpers = {};
         chargerScript('js/profil-etudiant-helpers.js', globaux, winHelpers);
-        globaux.situerPourcentageDansEchelle = winHelpers.situerPourcentageDansEchelle;
+        for (const nom of helpersVrais) globaux[nom] = winHelpers[nom];
     }
     // 30 oct. 2026 (une seule source par famille de seuils) : les seuils et leurs lecteurs sont les VRAIS, comme dans
     // l'app (`interpretation-config.js`, sur le store du banc), sauf si le banc fournit son propre `obtenirSeuil`.
-    const winConfig = {};
+    // 27 nov. 2026 (fiche 2 du lot « Suivi ») : sans choix, le seuil de défi est le seuil de maîtrise de l'échelle, que
+    // `obtenirSeuil` lit à l'appel par `window.reperesPerformance` : celle du banc, comme dans l'app.
+    const winConfig = { reperesPerformance: (...a) => (typeof win.reperesPerformance === 'function' ? win.reperesPerformance(...a) : null) };
     chargerScript('js/interpretation-config.js', { db }, winConfig);
     win.NOTE_DE_PASSAGE = winConfig.NOTE_DE_PASSAGE;
     win.SEUILS_PAR_DEFAUT = winConfig.SEUILS_PAR_DEFAUT;
