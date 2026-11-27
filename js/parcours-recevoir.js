@@ -268,14 +268,27 @@
 
     function boutonVerrou() { return el('btnVerrouillerEvaluation'); }
 
-    /** Le menu « Actions… » d'une ligne de la Liste qui offre ce geste (`evaluer`, `annoter`). */
-    function menuActions(geste) {
-        var menus = document.querySelectorAll('#evaluations-liste select.eval-actions-select');
-        for (var k = 0; k < menus.length; k++) {
-            if (vis(menus[k]) && menus[k].querySelector('option[value^="' + geste + '|"]')) return menus[k];
-        }
-        return null;
+    /**
+     * Le menu « Actions… » d'une ligne de la Liste qui offre ce geste (`evaluer`, `annoter`). Avec un `statut`
+     * (l'identifiant que la Liste pose en classe sur la pastille de la ligne, `js/liste-evaluations.js`), celui d'une
+     * ligne à ce statut s'il y en a une ; sinon, le premier qui offre le geste.
+     */
+    function menuActions(geste, statut) {
+        var menus = [].filter.call(document.querySelectorAll('#evaluations-liste select.eval-actions-select'), function (s) {
+            return vis(s) && !!s.querySelector('option[value^="' + geste + '|"]');
+        });
+        var aCeStatut = statut ? menus.filter(function (s) {
+            var r = rangeeDe(s);
+            return !!(r && r.querySelector('.travaux-badge-pill.' + statut));
+        }) : [];
+        return aCeStatut[0] || menus[0] || null;
     }
+
+    /**
+     * « Sur la ligne d'une production importée » (l'étape « La liste ») : vu le 22 nov. 2026, le halo et la flèche allaient
+     * à la première ligne qui offre « Annoter », déjà « Évalué ». Une ligne « Importé » s'il y en a une ; sinon, comme avant.
+     */
+    function menuAAnnoter() { return menuActions('annoter', 'importe'); }
 
     function rangeeDe(s) { return s ? (s.closest('tr') || s.parentElement) : null; }
 
@@ -526,11 +539,11 @@
         avant: async function () {
             retirerExtras();
             aller('evaluations', 'liste');
-            await attendre(function () { return !!menuActions('annoter'); }, 3000);
-            amenerDeCote(menuActions('annoter'));
+            await attendre(function () { return !!menuAAnnoter(); }, 3000);
+            amenerDeCote(menuAAnnoter());
         },
-        zones: function () { return [rangeeDe(menuActions('annoter'))]; },
-        contour: function () { return menuActions('annoter'); },
+        zones: function () { return [rangeeDe(menuAAnnoter())]; },
+        contour: menuAAnnoter,
         nommeLeContour: true,   // « Actions › Annoter » (Grégoire, 11 nov. 2026, 9 h 47 : la flèche va à ce que la bulle nomme)
         atteint: annotationOuverteRetenue
     };
