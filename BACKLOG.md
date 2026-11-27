@@ -222,6 +222,8 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
 
 **À décider** : la condition du bandeau (exiger une pratique), ou ses mots. Ce sont des mots que l'utilisateur lit : à Grégoire.
 
+**↻ 27 nov. 2026 : DÉCIDÉ PAR GRÉGOIRE, FAIT SUR `lot/accueil-2026-11-27`, NON FUSIONNÉ** : le bandeau ne paraît que si chacun des cinq éléments qu'il nomme existe pour le groupe-cours actif ; aucun mot ne change. `espaceDeTravailEstPret` (`js/transitions.js`) remplace `groupeActifAUnHoraire` : trimestre actif, groupe-cours actif retrouvé dans la liste du trimestre, son cours et son horaire retrouvés dans leurs listes, et sa pratique résolue comme pour la note (`resoudrePratiqueActive`, état « ok »). **Preuve** : `tests/unit/sentinelle-1310-bandeau-espace-pret.test.js` (vrais `modes.js`, registre et `transitions.js`), 12 essais ; huit rouges sur la condition d'avant, six mutations de la nouvelle prises. **Source seulement** : une préférence « vu » déjà enregistrée n'est pas réécrite, et un bandeau fermé ne reparaît pas quand la pratique est posée (mesuré, essai témoin). **Pas vu à l'écran** (aucun navigateur dans le conteneur) : reste ouvert jusqu'au coup d'œil de Grégoire. Rapport : `plans de travail/RAPPORT-2026-11-27-accueil.md`.
+
 ### #1309 · Dans la bande « Mode démonstration », « Quitter la démo » n'a pas répondu au toucher sur l'iPad, 24 novembre 2026 (vécu par Grégoire, 19 h 38, aperçu n° 60, paysage en plein écran ; inscrit sur consigne de Cowork, 19 h 45, sans y toucher)
 
 **Symptôme** : le bouton « Quitter la démo » du bandeau vert n'a pas répondu au toucher. Grégoire a quitté par le menu en haut à droite.

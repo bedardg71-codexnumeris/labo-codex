@@ -43,16 +43,30 @@ function lireCleGlobale(nomCle, parDefaut) {
     }
 }
 
-/** Faux seulement pour un groupe-cours de COURS qui n'a pas d'horaire (lu dans la liste du trimestre : la copie du pointeur peut dater). */
-function groupeActifAUnHoraire() {
+function trouverParId(liste, id) {
+    if (!id || !Array.isArray(liste)) return null;
+    return liste.filter(function(x) { return x && x.id === id; })[0] || null;
+}
+
+/**
+ * #1310 (décision de Grégoire, 27 nov. 2026) : « trimestre, cours, groupe, horaire et pratique sont configurés » ne se dit
+ * que si chacun des cinq existe pour le groupe-cours actif. Sinon le bandeau se tait : le message voisin (« Ce groupe-cours
+ * n'a pas de pratique de notation ») dit déjà ce qui manque. Avant, seul l'horaire était regardé. Lecture seule.
+ * - trimestre : le trimestre actif ;
+ * - groupe : le groupe-cours actif, retrouvé dans la liste du trimestre (la copie du pointeur peut dater). Le mode « cours,
+ *   tous groupes » n'en a pas, et se tait désormais, comme un service sans horaire ;
+ * - cours et horaire : les fiches que ce groupe désigne, retrouvées dans leurs listes ;
+ * - pratique : la résolution de la note (`resoudrePratiqueActive`, état 'ok'), ni 'aucune', ni 'introuvable', ni 'illisible'.
+ */
+function espaceDeTravailEstPret() {
+    if (typeof window.obtenirTrimestreId !== 'function' || !window.obtenirTrimestreId()) return false;
     var actif = lireCleGlobale('groupeCoursActif', null);
-    if (!actif) return false;
-    // Comme avant le lot : le mode « cours, tous groupes » (pas d'id) et un service (qui n'a jamais d'horaire) gardent le bandeau.
-    if (!actif.id) return true;
-    if (typeof window.contexteActifEstService === 'function' && window.contexteActifEstService()) return true;
-    var groupes = lireCleTrim('groupesCours', []);
-    var gc = Array.isArray(groupes) ? groupes.filter(function(g) { return g && g.id === actif.id; })[0] : null;
-    return !gc || !!gc.horaireId;
+    var gc = actif ? trouverParId(lireCleTrim('groupesCours', []), actif.id) : null;
+    if (!gc) return false;
+    if (!trouverParId(lireCleGlobale('cours', []), gc.coursId)) return false;
+    if (!trouverParId(lireCleTrim('horaires', []), gc.horaireId)) return false;
+    var pratique = (typeof window.resoudrePratiqueActive === 'function') ? window.resoudrePratiqueActive() : null;
+    return !!pratique && pratique.etat === 'ok';
 }
 
 function nbTrim(nomCle) {
@@ -71,10 +85,9 @@ var TRANSITIONS = [
         // et évaluer » relève de l'Évaluation). Vide/absent = aucune restriction.
         sections: ['evaluations'],
         condition: function() {
-            // groupeCoursActif est une clé GLOBALE (stocke l'ID du GC actif)
-            // Vue simple (9 nov. 2026) : un groupe né en vue simple n'a pas d'horaire — le message, qui dit « horaire […]
-            // configurés », ne paraît que si le groupe actif en a un.
-            return groupeActifAUnHoraire();
+            // Vue simple (9 nov. 2026) : un groupe né en vue simple n'a pas d'horaire. #1310 (27 nov. 2026) : ni l'horaire
+            // seul, ni la pratique seule : les cinq éléments que le message nomme.
+            return espaceDeTravailEstPret();
         },
         message: 'Ton espace de travail est pr\u00eat\u00a0: trimestre, cours, groupe, horaire et pratique sont configur\u00e9s. Tu peux maintenant saisir les pr\u00e9sences et \u00e9valuer les productions de tes \u00e9tudiant\u00b7es.',
         messageDemo: 'Cet espace de travail est une d\u00e9mo. Tu peux explorer les pr\u00e9sences et \u00e9valuations avec des donn\u00e9es fictives. Pour construire ton vrai espace, quitte la d\u00e9mo et configure tes propres trimestre, cours, groupe, horaire et pratique.'
